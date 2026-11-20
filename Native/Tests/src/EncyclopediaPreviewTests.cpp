@@ -12,7 +12,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "ActorAssets.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Actors/SkeletonLiveState.hpp"
@@ -26,7 +25,6 @@
 #include "DiscQueue.h"
 #include "Event/ScriptVmLiveState.hpp"
 #include "Legacy/Psx.h"
-#include "LegacyFiles.h"
 #include "Menu/GameClearLifecycleLiveFixture.hpp"
 #include "Menu/GazetteTimesLiveFixture.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
@@ -34,7 +32,6 @@
 #include "Menu/Score/EncyclopediaPreview.hpp"
 #include "Menu/Score/EncyclopediaPreviewLive.hpp"
 #include "Menu/TextBox.hpp"
-#include "ModelLoading.h"
 
 namespace {
 namespace score = VS::Menu::Score;
@@ -522,7 +519,7 @@ struct LivePreviewFixture {
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   std::array<Content_DiscQueueSlot, 32> saved_slots{};
   Content_DiscRequestCounts saved_counts = Content_discRequestCounts;
-  std::array<Content_ActorAssetRequest, 16> saved_requests{};
+  decltype(VS::Content::legacyActorAssetRequests) saved_requests{};
   std::uint8_t saved_step = VS::Content::objectDataLoadStep;
   score::EnemyPreviewState saved_state = score::LiveEnemyPreviewState();
 
@@ -531,10 +528,8 @@ struct LivePreviewFixture {
                 sizeof Content_discRequestSlots);
     std::memset(Content_discRequestSlots, 0, sizeof Content_discRequestSlots);
     Content_discRequestCounts = Content_DiscRequestCounts{};
-    std::copy_n(Content_legacyActorAssetRequests, saved_requests.size(),
-                saved_requests.begin());
-    std::fill_n(Content_legacyActorAssetRequests, saved_requests.size(),
-                Content_ActorAssetRequest{});
+    saved_requests = VS::Content::legacyActorAssetRequests;
+    VS::Content::legacyActorAssetRequests.fill({});
     VS::Content::objectDataLoadStep = 0;
     score::ResetLiveEnemyPreview();
   }
@@ -542,8 +537,7 @@ struct LivePreviewFixture {
     std::memcpy(Content_discRequestSlots, saved_slots.data(),
                 sizeof Content_discRequestSlots);
     Content_discRequestCounts = saved_counts;
-    std::copy(saved_requests.begin(), saved_requests.end(),
-              Content_legacyActorAssetRequests);
+    VS::Content::legacyActorAssetRequests = saved_requests;
     VS::Content::objectDataLoadStep = saved_step;
     score::LiveEnemyPreviewState() = saved_state;
   }
@@ -561,17 +555,17 @@ T* Pointer(AssetAddress address) {
 // The companion record, or the enemy's weapon and shield, follow the body at
 // the native record strides.
 void CheckAttachmentStrides(bool companion, const u_char* buffer) {
-  const Content_ActorAssetRequest& attachment =
-      Content_legacyActorAssetRequests[1];
+  const VS::Content::LegacyActorAssetRequest& attachment =
+      VS::Content::legacyActorAssetRequests[1];
   CHECK(attachment.destination == buffer + sizeof(Actors_ActorRecord));
-  CHECK(attachment.assetKind == (companion ? 1 : 4));
-  CHECK(attachment.targetSlot == (companion ? 16 : 2));
+  CHECK(attachment.asset_kind == (companion ? 1 : 4));
+  CHECK(attachment.target_slot == (companion ? 16 : 2));
   if (!companion) {
-    const Content_ActorAssetRequest& shield =
-        Content_legacyActorAssetRequests[2];
+    const VS::Content::LegacyActorAssetRequest& shield =
+        VS::Content::legacyActorAssetRequests[2];
     CHECK(shield.destination ==
           buffer + sizeof(Actors_ActorRecord) + sizeof(Actors_WeaponModel));
-    CHECK(shield.targetSlot == 3);
+    CHECK(shield.target_slot == 3);
   }
 }
 
@@ -614,28 +608,29 @@ struct PreviewLifecycleFixture : LivePreviewFixture {
   game_clear_live_tests::SavedRuntime saved_runtime;
   game_clear_live_tests::SavedGlobals<
       Actors_actorRecords, VS::Actors::weaponModels,
-      Content_legacyModelLoadPhase, VS::Content::modelParseResetFlag,
-      Content_legacySequenceParsePhase, Content_legacyShpFileBuffer,
-      Content_legacyShpAllocated, Content_legacyShpFileLocation,
-      Content_legacyShpDiscRequest, Content_legacyShpParseCursor,
-      Content_legacyShpCopiedWordCount, Content_legacyShpHeaderWord,
-      Content_legacyShpTextureWidth, Content_legacyShpTextureHeight,
-      Content_legacyWeaponParseCursor, Content_legacySequenceParseData,
-      Content_legacyShpDiscOffsets, Content_legacyShpSectorCounts>
+      VS::Content::legacyModelLoadPhase, VS::Content::modelParseResetFlag,
+      VS::Content::legacySequenceParsePhase, VS::Content::legacyShpFileBuffer,
+      VS::Content::legacyShpAllocated, VS::Content::legacyShpFileLocation,
+      VS::Content::legacyShpDiscRequest, VS::Content::legacyShpParseCursor,
+      VS::Content::legacyShpCopiedWordCount, VS::Content::legacyShpHeaderWord,
+      VS::Content::legacyShpTextureWidth, VS::Content::legacyShpTextureHeight,
+      VS::Content::legacyWeaponParseCursor,
+      VS::Content::legacySequenceParseData, VS::Content::legacyShpDiscOffsets,
+      VS::Content::legacyShpSectorCounts>
       saved_loader;
   equipment_detail_tests::ValueRestore<int> saved_zud_size{score::zudSizes[7]};
 
   PreviewLifecycleFixture() {
     std::ranges::fill(Actors_actorRecords, nullptr);
     std::ranges::fill(VS::Actors::weaponModels, nullptr);
-    Content_legacyModelLoadPhase = 0;
+    VS::Content::legacyModelLoadPhase = 0;
     VS::Content::modelParseResetFlag = 0;
-    Content_legacySequenceParsePhase = 0;
-    Content_legacyShpAllocated = 0;
-    Content_legacyShpFileBuffer = nullptr;
-    Content_legacyShpParseCursor = nullptr;
-    Content_legacyWeaponParseCursor = nullptr;
-    Content_legacySequenceParseData = nullptr;
+    VS::Content::legacySequenceParsePhase = 0;
+    VS::Content::legacyShpAllocated = 0;
+    VS::Content::legacyShpFileBuffer = nullptr;
+    VS::Content::legacyShpParseCursor = nullptr;
+    VS::Content::legacyWeaponParseCursor = nullptr;
+    VS::Content::legacySequenceParseData = nullptr;
   }
   ~PreviewLifecycleFixture() {
     CHECK(score::CleanupLiveEnemyPreviewOwnedState());
@@ -672,37 +667,37 @@ score::EnemyPreviewState QueueOriginalPreview() {
 
 score::EnemyPreviewState StartCompanionRead() {
   const auto before = QueuePreviewParts(true, true);
-  const auto model =
-      static_cast<std::uint16_t>(Content_legacyActorAssetRequests[1].modelId);
-  REQUIRE(model < std::size(Content_legacyShpDiscOffsets));
-  if (model >= std::size(Content_legacyShpDiscOffsets)) {
+  const auto model = static_cast<std::uint16_t>(
+      VS::Content::legacyActorAssetRequests[1].model_id);
+  REQUIRE(model < std::size(VS::Content::legacyShpDiscOffsets));
+  if (model >= std::size(VS::Content::legacyShpDiscOffsets)) {
     throw std::runtime_error("companion model is outside its file table");
   }
-  Content_legacyShpSectorCounts[model] = 1;
-  Content_legacyShpDiscOffsets[model] = 7;
+  VS::Content::legacyShpSectorCounts[model] = 1;
+  VS::Content::legacyShpDiscOffsets[model] = 7;
   REQUIRE(VS::Content::UpdateLiveActorAssetQueue() == 1);
-  REQUIRE(Content_legacyActorAssetRequests[0].targetSlot == 16);
+  REQUIRE(VS::Content::legacyActorAssetRequests[0].target_slot == 16);
   REQUIRE(VS::Content::UpdateLiveActorAssetQueue() == 1);
-  REQUIRE(Content_legacyModelLoadPhase == 1);
-  REQUIRE(Content_legacyShpAllocated == 1);
+  REQUIRE(VS::Content::legacyModelLoadPhase == 1);
+  REQUIRE(VS::Content::legacyShpAllocated == 1);
   return before;
 }
 
 void CheckEmptyPreviewQueue() {
   CHECK(std::ranges::all_of(
-      Content_legacyActorAssetRequests,
-      [](const auto& item) { return item.assetKind == 0; }));
+      VS::Content::legacyActorAssetRequests,
+      [](const auto& item) { return item.asset_kind == 0; }));
   CHECK(VS::Content::modelParseResetFlag == 0);
-  CHECK(Content_legacyShpParseCursor == nullptr);
-  CHECK(Content_legacySequenceParseData == nullptr);
+  CHECK(VS::Content::legacyShpParseCursor == nullptr);
+  CHECK(VS::Content::legacySequenceParseData == nullptr);
 }
 
 std::span<std::byte> StartForeignModelRead() {
   auto* foreign = static_cast<std::byte*>(
       VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(Actors_ActorRecord)));
   REQUIRE(foreign != nullptr);
-  Content_legacyShpSectorCounts[20] = 1;
-  Content_legacyShpDiscOffsets[20] = 7;
+  VS::Content::legacyShpSectorCounts[20] = 1;
+  VS::Content::legacyShpDiscOffsets[20] = 7;
   ActorAssetRequest request;
   request.kind =
       static_cast<std::uint8_t>(VS::Content::ActorAssetKind::kActorModelLoad);
@@ -715,8 +710,8 @@ std::span<std::byte> StartForeignModelRead() {
 
 void CheckForeignModelRead(const void* file, const Content_DiscQueueSlot* read,
                            std::uint64_t generation) {
-  CHECK(Content_legacyModelLoadPhase == 1);
-  CHECK(Content_legacyShpFileBuffer == file);
+  CHECK(VS::Content::legacyModelLoadPhase == 1);
+  CHECK(VS::Content::legacyShpFileBuffer == file);
   CHECK(VS::Content::LiveDiscRequestGeneration(read) == generation);
   CHECK(VS::Content::FindLiveFreeActorAssetRequest() == 1);
   CHECK(VS::Core::Memory::LivePayloadCapacity(file).has_value());
@@ -801,9 +796,10 @@ TEST_CASE("Live enemy preview places parts at native record strides",
   auto* buffer = Pointer<u_char>(state.model_buffer);
   auto* file = Pointer<u_char>(state.file);
   REQUIRE(score::LoadLiveEnemyModelParts() == 1);
-  const Content_ActorAssetRequest& body = Content_legacyActorAssetRequests[0];
+  const VS::Content::LegacyActorAssetRequest& body =
+      VS::Content::legacyActorAssetRequests[0];
   CHECK(body.destination == buffer);
-  CHECK(body.dataAddress == reinterpret_cast<std::uintptr_t>(file + 0x30));
+  CHECK(body.data_address == reinterpret_cast<std::uintptr_t>(file + 0x30));
   CHECK(body.placement == 0);
   CheckAttachmentStrides(companion, buffer);
 }
@@ -820,8 +816,7 @@ TEST_CASE("Live enemy preview releases the file after the queue drains",
       Content_DiscRequestState_Loaded;
   std::ranges::copy(ZudFile(), Pointer(state.file));
   REQUIRE(score::LoadLiveEnemyModelParts() == 1);
-  std::fill_n(Content_legacyActorAssetRequests, 16,
-              Content_ActorAssetRequest{});
+  VS::Content::legacyActorAssetRequests.fill({});
   REQUIRE(score::LoadLiveEnemyModelParts() == 1);
   CHECK(state.file == AssetAddress::kNone);
   CHECK_FALSE(VS::Core::Memory::LivePayloadCapacity(file).has_value());
@@ -915,8 +910,8 @@ TEST_CASE("Preview cleanup preserves a foreign active model read",
           "[encyclopedia-preview][gazette-preview-lifecycle]") {
   PreviewLifecycleFixture fixture;
   const auto foreign = StartForeignModelRead();
-  const auto* file = Content_legacyShpFileBuffer;
-  auto* read = Content_legacyShpDiscRequest;
+  const auto* file = VS::Content::legacyShpFileBuffer;
+  auto* read = VS::Content::legacyShpDiscRequest;
   const auto generation = VS::Content::LiveDiscRequestGeneration(read);
   const auto before = QueuePreviewParts(false);
   REQUIRE(score::CleanupLiveEnemyPreviewOwnedState());
@@ -931,8 +926,8 @@ TEST_CASE("Preview cleanup cancels the companion model-file owner",
   const bool loaded = GENERATE(false, true);
   PreviewLifecycleFixture fixture;
   const auto before = StartCompanionRead();
-  auto* request = Content_legacyShpDiscRequest;
-  const auto* file = Content_legacyShpFileBuffer;
+  auto* request = VS::Content::legacyShpDiscRequest;
+  const auto* file = VS::Content::legacyShpFileBuffer;
   REQUIRE(VS::Content::LiveDiscRequestGeneration(request) != 0);
   if (loaded) request->state = Content_DiscRequestState_Loaded;
   REQUIRE(score::CleanupLiveEnemyPreviewOwnedState());
@@ -940,8 +935,8 @@ TEST_CASE("Preview cleanup cancels the companion model-file owner",
   CheckEmptyPreviewQueue();
   CHECK(VS::Content::LiveDiscRequestGeneration(request) == 0);
   CHECK_FALSE(VS::Core::Memory::LivePayloadCapacity(file).has_value());
-  CHECK(Content_legacyModelLoadPhase == 0);
-  CHECK(Content_legacyShpAllocated == 0);
+  CHECK(VS::Content::legacyModelLoadPhase == 0);
+  CHECK(VS::Content::legacyShpAllocated == 0);
   CHECK(Actors_actorRecords[1] == nullptr);
 }
 
@@ -1009,14 +1004,15 @@ TEST_CASE("Preview cleanup preserves foreign actors queue order and tail",
   const auto before = QueuePreviewParts(false);
   const int first_foreign = VS::Content::FindLiveFreeActorAssetRequest();
   FillForeignPreviewQueue(foreign);
-  const auto tail = Content_legacyActorAssetRequests[15];
+  const auto tail = VS::Content::legacyActorAssetRequests[15];
   REQUIRE(score::CleanupLiveEnemyPreviewOwnedState());
   CheckColdPreviewRelease(before);
   CHECK(static_cast<void*>(Actors_actorRecords[1]) == foreign.data());
   CHECK(VS::Core::Memory::LivePayloadCapacity(foreign.data()).has_value());
-  CHECK(Content_legacyActorAssetRequests[0].variant == first_foreign);
-  CHECK(Content_legacyActorAssetRequests[15].variant == tail.variant);
-  CHECK(Content_legacyActorAssetRequests[15].destination == tail.destination);
+  CHECK(VS::Content::legacyActorAssetRequests[0].variant == first_foreign);
+  CHECK(VS::Content::legacyActorAssetRequests[15].variant == tail.variant);
+  CHECK(VS::Content::legacyActorAssetRequests[15].destination ==
+        tail.destination);
   REQUIRE(VS::Content::CancelLiveActorAssetBorrows({}, foreign));
   CHECK(VS::Content::ReleaseLiveActorModel(1) == 0);
   VS::Core::Memory::FreeLiveFromLowEnd(foreign.data());
@@ -1026,8 +1022,8 @@ TEST_CASE("Preview cleanup preserves a reused companion read generation",
           "[encyclopedia-preview][gazette-preview-lifecycle]") {
   PreviewLifecycleFixture fixture;
   const auto before = StartCompanionRead();
-  auto* original = Content_legacyShpDiscRequest;
-  const auto* file = Content_legacyShpFileBuffer;
+  auto* original = VS::Content::legacyShpDiscRequest;
+  const auto* file = VS::Content::legacyShpFileBuffer;
   VS::Content::ReleaseLiveDiscRequest(original);
   const Content_DiscFile location{1, 16};
   auto* foreign = VS::Content::AllocateLiveDiscRequest(&location);
@@ -1039,6 +1035,6 @@ TEST_CASE("Preview cleanup preserves a reused companion read generation",
       Pointer<Content_DiscQueueSlot>(before.read) == foreign ? generation : 0);
   CHECK(VS::Content::LiveDiscRequestGeneration(foreign) == generation);
   CHECK_FALSE(VS::Core::Memory::LivePayloadCapacity(file).has_value());
-  CHECK(Content_legacyShpAllocated == 0);
+  CHECK(VS::Content::legacyShpAllocated == 0);
   VS::Content::ReleaseLiveDiscRequest(foreign);
 }

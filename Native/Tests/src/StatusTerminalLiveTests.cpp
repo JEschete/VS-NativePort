@@ -71,8 +71,8 @@ TEST_CASE("Terminal fixture loads production sequence font and queue resources",
   CHECK_FALSE(VS::Actors::SequenceBankBytes(preview->battleSequence).empty());
   CHECK(preview->battleSequence != source->battleSequence);
   CHECK(std::ranges::all_of(
-      Content_legacyActorAssetRequests,
-      [](const auto& request) { return request.assetKind == 0; }));
+      VS::Content::legacyActorAssetRequests,
+      [](const auto& request) { return request.asset_kind == 0; }));
   CHECK(std::ranges::any_of(VS::Render::compactGlyphWidths,
                             [](auto width) { return width != 0; }));
 }

@@ -354,8 +354,9 @@ constexpr int kPromptTop = 18;
 constexpr int kPromptPitch = 16;
 constexpr int kPromptCursorTop = 10;
 
-// libcard's event results (Save_CardReadinessResult_*) and maskedHandler's
-// (Save_MaskedHandlerResult_*).
+// libcard's event results (decomp memcardEventHandler_e,
+// src/MENU/MENU7.PRG/260.c:38) and maskedHandler's (decomp maskedHandler_e,
+// 260.c:1629).
 constexpr int kReadinessPending = 0;
 constexpr int kReadinessReady = 1;
 constexpr int kReadinessTimeout = 2;
@@ -365,7 +366,8 @@ constexpr int kMaskedError = -1;
 constexpr int kMaskedPending = 0;
 constexpr int kMaskedComplete = 1;
 constexpr int kEventMaskShift = 4;
-// Save_FindSaveResult_*: the search covers both ports, two steps each.
+// decomp _findCurrentSave_e (260.c:1561): the search covers both ports, two
+// steps each.
 constexpr int kFindTimeout = -2;
 constexpr int kFindNotFound = -1;
 constexpr int kFindPending = 0;
@@ -1088,7 +1090,7 @@ constexpr std::uint8_t kLoadSettleTicks = 16;
 constexpr std::int32_t kCompleteCounter = -kCompleteFrames;
 // VS_SFX_FILEOPCOMPLETE.
 constexpr int kFileOperationComplete = 8;
-// Save_EventMask_All and Save_EventMask_IgnoreNoEvent.
+// decomp _memcardEventMask_e (260.c:1624): all events, and all but no-event.
 constexpr int kEventMaskAll = 0x70;
 constexpr int kEventMaskIgnoreNoEvent = 0x30;
 // The write and read requests: the file, the port above it and the read's

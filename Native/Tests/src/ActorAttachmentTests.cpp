@@ -9,9 +9,9 @@
 #include "Actors/ModelDrawingLive.hpp"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
+#include "Content/ActorAssetsLive.hpp"
 #include "Core/Log.hpp"
 #include "Legacy/Psx.h"
-#include "ModelLoading.h"
 
 namespace {
 struct AttachmentFixture {

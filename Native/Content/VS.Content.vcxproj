@@ -62,20 +62,6 @@
     <ClCompile Include="src\DiscReaderLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\LegacyFiles.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
-    <ClCompile Include="src\ModelLoading.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
     <ClCompile Include="src\ModuleLoader.cpp" />
     <ClCompile Include="src\MovieEncoder.cpp" />
     <ClCompile Include="src\OverlayFiles.cpp" />
@@ -96,11 +82,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\ActorAssets.h" />
     <ClInclude Include="src\DiscQueue.h" />
-    <ClInclude Include="src\LegacyFiles.h" />
-    <ClInclude Include="src\ModelLoading.h" />
-    <ClInclude Include="src\SystemResources.h" />
     <ClInclude Include="include\Content\ActorAssets.hpp" />
     <ClInclude Include="include\Content\ActorAssetsLive.hpp" />
     <ClInclude Include="include\Content\AudioBank.hpp" />

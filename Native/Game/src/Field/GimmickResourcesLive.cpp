@@ -8,7 +8,6 @@
 #include <optional>
 #include <span>
 
-#include "ActorAssets.h"
 #include "Actors/Skeleton.h"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
@@ -351,16 +350,17 @@ bool SetLiveGimmickPaletteTable(std::span<const std::byte> palette_bytes) {
 }
 }  // namespace VS::Field
 
-int VS::Field::FindSharedGimmickModelEntry(Content_ActorAssetRequest* request) {
+int VS::Field::FindSharedGimmickModelEntry(
+    VS::Content::LegacyActorAssetRequest* request) {
   if (request == nullptr) return 0;
-  Content_ActorAssetRequest input{};
+  VS::Content::LegacyActorAssetRequest input{};
   std::memcpy(&input, request, sizeof(input));
   const auto slot =
-      VS::Field::FindLiveSharedGimmickModel(input.targetSlot, input.subKind);
+      VS::Field::FindLiveSharedGimmickModel(input.target_slot, input.sub_kind);
   if (!slot) return 0;
   const auto value = static_cast<std::uintptr_t>(*slot);
   std::memcpy(reinterpret_cast<std::byte*>(request) +
-                  offsetof(Content_ActorAssetRequest, dataAddress),
+                  offsetof(VS::Content::LegacyActorAssetRequest, data_address),
               &value, sizeof(value));
   return 1;
 }
@@ -376,26 +376,27 @@ int VS::Field::ReleaseGimmickInstanceEntry(int slot) {
   return VS::Field::ReleaseLiveGimmickInstance(slot);
 }
 
-int VS::Field::CreateGimmickInstanceEntry(Content_ActorAssetRequest* request) {
+int VS::Field::CreateGimmickInstanceEntry(
+    VS::Content::LegacyActorAssetRequest* request) {
   if (request == nullptr) return VS::Content::kAssetRefused;
-  Content_ActorAssetRequest input{};
+  VS::Content::LegacyActorAssetRequest input{};
   std::memcpy(&input, request, sizeof(input));
   VS::Content::ActorAssetRequest state{
-      .kind = input.assetKind,
-      .target_slot = input.targetSlot,
-      .model_id = input.modelId,
+      .kind = input.asset_kind,
+      .target_slot = input.target_slot,
+      .model_id = input.model_id,
       .destination = std::bit_cast<VS::Content::AssetAddress>(
           reinterpret_cast<std::uintptr_t>(input.destination)),
-      .data = std::bit_cast<VS::Content::AssetAddress>(input.dataAddress),
+      .data = std::bit_cast<VS::Content::AssetAddress>(input.data_address),
       .placement = input.placement,
-      .sub_kind = static_cast<std::uint8_t>(input.subKind),
-      .texture_slot = static_cast<std::uint8_t>(input.textureSlot),
+      .sub_kind = static_cast<std::uint8_t>(input.sub_kind),
+      .texture_slot = static_cast<std::uint8_t>(input.texture_slot),
       .material = static_cast<std::uint8_t>(input.material),
       .variant = static_cast<std::uint8_t>(input.variant)};
   const auto result = VS::Field::CreateLiveGimmickInstance(state);
   const auto value = static_cast<std::uintptr_t>(state.data);
   std::memcpy(reinterpret_cast<std::byte*>(request) +
-                  offsetof(Content_ActorAssetRequest, dataAddress),
+                  offsetof(VS::Content::LegacyActorAssetRequest, data_address),
               &value, sizeof(value));
   return result;
 }

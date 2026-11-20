@@ -4,7 +4,9 @@
 #include <cstddef>
 #include <cstdint>
 
-struct Save_GameSaveImage;
+namespace VS::Save {
+struct GameSaveImage;
+}  // namespace VS::Save
 
 // Binds the memory-card save cores (GameFiles.hpp) to the libapi card calls,
 // the card globals both save screens share and the game state, in the shapes
@@ -26,7 +28,7 @@ int FindLiveMatchingSaveSlot();
 int ParseLiveSaveFileNumber(const char* name);
 // Nonzero when a checksum fails or `block_count` is outside 0..92. Reads
 // max(block_count, 2) blocks of `image`.
-int HasLiveChecksumError(const Save_GameSaveImage* image, int block_count);
+int HasLiveChecksumError(const GameSaveImage* image, int block_count);
 void DecodeLiveSaveBytes(std::uint32_t key, void* bytes, std::size_t count);
 // Over the directory in VS::Title::cardDirectoryEntries: the mask of the
 // temporary files erased, or 0x80 when an erase failed.
@@ -37,7 +39,8 @@ int DeleteLiveRedundantTemporaryFiles(int channel);
 int ScanLiveSaveDirectory(int port);
 // 0, or -1 when the file could not be created.
 int CreateLiveSaveFile(int port, int file_number);
-// `begin_port` nonzero restarts for that port; a Save_CardReadinessResult.
+// `begin_port` nonzero restarts for that port; a CardReadiness value
+// (GameFiles.hpp).
 int AdvanceLiveCardReadiness(int begin_port);
 // The same check with TITLE.PRG's own statics (22C.c:457 _memcardEventHandler).
 int AdvanceLiveTitleCardReadiness(int begin_port);

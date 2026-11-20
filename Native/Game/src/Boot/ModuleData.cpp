@@ -112,7 +112,6 @@
 #include "Items/Categories.hpp"
 #include "Items/Materials.hpp"
 #include "Legacy/Psx.h"
-#include "LegacyFiles.h"
 #include "Menu/BattleAbilitiesLiveState.hpp"
 #include "Menu/BreakArtsLive.hpp"
 #include "Menu/Container/ItemView.hpp"
@@ -129,7 +128,6 @@
 #include "Menu/Score/ScoreScreen.hpp"
 #include "Menu/Status/ActorStatus.hpp"
 #include "Menu/TextBox.hpp"
-#include "ModelLoading.h"
 #include "Render/FramebufferEffects.hpp"
 #include "Render/Images.hpp"
 #include "Render/Loading.hpp"
@@ -253,70 +251,70 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x7FE40, sizeof Battle_lockedLabelPieces,
      &Battle_lockedLabelPieces,
      sizeof Battle_lockedLabelPieces},  // G00048 D_800E8640
-    {"BATTLE/BATTLE.PRG", 0x7FE60, sizeof Content_legacyShpDiscOffsets,
-     &Content_legacyShpDiscOffsets,
-     sizeof Content_legacyShpDiscOffsets},  // G00049 _shpLbaOffsets
-    {"BATTLE/BATTLE.PRG", 0x80060, sizeof Content_legacyShpSectorCounts,
-     &Content_legacyShpSectorCounts,
-     sizeof Content_legacyShpSectorCounts},  // G00050 _shpFileSectorSizes
+    {"BATTLE/BATTLE.PRG", 0x7FE60, sizeof VS::Content::legacyShpDiscOffsets,
+     &VS::Content::legacyShpDiscOffsets,
+     sizeof VS::Content::legacyShpDiscOffsets},  // G00049 _shpLbaOffsets
+    {"BATTLE/BATTLE.PRG", 0x80060, sizeof VS::Content::legacyShpSectorCounts,
+     &VS::Content::legacyShpSectorCounts,
+     sizeof VS::Content::legacyShpSectorCounts},  // G00050 _shpFileSectorSizes
     {"BATTLE/BATTLE.PRG", 0x80160, sizeof Actors_sharedSequenceIdsByKind,
      &Actors_sharedSequenceIdsByKind,
      sizeof Actors_sharedSequenceIdsByKind},  // G00051 D_800E8960
-    {"BATTLE/BATTLE.PRG", 0x80260, sizeof Content_legacySequenceDiscOffsets,
-     &Content_legacySequenceDiscOffsets,
-     sizeof Content_legacySequenceDiscOffsets},  // G00052 D_800E8A60
-    {"BATTLE/BATTLE.PRG", 0x80340, sizeof Content_legacySequenceSectorCounts,
-     &Content_legacySequenceSectorCounts,
-     sizeof Content_legacySequenceSectorCounts},  // G00053 D_800E8B40
-    {"BATTLE/BATTLE.PRG", 0x803B0, sizeof Content_legacyEtmDiscOffsets,
-     &Content_legacyEtmDiscOffsets,
-     sizeof Content_legacyEtmDiscOffsets},  // G00054 _etmLbaOffsets
-    {"BATTLE/BATTLE.PRG", 0x80490, sizeof Content_legacyEtmSectorCounts,
-     &Content_legacyEtmSectorCounts,
-     sizeof Content_legacyEtmSectorCounts},  // G00055 _etmFileSectorSizes
-    {"BATTLE/BATTLE.PRG", 0x80500, sizeof Content_legacyWepDiscOffsets,
-     &Content_legacyWepDiscOffsets,
-     sizeof Content_legacyWepDiscOffsets},  // G00056 D_800E8D00
-    {"BATTLE/BATTLE.PRG", 0x80600, sizeof Content_legacyWepSectorCounts,
-     &Content_legacyWepSectorCounts,
-     sizeof Content_legacyWepSectorCounts},  // G00057 _wepFileSectorOffsets
+    {"BATTLE/BATTLE.PRG", 0x80260, sizeof VS::Content::legacySequenceDiscOffsets,
+     &VS::Content::legacySequenceDiscOffsets,
+     sizeof VS::Content::legacySequenceDiscOffsets},  // G00052 D_800E8A60
+    {"BATTLE/BATTLE.PRG", 0x80340, sizeof VS::Content::legacySequenceSectorCounts,
+     &VS::Content::legacySequenceSectorCounts,
+     sizeof VS::Content::legacySequenceSectorCounts},  // G00053 D_800E8B40
+    {"BATTLE/BATTLE.PRG", 0x803B0, sizeof VS::Content::legacyEtmDiscOffsets,
+     &VS::Content::legacyEtmDiscOffsets,
+     sizeof VS::Content::legacyEtmDiscOffsets},  // G00054 _etmLbaOffsets
+    {"BATTLE/BATTLE.PRG", 0x80490, sizeof VS::Content::legacyEtmSectorCounts,
+     &VS::Content::legacyEtmSectorCounts,
+     sizeof VS::Content::legacyEtmSectorCounts},  // G00055 _etmFileSectorSizes
+    {"BATTLE/BATTLE.PRG", 0x80500, sizeof VS::Content::legacyWepDiscOffsets,
+     &VS::Content::legacyWepDiscOffsets,
+     sizeof VS::Content::legacyWepDiscOffsets},  // G00056 D_800E8D00
+    {"BATTLE/BATTLE.PRG", 0x80600, sizeof VS::Content::legacyWepSectorCounts,
+     &VS::Content::legacyWepSectorCounts,
+     sizeof VS::Content::legacyWepSectorCounts},  // G00057 _wepFileSectorOffsets
     {"BATTLE/BATTLE.PRG", 0x80680, sizeof Battle_chainAbilityAnimationGroups,
      &Battle_chainAbilityAnimationGroups,
      sizeof Battle_chainAbilityAnimationGroups},  // G00058 D_800E8E80
     {"BATTLE/BATTLE.PRG", 0x8068E,
-     sizeof Content_legacyMaterialSequenceDiscOffsets,
-     &Content_legacyMaterialSequenceDiscOffsets,
-     sizeof Content_legacyMaterialSequenceDiscOffsets},  // G00059 D_800E8E8E
+     sizeof VS::Content::legacyMaterialSequenceDiscOffsets,
+     &VS::Content::legacyMaterialSequenceDiscOffsets,
+     sizeof VS::Content::legacyMaterialSequenceDiscOffsets},  // G00059 D_800E8E8E
     {"BATTLE/BATTLE.PRG", 0x806A3,
-     sizeof Content_legacyMaterialSequenceSectorCounts,
-     &Content_legacyMaterialSequenceSectorCounts,
-     sizeof Content_legacyMaterialSequenceSectorCounts},  // G00060 D_800E8EA3
+     sizeof VS::Content::legacyMaterialSequenceSectorCounts,
+     &VS::Content::legacyMaterialSequenceSectorCounts,
+     sizeof VS::Content::legacyMaterialSequenceSectorCounts},  // G00060 D_800E8EA3
     {"BATTLE/BATTLE.PRG", 0x806A8,
-     sizeof Content_legacyMaterialModelSequenceDiscOffsets,
-     &Content_legacyMaterialModelSequenceDiscOffsets,
-     sizeof Content_legacyMaterialModelSequenceDiscOffsets},  // G00061
+     sizeof VS::Content::legacyMaterialModelSequenceDiscOffsets,
+     &VS::Content::legacyMaterialModelSequenceDiscOffsets,
+     sizeof VS::Content::legacyMaterialModelSequenceDiscOffsets},  // G00061
                                                               // D_800E8EA8
     {"BATTLE/BATTLE.PRG", 0x806FC,
-     sizeof Content_legacyMaterialModelSequenceSectorCounts,
-     &Content_legacyMaterialModelSequenceSectorCounts,
-     sizeof Content_legacyMaterialModelSequenceSectorCounts},  // G00062
+     sizeof VS::Content::legacyMaterialModelSequenceSectorCounts,
+     &VS::Content::legacyMaterialModelSequenceSectorCounts,
+     sizeof VS::Content::legacyMaterialModelSequenceSectorCounts},  // G00062
                                                                // D_800E8EFC
     {"BATTLE/BATTLE.PRG", 0x80728, sizeof VS::Content::objectDataLoadStep,
      &VS::Content::objectDataLoadStep,
      sizeof VS::Content::objectDataLoadStep},  // G00063
                                                // vs_battle_loadObjectDataState
-    {"BATTLE/BATTLE.PRG", 0x8072A, sizeof Content_legacyModelLoadPhase,
-     &Content_legacyModelLoadPhase,
-     sizeof Content_legacyModelLoadPhase},  // G00065 _loadShpState
-    {"BATTLE/BATTLE.PRG", 0x8072B, sizeof Content_legacySequenceParsePhase,
-     &Content_legacySequenceParsePhase,
-     sizeof Content_legacySequenceParsePhase},  // G00066 D_800E8F2B
+    {"BATTLE/BATTLE.PRG", 0x8072A, sizeof VS::Content::legacyModelLoadPhase,
+     &VS::Content::legacyModelLoadPhase,
+     sizeof VS::Content::legacyModelLoadPhase},  // G00065 _loadShpState
+    {"BATTLE/BATTLE.PRG", 0x8072B, sizeof VS::Content::legacySequenceParsePhase,
+     &VS::Content::legacySequenceParsePhase,
+     sizeof VS::Content::legacySequenceParsePhase},  // G00066 D_800E8F2B
     {"BATTLE/BATTLE.PRG", 0x8072C, sizeof Actors_sharedSequenceBankIndex,
      &Actors_sharedSequenceBankIndex,
      sizeof Actors_sharedSequenceBankIndex},  // G00067 D_800E8F2C
-    {"BATTLE/BATTLE.PRG", 0x8072D, sizeof Content_legacyEtmLoadPhase,
-     &Content_legacyEtmLoadPhase,
-     sizeof Content_legacyEtmLoadPhase},  // G00068 _loadEtmState
+    {"BATTLE/BATTLE.PRG", 0x8072D, sizeof VS::Content::legacyEtmLoadPhase,
+     &VS::Content::legacyEtmLoadPhase,
+     sizeof VS::Content::legacyEtmLoadPhase},  // G00068 _loadEtmState
     {"BATTLE/BATTLE.PRG", 0x80730, sizeof Actors_textureSlotOrigins,
      &Actors_textureSlotOrigins,
      sizeof Actors_textureSlotOrigins},  // G00069 D_800E8F30

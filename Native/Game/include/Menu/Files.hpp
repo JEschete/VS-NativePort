@@ -309,7 +309,8 @@ class Host : public Render::ImmediatePacketTarget, public CardHost {
   virtual void DrawCompactText(std::string_view text,
                                std::uint32_t position) = 0;
   [[nodiscard]] virtual std::uint32_t InterfaceRandomBits() = 0;
-  // Save_MemoryCard_uiResources->locationPalettes[index] (256 colours).
+  // VS::Save::MemoryCard::uiResources->location_palettes[index] (256
+  // colours).
   [[nodiscard]] virtual std::span<const std::uint16_t> LocationPalette(
       int index) = 0;
   virtual void SetDisplayMask(bool shown) = 0;

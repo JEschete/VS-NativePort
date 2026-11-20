@@ -126,9 +126,9 @@ struct ActorAssetRequest {
                          const ActorAssetRequest&) = default;
 };
 
-// The disc file tables (LegacyFiles.h): per-model disc offsets and sector
-// counts. The material-model sequence tables are indexed material * 4 +
-// model, as the original's flattened arrays.
+// The disc file tables (legacy_files in ActorAssetsLive.hpp): per-model
+// disc offsets and sector counts. The material-model sequence tables are
+// indexed material * 4 + model, as the original's flattened arrays.
 enum class AssetFileTable : std::uint8_t {
   kShpOffsets,
   kShpSectors,

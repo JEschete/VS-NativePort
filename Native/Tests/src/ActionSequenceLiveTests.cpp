@@ -8,7 +8,6 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "ActorAssets.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Battle/Action.h"
@@ -19,12 +18,12 @@
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Damage.h"
+#include "Content/ActorAssetsLive.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Gte.h"
 #include "Effects/Runtime.hpp"
 #include "Field/CameraLiveState.hpp"
 #include "Menu/TextBox.hpp"
-#include "ModelLoading.h"
 #include "Render/Camera.hpp"
 #include "Render/CameraViewLive.hpp"
 
@@ -43,7 +42,8 @@ struct LiveFixture {
       VS::Menu::sceneNotificationBuffer;
   decltype(VS::Field::sphericalCamera) saved_camera =
       VS::Field::sphericalCamera;
-  Content_ActorAssetRequest saved_request = Content_legacyActorAssetRequests[0];
+  VS::Content::LegacyActorAssetRequest saved_request =
+      VS::Content::legacyActorAssetRequests[0];
   std::array<unsigned, 2> saved_effects{VS::Effects::primaryPhase,
                                         VS::Effects::pendingTracks};
   std::array<int, 2> saved_tracks{VS::Effects::trackCount,
@@ -76,7 +76,7 @@ struct LiveFixture {
     VS::Effects::secondaryInstances = saved_trails;
     VS::Menu::sceneNotificationBuffer = saved_notification;
     VS::Field::sphericalCamera = saved_camera;
-    Content_legacyActorAssetRequests[0] = saved_request;
+    VS::Content::legacyActorAssetRequests[0] = saved_request;
     VS::Effects::primaryPhase = saved_effects[0];
     VS::Effects::pendingTracks = saved_effects[1];
     VS::Effects::trackCount = saved_tracks[0];
@@ -137,7 +137,7 @@ TEST_CASE(
   fixture->record.pose.reachedEnd = -1;
   fixture->state.queueIndex = 0xFFFFFFFF;
   fixture->state.queue[3].primaryTarget.target.targetActor = 15;
-  Content_legacyActorAssetRequests[0].assetKind = 0;
+  VS::Content::legacyActorAssetRequests[0].asset_kind = 0;
   VS::Effects::primaryPhase = 4;
   VS::Effects::trackCount = 1;
   VS::Effects::startedTrackCount = 0;

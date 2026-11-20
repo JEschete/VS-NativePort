@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "ActorAssets.h"
 #include "Actors/ActorCommandsLiveState.hpp"
 #include "Actors/ActorModelSlot.hpp"
 #include "Actors/ActorRecord.h"
@@ -245,7 +244,6 @@
 #include "Items/LootLiveState.hpp"
 #include "Items/Materials.hpp"
 #include "Legacy/Psx.h"
-#include "LegacyFiles.h"
 #include "Menu/BattleAbilitiesTerminalLive.hpp"
 #include "Menu/BattleAbilitiesUnlockLive.hpp"
 #include "Menu/BreakArtsLive.hpp"
@@ -312,7 +310,6 @@
 #include "Menu/TextBoxFramesLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Menu/TextBoxUpdateLive.hpp"
-#include "ModelLoading.h"
 #include "Movie/Intro.hpp"
 #include "Render/Camera.hpp"
 #include "Render/Display.hpp"
@@ -392,18 +389,18 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E861Cu, 24u, (void*)&Battle_valueCaptionRects, sizeof Battle_valueCaptionRects, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8634u, 12u, (void*)&Battle_lockedLabelHalfHeights, sizeof Battle_lockedLabelHalfHeights, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8640u, 32u, (void*)&Battle_lockedLabelPieces, sizeof Battle_lockedLabelPieces, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E8660u, 512u, (void*)&Content_legacyShpDiscOffsets, sizeof Content_legacyShpDiscOffsets, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E8860u, 256u, (void*)&Content_legacyShpSectorCounts, sizeof Content_legacyShpSectorCounts, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E8660u, 512u, (void*)&VS::Content::legacyShpDiscOffsets, sizeof VS::Content::legacyShpDiscOffsets, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E8860u, 256u, (void*)&VS::Content::legacyShpSectorCounts, sizeof VS::Content::legacyShpSectorCounts, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8960u, 256u, (void*)&Actors_sharedSequenceIdsByKind, sizeof Actors_sharedSequenceIdsByKind, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E8A60u, 224u, (void*)&Content_legacySequenceDiscOffsets, sizeof Content_legacySequenceDiscOffsets, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E8B40u, 112u, (void*)&Content_legacySequenceSectorCounts, sizeof Content_legacySequenceSectorCounts, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E8BB0u, 224u, (void*)&Content_legacyEtmDiscOffsets, sizeof Content_legacyEtmDiscOffsets, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E8C90u, 112u, (void*)&Content_legacyEtmSectorCounts, sizeof Content_legacyEtmSectorCounts, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E8D00u, 256u, (void*)&Content_legacyWepDiscOffsets, sizeof Content_legacyWepDiscOffsets, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E8E00u, 128u, (void*)&Content_legacyWepSectorCounts, sizeof Content_legacyWepSectorCounts, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E8A60u, 224u, (void*)&VS::Content::legacySequenceDiscOffsets, sizeof VS::Content::legacySequenceDiscOffsets, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E8B40u, 112u, (void*)&VS::Content::legacySequenceSectorCounts, sizeof VS::Content::legacySequenceSectorCounts, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E8BB0u, 224u, (void*)&VS::Content::legacyEtmDiscOffsets, sizeof VS::Content::legacyEtmDiscOffsets, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E8C90u, 112u, (void*)&VS::Content::legacyEtmSectorCounts, sizeof VS::Content::legacyEtmSectorCounts, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E8D00u, 256u, (void*)&VS::Content::legacyWepDiscOffsets, sizeof VS::Content::legacyWepDiscOffsets, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E8E00u, 128u, (void*)&VS::Content::legacyWepSectorCounts, sizeof VS::Content::legacyWepSectorCounts, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8E80u, 40u, (void*)&Battle_chainAbilityAnimationGroups, sizeof Battle_chainAbilityAnimationGroups, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E8EA8u, 84u, (void*)&Content_legacyMaterialModelSequenceDiscOffsets, sizeof Content_legacyMaterialModelSequenceDiscOffsets, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E8EFCu, 44u, (void*)&Content_legacyMaterialModelSequenceSectorCounts, sizeof Content_legacyMaterialModelSequenceSectorCounts, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E8EA8u, 84u, (void*)&VS::Content::legacyMaterialModelSequenceDiscOffsets, sizeof VS::Content::legacyMaterialModelSequenceDiscOffsets, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E8EFCu, 44u, (void*)&VS::Content::legacyMaterialModelSequenceSectorCounts, sizeof VS::Content::legacyMaterialModelSequenceSectorCounts, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8F28u, 4u, (void*)&VS::Content::objectDataLoadStep, sizeof VS::Content::objectDataLoadStep, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8F2Cu, 4u, (void*)&Actors_sharedSequenceBankIndex, sizeof Actors_sharedSequenceBankIndex, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8F30u, 96u, (void*)&Actors_textureSlotOrigins, sizeof Actors_textureSlotOrigins, 1u, 1u},
@@ -625,29 +622,29 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F2278u, 4u, (void*)&Battle_statusLabelStepTimer, sizeof Battle_statusLabelStepTimer, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F227Cu, 4u, (void*)&Battle_placedLabelCount, sizeof Battle_placedLabelCount, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F2280u, 8u, (void*)&Battle_abilityTimingCuePosition, sizeof Battle_abilityTimingCuePosition, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F2288u, 4u, (void*)&Content_legacyWeaponFileBuffer, sizeof Content_legacyWeaponFileBuffer, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F228Cu, 4u, (void*)&Content_legacyWeaponFileLoaded, sizeof Content_legacyWeaponFileLoaded, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F2290u, 8u, (void*)&Content_legacyWeaponFileLocation, sizeof Content_legacyWeaponFileLocation, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F2298u, 4u, (void*)&Content_legacyWeaponDiscRequest, sizeof Content_legacyWeaponDiscRequest, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F229Cu, 4u, (void*)&Content_legacyWeaponParseCursor, sizeof Content_legacyWeaponParseCursor, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F22A0u, 4u, (void*)&Content_legacyShpFileBuffer, sizeof Content_legacyShpFileBuffer, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F22A4u, 4u, (void*)&Content_legacyShpAllocated, sizeof Content_legacyShpAllocated, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F22A8u, 8u, (void*)&Content_legacyShpFileLocation, sizeof Content_legacyShpFileLocation, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F22B0u, 4u, (void*)&Content_legacyShpDiscRequest, sizeof Content_legacyShpDiscRequest, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F22B4u, 4u, (void*)&Content_legacyShpParseCursor, sizeof Content_legacyShpParseCursor, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F22B8u, 4u, (void*)&Content_legacyShpCopiedWordCount, sizeof Content_legacyShpCopiedWordCount, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F22BCu, 4u, (void*)&Content_legacyShpHeaderWord, sizeof Content_legacyShpHeaderWord, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F22C0u, 4u, (void*)&Content_legacyShpTextureWidth, sizeof Content_legacyShpTextureWidth, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F22C4u, 4u, (void*)&Content_legacyShpTextureHeight, sizeof Content_legacyShpTextureHeight, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F22C8u, 4u, (void*)&Content_legacySequenceFileBuffer, sizeof Content_legacySequenceFileBuffer, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F22D0u, 4u, (void*)&Content_legacySequenceBufferOwned, sizeof Content_legacySequenceBufferOwned, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F22D8u, 8u, (void*)&Content_legacySequenceFileLocation, sizeof Content_legacySequenceFileLocation, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F22E0u, 4u, (void*)&Content_legacySequenceDiscRequest, sizeof Content_legacySequenceDiscRequest, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F22E4u, 4u, (void*)&Content_legacySequenceParseData, sizeof Content_legacySequenceParseData, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F22FCu, 4u, (void*)&Content_legacyEtmFileBuffer, sizeof Content_legacyEtmFileBuffer, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F2300u, 8u, (void*)&Content_legacyEtmFileLocation, sizeof Content_legacyEtmFileLocation, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F2308u, 4u, (void*)&Content_legacyEtmDiscRequest, sizeof Content_legacyEtmDiscRequest, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F2310u, 320u, (void*)&Content_legacyActorAssetRequests, sizeof Content_legacyActorAssetRequests, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F2288u, 4u, (void*)&VS::Content::legacyWeaponFileBuffer, sizeof VS::Content::legacyWeaponFileBuffer, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F228Cu, 4u, (void*)&VS::Content::legacyWeaponFileLoaded, sizeof VS::Content::legacyWeaponFileLoaded, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F2290u, 8u, (void*)&VS::Content::legacyWeaponFileLocation, sizeof VS::Content::legacyWeaponFileLocation, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F2298u, 4u, (void*)&VS::Content::legacyWeaponDiscRequest, sizeof VS::Content::legacyWeaponDiscRequest, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F229Cu, 4u, (void*)&VS::Content::legacyWeaponParseCursor, sizeof VS::Content::legacyWeaponParseCursor, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F22A0u, 4u, (void*)&VS::Content::legacyShpFileBuffer, sizeof VS::Content::legacyShpFileBuffer, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F22A4u, 4u, (void*)&VS::Content::legacyShpAllocated, sizeof VS::Content::legacyShpAllocated, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F22A8u, 8u, (void*)&VS::Content::legacyShpFileLocation, sizeof VS::Content::legacyShpFileLocation, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F22B0u, 4u, (void*)&VS::Content::legacyShpDiscRequest, sizeof VS::Content::legacyShpDiscRequest, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F22B4u, 4u, (void*)&VS::Content::legacyShpParseCursor, sizeof VS::Content::legacyShpParseCursor, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F22B8u, 4u, (void*)&VS::Content::legacyShpCopiedWordCount, sizeof VS::Content::legacyShpCopiedWordCount, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F22BCu, 4u, (void*)&VS::Content::legacyShpHeaderWord, sizeof VS::Content::legacyShpHeaderWord, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F22C0u, 4u, (void*)&VS::Content::legacyShpTextureWidth, sizeof VS::Content::legacyShpTextureWidth, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F22C4u, 4u, (void*)&VS::Content::legacyShpTextureHeight, sizeof VS::Content::legacyShpTextureHeight, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F22C8u, 4u, (void*)&VS::Content::legacySequenceFileBuffer, sizeof VS::Content::legacySequenceFileBuffer, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F22D0u, 4u, (void*)&VS::Content::legacySequenceBufferOwned, sizeof VS::Content::legacySequenceBufferOwned, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F22D8u, 8u, (void*)&VS::Content::legacySequenceFileLocation, sizeof VS::Content::legacySequenceFileLocation, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F22E0u, 4u, (void*)&VS::Content::legacySequenceDiscRequest, sizeof VS::Content::legacySequenceDiscRequest, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F22E4u, 4u, (void*)&VS::Content::legacySequenceParseData, sizeof VS::Content::legacySequenceParseData, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F22FCu, 4u, (void*)&VS::Content::legacyEtmFileBuffer, sizeof VS::Content::legacyEtmFileBuffer, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F2300u, 8u, (void*)&VS::Content::legacyEtmFileLocation, sizeof VS::Content::legacyEtmFileLocation, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F2308u, 4u, (void*)&VS::Content::legacyEtmDiscRequest, sizeof VS::Content::legacyEtmDiscRequest, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F2310u, 320u, (void*)&VS::Content::legacyActorAssetRequests, sizeof VS::Content::legacyActorAssetRequests, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F2450u, 8u, (void*)&Actors_sharedSequenceBankTexturePages, sizeof Actors_sharedSequenceBankTexturePages, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F2458u, 6144u, (void*)&VS::Actors::modelRenderContext, sizeof VS::Actors::modelRenderContext, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F3C58u, 32u, (void*)&VS::Actors::skeletonPose, sizeof VS::Actors::skeletonPose, 0u, 0u},
@@ -663,7 +660,7 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F4594u, 4u, (void*)&Battle_unusedGlobal2, sizeof Battle_unusedGlobal2, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F45D8u, 4u, (void*)&VS::Content::lastAssetRequestType, sizeof VS::Content::lastAssetRequestType, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F45E0u, 64u, (void*)&Field_gimmickInstances, sizeof Field_gimmickInstances, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F4620u, 4u, (void*)&Content_legacyWeaponModelBuffers, sizeof Content_legacyWeaponModelBuffers, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F4620u, 4u, (void*)&VS::Content::legacyWeaponModelBuffers, sizeof VS::Content::legacyWeaponModelBuffers, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4628u, 128u, (void*)&Actors_sharedSequenceAnimationIds, sizeof Actors_sharedSequenceAnimationIds, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F46A8u, 192u, (void*)&VS::Render::legacyActorTextureSlots, sizeof VS::Render::legacyActorTextureSlots, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4768u, 4u, (void*)&Actors_sequenceWorkBuffer, sizeof Actors_sequenceWorkBuffer, 0u, 0u},

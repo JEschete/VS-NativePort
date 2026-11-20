@@ -726,15 +726,6 @@
     <ClCompile Include="src\Save\MemoryCard\GameFiles.cpp">
       <Filter>src\Save\MemoryCard</Filter>
     </ClCompile>
-    <ClInclude Include="src\Save\MemoryCard\GameFiles.h">
-      <Filter>src\Save\MemoryCard</Filter>
-    </ClInclude>
-    <ClCompile Include="src\Save\MemoryCard\Resources.cpp">
-      <Filter>src\Save\MemoryCard</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Save\MemoryCard\Resources.h">
-      <Filter>src\Save\MemoryCard</Filter>
-    </ClInclude>
     <ClCompile Include="src\Save\SaveStore.cpp">
       <Filter>src\Save</Filter>
     </ClCompile>

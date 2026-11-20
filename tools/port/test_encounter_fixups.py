@@ -4245,17 +4245,17 @@ int func_800F9800(void) {
         ) as stream:
             fields = {row["id"]: row for row in csv.DictReader(stream)}
         for identity, original, name in (
-            ("T00594.002", "unk8", "formatSignature"),
-            ("T00596.002", "unk20", "cardTitleTail"),
+            ("T00594.002", "unk8", "format_signature"),
+            ("T00596.002", "unk20", "card_title_tail"),
         ):
             with self.subTest(identity=identity):
                 self.assertEqual(fields[identity]["name"], original)
                 self.assertEqual(fields[identity]["final_name"], name)
-        header = (root / r"Native\Engine\src\Save\MemoryCard\GameFiles.h").read_text(
+        header = (root / r"Native\Game\include\Save\MemoryCard\SaveImage.hpp").read_text(
             encoding="utf-8"
         )
-        self.assertIn("    int formatSignature;", header)
-        self.assertIn("    u_short cardTitleTail[16];", header)
+        self.assertIn("  std::int32_t format_signature;", header)
+        self.assertIn("  std::uint16_t card_title_tail[kCardTitleTailChars];", header)
 
     def test_identifier_fixups_see_code_between_numeric_separator_literals(self):
         source = "auto n = 1'000; int arg0 = 7; auto m = 2'000; // arg0\n"

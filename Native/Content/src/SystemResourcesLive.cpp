@@ -14,7 +14,6 @@
 #include "Legacy/Psx.h"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
-#include "SystemResources.h"
 
 namespace VS::Content {
 namespace {
@@ -24,15 +23,15 @@ constexpr std::size_t SectionOffsetAt(SystemDatSection section) {
 
 static_assert(kSystemDatSector == VS_SYSTEM_DAT_LBA);
 static_assert(kSystemDatBytes == VS_SYSTEM_DAT_SIZE);
-static_assert(sizeof(Content_SystemDatHeader) ==
+static_assert(sizeof(SystemDatHeader) ==
               kSystemDatSections * sizeof(std::uint32_t));
-static_assert(offsetof(Content_SystemDatHeader, image0Offset) ==
+static_assert(offsetof(SystemDatHeader, image0_offset) ==
               SectionOffsetAt(SystemDatSection::kImage0));
-static_assert(offsetof(Content_SystemDatHeader, paletteOffset) ==
+static_assert(offsetof(SystemDatHeader, palette_offset) ==
               SectionOffsetAt(SystemDatSection::kPalette));
-static_assert(offsetof(Content_SystemDatHeader, fixedImageOffset) ==
+static_assert(offsetof(SystemDatHeader, fixed_image_offset) ==
               SectionOffsetAt(SystemDatSection::kFixedImage));
-static_assert(offsetof(Content_SystemDatHeader, interfaceDataOffset) ==
+static_assert(offsetof(SystemDatHeader, interface_data_offset) ==
               SectionOffsetAt(SystemDatSection::kInterface));
 static_assert(sizeof(RECT) == sizeof(VramRect));
 

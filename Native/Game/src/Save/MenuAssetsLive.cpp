@@ -13,10 +13,13 @@
 #include "Menu/FilesLiveState.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "Save/MemoryCard/GameFiles.h"
-#include "Save/MemoryCard/Resources.h"
+#include "Save/MemoryCard/CardResources.hpp"
+#include "Save/MemoryCard/SaveImage.hpp"
 #include "Title/SaveCard.hpp"
 #include "Title/SaveFiles.hpp"
+
+// decomp: _mcData (_mcData@src/TITLE/TITLE.PRG/22C.c)
+VS::Save::CardUiResources* VS::Save::MemoryCard::uiResources;
 
 namespace VS::Save::MemoryCard {
 namespace {
@@ -38,12 +41,13 @@ constexpr int PackedPair(int low, int high) {
   return (high << kHalfwordBits) | (low & kHalfwordMask);
 }
 constexpr unsigned kTextBytes = VS_MCDATA_BIN_SIZE + VS_MCMAN_BIN_SIZE;
-constexpr auto kResourceOffset = sizeof(Save_GameSaveImage) * kSaveImageCount;
+constexpr auto kResourceOffset = sizeof(GameSaveImage) * kSaveImageCount;
 
 // The save images and the text resources share the image buffer once the
 // image has been uploaded; both must stay inside it (#264).
-static_assert(kResourceOffset + sizeof(Save_CardUiResources) <= kImageBytes);
-static_assert(kTextBytes <= sizeof(Save_CardUiResources));
+static_assert(kResourceOffset + sizeof(VS::Save::CardUiResources) <=
+              kImageBytes);
+static_assert(kTextBytes <= sizeof(VS::Save::CardUiResources));
 
 MenuAssetLoad live_load;
 Content_DiscQueueSlot* live_request = nullptr;
@@ -93,22 +97,25 @@ class LiveMenuAssets final : public MenuAssetHost {
     // #301: a refused buffer derives no views.
     if (buffer == nullptr) return false;
     VS::Title::memoryCardUiResource = buffer;
-    Save_MemoryCard_uiResources = reinterpret_cast<Save_CardUiResources*>(
-        VS::Title::memoryCardUiResource + kResourceOffset);
+    VS::Save::MemoryCard::uiResources =
+        reinterpret_cast<VS::Save::CardUiResources*>(
+            VS::Title::memoryCardUiResource + kResourceOffset);
     if (owner == MenuAssetOwner::kDataMenu) {
-      VS::Menu::Files::textTable = Save_MemoryCard_uiResources->textTable;
+      VS::Menu::Files::textTable =
+          VS::Save::MemoryCard::uiResources->text_table;
     } else {
-      VS::Title::saveMenuText = Save_MemoryCard_uiResources->textTable;
+      VS::Title::saveMenuText = VS::Save::MemoryCard::uiResources->text_table;
     }
-    VS::Title::saveFileSummaries = Save_MemoryCard_uiResources->fileHeaders;
+    VS::Title::saveFileSummaries =
+        VS::Save::MemoryCard::uiResources->file_headers;
     VS::Title::cardDirectoryEntryBuffer =
-        &Save_MemoryCard_uiResources->directoryEntry;
+        &VS::Save::MemoryCard::uiResources->directory_entry;
     return true;
   }
   void FreeAssets() override {
     VS::Core::Memory::FreeLiveFromLowEnd(VS::Title::memoryCardUiResource);
     VS::Title::memoryCardUiResource = nullptr;
-    Save_MemoryCard_uiResources = nullptr;
+    VS::Save::MemoryCard::uiResources = nullptr;
     // #300: every view AllocateAssets derived pointed into the freed block, so
     // clear them all for the readers' null guards to refuse later reads.
     VS::Menu::Files::textTable = nullptr;
@@ -120,7 +127,7 @@ class LiveMenuAssets final : public MenuAssetHost {
     Request(VS_SPMCIMG_BIN_LBA, kImageBytes, VS::Title::memoryCardUiResource);
   }
   void RequestText() override {
-    Request(VS_MCDATA_BIN_LBA, kTextBytes, Save_MemoryCard_uiResources);
+    Request(VS_MCDATA_BIN_LBA, kTextBytes, VS::Save::MemoryCard::uiResources);
   }
   bool RequestLoaded() const override {
     return live_request != nullptr &&

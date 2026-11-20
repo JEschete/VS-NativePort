@@ -8,7 +8,6 @@
 #include <memory>
 #include <vector>
 
-#include "ActorAssets.h"
 #include "Actors/ActorRosterLive.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
@@ -297,12 +296,12 @@ class LiveWorld final : public ActionPresentationWorld {
   }
   std::uint8_t SourceModel(int actor) override;
   void QueueAsset(PresentationAsset asset) override {
-    Content_ActorAssetRequest live{};
+    VS::Content::LegacyActorAssetRequest live{};
     constexpr int kEffectAsset = 7;
-    live.assetKind = kEffectAsset;
-    live.targetSlot = std::bit_cast<decltype(live.targetSlot)>(asset.slot);
-    live.subKind = asset.kind;
-    live.modelId = asset.model;
+    live.asset_kind = kEffectAsset;
+    live.target_slot = std::bit_cast<decltype(live.target_slot)>(asset.slot);
+    live.sub_kind = asset.kind;
+    live.model_id = asset.model;
     live.material = std::bit_cast<decltype(live.material)>(asset.material);
     Content::QueueLiveActorAssetRequest(&live);
   }

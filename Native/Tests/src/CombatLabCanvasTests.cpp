@@ -8,13 +8,13 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "CombatLab/Canvas.hpp"
+#include "Content/SystemResources.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Text/CompactFont.hpp"
-#include "SystemResources.h"
 
 namespace {
 using VS::combat_lab::Canvas;
-constexpr std::size_t kImageOffset = sizeof(Content_SystemDatHeader);
+constexpr std::size_t kImageOffset = sizeof(VS::Content::SystemDatHeader);
 constexpr auto kImageBytes = std::size_t{64} * 96 * sizeof(std::uint16_t);
 constexpr auto kUiOffset = kImageOffset + sizeof(RECT) + kImageBytes;
 constexpr auto kPaletteOffset = kUiOffset + (std::size_t{223} * 64 + 32) * 2;
@@ -28,9 +28,9 @@ void Store(std::vector<std::uint8_t>& bytes, std::size_t offset,
 
 std::vector<std::uint8_t> FontData() {
   std::vector<std::uint8_t> bytes(kPaletteOffset + 16 * sizeof(std::uint16_t));
-  Content_SystemDatHeader header{};
-  header.image0Offset = static_cast<std::uint32_t>(kImageOffset);
-  header.interfaceDataOffset = static_cast<std::uint32_t>(kUiOffset);
+  VS::Content::SystemDatHeader header{};
+  header.image0_offset = static_cast<std::uint32_t>(kImageOffset);
+  header.interface_data_offset = static_cast<std::uint32_t>(kUiOffset);
   Store(bytes, 0, header);
   const RECT rect{768, 0, 64, 96};
   Store(bytes, kImageOffset, rect);
@@ -114,17 +114,18 @@ TEST_CASE("Combat Lab glyphs clip without wrapping across canvas edges",
 TEST_CASE("Combat Lab rejects truncated or invalid font assets",
           "[combat-lab][render][font]") {
   auto bytes = FontData();
-  SECTION("header") { bytes.resize(sizeof(Content_SystemDatHeader) - 1); }
+  SECTION("header") { bytes.resize(sizeof(VS::Content::SystemDatHeader) - 1); }
   SECTION("image") { bytes.resize(kUiOffset - 1); }
   SECTION("palette") { bytes.resize(kPaletteOffset + 31); }
   SECTION("palette offset overflow") {
     const std::uint32_t invalid = UINT32_MAX;
-    Store(bytes, offsetof(Content_SystemDatHeader, interfaceDataOffset),
+    Store(bytes, offsetof(VS::Content::SystemDatHeader, interface_data_offset),
           invalid);
   }
   SECTION("image offset overflow") {
     const std::uint32_t invalid = UINT32_MAX;
-    Store(bytes, offsetof(Content_SystemDatHeader, image0Offset), invalid);
+    Store(bytes, offsetof(VS::Content::SystemDatHeader, image0_offset),
+          invalid);
   }
   SECTION("wrong texture page") {
     const RECT invalid{832, 0, 64, 96};

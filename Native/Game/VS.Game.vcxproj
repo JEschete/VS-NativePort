@@ -2837,7 +2837,9 @@
     <ClInclude Include="include\Menu\TextBoxUpdateLive.hpp" />
     <ClInclude Include="include\Save\FileMenu.hpp" />
     <ClInclude Include="include\Save\FileMenuLive.hpp" />
+    <ClInclude Include="include\Save\MemoryCard\CardResources.hpp" />
     <ClInclude Include="include\Save\MemoryCard\GameFilesLive.hpp" />
+    <ClInclude Include="include\Save\MemoryCard\SaveImage.hpp" />
     <ClInclude Include="include\Save\MenuAssets.hpp" />
     <ClInclude Include="include\Save\MenuAssetsLive.hpp" />
     <ClInclude Include="include\Save\NativeContainer.hpp" />

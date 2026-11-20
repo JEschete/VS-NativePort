@@ -40,6 +40,23 @@ struct VramRect {
   std::int16_t h = 0;
 };
 
+// decomp: System_dat_h (src/BATTLE/INITBTL.PRG/18.c:23), upstream
+// src/BATTLE/INITBTL.PRG/18.c:30-39: the file's leading section offsets, in
+// SystemDatSection order.
+struct SystemDatHeader {
+  std::uint32_t image0_offset;
+  std::uint32_t image1_offset;
+  std::uint32_t palette_offset;
+  std::uint32_t image2_offset;
+  std::uint32_t image3_offset;
+  std::uint32_t image4_offset;
+  std::uint32_t fixed_image_offset;
+  std::uint32_t interface_data_offset;
+};
+static_assert(sizeof(SystemDatHeader) ==
+                  kSystemDatSections * sizeof(std::uint32_t),
+              "SystemDatHeader must keep its PS1 layout");
+
 // The heap, drive, VRAM and menu services the loader uses.
 class SystemResourcesHost {
  public:

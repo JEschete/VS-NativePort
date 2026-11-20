@@ -41,7 +41,6 @@
 #include "Menu/Status/ActorSwitchingLive.hpp"
 #include "Menu/Status/LimbControllersLive.hpp"
 #include "Menu/Status/TerminalControllersLiveInternal.hpp"
-#include "ModelLoading.h"
 #include "Render/Camera.hpp"
 #include "Render/ModelDraw.hpp"
 #include "Render/ModelGeometryLive.hpp"
@@ -128,18 +127,19 @@ struct VramRestore {
 };
 
 struct AssetStateRestore {
-  ArrayRestore<Content_ActorAssetRequest, VS::Content::kActorAssetRequestCount>
-      requests{Content_legacyActorAssetRequests};
-  ValueRestore<u_char> model_phase{Content_legacyModelLoadPhase};
+  ArrayRestore<VS::Content::LegacyActorAssetRequest,
+               VS::Content::kActorAssetRequestCount>
+      requests{VS::Content::legacyActorAssetRequests.data()};
+  ValueRestore<u_char> model_phase{VS::Content::legacyModelLoadPhase};
   ValueRestore<unsigned char> parse_phase{VS::Content::modelParseResetFlag};
-  ValueRestore<u_char> sequence_phase{Content_legacySequenceParsePhase};
-  ValueRestore<u_char> effect_phase{Content_legacyEtmLoadPhase};
-  ValueRestore<u_char*> model_cursor{Content_legacyShpParseCursor};
-  ValueRestore<u_char*> sequence_cursor{Content_legacySequenceParseData};
-  ValueRestore<u_char> palette_words{Content_legacyShpCopiedWordCount};
-  ValueRestore<int> header_word{Content_legacyShpHeaderWord};
-  ValueRestore<int> texture_width{Content_legacyShpTextureWidth};
-  ValueRestore<int> texture_height{Content_legacyShpTextureHeight};
+  ValueRestore<u_char> sequence_phase{VS::Content::legacySequenceParsePhase};
+  ValueRestore<u_char> effect_phase{VS::Content::legacyEtmLoadPhase};
+  ValueRestore<u_char*> model_cursor{VS::Content::legacyShpParseCursor};
+  ValueRestore<u_char*> sequence_cursor{VS::Content::legacySequenceParseData};
+  ValueRestore<u_char> palette_words{VS::Content::legacyShpCopiedWordCount};
+  ValueRestore<int> header_word{VS::Content::legacyShpHeaderWord};
+  ValueRestore<int> texture_width{VS::Content::legacyShpTextureWidth};
+  ValueRestore<int> texture_height{VS::Content::legacyShpTextureHeight};
   ValueRestore<int> peak{VS::Content::assetQueuePeakUsage};
   ValueRestore<int> load_phase{VS::Content::lastLoadPhaseSnapshot};
   ValueRestore<int> ticks{VS::Content::assetQueueFrameTicks};
@@ -155,8 +155,8 @@ struct AssetStateRestore {
   ArrayRestore<u_char, std::size(Actors_textureSlotRowOffsets)> texture_rows{
       Actors_textureSlotRowOffsets};
   ArrayRestore<Actors_WeaponModelData*,
-               std::size(Content_legacyWeaponModelBuffers)>
-      weapon_buffers{Content_legacyWeaponModelBuffers};
+               std::size(VS::Content::legacyWeaponModelBuffers)>
+      weapon_buffers{VS::Content::legacyWeaponModelBuffers.data()};
   ArrayRestore<Field_GimmickInstance*, std::size(Field_gimmickInstances)>
       gimmicks{Field_gimmickInstances};
   ArrayRestore<u_char, std::size(Actors_sharedSequenceBankTexturePages)>
@@ -392,11 +392,11 @@ struct Fixture {
   void BindPreview() {
     namespace content = VS::Content;
     if (std::ranges::any_of(
-            Content_legacyActorAssetRequests,
-            [](const auto& request) { return request.assetKind != 0; }) ||
-        Content_legacyModelLoadPhase != 0 ||
+            VS::Content::legacyActorAssetRequests,
+            [](const auto& request) { return request.asset_kind != 0; }) ||
+        VS::Content::legacyModelLoadPhase != 0 ||
         VS::Content::modelParseResetFlag != 0 ||
-        Content_legacySequenceParsePhase != 0) {
+        VS::Content::legacySequenceParsePhase != 0) {
       throw std::runtime_error("terminal fixture requires an idle asset queue");
     }
     LoadTextureOrigins();

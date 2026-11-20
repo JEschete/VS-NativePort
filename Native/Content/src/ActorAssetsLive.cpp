@@ -1,7 +1,7 @@
 // Hand-maintained (tools/port/owned.csv).
 // Live binding for the battle asset queue and loaders (ActorAssets.hpp): the
-// legacy request queue, the loaders' globals (ModelLoading.h and
-// ActorAssetsLive.hpp), the actor and weapon records, the shared sequence
+// legacy request queue, the loaders' globals and disc file tables
+// (ActorAssetsLive.hpp), the actor and weapon records, the shared sequence
 // banks, the texture slot tables, the game heap and the disc request queue
 // (CdDriveLive.hpp).
 #include "Content/ActorAssetsLive.hpp"
@@ -19,7 +19,6 @@
 #include <tuple>
 #include <type_traits>
 
-#include "ActorAssets.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorSpawning.hpp"
 #include "Actors/ActorStateLive.hpp"
@@ -47,8 +46,6 @@
 #include "Field/Gimmicks.h"
 #include "Items/Materials.hpp"
 #include "Legacy/Psx.h"
-#include "LegacyFiles.h"
-#include "ModelLoading.h"
 #include "Render/ModelGeometryLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/TexturePagesLive.hpp"
@@ -69,9 +66,97 @@ int VS::Content::assetQueueFrameTicks;
 int VS::Content::lastAssetRequestType;
 
 namespace VS::Content {
+// The loaders' legacy state (ActorAssetsLive.hpp). The phases' contents come
+// from the module image (ModuleData.cpp).
+
+// decomp: _loadShpState (_loadShpState@BATTLE/BATTLE.PRG)
+std::uint8_t legacyModelLoadPhase;
+// decomp: D_800E8F2B (D_800E8F2B@BATTLE/BATTLE.PRG)
+std::uint8_t legacySequenceParsePhase;
+// decomp: _loadEtmState (_loadEtmState@BATTLE/BATTLE.PRG)
+std::uint8_t legacyEtmLoadPhase;
+// decomp: _wepFileData (_wepFileData@BATTLE/BATTLE.PRG)
+void* legacyWeaponFileBuffer;
+// decomp: _wepFileLoaded (_wepFileLoaded@BATTLE/BATTLE.PRG)
+std::int32_t legacyWeaponFileLoaded;
+// decomp: _wepFile (_wepFile@BATTLE/BATTLE.PRG)
+Content_DiscFile legacyWeaponFileLocation;
+// decomp: _wepCdSlot (_wepCdSlot@BATTLE/BATTLE.PRG)
+Content_DiscQueueSlot* legacyWeaponDiscRequest;
+// decomp: _wepFileEpilog (_wepFileEpilog@BATTLE/BATTLE.PRG)
+void* legacyWeaponParseCursor;
+// decomp: _shpData (_shpData@BATTLE/BATTLE.PRG)
+void* legacyShpFileBuffer;
+// decomp: _shpAllocated (_shpAllocated@BATTLE/BATTLE.PRG)
+std::int32_t legacyShpAllocated;
+// decomp: _shpFile (_shpFile@BATTLE/BATTLE.PRG)
+Content_DiscFile legacyShpFileLocation;
+// decomp: _shpCdSlot (_shpCdSlot@BATTLE/BATTLE.PRG)
+Content_DiscQueueSlot* legacyShpDiscRequest;
+// decomp: D_800F22B4 (D_800F22B4@BATTLE/BATTLE.PRG)
+std::uint8_t* legacyShpParseCursor;
+// decomp: D_800F22B8 (D_800F22B8@BATTLE/BATTLE.PRG)
+std::uint8_t legacyShpCopiedWordCount;
+// decomp: D_800F22BC (D_800F22BC@BATTLE/BATTLE.PRG)
+std::int32_t legacyShpHeaderWord;
+// decomp: D_800F22C0 (D_800F22C0@BATTLE/BATTLE.PRG)
+std::int32_t legacyShpTextureWidth;
+// decomp: D_800F22C4 (D_800F22C4@BATTLE/BATTLE.PRG)
+std::int32_t legacyShpTextureHeight;
+// decomp: D_800F22C8 (D_800F22C8@BATTLE/BATTLE.PRG)
+void* legacySequenceFileBuffer;
+// decomp: D_800F22D0 (D_800F22D0@BATTLE/BATTLE.PRG)
+std::int32_t legacySequenceBufferOwned;
+// decomp: D_800F22D8 (D_800F22D8@BATTLE/BATTLE.PRG)
+Content_DiscFile legacySequenceFileLocation;
+// decomp: D_800F22E0 (D_800F22E0@BATTLE/BATTLE.PRG)
+Content_DiscQueueSlot* legacySequenceDiscRequest;
+// decomp: D_800F22E4 (D_800F22E4@BATTLE/BATTLE.PRG)
+std::uint8_t* legacySequenceParseData;
+// decomp: _etmData (_etmData@BATTLE/BATTLE.PRG)
+std::uint16_t* legacyEtmFileBuffer;
+// decomp: _etmFile (_etmFile@BATTLE/BATTLE.PRG)
+Content_DiscFile legacyEtmFileLocation;
+// decomp: _etmFileCdSlot (_etmFileCdSlot@BATTLE/BATTLE.PRG)
+Content_DiscQueueSlot* legacyEtmDiscRequest;
+// decomp: vs_battle_objectDataSlots
+// (vs_battle_objectDataSlots@BATTLE/BATTLE.PRG)
+legacy_files::Requests legacyActorAssetRequests;
+// decomp: vs_battle_commonWepBuffs (vs_battle_commonWepBuffs@BATTLE/BATTLE.PRG)
+legacy_files::WeaponModels legacyWeaponModelBuffers;
+
+// The disc file tables; their contents come from the module image
+// (ModuleData.cpp).
+
+// decomp: _shpLbaOffsets (_shpLbaOffsets@BATTLE/BATTLE.PRG)
+legacy_files::ShpOffsets legacyShpDiscOffsets;
+// decomp: _shpFileSectorSizes (_shpFileSectorSizes@BATTLE/BATTLE.PRG)
+legacy_files::ShpSectors legacyShpSectorCounts;
+// decomp: D_800E8A60 (D_800E8A60@BATTLE/BATTLE.PRG)
+legacy_files::SequenceOffsets legacySequenceDiscOffsets;
+// decomp: D_800E8B40 (D_800E8B40@BATTLE/BATTLE.PRG)
+legacy_files::SequenceSectors legacySequenceSectorCounts;
+// decomp: _etmLbaOffsets (_etmLbaOffsets@BATTLE/BATTLE.PRG)
+legacy_files::EtmOffsets legacyEtmDiscOffsets;
+// decomp: _etmFileSectorSizes (_etmFileSectorSizes@BATTLE/BATTLE.PRG)
+legacy_files::EtmSectors legacyEtmSectorCounts;
+// decomp: D_800E8D00 (D_800E8D00@BATTLE/BATTLE.PRG)
+legacy_files::WepOffsets legacyWepDiscOffsets;
+// decomp: _wepFileSectorOffsets (_wepFileSectorOffsets@BATTLE/BATTLE.PRG)
+legacy_files::WepSectors legacyWepSectorCounts;
+// decomp: D_800E8E8E (D_800E8E8E@BATTLE/BATTLE.PRG)
+legacy_files::MaterialOffsets legacyMaterialSequenceDiscOffsets;
+// decomp: D_800E8EA3 (D_800E8EA3@BATTLE/BATTLE.PRG)
+legacy_files::MaterialSectors legacyMaterialSequenceSectorCounts;
+// decomp: D_800E8EA8 (D_800E8EA8@BATTLE/BATTLE.PRG)
+legacy_files::ModelOffsets legacyMaterialModelSequenceDiscOffsets;
+// decomp: D_800E8EFC (D_800E8EFC@BATTLE/BATTLE.PRG)
+legacy_files::ModelSectors legacyMaterialModelSequenceSectorCounts;
+}  // namespace VS::Content
+
+namespace VS::Content {
 namespace {
-static_assert(std::size(Content_legacyActorAssetRequests) ==
-              kActorAssetRequestCount);
+static_assert(std::size(legacyActorAssetRequests) == kActorAssetRequestCount);
 static_assert(std::size(Actors_actorRecords) == kActorRecordSlots);
 static_assert(std::size(VS::Actors::weaponModels) == kWeaponModelSlots);
 static_assert(std::size(VS::Render::legacyActorTextureSlots) ==
@@ -88,18 +173,18 @@ static_assert(std::extent_v<decltype(Actors_sharedSequenceEntryParams), 1> ==
 static_assert(std::extent_v<decltype(Actors_sharedSequenceAnimationData), 1> ==
               kSharedSequenceEntries);
 
-static_assert(offsetof(Content_ActorAssetRequest, assetKind) == 0);
-static_assert(offsetof(Content_ActorAssetRequest, targetSlot) == 1);
-static_assert(offsetof(Content_ActorAssetRequest, modelId) == 2);
-static_assert(offsetof(Content_ActorAssetRequest, subKind) ==
-              offsetof(Content_ActorAssetRequest, placement) +
+static_assert(offsetof(LegacyActorAssetRequest, asset_kind) == 0);
+static_assert(offsetof(LegacyActorAssetRequest, target_slot) == 1);
+static_assert(offsetof(LegacyActorAssetRequest, model_id) == 2);
+static_assert(offsetof(LegacyActorAssetRequest, sub_kind) ==
+              offsetof(LegacyActorAssetRequest, placement) +
                   sizeof(std::uint32_t));
-static_assert(offsetof(Content_ActorAssetRequest, textureSlot) ==
-              offsetof(Content_ActorAssetRequest, subKind) + 1);
-static_assert(offsetof(Content_ActorAssetRequest, material) ==
-              offsetof(Content_ActorAssetRequest, textureSlot) + 1);
-static_assert(offsetof(Content_ActorAssetRequest, variant) ==
-              offsetof(Content_ActorAssetRequest, material) + 1);
+static_assert(offsetof(LegacyActorAssetRequest, texture_slot) ==
+              offsetof(LegacyActorAssetRequest, sub_kind) + 1);
+static_assert(offsetof(LegacyActorAssetRequest, material) ==
+              offsetof(LegacyActorAssetRequest, texture_slot) + 1);
+static_assert(offsetof(LegacyActorAssetRequest, variant) ==
+              offsetof(LegacyActorAssetRequest, material) + 1);
 
 // The instance's flag byte (isSkipped .. isParsed) follows the counts; the
 // Live binding is built without /J, so its char bit-fields are read raw.
@@ -247,77 +332,77 @@ Actors_ActorRecord* ActorAt(int slot) {
 
 // --- Requests and loader state ---------------------------------------------
 
-ActorAssetRequest LoadRequest(const Content_ActorAssetRequest& in) {
+ActorAssetRequest LoadRequest(const LegacyActorAssetRequest& in) {
   return {
-      .kind = in.assetKind,
-      .target_slot = in.targetSlot,
-      .model_id = in.modelId,
+      .kind = in.asset_kind,
+      .target_slot = in.target_slot,
+      .model_id = in.model_id,
       .destination = Address(in.destination),
-      .data = static_cast<AssetAddress>(in.dataAddress),
+      .data = static_cast<AssetAddress>(in.data_address),
       .placement = in.placement,
-      .sub_kind = in.subKind,
-      .texture_slot = static_cast<std::uint8_t>(in.textureSlot),
-      .material = static_cast<std::uint8_t>(in.material),
-      .variant = static_cast<std::uint8_t>(in.variant),
+      .sub_kind = in.sub_kind,
+      .texture_slot = in.texture_slot,
+      .material = in.material,
+      .variant = in.variant,
   };
 }
 
 void StoreRequestFields(const ActorAssetRequest& in,
-                        Content_ActorAssetRequest& out) {
-  out.assetKind = in.kind;
-  out.targetSlot = in.target_slot;
-  out.modelId = in.model_id;
+                        LegacyActorAssetRequest& out) {
+  out.asset_kind = in.kind;
+  out.target_slot = in.target_slot;
+  out.model_id = in.model_id;
   out.destination = Pointer(in.destination);
-  out.dataAddress = static_cast<std::uintptr_t>(in.data);
+  out.data_address = static_cast<std::uintptr_t>(in.data);
   out.placement = in.placement;
-  out.subKind = in.sub_kind;
-  out.textureSlot = static_cast<char>(in.texture_slot);
-  out.material = static_cast<char>(in.material);
-  out.variant = static_cast<char>(in.variant);
+  out.sub_kind = in.sub_kind;
+  out.texture_slot = in.texture_slot;
+  out.material = in.material;
+  out.variant = in.variant;
 }
 
 ActorAssetLoadState LoadState() {
   ActorAssetLoadState state;
-  state.model_phase = Content_legacyModelLoadPhase;
+  state.model_phase = legacyModelLoadPhase;
   state.parse_phase = modelParseResetFlag;
-  state.sequence_parse_phase = Content_legacySequenceParsePhase;
-  state.effect_texture_phase = Content_legacyEtmLoadPhase;
-  state.weapon_file_loaded = Content_legacyWeaponFileLoaded != 0;
-  state.model_file_allocated = Content_legacyShpAllocated != 0;
-  state.sequence_file_owned = Content_legacySequenceBufferOwned != 0;
-  state.weapon_file = Address(Content_legacyWeaponFileBuffer);
-  state.model_file = Address(Content_legacyShpFileBuffer);
-  state.sequence_file = Address(Content_legacySequenceFileBuffer);
-  state.effect_texture_file = Address(Content_legacyEtmFileBuffer);
-  state.weapon_cursor = Address(Content_legacyWeaponParseCursor);
-  state.model_cursor = Address(Content_legacyShpParseCursor);
-  state.sequence_cursor = Address(Content_legacySequenceParseData);
-  state.model_palette_words = Content_legacyShpCopiedWordCount;
-  state.model_header_word = Content_legacyShpHeaderWord;
-  state.model_texture_width = Content_legacyShpTextureWidth;
-  state.model_texture_height = Content_legacyShpTextureHeight;
+  state.sequence_parse_phase = legacySequenceParsePhase;
+  state.effect_texture_phase = legacyEtmLoadPhase;
+  state.weapon_file_loaded = legacyWeaponFileLoaded != 0;
+  state.model_file_allocated = legacyShpAllocated != 0;
+  state.sequence_file_owned = legacySequenceBufferOwned != 0;
+  state.weapon_file = Address(legacyWeaponFileBuffer);
+  state.model_file = Address(legacyShpFileBuffer);
+  state.sequence_file = Address(legacySequenceFileBuffer);
+  state.effect_texture_file = Address(legacyEtmFileBuffer);
+  state.weapon_cursor = Address(legacyWeaponParseCursor);
+  state.model_cursor = Address(legacyShpParseCursor);
+  state.sequence_cursor = Address(legacySequenceParseData);
+  state.model_palette_words = legacyShpCopiedWordCount;
+  state.model_header_word = legacyShpHeaderWord;
+  state.model_texture_width = legacyShpTextureWidth;
+  state.model_texture_height = legacyShpTextureHeight;
   return state;
 }
 
 void StoreState(const ActorAssetLoadState& state) {
-  Content_legacyModelLoadPhase = state.model_phase;
+  legacyModelLoadPhase = state.model_phase;
   modelParseResetFlag = state.parse_phase;
-  Content_legacySequenceParsePhase = state.sequence_parse_phase;
-  Content_legacyEtmLoadPhase = state.effect_texture_phase;
-  Content_legacyWeaponFileLoaded = state.weapon_file_loaded ? 1 : 0;
-  Content_legacyShpAllocated = state.model_file_allocated ? 1 : 0;
-  Content_legacySequenceBufferOwned = state.sequence_file_owned ? 1 : 0;
-  Content_legacyWeaponFileBuffer = Pointer(state.weapon_file);
-  Content_legacyShpFileBuffer = Pointer(state.model_file);
-  Content_legacySequenceFileBuffer = Pointer(state.sequence_file);
-  Content_legacyEtmFileBuffer = Pointer<u_short>(state.effect_texture_file);
-  Content_legacyWeaponParseCursor = Pointer(state.weapon_cursor);
-  Content_legacyShpParseCursor = Pointer<u_char>(state.model_cursor);
-  Content_legacySequenceParseData = Pointer<u_char>(state.sequence_cursor);
-  Content_legacyShpCopiedWordCount = state.model_palette_words;
-  Content_legacyShpHeaderWord = state.model_header_word;
-  Content_legacyShpTextureWidth = state.model_texture_width;
-  Content_legacyShpTextureHeight = state.model_texture_height;
+  legacySequenceParsePhase = state.sequence_parse_phase;
+  legacyEtmLoadPhase = state.effect_texture_phase;
+  legacyWeaponFileLoaded = state.weapon_file_loaded ? 1 : 0;
+  legacyShpAllocated = state.model_file_allocated ? 1 : 0;
+  legacySequenceBufferOwned = state.sequence_file_owned ? 1 : 0;
+  legacyWeaponFileBuffer = Pointer(state.weapon_file);
+  legacyShpFileBuffer = Pointer(state.model_file);
+  legacySequenceFileBuffer = Pointer(state.sequence_file);
+  legacyEtmFileBuffer = Pointer<std::uint16_t>(state.effect_texture_file);
+  legacyWeaponParseCursor = Pointer(state.weapon_cursor);
+  legacyShpParseCursor = Pointer<std::uint8_t>(state.model_cursor);
+  legacySequenceParseData = Pointer<std::uint8_t>(state.sequence_cursor);
+  legacyShpCopiedWordCount = state.model_palette_words;
+  legacyShpHeaderWord = state.model_header_word;
+  legacyShpTextureWidth = state.model_texture_width;
+  legacyShpTextureHeight = state.model_texture_height;
 }
 
 ActorAssetQueueStats LoadStats() {
@@ -623,7 +708,7 @@ void StoreActorTables(const ActorAssetRecord& in, Actors_ActorRecord& out) {
 // --- Files -------------------------------------------------------------------
 
 template <typename T, std::size_t N>
-std::optional<std::uint32_t> TableEntry(const T (&table)[N],
+std::optional<std::uint32_t> TableEntry(const std::array<T, N>& table,
                                         std::size_t index) {
   if (index >= N) {
     return std::nullopt;
@@ -633,8 +718,8 @@ std::optional<std::uint32_t> TableEntry(const T (&table)[N],
 
 // The material-model tables, indexed material * 4 + model.
 template <typename T, std::size_t Rows, std::size_t Columns>
-std::optional<std::uint32_t> FlatTableEntry(const T (&table)[Rows][Columns],
-                                            std::size_t index) {
+std::optional<std::uint32_t> FlatTableEntry(
+    const std::array<std::array<T, Columns>, Rows>& table, std::size_t index) {
   if (index >= Rows * Columns) {
     return std::nullopt;
   }
@@ -656,16 +741,14 @@ ModelReadOwner model_read_owner;
 LiveFileStream Stream(AssetFileStream stream) {
   switch (stream) {
     case AssetFileStream::kWeapon:
-      return {&Content_legacyWeaponFileLocation,
-              &Content_legacyWeaponDiscRequest};
+      return {&legacyWeaponFileLocation, &legacyWeaponDiscRequest};
     case AssetFileStream::kActorModel:
-      return {&Content_legacyShpFileLocation, &Content_legacyShpDiscRequest};
+      return {&legacyShpFileLocation, &legacyShpDiscRequest};
     case AssetFileStream::kSequence:
-      return {&Content_legacySequenceFileLocation,
-              &Content_legacySequenceDiscRequest};
+      return {&legacySequenceFileLocation, &legacySequenceDiscRequest};
     case AssetFileStream::kEffectTexture:
     default:
-      return {&Content_legacyEtmFileLocation, &Content_legacyEtmDiscRequest};
+      return {&legacyEtmFileLocation, &legacyEtmDiscRequest};
   }
 }
 
@@ -707,7 +790,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
   // The request queue.
   [[nodiscard]] std::uint8_t RequestKind(int slot) const override {
     return InRange(slot, kActorAssetRequestCount)
-               ? Content_legacyActorAssetRequests[slot].assetKind
+               ? legacyActorAssetRequests[slot].asset_kind
                : 0;
   }
   void StoreRequest(int slot, const ActorAssetRequest& request) override {
@@ -715,12 +798,12 @@ class LiveActorAssetHost final : public ActorAssetHost {
       CountRefusal("asset request slot", slot);
       return;
     }
-    StoreRequestFields(request, Content_legacyActorAssetRequests[slot]);
+    StoreRequestFields(request, legacyActorAssetRequests[slot]);
   }
   void OnRequestQueued(const ActorAssetRequest& request) override {
     const std::uint8_t phase = active_state_ != nullptr
                                    ? active_state_->model_phase
-                                   : Content_legacyModelLoadPhase;
+                                   : legacyModelLoadPhase;
     const std::uint8_t parse = active_state_ != nullptr
                                    ? active_state_->parse_phase
                                    : modelParseResetFlag;
@@ -732,14 +815,13 @@ class LiveActorAssetHost final : public ActorAssetHost {
         static_cast<unsigned>(parse));
   }
   void MoveRequest(int from, int to) override {
-    Content_legacyActorAssetRequests[to] =
-        Content_legacyActorAssetRequests[from];
+    legacyActorAssetRequests[to] = legacyActorAssetRequests[from];
   }
   void ClearRequestKind(int slot) override {
-    Content_legacyActorAssetRequests[slot].assetKind = 0;
+    legacyActorAssetRequests[slot].asset_kind = 0;
   }
   int ProcessHeadRequest(ActorAssetKind kind) override {
-    Content_ActorAssetRequest& head = Content_legacyActorAssetRequests[0];
+    LegacyActorAssetRequest& head = legacyActorAssetRequests[0];
     ActorAssetRequest request = LoadRequest(head);
     if (kind == ActorAssetKind::kGimmick) {
       const auto result = VS::Field::CreateLiveGimmickInstance(request);
@@ -756,17 +838,17 @@ class LiveActorAssetHost final : public ActorAssetHost {
   }
   std::int32_t FrameCounter() override { return VSync(1); }
   [[nodiscard]] std::uint8_t ModelLoadPhase() const override {
-    return Content_legacyModelLoadPhase;
+    return legacyModelLoadPhase;
   }
   void OnHeadRequestDone(int result) override {
-    const Content_ActorAssetRequest& head = Content_legacyActorAssetRequests[0];
+    const LegacyActorAssetRequest& head = legacyActorAssetRequests[0];
     // The original indexed the records with any slot below 17.
-    const void* record = ActorAt(head.targetSlot);
+    const void* record = ActorAt(head.target_slot);
     VS::Core::Debugf("actors",
                      "loaded kind=%u actor=%u model=%d result=%d record=%p",
-                     static_cast<unsigned>(head.assetKind),
-                     static_cast<unsigned>(head.targetSlot),
-                     static_cast<int>(head.modelId), result, record);
+                     static_cast<unsigned>(head.asset_kind),
+                     static_cast<unsigned>(head.target_slot),
+                     static_cast<int>(head.model_id), result, record);
   }
 
   // The game heap.
@@ -948,9 +1030,8 @@ class LiveActorAssetHost final : public ActorAssetHost {
     }
   }
   [[nodiscard]] AssetAddress WeaponGeometryBuffer(int slot) const override {
-    return slot == 0 || slot == 1
-               ? Address(Content_legacyWeaponModelBuffers[slot])
-               : AssetAddress::kNone;
+    return slot == 0 || slot == 1 ? Address(legacyWeaponModelBuffers[slot])
+                                  : AssetAddress::kNone;
   }
   [[nodiscard]] std::span<const std::uint8_t> WeaponMaterialPalettes()
       const override {
@@ -1171,31 +1252,29 @@ class LiveActorAssetHost final : public ActorAssetHost {
                                                          std::size_t index) {
     switch (table) {
       case AssetFileTable::kShpOffsets:
-        return TableEntry(Content_legacyShpDiscOffsets, index);
+        return TableEntry(legacyShpDiscOffsets, index);
       case AssetFileTable::kShpSectors:
-        return TableEntry(Content_legacyShpSectorCounts, index);
+        return TableEntry(legacyShpSectorCounts, index);
       case AssetFileTable::kSequenceOffsets:
-        return TableEntry(Content_legacySequenceDiscOffsets, index);
+        return TableEntry(legacySequenceDiscOffsets, index);
       case AssetFileTable::kSequenceSectors:
-        return TableEntry(Content_legacySequenceSectorCounts, index);
+        return TableEntry(legacySequenceSectorCounts, index);
       case AssetFileTable::kEtmOffsets:
-        return TableEntry(Content_legacyEtmDiscOffsets, index);
+        return TableEntry(legacyEtmDiscOffsets, index);
       case AssetFileTable::kEtmSectors:
-        return TableEntry(Content_legacyEtmSectorCounts, index);
+        return TableEntry(legacyEtmSectorCounts, index);
       case AssetFileTable::kWepOffsets:
-        return TableEntry(Content_legacyWepDiscOffsets, index);
+        return TableEntry(legacyWepDiscOffsets, index);
       case AssetFileTable::kWepSectors:
-        return TableEntry(Content_legacyWepSectorCounts, index);
+        return TableEntry(legacyWepSectorCounts, index);
       case AssetFileTable::kMaterialSequenceOffsets:
-        return TableEntry(Content_legacyMaterialSequenceDiscOffsets, index);
+        return TableEntry(legacyMaterialSequenceDiscOffsets, index);
       case AssetFileTable::kMaterialSequenceSectors:
-        return TableEntry(Content_legacyMaterialSequenceSectorCounts, index);
+        return TableEntry(legacyMaterialSequenceSectorCounts, index);
       case AssetFileTable::kMaterialModelSequenceOffsets:
-        return FlatTableEntry(Content_legacyMaterialModelSequenceDiscOffsets,
-                              index);
+        return FlatTableEntry(legacyMaterialModelSequenceDiscOffsets, index);
       case AssetFileTable::kMaterialModelSequenceSectors:
-        return FlatTableEntry(Content_legacyMaterialModelSequenceSectorCounts,
-                              index);
+        return FlatTableEntry(legacyMaterialModelSequenceSectorCounts, index);
       default:
         return std::nullopt;
     }
@@ -1336,14 +1415,14 @@ void RemoveBorrowRequests(
   std::size_t destination = 0;
   for (std::size_t source = 0; source < kImmobile; ++source) {
     if (!cancelled[source]) {
-      Content_legacyActorAssetRequests[destination++] =
-          Content_legacyActorAssetRequests[source];
+      legacyActorAssetRequests[destination++] =
+          legacyActorAssetRequests[source];
     }
   }
   while (destination < kImmobile) {
-    Content_legacyActorAssetRequests[destination++] = {};
+    legacyActorAssetRequests[destination++] = {};
   }
-  if (cancelled[kImmobile]) Content_legacyActorAssetRequests[kImmobile] = {};
+  if (cancelled[kImmobile]) legacyActorAssetRequests[kImmobile] = {};
 }
 }  // namespace
 
@@ -1352,7 +1431,7 @@ int FindLiveFreeActorAssetRequest() {
   return FindFreeActorAssetRequest(host);
 }
 
-int QueueLiveActorAssetRequest(const Content_ActorAssetRequest* request) {
+int QueueLiveActorAssetRequest(const LegacyActorAssetRequest* request) {
   if (request == nullptr) {
     CountRefusal("null asset request", 0);
     return -1;
@@ -1382,7 +1461,7 @@ bool CancelLiveActorAssetBorrows(std::span<std::byte> source,
   std::array<bool, kActorAssetRequestCount> cancelled{};
   bool any = false;
   for (std::size_t index = 0; index < cancelled.size(); ++index) {
-    const auto request = LoadRequest(Content_legacyActorAssetRequests[index]);
+    const auto request = LoadRequest(legacyActorAssetRequests[index]);
     if (request.kind == 0 ||
         (!ContainsAddress(source, request.data) &&
          !ContainsAddress(destination, request.destination))) {
@@ -1398,9 +1477,9 @@ bool CancelLiveActorAssetBorrows(std::span<std::byte> source,
     return false;
   }
   if (cancelled.front() &&
-      !CancelBorrowHead(static_cast<ActorAssetKind>(
-                            Content_legacyActorAssetRequests[0].assetKind),
-                        state)) {
+      !CancelBorrowHead(
+          static_cast<ActorAssetKind>(legacyActorAssetRequests[0].asset_kind),
+          state)) {
     return false;
   }
   StoreState(state);
@@ -1433,8 +1512,8 @@ int ReleaseLiveWeaponModel(int slot) {
   return ReleaseWeaponModel(host, slot);
 }
 
-void CopyLiveWeaponSequence(Content_SequenceBuffer* destination,
-                            Content_SequenceBuffer* source) {
+void CopyLiveWeaponSequence(SequenceBuffer* destination,
+                            SequenceBuffer* source) {
   LiveActorAssetHost host;
   CopyWeaponSequence(host, Address(destination), Address(source));
 }

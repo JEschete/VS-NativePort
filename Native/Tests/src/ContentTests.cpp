@@ -19,7 +19,6 @@
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/generators/catch_generators_range.hpp>
 
-#include "ActorAssets.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/Movement.h"
@@ -91,7 +90,6 @@
 #include "Field/MapProgress.hpp"
 #include "Field/RoomLoading.hpp"
 #include "Legacy/Psx.h"
-#include "ModelLoading.h"
 #include "Movie/MoviePlayer.hpp"
 #include "Render/PageSpace.hpp"
 
@@ -1249,13 +1247,13 @@ struct ContentWorkspaceState {
 struct ActorAssetState {
   decltype(std::to_array(Actors_actorRecords)) saved_records =
       std::to_array(Actors_actorRecords);
-  decltype(std::to_array(Content_legacyActorAssetRequests)) saved_requests =
-      std::to_array(Content_legacyActorAssetRequests);
+  decltype(VS::Content::legacyActorAssetRequests) saved_requests =
+      VS::Content::legacyActorAssetRequests;
   decltype(std::to_array(Actors_sharedSequenceData)) saved_banks =
       std::to_array(Actors_sharedSequenceData);
   std::array<unsigned char, 3> saved_pages{};
   std::array<Actors_ActorRecord, 4> records{};
-  Content_SequenceBuffer sequence{};
+  VS::Content::SequenceBuffer sequence{};
 
   ActorAssetState() {
     std::copy_n(Actors_sharedSequenceBankTexturePages, saved_pages.size(),
@@ -1263,8 +1261,7 @@ struct ActorAssetState {
     std::fill_n(Actors_sharedSequenceBankTexturePages, saved_pages.size(), 0);
     std::fill_n(Actors_sharedSequenceData, saved_banks.size(), nullptr);
     std::fill_n(Actors_actorRecords, saved_records.size(), nullptr);
-    std::fill_n(Content_legacyActorAssetRequests, saved_requests.size(),
-                Content_ActorAssetRequest{});
+    VS::Content::legacyActorAssetRequests.fill({});
     for (std::size_t index = 0; index < records.size(); ++index) {
       records[index].modelId = 7;
       Actors_actorRecords[index] = &records[index];
@@ -1273,8 +1270,7 @@ struct ActorAssetState {
 
   ~ActorAssetState() {
     std::copy(saved_records.begin(), saved_records.end(), Actors_actorRecords);
-    std::copy(saved_requests.begin(), saved_requests.end(),
-              Content_legacyActorAssetRequests);
+    VS::Content::legacyActorAssetRequests = saved_requests;
     std::copy(saved_banks.begin(), saved_banks.end(),
               Actors_sharedSequenceData);
     std::copy(saved_pages.begin(), saved_pages.end(),
@@ -1307,12 +1303,12 @@ struct TimelineBlockFixture {
 
 TEST_CASE("Weapon sequence copies retain relative offsets and exact extent",
           "[content][semantic-names][sequence]") {
-  auto source = std::make_unique<Content_SequenceBuffer>();
-  auto destination = std::make_unique<Content_SequenceBuffer>();
+  auto source = std::make_unique<VS::Content::SequenceBuffer>();
+  auto destination = std::make_unique<VS::Content::SequenceBuffer>();
   std::memset(source.get(), 0xA5, sizeof(*source));
   std::memset(destination.get(), 0x6B, sizeof(*destination));
-  source->firstSectionPointer = 0x40;
-  source->secondSectionPointer = 0x200;
+  source->first_section_offset = 0x40;
+  source->second_section_offset = 0x200;
   VS::Actors::RegisterSequenceBank(source.get(), Content::kWeaponSequenceBytes);
   Content::CopyLiveWeaponSequence(destination.get(), source.get());
   const auto original = std::as_bytes(std::span(source.get(), 1));
@@ -1321,8 +1317,8 @@ TEST_CASE("Weapon sequence copies retain relative offsets and exact extent",
   CHECK(std::ranges::all_of(copied.subspan(0x7800), [](std::byte value) {
     return value == std::byte{0x6B};
   }));
-  CHECK(destination->firstSectionPointer == 0x40);
-  CHECK(destination->secondSectionPointer == 0x200);
+  CHECK(destination->first_section_offset == 0x40);
+  CHECK(destination->second_section_offset == 0x200);
   VS::Actors::ForgetSequenceBanks(source.get(), Content::kWeaponSequenceBytes);
 }
 

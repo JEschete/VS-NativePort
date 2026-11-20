@@ -46,7 +46,7 @@ using ConstSummaryTable = std::span<const std::byte, kSlotCount * kRecordBytes>;
 // A NUL-terminated memory-card path such as "bu00:BASLUS-01040VAG1".
 using CardFilename = std::array<char, kFilenameBytes>;
 
-// Byte offsets in a Save_GameSaveImage.
+// Byte offsets in a VS::Save::GameSaveImage.
 inline constexpr std::size_t kCardMagicOffset = 0;
 inline constexpr std::size_t kCardTitleOffset = 4;
 inline constexpr std::size_t kCardTitleBytes = 0x40;
@@ -74,7 +74,7 @@ inline constexpr std::size_t kSummarySignatureOffset = 0xC;
 inline constexpr std::size_t kSummaryStatsOffset = 0x10;
 inline constexpr std::size_t kStatsBytes = 0x14;
 
-// Byte offsets in the save statistics (Save_SaveFileStats).
+// Byte offsets in the save statistics (VS::Save::SaveFileStats).
 inline constexpr std::size_t kStatsGameTimeOffset = 0;
 inline constexpr std::size_t kStatsCumulativeSavesOffset = 4;
 inline constexpr std::size_t kStatsCurrentGameSavesOffset = 6;
@@ -198,7 +198,8 @@ enum class CardEventGroup : std::uint8_t {
   kHardware = 4,
 };
 
-// _memcardEventHandler's results (Save_CardReadinessResult). A card that was
+// _memcardEventHandler's results (decomp memcardEventHandler_e,
+// src/MENU/MENU7.PRG/260.c:38). A card that was
 // cleared after reporting unformatted adds four.
 enum class CardReadiness : std::uint8_t {
   kPending = 0,

@@ -26,7 +26,7 @@ constexpr std::uint32_t kByteMask = 0xFF;
 constexpr std::size_t kWordBytes = sizeof(std::uint32_t);
 constexpr std::size_t kHalfBytes = sizeof(std::uint16_t);
 
-// Save_CardFileSlotStatus below the in-use states.
+// VS::Save::CardFileSlotStatus below the in-use states.
 constexpr std::uint32_t kSlotUnavailable = 0;
 constexpr std::uint32_t kSlotAvailable = 1;
 constexpr std::uint32_t kSlotTemporary = 2;

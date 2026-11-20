@@ -8,9 +8,9 @@
 #include <vector>
 
 #include "Content/DataStore.hpp"
+#include "Content/SystemResources.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Text/CompactFont.hpp"
-#include "SystemResources.h"
 
 namespace VS::combat_lab {
 namespace {
@@ -74,8 +74,8 @@ Canvas::Canvas() : Canvas(ReadSystemFont()) {}
 
 Canvas::Canvas(std::span<const std::uint8_t> system_data)
     : pixels_(std::size_t{kWidth} * kHeight) {
-  const auto header = Read<Content_SystemDatHeader>(system_data, 0);
-  const auto rect = Read<RECT>(system_data, header.image0Offset);
+  const auto header = Read<Content::SystemDatHeader>(system_data, 0);
+  const auto rect = Read<RECT>(system_data, header.image0_offset);
   font_width_ = rect.w;
   font_height_ = rect.h;
   if (rect.x != kFontPageX || rect.y != 0 ||
@@ -83,7 +83,7 @@ Canvas::Canvas(std::span<const std::uint8_t> system_data)
       font_height_ < kFontMinimumHeight || font_height_ > kPageHeight) {
     throw std::runtime_error("invalid SYSTEM.DAT font dimensions");
   }
-  const auto offset = std::size_t{header.image0Offset} + sizeof(RECT);
+  const auto offset = std::size_t{header.image0_offset} + sizeof(RECT);
   const auto length = static_cast<std::size_t>(font_width_) * font_height_ *
                       sizeof(std::uint16_t);
   if (offset > system_data.size() || length > system_data.size() - offset) {
@@ -92,9 +92,9 @@ Canvas::Canvas(std::span<const std::uint8_t> system_data)
   font_.resize(length / sizeof(std::uint16_t));
   std::memcpy(font_.data(), system_data.data() + offset, length);
   // BATTLE/5BF94.c:3484 uploads the first interface block to (832,0).
-  // Compact text uses its CLUT at (864,223), not SYSTEM.DAT paletteOffset.
+  // Compact text uses its CLUT at (864,223), not SYSTEM.DAT palette_offset.
   const auto palette_offset =
-      std::size_t{header.interfaceDataOffset} +
+      std::size_t{header.interface_data_offset} +
       (kFontPaletteY * kInterfaceWidthWords + kFontPaletteX - kInterfacePageX) *
           sizeof(std::uint16_t);
   font_palette_ = Read<decltype(font_palette_)>(system_data, palette_offset);

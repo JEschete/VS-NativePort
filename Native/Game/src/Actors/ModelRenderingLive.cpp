@@ -14,7 +14,6 @@
 #include <span>
 #include <type_traits>
 
-#include "ActorAssets.h"
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorTableLive.hpp"
@@ -45,7 +44,6 @@
 #include "Event/ScriptVmLive.hpp"
 #include "Field/GimmickDynamicsLive.hpp"
 #include "Field/Gimmicks.h"
-#include "ModelLoading.h"
 #include "Render/CameraViewLive.hpp"
 #include "Render/ModelDraw.hpp"
 #include "Render/ModelGeometryLive.hpp"
@@ -625,8 +623,9 @@ void DrawLiveActorWeaponModel(Actors_WeaponModel* weapon, MATRIX* source) {
 // decomp: INITBTL.PRG func_800FA7B0 (src/BATTLE/INITBTL.PRG/FB0.c:19)
 void InitializeLiveActorModelResources() {
   Actors_forcedModelOverrides = 0;
-  for (Content_ActorAssetRequest& request : Content_legacyActorAssetRequests) {
-    request.assetKind = 0;
+  for (VS::Content::LegacyActorAssetRequest& request :
+       VS::Content::legacyActorAssetRequests) {
+    request.asset_kind = 0;
   }
   for (std::size_t slot = 0; slot < kInitializedActorTextureSlots; ++slot) {
     const TextureSlotIds ids = ActorTextureSlotIds(
@@ -647,7 +646,7 @@ void InitializeLiveActorModelResources() {
   }
   std::fill(std::begin(weaponModels), std::end(weaponModels), nullptr);
   for (std::size_t buffer = 0; buffer < 2; ++buffer) {
-    Content_legacyWeaponModelBuffers[buffer] =
+    VS::Content::legacyWeaponModelBuffers[buffer] =
         static_cast<Actors_WeaponModelData*>(
             Core::Memory::AllocateLiveFromLowEnd(
                 sizeof(Actors_WeaponModelData)));
@@ -660,11 +659,11 @@ void InitializeLiveActorModelResources() {
               kClearedBankPages, u_char{0});
   std::fill_n(std::begin(Actors_sharedSequenceData), kClearedSequenceBanks,
               nullptr);
-  Content_legacySequenceParsePhase = 0;
-  Content_legacyEtmLoadPhase = 0;
+  VS::Content::legacySequenceParsePhase = 0;
+  VS::Content::legacyEtmLoadPhase = 0;
   VS::Content::modelParseResetFlag = 0;
   VS::Content::objectDataLoadStep = 0;
-  Content_legacyModelLoadPhase = 0;
+  VS::Content::legacyModelLoadPhase = 0;
   Actors_sharedSequenceBankIndex = 0;
   VECTOR unit_room_scale{};
   unit_room_scale.vx = kUnitActorScale;

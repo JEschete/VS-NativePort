@@ -12,7 +12,6 @@
 #include <string_view>
 #include <type_traits>
 
-#include "ActorAssets.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/ActorStateRecord.hpp"
@@ -175,8 +174,8 @@ class LiveActorPreviewHost final : public ActorPreviewHost {
     if (copy.battle_copy != AssetAddress::kNone) {
       preview->battleSequence = Pointer(copy.battle_copy);
       Content::CopyLiveWeaponSequence(
-          static_cast<Content_SequenceBuffer*>(preview->battleSequence),
-          static_cast<Content_SequenceBuffer*>(source->battleSequence));
+          static_cast<VS::Content::SequenceBuffer*>(preview->battleSequence),
+          static_cast<VS::Content::SequenceBuffer*>(source->battleSequence));
     } else {
       preview->battleSequence = source->battleSequence;
     }

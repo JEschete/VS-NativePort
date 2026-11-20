@@ -13,7 +13,6 @@
 #include <span>
 #include <type_traits>
 
-#include "ActorAssets.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/AnimationPoseLive.hpp"
@@ -28,6 +27,7 @@
 #include "Actors/TextureAnimation.h"
 #include "Actors/Textures.h"
 #include "Actors/WeaponModel.h"
+#include "Content/ActorAssetsLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Event/ScriptVmLive.hpp"
@@ -35,7 +35,6 @@
 #include "Field/Gimmicks.h"
 #include "Field/RoomLightingLive.hpp"
 #include "Legacy/Psx.h"
-#include "ModelLoading.h"
 #include "Render/Camera.hpp"
 #include "Render/ModelDraw.hpp"
 #include "Render/ModelGeometryLive.hpp"

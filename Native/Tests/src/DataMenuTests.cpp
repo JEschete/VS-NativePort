@@ -31,7 +31,7 @@
 #include "Render/Render.hpp"
 #include "Render/Text/CompactFont.hpp"
 #include "Render/UiPrimitives.hpp"
-#include "Save/MemoryCard/GameFiles.h"
+#include "Save/MemoryCard/SaveImage.hpp"
 #include "State/PlayTime.hpp"
 #include "Title/SaveFiles.hpp"
 
@@ -45,13 +45,13 @@ files::Context LiveFiles() {
 struct EmptySlotsFixture {
   decltype(VS::Input::buttonsPressed) saved_pressed = VS::Input::buttonsPressed;
   decltype(VS::Input::buttonRepeat) saved_repeat = VS::Input::buttonRepeat;
-  Save_CardFileInfoRecord* saved_summaries = VS::Title::saveFileSummaries;
+  VS::Save::CardFileInfoRecord* saved_summaries = VS::Title::saveFileSummaries;
   u_short* saved_table = VS::Menu::Files::textTable;
   char* saved_message = VS::Menu::Files::memoryCardMessage;
   int saved_cursor = VS::Menu::Files::selectCursorXy;
   std::array<files::Element, files::kElementCount> saved_elements =
       files::LiveFilesState().elements;
-  std::array<Save_CardFileInfoRecord, 5> summaries{};
+  std::array<VS::Save::CardFileInfoRecord, 5> summaries{};
   std::array<u_short, 2048> text{};
   std::array<u_int, 0x180> sfx_offsets{};
   std::array<u_short, 0x180> sfx_selectors{};
@@ -62,7 +62,8 @@ struct EmptySlotsFixture {
 
   EmptySlotsFixture() {
     for (auto& summary : summaries) {
-      summary.summary.base.slotState = Save_CardFileSlotStatus_Available;
+      summary.summary.base.slot_state =
+          VS::Save::CardFileSlotStatus::kAvailable;
     }
     VS::Title::saveFileSummaries = summaries.data();
     VS::Menu::Files::textTable = text.data();

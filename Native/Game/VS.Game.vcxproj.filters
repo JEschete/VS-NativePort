@@ -4725,7 +4725,13 @@
     <ClInclude Include="include\Save\FileMenuLive.hpp">
       <Filter>include\Save</Filter>
     </ClInclude>
+    <ClInclude Include="include\Save\MemoryCard\CardResources.hpp">
+      <Filter>include\Save\MemoryCard</Filter>
+    </ClInclude>
     <ClInclude Include="include\Save\MemoryCard\GameFilesLive.hpp">
+      <Filter>include\Save\MemoryCard</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Save\MemoryCard\SaveImage.hpp">
       <Filter>include\Save\MemoryCard</Filter>
     </ClInclude>
     <ClInclude Include="include\Save\MenuAssets.hpp">

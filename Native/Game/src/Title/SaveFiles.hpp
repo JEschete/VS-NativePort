@@ -6,7 +6,9 @@
 
 #include "Menu/Files.hpp"
 
-struct Save_CardFileInfoRecord;
+namespace VS::Save {
+struct CardFileInfoRecord;
+}  // namespace VS::Save
 
 namespace VS::Title {
 inline constexpr std::size_t kSaveFontRows = 220;
@@ -86,7 +88,7 @@ extern std::uint8_t isSaving;
 // decomp: _memoryCardMessage (_memoryCardMessage@src/TITLE/TITLE.PRG/22C.c)
 extern char* memoryCardMessage;
 // decomp: _saveFileInfo (_saveFileInfo@src/TITLE/TITLE.PRG/22C.c)
-extern Save_CardFileInfoRecord* saveFileSummaries;
+extern Save::CardFileInfoRecord* saveFileSummaries;
 // decomp: _saveMenuBg_clut (_saveMenuBg_clut@TITLE/TITLE.PRG)
 extern SaveMenuBackgroundRecord saveMenuBackground;
 // decomp: _selectCursorColor (_selectCursorColor@src/TITLE/TITLE.PRG/22C.c)

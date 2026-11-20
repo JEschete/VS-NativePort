@@ -49,9 +49,9 @@
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.hpp"
 #include "Save/FileMenuLive.hpp"
-#include "Save/MemoryCard/GameFiles.h"
+#include "Save/MemoryCard/CardResources.hpp"
 #include "Save/MemoryCard/GameFilesLive.hpp"
-#include "Save/MemoryCard/Resources.h"
+#include "Save/MemoryCard/SaveImage.hpp"
 #include "Save/MenuAssetsLive.hpp"
 #include "Save/NativeMenu.hpp"
 #include "State/PlayTime.hpp"
@@ -83,10 +83,10 @@ static_assert(sizeof(containerStrings) ==
 static_assert(VS_GAMEOVER_BIN_SIZE >=
               kGameOverImageHalfwords * sizeof(std::uint16_t));
 
-// MCMAN.BIN's table (Save_CardUiResources::textTable) in halfwords and
+// MCMAN.BIN's table (VS::Save::CardUiResources::text_table) in halfwords and
 // bytes.
-using TextTable = decltype(Save_CardUiResources::textTable);
-using Palettes = decltype(Save_CardUiResources::locationPalettes);
+using TextTable = decltype(VS::Save::CardUiResources::text_table);
+using Palettes = decltype(VS::Save::CardUiResources::location_palettes);
 constexpr std::size_t kTextTableHalfwords = std::extent_v<TextTable>;
 constexpr std::size_t kTextTableBytes = sizeof(TextTable);
 static_assert(kTextTableBytes == kTextTableHalfwords * sizeof(std::uint16_t));
@@ -94,17 +94,17 @@ constexpr std::size_t kLocationPalettes = std::extent_v<Palettes>;
 constexpr std::size_t kLocationPaletteColors = std::extent_v<Palettes, 1>;
 // _spmcimg's fourth 0x80-byte record (_rMemcpy(&_saveFileInfo[saveId],
 // _spmcimg + sizeof _saveFileInfo[saveId] * 3, ...), 260.c:2471).
-constexpr std::size_t kFileInfoRecordBytes = sizeof(Save_CardFileInfoRecord);
+constexpr std::size_t kFileInfoRecordBytes = sizeof(Save::CardFileInfoRecord);
 constexpr std::size_t kWrittenSummaryOffset = kFileInfoRecordBytes * 3;
 // The workspace (_spmcimg) starts with three save images; the outgoing image
 // is kept in the third.
-constexpr std::size_t kSaveImageBytes = sizeof(Save_GameSaveImage);
+constexpr std::size_t kSaveImageBytes = sizeof(VS::Save::GameSaveImage);
 constexpr std::size_t kWorkspaceImages = 3;
 static_assert(kSaveImageBytes * kWorkspaceImages <= VS_SPMCIMG_BIN_SIZE);
-static_assert(kWrittenSummaryOffset + sizeof(Save_CardFileInfoRecord) <=
+static_assert(kWrittenSummaryOffset + sizeof(VS::Save::CardFileInfoRecord) <=
               kSaveImageBytes);
-static_assert(offsetof(Save_CardFileInfoRecord, summary) ==
-              sizeof(Save_CardFileInfoRecord::key));
+static_assert(offsetof(VS::Save::CardFileInfoRecord, summary) ==
+              sizeof(VS::Save::CardFileInfoRecord::key));
 // The packets the screens build fill the original's primBuf_t
 // (MENU7.PRG 260.c:150): a tag word and a 15-word packet union.
 constexpr std::size_t kImmediatePacketWords = 16;
@@ -241,7 +241,7 @@ char* TableMessage(u_short* table, std::optional<std::uint16_t> offset,
   return reinterpret_cast<char*>(table + *offset);
 }
 
-Save_CardFileInfoRecord* SummaryRecord(int slot) {
+VS::Save::CardFileInfoRecord* SummaryRecord(int slot) {
   if (VS::Title::saveFileSummaries == nullptr || slot < 0 ||
       slot >= static_cast<int>(kSaveSlots)) {
     return nullptr;
@@ -309,11 +309,11 @@ class LiveGpuHost : public Host {
     return Core::NextLiveInterfaceRandomBits(kInterfaceRandomBits);
   }
   std::span<const std::uint16_t> LocationPalette(int index) override {
-    if (Save_MemoryCard_uiResources == nullptr || index < 0 ||
+    if (VS::Save::MemoryCard::uiResources == nullptr || index < 0 ||
         index >= static_cast<int>(kLocationPalettes)) {
       return {};
     }
-    return {Save_MemoryCard_uiResources->locationPalettes[index],
+    return {VS::Save::MemoryCard::uiResources->location_palettes[index],
             kLocationPaletteColors};
   }
   void SetDisplayMask(bool shown) override { SetDispMask(shown ? 1 : 0); }
@@ -395,27 +395,27 @@ class LiveCardHost : public LiveGpuHost {
   }
 
   SlotSummary Summary(int slot) override {
-    const Save_CardFileInfoRecord* const record = SummaryRecord(slot);
+    const VS::Save::CardFileInfoRecord* const record = SummaryRecord(slot);
     if (record == nullptr) {
       return {};
     }
-    const Save_SaveFileStats& stats = record->summary.stats;
+    const VS::Save::SaveFileStats& stats = record->summary.stats;
     return {
-        .status = static_cast<std::uint32_t>(record->summary.base.slotState),
-        .hours = stats.gameTime.hours,
-        .minutes = stats.gameTime.minutes,
-        .seconds = stats.gameTime.seconds,
-        .save_count = stats.cumulativeSaveCount,
-        .current_hp = stats.currentHP,
-        .max_hp = stats.maxHP,
-        .current_mp = stats.currentMP,
-        .max_mp = stats.maxMP,
-        .save_location = static_cast<std::uint8_t>(stats.saveLocation),
-        .clear_count = static_cast<std::uint8_t>(stats.clearCount),
-        .map_completion = static_cast<std::uint8_t>(stats.mapCompletion)};
+        .status = static_cast<std::uint32_t>(record->summary.base.slot_state),
+        .hours = stats.game_time.hours,
+        .minutes = stats.game_time.minutes,
+        .seconds = stats.game_time.seconds,
+        .save_count = stats.cumulative_save_count,
+        .current_hp = stats.current_hp,
+        .max_hp = stats.max_hp,
+        .current_mp = stats.current_mp,
+        .max_mp = stats.max_mp,
+        .save_location = static_cast<std::uint8_t>(stats.save_location),
+        .clear_count = static_cast<std::uint8_t>(stats.clear_count),
+        .map_completion = static_cast<std::uint8_t>(stats.map_completion)};
   }
   void ZeroSummary(int slot) override {
-    Save_CardFileInfoRecord* const record = SummaryRecord(slot);
+    VS::Save::CardFileInfoRecord* const record = SummaryRecord(slot);
     if (record == nullptr) {
       Refuse("cleared save summary outside the loaded summaries");
       return;
@@ -423,16 +423,16 @@ class LiveCardHost : public LiveGpuHost {
     std::memset(record, 0, sizeof *record);
   }
   void SetSummaryStatus(int slot, std::uint32_t status) override {
-    Save_CardFileInfoRecord* const record = SummaryRecord(slot);
+    VS::Save::CardFileInfoRecord* const record = SummaryRecord(slot);
     if (record == nullptr) {
       Refuse("save summary status outside the loaded summaries");
       return;
     }
-    record->summary.base.slotState =
-        static_cast<enum Save_CardFileSlotStatus>(status);
+    record->summary.base.slot_state =
+        static_cast<VS::Save::CardFileSlotStatus>(status);
   }
   void LoadWrittenSummary(int slot) override {
-    Save_CardFileInfoRecord* const record = SummaryRecord(slot);
+    VS::Save::CardFileInfoRecord* const record = SummaryRecord(slot);
     if (record == nullptr || VS::Title::memoryCardUiResource == nullptr) {
       Refuse("written save summary without the loaded save workspace");
       return;
@@ -440,7 +440,7 @@ class LiveCardHost : public LiveGpuHost {
     std::memcpy(record, VS::Title::memoryCardUiResource + kWrittenSummaryOffset,
                 sizeof *record);
     VS::Save::MemoryCard::DecodeLiveSaveBytes(
-        record->key, &record->summary.base.slotState,
+        record->key, &record->summary.base.slot_state,
         sizeof *record - sizeof record->key);
   }
   void ClearCardDirectory() override {

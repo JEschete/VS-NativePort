@@ -24,10 +24,10 @@
 #include "Field/Mpd.h"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
-#include "Save/MemoryCard/GameFiles.h"
+#include "Save/MemoryCard/CardResources.hpp"
 #include "Save/MemoryCard/GameFiles.hpp"
 #include "Save/MemoryCard/GameFilesLive.hpp"
-#include "Save/MemoryCard/Resources.h"
+#include "Save/MemoryCard/SaveImage.hpp"
 #include "Save/Snapshot.hpp"
 #include "Save/SnapshotLive.hpp"
 #include "State/Ashley.hpp"
@@ -691,7 +691,7 @@ class FakeSnapshotHost final : public Save::SnapshotHost {
 }  // namespace
 
 namespace {
-static_assert(sizeof(Save_CardFileInfoRecord) == Files::kRecordBytes);
+static_assert(sizeof(VS::Save::CardFileInfoRecord) == Files::kRecordBytes);
 
 // The current game's save in SlotTable().
 constexpr SummaryFields kCurrentSlot = {
@@ -853,7 +853,7 @@ TEST_CASE("Checksum checks refuse spans shorter than their blocks",
 
 TEST_CASE("The live checksum check refuses missing images and bad counts",
           "[save][save-memory-card]") {
-  const auto image = std::make_unique<Save_GameSaveImage>();
+  const auto image = std::make_unique<VS::Save::GameSaveImage>();
   CHECK(Files::HasLiveChecksumError(nullptr, 2) == 1);
   CHECK(Files::HasLiveChecksumError(image.get(), -1) == 1);
   CHECK(Files::HasLiveChecksumError(image.get(), 93) == 1);
@@ -920,7 +920,7 @@ TEST_CASE("The live slot lookups read the published summaries and settings",
   Restore summaries_global{VS::Title::saveFileSummaries};
   Restore settings_global{VS::Input::settings};
   const Summaries table = SlotTable();
-  std::array<Save_CardFileInfoRecord, Files::kSlotCount> records{};
+  std::array<VS::Save::CardFileInfoRecord, Files::kSlotCount> records{};
   std::memcpy(records.data(), table.data(), table.size());
   const auto settings = SettingsFor(kCurrentSlot);
   std::memcpy(&VS::Input::settings, settings.data(), settings.size());
@@ -1779,13 +1779,13 @@ TEST_CASE("Live packaging refuses a save without the save menu's icons",
           "[save][save-memory-card]") {
   Restore resource_global{VS::Title::memoryCardUiResource};
   Restore summaries_global{VS::Title::saveFileSummaries};
-  Restore icons_global{Save_MemoryCard_uiResources};
+  Restore icons_global{VS::Save::MemoryCard::uiResources};
   Restore settings_global{VS::Input::settings};
   std::vector<char> workspace(2 * kImageBytes, '\x5A');
-  std::array<Save_CardFileInfoRecord, Files::kSlotCount> records{};
+  std::array<VS::Save::CardFileInfoRecord, Files::kSlotCount> records{};
   VS::Title::memoryCardUiResource = workspace.data();
   VS::Title::saveFileSummaries = records.data();
-  Save_MemoryCard_uiResources = nullptr;
+  VS::Save::MemoryCard::uiResources = nullptr;
   const VS::Input::Settings settings = VS::Input::settings;
   Files::PackageLiveGameSave(1);
   Files::PackageLiveClearSave(1);

@@ -9,11 +9,11 @@ T00001.001,T00001,_disFileIndices,1,timeDis,0,,,1,,kTime,DisFile Time,med,declar
 T00001.002,T00001,_disFileIndices,2,attackDis,0,,,2,,kAttack,DisFile Attack,med,declaration-only;source:3B8.c:44
 T00001.003,T00001,_disFileIndices,3,iqDis,0,,,3,,kIq,DisFile Iq,med,declaration-only;source:3B8.c:44
 T00001.004,T00001,_disFileIndices,4,escDis,0,,,4,,kEsc,DisFile Esc,med,declaration-only;source:3B8.c:44
-T00002.000,T00002,_findCurrentSave_e,0,findSaveTimeout,0,,,-2,,Timeout,FindSaveResult Timeout,med,declaration-only;source:MENU/MENU7.PRG/260.c:1562
-T00002.001,T00002,_findCurrentSave_e,1,findSaveNotFound,0,,,-1,,NotFound,FindSaveResult NotFound,med,declaration-only;source:MENU/MENU7.PRG/260.c:1563
-T00002.002,T00002,_findCurrentSave_e,2,findSavePending,0,,,0,,Pending,FindSaveResult Pending,med,declaration-only;source:MENU/MENU7.PRG/260.c:1564
-T00003.000,T00003,_memcardEventMask_e,0,memcardEventMaskIgnoreNoEvent,0,,,48,,IgnoreNoEvent,EventMask IgnoreNoEvent,med,declaration-only;source:MENU/MENU7.PRG/260.c:1625
-T00003.001,T00003,_memcardEventMask_e,1,memcardEventMaskAll,0,,,112,,All,EventMask All,med,declaration-only;source:MENU/MENU7.PRG/260.c:1626
+T00002.000,T00002,_findCurrentSave_e,0,findSaveTimeout,0,,,-2,,Timeout,FindSaveResult Timeout,med,retired-by:nothing; no reader (Menu/Files.cpp keeps the search results as named constants); the enum Save_FindSaveResult is deleted with Save/MemoryCard/GameFiles.h (#441);declaration-only;source:MENU/MENU7.PRG/260.c:1562
+T00002.001,T00002,_findCurrentSave_e,1,findSaveNotFound,0,,,-1,,NotFound,FindSaveResult NotFound,med,retired-by:nothing; no reader (Menu/Files.cpp keeps the search results as named constants); the enum Save_FindSaveResult is deleted with Save/MemoryCard/GameFiles.h (#441);declaration-only;source:MENU/MENU7.PRG/260.c:1563
+T00002.002,T00002,_findCurrentSave_e,2,findSavePending,0,,,0,,Pending,FindSaveResult Pending,med,retired-by:nothing; no reader (Menu/Files.cpp keeps the search results as named constants); the enum Save_FindSaveResult is deleted with Save/MemoryCard/GameFiles.h (#441);declaration-only;source:MENU/MENU7.PRG/260.c:1564
+T00003.000,T00003,_memcardEventMask_e,0,memcardEventMaskIgnoreNoEvent,0,,,48,,IgnoreNoEvent,EventMask IgnoreNoEvent,med,retired-by:nothing; no reader (Menu/Files.cpp keeps the event masks as named constants); the enum Save_EventMask is deleted with Save/MemoryCard/GameFiles.h (#441);declaration-only;source:MENU/MENU7.PRG/260.c:1625
+T00003.001,T00003,_memcardEventMask_e,1,memcardEventMaskAll,0,,,112,,All,EventMask All,med,retired-by:nothing; no reader (Menu/Files.cpp keeps the event masks as named constants); the enum Save_EventMask is deleted with Save/MemoryCard/GameFiles.h (#441);declaration-only;source:MENU/MENU7.PRG/260.c:1626
 T00004.000,T00004,_memcardMaskedHandler_e,0,memcardMaskedHandlerError,0,,,-1,,Error,Masked card operation failed,med,replaced-by:Save asynchronous completion;declaration-only;source:22C.c:1483
 T00004.001,T00004,_memcardMaskedHandler_e,1,memcardMaskedHandlerPending,0,,,0,,Pending,Masked card operation is pending,med,replaced-by:Save asynchronous completion;declaration-only;source:22C.c:1484
 T00004.002,T00004,_memcardMaskedHandler_e,2,memcardMaskedHandlerComplete,0,,,1,,Complete,Masked card operation completed,med,replaced-by:Save asynchronous completion;declaration-only;source:22C.c:1485
@@ -146,15 +146,15 @@ T00023.001,T00023,magicSubMenu,1,shaman,0,,,1,,kShaman,MagicSubmenu Shaman,med,n
 T00023.002,T00023,magicSubMenu,2,sorcerer,0,,,2,,kSorcerer,MagicSubmenu Sorcerer,med,native:MagicMenus.hpp School::kSorcerer (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:294
 T00023.003,T00023,magicSubMenu,3,enchanter,0,,,3,,kEnchanter,MagicSubmenu Enchanter,med,native:MagicMenus.hpp School::kEnchanter (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:294
 T00023.004,T00023,magicSubMenu,4,teleport,0,,,4,,Teleport,MagicSubmenu Teleport,med,"native:no named enumerator; the constant kSchoolCount (MagicMenus.hpp), which MagicTerminal.cpp RunSelection treats as the teleport row (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:294"
-T00024.000,T00024,maskedHandler_e,0,memcardMaskedHandlerError,0,,,-1,,Error,MaskedHandlerResult Error,med,declaration-only;source:MENU/MENU7.PRG/260.c:1630
-T00024.001,T00024,maskedHandler_e,1,memcardMaskedHandlerPending,0,,,0,,Pending,MaskedHandlerResult Pending,med,declaration-only;source:MENU/MENU7.PRG/260.c:1631
-T00024.002,T00024,maskedHandler_e,2,memcardMaskedHandlerComplete,0,,,1,,Complete,MaskedHandlerResult Complete,med,declaration-only;source:MENU/MENU7.PRG/260.c:1632
-T00025.000,T00025,memcardEventHandler_e,0,memcardEventPending,0,,,0,,Pending,Still working,high,source:260.c:586
-T00025.001,T00025,memcardEventHandler_e,1,memcardEventIoEnd,0,,,1,,Ready,Card responded and is usable,med,declaration-only;source:260.c:40
-T00025.002,T00025,memcardEventHandler_e,2,memcardEventTimeout,0,,,2,,Timeout,Card did not respond,high,source:260.c:591
-T00025.003,T00025,memcardEventHandler_e,3,memcardEventUnformatted,0,,,3,,Unformatted,Card is not formatted,med,declaration-only;source:260.c:42
-T00026.000,T00026,memcardEvents_e,0,memcardEventsSw,0,,,0,,Software,Software memory-card event group at offset zero,med,replaced-by:Save asynchronous completion;declaration-only;source:260.c:36
-T00026.001,T00026,memcardEvents_e,1,memcardEventsHw,0,,,4,,Hardware,Hardware memory-card event group at offset four,med,replaced-by:Save asynchronous completion;declaration-only;source:260.c:36
+T00024.000,T00024,maskedHandler_e,0,memcardMaskedHandlerError,0,,,-1,,Error,MaskedHandlerResult Error,med,retired-by:nothing; no reader (Menu/Files.cpp keeps the handler results as named constants); the enum Save_MaskedHandlerResult is deleted with Save/MemoryCard/GameFiles.h (#441);declaration-only;source:MENU/MENU7.PRG/260.c:1630
+T00024.001,T00024,maskedHandler_e,1,memcardMaskedHandlerPending,0,,,0,,Pending,MaskedHandlerResult Pending,med,retired-by:nothing; no reader (Menu/Files.cpp keeps the handler results as named constants); the enum Save_MaskedHandlerResult is deleted with Save/MemoryCard/GameFiles.h (#441);declaration-only;source:MENU/MENU7.PRG/260.c:1631
+T00024.002,T00024,maskedHandler_e,2,memcardMaskedHandlerComplete,0,,,1,,Complete,MaskedHandlerResult Complete,med,retired-by:nothing; no reader (Menu/Files.cpp keeps the handler results as named constants); the enum Save_MaskedHandlerResult is deleted with Save/MemoryCard/GameFiles.h (#441);declaration-only;source:MENU/MENU7.PRG/260.c:1632
+T00025.000,T00025,memcardEventHandler_e,0,memcardEventPending,0,,,0,,Pending,Still working,high,retired-by:VS::Save::MemoryCard::CardReadiness (Native/Engine/include/Save/MemoryCard/GameFiles.hpp); the unread enum Save_CardReadinessResult is deleted with Save/MemoryCard/GameFiles.h (#441);source:260.c:586
+T00025.001,T00025,memcardEventHandler_e,1,memcardEventIoEnd,0,,,1,,Ready,Card responded and is usable,med,retired-by:VS::Save::MemoryCard::CardReadiness (Native/Engine/include/Save/MemoryCard/GameFiles.hpp); the unread enum Save_CardReadinessResult is deleted with Save/MemoryCard/GameFiles.h (#441);declaration-only;source:260.c:40
+T00025.002,T00025,memcardEventHandler_e,2,memcardEventTimeout,0,,,2,,Timeout,Card did not respond,high,retired-by:VS::Save::MemoryCard::CardReadiness (Native/Engine/include/Save/MemoryCard/GameFiles.hpp); the unread enum Save_CardReadinessResult is deleted with Save/MemoryCard/GameFiles.h (#441);source:260.c:591
+T00025.003,T00025,memcardEventHandler_e,3,memcardEventUnformatted,0,,,3,,Unformatted,Card is not formatted,med,retired-by:VS::Save::MemoryCard::CardReadiness (Native/Engine/include/Save/MemoryCard/GameFiles.hpp); the unread enum Save_CardReadinessResult is deleted with Save/MemoryCard/GameFiles.h (#441);declaration-only;source:260.c:42
+T00026.000,T00026,memcardEvents_e,0,memcardEventsSw,0,,,0,,Software,Software memory-card event group at offset zero,med,retired-by:VS::Save::MemoryCard::CardEventGroup (Native/Engine/include/Save/MemoryCard/GameFiles.hpp); the unread enum Save_CardEventGroup is deleted with Save/MemoryCard/GameFiles.h (#441);replaced-by:Save asynchronous completion;declaration-only;source:260.c:36
+T00026.001,T00026,memcardEvents_e,1,memcardEventsHw,0,,,4,,Hardware,Hardware memory-card event group at offset four,med,retired-by:VS::Save::MemoryCard::CardEventGroup (Native/Engine/include/Save/MemoryCard/GameFiles.hpp); the unread enum Save_CardEventGroup is deleted with Save/MemoryCard/GameFiles.h (#441);replaced-by:Save asynchronous completion;declaration-only;source:260.c:36
 T00027.000,T00027,menuItemState_e,0,menuItemStateStatic,0,,,0,,Stationary,Menu item holds its current position,high,source:22C.c:3741
 T00027.001,T00027,menuItemState_e,1,menuItemStateUpper,0,,,1,,MovingUp,Menu item moves toward a smaller vertical position,high,source:22C.c:4034
 T00027.002,T00027,menuItemState_e,2,menuItemStateLower,0,,,2,,MovingDown,Menu item moves toward a larger vertical position,high,source:22C.c:4040
@@ -173,10 +173,10 @@ T00030.000,T00030,shortcutMagicMenu,0,warlock,0,,,1,,Warlock,ShortcutMagicMenu W
 T00030.001,T00030,shortcutMagicMenu,1,shaman,0,,,2,,Shaman,ShortcutMagicMenu Shaman,med,native:no named enumerator; School::kShaman after MagicTerminal.cpp HandleShortcut's shortcut - 1 (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:204
 T00030.002,T00030,shortcutMagicMenu,2,sorcerer,0,,,3,,Sorcerer,ShortcutMagicMenu Sorcerer,med,native:no named enumerator; School::kSorcerer after MagicTerminal.cpp HandleShortcut's shortcut - 1 (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:204
 T00030.003,T00030,shortcutMagicMenu,3,enchanter,0,,,4,,Enchanter,ShortcutMagicMenu Enchanter,med,native:no named enumerator; School::kEnchanter after MagicTerminal.cpp HandleShortcut's shortcut - 1 (#441);declaration-only;source:MENU/MENU0.PRG/15AC.c:204
-T00031.000,T00031,slotState_e,0,slotStateUnavailable,0,,,0,,Unavailable,Save slot cannot be used,high,source:22C.c:132
-T00031.001,T00031,slotState_e,1,slotStateAvailable,0,,,1,,Available,Save slot is available,high,source:22C.c:132
-T00031.002,T00031,slotState_e,2,slotStateTemporary,0,,,2,,Temporary,Slot contains a temporary save,high,source:22C.c:132
-T00031.003,T00031,slotState_e,3,slotStateInUse,0,,,3,,InUse,Slot contains an occupied save,high,source:22C.c:132
+T00031.000,T00031,slotState_e,0,slotStateUnavailable,0,,,0,,kUnavailable,Save slot cannot be used,high,source:22C.c:132
+T00031.001,T00031,slotState_e,1,slotStateAvailable,0,,,1,,kAvailable,Save slot is available,high,source:22C.c:132
+T00031.002,T00031,slotState_e,2,slotStateTemporary,0,,,2,,kTemporary,Slot contains a temporary save,high,source:22C.c:132
+T00031.003,T00031,slotState_e,3,slotStateInUse,0,,,3,,kInUse,Slot contains an occupied save,high,source:22C.c:132
 T00032.000,T00032,statType_e,0,statTypeHP,0,,,0,,kHp,StatType HP,med,native:Files.hpp Stat::kHp (#441);declaration-only;source:MENU/MENU7.PRG/260.c:1265
 T00032.001,T00032,statType_e,1,statTypeMP,0,,,1,,kMp,StatType MP,med,native:Files.hpp Stat::kMp (#441);declaration-only;source:MENU/MENU7.PRG/260.c:1265
 T00033.000,T00033,state,0,init,0,,,0,,kInitialize,EquipmentDetailsState Init,med,native:EquipmentDetailControllers.hpp DetailStage::kInitialize (#471);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
@@ -204,22 +204,22 @@ T00039.004,T00039,state,4,clearTemplate,0,,,4,,kDiscardWaitQuantity,DiscardMenuS
 T00039.005,T00039,state,5,determineDiscardAmount,0,,,5,,kDiscardQuantityInput,DiscardMenuState DetermineDiscardAmount,med,native:InventoryTerminal.cpp DiscardStep::kDiscardQuantityInput (#471);declaration-only;source:items1.h:1195
 T00039.006,T00039,state,6,discardMultipleConfirm,0,,,6,,kDiscardQuantityConfirm,DiscardMenuState DiscardMultipleConfirm,med,native:InventoryTerminal.cpp DiscardStep::kDiscardQuantityConfirm (#471);declaration-only;source:items1.h:1196
 T00039.007,T00039,state,7,discardMultiple,0,,,7,,kDiscardQuantityDecision,DiscardMenuState DiscardMultiple,med,native:InventoryTerminal.cpp DiscardStep::kDiscardQuantityDecision (#471);declaration-only;source:items1.h:1197
-T00040.000,T00040,state,0,init,0,,,0,,Init,CardReadinessState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00040.001,T00040,state,1,ready,0,,,1,,Ready,CardReadinessState Ready,med,declaration-only;source:MENU/MENU7.PRG/260.c:567
-T00040.002,T00040,state,2,unformatted,0,,,2,,Unformatted,CardReadinessState Unformatted,med,declaration-only;source:MENU/MENU7.PRG/260.c:568
-T00040.003,T00040,state,3,confirmed,0,,,3,,Confirmed,CardReadinessState Confirmed,med,declaration-only;source:MENU/MENU7.PRG/260.c:569
-T00040.004,T00040,state,4,loadReady,0,,,4,,LoadReady,CardReadinessState LoadReady,med,declaration-only;source:MENU/MENU7.PRG/260.c:570
-T00040.005,T00040,state,5,loaded,0,,,5,,Loaded,CardReadinessState Loaded,med,declaration-only;source:MENU/MENU7.PRG/260.c:571
-T00041.000,T00041,state,0,init,0,,,0,,Init,SaveReadState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00041.001,T00041,state,1,reading,0,,,1,,Reading,SaveReadState Reading,med,declaration-only;source:MENU/MENU7.PRG/260.c:873
-T00042.000,T00042,state,0,init,0,,,0,,Init,SaveWriteState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00042.001,T00042,state,1,tempFileCreated,0,,,1,,TemporaryFileCreated,SaveWriteState TemporaryFileCreated,med,declaration-only;source:MENU/MENU7.PRG/260.c:964
-T00042.002,T00042,state,2,readReady,0,,,2,,ReadReady,SaveWriteState ReadReady,med,declaration-only;source:MENU/MENU7.PRG/260.c:965
-T00042.003,T00042,state,3,verifyPending,0,,,3,,VerifyPending,SaveWriteState VerifyPending,med,declaration-only;source:MENU/MENU7.PRG/260.c:966
-T00042.004,T00042,state,4,fileVerified,0,,,4,,FileVerified,SaveWriteState FileVerified,med,declaration-only;source:MENU/MENU7.PRG/260.c:967
-T00043.000,T00043,state,0,none,0,,,0,,None,ResourceInitState None,med,declaration-only;source:15AC.c:169
-T00043.001,T00043,state,1,queueReady,0,,,1,,QueueReady,ResourceInitState QueueReady,med,declaration-only;source:MENU/MENU7.PRG/260.c:1084
-T00043.002,T00043,state,2,enqueued,0,,,2,,Enqueued,ResourceInitState Enqueued,med,declaration-only;source:MENU/MENU7.PRG/260.c:1085
+T00040.000,T00040,state,0,init,0,,,0,,Init,CardReadinessState Init,med,"retired-by:VS::Save::MemoryCard::CardReadinessState and CardReadinessPhase (Native/Engine/include/Save/MemoryCard/GameFiles.hpp); the function-local enum was never declared in Save/MemoryCard/GameFiles.h, which is deleted (#441);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482"
+T00040.001,T00040,state,1,ready,0,,,1,,Ready,CardReadinessState Ready,med,"retired-by:VS::Save::MemoryCard::CardReadinessState and CardReadinessPhase (Native/Engine/include/Save/MemoryCard/GameFiles.hpp); the function-local enum was never declared in Save/MemoryCard/GameFiles.h, which is deleted (#441);declaration-only;source:MENU/MENU7.PRG/260.c:567"
+T00040.002,T00040,state,2,unformatted,0,,,2,,Unformatted,CardReadinessState Unformatted,med,"retired-by:VS::Save::MemoryCard::CardReadinessState and CardReadinessPhase (Native/Engine/include/Save/MemoryCard/GameFiles.hpp); the function-local enum was never declared in Save/MemoryCard/GameFiles.h, which is deleted (#441);declaration-only;source:MENU/MENU7.PRG/260.c:568"
+T00040.003,T00040,state,3,confirmed,0,,,3,,Confirmed,CardReadinessState Confirmed,med,"retired-by:VS::Save::MemoryCard::CardReadinessState and CardReadinessPhase (Native/Engine/include/Save/MemoryCard/GameFiles.hpp); the function-local enum was never declared in Save/MemoryCard/GameFiles.h, which is deleted (#441);declaration-only;source:MENU/MENU7.PRG/260.c:569"
+T00040.004,T00040,state,4,loadReady,0,,,4,,LoadReady,CardReadinessState LoadReady,med,"retired-by:VS::Save::MemoryCard::CardReadinessState and CardReadinessPhase (Native/Engine/include/Save/MemoryCard/GameFiles.hpp); the function-local enum was never declared in Save/MemoryCard/GameFiles.h, which is deleted (#441);declaration-only;source:MENU/MENU7.PRG/260.c:570"
+T00040.005,T00040,state,5,loaded,0,,,5,,Loaded,CardReadinessState Loaded,med,"retired-by:VS::Save::MemoryCard::CardReadinessState and CardReadinessPhase (Native/Engine/include/Save/MemoryCard/GameFiles.hpp); the function-local enum was never declared in Save/MemoryCard/GameFiles.h, which is deleted (#441);declaration-only;source:MENU/MENU7.PRG/260.c:571"
+T00041.000,T00041,state,0,init,0,,,0,,Init,SaveReadState Init,med,"retired-by:VS::Save::MemoryCard::SaveReadState and SaveReadPhase (Native/Engine/include/Save/MemoryCard/GameFiles.hpp); the function-local enum was never declared in Save/MemoryCard/GameFiles.h, which is deleted (#441);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482"
+T00041.001,T00041,state,1,reading,0,,,1,,Reading,SaveReadState Reading,med,"retired-by:VS::Save::MemoryCard::SaveReadState and SaveReadPhase (Native/Engine/include/Save/MemoryCard/GameFiles.hpp); the function-local enum was never declared in Save/MemoryCard/GameFiles.h, which is deleted (#441);declaration-only;source:MENU/MENU7.PRG/260.c:873"
+T00042.000,T00042,state,0,init,0,,,0,,Init,SaveWriteState Init,med,"retired-by:VS::Save::MemoryCard::SaveWriteState and SaveWritePhase (Native/Engine/include/Save/MemoryCard/GameFiles.hpp); the function-local enum was never declared in Save/MemoryCard/GameFiles.h, which is deleted (#441);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482"
+T00042.001,T00042,state,1,tempFileCreated,0,,,1,,TemporaryFileCreated,SaveWriteState TemporaryFileCreated,med,"retired-by:VS::Save::MemoryCard::SaveWriteState and SaveWritePhase (Native/Engine/include/Save/MemoryCard/GameFiles.hpp); the function-local enum was never declared in Save/MemoryCard/GameFiles.h, which is deleted (#441);declaration-only;source:MENU/MENU7.PRG/260.c:964"
+T00042.002,T00042,state,2,readReady,0,,,2,,ReadReady,SaveWriteState ReadReady,med,"retired-by:VS::Save::MemoryCard::SaveWriteState and SaveWritePhase (Native/Engine/include/Save/MemoryCard/GameFiles.hpp); the function-local enum was never declared in Save/MemoryCard/GameFiles.h, which is deleted (#441);declaration-only;source:MENU/MENU7.PRG/260.c:965"
+T00042.003,T00042,state,3,verifyPending,0,,,3,,VerifyPending,SaveWriteState VerifyPending,med,"retired-by:VS::Save::MemoryCard::SaveWriteState and SaveWritePhase (Native/Engine/include/Save/MemoryCard/GameFiles.hpp); the function-local enum was never declared in Save/MemoryCard/GameFiles.h, which is deleted (#441);declaration-only;source:MENU/MENU7.PRG/260.c:966"
+T00042.004,T00042,state,4,fileVerified,0,,,4,,FileVerified,SaveWriteState FileVerified,med,"retired-by:VS::Save::MemoryCard::SaveWriteState and SaveWritePhase (Native/Engine/include/Save/MemoryCard/GameFiles.hpp); the function-local enum was never declared in Save/MemoryCard/GameFiles.h, which is deleted (#441);declaration-only;source:MENU/MENU7.PRG/260.c:967"
+T00043.000,T00043,state,0,none,0,,,0,,None,ResourceInitState None,med,"retired-by:VS::Save::MemoryCard::MenuAssetLoad and MenuAssetPhase (Native/Game/include/Save/MenuAssets.hpp); the function-local enum was never declared in Save/MemoryCard/GameFiles.h, which is deleted (#441);declaration-only;source:15AC.c:169"
+T00043.001,T00043,state,1,queueReady,0,,,1,,QueueReady,ResourceInitState QueueReady,med,"retired-by:VS::Save::MemoryCard::MenuAssetLoad and MenuAssetPhase (Native/Game/include/Save/MenuAssets.hpp); the function-local enum was never declared in Save/MemoryCard/GameFiles.h, which is deleted (#441);declaration-only;source:MENU/MENU7.PRG/260.c:1084"
+T00043.002,T00043,state,2,enqueued,0,,,2,,Enqueued,ResourceInitState Enqueued,med,"retired-by:VS::Save::MemoryCard::MenuAssetLoad and MenuAssetPhase (Native/Game/include/Save/MenuAssets.hpp); the function-local enum was never declared in Save/MemoryCard/GameFiles.h, which is deleted (#441);declaration-only;source:MENU/MENU7.PRG/260.c:1085"
 T00044.000,T00044,state,0,initYes,0,,,0,,kConfirmationYes,ConfirmationState InitYes,med,native:Files.cpp ConfirmationStep::kConfirmationYes (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2095
 T00044.001,T00044,state,1,initNo,0,,,1,,kConfirmationNo,ConfirmationState InitNo,med,native:Files.cpp ConfirmationStep::kConfirmationNo (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2096
 T00044.002,T00044,state,2,waitForAnimation,0,,,2,,kConfirmationWait,ConfirmationState WaitForAnimation,med,native:Files.cpp ConfirmationStep::kConfirmationWait (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2097
@@ -511,11 +511,11 @@ T00090.001,T00090,state,1,loading,0,,,1,,Loading,Load the clear-save UI resource
 T00090.002,T00090,state,2,loaded,0,,,2,,Ready,Run the loaded clear-save menu,high,source:22C.c:3315
 T00090.003,T00090,state,3,confirmation,0,,,3,,Confirmation,Run clear-save confirmation,high,source:22C.c:3315
 T00090.004,T00090,state,4,exit,0,,,4,,Exit,Leave the clear-save screen,high,source:22C.c:3315
-T00091.000,T00091,testMemcardEvents_e,0,memcardInternalEventIoEnd,0,,,0,,IoEnd,Operation completed,high,declaration-only;source:260.c:29
-T00091.001,T00091,testMemcardEvents_e,1,memcardInternalEventError,0,,,1,,Error,Operation failed,high,declaration-only;source:260.c:30
-T00091.002,T00091,testMemcardEvents_e,2,memcardInternalEventTimeout,0,,,2,,Timeout,Card did not respond,high,declaration-only;source:260.c:31
-T00091.003,T00091,testMemcardEvents_e,3,memcardInternalEventUnformatted,0,,,3,,Unformatted,New or unformatted card,high,declaration-only;source:260.c:32
-T00091.004,T00091,testMemcardEvents_e,4,memcardInternalEventNone,0,,,4,,None,No event signalled,high,source:260.c:178;source:260.c:33
+T00091.000,T00091,testMemcardEvents_e,0,memcardInternalEventIoEnd,0,,,0,,IoEnd,Operation completed,high,retired-by:VS::Save::MemoryCard::CardEvent (Native/Engine/include/Save/MemoryCard/GameFiles.hpp); the unread enum Save_CardEventSignal is deleted with Save/MemoryCard/GameFiles.h (#441);declaration-only;source:260.c:29
+T00091.001,T00091,testMemcardEvents_e,1,memcardInternalEventError,0,,,1,,Error,Operation failed,high,retired-by:VS::Save::MemoryCard::CardEvent (Native/Engine/include/Save/MemoryCard/GameFiles.hpp); the unread enum Save_CardEventSignal is deleted with Save/MemoryCard/GameFiles.h (#441);declaration-only;source:260.c:30
+T00091.002,T00091,testMemcardEvents_e,2,memcardInternalEventTimeout,0,,,2,,Timeout,Card did not respond,high,retired-by:VS::Save::MemoryCard::CardEvent (Native/Engine/include/Save/MemoryCard/GameFiles.hpp); the unread enum Save_CardEventSignal is deleted with Save/MemoryCard/GameFiles.h (#441);declaration-only;source:260.c:31
+T00091.003,T00091,testMemcardEvents_e,3,memcardInternalEventUnformatted,0,,,3,,Unformatted,New or unformatted card,high,retired-by:VS::Save::MemoryCard::CardEvent (Native/Engine/include/Save/MemoryCard/GameFiles.hpp); the unread enum Save_CardEventSignal is deleted with Save/MemoryCard/GameFiles.h (#441);declaration-only;source:260.c:32
+T00091.004,T00091,testMemcardEvents_e,4,memcardInternalEventNone,0,,,4,,None,No event signalled,high,retired-by:VS::Save::MemoryCard::CardEvent (Native/Engine/include/Save/MemoryCard/GameFiles.hpp); the unread enum Save_CardEventSignal is deleted with Save/MemoryCard/GameFiles.h (#441);source:260.c:178;source:260.c:33
 T00092.000,T00092,vs_battle_informationTextBoxHeader,0,informationTextBoxHeaderNone,0,,,0,,kNone,InformationBoxHeader None,med,native:TextBoxState.hpp InformationHeader::kNone (#441);declaration-only;source:BATTLE/BATTLE.PRG/battleUi.h:189
 T00092.001,T00092,vs_battle_informationTextBoxHeader,1,informationTextBoxHeaderCaution,0,,,1,,kCaution,InformationBoxHeader Caution,med,native:TextBoxState.hpp InformationHeader::kCaution (#441);declaration-only;source:BATTLE/BATTLE.PRG/battleUi.h:190
 T00092.002,T00092,vs_battle_informationTextBoxHeader,2,informationTextBoxHeaderInformation,0,,,2,,kInformation,InformationBoxHeader Information,med,native:TextBoxState.hpp InformationHeader::kInformation (#441);declaration-only;source:BATTLE/BATTLE.PRG/battleUi.h:191
@@ -779,7 +779,7 @@ T00134.003,T00134,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00825.000,T00825,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6E644.h:13:9),0,actor,0,u_int,8,,,actor,Target actor index,high,native:ActionRequest.hpp LiveActorEndpoint::actor (#441);source:146C.c:3970
 T00825.001,T00825,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6E644.h:13:9),1,unk1,1,u_int,8,,,event_actor_slot,Slot in the event's actor list; battle code sets 0,med,native:ActionRequest.hpp LiveActorEndpoint::event_actor_slot (#441);source:5BF94.c:8031
 T00825.002,T00825,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6E644.h:13:9),2,part,0,u_int,8,,,part,Targeted body part; 0xFD is a special marker,med,native:ActionRequest.hpp LiveActorEndpoint::part (#441);source:146C.c:3308
-T00825.003,T00825,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6E644.h:13:9),3,unk3,1,u_int,8,,,reserved3,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Battle\ActionPresentationLive.cpp:125;declaration-only;source:6E644.h:17
+T00825.003,T00825,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6E644.h:13:9),3,unk3,1,u_int,8,,,reserved3,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Battle\ActionPresentationLive.cpp:124;declaration-only;source:6E644.h:17
 T00135.000,T00135,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:415:5),0,x,0,unsigned int,8,,,tileX,Tile X,high,source:771A8.c:583
 T00135.001,T00135,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:415:5),1,y,0,unsigned int,8,,,tag,"Extra byte: gate index in routes, layer in placements, height in steps",low,source:771A8.c:631
 T00135.002,T00135,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:415:5),2,z,0,unsigned int,8,,,tileZ,Tile Z,high,source:771A8.c:583
@@ -1154,7 +1154,7 @@ T00197.006,T00197,ColorInfo,6,bindex,0,u_char,,,,blueStepRow,Target minus curren
 T00198.000,T00198,D_1F80035C_t,0,unk0,1,u_char[52],,,,reserved0,Bytes not read by the decompiled users; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:27;declaration-only;source:30DB0.h:28
 T00198.001,T00198,D_1F80035C_t,1,tpage,0,u_short,,,,texture_page,Texture page of the model being drawn,high,source:49268.c:134
 T00198.002,T00198,D_1F80035C_t,2,clut,0,u_short,,,,palette,Palette of the model being drawn,high,source:49268.c:137
-T00198.003,T00198,D_1F80035C_t,3,unk38,1,u_short,,,,reserved38,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ModelDrawingLive.cpp:400;declaration-only;source:30DB0.h:31
+T00198.003,T00198,D_1F80035C_t,3,unk38,1,u_short,,,,reserved38,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ModelDrawingLive.cpp:399;declaration-only;source:30DB0.h:31
 T00198.004,T00198,D_1F80035C_t,4,unk3A,1,u_short,,,,angle_x,Actor X angle staged for the transform,med,source:44F14.c:849
 T00198.005,T00198,D_1F80035C_t,5,unk3C,1,u_short,,,,angle_y,Actor Y angle staged for the transform,med,source:44F14.c:850
 T00198.006,T00198,D_1F80035C_t,6,unk3E,1,u_char[14],,,,reserved3e,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:33;declaration-only;source:30DB0.h:34
@@ -1250,7 +1250,7 @@ T00211.007,T00211,D_800E8594_t,7,unk1C,1,int,,,,reserved1C,Not written by the ma
 T00211.008,T00211,D_800E8594_t,8,unk20,1,int,,,,reserved20,Not written by the marker code; not used by native code; kept for the original layout,med,retired-by:nothing; no reader (#441);native-refs:none;source:native:Native\Game\src\Field\TriggerMarkers.h:17;declaration-only;source:146C.c:195
 T00211.009,T00211,D_800E8594_t,9,unk24,1,char[4],,,,lastVertexShade,Shade of the final vertex,med,"retired-by:VS::Field::TriggerMarkerPlacement::shade (Field/RoomTriggerMarkers.hpp, #441);declaration-only;source:146C.c:196"
 T00212.000,T00212,D_800E8FB4_t,0,unk0,1,int,,,,instanceFlags,Flags copied into the new instance,med,declaration-only;source:30DB0.c:32
-T00212.001,T00212,D_800E8FB4_t,1,unk4,1,int,,,,instanceWord4,Word copied into the new instance; only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Game\src\Field\GimmickResourcesLive.cpp:139;declaration-only;source:30DB0.c:33
+T00212.001,T00212,D_800E8FB4_t,1,unk4,1,int,,,,instanceWord4,Word copied into the new instance; only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Game\src\Field\GimmickResourcesLive.cpp:138;declaration-only;source:30DB0.c:33
 T00212.002,T00212,D_800E8FB4_t,2,unk8,1,int,,,,recolorCount,Count passed to the palette recolor routine,low,source:30DB0.c:329;use cited by sanity pass;source:30DB0.c:34
 T00212.003,T00212,D_800E8FB4_t,3,unkC,1,int,,,,modelDataSize,Size passed to the model parser,med,declaration-only;source:30DB0.c:35
 T00213.000,T00213,D_800EB9B4_t,0,unk0,1,u_char,,,,loading,Set while SCREFF2.PRG loads; scripts wait for it to clear,med,native:ScreenEffectState.hpp LiveScreenEffectOverlay::loading (#441);source:GIM/SCREFF2.PRG/0.h:6
@@ -1592,7 +1592,7 @@ T00239.086,T00239,D_800F4538_t,86,spSeqLbas,0,u_int[4],,,,specialSequenceLbas,Di
 T00239.087,T00239,D_800F4538_t,87,unk6BC,1,int[4],,,,reserved6BC,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\ActorRecord.h:114;declaration-only;source:3A1A0.h:333
 T00239.088,T00239,D_800F4538_t,88,spSeqSizes,0,u_short[4],,,,specialSequenceSizes,Byte sizes of the special-attack sequences,high,source:30DB0.c:1572
 T00239.089,T00239,D_800F4538_t,89,unk6D4,1,int[2],,,,reserved6D4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\ActorRecord.h:116;declaration-only;source:3A1A0.h:335
-T00239.090,T00239,D_800F4538_t,90,unk6DC,1,int,,,,opaque6DC,Cleared when parsed; not read; only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Content\src\ActorAssetsLive.cpp:501;source:30DB0.c:1360
+T00239.090,T00239,D_800F4538_t,90,unk6DC,1,int,,,,opaque6DC,Cleared when parsed; not read; only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Content\src\ActorAssetsLive.cpp:586;source:30DB0.c:1360
 T00239.091,T00239,D_800F4538_t,91,unk6E0,1,u_char,,,queued animation | queuedAnimationId,queuedAnimation,Animation queued to play next; 0 when none,high,source:30DB0.c:3718
 T00239.092,T00239,D_800F4538_t,92,unk6E1,1,u_char,,,queued blend frames,queuedParameterA,First parameter of the queued animation,low,source:30DB0.c:3719
 T00239.093,T00239,D_800F4538_t,93,unk6E2,1,u_char,,,queued starting-frame parameter,queuedParameterB,Second parameter of the queued animation,low,source:30DB0.c:3720
@@ -1601,7 +1601,7 @@ T00239.095,T00239,D_800F4538_t,95,unk6E4,1,u_char,,,,contactKind,Kind of surface
 T00239.096,T00239,D_800F4538_t,96,unk6E5,1,u_char,,,idle animation | travelAnimationId,travelAnimation,Animation played while travelling,high,source:30DB0.c:1350
 T00239.097,T00239,D_800F4538_t,97,unk6E6,1,u_short,,,,modelId,Model id,high,source:30DB0.c:1097
 T00239.098,T00239,D_800F4538_t,98,unk6E8,1,short,,,,clutA,First palette slot,low,source:30DB0.c:1333
-T00239.099,T00239,D_800F4538_t,99,unk6EA,1,short,,,,clutB,Second palette slot; only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Content\src\ActorAssetsLive.cpp:504;source:30DB0.c:1334
+T00239.099,T00239,D_800F4538_t,99,unk6EA,1,short,,,,clutB,Second palette slot; only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Content\src\ActorAssetsLive.cpp:589;source:30DB0.c:1334
 T00239.100,T00239,D_800F4538_t,100,unk6EC,1,short,,,,ledgeHeight,Height compared when hanging from a ledge,low,source:3A1A0.c:1966
 T00239.101,T00239,D_800F4538_t,101,unk6EE,1,signed char,,,,platformOffsetX,X offset from the platform anchor,med,source:3A1A0.c:1121
 T00239.102,T00239,D_800F4538_t,102,unk6EF,1,signed char,,,,platformOffsetZ,Z offset from the platform anchor,med,source:3A1A0.c:1122
@@ -1826,7 +1826,7 @@ T00255.000,T00255,D_800F45E0_t,0,unk0,1,char,,,,boneCount,SHP bone count; zero f
 T00255.001,T00255,D_800F45E0_t,1,unk1,1,char,,,,reserved1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Field\Gimmicks.h:55;declaration-only;source:3A1A0.h:453
 T00255.002,T00255,D_800F45E0_t,2,unk2,1,char,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Field\Gimmicks.h:56;declaration-only;source:3A1A0.h:454
 T00255.003,T00255,D_800F45E0_t,3,unk3,1,char,,,,reserved3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Field\Gimmicks.h:57;declaration-only;source:3A1A0.h:455
-T00255.004,T00255,D_800F45E0_t,4,unk4,1,int,,,,reserved4,Copied from the model template's word 4 when the gimmick is created; not read; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Field\GimmickResourcesLive.cpp:139;source:30DB0.c:328;sanity pass 2026-10-17
+T00255.004,T00255,D_800F45E0_t,4,unk4,1,int,,,,reserved4,Copied from the model template's word 4 when the gimmick is created; not read; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Field\GimmickResourcesLive.cpp:138;source:30DB0.c:328;sanity pass 2026-10-17
 T00255.005,T00255,D_800F45E0_t,5,unk8_0,1,char,1,,,isSkipped,Set when display flag bit 0 is clear,med,source:30DB0.c:3957
 T00255.006,T00255,D_800F45E0_t,6,unk8_1,1,char,1,,,isVisible,Drawn when set (display flag bit 1),high,source:30DB0.c:3958
 T00255.007,T00255,D_800F45E0_t,7,unk8_2,1,char,1,,,reserved8Bits2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Field\Gimmicks.h:61;declaration-only;source:3A1A0.h:459
@@ -2516,14 +2516,14 @@ T00292.011,T00292,PLG005_data_t,11,unk10,1,short,,,zSpacingSpeed,z_speed,Z spaci
 T00292.012,T00292,PLG005_data_t,12,unk12,1,short,,,xWavePhase,x_phase,X sway phase; advances by the jitter each tick,med,native:Effects/Templates/Grid.hpp GridState::x_phase (#441);source:EFFECT/grids.h:29
 T00292.013,T00292,PLG005_data_t,13,unk14,1,short,,,zWavePhase,z_phase,Z sway phase; advances by the jitter each tick,med,native:Effects/Templates/Grid.hpp GridState::z_phase (#441);source:EFFECT/grids.h:30
 T00292.014,T00292,PLG005_data_t,14,curveSampleDistance,0,int,,,,age,Age the update and texture scroll read,med,native:Effects/Templates/Grid.hpp GridState::age (#441);source:EFFECT/grids.h:31
-T00293.000,T00293,System_dat_h,0,unk0,1,size_t,,,,image0Offset,First rectangle-headed image,high,source:18.c:267
-T00293.001,T00293,System_dat_h,1,unk4,1,size_t,,,,image1Offset,Second rectangle-headed image,high,source:18.c:272
-T00293.002,T00293,System_dat_h,2,unk8,1,size_t,,,,paletteOffset,Palette block loaded with vs_main_loadClut,high,source:18.c:277
-T00293.003,T00293,System_dat_h,3,unkC,1,size_t,,,,image2Offset,Third rectangle-headed image,high,source:18.c:280
-T00293.004,T00293,System_dat_h,4,unk10,1,size_t,,,,image3Offset,Fourth rectangle-headed image,high,source:18.c:285
-T00293.005,T00293,System_dat_h,5,unk14,1,size_t,,,,image4Offset,Fifth rectangle-headed image,high,source:18.c:290
-T00293.006,T00293,System_dat_h,6,unk18,1,size_t,,,,fixedImageOffset,Size-headed image loaded at VRAM 768 240,high,source:18.c:295;source:18.c:296
-T00293.007,T00293,System_dat_h,7,unk1C,1,size_t,,,,interfaceDataOffset,Data passed to Menu::Framework::InitGameInterface,high,source:18.c:300
+T00293.000,T00293,System_dat_h,0,unk0,1,size_t,,,,image0_offset,First rectangle-headed image,high,source:18.c:267
+T00293.001,T00293,System_dat_h,1,unk4,1,size_t,,,,image1_offset,Second rectangle-headed image,high,source:18.c:272
+T00293.002,T00293,System_dat_h,2,unk8,1,size_t,,,,palette_offset,Palette block loaded with vs_main_loadClut,high,source:18.c:277
+T00293.003,T00293,System_dat_h,3,unkC,1,size_t,,,,image2_offset,Third rectangle-headed image,high,source:18.c:280
+T00293.004,T00293,System_dat_h,4,unk10,1,size_t,,,,image3_offset,Fourth rectangle-headed image,high,source:18.c:285
+T00293.005,T00293,System_dat_h,5,unk14,1,size_t,,,,image4_offset,Fifth rectangle-headed image,high,source:18.c:290
+T00293.006,T00293,System_dat_h,6,unk18,1,size_t,,,,fixed_image_offset,Size-headed image loaded at VRAM 768 240,high,source:18.c:295;source:18.c:296
+T00293.007,T00293,System_dat_h,7,unk1C,1,size_t,,,,interface_data_offset,Data passed to Menu::Framework::InitGameInterface,high,source:18.c:300
 T00294.000,T00294,TrailPacket,0,tag,0,u_long,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:43;declaration-only;source:5BF94.c:138
 T00294.001,T00294,TrailPacket,1,mode,0,u_long,,,,mode,Named in the fork; see cited use,med,source:5BF94.c:4915
 T00294.002,T00294,TrailPacket,2,r0,0,u_char,,,,red0,Named in the fork; see cited use,med,source:5BF94.c:4923
@@ -4132,8 +4132,8 @@ T00459.007,T00459,func_800962E4_t,7,unkB,1,char,,,,opaqueB,Not used by native co
 T00459.008,T00459,func_800962E4_t,8,unkC,1,short,,,,reservedC,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\BattleTypes.h:120;declaration-only;source:2842C.c:80
 T00459.009,T00459,func_800962E4_t,9,unkE,1,char,,,,reservedE,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\BattleTypes.h:121;declaration-only;source:2842C.c:81
 T00459.010,T00459,func_800962E4_t,10,unkF,1,char,,,,reservedF,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\BattleTypes.h:122;declaration-only;source:2842C.c:82
-T00460.000,T00460,func_8009C378_t,0,unk0,1,void *,,,,firstSectionPointer,First struct-relative SEQ section offset preserved natively,med,source:30DB0.c:1721;original rebases on load;native F00797/F00798 on-disc fixups retain the serialized offset
-T00460.001,T00460,func_8009C378_t,1,unk4,1,void *,,,,secondSectionPointer,Second struct-relative SEQ section offset preserved natively,med,source:30DB0.c:1722;original rebases on load;native F00797/F00798 on-disc fixups retain the serialized offset
+T00460.000,T00460,func_8009C378_t,0,unk0,1,void *,,,,first_section_offset,First struct-relative SEQ section offset preserved natively,med,source:30DB0.c:1721;original rebases on load;native F00797/F00798 on-disc fixups retain the serialized offset
+T00460.001,T00460,func_8009C378_t,1,unk4,1,void *,,,,second_section_offset,Second struct-relative SEQ section offset preserved natively,med,source:30DB0.c:1722;original rebases on load;native F00797/F00798 on-disc fixups retain the serialized offset
 T00460.002,T00460,func_8009C378_t,2,unk8,1,char[30968],,,,body,Remaining sequence bytes,med,declaration-only;source:30DB0.h:8
 T00461.000,T00461,func_800A0024_t,0,unk0,1,u_char,,,,placementByte0,First copied placement byte,low,source:30DB0.c:3678
 T00461.001,T00461,func_800A0024_t,1,unk1,1,u_char,,,,heightAboveGround,Height above ground in units of 128,med,source:30DB0.c:3684
@@ -4942,15 +4942,15 @@ T00545.000,T00545,labelBoxPrim_t,0,tag,0,u_long,,,,tag,Named in the fork; see ci
 T00545.001,T00545,labelBoxPrim_t,1,box,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.c:73:5),,,,box,Named in the fork; see cited use,med,source:58578.c:704
 T00546.000,T00546,limbEffects_t,0,value0,0,short,,,,opaque0,"Used, but its meaning is not established",low,source:146C.c:10641
 T00546.001,T00546,limbEffects_t,1,value1,0,short,,,,opaque2,"Used, but its meaning is not established",low,source:146C.c:12568
-T00547.000,T00547,mcdata_t,0,locationCluts,0,u_short[2][256],,,,locationPalettes,Two palettes for the save-location artwork,high,source:260.c:1849
-T00547.001,T00547,mcdata_t,1,unk400,1,char[7][32],,,,fileIconPalettes,Per-file 32-byte card icon palette copied into the save header,med,source:260.c:771;PS1 card header icon palette at 0x60
-T00547.002,T00547,mcdata_t,2,unk4E0,1,char[7][128],,,,fileIconBitmaps,Per-file 128-byte card icon bitmap copied after the header,med,source:260.c:773;PS1 card icon frame at 0x80
-T00547.003,T00547,mcdata_t,3,unk860,1,char[7][128],,,,reserved860,Not used by native code; kept for the original layout,med,"native-refs:none;source:native:Native\Engine\src\Save\MemoryCard\Resources.h:14;declaration-only;source:260.c:156;source-review:#148 MENU7 mcdata_t line156 and TITLE line176 declare this 7x128-byte region after the icon bitmaps. All _mcData consumers inspected select locationCluts, unk400 palettes, unk4E0 bitmaps, textTable, file summaries or directory buffer; none addresses unk860. Adjacent icon shape alone is not evidence that this is a second animation-frame bank."
-T00547.004,T00547,mcdata_t,4,unkBE0,1,char[8][128],,,,reservedBE0,Not used by native code; kept for the original layout,med,"native-refs:none;source:native:Native\Engine\src\Save\MemoryCard\Resources.h:15;declaration-only;source:260.c:157;source-review:#148 Distinct 8x128-byte region at mcdata_t.unkBE0, declared in both original overlays without a field consumer. It follows the seven-element region but has a different count; do not merge it with icon bitmaps or infer a palette bank from size."
-T00547.005,T00547,mcdata_t,5,unkFE0,1,char[32],,,,reservedFE0,Not used by native code; kept for the original layout,med,"native-refs:none;source:native:Native\Engine\src\Save\MemoryCard\Resources.h:16;declaration-only;source:260.c:158;source-review:#148 Original mcdata_t.unkFE0[32] is the final 32-byte span before textTable. Resource initialization points at textTable directly, and no field consumer reads unkFE0; its size is insufficient evidence to call it an icon palette. Preserve the gap and text-table start."
-T00547.006,T00547,mcdata_t,6,textTable,0,u_short[2048],,,,textTable,Menu text table,high,source:260.c:1101
-T00547.007,T00547,mcdata_t,7,saveFileInfo,0,saveFileInfo_t[5],,,,fileHeaders,Card header of each of the five save files,high,source:260.c:1102
-T00547.008,T00547,mcdata_t,8,_dirEntBuf,0,struct DIRENTRY,,,,directoryEntry,Card directory entry buffer,high,source:260.c:1103
+T00547.000,T00547,mcdata_t,0,locationCluts,0,u_short[2][256],,,,location_palettes,Two palettes for the save-location artwork,high,source:260.c:1849
+T00547.001,T00547,mcdata_t,1,unk400,1,char[7][32],,,,file_icon_palettes,Per-file 32-byte card icon palette copied into the save header,med,source:260.c:771;PS1 card header icon palette at 0x60
+T00547.002,T00547,mcdata_t,2,unk4E0,1,char[7][128],,,,file_icon_bitmaps,Per-file 128-byte card icon bitmap copied after the header,med,source:260.c:773;PS1 card icon frame at 0x80
+T00547.003,T00547,mcdata_t,3,unk860,1,char[7][128],,,,reserved_860,Not used by native code; kept for the original layout,med,"native-refs:none;source:native:Native\Game\include\Save\MemoryCard\CardResources.hpp:28;declaration-only;source:260.c:156;source-review:#148 MENU7 mcdata_t line156 and TITLE line176 declare this 7x128-byte region after the icon bitmaps. All _mcData consumers inspected select locationCluts, unk400 palettes, unk4E0 bitmaps, textTable, file summaries or directory buffer; none addresses unk860. Adjacent icon shape alone is not evidence that this is a second animation-frame bank."
+T00547.004,T00547,mcdata_t,4,unkBE0,1,char[8][128],,,,reserved_be0,Not used by native code; kept for the original layout,med,"native-refs:none;source:native:Native\Game\include\Save\MemoryCard\CardResources.hpp:29;declaration-only;source:260.c:157;source-review:#148 Distinct 8x128-byte region at mcdata_t.unkBE0, declared in both original overlays without a field consumer. It follows the seven-element region but has a different count; do not merge it with icon bitmaps or infer a palette bank from size."
+T00547.005,T00547,mcdata_t,5,unkFE0,1,char[32],,,,reserved_fe0,Not used by native code; kept for the original layout,med,"native-refs:none;source:native:Native\Game\include\Save\MemoryCard\CardResources.hpp:30;declaration-only;source:260.c:158;source-review:#148 Original mcdata_t.unkFE0[32] is the final 32-byte span before textTable. Resource initialization points at textTable directly, and no field consumer reads unkFE0; its size is insufficient evidence to call it an icon palette. Preserve the gap and text-table start."
+T00547.006,T00547,mcdata_t,6,textTable,0,u_short[2048],,,,text_table,Menu text table,high,source:260.c:1101
+T00547.007,T00547,mcdata_t,7,saveFileInfo,0,saveFileInfo_t[5],,,,file_headers,Card header of each of the five save files,high,source:260.c:1102
+T00547.008,T00547,mcdata_t,8,_dirEntBuf,0,struct DIRENTRY,,,,directory_entry,Card directory entry buffer,high,source:260.c:1103
 T00548.000,T00548,menuBg_t,0,clut,0,u_short[256],,,,palette,256 RGB555 colors for the background,high,source:22C.c:3119
 T00548.001,T00548,menuBg_t,1,data,0,char[240][192],,,,indexed_pixels,240 rows of 192 eight-bit palette indices,high,source:22C.c:3119
 T00549.000,T00549,menuItemPrim_t,0,tag,0,u_long,,,,dmaTag,PS1 DMA packet tag,med,replaced-by:Render sprite commands;source:22C.c:4099;use cited by sanity pass;source:22C.c:4076
@@ -5364,16 +5364,16 @@ T00593.026,T00593,routeEdgeState,26,angle,0,short,,,,angle,Facing angle,med,sour
 T00593.027,T00593,routeEdgeState,27,unk18C,1,char[15],,,,reserved18C,Not read through this view,low,declaration-only;source:771A8.c:551
 T00593.028,T00593,routeEdgeState,28,gate,0,u_char,,,,gate,Named in the fork view; see cited use,med,source:771A8.c:634
 T00593.029,T00593,routeEdgeState,29,exit,0,func_800DFA54_t,,,,exit,Named in the fork view; see cited use,med,source:771A8.c:638
-T00594.000,T00594,saveBase_t,0,slotState,0,enum slotState_e,,,saveIdentityWhenOccupied,slotState,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:285
+T00594.000,T00594,saveBase_t,0,slotState,0,enum slotState_e,,,saveIdentityWhenOccupied,slot_state,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:285
 T00594.001,T00594,saveBase_t,1,generation,0,u_int,,,,generation,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:286
-T00594.002,T00594,saveBase_t,2,unk8,1,int,,,formatSignature,formatSignature,Fixed save-format signature 0x20000107 written by both packagers and checked before loaded state is applied; individual bits are not interpreted.,high,"source:MENU/MENU7.PRG/260.c:698;source-review:#148 T00594.002 original unk8: MENU7/260.c:698,809 and TITLE/22C.c:586,688 compare/write 0x20000107;fixed format signature only;int and 0xC slot-base layout unchanged"
+T00594.002,T00594,saveBase_t,2,unk8,1,int,,,formatSignature,format_signature,Fixed save-format signature 0x20000107 written by both packagers and checked before loaded state is applied; individual bits are not interpreted.,high,"source:MENU/MENU7.PRG/260.c:698;source-review:#148 T00594.002 original unk8: MENU7/260.c:698,809 and TITLE/22C.c:586,688 compare/write 0x20000107;fixed format signature only;int and 0xC slot-base layout unchanged"
 T00595.000,T00595,saveFileInfo_t,0,key,0,u_int,,,,key,Original save-file key word,high,source:22C.c:165
 T00595.001,T00595,saveFileInfo_t,1,unk4,1,saveFileSubInfo_t,,,,summary,Save slot metadata statistics and formatted card title,high,source:22C.c:640
-T00595.002,T00595,saveFileInfo_t,2,unk44,1,char[28],,,,reserved44,Unresolved 28-byte range in the original save header; not used by native code; kept for the original layout,med,"native-refs:none;source:native:Native\Engine\src\Save\MemoryCard\GameFiles.h:102;No direct field accesses found;preserve in legacy decoder;declaration-only;source:260.c:74;source-review:#148 Original saveFileInfo_t.unk44[0x1C] lies after the title/summary at offset0x44 and before the 32-byte icon palette at0x60. Packaging zeroes the image and explicitly writes title and palette, not this span; whole-record read/decode/checksum copies do not establish a more specific role. Retain exact 28-byte range."
-T00595.003,T00595,saveFileInfo_t,3,unk60,1,char[32],,,,iconHeaderBytes,32 bytes copied from the selected card image header,med,source:22C.c:654;exact subformat still needs confirmation
+T00595.002,T00595,saveFileInfo_t,2,unk44,1,char[28],,,,reserved_44,Unresolved 28-byte range in the original save header; not used by native code; kept for the original layout,med,"native-refs:none;source:native:Native\Game\include\Save\MemoryCard\SaveImage.hpp:81;No direct field accesses found;preserve in legacy decoder;declaration-only;source:260.c:74;source-review:#148 Original saveFileInfo_t.unk44[0x1C] lies after the title/summary at offset0x44 and before the 32-byte icon palette at0x60. Packaging zeroes the image and explicitly writes title and palette, not this span; whole-record read/decode/checksum copies do not establish a more specific role. Retain exact 28-byte range."
+T00595.003,T00595,saveFileInfo_t,3,unk60,1,char[32],,,,icon_header_bytes,32 bytes copied from the selected card image header,med,source:22C.c:654;exact subformat still needs confirmation
 T00596.000,T00596,saveFileSubInfo_t,0,base,0,saveBase_t,,,,base,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:285
 T00596.001,T00596,saveFileSubInfo_t,1,stats,0,stats_t,,,,stats,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:307
-T00596.002,T00596,saveFileSubInfo_t,2,unk20,1,u_short[16],,,,cardTitleTail,Last 16 halfwords of the card-header title view; slot number and play-time digits plus terminator are written here. The structure is also reused for save-summary records.,high,source:MENU/MENU7.PRG/260.c:758;source-review:#148 T00596.002 original unk20: MENU7/260.c:758-770 and TITLE/22C.c:641-653 update card-title slot/time/terminator;u_short[16] and reused summary layout unchanged;no encoding/type reinterpretation
+T00596.002,T00596,saveFileSubInfo_t,2,unk20,1,u_short[16],,,,card_title_tail,Last 16 halfwords of the card-header title view; slot number and play-time digits plus terminator are written here. The structure is also reused for save-summary records.,high,source:MENU/MENU7.PRG/260.c:758;source-review:#148 T00596.002 original unk20: MENU7/260.c:758-770 and TITLE/22C.c:641-653 update card-title slot/time/terminator;u_short[16] and reused summary layout unchanged;no encoding/type reinterpretation
 T00597.000,T00597,savedEnemyState,0,unk0,1,u_char,,,,spawnSlot,Spawn index + 1; 0 marks a free slot,med,declaration-only;source:146C.c:359
 T00597.001,T00597,savedEnemyState,1,hidden,0,u_char,,,,isHidden,Hidden flag saved for the spawn,high,source:146C.c:15131
 T00597.002,T00597,savedEnemyState,2,unk2,1,short,,,,aiFlags,Packed AI relation and behavior flags handed to the AI on respawn,high,source:146C.c:6774
@@ -5391,47 +5391,47 @@ T00597.013,T00597,savedEnemyState,13,x,0,u_char,,,,tileX,Tile X,high,source:146C
 T00597.014,T00597,savedEnemyState,14,direction,0,u_char,,,,direction,Facing direction bits; only bit 0 is kept,high,source:146C.c:6655
 T00597.015,T00597,savedEnemyState,15,z,0,u_char,,,,tileZ,Tile Z,high,source:146C.c:6654
 T00597.016,T00597,savedEnemyState,16,height,0,u_char,,,,height,Height,high,source:146C.c:6656
-T00598.000,T00598,savedata_t,0,fileInfo,0,saveFileInfo_t,,,,cardHeader,Card file header with title and icon palette,high,source:260.c:753
-T00598.001,T00598,savedata_t,1,unk80,1,char[128],,,,iconBitmap,Card icon bitmap,high,source:260.c:773
-T00598.002,T00598,savedata_t,2,unk100,1,char[128],,,,reserved100,Zero block included in checksum block 1; not used by native code; kept for the original layout,med,"native-refs:none;source:native:Native\Engine\src\Save\MemoryCard\GameFiles.h:124;source:260.c:376;source-review:#148 Both savedata_t layouts declare unk100[0x80] between icon bitmap and protected header. Packaging initializes this 128-byte span through the image memset. The verifier starts a 256-byte XOR here, spanning this region AND the protected header; do not rename the member to an entire checksum block or expand it. Native C references at HasChecksumError are the same member, not locals."
-T00598.003,T00598,savedata_t,3,unk180,1,savedata_unk180_t,,,,protectedHeader,Cipher key slot header summary and block checksums,high,source:260.c:749
-T00598.004,T00598,savedata_t,4,stateFlags,0,char[1088],,,,stateFlags,Game state flags,high,source:260.c:820
-T00598.005,T00598,savedata_t,5,actionsLearned,0,char[32],,,,learnedActions,Learned action flags,high,source:260.c:821
-T00598.006,T00598,savedata_t,6,mapStatus,0,char[72],,,,mapStatus,Visited room and area flags,high,source:260.c:823
+T00598.000,T00598,savedata_t,0,fileInfo,0,saveFileInfo_t,,,,card_header,Card file header with title and icon palette,high,source:260.c:753
+T00598.001,T00598,savedata_t,1,unk80,1,char[128],,,,icon_bitmap,Card icon bitmap,high,source:260.c:773
+T00598.002,T00598,savedata_t,2,unk100,1,char[128],,,,reserved_100,Zero block included in checksum block 1; not used by native code; kept for the original layout,med,"native-refs:none;source:native:Native\Game\include\Save\MemoryCard\SaveImage.hpp:107;source:260.c:376;source-review:#148 Both savedata_t layouts declare unk100[0x80] between icon bitmap and protected header. Packaging initializes this 128-byte span through the image memset. The verifier starts a 256-byte XOR here, spanning this region AND the protected header; do not rename the member to an entire checksum block or expand it. Native C references at HasChecksumError are the same member, not locals."
+T00598.003,T00598,savedata_t,3,unk180,1,savedata_unk180_t,,,,protected_header,Cipher key slot header summary and block checksums,high,source:260.c:749
+T00598.004,T00598,savedata_t,4,stateFlags,0,char[1088],,,,state_flags,Game state flags,high,source:260.c:820
+T00598.005,T00598,savedata_t,5,actionsLearned,0,char[32],,,,learned_actions,Learned action flags,high,source:260.c:821
+T00598.006,T00598,savedata_t,6,mapStatus,0,char[72],,,,map_status,Visited room and area flags,high,source:260.c:823
 T00598.007,T00598,savedata_t,7,settings,0,vs_main_settings_t,,,,settings,Player settings,high,source:260.c:824
-T00598.008,T00598,savedata_t,8,unk6C8,1,D_80060068_t,,,,ashleySnapshot,Ashley's statistics snapshot,high,source:260.c:825
+T00598.008,T00598,savedata_t,8,unk6C8,1,D_80060068_t,,,,ashley_snapshot,Ashley's statistics snapshot,high,source:260.c:825
 T00598.009,T00598,savedata_t,9,inventory,0,vs_main_inventory_t,,,,inventory,Inventory,high,source:260.c:826
-T00598.010,T00598,savedata_t,10,unk16C8,1,vs_main_inventoryIndices_t,,,,inventoryIndices,Inventory ordering indices,high,source:260.c:827
-T00598.011,T00598,savedata_t,11,unk1778,1,_mpdRoomDoorSection_t,,,,entryDoor,Door the player entered the current room through,high,source:260.c:828
-T00598.012,T00598,savedata_t,12,scoreData,0,vs_main_scoredata_t,,,,scoreData,Score and record statistics,high,source:260.c:829
-T00598.013,T00598,savedata_t,13,unk1898,1,int,,,,roomStateSlot,Current room state slot,high,source:260.c:832
-T00598.014,T00598,savedata_t,14,unk189C,1,char[1312],,,,recentRoomEnemyStates,Recent room enemy states,high,source:260.c:833
-T00598.015,T00598,savedata_t,15,artsStatus,0,vs_main_artsStatus_t,,,,artsStatus,Break art progress,high,source:260.c:834
-T00598.016,T00598,savedata_t,16,containerData,0,vs_menu_containerData,,,,containerData,Container contents,high,source:260.c:830
-T00598.017,T00598,savedata_t,17,unk59E0,1,char[544],,,,reserved59E0,Zero padding to the end of the 23 blocks; not used by native code; kept for the original layout,med,"native-refs:none;source:native:Native\Engine\src\Save\MemoryCard\GameFiles.h:139;source:260.c:752;no member access;source:260.c:107;source-review:#148 Both original savedata_t variants end with unk59E0[0x220]. No field accesses occur in either packager/loader: whole-image zeroing, checksum/encryption and I/O cover the tail. It pads the 0x5C00 image, not a demonstrated extra gameplay record. Preserve exact size and layout."
-T00599.000,T00599,savedata_t,0,fileInfo,0,saveFileInfo_t,,,,cardHeader,Card file header with title and icon palette,med,source:MENU/MENU7.PRG/260.c:753;use cited by sanity pass;source:22C.c:264;same layout as T00598
-T00599.001,T00599,savedata_t,1,unk80,1,char[128],,,,iconBitmap,Card icon bitmap,med,source:MENU/MENU7.PRG/260.c:773;use cited by sanity pass;source:22C.c:265;same layout as T00598
-T00599.002,T00599,savedata_t,2,unk100,1,char[128],,,,reserved100,Zero block included in checksum block 1,low,source:MENU/MENU7.PRG/260.c:376;use cited by sanity pass;source:22C.c:266;same layout as T00598
-T00599.003,T00599,savedata_t,3,unk180,1,savedata_unk180_t,,,,protectedHeader,Cipher key slot header summary and block checksums,med,source:MENU/MENU7.PRG/260.c:369;use cited by sanity pass;source:22C.c:267;same layout as T00598
-T00599.004,T00599,savedata_t,4,unk200,1,char[1088],,,,stateFlags,Game state flags,med,source:22C.c:596;use cited by sanity pass;source:22C.c:268;same layout as T00598
-T00599.005,T00599,savedata_t,5,unk640,1,char[32],,,,learnedActions,Learned action flags,med,source:22C.c:597;use cited by sanity pass;source:22C.c:269;same layout as T00598
-T00599.006,T00599,savedata_t,6,mapStatus,0,char[72],,,,mapStatus,Visited room and area flags,med,source:MENU/MENU7.PRG/260.c:711;use cited by sanity pass;source:22C.c:270;same layout as T00598
+T00598.010,T00598,savedata_t,10,unk16C8,1,vs_main_inventoryIndices_t,,,,inventory_indices,Inventory ordering indices,high,source:260.c:827
+T00598.011,T00598,savedata_t,11,unk1778,1,_mpdRoomDoorSection_t,,,,entry_door,Door the player entered the current room through,high,source:260.c:828
+T00598.012,T00598,savedata_t,12,scoreData,0,vs_main_scoredata_t,,,,score_data,Score and record statistics,high,source:260.c:829
+T00598.013,T00598,savedata_t,13,unk1898,1,int,,,,room_state_slot,Current room state slot,high,source:260.c:832
+T00598.014,T00598,savedata_t,14,unk189C,1,char[1312],,,,recent_room_enemy_states,Recent room enemy states,high,source:260.c:833
+T00598.015,T00598,savedata_t,15,artsStatus,0,vs_main_artsStatus_t,,,,arts_status,Break art progress,high,source:260.c:834
+T00598.016,T00598,savedata_t,16,containerData,0,vs_menu_containerData,,,,container_data,Container contents,high,source:260.c:830
+T00598.017,T00598,savedata_t,17,unk59E0,1,char[544],,,,reserved_59e0,Zero padding to the end of the 23 blocks; not used by native code; kept for the original layout,med,"native-refs:none;source:native:Native\Game\include\Save\MemoryCard\SaveImage.hpp:122;source:260.c:752;no member access;source:260.c:107;source-review:#148 Both original savedata_t variants end with unk59E0[0x220]. No field accesses occur in either packager/loader: whole-image zeroing, checksum/encryption and I/O cover the tail. It pads the 0x5C00 image, not a demonstrated extra gameplay record. Preserve exact size and layout."
+T00599.000,T00599,savedata_t,0,fileInfo,0,saveFileInfo_t,,,,card_header,Card file header with title and icon palette,med,source:MENU/MENU7.PRG/260.c:753;use cited by sanity pass;source:22C.c:264;same layout as T00598
+T00599.001,T00599,savedata_t,1,unk80,1,char[128],,,,icon_bitmap,Card icon bitmap,med,source:MENU/MENU7.PRG/260.c:773;use cited by sanity pass;source:22C.c:265;same layout as T00598
+T00599.002,T00599,savedata_t,2,unk100,1,char[128],,,,reserved_100,Zero block included in checksum block 1,low,source:MENU/MENU7.PRG/260.c:376;use cited by sanity pass;source:22C.c:266;same layout as T00598
+T00599.003,T00599,savedata_t,3,unk180,1,savedata_unk180_t,,,,protected_header,Cipher key slot header summary and block checksums,med,source:MENU/MENU7.PRG/260.c:369;use cited by sanity pass;source:22C.c:267;same layout as T00598
+T00599.004,T00599,savedata_t,4,unk200,1,char[1088],,,,state_flags,Game state flags,med,source:22C.c:596;use cited by sanity pass;source:22C.c:268;same layout as T00598
+T00599.005,T00599,savedata_t,5,unk640,1,char[32],,,,learned_actions,Learned action flags,med,source:22C.c:597;use cited by sanity pass;source:22C.c:269;same layout as T00598
+T00599.006,T00599,savedata_t,6,mapStatus,0,char[72],,,,map_status,Visited room and area flags,med,source:MENU/MENU7.PRG/260.c:711;use cited by sanity pass;source:22C.c:270;same layout as T00598
 T00599.007,T00599,savedata_t,7,unk6A8,1,vs_main_settings_t,,,settings,settings,Player settings,med,source:22C.c:599;use cited by sanity pass;source:22C.c:271;same layout as T00598
-T00599.008,T00599,savedata_t,8,unk6C8,1,D_80060068_t,,,,ashleySnapshot,Ashley's statistics snapshot,med,source:MENU/MENU7.PRG/260.c:713;use cited by sanity pass;source:22C.c:272;same layout as T00598
+T00599.008,T00599,savedata_t,8,unk6C8,1,D_80060068_t,,,,ashley_snapshot,Ashley's statistics snapshot,med,source:MENU/MENU7.PRG/260.c:713;use cited by sanity pass;source:22C.c:272;same layout as T00598
 T00599.009,T00599,savedata_t,9,unk7C8,1,char[15][256],,,,inventory,Inventory,med,source:22C.c:601;use cited by sanity pass;source:22C.c:273;same layout as T00598
-T00599.010,T00599,savedata_t,10,unk16C8,1,char[176],,,,inventoryIndices,Inventory ordering indices,med,source:MENU/MENU7.PRG/260.c:716;use cited by sanity pass;source:22C.c:274;same layout as T00598
-T00599.011,T00599,savedata_t,11,unk1778,1,_mpdRoomDoorSection_t,,,,entryDoor,Door the player entered the current room through,med,source:MENU/MENU7.PRG/260.c:717;use cited by sanity pass;source:22C.c:275;same layout as T00598
-T00599.012,T00599,savedata_t,12,unk1784,1,vs_main_scoredata_t,,,scoreData,scoreData,Score and record statistics,med,source:22C.c:605;use cited by sanity pass;source:22C.c:276;same layout as T00598
-T00599.013,T00599,savedata_t,13,unk1898,1,int,,,,roomStateSlot,Current room state slot,med,source:MENU/MENU7.PRG/260.c:719;use cited by sanity pass;source:22C.c:277;same layout as T00598
-T00599.014,T00599,savedata_t,14,unk189C,1,char[1312],,,,recentRoomEnemyStates,Recent room enemy states,med,source:MENU/MENU7.PRG/260.c:720;use cited by sanity pass;source:22C.c:278;same layout as T00598
-T00599.015,T00599,savedata_t,15,artsStatus,0,vs_main_artsStatus_t,,,,artsStatus,Break art progress,med,source:MENU/MENU7.PRG/260.c:722;use cited by sanity pass;source:22C.c:279;same layout as T00598
-T00599.016,T00599,savedata_t,16,containerData,0,vs_menu_containerData,,,,containerData,Container contents,med,source:MENU/MENU7.PRG/260.c:781;use cited by sanity pass;source:22C.c:280;same layout as T00598
-T00599.017,T00599,savedata_t,17,unk59E0,1,char[544],,,,reserved59E0,Zero padding to the end of the 23 blocks,low,declaration-only;source:22C.c:281;same layout as T00598
-T00600.000,T00600,savedata_unk180_2_t,0,key,0,int,,,,cipherKey,Key for the save byte stream cipher,high,source:260.c:786
-T00600.001,T00600,savedata_unk180_2_t,1,base,0,saveBase_t,,,,slotHeader,Slot state generation and format version,high,source:260.c:787
-T00601.000,T00601,savedata_unk180_t,0,unk180,1,savedata_unk180_2_t,,,,cipherHeader,Cipher key and slot header,high,source:260.c:786
+T00599.010,T00599,savedata_t,10,unk16C8,1,char[176],,,,inventory_indices,Inventory ordering indices,med,source:MENU/MENU7.PRG/260.c:716;use cited by sanity pass;source:22C.c:274;same layout as T00598
+T00599.011,T00599,savedata_t,11,unk1778,1,_mpdRoomDoorSection_t,,,,entry_door,Door the player entered the current room through,med,source:MENU/MENU7.PRG/260.c:717;use cited by sanity pass;source:22C.c:275;same layout as T00598
+T00599.012,T00599,savedata_t,12,unk1784,1,vs_main_scoredata_t,,,scoreData,score_data,Score and record statistics,med,source:22C.c:605;use cited by sanity pass;source:22C.c:276;same layout as T00598
+T00599.013,T00599,savedata_t,13,unk1898,1,int,,,,room_state_slot,Current room state slot,med,source:MENU/MENU7.PRG/260.c:719;use cited by sanity pass;source:22C.c:277;same layout as T00598
+T00599.014,T00599,savedata_t,14,unk189C,1,char[1312],,,,recent_room_enemy_states,Recent room enemy states,med,source:MENU/MENU7.PRG/260.c:720;use cited by sanity pass;source:22C.c:278;same layout as T00598
+T00599.015,T00599,savedata_t,15,artsStatus,0,vs_main_artsStatus_t,,,,arts_status,Break art progress,med,source:MENU/MENU7.PRG/260.c:722;use cited by sanity pass;source:22C.c:279;same layout as T00598
+T00599.016,T00599,savedata_t,16,containerData,0,vs_menu_containerData,,,,container_data,Container contents,med,source:MENU/MENU7.PRG/260.c:781;use cited by sanity pass;source:22C.c:280;same layout as T00598
+T00599.017,T00599,savedata_t,17,unk59E0,1,char[544],,,,reserved_59e0,Zero padding to the end of the 23 blocks,low,declaration-only;source:22C.c:281;same layout as T00598
+T00600.000,T00600,savedata_unk180_2_t,0,key,0,int,,,,cipher_key,Key for the save byte stream cipher,high,source:260.c:786
+T00600.001,T00600,savedata_unk180_2_t,1,base,0,saveBase_t,,,,slot_header,Slot state generation and format version,high,source:260.c:787
+T00601.000,T00601,savedata_unk180_t,0,unk180,1,savedata_unk180_2_t,,,,cipher_header,Cipher key and slot header,high,source:260.c:786
 T00601.001,T00601,savedata_unk180_t,1,stats,0,stats_t,,,,summary,Summary statistics shown in the file menu,high,source:260.c:810
-T00601.002,T00601,savedata_unk180_t,2,checksums,0,char[92],,,,blockChecksums,XOR checksum of each 256-byte block,high,source:260.c:842
+T00601.002,T00601,savedata_unk180_t,2,checksums,0,char[92],,,,block_checksums,XOR checksum of each 256-byte block,high,source:260.c:842
 T00602.000,T00602,scriptBytePair,0,low,0,u_char,,,,lowByte,Low byte of a little-endian script value,med,"retired with T00602, which had no users (#441);source:4A0A8.c:4620;use cited by sanity pass;source:4A0A8.c:231"
 T00602.001,T00602,scriptBytePair,1,high,0,u_char,,,,highByte,High byte of a little-endian script value,med,"retired with T00602, which had no users (#441);source:4A0A8.c:4620;use cited by sanity pass;source:4A0A8.c:232"
 T00603.000,T00603,soundData_t,0,currentMusicSlot,0,int,,,,current_music_slot,Music slot playing,high,source:main.c:9506
@@ -5456,17 +5456,17 @@ T00604.001,T00604,soundEventTargets,1,count,0,u_char,,,,reserved2,Not used by na
 T00604.002,T00604,soundEventTargets,2,unk3,1,u_char,,,,reserved3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\ActionEffects.h:12;declaration-only;source:5BF94.c:634
 T00604.003,T00604,soundEventTargets,3,prefix,0,char[12],,,,reserved4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\ActionEffects.h:13;declaration-only;source:5BF94.c:635
 T00604.004,T00604,soundEventTargets,4,target,0,actionEffectTarget[0],,,,reserved10,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\ActionEffects.h:14;declaration-only;source:5BF94.c:636
-T00605.000,T00605,stats_t,0,gameTime,0,vs_Gametime_t,,,,gameTime,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:723
-T00605.001,T00605,stats_t,1,cumulativeSaveCount,0,u_short,,,,cumulativeSaveCount,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:307
-T00605.002,T00605,stats_t,2,currentGameSaveCount,0,u_short,,,,currentGameSaveCount,Named in the fork; see cited use,med,declaration-only;source:MENU/MENU7.PRG/260.c:54
-T00605.003,T00605,stats_t,3,currentHP,0,u_short,,,,currentHP,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:811
-T00605.004,T00605,stats_t,4,maxHP,0,u_short,,,,maxHP,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:812
-T00605.005,T00605,stats_t,5,saveLocation,0,char,,,,saveLocation,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:815
-T00605.006,T00605,stats_t,6,clearCount,0,char,,,,clearCount,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:817
-T00605.007,T00605,stats_t,7,mapCompletion,0,char,,,,mapCompletion,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:816
-T00605.008,T00605,stats_t,8,unk1B,1,char,,,,reservedF,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Save\MemoryCard\GameFiles.h:86;declaration-only;source:MENU/MENU7.PRG/260.c:60;source-review:#148 Original stats_t.unk1B is the byte between mapCompletion and currentMP. Both packagers set the neighboring stats explicitly but do not assign this byte; image memset and whole-summary transfers preserve it. No stat meaning is supported. Preserve the char byte and offsets.
-T00605.009,T00605,stats_t,9,currentMP,0,u_short,,,,currentMP,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:818
-T00605.010,T00605,stats_t,10,maxMP,0,u_short,,,,maxMP,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:819
+T00605.000,T00605,stats_t,0,gameTime,0,vs_Gametime_t,,,,game_time,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:723
+T00605.001,T00605,stats_t,1,cumulativeSaveCount,0,u_short,,,,cumulative_save_count,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:307
+T00605.002,T00605,stats_t,2,currentGameSaveCount,0,u_short,,,,current_game_save_count,Named in the fork; see cited use,med,declaration-only;source:MENU/MENU7.PRG/260.c:54
+T00605.003,T00605,stats_t,3,currentHP,0,u_short,,,,current_hp,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:811
+T00605.004,T00605,stats_t,4,maxHP,0,u_short,,,,max_hp,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:812
+T00605.005,T00605,stats_t,5,saveLocation,0,char,,,,save_location,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:815
+T00605.006,T00605,stats_t,6,clearCount,0,char,,,,clear_count,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:817
+T00605.007,T00605,stats_t,7,mapCompletion,0,char,,,,map_completion,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:816
+T00605.008,T00605,stats_t,8,unk1B,1,char,,,,reserved_f,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Save\MemoryCard\SaveImage.hpp:64;declaration-only;source:MENU/MENU7.PRG/260.c:60;source-review:#148 Original stats_t.unk1B is the byte between mapCompletion and currentMP. Both packagers set the neighboring stats explicitly but do not assign this byte; image memset and whole-summary transfers preserve it. No stat meaning is supported. Preserve the char byte and offsets.
+T00605.009,T00605,stats_t,9,currentMP,0,u_short,,,,current_mp,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:818
+T00605.010,T00605,stats_t,10,maxMP,0,u_short,,,,max_mp,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:819
 T00606.000,T00606,statusEffectTable,0,entries,0,statusEffectTick[1],,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\StatusEffects.h:67;declaration-only;source:74088.c:1164
 T00607.000,T00607,statusEffectTick,0,mask,0,int,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\StatusEffects.h:57;declaration-only;source:74088.c:1157
 T00607.001,T00607,statusEffectTick,1,unk4,1,u_short,,,,reserved4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\StatusEffects.h:58;declaration-only;source:74088.c:1158
@@ -5941,14 +5941,14 @@ T00658.001,T00658,vs_battle_menuState_t,1,returnState,0,char,,,,return_state,Nam
 T00658.002,T00658,vs_battle_menuState_t,2,executeAbilityType,0,char,,,,execute_ability_type,Named in the fork; see cited use,med,native:Framework.hpp MenuControl::execute_ability_type (#441);source:5BF94.c:3528
 T00658.003,T00658,vs_battle_menuState_t,3,loading,0,char,,,,loading,Named in the fork; see cited use,med,native:Framework.hpp MenuControl::loading (#441);source:5BF94.c:2595
 T00658.004,T00658,vs_battle_menuState_t,4,cdQueue,0,vs_main_CdQueueSlot *,,,,cd_queue,Named in the fork; see cited use,med,native:FrameworkLiveState.hpp LiveMenuControl::cd_queue (#441);source:5BF94.c:2605
-T00659.000,T00659,vs_battle_objectData,0,dataType,0,u_char,,,,assetKind,Kind of asset being requested,high,source:146C.c:6096
-T00659.001,T00659,vs_battle_objectData,1,index,0,signed char,,,,targetSlot,Actor or weapon slot receiving the asset,high,source:30DB0.c:1085
-T00659.002,T00659,vs_battle_objectData,2,modelId,0,short,,,,modelId,Model identifier,high,source:30DB0.c:1095
+T00659.000,T00659,vs_battle_objectData,0,dataType,0,u_char,,,,asset_kind,Kind of asset being requested,high,source:146C.c:6096
+T00659.001,T00659,vs_battle_objectData,1,index,0,signed char,,,,target_slot,Actor or weapon slot receiving the asset,high,source:30DB0.c:1085
+T00659.002,T00659,vs_battle_objectData,2,modelId,0,short,,,,model_id,Model identifier,high,source:30DB0.c:1095
 T00659.003,T00659,vs_battle_objectData,3,unk4,1,void *,,,decodedModelBuffer,destination,Storage that receives the asset,high,source:30DB0.c:1085;source:30DB0.c:621
-T00659.004,T00659,vs_battle_objectData,4,dataAddr,0,u_long,,,,dataAddress,Address of the asset data or a small table index,high,source:146C.c:6648
-T00659.005,T00659,vs_battle_objectData,5,unkC,1,vs_battle_objectData_flags,,,,placement,Placement word copied into the new actor,high,native:Content_ActorAssetRequest::placement is std::uint32_t (Content/ActorAssets.h); Actors::UnpackPlacement gives the VS::Actors::SpawnPlacement (#441);source:30DB0.c:1116
-T00659.006,T00659,vs_battle_objectData,6,actorId,0,u_char,,,,subKind,Per-kind selector such as the sequence kind; 0xFF for none,med,source:30DB0.c:1724;source:30DB0.c:1413
-T00659.007,T00659,vs_battle_objectData,7,unk11,1,char,,,,textureSlot,Palette or texture slot used by the asset,med,source:30DB0.c:669;source:30DB0.c:2057
+T00659.004,T00659,vs_battle_objectData,4,dataAddr,0,u_long,,,,data_address,Address of the asset data or a small table index,high,source:146C.c:6648
+T00659.005,T00659,vs_battle_objectData,5,unkC,1,vs_battle_objectData_flags,,,,placement,Placement word copied into the new actor,high,native:VS::Content::LegacyActorAssetRequest::placement is std::uint32_t (Content/ActorAssets.h); Actors::UnpackPlacement gives the VS::Actors::SpawnPlacement (#441);source:30DB0.c:1116
+T00659.006,T00659,vs_battle_objectData,6,actorId,0,u_char,,,,sub_kind,Per-kind selector such as the sequence kind; 0xFF for none,med,source:30DB0.c:1724;source:30DB0.c:1413
+T00659.007,T00659,vs_battle_objectData,7,unk11,1,char,,,,texture_slot,Palette or texture slot used by the asset,med,source:30DB0.c:669;source:30DB0.c:2057
 T00659.008,T00659,vs_battle_objectData,8,material,0,u_char,,,,material,Weapon or armor material,high,source:146C.c:4071
 T00659.009,T00659,vs_battle_objectData,9,variant,0,u_char,,,,variant,Asset variant,high,source:146C.c:6108
 T00660.000,T00660,vs_battle_objectData_flags,0,unk0_0,1,u_int,8,,,tileX,Tile X,high,"retired-by:VS::Actors::SpawnPlacement::tile_x (Actors/ActorSpawning.hpp, #441);source:146C.c:15084"

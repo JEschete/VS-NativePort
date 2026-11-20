@@ -29,7 +29,6 @@
 #include "Menu/GazetteTerminalLiveFixture.hpp"
 #include "Menu/Score/EncyclopediaPreview.hpp"
 #include "Menu/Score/EncyclopediaPreviewLive.hpp"
-#include "ModelLoading.h"
 #include "Render/ModelDraw.hpp"
 #include "Render/ModelWorkspace.hpp"
 #include "Render/Textures.hpp"
@@ -42,8 +41,8 @@ inline content::AssetAddress Address(const void* pointer) {
 
 inline bool AssetsIdle() {
   return std::ranges::all_of(
-      Content_legacyActorAssetRequests,
-      [](const auto& request) { return request.assetKind == 0; });
+      VS::Content::legacyActorAssetRequests,
+      [](const auto& request) { return request.asset_kind == 0; });
 }
 
 inline auto PreviewOwners() {
@@ -59,7 +58,7 @@ inline auto PreviewOwners() {
                     BytesOf(Actors_primarySequenceBuffer),
                     BytesOf(Actors_sequenceWorkBuffer),
                     BytesOf(Actors_forcedModelOverrides),
-                    BytesOf(Content_legacyWeaponModelBuffers),
+                    BytesOf(VS::Content::legacyWeaponModelBuffers),
                     BytesOf(VS::Render::legacyActorTextureSlots),
                     BytesOf(VS::Render::legacyWeaponTextureSlots),
                     BytesOf(Actors_sharedSequenceBankTexturePages),
@@ -77,32 +76,32 @@ inline auto PreviewOwners() {
                     BytesOf(VS::Actors::boneMatrixScratch),
                     BytesOf(VS::Actors::modelRenderContext),
                     BytesOf(*VS::Render::ModelWorkspace()),
-                    BytesOf(Content_legacyActorAssetRequests),
-                    BytesOf(Content_legacyModelLoadPhase),
-                    BytesOf(Content_legacySequenceParsePhase),
-                    BytesOf(Content_legacyEtmLoadPhase),
-                    BytesOf(Content_legacyWeaponFileBuffer),
-                    BytesOf(Content_legacyWeaponFileLoaded),
-                    BytesOf(Content_legacyWeaponFileLocation),
-                    BytesOf(Content_legacyWeaponDiscRequest),
-                    BytesOf(Content_legacyWeaponParseCursor),
-                    BytesOf(Content_legacyShpFileBuffer),
-                    BytesOf(Content_legacyShpAllocated),
-                    BytesOf(Content_legacyShpFileLocation),
-                    BytesOf(Content_legacyShpDiscRequest),
-                    BytesOf(Content_legacyShpParseCursor),
-                    BytesOf(Content_legacyShpCopiedWordCount),
-                    BytesOf(Content_legacyShpHeaderWord),
-                    BytesOf(Content_legacyShpTextureWidth),
-                    BytesOf(Content_legacyShpTextureHeight),
-                    BytesOf(Content_legacySequenceFileBuffer),
-                    BytesOf(Content_legacySequenceBufferOwned),
-                    BytesOf(Content_legacySequenceFileLocation),
-                    BytesOf(Content_legacySequenceDiscRequest),
-                    BytesOf(Content_legacySequenceParseData),
-                    BytesOf(Content_legacyEtmFileBuffer),
-                    BytesOf(Content_legacyEtmFileLocation),
-                    BytesOf(Content_legacyEtmDiscRequest),
+                    BytesOf(VS::Content::legacyActorAssetRequests),
+                    BytesOf(VS::Content::legacyModelLoadPhase),
+                    BytesOf(VS::Content::legacySequenceParsePhase),
+                    BytesOf(VS::Content::legacyEtmLoadPhase),
+                    BytesOf(VS::Content::legacyWeaponFileBuffer),
+                    BytesOf(VS::Content::legacyWeaponFileLoaded),
+                    BytesOf(VS::Content::legacyWeaponFileLocation),
+                    BytesOf(VS::Content::legacyWeaponDiscRequest),
+                    BytesOf(VS::Content::legacyWeaponParseCursor),
+                    BytesOf(VS::Content::legacyShpFileBuffer),
+                    BytesOf(VS::Content::legacyShpAllocated),
+                    BytesOf(VS::Content::legacyShpFileLocation),
+                    BytesOf(VS::Content::legacyShpDiscRequest),
+                    BytesOf(VS::Content::legacyShpParseCursor),
+                    BytesOf(VS::Content::legacyShpCopiedWordCount),
+                    BytesOf(VS::Content::legacyShpHeaderWord),
+                    BytesOf(VS::Content::legacyShpTextureWidth),
+                    BytesOf(VS::Content::legacyShpTextureHeight),
+                    BytesOf(VS::Content::legacySequenceFileBuffer),
+                    BytesOf(VS::Content::legacySequenceBufferOwned),
+                    BytesOf(VS::Content::legacySequenceFileLocation),
+                    BytesOf(VS::Content::legacySequenceDiscRequest),
+                    BytesOf(VS::Content::legacySequenceParseData),
+                    BytesOf(VS::Content::legacyEtmFileBuffer),
+                    BytesOf(VS::Content::legacyEtmFileLocation),
+                    BytesOf(VS::Content::legacyEtmDiscRequest),
                     BytesOf(VS::Content::modelParseResetFlag),
                     BytesOf(VS::Content::assetQueuePeakUsage),
                     BytesOf(VS::Content::lastLoadPhaseSnapshot),
@@ -173,8 +172,8 @@ class PreviewFixture : public TerminalFixture {
     for (void* allocation :
          {source_record_, static_cast<void*>(source_file_),
           Actors_primarySequenceBuffer, Actors_sequenceWorkBuffer,
-          static_cast<void*>(Content_legacyWeaponModelBuffers[0]),
-          static_cast<void*>(Content_legacyWeaponModelBuffers[1])}) {
+          static_cast<void*>(VS::Content::legacyWeaponModelBuffers[0]),
+          static_cast<void*>(VS::Content::legacyWeaponModelBuffers[1])}) {
       if (allocation != nullptr && memory::LivePayloadCapacity(allocation)) {
         memory::FreeLiveFromLowEnd(allocation);
       }

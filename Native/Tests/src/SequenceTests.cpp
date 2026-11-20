@@ -6,7 +6,6 @@
 #include <cstddef>
 #include <span>
 
-#include "ActorAssets.h"
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorStateLive.hpp"
@@ -53,7 +52,6 @@
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/Zone.hpp"
 #include "Legacy/Psx.h"
-#include "ModelLoading.h"
 #include "Render/Camera.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/Display.hpp"
@@ -644,9 +642,9 @@ int Tests_FacialTextureBankHandoff(void) {
   const VS::Render::FrameScratch saved_frame =
       *reinterpret_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase());
   void* saved_ordering = VS::Render::legacyCurrentOrderingTable;
-  const unsigned char saved_phase = Content_legacyEtmLoadPhase;
-  uint16_t* saved_image = Content_legacyEtmFileBuffer;
-  Content_DiscQueueSlot* saved_request = Content_legacyEtmDiscRequest;
+  const unsigned char saved_phase = VS::Content::legacyEtmLoadPhase;
+  uint16_t* saved_image = VS::Content::legacyEtmFileBuffer;
+  Content_DiscQueueSlot* saved_request = VS::Content::legacyEtmDiscRequest;
   const unsigned char saved_page = Actors_sharedSequenceBankTexturePages[0];
   const unsigned char saved_legacy_page =
       Actors_sequenceTexturePagesOneBased[1];
@@ -665,24 +663,22 @@ int Tests_FacialTextureBankHandoff(void) {
   // The loaded read is a queue slot, as the loader's own reads are.
   Content_DiscQueueSlot* const request = &Content_discRequestSlots[31];
   const Content_DiscQueueSlot saved_slot = *request;
-  Content_ActorAssetRequest saved_requests[16];
-  memcpy(saved_requests, Content_legacyActorAssetRequests,
-         sizeof saved_requests);
+  const auto saved_requests = VS::Content::legacyActorAssetRequests;
   request->state = Content_DiscRequestState_Loaded;
-  Content_ActorAssetRequest upload = {0};
-  upload.assetKind = 9;
-  upload.targetSlot = 1;
-  upload.textureSlot = 26;
-  Content_legacyActorAssetRequests[0] = upload;
-  Content_legacyEtmLoadPhase = 1;
-  Content_legacyEtmFileBuffer = image;
-  Content_legacyEtmDiscRequest = request;
+  VS::Content::LegacyActorAssetRequest upload{};
+  upload.asset_kind = 9;
+  upload.target_slot = 1;
+  upload.texture_slot = 26;
+  VS::Content::legacyActorAssetRequests[0] = upload;
+  VS::Content::legacyEtmLoadPhase = 1;
+  VS::Content::legacyEtmFileBuffer = image;
+  VS::Content::legacyEtmDiscRequest = request;
   Actors_sharedSequenceBankTexturePages[0] = 0;
   Actors_sequenceTexturePagesOneBased[1] = 0;
   VS::Render::LiveTexturePages()[26] = VS::Render::TexturePage{};
   // The upload leaves the request at the head, pending its second frame.
   int passed = VS::Content::UpdateLiveActorAssetQueue() == 1 &&
-               Content_legacyActorAssetRequests[0].assetKind == 9 &&
+               VS::Content::legacyActorAssetRequests[0].asset_kind == 9 &&
                Actors_sharedSequenceBankTexturePages[0] == 26;
   Actors_ActorRecord actor = {0};
   actor.textureHeaderBit = 1;
@@ -756,12 +752,11 @@ int Tests_FacialTextureBankHandoff(void) {
   *reinterpret_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase()) =
       saved_frame;
   VS::Render::legacyCurrentOrderingTable = saved_ordering;
-  Content_legacyEtmLoadPhase = saved_phase;
-  Content_legacyEtmFileBuffer = saved_image;
-  Content_legacyEtmDiscRequest = saved_request;
+  VS::Content::legacyEtmLoadPhase = saved_phase;
+  VS::Content::legacyEtmFileBuffer = saved_image;
+  VS::Content::legacyEtmDiscRequest = saved_request;
   *request = saved_slot;
-  memcpy(Content_legacyActorAssetRequests, saved_requests,
-         sizeof saved_requests);
+  VS::Content::legacyActorAssetRequests = saved_requests;
   Actors_sharedSequenceBankTexturePages[0] = saved_page;
   Actors_sequenceTexturePagesOneBased[1] = saved_legacy_page;
   VS::Render::LiveTexturePages()[26] = saved_reservation;
@@ -1674,10 +1669,8 @@ int Tests_SharedSequenceOffsets(void) {
   Actors_SeqAnimationBank* second =
       reinterpret_cast<Actors_SeqAnimationBank*>((payload + 144 + 8));
   Actors_ActorRecord actor = {0};
-  Content_ActorAssetRequest request = {0};
-  Content_ActorAssetRequest saved_requests[16];
-  memcpy(saved_requests, Content_legacyActorAssetRequests,
-         sizeof saved_requests);
+  VS::Content::LegacyActorAssetRequest request{};
+  const auto saved_requests = VS::Content::legacyActorAssetRequests;
   Actors_ActorRecord* saved_actors[17];
   void* saved_data = Actors_sharedSequenceData[0];
   int16_t saved_ids[16];
@@ -1686,8 +1679,8 @@ int Tests_SharedSequenceOffsets(void) {
   u_char saved_page = Actors_sharedSequenceBankTexturePages[0];
   u_char saved_bank = Actors_sharedSequenceBankIndex;
   char saved_resolved = Actors_lastResolvedSequenceIndex;
-  u_char saved_phase = Content_legacySequenceParsePhase;
-  u_char* saved_parse_data = Content_legacySequenceParseData;
+  u_char saved_phase = VS::Content::legacySequenceParsePhase;
+  u_char* saved_parse_data = VS::Content::legacySequenceParseData;
   u_short* header = nullptr;
   int passed;
 
@@ -1700,7 +1693,7 @@ int Tests_SharedSequenceOffsets(void) {
   Actors_actorRecords[0] = &actor;
   Actors_sharedSequenceData[0] = nullptr;
   Actors_sharedSequenceBankIndex = 0;
-  Content_legacySequenceParsePhase = 0;
+  VS::Content::legacySequenceParsePhase = 0;
 
   actor.modelId = 101;
   actor.instance.boneCount = 2;
@@ -1713,11 +1706,11 @@ int Tests_SharedSequenceOffsets(void) {
   memcpy(payload + 144 + 4, &second_bytes, sizeof second_bytes);
   (reinterpret_cast<u_char*>(first))[64] = 1;
   (reinterpret_cast<u_char*>(second))[64] = 0;
-  request.assetKind = 8;
-  request.targetSlot = 1;
-  request.subKind = 1;
-  request.dataAddress = reinterpret_cast<uintptr_t>(source);
-  Content_legacyActorAssetRequests[0] = request;
+  request.asset_kind = 8;
+  request.target_slot = 1;
+  request.sub_kind = 1;
+  request.data_address = reinterpret_cast<uintptr_t>(source);
+  VS::Content::legacyActorAssetRequests[0] = request;
 
   // A finished parse returns 1 and shifts the queue.
   passed = VS::Content::UpdateLiveActorAssetQueue() == 1 &&
@@ -1736,7 +1729,7 @@ int Tests_SharedSequenceOffsets(void) {
   // Reparsing the bank rebinds every actor (func_8009CAEC).
   actor.modelId = 102;
   Actors_sharedSequenceData[0] = nullptr;
-  Content_legacyActorAssetRequests[0] = request;
+  VS::Content::legacyActorAssetRequests[0] = request;
   passed = passed && VS::Content::UpdateLiveActorAssetQueue() == 1;
   passed = passed && actor.sharedSequences[0] == second &&
            actor.textureRowOffsets[0] == 6;
@@ -1755,10 +1748,9 @@ int Tests_SharedSequenceOffsets(void) {
   Actors_sharedSequenceBankTexturePages[0] = saved_page;
   Actors_sharedSequenceBankIndex = saved_bank;
   Actors_lastResolvedSequenceIndex = saved_resolved;
-  Content_legacySequenceParsePhase = saved_phase;
-  Content_legacySequenceParseData = saved_parse_data;
-  memcpy(Content_legacyActorAssetRequests, saved_requests,
-         sizeof saved_requests);
+  VS::Content::legacySequenceParsePhase = saved_phase;
+  VS::Content::legacySequenceParseData = saved_parse_data;
+  VS::Content::legacyActorAssetRequests = saved_requests;
   VS::Actors::ForgetSequenceBanks(source, sizeof source);
   return passed;
 }

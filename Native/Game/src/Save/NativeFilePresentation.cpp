@@ -25,7 +25,7 @@
 #include "Menu/FilesLiveState.hpp"
 #include "Render/UiPackets.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "Save/MemoryCard/Resources.h"
+#include "Save/MemoryCard/CardResources.hpp"
 #include "Title/SaveFiles.hpp"
 
 namespace mcman_text = VS::Content::text::mcman_bin;
@@ -312,7 +312,7 @@ class Frontend {
     element.state =
         static_cast<std::uint8_t>(VS::Menu::Files::ElementState::kStatic);
     // 255 takes the generic-background path, without manufacturing
-    // Save_CardFileInfoRecord data or file headers.
+    // VS::Save::CardFileInfoRecord data or file headers.
     element.slot_id = static_cast<std::uint8_t>(kGenericElementId);
     element.text[0] = static_cast<std::uint8_t>(kGenericElementId);
     element.x = static_cast<std::int16_t>(position.x);
@@ -372,7 +372,7 @@ class Frontend {
 };
 
 std::span<const char> OriginalText(std::size_t offset) {
-  const auto& table = Save_MemoryCard_uiResources->textTable;
+  const auto& table = VS::Save::MemoryCard::uiResources->text_table;
   if (offset >= std::size(table)) return {};
   return {reinterpret_cast<const char*>(table + offset),
           (std::size(table) - offset) * sizeof(table[0])};
@@ -420,7 +420,7 @@ void Artwork(const Frontend& frontend, int artwork, int y, bool selected) {
   const unsigned palette =
       artwork >= 0 && artwork < kFirstPaletteImages ? 0 : 1;
   VS::Render::UploadLiveImageRectangle(
-      palette_xy, Save_MemoryCard_uiResources->locationPalettes[palette],
+      palette_xy, VS::Save::MemoryCard::uiResources->location_palettes[palette],
       kPaletteSize);
   const int dimming = (selected ? 0 : kSelectedBlend) << kDimmingShift;
   if (artwork < 0) {
@@ -607,7 +607,7 @@ void DrawNativeFileScreen(const NativeFileScreen& screen) {
   constexpr Point kOperationText{186, 34}, kLocalText{186, 50};
   constexpr Extent kHeaderSize{140, 12};
   if (VS::Title::memoryCardUiResource == nullptr ||
-      Save_MemoryCard_uiResources == nullptr ||
+      VS::Save::MemoryCard::uiResources == nullptr ||
       (screen.title ? VS::Title::saveMenuText : VS::Menu::Files::textTable) ==
           nullptr) {
     return;

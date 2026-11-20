@@ -30,9 +30,9 @@
 #include "Legacy/Psx.h"
 #include "Menu/FilesLiveState.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Save/MemoryCard/GameFiles.h"
+#include "Save/MemoryCard/CardResources.hpp"
 #include "Save/MemoryCard/GameFiles.hpp"
-#include "Save/MemoryCard/Resources.h"
+#include "Save/MemoryCard/SaveImage.hpp"
 #include "Save/SnapshotLive.hpp"
 #include "State/Ashley.hpp"
 #include "State/Location.hpp"
@@ -62,23 +62,28 @@ constexpr std::size_t kWorkspaceBytes = 2 * kSaveImageBytes;
 
 // The save image (savedata_t) and the record and settings layouts the cores
 // address as bytes.
-static_assert(sizeof(Save_GameSaveImage) == kSaveImageBytes);
-static_assert(sizeof(Save_CardFileInfoRecord) == kRecordBytes);
-static_assert(offsetof(Save_GameSaveImage, cardHeader) == kCardMagicOffset);
-static_assert(offsetof(Save_GameSaveImage, iconBitmap) == kIconBitmapOffset);
-static_assert(offsetof(Save_GameSaveImage, protectedHeader) == kSummaryOffset);
-static_assert(offsetof(Save_GameSaveImage, protectedHeader.blockChecksums) ==
-              kChecksumOffset);
-static_assert(offsetof(Save_GameSaveImage, containerData) == kContainerOffset);
-static_assert(sizeof(Save_GameSaveImage::containerData) == kContainerBytes);
-static_assert(offsetof(Save_CardFileInfoRecord, iconHeaderBytes) ==
+static_assert(sizeof(VS::Save::GameSaveImage) == kSaveImageBytes);
+static_assert(sizeof(VS::Save::CardFileInfoRecord) == kRecordBytes);
+static_assert(offsetof(VS::Save::GameSaveImage, card_header) ==
+              kCardMagicOffset);
+static_assert(offsetof(VS::Save::GameSaveImage, icon_bitmap) ==
+              kIconBitmapOffset);
+static_assert(offsetof(VS::Save::GameSaveImage, protected_header) ==
+              kSummaryOffset);
+static_assert(offsetof(VS::Save::GameSaveImage,
+                       protected_header.block_checksums) == kChecksumOffset);
+static_assert(offsetof(VS::Save::GameSaveImage, container_data) ==
+              kContainerOffset);
+static_assert(sizeof(VS::Save::GameSaveImage::container_data) ==
+              kContainerBytes);
+static_assert(offsetof(VS::Save::CardFileInfoRecord, icon_header_bytes) ==
               kIconPaletteOffset);
-static_assert(offsetof(Save_CardFileInfoRecord, summary.cardTitleTail) ==
+static_assert(offsetof(VS::Save::CardFileInfoRecord, summary.card_title_tail) ==
               kCardTitleTailOffset);
-static_assert(offsetof(Save_SaveProtectedHeader, summary) ==
+static_assert(offsetof(VS::Save::SaveProtectedHeader, summary) ==
               kSummaryStatsOffset);
-static_assert(sizeof(Save_SaveFileStats) == kStatsBytes);
-static_assert(offsetof(Save_SaveFileStats, mapCompletion) ==
+static_assert(sizeof(VS::Save::SaveFileStats) == kStatsBytes);
+static_assert(offsetof(VS::Save::SaveFileStats, map_completion) ==
               kStatsMapCompletionOffset);
 static_assert(sizeof(VS::Input::Settings) == kSettingsBytes);
 static_assert(offsetof(VS::Input::Settings, menu_flags) ==
@@ -101,9 +106,9 @@ static_assert(offsetof(VS::State::RoomEnemyStates, next_slot) ==
               kRoomEnemyNextSlotOffset);
 static_assert(std::extent_v<decltype(VS::State::recentRoomEnemyStates)> ==
               kRoomStateSlotCount);
-static_assert(sizeof(Save_CardUiResources::fileIconPalettes) ==
+static_assert(sizeof(VS::Save::CardUiResources::file_icon_palettes) ==
               kFileIconCount * kIconPaletteBytes);
-static_assert(sizeof(Save_CardUiResources::fileIconBitmaps) ==
+static_assert(sizeof(VS::Save::CardUiResources::file_icon_bitmaps) ==
               kFileIconCount * kIconBitmapBytes);
 static_assert(sizeof(DIRENTRY::name) == kDirectoryNameBytes);
 static_assert(std::extent_v<decltype(VS::Title::cardDirectoryEntries)> ==
@@ -120,40 +125,41 @@ constexpr bool LaysOut(SaveSection section, std::size_t offset,
   return LayoutOf(section).offset == offset && LayoutOf(section).size == size;
 }
 static_assert(LaysOut(SaveSection::kStateFlags,
-                      offsetof(Save_GameSaveImage, stateFlags),
+                      offsetof(VS::Save::GameSaveImage, state_flags),
                       sizeof(VS::State::stateFlags)));
 static_assert(LaysOut(SaveSection::kLearnedActions,
-                      offsetof(Save_GameSaveImage, learnedActions),
+                      offsetof(VS::Save::GameSaveImage, learned_actions),
                       sizeof(VS::State::learnedActionFlags)));
 static_assert(LaysOut(SaveSection::kMapStatus,
-                      offsetof(Save_GameSaveImage, mapStatus),
+                      offsetof(VS::Save::GameSaveImage, map_status),
                       sizeof(VS::State::roomVisitProgress)));
 static_assert(LaysOut(SaveSection::kSettings,
-                      offsetof(Save_GameSaveImage, settings),
+                      offsetof(VS::Save::GameSaveImage, settings),
                       sizeof(VS::Input::settings)));
 static_assert(LaysOut(SaveSection::kAshleySnapshot,
-                      offsetof(Save_GameSaveImage, ashleySnapshot),
+                      offsetof(VS::Save::GameSaveImage, ashley_snapshot),
                       sizeof(VS::State::ashleySnapshot)));
 static_assert(LaysOut(SaveSection::kInventory,
-                      offsetof(Save_GameSaveImage, inventory),
+                      offsetof(VS::Save::GameSaveImage, inventory),
                       sizeof(VS::Items::inventory)));
 static_assert(LaysOut(SaveSection::kInventoryIndices,
-                      offsetof(Save_GameSaveImage, inventoryIndices),
+                      offsetof(VS::Save::GameSaveImage, inventory_indices),
                       sizeof(VS::Items::inventoryIndices)));
 static_assert(LaysOut(SaveSection::kEntryDoor,
-                      offsetof(Save_GameSaveImage, entryDoor),
+                      offsetof(VS::Save::GameSaveImage, entry_door),
                       sizeof(VS::State::savedEntryDoor)));
 static_assert(LaysOut(SaveSection::kScoreData,
-                      offsetof(Save_GameSaveImage, scoreData),
+                      offsetof(VS::Save::GameSaveImage, score_data),
                       sizeof(VS::State::scoreData)));
 static_assert(LaysOut(SaveSection::kRoomStateSlot,
-                      offsetof(Save_GameSaveImage, roomStateSlot),
+                      offsetof(VS::Save::GameSaveImage, room_state_slot),
                       sizeof(VS::State::currentRoomStateSlot)));
 static_assert(LaysOut(SaveSection::kRecentRoomEnemyStates,
-                      offsetof(Save_GameSaveImage, recentRoomEnemyStates),
+                      offsetof(VS::Save::GameSaveImage,
+                               recent_room_enemy_states),
                       sizeof(VS::State::recentRoomEnemyStates)));
 static_assert(LaysOut(SaveSection::kArtsStatus,
-                      offsetof(Save_GameSaveImage, artsStatus),
+                      offsetof(VS::Save::GameSaveImage, arts_status),
                       sizeof(VS::State::artsStatus)));
 
 template <typename T>
@@ -201,8 +207,9 @@ std::optional<SummaryTable> LiveSummaries() {
                      "Memory-card slot summaries are not loaded");
     return std::nullopt;
   }
-  return std::as_writable_bytes(std::span<Save_CardFileInfoRecord, kSlotCount>{
-      VS::Title::saveFileSummaries, kSlotCount});
+  return std::as_writable_bytes(
+      std::span<VS::Save::CardFileInfoRecord, kSlotCount>{
+          VS::Title::saveFileSummaries, kSlotCount});
 }
 
 std::span<const std::byte, kSettingsBytes> LiveSettings() {
@@ -385,21 +392,21 @@ class LiveSaveState final : public SaveStateHost {
       return {};
     }
     return std::as_bytes(
-        std::span{Save_MemoryCard_uiResources->fileIconPalettes}.subspan(
-            static_cast<std::size_t>(index), 1));
+        std::span{VS::Save::MemoryCard::uiResources->file_icon_palettes}
+            .subspan(static_cast<std::size_t>(index), 1));
   }
   std::span<const std::byte> FileIconBitmap(std::int32_t index) override {
     if (!HasIcon(index)) {
       return {};
     }
     return std::as_bytes(
-        std::span{Save_MemoryCard_uiResources->fileIconBitmaps}.subspan(
+        std::span{VS::Save::MemoryCard::uiResources->file_icon_bitmaps}.subspan(
             static_cast<std::size_t>(index), 1));
   }
 
  private:
   static bool HasIcon(std::int32_t index) {
-    return Save_MemoryCard_uiResources != nullptr && index >= 0 &&
+    return VS::Save::MemoryCard::uiResources != nullptr && index >= 0 &&
            index < kFileIconCount;
   }
 
@@ -534,7 +541,8 @@ int ParseLiveSaveFileNumber(const char* name) {
   return number->temporary ? -number->number : number->number;
 }
 
-int HasLiveChecksumError(const Save_GameSaveImage* image, int block_count) {
+int HasLiveChecksumError(const VS::Save::GameSaveImage* image,
+                         int block_count) {
   if (image == nullptr || block_count < 0 ||
       block_count > static_cast<int>(kImageBlockCount)) {
     return kLiveFailure;

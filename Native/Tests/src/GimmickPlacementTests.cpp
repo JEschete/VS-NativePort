@@ -15,7 +15,6 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "ActorAssets.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
@@ -28,6 +27,7 @@
 #include "Battle/Ai/NavigationPrimitives.hpp"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
+#include "Content/ActorAssetsLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -481,13 +481,13 @@ TEST_CASE(
     "Native gimmick sharing writes only the selected request data address",
     "[gimmick-resource-live][field]") {
   GimmickResourcesLiveFixture fixture;
-  Content_ActorAssetRequest request{};
-  request.targetSlot = 1;
-  request.modelId = -7;
-  request.dataAddress = 0x1234;
-  request.subKind = 3;
+  VS::Content::LegacyActorAssetRequest request{};
+  request.target_slot = 1;
+  request.model_id = -7;
+  request.data_address = 0x1234;
+  request.sub_kind = 3;
   auto expected = request;
-  expected.dataAddress = 5;
+  expected.data_address = 5;
   REQUIRE(VS::Field::FindSharedGimmickModelEntry(&request) == 1);
   using Bytes = std::array<std::byte, sizeof(request)>;
   CHECK(std::bit_cast<Bytes>(request) == std::bit_cast<Bytes>(expected));
@@ -498,27 +498,27 @@ TEST_CASE(
     "Native gimmick sharing supports signed exclusion and unaligned requests",
     "[gimmick-resource-live][field]") {
   GimmickResourcesLiveFixture fixture;
-  Content_ActorAssetRequest request{};
-  request.targetSlot = -1;
-  request.subKind = 3;
+  VS::Content::LegacyActorAssetRequest request{};
+  request.target_slot = -1;
+  request.sub_kind = 3;
   std::array<std::byte, sizeof(request) + 1> bytes{};
   std::memcpy(bytes.data() + 1, &request, sizeof(request));
   REQUIRE(VS::Field::FindSharedGimmickModelEntry(
-              reinterpret_cast<Content_ActorAssetRequest*>(bytes.data() + 1)) ==
-          1);
+              reinterpret_cast<VS::Content::LegacyActorAssetRequest*>(
+                  bytes.data() + 1)) == 1);
   std::memcpy(&request, bytes.data() + 1, sizeof(request));
-  CHECK(request.dataAddress == 1);
-  CHECK(request.targetSlot == -1);
+  CHECK(request.data_address == 1);
+  CHECK(request.target_slot == -1);
 }
 
 TEST_CASE("Native gimmick sharing preserves failed and absent requests",
           "[gimmick-resource-live][field]") {
   GimmickResourcesLiveFixture fixture;
-  Content_ActorAssetRequest request{};
-  request.subKind = 255;
-  request.dataAddress = 0x1234;
+  VS::Content::LegacyActorAssetRequest request{};
+  request.sub_kind = 255;
+  request.data_address = 0x1234;
   REQUIRE(VS::Field::FindSharedGimmickModelEntry(&request) == 0);
-  CHECK(request.dataAddress == 0x1234);
+  CHECK(request.data_address == 0x1234);
   CHECK(VS::Field::FindSharedGimmickModelEntry(nullptr) == 0);
 }
 
@@ -8017,8 +8017,8 @@ TEST_CASE(
   alignas(VS::Core::Memory::kHeapUnitBytes) std::array<std::byte, 4096> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   fixture.Template();
-  Content_ActorAssetRequest request{};
-  request.targetSlot = 2;
+  VS::Content::LegacyActorAssetRequest request{};
+  request.target_slot = 2;
   request.destination = &fixture.instances[0];
   REQUIRE(VS::Field::CreateGimmickInstanceEntry(&request) == 0);
   auto& record = fixture.instances[0];
@@ -8037,18 +8037,18 @@ TEST_CASE(
   alignas(VS::Core::Memory::kHeapUnitBytes) std::array<std::byte, 4096> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   fixture.Template();
-  Content_ActorAssetRequest request{};
-  request.targetSlot = 1;
+  VS::Content::LegacyActorAssetRequest request{};
+  request.target_slot = 1;
   request.destination = &fixture.instances[0];
-  request.subKind = 3;
+  request.sub_kind = 3;
   REQUIRE(VS::Field::CreateGimmickInstanceEntry(&request) == 0);
   fixture.instances[0].matrices[0].t[0] = 0x12345678;
   fixture.instances[1].reserved178[0] = 0xA5;
-  request.targetSlot = 5;
+  request.target_slot = 5;
   request.destination = &fixture.instances[1];
-  request.dataAddress = 0x9876;
+  request.data_address = 0x9876;
   REQUIRE(VS::Field::CreateGimmickInstanceEntry(&request) == 0);
-  CHECK(request.dataAddress == 1);
+  CHECK(request.data_address == 1);
   CHECK(fixture.instances[1].model == fixture.instances[0].model);
   CHECK(fixture.instances[1].matrices[0].t[0] == 0x12345678);
   CHECK(fixture.instances[1].reserved178[0] == 0xA5);
@@ -8061,17 +8061,17 @@ TEST_CASE(
     "publication",
     "[gimmick-create-live][field]") {
   GimmickCreationLiveFixture fixture;
-  Content_ActorAssetRequest request{};
-  request.targetSlot = 2;
+  VS::Content::LegacyActorAssetRequest request{};
+  request.target_slot = 2;
   request.destination = &fixture.instances[0];
-  request.subKind = 8;
+  request.sub_kind = 8;
   fixture.instances[0].reserved178[0] = 0xA5;
   CHECK(VS::Field::CreateGimmickInstanceEntry(&request) == -2);
   CHECK(Field_gimmickInstances[2] == &fixture.instances[0]);
   CHECK(fixture.instances[0].model == nullptr);
   CHECK(fixture.instances[0].reserved178[0] == 0xA5);
   Field_gimmickInstances[2] = nullptr;
-  request.subKind = 0;
+  request.sub_kind = 0;
   Field_gimmickTemplateIndices[0] = 3;
   CHECK(VS::Field::CreateGimmickInstanceEntry(&request) == -2);
   CHECK(Field_gimmickInstances[2] == &fixture.instances[0]);
@@ -8088,8 +8088,8 @@ TEST_CASE(
       static_cast<std::byte*>(VS::Core::Memory::AllocateLiveFromLowEnd(64));
   REQUIRE(destination != nullptr);
   std::memset(destination, 0xA5, 64);
-  Content_ActorAssetRequest request{};
-  request.targetSlot = 2;
+  VS::Content::LegacyActorAssetRequest request{};
+  request.target_slot = 2;
   request.destination = destination;
   CHECK(VS::Field::CreateGimmickInstanceEntry(&request) == -2);
   CHECK(Field_gimmickInstances[2] == nullptr);
@@ -8106,8 +8106,8 @@ TEST_CASE(
   GimmickCreationLiveFixture fixture;
   alignas(VS::Core::Memory::kHeapUnitBytes) std::array<std::byte, 4096> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
-  Content_ActorAssetRequest request{};
-  request.targetSlot = 2;
+  VS::Content::LegacyActorAssetRequest request{};
+  request.target_slot = 2;
   request.destination = &fixture.instances[0];
   Field_gimmickModelTemplates[0] = reinterpret_cast<void*>(0x1000);
   CHECK(VS::Field::CreateGimmickInstanceEntry(&request) == -2);
@@ -8132,21 +8132,21 @@ TEST_CASE(
   GimmickCreationLiveFixture fixture;
   fixture.instances[0].objectInfo.objectId = 3;
   Field_gimmickInstances[1] = &fixture.instances[0];
-  Content_ActorAssetRequest input{};
-  input.targetSlot = 2;
+  VS::Content::LegacyActorAssetRequest input{};
+  input.target_slot = 2;
   input.destination = &fixture.instances[1];
-  input.subKind = 3;
-  input.dataAddress = 0x1234;
+  input.sub_kind = 3;
+  input.data_address = 0x1234;
   std::array<std::byte, sizeof(input) + 2> bytes{};
   bytes.fill(std::byte{0xA5});
   std::memcpy(bytes.data() + 1, &input, sizeof(input));
   auto expected = bytes;
   const std::uintptr_t shared = 1;
-  std::memcpy(
-      expected.data() + 1 + offsetof(Content_ActorAssetRequest, dataAddress),
-      &shared, sizeof(shared));
+  std::memcpy(expected.data() + 1 +
+                  offsetof(VS::Content::LegacyActorAssetRequest, data_address),
+              &shared, sizeof(shared));
   auto* request =
-      reinterpret_cast<Content_ActorAssetRequest*>(bytes.data() + 1);
+      reinterpret_cast<VS::Content::LegacyActorAssetRequest*>(bytes.data() + 1);
   CHECK(VS::Field::CreateGimmickInstanceEntry(request) == 0);
   CHECK(bytes == expected);
   CHECK(VS::Field::CreateGimmickInstanceEntry(nullptr) == -2);
@@ -8159,10 +8159,10 @@ TEST_CASE(
   GimmickCreationLiveFixture fixture;
   fixture.instances[0].objectInfo.objectId = 3;
   Field_gimmickInstances[1] = &fixture.instances[0];
-  Content_ActorAssetRequest request{};
-  request.targetSlot = 2;
+  VS::Content::LegacyActorAssetRequest request{};
+  request.target_slot = 2;
   request.destination = &fixture.instances[1];
-  request.subKind = 3;
+  request.sub_kind = 3;
   request.variant = std::bit_cast<char>(std::uint8_t{255});
   request.placement = 0x77FE00FF;
   CHECK(VS::Field::LiveSampleSupportHeightAt(32704, 0, 32576, 0, 0, 1) ==

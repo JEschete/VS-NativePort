@@ -4,14 +4,14 @@ H0002,header,Native/Content/include/Content/DataAccess.hpp,owned,no,pragma-once,
 H0003,header,Native/Content/include/Content/DiscLayout.h,generated,yes,pragma-once,0,0,0,0,0,10324,0,0,0,remaining,
 H0004,header,Native/Content/include/Content/ModuleData.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0005,header,Native/Content/include/Content/StringTables.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0006,header,Native/Content/src/ActorAssets.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,remaining,
+H0006,header,Native/Content/src/ActorAssets.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,retired,merged into Native/Content/include/Content/ActorAssetsLive.hpp as VS::Content::LegacyActorAssetRequest and VS::Content::SequenceBuffer (#441)
 H0007,header,Native/Content/src/ActorAssetsLiveState.h,owned,no,pragma-once,0,0,0,0,0,0,5,0,0,retired,merged into Native/Content/include/Content/ActorAssetsLive.hpp (#441)
 H0008,header,Native/Content/src/DiscQueue.h,generated,yes,pragma-once,0,0,0,0,0,0,17,0,0,remaining,
-H0009,header,Native/Content/src/LegacyFiles.h,generated,yes,pragma-once,0,0,0,0,0,0,12,0,0,remaining,
-H0010,header,Native/Content/src/ModelLoading.h,generated,yes,pragma-once,0,0,0,0,0,0,27,0,0,remaining,
+H0009,header,Native/Content/src/LegacyFiles.h,generated,yes,pragma-once,0,0,0,0,0,0,12,0,0,retired,"the BATTLE.PRG disc tables became std::array globals in VS::Content, declared in Native/Content/include/Content/ActorAssetsLive.hpp (#441)"
+H0010,header,Native/Content/src/ModelLoading.h,generated,yes,pragma-once,0,0,0,0,0,0,27,0,0,retired,"the BATTLE.PRG loader globals moved to VS::Content, declared in Native/Content/include/Content/ActorAssetsLive.hpp (#441)"
 H0011,header,Native/Content/src/OverlayWorkspaceLiveState.h,owned,no,pragma-once,0,0,0,0,0,0,1,0,0,retired,merged into Native/Content/include/Content/OverlayWorkspaceLive.hpp (#441)
 H0012,header,Native/Content/src/PFile.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,retired,deleted; its records are replaced by the Content/PFile.hpp byte readers (#441)
-H0013,header,Native/Content/src/SystemResources.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,remaining,
+H0013,header,Native/Content/src/SystemResources.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,Content_SystemDatHeader became VS::Content::SystemDatHeader in Native/Content/include/Content/SystemResources.hpp (#441)
 H0014,header,Native/Engine/Legacy/Audio/LibSpu.h,legacy,no,pragma-once,0,0,0,0,0,7,18,0,0,remaining,
 H0015,header,Native/Engine/Legacy/Core/LibEtc.h,legacy,no,pragma-once,0,0,0,0,0,15,12,0,0,remaining,
 H0016,header,Native/Engine/Legacy/Core/PsxTypes.h,legacy,no,pragma-once,0,0,0,0,0,2,7,0,0,remaining,
@@ -92,8 +92,8 @@ H0090,header,Native/Engine/src/Render/Text/CompactFont.hpp,generated,no,pragma-o
 H0091,header,Native/Engine/src/Render/Text/VariableFont.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0092,header,Native/Engine/src/Render/Textures.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0093,header,Native/Engine/src/Render/UiPrimitives.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0094,header,Native/Engine/src/Save/MemoryCard/GameFiles.h,generated,yes,pragma-once,0,0,0,0,0,0,14,0,0,remaining,
-H0095,header,Native/Engine/src/Save/MemoryCard/Resources.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,remaining,
+H0094,header,Native/Engine/src/Save/MemoryCard/GameFiles.h,generated,yes,pragma-once,0,0,0,0,0,0,14,0,0,retired,the save image types moved to VS::Save in Native/Game/include/Save/MemoryCard/SaveImage.hpp; its unread enums were deleted (#441)
+H0095,header,Native/Engine/src/Save/MemoryCard/Resources.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,retired,Save_CardUiResources became VS::Save::CardUiResources in Native/Game/include/Save/MemoryCard/CardResources.hpp (#441)
 H0096,header,Native/Game/include/Actors/ModelDrawingLive.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0097,header,Native/Game/include/Actors/ModelRenderingLive.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0098,header,Native/Game/include/Actors/SkeletonLive.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
@@ -440,8 +440,8 @@ S0003,source,Native/Content/src/CdDriveLive.cpp,owned,no,,0,,,,,,,,,done,
 S0004,source,Native/Content/src/DataStore.cpp,owned,no,,0,,,,,,,,,done,
 S0005,source,Native/Content/src/DiscQueue.cpp,generated,yes,,0,,,,,,,,,done,
 S0006,source,Native/Content/src/DiscReaderLive.cpp,owned,no,,0,,,,,,,,,done,
-S0007,source,Native/Content/src/LegacyFiles.cpp,generated,yes,,0,,,,,,,,,done,
-S0008,source,Native/Content/src/ModelLoading.cpp,generated,yes,,0,,,,,,,,,done,
+S0007,source,Native/Content/src/LegacyFiles.cpp,generated,yes,,0,,,,,,,,,retired,the disc table definitions moved to Native/Content/src/ActorAssetsLive.cpp (#441)
+S0008,source,Native/Content/src/ModelLoading.cpp,generated,yes,,0,,,,,,,,,retired,the loader global definitions moved to Native/Content/src/ActorAssetsLive.cpp (#441)
 S0009,source,Native/Content/src/ModuleLoader.cpp,owned,no,,0,,,,,,,,,done,
 S0010,source,Native/Content/src/OverlayWorkspaceLive.cpp,owned,no,,0,,,,,,,,,done,
 S0011,source,Native/Content/src/PFileLive.cpp,owned,no,,0,,,,,,,,,done,
@@ -536,7 +536,7 @@ S0099,source,Native/Engine/src/Render/Textures.cpp,generated,yes,,0,,,,,,,,,done
 S0100,source,Native/Engine/src/Render/TimImageLive.cpp,owned,no,,0,,,,,,,,,done,
 S0101,source,Native/Engine/src/Render/UiPacketsLive.cpp,owned,no,,0,,,,,,,,,done,
 S0102,source,Native/Engine/src/Render/UiPrimitives.cpp,generated,yes,,0,,,,,,,,,done,
-S0103,source,Native/Engine/src/Save/MemoryCard/Resources.cpp,generated,yes,,0,,,,,,,,,done,
+S0103,source,Native/Engine/src/Save/MemoryCard/Resources.cpp,generated,yes,,0,,,,,,,,,retired,VS::Save::MemoryCard::uiResources is defined in Native/Game/src/Save/MenuAssetsLive.cpp (#441)
 S0104,source,Native/Game/src/Actors/ActorCommandsLive.cpp,owned,no,,0,,,,,,,,,done,
 S0105,source,Native/Game/src/Actors/ActorMotionLive.cpp,owned,no,,0,,,,,,,,,done,
 S0106,source,Native/Game/src/Actors/ActorMovementLive.cpp,owned,no,,0,,,,,,,,,done,

@@ -44,7 +44,7 @@ std::uint8_t VS::Title::isSaving;
 char* VS::Title::memoryCardMessage;
 
 // decomp: _saveFileInfo (_saveFileInfo@src/TITLE/TITLE.PRG/22C.c)
-Save_CardFileInfoRecord* VS::Title::saveFileSummaries;
+VS::Save::CardFileInfoRecord* VS::Title::saveFileSummaries;
 
 // decomp: _saveMenuBg_clut (_saveMenuBg_clut@TITLE/TITLE.PRG)
 VS::Title::SaveMenuBackgroundRecord VS::Title::saveMenuBackground; /* contents: module image (ModuleData.cpp) */

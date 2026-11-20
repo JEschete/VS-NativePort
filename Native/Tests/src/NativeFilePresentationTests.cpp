@@ -23,7 +23,7 @@
 #include "Field/RoomLoading.hpp"
 #include "Menu/FilesLive.hpp"
 #include "Menu/FilesLiveState.hpp"
-#include "Save/MemoryCard/Resources.h"
+#include "Save/MemoryCard/CardResources.hpp"
 #include "Save/NativeFilePresentation.hpp"
 #include "Title/SaveFiles.hpp"
 
@@ -232,8 +232,8 @@ TEST_CASE("Native file summary bounds original artwork content tables",
 
 TEST_CASE("Native file drawing is inert outside the original asset lifetime",
           "[save-presentation]") {
-  auto* saved_resources = Save_MemoryCard_uiResources;
-  Save_MemoryCard_uiResources = nullptr;
+  auto* saved_resources = VS::Save::MemoryCard::uiResources;
+  VS::Save::MemoryCard::uiResources = nullptr;
   const auto before_menu = VS::Menu::Files::LiveFilesState().elements[0];
   const auto before_title = VS::Title::fileMenuElements[0];
   const int menu_cursor = VS::Menu::Files::selectCursorXy;
@@ -248,5 +248,5 @@ TEST_CASE("Native file drawing is inert outside the original asset lifetime",
                     sizeof(before_title)) == 0);
   CHECK(VS::Menu::Files::selectCursorXy == menu_cursor);
   CHECK(VS::Title::selectionCursorPosition == title_cursor);
-  Save_MemoryCard_uiResources = saved_resources;
+  VS::Save::MemoryCard::uiResources = saved_resources;
 }

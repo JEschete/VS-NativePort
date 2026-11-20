@@ -18,9 +18,6 @@
     <ClCompile Include="src\ActorAssets.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClInclude Include="src\ActorAssets.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClCompile Include="src\ActorAssetsLive.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -54,18 +51,6 @@
     <ClCompile Include="src\DiscReaderLive.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\LegacyFiles.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClInclude Include="src\LegacyFiles.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClCompile Include="src\ModelLoading.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClInclude Include="src\ModelLoading.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClCompile Include="src\ModuleLoader.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -90,9 +75,6 @@
     <ClCompile Include="src\SystemResources.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClInclude Include="src\SystemResources.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClCompile Include="src\SystemResourcesLive.cpp">
       <Filter>src</Filter>
     </ClCompile>
