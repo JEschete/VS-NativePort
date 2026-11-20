@@ -64,8 +64,6 @@ struct MapFixture {
   std::vector<std::uint32_t> storage = std::vector<std::uint32_t>(
       0x20000 / sizeof(std::uint32_t) + 2, 0xDEADBEEF);
   std::array<std::uint32_t, 2084> ordering{};
-  std::array<unsigned char, 1024 - sizeof(VS::Render::FrameScratch)>
-      saved_tail{};
 
   explicit MapFixture(int framebuffer = 0) {
     VS::Core::Gte::Reset();
@@ -80,9 +78,6 @@ struct MapFixture {
     VS::Render::FrameScratchpad().overlay_ordering_table = ordering.data() + 2;
     VS::Render::FrameScratchpad().ordering_table = ordering.data() + 18;
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
-    std::copy_n(static_cast<unsigned char*>(VS::Core::ScratchBase()) +
-                    sizeof(VS::Render::FrameScratch),
-                saved_tail.size(), saved_tail.begin());
     VS::Menu::map::currentRoomIndex = 0;
     VS::Menu::map::ResetMapDrawingLive();
   }
@@ -203,9 +198,6 @@ TEST_CASE("Full Map projection handles all byte-indexed vertices off scratch",
                                            triangle->x2, triangle->y2};
   const std::array<int16_t, 6> expected{160, 112, 168, 112, 160, 120};
   CHECK(coordinates == expected);
-  CHECK(std::equal(fixture.saved_tail.begin(), fixture.saved_tail.end(),
-                   static_cast<const unsigned char*>(VS::Core::ScratchBase()) +
-                       sizeof(VS::Render::FrameScratch)));
   CHECK(fixture.CompleteChain());
 }
 

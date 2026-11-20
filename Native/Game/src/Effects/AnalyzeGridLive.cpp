@@ -16,7 +16,6 @@
 #include "Core/Math/InterpolationLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Core/Scratch.hpp"
 #include "Effects/AnalyzeGrid.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/Package.hpp"
@@ -49,7 +48,6 @@ namespace {
 namespace math = Core::Math;
 namespace grid = Templates;
 
-constexpr std::size_t kEmitterScratchOffset = 0x1D0;
 using InstanceTransforms = decltype(LiveEffectInstance::transforms);
 constexpr std::size_t kTransformCount = std::tuple_size_v<InstanceTransforms>;
 constexpr unsigned kHalfwordBits = 16;
@@ -147,11 +145,6 @@ bool CurvesAvailable(const grid::SurfaceCurves& curves, std::int32_t age) {
   return std::ranges::all_of(ids, [age](std::uint8_t id) {
     return id == 0 || !IsCurveRefusal(SampleLiveEffectCurve(id, age).status);
   });
-}
-
-LiveParticleEmitterScratch& EmitterScratch() {
-  return *reinterpret_cast<LiveParticleEmitterScratch*>(
-      static_cast<std::byte*>(VS::Core::ScratchBase()) + kEmitterScratchOffset);
 }
 
 class LiveAnalyzeGridHost final : public AnalyzeGridHost {
@@ -263,7 +256,7 @@ class LiveAnalyzeGridHost final : public AnalyzeGridHost {
 };
 
 void LiveAnalyzeGridHost::PublishScratch(const grid::SurfaceScratch& values) {
-  LiveParticleEmitterScratch& scratch = EmitterScratch();
+  LiveParticleEmitterScratch& scratch = EmitterWorkspace();
   scratch.flags = values.flags;
   math::StoreVector(scratch.position, values.position);
   math::StoreVector(scratch.extent, values.extent);

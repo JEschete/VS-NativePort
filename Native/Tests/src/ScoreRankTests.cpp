@@ -11,7 +11,6 @@
 #include "Battle/Action.hpp"
 #include "Battle/ActionTable.hpp"
 #include "Battle/StatusEffects.hpp"
-#include "Core/Scratch.hpp"
 #include "Field/MapProgress.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.hpp"
@@ -112,11 +111,11 @@ class LiveGlobals {
         settings_(VS::Input::settings),
         cursor_(VS::Battle::menu9CursorMemory),
         position_(s::cameraPositionBackup),
-        angles_(s::cameraAnglesBackup) {
+        angles_(s::cameraAnglesBackup),
+        frame_(VS::Render::FrameScratchpad()) {
     masks_ = VS::Field::countableRoomMask;
     std::memcpy(actions_.data(), VS::Battle::actionDefinitions.data(),
                 sizeof VS::Battle::actionDefinitions);
-    std::memcpy(scratch_.data(), VS::Core::ScratchBase(), scratch_.size());
     VS::State::scoreData = {};
     VS::State::stateFlags = {};
     VS::State::roomVisitProgress = {};
@@ -144,7 +143,7 @@ class LiveGlobals {
     VS::Field::countableRoomMask = masks_;
     std::memcpy(VS::Battle::actionDefinitions.data(), actions_.data(),
                 sizeof VS::Battle::actionDefinitions);
-    std::memcpy(VS::Core::ScratchBase(), scratch_.data(), scratch_.size());
+    VS::Render::FrameScratchpad() = frame_;
   }
 
  private:
@@ -157,7 +156,7 @@ class LiveGlobals {
   VECTOR angles_;
   VS::Field::RoomVisitFlags masks_{};
   std::array<std::byte, sizeof VS::Battle::actionDefinitions> actions_{};
-  std::array<std::byte, 0x400> scratch_{};
+  VS::Render::FrameScratch frame_;
 };
 
 void CheckChainTiers() {
@@ -460,8 +459,7 @@ TEST_CASE("F04157 live progress binds the room chest and score globals",
   VS::Battle::menu9CursorMemory = {kStaleCursor, kStaleCursor, kStaleCursor,
                                    kStaleCursor, kStaleCursor, kStaleCursor,
                                    kStaleCursor, kStaleCursor};
-  auto* scratch =
-      static_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase());
+  auto* scratch = &VS::Render::FrameScratchpad();
   scratch->camera.position.vy = 1234;
   scratch->camera.angles.vz = -56;
   CHECK(VS::Menu::Score::CalculateLiveProgress() == 1);

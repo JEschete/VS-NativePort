@@ -242,16 +242,26 @@ code uses as shared temporary memory.
 only, the copy tool maps `getScratchAddr(n)` and `vs_scratch` to a per-module scratch struct (or one `Core` scratch
 area), so the code compiles and runs unchanged until each function is modernized.
 
-As copied: one `Core` scratch block (`Core/Scratch.hpp`, `VS::Core::ScratchBase()`, 1 KiB). `getScratchAddr(n)`, the game's scratch struct
-(`Render::frameScratch`, a view of the block's start) and scratch literals (`(T*)0x1F8003EC`) all reach the same
-bytes. Note that the block's struct holds pointers, which are 8 bytes on x64, so its later members sit at other
-offsets than raw literals assume (§2).
+As copied, one `Core` scratch block (`Core/Scratch.hpp`, 1 KiB) stood in for the scratchpad, and `getScratchAddr(n)`,
+the frame's scratch struct and scratch literals (`(T*)0x1F8003EC`) all reached the same bytes. #45 retired it: each
+use now has a typed owner with a stated lifetime (plan §6.8.2), and no code addresses a scratchpad offset.
+
+| Original scratchpad use | Native owner | Lifetime |
+|---|---|---|
+| `vs_scratch` (frame drawing context at the start) | `Render::FrameScratchpad()` | rewritten every frame |
+| Event camera shake envelope (`0x1F800088`) and offsets | `Event::LiveEventCameraScratch()` | session |
+| Particle emitter flags carried between emissions (`0x1D0`) | `Effects::EmitterWorkspace()` | session |
+| Battle sphere bases, sine samples and staged volumes | `Battle::LiveSphereWorkspace()` | session |
+| Call-local temporaries | locals or call-local workspaces | one call |
+
+When porting a function that used the scratchpad, find which values outlive the call. Only those belong in an owned
+workspace, and that workspace must be cleared at its lifetime's boundary. Values the original rewrote before reading
+become locals. Do not give two subsystems one shared block again.
 
 **GIM follow-up:** F01393 (`Render::DrawGimTiles`, BATTLE `func_800CBBCC`, `5BF94.c:4056`) formed coordinate
-arrays backward from `0x1F800400`. Its copy-tool fix uses independent native `short[256]` arrays, sufficient for
-each byte-sized dimension plus its final boundary, and checks the tile-table capacity. Tests verify packet
-coordinates and that the rest of Core's shared scratch remains untouched; do not rebase this workspace into it.
-The same function's scaled-quad links now use native handles rather than truncated pointers.
+arrays backward from `0x1F800400`. Its fix uses independent native `short[256]` arrays, sufficient for each
+byte-sized dimension plus its final boundary, and checks the tile-table capacity. Tests verify the packet
+coordinates. The same function's scaled-quad links now use native handles rather than truncated pointers.
 
 ## 7. Extractor (deferred)
 

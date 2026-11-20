@@ -1,14 +1,12 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
-#include <cstring>
 #include <optional>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
 
 #include "Core/Math/Distance.hpp"
-#include "Core/Scratch.hpp"
 #include "Event/Camera.hpp"
 #include "Event/EventCameraLens.hpp"
 #include "Event/EventCameraLensLive.hpp"
@@ -71,13 +69,9 @@ struct LiveLensFixture {
   VS::Event::CameraState camera{};
   VS::Event::CameraState* saved_camera = event::cameraWorkspace;
   int saved_tick_speed = VS::State::tickSpeed;
-  std::array<unsigned char, 0x100> saved_scratch{};
+  event::EventCameraScratch saved_scratch = event::LiveEventCameraScratch();
 
-  LiveLensFixture() {
-    std::memcpy(saved_scratch.data(), VS::Core::ScratchBase(),
-                saved_scratch.size());
-    event::cameraWorkspace = &camera;
-  }
+  LiveLensFixture() { event::cameraWorkspace = &camera; }
   LiveLensFixture(const LiveLensFixture&) = delete;
   LiveLensFixture& operator=(const LiveLensFixture&) = delete;
   LiveLensFixture(LiveLensFixture&&) = delete;
@@ -85,31 +79,9 @@ struct LiveLensFixture {
   ~LiveLensFixture() {
     event::cameraWorkspace = saved_camera;
     VS::State::tickSpeed = saved_tick_speed;
-    std::memcpy(VS::Core::ScratchBase(), saved_scratch.data(),
-                saved_scratch.size());
+    event::LiveEventCameraScratch() = saved_scratch;
   }
 };
-
-std::int32_t ScratchWord(std::size_t offset) {
-  std::int32_t value = 0;
-  std::memcpy(&value,
-              static_cast<unsigned char*>(VS::Core::ScratchBase()) + offset,
-              sizeof(value));
-  return value;
-}
-
-void SetScratchWord(std::size_t offset, std::int32_t value) {
-  std::memcpy(static_cast<unsigned char*>(VS::Core::ScratchBase()) + offset,
-              &value, sizeof(value));
-}
-
-Position3 ScratchPosition(std::size_t offset) {
-  Position3 value;
-  std::memcpy(&value,
-              static_cast<unsigned char*>(VS::Core::ScratchBase()) + offset,
-              sizeof(value));
-  return value;
-}
 }  // namespace
 
 // F01232 (func_800BDC9C)
@@ -412,12 +384,12 @@ TEST_CASE("Live camera shake entry updates the workspace and scratch",
   VS::State::tickSpeed = 2;
   std::array<std::uint8_t, 6> start{0xEF, 0, 0x40, (2 << 2) | 1, 0, 30};
   REQUIRE(VS::Event::CommandCameraLensOrShakeOpcode(start.data(), 0) == 0);
-  SetScratchWord(0x88, 5);
+  event::LiveEventCameraScratch().envelope = 5;
   VS::Event::UpdateEventCameraShakeEntry();
   CHECK(event::cameraWorkspace->shake_active_count == 1);
   // Zero cycles keep the wave at sin(0).
   CHECK(event::cameraWorkspace->shake_look_at_offset == Position3{});
-  CHECK(ScratchWord(0x88) == 0x1000);
+  CHECK(event::LiveEventCameraScratch().envelope == 0x1000);
   CHECK(event::cameraWorkspace->shake_oscillators.at(0).elapsed_frames == 1);
 }
 
@@ -439,8 +411,8 @@ TEST_CASE("Live camera shake routes each axis bit to its workspace offset",
   CHECK(event::cameraWorkspace->shake_active_count == 2);
   CHECK(event::cameraWorkspace->shake_look_at_offset == Position3{.x = 0x40});
   CHECK(event::cameraWorkspace->shake_eye_offset == Position3{.y = 0x20});
-  CHECK(ScratchPosition(0xD8) == Position3{.x = 0x40});
-  CHECK(ScratchPosition(0xE0) == Position3{.y = 0x20});
+  CHECK(event::LiveEventCameraScratch().look_at_shake == Position3{.x = 0x40});
+  CHECK(event::LiveEventCameraScratch().eye_shake == Position3{.y = 0x20});
 }
 
 TEST_CASE("Live lens tween entry stores the value and the fraction",
@@ -452,11 +424,36 @@ TEST_CASE("Live lens tween entry stores the value and the fraction",
   tween.delta_value = 0x100;
   tween.elapsed_frames = 8;
   tween.duration_frames = 10;
-  SetScratchWord(0x88, -1);
+  event::LiveEventCameraScratch().envelope = -1;
   VS::Event::UpdateEventLensTweenEntry(&tween);
   CHECK(tween.elapsed_frames == 10);
   CHECK(tween.duration_frames == 0);
   CHECK(tween.has_changed == 1);
-  CHECK(ScratchWord(0x88) == 0x1000);
+  CHECK(event::LiveEventCameraScratch().envelope == 0x1000);
   CHECK(tween.value == 0x200);
+}
+
+// The lens tweens and shake oscillators share one envelope word (the
+// scratchpad's 0x1F800088): an oscillator with an unknown envelope shape scales
+// its swing by the last tween's eased fraction.
+TEST_CASE("Live shake with an unknown envelope reuses the lens tween fraction",
+          "[event][camera][lens]") {
+  const LiveLensFixture fixture;
+  VS::State::tickSpeed = 2;
+  VS::Event::LensTween& tween = event::cameraWorkspace->far_clip;
+  tween.delta_value = 0x100;
+  tween.duration_frames = 2;
+  event::LiveEventCameraScratch().envelope = 0;
+  VS::Event::UpdateEventLensTweenEntry(&tween);
+  const std::int32_t fraction = event::LiveEventCameraScratch().envelope;
+  REQUIRE(fraction > 0);
+  REQUIRE(fraction < 0x1000);
+  // A quarter cycle on the first tick swings by the whole amplitude along +x.
+  std::array<std::uint8_t, 6> start{
+      0xEF, 1, 0x40, (2 << 2) | (1 << 4) | (1 << 6) | 1, 9, 4};
+  REQUIRE(VS::Event::CommandCameraLensOrShakeOpcode(start.data(), 0) == 0);
+  VS::Event::UpdateEventCameraShakeEntry();
+  CHECK(event::LiveEventCameraScratch().envelope == fraction);
+  CHECK(event::cameraWorkspace->shake_look_at_offset ==
+        Position3{.x = static_cast<std::int16_t>((0x40 * fraction) >> 12)});
 }

@@ -11,7 +11,6 @@
 
 #include "Battle/Sphere.hpp"
 #include "Core/Log.hpp"
-#include "Core/Scratch.hpp"
 
 using VS::Core::Gte::MATRIX;
 
@@ -27,9 +26,6 @@ constexpr std::size_t kSphereCommandCount = 218;
 constexpr std::size_t kSphereSineSampleCount = 32;
 constexpr std::size_t kArcBasisStride = 4;
 constexpr std::size_t kWireBasisStride = kTargetWireAxes;
-constexpr std::size_t kTransformScratchOffset = 0x350;
-constexpr std::size_t kBasisScratchOffset = 0x398;
-constexpr std::size_t kSineScratchOffset = 0x3B0;
 constexpr std::uint32_t kWireVertexCountMask = 0x0000FFFF;
 constexpr std::int32_t kWireVertexCountShift = 16;
 constexpr std::size_t kWirePhaseAOffset = 0x24;
@@ -62,30 +58,30 @@ static_assert(offsetof(TargetVolume, scale) == kTargetVolumeScaleOffset);
 static_assert(sizeof(TargetVolume{}.scale.extents) == kTargetVolumeExtents);
 static_assert(offsetof(ShapeVertex, xyz) == 0);
 static_assert(offsetof(ShapeVertex, segment) == kShapeVertexSegmentOffset);
+static_assert(kSphereSineSampleCount <= kSphereSineSamples);
+static_assert((kTargetWireAxes - 1) * kArcBasisStride + kTargetWireAxes <=
+              kSphereBasisHalfwords);
+
+SphereWorkspace sphereWorkspace{};
 
 [[noreturn]] void Refuse(const char* operation, const char* reason) {
   VS::Core::LogError("battle.sphere", "{} refused: {}", operation, reason);
   std::abort();
 }
 
-std::byte* ScratchBytes() {
-  auto* scratch = static_cast<std::byte*>(VS::Core::ScratchBase());
-  if (scratch == nullptr) {
-    Refuse("sphere geometry", "missing scratch workspace");
-  }
-  return scratch;
+std::span<const std::int16_t, kSphereSineSampleCount> WireSineSamples() {
+  return std::span<const std::int16_t, kSphereSineSamples>(
+             sphereWorkspace.sine_samples)
+      .first<kSphereSineSampleCount>();
 }
 
-std::int16_t* ScratchShorts(std::size_t offset) {
-  return reinterpret_cast<std::int16_t*>(ScratchBytes() + offset);
-}
-
-SphereArcBasis ReadBasis(const std::int16_t* values, std::size_t stride) {
+SphereArcBasis ReadBasis(std::size_t stride) {
   SphereArcBasis basis{};
   for (std::size_t axis = 0; axis < basis.size(); ++axis) {
     for (std::size_t component = 0; component < basis[axis].size();
          ++component) {
-      basis[axis][component] = values[axis * stride + component];
+      basis[axis][component] =
+          sphereWorkspace.basis.at((axis * stride) + component);
     }
   }
   return basis;
@@ -116,7 +112,11 @@ void WriteVertices(VS::Battle::TargetSphereSetupView& sphere,
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800C085C (src/BATTLE/BATTLE.PRG/573B8.c:523).
+SphereWorkspace& LiveSphereWorkspace() noexcept { return sphereWorkspace; }
+
+void ResetLiveSphereWorkspace() noexcept { sphereWorkspace = {}; }
+
+// decomp: BATTLE.PRG func_800C085C (src/BATTLE/BATTLE.PRG/57B1C.c:175).
 std::optional<Core::Math::Mat3> BuildLiveSphereVolumeTransform(
     const TargetVolume* volume) noexcept {
   if (volume == nullptr) return std::nullopt;
@@ -126,7 +126,7 @@ std::optional<Core::Math::Mat3> BuildLiveSphereVolumeTransform(
   return BuildSphereVolumeTransform(extents, volume->angle);
 }
 
-// decomp: BATTLE.PRG func_800C253C (src/BATTLE/BATTLE.PRG/58578.c:887).
+// decomp: BATTLE.PRG func_800C253C (src/BATTLE/BATTLE.PRG/58578.c:836).
 std::optional<SphereWireframeBuildResult> BuildLiveSphereWireframe(
     VS::Battle::TargetSphereSetupView* sphere, std::int32_t type,
     const SphereGeometryTables& tables) noexcept {
@@ -163,21 +163,19 @@ std::optional<SphereWireframeBuildResult> BuildLiveSphereWireframe(
   return result;
 }
 
-// decomp: BATTLE.PRG func_800C0758 (src/BATTLE/BATTLE.PRG/573B8.c:495).
+// decomp: BATTLE.PRG func_800C0758 (src/BATTLE/BATTLE.PRG/57B1C.c:147).
 int AppendSphereArcVerticesEntry(int phase, int segments, int index) {
   auto& sphere = RequiredSphere("sphere arc append");
   std::array<TargetWireVertex, kTargetWireVertices> generated{};
   const auto next = AppendSphereArcVertices(
-      ReadBasis(ScratchShorts(kBasisScratchOffset), kArcBasisStride),
-      std::span<const std::int16_t>(ScratchShorts(kSineScratchOffset),
-                                    kSphereSineSampleCount),
-      phase, segments, generated, static_cast<std::size_t>(index));
+      ReadBasis(kArcBasisStride), WireSineSamples(), phase, segments, generated,
+      static_cast<std::size_t>(index));
   if (!next) Refuse("sphere arc append", "invalid geometry inputs");
   WriteVertices(sphere, generated, static_cast<std::size_t>(index), *next);
   return static_cast<int>(*next);
 }
 
-// decomp: BATTLE.PRG func_800C085C (src/BATTLE/BATTLE.PRG/573B8.c:523).
+// decomp: BATTLE.PRG func_800C085C (src/BATTLE/BATTLE.PRG/57B1C.c:175).
 MATRIX* BuildSphereVolumeTransformEntry(std::uint8_t* scale, int angle) {
   if (scale == nullptr) {
     Refuse("sphere volume transform", "missing scale extents");
@@ -187,40 +185,39 @@ MATRIX* BuildSphereVolumeTransformEntry(std::uint8_t* scale, int angle) {
     extents[index] = scale[index];
   }
   const auto transform = BuildSphereVolumeTransform(extents, angle);
-  auto* matrix = ScratchShorts(kTransformScratchOffset);
+  MATRIX& matrix = sphereWorkspace.volume_transform;
   for (std::size_t axis = 0; axis < transform.m.size(); ++axis) {
     for (std::size_t component = 0; component < transform.m[axis].size();
          ++component) {
-      matrix[axis * kTargetWireAxes + component] = transform.m[axis][component];
+      matrix.m[axis][component] = transform.m[axis][component];
     }
   }
-  return reinterpret_cast<MATRIX*>(matrix);
+  return &matrix;
 }
 
-// decomp: BATTLE.PRG func_800C2254 (src/BATTLE/BATTLE.PRG/58578.c:821).
+// decomp: BATTLE.PRG func_800C2254 (src/BATTLE/BATTLE.PRG/58578.c:770).
 int AppendSphereCircleVerticesEntry(int angle, int index) {
   auto& sphere = RequiredSphere("sphere circle append");
   std::array<TargetWireVertex, kTargetWireVertices> generated{};
-  const auto next = AppendSphereCircleVertices(
-      ReadBasis(ScratchShorts(kBasisScratchOffset), kWireBasisStride), angle,
-      generated, static_cast<std::size_t>(index));
+  const auto next =
+      AppendSphereCircleVertices(ReadBasis(kWireBasisStride), angle, generated,
+                                 static_cast<std::size_t>(index));
   if (!next) Refuse("sphere circle append", "invalid geometry inputs");
   WriteVertices(sphere, generated, static_cast<std::size_t>(index), *next);
   return static_cast<int>(*next);
 }
 
-// decomp: BATTLE.PRG func_800C2368 (src/BATTLE/BATTLE.PRG/58578.c:845).
+// decomp: BATTLE.PRG func_800C2368 (src/BATTLE/BATTLE.PRG/58578.c:794).
 int AppendSphereConeVerticesEntry(int step, int radius, int index) {
   auto& sphere = RequiredSphere("sphere cone append");
   std::array<TargetWireVertex, kTargetWireVertices> generated{};
   const auto appended = AppendSphereConeVertices(
       step, radius, generated, static_cast<std::size_t>(index));
   if (!appended) Refuse("sphere cone append", "invalid geometry inputs");
-  auto* basis = ScratchShorts(kBasisScratchOffset);
   for (std::size_t axis = 0; axis < appended->basis.size(); ++axis) {
     for (std::size_t component = 0; component < appended->basis[axis].size();
          ++component) {
-      basis[axis * kTargetWireAxes + component] =
+      sphereWorkspace.basis.at((axis * kTargetWireAxes) + component) =
           appended->basis[axis][component];
     }
   }
@@ -229,9 +226,8 @@ int AppendSphereConeVerticesEntry(int step, int radius, int index) {
   return static_cast<int>(appended->next_index);
 }
 
-// decomp: BATTLE.PRG func_800C253C (src/BATTLE/BATTLE.PRG/58578.c:887).
+// decomp: BATTLE.PRG func_800C253C (src/BATTLE/BATTLE.PRG/58578.c:836).
 void BuildSphereWireframeEntry(int type) {
-  auto* sine = ScratchShorts(kSineScratchOffset);
   const SphereGeometryTables tables{
       .arc_bases = {VS::Battle::sphereArcBases.data(), kSphereArcBaseCount},
       .mirrored_vertices = {VS::Battle::sphereMirroredVertices.data(),
@@ -240,7 +236,7 @@ void BuildSphereWireframeEntry(int type) {
                                kSphereShapeStartCount},
       .commands = {VS::Battle::sphereWireframeCommands.data(),
                    kSphereCommandCount},
-      .sine_samples = {sine, kSphereSineSampleCount},
+      .sine_samples = WireSineSamples(),
   };
   if (!BuildLiveSphereWireframe(VS::Battle::targetSphere, type, tables)) {
     Refuse("sphere wireframe build", "invalid geometry state or tables");

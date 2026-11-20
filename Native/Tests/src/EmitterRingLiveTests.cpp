@@ -11,7 +11,6 @@
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
-#include "Core/Scratch.hpp"
 #include "Effects/ActionRequest.hpp"
 #include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
@@ -24,6 +23,7 @@
 #include "Effects/Templates/TemplateLiveState.hpp"
 #include "Effects/TransformsLiveState.hpp"
 #include "Legacy/Psx.hpp"
+#include "Render/Render.hpp"
 
 namespace {
 namespace effects = VS::Effects;
@@ -31,13 +31,8 @@ namespace rings = VS::Effects::Templates;
 namespace memory = VS::Core::Memory;
 namespace math = VS::Core::Math;
 using LiveRing = int (*)(VS::Effects::LiveRendererSlot*, unsigned int, int);
-constexpr std::size_t kScratchBytes = 1024;
-constexpr std::size_t kEmitterScratch = 0x1D0;
-
 VS::Effects::LiveParticleEmitterScratch& Scratch() {
-  const auto base = reinterpret_cast<std::uintptr_t>(VS::Core::ScratchBase());
-  return *reinterpret_cast<VS::Effects::LiveParticleEmitterScratch*>(
-      base + kEmitterScratch);
+  return VS::Effects::EmitterWorkspace();
 }
 
 struct Definitions {
@@ -58,10 +53,6 @@ class LiveEmission {
   LiveEmission() {
     std::ranges::copy(std::span(VS::Effects::curveSamples),
                       saved_samples_.begin());
-    std::ranges::copy(
-        std::span(static_cast<const std::byte*>(VS::Core::ScratchBase()),
-                  kScratchBytes),
-        saved_scratch_.begin());
     VS::Effects::package = &package;
     VS::Effects::currentInstance = instance.get();
     package.particle_definitions =
@@ -114,8 +105,8 @@ class LiveEmission {
     VS::Effects::usedParticleCount = saved_used_;
     VS::Effects::emissionCounter = saved_counter_;
     std::ranges::copy(saved_samples_, VS::Effects::curveSamples);
-    std::ranges::copy(saved_scratch_,
-                      static_cast<std::byte*>(VS::Core::ScratchBase()));
+    Scratch() = saved_scratch_;
+    VS::Render::FrameScratchpad() = saved_frame_;
     VS::Core::BiosRand().Seed(saved_random_);
     VS::Core::Gte::Reset();
   }
@@ -134,7 +125,8 @@ class LiveEmission {
   int saved_counter_ = VS::Effects::emissionCounter;
   std::uint32_t saved_random_ = VS::Core::BiosRand().State();
   std::array<int, 211> saved_samples_{};
-  std::array<std::byte, kScratchBytes> saved_scratch_{};
+  VS::Effects::LiveParticleEmitterScratch saved_scratch_ = Scratch();
+  VS::Render::FrameScratch saved_frame_ = VS::Render::FrameScratchpad();
   alignas(memory::kHeapUnitBytes)
       std::array<std::byte, memory::kHeapUnitBytes * 64> arena_{};
   memory::ScopedLiveGameHeap heap_{arena_};

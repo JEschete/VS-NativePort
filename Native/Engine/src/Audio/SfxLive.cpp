@@ -20,7 +20,6 @@
 #include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/Runtime.hpp"
-#include "Core/Scratch.hpp"
 #include "Legacy/Psx.hpp"
 #include "Render/Render.hpp"
 
@@ -203,10 +202,9 @@ class LiveSfxHost final : public SfxHost {
   }
 
   // The original loads vs_scratch_t::viewMatrix at 0x1F800014; the native
-  // scratch keeps the field but not the PS1 offset.
+  // frame context keeps the field but not the PS1 offset.
   SfxProjection Project(const SfxPoint& point) override {
-    auto* const scratch =
-        static_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase());
+    VS::Render::FrameScratch* const scratch = &VS::Render::FrameScratchpad();
     SetRotMatrix(&scratch->view_matrix);
     SetTransMatrix(&scratch->view_matrix);
     SVECTOR vector{.vx = point.x, .vy = point.y, .vz = point.z, .pad = 0};

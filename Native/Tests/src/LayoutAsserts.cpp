@@ -398,7 +398,6 @@ int Tests_AiFrameStages(void) {
 }
 
 int Tests_AiFrameCache(void) {
-  enum { kScratchSentinel = 0xA5 };
   const VS::Battle::Ai::FrameContext savedFrame =
       VS::Battle::Ai::LiveFrameContext();
   const auto saved_actors = VS::Battle::Ai::actorAiStates;
@@ -409,13 +408,6 @@ int Tests_AiFrameCache(void) {
   const unsigned saved_aux_length =
       VS::Field::roomData.header.ai_navigation_length;
   const int saved_random = VS::Battle::Ai::savedMovementRandomState;
-  std::uint8_t saved_scratch[132];
-  std::uint8_t* scratch =
-      reinterpret_cast<std::uint8_t*>(VS::Core::ScratchBase()) + 0x37C;
-  memcpy(saved_scratch, scratch, sizeof saved_scratch);
-  for (size_t index = 0; index < sizeof saved_scratch; ++index) {
-    scratch[index] = kScratchSentinel;
-  }
   VS::Battle::Ai::ActorAiState actor = {};
   VS::Battle::Ai::RoomAiState room = {};
   std::uint16_t flags[32][32] = {{0}};
@@ -443,9 +435,6 @@ int Tests_AiFrameCache(void) {
                frame->randomState == 0x12345678 &&
                memcmp(frame->directions, VS::Battle::Ai::directionDeltas.data(),
                       sizeof frame->directions) == 0;
-  for (unsigned index = 0; index < sizeof saved_scratch; ++index) {
-    passed = passed && scratch[index] == kScratchSentinel;
-  }
   VS::Battle::Ai::LiveFrameContext() = savedFrame;
   VS::Battle::Ai::actorAiStates = saved_actors;
   VS::Battle::Ai::roomAiState = saved_room;
@@ -454,7 +443,6 @@ int Tests_AiFrameCache(void) {
   VS::Battle::Ai::roomAuxiliaryData = saved_data;
   VS::Field::roomData.header.ai_navigation_length = saved_aux_length;
   VS::Battle::Ai::savedMovementRandomState = saved_random;
-  memcpy(scratch, saved_scratch, sizeof saved_scratch);
   return passed;
 }
 

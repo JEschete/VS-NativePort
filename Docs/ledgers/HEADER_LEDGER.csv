@@ -33,7 +33,7 @@ H0031,header,Native/Engine/include/Core/Gte.hpp,owned,no,pragma-once,0,0,0,0,0,0
 H0032,header,Native/Engine/include/Core/IntPair.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,deleted: Core_IntPair had no native users; TYPE T00544 retired (#441)
 H0033,header,Native/Engine/include/Core/Log.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0034,header,Native/Engine/include/Core/Memory/HeapLive.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0035,header,Native/Engine/include/Core/Scratch.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
+H0035,header,Native/Engine/include/Core/Scratch.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,retired,"deleted with the PS1 scratchpad block: Render::FrameScratchpad, Event::LiveEventCameraScratch, Effects::EmitterWorkspace and Battle::LiveSphereWorkspace own its uses (#45)"
 H0036,header,Native/Engine/include/Core/Text/TextCode.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0037,header,Native/Engine/include/Core/Unported.h,owned,no,pragma-once,0,0,0,0,0,1,2,0,0,retired,merged into Core/Unported.hpp and Core/Diagnostics.hpp (#441)
 H0038,header,Native/Engine/include/Core/Unported.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
@@ -500,7 +500,7 @@ S0063,source,Native/Engine/src/Core/Overlays.cpp,generated,yes,,0,,,,,,,,,done,
 S0064,source,Native/Engine/src/Core/Random.cpp,generated,yes,,0,,,,,,,,,done,
 S0065,source,Native/Engine/src/Core/RandomGenerator.cpp,owned,no,,0,,,,,,,,,done,
 S0066,source,Native/Engine/src/Core/RandomLive.cpp,owned,no,,0,,,,,,,,,done,
-S0067,source,Native/Engine/src/Core/Scratch.cpp,owned,no,,0,,,,,,,,,done,
+S0067,source,Native/Engine/src/Core/Scratch.cpp,owned,no,,0,,,,,,,,,retired,deleted with Native/Engine/include/Core/Scratch.hpp (#45)
 S0068,source,Native/Engine/src/Core/String/GameTextLive.cpp,owned,no,,0,,,,,,,,,done,
 S0069,source,Native/Engine/src/Core/Unported.cpp,owned,no,,0,,,,,,,,,done,
 S0070,source,Native/Engine/src/Input/ControllerLive.cpp,owned,no,,0,,,,,,,,,done,

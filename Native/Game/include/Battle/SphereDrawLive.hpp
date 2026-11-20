@@ -4,17 +4,17 @@
 #include "Legacy/Psx.hpp"
 
 // The ABI-compatible entries of the target sphere's drawing (SphereDraw.hpp)
-// over the live target sphere, the scratchpad working copies, the GTE, the
-// frame's primitive buffer and ordering table and the room's collision map.
-// Null or out-of-range inputs and a missing frame buffer are refused with a
-// throttled diagnostic instead of being dereferenced.
+// over the live target sphere, its working copies (SphereWorkspace), the GTE,
+// the frame's primitive buffer and ordering table and the room's collision
+// map. Null or out-of-range inputs and a missing frame buffer are refused with
+// a throttled diagnostic instead of being dereferenced.
 namespace VS::Battle {
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
 void LiveDrawSphereWireLine(VS::Core::Gte::SVECTOR* start,
                             VS::Core::Gte::SVECTOR* end, std::uint32_t color,
                             int intensity);
 void LiveDrawSphere();
-// Returns the scratchpad yaw basis matrix.
+// Returns the yaw basis rows (SphereWorkspace::camera_basis).
 void* LiveBuildSphereCameraBasis();
 void LiveDrawSpherePositionCursor(VS::Core::Gte::SVECTOR* position,
                                   int lock_pitch);

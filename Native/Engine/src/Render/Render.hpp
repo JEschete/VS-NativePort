@@ -6,7 +6,6 @@
 #include <cstdint>
 
 #include "Core/Gte.hpp"
-#include "Core/Scratch.hpp"
 
 namespace VS::Render {
 // decomp: vs_dithering (src/include/gpu.h:15)
@@ -42,8 +41,7 @@ struct Camera {
 };
 
 // decomp: vs_scratch_t (src/include/scratch.h:20). The original's pointers
-// were 4 bytes; natively they widen the record, which still fits the 1 KiB
-// scratch block.
+// were 4 bytes; natively they widen the record.
 struct FrameScratch {
   void* primitive_cursor;
   void* ordering_table;
@@ -54,10 +52,13 @@ struct FrameScratch {
   Camera camera;
 };
 
-// decomp: vs_scratch (src/include/scratch.h): the frame's drawing context at
-// the start of scratch memory.
+// decomp: vs_scratch (src/include/scratch.h): the frame's drawing context,
+// which the original kept at the start of the scratchpad. Render owns it
+// (Frame.cpp); the frame setup rewrites it every frame.
+extern FrameScratch frameScratch;
+
 [[nodiscard]] inline FrameScratch& FrameScratchpad() noexcept {
-  return *static_cast<FrameScratch*>(Core::ScratchBase());
+  return frameScratch;
 }
 
 namespace layout {

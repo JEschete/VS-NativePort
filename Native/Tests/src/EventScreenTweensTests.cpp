@@ -1,16 +1,16 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
-#include <cstring>
 #include <optional>
 #include <string>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Core/Scratch.hpp"
 #include "Effects/ScreenDistortion/RadialWarp.hpp"
 #include "Event/Camera.hpp"
+#include "Event/EventCameraLens.hpp"
+#include "Event/EventCameraLensLive.hpp"
 #include "Event/EventScreenTweens.hpp"
 #include "Event/EventScreenTweensLive.hpp"
 #include "Event/InterpolationCurveLive.hpp"
@@ -384,11 +384,8 @@ TEST_CASE("Live screen tween entries keep the workspace layout",
   CHECK(camera.screen_tint.reserved08 == 0x1234);
   CHECK(camera.screen_tint.reserved1a == 0x5678);
   CHECK(camera.screen_tint.duration_frames == 0);
-  std::int32_t recorded = 0;
-  std::memcpy(&recorded,
-              static_cast<std::byte*>(VS::Core::ScratchBase()) + 0x88,
-              sizeof(recorded));
-  CHECK(recorded == VS::Event::EvaluateInterpolationCurveEntry(0, 2, 2));
+  CHECK(VS::Event::LiveEventCameraScratch().envelope ==
+        VS::Event::EvaluateInterpolationCurveEntry(0, 2, 2));
   VS::State::tickSpeed = saved_tick;
   VS::Event::cameraWorkspace = saved;
 }

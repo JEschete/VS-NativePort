@@ -2,7 +2,6 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
-#include <cstring>
 #include <exception>
 #include <initializer_list>
 #include <iterator>
@@ -13,12 +12,16 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Battle/SphereGeometryLive.hpp"
 #include "Battle/TargetingState.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Effects/Particles.hpp"
 #include "Event/Camera.hpp"
 #include "Event/EventCameraControl.hpp"
+#include "Event/EventCameraLens.hpp"
+#include "Event/EventCameraLensLive.hpp"
 #include "Event/EventCameraTrack.hpp"
 #include "Event/EventCameraTrackLive.hpp"
 #include "Event/Script.hpp"
@@ -73,20 +76,12 @@ struct EventSessionFixture {
 };
 
 struct EventCameraFixture {
-  // The camera track rules use the scratch words from 0x1F800088 (decomp
-  // cameraScratch, 0x90 bytes).
-  static constexpr std::size_t kCameraScratchOffset = 0x88;
-  static constexpr std::size_t kCameraScratchBytes = 0x90;
   VS::Event::CameraState* saved_camera = VS::Event::cameraWorkspace;
   decltype(VS::State::tickSpeed) saved_speed = VS::State::tickSpeed;
   VS::Event::CameraState camera{};
-  std::array<std::byte, kCameraScratchBytes> scratch{};
+  VS::Event::EventCameraScratch scratch = VS::Event::LiveEventCameraScratch();
 
   EventCameraFixture() {
-    std::memcpy(
-        scratch.data(),
-        static_cast<std::byte*>(VS::Core::ScratchBase()) + kCameraScratchOffset,
-        scratch.size());
     VS::Event::cameraWorkspace = &camera;
     VS::State::tickSpeed = 2;
     camera.look_at.current_position = {100, 200, 300, 0};
@@ -98,9 +93,7 @@ struct EventCameraFixture {
   }
 
   ~EventCameraFixture() {
-    std::memcpy(
-        static_cast<std::byte*>(VS::Core::ScratchBase()) + kCameraScratchOffset,
-        scratch.data(), scratch.size());
+    VS::Event::LiveEventCameraScratch() = scratch;
     VS::Event::cameraWorkspace = saved_camera;
     VS::State::tickSpeed = saved_speed;
     VS::Core::Gte::Reset();
@@ -225,6 +218,64 @@ int EnterUiBattle() {
   if (!SessionUiIsClear()) return -1;
   if (!uiReturnToTitle) return 41;
   BorrowSessionUiText();
+  VS::Boot::JumpToLiveTitle();
+  return -1;
+}
+
+// Restores the workspaces that replaced the PS1 scratchpad (#45).
+struct SessionWorkspaceFixture {
+  VS::Event::EventCameraScratch event = VS::Event::LiveEventCameraScratch();
+  VS::Effects::LiveParticleEmitterScratch emitter =
+      VS::Effects::EmitterWorkspace();
+  VS::Battle::SphereWorkspace sphere = VS::Battle::LiveSphereWorkspace();
+
+  SessionWorkspaceFixture() = default;
+  SessionWorkspaceFixture(const SessionWorkspaceFixture&) = delete;
+  SessionWorkspaceFixture& operator=(const SessionWorkspaceFixture&) = delete;
+  SessionWorkspaceFixture(SessionWorkspaceFixture&&) = delete;
+  SessionWorkspaceFixture& operator=(SessionWorkspaceFixture&&) = delete;
+  ~SessionWorkspaceFixture() {
+    VS::Event::LiveEventCameraScratch() = event;
+    VS::Effects::EmitterWorkspace() = emitter;
+    VS::Battle::LiveSphereWorkspace() = sphere;
+  }
+};
+
+constexpr std::int32_t kStaleEnvelope = 0x800;
+constexpr std::uint16_t kStaleEmitterFlags = 0x1234;
+constexpr std::int16_t kStaleSine = 99;
+
+void DirtySessionWorkspaces() {
+  VS::Event::LiveEventCameraScratch().envelope = kStaleEnvelope;
+  VS::Effects::EmitterWorkspace().saved_flags = kStaleEmitterFlags;
+  VS::Battle::LiveSphereWorkspace().sine_samples.back() = kStaleSine;
+}
+
+bool SessionWorkspacesAreDirty() {
+  return VS::Event::LiveEventCameraScratch().envelope == kStaleEnvelope &&
+         VS::Effects::EmitterWorkspace().saved_flags == kStaleEmitterFlags &&
+         VS::Battle::LiveSphereWorkspace().sine_samples.back() == kStaleSine;
+}
+
+bool SessionWorkspacesAreClear() {
+  constexpr VS::Event::EventCameraScratch kColdEventCamera{};
+  return VS::Event::LiveEventCameraScratch() == kColdEventCamera &&
+         VS::Effects::EmitterWorkspace().saved_flags == 0 &&
+         VS::Battle::LiveSphereWorkspace().sine_samples.back() == 0;
+}
+
+int workspaceTitleEntries = 0;
+
+int EnterWorkspaceTitle() {
+  if (++workspaceTitleEntries > 1) return SessionWorkspacesAreClear() ? 41 : -1;
+  DirtySessionWorkspaces();
+  VS::Boot::JumpToLiveGameLoop();
+  return -1;
+}
+
+// The game loop continues the session, so the workspaces carry into it.
+int EnterWorkspaceBattle() {
+  if (!SessionWorkspacesAreDirty()) return -1;
   VS::Boot::JumpToLiveTitle();
   return -1;
 }
@@ -358,6 +409,40 @@ TEST_CASE("Native title and battle jumps invalidate interrupted scene UI",
   CHECK(VS::Boot::RunLiveSessionLoop(EnterUiTitle, EnterUiBattle) == 41);
   CHECK(uiTitleEntries == (uiReturnToTitle ? 2 : 1));
   CHECK(SessionUiIsClear());
+}
+
+TEST_CASE("Native title jump returns the scratchpad workspaces to cold boot",
+          "[event][session-reset][workspaces]") {
+  const UiSessionFixture ui_fixture;
+  const SessionWorkspaceFixture workspace_fixture;
+  workspaceTitleEntries = 0;
+  CHECK(VS::Boot::RunLiveSessionLoop(EnterWorkspaceTitle,
+                                     EnterWorkspaceBattle) == 41);
+  CHECK(workspaceTitleEntries == 2);
+  CHECK(SessionWorkspacesAreClear());
+}
+
+TEST_CASE("Native session state reset clears every scratchpad workspace",
+          "[event][session-reset][workspaces]") {
+  const SessionWorkspaceFixture fixture;
+  DirtySessionWorkspaces();
+  VS::Event::LiveEventCameraScratch().eye_shake.x = 7;
+  VS::Effects::EmitterWorkspace().flags = 0x55;
+  VS::Battle::LiveSphereWorkspace().camera_basis.front() = 0x1000;
+  VS::Battle::LiveSphereWorkspace().staged_volumes.back().angle = 0x200;
+  VS::Battle::LiveSphereWorkspace().basis.back() = -1;
+  VS::Battle::LiveSphereWorkspace().volume_transform.m[1][1] = 0x1000;
+  VS::Boot::ResetLiveSessionState();
+  const VS::Battle::SphereWorkspace& sphere = VS::Battle::LiveSphereWorkspace();
+  CHECK(SessionWorkspacesAreClear());
+  CHECK(VS::Effects::EmitterWorkspace().flags == 0);
+  CHECK(
+      std::ranges::all_of(sphere.camera_basis, [](auto v) { return v == 0; }));
+  CHECK(std::ranges::all_of(sphere.basis, [](auto v) { return v == 0; }));
+  CHECK(
+      std::ranges::all_of(sphere.sine_samples, [](auto v) { return v == 0; }));
+  CHECK(sphere.staged_volumes.back().angle == 0);
+  CHECK(sphere.volume_transform.m[1][1] == 0);
 }
 
 TEST_CASE("Native session transfer abandons the active owned VM source",

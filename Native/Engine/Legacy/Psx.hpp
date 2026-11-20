@@ -8,7 +8,6 @@
 #include "Core/Diagnostics.hpp"
 #include "Core/Gte.hpp"
 #include "Core/RandomLive.hpp"
-#include "Core/Scratch.hpp"
 #include "Legacy/Audio/LibSpu.hpp"
 #include "Legacy/Core/LibEtc.hpp"
 #include "Legacy/Core/PsxTypes.hpp"

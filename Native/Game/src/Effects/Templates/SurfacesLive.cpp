@@ -19,7 +19,6 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
-#include "Core/Scratch.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
@@ -85,7 +84,6 @@ namespace {
 namespace math = Core::Math;
 using math::Vec3;
 
-constexpr std::uintptr_t kEmitterScratchOffset = 0x1D0;
 using InstanceTransforms = decltype(LiveEffectInstance::transforms);
 using TextureTables = decltype(LiveEffectPackage::texture_tables);
 constexpr std::size_t kTransformCount = std::tuple_size_v<InstanceTransforms>;
@@ -133,12 +131,6 @@ std::uint64_t droppedPrimitives = 0;
 // diagnostics readable.
 [[nodiscard]] bool ShouldReport(std::uint64_t& count) {
   return std::has_single_bit(++count);
-}
-
-LiveParticleEmitterScratch& EmitterScratch() {
-  return *reinterpret_cast<LiveParticleEmitterScratch*>(
-      reinterpret_cast<std::uintptr_t>(VS::Core::ScratchBase()) +
-      kEmitterScratchOffset);
 }
 
 // The current package's definition `index`, or null when its recorded
@@ -320,7 +312,7 @@ std::optional<SurfaceTickInputs> LiveSurfaceServices::BeginTick(
     return std::nullopt;
   }
   // The original stored the flags before sampling anything.
-  EmitterScratch().flags = definition_->flags;
+  EmitterWorkspace().flags = definition_->flags;
   const MATRIX& world =
       instance_->transforms[definition_->transform_index].world;
   // The effect origin (D_800F5310): the action request's focus point.
@@ -360,7 +352,7 @@ std::int32_t LiveSurfaceServices::SampleCurve(std::int32_t curve,
 }
 
 void LiveSurfaceServices::PublishScratch(const SurfaceScratch& values) {
-  LiveParticleEmitterScratch& scratch = EmitterScratch();
+  LiveParticleEmitterScratch& scratch = EmitterWorkspace();
   scratch.flags = values.flags;
   math::StoreVector(scratch.position, values.position);
   math::StoreVector(scratch.extent, values.extent);
@@ -494,7 +486,7 @@ Vec3 LiveSurfaceServices::TransformByActor(RingPoint point) const {
       instance_->transforms[definition_->transform_index].world;
   SetRotMatrix(&world);
   SetTransMatrix(&world);
-  LiveParticleEmitterScratch& scratch = EmitterScratch();
+  LiveParticleEmitterScratch& scratch = EmitterWorkspace();
   scratch.vector.vx = point.x;
   scratch.vector.vy = point.y;
   scratch.vector.vz = point.z;

@@ -458,7 +458,7 @@ For each row (in file order):
 7. Mark `copied`.
 8. Effect template instantiations (`copy = template`) are **not** duplicated. One shared implementation per template (`tiledRings`, `particleSetup`, `trails9`, …) is copied. Each instantiation becomes a row in the effects catalog (§6.8).
 9. Rename by reference, not by text. `tools\port\ref_index.py` resolves every identifier occurrence in game code (declarations and uses, including those inside macro bodies) to its ledger row with libclang. It writes `build\port\refs.json` as `[line, col, length, kind, target]` per source file, so a member such as `unk4` is renamed only where it belongs to the right type. The copy tool checks that the text at each position equals the original spelling before replacing it. The target forms are documented in the script; the full run's stats are in [NAMING_CONVENTIONS.md](NAMING_CONVENTIONS.md) §11.4.
-10. Module statics with an initial value are restored by generated per-module resets (as built: the statics stay named variables; folding them into the `state:` structs the data ledger names is Step 5); scratchpad uses map to Core's scratch block; asm-only functions become `VS_UNPORTED` stubs ([PORTING_WATCHLIST.md](PORTING_WATCHLIST.md) §1, §5, §6).
+10. Module statics with an initial value are restored by generated per-module resets (as built: the statics stay named variables; folding them into the `state:` structs the data ledger names is Step 5); scratchpad uses mapped to Core's scratch block (since retired: #45 gave every use a typed owner, §6.8.2); asm-only functions become `VS_UNPORTED` stubs ([PORTING_WATCHLIST.md](PORTING_WATCHLIST.md) §1, §5, §6).
 11. Re-run `tools\scaffold\gen_solution.py` so the projects list the new files.
 
 **As built (2026-10-17; the regeneration workflow is superseded by D24, 2026-11-18).** `python tools\port\decl_index.py` (libclang declaration extents, about 90 s) and
@@ -486,7 +486,8 @@ PS1 layout under the x64 MSVC rules.
 - **Legacy SDK layer** (`Native\Engine\Legacy\`, `Native\Content\Legacy\LibDs.h`, umbrella `Legacy/Psx.hpp`): own
   PS1 type layouts, packet macros and prototypes for the 287 SDK names in use. R: libgte and the GTE inline macros
   become `Core/Gte.hpp` (`VS::Core::Gte`, fixed-point math with the GTE's small state), `rand`/`srand` the BIOS LCG
-  (now `Core/RandomLive.hpp`), `getScratchAddr` and scratch literals `Core/Scratch.hpp`, CRT-clashing libapi file calls
+  (now `Core/RandomLive.hpp`), `getScratchAddr` and scratch literals the `Core/Scratch.hpp` block (retired by #45 for the typed workspaces of
+  §6.8.2), CRT-clashing libapi file calls
   `VS::Legacy::LibApi::*`. D: whole-statement calls are deleted (the last expression uses were folded or deleted and `Legacy/Removed.h` is retired, #441).
   T: shims record `VS::Core::RecordUnported` until they translate into their system.
 - **Effect templates:** one body per template (`Effects\Templates\<Name>.inl`); each plugin instance is a block in
@@ -718,6 +719,27 @@ offset to the record's address, and the `VS_ONDISC` macro that did so is retired
 (`tools\port\field_at.py`). Each fix is a copy-tool rule or a reviewed fixup on the shared function, so it holds
 for every actor and every caller; `Native\Tests\src\LayoutAsserts.cpp` checks the layouts they rely on.
 
+### 6.8.2 State ownership and reset boundaries (#45)
+
+Every piece of game state has one of four lifetimes, and it is reset only at that lifetime's boundary. The table
+lists the owners as built; `GameState` as one owned object (§6.8 `State`) is still the target.
+
+| Lifetime | Lasts | Owners | Reset or load point |
+|---|---|---|---|
+| Persistent | across saves | `State::stateFlags` (typed `StateFlags`), read and written by id through `State::ScriptFlags` (`LiveScriptFlag`, `SetLiveScriptFlag`); `State::scoreData`, `artsStatus`, `roomVisitProgress`, `learnedActionFlags`, `playTime`, `recentRoomEnemyStates`; `Items::inventory` and `inventoryIndices` (the original's misnamed `Audio_Seq_unused*` storage); `Input::settings` | New Game (`Title::InitializeNewGameData`); `Game::Save::Capture` and its restore in `Save/RuntimeSnapshot.cpp` |
+| Session | from one title entry to the next | `Boot::SessionState`, `SoftResetState`, the save resume, and the workspaces that replaced the PS1 scratchpad: `Event::LiveEventCameraScratch()` (shake envelope and offsets), `Effects::EmitterWorkspace()` (emitter flags carried between emissions) and `Battle::LiveSphereWorkspace()` (sphere bases, sine samples, staged volumes) | `Boot::ResetLiveSessionState()`, called by every `ResetNativeSession` (`InitializeTitleSession`, `ResetToTitle`, `JumpToTitle`, `EndSession`); the jump into the game loop keeps them |
+| Scene | one room or battle | `Field::RoomVisitState`, `Event::cameraWorkspace`, `Battle::targetSphere`, the AI room state and its borrowed bindings | room load; the AI session invalidation (`Battle/Ai/RoomState.cpp`) |
+| Temporary | one frame or one call | `Render::FrameScratchpad()` (the frame setup rewrites it every frame), the AI `PlanningWorkspace` (one per call), `Render` model workspaces, event frame locals | none |
+
+Rules:
+- A soft reset must not leak session state into the next run. The PS1 kept scratchpad values across a soft reset
+  only because nothing cleared them, and the title overlay overwrote them anyway; native code clears them at the title.
+- A workspace that the original shared through the scratchpad gets its own typed struct with fixed capacity, so
+  writers cannot reach each other's state. `Native\Tests\src\EventSessionTests.cpp` (`[session-reset][workspaces]`)
+  checks that the workspaces survive the game-loop jump and are cleared at the title.
+- Remaining: the planner still publishes its call-local workspace through globals while it runs (#57), and the overlay
+  arena still keeps the original's overlapping slot offsets (EC-05).
+
 ---
 
 ## 7. Retirement strategies, in detail
@@ -924,7 +946,7 @@ Fixed-step simulation, the original RNG sequence, no wall-clock in game logic, a
 |---|---|
 | BATTLE naming quality (1,478 generic) | Parallel agents with call-graph context, confidence tags, re-queue of low-confidence rows, and name review at the 1c gate |
 | Hidden layout dependence and incorrect pointer-table extents | M1 validates source bounds, aliases, signatures and native layouts; compile success and x64-safe OT handles alone do not establish correctness |
-| Scratchpad use (1,034 hits) | Becomes per-module scratch structs; tracked as a hazard until 0 |
+| Scratchpad use (1,034 hits) | Became typed owned workspaces; since #45 no code addresses the scratchpad, only provenance comments name its offsets (§6.8.2) |
 | Readback-dependent effects (`StoreImage`/`MoveImage`) | Capture API in Engine\Render from 1b |
 | Timing parity (30/20 fps logic, field timing) | FrameClock reproduces logical ticks; replays catch drift |
 | Effects volume (480 instantiations, ~90 plugins) | Template + catalog design; previewer in 2d |
@@ -1440,11 +1462,15 @@ has no module-image copying, sector arithmetic or original-address relocation de
 
 #### EC-05: Scratchpad and overlay-offset preservation
 
-**Evidence:** `Native/Engine/src/Core/Scratch.cpp` (`scratchpad`), `Native/Engine/include/Core/Arena.hpp`
-(`VS::Core::overlayArena`, `VS::Core::OverlayAddress`), `Native/Engine/src/Core/Overlays.cpp`, and
-`Native/Game/src/Boot/OverlayReset.cpp`.
+**Evidence:** `Native/Engine/include/Core/Arena.hpp` (`VS::Core::overlayArena`, `VS::Core::OverlayAddress`),
+`Native/Engine/src/Core/Overlays.cpp`, and `Native/Game/src/Boot/OverlayReset.cpp`.
 
-Scratch users share a byte block; overlay slots retain original relative addresses and overlaps inside native storage.
+**Scratchpad: retired (#45).** The shared 1 KiB block (`Core/Scratch.hpp`, `ScratchBase`) is deleted. Its users
+now own typed workspaces with explicit lifetimes (§6.8.2): `Render::FrameScratchpad()`, `Event::LiveEventCameraScratch()`,
+`Effects::EmitterWorkspace()` and `Battle::LiveSphereWorkspace()`. No code addresses a scratchpad offset; provenance
+comments still name the original offsets.
+
+**Remaining: overlay storage.** Overlay slots retain original relative addresses and overlaps inside native storage.
 The modules execute as native code, but their original loading/memory relationships still influence behavior.
 
 **Issue:** lifetimes, aliasing and reload resets remain implicit. A native arena itself is not emulation; preserving PS1

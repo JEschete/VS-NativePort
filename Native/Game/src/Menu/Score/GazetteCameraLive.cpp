@@ -16,7 +16,6 @@
 #include "Core/Log.hpp"
 #include "Core/Math/Matrix.hpp"
 #include "Core/Math/MatrixLive.hpp"
-#include "Core/Scratch.hpp"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Score/GazetteCamera.hpp"
 #include "Menu/Score/Records.hpp"

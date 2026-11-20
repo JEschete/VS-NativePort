@@ -19,7 +19,6 @@
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Core/Scratch.hpp"
 #include "Field/BackgroundLiveState.hpp"
 #include "Field/Environment.hpp"
 #include "Field/EnvironmentLive.hpp"
@@ -159,7 +158,7 @@ std::uint64_t refusedSections = 0;
 }
 
 [[nodiscard]] VS::Render::FrameScratch& Scratch() {
-  return *static_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase());
+  return VS::Render::FrameScratchpad();
 }
 
 // The read and buffer ids name only kNone; each carries the address of a

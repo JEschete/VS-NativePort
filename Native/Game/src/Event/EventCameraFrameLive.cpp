@@ -2,7 +2,6 @@
 #include "Event/EventCameraFrameLive.hpp"
 
 #include <atomic>
-#include <cstddef>
 #include <cstdint>
 #include <optional>
 
@@ -11,7 +10,6 @@
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Core/Scratch.hpp"
 #include "Event/Camera.hpp"
 #include "Event/EventCameraFrame.hpp"
 #include "Event/EventCameraLensLive.hpp"
@@ -34,14 +32,6 @@ namespace VS::Event {
 namespace {
 using Core::Math::Mat3;
 using Core::Math::Vec3;
-
-// The scratchpad words vs_battle_applyCameraState used: the look-at and eye
-// shake vectors (0x1F800098, 0x1F8000A8), the yaw-only rotation angles
-// (0x1F8000D8) and its matrix (0x1F8000F8).
-constexpr std::size_t kLookAtShakeScratchOffset = 0x98;
-constexpr std::size_t kEyeShakeScratchOffset = 0xA8;
-constexpr std::size_t kRotationScratchOffset = 0xD8;
-constexpr std::size_t kMatrixScratchOffset = 0xF8;
 
 std::atomic<std::uint64_t> refusedCount{0};
 
@@ -121,8 +111,10 @@ EventCameraProgress LoadProgress(const CameraState& camera) {
                               camera.shake_oscillators.at(1).duration_frames}};
 }
 
-// The field camera, the renderer and the GTE, through the scratchpad words
-// the original used. Without a scratchpad the rotation stays local.
+// The field camera, the renderer and the GTE. vs_battle_applyCameraState kept
+// the look-at and eye shake vectors (0x1F800098, 0x1F8000A8), the yaw-only
+// rotation angles (0x1F8000D8) and its matrix (0x1F8000F8) in the scratchpad;
+// each is written before it is read within one call, so they are locals.
 class LiveCameraOutput final : public EventCameraOutputPort {
  public:
   EventCameraPair InitializeFieldCamera() override {
@@ -137,31 +129,23 @@ class LiveCameraOutput final : public EventCameraOutputPort {
   }
 
   Mat3 BuildRotation(Core::Math::Angles3 rotation) override {
-    SVECTOR local_angles{};
-    MATRIX local_matrix{};
-    auto* angles = Scratch<SVECTOR>(kRotationScratchOffset, &local_angles);
-    auto* matrix = Scratch<MATRIX>(kMatrixScratchOffset, &local_matrix);
-    // The original stored only vx, vy and vz; the pad is kept.
-    angles->vx = static_cast<std::int16_t>(rotation.x);
-    angles->vy = static_cast<std::int16_t>(rotation.y);
-    angles->vz = static_cast<std::int16_t>(rotation.z);
-    Core::Math::BuildLiveRotationXyz(angles, matrix);
-    return Core::Math::MatrixOf(*matrix);
+    SVECTOR angles{};
+    MATRIX matrix{};
+    angles.vx = static_cast<std::int16_t>(rotation.x);
+    angles.vy = static_cast<std::int16_t>(rotation.y);
+    angles.vz = static_cast<std::int16_t>(rotation.z);
+    Core::Math::BuildLiveRotationXyz(&angles, &matrix);
+    return Core::Math::MatrixOf(matrix);
   }
 
   Vec3 ApplyMatrix(const Mat3& rotation, Vec3 vector,
-                   EventShakeTarget target) override {
-    MATRIX local_matrix{};
-    VECTOR local_vector{};
-    auto* matrix = Scratch<MATRIX>(kMatrixScratchOffset, &local_matrix);
-    auto* record = Scratch<VECTOR>(target == EventShakeTarget::kLookAt
-                                       ? kLookAtShakeScratchOffset
-                                       : kEyeShakeScratchOffset,
-                                   &local_vector);
-    Core::Math::StoreMatrix(*matrix, rotation);
-    StoreVector(*record, vector);
-    ApplyMatrixLV(matrix, record, record);
-    return VectorOf(*record);
+                   EventShakeTarget /*target*/) override {
+    MATRIX matrix{};
+    VECTOR record{};
+    Core::Math::StoreMatrix(matrix, rotation);
+    StoreVector(record, vector);
+    ApplyMatrixLV(&matrix, &record, &record);
+    return VectorOf(record);
   }
 
   void SetLookAt(Vec3 look_at) override {
@@ -185,14 +169,6 @@ class LiveCameraOutput final : public EventCameraOutputPort {
   void SetFarClip(std::int16_t far_clip,
                   std::uint8_t preserve_texture_lod) override {
     Render::SetLiveCameraFarClip(far_clip, preserve_texture_lod);
-  }
-
- private:
-  template <typename Record>
-  static Record* Scratch(std::size_t offset, Record* fallback) {
-    auto* scratch = static_cast<std::byte*>(VS::Core::ScratchBase());
-    if (scratch == nullptr) return fallback;
-    return reinterpret_cast<Record*>(scratch + offset);
   }
 };
 

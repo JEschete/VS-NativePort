@@ -16,7 +16,6 @@
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Core/Scratch.hpp"
 #include "Effects/Camera.hpp"
 #include "Effects/CameraLive.hpp"
 #include "Effects/CameraLiveState.hpp"
@@ -40,7 +39,6 @@ namespace math = Core::Math;
 using math::Position3;
 using math::Vec3;
 
-constexpr std::uintptr_t kEmitterScratchOffset = 0x1D0;
 // func_800FDEC4 allocates the state with vs_main_allocHeapR(0xD0).
 constexpr std::size_t kStateBytes = 0xD0;
 
@@ -76,12 +74,6 @@ std::uint64_t refusedTransforms = 0;
 // diagnostics readable.
 [[nodiscard]] bool ShouldReport(std::uint64_t& count) {
   return std::has_single_bit(++count);
-}
-
-LiveParticleEmitterScratch& EmitterScratch() {
-  return *reinterpret_cast<LiveParticleEmitterScratch*>(
-      reinterpret_cast<std::uintptr_t>(VS::Core::ScratchBase()) +
-      kEmitterScratchOffset);
 }
 
 [[nodiscard]] Position3 ShortOf(const SVECTOR& value) {
@@ -312,7 +304,7 @@ int UpdateLiveEffectCamera(LiveRendererSlot* slot, unsigned int command,
     return kind == CameraCommand::kStop ? 0 : 1;
   }
   auto& live = *static_cast<LiveCameraRecord*>(slot->renderer_state);
-  LiveParticleEmitterScratch& live_scratch = EmitterScratch();
+  LiveParticleEmitterScratch& live_scratch = EmitterWorkspace();
   CameraEffectState state = StateOf(live);
   CameraScratch scratch = ScratchOf(live_scratch);
   LiveCameraEffectHost host(currentInstance);

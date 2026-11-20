@@ -27,8 +27,7 @@ constexpr std::size_t kCornerWords = kTriangleCount * kTriangleWords;
 constexpr std::size_t kPacketWords = kCornerWords + kRingCount * kRingWords;
 
 struct VignetteFixture {
-  VS::Render::FrameScratch* frame =
-      static_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase());
+  VS::Render::FrameScratch* frame = &VS::Render::FrameScratchpad();
   VS::Render::FrameScratch saved = *frame;
   void* const saved_ordering =
       VS::Render::legacyOrderingTables[VS::Render::frameBuf & 1];

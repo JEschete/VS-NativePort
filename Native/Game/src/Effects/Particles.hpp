@@ -175,7 +175,8 @@ struct LiveParticleColorCurves {
 };
 
 // decomp: func_800FA098_arg1 (src/BATTLE/BATTLE.PRG/battleEffect.h:152): the
-// emitter's scratch at scratchpad offset 0x1D0, carried between emissions.
+// emitter's workspace, which the original kept at scratchpad offset 0x1D0 and
+// carried between emissions (EmitterWorkspace).
 struct LiveParticleEmitterScratch {
   // RotMatrix_gte overlays the first eighteen bytes with the direction matrix.
   VS::Core::Gte::VECTOR reserved_0;
@@ -271,6 +272,13 @@ static_assert(sizeof(LiveParticleLinePacket) == kParticleLinePacketBytes);
 // decomp: D_800EC328 (BATTLE.PRG): the emission counter func_800D2ADC
 // advances.
 extern std::int32_t emissionCounter;
+// decomp: func_800FA098_arg1 at scratchpad 0x1F8001D0: the workspace the
+// particle, trail, ring, surface, grid and camera emitters share. The session
+// owns it (ParticleEmitterLive.cpp): saved_flags carries the previous
+// emission's definition flags, so it lives across frames and scenes.
+[[nodiscard]] LiveParticleEmitterScratch& EmitterWorkspace() noexcept;
+// Restores the cold-boot state (all zero) at a session boundary.
+void ResetEmitterWorkspace() noexcept;
 // decomp: D_800EC330 (src/BATTLE/BATTLE.PRG/5BF94.c:402): the colour curves
 // of the paired definitions, by preset.
 extern LiveColorPresets<kPairedDefinitions> pairedParticleColorPresets;

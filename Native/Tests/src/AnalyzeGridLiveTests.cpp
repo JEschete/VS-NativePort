@@ -10,7 +10,6 @@
 
 #include "Core/Gte.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Core/Scratch.hpp"
 #include "Effects/AnalyzeGrid.hpp"
 #include "Effects/AnalyzeGridLive.hpp"
 #include "Effects/Package.hpp"
@@ -34,12 +33,10 @@ namespace memory = VS::Core::Memory;
 constexpr std::size_t kPrimitiveWords = 0x20000 / sizeof(std::uint32_t);
 constexpr std::size_t kOrderingWords = 0x2088 / sizeof(std::uint32_t);
 constexpr std::size_t kSceneOffset = 32;
-constexpr std::size_t kEmitterOffset = 0x1D0;
 constexpr std::uint32_t kInitialLink = 0xC4000007;
 
 VS::Effects::LiveParticleEmitterScratch& Emitter() {
-  return *reinterpret_cast<VS::Effects::LiveParticleEmitterScratch*>(
-      static_cast<std::byte*>(VS::Core::ScratchBase()) + kEmitterOffset);
+  return VS::Effects::EmitterWorkspace();
 }
 
 struct Definitions {

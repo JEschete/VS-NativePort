@@ -17,7 +17,6 @@
 #include "Core/Math/InterpolationLive.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/RandomLive.hpp"
-#include "Core/Scratch.hpp"
 #include "Effects/ActionRequest.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/Package.hpp"
@@ -40,11 +39,22 @@ namespace VS::Effects {
 std::int32_t emissionCounter = 0;
 
 namespace {
+// decomp: func_800FA098_arg1 at scratchpad 0x1F8001D0. Zero, as a cold boot
+// leaves it.
+LiveParticleEmitterScratch emitterWorkspace{};
+}  // namespace
+
+LiveParticleEmitterScratch& EmitterWorkspace() noexcept {
+  return emitterWorkspace;
+}
+
+void ResetEmitterWorkspace() noexcept { emitterWorkspace = {}; }
+
+namespace {
 namespace math = Core::Math;
 using math::Vec3;
 using Particle = LiveParticle;
 
-constexpr std::uintptr_t kScratchOffset = 0x1D0;
 constexpr std::uint32_t kDirectionMask = 0xE000;
 constexpr std::uint32_t kTowardSource = 0x4000;
 constexpr std::uint32_t kTowardDestination = 0x6000;
@@ -428,9 +438,7 @@ void EmitLiveParticleEvent(LiveEffectInstance* instance, int event,
         .transparency = static_cast<std::uint8_t>(parent->transparency),
         .variant = static_cast<std::uint8_t>(parent->variant)};
   }
-  auto& live_scratch = *reinterpret_cast<LiveParticleEmitterScratch*>(
-      reinterpret_cast<std::uintptr_t>(VS::Core::ScratchBase()) +
-      kScratchOffset);
+  LiveParticleEmitterScratch& live_scratch = emitterWorkspace;
   auto scratch = LoadScratch(live_scratch);
   LiveEmissionHost host(*instance);
   const auto result = EmitParticleEvent(

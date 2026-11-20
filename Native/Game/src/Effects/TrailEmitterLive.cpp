@@ -17,7 +17,6 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
-#include "Core/Scratch.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
@@ -49,7 +48,6 @@ using VS::Core::Gte::VECTOR;
 
 namespace VS::Effects {
 namespace {
-constexpr std::uintptr_t kEmitterScratchOffset = 0x1D0;
 using InstanceTransforms = decltype(LiveEffectInstance::transforms);
 using PackageCurves = decltype(LiveEffectPackage::curves);
 constexpr std::size_t kTransformCount = std::tuple_size_v<InstanceTransforms>;
@@ -100,12 +98,6 @@ const Templates::TrailStages& Plg074Stages() {
 [[noreturn]] void InvalidEmitter(std::string_view overlay, const char* reason) {
   VS::Core::LogError("effects", "{} trail emitter: {}", overlay, reason);
   std::abort();
-}
-
-LiveParticleEmitterScratch& EmitterScratch() {
-  return *reinterpret_cast<LiveParticleEmitterScratch*>(
-      reinterpret_cast<std::uintptr_t>(VS::Core::ScratchBase()) +
-      kEmitterScratchOffset);
 }
 
 TrailVector Wide(const VECTOR& value) {
@@ -300,7 +292,7 @@ class LiveTrailEmitterHost final : public TrailEmitterHost {
   // origin, target, control and init).
   void InitializeTrails() override {
     Emitter& state = *State();
-    LiveParticleEmitterScratch& scratch = EmitterScratch();
+    LiveParticleEmitterScratch& scratch = EmitterWorkspace();
     GenerateOrigins(*definition_, scratch, *instance_, state, overlay_);
     const auto& stages = *overlay_.stages;
     for (const auto stage : {stages.target, stages.control, stages.init}) {
@@ -416,7 +408,7 @@ bool LiveTrailEmitterHost<Emitter>::BeginTick() {
                       kTransformCount);
     return false;
   }
-  EmitterScratch().flags = definition_->flags;
+  EmitterWorkspace().flags = definition_->flags;
   return true;
 }
 
@@ -425,7 +417,7 @@ bool LiveTrailEmitterHost<Emitter>::BeginTick() {
 template <typename Emitter>
 void LiveTrailEmitterHost<Emitter>::DrawTrails() {
   Emitter& state = *State();
-  LiveParticleEmitterScratch& scratch = EmitterScratch();
+  LiveParticleEmitterScratch& scratch = EmitterWorkspace();
   Layout::kRunStage(overlay_.stages->update, *definition_, scratch, *instance_,
                     state);
   Layout::kRunStage(overlay_.stages->render, *definition_, scratch, *instance_,
@@ -450,7 +442,7 @@ template <typename Emitter>
 void LiveTrailEmitterHost<Emitter>::EmitTickEvents(std::size_t event) {
   constexpr std::size_t kSplineSampleCount =
       std::tuple_size_v<decltype(TrailOf<Emitter>::spline_samples)>;
-  LiveParticleEmitterScratch& scratch = EmitterScratch();
+  LiveParticleEmitterScratch& scratch = EmitterWorkspace();
   const MATRIX& world =
       instance_->transforms[definition_->transform_index].world;
   const bool world_events = (definition_->flags & kTrailWorldEvents) != 0;

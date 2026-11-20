@@ -222,7 +222,6 @@
     </ClCompile>
     <ClCompile Include="src\Core\Runtime.cpp" />
     <ClCompile Include="src\Core\RuntimeLive.cpp" />
-    <ClCompile Include="src\Core\Scratch.cpp" />
     <ClCompile Include="src\Core\String\GameText.cpp" />
     <ClCompile Include="src\Core\String\GameTextLive.cpp" />
     <ClCompile Include="src\Core\Unported.cpp" />
@@ -493,7 +492,6 @@
     <ClInclude Include="include\Core\RandomLive.hpp" />
     <ClInclude Include="include\Core\Runtime.hpp" />
     <ClInclude Include="include\Core\RuntimeLive.hpp" />
-    <ClInclude Include="include\Core\Scratch.hpp" />
     <ClInclude Include="include\Core\String\GameText.hpp" />
     <ClInclude Include="include\Core\String\GameTextLive.hpp" />
     <ClInclude Include="include\Core\Text\TextCode.hpp" />

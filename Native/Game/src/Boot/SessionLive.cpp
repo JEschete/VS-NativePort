@@ -16,6 +16,7 @@
 #include "Audio/VoiceOutputLive.hpp"
 #include "Battle/Ai/RoomState.hpp"
 #include "Battle/EncounterHooks.hpp"
+#include "Battle/SphereGeometryLive.hpp"
 #include "Battle/TargetingState.hpp"
 #include "Boot/GameLoop.hpp"
 #include "Content/CdDriveLive.hpp"
@@ -27,7 +28,9 @@
 #include "Core/Overlays.hpp"
 #include "Core/RandomLive.hpp"
 #include "Core/Runtime.hpp"
+#include "Effects/Particles.hpp"
 #include "Ending/EndingLive.hpp"
+#include "Event/EventCameraLensLive.hpp"
 #include "Event/ScriptDialogCommandsLive.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Event/ScriptVmLiveState.hpp"
@@ -152,7 +155,7 @@ class LiveSessionHost final : public SessionHost {
   void ResetGameplayInspection() override {
     VS::Boot::ResetGameplayInspection();
   }
-  void ResetNativeSession() override { VS::Game::Save::ResetSession(); }
+  void ResetNativeSession() override { ResetLiveSessionState(); }
 
   [[noreturn]] void Transfer(SessionDestination destination) override {
     VS::Core::Debugf(
@@ -226,7 +229,7 @@ class LiveLifecycleHost final : public OverlayLoadHost,
     VS::Content::ReleaseLiveDiscRequest(slot);
   }
 
-  void ResetNativeSession() override { VS::Game::Save::ResetSession(); }
+  void ResetNativeSession() override { ResetLiveSessionState(); }
   void HideDisplay() override { SetDispMask(0); }
   void StopControllerMotors() override {
     VS::Input::SetLiveMotorCommand(0, 0, 0);
@@ -362,6 +365,16 @@ class LiveGameHost final : public GameHost {
   }
 };
 }  // namespace
+
+// The workspaces below replace the PS1 scratchpad (#45), which outlived a soft
+// reset only because nothing cleared it; the title overlay overwrote it anyway,
+// so a new session matches the first boot instead of inheriting its values.
+void ResetLiveSessionState() {
+  VS::Game::Save::ResetSession();
+  Event::ResetLiveEventCameraScratch();
+  Effects::ResetEmitterWorkspace();
+  Battle::ResetLiveSphereWorkspace();
+}
 
 void ResetLiveSessionHeap() {
   CleanupMenuOwners();

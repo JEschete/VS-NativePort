@@ -4,14 +4,14 @@
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
-#include <cstring>
 #include <optional>
 
 #include "Core/Log.hpp"
-#include "Core/Scratch.hpp"
 #include "Effects/ScreenDistortion/RadialWarp.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Event/Camera.hpp"
+#include "Event/EventCameraLens.hpp"
+#include "Event/EventCameraLensLive.hpp"
 #include "Event/EventScreenTweens.hpp"
 #include "Event/InterpolationCurveLive.hpp"
 #include "Event/ScriptCamera.hpp"
@@ -25,9 +25,6 @@ using VS::Core::Gte::CVECTOR;
 
 namespace VS::Event {
 namespace {
-// The scratchpad word (0x1F800088) func_800BDBB4 kept each eased fraction in.
-constexpr std::size_t kEasedFractionScratchOffset = 0x88;
-
 std::atomic<std::uint64_t> refusedCount{0};
 
 void Skip(const char* operation, const char* reason) {
@@ -102,11 +99,10 @@ class LiveTweenEasing final : public EventTweenEasing {
     return EvaluateInterpolationCurveEntry(mode, frame, duration);
   }
 
+  // func_800BDBB4 kept each eased fraction in the camera scratch's envelope
+  // word (0x1F800088), which the lens and shake updates share.
   void RecordEasedFraction(std::int32_t fraction) override {
-    auto* scratch = static_cast<std::byte*>(VS::Core::ScratchBase());
-    if (scratch == nullptr) return;
-    std::memcpy(scratch + kEasedFractionScratchOffset, &fraction,
-                sizeof(fraction));
+    LiveEventCameraScratch().envelope = fraction;
   }
 };
 

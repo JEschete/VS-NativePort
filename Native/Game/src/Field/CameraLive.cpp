@@ -27,7 +27,6 @@
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Core/Scratch.hpp"
 #include "Field/CameraLiveState.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GameModeLive.hpp"
@@ -127,7 +126,7 @@ void RefuseNull(std::string_view entry) {
 }
 
 [[nodiscard]] VS::Render::FrameScratch& Scratch() {
-  return *static_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase());
+  return VS::Render::FrameScratchpad();
 }
 
 [[nodiscard]] Actors::MotionVector MotionOf(const SVECTOR& vector) {

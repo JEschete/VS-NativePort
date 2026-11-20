@@ -52,7 +52,6 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Runtime.hpp"
-#include "Core/Scratch.hpp"
 #include "Effects/Runtime.hpp"
 #include "Effects/WeatherPoolLive.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
@@ -226,7 +225,7 @@ void RefuseCall(std::string_view entry, std::string_view reason) {
 }
 
 [[nodiscard]] VS::Render::FrameScratch& Scratch() {
-  return *static_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase());
+  return VS::Render::FrameScratchpad();
 }
 
 [[nodiscard]] RECT ToRect(const Render::ScreenRect& area) {

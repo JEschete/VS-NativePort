@@ -25,6 +25,10 @@ void EnterBattleLive();
 void RunEndingAndReturnToTitleLive();
 void InitializePlatformServicesLive();
 void InitializeTitleSessionLive();
+// Returns the session's native state to its cold-boot form: the staged resume,
+// the file menu and the event, emitter and sphere workspaces. Every session
+// boundary reaches it through ResetNativeSession.
+void ResetLiveSessionState();
 // After the old frame producer stops, drain menu owners and abandon
 // frame bindings/packets before heap replacement. Refused cleanup is fatal.
 void ResetLiveSessionHeap();

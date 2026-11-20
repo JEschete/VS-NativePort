@@ -17,7 +17,6 @@
 #include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Core/Scratch.hpp"
 #include "Effects/ActionRequest.hpp"
 #include "Effects/BoneTrail.hpp"
 #include "Effects/BoneTrailLiveState.hpp"

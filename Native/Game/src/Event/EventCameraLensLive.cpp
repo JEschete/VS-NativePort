@@ -5,13 +5,11 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
-#include <cstring>
 #include <optional>
 
 #include "Core/Log.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Core/Scratch.hpp"
 #include "Event/Camera.hpp"
 #include "Event/EventCameraLens.hpp"
 #include "Event/InterpolationCurveLive.hpp"
@@ -22,16 +20,11 @@
 
 namespace VS::Event {
 namespace {
-using Core::Math::Position3;
-
 static_assert(kShakeOscillatorCount == kEventShakeOscillatorCount);
-// The scratch words (decomp cameraShakeScratch at 0x1F800088): the shared
-// envelope, then the look-at, eye and per-axis shake vectors.
-constexpr std::size_t kEnvelopeScratch = 0x88;
-constexpr std::size_t kLookAtShakeScratch = 0xD8;
-constexpr std::size_t kEyeShakeScratch = 0xE0;
-constexpr std::size_t kAxisShakeScratch = 0xE8;
-constexpr std::size_t kHalfBytes = sizeof(std::int16_t);
+
+// decomp: cameraShakeScratch (0x1F800088): the shared envelope, then the
+// look-at, eye and per-axis shake vectors. Zero, as a cold boot leaves it.
+EventCameraScratch cameraScratch;
 
 [[noreturn]] void Refuse(const char* operation, const char* reason) {
   VS::Core::LogError("event.camera", "{} refused: {}", operation, reason);
@@ -41,59 +34,6 @@ constexpr std::size_t kHalfBytes = sizeof(std::int16_t);
 CameraState& RequiredCamera(const char* operation) {
   if (cameraWorkspace == nullptr) Refuse(operation, "missing event camera");
   return *cameraWorkspace;
-}
-
-template <typename Value>
-Value LoadAt(const unsigned char* base, std::size_t offset) {
-  Value value{};
-  std::memcpy(&value, base + offset, sizeof(value));
-  return value;
-}
-
-template <typename Value>
-void StoreAt(unsigned char* base, std::size_t offset, Value value) {
-  std::memcpy(base + offset, &value, sizeof(value));
-}
-
-unsigned char* ScratchBytes() {
-  return static_cast<unsigned char*>(VS::Core::ScratchBase());
-}
-
-Position3 LoadPosition(const unsigned char* base, std::size_t offset) {
-  return {.x = LoadAt<std::int16_t>(base, offset),
-          .y = LoadAt<std::int16_t>(base, offset + kHalfBytes),
-          .z = LoadAt<std::int16_t>(base, offset + 2 * kHalfBytes)};
-}
-
-// The shake writes three halfwords and keeps the pad.
-void StorePosition(unsigned char* base, std::size_t offset, Position3 value) {
-  StoreAt(base, offset, value.x);
-  StoreAt(base, offset + kHalfBytes, value.y);
-  StoreAt(base, offset + 2 * kHalfBytes, value.z);
-}
-
-EventCameraScratch LoadScratch() {
-  const unsigned char* scratch = ScratchBytes();
-  return {.envelope = LoadAt<std::int32_t>(scratch, kEnvelopeScratch),
-          .look_at_shake = LoadPosition(scratch, kLookAtShakeScratch),
-          .eye_shake = LoadPosition(scratch, kEyeShakeScratch),
-          .axis_shake = LoadPosition(scratch, kAxisShakeScratch)};
-}
-
-void StoreScratch(const EventCameraScratch& values) {
-  unsigned char* scratch = ScratchBytes();
-  StoreAt(scratch, kEnvelopeScratch, values.envelope);
-  StorePosition(scratch, kLookAtShakeScratch, values.look_at_shake);
-  StorePosition(scratch, kEyeShakeScratch, values.eye_shake);
-  StorePosition(scratch, kAxisShakeScratch, values.axis_shake);
-}
-
-std::int32_t LoadEnvelopeScratch() {
-  return LoadAt<std::int32_t>(ScratchBytes(), kEnvelopeScratch);
-}
-
-void StoreEnvelopeScratch(std::int32_t envelope) {
-  StoreAt(ScratchBytes(), kEnvelopeScratch, envelope);
 }
 
 EventLensTween LoadLens(const LensTween& lens) {
@@ -200,16 +140,18 @@ class LiveEventCameraLensHost final : public EventCameraLensHost {
 };
 }  // namespace
 
+EventCameraScratch& LiveEventCameraScratch() noexcept { return cameraScratch; }
+
+void ResetLiveEventCameraScratch() noexcept { cameraScratch = {}; }
+
 // decomp: BATTLE.PRG func_800BDF6C (F01233, src/BATTLE/BATTLE.PRG/4A0A8.c:3927,
 // 0x800BDF6C-0x800BE01C)
 void UpdateEventLensTweenEntry(LensTween* lens_tween) {
   if (lens_tween == nullptr) Refuse("UpdateEventLensTween", "missing tween");
   LiveEventCameraLensHost host;
   EventLensTween tween = LoadLens(*lens_tween);
-  std::int32_t fraction = LoadEnvelopeScratch();
-  UpdateEventLensTween(tween, fraction, host);
+  UpdateEventLensTween(tween, cameraScratch.envelope, host);
   StoreLens(*lens_tween, tween);
-  StoreEnvelopeScratch(fraction);
 }
 
 // decomp: BATTLE.PRG func_800BE01C (F01234, src/BATTLE/BATTLE.PRG/4A0A8.c:3945,
@@ -220,10 +162,9 @@ int UpdateEventShakeOscillatorEntry(ShakeOscillator* oscillator) {
   }
   LiveEventCameraLensHost host;
   EventShakeOscillator state = LoadOscillator(*oscillator);
-  std::int32_t envelope = LoadEnvelopeScratch();
-  const bool active = UpdateEventShakeOscillator(state, envelope, host);
+  const bool active =
+      UpdateEventShakeOscillator(state, cameraScratch.envelope, host);
   StoreOscillator(*oscillator, state);
-  StoreEnvelopeScratch(envelope);
   return active ? 1 : 0;
 }
 
@@ -233,10 +174,8 @@ void UpdateEventCameraShakeEntry() {
   CameraState& camera = RequiredCamera("UpdateEventCameraShake");
   LiveEventCameraLensHost host;
   EventCameraShake shake = LoadShake(camera);
-  EventCameraScratch scratch = LoadScratch();
-  UpdateEventCameraShake(shake, scratch, host);
+  UpdateEventCameraShake(shake, cameraScratch, host);
   StoreShake(camera, shake);
-  StoreScratch(scratch);
 }
 }  // namespace VS::Event
 

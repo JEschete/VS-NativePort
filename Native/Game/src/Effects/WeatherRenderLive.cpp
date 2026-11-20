@@ -13,7 +13,6 @@
 
 #include "Core/Gte.hpp"
 #include "Core/Log.hpp"
-#include "Core/Scratch.hpp"
 #include "Effects/WeatherPool.hpp"
 #include "Effects/WeatherPoolLiveSupport.hpp"
 #include "Effects/WeatherRender.hpp"

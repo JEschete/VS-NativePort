@@ -3,8 +3,12 @@
 #include "Render/Frame.hpp"
 
 #include "Legacy/Psx.hpp"
+#include "Render/Render.hpp"
 
 using VS::Legacy::DR_STP;
+
+// decomp: vs_scratch (src/include/scratch.h): the frame's drawing context.
+VS::Render::FrameScratch VS::Render::frameScratch{};
 
 // decomp: D_800F1870 (D_800F1870@BATTLE/BATTLE.PRG)
 void* VS::Render::legacyCurrentOrderingTable;

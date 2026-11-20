@@ -6,7 +6,6 @@
 #include <bit>
 #include <cstddef>
 #include <cstdint>
-#include <cstring>
 #include <iterator>
 #include <optional>
 #include <span>
@@ -23,7 +22,6 @@
 #include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Core/Scratch.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GimmickLookup.hpp"
@@ -49,10 +47,7 @@ namespace VS::Battle {
 namespace {
 namespace math = Core::Math;
 
-constexpr std::size_t kTransformScratchOffset = 0x350;
-constexpr std::size_t kVolumeScratchOffset = 0x378;
-constexpr std::size_t kSineScratchOffset = 0x3B0;
-// The yaw basis entries written into the scratchpad MATRIX (halfwords).
+// The yaw basis entries of the camera basis rows (halfwords).
 constexpr std::size_t kBasisCosine = 0;
 constexpr std::size_t kBasisSine = 2;
 constexpr std::size_t kBasisNegatedSine = 8;
@@ -65,6 +60,7 @@ constexpr std::uint32_t kCursorQuadTag = 0x09000000;
 constexpr std::size_t kSpriteTexcoordWord = 4;
 constexpr unsigned kHalfwordBits = 16;
 
+static_assert(kBasisCosineAgain < kSphereCameraBasisHalfwords);
 constexpr std::size_t kTargetVolumeBytes = 16;
 static_assert(sizeof(TargetVolume) == kTargetVolumeBytes);
 static_assert(sizeof(VS::Field::MpdTileCell) == sizeof(std::uint32_t));
@@ -81,10 +77,6 @@ void Refuse(const char* what) {
                       "Sphere drawing refused: {} ({} refusals)", what,
                       refusals);
   }
-}
-
-[[nodiscard]] std::byte* Scratch(std::size_t offset) {
-  return static_cast<std::byte*>(VS::Core::ScratchBase()) + offset;
 }
 
 [[nodiscard]] VS::Battle::TargetSphereRecord* LiveSphere() {
@@ -117,9 +109,14 @@ void Refuse(const char* what) {
   return record;
 }
 
+// The working copy of volume `slot`; null (and refused) past the two volumes.
 [[nodiscard]] TargetVolume* StagedVolume(std::size_t slot) {
-  return reinterpret_cast<TargetVolume*>(
-      Scratch(kVolumeScratchOffset + (slot * sizeof(TargetVolume))));
+  auto& staged = LiveSphereWorkspace().staged_volumes;
+  if (slot >= staged.size()) {
+    Refuse("staged volume past the sphere's two volumes");
+    return nullptr;
+  }
+  return &staged.at(slot);
 }
 
 class LiveSphereDrawPort final : public SphereDrawPort {
@@ -129,12 +126,13 @@ class LiveSphereDrawPort final : public SphereDrawPort {
 
   void StoreSineSamples(
       std::span<const std::int16_t, kSphereSineSamples> samples) override {
-    std::memcpy(Scratch(kSineScratchOffset), samples.data(),
-                samples.size_bytes());
+    std::ranges::copy(samples, LiveSphereWorkspace().sine_samples.begin());
   }
 
   void StageVolume(std::size_t slot, const SphereDrawVolume& volume) override {
-    *StagedVolume(slot) = RecordOf(volume);
+    if (TargetVolume* staged = StagedVolume(slot)) {
+      *staged = RecordOf(volume);
+    }
   }
 
   void LoadFrameView() override { VS::Render::LoadLiveFrameViewMatrix(); }
@@ -170,6 +168,9 @@ class LiveSphereDrawPort final : public SphereDrawPort {
   void DrawVolumeWireframe(std::size_t slot, const SphereDrawVolume& volume,
                            std::uint32_t color) override {
     TargetVolume* staged = StagedVolume(slot);
+    if (staged == nullptr) {
+      return;
+    }
     *staged = RecordOf(volume);
     DrawLiveSphereVolumeWireframe(staged, static_cast<int>(color));
   }
@@ -249,7 +250,7 @@ class LiveTerrainSource final : public SphereTerrainSource {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800C0990 (src/BATTLE/BATTLE.PRG/573B8.c:552).
+// decomp: BATTLE.PRG func_800C0990 (src/BATTLE/BATTLE.PRG/57B1C.c:204).
 void LiveDrawSphereWireLine(SVECTOR* start, SVECTOR* end, std::uint32_t color,
                             int intensity) {
   if (start == nullptr || end == nullptr) {
@@ -280,7 +281,7 @@ void LiveDrawSphereWireLine(SVECTOR* start, SVECTOR* end, std::uint32_t color,
   slot = GpuHandle(packet);
 }
 
-// decomp: BATTLE.PRG func_800C0D78 (src/BATTLE/BATTLE.PRG/58578.c:104).
+// decomp: BATTLE.PRG func_800C0D78 (src/BATTLE/BATTLE.PRG/58578.c:53).
 void LiveDrawSphere() {
   VS::Battle::TargetSphereRecord* sphere = LiveSphere();
   if (sphere == nullptr) {
@@ -292,14 +293,12 @@ void LiveDrawSphere() {
              port);
 }
 
-// decomp: BATTLE.PRG func_800C282C (src/BATTLE/BATTLE.PRG/58578.c:965).
+// decomp: BATTLE.PRG func_800C282C (src/BATTLE/BATTLE.PRG/58578.c:914).
 void* LiveBuildSphereCameraBasis() {
   VS::Field::SphericalCamera camera{};
   static_cast<void>(VS::Field::LiveSyncCameraAnglesFromPosition(&camera));
   const SphereCameraBasis basis = BuildSphereCameraBasis(camera.values.yaw);
-  auto* matrix =
-      reinterpret_cast<std::int16_t*>(Scratch(kTransformScratchOffset));
-  const std::span<std::int16_t> entries(matrix, kBasisCosineAgain + 1);
+  auto& entries = LiveSphereWorkspace().camera_basis;
   entries[kBasisCosine] = basis.cosine;
   entries[kBasisSine] = basis.sine;
   entries[kBasisNegatedSine] = basis.negated_sine;
@@ -309,10 +308,10 @@ void* LiveBuildSphereCameraBasis() {
   } else {
     Refuse("camera yaw without a target sphere");
   }
-  return Scratch(kTransformScratchOffset);
+  return entries.data();
 }
 
-// decomp: BATTLE.PRG func_800C28AC (src/BATTLE/BATTLE.PRG/58578.c:984).
+// decomp: BATTLE.PRG func_800C28AC (src/BATTLE/BATTLE.PRG/58578.c:933).
 void LiveDrawSpherePositionCursor(SVECTOR* position, int lock_pitch) {
   if (position == nullptr) {
     Refuse("position cursor without a position");
@@ -358,7 +357,7 @@ void LiveDrawSpherePositionCursor(SVECTOR* position, int lock_pitch) {
   }
 }
 
-// decomp: BATTLE.PRG func_800C2B0C (src/BATTLE/BATTLE.PRG/58578.c:1036).
+// decomp: BATTLE.PRG func_800C2B0C (src/BATTLE/BATTLE.PRG/58578.c:985).
 void LiveCacheSphereTerrainRow(SVECTOR* position, std::uint32_t row) {
   if (row >= kSphereTerrainRows) {
     return;

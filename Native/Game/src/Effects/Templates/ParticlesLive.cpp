@@ -19,7 +19,6 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
-#include "Core/Scratch.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
@@ -76,7 +75,6 @@ namespace {
 namespace math = Core::Math;
 using math::Vec3;
 
-constexpr std::uintptr_t kEmitterScratchOffset = 0x1D0;
 using InstanceTransforms = decltype(LiveEffectInstance::transforms);
 using TextureTables = decltype(LiveEffectPackage::texture_tables);
 constexpr std::size_t kTransformCount = std::tuple_size_v<InstanceTransforms>;
@@ -115,12 +113,6 @@ std::uint64_t droppedPackets = 0;
 // diagnostics readable.
 [[nodiscard]] bool ShouldReport(std::uint64_t& count) {
   return std::has_single_bit(++count);
-}
-
-LiveParticleEmitterScratch& EmitterScratch() {
-  return *reinterpret_cast<LiveParticleEmitterScratch*>(
-      reinterpret_cast<std::uintptr_t>(VS::Core::ScratchBase()) +
-      kEmitterScratchOffset);
 }
 
 // The current package's definition `index`, or null when its recorded
@@ -525,7 +517,7 @@ void LiveParticleHost::StorePoints(const ParticleSetPoints& points) {
 }
 
 ParticleSetScratch LiveParticleHost::LoadScratch() const {
-  const LiveParticleEmitterScratch& scratch = EmitterScratch();
+  const LiveParticleEmitterScratch& scratch = EmitterWorkspace();
   return {.flags = scratch.flags,
           .position = math::VectorOf(scratch.position),
           .extent = math::VectorOf(scratch.extent),
@@ -549,7 +541,7 @@ ParticleSetScratch LiveParticleHost::LoadScratch() const {
 }
 
 void LiveParticleHost::PublishScratch(const ParticleSetScratch& values) {
-  LiveParticleEmitterScratch& scratch = EmitterScratch();
+  LiveParticleEmitterScratch& scratch = EmitterWorkspace();
   scratch.flags = values.flags;
   math::StoreVector(scratch.position, values.position);
   math::StoreVector(scratch.extent, values.extent);

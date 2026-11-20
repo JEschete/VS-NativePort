@@ -47,7 +47,6 @@
 #include "Core/Diagnostics.hpp"
 #include "Core/Log.hpp"
 #include "Core/RandomLive.hpp"
-#include "Core/Scratch.hpp"
 #include "Diagnostics/GameplayTrace.hpp"
 #include "Effects/Runtime.hpp"
 #include "Ending/ClearResults.hpp"

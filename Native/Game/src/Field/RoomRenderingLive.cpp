@@ -14,7 +14,6 @@
 #include "Battle/Feedback.hpp"
 #include "Core/Gte.hpp"
 #include "Core/Log.hpp"
-#include "Core/Scratch.hpp"
 #include "Field/CameraLiveState.hpp"
 #include "Field/EnvironmentLive.hpp"
 #include "Field/GimmickAnimationQueueLive.hpp"
@@ -122,7 +121,7 @@ void RefuseCall(std::string_view entry, std::string_view reason) {
 }
 
 [[nodiscard]] VS::Render::FrameScratch& Scratch() {
-  return *static_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase());
+  return VS::Render::FrameScratchpad();
 }
 
 template <typename Byte>

@@ -796,15 +796,10 @@ TEST_CASE(
   auto expected = candidate;
   expected.opaque0 = 256 * 128 + 128;
   expected.weight = 128;
-  std::array<std::byte, 16 * sizeof(VS::Battle::Ai::ActionTiming)> scratch{};
-  auto* scratch_rows = static_cast<std::byte*>(VS::Core::ScratchBase()) + 0x18C;
-  std::memcpy(scratch.data(), scratch_rows, scratch.size());
   REQUIRE(VS::Battle::Ai::EvaluateLiveActionCandidate(&fixture.state,
                                                       &candidate, 0, nullptr));
   CHECK(std::bit_cast<VS::Battle::Ai::ActionCandidate::Words>(candidate) ==
         std::bit_cast<VS::Battle::Ai::ActionCandidate::Words>(expected));
-  CHECK(std::memcmp(scratch.data(), scratch_rows, scratch.size()) == 0);
-  std::memcpy(scratch_rows, scratch.data(), scratch.size());
   fixture.state.scores_special_actions = 1;
   VS::Battle::actionDefinitions[42].ai_flags.special_mode_action = 1;
   VS::Battle::Ai::EvaluateActionCandidateEntry(
@@ -899,11 +894,6 @@ TEST_CASE("Native enumeration caches and ranks without its old scratch records",
           "[ai][planning][candidate-enumeration-live]") {
   EnumerationFixture fixture;
   fixture.state.action_slots[2][1].kind = GENERATE(1u, 2u, 3u);
-  std::array<std::byte, 4 * sizeof(VS::Battle::Ai::ActionCandidateRecord)>
-      scratch{};
-  const auto* scratch_rows =
-      static_cast<const std::byte*>(VS::Core::ScratchBase()) + 0x30C;
-  std::memcpy(scratch.data(), scratch_rows, scratch.size());
   VS::Battle::Ai::EnumerateActionCandidatesEntry(&fixture.state, -1);
   REQUIRE(fixture.state.candidate_count == 1);
   REQUIRE(VS::Battle::Ai::fallbackCandidateCount == 1);
@@ -912,7 +902,6 @@ TEST_CASE("Native enumeration caches and ranks without its old scratch records",
   CHECK(fixture.exclusions[1][42] == 1);
   CHECK(VS::Battle::Ai::fallbackSlotMask == (1 << 9));
   CHECK(std::memcmp(&fixture.fallback[0], &selected, sizeof(selected)) == 0);
-  CHECK(std::memcmp(scratch.data(), scratch_rows, scratch.size()) == 0);
 }
 
 TEST_CASE("Native enumeration rereads exclusions on repeated calls",
