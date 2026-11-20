@@ -62,7 +62,7 @@ class LiveInjuryQueue final : public LimbInjuryQueue {
   }
   ActionResultChange PendingHp(std::uint8_t limb) override {
     Require(limb < std::size(hit_.limbs));
-    return {hit_.limbs[limb].effects.opaque0,
+    return {hit_.limbs[limb].effects.hp_change,
             static_cast<std::uint8_t>(hit_.hp_effect)};
   }
   std::uint32_t ActiveStatuses() override {

@@ -76,7 +76,7 @@ struct ActionTargetPreview {
   std::uint32_t removed_statuses = 0;
   std::uint8_t action_kind = 0;
   std::uint8_t damage_type = 0;
-  std::uint8_t effect_variant = 0;
+  std::uint8_t affinity = 0;
   std::uint8_t enemy_class = 0;
 
   friend bool operator==(const ActionTargetPreview&,
@@ -88,7 +88,7 @@ struct ActionTargetPreview {
 struct ActionPreviewResult {
   int action_id = 0;
   int damage_type = 0;
-  int effect_variant = 0;
+  int affinity = 0;
   int target_actor = 0;
   int target_hp = 0;
   int target_mp = 0;
@@ -363,7 +363,7 @@ struct TargetSelectionLabel {
   int state = 0;
   int depth = 0;
   int gradient = 0;
-  int ring_size = 0;
+  int pulse_phase = 0;
   int screen_x = 0;
   int offset_y = 0;
   int fade = 0;

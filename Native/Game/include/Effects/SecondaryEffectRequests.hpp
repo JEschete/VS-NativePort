@@ -78,7 +78,7 @@ struct ImpactTarget {
 // The current queued action (VS::Battle::actionState->queue[queueIndex & 3]).
 struct QueuedEffectAction {
   std::uint16_t action_id{};
-  std::uint8_t effect_variant{};
+  std::uint8_t affinity{};
   // primaryTarget.target.target_actor: the request's source actor.
   std::uint8_t source_actor{};
   std::uint16_t target_count{};
@@ -146,7 +146,7 @@ struct ImpactEffectChoice {
 // func_8006C4C4 (146C.c:1927): the hit effect request from the queued
 // action's source actor to `target`: at its actor's limb bone tag with
 // `limb` as the slot byte, or at the position its hit word holds. The target
-// carries the action's effect variant as its color preset. `bone_tag` is the
+// carries the action's affinity as its color preset. `bone_tag` is the
 // actor bone tag the request names (unused for a position).
 [[nodiscard]] SingleTargetEffectRequest ActionHitEffectRequest(
     std::uint16_t effect_id, const QueuedEffectAction& action,

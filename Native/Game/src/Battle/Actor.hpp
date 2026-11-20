@@ -52,7 +52,7 @@ struct Actor {
   std::uint16_t sub_type;
   std::uint16_t kind;
   std::uint8_t facing;
-  std::uint8_t spawn_byte26;
+  std::uint8_t combat_pose;
   std::int32_t weapon_drawn;
   std::uint8_t interaction_flags;
   std::uint8_t equipped_weapon_category;
@@ -67,8 +67,8 @@ struct Actor {
   std::uint32_t reserved30_bit4 : 5;
   std::uint32_t ai_linked_group : 5;
   std::uint32_t reserved31_bit6 : 18;
-  std::int32_t reserved34;
-  std::int32_t template_word2c;
+  std::int32_t spawn_ai_settings;
+  std::int32_t ai_settings;
   ActorStats* stats;
   std::int32_t allocation_kind;
   VS::Actors::ModelInstance* model;

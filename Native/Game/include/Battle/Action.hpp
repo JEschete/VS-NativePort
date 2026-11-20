@@ -59,10 +59,10 @@ inline constexpr std::size_t kActionRequestTargetCount = 255;
 // decomp: D_800F19CC_t2 (src/BATTLE/BATTLE.PRG/hitEntity.h:58-67)
 struct ActionRequestRecord {
   std::uint16_t action_id;
-  std::int8_t effect_variant;
+  std::int8_t affinity;
   std::int8_t damage_type;
   HitResult primary_target;
-  std::uint16_t animation_parameter;
+  std::uint16_t target_redirected;
   std::uint16_t target_count;
   std::array<HitResult, kActionRequestTargetCount> targets;
   VS::Core::Gte::SVECTOR focus_position;
@@ -112,7 +112,7 @@ struct ActionState {
   std::int8_t previous_chain_input;
   std::int8_t ability_input_succeeded;
   std::int8_t ability_input_attempted;
-  std::int8_t chain_continued;
+  std::int8_t defense_continued;
   std::uint16_t ability_timer;
   std::uint16_t ability_window;
   std::int16_t preferred_camera_distance;
@@ -124,12 +124,12 @@ struct ActionState {
 // decomp: vs_ActionFlags (src/SLUS_010.40/actions.h:17-27)
 struct ActionAiFlags {
   std::uint16_t reserved0_bit0 : 4;
-  std::uint16_t opaque0_bit4 : 1;
+  std::uint16_t special_mode_action : 1;
   std::uint16_t rarely_chosen : 1;
-  std::uint16_t reserved0_bit6 : 1;
+  std::uint16_t fallback_eligible : 1;
   std::uint16_t shaped_area : 1;
   std::uint16_t reserved1_bit0 : 4;
-  std::uint16_t opaque1_bit4 : 1;
+  std::uint16_t ignores_sight : 1;
   std::uint16_t radial_area : 1;
   std::uint16_t reserved1_bit6 : 2;
 };
@@ -176,8 +176,8 @@ struct ActionDefinition {
   std::uint8_t area_shape;
   std::uint8_t recovery_delay;
   std::uint8_t reserved_d_bit0 : 4;
-  std::uint8_t opaque_d_bit4 : 2;
-  std::uint8_t resets_hit_results : 1;
+  std::uint8_t camera_zoom_mode : 2;
+  std::uint8_t hits_first_obstruction : 1;
   std::uint8_t unlocked : 1;
   ActionAiFlags ai_flags;
   std::int32_t reserved10;

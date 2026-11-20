@@ -36,9 +36,8 @@ static_assert(sizeof(VS::Battle::TargetSphereRecord) <=
               sizeof(VS::Battle::TargetSphereSetupView));
 static_assert(std::size(VS::Battle::TargetSphereSetupView{}.wire_edges) ==
               kSphereWireEdgeCapacity);
-static_assert(offsetof(VS::Battle::TargetSphereRecord, input_locked) ==
-              offsetof(VS::Battle::TargetSphereSetupView,
-                       cursor_z_and_input_locked) +
+static_assert(offsetof(VS::Battle::TargetSphereRecord, cursor_locked) ==
+              offsetof(VS::Battle::TargetSphereSetupView, cursor_z_and_locked) +
                   sizeof(std::int16_t));
 
 [[noreturn]] void Refuse(const char* operation, const char* reason) {
@@ -65,7 +64,7 @@ SphereVolume ReadVolume(const VS::Battle::TargetSphereSpec& spec) {
     extents[index] = volume.scale.extents[index];
   }
   return {.kind = volume.kind,
-          .range_kind = volume.opaque1,
+          .range_kind = volume.range_kind,
           .angle = volume.angle,
           .extents = extents,
           .position = {volume.position[kPositionXIndex],
@@ -77,7 +76,7 @@ SphereVolume ReadVolume(const VS::Battle::TargetSphereSpec& spec) {
 VS::Battle::TargetSphereSpec WriteVolume(const SphereVolume& value) {
   TargetVolume volume{};
   volume.kind = static_cast<std::uint8_t>(value.kind);
-  volume.opaque1 = static_cast<std::uint8_t>(value.range_kind);
+  volume.range_kind = static_cast<std::uint8_t>(value.range_kind);
   volume.angle = static_cast<std::int16_t>(value.angle);
   for (std::size_t index = 0; index < value.extents.size(); ++index) {
     volume.scale.extents[index] = value.extents[index];
@@ -101,10 +100,10 @@ SphereLifecycleState ReadState(
               static_cast<std::uint8_t>(sphere.target_count)),
           .selected_target = std::bit_cast<std::int8_t>(
               static_cast<std::uint8_t>(sphere.selected_target)),
-          .sphere_mode = sphere.sphere_mode,
-          .reserved_38 = std::bit_cast<std::uint32_t>(sphere.cursor_xy),
-          .reserved_3c_and_input_locked =
-              std::bit_cast<std::uint32_t>(sphere.cursor_z_and_input_locked)};
+          .area_target_count = sphere.area_target_count,
+          .cursor_xy = std::bit_cast<std::uint32_t>(sphere.cursor_xy),
+          .cursor_z_and_locked =
+              std::bit_cast<std::uint32_t>(sphere.cursor_z_and_locked)};
 }
 
 void WriteState(VS::Battle::TargetSphereSetupView& sphere,
@@ -117,10 +116,9 @@ void WriteState(VS::Battle::TargetSphereSetupView& sphere,
   sphere.wire_shape = state.wire_shape;
   sphere.target_count = std::bit_cast<char>(state.target_count);
   sphere.selected_target = std::bit_cast<char>(state.selected_target);
-  sphere.sphere_mode = state.sphere_mode;
-  sphere.cursor_xy = std::bit_cast<int>(state.reserved_38);
-  sphere.cursor_z_and_input_locked =
-      std::bit_cast<int>(state.reserved_3c_and_input_locked);
+  sphere.area_target_count = state.area_target_count;
+  sphere.cursor_xy = std::bit_cast<int>(state.cursor_xy);
+  sphere.cursor_z_and_locked = std::bit_cast<int>(state.cursor_z_and_locked);
 }
 }  // namespace
 
@@ -153,7 +151,7 @@ void FreeLiveSphere(VS::Battle::TargetSphereSetupView*& sphere,
 void SetLiveSphereVolumes(VS::Battle::TargetSphereSetupView* sphere,
                           const VS::Battle::TargetSphereSpec* primary,
                           const VS::Battle::TargetSphereSpec* secondary,
-                          std::uint8_t sphere_mode,
+                          std::uint8_t area_target_count,
                           VS::Battle::TargetPreview* target_previews,
                           std::uint8_t& reuse_volumes) {
   auto& legacy = RequiredSphere(sphere, "sphere volume update");
@@ -171,7 +169,7 @@ void SetLiveSphereVolumes(VS::Battle::TargetSphereSetupView* sphere,
   auto reuse_state = reuse;
   const auto result = SetSphereVolumes(
       state, primary_value, secondary == nullptr ? nullptr : &secondary_value,
-      sphere_mode, reuse_state);
+      area_target_count, reuse_state);
   if (!result.has_value()) {
     Refuse("sphere volume update", "invalid lifecycle state");
   }
@@ -248,10 +246,10 @@ void InitializeSphereEntry() {
 // decomp: BATTLE.PRG func_800C05EC (src/BATTLE/BATTLE.PRG/573B8.c:444).
 void SetSphereVolumesEntry(VS::Battle::TargetSphereSpec* primary,
                            VS::Battle::TargetSphereSpec* secondary,
-                           std::uint8_t sphere_mode,
+                           std::uint8_t area_target_count,
                            VS::Battle::TargetPreview* target_previews) {
   SetLiveSphereVolumes(VS::Battle::targetSphere, primary, secondary,
-                       sphere_mode, target_previews,
+                       area_target_count, target_previews,
                        VS::Battle::reuseSphereVolumes);
 }
 

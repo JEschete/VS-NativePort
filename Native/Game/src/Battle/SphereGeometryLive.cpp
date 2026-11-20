@@ -39,7 +39,7 @@ constexpr std::size_t kWireShapeOffset = 0x2A;
 constexpr std::size_t kPulseModeAndVertexCountOffset = 0x30;
 constexpr std::size_t kWireVerticesOffset = 0x50;
 constexpr std::size_t kTargetVolumeScaleOffset = 0x4;
-constexpr std::size_t kShapeVertexOpaqueOffset = 6;
+constexpr std::size_t kShapeVertexSegmentOffset = 6;
 
 static_assert(offsetof(VS::Battle::TargetSphereSetupView, wire_phase_a) ==
               kWirePhaseAOffset);
@@ -61,7 +61,7 @@ static_assert(
 static_assert(offsetof(TargetVolume, scale) == kTargetVolumeScaleOffset);
 static_assert(sizeof(TargetVolume{}.scale.extents) == kTargetVolumeExtents);
 static_assert(offsetof(ShapeVertex, xyz) == 0);
-static_assert(offsetof(ShapeVertex, opaque6) == kShapeVertexOpaqueOffset);
+static_assert(offsetof(ShapeVertex, segment) == kShapeVertexSegmentOffset);
 
 [[noreturn]] void Refuse(const char* operation, const char* reason) {
   VS::Core::LogError("battle.sphere", "{} refused: {}", operation, reason);
@@ -111,7 +111,7 @@ void WriteVertices(VS::Battle::TargetSphereSetupView& sphere,
          ++component) {
       destination.xyz[component] = source.position[component];
     }
-    destination.opaque6 = source.segment;
+    destination.segment = source.segment;
   }
 }
 }  // namespace
@@ -146,7 +146,7 @@ std::optional<SphereWireframeBuildResult> BuildLiveSphereWireframe(
     destination.xyz[0] = source.position[0];
     destination.xyz[1] = source.position[1];
     destination.xyz[2] = source.position[2];
-    destination.opaque6 = source.segment;
+    destination.segment = source.segment;
   }
   sphere->wire_phase_a = result->state.phase_a;
   sphere->wire_phase_b = result->state.phase_b;

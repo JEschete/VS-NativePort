@@ -25,8 +25,8 @@ struct TargetPreview {
   std::int16_t hit_chance;
   std::int32_t removed_statuses;
   std::int8_t action_kind;
-  std::int8_t opaque15;
-  std::int8_t opaque16;
+  std::int8_t damage_type;
+  std::int8_t affinity;
   std::int8_t enemy_class;
 };
 inline constexpr std::size_t kTargetPreviewBytes = 0x18;

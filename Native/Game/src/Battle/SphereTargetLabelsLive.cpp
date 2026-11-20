@@ -83,7 +83,7 @@ SphereTargetLabel ReadLabel(
   return {.state = static_cast<std::uint8_t>(label.state),
           .depth = static_cast<std::uint8_t>(label.depth),
           .gradient = static_cast<std::uint8_t>(label.gradient),
-          .ring_size = static_cast<std::uint8_t>(label.ring_size),
+          .pulse_phase = static_cast<std::uint8_t>(label.pulse_phase),
           .screen_x = label.screen_x,
           .offset_y = label.offset_y,
           .fade = static_cast<std::uint8_t>(label.fade),

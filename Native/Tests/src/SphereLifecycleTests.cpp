@@ -35,7 +35,7 @@ constexpr std::uint16_t kEdgeSentinel = 0xBEEF;
 VS::Battle::TargetSphereSpec LegacySpec(const battle::SphereVolume& value) {
   TargetVolume raw{};
   raw.kind = static_cast<std::uint8_t>(value.kind);
-  raw.opaque1 = static_cast<std::uint8_t>(value.range_kind);
+  raw.range_kind = static_cast<std::uint8_t>(value.range_kind);
   raw.angle = static_cast<std::int16_t>(value.angle);
   for (std::size_t index = 0; index < value.extents.size(); ++index) {
     raw.scale.extents[index] = value.extents[index];
@@ -67,9 +67,9 @@ TEST_CASE("Sphere initialization resets lifecycle state",
       .wire_shape = 4,
       .target_count = 5,
       .selected_target = 6,
-      .sphere_mode = 7,
-      .reserved_38 = 8,
-      .reserved_3c_and_input_locked = 9,
+      .area_target_count = 7,
+      .cursor_xy = 8,
+      .cursor_z_and_locked = 9,
   };
   battle::InitializeSphereState(state);
   const battle::SphereLifecycleState expected{.selected_target = -1};
@@ -106,9 +106,9 @@ TEST_CASE("Sphere volume setup copies and activates a secondary volume",
       .wire_phase_b = 22,
       .wire_phase_c = 23,
       .wire_shape = 24,
-      .sphere_mode = 25,
-      .reserved_38 = 26,
-      .reserved_3c_and_input_locked = 27,
+      .area_target_count = 25,
+      .cursor_xy = 26,
+      .cursor_z_and_locked = 27,
   };
   bool reuse = false;
   const auto result =
@@ -122,7 +122,7 @@ TEST_CASE("Sphere volume setup copies and activates a secondary volume",
       .secondary_volume = active_secondary,
       .wire_phase_b = 22,
       .wire_shape = 0xF,
-      .sphere_mode = 31,
+      .area_target_count = 31,
   };
   CHECK(state == expected);
   CHECK_FALSE(reuse);
@@ -157,9 +157,9 @@ TEST_CASE("Sphere volume reuse changes only the original reused fields",
       .wire_phase_b = 32,
       .wire_phase_c = 33,
       .wire_shape = 34,
-      .sphere_mode = 35,
-      .reserved_38 = 36,
-      .reserved_3c_and_input_locked = 37,
+      .area_target_count = 35,
+      .cursor_xy = 36,
+      .cursor_z_and_locked = 37,
   };
   auto expected = state;
   expected.primary_volume = kPrimary;
@@ -185,16 +185,16 @@ TEST_CASE("Sphere volume setup preserves the null-secondary asymmetry",
       .wire_phase_b = 52,
       .wire_phase_c = 53,
       .wire_shape = 54,
-      .sphere_mode = 55,
-      .reserved_38 = 56,
-      .reserved_3c_and_input_locked = 57,
+      .area_target_count = 55,
+      .cursor_xy = 56,
+      .cursor_z_and_locked = 57,
   };
   auto expected = state;
   expected.primary_volume = kPrimary;
   expected.secondary_volume.kind = 0;
   expected.wire_shape = 0xF;
-  expected.reserved_38 = 0;
-  expected.reserved_3c_and_input_locked = 0;
+  expected.cursor_xy = 0;
+  expected.cursor_z_and_locked = 0;
   expected.wire_phase_a = 0;
   expected.wire_phase_c = 0;
   bool reuse = false;
@@ -213,8 +213,8 @@ TEST_CASE("Sphere volume reuse refuses a missing secondary before mutation",
       .wire_phase_a = 71,
       .wire_phase_c = 72,
       .wire_shape = 73,
-      .reserved_38 = 74,
-      .reserved_3c_and_input_locked = 75,
+      .cursor_xy = 74,
+      .cursor_z_and_locked = 75,
   };
   const auto original = state;
   bool reuse = true;
@@ -274,10 +274,10 @@ TEST_CASE("Sphere interaction mode handles absent, transitioning and locked",
   battle::SphereLifecycleState state{.wire_shape = 1};
   CHECK(battle::SphereInteractionMode(&state, false) == 0);
   state.wire_shape = 0;
-  state.reserved_3c_and_input_locked = 1U << 16;
+  state.cursor_z_and_locked = 1U << 16;
   CHECK(battle::SphereInteractionMode(&state, false) == 2);
   CHECK(battle::SphereInteractionMode(&state, true) == 1);
-  state.reserved_3c_and_input_locked = 0;
+  state.cursor_z_and_locked = 0;
   CHECK(battle::SphereInteractionMode(&state, false) == 1);
 }
 
@@ -337,16 +337,16 @@ TEST_CASE("Live sphere volume binding preserves pointer and reuse asymmetries",
   sphere.target_list1 = previews;
   sphere.secondary_volume = LegacySpec(kPrimary);
   sphere.cursor_xy = 5;
-  sphere.cursor_z_and_input_locked = 6;
+  sphere.cursor_z_and_locked = 6;
   std::uint8_t reuse = 0;
   VS::Battle::SetLiveSphereVolumes(&sphere, &primary, nullptr, 7, nullptr,
                                    reuse);
   CHECK(sphere.secondary_volume.kind == 0);
   CHECK(sphere.secondary_volume.reserved1 == kPrimary.range_kind);
   CHECK(sphere.target_list1 == previews);
-  CHECK(sphere.sphere_mode == 0);
+  CHECK(sphere.area_target_count == 0);
   CHECK(sphere.cursor_xy == 0);
-  CHECK(sphere.cursor_z_and_input_locked == 0);
+  CHECK(sphere.cursor_z_and_locked == 0);
 }
 
 TEST_CASE("Live sphere binding updates the secondary preview only on set",
@@ -359,7 +359,7 @@ TEST_CASE("Live sphere binding updates the secondary preview only on set",
   VS::Battle::SetLiveSphereVolumes(&sphere, &primary, &secondary, 9, previews,
                                    reuse);
   CHECK(sphere.secondary_volume.kind == (secondary.kind | 0x80));
-  CHECK(sphere.sphere_mode == 9);
+  CHECK(sphere.area_target_count == 9);
   CHECK(sphere.target_list1 == previews);
   CHECK(reuse == 0);
 }
@@ -377,7 +377,7 @@ TEST_CASE("Live sphere volume reuse leaves mode and preview pointer unchanged",
   CHECK(reuse == 0);
   CHECK(sphere.secondary_volume.kind == secondary.kind);
   CHECK(sphere.target_list1 == previews);
-  CHECK(sphere.sphere_mode == 0);
+  CHECK(sphere.area_target_count == 0);
 }
 
 TEST_CASE("Live clear and interaction adapters preserve null asymmetry",
@@ -389,7 +389,7 @@ TEST_CASE("Live clear and interaction adapters preserve null asymmetry",
   sphere.target_count = 9;
   sphere.selected_target = 3;
   sphere.wire_shape = 0;
-  sphere.cursor_z_and_input_locked = 1 << 16;
+  sphere.cursor_z_and_locked = 1 << 16;
   VS::Battle::ClearLivePrimarySphereVolume(nullptr);
   VS::Battle::ClearLiveSecondarySphereVolume(nullptr);
   VS::Battle::ClearLiveSphereTargets(nullptr);
@@ -407,10 +407,10 @@ TEST_CASE("Live sphere interaction query honors lock, override and transition",
           "[battle][sphere][lifecycle]") {
   VS::Battle::TargetSphereSetupView sphere{};
   sphere.wire_shape = 0;
-  sphere.cursor_z_and_input_locked = 1 << 16;
+  sphere.cursor_z_and_locked = 1 << 16;
   CHECK(VS::Battle::LiveSphereInteractionMode(&sphere, false) == 2);
   CHECK(VS::Battle::LiveSphereInteractionMode(&sphere, true) == 1);
-  sphere.cursor_z_and_input_locked = 0;
+  sphere.cursor_z_and_locked = 0;
   CHECK(VS::Battle::LiveSphereInteractionMode(&sphere, false) == 1);
   sphere.wire_shape = 1;
   CHECK(VS::Battle::LiveSphereInteractionMode(&sphere, true) == 0);
@@ -424,13 +424,13 @@ TEST_CASE("Live sphere volume binding preserves null secondary bytes",
   auto secondary = LegacySpec(kSecondary);
   sphere.target_list1 = &previous;
   sphere.secondary_volume = secondary;
-  sphere.sphere_mode = 5;
+  sphere.area_target_count = 5;
   std::uint8_t reuse = 0;
   VS::Battle::SetLiveSphereVolumes(&sphere, &primary, nullptr, 9, nullptr,
                                    reuse);
   CHECK(sphere.secondary_volume.kind == 0);
   CHECK(sphere.secondary_volume.reserved1 == secondary.reserved1);
-  CHECK(sphere.sphere_mode == 5);
+  CHECK(sphere.area_target_count == 5);
   CHECK(sphere.target_list1 == &previous);
 }
 

@@ -77,7 +77,7 @@ SingleTargetEffectRequest ActionHitEffectRequest(
                       .slot = limb,
                       .part = static_cast<std::uint8_t>(bone_tag)};
   }
-  request.target.color_preset = action.effect_variant;
+  request.target.color_preset = action.affinity;
   return request;
 }
 

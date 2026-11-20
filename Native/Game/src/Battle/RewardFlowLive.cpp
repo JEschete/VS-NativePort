@@ -74,7 +74,7 @@ class LiveWorld final : public RewardDispatchWorld {
         .action_id = state.selection.action_id,
         .targets_position = static_cast<std::uint32_t>(
             state.selection.primary_target.targets_position),
-        .continued = static_cast<std::uint8_t>(state.chain_continued),
+        .continued = static_cast<std::uint8_t>(state.defense_continued),
         .primary_actor = state.selection.primary_target.target.target_actor};
   }
   bool DefinitionUnlocked(std::uint16_t action) override {

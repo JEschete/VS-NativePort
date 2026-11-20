@@ -1753,7 +1753,7 @@ int func_800F9800(void) {
             self.assertIn(binding, copy_fixups.NATIVE_HELPER_HEADERS)
         live = (copy_to_native.REPO / "Native/Game/src/Battle/ActionPreviewLive.cpp").read_text(encoding="utf-8")
         core = (copy_to_native.REPO / "Native/Game/src/Battle/ActionPreview.cpp").read_text(encoding="utf-8")
-        self.assertIn("return definition.resets_hit_results != 0;", live)
+        self.assertIn("return definition.hits_first_obstruction != 0;", live)
         self.assertIn("Field::TraceLiveActorAndTerrainCollision(", live)
         self.assertIn("? std::optional{std::bit_cast<ActionPoint>(impact)}", live)
         self.assertIn("if (!impact) return false;", core)

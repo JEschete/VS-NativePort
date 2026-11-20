@@ -1,7 +1,9 @@
 #pragma once
 // The action camera's settled distance and ease mode, which the action
-// sequence reads when it frames an action. The original never writes them, so
-// they keep their module-image values. ActionExecution.cpp defines them.
+// sequence reads when it frames an action. In the original they are
+// vs_battle_cameraCurrentSpherical's values.distance and delta.mode
+// (src/BATTLE/BATTLE.PRG/camera.h:7-20); the native sequence reads
+// VS::Field::sphericalCamera instead. ActionExecution.cpp defines them.
 
 #include <cstdint>
 

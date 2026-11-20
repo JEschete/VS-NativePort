@@ -450,7 +450,7 @@ TEST_CASE(
   fixture.state.current_choice =
       std::bit_cast<VS::Battle::Ai::ActionCandidateRecord>(
           Words{0xDEADBEEF, 0xFFFFFFFF, 0xABCDEF01, 0xFFFFFFFF, 0xFFFFFFFF});
-  VS::Battle::actionDefinitions[42].ai_flags.opaque1_bit4 =
+  VS::Battle::actionDefinitions[42].ai_flags.ignores_sight =
       ignores_sight ? 1u : 0u;
   for (int row = 0; row < 6; ++row) {
     fixture.stats.limbs[row].hp = 2;
@@ -522,7 +522,7 @@ TEST_CASE(
   CHECK(fixture.state.current_choice.distance_squared == 9);
   CHECK(fixture.state.current_choice.weight == 128);
   CHECK(fixture.state.current_choice.options.opaque0_bit2 ==
-        VS::Battle::actionDefinitions[0].ai_flags.opaque1_bit4);
+        VS::Battle::actionDefinitions[0].ai_flags.ignores_sight);
   CHECK(fixture.state.action_slots[2][1].usable == 1);
 }
 
@@ -806,7 +806,7 @@ TEST_CASE(
   CHECK(std::memcmp(scratch.data(), scratch_rows, scratch.size()) == 0);
   std::memcpy(scratch_rows, scratch.data(), scratch.size());
   fixture.state.scores_special_actions = 1;
-  VS::Battle::actionDefinitions[42].ai_flags.opaque0_bit4 = 1;
+  VS::Battle::actionDefinitions[42].ai_flags.special_mode_action = 1;
   VS::Battle::Ai::EvaluateActionCandidateEntry(
       &fixture.state, &candidate, 3, &VS::Battle::actionDefinitions[42]);
   CHECK(candidate.opaque0 == 257 * 128 + 40);

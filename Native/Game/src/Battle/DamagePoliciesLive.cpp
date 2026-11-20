@@ -37,13 +37,13 @@ const VS::Battle::ActorStats* StatsOf(const VS::Battle::HitResult* hit) {
 auto HitAmounts(const VS::Battle::HitResult& hit) {
   std::array<std::int16_t, Items::kLimbCount> result{};
   for (std::size_t i = 0; i < result.size(); ++i) {
-    result[i] = hit.limbs[i].effects.opaque0;
+    result[i] = hit.limbs[i].effects.hp_change;
   }
   return result;
 }
 void CommitAmounts(VS::Battle::HitResult& hit, HitLimbAmounts amounts) {
   for (std::size_t i = 0; i < amounts.size(); ++i) {
-    hit.limbs[i].effects.opaque0 = amounts[i];
+    hit.limbs[i].effects.hp_change = amounts[i];
   }
 }
 auto Vitals(const VS::Battle::ActorStats& stats) {

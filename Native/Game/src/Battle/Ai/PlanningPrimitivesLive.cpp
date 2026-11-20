@@ -856,7 +856,7 @@ class LiveFallbackActionSelection final : public FallbackActionHost {
         .eligible = eligible};
   }
   bool IgnoresSight(unsigned action) const override {
-    return VS::Battle::actionDefinitions[action].ai_flags.opaque1_bit4 != 0;
+    return VS::Battle::actionDefinitions[action].ai_flags.ignores_sight != 0;
   }
 
  private:
@@ -948,7 +948,7 @@ class LiveCandidateEnumeration final : public CandidateEnumerationHost {
     const auto& action = VS::Battle::actionDefinitions[slot.action];
     slot.minimum_range =
         action.ai_flags.shaped_area != 0 || action.ai_flags.radial_area != 0;
-    slot.ignores_sight = action.ai_flags.opaque1_bit4 != 0;
+    slot.ignores_sight = action.ai_flags.ignores_sight != 0;
     slot.ignores_obstruction = metadata.ignores_obstruction != 0;
     slot.radius = static_cast<std::uint16_t>(metadata.radius);
     slot.range_squared = metadata.range_squared;
@@ -1273,7 +1273,7 @@ bool EvaluateLiveActionCandidate(
   CandidateEvaluationOptions options{
       .rarely_chosen = action != nullptr && action->ai_flags.rarely_chosen != 0,
       .special_action =
-          action != nullptr && action->ai_flags.opaque0_bit4 != 0};
+          action != nullptr && action->ai_flags.special_mode_action != 0};
   if (simulation_mode != 0) {
     options.simulation = simulation_mode == kAimedSimulationMode
                              ? CandidateSimulationMode::kAimed

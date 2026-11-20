@@ -77,11 +77,11 @@ static_assert(offsetof(ActorView, state_flags) + kCommandFlagsByte ==
 static_assert(offsetof(ActorView, ai_control_flags) ==
               offsetof(VS::Battle::Actor, kind));
 static_assert(offsetof(ActorView, start_command_flag) ==
-              offsetof(VS::Battle::Actor, spawn_byte26));
+              offsetof(VS::Battle::Actor, combat_pose));
 static_assert(offsetof(ActorView, saved_ai_settings_flags) ==
-              offsetof(VS::Battle::Actor, reserved34));
+              offsetof(VS::Battle::Actor, spawn_ai_settings));
 static_assert(offsetof(ActorView, ai_settings) ==
-              offsetof(VS::Battle::Actor, template_word2c));
+              offsetof(VS::Battle::Actor, ai_settings));
 static_assert(offsetof(ActorView, stats) == offsetof(VS::Battle::Actor, stats));
 static_assert(offsetof(ActorView, list_exempt_flag) ==
               offsetof(VS::Battle::Actor, allocation_kind));
@@ -459,10 +459,10 @@ int CreateLiveActorAiState(VS::Battle::Actor* actor, int options) {
       .handle = HandleOf(actor),
       .id = actor->id,
       .kind = actor->kind,
-      .combat_pose = actor->spawn_byte26,
+      .combat_pose = actor->combat_pose,
       .saved_settings_flags = static_cast<std::uint16_t>(
-          std::bit_cast<std::uint32_t>(actor->reserved34)),
-      .settings = std::bit_cast<std::uint32_t>(actor->template_word2c),
+          std::bit_cast<std::uint32_t>(actor->spawn_ai_settings)),
+      .settings = std::bit_cast<std::uint32_t>(actor->ai_settings),
       .allocation_kind = actor->allocation_kind};
   LiveCreationHost host;
   const std::optional<bool> remembered_idle =

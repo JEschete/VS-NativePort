@@ -305,7 +305,7 @@ void InspectTargeting(EncounterState& state, const ActionState& action) {
   // area cursor; a second Circle confirms it.
   const auto* sphere = reinterpret_cast<const VS::Battle::TargetSphereRecord*>(
       VS::Battle::targetSphere);
-  state.area_positioning = sphere != nullptr && sphere->input_locked != 0;
+  state.area_positioning = sphere != nullptr && sphere->cursor_locked != 0;
   if (sphere != nullptr) {
     constexpr int kExtentUnits = 32;
     for (const auto& volume : sphere->volumes) {

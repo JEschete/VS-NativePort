@@ -176,8 +176,8 @@ constexpr int kLabelTopRow = 32;
 constexpr int kRightLabelX = 320;
 constexpr int kLeftLabelX = -72;
 constexpr int kByteMask = 0xFF;
-constexpr int kRingSizeWrap = 0x22;
-constexpr int kRingSizeRestart = 0x12;
+constexpr int kPulsePhaseWrap = 0x22;
+constexpr int kPulsePhaseRestart = 0x12;
 constexpr int kLargestGroup = 6;
 constexpr int kReusedRangeKind = 2;
 // Target list steps: rows reveal one per step below kNoTargetsStep.
@@ -206,7 +206,7 @@ constexpr int kNameString = 0;
 constexpr int kDetailString = 1;
 constexpr int kActionKindString = 2;
 constexpr int kDamageTypeString = 3;
-constexpr int kEffectVariantString = 4;
+constexpr int kAffinityString = 4;
 constexpr int kEnemyClassString = 5;
 constexpr int kStatusString = 6;
 constexpr int kAmountInteger = 0;
@@ -530,7 +530,7 @@ int CollectChestTargets(ActionTargetingHost& host,
     preview.hit_chance = ChestUnlockChance(attacker, chest);
     preview.action_kind = kChestActionKind;
     preview.enemy_class = 0;
-    preview.effect_variant = 0;
+    preview.affinity = 0;
     preview.damage_type = 0;
     preview.removed_statuses = 0;
     preview.effect = 0;
@@ -636,7 +636,7 @@ void PopulateActionTargetPreview(const ActionTargetingHost& host,
   preview.removed_statuses = result.remove_statuses & kRemovableStatusMask;
   preview.action_kind = static_cast<std::uint8_t>(action.category);
   preview.damage_type = static_cast<std::uint8_t>(result.damage_type);
-  preview.effect_variant = static_cast<std::uint8_t>(result.effect_variant);
+  preview.affinity = static_cast<std::uint8_t>(result.affinity);
   const std::optional<TargetingActor> target =
       host.Actor(result.target_actor & kActorSlotMask);
   if (!target) {
@@ -1743,8 +1743,8 @@ void DescribeTarget(TargetSelectionHost& host, int selected) {
     }
     host.SetContextText(kDamageTypeString,
                         StatusIndexText(entry.damage_type + kEmptyText));
-    host.SetContextText(kEffectVariantString,
-                        StatusIndexText(entry.effect_variant + kPhysicalText));
+    host.SetContextText(kAffinityString,
+                        StatusIndexText(entry.affinity + kPhysicalText));
   }
   host.SetContextInteger(kAmountInteger, entry.preview_amount);
   host.SetContextInteger(kHitChanceInteger,
@@ -1807,9 +1807,9 @@ void CloseTargetList(TargetSelectionHost& host) {
 // The selected label pulses its ring and drops back while the pad is read.
 void PulseSelectedLabel(TargetSelectionHost& host, int selected) {
   TargetSelectionLabel label = host.Label(selected);
-  label.ring_size = (label.ring_size + 1) & kByteMask;
-  if (label.ring_size == kRingSizeWrap) {
-    label.ring_size = kRingSizeRestart;
+  label.pulse_phase = (label.pulse_phase + 1) & kByteMask;
+  if (label.pulse_phase == kPulsePhaseWrap) {
+    label.pulse_phase = kPulsePhaseRestart;
   }
   label.depth = 0;
   host.SetLabel(selected, label);
@@ -1819,7 +1819,7 @@ void MarkSelectedLabel(TargetSelectionHost& host, int previous, int selected) {
   TargetSelectionLabel label = host.Label(selected);
   label.depth = 1;
   if (previous != selected) {
-    label.ring_size = 0;
+    label.pulse_phase = 0;
   }
   host.SetLabel(selected, label);
   if (previous != selected) {

@@ -345,7 +345,7 @@ TEST_CASE("F01305 live mapping writes vertices and preserves the suffix",
   const auto built = battle::BuildLiveSphereWireframe(sphere.get(), 0, tables);
   CHECK(Required(built).vertex_count == 4);
   CHECK(sphere->wire_vertices[0].xyz[0] == 1);
-  CHECK(sphere->wire_vertices[0].opaque6 == 0);
+  CHECK(sphere->wire_vertices[0].segment == 0);
   CHECK(sphere->wire_vertices[1].xyz[0] == 4);
   CHECK(sphere->wire_vertices[2].xyz[0] == -1);
   CHECK(sphere->wire_vertices[3].xyz[2] == -6);

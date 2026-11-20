@@ -192,7 +192,7 @@ TEST_CASE(
     "[ai][decisions]") {
   DecisionFixture fixture;
   ActionDefinition action{};
-  action.ai_flags.reserved0_bit6 = 1;
+  action.ai_flags.fallback_eligible = 1;
   for (unsigned index = 0; index < 24; ++index) {
     fixture.candidate.row = index / 4;
     fixture.candidate.column = index % 4;

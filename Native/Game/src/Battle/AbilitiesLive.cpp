@@ -270,8 +270,8 @@ int LiveAbilityHost::Field(AbilityField field) const {
       return state_->ability_input_succeeded;
     case AbilityField::kAbilityInputAttempted:
       return state_->ability_input_attempted;
-    case AbilityField::kChainContinued:
-      return state_->chain_continued;
+    case AbilityField::kDefenseContinued:
+      return state_->defense_continued;
     case AbilityField::kAbilityTimer:
       return state_->ability_timer;
     case AbilityField::kAbilityWindow:
@@ -298,8 +298,8 @@ void LiveAbilityHost::SetField(AbilityField field, int value) {
     case AbilityField::kAbilityInputAttempted:
       state_->ability_input_attempted = byte;
       break;
-    case AbilityField::kChainContinued:
-      state_->chain_continued = byte;
+    case AbilityField::kDefenseContinued:
+      state_->defense_continued = byte;
       break;
     case AbilityField::kAbilityTimer:
       state_->ability_timer = static_cast<std::uint16_t>(value);

@@ -61,7 +61,7 @@ union TargetShapeExtent {
 // decomp: func_800C1564_t (src/BATTLE/BATTLE.PRG/57B1C.h:11-23)
 struct TargetVolume {
   std::uint8_t kind;
-  std::uint8_t opaque1;
+  std::uint8_t range_kind;
   std::int16_t angle;
   TargetShapeExtent scale;
   std::array<std::int16_t, kTargetVolumePositionCount> position;
@@ -167,8 +167,8 @@ struct TargetSphereLabelView {
 // A limb's pair of effect values inside a hit result.
 // decomp: LimbEffects (src/BATTLE/BATTLE.PRG/hitEntity.h:14-17)
 struct LimbEffects {
-  std::int16_t opaque0;
-  std::int16_t opaque2;
+  std::int16_t hp_change;
+  std::int16_t armor_dp_change;
 };
 inline constexpr std::size_t kLimbEffectsBytes = 0x4;
 static_assert(sizeof(LimbEffects) == kLimbEffectsBytes,
@@ -180,7 +180,7 @@ inline constexpr std::size_t kShapeVertexAxisCount = 3;
 // decomp: MenuShapeVertex (src/BATTLE/BATTLE.PRG/57B1C.h:40-43)
 struct ShapeVertex {
   std::array<std::int16_t, kShapeVertexAxisCount> xyz;
-  std::int16_t opaque6;
+  std::int16_t segment;
 };
 inline constexpr std::size_t kShapeVertexBytes = 0x8;
 static_assert(sizeof(ShapeVertex) == kShapeVertexBytes,

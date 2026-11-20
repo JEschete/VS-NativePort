@@ -18,7 +18,7 @@ std::int8_t hudBattleMode;
 std::int8_t battleModeIndicatorStep;
 // decomp: D_800EB9D0 (D_800EB9D0@BATTLE/BATTLE.PRG); module symbol
 // (ModulePointers.cpp)
-HudHighlightWord statusIconCarousel;
+StatusIconCarousel statusIconCarousel;
 // decomp: D_800EBBDC (D_800EBBDC@BATTLE/BATTLE.PRG)
 std::array<std::int32_t, kHudGaugeCount> hudGaugePositions;
 // decomp: D_800EBBEC (D_800EBBEC@BATTLE/BATTLE.PRG)

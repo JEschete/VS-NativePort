@@ -110,11 +110,9 @@ struct LiveAction final : PresentationAction {
     return std::bit_cast<ActionHit>(record.targets[index]);
   }
   std::uint16_t Count() const override { return record.target_count; }
-  std::uint16_t Animation() const override {
-    return record.animation_parameter;
-  }
+  std::uint16_t Animation() const override { return record.target_redirected; }
   std::uint8_t Variant() const override {
-    return static_cast<std::uint8_t>(record.effect_variant);
+    return static_cast<std::uint8_t>(record.affinity);
   }
   ActionPoint Focus() const override {
     return std::bit_cast<ActionPoint>(record.focus_position);
@@ -182,7 +180,7 @@ class LiveWorld final : public ActionPresentationWorld {
     return Definition(action).effect_id;
   }
   std::uint8_t Zoom(std::uint16_t action) override {
-    return static_cast<std::uint8_t>(Definition(action).opaque_d_bit4);
+    return static_cast<std::uint8_t>(Definition(action).camera_zoom_mode);
   }
   std::uint32_t PlayerStatuses() override {
     Require(VS::Battle::characterState != nullptr &&
@@ -353,8 +351,8 @@ void LiveWorld::SetField(AbilityField field, int value) {
     case AbilityField::kAbilityInputAttempted:
       state.ability_input_attempted = byte;
       break;
-    case AbilityField::kChainContinued:
-      state.chain_continued = byte;
+    case AbilityField::kDefenseContinued:
+      state.defense_continued = byte;
       break;
     case AbilityField::kAbilityTimer:
       state.ability_timer = static_cast<std::uint16_t>(value);

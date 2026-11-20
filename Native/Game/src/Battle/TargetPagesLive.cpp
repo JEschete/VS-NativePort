@@ -79,7 +79,7 @@ class LiveSphere final : public VS::Battle::TargetSphere {
 
   void ShowPage(VS::Battle::TargetPage page, int mode) override {
     targets = entries_;
-    Sphere()->target_mode = static_cast<char>(mode);
+    Sphere()->highlights_all_targets = static_cast<char>(mode);
     ApplyPage(page, false);
   }
 

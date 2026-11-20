@@ -462,7 +462,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
       return;
     }
     actor->facing = details.facing;
-    actor->spawn_byte26 = details.spawn_byte;
+    actor->combat_pose = details.spawn_byte;
     actor->room_spawn_index = details.room_spawn_index;
     actor->kill_counted = 0;
     actor->defeated = 0;
@@ -470,8 +470,8 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     actor->reserved30_bit4 = details.settings.group_reserved;
     actor->ai_linked_group = details.settings.ai_linked_group;
     actor->reserved31_bit6 = details.settings.linked_reserved;
-    actor->reserved34 = details.settings.extra;
-    actor->template_word2c = details.template_word;
+    actor->spawn_ai_settings = details.settings.extra;
+    actor->ai_settings = details.template_word;
     VS::Battle::ActorStats* stats = actor->stats;
     if (stats == nullptr) {
       return;
@@ -486,7 +486,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
 
   void SetTemplateWord(std::size_t slot, std::int32_t word) override {
     if (VS::Battle::Actor* actor = SlotActor(slot); actor != nullptr) {
-      actor->template_word2c = word;
+      actor->ai_settings = word;
     }
   }
 

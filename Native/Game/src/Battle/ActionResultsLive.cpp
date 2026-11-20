@@ -146,8 +146,8 @@ ActorActionResult ReadResult(const VS::Battle::HitResult& hit) {
       .inflict_statuses = std::bit_cast<std::uint32_t>(hit.inflict_statuses),
       .remove_statuses = std::bit_cast<std::uint32_t>(hit.remove_statuses)};
   for (std::size_t index = 0; index < result.limbs.size(); ++index) {
-    result.limbs.at(index) = {hit.limbs[index].effects.opaque0,
-                              hit.limbs[index].effects.opaque2};
+    result.limbs.at(index) = {hit.limbs[index].effects.hp_change,
+                              hit.limbs[index].effects.armor_dp_change};
   }
   return result;
 }

@@ -19,7 +19,7 @@ void FreeLiveSphere(VS::Battle::TargetSphereSetupView*& sphere,
 void SetLiveSphereVolumes(VS::Battle::TargetSphereSetupView* sphere,
                           const VS::Battle::TargetSphereSpec* primary,
                           const VS::Battle::TargetSphereSpec* secondary,
-                          std::uint8_t sphere_mode,
+                          std::uint8_t area_target_count,
                           VS::Battle::TargetPreview* target_previews,
                           std::uint8_t& reuse_volumes);
 void ClearLivePrimarySphereVolume(VS::Battle::TargetSphereSetupView* sphere);
@@ -34,7 +34,7 @@ void ClearLiveSphereTargets(VS::Battle::TargetSphereSetupView* sphere);
 void InitializeSphereEntry();
 void SetSphereVolumesEntry(VS::Battle::TargetSphereSpec* primary,
                            VS::Battle::TargetSphereSpec* secondary,
-                           std::uint8_t sphere_mode,
+                           std::uint8_t area_target_count,
                            VS::Battle::TargetPreview* target_previews);
 void ClearPrimarySphereVolumeEntry();
 void SetSecondarySphereVolumeEntry(VS::Battle::TargetSphereSpec* secondary);

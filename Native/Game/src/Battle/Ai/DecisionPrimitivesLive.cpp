@@ -270,7 +270,7 @@ void CacheLiveFallbackActionCandidate(
   Require(action != nullptr, "AI fallback cache requires an action");
   LiveFallbackCache cache;
   Require(CacheFallbackActionCandidate(cache, CandidateOf(candidate),
-                                       action->ai_flags.reserved0_bit6 != 0)
+                                       action->ai_flags.fallback_eligible != 0)
               .has_value(),
           "AI fallback cache requires a valid slot, count and storage");
 }

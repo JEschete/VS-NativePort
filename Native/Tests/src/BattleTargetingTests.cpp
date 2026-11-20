@@ -932,7 +932,7 @@ TEST_CASE("Pending reward poses only for an earned or new action",
   CHECK(host.calls == Calls{"Wait()"});
   host.calls.clear();
   host.selection.primary_actor = 0;
-  host.fields[Field::kChainContinued] = 1;
+  host.fields[Field::kDefenseContinued] = 1;
   battle::BeginPendingAbilityReward(host);
   CHECK(host.calls == Calls{"Wait()"});
 }
@@ -1337,7 +1337,7 @@ TEST_CASE("Defense step collapses the selection onto the attacker",
                             "Resolve(61)"});
   CHECK(host.chain_step == 1);
   CHECK(host.queue_index == 2);
-  CHECK(host.Field(Field::kChainContinued) == 1);
+  CHECK(host.Field(Field::kDefenseContinued) == 1);
   CHECK(host.total_kills == 4);
   const BattleLog log;
   host.calls.clear();
@@ -1549,7 +1549,7 @@ struct FakeActionHost final : battle::ActionTargetingHost {
     calls.push_back(Call("PreviewHit", {id, source_actor, target_actor, limb}));
     return battle::ActionPreviewResult{.action_id = id,
                                        .damage_type = 2,
-                                       .effect_variant = 3,
+                                       .affinity = 3,
                                        .target_actor = target_actor,
                                        .target_hp = 40,
                                        .target_mp = 7,
@@ -1684,7 +1684,7 @@ void SetUpPreviewAction(FakeActionHost& host) {
 constexpr battle::ActionPreviewResult kPreviewResult{
     .action_id = 5,
     .damage_type = 2,
-    .effect_variant = 1,
+    .affinity = 1,
     .target_actor = 0x13,
     .target_hp = 40,
     .target_mp = 7,
@@ -1705,7 +1705,7 @@ TEST_CASE("Target preview takes the amount its effect names",
   CHECK(preview.removed_statuses == 0x1FFFFFE0);
   CHECK(preview.action_kind == 4);
   CHECK(preview.damage_type == 2);
-  CHECK(preview.effect_variant == 1);
+  CHECK(preview.affinity == 1);
   CHECK(preview.enemy_class == 6);
 }
 
@@ -2266,7 +2266,7 @@ TEST_CASE("Direct body-part targets list each exposed limb in range",
                       .removed_statuses = 0x1FFFFFE0,
                       .action_kind = 3,
                       .damage_type = 2,
-                      .effect_variant = 3,
+                      .affinity = 3,
                       .enemy_class = 0});
   CHECK(host.previews[1].kind == 45);
   CHECK(host.previews[1].limb == 2);
@@ -3149,11 +3149,11 @@ TEST_CASE("Dismissing the target list sends each column off its side",
   host.highlighted = {.group = 1, .pulse_slot = 4};
   host.columns.columns[0] = MakeColumn({.entries = {2, 3}});
   host.columns.columns[1] = MakeColumn({.entries = {0}});
-  host.labels[2].ring_size = 9;
+  host.labels[2].pulse_phase = 9;
   battle::DismissTargetSelectionRows(host);
   CHECK(host.calls == Calls{"Unpulse(1,4)", "Tint(1,0)"});
   CHECK(host.labels[2].state == 3);
-  CHECK(host.labels[2].ring_size == 9);
+  CHECK(host.labels[2].pulse_phase == 9);
   CHECK(host.labels[3].state == 3);
   CHECK(host.labels[0].state == 2);
   CHECK(host.labels[1].state == 0);
@@ -3165,7 +3165,7 @@ TEST_CASE("Target rows start off screen on their column's side",
   host.lists[kCandidates] = Groups({0, 0, 0, 0, 0});
   host.lists[kCandidates][4].position = {.x = 1, .y = 2, .z = 3, .pad = 4};
   host.lists[kCandidates][4].kind = 7;
-  host.labels[4].ring_size = 5;
+  host.labels[4].pulse_phase = 5;
   battle::InitTargetSelectionRow(host, 4, {.state = 2, .index = 3});
   CHECK(host.labels[4] ==
         battle::TargetSelectionLabel{
@@ -3359,7 +3359,7 @@ TEST_CASE("Page buttons take the choosing frame",
 [[nodiscard]] MenuFrame CrossFromSecondRow(FakeSelectionHost& host) {
   SetUpChoosing(host);
   host.selected = 1;
-  host.labels[1].ring_size = 0x21;
+  host.labels[1].pulse_phase = 0x21;
   host.labels[1].depth = 1;
   host.pressed = kCross;
   return Frame(host);
@@ -3371,7 +3371,7 @@ TEST_CASE("Cross closes the target list and sends the rows away",
   const MenuFrame frame = CrossFromSecondRow(host);
   CHECK_FALSE(frame.closed);
   CHECK(frame.target == battle::kNoPreviewSelected);
-  CHECK(host.labels[1].ring_size == 0x12);
+  CHECK(host.labels[1].pulse_phase == 0x12);
   CHECK(host.labels[1].depth == 0);
   CHECK(host.calls ==
         Calls{"Page()", "Leave()", "Unpulse(2,1)", "Tint(2,0)", "Reuse(0)"});
@@ -3412,7 +3412,7 @@ void SetUpMovingDown(FakeSelectionHost& host) {
   SetUpChoosing(host);
   host.page_offset = 100;
   host.repeated = kDown;
-  host.labels[1].ring_size = 7;
+  host.labels[1].pulse_phase = 7;
 }
 
 TEST_CASE("Moving the selection rings the new label and describes it",
@@ -3422,8 +3422,8 @@ TEST_CASE("Moving the selection rings the new label and describes it",
   CHECK(Frame(host).target == 100);
   CHECK(host.selected == 1);
   CHECK(host.labels[1].depth == 1);
-  CHECK(host.labels[1].ring_size == 0);
-  CHECK(host.labels[0].ring_size == 1);
+  CHECK(host.labels[1].pulse_phase == 0);
+  CHECK(host.labels[0].pulse_phase == 1);
   CHECK(host.labels[0].depth == 0);
   CHECK(host.calls == Calls{"Page()", "Change()", "Unpulse(2,1)", "Tint(2,0)",
                             "Highlighted(2,3)", "Pulse(2,0,3)", "Tint(2,1)",
@@ -3438,7 +3438,7 @@ TEST_CASE("A held selection grows its ring", "[battle][battle-targeting]") {
   host.calls.clear();
   host.repeated = 0;
   CHECK(Frame(host).target == 101);
-  CHECK(host.labels[1].ring_size == 1);
+  CHECK(host.labels[1].pulse_phase == 1);
   CHECK(host.labels[1].depth == 1);
   CHECK(host.calls == Calls{"Page()", "ShowInfo()"});
 }
@@ -3559,7 +3559,7 @@ TEST_CASE("Target information describes an object's durability",
                        .preview_amount = 9,
                        .action_kind = 1,
                        .damage_type = 2,
-                       .effect_variant = 3,
+                       .affinity = 3,
                        .enemy_class = 4};
   SECTION("an indestructible object") {
     DescribeCandidate(host, object);
@@ -3757,13 +3757,13 @@ TEST_CASE("Live selection highlight records the selected position group",
   previews[1].limb = 2;
   sphere->target_lists[0] = previews.data();
   sphere->selected_target = 1;
-  sphere->highlighted_group = 0x20;
+  sphere->highlighted_actor = 0x20;
   const ScopedOverride<VS::Battle::TargetSphereSetupView*> live(
       VS::Battle::targetSphere,
       reinterpret_cast<VS::Battle::TargetSphereSetupView*>(sphere.get()));
   const BattleLog log;
   VS::Battle::LiveUpdateTargetSelectionHighlight(3);
-  CHECK(sphere->highlighted_group == 0x30);
+  CHECK(sphere->highlighted_actor == 0x30);
   CHECK(sphere->highlighted_pulse_slot == 2);
   CHECK(log.messages.empty());
 }

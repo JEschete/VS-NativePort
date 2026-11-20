@@ -48,7 +48,7 @@ struct SphereTargetLabel {
   // Highlight fade that counts down once per draw; 8 is fully lit.
   std::uint8_t gradient = 0;
   // Phase of the selected label's link pulse.
-  std::uint8_t ring_size = 0;
+  std::uint8_t pulse_phase = 0;
   std::int16_t screen_x = 0;
   // Row offset below the column top.
   std::uint8_t offset_y = 0;

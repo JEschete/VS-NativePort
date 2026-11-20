@@ -114,7 +114,7 @@ struct ActionTraceFixture : SegmentFixture {
   ActionTraceFixture() {
     VS::Battle::actionState = owned_state.get();
     VS::Battle::actionDefinitions[kAction] = {};
-    VS::Battle::actionDefinitions[kAction].resets_hit_results = 1;
+    VS::Battle::actionDefinitions[kAction].hits_first_obstruction = 1;
     VS::Battle::actionDefinitions[kAction].hits[0].prerequisite_function_id = 1;
     VS::Actors::boneMatrixScratch = {};
     for (int axis = 0; axis < 3; ++axis) {
@@ -354,7 +354,7 @@ TEST_CASE(
   CHECK(result->target_count == 1);
   CHECK(result->targets[0].targets_position == 1);
   CHECK(result->targets[0].target.mp == 0x80);
-  CHECK(result->animation_parameter == 1);
+  CHECK(result->target_redirected == 1);
   SVECTOR impact{};
   std::memcpy(&impact, &result->targets[0].target, sizeof impact);
   CHECK(impact.vx == 8);

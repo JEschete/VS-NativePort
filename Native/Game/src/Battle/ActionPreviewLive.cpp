@@ -90,7 +90,7 @@ struct LiveDefinition final : ResolutionDefinition {
             static_cast<std::uint8_t>(value.damage_type),
             static_cast<std::uint8_t>(value.affinity)};
   }
-  bool Redirects() override { return definition.resets_hit_results != 0; }
+  bool Redirects() override { return definition.hits_first_obstruction != 0; }
   std::uint8_t Category() override { return definition.category; }
   PreviewVolume Range() override {
     return {definition.shape,

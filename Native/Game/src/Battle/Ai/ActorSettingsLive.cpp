@@ -36,9 +36,9 @@ static_assert(offsetof(VS::Battle::Ai::AiActorView, saved_ai_settings) +
                   offsetof(VS::Battle::Ai::SavedSettingsPair, saved_flags) ==
               offsetof(VS::Battle::Ai::AiActorView, saved_ai_settings_flags));
 static_assert(offsetof(VS::Battle::Ai::AiActorView, saved_ai_settings_flags) ==
-              offsetof(VS::Battle::Actor, reserved34));
+              offsetof(VS::Battle::Actor, spawn_ai_settings));
 static_assert(offsetof(VS::Battle::Ai::AiActorView, ai_settings) ==
-              offsetof(VS::Battle::Actor, template_word2c));
+              offsetof(VS::Battle::Actor, ai_settings));
 // The settings actor view reads the actor's sub-type, its spawn group word
 // (the AI group bit-fields) and its spawn flags word.
 static_assert(offsetof(VS::Battle::Ai::SettingsActorView, kind) ==
@@ -47,7 +47,7 @@ static_assert(offsetof(VS::Battle::Ai::SettingsActorView, spawn_group) ==
               offsetof(VS::Battle::Actor, last_trigger_tile) +
                   sizeof(VS::Battle::Actor::last_trigger_tile));
 static_assert(offsetof(VS::Battle::Ai::SettingsActorView, spawn_flags) ==
-              offsetof(VS::Battle::Actor, reserved34));
+              offsetof(VS::Battle::Actor, spawn_ai_settings));
 
 // The settings view aliases the AI state it initialises, so the fields it
 // writes must be the ones the AI behaviours read.

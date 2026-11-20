@@ -646,7 +646,7 @@ struct LiveCreationFixture {
     actor.id = 0;
     actor.kind = 0x04;
     actor.allocation_kind = 1;
-    actor.spawn_byte26 = 1;
+    actor.combat_pose = 1;
     actor.command_opcode = 7;
     actor.command_flags = 0xAB;
     actor.stats = &stats;

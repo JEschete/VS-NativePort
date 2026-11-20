@@ -42,7 +42,7 @@ struct SphereTargetLabelRecord {
   char state;
   char depth;
   char gradient;
-  char ring_size;
+  char pulse_phase;
   std::int16_t screen_x;
   std::uint8_t offset_y;
   char fade;
@@ -63,13 +63,13 @@ struct TargetSphereSetupView {
   std::int16_t wire_shape;
   char target_count;
   char selected_target;
-  std::uint8_t sphere_mode;
-  char highlighted_group;
+  std::uint8_t area_target_count;
+  char highlighted_actor;
   // The highlighted pulse slot, target mode and wire vertex count.
   std::int32_t pulse_mode_and_vertex_count;
   std::int32_t highlight_tint;
   std::int32_t cursor_xy;
-  std::int32_t cursor_z_and_input_locked;
+  std::int32_t cursor_z_and_locked;
   TargetPreview* target_list0;
   TargetPreview* target_list1;
   VS::Battle::ShapeVertex wire_vertices[kSphereWireVertexCount];
@@ -91,16 +91,16 @@ struct TargetSphereRecord {
   std::int16_t wire_shape;
   char target_count;
   char selected_target;
-  char sphere_mode;
-  char highlighted_group;
+  char area_target_count;
+  char highlighted_actor;
   char highlighted_pulse_slot;
-  char target_mode;
+  char highlights_all_targets;
   std::int16_t vertex_count;
   std::int32_t highlight_tint;
   // The cursor's x and y halfwords.
   std::int32_t cursor_xy;
   std::int16_t cursor_z;
-  std::int16_t input_locked;
+  std::int16_t cursor_locked;
   TargetPreview* target_lists[2];
   VS::Battle::ShapeVertex wire_vertices[kSphereWireVertexCount];
   SphereTargetLabelRecord labels[kSphereTargetLabelSlots];

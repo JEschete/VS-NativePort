@@ -88,7 +88,7 @@ void DrawLiveSphereVolumeWireframe(TargetVolume* shape, int color) {
     const ShapeVertex& source = sphere->wire_vertices[index];
     vertices[index] = {
         .position = {source.xyz[0], source.xyz[1], source.xyz[2]},
-        .segment = source.opaque6};
+        .segment = source.segment};
   }
   const TargetWireState wire{.phase_a = sphere->wire_phase_a,
                              .phase_b = sphere->wire_phase_b,

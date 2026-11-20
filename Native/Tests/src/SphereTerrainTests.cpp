@@ -203,7 +203,7 @@ struct SphereLabelFixture {
       label.depth = 1;
       label.screen_x = static_cast<int16_t>(index % 2 ? 248 : -4);
       label.offset_y = static_cast<char>(index % 8 * 11);
-      label.ring_size = 20;
+      label.pulse_phase = 20;
       label.world_position = {1083, -650, 2008, 0};
       label.text = text;
     }

@@ -188,8 +188,8 @@ ActionTargetPreview ReadPreview(const VS::Battle::TargetPreview& raw) {
           .hit_chance = raw.hit_chance,
           .removed_statuses = static_cast<std::uint32_t>(raw.removed_statuses),
           .action_kind = static_cast<std::uint8_t>(raw.action_kind),
-          .damage_type = static_cast<std::uint8_t>(raw.opaque15),
-          .effect_variant = static_cast<std::uint8_t>(raw.opaque16),
+          .damage_type = static_cast<std::uint8_t>(raw.damage_type),
+          .affinity = static_cast<std::uint8_t>(raw.affinity),
           .enemy_class = static_cast<std::uint8_t>(raw.enemy_class)};
 }
 
@@ -204,8 +204,8 @@ void WritePreview(VS::Battle::TargetPreview& raw,
   raw.hit_chance = preview.hit_chance;
   raw.removed_statuses = static_cast<int>(preview.removed_statuses);
   raw.action_kind = static_cast<char>(preview.action_kind);
-  raw.opaque15 = static_cast<char>(preview.damage_type);
-  raw.opaque16 = static_cast<char>(preview.effect_variant);
+  raw.damage_type = static_cast<char>(preview.damage_type);
+  raw.affinity = static_cast<char>(preview.affinity);
   raw.enemy_class = static_cast<char>(preview.enemy_class);
 }
 
@@ -259,7 +259,7 @@ void WriteVolume(const VolumeFields& fields, const TargetingVolume& volume) {
 TargetVolume RawVolume(const TargetingVolume& volume) {
   TargetVolume raw{};
   raw.kind = static_cast<std::uint8_t>(volume.shape);
-  raw.opaque1 = static_cast<std::uint8_t>(volume.kind);
+  raw.range_kind = static_cast<std::uint8_t>(volume.kind);
   raw.angle = static_cast<std::int16_t>(volume.facing);
   const std::array<std::uint8_t, kVolumeExtentCount> extents{
       static_cast<std::uint8_t>(volume.x), static_cast<std::uint8_t>(volume.y),
@@ -560,7 +560,7 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
     const VS::Battle::HitResult& hit = result.targets[0];
     return {.action_id = result.action_id,
             .damage_type = result.damage_type,
-            .effect_variant = result.effect_variant,
+            .affinity = result.affinity,
             .target_actor = hit.target.target_actor,
             .target_hp = hit.target.hp,
             .target_mp = hit.target.mp,
@@ -890,7 +890,7 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
     }
     const TargetVolume& volume = sphere_.volumes[index];
     return {.kind = volume.kind,
-            .range_kind = volume.opaque1,
+            .range_kind = volume.range_kind,
             .angle = volume.angle,
             .extents = volume.scale.extents,
             .position = PositionOf(volume)};
@@ -903,7 +903,7 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
     }
     TargetVolume& raw = sphere_.volumes[index];
     raw.kind = static_cast<std::uint8_t>(volume.kind);
-    raw.opaque1 = static_cast<std::uint8_t>(volume.range_kind);
+    raw.range_kind = static_cast<std::uint8_t>(volume.range_kind);
     raw.angle = static_cast<std::int16_t>(volume.angle);
     std::ranges::copy(volume.extents, std::begin(raw.scale.extents));
     const std::array<std::int16_t, kPointHalfwords> position{
@@ -913,14 +913,14 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
   }
   [[nodiscard]] battle::SphereCursor Cursor() const override {
     const auto across = std::bit_cast<HalfwordPair>(sphere_.cursor_xy);
-    return {across[0], across[1], sphere_.cursor_z, sphere_.input_locked};
+    return {across[0], across[1], sphere_.cursor_z, sphere_.cursor_locked};
   }
   void SetCursor(const battle::SphereCursor& cursor) override {
     sphere_.cursor_xy =
         std::bit_cast<int>(HalfwordPair{static_cast<std::int16_t>(cursor.x),
                                         static_cast<std::int16_t>(cursor.y)});
     sphere_.cursor_z = static_cast<std::int16_t>(cursor.z);
-    sphere_.input_locked = static_cast<std::int16_t>(cursor.locked);
+    sphere_.cursor_locked = static_cast<std::int16_t>(cursor.locked);
   }
   [[nodiscard]] int WireShape() const override { return sphere_.wire_shape; }
   [[nodiscard]] int CameraYaw() const override { return sphere_.camera_yaw; }
@@ -928,7 +928,7 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
     return Byte(sphere_.target_count);
   }
   [[nodiscard]] int SecondaryTargetCount() const override {
-    return Byte(sphere_.sphere_mode);
+    return Byte(sphere_.area_target_count);
   }
   [[nodiscard]] int SelectedTarget() const override {
     return Byte(sphere_.selected_target);
@@ -937,14 +937,14 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
     sphere_.selected_target = static_cast<char>(index);
   }
   [[nodiscard]] bool AllTargetsMode() const override {
-    return sphere_.target_mode != 0;
+    return sphere_.highlights_all_targets != 0;
   }
   [[nodiscard]] battle::HighlightedTarget Highlighted() const override {
-    return {Byte(sphere_.highlighted_group),
+    return {Byte(sphere_.highlighted_actor),
             static_cast<std::int8_t>(sphere_.highlighted_pulse_slot)};
   }
   void SetHighlighted(battle::HighlightedTarget target) override {
-    sphere_.highlighted_group = static_cast<char>(target.group);
+    sphere_.highlighted_actor = static_cast<char>(target.group);
     sphere_.highlighted_pulse_slot = static_cast<char>(target.pulse_slot);
   }
   void SetHighlightTint(int rgb) override { sphere_.highlight_tint = rgb; }
@@ -985,7 +985,7 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
                                           static_cast<std::uint32_t>(row));
   }
   void UpdateTargetHighlights() override {
-    const int count = Byte(sphere_.sphere_mode);
+    const int count = Byte(sphere_.area_target_count);
     VS::Battle::TargetPreview* list = sphere_.target_lists[kAreaTargetList];
     if (list == nullptr && count > 0) {
       VS::Core::LogError("battle.targeting", "{} area targets without a list",
@@ -1087,7 +1087,7 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
     return {.state = Byte(label.state),
             .depth = Byte(label.depth),
             .gradient = Byte(label.gradient),
-            .ring_size = Byte(label.ring_size),
+            .pulse_phase = Byte(label.pulse_phase),
             .screen_x = label.screen_x,
             .offset_y = label.offset_y,
             .fade = Byte(label.fade),
@@ -1103,7 +1103,7 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
     raw.state = static_cast<char>(label.state);
     raw.depth = static_cast<char>(label.depth);
     raw.gradient = static_cast<char>(label.gradient);
-    raw.ring_size = static_cast<char>(label.ring_size);
+    raw.pulse_phase = static_cast<char>(label.pulse_phase);
     raw.screen_x = static_cast<std::int16_t>(label.screen_x);
     raw.offset_y = static_cast<std::uint8_t>(label.offset_y);
     raw.fade = static_cast<char>(label.fade);

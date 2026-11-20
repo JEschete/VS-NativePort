@@ -94,7 +94,7 @@ void Refuse(const char* what) {
 
 [[nodiscard]] SphereDrawVolume VolumeOf(const TargetVolume& source) {
   SphereDrawVolume volume{.kind = source.kind,
-                          .reserved = source.opaque1,
+                          .reserved = source.range_kind,
                           .angle = source.angle,
                           .position_pad = source.position[kTargetWireAxes]};
   std::copy_n(std::begin(source.scale.extents), volume.extents.size(),
@@ -107,7 +107,7 @@ void Refuse(const char* what) {
 [[nodiscard]] TargetVolume RecordOf(const SphereDrawVolume& volume) {
   TargetVolume record{};
   record.kind = volume.kind;
-  record.opaque1 = volume.reserved;
+  record.range_kind = volume.reserved;
   record.angle = volume.angle;
   std::copy(volume.extents.begin(), volume.extents.end(),
             std::begin(record.scale.extents));

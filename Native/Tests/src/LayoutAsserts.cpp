@@ -174,7 +174,7 @@ SAME_FIELD(VS::Battle::Ai::AiActorView, ai_control_flags, VS::Battle::Actor,
 SAME_FIELD(VS::Battle::Ai::AiActorView, stats, VS::Battle::Actor, stats);
 SAME_FIELD(VS::Battle::Ai::AiActorView, model, VS::Battle::Actor, model);
 SAME_FIELD(VS::Battle::Ai::SettingsActorView, spawn_flags, VS::Battle::Actor,
-           reserved34);
+           spawn_ai_settings);
 SAME_FIELD(VS::Battle::Ai::CreationModelView, radius, VS::Actors::ActorRecord,
            collision_radius);
 SAME_FIELD(VS::Battle::Ai::CreationModelView, opaque_63e,

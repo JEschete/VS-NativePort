@@ -22,7 +22,7 @@ enum class AbilityField : std::uint8_t {
   kPreviousChainInput,
   kAbilityInputSucceeded,
   kAbilityInputAttempted,
-  kChainContinued,
+  kDefenseContinued,
   kAbilityTimer,
   kAbilityWindow,
 };

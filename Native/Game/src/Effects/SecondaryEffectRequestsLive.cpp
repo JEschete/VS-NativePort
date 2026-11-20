@@ -85,7 +85,7 @@ class LiveWorld final : public ActionImpactWorld {
     if (queued == nullptr) return std::nullopt;
     return QueuedEffectAction{
         .action_id = queued->action_id,
-        .effect_variant = static_cast<std::uint8_t>(queued->effect_variant),
+        .affinity = static_cast<std::uint8_t>(queued->affinity),
         .source_actor = queued->primary_target.target.target_actor,
         .target_count = queued->target_count};
   }

@@ -59,10 +59,8 @@ class FakeWorld final : public fx::ActionImpactWorld {
 };
 
 fx::QueuedEffectAction Action(std::uint16_t id, std::uint16_t count = 1) {
-  return {.action_id = id,
-          .effect_variant = 7,
-          .source_actor = 3,
-          .target_count = count};
+  return {
+      .action_id = id, .affinity = 7, .source_actor = 3, .target_count = count};
 }
 
 fx::ImpactTarget ActorTarget(std::uint8_t impact) {
@@ -141,7 +139,7 @@ TEST_CASE("Action hit effect at a position reads its hit word as a point",
 TEST_CASE("Action hit effect variant becomes the target color preset",
           "[effects][secondary-requests]") {
   fx::QueuedEffectAction action = Action(1);
-  action.effect_variant = 0xFF;
+  action.affinity = 0xFF;
   const auto at_actor =
       fx::ActionHitEffectRequest(1, action, ActorTarget(0), 0, 0x77);
   const auto at_position =

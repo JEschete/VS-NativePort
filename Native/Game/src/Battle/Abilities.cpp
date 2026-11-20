@@ -104,7 +104,7 @@ bool IsNewActionLearned(const AbilityHost& host) {
   return selection.action_id != 0 &&
          !host.ActionDefinitionUnlocked(selection.action_id) &&
          !selection.primary_targets_position &&
-         host.Field(AbilityField::kChainContinued) == 0 &&
+         host.Field(AbilityField::kDefenseContinued) == 0 &&
          selection.primary_actor == 0;
 }
 
@@ -194,7 +194,7 @@ void ContinueDefense(AbilityHost& host) {
   host.SetChainStep(host.ChainStep() + 1);
   CollapseDefenseSelection(host);
   host.SetQueueIndex(host.QueueIndex() + 1);
-  host.SetField(AbilityField::kChainContinued, 1);
+  host.SetField(AbilityField::kDefenseContinued, 1);
   host.ResolveSelectionIntoQueue(
       host.MappedAbility(AbilityKind::kDefense, slot - 1));
   CountChainKill(host);

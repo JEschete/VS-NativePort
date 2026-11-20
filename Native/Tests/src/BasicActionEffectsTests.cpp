@@ -255,7 +255,7 @@ TEST_CASE("Live armor wear changes only selected DP and its two effect bits",
       const auto doubled =
           std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(hp * 2));
       expected.armor_dp_change = doubled;
-      expected.limbs[limb].effects.opaque2 = doubled;
+      expected.limbs[limb].effects.armor_dp_change = doubled;
       expected.armor_dp_effect = 1;
       battle::QueueLiveDamageBasedArmorWear(nullptr, nullptr, &fixture.hit,
                                             kUnusedIndex, -1);
@@ -428,7 +428,7 @@ TEST_CASE("Armor wear original void mediator invokes the native policy",
   Relocated(0x800842AC, battle::QueueLiveDamageBasedArmorWear)(
       nullptr, nullptr, &fixture.hit, kUnusedIndex, 0);
   CHECK(fixture.hit.armor_dp_change == -14);
-  CHECK(fixture.hit.limbs[5].effects.opaque2 == -14);
+  CHECK(fixture.hit.limbs[5].effects.armor_dp_change == -14);
 }
 TEST_CASE("Flag sixty four original void mediator invokes the native policy",
           "[basic-action-effects][F00473]") {
@@ -886,7 +886,7 @@ struct RecoveryFixture : LiveFixture {
   void Select(std::size_t function) {
     state.selection.action_id = function < 2 ? 255 : 65535;
     VS::Battle::actionDefinitions[255].type = function == 0 ? 1 : 7;
-    state.selection.effect_variant = static_cast<char>(function - 2);
+    state.selection.affinity = static_cast<char>(function - 2);
   }
   void Prepare(std::size_t function, int value, int pending) {
     Select(function);
@@ -916,7 +916,7 @@ std::int16_t RecoveryCalculator(ActionDefinition* action,
   *target = fixture.changed;
   VS::Battle::actors[41] = &fixture.replacement;
   fixture.state.selection.action_id = 65535;
-  fixture.state.selection.effect_variant = 127;
+  fixture.state.selection.affinity = 127;
   return fixture.amount;
 }
 
@@ -926,8 +926,8 @@ void CheckLiveRecoverySample(RecoveryFixture& fixture, Handler handler,
   auto expected = fixture.changed;
   expected.target.hp = RecoveryHalf(pending + amount);
   expected.hp_effect = 2;
-  expected.limbs[5].effects.opaque0 =
-      RecoveryHalf(expected.limbs[5].effects.opaque0 + amount * 2);
+  expected.limbs[5].effects.hp_change =
+      RecoveryHalf(expected.limbs[5].effects.hp_change + amount * 2);
   auto expected_armor = VS::Battle::limbArmorDpLoss;
   expected_armor.at(5) = RecoveryHalf(amount);
   const auto source = Bytes(fixture.source);
@@ -970,7 +970,7 @@ void CheckLiveRecoveryMiss(std::size_t function) {
     fixture.Select(function);
     const auto type = selected % 8;
     VS::Battle::actionDefinitions[255].type = type;
-    fixture.state.selection.effect_variant = static_cast<char>(selected);
+    fixture.state.selection.affinity = static_cast<char>(selected);
     if (RecoveryMatches(function, type, selected)) continue;
     kRecoveryEffects.at(function).live(nullptr, nullptr, nullptr,
                                        std::numeric_limits<int>::min(), -1);
@@ -1308,9 +1308,9 @@ TEST_CASE("F00498 post-calculation position controls real limb recovery",
   CheckLiveRecoverySample(fixture, handler, 8, 30, 32767);
   fixture.Prepare(8, 0, -1);
   fixture.changed.targets_position = -1;
-  const auto limbs = fixture.changed.limbs[5].effects.opaque0;
+  const auto limbs = fixture.changed.limbs[5].effects.hp_change;
   handler(&fixture.input, &fixture.source, &fixture.hit, 0, 0);
-  CHECK(fixture.hit.limbs[5].effects.opaque0 == limbs);
+  CHECK(fixture.hit.limbs[5].effects.hp_change == limbs);
   CHECK(fixture.hit.hp_effect == 2);
 }
 TEST_CASE("F00499 MP recovery wraps current queue and preserves neighbors",

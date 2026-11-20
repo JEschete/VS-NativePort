@@ -700,8 +700,8 @@ TEST_CASE("AI saved settings flags apply through the actor-state creation view",
   };
   VS::Battle::Actor actor{};
   std::memset(&actor, 0xA5, sizeof(actor));
-  actor.reserved34 = static_cast<int>(0xBEEF0ACFu);
-  actor.template_word2c = 0x12345678;
+  actor.spawn_ai_settings = static_cast<int>(0xBEEF0ACFu);
+  actor.ai_settings = 0x12345678;
   const auto before = bytes(actor);
   auto* view = reinterpret_cast<VS::Battle::Ai::AiActorView*>(&actor);
   REQUIRE((view->saved_ai_settings_flags & 1u) != 0);
@@ -778,7 +778,7 @@ struct ActorSettingsFixture {
     actor.ai_linked_group = 0x1F;
     actor.reserved31_bit6 = 2u | (0x2Au << 2) | (0x15u << 8) | (0x1Bu << 13);
     // Spawn flags: mode bits 12-13 both set and patrol rate bit 14.
-    actor.reserved34 = 0x7FFF;
+    actor.spawn_ai_settings = 0x7FFF;
     VS::Battle::Ai::ActorAiState& state = states[0];
     std::memset(&state, 0xA5, sizeof(state));
     state.actor_id = 0;

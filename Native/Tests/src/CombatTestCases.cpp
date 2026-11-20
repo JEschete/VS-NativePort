@@ -257,7 +257,7 @@ struct AbilityFixture {
       hit.target.target_limb = static_cast<char>(limb);
       hit.target.hp = hit.target.mp = amount;
       hit.hp_effect = hit.mp_effect = 1;
-      hit.limbs[limb].effects.opaque0 = amount;
+      hit.limbs[limb].effects.hp_change = amount;
     }
   }
 
@@ -2251,7 +2251,7 @@ TEST_CASE("All seven affinity defenses recover only matching damage",
   const int incoming = GENERATE(0, 1, 2, 3, 4, 5, 6);
   const int incoming_effect = GENERATE(1, 2, 3);
   AbilityEffectFixture fixture;
-  fixture.action.selection.effect_variant = static_cast<char>(incoming);
+  fixture.action.selection.affinity = static_cast<char>(incoming);
   fixture.action.selection.primary_target.hp_effect = incoming_effect;
   fixture.Queue(46 + affinity, 0, {22, 5, kEffects[affinity], true});
   fixture.Commit();
@@ -2415,7 +2415,7 @@ TEST_CASE("Armor-wearing arts saturate both original DP application stages",
   fixture.target.hp_effect = 1;
   fixture.Queue(id, 1, {0, 0, VS::Battle::QueueLiveDamageBasedArmorWear});
   CHECK(fixture.target.armor_dp_change == 40);
-  CHECK(fixture.target.limbs[limb].effects.opaque2 == 40);
+  CHECK(fixture.target.limbs[limb].effects.armor_dp_change == 40);
   fixture.Commit();
   CHECK(armor_dp == std::max(0, dp - 80));
   CHECK(shield_dp == std::max(0, dp - 40));

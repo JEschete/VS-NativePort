@@ -304,10 +304,10 @@ void DrawSphereTargetLabel(SphereTargetLabel& label,
   y += kLinkRowOffset;
   canvas.BeginProjection();
   const LabelScreenPoint anchor = canvas.Project(label.world_position);
-  const int pulse_head = label.ring_size - kPulseHeadLag;
-  const bool second_pulse = label.ring_size >= kSecondPulsePhase;
+  const int pulse_head = label.pulse_phase - kPulseHeadLag;
+  const bool second_pulse = label.pulse_phase >= kSecondPulsePhase;
   const int second_head =
-      (label.ring_size + kSecondPulseOffset) & kPulsePhaseMask;
+      (label.pulse_phase + kSecondPulseOffset) & kPulsePhaseMask;
   if (left_column) {
     const LabelScreenPoint ring = ScreenPoint(x + kLeftLabelRingInset, y);
     DrawLeftTargetLabelLink(anchor, ring, pulse_head, canvas);

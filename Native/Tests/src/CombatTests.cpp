@@ -46,7 +46,7 @@ int Tests_CombatTargetResults(void) {
   hit->target.target_limb = 0;
   hit->target.hp = 12;
   hit->hp_effect = 1;
-  hit->limbs[0].effects.opaque0 = 4;
+  hit->limbs[0].effects.hp_change = 4;
   action->targets[1] = *hit;
   action->targets[1].target.target_actor = 3;
   action->targets[2] = *hit;

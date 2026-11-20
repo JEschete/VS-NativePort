@@ -15,15 +15,16 @@ namespace VS::Battle {
 
 inline constexpr std::size_t kStatusIconCarouselSlots = 4;
 
-// The status icon carousel: four icon slots, also read as one word.
+// The status icon carousel: the previous, shown and next status icon (0xFF
+// for none) and the scroll step, also cleared as one word.
 // decomp: D_800EB9D0 (src/BATTLE/BATTLE.PRG/5BF94.c:362, declared u_char[])
-union HudHighlightWord {
+union StatusIconCarousel {
   std::int32_t word;
   std::array<std::uint8_t, kStatusIconCarouselSlots> bytes;
 };
-inline constexpr std::size_t kHudHighlightWordBytes = 0x4;
-static_assert(sizeof(HudHighlightWord) == kHudHighlightWordBytes,
-              "HudHighlightWord must keep its PS1 layout");
+inline constexpr std::size_t kStatusIconCarouselBytes = 0x4;
+static_assert(sizeof(StatusIconCarousel) == kStatusIconCarouselBytes,
+              "StatusIconCarousel must keep its PS1 layout");
 
 inline constexpr std::size_t kLimbNameCount = 20;
 inline constexpr std::size_t kHudGaugeLabelTexUBytes = 20;
@@ -92,7 +93,7 @@ extern std::int8_t hudBattleMode;
 // decomp: D_800EB9CD (src/BATTLE/BATTLE.PRG/5BF94.c:360)
 extern std::int8_t battleModeIndicatorStep;
 // decomp: D_800EB9D0 (src/BATTLE/BATTLE.PRG/5BF94.c:362)
-extern HudHighlightWord statusIconCarousel;
+extern StatusIconCarousel statusIconCarousel;
 // decomp: D_800EBBDC (src/BATTLE/BATTLE.PRG/5BF94.c:368)
 extern std::array<std::int32_t, kHudGaugeCount> hudGaugePositions;
 // decomp: D_800EBBEC (src/BATTLE/BATTLE.PRG/battleUi.h:279)

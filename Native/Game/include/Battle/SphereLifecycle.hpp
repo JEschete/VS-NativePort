@@ -20,10 +20,10 @@ struct SphereLifecycleState {
   std::int16_t wire_shape = 0;
   std::int8_t target_count = 0;
   std::int8_t selected_target = 0;
-  std::uint8_t sphere_mode = 0;
-  std::uint32_t reserved_38 = 0;
-  // The upper halfword is input_locked in the native sphere view.
-  std::uint32_t reserved_3c_and_input_locked = 0;
+  std::uint8_t area_target_count = 0;
+  std::uint32_t cursor_xy = 0;
+  // The upper halfword is cursor_locked in the native sphere view.
+  std::uint32_t cursor_z_and_locked = 0;
 
   friend bool operator==(const SphereLifecycleState&,
                          const SphereLifecycleState&) = default;
@@ -48,7 +48,7 @@ void InitializeSphereState(SphereLifecycleState& state) noexcept;
 // Invalid input is refused without modifying state or reuse.
 [[nodiscard]] std::optional<SphereVolumeSetResult> SetSphereVolumes(
     SphereLifecycleState& state, const SphereVolume& primary,
-    const SphereVolume* secondary, std::uint8_t sphere_mode,
+    const SphereVolume* secondary, std::uint8_t area_target_count,
     bool& reuse_volumes) noexcept;
 
 void ClearPrimarySphereVolume(SphereLifecycleState& state) noexcept;

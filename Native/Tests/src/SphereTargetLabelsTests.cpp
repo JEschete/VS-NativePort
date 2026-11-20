@@ -178,7 +178,7 @@ SphereTargetLabel SelectedLeftLabel() {
   return {.state = battle::kTargetLabelSettled,
           .depth = 1,
           .gradient = 2,
-          .ring_size = 20,
+          .pulse_phase = 20,
           .screen_x = -4,
           .offset_y = 10,
           .fade = 1,
@@ -434,7 +434,7 @@ TEST_CASE("Selected right target label links once before its second pulse",
           "[battle][sphere][labels]") {
   SphereTargetLabel label{.state = battle::kTargetLabelSettled,
                           .depth = 1,
-                          .ring_size = 17,
+                          .pulse_phase = 17,
                           .screen_x = 0xF8,
                           .offset_y = 4};
   RecordingLabelCanvas canvas;

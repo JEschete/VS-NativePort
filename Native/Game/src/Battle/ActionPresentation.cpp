@@ -94,7 +94,7 @@ void ResetInputs(ActionPresentationWorld& world) {
   world.SetField(AbilityField::kPreviousChainButtons, 0);
   world.SetField(AbilityField::kPreviousChainInput, 0);
   world.SetField(AbilityField::kChainAbilitySlot, 0);
-  world.SetField(AbilityField::kChainContinued, 0);
+  world.SetField(AbilityField::kDefenseContinued, 0);
 }
 bool Targeted(const PresentationAction& action, int actor) {
   for (std::size_t i = 0; i < action.Count(); ++i) {

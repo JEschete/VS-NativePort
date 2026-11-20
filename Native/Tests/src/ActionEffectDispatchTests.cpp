@@ -257,7 +257,7 @@ TEST_CASE("F00506 live injuries use low HP only and the actual status queue",
   VS::Battle::statusEffectParams[4].status_flags = 0x10;
   fixture.hit.target.target_actor = 41;
   fixture.hit.hp_effect = 2;
-  for (auto& limb : fixture.hit.limbs) limb.effects.opaque2 = -1;
+  for (auto& limb : fixture.hit.limbs) limb.effects.armor_dp_change = -1;
   battle::DeriveLiveLimbInjuryStatuses(&fixture.hit);
   CHECK(fixture.hit.remove_statuses == 0x10);
   CHECK(fixture.stats.statuses == 0);

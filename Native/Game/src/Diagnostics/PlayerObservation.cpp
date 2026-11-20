@@ -366,7 +366,7 @@ void InspectIncomingEffect(const ActionState& action,
     snapshot.incoming_type = VS::Battle::actionDefinitions[incoming_id].type;
     snapshot.incoming_cost = VS::Battle::actionDefinitions[incoming_id].cost;
     snapshot.incoming_affinity =
-        static_cast<unsigned char>(action.selection.effect_variant);
+        static_cast<unsigned char>(action.selection.affinity);
   }
   if (queued.target_count > std::size(queued.targets)) {
     throw std::runtime_error(

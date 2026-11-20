@@ -57,7 +57,7 @@ class LiveTriggeredRecoveryQueue final : public TriggeredRecoveryQueue {
     return static_cast<std::uint8_t>(VS::Battle::actionDefinitions[id].type);
   }
   std::uint8_t SelectedAffinity() override {
-    return static_cast<std::uint8_t>(Selection().effect_variant);
+    return static_cast<std::uint8_t>(Selection().affinity);
   }
   std::int16_t Calculate() override {
     return LiveCalculateActionStatChange(action_, source_, target_, hit_,
@@ -403,7 +403,7 @@ void QueueLiveDamageBasedArmorWear(ActionDefinition*, VS::Battle::HitResult*,
   const auto& armor =
       queued.changes.at(static_cast<std::size_t>(ActionResultField::kArmorDp));
   hit.armor_dp_change = armor.amount;
-  hit.limbs[queued.limb].effects.opaque2 =
+  hit.limbs[queued.limb].effects.armor_dp_change =
       queued.limbs.at(static_cast<std::size_t>(queued.limb)).armor_dp;
   hit.armor_dp_effect = armor.mode;
 }

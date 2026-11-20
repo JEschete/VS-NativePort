@@ -74,7 +74,7 @@ bool BuildSphereWireEdges(std::span<std::uint16_t> edges) noexcept {
 // decomp: BATTLE.PRG func_800C05EC (src/BATTLE/BATTLE.PRG/573B8.c:444).
 std::optional<SphereVolumeSetResult> SetSphereVolumes(
     SphereLifecycleState& state, const SphereVolume& primary,
-    const SphereVolume* secondary, std::uint8_t sphere_mode,
+    const SphereVolume* secondary, std::uint8_t area_target_count,
     bool& reuse_volumes) noexcept {
   if (reuse_volumes && secondary == nullptr) return std::nullopt;
 
@@ -91,13 +91,13 @@ std::optional<SphereVolumeSetResult> SetSphereVolumes(
     return SphereVolumeSetResult::kReused;
   }
 
-  state.reserved_38 = 0;
-  state.reserved_3c_and_input_locked = 0;
+  state.cursor_xy = 0;
+  state.cursor_z_and_locked = 0;
   state.wire_shape = kSphereTransitionShape;
   if (secondary != nullptr) {
     state.secondary_volume = *secondary;
     state.secondary_volume.kind |= kVolumeActiveMask;
-    state.sphere_mode = sphere_mode;
+    state.area_target_count = area_target_count;
     return SphereVolumeSetResult::kSecondarySet;
   }
 
@@ -131,8 +131,8 @@ void ClearSphereTargetCount(SphereLifecycleState& state) noexcept {
 int SphereInteractionMode(const SphereLifecycleState* state,
                           bool override_button) noexcept {
   if (state == nullptr || state->wire_shape != 0) return 0;
-  const auto input_locked =
-      static_cast<std::uint16_t>(state->reserved_3c_and_input_locked >> 16);
-  return input_locked == 0 || override_button ? 1 : 2;
+  const auto cursor_locked =
+      static_cast<std::uint16_t>(state->cursor_z_and_locked >> 16);
+  return cursor_locked == 0 || override_button ? 1 : 2;
 }
 }  // namespace VS::Battle
