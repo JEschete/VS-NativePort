@@ -13,14 +13,14 @@
 #include "Actors/Movement.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCommandsLive.hpp"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/BossOrbit.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
-#include "Battle/Ai/Movement.h"
-#include "Battle/Ai/OrbitingBoss.h"
+#include "Battle/Ai/Movement.hpp"
+#include "Battle/Ai/OrbitingBoss.hpp"
 #include "Battle/Ai/RadialMovementLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/RandomLive.hpp"
@@ -41,7 +41,8 @@ constexpr int kRetreatPathSteps = 31;
 // The boss's core limb.
 constexpr int kCoreLimb = 4;
 
-static_assert(std::size(Battle_Ai_radialRetreatPath) >= kRetreatPathSteps);
+static_assert(std::size(VS::Battle::Ai::radialRetreatPath) >=
+              kRetreatPathSteps);
 static_assert(std::extent_v<decltype(Battle_ActorStats::limbs)> > kCoreLimb);
 
 // The retreat and tracking views are the actor's AI state.
@@ -100,52 +101,53 @@ void Store(const OrbitingBoss& boss, AiState& state) {
   state.candidateCount = boss.candidate_count;
 }
 
-ArenaOrbit LoadOrbit(const Battle_Ai_ArenaOrbitState& live) {
+ArenaOrbit LoadOrbit(const VS::Battle::Ai::ArenaOrbitState& live) {
   return ArenaOrbit{.heading = live.heading,
                     .retreat_phase = live.phase,
-                    .distance_cached = live.distanceCached,
-                    .distance_squared = live.distanceSquared,
-                    .is_orbiting = live.isOrbiting,
-                    .path_step = live.pathStep,
+                    .distance_cached = live.distance_cached,
+                    .distance_squared = live.distance_squared,
+                    .is_orbiting = live.is_orbiting,
+                    .path_step = live.path_step,
                     .cooldown = live.cooldown,
                     .move_requested = live.requested,
-                    .retreat_angle = live.orbitAngle,
-                    .saved_height = live.savedHeight,
-                    .health_phase = live.healthPhase,
-                    .plan_saved = live.planSaved,
-                    .saved_plan_count = live.savedPlanCount,
-                    .start_x = live.startX,
-                    .start_z = live.startZ,
+                    .retreat_angle = live.orbit_angle,
+                    .saved_height = live.saved_height,
+                    .health_phase = live.health_phase,
+                    .plan_saved = live.plan_saved,
+                    .saved_plan_count = live.saved_plan_count,
+                    .start_x = live.start_x,
+                    .start_z = live.start_z,
                     .started = live.started,
-                    .angular_velocity = Battle_Ai_orbitAngularVelocity,
-                    .height_offset = Battle_Ai_orbitHeightOffset};
+                    .angular_velocity = VS::Battle::Ai::orbitAngularVelocity,
+                    .height_offset = VS::Battle::Ai::orbitHeightOffset};
 }
 
-void StoreOrbit(const ArenaOrbit& orbit, Battle_Ai_ArenaOrbitState& live) {
+void StoreOrbit(const ArenaOrbit& orbit,
+                VS::Battle::Ai::ArenaOrbitState& live) {
   live.heading = orbit.heading;
   live.phase = orbit.retreat_phase;
-  live.distanceCached = orbit.distance_cached;
-  live.distanceSquared = orbit.distance_squared;
-  live.isOrbiting = orbit.is_orbiting;
-  live.pathStep = orbit.path_step;
+  live.distance_cached = orbit.distance_cached;
+  live.distance_squared = orbit.distance_squared;
+  live.is_orbiting = orbit.is_orbiting;
+  live.path_step = orbit.path_step;
   live.cooldown = orbit.cooldown;
   live.requested = orbit.move_requested;
-  live.orbitAngle = orbit.retreat_angle;
-  live.savedHeight = orbit.saved_height;
-  live.healthPhase = orbit.health_phase;
-  live.planSaved = orbit.plan_saved;
-  live.savedPlanCount = orbit.saved_plan_count;
-  live.startX = orbit.start_x;
-  live.startZ = orbit.start_z;
+  live.orbit_angle = orbit.retreat_angle;
+  live.saved_height = orbit.saved_height;
+  live.health_phase = orbit.health_phase;
+  live.plan_saved = orbit.plan_saved;
+  live.saved_plan_count = orbit.saved_plan_count;
+  live.start_x = orbit.start_x;
+  live.start_z = orbit.start_z;
   live.started = orbit.started;
-  Battle_Ai_orbitAngularVelocity = orbit.angular_velocity;
-  Battle_Ai_orbitHeightOffset = orbit.height_offset;
+  VS::Battle::Ai::orbitAngularVelocity = orbit.angular_velocity;
+  VS::Battle::Ai::orbitHeightOffset = orbit.height_offset;
 }
 
-Battle_Ai_ArenaOrbitState& LiveOrbit() {
-  Require(Battle_Ai_arenaOrbit != nullptr,
+VS::Battle::Ai::ArenaOrbitState& LiveOrbit() {
+  Require(VS::Battle::Ai::arenaOrbit != nullptr,
           "AI orbiting boss requires the arena orbit");
-  return *Battle_Ai_arenaOrbit;
+  return *VS::Battle::Ai::arenaOrbit;
 }
 
 // The retreat path, the player's record, the plan, the battle actor and the
@@ -159,7 +161,7 @@ class LiveBossOrbitWorld final : public BossOrbitWorld {
   [[nodiscard]] std::optional<RetreatStep> RetreatPathStep(
       int step) const override {
     if (step < 0 || step >= kRetreatPathSteps) return std::nullopt;
-    const auto& entry = Battle_Ai_radialRetreatPath[step];
+    const auto& entry = VS::Battle::Ai::radialRetreatPath[step];
     return RetreatStep{.distance = entry[0], .height = entry[1]};
   }
   [[nodiscard]] std::optional<BossPlayer> Player() const override {
@@ -187,8 +189,8 @@ class LiveBossOrbitWorld final : public BossOrbitWorld {
     return static_cast<std::uint16_t>(candidate->threshold);
   }
   [[nodiscard]] std::optional<std::uint16_t> ReadinessLevel() const override {
-    if (Battle_Ai_roomAiState == nullptr) return std::nullopt;
-    return Battle_Ai_roomAiState->readinessLevel;
+    if (VS::Battle::Ai::roomAiState == nullptr) return std::nullopt;
+    return VS::Battle::Ai::roomAiState->readinessLevel;
   }
   [[nodiscard]] bool IsEngagementReady(OrbitingBoss& boss) override {
     bool ready = false;

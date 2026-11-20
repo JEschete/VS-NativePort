@@ -24,7 +24,7 @@
 #include "Actors/Spawning.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Legacy/Psx.h"
@@ -449,8 +449,8 @@ struct LiveRosterFixture {
       std::to_array(Battle_actors);
   decltype(std::to_array(Actors_actorRecords)) saved_records =
       std::to_array(Actors_actorRecords);
-  decltype(std::to_array(Battle_Ai_actorAiStates)) saved_ai =
-      std::to_array(Battle_Ai_actorAiStates);
+  decltype(VS::Battle::Ai::actorAiStates) saved_ai =
+      VS::Battle::Ai::actorAiStates;
   decltype(std::to_array(VS::Actors::weaponModels)) saved_weapons =
       std::to_array(VS::Actors::weaponModels);
   decltype(std::to_array(Battle_actorMarkers)) saved_markers =
@@ -462,7 +462,8 @@ struct LiveRosterFixture {
   LiveRosterFixture() {
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
     std::fill_n(Actors_actorRecords, saved_records.size(), nullptr);
-    std::fill_n(Battle_Ai_actorAiStates, saved_ai.size(), nullptr);
+    std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved_ai.size(),
+                nullptr);
     std::fill_n(VS::Actors::weaponModels, saved_weapons.size(), nullptr);
     std::fill_n(Battle_actorMarkers, saved_markers.size(), 0);
     std::fill_n(VS::State::recentRoomEnemyStates, saved_rooms.size(),
@@ -476,7 +477,7 @@ struct LiveRosterFixture {
   ~LiveRosterFixture() {
     std::ranges::copy(saved_actors, Battle_actors);
     std::ranges::copy(saved_records, Actors_actorRecords);
-    std::ranges::copy(saved_ai, Battle_Ai_actorAiStates);
+    std::ranges::copy(saved_ai, VS::Battle::Ai::actorAiStates.begin());
     std::ranges::copy(saved_weapons, VS::Actors::weaponModels);
     std::ranges::copy(saved_markers, Battle_actorMarkers);
     std::ranges::copy(saved_rooms, VS::State::recentRoomEnemyStates);

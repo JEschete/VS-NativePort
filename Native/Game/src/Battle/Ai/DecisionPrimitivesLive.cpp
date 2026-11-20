@@ -18,8 +18,8 @@
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActionPlanning.h"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActionPlanning.hpp"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/EngagementLive.hpp"
@@ -118,9 +118,9 @@ class LiveExecutionHost final : public ActionExecutionHost {
       : state_(state) {}
 
   [[nodiscard]] std::uint16_t ReadinessLevel() const override {
-    Require(Battle_Ai_roomAiState != nullptr,
+    Require(VS::Battle::Ai::roomAiState != nullptr,
             "AI execution check requires room state");
-    return Battle_Ai_roomAiState->readinessLevel;
+    return VS::Battle::Ai::roomAiState->readinessLevel;
   }
   [[nodiscard]] ActionCooldown Cooldown() const override {
     return CooldownOf(state_);
@@ -171,23 +171,23 @@ std::uint16_t ActionAiFlags(unsigned action) {
 class LiveFallbackCache final : public FallbackCandidateCache {
  public:
   [[nodiscard]] std::uint32_t SlotMask() const override {
-    return std::bit_cast<std::uint32_t>(Battle_Ai_unusedPlanCounter);
+    return std::bit_cast<std::uint32_t>(VS::Battle::Ai::unusedPlanCounter);
   }
   void SetSlotMask(std::uint32_t mask) override {
-    Battle_Ai_unusedPlanCounter = std::bit_cast<int>(mask);
+    VS::Battle::Ai::unusedPlanCounter = std::bit_cast<int>(mask);
   }
   [[nodiscard]] int Count() const override {
-    return Battle_Ai_fallbackCandidateCount;
+    return VS::Battle::Ai::fallbackCandidateCount;
   }
   [[nodiscard]] bool Store(std::size_t index,
                            const ActionCandidate& candidate) override {
-    if (Battle_Ai_fallbackCandidates == nullptr) return false;
-    Battle_Ai_fallbackCandidates[index] =
+    if (VS::Battle::Ai::fallbackCandidates == nullptr) return false;
+    VS::Battle::Ai::fallbackCandidates[index] =
         std::bit_cast<Battle_Ai_CandidateEntryView>(candidate.RawWords());
     return true;
   }
   void SetCount(int count) override {
-    Battle_Ai_fallbackCandidateCount = count;
+    VS::Battle::Ai::fallbackCandidateCount = count;
   }
 };
 
@@ -302,8 +302,8 @@ bool CanApproachLiveEngagedTarget(const Battle_Ai_ActorAiState* state,
   const Battle_Ai_ActorAiState& actor = StateOf(state);
   const ActionCandidate typed = CandidateOf(candidate);
   std::optional<EngagementRoster> roster;
-  if (Battle_Ai_roomAiState != nullptr) {
-    const Battle_Ai_RoomAiState& room = *Battle_Ai_roomAiState;
+  if (VS::Battle::Ai::roomAiState != nullptr) {
+    const Battle_Ai_RoomAiState& room = *VS::Battle::Ai::roomAiState;
     roster = EngagementRoster{.engaged_mask = EngagedMask(room),
                               .engaged_count = room.engagedCount,
                               .limit = room.engagementLimit,

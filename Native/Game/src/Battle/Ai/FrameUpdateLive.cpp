@@ -19,17 +19,17 @@
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionExecutionLive.hpp"
-#include "Battle/Ai/ActionPlanning.h"
+#include "Battle/Ai/ActionPlanning.hpp"
 #include "Battle/Ai/ActorPerceptionLive.hpp"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/BlockedMovementLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
-#include "Battle/Ai/Movement.h"
-#include "Battle/Ai/Navigation.h"
-#include "Battle/Ai/OrbitingBoss.h"
-#include "Battle/Ai/Perception.h"
+#include "Battle/Ai/Movement.hpp"
+#include "Battle/Ai/Navigation.hpp"
+#include "Battle/Ai/OrbitingBoss.hpp"
+#include "Battle/Ai/Perception.hpp"
 #include "Battle/Ai/RoomState.hpp"
 #include "Battle/Damage.h"
 #include "Core/Diagnostics.hpp"
@@ -78,22 +78,23 @@ Battle_Ai_ActorAiState* AsActorAiState(void* view) {
 class LiveActorAiFrame final : public VS::Battle::Ai::ActorAiFrame {
  public:
   [[nodiscard]] bool HasTileFlags() const override {
-    return Battle_Ai_tileFlagMap != nullptr;
+    return VS::Battle::Ai::tileFlagMap != nullptr;
   }
   [[nodiscard]] bool HasRoomAndActors() const override {
-    return Battle_Ai_roomAiState != nullptr && Battle_actors[0] != nullptr;
+    return VS::Battle::Ai::roomAiState != nullptr &&
+           Battle_actors[0] != nullptr;
   }
   void CacheWorkingState() override {
     VS::Battle::Ai::CacheLiveActorAiWorkingState();
   }
   [[nodiscard]] std::uint32_t AttributeActorMask() const override {
-    return static_cast<std::uint32_t>(Battle_Ai_attributeActorMask);
+    return static_cast<std::uint32_t>(VS::Battle::Ai::attributeActorMask);
   }
   [[nodiscard]] std::uint32_t PerceptionTarget() const override {
-    return static_cast<std::uint32_t>(Battle_Ai_secondPerceptionTarget);
+    return static_cast<std::uint32_t>(VS::Battle::Ai::secondPerceptionTarget);
   }
   void SetPerceptionTarget(std::uint32_t target) override {
-    Battle_Ai_secondPerceptionTarget = static_cast<int>(target);
+    VS::Battle::Ai::secondPerceptionTarget = static_cast<int>(target);
   }
   void UpdatePerception() override {
     VS::Battle::Ai::UpdateLiveActorPerception();
@@ -114,14 +115,14 @@ namespace VS::Battle::Ai {
 // decomp: BATTLE.PRG func_800E65DC (src/BATTLE/BATTLE.PRG/7DDDC.s:8).
 int CacheLiveActorAiWorkingState() {
   static_assert(std::size(frame_context.actors) == kFrameActorSlots);
-  static_assert(std::size(Battle_Ai_actorAiStates) == kFrameActorSlots);
+  static_assert(std::size(VS::Battle::Ai::actorAiStates) == kFrameActorSlots);
   for (std::size_t slot = 0; slot < kFrameActorSlots; ++slot) {
-    frame_context.actors[slot] = Battle_Ai_actorAiStates[slot];
+    frame_context.actors[slot] = VS::Battle::Ai::actorAiStates[slot];
   }
-  frame_context.room = Battle_Ai_roomAiState;
-  frame_context.heightMap = Battle_Ai_specialTerrainHeights;
-  frame_context.tileFlags = Battle_Ai_tileFlagMap;
-  frame_context.roomData = Battle_Ai_roomHasWaypoints;
+  frame_context.room = VS::Battle::Ai::roomAiState;
+  frame_context.heightMap = VS::Battle::Ai::specialTerrainHeights;
+  frame_context.tileFlags = VS::Battle::Ai::tileFlagMap;
+  frame_context.roomData = VS::Battle::Ai::roomHasWaypoints;
   WorkingStateSource source;
   source.has_room_data = frame_context.roomData != nullptr;
   source.auxiliary_bytes = Field_roomData.header.section6Length;
@@ -147,8 +148,8 @@ int CacheLiveActorAiWorkingState() {
     frame_context.terrain_region_count = window->terrain_regions->count;
   }
   frame_context.randomState =
-      static_cast<u_int>(Battle_Ai_savedMovementRandomState);
-  memcpy(frame_context.directions, Battle_Ai_directionDeltas,
+      static_cast<u_int>(VS::Battle::Ai::savedMovementRandomState);
+  memcpy(frame_context.directions, VS::Battle::Ai::directionDeltas.data(),
          sizeof frame_context.directions);
   frame_context.roomBounds = window->room_bounds;
   return static_cast<int>(frame_context.roomBounds);
@@ -192,7 +193,7 @@ void SetLiveActorVerticalMovementSteps(int actor_id, int walk_step,
                      actor_id);
     abort();
   }
-  Battle_Ai_ActorAiState* state = Battle_Ai_actorAiStates[actor_id];
+  Battle_Ai_ActorAiState* state = VS::Battle::Ai::actorAiStates[actor_id];
   if (state == nullptr) return;
   VerticalMovementSteps steps;
   SetActorVerticalMovementSteps(steps, walk_step, run_step);
@@ -217,10 +218,10 @@ std::optional<std::uint8_t> LiveTerrainRegionCell(int x, int z) {
 }
 
 std::optional<RoomTileBounds> LiveRoomTileBounds() {
-  if (Battle_Ai_roomAiState == nullptr) return std::nullopt;
-  return RoomTileBounds{.min_x = Battle_Ai_roomAiState->minTileX,
-                        .min_z = Battle_Ai_roomAiState->minTileZ,
-                        .max_x = Battle_Ai_roomAiState->maxTileX,
-                        .max_z = Battle_Ai_roomAiState->maxTileZ};
+  if (VS::Battle::Ai::roomAiState == nullptr) return std::nullopt;
+  return RoomTileBounds{.min_x = VS::Battle::Ai::roomAiState->minTileX,
+                        .min_z = VS::Battle::Ai::roomAiState->minTileZ,
+                        .max_x = VS::Battle::Ai::roomAiState->maxTileX,
+                        .max_z = VS::Battle::Ai::roomAiState->maxTileZ};
 }
 }  // namespace VS::Battle::Ai

@@ -10,7 +10,8 @@
 
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
+#include "Battle/Ai/AiState.h"
 #include "Battle/StatusEffects.h"
 #include "Battle/StatusLifecycle.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
@@ -114,7 +115,7 @@ State Actor() {
 
 struct LiveFixture {
   Battle_Actor* saved_player = Battle_characterState;
-  Battle_Ai_ActorAiState* saved_ai = Battle_Ai_actorAiStates[0];
+  Battle_Ai_ActorAiState* saved_ai = VS::Battle::Ai::actorAiStates[0];
   Battle_StatusEffectParams saved_attribute = Battle_statusEffectParams[5];
   Battle_StatusEffectParams saved_movement = Battle_statusEffectParams[11];
   Battle_StatusEffectParams saved_poison = Battle_statusEffectParams[14];
@@ -125,7 +126,7 @@ struct LiveFixture {
   LiveFixture() {
     player.stats = &stats;
     Battle_characterState = &player;
-    Battle_Ai_actorAiStates[0] = &ai;
+    VS::Battle::Ai::actorAiStates[0] = &ai;
     stats.currentHp = -32768;
     stats.currentMp = -123;
     stats.risk = 65535;
@@ -142,7 +143,7 @@ struct LiveFixture {
   }
   ~LiveFixture() {
     Battle_characterState = saved_player;
-    Battle_Ai_actorAiStates[0] = saved_ai;
+    VS::Battle::Ai::actorAiStates[0] = saved_ai;
     Battle_statusEffectParams[5] = saved_attribute;
     Battle_statusEffectParams[11] = saved_movement;
     Battle_statusEffectParams[14] = saved_poison;

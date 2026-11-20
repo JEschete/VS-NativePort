@@ -19,14 +19,14 @@
 #include "Actors/WeaponModel.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorSettingsLive.hpp"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/BossOrbitLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
-#include "Battle/Ai/Movement.h"
-#include "Battle/Ai/Navigation.h"
-#include "Battle/Ai/OrbitingBoss.h"
+#include "Battle/Ai/Movement.hpp"
+#include "Battle/Ai/Navigation.hpp"
+#include "Battle/Ai/OrbitingBoss.hpp"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Core/Memory/HeapLive.hpp"
@@ -38,16 +38,17 @@ namespace {
 struct CleanupFixture {
   decltype(std::to_array(Battle_actors)) saved_actors =
       std::to_array(Battle_actors);
-  decltype(std::to_array(Battle_Ai_actorAiStates)) saved_states =
-      std::to_array(Battle_Ai_actorAiStates);
+  decltype(VS::Battle::Ai::actorAiStates) saved_states =
+      VS::Battle::Ai::actorAiStates;
   decltype(std::to_array(Battle_actorMarkers)) saved_markers =
       std::to_array(Battle_actorMarkers);
-  Battle_Ai_RoomAiState* saved_room = Battle_Ai_roomAiState;
-  decltype(Battle_Ai_tileFlagMap) saved_flags = Battle_Ai_tileFlagMap;
-  Battle_Ai_ArenaOrbitState* saved_orbit = Battle_Ai_arenaOrbit;
+  Battle_Ai_RoomAiState* saved_room = VS::Battle::Ai::roomAiState;
+  decltype(VS::Battle::Ai::tileFlagMap) saved_flags =
+      VS::Battle::Ai::tileFlagMap;
+  VS::Battle::Ai::ArenaOrbitState* saved_orbit = VS::Battle::Ai::arenaOrbit;
   VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
-  int saved_attribute = Battle_Ai_attributeActorMask;
-  int saved_busy = Battle_Ai_candidateEngagedThisUpdate;
+  int saved_attribute = VS::Battle::Ai::attributeActorMask;
+  int saved_busy = VS::Battle::Ai::candidateEngagedThisUpdate;
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 3072> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
@@ -56,13 +57,14 @@ struct CleanupFixture {
   u_short flags[32][32]{};
 
   CleanupFixture() {
-    Battle_Ai_roomAiState = &room;
-    Battle_Ai_tileFlagMap = flags;
-    Battle_Ai_arenaOrbit = nullptr;
-    Battle_Ai_attributeActorMask = 0;
-    Battle_Ai_candidateEngagedThisUpdate = 0;
+    VS::Battle::Ai::roomAiState = &room;
+    VS::Battle::Ai::tileFlagMap = flags;
+    VS::Battle::Ai::arenaOrbit = nullptr;
+    VS::Battle::Ai::attributeActorMask = 0;
+    VS::Battle::Ai::candidateEngagedThisUpdate = 0;
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
-    std::fill_n(Battle_Ai_actorAiStates, saved_states.size(), nullptr);
+    std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved_states.size(),
+                nullptr);
     const std::array<int, 3> ids{0, 2, 5};
     for (std::size_t index = 0; index < actors.size(); ++index) {
       actors[index].id = ids[index];
@@ -82,14 +84,14 @@ struct CleanupFixture {
   ~CleanupFixture() {
     std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
     std::copy(saved_states.begin(), saved_states.end(),
-              Battle_Ai_actorAiStates);
+              VS::Battle::Ai::actorAiStates.begin());
     std::copy(saved_markers.begin(), saved_markers.end(), Battle_actorMarkers);
-    Battle_Ai_roomAiState = saved_room;
-    Battle_Ai_tileFlagMap = saved_flags;
-    Battle_Ai_arenaOrbit = saved_orbit;
+    VS::Battle::Ai::roomAiState = saved_room;
+    VS::Battle::Ai::tileFlagMap = saved_flags;
+    VS::Battle::Ai::arenaOrbit = saved_orbit;
     VS::Battle::Ai::LiveFrameContext() = saved_frame;
-    Battle_Ai_attributeActorMask = saved_attribute;
-    Battle_Ai_candidateEngagedThisUpdate = saved_busy;
+    VS::Battle::Ai::attributeActorMask = saved_attribute;
+    VS::Battle::Ai::candidateEngagedThisUpdate = saved_busy;
   }
 
   Battle_Ai_ActorAiState* AllocateState(std::size_t index) {
@@ -101,19 +103,19 @@ struct CleanupFixture {
     state->actorId = static_cast<u_char>(actors[index].id);
     state->actor = reinterpret_cast<Battle_Ai_EngagementData*>(&actors[index]);
     state->nextTile.word = 0x00070004;
-    Battle_Ai_actorAiStates[state->actorId] = state;
-    Battle_Ai_attributeActorMask |= 1 << state->actorId;
+    VS::Battle::Ai::actorAiStates[state->actorId] = state;
+    VS::Battle::Ai::attributeActorMask |= 1 << state->actorId;
     return state;
   }
 };
 
 void CheckRetiredAiOwnership(const CleanupFixture& fixture,
                              const Battle_Ai_ActorAiState* peer) {
-  CHECK(Battle_Ai_actorAiStates[2] == nullptr);
+  CHECK(VS::Battle::Ai::actorAiStates[2] == nullptr);
   CHECK(VS::Battle::Ai::LiveFrameContext().actors[2] == nullptr);
-  CHECK(Battle_Ai_attributeActorMask == (1 << 5));
+  CHECK(VS::Battle::Ai::attributeActorMask == (1 << 5));
   CHECK(fixture.room.engagedCount == 0);
-  CHECK(Battle_Ai_actorAiStates[5] == peer);
+  CHECK(VS::Battle::Ai::actorAiStates[5] == peer);
   CHECK(VS::Battle::Ai::LiveFrameContext().actors[5] == peer);
   CHECK(peer->linkedActor == 16);
 }
@@ -123,8 +125,8 @@ void CheckRetiredAiOwnership(const CleanupFixture& fixture,
 // actors' states let the link resolution run.
 Battle_Ai_ActorAiState* ApplySubTypeSettings(CleanupFixture& fixture,
                                              int sub_type) {
-  void* saved_has_waypoints = Battle_Ai_roomHasWaypoints;
-  Battle_Ai_roomHasWaypoints = nullptr;
+  void* saved_has_waypoints = VS::Battle::Ai::roomHasWaypoints;
+  VS::Battle::Ai::roomHasWaypoints = nullptr;
   auto* state = fixture.AllocateState(0);
   fixture.AllocateState(1);
   fixture.AllocateState(2);
@@ -133,19 +135,19 @@ Battle_Ai_ActorAiState* ApplySubTypeSettings(CleanupFixture& fixture,
   Battle_Ai_SettingsWord settings{};
   VS::Battle::Ai::ApplyLiveActorAiSettings(
       reinterpret_cast<Battle_Ai_SettingsView*>(state), &settings);
-  Battle_Ai_roomHasWaypoints = saved_has_waypoints;
+  VS::Battle::Ai::roomHasWaypoints = saved_has_waypoints;
   return state;
 }
 
 // Frees the orbit and the three states ApplySubTypeSettings allocated.
 void ReleaseSubTypeSettings(CleanupFixture& fixture,
                             Battle_Ai_ActorAiState* state) {
-  VS::Core::Memory::FreeLiveFromLowEnd(Battle_Ai_arenaOrbit);
-  Battle_Ai_arenaOrbit = nullptr;
+  VS::Core::Memory::FreeLiveFromLowEnd(VS::Battle::Ai::arenaOrbit);
+  VS::Battle::Ai::arenaOrbit = nullptr;
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[2]);
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
   VS::Core::Memory::FreeLiveFromLowEnd(state);
-  Battle_Ai_actorAiStates[0] = nullptr;
+  VS::Battle::Ai::actorAiStates[0] = nullptr;
 }
 }  // namespace
 
@@ -246,10 +248,10 @@ TEST_CASE(
   fixture.room.specialActors[1] = &fixture.actors[2];
   REQUIRE(VS::Battle::Ai::TryEngageLiveActor(removed));
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
-  CHECK(Battle_Ai_actorAiStates[2] == nullptr);
-  CHECK(Battle_Ai_actorAiStates[5] == peer);
+  CHECK(VS::Battle::Ai::actorAiStates[2] == nullptr);
+  CHECK(VS::Battle::Ai::actorAiStates[5] == peer);
   CHECK(peer->linkedActor == 16);
-  CHECK(Battle_Ai_attributeActorMask == (1 << 5));
+  CHECK(VS::Battle::Ai::attributeActorMask == (1 << 5));
   CHECK(fixture.room.specialActors[0] == nullptr);
   CHECK(fixture.room.specialActors[3] == nullptr);
   CHECK(fixture.room.specialActors[1] == &fixture.actors[2]);
@@ -280,10 +282,10 @@ TEST_CASE("AI teardown preserves the original Ashley state lifetime",
   state->nativePointer18C = VS::Core::Memory::AllocateLiveFromHighEnd(128);
   REQUIRE(state->nativePointer18C != nullptr);
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[0]);
-  CHECK(Battle_Ai_actorAiStates[0] == state);
+  CHECK(VS::Battle::Ai::actorAiStates[0] == state);
   CHECK(state->nativePointer18C == nullptr);
   VS::Core::Memory::FreeLiveFromLowEnd(state);
-  Battle_Ai_actorAiStates[0] = nullptr;
+  VS::Battle::Ai::actorAiStates[0] = nullptr;
   CHECK(VS::Core::Memory::GameHeap().Empty());
 }
 
@@ -295,25 +297,25 @@ TEST_CASE("AI orbit construction clears reused storage and sets its cooldown",
   std::array<unsigned char, sizeof(input)> before{};
   std::memcpy(before.data(), &input, before.size());
   auto* dirty = VS::Core::Memory::AllocateLiveFromLowEnd(
-      sizeof(Battle_Ai_ArenaOrbitState));
+      sizeof(VS::Battle::Ai::ArenaOrbitState));
   REQUIRE(dirty != nullptr);
-  std::memset(dirty, 0xA5, sizeof(Battle_Ai_ArenaOrbitState));
+  std::memset(dirty, 0xA5, sizeof(VS::Battle::Ai::ArenaOrbitState));
   VS::Core::Memory::FreeLiveFromLowEnd(dirty);
   VS::Battle::Ai::AllocateLiveOrbitingBossState(supplied ? &input : nullptr);
-  REQUIRE(Battle_Ai_arenaOrbit != nullptr);
-  CHECK(static_cast<void*>(Battle_Ai_arenaOrbit) == dirty);
-  std::array<unsigned char, sizeof(Battle_Ai_ArenaOrbitState)> actual{};
-  std::memcpy(actual.data(), Battle_Ai_arenaOrbit, actual.size());
+  REQUIRE(VS::Battle::Ai::arenaOrbit != nullptr);
+  CHECK(static_cast<void*>(VS::Battle::Ai::arenaOrbit) == dirty);
+  std::array<unsigned char, sizeof(VS::Battle::Ai::ArenaOrbitState)> actual{};
+  std::memcpy(actual.data(), VS::Battle::Ai::arenaOrbit, actual.size());
   auto expected = decltype(actual){};
-  expected[offsetof(Battle_Ai_ArenaOrbitState, cooldown)] = 0x84;
-  expected[offsetof(Battle_Ai_ArenaOrbitState, cooldown) + 1] = 0x03;
+  expected[offsetof(VS::Battle::Ai::ArenaOrbitState, cooldown)] = 0x84;
+  expected[offsetof(VS::Battle::Ai::ArenaOrbitState, cooldown) + 1] = 0x03;
   CHECK(actual == expected);
   std::array<unsigned char, sizeof(input)> after{};
   std::memcpy(after.data(), &input, after.size());
   CHECK(after == before);
   CHECK_FALSE(VS::Core::Memory::GameHeap().Empty());
-  VS::Core::Memory::FreeLiveFromLowEnd(Battle_Ai_arenaOrbit);
-  Battle_Ai_arenaOrbit = nullptr;
+  VS::Core::Memory::FreeLiveFromLowEnd(VS::Battle::Ai::arenaOrbit);
+  VS::Battle::Ai::arenaOrbit = nullptr;
   CHECK(VS::Core::Memory::GameHeap().Empty());
 }
 
@@ -328,11 +330,11 @@ TEST_CASE("AI settings allocate the orbit state for orbiting boss sub-types",
   CHECK(view->settingsConstant19 == 1);
   CHECK(state->linkedActor == 16);
   CHECK(state->actionCostEnabled == 1);
-  REQUIRE(Battle_Ai_arenaOrbit != nullptr);
-  CHECK(Battle_Ai_arenaOrbit->cooldown == 900);
+  REQUIRE(VS::Battle::Ai::arenaOrbit != nullptr);
+  CHECK(VS::Battle::Ai::arenaOrbit->cooldown == 900);
   ReleaseSubTypeSettings(fixture, state);
-  CHECK(Battle_Ai_actorAiStates[2] == nullptr);
-  CHECK(Battle_Ai_actorAiStates[5] == nullptr);
+  CHECK(VS::Battle::Ai::actorAiStates[2] == nullptr);
+  CHECK(VS::Battle::Ai::actorAiStates[5] == nullptr);
   CHECK(VS::Core::Memory::GameHeap().Empty());
 }
 
@@ -345,9 +347,9 @@ TEST_CASE("AI special orbit teardown releases reconstructed ownership once",
     fixture.actors[1].subType = static_cast<u_short>(type);
     VS::Battle::Ai::AllocateLiveOrbitingBossState(
         reinterpret_cast<Battle_Ai_SettingsView*>(state));
-    REQUIRE(Battle_Ai_arenaOrbit != nullptr);
+    REQUIRE(VS::Battle::Ai::arenaOrbit != nullptr);
     VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
-    CHECK(Battle_Ai_arenaOrbit == nullptr);
+    CHECK(VS::Battle::Ai::arenaOrbit == nullptr);
     CHECK(VS::Core::Memory::GameHeap().Empty());
   }
 }
@@ -644,11 +646,11 @@ TEST_CASE(
   VS::Battle::Ai::LiveFrameContext().actors[0] = state;
   fixture.actors[0].kind = static_cast<u_short>(kind);
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[0]);
-  CHECK(Battle_Ai_actorAiStates[0] == state);
+  CHECK(VS::Battle::Ai::actorAiStates[0] == state);
   CHECK(VS::Battle::Ai::LiveFrameContext().actors[0] == state);
   CHECK(state->nativePointer18C == nullptr);
   VS::Core::Memory::FreeLiveFromLowEnd(state);
-  Battle_Ai_actorAiStates[0] = nullptr;
+  VS::Battle::Ai::actorAiStates[0] = nullptr;
 }
 
 TEST_CASE("Non-AI slots outside the perception mask do not retire live peers",
@@ -659,8 +661,8 @@ TEST_CASE("Non-AI slots outside the perception mask do not retire live peers",
   preview.id = 20;
   Battle_actors[20] = &preview;
   VS::Battle::Ai::FreeLiveActorAiState(&preview);
-  CHECK(Battle_Ai_actorAiStates[2] == peer);
-  CHECK(Battle_Ai_attributeActorMask == (1 << 2));
+  CHECK(VS::Battle::Ai::actorAiStates[2] == peer);
+  CHECK(VS::Battle::Ai::attributeActorMask == (1 << 2));
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
 }
 

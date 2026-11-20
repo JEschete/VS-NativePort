@@ -11,12 +11,13 @@
 #include "Actors/Movement.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActionPlanning.h"
+#include "Battle/Ai/ActionPlanning.hpp"
 #include "Battle/Ai/ActorPerceptionLive.hpp"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
+#include "Battle/Ai/AiState.h"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
-#include "Battle/Ai/Perception.h"
+#include "Battle/Ai/Perception.hpp"
 #include "Battle/Ai/ReactionDelay.hpp"
 #include "Battle/Damage.h"
 #include "Battle/TargetingLive.hpp"
@@ -27,11 +28,12 @@
 
 namespace {
 struct DecisionFixture {
-  decltype(Battle_Ai_roomAiState) saved_room = Battle_Ai_roomAiState;
-  decltype(Battle_Ai_fallbackCandidates) saved_fallback =
-      Battle_Ai_fallbackCandidates;
-  int saved_count = Battle_Ai_fallbackCandidateCount;
-  int saved_mask = Battle_Ai_unusedPlanCounter;
+  decltype(VS::Battle::Ai::roomAiState) saved_room =
+      VS::Battle::Ai::roomAiState;
+  decltype(VS::Battle::Ai::fallbackCandidates) saved_fallback =
+      VS::Battle::Ai::fallbackCandidates;
+  int saved_count = VS::Battle::Ai::fallbackCandidateCount;
+  int saved_mask = VS::Battle::Ai::unusedPlanCounter;
   Battle_ActionDefinition saved_action = Battle_actionDefinitions[42];
   decltype(std::to_array(Battle_actors)) saved_actors =
       std::to_array(Battle_actors);
@@ -62,13 +64,14 @@ struct DecisionFixture {
       Battle_actors[id] = &actors[index];
       Actors_actorRecords[id] = &records[index];
     }
-    Battle_Ai_roomAiState = &room;
-    Battle_Ai_fallbackCandidates = fallback.data();
-    Battle_Ai_fallbackCandidateCount = Battle_Ai_unusedPlanCounter = 0;
+    VS::Battle::Ai::roomAiState = &room;
+    VS::Battle::Ai::fallbackCandidates = fallback.data();
+    VS::Battle::Ai::fallbackCandidateCount = VS::Battle::Ai::unusedPlanCounter =
+        0;
     state.actorId = 2;
     state.distancesSquared[3] = 25;
     state.relations[3] =
-        std::bit_cast<Battle_Ai_RelationWord>(uint32_t{0x800000C4});
+        std::bit_cast<VS::Battle::Ai::RelationWord>(uint32_t{0x800000C4});
     room.readinessLevel = 5;
     candidate.targetId = 3;
     candidate.action = 42;
@@ -78,10 +81,10 @@ struct DecisionFixture {
   }
 
   ~DecisionFixture() {
-    Battle_Ai_roomAiState = saved_room;
-    Battle_Ai_fallbackCandidates = saved_fallback;
-    Battle_Ai_fallbackCandidateCount = saved_count;
-    Battle_Ai_unusedPlanCounter = saved_mask;
+    VS::Battle::Ai::roomAiState = saved_room;
+    VS::Battle::Ai::fallbackCandidates = saved_fallback;
+    VS::Battle::Ai::fallbackCandidateCount = saved_count;
+    VS::Battle::Ai::unusedPlanCounter = saved_mask;
     Battle_actionDefinitions[42] = saved_action;
     std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
     std::copy(saved_records.begin(), saved_records.end(), Actors_actorRecords);
@@ -116,14 +119,15 @@ TEST_CASE(
 
 TEST_CASE("AI reaction-delay reset updates only existing non-player states",
           "[ai][decisions]") {
-  const auto saved_states = std::to_array(Battle_Ai_actorAiStates);
+  const auto saved_states = VS::Battle::Ai::actorAiStates;
   std::array<Battle_Ai_ActorAiState, 16> states{};
-  std::fill_n(Battle_Ai_actorAiStates, saved_states.size(), nullptr);
+  std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved_states.size(),
+              nullptr);
   for (std::size_t id = 0; id < states.size(); ++id) {
     states[id].minActionDelay = static_cast<u_char>(id + 1);
-    Battle_Ai_actorAiStates[id] = &states[id];
+    VS::Battle::Ai::actorAiStates[id] = &states[id];
   }
-  Battle_Ai_actorAiStates[3] = nullptr;
+  VS::Battle::Ai::actorAiStates[3] = nullptr;
 
   VS::Battle::Ai::ResetActorAiReactionDelay(
       VS::Battle::Ai::BattleActorReactionDelays(), 0);
@@ -138,7 +142,8 @@ TEST_CASE("AI reaction-delay reset updates only existing non-player states",
     }
   }
 
-  std::copy(saved_states.begin(), saved_states.end(), Battle_Ai_actorAiStates);
+  std::copy(saved_states.begin(), saved_states.end(),
+            VS::Battle::Ai::actorAiStates.begin());
 }
 
 TEST_CASE("AI condition scoring uses the source's signed-halfword weights",
@@ -189,14 +194,14 @@ TEST_CASE(
     fixture.candidate.opaque0 = static_cast<int>(index);
     VS::Battle::Ai::CacheLiveFallbackActionCandidate(&fixture.candidate,
                                                      &action);
-    REQUIRE(Battle_Ai_fallbackCandidateCount ==
+    REQUIRE(VS::Battle::Ai::fallbackCandidateCount ==
             static_cast<int>(std::min(index + 1, 16u)));
     if (index < 16) {
       CHECK(std::memcmp(&fixture.fallback[index], &fixture.candidate,
                         sizeof(fixture.candidate)) == 0);
     }
   }
-  CHECK(Battle_Ai_unusedPlanCounter == 0xFFFFFF);
+  CHECK(VS::Battle::Ai::unusedPlanCounter == 0xFFFFFF);
   fixture.candidate.row = fixture.candidate.column = 0;
   fixture.candidate.opaque0 = 999;
   VS::Battle::Ai::CacheLiveFallbackActionCandidate(&fixture.candidate, &action);
@@ -208,8 +213,8 @@ TEST_CASE("AI fallback caching ignores actions without the cache flag",
   DecisionFixture fixture;
   Battle_ActionDefinition action{};
   VS::Battle::Ai::CacheLiveFallbackActionCandidate(&fixture.candidate, &action);
-  CHECK(Battle_Ai_fallbackCandidateCount == 0);
-  CHECK(Battle_Ai_unusedPlanCounter == 0);
+  CHECK(VS::Battle::Ai::fallbackCandidateCount == 0);
+  CHECK(VS::Battle::Ai::unusedPlanCounter == 0);
 }
 
 TEST_CASE(
@@ -267,7 +272,7 @@ TEST_CASE(
       break;
     case 5:
       fixture.state.relations[3] =
-          std::bit_cast<Battle_Ai_RelationWord>(uint32_t{0xC4});
+          std::bit_cast<VS::Battle::Ai::RelationWord>(uint32_t{0xC4});
       break;
     case 6:
     case 7:
@@ -289,7 +294,7 @@ TEST_CASE("AI execution applies visibility and obstruction option alternatives",
   const auto blocked = GENERATE(0, 1);
   const auto override_obstruction = GENERATE(0, 1);
   DecisionFixture fixture;
-  fixture.state.relations[3] = std::bit_cast<Battle_Ai_RelationWord>(
+  fixture.state.relations[3] = std::bit_cast<VS::Battle::Ai::RelationWord>(
       uint32_t{0x800000C0} | (static_cast<uint32_t>(visible) << 2));
   fixture.state.relations[3].blocked = blocked;
   fixture.candidate.opaque10.opaque0Bit2 = override_visibility;
@@ -383,17 +388,18 @@ TEST_CASE(
 
 namespace {
 struct PerceptionFixture : DecisionFixture {
-  decltype(std::to_array(Battle_Ai_actorAiStates)) saved_states =
-      std::to_array(Battle_Ai_actorAiStates);
+  decltype(VS::Battle::Ai::actorAiStates) saved_states =
+      VS::Battle::Ai::actorAiStates;
   Battle_Ai_ActorAiState player{};
   u_short flags[32][32]{};
 
   PerceptionFixture() {
-    std::fill_n(Battle_Ai_actorAiStates, saved_states.size(), nullptr);
+    std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved_states.size(),
+                nullptr);
     auto& frame = VS::Battle::Ai::LiveFrameContext();
     std::fill_n(frame.actors, VS::Battle::Ai::kFrameActorSlots, nullptr);
-    frame.actors[0] = Battle_Ai_actorAiStates[0] = &player;
-    frame.actors[2] = Battle_Ai_actorAiStates[2] = &state;
+    frame.actors[0] = VS::Battle::Ai::actorAiStates[0] = &player;
+    frame.actors[2] = VS::Battle::Ai::actorAiStates[2] = &state;
     frame.tileFlags = flags;
     actors[0].model = &records[0].instance;
     actors[1].model = &records[1].instance;
@@ -411,7 +417,7 @@ struct PerceptionFixture : DecisionFixture {
 
   ~PerceptionFixture() {
     std::copy(saved_states.begin(), saved_states.end(),
-              Battle_Ai_actorAiStates);
+              VS::Battle::Ai::actorAiStates.begin());
   }
 
   Battle_Ai_PerceptionView& View() {
@@ -453,7 +459,8 @@ TEST_CASE("AI marked tiles and awareness timers retain original readiness",
   fixture.flags[0][0] = marked ? 0x2000 : 0;
   auto relation = fixture.Relation();
   relation.bits.timer = 1;
-  fixture.state.relations[0] = std::bit_cast<Battle_Ai_RelationWord>(relation);
+  fixture.state.relations[0] =
+      std::bit_cast<VS::Battle::Ai::RelationWord>(relation);
   fixture.Update();
   CHECK(
       (std::array<int, 5>{

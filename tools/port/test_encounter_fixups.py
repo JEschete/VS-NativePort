@@ -2165,7 +2165,7 @@ int func_800F9800(void) {
             "found->aiFlags = VS::Battle::Ai::PackLiveActorAiPersistenceFlags(slot);",
             snapshot,
         )
-        self.assertNotIn("relation.previousClassification <<", snapshot)
+        self.assertNotIn("relation.previous_classification <<", snapshot)
 
     def test_every_native_redirect_retains_its_module_symbol_binding(self):
         root = Path(__file__).resolve().parents[2]
@@ -2378,7 +2378,7 @@ int func_800F9800(void) {
         planning = (root / r"Native\Game\src\Battle\Ai\ActionPlanning.cpp").read_text(
             encoding="utf-8"
         )
-        header = (root / r"Native\Game\src\Battle\Ai\ActionPlanning.h").read_text(
+        header = (root / r"Native\Game\src\Battle\Ai\ActionPlanning.hpp").read_text(
             encoding="utf-8"
         )
         bindings = (root / r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.cpp").read_text(
@@ -2540,7 +2540,7 @@ int func_800F9800(void) {
         settings = (ai / "ActorSettingsLive.cpp").read_text(encoding="utf-8")
         self.assertEqual(settings.count("ResolveLiveAiLinkedActors();"), 1)
         self.assertLess(settings.index("ResolveLiveAiLinkedActors();"), settings.index("BuildLiveAiActionMetadata("))
-        for name in ("ActorState.cpp", "ActorState.h"):
+        for name in ("ActorState.cpp", "ActorState.hpp"):
             self.assertNotIn("Battle_Ai_ResolveAiLinkedActors", (ai / name).read_text(encoding="utf-8"))
         pointers = (copy_to_native.REPO / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
         self.assertEqual(pointers.count("0x800E5998u"), 1)
@@ -2565,7 +2565,7 @@ int func_800F9800(void) {
         self.assertEqual(caller.count(call), 1)
         self.assertLess(caller.index("if ((actor.saved_settings_flags & 1u) != 0) {"), caller.index(call))
         self.assertLess(caller.index(call), caller.index("host.ApplySettings(state, settings);"))
-        for name in ("ActorState.cpp", "ActorState.h"):
+        for name in ("ActorState.cpp", "ActorState.hpp"):
             self.assertNotIn("Battle_Ai_ApplySavedAiSettingsFlags", (ai / name).read_text(encoding="utf-8"))
         pointers = (copy_to_native.REPO / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
         self.assertEqual(pointers.count("0x800E5A74u"), 1)
@@ -2591,11 +2591,11 @@ int func_800F9800(void) {
         self.assertLess(caller.index("AiState& state = StoreState(created);"), caller.index(call))
         self.assertIn('#include "Battle/Ai/ActorSettingsLive.hpp"', caller)
         tables = (ai / "ActorState.cpp").read_text(encoding="utf-8")
-        for name in ("ActorState.cpp", "ActorState.h"):
+        for name in ("ActorState.cpp", "ActorState.hpp"):
             self.assertNotIn("Battle_Ai_ApplyActorAiSettings", (ai / name).read_text(encoding="utf-8"))
         # The decode reads the module tables, so the copy still emits them.
-        for table in ("Battle_Ai_kPerceptionRangesSquared", "Battle_Ai_viewAngles", "Battle_Ai_decisionCallbacks",
-                      "Battle_Ai_kWanderTimingPresets", "Battle_Ai_kFlags34Bit14Values"):
+        for table in ("kPerceptionRangesSquared;", "viewAngles;", "decisionCallbacks;",
+                      "kWanderTimingPresets;", "kFlags34Bit14Values ="):
             self.assertIn(table, tables)
         pointers = (copy_to_native.REPO / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
         self.assertEqual(pointers.count("0x800E5A9Cu"), 1)
@@ -2614,7 +2614,7 @@ int func_800F9800(void) {
                          r"Native\Game\include\Battle\Ai\ActorCreationLive.hpp")
         self.assertIn(("BATTLE/BATTLE.PRG", 0x800E6178, live), copy_fixups.MODULE_BINDING_ENTRIES)
         ai = copy_to_native.REPO / r"Native\Game\src\Battle\Ai"
-        for name in ("ActorState.cpp", "ActorState.h"):
+        for name in ("ActorState.cpp", "ActorState.hpp"):
             self.assertNotIn("Battle_Ai_CreateActorAiState", (ai / name).read_text(encoding="utf-8"))
         # Spawning, its only caller, creates the state through the live binding.
         spawning = (copy_to_native.REPO / r"Native\Game\src\Actors\ActorSpawningLive.cpp").read_text(encoding="utf-8")

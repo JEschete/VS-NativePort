@@ -18,7 +18,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionExecutionLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/CandidateMovement.hpp"
@@ -44,7 +44,8 @@ static_assert(sizeof(Battle_Ai_ActionCandidate) ==
               sizeof(ActionCandidate::Words));
 static_assert(std::extent_v<decltype(State::candidateOrder)> ==
               kCandidateCapacity);
-static_assert(std::size(Battle_Ai_actorAiStates) == kCandidateTargetSlots);
+static_assert(std::size(VS::Battle::Ai::actorAiStates) ==
+              kCandidateTargetSlots);
 static_assert(kFrameActorSlots == kCandidateTargetSlots);
 static_assert(offsetof(Movement, opaque1) == offsetof(State, opaque1));
 static_assert(offsetof(Movement, position) == offsetof(State, position));
@@ -129,7 +130,7 @@ void Store(const CandidateMover& mover, State& state) {
   state.movementTarget = mover.movement_target;
   for (int id = 0; id < kCandidateTargetSlots; ++id) {
     state.relations[id] =
-        std::bit_cast<Battle_Ai_RelationWord>(mover.relations.at(id));
+        std::bit_cast<VS::Battle::Ai::RelationWord>(mover.relations.at(id));
   }
 }
 
@@ -181,10 +182,11 @@ class LiveCandidateMovementWorld final
   }
   [[nodiscard]] std::optional<std::int16_t> TargetHeight(
       int target) const override {
-    if (!ValidTarget(target) || Battle_Ai_actorAiStates[target] == nullptr) {
+    if (!ValidTarget(target) ||
+        VS::Battle::Ai::actorAiStates[target] == nullptr) {
       return std::nullopt;
     }
-    return Battle_Ai_actorAiStates[target]->pointHeight;
+    return VS::Battle::Ai::actorAiStates[target]->pointHeight;
   }
   [[nodiscard]] std::optional<std::uint32_t> FrameDistance(
       int observer, int target) const override {
@@ -206,14 +208,14 @@ class LiveCandidateMovementWorld final
     return Field::GroundHeightAtWorldPosition(CurrentTerrain(), x, z);
   }
   [[nodiscard]] std::uint16_t ReadinessLevel() const override {
-    Require(Battle_Ai_roomAiState != nullptr,
+    Require(VS::Battle::Ai::roomAiState != nullptr,
             "AI pursuit requires room readiness");
-    return Battle_Ai_roomAiState->readinessLevel;
+    return VS::Battle::Ai::roomAiState->readinessLevel;
   }
   void CountApproachMove() override {
-    Require(Battle_Ai_roomAiState != nullptr,
+    Require(VS::Battle::Ai::roomAiState != nullptr,
             "AI pursuit requires the room approach counter");
-    auto& count = Battle_Ai_roomAiState->approachMoves;
+    auto& count = VS::Battle::Ai::roomAiState->approachMoves;
     count = Core::Math::WrappingAdd(count, 1);
   }
   [[nodiscard]] bool CanApproach(CandidateMover& mover,
@@ -277,7 +279,7 @@ class LiveCandidateMovementWorld final
   void ProjectRadial(CandidateMover& mover, std::uint32_t tile, int angle,
                      std::uint32_t distance) override {
     Call(mover, [&] {
-      Battle_Ai_TilePosition source{};
+      VS::Battle::Ai::TilePosition source{};
       source.word = tile;
       ProjectLiveClearRadialDestination(&state_, source, angle, distance);
     });

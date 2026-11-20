@@ -17,14 +17,14 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionExecution.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
-#include "Battle/Ai/Perception.h"
+#include "Battle/Ai/Perception.hpp"
 #include "Battle/Damage.h"
 #include "Core/Diagnostics.hpp"
 #include "Core/FrameTiming.hpp"
@@ -39,7 +39,8 @@ static_assert(sizeof(Battle_Ai_ActionCandidate) ==
 static_assert(offsetof(State, opaqueE) == kClearedHeaderBytes);
 static_assert(std::is_same_v<decltype(State::currentCandidate),
                              Battle_Ai_ActionCandidate*>);
-static_assert(std::size(Battle_Ai_actorAiStates) == kCandidateTargetSlots);
+static_assert(std::size(VS::Battle::Ai::actorAiStates) ==
+              kCandidateTargetSlots);
 
 class LiveExecution final : public ActionExecutionWorld {
  public:
@@ -78,7 +79,7 @@ class LiveExecution final : public ActionExecutionWorld {
   bool EngagementReady() override { return IsLiveEngagementReady(&state_); }
   void SelectCandidate(std::size_t handle) override {
     state_.currentCandidate = candidates_.at(handle);
-    Battle_Ai_candidateEngagedThisUpdate = 1;
+    VS::Battle::Ai::candidateEngagedThisUpdate = 1;
   }
   bool TargetMoving(unsigned target) const override {
     return target < std::size(Actors_actorRecords) &&
@@ -99,16 +100,19 @@ class LiveExecution final : public ActionExecutionWorld {
   }
   std::optional<std::uint8_t> RoomDelay() const override {
     if (!HasRoom()) return std::nullopt;
-    return Battle_Ai_roomAiState->defaultActionDelay;
+    return VS::Battle::Ai::roomAiState->defaultActionDelay;
   }
   void SetDelay(std::uint8_t delay) override { state_.minActionDelay = delay; }
-  bool HasRoom() const override { return Battle_Ai_roomAiState != nullptr; }
+  bool HasRoom() const override {
+    return VS::Battle::Ai::roomAiState != nullptr;
+  }
   std::optional<int> SpecialActor(unsigned slot) const override {
-    if (!HasRoom() || slot >= std::size(Battle_Ai_roomAiState->specialActors) ||
-        Battle_Ai_roomAiState->specialActors[slot] == nullptr) {
+    if (!HasRoom() ||
+        slot >= std::size(VS::Battle::Ai::roomAiState->specialActors) ||
+        VS::Battle::Ai::roomAiState->specialActors[slot] == nullptr) {
       return std::nullopt;
     }
-    return Battle_Ai_roomAiState->specialActors[slot]->id;
+    return VS::Battle::Ai::roomAiState->specialActors[slot]->id;
   }
   std::optional<bool> GimmickReady(int actor) const override {
     if (actor < 0 ||
@@ -135,13 +139,13 @@ class LiveDecisions final : public LiveDecisionList<DecisionUpdateWorld> {
   DecisionDispatchState State() const override {
     return {.restricted = state_->reserved14[0] != 0,
             .partial = state_->reserved1D[0] != 0,
-            .tile_x = state_->tile.tile.tileX,
-            .tile_z = state_->tile.tile.tileZ,
+            .tile_x = state_->tile.tile.tile_x,
+            .tile_z = state_->tile.tile.tile_z,
             .position = Core::Math::PositionOf(state_->position),
             .point_height = state_->pointHeight};
   }
   int ElapsedTicks() override { return Core::ElapsedFrameCounterTicks(); }
-  int TickBudget() const override { return Battle_Ai_frameTickBudget; }
+  int TickBudget() const override { return VS::Battle::Ai::frameTickBudget; }
   void CacheTick(int tick) override {
     LiveFrameContext().lastBudgetTick = tick;
   }
@@ -149,7 +153,7 @@ class LiveDecisions final : public LiveDecisionList<DecisionUpdateWorld> {
     IssueLiveActorCommand(state_, command);
   }
   std::optional<DecisionPlayer> Player() const override {
-    const auto* ai = Battle_Ai_actorAiStates[0];
+    const auto* ai = VS::Battle::Ai::actorAiStates[0];
     if (ai == nullptr) return DecisionPlayer{};
     const auto* record = Actors_actorRecords[0];
     if (record == nullptr) return std::nullopt;

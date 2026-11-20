@@ -21,7 +21,8 @@
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
+#include "Battle/Ai/AiState.h"
 #include "Battle/Damage.h"
 #include "Battle/EncounterHooks.hpp"
 #include "Boot/GameLoop.hpp"
@@ -1051,8 +1052,8 @@ struct ReactionInspectionFixture : GameplayInspectionFixture {
   decltype(Battle_characterState) saved_character = Battle_characterState;
   decltype(Battle_actionFlowMode) saved_phase = Battle_actionFlowMode;
   int saved_tick_speed = VS::State::tickSpeed;
-  decltype(std::to_array(Battle_Ai_actorAiStates)) saved_ai =
-      std::to_array(Battle_Ai_actorAiStates);
+  decltype(VS::Battle::Ai::actorAiStates) saved_ai =
+      VS::Battle::Ai::actorAiStates;
   decltype(std::to_array(Battle_actionDefinitions)) saved_definitions =
       std::to_array(Battle_actionDefinitions);
   std::unique_ptr<Battle_ActionState> action =
@@ -1085,11 +1086,12 @@ struct ReactionInspectionFixture : GameplayInspectionFixture {
     Battle_actors[2] = &enemy;
     player_model.modelId = 0;
     Actors_actorRecords[0] = &player_model;
-    std::fill_n(Battle_Ai_actorAiStates, saved_ai.size(), nullptr);
+    std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved_ai.size(),
+                nullptr);
     enemy_ai.relations[0].classification = 3;
     enemy_ai.relations[0].active = 1;
     enemy_ai.relations[0].visible = 1;
-    Battle_Ai_actorAiStates[2] = &enemy_ai;
+    VS::Battle::Ai::actorAiStates[2] = &enemy_ai;
     action->abilityTimer = 42;
     action->abilityWindow = 40;
     action->previousChainInput = 1;
@@ -1115,7 +1117,8 @@ struct ReactionInspectionFixture : GameplayInspectionFixture {
     Battle_characterState = saved_character;
     Battle_actionFlowMode = saved_phase;
     VS::State::tickSpeed = saved_tick_speed;
-    std::copy(saved_ai.begin(), saved_ai.end(), Battle_Ai_actorAiStates);
+    std::copy(saved_ai.begin(), saved_ai.end(),
+              VS::Battle::Ai::actorAiStates.begin());
     std::copy(saved_definitions.begin(), saved_definitions.end(),
               Battle_actionDefinitions);
     std::copy(saved_shaman.begin(), saved_shaman.end(),

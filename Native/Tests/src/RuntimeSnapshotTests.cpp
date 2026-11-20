@@ -33,10 +33,10 @@
 #include "Audio/SoundBanksLive.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/ActionTable.h"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/FrameUpdateLive.hpp"
-#include "Battle/Ai/Movement.h"
+#include "Battle/Ai/Movement.hpp"
 #include "Battle/Damage.h"
 #include "Boot/GameLoop.hpp"
 #include "Content/DataStore.hpp"
@@ -251,8 +251,7 @@ struct RuntimeFixture {
   decltype(std::to_array(Battle_actors)) actors = std::to_array(Battle_actors);
   decltype(std::to_array(Actors_actorRecords)) models =
       std::to_array(Actors_actorRecords);
-  decltype(std::to_array(Battle_Ai_actorAiStates)) ai =
-      std::to_array(Battle_Ai_actorAiStates);
+  decltype(VS::Battle::Ai::actorAiStates) ai = VS::Battle::Ai::actorAiStates;
   decltype(std::to_array(VS::Core::randomShuffleTable)) shuffle =
       std::to_array(VS::Core::randomShuffleTable);
   decltype(std::to_array(VS::Items::itemCategoryUpperIds)) bounds =
@@ -261,7 +260,7 @@ struct RuntimeFixture {
   unsigned bios = VS::Core::BiosRand().State();
   unsigned interface_random = VS::Core::interfaceRandomState;
   int shuffle_index = VS::Core::randomShuffleIndex;
-  int movement_random = Battle_Ai_savedMovementRandomState;
+  int movement_random = VS::Battle::Ai::savedMovementRandomState;
   unsigned frame_random = VS::Battle::Ai::LiveFrameContext().randomState;
   int current_cache = VS::State::currentRoomStateSlot;
   int gameplay = VS::Boot::isGameplayActive;
@@ -302,7 +301,7 @@ struct RuntimeFixture {
     std::copy(kBounds.begin(), kBounds.end(), VS::Items::itemCategoryUpperIds);
     std::fill_n(Battle_actors, actors.size(), nullptr);
     std::fill_n(Actors_actorRecords, models.size(), nullptr);
-    std::fill_n(Battle_Ai_actorAiStates, ai.size(), nullptr);
+    std::fill_n(VS::Battle::Ai::actorAiStates.begin(), ai.size(), nullptr);
     Battle_characterState = &player;
     Battle_actors[0] = &player;
     Actors_actorRecords[0] = &player_model;
@@ -436,7 +435,7 @@ struct RuntimeFixture {
     for (std::size_t index = 0; index < shuffle.size(); ++index) {
       VS::Core::randomShuffleTable[index] = static_cast<int>(index) * 337;
     }
-    Battle_Ai_savedMovementRandomState = std::bit_cast<int>(0xFEDCBA98u);
+    VS::Battle::Ai::savedMovementRandomState = std::bit_cast<int>(0xFEDCBA98u);
     VS::State::currentRoomStateSlot = 0;
     for (auto& cache : VS::State::recentRoomEnemyStates) cache = {};
     VS::State::recentRoomEnemyStates[0].zone_id = 9;
@@ -544,7 +543,7 @@ struct RuntimeFixture {
   void AddEnemy() {
     Battle_actors[2] = &enemy;
     Actors_actorRecords[2] = &enemy_model;
-    Battle_Ai_actorAiStates[2] = &enemy_ai;
+    VS::Battle::Ai::actorAiStates[2] = &enemy_ai;
     enemy.roomSpawnIndex = 0;
     enemy.stats = &enemy_stats;
     enemy.model = &enemy_model.instance;
@@ -565,8 +564,8 @@ struct RuntimeFixture {
     enemy_ai.usesRoomActionDelay = 1;
     enemy_ai.behaviorMode = 0;
     enemy_ai.relations[0].classification = 3;
-    enemy_ai.relations[0].previousClassification = 2;
-    enemy_ai.relations[0].classificationTimer = 77;
+    enemy_ai.relations[0].previous_classification = 2;
+    enemy_ai.relations[0].classification_timer = 77;
   }
 
   Save::Snapshot Capture() const {
@@ -625,14 +624,14 @@ struct RuntimeFixture {
     std::copy(actions.begin(), actions.end(), Battle_actionDefinitions);
     std::copy(actors.begin(), actors.end(), Battle_actors);
     std::copy(models.begin(), models.end(), Actors_actorRecords);
-    std::copy(ai.begin(), ai.end(), Battle_Ai_actorAiStates);
+    std::copy(ai.begin(), ai.end(), VS::Battle::Ai::actorAiStates.begin());
     std::copy(shuffle.begin(), shuffle.end(), VS::Core::randomShuffleTable);
     std::copy(bounds.begin(), bounds.end(), VS::Items::itemCategoryUpperIds);
     Battle_characterState = character;
     VS::Core::SeedBiosRand(bios);
     VS::Core::interfaceRandomState = interface_random;
     VS::Core::randomShuffleIndex = shuffle_index;
-    Battle_Ai_savedMovementRandomState = movement_random;
+    VS::Battle::Ai::savedMovementRandomState = movement_random;
     VS::Battle::Ai::LiveFrameContext().randomState = frame_random;
     VS::State::currentRoomStateSlot = current_cache;
     VS::Boot::isGameplayActive = gameplay;
@@ -698,7 +697,7 @@ std::vector<std::uint8_t> LiveFingerprint(const RuntimeFixture& fixture) {
   Append(bytes, VS::Core::interfaceRandomState);
   Append(bytes, VS::Core::randomShuffleTable);
   Append(bytes, VS::Core::randomShuffleIndex);
-  Append(bytes, Battle_Ai_savedMovementRandomState);
+  Append(bytes, VS::Battle::Ai::savedMovementRandomState);
   Append(bytes, VS::Battle::Ai::LiveFrameContext().randomState);
   Append(bytes, VS::Audio::Driver::controlLatches.mix_behavior);
   return bytes;
@@ -1361,7 +1360,7 @@ void SimulateRoomEntryWork(RuntimeFixture& fixture) {
   VS::Core::interfaceRandomState = 1;
   std::fill_n(VS::Core::randomShuffleTable, 97, 0);
   VS::Core::randomShuffleIndex = 0;
-  Battle_Ai_savedMovementRandomState = 1;
+  VS::Battle::Ai::savedMovementRandomState = 1;
   VS::Battle::Ai::LiveFrameContext().randomState = 1;
   VS::State::SetLiveScriptFlag(64, 0);
   VS::State::recentRoomEnemyStates[0].next_slot = 3;
@@ -1399,7 +1398,7 @@ void CheckRestoredRandom(const Save::Snapshot& state) {
                    VS::Core::randomShuffleTable));
   CHECK(VS::Core::randomShuffleIndex == 96);
   CHECK(VS::Battle::Ai::LiveFrameContext().randomState == 0xFEDCBA98);
-  CHECK(std::bit_cast<unsigned>(Battle_Ai_savedMovementRandomState) ==
+  CHECK(std::bit_cast<unsigned>(VS::Battle::Ai::savedMovementRandomState) ==
         0xFEDCBA98);
 }
 

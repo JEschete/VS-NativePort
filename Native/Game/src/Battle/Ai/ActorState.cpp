@@ -1,52 +1,36 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Actors/ActorModelSlot.hpp"
-#include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
-#include "Actors/Shadow.h"
-#include "Actors/TextureAnimation.h"
-#include "Battle/Actor.h"
-#include "Battle/Ai/ActorState.h"
-#include "Battle/Ai/AiState.h"
-#include "Battle/Ai/AiViews.h"
-#include "Battle/Ai/Perception.h"
-#include "Render/Palette.hpp"
+// The actor AI tables and bindings (ActorState.hpp).
+#include "Battle/Ai/ActorState.hpp"
 
-// decomp: D_80069C18 (D_80069C18@BATTLE/BATTLE.PRG)
-unsigned char Battle_Ai_kSettingsBits30Values[1284]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_80069C1C (D_80069C1C@BATTLE/BATTLE.PRG)
-unsigned int Battle_Ai_kPerceptionRangesSquared[320]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_80069C3C (D_80069C3C@BATTLE/BATTLE.PRG)
-Battle_Ai_WanderTiming Battle_Ai_kWanderTimingPresets[208]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800F1790 (D_800F1790@BATTLE/BATTLE.PRG)
-int (*Battle_Ai_decisionCallbacks[9])(Battle_Ai_ActorAiState*); /* contents: module image, relocated (ModulePointers.cpp) */
-
-// decomp: D_800F17B8 (D_800F17B8@BATTLE/BATTLE.PRG)
-unsigned short Battle_Ai_viewAngles[45][2]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800F17C8 (D_800F17C8@BATTLE/BATTLE.PRG)
-unsigned short Battle_Ai_settingsBits8Values[41][2]; /* contents: module image (ModuleData.cpp) */
-
-// decomp: D_800F17D8 (D_800F17D8@BATTLE/BATTLE.PRG)
-unsigned char Battle_Ai_facingDelayScales[148]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Battle::Ai {
+// decomp: D_80069C18 (D_80069C18@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+Bits30ValueTable kSettingsBits30Values;
+// decomp: D_80069C1C (D_80069C1C@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+RangeTable kPerceptionRangesSquared;
+// decomp: D_80069C3C (D_80069C3C@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+std::array<WanderTiming, kWanderTimingPresetCount> kWanderTimingPresets;
+// decomp: D_800F1790 (D_800F1790@BATTLE/BATTLE.PRG); contents: module image,
+// relocated (ModulePointers.cpp)
+std::array<DecisionCallback, kDecisionCallbackCount> decisionCallbacks;
+// decomp: D_800F17B8 (D_800F17B8@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+std::array<WordPair, kViewAngleCount> viewAngles;
+// decomp: D_800F17C8 (D_800F17C8@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+std::array<WordPair, kSettingsBits8ValueCount> settingsBits8Values;
+// decomp: D_800F17D8 (D_800F17D8@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+std::array<std::uint8_t, kFacingDelayScaleCount> facingDelayScales;
 // decomp: D_800F5878 (D_800F5878@BATTLE/BATTLE.PRG)
-Battle_Ai_ActorAiState* Battle_Ai_actorAiStates[16];
-
+std::array<Battle_Ai_ActorAiState*, kActorAiStateSlots> actorAiStates;
 // decomp: D_800F58BC (D_800F58BC@BATTLE/BATTLE.PRG)
-Battle_Ai_RoomAiState* Battle_Ai_roomAiState;
-
+Battle_Ai_RoomAiState* roomAiState;
 // decomp: D_800F58C0 (D_800F58C0@BATTLE/BATTLE.PRG)
-void* Battle_Ai_roomHasWaypoints;
-
+void* roomHasWaypoints;
 // decomp: D_800F590C (D_800F590C@BATTLE/BATTLE.PRG)
-int Battle_Ai_attributeActorMask;
-
+std::int32_t attributeActorMask;
 // decomp: D_80069C08 (D_80069C08@BATTLE/BATTLE.PRG)
-const unsigned char Battle_Ai_kFlags34Bit14Values[4] = { 9, 7, 0, 0 };
-
+const std::array<std::uint8_t, 4> kFlags34Bit14Values = {9, 7, 0, 0};
+}  // namespace VS::Battle::Ai

@@ -9,7 +9,7 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AreaRouteLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
@@ -17,9 +17,9 @@
 #include "Battle/Ai/FlightTerrain.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
-#include "Battle/Ai/Movement.h"
+#include "Battle/Ai/Movement.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
-#include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/WaypointsLive.hpp"
 #include "Battle/Damage.h"
 #include "Legacy/Psx.h"
@@ -35,10 +35,12 @@ struct GroundFixture {
       std::to_array(Actors_actorRecords);
   decltype(std::to_array(Battle_actors)) saved_actors =
       std::to_array(Battle_actors);
-  decltype(std::to_array(Battle_Ai_actorAiStates)) saved_states =
-      std::to_array(Battle_Ai_actorAiStates);
-  decltype(Battle_Ai_roomAiState) saved_room = Battle_Ai_roomAiState;
-  decltype(Battle_Ai_tileFlagMap) saved_flags = Battle_Ai_tileFlagMap;
+  decltype(VS::Battle::Ai::actorAiStates) saved_states =
+      VS::Battle::Ai::actorAiStates;
+  decltype(VS::Battle::Ai::roomAiState) saved_room =
+      VS::Battle::Ai::roomAiState;
+  decltype(VS::Battle::Ai::tileFlagMap) saved_flags =
+      VS::Battle::Ai::tileFlagMap;
   unsigned saved_lengths = VS::Content::battleAiHesitationLengths[0];
   Battle_Ai_RoomAiState room{};
   std::array<Actors_ActorRecord, 2> models{};
@@ -59,8 +61,8 @@ struct GroundFixture {
     frame.terrainRegions = regions.data();
     frame.terrain_region_count = regions.size();
     frame.room = &room;
-    Battle_Ai_roomAiState = &room;
-    Battle_Ai_tileFlagMap = flags;
+    VS::Battle::Ai::roomAiState = &room;
+    VS::Battle::Ai::tileFlagMap = flags;
     VS::Content::battleAiHesitationLengths[0] = 0x01184614;
     frame.randomState = 40;
     frame.lastBudgetTick = 1;
@@ -71,10 +73,11 @@ struct GroundFixture {
     std::fill_n(frame.actors, VS::Battle::Ai::kFrameActorSlots, nullptr);
     std::fill_n(Actors_actorRecords, saved_models.size(), nullptr);
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
-    std::fill_n(Battle_Ai_actorAiStates, saved_states.size(), nullptr);
+    std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved_states.size(),
+                nullptr);
     for (unsigned index = 0; index < states.size(); ++index) {
       frame.actors[index] = &states[index];
-      Battle_Ai_actorAiStates[index] = &states[index];
+      VS::Battle::Ai::actorAiStates[index] = &states[index];
       Actors_actorRecords[index] = &models[index];
       Battle_actors[index] = &actors[index];
       actors[index].id = static_cast<int>(index);
@@ -108,9 +111,9 @@ struct GroundFixture {
     std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
     std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
     std::copy(saved_states.begin(), saved_states.end(),
-              Battle_Ai_actorAiStates);
-    Battle_Ai_roomAiState = saved_room;
-    Battle_Ai_tileFlagMap = saved_flags;
+              VS::Battle::Ai::actorAiStates.begin());
+    VS::Battle::Ai::roomAiState = saved_room;
+    VS::Battle::Ai::tileFlagMap = saved_flags;
     VS::Content::battleAiHesitationLengths[0] = saved_lengths;
   }
 
@@ -203,7 +206,7 @@ TEST_CASE("Flight terrain helpers preserve sampled heights and room ceiling",
   fixture.room.flightCeiling = 512;
   auto& runtime = VS::Battle::Ai::BattleRoomAiRuntime();
   CHECK(VS::Battle::Ai::RoomNavigationCeilingHeight(runtime) == 512);
-  Battle_Ai_roomAiState = nullptr;
+  VS::Battle::Ai::roomAiState = nullptr;
   CHECK(VS::Battle::Ai::RoomNavigationCeilingHeight(runtime) == 0);
 }
 
@@ -662,18 +665,18 @@ TEST_CASE("Actor contact release preserves source no-state and no-room gates",
           "[ai][contact-release]") {
   GroundFixture fixture;
   Battle_actors[1] = nullptr;
-  Battle_Ai_actorAiStates[1] = nullptr;
+  VS::Battle::Ai::actorAiStates[1] = nullptr;
   fixture.room.reservedEPrefix[0] = 0xA5;
   VS::Battle::Ai::ReleaseLiveActorAiContactOccupancy(1);
   CHECK(fixture.room.reservedEPrefix[0] == 0xA5);
   Battle_actors[1] = &fixture.actors[1];
-  Battle_Ai_actorAiStates[1] = &fixture.states[1];
+  VS::Battle::Ai::actorAiStates[1] = &fixture.states[1];
   fixture.actors[1].commandOpcode = 11;
   fixture.states[1].nextTile.word = 0x200;
-  Battle_Ai_roomAiState = nullptr;
+  VS::Battle::Ai::roomAiState = nullptr;
   VS::Battle::Ai::ReleaseLiveActorAiContactOccupancy(1);
   CHECK(fixture.room.reservedEPrefix[0] == 0xA5);
-  Battle_Ai_roomAiState = &fixture.room;
+  VS::Battle::Ai::roomAiState = &fixture.room;
   VS::Battle::Ai::ReleaseLiveActorAiContactOccupancy(1);
   CHECK(fixture.room.reservedEPrefix[0] == 0xA1);
 }
@@ -681,18 +684,18 @@ TEST_CASE("Actor contact release preserves source no-state and no-room gates",
 TEST_CASE("Live patrols store the cursor and walk to the next waypoint",
           "[ai][waypoints][waypoints-live][ground-motion]") {
   GroundFixture fixture;
-  auto* const saved_routes = Battle_Ai_patrolRoutes;
+  auto* const saved_routes = VS::Battle::Ai::patrolRoutes;
   std::uint16_t routes[4][8]{};
   routes[1][0] = 0x8000 | (8 << 5) | 8;
   routes[1][1] = 0x8000 | (8 << 5) | 10;
-  Battle_Ai_patrolRoutes = routes;
+  VS::Battle::Ai::patrolRoutes = routes;
   auto& state = fixture.states[0];
   state.patrolRow = 1;
   state.patrolRate = 3;
   state.patrolDirection = 1;
   VS::Battle::Ai::UpdateLiveWaypointPatrol(
       reinterpret_cast<Battle_Ai_PatrolView*>(&state));
-  Battle_Ai_patrolRoutes = saved_routes;
+  VS::Battle::Ai::patrolRoutes = saved_routes;
   CHECK(state.patrolIndex == 1);
   CHECK(state.patrolRow == 1);
   CHECK(state.patrolRate == 3);

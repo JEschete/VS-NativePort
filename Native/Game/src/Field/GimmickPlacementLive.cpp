@@ -17,7 +17,7 @@
 #include "Actors/SkeletonLive.hpp"
 #include "Audio/ActorSoundLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
-#include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -440,7 +440,7 @@ class LiveGimmickInteractionStartHost final
   }
   bool ReserveTile(const VS::Field::GimmickTileQuery& tile) override {
     constexpr auto kGridSide = VS::Battle::Ai::kNavigationGridSide;
-    if (!Valid() || Battle_Ai_tileFlagMap == nullptr || tile.tile_x < 0 ||
+    if (!Valid() || VS::Battle::Ai::tileFlagMap == nullptr || tile.tile_x < 0 ||
         tile.tile_z < 0 || tile.tile_x >= kGridSide ||
         tile.tile_z >= kGridSide) {
       return false;
@@ -542,8 +542,8 @@ class LiveGimmickInteractionCommandHost final
   }
   bool ReleaseTile(const VS::Field::GimmickTileQuery& tile) override {
     constexpr auto kGridSide = VS::Battle::Ai::kNavigationGridSide;
-    if (!ValidObject() || Battle_Ai_tileFlagMap == nullptr || tile.tile_x < 0 ||
-        tile.tile_z < 0 || tile.tile_x >= kGridSide ||
+    if (!ValidObject() || VS::Battle::Ai::tileFlagMap == nullptr ||
+        tile.tile_x < 0 || tile.tile_z < 0 || tile.tile_x >= kGridSide ||
         tile.tile_z >= kGridSide) {
       return false;
     }

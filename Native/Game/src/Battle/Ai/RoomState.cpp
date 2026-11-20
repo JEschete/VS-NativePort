@@ -17,17 +17,17 @@
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActionPlanning.h"
+#include "Battle/Ai/ActionPlanning.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/FrameUpdateLive.hpp"
-#include "Battle/Ai/Movement.h"
-#include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/Movement.hpp"
+#include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
-#include "Battle/Ai/OrbitingBoss.h"
-#include "Battle/Ai/Perception.h"
+#include "Battle/Ai/OrbitingBoss.hpp"
+#include "Battle/Ai/Perception.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Ai/ReactionDelay.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
@@ -69,13 +69,13 @@ struct RoomAiStorage {
 void ClearRoomAiBindings() {
   memset(&VS::Battle::Ai::LiveFrameContext(), 0,
          sizeof VS::Battle::Ai::LiveFrameContext());
-  Battle_Ai_roomAiState = nullptr;
-  Battle_Ai_tileFlagMap = nullptr;
-  Battle_Ai_specialTerrainHeights = nullptr;
-  Battle_Ai_roomHasWaypoints = nullptr;
-  Battle_Ai_patrolRoutes = nullptr;
-  Battle_Ai_roomWaypoints = nullptr;
-  Battle_Ai_routeGates = nullptr;
+  VS::Battle::Ai::roomAiState = nullptr;
+  VS::Battle::Ai::tileFlagMap = nullptr;
+  VS::Battle::Ai::specialTerrainHeights = nullptr;
+  VS::Battle::Ai::roomHasWaypoints = nullptr;
+  VS::Battle::Ai::patrolRoutes = nullptr;
+  VS::Battle::Ai::roomWaypoints = nullptr;
+  VS::Battle::Ai::routeGates = nullptr;
 }
 
 std::optional<std::uint32_t> CollisionCell(TileCoordinate tile) {
@@ -153,29 +153,30 @@ class BattleRuntime final : public VS::Battle::Ai::RoomAiRuntime {
         storage->heights[z][x] = grid.heights[z][x];
       }
     }
-    Battle_Ai_roomAiState = &storage->state;
-    Battle_Ai_tileFlagMap = storage->flags;
-    Battle_Ai_specialTerrainHeights = storage->heights;
+    VS::Battle::Ai::roomAiState = &storage->state;
+    VS::Battle::Ai::tileFlagMap = storage->flags;
+    VS::Battle::Ai::specialTerrainHeights = storage->heights;
     auto* auxiliary = static_cast<unsigned char*>(Field_roomData.section6);
-    Battle_Ai_roomHasWaypoints = auxiliary;
-    Battle_Ai_patrolRoutes =
+    VS::Battle::Ai::roomHasWaypoints = auxiliary;
+    VS::Battle::Ai::patrolRoutes =
         auxiliary != nullptr
             ? reinterpret_cast<uint16_t (*)[kPatrolRouteLength]>(
                   auxiliary + kPatrolRoutesOffset)
             : nullptr;
-    Battle_Ai_roomWaypoints =
+    VS::Battle::Ai::roomWaypoints =
         auxiliary != nullptr
             ? reinterpret_cast<uint16_t*>(auxiliary + kWaypointsOffset)
             : nullptr;
-    Battle_Ai_routeGates = auxiliary != nullptr
-                               ? reinterpret_cast<Battle_Ai_RouteGateEnd*>(
-                                     auxiliary + kRouteGatesOffset)
-                               : nullptr;
+    VS::Battle::Ai::routeGates =
+        auxiliary != nullptr
+            ? reinterpret_cast<VS::Battle::Ai::RouteGateEndRecord*>(
+                  auxiliary + kRouteGatesOffset)
+            : nullptr;
   }
 
   [[nodiscard]] std::optional<VS::Battle::Ai::RoomAiSettings>
   PublishedSettings() const override {
-    const Battle_Ai_RoomAiState* state = Battle_Ai_roomAiState;
+    const Battle_Ai_RoomAiState* state = VS::Battle::Ai::roomAiState;
     if (state == nullptr) return std::nullopt;
     VS::Battle::Ai::RoomAiSettings settings;
     settings.max_tile_x = state->maxTileX;
@@ -205,8 +206,8 @@ class BattleRuntime final : public VS::Battle::Ai::RoomAiRuntime {
   }
 
   void ReleaseRoomAiMap() override {
-    if (Battle_Ai_roomAiState != nullptr) {
-      VS::Core::Memory::FreeLiveFromLowEnd(Battle_Ai_roomAiState);
+    if (VS::Battle::Ai::roomAiState != nullptr) {
+      VS::Core::Memory::FreeLiveFromLowEnd(VS::Battle::Ai::roomAiState);
     }
     ClearRoomAiBindings();
   }
@@ -215,12 +216,12 @@ class BattleRuntime final : public VS::Battle::Ai::RoomAiRuntime {
 class BattleReactionDelays final : public VS::Battle::Ai::ActorReactionDelays {
  public:
   bool SetMinimumActionDelay(int actor_id, std::uint8_t frames) override {
-    static_assert(std::size(Battle_Ai_actorAiStates) ==
+    static_assert(std::size(VS::Battle::Ai::actorAiStates) ==
                   VS::Battle::Ai::kAiActorSlotCount);
     if (actor_id < 0 || actor_id >= VS::Battle::Ai::kAiActorSlotCount) {
       return false;
     }
-    Battle_Ai_ActorAiState* state = Battle_Ai_actorAiStates[actor_id];
+    Battle_Ai_ActorAiState* state = VS::Battle::Ai::actorAiStates[actor_id];
     if (state == nullptr) return false;
     state->minActionDelay = frames;
     return true;
@@ -242,22 +243,18 @@ VS::Battle::Ai::BattleActorReactionDelays() {
 void VS::Battle::Ai::InvalidateSessionBindings(void) {
   // The arena was already reset: never dereference or free its former bindings.
   ClearRoomAiBindings();
-  for (size_t slot = 0; slot < sizeof Battle_Ai_actorAiStates /
-                                   sizeof Battle_Ai_actorAiStates[0];
-       ++slot) {
-    Battle_Ai_actorAiStates[slot] = nullptr;
-  }
-  Battle_Ai_attributeActorMask = 0;
-  Battle_Ai_secondPerceptionTarget = 0;
-  Battle_Ai_arenaOrbit = nullptr;
+  VS::Battle::Ai::actorAiStates.fill(nullptr);
+  VS::Battle::Ai::attributeActorMask = 0;
+  VS::Battle::Ai::secondPerceptionTarget = 0;
+  VS::Battle::Ai::arenaOrbit = nullptr;
   VS::Battle::Ai::InvalidateLivePlanningStatsSnapshot();
-  Battle_Ai_planningWorkspace = nullptr;
-  Battle_Ai_planningPassCandidates = nullptr;
-  Battle_Ai_candidateExclusions = nullptr;
-  Battle_Ai_fallbackCandidates = nullptr;
-  Battle_Ai_fallbackCandidateCount = 0;
-  Battle_Ai_unusedPlanCounter = 0;
-  Battle_Ai_candidateEngagedThisUpdate = 0;
+  VS::Battle::Ai::planningWorkspace = nullptr;
+  VS::Battle::Ai::planningPassCandidates = nullptr;
+  VS::Battle::Ai::candidateExclusions = nullptr;
+  VS::Battle::Ai::fallbackCandidates = nullptr;
+  VS::Battle::Ai::fallbackCandidateCount = 0;
+  VS::Battle::Ai::unusedPlanCounter = 0;
+  VS::Battle::Ai::candidateEngagedThisUpdate = 0;
   VS::Core::Debugf("ai.lifecycle",
                    "invalidated AI bindings after game-arena reset");
 }

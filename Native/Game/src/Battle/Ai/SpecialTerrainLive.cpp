@@ -8,34 +8,36 @@
 #include <type_traits>
 
 #include "Battle/Ai/LiveRequire.hpp"
-#include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/Navigation.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Field/CollisionMapLive.hpp"
 
 namespace VS::Battle::Ai {
 namespace {
-using LiveMapRow = std::remove_pointer_t<decltype(Battle_Ai_tileFlagMap)>;
-static_assert(std::is_same_v<LiveMapRow, u_short[kNavigationGridSide]>);
-static_assert(std::is_same_v<decltype(Battle_Ai_specialTerrainHeights),
-                             decltype(Battle_Ai_tileFlagMap)>);
+using LiveMapRow = std::remove_pointer_t<decltype(VS::Battle::Ai::tileFlagMap)>;
+static_assert(std::is_same_v<LiveMapRow, std::uint16_t[kNavigationGridSide]>);
+static_assert(std::is_same_v<decltype(VS::Battle::Ai::specialTerrainHeights),
+                             decltype(VS::Battle::Ai::tileFlagMap)>);
 static_assert(sizeof(LiveMapRow) * kNavigationGridSide ==
               kSpecialTerrainCells * sizeof(std::uint16_t));
-static_assert(sizeof(Battle_Ai_directionDeltas) ==
+static_assert(sizeof(VS::Battle::Ai::directionDeltas) ==
               sizeof(NavigationDirectionCodes));
 
 SpecialTerrainMaps LiveMaps() {
-  Require(Battle_Ai_tileFlagMap != nullptr &&
-              Battle_Ai_specialTerrainHeights != nullptr,
+  Require(VS::Battle::Ai::tileFlagMap != nullptr &&
+              VS::Battle::Ai::specialTerrainHeights != nullptr,
           "Special terrain heights require the room's AI tile maps");
-  return {.tile_flags =
-              TileFlagCells(&Battle_Ai_tileFlagMap[0][0], kSpecialTerrainCells),
-          .heights = SpecialHeightCells(&Battle_Ai_specialTerrainHeights[0][0],
-                                        kSpecialTerrainCells)};
+  return {
+      .tile_flags = TileFlagCells(&VS::Battle::Ai::tileFlagMap[0][0],
+                                  kSpecialTerrainCells),
+      .heights = SpecialHeightCells(
+          &VS::Battle::Ai::specialTerrainHeights[0][0], kSpecialTerrainCells)};
 }
 
 NavigationDirectionCodes LiveDirections() {
   NavigationDirectionCodes directions{};
-  std::memcpy(directions.data(), Battle_Ai_directionDeltas, directions.size());
+  std::memcpy(directions.data(), VS::Battle::Ai::directionDeltas.data(),
+              directions.size());
   return directions;
 }
 

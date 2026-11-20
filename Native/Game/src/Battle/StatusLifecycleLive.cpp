@@ -10,7 +10,7 @@
 #include <type_traits>
 
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Feedback.h"
 #include "Battle/FloatingLabelPlacementLive.hpp"
@@ -127,7 +127,7 @@ class LiveStatusWorld final : public StatusLifecycleWorld {
     return Call(state, [&] { return Core::NextLiveRandomAveraged(bound); });
   }
   void UpdateMovement(StatusLifecycleState& state) override {
-    Require(state.actor_id < std::size(Battle_Ai_actorAiStates),
+    Require(state.actor_id < std::size(VS::Battle::Ai::actorAiStates),
             "Status movement requires a valid AI slot");
     Call(state, [&] {
       Ai::SetLiveActorVerticalMovementSteps(

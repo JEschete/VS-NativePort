@@ -23,7 +23,7 @@
 #include "Battle/AbilityState.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/NavigationPrimitives.hpp"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
@@ -236,17 +236,18 @@ struct GimmickResourcesLiveFixture {
 };
 
 struct GimmickReleaseLiveFixture : GimmickResourcesLiveFixture {
-  decltype(Battle_Ai_tileFlagMap) saved_flags = Battle_Ai_tileFlagMap;
-  decltype(Battle_Ai_specialTerrainHeights) saved_heights =
-      Battle_Ai_specialTerrainHeights;
+  decltype(VS::Battle::Ai::tileFlagMap) saved_flags =
+      VS::Battle::Ai::tileFlagMap;
+  decltype(VS::Battle::Ai::specialTerrainHeights) saved_heights =
+      VS::Battle::Ai::specialTerrainHeights;
   GimmickReleaseLiveFixture() {
-    Battle_Ai_tileFlagMap = nullptr;
-    Battle_Ai_specialTerrainHeights = nullptr;
+    VS::Battle::Ai::tileFlagMap = nullptr;
+    VS::Battle::Ai::specialTerrainHeights = nullptr;
     instances[0].boneCount = 1;
   }
   ~GimmickReleaseLiveFixture() {
-    Battle_Ai_tileFlagMap = saved_flags;
-    Battle_Ai_specialTerrainHeights = saved_heights;
+    VS::Battle::Ai::tileFlagMap = saved_flags;
+    VS::Battle::Ai::specialTerrainHeights = saved_heights;
   }
 };
 
@@ -4073,21 +4074,22 @@ TEST_CASE("Active room trigger values preserve order and current identities",
 
 namespace {
 struct RoomTriggerLiveFixture : SigilDoorLiveFixture {
-  decltype(Battle_Ai_tileFlagMap) saved_flags = Battle_Ai_tileFlagMap;
+  decltype(VS::Battle::Ai::tileFlagMap) saved_flags =
+      VS::Battle::Ai::tileFlagMap;
   using FlagRow = std::uint16_t[32];
   std::array<FlagRow, 32> flags{};
   std::array<Field_MpdFloorTrigger, 3> triggers{};
   RoomTriggerLiveFixture() {
     Field_roomData.floorTriggers = triggers.data();
     Field_roomData.header.floorTriggersLength = sizeof(triggers);
-    Battle_Ai_tileFlagMap = flags.data();
+    VS::Battle::Ai::tileFlagMap = flags.data();
     triggers[0].kind = 15;
     triggers[1].kind = 16;
     triggers[2].tileX = -1;
     for (auto& trigger : triggers) trigger.activation = 7;
     flags[0][0] = 0x80;
   }
-  ~RoomTriggerLiveFixture() { Battle_Ai_tileFlagMap = saved_flags; }
+  ~RoomTriggerLiveFixture() { VS::Battle::Ai::tileFlagMap = saved_flags; }
 };
 }  // namespace
 
@@ -7121,7 +7123,7 @@ TEST_CASE(
   CHECK(VS::Field::RefreshLiveAshleyInteractionTile(&record));
   CHECK((std::bit_cast<FlagBytes>(room.flags) == saved));
   record.instance.slot = 0;
-  Battle_Ai_tileFlagMap = nullptr;
+  VS::Battle::Ai::tileFlagMap = nullptr;
   CHECK(VS::Field::RefreshLiveAshleyInteractionTile(&record));
 }
 
@@ -7231,7 +7233,8 @@ struct GimmickInteractionLiveFixture : GimmickPointLiveFixture {
 };
 
 struct GimmickStartLiveFixture : GimmickInteractionLiveFixture {
-  decltype(Battle_Ai_tileFlagMap) saved_flags = Battle_Ai_tileFlagMap;
+  decltype(VS::Battle::Ai::tileFlagMap) saved_flags =
+      VS::Battle::Ai::tileFlagMap;
   decltype(Field_interactingGimmickId) saved_selected =
       Field_interactingGimmickId;
   using FlagsRow = std::uint16_t[32];
@@ -7240,7 +7243,7 @@ struct GimmickStartLiveFixture : GimmickInteractionLiveFixture {
   GimmickStartLiveFixture() {
     std::copy_n(Field_kGimmickRollOrientations, saved_roll.size(),
                 saved_roll.begin());
-    Battle_Ai_tileFlagMap = flags.data();
+    VS::Battle::Ai::tileFlagMap = flags.data();
     instances[0].positionX = 64;
     instances[0].positionZ = 192;
     instances[0].objectInfo.objectId = 2;
@@ -7255,16 +7258,16 @@ struct GimmickStartLiveFixture : GimmickInteractionLiveFixture {
   ~GimmickStartLiveFixture() {
     std::copy(saved_roll.begin(), saved_roll.end(),
               Field_kGimmickRollOrientations);
-    Battle_Ai_tileFlagMap = saved_flags;
+    VS::Battle::Ai::tileFlagMap = saved_flags;
     Field_interactingGimmickId = saved_selected;
   }
 };
 
 struct GimmickCommandLiveFixture : GimmickStartLiveFixture {
-  decltype(Battle_Ai_specialTerrainHeights) saved_heights =
-      Battle_Ai_specialTerrainHeights;
+  decltype(VS::Battle::Ai::specialTerrainHeights) saved_heights =
+      VS::Battle::Ai::specialTerrainHeights;
   using HeightRow =
-      std::remove_pointer_t<decltype(Battle_Ai_specialTerrainHeights)>;
+      std::remove_pointer_t<decltype(VS::Battle::Ai::specialTerrainHeights)>;
   std::array<HeightRow, 32> heights{};
   MATRIX saved_camera = VS::Actors::boneMatrixScratch;
   struct Model {
@@ -7273,7 +7276,7 @@ struct GimmickCommandLiveFixture : GimmickStartLiveFixture {
   } model;
   GimmickCommandLiveFixture() {
     static_assert(offsetof(Model, bones) == sizeof(Actors_ShpModel));
-    Battle_Ai_specialTerrainHeights = heights.data();
+    VS::Battle::Ai::specialTerrainHeights = heights.data();
     heights[1][0] = 0x800;
     flags[1][0] = 0x480;
     Field_interactingGimmickId = 1;
@@ -7293,7 +7296,7 @@ struct GimmickCommandLiveFixture : GimmickStartLiveFixture {
   }
   ~GimmickCommandLiveFixture() {
     VS::Render::ForgetLiveModelExtent(&model);
-    Battle_Ai_specialTerrainHeights = saved_heights;
+    VS::Battle::Ai::specialTerrainHeights = saved_heights;
     VS::Actors::boneMatrixScratch = saved_camera;
   }
   static MATRIX IdentityMatrix() {
@@ -7457,7 +7460,7 @@ TEST_CASE(
   CHECK_FALSE(VS::Field::UpdateLiveGimmickMotion(nullptr));
   fixture.instances[0].mode = 253;
   fixture.instances[0].objectInfo.supportIndex = 14;
-  Battle_Ai_specialTerrainHeights = nullptr;
+  VS::Battle::Ai::specialTerrainHeights = nullptr;
   CHECK_FALSE(VS::Field::UpdateLiveGimmickMotion(&fixture.instances[0]));
   CHECK(fixture.flags[1][0] == 0x480);
   alignas(VS::Core::Memory::kHeapUnitBytes) std::array<std::byte, 4096> arena{};
@@ -7519,7 +7522,7 @@ TEST_CASE("Native gimmick command refuses missing data without fatal helpers",
           "[gimmick-interaction-command-live][field]") {
   GimmickCommandLiveFixture fixture;
   CHECK_FALSE(VS::Field::ApplyLiveGimmickInteractionCommand(nullptr, 1));
-  Battle_Ai_tileFlagMap = nullptr;
+  VS::Battle::Ai::tileFlagMap = nullptr;
   CHECK_FALSE(VS::Field::ApplyLiveGimmickInteractionCommand(&fixture.actor, 0));
   CHECK(fixture.heights[1][0] == 0x800);
   CHECK(fixture.actor.actionPoseActive == 0);
@@ -7574,7 +7577,7 @@ TEST_CASE(
   CHECK(VS::Field::BeginGimmickInteractionEntry(0) == -1);
   CHECK(Field_interactingGimmickId == -1);
   fixture.actor.weaponPoseActive = 0;
-  Battle_Ai_tileFlagMap = nullptr;
+  VS::Battle::Ai::tileFlagMap = nullptr;
   CHECK(VS::Field::BeginGimmickInteractionEntry(0) == -1);
   CHECK(fixture.actor.instance.turnFrames == 0);
 }
@@ -7835,12 +7838,13 @@ TEST_CASE(
 
 namespace {
 struct GimmickStackDropLiveFixture : GimmickPointLiveFixture {
-  decltype(Battle_Ai_tileFlagMap) saved_flags = Battle_Ai_tileFlagMap;
-  decltype(Battle_Ai_specialTerrainHeights) saved_heights =
-      Battle_Ai_specialTerrainHeights;
+  decltype(VS::Battle::Ai::tileFlagMap) saved_flags =
+      VS::Battle::Ai::tileFlagMap;
+  decltype(VS::Battle::Ai::specialTerrainHeights) saved_heights =
+      VS::Battle::Ai::specialTerrainHeights;
   GimmickStackDropLiveFixture() {
-    Battle_Ai_tileFlagMap = nullptr;
-    Battle_Ai_specialTerrainHeights = nullptr;
+    VS::Battle::Ai::tileFlagMap = nullptr;
+    VS::Battle::Ai::specialTerrainHeights = nullptr;
     Field_gimmickInstances[3] = &instances[0];
     Field_gimmickInstances[1] = &instances[1];
     for (auto& record : instances) {
@@ -7858,8 +7862,8 @@ struct GimmickStackDropLiveFixture : GimmickPointLiveFixture {
     Actors_actorRecords[2] = &actor;
   }
   ~GimmickStackDropLiveFixture() {
-    Battle_Ai_tileFlagMap = saved_flags;
-    Battle_Ai_specialTerrainHeights = saved_heights;
+    VS::Battle::Ai::tileFlagMap = saved_flags;
+    VS::Battle::Ai::specialTerrainHeights = saved_heights;
   }
   void CheckActorFall() {
     CHECK(actor.instance.movementMode == 3);

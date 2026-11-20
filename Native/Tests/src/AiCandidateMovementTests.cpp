@@ -14,7 +14,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/CandidateMovement.hpp"

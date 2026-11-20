@@ -11,7 +11,7 @@
 #include "Battle/Ai/BlockedMovement.hpp"
 #include "Battle/Ai/BlockedMovementLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
-#include "Battle/Ai/Movement.h"
+#include "Battle/Ai/Movement.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Legacy/Psx.h"
@@ -293,12 +293,13 @@ TEST_CASE("The live random state save copies the AI frame's state",
     int saved;
     ~Restore() {
       VS::Battle::Ai::LiveFrameContext().randomState = random;
-      Battle_Ai_savedMovementRandomState = saved;
+      VS::Battle::Ai::savedMovementRandomState = saved;
     }
-  } restore{frame.randomState, Battle_Ai_savedMovementRandomState};
+  } restore{frame.randomState, VS::Battle::Ai::savedMovementRandomState};
   frame.randomState = 0xFEDCBA98U;
   VS::Battle::Ai::SaveLiveMovementRandomState();
-  CHECK(Battle_Ai_savedMovementRandomState == static_cast<int>(0xFEDCBA98U));
+  CHECK(VS::Battle::Ai::savedMovementRandomState ==
+        static_cast<int>(0xFEDCBA98U));
 }
 
 enum class Event { kForget, kDispatch };

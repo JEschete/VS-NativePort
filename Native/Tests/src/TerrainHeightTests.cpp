@@ -10,7 +10,7 @@
 
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
-#include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Math/Distance.hpp"
@@ -20,7 +20,8 @@
 namespace {
 struct TerrainFixture {
   VS::Battle::Ai::FrameContext saved = VS::Battle::Ai::LiveFrameContext();
-  decltype(Battle_Ai_tileFlagMap) saved_flags = Battle_Ai_tileFlagMap;
+  decltype(VS::Battle::Ai::tileFlagMap) saved_flags =
+      VS::Battle::Ai::tileFlagMap;
   u_short heights[VS::Battle::Ai::kNavigationGridSide]
                  [VS::Battle::Ai::kNavigationGridSide]{};
   u_short flags[VS::Battle::Ai::kNavigationGridSide]
@@ -33,12 +34,12 @@ struct TerrainFixture {
     const std::array<u_char, 8> directions{0x30, 0x33, 0x03, 0x13,
                                            0x10, 0x11, 0x01, 0x31};
     std::copy(directions.begin(), directions.end(), frame->directions);
-    Battle_Ai_tileFlagMap = flags;
+    VS::Battle::Ai::tileFlagMap = flags;
   }
 
   ~TerrainFixture() {
     VS::Battle::Ai::LiveFrameContext() = saved;
-    Battle_Ai_tileFlagMap = saved_flags;
+    VS::Battle::Ai::tileFlagMap = saved_flags;
   }
 };
 
@@ -305,7 +306,7 @@ TEST_CASE(
       CHECK(fixture.flags[z][x] == (x == 13 && z == 7 ? 0x80 : 0));
     }
   }
-  Battle_Ai_tileFlagMap = nullptr;
+  VS::Battle::Ai::tileFlagMap = nullptr;
   VS::Battle::Ai::ReserveLiveAiDestinationTile(13, 7);
   CHECK(fixture.flags[7][13] == 0x80);
 }

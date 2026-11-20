@@ -27,7 +27,8 @@
 #include "Battle/ActionResultsLive.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
+#include "Battle/Ai/AiState.h"
 #include "Battle/AttackPrerequisiteTable.hpp"
 #include "Battle/AttackPrerequisitesLive.hpp"
 #include "Battle/BasicActionEffectsLive.hpp"
@@ -272,8 +273,8 @@ struct AbilityEffectFixture : AbilityFixture {
       std::to_array(Battle_limbArmorDpLoss);
   decltype(std::to_array(Battle_statusEffectParams)) saved_status_params =
       std::to_array(Battle_statusEffectParams);
-  std::array<Battle_Ai_ActorAiState*, 2> saved_ai{Battle_Ai_actorAiStates[0],
-                                                  Battle_Ai_actorAiStates[1]};
+  std::array<Battle_Ai_ActorAiState*, 2> saved_ai{
+      VS::Battle::Ai::actorAiStates[0], VS::Battle::Ai::actorAiStates[1]};
   u_int saved_last_value = Battle_lastActionStatValue;
   int saved_critical = Battle_criticalHitOccurred;
   Battle_Ai_ActorAiState ai[2]{};
@@ -295,7 +296,7 @@ struct AbilityEffectFixture : AbilityFixture {
     VS::Battle::InitializeLiveActionHit(&target);
     target.target.targetActor = 1;
     for (int index = 0; index < 2; ++index) {
-      Battle_Ai_actorAiStates[index] = &ai[index];
+      VS::Battle::Ai::actorAiStates[index] = &ai[index];
       auto& actor = stats[index];
       actor.maxHp = 1000;
       actor.maxMp = 300;
@@ -334,7 +335,7 @@ struct AbilityEffectFixture : AbilityFixture {
     Battle_lastActionStatValue = saved_last_value;
     Battle_criticalHitOccurred = saved_critical;
     for (int index = 0; index < 2; ++index) {
-      Battle_Ai_actorAiStates[index] = saved_ai[index];
+      VS::Battle::Ai::actorAiStates[index] = saved_ai[index];
     }
   }
 

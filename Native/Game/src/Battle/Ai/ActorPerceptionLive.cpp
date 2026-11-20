@@ -16,7 +16,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorPerception.hpp"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/CurrentTerrain.hpp"
@@ -24,7 +24,7 @@
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
-#include "Battle/Ai/Perception.h"
+#include "Battle/Ai/Perception.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Ai/RadialMovementLive.hpp"
 #include "Battle/Damage.h"
@@ -48,7 +48,7 @@ constexpr int kHalfShift = 16;
 constexpr int kTopByteShift = 24;
 constexpr std::uint32_t kHalfMask = 0xFFFF;
 
-static_assert(std::size(Battle_Ai_actorAiStates) == kPerceptionSlots);
+static_assert(std::size(VS::Battle::Ai::actorAiStates) == kPerceptionSlots);
 static_assert(std::size(Field_gimmickInstances) == kPerceptionSlots);
 static_assert(kFrameActorSlots == kPerceptionSlots);
 static_assert(std::size(Actors_actorRecords) == kPerceptionRecordSlots);
@@ -184,7 +184,7 @@ class LiveTargetPerceptionWorld final : public TargetPerceptionWorld {
   }
   [[nodiscard]] std::optional<PerceptionShape> AiStateShape(
       int target) const override {
-    const AiState* state = Battle_Ai_actorAiStates[target];
+    const AiState* state = VS::Battle::Ai::actorAiStates[target];
     if (state == nullptr) return std::nullopt;
     return ShapeOf(*state);
   }
@@ -395,10 +395,10 @@ class LiveActorPerceptionWorld final : public ActorPerceptionWorld {
     return CurrentTileWord(record->instance);
   }
   [[nodiscard]] std::int32_t FrameTickBudget() const override {
-    return Battle_Ai_frameTickBudget;
+    return VS::Battle::Ai::frameTickBudget;
   }
   [[nodiscard]] std::int32_t SecondPerceptionTarget() const override {
-    return Battle_Ai_secondPerceptionTarget;
+    return VS::Battle::Ai::secondPerceptionTarget;
   }
   [[nodiscard]] std::int32_t ElapsedFrameTicks() override {
     return Core::ElapsedFrameCounterTicks();
@@ -510,14 +510,14 @@ void UpdateLiveTargetPerception(Battle_Ai_PerceptionView* state, int target) {
 
 // decomp: func_800D8EF4 (src/BATTLE/BATTLE.PRG/6FC00.c:983).
 void UpdateLiveActorPerception() {
-  Battle_Ai_RoomAiState* room = Battle_Ai_roomAiState;
+  Battle_Ai_RoomAiState* room = VS::Battle::Ai::roomAiState;
   Require(room != nullptr, "AI perception requires the room AI state");
   PerceptionRoom typed{
       .readiness_level = room->readinessLevel,
       .approach_moves = room->approachMoves,
-      .candidate_engaged = Battle_Ai_candidateEngagedThisUpdate};
+      .candidate_engaged = VS::Battle::Ai::candidateEngagedThisUpdate};
   BeginActorPerception(typed);
-  Battle_Ai_candidateEngagedThisUpdate = typed.candidate_engaged;
+  VS::Battle::Ai::candidateEngagedThisUpdate = typed.candidate_engaged;
   room->approachMoves = typed.approach_moves;
   room->readinessLevel = typed.readiness_level;
   WalkBattleActors(UpdateListedActor);

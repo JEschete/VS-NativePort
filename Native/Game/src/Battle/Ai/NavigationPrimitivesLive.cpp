@@ -17,7 +17,8 @@
 #include "Actors/Movement.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
+#include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AreaRouteLive.hpp"
 #include "Battle/Ai/BlockedMovementLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
@@ -25,9 +26,9 @@
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
-#include "Battle/Ai/Movement.h"
-#include "Battle/Ai/Navigation.h"
-#include "Battle/Ai/Perception.h"
+#include "Battle/Ai/Movement.hpp"
+#include "Battle/Ai/Navigation.hpp"
+#include "Battle/Ai/Perception.hpp"
 #include "Battle/Ai/SpecialTerrainLive.hpp"
 #include "Battle/Damage.h"
 #include "Core/Diagnostics.hpp"
@@ -46,14 +47,15 @@ constexpr unsigned kSuspendedActorCommands = 0xC0;
 constexpr unsigned kTileMask = 0xFF;
 constexpr int kTileZShift = 16;
 
-static_assert(std::size(Battle_Ai_actorAiStates) == kNavigationActorSlots);
+static_assert(std::size(VS::Battle::Ai::actorAiStates) ==
+              kNavigationActorSlots);
 static_assert(kFrameActorSlots == kNavigationActorSlots);
 static_assert(std::size(FrameContext{}.directions) == kNavigationDirections);
 // The route table is 256 words followed, at 0x454, by eight link end pairs.
-static_assert(sizeof(Battle_Ai_RouteGateEnd) == 2);
+static_assert(sizeof(VS::Battle::Ai::RouteGateEndRecord) == 2);
 static_assert(kRouteWordCount * sizeof(u_int) <= kRouteEndOffset);
-static_assert(kRouteEndOffset +
-                  (kRouteGateEndCount * sizeof(Battle_Ai_RouteGateEnd)) <=
+static_assert(kRouteEndOffset + (kRouteGateEndCount *
+                                 sizeof(VS::Battle::Ai::RouteGateEndRecord)) <=
               kRouteAuxiliaryBytes);
 static_assert(sizeof(Battle_Ai_ActorAiState{}.step_height_bytes) ==
               sizeof(std::uint16_t));
@@ -61,30 +63,30 @@ static_assert(sizeof(Battle_Ai_ActorAiState{}.step_height_bytes) ==
 class LiveNavigationGrid final : public NavigationGrid {
  public:
   [[nodiscard]] bool HasTileFlags() const override {
-    return Battle_Ai_tileFlagMap != nullptr;
+    return VS::Battle::Ai::tileFlagMap != nullptr;
   }
   [[nodiscard]] std::uint16_t TileFlags(int x, int z) const override {
-    return Battle_Ai_tileFlagMap[z][x];
+    return VS::Battle::Ai::tileFlagMap[z][x];
   }
   void SetTileFlags(int x, int z, std::uint16_t flags) override {
-    Battle_Ai_tileFlagMap[z][x] = flags;
+    VS::Battle::Ai::tileFlagMap[z][x] = flags;
   }
   [[nodiscard]] bool HasOccupancyHeights() const override {
-    return Battle_Ai_specialTerrainHeights != nullptr;
+    return VS::Battle::Ai::specialTerrainHeights != nullptr;
   }
   [[nodiscard]] std::uint16_t OccupancyHeight(int x, int z) const override {
-    return Battle_Ai_specialTerrainHeights[z][x];
+    return VS::Battle::Ai::specialTerrainHeights[z][x];
   }
   void SetOccupancyHeight(int x, int z, std::uint16_t value) override {
-    Battle_Ai_specialTerrainHeights[z][x] = value;
+    VS::Battle::Ai::specialTerrainHeights[z][x] = value;
   }
 };
 
 class LiveSpecialTerrainBuilder final : public SpecialTerrainBuilder {
  public:
   [[nodiscard]] bool HasNativeMaps() const override {
-    return Battle_Ai_tileFlagMap != nullptr &&
-           Battle_Ai_specialTerrainHeights != nullptr;
+    return VS::Battle::Ai::tileFlagMap != nullptr &&
+           VS::Battle::Ai::specialTerrainHeights != nullptr;
   }
   void BuildSpecialTerrainHeights() override {
     BuildLiveAiSpecialTerrainHeights();
@@ -119,17 +121,14 @@ std::uint32_t LiveVisiblePlatformMask() {
 }
 
 std::array<RouteGateEnd, kRouteGateEndCount> LiveRouteGateEnds() {
-  std::array<RouteGateEnd, kRouteGateEndCount> ends{};
-  for (std::size_t index = 0; index < ends.size(); ++index) {
-    ends[index] = {
-        .x = static_cast<std::uint8_t>(Battle_Ai_routeGates[index].tileX),
-        .z = static_cast<std::uint8_t>(Battle_Ai_routeGates[index].tileZ)};
-  }
-  return ends;
+  return DecodeRouteGateEnds(
+      std::span<const RouteGateEndRecord, kRouteGateEndCount>(
+          VS::Battle::Ai::routeGates, kRouteGateEndCount));
 }
 
 Battle_Ai_ActorAiState& ActorState(int actor_id) {
-  auto* state = Battle_Ai_actorAiStates[static_cast<std::size_t>(actor_id)];
+  auto* state =
+      VS::Battle::Ai::actorAiStates[static_cast<std::size_t>(actor_id)];
   Require(state != nullptr, "AI navigation requires the actor's AI state");
   return *state;
 }
@@ -147,7 +146,7 @@ class LiveNavigationOverrideCopy final : public NavigationOverrideCopy {
       : destination_(destination) {}
 
   [[nodiscard]] bool HasSource(int actor_id) const override {
-    return Battle_Ai_actorAiStates[static_cast<std::size_t>(actor_id)] !=
+    return VS::Battle::Ai::actorAiStates[static_cast<std::size_t>(actor_id)] !=
            nullptr;
   }
   [[nodiscard]] bool HasDestination() const override {
@@ -174,10 +173,10 @@ class LiveNavigationOverrideCopy final : public NavigationOverrideCopy {
 class LiveNavigationOverrideHost final : public NavigationOverrideHost {
  public:
   [[nodiscard]] bool HasTileFlags() const override {
-    return Battle_Ai_tileFlagMap != nullptr;
+    return VS::Battle::Ai::tileFlagMap != nullptr;
   }
   [[nodiscard]] bool HasActorState(int actor_id) const override {
-    return Battle_Ai_actorAiStates[static_cast<std::size_t>(actor_id)] !=
+    return VS::Battle::Ai::actorAiStates[static_cast<std::size_t>(actor_id)] !=
            nullptr;
   }
   [[nodiscard]] bool HasOverride(int actor_id) const override {
@@ -200,7 +199,7 @@ class LiveNavigationOverrideHost final : public NavigationOverrideHost {
            static_cast<void*>(state.actor) ==
                static_cast<void*>(
                    Battle_actors[static_cast<std::size_t>(actor_id)]) &&
-           Battle_Ai_roomAiState != nullptr;
+           VS::Battle::Ai::roomAiState != nullptr;
   }
   void ReleaseEngagement(int actor_id) override {
     auto* state = &ActorState(actor_id);
@@ -427,11 +426,11 @@ void BuildLiveAiTerrainHeightsWithWorkspace() {
 
 void UpdateLiveRouteGateAvailability() {
   const auto active = LiveVisiblePlatformMask();
-  if (Battle_Ai_roomHasWaypoints == nullptr) return;
-  auto* auxiliary = static_cast<u_char*>(Battle_Ai_roomHasWaypoints);
+  if (VS::Battle::Ai::roomHasWaypoints == nullptr) return;
+  auto* auxiliary = static_cast<u_char*>(VS::Battle::Ai::roomHasWaypoints);
   Require(auxiliary == Field_roomData.section6 &&
               Field_roomData.header.section6Length >= kRouteAuxiliaryBytes &&
-              reinterpret_cast<const u_char*>(Battle_Ai_routeGates) ==
+              reinterpret_cast<const u_char*>(VS::Battle::Ai::routeGates) ==
                   auxiliary + kRouteEndOffset,
           "Route availability: route table does not belong to the active "
           "room auxiliary section");

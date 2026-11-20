@@ -28,10 +28,10 @@
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/FrameUpdateLive.hpp"
-#include "Battle/Ai/Movement.h"
+#include "Battle/Ai/Movement.hpp"
 #include "Battle/Damage.h"
 #include "Boot/GameLoop.hpp"
 #include "Content/DataStore.hpp"
@@ -1511,7 +1511,7 @@ std::expected<Snapshot, std::string> Capture(
   state.random.shuffle_index =
       static_cast<std::uint32_t>(VS::Core::randomShuffleIndex);
   state.random.movement_state =
-      std::bit_cast<std::uint32_t>(Battle_Ai_savedMovementRandomState);
+      std::bit_cast<std::uint32_t>(VS::Battle::Ai::savedMovementRandomState);
   valid = CaptureActors(state);
   if (!valid) return std::unexpected(valid.error());
   valid = ValidateContent(state);
@@ -1667,7 +1667,7 @@ std::expected<void, std::string> FinishResume() {
   std::copy(state.random.shuffle.begin(), state.random.shuffle.end(),
             VS::Core::randomShuffleTable);
   VS::Core::randomShuffleIndex = static_cast<int>(state.random.shuffle_index);
-  Battle_Ai_savedMovementRandomState =
+  VS::Battle::Ai::savedMovementRandomState =
       std::bit_cast<int>(state.random.movement_state);
   VS::Battle::Ai::LiveFrameContext().randomState = state.random.movement_state;
   pending.reset();

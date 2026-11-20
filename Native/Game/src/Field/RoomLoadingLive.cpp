@@ -30,7 +30,7 @@
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
-#include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Battle/Ai/RoomAiMapLive.hpp"
 #include "Battle/Damage.h"

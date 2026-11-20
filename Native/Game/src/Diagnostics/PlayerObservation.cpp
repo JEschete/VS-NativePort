@@ -25,7 +25,8 @@
 #include "Battle/ActionResolution.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
+#include "Battle/Ai/AiState.h"
 #include "Battle/Damage.h"
 #include "Battle/EncounterHooks.hpp"
 #include "Battle/StatusEffects.h"
@@ -109,7 +110,7 @@ PlayerActorObservation InspectPlayerActor(const EncounterActorState& base) {
                            static_cast<int>(stats.currentAttackShape),
                            static_cast<int>(stats.currentAttackShapeAngle),
                            VS::Battle::LiveCalculateRangeShapeExtent(&range)};
-  if (const auto* ai = Battle_Ai_actorAiStates[slot]; ai != nullptr) {
+  if (const auto* ai = VS::Battle::Ai::actorAiStates[slot]; ai != nullptr) {
     constexpr unsigned kHostileRelation = 3;
     const auto& relation = ai->relations[0];
     snapshot.relation_to_player = static_cast<int>(relation.classification);

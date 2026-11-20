@@ -24,7 +24,7 @@
 #include "Battle/Actor.h"
 #include "Battle/ActorVitalsLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
-#include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
@@ -117,11 +117,11 @@ class LiveAshleyInteractionTileHost final
  private:
   bool Valid() const {
     return generation_ == VS::Field::LiveInteractionTargetDomain().generation &&
-           flags_ == Battle_Ai_tileFlagMap;
+           flags_ == VS::Battle::Ai::tileFlagMap;
   }
   std::uint64_t generation_ =
       VS::Field::LiveInteractionTargetDomain().generation;
-  decltype(Battle_Ai_tileFlagMap) flags_ = Battle_Ai_tileFlagMap;
+  decltype(VS::Battle::Ai::tileFlagMap) flags_ = VS::Battle::Ai::tileFlagMap;
 };
 
 class LiveSavePointQueryHost final : public VS::Field::SavePointQueryHost {

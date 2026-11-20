@@ -6,14 +6,14 @@
 #include <vector>
 
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActionPlanning.h"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActionPlanning.hpp"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
-#include "Battle/Ai/Movement.h"
+#include "Battle/Ai/Movement.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
-#include "Battle/Ai/Perception.h"
+#include "Battle/Ai/Perception.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Ai/PlanningWorkspace.hpp"
 #include "Battle/Damage.h"
@@ -34,21 +34,21 @@ constexpr unsigned kSuppressAwarenessIndicator = 0x20;
 class BoundPlanningWorkspace {
  public:
   explicit BoundPlanningWorkspace(PlanningWorkspace& workspace) {
-    Battle_Ai_planningWorkspace =
+    VS::Battle::Ai::planningWorkspace =
         reinterpret_cast<Battle_Ai_ReactionRecord*>(&workspace.result);
-    Battle_Ai_planningPassCandidates = workspace.candidates;
-    Battle_Ai_candidateExclusions = workspace.exclusions;
-    Battle_Ai_fallbackCandidates = workspace.fallback;
+    VS::Battle::Ai::planningPassCandidates = workspace.candidates;
+    VS::Battle::Ai::candidateExclusions = workspace.exclusions;
+    VS::Battle::Ai::fallbackCandidates = workspace.fallback;
   }
   BoundPlanningWorkspace(const BoundPlanningWorkspace&) = delete;
   BoundPlanningWorkspace& operator=(const BoundPlanningWorkspace&) = delete;
   BoundPlanningWorkspace(BoundPlanningWorkspace&&) = delete;
   BoundPlanningWorkspace& operator=(BoundPlanningWorkspace&&) = delete;
   ~BoundPlanningWorkspace() {
-    Battle_Ai_planningWorkspace = nullptr;
-    Battle_Ai_planningPassCandidates = nullptr;
-    Battle_Ai_candidateExclusions = nullptr;
-    Battle_Ai_fallbackCandidates = nullptr;
+    VS::Battle::Ai::planningWorkspace = nullptr;
+    VS::Battle::Ai::planningPassCandidates = nullptr;
+    VS::Battle::Ai::candidateExclusions = nullptr;
+    VS::Battle::Ai::fallbackCandidates = nullptr;
   }
 
  private:
@@ -59,11 +59,11 @@ class BoundPlanningWorkspace {
 
 Battle_Ai_ActorAiState& AiStateOf(int slot) {
   if (slot < 0 ||
-      slot >= static_cast<int>(std::size(Battle_Ai_actorAiStates)) ||
-      Battle_Ai_actorAiStates[slot] == nullptr) {
+      slot >= static_cast<int>(std::size(VS::Battle::Ai::actorAiStates)) ||
+      VS::Battle::Ai::actorAiStates[slot] == nullptr) {
     throw std::logic_error("battle actor has no AI state");
   }
-  return *Battle_Ai_actorAiStates[slot];
+  return *VS::Battle::Ai::actorAiStates[slot];
 }
 
 Battle_Actor& ActorOf(const PlanningActor& actor) {
@@ -89,7 +89,9 @@ class LiveActionPlanningRoom final : public ActionPlanningRoom {
       : request_(request),
         record_(reinterpret_cast<Battle_Ai_ReactionRecord*>(request)) {}
 
-  void ResetReadiness() override { Battle_Ai_roomAiState->readinessLevel = 0; }
+  void ResetReadiness() override {
+    VS::Battle::Ai::roomAiState->readinessLevel = 0;
+  }
 
   void ReconcileCompletedPlan() override {
     ReconcileLiveCompletedActionPlan(request_);

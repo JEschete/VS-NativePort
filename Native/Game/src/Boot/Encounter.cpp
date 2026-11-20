@@ -29,7 +29,8 @@
 #include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
+#include "Battle/Ai/AiState.h"
 #include "Battle/Damage.h"
 #include "Battle/EncounterHooks.hpp"
 #include "Battle/Feedback.h"
@@ -262,14 +263,14 @@ EncounterActorState InspectActor(int slot, const Battle_Actor& actor) {
   snapshot.defeated = actor.defeated != 0;
   snapshot.awareness_marker =
       static_cast<unsigned char>(Battle_actorMarkers[slot]);
-  const auto* ai = Battle_Ai_actorAiStates[slot];
+  const auto* ai = VS::Battle::Ai::actorAiStates[slot];
   if (ai != nullptr) {
     snapshot.ai_present = true;
     snapshot.ai_candidates = ai->candidateCount;
     snapshot.ai_engagement_frames = ai->engagementFrames;
     snapshot.ai_movement_mode = ai->requestedMovementMode;
-    snapshot.ai_destination_x = ai->destination.tile.tileX;
-    snapshot.ai_destination_z = ai->destination.tile.tileZ;
+    snapshot.ai_destination_x = ai->destination.tile.tile_x;
+    snapshot.ai_destination_z = ai->destination.tile.tile_z;
     if (ai->candidateCount > 0 && ai->candidateOrder[0] != nullptr) {
       snapshot.ai_target = ai->candidateOrder[0]->targetId;
     }

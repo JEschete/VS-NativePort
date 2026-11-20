@@ -7,35 +7,38 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
+#include "Battle/Ai/AiState.h"
 #include "Battle/Ai/EngagementLive.hpp"
-#include "Battle/Ai/Perception.h"
+#include "Battle/Ai/Perception.hpp"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Legacy/Psx.h"
 
 namespace {
 struct EngagementFixture {
-  decltype(Battle_Ai_roomAiState) saved_room = Battle_Ai_roomAiState;
+  decltype(VS::Battle::Ai::roomAiState) saved_room =
+      VS::Battle::Ai::roomAiState;
   decltype(std::to_array(Battle_actors)) saved_actors =
       std::to_array(Battle_actors);
-  decltype(std::to_array(Battle_Ai_actorAiStates)) saved_states =
-      std::to_array(Battle_Ai_actorAiStates);
+  decltype(VS::Battle::Ai::actorAiStates) saved_states =
+      VS::Battle::Ai::actorAiStates;
   decltype(std::to_array(Battle_actorMarkers)) saved_markers =
       std::to_array(Battle_actorMarkers);
-  int saved_busy = Battle_Ai_candidateEngagedThisUpdate;
+  int saved_busy = VS::Battle::Ai::candidateEngagedThisUpdate;
   Battle_Ai_RoomAiState room{};
   std::array<Battle_Actor, 3> actors{};
   std::array<Battle_Ai_ActorAiState, 3> states{};
 
   EngagementFixture() {
-    Battle_Ai_roomAiState = &room;
-    Battle_Ai_candidateEngagedThisUpdate = 0;
+    VS::Battle::Ai::roomAiState = &room;
+    VS::Battle::Ai::candidateEngagedThisUpdate = 0;
     room.engagementLimit = 1;
     VS::Battle::Ai::StoreEngagedMask(room, 0);
     room.engagedCount = 0;
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
-    std::fill_n(Battle_Ai_actorAiStates, saved_states.size(), nullptr);
+    std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved_states.size(),
+                nullptr);
     const std::array<int, 3> ids{0, 2, 5};
     for (std::size_t index = 0; index < actors.size(); ++index) {
       actors[index].id = states[index].actorId = ids[index];
@@ -45,18 +48,18 @@ struct EngagementFixture {
           reinterpret_cast<Battle_Ai_EngagementData*>(&actors[index]);
       states[index].engagementRequest = 7;
       Battle_actors[ids[index]] = &actors[index];
-      Battle_Ai_actorAiStates[ids[index]] = &states[index];
+      VS::Battle::Ai::actorAiStates[ids[index]] = &states[index];
     }
     std::fill_n(Battle_actorMarkers, saved_markers.size(),
                 std::bit_cast<char>(uint8_t{0x80}));
   }
 
   ~EngagementFixture() {
-    Battle_Ai_roomAiState = saved_room;
-    Battle_Ai_candidateEngagedThisUpdate = saved_busy;
+    VS::Battle::Ai::roomAiState = saved_room;
+    VS::Battle::Ai::candidateEngagedThisUpdate = saved_busy;
     std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
     std::copy(saved_states.begin(), saved_states.end(),
-              Battle_Ai_actorAiStates);
+              VS::Battle::Ai::actorAiStates.begin());
     std::copy(saved_markers.begin(), saved_markers.end(), Battle_actorMarkers);
   }
 
@@ -120,7 +123,7 @@ TEST_CASE(
   const auto blocked = GENERATE(0, 1, 2);
   EngagementFixture fixture;
   if (blocked == 0) fixture.states[1].engagementCooldownFrames = 1;
-  if (blocked == 1) Battle_Ai_candidateEngagedThisUpdate = 1;
+  if (blocked == 1) VS::Battle::Ai::candidateEngagedThisUpdate = 1;
   if (blocked == 2) {
     fixture.room.engagementLimit = 0;
     REQUIRE(VS::Battle::Ai::TryEngageLiveActor(&fixture.states[2]));

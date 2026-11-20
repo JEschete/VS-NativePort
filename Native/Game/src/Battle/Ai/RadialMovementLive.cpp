@@ -19,7 +19,7 @@
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
-#include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/RadialMovement.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Legacy/Psx.h"
@@ -174,8 +174,8 @@ AiState& StateWithModel(AiState* state) {
 }  // namespace
 
 void ProjectLiveClearRadialDestination(Battle_Ai_ActorAiState* state,
-                                       Battle_Ai_TilePosition source, int angle,
-                                       unsigned int distance) {
+                                       VS::Battle::Ai::TilePosition source,
+                                       int angle, unsigned int distance) {
   Require(state != nullptr, "AI radial projection requires an AI state");
   Update(*state, "AI radial projection refused its room or actors",
          [&](RadialMovementWorld& world, RadialMover& mover) {

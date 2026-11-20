@@ -1,33 +1,22 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's
-// decomp line.
-#include "Battle/Ai/ActionPlanning.h"
+// The action planner's working state (ActionPlanning.hpp).
+#include "Battle/Ai/ActionPlanning.hpp"
 
-#include "Battle/Actor.h"
-#include "Battle/Ai/AiViews.h"
-#include "Items/ItemRecords.hpp"
-#include "Legacy/Psx.h"
-
-// decomp: D_80069BBC (D_80069BBC@BATTLE/BATTLE.PRG)
-u_int Battle_Ai_kTimedStatusFlags[344]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Battle::Ai {
+// decomp: D_80069BBC (D_80069BBC@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+std::array<std::uint32_t, kTimedStatusFlagWords> kTimedStatusFlags;
 // decomp: D_800F58E8 (D_800F58E8@BATTLE/BATTLE.PRG)
-Battle_ActorStats* Battle_Ai_planningStatsSnapshot;
-
+Battle_ActorStats* planningStatsSnapshot;
 // decomp: D_800F58EC (D_800F58EC@BATTLE/BATTLE.PRG)
-Battle_Ai_CandidateEntryView (*Battle_Ai_planningPassCandidates)[16];
-
+Battle_Ai_CandidateEntryView (*planningPassCandidates)[kPassCandidates];
 // decomp: D_800F58F0 (D_800F58F0@BATTLE/BATTLE.PRG)
-int Battle_Ai_fallbackCandidateCount;
-
+std::int32_t fallbackCandidateCount;
 // decomp: D_800F58F4 (D_800F58F4@BATTLE/BATTLE.PRG)
-int Battle_Ai_unusedPlanCounter;
-
+std::int32_t unusedPlanCounter;
 // decomp: D_800F58F8 (D_800F58F8@BATTLE/BATTLE.PRG)
-Battle_Ai_CandidateEntryView* Battle_Ai_fallbackCandidates;
-
+Battle_Ai_CandidateEntryView* fallbackCandidates;
 // decomp: D_800F5900 (D_800F5900@BATTLE/BATTLE.PRG)
-Battle_Ai_ReactionRecord* Battle_Ai_planningWorkspace;
-
+Battle_Ai_ReactionRecord* planningWorkspace;
 // decomp: D_800F5904 (D_800F5904@BATTLE/BATTLE.PRG)
-u_char (*Battle_Ai_candidateExclusions)[256];
-
+std::uint8_t (*candidateExclusions)[kCandidateExclusionBytes];
+}  // namespace VS::Battle::Ai

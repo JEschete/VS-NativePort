@@ -1,17 +1,14 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Battle/Ai/Movement.h"
-#include "Battle/Ai/OrbitingBoss.h"
+// The orbiting boss movement state (OrbitingBoss.hpp).
+#include "Battle/Ai/OrbitingBoss.hpp"
 
-// decomp: D_800F17DC (D_800F17DC@BATTLE/BATTLE.PRG)
-short Battle_Ai_radialRetreatPath[36][2]; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Battle::Ai {
+// decomp: D_800F17DC (D_800F17DC@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+std::array<PathPoint, kRadialRetreatPathPoints> radialRetreatPath;
 // decomp: D_800F5918 (D_800F5918@BATTLE/BATTLE.PRG)
-int Battle_Ai_orbitAngularVelocity;
-
+std::int32_t orbitAngularVelocity;
 // decomp: D_800F591C (D_800F591C@BATTLE/BATTLE.PRG)
-int Battle_Ai_orbitHeightOffset;
-
+std::int32_t orbitHeightOffset;
 // decomp: D_800F5920 (D_800F5920@BATTLE/BATTLE.PRG)
-Battle_Ai_ArenaOrbitState* Battle_Ai_arenaOrbit;
-
+ArenaOrbitState* arenaOrbit;
+}  // namespace VS::Battle::Ai

@@ -10,7 +10,8 @@
 #include "Battle/ActionResolution.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
+#include "Battle/Ai/AiState.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Battle/StatusEffects.h"
@@ -23,7 +24,7 @@ namespace {
 struct ConditionFixture {
   Battle_Actor* saved_actor = Battle_actors[0];
   Actors_ActorRecord* saved_record = Actors_actorRecords[0];
-  Battle_Ai_ActorAiState* saved_ai = Battle_Ai_actorAiStates[0];
+  Battle_Ai_ActorAiState* saved_ai = VS::Battle::Ai::actorAiStates[0];
   Battle_ActionState* saved_action = Battle_actionState;
   decltype(Battle_floatingLabels) saved_labels = Battle_floatingLabels;
   decltype(Battle_floatingLabelCount) saved_label_count =
@@ -47,7 +48,7 @@ struct ConditionFixture {
     actor.stats = &stats;
     actor.weaponDrawn = 1;
     Actors_actorRecords[0] = &record;
-    Battle_Ai_actorAiStates[0] = &ai;
+    VS::Battle::Ai::actorAiStates[0] = &ai;
     Battle_actionState = &action;
     Battle_floatingLabels = &labels;
     Battle_floatingLabelCount = 0;
@@ -60,7 +61,7 @@ struct ConditionFixture {
   ~ConditionFixture() {
     Battle_actors[0] = saved_actor;
     Actors_actorRecords[0] = saved_record;
-    Battle_Ai_actorAiStates[0] = saved_ai;
+    VS::Battle::Ai::actorAiStates[0] = saved_ai;
     Battle_actionState = saved_action;
     Battle_floatingLabels = saved_labels;
     Battle_floatingLabelCount = saved_label_count;

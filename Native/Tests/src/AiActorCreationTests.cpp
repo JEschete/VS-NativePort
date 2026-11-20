@@ -28,10 +28,10 @@
 #include "Battle/Ai/ActorCreation.hpp"
 #include "Battle/Ai/ActorCreationLive.hpp"
 #include "Battle/Ai/ActorSettings.hpp"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/FrameUpdateLive.hpp"
-#include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Battle/Damage.h"
 #include "Content/ModuleData.hpp"
@@ -594,15 +594,16 @@ static_assert(offsetof(CreationTestModel, bones) == sizeof(Actors_ShpModel));
 struct LiveCreationFixture {
   decltype(std::to_array(Battle_actors)) saved_actors =
       std::to_array(Battle_actors);
-  decltype(std::to_array(Battle_Ai_actorAiStates)) saved_states =
-      std::to_array(Battle_Ai_actorAiStates);
+  decltype(VS::Battle::Ai::actorAiStates) saved_states =
+      VS::Battle::Ai::actorAiStates;
   decltype(std::to_array(Actors_actorRecords)) saved_records =
       std::to_array(Actors_actorRecords);
-  Battle_Ai_RoomAiState* saved_room = Battle_Ai_roomAiState;
-  decltype(Battle_Ai_tileFlagMap) saved_flags = Battle_Ai_tileFlagMap;
-  void* saved_has_waypoints = Battle_Ai_roomHasWaypoints;
+  Battle_Ai_RoomAiState* saved_room = VS::Battle::Ai::roomAiState;
+  decltype(VS::Battle::Ai::tileFlagMap) saved_flags =
+      VS::Battle::Ai::tileFlagMap;
+  void* saved_has_waypoints = VS::Battle::Ai::roomHasWaypoints;
   VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
-  int saved_attribute = Battle_Ai_attributeActorMask;
+  int saved_attribute = VS::Battle::Ai::attributeActorMask;
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 3072> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
@@ -615,13 +616,14 @@ struct LiveCreationFixture {
 
   LiveCreationFixture() {
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
-    std::fill_n(Battle_Ai_actorAiStates, saved_states.size(), nullptr);
+    std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved_states.size(),
+                nullptr);
     std::fill(std::begin(Actors_actorRecords), std::end(Actors_actorRecords),
               nullptr);
-    Battle_Ai_roomAiState = &room;
-    Battle_Ai_tileFlagMap = flags;
-    Battle_Ai_roomHasWaypoints = nullptr;
-    Battle_Ai_attributeActorMask = 0;
+    VS::Battle::Ai::roomAiState = &room;
+    VS::Battle::Ai::tileFlagMap = flags;
+    VS::Battle::Ai::roomHasWaypoints = nullptr;
+    VS::Battle::Ai::attributeActorMask = 0;
     model.bones[1].auxiliaryTag = 2;
     VS::Render::RecordLiveModelExtent(&model, sizeof model);
   }
@@ -632,13 +634,13 @@ struct LiveCreationFixture {
   ~LiveCreationFixture() {
     VS::Render::ForgetLiveModelExtent(&model);
     std::ranges::copy(saved_actors, std::begin(Battle_actors));
-    std::ranges::copy(saved_states, std::begin(Battle_Ai_actorAiStates));
+    std::ranges::copy(saved_states, std::begin(VS::Battle::Ai::actorAiStates));
     std::ranges::copy(saved_records, std::begin(Actors_actorRecords));
-    Battle_Ai_roomAiState = saved_room;
-    Battle_Ai_tileFlagMap = saved_flags;
-    Battle_Ai_roomHasWaypoints = saved_has_waypoints;
+    VS::Battle::Ai::roomAiState = saved_room;
+    VS::Battle::Ai::tileFlagMap = saved_flags;
+    VS::Battle::Ai::roomHasWaypoints = saved_has_waypoints;
     VS::Battle::Ai::LiveFrameContext() = saved_frame;
-    Battle_Ai_attributeActorMask = saved_attribute;
+    VS::Battle::Ai::attributeActorMask = saved_attribute;
   }
 
   // Ashley: an AI kind with a body allocation, her actor record and stats.
@@ -728,9 +730,9 @@ TEST_CASE("Live AI creation builds Ashley's state from her actor record",
   const int idle =
       VS::Battle::Ai::CreateLiveActorAiState(&fixture.actor, options);
   CHECK(idle == (options == 0x20 ? 1 : 0));
-  const Battle_Ai_ActorAiState* state = Battle_Ai_actorAiStates[0];
+  const Battle_Ai_ActorAiState* state = VS::Battle::Ai::actorAiStates[0];
   REQUIRE(state != nullptr);
-  CHECK(Battle_Ai_attributeActorMask == 1);
+  CHECK(VS::Battle::Ai::attributeActorMask == 1);
   CheckLiveStateLinks(*state, fixture);
   CheckLiveStateBody(*state);
   CheckLiveStateLocomotion(*state);
@@ -758,8 +760,8 @@ TEST_CASE("Live AI creation registers an auxiliary special actor",
   CHECK(fixture.room.specialActors[0] == &holder);
   CHECK(fixture.room.specialActors[1] == &fixture.actor);
   CHECK(fixture.room.specialActors[2] == nullptr);
-  CHECK(Battle_Ai_attributeActorMask == (1 << 6));
-  CHECK(Battle_Ai_actorAiStates[6] == nullptr);
+  CHECK(VS::Battle::Ai::attributeActorMask == (1 << 6));
+  CHECK(VS::Battle::Ai::actorAiStates[6] == nullptr);
 }
 
 TEST_CASE("AI creation retains its original module address",
@@ -803,9 +805,9 @@ TEST_CASE("Planning invariant termination child",
   Battle_Actor actor{};
   Battle_Ai_RoomAiState room{};
   actor.id = 0;
-  Battle_Ai_roomAiState = &room;
+  VS::Battle::Ai::roomAiState = &room;
   Battle_actors[0] = &actor;
-  Battle_Ai_actorAiStates[0] = nullptr;
+  VS::Battle::Ai::actorAiStates[0] = nullptr;
   try {
     VS::Battle::Ai::RebuildLiveActorActionPlans(nullptr);
   } catch (...) {

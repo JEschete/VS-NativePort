@@ -249,13 +249,7 @@
     <ClCompile Include="src\Battle\Ai\ActionExecutionLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Battle\Ai\ActionPlanning.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Battle\Ai\ActionPlanning.cpp" />
     <ClCompile Include="src\Battle\Ai\ActorCleanup.cpp" />
     <ClCompile Include="src\Battle\Ai\ActorCleanupLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -276,13 +270,7 @@
     <ClCompile Include="src\Battle\Ai\ActorSettingsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Battle\Ai\ActorState.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Battle\Ai\ActorState.cpp" />
     <ClCompile Include="src\Battle\Ai\ActorStateHelpers.cpp" />
     <ClCompile Include="src\Battle\Ai\AreaRoute.cpp" />
     <ClCompile Include="src\Battle\Ai\AreaRouteLive.cpp">
@@ -332,42 +320,18 @@
     <ClCompile Include="src\Battle\Ai\GroundNavigationLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Battle\Ai\Movement.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Battle\Ai\Movement.cpp" />
     <ClCompile Include="src\Battle\Ai\MovementBehavior.cpp" />
     <ClCompile Include="src\Battle\Ai\MovementBehaviorLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Battle\Ai\Navigation.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Battle\Ai\Navigation.cpp" />
     <ClCompile Include="src\Battle\Ai\NavigationPrimitives.cpp" />
     <ClCompile Include="src\Battle\Ai\NavigationPrimitivesLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Battle\Ai\OrbitingBoss.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
-    <ClCompile Include="src\Battle\Ai\Perception.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Battle\Ai\OrbitingBoss.cpp" />
+    <ClCompile Include="src\Battle\Ai\Perception.cpp" />
     <ClCompile Include="src\Battle\Ai\PlanningPrimitives.cpp" />
     <ClCompile Include="src\Battle\Ai\PlanningPrimitivesLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2078,17 +2042,17 @@
     <ClInclude Include="src\Battle\ActionResolution.h" />
     <ClInclude Include="src\Battle\ActionTable.h" />
     <ClInclude Include="src\Battle\Actor.h" />
-    <ClInclude Include="src\Battle\Ai\ActionPlanning.h" />
-    <ClInclude Include="src\Battle\Ai\ActorState.h" />
+    <ClInclude Include="src\Battle\Ai\ActionPlanning.hpp" />
+    <ClInclude Include="src\Battle\Ai\ActorState.hpp" />
     <ClInclude Include="src\Battle\Ai\AiState.h" />
     <ClInclude Include="src\Battle\Ai\AiViews.h" />
     <ClInclude Include="src\Battle\Ai\ConditionSnapshotBinding.hpp" />
     <ClInclude Include="src\Battle\Ai\CurrentTerrain.hpp" />
     <ClInclude Include="src\Battle\Ai\LiveRequire.hpp" />
-    <ClInclude Include="src\Battle\Ai\Movement.h" />
-    <ClInclude Include="src\Battle\Ai\Navigation.h" />
-    <ClInclude Include="src\Battle\Ai\OrbitingBoss.h" />
-    <ClInclude Include="src\Battle\Ai\Perception.h" />
+    <ClInclude Include="src\Battle\Ai\Movement.hpp" />
+    <ClInclude Include="src\Battle\Ai\Navigation.hpp" />
+    <ClInclude Include="src\Battle\Ai\OrbitingBoss.hpp" />
+    <ClInclude Include="src\Battle\Ai\Perception.hpp" />
     <ClInclude Include="src\Battle\Ai\RoomState.hpp" />
     <ClInclude Include="src\Battle\AttackPrerequisiteTable.hpp" />
     <ClInclude Include="src\Battle\BattleTypes.h" />

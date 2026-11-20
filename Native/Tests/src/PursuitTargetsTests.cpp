@@ -11,9 +11,9 @@
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/FrameUpdateLive.hpp"
-#include "Battle/Ai/Movement.h"
+#include "Battle/Ai/Movement.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
-#include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/Navigation.hpp"
 #include "Battle/Damage.h"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
@@ -31,12 +31,12 @@ struct PursuitFixture {
       Field_roomData.movingPlatforms;
   decltype(Field_roomData.header.movingPlatformsLength) saved_platform_bytes =
       Field_roomData.header.movingPlatformsLength;
-  decltype(Battle_Ai_routeGates) saved_gates = Battle_Ai_routeGates;
+  decltype(VS::Battle::Ai::routeGates) saved_gates = VS::Battle::Ai::routeGates;
   std::array<Actors_ActorRecord, 2> models{};
   std::array<Battle_Actor, 2> actors{};
   std::array<Battle_Ai_ActorAiState, 2> states{};
   std::array<Field_MpdMovingPlatform, 4> platforms{};
-  std::array<Battle_Ai_RouteGateEnd, 16> gates{};
+  std::array<VS::Battle::Ai::RouteGateEndRecord, 16> gates{};
 
   PursuitFixture() {
     std::fill_n(Actors_actorRecords, saved_models.size(), nullptr);
@@ -56,7 +56,7 @@ struct PursuitFixture {
     }
     Field_roomData.movingPlatforms = platforms.data();
     Field_roomData.header.movingPlatformsLength = sizeof platforms;
-    Battle_Ai_routeGates = gates.data();
+    VS::Battle::Ai::routeGates = gates.data();
     auto& model = models[1].instance;
     model.currentTileX = 4;
     model.currentTileZ = 6;
@@ -77,7 +77,7 @@ struct PursuitFixture {
     VS::Battle::Ai::LiveFrameContext() = saved_frame;
     Field_roomData.movingPlatforms = saved_platforms;
     Field_roomData.header.movingPlatformsLength = saved_platform_bytes;
-    Battle_Ai_routeGates = saved_gates;
+    VS::Battle::Ai::routeGates = saved_gates;
   }
 
   Battle_Ai_TargetApproachView& Approach() {
@@ -93,10 +93,10 @@ struct PursuitFixture {
     platforms[group].currentWaypoint = 3;
     platforms[group].waypoints[3].vx = 4 << 19;
     platforms[group].waypoints[3].vz = 6 << 19;
-    gates[group * 4 + 3].tileX = 4;
-    gates[group * 4 + 3].tileZ = 6;
-    gates[group * 4 + 2].tileX = static_cast<u_char>(12 + group);
-    gates[group * 4 + 2].tileZ = static_cast<u_char>(9 + group);
+    gates[group * 4 + 3].tile_x = 4;
+    gates[group * 4 + 3].tile_z = 6;
+    gates[group * 4 + 2].tile_x = static_cast<u_char>(12 + group);
+    gates[group * 4 + 2].tile_z = static_cast<u_char>(9 + group);
   }
 };
 }  // namespace

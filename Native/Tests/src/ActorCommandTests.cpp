@@ -13,10 +13,11 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Battle/Ai/ActorCommandsLive.hpp"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
+#include "Battle/Ai/AiState.h"
 #include "Battle/Ai/FrameUpdateLive.hpp"
-#include "Battle/Ai/Movement.h"
-#include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/Movement.hpp"
+#include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Battle/Ai/RoomAiMapLive.hpp"
 #include "Battle/Damage.h"
@@ -39,7 +40,8 @@ const T& Required(const std::optional<T>& value) {
 
 struct CommandFixture {
   VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
-  decltype(Battle_Ai_tileFlagMap) saved_flags = Battle_Ai_tileFlagMap;
+  decltype(VS::Battle::Ai::tileFlagMap) saved_flags =
+      VS::Battle::Ai::tileFlagMap;
   Battle_Actor* saved_actor = Battle_actors[2];
   Actors_ActorRecord* saved_target = Actors_actorRecords[3];
   Battle_Actor actor{};
@@ -91,12 +93,12 @@ struct CommandFixture {
     const std::array<u_char, 8> directions{0x30, 0x33, 0x03, 0x13,
                                            0x10, 0x11, 0x01, 0x31};
     std::copy(directions.begin(), directions.end(), frame->directions);
-    Battle_Ai_tileFlagMap = flags;
+    VS::Battle::Ai::tileFlagMap = flags;
   }
 
   ~CommandFixture() {
     VS::Battle::Ai::LiveFrameContext() = saved_frame;
-    Battle_Ai_tileFlagMap = saved_flags;
+    VS::Battle::Ai::tileFlagMap = saved_flags;
     Battle_actors[2] = saved_actor;
     Actors_actorRecords[3] = saved_target;
   }
@@ -225,20 +227,22 @@ namespace {
 struct RoomCommandFixture : CommandFixture {
   decltype(std::to_array(Battle_actors)) saved_actors =
       std::to_array(Battle_actors);
-  decltype(std::to_array(Battle_Ai_actorAiStates)) saved_states =
-      std::to_array(Battle_Ai_actorAiStates);
-  Battle_Ai_RoomAiState* saved_room = Battle_Ai_roomAiState;
-  decltype(Battle_Ai_specialTerrainHeights) saved_heights =
-      Battle_Ai_specialTerrainHeights;
-  decltype(Battle_Ai_roomHasWaypoints) saved_auxiliary =
-      Battle_Ai_roomHasWaypoints;
-  decltype(Battle_Ai_patrolRoutes) saved_routes = Battle_Ai_patrolRoutes;
-  decltype(Battle_Ai_roomWaypoints) saved_waypoints = Battle_Ai_roomWaypoints;
-  decltype(Battle_Ai_routeGates) saved_gates = Battle_Ai_routeGates;
-  int saved_random = Battle_Ai_savedMovementRandomState;
+  decltype(VS::Battle::Ai::actorAiStates) saved_states =
+      VS::Battle::Ai::actorAiStates;
+  Battle_Ai_RoomAiState* saved_room = VS::Battle::Ai::roomAiState;
+  decltype(VS::Battle::Ai::specialTerrainHeights) saved_heights =
+      VS::Battle::Ai::specialTerrainHeights;
+  decltype(VS::Battle::Ai::roomHasWaypoints) saved_auxiliary =
+      VS::Battle::Ai::roomHasWaypoints;
+  decltype(VS::Battle::Ai::patrolRoutes) saved_routes =
+      VS::Battle::Ai::patrolRoutes;
+  decltype(VS::Battle::Ai::roomWaypoints) saved_waypoints =
+      VS::Battle::Ai::roomWaypoints;
+  decltype(VS::Battle::Ai::routeGates) saved_gates = VS::Battle::Ai::routeGates;
+  int saved_random = VS::Battle::Ai::savedMovementRandomState;
   Field_RoomRecord saved_data = Field_roomData;
-  decltype(std::to_array(Battle_Ai_directionDeltas)) saved_directions =
-      std::to_array(Battle_Ai_directionDeltas);
+  decltype(VS::Battle::Ai::directionDeltas) saved_directions =
+      VS::Battle::Ai::directionDeltas;
   Field_MpdCollisionHeader dimensions{2, 2, 0, 4};
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 3072> arena{};
@@ -246,37 +250,38 @@ struct RoomCommandFixture : CommandFixture {
 
   RoomCommandFixture() {
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
-    std::fill_n(Battle_Ai_actorAiStates, saved_states.size(), nullptr);
+    std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved_states.size(),
+                nullptr);
     Battle_actors[2] = &actor;
-    Battle_Ai_roomAiState = nullptr;
-    Battle_Ai_tileFlagMap = nullptr;
-    Battle_Ai_specialTerrainHeights = nullptr;
-    Battle_Ai_roomHasWaypoints = nullptr;
-    Battle_Ai_patrolRoutes = nullptr;
-    Battle_Ai_roomWaypoints = nullptr;
-    Battle_Ai_routeGates = nullptr;
+    VS::Battle::Ai::roomAiState = nullptr;
+    VS::Battle::Ai::tileFlagMap = nullptr;
+    VS::Battle::Ai::specialTerrainHeights = nullptr;
+    VS::Battle::Ai::roomHasWaypoints = nullptr;
+    VS::Battle::Ai::patrolRoutes = nullptr;
+    VS::Battle::Ai::roomWaypoints = nullptr;
+    VS::Battle::Ai::routeGates = nullptr;
     Field_roomData = {};
     Field_roomData.collisionMap = &dimensions;
     VS::Battle::Ai::LiveFrameContext() = {};
     state.nextTile.word = 0x00010001;
-    Battle_Ai_savedMovementRandomState = 0x12345678;
+    VS::Battle::Ai::savedMovementRandomState = 0x12345678;
   }
 
   ~RoomCommandFixture() {
     VS::Battle::Ai::FreeRoomAiState(VS::Battle::Ai::BattleRoomAiRuntime());
     std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
     std::copy(saved_states.begin(), saved_states.end(),
-              Battle_Ai_actorAiStates);
-    Battle_Ai_roomAiState = saved_room;
-    Battle_Ai_specialTerrainHeights = saved_heights;
-    Battle_Ai_roomHasWaypoints = saved_auxiliary;
-    Battle_Ai_patrolRoutes = saved_routes;
-    Battle_Ai_roomWaypoints = saved_waypoints;
-    Battle_Ai_routeGates = saved_gates;
-    Battle_Ai_savedMovementRandomState = saved_random;
+              VS::Battle::Ai::actorAiStates.begin());
+    VS::Battle::Ai::roomAiState = saved_room;
+    VS::Battle::Ai::specialTerrainHeights = saved_heights;
+    VS::Battle::Ai::roomHasWaypoints = saved_auxiliary;
+    VS::Battle::Ai::patrolRoutes = saved_routes;
+    VS::Battle::Ai::roomWaypoints = saved_waypoints;
+    VS::Battle::Ai::routeGates = saved_gates;
+    VS::Battle::Ai::savedMovementRandomState = saved_random;
     Field_roomData = saved_data;
     std::copy(saved_directions.begin(), saved_directions.end(),
-              Battle_Ai_directionDeltas);
+              VS::Battle::Ai::directionDeltas.begin());
   }
 };
 }  // namespace
@@ -298,22 +303,22 @@ TEST_CASE(
   constexpr std::array<int, 4> kX{0, 1, 0, -1};
   constexpr std::array<int, 4> kZ{-1, 0, 1, 0};
   for (std::size_t index = 0; index < kX.size(); ++index) {
-    Battle_Ai_directionDeltas[index * 2].dx =
+    VS::Battle::Ai::directionDeltas[index * 2].dx =
         static_cast<signed char>(kX[index]);
-    Battle_Ai_directionDeltas[index * 2].dz =
+    VS::Battle::Ai::directionDeltas[index * 2].dz =
         static_cast<signed char>(kZ[index]);
   }
   for (int entry = 0; entry < 2; ++entry) {
     VS::Battle::Ai::InitializeLiveRoomNavigation();
-    REQUIRE(Battle_Ai_specialTerrainHeights != nullptr);
-    CHECK(Battle_Ai_tileFlagMap[1][1] == 0x20);
-    CHECK(Battle_Ai_specialTerrainHeights[1][1] == 0x2002);
-    CHECK(Battle_Ai_specialTerrainHeights[0][0] == 2);
+    REQUIRE(VS::Battle::Ai::specialTerrainHeights != nullptr);
+    CHECK(VS::Battle::Ai::tileFlagMap[1][1] == 0x20);
+    CHECK(VS::Battle::Ai::specialTerrainHeights[1][1] == 0x2002);
+    CHECK(VS::Battle::Ai::specialTerrainHeights[0][0] == 2);
     CHECK(VS::Battle::Ai::LiveFrameContext().heightMap ==
-          Battle_Ai_specialTerrainHeights);
+          VS::Battle::Ai::specialTerrainHeights);
     VS::Battle::Ai::FreeRoomAiState(VS::Battle::Ai::BattleRoomAiRuntime());
     CHECK(VS::Battle::Ai::LiveFrameContext().heightMap == nullptr);
-    CHECK(Battle_Ai_specialTerrainHeights == nullptr);
+    CHECK(VS::Battle::Ai::specialTerrainHeights == nullptr);
   }
 }
 
@@ -323,16 +328,16 @@ TEST_CASE("Room terrain supports hover before the first AI update",
   VS::Battle::Ai::InitializeRoomAiMap(VS::Battle::Ai::BattleRoomAiRuntime());
   auto* frame = &VS::Battle::Ai::LiveFrameContext();
   REQUIRE(frame->heightMap != nullptr);
-  CHECK(frame->heightMap == Battle_Ai_specialTerrainHeights);
-  CHECK(frame->tileFlags == Battle_Ai_tileFlagMap);
-  CHECK(frame->room == Battle_Ai_roomAiState);
+  CHECK(frame->heightMap == VS::Battle::Ai::specialTerrainHeights);
+  CHECK(frame->tileFlags == VS::Battle::Ai::tileFlagMap);
+  CHECK(frame->room == VS::Battle::Ai::roomAiState);
   frame->heightMap[1][1] = 2;
   frame->randomState = 0x87654321;
   VS::Battle::Ai::IssueLiveActorCommand(&fixture.state, 12);
   CHECK(fixture.actor.commandArg0 == (144 << 16 | 192));
   CHECK((fixture.actor.commandArg1.word & 0xFFFF) == 192);
   CHECK(frame->randomState == 0x87654321);
-  CHECK(Battle_Ai_savedMovementRandomState == 0x12345678);
+  CHECK(VS::Battle::Ai::savedMovementRandomState == 0x12345678);
 }
 
 TEST_CASE("Room teardown retires frame pointers before another room",
@@ -341,7 +346,7 @@ TEST_CASE("Room teardown retires frame pointers before another room",
   for (int world = 1; world <= 2; ++world) {
     VS::Battle::Ai::InitializeRoomAiMap(VS::Battle::Ai::BattleRoomAiRuntime());
     auto* frame = &VS::Battle::Ai::LiveFrameContext();
-    REQUIRE(frame->heightMap == Battle_Ai_specialTerrainHeights);
+    REQUIRE(frame->heightMap == VS::Battle::Ai::specialTerrainHeights);
     REQUIRE(frame->heightMap != nullptr);
     CHECK(frame->randomState == 0x12345678);
     frame->heightMap[1][1] = static_cast<u_short>(world);
@@ -356,7 +361,7 @@ TEST_CASE("Room teardown retires frame pointers before another room",
         frame->walk_valid == 0};
     const std::array expected_retired{true, true, true, true, true};
     CHECK(retired == expected_retired);
-    CHECK(Battle_Ai_savedMovementRandomState == 0x12345678);
+    CHECK(VS::Battle::Ai::savedMovementRandomState == 0x12345678);
   }
 }
 

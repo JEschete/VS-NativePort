@@ -7,7 +7,7 @@
 #include <cstdlib>
 #include <optional>
 
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
@@ -15,8 +15,8 @@
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
-#include "Battle/Ai/Movement.h"
-#include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/Movement.hpp"
+#include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Ai/RadialMovementLive.hpp"
 #include "Core/Diagnostics.hpp"
@@ -166,7 +166,7 @@ class LiveWanderWorld final : public LiveRoomRegions<WanderWorld> {
                                      int angle,
                                      std::uint32_t distance) override {
     Run(actor, [&] {
-      Battle_Ai_TilePosition position{};
+      VS::Battle::Ai::TilePosition position{};
       position.word = source;
       ProjectLiveClearRadialDestination(State(), position, angle, distance);
     });

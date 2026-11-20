@@ -378,7 +378,7 @@ class ReviewedConsumerTests(unittest.TestCase):
                 self.assertEqual((row["final_name"], row["meaning"], row["confidence"]),
                                  (final, "Not used by native code; kept for the original layout", "med"))
                 self.assertRegex(row["notes"],
-                                 r"^native-refs:none;source:native:Native\\[^;]+\.h:\d+;"
+                                 r"^native-refs:none;source:native:Native\\[^;]+\.h(?:pp)?:\d+;"
                                  r"declaration-only;source:upstream:6E644\.c:\d+$")
 
 

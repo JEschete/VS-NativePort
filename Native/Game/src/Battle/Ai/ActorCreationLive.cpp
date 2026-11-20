@@ -20,11 +20,11 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/ActorSettingsLive.hpp"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/LiveRequire.hpp"
-#include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Core/Diagnostics.hpp"
@@ -58,11 +58,12 @@ constexpr unsigned kTileLayerShift = 8;
 constexpr unsigned kTileZShift = 16;
 constexpr unsigned kTileStatusShift = 24;
 
-static_assert(std::size(Battle_Ai_actorAiStates) == kCleanupActorSlots);
+static_assert(std::size(VS::Battle::Ai::actorAiStates) == kCleanupActorSlots);
 static_assert(std::extent_v<decltype(Battle_Ai_RoomAiState::specialActors)> ==
               kRoomSpecialActorSlots);
 static_assert(
-    std::extent_v<std::remove_pointer_t<decltype(Battle_Ai_tileFlagMap)>> ==
+    std::extent_v<
+        std::remove_pointer_t<decltype(VS::Battle::Ai::tileFlagMap)>> ==
     kTileFlagGridSide);
 
 // The original read the battle actor through the creation actor view.
@@ -286,7 +287,8 @@ CreatedAiState Load(const AiState& state) {
 AiState& StateOf(int actor_id) {
   Require(actor_id >= 0 && actor_id < kCleanupActorSlots,
           "AI creation requires an actor ID in the AI state table");
-  AiState* state = Battle_Ai_actorAiStates[static_cast<std::size_t>(actor_id)];
+  AiState* state =
+      VS::Battle::Ai::actorAiStates[static_cast<std::size_t>(actor_id)];
   Require(state != nullptr, "AI creation lost the actor's AI state");
   return *state;
 }
@@ -294,28 +296,30 @@ AiState& StateOf(int actor_id) {
 class LiveCreationHost final : public ActorCreationHost {
  public:
   [[nodiscard]] std::uint32_t AttributeActorMask() const override {
-    return std::bit_cast<std::uint32_t>(Battle_Ai_attributeActorMask);
+    return std::bit_cast<std::uint32_t>(VS::Battle::Ai::attributeActorMask);
   }
   void StoreAttributeActorMask(std::uint32_t mask) override {
-    Battle_Ai_attributeActorMask = std::bit_cast<int>(mask);
+    VS::Battle::Ai::attributeActorMask = std::bit_cast<int>(mask);
   }
   [[nodiscard]] std::optional<RoomSpecialActors> SpecialActors()
       const override {
-    if (Battle_Ai_roomAiState == nullptr) return std::nullopt;
+    if (VS::Battle::Ai::roomAiState == nullptr) return std::nullopt;
     RoomSpecialActors slots{};
     for (std::size_t slot = 0; slot < kRoomSpecialActorSlots; ++slot) {
-      slots.at(slot) = HandleOf(Battle_Ai_roomAiState->specialActors[slot]);
+      slots.at(slot) =
+          HandleOf(VS::Battle::Ai::roomAiState->specialActors[slot]);
     }
     return slots;
   }
   void StoreSpecialActor(std::size_t slot, BattleActorHandle actor) override {
-    Require(Battle_Ai_roomAiState != nullptr && slot < kRoomSpecialActorSlots,
-            "AI special actors require the room's AI state");
-    Battle_Ai_roomAiState->specialActors[slot] = &ActorOf(actor);
+    Require(
+        VS::Battle::Ai::roomAiState != nullptr && slot < kRoomSpecialActorSlots,
+        "AI special actors require the room's AI state");
+    VS::Battle::Ai::roomAiState->specialActors[slot] = &ActorOf(actor);
   }
   [[nodiscard]] std::span<const std::uint16_t> TileFlags() const override {
-    if (Battle_Ai_tileFlagMap == nullptr) return {};
-    return {&Battle_Ai_tileFlagMap[0][0], kTileFlagCells};
+    if (VS::Battle::Ai::tileFlagMap == nullptr) return {};
+    return {&VS::Battle::Ai::tileFlagMap[0][0], kTileFlagCells};
   }
   [[nodiscard]] std::optional<std::uint32_t> ModelObjectWord(
       BattleActorHandle actor) const override {
@@ -358,7 +362,7 @@ class LiveCreationHost final : public ActorCreationHost {
     auto* state = static_cast<AiState*>(
         Core::Memory::AllocateLiveFromLowEnd(sizeof(AiState)));
     if (state == nullptr) return false;
-    Battle_Ai_actorAiStates[static_cast<std::size_t>(actor_id)] = state;
+    VS::Battle::Ai::actorAiStates[static_cast<std::size_t>(actor_id)] = state;
     Core::Memory::ClearLiveAlignedWords(
         state, static_cast<std::int32_t>(sizeof(AiState)));
     state->actorId = static_cast<std::uint8_t>(actor_id);

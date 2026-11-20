@@ -1,13 +1,12 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Battle/Ai/Perception.h"
+// The perception pass globals (Perception.hpp).
+#include "Battle/Ai/Perception.hpp"
 
-// decomp: D_800F16F4 (D_800F16F4@BATTLE/BATTLE.PRG)
-int Battle_Ai_frameTickBudget; /* contents: module image (ModuleData.cpp) */
-
+namespace VS::Battle::Ai {
+// decomp: D_800F16F4 (D_800F16F4@BATTLE/BATTLE.PRG); contents: module image
+// (ModuleData.cpp)
+std::int32_t frameTickBudget;
 // decomp: D_800F58D4 (D_800F58D4@BATTLE/BATTLE.PRG)
-int Battle_Ai_secondPerceptionTarget;
-
+std::int32_t secondPerceptionTarget;
 // decomp: D_800F58E0 (D_800F58E0@BATTLE/BATTLE.PRG)
-int Battle_Ai_candidateEngagedThisUpdate;
-
+std::int32_t candidateEngagedThisUpdate;
+}  // namespace VS::Battle::Ai

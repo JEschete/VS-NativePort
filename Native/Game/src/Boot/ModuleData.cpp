@@ -17,12 +17,12 @@
 #include "Battle/ActionMenu.h"
 #include "Battle/ActionResolution.h"
 #include "Battle/ActionTable.h"
-#include "Battle/Ai/ActionPlanning.h"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActionPlanning.hpp"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiViews.h"
-#include "Battle/Ai/Navigation.h"
-#include "Battle/Ai/OrbitingBoss.h"
-#include "Battle/Ai/Perception.h"
+#include "Battle/Ai/Navigation.hpp"
+#include "Battle/Ai/OrbitingBoss.hpp"
+#include "Battle/Ai/Perception.hpp"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Battle/Hud.h"
@@ -167,18 +167,18 @@ unsigned int Content_battleSkyDome[166];
 short Content_residentLfoSamples[167936];
 
 const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
-    {"BATTLE/BATTLE.PRG", 0x13BC, sizeof Battle_Ai_kTimedStatusFlags,
-     &Battle_Ai_kTimedStatusFlags,
-     sizeof Battle_Ai_kTimedStatusFlags},  // G00013 D_80069BBC
-    {"BATTLE/BATTLE.PRG", 0x1418, sizeof Battle_Ai_kSettingsBits30Values,
-     &Battle_Ai_kSettingsBits30Values,
-     sizeof Battle_Ai_kSettingsBits30Values},  // G00014 D_80069C18
-    {"BATTLE/BATTLE.PRG", 0x141C, sizeof Battle_Ai_kPerceptionRangesSquared,
-     &Battle_Ai_kPerceptionRangesSquared,
-     sizeof Battle_Ai_kPerceptionRangesSquared},  // G00015 D_80069C1C
-    {"BATTLE/BATTLE.PRG", 0x143C, sizeof Battle_Ai_kWanderTimingPresets,
-     &Battle_Ai_kWanderTimingPresets,
-     sizeof Battle_Ai_kWanderTimingPresets},  // G00016 D_80069C3C
+    {"BATTLE/BATTLE.PRG", 0x13BC, sizeof VS::Battle::Ai::kTimedStatusFlags,
+     &VS::Battle::Ai::kTimedStatusFlags,
+     sizeof VS::Battle::Ai::kTimedStatusFlags},  // G00013 D_80069BBC
+    {"BATTLE/BATTLE.PRG", 0x1418, sizeof VS::Battle::Ai::kSettingsBits30Values,
+     &VS::Battle::Ai::kSettingsBits30Values,
+     sizeof VS::Battle::Ai::kSettingsBits30Values},  // G00014 D_80069C18
+    {"BATTLE/BATTLE.PRG", 0x141C, sizeof VS::Battle::Ai::kPerceptionRangesSquared,
+     &VS::Battle::Ai::kPerceptionRangesSquared,
+     sizeof VS::Battle::Ai::kPerceptionRangesSquared},  // G00015 D_80069C1C
+    {"BATTLE/BATTLE.PRG", 0x143C, sizeof VS::Battle::Ai::kWanderTimingPresets,
+     &VS::Battle::Ai::kWanderTimingPresets,
+     sizeof VS::Battle::Ai::kWanderTimingPresets},  // G00016 D_80069C3C
     {"BATTLE/BATTLE.PRG", 0x2C7AC, sizeof VS::Audio::legacyUnreferencedTable,
      &VS::Audio::legacyUnreferencedTable,
      sizeof VS::Audio::legacyUnreferencedTable},  // G00017 D_80094FAC
@@ -697,26 +697,26 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
      sizeof VS::Effects::lastReactionSoundVariant},  // G00228 D_800EC4B8
     {"BATTLE/BATTLE.PRG", 0x83CBC, sizeof VS::Effects::emptyPackage,
      &VS::Effects::emptyPackage, sizeof VS::Effects::emptyPackage},  // G00229 D_800EC4BC
-    {"BATTLE/BATTLE.PRG", 0x88EEC, sizeof Battle_Ai_directionDeltas,
-     &Battle_Ai_directionDeltas,
-     sizeof Battle_Ai_directionDeltas},  // G00230 D_800F16EC
-    {"BATTLE/BATTLE.PRG", 0x88EF4, sizeof Battle_Ai_frameTickBudget,
-     &Battle_Ai_frameTickBudget,
-     sizeof Battle_Ai_frameTickBudget},  // G00231 D_800F16F4
-    {"BATTLE/BATTLE.PRG", 0x88F5C, sizeof Battle_Ai_routeStepDirections,
-     &Battle_Ai_routeStepDirections,
-     sizeof Battle_Ai_routeStepDirections},  // G00232 D_800F175C
-    {"BATTLE/BATTLE.PRG", 0x88FB8, sizeof Battle_Ai_viewAngles,
-     &Battle_Ai_viewAngles, sizeof Battle_Ai_viewAngles},  // G00234 D_800F17B8
-    {"BATTLE/BATTLE.PRG", 0x88FC8, sizeof Battle_Ai_settingsBits8Values,
-     &Battle_Ai_settingsBits8Values,
-     sizeof Battle_Ai_settingsBits8Values},  // G00235 D_800F17C8
-    {"BATTLE/BATTLE.PRG", 0x88FD8, sizeof Battle_Ai_facingDelayScales,
-     &Battle_Ai_facingDelayScales,
-     sizeof Battle_Ai_facingDelayScales},  // G00236 D_800F17D8
-    {"BATTLE/BATTLE.PRG", 0x88FDC, sizeof Battle_Ai_radialRetreatPath,
-     &Battle_Ai_radialRetreatPath,
-     sizeof Battle_Ai_radialRetreatPath},  // G00237 D_800F17DC
+    {"BATTLE/BATTLE.PRG", 0x88EEC, sizeof VS::Battle::Ai::directionDeltas,
+     &VS::Battle::Ai::directionDeltas,
+     sizeof VS::Battle::Ai::directionDeltas},  // G00230 D_800F16EC
+    {"BATTLE/BATTLE.PRG", 0x88EF4, sizeof VS::Battle::Ai::frameTickBudget,
+     &VS::Battle::Ai::frameTickBudget,
+     sizeof VS::Battle::Ai::frameTickBudget},  // G00231 D_800F16F4
+    {"BATTLE/BATTLE.PRG", 0x88F5C, sizeof VS::Battle::Ai::routeStepDirections,
+     &VS::Battle::Ai::routeStepDirections,
+     sizeof VS::Battle::Ai::routeStepDirections},  // G00232 D_800F175C
+    {"BATTLE/BATTLE.PRG", 0x88FB8, sizeof VS::Battle::Ai::viewAngles,
+     &VS::Battle::Ai::viewAngles, sizeof VS::Battle::Ai::viewAngles},  // G00234 D_800F17B8
+    {"BATTLE/BATTLE.PRG", 0x88FC8, sizeof VS::Battle::Ai::settingsBits8Values,
+     &VS::Battle::Ai::settingsBits8Values,
+     sizeof VS::Battle::Ai::settingsBits8Values},  // G00235 D_800F17C8
+    {"BATTLE/BATTLE.PRG", 0x88FD8, sizeof VS::Battle::Ai::facingDelayScales,
+     &VS::Battle::Ai::facingDelayScales,
+     sizeof VS::Battle::Ai::facingDelayScales},  // G00236 D_800F17D8
+    {"BATTLE/BATTLE.PRG", 0x88FDC, sizeof VS::Battle::Ai::radialRetreatPath,
+     &VS::Battle::Ai::radialRetreatPath,
+     sizeof VS::Battle::Ai::radialRetreatPath},  // G00237 D_800F17DC
     {"EFFECT/PLG045.BIN", 0x1DB4,
      sizeof VS::Effects::Plg045::particleEmissionCounter,
      &VS::Effects::Plg045::particleEmissionCounter,

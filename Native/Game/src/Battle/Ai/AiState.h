@@ -66,8 +66,8 @@ struct Battle_Ai_WanderView;
 struct Battle_Ai_WaypointSearchView;
 
 #include "Battle/Ai/AiViews.h"
-#include "Battle/Ai/Navigation.h"
-#include "Battle/Ai/Perception.h"
+#include "Battle/Ai/Navigation.hpp"
+#include "Battle/Ai/Perception.hpp"
 
 // layout: ledger (upstream merge) for D_800F58BC_t
 struct Battle_Ai_RoomAiState {
@@ -401,7 +401,7 @@ struct Battle_Ai_PerceptionView {
     char reserved23[2];
     u_char settingsBit15;
     char reserved26[0xE];
-    Battle_Ai_TilePosition tile;
+    VS::Battle::Ai::TilePosition tile;
     char reserved38[0x14];
     SVECTOR position;
     void* nativePointer54; /* PS1 pointer slot 0x54 */
@@ -735,7 +735,7 @@ struct Battle_Ai_MoveTargetView {
     unsigned char reserved0[7];
     unsigned char movementDisabled;
     unsigned char reserved8[0x2C];
-    Battle_Ai_TilePosition tile;
+    VS::Battle::Ai::TilePosition tile;
     char reserved38_38[28];
     void* nativePointer54; /* PS1 pointer slot 0x54 */
     void* nativePointer58; /* PS1 pointer slot 0x58 */
@@ -744,7 +744,7 @@ struct Battle_Ai_MoveTargetView {
     void* nativePointer64; /* PS1 pointer slot 0x64 */
     void* nativePointer68; /* PS1 pointer slot 0x68 */
     char reserved38_6C[252];
-    Battle_Ai_TilePosition destination;
+    VS::Battle::Ai::TilePosition destination;
 };
 
 // decomp: func_800DCAA0_t (src/BATTLE/BATTLE.PRG/6F014.c:112)
@@ -905,7 +905,7 @@ struct Battle_Ai_ActorAiState {
             u_char reserved33;
         };
     };
-    /* 0x34 */ Battle_Ai_TilePosition tile;
+    /* 0x34 */ VS::Battle::Ai::TilePosition tile;
     /* 0x38 */ int previousTile;
     /* 0x3C */ union {
         char reserved3C[8];
@@ -917,7 +917,7 @@ struct Battle_Ai_ActorAiState {
     };
     /* 0x44 */ u_char opaque44;
     /* 0x45 */ char reserved45[3];
-    /* 0x48 */ Battle_Ai_TilePosition savedDestination;
+    /* 0x48 */ VS::Battle::Ai::TilePosition savedDestination;
     /* 0x4C */ SVECTOR position;
     /* 0x54 */ Battle_Ai_EngagementData *actor;
     /* 0x58 */ Battle_Ai_ModelStatePrefix *model;
@@ -975,7 +975,7 @@ struct Battle_Ai_ActorAiState {
         char reservedC8[8];
         struct {
             int wander_center_radius;
-            Battle_Ai_TilePosition wander_center;
+            VS::Battle::Ai::TilePosition wander_center;
         };
     };
     /* 0xD0 */ short wanderHeading;
@@ -1002,14 +1002,14 @@ struct Battle_Ai_ActorAiState {
             u_char reserved105[3];
         };
     };
-    /* 0x108 */ Battle_Ai_TilePosition previousFacingTile;
+    /* 0x108 */ VS::Battle::Ai::TilePosition previousFacingTile;
     /* 0x10C */ u_char facingPending;
     /* 0x10D */ char reserved10D[3];
-    Battle_Ai_TilePosition flee_tile;
+    VS::Battle::Ai::TilePosition flee_tile;
     u_short flee_timer;
     char reserved116[2];
     /* 0x118 */ u_char detourDirections[4];
-    /* 0x11C */ Battle_Ai_TilePosition goal;
+    /* 0x11C */ VS::Battle::Ai::TilePosition goal;
     /* 0x120 */ union {
         char reserved120[10];
         struct {
@@ -1037,7 +1037,7 @@ struct Battle_Ai_ActorAiState {
     /* 0x131 */ u_char actionStatus;
     /* 0x132 */ u_char ground_area;
     /* 0x133 */ u_char reserved133;
-    /* 0x134 */ Battle_Ai_TilePosition plannedTile;
+    /* 0x134 */ VS::Battle::Ai::TilePosition plannedTile;
     /* 0x138 */ u_short awarenessMarker;
     /* 0x13A */ u_short opaque13A;
     /* 0x13C */ u_short opaque13C;
@@ -1058,9 +1058,9 @@ struct Battle_Ai_ActorAiState {
     /* 0x15D */ u_char opaque15D;
     /* 0x15E */ u_short movementFlags;
     /* 0x160 */ union { char reserved160[8]; u_int scriptedTargetXZ; };
-    /* 0x168 */ Battle_Ai_TilePosition destination;
+    /* 0x168 */ VS::Battle::Ai::TilePosition destination;
     /* 0x16C */ char reserved16C[4];
-    /* 0x170 */ Battle_Ai_TilePosition nextTile;
+    /* 0x170 */ VS::Battle::Ai::TilePosition nextTile;
     /* 0x174 */ union {
         char reserved174[8];
         SVECTOR nextPosition;
@@ -1083,7 +1083,7 @@ struct Battle_Ai_ActorAiState {
         u_char route_exit_bytes[4];
     }; };
     /* 0x1A0 */ struct Battle_Ai_ActorAiState *nextEngaged;
-    /* 0x1A4 */ Battle_Ai_RelationWord relations[16];
+    /* 0x1A4 */ VS::Battle::Ai::RelationWord relations[16];
     /* 0x1E4 */ u_int distancesSquared[16];
     /* 0x224 */ union {
         char reserved224[4];
@@ -1187,9 +1187,9 @@ struct Battle_Ai_MovementDestinationView {
     char reserved0[0xD];
     unsigned char opaqueD;
     char reservedE[0x26];
-    Battle_Ai_TilePosition tile;
+    VS::Battle::Ai::TilePosition tile;
     char reserved38[0x10];
-    Battle_Ai_TilePosition savedDestination;
+    VS::Battle::Ai::TilePosition savedDestination;
     short x;
     char reserved4E[2];
     short z;
@@ -1207,9 +1207,9 @@ struct Battle_Ai_MovementDestinationView {
     char reservedB8[0xA6];
     unsigned short movementFlags;
     char reserved160[8];
-    Battle_Ai_TilePosition destination;
+    VS::Battle::Ai::TilePosition destination;
     char reserved16C[4];
-    Battle_Ai_TilePosition nextTile;
+    VS::Battle::Ai::TilePosition nextTile;
     char reserved174[8];
     int moveX, moveZ;
 };
@@ -1222,7 +1222,7 @@ struct Battle_Ai_MovementPathView {
     u_char opaque4;
     u_char opaque5;
     char reserved6[0x2E];
-    Battle_Ai_TilePosition tile;
+    VS::Battle::Ai::TilePosition tile;
     char reserved38[0x14];
     short x;
     char reserved4E[2];
@@ -1242,9 +1242,9 @@ struct Battle_Ai_MovementPathView {
     char reservedE9[0x75];
     u_short movementFlags;
     char reserved160[8];
-    Battle_Ai_TilePosition destination;
+    VS::Battle::Ai::TilePosition destination;
     char reserved16C[4];
-    Battle_Ai_TilePosition nextTile;
+    VS::Battle::Ai::TilePosition nextTile;
     char reserved174_174[24];
     void* nativePointer18C; /* PS1 pointer slot 0x18C */
     Battle_Ai_DetourWord path;
@@ -1258,7 +1258,7 @@ struct Battle_Ai_MovementRecoveryView {
     char reserved0[9];
     unsigned char opaque9;
     char reservedA[0x2A];
-    Battle_Ai_TilePosition tile;
+    VS::Battle::Ai::TilePosition tile;
     char reserved38[0x14];
     short x;
     char reserved4E[2];
@@ -1353,7 +1353,7 @@ struct Battle_Ai_ObstructionView {
 // decomp: patrolWaypointState (src/BATTLE/BATTLE.PRG/771A8.c:1854)
 struct Battle_Ai_PatrolView {
     char reserved0[0x34];
-    Battle_Ai_TilePosition tile;
+    VS::Battle::Ai::TilePosition tile;
     char reserved38_38[28];
     void* nativePointer54; /* PS1 pointer slot 0x54 */
     void* nativePointer58; /* PS1 pointer slot 0x58 */
@@ -1364,7 +1364,7 @@ struct Battle_Ai_PatrolView {
     char reserved38_6C[148];
     unsigned char index, row, rate, direction, opaque104;
     char reserved105[0x63];
-    Battle_Ai_TilePosition destination;
+    VS::Battle::Ai::TilePosition destination;
 };
 
 // decomp: radialMotionState (src/BATTLE/BATTLE.PRG/7EE98.c:480)
@@ -1412,7 +1412,7 @@ struct Battle_Ai_AreaRouteView {
     char reserved0[5];
     u_char opaque5;
     char reserved6[0x2E];
-    Battle_Ai_TilePosition tile;
+    VS::Battle::Ai::TilePosition tile;
     char reserved38[0x14];
     short x;
     short y;
@@ -1434,9 +1434,9 @@ struct Battle_Ai_AreaRouteView {
     char reserved155[7];
     u_char movementTarget;
     char reserved15D[0xB];
-    Battle_Ai_TilePosition destination;
+    VS::Battle::Ai::TilePosition destination;
     char reserved16C[4];
-    Battle_Ai_TilePosition nextTile;
+    VS::Battle::Ai::TilePosition nextTile;
     char reserved174[8];
     int moveX;
     int moveZ;
@@ -1496,7 +1496,7 @@ struct Battle_Ai_TargetApproachView {
     unsigned char settingsBit13;
     char reserved25[14];
     unsigned char settingsByte0Bit7;
-    Battle_Ai_TilePosition tile;
+    VS::Battle::Ai::TilePosition tile;
     char reserved38[16];
     Battle_Ai_ApproachTileWord savedDestination;
     short x;
@@ -1605,9 +1605,9 @@ struct Battle_Ai_WanderView {
     char reserved4[4];
     unsigned char opaque8;
     char reserved9[0x2B];
-    Battle_Ai_TilePosition tile;
+    VS::Battle::Ai::TilePosition tile;
     char reserved38[0x10];
-    Battle_Ai_TilePosition savedDestination;
+    VS::Battle::Ai::TilePosition savedDestination;
     short x, y, z;
     char reserved52_52[2];
     void* nativePointer54; /* PS1 pointer slot 0x54 */
@@ -1629,12 +1629,12 @@ struct Battle_Ai_WanderView {
     unsigned short movePeriod;
     unsigned char wanderRate;
     char reservedD9[0x43];
-    Battle_Ai_TilePosition goal;
+    VS::Battle::Ai::TilePosition goal;
     char reserved120[13];
     unsigned char behaviorMode;
     char reserved12E[0x2F];
     unsigned char count;
     unsigned short movementFlags;
     char reserved160[8];
-    Battle_Ai_TilePosition destination;
+    VS::Battle::Ai::TilePosition destination;
 };

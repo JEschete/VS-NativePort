@@ -1,8 +1,9 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
+#include "Battle/Ai/Navigation.hpp"
+
 struct Battle_Ai_ActorAiState;
-union Battle_Ai_TilePosition;
 
 // Bindings from the actor AI state table, the room's AI frame, the battle
 // actor list and the movement code to the typed radial movement
@@ -12,8 +13,8 @@ union Battle_Ai_TilePosition;
 namespace VS::Battle::Ai {
 // func_800E1388.
 void ProjectLiveClearRadialDestination(Battle_Ai_ActorAiState* state,
-                                       Battle_Ai_TilePosition source, int angle,
-                                       unsigned int distance);
+                                       VS::Battle::Ai::TilePosition source,
+                                       int angle, unsigned int distance);
 
 // func_800E153C. The angle is unused, as in the original.
 void MoveLiveToRadialDestination(Battle_Ai_ActorAiState* state, int unused);

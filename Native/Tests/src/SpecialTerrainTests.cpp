@@ -7,7 +7,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Ai/RoomAiMapLive.hpp"
 #include "Battle/Ai/SpecialTerrainLive.hpp"
@@ -24,19 +24,20 @@ static_assert(std::is_same_v<
 
 namespace {
 struct SpecialTerrainFixture {
-  decltype(Battle_Ai_tileFlagMap) saved_flags = Battle_Ai_tileFlagMap;
-  decltype(Battle_Ai_specialTerrainHeights) saved_heights =
-      Battle_Ai_specialTerrainHeights;
-  decltype(std::to_array(Battle_Ai_directionDeltas)) saved_directions =
-      std::to_array(Battle_Ai_directionDeltas);
+  decltype(VS::Battle::Ai::tileFlagMap) saved_flags =
+      VS::Battle::Ai::tileFlagMap;
+  decltype(VS::Battle::Ai::specialTerrainHeights) saved_heights =
+      VS::Battle::Ai::specialTerrainHeights;
+  decltype(VS::Battle::Ai::directionDeltas) saved_directions =
+      VS::Battle::Ai::directionDeltas;
   Field_RoomRecord saved_room = Field_roomData;
   u_short flags[32][32]{};
   u_short heights[32][32]{};
   alignas(Field_MpdCollisionHeader) std::array<unsigned char, 4120> collision{};
 
   SpecialTerrainFixture() {
-    Battle_Ai_tileFlagMap = flags;
-    Battle_Ai_specialTerrainHeights = heights;
+    VS::Battle::Ai::tileFlagMap = flags;
+    VS::Battle::Ai::specialTerrainHeights = heights;
     Field_roomData = {};
     const Field_MpdCollisionHeader header{32, 32, 16, 1024};
     std::memcpy(collision.data(), &header, sizeof header);
@@ -46,8 +47,10 @@ struct SpecialTerrainFixture {
     constexpr std::array<int, 8> kX{0, 1, 1, 1, 0, -1, -1, -1};
     constexpr std::array<int, 8> kZ{-1, -1, 0, 1, 1, 1, 0, -1};
     for (unsigned index = 0; index < 8; ++index) {
-      Battle_Ai_directionDeltas[index].dx = static_cast<signed char>(kX[index]);
-      Battle_Ai_directionDeltas[index].dz = static_cast<signed char>(kZ[index]);
+      VS::Battle::Ai::directionDeltas[index].dx =
+          static_cast<signed char>(kX[index]);
+      VS::Battle::Ai::directionDeltas[index].dz =
+          static_cast<signed char>(kZ[index]);
     }
     for (unsigned z = 0; z < 32; ++z) {
       for (unsigned x = 0; x < 32; ++x) {
@@ -57,10 +60,10 @@ struct SpecialTerrainFixture {
   }
 
   ~SpecialTerrainFixture() {
-    Battle_Ai_tileFlagMap = saved_flags;
-    Battle_Ai_specialTerrainHeights = saved_heights;
+    VS::Battle::Ai::tileFlagMap = saved_flags;
+    VS::Battle::Ai::specialTerrainHeights = saved_heights;
     std::copy(saved_directions.begin(), saved_directions.end(),
-              Battle_Ai_directionDeltas);
+              VS::Battle::Ai::directionDeltas.begin());
     Field_roomData = saved_room;
   }
 };

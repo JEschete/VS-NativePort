@@ -9,9 +9,10 @@
 #include "Actors/Movement.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorPerceptionLive.hpp"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
+#include "Battle/Ai/AiState.h"
 #include "Battle/Ai/FrameUpdateLive.hpp"
-#include "Battle/Ai/Perception.h"
+#include "Battle/Ai/Perception.hpp"
 #include "Battle/Damage.h"
 #include "Field/Gimmicks.h"
 #include "Legacy/Psx.h"
@@ -29,8 +30,8 @@ struct AuxiliaryPerceptionFixture {
       std::to_array(Actors_actorRecords);
   decltype(std::to_array(Field_gimmickInstances)) saved_gimmicks =
       std::to_array(Field_gimmickInstances);
-  decltype(std::to_array(Battle_Ai_actorAiStates)) saved_states =
-      std::to_array(Battle_Ai_actorAiStates);
+  decltype(VS::Battle::Ai::actorAiStates) saved_states =
+      VS::Battle::Ai::actorAiStates;
   VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
   std::array<Actors_ActorRecord, 2> records{};
   std::array<Battle_Actor, 3> actors{};
@@ -44,12 +45,13 @@ struct AuxiliaryPerceptionFixture {
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
     std::fill_n(Actors_actorRecords, saved_records.size(), nullptr);
     std::fill_n(Field_gimmickInstances, saved_gimmicks.size(), nullptr);
-    std::fill_n(Battle_Ai_actorAiStates, saved_states.size(), nullptr);
+    std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved_states.size(),
+                nullptr);
     auto& frame = VS::Battle::Ai::LiveFrameContext();
     frame = {};
     frame.tileFlags = flags;
-    frame.actors[0] = Battle_Ai_actorAiStates[0] = &owner;
-    if (target_ai) frame.actors[2] = Battle_Ai_actorAiStates[2] = &target;
+    frame.actors[0] = VS::Battle::Ai::actorAiStates[0] = &owner;
+    if (target_ai) frame.actors[2] = VS::Battle::Ai::actorAiStates[2] = &target;
     records[0].instance.position = {16, 0, 16, 0};
     records[1].instance.position = {16, 0, 112, 0};
     Actors_actorRecords[0] = &records[0];
@@ -86,7 +88,7 @@ struct AuxiliaryPerceptionFixture {
     std::copy(saved_gimmicks.begin(), saved_gimmicks.end(),
               Field_gimmickInstances);
     std::copy(saved_states.begin(), saved_states.end(),
-              Battle_Ai_actorAiStates);
+              VS::Battle::Ai::actorAiStates.begin());
     VS::Battle::Ai::LiveFrameContext() = saved_frame;
     Core_Gte_Reset();
   }
@@ -127,7 +129,7 @@ TEST_CASE(
     fixture.Update();
     CHECK(fixture.View().distancesSquared[2] == (with_ai ? 13312 : 10240));
     CHECK(Field_gimmickInstances[2] == &fixture.auxiliary);
-    CHECK((Battle_Ai_actorAiStates[2] != nullptr) == with_ai);
+    CHECK((VS::Battle::Ai::actorAiStates[2] != nullptr) == with_ai);
   }
 }
 

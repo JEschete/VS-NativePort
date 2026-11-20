@@ -17,9 +17,9 @@
 
 #include "Battle/Ai/ActorCleanup.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.h"
-#include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/Navigation.hpp"
 #include "Legacy/Psx.h"
 
 namespace {
@@ -740,19 +740,19 @@ TEST_CASE("Hostility toward a hostile target only rewrites its relation",
 }
 
 TEST_CASE("Live destination release uses the live tile grid", "[ai][cleanup]") {
-  const auto saved = Battle_Ai_tileFlagMap;
+  const auto saved = VS::Battle::Ai::tileFlagMap;
   u_short flags[32][32]{};
   for (auto& row : flags) {
     for (u_short& cell : row) cell = 0xFFFF;
   }
-  Battle_Ai_tileFlagMap = flags;
+  VS::Battle::Ai::tileFlagMap = flags;
   ai::ReleaseLiveAiDestinationTile(3, 5);
   CHECK(flags[5][3] == 0xFF7F);
   CHECK(flags[3][5] == 0xFFFF);
-  Battle_Ai_tileFlagMap = nullptr;
+  VS::Battle::Ai::tileFlagMap = nullptr;
   ai::ReleaseLiveAiDestinationTile(3, 6);
   CHECK(flags[6][3] == 0xFFFF);
-  Battle_Ai_tileFlagMap = saved;
+  VS::Battle::Ai::tileFlagMap = saved;
 }
 
 TEST_CASE("Live reservation release reads the room's tile range bytes",
@@ -766,8 +766,8 @@ TEST_CASE("Live reservation release reads the room's tile range bytes",
                                                 {7, 6, true},
                                                 {7, 12, true},
                                                 {7, 13, false}}));
-  const auto saved_flags = Battle_Ai_tileFlagMap;
-  Battle_Ai_RoomAiState* const saved_room = Battle_Ai_roomAiState;
+  const auto saved_flags = VS::Battle::Ai::tileFlagMap;
+  Battle_Ai_RoomAiState* const saved_room = VS::Battle::Ai::roomAiState;
   u_short flags[32][32]{};
   for (auto& row : flags) {
     for (u_short& cell : row) cell = 0xFFFF;
@@ -780,25 +780,25 @@ TEST_CASE("Live reservation release reads the room's tile range bytes",
   auto state = std::make_unique<Battle_Ai_ActorAiState>();
   state->opaque1A = 1;
   state->nextTile.word = static_cast<u_int>(x | (z << 16));
-  Battle_Ai_tileFlagMap = flags;
-  Battle_Ai_roomAiState = &room;
+  VS::Battle::Ai::tileFlagMap = flags;
+  VS::Battle::Ai::roomAiState = &room;
   ai::ReleaseLiveActorAiReservations(state.get());
-  Battle_Ai_tileFlagMap = saved_flags;
-  Battle_Ai_roomAiState = saved_room;
+  VS::Battle::Ai::tileFlagMap = saved_flags;
+  VS::Battle::Ai::roomAiState = saved_room;
   CHECK(flags[z][x] == (released ? 0xFF7F : 0xFFFF));
   CHECK(state->opaque1A == 0);
 }
 
 TEST_CASE("Live persistence flags read the AI state table", "[ai][cleanup]") {
-  Battle_Ai_ActorAiState* const saved = Battle_Ai_actorAiStates[4];
+  Battle_Ai_ActorAiState* const saved = VS::Battle::Ai::actorAiStates[4];
   auto state = std::make_unique<Battle_Ai_ActorAiState>();
   state->usesRoomActionDelay = 1;
   state->behaviorMode = 0;
   const std::uint32_t relation = 0x37F00080u;
   std::memcpy(&state->relations[0], &relation, sizeof(relation));
-  Battle_Ai_actorAiStates[4] = nullptr;
+  VS::Battle::Ai::actorAiStates[4] = nullptr;
   CHECK(ai::PackLiveActorAiPersistenceFlags(4) == -1);
-  Battle_Ai_actorAiStates[4] = state.get();
+  VS::Battle::Ai::actorAiStates[4] = state.get();
   CHECK(ai::PackLiveActorAiPersistenceFlags(4) == 0x1FFD);
-  Battle_Ai_actorAiStates[4] = saved;
+  VS::Battle::Ai::actorAiStates[4] = saved;
 }

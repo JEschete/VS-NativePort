@@ -17,9 +17,9 @@
 #include "Battle/Ai/FlightMovementLive.hpp"
 #include "Battle/Ai/FlightTerrain.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
-#include "Battle/Ai/Movement.h"
-#include "Battle/Ai/Navigation.h"
-#include "Battle/Ai/Perception.h"
+#include "Battle/Ai/Movement.hpp"
+#include "Battle/Ai/Navigation.hpp"
+#include "Battle/Ai/Perception.hpp"
 #include "Field/TerrainHeight.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Legacy/Psx.h"
@@ -37,8 +37,8 @@ Field::TerrainGrid CurrentTerrain() noexcept {
 FlightNeighborhood ActorFlightNeighborhood(Battle_Ai_ActorAiState& state) {
   FlightNeighborhood neighborhood;
   neighborhood.terrain = CurrentTerrain();
-  neighborhood.origin = {state.tile.tile.tileX, state.tile.tile.tileZ};
-  const auto* deltas = reinterpret_cast<const Battle_Ai_DirectionDelta*>(
+  neighborhood.origin = {state.tile.tile.tile_x, state.tile.tile.tile_z};
+  const auto* deltas = reinterpret_cast<const VS::Battle::Ai::DirectionDelta*>(
       LiveFrameContext().directions);
   for (std::size_t direction = 0; direction < neighborhood.steps.size();
        ++direction) {

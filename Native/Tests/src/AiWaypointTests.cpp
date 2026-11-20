@@ -11,7 +11,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Battle/Ai/AiState.h"
-#include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/Waypoints.hpp"
 #include "Battle/Ai/WaypointsLive.hpp"
 #include "Content/ModuleData.hpp"
@@ -309,12 +309,12 @@ TEST_CASE("Patrols refuse rows, indices and steps without active waypoints",
 
 TEST_CASE("Live waypoint search writes only the nearest active tile",
           "[ai][waypoints][waypoints-live]") {
-  auto* const saved_waypoints = Battle_Ai_roomWaypoints;
-  auto* const saved_heights = Battle_Ai_specialTerrainHeights;
+  auto* const saved_waypoints = VS::Battle::Ai::roomWaypoints;
+  auto* const saved_heights = VS::Battle::Ai::specialTerrainHeights;
   Waypoints waypoints{};
   u_short heights[32][32]{};
-  Battle_Ai_roomWaypoints = waypoints.data();
-  Battle_Ai_specialTerrainHeights = heights;
+  VS::Battle::Ai::roomWaypoints = waypoints.data();
+  VS::Battle::Ai::specialTerrainHeights = heights;
   Battle_Ai_ActorAiState state{};
   state.position.vx = Centre(4);
   state.position.vz = Centre(4);
@@ -334,8 +334,8 @@ TEST_CASE("Live waypoint search writes only the nearest active tile",
   CHECK(destination.reserved1 == 0x11);
   CHECK(destination.z == 5);
   CHECK(destination.reserved3 == 0x22);
-  Battle_Ai_roomWaypoints = saved_waypoints;
-  Battle_Ai_specialTerrainHeights = saved_heights;
+  VS::Battle::Ai::roomWaypoints = saved_waypoints;
+  VS::Battle::Ai::specialTerrainHeights = saved_heights;
 }
 
 TEST_CASE("Waypoint routines keep their original module entries",

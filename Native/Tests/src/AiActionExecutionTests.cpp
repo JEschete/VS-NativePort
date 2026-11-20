@@ -18,10 +18,10 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionExecution.hpp"
 #include "Battle/Ai/ActionExecutionLive.hpp"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/FrameUpdateLive.hpp"
-#include "Battle/Ai/Perception.h"
+#include "Battle/Ai/Perception.hpp"
 #include "Battle/Damage.h"
 #include "Content/ModuleData.hpp"
 
@@ -180,9 +180,9 @@ class Decisions final : public ai::DecisionUpdateWorld {
 struct LiveDecisionFixture {
   VS::Battle::Ai::FrameContext old_frame = VS::Battle::Ai::LiveFrameContext();
   Battle_Actor* old_head = Battle_actors[0];
-  Battle_Ai_ActorAiState* old_player = Battle_Ai_actorAiStates[0];
+  Battle_Ai_ActorAiState* old_player = VS::Battle::Ai::actorAiStates[0];
   Actors_ActorRecord* old_record = Actors_actorRecords[0];
-  int old_budget = Battle_Ai_frameTickBudget;
+  int old_budget = VS::Battle::Ai::frameTickBudget;
   Battle_Actor head{}, actor{};
   Battle_Ai_ActorAiState player{}, state{};
   Actors_ActorRecord record{};
@@ -195,16 +195,16 @@ struct LiveDecisionFixture {
     state.reserved1D[0] = 1;
     Battle_actors[0] = &head;
     VS::Battle::Ai::LiveFrameContext().actors[1] = &state;
-    Battle_Ai_actorAiStates[0] = &player;
+    VS::Battle::Ai::actorAiStates[0] = &player;
     Actors_actorRecords[0] = &record;
-    Battle_Ai_frameTickBudget = std::numeric_limits<int>::max();
+    VS::Battle::Ai::frameTickBudget = std::numeric_limits<int>::max();
   }
   ~LiveDecisionFixture() {
     VS::Battle::Ai::LiveFrameContext() = old_frame;
     Battle_actors[0] = old_head;
-    Battle_Ai_actorAiStates[0] = old_player;
+    VS::Battle::Ai::actorAiStates[0] = old_player;
     Actors_actorRecords[0] = old_record;
-    Battle_Ai_frameTickBudget = old_budget;
+    VS::Battle::Ai::frameTickBudget = old_budget;
   }
 };
 }  // namespace
@@ -494,7 +494,7 @@ TEST_CASE("Live partial decisions keep player record and battle model distinct",
   fixture.record.instance.position.vy = 0;
   CHECK(ai::UpdateCheckedLiveActorDecisions());
   CHECK(fixture.state.distancesSquared[0] == 20309);
-  Battle_Ai_actorAiStates[0] = nullptr;
+  VS::Battle::Ai::actorAiStates[0] = nullptr;
   Actors_actorRecords[0] = nullptr;
   CHECK(ai::UpdateCheckedLiveActorDecisions());
   CHECK(fixture.state.distancesSquared[0] == 12836);

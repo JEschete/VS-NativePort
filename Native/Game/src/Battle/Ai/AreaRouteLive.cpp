@@ -11,15 +11,15 @@
 #include <vector>
 
 #include "Battle/Ai/ActorCommandsLive.hpp"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
-#include "Battle/Ai/Movement.h"
+#include "Battle/Ai/Movement.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
-#include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/Navigation.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 #include "Legacy/Psx.h"
@@ -56,7 +56,7 @@ static_assert(offsetof(RouteView, heading) == offsetof(AiState, heading));
 static_assert(offsetof(RouteView, gate) == offsetof(AiState, route_gate));
 static_assert(offsetof(RouteView, exit) == offsetof(AiState, route_exit_bytes));
 static_assert(sizeof(AiState{}.route_exit_bytes) == kTileWordBytes);
-static_assert(sizeof(Battle_Ai_TilePosition) == kTileWordBytes);
+static_assert(sizeof(VS::Battle::Ai::TilePosition) == kTileWordBytes);
 static_assert(kFrameActorSlots == kAreaRouteNoTarget);
 static_assert(sizeof(Battle_Ai_RouteGateTile) == kRouteGateTileBytes);
 // So does the area movement view.
@@ -84,14 +84,10 @@ AiState& State(void* view) {
 FrameContext& Frame() { return LiveFrameContext(); }
 
 std::optional<std::array<RouteGateEnd, kRouteGateEndCount>> LiveGateEnds() {
-  if (Battle_Ai_routeGates == nullptr) return std::nullopt;
-  std::array<RouteGateEnd, kRouteGateEndCount> ends{};
-  for (std::size_t index = 0; index < ends.size(); ++index) {
-    ends[index] = {
-        .x = static_cast<std::uint8_t>(Battle_Ai_routeGates[index].tileX),
-        .z = static_cast<std::uint8_t>(Battle_Ai_routeGates[index].tileZ)};
-  }
-  return ends;
+  if (VS::Battle::Ai::routeGates == nullptr) return std::nullopt;
+  return DecodeRouteGateEnds(
+      std::span<const RouteGateEndRecord, kRouteGateEndCount>(
+          VS::Battle::Ai::routeGates, kRouteGateEndCount));
 }
 
 AreaRouteActor Load(const AiState& state) {
@@ -169,7 +165,7 @@ class LiveAreaRouteWorld final : public AreaRouteWorld {
     return LiveDirectionCodes();
   }
   [[nodiscard]] std::uint8_t RouteStepDirection(int kind) const override {
-    return Battle_Ai_routeStepDirections[static_cast<std::size_t>(kind)];
+    return VS::Battle::Ai::routeStepDirections[static_cast<std::size_t>(kind)];
   }
   [[nodiscard]] std::optional<std::array<RouteGateEnd, kRouteGateEndCount>>
   RouteGateEnds() const override {
@@ -184,8 +180,8 @@ class LiveAreaRouteWorld final : public AreaRouteWorld {
     return Field::LiveMovingPlatformDwellTicks(platform);
   }
   [[nodiscard]] std::optional<std::uint8_t> ClosedGates() const override {
-    if (Battle_Ai_roomAiState == nullptr) return std::nullopt;
-    return Battle_Ai_roomAiState->reservedEPrefix[0];
+    if (VS::Battle::Ai::roomAiState == nullptr) return std::nullopt;
+    return VS::Battle::Ai::roomAiState->reservedEPrefix[0];
   }
   void SetContactOccupancy(int bit) override { SetLiveAiContactOccupancy(bit); }
   [[nodiscard]] std::optional<int> DestinationOccupancy(

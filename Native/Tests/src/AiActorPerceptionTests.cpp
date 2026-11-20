@@ -14,11 +14,11 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorPerception.hpp"
 #include "Battle/Ai/ActorPerceptionLive.hpp"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/FrameUpdateLive.hpp"
-#include "Battle/Ai/Perception.h"
+#include "Battle/Ai/Perception.hpp"
 #include "Battle/Damage.h"
 #include "Content/ModuleData.hpp"
 #include "Core/Math/Distance.hpp"
@@ -1325,8 +1325,9 @@ struct LivePerceptionFixture {
   decltype(std::to_array(Battle_actors)) saved_actors =
       std::to_array(Battle_actors);
   VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
-  decltype(Battle_Ai_roomAiState) saved_room = Battle_Ai_roomAiState;
-  int saved_engaged = Battle_Ai_candidateEngagedThisUpdate;
+  decltype(VS::Battle::Ai::roomAiState) saved_room =
+      VS::Battle::Ai::roomAiState;
+  int saved_engaged = VS::Battle::Ai::candidateEngagedThisUpdate;
   Battle_Ai_RoomAiState room{};
   Battle_Actor actor{};
   Battle_ActorStats stats{};
@@ -1336,14 +1337,14 @@ struct LivePerceptionFixture {
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
     auto& frame = VS::Battle::Ai::LiveFrameContext();
     std::fill_n(frame.actors, VS::Battle::Ai::kFrameActorSlots, nullptr);
-    Battle_Ai_roomAiState = &room;
+    VS::Battle::Ai::roomAiState = &room;
   }
 
   ~LivePerceptionFixture() {
     std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
     VS::Battle::Ai::LiveFrameContext() = saved_frame;
-    Battle_Ai_roomAiState = saved_room;
-    Battle_Ai_candidateEngagedThisUpdate = saved_engaged;
+    VS::Battle::Ai::roomAiState = saved_room;
+    VS::Battle::Ai::candidateEngagedThisUpdate = saved_engaged;
   }
 };
 }  // namespace
@@ -1353,11 +1354,11 @@ TEST_CASE("Actor perception Live pass resets the room without actors",
   LivePerceptionFixture fixture;
   fixture.room.readinessLevel = 5;
   fixture.room.approachMoves = 9;
-  Battle_Ai_candidateEngagedThisUpdate = 1;
+  VS::Battle::Ai::candidateEngagedThisUpdate = 1;
   ai::UpdateLiveActorPerception();
   CHECK(fixture.room.readinessLevel == 6);
   CHECK(fixture.room.approachMoves == 0);
-  CHECK(Battle_Ai_candidateEngagedThisUpdate == 0);
+  CHECK(VS::Battle::Ai::candidateEngagedThisUpdate == 0);
 }
 
 TEST_CASE("Actor perception Live pass keeps the AI state's other fields",

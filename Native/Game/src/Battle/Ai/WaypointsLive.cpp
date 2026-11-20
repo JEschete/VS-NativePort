@@ -13,8 +13,8 @@
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
-#include "Battle/Ai/Movement.h"
-#include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/Movement.hpp"
+#include "Battle/Ai/Navigation.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Field/TerrainHeight.hpp"
 #include "Legacy/Psx.h"
@@ -24,7 +24,7 @@ namespace {
 // The room's auxiliary section holds four patrol rows before its waypoints.
 constexpr std::size_t kLivePatrolRows = 4;
 
-static_assert(sizeof(Battle_Ai_patrolRoutes[0]) ==
+static_assert(sizeof(VS::Battle::Ai::patrolRoutes[0]) ==
               kPatrolWaypointsPerRow * sizeof(std::uint16_t));
 // The patrol and waypoint search views alias the actor AI state.
 using AiState = Battle_Ai_ActorAiState;
@@ -39,10 +39,10 @@ static_assert(offsetof(Battle_Ai_WaypointSearchView, x) ==
               offsetof(AiState, position));
 
 Field::TerrainGrid LiveSpecialHeights() {
-  if (Battle_Ai_specialTerrainHeights == nullptr) return {};
+  if (VS::Battle::Ai::specialTerrainHeights == nullptr) return {};
   return Field::TerrainGrid{
       std::span<const Field::TerrainRow, Field::kTerrainGridSide>(
-          Battle_Ai_specialTerrainHeights, Field::kTerrainGridSide)};
+          VS::Battle::Ai::specialTerrainHeights, Field::kTerrainGridSide)};
 }
 
 class LivePatrolRandom final : public PatrolRandom {
@@ -54,8 +54,8 @@ class LivePatrolRandom final : public PatrolRandom {
 }  // namespace
 
 std::span<const std::uint16_t> LivePatrolRoutes() {
-  if (Battle_Ai_patrolRoutes == nullptr) return {};
-  return {&Battle_Ai_patrolRoutes[0][0],
+  if (VS::Battle::Ai::patrolRoutes == nullptr) return {};
+  return {&VS::Battle::Ai::patrolRoutes[0][0],
           kLivePatrolRows * kPatrolWaypointsPerRow};
 }
 
@@ -63,10 +63,10 @@ void FindLiveNearestActiveWaypoint(Battle_Ai_WaypointSearchView* state,
                                    Battle_Ai_WaypointTile* destination) {
   Require(state != nullptr && destination != nullptr,
           "AI waypoint search requires an AI state and a destination");
-  Require(Battle_Ai_roomWaypoints != nullptr,
+  Require(VS::Battle::Ai::roomWaypoints != nullptr,
           "AI waypoint search requires the room's waypoints");
   const std::span<const std::uint16_t, kRoomWaypointCount> waypoints(
-      Battle_Ai_roomWaypoints, kRoomWaypointCount);
+      VS::Battle::Ai::roomWaypoints, kRoomWaypointCount);
   const auto search =
       Required(FindNearestActiveWaypoint(
                    waypoints, {.x = state->x, .y = state->y, .z = state->z},
@@ -88,8 +88,8 @@ void UpdateLiveWaypointPatrol(Battle_Ai_PatrolView* state) {
   const auto target =
       Required(UpdateWaypointPatrol(
                    cursor, LivePatrolRoutes(),
-                   {.x = static_cast<std::uint8_t>(state->tile.tile.tileX),
-                    .z = static_cast<std::uint8_t>(state->tile.tile.tileZ)},
+                   {.x = static_cast<std::uint8_t>(state->tile.tile.tile_x),
+                    .z = static_cast<std::uint8_t>(state->tile.tile.tile_z)},
                    random),
                "AI patrol refused its route row");
   state->index = cursor.index;
@@ -97,8 +97,8 @@ void UpdateLiveWaypointPatrol(Battle_Ai_PatrolView* state) {
   state->rate = cursor.rate;
   state->direction = cursor.direction;
   state->opaque104 = cursor.cooldown;
-  state->destination.tile.tileX = target.x;
-  state->destination.tile.tileZ = target.z;
+  state->destination.tile.tile_x = target.x;
+  state->destination.tile.tile_z = target.z;
   DispatchLiveAiLocomotionMode(state, 0, 0);
 }
 }  // namespace VS::Battle::Ai

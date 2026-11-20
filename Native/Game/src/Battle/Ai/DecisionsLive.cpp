@@ -12,20 +12,21 @@
 #include "Battle/Ai/ActionExecutionLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/BlockedMovementLive.hpp"
 #include "Battle/Ai/CandidateMovementLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
-#include "Battle/Ai/Movement.h"
+#include "Battle/Ai/Movement.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Core/Diagnostics.hpp"
 
 namespace VS::Battle::Ai {
 namespace {
-static_assert(std::size(Battle_Ai_decisionCallbacks) == kDecisionBehaviorCount);
+static_assert(std::size(VS::Battle::Ai::decisionCallbacks) ==
+              kDecisionBehaviorCount);
 constexpr int kFleeVisibleMode = 1;
 constexpr unsigned kFirstNonLocomotionCommand = 9;
 constexpr int kAllyRelationship = 2;
@@ -181,6 +182,6 @@ LiveDecisionBehavior SelectLiveDecisionBehavior(std::uint32_t spawn_settings) {
         DecisionBehaviorIndex(spawn_settings), kDecisionBehaviorCount);
     return nullptr;
   }
-  return Battle_Ai_decisionCallbacks[*slot];
+  return VS::Battle::Ai::decisionCallbacks[*slot];
 }
 }  // namespace VS::Battle::Ai

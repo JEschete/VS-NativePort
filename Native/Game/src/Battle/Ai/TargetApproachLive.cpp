@@ -21,7 +21,7 @@
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
-#include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/RadialMovementLive.hpp"
 #include "Battle/Ai/TargetApproach.hpp"
 #include "Core/Diagnostics.hpp"
@@ -38,7 +38,7 @@ static_assert(std::extent_v<decltype(AiState::relations)> ==
 static_assert(std::extent_v<decltype(AiState::distancesSquared)> ==
               kTargetApproachActorSlots);
 static_assert(std::size(Actors_actorRecords) >= kTargetApproachActorSlots);
-static_assert(sizeof(Battle_Ai_RelationWord) == sizeof(std::uint32_t));
+static_assert(sizeof(VS::Battle::Ai::RelationWord) == sizeof(std::uint32_t));
 static_assert(sizeof(Battle_Ai_ApproachRelationBits) == sizeof(std::uint32_t));
 
 // The approach view names the actor state's unnamed bytes; both alias it.
@@ -242,7 +242,7 @@ class LiveTargetApproachWorld final : public TargetApproachWorld {
                                      std::uint32_t source, int angle,
                                      std::uint32_t distance) override {
     Run(approacher, [&] {
-      Battle_Ai_TilePosition position{};
+      VS::Battle::Ai::TilePosition position{};
       position.word = source;
       ProjectLiveClearRadialDestination(&state_, position, angle, distance);
     });

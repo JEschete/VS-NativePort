@@ -15,7 +15,7 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Battle/Ai/ActorCommandsLive.hpp"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AreaRouteLive.hpp"
 #include "Battle/Ai/BlockedMovementLive.hpp"
@@ -24,9 +24,9 @@
 #include "Battle/Ai/FlightMovementLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
-#include "Battle/Ai/Movement.h"
+#include "Battle/Ai/Movement.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
-#include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/RadialMovementLive.hpp"
 #include "Battle/Damage.h"
 #include "Core/Diagnostics.hpp"
@@ -46,7 +46,7 @@ static_assert(sizeof(Battle_Ai_ActorAiState{}.detour_tile_bytes) ==
               sizeof(std::uint32_t));
 static_assert(sizeof(Battle_Ai_ActorAiState{}.route_exit_bytes) ==
               sizeof(std::uint32_t));
-static_assert(sizeof(Battle_Ai_TilePosition) == sizeof(std::uint32_t));
+static_assert(sizeof(VS::Battle::Ai::TilePosition) == sizeof(std::uint32_t));
 // The movement views alias the actor AI state they are handed.
 static_assert(offsetof(Battle_Ai_MoveTargetView, movementDisabled) ==
               offsetof(Battle_Ai_ActorAiState, movementDisabled));
@@ -390,22 +390,23 @@ class LiveGroundRoom : public LiveRoomRegions<GroundNavigationWorld> {
   }
 
   [[nodiscard]] bool HasRoomAiState() const override {
-    return Battle_Ai_roomAiState != nullptr;
+    return VS::Battle::Ai::roomAiState != nullptr;
   }
   [[nodiscard]] std::uint8_t ContactMask() const override {
-    return Battle_Ai_roomAiState->reservedEPrefix[0];
+    return VS::Battle::Ai::roomAiState->reservedEPrefix[0];
   }
   void SetContactMask(std::uint8_t mask) override {
-    Battle_Ai_roomAiState->reservedEPrefix[0] = mask;
+    VS::Battle::Ai::roomAiState->reservedEPrefix[0] = mask;
   }
 
   [[nodiscard]] bool HasRouteGates() const override {
-    return Battle_Ai_routeGates != nullptr;
+    return VS::Battle::Ai::routeGates != nullptr;
   }
   [[nodiscard]] RouteGateEnd RouteLinkStart(int link) const override {
     const auto& end =
-        Battle_Ai_routeGates[static_cast<std::size_t>(link) * kRouteLinkEnds];
-    return {.x = end.tileX, .z = end.tileZ};
+        VS::Battle::Ai::routeGates[static_cast<std::size_t>(link) *
+                                   kRouteLinkEnds];
+    return {.x = end.tile_x, .z = end.tile_z};
   }
 
  protected:

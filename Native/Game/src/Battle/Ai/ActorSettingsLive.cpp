@@ -15,14 +15,14 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanup.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/BossOrbitLive.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
-#include "Battle/Ai/Navigation.h"
-#include "Battle/Ai/OrbitingBoss.h"
+#include "Battle/Ai/Navigation.hpp"
+#include "Battle/Ai/OrbitingBoss.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Core/Diagnostics.hpp"
@@ -109,48 +109,55 @@ constexpr std::size_t kWaypointsOffset = 0x440;
 constexpr std::size_t kWaypointsEnd = kWaypointsOffset + sizeof(RoomWaypoints);
 
 // The module tables the decode indexes must cover each field's range.
-static_assert(std::size(Battle_Ai_kPerceptionRangesSquared) >=
+static_assert(std::size(VS::Battle::Ai::kPerceptionRangesSquared) >=
               kPerceptionRangeCount);
-static_assert(std::size(Battle_Ai_viewAngles) >= kSettingsChoiceCount);
-static_assert(std::size(Battle_Ai_settingsBits8Values) >= kSettingsChoiceCount);
-static_assert(std::size(Battle_Ai_facingDelayScales) >= kSettingsChoiceCount);
-static_assert(std::size(Battle_Ai_kWanderTimingPresets) >= kWanderPresetCount);
-static_assert(std::size(Battle_Ai_kSettingsBits30Values) >=
+static_assert(std::size(VS::Battle::Ai::viewAngles) >= kSettingsChoiceCount);
+static_assert(std::size(VS::Battle::Ai::settingsBits8Values) >=
               kSettingsChoiceCount);
-static_assert(std::size(Battle_Ai_kFlags34Bit14Values) >= kPatrolRateCount);
+static_assert(std::size(VS::Battle::Ai::facingDelayScales) >=
+              kSettingsChoiceCount);
+static_assert(std::size(VS::Battle::Ai::kWanderTimingPresets) >=
+              kWanderPresetCount);
+static_assert(std::size(VS::Battle::Ai::kSettingsBits30Values) >=
+              kSettingsChoiceCount);
+static_assert(std::size(VS::Battle::Ai::kFlags34Bit14Values) >=
+              kPatrolRateCount);
 
 ActorAiSettingsTables LiveSettingsTables() {
   ActorAiSettingsTables tables;
-  std::copy_n(std::begin(Battle_Ai_kPerceptionRangesSquared),
+  std::copy_n(std::begin(VS::Battle::Ai::kPerceptionRangesSquared),
               tables.perception_ranges_squared.size(),
               tables.perception_ranges_squared.begin());
   for (std::size_t index = 0; index < kSettingsChoiceCount; ++index) {
-    tables.view_angles[index] = Battle_Ai_viewAngles[index][0];
-    tables.step_heights[index] = Battle_Ai_settingsBits8Values[index][0];
-    tables.facing_delay_scales[index] = Battle_Ai_facingDelayScales[index];
-    tables.terrain_reject_masks[index] = Battle_Ai_kSettingsBits30Values[index];
+    tables.view_angles[index] = VS::Battle::Ai::viewAngles[index][0];
+    tables.step_heights[index] = VS::Battle::Ai::settingsBits8Values[index][0];
+    tables.facing_delay_scales[index] =
+        VS::Battle::Ai::facingDelayScales[index];
+    tables.terrain_reject_masks[index] =
+        VS::Battle::Ai::kSettingsBits30Values[index];
   }
   for (std::size_t index = 0; index < kWanderPresetCount; ++index) {
-    const Battle_Ai_WanderTiming& preset =
-        Battle_Ai_kWanderTimingPresets[index];
+    const VS::Battle::Ai::WanderTiming& preset =
+        VS::Battle::Ai::kWanderTimingPresets[index];
     tables.wander_presets[index] =
-        WanderPreset{preset.movePeriod, preset.restPeriod, preset.rate};
+        WanderPreset{preset.move_period, preset.rest_period, preset.rate};
   }
-  std::copy_n(std::begin(Battle_Ai_kFlags34Bit14Values),
+  std::copy_n(std::begin(VS::Battle::Ai::kFlags34Bit14Values),
               tables.patrol_rates.size(), tables.patrol_rates.begin());
   return tables;
 }
 
 std::optional<RoomWaypoints> LiveRoomWaypoints() {
-  if (Battle_Ai_roomHasWaypoints == nullptr) return std::nullopt;
+  if (VS::Battle::Ai::roomHasWaypoints == nullptr) return std::nullopt;
   const auto* auxiliary =
-      static_cast<const unsigned char*>(Battle_Ai_roomHasWaypoints);
-  Require(auxiliary == Field_roomData.section6 &&
-              Field_roomData.header.section6Length >= kWaypointsEnd &&
-              reinterpret_cast<const unsigned char*>(Battle_Ai_roomWaypoints) ==
-                  auxiliary + kWaypointsOffset,
-          "AI settings: room waypoints do not belong to the active room "
-          "auxiliary section");
+      static_cast<const unsigned char*>(VS::Battle::Ai::roomHasWaypoints);
+  Require(
+      auxiliary == Field_roomData.section6 &&
+          Field_roomData.header.section6Length >= kWaypointsEnd &&
+          reinterpret_cast<const unsigned char*>(
+              VS::Battle::Ai::roomWaypoints) == auxiliary + kWaypointsOffset,
+      "AI settings: room waypoints do not belong to the active room "
+      "auxiliary section");
   RoomWaypoints waypoints{};
   std::memcpy(waypoints.data(), auxiliary + kWaypointsOffset, sizeof waypoints);
   return waypoints;

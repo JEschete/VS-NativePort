@@ -8,24 +8,25 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Battle/Ai/AiState.h"
-#include "Battle/Ai/Movement.h"
+#include "Battle/Ai/Movement.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Legacy/Psx.h"
 
 namespace {
 struct MovementFixture {
-  decltype(Battle_Ai_patrolRoutes) saved_routes = Battle_Ai_patrolRoutes;
+  decltype(VS::Battle::Ai::patrolRoutes) saved_routes =
+      VS::Battle::Ai::patrolRoutes;
   std::uint16_t routes[4][8]{};
   Battle_Ai_ActorAiState state{};
 
   MovementFixture() {
-    Battle_Ai_patrolRoutes = routes;
+    VS::Battle::Ai::patrolRoutes = routes;
     state.navigationFlags = 0xFFFFFFFF;
     state.currentMovementMode = 7;
     std::fill_n(state.movementModeCounters, 13, 0x55);
   }
 
-  ~MovementFixture() { Battle_Ai_patrolRoutes = saved_routes; }
+  ~MovementFixture() { VS::Battle::Ai::patrolRoutes = saved_routes; }
 
   std::array<std::byte, sizeof(Battle_Ai_ActorAiState)> Bytes() const {
     std::array<std::byte, sizeof(Battle_Ai_ActorAiState)> result;
@@ -149,8 +150,8 @@ TEST_CASE(
   fixture.state.patrolRow = 3;
   fixture.state.patrolIndex = 7;
   fixture.state.patrolCooldown = 12;
-  fixture.state.tile.tile.tileX = 4;
-  fixture.state.tile.tile.tileZ = 5;
+  fixture.state.tile.tile.tile_x = 4;
+  fixture.state.tile.tile.tile_z = 5;
   const std::array<std::uint16_t, 8> entries{0,
                                              0x8000 | 4 | (8 << 5),
                                              0x8000 | 7 | (5 << 5),

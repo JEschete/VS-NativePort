@@ -6,7 +6,7 @@
 #include <span>
 #include <vector>
 
-#include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Interactions.hpp"
@@ -89,7 +89,7 @@ class LiveRoomTriggerActivationHost final : public TrapDisableHost {
   }
   bool MarkObstacle(const RoomTriggerTile& tile) override {
     constexpr auto kGridSide = VS::Battle::Ai::kNavigationGridSide;
-    if (!Valid() || (Battle_Ai_tileFlagMap != nullptr &&
+    if (!Valid() || (VS::Battle::Ai::tileFlagMap != nullptr &&
                      (tile.x < 0 || tile.z < 0 || tile.x >= kGridSide ||
                       tile.z >= kGridSide))) {
       return false;

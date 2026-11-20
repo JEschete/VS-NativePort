@@ -15,7 +15,7 @@
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionSequenceLive.hpp"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Damage.h"
 #include "Content/ActorAssetsLive.hpp"
@@ -35,7 +35,8 @@ struct LiveFixture {
   decltype(std::to_array(Battle_actors)) saved_actors =
       std::to_array(Battle_actors);
   Battle_ActionState* saved_state = Battle_actionState;
-  decltype(Battle_Ai_roomAiState) saved_room = Battle_Ai_roomAiState;
+  decltype(VS::Battle::Ai::roomAiState) saved_room =
+      VS::Battle::Ai::roomAiState;
   decltype(VS::Effects::secondaryInstances) saved_trails =
       VS::Effects::secondaryInstances;
   decltype(VS::Menu::sceneNotificationBuffer) saved_notification =
@@ -62,7 +63,7 @@ struct LiveFixture {
     std::ranges::fill(Actors_actorRecords, nullptr);
     std::ranges::fill(Battle_actors, nullptr);
     Battle_actionState = &state;
-    Battle_Ai_roomAiState = &room;
+    VS::Battle::Ai::roomAiState = &room;
     VS::Effects::secondaryInstances = nullptr;
     VS::Menu::sceneNotificationBuffer = nullptr;
   }
@@ -72,7 +73,7 @@ struct LiveFixture {
     std::ranges::copy(saved_records, std::begin(Actors_actorRecords));
     std::ranges::copy(saved_actors, std::begin(Battle_actors));
     Battle_actionState = saved_state;
-    Battle_Ai_roomAiState = saved_room;
+    VS::Battle::Ai::roomAiState = saved_room;
     VS::Effects::secondaryInstances = saved_trails;
     VS::Menu::sceneNotificationBuffer = saved_notification;
     VS::Field::sphericalCamera = saved_camera;

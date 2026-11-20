@@ -37,7 +37,7 @@ constexpr unsigned kTimerMask = 0x7F;
 
 constexpr std::uint32_t Bit(int actor) { return std::uint32_t{1} << actor; }
 
-// Relation word fields (Battle_Ai_RelationWord).
+// Relation word fields (VS::Battle::Ai::RelationWord).
 constexpr std::uint32_t kRelationActiveBit = 1;
 constexpr unsigned kRelationClassShift = 6;
 constexpr unsigned kRelationTimerShift = 15;

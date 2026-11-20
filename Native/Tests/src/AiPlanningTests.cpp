@@ -17,14 +17,14 @@
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActionPlanning.h"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActionPlanning.hpp"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/BlockedMovementLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
-#include "Battle/Ai/Movement.h"
-#include "Battle/Ai/OrbitingBoss.h"
+#include "Battle/Ai/Movement.hpp"
+#include "Battle/Ai/OrbitingBoss.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Damage.h"
 #include "Battle/StatusEffects.h"
@@ -37,10 +37,10 @@
 
 namespace {
 struct PlanningFixture {
-  decltype(Battle_Ai_candidateExclusions) saved_exclusions =
-      Battle_Ai_candidateExclusions;
+  decltype(VS::Battle::Ai::candidateExclusions) saved_exclusions =
+      VS::Battle::Ai::candidateExclusions;
   std::array<Battle_Ai_ActorAiState*, 16> saved_states =
-      std::to_array(Battle_Ai_actorAiStates);
+      VS::Battle::Ai::actorAiStates;
   Battle_ActionDefinition saved_action = Battle_actionDefinitions[42];
   Battle_Ai_ActorAiState state{};
   Battle_Ai_ActorAiState peer{};
@@ -49,10 +49,10 @@ struct PlanningFixture {
   u_char exclusions[16][256]{};
 
   PlanningFixture() {
-    Battle_Ai_candidateExclusions = exclusions;
-    std::fill_n(Battle_Ai_actorAiStates, 16, nullptr);
-    Battle_Ai_actorAiStates[1] = &state;
-    Battle_Ai_actorAiStates[3] = &peer;
+    VS::Battle::Ai::candidateExclusions = exclusions;
+    std::fill_n(VS::Battle::Ai::actorAiStates.begin(), 16, nullptr);
+    VS::Battle::Ai::actorAiStates[1] = &state;
+    VS::Battle::Ai::actorAiStates[3] = &peer;
     Battle_actionDefinitions[42] = {};
     actor.opaque3C = &stats;
     state.actor = &actor;
@@ -66,15 +66,15 @@ struct PlanningFixture {
   }
 
   ~PlanningFixture() {
-    Battle_Ai_candidateExclusions = saved_exclusions;
+    VS::Battle::Ai::candidateExclusions = saved_exclusions;
     std::copy(saved_states.begin(), saved_states.end(),
-              Battle_Ai_actorAiStates);
+              VS::Battle::Ai::actorAiStates.begin());
     Battle_actionDefinitions[42] = saved_action;
   }
 };
 
 struct PlanningAdvanceFixture : PlanningFixture {
-  Battle_Ai_RoomAiState* saved_room = Battle_Ai_roomAiState;
+  Battle_Ai_RoomAiState* saved_room = VS::Battle::Ai::roomAiState;
   decltype(std::to_array(Battle_actors)) saved_actors =
       std::to_array(Battle_actors);
   std::array<u_int, 5> saved_masks{};
@@ -84,16 +84,17 @@ struct PlanningAdvanceFixture : PlanningFixture {
   Battle_Actor battle_actor{};
 
   PlanningAdvanceFixture() {
-    std::copy_n(Battle_Ai_kTimedStatusFlags, saved_masks.size(),
+    std::copy_n(VS::Battle::Ai::kTimedStatusFlags.begin(), saved_masks.size(),
                 saved_masks.begin());
-    std::fill_n(Battle_Ai_kTimedStatusFlags, saved_masks.size(), 0);
+    std::fill_n(VS::Battle::Ai::kTimedStatusFlags.begin(), saved_masks.size(),
+                0);
     Battle_statusEffectParams[14].tickInterval = 1;
     Battle_statusEffectParams[17].tickInterval = 1;
     room.allowsNonSpellActions = 0;
     room.engaged_mask_bytes[0] = 0;
     room.engaged_mask_bytes[1] = 0;
     room.engagedCount = 0;
-    Battle_Ai_roomAiState = &room;
+    VS::Battle::Ai::roomAiState = &room;
     std::fill(std::begin(Battle_actors), std::end(Battle_actors), nullptr);
     battle_actor.id = 1;
     battle_actor.stats = &stats;
@@ -103,10 +104,10 @@ struct PlanningAdvanceFixture : PlanningFixture {
     }
   }
   ~PlanningAdvanceFixture() {
-    Battle_Ai_roomAiState = saved_room;
+    VS::Battle::Ai::roomAiState = saved_room;
     std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
     std::copy(saved_masks.begin(), saved_masks.end(),
-              Battle_Ai_kTimedStatusFlags);
+              VS::Battle::Ai::kTimedStatusFlags.begin());
     Battle_statusEffectParams[14] = saved_poison;
     Battle_statusEffectParams[17] = saved_regeneration;
   }
@@ -115,7 +116,7 @@ struct PlanningAdvanceFixture : PlanningFixture {
 struct PlanningStatsFixture {
   decltype(std::to_array(Battle_actors)) saved_actors =
       std::to_array(Battle_actors);
-  Battle_ActorStats* saved_snapshot = Battle_Ai_planningStatsSnapshot;
+  Battle_ActorStats* saved_snapshot = VS::Battle::Ai::planningStatsSnapshot;
   std::array<std::byte, 65536> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   Battle_Actor first{}, second{};
@@ -136,14 +137,14 @@ struct PlanningStatsFixture {
   ~PlanningStatsFixture() {
     VS::Battle::Ai::InvalidateLivePlanningStatsSnapshot();
     std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
-    Battle_Ai_planningStatsSnapshot = saved_snapshot;
+    VS::Battle::Ai::planningStatsSnapshot = saved_snapshot;
   }
 };
 
 struct SimulationResultsFixture : PlanningFixture {
   std::array<std::byte, 32768> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
-  Battle_Ai_ReactionRecord* saved_workspace = Battle_Ai_planningWorkspace;
+  Battle_Ai_ReactionRecord* saved_workspace = VS::Battle::Ai::planningWorkspace;
   std::array<Battle_Ai_ActionTiming, VS::Battle::Ai::kBattleActorSlotCount>
       rows{};
   Battle_ActionRequest* request = nullptr;
@@ -154,7 +155,7 @@ struct SimulationResultsFixture : PlanningFixture {
     if (request == nullptr) throw std::bad_alloc();
     std::memset(request, 0, sizeof(*request));
     workspace = reinterpret_cast<Battle_Ai_ReactionRecord*>(request);
-    Battle_Ai_planningWorkspace = workspace;
+    VS::Battle::Ai::planningWorkspace = workspace;
     workspace->opaque0 = 42;
     for (std::size_t index = 0; index < rows.size(); ++index) {
       rows[index].opaque0Bit0 = static_cast<unsigned>(index);
@@ -170,17 +171,19 @@ struct SimulationResultsFixture : PlanningFixture {
       rows[index].opaqueC = 0x80000000;
     }
   }
-  ~SimulationResultsFixture() { Battle_Ai_planningWorkspace = saved_workspace; }
+  ~SimulationResultsFixture() {
+    VS::Battle::Ai::planningWorkspace = saved_workspace;
+  }
 };
 
 struct ReadinessFixture : PlanningFixture {
-  Battle_Ai_RoomAiState* saved_room = Battle_Ai_roomAiState;
+  Battle_Ai_RoomAiState* saved_room = VS::Battle::Ai::roomAiState;
   decltype(std::to_array(Battle_actors)) saved_actors =
       std::to_array(Battle_actors);
   Battle_Ai_RoomAiState room{};
   Battle_Actor hostile{};
   ReadinessFixture() {
-    Battle_Ai_roomAiState = &room;
+    VS::Battle::Ai::roomAiState = &room;
     std::fill_n(Battle_actors, std::size(Battle_actors), nullptr);
     room.readinessLevel = 100;
     state.candidateCount = 1;
@@ -195,25 +198,25 @@ struct ReadinessFixture : PlanningFixture {
     }
   }
   ~ReadinessFixture() {
-    Battle_Ai_roomAiState = saved_room;
+    VS::Battle::Ai::roomAiState = saved_room;
     std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
   }
 };
 
 struct EnumerationFixture : ReadinessFixture {
-  decltype(Battle_Ai_fallbackCandidates) saved_fallback =
-      Battle_Ai_fallbackCandidates;
-  int saved_count = Battle_Ai_fallbackCandidateCount;
-  int saved_mask = Battle_Ai_unusedPlanCounter;
+  decltype(VS::Battle::Ai::fallbackCandidates) saved_fallback =
+      VS::Battle::Ai::fallbackCandidates;
+  int saved_count = VS::Battle::Ai::fallbackCandidateCount;
+  int saved_mask = VS::Battle::Ai::unusedPlanCounter;
   unsigned saved_random = VS::Core::BiosRand().State();
   std::array<Battle_Ai_CandidateEntryView, 24> fallback{};
   Battle_Actor battle_actor{};
   Battle_ActorStats target_stats{};
 
   EnumerationFixture() {
-    Battle_Ai_fallbackCandidates = fallback.data();
-    Battle_Ai_fallbackCandidateCount = 0;
-    Battle_Ai_unusedPlanCounter = 0;
+    VS::Battle::Ai::fallbackCandidates = fallback.data();
+    VS::Battle::Ai::fallbackCandidateCount = 0;
+    VS::Battle::Ai::unusedPlanCounter = 0;
     VS::Core::SeedBiosRand(1);
     state.candidateCount = 0;
     state.settingsModeLow = 1;
@@ -235,36 +238,36 @@ struct EnumerationFixture : ReadinessFixture {
     slot.rangeSquared = 0xFFFFFFFFu;
   }
   ~EnumerationFixture() {
-    Battle_Ai_fallbackCandidates = saved_fallback;
-    Battle_Ai_fallbackCandidateCount = saved_count;
-    Battle_Ai_unusedPlanCounter = saved_mask;
+    VS::Battle::Ai::fallbackCandidates = saved_fallback;
+    VS::Battle::Ai::fallbackCandidateCount = saved_count;
+    VS::Battle::Ai::unusedPlanCounter = saved_mask;
     VS::Core::SeedBiosRand(saved_random);
   }
 };
 
 struct ActorPlanFixture : EnumerationFixture {
-  decltype(Battle_Ai_planningPassCandidates) saved_passes =
-      Battle_Ai_planningPassCandidates;
-  Battle_Ai_ArenaOrbitState* saved_orbit = Battle_Ai_arenaOrbit;
-  Battle_ActorStats* saved_snapshot = Battle_Ai_planningStatsSnapshot;
+  decltype(VS::Battle::Ai::planningPassCandidates) saved_passes =
+      VS::Battle::Ai::planningPassCandidates;
+  VS::Battle::Ai::ArenaOrbitState* saved_orbit = VS::Battle::Ai::arenaOrbit;
+  Battle_ActorStats* saved_snapshot = VS::Battle::Ai::planningStatsSnapshot;
   int saved_progress = VS::State::LiveScriptFlag(0xA6);
   std::array<std::byte, 65536> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   Battle_Ai_CandidateEntryView pass_candidates[3][16]{};
-  Battle_Ai_ArenaOrbitState orbit{};
+  VS::Battle::Ai::ArenaOrbitState orbit{};
 
   ActorPlanFixture() {
     VS::Battle::Ai::InvalidateLivePlanningStatsSnapshot();
-    Battle_Ai_planningPassCandidates = pass_candidates;
-    Battle_Ai_arenaOrbit = nullptr;
+    VS::Battle::Ai::planningPassCandidates = pass_candidates;
+    VS::Battle::Ai::arenaOrbit = nullptr;
     state.actionSlots[2][1].opaque0Bit7 = 0;
     std::memset(exclusions, 1, sizeof(exclusions));
   }
   ~ActorPlanFixture() {
     VS::Battle::Ai::InvalidateLivePlanningStatsSnapshot();
-    Battle_Ai_planningStatsSnapshot = saved_snapshot;
-    Battle_Ai_planningPassCandidates = saved_passes;
-    Battle_Ai_arenaOrbit = saved_orbit;
+    VS::Battle::Ai::planningStatsSnapshot = saved_snapshot;
+    VS::Battle::Ai::planningPassCandidates = saved_passes;
+    VS::Battle::Ai::arenaOrbit = saved_orbit;
     VS::State::SetLiveScriptFlag(0xA6, saved_progress);
   }
 };
@@ -314,7 +317,7 @@ bool CopiedStatByte(std::size_t offset) {
 // slot (row 3, column 1) against target 5.
 struct CompletedPlanFixture {
   std::array<Battle_Ai_ActorAiState*, 16> saved_states =
-      std::to_array(Battle_Ai_actorAiStates);
+      VS::Battle::Ai::actorAiStates;
   decltype(std::to_array(Field_gimmickInstances)) saved_objects =
       std::to_array(Field_gimmickInstances);
   decltype(std::to_array(Actors_actorRecords)) saved_models =
@@ -331,9 +334,9 @@ struct CompletedPlanFixture {
   static constexpr int kUntouchedTile = 0x12345678;
 
   CompletedPlanFixture() {
-    std::fill_n(Battle_Ai_actorAiStates, 16, nullptr);
+    std::fill_n(VS::Battle::Ai::actorAiStates.begin(), 16, nullptr);
     std::fill_n(Field_gimmickInstances, 16, nullptr);
-    Battle_Ai_actorAiStates[2] = &state;
+    VS::Battle::Ai::actorAiStates[2] = &state;
     state.actor = reinterpret_cast<Battle_Ai_EngagementData*>(&actor);
     state.previousTile = kUntouchedTile;
     actor.commandOpcode = 24;
@@ -358,7 +361,7 @@ struct CompletedPlanFixture {
 
   ~CompletedPlanFixture() {
     std::copy(saved_states.begin(), saved_states.end(),
-              Battle_Ai_actorAiStates);
+              VS::Battle::Ai::actorAiStates.begin());
     std::copy(saved_objects.begin(), saved_objects.end(),
               Field_gimmickInstances);
     std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
@@ -406,7 +409,7 @@ TEST_CASE(
           fixture.first_stats);
   const auto refused = VS::Core::Memory::RefusedLiveHeapRequestCount();
   REQUIRE(VS::Battle::Ai::SnapshotLivePlanningActorStats());
-  auto* storage = Battle_Ai_planningStatsSnapshot;
+  auto* storage = VS::Battle::Ai::planningStatsSnapshot;
   REQUIRE(storage != nullptr);
   CHECK(VS::Core::Memory::LivePayloadCapacity(storage).value() >=
         VS::Battle::Ai::kPlanningStatsTableBytes);
@@ -421,7 +424,7 @@ TEST_CASE(
           (CopiedStatByte(offset) ? original[offset] : std::byte{0x75}));
   }
   CHECK(fixture.second_stats.currentHp == 50);
-  CHECK(Battle_Ai_planningStatsSnapshot == nullptr);
+  CHECK(VS::Battle::Ai::planningStatsSnapshot == nullptr);
   CHECK_FALSE(VS::Core::Memory::LivePayloadCapacity(storage).has_value());
   CHECK(VS::Core::Memory::RefusedLiveHeapRequestCount() == refused);
 }
@@ -530,7 +533,7 @@ TEST_CASE("Native planning simulation updates only the original stat fields",
   PlanningAdvanceFixture fixture;
   fixture.room.readinessLevel = 2880;
   fixture.stats.statuses = 0x11;
-  Battle_Ai_kTimedStatusFlags[0] = 1;
+  VS::Battle::Ai::kTimedStatusFlags[0] = 1;
   for (auto& limb : fixture.stats.limbs) {
     limb.hp = 0;
     limb.maxHp = 10;
@@ -632,10 +635,10 @@ TEST_CASE(
     "[ai][planning][stats-lifecycle-live]") {
   PlanningStatsFixture fixture;
   REQUIRE(VS::Battle::Ai::SnapshotLivePlanningActorStats());
-  auto* storage = Battle_Ai_planningStatsSnapshot;
+  auto* storage = VS::Battle::Ai::planningStatsSnapshot;
   fixture.first_stats.currentHp = 7;
   CHECK_FALSE(VS::Battle::Ai::SnapshotLivePlanningActorStats());
-  CHECK(Battle_Ai_planningStatsSnapshot == storage);
+  CHECK(VS::Battle::Ai::planningStatsSnapshot == storage);
   VS::Battle::Ai::RestoreLivePlanningActorStats();
   CHECK(fixture.first_stats.currentHp == 100);
   fixture.first_stats.currentHp = 80;
@@ -643,7 +646,7 @@ TEST_CASE(
   fixture.first_stats.currentHp = 3;
   VS::Battle::Ai::RestoreLivePlanningActorStats();
   CHECK(fixture.first_stats.currentHp == 80);
-  CHECK(Battle_Ai_planningStatsSnapshot == nullptr);
+  CHECK(VS::Battle::Ai::planningStatsSnapshot == nullptr);
 }
 
 TEST_CASE("Native planning stats handle empty and shortened actor lists",
@@ -658,7 +661,7 @@ TEST_CASE("Native planning stats handle empty and shortened actor lists",
   Battle_actors[0] = nullptr;
   REQUIRE(VS::Battle::Ai::SnapshotLivePlanningActorStats());
   VS::Battle::Ai::RestoreLivePlanningActorStats();
-  CHECK(Battle_Ai_planningStatsSnapshot == nullptr);
+  CHECK(VS::Battle::Ai::planningStatsSnapshot == nullptr);
 }
 
 TEST_CASE(
@@ -669,7 +672,7 @@ TEST_CASE(
   const VS::Core::Memory::ScopedLiveGameHeap heap(tiny);
   Battle_actors[0] = reinterpret_cast<Battle_Actor*>(std::uintptr_t{1});
   CHECK_FALSE(VS::Battle::Ai::SnapshotLivePlanningActorStats());
-  CHECK(Battle_Ai_planningStatsSnapshot == nullptr);
+  CHECK(VS::Battle::Ai::planningStatsSnapshot == nullptr);
 }
 
 TEST_CASE(
@@ -690,7 +693,7 @@ TEST_CASE(
   }
   const auto refused = VS::Core::Memory::RefusedLiveHeapRequestCount();
   CHECK_FALSE(VS::Battle::Ai::SnapshotLivePlanningActorStats());
-  CHECK(Battle_Ai_planningStatsSnapshot == nullptr);
+  CHECK(VS::Battle::Ai::planningStatsSnapshot == nullptr);
   CHECK(fixture.first_stats.currentHp == 100);
   CHECK(VS::Core::Memory::RefusedLiveHeapRequestCount() == refused);
   fixture.second.id = 15;
@@ -749,9 +752,9 @@ TEST_CASE(
   REQUIRE(short_workspace != nullptr);
   std::memset(short_workspace, 0, sizeof(*short_workspace));
   short_workspace->opaque4A = 1;
-  Battle_Ai_planningWorkspace = short_workspace;
+  VS::Battle::Ai::planningWorkspace = short_workspace;
   CHECK_FALSE(VS::Battle::Ai::UpdateLiveCandidateHitWeight(&candidate));
-  Battle_Ai_planningWorkspace = nullptr;
+  VS::Battle::Ai::planningWorkspace = nullptr;
   CHECK_FALSE(VS::Battle::Ai::UpdateLiveCandidateHitWeight(&candidate));
   CHECK(std::bit_cast<VS::Battle::Ai::ActionCandidate::Words>(candidate) ==
         before);
@@ -883,11 +886,11 @@ TEST_CASE("Native enumeration caches and ranks without its old scratch records",
   std::memcpy(scratch.data(), scratch_rows, scratch.size());
   VS::Battle::Ai::EnumerateActionCandidatesEntry(&fixture.state, -1);
   REQUIRE(fixture.state.candidateCount == 1);
-  REQUIRE(Battle_Ai_fallbackCandidateCount == 1);
+  REQUIRE(VS::Battle::Ai::fallbackCandidateCount == 1);
   const auto& selected = fixture.state.candidates[0];
   CHECK(fixture.state.candidateOrder[0] == &selected);
   CHECK(fixture.exclusions[1][42] == 1);
-  CHECK(Battle_Ai_unusedPlanCounter == (1 << 9));
+  CHECK(VS::Battle::Ai::unusedPlanCounter == (1 << 9));
   CHECK(std::memcmp(&fixture.fallback[0], &selected, sizeof(selected)) == 0);
   CHECK(std::memcmp(scratch.data(), scratch_rows, scratch.size()) == 0);
 }
@@ -898,11 +901,11 @@ TEST_CASE("Native enumeration rereads exclusions on repeated calls",
   fixture.state.actionSlots[2][1].kind = GENERATE(1u, 2u, 3u);
   VS::Battle::Ai::EnumerateActionCandidatesEntry(&fixture.state, -1);
   REQUIRE(fixture.state.candidateCount == 1);
-  REQUIRE(Battle_Ai_fallbackCandidateCount == 1);
+  REQUIRE(VS::Battle::Ai::fallbackCandidateCount == 1);
   REQUIRE_NOTHROW(
       VS::Battle::Ai::EnumerateLiveActionCandidates(&fixture.state, 0));
   CHECK(fixture.state.candidateCount == 1);
-  CHECK(Battle_Ai_fallbackCandidateCount == 1);
+  CHECK(VS::Battle::Ai::fallbackCandidateCount == 1);
 }
 
 TEST_CASE(
@@ -911,16 +914,16 @@ TEST_CASE(
   EnumerationFixture fixture;
   fixture.state.actionSlots[2][1].opaque0Bit7 = 0;
   fixture.state.candidateCount = 3;
-  Battle_Ai_fallbackCandidateCount = 7;
-  Battle_Ai_candidateExclusions = nullptr;
-  Battle_Ai_fallbackCandidates = nullptr;
+  VS::Battle::Ai::fallbackCandidateCount = 7;
+  VS::Battle::Ai::candidateExclusions = nullptr;
+  VS::Battle::Ai::fallbackCandidates = nullptr;
   using StateBytes = std::array<std::byte, sizeof(fixture.state)>;
   const auto before = std::bit_cast<StateBytes>(fixture.state);
   REQUIRE_NOTHROW(
       VS::Battle::Ai::EnumerateLiveActionCandidates(&fixture.state, 70000));
   CHECK(std::bit_cast<StateBytes>(fixture.state) == before);
-  CHECK(Battle_Ai_fallbackCandidateCount == 7);
-  CHECK(Battle_Ai_unusedPlanCounter == 0);
+  CHECK(VS::Battle::Ai::fallbackCandidateCount == 7);
+  CHECK(VS::Battle::Ai::unusedPlanCounter == 0);
   CHECK(VS::Core::BiosRand().State() == 1);
 }
 
@@ -936,7 +939,7 @@ TEST_CASE("Native enumeration retains its original module address",
 TEST_CASE("Completed action reconciliation ignores an absent performer state",
           "[ai][planning][completed-plan-live]") {
   CompletedPlanFixture fixture;
-  Battle_Ai_actorAiStates[2] = nullptr;
+  VS::Battle::Ai::actorAiStates[2] = nullptr;
   fixture.state.actor = nullptr;
   const auto expected = fixture.Bytes();
   fixture.Reconcile();
@@ -1041,12 +1044,12 @@ TEST_CASE(
   ActorPlanFixture fixture;
   fixture.state.actorId = 0;
   fixture.state.candidateCount = 5;
-  Battle_Ai_fallbackCandidateCount = 7;
-  Battle_Ai_unusedPlanCounter = -1;
+  VS::Battle::Ai::fallbackCandidateCount = 7;
+  VS::Battle::Ai::unusedPlanCounter = -1;
   VS::Battle::Ai::BuildLiveActorActionPlan(&fixture.state);
   CHECK(fixture.state.candidateCount == 0);
-  CHECK(Battle_Ai_fallbackCandidateCount == 0);
-  CHECK(Battle_Ai_unusedPlanCounter == 0);
+  CHECK(VS::Battle::Ai::fallbackCandidateCount == 0);
+  CHECK(VS::Battle::Ai::unusedPlanCounter == 0);
   CHECK(fixture.exclusions[1][0] == 0);
   CHECK(fixture.exclusions[1][42] == 0);
   CHECK(fixture.exclusions[1][43] == 1);
@@ -1063,7 +1066,7 @@ TEST_CASE(
   const auto before = std::bit_cast<StatsBytes>(fixture.target_stats);
   VS::Battle::Ai::BuildLiveActorActionPlan(&fixture.state);
   CHECK(std::bit_cast<StatsBytes>(fixture.target_stats) == before);
-  CHECK(Battle_Ai_planningStatsSnapshot == nullptr);
+  CHECK(VS::Battle::Ai::planningStatsSnapshot == nullptr);
   CHECK(fixture.room.readinessLevel == 0);
   CHECK(fixture.state.candidateCount == 0);
   CHECK(fixture.state.planMode == 7);
@@ -1077,7 +1080,7 @@ TEST_CASE(
   auto* reserved = VS::Core::Memory::AllocateLiveFromHighEnd(60000);
   REQUIRE(reserved != nullptr);
   VS::Battle::Ai::BuildLiveActorActionPlan(&fixture.state);
-  CHECK(Battle_Ai_planningStatsSnapshot == nullptr);
+  CHECK(VS::Battle::Ai::planningStatsSnapshot == nullptr);
   CHECK(fixture.room.readinessLevel == 100);
   CHECK(fixture.state.candidateCount == 0);
   CHECK(fixture.state.planMode == 7);
@@ -1109,9 +1112,9 @@ TEST_CASE("Native actor plan reads the full arena command argument",
   ActorPlanFixture fixture;
   fixture.stats.limbActions[2][1].actionId = 0;
   const int argument = GENERATE(4, 0x10004);
-  Battle_Ai_arenaOrbit = &fixture.orbit;
-  fixture.orbit.planSaved = 1;
-  fixture.orbit.savedPlanCount = 9;
+  VS::Battle::Ai::arenaOrbit = &fixture.orbit;
+  fixture.orbit.plan_saved = 1;
+  fixture.orbit.saved_plan_count = 9;
   fixture.battle_actor.commandOpcode = 24;
   fixture.battle_actor.commandArg0 = argument;
   fixture.battle_actor.subType = 173;
@@ -1120,7 +1123,7 @@ TEST_CASE("Native actor plan reads the full arena command argument",
   VS::State::SetLiveScriptFlag(0xA6, 4);
   VS::Battle::Ai::BuildLiveActorActionPlan(&fixture.state);
   CHECK(VS::State::LiveScriptFlag(0xA6) == (argument == 4 ? 5 : 4));
-  CHECK(fixture.orbit.savedPlanCount == 0);
+  CHECK(fixture.orbit.saved_plan_count == 0);
   CHECK(fixture.state.candidateCount == 0);
 }
 
@@ -1242,9 +1245,9 @@ TEST_CASE("Native simulated results refuse short tails and invalid actor slots",
   REQUIRE(short_workspace != nullptr);
   std::memset(short_workspace, 0, sizeof(*short_workspace));
   short_workspace->opaque4A = 1;
-  Battle_Ai_planningWorkspace = short_workspace;
+  VS::Battle::Ai::planningWorkspace = short_workspace;
   CHECK_FALSE(VS::Battle::Ai::ApplyLiveSimulatedActionResults(fixture.rows));
-  Battle_Ai_planningWorkspace = nullptr;
+  VS::Battle::Ai::planningWorkspace = nullptr;
   CHECK_FALSE(VS::Battle::Ai::ApplyLiveSimulatedActionResults(fixture.rows));
   CHECK((std::bit_cast<RowBytes>(fixture.rows) == before));
 }
@@ -1509,10 +1512,10 @@ static_assert(sizeof(Battle_Ai_BlockedRecoveryView) <=
 TEST_CASE("Blocked movement forgets its target after exhausting detours",
           "[ai][movement][target-forget-live]") {
   struct OrbitGuard {
-    Battle_Ai_ArenaOrbitState* saved = Battle_Ai_arenaOrbit;
-    ~OrbitGuard() { Battle_Ai_arenaOrbit = saved; }
+    VS::Battle::Ai::ArenaOrbitState* saved = VS::Battle::Ai::arenaOrbit;
+    ~OrbitGuard() { VS::Battle::Ai::arenaOrbit = saved; }
   } orbit_guard;
-  Battle_Ai_arenaOrbit = nullptr;
+  VS::Battle::Ai::arenaOrbit = nullptr;
   Battle_Ai_ActorAiState state{};
   auto* view = reinterpret_cast<Battle_Ai_BlockedRecoveryView*>(&state);
   view->tile.word = 0x00120034;

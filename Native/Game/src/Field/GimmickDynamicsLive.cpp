@@ -9,7 +9,7 @@
 
 #include "Audio/SfxLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
-#include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/ActorCollisionLive.hpp"
@@ -148,7 +148,7 @@ class LiveDynamicsHost final : public VS::Field::GimmickDynamicsHost {
   }
   bool ReleaseTile(const VS::Field::GimmickTileQuery& tile) override {
     if (!Valid()) return false;
-    if (Battle_Ai_tileFlagMap != nullptr &&
+    if (VS::Battle::Ai::tileFlagMap != nullptr &&
         (tile.tile_x < 0 || tile.tile_z < 0 ||
          tile.tile_x >= VS::Battle::Ai::kNavigationGridSide ||
          tile.tile_z >= VS::Battle::Ai::kNavigationGridSide)) {
@@ -198,8 +198,8 @@ class LiveDynamicsHost final : public VS::Field::GimmickDynamicsHost {
            VS::Field::IsLiveGimmickPrefixReadable(records_[slot]);
   }
   bool ValidOccupancy() const {
-    if (Battle_Ai_tileFlagMap == nullptr) return true;
-    if (Battle_Ai_specialTerrainHeights == nullptr) return false;
+    if (VS::Battle::Ai::tileFlagMap == nullptr) return true;
+    if (VS::Battle::Ai::specialTerrainHeights == nullptr) return false;
     const auto offset =
         static_cast<unsigned>(static_cast<std::uint8_t>(record_->tileX)) *
             kOccupancyCellBytes +

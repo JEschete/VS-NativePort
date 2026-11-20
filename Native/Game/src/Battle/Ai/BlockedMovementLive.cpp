@@ -16,8 +16,8 @@
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
-#include "Battle/Ai/Movement.h"
-#include "Battle/Ai/OrbitingBoss.h"
+#include "Battle/Ai/Movement.hpp"
+#include "Battle/Ai/OrbitingBoss.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Legacy/Psx.h"
@@ -123,7 +123,7 @@ class LiveBlockedMovementWorld final : public BlockedMovementWorld {
     return LiveDirectionCodes();
   }
   [[nodiscard]] bool HasArenaOrbit() const override {
-    return Battle_Ai_arenaOrbit != nullptr;
+    return VS::Battle::Ai::arenaOrbit != nullptr;
   }
   [[nodiscard]] int NextRandomMasked(int range) override {
     return NextLiveActorRandomMasked(range);
@@ -182,10 +182,11 @@ int IsLiveMovementHistoryStalled(Battle_Ai_PerceptionUpdateView* state) {
 }
 
 void SaveLiveMovementRandomState() {
-  MovementRandomStates states{.frame = LiveFrameContext().randomState,
-                              .saved = Battle_Ai_savedMovementRandomState};
+  MovementRandomStates states{
+      .frame = LiveFrameContext().randomState,
+      .saved = VS::Battle::Ai::savedMovementRandomState};
   SaveMovementRandomState(states);
-  Battle_Ai_savedMovementRandomState = states.saved;
+  VS::Battle::Ai::savedMovementRandomState = states.saved;
 }
 
 int TryRecoverLiveBlockedMovement(Battle_Ai_BlockedRecoveryView* state) {

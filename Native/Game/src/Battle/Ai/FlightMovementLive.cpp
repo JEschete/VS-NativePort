@@ -16,7 +16,7 @@
 #include "Actors/Movement.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/CurrentTerrain.hpp"
@@ -151,7 +151,7 @@ class LiveFlightWorld final : public FlightMovementWorld {
     const auto bounds = LiveRoomTileBounds();
     if (!bounds) return std::nullopt;
     return FlightRoom{.bounds = *bounds,
-                      .ceiling = Battle_Ai_roomAiState->flightCeiling};
+                      .ceiling = VS::Battle::Ai::roomAiState->flightCeiling};
   }
   [[nodiscard]] std::optional<std::uint16_t> TileFlags(int x,
                                                        int z) const override {

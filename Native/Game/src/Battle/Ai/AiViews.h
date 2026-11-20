@@ -89,11 +89,10 @@ union Battle_Ai_TargetRelation;
 struct Battle_Ai_TerrainMoveActorView;
 union Battle_Ai_TerrainTileWord;
 struct Battle_Ai_WanderRecordView;
-struct Battle_Ai_WanderTiming;
 struct Battle_Ai_WaypointTile;
 struct Battle_Ai_WordPair;
 
-#include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/Navigation.hpp"
 
 // decomp: actionCandidateEntry (src/BATTLE/BATTLE.PRG/6FC00.c:500)
 struct Battle_Ai_CandidateEntryView {
@@ -393,8 +392,8 @@ struct Battle_Ai_PerceivedObjectView {
     short reserved24;
     short facing;
     char reserved28[0x34];
-    Battle_Ai_TilePosition tile;
-    Battle_Ai_TilePosition lastTile;
+    VS::Battle::Ai::TilePosition tile;
+    VS::Battle::Ai::TilePosition lastTile;
     char reserved64_64[4];
     void* nativePointer68; /* PS1 pointer slot 0x68 */
     char reserved64_6C[1344];
@@ -432,13 +431,6 @@ struct Battle_Ai_SettingsActorView {
         } bits;
     } opaque34;
 };
-
-// decomp: actorSettingsEntry (src/BATTLE/BATTLE.PRG/7CD68.c:677)
-struct Battle_Ai_WanderTiming {
-    unsigned short movePeriod, restPeriod;
-    unsigned char rate, reserved5;
-};
-static_assert(sizeof(Battle_Ai_WanderTiming) == 0x6, "Battle_Ai_WanderTiming must keep its PS1 layout");
 
 // decomp: actorUpdateActor (src/BATTLE/BATTLE.PRG/6FC00.c:868)
 struct Battle_Ai_PerceptionActorView {
@@ -501,7 +493,7 @@ struct Battle_Ai_GuardModelView {
     char reserved1E[2];
     short z;
     char reserved22[58];
-    Battle_Ai_TilePosition tile;
+    VS::Battle::Ai::TilePosition tile;
 };
 
 // decomp: da4bcTargetBits (src/BATTLE/BATTLE.PRG/71618.c:766)

@@ -8,7 +8,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/Decisions.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Legacy/Psx.h"
@@ -312,14 +312,14 @@ int TestDecisionBehavior(Battle_Ai_ActorAiState* /*state*/) { return 1; }
 TEST_CASE("AI live behaviour selection refuses indices past the table",
           "[ai][decisions]") {
   std::array<Ai::LiveDecisionBehavior, Ai::kDecisionBehaviorCount> saved{};
-  std::copy(std::begin(Battle_Ai_decisionCallbacks),
-            std::end(Battle_Ai_decisionCallbacks), saved.begin());
-  std::fill(std::begin(Battle_Ai_decisionCallbacks),
-            std::end(Battle_Ai_decisionCallbacks), nullptr);
-  Battle_Ai_decisionCallbacks[8] = TestDecisionBehavior;
+  std::copy(std::begin(VS::Battle::Ai::decisionCallbacks),
+            std::end(VS::Battle::Ai::decisionCallbacks), saved.begin());
+  std::fill(std::begin(VS::Battle::Ai::decisionCallbacks),
+            std::end(VS::Battle::Ai::decisionCallbacks), nullptr);
+  VS::Battle::Ai::decisionCallbacks[8] = TestDecisionBehavior;
   CHECK(Ai::SelectLiveDecisionBehavior(8U << 4) == TestDecisionBehavior);
   CHECK(Ai::SelectLiveDecisionBehavior(9U << 4) == nullptr);
   CHECK(Ai::SelectLiveDecisionBehavior(31U << 4) == nullptr);
   std::copy(saved.begin(), saved.end(),
-            std::begin(Battle_Ai_decisionCallbacks));
+            std::begin(VS::Battle::Ai::decisionCallbacks));
 }

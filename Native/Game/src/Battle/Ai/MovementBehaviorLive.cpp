@@ -15,7 +15,7 @@
 #include "Actors/Movement.h"
 #include "Battle/Action.h"
 #include "Battle/Ai/ActorCommandsLive.hpp"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/AreaRouteLive.hpp"
@@ -23,9 +23,9 @@
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
-#include "Battle/Ai/Movement.h"
-#include "Battle/Ai/Navigation.h"
-#include "Battle/Ai/Perception.h"
+#include "Battle/Ai/Movement.hpp"
+#include "Battle/Ai/Navigation.hpp"
+#include "Battle/Ai/Perception.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Battle/Ai/TargetApproachLive.hpp"
 #include "Battle/Ai/WanderLive.hpp"
@@ -38,14 +38,14 @@
 
 namespace VS::Battle::Ai {
 namespace {
-static_assert(std::size(Battle_Ai_actorAiStates) == kMovementActorSlots);
+static_assert(std::size(VS::Battle::Ai::actorAiStates) == kMovementActorSlots);
 static_assert(std::extent_v<decltype(FrameContext::actors)> ==
               kMovementActorSlots);
 static_assert(std::size(Actors_actorRecords) >= kMovementActorSlots);
 static_assert(std::extent_v<decltype(Battle_Ai_ActorAiState::relations)> ==
               kMovementActorSlots);
-static_assert(sizeof(Battle_Ai_RelationWord) == sizeof(std::uint32_t));
-static_assert(sizeof(Battle_Ai_TilePosition) == sizeof(std::uint32_t));
+static_assert(sizeof(VS::Battle::Ai::RelationWord) == sizeof(std::uint32_t));
+static_assert(sizeof(VS::Battle::Ai::TilePosition) == sizeof(std::uint32_t));
 static_assert(
     std::extent_v<decltype(Battle_Ai_ActorAiState::movementModeCounters)> ==
     kMovementModeCounterBytes);
@@ -376,7 +376,7 @@ class LiveRelationshipChanges final : public RelationshipChangeHost {
     return LiveBattleActors();
   }
   [[nodiscard]] bool HasAiState(int actor_id) const override {
-    return Battle_Ai_actorAiStates[static_cast<std::size_t>(actor_id)] !=
+    return VS::Battle::Ai::actorAiStates[static_cast<std::size_t>(actor_id)] !=
            nullptr;
   }
   void ApplyActionReaction(int actor_id) override {
@@ -392,7 +392,7 @@ class LiveRelationshipChanges final : public RelationshipChangeHost {
  private:
   static Battle_Ai_ReactionView* ReactionState(int actor_id) {
     return reinterpret_cast<Battle_Ai_ReactionView*>(
-        Battle_Ai_actorAiStates[static_cast<std::size_t>(actor_id)]);
+        VS::Battle::Ai::actorAiStates[static_cast<std::size_t>(actor_id)]);
   }
 
   Battle_Ai_ReactionRecord* record_;

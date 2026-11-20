@@ -11,11 +11,11 @@
 #include <optional>
 
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/LiveRequire.hpp"
-#include "Battle/Ai/Perception.h"
+#include "Battle/Ai/Perception.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
@@ -24,7 +24,8 @@
 
 namespace VS::Battle::Ai {
 namespace {
-static_assert(std::size(Battle_Ai_actorAiStates) == kEngagementActorSlots);
+static_assert(std::size(VS::Battle::Ai::actorAiStates) ==
+              kEngagementActorSlots);
 // The perception view aliases the actor AI state that holds the actor ID.
 static_assert(offsetof(Battle_Ai_PerceptionUpdateView,
                        awarenessFramesRemaining) ==
@@ -54,7 +55,7 @@ class LiveEngagementHost final : public EngagementBuildupHost {
     VS::Battle::SetLiveActorMarker(actor_id, marker);
   }
   [[nodiscard]] bool CandidateEngagedThisUpdate() const override {
-    return Battle_Ai_candidateEngagedThisUpdate != 0;
+    return VS::Battle::Ai::candidateEngagedThisUpdate != 0;
   }
   void ClearEngagementRequest() override { state_.engagementRequest = 0; }
   void LinkEngagedActor() override {
@@ -125,7 +126,8 @@ class LiveEngagedList final : public EngagedList {
   static std::optional<int> IdOf(const Battle_Ai_ActorAiState* state) {
     if (state == nullptr) return std::nullopt;
     for (int id = 0; id < kEngagementActorSlots; ++id) {
-      if (Battle_Ai_actorAiStates[static_cast<std::size_t>(id)] == state) {
+      if (VS::Battle::Ai::actorAiStates[static_cast<std::size_t>(id)] ==
+          state) {
         return id;
       }
     }
@@ -138,7 +140,7 @@ class LiveEngagedList final : public EngagedList {
   }
   static Battle_Ai_ActorAiState& At(int actor_id) {
     Battle_Ai_ActorAiState* state =
-        Battle_Ai_actorAiStates[static_cast<std::size_t>(actor_id)];
+        VS::Battle::Ai::actorAiStates[static_cast<std::size_t>(actor_id)];
     Require(state != nullptr, "AI engaged list requires the member's state");
     return *state;
   }
@@ -149,12 +151,12 @@ class LiveEngagedList final : public EngagedList {
 class LiveEngagementTable final : public EngagementTable {
  public:
   [[nodiscard]] bool HasActorState(int actor_id) const override {
-    return Battle_Ai_actorAiStates[static_cast<std::size_t>(actor_id)] !=
+    return VS::Battle::Ai::actorAiStates[static_cast<std::size_t>(actor_id)] !=
            nullptr;
   }
   void DisengageActorState(int actor_id) override {
     DisengageLiveActor(
-        Battle_Ai_actorAiStates[static_cast<std::size_t>(actor_id)]);
+        VS::Battle::Ai::actorAiStates[static_cast<std::size_t>(actor_id)]);
   }
 };
 
@@ -251,9 +253,9 @@ void DisengageLiveActorById(int actor_id) {
 
 void DisengageLiveActor(Battle_Ai_ActorAiState* pointer) {
   Battle_Ai_ActorAiState& state = StateOf(pointer);
-  Require(Battle_Ai_roomAiState != nullptr,
+  Require(VS::Battle::Ai::roomAiState != nullptr,
           "AI disengagement requires room state");
-  Battle_Ai_RoomAiState& room = *Battle_Ai_roomAiState;
+  Battle_Ai_RoomAiState& room = *VS::Battle::Ai::roomAiState;
   EngagementTimers timers = TimersOf(state);
   EngagementRoster roster = RosterOf(room);
   LiveEngagementHost host(state, &room);
@@ -269,27 +271,27 @@ bool TryEngageLiveActor(Battle_Ai_ActorAiState* pointer) {
   Battle_Ai_ActorAiState& state = StateOf(pointer);
   EngagementTimers timers = TimersOf(state);
   std::optional<EngagementRoster> roster;
-  if (Battle_Ai_roomAiState != nullptr) {
-    roster = RosterOf(*Battle_Ai_roomAiState);
+  if (VS::Battle::Ai::roomAiState != nullptr) {
+    roster = RosterOf(*VS::Battle::Ai::roomAiState);
   }
-  LiveEngagementHost host(state, Battle_Ai_roomAiState);
+  LiveEngagementHost host(state, VS::Battle::Ai::roomAiState);
   const std::optional<bool> engaged = TryEngageActor(
       host, state.actorId, timers, roster.has_value() ? &*roster : nullptr);
   Require(engaged.has_value(),
           "AI engagement requires a valid actor, roster and room state");
   StoreTimers(state, timers);
-  if (roster.has_value()) StoreRoster(*Battle_Ai_roomAiState, *roster);
+  if (roster.has_value()) StoreRoster(*VS::Battle::Ai::roomAiState, *roster);
   return *engaged;
 }
 
 void UnlinkLiveEngagedActor(Battle_Ai_ActorAiState* pointer) {
   Battle_Ai_ActorAiState& state = StateOf(pointer);
   Require(state.actorId < kEngagementActorSlots &&
-              Battle_Ai_actorAiStates[state.actorId] == &state,
+              VS::Battle::Ai::actorAiStates[state.actorId] == &state,
           "AI engaged-list removal requires the AI state table's entry");
-  Require(state.actor != nullptr && Battle_Ai_roomAiState != nullptr,
+  Require(state.actor != nullptr && VS::Battle::Ai::roomAiState != nullptr,
           "AI engaged-list removal requires the actor and room state");
-  LiveEngagedList list(*Battle_Ai_roomAiState);
+  LiveEngagedList list(*VS::Battle::Ai::roomAiState);
   Require(UnlinkEngagedActor(list, state.actorId),
           "AI engaged-list removal requires a list without repeats");
 }
@@ -298,22 +300,22 @@ void UpdateLiveEngagementBuildup(Battle_Ai_ActorAiState* pointer) {
   Battle_Ai_ActorAiState& state = StateOf(pointer);
   EngagementTimers timers = TimersOf(state);
   std::optional<EngagementRoster> roster;
-  if (Battle_Ai_roomAiState != nullptr) {
-    roster = RosterOf(*Battle_Ai_roomAiState);
+  if (VS::Battle::Ai::roomAiState != nullptr) {
+    roster = RosterOf(*VS::Battle::Ai::roomAiState);
   }
-  LiveEngagementHost host(state, Battle_Ai_roomAiState);
+  LiveEngagementHost host(state, VS::Battle::Ai::roomAiState);
   const bool updated = UpdateEngagementBuildup(
       host, state.actorId, timers, roster.has_value() ? &*roster : nullptr);
   Require(updated,
           "AI engagement buildup requires a valid actor, roster and list");
   StoreTimers(state, timers);
-  if (roster.has_value()) StoreRoster(*Battle_Ai_roomAiState, *roster);
+  if (roster.has_value()) StoreRoster(*VS::Battle::Ai::roomAiState, *roster);
 }
 
 void AnimateLiveEngagementPhase() {
-  Require(Battle_Ai_roomAiState != nullptr,
+  Require(VS::Battle::Ai::roomAiState != nullptr,
           "AI engagement animation requires room state");
-  LiveEngagedList list(*Battle_Ai_roomAiState);
+  LiveEngagedList list(*VS::Battle::Ai::roomAiState);
   Require(AnimateEngagementPhase(list),
           "AI engagement animation requires a list without repeats");
 }

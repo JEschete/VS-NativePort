@@ -57,12 +57,12 @@
 #include "Battle/ActorMarkersLive.hpp"
 #include "Battle/ActorVitalsLive.hpp"
 #include "Battle/Ai/ActionExecutionLive.hpp"
-#include "Battle/Ai/ActionPlanning.h"
+#include "Battle/Ai/ActionPlanning.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorCreationLive.hpp"
 #include "Battle/Ai/ActorPerceptionLive.hpp"
 #include "Battle/Ai/ActorSettingsLive.hpp"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/AreaRouteLive.hpp"
@@ -74,11 +74,11 @@
 #include "Battle/Ai/FlightMovementLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
-#include "Battle/Ai/Movement.h"
-#include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/Movement.hpp"
+#include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
-#include "Battle/Ai/OrbitingBoss.h"
-#include "Battle/Ai/Perception.h"
+#include "Battle/Ai/OrbitingBoss.hpp"
+#include "Battle/Ai/Perception.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Ai/RadialMovementLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
@@ -358,11 +358,11 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80069144u, 56u, (void*)&Battle_kStatChangeFirstWordRects, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006917Cu, 104u, (void*)&Battle_kStatChangeSecondWordRects, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80069998u, 9u, (void*)&Battle_puzzleTimerText, sizeof Battle_puzzleTimerText, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x80069BBCu, 20u, (void*)&Battle_Ai_kTimedStatusFlags, sizeof Battle_Ai_kTimedStatusFlags, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x80069C08u, 4u, (void*)&Battle_Ai_kFlags34Bit14Values, sizeof Battle_Ai_kFlags34Bit14Values, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x80069C18u, 4u, (void*)&Battle_Ai_kSettingsBits30Values, sizeof Battle_Ai_kSettingsBits30Values, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x80069C1Cu, 32u, (void*)&Battle_Ai_kPerceptionRangesSquared, sizeof Battle_Ai_kPerceptionRangesSquared, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x80069C3Cu, 48u, (void*)&Battle_Ai_kWanderTimingPresets, sizeof Battle_Ai_kWanderTimingPresets, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x80069BBCu, 20u, (void*)&VS::Battle::Ai::kTimedStatusFlags, sizeof VS::Battle::Ai::kTimedStatusFlags, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x80069C08u, 4u, (void*)&VS::Battle::Ai::kFlags34Bit14Values, sizeof VS::Battle::Ai::kFlags34Bit14Values, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x80069C18u, 4u, (void*)&VS::Battle::Ai::kSettingsBits30Values, sizeof VS::Battle::Ai::kSettingsBits30Values, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x80069C1Cu, 32u, (void*)&VS::Battle::Ai::kPerceptionRangesSquared, sizeof VS::Battle::Ai::kPerceptionRangesSquared, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x80069C3Cu, 48u, (void*)&VS::Battle::Ai::kWanderTimingPresets, sizeof VS::Battle::Ai::kWanderTimingPresets, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8184u, 16u, (void*)&Battle_categoryNeedsTargetSelection, sizeof Battle_categoryNeedsTargetSelection, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8194u, 32u, (void*)&Battle_categoryIsAreaTarget, sizeof Battle_categoryIsAreaTarget, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E81B4u, 16u, (void*)&Battle_categoryIncludesActingActor, sizeof Battle_categoryIncludesActingActor, 1u, 1u},
@@ -528,14 +528,14 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800EC3F4u, 196u, (void*)&VS::Effects::scriptOpcodeHandlers, sizeof VS::Effects::scriptOpcodeHandlers, 4u, sizeof VS::Effects::scriptOpcodeHandlers[0]},
     {"BATTLE/BATTLE.PRG", 0x800EC4B8u, 4u, (void*)&VS::Effects::lastReactionSoundVariant, sizeof VS::Effects::lastReactionSoundVariant, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EC4BCu, 20992u, (void*)&VS::Effects::emptyPackage, sizeof VS::Effects::emptyPackage, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F16ECu, 4u, (void*)&Battle_Ai_directionDeltas, sizeof Battle_Ai_directionDeltas, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F16F4u, 4u, (void*)&Battle_Ai_frameTickBudget, sizeof Battle_Ai_frameTickBudget, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F175Cu, 4u, (void*)&Battle_Ai_routeStepDirections, sizeof Battle_Ai_routeStepDirections, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F1790u, 36u, (void*)&Battle_Ai_decisionCallbacks, sizeof Battle_Ai_decisionCallbacks, 4u, sizeof Battle_Ai_decisionCallbacks[0]},
-    {"BATTLE/BATTLE.PRG", 0x800F17B8u, 16u, (void*)&Battle_Ai_viewAngles, sizeof Battle_Ai_viewAngles, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F17C8u, 16u, (void*)&Battle_Ai_settingsBits8Values, sizeof Battle_Ai_settingsBits8Values, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F17D8u, 4u, (void*)&Battle_Ai_facingDelayScales, sizeof Battle_Ai_facingDelayScales, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F17DCu, 124u, (void*)&Battle_Ai_radialRetreatPath, sizeof Battle_Ai_radialRetreatPath, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F16ECu, 4u, (void*)&VS::Battle::Ai::directionDeltas, sizeof VS::Battle::Ai::directionDeltas, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F16F4u, 4u, (void*)&VS::Battle::Ai::frameTickBudget, sizeof VS::Battle::Ai::frameTickBudget, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F175Cu, 4u, (void*)&VS::Battle::Ai::routeStepDirections, sizeof VS::Battle::Ai::routeStepDirections, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F1790u, 36u, (void*)&VS::Battle::Ai::decisionCallbacks, sizeof VS::Battle::Ai::decisionCallbacks, 4u, sizeof VS::Battle::Ai::decisionCallbacks[0]},
+    {"BATTLE/BATTLE.PRG", 0x800F17B8u, 16u, (void*)&VS::Battle::Ai::viewAngles, sizeof VS::Battle::Ai::viewAngles, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F17C8u, 16u, (void*)&VS::Battle::Ai::settingsBits8Values, sizeof VS::Battle::Ai::settingsBits8Values, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F17D8u, 4u, (void*)&VS::Battle::Ai::facingDelayScales, sizeof VS::Battle::Ai::facingDelayScales, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F17DCu, 124u, (void*)&VS::Battle::Ai::radialRetreatPath, sizeof VS::Battle::Ai::radialRetreatPath, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1858u, 4u, (void*)&VS::Field::isMenuRequestQueued, sizeof VS::Field::isMenuRequestQueued, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F185Cu, 4u, (void*)&VS::Effects::tintedActor, sizeof VS::Effects::tintedActor, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1860u, 4u, (void*)&VS::Battle::lootMenuOpened, sizeof VS::Battle::lootMenuOpened, 1u, 1u},
@@ -776,28 +776,28 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F56C8u, 212u, (void*)&VS::Effects::actionPackage, sizeof VS::Effects::actionPackage, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F57A0u, 212u, (void*)&VS::Effects::secondaryPackage, sizeof VS::Effects::secondaryPackage, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F5874u, 4u, (void*)&VS::Effects::loadedTextureSlots, sizeof VS::Effects::loadedTextureSlots, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F5878u, 4u, (void*)&Battle_Ai_actorAiStates, sizeof Battle_Ai_actorAiStates, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F58B8u, 4u, (void*)&Battle_Ai_tileFlagMap, sizeof Battle_Ai_tileFlagMap, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F58BCu, 4u, (void*)&Battle_Ai_roomAiState, sizeof Battle_Ai_roomAiState, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F58C0u, 4u, (void*)&Battle_Ai_roomHasWaypoints, sizeof Battle_Ai_roomHasWaypoints, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F58C4u, 4u, (void*)&Battle_Ai_savedMovementRandomState, sizeof Battle_Ai_savedMovementRandomState, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F58C8u, 4u, (void*)&Battle_Ai_roomWaypoints, sizeof Battle_Ai_roomWaypoints, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F58D0u, 4u, (void*)&Battle_Ai_specialTerrainHeights, sizeof Battle_Ai_specialTerrainHeights, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F58D4u, 4u, (void*)&Battle_Ai_secondPerceptionTarget, sizeof Battle_Ai_secondPerceptionTarget, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F58D8u, 4u, (void*)&Battle_Ai_patrolRoutes, sizeof Battle_Ai_patrolRoutes, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F58E0u, 4u, (void*)&Battle_Ai_candidateEngagedThisUpdate, sizeof Battle_Ai_candidateEngagedThisUpdate, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F58E8u, 4u, (void*)&Battle_Ai_planningStatsSnapshot, sizeof Battle_Ai_planningStatsSnapshot, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F58ECu, 4u, (void*)&Battle_Ai_planningPassCandidates, sizeof Battle_Ai_planningPassCandidates, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F58F0u, 4u, (void*)&Battle_Ai_fallbackCandidateCount, sizeof Battle_Ai_fallbackCandidateCount, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F58F4u, 4u, (void*)&Battle_Ai_unusedPlanCounter, sizeof Battle_Ai_unusedPlanCounter, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F58F8u, 4u, (void*)&Battle_Ai_fallbackCandidates, sizeof Battle_Ai_fallbackCandidates, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F5900u, 4u, (void*)&Battle_Ai_planningWorkspace, sizeof Battle_Ai_planningWorkspace, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F5904u, 4u, (void*)&Battle_Ai_candidateExclusions, sizeof Battle_Ai_candidateExclusions, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F590Cu, 4u, (void*)&Battle_Ai_attributeActorMask, sizeof Battle_Ai_attributeActorMask, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F5910u, 4u, (void*)&Battle_Ai_routeGates, sizeof Battle_Ai_routeGates, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F5918u, 4u, (void*)&Battle_Ai_orbitAngularVelocity, sizeof Battle_Ai_orbitAngularVelocity, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F591Cu, 4u, (void*)&Battle_Ai_orbitHeightOffset, sizeof Battle_Ai_orbitHeightOffset, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F5920u, 4u, (void*)&Battle_Ai_arenaOrbit, sizeof Battle_Ai_arenaOrbit, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F5878u, 4u, (void*)&VS::Battle::Ai::actorAiStates, sizeof VS::Battle::Ai::actorAiStates, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F58B8u, 4u, (void*)&VS::Battle::Ai::tileFlagMap, sizeof VS::Battle::Ai::tileFlagMap, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F58BCu, 4u, (void*)&VS::Battle::Ai::roomAiState, sizeof VS::Battle::Ai::roomAiState, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F58C0u, 4u, (void*)&VS::Battle::Ai::roomHasWaypoints, sizeof VS::Battle::Ai::roomHasWaypoints, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F58C4u, 4u, (void*)&VS::Battle::Ai::savedMovementRandomState, sizeof VS::Battle::Ai::savedMovementRandomState, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F58C8u, 4u, (void*)&VS::Battle::Ai::roomWaypoints, sizeof VS::Battle::Ai::roomWaypoints, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F58D0u, 4u, (void*)&VS::Battle::Ai::specialTerrainHeights, sizeof VS::Battle::Ai::specialTerrainHeights, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F58D4u, 4u, (void*)&VS::Battle::Ai::secondPerceptionTarget, sizeof VS::Battle::Ai::secondPerceptionTarget, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F58D8u, 4u, (void*)&VS::Battle::Ai::patrolRoutes, sizeof VS::Battle::Ai::patrolRoutes, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F58E0u, 4u, (void*)&VS::Battle::Ai::candidateEngagedThisUpdate, sizeof VS::Battle::Ai::candidateEngagedThisUpdate, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F58E8u, 4u, (void*)&VS::Battle::Ai::planningStatsSnapshot, sizeof VS::Battle::Ai::planningStatsSnapshot, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F58ECu, 4u, (void*)&VS::Battle::Ai::planningPassCandidates, sizeof VS::Battle::Ai::planningPassCandidates, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F58F0u, 4u, (void*)&VS::Battle::Ai::fallbackCandidateCount, sizeof VS::Battle::Ai::fallbackCandidateCount, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F58F4u, 4u, (void*)&VS::Battle::Ai::unusedPlanCounter, sizeof VS::Battle::Ai::unusedPlanCounter, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F58F8u, 4u, (void*)&VS::Battle::Ai::fallbackCandidates, sizeof VS::Battle::Ai::fallbackCandidates, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F5900u, 4u, (void*)&VS::Battle::Ai::planningWorkspace, sizeof VS::Battle::Ai::planningWorkspace, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F5904u, 4u, (void*)&VS::Battle::Ai::candidateExclusions, sizeof VS::Battle::Ai::candidateExclusions, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F590Cu, 4u, (void*)&VS::Battle::Ai::attributeActorMask, sizeof VS::Battle::Ai::attributeActorMask, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F5910u, 4u, (void*)&VS::Battle::Ai::routeGates, sizeof VS::Battle::Ai::routeGates, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F5918u, 4u, (void*)&VS::Battle::Ai::orbitAngularVelocity, sizeof VS::Battle::Ai::orbitAngularVelocity, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F591Cu, 4u, (void*)&VS::Battle::Ai::orbitHeightOffset, sizeof VS::Battle::Ai::orbitHeightOffset, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F5920u, 4u, (void*)&VS::Battle::Ai::arenaOrbit, sizeof VS::Battle::Ai::arenaOrbit, 0u, 0u},
     {"SLUS_010.40", 0x80010000u, 20u, (void*)&VS::Core::kOverlaySlots, sizeof VS::Core::kOverlaySlots, 0u, 0u},
     {"SLUS_010.40", 0x8002F544u, 4u, (void*)&VS::Audio::Driver::legacySpuEvent, sizeof VS::Audio::Driver::legacySpuEvent, 1u, 1u},
     {"SLUS_010.40", 0x8002F548u, 4u, (void*)&VS::Audio::Driver::recentTickCostTotal, sizeof VS::Audio::Driver::recentTickCostTotal, 1u, 1u},
@@ -2402,7 +2402,7 @@ const VS::Content::ModulePointerTable VS::Content::kModulePointers[] = {
     {"BATTLE/BATTLE.PRG", 0x835AC, 4u, (void**)Battle_spellClassSpellIds, sizeof Battle_spellClassSpellIds / sizeof Battle_spellClassSpellIds[0], NULL}, // G00206 _spellIds
     {"BATTLE/BATTLE.PRG", 0x83B24, 2u, (void**)VS::Effects::scriptRenderers, sizeof VS::Effects::scriptRenderers / sizeof VS::Effects::scriptRenderers[0], NULL}, // G00222 D_800EC324
     {"BATTLE/BATTLE.PRG", 0x83BF4, 49u, (void**)VS::Effects::scriptOpcodeHandlers, sizeof VS::Effects::scriptOpcodeHandlers / sizeof VS::Effects::scriptOpcodeHandlers[0], NULL}, // G00227 D_800EC3F4
-    {"BATTLE/BATTLE.PRG", 0x88F90, 9u, (void**)Battle_Ai_decisionCallbacks, sizeof Battle_Ai_decisionCallbacks / sizeof Battle_Ai_decisionCallbacks[0], NULL}, // G00233 D_800F1790
+    {"BATTLE/BATTLE.PRG", 0x88F90, 9u, (void**)VS::Battle::Ai::decisionCallbacks.data(), sizeof VS::Battle::Ai::decisionCallbacks / sizeof VS::Battle::Ai::decisionCallbacks[0], NULL}, // G00233 D_800F1790
     {"SLUS_010.40", 0x209A0, 256u, (void**)VS::Audio::Seq::kLfoWaveforms, sizeof VS::Audio::Seq::kLfoWaveforms / sizeof VS::Audio::Seq::kLfoWaveforms[0], &Content_residentLfoSamplesSource}, // G01840 g_Sound_LfoTable
     {"SLUS_010.40", 0x209E0, 256u, (void**)VS::Audio::Mixer::kCommandHandlers, sizeof VS::Audio::Mixer::kCommandHandlers / sizeof VS::Audio::Mixer::kCommandHandlers[0], NULL}, // G01841 D_800301E0
     {"SLUS_010.40", 0x20DE0, 96u, (void**)VS::Audio::Seq::kOpcodeHandlers, sizeof VS::Audio::Seq::kOpcodeHandlers / sizeof VS::Audio::Seq::kOpcodeHandlers[0], NULL}, // G01842 D_800305E0

@@ -16,24 +16,24 @@
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
-#include "Battle/Ai/Movement.h"
+#include "Battle/Ai/Movement.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
-#include "Battle/Ai/OrbitingBoss.h"
-#include "Battle/Ai/Perception.h"
+#include "Battle/Ai/OrbitingBoss.hpp"
+#include "Battle/Ai/Perception.hpp"
 #include "Battle/Damage.h"
 #include "Core/Diagnostics.hpp"
 #include "Core/RandomLive.hpp"
 
 namespace VS::Battle::Ai {
 namespace {
-static_assert(std::size(Battle_Ai_actorAiStates) == kRelationActorSlots);
+static_assert(std::size(VS::Battle::Ai::actorAiStates) == kRelationActorSlots);
 constexpr unsigned kPreservedRelationFlag = 8;
 
 // The room actor IDs in battle actor list order.
@@ -60,7 +60,7 @@ class RoomActorList {
 
 Battle_Ai_ActorAiState& TableState(int actor) {
   Battle_Ai_ActorAiState* state =
-      Battle_Ai_actorAiStates[static_cast<std::size_t>(actor)];
+      VS::Battle::Ai::actorAiStates[static_cast<std::size_t>(actor)];
   Require(state != nullptr, "AI relations require every room actor's state");
   return *state;
 }
@@ -92,7 +92,7 @@ class LiveRelationTable final : public ActorRelationTable {
 // table; requiring the registration makes both the same state.
 void InitializeRelations(Battle_Ai_ActorAiState& state) {
   Require(state.actorId < kRelationActorSlots &&
-              Battle_Ai_actorAiStates[state.actorId] == &state,
+              VS::Battle::Ai::actorAiStates[state.actorId] == &state,
           "AI relations require a registered actor state");
   LiveRelationTable table;
   Require(InitializeActorAiRelations(table, state.actorId),
@@ -167,12 +167,12 @@ class LiveSavedRelationActors final : public SavedRelationActors {
   }
   void RestoreAshleyRelation(int actor,
                              const SavedAshleyRelation& saved) override {
-    Battle_Ai_RelationWord& relation = TableState(actor).relations[0];
+    VS::Battle::Ai::RelationWord& relation = TableState(actor).relations[0];
     relation.active = 0;
-    relation.reserved0Bit1 &= kPreservedRelationFlag;
-    relation.previousClassification = saved.previous_classification;
+    relation.reserved0_bit1 &= kPreservedRelationFlag;
+    relation.previous_classification = saved.previous_classification;
     relation.classification = saved.classification;
-    relation.classificationTimer = saved.classification_timer;
+    relation.classification_timer = saved.classification_timer;
   }
   void BeginForcedAlliance(int actor) override {
     LiveAllianceActor alliance(
@@ -210,7 +210,7 @@ class LiveLinkedActorTable final : public LinkedActorTable {
   }
   [[nodiscard]] std::optional<int> LinkedActor(int actor_id) const override {
     const Battle_Ai_ActorAiState* state =
-        Battle_Ai_actorAiStates[static_cast<std::size_t>(actor_id)];
+        VS::Battle::Ai::actorAiStates[static_cast<std::size_t>(actor_id)];
     if (state == nullptr) return std::nullopt;
     return state->linkedActor;
   }
@@ -227,7 +227,7 @@ class LiveLinkedActorTable final : public LinkedActorTable {
 static_assert(offsetof(Battle_Ai_ReactionView, relations) ==
               offsetof(Battle_Ai_ActorAiState, relations));
 static_assert(sizeof(Battle_Ai_RelationWordView) ==
-              sizeof(Battle_Ai_RelationWord));
+              sizeof(VS::Battle::Ai::RelationWord));
 using ActionTargets = decltype(Battle_ActionRequest::targets);
 constexpr std::size_t kMaxActionHits = std::extent_v<ActionTargets>;
 
@@ -248,7 +248,7 @@ ReactionSettings ReadSettings(const Battle_Ai_ReactionView& view) {
 Battle_Ai_ReactionView* PeerView(int actor) {
   RequireSlot(actor);
   return reinterpret_cast<Battle_Ai_ReactionView*>(
-      Battle_Ai_actorAiStates[static_cast<std::size_t>(actor)]);
+      VS::Battle::Ai::actorAiStates[static_cast<std::size_t>(actor)]);
 }
 
 class LiveActorReaction final : public ActorReactionHost {
@@ -306,7 +306,9 @@ class LiveActorReaction final : public ActorReactionHost {
     MakeLiveTargetHostile(&state_, target);
   }
   void StopArenaOrbit() override {
-    if (Battle_Ai_arenaOrbit != nullptr) Battle_Ai_arenaOrbit->isOrbiting = 0;
+    if (VS::Battle::Ai::arenaOrbit != nullptr) {
+      VS::Battle::Ai::arenaOrbit->is_orbiting = 0;
+    }
   }
 
  private:
@@ -360,7 +362,7 @@ class LiveActionNotification final : public ActionNotificationHost {
 
   void ClearReengagementGrace(int actor) override {
     Battle_Ai_ActorAiState* state =
-        Battle_Ai_actorAiStates[static_cast<std::size_t>(actor)];
+        VS::Battle::Ai::actorAiStates[static_cast<std::size_t>(actor)];
     if (state != nullptr) state->reengagementGraceFrames = 0;
   }
   void ApplyRelationshipChanges() override {
