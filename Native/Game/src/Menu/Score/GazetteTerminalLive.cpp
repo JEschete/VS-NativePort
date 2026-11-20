@@ -84,10 +84,10 @@ struct EnemyDataOwner {
   std::uint64_t generation = 0;
 };
 
-EnemyDataOwner enemy_data;
-GazetteRecordAnimation enemy_animation;
-GazetteScreenState screen_state;
-std::int32_t menu_animation = 0;
+EnemyDataOwner enemyData;
+GazetteRecordAnimation enemyAnimation;
+GazetteScreenState screenState;
+std::int32_t menuAnimation = 0;
 std::uint64_t refusals = 0;
 
 void Refuse(std::string_view reason) {
@@ -339,7 +339,7 @@ class LiveEnemyViewerHost final : public EnemyViewerHost {
 GazetteState ReadState() {
   return {.phase = static_cast<GazettePhase>(menuState),
           .next_result = nextState,
-          .animation_step = menu_animation,
+          .animation_step = menuAnimation,
           .camera = {cameraAngles.vx, cameraAngles.vy, cameraAngles.vz,
                      cameraDistance, cameraHeightOffset},
           .initial_camera_distance = initCameraDistance,
@@ -355,7 +355,7 @@ GazetteState ReadState() {
 void WriteState(const GazetteState& state) {
   menuState = static_cast<int>(state.phase);
   nextState = state.next_result;
-  menu_animation = state.animation_step;
+  menuAnimation = state.animation_step;
   cameraAngles.vx = state.camera.pitch;
   cameraAngles.vy = state.camera.yaw;
   cameraAngles.vz = state.camera.roll;
@@ -393,7 +393,7 @@ void WriteCursor(const GazetteCursorMemory& cursor) {
 }
 
 bool BeginRead() {
-  if (enemy_data.data != nullptr || enemy_data.request != nullptr ||
+  if (enemyData.data != nullptr || enemyData.request != nullptr ||
       monBinData != nullptr || monBinCdQueueSlot != nullptr) {
     Refuse("a prior enemy-list owner is still active");
     return false;
@@ -402,8 +402,8 @@ bool BeginRead() {
   const auto size = static_cast<std::size_t>(kMonBinFile.size);
   auto* data = static_cast<std::byte*>(memory::AllocateLiveFromHighEnd(size));
   if (data == nullptr) return false;
-  enemy_data.data = data;
-  enemy_data.bytes = size;
+  enemyData.data = data;
+  enemyData.bytes = size;
   // This exported pointer remains a compatibility borrow, not the owner.
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
   monBinData = reinterpret_cast<EnemyEntry*>(data);
@@ -415,9 +415,9 @@ bool BeginRead() {
     request = Content::CompleteLiveRefusedDiscRequest(&kMonBinFile, data);
     monBinCdQueueSlot = request;
   }
-  enemy_data.request = request;
-  enemy_data.generation = Content::LiveDiscRequestGeneration(request);
-  if (request == nullptr || enemy_data.generation == 0) {
+  enemyData.request = request;
+  enemyData.generation = Content::LiveDiscRequestGeneration(request);
+  if (request == nullptr || enemyData.generation == 0) {
     if (!ReleaseLiveGazetteEnemyData()) {
       Refuse("failed enemy read retained storage awaiting cancellation");
     }
@@ -427,35 +427,35 @@ bool BeginRead() {
 }
 
 GazetteReadStatus ReadStatus() {
-  if (enemy_data.request == nullptr || enemy_data.generation == 0 ||
-      Content::LiveDiscRequestGeneration(enemy_data.request) !=
-          enemy_data.generation ||
-      enemy_data.request != monBinCdQueueSlot ||
-      static_cast<void*>(enemy_data.data) != static_cast<void*>(monBinData) ||
+  if (enemyData.request == nullptr || enemyData.generation == 0 ||
+      Content::LiveDiscRequestGeneration(enemyData.request) !=
+          enemyData.generation ||
+      enemyData.request != monBinCdQueueSlot ||
+      static_cast<void*>(enemyData.data) != static_cast<void*>(monBinData) ||
       EnemyBytes().empty()) {
     return GazetteReadStatus::kRefused;
   }
-  if (enemy_data.request->state == VS::Content::DiscRequestState::kError) {
+  if (enemyData.request->state == VS::Content::DiscRequestState::kError) {
     return GazetteReadStatus::kRefused;
   }
-  return enemy_data.request->state == VS::Content::DiscRequestState::kLoaded
+  return enemyData.request->state == VS::Content::DiscRequestState::kLoaded
              ? GazetteReadStatus::kLoaded
              : GazetteReadStatus::kPending;
 }
 
 bool FinishRead() {
   if (ReadStatus() != GazetteReadStatus::kLoaded ||
-      enemy_data.bytes <
+      enemyData.bytes <
           kDescriptionOffset + kEncyclopediaEnemies * kHalfwordBytes) {
     return false;
   }
-  Content::ReleaseLiveDiscRequest(enemy_data.request);
-  enemy_data.request = nullptr;
-  enemy_data.generation = 0;
+  Content::ReleaseLiveDiscRequest(enemyData.request);
+  enemyData.request = nullptr;
+  enemyData.generation = 0;
   monBinCdQueueSlot = nullptr;
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
   enemyDescriptions =
-      reinterpret_cast<std::uint16_t*>(enemy_data.data + kDescriptionOffset);
+      reinterpret_cast<std::uint16_t*>(enemyData.data + kDescriptionOffset);
   return true;
 }
 
@@ -780,7 +780,7 @@ void RenderLiveEnemyList(int step) {
   }
   LiveEnemyListHost host;
   if (RenderEnemyList(
-          enemies, ReadCursor().enemies, step, enemy_animation,
+          enemies, ReadCursor().enemies, step, enemyAnimation,
           Label(miscInfo, menu9_misc_info::index::kEnemyNameNone),
           Label(miscInfo, menu9_misc_info::index::kEnemyNotDefeated), host)) {
     StoreEnemies(enemies, false);
@@ -840,35 +840,35 @@ int UpdateLiveGazetteScreen(std::uint8_t* phase) {
   auto environment = ReadScreenEnvironment();
   LiveScreenHost host(environment);
   const auto result =
-      UpdateGazetteScreen(*phase, screen_state, environment, host);
+      UpdateGazetteScreen(*phase, screenState, environment, host);
   WriteScreenEnvironment(environment);
   return result;
 }
 
 bool ReleaseLiveGazetteEnemyData() {
-  if (enemy_data.data == nullptr &&
-      (enemy_data.request != nullptr || monBinData != nullptr ||
+  if (enemyData.data == nullptr &&
+      (enemyData.request != nullptr || monBinData != nullptr ||
        monBinCdQueueSlot != nullptr)) {
     Refuse("enemy-list aliases have no terminal storage owner");
     return false;
   }
-  if (enemy_data.data != nullptr) {
-    const auto capacity = memory::LivePayloadCapacity(enemy_data.data);
-    if (!capacity.has_value() || *capacity < enemy_data.bytes ||
-        !Content::CancelLiveDiscWrites({enemy_data.data, enemy_data.bytes})) {
+  if (enemyData.data != nullptr) {
+    const auto capacity = memory::LivePayloadCapacity(enemyData.data);
+    if (!capacity.has_value() || *capacity < enemyData.bytes ||
+        !Content::CancelLiveDiscWrites({enemyData.data, enemyData.bytes})) {
       Refuse("enemy-list storage cannot be safely cancelled/released");
       return false;
     }
   }
-  if (enemy_data.request != nullptr &&
-      Content::LiveDiscRequestGeneration(enemy_data.request) ==
-          enemy_data.generation) {
-    Content::ReleaseLiveDiscRequest(enemy_data.request);
+  if (enemyData.request != nullptr &&
+      Content::LiveDiscRequestGeneration(enemyData.request) ==
+          enemyData.generation) {
+    Content::ReleaseLiveDiscRequest(enemyData.request);
   }
-  if (enemy_data.data != nullptr) {
-    memory::FreeLiveFromHighEnd(enemy_data.data);
+  if (enemyData.data != nullptr) {
+    memory::FreeLiveFromHighEnd(enemyData.data);
   }
-  enemy_data = {};
+  enemyData = {};
   monBinData = nullptr;
   monBinCdQueueSlot = nullptr;
   enemyDescriptions = nullptr;
@@ -879,8 +879,8 @@ bool ResetLiveGazetteTerminalModuleState() {
   if (!ReleaseLiveGazetteEnemyData()) return false;
   WriteState({});
   cameraAngles.pad = 0;
-  screen_state = {};
-  enemy_animation = {};
+  screenState = {};
+  enemyAnimation = {};
   return true;
 }
 

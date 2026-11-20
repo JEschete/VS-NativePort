@@ -842,7 +842,7 @@ void CheckRecoveryCallback(std::size_t function) {
 }
 
 struct RecoveryFixture;
-RecoveryFixture* g_recovery{};
+RecoveryFixture* activeRecoveryFixture{};
 struct RecoveryFixture : LiveFixture {
   ActionState* saved_state = VS::Battle::actionState;
   ActionState state{};
@@ -864,7 +864,7 @@ struct RecoveryFixture : LiveFixture {
 
   RecoveryFixture() {
     VS::Battle::actionState = &state;
-    g_recovery = this;
+    activeRecoveryFixture = this;
     replacement.stats = &replacement_stats;
     replacement_stats.limbs[5].max_hp = 100;
     replacement_stats.current_hp = 321;
@@ -876,7 +876,7 @@ struct RecoveryFixture : LiveFixture {
     input.hits[1].stat_calculator_id = 1;
   }
   ~RecoveryFixture() {
-    g_recovery = nullptr;
+    activeRecoveryFixture = nullptr;
     VS::Battle::actionState = saved_state;
     VS::Battle::lastActionStatValue = last;
     std::ranges::copy(definitions, VS::Battle::actionDefinitions.data());
@@ -907,7 +907,7 @@ std::int16_t RecoveryCalculator(ActionDefinition* action,
                                 VS::Battle::HitResult* source,
                                 VS::Battle::HitResult* target, int index,
                                 int execute) {
-  auto& fixture = *g_recovery;
+  auto& fixture = *activeRecoveryFixture;
   ++fixture.calls;
   fixture.arguments_match = action == &fixture.input &&
                             source == fixture.expected_source &&
@@ -1139,13 +1139,13 @@ TEST_CASE("F00485 original mediator recovers through real dispatch and limbs",
 }
 
 struct DamageFixture;
-DamageFixture* g_damage{};
+DamageFixture* activeDamageFixture{};
 struct DamageFixture : RecoveryFixture {
   int critical_before = VS::Battle::criticalHitOccurred;
   int critical_seen{};
   bool mutate_owner = true;
   DamageFixture() {
-    g_damage = this;
+    activeDamageFixture = this;
     source.target.target_actor = 41;
     hit.target.target_actor = 41;
     hit.targets_position = 0;
@@ -1169,14 +1169,14 @@ struct DamageFixture : RecoveryFixture {
   }
   ~DamageFixture() {
     VS::Battle::criticalHitOccurred = critical_before;
-    g_damage = nullptr;
+    activeDamageFixture = nullptr;
   }
 };
 std::int16_t DamageCalculator(ActionDefinition* action,
                               VS::Battle::HitResult* source,
                               VS::Battle::HitResult* target, int hit,
                               int execute) {
-  auto& fixture = *g_damage;
+  auto& fixture = *activeDamageFixture;
   ++fixture.calls;
   fixture.arguments_match =
       action == &fixture.input && source == &fixture.source &&

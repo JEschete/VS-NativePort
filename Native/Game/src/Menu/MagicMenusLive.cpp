@@ -54,13 +54,13 @@ constexpr int kTitleFirstRow = 10;
 constexpr int kTitleX = 320;
 constexpr int kTitleY = 34;
 constexpr int kTitleBackgroundWidth = 8;
-std::array<SpellMenuState, kSchoolCount> g_schools{};
-std::uint64_t g_refusals = 0;
+std::array<SpellMenuState, kSchoolCount> schoolMenus{};
+std::uint64_t refusals = 0;
 
 void Refuse(std::string_view reason) {
-  ++g_refusals;
-  if (g_refusals <= kLogFirst || g_refusals % kLogInterval == 0) {
-    VS::Core::LogWarn("menu.magic", "{} (refusal {})", reason, g_refusals);
+  ++refusals;
+  if (refusals <= kLogFirst || refusals % kLogInterval == 0) {
+    VS::Core::LogWarn("menu.magic", "{} (refusal {})", reason, refusals);
   }
 }
 
@@ -282,13 +282,13 @@ class LiveHost final : public MenuHost {
   std::optional<int> RunSchool(School school, unsigned int init) override {
     switch (school) {
       case School::kWarlock:
-        return UpdateWarlockMenu(init, g_schools[0], *this);
+        return UpdateWarlockMenu(init, schoolMenus[0], *this);
       case School::kShaman:
-        return UpdateShamanMenu(init, g_schools[1], *this);
+        return UpdateShamanMenu(init, schoolMenus[1], *this);
       case School::kSorcerer:
-        return UpdateSorcererMenu(init, g_schools[2], *this);
+        return UpdateSorcererMenu(init, schoolMenus[2], *this);
       case School::kEnchanter:
-        return UpdateEnchanterMenu(init, g_schools.back(), *this);
+        return UpdateEnchanterMenu(init, schoolMenus.back(), *this);
     }
     Refuse("Magic school dispatch is invalid");
     return std::nullopt;
@@ -393,6 +393,6 @@ int UpdateLive(std::uint8_t* state) {
   return result ? *result : 0;
 }
 
-void ResetMagicMenusLiveState() { g_schools = {}; }
-std::uint64_t RefusedMagicMenuCount() { return g_refusals; }
+void ResetMagicMenusLiveState() { schoolMenus = {}; }
+std::uint64_t RefusedMagicMenuCount() { return refusals; }
 }  // namespace VS::Menu::Magic

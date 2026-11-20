@@ -506,10 +506,10 @@ TEST_CASE("A driver tick records its cost and refuses a missing layer",
 namespace {
 using OpcodeHandler = VS::Audio::SeqOpcodeHandler;
 
-int track_end_calls = 0;
+int trackEndCalls = 0;
 
 void RecordTrackEnd(VS::Audio::SeqChannel* /*channel*/, int /*channel_bit*/) {
-  ++track_end_calls;
+  ++trackEndCalls;
 }
 
 // A music channel stepping a program in a live game heap block, over saved
@@ -534,7 +534,7 @@ struct LiveStepFixture {
     VS::Audio::Mixer::voiceScheduler = {};
     VS::Audio::Driver::controlLatches = {};
     VS::Audio::Seq::kOpcodeHandlers[0] = &RecordTrackEnd;
-    track_end_calls = 0;
+    trackEndCalls = 0;
     auto* const data =
         static_cast<std::uint8_t*>(VS::Core::Memory::AllocateLiveFromLowEnd(8));
     REQUIRE(data != nullptr);
@@ -570,7 +570,7 @@ TEST_CASE("A live channel step stays inside its program's heap block",
   CHECK(fixture.channel.program_counter == fixture.At(1));
   CHECK(fixture.channel.opcode_step_counter == 1);
   CHECK(Seq::LiveRefusalCount() == refused);
-  CHECK(track_end_calls == 0);
+  CHECK(trackEndCalls == 0);
 }
 
 TEST_CASE("A live channel step at the end of its heap block ends the track",
@@ -584,7 +584,7 @@ TEST_CASE("A live channel step at the end of its heap block ends the track",
   Seq::LiveExecuteChannelStep(&fixture.channel, static_cast<int>(kChannelBit));
   CHECK(fixture.channel.program_counter == end);
   CHECK(fixture.channel.opcode_step_counter == 1);
-  CHECK(track_end_calls == 1);
+  CHECK(trackEndCalls == 1);
   CHECK(fixture.config.pending_key_off == static_cast<int>(kChannelBit));
   CHECK(Seq::LiveRefusalCount() == refused + 1);
   Seq::LiveExecuteChannelStep(nullptr, static_cast<int>(kChannelBit));

@@ -19,7 +19,7 @@ namespace {
 constexpr std::size_t kRectWidthOffset = kTimRectOffset + 4;
 constexpr std::size_t kRectHeightOffset = kTimRectOffset + 6;
 
-std::uint64_t refused_tims = 0;
+std::uint64_t refusedTims = 0;
 
 template <typename T>
 T ReadField(const std::byte* data, std::size_t offset) {
@@ -29,12 +29,12 @@ T ReadField(const std::byte* data, std::size_t offset) {
 }
 
 void ReportRefusal(const void* data, std::uint32_t mode) {
-  if (std::has_single_bit(++refused_tims)) {
+  if (std::has_single_bit(++refusedTims)) {
     VS::Core::Errorf("render",
                      "TIM at %p (mode 0x%" PRIX32
                      ") refused: its blocks are inconsistent or exceed VRAM "
                      "(%" PRIu64 " refused)",
-                     data, mode, refused_tims);
+                     data, mode, refusedTims);
   }
 }
 
@@ -89,5 +89,5 @@ void ParseLiveTim(void* data, TIM_IMAGE* tim) {
       reinterpret_cast<std::uint32_t*>(bytes + image->image.pixel_offset);
 }
 
-std::uint64_t RefusedLiveTimCount() { return refused_tims; }
+std::uint64_t RefusedLiveTimCount() { return refusedTims; }
 }  // namespace VS::Render

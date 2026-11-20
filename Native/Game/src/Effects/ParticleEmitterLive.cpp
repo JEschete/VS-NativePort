@@ -52,12 +52,12 @@ constexpr std::uint32_t kAttractionMask = 0x1C0;
 constexpr std::uint32_t kActorAttraction = 0xC0;
 constexpr std::uint32_t kByteMask = 0xFF;
 constexpr std::uint16_t kActorTarget = 4;
-std::uint64_t refused_emissions = 0;
+std::uint64_t refusedEmissions = 0;
 
 void Refuse(std::string_view reason) {
-  if (std::has_single_bit(++refused_emissions)) {
+  if (std::has_single_bit(++refusedEmissions)) {
     VS::Core::LogWarn("effects", "particle emission refused: {} ({} refusals)",
-                      reason, refused_emissions);
+                      reason, refusedEmissions);
   }
 }
 

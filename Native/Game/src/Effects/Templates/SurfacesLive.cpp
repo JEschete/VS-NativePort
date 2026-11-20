@@ -125,9 +125,9 @@ static_assert(sizeof(VS::Render::RotatingSurfacePacket) ==
 static_assert(sizeof(plugins::SurfaceProfile) ==
               kSurfaceProfilePoints * sizeof(SVECTOR));
 
-std::uint64_t refused_curves = 0;
-std::uint64_t refused_textures = 0;
-std::uint64_t dropped_primitives = 0;
+std::uint64_t refusedCurves = 0;
+std::uint64_t refusedTextures = 0;
+std::uint64_t droppedPrimitives = 0;
 
 // True on the 1st, 2nd, 4th, 8th... occurrence, to keep repeated
 // diagnostics readable.
@@ -346,12 +346,12 @@ std::int32_t LiveSurfaceServices::SampleCurve(std::int32_t curve,
   const std::size_t bound = LiveEffectCurveCount();
   if (curve < 0 || std::cmp_greater(curve, bound) ||
       VS::Effects::package->curve_block->Size(curve - 1) == 0) {
-    if (ShouldReport(refused_curves)) {
+    if (ShouldReport(refusedCurves)) {
       VS::Core::LogWarn(
           "effects",
           "{}: curve {} is outside the package's {} bound curves or "
           "empty; sampled as 0 ({} refusals)",
-          name_, curve, bound, refused_curves);
+          name_, curve, bound, refusedCurves);
     }
     return 0;
   }
@@ -439,13 +439,13 @@ std::optional<RingTexture> LiveSurfaceServices::AdvanceTexture(
     LiveAdvanceParticleTextureAnimation(&animation);
   }
   if (!bound || animation.texture_info == nullptr) {
-    if (ShouldReport(refused_textures)) {
+    if (ShouldReport(refusedTextures)) {
       VS::Core::LogWarn(
           "effects",
           "{}: texture table {} of {} has no frame; drawn without "
           "primitives ({} refusals)",
           name_, table, VS::Effects::package->texture_table_count,
-          refused_textures);
+          refusedTextures);
     }
     return std::nullopt;
   }
@@ -472,12 +472,12 @@ void LiveSurfaceServices::Submit(std::span<const std::uint32_t> words,
       entry != nullptr ? Render::ReserveLivePrimitiveWords(words.size())
                        : nullptr;
   if (packet == nullptr) {
-    if (ShouldReport(dropped_primitives)) {
+    if (ShouldReport(droppedPrimitives)) {
       VS::Core::LogWarn(
           "effects",
           "{}: primitive at depth {} has no ordering entry or buffer "
           "room; dropped ({} drops)",
-          name_, depth, dropped_primitives);
+          name_, depth, droppedPrimitives);
     }
     return;
   }

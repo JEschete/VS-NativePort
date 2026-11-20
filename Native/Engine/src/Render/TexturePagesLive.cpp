@@ -13,34 +13,34 @@ namespace {
 // The original's table (D_800F19A8) is replaced by this one; nothing outside
 // the binding reaches the pages by address. Like the original it starts all
 // free until the boot sequence initializes it.
-TexturePageTable live_pages{};
-std::uint64_t refused_requests = 0;
+TexturePageTable livePages{};
+std::uint64_t refusedRequests = 0;
 
 void ReportRefusal(const char* request, TexturePageRange range, int owner,
                    TexturePageResult result) {
-  if (std::has_single_bit(++refused_requests)) {
+  if (std::has_single_bit(++refusedRequests)) {
     VS::Core::Errorf("render",
                      "texture page %s of %" PRIu32 "+%" PRIu32
                      " for owner %d refused (result %d, %" PRIu64 " refused)",
                      request, range.first, range.count, owner,
-                     static_cast<int>(result), refused_requests);
+                     static_cast<int>(result), refusedRequests);
   }
 }
 }  // namespace
 
-TexturePageTable& LiveTexturePages() { return live_pages; }
+TexturePageTable& LiveTexturePages() { return livePages; }
 
-void InitializeLiveTexturePages() { InitializeTexturePages(live_pages); }
+void InitializeLiveTexturePages() { InitializeTexturePages(livePages); }
 
 void AdvanceLiveTexturePageRetirements() {
-  AdvanceTexturePageRetirements(live_pages);
+  AdvanceTexturePageRetirements(livePages);
 }
 
 int ReserveLiveTexturePageRange(std::uint32_t first_page,
                                 std::uint32_t page_count, int owner_tag) {
   const TexturePageRange range{.first = first_page, .count = page_count};
   const TexturePageResult result =
-      ReserveTexturePages(live_pages, range, owner_tag);
+      ReserveTexturePages(livePages, range, owner_tag);
   if (result != TexturePageResult::kDone) {
     ReportRefusal("reservation", range, owner_tag, result);
     return 0;
@@ -52,7 +52,7 @@ int RetireLiveTexturePageRange(std::uint32_t first_page,
                                std::uint32_t page_count, int owner_tag) {
   const TexturePageRange range{.first = first_page, .count = page_count};
   const TexturePageResult result =
-      RetireTexturePages(live_pages, range, owner_tag);
+      RetireTexturePages(livePages, range, owner_tag);
   if (result != TexturePageResult::kDone) {
     ReportRefusal("retirement", range, owner_tag, result);
     return 0;
@@ -60,5 +60,5 @@ int RetireLiveTexturePageRange(std::uint32_t first_page,
   return 1;
 }
 
-std::uint64_t RefusedLiveTexturePageRequestCount() { return refused_requests; }
+std::uint64_t RefusedLiveTexturePageRequestCount() { return refusedRequests; }
 }  // namespace VS::Render

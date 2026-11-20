@@ -751,7 +751,7 @@ class LiveVmHost final : public ScriptVmHost {
   bool chained_ready_ = false;
 };
 
-LiveVmHost live_host;
+LiveVmHost liveHost;
 
 bool LiveVmHost::RequestMatches() const {
   return request_ != nullptr && request_generation_ != 0 &&
@@ -1060,14 +1060,14 @@ ScriptFlow LiveVmHost::RunOpcode(ScriptLocation location, int thread) {
 template <typename Operation>
 auto WithSourceUse(Operation operation) -> decltype(operation()) {
   static_assert(std::is_trivially_destructible_v<Operation>);
-  const auto begun = live_host.sources.BeginUse();
+  const auto begun = liveHost.sources.BeginUse();
   if (!begun) {
     VS::Core::Warnf("event", "Script source use refused: reason=%d",
                     static_cast<int>(begun.error()));
     return {};
   }
   const auto result = operation();
-  if (!live_host.sources.EndUse()) {
+  if (!liveHost.sources.EndUse()) {
     VS::Core::Errorf("event",
                      "Script source use ended without a matching begin");
     std::abort();
@@ -1088,31 +1088,31 @@ std::expected<ScriptDataLease, ScriptSourceError> LeaseData(
 
 }  // namespace
 
-ScriptVmHost& LiveScriptVm() { return live_host; }
+ScriptVmHost& LiveScriptVm() { return liveHost; }
 
 std::intptr_t DispatchLiveScriptControlOpcode(std::uint8_t* instruction,
                                               std::int16_t thread,
                                               ScriptControlOpcode opcode) {
-  const ScriptInstruction current = live_host.invocation.instruction;
-  if (!live_host.invocation.active || opcode == nullptr ||
+  const ScriptInstruction current = liveHost.invocation.instruction;
+  if (!liveHost.invocation.active || opcode == nullptr ||
       instruction != current.bytes.data() || thread != current.thread ||
       current.location.generation !=
-          live_host.RegionGeneration(current.location.region)) {
-    live_host.Refuse(ScriptVmRefusal::kMissingCursor, thread);
+          liveHost.RegionGeneration(current.location.region)) {
+    liveHost.Refuse(ScriptVmRefusal::kMissingCursor, thread);
     return static_cast<std::intptr_t>(ScriptFlowKind::kStop);
   }
-  live_host.invocation.result = opcode(current, live_host);
-  live_host.invocation.handled = true;
+  liveHost.invocation.result = opcode(current, liveHost);
+  liveHost.invocation.handled = true;
   return static_cast<std::intptr_t>(ScriptFlowKind::kAdvance);
 }
 
 std::expected<ScriptSource, ScriptSourceError> LeaseLiveScriptSource(
     ScriptRegion region) {
-  return live_host.sources.Lease(region);
+  return liveHost.sources.Lease(region);
 }
 
 std::expected<ScriptDataLease, ScriptSourceError> LeaseLiveDialogStrings() {
-  return LeaseData(live_host.strings);
+  return LeaseData(liveHost.strings);
 }
 
 std::expected<ScriptDataLease, ScriptSourceError> LeaseLiveTextBoxFrame(
@@ -1120,7 +1120,7 @@ std::expected<ScriptDataLease, ScriptSourceError> LeaseLiveTextBoxFrame(
   if (style < 0 || style >= kTextBoxFrameStyleCount) {
     return std::unexpected(ScriptSourceError::kExtent);
   }
-  return LeaseData(live_host.frames[static_cast<std::size_t>(style)]);
+  return LeaseData(liveHost.frames[static_cast<std::size_t>(style)]);
 }
 
 std::expected<ScriptDataLease, ScriptSourceError> LeaseLiveVibrationPattern(
@@ -1128,78 +1128,78 @@ std::expected<ScriptDataLease, ScriptSourceError> LeaseLiveVibrationPattern(
   if (pattern < 0 || pattern >= kVibrationPatternSlots) {
     return std::unexpected(ScriptSourceError::kExtent);
   }
-  return LeaseData(live_host.patterns[static_cast<std::size_t>(pattern)]);
+  return LeaseData(liveHost.patterns[static_cast<std::size_t>(pattern)]);
 }
 
 std::expected<void, ScriptSourceError> MountLiveScriptSource(
     ScriptRegion region, std::shared_ptr<const Buffer> source) {
-  return live_host.sources.MountBuffer(region, std::move(source));
+  return liveHost.sources.MountBuffer(region, std::move(source));
 }
 
 std::expected<PreparedScriptSource, ScriptSourceError>
 PrepareLiveRoomEntrySource(RoomEventLease room) {
-  return live_host.sources.PrepareRoom(ScriptRegion::kEventScript,
-                                       std::move(room));
+  return liveHost.sources.PrepareRoom(ScriptRegion::kEventScript,
+                                      std::move(room));
 }
 
 std::expected<void, ScriptSourceError> PublishLiveScriptSource(
     PreparedScriptSource&& prepared) {
-  return live_host.sources.Publish(std::move(prepared));
+  return liveHost.sources.Publish(std::move(prepared));
 }
 
-RoomEventLease LiveRoomScriptSections() { return live_host.room; }
+RoomEventLease LiveRoomScriptSections() { return liveHost.room; }
 
 void PublishLiveRoomScriptSections(RoomEventLease room) {
-  live_host.room = std::move(room);
+  liveHost.room = std::move(room);
 }
 
 bool InitializeLiveEventScriptData(ScriptLocation source) {
   return WithSourceUse(
-      [source] { return InitializeEventScriptData(source, live_host); });
+      [source] { return InitializeEventScriptData(source, liveHost); });
 }
 
 bool InitializeLiveScriptOpcodeTable() {
-  return WithSourceUse([] { return InitializeScriptOpcodeTable(live_host); });
+  return WithSourceUse([] { return InitializeScriptOpcodeTable(liveHost); });
 }
 
 int UpdateLiveEventPlayback() {
-  return WithSourceUse([] { return UpdateEventPlayback(live_host); });
+  return WithSourceUse([] { return UpdateEventPlayback(liveHost); });
 }
 
 bool ExecuteLiveScriptThread(int thread) {
   return WithSourceUse([thread] {
-    return ExecuteScriptThread(static_cast<ScriptThreadId>(thread), live_host);
+    return ExecuteScriptThread(static_cast<ScriptThreadId>(thread), liveHost);
   });
 }
 
-void ReleaseLiveScriptActorControl() { ReleaseScriptActorControl(live_host); }
+void ReleaseLiveScriptActorControl() { ReleaseScriptActorControl(liveHost); }
 
 void ResetLiveScriptRuntime() {
-  live_host.CancelEventFile();
-  live_host.DiscardChainedEventBuffer();
-  live_host.sources.Reset();
-  live_host.room.reset();
-  live_host.cursors = {};
-  live_host.return_to = {};
-  live_host.strings = {};
-  live_host.frames = {};
-  live_host.patterns = {};
-  live_host.curves = {};
-  live_host.invocation = {};
-  live_host.SetPhase(PlaybackPhase::kIdle);
-  live_host.SetStartConfirmed(false);
-  live_host.SetMainThreadFinished(false);
-  live_host.SetChainedEventLoaded(false);
+  liveHost.CancelEventFile();
+  liveHost.DiscardChainedEventBuffer();
+  liveHost.sources.Reset();
+  liveHost.room.reset();
+  liveHost.cursors = {};
+  liveHost.return_to = {};
+  liveHost.strings = {};
+  liveHost.frames = {};
+  liveHost.patterns = {};
+  liveHost.curves = {};
+  liveHost.invocation = {};
+  liveHost.SetPhase(PlaybackPhase::kIdle);
+  liveHost.SetStartConfirmed(false);
+  liveHost.SetMainThreadFinished(false);
+  liveHost.SetChainedEventLoaded(false);
 }
 
 void AbandonLiveScriptUses() {
-  live_host.invocation = {};
-  live_host.sources.AbandonUses();
+  liveHost.invocation = {};
+  liveHost.sources.AbandonUses();
 }
 
 // decomp: BATTLE.PRG func_800BFE50 (573B8.c:156).
 int ResolveLiveScriptActorReference(std::uint16_t reference) {
-  return ResolveScriptActorReference(reference, live_host);
+  return ResolveScriptActorReference(reference, liveHost);
 }
 
 }  // namespace VS::Event

@@ -27,13 +27,13 @@ using Instance = LiveEffectInstance;
 using Slot = LiveRendererSlot;
 using Spawn = LiveEffectSpawnRequest;
 
-std::uint64_t refused_calls = 0;
+std::uint64_t refusedCalls = 0;
 
 void Refuse(std::string_view call, std::string_view reason) {
-  if (std::has_single_bit(++refused_calls)) {
+  if (std::has_single_bit(++refusedCalls)) {
     VS::Core::LogWarn("effects",
                       "effect instance: {} refused: {} ({} refusals)", call,
-                      reason, refused_calls);
+                      reason, refusedCalls);
   }
 }
 

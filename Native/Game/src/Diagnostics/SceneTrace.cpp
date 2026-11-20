@@ -10,7 +10,7 @@
 #include "nlohmann/json.hpp"
 
 namespace {
-std::atomic<std::uint64_t> next_command{0};
+std::atomic<std::uint64_t> nextCommand{0};
 
 void TraceFailure(std::string_view reason) noexcept {
   try {
@@ -35,7 +35,7 @@ std::uint64_t VS::Game::RecordSceneCommand(
   }
   try {
     const auto* bytes = static_cast<const std::uint8_t*>(instruction);
-    const auto command = ++next_command;
+    const auto command = ++nextCommand;
     const auto pc = reinterpret_cast<std::uintptr_t>(instruction);
     const auto base = reinterpret_cast<std::uintptr_t>(script_base);
     nlohmann::json record{

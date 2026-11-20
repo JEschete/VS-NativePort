@@ -9,10 +9,10 @@
 
 namespace VS::Core::String {
 namespace {
-std::uint64_t refused_text = 0;
+std::uint64_t refusedText = 0;
 }  // namespace
 
-std::uint64_t RefusedLiveTextCount() noexcept { return refused_text; }
+std::uint64_t RefusedLiveTextCount() noexcept { return refusedText; }
 
 std::size_t live_detail::TerminatedLength(
     std::span<const std::uint8_t> text) noexcept {
@@ -23,16 +23,16 @@ std::size_t live_detail::TerminatedLength(
 void live_detail::ReportRefusedText(const char* operation,
                                     std::size_t requested, std::size_t written,
                                     const std::source_location& site) {
-  ++refused_text;
+  ++refusedText;
   // The first and then every power-of-two refusal, so a per-frame request
   // cannot flood the log.
-  if ((refused_text & (refused_text - 1)) == 0) {
+  if ((refusedText & (refusedText - 1)) == 0) {
     VS::Core::Errorf(
         "text",
         "%s at %s:%u: wrote %zu of %zu bytes; the text has no "
         "terminator or does not fit the destination (refusal %" PRIu64 ")",
         operation, site.file_name(), static_cast<unsigned>(site.line()),
-        written, requested, refused_text);
+        written, requested, refusedText);
   }
 }
 }  // namespace VS::Core::String

@@ -51,16 +51,16 @@ constexpr std::size_t kTrustedCompactTextBytes = 0x1000;
 constexpr int kTextSoundGroup = 0x7E;
 constexpr int kFramebufferWidth = 320;
 
-FontStyle font_style;
-std::uint64_t text_box_problems = 0;
+FontStyle fontStyle;
+std::uint64_t textBoxProblems = 0;
 
 void ReportTextBox(const VS::Menu::TextBoxState* box, const char* problem) {
-  ++text_box_problems;
+  ++textBoxProblems;
   // The first and then every power-of-two report, so a per-frame problem
   // cannot flood the log.
-  if (std::has_single_bit(text_box_problems)) {
+  if (std::has_single_bit(textBoxProblems)) {
     VS::Core::Errorf("text", "text box %p %s (%" PRIu64 " text box problems)",
-                     static_cast<const void*>(box), problem, text_box_problems);
+                     static_cast<const void*>(box), problem, textBoxProblems);
   }
 }
 
@@ -172,9 +172,9 @@ class LiveVramPixels final : public VramPixelTarget {
 };
 }  // namespace
 
-FontStyle& LiveFontStyle() noexcept { return font_style; }
+FontStyle& LiveFontStyle() noexcept { return fontStyle; }
 
-std::uint64_t RefusedLiveTextBoxCount() noexcept { return text_box_problems; }
+std::uint64_t RefusedLiveTextBoxCount() noexcept { return textBoxProblems; }
 
 void DrawLiveCompactTextColor(const char* text, int xy, int color,
                               std::uint32_t* chain) {
@@ -195,12 +195,12 @@ int DrawLiveVariableWidthGlyph(std::uint32_t glyph, int x, int y,
                                std::uint32_t* layers) {
   LivePacketQueue queue(layers != nullptr ? layers + kTextForegroundLayer
                                           : nullptr);
-  return DrawVariableWidthGlyph(queue, font_style,
-                                LiveVariableFontGlyphWidths(), glyph, x, y);
+  return DrawVariableWidthGlyph(queue, fontStyle, LiveVariableFontGlyphWidths(),
+                                glyph, x, y);
 }
 
 void SetLiveMenuFontStyle(int palette_offset) {
-  SetMenuFontStyle(font_style, static_cast<std::uint8_t>(palette_offset));
+  SetMenuFontStyle(fontStyle, static_cast<std::uint8_t>(palette_offset));
 }
 
 void DrawLiveProgressiveTextBoxText(VS::Menu::TextBoxState* box) {
@@ -219,7 +219,7 @@ void DrawLiveProgressiveTextBoxText(VS::Menu::TextBoxState* box) {
       .tick_speed = VS::State::tickSpeed};
   LivePacketQueue glyphs(layers + kTextForegroundLayer);
   const ProgressiveTextResult result = DrawProgressiveTextBoxText(
-      view, input, font_style, LiveVariableFontGlyphWidths(),
+      view, input, fontStyle, LiveVariableFontGlyphWidths(),
       LiveEncodedTextArguments(), glyphs);
   StoreProgress(*box, view);
   if (result.next_page) {
@@ -253,7 +253,7 @@ void DrawLiveScaledTextBoxText(VS::Menu::TextBoxState* box, int scale) {
     return;
   }
   LiveScaledGlyphTarget target(layers + kTextForegroundLayer);
-  DrawScaledTextBoxText(ViewOf(*box), scale, font_style,
+  DrawScaledTextBoxText(ViewOf(*box), scale, fontStyle,
                         LiveVariableFontGlyphWidths(), target);
 }
 
@@ -272,7 +272,7 @@ void BlendLiveTextBoxIntoFramebuffer(VS::Menu::TextBoxState* box,
   const VariableFontTables font{.glyph_widths = LiveVariableFontGlyphWidths(),
                                 .pixel_expansion = kGlyphPixelExpansion};
   LiveVramPixels vram;
-  BlendTextBoxIntoFramebuffer(view, blend, font_style, font, vram);
+  BlendTextBoxIntoFramebuffer(view, blend, fontStyle, font, vram);
   box->speed = view.speed;
 }
 }  // namespace VS::Render

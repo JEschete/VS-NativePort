@@ -99,8 +99,8 @@ constexpr int kPortIdShift = 4;
 // is refused rather than followed through memory.
 constexpr std::size_t kMaxPatternBytes = 4096;
 
-std::uint64_t refused_requests = 0;
-VibrationState live_vibration;
+std::uint64_t refusedRequests = 0;
+VibrationState liveVibration;
 
 // Reports the first occurrence and then every power of two.
 bool Reportable(std::uint64_t count) noexcept {
@@ -108,11 +108,11 @@ bool Reportable(std::uint64_t count) noexcept {
 }
 
 void Refused(const char* operation, const char* reason, std::int64_t value) {
-  ++refused_requests;
-  if (Reportable(refused_requests)) {
+  ++refusedRequests;
+  if (Reportable(refusedRequests)) {
     VS::Core::Warnf(
         "input", "%s: %s (%" PRId64 "); nothing changed (refusal %" PRIu64 ")",
-        operation, reason, value, refused_requests);
+        operation, reason, value, refusedRequests);
   }
 }
 
@@ -297,10 +297,10 @@ ControllerFrame PollLiveControllers() {
 }
 }  // namespace
 
-VibrationState& LiveVibrationState() noexcept { return live_vibration; }
+VibrationState& LiveVibrationState() noexcept { return liveVibration; }
 
 std::uint64_t RefusedLiveControllerRequestCount() noexcept {
-  return refused_requests;
+  return refusedRequests;
 }
 
 void InvalidateLiveControllerConnections() {
@@ -378,7 +378,7 @@ int StartLiveVibrationPattern(std::span<const std::byte> pattern,
     return 0;
   }
   return static_cast<int>(
-      StartVibrationPattern(live_vibration, extent, request, owner));
+      StartVibrationPattern(liveVibration, extent, request, owner));
 }
 
 int StartLiveOwnedVibrationPattern(std::span<const std::byte> pattern,
@@ -392,7 +392,7 @@ int StartLiveOwnedVibrationPattern(std::span<const std::byte> pattern,
     const auto storage = std::make_shared<const VibrationPattern::Storage>(
         extent.begin(), extent.end());
     return static_cast<int>(
-        StartOwnedVibrationPattern(live_vibration, storage, request, owner));
+        StartOwnedVibrationPattern(liveVibration, storage, request, owner));
   } catch (const std::bad_alloc&) {
     Refused("StartLiveOwnedVibrationPattern",
             "pattern allocation failed, slot request", request);
@@ -414,19 +414,19 @@ int StartLiveVibrationPattern(const char* pattern, std::uint32_t request,
 
 int StopLiveVibrationPatterns(std::uint32_t selector, int owner) {
   return static_cast<int>(
-      StopVibrationPatterns(live_vibration, selector, owner));
+      StopVibrationPatterns(liveVibration, selector, owner));
 }
 
 void ResetLiveVibrationPatterns() {
   ControllerPorts ports = LoadPorts();
-  ResetVibrationPatterns(live_vibration, ports);
+  ResetVibrationPatterns(liveVibration, ports);
   StorePorts(ports);
 }
 
 void UpdateLiveVibrationPatterns() {
   ControllerPortState first = LoadPort(ControllerPort::kFirst);
   const std::uint32_t outside = UpdateVibrationPatterns(
-      live_vibration, first, VS::Input::settings.vibration_on != 0);
+      liveVibration, first, VS::Input::settings.vibration_on != 0);
   StorePort(ControllerPort::kFirst, first);
   if (outside != 0) {
     Refused("UpdateLiveVibrationPatterns", "pattern reads outside the pattern",
@@ -436,7 +436,7 @@ void UpdateLiveVibrationPatterns() {
 
 void PlayLiveVibrationPreset(int index) {
   const auto presets = std::as_bytes(std::span(vibrationPresets));
-  const auto started = PlayVibrationPreset(live_vibration, presets, index);
+  const auto started = PlayVibrationPreset(liveVibration, presets, index);
   if (!started && started.error() != VibrationPresetError::kNotListed) {
     Refused("PlayLiveVibrationPreset",
             VibrationPresetErrorName(started.error()), index);

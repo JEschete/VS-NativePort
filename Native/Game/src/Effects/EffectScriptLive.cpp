@@ -50,29 +50,29 @@ LiveColorPresets<kPairedDefinitions> pairedParticleColorPresets{};
 LiveColorPresets<kColorPresetEntries> particleColorPresetTable{};
 
 namespace {
-std::uint64_t refused_calls = 0;
-std::uint64_t refused_reads = 0;
-std::uint64_t refused_opcodes = 0;
-std::uint64_t refused_registers = 0;
-std::uint64_t refused_definitions = 0;
-std::uint64_t refused_presets = 0;
-std::uint64_t refused_timelines = 0;
-std::uint64_t refused_renderers = 0;
-std::uint64_t unmapped_timelines = 0;
-std::uint64_t clamped_transforms = 0;
-std::uint64_t wrapped_children = 0;
-std::uint64_t reported_diagnostics = 0;
+std::uint64_t refusedCalls = 0;
+std::uint64_t refusedReads = 0;
+std::uint64_t refusedOpcodes = 0;
+std::uint64_t refusedRegisters = 0;
+std::uint64_t refusedDefinitions = 0;
+std::uint64_t refusedPresets = 0;
+std::uint64_t refusedTimelines = 0;
+std::uint64_t refusedRenderers = 0;
+std::uint64_t unmappedTimelines = 0;
+std::uint64_t clampedTransforms = 0;
+std::uint64_t wrappedChildren = 0;
+std::uint64_t reportedDiagnostics = 0;
 
 [[nodiscard]] bool ShouldReport(std::uint64_t& count) {
   return std::has_single_bit(++count);
 }
 
 void ReportRefusal(const char* entry) {
-  if (ShouldReport(refused_calls)) {
+  if (ShouldReport(refusedCalls)) {
     VS::Core::LogWarn(
         "effects",
         "effect script: {} refused: no effect instance ({} refusals)", entry,
-        refused_calls);
+        refusedCalls);
   }
 }
 
@@ -85,12 +85,12 @@ void ReportRefusal(const char* entry) {
 void Settle(LiveEffectInstance& instance, const ScriptCursor& cursor,
             bool refused) {
   instance.script_offset = cursor.offset;
-  if (refused && ShouldReport(refused_reads)) {
+  if (refused && ShouldReport(refusedReads)) {
     VS::Core::LogWarn(
         "effects",
         "effect script: read at {:#x} refused: program has {} bytes "
         "({} refusals)",
-        cursor.offset, cursor.program.size(), refused_reads);
+        cursor.offset, cursor.program.size(), refusedReads);
   }
 }
 
@@ -128,47 +128,47 @@ void ReportOpcodeRefusal(const char* entry, ScriptRefusal refusal,
     case ScriptRefusal::kOperand:
       return;
     case ScriptRefusal::kRegister:
-      if (ShouldReport(refused_registers)) {
+      if (ShouldReport(refusedRegisters)) {
         VS::Core::LogWarn(
             "effects",
             "effect script: {} before {:#x} names a register past the "
             "{} registers ({} refusals)",
-            entry, offset, kScriptRegisters, refused_registers);
+            entry, offset, kScriptRegisters, refusedRegisters);
       }
       return;
     case ScriptRefusal::kDefinition:
-      if (ShouldReport(refused_definitions)) {
+      if (ShouldReport(refusedDefinitions)) {
         VS::Core::LogWarn("effects",
                           "effect script: {} before {:#x} names a particle "
                           "definition past the package's {} ({} refusals)",
                           entry, offset, LiveParticleDefinitionCount(),
-                          refused_definitions);
+                          refusedDefinitions);
       }
       return;
     case ScriptRefusal::kColorPreset:
-      if (ShouldReport(refused_presets)) {
+      if (ShouldReport(refusedPresets)) {
         VS::Core::LogWarn(
             "effects",
             "effect script: {} before {:#x} names a colour preset past "
             "the {} presets ({} refusals)",
-            entry, offset, kParticleColorPresets, refused_presets);
+            entry, offset, kParticleColorPresets, refusedPresets);
       }
       return;
     case ScriptRefusal::kTimeline:
-      if (ShouldReport(refused_timelines)) {
+      if (ShouldReport(refusedTimelines)) {
         VS::Core::LogWarn("effects",
                           "effect script: {} before {:#x} needs a timeline the "
                           "instance has not loaded ({} refusals)",
-                          entry, offset, refused_timelines);
+                          entry, offset, refusedTimelines);
       }
       return;
     case ScriptRefusal::kRenderer:
-      if (ShouldReport(refused_renderers)) {
+      if (ShouldReport(refusedRenderers)) {
         VS::Core::LogWarn(
             "effects",
             "effect script: {} before {:#x} names a renderer past the "
             "{} script renderers ({} refusals)",
-            entry, offset, kScriptRenderers, refused_renderers);
+            entry, offset, kScriptRenderers, refusedRenderers);
       }
       return;
   }
@@ -221,12 +221,12 @@ void StoreRegisters(LiveEffectInstance& instance,
       LiveBoundPackageBlock(PackageBlockType::kParameters));
   if (!parameters) return 0;
   const std::size_t counted = parameters->transform_count;
-  if (counted > kEffectTransformSlots && ShouldReport(clamped_transforms)) {
+  if (counted > kEffectTransformSlots && ShouldReport(clampedTransforms)) {
     VS::Core::LogWarn(
         "effects",
         "effect script: block 9 counts {} transforms; heights apply to "
         "the instance's {} ({} clamps)",
-        counted, kEffectTransformSlots, clamped_transforms);
+        counted, kEffectTransformSlots, clampedTransforms);
   }
   return std::min(counted, kEffectTransformSlots);
 }
@@ -310,11 +310,11 @@ PresetTables() {
   if (const auto parameters = ReadPackageParameters(
           LiveBoundPackageBlock(PackageBlockType::kParameters))) {
     remap.ids = parameters->timeline_ids;
-  } else if (ShouldReport(unmapped_timelines)) {
+  } else if (ShouldReport(unmappedTimelines)) {
     VS::Core::LogWarn("effects",
                       "effect script: the package binds no block 9; register "
                       "timelines load unmapped ({} times)",
-                      unmapped_timelines);
+                      unmappedTimelines);
   }
   const std::span timelines =
       LiveBoundPackageBlock(PackageBlockType::kTimelines);
@@ -406,13 +406,13 @@ class InstanceMachine final : public ScriptMachine {
   std::optional<ScriptStep> Execute(std::uint8_t opcode) override {
     const std::span handlers{scriptOpcodeHandlers};
     if (opcode >= handlers.size() || handlers[opcode] == nullptr) {
-      if (ShouldReport(refused_opcodes)) {
+      if (ShouldReport(refusedOpcodes)) {
         VS::Core::LogWarn(
             "effects",
             "effect script: opcode {:#x} at {:#x} has no handler ({} "
             "refusals)",
             opcode, static_cast<std::uint16_t>(instance_->script_offset - 1),
-            refused_opcodes);
+            refusedOpcodes);
       }
       return std::nullopt;
     }
@@ -623,12 +623,12 @@ int LiveCompleteChildEffectScript(LiveEffectInstance* instance) {
   LiveEffectInstance* parent = instance->parent;
   if (parent == nullptr) return HandlerResult(ContinueScript());
   const auto children = static_cast<std::uint8_t>(parent->child_count);
-  if (children == 0 && ShouldReport(wrapped_children)) {
+  if (children == 0 && ShouldReport(wrappedChildren)) {
     VS::Core::LogWarn(
         "effects",
         "effect script: a child completed with its parent counting no "
         "running children; the count wraps to {} ({} wraps)",
-        kChildCountMask, wrapped_children);
+        kChildCountMask, wrappedChildren);
   }
   parent->child_count = CompleteChildScript(children).value_or(children);
   return HandlerResult(ContinueScript());
@@ -776,10 +776,10 @@ int LiveEmitParticlesFromScriptRegister(LiveEffectInstance* instance) {
 
 // decomp: func_800CE644 (src/BATTLE/BATTLE.PRG/5BF94.c:5045)
 void LiveReportEffectDiagnostic(int code) {
-  if (!ShouldReport(reported_diagnostics)) return;
+  if (!ShouldReport(reportedDiagnostics)) return;
   const std::string_view description = DescribeEffectDiagnostic(code);
   VS::Core::LogWarn("effects", "effect diagnostic {:#x}: {} ({} reports)", code,
                     description.empty() ? "unknown code" : description,
-                    reported_diagnostics);
+                    reportedDiagnostics);
 }
 }  // namespace VS::Effects

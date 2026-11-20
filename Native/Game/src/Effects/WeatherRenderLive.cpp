@@ -52,8 +52,8 @@ constexpr std::uint32_t kLengthShift = 24;
 constexpr std::uint32_t kHighHalfShift = 16;
 constexpr int kCollisionLayer = 0;
 
-std::uint64_t refused_calls = 0;
-std::uint64_t dropped_packets = 0;
+std::uint64_t refusedCalls = 0;
+std::uint64_t droppedPackets = 0;
 
 // True on the 1st, 2nd, 4th, 8th... occurrence, to keep repeated
 // diagnostics readable.
@@ -62,9 +62,9 @@ std::uint64_t dropped_packets = 0;
 }
 
 void Refuse(std::string_view call, std::string_view reason) {
-  if (ShouldReport(refused_calls)) {
+  if (ShouldReport(refusedCalls)) {
     VS::Core::LogWarn("effects", "weather draw: {} refused: {} ({} refusals)",
-                      call, reason, refused_calls);
+                      call, reason, refusedCalls);
   }
 }
 
@@ -141,12 +141,12 @@ class LiveRenderHost final : public WeatherRenderHost {
     std::uint32_t* const tag =
         entry != nullptr ? Render::ReserveLivePrimitiveWords(words) : nullptr;
     if (tag == nullptr || packet.size > kWeatherPacketMaxWords) {
-      if (ShouldReport(dropped_packets)) {
+      if (ShouldReport(droppedPackets)) {
         VS::Core::LogWarn(
             "effects",
             "weather draw: packet at slot {} has no ordering entry or "
             "buffer room; dropped ({} drops)",
-            slot, dropped_packets);
+            slot, droppedPackets);
       }
       return;
     }

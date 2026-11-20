@@ -181,7 +181,7 @@ constexpr int kConfirmationOrderingSlot = -3;
 // The action restriction the workshop lifts when it returns.
 constexpr int kWorkshopRestriction = 0x200;
 
-State g_state{};
+State setupState{};
 
 // _sydData's block, its read and the file it decoded into.
 struct RecipeLoad {
@@ -191,15 +191,15 @@ struct RecipeLoad {
   VS::Content::DiscQueueSlot* request = nullptr;
   std::optional<RecipeBook> book;
 };
-RecipeLoad g_recipes{};
+RecipeLoad recipeLoad{};
 
 void FreeRecipeBlock() {
-  if (g_recipes.data != nullptr) {
-    Core::Memory::FreeLiveFromHighEnd(g_recipes.data);
+  if (recipeLoad.data != nullptr) {
+    Core::Memory::FreeLiveFromHighEnd(recipeLoad.data);
   }
-  g_recipes.data = nullptr;
-  g_recipes.size = 0;
-  g_recipes.book.reset();
+  recipeLoad.data = nullptr;
+  recipeLoad.size = 0;
+  recipeLoad.book.reset();
 }
 
 // A row text the framework copies while it builds the rows: the row
@@ -502,14 +502,14 @@ class LiveHost final : public Host {
 
   void StartRecipeLoad(RecipeKind kind) override;
   std::optional<bool> RecipeLoaded() override {
-    if (g_recipes.request == nullptr) {
+    if (recipeLoad.request == nullptr) {
       return std::nullopt;
     }
-    return g_recipes.request->state == VS::Content::DiscRequestState::kLoaded;
+    return recipeLoad.request->state == VS::Content::DiscRequestState::kLoaded;
   }
   void ReleaseRecipeRequest() override;
   const RecipeBook* Recipes() override {
-    return g_recipes.book ? &*g_recipes.book : nullptr;
+    return recipeLoad.book ? &*recipeLoad.book : nullptr;
   }
   void FreeRecipes() override { FreeRecipeBlock(); }
 
@@ -559,13 +559,13 @@ void LiveHost::StartRecipeLoad(RecipeKind kind) {
     Refuse("recipe file outside BLADE, SHIELD and ARMOR.SYD");
     return;
   }
-  if (g_recipes.request != nullptr) {
+  if (recipeLoad.request != nullptr) {
     // The original lost the read in flight and its block; the block stays
     // until that read finishes.
     Refuse("recipe file read while the previous read was in flight");
     return;
   }
-  if (g_recipes.data != nullptr) {
+  if (recipeLoad.data != nullptr) {
     // The original replaced _sydData and lost the earlier block.
     Refuse("recipe file read while the previous block was held; freed it");
     FreeRecipeBlock();
@@ -577,42 +577,43 @@ void LiveHost::StartRecipeLoad(RecipeKind kind) {
     Refuse("recipe file does not fit the game heap");
     return;
   }
-  g_recipes.data = data;
-  g_recipes.size = size;
-  g_recipes.kind = kind;
+  recipeLoad.data = data;
+  recipeLoad.size = size;
+  recipeLoad.kind = kind;
   VS::Content::DiscFile request{};
   request.lba = file.lba;
   request.size = file.size;
-  g_recipes.request = Content::AllocateLiveDiscRequest(&request);
-  if (g_recipes.request != nullptr) {
-    Content::EnqueueLiveDiscRequest(g_recipes.request, data);
+  recipeLoad.request = Content::AllocateLiveDiscRequest(&request);
+  if (recipeLoad.request != nullptr) {
+    Content::EnqueueLiveDiscRequest(recipeLoad.request, data);
   } else {
-    g_recipes.request = Content::CompleteLiveRefusedDiscRequest(&request, data);
+    recipeLoad.request =
+        Content::CompleteLiveRefusedDiscRequest(&request, data);
   }
 }
 
 void LiveHost::ReleaseRecipeRequest() {
-  Content::ReleaseLiveDiscRequest(g_recipes.request);
-  g_recipes.request = nullptr;
-  if (g_recipes.data == nullptr) {
+  Content::ReleaseLiveDiscRequest(recipeLoad.request);
+  recipeLoad.request = nullptr;
+  if (recipeLoad.data == nullptr) {
     Refuse("recipe file read without its block");
     return;
   }
   const std::span<const std::uint8_t> bytes(
-      static_cast<const std::uint8_t*>(g_recipes.data), g_recipes.size);
-  auto decoded = DecodeRecipeFile(g_recipes.kind, bytes);
+      static_cast<const std::uint8_t*>(recipeLoad.data), recipeLoad.size);
+  auto decoded = DecodeRecipeFile(recipeLoad.kind, bytes);
   if (!decoded) {
     Refuse(decoded.error());
-    g_recipes.book.reset();
+    recipeLoad.book.reset();
     return;
   }
-  g_recipes.book = std::move(*decoded);
+  recipeLoad.book = std::move(*decoded);
 }
 
 template <typename Call>
 int RunWithLiveHost(const Call& call) {
   LiveHost host;
-  Context ctx{.state = g_state, .host = host};
+  Context ctx{.state = setupState, .host = host};
   const int result = call(ctx);
   host.Commit();
   return result;
@@ -628,15 +629,15 @@ int RunLiveSetup(const std::function<int(Context&)>& call) {
   return RunWithLiveHost(call);
 }
 
-State& LiveSetupState() { return g_state; }
+State& LiveSetupState() { return setupState; }
 
 const RecipeBook* LiveSetupRecipes() {
-  return g_recipes.book ? &*g_recipes.book : nullptr;
+  return recipeLoad.book ? &*recipeLoad.book : nullptr;
 }
 
 void ResetLiveSetupStatics() {
-  ResetModuleStatics(g_state);
-  if (g_recipes.request != nullptr) {
+  ResetModuleStatics(setupState);
+  if (recipeLoad.request != nullptr) {
     VS::Core::LogWarn("menu.setup",
                       "workshop reset while its recipe read was in flight; the "
                       "block stays until the read finishes");

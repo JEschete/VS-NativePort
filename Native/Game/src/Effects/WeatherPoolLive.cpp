@@ -37,12 +37,12 @@ constexpr std::size_t kScaleWord = 6;
 static_assert(sizeof(VS::Field::WeatherParticleRecord) ==
               kWeatherParticleBytes);
 
-std::uint64_t refused_calls = 0;
+std::uint64_t refusedCalls = 0;
 
 void Refuse(std::string_view call, std::string_view reason) {
-  if (std::has_single_bit(++refused_calls)) {
+  if (std::has_single_bit(++refusedCalls)) {
     VS::Core::LogWarn("effects", "weather pool: {} refused: {} ({} refusals)",
-                      call, reason, refused_calls);
+                      call, reason, refusedCalls);
   }
 }
 

@@ -1296,7 +1296,7 @@ backend, if later approved, must not make the modern path depend on it.
 
 #### EC-02: SPU register and sample-memory model
 
-**Evidence:** `Native/Engine/Legacy/Audio/LibSpu.cpp` (`g_registers`, `g_ram`, `SpuWrite`, `SpuRead`),
+**Evidence:** `Native/Engine/Legacy/Audio/LibSpu.cpp` (`spuRegisters`, `spuRam`, `SpuWrite`, `SpuRead`),
 `Native/Engine/src/Audio/Driver/SoundDriver.hpp`, `Driver/PlaybackResetLive.cpp` (the live binding of the typed reset), `SoundEffects/SoundEffects.c`, and
 `Native/Engine/src/Audio/AudioDevice.cpp`.
 
@@ -1384,8 +1384,8 @@ has no module-image copying, sector arithmetic or original-address relocation de
 
 #### EC-05: Scratchpad and overlay-offset preservation
 
-**Evidence:** `Native/Engine/src/Core/Scratch.cpp` (`g_scratch[1024]`), `Native/Engine/include/Core/Arena.hpp`
-(`VS::Core::overlay_arena`, `VS::Core::OverlayAddress`), `Native/Engine/src/Core/Overlays.cpp`, and
+**Evidence:** `Native/Engine/src/Core/Scratch.cpp` (`scratchpad`), `Native/Engine/include/Core/Arena.hpp`
+(`VS::Core::overlayArena`, `VS::Core::OverlayAddress`), `Native/Engine/src/Core/Overlays.cpp`, and
 `Native/Game/src/Boot/OverlayReset.cpp`.
 
 Scratch users share a byte block; overlay slots retain original relative addresses and overlaps inside native storage.

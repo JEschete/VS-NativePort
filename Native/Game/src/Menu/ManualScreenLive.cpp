@@ -51,13 +51,13 @@ constexpr std::uint32_t kRefusalLogInterval = 1024;
 // D_800F4EE8.cursorMemories: the manual's list cursor row and first row.
 constexpr std::size_t kCursorRowMemory = 4;
 constexpr std::size_t kCursorScrollMemory = 5;
-std::uint64_t g_refusals = 0;
-ScreenState g_screen;
+std::uint64_t refusals = 0;
+ScreenState manualScreen;
 
 void RefuseLive(std::string_view reason) {
-  ++g_refusals;
-  if (g_refusals <= kRefusalLogLimit || g_refusals % kRefusalLogInterval == 0) {
-    VS::Core::LogWarn("menu.manual", "{} (refusal {})", reason, g_refusals);
+  ++refusals;
+  if (refusals <= kRefusalLogLimit || refusals % kRefusalLogInterval == 0) {
+    VS::Core::LogWarn("menu.manual", "{} (refusal {})", reason, refusals);
   }
 }
 
@@ -404,7 +404,7 @@ int LiveUpdateScreen(std::uint8_t* state) {
     return 0;
   }
   LiveScreenHost host;
-  return UpdateScreen(host, *state, g_screen);
+  return UpdateScreen(host, *state, manualScreen);
 }
 
 // decomp: MENUE.PRG _initMenuState (src/MENU/MENUE.PRG/494.c:219), 0x801030A4
@@ -425,9 +425,9 @@ int LiveUpdateHelpPages() {
   return result;
 }
 
-void ResetLiveManualScreenStatics() { g_screen = {}; }
+void ResetLiveManualScreenStatics() { manualScreen = {}; }
 
-ScreenState& LiveManualScreenState() noexcept { return g_screen; }
+ScreenState& LiveManualScreenState() noexcept { return manualScreen; }
 
-std::uint64_t LiveManualScreenRefusalCount() noexcept { return g_refusals; }
+std::uint64_t LiveManualScreenRefusalCount() noexcept { return refusals; }
 }  // namespace VS::Menu::manual

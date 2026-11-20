@@ -93,19 +93,18 @@ struct WorkspaceViews {
   std::array<LootRow, kLootRowCapacity> rows{};
   std::array<LootRow, kLootRowCapacity> working_rows{};
 };
-Controllers g_controllers;
-std::unique_ptr<WorkspaceViews> g_workspace;
-std::uint64_t g_refusals = 0;
+Controllers controllers;
+std::unique_ptr<WorkspaceViews> workspaceViews;
+std::uint64_t refusals = 0;
 
 [[noreturn]] void Refuse(std::string_view reason) {
-  ++g_refusals;
+  ++refusals;
   VS::Core::Errorf("menu.loot", "Loot terminal refused: %.*s",
                    static_cast<int>(reason.size()), reason.data());
   std::abort();
 }
 void RequireIdleControllers() {
-  if (std::ranges::find(g_controllers.active, true) !=
-      g_controllers.active.end()) {
+  if (std::ranges::find(controllers.active, true) != controllers.active.end()) {
     Refuse("reset during an active loot terminal call");
   }
 }
@@ -182,8 +181,8 @@ void WriteRuntime(const LootTerminalRuntime& runtime) {
   VS::Menu::Framework::actionSelection.selection_kind = runtime.result_kind;
 }
 void InvalidateWorkspace() {
-  if (g_workspace) {
-    for (auto& weapon : g_workspace->inventory.weapons) {
+  if (workspaceViews) {
+    for (auto& weapon : workspaceViews->inventory.weapons) {
       if (VS::Battle::stringContext.strings[0] == weapon.name.data()) {
         VS::Battle::stringContext.strings[0] = nullptr;
       }
@@ -193,13 +192,13 @@ void InvalidateWorkspace() {
   inventoryBackup = nullptr;
   lootList = nullptr;
   lootListWorkingCopy = nullptr;
-  g_workspace.reset();
+  workspaceViews.reset();
 }
 void RequireOwnedWorkspace() {
-  if (!g_workspace || stagedInventory != &g_workspace->inventory ||
-      inventoryBackup != &g_workspace->inventory_backup ||
-      lootList != g_workspace->rows.data() ||
-      lootListWorkingCopy != g_workspace->working_rows.data()) {
+  if (!workspaceViews || stagedInventory != &workspaceViews->inventory ||
+      inventoryBackup != &workspaceViews->inventory_backup ||
+      lootList != workspaceViews->rows.data() ||
+      lootListWorkingCopy != workspaceViews->working_rows.data()) {
     Refuse("loot workspace cannot be released by a different owner");
   }
 }
@@ -223,7 +222,7 @@ int LegacyRow(std::optional<std::size_t> row) {
 class CallGuard {
  public:
   explicit CallGuard(Controller controller)
-      : active_(g_controllers.active[static_cast<std::size_t>(controller)]) {
+      : active_(controllers.active[static_cast<std::size_t>(controller)]) {
     if (active_) Refuse("same loot controller reentered before returning");
     active_ = true;
   }
@@ -589,16 +588,16 @@ class LiveTerminalHost final : public LootTerminalHost {
   }
   void AcquireWorkspace() override {
     Publish();
-    if (g_workspace || stagedInventory != nullptr ||
+    if (workspaceViews || stagedInventory != nullptr ||
         inventoryBackup != nullptr || lootList != nullptr ||
         lootListWorkingCopy != nullptr) {
       Refuse("loot workspace already acquired or borrowed by another owner");
     }
-    g_workspace = std::make_unique<WorkspaceViews>();
-    stagedInventory = &g_workspace->inventory;
-    inventoryBackup = &g_workspace->inventory_backup;
-    lootList = g_workspace->rows.data();
-    lootListWorkingCopy = g_workspace->working_rows.data();
+    workspaceViews = std::make_unique<WorkspaceViews>();
+    stagedInventory = &workspaceViews->inventory;
+    inventoryBackup = &workspaceViews->inventory_backup;
+    lootList = workspaceViews->rows.data();
+    lootListWorkingCopy = workspaceViews->working_rows.data();
     ForgetWorkspace();
     ReadRuntime(runtime_);
   }
@@ -721,27 +720,27 @@ int UpdateLiveInventoryTransition(int initialize) {
       initialize != 0 ? std::optional(static_cast<LootCategory>(initialize - 1))
                       : std::nullopt;
   return Execute(Controller::kTransition, [&](auto& host) {
-    return UpdateInventoryTransition(g_controllers.transition, host, category);
+    return UpdateInventoryTransition(controllers.transition, host, category);
   });
 }
 // decomp: _disassembleItem (src/MENU/MENUB.PRG/260.c:232).
 int UpdateLiveDisassembly(int initialize) {
   const auto row = RowEntry(initialize);
   return Execute(Controller::kDisassembly, [&](auto& host) {
-    return UpdateDisassembly(g_controllers.disassembly, host, row);
+    return UpdateDisassembly(controllers.disassembly, host, row);
   });
 }
 // decomp: _consolidateMiscItems (src/MENU/MENUB.PRG/260.c:458).
 int UpdateLiveStackConsolidation(int initialize) {
   const auto row = RowEntry(initialize);
   return Execute(Controller::kConsolidation, [&](auto& host) {
-    return UpdateStackConsolidation(g_controllers.consolidation, host, row);
+    return UpdateStackConsolidation(controllers.consolidation, host, row);
   });
 }
 // decomp: _processLootMenu (src/MENU/MENUB.PRG/260.c:1622).
 int UpdateLiveLootSelection(int initialize) {
   return Execute(Controller::kSelection, [&](auto& host) {
-    return UpdateLootSelection(g_controllers.selection, host, initialize != 0);
+    return UpdateLootSelection(controllers.selection, host, initialize != 0);
   });
 }
 // decomp: vs_menuB_exec (src/MENU/MENUB.PRG/260.c:1951).
@@ -752,13 +751,13 @@ int UpdateLiveLootScreen(unsigned char* step) {
 }
 void ResetLootTerminalModuleData() {
   RequireIdleControllers();
-  g_controllers = {};
+  controllers = {};
 }
 void ResetLootTerminalSession() {
   RequireIdleControllers();
   VS::Menu::Loot::Live::ResetPaging();
   InvalidateWorkspace();
-  g_controllers = {};
+  controllers = {};
   lootListCount = 0;
   lootListOffset = 0;
   selectedLoot = 0;
@@ -770,5 +769,5 @@ void ResetLootTerminalSession() {
   inventoryCapacityFlyinTimer = 0;
   lootLeftEdge = 0;
 }
-std::uint64_t LootTerminalLiveRefusalCount() noexcept { return g_refusals; }
+std::uint64_t LootTerminalLiveRefusalCount() noexcept { return refusals; }
 }  // namespace VS::Menu::Loot

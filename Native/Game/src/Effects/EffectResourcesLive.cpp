@@ -86,8 +86,8 @@ constexpr int kEffectOwnerTag = 2;
 // func_800F9800 calls each plugin entry with message 2 (update).
 constexpr unsigned int kPluginUpdateMessage = 2;
 
-std::uint64_t refused_calls = 0;
-std::uint64_t walk_reports = 0;
+std::uint64_t refusedCalls = 0;
+std::uint64_t walkReports = 0;
 
 // True on the 1st, 2nd, 4th, 8th... occurrence, to keep repeated
 // diagnostics readable.
@@ -96,10 +96,10 @@ std::uint64_t walk_reports = 0;
 }
 
 void ReportRefusal(const char* entry, const char* reason) {
-  if (ShouldReport(refused_calls)) {
+  if (ShouldReport(refusedCalls)) {
     VS::Core::LogWarn("effects",
                       "effect resources: {} refused: {} ({} refusals)", entry,
-                      reason, refused_calls);
+                      reason, refusedCalls);
   }
 }
 
@@ -110,21 +110,21 @@ struct PackageRecord {
   EffectPackageBlocks blocks;
 };
 
-std::array<PackageRecord, kPackageRecords> package_records{};
-std::size_t next_package_record = 0;
+std::array<PackageRecord, kPackageRecords> packageRecords{};
+std::size_t nextPackageRecord = 0;
 
 [[nodiscard]] PackageRecord* FindPackageRecord(
     const LiveEffectPackage* package) {
   const auto found =
-      std::ranges::find(package_records, package, &PackageRecord::package);
-  return found == package_records.end() ? nullptr : &*found;
+      std::ranges::find(packageRecords, package, &PackageRecord::package);
+  return found == packageRecords.end() ? nullptr : &*found;
 }
 
 [[nodiscard]] PackageRecord& PackageRecordFor(
     const LiveEffectPackage* package) {
   if (PackageRecord* record = FindPackageRecord(package)) return *record;
-  PackageRecord& record = package_records.at(next_package_record);
-  next_package_record = (next_package_record + 1) % package_records.size();
+  PackageRecord& record = packageRecords.at(nextPackageRecord);
+  nextPackageRecord = (nextPackageRecord + 1) % packageRecords.size();
   record = {.package = package, .blocks = {}};
   return record;
 }
@@ -272,13 +272,13 @@ void ReportWalk(const PackageWalk& walk) {
   if (walk.status == PackageWalkStatus::kEnded && walk.curves.refused == 0) {
     return;
   }
-  if (ShouldReport(walk_reports)) {
+  if (ShouldReport(walkReports)) {
     VS::Core::LogWarn(
         "effects",
         "effect package: walk stopped with status {} after {} blocks; "
         "{} of {} curves refused ({} reports)",
         static_cast<int>(walk.status), walk.blocks, walk.curves.refused,
-        walk.curves.header_count, walk_reports);
+        walk.curves.header_count, walkReports);
   }
 }
 
@@ -412,8 +412,8 @@ class LiveResourceHost final : public EffectResourceHost {
     const void* slot = VS::Core::kOverlaySlots[kPurgeOverlaySlot];
     const auto address = reinterpret_cast<std::uintptr_t>(slot);
     const auto arena =
-        reinterpret_cast<std::uintptr_t>(Core::overlay_arena.data());
-    const std::uintptr_t end = arena + Core::overlay_arena.size();
+        reinterpret_cast<std::uintptr_t>(Core::overlayArena.data());
+    const std::uintptr_t end = arena + Core::overlayArena.size();
     if (slot == nullptr) return {};
     return {.id = IdOf<EffectBufferId>(slot),
             .capacity = address < arena || address >= end ? 0 : end - address};
@@ -565,14 +565,14 @@ void ReportConfiguration(const EffectPurgeConfiguration& configuration,
       configuration.package == PurgeTableRefusal::kNone) {
     return;
   }
-  if (ShouldReport(refused_calls)) {
+  if (ShouldReport(refusedCalls)) {
     VS::Core::LogWarn(
         "effects",
         "effect resources: effect {} refused tables: textures {}, "
         "plugins {}, package {} ({} refusals)",
         effect_id, static_cast<int>(configuration.textures),
         static_cast<int>(configuration.plugins),
-        static_cast<int>(configuration.package), refused_calls);
+        static_cast<int>(configuration.package), refusedCalls);
   }
 }
 }  // namespace

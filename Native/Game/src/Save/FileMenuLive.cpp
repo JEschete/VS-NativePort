@@ -81,8 +81,8 @@ struct LivePicker {
 LivePicker picker;
 std::optional<std::filesystem::path> directory;
 std::optional<Files> files;
-std::optional<VS::Items::ContainerData> staged_storage;
-std::optional<Document> staged_clear;
+std::optional<VS::Items::ContainerData> stagedStorage;
+std::optional<Document> stagedClear;
 std::array<char, kFooterTextLimit + 1> footer{};
 
 std::string& ClearError() {
@@ -273,10 +273,10 @@ std::expected<FileInfo, FileMenuError> ReadConfirmedSelection(
 std::expected<VS::Items::ContainerData, std::string> BankFor(
     const file_menu::FileMenu& menu, const FileInfo& selected) {
   if (menu.container) {
-    if (!staged_storage) {
+    if (!stagedStorage) {
       return std::unexpected("No staged container transaction");
     }
-    return *staged_storage;
+    return *stagedStorage;
   }
   if (selected.document) return selected.document->state.storage;
   return VS::Items::ContainerData{};
@@ -288,10 +288,10 @@ std::expected<Document, std::string> BuildDocument(
   if (!bank) return std::unexpected(bank.error());
   Document document;
   if (menu.clear_game) {
-    if (!staged_clear) {
+    if (!stagedClear) {
       return std::unexpected("No staged original ending clear save");
     }
-    document = *staged_clear;
+    document = *stagedClear;
     // F03601 TITLE 22C.c:698 preserves the source's partial container reset.
     std::fill_n(std::begin(bank->misc), kClearContainerResetStacks,
                 VS::Items::InventoryMisc{});
@@ -362,7 +362,7 @@ class LiveFileMenuHost final : public file_menu::FileMenuHost {
   }
   [[nodiscard]] std::expected<void, std::string> ClearSaveStaged()
       const override {
-    if (staged_clear) return {};
+    if (stagedClear) return {};
     return std::unexpected(ClearError());
   }
 
@@ -388,7 +388,7 @@ class LiveFileMenuHost final : public file_menu::FileMenuHost {
   std::expected<void, std::string> WriteSelection(
       const file_menu::FileMenu& menu, VS::Save::WriteConsent consent) override;
   void OpenEmptyContainer() override {
-    staged_storage.emplace();
+    stagedStorage.emplace();
     VS::Input::settings.container_empty = 1;
   }
   void OpenConfirmedContainer() override;
@@ -520,8 +520,8 @@ std::expected<void, std::string> LiveFileMenuHost::WriteSelection(
 void LiveFileMenuHost::OpenConfirmedContainer() {
   const auto& document = ConfirmedDocument();
   const auto& current = ConfirmedFile();
-  staged_storage = document.state.storage;
-  VS::Input::settings.container_empty = BankEmpty(*staged_storage);
+  stagedStorage = document.state.storage;
+  VS::Input::settings.container_empty = BankEmpty(*stagedStorage);
   VS::Core::LogInfo("save", "Opened native container in slot {} recovered {}",
                     current.slot, current.status == FileStatus::kRecovered);
 }
@@ -587,8 +587,8 @@ void ConfigureDirectory(std::filesystem::path root) {
 void ResetFileMenuSession() {
   picker.session = {};
   ForgetPicker();
-  staged_storage.reset();
-  staged_clear.reset();
+  stagedStorage.reset();
+  stagedClear.reset();
   ClearError().clear();
   if (VS::Title::memoryCardMessage == footer.data()) {
     VS::Title::memoryCardMessage = nullptr;
@@ -630,18 +630,18 @@ void DrawFileOverlay(bool title) {
 }
 
 VS::Items::ContainerData* ContainerData() {
-  if (!staged_storage) {
+  if (!stagedStorage) {
     VS::Core::LogError("save",
                        "Container access without a selected native file");
     std::abort();
   }
-  return &*staged_storage;
+  return &*stagedStorage;
 }
 
-void ReleaseContainer() { staged_storage.reset(); }
+void ReleaseContainer() { stagedStorage.reset(); }
 
 void StageClearGame() {
-  staged_clear.reset();
+  stagedClear.reset();
   ClearError().clear();
   auto document = CaptureClearGame();
   if (!document) {
@@ -650,7 +650,7 @@ void StageClearGame() {
                        document.error());
     return;
   }
-  staged_clear = std::move(*document);
+  stagedClear = std::move(*document);
   VS::Core::LogInfo("save", "Staged original ending clear save");
 }
 }  // namespace VS::Game::Save

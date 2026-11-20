@@ -41,11 +41,11 @@ constexpr std::uintptr_t kNumberChainOffset = 0x10;
 // Ending/Credits/StaffRoll.cpp allocate them).
 constexpr std::size_t kOrderingTableEntries = 0x2088 / sizeof(std::uint32_t);
 
-std::uint64_t dropped_packets = 0;
-std::uint64_t unspliced_primitives = 0;
-std::uint64_t truncated_numbers = 0;
-std::uint64_t refused_texture_pages = 0;
-std::uint64_t refused_sprites = 0;
+std::uint64_t droppedPackets = 0;
+std::uint64_t unsplicedPrimitives = 0;
+std::uint64_t truncatedNumbers = 0;
+std::uint64_t refusedTexturePages = 0;
+std::uint64_t refusedSprites = 0;
 
 // Counts an event, logging at powers of two so it cannot flood the log.
 bool CountAndReport(std::uint64_t& count) {
@@ -54,21 +54,21 @@ bool CountAndReport(std::uint64_t& count) {
 }
 
 void ReportUnspliced(SpliceResult result) {
-  if (CountAndReport(unspliced_primitives)) {
+  if (CountAndReport(unsplicedPrimitives)) {
     VS::Core::Errorf("render",
                      "overlay primitive not spliced (result %d, %" PRIu64
                      " refused)",
-                     static_cast<int>(result), unspliced_primitives);
+                     static_cast<int>(result), unsplicedPrimitives);
   }
 }
 
 void ReportDropped() {
-  if (CountAndReport(dropped_packets)) {
+  if (CountAndReport(droppedPackets)) {
     VS::Core::Errorf(
         "render",
         "UI packet dropped: no room in the frame primitive buffer or "
         "no chain (%" PRIu64 " dropped)",
-        dropped_packets);
+        droppedPackets);
   }
 }
 
@@ -246,12 +246,12 @@ int DrawLiveIntegerRightAligned(int font, int xy, int value,
   LivePacketQueue queue(before != nullptr ? before : DefaultNumberChain());
   const RightAlignedNumber number = DrawIntegerRightAligned(
       queue, {.font = font, .position = xy, .value = value});
-  if (number.truncated && CountAndReport(truncated_numbers)) {
+  if (number.truncated && CountAndReport(truncatedNumbers)) {
     VS::Core::Errorf(
         "render",
         "number %d does not end its digit loop; %d digits drawn (%" PRIu64
         " truncated)",
-        value, kMaxDecimalDigits, truncated_numbers);
+        value, kMaxDecimalDigits, truncatedNumbers);
   }
   return number.next_position;
 }
@@ -328,12 +328,12 @@ void* AppendLiveTexturePage(int tpage, int ot_slot) {
   std::uint32_t* entry =
       LiveFrameOrderingEntry(LiveOrderingBase::kScene, ot_slot);
   if (entry == nullptr) {
-    if (CountAndReport(refused_texture_pages)) {
+    if (CountAndReport(refusedTexturePages)) {
       VS::Core::Errorf("render",
                        "texture page 0x%X refused: ordering-table entry %d is "
                        "outside the frame's table (%" PRIu64 " refused)",
                        static_cast<unsigned>(tpage), ot_slot,
-                       refused_texture_pages);
+                       refusedTexturePages);
     }
     return FrameScratchpad().primitive_cursor;
   }
@@ -348,16 +348,16 @@ void DrawLiveImmediateSprite(int xy, int uv_clut, int wh, int tpage) {
                                     .uv_clut = uv_clut,
                                     .size = wh,
                                     .texture_page = tpage}) &&
-      CountAndReport(refused_sprites)) {
+      CountAndReport(refusedSprites)) {
     VS::Core::Errorf("render",
                      "sprite at 0x%08X refused: texture page 0x%08X dims it "
                      "outside a colour byte (%" PRIu64 " refused)",
                      static_cast<unsigned>(xy), static_cast<unsigned>(tpage),
-                     refused_sprites);
+                     refusedSprites);
   }
 }
 
 std::uint64_t DroppedLiveUiPacketCount() {
-  return dropped_packets + refused_texture_pages + refused_sprites;
+  return droppedPackets + refusedTexturePages + refusedSprites;
 }
 }  // namespace VS::Render

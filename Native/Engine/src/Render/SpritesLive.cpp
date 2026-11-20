@@ -28,8 +28,8 @@ namespace {
 // (Field/RoomLoading.cpp, Ending/Credits/StaffRoll.cpp).
 constexpr std::size_t kPrimitiveBufferBytes = 0x20000;
 
-std::array<std::uint32_t, kSpritePacketWords> discard_packet{};
-std::uint64_t dropped_sprites = 0;
+std::array<std::uint32_t, kSpritePacketWords> discardPacket{};
+std::uint64_t droppedSprites = 0;
 
 class LiveSpriteQueue final : public SpriteQueue {
  public:
@@ -57,15 +57,15 @@ class LiveSpriteQueue final : public SpriteQueue {
 
  private:
   void Drop() {
-    discard_packet.fill(0);
-    packet_ = discard_packet.data();
-    ++dropped_sprites;
+    discardPacket.fill(0);
+    packet_ = discardPacket.data();
+    ++droppedSprites;
     // Logged at powers of two so a full buffer cannot flood the log.
-    if (std::has_single_bit(dropped_sprites)) {
+    if (std::has_single_bit(droppedSprites)) {
       VS::Core::Errorf("render",
                        "sprite packet dropped: no room in the frame primitive "
                        "buffer or no chain (%" PRIu64 " dropped)",
-                       dropped_sprites);
+                       droppedSprites);
     }
   }
 
@@ -124,5 +124,5 @@ void LoadLiveFrameViewMatrix() {
   LoadFrameViewMatrix(target);
 }
 
-std::uint64_t DroppedLiveSpriteCount() { return dropped_sprites; }
+std::uint64_t DroppedLiveSpriteCount() { return droppedSprites; }
 }  // namespace VS::Render

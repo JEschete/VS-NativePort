@@ -39,14 +39,14 @@ constexpr std::size_t kActionTextCount{
 constexpr std::int32_t kNotificationCount{
     battle_door_strings::index::kDoorLocked + 1,
 };
-std::uint64_t refused_notifications = 0;
+std::uint64_t refusedNotifications = 0;
 
 void Refuse(const char* reason) {
-  ++refused_notifications;
-  if (std::has_single_bit(refused_notifications)) {
+  ++refusedNotifications;
+  if (std::has_single_bit(refusedNotifications)) {
     VS::Core::Warnf("menu",
                     "Scene notification refused: %s (count=%" PRIu64 ")",
-                    reason, refused_notifications);
+                    reason, refusedNotifications);
   }
 }
 
@@ -248,6 +248,6 @@ void ReleaseLiveSceneNotification() {
 }
 
 std::uint64_t RefusedLiveSceneNotificationCount() {
-  return refused_notifications;
+  return refusedNotifications;
 }
 }  // namespace VS::Menu

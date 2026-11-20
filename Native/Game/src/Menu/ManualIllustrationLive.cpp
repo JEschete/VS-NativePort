@@ -40,12 +40,12 @@ constexpr std::size_t kLineWords = 4;
 constexpr std::size_t kTexturePageWords = 2;
 constexpr int kUvRowShift = 8;
 constexpr int kUvClutShift = 16;
-std::uint64_t g_refusals = 0;
+std::uint64_t refusals = 0;
 
 void Refuse(std::string_view reason) {
-  ++g_refusals;
-  if (g_refusals <= kRefusalLogLimit || g_refusals % kRefusalLogInterval == 0) {
-    VS::Core::LogWarn("menu.manual", "{} (refusal {})", reason, g_refusals);
+  ++refusals;
+  if (refusals <= kRefusalLogLimit || refusals % kRefusalLogInterval == 0) {
+    VS::Core::LogWarn("menu.manual", "{} (refusal {})", reason, refusals);
   }
 }
 
@@ -204,5 +204,5 @@ std::int16_t LiveAdvanceVisibilityAnimation(VisibilityAnimation* state) {
   return AdvanceVisibilityAnimation(*state);
 }
 
-std::uint64_t LiveIllustrationRefusalCount() { return g_refusals; }
+std::uint64_t LiveIllustrationRefusalCount() { return refusals; }
 }  // namespace VS::Menu::manual

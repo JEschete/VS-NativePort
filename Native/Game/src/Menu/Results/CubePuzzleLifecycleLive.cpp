@@ -76,8 +76,8 @@ struct AssetLoad {
   void* buffer = nullptr;
 };
 
-AssetLoad iq_load;
-AssetLoad esc_load;
+AssetLoad iqLoad;
+AssetLoad escLoad;
 
 [[nodiscard]] std::span<std::uint16_t, kResultsClutWords> LiveClut() {
   return std::span<std::uint16_t, kResultsClutWords>{clutBuf};
@@ -305,7 +305,7 @@ void LivePulseCubePuzzleClut(int blend_weight) {
 // decomp: MENUF.PRG _initCubePuzzleStart (src/MENU/MENUF.PRG/3B8.c:2260),
 // 0x80107A8C
 int LiveInitializeCubePuzzleStart() {
-  LiveCubePuzzleLoad host("start", iq_load, DiscFileFor(DisFile::kIq));
+  LiveCubePuzzleLoad host("start", iqLoad, DiscFileFor(DisFile::kIq));
   CubePuzzleScreen screen = LiveScreen();
   CubePuzzleRating rating = LiveRating();
   const CubePuzzleLoad load =
@@ -318,7 +318,7 @@ int LiveInitializeCubePuzzleStart() {
 // decomp: MENUF.PRG _initCubePuzzleEnd (src/MENU/MENUF.PRG/3B8.c:2351),
 // 0x80107D4C
 int LiveInitializeCubePuzzleResults() {
-  LiveCubePuzzleLoad host("results", iq_load, DiscFileFor(DisFile::kIq));
+  LiveCubePuzzleLoad host("results", iqLoad, DiscFileFor(DisFile::kIq));
   CubePuzzleScreen screen = LiveScreen();
   CubePuzzleRating rating = LiveRating();
   CubePuzzleTimer timer{.clock = LiveClock(),
@@ -342,7 +342,7 @@ int LiveInitializeCubePuzzleResults() {
 // decomp: MENUF.PRG _initCubePuzzleQuit (src/MENU/MENUF.PRG/3B8.c:2363),
 // 0x80107D98
 int LiveInitializeCubePuzzleQuit() {
-  LiveCubePuzzleLoad host("quit", esc_load, DiscFileFor(DisFile::kEsc));
+  LiveCubePuzzleLoad host("quit", escLoad, DiscFileFor(DisFile::kEsc));
   CubePuzzleScreen screen = LiveScreen();
   const CubePuzzleLoad load =
       InitializeCubePuzzleQuit(screen, LiveClut(), host);
@@ -390,7 +390,7 @@ int LiveUpdateCubePuzzleQuit() {
 }
 
 void ResetLiveCubePuzzleLifecycleStatics() {
-  iq_load = {};
-  esc_load = {};
+  iqLoad = {};
+  escLoad = {};
 }
 }  // namespace VS::Menu::Results

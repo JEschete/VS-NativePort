@@ -13,25 +13,25 @@
 namespace VS::Legacy {
 namespace {
 
-alignas(16) std::uint8_t g_registers[kSpuRegisterBytes];
-std::uint8_t g_ram[kSpuRamBytes];
-std::uint32_t g_transferAddr = 0;
-SpuTransferCallbackProc g_transferDone = nullptr;
+alignas(16) std::uint8_t spuRegisters[kSpuRegisterBytes];
+std::uint8_t spuRam[kSpuRamBytes];
+std::uint32_t transferAddr = 0;
+SpuTransferCallbackProc transferDone = nullptr;
 
 void CompleteTransfer() {
   // the callback may replace itself (the sound driver's clears it)
-  if (SpuTransferCallbackProc done = g_transferDone) {
+  if (SpuTransferCallbackProc done = transferDone) {
     done();
   }
 }
 
 }  // namespace
 
-void* SpuRegisters() { return g_registers; }
+void* SpuRegisters() { return spuRegisters; }
 
 SpuTransferCallbackProc SpuSetTransferCallback(SpuTransferCallbackProc func) {
-  SpuTransferCallbackProc previous = g_transferDone;
-  g_transferDone = func;
+  SpuTransferCallbackProc previous = transferDone;
+  transferDone = func;
   return previous;
 }
 
@@ -41,24 +41,22 @@ std::uint32_t SpuSetTransferStartAddr(std::uint32_t addr) {
   if (addr < 0x1010 || addr >= kSpuRamBytes) {
     return 0;
   }
-  g_transferAddr = addr & ~7u;
-  return g_transferAddr;
+  transferAddr = addr & ~7u;
+  return transferAddr;
 }
 
 std::uint32_t SpuWrite(std::uint8_t* addr, std::uint32_t size) {
-  const std::uint32_t n = size <= kSpuRamBytes - g_transferAddr
-                              ? size
-                              : kSpuRamBytes - g_transferAddr;
-  std::memcpy(g_ram + g_transferAddr, addr, n);
+  const std::uint32_t n =
+      size <= kSpuRamBytes - transferAddr ? size : kSpuRamBytes - transferAddr;
+  std::memcpy(spuRam + transferAddr, addr, n);
   CompleteTransfer();
   return n;
 }
 
 std::uint32_t SpuRead(std::uint8_t* addr, std::uint32_t size) {
-  const std::uint32_t n = size <= kSpuRamBytes - g_transferAddr
-                              ? size
-                              : kSpuRamBytes - g_transferAddr;
-  std::memcpy(addr, g_ram + g_transferAddr, n);
+  const std::uint32_t n =
+      size <= kSpuRamBytes - transferAddr ? size : kSpuRamBytes - transferAddr;
+  std::memcpy(addr, spuRam + transferAddr, n);
   CompleteTransfer();
   return n;
 }

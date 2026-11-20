@@ -36,12 +36,13 @@ namespace Samples = VS::Audio::Samples;
 static_assert(VoiceEngine::kVoices == Driver::kVoiceCount);
 
 constexpr unsigned kSilentSource = 0x1010;
-std::array<std::filesystem::path, Samples::kInstrumentSlotCount> g_instruments;
-std::array<VoiceControls, VoiceEngine::kVoices> g_controls;
-std::array<unsigned, VoiceEngine::kVoices> g_voice_instruments{};
-VS::u64 g_sample_clock = 0;
-VS::Audio::ReverbControls g_reverb;
-bool g_mono = false;
+constexpr std::size_t kInstrumentSlots = Samples::kInstrumentSlotCount;
+std::array<std::filesystem::path, kInstrumentSlots> instrumentPaths;
+std::array<VoiceControls, VoiceEngine::kVoices> voiceControls;
+std::array<unsigned, VoiceEngine::kVoices> voiceInstruments{};
+VS::u64 sampleClock = 0;
+VS::Audio::ReverbControls reverbControls;
+bool monoOutput = false;
 
 VoiceEngine& Engine() {
   static VoiceEngine engine;
@@ -78,23 +79,23 @@ class LiveVoiceOutput final : public Driver::VoiceOutputHost {
   void KeyOn(std::uint32_t voice) override {
     if (auto result = Engine().NoteOn(voice); !result) {
       VS::Core::LogError("audio", "voice {} instrument {}: {}", voice,
-                         g_voice_instruments[voice], result.error());
+                         voiceInstruments[voice], result.error());
       return;
     }
     VS::Core::LogInfo("audio",
                       "note-on sample={} voice={} instrument={} rate={} "
                       "noise={} fm={} reverb={}",
-                      g_sample_clock, voice, g_voice_instruments[voice],
-                      g_controls[voice].rate, g_controls[voice].noise,
-                      g_controls[voice].frequency_modulation,
-                      g_controls[voice].reverb);
+                      sampleClock, voice, voiceInstruments[voice],
+                      voiceControls[voice].rate, voiceControls[voice].noise,
+                      voiceControls[voice].frequency_modulation,
+                      voiceControls[voice].reverb);
   }
 
   void KeyOff(std::uint32_t voice) override { Engine().NoteOff(voice); }
 
   void SetVoiceMode(std::uint32_t voice, Driver::VoiceMode mode,
                     bool enabled) override {
-    auto& controls = g_controls[voice];
+    auto& controls = voiceControls[voice];
     bool& flag = ModeFlag(controls, mode);
     if (flag == enabled) return;
     flag = enabled;
@@ -103,21 +104,21 @@ class LiveVoiceOutput final : public Driver::VoiceOutputHost {
 
   void SetVoiceGains(std::uint32_t voice,
                      const Driver::VoiceGains& gains) override {
-    auto& controls = g_controls[voice];
+    auto& controls = voiceControls[voice];
     controls.left = gains.left;
     controls.right = gains.right;
     Engine().Configure(voice, controls);
   }
 
   void SetVoiceRate(std::uint32_t voice, float rate) override {
-    auto& controls = g_controls[voice];
+    auto& controls = voiceControls[voice];
     controls.rate = rate;
     Engine().Configure(voice, controls);
   }
 
   void SetVoiceRelease(std::uint32_t voice,
                        const VS::Audio::EnvelopeRate& release) override {
-    g_controls[voice].envelope.release = release;
+    voiceControls[voice].envelope.release = release;
     Engine().SetRelease(voice, release);
   }
 };
@@ -180,7 +181,7 @@ class LiveSampleBanks final : public Samples::SampleBankHost {
     VS::Audio::Samples::instruments[slot] = {
         record.sample_start, record.loop_start, record.fine_tune,
         record.root_note,    record.adsr_lower, record.adsr_upper};
-    g_instruments[slot] =
+    instrumentPaths[slot] =
         available ? VS::Content::AudioInstrumentPath(root_, bank_id, index)
                   : std::filesystem::path{};
   }
@@ -289,10 +290,10 @@ void VS::Audio::Driver::ResetVoiceOutput() {
   VS::Audio::ResetCutsceneStream();
   VS::Audio::StopXaStream();
   Engine().Reset();
-  g_instruments = {};
-  g_controls = {};
-  g_reverb = {};
-  g_mono = false;
+  instrumentPaths = {};
+  voiceControls = {};
+  reverbControls = {};
+  monoOutput = false;
   Banks().clear();
   if (auto* device = VS::Audio::AudioDevice::Primary()) {
     device->Clear();
@@ -301,13 +302,13 @@ void VS::Audio::Driver::ResetVoiceOutput() {
 
 void VS::Audio::Driver::ConfigureOutputChannel(VS::Audio::SeqChannel* channel) {
   const auto voice = CheckedVoice(channel->voice.assigned_voice);
-  if (channel->instrument_index >= g_instruments.size()) {
+  if (channel->instrument_index >= instrumentPaths.size()) {
     VS::Core::LogError("audio", "invalid instrument {}",
                        channel->instrument_index);
     std::abort();
   }
-  auto& controls = g_controls[voice];
-  controls.instrument = g_instruments[channel->instrument_index];
+  auto& controls = voiceControls[voice];
+  controls.instrument = instrumentPaths[channel->instrument_index];
   controls.rate = Driver::VoiceSampleRateRatio(channel->voice.sample_rate);
   controls.left = Driver::VoiceVolumeGain(Driver::VoiceVolumeRegister(
       channel->voice.volume.left, channel->voice.volume_scale));
@@ -315,7 +316,7 @@ void VS::Audio::Driver::ConfigureOutputChannel(VS::Audio::SeqChannel* channel) {
       channel->voice.volume.right, channel->voice.volume_scale));
   controls.envelope = VS::Audio::DecodeAkaoEnvelope(channel->voice.adsr_lower,
                                                     channel->voice.adsr_upper);
-  g_voice_instruments[voice] = channel->instrument_index;
+  voiceInstruments[voice] = channel->instrument_index;
   controls.silent = channel->voice.sample_start == kSilentSource;
   Engine().Configure(voice, controls);
   channel->voice.dirty_flags = 0;
@@ -330,7 +331,7 @@ void VS::Audio::Driver::SetOutputNoiseClock(int clock) {
 
 // decomp: SLUS_010.40/libspu/S_SRMT.c, S_SRMD.c, S_SR.c and S_GRMT.c.
 int VS::Audio::Driver::OutputReverbMode() {
-  return static_cast<int>(g_reverb.preset);
+  return static_cast<int>(reverbControls.preset);
 }
 
 void VS::Audio::Driver::SetOutputReverbMode(int mode) {
@@ -338,18 +339,18 @@ void VS::Audio::Driver::SetOutputReverbMode(int mode) {
     VS::Core::LogError("audio", "invalid reverb preset {}", mode);
     std::abort();
   }
-  g_reverb.preset = static_cast<VS::Audio::ReverbPreset>(mode);
-  g_reverb.left = g_reverb.right = 0;
-  Engine().SetReverb(g_reverb, true);
+  reverbControls.preset = static_cast<VS::Audio::ReverbPreset>(mode);
+  reverbControls.left = reverbControls.right = 0;
+  Engine().SetReverb(reverbControls, true);
   VS::Core::LogInfo("audio", "reverb preset {}", mode);
 }
 
 void VS::Audio::Driver::SetOutputReverbDepth(std::int16_t left,
                                              std::int16_t right) {
   constexpr float kDepthUnit = 32768;
-  g_reverb.left = static_cast<float>(left) / kDepthUnit;
-  g_reverb.right = static_cast<float>(right) / kDepthUnit;
-  Engine().SetReverb(g_reverb);
+  reverbControls.left = static_cast<float>(left) / kDepthUnit;
+  reverbControls.right = static_cast<float>(right) / kDepthUnit;
+  Engine().SetReverb(reverbControls);
 }
 
 void VS::Audio::Driver::EnableOutputReverb(int enabled) {
@@ -357,8 +358,8 @@ void VS::Audio::Driver::EnableOutputReverb(int enabled) {
     VS::Core::LogError("audio", "invalid reverb enable {}", enabled);
     std::abort();
   }
-  g_reverb.enabled = enabled != 0;
-  Engine().SetReverb(g_reverb);
+  reverbControls.enabled = enabled != 0;
+  Engine().SetReverb(reverbControls);
 }
 
 std::int16_t VS::Audio::Driver::OutputVoiceEnvelope(unsigned voice) {
@@ -369,7 +370,7 @@ int VS::Audio::Driver::StartOutputStreamVoice(unsigned voice,
                                               const char* instrument,
                                               float rate, unsigned left,
                                               unsigned right, int reverb) {
-  auto& controls = g_controls[CheckedVoice(voice)];
+  auto& controls = voiceControls[CheckedVoice(voice)];
   controls = {};
   controls.instrument = VS::Platform::Utf8Path(instrument);
   controls.rate = rate;
@@ -388,12 +389,12 @@ int VS::Audio::Driver::StartOutputStreamVoice(unsigned voice,
     return 0;
   }
   VS::Core::LogInfo("audio", "stream-note-on sample={} voice={} asset={}",
-                    g_sample_clock, voice, instrument);
+                    sampleClock, voice, instrument);
   return 1;
 }
 
 void VS::Audio::Driver::PauseOutputVoice(unsigned voice, int paused) {
-  auto& controls = g_controls[CheckedVoice(voice)];
+  auto& controls = voiceControls[CheckedVoice(voice)];
   controls.paused = paused != 0;
   Engine().Configure(voice, controls);
 }
@@ -407,14 +408,14 @@ void VS::Audio::Driver::TickVoiceOutput() {
   constexpr unsigned kMonoOutput = 2;
   const bool mono =
       (VS::Audio::Driver::controlLatches.mix_behavior & kMonoOutput) != 0;
-  if (mono != g_mono) {
+  if (mono != monoOutput) {
     Engine().SetMonoOutput(mono);
-    g_mono = mono;
+    monoOutput = mono;
     VS::Core::LogInfo("audio", "native output mode: {}",
                       mono ? "mono" : "stereo");
   }
   Engine().CommitTick();
-  g_sample_clock += VoiceEngine::kFramesPerTick;
+  sampleClock += VoiceEngine::kFramesPerTick;
   auto* device = VS::Audio::AudioDevice::Primary();
   if (device && device->IsRealtime()) {
     if (auto result = device->RenderFrom(Engine()); !result) {

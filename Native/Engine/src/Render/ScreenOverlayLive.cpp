@@ -74,15 +74,15 @@ constexpr std::size_t kOriginalPacketBlockBytes = 0x2D0;
 static_assert(sizeof(EffectPacketBlock) == kOriginalPacketBlockBytes,
               "the block keeps the original's heap footprint");
 
-FramebufferEffect live_effect;
-EffectPacketBlock* live_packets = nullptr;
-std::uint64_t refused_overlays = 0;
+FramebufferEffect liveEffect;
+EffectPacketBlock* livePackets = nullptr;
+std::uint64_t refusedOverlays = 0;
 
 void ReportRefusal(const char* what) {
-  if (std::has_single_bit(++refused_overlays)) {
+  if (std::has_single_bit(++refusedOverlays)) {
     VS::Core::Errorf(kChannel,
                      "screen overlay refused: %s (%" PRIu64 " refused)", what,
-                     refused_overlays);
+                     refusedOverlays);
   }
 }
 
@@ -172,7 +172,7 @@ class LiveEffectPackets final : public FramebufferEffectPackets {
   explicit LiveEffectPackets(void* ordering_table = nullptr)
       : ordering_table_(ordering_table) {}
 
-  [[nodiscard]] bool Ready() const override { return live_packets != nullptr; }
+  [[nodiscard]] bool Ready() const override { return livePackets != nullptr; }
   bool Acquire(const FramebufferEffectTint& tint) override {
     void* memory =
         Core::Memory::AllocateLiveFromHighEnd(sizeof(EffectPacketBlock));
@@ -180,19 +180,19 @@ class LiveEffectPackets final : public FramebufferEffectPackets {
       ReportRefusal("no heap block for the framebuffer effect packets");
       return false;
     }
-    live_packets = std::construct_at(static_cast<EffectPacketBlock*>(memory));
-    FillPackets(*live_packets, tint);
+    livePackets = std::construct_at(static_cast<EffectPacketBlock*>(memory));
+    FillPackets(*livePackets, tint);
     return true;
   }
   void Release() override {
-    if (live_packets != nullptr) {
-      Core::Memory::FreeLiveFromHighEnd(live_packets);
-      live_packets = nullptr;
+    if (livePackets != nullptr) {
+      Core::Memory::FreeLiveFromHighEnd(livePackets);
+      livePackets = nullptr;
     }
   }
-  void Forget() override { live_packets = nullptr; }
+  void Forget() override { livePackets = nullptr; }
   void Submit(const FramebufferEffectFrame& frame) override {
-    if (live_packets == nullptr || ordering_table_ == nullptr) {
+    if (livePackets == nullptr || ordering_table_ == nullptr) {
       ReportRefusal("framebuffer effect frame without packets or table");
       return;
     }
@@ -201,9 +201,9 @@ class LiveEffectPackets final : public FramebufferEffectPackets {
       if (strip.slot >= kFramebufferEffectSlotCount) {
         ReportRefusal("framebuffer effect strip past the packet block");
       } else if (frame.layout == FramebufferEffectLayout::kTransformed) {
-        SubmitRotated(*live_packets, frame, strip, entry);
+        SubmitRotated(*livePackets, frame, strip, entry);
       } else {
-        SubmitFlat(*live_packets, frame, strip, entry);
+        SubmitFlat(*livePackets, frame, strip, entry);
       }
     }
   }
@@ -290,17 +290,17 @@ void DrawLiveScreenTransition(void* ordering_table) {
 }
 
 // decomp: BATTLE.PRG func_8007D360 (src/BATTLE/BATTLE.PRG/146C.c:9258).
-void ResetLiveFramebufferEffect() { ResetFramebufferEffect(live_effect); }
+void ResetLiveFramebufferEffect() { ResetFramebufferEffect(liveEffect); }
 
 // decomp: BATTLE.PRG func_8007D3F8 (src/BATTLE/BATTLE.PRG/146C.c:9278).
 void InitializeLiveFramebufferEffect() {
   LiveEffectPackets packets;
-  InitializeFramebufferEffect(live_effect, packets);
+  InitializeFramebufferEffect(liveEffect, packets);
 }
 
 bool AbandonLiveFrameBeforeHeapReset() {
-  if (live_packets != nullptr) {
-    const auto capacity = Core::Memory::LivePayloadCapacity(live_packets);
+  if (livePackets != nullptr) {
+    const auto capacity = Core::Memory::LivePayloadCapacity(livePackets);
     if (!capacity.has_value() || *capacity < sizeof(EffectPacketBlock)) {
       ReportRefusal("framebuffer packets no longer belong to the live heap");
       return false;
@@ -314,7 +314,7 @@ bool AbandonLiveFrameBeforeHeapReset() {
   FrameScratchpad().primitive_cursor = nullptr;
   LiveEffectPackets packets;
   packets.Release();
-  ResetFramebufferEffect(live_effect);
+  ResetFramebufferEffect(liveEffect);
   return true;
 }
 
@@ -322,7 +322,7 @@ bool AbandonLiveFrameBeforeHeapReset() {
 void DrawLiveFramebufferEffect(void* ordering_table) {
   LiveEffectPackets packets(ordering_table);
   LiveScreenTransformer transformer;
-  if (DrawFramebufferEffect(live_effect, packets, transformer,
+  if (DrawFramebufferEffect(liveEffect, packets, transformer,
                             CurrentBuffer()) ==
       FramebufferEffectDraw::kNoPackets) {
     ReportRefusal("framebuffer effect drawn without its packet block");
@@ -333,12 +333,12 @@ void DrawLiveFramebufferEffect(void* ordering_table) {
 void SetLiveFramebufferEffectEnabled(int enabled) {
   LiveEffectPackets packets;
   static_cast<void>(
-      SetFramebufferEffectEnabled(live_effect, packets, enabled != 0));
+      SetFramebufferEffectEnabled(liveEffect, packets, enabled != 0));
 }
 
 // decomp: BATTLE.PRG func_8007DDAC (src/BATTLE/BATTLE.PRG/146C.c:9430).
 void SetLiveFramebufferEffectRotation(int roll_angle) {
-  SetFramebufferEffectRoll(live_effect.settings, roll_angle);
+  SetFramebufferEffectRoll(liveEffect.settings, roll_angle);
 }
 
 // decomp: BATTLE.PRG func_8007DDB8 (src/BATTLE/BATTLE.PRG/146C.c:9432).
@@ -347,7 +347,7 @@ void SetLiveFramebufferEffectScale(const FramebufferEffectTranslation* scale) {
     ReportRefusal("null framebuffer effect scale");
     return;
   }
-  SetFramebufferEffectScale(live_effect.settings, {scale->x, scale->y});
+  SetFramebufferEffectScale(liveEffect.settings, {scale->x, scale->y});
 }
 
 // decomp: BATTLE.PRG func_8007DDD4 (src/BATTLE/BATTLE.PRG/146C.c:9438).
@@ -356,7 +356,7 @@ void SetLiveFramebufferEffectTint(const CVECTOR* tint) {
     ReportRefusal("null framebuffer effect tint");
     return;
   }
-  SetFramebufferEffectTint(live_effect.settings, {tint->r, tint->g, tint->b});
+  SetFramebufferEffectTint(liveEffect.settings, {tint->r, tint->g, tint->b});
 }
 
 // decomp: BATTLE.PRG func_8007DDF8 (src/BATTLE/BATTLE.PRG/146C.c:9440).
@@ -366,24 +366,24 @@ void SetLiveFramebufferEffectOffset(
     ReportRefusal("null framebuffer effect offset");
     return;
   }
-  SetFramebufferEffectOffset(live_effect.settings, {offset->x, offset->y});
+  SetFramebufferEffectOffset(liveEffect.settings, {offset->x, offset->y});
 }
 
 // decomp: BATTLE.PRG func_8007DE2C (src/BATTLE/BATTLE.PRG/146C.c:9442).
 void SetLiveFramebufferEffectBlendMode(int blend_mode) {
-  SetFramebufferEffectBlendMode(live_effect.settings, blend_mode);
+  SetFramebufferEffectBlendMode(liveEffect.settings, blend_mode);
 }
 
 // decomp: BATTLE.PRG func_8007DE44 (src/BATTLE/BATTLE.PRG/146C.c:9446). A
 // depth past the table is ignored, as in the original.
 void SetLiveFramebufferEffectDepth(std::uint32_t ordering_depth) {
   static_cast<void>(
-      SetFramebufferEffectDepth(live_effect.settings, ordering_depth));
+      SetFramebufferEffectDepth(liveEffect.settings, ordering_depth));
 }
 
 // decomp: BATTLE.PRG func_8007DE5C (src/BATTLE/BATTLE.PRG/146C.c:9453).
 void SetLiveFramebufferPreviousFrame(int use_previous_frame) {
-  SetFramebufferEffectPreviousFrame(live_effect.settings, use_previous_frame);
+  SetFramebufferEffectPreviousFrame(liveEffect.settings, use_previous_frame);
 }
 
 // decomp: BATTLE.PRG func_8007DE88 (src/BATTLE/BATTLE.PRG/146C.c:9459).
@@ -393,7 +393,7 @@ void ReadLiveFramebufferEffectScale(FramebufferEffectTranslation* output) {
     return;
   }
   const FramebufferEffectPair scale =
-      ReadFramebufferEffectScale(live_effect.settings);
+      ReadFramebufferEffectScale(liveEffect.settings);
   output->x = scale.x;
   output->y = scale.y;
   output->reserved08 = 0;
@@ -406,7 +406,7 @@ void ReadLiveFramebufferEffectTint(CVECTOR* output) {
     return;
   }
   const FramebufferEffectTint tint =
-      ReadFramebufferEffectTint(live_effect.settings);
+      ReadFramebufferEffectTint(liveEffect.settings);
   output->r = tint.red;
   output->g = tint.green;
   output->b = tint.blue;
@@ -419,25 +419,23 @@ void ReadLiveFramebufferEffectOffset(FramebufferEffectTranslation* output) {
     return;
   }
   const FramebufferEffectPair offset =
-      ReadFramebufferEffectOffset(live_effect.settings);
+      ReadFramebufferEffectOffset(liveEffect.settings);
   output->x = offset.x;
   output->y = offset.y;
 }
 
 bool IsLiveFramebufferEffectShowing() noexcept {
-  return live_effect.phase == FramebufferEffectPhase::kStarting ||
-         live_effect.phase == FramebufferEffectPhase::kDrawing;
+  return liveEffect.phase == FramebufferEffectPhase::kStarting ||
+         liveEffect.phase == FramebufferEffectPhase::kDrawing;
 }
 
-const FramebufferEffect& LiveFramebufferEffect() noexcept {
-  return live_effect;
-}
+const FramebufferEffect& LiveFramebufferEffect() noexcept { return liveEffect; }
 
 bool HasLiveFramebufferEffectPackets() noexcept {
-  return live_packets != nullptr;
+  return livePackets != nullptr;
 }
 
 std::uint64_t RefusedLiveScreenOverlayCount() noexcept {
-  return refused_overlays;
+  return refusedOverlays;
 }
 }  // namespace VS::Render

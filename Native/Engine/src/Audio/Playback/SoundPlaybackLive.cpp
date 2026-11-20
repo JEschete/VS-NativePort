@@ -38,7 +38,7 @@ static_assert(sizeof(*VS::Audio::Playback::soundEffectBankSelectors) ==
               sizeof(std::uint16_t));
 
 // The bound shared sound-effect tables (BindLiveEffectTables).
-std::optional<LiveEffectTables> bound_tables;
+std::optional<LiveEffectTables> boundTables;
 
 const char* RefusalReason(PlaybackRefusal refusal) {
   switch (refusal) {
@@ -186,7 +186,7 @@ class LivePlayback final : public PlaybackHost {
 }  // namespace
 
 void BindLiveEffectTables(const LiveEffectTables& tables) {
-  bound_tables = tables;
+  boundTables = tables;
   VS::Audio::Playback::soundEffectProgramOffsets =
       tables.program_offsets.data();
   VS::Audio::Playback::soundEffectBankSelectors = tables.bank_selectors.data();
@@ -194,18 +194,18 @@ void BindLiveEffectTables(const LiveEffectTables& tables) {
 }
 
 std::optional<LiveEffectTables> BoundLiveEffectTables() {
-  if (!bound_tables || bound_tables->program_offsets.data() == nullptr ||
-      bound_tables->program_offsets.data() !=
+  if (!boundTables || boundTables->program_offsets.data() == nullptr ||
+      boundTables->program_offsets.data() !=
           VS::Audio::Playback::soundEffectProgramOffsets ||
-      bound_tables->bank_selectors.data() !=
+      boundTables->bank_selectors.data() !=
           VS::Audio::Playback::soundEffectBankSelectors) {
     return std::nullopt;
   }
-  return bound_tables;
+  return boundTables;
 }
 
 ScopedLiveEffectTables::ScopedLiveEffectTables(const LiveEffectTables& tables)
-    : saved_binding_(bound_tables),
+    : saved_binding_(boundTables),
       saved_offsets_(VS::Audio::Playback::soundEffectProgramOffsets),
       saved_selectors_(VS::Audio::Playback::soundEffectBankSelectors),
       saved_program_data_(VS::Audio::Playback::soundEffectProgramData) {
@@ -213,7 +213,7 @@ ScopedLiveEffectTables::ScopedLiveEffectTables(const LiveEffectTables& tables)
 }
 
 ScopedLiveEffectTables::~ScopedLiveEffectTables() {
-  bound_tables = saved_binding_;
+  boundTables = saved_binding_;
   VS::Audio::Playback::soundEffectProgramOffsets = saved_offsets_;
   VS::Audio::Playback::soundEffectBankSelectors = saved_selectors_;
   VS::Audio::Playback::soundEffectProgramData = saved_program_data_;

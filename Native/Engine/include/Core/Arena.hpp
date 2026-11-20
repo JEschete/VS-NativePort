@@ -26,12 +26,12 @@ inline constexpr std::size_t kOverlaySize = kOverlayEnd - kOverlayBase;
 
 // A named object rather than an accessor so slot tables holding addresses in
 // it (VS::Core::kOverlaySlots) stay constant-initialized.
-extern std::array<std::byte, kOverlaySize> overlay_arena;
+extern std::array<std::byte, kOverlaySize> overlayArena;
 
 // The native address of a PS1 overlay-RAM address.
 [[nodiscard]] constexpr void* OverlayAddress(
     std::uint32_t psx_address) noexcept {
-  return overlay_arena.data() + (psx_address - kOverlayBase);
+  return overlayArena.data() + (psx_address - kOverlayBase);
 }
 
 }  // namespace VS::Core

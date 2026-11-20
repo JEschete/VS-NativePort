@@ -237,11 +237,10 @@ struct Fixture {
   MainMenuScope main_menu;
   FrameRestore saved_frame;
   ValueRestore<st::EquipmentDetailState> saved_detail{
-      st::terminal_live::detail_state};
-  ValueRestore<st::EquipmentListState> saved_list{
-      st::terminal_live::list_state};
+      st::terminal_live::detailState};
+  ValueRestore<st::EquipmentListState> saved_list{st::terminal_live::listState};
   ValueRestore<st::StatusTerminalState> saved_screen{
-      st::terminal_live::screen_state};
+      st::terminal_live::screenState};
   ValueRestore<VS::Render::FrameScratch> saved_scratch{
       VS::Render::FrameScratchpad()};
   ValueRestore<int> saved_projection{VS::Render::projectionDistance};

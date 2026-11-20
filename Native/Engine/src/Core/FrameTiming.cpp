@@ -9,14 +9,14 @@
 
 namespace {
 using Clock = std::chrono::steady_clock;
-Clock::time_point frame_start = Clock::now();
+Clock::time_point frameStart = Clock::now();
 constexpr std::int64_t kNanosecondsPerSecond = 1000000000;
 constexpr std::int64_t kCounterModulus = 65536;
 // Original root counter 1 counts horizontal lines, not CPU cycles. The
 // read-only PC timing reference uses 15,734 units/second for this ABI.
 constexpr std::int64_t kCounterUnitsPerSecond = 15734;
-int tick_step = 0;
-int stepped_ticks = 0;
+int tickStep = 0;
+int steppedTicks = 0;
 }  // namespace
 
 namespace VS::Core {
@@ -34,13 +34,13 @@ int FrameCounterTicks(std::chrono::nanoseconds elapsed) {
 }
 
 void ResetFrameTimingBaseline() {
-  frame_start = Clock::now();
-  stepped_ticks = 0;
+  frameStart = Clock::now();
+  steppedTicks = 0;
 }
 
 void StepFrameCounterTicks(int step) {
-  tick_step = step;
-  stepped_ticks = 0;
+  tickStep = step;
+  steppedTicks = 0;
 }
 
 // decomp: func_800E45B4 (src/BATTLE/BATTLE.PRG/7BDB4.s:7-16).
@@ -48,13 +48,12 @@ void StepFrameCounterTicks(int step) {
 // no hardware register, guest counter, or frame-wait time is represented.
 // Stepped replays wrap the same way, so the sum cannot overflow.
 int ElapsedFrameCounterTicks() {
-  if (tick_step != 0) {
-    stepped_ticks = static_cast<int>(
-        (static_cast<std::int64_t>(stepped_ticks) + tick_step) %
-        kCounterModulus);
-    return stepped_ticks;
+  if (tickStep != 0) {
+    steppedTicks = static_cast<int>(
+        (static_cast<std::int64_t>(steppedTicks) + tickStep) % kCounterModulus);
+    return steppedTicks;
   }
   return FrameCounterTicks(std::chrono::duration_cast<std::chrono::nanoseconds>(
-      Clock::now() - frame_start));
+      Clock::now() - frameStart));
 }
 }  // namespace VS::Core

@@ -205,10 +205,10 @@ class LiveGameplayOverlayHost final : public GameplayOverlayHost {
   }
 };
 
-LiveGameplayOverlayHost live_gameplay_overlay_host;
+LiveGameplayOverlayHost liveGameplayOverlayHost;
 }  // namespace
 
 void InitializeGameplayOverlayLive([[maybe_unused]] int start_state) {
-  InitializeGameplayOverlay(live_gameplay_overlay_host);
+  InitializeGameplayOverlay(liveGameplayOverlayHost);
 }
 }  // namespace VS::Boot

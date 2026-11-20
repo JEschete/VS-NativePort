@@ -32,12 +32,12 @@ constexpr std::uint64_t kRefusalLogInterval = 1024;
 // VS::Menu::Inventory::categoryOrders names the seven item tables.
 constexpr auto kManage = ItemCategory::kManage;
 constexpr auto kOrderedCategories = static_cast<std::size_t>(kManage);
-std::uint64_t g_refusals = 0;
+std::uint64_t refusals = 0;
 
 void Refuse(std::string_view reason) {
-  ++g_refusals;
-  if (g_refusals <= kRefusalLogLimit || g_refusals % kRefusalLogInterval == 0) {
-    VS::Core::LogWarn("menu.inventory", "{} (refusal {})", reason, g_refusals);
+  ++refusals;
+  if (refusals <= kRefusalLogLimit || refusals % kRefusalLogInterval == 0) {
+    VS::Core::LogWarn("menu.inventory", "{} (refusal {})", reason, refusals);
   }
 }
 
@@ -272,5 +272,5 @@ void LiveRestoreItemRows(int item_category) {
   if (!restored) Refuse(Describe(restored.error()));
 }
 
-std::uint64_t ItemListRowsLiveRefusalCount() noexcept { return g_refusals; }
+std::uint64_t ItemListRowsLiveRefusalCount() noexcept { return refusals; }
 }  // namespace VS::Menu::Inventory

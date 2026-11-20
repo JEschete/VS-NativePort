@@ -65,9 +65,9 @@ constexpr int kSectorWords = kSectorBytes / 4;
 // ReadLiveRefusedDiscFile waits at most a minute of frames for the drive.
 constexpr std::uint32_t kRefusedReadWaitFrames = 60 * 60;
 
-std::uint64_t refused_requests = 0;
-std::uint64_t request_serial = 0;
-std::array<std::uint64_t, kDiscRequestCapacity> request_generations{};
+std::uint64_t refusedRequests = 0;
+std::uint64_t requestSerial = 0;
+std::array<std::uint64_t, kDiscRequestCapacity> requestGenerations{};
 
 struct RefusedRecord {
   DiscQueueSlot slot{};
@@ -77,30 +77,30 @@ struct RefusedRecord {
 // A released record returns to Free and is reused, as the array's slots are,
 // so a caller's stale pointer stays readable (each record is allocated on
 // its own, so its address stays put).
-std::vector<std::unique_ptr<RefusedRecord>> refused_records;
+std::vector<std::unique_ptr<RefusedRecord>> refusedRecords;
 
 RefusedRecord* FindRefusedRecord(const DiscQueueSlot* request) {
   const auto record = std::ranges::find_if(
-      refused_records,
+      refusedRecords,
       [request](const auto& candidate) { return &candidate->slot == request; });
-  return record == refused_records.end() ? nullptr : record->get();
+  return record == refusedRecords.end() ? nullptr : record->get();
 }
 
 RefusedRecord& FreeRefusedRecord() {
   const auto record =
-      std::ranges::find_if(refused_records, [](const auto& candidate) {
+      std::ranges::find_if(refusedRecords, [](const auto& candidate) {
         return candidate->slot.state == DiscRequestState::kFree;
       });
-  if (record != refused_records.end()) return **record;
-  return *refused_records.emplace_back(std::make_unique<RefusedRecord>());
+  if (record != refusedRecords.end()) return **record;
+  return *refusedRecords.emplace_back(std::make_unique<RefusedRecord>());
 }
 
 std::uint64_t NextRequestGeneration() {
-  if (request_serial == std::numeric_limits<std::uint64_t>::max()) {
+  if (requestSerial == std::numeric_limits<std::uint64_t>::max()) {
     VS::Core::Warnf("content", "Disc request generation exhausted");
     return 0;
   }
-  return ++request_serial;
+  return ++requestSerial;
 }
 
 DiscDestination Destination(void* pointer) {
@@ -300,12 +300,12 @@ DiscQueueSlot* AllocateLiveDiscRequest(const DiscFile* file) {
   const std::optional<std::size_t> index =
       AllocateDiscRequest(queue, Extent(*file));
   if (!index) {
-    if (std::has_single_bit(++refused_requests)) {
+    if (std::has_single_bit(++refusedRequests)) {
       VS::Core::Warnf(
           "content",
           "AllocateDiscRequest refused: all %zu disc requests are in "
           "use (sector %d, %d bytes); %" PRIu64 " refused",
-          kDiscRequestCapacity, file->lba, file->size, refused_requests);
+          kDiscRequestCapacity, file->lba, file->size, refusedRequests);
     }
     return nullptr;
   }
@@ -314,7 +314,7 @@ DiscQueueSlot* AllocateLiveDiscRequest(const DiscFile* file) {
     return nullptr;
   }
   CommitQueue(queue);
-  request_generations[*index] = generation;
+  requestGenerations[*index] = generation;
   return &discRequestSlots[*index];
 }
 
@@ -322,7 +322,7 @@ std::uint64_t LiveDiscRequestGeneration(const DiscQueueSlot* request) {
   if (const auto index = IndexOf(request)) {
     return request->state == DiscRequestState::kFree
                ? 0
-               : request_generations[*index];
+               : requestGenerations[*index];
   }
   if (const auto* record = FindRefusedRecord(request)) {
     return record->slot.state == DiscRequestState::kFree ? 0
@@ -388,7 +388,7 @@ DiscQueueSlot* CompleteLiveRefusedDiscRequest(const DiscFile* file,
 
 std::size_t LiveRefusedDiscRecordsInUse() noexcept {
   return static_cast<std::size_t>(
-      std::ranges::count_if(refused_records, [](const auto& record) {
+      std::ranges::count_if(refusedRecords, [](const auto& record) {
         return record->slot.state != DiscRequestState::kFree;
       }));
 }
@@ -419,9 +419,9 @@ void InitializeLiveDiscQueue() {
   DiscRequestQueue queue = LoadQueue();
   InitializeDiscQueue(queue);
   CommitQueue(queue);
-  request_generations.fill(0);
+  requestGenerations.fill(0);
   // The records are freed like the array's slots but never deallocated.
-  for (const auto& record : refused_records) {
+  for (const auto& record : refusedRecords) {
     record->slot.state = DiscRequestState::kFree;
     record->generation = 0;
   }
@@ -469,7 +469,7 @@ int ReadLiveRefusedDiscFile(const DiscFile* file, void* destination) {
   return 1;
 }
 
-std::uint64_t LiveDiscRequestRefusals() noexcept { return refused_requests; }
+std::uint64_t LiveDiscRequestRefusals() noexcept { return refusedRequests; }
 
 DiscDriveState LiveDiscState() { return DiscState(LoadTransfer()); }
 

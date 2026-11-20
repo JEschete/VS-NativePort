@@ -34,9 +34,9 @@ using VS::Core::Gte::MATRIX;
 
 // NOLINTNEXTLINE(readability-identifier-naming): the catalog's component.
 namespace VS::Menu::Status::terminal_live {
-EquipmentDetailState detail_state;
-EquipmentListState list_state;
-StatusTerminalState screen_state;
+EquipmentDetailState detailState;
+EquipmentListState listState;
+StatusTerminalState screenState;
 namespace {
 std::uint64_t refused = 0;
 constexpr int kWorkspaceOwner = 6;
@@ -384,19 +384,19 @@ void LiveDrawBackground() {
 void LiveDrawFrame() { static_cast<void>(terminal_live::DrawFrameChecked()); }
 
 void ResetLiveTerminalControllersModuleData() {
-  terminal_live::detail_state = {};
-  terminal_live::list_state = {};
-  terminal_live::screen_state = {};
+  terminal_live::detailState = {};
+  terminal_live::listState = {};
+  terminal_live::screenState = {};
   selectedStatRow = 0;
 }
 const EquipmentDetailState& LiveEquipmentDetailControllerState() {
-  return terminal_live::detail_state;
+  return terminal_live::detailState;
 }
 const EquipmentListState& LiveEquipmentListControllerState() {
-  return terminal_live::list_state;
+  return terminal_live::listState;
 }
 const StatusTerminalState& LiveStatusTerminalControllerState() {
-  return terminal_live::screen_state;
+  return terminal_live::screenState;
 }
 std::uint64_t RefusedLiveTerminalControllerCount() {
   return terminal_live::refused;

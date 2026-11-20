@@ -239,7 +239,7 @@ CardDirectory PublishedDirectory() {
 
 // _initSaveFileInfo's firstfile/nextfile targets. The original lists into
 // fifteen entries from _dirEntBuf, which holds one; these hold all fifteen.
-std::array<DIRENTRY, kDirectoryCapacity> live_directory_entries{};
+std::array<DIRENTRY, kDirectoryCapacity> liveDirectoryEntries{};
 
 class LiveCardHost final : public CardHost {
  public:
@@ -297,14 +297,14 @@ class LiveCardHost final : public CardHost {
       const CardFilename& pattern) override {
     CardFilename name = pattern;
     return Publish(0, VS::Legacy::LibApi::firstfile(
-                          name.data(), &live_directory_entries.front()));
+                          name.data(), &liveDirectoryEntries.front()));
   }
   std::optional<CardDirectoryEntry> NextFile(std::size_t index) override {
     if (index >= kDirectoryCapacity) {
       return std::nullopt;
     }
     return Publish(
-        index, VS::Legacy::LibApi::nextfile(&live_directory_entries.at(index)));
+        index, VS::Legacy::LibApi::nextfile(&liveDirectoryEntries.at(index)));
   }
 
  private:
@@ -324,7 +324,7 @@ enum class LiveKeystream : std::uint8_t { kInterface, kTitleCipher };
 
 // _keystreamBits' seed. No native TITLE.PRG reload resets it (OverlayReset.cpp
 // has no TITLE entry), so it runs on from start-up.
-CipherState title_cipher;
+CipherState titleCipher;
 
 class LiveSaveState final : public SaveStateHost {
  public:
@@ -382,7 +382,7 @@ class LiveSaveState final : public SaveStateHost {
   }
   std::uint32_t NextKeystreamBits(std::int32_t bits) override {
     if (keystream_ == LiveKeystream::kTitleCipher) {
-      return NextCipherBits(title_cipher, bits);
+      return NextCipherBits(titleCipher, bits);
     }
     return VS::Core::NextLiveInterfaceRandomBits(bits);
   }
@@ -466,14 +466,14 @@ class LiveIntroHost final : public IntroSnapshotHost {
   std::byte* image_ = nullptr;
 };
 
-LiveCardHost live_card;
-CardReadinessState live_readiness;
-CardReadinessState live_title_readiness;
-SaveReadState live_read;
-SaveWriteState live_write;
-LiveIntroHost live_intro;
-CardFilename live_save_filename{};
-CardFilename live_temporary_filename{};
+LiveCardHost liveCard;
+CardReadinessState liveReadiness;
+CardReadinessState liveTitleReadiness;
+SaveReadState liveRead;
+SaveWriteState liveWrite;
+LiveIntroHost liveIntro;
+CardFilename liveSaveFilename{};
+CardFilename liveTemporaryFilename{};
 
 TransferProgress LoadProgress() {
   return TransferProgress{.position = VS::Title::transferProgressPosition,
@@ -500,13 +500,13 @@ void ReportPackageError(const std::expected<void, SaveImageError>& packaged) {
 }  // namespace
 
 char* BuildLiveSaveFilename(int channel, int file_number) {
-  live_save_filename = BuildSaveFilename(channel, file_number);
-  return live_save_filename.data();
+  liveSaveFilename = BuildSaveFilename(channel, file_number);
+  return liveSaveFilename.data();
 }
 
 char* BuildLiveTemporaryFilename(int channel, int file_number) {
-  live_temporary_filename = BuildTemporaryFilename(channel, file_number);
-  return live_temporary_filename.data();
+  liveTemporaryFilename = BuildTemporaryFilename(channel, file_number);
+  return liveTemporaryFilename.data();
 }
 
 int NewestLiveSaveSlot() {
@@ -563,7 +563,7 @@ void DecodeLiveSaveBytes(std::uint32_t key, void* bytes, std::size_t count) {
 
 int DeleteLiveRedundantTemporaryFiles(int channel) {
   const auto erased =
-      DeleteRedundantTemporaryFiles(live_card, PublishedDirectory(), channel);
+      DeleteRedundantTemporaryFiles(liveCard, PublishedDirectory(), channel);
   return erased.has_value() ? *erased : kEraseFailedMask;
 }
 
@@ -574,25 +574,25 @@ int ScanLiveSaveDirectory(int port) {
     return kLiveFailure;
   }
   CardDirectory directory;
-  return ScanSaveDirectory(live_card, directory, *summaries, port).has_value()
+  return ScanSaveDirectory(liveCard, directory, *summaries, port).has_value()
              ? 0
              : kLiveFailure;
 }
 
 int CreateLiveSaveFile(int port, int file_number) {
-  return CreateSaveFile(live_card, port, file_number).has_value()
+  return CreateSaveFile(liveCard, port, file_number).has_value()
              ? 0
              : kCreateFailed;
 }
 
 int AdvanceLiveCardReadiness(int begin_port) {
   return static_cast<int>(
-      AdvanceCardReadiness(live_readiness, live_card, begin_port));
+      AdvanceCardReadiness(liveReadiness, liveCard, begin_port));
 }
 
 int AdvanceLiveTitleCardReadiness(int begin_port) {
   return static_cast<int>(
-      AdvanceCardReadiness(live_title_readiness, live_card, begin_port));
+      AdvanceCardReadiness(liveTitleReadiness, liveCard, begin_port));
 }
 
 int ValidateAndApplyLiveLoadedSave(int apply) {
@@ -625,11 +625,11 @@ int ReadLiveSaveStep(int request) {
   }
   TransferProgress progress = LoadProgress();
   SaveTransfer transfer{
-      .card = live_card,
+      .card = liveCard,
       .progress = progress,
       .progress_counter = VS::Menu::Files::fileProgressCounter,
       .workspace = *workspace};
-  const TransferStatus status = ReadSaveStep(live_read, transfer, request);
+  const TransferStatus status = ReadSaveStep(liveRead, transfer, request);
   StoreProgress(progress);
   return static_cast<int>(status);
 }
@@ -641,11 +641,11 @@ int WriteLiveSaveStep(int request) {
   }
   TransferProgress progress = LoadProgress();
   SaveTransfer transfer{
-      .card = live_card,
+      .card = liveCard,
       .progress = progress,
       .progress_counter = VS::Menu::Files::fileProgressCounter,
       .workspace = *workspace};
-  const TransferStatus status = WriteSaveStep(live_write, live_read, transfer,
+  const TransferStatus status = WriteSaveStep(liveWrite, liveRead, transfer,
                                               PublishedDirectory(), request);
   StoreProgress(progress);
   return static_cast<int>(status);
@@ -653,14 +653,14 @@ int WriteLiveSaveStep(int request) {
 
 int LoadLiveIntroSnapshotStep(int action) {
   LiveSaveState state{LiveKeystream::kInterface};
-  return LoadIntroSnapshotStep(live_intro, state, action) ==
+  return LoadIntroSnapshotStep(liveIntro, state, action) ==
                  IntroSnapshotResult::kPending
              ? 0
              : 1;
 }
 
 std::uint32_t NextLiveTitleCipherBits(int bits) {
-  return NextCipherBits(title_cipher, bits);
+  return NextCipherBits(titleCipher, bits);
 }
 
 void PackageLiveClearSave(int target_file) {

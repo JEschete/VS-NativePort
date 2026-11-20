@@ -37,17 +37,17 @@
 #include "Render/Palette.hpp"
 
 namespace {
-VS::Battle::Ai::FrameContext frame_context;
+VS::Battle::Ai::FrameContext frameContext;
 }  // namespace
 
 VS::Battle::Ai::FrameContext& VS::Battle::Ai::LiveFrameContext() {
-  return frame_context;
+  return frameContext;
 }
 
 std::uint8_t* VS::Battle::Ai::FindTerrainRegionCell(int tile_x, int tile_z) {
-  const unsigned width = frame_context.roomBounds & 0xFFu;
-  const unsigned height = (frame_context.roomBounds >> 8) & 0xFFu;
-  if (frame_context.terrainRegions == nullptr || width == 0 ||
+  const unsigned width = frameContext.roomBounds & 0xFFu;
+  const unsigned height = (frameContext.roomBounds >> 8) & 0xFFu;
+  if (frameContext.terrainRegions == nullptr || width == 0 ||
       width > kNavigationGridSide || height == 0 ||
       height > kNavigationGridSide || static_cast<unsigned>(tile_x) >= width ||
       static_cast<unsigned>(tile_z) >= height) {
@@ -57,14 +57,14 @@ std::uint8_t* VS::Battle::Ai::FindTerrainRegionCell(int tile_x, int tile_z) {
   }
   const size_t index =
       static_cast<size_t>(tile_z) * width + static_cast<unsigned>(tile_x);
-  if (index >= frame_context.terrain_region_count) {
+  if (index >= frameContext.terrain_region_count) {
     VS::Core::Errorf("ai",
                      "AI direction cell exceeds source payload: tile=%d,%d "
                      "index=%zu bytes=%zu",
-                     tile_x, tile_z, index, frame_context.terrain_region_count);
+                     tile_x, tile_z, index, frameContext.terrain_region_count);
     return nullptr;
   }
-  return frame_context.terrainRegions + index;
+  return frameContext.terrainRegions + index;
 }
 
 namespace {
@@ -111,22 +111,22 @@ class LiveActorAiFrame final : public VS::Battle::Ai::ActorAiFrame {
 namespace VS::Battle::Ai {
 // decomp: BATTLE.PRG func_800E65DC (src/BATTLE/BATTLE.PRG/7DDDC.s:8).
 int CacheLiveActorAiWorkingState() {
-  static_assert(std::size(frame_context.actors) == kFrameActorSlots);
+  static_assert(std::size(frameContext.actors) == kFrameActorSlots);
   static_assert(std::size(VS::Battle::Ai::actorAiStates) == kFrameActorSlots);
   for (std::size_t slot = 0; slot < kFrameActorSlots; ++slot) {
-    frame_context.actors[slot] = VS::Battle::Ai::actorAiStates[slot];
+    frameContext.actors[slot] = VS::Battle::Ai::actorAiStates[slot];
   }
-  frame_context.room = VS::Battle::Ai::roomAiState;
-  frame_context.heightMap = VS::Battle::Ai::specialTerrainHeights;
-  frame_context.tileFlags = VS::Battle::Ai::tileFlagMap;
-  frame_context.roomData = VS::Battle::Ai::roomHasWaypoints;
+  frameContext.room = VS::Battle::Ai::roomAiState;
+  frameContext.heightMap = VS::Battle::Ai::specialTerrainHeights;
+  frameContext.tileFlags = VS::Battle::Ai::tileFlagMap;
+  frameContext.roomData = VS::Battle::Ai::roomHasWaypoints;
   WorkingStateSource source;
-  source.has_room_data = frame_context.roomData != nullptr;
+  source.has_room_data = frameContext.roomData != nullptr;
   source.auxiliary_bytes = VS::Field::roomData.header.section6_length;
-  if (frame_context.room != nullptr) {
+  if (frameContext.room != nullptr) {
     std::array<std::uint8_t, kRoomExtentBytes> extent{};
-    static_assert(sizeof frame_context.room->reserved4 == extent.size());
-    memcpy(extent.data(), frame_context.room->reserved4.data(), extent.size());
+    static_assert(sizeof frameContext.room->reserved4 == extent.size());
+    memcpy(extent.data(), frameContext.room->reserved4.data(), extent.size());
     source.room_extent = extent;
   }
   const std::optional<WorkingStateWindow> window =
@@ -136,20 +136,20 @@ int CacheLiveActorAiWorkingState() {
                      source.auxiliary_bytes);
     abort();
   }
-  frame_context.terrainRegions = nullptr;
-  frame_context.terrain_region_count = 0;
+  frameContext.terrainRegions = nullptr;
+  frameContext.terrain_region_count = 0;
   if (window->terrain_regions) {
-    frame_context.terrainRegions =
-        static_cast<std::uint8_t*>(frame_context.roomData) +
+    frameContext.terrainRegions =
+        static_cast<std::uint8_t*>(frameContext.roomData) +
         window->terrain_regions->offset;
-    frame_context.terrain_region_count = window->terrain_regions->count;
+    frameContext.terrain_region_count = window->terrain_regions->count;
   }
-  frame_context.randomState =
+  frameContext.randomState =
       static_cast<std::uint32_t>(VS::Battle::Ai::savedMovementRandomState);
-  memcpy(frame_context.directions, VS::Battle::Ai::directionDeltas.data(),
-         sizeof frame_context.directions);
-  frame_context.roomBounds = window->room_bounds;
-  return static_cast<int>(frame_context.roomBounds);
+  memcpy(frameContext.directions, VS::Battle::Ai::directionDeltas.data(),
+         sizeof frameContext.directions);
+  frameContext.roomBounds = window->room_bounds;
+  return static_cast<int>(frameContext.roomBounds);
 }
 
 // decomp: BATTLE.PRG func_800E511C; stages at 0x800F16BC (7C7E0.s:108).
@@ -201,14 +201,14 @@ void SetLiveActorVerticalMovementSteps(int actor_id, int walk_step,
 
 NavigationDirectionCodes LiveDirectionCodes() {
   NavigationDirectionCodes codes{};
-  std::memcpy(codes.data(), frame_context.directions, codes.size());
+  std::memcpy(codes.data(), frameContext.directions, codes.size());
   return codes;
 }
 
-bool LiveHasRoomData() { return frame_context.roomData != nullptr; }
+bool LiveHasRoomData() { return frameContext.roomData != nullptr; }
 
 std::optional<std::uint8_t> LiveTerrainRegionCell(int x, int z) {
-  if (frame_context.terrainRegions == nullptr) return std::nullopt;
+  if (frameContext.terrainRegions == nullptr) return std::nullopt;
   const std::uint8_t* cell = FindTerrainRegionCell(x, z);
   if (cell == nullptr) return std::nullopt;
   return *cell;

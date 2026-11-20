@@ -120,11 +120,11 @@ static_assert(std::ranges::all_of(kGimFiles, [](const GimFile& file) {
   return file.sectors != 0 && file.sectors <= kMaxSectors;
 }));
 
-GimImageSet* live_set = nullptr;
-std::uint16_t* live_file = nullptr;
-std::size_t live_file_words = 0;
-VS::Content::DiscQueueSlot* live_request = nullptr;
-std::uint64_t refused_requests = 0;
+GimImageSet* liveSet = nullptr;
+std::uint16_t* liveFile = nullptr;
+std::size_t liveFileWords = 0;
+VS::Content::DiscQueueSlot* liveRequest = nullptr;
+std::uint64_t refusedRequests = 0;
 
 const char* RefusalName(GimRefusal refusal) {
   switch (refusal) {
@@ -155,36 +155,36 @@ const char* RefusalName(GimRefusal refusal) {
 }
 
 void Report(GimRefusal refusal) {
-  if (std::has_single_bit(++refused_requests)) {
+  if (std::has_single_bit(++refusedRequests)) {
     VS::Core::Errorf("render",
                      "GIM image request refused: %s (%" PRIu64 " refused)",
-                     RefusalName(refusal), refused_requests);
+                     RefusalName(refusal), refusedRequests);
   }
 }
 
 class LiveGimHost final : public GimHost {
  public:
   [[nodiscard]] bool FileReadFinished() override {
-    return live_request != nullptr &&
-           live_request->state == VS::Content::DiscRequestState::kLoaded;
+    return liveRequest != nullptr &&
+           liveRequest->state == VS::Content::DiscRequestState::kLoaded;
   }
   void ReleaseFileRead() override {
-    if (live_request != nullptr) {
-      Content::ReleaseLiveDiscRequest(live_request);
-      live_request = nullptr;
+    if (liveRequest != nullptr) {
+      Content::ReleaseLiveDiscRequest(liveRequest);
+      liveRequest = nullptr;
     }
   }
   [[nodiscard]] std::span<const std::uint16_t> FileWords() override {
-    if (live_file == nullptr) {
+    if (liveFile == nullptr) {
       return {};
     }
-    return {live_file, live_file_words};
+    return {liveFile, liveFileWords};
   }
   void FreeFile() override {
-    if (live_file != nullptr) {
-      Core::Memory::FreeLiveFromHighEnd(live_file);
-      live_file = nullptr;
-      live_file_words = 0;
+    if (liveFile != nullptr) {
+      Core::Memory::FreeLiveFromHighEnd(liveFile);
+      liveFile = nullptr;
+      liveFileWords = 0;
     }
   }
   void UploadImage(const ScreenRect& area,
@@ -238,7 +238,7 @@ class LiveGimHost final : public GimHost {
 }  // namespace
 
 void QueueLiveGimImage(int image_id, int first_page) {
-  if (live_set != nullptr) {
+  if (liveSet != nullptr) {
     return;
   }
   if (image_id < 0 || image_id >= kGimImageCount) {
@@ -268,38 +268,38 @@ void QueueLiveGimImage(int image_id, int first_page) {
     Report(GimRefusal::kNoDiscRequest);
     return;
   }
-  live_set = std::construct_at(static_cast<GimImageSet*>(block),
-                               MakeGimImageSet(image_id, first_page));
-  live_file = static_cast<std::uint16_t*>(data);
-  live_file_words = bytes / sizeof(std::uint16_t);
-  live_request = request;
-  Content::EnqueueLiveDiscRequest(live_request, live_file);
+  liveSet = std::construct_at(static_cast<GimImageSet*>(block),
+                              MakeGimImageSet(image_id, first_page));
+  liveFile = static_cast<std::uint16_t*>(data);
+  liveFileWords = bytes / sizeof(std::uint16_t);
+  liveRequest = request;
+  Content::EnqueueLiveDiscRequest(liveRequest, liveFile);
 }
 
 void ReleaseLiveGimImages() {
-  if (live_set == nullptr) {
+  if (liveSet == nullptr) {
     return;
   }
   LiveGimHost host;
-  if (ReleaseGimImageSet(*live_set, host)) {
-    Core::Memory::FreeLiveFromHighEnd(live_set);
-    live_set = nullptr;
+  if (ReleaseGimImageSet(*liveSet, host)) {
+    Core::Memory::FreeLiveFromHighEnd(liveSet);
+    liveSet = nullptr;
   }
 }
 
 void UpdateLiveGimImages() {
-  if (live_set == nullptr) {
+  if (liveSet == nullptr) {
     return;
   }
   LiveGimHost host;
-  if (!UpdateGimImageSet(*live_set, host)) {
+  if (!UpdateGimImageSet(*liveSet, host)) {
     return;
   }
   for (std::size_t layer = 0; layer < kGimLayerCount; ++layer) {
-    if (!live_set->layers[layer].draw_enabled) {
+    if (!liveSet->layers[layer].draw_enabled) {
       continue;
     }
-    const GimOrderingEntry entry = GimLayerOrderingEntry(*live_set, layer);
+    const GimOrderingEntry entry = GimLayerOrderingEntry(*liveSet, layer);
     std::uint32_t* chain = LiveFrameOrderingEntry(
         entry.scene ? LiveOrderingBase::kScene : LiveOrderingBase::kOverlay,
         entry.entry);
@@ -308,30 +308,30 @@ void UpdateLiveGimImages() {
       continue;
     }
     LivePacketQueue queue(chain);
-    DrawGimLayer(queue, *live_set, layer, frameBuf);
+    DrawGimLayer(queue, *liveSet, layer, frameBuf);
   }
 }
 
 void ForgetLiveGimImages() {
-  live_set = nullptr;
-  live_file = nullptr;
-  live_file_words = 0;
-  live_request = nullptr;
+  liveSet = nullptr;
+  liveFile = nullptr;
+  liveFileWords = 0;
+  liveRequest = nullptr;
 }
 
-bool LiveGimImagesPresent() { return live_set != nullptr; }
+bool LiveGimImagesPresent() { return liveSet != nullptr; }
 
 int LiveGimImageLoading() {
-  if (live_set == nullptr) {
+  if (liveSet == nullptr) {
     Report(GimRefusal::kNoSet);
     return 0;
   }
-  return live_set->layers[0].loading ? 1 : 0;
+  return liveSet->layers[0].loading ? 1 : 0;
 }
 
 void ConfigureLiveGimLayer(int layer, int routine, int offset_x, int offset_y,
                            int scale_and_order, int brightness) {
-  if (live_set == nullptr) {
+  if (liveSet == nullptr) {
     return;
   }
   const std::optional<std::size_t> index = LayerIndex(layer);
@@ -344,36 +344,36 @@ void ConfigureLiveGimLayer(int layer, int routine, int offset_x, int offset_y,
   }
   LiveGimHost host;
   ConfigureGimLayer(
-      *live_set, *index,
+      *liveSet, *index,
       {.routine = static_cast<GimDrawRoutine>(routine),
        .placement = Placement(offset_x, offset_y, scale_and_order, brightness)},
       host);
 }
 
 std::optional<GimPlacement> LiveGimLayerPlacement(int layer) {
-  if (live_set == nullptr) {
+  if (liveSet == nullptr) {
     return std::nullopt;
   }
   const std::optional<std::size_t> index = LayerIndex(layer);
   if (!index.has_value()) {
     return std::nullopt;
   }
-  return live_set->layers[*index].placement;
+  return liveSet->layers[*index].placement;
 }
 
 void PlaceLiveGimLayer(int layer, int offset_x, int offset_y,
                        int scale_and_order, int brightness) {
-  if (live_set == nullptr) {
+  if (liveSet == nullptr) {
     return;
   }
   const std::optional<std::size_t> index = LayerIndex(layer);
   if (index.has_value()) {
-    live_set->layers[*index].placement =
+    liveSet->layers[*index].placement =
         Placement(offset_x, offset_y, scale_and_order, brightness);
   }
 }
 
-const GimImageSet* LiveGimImages() { return live_set; }
+const GimImageSet* LiveGimImages() { return liveSet; }
 
-std::uint64_t RefusedLiveGimRequestCount() { return refused_requests; }
+std::uint64_t RefusedLiveGimRequestCount() { return refusedRequests; }
 }  // namespace VS::Render

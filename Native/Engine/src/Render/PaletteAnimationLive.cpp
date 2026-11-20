@@ -29,23 +29,23 @@ constexpr int kModeLimit = std::numeric_limits<std::uint8_t>::max();
 static_assert(sizeof(ClutRowColors) == kClutColorCount * sizeof(std::uint16_t),
               "the animated rows upload as one contiguous block");
 
-PaletteAnimation live_animation;
-std::uint64_t refused_requests = 0;
-std::uint32_t reported_steps = 0;
+PaletteAnimation liveAnimation;
+std::uint64_t refusedRequests = 0;
+std::uint32_t reportedSteps = 0;
 
 void ReportRefusal(const char* what) {
-  if (std::has_single_bit(++refused_requests)) {
+  if (std::has_single_bit(++refusedRequests)) {
     VS::Core::Errorf(kChannel,
                      "palette request refused: %s (%" PRIu64 " refused)", what,
-                     refused_requests);
+                     refusedRequests);
   }
 }
 
 // The animator holds a channel whose delta-table row or frame is outside its
 // table instead of reading past it; each such step counts as a refusal.
 void ReportHeldSteps() {
-  while (reported_steps < live_animation.refused_steps) {
-    ++reported_steps;
+  while (reportedSteps < liveAnimation.refused_steps) {
+    ++reportedSteps;
     ReportRefusal("delta-table step outside its table");
   }
 }
@@ -92,7 +92,7 @@ class LivePaletteHost final : public PaletteHost {
   }
 };
 
-LivePaletteHost live_host;
+LivePaletteHost liveHost;
 
 struct Request {
   ColorTransform mode = ColorTransform::kOffsetCurrent;
@@ -120,7 +120,7 @@ bool ReadRequest(int mode, int duration, Request& request) {
 
 bool LoadLiveClutRow(std::uint32_t row, std::uint32_t first_color,
                      std::span<const std::uint16_t> colors) {
-  if (!LoadClutColors(live_animation, live_host, row, first_color, colors)) {
+  if (!LoadClutColors(liveAnimation, liveHost, row, first_color, colors)) {
     ReportRefusal("CLUT row or colour span outside VRAM or its row");
     return false;
   }
@@ -137,20 +137,20 @@ void LoadLiveClutColors(const std::uint16_t* colors, std::uint32_t row,
                         std::span<const std::uint16_t>(colors, count));
 }
 
-void CommitLiveClutRows() { CommitClutRows(live_animation, live_host); }
+void CommitLiveClutRows() { CommitClutRows(liveAnimation, liveHost); }
 
-void InitializeLiveClutAnimation() { InitializeClutAnimation(live_animation); }
+void InitializeLiveClutAnimation() { InitializeClutAnimation(liveAnimation); }
 
 void UpdateLiveBackgroundGradientTransition() {
-  UpdateBackgroundGradientTransition(live_animation, live_host);
+  UpdateBackgroundGradientTransition(liveAnimation, liveHost);
 }
 
 void UpdateLiveModelTintTransitions() {
-  UpdateModelTintTransitions(live_animation, live_host);
+  UpdateModelTintTransitions(liveAnimation, liveHost);
 }
 
 void UpdateLiveClutTransitions() {
-  UpdateClutTransitions(live_animation);
+  UpdateClutTransitions(liveAnimation);
   ReportHeldSteps();
 }
 
@@ -164,11 +164,11 @@ void CaptureLiveRoomBackgroundColors() {
   for (std::size_t index = 0; index < colors.size(); ++index) {
     colors[index] = room[index];
   }
-  CaptureRoomBackgroundColors(live_animation, colors);
+  CaptureRoomBackgroundColors(liveAnimation, colors);
 }
 
 void SetLiveClutAnimationEnabled(int enabled) {
-  SetClutAnimationEnabled(live_animation, enabled);
+  SetClutAnimationEnabled(liveAnimation, enabled);
 }
 
 void TransformLiveRoomPalettes(int mode, int duration, int red_offset,
@@ -177,7 +177,7 @@ void TransformLiveRoomPalettes(int mode, int duration, int red_offset,
   Request request;
   if (ReadRequest(mode, duration, request)) {
     TransformRoomPalettes(
-        live_animation, request.mode, request.duration,
+        liveAnimation, request.mode, request.duration,
         {Math::WrapSigned16(static_cast<std::uint32_t>(red_offset)),
          green_offset, blue_offset});
   }
@@ -188,7 +188,7 @@ void TransformLiveSceneColors(int mode, int duration, std::int16_t red_offset,
                               std::int16_t blue_offset) {
   Request request;
   if (ReadRequest(mode, duration, request)) {
-    TransformSceneColors(live_animation, live_host, request.mode,
+    TransformSceneColors(liveAnimation, liveHost, request.mode,
                          request.duration,
                          {red_offset, green_offset, blue_offset});
   }
@@ -204,7 +204,7 @@ void TransformLiveActorColors(int mode, int duration, int actor,
   }
   Request request;
   if (ReadRequest(mode, duration, request)) {
-    TransformActorColors(live_animation, live_host, request.mode,
+    TransformActorColors(liveAnimation, liveHost, request.mode,
                          request.duration, static_cast<std::uint32_t>(actor),
                          {red_offset, green_offset, blue_offset});
   }
@@ -216,17 +216,17 @@ void TransformLiveBackgroundColors(int mode, int duration,
                                    std::int16_t blue_offset) {
   Request request;
   if (ReadRequest(mode, duration, request)) {
-    TransformBackgroundColors(live_animation, live_host, request.mode,
+    TransformBackgroundColors(liveAnimation, liveHost, request.mode,
                               request.duration,
                               {red_offset, green_offset, blue_offset});
   }
 }
 
 const PaletteAnimation& LivePaletteAnimation() noexcept {
-  return live_animation;
+  return liveAnimation;
 }
 
 std::uint64_t RefusedLivePaletteRequestCount() noexcept {
-  return refused_requests;
+  return refusedRequests;
 }
 }  // namespace VS::Render

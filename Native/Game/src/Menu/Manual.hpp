@@ -20,7 +20,7 @@ inline constexpr std::size_t kHelpFileCount{kTopicCount * kHelpFilesPerTopic};
 // decomp: menuTextTable (src/MENU/MENUE.PRG/494.c:142)
 extern std::uint16_t menuTextTable[kMenuTextTableWords];
 // decomp: topMenu_state (src/MENU/MENUE.PRG/494.c:213)
-extern std::int32_t topMenu_state;
+extern std::int32_t topMenuState;
 // decomp: menuSelectedRow (src/MENU/MENUE.PRG/494.c:214)
 extern std::int32_t menuSelectedRow;
 // decomp: helpTextCdQueue (src/MENU/MENUE.PRG/494.c:215)

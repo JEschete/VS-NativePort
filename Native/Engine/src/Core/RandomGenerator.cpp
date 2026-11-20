@@ -9,7 +9,7 @@ namespace VS::Core {
 namespace {
 // The BIOS rand() state shared by every copied caller of rand()/srand(); seeded
 // with 1 at boot like the original.
-constinit Rand15 g_bios_rand;
+constinit Rand15 biosRand;
 
 constexpr i32 kTableLast = static_cast<i32>(Random::TableSize) - 1;
 constexpr unsigned kWordBits = 32;
@@ -20,18 +20,18 @@ constexpr int kAveragedDraws = 12;
 bool InTable(i32 index) { return index >= 0 && index <= kTableLast; }
 }  // namespace
 
-Rand15& BiosRand() noexcept { return g_bios_rand; }
+Rand15& BiosRand() noexcept { return biosRand; }
 
 i32 NextBiosRand() {
-  const u32 before = g_bios_rand.State();
-  const i32 value = g_bios_rand.Next();
-  LogTrace("rng", "raw before={} after={} value={}", before,
-           g_bios_rand.State(), value);
+  const u32 before = biosRand.State();
+  const i32 value = biosRand.Next();
+  LogTrace("rng", "raw before={} after={} value={}", before, biosRand.State(),
+           value);
   return value;
 }
 
 void SeedBiosRand(u32 seed) {
-  g_bios_rand.Seed(seed);
+  biosRand.Seed(seed);
   LogTrace("rng", "seed={}", seed);
 }
 

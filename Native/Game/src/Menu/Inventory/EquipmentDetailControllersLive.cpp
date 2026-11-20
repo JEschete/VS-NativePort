@@ -46,8 +46,8 @@ constexpr int kGemIconY = 32;
 constexpr int kGemTextX = 280;
 constexpr int kGemTextY = 36;
 constexpr std::uint8_t kDigitZero = 0x30;
-std::array<EquipmentDetailState, kControllerCount> g_states{};
-std::array g_gem_count_text{'X', ' ', ' ', ' ', ' ', ' ', '0', '\0'};
+std::array<EquipmentDetailState, kControllerCount> detailStates{};
+std::array gemCountText{'X', ' ', ' ', ' ', ' ', ' ', '0', '\0'};
 
 [[noreturn]] void Refuse(const char* reason) {
   VS::Core::Errorf("menu.inventory", "Equipment details refused: %s", reason);
@@ -283,7 +283,7 @@ class LiveWorld final : public LiveDetailWorld<EquipmentDetailWorld> {
     return Referenced(VS::Items::inventory.grips, slot.one_based).gem_slots;
   }
   void DrawGripGemSlotCount(std::uint8_t slots) override {
-    g_gem_count_text[kGemDigit] =
+    gemCountText[kGemDigit] =
         static_cast<char>(static_cast<std::uint8_t>(slots + kDigitZero));
     if (VS::Render::FrameScratchpad().primitive_cursor == nullptr ||
         VS::Render::FrameScratchpad().overlay_ordering_table == nullptr) {
@@ -291,7 +291,7 @@ class LiveWorld final : public LiveDetailWorld<EquipmentDetailWorld> {
     }
     Framework::DrawLiveRowIcon(kGemCountIcon, kGemIconX, kGemIconY);
     Render::DrawLiveCompactText(
-        g_gem_count_text.data(),
+        gemCountText.data(),
         static_cast<int>(Framework::PackXy(kGemTextX, kGemTextY)), nullptr);
   }
 
@@ -351,30 +351,30 @@ class LiveWorld final : public LiveDetailWorld<EquipmentDetailWorld> {
 // decomp: _weaponStatusView (src/MENU/items1.h:98-185).
 int UpdateLiveWeaponDetails(int item_info) {
   LiveWorld world(Category::kWeapon);
-  return UpdateWeaponDetails(g_states[0], world, Selection(item_info));
+  return UpdateWeaponDetails(detailStates[0], world, Selection(item_info));
 }
 
 // decomp: _bladeStatusView (src/MENU/items1.h:195-265).
 int UpdateLiveBladeDetails(int item_info) {
   LiveWorld world(Category::kBlade);
-  return UpdateBladeDetails(g_states[1], world, Selection(item_info));
+  return UpdateBladeDetails(detailStates[1], world, Selection(item_info));
 }
 
 // decomp: _gripStatusView (src/MENU/items1.h:275-355).
 int UpdateLiveGripDetails(int item_info) {
   LiveWorld world(Category::kGrip);
-  return UpdateGripDetails(g_states[2], world, Selection(item_info));
+  return UpdateGripDetails(detailStates[2], world, Selection(item_info));
 }
 
 // decomp: _shieldStatusView (src/MENU/items1.h:365-454).
 int UpdateLiveShieldDetails(int item_info) {
   LiveWorld world(Category::kShield);
-  return UpdateShieldDetails(g_states[kShieldControllerIndex], world,
+  return UpdateShieldDetails(detailStates[kShieldControllerIndex], world,
                              Selection(item_info));
 }
 
 void ResetLiveEquipmentDetailControllers() {
-  g_states = {};
-  g_gem_count_text = {'X', ' ', ' ', ' ', ' ', ' ', '0', '\0'};
+  detailStates = {};
+  gemCountText = {'X', ' ', ' ', ' ', ' ', ' ', '0', '\0'};
 }
 }  // namespace VS::Menu::Inventory

@@ -249,10 +249,10 @@ struct ReadRecord {
   const void* data = nullptr;
   std::size_t bytes = 0;
 };
-std::array<ReadRecord, 2> read_records{};
+std::array<ReadRecord, 2> readRecords{};
 
 [[nodiscard]] ReadRecord& RecordOf(LoadedFile file) {
-  return read_records.at(file == LoadedFile::kZone ? 0 : 1);
+  return readRecords.at(file == LoadedFile::kZone ? 0 : 1);
 }
 
 [[nodiscard]] VS::Content::DiscQueueSlot*& RequestOf(LoadedFile file) {
@@ -415,7 +415,7 @@ struct RoomFileTable {
   const VS::Content::DiscFile* table = nullptr;
   std::size_t count = 0;
 };
-RoomFileTable room_files{};
+RoomFileTable roomFiles{};
 
 void FreeLowEnd(auto*& block) {
   if (block != nullptr) {
@@ -794,7 +794,7 @@ class LiveZoneLoadHost final
   // decomp: BATTLE.PRG _loadMpdLbas (146C.c:14774)
   void StoreRoomFiles(std::span<const Content::DiscFileExtent> files) override {
     zoneContext.room_files = nullptr;
-    room_files = {};
+    roomFiles = {};
     if (files.empty()) {
       return;
     }
@@ -807,7 +807,7 @@ class LiveZoneLoadHost final
     }
     std::ranges::transform(files, table, ToDiscFile);
     zoneContext.room_files = table;
-    room_files = {.table = table, .count = files.size()};
+    roomFiles = {.table = table, .count = files.size()};
   }
 
   // decomp: BATTLE.PRG _loadZndEnemies (146C.c:14783)
@@ -936,7 +936,7 @@ class LiveZoneReleaseHost final : public ZoneReleaseHost {
     FreeLowEnd(zoneContext.zud_files);
     FreeLowEnd(zoneContext.room_files);
     zoneContext.zone_enemy_count = 0;
-    room_files = {};
+    roomFiles = {};
   }
 };
 
@@ -952,14 +952,14 @@ class LiveRoomLoadHost final
   }
 
   [[nodiscard]] Content::DiscFileExtent RoomFile(int room_id) const override {
-    return ToExtent(room_files.table[room_id]);
+    return ToExtent(roomFiles.table[room_id]);
   }
 
   // Only the table the zone load stored is read.
   [[nodiscard]] int RoomFileCount() const override {
-    return room_files.table != nullptr &&
-                   room_files.table == zoneContext.room_files
-               ? static_cast<int>(room_files.count)
+    return roomFiles.table != nullptr &&
+                   roomFiles.table == zoneContext.room_files
+               ? static_cast<int>(roomFiles.count)
                : 0;
   }
 

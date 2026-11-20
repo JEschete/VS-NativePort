@@ -42,7 +42,7 @@ constexpr unsigned kLeftToLeft = 0;
 constexpr unsigned kLeftToRight = 1;
 constexpr unsigned kRightToLeft = 2;
 constexpr unsigned kRightToRight = 3;
-std::uint32_t g_mix = VS::Audio::kDefaultDiscMixVolume;
+std::uint32_t discMixVolume = VS::Audio::kDefaultDiscMixVolume;
 
 // Volume in bits 32-47 and the four routes in bits 0-31, so the audio thread
 // reads one consistent set.
@@ -267,7 +267,7 @@ void VS::Audio::UpdateXaControls(void) {
       (VS::Audio::Driver::controlLatches.mix_behavior & kMono) != 0;
   Playback().Configure(
       VS::Audio::Seq::WriteDiscVolume(VS::Audio::Seq::discVolume),
-      VS::Audio::Control::SetDiscMixVolume(g_mix, mono)
+      VS::Audio::Control::SetDiscMixVolume(discMixVolume, mono)
           .value_or(VS::Audio::DiscMixMatrix{}));
 }
 
@@ -277,7 +277,7 @@ bool SetLiveDiscMixVolume(std::uint32_t volume) {
     VS::Core::LogError("audio", "invalid XA mix attenuation: {}", volume);
     return false;
   }
-  g_mix = volume;
+  discMixVolume = volume;
   VS::Audio::UpdateXaControls();
   return true;
 }

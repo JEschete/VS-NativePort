@@ -111,7 +111,7 @@ constexpr std::uint8_t kNoCameraPreview = 0xFF;
 // (DualShock) pad.
 constexpr int kAnalogControllerType = 7;
 
-std::uint64_t refused_calls = 0;
+std::uint64_t refusedCalls = 0;
 
 // True on the 1st, 2nd, 4th, 8th... occurrence, to keep repeated
 // diagnostics readable.
@@ -120,7 +120,7 @@ std::uint64_t refused_calls = 0;
 }
 
 void RefuseNull(std::string_view entry) {
-  if (ShouldReport(refused_calls)) {
+  if (ShouldReport(refusedCalls)) {
     VS::Core::LogWarn(kChannel,
                       "{} was given a null record; the call is refused", entry);
   }
@@ -358,7 +358,7 @@ std::optional<ActionCameraTargets> LiveCameraHost::ActionTargets() {
 
 void LiveCameraHost::SetPreferredActionCameraDistance(std::int32_t distance) {
   if (VS::Battle::actionState == nullptr) {
-    if (ShouldReport(refused_calls)) {
+    if (ShouldReport(refusedCalls)) {
       VS::Core::LogWarn(
           kChannel, "no battle action to keep the preferred camera distance {}",
           distance);

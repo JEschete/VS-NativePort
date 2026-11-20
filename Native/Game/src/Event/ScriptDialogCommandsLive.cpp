@@ -43,7 +43,7 @@ static_assert(std::size(VS::Battle::stringContext.integers) ==
 constexpr char kSkipActive = 2;
 constexpr unsigned kAlignmentMask = 0x3;
 constexpr unsigned kFramePartMask = 0xF;
-std::array<event::ScriptDataLease, event::kTextBoxCount + 1> dialog_owners{};
+std::array<event::ScriptDataLease, event::kTextBoxCount + 1> dialogOwners{};
 
 bool ContainsDialogText(const event::ScriptDataLease& lease,
                         const char* text) noexcept {
@@ -54,7 +54,7 @@ bool ContainsDialogText(const event::ScriptDataLease& lease,
 }
 
 bool RetainedDialogText(const char* text) noexcept {
-  return std::ranges::any_of(dialog_owners, [text](const auto& owner) {
+  return std::ranges::any_of(dialogOwners, [text](const auto& owner) {
     return ContainsDialogText(owner, text);
   });
 }
@@ -71,7 +71,7 @@ void PruneDialogOwners() noexcept {
       ClearRetainedDialogText(box);
     }
   }
-  for (auto& owner : dialog_owners) {
+  for (auto& owner : dialogOwners) {
     const bool borrowed =
         std::ranges::any_of(VS::Menu::textBoxes, [&owner](const auto& box) {
           return ContainsDialogText(owner, box.text);
@@ -85,13 +85,13 @@ void PruneDialogOwners() noexcept {
 bool RetainDialogOwner(const event::ScriptDataLease& lease) {
   PruneDialogOwners();
   const auto bytes = lease.source.Bytes();
-  for (auto& owner : dialog_owners) {
+  for (auto& owner : dialogOwners) {
     const auto retained = owner.source.Bytes();
     if (retained.data() == bytes.data() && retained.size() == bytes.size()) {
       return true;
     }
   }
-  for (auto& owner : dialog_owners) {
+  for (auto& owner : dialogOwners) {
     if (owner.source.Bytes().empty()) {
       owner = lease;
       return true;
@@ -271,7 +271,7 @@ void ReleaseLiveScriptDialogText() noexcept {
   for (auto& box : VS::Menu::textBoxes) {
     ClearRetainedDialogText(box);
   }
-  std::ranges::fill(dialog_owners, ScriptDataLease{});
+  std::ranges::fill(dialogOwners, ScriptDataLease{});
 }
 
 }  // namespace VS::Event

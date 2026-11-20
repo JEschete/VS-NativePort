@@ -74,9 +74,9 @@ struct LoadOwner {
 };
 LoadOwner owner;
 // These are the original file-backed private slots, not the native owner.
-bool request_bound = false;
-bool buffer_bound = false;
-std::int32_t state_timer = 0;
+bool requestBound = false;
+bool bufferBound = false;
+std::int32_t stateTimer = 0;
 std::uint64_t refusals = 0;
 
 void Refuse(const char* reason) {
@@ -113,7 +113,7 @@ void ReleaseRequest() {
   }
   owner.request = nullptr;
   owner.generation = 0;
-  request_bound = false;
+  requestBound = false;
 }
 
 bool FreeBuffer() {
@@ -126,7 +126,7 @@ bool FreeBuffer() {
   Core::Memory::FreeLiveFromHighEnd(owner.buffer);
   owner.buffer = nullptr;
   owner.bytes = 0;
-  buffer_bound = false;
+  bufferBound = false;
   return true;
 }
 
@@ -145,7 +145,7 @@ GameClearState LoadState() {
       .init_phase = VS::Battle::submenuState,
       .screen = {.timer = screenTimer,
                  .phase = screenState,
-                 .state_timer = state_timer,
+                 .state_timer = stateTimer,
                  .reel = {.selection = buffReelSelection,
                           .speed = elementAnimationState,
                           .reel_index = buffReelIndex},
@@ -171,7 +171,7 @@ void StoreState(const GameClearState& game) {
   const auto& screen = game.screen;
   screenTimer = screen.timer;
   screenState = screen.phase;
-  state_timer = screen.state_timer;
+  stateTimer = screen.state_timer;
   buffReelSelection = screen.reel.selection;
   elementAnimationState = screen.reel.speed;
   buffReelIndex = screen.reel.reel_index;
@@ -278,8 +278,8 @@ class LiveInit final : public GameClearInitHost {
     owner.bytes = static_cast<std::size_t>(file.size);
     owner.buffer = static_cast<std::byte*>(
         Core::Memory::AllocateLiveFromHighEnd(owner.bytes));
-    buffer_bound = owner.buffer != nullptr;
-    if (!buffer_bound) {
+    bufferBound = owner.buffer != nullptr;
+    if (!bufferBound) {
       owner.bytes = 0;
       Refuse("RANK.DIS allocation refused");
       return false;
@@ -292,15 +292,15 @@ class LiveInit final : public GameClearInitHost {
           Content::CompleteLiveRefusedDiscRequest(&file, owner.buffer);
     }
     owner.generation = Content::LiveDiscRequestGeneration(owner.request);
-    request_bound = RequestMatches();
-    if (!request_bound) {
+    requestBound = RequestMatches();
+    if (!requestBound) {
       Refuse("RANK.DIS request allocation refused");
       return false;
     }
     return true;
   }
   bool TextureReadLoaded() override {
-    if (!request_bound || !buffer_bound || !RequestMatches()) {
+    if (!requestBound || !bufferBound || !RequestMatches()) {
       Refuse("missing or reused RANK.DIS controller request");
       return false;
     }
@@ -355,7 +355,7 @@ class LiveInit final : public GameClearInitHost {
     Audio::LivePlayMusicSlot(kMusicSlot, kMusicVolume, 0);
   }
   bool FreeTextureBlock() override {
-    if (!buffer_bound) {
+    if (!bufferBound) {
       Refuse("free without an active RANK.DIS controller buffer");
       return false;
     }
@@ -407,7 +407,7 @@ class LiveInit final : public GameClearInitHost {
 
   static std::optional<std::span<std::byte>> TimBytes(std::size_t index) {
     const auto bytes = OwnedBuffer();
-    if (!buffer_bound || !bytes.has_value() || index >= kGameClearTimCount ||
+    if (!bufferBound || !bytes.has_value() || index >= kGameClearTimCount ||
         index * kGameClearTimStride >= bytes->size()) {
       Refuse("TIM offset outside the active RANK.DIS buffer");
       return std::nullopt;
@@ -604,8 +604,8 @@ void ResetLiveGameClearModuleData() {
   GameClearState initial;
   initial.init_phase = VS::Battle::submenuState;
   StoreState(initial);
-  request_bound = false;
-  buffer_bound = false;
+  requestBound = false;
+  bufferBound = false;
 }
 
 bool CleanupLiveGameClearOwnedState() {
@@ -615,9 +615,9 @@ bool CleanupLiveGameClearOwnedState() {
 }
 
 LiveGameClearStatus InspectLiveGameClear() {
-  return {.state_timer = state_timer,
-          .request_bound = request_bound,
-          .buffer_bound = buffer_bound,
+  return {.state_timer = stateTimer,
+          .request_bound = requestBound,
+          .buffer_bound = bufferBound,
           .owns_request = owner.request != nullptr,
           .owns_buffer = owner.buffer != nullptr,
           .owns_pages = owner.pages};

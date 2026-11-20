@@ -81,7 +81,7 @@ constexpr int kAimedSimulationMode = 3;
 constexpr std::size_t kPoisonStatusIndex = 14;
 constexpr std::size_t kRegenerationStatusIndex = 17;
 constexpr auto kTargetOffset = offsetof(ReactionRecord, opaque_4c);
-PlanningStatsSnapshot planning_stats_snapshot;
+PlanningStatsSnapshot liveStatsSnapshot;
 static_assert(std::tuple_size_v<decltype(ActionRequestRecord::targets)> ==
               kTargetPreviewCapacity);
 static_assert(kTargetOffset == offsetof(ActionRequestRecord, targets));
@@ -209,8 +209,8 @@ std::optional<std::span<const PlanningActorStats>> ReadPlanningStatsRows(
     auto bytes = std::as_writable_bytes(
         std::span<VS::Battle::ActorStats, 1>(actor->stats, 1));
     if (OverlappingPlanningBytes(bytes.data(), bytes.size(),
-                                 planning_stats_snapshot.bytes.data(),
-                                 planning_stats_snapshot.bytes.size())) {
+                                 liveStatsSnapshot.bytes.data(),
+                                 liveStatsSnapshot.bytes.size())) {
       return std::nullopt;
     }
     rows[count++] = {.slot = static_cast<std::size_t>(actor->id),
@@ -1422,7 +1422,7 @@ void CopyLivePlanningActorStats(const VS::Battle::ActorStats* source,
 }
 
 bool SnapshotLivePlanningActorStats() {
-  if (!planning_stats_snapshot.bytes.empty() ||
+  if (!liveStatsSnapshot.bytes.empty() ||
       VS::Battle::Ai::planningStatsSnapshot != nullptr) {
     return RefusePlanning("AI stat capture is already active");
   }
@@ -1431,13 +1431,13 @@ bool SnapshotLivePlanningActorStats() {
   if (storage == nullptr) {
     return RefusePlanning("AI stat capture has no snapshot storage");
   }
-  planning_stats_snapshot = {
+  liveStatsSnapshot = {
       .bytes = std::span<std::byte>(storage, kPlanningStatsTableBytes)};
   VS::Battle::Ai::planningStatsSnapshot =
       reinterpret_cast<VS::Battle::ActorStats*>(storage);
   std::array<PlanningActorStats, kBattleActorSlotCount> rows{};
   const auto actors = ReadPlanningStatsRows(rows);
-  if (actors && SnapshotPlanningActorStats(planning_stats_snapshot, *actors)) {
+  if (actors && SnapshotPlanningActorStats(liveStatsSnapshot, *actors)) {
     return true;
   }
   Core::Memory::FreeLiveFromHighEnd(storage);
@@ -1446,7 +1446,7 @@ bool SnapshotLivePlanningActorStats() {
 }
 
 void RestoreLivePlanningActorStats() {
-  const auto storage = planning_stats_snapshot.bytes;
+  const auto storage = liveStatsSnapshot.bytes;
   const auto allocation = Core::Memory::LivePayloadContaining(storage.data());
   Require(allocation.has_value() && allocation->data() == storage.data() &&
               allocation->size() >= kPlanningStatsTableBytes &&
@@ -1456,7 +1456,7 @@ void RestoreLivePlanningActorStats() {
   std::array<PlanningActorStats, kBattleActorSlotCount> rows{};
   const auto actors = ReadPlanningStatsRows(rows);
   Require(actors.has_value() &&
-              RestorePlanningActorStats(planning_stats_snapshot, *actors),
+              RestorePlanningActorStats(liveStatsSnapshot, *actors),
           "AI stat restore requires a valid captured actor list");
   Core::Memory::FreeLiveFromHighEnd(storage.data());
   InvalidateLivePlanningStatsSnapshot();
@@ -1515,7 +1515,7 @@ void AdvanceLivePlanningSimulation(std::int32_t time_step) {
 }
 
 void InvalidateLivePlanningStatsSnapshot() {
-  planning_stats_snapshot = {};
+  liveStatsSnapshot = {};
   VS::Battle::Ai::planningStatsSnapshot = nullptr;
 }
 

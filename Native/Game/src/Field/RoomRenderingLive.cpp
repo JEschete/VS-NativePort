@@ -105,8 +105,8 @@ constexpr std::uint8_t kFrameDrawModeLength = 2;
 constexpr int kDisplayBufferMask = 1;
 constexpr std::uint32_t kViewFacingMask = 0xFF;
 
-std::uint64_t dropped_packets = 0;
-std::uint64_t refused_calls = 0;
+std::uint64_t droppedPackets = 0;
+std::uint64_t refusedCalls = 0;
 
 // True on the 1st, 2nd, 4th, 8th... occurrence, to keep repeated
 // diagnostics readable.
@@ -115,9 +115,9 @@ std::uint64_t refused_calls = 0;
 }
 
 void RefuseCall(std::string_view entry, std::string_view reason) {
-  if (ShouldReport(refused_calls)) {
+  if (ShouldReport(refusedCalls)) {
     VS::Core::LogWarn(kChannel, "{} refused: {} ({} refusals)", entry, reason,
-                      refused_calls);
+                      refusedCalls);
   }
 }
 
@@ -189,12 +189,12 @@ void LinkPacket(const Packet& packet, std::string_view kind) {
   std::uint32_t* const slot =
       entry != nullptr ? Render::ReserveLivePrimitiveWords(kWords) : nullptr;
   if (slot == nullptr) {
-    if (ShouldReport(dropped_packets)) {
+    if (ShouldReport(droppedPackets)) {
       VS::Core::LogWarn(
           kChannel,
           "minimap {} has no ordering entry or buffer room; dropped "
           "({} drops)",
-          kind, dropped_packets);
+          kind, droppedPackets);
     }
     return;
   }

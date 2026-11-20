@@ -101,10 +101,10 @@ struct ScreenResources {
 
 MapScreenState screen;
 ScreenResources resources;
-PendingScene pending_scene;
+PendingScene pendingScene;
 std::array<std::uint8_t, kCaptionBytes> caption{};
-std::size_t caption_start = 0;
-bool caption_loaded = false;
+std::size_t captionStart = 0;
+bool captionLoaded = false;
 std::uint64_t refused = 0;
 
 void Refuse(std::string_view operation, std::string_view reason) {
@@ -268,7 +268,7 @@ class LiveFrame final : public MapFrameHost {
     const auto text = LiveMapPalingText();
     if (!text.empty()) {
       SetLiveTextBoxText(
-          0, reinterpret_cast<char*>(caption.data() + caption_start));
+          0, reinterpret_cast<char*>(caption.data() + captionStart));
     }
   }
   void ApplyView() override { LiveApplyCamera(); }
@@ -327,8 +327,8 @@ class LiveMapMenu final : public MapMenuHost {
     });
   }
   bool BeginSceneRead(std::int32_t scene, DiscFileRange file) override {
-    if (pending_scene.destination != nullptr ||
-        pending_scene.request != nullptr || !ValidScene(scene)) {
+    if (pendingScene.destination != nullptr ||
+        pendingScene.request != nullptr || !ValidScene(scene)) {
       return false;
     }
     auto* destination =
@@ -342,51 +342,51 @@ class LiveMapMenu final : public MapMenuHost {
       request =
           Content::CompleteLiveRefusedDiscRequest(original_file, destination);
     }
-    pending_scene = {request, Content::LiveDiscRequestGeneration(request),
-                     destination, file};
+    pendingScene = {request, Content::LiveDiscRequestGeneration(request),
+                    destination, file};
     armFileBuff = destination;
     sceneCdQueueSlot = request;
     return request != nullptr;
   }
   std::int32_t SceneReadState() override {
-    if (pending_scene.read_completed && pending_scene.destination != nullptr) {
+    if (pendingScene.read_completed && pendingScene.destination != nullptr) {
       return kDiscReadLoaded;
     }
-    if (pending_scene.request == nullptr || pending_scene.generation == 0 ||
-        Content::LiveDiscRequestGeneration(pending_scene.request) !=
-            pending_scene.generation) {
+    if (pendingScene.request == nullptr || pendingScene.generation == 0 ||
+        Content::LiveDiscRequestGeneration(pendingScene.request) !=
+            pendingScene.generation) {
       Refuse("SceneReadState", "missing or reused request");
       return std::to_underlying(VS::Content::DiscRequestState::kError);
     }
-    return std::to_underlying(pending_scene.request->state);
+    return std::to_underlying(pendingScene.request->state);
   }
   bool InstallSceneRead(std::int32_t scene, DiscFileRange file) override {
-    if (!ValidScene(scene) || pending_scene.file != file ||
+    if (!ValidScene(scene) || pendingScene.file != file ||
         SceneReadState() != kDiscReadLoaded) {
       return false;
     }
-    const auto bytes = Payload(pending_scene.destination);
+    const auto bytes = Payload(pendingScene.destination);
     if (file.bytes <= 0 ||
         static_cast<std::size_t>(file.bytes) > bytes.size() ||
         !Field::IsValidMapScene(
             bytes.first(static_cast<std::size_t>(file.bytes)))) {
       return false;
     }
-    if (!pending_scene.read_completed) {
-      Content::ReleaseLiveDiscRequest(pending_scene.request);
-      pending_scene.request = nullptr;
-      pending_scene.generation = 0;
-      pending_scene.read_completed = true;
+    if (!pendingScene.read_completed) {
+      Content::ReleaseLiveDiscRequest(pendingScene.request);
+      pendingScene.request = nullptr;
+      pendingScene.generation = 0;
+      pendingScene.read_completed = true;
       sceneCdQueueSlot = nullptr;
     }
     if (!ReleaseScene()) return false;
     auto* destination =
         memory::AllocateLiveFromHighEnd(static_cast<std::size_t>(file.bytes));
     if (destination == nullptr) return false;
-    memory::CopyLiveAlignedWords(destination, pending_scene.destination,
+    memory::CopyLiveAlignedWords(destination, pendingScene.destination,
                                  file.bytes);
-    memory::FreeLiveFromHighEnd(pending_scene.destination);
-    pending_scene = {};
+    memory::FreeLiveFromHighEnd(pendingScene.destination);
+    pendingScene = {};
     armFileBuff = nullptr;
     VS::Battle::sceneBuffer = destination;
     BindLiveMapScene(destination, static_cast<std::size_t>(file.bytes));
@@ -525,22 +525,22 @@ class LiveScreen final : public MapScreenHost {
 };
 
 bool DrainPendingScene() {
-  if (pending_scene.destination == nullptr) return true;
-  const auto bytes = Payload(pending_scene.destination);
+  if (pendingScene.destination == nullptr) return true;
+  const auto bytes = Payload(pendingScene.destination);
   if (bytes.empty() || !Content::CancelLiveDiscWrites(bytes)) return false;
-  if (pending_scene.generation != 0 &&
-      Content::LiveDiscRequestGeneration(pending_scene.request) ==
-          pending_scene.generation) {
-    Content::ReleaseLiveDiscRequest(pending_scene.request);
+  if (pendingScene.generation != 0 &&
+      Content::LiveDiscRequestGeneration(pendingScene.request) ==
+          pendingScene.generation) {
+    Content::ReleaseLiveDiscRequest(pendingScene.request);
   }
-  if (sceneCdQueueSlot == pending_scene.request) {
+  if (sceneCdQueueSlot == pendingScene.request) {
     sceneCdQueueSlot = nullptr;
   }
-  if (armFileBuff == pending_scene.destination) {
+  if (armFileBuff == pendingScene.destination) {
     armFileBuff = nullptr;
   }
-  memory::FreeLiveFromHighEnd(pending_scene.destination);
-  pending_scene = {};
+  memory::FreeLiveFromHighEnd(pendingScene.destination);
+  pendingScene = {};
   return true;
 }
 }  // namespace
@@ -590,8 +590,8 @@ void LiveDrawPalingDistortion() {
 int LiveUpdateMapMenu() {
   try {
     if (!LoadedScene() &&
-        !(menuState == kSceneReadPhase && pending_scene.read_completed &&
-          !Payload(pending_scene.destination).empty())) {
+        !(menuState == kSceneReadPhase && pendingScene.read_completed &&
+          !Payload(pendingScene.destination).empty())) {
       Refuse("UpdateMapMenu",
              "no owned loaded scene or completed staging read");
       return 0;
@@ -645,7 +645,7 @@ int LiveUpdateScreen(unsigned char* step) {
 }
 
 std::span<const std::uint8_t> LiveMapPalingText() {
-  if (!caption_loaded) {
+  if (!captionLoaded) {
     const auto* store = Content::DataStore::Get();
     const auto* entry = store ? store->Find("MENU/MENU5.PRG") : nullptr;
     std::array<std::uint8_t, kCaptionBytes> bytes{};
@@ -662,10 +662,10 @@ std::span<const std::uint8_t> LiveMapPalingText() {
       return {};
     }
     caption = bytes;
-    caption_start = start;
-    caption_loaded = true;
+    captionStart = start;
+    captionLoaded = true;
   }
-  return std::span(caption).subspan(caption_start);
+  return std::span(caption).subspan(captionStart);
 }
 
 bool DrainMapTerminalLive() {
@@ -722,8 +722,8 @@ bool ResetMapTerminalColdState() {
   if (!ResetMapTerminalModuleData()) return false;
   ClearLiveMapTextBorrow(std::as_bytes(std::span(caption)));
   caption = {};
-  caption_start = 0;
-  caption_loaded = false;
+  captionStart = 0;
+  captionLoaded = false;
   ResetMapDrawingLive();
   ResetMapDrawingModuleData();
   return true;

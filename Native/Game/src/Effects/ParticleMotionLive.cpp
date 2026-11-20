@@ -30,13 +30,13 @@ using Instance = LiveEffectInstance;
 constexpr std::uint32_t kHalfwordBits = 16;
 constexpr std::uint32_t kHalfwordMask = 0xFFFF;
 
-std::uint64_t refused_calls = 0;
+std::uint64_t refusedCalls = 0;
 
 void Refuse(std::string_view call, std::string_view reason) {
-  if (std::has_single_bit(++refused_calls)) {
+  if (std::has_single_bit(++refusedCalls)) {
     VS::Core::LogWarn("effects",
                       "particle motion: {} refused: {} ({} refusals)", call,
-                      reason, refused_calls);
+                      reason, refusedCalls);
   }
 }
 

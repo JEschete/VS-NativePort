@@ -7,7 +7,7 @@
 namespace VS::Platform {
 
 namespace {
-GameFiber* g_current = nullptr;
+GameFiber* currentFiber = nullptr;
 }
 
 GameFiber::GameFiber(Entry entry, usize stack_bytes) : m_entry_(entry) {
@@ -24,8 +24,8 @@ GameFiber::~GameFiber() {
   if (m_fiber_ != nullptr) {
     DeleteFiber(m_fiber_);
   }
-  if (g_current == this) {
-    g_current = nullptr;
+  if (currentFiber == this) {
+    currentFiber = nullptr;
   }
 }
 
@@ -33,20 +33,20 @@ bool GameFiber::Resume() {
   if (m_finished_) {
     return false;
   }
-  g_current = this;
+  currentFiber = this;
   SwitchToFiber(m_fiber_);
-  g_current = nullptr;
+  currentFiber = nullptr;
   return !m_finished_;
 }
 
 void GameFiber::YieldToHost() {
-  if (g_current != nullptr && GetCurrentFiber() == g_current->m_fiber_) {
-    SwitchToFiber(g_current->m_host_);
+  if (currentFiber != nullptr && GetCurrentFiber() == currentFiber->m_fiber_) {
+    SwitchToFiber(currentFiber->m_host_);
   }
 }
 
 bool GameFiber::InGame() {
-  return g_current != nullptr && GetCurrentFiber() == g_current->m_fiber_;
+  return currentFiber != nullptr && GetCurrentFiber() == currentFiber->m_fiber_;
 }
 
 void __stdcall GameFiber::Start(void* self) {

@@ -168,11 +168,11 @@ bool Tick(TestTrailHost& host, int count) {
   return alive;
 }
 
-int other_renderer_calls = 0;
+int otherRendererCalls = 0;
 
 int OtherRenderer(fx::LiveRendererSlot* /*slot*/, std::uint32_t /*command*/,
                   int /*parameter*/) {
-  ++other_renderer_calls;
+  ++otherRendererCalls;
   return 1;
 }
 
@@ -618,7 +618,7 @@ TEST_CASE("The live fade commands only the secondary bone trails",
   chain.slots[1].renderer = &OtherRenderer;
   fx::LiveEffectInstance* const saved = fx::secondaryInstances;
   fx::secondaryInstances = chain.instances.data();
-  other_renderer_calls = 0;
+  otherRendererCalls = 0;
   fx::LiveFadeBoneTrails();
   CHECK(chain.trails[0].config.life == fx::kFadingTrailLife);
   CHECK(chain.trails[1].config.life == fx::kEndlessTrailLife);
@@ -627,7 +627,7 @@ TEST_CASE("The live fade commands only the secondary bone trails",
   fx::LiveFadeWeaponTrails();
   CHECK(chain.trails[2].config.life == fx::kFadingTrailLife);
   fx::secondaryInstances = saved;
-  CHECK(other_renderer_calls == 0);
+  CHECK(otherRendererCalls == 0);
 }
 
 TEST_CASE("The live renderer refuses a missing slot or trail",

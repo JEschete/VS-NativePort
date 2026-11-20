@@ -35,9 +35,9 @@ constexpr int kAbilityCategoryCount = 2;
 constexpr int kChainRowInfo = 0x11B;
 constexpr int kDefenseRowInfo = 0x11C;
 constexpr std::size_t kPointersPerRow = 2;
-BreakArtUnlockState g_break_art;
-AbilityUnlockState g_ability_unlock;
-RiskCostState g_risk;
+BreakArtUnlockState breakArtUnlock;
+AbilityUnlockState abilityUnlock;
+RiskCostState riskCost;
 
 void Refuse(std::string_view reason) {
   VS::Core::LogWarn("menu.battle-abilities", "Ability menu refused: {}",
@@ -350,7 +350,7 @@ int LiveUpdateBreakArtUnlock(int initialize) {
     }
   }
   LiveBreakArtHost host;
-  return UpdateBreakArtUnlock(g_break_art, progress, host, initialize != 0);
+  return UpdateBreakArtUnlock(breakArtUnlock, progress, host, initialize != 0);
 }
 
 // decomp binding: _getAbilityDescription (src/MENU/MENU2.PRG/143C.c:81).
@@ -369,7 +369,7 @@ char* LiveUnlockDescription(int ability) {
 int LiveUpdateAbilityUnlock(int initialize) {
   LiveProgress progress;
   LiveAbilityHost host;
-  return UpdateAbilityUnlock(g_ability_unlock, progress, host, initialize != 0);
+  return UpdateAbilityUnlock(abilityUnlock, progress, host, initialize != 0);
 }
 
 // decomp binding: vs_menu2_actionUnlock (src/MENU/MENU2.PRG/143C.c:422).
@@ -392,7 +392,7 @@ void LiveSetRiskCost(int action) {
     return;
   }
   LiveRiskHost host;
-  SetRiskCost(g_risk, VS::Battle::actionDefinitions[action].cost, host);
+  SetRiskCost(riskCost, VS::Battle::actionDefinitions[action].cost, host);
 }
 
 // decomp binding: _initAbilityMenu (src/MENU/MENU2.PRG/64.c:64).
@@ -429,8 +429,8 @@ int LiveCreateAbilityRowsEntry(int count, int type, std::uint16_t** menu_text) {
 }
 
 void ResetLiveAbilityFoundationState() {
-  g_break_art = {};
-  g_ability_unlock = {};
-  g_risk = {};
+  breakArtUnlock = {};
+  abilityUnlock = {};
+  riskCost = {};
 }
 }  // namespace VS::Menu::BattleAbilities

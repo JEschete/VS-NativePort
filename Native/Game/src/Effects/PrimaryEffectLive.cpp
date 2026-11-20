@@ -18,10 +18,10 @@ static_assert(std::extent_v<decltype(VS::Effects::tokenBitmaps)> >=
 
 namespace VS::Effects {
 namespace {
-std::uint64_t refused_tracks = 0;
-std::uint64_t refused_phases = 0;
-std::uint64_t refused_tokens = 0;
-std::uint64_t exhausted_pools = 0;
+std::uint64_t refusedTracks = 0;
+std::uint64_t refusedPhases = 0;
+std::uint64_t refusedTokens = 0;
+std::uint64_t exhaustedPools = 0;
 
 [[nodiscard]] bool ShouldReport(std::uint64_t& count) {
   return std::has_single_bit(++count);
@@ -73,12 +73,12 @@ int LivePrimaryEffectTrackCount() { return PlayableTrackCount(LiveState()); }
 void LiveRequeueEffectTrack(int track) {
   PrimaryEffectState state = LiveState();
   if (!RequeueTrack(state, track)) {
-    if (ShouldReport(refused_tracks)) {
+    if (ShouldReport(refusedTracks)) {
       VS::Core::LogWarn(
           "effects",
           "primary effect: requeue of track {} refused: past the {} "
           "tracks ({} refusals)",
-          track, kPrimaryEffectTracks, refused_tracks);
+          track, kPrimaryEffectTracks, refusedTracks);
     }
     return;
   }
@@ -93,12 +93,12 @@ int LiveIsPrimaryEffectLoaded() {
 void LiveSetPrimaryEffectPhase(int phase) {
   const auto known = ToPrimaryEffectPhase(static_cast<std::uint32_t>(phase));
   if (!known) {
-    if (ShouldReport(refused_phases)) {
+    if (ShouldReport(refusedPhases)) {
       VS::Core::LogWarn(
           "effects",
           "primary effect: phase {} refused: not a runtime phase ({} "
           "refusals)",
-          phase, refused_phases);
+          phase, refusedPhases);
     }
     return;
   }
@@ -116,12 +116,12 @@ int LiveAllocateEffectToken() {
   EffectTokenPool pool = LiveTokenPool();
   const auto token = AllocateEffectToken(pool);
   if (!token) {
-    if (ShouldReport(exhausted_pools)) {
+    if (ShouldReport(exhaustedPools)) {
       VS::Core::LogWarn(
           "effects",
           "effect tokens: the pool is full; token 0 handed out ({} "
           "times)",
-          exhausted_pools);
+          exhaustedPools);
     }
     return 0;
   }
@@ -132,12 +132,12 @@ int LiveAllocateEffectToken() {
 void LiveReleaseEffectToken(int token) {
   EffectTokenPool pool = LiveTokenPool();
   if (!ReleaseEffectToken(pool, token)) {
-    if (ShouldReport(refused_tokens)) {
+    if (ShouldReport(refusedTokens)) {
       VS::Core::LogWarn(
           "effects",
           "effect tokens: release of token {} refused: past the {} "
           "tokens ({} refusals)",
-          token, kEffectTokens, refused_tokens);
+          token, kEffectTokens, refusedTokens);
     }
     return;
   }

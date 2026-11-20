@@ -8,21 +8,21 @@
 
 namespace VS::Core::Memory {
 namespace {
-std::uint64_t refused_sizes = 0;
+std::uint64_t refusedSizes = 0;
 }  // namespace
 
-std::uint64_t RefusedLiveSizeCount() noexcept { return refused_sizes; }
+std::uint64_t RefusedLiveSizeCount() noexcept { return refusedSizes; }
 
 void live_detail::ReportRefusedSize(const char* operation, std::int64_t size,
                                     const std::source_location& site) {
-  ++refused_sizes;
-  if ((refused_sizes & (refused_sizes - 1)) == 0) {
+  ++refusedSizes;
+  if ((refusedSizes & (refusedSizes - 1)) == 0) {
     VS::Core::Errorf("memory",
                      "%s at %s:%u: size %" PRId64
                      " would not terminate in the original and was refused "
                      "(refusal %" PRIu64 ")",
                      operation, site.file_name(),
-                     static_cast<unsigned>(site.line()), size, refused_sizes);
+                     static_cast<unsigned>(site.line()), size, refusedSizes);
   }
 }
 

@@ -28,10 +28,10 @@ namespace {
 // The scratchpad word (0x1F800088) func_800BDBB4 kept each eased fraction in.
 constexpr std::size_t kEasedFractionScratchOffset = 0x88;
 
-std::atomic<std::uint64_t> refused_count{0};
+std::atomic<std::uint64_t> refusedCount{0};
 
 void Skip(const char* operation, const char* reason) {
-  refused_count.fetch_add(1, std::memory_order_relaxed);
+  refusedCount.fetch_add(1, std::memory_order_relaxed);
   VS::Core::LogError("event.camera", "{} skipped: {}", operation, reason);
 }
 
@@ -213,7 +213,7 @@ int UpdateEventTripleTweenEntry(TripleTween* tween) {
 }
 
 std::uint64_t RefusedEventScreenTweenCount() noexcept {
-  return refused_count.load(std::memory_order_relaxed);
+  return refusedCount.load(std::memory_order_relaxed);
 }
 }  // namespace VS::Event
 

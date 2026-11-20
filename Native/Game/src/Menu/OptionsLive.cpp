@@ -51,7 +51,7 @@ void SetFlag(std::uint8_t& flags, std::uint8_t bit, bool on) {
   flags = static_cast<std::uint8_t>(on ? (flags | bit) : (flags & ~bit));
 }
 
-State g_state{};
+State optionsState{};
 
 class LiveHost final : public Host {
  public:
@@ -147,9 +147,9 @@ class LiveHost final : public Host {
 
 int UpdateLiveOptions(std::uint8_t& step) {
   LiveHost host;
-  Context ctx{.state = g_state, .host = host};
+  Context ctx{.state = optionsState, .host = host};
   return Update(ctx, step);
 }
 
-void ResetLiveOptionsStatics() { g_state = {}; }
+void ResetLiveOptionsStatics() { optionsState = {}; }
 }  // namespace VS::Menu::Options

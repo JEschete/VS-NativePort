@@ -46,12 +46,12 @@ constexpr int kPreviewActor = 1;
 constexpr std::array<const char*, kLimbConditionCount> kLimbStatuses{
     "DYING", "BAD", "AVERAGE", "GOOD", "EXCELLENT",
 };
-LimbPanelState panel_state;
-StatusEffectNavigationState navigation_state;
-std::uint64_t refused_calls = 0;
+LimbPanelState panelState;
+StatusEffectNavigationState navigationState;
+std::uint64_t refusedCalls = 0;
 
 void Refuse(std::string_view call, LimbControllerError error) {
-  if (std::has_single_bit(++refused_calls)) {
+  if (std::has_single_bit(++refusedCalls)) {
     const auto message = LimbControllerErrorText(error);
     VS::Core::Warnf("menu", "status limbs: %.*s refused: %.*s",
                     static_cast<int>(call.size()), call.data(),
@@ -259,7 +259,7 @@ class LiveNavigation final : public StatusEffectNavigationHost {
     int request) {
   LimbPanelFrame frame = PanelFrame();
   LivePanel host;
-  const auto result = UpdateLimbPanel(panel_state, frame, request, host);
+  const auto result = UpdateLimbPanel(panelState, frame, request, host);
   VS::Menu::Framework::menuMemory.limb_selection_and_dimming =
       frame.selection_and_dimming;
   return result;
@@ -345,7 +345,7 @@ int LiveNavigateStatusEffects(VS::Battle::ActorStats* actor,
   }
   auto frame = NavigationFrame();
   LiveNavigation host;
-  const auto result = NavigateStatusEffects(navigation_state, frame, target,
+  const auto result = NavigateStatusEffects(navigationState, frame, target,
                                             selection_active != 0, host);
   StoreNavigationFrame(frame);
   if (!result) {
@@ -419,13 +419,13 @@ void LivePopulateSelectedLimbDefense() {
 }
 
 void ResetLiveLimbControllersModuleData() {
-  panel_state = {};
-  navigation_state = {};
+  panelState = {};
+  navigationState = {};
   selectedElement = 0;
 }
-const LimbPanelState& LiveLimbPanelControllerState() { return panel_state; }
+const LimbPanelState& LiveLimbPanelControllerState() { return panelState; }
 const StatusEffectNavigationState& LiveStatusEffectNavigationControllerState() {
-  return navigation_state;
+  return navigationState;
 }
-std::uint64_t RefusedLiveLimbControllerCount() { return refused_calls; }
+std::uint64_t RefusedLiveLimbControllerCount() { return refusedCalls; }
 }  // namespace VS::Menu::Status

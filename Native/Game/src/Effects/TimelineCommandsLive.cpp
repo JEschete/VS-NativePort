@@ -41,29 +41,29 @@ namespace {
 static_assert(sizeof(ActionControlKey) == sizeof(std::uint32_t));
 static_assert(std::is_trivially_copyable_v<ActionControlKey>);
 
-std::uint64_t refused_instances = 0;
-std::uint64_t refused_records = 0;
+std::uint64_t refusedInstances = 0;
+std::uint64_t refusedRecords = 0;
 
 // Reports a null instance; the first refusal and each power of two after it
 // are logged.
 [[nodiscard]] bool Refused(const LiveEffectInstance* instance,
                            std::string_view command) {
   if (instance != nullptr) return false;
-  if (std::has_single_bit(++refused_instances)) {
+  if (std::has_single_bit(++refusedInstances)) {
     VS::Core::LogWarn("effects",
                       "timeline command {} refused: no effect instance ({} "
                       "refusals)",
-                      command, refused_instances);
+                      command, refusedInstances);
   }
   return true;
 }
 
 // Reports a missing transform, timeline or track key, rate-limited as Refused.
 void ReportMissing(std::string_view command, std::string_view missing) {
-  if (std::has_single_bit(++refused_records)) {
+  if (std::has_single_bit(++refusedRecords)) {
     VS::Core::LogWarn("effects",
                       "timeline command {} refused: {} ({} refusals)", command,
-                      missing, refused_records);
+                      missing, refusedRecords);
   }
 }
 

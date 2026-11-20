@@ -42,7 +42,7 @@ constexpr std::size_t kShieldOffset = kRecordBytes + kWeaponBytes;
 constexpr std::size_t kCompanionBufferBytes = 2 * kRecordBytes;
 constexpr std::size_t kEquippedBufferBytes = kRecordBytes + (2 * kWeaponBytes);
 
-EnemyPreviewState live_state;
+EnemyPreviewState liveState;
 std::uint64_t refusals = 0;
 
 void Report(std::string_view what) {
@@ -110,7 +110,7 @@ class LiveEnemyPreviewHost final : public EnemyPreviewHost {
       const EnemyPreviewFile& file) override {
     const VS::Content::DiscFile disc = DiscFile(file);
     auto* request = Content::AllocateLiveDiscRequest(&disc);
-    live_state.read_generation = Content::LiveDiscRequestGeneration(request);
+    liveState.read_generation = Content::LiveDiscRequestGeneration(request);
     return Address(request);
   }
 
@@ -124,7 +124,7 @@ class LiveEnemyPreviewHost final : public EnemyPreviewHost {
     const VS::Content::DiscFile disc = DiscFile(file);
     auto* request =
         Content::CompleteLiveRefusedDiscRequest(&disc, Pointer(destination));
-    live_state.read_generation = Content::LiveDiscRequestGeneration(request);
+    liveState.read_generation = Content::LiveDiscRequestGeneration(request);
     return Address(request);
   }
 
@@ -136,7 +136,7 @@ class LiveEnemyPreviewHost final : public EnemyPreviewHost {
 
   void ReleaseRead(AssetAddress read) override {
     Content::ReleaseLiveDiscRequest(Pointer<VS::Content::DiscQueueSlot>(read));
-    live_state.read_generation = 0;
+    liveState.read_generation = 0;
   }
 
   [[nodiscard]] AssetAddress AllocateFile(std::uint32_t bytes) override {
@@ -324,11 +324,11 @@ void ReleasePreviewRecords(std::span<const std::byte> buffer) {
 
 // decomp: MENU9.PRG vs_menu9_loadZud (F02836, src/MENU/MENU9.PRG/57BC.c:10)
 int LoadLiveEnemyPreview(int zud_id) {
-  return LoadEnemyPreview(Host(), live_state, zud_id);
+  return LoadEnemyPreview(Host(), liveState, zud_id);
 }
 
 // decomp: MENU9.PRG vs_menu9_freeZud (F02837, src/MENU/MENU9.PRG/57BC.c:42)
-void FreeLiveEnemyPreview() { FreeEnemyPreview(Host(), live_state); }
+void FreeLiveEnemyPreview() { FreeEnemyPreview(Host(), liveState); }
 
 // decomp: MENU9.PRG func_801080C8 (F02838, src/MENU/MENU9.PRG/57BC.c:49)
 void InitializeLiveAshleyPreviewPose() { InitializeAshleyPreviewPose(Host()); }
@@ -336,45 +336,43 @@ void InitializeLiveAshleyPreviewPose() { InitializeAshleyPreviewPose(Host()); }
 // decomp: MENU9.PRG vs_menu9_loadZudFile (F02839,
 // src/MENU/MENU9.PRG/592C.c:171)
 void QueueLiveEnemyModelRead(int zud_id) {
-  QueueEnemyModelRead(Host(), live_state, zud_id);
+  QueueEnemyModelRead(Host(), liveState, zud_id);
 }
 
 // decomp: MENU9.PRG vs_menu9_parseZudFile (F02840,
 // src/MENU/MENU9.PRG/592C.c:203)
-int LoadLiveEnemyModelParts() {
-  return LoadEnemyModelParts(Host(), live_state);
-}
+int LoadLiveEnemyModelParts() { return LoadEnemyModelParts(Host(), liveState); }
 
 // decomp: MENU9.PRG vs_menu9_freeZudFile (F02841,
 // src/MENU/MENU9.PRG/592C.c:295)
-void FreeLiveEnemyModelBuffer() { FreeEnemyModelBuffer(Host(), live_state); }
+void FreeLiveEnemyModelBuffer() { FreeEnemyModelBuffer(Host(), liveState); }
 
 bool CleanupLiveEnemyPreviewOwnedState() {
-  const bool owned = live_state.read != AssetAddress::kNone ||
-                     live_state.file != AssetAddress::kNone ||
-                     live_state.model_buffer != AssetAddress::kNone;
-  const auto file = PreviewAllocation(live_state.file, live_state.file_bytes);
-  const auto model = PreviewAllocation(live_state.model_buffer, kRecordBytes);
+  const bool owned = liveState.read != AssetAddress::kNone ||
+                     liveState.file != AssetAddress::kNone ||
+                     liveState.model_buffer != AssetAddress::kNone;
+  const auto file = PreviewAllocation(liveState.file, liveState.file_bytes);
+  const auto model = PreviewAllocation(liveState.model_buffer, kRecordBytes);
   if (!file || !model || !ValidatePreviewRecords(*model)) return false;
   if (!file->empty() && !Content::CancelLiveDiscWrites(*file)) return false;
   if (!Content::CancelLiveActorAssetBorrows(*file, *model)) return false;
-  auto* request = Pointer<VS::Content::DiscQueueSlot>(live_state.read);
-  if (live_state.read_generation != 0 &&
+  auto* request = Pointer<VS::Content::DiscQueueSlot>(liveState.read);
+  if (liveState.read_generation != 0 &&
       Content::LiveDiscRequestGeneration(request) ==
-          live_state.read_generation) {
+          liveState.read_generation) {
     Content::ReleaseLiveDiscRequest(request);
   }
   ReleasePreviewRecords(*model);
   if (!file->empty()) Core::Memory::FreeLiveFromHighEnd(file->data());
   if (!model->empty()) Core::Memory::FreeLiveFromHighEnd(model->data());
-  live_state = {};
+  liveState = {};
   if (owned) Host().SetLoadStep(0);
   return true;
 }
 
-void ResetLiveEnemyPreview() { live_state = {}; }
+void ResetLiveEnemyPreview() { liveState = {}; }
 
-EnemyPreviewState& LiveEnemyPreviewState() noexcept { return live_state; }
+EnemyPreviewState& LiveEnemyPreviewState() noexcept { return liveState; }
 
 std::uint64_t LiveEnemyPreviewRefusals() noexcept { return refusals; }
 }  // namespace VS::Menu::Score

@@ -301,9 +301,9 @@ namespace {
 
 constexpr DWORD kWatchRequest = 0xE0564157;  // private exception code: "set the
                                              // watchpoint from this context"
-const void* g_watch_address = nullptr;
-int g_watch_bytes = 0;
-int g_watch_hits = 0;
+const void* watchAddress = nullptr;
+int watchBytes = 0;
+int watchHits = 0;
 
 void LogContextStack(CONTEXT ctx) {
   HANDLE process = GetCurrentProcess();
@@ -345,27 +345,26 @@ LONG WINAPI OnWatch(EXCEPTION_POINTERS* info) {
   CONTEXT* ctx = info->ContextRecord;
   if (info->ExceptionRecord->ExceptionCode == kWatchRequest) {
     constexpr DWORD64 kDwordLengthCode = 3;
-    const DWORD64 len = g_watch_bytes == sizeof(std::uint64_t) ? 2
-                        : g_watch_bytes == sizeof(std::uint32_t)
-                            ? kDwordLengthCode
-                        : g_watch_bytes == sizeof(std::uint16_t) ? 1
-                                                                 : 0;
-    ctx->Dr0 = reinterpret_cast<DWORD64>(g_watch_address);
+    const DWORD64 len = watchBytes == sizeof(std::uint64_t)   ? 2
+                        : watchBytes == sizeof(std::uint32_t) ? kDwordLengthCode
+                        : watchBytes == sizeof(std::uint16_t) ? 1
+                                                              : 0;
+    ctx->Dr0 = reinterpret_cast<DWORD64>(watchAddress);
     // DR7: local enable 0, condition 01 (write), length
-    ctx->Dr7 = g_watch_address ? (1ull | (1ull << kDebugConditionShift) |
-                                  (len << kDebugLengthShift))
-                               : 0;
+    ctx->Dr7 = watchAddress ? (1ull | (1ull << kDebugConditionShift) |
+                               (len << kDebugLengthShift))
+                            : 0;
     ctx->ContextFlags |= CONTEXT_DEBUG_REGISTERS;
     return EXCEPTION_CONTINUE_EXECUTION;
   }
   if (info->ExceptionRecord->ExceptionCode == EXCEPTION_SINGLE_STEP &&
       (ctx->Dr6 & 1)) {
     ctx->Dr6 = 0;
-    if (g_watch_hits++ < kWatchHitLimit) {
+    if (watchHits++ < kWatchHitLimit) {
       std::uint64_t value = 0;
-      std::memcpy(&value, g_watch_address, static_cast<size_t>(g_watch_bytes));
+      std::memcpy(&value, watchAddress, static_cast<size_t>(watchBytes));
       VS::Core::LogWarn("watch", "write to {} (now 0x{:X}), hit {}",
-                        g_watch_address, value, g_watch_hits);
+                        watchAddress, value, watchHits);
       LogContextStack(*ctx);
     }
     return EXCEPTION_CONTINUE_EXECUTION;
@@ -384,9 +383,9 @@ void WatchWrites(const void* address, int bytes) {
     SymSetOptions(SYMOPT_LOAD_LINES | SYMOPT_UNDNAME | SYMOPT_DEFERRED_LOADS);
     SymInitialize(GetCurrentProcess(), nullptr, TRUE);
   }
-  g_watch_address = address;
-  g_watch_bytes = bytes;
-  g_watch_hits = 0;
+  watchAddress = address;
+  watchBytes = bytes;
+  watchHits = 0;
   RaiseException(kWatchRequest, 0, 0, nullptr);
   VS::Core::LogWarn("watch", "watching {} bytes at {}", bytes, address);
 }

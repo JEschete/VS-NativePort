@@ -44,7 +44,7 @@ constexpr std::size_t kActionNameBytes = 24;
 constexpr std::size_t kAnimationCount = 11;
 constexpr std::size_t kPointRequirementCategoryCount = 15;
 constexpr int kMenuItemTargetPosition = 180;
-State g_state{};
+State breakArtsState{};
 
 char ToStorageChar(std::uint8_t value) { return std::bit_cast<char>(value); }
 
@@ -314,7 +314,7 @@ void DrawNextUnlockPointsLive(int x_offset, int weapon_category, int row) {
 // decomp: MENU1.PRG _weaponArtsMenu (src/MENU/MENU1.PRG/30.c:104).
 int UpdateArtListLive(int type_cursor_memory) {
   LiveHost host;
-  Context context{.state = g_state, .host = host};
+  Context context{.state = breakArtsState, .host = host};
   return UpdateArtList(type_cursor_memory, context);
 }
 
@@ -322,7 +322,7 @@ int UpdateArtListLive(int type_cursor_memory) {
 // (src/MENU/MENU1.PRG/30.c:266).
 int UpdateWeaponCategoriesLive(int initialize) {
   LiveHost host;
-  Context context{.state = g_state, .host = host};
+  Context context{.state = breakArtsState, .host = host};
   return UpdateWeaponCategories(initialize, context);
 }
 
@@ -340,12 +340,12 @@ int UpdateLive(std::uint8_t* step) {
     return 0;
   }
   if (*step == static_cast<std::uint8_t>(ScreenStep::kInit)) {
-    g_state = {};
+    breakArtsState = {};
   }
   LiveHost host;
-  Context context{.state = g_state, .host = host};
+  Context context{.state = breakArtsState, .host = host};
   return Update(context, *step);
 }
 
-void ResetLiveStatics() { g_state = {}; }
+void ResetLiveStatics() { breakArtsState = {}; }
 }  // namespace VS::Menu::break_arts

@@ -52,8 +52,8 @@ constexpr std::size_t kTextPerRow = 2;
 constexpr std::size_t kTopMenuCursorRow = 2;
 constexpr std::size_t kTopMenuFirstRow = 3;
 
-ScrollableRowAnimation live_animation;
-TopMenuState live_top_menu;
+ScrollableRowAnimation liveAnimation;
+TopMenuState liveTopMenu;
 std::uint64_t refusals = 0;
 
 void Refuse(std::string_view what) {
@@ -199,7 +199,7 @@ void RenderLiveScrollableRow(Framework::MenuRow* row) {
     return;
   }
   LiveScrollableRow host(row, before);
-  RenderScrollableRow(host, live_animation, *row);
+  RenderScrollableRow(host, liveAnimation, *row);
 }
 
 // decomp: MENU9.PRG _setRows (src/MENU/MENU9.PRG/238.c:196), 80102E10
@@ -221,7 +221,7 @@ int LiveSelectedTopMenuRow() {
 // decomp: MENU9.PRG _topMenu (src/MENU/MENU9.PRG/238.c:1430), 80104BD0
 int UpdateLiveTopMenu(int initialize) {
   LiveGazetteMenu host;
-  return UpdateTopMenu(host, live_top_menu, initialize);
+  return UpdateTopMenu(host, liveTopMenu, initialize);
 }
 
 // decomp: MENU9.PRG _clearMenuExceptRow8 (src/MENU/MENU9.PRG/238.c:258),
@@ -238,15 +238,15 @@ void PollLiveMenuReady() {
 }
 
 void ResetGazetteRowsLive() {
-  live_animation = {};
-  live_top_menu = {};
+  liveAnimation = {};
+  liveTopMenu = {};
 }
 
 ScrollableRowAnimation& LiveScrollableRowAnimation() noexcept {
-  return live_animation;
+  return liveAnimation;
 }
 
-TopMenuState& LiveTopMenuState() noexcept { return live_top_menu; }
+TopMenuState& LiveTopMenuState() noexcept { return liveTopMenu; }
 
 std::uint64_t LiveGazetteRowsRefusals() noexcept { return refusals; }
 }  // namespace VS::Menu::Score

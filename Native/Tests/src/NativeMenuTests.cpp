@@ -58,11 +58,11 @@ namespace fs = std::filesystem;
 namespace Save = VS::Game::Save;
 
 constexpr std::size_t kSoundCount = 12;
-std::array<unsigned, kSoundCount>* sound_calls = nullptr;
+std::array<unsigned, kSoundCount>* soundCalls = nullptr;
 
 void CountSound(VS::Audio::CommandParams* parameters) {
-  if (sound_calls != nullptr && parameters->param1 < sound_calls->size()) {
-    ++(*sound_calls)[parameters->param1];
+  if (soundCalls != nullptr && parameters->param1 < soundCalls->size()) {
+    ++(*soundCalls)[parameters->param1];
   }
 }
 
@@ -85,7 +85,7 @@ struct MenuFixture {
   VS::Audio::CommandParams sound_params = VS::Audio::Mixer::commandParams;
   int sound_group = VS::Audio::nextSfxChannelGroup7E;
   std::array<unsigned, kSoundCount> sounds{};
-  std::array<unsigned, kSoundCount>* previous_calls = sound_calls;
+  std::array<unsigned, kSoundCount>* previous_calls = soundCalls;
 
   MenuFixture() {
     static std::atomic<unsigned> counter = 0;
@@ -103,7 +103,7 @@ struct MenuFixture {
     sound_selectors.fill(0x8000);
     VS::Audio::Mixer::kCommandHandlers[0x20] = CountSound;
     VS::Audio::nextSfxChannelGroup7E = 2;
-    sound_calls = &sounds;
+    soundCalls = &sounds;
   }
 
   ~MenuFixture() {
@@ -117,7 +117,7 @@ struct MenuFixture {
       VS::Audio::Driver::commandArguments = sound_arguments;
       VS::Audio::Mixer::commandParams = sound_params;
       VS::Audio::nextSfxChannelGroup7E = sound_group;
-      sound_calls = previous_calls;
+      soundCalls = previous_calls;
       std::error_code error;
       fs::remove_all(root, error);
       if (error) {

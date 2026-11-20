@@ -42,8 +42,8 @@ struct BoundStream {
   VS::Content::AudioStreamInfo info;
   std::array<std::string, Cutscene::kStreamChannelCount> instruments;
 };
-std::optional<BoundStream> g_bound;
-std::optional<Cutscene::StreamGains> g_gains;
+std::optional<BoundStream> boundStream;
+std::optional<Cutscene::StreamGains> streamGains;
 
 // Stream commands name their source by the pointer the room stream was bound
 // with; the identity is compared and never read through.
@@ -51,7 +51,7 @@ Cutscene::StreamSourceId SourceIdOf(const void* source) {
   return static_cast<Cutscene::StreamSourceId>(
       reinterpret_cast<std::uintptr_t>(source));
 }
-int g_fade_target = kMaximumVolume;
+int fadeTarget = kMaximumVolume;
 
 // The driver's stream state (VS::Audio::Cutscene::streamState), the sequencer's
 // voice scheduler and the room stream slot of VS::Audio::soundState.
@@ -81,8 +81,10 @@ class LiveStreamHost final : public Cutscene::StreamHost {
 
   [[nodiscard]] std::optional<Cutscene::StreamFormat> BoundFormat(
       Cutscene::StreamSourceId source) const override {
-    if (!g_bound || source != SourceIdOf(g_bound->source)) return std::nullopt;
-    const auto& info = g_bound->info;
+    if (!boundStream || source != SourceIdOf(boundStream->source)) {
+      return std::nullopt;
+    }
+    const auto& info = boundStream->info;
     return Cutscene::StreamFormat{info.channels, info.repeat, info.source_pitch,
                                   info.sample_rate};
   }
@@ -132,10 +134,12 @@ class LiveStreamHost final : public Cutscene::StreamHost {
   bool StartVoice(std::size_t channel, std::int32_t voice, float rate,
                   std::uint32_t left, std::uint32_t right,
                   bool reverb) override {
-    if (!g_bound || channel >= g_bound->instruments.size()) return false;
+    if (!boundStream || channel >= boundStream->instruments.size()) {
+      return false;
+    }
     return VS::Audio::Driver::StartOutputStreamVoice(
                static_cast<unsigned>(voice),
-               g_bound->instruments[channel].c_str(), rate, left, right,
+               boundStream->instruments[channel].c_str(), rate, left, right,
                reverb ? 1 : 0) != 0;
   }
 
@@ -146,12 +150,12 @@ class LiveStreamHost final : public Cutscene::StreamHost {
 
   [[nodiscard]] std::optional<Cutscene::StreamGains> AppliedGains()
       const override {
-    return g_gains;
+    return streamGains;
   }
 
   void SetAppliedGains(
       const std::optional<Cutscene::StreamGains>& gains) override {
-    g_gains = gains;
+    streamGains = gains;
   }
 
   void SetVolume(std::uint32_t volume) override {
@@ -160,7 +164,7 @@ class LiveStreamHost final : public Cutscene::StreamHost {
   }
 
   void StartFade(const Cutscene::StreamFade& fade) override {
-    g_fade_target = static_cast<int>(fade.target);
+    fadeTarget = static_cast<int>(fade.target);
     VS::Audio::Cutscene::streamState.volume_fade_step = fade.step;
     VS::Audio::Cutscene::streamState.volume_fade_ticks_left =
         static_cast<int>(fade.ticks);
@@ -194,7 +198,7 @@ class LiveStreamHost final : public Cutscene::StreamHost {
               : VS::Platform::PathText(VS::Content::AudioStreamInstrumentPath(
                     store->Root(), info, channel % info.channels));
     }
-    g_bound = std::move(binding);
+    boundStream = std::move(binding);
     VS::Audio::soundState.sfx_stream_data[kRoomSlot] = data_;
     VS::Core::LogInfo("audio", "bound stream {}: {} channels, {} frames",
                       info.id, info.channels, info.frames);
@@ -202,7 +206,7 @@ class LiveStreamHost final : public Cutscene::StreamHost {
 
   void UnbindSlot() override {
     VS::Audio::soundState.sfx_stream_data[kRoomSlot] = nullptr;
-    g_bound.reset();
+    boundStream.reset();
   }
 
  private:
@@ -306,8 +310,9 @@ void SetLiveStreamPan(VS::Audio::CommandParams* params) {
 }
 
 std::span<std::uint8_t> LiveBoundStreamBytes() {
-  if (!g_bound) return {};
-  return {static_cast<std::uint8_t*>(g_bound->source), g_bound->byte_count};
+  if (!boundStream) return {};
+  return {static_cast<std::uint8_t*>(boundStream->source),
+          boundStream->byte_count};
 }
 }  // namespace VS::Audio::Cutscene
 
@@ -359,7 +364,7 @@ void VS::Audio::UpdateCutsceneStream(void) {
   if (state.volume_fade_ticks_left > 0) {
     --state.volume_fade_ticks_left;
     state.volume = state.volume_fade_ticks_left == 0
-                       ? g_fade_target
+                       ? fadeTarget
                        : std::clamp(static_cast<int>(state.volume) +
                                         state.volume_fade_step,
                                     0, kMaximumVolume);
@@ -373,7 +378,7 @@ void VS::Audio::ResetCutsceneStream(void) {
   VS::Audio::soundState.sfx_stream_data[kRoomSlot] = nullptr;
   VS::Audio::Cutscene::streamState = {};
   VS::Audio::Cutscene::streamState.volume = kMaximumVolume;
-  g_bound.reset();
-  g_gains.reset();
-  g_fade_target = kMaximumVolume;
+  boundStream.reset();
+  streamGains.reset();
+  fadeTarget = kMaximumVolume;
 }

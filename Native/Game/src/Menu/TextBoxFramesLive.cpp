@@ -29,14 +29,14 @@ namespace {
 
 using FrameBytes = std::span<const std::uint8_t>;
 constexpr std::size_t kBoxOrderingStride = 4;
-std::uint64_t refused_frames = 0;
+std::uint64_t refusedFrames = 0;
 
 void RefuseFrame(int index, int reason) {
-  ++refused_frames;
-  if (std::has_single_bit(refused_frames)) {
+  ++refusedFrames;
+  if (std::has_single_bit(refusedFrames)) {
     VS::Core::Warnf("menu",
                     "Text-box frame refused: box=%d reason=%d count=%" PRIu64,
-                    index, reason, refused_frames);
+                    index, reason, refusedFrames);
   }
 }
 

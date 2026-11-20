@@ -12,19 +12,19 @@
 namespace VS::Core {
 
 namespace {
-std::atomic<LogLevel> g_level{LogLevel::Info};
-std::atomic<std::uint64_t> g_tick{0};
-std::mutex g_mutex;
-std::FILE* g_file = nullptr;
-std::FILE* g_mirror = nullptr;
-std::vector<std::string> g_channels;
-LogObserver g_observer;
-LogLevel g_console_level = LogLevel::Trace;
-bool g_flush_each_message = true;
+std::atomic<LogLevel> minimumLevel{LogLevel::Info};
+std::atomic<std::uint64_t> logTick{0};
+std::mutex logMutex;
+std::FILE* logFile = nullptr;
+std::FILE* mirrorFile = nullptr;
+std::vector<std::string> enabledChannels;
+LogObserver logObserver;
+LogLevel consoleLevel = LogLevel::Trace;
+bool flushEachMessage = true;
 
 bool ChannelEnabled(LogLevel level, std::string_view channel) {
-  return level >= LogLevel::Warn || g_channels.empty() ||
-         std::ranges::find(g_channels, channel) != g_channels.end();
+  return level >= LogLevel::Warn || enabledChannels.empty() ||
+         std::ranges::find(enabledChannels, channel) != enabledChannels.end();
 }
 
 const char* LevelName(LogLevel level) {
@@ -47,28 +47,28 @@ const char* LevelName(LogLevel level) {
 }  // namespace
 
 LogObserver SetLogObserver(LogObserver observer) {
-  std::lock_guard lock(g_mutex);
-  return std::exchange(g_observer, std::move(observer));
+  std::lock_guard lock(logMutex);
+  return std::exchange(logObserver, std::move(observer));
 }
 
-void SetLogLevel(LogLevel level) { g_level = level; }
+void SetLogLevel(LogLevel level) { minimumLevel = level; }
 
 LogLevel SetConsoleLogLevel(LogLevel level) {
-  std::lock_guard lock(g_mutex);
-  return std::exchange(g_console_level, level);
+  std::lock_guard lock(logMutex);
+  return std::exchange(consoleLevel, level);
 }
 
 bool SetLogFlushEachMessage(bool enabled) {
-  std::lock_guard lock(g_mutex);
-  return std::exchange(g_flush_each_message, enabled);
+  std::lock_guard lock(logMutex);
+  return std::exchange(flushEachMessage, enabled);
 }
 
 bool FlushLogFile() {
-  std::lock_guard lock(g_mutex);
-  const bool primary = g_file == nullptr ||
-                       (std::fflush(g_file) == 0 && std::ferror(g_file) == 0);
-  const bool mirror = g_mirror == nullptr || (std::fflush(g_mirror) == 0 &&
-                                              std::ferror(g_mirror) == 0);
+  std::lock_guard lock(logMutex);
+  const bool primary = logFile == nullptr ||
+                       (std::fflush(logFile) == 0 && std::ferror(logFile) == 0);
+  const bool mirror = mirrorFile == nullptr || (std::fflush(mirrorFile) == 0 &&
+                                                std::ferror(mirrorFile) == 0);
   return primary && mirror;
 }
 
@@ -99,70 +99,70 @@ bool SetLogChannels(std::string_view channels) {
       channels.remove_prefix(comma + 1);
     }
   }
-  std::lock_guard lock(g_mutex);
-  g_channels = std::move(parsed);
+  std::lock_guard lock(logMutex);
+  enabledChannels = std::move(parsed);
   return true;
 }
 
 bool IsLogEnabled(LogLevel level, std::string_view channel) {
-  if (level == LogLevel::Off || level < g_level.load()) {
+  if (level == LogLevel::Off || level < minimumLevel.load()) {
     return false;
   }
-  std::lock_guard lock(g_mutex);
+  std::lock_guard lock(logMutex);
   return ChannelEnabled(level, channel);
 }
 
-void SetLogTick(std::uint64_t tick) { g_tick = tick; }
+void SetLogTick(std::uint64_t tick) { logTick = tick; }
 
 bool SetLogFile(const char* path) {
-  std::lock_guard lock(g_mutex);
-  if (g_file) {
-    std::fclose(g_file);
-    g_file = nullptr;
+  std::lock_guard lock(logMutex);
+  if (logFile) {
+    std::fclose(logFile);
+    logFile = nullptr;
   }
   if (path && *path) {
-    g_file = std::fopen(path, "w");
+    logFile = std::fopen(path, "w");
   }
-  return !path || !*path || g_file != nullptr;
+  return !path || !*path || logFile != nullptr;
 }
 
 bool SetLogMirrorFile(const char* path) {
-  std::lock_guard lock(g_mutex);
-  if (g_mirror) {
-    std::fclose(g_mirror);
-    g_mirror = nullptr;
+  std::lock_guard lock(logMutex);
+  if (mirrorFile) {
+    std::fclose(mirrorFile);
+    mirrorFile = nullptr;
   }
-  if (path && *path) g_mirror = std::fopen(path, "w");
-  return !path || !*path || g_mirror != nullptr;
+  if (path && *path) mirrorFile = std::fopen(path, "w");
+  return !path || !*path || mirrorFile != nullptr;
 }
 
 void LogWrite(LogLevel level, std::string_view channel,
               std::string_view message) {
-  if (level == LogLevel::Off || level < g_level.load()) {
+  if (level == LogLevel::Off || level < minimumLevel.load()) {
     return;
   }
-  std::unique_lock lock(g_mutex);
+  std::unique_lock lock(logMutex);
   if (!ChannelEnabled(level, channel)) {
     return;
   }
-  const std::uint64_t tick = g_tick.load();
-  if (level >= g_console_level) {
+  const std::uint64_t tick = logTick.load();
+  if (level >= consoleLevel) {
     std::FILE* out = level >= LogLevel::Warn ? stderr : stdout;
     std::fprintf(out, "[%s] [tick=%" PRIu64 "] %.*s: %.*s\n", LevelName(level),
                  tick, static_cast<int>(channel.size()), channel.data(),
                  static_cast<int>(message.size()), message.data());
     std::fflush(out);
   }
-  for (auto* file : {g_file, g_mirror}) {
+  for (auto* file : {logFile, mirrorFile}) {
     if (!file) continue;
     std::fprintf(file, "[%s] [tick=%" PRIu64 "] %.*s: %.*s\n", LevelName(level),
                  tick, static_cast<int>(channel.size()), channel.data(),
                  static_cast<int>(message.size()), message.data());
-    if (g_flush_each_message || level >= LogLevel::Warn) {
+    if (flushEachMessage || level >= LogLevel::Warn) {
       std::fflush(file);
     }
   }
-  auto observer = g_observer;
+  auto observer = logObserver;
   lock.unlock();
   if (observer) observer({level, tick, channel, message});
 }

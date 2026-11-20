@@ -59,10 +59,10 @@ static_assert(kAboveMenuChainBytes % sizeof(std::uint32_t) == 0);
 constexpr auto kChainSlots = kAboveMenuChainBytes / sizeof(std::uint32_t);
 constexpr int kAboveMenuChainSlot = -static_cast<int>(kChainSlots);
 
-ItemListState g_item_list{};
-TransferDirectionState g_direction{};
-ScreenState g_screen{};
-std::uint64_t g_refusals = 0;
+ItemListState itemList{};
+TransferDirectionState transferDirection{};
+ScreenState transferScreen{};
+std::uint64_t refusals = 0;
 
 struct Refusal {
   std::string_view reason;
@@ -71,9 +71,9 @@ struct Refusal {
 [[noreturn]] void Refuse(std::string_view reason) { throw Refusal{reason}; }
 
 void Warn(std::string_view entry, std::string_view reason) {
-  if (std::has_single_bit(++g_refusals)) {
+  if (std::has_single_bit(++refusals)) {
     VS::Core::LogWarn("menu.container", "{} refused: {} ({} refusals)", entry,
-                      reason, g_refusals);
+                      reason, refusals);
   }
 }
 
@@ -523,10 +523,11 @@ class LiveTransferWorld final : public TransferWorld {
     return UpdateLiveSortMenu(selection);
   }
   std::int32_t UpdateItemList(std::int32_t direction) override {
-    return container::UpdateItemList(direction, g_item_list, *this);
+    return container::UpdateItemList(direction, itemList, *this);
   }
   std::int32_t UpdateTransferDirection(std::int32_t initialize) override {
-    return container::UpdateTransferDirection(initialize, g_direction, *this);
+    return container::UpdateTransferDirection(initialize, transferDirection,
+                                              *this);
   }
 
   void DrawCompactText(std::string_view text, std::int32_t xy,
@@ -663,14 +664,14 @@ void LiveBuildShieldRow(VS::Items::ContainerData* container, char** row_strings,
 int LiveUpdateItemList(int transfer_direction_selection) {
   return Guard("UpdateItemList", [&] {
     LiveTransferWorld world;
-    return UpdateItemList(transfer_direction_selection, g_item_list, world);
+    return UpdateItemList(transfer_direction_selection, itemList, world);
   });
 }
 
 int LiveUpdateTransferDirection(int initialize_direction_menu) {
   return Guard("UpdateTransferDirection", [&] {
     LiveTransferWorld world;
-    return UpdateTransferDirection(initialize_direction_menu, g_direction,
+    return UpdateTransferDirection(initialize_direction_menu, transferDirection,
                                    world);
   });
 }
@@ -679,13 +680,13 @@ int LiveUpdateScreen(std::uint8_t* screen_step) {
   return Guard("UpdateScreen", [&] {
     if (screen_step == nullptr) Refuse("missing screen step");
     LiveTransferWorld world;
-    return UpdateScreen(*screen_step, g_screen, world);
+    return UpdateScreen(*screen_step, transferScreen, world);
   });
 }
 
 void ResetLiveContainerTransferStatics() {
-  g_item_list = {};
-  g_direction = {};
-  g_screen = {};
+  itemList = {};
+  transferDirection = {};
+  transferScreen = {};
 }
 }  // namespace VS::Menu::container

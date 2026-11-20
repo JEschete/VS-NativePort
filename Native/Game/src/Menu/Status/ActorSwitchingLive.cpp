@@ -37,15 +37,15 @@ constexpr std::ptrdiff_t kVitalsChainBytes = 0xC;
 constexpr std::size_t kSpriteUvClutWord = 4;
 
 // _switchCurrentActor's function-local state word.
-std::uint32_t actor_switch_phase_word = actor_switch_phase::kMenuLoaded;
+std::uint32_t actorSwitchPhaseWord = actor_switch_phase::kMenuLoaded;
 
-std::uint64_t refused_calls = 0;
+std::uint64_t refusedCalls = 0;
 
 void Refuse(std::string_view call, std::string_view reason) {
-  if (std::has_single_bit(++refused_calls)) {
+  if (std::has_single_bit(++refusedCalls)) {
     VS::Core::LogWarn("menu",
                       "status actor switching: {} refused: {} ({} refusals)",
-                      call, reason, refused_calls);
+                      call, reason, refusedCalls);
   }
 }
 
@@ -174,7 +174,7 @@ void StoreVitalsState(const VitalsPanelState& state) {
 }
 
 [[nodiscard]] ActorSwitchState LoadSwitchState() {
-  return {.phase = actor_switch_phase_word,
+  return {.phase = actorSwitchPhaseWord,
           .selected_actor = selectedActor,
           .animation_step = screenAnimationStep,
           .draw_background_first = drawBackgroundFirst,
@@ -183,7 +183,7 @@ void StoreVitalsState(const VitalsPanelState& state) {
 }
 
 void StoreSwitchState(const ActorSwitchState& state) {
-  actor_switch_phase_word = state.phase;
+  actorSwitchPhaseWord = state.phase;
   selectedActor = state.selected_actor;
   screenAnimationStep = state.animation_step;
   drawBackgroundFirst = state.draw_background_first;
@@ -286,6 +286,6 @@ int LiveEquipmentRowCount() {
 }
 
 void ResetLiveActorSwitchPhase() {
-  actor_switch_phase_word = actor_switch_phase::kMenuLoaded;
+  actorSwitchPhaseWord = actor_switch_phase::kMenuLoaded;
 }
 }  // namespace VS::Menu::Status

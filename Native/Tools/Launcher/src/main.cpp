@@ -21,9 +21,9 @@
 namespace {
 namespace fs = std::filesystem;
 namespace Launcher = VS::Launcher;
-bool g_console_mode = false;
+bool consoleMode = false;
 void Report(const std::string& message, UINT icon = MB_ICONERROR) {
-  if (g_console_mode) {
+  if (consoleMode) {
     std::fprintf(stderr, "launcher: %s\n", message.c_str());
   } else {
     const auto text = VS::Platform::Utf8Path(message).wstring();
@@ -123,7 +123,7 @@ Options ParseOptions(const std::vector<std::wstring>& arguments) {
 std::optional<Launcher::Settings> LoadOrResetSettings(const fs::path& state) {
   auto loaded = Launcher::LoadSettings(state);
   if (loaded) return *loaded;
-  if (g_console_mode) throw std::runtime_error(loaded.error());
+  if (consoleMode) throw std::runtime_error(loaded.error());
   const auto question =
       VS::Platform::Utf8Path(loaded.error() +
                              "\nReset launcher settings? Your assets and "
@@ -178,10 +178,10 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int show) try {
       arguments.end()) {
     return 0;
   }
-  g_console_mode = std::find(arguments.begin(), arguments.end(),
-                             L"--prepare-only") != arguments.end() ||
-                   std::find(arguments.begin(), arguments.end(),
-                             L"--verify-only") != arguments.end();
+  consoleMode = std::find(arguments.begin(), arguments.end(),
+                          L"--prepare-only") != arguments.end() ||
+                std::find(arguments.begin(), arguments.end(),
+                          L"--verify-only") != arguments.end();
   auto options = ParseOptions(arguments);
   const bool default_state = options.state.empty();
   if (default_state) options.state = installation;

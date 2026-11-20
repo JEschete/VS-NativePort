@@ -64,9 +64,9 @@ static_assert(std::is_same_v<decltype(&LiveUpdateBoneTrail), EffectRenderer>);
 constexpr std::uint32_t kOrderingHighMask = ~kRingLinkMask;
 constexpr unsigned kByteBits = 8;
 
-std::uint64_t refused_calls = 0;
-std::uint64_t unknown_colors = 0;
-std::uint64_t dropped_quads = 0;
+std::uint64_t refusedCalls = 0;
+std::uint64_t unknownColors = 0;
+std::uint64_t droppedQuads = 0;
 
 // True on the 1st, 2nd, 4th, 8th... occurrence, to keep repeated
 // diagnostics readable.
@@ -75,9 +75,9 @@ std::uint64_t dropped_quads = 0;
 }
 
 void Refuse(std::string_view call, std::string_view reason) {
-  if (ShouldReport(refused_calls)) {
+  if (ShouldReport(refusedCalls)) {
     VS::Core::LogWarn("effects", "bone trail: {} refused: {} ({} refusals)",
-                      call, reason, refused_calls);
+                      call, reason, refusedCalls);
   }
 }
 
@@ -137,12 +137,12 @@ class LiveTrailSegmentHost final : public TrailSegmentHost {
         entry != nullptr ? Render::ReserveLivePrimitiveWords(kRingPacketWords)
                          : nullptr;
     if (packet == nullptr) {
-      if (ShouldReport(dropped_quads)) {
+      if (ShouldReport(droppedQuads)) {
         VS::Core::LogWarn(
             "effects",
             "bone trail: quad at depth {} has no ordering entry or "
             "buffer room; dropped ({} drops)",
-            depth, dropped_quads);
+            depth, droppedQuads);
       }
       return;
     }
@@ -162,12 +162,12 @@ void DrawSegment(const BoneTrail& trail, TrailSegmentWeights weights) {
   LiveTrailSegmentHost host;
   if (DrawTrailSegment(trail, weights, host) ==
           TrailSegmentDraw::kUnknownColor &&
-      ShouldReport(unknown_colors)) {
+      ShouldReport(unknownColors)) {
     VS::Core::LogWarn(
         "effects",
         "bone trail: colour {} has no entry for texture {}; segment "
         "not drawn ({} segments)",
-        trail.config.color, trail.config.texture, unknown_colors);
+        trail.config.color, trail.config.texture, unknownColors);
   }
 }
 

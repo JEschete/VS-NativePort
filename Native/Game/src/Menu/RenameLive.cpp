@@ -64,10 +64,10 @@ constexpr int kItemNameCount = static_cast<int>(kItemNames);
 constexpr int kInformationTextBox = 7;
 constexpr char kWeaponMenu = 13;
 
-State g_state{};
+State renameState{};
 // _nameEditorNameBuffer as the battle string context's first string: the
 // confirmed name with a terminator after it.
-std::array<std::uint8_t, kNameBytes + 1> g_prompt_name{};
+std::array<std::uint8_t, kNameBytes + 1> promptName{};
 
 class LiveHost final : public Host {
  public:
@@ -144,11 +144,11 @@ class LiveHost final : public Host {
   void ShowConfirmPrompt(std::span<const std::uint8_t> name,
                          std::span<const std::uint8_t> prompt) override {
     VS::Menu::InitLiveInformationTextBox(InformationHeader::kCaution);
-    g_prompt_name.fill(Render::kTextTerminator);
-    std::memcpy(g_prompt_name.data(), name.data(),
+    promptName.fill(Render::kTextTerminator);
+    std::memcpy(promptName.data(), name.data(),
                 std::min(name.size(), kNameBytes));
     VS::Battle::stringContext.strings[0] =
-        reinterpret_cast<char*>(g_prompt_name.data());
+        reinterpret_cast<char*>(promptName.data());
     if (VS::Menu::Framework::stringBuf == nullptr) {
       Refuse("rename prompt without the menu's string buffer");
       return;
@@ -243,33 +243,33 @@ class LiveHost final : public Host {
 
 int UpdateLiveRename(std::uint8_t& step) {
   LiveHost host;
-  Context ctx{.state = g_state, .host = host};
+  Context ctx{.state = renameState, .host = host};
   return Update(ctx, step);
 }
 
 void DrawLiveFrame(int x_offset) {
   LiveHost host;
-  Context ctx{.state = g_state, .host = host};
+  Context ctx{.state = renameState, .host = host};
   DrawFrame(ctx, x_offset);
 }
 
 void DrawLiveSelectionBox(const Box& box) {
   LiveHost host;
-  Context ctx{.state = g_state, .host = host};
+  Context ctx{.state = renameState, .host = host};
   DrawSelectionBox(ctx, box);
 }
 
-State& LiveRenameState() { return g_state; }
+State& LiveRenameState() { return renameState; }
 
 void ResetLiveRenameStatics() {
   // The statics with an initial value; the zero-initialised ones were not
   // cleared by a reload.
-  g_state.nav_icon_pulse = false;
-  g_state.nav_icon_animation = 0;
-  g_state.selected_action = 0;
-  g_state.action_counters = {};
-  g_state.confirmation_cursor = 0;
-  g_state.confirmed_name = {};
-  g_prompt_name = {};
+  renameState.nav_icon_pulse = false;
+  renameState.nav_icon_animation = 0;
+  renameState.selected_action = 0;
+  renameState.action_counters = {};
+  renameState.confirmation_cursor = 0;
+  renameState.confirmed_name = {};
+  promptName = {};
 }
 }  // namespace VS::Menu::Rename

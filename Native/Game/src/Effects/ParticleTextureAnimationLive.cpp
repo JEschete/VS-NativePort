@@ -22,18 +22,18 @@ namespace VS::Effects {
 namespace {
 using Animation = LiveParticleTextureAnimation;
 
-std::uint64_t refused_calls = 0;
-std::uint64_t unbound_frames = 0;
+std::uint64_t refusedCalls = 0;
+std::uint64_t unboundFrames = 0;
 
 [[nodiscard]] bool ShouldReport(std::uint64_t& count) {
   return std::has_single_bit(++count);
 }
 
 void Refuse(std::string_view call, std::string_view reason) {
-  if (ShouldReport(refused_calls)) {
+  if (ShouldReport(refusedCalls)) {
     VS::Core::LogWarn("effects",
                       "texture animation: {} refused: {} ({} refusals)", call,
-                      reason, refused_calls);
+                      reason, refusedCalls);
   }
 }
 
@@ -94,7 +94,7 @@ void SelectFrame(Animation& animation, std::uint16_t frame) {
   LivePackageTextureFrame* const table =
       BoundTextureTable(animation.texture_index);
   if (table == nullptr) {
-    if (ShouldReport(unbound_frames)) {
+    if (ShouldReport(unboundFrames)) {
       const PackageContext context = Context();
       VS::Core::LogWarn(
           "effects",
@@ -105,7 +105,7 @@ void SelectFrame(Animation& animation, std::uint16_t frame) {
           VS::Effects::package == nullptr
               ? 0
               : VS::Effects::package->texture_table_count,
-          context.name, context.request_effect, unbound_frames);
+          context.name, context.request_effect, unboundFrames);
     }
     return;
   }

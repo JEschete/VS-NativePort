@@ -43,16 +43,16 @@ static_assert(std::size(VS::Menu::Inventory::menuText) ==
                   kEquipmentMenuTextEntries,
               "_menuText holds 472 halfwords");
 
-std::uint64_t g_refusals = 0;
+std::uint64_t refusals = 0;
 // decomp: the slot menus' statics (16C.c:347-350, 507-511, 687-691,
 // 864-867), _dispatchEquipMenu's currentEquipMenu (16C.c:1033) and
 // _equipMenu's selectedRow and state (16C.c:1060-1061).
-AccessoryMenuState g_accessory;
-WeaponMenuState g_weapon;
-ShieldMenuState g_shield;
-ArmorMenuState g_armor;
-std::uint8_t g_current_menu = 0;
-EquipmentMenuState g_menu;
+AccessoryMenuState accessoryMenu;
+WeaponMenuState weaponMenu;
+ShieldMenuState shieldMenu;
+ArmorMenuState armorMenu;
+std::uint8_t currentMenu = 0;
+EquipmentMenuState equipmentMenu;
 
 // decomp: _dispatchEquipMenu's equipMenuHandlers (16C.c:1030).
 constexpr EquipmentMenuHandlers kLiveHandlers{
@@ -63,10 +63,10 @@ constexpr EquipmentMenuHandlers kLiveHandlers{
 };
 
 void Refuse(std::string_view reason) {
-  ++g_refusals;
-  if (g_refusals <= kRefusalLogLimit || g_refusals % kRefusalLogInterval == 0) {
+  ++refusals;
+  if (refusals <= kRefusalLogLimit || refusals % kRefusalLogInterval == 0) {
     VS::Core::LogWarn("menu.inventory", "equipment menus: {} (refusal {})",
-                      reason, g_refusals);
+                      reason, refusals);
   }
 }
 
@@ -372,40 +372,40 @@ class LiveEquipmentMenusHost final : public EquipmentMenusHost {
 
 int UpdateLiveAccessoryMenu(int initialize) {
   LiveEquipmentMenusHost host;
-  return Resolve(UpdateAccessoryMenu(g_accessory, host, initialize),
+  return Resolve(UpdateAccessoryMenu(accessoryMenu, host, initialize),
                  "accessory menu: an armor count, listed slot or chosen "
                  "accessory outside the inventory");
 }
 
 int UpdateLiveWeaponMenu(int initialize) {
   LiveEquipmentMenusHost host;
-  return Resolve(UpdateWeaponMenu(g_weapon, host, initialize),
+  return Resolve(UpdateWeaponMenu(weaponMenu, host, initialize),
                  "weapon menu: a weapon count, listed slot, chosen weapon, "
                  "blade or category outside the inventory");
 }
 
 int UpdateLiveShieldMenu(int initialize) {
   LiveEquipmentMenusHost host;
-  return Resolve(UpdateShieldMenu(g_shield, host, initialize),
+  return Resolve(UpdateShieldMenu(shieldMenu, host, initialize),
                  "shield menu: a shield count, listed slot or chosen shield "
                  "outside the inventory, or no battle stats for Ashley");
 }
 
 int UpdateLiveArmorMenu(int body_part) {
   LiveEquipmentMenusHost host;
-  return Resolve(UpdateArmorMenu(g_armor, host, body_part),
+  return Resolve(UpdateArmorMenu(armorMenu, host, body_part),
                  "armor menu: a body part, armor count, listed slot or "
                  "chosen armor outside the inventory");
 }
 
 int DispatchLiveEquipmentMenu(int row) {
-  return Resolve(DispatchEquipmentMenu(g_current_menu, kLiveHandlers, row),
+  return Resolve(DispatchEquipmentMenu(currentMenu, kLiveHandlers, row),
                  "dispatch: a row outside the equipment menu");
 }
 
 int UpdateLiveEquipmentMenu(int initialize) {
   LiveEquipmentMenusHost host;
-  return Resolve(UpdateEquipmentMenu(g_menu, host, initialize),
+  return Resolve(UpdateEquipmentMenu(equipmentMenu, host, initialize),
                  "equipment menu: a selected row, hint or none text outside "
                  "the menu");
 }
@@ -415,13 +415,13 @@ const EquipmentMenuHandlers& LiveEquipmentMenuHandlers() {
 }
 
 void ResetEquipmentMenusLive() {
-  g_accessory = {};
-  g_weapon = {};
-  g_shield = {};
-  g_armor = {};
-  g_current_menu = 0;
-  g_menu = {};
+  accessoryMenu = {};
+  weaponMenu = {};
+  shieldMenu = {};
+  armorMenu = {};
+  currentMenu = 0;
+  equipmentMenu = {};
 }
 
-std::uint64_t LiveEquipmentMenusRefusalCount() { return g_refusals; }
+std::uint64_t LiveEquipmentMenusRefusalCount() { return refusals; }
 }  // namespace VS::Menu::Inventory

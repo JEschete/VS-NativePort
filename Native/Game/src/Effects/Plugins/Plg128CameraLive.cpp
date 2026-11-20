@@ -69,8 +69,8 @@ constexpr std::size_t kAttractionOffsetRange = 6;
 constexpr std::size_t kAttractionJitterRange = 7;
 constexpr std::size_t kSpeedRange = 2;
 
-std::uint64_t refused_definitions = 0;
-std::uint64_t refused_transforms = 0;
+std::uint64_t refusedDefinitions = 0;
+std::uint64_t refusedTransforms = 0;
 
 // True on the 1st, 2nd, 4th, 8th... occurrence, to keep repeated
 // diagnostics readable.
@@ -195,7 +195,7 @@ class LiveCameraEffectHost final : public CameraEffectHost {
     if (VS::Effects::package == nullptr ||
         VS::Effects::package->particle_definitions == nullptr ||
         index >= LiveParticleDefinitionCount()) {
-      if (ShouldReport(refused_definitions)) {
+      if (ShouldReport(refusedDefinitions)) {
         VS::Core::LogWarn(
             "effects",
             "plg128 camera: definition {} is outside the package's "
@@ -264,7 +264,7 @@ class LiveCameraEffectHost final : public CameraEffectHost {
  private:
   [[nodiscard]] const LiveTransformSlot* Transform(std::uint8_t index) {
     if (instance_ == nullptr || index >= kTransformCount) {
-      if (ShouldReport(refused_transforms)) {
+      if (ShouldReport(refusedTransforms)) {
         VS::Core::LogWarn(
             "effects",
             "plg128 camera: transform {} is outside the instance's "

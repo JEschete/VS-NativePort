@@ -12,7 +12,7 @@ namespace VS::Menu::manual {
 // image (ModuleData.cpp).
 std::uint16_t menuTextTable[kMenuTextTableWords];
 // decomp: topMenu_state (src/MENU/MENUE.PRG/494.c:213)
-std::int32_t topMenu_state;
+std::int32_t topMenuState;
 // decomp: menuSelectedRow (src/MENU/MENUE.PRG/494.c:214)
 std::int32_t menuSelectedRow;
 // decomp: helpTextCdQueue (src/MENU/MENUE.PRG/494.c:215)

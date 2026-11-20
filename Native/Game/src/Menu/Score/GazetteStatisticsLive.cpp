@@ -26,8 +26,8 @@ namespace menu9_misc_info = VS::Content::text::menu9_prg::misc_info;
 
 namespace VS::Menu::Score {
 namespace {
-GazetteRecordAnimation title_animation;
-GazetteRecordAnimation statistic_animation;
+GazetteRecordAnimation titleAnimation;
+GazetteRecordAnimation statisticAnimation;
 std::uint64_t refusals = 0;
 
 void Refuse(std::string_view reason) {
@@ -195,7 +195,7 @@ void RenderLiveTitles(std::int32_t presentation_step) {
   if (RenderTitles(rows,
                    {VS::Battle::menu9CursorMemory.title_page,
                     VS::Battle::menu9CursorMemory.title_row},
-                   presentation_step, title_animation, host)) {
+                   presentation_step, titleAnimation, host)) {
     StoreRows(rows, false);
   }
 }
@@ -234,14 +234,14 @@ void RenderLiveStatistics(std::int32_t presentation_step) {
   if (RenderStatistics(rows, values,
                        {VS::Battle::menu9CursorMemory.record_time_page,
                         VS::Battle::menu9CursorMemory.record_time_row},
-                       presentation_step, statistic_animation, host)) {
+                       presentation_step, statisticAnimation, host)) {
     StoreRows(std::span(rows).first(kGazetteStatisticCount), false);
   }
 }
 
 void ResetLiveGazetteStatisticsStatics() noexcept {
-  title_animation = {};
-  statistic_animation = {};
+  titleAnimation = {};
+  statisticAnimation = {};
 }
 
 std::uint64_t LiveGazetteStatisticsRefusals() noexcept { return refusals; }

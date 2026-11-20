@@ -126,9 +126,9 @@ constexpr std::size_t kSpeedRange = 2;
 
 static_assert(sizeof(LiveParticleDefinition) == kParticleDefinitionBytes);
 
-std::uint64_t refused_curves = 0;
-std::uint64_t refused_textures = 0;
-std::uint64_t dropped_quads = 0;
+std::uint64_t refusedCurves = 0;
+std::uint64_t refusedTextures = 0;
+std::uint64_t droppedQuads = 0;
 
 // True on the 1st, 2nd, 4th, 8th... occurrence, to keep repeated
 // diagnostics readable.
@@ -403,12 +403,12 @@ std::int32_t LiveRingHost::SampleCurve(std::uint8_t curve,
   const std::size_t bound = LiveEffectCurveCount();
   if (curve > bound ||
       VS::Effects::package->curve_block->Size(curve - 1) == 0) {
-    if (ShouldReport(refused_curves)) {
+    if (ShouldReport(refusedCurves)) {
       VS::Core::LogWarn(
           "effects",
           "ring: curve {} is outside the package's {} bound curves "
           "or empty; sampled as 0 ({} refusals)",
-          curve, bound, refused_curves);
+          curve, bound, refusedCurves);
     }
     return 0;
   }
@@ -447,12 +447,12 @@ std::optional<RingTexture> LiveRingHost::AdvanceTexture() {
     LiveAdvanceParticleTextureAnimation(&animation);
   }
   if (!bound || animation.texture_info == nullptr) {
-    if (ShouldReport(refused_textures)) {
+    if (ShouldReport(refusedTextures)) {
       VS::Core::LogWarn("effects",
                         "ring: texture table {} of {} has no frame; ring drawn "
                         "without quads ({} refusals)",
                         table, VS::Effects::package->texture_table_count,
-                        refused_textures);
+                        refusedTextures);
     }
     return std::nullopt;
   }
@@ -476,12 +476,12 @@ void LiveRingHost::Submit(const RingQuad& quad, std::int32_t depth) {
       entry != nullptr ? Render::ReserveLivePrimitiveWords(kRingPacketWords)
                        : nullptr;
   if (packet == nullptr) {
-    if (ShouldReport(dropped_quads)) {
+    if (ShouldReport(droppedQuads)) {
       VS::Core::LogWarn(
           "effects",
           "ring: quad at depth {} has no ordering entry or buffer "
           "room; dropped ({} drops)",
-          depth, dropped_quads);
+          depth, droppedQuads);
     }
     return;
   }

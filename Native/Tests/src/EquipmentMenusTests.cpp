@@ -937,11 +937,11 @@ TEST_CASE("Armor menu reopens on another body part", "[equipment-menus]") {
 // ---------------------------------------------------------------------------
 // F02634 _dispatchEquipMenu
 
-std::vector<std::pair<int, int>> g_handled;
+std::vector<std::pair<int, int>> handledCalls;
 
 template <int Menu>
 int Record(int argument) {
-  g_handled.emplace_back(Menu, argument);
+  handledCalls.emplace_back(Menu, argument);
   return (Menu * 100) + argument;
 }
 
@@ -954,48 +954,49 @@ constexpr inv::EquipmentMenuHandlers kRecorders{
 
 TEST_CASE("Dispatch opens the weapon and shield menus on rows 1 and 2",
           "[equipment-menus]") {
-  g_handled.clear();
+  handledCalls.clear();
   std::uint8_t current = 3;
   CHECK(inv::DispatchEquipmentMenu(current, kRecorders, 1) == 101);
   CHECK(current == 1);
   CHECK(inv::DispatchEquipmentMenu(current, kRecorders, 2) == 202);
   CHECK(current == 2);
-  CHECK(g_handled == std::vector<std::pair<int, int>>{{1, 1}, {2, 2}});
+  CHECK(handledCalls == std::vector<std::pair<int, int>>{{1, 1}, {2, 2}});
 }
 
 TEST_CASE("Dispatch opens the armor menu on parts 1 to 5 for rows 3 to 7",
           "[equipment-menus]") {
   for (int row = 3; row <= 7; ++row) {
-    g_handled.clear();
+    handledCalls.clear();
     std::uint8_t current = 1;
     CHECK(inv::DispatchEquipmentMenu(current, kRecorders, row) == row - 2);
     CHECK(current == 0);
-    CHECK(g_handled == std::vector<std::pair<int, int>>{{0, row - 2}});
+    CHECK(handledCalls == std::vector<std::pair<int, int>>{{0, row - 2}});
   }
 }
 
 TEST_CASE("Dispatch opens the accessory menu on row 8", "[equipment-menus]") {
-  g_handled.clear();
+  handledCalls.clear();
   std::uint8_t current = 0;
   CHECK(inv::DispatchEquipmentMenu(current, kRecorders, 8) == 308);
   CHECK(current == 3);
-  CHECK(g_handled == std::vector<std::pair<int, int>>{{3, 8}});
+  CHECK(handledCalls == std::vector<std::pair<int, int>>{{3, 8}});
 }
 
 TEST_CASE("Dispatch row 0 updates the open menu", "[equipment-menus]") {
-  g_handled.clear();
+  handledCalls.clear();
   std::uint8_t current = 2;
   CHECK(inv::DispatchEquipmentMenu(current, kRecorders, 0) == 200);
   CHECK(inv::DispatchEquipmentMenu(current, kRecorders, 0) == 200);
   CHECK(current == 2);
   current = 0;
   CHECK(inv::DispatchEquipmentMenu(current, kRecorders, 0) == 0);
-  CHECK(g_handled == std::vector<std::pair<int, int>>{{2, 0}, {2, 0}, {0, 0}});
+  CHECK(handledCalls ==
+        std::vector<std::pair<int, int>>{{2, 0}, {2, 0}, {0, 0}});
 }
 
 TEST_CASE("Dispatch calls whichever handler the table binds",
           "[equipment-menus]") {
-  g_handled.clear();
+  handledCalls.clear();
   constexpr inv::EquipmentMenuHandlers kReversed{Record<3>, Record<2>,
                                                  Record<1>, Record<0>};
   std::uint8_t current = 0;
@@ -1003,12 +1004,13 @@ TEST_CASE("Dispatch calls whichever handler the table binds",
   CHECK(inv::DispatchEquipmentMenu(current, kReversed, 8) == 8);
   CHECK(inv::DispatchEquipmentMenu(current, kReversed, 4) == 302);
   CHECK(current == 0);
-  CHECK(g_handled == std::vector<std::pair<int, int>>{{2, 1}, {0, 8}, {3, 2}});
+  CHECK(handledCalls ==
+        std::vector<std::pair<int, int>>{{2, 1}, {0, 8}, {3, 2}});
 }
 
 TEST_CASE("Dispatch refuses rows outside the menu and unbound handlers",
           "[equipment-menus]") {
-  g_handled.clear();
+  handledCalls.clear();
   std::uint8_t current = 2;
   CHECK_FALSE(inv::DispatchEquipmentMenu(current, kRecorders, -1));
   CHECK_FALSE(inv::DispatchEquipmentMenu(current, kRecorders, 9));
@@ -1020,7 +1022,7 @@ TEST_CASE("Dispatch refuses rows outside the menu and unbound handlers",
   current = 7;
   CHECK_FALSE(inv::DispatchEquipmentMenu(current, kRecorders, 0));
   CHECK(current == 7);
-  CHECK(g_handled.empty());
+  CHECK(handledCalls.empty());
 }
 
 // ---------------------------------------------------------------------------

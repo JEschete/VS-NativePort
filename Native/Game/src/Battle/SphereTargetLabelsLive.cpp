@@ -52,7 +52,7 @@ static_assert(std::size(VS::Menu::Framework::rowAnimationSteps) >=
               kTargetLabelSlideStepCount);
 static_assert(sizeof(TargetLabelLine) == sizeof(VS::Battle::TargetPreview));
 
-std::uint64_t unordered_labels = 0;
+std::uint64_t unorderedLabels = 0;
 
 [[noreturn]] void Refuse(const char* operation, const char* reason) {
   VS::Core::LogError("battle.sphere", "{} refused: {}", operation, reason);
@@ -104,11 +104,11 @@ void WriteLabel(const SphereTargetLabel& value,
 std::uint32_t* LabelOverlayEntry(int slot) {
   std::uint32_t* entry =
       Render::LiveFrameOrderingEntry(Render::LiveOrderingBase::kOverlay, slot);
-  if (entry == nullptr && std::has_single_bit(++unordered_labels)) {
+  if (entry == nullptr && std::has_single_bit(++unorderedLabels)) {
     VS::Core::LogError("battle.sphere",
                        "target label skipped: overlay entry {} is outside the "
                        "frame's ordering table ({} skipped)",
-                       slot, unordered_labels);
+                       slot, unorderedLabels);
   }
   return entry;
 }

@@ -47,7 +47,7 @@ constexpr int kPageSoundEffect = 0x7E;
 
 // The screen's variables between calls: the shared ones are reloaded from
 // EquipmentDetailsLiveState.hpp around each call, the rest were module statics.
-EquipmentDetailsState g_state;
+EquipmentDetailsState equipmentDetailsState;
 
 void Warn(std::string_view what) {
   VS::Core::LogWarn("menu.framework", "equipment details: {}", what);
@@ -58,7 +58,7 @@ void Warn(std::string_view what) {
 }
 
 void Load() {
-  auto& state = g_state;
+  auto& state = equipmentDetailsState;
   std::ranges::copy(equipmentStats, state.stats.begin());
   std::ranges::copy(strIntAgi, state.primary.begin());
   std::ranges::transform(rangeRiskData, state.range_risk.begin(), Byte);
@@ -80,7 +80,7 @@ void Load() {
 }
 
 void Store() {
-  const auto& state = g_state;
+  const auto& state = equipmentDetailsState;
   std::ranges::copy(state.stats, equipmentStats);
   std::ranges::copy(state.primary, strIntAgi);
   std::ranges::transform(
@@ -329,7 +329,7 @@ template <typename Body>
 void LiveCall(Body body) {
   Load();
   LiveEquipmentDetailsHost host;
-  EquipmentDetailsContext ctx{.state = g_state, .host = host};
+  EquipmentDetailsContext ctx{.state = equipmentDetailsState, .host = host};
   body(ctx);
   Store();
 }
@@ -538,7 +538,7 @@ void PopulateLiveGemStats(const VS::Items::EquipmentPart* gem) {
 
 void ResetLiveEquipmentDetailsStatics() {
   const EquipmentDetailsState initial;
-  auto& state = g_state;
+  auto& state = equipmentDetailsState;
   state.current_dp = initial.current_dp;
   state.max_dp = initial.max_dp;
   state.current_pp = initial.current_pp;

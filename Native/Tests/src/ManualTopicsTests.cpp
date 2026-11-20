@@ -444,7 +444,7 @@ struct LiveTopicFixture {
   std::uint16_t saved_count = VS::Menu::Framework::subMenuRowCount;
   std::array<std::uint16_t, 516> saved_table =
       std::to_array(manual::menuTextTable);
-  int saved_step = manual::topMenu_state;
+  int saved_step = manual::topMenuState;
   int saved_row = manual::menuSelectedRow;
   std::uint16_t saved_manual = VS::Field::manualDisplayState.current_manual;
   alignas(VS::Core::Memory::kHeapUnitBytes)
@@ -478,7 +478,7 @@ struct LiveTopicFixture {
     VS::Menu::Framework::selectedRow = saved_selected;
     VS::Menu::Framework::subMenuRowCount = saved_count;
     std::copy(saved_table.begin(), saved_table.end(), manual::menuTextTable);
-    manual::topMenu_state = saved_step;
+    manual::topMenuState = saved_step;
     manual::menuSelectedRow = saved_row;
     VS::Field::manualDisplayState.current_manual = saved_manual;
   }
@@ -537,14 +537,14 @@ TEST_CASE("Live topic menu lists the module's topic rows then polls",
   LiveTopicFixture fixture;
   VS::Field::manualDisplayState.current_manual = 10;
   CHECK(manual::LiveUpdateTopicMenu(1) == -1);
-  CHECK(manual::topMenu_state == 1);
+  CHECK(manual::topMenuState == 1);
   CHECK(VS::Menu::Framework::menuMemory.cursor_memories[4] == 5);
   CHECK(VS::Menu::Framework::menuMemory.cursor_memories[5] == 5);
   CHECK(VS::Input::settings.cursor_memory ==
         fixture.saved_settings.cursor_memory);
   REQUIRE(VS::Menu::Framework::itemsText != nullptr);
   CHECK(manual::LiveUpdateTopicMenu(0) == -1);
-  CHECK(manual::topMenu_state == 1);
+  CHECK(manual::topMenuState == 1);
 }
 
 TEST_CASE("Live topic selection returns chosen and cancelled rows",
@@ -552,7 +552,7 @@ TEST_CASE("Live topic selection returns chosen and cancelled rows",
   LiveTopicFixture fixture;
   VS::Menu::Framework::menuMemory.cursor_memories[4] = 3;
   VS::Menu::Framework::selectedRow = 2;
-  manual::topMenu_state = 1;
+  manual::topMenuState = 1;
   CHECK(manual::LiveUpdateTopicMenu(0) == 2);
   CHECK(manual::menuSelectedRow == 2);
   VS::Menu::Framework::selectedRow = -2;
@@ -567,7 +567,7 @@ TEST_CASE("Live topic menu refuses an unterminated table as a cancel",
   const auto refusals = manual::LiveTopicRefusalCount();
   CHECK(manual::LiveUpdateTopicMenu(1) == -2);
   CHECK(manual::LiveTopicRefusalCount() == refusals + 1);
-  CHECK(manual::topMenu_state == 0);
+  CHECK(manual::topMenuState == 0);
   CHECK(VS::Menu::Framework::itemsText == nullptr);
 }
 

@@ -51,12 +51,12 @@ static_assert(sizeof(VS::Content::DiscFile) == sizeof(DiscFileRange));
 static_assert(std::size(sceneRowIdMap) == kSceneCount);
 static_assert(sizeof(VS::State::stateFlags.map_paling) == kSceneCount);
 
-std::uint64_t refused_calls = 0;
+std::uint64_t refusedCalls = 0;
 
 void Refuse(std::string_view call, std::string_view reason) {
-  if (std::has_single_bit(++refused_calls)) {
+  if (std::has_single_bit(++refusedCalls)) {
     VS::Core::LogWarn("menu", "map loading: {} refused: {} ({} refusals)", call,
-                      reason, refused_calls);
+                      reason, refusedCalls);
   }
 }
 
@@ -152,10 +152,10 @@ struct BackgroundLoad {
 };
 
 BackgroundLoad background;
-VS::Content::DiscQueueSlot* initial_scene_request = nullptr;
-std::uint64_t initial_scene_generation = 0;
-void* initial_scene_destination = nullptr;
-std::size_t initial_scene_bytes = 0;
+VS::Content::DiscQueueSlot* initialSceneRequest = nullptr;
+std::uint64_t initialSceneGeneration = 0;
+void* initialSceneDestination = nullptr;
+std::size_t initialSceneBytes = 0;
 
 class LiveBackground final : public BackgroundLoadHost {
  public:
@@ -249,18 +249,18 @@ class LiveSceneMap final : public SceneMapHost {
       sceneCdQueueSlot = Content::CompleteLiveRefusedDiscRequest(
           file_, VS::Battle::sceneBuffer);
     }
-    initial_scene_request = sceneCdQueueSlot;
-    initial_scene_generation =
-        Content::LiveDiscRequestGeneration(initial_scene_request);
-    initial_scene_destination = VS::Battle::sceneBuffer;
-    initial_scene_bytes = static_cast<std::size_t>(file_->size);
+    initialSceneRequest = sceneCdQueueSlot;
+    initialSceneGeneration =
+        Content::LiveDiscRequestGeneration(initialSceneRequest);
+    initialSceneDestination = VS::Battle::sceneBuffer;
+    initialSceneBytes = static_cast<std::size_t>(file_->size);
   }
   std::int32_t SceneReadState() override {
     if (sceneCdQueueSlot == nullptr ||
-        sceneCdQueueSlot != initial_scene_request ||
-        initial_scene_generation == 0 ||
-        Content::LiveDiscRequestGeneration(initial_scene_request) !=
-            initial_scene_generation) {
+        sceneCdQueueSlot != initialSceneRequest ||
+        initialSceneGeneration == 0 ||
+        Content::LiveDiscRequestGeneration(initialSceneRequest) !=
+            initialSceneGeneration) {
       Refuse("LoadSceneMap", "missing or reused scene read");
       return std::to_underlying(VS::Content::DiscRequestState::kFree);
     }
@@ -269,10 +269,10 @@ class LiveSceneMap final : public SceneMapHost {
   void ReleaseSceneRead() override {
     Content::ReleaseLiveDiscRequest(sceneCdQueueSlot);
     sceneCdQueueSlot = nullptr;
-    initial_scene_request = nullptr;
-    initial_scene_generation = 0;
-    initial_scene_destination = nullptr;
-    initial_scene_bytes = 0;
+    initialSceneRequest = nullptr;
+    initialSceneGeneration = 0;
+    initialSceneDestination = nullptr;
+    initialSceneBytes = 0;
   }
   void ResolveRoomNames() override {
     roomNamesTable =
@@ -364,7 +364,7 @@ void StoreView(const SceneMapView& view) {
   isPaling = view.is_paling;
 }
 
-AreaSelection area_selection;
+AreaSelection areaSelection;
 }  // namespace
 
 SceneMapView ReadLiveMapView() { return ViewOfGlobals(); }
@@ -449,7 +449,7 @@ int LiveLoadSceneMap() {
 
 // decomp: MENU5.PRG _mapSelectionMenu (4D8.c:979).
 int LiveUpdateAreaSelection(int initialize) {
-  if (initialize != 0 || area_selection.step == 0) {
+  if (initialize != 0 || areaSelection.step == 0) {
     for (std::int32_t scene = 1; scene < kSceneCount; ++scene) {
       const bool visited = (static_cast<std::uint32_t>(
                                 VS::State::roomVisitProgress.area_flags[0]) &
@@ -466,7 +466,7 @@ int LiveUpdateAreaSelection(int initialize) {
       .current_scene = currentScene,
       .current_scene_row = currentSceneRow};
   LiveAreaMenu host(nullptr);
-  return UpdateAreaSelection(host, area_selection, input, sceneRowIdMap,
+  return UpdateAreaSelection(host, areaSelection, input, sceneRowIdMap,
                              currentMapRow, initialize);
 }
 
@@ -480,15 +480,15 @@ bool DrainMapLoadingLive() {
       return false;
     }
   }
-  if (initial_scene_destination != nullptr) {
+  if (initialSceneDestination != nullptr) {
     const auto capacity =
-        Core::Memory::LivePayloadCapacity(initial_scene_destination);
-    if (!capacity || *capacity < initial_scene_bytes) {
+        Core::Memory::LivePayloadCapacity(initialSceneDestination);
+    if (!capacity || *capacity < initialSceneBytes) {
       Refuse("Drain", "initial scene destination is not owned");
       return false;
     }
-    const auto bytes = std::span{
-        static_cast<std::byte*>(initial_scene_destination), *capacity};
+    const auto bytes =
+        std::span{static_cast<std::byte*>(initialSceneDestination), *capacity};
     ClearLiveMapTextBorrow(bytes);
     if (!Content::CancelLiveDiscWrites(bytes)) {
       Refuse("Drain", "initial scene destination is not safe to release");
@@ -504,38 +504,37 @@ bool DrainMapLoadingLive() {
     Core::Memory::FreeLiveFromHighEnd(background.image);
   }
   background = {};
-  if (initial_scene_request != nullptr && initial_scene_generation != 0 &&
-      Content::LiveDiscRequestGeneration(initial_scene_request) ==
-          initial_scene_generation) {
-    Content::ReleaseLiveDiscRequest(initial_scene_request);
+  if (initialSceneRequest != nullptr && initialSceneGeneration != 0 &&
+      Content::LiveDiscRequestGeneration(initialSceneRequest) ==
+          initialSceneGeneration) {
+    Content::ReleaseLiveDiscRequest(initialSceneRequest);
   }
-  if (sceneCdQueueSlot == initial_scene_request) {
+  if (sceneCdQueueSlot == initialSceneRequest) {
     sceneCdQueueSlot = nullptr;
   }
-  if (initial_scene_destination != nullptr) {
-    ForgetLiveMapScene(initial_scene_destination);
-    if (VS::Battle::sceneBuffer == initial_scene_destination) {
+  if (initialSceneDestination != nullptr) {
+    ForgetLiveMapScene(initialSceneDestination);
+    if (VS::Battle::sceneBuffer == initialSceneDestination) {
       VS::Battle::sceneBuffer = nullptr;
       roomNamesTable = nullptr;
     }
-    Core::Memory::FreeLiveFromHighEnd(initial_scene_destination);
+    Core::Memory::FreeLiveFromHighEnd(initialSceneDestination);
   }
-  initial_scene_request = nullptr;
-  initial_scene_generation = 0;
-  initial_scene_destination = nullptr;
-  initial_scene_bytes = 0;
+  initialSceneRequest = nullptr;
+  initialSceneGeneration = 0;
+  initialSceneDestination = nullptr;
+  initialSceneBytes = 0;
   return true;
 }
 
 bool ResetMapLoadingModuleData() {
   if (background.image != nullptr || background.request != nullptr ||
-      initial_scene_destination != nullptr ||
-      initial_scene_request != nullptr) {
+      initialSceneDestination != nullptr || initialSceneRequest != nullptr) {
     Refuse("Reset", "drain map loads before restoring module data");
     return false;
   }
   background = {};
-  area_selection = {};
+  areaSelection = {};
   return true;
 }
 }  // namespace VS::Menu::map

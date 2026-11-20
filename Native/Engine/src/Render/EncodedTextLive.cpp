@@ -18,10 +18,10 @@
 
 namespace VS::Render {
 namespace {
-std::uint64_t refused_text = 0;
+std::uint64_t refusedText = 0;
 }  // namespace
 
-std::uint64_t RefusedLiveEncodedTextCount() noexcept { return refused_text; }
+std::uint64_t RefusedLiveEncodedTextCount() noexcept { return refusedText; }
 
 EncodedTextArguments LiveEncodedTextArguments() {
   EncodedTextArguments arguments;
@@ -39,10 +39,10 @@ char* encoded_text_live::Finish(std::uint8_t* destination,
   if (end) {
     return reinterpret_cast<char*>(destination + *end);
   }
-  ++refused_text;
+  ++refusedText;
   // The first and then every power-of-two refusal, so a per-frame request
   // cannot flood the log.
-  if (std::has_single_bit(refused_text)) {
+  if (std::has_single_bit(refusedText)) {
     VS::Core::Errorf(
         "text",
         "encoded text at %s:%u refused: no destination or source, a "
@@ -50,7 +50,7 @@ char* encoded_text_live::Finish(std::uint8_t* destination,
         "references nested deeper than %d or a destination too small "
         "(refusal %" PRIu64 ")",
         site.file_name(), static_cast<unsigned>(site.line()),
-        kMaxEncodedTextNesting, refused_text);
+        kMaxEncodedTextNesting, refusedText);
   }
   if (destination == nullptr) {
     return nullptr;

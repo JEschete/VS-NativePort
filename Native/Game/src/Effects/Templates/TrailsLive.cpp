@@ -150,11 +150,11 @@ static_assert(offsetof(Scratch, acceleration_min) == kScratchAccelerationAt);
 static_assert(offsetof(Scratch, attraction_jitter) == kScratchJitterAt);
 static_assert(sizeof(LiveParticleDefinition) == kParticleDefinitionBytes);
 
-std::uint64_t refused_curves = 0;
-std::uint64_t refused_transforms = 0;
-std::uint64_t undrawn_textures = 0;
-std::uint64_t dropped_quads = 0;
-std::uint64_t skipped_trails = 0;
+std::uint64_t refusedCurves = 0;
+std::uint64_t refusedTransforms = 0;
+std::uint64_t undrawnTextures = 0;
+std::uint64_t droppedQuads = 0;
+std::uint64_t skippedTrails = 0;
 
 // Repeated diagnostics are kept at the 1st, 2nd, 4th, 8th... occurrence.
 [[nodiscard]] bool Reportable(std::uint64_t& occurrences) {
@@ -414,12 +414,12 @@ std::int32_t LiveTrailHost<History>::SampleCurve(std::uint8_t curve,
     // The promoted curve sampler (#276 row 38) through its Live entry.
     return VS::Effects::LiveSampleEffectCurve(curve, distance);
   }
-  if (Reportable(refused_curves)) {
+  if (Reportable(refusedCurves)) {
     VS::Core::LogWarn(
         "effects",
         "trail: curve {} lies past the package's {} bound curves or "
         "has no entries; sampled as 0 ({} refusals)",
-        curve, curves, refused_curves);
+        curve, curves, refusedCurves);
   }
   return 0;
 }
@@ -430,11 +430,11 @@ const LiveTransformSlot* LiveTrailHost<History>::Transform(
   if (index < kTransformCount) {
     return &instance_.transforms[index];
   }
-  if (Reportable(refused_transforms)) {
+  if (Reportable(refusedTransforms)) {
     VS::Core::LogWarn("effects",
                       "trail: {} transform {} lies past the instance's {} "
                       "transforms; refused ({} refusals)",
-                      role, index, kTransformCount, refused_transforms);
+                      role, index, kTransformCount, refusedTransforms);
   }
   return nullptr;
 }
@@ -510,12 +510,12 @@ std::optional<RingTexture> LiveTrailHost<History>::AdvanceTexture() {
     frame = animation.texture_info;
   }
   if (frame == nullptr) {
-    if (Reportable(undrawn_textures)) {
+    if (Reportable(undrawnTextures)) {
       VS::Core::LogWarn(
           "effects",
           "trail: texture table {} of {} gives no frame; trails left "
           "undrawn ({} ticks)",
-          table, VS::Effects::package->texture_table_count, undrawn_textures);
+          table, VS::Effects::package->texture_table_count, undrawnTextures);
     }
     return std::nullopt;
   }
@@ -552,12 +552,12 @@ void LiveTrailHost<History>::Submit(const RingQuad& quad, std::int32_t depth) {
       bucket == nullptr ? nullptr
                         : Render::ReserveLivePrimitiveWords(kRingPacketWords);
   if (words == nullptr) {
-    if (Reportable(dropped_quads)) {
+    if (Reportable(droppedQuads)) {
       VS::Core::LogWarn(
           "effects",
           "trail: no ordering entry or primitive room for a quad at "
           "depth {}; dropped ({} drops)",
-          depth, dropped_quads);
+          depth, droppedQuads);
     }
     return;
   }
@@ -572,12 +572,12 @@ void LiveTrailHost<History>::Submit(const RingQuad& quad, std::int32_t depth) {
 template <std::size_t History>
 void LiveTrailHost<History>::ReportSkippedTrail(std::size_t index,
                                                 TrailFault fault) {
-  if (Reportable(skipped_trails)) {
+  if (Reportable(skippedTrails)) {
     VS::Core::LogWarn(
         "effects",
         "trail: trail {} of definition {} has {}; left undrawn ({} "
         "skips)",
-        index, context_.definition_index, FaultName(fault), skipped_trails);
+        index, context_.definition_index, FaultName(fault), skippedTrails);
   }
 }
 

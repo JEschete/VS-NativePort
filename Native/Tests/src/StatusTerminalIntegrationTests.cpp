@@ -32,14 +32,14 @@ struct ReloadFixture : Fixture {
   void Prime() {
     REQUIRE(st::LiveUpdateEquipmentDetails(2) == 0);
     REQUIRE(st::LiveUpdateEquipmentList(0) == 0);
-    st::terminal_live::detail_state = {7, 2, 4, 5, 6};
-    st::terminal_live::list_state = {3, 8};
-    st::terminal_live::screen_state = {.animation_wait = 9,
-                                       .screen_enabled = 1,
-                                       .cursor_animation = 10,
-                                       .saved_projection = 333,
-                                       .prompt_animation = 6};
-    auto& saved = st::terminal_live::screen_state.saved_view;
+    st::terminal_live::detailState = {7, 2, 4, 5, 6};
+    st::terminal_live::listState = {3, 8};
+    st::terminal_live::screenState = {.animation_wait = 9,
+                                      .screen_enabled = 1,
+                                      .cursor_animation = 10,
+                                      .saved_projection = 333,
+                                      .prompt_animation = 6};
+    auto& saved = st::terminal_live::screenState.saved_view;
     for (auto& row : saved.rotation.m) {
       row.fill(-17);
     }

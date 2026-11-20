@@ -98,14 +98,14 @@ static_assert(offsetof(Field::MapRoomRecord, data_offset) == kDataOffset);
 static_assert(std::size(VS::State::StateFlags{}.map_paling) ==
               kMapPalingScenes);
 
-std::uint64_t refused_calls = 0;
-int legend_offset = 0;
-RoomWorkspace room_workspace{};
+std::uint64_t refusedCalls = 0;
+int legendOffset = 0;
+RoomWorkspace roomWorkspace{};
 
 void Refuse(std::string_view call, std::string_view reason) {
-  if (std::has_single_bit(++refused_calls)) {
+  if (std::has_single_bit(++refusedCalls)) {
     VS::Core::LogWarn("menu", "map drawing: {} refused: {} ({} refusals)", call,
-                      reason, refused_calls);
+                      reason, refusedCalls);
   }
 }
 
@@ -311,7 +311,7 @@ class LiveRoomHost final : public RoomDrawHost {
                             .map_id = map_id,
                             .brightness = std::span{kAshleyIconBrightness}};
   LiveRoomHost host;
-  switch (DrawRoom(host, room, context, room_workspace)) {
+  switch (DrawRoom(host, room, context, roomWorkspace)) {
     case RoomDrawResult::kDrawn:
       return 1;
     case RoomDrawResult::kOutOfDepthRange:
@@ -563,14 +563,14 @@ void LiveDrawControlBackdrop(int x, int y, int w, int h) {
 // decomp: MENU5.PRG _drawUIControls (4D8.c:1991).
 void LiveDrawControls() {
   ControlsState state{.animation_state = uiAnimationState,
-                      .x_offset = legend_offset};
+                      .x_offset = legendOffset};
   const ControlsFrame frame{.hide_ui = triggerHideUi != 0,
                             .commands_state = menuCommandsState,
                             .compass_angle = cameraAngles.vy};
   LiveControlsHost host;
   static_cast<void>(DrawControls(host, state, frame));
   uiAnimationState = state.animation_state;
-  legend_offset = state.x_offset;
+  legendOffset = state.x_offset;
 }
 
 // decomp: MENU5.PRG _renderCompass (4D8.c:2272).
@@ -598,9 +598,9 @@ void LiveDrawLabels() {
 }
 
 void ResetMapDrawingLive() {
-  legend_offset = kHiddenLegendOffset;
-  room_workspace = {};
+  legendOffset = kHiddenLegendOffset;
+  roomWorkspace = {};
 }
 
-void ResetMapDrawingModuleData() { legend_offset = 0; }
+void ResetMapDrawingModuleData() { legendOffset = 0; }
 }  // namespace VS::Menu::map

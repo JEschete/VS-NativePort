@@ -102,15 +102,15 @@ namespace VS::Game {
 namespace {
 EncounterSetup configuration;
 std::array<VS::Field::MpdEnemySpawn, EncounterLimits::kEnemies> placements{};
-std::atomic<bool> stop_requested{false};
+std::atomic<bool> stopRequested{false};
 bool configured = false;
 bool active = false;
 bool entered = false;
-bool room_prepared = false;
-bool gameplay_inspection_ready = false;
-bool player_stats_initialized = false;
-bool external_event_started = false;
-bool room_local_event_started = false;
+bool roomPrepared = false;
+bool gameplayInspectionReady = false;
+bool playerStatsInitialized = false;
+bool externalEventStarted = false;
+bool roomLocalEventStarted = false;
 
 std::optional<EncounterRouletteState> InspectRoulette(int menu) {
   constexpr int kResultsMenu = 15;
@@ -127,9 +127,9 @@ std::optional<EncounterRouletteState> InspectRoulette(int menu) {
       .bios_state = VS::Core::BiosRand().State()};
 }
 constexpr int kDirectEventTrigger = 0x40;
-int pending_door = -1;
-int pending_door_zone = 0;
-int pending_door_room = 0;
+int pendingDoor = -1;
+int pendingDoorZone = 0;
+int pendingDoorRoom = 0;
 
 int ResumeEncounter() {
   VS::Boot::isGameplayActive = 1;
@@ -702,13 +702,13 @@ std::expected<void, std::string> ConfigureEncounter(const EncounterSetup& setup,
   }
   configuration = setup;
   placements = staged_placements;
-  stop_requested = false;
+  stopRequested = false;
   entered = false;
-  room_prepared = false;
-  player_stats_initialized = false;
-  external_event_started = false;
-  room_local_event_started = false;
-  pending_door = -1;
+  roomPrepared = false;
+  playerStatsInitialized = false;
+  externalEventStarted = false;
+  roomLocalEventStarted = false;
+  pendingDoor = -1;
   configured = true;
   return {};
 }
@@ -759,17 +759,17 @@ void RunEncounter() {
   VS::Boot::RunLiveSessionLoop(EnterOrFinishEncounter, ResumeEncounter);
   VS::Battle::ResetTargetPages();
   active = false;
-  external_event_started = false;
-  room_local_event_started = false;
-  pending_door = -1;
-  gameplay_inspection_ready = false;
+  externalEventStarted = false;
+  roomLocalEventStarted = false;
+  pendingDoor = -1;
+  gameplayInspectionReady = false;
   configured = false;
-  room_prepared = false;
+  roomPrepared = false;
   VS::Core::LogInfo("encounter",
                     "session finished; no normal title entry invoked");
 }
 
-void RequestEncounterStop() { stop_requested = true; }
+void RequestEncounterStop() { stopRequested = true; }
 
 const char* EncounterAdjustmentName(EncounterAdjustment adjustment) {
   return kAdjustments.at(static_cast<std::size_t>(adjustment)).name;
@@ -785,7 +785,7 @@ std::expected<EncounterAdjustmentResult, std::string> AdjustEncounterPlayer(
   if (static_cast<std::size_t>(adjustment) >= kAdjustments.size()) {
     return reject("UNKNOWN LAB ADJUSTMENT");
   }
-  if (!active || !room_prepared || stop_requested.load()) {
+  if (!active || !roomPrepared || stopRequested.load()) {
     return reject("NO READY COMBAT LAB ENCOUNTER");
   }
   constexpr int kFieldControl = 1;
@@ -812,7 +812,7 @@ std::expected<EncounterAdjustmentResult, std::string> AdjustEncounterPlayer(
 }
 
 EncounterState InspectEncounter() {
-  if (!active || !room_prepared) return {};
+  if (!active || !roomPrepared) return {};
   return InspectGameplay();
 }
 
@@ -870,7 +870,7 @@ void InspectFloorTriggers(EncounterState& state) {
 
 EncounterState InspectGameplay() {
   EncounterState state;
-  state.ready = gameplay_inspection_ready && VS::Boot::isGameplayActive != 0 &&
+  state.ready = gameplayInspectionReady && VS::Boot::isGameplayActive != 0 &&
                 VS::Field::controlMode != 0;
   if (!state.ready) return state;
   state.zone = VS::Field::zoneContext.zone_id;
@@ -975,7 +975,7 @@ nlohmann::json InspectModels() {
 }  // namespace
 
 nlohmann::json InspectGameplayScene(const EncounterState& state) {
-  const bool available = state.ready && gameplay_inspection_ready &&
+  const bool available = state.ready && gameplayInspectionReady &&
                          VS::Boot::isGameplayActive != 0 &&
                          VS::Field::controlMode != 0;
   nlohmann::json scene{{"available", available},
@@ -1039,7 +1039,7 @@ EncounterDoorRequest CheckDoorRequest(int index) {
     return {EncounterDoorRequestStatus::kInvalid,
             "original-room session required"};
   }
-  if (!gameplay_inspection_ready || !room_prepared ||
+  if (!gameplayInspectionReady || !roomPrepared ||
       VS::Field::controlMode != 1 || VS::Event::playbackPhase != 0 ||
       VS::Field::LiveScreenTransitionPhase() != 0 ||
       VS::Actors::actorRecords[0] == nullptr) {
@@ -1068,18 +1068,18 @@ EncounterDoorRequest CheckDoorRequest(int index) {
 }
 
 void ApplyPendingDoorRequest() {
-  if (pending_door < 0 || !gameplay_inspection_ready || !room_prepared) return;
-  if (VS::Field::zoneContext.zone_id != pending_door_zone ||
-      VS::Field::zoneContext.room_id != pending_door_room) {
+  if (pendingDoor < 0 || !gameplayInspectionReady || !roomPrepared) return;
+  if (VS::Field::zoneContext.zone_id != pendingDoorZone ||
+      VS::Field::zoneContext.room_id != pendingDoorRoom) {
     VS::Core::LogError("field.door-test",
                        "source changed before queued door {} executed",
-                       pending_door);
-    pending_door = -1;
+                       pendingDoor);
+    pendingDoor = -1;
     return;
   }
-  const auto checked = CheckDoorRequest(pending_door);
+  const auto checked = CheckDoorRequest(pendingDoor);
   if (checked.status == EncounterDoorRequestStatus::kBusy) return;
-  const int index = std::exchange(pending_door, -1);
+  const int index = std::exchange(pendingDoor, -1);
   if (checked.status != EncounterDoorRequestStatus::kAccepted) {
     VS::Core::LogWarn("field.door-test", "queued door {} rejected: {}", index,
                       checked.reason);
@@ -1088,7 +1088,7 @@ void ApplyPendingDoorRequest() {
   auto& door = VS::Field::roomData.doors[index];
   VS::Core::LogInfo("field.door-test",
                     "begin source={}/{} door={} destination={}/{}",
-                    pending_door_zone, pending_door_room, index,
+                    pendingDoorZone, pendingDoorRoom, index,
                     door.destination_zone_id, door.destination_room_id);
   // Same handoff as Field_CheckActorTriggers (146C.c), after its door gate.
   constexpr int kTransitionSpeed = 8;
@@ -1103,24 +1103,24 @@ void ApplyPendingDoorRequest() {
 }  // namespace
 
 EncounterDoorRequest RequestEncounterDoorTransition(int index) {
-  if (pending_door >= 0) {
+  if (pendingDoor >= 0) {
     return {EncounterDoorRequestStatus::kBusy, "door request already pending"};
   }
   const auto checked = CheckDoorRequest(index);
   if (checked.status != EncounterDoorRequestStatus::kAccepted) return checked;
-  pending_door = index;
-  pending_door_zone = VS::Field::zoneContext.zone_id;
-  pending_door_room = VS::Field::zoneContext.room_id;
+  pendingDoor = index;
+  pendingDoorZone = VS::Field::zoneContext.zone_id;
+  pendingDoorRoom = VS::Field::zoneContext.room_id;
   return {EncounterDoorRequestStatus::kAccepted, {}};
 }
 }  // namespace VS::Game
 
 void VS::Boot::EncounterRoomPlacements(void** data, unsigned int* size) {
   if (!VS::Game::active) return;
-  VS::Game::room_prepared = false;
+  VS::Game::roomPrepared = false;
   if (!VS::Game::UsesConfiguredEncounterPlacements(
           VS::Game::configuration, VS::Field::zoneContext.zone_id,
-          VS::Field::zoneContext.room_id, VS::Game::external_event_started)) {
+          VS::Field::zoneContext.room_id, VS::Game::externalEventStarted)) {
     VS::Core::LogDebug(
         "encounter.spawn", "using original placements zone={} room={}",
         VS::Field::zoneContext.zone_id, VS::Field::zoneContext.room_id);
@@ -1136,7 +1136,7 @@ void VS::Boot::EncounterRoomPlacements(void** data, unsigned int* size) {
 int VS::Boot::EncounterUsesRoomEvents() {
   return !VS::Game::active ||
          VS::Game::UsesEncounterRoomEvents(VS::Game::configuration,
-                                           VS::Game::external_event_started);
+                                           VS::Game::externalEventStarted);
 }
 
 VS::Event::RoomEventLoad VS::Game::LoadEncounterRoomEvents() {
@@ -1153,17 +1153,17 @@ VS::Event::RoomEventLoad VS::Game::LoadEncounterRoomEvents() {
 }
 
 void VS::Boot::EncounterPollStop() {
-  VS::Game::gameplay_inspection_ready = true;
+  VS::Game::gameplayInspectionReady = true;
   if (VS::Game::active) {
-    if (!VS::Game::player_stats_initialized) {
+    if (!VS::Game::playerStatsInitialized) {
       VS::Game::InitializeEncounterPlayerStats(
           VS::Game::configuration.stat_overrides);
-      VS::Game::player_stats_initialized = true;
+      VS::Game::playerStatsInitialized = true;
     }
 
-    VS::Game::room_prepared = true;
-    if (VS::Game::stop_requested.load()) {
-      VS::Game::pending_door = -1;
+    VS::Game::roomPrepared = true;
+    if (VS::Game::stopRequested.load()) {
+      VS::Game::pendingDoor = -1;
       VS::Boot::ResetToTitleLive();
     } else {
       VS::Game::ApplyPendingDoorRequest();
@@ -1174,7 +1174,7 @@ void VS::Boot::EncounterPollStop() {
           VS::Field::zoneContext.zone_id == VS::Game::configuration.zone &&
           VS::Field::zoneContext.room_id == VS::Game::configuration.room;
       if (VS::Game::configuration.external_event &&
-          !VS::Game::external_event_started && configured_room_ready) {
+          !VS::Game::externalEventStarted && configured_room_ready) {
         const int event = *VS::Game::configuration.external_event;
         // Original 4A0A8.c:4302 direct-event request; no story flag mutation.
         const int result = VS::Event::EvaluateRoomEventTriggersEntry(
@@ -1185,7 +1185,7 @@ void VS::Boot::EncounterPollStop() {
                            result);
           std::abort();
         }
-        VS::Game::external_event_started = true;
+        VS::Game::externalEventStarted = true;
         VS::Core::LogInfo("encounter.event",
                           "Starting external event {} in zone {} room {}; "
                           "component fixture, not story progression",
@@ -1193,7 +1193,7 @@ void VS::Boot::EncounterPollStop() {
                           VS::Field::zoneContext.room_id);
         VS::Event::BeginLiveQueuedCutscene();
       } else if (VS::Game::configuration.room_local_event &&
-                 !VS::Game::room_local_event_started && configured_room_ready) {
+                 !VS::Game::roomLocalEventStarted && configured_room_ready) {
         const int selector = *VS::Game::configuration.room_local_event;
         const auto room = VS::Event::LiveRoomScriptSections();
         const auto locals = room ? room->Doors() : VS::Event::ScriptCommand{};
@@ -1215,7 +1215,7 @@ void VS::Boot::EncounterPollStop() {
         VS::Event::eventSource = 2;
         VS::Event::playbackPhase = 1;
         VS::Event::isDirectEventRequest = 0;
-        VS::Game::room_local_event_started = true;
+        VS::Game::roomLocalEventStarted = true;
         VS::Core::LogInfo("encounter.event",
                           "Starting room-local event {} in zone {} room {}; "
                           "trigger conditions not evaluated",
@@ -1228,5 +1228,5 @@ void VS::Boot::EncounterPollStop() {
 }
 
 void VS::Boot::ResetGameplayInspection() {
-  VS::Game::gameplay_inspection_ready = false;
+  VS::Game::gameplayInspectionReady = false;
 }

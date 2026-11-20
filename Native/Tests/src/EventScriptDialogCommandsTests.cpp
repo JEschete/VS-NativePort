@@ -86,20 +86,20 @@ void DismissNativeDialog(std::uint8_t box) {
   CHECK(VS::Event::ScriptDismissDialogBoxOpcode(command.data(), 0) == 0);
 }
 
-std::weak_ptr<const Bytes> session_dialog_owner;
-int session_dialog_entries = 0;
+std::weak_ptr<const Bytes> sessionDialogOwner;
+int sessionDialogEntries = 0;
 
 void PrepareSessionDialog() {
   VS::Menu::textBoxes[0].state = 1;
   VS::Menu::textBoxes[0].flags.speaker_texture = event::kNoSpeakerTexture;
-  BindDialogTable({1, 0, 0x24, 0xE7}, &session_dialog_owner);
+  BindDialogTable({1, 0, 0x24, 0xE7}, &sessionDialogOwner);
   ShowNativeDialog(0);
-  CHECK_FALSE(session_dialog_owner.expired());
+  CHECK_FALSE(sessionDialogOwner.expired());
 }
 
 int EnterDialogSession() {
-  if (++session_dialog_entries > 1) {
-    return session_dialog_owner.expired() &&
+  if (++sessionDialogEntries > 1) {
+    return sessionDialogOwner.expired() &&
                    VS::Menu::textBoxes[0].text == nullptr
                ? 41
                : -1;
@@ -254,12 +254,12 @@ TEST_CASE("Native dialog text survives VM reset until UI invalidation",
 TEST_CASE("Actual title transfer clears native dialog pointers before owners",
           "[event-script-dialog][event-vm-live][session-reset]") {
   LiveDialogFixture fixture;
-  session_dialog_owner.reset();
-  session_dialog_entries = 0;
+  sessionDialogOwner.reset();
+  sessionDialogEntries = 0;
   CHECK(VS::Boot::RunLiveSessionLoop(EnterDialogSession, EnterDialogSession) ==
         41);
-  CHECK(session_dialog_entries == 2);
-  CHECK(session_dialog_owner.expired());
+  CHECK(sessionDialogEntries == 2);
+  CHECK(sessionDialogOwner.expired());
   CHECK(VS::Menu::textBoxes[0].text == nullptr);
 }
 

@@ -37,12 +37,12 @@ constexpr std::size_t kTagWords = 1;
 constexpr std::size_t kDrawAreaWords = 2;
 static_assert(sizeof(DR_AREA) ==
               (kTagWords + kDrawAreaWords) * sizeof(std::uint32_t));
-std::uint64_t g_refusals = 0;
+std::uint64_t refusals = 0;
 
 void Refuse(std::string_view reason) {
-  ++g_refusals;
-  if (g_refusals <= kRefusalLogLimit || g_refusals % kRefusalLogInterval == 0) {
-    VS::Core::LogWarn("menu.manual", "{} (refusal {})", reason, g_refusals);
+  ++refusals;
+  if (refusals <= kRefusalLogLimit || refusals % kRefusalLogInterval == 0) {
+    VS::Core::LogWarn("menu.manual", "{} (refusal {})", reason, refusals);
   }
 }
 
@@ -266,5 +266,5 @@ void LiveDrawControlsBackground(int x, int y, int w, int h) {
               });
 }
 
-std::uint64_t LivePageRefusalCount() { return g_refusals; }
+std::uint64_t LivePageRefusalCount() { return refusals; }
 }  // namespace VS::Menu::manual

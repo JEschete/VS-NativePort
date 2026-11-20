@@ -45,12 +45,12 @@ constexpr std::size_t kLabelLineSlot = 8;
 static_assert(offsetof(VS::State::StateFlags, opaque_33f) ==
               kDoorStateFlagsOffset);
 
-std::uint64_t refused_calls = 0;
+std::uint64_t refusedCalls = 0;
 
 void Refuse(std::string_view call, std::string_view reason) {
-  if (std::has_single_bit(++refused_calls)) {
+  if (std::has_single_bit(++refusedCalls)) {
     VS::Core::LogWarn("menu", "map markers: {} refused: {} ({} refusals)", call,
-                      reason, refused_calls);
+                      reason, refusedCalls);
   }
 }
 

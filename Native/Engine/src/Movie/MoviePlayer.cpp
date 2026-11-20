@@ -334,12 +334,12 @@ class Player {
   SDL_AudioStream* m_audio_ = nullptr;
 };
 
-std::unique_ptr<Player> g_player;
+std::unique_ptr<Player> activePlayer;
 
 }  // namespace
 
 int VS::Movie::PlayerOpen(const char* disc_path) {
-  g_player.reset();
+  activePlayer.reset();
   const Content::DataStore* store = Content::DataStore::Get();
   const Content::DataStore::Entry* e = store ? store->Find(disc_path) : nullptr;
   if (e == nullptr || e->form == "raw" || e->form == "stream") {
@@ -353,18 +353,18 @@ int VS::Movie::PlayerOpen(const char* disc_path) {
   if (!player->Open(store->FileOf(*e))) {
     return 0;
   }
-  g_player = std::move(player);
+  activePlayer = std::move(player);
   return 1;
 }
 
 int VS::Movie::PlayerDrawFrame(int ticks, int x, int y) {
-  if (!g_player) {
+  if (!activePlayer) {
     return 0;
   }
-  const bool more = g_player->Advance(
+  const bool more = activePlayer->Advance(
       static_cast<i64>(ticks) * kNanosecondsPerSecond / kMovieTicksPerSecond);
-  g_player->Draw(x, y);
+  activePlayer->Draw(x, y);
   return more ? 1 : 0;
 }
 
-void VS::Movie::PlayerClose(void) { g_player.reset(); }
+void VS::Movie::PlayerClose(void) { activePlayer.reset(); }

@@ -47,12 +47,12 @@ static_assert(offsetof(Field::MapRoomRecord, map_id) == kMapOffset);
 static_assert(offsetof(Field::MapRoomName, previous) == kLinkPreviousOffset);
 static_assert(offsetof(Field::MapRoomName, next) == kLinkNextOffset);
 
-std::uint64_t refused_calls = 0;
+std::uint64_t refusedCalls = 0;
 
 void Refuse(std::string_view call, std::string_view reason) {
-  if (std::has_single_bit(++refused_calls)) {
+  if (std::has_single_bit(++refusedCalls)) {
     VS::Core::LogWarn("menu", "map navigation: {} refused: {} ({} refusals)",
-                      call, reason, refused_calls);
+                      call, reason, refusedCalls);
   }
 }
 

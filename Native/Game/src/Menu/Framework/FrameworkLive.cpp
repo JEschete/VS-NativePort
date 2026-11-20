@@ -282,17 +282,17 @@ constexpr std::array<std::uint32_t, kSubmenuStateCount> kMenuFiles = {
     SquashLba(VS_MENUF_PRG_LBA, VS_MENUF_PRG_SIZE),
 };
 
-State g_state;
+State frameworkState;
 
 // The item lists' blocks and their entry counts.
 struct TrackedItems {
   ItemText* items = nullptr;
   std::size_t count = 0;
 };
-std::array<TrackedItems, 2> g_items{};
+std::array<TrackedItems, 2> trackedItems{};
 
 [[nodiscard]] TrackedItems& Tracked(ItemList list) {
-  return g_items[static_cast<std::size_t>(list)];
+  return trackedItems[static_cast<std::size_t>(list)];
 }
 
 // The copied code reads plain char as unsigned (/J).
@@ -308,25 +308,27 @@ std::array<TrackedItems, 2> g_items{};
 }
 
 void LoadControl() {
-  g_state.loaded_sub_menu = loadedSubMenu;
-  g_state.control = menuState.control;
-  g_state.action_selection = actionSelection;
-  g_state.shortcut_invoked = Byte(shortcutInvoked);
-  g_state.opened_without_main_menu = Byte(openedWithoutMainMenu);
-  g_state.unlocked_break_art = Byte(unlockedBreakArt);
-  g_state.unlocked_battle_ability = Byte(unlockedBattleAbility);
-  g_state.save_location_id = Byte(VS::Menu::saveLocationId);
-  g_state.action_restrictions = actionRestrictions;
-  g_state.main_menu_cursor_animation = mainMenuCursorAnimation;
-  std::memcpy(g_state.submenu_states.data(), submenuStates,
+  frameworkState.loaded_sub_menu = loadedSubMenu;
+  frameworkState.control = menuState.control;
+  frameworkState.action_selection = actionSelection;
+  frameworkState.shortcut_invoked = Byte(shortcutInvoked);
+  frameworkState.opened_without_main_menu = Byte(openedWithoutMainMenu);
+  frameworkState.unlocked_break_art = Byte(unlockedBreakArt);
+  frameworkState.unlocked_battle_ability = Byte(unlockedBattleAbility);
+  frameworkState.save_location_id = Byte(VS::Menu::saveLocationId);
+  frameworkState.action_restrictions = actionRestrictions;
+  frameworkState.main_menu_cursor_animation = mainMenuCursorAnimation;
+  std::memcpy(frameworkState.submenu_states.data(), submenuStates,
               sizeof(submenuStates));
-  g_state.text_headers = textHeaders;
-  g_state.loot_lists = LootListId{reinterpret_cast<std::uintptr_t>(lootLists)};
-  g_state.loot_entry = LootEntryId{reinterpret_cast<std::uintptr_t>(lootEntry)};
+  frameworkState.text_headers = textHeaders;
+  frameworkState.loot_lists =
+      LootListId{reinterpret_cast<std::uintptr_t>(lootLists)};
+  frameworkState.loot_entry =
+      LootEntryId{reinterpret_cast<std::uintptr_t>(lootEntry)};
 }
 
 void LoadMainMenu() {
-  MainMenuStatics& menu = g_state.main_menu;
+  MainMenuStatics& menu = frameworkState.main_menu;
   menu.menu_row_y_offset = Byte(menuRowYOffset);
   menu.selected_row = selectedRow;
   menu.sub_menu_id = subMenuId;
@@ -349,27 +351,27 @@ void LoadMainMenu() {
 }
 
 void StoreControl() {
-  loadedSubMenu = g_state.loaded_sub_menu;
-  menuState.control = g_state.control;
-  actionSelection = g_state.action_selection;
-  shortcutInvoked = Char(g_state.shortcut_invoked);
-  openedWithoutMainMenu = Char(g_state.opened_without_main_menu);
-  unlockedBreakArt = Char(g_state.unlocked_break_art);
-  unlockedBattleAbility = Char(g_state.unlocked_battle_ability);
-  VS::Menu::saveLocationId = Char(g_state.save_location_id);
-  actionRestrictions = g_state.action_restrictions;
-  mainMenuCursorAnimation = g_state.main_menu_cursor_animation;
-  std::memcpy(submenuStates, g_state.submenu_states.data(),
+  loadedSubMenu = frameworkState.loaded_sub_menu;
+  menuState.control = frameworkState.control;
+  actionSelection = frameworkState.action_selection;
+  shortcutInvoked = Char(frameworkState.shortcut_invoked);
+  openedWithoutMainMenu = Char(frameworkState.opened_without_main_menu);
+  unlockedBreakArt = Char(frameworkState.unlocked_break_art);
+  unlockedBattleAbility = Char(frameworkState.unlocked_battle_ability);
+  VS::Menu::saveLocationId = Char(frameworkState.save_location_id);
+  actionRestrictions = frameworkState.action_restrictions;
+  mainMenuCursorAnimation = frameworkState.main_menu_cursor_animation;
+  std::memcpy(submenuStates, frameworkState.submenu_states.data(),
               sizeof(submenuStates));
-  textHeaders = g_state.text_headers;
+  textHeaders = frameworkState.text_headers;
   lootLists = reinterpret_cast<VS::Items::LootListNode*>(
-      static_cast<std::uintptr_t>(g_state.loot_lists));
+      static_cast<std::uintptr_t>(frameworkState.loot_lists));
   lootEntry = reinterpret_cast<VS::Items::BattleLoot*>(
-      static_cast<std::uintptr_t>(g_state.loot_entry));
+      static_cast<std::uintptr_t>(frameworkState.loot_entry));
 }
 
 void StoreMainMenu() {
-  const MainMenuStatics& menu = g_state.main_menu;
+  const MainMenuStatics& menu = frameworkState.main_menu;
   menuRowYOffset = Char(menu.menu_row_y_offset);
   selectedRow = menu.selected_row;
   subMenuId = menu.sub_menu_id;
@@ -471,7 +473,7 @@ struct PreviewBackup {
   MATRIX view_matrix{};
   VS::Render::Camera camera{};
 };
-PreviewBackup g_preview_backup;
+PreviewBackup previewBackup;
 
 template <typename T>
 [[nodiscard]] std::span<const std::uint8_t> BytesOf(const T& value) {
@@ -889,8 +891,8 @@ class LiveHost final : public Host {
     if (*loaded_lba == VS_MAINMENU_PRG_LBA) {
       // The core handles ordinary MAINMENU loads; the item shortcut can
       // load that same program for a nonzero logical submenu.
-      if (g_state.loaded_sub_menu != 0) {
-        g_state.main_menu = {};
+      if (frameworkState.loaded_sub_menu != 0) {
+        frameworkState.main_menu = {};
         ResetMainMenuOverlay();
       }
       return;
@@ -904,7 +906,7 @@ class LiveHost final : public Host {
   // The other MAINMENU.PRG files' statics; the original dropped both lists'
   // pointers without freeing them.
   void ResetMainMenuOverlay() override {
-    g_items = {};
+    trackedItems = {};
     const CallOutScope scope;
     VS::Boot::ResetMainMenuStatics();
     ResetLiveItemRowsStatics();
@@ -1123,10 +1125,10 @@ class LiveHost final : public Host {
 
   void BeginAshleyPreview() override {
     VS::Render::Camera& camera = VS::Render::FrameScratchpad().camera;
-    g_preview_backup.projection_distance = VS::Render::projectionDistance;
+    previewBackup.projection_distance = VS::Render::projectionDistance;
     VS::Render::SetLiveCameraProjectionDistance(kPreviewProjectionDistance);
-    g_preview_backup.view_matrix = VS::Render::FrameScratchpad().view_matrix;
-    g_preview_backup.camera = camera;
+    previewBackup.view_matrix = VS::Render::FrameScratchpad().view_matrix;
+    previewBackup.camera = camera;
     camera.angles.vx = 0;
     camera.angles.vy = 0;
     camera.angles.vz = 0;
@@ -1146,9 +1148,9 @@ class LiveHost final : public Host {
 
   void EndAshleyPreview() override {
     VS::Render::SetLiveCameraProjectionDistance(
-        g_preview_backup.projection_distance);
-    VS::Render::FrameScratchpad().view_matrix = g_preview_backup.view_matrix;
-    VS::Render::FrameScratchpad().camera = g_preview_backup.camera;
+        previewBackup.projection_distance);
+    VS::Render::FrameScratchpad().view_matrix = previewBackup.view_matrix;
+    VS::Render::FrameScratchpad().camera = previewBackup.camera;
   }
 
   void DrawAshleyPreview(const Core::Math::Vec3& look_at,
@@ -1217,7 +1219,7 @@ class LiveCall {
  private:
   LiveHost host_;
   Tables tables_;
-  Context ctx_{.state = g_state, .host = host_, .tables = tables_};
+  Context ctx_{.state = frameworkState, .host = host_, .tables = tables_};
 };
 
 void CopyRotation(const Core::Math::Mat3& rotation, MATRIX& matrix) {
@@ -1767,8 +1769,8 @@ void ShowLiveSecondaryTitle(char* text) {
 
 void ResetLiveMainMenuStatics() {
   Load();
-  g_state.main_menu = {};
-  g_items = {};
+  frameworkState.main_menu = {};
+  trackedItems = {};
   Store();
 }
 }  // namespace VS::Menu::Framework

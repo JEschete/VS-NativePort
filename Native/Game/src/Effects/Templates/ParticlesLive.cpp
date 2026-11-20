@@ -107,9 +107,9 @@ static_assert(sizeof(VS::Render::ParticleLinePacket) ==
 static_assert(sizeof(SVECTOR) * kParticleControlPoints ==
               kParticleControlPointBytes);
 
-std::uint64_t refused_curves = 0;
-std::uint64_t refused_textures = 0;
-std::uint64_t dropped_packets = 0;
+std::uint64_t refusedCurves = 0;
+std::uint64_t refusedTextures = 0;
+std::uint64_t droppedPackets = 0;
 
 // True on the 1st, 2nd, 4th, 8th... occurrence, to keep repeated
 // diagnostics readable.
@@ -585,12 +585,12 @@ std::int32_t LiveParticleHost::SampleCurve(std::uint8_t curve,
   const std::size_t bound = LiveEffectCurveCount();
   if (curve > bound ||
       VS::Effects::package->curve_block->Size(curve - 1) == 0) {
-    if (ShouldReport(refused_curves)) {
+    if (ShouldReport(refusedCurves)) {
       VS::Core::LogWarn(
           "effects",
           "particle set: curve {} is outside the package's {} bound "
           "curves or empty; sampled as 0 ({} refusals)",
-          curve, bound, refused_curves);
+          curve, bound, refusedCurves);
     }
     return 0;
   }
@@ -612,12 +612,12 @@ std::optional<ParticleTexture> LiveParticleHost::AdvanceTexture() {
     VS::Effects::LiveAdvanceParticleTextureAnimation(&animation);
   }
   if (!bound || animation.texture_info == nullptr) {
-    if (ShouldReport(refused_textures)) {
+    if (ShouldReport(refusedTextures)) {
       VS::Core::LogWarn(
           "effects",
           "particle set: texture table {} of {} has no frame; set "
           "drawn without quads ({} refusals)",
-          table, VS::Effects::package->texture_table_count, refused_textures);
+          table, VS::Effects::package->texture_table_count, refusedTextures);
     }
     return std::nullopt;
   }
@@ -642,12 +642,12 @@ LiveParticleHost::Reserve(std::int32_t depth, std::size_t words) {
   std::uint32_t* const packet =
       entry != nullptr ? Render::ReserveLivePrimitiveWords(words) : nullptr;
   if (packet == nullptr) {
-    if (ShouldReport(dropped_packets)) {
+    if (ShouldReport(droppedPackets)) {
       VS::Core::LogWarn(
           "effects",
           "particle set: segment at depth {} has no ordering entry or "
           "buffer room; dropped ({} drops)",
-          depth, dropped_packets);
+          depth, droppedPackets);
     }
     return std::nullopt;
   }

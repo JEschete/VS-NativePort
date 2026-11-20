@@ -52,9 +52,9 @@ using PerSlot = std::array<T, kEffectTransformSlots>;
 using TransformDefinitions = PerSlot<TransformDefinition>;
 using TransformStates = PerSlot<TransformState>;
 
-std::uint64_t refused_calls = 0;
-std::uint64_t clamped_counts = 0;
-std::uint64_t refused_transforms = 0;
+std::uint64_t refusedCalls = 0;
+std::uint64_t clampedCounts = 0;
+std::uint64_t refusedTransforms = 0;
 
 // True on the 1st, 2nd, 4th, 8th... occurrence, to keep repeated
 // diagnostics readable.
@@ -192,10 +192,10 @@ class LiveTransformHostImpl final : public TransformHost {
 };
 
 void ReportRefusal(const char* entry, const char* reason) {
-  if (ShouldReport(refused_calls)) {
+  if (ShouldReport(refusedCalls)) {
     VS::Core::LogWarn("effects",
                       "effect transforms: {} refused: {} ({} refusals)", entry,
-                      reason, refused_calls);
+                      reason, refusedCalls);
   }
 }
 
@@ -226,12 +226,12 @@ std::size_t LiveTransformDefinitions(
   const std::size_t decoded = ReadTransformDefinitions(
       LiveBoundPackageBlock(PackageBlockType::kTransformDefinitions),
       out.first(std::min(counted, out.size())));
-  if (decoded < counted && ShouldReport(clamped_counts)) {
+  if (decoded < counted && ShouldReport(clampedCounts)) {
     VS::Core::LogWarn(
         "effects",
         "effect transforms: block 9 counts {} transforms but {} are "
         "bound ({} clamps)",
-        counted, decoded, clamped_counts);
+        counted, decoded, clampedCounts);
   }
   return decoded;
 }
@@ -274,11 +274,11 @@ void LiveUpdateEffectTransforms(LiveEffectInstance* instance) {
       std::span<const TransformDefinition>(definitions).first(count), loaded,
       LiveTransformHost());
   StoreStates(*instance, loaded);
-  if (pass.refused != 0 && ShouldReport(refused_transforms)) {
+  if (pass.refused != 0 && ShouldReport(refusedTransforms)) {
     VS::Core::LogWarn("effects",
                       "effect transforms: {} transforms skipped a frame for a "
                       "curve past the samples ({} reports)",
-                      pass.refused, refused_transforms);
+                      pass.refused, refusedTransforms);
   }
 }
 }  // namespace VS::Effects

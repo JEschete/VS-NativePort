@@ -61,15 +61,15 @@ constexpr int kMenuSoundGroup = 0x7E;
 constexpr int kPreviewActor = 1;
 constexpr int kAdvanceAllBones = 1;
 constexpr int kWeaponDrawTransition = 1;
-std::uint64_t g_refusals = 0;
+std::uint64_t refusals = 0;
 // decomp: _processEquipSubMenu's cursor static (16C.c:113).
-std::uint8_t g_cursor_animation = 0;
+std::uint8_t cursorAnimation = 0;
 
 void Refuse(std::string_view reason) {
-  ++g_refusals;
-  if (g_refusals <= kRefusalLogLimit || g_refusals % kRefusalLogInterval == 0) {
+  ++refusals;
+  if (refusals <= kRefusalLogLimit || refusals % kRefusalLogInterval == 0) {
     VS::Core::LogWarn("menu.inventory", "equipment rows: {} (refusal {})",
-                      reason, g_refusals);
+                      reason, refusals);
   }
 }
 
@@ -108,7 +108,7 @@ void Refuse(std::string_view reason) {
   state.row_count = VS::Menu::Inventory::menuRowCount;
   state.first_row = VS::Menu::Inventory::itemsFirstRow;
   state.equipped_item = VS::Menu::Inventory::equippedItem;
-  state.cursor_animation = g_cursor_animation;
+  state.cursor_animation = cursorAnimation;
   return state;
 }
 
@@ -132,7 +132,7 @@ void StoreState(const EquipmentRowsState& state) {
   VS::Menu::Inventory::menuRowCount = state.row_count;
   VS::Menu::Inventory::itemsFirstRow = state.first_row;
   VS::Menu::Inventory::equippedItem = state.equipped_item;
-  g_cursor_animation = state.cursor_animation;
+  cursorAnimation = state.cursor_animation;
 }
 
 class LiveRowsHost final : public EquipmentRowsHost {
@@ -394,7 +394,7 @@ void QueueLiveEquipmentModel(int wep_id, int material) {
   }
 }
 
-void ResetEquipmentRowsLive() { g_cursor_animation = 0; }
+void ResetEquipmentRowsLive() { cursorAnimation = 0; }
 
-std::uint64_t LiveEquipmentRowsRefusalCount() { return g_refusals; }
+std::uint64_t LiveEquipmentRowsRefusalCount() { return refusals; }
 }  // namespace VS::Menu::Inventory

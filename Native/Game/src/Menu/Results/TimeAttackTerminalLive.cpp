@@ -68,7 +68,7 @@ struct LoadOwner {
   bool buffer_bound = false;
 };
 std::array<LoadOwner, 2> owners{};
-bool countdown_controls = false;
+bool countdownControls = false;
 std::uint64_t refusals = 0;
 
 LoadOwner& Owner(TimeAttackAsset asset) {
@@ -430,7 +430,7 @@ class LiveScreen final : public TimeAttackScreenHost {
   }
   void SetTickSpeed(std::int32_t speed) override {
     StoreState(state_);
-    if (speed == kCountdownTickSpeed) countdown_controls = true;
+    if (speed == kCountdownTickSpeed) countdownControls = true;
     State::SetLiveTickSpeed(speed);
   }
   void SetEffectRotation(std::int32_t angle) override {
@@ -462,7 +462,7 @@ class LiveScreen final : public TimeAttackScreenHost {
   bool EnableEffect(bool enabled) override {
     Render::SetLiveFramebufferEffectEnabled(enabled ? 1 : 0);
     if (!enabled) {
-      countdown_controls = false;
+      countdownControls = false;
       return true;
     }
     if (Render::IsLiveFramebufferEffectShowing() &&
@@ -625,12 +625,12 @@ void ResetLiveTimeAttackModuleData() {
 }
 
 bool CleanupLiveTimeAttackOwnedState() {
-  if (countdown_controls) {
+  if (countdownControls) {
     State::SetLiveTickSpeed(kNormalTickSpeed);
     const VS::Render::FramebufferEffectTranslation stopped{};
     Render::SetLiveFramebufferEffectScale(&stopped);
     Render::SetLiveFramebufferEffectEnabled(0);
-    countdown_controls = false;
+    countdownControls = false;
   }
   const bool results =
       CleanupOwner(TimeAttackAsset::kResults, kTimeAttackResultPages);
@@ -652,5 +652,5 @@ LiveTimeAttackLoadStatus InspectLiveTimeAttackLoad(TimeAttackAsset asset) {
           .owns_pages = owner.pages};
 }
 
-bool LiveTimeAttackOwnsCountdownControls() { return countdown_controls; }
+bool LiveTimeAttackOwnsCountdownControls() { return countdownControls; }
 }  // namespace VS::Menu::Results

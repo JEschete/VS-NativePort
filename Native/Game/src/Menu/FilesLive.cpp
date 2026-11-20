@@ -139,10 +139,10 @@ constexpr std::uint32_t kHalfwordMask = 0xFFFF;
 // vs_main_playSfxDefault's interface random draw.
 constexpr std::int32_t kInterfaceRandomBits = 15;
 
-State g_state{};
+State filesState{};
 // _initGameOver's queue slot and GAMEOVER.BIN buffer.
-VS::Content::DiscQueueSlot* g_game_over_request = nullptr;
-void* g_game_over_image = nullptr;
+VS::Content::DiscQueueSlot* gameOverRequest = nullptr;
+void* gameOverImage = nullptr;
 
 void Warn(std::string_view what) {
   VS::Core::LogWarn("menu.files", "{}", what);
@@ -639,35 +639,34 @@ class LiveHost : public LiveCardHost {
   void BeginGameOverLoad() override {
     VS::Content::DiscFile file{.lba = VS_GAMEOVER_BIN_LBA,
                                .size = VS_GAMEOVER_BIN_SIZE};
-    g_game_over_request = Content::AllocateLiveDiscRequest(&file);
-    g_game_over_image =
-        Core::Memory::AllocateLiveFromHighEnd(VS_GAMEOVER_BIN_SIZE);
-    if (g_game_over_request != nullptr) {
-      Content::EnqueueLiveDiscRequest(g_game_over_request, g_game_over_image);
+    gameOverRequest = Content::AllocateLiveDiscRequest(&file);
+    gameOverImage = Core::Memory::AllocateLiveFromHighEnd(VS_GAMEOVER_BIN_SIZE);
+    if (gameOverRequest != nullptr) {
+      Content::EnqueueLiveDiscRequest(gameOverRequest, gameOverImage);
     } else {
-      g_game_over_request =
-          Content::CompleteLiveRefusedDiscRequest(&file, g_game_over_image);
+      gameOverRequest =
+          Content::CompleteLiveRefusedDiscRequest(&file, gameOverImage);
     }
   }
   std::optional<bool> GameOverLoaded() override {
-    if (g_game_over_request == nullptr) {
+    if (gameOverRequest == nullptr) {
       return std::nullopt;
     }
-    return g_game_over_request->state == VS::Content::DiscRequestState::kLoaded;
+    return gameOverRequest->state == VS::Content::DiscRequestState::kLoaded;
   }
   std::span<const std::uint16_t> FinishGameOverLoad() override {
-    Content::ReleaseLiveDiscRequest(g_game_over_request);
-    g_game_over_request = nullptr;
-    if (g_game_over_image == nullptr) {
+    Content::ReleaseLiveDiscRequest(gameOverRequest);
+    gameOverRequest = nullptr;
+    if (gameOverImage == nullptr) {
       return {};
     }
-    return {static_cast<const std::uint16_t*>(g_game_over_image),
+    return {static_cast<const std::uint16_t*>(gameOverImage),
             kGameOverImageHalfwords};
   }
   void FreeGameOverImage() override {
-    if (g_game_over_image != nullptr) {
-      Core::Memory::FreeLiveFromHighEnd(g_game_over_image);
-      g_game_over_image = nullptr;
+    if (gameOverImage != nullptr) {
+      Core::Memory::FreeLiveFromHighEnd(gameOverImage);
+      gameOverImage = nullptr;
     }
   }
 };
@@ -733,26 +732,25 @@ class TitleFilesLiveHost final : public TitleCardMessages<LiveHost> {
 // VS::Title::fileMenuElements and the scalars are read in before each call and
 // written back after it, so the copied title code and the tests keep seeing
 // them.
-State g_title_state{};
+State titleState{};
 
 void LoadTitleState() {
-  std::ranges::copy(VS::Title::fileMenuElements,
-                    g_title_state.elements.begin());
-  g_title_state.is_saving = VS::Title::isSaving != 0;
-  g_title_state.container_data_empty = VS::Title::isContainerDataEmpty != 0;
-  g_title_state.backup_main_setting = VS::Title::savedMainMenuSetting;
-  g_title_state.screen_fade = VS::Title::fileMenuScreenFade;
-  g_title_state.cursor_color = VS::Title::selectionCursorColor;
+  std::ranges::copy(VS::Title::fileMenuElements, titleState.elements.begin());
+  titleState.is_saving = VS::Title::isSaving != 0;
+  titleState.container_data_empty = VS::Title::isContainerDataEmpty != 0;
+  titleState.backup_main_setting = VS::Title::savedMainMenuSetting;
+  titleState.screen_fade = VS::Title::fileMenuScreenFade;
+  titleState.cursor_color = VS::Title::selectionCursorColor;
 }
 
 void StoreTitleState() {
-  std::ranges::copy(g_title_state.elements,
+  std::ranges::copy(titleState.elements,
                     std::begin(VS::Title::fileMenuElements));
-  VS::Title::isSaving = g_title_state.is_saving ? 1 : 0;
-  VS::Title::isContainerDataEmpty = g_title_state.container_data_empty ? 1 : 0;
-  VS::Title::savedMainMenuSetting = g_title_state.backup_main_setting;
-  VS::Title::fileMenuScreenFade = g_title_state.screen_fade;
-  VS::Title::selectionCursorColor = g_title_state.cursor_color;
+  VS::Title::isSaving = titleState.is_saving ? 1 : 0;
+  VS::Title::isContainerDataEmpty = titleState.container_data_empty ? 1 : 0;
+  VS::Title::savedMainMenuSetting = titleState.backup_main_setting;
+  VS::Title::fileMenuScreenFade = titleState.screen_fade;
+  VS::Title::selectionCursorColor = titleState.cursor_color;
 }
 
 class TitleStateBinding {
@@ -769,7 +767,7 @@ template <typename Function>
 auto WithLiveTitleContext(Function&& function) {
   TitleFilesLiveHost host;
   const TitleStateBinding binding;
-  Context context{.state = g_title_state, .host = host};
+  Context context{.state = titleState, .host = host};
   return function(context);
 }
 
@@ -847,7 +845,7 @@ class TitleLiveHost final : public TitleCardMessages<TitleHost> {
 template <typename Function>
 auto WithLiveContext(Function&& function) {
   LiveHost host;
-  Context context{.state = g_state, .host = host};
+  Context context{.state = filesState, .host = host};
   return function(context);
 }
 }  // namespace
@@ -909,7 +907,7 @@ bool InitializeLiveTitleElement(int id, std::uint32_t position,
 
 bool AreLiveTitleAnimationsComplete() {
   LoadTitleState();
-  return AreAnimationsComplete(g_title_state);
+  return AreAnimationsComplete(titleState);
 }
 
 void CopyLiveSelectedContainerItems(
@@ -956,7 +954,7 @@ void DrawLiveText(const char* text, int x, int y, int clut) {
     return;
   }
   LiveImmediateTarget target;
-  DrawText(target, g_state.text_arrow, tail, x, y, clut);
+  DrawText(target, filesState.text_arrow, tail, x, y, clut);
 }
 
 std::uint32_t LiveElementBackgroundColor(std::uint32_t outer,
@@ -988,7 +986,7 @@ void SwapLiveBuffers() {
 
 int UpdateLiveClearSaveReminder(int init) {
   TitleLiveHost host;
-  TitleContext context{.state = g_state, .host = host};
+  TitleContext context{.state = filesState, .host = host};
   return UpdateClearSaveReminder(context, init != 0);
 }
 
@@ -997,12 +995,12 @@ void DrawLiveExitFade() {
   DrawExitFade(host);
 }
 
-State& LiveFilesState() { return g_state; }
+State& LiveFilesState() { return filesState; }
 
 Host& LiveFilesHost() {
   static LiveHost host;
   return host;
 }
 
-void ResetLiveFilesStatics() { ResetStatics(g_state); }
+void ResetLiveFilesStatics() { ResetStatics(filesState); }
 }  // namespace VS::Menu::Files

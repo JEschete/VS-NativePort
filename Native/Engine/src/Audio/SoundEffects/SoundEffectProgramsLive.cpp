@@ -168,18 +168,18 @@ void StoreChannel(VS::Audio::SeqChannel& legacy, const EffectChannel& channel) {
 // identity word for shared effects and blobs; a channel plays a blob while
 // that word still names the blob it started on, so any other writer of the
 // word (a release, a reset, a shared start) ends the program kind.
-std::array<std::uintptr_t, kChannelCount> started_blobs{};
+std::array<std::uintptr_t, kChannelCount> startedBlobs{};
 
 EffectKind KindOf(std::size_t index, const VS::Audio::SeqChannel& legacy) {
-  const std::uintptr_t blob = started_blobs[index];
+  const std::uintptr_t blob = startedBlobs[index];
   return blob != 0 && legacy.effect_id == blob ? EffectKind::kProgram
                                                : EffectKind::kShared;
 }
 
 void RecordKind(std::size_t index, const EffectChannel& channel) {
-  started_blobs[index] = channel.kind == EffectKind::kProgram
-                             ? static_cast<std::uintptr_t>(channel.effect)
-                             : 0;
+  startedBlobs[index] = channel.kind == EffectKind::kProgram
+                            ? static_cast<std::uintptr_t>(channel.effect)
+                            : 0;
 }
 
 EffectState LoadState() {

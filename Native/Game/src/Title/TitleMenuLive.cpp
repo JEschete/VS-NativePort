@@ -466,20 +466,20 @@ class LiveHost final : public Host {
   }
 };
 
-State g_state{};
-LiveHost g_host;
+State titleMenuState{};
+LiveHost titleMenuHost;
 }  // namespace
 
 int RunLive() {
-  Context context{.state = g_state, .host = g_host};
+  Context context{.state = titleMenuState, .host = titleMenuHost};
   return Run(context);
 }
 
-void InitializeLiveNewGameData() { InitializeNewGameData(g_host); }
+void InitializeLiveNewGameData() { InitializeNewGameData(titleMenuHost); }
 
-void PrepareLiveExit(int cause) { PrepareExit(g_host, cause); }
+void PrepareLiveExit(int cause) { PrepareExit(titleMenuHost, cause); }
 
-State& LiveTitleState() { return g_state; }
+State& LiveTitleState() { return titleMenuState; }
 
-Host& LiveTitleHost() { return g_host; }
+Host& LiveTitleHost() { return titleMenuHost; }
 }  // namespace VS::Title

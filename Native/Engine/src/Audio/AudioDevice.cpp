@@ -17,12 +17,12 @@
 namespace VS::Audio {
 
 namespace {
-AudioDevice* g_primary = nullptr;
+AudioDevice* primaryDevice = nullptr;
 }
 
 AudioDevice::~AudioDevice() { Close(); }
 
-AudioDevice* AudioDevice::Primary() { return g_primary; }
+AudioDevice* AudioDevice::Primary() { return primaryDevice; }
 
 std::expected<void, std::string> AudioDevice::Open() {
   if (IsOpen()) {
@@ -42,8 +42,8 @@ std::expected<void, std::string> AudioDevice::Open() {
     Close();
     return std::unexpected("audio stream: " + error);
   }
-  if (g_primary == nullptr) {
-    g_primary = this;
+  if (primaryDevice == nullptr) {
+    primaryDevice = this;
   }
   m_starved_requests_ = 0;
   m_missing_bytes_ = 0;
@@ -83,7 +83,7 @@ std::expected<void, std::string> AudioDevice::Open() {
 }
 
 void AudioDevice::Close() {
-  if (g_primary == this) VS::Audio::StopXaStream();
+  if (primaryDevice == this) VS::Audio::StopXaStream();
   if (m_stream_) {
     if (!SDL_SetAudioStreamGetCallback(m_stream_, nullptr, nullptr)) {
       Core::LogWrite(Core::LogLevel::Error, "audio",
@@ -106,8 +106,8 @@ void AudioDevice::Close() {
     SDL_CloseAudioDevice(m_device_);
     m_device_ = 0;
   }
-  if (g_primary == this) {
-    g_primary = nullptr;
+  if (primaryDevice == this) {
+    primaryDevice = nullptr;
   }
 }
 

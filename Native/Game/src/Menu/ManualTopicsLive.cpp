@@ -33,14 +33,14 @@ constexpr std::size_t kCursorRowMemory = 4;
 constexpr std::size_t kCursorScrollMemory = 5;
 constexpr int kTopicMenuCancelled = -2;
 constexpr int kTextBox = 0;
-std::uint64_t g_refusals = 0;
+std::uint64_t refusals = 0;
 // The composed page outlives the call: text box 0 keeps printing from it.
-std::array<std::uint8_t, kPageTextCapacity> g_page_text{};
+std::array<std::uint8_t, kPageTextCapacity> pageText{};
 
 void Refuse(std::string_view reason) {
-  ++g_refusals;
-  if (g_refusals <= kRefusalLogLimit || g_refusals % kRefusalLogInterval == 0) {
-    VS::Core::LogWarn("menu.manual", "{} (refusal {})", reason, g_refusals);
+  ++refusals;
+  if (refusals <= kRefusalLogLimit || refusals % kRefusalLogInterval == 0) {
+    VS::Core::LogWarn("menu.manual", "{} (refusal {})", reason, refusals);
   }
 }
 
@@ -173,12 +173,12 @@ int LiveGetSelectedTopicRow() {
 
 // decomp: MENUE.PRG _topMenu (494.c:450).
 int LiveUpdateTopicMenu(int init) {
-  TopicMenuState state{.step = topMenu_state, .selected_row = menuSelectedRow};
+  TopicMenuState state{.step = topMenuState, .selected_row = menuSelectedRow};
   LiveTopicMenuHost host;
   const auto result =
       UpdateTopicMenu(state, init != 0, TopicTable(),
                       VS::Field::manualDisplayState.current_manual, host);
-  topMenu_state = state.step;
+  topMenuState = state.step;
   menuSelectedRow = state.selected_row;
   if (!result.has_value()) {
     Refuse("Manual topic table cannot be listed");
@@ -215,9 +215,9 @@ void LiveCopyPageText() {
     Refuse(PageRefusal(length.error()));
     return;
   }
-  g_page_text = page;
-  SetLiveTextBoxText(kTextBox, reinterpret_cast<char*>(g_page_text.data()));
+  pageText = page;
+  SetLiveTextBoxText(kTextBox, reinterpret_cast<char*>(pageText.data()));
 }
 
-std::uint64_t LiveTopicRefusalCount() { return g_refusals; }
+std::uint64_t LiveTopicRefusalCount() { return refusals; }
 }  // namespace VS::Menu::manual

@@ -101,14 +101,14 @@ struct ContextState {
   InventoryNavigationState navigation;
   std::array<bool, kControllerCount> active{};
 };
-std::array<ContextState, kContextCount> g_contexts;
-MiscShortcutState g_shortcut;
-InventoryScreenState g_screen;
-LootInventoryText g_loot_text;
-std::uint64_t g_refusals = 0;
+std::array<ContextState, kContextCount> contexts;
+MiscShortcutState miscShortcut;
+InventoryScreenState inventoryScreen;
+LootInventoryText lootText;
+std::uint64_t refusals = 0;
 
 [[noreturn]] void Refuse(std::string_view reason) {
-  ++g_refusals;
+  ++refusals;
   VS::Core::Errorf("menu.inventory", "Inventory terminal refused: %.*s",
                    static_cast<int>(reason.size()), reason.data());
   std::abort();
@@ -709,7 +709,7 @@ class LiveTerminalHost final : public InventoryTerminalHost,
   }
   std::int32_t Discard(std::optional<InventoryDiscardEntry> entry) override {
     return Call([&] {
-      auto& state = g_contexts[ContextIndex(context_)];
+      auto& state = contexts[ContextIndex(context_)];
       const CallGuard guard(
           state.active[static_cast<std::size_t>(Controller::kDiscard)]);
       LiveTerminalHost host(context_);
@@ -721,7 +721,7 @@ class LiveTerminalHost final : public InventoryTerminalHost,
   }
   std::int32_t SortMenu(std::optional<Category> category) override {
     return Call([&] {
-      auto& state = g_contexts[ContextIndex(context_)];
+      auto& state = contexts[ContextIndex(context_)];
       const CallGuard guard(
           state.active[static_cast<std::size_t>(Controller::kSort)]);
       LiveTerminalHost host(context_);
@@ -879,7 +879,7 @@ std::optional<InventoryDiscardEntry> DiscardEntry(int initialize) {
 template <typename Function>
 int Execute(ItemRowsContext context, Controller controller,
             Function&& function) {
-  auto& state = g_contexts[ContextIndex(context)];
+  auto& state = contexts[ContextIndex(context)];
   const CallGuard guard(state.active[static_cast<std::size_t>(controller)]);
   try {
     LiveTerminalHost host(context, controller == Controller::kShortcut);
@@ -910,12 +910,12 @@ int NavigateLive(ItemRowsContext context, int initialize) {
 }  // namespace
 
 void BindLiveLootInventoryText(std::span<const std::uint8_t> bytes) {
-  if (!BindLootInventoryText(g_loot_text, bytes)) {
+  if (!BindLootInventoryText(lootText, bytes)) {
     Refuse("MENUB text table has an invalid extent, offset or terminator");
   }
 }
 std::span<const std::uint8_t> LiveLootInventoryText() {
-  if (!g_loot_text.loaded) {
+  if (!lootText.loaded) {
     try {
       const auto* store = Content::DataStore::Get();
       const auto* entry = store ? store->Find("MENU/MENUB.PRG") : nullptr;
@@ -931,7 +931,7 @@ std::span<const std::uint8_t> LiveLootInventoryText() {
       Refuse("MENUB text loading allocation failed");
     }
   }
-  return g_loot_text.bytes;
+  return lootText.bytes;
 }
 
 // decomp: _sortItems (src/MENU/items1.h:1077), separately compiled in both
@@ -961,7 +961,7 @@ int UpdateLiveLootItemList(int initialize) {
 void UpdateLiveMiscItemShortcut(int initialize) {
   static_cast<void>(Execute(ItemRowsContext::kItemMenu, Controller::kShortcut,
                             [&](auto& host, auto&) {
-                              UpdateMiscItemShortcut(g_shortcut, host,
+                              UpdateMiscItemShortcut(miscShortcut, host,
                                                      initialize);
                               return 0;
                             }));
@@ -971,34 +971,32 @@ int UpdateLiveInventoryScreen(unsigned char* step) {
   if (step == nullptr) Refuse("inventory screen without a menu state");
   return Execute(ItemRowsContext::kItemMenu, Controller::kScreen,
                  [&](auto& host, auto&) {
-                   return UpdateInventoryScreen(g_screen, *step, host);
+                   return UpdateInventoryScreen(inventoryScreen, *step, host);
                  });
 }
 void ResetInventoryTerminalModuleData() {
-  RequireIdleContext(g_contexts[0]);
-  g_contexts[0] = {};
-  g_screen = {};
+  RequireIdleContext(contexts[0]);
+  contexts[0] = {};
+  inventoryScreen = {};
 }
 void ResetLootInventoryTerminalModuleData() {
-  RequireIdleContext(g_contexts[1]);
-  g_contexts[1] = {};
+  RequireIdleContext(contexts[1]);
+  contexts[1] = {};
 }
 void ResetMiscItemShortcutModuleData() {
-  if (g_contexts[0].active[static_cast<std::size_t>(Controller::kShortcut)]) {
+  if (contexts[0].active[static_cast<std::size_t>(Controller::kShortcut)]) {
     Refuse("MAINMENU reload during an active shortcut call");
   }
-  g_shortcut = {};
+  miscShortcut = {};
 }
 void ResetInventoryTerminalSession() {
-  for (const auto& context : g_contexts) {
+  for (const auto& context : contexts) {
     RequireIdleContext(context);
   }
-  g_contexts = {};
-  g_shortcut = {};
-  g_screen = {};
-  g_loot_text = {};
+  contexts = {};
+  miscShortcut = {};
+  inventoryScreen = {};
+  lootText = {};
 }
-std::uint64_t InventoryTerminalLiveRefusalCount() noexcept {
-  return g_refusals;
-}
+std::uint64_t InventoryTerminalLiveRefusalCount() noexcept { return refusals; }
 }  // namespace VS::Menu::Inventory

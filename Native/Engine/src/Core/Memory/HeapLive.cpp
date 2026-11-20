@@ -16,8 +16,8 @@
 
 namespace VS::Core::Memory {
 namespace {
-std::uint64_t refused_requests = 0;
-std::uint64_t damaged_guards = 0;
+std::uint64_t refusedRequests = 0;
+std::uint64_t damagedGuards = 0;
 
 // Reports the first occurrence and then every power of two.
 bool Reportable(std::uint64_t count) noexcept {
@@ -30,15 +30,15 @@ void* Allocated(const char* operation, std::size_t bytes,
   if (payload) {
     return payload->data();
   }
-  ++refused_requests;
-  if (Reportable(refused_requests)) {
+  ++refusedRequests;
+  if (Reportable(refusedRequests)) {
     VS::Core::Errorf(
         "memory",
         "%s at %s:%u: %zu bytes refused: %s (largest free block %" PRIu32
         " units, refusal %" PRIu64 ")",
         operation, site.file_name(), static_cast<unsigned>(site.line()), bytes,
         HeapErrorName(payload.error()), GameHeap().LargestFreeUnits(),
-        refused_requests);
+        refusedRequests);
   }
   return nullptr;
 }
@@ -47,27 +47,27 @@ void Released(const char* operation, const void* payload,
               const std::expected<HeapRelease, HeapError>& release,
               const std::source_location& site) {
   if (!release) {
-    ++refused_requests;
-    if (Reportable(refused_requests)) {
+    ++refusedRequests;
+    if (Reportable(refusedRequests)) {
       VS::Core::Errorf("memory",
                        "%s at %s:%u: %p refused: %s; the heap is unchanged "
                        "(refusal %" PRIu64 ")",
                        operation, site.file_name(),
                        static_cast<unsigned>(site.line()), payload,
-                       HeapErrorName(release.error()), refused_requests);
+                       HeapErrorName(release.error()), refusedRequests);
     }
     return;
   }
   if (!release->guard_intact) {
-    ++damaged_guards;
-    if (Reportable(damaged_guards)) {
+    ++damagedGuards;
+    if (Reportable(damagedGuards)) {
       VS::Core::Errorf("memory",
                        "%s at %s:%u: the header unit before %p (%" PRIu32
                        " units) was overwritten; the block was released "
                        "(damaged guard %" PRIu64 ")",
                        operation, site.file_name(),
                        static_cast<unsigned>(site.line()), payload,
-                       release->units, damaged_guards);
+                       release->units, damagedGuards);
     }
   }
 }
@@ -123,11 +123,9 @@ std::expected<std::span<const std::byte>, HeapError> LivePayloadContaining(
   return PayloadContaining(GameHeap(), static_cast<const std::byte*>(address));
 }
 
-std::uint64_t RefusedLiveHeapRequestCount() noexcept {
-  return refused_requests;
-}
+std::uint64_t RefusedLiveHeapRequestCount() noexcept { return refusedRequests; }
 
-std::uint64_t DamagedLiveHeapGuardCount() noexcept { return damaged_guards; }
+std::uint64_t DamagedLiveHeapGuardCount() noexcept { return damagedGuards; }
 
 ScopedLiveGameHeap::ScopedLiveGameHeap(std::span<std::byte> arena)
     : saved_(std::exchange(GameHeap(), Heap{})) {

@@ -78,8 +78,8 @@ namespace {
 // The boundary is the one place a transition lands; the frames it abandons
 // must hold no object whose destructor matters (#266), which the transition
 // barrier enforces for the scopes known to need it.
-std::jmp_buf session_boundary;
-SessionState live_state;
+std::jmp_buf sessionBoundary;
+SessionState liveState;
 
 // libpad port IDs (ControllerLive.hpp).
 constexpr int kFirstPadPortId = 0x00;
@@ -161,7 +161,7 @@ class LiveSessionHost final : public SessionHost {
     Event::AbandonLiveScriptUses();
     // NOLINTNEXTLINE(cert-err52-cpp): the session boundary leaves the copied
     // call graph by jump, not exception (#267); the barrier guards the frames.
-    std::longjmp(session_boundary, static_cast<int>(destination));
+    std::longjmp(sessionBoundary, static_cast<int>(destination));
   }
 
   [[noreturn]] void Refuse(SessionRefusal refusal) override {
@@ -173,8 +173,8 @@ class LiveSessionHost final : public SessionHost {
   }
 };
 
-LiveSessionHost live_host;
-SoftResetState live_soft_reset_state;
+LiveSessionHost liveHost;
+SoftResetState liveSoftResetState;
 
 class LiveLifecycleHost final : public OverlayLoadHost,
                                 public TransitionHost,
@@ -321,7 +321,7 @@ class LiveLifecycleHost final : public OverlayLoadHost,
   }
 };
 
-LiveLifecycleHost live_lifecycle_host;
+LiveLifecycleHost liveLifecycleHost;
 
 int RunLoadedGame() {
   VS::Boot::ResetGameplayInspection();
@@ -373,16 +373,16 @@ void ResetLiveSessionHeap() {
 }
 
 int RunLiveSessionLoop(SessionEntry title, SessionEntry battle) {
-  if (!BeginSession(live_state, live_host,
+  if (!BeginSession(liveState, liveHost,
                     title != nullptr && battle != nullptr)) {
     return -1;
   }
   // NOLINTNEXTLINE(cert-err52-cpp): see Transfer.
-  const int boundary_value = setjmp(session_boundary);
+  const int boundary_value = setjmp(sessionBoundary);
   const int result = EntryFor(boundary_value) == SessionDestination::kGameLoop
                          ? battle()
                          : title();
-  EndSession(live_state, live_host);
+  EndSession(liveState, liveHost);
   return result;
 }
 
@@ -397,42 +397,38 @@ void RunLiveGame() {
   RunGame(host);
 }
 
-void LoadBattleOverlaysLive() { LoadBattleOverlays(live_lifecycle_host); }
+void LoadBattleOverlaysLive() { LoadBattleOverlays(liveLifecycleHost); }
 
-void LoadTitleOverlayLive() { LoadTitleOverlay(live_lifecycle_host); }
+void LoadTitleOverlayLive() { LoadTitleOverlay(liveLifecycleHost); }
 
-void LoadEndingOverlayLive() { LoadEndingOverlay(live_lifecycle_host); }
+void LoadEndingOverlayLive() { LoadEndingOverlay(liveLifecycleHost); }
 
 void WaitForOverlayReadyLive() { WaitForOverlayReady(); }
 
-void ResetToTitleLive() { ResetToTitle(live_lifecycle_host); }
+void ResetToTitleLive() { ResetToTitle(liveLifecycleHost); }
 
-void EnterBattleLive() {
-  EnterBattle(live_lifecycle_host, live_lifecycle_host);
-}
+void EnterBattleLive() { EnterBattle(liveLifecycleHost, liveLifecycleHost); }
 
 void RunEndingAndReturnToTitleLive() {
-  RunEndingAndReturnToTitle(live_lifecycle_host, live_lifecycle_host);
+  RunEndingAndReturnToTitle(liveLifecycleHost, liveLifecycleHost);
 }
 
 void InitializePlatformServicesLive() {
-  live_soft_reset_state.enabled = VS::Boot::isSoftResetEnabled != 0;
-  InitializePlatformServices(live_soft_reset_state, live_lifecycle_host);
+  liveSoftResetState.enabled = VS::Boot::isSoftResetEnabled != 0;
+  InitializePlatformServices(liveSoftResetState, liveLifecycleHost);
 }
 
-void InitializeTitleSessionLive() {
-  InitializeTitleSession(live_lifecycle_host);
-}
+void InitializeTitleSessionLive() { InitializeTitleSession(liveLifecycleHost); }
 
 void SetSoftResetEnabledLive(int enabled) {
-  SetSoftResetEnabled(live_soft_reset_state, enabled != 0);
-  live_lifecycle_host.StoreSoftResetEnabled(live_soft_reset_state.enabled);
+  SetSoftResetEnabled(liveSoftResetState, enabled != 0);
+  liveLifecycleHost.StoreSoftResetEnabled(liveSoftResetState.enabled);
 }
 
-void JumpToLiveTitle() { JumpToTitle(live_state, live_host); }
+void JumpToLiveTitle() { JumpToTitle(liveState, liveHost); }
 
-void JumpToLiveGameLoop() { JumpToGameLoop(live_state, live_host); }
+void JumpToLiveGameLoop() { JumpToGameLoop(liveState, liveHost); }
 
 LiveSessionTransitionBarrier::LiveSessionTransitionBarrier()
-    : barrier_(live_state) {}
+    : barrier_(liveState) {}
 }  // namespace VS::Boot

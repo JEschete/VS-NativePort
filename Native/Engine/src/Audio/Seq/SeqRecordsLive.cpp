@@ -545,8 +545,8 @@ void StorePosition(std::uint8_t*& pointer, std::uint32_t offset,
 }
 
 std::uint64_t refusals = 0;
-const VS::Audio::SeqChannel* scoped_channel = nullptr;
-LiveProgramMemory scoped_memory;
+const VS::Audio::SeqChannel* scopedChannel = nullptr;
+LiveProgramMemory scopedMemory;
 }  // namespace
 
 ProgramData LiveProgramMemory::View() const {
@@ -657,8 +657,8 @@ std::optional<LiveProgramMemory> LiveProgramRegion(std::uint8_t* address) {
     return idle;
   }
   return Containing(address,
-                    reinterpret_cast<std::uint8_t*>(Core::overlay_arena.data()),
-                    Core::overlay_arena.size());
+                    reinterpret_cast<std::uint8_t*>(Core::overlayArena.data()),
+                    Core::overlayArena.size());
 }
 
 std::uint8_t* LiveIdleProgram() {
@@ -667,21 +667,21 @@ std::uint8_t* LiveIdleProgram() {
 
 ScopedChannelProgram::ScopedChannelProgram(const VS::Audio::SeqChannel& channel,
                                            const LiveProgramMemory& memory)
-    : previous_channel_(scoped_channel), previous_memory_(scoped_memory) {
-  scoped_channel = &channel;
-  scoped_memory = memory;
+    : previous_channel_(scopedChannel), previous_memory_(scopedMemory) {
+  scopedChannel = &channel;
+  scopedMemory = memory;
 }
 
 ScopedChannelProgram::~ScopedChannelProgram() {
-  scoped_channel = previous_channel_;
-  scoped_memory = previous_memory_;
+  scopedChannel = previous_channel_;
+  scopedMemory = previous_memory_;
 }
 
 std::optional<LiveProgramMemory> LiveChannelProgram(
     const VS::Audio::SeqChannel& channel) {
-  if (&channel == scoped_channel && scoped_memory.base != nullptr &&
-      OffsetOf(channel.program_counter, scoped_memory) != kOutsideProgram) {
-    return scoped_memory;
+  if (&channel == scopedChannel && scopedMemory.base != nullptr &&
+      OffsetOf(channel.program_counter, scopedMemory) != kOutsideProgram) {
+    return scopedMemory;
   }
   std::uint8_t* const counter = channel.program_counter;
   if (auto region = LiveProgramRegion(counter)) return region;

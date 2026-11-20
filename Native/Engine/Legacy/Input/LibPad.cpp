@@ -24,12 +24,12 @@ struct Port {
   bool aligned = false;
 };
 
-Port g_ports[2];
+Port padPorts[2];
 
 Port* PortFor(std::int32_t port) {
   // libpad port ids: 0x00 = port 1, 0x10 = port 2
   const std::int32_t index = port >> 4;
-  return index >= 0 && index < 2 ? &g_ports[index] : nullptr;
+  return index >= 0 && index < 2 ? &padPorts[index] : nullptr;
 }
 
 }  // namespace
@@ -39,7 +39,7 @@ ActuatorState ReadActuators(int port) {
     VS::Core::LogWarn("input", "invalid actuator port index {}", port);
     return {};
   }
-  const Port& p = g_ports[port];
+  const Port& p = padPorts[port];
   if (!p.connected || !p.analog || !p.aligned || !p.actuators ||
       p.actuator_count == 0 || VS::Input::settings.vibration_on == 0) {
     return {};
@@ -56,7 +56,7 @@ void FeedPad(int port, const Input::PadState& state, bool connected) {
   if (port < 0 || port > 1) {
     return;
   }
-  Port& p = g_ports[port];
+  Port& p = padPorts[port];
   p.connected = connected;
   p.analog = state.analog;
   if (p.buffer == nullptr) {
@@ -78,11 +78,11 @@ void FeedPad(int port, const Input::PadState& state, bool connected) {
 }
 
 void PadInitDirect(std::uint8_t* port1, std::uint8_t* port2) {
-  g_ports[0] = Port{};
-  g_ports[1] = Port{};
-  g_ports[0].buffer = port1;
-  g_ports[1].buffer = port2;
-  for (Port& p : g_ports) {
+  padPorts[0] = Port{};
+  padPorts[1] = Port{};
+  padPorts[0].buffer = port1;
+  padPorts[1].buffer = port2;
+  for (Port& p : padPorts) {
     if (p.buffer != nullptr) {
       p.buffer[0] = 0xFF;
     }

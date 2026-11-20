@@ -43,10 +43,10 @@ constexpr std::size_t kEyeShakeScratchOffset = 0xA8;
 constexpr std::size_t kRotationScratchOffset = 0xD8;
 constexpr std::size_t kMatrixScratchOffset = 0xF8;
 
-std::atomic<std::uint64_t> refused_count{0};
+std::atomic<std::uint64_t> refusedCount{0};
 
 void Skip(const char* operation, const char* reason) {
-  refused_count.fetch_add(1, std::memory_order_relaxed);
+  refusedCount.fetch_add(1, std::memory_order_relaxed);
   VS::Core::LogError("event.camera", "{} skipped: {}", operation, reason);
 }
 
@@ -276,7 +276,7 @@ int EventCameraCompletionMaskEntry() {
 }
 
 std::uint64_t RefusedEventCameraFrameCount() noexcept {
-  return refused_count.load(std::memory_order_relaxed);
+  return refusedCount.load(std::memory_order_relaxed);
 }
 }  // namespace VS::Event
 

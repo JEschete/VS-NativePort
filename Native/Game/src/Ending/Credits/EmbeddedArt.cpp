@@ -42,7 +42,7 @@ struct TimStorage {
 };
 static_assert(sizeof(TimStorage) == kTimCapacity);
 
-std::array<TimStorage, kSourceAddresses.size()> embedded_art{};
+std::array<TimStorage, kSourceAddresses.size()> embeddedArt{};
 bool prepared = false;
 
 template <typename Integer>
@@ -104,20 +104,20 @@ int VS::Ending::Credits::PrepareEmbeddedArt() {
                        static_cast<unsigned>(index + 1));
       return 0;
     }
-    std::memcpy(&embedded_art[index], source.data() + offset, *bytes);
+    std::memcpy(&embeddedArt[index], source.data() + offset, *bytes);
   }
   VS::Ending::Credits::illustrationTimWorkspace =
-      &embedded_art[kIllustrationIndex].header;
+      &embeddedArt[kIllustrationIndex].header;
   prepared = true;
   return 1;
 }
 
 VS::Ending::Credits::TimHeader* VS::Ending::Credits::EmbeddedArt(
     unsigned index) {
-  if (!prepared || index >= embedded_art.size()) {
+  if (!prepared || index >= embeddedArt.size()) {
     VS::Core::Errorf("ending.art",
                      "unprepared or invalid embedded TIM index=%u", index);
     std::abort();
   }
-  return &embedded_art[index].header;
+  return &embeddedArt[index].header;
 }

@@ -174,7 +174,6 @@ int LiveUpdateStatusTerminal(std::uint8_t* state) {
   }
   terminal_live::ScreenHost host;
   return terminal_live::Report(
-      "update",
-      UpdateStatusTerminal(terminal_live::screen_state, host, *state));
+      "update", UpdateStatusTerminal(terminal_live::screenState, host, *state));
 }
 }  // namespace VS::Menu::Status

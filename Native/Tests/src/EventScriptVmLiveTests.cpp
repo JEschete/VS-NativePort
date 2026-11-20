@@ -1628,9 +1628,9 @@ void CheckDataError(
   }
 }
 
-bool nested_finished = false;
+bool nestedFinished = false;
 std::intptr_t NestedJumpBridge(std::uint8_t* instruction, std::int16_t thread) {
-  nested_finished = !event::ExecuteLiveScriptThread(1);
+  nestedFinished = !event::ExecuteLiveScriptThread(1);
   return event::DispatchLiveScriptControlOpcode(instruction, thread,
                                                 event::ScriptJumpForward);
 }
@@ -3407,7 +3407,7 @@ TEST_CASE("Live VM restores the outer typed invocation after nested dispatch",
   const LiveVmFixture fixture;
   const auto start = MountScript({0x42, 3, 0, 0xF0, 0xF0});
   observations = 0;
-  nested_finished = false;
+  nestedFinished = false;
   event::opcodeHandlers[0x42] = NestedJumpBridge;
   event::opcodeHandlers[0xF0] = StopBridge;
   event::opcodeSizes[0x42] = 3;
@@ -3415,7 +3415,7 @@ TEST_CASE("Live VM restores the outer typed invocation after nested dispatch",
   host.SetThreadCursor(0, start);
   host.SetThreadCursor(1, {start.region, 4, start.generation});
   CHECK_FALSE(event::ExecuteLiveScriptThread(0));
-  CHECK(nested_finished);
+  CHECK(nestedFinished);
   CHECK(observations == 2);
   CHECK(observed[0] ==
         event::ScriptLocation{start.region, 4, start.generation});

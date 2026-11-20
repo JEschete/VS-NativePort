@@ -233,6 +233,8 @@ Choose one (plan §4.4). The generator's `proposed_disposition` is a size/segmen
 - Forbidden: `D_`, `B_`, address digits, `unk`, `temp`, `data`/`buf`/`table` on their own, Hungarian `g_`/`s_`
   prefixes, `vs_`.
 - Units belong in the name when they are not obvious: `fadeTimerFrames`, `cameraDistanceFixed12`.
+- Native namespace-scope variables follow the same rule. `Native\.clang-tidy` enforces it (`GlobalVariableCase:
+  camelBack`, #453) and exempts only the copied `System_name` C spellings until #441 retires them.
 
 ### 8.4 `final_location`
 

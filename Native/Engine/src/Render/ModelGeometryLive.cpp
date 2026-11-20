@@ -74,7 +74,7 @@ std::vector<ModelExtent>& Extents() {
   return extents;
 }
 
-std::uint64_t unrecorded_models = 0;
+std::uint64_t unrecordedModels = 0;
 
 // The instance's eight-byte bone, group and polygon count prefix.
 template <typename Instance>
@@ -231,10 +231,10 @@ class LiveShadowGround final : public ShadowGround {
 [[nodiscard]] std::span<const std::byte> RecordedModelBytes(const void* model) {
   const std::span<const std::byte> bytes = LiveModelBytes(model);
   if (bytes.empty() && model != nullptr &&
-      std::has_single_bit(++unrecorded_models)) {
+      std::has_single_bit(++unrecordedModels)) {
     VS::Core::Errorf(kChannel,
                      "model %p has no recorded extent (%" PRIu64 " refused)",
-                     model, unrecorded_models);
+                     model, unrecordedModels);
   }
   return bytes;
 }

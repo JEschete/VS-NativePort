@@ -24,9 +24,9 @@
 
 // NOLINTNEXTLINE(readability-identifier-naming): the catalog's component.
 namespace VS::Menu::Status::terminal_live {
-extern EquipmentDetailState detail_state;
-extern EquipmentListState list_state;
-extern StatusTerminalState screen_state;
+extern EquipmentDetailState detailState;
+extern EquipmentListState listState;
+extern StatusTerminalState screenState;
 
 void Refuse(std::string_view reason);
 [[nodiscard]] int Report(std::string_view entry, const TerminalResult& result);

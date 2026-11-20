@@ -25,19 +25,19 @@ using VS::Core::Gte::CVECTOR;
 namespace VS::Menu::Results {
 namespace {
 // Refused draws so far; the warning repeats at each power of two.
-std::uint64_t title_refusals = 0;
+std::uint64_t titleRefusals = 0;
 
 void Report(ResultsDrawResult result) {
   if (result != ResultsDrawResult::kInvalidTexture) {
     return;
   }
-  ++title_refusals;
-  if (std::has_single_bit(title_refusals)) {
+  ++titleRefusals;
+  if (std::has_single_bit(titleRefusals)) {
     VS::Core::LogWarn(
         "menu.results",
         "Cube-puzzle drawing refused a title outside the atlas ({} "
         "refusals)",
-        title_refusals);
+        titleRefusals);
   }
 }
 

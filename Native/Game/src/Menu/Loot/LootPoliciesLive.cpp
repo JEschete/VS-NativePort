@@ -63,7 +63,7 @@ constexpr int kDiscardSound = 0x1C;
 // vs_mainMenu_initInformationTextBox(1).
 constexpr auto kCautionHeader = InformationHeader::kCaution;
 
-std::uint64_t g_refusals = 0;
+std::uint64_t refusals = 0;
 
 // _discardItems' and _organizeInventory's statics.
 struct PolicyStatics {
@@ -77,10 +77,10 @@ PolicyStatics& Statics() {
 }
 
 void Refuse(std::string_view reason) {
-  ++g_refusals;
-  if (g_refusals <= kRefusalLogLimit || g_refusals % kRefusalLogInterval == 0) {
+  ++refusals;
+  if (refusals <= kRefusalLogLimit || refusals % kRefusalLogInterval == 0) {
     VS::Core::LogWarn("menu.loot", "loot policies: {} (refusal {})", reason,
-                      g_refusals);
+                      refusals);
   }
 }
 
@@ -467,6 +467,6 @@ int UpdateOrganizationMenu(LootRow* loot) {
 
 void ResetPolicyStatics() {
   Statics() = {};
-  g_refusals = 0;
+  refusals = 0;
 }
 }  // namespace VS::Menu::Loot::Live

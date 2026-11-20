@@ -26,13 +26,13 @@
 
 namespace VS::Effects::Templates {
 namespace {
-std::uint64_t refused_rings = 0;
+std::uint64_t refusedRings = 0;
 
 [[nodiscard]] bool Refuse(std::string_view reason) {
-  if (std::has_single_bit(++refused_rings)) {
+  if (std::has_single_bit(++refusedRings)) {
     VS::Core::LogWarn("effects",
                       "closed repeating ring refused: {} ({} refusals)", reason,
-                      refused_rings);
+                      refusedRings);
   }
   return false;
 }

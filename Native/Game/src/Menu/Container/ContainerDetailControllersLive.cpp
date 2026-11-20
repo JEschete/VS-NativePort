@@ -58,13 +58,13 @@ constexpr std::uint32_t kFirstIconU = 120;
 constexpr std::uint32_t kIconV = 128;
 constexpr std::uint32_t kSelectedIconPalette = 0x37FD0000;
 constexpr std::uint32_t kIdleIconPalette = 0x37FE0000;
-std::array<ControllerState, kControllerCount> g_states{};
-DispatcherState g_dispatcher;
+std::array<ControllerState, kControllerCount> controllerStates{};
+DispatcherState detailDispatcher;
 using GemCountText = std::array<char, kGemCountTextBytes>;
-GemCountText g_gem_count_text{'X', ' ', ' ', ' ', ' ', ' ', '0', '\0'};
+GemCountText gemCountText{'X', ' ', ' ', ' ', ' ', ' ', '0', '\0'};
 
 ControllerState& State(Category category) {
-  return g_states[static_cast<std::size_t>(category)];
+  return controllerStates[static_cast<std::size_t>(category)];
 }
 
 [[noreturn]] void Refuse(std::string_view reason) {
@@ -341,12 +341,12 @@ class LiveControllerWorld final : public ControllerWorld {
     return Referenced(Records().grips, item).gem_slots;
   }
   void DrawGripGemSlotCount(std::uint8_t slots) override {
-    g_gem_count_text[kGemDigit] =
+    gemCountText[kGemDigit] =
         static_cast<char>(static_cast<std::uint8_t>(slots + kDigitZero));
     RequireFrame(true);
     Framework::DrawLiveRowIcon(kGemCountIcon, kGemIconX, kGemIconY);
     Render::DrawLiveCompactText(
-        g_gem_count_text.data(),
+        gemCountText.data(),
         static_cast<int>(Framework::PackXy(kGemTextX, kGemTextY)), nullptr);
   }
   bool SelectedArmorShowsDp(ContainerSlot item) override {
@@ -593,12 +593,12 @@ int UpdateLiveGemDetails(int selection) {
 // decomp: func_80105008 (src/MENU/MENUD.PRG/234.c:1235).
 int UpdateLiveItemDetails(int selection) {
   LiveDispatcherWorld world;
-  return UpdateItemDetails(g_dispatcher, world, Dispatch(selection));
+  return UpdateItemDetails(detailDispatcher, world, Dispatch(selection));
 }
 
 void ResetLiveContainerDetailControllers() {
-  g_states = {};
-  g_dispatcher = {};
-  g_gem_count_text = {'X', ' ', ' ', ' ', ' ', ' ', '0', '\0'};
+  controllerStates = {};
+  detailDispatcher = {};
+  gemCountText = {'X', ' ', ' ', ' ', ' ', ' ', '0', '\0'};
 }
 }  // namespace VS::Menu::container

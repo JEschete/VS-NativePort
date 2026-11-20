@@ -23,7 +23,7 @@ struct PackageExtentRecord {
 };
 
 std::array<PackageExtentRecord, kRecordCapacity> records{};
-std::size_t next_replacement = 0;
+std::size_t nextReplacement = 0;
 
 // Whether the action or secondary package record still binds `data` as its
 // `block` pointer; the current and saved package pointers only ever select
@@ -67,7 +67,7 @@ struct ProgramExtent {
 };
 
 std::array<ProgramExtent, kProgramCapacity> programs{};
-std::uint64_t program_records = 0;
+std::uint64_t programRecords = 0;
 
 ProgramExtent* FindProgram(const void* data) {
   if (data == nullptr) return nullptr;
@@ -92,14 +92,14 @@ struct AnimationTableExtent {
   [[nodiscard]] std::uintptr_t End() const { return Begin() + size; }
 };
 
-std::array<AnimationTableExtent, kAnimationTableCapacity> animation_tables{};
-std::uint64_t animation_records = 0;
+std::array<AnimationTableExtent, kAnimationTableCapacity> animationTables{};
+std::uint64_t animationRecords = 0;
 
 AnimationTableExtent* FindAnimationTable(const void* data) {
   if (data == nullptr) return nullptr;
   const auto found =
-      std::ranges::find(animation_tables, data, &AnimationTableExtent::data);
-  return found == animation_tables.end() ? nullptr : &*found;
+      std::ranges::find(animationTables, data, &AnimationTableExtent::data);
+  return found == animationTables.end() ? nullptr : &*found;
 }
 
 PackageExtentRecord* Find() {
@@ -112,8 +112,8 @@ PackageExtentRecord* Find() {
 PackageExtentRecord* FindOrAdd() {
   if (VS::Effects::package == nullptr) return nullptr;
   if (auto* record = Find()) return record;
-  auto& record = records.at(next_replacement);
-  next_replacement = (next_replacement + 1) % records.size();
+  auto& record = records.at(nextReplacement);
+  nextReplacement = (nextReplacement + 1) % records.size();
   record = {.package = VS::Effects::package};
   return &record;
 }
@@ -163,7 +163,7 @@ void RecordLiveEffectPrograms(std::span<const std::byte> payload) {
   }
   *extent = {.data = payload.data(),
              .size = payload.size(),
-             .recorded = ++program_records};
+             .recorded = ++programRecords};
 }
 
 void ForgetLiveEffectPrograms(const void* data) {
@@ -180,14 +180,14 @@ void RecordLiveAnimationTable(std::span<std::byte> table) {
   if (table.data() == nullptr) return;
   const AnimationTableExtent recorded{.data = table.data(),
                                       .size = table.size(),
-                                      .recorded = ++animation_records};
-  for (auto& extent : animation_tables) {
+                                      .recorded = ++animationRecords};
+  for (auto& extent : animationTables) {
     if (extent.data != nullptr && extent.Begin() < recorded.End() &&
         recorded.Begin() < extent.End()) {
       extent = {};
     }
   }
-  ReplaceableExtent(animation_tables, &LiveEffectPackage::animation_table) =
+  ReplaceableExtent(animationTables, &LiveEffectPackage::animation_table) =
       recorded;
 }
 
@@ -204,11 +204,11 @@ std::span<std::byte> LiveAnimationTable(const void* data) {
 std::span<const std::byte> LiveAnimationProgram(const void* program) {
   const auto at = reinterpret_cast<std::uintptr_t>(program);
   const auto found =
-      std::ranges::find_if(animation_tables, [at](const auto& extent) {
+      std::ranges::find_if(animationTables, [at](const auto& extent) {
         return extent.data != nullptr && extent.Begin() <= at &&
                at < extent.End();
       });
-  if (found == animation_tables.end()) return {};
+  if (found == animationTables.end()) return {};
   const std::span<const std::byte> table(found->data, found->size);
   return table.subspan(at - found->Begin());
 }

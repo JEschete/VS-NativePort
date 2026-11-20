@@ -46,9 +46,9 @@ constexpr std::uint32_t kIconV = 128;
 constexpr std::uint32_t kTextureVShift = 8;
 constexpr std::uint32_t kSelectedIconPalette = 0x37FD0000;
 constexpr std::uint32_t kIdleIconPalette = 0x37FE0000;
-EquipmentDetailState g_armor_state;
-EquipmentDetailState g_gem_state;
-ItemDetailDispatcherState g_dispatcher;
+EquipmentDetailState armorState;
+EquipmentDetailState gemState;
+ItemDetailDispatcherState detailDispatcher;
 
 [[noreturn]] void Refuse(const char* reason) {
   VS::Core::Errorf("menu.inventory", "Item details refused: %s", reason);
@@ -340,24 +340,24 @@ void DrawLiveItemCategoryIcons(int animation_step, int highlight_selected) {
 // decomp: _armorStatusView (src/MENU/items1.h:464-544).
 int UpdateLiveArmorDetails(int item_info) {
   LiveItemWorld world(Category::kArmor);
-  return UpdateArmorDetails(g_armor_state, world, Selection(item_info));
+  return UpdateArmorDetails(armorState, world, Selection(item_info));
 }
 
 // decomp: _gemStatusView (src/MENU/items1.h:554-630).
 int UpdateLiveGemDetails(int item_info) {
   LiveItemWorld world(Category::kGem);
-  return UpdateGemDetails(g_gem_state, world, Selection(item_info));
+  return UpdateGemDetails(gemState, world, Selection(item_info));
 }
 
 // decomp: _itemStatusDispatcher (src/MENU/items1.h:640-688).
 int UpdateLiveItemDetails(int item_info) {
   LiveDispatcherWorld world;
-  return UpdateItemDetails(g_dispatcher, world, DispatchEntry(item_info));
+  return UpdateItemDetails(detailDispatcher, world, DispatchEntry(item_info));
 }
 
 void ResetLiveItemDetailDispatch() {
-  g_armor_state = {};
-  g_gem_state = {};
-  g_dispatcher = {};
+  armorState = {};
+  gemState = {};
+  detailDispatcher = {};
 }
 }  // namespace VS::Menu::Inventory

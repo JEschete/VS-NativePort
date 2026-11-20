@@ -334,7 +334,7 @@ int LiveUpdateEquipmentDetails(int row) {
   terminal_live::EquipmentHost host;
   return terminal_live::Report(
       "equipment details",
-      UpdateEquipmentDetails(terminal_live::detail_state, host, row));
+      UpdateEquipmentDetails(terminal_live::detailState, host, row));
 }
 // decomp: _equipmentScreen (src/MENU/MENU4.PRG/120.c:1875)
 int LiveUpdateEquipmentList(int element) {
@@ -344,7 +344,7 @@ int LiveUpdateEquipmentList(int element) {
   terminal_live::EquipmentHost host;
   return terminal_live::Report(
       "equipment list",
-      UpdateEquipmentList(terminal_live::list_state,
-                          terminal_live::detail_state, host, element));
+      UpdateEquipmentList(terminal_live::listState, terminal_live::detailState,
+                          host, element));
 }
 }  // namespace VS::Menu::Status

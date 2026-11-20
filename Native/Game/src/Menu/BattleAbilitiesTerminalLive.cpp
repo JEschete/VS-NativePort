@@ -45,10 +45,10 @@ constexpr std::uint32_t kSquare = 0x80;
 constexpr std::uint32_t kCancel = 0x40;
 constexpr std::uint32_t kUp = 0x1000;
 constexpr std::uint32_t kDown = 0x4000;
-AssignmentState g_assignments;
-AbilityListState g_chain;
-AbilityListState g_defense;
-AbilityScreenAnimation g_screen_animation;
+AssignmentState assignments;
+AbilityListState chainAbilityList;
+AbilityListState defenseAbilityList;
+AbilityScreenAnimation screenAnimation;
 
 void Refuse(std::string_view reason) {
   VS::Core::LogWarn("menu.battle-abilities", "Ability terminal refused: {}",
@@ -400,7 +400,7 @@ int LiveUpdateAssignments() {
       .type = static_cast<AbilityMenuType>(selectedAbilityType),
       .cursor = {.highlighted = highlightedAbility, .first = firstAbility}};
   LiveAssignmentHost host;
-  const int result = UpdateAssignments(rows, g_assignments, host);
+  const int result = UpdateAssignments(rows, assignments, host);
   abilityMenuState = rows.menu_state;
   highlightedAbility = rows.cursor.highlighted;
   firstAbility = static_cast<std::uint8_t>(rows.cursor.first);
@@ -410,13 +410,13 @@ int LiveUpdateAssignments() {
 // decomp binding: _chainAbilityMenu (src/MENU/MENU2.PRG/64.c:492).
 int LiveUpdateChainAbilityMenu(int initialize) {
   LiveListHost host;
-  return UpdateChainAbilityMenu(g_chain, host, initialize != 0);
+  return UpdateChainAbilityMenu(chainAbilityList, host, initialize != 0);
 }
 
 // decomp binding: _defenseAbilityMenu (src/MENU/MENU2.PRG/64.c:553).
 int LiveUpdateDefenseAbilityMenu(int initialize) {
   LiveListHost host;
-  return UpdateDefenseAbilityMenu(g_defense, host, initialize != 0);
+  return UpdateDefenseAbilityMenu(defenseAbilityList, host, initialize != 0);
 }
 
 // decomp binding: _setNextAbilityUnlockPointsRemaining
@@ -433,17 +433,17 @@ int LiveUpdateAbilityScreen(std::uint8_t* phase) {
     return 1;
   }
   LiveScreenHost host;
-  return UpdateAbilityScreen(*phase, g_screen_animation, host);
+  return UpdateAbilityScreen(*phase, screenAnimation, host);
 }
 
 // vs_battle_loadMenuPrg (src/BATTLE/BATTLE.PRG/5BF94.c) reads six sectors.
 // Our 0x80104EC4..D3 and 0x801050C0..EF statics have zero bytes in that image,
 // including the original C declarations without explicit initializers.
 void ResetLiveAbilityTerminalModuleState() {
-  g_assignments = {};
-  g_chain = {};
-  g_defense = {};
-  g_screen_animation = {};
+  assignments = {};
+  chainAbilityList = {};
+  defenseAbilityList = {};
+  screenAnimation = {};
   std::ranges::fill(LearnedActions(AbilityKind::kChain), std::uint8_t{0});
   std::ranges::fill(LearnedActions(AbilityKind::kDefense), std::uint8_t{0});
 }

@@ -39,8 +39,8 @@ constexpr std::size_t kTeleportCursorRow = 22;
 constexpr std::size_t kTeleportCursorScroll = 23;
 constexpr std::uint32_t kRefusalLogLimit = 16;
 constexpr std::uint32_t kRefusalLogInterval = 1024;
-TeleportMenuState g_teleport_state{};
-std::uint32_t g_refusals = 0;
+TeleportMenuState teleportState{};
+std::uint32_t refusals = 0;
 
 char ToStorageChar(std::uint8_t value) { return std::bit_cast<char>(value); }
 
@@ -73,10 +73,9 @@ bool ResolveRowText(std::span<const std::uint16_t> table, std::uint16_t offset,
 class LiveHost final : public Host {
  public:
   void Refuse(std::string_view reason) override {
-    ++g_refusals;
-    if (g_refusals <= kRefusalLogLimit ||
-        g_refusals % kRefusalLogInterval == 0) {
-      VS::Core::LogWarn("menu.magic", "{} (refusal {})", reason, g_refusals);
+    ++refusals;
+    if (refusals <= kRefusalLogLimit || refusals % kRefusalLogInterval == 0) {
+      VS::Core::LogWarn("menu.magic", "{} (refusal {})", reason, refusals);
     }
   }
 
@@ -215,7 +214,7 @@ class LiveHost final : public Host {
 int UpdateTeleportMenuLive(int init) {
   LiveHost host;
   const TeleportMenuResult result =
-      UpdateTeleportMenu(init, g_teleport_state, host);
+      UpdateTeleportMenu(init, teleportState, host);
   if (result.destination) {
     return PackTeleportDestination(*result.destination);
   }
@@ -252,5 +251,5 @@ int TeleportMpCostLive(int target_save_point) {
   return *cost;
 }
 
-void ResetTeleportMenuLiveState() { g_teleport_state = {}; }
+void ResetTeleportMenuLiveState() { teleportState = {}; }
 }  // namespace VS::Menu::Magic

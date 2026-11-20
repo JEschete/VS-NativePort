@@ -28,18 +28,18 @@ namespace VS::Menu {
 namespace {
 constexpr int kTextOrderingSlot = -6;
 constexpr int kTimerVisible = 1;
-std::uint64_t refused_updates = 0;
+std::uint64_t refusedUpdates = 0;
 static_assert(std::size(textBoxOrderingTables) ==
               kTextBoxOrderingBufferCount * kTextBoxOrderingTags);
 
 void RefuseUpdate() {
-  ++refused_updates;
-  if (std::has_single_bit(refused_updates)) {
+  ++refusedUpdates;
+  if (std::has_single_bit(refusedUpdates)) {
     VS::Core::Warnf(
         "menu",
         "Text-box update refused an unbound frame or ordering buffer "
         "(count=%" PRIu64 ")",
-        refused_updates);
+        refusedUpdates);
   }
 }
 

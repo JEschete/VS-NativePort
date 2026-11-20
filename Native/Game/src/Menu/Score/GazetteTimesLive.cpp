@@ -32,7 +32,7 @@ constexpr unsigned kMinutesShift = 16;
 constexpr unsigned kSecondsShift = 8;
 constexpr std::size_t kTextOrderingSlot = 7;
 
-TimeTrialAnimation live_animation;
+TimeTrialAnimation liveAnimation;
 std::uint64_t refusals = 0;
 
 void Refuse(std::string_view reason) {
@@ -218,12 +218,12 @@ void RenderLiveTimeTrialRecords(std::int32_t presentation_step) {
   if (RenderTimeTrialRecords(
           rows, Scores(),
           static_cast<TimeTrialId>(VS::Battle::menu9CursorMemory.gazette_page),
-          presentation_step, live_animation, host)) {
+          presentation_step, liveAnimation, host)) {
     StoreAnimation(rows);
   }
 }
 
-void ResetLiveTimeTrialStatics() noexcept { live_animation = {}; }
+void ResetLiveTimeTrialStatics() noexcept { liveAnimation = {}; }
 
 std::uint64_t LiveTimeTrialRefusals() noexcept { return refusals; }
 }  // namespace VS::Menu::Score

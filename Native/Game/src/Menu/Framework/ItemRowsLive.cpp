@@ -104,8 +104,8 @@ constexpr std::array<std::uint8_t, kWeaponHandCategories> kInitialWeaponHands{
 
 // The read the last load queued (_itemNamesCdQueueSlot, 2D10.c:1138) and the
 // load state (_itemNamesLoading, 2D10.c:1142).
-VS::Content::DiscQueueSlot* g_item_text_request = nullptr;
-ItemTextLoadState g_item_text_load;
+VS::Content::DiscQueueSlot* itemTextRequest = nullptr;
+ItemTextLoadState itemTextLoad;
 
 void Warn(std::string_view what) {
   VS::Core::LogWarn("menu.framework", "{}", what);
@@ -233,7 +233,7 @@ class LiveItemTextLoadHost final : public ItemTextLoadHost {
   void Refuse(std::string_view what) override { Warn(what); }
 
   void StartItemTextLoad() override {
-    g_item_text_request = nullptr;
+    itemTextRequest = nullptr;
     void* block = Core::Memory::AllocateLiveFromHighEnd(kItemTextBytes);
     if (block == nullptr) {
       Warn("item text: no memory for the text block");
@@ -246,25 +246,24 @@ class LiveItemTextLoadHost final : public ItemTextLoadHost {
     // The three files are contiguous on the disc.
     const VS::Content::DiscFile file{.lba = VS_ITEMNAME_BIN_LBA,
                                      .size = static_cast<int>(kItemTextBytes)};
-    g_item_text_request = Content::AllocateLiveDiscRequest(&file);
-    if (g_item_text_request != nullptr) {
-      Content::EnqueueLiveDiscRequest(g_item_text_request, block);
+    itemTextRequest = Content::AllocateLiveDiscRequest(&file);
+    if (itemTextRequest != nullptr) {
+      Content::EnqueueLiveDiscRequest(itemTextRequest, block);
     } else {
-      g_item_text_request =
-          Content::CompleteLiveRefusedDiscRequest(&file, block);
+      itemTextRequest = Content::CompleteLiveRefusedDiscRequest(&file, block);
     }
   }
 
   [[nodiscard]] std::optional<bool> ItemTextLoaded() override {
-    if (g_item_text_request == nullptr) {
+    if (itemTextRequest == nullptr) {
       return std::nullopt;
     }
-    return g_item_text_request->state == VS::Content::DiscRequestState::kLoaded;
+    return itemTextRequest->state == VS::Content::DiscRequestState::kLoaded;
   }
 
   void ReleaseItemTextRequest() override {
-    Content::ReleaseLiveDiscRequest(g_item_text_request);
-    g_item_text_request = nullptr;
+    Content::ReleaseLiveDiscRequest(itemTextRequest);
+    itemTextRequest = nullptr;
   }
 
   [[nodiscard]] bool ItemTextAllocated() override {
@@ -484,12 +483,12 @@ void FormatLiveMiscItemRow(VS::Items::InventoryMisc* misc, char* menu_text[],
 
 int LoadLiveItemText(int load) {
   LiveItemTextLoadHost host;
-  return LoadItemText(g_item_text_load, host, load != 0);
+  return LoadItemText(itemTextLoad, host, load != 0);
 }
 
 int UnloadLiveItemTextWhenReady() {
   LiveItemTextLoadHost host;
-  return UnloadItemTextWhenReady(g_item_text_load, host);
+  return UnloadItemTextWhenReady(itemTextLoad, host);
 }
 
 void ResetLiveItemRowsStatics() {

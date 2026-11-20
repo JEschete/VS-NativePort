@@ -19,8 +19,8 @@ using VS::Core::Gte::SVECTOR;
 namespace VS::Field {
 namespace {
 
-InteractionTargetState target_state;
-std::uint64_t room_generation = 1;
+InteractionTargetState targetState;
+std::uint64_t roomGeneration = 1;
 constexpr std::size_t kOriginalFloorRecordBytes = 12;
 constexpr std::size_t kOriginalChestRecordBytes = 0x234;
 
@@ -63,14 +63,14 @@ class LiveRoomTriggerActivationHost final : public TrapDisableHost {
  public:
   LiveRoomTriggerActivationHost()
       : records_(TrapRecords()),
-        generation_(room_generation),
+        generation_(roomGeneration),
         pointer_(VS::Field::roomData.floor_triggers),
         length_(VS::Field::roomData.header.floor_triggers_length) {}
   InteractionTargetDomain Domain() override {
     return {generation_, records_.size(), 0};
   }
   bool StoreActivation(TrapTarget target, std::uint8_t activation) override {
-    if (generation_ != room_generation ||
+    if (generation_ != roomGeneration ||
         pointer_ != VS::Field::roomData.floor_triggers ||
         length_ != VS::Field::roomData.header.floor_triggers_length) {
       return false;
@@ -104,7 +104,7 @@ class LiveRoomTriggerActivationHost final : public TrapDisableHost {
 
  private:
   bool Valid() const {
-    return generation_ == room_generation &&
+    return generation_ == roomGeneration &&
            pointer_ == VS::Field::roomData.floor_triggers &&
            length_ == VS::Field::roomData.header.floor_triggers_length;
   }
@@ -127,7 +127,7 @@ std::vector<RoomTriggerInfo> LiveActiveRoomTriggerInfo() {
   for (std::size_t index = 0; index < records.size(); ++index) {
     const auto& record = records[index];
     result.push_back(
-        {.target = {static_cast<std::uint32_t>(index), room_generation},
+        {.target = {static_cast<std::uint32_t>(index), roomGeneration},
          .kind = record.kind,
          .tile_x = record.tile_x,
          .tile_z = record.tile_z,
@@ -143,7 +143,7 @@ std::optional<TrapTarget> FindLiveRoomTriggerAtTile(
   values.reserve(records.size());
   for (std::size_t index = 0; index < records.size(); ++index) {
     const auto& record = records[index];
-    values.push_back({{static_cast<std::uint32_t>(index), room_generation},
+    values.push_back({{static_cast<std::uint32_t>(index), roomGeneration},
                       record.kind,
                       record.tile_x,
                       record.tile_z,
@@ -172,7 +172,7 @@ bool DisableLiveTrapAtPosition(TrapWorldPosition position) {
 std::optional<TrapTarget> FindLiveTrapTarget(
     const VS::Field::MpdFloorTrigger* record) {
   const auto index = RecordIndex(TrapRecords(), record);
-  return index ? std::optional{TrapTarget{*index, room_generation}}
+  return index ? std::optional{TrapTarget{*index, roomGeneration}}
                : std::nullopt;
 }
 
@@ -180,7 +180,7 @@ std::optional<TrapTarget> FindLiveTrapTargetAddress(const void* address) {
   const auto records = TrapRecords();
   for (std::size_t index = 0; index < records.size(); ++index) {
     if (static_cast<const void*>(&records[index]) == address) {
-      return TrapTarget{static_cast<std::uint32_t>(index), room_generation};
+      return TrapTarget{static_cast<std::uint32_t>(index), roomGeneration};
     }
   }
   return std::nullopt;
@@ -189,7 +189,7 @@ std::optional<TrapTarget> FindLiveTrapTargetAddress(const void* address) {
 std::optional<ChestTarget> FindLiveChestTarget(
     const VS::Items::TreasureChest* record) {
   const auto index = RecordIndex(ChestRecords(), record);
-  return index ? std::optional{ChestTarget{*index, room_generation}}
+  return index ? std::optional{ChestTarget{*index, roomGeneration}}
                : std::nullopt;
 }
 
@@ -197,7 +197,7 @@ std::optional<ChestTarget> FindLiveChestTargetAddress(const void* address) {
   const auto records = ChestRecords();
   for (std::size_t index = 0; index < records.size(); ++index) {
     if (static_cast<const void*>(&records[index]) == address) {
-      return ChestTarget{static_cast<std::uint32_t>(index), room_generation};
+      return ChestTarget{static_cast<std::uint32_t>(index), roomGeneration};
     }
   }
   return std::nullopt;
@@ -215,17 +215,17 @@ VS::Items::TreasureChest* ResolveLiveChestTarget(ChestTarget target) {
   return index ? &records[*index] : nullptr;
 }
 
-InteractionTargetState& LiveInteractionTargetState() { return target_state; }
+InteractionTargetState& LiveInteractionTargetState() { return targetState; }
 
 InteractionTargetDomain LiveInteractionTargetDomain() {
-  return {room_generation, TrapRecords().size(), ChestRecords().size()};
+  return {roomGeneration, TrapRecords().size(), ChestRecords().size()};
 }
 
 void InvalidateLiveInteractionTargets() {
-  target_state.Clear();
+  targetState.Clear();
   interactionFocus.actor_query = {};
-  if (++room_generation == 0) {
-    ++room_generation;
+  if (++roomGeneration == 0) {
+    ++roomGeneration;
   }
 }
 

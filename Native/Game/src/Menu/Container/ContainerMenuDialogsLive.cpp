@@ -45,10 +45,10 @@ constexpr unsigned kCategoryShift = 12;
 constexpr unsigned kKindShift = 16;
 constexpr std::uint32_t kCategoryMask = 15;
 constexpr std::uint8_t kTransferControls = 5;
-SortMenuState g_sort;
-DiscardMenuState g_discard;
-DiscardPresentation g_presentation;
-TransferConfirmationState g_transfer;
+SortMenuState sortMenu;
+DiscardMenuState discardMenu;
+DiscardPresentation discardPresentation;
+TransferConfirmationState transferMenu;
 
 [[noreturn]] void Refuse(std::string_view reason) {
   VS::Core::Errorf("menu.container", "Container dialog refused: %.*s",
@@ -225,7 +225,7 @@ int UpdateLiveSortMenu(int category_selection) {
           ? std::optional<Items::ItemCategory>{}
           : static_cast<Items::ItemCategory>(static_cast<std::uint8_t>(
                 Core::Math::WrappingSubtract(category_selection, 1)));
-  return UpdateSortMenu(g_sort, world, entry);
+  return UpdateSortMenu(sortMenu, world, entry);
 }
 
 // decomp: _discardMenu (src/MENU/MENUD.PRG/234.c:1680), 80105D24.
@@ -239,7 +239,7 @@ int UpdateLiveDiscardMenu(int packed_selection) {
                          static_cast<std::uint8_t>(command - 1U),
                          static_cast<std::uint8_t>(command >> kKindShift)};
   }
-  return UpdateDiscardMenu(g_discard, g_presentation, world, entry);
+  return UpdateDiscardMenu(discardMenu, discardPresentation, world, entry);
 }
 
 // decomp: func_801071D8 (src/MENU/MENUD.PRG/234.c:2309), 801071D8.
@@ -251,15 +251,15 @@ void RestoreLiveItemRows(int category) {
 // decomp: func_801072B0 (src/MENU/MENUD.PRG/234.c:2332), 801072B0.
 int UpdateLiveTransferConfirmation(int initialize) {
   LiveMenuDialogWorld world;
-  return UpdateTransferConfirmation(g_transfer, world, initialize != 0);
+  return UpdateTransferConfirmation(transferMenu, world, initialize != 0);
 }
 
-void ResetLiveContainerDialogStatics() { g_presentation = {}; }
+void ResetLiveContainerDialogStatics() { discardPresentation = {}; }
 
 void ResetLiveContainerDialogSession() {
-  g_sort = {};
-  g_discard = {};
-  g_transfer = {};
+  sortMenu = {};
+  discardMenu = {};
+  transferMenu = {};
   ResetLiveContainerDialogStatics();
 }
 }  // namespace VS::Menu::container

@@ -757,7 +757,7 @@ struct ModelReadOwner {
   std::uint64_t generation = 0;
 };
 
-ModelReadOwner model_read_owner;
+ModelReadOwner modelReadOwner;
 
 LiveFileStream Stream(AssetFileStream stream) {
   switch (stream) {
@@ -902,8 +902,8 @@ class LiveActorAssetHost final : public ActorAssetHost {
     live.file->size = file.bytes;
     *live.request = AllocateLiveDiscRequest(live.file);
     if (stream == AssetFileStream::kActorModel) {
-      model_read_owner = {*live.request,
-                          LiveDiscRequestGeneration(*live.request)};
+      modelReadOwner = {*live.request,
+                        LiveDiscRequestGeneration(*live.request)};
     }
     if (*live.request == nullptr) {
       return false;
@@ -925,7 +925,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
   }
   void ReleaseFileRead(AssetFileStream stream) override {
     ReleaseLiveDiscRequest(*Stream(stream).request);
-    if (stream == AssetFileStream::kActorModel) model_read_owner = {};
+    if (stream == AssetFileStream::kActorModel) modelReadOwner = {};
   }
 
   // VRAM.
@@ -1384,12 +1384,12 @@ bool CancelModelFile(ActorAssetLoadState& state) {
   }
   if (!ClearBorrowCursors(state, {file, *capacity}, true)) return false;
   if (!CancelLiveDiscWrites({file, *capacity})) return false;
-  if (model_read_owner.generation != 0 &&
-      LiveDiscRequestGeneration(model_read_owner.request) ==
-          model_read_owner.generation) {
-    ReleaseLiveDiscRequest(model_read_owner.request);
+  if (modelReadOwner.generation != 0 &&
+      LiveDiscRequestGeneration(modelReadOwner.request) ==
+          modelReadOwner.generation) {
+    ReleaseLiveDiscRequest(modelReadOwner.request);
   }
-  model_read_owner = {};
+  modelReadOwner = {};
   Core::Memory::FreeLiveFromHighEnd(file);
   state.model_file_allocated = false;
   return true;

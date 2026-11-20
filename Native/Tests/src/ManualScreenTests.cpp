@@ -926,7 +926,7 @@ struct LiveManualFixture {
   int saved_line_count = manual::totalLineCount;
   int saved_arrow = manual::pageArrowAnimState;
   int saved_load_counter = manual::helpPageLoadCounter;
-  int saved_topic_step = manual::topMenu_state;
+  int saved_topic_step = manual::topMenuState;
   int saved_topic_row = manual::menuSelectedRow;
   int saved_frame_index = VS::Render::frameBuf;
   ScreenState saved_screen = manual::LiveManualScreenState();
@@ -1002,7 +1002,7 @@ struct LiveManualFixture {
     manual::helpAssets = saved_assets;
     manual::helpTextCdQueue = saved_text_request;
     manual::helpAssetsCdQueue = saved_assets_request;
-    manual::topMenu_state = saved_topic_step;
+    manual::topMenuState = saved_topic_step;
     manual::menuSelectedRow = saved_topic_row;
     std::ranges::copy(saved_requests,
                       std::begin(VS::Content::discRequestSlots));
@@ -1265,7 +1265,7 @@ TEST_CASE("F04163 LiveUpdateHelpPages chooses a cancel from the topic rows",
           "[manual-screen-live]") {
   LiveManualFixture fixture;
   manual::showMenuState = manual::kHelpSelectTopic;
-  manual::topMenu_state = 1;
+  manual::topMenuState = 1;
   const auto [selected, step] = GENERATE(
       std::pair{-2, manual::kHelpLeaveToMenu},
       std::pair{manual::kTopicMenuExitToGame, manual::kHelpLeaveToGame});
@@ -1523,7 +1523,7 @@ TEST_CASE(
   LiveManualFixture fixture;
   MissingHelpFiles missing;
   manual::showMenuState = manual::kHelpSelectTopic;
-  manual::topMenu_state = manual::kTopicStepSelectRow;
+  manual::topMenuState = manual::kTopicStepSelectRow;
   VS::Menu::Framework::selectedRow = 0;
   CHECK(manual::LiveUpdateHelpPages() == 0);
   REQUIRE(manual::showMenuState == manual::kHelpLoadAssets);

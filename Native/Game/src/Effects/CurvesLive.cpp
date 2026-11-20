@@ -25,9 +25,9 @@ namespace {
 using PackageCurves = decltype(LiveEffectPackage::curves);
 static_assert(std::tuple_size_v<PackageCurves> == kEffectCurveCapacity);
 
-std::uint64_t refused_samples = 0;
-std::uint64_t refused_segments = 0;
-std::uint64_t refused_sweeps = 0;
+std::uint64_t refusedSamples = 0;
+std::uint64_t refusedSegments = 0;
+std::uint64_t refusedSweeps = 0;
 
 // True on the 1st, 2nd, 4th, 8th... occurrence, to keep repeated
 // diagnostics readable.
@@ -107,7 +107,7 @@ int LiveSampleEffectCurve(int curve_id, int distance) {
   const CurveSample sample = SampleLiveEffectCurve(curve_id, distance);
   if (IsCurveRefusal(sample.status)) {
     ReportRefusal("sample curve", curve_id, distance, sample.status,
-                  refused_samples);
+                  refusedSamples);
   }
   return sample.value;
 }
@@ -116,18 +116,18 @@ void LiveSampleAllEffectCurves(int distance) {
   if (VS::Effects::package == nullptr ||
       VS::Effects::package->curve_block == nullptr) {
     ReportRefusal("sample all curves", 0, distance, CurveSampleStatus::kNoBlock,
-                  refused_sweeps);
+                  refusedSweeps);
     return;
   }
   const LiveCurveBlock live = CurrentCurveBlock();
   const CurveSweep sweep =
       SampleAllEffectCurves(live.block, distance, LiveEffectCurveSamples());
-  if (sweep.refused != 0 && ShouldReport(refused_sweeps)) {
+  if (sweep.refused != 0 && ShouldReport(refusedSweeps)) {
     VS::Core::LogWarn(
         "effects",
         "sample all curves: {} of {} curves at {} refused and kept "
         "their previous samples ({} sweeps)",
-        sweep.refused, live.block.header_count, distance, refused_sweeps);
+        sweep.refused, live.block.header_count, distance, refusedSweeps);
   }
 }
 
@@ -136,7 +136,7 @@ int LiveSampleSegmentedEffectCurve(int curve_index, int distance) {
       SampleLiveSegmentedEffectCurve(curve_index, distance);
   if (IsCurveRefusal(sample.status)) {
     ReportRefusal("sample segmented curve", curve_index, distance,
-                  sample.status, refused_segments);
+                  sample.status, refusedSegments);
   }
   return sample.value;
 }
@@ -146,7 +146,7 @@ int LiveSegmentedEffectCurveDuration(int curve_index) {
       SegmentedEffectCurveDuration(SegmentedTable(), curve_index);
   if (IsCurveRefusal(duration.status)) {
     ReportRefusal("segmented curve duration", curve_index, 0, duration.status,
-                  refused_segments);
+                  refusedSegments);
   }
   return duration.value;
 }

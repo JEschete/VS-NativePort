@@ -54,7 +54,7 @@ constexpr int kTransformSlots = 16;
 static_assert(std::tuple_size_v<decltype(LiveEffectInstance::transforms)> ==
               kTransformSlots);
 
-std::uint64_t refused_calls = 0;
+std::uint64_t refusedCalls = 0;
 
 // True on the 1st, 2nd, 4th, 8th... occurrence, to keep repeated
 // diagnostics readable.
@@ -160,9 +160,9 @@ class LiveCameraHost final : public EffectCameraHost {
 };
 
 void ReportRefusal(const char* entry, const char* reason) {
-  if (ShouldReport(refused_calls)) {
+  if (ShouldReport(refusedCalls)) {
     VS::Core::LogWarn("effects", "effect camera: {} refused: {} ({} refusals)",
-                      entry, reason, refused_calls);
+                      entry, reason, refusedCalls);
   }
 }
 }  // namespace

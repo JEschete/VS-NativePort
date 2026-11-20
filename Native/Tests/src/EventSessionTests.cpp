@@ -210,12 +210,12 @@ int ReturnWithSessionUi() {
   return 42;
 }
 
-int ui_title_entries = 0;
-bool ui_return_to_title = false;
+int uiTitleEntries = 0;
+bool uiReturnToTitle = false;
 
 int EnterUiTitle() {
   if (!SessionUiIsClear()) return -1;
-  if (++ui_title_entries > 1) return 41;
+  if (++uiTitleEntries > 1) return 41;
   BorrowSessionUiText();
   VS::Boot::JumpToLiveGameLoop();
   return -1;
@@ -223,20 +223,20 @@ int EnterUiTitle() {
 
 int EnterUiBattle() {
   if (!SessionUiIsClear()) return -1;
-  if (!ui_return_to_title) return 41;
+  if (!uiReturnToTitle) return 41;
   BorrowSessionUiText();
   VS::Boot::JumpToLiveTitle();
   return -1;
 }
 
-std::weak_ptr<const std::vector<std::uint8_t>> script_session_owner;
-int script_title_entries = 0;
-int script_fallthrough = 0;
+std::weak_ptr<const std::vector<std::uint8_t>> scriptSessionOwner;
+int scriptTitleEntries = 0;
+int scriptFallthrough = 0;
 
 void PrepareSessionScript() {
   const auto source = std::make_shared<const std::vector<std::uint8_t>>(
       std::initializer_list<std::uint8_t>{0xFE});
-  script_session_owner = source;
+  scriptSessionOwner = source;
   REQUIRE(VS::Event::MountLiveScriptSource(
               VS::Event::ScriptRegion::kEventScript, source)
               .has_value());
@@ -252,7 +252,7 @@ void PrepareSessionScript() {
 
 VS::Event::ScriptFlow TransferScriptToTitle(const VS::Event::ScriptInstruction&,
                                             VS::Event::ScriptVmHost&) {
-  CHECK_FALSE(script_session_owner.expired());
+  CHECK_FALSE(scriptSessionOwner.expired());
   VS::Boot::JumpToLiveTitle();
 }
 
@@ -263,12 +263,12 @@ std::intptr_t SessionTransferOpcode(std::uint8_t* instruction,
 }
 
 int EnterScriptTitle() {
-  if (++script_title_entries > 1) {
-    return script_session_owner.expired() && SessionUiIsClear() ? 41 : -1;
+  if (++scriptTitleEntries > 1) {
+    return scriptSessionOwner.expired() && SessionUiIsClear() ? 41 : -1;
   }
   PrepareSessionScript();
   static_cast<void>(VS::Event::ExecuteLiveScriptThread(0));
-  ++script_fallthrough;
+  ++scriptFallthrough;
   return -1;
 }
 }  // namespace
@@ -353,10 +353,10 @@ TEST_CASE("Native session return releases borrowed UI without freeing its data",
 TEST_CASE("Native title and battle jumps invalidate interrupted scene UI",
           "[event][session-reset][session-ui]") {
   UiSessionFixture fixture;
-  ui_return_to_title = GENERATE(false, true);
-  ui_title_entries = 0;
+  uiReturnToTitle = GENERATE(false, true);
+  uiTitleEntries = 0;
   CHECK(VS::Boot::RunLiveSessionLoop(EnterUiTitle, EnterUiBattle) == 41);
-  CHECK(ui_title_entries == (ui_return_to_title ? 2 : 1));
+  CHECK(uiTitleEntries == (uiReturnToTitle ? 2 : 1));
   CHECK(SessionUiIsClear());
 }
 
@@ -364,15 +364,15 @@ TEST_CASE("Native session transfer abandons the active owned VM source",
           "[event-vm-live][session-reset][session-ui]") {
   const EventSessionFixture vm_fixture;
   const UiSessionFixture ui_fixture;
-  script_title_entries = 0;
-  script_fallthrough = 0;
+  scriptTitleEntries = 0;
+  scriptFallthrough = 0;
   VS::Event::skipState = 0;
   VS::Event::opcodeHandlers[0xFE] = SessionTransferOpcode;
   VS::Event::opcodeSizes[0xFE] = 1;
   CHECK(VS::Boot::RunLiveSessionLoop(EnterScriptTitle, EnterScriptTitle) == 41);
-  CHECK(script_title_entries == 2);
-  CHECK(script_fallthrough == 0);
-  CHECK(script_session_owner.expired());
+  CHECK(scriptTitleEntries == 2);
+  CHECK(scriptFallthrough == 0);
+  CHECK(scriptSessionOwner.expired());
   CHECK_FALSE(
       VS::Event::LeaseLiveScriptSource(VS::Event::ScriptRegion::kEventScript)
           .has_value());
@@ -401,10 +401,10 @@ TEST_CASE("Retired stack capture and room code jumps have no native bindings",
                                           0x80098B1C) == nullptr);
   UiSessionFixture fixture;
   for (int iteration = 0; iteration < 32; ++iteration) {
-    ui_return_to_title = true;
-    ui_title_entries = 0;
+    uiReturnToTitle = true;
+    uiTitleEntries = 0;
     CHECK(VS::Boot::RunLiveSessionLoop(EnterUiTitle, EnterUiBattle) == 41);
-    CHECK(ui_title_entries == 2);
+    CHECK(uiTitleEntries == 2);
     CHECK(SessionUiIsClear());
   }
 }

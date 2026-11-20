@@ -49,8 +49,8 @@ static_assert(kResourceOffset + sizeof(VS::Save::CardUiResources) <=
               kImageBytes);
 static_assert(kTextBytes <= sizeof(VS::Save::CardUiResources));
 
-MenuAssetLoad live_load;
-VS::Content::DiscQueueSlot* live_request = nullptr;
+MenuAssetLoad liveLoad;
+VS::Content::DiscQueueSlot* liveRequest = nullptr;
 
 const char* MisuseName(MenuAssetMisuse misuse) {
   switch (misuse) {
@@ -72,12 +72,12 @@ void Request(unsigned lba, unsigned size, void* target) {
   VS::Content::DiscFile file;
   file.lba = static_cast<int>(lba);
   file.size = static_cast<int>(size);
-  live_request = VS::Content::AllocateLiveDiscRequest(&file);
-  if (live_request != nullptr) {
-    VS::Content::EnqueueLiveDiscRequest(live_request, target);
+  liveRequest = VS::Content::AllocateLiveDiscRequest(&file);
+  if (liveRequest != nullptr) {
+    VS::Content::EnqueueLiveDiscRequest(liveRequest, target);
   } else {
     // #282: the queue was full; read the file without it.
-    live_request = VS::Content::CompleteLiveRefusedDiscRequest(&file, target);
+    liveRequest = VS::Content::CompleteLiveRefusedDiscRequest(&file, target);
   }
 }
 
@@ -130,12 +130,12 @@ class LiveMenuAssets final : public MenuAssetHost {
     Request(VS_MCDATA_BIN_LBA, kTextBytes, VS::Save::MemoryCard::uiResources);
   }
   bool RequestLoaded() const override {
-    return live_request != nullptr &&
-           live_request->state == VS::Content::DiscRequestState::kLoaded;
+    return liveRequest != nullptr &&
+           liveRequest->state == VS::Content::DiscRequestState::kLoaded;
   }
   void ReleaseRequest() override {
-    VS::Content::ReleaseLiveDiscRequest(live_request);
-    live_request = nullptr;
+    VS::Content::ReleaseLiveDiscRequest(liveRequest);
+    liveRequest = nullptr;
   }
   void UploadImage() override {
     VS::Render::UploadLiveImageRectangle(PackedPair(kImageX, kImageY),
@@ -147,30 +147,30 @@ class LiveMenuAssets final : public MenuAssetHost {
   }
   void ReportMisuse(MenuAssetMisuse misuse) override {
     VS::Core::Errorf("save.assets", "Memory-card assets: %s (phase %d)",
-                     MisuseName(misuse), static_cast<int>(live_load.phase));
+                     MisuseName(misuse), static_cast<int>(liveLoad.phase));
   }
 };
 }  // namespace
 
 int StepLiveMenuResources(int init) {
   LiveMenuAssets host;
-  return InitializeMenuResourcesStep(live_load, host, init != 0) ? 1 : 0;
+  return InitializeMenuResourcesStep(liveLoad, host, init != 0) ? 1 : 0;
 }
 
 void ReleaseLiveMenuResources() {
   LiveMenuAssets host;
-  ReleaseMenuResources(live_load, host);
+  ReleaseMenuResources(liveLoad, host);
 }
 
 int StepLiveTitleResources(int init) {
   LiveMenuAssets host;
-  return InitializeResourcesStep(live_load, host, init != 0) ? 1 : 0;
+  return InitializeResourcesStep(liveLoad, host, init != 0) ? 1 : 0;
 }
 
 void ReleaseLiveTitleResources() {
   LiveMenuAssets host;
-  ReleaseResources(live_load, host);
+  ReleaseResources(liveLoad, host);
 }
 
-MenuAssetPhase LiveMenuAssetPhase() { return live_load.phase; }
+MenuAssetPhase LiveMenuAssetPhase() { return liveLoad.phase; }
 }  // namespace VS::Save::MemoryCard

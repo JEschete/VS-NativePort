@@ -28,8 +28,9 @@ CheckOptions:
   readability-identifier-naming.FunctionIgnoredRegexp: '^((Actors|Audio|Battle|Boot|Content|Core|Diagnostics|Effects|Ending|Event|Field|Input|Items|Menu|Movie|Platform|Render|Save|State|Title)_[A-Za-z0-9_]+|wmain)$'
   readability-identifier-naming.MethodCase: CamelCase
   readability-identifier-naming.VariableCase: lower_case
-  # Global variables have never been case-checked; #453 moves them to camelBack (NAMING_CONVENTIONS.md 8.3).
-  readability-identifier-naming.GlobalVariableCase: aNy_CasE
+  # Namespace-scope variables are lowerCamelCase (NAMING_CONVENTIONS.md 8.3); copied C spellings await #441.
+  readability-identifier-naming.GlobalVariableCase: camelBack
+  readability-identifier-naming.GlobalVariableIgnoredRegexp: '^(Actors|Audio|Battle|Boot|Content|Core|Diagnostics|Effects|Ending|Event|Field|Input|Items|Menu|Movie|Platform|Render|Save|State|Title)_[A-Za-z0-9_]+$'
   readability-identifier-naming.ParameterCase: lower_case
   readability-identifier-naming.MemberCase: lower_case
   readability-identifier-naming.MemberIgnoredRegexp: '^(nativeSize|sourceElementSize|nativeElementSize|polygonOffset|firstFrame|lastFrame|heightMap|tileFlags|terrainRegions|movementResult|roomBounds|roomData|randomState|lastBudgetTick)$'

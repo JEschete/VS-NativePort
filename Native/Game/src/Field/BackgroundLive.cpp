@@ -147,9 +147,9 @@ constexpr std::string_view kChannel = "field.background";
 // The farthest scene ordering entry (orderingTable + 0x1FFC).
 constexpr int kFarthestOrderingSlot = 0x7FF;
 
-std::uint64_t refused_calls = 0;
-std::uint64_t dropped_packets = 0;
-std::uint64_t refused_sections = 0;
+std::uint64_t refusedCalls = 0;
+std::uint64_t droppedPackets = 0;
+std::uint64_t refusedSections = 0;
 
 // True on the 1st, 2nd, 4th, 8th... occurrence, to keep repeated
 // diagnostics readable.
@@ -220,11 +220,11 @@ void LinkPacket(const Packet& packet, std::string_view kind) {
   std::uint32_t* const slot =
       entry != nullptr ? Render::ReserveLivePrimitiveWords(kWords) : nullptr;
   if (slot == nullptr) {
-    if (ShouldReport(dropped_packets)) {
+    if (ShouldReport(droppedPackets)) {
       VS::Core::LogWarn(kChannel,
                         "background {} has no ordering entry or buffer room; "
                         "dropped ({} drops)",
-                        kind, dropped_packets);
+                        kind, droppedPackets);
     }
     return;
   }
@@ -246,7 +246,7 @@ void SetCorners(Primitive& primitive, const TexturedQuad& quad) {
 }
 
 void RefuseNull(std::string_view entry) {
-  if (ShouldReport(refused_calls)) {
+  if (ShouldReport(refusedCalls)) {
     VS::Core::LogWarn(kChannel,
                       "{} was given a null record; the call is refused", entry);
   }
@@ -462,7 +462,7 @@ std::optional<TiledBackgroundSection> LiveBackgroundHost::TiledBackground() {
   if (words == nullptr) return std::nullopt;
   const std::size_t bytes = VS::Field::roomData.header.tiled_background_length;
   if (bytes < kTiledSectionBytes) {
-    if (ShouldReport(refused_sections)) {
+    if (ShouldReport(refusedSections)) {
       VS::Core::LogWarn(
           kChannel,
           "the room's tiled background section has {} bytes, fewer "
