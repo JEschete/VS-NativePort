@@ -49,13 +49,12 @@ architecture changes rather than per-function work, so this ledger is what track
 
 Function bodies: 3,732 found, 0 macro aliases, 0 templates with 0 instances, 0 not located. 0 of 0 open owned functions have generated callers.
 
-SDK shim sites still recording `VS::Core::RecordUnported`: 28.
+SDK shim sites still recording `VS::Core::RecordUnported`: 27.
 
 | Shim source | Sites | Calls |
 | --- | ---: | --- |
 | `Native/Content/Legacy/LibDs.cpp` | 2 | `libds:DsGetSector`, `libds:DsInit` |
 | `Native/Engine/Legacy/Audio/LibSpu.cpp` | 9 | `libspu:SpuGetReverbModeType`, `libspu:SpuGetVoiceEnvelope`, `libspu:SpuSetCommonMasterVolume`, `libspu:SpuSetNoiseClock`, `libspu:SpuSetReverb`, `libspu:SpuSetReverbModeDepth`, `libspu:SpuSetReverbModeType`, `libspu:SsUtReverbOff`, `libspu:SsUtReverbOn` |
-| `Native/Engine/Legacy/Core/LibEtc.cpp` | 1 | `libetc:GetRCnt (counter other than 2)` |
 | `Native/Engine/Legacy/Render/LibGpu.cpp` | 1 | `libgpu: more than 2^24 packet addresses linked` |
 | `Native/Engine/Legacy/Save/LibCard.cpp` | 15 | `libapi:cd`, `libapi:close`, `libapi:erase`, `libapi:firstfile`, `libapi:nextfile`, `libapi:open`, `libapi:read`, `libapi:rename`, `libapi:write`, `libcard:InitCARD`, `libcard:StartCARD`, `libcard:_card_clear`, `libcard:_card_format`, `libcard:_card_info`, `libcard:_card_load` |
 

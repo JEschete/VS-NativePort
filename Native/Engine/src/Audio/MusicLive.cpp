@@ -151,7 +151,7 @@ class LiveMusic final : public MusicHost {
 
   void SaveMusicState() override { Playback::LiveSaveMusicState(); }
 
-  void WaitFrame() override { State::UpdateLivePlayTimeAndLoading(0); }
+  void WaitFrame() override { State::UpdateLivePlayTimeAndLoading(); }
 
   // func_80012468 takes the threshold in its pointer argument.
   void SetMusicBranchThreshold(std::int32_t threshold) override {

@@ -142,7 +142,7 @@ class TransitionHost {
   virtual void StopControllerMotors() = 0;
   virtual void RefreshControllers() = 0;
   virtual void ShutdownAudio() = 0;
-  virtual void WaitForVerticalSync(int count) = 0;
+  virtual void WaitTicks(int count) = 0;
   virtual void StopAllMusic() = 0;
   virtual void StopSceneSoundEffects() = 0;
   virtual void InvalidateSavedMusicId() = 0;
@@ -167,7 +167,6 @@ void RunEndingAndReturnToTitle(TransitionHost& host, OverlayLoadHost& overlays);
 class PlatformServicesHost {
  public:
   virtual ~PlatformServicesHost() = default;
-  virtual void SelectNtscVideoMode() = 0;
   virtual void HideDisplay() = 0;
   virtual void InitializeMemoryCard() = 0;
   virtual void StartMemoryCard() = 0;
@@ -193,7 +192,6 @@ class TitleSessionInitHost {
   virtual void ClearFramebuffer() = 0;
   virtual void ShowLoadingScreen() = 0;
   virtual void EnableReverb() = 0;
-  virtual void RegisterVSyncCallback() = 0;
   virtual void ResetGameHeap() = 0;
   virtual void InvalidateAiBindings() = 0;
   virtual void InitializeDiscQueue() = 0;

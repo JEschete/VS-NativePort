@@ -28,10 +28,10 @@
 #include "Audio/SoundEffectProgramsLive.hpp"
 #include "Audio/SoundEffects/SoundEffects.hpp"
 #include "Audio/StreamPlayback.hpp"
+#include "Audio/TickTimer.hpp"
 #include "Audio/VoiceMixerLive.hpp"
 #include "Audio/VoiceOutputLive.hpp"
 #include "Audio/XaMixLive.hpp"
-#include "Legacy/Psx.hpp"
 
 namespace VS::Audio::Seq {
 namespace {
@@ -386,10 +386,7 @@ LiveMusicGroup MusicGroupOf(ChannelGroup group) {
 // state stores it before and loads it after.
 class LivePlaybackHost final : public PlaybackHost {
  public:
-  std::int32_t ReadTimer() override {
-    return static_cast<std::int32_t>(
-        VS::Legacy::GetRCnt(VS::Legacy::kRootCounter2));
-  }
+  std::int32_t ReadTimer() override { return tick_timer::ReadClock(); }
 
   void ReleasePendingVoices(PlaybackState& state) override {
     StorePlayback(state);
@@ -612,7 +609,7 @@ void LiveExecuteChannelStep(VS::Audio::SeqChannel* channel, int channel_bit) {
 }
 
 // decomp: SLUS_010.40 func_80019A58 (src/SLUS_010.40/25AC.c:4287)
-CounterEventResult LiveTickPlayback() {
+std::int32_t LiveTickPlayback() {
   if (!PlaybackLayersValid("TickPlayback")) return 0;
   LivePlaybackHost host;
   PlaybackState state;

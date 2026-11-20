@@ -12,7 +12,7 @@ namespace VS::Render {
 void ConfigureLiveFieldDisplay(int frame_width, int frame_height,
                                int projection_distance, int clear_red,
                                int clear_green, int clear_blue);
-int PresentLiveFieldFrame(std::uint32_t* ordering_table);
+void PresentLiveFieldFrame(std::uint32_t* ordering_table);
 void EnableLiveDisplay();
 void DisableLiveDisplay();
 void ShowLiveDisplay();

@@ -10,6 +10,7 @@
 #include "Content/DiscReader.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Legacy/Psx.hpp"
+#include "Platform/LogicalTicks.hpp"
 
 namespace VS::Content {
 namespace {
@@ -150,7 +151,7 @@ class LiveDiscDriveHost final : public DiscDriveHost {
     legacyDiscReadBuffer = nullptr;
   }
   void WaitFrames(std::uint32_t frames) override {
-    VS::Legacy::VSync(static_cast<int>(frames));
+    VS::Platform::WaitTicks(static_cast<int>(frames));
   }
 
  private:

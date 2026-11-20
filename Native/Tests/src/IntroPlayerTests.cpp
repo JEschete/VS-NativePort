@@ -18,7 +18,7 @@ std::string PageName(PicturePage page) {
 class FakeIntroHost final : public VS::Movie::Intro::Host {
  public:
   [[nodiscard]] std::uint32_t Tick() const override { return tick; }
-  void WaitForVerticalBlank() override { ++tick; }
+  void WaitTick() override { ++tick; }
   void UpdateControllers() override {
     ++polls;
     skip = skip_at_poll != 0 && polls == skip_at_poll;

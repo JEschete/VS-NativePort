@@ -51,16 +51,16 @@ void StopAfterAudioTail(Host& host) {
 
 // decomp: TITLE.PRG _playIntroMovie (src/TITLE/TITLE.PRG/22C.c:3693)
 // Each pass draws into the current page, flips the draw page, waits for the
-// vertical blank and polls the pads; the drawn page is shown and the display
-// enabled from the second shown frame. Elapsed ticks wrap like the original's
-// unsigned VSync difference.
+// next tick (the original's vertical blank) and polls the pads; the drawn page
+// is shown and the display enabled from the second shown frame. Elapsed ticks
+// wrap like the original's unsigned VSync(-1) difference.
 PlaybackResult Play(Host& host) {
   bool shown_first = false;
   while (true) {
     const PicturePage page = host.DrawPage();
     host.DrawFrame(std::bit_cast<std::int32_t>(ElapsedTicks(host)), page);
     host.SetDrawPage(OtherPage(page));
-    host.WaitForVerticalBlank();
+    host.WaitTick();
     host.UpdateControllers();
 
     if (ElapsedTicks(host) >= kPictureTicks) {

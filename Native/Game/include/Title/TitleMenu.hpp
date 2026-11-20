@@ -197,16 +197,14 @@ class Host : public Render::ImmediatePacketTarget {
   virtual void UpdateVibrationPatterns() = 0;
   virtual void PlayVibrationPreset(int preset) = 0;
 
-  // VSync(0): the next vertical blank.
-  virtual void WaitForVerticalBlank() = 0;
-  // VSync(count): `count` vertical blanks.
-  virtual void WaitForVerticalBlanks(int count) = 0;
-  // VSync(1): lines drawn since the last vertical blank.
-  [[nodiscard]] virtual int HorizontalBlankCount() = 0;
-  // VSync(-1): vertical blanks since start-up.
-  [[nodiscard]] virtual int VerticalBlankCount() = 0;
-  // Advances play time and pending loads; returns the vsync result.
-  virtual int AdvanceFrameClock(int vsync_mode) = 0;
+  // Logical ticks replace the original's vertical blanks: VSync(0) waits for
+  // the next tick, VSync(count) for `count` ticks and VSync(-1) reads the
+  // ticks since start-up.
+  virtual void WaitTick() = 0;
+  virtual void WaitTicks(int count) = 0;
+  [[nodiscard]] virtual int ElapsedTicks() = 0;
+  // Waits `ticks` ticks, then advances pending loads and play time.
+  virtual void AdvanceFrameClock(int ticks) = 0;
 
   // Uploads the module image into the VRAM area.
   virtual void UploadImage(Image image, const Render::ScreenRect& area) = 0;
@@ -348,8 +346,10 @@ void InitializeSettings(Context& context);
 int Run(Context& context);
 // decomp: TITLE.PRG _initScreen (src/TITLE/TITLE.PRG/22C.c:4658)
 void InitializeGameDisplay(Host& host, const GameDisplayRequest& request);
-// decomp: TITLE.PRG _renderScreen (src/TITLE/TITLE.PRG/22C.c:4684)
-int PresentGameFrame(Host& host);
+// decomp: TITLE.PRG _renderScreen (src/TITLE/TITLE.PRG/22C.c:4684). The
+// original returned vs_main_gametimeUpdate's VSync result, which no caller
+// read.
+void PresentGameFrame(Host& host);
 // decomp: TITLE.PRG _initGameData (src/TITLE/TITLE.PRG/22C.c:4698)
 void InitializeNewGameData(Host& host);
 // decomp: TITLE.PRG _setTitleExitFlags (src/TITLE/TITLE.PRG/22C.c:4741)

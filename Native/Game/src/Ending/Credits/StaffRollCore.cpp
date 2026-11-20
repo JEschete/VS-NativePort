@@ -239,7 +239,6 @@ constexpr std::size_t kHoldOperandBytes = 4;
 constexpr int kHoldFramesBias = 160;
 constexpr int kByteShift = 8;
 
-constexpr int kDecodeBudgetTicks = 200;
 constexpr std::uint8_t kBackreferenceFlag = 0x80;
 constexpr std::uint8_t kEndOfImage = 0x7F;
 constexpr std::uint8_t kFillRun = 0x7D;
@@ -1204,8 +1203,6 @@ DrawEnvironment ConfigureDrawEnvironment() {
 // decomp: ENDING.PRG func_8006A888 (src/ENDING/ENDING.PRG/D4.c:1081)
 void RunFrames(State& state, StaffRollHost& host) {
   while (!state.has_finished) {
-    state.decoder.budget_start_tick =
-        static_cast<std::int16_t>(host.VerticalBlankCounter());
     BeginFrame(host);
     ExecuteScript(state, host);
     DrawElements(state, host);
@@ -1299,7 +1296,10 @@ void QueueIllustrationDecode(DecoderState& decoder, std::size_t resource) {
   decoder.resource = resource;
 }
 
-// decomp: ENDING.PRG func_8006AF64 (src/ENDING/ENDING.PRG/D4.c:1317)
+// decomp: ENDING.PRG func_8006AF64 (src/ENDING/ENDING.PRG/D4.c:1317). The
+// original decoded until VSync(1) was 200 scanlines past the frame start
+// (func_8006A888 kept the start) and resumed on the next frame; a native frame
+// has no scanline clock, so one step decodes the whole illustration.
 bool DecodeIllustrationStep(State& state, StaffRollHost& host) {
   DecoderState& decoder = state.decoder;
   if (decoder.phase == DecodePhase::kIdle) return false;
@@ -1310,8 +1310,7 @@ bool DecodeIllustrationStep(State& state, StaffRollHost& host) {
   }
   ImageDecoder image(host.IllustrationResource(decoder.resource),
                      host.IllustrationWorkspace(), decoder);
-  while (host.VerticalBlankCounter() - decoder.budget_start_tick <=
-         kDecodeBudgetTicks) {
+  while (true) {
     switch (image.Step()) {
       case DecodeResult::kContinue:
         break;
@@ -1369,15 +1368,16 @@ void InitializeDisplay(const DisplaySettings& settings, DisplayHost& host) {
   host.ResetPresentedFrameCount();
 }
 
-// decomp: ENDING.PRG _drawScreen (src/ENDING/ENDING.PRG/D4.c:1480)
-int PresentFrame(int ordering_slot, DisplayHost& host) {
+// decomp: ENDING.PRG _drawScreen (src/ENDING/ENDING.PRG/D4.c:1480). The
+// original returned vs_main_gametimeUpdate's VSync result, which no caller
+// read.
+void PresentFrame(int ordering_slot, DisplayHost& host) {
   const int buffer = host.FrameBuffer() == 0 ? 1 : 0;
   host.SetFrameBuffer(buffer);
-  const int result = host.AdvanceFrameClock();
+  host.AdvanceFrameClock();
   host.ShowFrameBuffer(buffer);
   host.DrawOrderingTable(ordering_slot);
   host.CountPresentedFrame();
-  return result;
 }
 
 // decomp: ENDING.PRG func_8006B884 (src/ENDING/ENDING.PRG/D4.c:1539)

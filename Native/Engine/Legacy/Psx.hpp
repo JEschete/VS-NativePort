@@ -9,7 +9,6 @@
 #include "Core/Gte.hpp"
 #include "Core/RandomLive.hpp"
 #include "Legacy/Audio/LibSpu.hpp"
-#include "Legacy/Core/LibEtc.hpp"
 #include "Legacy/Core/PsxTypes.hpp"
 #include "Legacy/Input/LibPad.hpp"
 #include "Legacy/LibDs.hpp"

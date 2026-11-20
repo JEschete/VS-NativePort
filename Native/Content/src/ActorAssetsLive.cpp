@@ -416,22 +416,6 @@ void StoreState(const ActorAssetLoadState& state) {
   legacyShpTextureHeight = state.model_texture_height;
 }
 
-ActorAssetQueueStats LoadStats() {
-  return {
-      .peak_frame_ticks = assetQueuePeakUsage,
-      .last_load_phase = lastLoadPhaseSnapshot,
-      .frame_ticks = assetQueueFrameTicks,
-      .last_kind = lastAssetRequestType,
-  };
-}
-
-void StoreStats(const ActorAssetQueueStats& stats) {
-  assetQueuePeakUsage = stats.peak_frame_ticks;
-  lastLoadPhaseSnapshot = stats.last_load_phase;
-  assetQueueFrameTicks = stats.frame_ticks;
-  lastAssetRequestType = stats.last_kind;
-}
-
 // --- Weapon records ----------------------------------------------------------
 
 WeaponAssetRecord LoadWeaponRecord(const VS::Actors::WeaponModel& in) {
@@ -856,10 +840,6 @@ class LiveActorAssetHost final : public ActorAssetHost {
     StoreState(state);
     StoreRequestFields(request, head);
     return result;
-  }
-  std::int32_t FrameCounter() override { return VS::Legacy::VSync(1); }
-  [[nodiscard]] std::uint8_t ModelLoadPhase() const override {
-    return legacyModelLoadPhase;
   }
   void OnHeadRequestDone(int result) override {
     const LegacyActorAssetRequest& head = legacyActorAssetRequests[0];
@@ -1466,10 +1446,7 @@ int QueueLiveActorAsset(const ActorAssetRequest& request) {
 
 int UpdateLiveActorAssetQueue() {
   LiveActorAssetHost host;
-  ActorAssetQueueStats stats = LoadStats();
-  const int result = UpdateActorAssetQueue(host, stats);
-  StoreStats(stats);
-  return result;
+  return UpdateActorAssetQueue(host);
 }
 
 bool CancelLiveActorAssetBorrows(std::span<std::byte> source,

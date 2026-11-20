@@ -19,7 +19,7 @@ constexpr ScreenRect kWholeVram{0, 0, 1024, 512};
 constexpr std::int32_t kLoadingFrameWidth = 320;
 constexpr std::int32_t kLoadingFrameHeight = 240;
 constexpr std::int32_t kLoadingVisibleHeight = 224;
-constexpr std::int32_t kLoadingSettleBlanks = 2;
+constexpr std::int32_t kLoadingSettleTicks = 2;
 
 std::int16_t Halfword(std::int32_t value) {
   return Core::Math::WrapSigned16(static_cast<std::uint32_t>(value));
@@ -89,12 +89,12 @@ void EnableDisplay(DisplayDevice& device) { ShowDisplay(device); }
 
 void DisableDisplay(DisplayDevice& device) { HideDisplay(device); }
 
-std::int32_t PresentFieldFrame(FieldFrameHost& host) {
+void PresentFieldFrame(FieldFrameHost& host) {
   const int buffer = host.FrameBuffer() == 0 ? 1 : 0;
   host.SelectFrameBuffer(buffer);
   host.AdvanceRandom();
   host.SetGeometryOffset(kFieldCenterX, kFieldCenterY);
-  const std::int32_t elapsed = host.UpdatePlayTime(host.TickSpeed());
+  host.UpdatePlayTime(host.TickSpeed());
   // The pause flag is only changed inside this wait, so it is a debug hook.
   if (host.FrameStepPaused()) {
     WaitForFrameStep(host);
@@ -102,7 +102,6 @@ std::int32_t PresentFieldFrame(FieldFrameHost& host) {
   host.PresentFrameBuffer(buffer);
   host.CommitPalettes();
   host.DrawOrderingTable();
-  return elapsed;
 }
 
 ScreenRect LoadingImageArea(const LoadingImage& image) noexcept {
@@ -122,7 +121,7 @@ void InitializeLoadingDisplay(DisplayDevice& device, std::int32_t width,
 bool ShowLoadingScreen(DisplayDevice& device, const LoadingImage& image) {
   InitializeLoadingDisplay(device, kLoadingFrameWidth, kLoadingFrameHeight);
   device.ClearToBlack(kWholeVram);
-  device.WaitVerticalBlanks(kLoadingSettleBlanks);
+  device.WaitTicks(kLoadingSettleTicks);
   const std::span<const std::uint16_t> pixels = ImagePixels(image);
   const bool uploaded = !pixels.empty();
   if (uploaded) {

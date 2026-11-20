@@ -599,8 +599,8 @@ class FakeDisplay final : public Render::DisplayDevice {
   void ClearToBlack(const Render::ScreenRect& area) override {
     calls.push_back("clear " + Text(area));
   }
-  void WaitVerticalBlanks(std::int32_t count) override {
-    calls.push_back("vsync " + std::to_string(count));
+  void WaitTicks(std::int32_t count) override {
+    calls.push_back("wait " + std::to_string(count));
   }
   void UploadImage(const Render::ScreenRect& area,
                    std::span<const std::uint16_t> pixels) override {
@@ -727,9 +727,8 @@ class FakeFrame final : public Render::FieldFrameHost {
     calls.push_back("offset " + std::to_string(x) + "," + std::to_string(y));
   }
   [[nodiscard]] std::int32_t TickSpeed() const override { return 3; }
-  std::int32_t UpdatePlayTime(std::int32_t ticks) override {
+  void UpdatePlayTime(std::int32_t ticks) override {
     calls.push_back("time " + std::to_string(ticks));
-    return ticks;
   }
   [[nodiscard]] bool FrameStepPaused() const override { return paused; }
   void ToggleFrameStepPause() override {
@@ -755,7 +754,7 @@ class FakeFrame final : public Render::FieldFrameHost {
 TEST_CASE("Field frames flip the buffer and submit the frame",
           "[render-display]") {
   FakeFrame frame;
-  CHECK(Render::PresentFieldFrame(frame) == 3);
+  Render::PresentFieldFrame(frame);
   CHECK(frame.calls == std::vector<std::string>{"select 1", "random",
                                                 "offset 160,112", "time 3",
                                                 "present 1", "cluts", "draw"});
@@ -769,7 +768,7 @@ TEST_CASE("The debug frame step waits for the second controller",
   FakeFrame step;
   step.paused = true;
   step.presses = {0, 0, Render::kFrameStepAdvanceButton};
-  CHECK(Render::PresentFieldFrame(step) == 3);
+  Render::PresentFieldFrame(step);
   CHECK(std::ranges::count(step.calls, std::string("poll")) == 3);
   CHECK(std::ranges::count(step.calls, std::string("time 2")) == 3);
   CHECK(step.paused);
@@ -793,7 +792,7 @@ TEST_CASE("The loading screen fills both buffers", "[render-display]") {
   CHECK(Render::ShowLoadingScreen(device, image));
   CHECK(device.calls ==
         std::vector<std::string>{
-            "show 0,0,320x224 0,8,256x224", "clear 0,0,1024x512", "vsync 2",
+            "show 0,0,320x224 0,8,256x224", "clear 0,0,1024x512", "wait 2",
             "upload 97,102,126x20", "upload 417,102,126x20", "display on"});
   CHECK(device.uploaded_pixels == pixels.size());
 

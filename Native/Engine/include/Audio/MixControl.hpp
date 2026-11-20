@@ -263,7 +263,8 @@ enum class ArgumentSlot : std::uint8_t { kFirst, kSecond };
 
 class DispatchHost : public ReverbHost, public CommandRefusalSink {
  public:
-  // DisableEvent / EnableEvent around the command.
+  // Holds the tick timer's event off around the command (the original's
+  // DisableEvent / EnableEvent).
   virtual void BeginCommand() = 0;
   virtual void EndCommand() = 0;
   // The header of the sequence argument `slot` names, as the command

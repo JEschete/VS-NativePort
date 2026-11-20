@@ -366,18 +366,6 @@ struct ActorAssetLoadState {
                          const ActorAssetLoadState&) = default;
 };
 
-// D_800E8FC4, D_800F457C, D_800F4580 and D_800F45D8: the slowest request
-// while a model file was parsing.
-struct ActorAssetQueueStats {
-  std::int32_t peak_frame_ticks = 0;
-  std::int32_t last_load_phase = 0;
-  std::int32_t frame_ticks = 0;
-  std::int32_t last_kind = 0;
-
-  friend bool operator==(const ActorAssetQueueStats&,
-                         const ActorAssetQueueStats&) = default;
-};
-
 // The records, heap, drive, VRAM and actor services the loaders use.
 class ActorAssetHost {
  public:
@@ -397,8 +385,6 @@ class ActorAssetHost {
   virtual void ClearRequestKind(int slot) = 0;
   // Runs the head request's loader; returns its result.
   virtual int ProcessHeadRequest(ActorAssetKind kind) = 0;
-  virtual std::int32_t FrameCounter() = 0;
-  virtual std::uint8_t ModelLoadPhase() const = 0;
   virtual void OnHeadRequestDone(int result) = 0;
 
   // The game heap. Allocations return kNone when refused.
@@ -505,7 +491,7 @@ class ActorAssetHost {
 [[nodiscard]] int FindFreeActorAssetRequest(const ActorAssetHost& host);
 int QueueActorAssetRequest(ActorAssetHost& host,
                            const ActorAssetRequest& request);
-int UpdateActorAssetQueue(ActorAssetHost& host, ActorAssetQueueStats& stats);
+int UpdateActorAssetQueue(ActorAssetHost& host);
 void QueueAshleyWeaponSequence(ActorAssetHost& host, int sequence_id);
 
 // Adds the texture offsets to `count` polygons' UVs (func_80099E7C).

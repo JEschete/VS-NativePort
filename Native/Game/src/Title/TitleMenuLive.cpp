@@ -7,6 +7,7 @@
 #include "Title/TitleMenuLive.hpp"  // NOLINT(build/include): typed API
 
 #include <array>
+#include <bit>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -33,6 +34,7 @@
 #include "Menu/Sounds.hpp"
 #include "Movie/Intro/Playback.hpp"
 #include "Movie/IntroPlayerLive.hpp"
+#include "Platform/LogicalTicks.hpp"
 #include "Render/Display.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Save/FileMenuLive.hpp"
@@ -68,7 +70,6 @@ using VS::Legacy::SetDefDispEnv;
 using VS::Legacy::SetDefDrawEnv;
 using VS::Legacy::SetDispMask;
 using VS::Legacy::setRGB0;
-using VS::Legacy::VSync;
 
 namespace mcman_text = VS::Content::text::mcman_bin;
 
@@ -218,12 +219,14 @@ class LiveHost final : public Host {
     ::VS::Input::PlayLiveVibrationPreset(preset);
   }
 
-  void WaitForVerticalBlank() override { VSync(0); }
-  void WaitForVerticalBlanks(int count) override { VSync(count); }
-  int HorizontalBlankCount() override { return VSync(1); }
-  int VerticalBlankCount() override { return VSync(-1); }
-  int AdvanceFrameClock(int vsync_mode) override {
-    return ::VS::State::UpdateLivePlayTimeAndLoading(vsync_mode);
+  void WaitTick() override { ::VS::Platform::WaitTicks(); }
+  void WaitTicks(int count) override { ::VS::Platform::WaitTicks(count); }
+  // The original's VSync(-1) count was a signed int that wrapped.
+  int ElapsedTicks() override {
+    return std::bit_cast<int>(::VS::Platform::ElapsedTicks());
+  }
+  void AdvanceFrameClock(int ticks) override {
+    ::VS::State::UpdateLivePlayTimeAndLoading(ticks);
   }
 
   // An image larger than its module data uploads the whole rows the data

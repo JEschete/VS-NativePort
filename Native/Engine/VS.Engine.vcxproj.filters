@@ -195,6 +195,9 @@
     <ClCompile Include="src\Audio\Driver\SoundDriverLive.cpp">
       <Filter>src\Audio\Driver</Filter>
     </ClCompile>
+    <ClCompile Include="src\Audio\Driver\TickTimer.cpp">
+      <Filter>src\Audio\Driver</Filter>
+    </ClCompile>
     <ClCompile Include="src\Audio\Driver\VoiceOutput.cpp">
       <Filter>src\Audio\Driver</Filter>
     </ClCompile>
@@ -535,6 +538,9 @@
       <Filter>src\Platform</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\GameFiber.cpp">
+      <Filter>src\Platform</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\LogicalTicks.cpp">
       <Filter>src\Platform</Filter>
     </ClCompile>
     <ClCompile Include="src\Render\Camera.cpp">
@@ -879,6 +885,9 @@
     <ClInclude Include="include\Audio\StreamPlayback.hpp">
       <Filter>include\Audio</Filter>
     </ClInclude>
+    <ClInclude Include="include\Audio\TickTimer.hpp">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
     <ClInclude Include="include\Audio\VoiceEngine.hpp">
       <Filter>include\Audio</Filter>
     </ClInclude>
@@ -1038,6 +1047,9 @@
     <ClInclude Include="include\Platform\GameFiber.hpp">
       <Filter>include\Platform</Filter>
     </ClInclude>
+    <ClInclude Include="include\Platform\LogicalTicks.hpp">
+      <Filter>include\Platform</Filter>
+    </ClInclude>
     <ClInclude Include="include\Platform\Paths.hpp">
       <Filter>include\Platform</Filter>
     </ClInclude>
@@ -1175,12 +1187,6 @@
     </ClCompile>
     <ClInclude Include="Legacy\Audio\LibSpu.hpp">
       <Filter>Legacy\Audio</Filter>
-    </ClInclude>
-    <ClCompile Include="Legacy\Core\LibEtc.cpp">
-      <Filter>Legacy\Core</Filter>
-    </ClCompile>
-    <ClInclude Include="Legacy\Core\LibEtc.hpp">
-      <Filter>Legacy\Core</Filter>
     </ClInclude>
     <ClInclude Include="Legacy\Core\PsxTypes.hpp">
       <Filter>Legacy\Core</Filter>

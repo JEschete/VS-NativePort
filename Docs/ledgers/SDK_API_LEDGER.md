@@ -46,6 +46,13 @@ The 2026-11-20 SDK header conversion (#441) moves libpad, libspu, libcard/libapi
 `TestEvent`, whose constant 0 is folded into `LiveCardHost::TestEvent`. Those rows are marked `[x]`.
 This does not retire EC-02, EC-06, EC-07 or EC-09.
 
+The 2026-11-21 logical-tick migration (#44) deletes the libetc shim (`LibEtc.hpp/.cpp`). Game waits use
+`Platform::WaitTicks` and `Platform::ElapsedTicks` (logical ticks) in place of `VSync`; the sound driver's
+240 Hz root counter 2 and its interrupt event are `Audio::TickTimer`, a logical-tick listener, in place of
+`SetRCnt`/`StartRCnt`/`StopRCnt`/`GetRCnt`, `OpenEvent`/`EnableEvent`/`DisableEvent`/`CloseEvent` and the
+`RCntCNT2`, `RCntMdINTR`, `EvSpINT` and `EvMdINTR` constants. `SetVideoMode(MODE_NTSC)` and the empty
+`VSyncCallback` are deleted. These rows are marked `[x]`; EC-06's fiber lifecycle gate remains.
+
 ## libgpu â†’ Graphics (78 symbols, 1742 uses)
 
 Target: VS.Render: PrimitiveList adapter -> RenderQueue (sprites/meshes/quads), Texture/VRAM-page cache, framebuffer readback API
@@ -232,14 +239,14 @@ Target: VS.Platform: FrameClock (VSync), video mode, callbacks
 | Status | Strategy | Symbol | Kind | Uses | Files | Overlays (uses) |
 |---|---|---|---|---:|---:|---|
 | [ ] | R | `getScratchAddr` | macro | 69 | 4 | MENU5.PRG (28), MENUE.PRG (22), MENU9.PRG (15), MENUF.PRG (4) |
-| [ ] | R | `VSync` | function | 38 | 4 | TITLE.PRG (27), SLUS_010.40 (6), ENDING.PRG (3), BATTLE.PRG (2) |
+| [x] | R | `VSync` | function | 38 | 4 | TITLE.PRG (27), SLUS_010.40 (6), ENDING.PRG (3), BATTLE.PRG (2) |
 | [ ] | R | `PADstart` | constant | 19 | 10 | MENUC.PRG (5), BATTLE.PRG (4), TITLE.PRG (4), ENDING.PRG (1), MENU5.PRG (1), MENU7.PRG (1), MENU8.PRG (1), MENUE.PRG (1), SLUS_010.40 (1) |
 | [ ] | R | `PADselect` | constant | 8 | 6 | TITLE.PRG (3), BATTLE.PRG (1), MENU5.PRG (1), MENU7.PRG (1), MENU9.PRG (1), SLUS_010.40 (1) |
 | [x] | R | `PADj` | constant | 7 | 2 | SLUS_010.40 (4), BATTLE.PRG (3) |
 | [x] | D | `ResetCallback` | function | 2 | 1 | SLUS_010.40 (2) |
-| [ ] | D | `MODE_NTSC` | constant | 1 | 1 | SLUS_010.40 (1) |
-| [ ] | R | `SetVideoMode` | function | 1 | 1 | SLUS_010.40 (1) |
-| [ ] | R | `VSyncCallback` | function | 1 | 1 | SLUS_010.40 (1) |
+| [x] | D | `MODE_NTSC` | constant | 1 | 1 | SLUS_010.40 (1) |
+| [x] | R | `SetVideoMode` | function | 1 | 1 | SLUS_010.40 (1) |
+| [x] | R | `VSyncCallback` | function | 1 | 1 | SLUS_010.40 (1) |
 
 ## libds â†’ Content (33 symbols, 98 uses)
 
@@ -332,25 +339,25 @@ Target: VS.Platform: Frame clock, callbacks -> events, file API removed
 |---|---|---|---|---:|---:|---|
 | [ ] | T | `close` | function | 12 | 2 | MENU7.PRG (6), TITLE.PRG (6) |
 | [ ] | T | `open` | function | 8 | 2 | MENU7.PRG (4), TITLE.PRG (4) |
-| [ ] | D | `DisableEvent` | function | 4 | 3 | SLUS_010.40 (2), MENU7.PRG (1), TITLE.PRG (1) |
-| [ ] | D | `EnableEvent` | function | 4 | 3 | SLUS_010.40 (2), MENU7.PRG (1), TITLE.PRG (1) |
+| [x] | D | `DisableEvent` | function | 4 | 3 | SLUS_010.40 (2), MENU7.PRG (1), TITLE.PRG (1) |
+| [x] | D | `EnableEvent` | function | 4 | 3 | SLUS_010.40 (2), MENU7.PRG (1), TITLE.PRG (1) |
 | [x] | D | `EnterCriticalSection` | function | 4 | 2 | MENU7.PRG (2), TITLE.PRG (2) |
 | [x] | D | `ExitCriticalSection` | function | 4 | 2 | MENU7.PRG (2), TITLE.PRG (2) |
 | [x] | D | `TestEvent` | function | 4 | 2 | MENU7.PRG (2), TITLE.PRG (2) |
 | [ ] | T | `erase` | function | 4 | 2 | MENU7.PRG (2), TITLE.PRG (2) |
 | [ ] | T | `read` | function | 4 | 2 | MENU7.PRG (2), TITLE.PRG (2) |
 | [ ] | T | `rename` | function | 4 | 2 | MENU7.PRG (2), TITLE.PRG (2) |
-| [ ] | D | `CloseEvent` | function | 3 | 3 | MENU7.PRG (1), SLUS_010.40 (1), TITLE.PRG (1) |
-| [ ] | D | `OpenEvent` | function | 3 | 3 | MENU7.PRG (1), SLUS_010.40 (1), TITLE.PRG (1) |
+| [x] | D | `CloseEvent` | function | 3 | 3 | MENU7.PRG (1), SLUS_010.40 (1), TITLE.PRG (1) |
+| [x] | D | `OpenEvent` | function | 3 | 3 | MENU7.PRG (1), SLUS_010.40 (1), TITLE.PRG (1) |
 | [ ] | T | `firstfile` | function | 3 | 2 | TITLE.PRG (2), MENU7.PRG (1) |
-| [ ] | R | `GetRCnt` | function | 2 | 1 | SLUS_010.40 (2) |
+| [x] | R | `GetRCnt` | function | 2 | 1 | SLUS_010.40 (2) |
 | [ ] | T | `_card_info` | function | 2 | 2 | MENU7.PRG (1), TITLE.PRG (1) |
 | [ ] | T | `_card_load` | function | 2 | 2 | MENU7.PRG (1), TITLE.PRG (1) |
 | [ ] | T | `nextfile` | function | 2 | 2 | MENU7.PRG (1), TITLE.PRG (1) |
 | [ ] | T | `write` | function | 2 | 2 | MENU7.PRG (1), TITLE.PRG (1) |
-| [ ] | R | `SetRCnt` | function | 1 | 1 | SLUS_010.40 (1) |
-| [ ] | R | `StartRCnt` | function | 1 | 1 | SLUS_010.40 (1) |
-| [ ] | R | `StopRCnt` | function | 1 | 1 | SLUS_010.40 (1) |
+| [x] | R | `SetRCnt` | function | 1 | 1 | SLUS_010.40 (1) |
+| [x] | R | `StartRCnt` | function | 1 | 1 | SLUS_010.40 (1) |
+| [x] | R | `StopRCnt` | function | 1 | 1 | SLUS_010.40 (1) |
 | [x] | D | `SystemError` | function | 1 | 1 | ENDING.PRG (1) |
 | [x] | D | `UnDeliverEvent` | function | 1 | 1 | SLUS_010.40 (1) |
 | [x] | D | `_bu_init` | function | 1 | 1 | SLUS_010.40 (1) |
@@ -370,17 +377,17 @@ Target: VS.Platform (removed: kernel events/critical sections)
 
 | Status | Strategy | Symbol | Kind | Uses | Files | Overlays (uses) |
 |---|---|---|---|---:|---:|---|
-| [ ] | R | `RCntCNT2` | constant | 7 | 1 | SLUS_010.40 (7) |
+| [x] | R | `RCntCNT2` | constant | 7 | 1 | SLUS_010.40 (7) |
 | [x] | D | `EvMdNOINTR` | constant | 2 | 2 | MENU7.PRG (1), TITLE.PRG (1) |
 | [x] | D | `EvSpERROR` | constant | 2 | 2 | MENU7.PRG (1), TITLE.PRG (1) |
-| [ ] | D | `EvSpINT` | constant | 2 | 1 | SLUS_010.40 (2) |
+| [x] | D | `EvSpINT` | constant | 2 | 1 | SLUS_010.40 (2) |
 | [x] | D | `EvSpIOE` | constant | 2 | 2 | MENU7.PRG (1), TITLE.PRG (1) |
 | [x] | D | `EvSpNEW` | constant | 2 | 2 | MENU7.PRG (1), TITLE.PRG (1) |
 | [x] | D | `EvSpTIMOUT` | constant | 2 | 2 | MENU7.PRG (1), TITLE.PRG (1) |
 | [x] | D | `HwCARD` | constant | 2 | 2 | MENU7.PRG (1), TITLE.PRG (1) |
 | [x] | D | `SwCARD` | constant | 2 | 2 | MENU7.PRG (1), TITLE.PRG (1) |
-| [ ] | D | `EvMdINTR` | constant | 1 | 1 | SLUS_010.40 (1) |
-| [ ] | D | `RCntMdINTR` | constant | 1 | 1 | SLUS_010.40 (1) |
+| [x] | D | `EvMdINTR` | constant | 1 | 1 | SLUS_010.40 (1) |
+| [x] | D | `RCntMdINTR` | constant | 1 | 1 | SLUS_010.40 (1) |
 
 ## libpress â†’ Video (13 symbols, 15 uses)
 

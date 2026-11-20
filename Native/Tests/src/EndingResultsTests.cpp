@@ -635,7 +635,7 @@ TEST_CASE(
   CHECK(host.reads == std::vector<std::size_t>{0, 16});
   CHECK(host.presented_frames == 14);
   CHECK(host.controller_updates == 14);
-  CHECK(host.vertical_blank_waits == 9);
+  CHECK(host.tick_waits == 9);
   CHECK(std::ranges::all_of(host.drawn_slots,
                             [](int slot) { return slot == 0x7FF; }));
   CHECK((state.is_leaving && state.animation_frame == 8));

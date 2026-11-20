@@ -89,10 +89,7 @@ class EndingDisplayRecorder : public Base {
   int advanced_frames = 0;
   int presented_frames = 0;
   int controller_updates = 0;
-  int vertical_blank = 0;
-  // VerticalBlankCounter advances by this much per call.
-  int vertical_blank_step = 0;
-  int vertical_blank_waits = 0;
+  int tick_waits = 0;
 
   void DrawSprite(const Ending::SpriteDraw& sprite) override {
     sprites.push_back(sprite);
@@ -152,7 +149,7 @@ class EndingDisplayRecorder : public Base {
   void DrawOrderingTable(int ordering_slot) override {
     drawn_slots.push_back(ordering_slot);
   }
-  int AdvanceFrameClock() override { return ++advanced_frames; }
+  void AdvanceFrameClock() override { ++advanced_frames; }
   void ResetPresentedFrameCount() override {
     presented_frames = 0;
     calls.emplace_back("reset presented");
@@ -170,10 +167,6 @@ class EndingDisplayRecorder : public Base {
                            std::size_t bytes) override {
     allocations.push_back({kind, buffer, bytes});
   }
-  [[nodiscard]] int VerticalBlankCounter() override {
-    vertical_blank += vertical_blank_step;
-    return vertical_blank;
-  }
-  void WaitForVerticalBlank() override { ++vertical_blank_waits; }
+  void WaitTick() override { ++tick_waits; }
 };
 }  // namespace VS::test_support

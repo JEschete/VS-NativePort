@@ -80,6 +80,7 @@
     <ClCompile Include="src\Audio\Driver\SoundDriverLive.cpp">
       <AdditionalIncludeDirectories>$(VSLegacyIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Audio\Driver\TickTimer.cpp" />
     <ClCompile Include="src\Audio\Driver\VoiceOutput.cpp" />
     <ClCompile Include="src\Audio\Driver\VoiceOutputLive.cpp">
       <AdditionalIncludeDirectories>$(VSLegacyIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -251,6 +252,7 @@
     <ClCompile Include="src\Platform\App.cpp" />
     <ClCompile Include="src\Platform\CrashHandler.cpp" />
     <ClCompile Include="src\Platform\GameFiber.cpp" />
+    <ClCompile Include="src\Platform\LogicalTicks.cpp" />
     <ClCompile Include="src\Render\Camera.cpp">
       <AdditionalIncludeDirectories>$(VSLegacyIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -350,9 +352,6 @@
     <ClCompile Include="src\Save\SaveStore.cpp" />
     <ClCompile Include="src\Save\Snapshot.cpp" />
     <ClCompile Include="Legacy\Audio\LibSpu.cpp">
-      <AdditionalIncludeDirectories>$(VSLegacyIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
-    <ClCompile Include="Legacy\Core\LibEtc.cpp">
       <AdditionalIncludeDirectories>$(VSLegacyIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="Legacy\Input\LibPad.cpp">
@@ -457,6 +456,7 @@
     <ClInclude Include="include\Audio\StreamControlLive.hpp" />
     <ClInclude Include="include\Audio\StreamLive.hpp" />
     <ClInclude Include="include\Audio\StreamPlayback.hpp" />
+    <ClInclude Include="include\Audio\TickTimer.hpp" />
     <ClInclude Include="include\Audio\VoiceEngine.hpp" />
     <ClInclude Include="include\Audio\VoiceMixer.hpp" />
     <ClInclude Include="include\Audio\VoiceMixerLive.hpp" />
@@ -510,6 +510,7 @@
     <ClInclude Include="include\Platform\App.hpp" />
     <ClInclude Include="include\Platform\CrashHandler.hpp" />
     <ClInclude Include="include\Platform\GameFiber.hpp" />
+    <ClInclude Include="include\Platform\LogicalTicks.hpp" />
     <ClInclude Include="include\Platform\Paths.hpp" />
     <ClInclude Include="include\Render\CameraView.hpp" />
     <ClInclude Include="include\Render\CameraViewLive.hpp" />
@@ -555,7 +556,6 @@
     <ClInclude Include="include\Save\SaveStore.hpp" />
     <ClInclude Include="include\Save\Snapshot.hpp" />
     <ClInclude Include="Legacy\Audio\LibSpu.hpp" />
-    <ClInclude Include="Legacy\Core\LibEtc.hpp" />
     <ClInclude Include="Legacy\Core\PsxTypes.hpp" />
     <ClInclude Include="Legacy\Input\LibPad.hpp" />
     <ClInclude Include="Legacy\Psx.hpp" />

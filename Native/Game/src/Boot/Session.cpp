@@ -3,7 +3,7 @@
 
 namespace VS::Boot {
 namespace {
-constexpr int kSoftResetWaitFrames = 10;
+constexpr int kSoftResetWaitTicks = 10;
 
 // Checked before any state changes, so a refused request leaves the session
 // exactly as it was.
@@ -110,7 +110,7 @@ void ResetToTitle(TransitionHost& host) {
   host.StopControllerMotors();
   host.RefreshControllers();
   host.ShutdownAudio();
-  host.WaitForVerticalSync(kSoftResetWaitFrames);
+  host.WaitTicks(kSoftResetWaitTicks);
   host.JumpToTitle();
 }
 
@@ -147,9 +147,11 @@ void RunEndingAndReturnToTitle(TransitionHost& host,
   host.JumpToTitle();
 }
 
+// _sysInit first selected the NTSC video mode (SetVideoMode(MODE_NTSC),
+// main.c:1138); the native frame clock is always the NTSC tick
+// (Core::FrameClock).
 void InitializePlatformServices(SoftResetState& reset_state,
                                 PlatformServicesHost& host) {
-  host.SelectNtscVideoMode();
   host.HideDisplay();
   host.InitializeMemoryCard();
   host.StartMemoryCard();
@@ -165,12 +167,14 @@ void InitializePlatformServices(SoftResetState& reset_state,
   host.ClearPendingClearSave();
 }
 
+// _sysReinit also installed an empty vertical-blank callback
+// (VSyncCallback(vSyncVoidCallback), main.c:1176); the native tick runs no
+// callback.
 void InitializeTitleSession(TitleSessionInitHost& host) {
   host.ResetNativeSession();
   host.ClearFramebuffer();
   host.ShowLoadingScreen();
   host.EnableReverb();
-  host.RegisterVSyncCallback();
   host.ResetGameHeap();
   host.InvalidateAiBindings();
   host.InitializeDiscQueue();

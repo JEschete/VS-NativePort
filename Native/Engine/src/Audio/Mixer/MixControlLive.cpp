@@ -29,11 +29,10 @@
 #include "Audio/SoundDriverLive.hpp"
 #include "Audio/SoundEffectProgramsLive.hpp"
 #include "Audio/SoundEffects/SoundEffects.hpp"
+#include "Audio/TickTimer.hpp"
 #include "Audio/VoiceOutputLive.hpp"
 #include "Legacy/Psx.hpp"
 
-using VS::Legacy::DisableEvent;
-using VS::Legacy::EnableEvent;
 using VS::Legacy::kSpuOff;
 using VS::Legacy::kSpuOn;
 
@@ -425,9 +424,11 @@ class LiveDispatchHost final : public DispatchHost {
   void SetReverbMode(std::int32_t mode) override { SetLiveReverbMode(mode); }
 
   void BeginCommand() override {
-    DisableEvent(VS::Audio::Driver::legacySpuEvent);
+    tick_timer::DisableEvent(VS::Audio::Driver::legacySpuEvent);
   }
-  void EndCommand() override { EnableEvent(VS::Audio::Driver::legacySpuEvent); }
+  void EndCommand() override {
+    tick_timer::EnableEvent(VS::Audio::Driver::legacySpuEvent);
+  }
 
   std::optional<AkaoHeader> SequenceAt(ArgumentSlot slot) override {
     std::uint8_t* const start = Sequence(slot);

@@ -1,10 +1,9 @@
 // Hand-maintained (tools/port/owned.csv).
 // Live binding for SoundDriver.hpp: the legacy SPU register file, the SPU
-// transfer state and callback, the SDK root counter 2 and its event, and the
-// voice output.
+// transfer state and callback, the tick timer and its event, and the voice
+// output.
 #include "Audio/SoundDriverLive.hpp"
 
-#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <span>
@@ -15,32 +14,23 @@
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/SeqSequencerLive.hpp"
 #include "Audio/SoundDriver.hpp"
+#include "Audio/TickTimer.hpp"
 #include "Audio/VoiceOutput.hpp"
 #include "Audio/VoiceOutputLive.hpp"
 #include "Legacy/Psx.hpp"
 
-using VS::Legacy::CloseEvent;
-using VS::Legacy::DisableEvent;
-using VS::Legacy::EnableEvent;
-using VS::Legacy::kEventModeInterrupt;
-using VS::Legacy::kEventSpecInterrupt;
-using VS::Legacy::kRootCounter2;
-using VS::Legacy::kRootCounterInterruptMode;
 using VS::Legacy::kSpuRegisterBytes;
-using VS::Legacy::OpenEvent;
-using VS::Legacy::SetRCnt;
 using VS::Legacy::SpuRead;
 using VS::Legacy::SpuRegisters;
 using VS::Legacy::SpuSetTransferCallback;
 using VS::Legacy::SpuWrite;
-using VS::Legacy::StartRCnt;
-using VS::Legacy::StopRCnt;
 
 namespace VS::Audio::Driver {
 namespace {
 constexpr std::size_t kRegistersPerVoice = 8;
 static_assert(kSpuRegisterBytes >=
               kVoiceCount * kRegistersPerVoice * sizeof(std::uint16_t));
+static_assert(tick_timer::kNoEvent == kNoTickEvent);
 static_assert(sizeof(VS::Audio::Driver::legacySpuEvent) ==
               sizeof(std::int32_t));
 static_assert(sizeof(VS::Audio::Cutscene::legacySpuTransferBusy) ==
@@ -52,8 +42,6 @@ std::uint16_t& Register(std::uint32_t voice, VoiceRegister reg) {
                    static_cast<std::size_t>(reg)];
 }
 
-bool Accepted(std::integral auto result) { return result != 0; }
-
 const char* RefusalReason(DriverRefusal refusal) {
   switch (refusal) {
     case DriverRefusal::kInvalidVoice:
@@ -61,9 +49,9 @@ const char* RefusalReason(DriverRefusal refusal) {
     case DriverRefusal::kTransferNeverEnded:
       return "the SPU transfer never ended";
     case DriverRefusal::kTickTimerUnavailable:
-      return "root counter 2 refused every attempt";
+      return "the tick timer refused every attempt";
     case DriverRefusal::kTickEventUnavailable:
-      return "the root counter 2 event refused every attempt";
+      return "the tick timer event refused every attempt";
   }
   return "refused";
 }
@@ -121,17 +109,22 @@ class LiveSoundDriver final : public SoundDriverHost {
   void ResetPlayback() override { ResetLivePlaybackState(); }
 
   bool SetTickTimer(std::uint16_t target) override {
-    return Accepted(SetRCnt(kRootCounter2, target, kRootCounterInterruptMode));
+    tick_timer::Configure(target);
+    return true;
   }
 
-  bool StartTickTimer() override { return Accepted(StartRCnt(kRootCounter2)); }
+  bool StartTickTimer() override {
+    tick_timer::Start();
+    return true;
+  }
 
-  bool StopTickTimer() override { return Accepted(StopRCnt(kRootCounter2)); }
+  bool StopTickTimer() override {
+    tick_timer::Stop();
+    return true;
+  }
 
   std::int32_t OpenTickEvent() override {
-    return static_cast<std::int32_t>(
-        OpenEvent(kRootCounter2, kEventSpecInterrupt, kEventModeInterrupt,
-                  &Seq::LiveTickPlayback));
+    return tick_timer::OpenEvent(&Seq::LiveTickPlayback);
   }
 
   std::int32_t TickEvent() override {
@@ -143,15 +136,15 @@ class LiveSoundDriver final : public SoundDriverHost {
   }
 
   bool EnableTickEvent(std::int32_t event) override {
-    return Accepted(EnableEvent(event));
+    return tick_timer::EnableEvent(event);
   }
 
   bool DisableTickEvent(std::int32_t event) override {
-    return Accepted(DisableEvent(event));
+    return tick_timer::DisableEvent(event);
   }
 
   bool CloseTickEvent(std::int32_t event) override {
-    return Accepted(CloseEvent(event));
+    return tick_timer::CloseEvent(event);
   }
 
   void ResetOutput() override { VS::Audio::Driver::ResetVoiceOutput(); }

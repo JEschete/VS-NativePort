@@ -922,22 +922,6 @@ TEST_CASE("DecodeIllustrationStep expands literals, fills and back-references",
   CHECK_FALSE(Credits::DecodeIllustrationStep(state, host));
 }
 
-TEST_CASE("DecodeIllustrationStep stops when the frame budget runs out",
-          "[ending][ending-results-credits]") {
-  FakeCreditsHost host;
-  host.vertical_blank_step = 100;
-  Credits::State state;
-  CHECK_FALSE(Decode(state, host, EncodedImage()));
-  CHECK(state.decoder.phase == Credits::DecodePhase::kRunning);
-  CHECK(state.decoder.output == 6);
-  state.decoder.budget_start_tick = 300;
-  CHECK_FALSE(Credits::DecodeIllustrationStep(state, host));
-  CHECK(state.decoder.output == 16);
-  state.decoder.budget_start_tick = 600;
-  CHECK(Credits::DecodeIllustrationStep(state, host));
-  CHECK(state.decoder.phase == Credits::DecodePhase::kIdle);
-}
-
 TEST_CASE(
     "DecodeIllustrationStep refuses runs that leave the input or "
     "workspace",
@@ -999,10 +983,11 @@ TEST_CASE("InitializeDisplay lays out both buffers and clears VRAM",
 TEST_CASE("PresentFrame flips the buffer and draws the ordering table",
           "[ending][ending-results-credits]") {
   DisplayRecorder host;
-  CHECK(Credits::PresentFrame(0x7FF, host) == 1);
+  Credits::PresentFrame(0x7FF, host);
   CHECK(host.frame_buffer == 1);
-  CHECK(Credits::PresentFrame(5, host) == 2);
+  Credits::PresentFrame(5, host);
   CHECK(host.frame_buffer == 0);
+  CHECK(host.advanced_frames == 2);
   CHECK(host.calls == std::vector<std::string>{"show 1", "show 0"});
   CHECK(host.drawn_slots == std::vector<int>{0x7FF, 5});
   CHECK(host.presented_frames == 2);

@@ -122,8 +122,8 @@ class RecordingLifecycleHost final : public VS::Boot::OverlayLoadHost,
   void StopControllerMotors() override { calls.emplace_back("stop-motors"); }
   void RefreshControllers() override { calls.emplace_back("refresh-input"); }
   void ShutdownAudio() override { calls.emplace_back("shutdown-audio"); }
-  void WaitForVerticalSync(int count) override {
-    calls.emplace_back("vsync-" + std::to_string(count));
+  void WaitTicks(int count) override {
+    calls.emplace_back("wait-" + std::to_string(count));
   }
   void StopAllMusic() override { calls.emplace_back("stop-music"); }
   void StopSceneSoundEffects() override {
@@ -149,7 +149,6 @@ class RecordingLifecycleHost final : public VS::Boot::OverlayLoadHost,
   }
   void JumpToTitle() override { calls.emplace_back("jump-title"); }
   void JumpToGameLoop() override { calls.emplace_back("jump-game"); }
-  void SelectNtscVideoMode() override { calls.emplace_back("ntsc"); }
   void InitializeMemoryCard() override { calls.emplace_back("init-card"); }
   void StartMemoryCard() override { calls.emplace_back("start-card"); }
   void InitializeControllers() override {
@@ -177,9 +176,6 @@ class RecordingLifecycleHost final : public VS::Boot::OverlayLoadHost,
   void ClearPendingClearSave() override { calls.emplace_back("clear-save"); }
   void ClearFramebuffer() override { calls.emplace_back("clear-framebuffer"); }
   void EnableReverb() override { calls.emplace_back("reverb-on"); }
-  void RegisterVSyncCallback() override {
-    calls.emplace_back("vsync-callback");
-  }
   void ResetGameHeap() override { calls.emplace_back("reset-heap"); }
   void InvalidateAiBindings() override { calls.emplace_back("invalidate-ai"); }
   void InitializeDiscQueue() override { calls.emplace_back("init-queue"); }
@@ -410,7 +406,7 @@ TEST_CASE("title reset preserves teardown order", "[session]") {
   VS::Boot::ResetToTitle(host);
   CHECK(host.calls == std::vector<std::string>{"reset-session", "hide",
                                                "stop-motors", "refresh-input",
-                                               "shutdown-audio", "vsync-10",
+                                               "shutdown-audio", "wait-10",
                                                "jump-title"});
 }
 
@@ -443,10 +439,10 @@ TEST_CASE("platform initialization enables reset after services start",
   VS::Boot::InitializePlatformServices(state, host);
   CHECK(state.enabled);
   CHECK(host.calls == std::vector<std::string>{
-                          "ntsc", "hide", "init-card", "start-card",
-                          "init-controllers", "start-comms", "unlock-analog",
-                          "reset-vibration", "reverb-off", "init-cd",
-                          "init-random", "soft-reset-on", "clear-save"});
+                          "hide", "init-card", "start-card", "init-controllers",
+                          "start-comms", "unlock-analog", "reset-vibration",
+                          "reverb-off", "init-cd", "init-random",
+                          "soft-reset-on", "clear-save"});
 
   VS::Boot::SetSoftResetEnabled(state, false);
   CHECK_FALSE(state.enabled);
@@ -457,11 +453,11 @@ TEST_CASE("title session initialization resets state in order", "[session]") {
   VS::Boot::InitializeTitleSession(host);
   CHECK(host.calls == std::vector<std::string>{
                           "reset-session", "clear-framebuffer", "loading",
-                          "reverb-on", "vsync-callback", "reset-heap",
-                          "invalidate-ai", "init-queue", "reset-cd",
-                          "init-menu-audio", "reset-vibration", "gameplay-off",
-                          "unlock-analog", "reset-held-frames",
-                          "reset-play-time", "clear-ashley-pending"});
+                          "reverb-on", "reset-heap", "invalidate-ai",
+                          "init-queue", "reset-cd", "init-menu-audio",
+                          "reset-vibration", "gameplay-off", "unlock-analog",
+                          "reset-held-frames", "reset-play-time",
+                          "clear-ashley-pending"});
 }
 
 TEST_CASE("gameplay overlay initialization preserves order and defaults",

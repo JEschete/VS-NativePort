@@ -27,7 +27,6 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Overlays.hpp"
 #include "Core/RandomLive.hpp"
-#include "Core/Runtime.hpp"
 #include "Effects/Particles.hpp"
 #include "Ending/EndingLive.hpp"
 #include "Event/EventCameraLensLive.hpp"
@@ -54,6 +53,7 @@
 #include "Menu/Status/LimbControllersLive.hpp"
 #include "Menu/Status/TerminalControllersLive.hpp"
 #include "Menu/TextBox.hpp"
+#include "Platform/LogicalTicks.hpp"
 #include "Render/Display.hpp"
 #include "Render/DisplayControlLive.hpp"
 #include "Render/ScreenOverlayLive.hpp"
@@ -66,15 +66,11 @@
 
 using VS::Legacy::ClearImage;
 using VS::Legacy::InitCARD;
-using VS::Legacy::kModeNtsc;
 using VS::Legacy::PadInitDirect;
 using VS::Legacy::PadStartCom;
 using VS::Legacy::RECT;
 using VS::Legacy::SetDispMask;
-using VS::Legacy::SetVideoMode;
 using VS::Legacy::StartCARD;
-using VS::Legacy::VSync;
-using VS::Legacy::VSyncCallback;
 
 namespace VS::Boot {
 namespace {
@@ -224,7 +220,7 @@ class LiveLifecycleHost final : public OverlayLoadHost,
           &file, VS::Core::kOverlaySlots[slot_index]);
     }
     while (slot->state != VS::Content::DiscRequestState::kLoaded) {
-      VS::State::UpdateLivePlayTimeAndLoading(0);
+      VS::State::UpdateLivePlayTimeAndLoading();
     }
     VS::Content::ReleaseLiveDiscRequest(slot);
   }
@@ -242,7 +238,7 @@ class LiveLifecycleHost final : public OverlayLoadHost,
         kSecondPadPortId, VS::Input::legacyPadResponseBytes[1]);
   }
   void ShutdownAudio() override { VS::Audio::Playback::LiveShutdown(); }
-  void WaitForVerticalSync(int count) override { VSync(count); }
+  void WaitTicks(int count) override { VS::Platform::WaitTicks(count); }
   void StopAllMusic() override { Audio::Control::LiveStopAllMusic(); }
   void StopSceneSoundEffects() override {
     Audio::Control::LiveStopSceneSoundEffects();
@@ -268,7 +264,6 @@ class LiveLifecycleHost final : public OverlayLoadHost,
   void JumpToTitle() override { JumpToLiveTitle(); }
   void JumpToGameLoop() override { JumpToLiveGameLoop(); }
 
-  void SelectNtscVideoMode() override { SetVideoMode(kModeNtsc); }
   void InitializeMemoryCard() override { InitCARD(0); }
   void StartMemoryCard() override { StartCARD(); }
   void InitializeControllers() override {
@@ -303,7 +298,6 @@ class LiveLifecycleHost final : public OverlayLoadHost,
     ClearImage(&rect, 0, 0, 0);
   }
   void EnableReverb() override { VS::Audio::Driver::EnableOutputReverb(1); }
-  void RegisterVSyncCallback() override { VSyncCallback(VS::Core::IgnoreCall); }
   void ResetGameHeap() override { ResetLiveSessionHeap(); }
   void InvalidateAiBindings() override {
     VS::Battle::Ai::InvalidateSessionBindings();

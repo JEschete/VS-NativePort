@@ -475,9 +475,7 @@ class LiveFileReads : public Host {
     }
   }
 
-  void UpdateWhileLoading() override {
-    static_cast<void>(State::UpdateLivePlayTimeAndLoading(0));
-  }
+  void UpdateWhileLoading() override { State::UpdateLivePlayTimeAndLoading(); }
 
   void ReleaseRead(LoadedFile file) override {
     VS::Content::DiscQueueSlot*& request = RequestOf(file);
@@ -1236,13 +1234,10 @@ class LiveRoomUnloadHost final
     Scratch().ordering_table = ordering_table;
     ClearOTagR(ordering_table, kOrderingTableEntries);
     Render::DrawLiveScreenTransition(ordering_table);
-    static_cast<void>(Render::PresentLiveFieldFrame(
-        ordering_table + (kOrderingTableEntries - 1)));
+    Render::PresentLiveFieldFrame(ordering_table + (kOrderingTableEntries - 1));
   }
 
-  void UpdateWhileLoading() override {
-    static_cast<void>(State::UpdateLivePlayTimeAndLoading(0));
-  }
+  void UpdateWhileLoading() override { State::UpdateLivePlayTimeAndLoading(); }
 
   void FreeRoomEventSections() override { Event::FreeLiveRoomScripts(); }
 

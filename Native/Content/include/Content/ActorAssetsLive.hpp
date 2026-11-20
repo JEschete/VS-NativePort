@@ -98,17 +98,14 @@ extern std::uint8_t objectDataLoadStep;
 // decomp: D_800E8F29 (BATTLE/BATTLE.PRG 30DB0.c): the parse phase of the
 // model being parsed; 1 while its primitives wait for the second frame.
 extern unsigned char modelParseResetFlag;
-// decomp: D_800E8FC4 (BATTLE/BATTLE.PRG 30DB0.c): the slowest request (in
-// VSync(1) ticks) while a model file was parsing.
+// The original's request profile (BATTLE/BATTLE.PRG 30DB0.c:176): the slowest
+// request in VSync(1) scanlines while a model file parsed (D_800E8FC4), its
+// load phase (D_800F457C), the last request's scanlines (D_800F4580) and the
+// slowest kind (D_800F45D8). The native queue keeps no scanline profile
+// (UpdateActorAssetQueue), so these keep their module-image values.
 extern int assetQueuePeakUsage;
-// decomp: D_800F457C (BATTLE/BATTLE.PRG 30DB0.c): the model load phase of
-// that request.
 extern int lastLoadPhaseSnapshot;
-// decomp: D_800F4580 (BATTLE/BATTLE.PRG 30DB0.c): the ticks the last request
-// took.
 extern int assetQueueFrameTicks;
-// decomp: D_800F45D8 (BATTLE/BATTLE.PRG 30DB0.c): the kind of the slowest
-// request.
 extern int lastAssetRequestType;
 
 // The loaders' legacy state (BATTLE.PRG 30DB0.c, declared upstream at

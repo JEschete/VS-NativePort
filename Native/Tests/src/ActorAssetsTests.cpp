@@ -20,7 +20,6 @@ namespace {
 namespace Content = VS::Content;
 using Content::ActorAssetKind;
 using Content::ActorAssetLoadState;
-using Content::ActorAssetQueueStats;
 using Content::ActorAssetRecord;
 using Content::ActorAssetRequest;
 using Content::AssetAddress;
@@ -155,11 +154,8 @@ class FakeAssetHost final : public Content::ActorAssetHost {
   }
   int ProcessHeadRequest(ActorAssetKind kind) override {
     processed.push_back(kind);
-    frame_counter += process_ticks;
     return process_result;
   }
-  std::int32_t FrameCounter() override { return frame_counter; }
-  std::uint8_t ModelLoadPhase() const override { return load_phase; }
   void OnHeadRequestDone(int result) override { finished.push_back(result); }
 
   AssetAddress AllocateHigh(std::size_t bytes) override {
@@ -406,10 +402,7 @@ class FakeAssetHost final : public Content::ActorAssetHost {
   std::vector<ActorAssetRequest> queued;
   std::vector<ActorAssetKind> processed;
   std::vector<int> finished;
-  std::int32_t frame_counter = 0;
-  std::int32_t process_ticks = 0;
   int process_result = kAssetDone;
-  std::uint8_t load_phase = 0;
 
   bool refuse_allocations = false;
   std::vector<AssetAddress> high_blocks;
@@ -652,15 +645,6 @@ void StepEffectTextureLoad(FakeAssetHost& host, ActorAssetLoadState& state,
   }
 }
 
-// A pending model parse that takes 7 frames from frame 100.
-void SetSlowModelParse(FakeAssetHost& host) {
-  host.requests[0].kind = 2;
-  host.process_result = kAssetPending;
-  host.frame_counter = 100;
-  host.process_ticks = 7;
-  host.load_phase = 2;
-}
-
 // Two colored polygons of 24 bytes: a triangle (0x34) and a quad (0x3C).
 std::array<std::byte, 56> ColoredPolygons() {
   std::array<std::byte, 56> polygons{};
@@ -796,14 +780,11 @@ TEST_CASE("Battle asset queue dispatch skips empty and undispatched requests",
           "[content-slice][content][actor-assets]") {
   const auto owner = std::make_unique<FakeAssetHost>();
   FakeAssetHost& host = *owner;
-  host.frame_counter = 50;
-  ActorAssetQueueStats stats;
-  CHECK(Content::UpdateActorAssetQueue(host, stats) == 0);
-  CHECK(stats.frame_ticks == 50);
+  CHECK(Content::UpdateActorAssetQueue(host) == 0);
   host.requests[0].kind = 5;
-  CHECK(Content::UpdateActorAssetQueue(host, stats) == -1);
+  CHECK(Content::UpdateActorAssetQueue(host) == -1);
   host.requests[0].kind = 10;
-  CHECK(Content::UpdateActorAssetQueue(host, stats) == -1);
+  CHECK(Content::UpdateActorAssetQueue(host) == -1);
   CHECK(host.processed.empty());
   CHECK(host.finished.empty());
   CHECK(host.requests[0].kind == 10);
@@ -818,11 +799,10 @@ TEST_CASE("Battle asset queue keeps a pending head and shifts a finished one",
   host.requests[14] = Request(ActorAssetKind::kSequenceLoad, 0, 14);
   host.requests[15] = Request(ActorAssetKind::kEffectTextureLoad, 0, 15);
   host.process_result = kAssetPending;
-  ActorAssetQueueStats stats;
-  CHECK(Content::UpdateActorAssetQueue(host, stats) == 1);
+  CHECK(Content::UpdateActorAssetQueue(host) == 1);
   CHECK(host.finished.empty());
   host.process_result = kAssetDone;
-  CHECK(Content::UpdateActorAssetQueue(host, stats) == 1);
+  CHECK(Content::UpdateActorAssetQueue(host) == 1);
   CHECK(host.finished == std::vector{0});
   CHECK(host.requests[0].model_id == 2);
   CHECK(host.requests[13].model_id == 14);
@@ -836,44 +816,9 @@ TEST_CASE("Battle asset queue reports a head request the loader refuses",
   FakeAssetHost& host = *owner;
   host.requests[0] = Request(ActorAssetKind::kWeaponModelLoad, 0, 2);
   host.process_result = kAssetRefused;
-  ActorAssetQueueStats stats;
-  CHECK(Content::UpdateActorAssetQueue(host, stats) == -1);
+  CHECK(Content::UpdateActorAssetQueue(host) == -1);
   CHECK(host.processed == std::vector{ActorAssetKind::kWeaponModelLoad});
   CHECK(host.finished == std::vector{kAssetRefused});
-}
-
-TEST_CASE("Battle asset queue records the slowest request while a model parses",
-          "[content-slice][content][actor-assets]") {
-  const auto owner = std::make_unique<FakeAssetHost>();
-  FakeAssetHost& host = *owner;
-  SetSlowModelParse(host);
-  ActorAssetQueueStats stats;
-  stats.peak_frame_ticks = 5;
-  CHECK(Content::UpdateActorAssetQueue(host, stats) == 1);
-  CHECK(stats.frame_ticks == 7);
-  CHECK(stats.peak_frame_ticks == 7);
-  CHECK(stats.last_kind == 2);
-  CHECK(stats.last_load_phase == 2);
-}
-
-TEST_CASE(
-    "Battle asset queue keeps the peak of a model parse for later requests",
-    "[content-slice][content][actor-assets]") {
-  const auto owner = std::make_unique<FakeAssetHost>();
-  FakeAssetHost& host = *owner;
-  SetSlowModelParse(host);
-  ActorAssetQueueStats stats;
-  stats.peak_frame_ticks = 5;
-  static_cast<void>(Content::UpdateActorAssetQueue(host, stats));
-  host.process_ticks = 3;
-  static_cast<void>(Content::UpdateActorAssetQueue(host, stats));
-  CHECK(stats.frame_ticks == 3);
-  host.process_ticks = 9;
-  host.load_phase = 1;
-  static_cast<void>(Content::UpdateActorAssetQueue(host, stats));
-  CHECK(stats.frame_ticks == 9);
-  CHECK(stats.peak_frame_ticks == 7);
-  CHECK(stats.last_load_phase == 2);
 }
 
 TEST_CASE("Ashley auxiliary sequence requests preserve kind and selector",

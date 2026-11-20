@@ -79,7 +79,6 @@ struct DecoderState {
   std::size_t resource = 0;
   std::size_t input = 0;
   std::size_t output = 0;
-  std::int16_t budget_start_tick = 0;
 };
 
 struct State {
@@ -191,7 +190,7 @@ bool DecodeIllustrationStep(State& state, StaffRollHost& host);
 void DrawSmallText(ScreenPoint origin, int palette_row_offset,
                    std::span<const std::uint8_t> text, DisplayHost& host);
 void InitializeDisplay(const DisplaySettings& settings, DisplayHost& host);
-int PresentFrame(int ordering_slot, DisplayHost& host);
+void PresentFrame(int ordering_slot, DisplayHost& host);
 void AllocateRenderBuffers(DisplayHost& host);
 void BeginFrame(DisplayHost& host);
 void StartMusic(StaffRollHost& host);

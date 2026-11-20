@@ -64,7 +64,8 @@ class DisplayDevice {
   virtual void ShowDisplayArea(const ScreenRect& area,
                                const ScreenRect& screen) = 0;
   virtual void ClearToBlack(const ScreenRect& area) = 0;
-  virtual void WaitVerticalBlanks(std::int32_t count) = 0;
+  // Waits `count` logical ticks.
+  virtual void WaitTicks(std::int32_t count) = 0;
   virtual void UploadImage(const ScreenRect& area,
                            std::span<const std::uint16_t> pixels) = 0;
   virtual void SetDisplayEnabled(bool enabled) = 0;
@@ -95,9 +96,8 @@ class FieldFrameHost {
   virtual void AdvanceRandom() = 0;
   virtual void SetGeometryOffset(std::int32_t x, std::int32_t y) = 0;
   [[nodiscard]] virtual std::int32_t TickSpeed() const = 0;
-  // Waits `ticks` vertical blanks, advances play time and loading; returns
-  // the elapsed ticks.
-  virtual std::int32_t UpdatePlayTime(std::int32_t ticks) = 0;
+  // Waits `ticks` logical ticks, then advances loading and play time.
+  virtual void UpdatePlayTime(std::int32_t ticks) = 0;
   [[nodiscard]] virtual bool FrameStepPaused() const = 0;
   virtual void ToggleFrameStepPause() = 0;
   // Reads both controllers; the second controller's newly pressed buttons.
@@ -113,8 +113,9 @@ inline constexpr std::uint32_t kFrameStepToggleButton = 0x800;
 inline constexpr std::uint32_t kFrameStepAdvanceButton = 0x100;
 
 // BATTLE.PRG func_8007629C (146C.c:5988): flips the frame buffer and submits
-// the frame; returns the elapsed ticks.
-std::int32_t PresentFieldFrame(FieldFrameHost& host);
+// the frame. The original returned vs_main_gametimeUpdate's VSync result, which
+// no caller read.
+void PresentFieldFrame(FieldFrameHost& host);
 
 // The boot loading image: its size and 16-bit pixels.
 struct LoadingImage {

@@ -227,8 +227,9 @@ constexpr std::array<ScreenRect, 2> kFileScreenClears{{
     {768, 256, 32, 240},
 }};
 constexpr ScreenRect kFileScreenBackground{672, 256, 96, 240};
-// UpdateLivePlayTimeAndLoading(2) each frame of the file screens.
-constexpr int kFileScreenVsyncMode = 2;
+// The file screens advance the frame clock two ticks a frame
+// (vs_main_gametimeUpdate(2)).
+constexpr int kFileScreenTicks = 2;
 // _gameLoadScreen opens the load menu with its fade (vs_menu7_loadMenu(2)).
 constexpr int kLoadMenuFadeIn = 2;
 constexpr int kClearSaveFadeFrames = 30;
@@ -299,8 +300,8 @@ constexpr std::array<int, 3> kColorFields{0x1F, 0x3E0, 0x7C00};
 constexpr int kImageBlendShift = 5;
 constexpr int kPaletteBlendShift = 4;
 constexpr std::uint16_t kOpaqueBit = 0x8000;
-constexpr int kStripBlendVsyncs = 4;
-constexpr int kCopyrightBlendVsyncs = 2;
+constexpr int kStripBlendTicks = 4;
+constexpr int kCopyrightBlendTicks = 2;
 
 // The menu animation (_setTitleMenuState, 22C.c:3997).
 constexpr int kFullSaturation = 128;
@@ -337,7 +338,7 @@ constexpr int kFadeOutBandEnd = 127;
 constexpr int kOutlineSubmenuShift = 64;
 constexpr std::int32_t kOutlineMotion = 0x10001;
 
-// vs_title_exec's idle limits in vertical blanks (22C.c:4491).
+// vs_title_exec's idle limits in ticks (22C.c:4491).
 constexpr int kIdleFrames = 1000;
 constexpr int kMovieIdleFrames = 100;
 constexpr int kLeaveFrames = 64;
@@ -445,7 +446,7 @@ void PrepareFileScreen(Host& host) {
 }
 
 void BeginFileScreenFrame(Host& host) {
-  host.AdvanceFrameClock(kFileScreenVsyncMode);
+  host.AdvanceFrameClock(kFileScreenTicks);
   host.SwapFileBuffers();
   host.UpdateControllers();
 }
@@ -557,7 +558,7 @@ void DrawLogo(Host& host, Render::ImmediateSpriteRequest sprite, int frame) {
 void ShowPublisher(Host& host) {
   for (int frame = 0; frame < kLogoFrames; ++frame) {
     DrawLogo(host, kPublisherSprite, frame);
-    host.WaitForVerticalBlank();
+    host.WaitTick();
     host.PutDisplay(LogoFrameDisplay(frame));
   }
 }
@@ -570,7 +571,7 @@ void ShowDeveloper(Host& host) {
       frame = kLogoFadeOutStart;
     }
     DrawLogo(host, kDeveloperSprite, frame);
-    host.WaitForVerticalBlank();
+    host.WaitTick();
     host.UpdateControllers();
     host.PutDisplay(LogoFrameDisplay(frame));
   }
@@ -858,11 +859,11 @@ void FadeInMenu(Context& context, std::span<std::uint16_t> capture) {
   for (int factor = kBlendStart; factor >= 0; factor -= kCopyrightBlendStep) {
     BlendCopyright(host, capture, factor);
   }
-  host.WaitForVerticalBlank();
+  host.WaitTick();
   if (CaptureHolds(host, capture)) {
     host.StoreImage(kFinishedStripArea, capture.first(kStripHalfwords));
   }
-  host.WaitForVerticalBlank();
+  host.WaitTick();
   for (int factor = kBlendStart; factor >= 0; factor -= kStripBlendStep) {
     BlendMenuBackground(host, capture, factor);
     DrawMenu(context);
@@ -932,19 +933,19 @@ void MoveMenu(Context& context, int& menu_item, int direction) {
 int WaitForSelection(Context& context, int& menu_item) {
   Host& host = context.host;
   host.InvalidateControllerConnections();
-  int last_movie_frame = host.VerticalBlankCount();
-  int last_button_frame = host.VerticalBlankCount();
+  int last_movie_frame = host.ElapsedTicks();
+  int last_button_frame = host.ElapsedTicks();
   while (true) {
-    host.WaitForVerticalBlank();
+    host.WaitTick();
     host.UpdateControllers();
     if (host.IntroMoviePlaying()) {
-      last_movie_frame = host.VerticalBlankCount();
+      last_movie_frame = host.ElapsedTicks();
     }
     if ((host.Input().held & kAnyButton) != 0) {
-      last_button_frame = host.VerticalBlankCount();
+      last_button_frame = host.ElapsedTicks();
     }
-    if (host.VerticalBlankCount() - last_button_frame > kIdleFrames &&
-        host.VerticalBlankCount() - last_movie_frame > kMovieIdleFrames) {
+    if (host.ElapsedTicks() - last_button_frame > kIdleFrames &&
+        host.ElapsedTicks() - last_movie_frame > kMovieIdleFrames) {
       return static_cast<int>(MenuItemId::kTimeout);
     }
     if ((host.Input().held & kConfirmButtons) != 0) {
@@ -952,7 +953,7 @@ int WaitForSelection(Context& context, int& menu_item) {
       if (choice.has_value()) {
         return *choice;
       }
-      last_button_frame = host.VerticalBlankCount();
+      last_button_frame = host.ElapsedTicks();
     }
     const int direction = NavigationDirection(host.Input().held);
     if (direction != 0) {
@@ -964,12 +965,12 @@ int WaitForSelection(Context& context, int& menu_item) {
 
 void LeaveMenu(Host& host) {
   for (int frame = kLeaveFrames; frame > 0; --frame) {
-    host.WaitForVerticalBlank();
+    host.WaitTick();
     host.UpdateControllers();
     host.Submit(TransitionTile());
     host.UpdateVibrationPatterns();
   }
-  host.WaitForVerticalBlank();
+  host.WaitTick();
   host.SetDisplayEnabled(false);
 }
 
@@ -1088,7 +1089,7 @@ void ShowPublisherAndDeveloper(Host& host) {
   host.UploadImage(Image::kPublisherPalette, kPublisherPaletteArea);
   host.UploadImage(Image::kPublisherPixels, kPublisherPixelsArea);
   host.PutDisplay(LogoDisplay(kLogoBufferRow, 0));
-  host.WaitForVerticalBlank();
+  host.WaitTick();
   host.SetDisplayEnabled(true);
   ShowPublisher(host);
   host.UploadImage(Image::kDeveloperLogo, kDeveloperArea);
@@ -1138,17 +1139,17 @@ void LoadBackgroundTextures(Host& host) {
   host.FreeLow(image);
 }
 
-// decomp: TITLE.PRG _initTitleScreen (src/TITLE/TITLE.PRG/22C.c:3821)
+// decomp: TITLE.PRG _initTitleScreen (src/TITLE/TITLE.PRG/22C.c:3821). The
+// original spun until VSync(1) reported scanline 248 so the display change
+// landed in the vertical blank; a native frame changes its display whole, so
+// there is no scanline to wait for.
 void InitializeTitleDisplay(Host& host) {
-  constexpr int kPutLine = 248;
   constexpr DisplaySetup kTitleDisplay{.display = {512, 16, 512, 480},
                                        .screen = {0, 8, 0, 224},
                                        .interlaced = true,
                                        .draw = {512, 0, 512, 480}};
-  while (host.HorizontalBlankCount() < kPutLine) {
-  }
   host.PutDisplay(kTitleDisplay);
-  host.WaitForVerticalBlank();
+  host.WaitTick();
 }
 
 // decomp: TITLE.PRG _initMenu (src/TITLE/TITLE.PRG/22C.c:3838)
@@ -1201,7 +1202,7 @@ void BlendMenuBackground(Host& host, std::span<std::uint16_t> capture,
     host.LoadImage(kStripLeftArea, blended.first(kStripHalfHalfwords));
     host.LoadImage(kStripRightArea, blended.subspan(kStripHalfHalfwords));
   }
-  host.WaitForVerticalBlanks(kStripBlendVsyncs);
+  host.WaitTicks(kStripBlendTicks);
   host.UpdateControllers();
 }
 
@@ -1224,7 +1225,7 @@ void BlendCopyright(Host& host, std::span<std::uint16_t> capture, int factor) {
           return BlendCopyrightPixel(background, text, factor);
         });
   }
-  host.WaitForVerticalBlanks(kCopyrightBlendVsyncs);
+  host.WaitTicks(kCopyrightBlendTicks);
   host.UpdateControllers();
   if (blend) {
     host.LoadImage(kCopyrightArea, blended);
@@ -1293,7 +1294,7 @@ void DrawMenu(Context& context) {
     host.Submit(kMenuStripRight);
     DrawMenuItems(context);
     if (field == 0) {
-      host.WaitForVerticalBlank();
+      host.WaitTick();
       host.UpdateVibrationPatterns();
     } else {
       host.StopIntroMovieAfterAudioTail();
@@ -1304,7 +1305,7 @@ void DrawMenu(Context& context) {
 // decomp: TITLE.PRG _drawAndSyncTitleMenu (src/TITLE/TITLE.PRG/22C.c:4227)
 void DrawMenuAndPollInput(Context& context) {
   DrawMenu(context);
-  context.host.WaitForVerticalBlank();
+  context.host.WaitTick();
   context.host.UpdateControllers();
 }
 
@@ -1375,13 +1376,13 @@ void InitializeGameDisplay(Host& host, const GameDisplayRequest& request) {
 }
 
 // decomp: TITLE.PRG _renderScreen (src/TITLE/TITLE.PRG/22C.c:4684)
-int PresentGameFrame(Host& host) {
+void PresentGameFrame(Host& host) {
   const int buffer = host.FrameBuffer() == 0 ? 1 : 0;
   host.SetFrameBuffer(buffer);
-  const int vsync = host.AdvanceFrameClock(0);
+  // vs_main_gametimeUpdate(0): VSync(0) waits one tick.
+  host.AdvanceFrameClock(1);
   host.ShowFrameBuffer(buffer);
   host.DrawOrderingTable();
-  return vsync;
 }
 
 // decomp: TITLE.PRG _initGameData (src/TITLE/TITLE.PRG/22C.c:4698). The

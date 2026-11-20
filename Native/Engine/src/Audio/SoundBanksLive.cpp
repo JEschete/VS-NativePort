@@ -214,7 +214,7 @@ class LiveSoundBanks final : public SoundBankHost {
                                       LiveBufferPointer(destination));
   }
 
-  void WaitFrame() override { State::UpdateLivePlayTimeAndLoading(0); }
+  void WaitFrame() override { State::UpdateLivePlayTimeAndLoading(); }
 
   BankBuffer AllocateBuffer(std::int32_t bytes) override {
     return AllocateLiveSlotBuffer(bytes);

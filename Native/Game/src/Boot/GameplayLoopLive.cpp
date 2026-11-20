@@ -537,8 +537,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     SetDrawStp(mask_bit, VS::Render::IsLiveFramebufferEffectShowing() ? 1 : 0);
     AddPrim(ordering_table_ + kMaskBitSlot, mask_bit);
     static_cast<void>(VS::Core::ElapsedFrameCounterTicks());
-    static_cast<void>(
-        VS::Render::PresentLiveFieldFrame(ordering_table_ + kPresentSlot));
+    VS::Render::PresentLiveFieldFrame(ordering_table_ + kPresentSlot);
     VS::Render::AdvanceLiveTexturePageRetirements();
   }
 

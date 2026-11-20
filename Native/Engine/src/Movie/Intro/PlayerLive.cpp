@@ -9,6 +9,7 @@
 #include "Movie/IntroPlayer.hpp"
 #include "Movie/IntroPlayerLive.hpp"
 #include "Movie/MoviePlayer.hpp"
+#include "Platform/LogicalTicks.hpp"
 
 using VS::Legacy::ClearImage;
 using VS::Legacy::DISPENV;
@@ -19,7 +20,6 @@ using VS::Legacy::RECT;
 using VS::Legacy::SetDefDispEnv;
 using VS::Legacy::SetDispMask;
 using VS::Legacy::setRECT;
-using VS::Legacy::VSync;
 
 namespace VS::Movie::Intro {
 namespace {
@@ -39,9 +39,9 @@ int PageY(PicturePage page) {
 class LiveHost final : public Host {
  public:
   [[nodiscard]] std::uint32_t Tick() const override {
-    return static_cast<std::uint32_t>(VSync(-1));
+    return VS::Platform::ElapsedTicks();
   }
-  void WaitForVerticalBlank() override { VSync(0); }
+  void WaitTick() override { VS::Platform::WaitTicks(); }
   void UpdateControllers() override { VS::Input::UpdateLiveControllers(); }
   [[nodiscard]] bool SkipRequested() const override {
     return (VS::Input::buttonsPressed & (kPadRright | kPadStart)) != 0;

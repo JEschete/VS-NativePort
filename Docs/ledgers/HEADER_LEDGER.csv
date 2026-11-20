@@ -13,7 +13,7 @@ H0011,header,Native/Content/src/OverlayWorkspaceLiveState.h,owned,no,pragma-once
 H0012,header,Native/Content/src/PFile.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,retired,deleted; its records are replaced by the Content/PFile.hpp byte readers (#441)
 H0013,header,Native/Content/src/SystemResources.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,Content_SystemDatHeader became VS::Content::SystemDatHeader in Native/Content/include/Content/SystemResources.hpp (#441)
 H0014,header,Native/Engine/Legacy/Audio/LibSpu.hpp,legacy,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0015,header,Native/Engine/Legacy/Core/LibEtc.hpp,legacy,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
+H0015,header,Native/Engine/Legacy/Core/LibEtc.hpp,legacy,no,pragma-once,0,0,0,0,0,0,0,0,0,retired,deleted: logical-tick waits (Platform/LogicalTicks.hpp) and the sound tick timer (Audio/TickTimer.hpp) replace VSync and root counter 2; SetVideoMode and VSyncCallback were no-ops (#44)
 H0016,header,Native/Engine/Legacy/Core/PsxTypes.hpp,legacy,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0017,header,Native/Engine/Legacy/Input/LibPad.hpp,legacy,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0018,header,Native/Engine/Legacy/OnDisc.h,legacy,no,pragma-once,0,0,0,0,0,2,0,0,0,retired,retired-by:nothing; no production reader of VS_ONDISC/VS_ONDISC_DOT remained (readers add the on-disc offset to the record address directly); the four SequenceTests.cpp uses read the SHP vertex section through a file-local FirstModelVertex helper (#441)
@@ -447,7 +447,7 @@ S0010,source,Native/Content/src/OverlayWorkspaceLive.cpp,owned,no,,0,,,,,,,,,don
 S0011,source,Native/Content/src/PFileLive.cpp,owned,no,,0,,,,,,,,,done,
 S0012,source,Native/Content/src/SystemResourcesLive.cpp,owned,no,,0,,,,,,,,,done,
 S0013,source,Native/Engine/Legacy/Audio/LibSpu.cpp,legacy,no,,0,,,,,,,,,done,
-S0014,source,Native/Engine/Legacy/Core/LibEtc.cpp,legacy,no,,0,,,,,,,,,done,
+S0014,source,Native/Engine/Legacy/Core/LibEtc.cpp,legacy,no,,0,,,,,,,,,retired,deleted with LibEtc.hpp: Platform/LogicalTicks.cpp and Audio/Driver/TickTimer.cpp replace it (#44)
 S0015,source,Native/Engine/Legacy/Input/LibPad.cpp,legacy,no,,0,,,,,,,,,done,
 S0016,source,Native/Engine/Legacy/Render/LibGpu.cpp,legacy,no,,0,,,,,,,,,done,
 S0017,source,Native/Engine/Legacy/Save/LibCard.cpp,legacy,no,,0,,,,,,,,,done,

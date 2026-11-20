@@ -606,9 +606,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   void UpdateAssetQueue() override {
     static_cast<void>(Content::UpdateLiveActorAssetQueue());
   }
-  void PumpLoading() override {
-    static_cast<void>(State::UpdateLivePlayTimeAndLoading(0));
-  }
+  void PumpLoading() override { State::UpdateLivePlayTimeAndLoading(); }
   void ReleaseWeaponModel(int slot) override {
     static_cast<void>(Content::ReleaseLiveWeaponModel(slot));
   }

@@ -15,7 +15,6 @@
 namespace VS::Content {
 namespace {
 // The model load phase while a file is parsing (_loadShpState 2).
-constexpr std::uint8_t kParsingLoadPhase = 2;
 // The loaders' phases.
 constexpr std::uint8_t kPhaseStart = 0;
 constexpr std::uint8_t kPhaseReading = 1;
@@ -287,8 +286,11 @@ int QueueActorAssetRequest(ActorAssetHost& host,
 
 // decomp: BATTLE.PRG vs_battle_processObjectDataQueue
 // (src/BATTLE/BATTLE.PRG/30DB0.c:176)
-int UpdateActorAssetQueue(ActorAssetHost& host, ActorAssetQueueStats& stats) {
-  stats.frame_ticks = host.FrameCounter();
+// The original also profiled each request in VSync(1) scanlines and kept the
+// slowest one while a model parsed (D_800E8FC4, D_800F457C, D_800F4580,
+// D_800F45D8). No caller read the record, and a native frame has no scanline
+// clock, so the profile is not kept.
+int UpdateActorAssetQueue(ActorAssetHost& host) {
   const std::uint8_t kind = host.RequestKind(0);
   if (kind == 0) {
     return 0;
@@ -297,15 +299,6 @@ int UpdateActorAssetQueue(ActorAssetHost& host, ActorAssetQueueStats& stats) {
     return -1;
   }
   const int result = host.ProcessHeadRequest(static_cast<ActorAssetKind>(kind));
-  stats.frame_ticks = static_cast<std::int32_t>(
-      static_cast<std::uint32_t>(host.FrameCounter()) -
-      static_cast<std::uint32_t>(stats.frame_ticks));
-  if (host.ModelLoadPhase() == kParsingLoadPhase &&
-      stats.peak_frame_ticks < stats.frame_ticks) {
-    stats.peak_frame_ticks = stats.frame_ticks;
-    stats.last_kind = host.RequestKind(0);
-    stats.last_load_phase = host.ModelLoadPhase();
-  }
   if (result == kAssetPending) {
     return 1;
   }

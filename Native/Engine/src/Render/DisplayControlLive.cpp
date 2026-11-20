@@ -16,6 +16,7 @@
 #include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Input/Controllers.hpp"
+#include "Platform/LogicalTicks.hpp"
 #include "Render/Display.hpp"
 #include "Render/Loading.hpp"
 #include "Render/PaletteAnimationLive.hpp"
@@ -102,8 +103,8 @@ class LiveDisplayDevice final : public DisplayDevice {
     RECT rect = ToRect(area);
     ClearImage2(&rect, 0, 0, 0);
   }
-  void WaitVerticalBlanks(std::int32_t count) override {
-    VS::Legacy::VSync(count);
+  void WaitTicks(std::int32_t count) override {
+    VS::Platform::WaitTicks(count);
   }
   void UploadImage(const ScreenRect& area,
                    std::span<const std::uint16_t> pixels) override {
@@ -131,8 +132,8 @@ class LiveFieldFrame final : public FieldFrameHost {
   [[nodiscard]] std::int32_t TickSpeed() const override {
     return VS::State::tickSpeed;
   }
-  std::int32_t UpdatePlayTime(std::int32_t ticks) override {
-    return VS::State::UpdateLivePlayTimeAndLoading(ticks);
+  void UpdatePlayTime(std::int32_t ticks) override {
+    VS::State::UpdateLivePlayTimeAndLoading(ticks);
   }
   [[nodiscard]] bool FrameStepPaused() const override {
     return isFrameStepPaused != 0;
@@ -194,9 +195,9 @@ void ConfigureLiveFieldDisplay(int frame_width, int frame_height,
                                      static_cast<std::uint8_t>(clear_blue)}});
 }
 
-int PresentLiveFieldFrame(std::uint32_t* ordering_table) {
+void PresentLiveFieldFrame(std::uint32_t* ordering_table) {
   LiveFieldFrame host(ordering_table);
-  return PresentFieldFrame(host);
+  PresentFieldFrame(host);
 }
 
 void EnableLiveDisplay() {

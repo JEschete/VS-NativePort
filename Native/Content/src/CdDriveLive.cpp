@@ -218,7 +218,7 @@ class LiveDiscQueueHost final : public DiscQueueHost {
   void RestartFramesSinceRead() override {
     discDriveState.frames_since_last_read = 0;
   }
-  void WaitFrame() override { VS::State::UpdateLivePlayTimeAndLoading(0); }
+  void WaitFrame() override { VS::State::UpdateLivePlayTimeAndLoading(); }
 
   [[nodiscard]] bool CommandsPending() const { return commands_pending_; }
 

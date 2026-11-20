@@ -25,8 +25,9 @@ class Host {
   Host& operator=(Host&&) = delete;
   virtual ~Host() = default;
 
+  // The logical ticks since start-up, and a wait for the next one.
   [[nodiscard]] virtual std::uint32_t Tick() const = 0;
-  virtual void WaitForVerticalBlank() = 0;
+  virtual void WaitTick() = 0;
   virtual void UpdateControllers() = 0;
   [[nodiscard]] virtual bool SkipRequested() const = 0;
 

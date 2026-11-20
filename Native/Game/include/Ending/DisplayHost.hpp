@@ -204,9 +204,8 @@ class DisplayHost {
   virtual void SetFrameBuffer(int buffer) = 0;
   // Draws the frame's ordering table from the scene slot.
   virtual void DrawOrderingTable(int ordering_slot) = 0;
-  // Advances play time and pending loads by one frame; returns the vsync
-  // result.
-  virtual int AdvanceFrameClock() = 0;
+  // Waits a tick, then advances pending loads and play time.
+  virtual void AdvanceFrameClock() = 0;
   virtual void ResetPresentedFrameCount() = 0;
   virtual void CountPresentedFrame() = 0;
   virtual void UpdateControllers() = 0;
@@ -215,9 +214,7 @@ class DisplayHost {
   virtual void ResetHeap() = 0;
   virtual void AllocateFrameBuffer(FrameBufferKind kind, int buffer,
                                    std::size_t bytes) = 0;
-  // VSync(1): the vertical-blank counter.
-  [[nodiscard]] virtual int VerticalBlankCounter() = 0;
-  // VSync(0): waits for the next vertical blank.
-  virtual void WaitForVerticalBlank() = 0;
+  // VSync(0): waits for the next logical tick.
+  virtual void WaitTick() = 0;
 };
 }  // namespace VS::Ending

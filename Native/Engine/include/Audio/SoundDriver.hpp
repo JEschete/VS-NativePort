@@ -93,8 +93,9 @@ class SoundDriverHost {
   virtual void WriteSampleMemory(std::span<const std::byte> data) = 0;
   virtual void ReadSampleMemory(std::span<std::byte> data) = 0;
 
-  // The tick timer (root counter 2) and its event. Each call reports whether
-  // the SDK accepted it; OpenTickEvent returns the event or kNoTickEvent.
+  // The tick timer (root counter 2 in the original, Audio/TickTimer.hpp) and
+  // its event. Each call reports whether it was accepted; OpenTickEvent
+  // returns the event or kNoTickEvent.
   virtual void ResetPlayback() = 0;
   virtual bool SetTickTimer(std::uint16_t target) = 0;
   virtual bool StartTickTimer() = 0;

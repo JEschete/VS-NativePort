@@ -38,6 +38,7 @@
 #include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.hpp"
+#include "Platform/LogicalTicks.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
 #include "Render/Images.hpp"
@@ -431,9 +432,9 @@ class LiveDisplay : public Host {
     DrawOTag(entry);
   }
 
-  int AdvanceFrameClock() override {
+  void AdvanceFrameClock() override {
     PublishState();
-    return State::UpdateLivePlayTimeAndLoading(0);
+    State::UpdateLivePlayTimeAndLoading();
   }
   void ResetPresentedFrameCount() override {
     VS::Ending::Credits::xaResumeFrameCount = 0;
@@ -485,12 +486,9 @@ class LiveDisplay : public Host {
     }
   }
 
-  [[nodiscard]] int VerticalBlankCounter() override {
-    return VS::Legacy::VSync(1);
-  }
-  void WaitForVerticalBlank() override {
+  void WaitTick() override {
     PublishState();
-    VS::Legacy::VSync(0);
+    VS::Platform::WaitTicks();
   }
 };
 

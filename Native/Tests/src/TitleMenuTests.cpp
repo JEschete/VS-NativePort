@@ -102,7 +102,7 @@ title::Buttons Pressed(std::uint32_t bits) {
 class FakeHost final : public title::Host {
  public:
   static constexpr int kPollLimit = 200000;
-  static constexpr int kVerticalBlankLimit = 100000;
+  static constexpr int kTickLimit = 100000;
   static constexpr int kClockLimit = 100000;
   static constexpr std::uint16_t kCopyrightPixel = 0x4321;
 
@@ -125,11 +125,9 @@ class FakeHost final : public title::Host {
   int polls = 0;
   int vibration_updates = 0;
 
-  int vblanks = 0;
-  int vblank_limit = kVerticalBlankLimit;
-  int hblanks = 0;
+  int ticks = 0;
+  int tick_limit = kTickLimit;
   int clock_advances = 0;
-  int vsync_result = 0;
 
   std::vector<std::vector<std::uint32_t>> packets;
   int packet_count = 0;
@@ -254,22 +252,20 @@ class FakeHost final : public title::Host {
   }
   void PlayVibrationPreset(int preset) override { presets.push_back(preset); }
 
-  void WaitForVerticalBlank() override {
-    Frame("VSync");
-    AddVerticalBlanks(1);
+  void WaitTick() override {
+    Frame("WaitTick");
+    AddTicks(1);
   }
-  void WaitForVerticalBlanks(int count) override {
-    Frame("VSync " + std::to_string(count));
-    AddVerticalBlanks(count);
+  void WaitTicks(int count) override {
+    Frame("WaitTicks " + std::to_string(count));
+    AddTicks(count);
   }
-  int HorizontalBlankCount() override { return hblanks++; }
-  int VerticalBlankCount() override { return vblanks; }
-  int AdvanceFrameClock(int vsync_mode) override {
-    Log("AdvanceFrameClock " + std::to_string(vsync_mode));
+  int ElapsedTicks() override { return ticks; }
+  void AdvanceFrameClock(int frame_ticks) override {
+    Log("AdvanceFrameClock " + std::to_string(frame_ticks));
     if (++clock_advances > kClockLimit) {
       throw std::runtime_error("the title never stopped its frame clock");
     }
-    return vsync_result;
   }
 
   void UploadImage(title::Image image, const ScreenRect& area) override {
@@ -445,9 +441,9 @@ class FakeHost final : public title::Host {
       Log(std::move(event));
     }
   }
-  void AddVerticalBlanks(int count) {
-    vblanks += count;
-    if (vblanks > vblank_limit) {
+  void AddTicks(int count) {
+    ticks += count;
+    if (ticks > tick_limit) {
       throw std::runtime_error("the title never stopped waiting");
     }
   }
@@ -793,17 +789,15 @@ TEST_CASE("Title game display plans two buffers", "[title][title-menu]") {
 }
 
 TEST_CASE("Title game frames swap buffers", "[title][title-menu]") {
-  constexpr int kVsync = 7;
   FakeHost host;
-  host.vsync_result = kVsync;
-  CHECK(title::PresentGameFrame(host) == kVsync);
+  title::PresentGameFrame(host);
   CHECK(host.frame_buffer == 1);
-  CHECK(title::PresentGameFrame(host) == kVsync);
+  title::PresentGameFrame(host);
   CHECK(host.frame_buffer == 0);
   CHECK(host.events ==
-        std::vector<std::string>{"SetFrameBuffer 1", "AdvanceFrameClock 0",
+        std::vector<std::string>{"SetFrameBuffer 1", "AdvanceFrameClock 1",
                                  "ShowFrameBuffer 1", "DrawOrderingTable",
-                                 "SetFrameBuffer 0", "AdvanceFrameClock 0",
+                                 "SetFrameBuffer 0", "AdvanceFrameClock 1",
                                  "ShowFrameBuffer 0", "DrawOrderingTable"});
 }
 
@@ -899,7 +893,7 @@ TEST_CASE("Title logos fade the publisher and developer in and out",
 TEST_CASE("Title logos alternate the display buffers", "[title][title-menu]") {
   FakeHost host;
   title::ShowPublisherAndDeveloper(host);
-  CHECK(host.vblanks == 729);
+  CHECK(host.ticks == 729);
   REQUIRE(host.displays.size() == 729);
   CHECK(host.displays[0] ==
         title::DisplaySetup{
@@ -1063,18 +1057,16 @@ TEST_CASE("Title background textures refuse bad encodings and heaps",
   }
 }
 
-TEST_CASE("Title display waits for the scanline before showing",
-          "[title][title-menu]") {
+TEST_CASE("Title display shows before waiting a tick", "[title][title-menu]") {
   FakeHost host;
   title::InitializeTitleDisplay(host);
-  CHECK(host.hblanks == 249);
   CHECK(host.displays ==
         std::vector<title::DisplaySetup>{
             {.display = {.x = 512, .y = 16, .width = 512, .height = 480},
              .screen = {.x = 0, .y = 8, .width = 0, .height = 224},
              .interlaced = true,
              .draw = {.x = 512, .y = 0, .width = 512, .height = 480}}});
-  CHECK(host.events == std::vector<std::string>{"PutDisplay", "VSync"});
+  CHECK(host.events == std::vector<std::string>{"PutDisplay", "WaitTick"});
 }
 
 TEST_CASE("Title pixel blends mix their channels", "[title][title-menu]") {
@@ -1097,7 +1089,7 @@ TEST_CASE("Title menu background blends the captured strips",
   CHECK(capture[kBlendOffset] == kStripBlended);
   CHECK(capture[0] == kStripTarget);
   CHECK(host.events == std::vector<std::string>{"LoadImage", "LoadImage",
-                                                "VSync 4",
+                                                "WaitTicks 4",
                                                 "UpdateControllers"});
 }
 
@@ -1127,7 +1119,7 @@ TEST_CASE("Title menu background refuses a short capture",
   title::BlendMenuBackground(refused, {}, 16);
   CHECK(refused.refusals.size() == 1);
   CHECK(refused.loads.empty());
-  CHECK(refused.vblanks == 8);
+  CHECK(refused.ticks == 8);
   CHECK(refused.polls == 2);
 }
 
@@ -1146,16 +1138,16 @@ TEST_CASE("Title copyright blends over its background", "[title][title-menu]") {
   CHECK(host.loads[0].size == kCopyrightHalfwords);
   CHECK(host.loads[0].pixels.front() == FakeHost::kCopyrightPixel);
   CHECK(host.loads[1].pixels.back() == kBackground);
-  CHECK(host.events ==
-        std::vector<std::string>{"VSync 2", "UpdateControllers", "LoadImage",
-                                 "VSync 2", "UpdateControllers", "LoadImage"});
+  CHECK(host.events == std::vector<std::string>{
+                           "WaitTicks 2", "UpdateControllers", "LoadImage",
+                           "WaitTicks 2", "UpdateControllers", "LoadImage"});
 
   host.copyright.resize(10);
   title::BlendCopyright(host, capture, 0);
   CHECK(host.refusals ==
         std::vector<std::string>{"title copyright smaller than 180x24"});
   CHECK(host.loads.size() == 2);
-  CHECK(host.vblanks == 6);
+  CHECK(host.ticks == 6);
 }
 
 TEST_CASE("Title item palettes blend between their rows",
@@ -1347,7 +1339,7 @@ TEST_CASE("Title menu fields wait between their submissions",
   CHECK(std::ranges::all_of(
       std::span(host.events).subspan(1, 34),
       [](const std::string& event) { return event == "Submit"; }));
-  CHECK(host.events[35] == "VSync");
+  CHECK(host.events[35] == "WaitTick");
   CHECK(host.events[36] == "UpdateVibrationPatterns");
   CHECK(host.events[71] == "AudioTail");
 }
@@ -1358,7 +1350,7 @@ TEST_CASE("Title menu polls input after drawing", "[title][title-menu]") {
   DrawFirstItem(fixture);
   title::DrawMenuAndPollInput(fixture.context);
   CHECK(host.events.back() == "UpdateControllers");
-  CHECK(host.events[host.events.size() - 2] == "VSync");
+  CHECK(host.events[host.events.size() - 2] == "WaitTick");
 }
 
 TEST_CASE("Title transition tile covers the screen", "[title][title-menu]") {

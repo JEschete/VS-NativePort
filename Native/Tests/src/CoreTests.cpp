@@ -12,6 +12,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Audio/TickTimer.hpp"
 #include "Core/FrameClock.hpp"
 #include "Core/FrameTiming.hpp"
 #include "Core/Gte.hpp"
@@ -27,8 +28,8 @@
 #include "Core/RuntimeLive.hpp"
 #include "Core/String/GameText.hpp"
 #include "Core/String/GameTextLive.hpp"
-#include "Legacy/Core/LibEtc.hpp"
 #include "Legacy/Psx.hpp"
+#include "Platform/LogicalTicks.hpp"
 
 using VS::Core::Gte::ApplyMatrixLV;
 using VS::Core::Gte::MATRIX;
@@ -36,22 +37,9 @@ using VS::Core::Gte::SetRotMatrix;
 using VS::Core::Gte::SVECTOR;
 using VS::Core::Gte::VECTOR;
 
-using VS::Legacy::AdvanceRootCounter2;
-using VS::Legacy::CloseEvent;
-using VS::Legacy::DisableEvent;
-using VS::Legacy::EnableEvent;
-using VS::Legacy::kEventModeInterrupt;
-using VS::Legacy::kEventSpecInterrupt;
-using VS::Legacy::kRootCounter2;
-using VS::Legacy::kRootCounterInterruptMode;
-using VS::Legacy::OpenEvent;
-using VS::Legacy::SetRCnt;
-using VS::Legacy::StartRCnt;
-using VS::Legacy::StopRCnt;
-using VS::Legacy::VSync;
-
 using VS::i32;
 namespace Core = VS::Core;
+namespace tick_timer = VS::Audio::tick_timer;
 
 TEST_CASE("Empty runtime handlers change nothing and trace ignored diagnostics",
           "[core]") {
@@ -235,71 +223,91 @@ TEST_CASE("FrameClock advances at NTSC field rate", "[core][clock]") {
   CHECK(c.Ticks() == 5);
 }
 
-TEST_CASE(
-    "Sound counter callbacks advance at 240 Hz and respect event lifecycle",
-    "[core][clock][audio]") {
+TEST_CASE("Sound tick timer handlers run at 240 Hz and follow the event",
+          "[core][clock][audio]") {
   static int calls = 0;
   calls = 0;
-  REQUIRE(SetRCnt(kRootCounter2, 0x44E8, kRootCounterInterruptMode) == 1);
-  REQUIRE(StartRCnt(kRootCounter2) == 1);
-  const auto event =
-      OpenEvent(kRootCounter2, kEventSpecInterrupt, kEventModeInterrupt, [] {
-        ++calls;
-        return 0L;
-      });
-  REQUIRE(event == 1);
+  tick_timer::Configure(0x44E8);
+  tick_timer::Start();
+  const std::int32_t event = tick_timer::OpenEvent([]() -> std::int32_t {
+    ++calls;
+    return 0;
+  });
+  REQUIRE(event == tick_timer::kEvent);
+  CHECK(tick_timer::OpenEvent([]() -> std::int32_t { return 0; }) ==
+        tick_timer::kNoEvent);
+  CHECK(tick_timer::OpenEvent(nullptr) == tick_timer::kNoEvent);
   std::vector<int> observed;
-  const auto advance = [&observed](int cycles) {
-    AdvanceRootCounter2(cycles);
+  const auto advance = [&observed](std::uint32_t clocks) {
+    tick_timer::Advance(clocks);
     observed.push_back(calls);
   };
   advance(70560);
-  EnableEvent(event);
+  tick_timer::EnableEvent(event);
   advance(70560);
-  DisableEvent(event);
+  tick_timer::DisableEvent(event);
   advance(70560);
-  EnableEvent(event);
+  tick_timer::EnableEvent(event);
   advance(35280);
-  StopRCnt(kRootCounter2);
+  tick_timer::Stop();
   advance(70560);
-  StartRCnt(kRootCounter2);
-  CloseEvent(event);
+  tick_timer::Start();
+  tick_timer::CloseEvent(event);
   advance(70560);
-  StopRCnt(kRootCounter2);
-  // Disabled, stopped and closed events stop the 240 Hz callbacks.
+  tick_timer::Stop();
+  // Disabled, stopped and closed events stop the 240 Hz handler.
   CHECK(observed == std::vector<int>{0, 4, 4, 6, 6, 6});
 }
 
-TEST_CASE("VSync keeps the sound counter at 240 Hz across NTSC fields",
+TEST_CASE("Logical ticks keep the sound tick timer at 240 Hz",
           "[core][clock][audio][audio-clock]") {
   static int calls = 0;
   calls = 0;
-  REQUIRE(SetRCnt(kRootCounter2, 17640, kRootCounterInterruptMode) == 1);
-  REQUIRE(StartRCnt(kRootCounter2) == 1);
-  const auto event =
-      OpenEvent(kRootCounter2, kEventSpecInterrupt, kEventModeInterrupt, [] {
-        ++calls;
-        return 0L;
-      });
-  REQUIRE(event == 1);
-  EnableEvent(event);
+  tick_timer::Configure(17640);
+  tick_timer::Start();
+  const std::int32_t event = tick_timer::OpenEvent([]() -> std::int32_t {
+    ++calls;
+    return 0;
+  });
+  REQUIRE(event == tick_timer::kEvent);
+  tick_timer::EnableEvent(event);
+  const std::uint32_t start = VS::Platform::ElapsedTicks();
   const std::array<std::array<int, 2>, 3> intervals{
       {{250, 1001}, {750, 4004}, {59000, 240240}}};
-  for (const auto& [fields, expected] : intervals) {
-    VSync(fields);
+  for (const auto& [ticks, expected] : intervals) {
+    VS::Platform::WaitTicks(ticks);
     CHECK(calls == expected);
   }
-  StopRCnt(kRootCounter2);
-  VSync(1000);
+  CHECK(VS::Platform::ElapsedTicks() - start == 60000U);
+  tick_timer::Stop();
+  VS::Platform::WaitTicks(1000);
   CHECK(calls == 240240);
-  StartRCnt(kRootCounter2);
-  VSync(250);
+  tick_timer::Start();
+  VS::Platform::WaitTicks(250);
   CHECK(calls == 241241);
-  SetRCnt(kRootCounter2, 17640, kRootCounterInterruptMode);
-  VSync(250);
+  tick_timer::Configure(17640);
+  VS::Platform::WaitTicks(250);
   CHECK(calls == 242242);
-  CloseEvent(event);
-  StopRCnt(kRootCounter2);
+  tick_timer::CloseEvent(event);
+  tick_timer::Stop();
+}
+
+TEST_CASE("Logical tick waits run each listener once a tick", "[core][clock]") {
+  static int calls = 0;
+  calls = 0;
+  const VS::Platform::TickListener listener = [] { ++calls; };
+  VS::Platform::AddTickListener(listener);
+  VS::Platform::AddTickListener(listener);
+  const std::uint32_t start = VS::Platform::ElapsedTicks();
+  VS::Platform::WaitTicks();
+  VS::Platform::WaitTicks(0);
+  VS::Platform::WaitTicks(-3);
+  VS::Platform::WaitTicks(2);
+  VS::Platform::RemoveTickListener(listener);
+  VS::Platform::WaitTicks();
+  // Counts below one wait one tick; a listener added twice runs once.
+  CHECK(VS::Platform::ElapsedTicks() - start == 6U);
+  CHECK(calls == 5);
 }
 
 TEST_CASE("Fixed multiply preserves the original signed product bits",
@@ -534,7 +542,7 @@ TEST_CASE("Frame work baseline resets at actual logical frame boundaries",
   std::this_thread::sleep_for(std::chrono::milliseconds{2});
   CHECK(Core::ElapsedFrameCounterTicks() >= 1);
   const auto before = std::chrono::steady_clock::now();
-  VSync(0);
+  VS::Platform::WaitTicks();
   const auto ticks = Core::ElapsedFrameCounterTicks();
   const auto duration = std::chrono::steady_clock::now() - before;
   CHECK(ticks >= 0);

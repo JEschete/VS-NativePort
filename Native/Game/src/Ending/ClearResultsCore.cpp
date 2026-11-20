@@ -519,7 +519,7 @@ void ShowClearResults(ResultsState& state, ClearProgress& progress,
   do {
     Credits::BeginFrame(host);
     is_complete = DrawClearResults(state, tables, host);
-    host.WaitForVerticalBlank();
+    host.WaitTick();
     Credits::PresentFrame(Credits::kFrameOrderingSlot, host);
   } while (!is_complete);
 }
