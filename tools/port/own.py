@@ -8,8 +8,7 @@ generated files stop emitting it and include the owned header where the name is 
 never regenerates that item. Ownership alone sets no status: `modernized`, `cpp` and `verified` are separate gates
 that tools\\ledger\\gates.py checks.
 
-A newly owned file is listed in tools\\port\\relaxed_sources.txt and keeps the copied-code compiler settings until it
-is promoted, a later and separate step (plan §8.2).
+A newly owned file compiles with the same strict settings as every other source (#483).
 """
 from __future__ import annotations
 

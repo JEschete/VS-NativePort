@@ -1,6 +1,7 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.hpp"
+// Copied from the decomp by tools/port/copy_to_native.py; see each item's
+// decomp line.
 #include "Audio/SfxChannelGroups.hpp"
+#include "Legacy/Psx.hpp"
 
 // decomp: D_8005FE70 (D_8005FE70@SLUS_010.40)
 int VS::Audio::nextSfxChannelGroup1;
@@ -19,4 +20,3 @@ int VS::Audio::nextSfxChannelGroupFF000;
 
 // decomp: D_8005FE84 (D_8005FE84@SLUS_010.40)
 int VS::Audio::nextSfxChannelGroupF00000;
-

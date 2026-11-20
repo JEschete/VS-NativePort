@@ -58,9 +58,9 @@ static_assert(sizeof VS::Menu::textBoxOrderingTables ==
 
 int Tests_EncodedTextFormatting(void) {
   const VS::Menu::StringContext saved = VS::Battle::stringContext;
-  char nested[] = {10, 0, VS::Core::TextCode::kPrintDecimal, 1,
-                   VS::Core::TextCode::kTerminator};
-  char format[] = {
+  std::uint8_t nested[] = {10, 0, VS::Core::TextCode::kPrintDecimal, 1,
+                           VS::Core::TextCode::kTerminator};
+  const std::uint8_t format[] = {
       VS::Core::TextCode::kPrintDecimal, 0, 0x8F,
       VS::Core::TextCode::kPrintString,  0, 0x8F,
       VS::Core::TextCode::kPrintHex,     2, VS::Core::TextCode::kTerminator,
@@ -72,7 +72,7 @@ int Tests_EncodedTextFormatting(void) {
   VS::Battle::stringContext.integers[0] = -105;
   VS::Battle::stringContext.integers[1] = 7;
   VS::Battle::stringContext.integers[2] = 0;
-  VS::Battle::stringContext.strings[0] = nested;
+  VS::Battle::stringContext.strings[0] = reinterpret_cast<char*>(nested);
   char* end = VS::Render::FormatLiveEncodedText(output + 1, format);
   int passed = end == output + sizeof expected &&
                memcmp(output + 1, expected, sizeof expected) == 0 &&
@@ -148,8 +148,9 @@ int Tests_ScaledDialogueGlyphs(void) {
   const int saved_frame_index = VS::Render::frameBuf;
   std::uint32_t* saved_ordering = VS::Menu::activeTextBoxOrderingTable;
   const VS::Render::FontStyle saved_style = VS::Render::LiveFontStyle();
-  const char saved_width = VS::Render::variableFontGlyphWidths[5];
-  const char saved_space_width = VS::Render::variableFontGlyphWidths[0x8F];
+  const std::uint8_t saved_width = VS::Render::variableFontGlyphWidths[5];
+  const std::uint8_t saved_space_width =
+      VS::Render::variableFontGlyphWidths[0x8F];
   const VS::Menu::TextBoxState saved_box = VS::Menu::textBoxes[2];
   std::uint8_t* saved_shape = VS::Event::textBoxFrameStyles[0];
   std::uint32_t ordering[34];
@@ -260,7 +261,7 @@ int CheckFeedbackEffectDialogueLinks(int framebuffer, int feedback_layer) {
       VS::Render::legacyOrderingTables[framebuffer & 1];
   VS::Effects::LiveScreenEffectOverlay* saved_effect =
       VS::Effects::screenEffectOverlay;
-  VS::Effects::LiveScreenEffectOverlay effect = {0};
+  VS::Effects::LiveScreenEffectOverlay effect = {};
   effect.feedback_layer = feedback_layer;
   VS::Effects::screenEffectOverlay = &effect;
   VS::Render::frameBuf = framebuffer;
@@ -323,7 +324,7 @@ int CheckMenuRowNativeLinks(int scrolling) {
   void* const saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
   void* const saved_table = VS::Render::legacyOrderingTables[0];
   const VS::Render::FontStyle saved_style = VS::Render::LiveFontStyle();
-  const char saved_width = VS::Render::variableFontGlyphWidths[5];
+  const std::uint8_t saved_width = VS::Render::variableFontGlyphWidths[5];
   VS::Menu::Framework::MenuRow* saved_items = VS::Menu::Framework::menuItems;
   VS::Menu::Framework::MenuRow rows[40] = {};
   // The Live menu links only into the current frame's ordering table, which
@@ -644,8 +645,8 @@ int CheckDefaultLoadoutNames(void) {
       0x0F, 0x24, 0x31,
       0x27, 0x24, 0x31,
       0x2A, 0x32, VS::Core::TextCode::kTerminator};
-  return memcmp(VS::Actors::ashleyInitialLoadout.name.data(), actor_name,
+  return memcmp(VS::Actors::kAshleyInitialLoadout.name.data(), actor_name,
                 sizeof actor_name) == 0 &&
-         memcmp(VS::Actors::ashleyInitialLoadout.weapon.name.data(),
+         memcmp(VS::Actors::kAshleyInitialLoadout.weapon.name.data(),
                 weapon_name, sizeof weapon_name) == 0;
 }

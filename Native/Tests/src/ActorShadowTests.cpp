@@ -35,9 +35,6 @@ using VS::Core::Gte::SetGeomOffset;
 using VS::Core::Gte::SetGeomScreen;
 using VS::Core::Gte::SVECTOR;
 
-extern unsigned int Content_battleShadowVertices[18];
-extern unsigned int Content_battleShadowFaces[24];
-
 static_assert(std::is_same_v<decltype(&VS::Render::DrawLiveActorGroundShadow),
                              void (*)(VS::Actors::ActorRecord&, const MATRIX&,
                                       const SVECTOR&)>);
@@ -70,9 +67,9 @@ struct ActorShadowFixture {
   std::array<VS::Field::MpdTileCell, 9> cells{};
 
   ActorShadowFixture() {
-    std::copy_n(Content_battleShadowVertices, saved_vertices.size(),
+    std::copy_n(VS::Content::battleShadowVertices, saved_vertices.size(),
                 saved_vertices.begin());
-    std::copy_n(Content_battleShadowFaces, saved_faces.size(),
+    std::copy_n(VS::Content::battleShadowFaces, saved_faces.size(),
                 saved_faces.begin());
     SetMesh();
     VS::Field::roomData = {};
@@ -114,9 +111,9 @@ struct ActorShadowFixture {
 
   ~ActorShadowFixture() {
     std::copy(saved_vertices.begin(), saved_vertices.end(),
-              Content_battleShadowVertices);
+              VS::Content::battleShadowVertices);
     std::copy(saved_faces.begin(), saved_faces.end(),
-              Content_battleShadowFaces);
+              VS::Content::battleShadowFaces);
     VS::Field::roomData = saved_room;
     VS::Actors::supportingPlatformLayer = saved_platform;
     VS::Actors::supportingGimmickIndex = saved_gimmick_index;
@@ -135,7 +132,7 @@ struct ActorShadowFixture {
   static void SetMesh() {
     constexpr std::array<int, 8> kX{64, 45, 0, -45, -64, -45, 0, 45};
     constexpr std::array<int, 8> kZ{0, 45, 64, 45, 0, -45, -64, -45};
-    std::fill_n(Content_battleShadowVertices, 18, 0);
+    std::fill_n(VS::Content::battleShadowVertices, 18, 0);
     const auto face = [](unsigned a, unsigned b, unsigned c) {
       return a * 4 | (b * 4 << 8) | (c * 4 << 16);
     };
@@ -143,16 +140,16 @@ struct ActorShadowFixture {
       const unsigned next = (index + 1) % 8;
       for (unsigned ring = 0; ring < 2; ++ring) {
         const int scale = static_cast<int>(ring + 1);
-        Content_battleShadowVertices[1 + ring * 8 + index] =
+        VS::Content::battleShadowVertices[1 + ring * 8 + index] =
             static_cast<std::uint16_t>(kX[index] * scale) |
             (static_cast<unsigned>(
                  static_cast<std::uint16_t>(kZ[index] * scale))
              << 16);
       }
-      Content_battleShadowFaces[index] = face(0, 1 + index, 1 + next);
-      Content_battleShadowFaces[8 + index] =
+      VS::Content::battleShadowFaces[index] = face(0, 1 + index, 1 + next);
+      VS::Content::battleShadowFaces[8 + index] =
           face(1 + index, 9 + index, 1 + next);
-      Content_battleShadowFaces[16 + index] =
+      VS::Content::battleShadowFaces[16 + index] =
           face(1 + next, 9 + index, 9 + next);
     }
   }
@@ -417,13 +414,13 @@ TEST_CASE(
   CHECK(fixture.PacketCount() == 24);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800E9A68u) ==
-        Content_battleShadowVertices);
+        VS::Content::battleShadowVertices);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800E9A6Cu) ==
-        Content_battleShadowVertices + 1);
+        VS::Content::battleShadowVertices + 1);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800E9AD8u) ==
-        Content_battleShadowFaces + 1);
+        VS::Content::battleShadowFaces + 1);
 }
 
 TEST_CASE("Actor shadows follow actual interpolated terrain on both axes",
@@ -462,7 +459,7 @@ TEST_CASE("Actor shadows flatten source-rejected steep terrain",
 TEST_CASE("Actor shadows reject reversed winding but retain the sound anchor",
           "[render][actor-shadow]") {
   ActorShadowFixture fixture;
-  for (auto& face : Content_battleShadowFaces) {
+  for (auto& face : VS::Content::battleShadowFaces) {
     face = (face & 0xFF0000FFu) | ((face & 0xFF00u) << 8) |
            ((face & 0xFF0000u) >> 8);
   }

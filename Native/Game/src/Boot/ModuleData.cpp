@@ -32,6 +32,7 @@
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Math/FixedPoint.hpp"
 #include "Core/RandomLive.hpp"
+#include "Effects/BoneTrailLiveState.hpp"
 #include "Effects/Particles.hpp"
 #include "Effects/Plugins/Plg045.hpp"
 #include "Effects/Plugins/Plg049.hpp"
@@ -93,7 +94,6 @@
 #include "Effects/Plugins/Plg300.hpp"
 #include "Effects/Plugins/Plg301.hpp"
 #include "Effects/Runtime.hpp"
-#include "Effects/BoneTrailLiveState.hpp"
 #include "Ending/ClearResults.hpp"
 #include "Ending/Credits.hpp"
 #include "Ending/Credits/StaffRoll.hpp"
@@ -137,33 +137,54 @@
 #include "Title/SaveFiles.hpp"
 #include "Title/TitleScreen.hpp"
 
-// Globals whose contents are in the module images (DATA_LEDGER segment data/rodata/asset, no pointers).
-#include "Content/ModuleData.hpp"
+// Globals whose contents are in the module images (DATA_LEDGER segment
+// data/rodata/asset, no pointers).
 #include "Battle/Ai/GroundNavigationLive.hpp"
+#include "Content/ModuleData.hpp"
 #include "Effects/TrailEmitterLive.hpp"
 
-// decomp: EFFECT/PLG074.BIN PLG074 trailEffect.h origin cursor; original image matches PLG073 but mutable state remains overlay-local
+// decomp: EFFECT/PLG074.BIN PLG074 trailEffect.h origin cursor; original image
+// matches PLG073 but mutable state remains overlay-local
 int VS::Content::plg074TrailEmissionCounter[1];
-// decomp: BATTLE/BATTLE.PRG 4B16C.s:1208 eighteen packed signed16 X/Z vertices; imported source data only
-unsigned int Content_battleShadowVertices[18];
-// decomp: BATTLE/BATTLE.PRG 4B16C.s:1208 twenty-four triangles with byte offsets into projected shadow vertices
-unsigned int Content_battleShadowFaces[24];
-// decomp: BATTLE/BATTLE.PRG 7B5DC.s:func_800E4180 indexed hesitation lengths; native module-owned data
+// decomp: BATTLE/BATTLE.PRG 4B16C.s:1208 eighteen packed signed16 X/Z vertices;
+// imported source data only
+unsigned int
+    VS::Content::battleShadowVertices[VS::Content::kBattleShadowVertexWords];
+// decomp: BATTLE/BATTLE.PRG 4B16C.s:1208 twenty-four triangles with byte
+// offsets into projected shadow vertices
+unsigned int
+    VS::Content::battleShadowFaces[VS::Content::kBattleShadowFaceWords];
+// decomp: BATTLE/BATTLE.PRG 7B5DC.s:func_800E4180 indexed hesitation lengths;
+// native module-owned data
 unsigned int VS::Content::battleAiHesitationLengths[1];
-// decomp: BATTLE/BATTLE.PRG 5BF94.c:2934 D_800EBA78 main menu help text; bytes 316..319 open the gradient window
-unsigned int Content_battleMainMenuHelpText[80];
-// decomp: BATTLE/BATTLE.PRG 58578.c INCLUDE_RODATA D_80069860; strings end at jtbl_800698F8
-unsigned int Content_battleLimbNameBytes[38];
-// decomp: BATTLE/BATTLE.PRG 30DB0.c:_loadGimmick; three 16-byte headers plus modelDataSize payloads
-unsigned int Content_battleGimmickTemplateBytes[455];
-// decomp: BATTLE/BATTLE.PRG 5BF94.c:textbox frame vertices; nine styles precede D_800EB588
-unsigned int Content_battleTextboxFrameBytes[631];
-// decomp: BATTLE/BATTLE.PRG 146C.c:func_8008E19C complete one-group/one-quad marker definition; G00039-G00041 are interior aliases
-unsigned int Content_battleTriggerMarkerBytes[29];
-// decomp: BATTLE/BATTLE.PRG 146C.c:17537 D_80068C1C sky dome: 34 twelve-byte vertices (colour word 2) and 64 four-byte faces; SetRoomBackgroundColors patches the vertex colours
-unsigned int Content_battleSkyDome[166];
-// decomp: SLUS_010.40 25AC.c:LFO selectors include source-code bytes as sample/control data; original PS-X EXE payload, never host code
-short Content_residentLfoSamples[167936];
+// decomp: BATTLE/BATTLE.PRG 5BF94.c:2934 D_800EBA78 main menu help text; bytes
+// 316..319 open the gradient window
+unsigned int VS::Content::battleMainMenuHelpText
+    [VS::Content::kBattleMainMenuHelpTextWords];
+// decomp: BATTLE/BATTLE.PRG 58578.c INCLUDE_RODATA D_80069860; strings end at
+// jtbl_800698F8
+unsigned int
+    VS::Content::battleLimbNameBytes[VS::Content::kBattleLimbNameWords];
+// decomp: BATTLE/BATTLE.PRG 30DB0.c:_loadGimmick; three 16-byte headers plus
+// modelDataSize payloads
+unsigned int VS::Content::battleGimmickTemplateBytes
+    [VS::Content::kBattleGimmickTemplateWords];
+// decomp: BATTLE/BATTLE.PRG 5BF94.c:textbox frame vertices; nine styles precede
+// D_800EB588
+unsigned int
+    VS::Content::battleTextboxFrameBytes[VS::Content::kBattleTextboxFrameWords];
+// decomp: BATTLE/BATTLE.PRG 146C.c:func_8008E19C complete one-group/one-quad
+// marker definition; G00039-G00041 are interior aliases
+unsigned int VS::Content::battleTriggerMarkerBytes
+    [VS::Content::kBattleTriggerMarkerWords];
+// decomp: BATTLE/BATTLE.PRG 146C.c:17537 D_80068C1C sky dome: 34 twelve-byte
+// vertices (colour word 2) and 64 four-byte faces; SetRoomBackgroundColors
+// patches the vertex colours
+unsigned int VS::Content::battleSkyDome[VS::Content::kBattleSkyDomeWords];
+// decomp: SLUS_010.40 25AC.c:LFO selectors include source-code bytes as
+// sample/control data; original PS-X EXE payload, never host code
+std::int16_t
+    VS::Content::residentLfoSamples[VS::Content::kResidentLfoSampleCount];
 
 const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x13BC, sizeof VS::Battle::Ai::kTimedStatusFlags,
@@ -172,7 +193,8 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x1418, sizeof VS::Battle::Ai::kSettingsBits30Values,
      &VS::Battle::Ai::kSettingsBits30Values,
      sizeof VS::Battle::Ai::kSettingsBits30Values},  // G00014 D_80069C18
-    {"BATTLE/BATTLE.PRG", 0x141C, sizeof VS::Battle::Ai::kPerceptionRangesSquared,
+    {"BATTLE/BATTLE.PRG", 0x141C,
+     sizeof VS::Battle::Ai::kPerceptionRangesSquared,
      &VS::Battle::Ai::kPerceptionRangesSquared,
      sizeof VS::Battle::Ai::kPerceptionRangesSquared},  // G00015 D_80069C1C
     {"BATTLE/BATTLE.PRG", 0x143C, sizeof VS::Battle::Ai::kWanderTimingPresets,
@@ -184,13 +206,15 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x2C7FC, sizeof VS::Audio::legacyUnreferencedWord,
      &VS::Audio::legacyUnreferencedWord,
      sizeof VS::Audio::legacyUnreferencedWord},  // G00018 D_80094FFC
-    {"BATTLE/BATTLE.PRG", 0x7F984, sizeof VS::Battle::categoryNeedsTargetSelection,
+    {"BATTLE/BATTLE.PRG", 0x7F984,
+     sizeof VS::Battle::categoryNeedsTargetSelection,
      &VS::Battle::categoryNeedsTargetSelection,
      sizeof VS::Battle::categoryNeedsTargetSelection},  // G00019 D_800E8184
     {"BATTLE/BATTLE.PRG", 0x7F994, sizeof VS::Battle::categoryIsAreaTarget,
      &VS::Battle::categoryIsAreaTarget,
      sizeof VS::Battle::categoryIsAreaTarget},  // G00020 D_800E8194
-    {"BATTLE/BATTLE.PRG", 0x7F9B4, sizeof VS::Battle::categoryIncludesActingActor,
+    {"BATTLE/BATTLE.PRG", 0x7F9B4,
+     sizeof VS::Battle::categoryIncludesActingActor,
      &VS::Battle::categoryIncludesActingActor,
      sizeof VS::Battle::categoryIncludesActingActor},  // G00021 D_800E81B4
     {"BATTLE/BATTLE.PRG", 0x7F9C4, sizeof VS::Battle::categoryTargetsBodyParts,
@@ -231,7 +255,8 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
      sizeof VS::Field::lockedDoorRoomPairs},  // G00037 D_800E84AC
     {"BATTLE/BATTLE.PRG", 0x7FD08, sizeof VS::Field::countableRoomMask,
      &VS::Field::countableRoomMask,
-     sizeof VS::Field::countableRoomMask},  // G00038 vs_battle_mapCompletionFlags
+     sizeof VS::Field::countableRoomMask},  // G00038
+                                            // vs_battle_mapCompletionFlags
     {"BATTLE/BATTLE.PRG", 0x7FDA0, sizeof VS::Field::triggerMarkerRecordTail,
      &VS::Field::triggerMarkerRecordTail,
      sizeof VS::Field::triggerMarkerRecordTail},  // G00041 D_800E85A0
@@ -259,10 +284,12 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x80160, sizeof VS::Actors::sharedSequenceIdsByKind,
      &VS::Actors::sharedSequenceIdsByKind,
      sizeof VS::Actors::sharedSequenceIdsByKind},  // G00051 D_800E8960
-    {"BATTLE/BATTLE.PRG", 0x80260, sizeof VS::Content::legacySequenceDiscOffsets,
+    {"BATTLE/BATTLE.PRG", 0x80260,
+     sizeof VS::Content::legacySequenceDiscOffsets,
      &VS::Content::legacySequenceDiscOffsets,
      sizeof VS::Content::legacySequenceDiscOffsets},  // G00052 D_800E8A60
-    {"BATTLE/BATTLE.PRG", 0x80340, sizeof VS::Content::legacySequenceSectorCounts,
+    {"BATTLE/BATTLE.PRG", 0x80340,
+     sizeof VS::Content::legacySequenceSectorCounts,
      &VS::Content::legacySequenceSectorCounts,
      sizeof VS::Content::legacySequenceSectorCounts},  // G00053 D_800E8B40
     {"BATTLE/BATTLE.PRG", 0x803B0, sizeof VS::Content::legacyEtmDiscOffsets,
@@ -276,28 +303,33 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
      sizeof VS::Content::legacyWepDiscOffsets},  // G00056 D_800E8D00
     {"BATTLE/BATTLE.PRG", 0x80600, sizeof VS::Content::legacyWepSectorCounts,
      &VS::Content::legacyWepSectorCounts,
-     sizeof VS::Content::legacyWepSectorCounts},  // G00057 _wepFileSectorOffsets
-    {"BATTLE/BATTLE.PRG", 0x80680, sizeof VS::Battle::chainAbilityAnimationGroups,
+     sizeof VS::Content::legacyWepSectorCounts},  // G00057
+                                                  // _wepFileSectorOffsets
+    {"BATTLE/BATTLE.PRG", 0x80680,
+     sizeof VS::Battle::chainAbilityAnimationGroups,
      &VS::Battle::chainAbilityAnimationGroups,
      sizeof VS::Battle::chainAbilityAnimationGroups},  // G00058 D_800E8E80
     {"BATTLE/BATTLE.PRG", 0x8068E,
      sizeof VS::Content::legacyMaterialSequenceDiscOffsets,
      &VS::Content::legacyMaterialSequenceDiscOffsets,
-     sizeof VS::Content::legacyMaterialSequenceDiscOffsets},  // G00059 D_800E8E8E
+     sizeof VS::Content::legacyMaterialSequenceDiscOffsets},  // G00059
+                                                              // D_800E8E8E
     {"BATTLE/BATTLE.PRG", 0x806A3,
      sizeof VS::Content::legacyMaterialSequenceSectorCounts,
      &VS::Content::legacyMaterialSequenceSectorCounts,
-     sizeof VS::Content::legacyMaterialSequenceSectorCounts},  // G00060 D_800E8EA3
+     sizeof VS::Content::legacyMaterialSequenceSectorCounts},  // G00060
+                                                               // D_800E8EA3
     {"BATTLE/BATTLE.PRG", 0x806A8,
      sizeof VS::Content::legacyMaterialModelSequenceDiscOffsets,
      &VS::Content::legacyMaterialModelSequenceDiscOffsets,
      sizeof VS::Content::legacyMaterialModelSequenceDiscOffsets},  // G00061
-                                                              // D_800E8EA8
+                                                                   // D_800E8EA8
     {"BATTLE/BATTLE.PRG", 0x806FC,
      sizeof VS::Content::legacyMaterialModelSequenceSectorCounts,
      &VS::Content::legacyMaterialModelSequenceSectorCounts,
-     sizeof VS::Content::legacyMaterialModelSequenceSectorCounts},  // G00062
-                                                               // D_800E8EFC
+     sizeof VS::Content::
+         legacyMaterialModelSequenceSectorCounts},  // G00062
+                                                    // D_800E8EFC
     {"BATTLE/BATTLE.PRG", 0x80728, sizeof VS::Content::objectDataLoadStep,
      &VS::Content::objectDataLoadStep,
      sizeof VS::Content::objectDataLoadStep},  // G00063
@@ -334,13 +366,15 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x807D0, sizeof VS::Field::kGimmickRollOrientations,
      &VS::Field::kGimmickRollOrientations,
      sizeof VS::Field::kGimmickRollOrientations},  // G00076 D_800E8FD0
-    {"BATTLE/BATTLE.PRG", 0x80830, sizeof VS::Field::kGimmickOrientationRotations,
+    {"BATTLE/BATTLE.PRG", 0x80830,
+     sizeof VS::Field::kGimmickOrientationRotations,
      &VS::Field::kGimmickOrientationRotations,
      sizeof VS::Field::kGimmickOrientationRotations},  // G00077 D_800E9030
     {"BATTLE/BATTLE.PRG", 0x80890, sizeof VS::Actors::drawnWeaponAnimationBases,
      &VS::Actors::drawnWeaponAnimationBases,
      sizeof VS::Actors::drawnWeaponAnimationBases},  // G00078 D_800E9090
-    {"BATTLE/BATTLE.PRG", 0x8089C, sizeof VS::Actors::sheathedWeaponAnimationBases,
+    {"BATTLE/BATTLE.PRG", 0x8089C,
+     sizeof VS::Actors::sheathedWeaponAnimationBases,
      &VS::Actors::sheathedWeaponAnimationBases,
      sizeof VS::Actors::sheathedWeaponAnimationBases},  // G00079 D_800E909C
     {"BATTLE/BATTLE.PRG", 0x808A8, sizeof VS::Field::interactingGimmickId,
@@ -355,16 +389,19 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x808C3, sizeof VS::Actors::motionResultAnimations,
      &VS::Actors::motionResultAnimations,
      sizeof VS::Actors::motionResultAnimations},  // G00084 D_800E90C3
-    {"BATTLE/BATTLE.PRG", 0x808C4, sizeof VS::Actors::motionResultOneAnimationId,
+    {"BATTLE/BATTLE.PRG", 0x808C4,
+     sizeof VS::Actors::motionResultOneAnimationId,
      &VS::Actors::motionResultOneAnimationId,
      sizeof VS::Actors::motionResultOneAnimationId},  // G00085 D_800E90C4
     {"BATTLE/BATTLE.PRG", 0x808C6, sizeof VS::Actors::hangMotionAnimationId,
      &VS::Actors::hangMotionAnimationId,
      sizeof VS::Actors::hangMotionAnimationId},  // G00086 D_800E90C6
-    {"BATTLE/BATTLE.PRG", 0x808CC, sizeof VS::Actors::slowQuadrantMoveAnimations,
+    {"BATTLE/BATTLE.PRG", 0x808CC,
+     sizeof VS::Actors::slowQuadrantMoveAnimations,
      &VS::Actors::slowQuadrantMoveAnimations,
      sizeof VS::Actors::slowQuadrantMoveAnimations},  // G00087 D_800E90CC
-    {"BATTLE/BATTLE.PRG", 0x808D0, sizeof VS::Actors::fastQuadrantMoveAnimations,
+    {"BATTLE/BATTLE.PRG", 0x808D0,
+     sizeof VS::Actors::fastQuadrantMoveAnimations,
      &VS::Actors::fastQuadrantMoveAnimations,
      sizeof VS::Actors::fastQuadrantMoveAnimations},  // G00088 D_800E90D0
     {"BATTLE/BATTLE.PRG", 0x8096C, sizeof VS::Actors::secondarySlotSequences,
@@ -400,7 +437,8 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x80A08, sizeof VS::Field::kGimmickRollHeightSteps,
      &VS::Field::kGimmickRollHeightSteps,
      sizeof VS::Field::kGimmickRollHeightSteps},  // G00099 D_800E9208
-    {"BATTLE/BATTLE.PRG", 0x80A18, sizeof VS::Field::kGimmickRollDisplacementSteps,
+    {"BATTLE/BATTLE.PRG", 0x80A18,
+     sizeof VS::Field::kGimmickRollDisplacementSteps,
      &VS::Field::kGimmickRollDisplacementSteps,
      sizeof VS::Field::kGimmickRollDisplacementSteps},  // G00100 D_800E9218
     {"BATTLE/BATTLE.PRG", 0x80A28, sizeof VS::Field::kGimmickRollAngleSteps,
@@ -452,7 +490,8 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
      &VS::Event::specialSubroutineScript,
      sizeof VS::Event::specialSubroutineScript},  // G00118 D_800E9B5C
     {"BATTLE/BATTLE.PRG", 0x81430, sizeof VS::Event::opcodeSizes,
-     &VS::Event::opcodeSizes, sizeof VS::Event::opcodeSizes},  // G00132 D_800E9C30
+     &VS::Event::opcodeSizes,
+     sizeof VS::Event::opcodeSizes},  // G00132 D_800E9C30
     {"BATTLE/BATTLE.PRG", 0x81A34, sizeof VS::Battle::sphereArcBases,
      &VS::Battle::sphereArcBases,
      sizeof VS::Battle::sphereArcBases},  // G00134 D_800EA234
@@ -465,13 +504,15 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x81C6C, sizeof VS::Battle::sphereWireframeCommands,
      &VS::Battle::sphereWireframeCommands,
      sizeof VS::Battle::sphereWireframeCommands},  // G00137 D_800EA46C
-    {"BATTLE/BATTLE.PRG", 0x81E70, sizeof VS::Battle::positionCursorSpriteOffsets,
+    {"BATTLE/BATTLE.PRG", 0x81E70,
+     sizeof VS::Battle::positionCursorSpriteOffsets,
      &VS::Battle::positionCursorSpriteOffsets,
      sizeof VS::Battle::positionCursorSpriteOffsets},  // G00139 D_800EA670
     {"BATTLE/BATTLE.PRG", 0x81E84, sizeof VS::Battle::positionCursorSpriteSizes,
      &VS::Battle::positionCursorSpriteSizes,
      sizeof VS::Battle::positionCursorSpriteSizes},  // G00140 D_800EA684
-    {"BATTLE/BATTLE.PRG", 0x81E98, sizeof VS::Battle::positionCursorSpriteTexCoords,
+    {"BATTLE/BATTLE.PRG", 0x81E98,
+     sizeof VS::Battle::positionCursorSpriteTexCoords,
      &VS::Battle::positionCursorSpriteTexCoords,
      sizeof VS::Battle::positionCursorSpriteTexCoords},  // G00141 D_800EA698
     {"BATTLE/BATTLE.PRG", 0x81EAC, sizeof VS::Battle::positionCursorBlinkFrame,
@@ -514,13 +555,15 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x831AE, sizeof VS::Battle::hudStatusIconsHidden,
      &VS::Battle::hudStatusIconsHidden,
      sizeof VS::Battle::hudStatusIconsHidden},  // G00156 D_800EB9AE
-    {"BATTLE/BATTLE.PRG", 0x831AF, sizeof VS::Battle::hudHidden, &VS::Battle::hudHidden,
+    {"BATTLE/BATTLE.PRG", 0x831AF, sizeof VS::Battle::hudHidden,
+     &VS::Battle::hudHidden,
      sizeof VS::Battle::hudHidden},  // G00157 D_800EB9AF
     {"BATTLE/BATTLE.PRG", 0x831B0, sizeof VS::Battle::hudSlideOffset,
      &VS::Battle::hudSlideOffset,
      sizeof VS::Battle::hudSlideOffset},  // G00158 D_800EB9B0
     {"BATTLE/BATTLE.PRG", 0x831CC, sizeof VS::Battle::hudBattleMode,
-     &VS::Battle::hudBattleMode, sizeof VS::Battle::hudBattleMode},  // G00165 D_800EB9CC
+     &VS::Battle::hudBattleMode,
+     sizeof VS::Battle::hudBattleMode},  // G00165 D_800EB9CC
     {"BATTLE/BATTLE.PRG", 0x831CD, sizeof VS::Battle::battleModeIndicatorStep,
      &VS::Battle::battleModeIndicatorStep,
      sizeof VS::Battle::battleModeIndicatorStep},  // G00166 D_800EB9CD
@@ -557,8 +600,9 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
      sizeof VS::Render::kStatGaugeColors},  // G00180 D_800EBC04
     {"BATTLE/BATTLE.PRG", 0x83414, sizeof VS::Battle::statusIconTexOffsets,
      &VS::Battle::statusIconTexOffsets,
-     sizeof VS::Battle::statusIconTexOffsets},  // G00181
-                                           // vs_battle_statusIconTexOffsets
+     sizeof VS::Battle::
+         statusIconTexOffsets},  // G00181
+                                 // vs_battle_statusIconTexOffsets
     {"BATTLE/BATTLE.PRG", 0x83454, sizeof VS::Battle::limbStatusColors,
      &VS::Battle::limbStatusColors,
      sizeof VS::Battle::limbStatusColors},  // G00182 D_800EBC54
@@ -575,28 +619,34 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x83488, sizeof VS::Battle::firstShortcutDigitOffsets,
      &VS::Battle::firstShortcutDigitOffsets,
      sizeof VS::Battle::firstShortcutDigitOffsets},  // G00186 D_800EBC88
-    {"BATTLE/BATTLE.PRG", 0x83498, sizeof VS::Battle::secondShortcutMarkerPositions,
+    {"BATTLE/BATTLE.PRG", 0x83498,
+     sizeof VS::Battle::secondShortcutMarkerPositions,
      &VS::Battle::secondShortcutMarkerPositions,
      sizeof VS::Battle::secondShortcutMarkerPositions},  // G00187 D_800EBC98
-    {"BATTLE/BATTLE.PRG", 0x834A0, sizeof VS::Battle::secondShortcutIconPositions,
+    {"BATTLE/BATTLE.PRG", 0x834A0,
+     sizeof VS::Battle::secondShortcutIconPositions,
      &VS::Battle::secondShortcutIconPositions,
      sizeof VS::Battle::secondShortcutIconPositions},  // G00188 D_800EBCA0
     {"BATTLE/BATTLE.PRG", 0x834A8, sizeof VS::Battle::secondShortcutIconSizes,
      &VS::Battle::secondShortcutIconSizes,
      sizeof VS::Battle::secondShortcutIconSizes},  // G00189 D_800EBCA8
-    {"BATTLE/BATTLE.PRG", 0x834B8, sizeof VS::Battle::secondShortcutIconTexCoords,
+    {"BATTLE/BATTLE.PRG", 0x834B8,
+     sizeof VS::Battle::secondShortcutIconTexCoords,
      &VS::Battle::secondShortcutIconTexCoords,
      sizeof VS::Battle::secondShortcutIconTexCoords},  // G00190 D_800EBCB8
-    {"BATTLE/BATTLE.PRG", 0x834C0, sizeof VS::Battle::firstShortcutMarkerPositions,
+    {"BATTLE/BATTLE.PRG", 0x834C0,
+     sizeof VS::Battle::firstShortcutMarkerPositions,
      &VS::Battle::firstShortcutMarkerPositions,
      sizeof VS::Battle::firstShortcutMarkerPositions},  // G00191 D_800EBCC0
-    {"BATTLE/BATTLE.PRG", 0x834C8, sizeof VS::Battle::firstShortcutIconPositions,
+    {"BATTLE/BATTLE.PRG", 0x834C8,
+     sizeof VS::Battle::firstShortcutIconPositions,
      &VS::Battle::firstShortcutIconPositions,
      sizeof VS::Battle::firstShortcutIconPositions},  // G00192 D_800EBCC8
     {"BATTLE/BATTLE.PRG", 0x834D0, sizeof VS::Battle::firstShortcutIconSizes,
      &VS::Battle::firstShortcutIconSizes,
      sizeof VS::Battle::firstShortcutIconSizes},  // G00193 D_800EBCD0
-    {"BATTLE/BATTLE.PRG", 0x834E0, sizeof VS::Battle::firstShortcutIconTexCoords,
+    {"BATTLE/BATTLE.PRG", 0x834E0,
+     sizeof VS::Battle::firstShortcutIconTexCoords,
      &VS::Battle::firstShortcutIconTexCoords,
      sizeof VS::Battle::firstShortcutIconTexCoords},  // G00194 D_800EBCE0
     {"BATTLE/BATTLE.PRG", 0x834E8, sizeof VS::Battle::shortcutHudAnimationStep,
@@ -608,7 +658,8 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x83514, sizeof VS::Battle::limbDisplaySpriteSizes,
      &VS::Battle::limbDisplaySpriteSizes,
      sizeof VS::Battle::limbDisplaySpriteSizes},  // G00197 D_800EBD14
-    {"BATTLE/BATTLE.PRG", 0x8353C, sizeof VS::Battle::limbDisplaySpriteTexCoords,
+    {"BATTLE/BATTLE.PRG", 0x8353C,
+     sizeof VS::Battle::limbDisplaySpriteTexCoords,
      &VS::Battle::limbDisplaySpriteTexCoords,
      sizeof VS::Battle::limbDisplaySpriteTexCoords},  // G00198 D_800EBD3C
     {"BATTLE/BATTLE.PRG", 0x83564, sizeof VS::Battle::battleModeIndicatorWobble,
@@ -640,12 +691,14 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
      sizeof VS::Battle::spellClassCounts},  // G00205 _spellClassCounts
     {"BATTLE/BATTLE.PRG", 0x835BC, sizeof VS::Battle::chainAbilityActionIds,
      &VS::Battle::chainAbilityActionIds,
-     sizeof VS::Battle::chainAbilityActionIds},  // G00207
-                                            // vs_battle_chainAbilityOffsets
+     sizeof VS::Battle::
+         chainAbilityActionIds},  // G00207
+                                  // vs_battle_chainAbilityOffsets
     {"BATTLE/BATTLE.PRG", 0x835CC, sizeof VS::Battle::defenseAbilityActionIds,
      &VS::Battle::defenseAbilityActionIds,
-     sizeof VS::Battle::defenseAbilityActionIds},  // G00208
-                                              // vs_battle_defenseAbilityOffsets
+     sizeof VS::Battle::
+         defenseAbilityActionIds},  // G00208
+                                    // vs_battle_defenseAbilityOffsets
     {"BATTLE/BATTLE.PRG", 0x835DC, sizeof VS::Battle::doorStrings,
      &VS::Battle::doorStrings,
      sizeof VS::Battle::doorStrings},  // G00209 D_800EBDDC
@@ -678,14 +731,16 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
      &VS::Effects::trailAdditiveColors,
      sizeof VS::Effects::trailAdditiveColors},  // G00220 D_800EC2E8
     {"BATTLE/BATTLE.PRG", 0x83B08, sizeof VS::Effects::trailColors,
-     &VS::Effects::trailColors, sizeof VS::Effects::trailColors},  // G00221 D_800EC308
+     &VS::Effects::trailColors,
+     sizeof VS::Effects::trailColors},  // G00221 D_800EC308
     {"BATTLE/BATTLE.PRG", 0x83B28, sizeof VS::Effects::emissionCounter,
      &VS::Effects::emissionCounter,
      sizeof VS::Effects::emissionCounter},  // G00223 D_800EC328
     {"BATTLE/BATTLE.PRG", 0x83B2C, sizeof VS::Effects::actionVariantValues,
      &VS::Effects::actionVariantValues,
      sizeof VS::Effects::actionVariantValues},  // G00224 D_800EC32C
-    {"BATTLE/BATTLE.PRG", 0x83B30, sizeof VS::Effects::pairedParticleColorPresets,
+    {"BATTLE/BATTLE.PRG", 0x83B30,
+     sizeof VS::Effects::pairedParticleColorPresets,
      &VS::Effects::pairedParticleColorPresets,
      sizeof VS::Effects::pairedParticleColorPresets},  // G00225 D_800EC330
     {"BATTLE/BATTLE.PRG", 0x83B68, sizeof VS::Effects::particleColorPresetTable,
@@ -695,7 +750,8 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
      &VS::Effects::lastReactionSoundVariant,
      sizeof VS::Effects::lastReactionSoundVariant},  // G00228 D_800EC4B8
     {"BATTLE/BATTLE.PRG", 0x83CBC, sizeof VS::Effects::emptyPackage,
-     &VS::Effects::emptyPackage, sizeof VS::Effects::emptyPackage},  // G00229 D_800EC4BC
+     &VS::Effects::emptyPackage,
+     sizeof VS::Effects::emptyPackage},  // G00229 D_800EC4BC
     {"BATTLE/BATTLE.PRG", 0x88EEC, sizeof VS::Battle::Ai::directionDeltas,
      &VS::Battle::Ai::directionDeltas,
      sizeof VS::Battle::Ai::directionDeltas},  // G00230 D_800F16EC
@@ -706,7 +762,8 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
      &VS::Battle::Ai::routeStepDirections,
      sizeof VS::Battle::Ai::routeStepDirections},  // G00232 D_800F175C
     {"BATTLE/BATTLE.PRG", 0x88FB8, sizeof VS::Battle::Ai::viewAngles,
-     &VS::Battle::Ai::viewAngles, sizeof VS::Battle::Ai::viewAngles},  // G00234 D_800F17B8
+     &VS::Battle::Ai::viewAngles,
+     sizeof VS::Battle::Ai::viewAngles},  // G00234 D_800F17B8
     {"BATTLE/BATTLE.PRG", 0x88FC8, sizeof VS::Battle::Ai::settingsBits8Values,
      &VS::Battle::Ai::settingsBits8Values,
      sizeof VS::Battle::Ai::settingsBits8Values},  // G00235 D_800F17C8
@@ -1419,24 +1476,29 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
      sizeof VS::Items::materialModifiers},  // G01905 vs_main_materialModifiers
     {"SLUS_010.40", 0x3F6CC, sizeof VS::Battle::statusEffectParams,
      &VS::Battle::statusEffectParams,
-     sizeof VS::Battle::statusEffectParams},  // G01906 vs_main_statusEffectParams
+     sizeof VS::Battle::statusEffectParams},  // G01906
+                                              // vs_main_statusEffectParams
     {"SLUS_010.40", 0x3F8CC, sizeof VS::Field::locationDestinations,
      &VS::Field::locationDestinations,
-     sizeof VS::Field::locationDestinations},  // G01913 vs_main_locationZoneMapIds
+     sizeof VS::Field::locationDestinations},  // G01913
+                                               // vs_main_locationZoneMapIds
     {"SLUS_010.40", 0x404CC, sizeof VS::Field::zoneMusicIds,
      &VS::Field::zoneMusicIds,
-     sizeof VS::Field::zoneMusicIds},  // G01914 vs_main_zndMusicMap (D_8004FCCC)
+     sizeof VS::Field::zoneMusicIds},  // G01914 vs_main_zndMusicMap
+                                       // (D_8004FCCC)
     {"SLUS_010.40", 0x405D0, sizeof VS::Actors::placeholderActorName,
      VS::Actors::placeholderActorName.data(),
      sizeof VS::Actors::placeholderActorName},  // G01915 D_8004FDD0
     {"SLUS_010.40", 0x405E4, sizeof VS::Battle::breakArtPointRequirements,
      &VS::Battle::breakArtPointRequirements,
-     sizeof VS::Battle::breakArtPointRequirements},  // G01916
-                                                // vs_main_artsPointsRequirements
+     sizeof VS::Battle::
+         breakArtPointRequirements},  // G01916
+                                      // vs_main_artsPointsRequirements
     {"SLUS_010.40", 0x4065C, sizeof VS::Battle::battleAbilityPointRequirements,
      &VS::Battle::battleAbilityPointRequirements,
-     sizeof VS::Battle::battleAbilityPointRequirements},  // G01917
-                                                     // vs_main_battleAbilitiesPointsRequirements
+     sizeof VS::Battle::
+         battleAbilityPointRequirements},  // G01917
+                                           // vs_main_battleAbilitiesPointsRequirements
     {"SLUS_010.40", 0x40688, sizeof VS::Actors::usesSecondaryBodyModel,
      VS::Actors::usesSecondaryBodyModel.data(),
      sizeof VS::Actors::usesSecondaryBodyModel},  // G01918 D_8004FE88
@@ -1466,26 +1528,27 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
      sizeof VS::Title::saveMenuBackground},  // G02089 _saveMenuBg_clut
     {"EFFECT/PLG074.BIN", 0x577C, 4u, VS::Content::plg074TrailEmissionCounter,
      sizeof VS::Content::plg074TrailEmissionCounter},
-    {"BATTLE/BATTLE.PRG", 0x81268, 72u, Content_battleShadowVertices,
-     sizeof Content_battleShadowVertices},
-    {"BATTLE/BATTLE.PRG", 0x812D4, 96u, Content_battleShadowFaces,
-     sizeof Content_battleShadowFaces},
+    {"BATTLE/BATTLE.PRG", 0x81268, 72u, VS::Content::battleShadowVertices,
+     sizeof VS::Content::battleShadowVertices},
+    {"BATTLE/BATTLE.PRG", 0x812D4, 96u, VS::Content::battleShadowFaces,
+     sizeof VS::Content::battleShadowFaces},
     {"BATTLE/BATTLE.PRG", 0x88F58, 4u, VS::Content::battleAiHesitationLengths,
      sizeof VS::Content::battleAiHesitationLengths},
-    {"BATTLE/BATTLE.PRG", 0x83278, 320u, Content_battleMainMenuHelpText,
-     sizeof Content_battleMainMenuHelpText},
-    {"BATTLE/BATTLE.PRG", 0x1060, 152u, Content_battleLimbNameBytes,
-     sizeof Content_battleLimbNameBytes},
-    {"BATTLE/BATTLE.PRG", 0x80B0C, 1820u, Content_battleGimmickTemplateBytes,
-     sizeof Content_battleGimmickTemplateBytes},
-    {"BATTLE/BATTLE.PRG", 0x823AC, 2524u, Content_battleTextboxFrameBytes,
-     sizeof Content_battleTextboxFrameBytes},
-    {"BATTLE/BATTLE.PRG", 0x7FD48, 116u, Content_battleTriggerMarkerBytes,
-     sizeof Content_battleTriggerMarkerBytes},
-    {"BATTLE/BATTLE.PRG", 0x41C, 664u, Content_battleSkyDome,
-     sizeof Content_battleSkyDome},
-    {"SLUS_010.40", 0x800, 335872u, Content_residentLfoSamples,
-     sizeof Content_residentLfoSamples},
+    {"BATTLE/BATTLE.PRG", 0x83278, 320u, VS::Content::battleMainMenuHelpText,
+     sizeof VS::Content::battleMainMenuHelpText},
+    {"BATTLE/BATTLE.PRG", 0x1060, 152u, VS::Content::battleLimbNameBytes,
+     sizeof VS::Content::battleLimbNameBytes},
+    {"BATTLE/BATTLE.PRG", 0x80B0C, 1820u,
+     VS::Content::battleGimmickTemplateBytes,
+     sizeof VS::Content::battleGimmickTemplateBytes},
+    {"BATTLE/BATTLE.PRG", 0x823AC, 2524u, VS::Content::battleTextboxFrameBytes,
+     sizeof VS::Content::battleTextboxFrameBytes},
+    {"BATTLE/BATTLE.PRG", 0x7FD48, 116u, VS::Content::battleTriggerMarkerBytes,
+     sizeof VS::Content::battleTriggerMarkerBytes},
+    {"BATTLE/BATTLE.PRG", 0x41C, 664u, VS::Content::battleSkyDome,
+     sizeof VS::Content::battleSkyDome},
+    {"SLUS_010.40", 0x800, 335872u, VS::Content::residentLfoSamples,
+     sizeof VS::Content::residentLfoSamples},
 };
-const unsigned VS::Content::kModuleDataCount = sizeof VS::Content::kModuleData / sizeof VS::Content::kModuleData[0];
-
+const unsigned VS::Content::kModuleDataCount =
+    sizeof VS::Content::kModuleData / sizeof VS::Content::kModuleData[0];

@@ -435,7 +435,7 @@ void UpdateLiveVibrationPatterns() {
 }
 
 void PlayLiveVibrationPreset(int index) {
-  const auto presets = std::as_bytes(std::span(vibrationPresets));
+  const auto presets = std::as_bytes(std::span(kVibrationPresets));
   const auto started = PlayVibrationPreset(liveVibration, presets, index);
   if (!started && started.error() != VibrationPresetError::kNotListed) {
     Refused("PlayLiveVibrationPreset",

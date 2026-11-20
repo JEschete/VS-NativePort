@@ -30,6 +30,11 @@ SOURCE_SUFFIXES = {".c", ".cpp"}
 # The owner's rule (2026-10-31): the port is C++. The disc's original C and assembly stay under resources\ as reference.
 FORBIDDEN_SUFFIXES = {".c", ".s", ".asm"}
 INLINE_ASSEMBLY = re.compile(r"\b(?:__asm__|__asm|_asm|asm)\b\s*(?:volatile\s*)?[({]|\b(?:__asm|_asm)\b\s+\w")
+# Options that relax a strict compile: the retired copied-code property, plain char made unsigned, C/MS dialect
+# semantics (wrapping overflow, kept null checks, falling off a function, non-finite loops) and demoted errors.
+RELAXED_OPTION = re.compile(
+    r"\$\(VSCopiedCOptions\)|(?<!\S)/J(?!\S)|-funsigned-char|-fwrapv|-fno-strict-overflow|-fno-delete-null-pointer-checks"
+    r"|-fno-strict-return|-fno-finite-loops|-fms-extensions|-Wno-error|/permissive(?!-)")
 NATIVE_SUFFIXES = SOURCE_SUFFIXES | {".h", ".hpp", ".inl"}
 
 COPIED_VALUES = {"", "x", "stub", "retired"}
@@ -109,7 +114,6 @@ class Report:
     promotion_inventory: dict = field(default_factory=dict)
     source_classes: dict[str, dict] = field(default_factory=dict)
     class_counts: dict[str, int] = field(default_factory=dict)
-    relaxation_debt: list[dict] = field(default_factory=list)
     behavior: dict = field(default_factory=dict)
     bridge_consumers: dict[str, dict] = field(default_factory=dict)
     legacy_consumers: dict[str, dict] = field(default_factory=dict)
@@ -486,7 +490,8 @@ def local(tag: str) -> str:
 
 def relaxation_of(root: ET.Element) -> bool:
     for group in root.iter():
-        if local(group.tag) == "ItemDefinitionGroup":
+        # The instrumented coverage build reports warnings instead of failing on them; it is not a product build.
+        if local(group.tag) == "ItemDefinitionGroup" and "$(VSCoverage)" not in group.attrib.get("Condition", ""):
             for child in group:
                 if local(child.tag) == "ClCompile" and metadata_relaxed(child):
                     return True
@@ -500,7 +505,9 @@ def metadata_relaxed(element: ET.Element) -> bool:
             return True
         if tag == "WarningLevel" and value not in {"Level4", "EnableAllWarnings"}:
             return True
-        if tag == "AdditionalOptions" and "$(VSCopiedCOptions)" in value:
+        if tag == "ConformanceMode" and value.lower() == "false":
+            return True
+        if tag == "AdditionalOptions" and RELAXED_OPTION.search(value):
             return True
     return False
 
@@ -518,10 +525,6 @@ class Gates:
         self.verify = read_csv(workspace.verify)
         self.bridges = read_csv(workspace.bridges)
         self.slices = read_csv(workspace.slices)
-        self.relaxed_list = (
-            {slash(entry) for entry in workspace.relaxed_sources.read_text(encoding="utf-8").split()}
-            if workspace.relaxed_sources.is_file() else set()
-        )
         self.manifest = {slash(path) for path in json.loads(workspace.manifest.read_text(encoding="utf-8"))}
         self.owned_paths = {slash(row[column]) for row in self.owned for column in ("path", "header") if row[column]}
         baseline = json.loads(workspace.baseline.read_text(encoding="utf-8"))
@@ -766,32 +769,23 @@ class Gates:
     def source_class(self, path: str) -> str:
         if path in self.retiring or "/Legacy/" in path:
             return "replacement-legacy"
-        if path in self.manifest and path not in self.owned_paths:
-            return "generated-cpp"
-        return "transitional-cpp" if path in self.relaxed_list else "strict-cpp"
+        return "strict-cpp"
 
     def quality_gate(self) -> None:
+        """Every source compiles with the strict settings (#483): a relaxed compile, or a list that grants one, fails."""
         report = self.report
-        owned_functions = Counter(slash(row["path"]) for row in self.owned if row["kind"] == "function")
         for path, entry in sorted(self.compile.items()):
-            source_class = self.source_class(path)
             report.source_classes[path] = {
-                "class": source_class, "compile": entry["compile"], "projects": sorted(set(entry["projects"])),
-                "quality_scope": source_class != "generated-cpp", "baseline_findings": self.debt[path],
+                "class": self.source_class(path), "compile": entry["compile"],
+                "projects": sorted(set(entry["projects"])), "baseline_findings": self.debt[path],
             }
-            maintained = source_class == "transitional-cpp" or (source_class == "replacement-legacy" and owned_functions[path])
-            if maintained and entry["compile"] == "relaxed":
-                report.relaxation_debt.append({
-                    "path": path, "class": source_class, "owned_functions": owned_functions[path],
-                    "baseline_findings": self.debt[path],
-                })
-            if (path in self.owned_paths and path.endswith(".cpp") and entry["compile"] == "relaxed"
-                    and path not in self.relaxed_list):
-                report.add("quality", "owned-cpp-relaxed", path, "owned C++ source is compiled with relaxed settings")
-        for path in sorted(self.relaxed_list):
-            if self.compile.get(path, {}).get("compile") != "relaxed":
-                report.add("quality", "relaxed-list-stale", path,
-                           "relaxed_sources.txt names a file that is missing or no longer compiled relaxed")
+            if entry["compile"] == "relaxed":
+                report.add("quality", "relaxed-compile", path,
+                           "compiled with relaxed settings; every source compiles strictly")
+        if self.workspace.relaxed_sources.is_file():
+            report.add("quality", "relaxed-list", slash(os.path.relpath(self.workspace.relaxed_sources,
+                                                                        self.workspace.root)),
+                       "relaxed compilation is retired; no list may grant it")
         report.class_counts = dict(sorted(Counter(item["class"] for item in report.source_classes.values()).items()))
         for record in self.promotion:
             owned = self.owned_by_id.get(record["id"])
@@ -1115,10 +1109,6 @@ def markdown(report: Report) -> str:
         lines.append(f"| {path} | {entry['rows']} | " + " | ".join(str(entry[step]) for step in STEPS) + " |")
     lines += ["", "## Quality and compilation", ""]
     lines += [f"- {name}: {count} files" for name, count in report.class_counts.items()]
-    lines += ["", "Transitional C++ compiled with relaxed settings:", "", "| File | Owned functions | Baseline findings |",
-              "| --- | ---: | ---: |"]
-    lines += [f"| {item['path']} | {item['owned_functions']} | {item['baseline_findings']} |"
-              for item in report.relaxation_debt]
     lines += ["", "## Behavior verification", "", f"- {json.dumps(report.behavior)}", "",
               "## Compatibility retirement", "",
               "| EC | Direct owned | Direct generated | Direct other | Indirect owned | Indirect generated | Indirect other |",
@@ -1165,7 +1155,7 @@ def main() -> int:
     inventory = report.promotion_inventory
     print(f"ownership {report.ownership_counts}")
     print(f"promotion {inventory['cpp']} steps {inventory['steps']}")
-    print(f"quality {report.class_counts}; {len(report.relaxation_debt)} relaxed transitional C++ files")
+    print(f"quality {report.class_counts}")
     print(f"behavior {report.behavior}")
     print(f"retirement {[(ec, entry['direct_counts']) for ec, entry in report.bridge_consumers.items()]}")
     print(f"{len(report.issues)} violations; reports in build/quality")

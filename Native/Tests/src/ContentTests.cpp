@@ -106,8 +106,6 @@ int Tests_DefaultEffectPackageLoaded(void);
 int TestsRoomSfxBankBinding(void);
 int TestsDiscReadSizeContract(void);
 int CheckMenuDiscStringsLoaded(void);
-// Reviewed source blob, defined with the generated module data (#280).
-extern unsigned int Content_battleTriggerMarkerBytes[29];
 
 namespace {
 constexpr auto kMesh10Data = std::to_array<VS::Content::ModuleDataEntry>({
@@ -552,9 +550,10 @@ void CheckTrapPackageSourcePoints(const Content::DataStore& store,
   const auto* entry = store.Find(path);
   REQUIRE(entry != nullptr);
   REQUIRE(entry->size <= 65535);
-  CHECK(entry->lba == VS_E000_P_LBA + VS::Effects::packageFiles[effect_id].lba);
+  CHECK(entry->lba ==
+        VS_E000_P_LBA + VS::Effects::kPackageFiles[effect_id].lba);
   CHECK(entry->SectorCount() * Content::DataStore::kDataSectorBytes ==
-        VS::Effects::packageFiles[effect_id].size);
+        VS::Effects::kPackageFiles[effect_id].size);
   auto bytes = store.ReadAll(*entry);
   REQUIRE(bytes);
   TrapPackageAuditHost host;
@@ -613,7 +612,7 @@ TEST_CASE("Original room trap kinds have bounded source-package mappings",
     REQUIRE(kind < kNonTrapFloorTriggerKind);
     const auto effect = static_cast<std::uint16_t>(kind + 6);
     const auto* file = store->FindBySector(
-        VS_E000_P_LBA + VS::Effects::packageFiles[effect].lba);
+        VS_E000_P_LBA + VS::Effects::kPackageFiles[effect].lba);
     REQUIRE(file != nullptr);
     CheckTrapPackageSourcePoints(*store, effect, file->path);
   }
@@ -681,7 +680,7 @@ TEST_CASE("Generated module extents stop before the next source symbol",
                 (kLastRoomWord * sizeof VS::Field::countableRoomMask[0])) ==
         &VS::Field::countableRoomMask[kLastRoomWord]);
   CHECK(Content::ResolveModuleAddress(symbols, kBattle, kTriggerMarkerBytes) ==
-        Content_battleTriggerMarkerBytes);
+        VS::Content::battleTriggerMarkerBytes);
 }
 
 TEST_CASE(
@@ -918,8 +917,11 @@ void CheckLoadedTiledRingData(const Content::DataStore& store) {
     CheckTemplateBinding(expected);
     CheckTemplateSourceBytes(store, expected);
   }
+  // The entry only names the bytes to compare; nothing writes the constant.
   const VS::Content::ModuleDataEntry initialized{
-      "EFFECT/PLG044.BIN", 3832, 32, VS::Effects::Plg044::tiledRingColorFactors,
+      "EFFECT/PLG044.BIN", 3832, 32,
+      const_cast<void*>(static_cast<const void*>(
+          VS::Effects::Plg044::kTiledRingColorFactors)),
       32};
   CheckTemplateSourceBytes(store, initialized);
   const VS::Content::ModuleDataEntry shared{

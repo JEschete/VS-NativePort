@@ -14,6 +14,7 @@
 
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscQueue.hpp"
+#include "Content/ModuleData.hpp"
 #include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -114,10 +115,10 @@ constexpr std::size_t kTiledLayoutFileAt = 0x84;
 constexpr std::size_t kTiledSectionBytes = kTiledLayoutFileAt + kDiscFileBytes;
 }  // namespace
 
-// Complete D_80068C1C definition from BATTLE.PRG:0x41C, loaded by Content.
-extern unsigned int Content_battleSkyDome[kSkyDomeWords];
-
-static_assert(sizeof(Content_battleSkyDome) == VS::Render::kSkyDomeBytes);
+// VS::Content::battleSkyDome is the complete D_80068C1C definition from
+// BATTLE.PRG:0x41C, loaded by Content.
+static_assert(VS::Content::kBattleSkyDomeWords == kSkyDomeWords);
+static_assert(sizeof(VS::Content::battleSkyDome) == VS::Render::kSkyDomeBytes);
 static_assert(VS::Render::kSkyDomeVertexBytes ==
               kSkyDomeVertexWords * sizeof(unsigned int));
 static_assert(VS::Field::kSkyDomeVertexCount ==
@@ -350,7 +351,7 @@ std::optional<CollisionMapExtent> LiveBackgroundHost::CollisionMapSize() {
 }
 
 void LiveBackgroundHost::StoreSkyDomeColors(const SkyDomeColors& colors) {
-  const std::span dome(Content_battleSkyDome);
+  const std::span dome(VS::Content::battleSkyDome);
   for (std::size_t vertex = 0; vertex < colors.size(); ++vertex) {
     dome[(vertex * kSkyDomeVertexWords) + kSkyDomeColorWord] =
         colors.at(vertex);
@@ -418,7 +419,8 @@ void LiveBackgroundHost::DrawSkyDome(const CameraVector& position,
   }
   SetRotMatrix(&view);
   SetTransMatrix(&view);
-  Render::DrawLiveSkyDome(Content_battleSkyDome, sizeof Content_battleSkyDome);
+  Render::DrawLiveSkyDome(VS::Content::battleSkyDome,
+                          sizeof VS::Content::battleSkyDome);
 }
 
 CameraVector LiveBackgroundHost::ReferenceRotation() {

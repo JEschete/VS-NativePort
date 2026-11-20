@@ -122,25 +122,24 @@ def files_of(p: Project) -> list[tuple[str, str]]:
     return out
 
 
-def copied_settings_sources() -> frozenset[str]:
-    """Sources compiled with the copied-code settings: everything the copy tool writes, plus hand-maintained sources
-    not yet promoted (tools\\port\\relaxed_sources.txt). Promotion removes a file from the list (plan §8.2)."""
-    port = ROOT / "tools" / "port"
-    generated = json.loads((port / "copy_manifest.json").read_text(encoding="utf-8"))
-    listed = (port / "relaxed_sources.txt").read_text(encoding="utf-8").split()
-    return frozenset(path for path in (*generated, *listed) if path.endswith(".cpp"))
+def copied_sources() -> frozenset[str]:
+    """Sources the retired copy tool wrote (tools\\port\\copy_manifest.json, kept as their provenance record). They
+    include headers from every project, so they see the copied-code include directories. They compile with the same
+    strict settings as every other source (#483)."""
+    generated = json.loads((ROOT / "tools" / "port" / "copy_manifest.json").read_text(encoding="utf-8"))
+    return frozenset(path for path in generated if path.endswith(".cpp"))
 
 
-COPIED_SETTINGS = copied_settings_sources()
+COPIED_SOURCES = copied_sources()
 
 
-def uses_copied_settings(p: Project, path: str) -> bool:
-    return rel(ROOT, p.dir / path) in COPIED_SETTINGS
+def is_copied(p: Project, path: str) -> bool:
+    return rel(ROOT, p.dir / path) in COPIED_SOURCES
 
 
 def needs_c_headers(project: str, path: str) -> bool:
     path = path.replace("/", "\\")
-    return (uses_copied_settings(BY_NAME[project], path) or "\\Legacy\\" in "\\" + path
+    return (is_copied(BY_NAME[project], path) or "\\Legacy\\" in "\\" + path
             or project == "VS.Engine" and path in (
                 r"src\Audio\Driver\VoiceOutputLive.cpp",
                 r"src\Audio\Cutscene\StreamControlLive.cpp",
@@ -200,6 +199,9 @@ def needs_c_headers(project: str, path: str) -> bool:
             or project == "VS.Tests"
             or project == "VS.CombatLab"
             or project == "VS.Game" and path in (
+                r"src\Battle\Ai\RoomState.cpp",
+                r"src\Boot\OverlayReset.cpp",
+                r"src\Boot\PlayerSettings.cpp",
                 r"src\Boot\Encounter.cpp",
                 r"src\Diagnostics\PlayerObservation.cpp",
                 r"src\Battle\SphereTerrainLive.cpp",
@@ -493,16 +495,6 @@ def vcxproj(p: Project, files: list[tuple[str, str]]) -> str:
     for kind, path in files:
         if kind == "ClInclude":
             header_items.append(f'    <ClInclude Include="{path}" />')
-        elif uses_copied_settings(p, path):
-            # Copied decomp code gets a relaxed warning set until promoted (plan Â§8.2).
-            compile_items.append(f'    <ClCompile Include="{path}">\n'
-                                 f'      <TreatWarningAsError>false</TreatWarningAsError>\n'
-                                 f'      <WarningLevel>Level1</WarningLevel>\n'
-                                 f'      <ConformanceMode>false</ConformanceMode>\n'
-                                 f'      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)'
-                                 f'</AdditionalIncludeDirectories>\n'
-                                 f'      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>\n'
-                                 f'    </ClCompile>')
         elif needs_c_headers(p.name, path) and p.name != "VS.Tests":
             # Legacy shims include the C SDK headers of other projects.
             compile_items.append(f'    <ClCompile Include="{path}">\n'

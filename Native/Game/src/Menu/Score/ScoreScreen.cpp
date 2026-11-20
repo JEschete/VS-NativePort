@@ -1,4 +1,5 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+// Copied from the decomp by tools/port/copy_to_native.py; see each item's
+// decomp line.
 #include "Menu/Score/ScoreScreen.hpp"
 
 #include <cstdint>
@@ -24,7 +25,8 @@ std::int32_t VS::Menu::Score::cameraDistance;
 // decomp: _cameraHeightOffset (_cameraHeightOffset@src/MENU/MENU9.PRG/238.c)
 std::int16_t VS::Menu::Score::cameraHeightOffset;
 
-// decomp: _cameraPositionBackup (_cameraPositionBackup@src/MENU/MENU9.PRG/238.c)
+// decomp: _cameraPositionBackup
+// (_cameraPositionBackup@src/MENU/MENU9.PRG/238.c)
 VECTOR VS::Menu::Score::cameraPositionBackup;
 
 // decomp: _characterRank (_characterRank@src/MENU/MENU9.PRG/238.c)
@@ -49,9 +51,8 @@ std::uint16_t VS::Menu::Score::mapCompletion;
 std::int32_t VS::Menu::Score::menuState;
 
 // decomp: _menuText (_menuText@src/MENU/MENU9.PRG/238.c)
-std::uint16_t VS::Menu::Score::menuText
-    [VS::Menu::Score::kMenuTextWords]; /* contents: disc string table
-                                          (ModuleData.cpp) */
+// contents: disc string table (ModuleData.cpp)
+std::uint16_t VS::Menu::Score::menuText[VS::Menu::Score::kMenuTextWords];
 
 // decomp: _monBinCdQueueSlot (_monBinCdQueueSlot@src/MENU/MENU9.PRG/238.c)
 VS::Content::DiscQueueSlot* VS::Menu::Score::monBinCdQueueSlot;
@@ -61,7 +62,7 @@ VS::Menu::Score::EnemyEntry* VS::Menu::Score::monBinData;
 
 // decomp: _monBinFile (_monBinFile@src/MENU/MENU9.PRG/238.c)
 const VS::Content::DiscFile VS::Menu::Score::kMonBinFile = {VS_MON_BIN_LBA,
-                                                       VS_MON_BIN_SIZE};
+                                                            VS_MON_BIN_SIZE};
 
 // decomp: _nextState (_nextState@src/MENU/MENU9.PRG/238.c)
 std::int32_t VS::Menu::Score::nextState;
@@ -70,9 +71,8 @@ std::int32_t VS::Menu::Score::nextState;
 std::uint16_t VS::Menu::Score::openedChestCount;
 
 // decomp: _rankText (_rankText@src/MENU/MENU9.PRG/238.c)
-std::uint16_t VS::Menu::Score::rankText
-    [VS::Menu::Score::kRankTextWords]; /* contents: disc string table
-                                          (ModuleData.cpp) */
+// contents: disc string table (ModuleData.cpp)
+std::uint16_t VS::Menu::Score::rankText[VS::Menu::Score::kRankTextWords];
 
 // decomp: _rotationColor (_rotationColor@src/MENU/MENU9.PRG/238.c)
 std::int32_t VS::Menu::Score::rotationColor;

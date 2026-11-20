@@ -14,9 +14,9 @@ using VS::Battle::ActionState;
 
 int Tests_CombatTargetResults(void) {
   enum { kInitialLimbHp = 20 };
-  ActionState action_state = {0};
-  VS::Battle::Actor target = {nullptr};
-  VS::Battle::ActorStats stats = {0};
+  ActionState action_state = {};
+  VS::Battle::Actor target = {};
+  VS::Battle::ActorStats stats = {};
   VS::Battle::FloatingLabelSlots labels{};
   ActionState* saved_action = VS::Battle::actionState;
   VS::Battle::Actor* saved_target = VS::Battle::actors[2];

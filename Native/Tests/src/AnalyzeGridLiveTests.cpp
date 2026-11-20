@@ -379,7 +379,7 @@ TEST_CASE("Analyze plugin dispatch retains overlay lifecycle bindings",
   }};
   for (const auto& binding : kBindings) {
     CAPTURE(binding.index);
-    REQUIRE(VS::Effects::effectEntryPoints[binding.index] == binding.entry);
-    CheckLiveLifecycle(VS::Effects::effectEntryPoints[binding.index]);
+    REQUIRE(VS::Effects::kEffectEntryPoints[binding.index] == binding.entry);
+    CheckLiveLifecycle(VS::Effects::kEffectEntryPoints[binding.index]);
   }
 }

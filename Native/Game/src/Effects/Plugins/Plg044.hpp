@@ -4,5 +4,5 @@
 
 namespace VS::Effects::Plg044 {
 // decomp: D_800FA6F8 (PLG044.BIN/0.c:5; closedRings.h:58)
-extern plugins::RingPalette tiledRingColorFactors;
+extern const plugins::RingPalette kTiledRingColorFactors;
 }  // namespace VS::Effects::Plg044

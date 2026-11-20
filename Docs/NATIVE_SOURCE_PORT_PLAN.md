@@ -700,7 +700,7 @@ The decomp stays as a reference in C, so the port gains nothing from staying in 
 Costs: compile times (mitigated by PCH and static libs), and the temptation to over-abstract (mitigated by "data for parameters, code for behaviors").
 
 ### 8.2 Promotion checklist (sets `cpp = yes`)
-1. Compile with the strict settings: remove the file from `tools\port\relaxed_sources.txt` or take it out of the copy.
+1. Compile with the strict settings (every source does since #483).
 2. Move it into `namespace VS::<System>`. Free functions become methods where they operate on one state object.
 3. Replace raw IDs with typed IDs/handles, and fixed arrays with `std::array`/`std::span`.
 4. No remaining shim calls (`modernized = yes` is a prerequisite).

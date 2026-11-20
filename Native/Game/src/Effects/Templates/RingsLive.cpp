@@ -709,14 +709,14 @@ int UpdateLivePlg297Ring(LiveRendererSlot* slot, unsigned int command,
 int UpdateLivePlg047ClosedRing(LiveRendererSlot* slot, unsigned int command,
                                int packed) {
   return RunRing(slot, command, packed,
-                 PaletteOf(Effects::Plg047::closedRingColorFactors),
+                 PaletteOf(Effects::Plg047::kClosedRingColorFactors),
                  &Plg047::ClosedRing);
 }
 
 int UpdateLivePlg051ClosedRing(LiveRendererSlot* slot, unsigned int command,
                                int packed) {
   return RunRing(slot, command, packed,
-                 PaletteOf(Effects::Plg051::closedRingColorFactors),
+                 PaletteOf(Effects::Plg051::kClosedRingColorFactors),
                  &Plg051::ClosedRing);
 }
 
@@ -912,7 +912,7 @@ int UpdateLivePlg301ClosedRing(LiveRendererSlot* slot, unsigned int command,
 int UpdateLivePlg044TiledRing(LiveRendererSlot* slot, unsigned int command,
                               int packed) {
   return RunRing(slot, command, packed,
-                 PaletteOf(Effects::Plg044::tiledRingColorFactors),
+                 PaletteOf(Effects::Plg044::kTiledRingColorFactors),
                  &Plg044::TiledRing);
 }
 

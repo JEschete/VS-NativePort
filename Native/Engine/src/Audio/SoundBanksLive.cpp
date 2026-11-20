@@ -158,7 +158,7 @@ class LiveSoundBanks final : public SoundBankHost {
 
   std::optional<std::int32_t> MappedWaveBankFile(std::int32_t id) override {
     if (id < 0 || id >= kWaveBankMapEntries) return std::nullopt;
-    return VS::Audio::waveBankFileMap[static_cast<std::size_t>(id)];
+    return VS::Audio::kWaveBankFileMap[static_cast<std::size_t>(id)];
   }
 
   Content::DiscFileExtent MenuFile(MenuSoundFile file) override {

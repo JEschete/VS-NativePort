@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+#include <cstdint>
 #include <span>
 #include <string_view>
 
@@ -67,4 +69,28 @@ void* ResolveModuleAddress(std::span<const ModuleSymbol> symbols,
 bool RelocateModulePointerTable(const ModulePointerTable& table,
                                 std::span<const unsigned char> image,
                                 std::span<const ModuleSymbol> symbols);
+
+// Extents of the module-image buffers below: 32-bit words, except the
+// resident LFO table, which is 16-bit samples.
+inline constexpr std::size_t kBattleShadowVertexWords = 18;
+inline constexpr std::size_t kBattleShadowFaceWords = 24;
+inline constexpr std::size_t kBattleMainMenuHelpTextWords = 80;
+inline constexpr std::size_t kBattleLimbNameWords = 38;
+inline constexpr std::size_t kBattleGimmickTemplateWords = 455;
+inline constexpr std::size_t kBattleTextboxFrameWords = 631;
+inline constexpr std::size_t kBattleTriggerMarkerWords = 29;
+inline constexpr std::size_t kBattleSkyDomeWords = 166;
+inline constexpr std::size_t kResidentLfoSampleCount = 167936;
+
+// Module-image buffers ModuleData.cpp defines and the loader fills from the
+// disc; ModulePointers.cpp registers them.
+extern unsigned int battleShadowVertices[kBattleShadowVertexWords];
+extern unsigned int battleShadowFaces[kBattleShadowFaceWords];
+extern unsigned int battleMainMenuHelpText[kBattleMainMenuHelpTextWords];
+extern unsigned int battleLimbNameBytes[kBattleLimbNameWords];
+extern unsigned int battleGimmickTemplateBytes[kBattleGimmickTemplateWords];
+extern unsigned int battleTextboxFrameBytes[kBattleTextboxFrameWords];
+extern unsigned int battleTriggerMarkerBytes[kBattleTriggerMarkerWords];
+extern unsigned int battleSkyDome[kBattleSkyDomeWords];
+extern std::int16_t residentLfoSamples[kResidentLfoSampleCount];
 }  // namespace VS::Content

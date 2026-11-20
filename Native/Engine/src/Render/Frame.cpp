@@ -1,6 +1,8 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.hpp"
+// Copied from the decomp by tools/port/copy_to_native.py; see each item's
+// decomp line.
 #include "Render/Frame.hpp"
+
+#include "Legacy/Psx.hpp"
 
 using VS::Legacy::DR_STP;
 
@@ -18,4 +20,3 @@ void* VS::Render::legacyOrderingTables[VS::Render::kFrameBufferCount];
 
 // decomp: D_8005E0C0 (D_8005E0C0@SLUS_010.40)
 void* VS::Render::legacyPrimitiveBuffers[VS::Render::kFrameBufferCount];
-

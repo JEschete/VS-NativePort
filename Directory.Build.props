@@ -9,14 +9,10 @@
     <VcpkgManifestRoot>$(VSRepositoryRoot)</VcpkgManifestRoot>
     <VcpkgInstalledDir>$(VSRepositoryRoot)vcpkg_installed\</VcpkgInstalledDir>
     <VcpkgTriplet>x64-windows</VcpkgTriplet>
-    <!-- Copied decomp code (plan Step 4): sees every project's src\ and include\ plus the Legacy SDK layer, and keeps
-         its leniency as warnings. /J keeps plain char unsigned. -fno-finite-loops and -fno-strict-return keep the C
-         meaning of wait loops and of falling off a non-void function, which C++ would treat as undefined.
-         -fno-delete-null-pointer-checks and -fwrapv keep null and overflow checks the optimizer would remove. The
-         pointer/integer casting warnings stay on and are counted (PORTING_WATCHLIST.md section 2). -->
+    <!-- Sources that include headers across projects and the Legacy SDK layer see every project's src\ and include\.
+         Every source compiles with the strict settings below; there is no relaxed class (#483). -->
     <VSNative>$(VSRepositoryRoot)Native\</VSNative>
     <VSCopiedCIncludes>$(VSNative)Engine;$(VSNative)Content;$(VSNative)Engine\include;$(VSNative)Engine\src;$(VSNative)Content\include;$(VSNative)Content\src;$(VSNative)Game\include;$(VSNative)Game\src</VSCopiedCIncludes>
-    <VSCopiedCOptions>/J /clang:-Wno-error=int-conversion /clang:-Wno-error=incompatible-pointer-types /clang:-Wno-error=incompatible-function-pointer-types /clang:-Wno-error=implicit-function-declaration /clang:-Wno-error=implicit-int /clang:-Wno-error=return-type /clang:-Wno-error=int-to-pointer-cast /clang:-Wno-c2x-extensions /clang:-Wno-unused /clang:-Wno-parentheses /clang:-Wno-missing-braces /clang:-Wno-sign-compare /clang:-Wno-pointer-sign /clang:-Wno-switch /clang:-Wno-unknown-pragmas /clang:-Wno-microsoft-anon-tag /clang:-fms-extensions /clang:-fno-finite-loops /clang:-fno-strict-return /clang:-fno-delete-null-pointer-checks /clang:-fwrapv /clang:-Wno-register /clang:-Wno-writable-strings</VSCopiedCOptions>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>

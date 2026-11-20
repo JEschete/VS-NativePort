@@ -28,6 +28,8 @@ struct LegacyControllerPort {
 // decomp: _actParams: the motor alignment table libpad reads.
 inline constexpr std::size_t kActuatorAlignmentBytes = 12;
 using ActuatorAlignment = std::array<std::uint8_t, kActuatorAlignmentBytes>;
+// libpad: an alignment byte of 0xFF leaves that command byte unassigned.
+inline constexpr std::uint8_t kUnassignedActuator = 0xFF;
 
 // decomp: vs_main_padBuffer: libpad's receive buffer for each port.
 extern std::array<PadPacket, kControllerPortCount> legacyPadResponseBytes;

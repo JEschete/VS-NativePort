@@ -9,6 +9,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Content/ModuleData.hpp"
 #include "Field/CameraLiveState.hpp"
 #include "Field/Gimmicks.hpp"
 #include "Field/Mpd.hpp"
@@ -30,8 +31,6 @@ using VS::Core::Gte::SetGeomScreen;
 
 using VS::Legacy::ClearOTagR;
 using VS::Legacy::nextPrim;
-
-extern unsigned int Content_battleTriggerMarkerBytes[29];
 
 namespace {
 struct MarkerDefinition {
@@ -81,7 +80,7 @@ struct TriggerMarkerFixture {
   MarkerDefinition definition;
 
   TriggerMarkerFixture() {
-    std::memcpy(saved_definition.data(), Content_battleTriggerMarkerBytes,
+    std::memcpy(saved_definition.data(), VS::Content::battleTriggerMarkerBytes,
                 sizeof saved_definition);
     EditGroup(definition, [](VS::Render::RoomGroup& group) {
       group.flags = 0x800;
@@ -130,7 +129,7 @@ struct TriggerMarkerFixture {
   }
 
   ~TriggerMarkerFixture() {
-    std::memcpy(Content_battleTriggerMarkerBytes, saved_definition.data(),
+    std::memcpy(VS::Content::battleTriggerMarkerBytes, saved_definition.data(),
                 sizeof saved_definition);
     VS::Field::roomData = saved_room;
     VS::State::stateFlags = saved_flags;
@@ -147,7 +146,7 @@ struct TriggerMarkerFixture {
   }
 
   void StoreDefinition() {
-    std::memcpy(Content_battleTriggerMarkerBytes, &definition,
+    std::memcpy(VS::Content::battleTriggerMarkerBytes, &definition,
                 sizeof definition);
     std::memcpy(expected_definition.data(), &definition, sizeof definition);
   }
@@ -167,7 +166,8 @@ struct TriggerMarkerFixture {
     CHECK(storage.front() == 0xDEADBEEF);
     CHECK(storage.back() == 0xDEADBEEF);
     std::array<unsigned int, 29> current_definition{};
-    std::memcpy(current_definition.data(), Content_battleTriggerMarkerBytes,
+    std::memcpy(current_definition.data(),
+                VS::Content::battleTriggerMarkerBytes,
                 sizeof current_definition);
     CHECK(current_definition == expected_definition);
   }

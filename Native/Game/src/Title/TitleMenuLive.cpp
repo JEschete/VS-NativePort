@@ -85,7 +85,7 @@ constexpr std::uint32_t kHalfwordMask = 0xFFFF;
 constexpr std::size_t kPacketWords = 16;
 constexpr std::uint32_t kTrialTimeMask = 0xFFFFFF;
 
-static_assert(sizeof(VS::Title::initialLearnedActionBits) ==
+static_assert(sizeof(VS::Title::kInitialLearnedActionBits) ==
               sizeof(VS::State::learnedActionFlags));
 
 void Warn(std::string_view what) { VS::Core::LogWarn(kChannel, "{}", what); }
@@ -396,8 +396,8 @@ class LiveHost final : public Host {
   }
   void RestoreInitialLearnedActions() override {
     Core::Memory::CopyLiveAlignedWords(
-        VS::State::learnedActionFlags, VS::Title::initialLearnedActionBits,
-        sizeof VS::Title::initialLearnedActionBits);
+        VS::State::learnedActionFlags, VS::Title::kInitialLearnedActionBits,
+        sizeof VS::Title::kInitialLearnedActionBits);
   }
   void ClearProgressRecords() override {
     Core::Memory::ZeroLiveAlignedWords(&VS::State::roomVisitProgress,
@@ -438,7 +438,7 @@ class LiveHost final : public Host {
   }
   void RestoreNewGameInventory() override {
     Core::Memory::CopyLiveAlignedWords(&VS::Items::inventory,
-                                       VS::Title::newGameInventoryTemplate,
+                                       VS::Title::kNewGameInventoryTemplate,
                                        sizeof VS::Items::inventory);
   }
   void SetTickSpeed(int speed) override { VS::State::tickSpeed = speed; }

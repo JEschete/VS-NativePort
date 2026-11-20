@@ -212,17 +212,17 @@ Everything goes to `build\<Config>\` (git-ignored):
 | `VS.CombatLab.exe` | standalone live encounter editor and production combat host |
 | `vs-native.log` | the log written by `VS.Desktop` at run time |
 
-C++ sources use warnings as errors (`/W4 /WX`). The solution generator currently overrides `.c` items
-to warning level 1 with non-fatal warnings, including hand-maintained sources listed in `tools\port\relaxed_sources.txt`. Compatibility options are in
-[Directory.Build.props](../Directory.Build.props). A successful build is therefore not necessarily
-warning-free: pointer/ABI, bounds, and uninitialized-value warnings still need source and runtime review.
+Every source compiles as C++ with warnings as errors (`/W4 /WX`), conformance mode and signed plain `char`; no
+file has relaxed per-file settings (#483). Compatibility options are in
+[Directory.Build.props](../Directory.Build.props). A warning-free build is not proof of correctness: pointer/ABI,
+bounds, and uninitialized-value behavior still need source and runtime review.
 
 ### 4.4 Source quality
 
 Native sources use Google C++ conventions. Run `quality-native.cmd` for the fast
 no-new-debt gate and `quality-native.cmd --changed --tidy` for compilation-based
-analysis of changed owned code. Reports go to `build/quality`; generated and
-reference sources are excluded from the default style scope. See
+analysis of changed owned code. Reports go to `build/quality`; reference sources
+are excluded from the default style scope. See
 [QUALITY.md](QUALITY.md) for setup, precise scope, baseline policy, and controls.
 
 ### 4.5 Standalone Combat Lab

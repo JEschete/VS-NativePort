@@ -1,26 +1,35 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+// Copied from the decomp by tools/port/copy_to_native.py; see each item's
+// decomp line.
 #include "Ending/ClearResults.hpp"
 
 // decomp: D_800DBA7C (D_800DBA7C@ENDING/ENDING.PRG)
-VS::Render::RegionColor VS::Ending::congratulationsTint[VS::Ending::kCongratulationsTints]; /* contents: module image (ModuleData.cpp) */
+// contents: module image (ModuleData.cpp)
+VS::Render::RegionColor
+    VS::Ending::congratulationsTint[VS::Ending::kCongratulationsTints];
 
 // decomp: D_800DBA88 (D_800DBA88@ENDING/ENDING.PRG)
-VS::Ending::RegionColorPair VS::Ending::scoreTint; /* contents: module image (ModuleData.cpp) */
+// contents: module image (ModuleData.cpp)
+VS::Ending::RegionColorPair VS::Ending::scoreTint;
 
 // decomp: D_800DBA90 (D_800DBA90@ENDING/ENDING.PRG)
-VS::Ending::RegionColorPair VS::Ending::countingScoreTint; /* contents: module image (ModuleData.cpp) */
+// contents: module image (ModuleData.cpp)
+VS::Ending::RegionColorPair VS::Ending::countingScoreTint;
 
 // decomp: D_800DBA98 (D_800DBA98@ENDING/ENDING.PRG)
-VS::Ending::RegionColorPair VS::Ending::mapCompletionTint; /* contents: module image (ModuleData.cpp) */
+// contents: module image (ModuleData.cpp)
+VS::Ending::RegionColorPair VS::Ending::mapCompletionTint;
 
 // decomp: D_800DBAA0 (D_800DBAA0@ENDING/ENDING.PRG)
-VS::Ending::RegionColorPair VS::Ending::countingMapCompletionTint; /* contents: module image (ModuleData.cpp) */
+// contents: module image (ModuleData.cpp)
+VS::Ending::RegionColorPair VS::Ending::countingMapCompletionTint;
 
 // decomp: D_800DBAA8 (D_800DBAA8@ENDING/ENDING.PRG)
-VS::Ending::RegionColorPair VS::Ending::rankHeadingTint; /* contents: module image (ModuleData.cpp) */
+// contents: module image (ModuleData.cpp)
+VS::Ending::RegionColorPair VS::Ending::rankHeadingTint;
 
 // decomp: D_800DBAB0 (D_800DBAB0@ENDING/ENDING.PRG)
-VS::Ending::RegionColorPair VS::Ending::rankLabelTint; /* contents: module image (ModuleData.cpp) */
+// contents: module image (ModuleData.cpp)
+VS::Ending::RegionColorPair VS::Ending::rankLabelTint;
 
 // decomp: _rank (_rank@ENDING/ENDING.PRG)
 std::uint32_t VS::Ending::riskbreakerRankIndex;
@@ -52,6 +61,6 @@ std::int32_t VS::Ending::isLeavingResults;
 // decomp: _incrementingScore (_incrementingScore@ENDING/ENDING.PRG)
 std::int32_t VS::Ending::isScoreIncrementing;
 
-// decomp: _incrementingMapCompletion (_incrementingMapCompletion@ENDING/ENDING.PRG)
+// decomp: _incrementingMapCompletion
+// (_incrementingMapCompletion@ENDING/ENDING.PRG)
 std::int32_t VS::Ending::isMapCompletionIncrementing;
-

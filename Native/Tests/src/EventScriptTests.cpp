@@ -77,9 +77,9 @@ int TestsCancelQueuedMusic(int queued, int secondary) {
   VS::Audio::MusicConfig* original_active = VS::Audio::Seq::activeMusicConfig;
   VS::Audio::MusicConfig* original_secondary =
       VS::Audio::Seq::secondaryMusicConfig;
-  VS::Audio::MusicConfig current = {0};
-  VS::Audio::MusicConfig saved = {0};
-  VS::Audio::AkaoSequenceFile sequence = {0};
+  VS::Audio::MusicConfig current = {};
+  VS::Audio::MusicConfig saved = {};
+  VS::Audio::AkaoSequenceFile sequence = {};
   const VS::Audio::CommandParams pending = {
       queued ? reinterpret_cast<uintptr_t>(&sequence) : 0, 2, 3, 4, 5, 6};
   int result;
@@ -108,9 +108,9 @@ int TestsCancelQueuedMusic(int queued, int secondary) {
 }
 
 int TestsSavedMusicVoiceConflicts(void) {
-  VS::Audio::MusicConfig current = {0};
-  VS::Audio::MusicConfig saved = {0};
-  VS::Audio::SeqChannel channels[32] = {nullptr};
+  VS::Audio::MusicConfig current = {};
+  VS::Audio::MusicConfig saved = {};
+  VS::Audio::SeqChannel channels[32] = {};
   VS::Audio::MusicConfig* original_current = VS::Audio::Seq::activeMusicConfig;
   VS::Audio::MusicConfig* original_saved = VS::Audio::Seq::secondaryMusicConfig;
   VS::Audio::SeqChannel* original_channels =
@@ -507,7 +507,7 @@ void TestsRestoreStreamPlayback(void) {
 }
 
 int TestsBindEffectStream(void* bytes, size_t size) {
-  VS::Effects::LiveEffectPackage package = {0};
+  VS::Effects::LiveEffectPackage package = {};
   VS::Effects::LiveEffectPackage* saved = VS::Effects::package;
   VS::Effects::package = &package;
   static_cast<void>(VS::Effects::BindLiveEffectPackage(
@@ -600,7 +600,7 @@ int TestsMenuSoundDispatch(void) {
     play[index]();
     if (menuSoundCalls == 1 &&
         menuSoundObserved.param1 == static_cast<uintptr_t>(ids[index]) &&
-        menuSoundObserved.param2 == (2 << index) &&
+        menuSoundObserved.param2 == (std::uint32_t{2} << index) &&
         menuSoundObserved.param3 == 0x80 && menuSoundObserved.param4 == 0x7F) {
       result |= 1 << index;
     }
@@ -613,7 +613,7 @@ int TestsMenuSoundDispatch(void) {
 }
 
 void TestsNativeNoiseChannel(void) {
-  VS::Audio::SeqChannel channel = {nullptr};
+  VS::Audio::SeqChannel channel = {};
   channel.voice.sample_start = 0x1010;
   channel.voice.sample_rate = 4096;
   channel.voice.volume.left = 0x1000;
@@ -738,7 +738,7 @@ int Tests_CollisionHeightPatterns(void) {
 }
 
 int Tests_AudioModesWithoutSavedMusic(void) {
-  VS::Audio::MusicConfig primary = {0};
+  VS::Audio::MusicConfig primary = {};
   VS::Audio::MusicConfig* saved_primary = VS::Audio::Seq::activeMusicConfig;
   VS::Audio::MusicConfig* saved_secondary =
       VS::Audio::Seq::secondaryMusicConfig;

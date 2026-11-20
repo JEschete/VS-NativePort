@@ -19,9 +19,6 @@
 #include "Legacy/Psx.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
 
-// D_80068C1C, loaded from BATTLE.PRG by Content.
-extern unsigned int Content_battleSkyDome[166];
-
 namespace {
 namespace fx = VS::Field;
 using Calls = std::vector<std::string>;
@@ -629,22 +626,22 @@ TEST_CASE("Background setters keep halfwords and bytes",
 TEST_CASE("Live background colours reach the sky dome",
           "[field-camera][field-background]") {
   std::array<unsigned int, 166> saved_dome{};
-  std::ranges::copy(Content_battleSkyDome, saved_dome.begin());
+  std::ranges::copy(VS::Content::battleSkyDome, saved_dome.begin());
   std::array<int, 5> saved_colors{};
   std::ranges::copy(VS::Field::backgroundGradientColors, saved_colors.begin());
   ChannelWarnings warnings{"field.background"};
 
   const std::array<int, 5> colors{1, 2, 3, 4, 0xABCDEF};
   VS::Field::LiveSetRoomBackgroundColors(colors.data());
-  CHECK(Content_battleSkyDome[2] == 0x30000001U);
-  CHECK(Content_battleSkyDome[(1 * 3) + 2] == 0x30000002U);
-  CHECK(Content_battleSkyDome[(33 * 3) + 2] == 0x30ABCDEFU);
+  CHECK(VS::Content::battleSkyDome[2] == 0x30000001U);
+  CHECK(VS::Content::battleSkyDome[(1 * 3) + 2] == 0x30000002U);
+  CHECK(VS::Content::battleSkyDome[(33 * 3) + 2] == 0x30ABCDEFU);
   CHECK(VS::Field::LiveRoomBackgroundColors()[4] == 0xABCDEF);
   for (int call = 0; call < 1024 && warnings.messages.empty(); ++call) {
     VS::Field::LiveSetRoomBackgroundColors(nullptr);
   }
 
-  std::ranges::copy(saved_dome, Content_battleSkyDome);
+  std::ranges::copy(saved_dome, VS::Content::battleSkyDome);
   std::ranges::copy(saved_colors, VS::Field::backgroundGradientColors);
   REQUIRE_FALSE(warnings.messages.empty());
   CHECK(warnings.messages[0] ==
@@ -675,5 +672,5 @@ TEST_CASE("The field camera module symbols are retired",
   }
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x80068C1CU) ==
-        static_cast<void*>(Content_battleSkyDome));
+        static_cast<void*>(VS::Content::battleSkyDome));
 }

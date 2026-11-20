@@ -38,6 +38,7 @@
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
 #include "Content/DiscQueue.hpp"
+#include "Content/ModuleData.hpp"
 #include "Content/OverlayWorkspaceLive.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -112,10 +113,8 @@ constexpr std::size_t kHelpTextWords = 80;
 }  // namespace VS::Menu::Framework
 
 // decomp: D_800EBA78 (BATTLE/BATTLE.PRG 5BF94.c:2934): the main menu help
-// text from the module image (ModuleData.cpp); its last word opens the
-// gradient window.
-extern unsigned int
-    Content_battleMainMenuHelpText[VS::Menu::Framework::kHelpTextWords];
+// text is VS::Content::battleMainMenuHelpText, filled from the module image
+// (ModuleData.cpp); its last word opens the gradient window.
 
 // decomp: _loadedSubMenu (BATTLE/BATTLE.PRG 5BF94.c): the module image byte
 // is 0.
@@ -202,7 +201,7 @@ namespace {
 static_assert(std::is_standard_layout_v<MenuRow>);
 static_assert(std::is_standard_layout_v<ItemText>);
 static_assert(std::is_standard_layout_v<MenuMemory>);
-static_assert(sizeof(Content_battleMainMenuHelpText) ==
+static_assert(sizeof(VS::Content::battleMainMenuHelpText) ==
               kHelpTextWords * sizeof(std::uint32_t));
 
 // AcquireLiveOverlayWorkspace's owner tag for the menu table.
@@ -484,7 +483,7 @@ template <typename T>
 // call, since the module image loads after the first menu frame can run.
 [[nodiscard]] Tables LiveTables() {
   static std::array<std::uint32_t, kGradientWindowWords> gradient{};
-  gradient[0] = Content_battleMainMenuHelpText[kHelpTextWords - 1];
+  gradient[0] = VS::Content::battleMainMenuHelpText[kHelpTextWords - 1];
   gradient[kGradientWindowTop] = VS::Menu::Framework::gradientTopColors[0];
   gradient[kGradientWindowTop + 1] = VS::Menu::Framework::gradientTopColors[1];
   gradient[kGradientWindowBottom] =
@@ -503,7 +502,7 @@ template <typename T>
           BytesOf(VS::Menu::Framework::cursorBrightnessAnimation),
       .menu_strings = BytesOf(VS::Menu::menuStrings),
       .glyph_widths = VS::Render::LiveVariableFontGlyphWidths(),
-      .main_menu_help_text = BytesOf(Content_battleMainMenuHelpText),
+      .main_menu_help_text = BytesOf(VS::Content::battleMainMenuHelpText),
   };
 }
 

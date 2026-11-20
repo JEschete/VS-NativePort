@@ -880,7 +880,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   }
 
   [[nodiscard]] CharacterTemplate AshleyTemplate() const override {
-    return DecodeCharacterTemplate(VS::Actors::ashleyInitialLoadout);
+    return DecodeCharacterTemplate(VS::Actors::kAshleyInitialLoadout);
   }
 
   [[nodiscard]] WeaponRange LoadAshleyWeapon(

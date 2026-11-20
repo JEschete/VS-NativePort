@@ -134,13 +134,7 @@
     <ClCompile Include="src\CombatLabCanvasTests.cpp" />
     <ClCompile Include="src\CombatLabTraceTests.cpp" />
     <ClCompile Include="src\CombatTestCases.cpp" />
-    <ClCompile Include="src\CombatTests.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\CombatTests.cpp" />
     <ClCompile Include="src\ConditionSnapshotTests.cpp" />
     <ClCompile Include="src\ContainerCapacityLiveTests.cpp" />
     <ClCompile Include="src\ContainerCapacityModuleTests.cpp" />
@@ -194,13 +188,7 @@
     <ClCompile Include="src\EffectScriptTests.cpp" />
     <ClCompile Include="src\EffectSurfaceTests.cpp" />
     <ClCompile Include="src\EffectTextureBindingTests.cpp" />
-    <ClCompile Include="src\EffectTimelineTests.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\EffectTimelineTests.cpp" />
     <ClCompile Include="src\EffectTrailNineTests.cpp" />
     <ClCompile Include="src\EffectTrailTests.cpp" />
     <ClCompile Include="src\EmitterRingLiveTests.cpp" />
@@ -231,13 +219,7 @@
     <ClCompile Include="src\EventScriptDialogCommandsTests.cpp" />
     <ClCompile Include="src\EventScriptEffectCommandsTests.cpp" />
     <ClCompile Include="src\EventScriptTestCases.cpp" />
-    <ClCompile Include="src\EventScriptTests.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\EventScriptTests.cpp" />
     <ClCompile Include="src\EventScriptVmLiveTests.cpp" />
     <ClCompile Include="src\EventScriptVmTests.cpp" />
     <ClCompile Include="src\EventSessionTests.cpp" />
@@ -285,13 +267,7 @@
     <ClCompile Include="src\GimImagesTests.cpp" />
     <ClCompile Include="src\GimmickPlacementTests.cpp" />
     <ClCompile Include="src\GimRenderTestCases.cpp" />
-    <ClCompile Include="src\GimRenderTests.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\GimRenderTests.cpp" />
     <ClCompile Include="src\GroundNavigationTests.cpp" />
     <ClCompile Include="src\HeapTests.cpp" />
     <ClCompile Include="src\HitCalculationsTests.cpp" />
@@ -325,13 +301,7 @@
     <ClCompile Include="src\ItemsTests.cpp" />
     <ClCompile Include="src\JumpEntryTests.cpp" />
     <ClCompile Include="src\LauncherTests.cpp" />
-    <ClCompile Include="src\LayoutAsserts.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\LayoutAsserts.cpp" />
     <ClCompile Include="src\LegacyGpuTests.cpp" />
     <ClCompile Include="src\LogObserverTests.cpp" />
     <ClCompile Include="src\LogTests.cpp" />
@@ -437,13 +407,7 @@
     <ClCompile Include="src\SeqSequencerTests.cpp" />
     <ClCompile Include="src\SequencePlaybackTests.cpp" />
     <ClCompile Include="src\SequenceTestCases.cpp" />
-    <ClCompile Include="src\SequenceTests.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\SequenceTests.cpp" />
     <ClCompile Include="src\SeqVoiceCommandsTests.cpp" />
     <ClCompile Include="src\SessionTests.cpp" />
     <ClCompile Include="src\SfxBankSelectionTests.cpp" />

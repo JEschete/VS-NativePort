@@ -494,7 +494,7 @@ class LiveParticleForceHost final : public ParticleForceHost {
 };
 
 [[nodiscard]] std::span<const EffectRenderer> EntryPoints() {
-  return effectEntryPoints;
+  return kEffectEntryPoints;
 }
 
 // EFFPURGE.BIN's entry points, called as updates.
@@ -649,15 +649,15 @@ void StoreLiveEffectResourceContext(const EffectResourceContext& context) {
 }
 
 EffectPurgeTables LiveEffectPurgeTables() {
-  return {.clut_rows = fbcClutRows,
-          .clut_files = fbcFiles,
-          .clut_slots = fbcSlots,
-          .texture_counts = fbtCounts,
-          .texture_files = fbtFiles,
-          .texture_slots = fbtSlots,
-          .package_files = packageFiles,
-          .plugin_files = pluginFiles,
-          .entry_point_indices = effectEntryPointIndices,
+  return {.clut_rows = kFbcClutRows,
+          .clut_files = kFbcFiles,
+          .clut_slots = kFbcSlots,
+          .texture_counts = kFbtCounts,
+          .texture_files = kFbtFiles,
+          .texture_slots = kFbtSlots,
+          .package_files = kPackageFiles,
+          .plugin_files = kPluginFiles,
+          .entry_point_indices = kEffectEntryPointIndices,
           .entry_point_count = kEntryPointCount};
 }
 

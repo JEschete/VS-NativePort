@@ -1,7 +1,7 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+// Copied from the decomp by tools/port/copy_to_native.py; see each item's
+// decomp line.
 #pragma once
 #include "Legacy/Psx.hpp"
-
 
 // Generated from the disc listing (tools/port/gen_decomp_headers.py).
 #define VS_BATTLE_PRG_LBA 1100

@@ -99,7 +99,7 @@ int TestBattleAnimationHeaderOutputs(int consumer, int mode, int available) {
   std::uint16_t file[256] = {0};
   VS::Actors::SeqAnimationBank* bank =
       reinterpret_cast<VS::Actors::SeqAnimationBank*>(file);
-  VS::Actors::ActorRecord actor = {0};
+  VS::Actors::ActorRecord actor = {};
   VS::Actors::ActorRecord* saved_actor = VS::Actors::actorRecords[kActorId];
   const char saved_index = VS::Actors::lastResolvedSequenceIndex;
   const std::int8_t saved_pitch = VS::Battle::specialActionPitch;
@@ -443,7 +443,7 @@ int TestAnimationEventUnwind(int scenario) {
 }
 
 int Tests_ActionCameraRecovery(void) {
-  ActionState state = {0};
+  ActionState state = {};
   ActionState* saved_action = VS::Battle::actionState;
   const VS::Field::SphericalCamera saved_camera = VS::Field::sphericalCamera;
   const int saved_projection = VS::Render::projectionDistance;
@@ -471,8 +471,8 @@ int Tests_ActionCameraRecovery(void) {
 int Tests_SparseIdlePoseReset(void) {
   VS::Actors::ActorRecord* saved_actor = VS::Actors::actorRecords[4];
   VS::Field::GimmickInstance* saved_object = VS::Field::gimmickInstances[4];
-  VS::Field::GimmickInstance object = {0};
-  VS::Actors::ActorRecord actor = {0};
+  VS::Field::GimmickInstance object = {};
+  VS::Actors::ActorRecord actor = {};
   VS::Actors::actorRecords[4] = nullptr;
   VS::Field::gimmickInstances[4] = nullptr;
   VS::Actors::RestoreLiveActorIdlePose(4);
@@ -494,7 +494,7 @@ int Tests_SparseIdlePoseReset(void) {
 
 int Tests_TargetLabelStride(void) {
   VS::Battle::TargetSphereSetupView* saved_sphere = VS::Battle::targetSphere;
-  VS::Battle::TargetSphereRecord sphere = {0};
+  VS::Battle::TargetSphereRecord sphere = {};
   char text[] = "Target";
   for (unsigned index = 0; index < 24; ++index) {
     sphere.labels[index].state = 3;
@@ -523,8 +523,8 @@ int Tests_TargetSphereWireframe(void) {
   void* saved_primitives = VS::Render::legacyPrimitiveBuffers[0];
   const int saved_frame_buffer = VS::Render::frameBuf;
   VS::Battle::TargetSphereSetupView* saved_sphere = VS::Battle::targetSphere;
-  VS::Battle::TargetSphereRecord sphere = {0};
-  TargetVolume volume = {0};
+  VS::Battle::TargetSphereRecord sphere = {};
+  TargetVolume volume = {};
   std::uint32_t ordering[0x822];
   std::uint32_t packets[12];
   memset(packets, 0xA5, sizeof packets);
@@ -535,7 +535,7 @@ int Tests_TargetSphereWireframe(void) {
   VS::Core::Gte::Reset();
   SetGeomOffset(160, 120);
   SetGeomScreen(256);
-  *frame = (VS::Render::FrameScratch){nullptr};
+  *frame = VS::Render::FrameScratch{};
   for (unsigned axis = 0; axis < kSpatialDimensions; ++axis) {
     frame->view_matrix.m[axis][axis] = kFixedPointOne;
   }
@@ -609,9 +609,9 @@ int Tests_GimmickRoomScale(void) {
   const VS::Actors::SkeletonPose saved_pose = VS::Actors::skeletonPose;
   const MATRIX saved_root = VS::Actors::skeletonRootMatrix;
   const VECTOR saved_scale = VS::Actors::roomActorScale;
-  VS::Field::GimmickInstance object = {0};
-  VS::Actors::ShpModel model = {0};
-  MATRIX camera = {0};
+  VS::Field::GimmickInstance object = {};
+  VS::Actors::ShpModel model = {};
+  MATRIX camera = {};
   for (unsigned axis = 0; axis < kSpatialDimensions; ++axis) {
     camera.m[axis][axis] = kFixedPointOne;
     object.matrices[kGimmickCameraMatrix].m[axis][axis] = kFixedPointOne;
@@ -619,7 +619,7 @@ int Tests_GimmickRoomScale(void) {
   object.model = &model;
   object.scale_x = object.scale_y = object.scale_z = 64;
   VS::Render::ModelWorkspace()->root_offset = (SVECTOR){10, 20, 30, 0};
-  VS::Actors::skeletonPose.scale = (VECTOR){0};
+  VS::Actors::skeletonPose.scale = VECTOR{};
   VS::Actors::roomActorScale = (VECTOR){2048, 4096, 4096, 0};
   VS::Actors::DrawLiveGimmickModel(&object, &camera);
   const int passed =
@@ -710,7 +710,7 @@ int Tests_FacialTextureBankHandoff(void) {
   int passed = VS::Content::UpdateLiveActorAssetQueue() == 1 &&
                VS::Content::legacyActorAssetRequests[0].asset_kind == 9 &&
                VS::Actors::sharedSequenceBankTexturePages[0] == 26;
-  VS::Actors::ActorRecord actor = {0};
+  VS::Actors::ActorRecord actor = {};
   actor.texture_header_bit = 1;
   actor.texture_overlays[6] = VS::Actors::TextureOverlayRect{16, 20, 8, 2};
   actor.texture_animation_frames[1] =
@@ -724,7 +724,7 @@ int Tests_FacialTextureBankHandoff(void) {
   memcpy(VS::Actors::textureSlotOrigins.data(), origin, sizeof origin);
   VS::Actors::textureSlotRowOffsets[0] = 1;
   std::uint32_t ordering[0x822];
-  DR_MOVE packet = {0};
+  DR_MOVE packet = {};
   // The texture move is bounded to the frame's primitive buffer.
   VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf & 1] = &packet;
   ClearOTagR(ordering, 0x822);
@@ -805,7 +805,7 @@ int Tests_FacialTextureBankHandoff(void) {
 
 int Tests_ActorTextureFrameRectangles(int wide, int fallback,
                                       unsigned* command) {
-  VS::Actors::ActorRecord actor = {0};
+  VS::Actors::ActorRecord actor = {};
   const VS::Render::FrameScratch saved_frame =
       *reinterpret_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase());
   void* saved_ordering = VS::Render::legacyCurrentOrderingTable;
@@ -893,9 +893,9 @@ int TestGimmickStackTop(int scenario) {
   enum { kActorSlots = 17, kGimmickSlots = 16, kRoot = 3, kMember = 4 };
   VS::Actors::ActorRecord* saved_actors[kActorSlots];
   VS::Field::GimmickInstance* saved_objects[kGimmickSlots];
-  VS::Actors::ActorRecord actor = {0};
-  VS::Field::GimmickInstance root = {0};
-  VS::Field::GimmickInstance member = {0};
+  VS::Actors::ActorRecord actor = {};
+  VS::Field::GimmickInstance root = {};
+  VS::Field::GimmickInstance member = {};
   const int skipped = scenario == 0;
   const int has_actor = scenario != 0;
   const int has_member = scenario == 2;
@@ -910,7 +910,7 @@ int TestGimmickStackTop(int scenario) {
   root.tile_x = root.tile_z = member.tile_x = member.tile_z = 2;
   root.parent = root.object_info.carrier = 0xFF;
   member.parent = member.object_info.carrier = 0xFF;
-  root.is_skipped = skipped;
+  root.is_skipped = static_cast<char>(skipped);
   root.slot = kRoot;
   member.slot = kMember;
   member.position_y = -128;
@@ -948,7 +948,7 @@ int TestOptionalMovementWrapper(int operation, int rate) {
   enum { kSlot = 4 };
   VS::Actors::ActorRecord* saved_actor = VS::Actors::actorRecords[kSlot];
   SVECTOR target = {117, -384, 370, 0};
-  VS::Actors::TileTarget tile = {0};
+  VS::Actors::TileTarget tile = {};
   int valid = 1;
   VS::Actors::actorRecords[kSlot] = nullptr;
   switch (operation) {
@@ -987,7 +987,7 @@ int TestOptionalMovementWrapper(int operation, int rate) {
 
 int TestOptionalActorScriptSlide(int present, int rate, int skip) {
   enum { kSlot = 4, kDefaultRate = 3 };
-  VS::Actors::ActorRecord actor = {0};
+  VS::Actors::ActorRecord actor = {};
   VS::Actors::ActorRecord* saved_actor = VS::Actors::actorRecords[kSlot];
   const char saved_control = VS::Event::scriptControlledActors[kSlot];
   const char saved_skip = VS::Event::skipState;
@@ -1047,9 +1047,9 @@ static std::uint16_t ScriptedEffectSelector(int scenario) {
 
 int TestScriptedEffectTargetBinding(int scenario) {
   enum { kEffect = 222, kSlots = 16 };
-  VS::Actors::ActorRecord actor = {0};
-  VS::Field::GimmickInstance object = {0};
-  VS::Battle::Actor battle_actor = {nullptr};
+  VS::Actors::ActorRecord actor = {};
+  VS::Field::GimmickInstance object = {};
+  VS::Battle::Actor battle_actor = {};
   VS::Battle::Actor* saved_battle[kSlots];
   VS::Actors::ActorRecord* saved_actor[kSlots];
   VS::Field::GimmickInstance* saved_object[kSlots];
@@ -1157,8 +1157,8 @@ int TestBoneEndpointOwner(int owner, int endpoint) {
   enum { kModelWords = 20, kBoneLength = 128 };
   const int slot = owner >= 4 ? 16 : 3;
   const int has_gimmick_slot = slot < std::ssize(VS::Field::gimmickInstances);
-  VS::Actors::ActorRecord actor = {0};
-  VS::Field::GimmickInstance object = {0};
+  VS::Actors::ActorRecord actor = {};
+  VS::Field::GimmickInstance object = {};
   unsigned model_bytes[kModelWords] = {0};
   VS::Actors::ShpModel* model =
       reinterpret_cast<VS::Actors::ShpModel*>(model_bytes);
@@ -1179,7 +1179,7 @@ int TestBoneEndpointOwner(int owner, int endpoint) {
   actor.model_data_size = sizeof model_bytes;
   VS::Render::RecordLiveModelExtent(model, sizeof model_bytes);
   model->bones[0].length = kBoneLength;
-  VS::Actors::boneMatrixScratch = (MATRIX){0};
+  VS::Actors::boneMatrixScratch = MATRIX{};
   for (int axis = 0; axis < kSpatialDimensions; ++axis) {
     VS::Actors::boneMatrixScratch.m[axis][axis] = kFixedPointOne;
     VS::Actors::boneMatrixScratch.t[axis] = (axis + 1) * 10;
@@ -1224,7 +1224,7 @@ int TestBoneEndpointOwner(int owner, int endpoint) {
 }
 
 int Tests_ProjectedBoneEndpoints(void) {
-  VS::Actors::ActorRecord actor = {0};
+  VS::Actors::ActorRecord actor = {};
   unsigned modelBytes[24] = {0};
   VS::Actors::ShpModel* model =
       reinterpret_cast<VS::Actors::ShpModel*>(modelBytes);
@@ -1260,7 +1260,7 @@ int Tests_ProjectedBoneEndpoints(void) {
 
 int Tests_ActorPoseHierarchy(void) {
   unsigned file[32] = {0};
-  VS::Actors::ActorRecord actor = {0};
+  VS::Actors::ActorRecord actor = {};
   VS::Actors::ShpModel* model = reinterpret_cast<VS::Actors::ShpModel*>(file);
   const VS::Actors::SkeletonPose saved_pose = VS::Actors::skeletonPose;
   const VS::Actors::ModelRenderContext saved_context =
@@ -1280,7 +1280,7 @@ int Tests_ActorPoseHierarchy(void) {
             actor.blend_pose.scale_keys[bone].vz = 64;
   }
   actor.blend_pose.scale_keys[1].vx = 32;
-  MATRIX camera = {0};
+  MATRIX camera = {};
   for (int axis = 0; axis < 3; ++axis) camera.m[axis][axis] = 4096;
   setVector(&VS::Render::ModelWorkspace()->root_offset, 100, 200, 300);
   int passed = VS::Actors::BuildLiveActorModelPose(actor, camera) == 1 &&
@@ -1413,7 +1413,7 @@ static int ModelPacketColorsMatch(const std::uint32_t* packet, int colored,
 static void DrawGimmickOverrideFixture(
     const VS::Actors::ModelInstance* instance, const CVECTOR* tint,
     VS::Actors::ShpModel* model, unsigned appearance, unsigned pulse_mask) {
-  VS::Field::GimmickInstance object = {0};
+  VS::Field::GimmickInstance object = {};
   enum { kSharedRendererHeaderBytes = 8 };
   memcpy(&object, instance, kSharedRendererHeaderBytes);
   object.motion_state = appearance;
@@ -1440,7 +1440,7 @@ static void DrawWeaponOverrideFixture(const VS::Actors::ModelInstance* instance,
                                       VS::Actors::ShpModel* model,
                                       unsigned appearance,
                                       unsigned pulse_mask) {
-  VS::Actors::WeaponModel weapon = {0};
+  VS::Actors::WeaponModel weapon = {};
   enum { kSharedRendererHeaderBytes = 8 };
   memcpy(&weapon, instance, kSharedRendererHeaderBytes);
   weapon.owner_motion_state = appearance;
@@ -1477,7 +1477,7 @@ static int ModelPolygonPackets(int colored, int split, int limb,
   unsigned modelWords[32] = {0};
   VS::Actors::ShpModel* model =
       reinterpret_cast<VS::Actors::ShpModel*>(modelWords);
-  VS::Actors::ModelInstance instance = {0};
+  VS::Actors::ModelInstance instance = {};
   const ModelPacketOptions options = {colored, split, limb, pulse_mask};
   const VS::Actors::ModelRenderContext saved_context =
       VS::Actors::modelRenderContext;
@@ -1601,8 +1601,8 @@ int TestsModelWeaponOverridePackets(unsigned state, unsigned pulse_mask,
 int Tests_ModelProjectionGroups(void) {
   unsigned file[64] = {0};
   VS::Actors::ShpModel* model = reinterpret_cast<VS::Actors::ShpModel*>(file);
-  VS::Actors::ModelInstance instance = {0};
-  MATRIX matrices[2] = {0};
+  VS::Actors::ModelInstance instance = {};
+  MATRIX matrices[2] = {};
   const VS::Actors::ModelRenderContext saved = VS::Actors::modelRenderContext;
   model->group_section = 96;
   model->vertex_section = 104;
@@ -1660,7 +1660,7 @@ int Tests_ModelWorkspaceIsolation(void) {
   const VS::Render::ModelScratchpad saved_workspace = *workspace;
   const MATRIX saved_basis = VS::Render::cameraBasisMatrix;
   const MATRIX saved_inverse = VS::Actors::boneMatrixScratch;
-  VS::Actors::ActorRecord actor = {0};
+  VS::Actors::ActorRecord actor = {};
   memcpy(saved_scratch, VS::Core::ScratchBase(), sizeof saved_scratch);
   memset(sentinel, 0xA5, sizeof sentinel);
   memcpy(VS::Core::ScratchBase(), sentinel, sizeof sentinel);
@@ -1683,7 +1683,7 @@ int Tests_ModelWorkspaceIsolation(void) {
       reinterpret_cast<VS::Render::FrameScratch*>(VS::Core::ScratchBase());
   memset(frame, 0, sizeof *frame);
   frame->camera.far_clip = 4096;
-  MATRIX camera = {0};
+  MATRIX camera = {};
   for (int axis = 0; axis < kSpatialDimensions; ++axis) {
     camera.m[axis][axis] = kFixedPointOne;
     camera.t[axis] = 1000 + axis;
@@ -1712,7 +1712,7 @@ int Tests_SharedSequenceOffsets(void) {
       reinterpret_cast<VS::Actors::SeqAnimationBank*>((payload + 32 + 8));
   VS::Actors::SeqAnimationBank* second =
       reinterpret_cast<VS::Actors::SeqAnimationBank*>((payload + 144 + 8));
-  VS::Actors::ActorRecord actor = {0};
+  VS::Actors::ActorRecord actor = {};
   VS::Content::LegacyActorAssetRequest request{};
   const auto saved_requests = VS::Content::legacyActorAssetRequests;
   VS::Actors::ActorRecord* saved_actors[17];
@@ -1808,7 +1808,7 @@ int Tests_AdvanceSequenceWithoutScratch(void) {
   std::uint32_t file[64] = {0};
   VS::Actors::SeqAnimationBank* bank =
       reinterpret_cast<VS::Actors::SeqAnimationBank*>(file);
-  VS::Actors::ActorRecord actor = {0};
+  VS::Actors::ActorRecord actor = {};
   unsigned char scratch[1024];
   const unsigned char tracks[] = {0xE0, 1, 2, 3, 0xE0, 1, 1, 1};
   char saved_resolved = VS::Actors::lastResolvedSequenceIndex;
@@ -1844,8 +1844,8 @@ int Tests_AdvanceSequenceWithoutScratch(void) {
 }
 
 int Tests_BlendSequencePose(int mode) {
-  VS::Actors::AnimationPose dst = {0};
-  VS::Actors::AnimationPose src = {0};
+  VS::Actors::AnimationPose dst = {};
+  VS::Actors::AnimationPose src = {};
   unsigned char events[2] = {0};
   dst.bone_keys[0].vx = 8190;
   src.bone_keys[0].vx = 2;
@@ -1855,7 +1855,7 @@ int Tests_BlendSequencePose(int mode) {
   src.scale_keys[0].vx = 128;
   src.event_script = events;
   src.frame = 19;
-  src.reached_end = 1;
+  src.reached_end = -1;
   if (mode == 0) {
     VS::Actors::BlendLiveActorPose(dst, src, 1, 1, 4);
     return dst.bone_keys[0].vx == 8191 && dst.bone_keys[41].vy == 6 &&

@@ -63,7 +63,7 @@ static_assert(offsetof(VS::Battle::Ai::ActorAiState, awareness_marker) == 340,
 
 int TestsRoomSfxBankBinding(void) {
   const VS::Audio::SoundState saved_state = VS::Audio::soundState;
-  VS::Audio::soundState = (VS::Audio::SoundState){0};
+  VS::Audio::soundState = VS::Audio::SoundState{};
   unsigned char bank = 0;
   unsigned char replacement = 0;
   int passed =
@@ -224,7 +224,7 @@ static int TestMovementDecision(VS::Battle::Ai::ActorAiState* state) {
 }
 
 int Tests_AiMovementDispatch(void) {
-  VS::Battle::Ai::ActorAiState state = {0};
+  VS::Battle::Ai::ActorAiState state = {};
   VS::Battle::Ai::SettingsView* settings =
       reinterpret_cast<VS::Battle::Ai::SettingsView*>(&state);
   state.previous_tile = -1;
@@ -238,8 +238,8 @@ int Tests_AiMovementDispatch(void) {
 }
 
 int Tests_AiRelations(void) {
-  VS::Battle::Actor actors[3] = {{nullptr}};
-  VS::Battle::Ai::ActorAiState states[3] = {{0}};
+  VS::Battle::Actor actors[3] = {};
+  VS::Battle::Ai::ActorAiState states[3] = {};
   const unsigned ids[3] = {0, 2, 5};
   VS::Battle::Actor* saved_head = VS::Battle::actors[0];
   VS::Battle::Ai::ActorAiState* saved_states[3];
@@ -287,7 +287,7 @@ int Tests_AiRelations(void) {
 }
 
 int Tests_AiMovementSetup(void) {
-  VS::Battle::Ai::ActorAiState state = {0};
+  VS::Battle::Ai::ActorAiState state = {};
   state.decision_delay = 2;
   state.min_action_delay = 1;
   VS::Battle::Ai::TickLiveActorDecisionTimers(
@@ -323,12 +323,12 @@ int Tests_AiMovementSetup(void) {
 }
 
 int Tests_TargetSphereViews(void) {
-  VS::Battle::TargetSphereSetupView setup = {0};
+  VS::Battle::TargetSphereSetupView setup = {};
   VS::Battle::TargetSphereRecord* sphere =
       reinterpret_cast<VS::Battle::TargetSphereRecord*>(&setup);
   TargetSphereLabelView* labels =
       reinterpret_cast<TargetSphereLabelView*>(&setup);
-  VS::Battle::TargetPreview targets[2] = {{0}};
+  VS::Battle::TargetPreview targets[2] = {};
   char text[] = "limb";
   setup.target_list0 = &targets[0];
   setup.target_list1 = &targets[1];
@@ -352,13 +352,13 @@ int Tests_AiFrameStages(void) {
   const int saved_target = VS::Battle::Ai::secondPerceptionTarget;
   const int saved_mask = VS::Battle::Ai::attributeActorMask;
   const int saved_random = VS::Battle::Ai::savedMovementRandomState;
-  VS::Battle::Actor actor = {nullptr};
-  VS::Battle::ActorStats stats = {0};
-  VS::Actors::ActorRecord model = {0};
-  VS::Battle::Ai::ActorAiState state = {0};
+  VS::Battle::Actor actor = {};
+  VS::Battle::ActorStats stats = {};
+  VS::Actors::ActorRecord model = {};
+  VS::Battle::Ai::ActorAiState state = {};
   VS::Battle::Ai::PerceptionUpdateView* view =
       reinterpret_cast<VS::Battle::Ai::PerceptionUpdateView*>(&state);
-  VS::Battle::Ai::RoomAiState room = {0};
+  VS::Battle::Ai::RoomAiState room = {};
   std::uint16_t flags[32][32] = {{0}};
   actor.stats = &stats;
   view->actor = reinterpret_cast<VS::Battle::Actor*>(&actor);
@@ -414,8 +414,8 @@ int Tests_AiFrameCache(void) {
   for (size_t index = 0; index < sizeof saved_scratch; ++index) {
     scratch[index] = kScratchSentinel;
   }
-  VS::Battle::Ai::ActorAiState actor = {0};
-  VS::Battle::Ai::RoomAiState room = {0};
+  VS::Battle::Ai::ActorAiState actor = {};
+  VS::Battle::Ai::RoomAiState room = {};
   std::uint16_t flags[32][32] = {{0}};
   std::uint16_t heights[32][32] = {{0}};
   std::uint8_t auxiliary[0x898] = {0};
@@ -462,7 +462,7 @@ int Tests_DefaultEffectPackageLoaded(void) {
       VS::Effects::emptyPackage[0x51FC / sizeof(std::uint32_t)] != 0) {
     return 0;
   }
-  VS::Effects::LiveEffectPackage package = {0};
+  VS::Effects::LiveEffectPackage package = {};
   VS::Effects::LiveEffectPackage* saved = VS::Effects::package;
   const uintptr_t base = reinterpret_cast<uintptr_t>(VS::Effects::emptyPackage);
   VS::Effects::package = &package;
@@ -494,9 +494,9 @@ int Tests_ActionDefinitionsLoaded(void) {
 }
 
 int Tests_ActorConditionSnapshot(void) {
-  VS::Battle::Actor first = {nullptr}, second = {nullptr};
-  VS::Battle::ActorStats first_stats = {0}, second_stats = {0};
-  VS::Battle::Ai::ActorAiState first_ai = {0}, second_ai = {0};
+  VS::Battle::Actor first = {}, second = {};
+  VS::Battle::ActorStats first_stats = {}, second_stats = {};
+  VS::Battle::Ai::ActorAiState first_ai = {}, second_ai = {};
   VS::Battle::Actor* saved_head = VS::Battle::actors[0];
   VS::Battle::Ai::ActorAiState* saved_first = VS::Battle::Ai::actorAiStates[2];
   VS::Battle::Ai::ActorAiState* saved_second = VS::Battle::Ai::actorAiStates[5];
@@ -544,8 +544,8 @@ int Tests_ActorConditionSnapshot(void) {
 }
 
 int Tests_GimmickViewsRoundTrip(void) {
-  VS::Field::GimmickInstance object = {0};
-  VS::Actors::ShpModel model = {0};
+  VS::Field::GimmickInstance object = {};
+  VS::Actors::ShpModel model = {};
   VS::Field::GimmickPhysicsView* physics =
       reinterpret_cast<VS::Field::GimmickPhysicsView*>(&object);
   object.model = &model;
@@ -568,9 +568,9 @@ int Tests_AiViewsRoundTrip(void) {
     VS::Battle::Ai::ActorAiState state;
     uint64_t after;
   } guarded;
-  VS::Battle::Actor actor = {nullptr};
-  VS::Actors::ActorRecord model = {0};
-  VS::Battle::ActorStats stats = {0};
+  VS::Battle::Actor actor = {};
+  VS::Actors::ActorRecord model = {};
+  VS::Battle::ActorStats stats = {};
   VS::Battle::Ai::AiCreationView* creation =
       reinterpret_cast<VS::Battle::Ai::AiCreationView*>(&guarded.state);
   VS::Battle::Ai::SettingsView* settings =

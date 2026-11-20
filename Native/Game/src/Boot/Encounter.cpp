@@ -210,7 +210,7 @@ int EnterOrFinishEncounter() {
         "encounter", "declared inherited music={} wave bank={}",
         *configuration.inherited_music,
         static_cast<int>(
-            VS::Audio::waveBankFileMap[*configuration.inherited_music]));
+            VS::Audio::kWaveBankFileMap[*configuration.inherited_music]));
   }
   // The original shuffle initialization always seeds with 1. Initialize that
   // same table from the requested seed; combat still calls its real RNG.

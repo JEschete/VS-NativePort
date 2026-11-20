@@ -45,6 +45,14 @@ def unpromoted_opcode_handlers(*identifiers: str):
         yield
 
 
+
+def module_pointers_text(root: Path) -> str:
+    """ModulePointers.cpp with runs of whitespace collapsed and none inside
+    parentheses, so a table entry matches however clang-format wraps it."""
+    text = (root / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
+    return " ".join(text.split()).replace("( ", "(").replace(" )", ")")
+
+
 class EncounterFixupTests(unittest.TestCase):
     def test_plugin_twins_use_extracted_data_across_checkout_roots(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -1412,11 +1420,8 @@ int func_800F9800(void) {
             "AddPrim( static_cast<std::uint32_t*>(FrameScratchpad().ordering_table) + depth,",
             flat(live),
         )
-        relaxed = (
-            Path(__file__).resolve().with_name("relaxed_sources.txt")
-            .read_text(encoding="utf-8").split()
-        )
-        self.assertNotIn(r"Native\Engine\src\Render\RoomDraw.cpp", relaxed)
+        relaxed = Path(__file__).resolve().with_name("relaxed_sources.txt")
+        self.assertFalse(relaxed.exists(), "every source compiles strictly (#483)")
 
     def test_room_subdivision_entries_share_the_existing_bounded_recursion(self):
         for identity, name in (
@@ -1704,7 +1709,7 @@ int func_800F9800(void) {
             self.assertEqual(owned[identity]["path"], r"Native\Game\src\Battle\Ai\FrameUpdate.cpp")
             self.assertEqual(owned[identity]["header"], r"Native\Game\include\Battle\Ai\FrameUpdate.hpp")
         root = Path(__file__).resolve().parents[2]
-        pointers = (root / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
+        pointers = module_pointers_text(root)
         for address, binding in (
             (0x800E65DC, "VS::Battle::Ai::CacheLiveActorAiWorkingState"),
             (0x800E6828, "VS::Battle::Ai::InitializeLiveActorLocomotionMode"),
@@ -1712,7 +1717,7 @@ int func_800F9800(void) {
         ):
             self.assertIn(("BATTLE/BATTLE.PRG", address, binding), copy_fixups.MODULE_BINDING_ENTRIES)
             self.assertIn(binding, copy_fixups.NATIVE_HELPER_HEADERS)
-            self.assertIn(f'0x{address:08X}u, 0u, (void*)&{binding},', pointers)
+            self.assertIn(f'0x{address:08X}u, 0u, reinterpret_cast<void*>(&{binding}),', pointers)
         loop = (root / r"Native\Game\src\Boot\GameplayLoopLive.cpp").read_text(encoding="utf-8")
         self.assertIn("VS::Battle::Ai::RunLiveActorAiUpdateStages();", loop)
         self.assertNotIn("Battle_Ai_RunActorAiUpdateStages", loop)
@@ -1816,16 +1821,14 @@ int func_800F9800(void) {
             (row["address"], row["size"], row["type"]),
             ("0x800F4ED8", "16", "short[8]"),
         )
-        symbols = (root / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(
-            encoding="utf-8"
-        )
+        symbols = module_pointers_text(root)
         for address, size, name in (
             ("800F4ED8", 16, "VS::Effects::screenEffectDefaults"),
             ("800F1D08", 4, "VS::Field::matchingDoorRecords"),
         ):
             self.assertIn(
                 f'{{"BATTLE/BATTLE.PRG", 0x{address}u, {size}u, '
-                f"(void*)&{name}, sizeof {name}, 0u, 0u}}",
+                f"&{name}, sizeof {name}, 0u, 0u}}",
                 symbols,
             )
 
@@ -2001,9 +2004,10 @@ int func_800F9800(void) {
         self.assertIn('#include "Event/WeaponModeOpcode.hpp"', vm)
         self.assertIn("ScriptSetAshleyBattleModeOpcode", skip_opcode_handlers())
         self.assertNotRegex(vm, r"\bScriptSetAshleyBattleMode\b")
-        pointers = (root / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
+        pointers = module_pointers_text(root)
         self.assertIn(
-            '{"BATTLE/BATTLE.PRG", 0x800B9DB4u, 0u, (void*)&VS::Event::ScriptSetAshleyBattleModeOpcode, 0u, 0u, 0u}',
+            '{"BATTLE/BATTLE.PRG", 0x800B9DB4u, 0u, '
+            'reinterpret_cast<void*>(&VS::Event::ScriptSetAshleyBattleModeOpcode), 0u, 0u, 0u}',
             pointers,
         )
         core = (root / r"Native\Game\src\Event\WeaponMode.cpp").read_text(encoding="utf-8")
@@ -2175,9 +2179,7 @@ int func_800F9800(void) {
             encoding="utf-8", newline=""
         ) as stream:
             rows = {row["id"]: row for row in csv.DictReader(stream)}
-        source = (root / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(
-            encoding="utf-8"
-        )
+        source = module_pointers_text(root)
         for identifier, (target, _) in copy_fixups.NATIVE_FUNCTION_REDIRECTS.items():
             if target.startswith("VS::"):
                 # Promoted C++ targets are reached only by name; no address resolves.
@@ -2185,7 +2187,7 @@ int func_800F9800(void) {
                 continue
             name = rows[identifier]["final_name"].replace("::", "_")
             self.assertTrue(
-                f"(void*)&{name}," in source,
+                f"reinterpret_cast<void*>(&{name})," in source,
                 f"Native alias {identifier} must retain its original module binding",
             )
 
@@ -2545,9 +2547,9 @@ int func_800F9800(void) {
         self.assertLess(settings.index("ResolveLiveAiLinkedActors();"), settings.index("BuildLiveAiActionMetadata("))
         for name in ("ActorState.cpp", "ActorState.hpp"):
             self.assertNotIn("Battle_Ai_ResolveAiLinkedActors", (ai / name).read_text(encoding="utf-8"))
-        pointers = (copy_to_native.REPO / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
+        pointers = module_pointers_text(copy_to_native.REPO)
         self.assertEqual(pointers.count("0x800E5998u"), 1)
-        self.assertIn(f"0x800E5998u, 0u, (void*)&{live},", pointers)
+        self.assertIn(f"0x800E5998u, 0u, reinterpret_cast<void*>(&{live}),", pointers)
 
     def test_ai_saved_settings_flags_keep_their_module_address_and_caller(self):
         # #276 row 28: Battle_Ai_ApplySavedAiSettingsFlags (F01812) is typed C++ in Battle/Ai/ActorSettings.cpp.
@@ -2570,9 +2572,9 @@ int func_800F9800(void) {
         self.assertLess(caller.index(call), caller.index("host.ApplySettings(state, settings);"))
         for name in ("ActorState.cpp", "ActorState.hpp"):
             self.assertNotIn("Battle_Ai_ApplySavedAiSettingsFlags", (ai / name).read_text(encoding="utf-8"))
-        pointers = (copy_to_native.REPO / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
+        pointers = module_pointers_text(copy_to_native.REPO)
         self.assertEqual(pointers.count("0x800E5A74u"), 1)
-        self.assertIn(f"0x800E5A74u, 0u, (void*)&{live},", pointers)
+        self.assertIn(f"0x800E5A74u, 0u, reinterpret_cast<void*>(&{live}),", pointers)
 
     def test_ai_settings_application_keeps_its_module_address_and_caller(self):
         # #276 row 28: Battle_Ai_ApplyActorAiSettings (F01813) is typed C++ in Battle/Ai/ActorSettings.cpp.
@@ -2600,9 +2602,9 @@ int func_800F9800(void) {
         for table in ("kPerceptionRangesSquared;", "viewAngles;", "decisionCallbacks;",
                       "kWanderTimingPresets;", "kFlags34Bit14Values ="):
             self.assertIn(table, tables)
-        pointers = (copy_to_native.REPO / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
+        pointers = module_pointers_text(copy_to_native.REPO)
         self.assertEqual(pointers.count("0x800E5A9Cu"), 1)
-        self.assertIn(f"0x800E5A9Cu, 0u, (void*)&{live},", pointers)
+        self.assertIn(f"0x800E5A9Cu, 0u, reinterpret_cast<void*>(&{live}),", pointers)
 
     def test_ai_state_creation_keeps_its_module_address_and_caller(self):
         # #276 row 28: Battle_Ai_CreateActorAiState (F01818) is typed C++ in Battle/Ai/ActorCreation.cpp.
@@ -2624,9 +2626,9 @@ int func_800F9800(void) {
         self.assertEqual(spawning.count("return Battle::Ai::CreateLiveActorAiState(actor, flags);"), 1)
         self.assertIn('#include "Battle/Ai/ActorCreationLive.hpp"', spawning)
         self.assertNotIn("Battle_Ai_CreateActorAiState", spawning)
-        pointers = (copy_to_native.REPO / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
+        pointers = module_pointers_text(copy_to_native.REPO)
         self.assertEqual(pointers.count("0x800E6178u"), 1)
-        self.assertIn(f"0x800E6178u, 0u, (void*)&{live},", pointers)
+        self.assertIn(f"0x800E6178u, 0u, reinterpret_cast<void*>(&{live}),", pointers)
 
     @staticmethod
     def battle_ability_function(name: str) -> str:
@@ -2792,9 +2794,8 @@ int func_800F9800(void) {
             self.assertEqual(owned[fid]["header"], r"Native\Game\include\Battle\Ai\FlightTerrain.hpp")
         self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS["VS::Battle::Ai::ActorFlightNeighborhood"],
                          r"Native\Game\src\Battle\Ai\CurrentTerrain.hpp")
-        self.assertNotIn(r"Native\Game\src\Battle\Ai\FlightTerrain.cpp",
-                         Path(__file__).resolve().with_name("relaxed_sources.txt").read_text(
-                             encoding="utf-8").split())
+        self.assertFalse(Path(__file__).resolve().with_name("relaxed_sources.txt").exists(),
+                         "every source compiles strictly (#483)")
 
     def test_palette_pulse_uses_the_native_gimmick_owner(self):
         registry = Path(__file__).resolve().with_name("owned.csv")
@@ -3384,17 +3385,17 @@ int func_800F9800(void) {
             0x80017EEC: "LiveFadeScenePan",
         }
         root = Path(__file__).resolve().parents[2]
-        pointers = (root / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
+        pointers = module_pointers_text(root)
         for address, name in handlers.items():
             with self.subTest(name=name):
                 binding = f"VS::Audio::SoundEffects::{name}"
                 self.assertIn(("SLUS_010.40", address, binding), copy_fixups.MODULE_BINDING_ENTRIES)
                 self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS[binding],
                                  r"Native\Engine\include\Audio\SoundEffectProgramsLive.hpp")
-                self.assertIn(f"0x{address:08X}u, 0u, (void*)&{binding},", pointers)
+                self.assertIn(f"0x{address:08X}u, 0u, reinterpret_cast<void*>(&{binding}),", pointers)
         for retired in ("Audio_PlaySfx,", "Audio_ResolveSfxProgram,", "Audio_Control_SetMusicVolume,",
                         "Audio_SoundEffects_PlayProgramPair,"):
-            self.assertNotIn(f"(void*)&{retired}", pointers)
+            self.assertNotIn(f"&{retired.rstrip(',')}", pointers)
 
     def test_empty_stack_top_is_checked_after_remaining_member_updates(self):
         source = """    UpdateRemainingMembers();
@@ -4954,7 +4955,7 @@ VS::Core::Memory::CopyAlignedWords(s1, VS::Field::gimmickInstances[arg0->dataAdd
         root = Path(__file__).resolve().parents[2]
         source = (root / "Native/Game/src/Effects/PurgeTables.cpp").read_text()
         table = source.split(
-            "EffectRenderer effectEntryPoints[kEntryPointCount] = {", 1
+            "const EffectRenderer kEffectEntryPoints[kEntryPointCount] = {", 1
         )[1]
         table = table.split("};", 1)[0]
         self.assertNotIn("InvokeAllPluginUpdates", table)

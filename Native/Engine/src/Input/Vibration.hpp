@@ -8,5 +8,5 @@
 namespace VS::Input {
 inline constexpr std::size_t kVibrationPresetBytes = 24;
 
-extern std::array<std::uint8_t, kVibrationPresetBytes> vibrationPresets;
+extern const std::array<std::uint8_t, kVibrationPresetBytes> kVibrationPresets;
 }  // namespace VS::Input

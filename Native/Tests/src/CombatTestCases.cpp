@@ -1664,18 +1664,18 @@ TEST_CASE("Blocked hit still plays the defense reaction on a real actor",
 
 TEST_CASE("Stat item effects bind plugin-local renderers, not EFFPURGE",
           "[combat][items][effects][item-plugin]") {
-  const auto count = VS::Effects::effectEntryPointIndices
-      [std::size(VS::Effects::effectEntryPointIndices) - 1];
+  const auto count = VS::Effects::kEffectEntryPointIndices
+      [std::size(VS::Effects::kEffectEntryPointIndices) - 1];
   for (unsigned slot = 0; slot < count; ++slot) {
     CAPTURE(slot);
-    CHECK(VS::Effects::effectEntryPoints[slot] !=
+    CHECK(VS::Effects::kEffectEntryPoints[slot] !=
           &VS::Effects::LiveInvokeAllPluginUpdates);
   }
-  CHECK(VS::Effects::effectEntryPoints
-            [VS::Effects::effectEntryPointIndices[198]] ==
+  CHECK(VS::Effects::kEffectEntryPoints
+            [VS::Effects::kEffectEntryPointIndices[198]] ==
         &VS::Effects::Templates::UpdateLivePlg198Ring);
-  CHECK(VS::Effects::effectEntryPoints
-            [VS::Effects::effectEntryPointIndices[199]] ==
+  CHECK(VS::Effects::kEffectEntryPoints
+            [VS::Effects::kEffectEntryPointIndices[199]] ==
         &VS::Effects::Templates::UpdateLivePlg198Ring);
 }
 

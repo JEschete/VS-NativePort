@@ -66,32 +66,6 @@ class BaselineTests(unittest.TestCase):
                     r".github\workflows\quality.yml", r"Docs\BUILDING.md", "README.md",
                 ])
 
-    def test_cpp_header_advice_requires_an_exact_c_member_assignment(self) -> None:
-        advice = quality.Finding(
-            "cpplint", "build/include_what_you_use", "Native/Tests/Fixture.cpp", 1,
-            "Add #include <string> for string", "box.string = text;",
-        )
-        relaxed = patch.object(quality, "relaxed_sources", return_value={advice.path})
-        relaxed.start()
-        self.addCleanup(relaxed.stop)
-        self.assertTrue(quality.inapplicable_cpp_header_advice(advice))
-        pointer = quality.Finding(
-            advice.tool, advice.rule, advice.path, 1, advice.message,
-            "owner->box.string = text;",
-        )
-        self.assertTrue(quality.inapplicable_cpp_header_advice(pointer))
-        for path, rule, message, context in (
-            ("Native/Tests/Strict.cpp", advice.rule, advice.message, advice.context),
-            ("Native/Tests/Fixture.h", advice.rule, advice.message, advice.context),
-            (advice.path, "clang-analyzer-core.NullDereference", advice.message, advice.context),
-            (advice.path, advice.rule, "Add #include <vector> for vector", advice.context),
-            (advice.path, advice.rule, advice.message, "std::string text;"),
-            (advice.path, advice.rule, advice.message, 'const char* text = "box.string = text;";'),
-        ):
-            with self.subTest(path=path, rule=rule, context=context):
-                item = quality.Finding(advice.tool, rule, path, 1, message, context)
-                self.assertFalse(quality.inapplicable_cpp_header_advice(item))
-
     def test_cpp_game_analysis_uses_the_builds_c_api_include_paths(self) -> None:
         with (
             tempfile.TemporaryDirectory() as directory,
@@ -361,13 +335,13 @@ class BaselineTests(unittest.TestCase):
             counts = {row["key"]: row["count"] for row in migrated["findings"]}
             self.assertEqual(quality.new_findings(findings, counts), findings[2:])
 
-    def test_scope_excludes_copied_and_external_sources(self) -> None:
+    def test_scope_includes_former_copied_sources_and_excludes_external_ones(self) -> None:
         native, python = quality.discover_files()
         self.assertIn("Native/Engine/src/Core/FrameClock.cpp", native)
         self.assertIn("tools/test/verify_first_lever.py", python)
         self.assertIn("Native/Player/player.py", python)
         self.assertIn("Native/Player/vs_player/reaction.py", python)
-        self.assertNotIn("Native/Game/src/Boot/ModulePointers.cpp", native)
+        self.assertIn("Native/Game/src/Boot/ModulePointers.cpp", native)
         self.assertTrue(all(path.startswith("Native/") for path in native))
         self.assertFalse(
             any(
@@ -569,29 +543,6 @@ class ToolControlTests(unittest.TestCase):
             source.write_text("void Test() { CHECK(value == 0); }\n", encoding="utf-8")
             findings = quality.check_cpplint([quality.relative(source)])
         self.assertFalse(any(item.rule == "readability/check" for item in findings))
-
-    def test_real_cpp_string_advice_stays_actionable(self) -> None:
-        path = self.source(
-            "missing_string.cc",
-            "void Example() { std::string text; }\n",
-        )
-        findings = quality.check_cpplint([path])
-        advice = [item for item in findings if item.rule == "build/include_what_you_use"]
-        self.assertTrue(advice)
-        self.assertFalse(any(quality.inapplicable_cpp_header_advice(item) for item in advice))
-
-    def test_real_c_member_advice_is_preserved_as_language_advice(self) -> None:
-        self.source("member_control.h", "typedef struct { char* string; } Message;\n")
-        path = self.source(
-            "member_control.cpp",
-            '#include "member_control.h"\n'
-            "void Example(char* text) {\n  Message box;\n  box.string = text;\n}\n",
-        )
-        findings = quality.check_cpplint([path])
-        advice = [item for item in findings if item.rule == "build/include_what_you_use"]
-        self.assertTrue(advice)
-        with patch.object(quality, "relaxed_sources", return_value={path}):
-            self.assertTrue(any(quality.inapplicable_cpp_header_advice(item) for item in advice))
 
     def test_clang_tidy_detects_an_unnamed_gameplay_number(self) -> None:
         path = self.source("number_control.cc", "int CalculateValue() { return 37; }\n")

@@ -112,20 +112,21 @@ there would have hidden the defect and left the wrong behavior in place.
 
 ## Release keeps its checks
 
-Copied code now compiles with these two flags, alongside `-fno-finite-loops` and `-fno-strict-return`:
+Copied code used to compile with these two flags, alongside `-fno-finite-loops` and `-fno-strict-return`:
 
-| Flag | What it preserves |
+| Flag | What it preserved |
 | --- | --- |
 | `-fno-delete-null-pointer-checks` | A null check after a read stays in the program |
 | `-fwrapv` | Signed overflow wraps, as it did on the PS1, so an overflow check stays in the program |
 
-Without them, compiling at `/O2` removed `if (table[i] == nullptr)` after a read of `table[i]->a`, and `if (x + 1 < x)`. With
-them, all three test functions keep their comparisons. Strict aliasing is not a concern, because clang-cl already passes
-`-relaxed-aliasing`.
+Without them, compiling at `/O2` removed `if (table[i] == nullptr)` after a read of `table[i]->a`, and `if (x + 1 < x)`.
+Strict aliasing is not a concern, because clang-cl already passes `-relaxed-aliasing`.
 
-With the flags, Debug and Release pass every test and match the same replay baselines, so gameplay on those scenarios did not
-change. They apply to sources using `VSCopiedCOptions`, not to strict C++ sources, which should not rely on either behavior.
-These flags keep a check that the source already has. They do not add one, so `GUARD-AFTER-READ` sites still need fixing.
+#483 removed the flags: every source now compiles strictly. Before removal, the disassembly, relocations and data of all
+135 formerly relaxed Release objects were compared with and without them. No production function changed (see
+[QUALITY.md](QUALITY.md)), so no copied check was being kept alive only by a flag. Code must not rely on either behavior:
+intentional 32-bit wraparound uses `Core::Math::Wrapping*`, and `GUARD-AFTER-READ` sites still need their check moved
+before the read, because nothing now stops the compiler from deleting a check that follows one.
 
 ## Modern replacements
 

@@ -379,7 +379,7 @@ TEST_CASE("EFFPURGE dispatches all repeating ring lifecycles to their overlays",
       Binding{339, &rings::UpdateLivePlg300ForegroundRepeatingRing}};
   for (const auto& binding : kBindings) {
     DYNAMIC_SECTION("entry " << binding.entry) {
-      const auto callback = VS::Effects::effectEntryPoints[binding.entry];
+      const auto callback = VS::Effects::kEffectEntryPoints[binding.entry];
       REQUIRE(callback == binding.callback);
       CheckLiveRing(callback);
     }

@@ -791,7 +791,7 @@ TEST_CASE(
   ProfileFixture fixture;
   WeaponHeap heap;
   auto& inventory = VS::Items::inventory;
-  std::memcpy(&inventory, VS::Title::newGameInventoryTemplate,
+  std::memcpy(&inventory, VS::Title::kNewGameInventoryTemplate,
               sizeof inventory);
   if (GENERATE(false, true)) inventory.shields[0].is_equipped = 1;
   const auto original = inventory;

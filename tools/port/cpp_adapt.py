@@ -283,15 +283,10 @@ def fix_enum_operand(file: File, ranges: list[tuple[int, int, int, int]]) -> boo
 def prototype_pass(paths: list[str]) -> int:
     """`T (*f)()` took any arguments in C and none in C++; `(...)` keeps the C call on this ABI."""
     changed = 0
-    headers = {
+    listed = {
         path.replace(chr(92), "/")
         for path in json.loads((ROOT / "tools/port/copy_manifest.json").read_text(encoding="utf-8"))
     }
-    listed = set(headers)
-    for path in (ROOT / "tools/port/relaxed_sources.txt").read_text(encoding="utf-8").split():
-        posix = path.replace(chr(92), "/")
-        listed.add(posix)
-        listed.add(posix[:-4] + ".h")
     for name in sorted(listed):
         target = ROOT / name
         if not target.is_file():

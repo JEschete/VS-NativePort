@@ -18,6 +18,7 @@
 #include "Actors/Movement.hpp"
 #include "Actors/Shadow.hpp"
 #include "Actors/WeaponModel.hpp"
+#include "Content/ModuleData.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Gte.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -43,9 +44,11 @@ using VS::Core::Gte::VECTOR;
 using VS::Legacy::AddPrim;
 using VS::Legacy::setlen;
 
-extern unsigned int
-    Content_battleShadowVertices[VS::Render::kShadowVertexCount];
-extern unsigned int Content_battleShadowFaces[VS::Render::kShadowFaceCount];
+// The shadow mesh in the module image matches the native draw extents.
+static_assert(VS::Content::kBattleShadowVertexWords ==
+              VS::Render::kShadowVertexCount);
+static_assert(VS::Content::kBattleShadowFaceWords ==
+              VS::Render::kShadowFaceCount);
 
 namespace VS::Render {
 namespace {
@@ -444,8 +447,8 @@ void DrawLiveActorGroundShadow(VS::Actors::ActorRecord& actor,
   const ActorShadowResult result = DrawActorGroundShadow(
       source, {Math::MatrixOf(camera), TranslationOf(camera)},
       {root_offset.vx, root_offset.vy, root_offset.vz},
-      {Content_battleShadowVertices, Content_battleShadowFaces}, ground,
-      transformer, queue);
+      {VS::Content::battleShadowVertices, VS::Content::battleShadowFaces},
+      ground, transformer, queue);
   if (result.status == ActorShadowStatus::kInvalidMesh) {
     VS::Core::Errorf(kChannel, "Invalid actor shadow vertex offset");
     std::abort();

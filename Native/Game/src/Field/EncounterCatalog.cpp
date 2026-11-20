@@ -563,7 +563,7 @@ std::vector<std::string> ValidateEncounterOptions(const EncounterSetup& setup) {
   if (setup.inherited_music &&
       (*setup.inherited_music < 1 ||
        *setup.inherited_music > EncounterLimits::kLastMusic ||
-       VS::Audio::waveBankFileMap[*setup.inherited_music] == 0)) {
+       VS::Audio::kWaveBankFileMap[*setup.inherited_music] == 0)) {
     errors.emplace_back("inherited music has no mapped wave bank");
   }
   if (!setup.stat_overrides.Valid()) {

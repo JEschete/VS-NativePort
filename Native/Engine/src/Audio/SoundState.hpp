@@ -52,5 +52,5 @@ extern std::uint16_t menuSoundEffects[kMenuSoundEffectWords];
 // decomp: vs_main_soundData (vs_main_soundData@SLUS_010.40)
 extern SoundState soundState;
 // decomp: _soundFileMap (_soundFileMap@SLUS_010.40)
-extern std::uint8_t waveBankFileMap[];
+extern const std::uint8_t kWaveBankFileMap[];
 }  // namespace VS::Audio

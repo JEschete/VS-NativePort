@@ -128,10 +128,6 @@ controls pass, and the ledgers satisfy the gate check below.
 
 It does **not** establish that:
 
-- copied code is clean: the files in `tools\port\copy_manifest.json` are outside the
-  default quality scope (#483);
-- transitional C++ is strict: the files in `tools\port\relaxed_sources.txt` are in
-  scope but compile relaxed (`/J`, warning level 1, warnings not errors);
 - any code is modernized, C++-promoted or behaviorally verified: those are
   separate gates, and this job builds nothing and runs no native test;
 - `--tidy` analysis passed: the fast CI job does not run it;
@@ -153,18 +149,29 @@ as evidence (#46):
 | --- | --- | --- |
 | Ownership | catalog, `owned.csv`, copy manifest, data/type/field ledgers | unknown/duplicate owned IDs, missing paths, owned paths in the manifest, location mismatches, unregistered rows in owned files, invalid `copied`, `retired` without `copy=no` and `retired-by:`, a live type row whose `final_location` does not exist, a `copied=x` global no longer defined in its `final_location` (#466), a live row whose `native-refs:` citation does not start its notes |
 | C++ promotion | `CPP_PROMOTION.csv`, source, projects | a §8.2 claim that does not verify, a missing record for an owned C++ function, catalog `cpp` differing from the derived value, remaining consumers of the old symbol |
-| Quality | generated `.vcxproj` files, `baseline.json` | owned C++ or any promotion claim compiled relaxed, `strict_clean` on a file with baseline debt |
+| Quality | generated `.vcxproj` files, `baseline.json` | any relaxed per-file compile, a `tools\port\relaxed_sources.txt` list, `strict_clean` on a file with baseline debt |
 | Behavior | `VERIFY_LEDGER.csv`, Catch2 sources | `verified=x` without a passing record, unresolved references, missing revision, configuration or limits, invalid values |
 | Retirement | `EC_BRIDGES.csv`, `GATE_SLICES.csv`, include graph | `modernized` on unowned rows, `modernized=x` reaching a bridge directly or indirectly, a listed bridge that no longer exists, a slice whose measured consumers differ from its record, or a `copy=yes`/`cpp=x` row missing from all slices |
 
 Source classes come from each file's actual compiler settings in the generated
-projects and `tools\port\relaxed_sources.txt`: `generated-cpp` (relaxed, outside quality scope),
-`transitional-cpp` (relaxed, in scope), `strict-cpp` and `replacement-legacy`
-(`RETIRING_NATIVE` and `Legacy/`). The report lists transitional relaxation as debt
-per file, with owned-function and baseline-finding counts. Owner decision: every
-source compiles strictly. Since the copier is retired (plan D24), copied files are
-maintained by hand like any other source, so both relaxed classes are debt that #483
-removes, along with the semantic flags in `VSCopiedCOptions` (`/J`, `-fwrapv`, …).
+projects: `strict-cpp`, and `replacement-legacy` (`RETIRING_NATIVE` and `Legacy/`).
+Every source compiles strictly and is in the quality scope (#483). The files the
+retired copier wrote (plan D24) are maintained by hand like any other source; they
+keep only the cross-project include directories (`VSCopiedCIncludes`). `--check`
+rejects any per-file setting that relaxes a compile: warnings not treated as
+errors, a warning level below 4, `ConformanceMode` false, or an option that
+changes language semantics or silences errors (`/J`, `-funsigned-char`, `-fwrapv`,
+`-fno-strict-overflow`, `-fno-delete-null-pointer-checks`, `-fno-strict-return`,
+`-fno-finite-loops`, `-fms-extensions`, `-Wno-error`, `/permissive`). The coverage
+build, conditioned on `$(VSCoverage)`, may keep warnings as warnings.
+
+Retiring the relaxed settings was audited per object, not just silenced: the
+disassembly, relocations and data of the 135 formerly relaxed Release objects were
+compared before and after. 124 were identical. The rest differed only by the MSVC
+`/J` runtime marker (`__use_char_max`), by null tests removed from never-null
+`std::function` storage, and by the test-only source edits, so no production code
+depended on unsigned plain `char`, wrapping overflow, retained null checks,
+side-effect-free endless loops or falling off a non-void function.
 
 The tool reads the baseline and never writes it. Moving or renaming a bridge
 without updating `EC_BRIDGES.csv` fails the check instead of lowering a consumer
@@ -258,15 +265,6 @@ registry are reported as `fixed_interface_advisories`: their published C call
 contracts must be preserved. Private helpers, conversions, bounds and lifetime
 diagnostics are not covered by this exception. Regression controls check both
 the registered path/name match and continued safety reporting.
-
-`language_advisories` retains cpplint's inapplicable C++ `<string>` suggestion
-for a direct `.string`/`->string` member assignment in a native C17 source.
-That field name does not make a C structure use `std::string`, and a C++
-standard header cannot repair C code. This classification is limited to that
-exact tool/rule/message and C member expression; C++ sources, headers, other
-include advice and safety diagnostics remain actionable. Real C/C++ tool
-controls verify both sides. The diagnostic stays visible in the report and
-does not require a baseline or source suppression.
 
 The positional-argument heuristic requires at least three identical-type
 arguments and does not group implicit conversions. This avoids redesigning

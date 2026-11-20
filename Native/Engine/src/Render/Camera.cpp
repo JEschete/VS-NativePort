@@ -1,6 +1,8 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.hpp"
+// Copied from the decomp by tools/port/copy_to_native.py; see each item's
+// decomp line.
 #include "Render/Camera.hpp"
+
+#include "Legacy/Psx.hpp"
 
 using VS::Core::Gte::MATRIX;
 
@@ -12,4 +14,3 @@ MATRIX VS::Render::cameraBasisMatrix;
 
 // decomp: vs_main_projectionDistance (vs_main_projectionDistance@SLUS_010.40)
 int VS::Render::projectionDistance;
-

@@ -139,9 +139,9 @@ compile settings, is part of #248.
      because `tools\port\check_leftovers.py` reads every listed path (#468).
    - Run `tools\ledger\gates.py --check`. Headers carry no `owned.csv` rows, so none were reported, but a header
      that a registered function names as its `header` would be.
-   - `tools\scaffold\gen_solution.py` applies the copied-C settings only to manifest `.cpp` files, so a header changes
-     no list. Rerun it for the new file name.
-   - The header is now in the strict quality scope: `lower_case` members, `<cstdint>` types (the original's plain
+   - `tools\scaffold\gen_solution.py` gives only manifest `.cpp` files the cross-project include directories, so a
+     header changes no list. Rerun it for the new file name.
+   - The header is in the strict quality scope (every source is since #483): `lower_case` members, `<cstdint>` types (the original's plain
      `char` was unsigned, so its bytes are `std::uint8_t`), and no magic numbers. Put the original layout's sizes and
      offsets in a `layout` namespace of named constants, each with its `static_assert`.
    - A generated file that stays in the manifest and declares data of the migrated type forward-declares it, for

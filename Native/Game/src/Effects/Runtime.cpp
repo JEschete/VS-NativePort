@@ -1,27 +1,37 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.hpp"
+// Copied from the decomp by tools/port/copy_to_native.py; see each item's
+// decomp line.
+#include "Effects/Runtime.hpp"
+
 #include "Content/DiscQueue.hpp"
 #include "Effects/Particles.hpp"
-#include "Effects/Runtime.hpp"
 #include "Effects/TransformsLiveState.hpp"
+#include "Legacy/Psx.hpp"
 
 // decomp: D_800EC2E4 (D_800EC2E4@BATTLE/BATTLE.PRG)
-std::uint8_t VS::Effects::effectBufferIndex; /* contents: module image (ModuleData.cpp) */
+// contents: module image (ModuleData.cpp)
+std::uint8_t VS::Effects::effectBufferIndex;
 
 // decomp: D_800EC324 (D_800EC324@BATTLE/BATTLE.PRG)
-VS::Effects::EffectRenderer VS::Effects::scriptRenderers[VS::Effects::kScriptRenderers]; /* contents: module image, relocated (ModulePointers.cpp) */
+// contents: module image, relocated (ModulePointers.cpp)
+VS::Effects::EffectRenderer
+    VS::Effects::scriptRenderers[VS::Effects::kScriptRenderers];
 
 // decomp: D_800EC32C (D_800EC32C@BATTLE/BATTLE.PRG)
-char VS::Effects::actionVariantValues[VS::Effects::kActionVariantImageBytes]; /* contents: module image (ModuleData.cpp) */
+// contents: module image (ModuleData.cpp)
+char VS::Effects::actionVariantValues[VS::Effects::kActionVariantImageBytes];
 
 // decomp: D_800EC3F4 (D_800EC3F4@BATTLE/BATTLE.PRG)
-VS::Effects::ScriptOpcodeHandler VS::Effects::scriptOpcodeHandlers[VS::Effects::kEffectScriptOpcodes]; /* contents: module image, relocated (ModulePointers.cpp) */
+// contents: module image, relocated (ModulePointers.cpp)
+VS::Effects::ScriptOpcodeHandler
+    VS::Effects::scriptOpcodeHandlers[VS::Effects::kEffectScriptOpcodes];
 
 // decomp: D_800EC4B8 (D_800EC4B8@BATTLE/BATTLE.PRG)
-std::uint8_t VS::Effects::lastReactionSoundVariant; /* contents: module image (ModuleData.cpp) */
+// contents: module image (ModuleData.cpp)
+std::uint8_t VS::Effects::lastReactionSoundVariant;
 
 // decomp: D_800EC4BC (D_800EC4BC@BATTLE/BATTLE.PRG)
-std::uint32_t VS::Effects::emptyPackage[VS::Effects::kEmptyPackageWords]; /* contents: module image (ModuleData.cpp) */
+// contents: module image (ModuleData.cpp)
+std::uint32_t VS::Effects::emptyPackage[VS::Effects::kEmptyPackageWords];
 
 // decomp: D_800F185C (D_800F185C@BATTLE/BATTLE.PRG)
 int VS::Effects::tintedActor;
@@ -93,12 +103,13 @@ VS::Effects::LiveEffectPackage* VS::Effects::package;
 // address, and nothing read it; upstream now names the address once
 // (effectRenderers), and the second declaration is retired (#441).
 
-// decomp: vs_battle_effectRenderers (vs_battle_effectRenderers@BATTLE/BATTLE.PRG)
-VS::Effects::EffectRenderer VS::Effects::effectRenderers[VS::Effects::kEffectRenderers];
+// decomp: vs_battle_effectRenderers
+// (vs_battle_effectRenderers@BATTLE/BATTLE.PRG)
+VS::Effects::EffectRenderer
+    VS::Effects::effectRenderers[VS::Effects::kEffectRenderers];
 
 // decomp: D_800F56C8 (D_800F56C8@BATTLE/BATTLE.PRG)
 VS::Effects::LiveEffectPackage VS::Effects::actionPackage;
 
 // decomp: D_800F57A0 (D_800F57A0@BATTLE/BATTLE.PRG)
 VS::Effects::LiveEffectPackage VS::Effects::secondaryPackage;
-

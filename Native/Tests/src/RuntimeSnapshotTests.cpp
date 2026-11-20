@@ -1077,9 +1077,9 @@ TEST_CASE("Original New Game inventory accepts its lazy display-index state",
           "[save][runtime-snapshot]") {
   RuntimeFixture fixture;
   auto state = fixture.Capture();
-  static_assert(sizeof(VS::Title::newGameInventoryTemplate) ==
+  static_assert(sizeof(VS::Title::kNewGameInventoryTemplate) ==
                 sizeof(state.inventory));
-  std::memcpy(&state.inventory, VS::Title::newGameInventoryTemplate,
+  std::memcpy(&state.inventory, VS::Title::kNewGameInventoryTemplate,
               sizeof(state.inventory));
   state.inventory_order = {};
   const auto before = LiveFingerprint(fixture);

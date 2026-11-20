@@ -102,8 +102,8 @@ class Fixture:
             {"ec": "EC-03", "path": "Native/Engine/include/Core/Gte.hpp", "kind": "header"},
             {"ec": "EC-03", "path": "Native/Engine/src/Core/Gte.cpp", "kind": "source"},
         ]
-        self.relaxed = {"src\\Gen\\Generated.cpp", "src\\Sys\\OwnedC.cpp"}
-        self.relaxed_list = ["Native\\Game\\src\\Sys\\OwnedC.cpp"]
+        self.relaxed: set[str] = set()
+        self.relaxed_list: list[str] = []
         self.catalog[1]["cpp"] = "wip"
         self.files = {
             "Native/Game/src/Gen/Generated.cpp": '#include "Legacy/Psx.h"\nint a;\n',
@@ -154,7 +154,8 @@ class Fixture:
         manifest = self.root / "tools/port/copy_manifest.json"
         manifest.write_text(json.dumps(self.manifest), encoding="utf-8")
         relaxed = self.root / "tools/port/relaxed_sources.txt"
-        relaxed.write_text("".join(item + chr(10) for item in self.relaxed_list), encoding="utf-8")
+        if self.relaxed_list:
+            relaxed.write_text("".join(item + chr(10) for item in self.relaxed_list), encoding="utf-8")
         baseline = self.root / "tools/lint/baseline.json"
         baseline.parent.mkdir(parents=True, exist_ok=True)
         baseline.write_text(json.dumps({"schema": 1, "findings": self.baseline}), encoding="utf-8")
@@ -199,10 +200,10 @@ def promotion_row(**values: str) -> dict[str, str]:
 
 
 def transitional_record() -> dict[str, str]:
-    """F00002: owned, already C++, compiled relaxed, with no step beyond the suffix claimed."""
+    """F00002: owned C++ claiming only the machine-measured strict steps."""
     return promotion_row(
-        id="F00002", path=r"Native\Game\src\Sys\OwnedC.cpp", source_cpp="", vs_namespace="", typed_interface="",
-        no_bridge="", strict_clean="", behavior_evidence="", evidence="", reviewed="",
+        id="F00002", path=r"Native\Game\src\Sys\OwnedC.cpp", vs_namespace="", typed_interface="",
+        no_bridge="", behavior_evidence="", evidence="", reviewed="",
     )
 
 
@@ -364,12 +365,6 @@ class PromotionGateTests(GateTestCase):
         report = self.report()
         self.assertIn(step, {item.rule for item in report.issues})
         self.assertNotEqual(report.derived_cpp["F00003"], "x")
-
-    def test_c_source_cannot_claim_source_cpp(self) -> None:
-        self.fixture.promote(path=r"Native\Game\src\Sys\OwnedC.cpp")
-        self.fixture.catalog[2]["final_location"] = r"Native\Game\src\Sys\OwnedC.cpp"
-        self.fixture.owned[1]["path"] = r"Native\Game\src\Sys\OwnedC.cpp"
-        self.expect_failure("claim-source_cpp")
 
     def test_relaxed_compilation_cannot_claim_source_cpp(self) -> None:
         self.fixture.promote()
@@ -663,44 +658,48 @@ class QualityGateTests(GateTestCase):
         self.fixture.files["resources/decomp/asm/func.s"] = "nop\n"
         self.assertNotIn("non-cpp-source", self.rules("language"))
 
-    def test_relaxed_list_entry_for_a_missing_file_is_rejected(self) -> None:
-        self.fixture.relaxed_list.append("Native\\Game\\src\\Sys\\Gone.cpp")
-        self.assertIn("relaxed-list-stale", self.rules("quality"))
+    def test_a_relaxed_source_list_is_rejected(self) -> None:
+        self.fixture.relaxed_list.append("Native\\Game\\src\\Sys\\OwnedC.cpp")
+        self.assertIn("relaxed-list", self.rules("quality"))
 
-    def test_relaxed_list_entry_compiled_strict_is_rejected(self) -> None:
-        self.fixture.relaxed.discard("src\\Sys\\OwnedC.cpp")
-        self.assertIn("relaxed-list-stale", self.rules("quality"))
+    def test_every_relaxed_compile_is_rejected(self) -> None:
+        for relative, retiring in (("src\\Sys\\Thing.cpp", {}), ("src\\Gen\\Generated.cpp", {}),
+                                   ("src\\Sys\\OwnedC.cpp", {"Native/Game/src/Sys/OwnedC.cpp": "EC-02"})):
+            with self.subTest(relative=relative):
+                self.setUp()
+                self.fixture.relax(relative)
+                report = gates.build_report(self.fixture.write(), retiring=retiring)
+                path = "Native/Game/" + relative.replace("\\", "/")
+                self.assertIn(("relaxed-compile", path),
+                              {(issue.rule, issue.subject) for issue in report.issues if issue.gate == "quality"})
 
-    def test_relaxed_owned_cpp_is_rejected(self) -> None:
-        self.fixture.relax("src\\Sys\\Thing.cpp")
-        self.assertIn("owned-cpp-relaxed", self.rules("quality"))
+    def test_semantic_compatibility_options_count_as_relaxed(self) -> None:
+        for metadata in ("<AdditionalOptions>/J %(AdditionalOptions)</AdditionalOptions>",
+                         "<AdditionalOptions>/clang:-fwrapv %(AdditionalOptions)</AdditionalOptions>",
+                         "<AdditionalOptions>/clang:-fno-delete-null-pointer-checks</AdditionalOptions>",
+                         "<AdditionalOptions>/clang:-Wno-error=return-type</AdditionalOptions>",
+                         "<ConformanceMode>false</ConformanceMode>"):
+            with self.subTest(metadata=metadata):
+                self.setUp()
+                self.fixture.files["Directory.Build.props"] = STRICT_PROPS.replace(
+                    "</ClCompile>", f"  {metadata}\n  </ClCompile>")
+                self.assertEqual(self.report().source_classes["Native/Game/src/Sys/Thing.cpp"]["compile"], "relaxed")
 
-    def test_owned_c_is_reported_as_maintained_relaxed_debt(self) -> None:
+    def test_the_coverage_build_may_keep_warnings_as_warnings(self) -> None:
+        self.fixture.files["Directory.Build.props"] = STRICT_PROPS.replace(
+            "</Project>", "  <ItemDefinitionGroup Condition=\"'$(VSCoverage)'=='true'\"><ClCompile>\n"
+            "    <AdditionalOptions>-Wno-error %(AdditionalOptions)</AdditionalOptions>\n"
+            "  </ClCompile></ItemDefinitionGroup>\n</Project>")
+        self.assertEqual(self.report().source_classes["Native/Game/src/Sys/Thing.cpp"]["compile"], "strict")
+        self.assertNotIn("relaxed-compile", self.rules("quality"))
+
+    def test_copied_and_owned_sources_are_strict_cpp(self) -> None:
         report = self.report()
-        entry = report.source_classes["Native/Game/src/Sys/OwnedC.cpp"]
-        self.assertEqual(entry["class"], "transitional-cpp")
-        self.assertEqual(entry["compile"], "relaxed")
-        self.assertEqual(report.relaxation_debt[0]["path"], "Native/Game/src/Sys/OwnedC.cpp")
-        self.assertEqual(report.relaxation_debt[0]["owned_functions"], 1)
-
-    def test_owned_relaxed_replacement_code_stays_on_the_debt_list(self) -> None:
-        report = gates.build_report(self.fixture.write(), retiring={"Native/Game/src/Sys/OwnedC.cpp": "EC-02"})
-        entry = report.source_classes["Native/Game/src/Sys/OwnedC.cpp"]
-        self.assertEqual(entry["class"], "replacement-legacy")
-        self.assertEqual([item["path"] for item in report.relaxation_debt], ["Native/Game/src/Sys/OwnedC.cpp"])
-        self.assertEqual(report.relaxation_debt[0]["class"], "replacement-legacy")
-
-    def test_unowned_relaxed_legacy_code_is_not_maintained_debt(self) -> None:
-        self.fixture.files["Native/Game/src/Sys/Shim.cpp"] = "int shim;\n"
-        self.fixture.relax("src\\Sys\\Shim.cpp")
-        report = gates.build_report(self.fixture.write(), retiring={"Native/Game/src/Sys/Shim.cpp": "EC-02"})
-        self.assertNotIn("Native/Game/src/Sys/Shim.cpp", [item["path"] for item in report.relaxation_debt])
-
-    def test_generated_output_is_outside_quality_scope(self) -> None:
-        report = self.report()
-        entry = report.source_classes["Native/Game/src/Gen/Generated.cpp"]
-        self.assertEqual(entry["class"], "generated-cpp")
-        self.assertFalse(entry["quality_scope"])
+        for path in ("Native/Game/src/Gen/Generated.cpp", "Native/Game/src/Sys/OwnedC.cpp"):
+            with self.subTest(path=path):
+                self.assertEqual(report.source_classes[path]["class"], "strict-cpp")
+                self.assertEqual(report.source_classes[path]["compile"], "strict")
+        self.assertEqual([issue for issue in report.issues if issue.gate == "quality"], [])
 
     def test_strict_cpp_comes_from_project_settings_not_the_extension(self) -> None:
         self.assertEqual(self.report().source_classes["Native/Game/src/Sys/Thing.cpp"]["compile"], "strict")
@@ -721,7 +720,7 @@ class QualityGateTests(GateTestCase):
             {"key": "a", "count": 2, "tool": "tidy", "rule": "r", "path": "Native/Game/src/Sys/OwnedC.cpp"},
             {"key": "b", "count": 1, "tool": "tidy", "rule": "s", "path": "Native/Game/src/Sys/OwnedC.cpp"},
         ]
-        self.assertEqual(self.report().relaxation_debt[0]["baseline_findings"], 3)
+        self.assertEqual(self.report().source_classes["Native/Game/src/Sys/OwnedC.cpp"]["baseline_findings"], 3)
 
     def test_relaxed_promotion_claim_is_rejected_by_the_quality_gate(self) -> None:
         self.fixture.promote()

@@ -1,6 +1,8 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.hpp"
+// Copied from the decomp by tools/port/copy_to_native.py; see each item's
+// decomp line.
 #include "Render/Display.hpp"
+
+#include "Legacy/Psx.hpp"
 
 using VS::Legacy::DISPENV;
 using VS::Legacy::DRAWENV;
@@ -28,4 +30,3 @@ int VS::Render::frameBuf;
 
 // decomp: D_8004A52C (D_8004A52C@SLUS_010.40)
 int VS::Render::isFrameStepPaused = 0;
-

@@ -48,7 +48,6 @@ FULL_SCAN_FILES = {
     "tools/requirements.txt",
     "tools/port/copy_manifest.json",
     "tools/port/owned.csv",
-    "tools/port/relaxed_sources.txt",
     "tools/scaffold/gen_solution.py",
 }
 FULL_SCAN_NAMES = {
@@ -147,23 +146,11 @@ def relative(path: str | Path) -> str:
 
 
 def discover_files() -> tuple[list[str], list[str]]:
-    manifest = json.loads((ROOT / "tools/port/copy_manifest.json").read_text())
-    generated = {path.replace("\\", "/") for path in manifest}
-    with (ROOT / "tools/port/owned.csv").open(
-        newline="", encoding="utf-8-sig"
-    ) as stream:
-        owned = {
-            row[column].replace("\\", "/")
-            for row in csv.DictReader(stream)
-            for column in ("path", "header")
-            if row[column]
-        }
     native = sorted(
         relative(path)
         for path in (ROOT / "Native").rglob("*")
         if path.is_file()
         and path.suffix.lower() in NATIVE_SUFFIXES
-        and (relative(path) not in generated or relative(path) in owned)
         and "data" not in path.relative_to(ROOT / "Native").parts
     )
     python = sorted(
@@ -455,11 +442,8 @@ def compile_commands(files: list[str]) -> Path:
     copied_directories = properties.findtext(
         ".//msbuild:VSCopiedCIncludes", namespaces=namespace
     )
-    copied_options = properties.findtext(
-        ".//msbuild:VSCopiedCOptions", namespaces=namespace
-    )
-    if not copied_directories or not copied_options:
-        raise RuntimeError("Copied-C compiler properties are missing")
+    if not copied_directories:
+        raise RuntimeError("Copied-C include directories are missing")
     copied_includes = [
         Path(value.replace("$(VSNative)", str(native) + os.sep))
         for value in copied_directories.split(";")
@@ -497,10 +481,6 @@ def compile_commands(files: list[str]) -> Path:
         ]
         arguments += [f"/I{directory}" for directory in includes]
         arguments += ["/TP", "/std:c++latest", "/EHsc"]
-        if project and scaffold["uses_copied_settings"](
-            project, str(source.relative_to(project.dir))
-        ):
-            arguments += copied_options.split()
         arguments.append(str(ROOT / path))
         commands.append(
             {"directory": str(ROOT), "file": str(ROOT / path), "arguments": arguments}
@@ -799,22 +779,6 @@ def fixed_interface_advisory(item: Finding, interfaces: set[tuple[str, str]]) ->
     return bool(function and (item.path, function[1]) in interfaces)
 
 
-def relaxed_sources() -> set[str]:
-    listed = (ROOT / "tools/port/relaxed_sources.txt").read_text(encoding="utf-8").split()
-    return {path.replace("\\", "/") for path in listed}
-
-
-def inapplicable_cpp_header_advice(item: Finding) -> bool:
-    return (
-        item.tool == "cpplint"
-        and item.rule == "build/include_what_you_use"
-        and item.path in relaxed_sources()
-        and item.message == "Add #include <string> for string"
-        and re.match(r"(?:[A-Za-z_]\w*\s*(?:\.|->)\s*)+string\s*=", item.context)
-        is not None
-    )
-
-
 def run_checks(checks: dict[str, Callable[[], list[Finding]]]) -> list[Finding]:
     """Run every check, overlapping background scans with the others.
 
@@ -956,12 +920,6 @@ def main() -> int:
     findings = [
         item for item in findings if not fixed_interface_advisory(item, interfaces)
     ]
-    language_notes = [
-        item for item in findings if inapplicable_cpp_header_advice(item)
-    ]
-    findings = [
-        item for item in findings if not inapplicable_cpp_header_advice(item)
-    ]
     previous = (
         json.loads(BASELINE.read_text())
         if BASELINE.is_file()
@@ -988,9 +946,6 @@ def main() -> int:
                 ],
                 "fixed_interface_advisories": [
                     asdict(item) for item in interface_notes
-                ],
-                "language_advisories": [
-                    asdict(item) for item in language_notes
                 ],
                 "findings": [asdict(item) for item in findings],
                 "new": [asdict(item) for item in introduced],
@@ -1031,7 +986,6 @@ def main() -> int:
     print(
         f"Registered C interface advisories reported separately: {len(interface_notes)}"
     )
-    print(f"Inapplicable C++ header advisories reported separately: {len(language_notes)}")
     print(
         f"Quality: {len(findings)} findings, {len(introduced)} new; report: build/quality/report.json"
     )

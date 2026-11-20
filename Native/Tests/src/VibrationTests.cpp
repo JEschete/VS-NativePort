@@ -214,7 +214,7 @@ struct PatternState {
   static void CheckPresetSlot(std::size_t slot_index) {
     CHECK(Slot(slot_index).pattern.Bytes().data() ==
           reinterpret_cast<const std::byte*>(
-              VS::Input::vibrationPresets.data() + 8));
+              VS::Input::kVibrationPresets.data() + 8));
     CHECK(Slot(slot_index).owner == 0x80);
     CHECK(Slot(slot_index).active);
   }
@@ -233,7 +233,7 @@ TEST_CASE("Original stick axis mapping preserves dead-zone boundaries",
 TEST_CASE("Original vibration preset uses its directory and preview owner",
           "[input][vibration][pattern]") {
   PatternState fixture;
-  REQUIRE(VS::Input::vibrationPresets[0] == 1);
+  REQUIRE(VS::Input::kVibrationPresets[0] == 1);
   VS::Input::PlayLiveVibrationPreset(0);
   PatternState::CheckPresetSlot(0);
   CHECK(PatternState::Slot(1).pattern.Bytes().data() == nullptr);

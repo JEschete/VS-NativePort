@@ -1,12 +1,15 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.hpp"
+// Copied from the decomp by tools/port/copy_to_native.py; see each item's
+// decomp line.
+#include "Audio/Seq/Channel.hpp"
+
 #include "Audio/Mixer/MixControl.hpp"
 #include "Audio/Mixer/VoiceMixer.hpp"
 #include "Audio/Seq/AkaoFormat.hpp"
-#include "Audio/Seq/Channel.hpp"
+#include "Legacy/Psx.hpp"
 
 // decomp: g_ActiveMusicChannels (g_ActiveMusicChannels@SLUS_010.40)
-VS::Audio::SeqChannel VS::Audio::Seq::musicChannels[VS::Audio::Seq::kMusicChannelCount];
+VS::Audio::SeqChannel
+    VS::Audio::Seq::musicChannels[VS::Audio::Seq::kMusicChannelCount];
 
 // decomp: g_PushedMusicConfig (g_PushedMusicConfig@SLUS_010.40)
 VS::Audio::MusicConfig VS::Audio::Seq::savedMusicConfig;
@@ -30,4 +33,5 @@ std::uint32_t VS::Audio::Seq::musicLoopsRemaining;
 VS::Audio::MusicConfig* VS::Audio::Seq::activeMusicConfig;
 
 // decomp: D_800378E8 (D_800378E8@SLUS_010.40)
-VS::Audio::SeqChannel VS::Audio::Seq::savedMusicChannels[VS::Audio::Seq::kMusicChannelCount];
+VS::Audio::SeqChannel
+    VS::Audio::Seq::savedMusicChannels[VS::Audio::Seq::kMusicChannelCount];

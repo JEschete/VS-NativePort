@@ -30,7 +30,7 @@ inline constexpr int kAnimationEventReloadLimit = 64;
 // The events a run may dispatch before it stops.
 inline constexpr int kAnimationEventDispatchLimit = 1024;
 // The event points of event 60 (D_800E9A28: 64 bytes before
-// Content_battleShadowVertices).
+// VS::Content::battleShadowVertices).
 inline constexpr std::size_t kAnimationEventPointCount = 8;
 
 enum class AnimationEventMode : std::uint8_t {

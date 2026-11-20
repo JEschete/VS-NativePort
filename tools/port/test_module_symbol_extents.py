@@ -14,10 +14,62 @@ import copy_to_native
 
 REPO = Path(__file__).resolve().parents[2]
 MODULE_POINTERS = REPO / "Native" / "Game" / "src" / "Boot" / "ModulePointers.cpp"
-ENTRY = re.compile(
-    r'^\s*\{"(?P<module>[^"]+)", 0x(?P<address>[0-9A-F]+)u, (?P<size>\d+)u, \(void\*\)&?(?P<name>[\w:]+), '
-    r"(?P<native>[^,]+), (?P<source_element>[^,]+), (?P<native_element>[^}]+)\},"
+MODULE_DATA = REPO / "Native" / "Game" / "src" / "Boot" / "ModuleData.cpp"
+COMMENT = re.compile(r"//[^\n]*|/\*.*?\*/", re.S)
+ADDRESS = re.compile(r"0x(?P<value>[0-9A-F]+)u")
+SIZE = re.compile(r"(?P<value>\d+)u")
+TARGET = re.compile(
+    r"(?:\(void\*\)|(?:static|reinterpret)_cast<void\*>\(|const_cast<void\*>\(static_cast<const (?:volatile )?void\*>\()?"
+    r"&?(?P<name>[\w:]+)(?:\.data\(\))?\)*"
 )
+
+
+def normalized(field: str) -> str:
+    return re.sub(r"\s*([()<>*&])\s*", r"\1", " ".join(field.split()))
+
+
+def initializer_fields(table: str) -> list[list[str]]:
+    """Split the body of a braced table into each element's top-level fields, whatever the line layout."""
+    entries: list[list[str]] = []
+    fields: list[str] = []
+    field = ""
+    depth = 0
+    for ch in COMMENT.sub("", table):
+        if ch in "({":
+            depth += 1
+            if depth == 1:
+                fields, field = [], ""
+                continue
+        elif ch in ")}":
+            depth -= 1
+            if depth == 0:
+                fields.append(normalized(field))
+                entries.append(fields)
+                continue
+        elif ch == "," and depth == 1:
+            fields.append(normalized(field))
+            field = ""
+            continue
+        if depth >= 1:
+            field += ch
+    return entries
+
+
+def symbol_entries(table: str) -> list[tuple[str, int, int, str, bool]]:
+    """Each ModuleSymbol initializer as (module, address, size, bound name, has interior extent)."""
+    symbols = []
+    for fields in initializer_fields(table):
+        if len(fields) != 7 or not fields[0].startswith('"'):
+            continue
+        module, address, size, target, _native, source_element, native_element = fields
+        address_match, size_match, target_match = (
+            ADDRESS.fullmatch(address), SIZE.fullmatch(size), TARGET.fullmatch(target))
+        if not address_match or not size_match or not target_match:
+            continue
+        interior = source_element != "0u" and native_element != "0u"
+        symbols.append((module.strip('"'), int(address_match["value"], 16), int(size_match["value"]),
+                        target_match["name"], interior))
+    return symbols
 
 
 def copier(views: dict[str, tuple[str, int]]) -> types.SimpleNamespace:
@@ -77,27 +129,47 @@ class SourceBoundaryTests(unittest.TestCase):
 class GeneratedSymbolTableTests(unittest.TestCase):
     def entries(self) -> dict[str, list[tuple[int, int, str, bool]]]:
         text = MODULE_POINTERS.read_text(encoding="utf-8")
-        start = text.index("const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {")
-        body = text[start:text.index("\n};", start)]
+        start = text.index("{", text.index("const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {")) + 1
         by_module: dict[str, list[tuple[int, int, str, bool]]] = {}
-        for line in body.splitlines():
-            m = ENTRY.match(line)
-            if m:
-                interior = m["source_element"].strip() != "0u" and m["native_element"].strip() != "0u"
-                by_module.setdefault(m["module"], []).append(
-                    (int(m["address"], 16), int(m["size"]), m["name"], interior))
+        for module, address, size, name, interior in symbol_entries(text[start:text.index("\n};", start)]):
+            by_module.setdefault(module, []).append((address, size, name, interior))
         return by_module
 
-    def test_namespace_qualified_entries_are_parsed(self):
-        # Promoted functions bind their module address to a qualified Live entry (#397).
-        line = '    {"BATTLE/BATTLE.PRG", 0x8006CDB8u, 0u, (void*)&VS::Effects::LiveSignalActorEffectAnimation, 0u, 0u, 0u},'
-        m = ENTRY.match(line)
-        self.assertIsNotNone(m)
-        assert m is not None
-        self.assertEqual(m["name"], "VS::Effects::LiveSignalActorEffectAnimation")
+    def test_wrapped_and_cast_entries_are_parsed(self):
+        # Promoted functions bind their module address to a qualified Live entry (#397); clang-format wraps entries
+        # and const tables bind through const_cast (#483).
+        table = (
+            '    {"BATTLE/BATTLE.PRG", 0x8006CDB8u, 0u,\n'
+            "     reinterpret_cast<void*>(&VS::Effects::LiveSignalActorEffectAnimation), 0u, 0u, 0u},\n"
+            '    {"BATTLE/BATTLE.PRG", 0x80068BECu, 14u,\n'
+            "     const_cast<void*>(\n"
+            "         static_cast<const void*>(&VS::Field::kPlatformBounceOffsets)),\n"
+            "     0u, 0u, 0u},\n"
+            '    {"SLUS_010.40", 0x80010000u, 335872u, (void*)Content_residentLfoSamples, sizeof(decltype(x)), 2u,\n'
+            "     2u},\n"
+            '    {"BATTLE/BATTLE.PRG", 0x80069998u, 9u, &VS::Battle::puzzleTimerText,\n'
+            "     sizeof VS::Battle::puzzleTimerText, 1u, 1u},\n"
+            '    {"SLUS_010.40", 0x8004B9DCu, 13312u, VS::Battle::actionDefinitions.data(),\n'
+            "     sizeof VS::Battle::actionDefinitions, 1u, 1u},\n"
+            '    {"SLUS_010.40", 0x800377F0u, 4u,\n'
+            "     const_cast<void*>(static_cast<const volatile void*>(\n"
+            "         &VS::Audio::Cutscene::legacySpuTransferBusy)),\n"
+            "     sizeof VS::Audio::Cutscene::legacySpuTransferBusy, 1u, 1u},\n"
+        )
+        self.assertEqual(symbol_entries(table), [
+            ("BATTLE/BATTLE.PRG", 0x8006CDB8, 0, "VS::Effects::LiveSignalActorEffectAnimation", False),
+            ("BATTLE/BATTLE.PRG", 0x80068BEC, 14, "VS::Field::kPlatformBounceOffsets", False),
+            ("SLUS_010.40", 0x80010000, 335872, "Content_residentLfoSamples", True),
+            ("BATTLE/BATTLE.PRG", 0x80069998, 9, "VS::Battle::puzzleTimerText", True),
+            ("SLUS_010.40", 0x8004B9DC, 13312, "VS::Battle::actionDefinitions", True),
+            ("SLUS_010.40", 0x800377F0, 4, "VS::Audio::Cutscene::legacySpuTransferBusy", True),
+        ])
 
     def test_interior_extents_end_before_the_next_entry(self):
-        blobs = {blob[4] for blob in copy_fixups.MODULE_DATA_BLOBS}
+        # The reviewed blobs keep the retired copier's Content_ names; their native storage is VS::Content (#483).
+        blobs = {"VS::Content::" + blob[4].removeprefix("Content_") for blob in copy_fixups.MODULE_DATA_BLOBS}
+        module_data = MODULE_DATA.read_text(encoding="utf-8")
+        self.assertEqual([name for name in sorted(blobs) if not re.search(re.escape(name) + r"\s*\[", module_data)], [])
         by_module = self.entries()
         self.assertGreater(sum(map(len, by_module.values())), 1000)
         crossing = []

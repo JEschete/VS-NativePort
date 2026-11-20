@@ -8,6 +8,7 @@
 #include <span>
 #include <vector>
 
+#include "Content/ModuleData.hpp"
 #include "Field/CameraLiveState.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/Gimmicks.hpp"
@@ -38,9 +39,10 @@ RECT ToRect(const VS::Render::ScreenRect& area) {
 }
 }  // namespace
 
-// Complete D_800E8548 definition from BATTLE.PRG:0x7FD48, loaded by Content.
-extern unsigned int
-    Content_battleTriggerMarkerBytes[kMarkerRecordBytes / sizeof(unsigned int)];
+// VS::Content::battleTriggerMarkerBytes is the complete D_800E8548 definition
+// from BATTLE.PRG:0x7FD48, loaded by Content.
+static_assert(sizeof(VS::Content::battleTriggerMarkerBytes) ==
+              kMarkerRecordBytes);
 
 namespace {
 // One-group room geometry: the count, the group record, the polygon counts
@@ -85,7 +87,7 @@ class LiveTriggerMarkerRenderer final
   // The definition is copied per draw so the resident record stays pristine.
   void DrawMarker(const VS::Field::TriggerMarkerPlacement& placement) override {
     RoomTriggerMarkerGeometry marker{};
-    std::memcpy(&marker, Content_battleTriggerMarkerBytes, sizeof marker);
+    std::memcpy(&marker, VS::Content::battleTriggerMarkerBytes, sizeof marker);
     const auto bytes = std::as_writable_bytes(std::span(&marker, 1));
     const auto group = VS::Render::ReadRoomGroup(bytes, 0);
     if (marker.group_count != 1 || !group ||

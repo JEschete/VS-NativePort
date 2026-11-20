@@ -8,7 +8,7 @@ namespace VS::Core {
 // decomp: _buildTimestamp (_buildTimestamp@SLUS_010.40)
 extern char legacyBuildTimestamp[];
 // decomp: _ramsize (_ramsize@SLUS_010.40)
-extern std::uint32_t legacyRamSize;
+extern const std::uint32_t kLegacyRamSize;
 // decomp: _stacksize (_stacksize@SLUS_010.40)
-extern std::uint32_t legacyStackSize;
+extern const std::uint32_t kLegacyStackSize;
 }  // namespace VS::Core

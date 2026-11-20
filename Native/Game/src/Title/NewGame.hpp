@@ -11,9 +11,10 @@ inline constexpr std::size_t kInventoryTemplateRows = 15;
 inline constexpr std::size_t kInventoryTemplateWords = 64;
 inline constexpr std::size_t kLearnedActionWords = 8;
 using InventoryTemplateRow = std::array<std::int32_t, kInventoryTemplateWords>;
+using InventoryTemplate = InventoryTemplateRow[kInventoryTemplateRows];
 
 // decomp: D_80074C24 (D_80074C24@TITLE/TITLE.PRG)
-extern InventoryTemplateRow newGameInventoryTemplate[kInventoryTemplateRows];
+extern const InventoryTemplate kNewGameInventoryTemplate;
 // decomp: actionsLearned (actionsLearned@TITLE/TITLE.PRG)
-extern std::int32_t initialLearnedActionBits[kLearnedActionWords];
+extern const std::int32_t kInitialLearnedActionBits[kLearnedActionWords];
 }  // namespace VS::Title

@@ -1,7 +1,9 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.hpp"
+// Copied from the decomp by tools/port/copy_to_native.py; see each item's
+// decomp line.
 #include "Audio/SurfaceSounds.hpp"
+#include "Legacy/Psx.hpp"
 
 // decomp: D_800E91A4 (D_800E91A4@BATTLE/BATTLE.PRG)
-std::uint8_t VS::Audio::objectSurfaceSoundIds[VS::Audio::kObjectSurfaceSoundIdCount]; /* contents: module image (ModuleData.cpp) */
-
+// contents: module image (ModuleData.cpp)
+std::uint8_t
+    VS::Audio::objectSurfaceSoundIds[VS::Audio::kObjectSurfaceSoundIdCount];
