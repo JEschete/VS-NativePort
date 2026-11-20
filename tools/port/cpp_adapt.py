@@ -22,7 +22,6 @@ import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from xml.etree import ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools" / "lint"))
@@ -67,11 +66,7 @@ def sources() -> list[str]:
 def compile_arguments() -> callable:
     compiler = quality.llvm_tool("clang-cl")
     scaffold = runpy.run_path(str(ROOT / "tools/scaffold/gen_solution.py"))
-    properties = ET.parse(ROOT / "Directory.Build.props").getroot()
-    namespace = {"m": "http://schemas.microsoft.com/developer/msbuild/2003"}
-    native = ROOT / "Native"
-    copied = [value.replace("$(VSNative)", str(native) + os.sep)
-              for value in properties.findtext(".//m:VSCopiedCIncludes", namespaces=namespace).split(";")]
+    copied = scaffold["property_directories"]("VSCopiedCIncludes")
 
     def arguments(path: str) -> list[str]:
         source = ROOT / path

@@ -434,20 +434,8 @@ def check_clones(files: list[str]) -> list[Finding]:
 
 
 def compile_commands(files: list[str]) -> Path:
-    native = ROOT / "Native"
     compiler = llvm_tool("clang-cl")
     scaffold = runpy.run_path(str(ROOT / "tools/scaffold/gen_solution.py"))
-    properties = ET.parse(ROOT / "Directory.Build.props").getroot()
-    namespace = {"msbuild": "http://schemas.microsoft.com/developer/msbuild/2003"}
-    copied_directories = properties.findtext(
-        ".//msbuild:VSCopiedCIncludes", namespaces=namespace
-    )
-    if not copied_directories:
-        raise RuntimeError("Copied-C include directories are missing")
-    copied_includes = [
-        Path(value.replace("$(VSNative)", str(native) + os.sep))
-        for value in copied_directories.split(";")
-    ]
     commands = []
     for path in files:
         if Path(path).suffix not in SOURCE_SUFFIXES:
@@ -467,10 +455,12 @@ def compile_commands(files: list[str]) -> Path:
                 scaffold["BY_NAME"][name].dir / "include"
                 for name in project.refs + project.see
             ]
-        if project and scaffold["needs_c_headers"](
-            project.name, str(source.relative_to(project.dir))
+        if project and (
+            include_property := scaffold["c_include_property"](
+                project.name, str(source.relative_to(project.dir))
+            )
         ):
-            includes += copied_includes
+            includes += scaffold["property_directories"](include_property)
         arguments = [
             compiler,
             "/nologo",

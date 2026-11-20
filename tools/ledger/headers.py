@@ -40,7 +40,7 @@ STATUS_VALUES = {"remaining", "done", "retired"}
 HEADER_SUFFIXES = (".h", ".hpp")
 SOURCE_SUFFIXES = (".cpp",)
 PRAGMA_ONCE = "pragma-once"
-# Include roots besides each project's include\ and src\: the Legacy shims (Directory.Build.props VSCopiedCIncludes).
+# Include roots besides each project's include\ and src\: the Legacy shims (Directory.Build.props VSLegacyIncludes).
 LEGACY_ROOTS = {"Native/Engine", "Native/Content"}
 
 LINKAGE = re.compile(r'\bextern\s*"C"|\b__cplusplus\b')

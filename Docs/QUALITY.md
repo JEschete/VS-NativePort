@@ -157,7 +157,13 @@ Source classes come from each file's actual compiler settings in the generated
 projects: `strict-cpp`, and `replacement-legacy` (`RETIRING_NATIVE` and `Legacy/`).
 Every source compiles strictly and is in the quality scope (#483). The files the
 retired copier wrote (plan D24) are maintained by hand like any other source; they
-keep only the cross-project include directories (`VSCopiedCIncludes`). `--check`
+keep only the cross-project include directories. Engine and Content legacy sources
+get the Legacy shims (`VSLegacyIncludes`); only the files with a remaining Game
+crossing in `Docs\ledgers\BOUNDARY_LEDGER.csv` and Game's own sources also get
+Game's directories (`VSCopiedCIncludes`). `tools\ledger\boundaries.py --check`
+rejects a new layer crossing, a resolved crossing that returns, a stale ledger or
+plan tracker, and a project that still gives Game's directories to a file without
+a remaining Game crossing (plan §3). `gates.py --check`
 rejects any per-file setting that relaxes a compile: warnings not treated as
 errors, a warning level below 4, `ConformanceMode` false, or an option that
 changes language semantics or silences errors (`/J`, `-funsigned-char`, `-fwrapv`,

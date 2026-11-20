@@ -9,10 +9,13 @@
     <VcpkgManifestRoot>$(VSRepositoryRoot)</VcpkgManifestRoot>
     <VcpkgInstalledDir>$(VSRepositoryRoot)vcpkg_installed\</VcpkgInstalledDir>
     <VcpkgTriplet>x64-windows</VcpkgTriplet>
-    <!-- Sources that include headers across projects and the Legacy SDK layer see every project's src\ and include\.
+    <!-- Sources that include headers across projects and the Legacy SDK layer see the src\ and include\ of Engine and
+         Content (VSLegacyIncludes) and, only where they still cross into Game, Game's as well (VSCopiedCIncludes):
+         tools\scaffold\gen_solution.py picks one per source from Docs\ledgers\BOUNDARY_LEDGER.csv (#43).
          Every source compiles with the strict settings below; there is no relaxed class (#483). -->
     <VSNative>$(VSRepositoryRoot)Native\</VSNative>
-    <VSCopiedCIncludes>$(VSNative)Engine;$(VSNative)Content;$(VSNative)Engine\include;$(VSNative)Engine\src;$(VSNative)Content\include;$(VSNative)Content\src;$(VSNative)Game\include;$(VSNative)Game\src</VSCopiedCIncludes>
+    <VSLegacyIncludes>$(VSNative)Engine;$(VSNative)Content;$(VSNative)Engine\include;$(VSNative)Engine\src;$(VSNative)Content\include;$(VSNative)Content\src</VSLegacyIncludes>
+    <VSCopiedCIncludes>$(VSLegacyIncludes);$(VSNative)Game\include;$(VSNative)Game\src</VSCopiedCIncludes>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>

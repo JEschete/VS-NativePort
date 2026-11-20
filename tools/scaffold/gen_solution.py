@@ -15,9 +15,12 @@ Re-run after adding or removing files (the copy tool runs it after writing):
 """
 from __future__ import annotations
 
+import csv
 import json
 import os
+import re
 import uuid
+import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -485,6 +488,51 @@ def needs_c_headers(project: str, path: str) -> bool:
             ))
 
 
+BOUNDARY_LEDGER = ROOT / "Docs" / "ledgers" / "BOUNDARY_LEDGER.csv"
+BOUNDED_PROJECTS = ("VS.Engine", "VS.Content")
+
+
+def game_crossings() -> frozenset[str]:
+    """Engine and Content sources that still include a Game header (Docs\\ledgers\\BOUNDARY_LEDGER.csv, #43). Only
+    these see Game's directories, so the compiler rejects a new crossing (tools\\ledger\\boundaries.py)."""
+    if not BOUNDARY_LEDGER.is_file():
+        return frozenset()
+    with BOUNDARY_LEDGER.open(encoding="utf-8-sig", newline="") as stream:
+        return frozenset(row["file"].replace("/", "\\") for row in csv.DictReader(stream)
+                         if row["status"] == "remaining" and row["to_layer"] == "Game")
+
+
+GAME_CROSSINGS = game_crossings()
+
+
+def c_include_property(project: str, path: str) -> str | None:
+    """The Directory.Build.props property naming the cross-project include directories a source compiles with, or
+    None when it sees only its own project's and its references' include directories."""
+    if not needs_c_headers(project, path):
+        return None
+    if project in BOUNDED_PROJECTS and rel(ROOT, BY_NAME[project].dir / path) not in GAME_CROSSINGS:
+        return "VSLegacyIncludes"
+    return "VSCopiedCIncludes"
+
+
+def property_directories(name: str) -> list[Path]:
+    """The directories an include property of Directory.Build.props lists, with the properties it uses expanded."""
+    properties = ET.parse(ROOT / "Directory.Build.props").getroot()
+    namespace = {"m": "http://schemas.microsoft.com/developer/msbuild/2003"}
+
+    def expand(value: str) -> str:
+        def lookup(match: re.Match[str]) -> str:
+            if match.group(1) == "MSBuildThisFileDirectory":
+                return str(ROOT) + os.sep
+            found = properties.findtext(f".//m:{match.group(1)}", namespaces=namespace)
+            if found is None:
+                raise SystemExit(f"Directory.Build.props has no {match.group(1)} property")
+            return expand(found)
+        return re.sub(r"\$\((\w+)\)", lookup, value)
+
+    return [Path(value) for value in expand(f"$({name})").split(";") if value]
+
+
 def vcxproj(p: Project, files: list[tuple[str, str]]) -> str:
     ctype = "Application" if p.kind == "exe" else "StaticLibrary"
     inc_dirs = ["$(MSBuildThisFileDirectory)include", "$(MSBuildThisFileDirectory)src"] + [
@@ -495,10 +543,10 @@ def vcxproj(p: Project, files: list[tuple[str, str]]) -> str:
     for kind, path in files:
         if kind == "ClInclude":
             header_items.append(f'    <ClInclude Include="{path}" />')
-        elif needs_c_headers(p.name, path) and p.name != "VS.Tests":
+        elif (include_property := c_include_property(p.name, path)) and p.name != "VS.Tests":
             # Legacy shims include the C SDK headers of other projects.
             compile_items.append(f'    <ClCompile Include="{path}">\n'
-                                 f'      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)'
+                                 f'      <AdditionalIncludeDirectories>$({include_property});%(AdditionalIncludeDirectories)'
                                  f'</AdditionalIncludeDirectories>\n'
                                  f'    </ClCompile>')
         else:
