@@ -1115,7 +1115,7 @@ def markdown(report: Report) -> str:
         lines.append(f"| {path} | {entry['rows']} | " + " | ".join(str(entry[step]) for step in STEPS) + " |")
     lines += ["", "## Quality and compilation", ""]
     lines += [f"- {name}: {count} files" for name, count in report.class_counts.items()]
-    lines += ["", "Maintained C compiled with relaxed settings:", "", "| File | Owned functions | Baseline findings |",
+    lines += ["", "Transitional C++ compiled with relaxed settings:", "", "| File | Owned functions | Baseline findings |",
               "| --- | ---: | ---: |"]
     lines += [f"| {item['path']} | {item['owned_functions']} | {item['baseline_findings']} |"
               for item in report.relaxation_debt]

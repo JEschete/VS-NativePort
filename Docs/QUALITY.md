@@ -128,8 +128,10 @@ controls pass, and the ledgers satisfy the gate check below.
 
 It does **not** establish that:
 
-- generated copied code is clean: it is outside the default quality scope;
-- maintained `.c` code is strict: it is in scope but compiles relaxed;
+- copied code is clean: the files in `tools\port\copy_manifest.json` are outside the
+  default quality scope (#483);
+- transitional C++ is strict: the files in `tools\port\relaxed_sources.txt` are in
+  scope but compile relaxed (`/J`, warning level 1, warnings not errors);
 - any code is modernized, C++-promoted or behaviorally verified: those are
   separate gates, and this job builds nothing and runs no native test;
 - `--tidy` analysis passed: the fast CI job does not run it;
@@ -158,9 +160,11 @@ as evidence (#46):
 Source classes come from each file's actual compiler settings in the generated
 projects and `tools\port\relaxed_sources.txt`: `generated-cpp` (relaxed, outside quality scope),
 `transitional-cpp` (relaxed, in scope), `strict-cpp` and `replacement-legacy`
-(`RETIRING_NATIVE` and `Legacy/`). The report lists maintained relaxation as debt
-per file, with owned-function and baseline-finding counts. Whether transitional C++
-should compile more strictly before promotion remains an owner decision.
+(`RETIRING_NATIVE` and `Legacy/`). The report lists transitional relaxation as debt
+per file, with owned-function and baseline-finding counts. Owner decision: every
+source compiles strictly. Since the copier is retired (plan D24), copied files are
+maintained by hand like any other source, so both relaxed classes are debt that #483
+removes, along with the semantic flags in `VSCopiedCOptions` (`/J`, `-fwrapv`, …).
 
 The tool reads the baseline and never writes it. Moving or renaming a bridge
 without updating `EC_BRIDGES.csv` fails the check instead of lowering a consumer
