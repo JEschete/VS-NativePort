@@ -111,14 +111,13 @@ _RENDER_LIVE = {
     # #276 row 6 (render GIM images): the event scripts' load, release and the game loop's per-frame update.
     "GimImagesLive.hpp": (
         ("QueueLiveGimImage", "F01338"), ("ReleaseLiveGimImages", "F01340"), ("UpdateLiveGimImages", "F01341")),
-    # #276 row 6 (render fonts): the battle string formatter over the battle string context, and the compact,
-    # variable-width and text box fonts over the shared font style.
-    "EncodedTextLive.hpp": (("FormatLiveEncodedText", "F01328"), ("MeasureLiveEncodedTextLine", "F01331")),
+    # #276 row 6 (render fonts): the line measure, and the compact and variable-width fonts over the shared font
+    # style. The battle string formatter and the dialogue text box drawers bind Game state, so their bindings are
+    # Game's (#43 GAME_TEXT_LIVE_BINDINGS).
+    "EncodedTextLive.hpp": (("MeasureLiveEncodedTextLine", "F01331"),),
     "GameFontLive.hpp": (
         ("DrawLiveCompactTextColor", "F01325"), ("DrawLiveCompactText", "F01326"),
-        ("DrawLiveVariableWidthGlyph", "F01332"), ("SetLiveMenuFontStyle", "F01333"),
-        ("DrawLiveProgressiveTextBoxText", "F01334"), ("DrawLiveScaledTextBoxText", "F01335"),
-        ("BlendLiveTextBoxIntoFramebuffer", "F01337")),
+        ("DrawLiveVariableWidthGlyph", "F01332"), ("SetLiveMenuFontStyle", "F01333")),
 }
 
 # #276 slice 8 (save-memory-card): the C-shaped bindings over the typed VS::Save::MemoryCard game-file core and the
@@ -3893,6 +3892,20 @@ for _bindings, _header in ((ITEM_ROWS_LIVE_BINDINGS, "ItemRowsLive.hpp"),
         for name in _bindings.values()
     }
 del _bindings, _header
+
+# #43 font/UI slice (BOUNDARY_LEDGER B0060-B0065): Engine draws a caller's text into the caller's layers; the Game
+# bindings supply the dialogue text boxes and their ordering table, the pad, tick speed, text sound and speaker reset
+# (VS::Menu), and the battle string context (VS::Battle).
+GAME_TEXT_LIVE_BINDINGS = (
+    ("VS::Menu", r"Native\Game\include\Menu\TextBoxTextLive.hpp",
+     (("DrawLiveProgressiveTextBoxText", "F01334"), ("DrawLiveScaledTextBoxText", "F01335"),
+      ("BlendLiveTextBoxIntoFramebuffer", "F01337"))),
+    ("VS::Battle", r"Native\Game\include\Battle\StringContextLive.hpp", (("FormatLiveEncodedText", "F01328"),)),
+)
+for _namespace, _header, _rows in GAME_TEXT_LIVE_BINDINGS:
+    OWNED_CALL_BINDINGS |= {fid: f"{_namespace}::{name}" for name, fid in _rows}
+    NATIVE_HELPER_HEADERS |= {f"{_namespace}::{name}": _header for name, _ in _rows}
+del _namespace, _header, _rows
 
 # Owned globals whose contents are a disc string table: the hand-maintained Live binding defines the storage and
 # ModuleData.cpp still fills it from the module image at start-up.

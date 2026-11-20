@@ -885,6 +885,9 @@
     <None Include="..\..\ledger\add_missing_functions.py">
       <Filter>tools\ledger</Filter>
     </None>
+    <None Include="..\..\ledger\boundaries.py">
+      <Filter>tools\ledger</Filter>
+    </None>
     <None Include="..\..\ledger\build_ledgers.py">
       <Filter>tools\ledger</Filter>
     </None>
@@ -904,6 +907,9 @@
       <Filter>tools\ledger</Filter>
     </None>
     <None Include="..\..\ledger\reconcile_locations.py">
+      <Filter>tools\ledger</Filter>
+    </None>
+    <None Include="..\..\ledger\test_boundaries.py">
       <Filter>tools\ledger</Filter>
     </None>
     <None Include="..\..\ledger\test_build_symbol_ledgers.py">

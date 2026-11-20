@@ -434,6 +434,7 @@
     <ClCompile Include="src\Battle\StatusQueueLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Battle\StringContextLive.cpp" />
     <ClCompile Include="src\Battle\Targeting.cpp" />
     <ClCompile Include="src\Battle\TargetingDraw.cpp" />
     <ClCompile Include="src\Battle\TargetingDrawLive.cpp">
@@ -1437,6 +1438,9 @@
     <ClCompile Include="src\Menu\TextBoxStateLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Menu\TextBoxTextLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Menu\TextBoxUpdate.cpp" />
     <ClCompile Include="src\Menu\TextBoxUpdateLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -1954,6 +1958,7 @@
     <ClInclude Include="include\Battle\StatusLifecycleLive.hpp" />
     <ClInclude Include="include\Battle\StatusQueue.hpp" />
     <ClInclude Include="include\Battle\StatusQueueLive.hpp" />
+    <ClInclude Include="include\Battle\StringContextLive.hpp" />
     <ClInclude Include="include\Battle\Targeting.hpp" />
     <ClInclude Include="include\Battle\TargetingDraw.hpp" />
     <ClInclude Include="include\Battle\TargetingDrawLive.hpp" />
@@ -2309,6 +2314,7 @@
     <ClInclude Include="include\Menu\TextBoxFramesLive.hpp" />
     <ClInclude Include="include\Menu\TextBoxState.hpp" />
     <ClInclude Include="include\Menu\TextBoxStateLive.hpp" />
+    <ClInclude Include="include\Menu\TextBoxTextLive.hpp" />
     <ClInclude Include="include\Menu\TextBoxUpdate.hpp" />
     <ClInclude Include="include\Menu\TextBoxUpdateLive.hpp" />
     <ClInclude Include="include\Save\FileMenu.hpp" />

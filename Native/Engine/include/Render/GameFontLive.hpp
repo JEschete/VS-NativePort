@@ -2,19 +2,18 @@
 // Hand-maintained (tools/port/owned.csv).
 
 #include <cstdint>
+#include <optional>
 
-#include "Legacy/Psx.hpp"
+#include "Render/EncodedText.hpp"
 #include "Render/GameFont.hpp"
-
-namespace VS::Menu {
-struct TextBoxState;
-}  // namespace VS::Menu
+#include "Render/TextBoxText.hpp"
 
 // Live binding for GameFont.hpp and TextBoxText.hpp: the font tables (module
 // data), the font style the menus and text boxes share, the current frame's
-// primitive buffer and ordering tables, the dialogue text boxes
-// (textBoxes), the first controller, the text sound and the speaker's
-// texture animation (GameFontLive.cpp).
+// primitive buffer and ordering tables and VRAM (GameFontLive.cpp). The caller
+// supplies the text box's text, its four ordering-table layers, the frame's
+// input and the encoded-text arguments; Game binds the dialogue text boxes
+// (Menu/TextBoxTextLive.hpp).
 namespace VS::Render {
 // BATTLE.PRG _fontTable, D_800F4CB8 and _fontBrightness: the style later
 // glyphs draw with.
@@ -33,16 +32,25 @@ int DrawLiveVariableWidthGlyph(std::uint32_t glyph, int x, int y,
 // BATTLE.PRG vs_battle_setFontStyle.
 void SetLiveMenuFontStyle(int palette_offset);
 
-// The text box drawers. The box's text is trusted for
-// kTrustedEncodedTextBytes. The progressive and scaled drawers draw into the
-// box's layers of the active text box ordering table, so a box outside
-// textBoxes is refused and reported.
-void DrawLiveProgressiveTextBoxText(VS::Menu::TextBoxState* box);
-void DrawLiveScaledTextBoxText(VS::Menu::TextBoxState* box, int scale);
-void BlendLiveTextBoxIntoFramebuffer(VS::Menu::TextBoxState* box,
-                                     int glyph_alpha);
+// The text drawers over a text box's text with the live font style and
+// tables. The progressive and scaled drawers draw in front of entry 3 of the
+// four text box layers at `layers`; null layers are refused, reported and
+// counted.
+//
+// BATTLE.PRG _printVariableWidthFont through DrawProgressiveTextBoxText;
+// nullopt when refused.
+[[nodiscard]] std::optional<ProgressiveTextResult> DrawLiveProgressiveText(
+    TextBoxText& box, const TextBoxInput& input,
+    const EncodedTextArguments& arguments, std::uint32_t* layers);
+// BATTLE.PRG _printFixedWidthFont through DrawScaledTextBoxText.
+void DrawLiveScaledText(const TextBoxText& box, int scale,
+                        std::uint32_t* layers);
+// BATTLE.PRG _renderTextImmediate through BlendTextBoxIntoFramebuffer, into
+// the drawn framebuffer (frameBuf) in VRAM.
+void BlendLiveTextIntoFramebuffer(TextBoxText& box, int glyph_alpha,
+                                  bool skip_pressed);
 
-// Text box draws refused, or that referenced a missing string or overran,
-// since start-up.
-[[nodiscard]] std::uint64_t RefusedLiveTextBoxCount() noexcept;
+// Text draws refused since start-up: null layers, or a VRAM area larger than
+// its pixels.
+[[nodiscard]] std::uint64_t RefusedLiveTextCount() noexcept;
 }  // namespace VS::Render

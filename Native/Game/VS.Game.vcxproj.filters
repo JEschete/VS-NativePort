@@ -957,6 +957,9 @@
     <ClCompile Include="src\Battle\StatusQueueLive.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
+    <ClCompile Include="src\Battle\StringContextLive.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
     <ClCompile Include="src\Battle\Targeting.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
@@ -2958,6 +2961,9 @@
     <ClCompile Include="src\Menu\TextBoxStateLive.cpp">
       <Filter>src\Menu</Filter>
     </ClCompile>
+    <ClCompile Include="src\Menu\TextBoxTextLive.cpp">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\TextBoxUpdate.cpp">
       <Filter>src\Menu</Filter>
     </ClCompile>
@@ -3646,6 +3652,9 @@
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\StatusQueueLive.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\StringContextLive.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Targeting.hpp">
@@ -4711,6 +4720,9 @@
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\TextBoxStateLive.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\TextBoxTextLive.hpp">
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\TextBoxUpdate.hpp">

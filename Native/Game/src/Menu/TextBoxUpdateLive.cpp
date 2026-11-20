@@ -12,12 +12,13 @@
 #include "Core/Diagnostics.hpp"
 #include "Core/RandomLive.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
+#include "Legacy/Psx.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/TextBox.hpp"
 #include "Menu/TextBoxFramesLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
+#include "Menu/TextBoxTextLive.hpp"
 #include "Menu/TextBoxUpdate.hpp"
-#include "Render/GameFontLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "State/Timers.hpp"
 
@@ -56,8 +57,7 @@ class LiveUpdateHost final : public TextBoxUpdateHost {
   }
   std::int32_t TickSpeed() const override { return VS::State::tickSpeed; }
   void BlendText(std::size_t index, std::int32_t scale) override {
-    Render::BlendLiveTextBoxIntoFramebuffer(&std::span(textBoxes)[index],
-                                            scale);
+    BlendLiveTextBoxIntoFramebuffer(&std::span(textBoxes)[index], scale);
   }
   void DrawInformationBackdrop(std::size_t index) override {
     DrawLiveInformationBoxBackdrop(static_cast<std::int32_t>(index));
@@ -66,10 +66,10 @@ class LiveUpdateHost final : public TextBoxUpdateHost {
     DrawLiveTextBoxFrame(static_cast<std::int32_t>(index));
   }
   void DrawProgressiveText(std::size_t index) override {
-    Render::DrawLiveProgressiveTextBoxText(&std::span(textBoxes)[index]);
+    DrawLiveProgressiveTextBoxText(&std::span(textBoxes)[index]);
   }
   void DrawScaledText(std::size_t index, std::int32_t scale) override {
-    Render::DrawLiveScaledTextBoxText(&std::span(textBoxes)[index], scale);
+    DrawLiveScaledTextBoxText(&std::span(textBoxes)[index], scale);
   }
   void SubmitOrdering() override {
     AddPrims(destination_, activeTextBoxOrderingTable,

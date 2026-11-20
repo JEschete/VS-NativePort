@@ -12,6 +12,7 @@
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.hpp"
 #include "Menu/Framework/TextBoxes.hpp"
+#include "Menu/TextBoxTextLive.hpp"
 #include "Render/Display.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/Render.hpp"
@@ -99,7 +100,7 @@ struct TextTransitionFixture {
   std::vector<std::uint16_t> Draw(std::array<std::uint8_t, Size>& text) {
     INFO(std::string("Encoded transition bytes: ") + std::to_string(Size));
     box.text = reinterpret_cast<char*>(text.data());
-    VS::Render::BlendLiveTextBoxIntoFramebuffer(&box, 0x10000);
+    VS::Menu::BlendLiveTextBoxIntoFramebuffer(&box, 0x10000);
     std::vector<std::uint16_t> pixels(std::size_t{kWidth} * kHeight);
     StoreImage(&target, reinterpret_cast<std::uint32_t*>(pixels.data()));
     return pixels;

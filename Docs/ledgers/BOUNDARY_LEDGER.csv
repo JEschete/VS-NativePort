@@ -58,12 +58,12 @@ B0056,Native/Engine/src/Render/CameraViewLive.cpp,Engine.Render,Native/Game/src/
 B0057,Native/Engine/src/Render/DisplayControlLive.cpp,Engine.Render,Native/Game/include/State/GameClockLive.hpp,Game,remaining,
 B0058,Native/Engine/src/Render/DisplayControlLive.cpp,Engine.Render,Native/Game/src/State/PlayTime.hpp,Game,remaining,
 B0059,Native/Engine/src/Render/DisplayControlLive.cpp,Engine.Render,Native/Game/src/State/Timers.hpp,Game,remaining,
-B0060,Native/Engine/src/Render/EncodedTextLive.cpp,Engine.Render,Native/Game/src/Battle/TargetingState.hpp,Game,remaining,
-B0061,Native/Engine/src/Render/GameFontLive.cpp,Engine.Render,Native/Game/include/Actors/TextureAnimationLive.hpp,Game,remaining,
-B0062,Native/Engine/src/Render/GameFontLive.cpp,Engine.Render,Native/Game/src/Battle/TargetingState.hpp,Game,remaining,
-B0063,Native/Engine/src/Render/GameFontLive.cpp,Engine.Render,Native/Game/src/Menu/Framework/TextBoxes.hpp,Game,remaining,
-B0064,Native/Engine/src/Render/GameFontLive.cpp,Engine.Render,Native/Game/src/Menu/TextBox.hpp,Game,remaining,
-B0065,Native/Engine/src/Render/GameFontLive.cpp,Engine.Render,Native/Game/src/State/Timers.hpp,Game,remaining,
+B0060,Native/Engine/src/Render/EncodedTextLive.cpp,Engine.Render,Native/Game/src/Battle/TargetingState.hpp,Game,resolved,#43 font/UI slice: VS::Render::FormatLiveEncodedText takes the caller's EncodedTextArguments; Game Battle/StringContextLive supplies the battle string context
+B0061,Native/Engine/src/Render/GameFontLive.cpp,Engine.Render,Native/Game/include/Actors/TextureAnimationLive.hpp,Game,resolved,"#43 font/UI slice: the Render text drawers take a TextBoxText view, input, arguments and layers; Game Menu/TextBoxTextLive binds the dialogue boxes, ordering table, pad, tick speed, sound and speaker reset"
+B0062,Native/Engine/src/Render/GameFontLive.cpp,Engine.Render,Native/Game/src/Battle/TargetingState.hpp,Game,resolved,"#43 font/UI slice: the Render text drawers take a TextBoxText view, input, arguments and layers; Game Menu/TextBoxTextLive binds the dialogue boxes, ordering table, pad, tick speed, sound and speaker reset"
+B0063,Native/Engine/src/Render/GameFontLive.cpp,Engine.Render,Native/Game/src/Menu/Framework/TextBoxes.hpp,Game,resolved,"#43 font/UI slice: the Render text drawers take a TextBoxText view, input, arguments and layers; Game Menu/TextBoxTextLive binds the dialogue boxes, ordering table, pad, tick speed, sound and speaker reset"
+B0064,Native/Engine/src/Render/GameFontLive.cpp,Engine.Render,Native/Game/src/Menu/TextBox.hpp,Game,resolved,"#43 font/UI slice: the Render text drawers take a TextBoxText view, input, arguments and layers; Game Menu/TextBoxTextLive binds the dialogue boxes, ordering table, pad, tick speed, sound and speaker reset"
+B0065,Native/Engine/src/Render/GameFontLive.cpp,Engine.Render,Native/Game/src/State/Timers.hpp,Game,resolved,"#43 font/UI slice: the Render text drawers take a TextBoxText view, input, arguments and layers; Game Menu/TextBoxTextLive binds the dialogue boxes, ordering table, pad, tick speed, sound and speaker reset"
 B0066,Native/Engine/src/Render/ModelGeometryLive.cpp,Engine.Render,Native/Game/include/Field/ActorCollisionLive.hpp,Game,remaining,
 B0067,Native/Engine/src/Render/ModelGeometryLive.cpp,Engine.Render,Native/Game/src/Actors/ActorRecord.hpp,Game,remaining,
 B0068,Native/Engine/src/Render/ModelGeometryLive.cpp,Engine.Render,Native/Game/src/Actors/ModelDraw.hpp,Game,remaining,

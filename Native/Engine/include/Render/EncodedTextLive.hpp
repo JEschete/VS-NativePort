@@ -11,13 +11,13 @@
 
 #include "Render/EncodedText.hpp"
 
-// Live binding for EncodedText.hpp: the arguments are the battle string
-// context (VS::Battle::stringContext) and the widths are the variable-width
-// font's (VS::Render::variableFontGlyphWidths). An array argument is bounded by
-// its declared extent; a pointer destination is trusted for the bytes the
-// request writes, and a pointer source or argument string is read up to
-// kTrustedEncodedTextBytes looking for its terminator. A refused request
-// leaves an empty text and is reported (EncodedTextLive.cpp).
+// Live binding for EncodedText.hpp: the caller supplies the arguments (Game
+// binds the battle string context, Battle/StringContextLive.hpp) and the
+// widths are the variable-width font's (VS::Render::variableFontGlyphWidths).
+// An array argument is bounded by its declared extent; a pointer destination is
+// trusted for the bytes the request writes, and a pointer source or argument
+// string is read up to kTrustedEncodedTextBytes looking for its terminator. A
+// refused request leaves an empty text and is reported (EncodedTextLive.cpp).
 namespace VS::Render {
 inline constexpr std::size_t kTrustedEncodedTextBytes = 0x1000;
 
@@ -80,9 +80,6 @@ char* Finish(std::uint8_t* destination, std::optional<std::size_t> end,
 [[nodiscard]] int MeasureLine(std::span<const std::uint8_t> text);
 }  // namespace encoded_text_live
 
-// The battle string context's integers and strings; an unset string is empty.
-[[nodiscard]] EncodedTextArguments LiveEncodedTextArguments();
-
 // The variable-width font's glyph widths (module data).
 [[nodiscard]] std::span<const std::uint8_t>
 LiveVariableFontGlyphWidths() noexcept;
@@ -90,13 +87,13 @@ LiveVariableFontGlyphWidths() noexcept;
 // Formatting requests refused since start-up.
 [[nodiscard]] std::uint64_t RefusedLiveEncodedTextCount() noexcept;
 
-// BATTLE.PRG vs_battle_printf over the battle string context. Returns the
-// written terminator's address, so formatting calls chain.
+// BATTLE.PRG vs_battle_printf over `arguments`. Returns the written
+// terminator's address, so formatting calls chain.
 template <typename Destination, typename Source>
 char* FormatLiveEncodedText(
     Destination&& destination, Source&& source,
+    const EncodedTextArguments& arguments,
     const std::source_location site = std::source_location::current()) {
-  const EncodedTextArguments arguments = LiveEncodedTextArguments();
   const std::span<const std::uint8_t> text = encoded_text_live::Text(source);
   std::uint8_t* const start = encoded_text_live::Start(destination);
   std::optional<std::size_t> end;

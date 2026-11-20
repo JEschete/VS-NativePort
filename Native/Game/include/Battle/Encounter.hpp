@@ -32,8 +32,10 @@ struct EncounterLimits {
 };
 
 // A start tile in the original placement encoding: facing is the quarter turn
-// the actor faces (0..3) and surface is the static collision layer it stands on
-// (0 or 1).
+// the actor faces (0..3) and surface is the collision layer it stands on.
+// Configured placements use only the static layers (0 or 1); a door's
+// destination keeps its arrival surface, which can also name a moving platform
+// (2..6) or a drop (7), as in ActorPlacement.cpp's PlaceOnLayer.
 struct EncounterPosition {
   int x = 0;
   int z = 0;

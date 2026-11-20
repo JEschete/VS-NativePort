@@ -1,6 +1,6 @@
 // Hand-maintained (tools/port/owned.csv).
-// Live binding for the encoded-text formatter (EncodedText.cpp): the battle
-// string context and the variable-width font's widths (module data).
+// Live binding for the encoded-text formatter (EncodedText.cpp): the refusal
+// report and the variable-width font's widths (module data).
 #include "Render/EncodedTextLive.hpp"
 
 #include <bit>
@@ -11,7 +11,6 @@
 #include <source_location>
 #include <span>
 
-#include "Battle/TargetingState.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Render/EncodedText.hpp"
 #include "Render/Text/VariableFont.hpp"
@@ -22,16 +21,6 @@ std::uint64_t refusedText = 0;
 }  // namespace
 
 std::uint64_t RefusedLiveEncodedTextCount() noexcept { return refusedText; }
-
-EncodedTextArguments LiveEncodedTextArguments() {
-  EncodedTextArguments arguments;
-  for (std::size_t index = 0; index < kEncodedTextArgumentCount; ++index) {
-    arguments.integers.at(index) = VS::Battle::stringContext.integers[index];
-    arguments.strings.at(index) = encoded_text_live::TrustedText(
-        VS::Battle::stringContext.strings[index]);
-  }
-  return arguments;
-}
 
 char* encoded_text_live::Finish(std::uint8_t* destination,
                                 std::optional<std::size_t> end,

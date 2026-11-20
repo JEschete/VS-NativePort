@@ -2833,10 +2833,25 @@ int func_800F9800(void) {
         ):
             self.assertEqual(owned[fid]["name"], name)
             self.assertNotIn(fid, copy_fixups.FIXES)
-        self.assertEqual(
-            copy_fixups.OWNED_CALL_BINDINGS["F01337"],
-            "VS::Render::BlendLiveTextBoxIntoFramebuffer",
-        )
+        # The Game bindings own the dialogue text boxes and the string context
+        # (#43); Engine's drawers take the caller's text, layers and arguments.
+        root = Path(__file__).resolve().parents[2]
+        for fid, binding, header in (
+            ("F01328", "VS::Battle::FormatLiveEncodedText",
+             r"Native\Game\include\Battle\StringContextLive.hpp"),
+            ("F01334", "VS::Menu::DrawLiveProgressiveTextBoxText",
+             r"Native\Game\include\Menu\TextBoxTextLive.hpp"),
+            ("F01335", "VS::Menu::DrawLiveScaledTextBoxText",
+             r"Native\Game\include\Menu\TextBoxTextLive.hpp"),
+            ("F01337", "VS::Menu::BlendLiveTextBoxIntoFramebuffer",
+             r"Native\Game\include\Menu\TextBoxTextLive.hpp"),
+        ):
+            self.assertEqual(copy_fixups.OWNED_CALL_BINDINGS[fid], binding)
+            self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS[binding], header)
+            self.assertRegex(
+                (root / header).read_text(encoding="utf-8"),
+                rf"\b{binding.rsplit('::', 1)[-1]}\(",
+            )
 
     def test_attached_draw_requires_a_resident_parent_matrix(self):
         live = self.model_rendering_live_source()

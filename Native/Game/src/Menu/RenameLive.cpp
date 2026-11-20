@@ -13,6 +13,7 @@
 #include <type_traits>
 
 #include "Audio/SfxLive.hpp"
+#include "Battle/StringContextLive.hpp"
 #include "Battle/TargetingState.hpp"
 #include "Content/DiscLayout.h"
 #include "Core/Log.hpp"
@@ -157,7 +158,7 @@ class LiveHost final : public Host {
         reinterpret_cast<std::uint8_t*>(VS::Menu::Framework::stringBuf),
         Framework::kStringBufferBytes);
     if (!Render::FormatEncodedText(message, prompt,
-                                   Render::LiveEncodedTextArguments())) {
+                                   VS::Battle::LiveEncodedTextArguments())) {
       Refuse("rename prompt does not fit the menu's string buffer");
       message[0] = Render::kTextTerminator;
     }

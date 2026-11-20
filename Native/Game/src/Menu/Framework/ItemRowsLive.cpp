@@ -11,6 +11,7 @@
 #include <span>
 #include <string_view>
 
+#include "Battle/StringContextLive.hpp"
 #include "Battle/TargetingState.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
@@ -296,7 +297,7 @@ std::span<const std::uint8_t> LiveItemRowsHost::WeaponHands() {
 }
 
 Render::EncodedTextArguments LiveItemRowsHost::TextArguments() {
-  return Render::LiveEncodedTextArguments();
+  return VS::Battle::LiveEncodedTextArguments();
 }
 
 void LiveItemRowsHost::SetStringArgument(std::size_t slot,

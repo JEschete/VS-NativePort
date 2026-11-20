@@ -272,15 +272,13 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Render\EncodedText.cpp" />
-    <ClCompile Include="src\Render\EncodedTextLive.cpp">
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
+    <ClCompile Include="src\Render\EncodedTextLive.cpp" />
     <ClCompile Include="src\Render\Frame.cpp">
       <AdditionalIncludeDirectories>$(VSLegacyIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Render\GameFont.cpp" />
     <ClCompile Include="src\Render\GameFontLive.cpp">
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VSLegacyIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Render\GimImages.cpp" />
     <ClCompile Include="src\Render\GimImagesLive.cpp">

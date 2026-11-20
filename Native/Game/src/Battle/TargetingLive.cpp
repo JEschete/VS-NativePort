@@ -48,6 +48,7 @@
 #include "Battle/SphereTerrainLive.hpp"
 #include "Battle/StatusEffects.hpp"
 #include "Battle/StatusHelpersLive.hpp"
+#include "Battle/StringContextLive.hpp"
 #include "Battle/TargetPages.hpp"
 #include "Battle/TargetVolume.hpp"
 #include "Battle/TargetingState.hpp"
@@ -1164,7 +1165,7 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
   }
   void ShowTargetInfo() override {
     auto* view = reinterpret_cast<TargetSphereLabelView*>(&sphere_);
-    VS::Render::FormatLiveEncodedText(view->text_buffer,
+    VS::Battle::FormatLiveEncodedText(view->text_buffer,
                                       VS::Battle::targetInfoTemplate);
     VS::Menu::SetLiveTextBoxText(kInformationTextBox, view->text_buffer.data());
   }

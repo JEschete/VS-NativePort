@@ -1,5 +1,8 @@
 #include <array>
+#include <cstdint>
 #include <cstring>
+#include <optional>
+#include <span>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
@@ -13,13 +16,18 @@
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/TextBox.hpp"
 #include "Menu/TextBoxStateLive.hpp"
+#include "Menu/TextBoxTextLive.hpp"
 #include "Render/Display.hpp"
+#include "Render/EncodedText.hpp"
 #include "Render/Frame.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/Render.hpp"
+#include "Render/TextBoxText.hpp"
 #include "Render/UiPrimitives.hpp"
 
 using VS::Legacy::ClearOTag;
+using VS::Legacy::isendprim;
+using VS::Legacy::nextPrim;
 
 namespace {
 struct InformationFixture {
@@ -104,7 +112,7 @@ TEST_CASE(
   for (int update = 0; update < updates; ++update) {
     VS::Menu::Framework::SetLiveInformationMessage(fixture.message.data());
     fixture.ResetPackets();
-    VS::Render::DrawLiveProgressiveTextBoxText(&VS::Menu::textBoxes[7]);
+    VS::Menu::DrawLiveProgressiveTextBoxText(&VS::Menu::textBoxes[7]);
     CHECK(VS::Menu::textBoxes[7].flags.done);
     CHECK(VS::Menu::textBoxes[7].previous_chunks == 3);
     CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
@@ -113,7 +121,7 @@ TEST_CASE(
   fixture.message[0] = static_cast<char>(VS::Core::TextCode::kTerminator);
   VS::Menu::Framework::SetLiveInformationMessage(fixture.message.data());
   fixture.ResetPackets();
-  VS::Render::DrawLiveProgressiveTextBoxText(&VS::Menu::textBoxes[7]);
+  VS::Menu::DrawLiveProgressiveTextBoxText(&VS::Menu::textBoxes[7]);
   CHECK(VS::Menu::textBoxes[7].flags.done);
   CHECK(VS::Menu::textBoxes[7].previous_chunks == 0);
   CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
@@ -134,7 +142,7 @@ TEST_CASE("Information control repair does not accelerate ordinary dialogue",
   dialogue.speed = 1;
   // NOLINTNEXTLINE(build/include_what_you_use): C text member, not std::string.
   dialogue.text = fixture.message.data();
-  VS::Render::DrawLiveProgressiveTextBoxText(&dialogue);
+  VS::Menu::DrawLiveProgressiveTextBoxText(&dialogue);
   CHECK_FALSE(dialogue.flags.done);
   CHECK(dialogue.previous_chunks == 1);
   CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
@@ -158,4 +166,81 @@ TEST_CASE("Information toggles hide normal help but retain required cautions",
   VS::Input::settings.information = 1;
   VS::Menu::Framework::UpdateLiveInformationVisibility(0, 16);
   CHECK(VS::Menu::textBoxes[7].state == 11);
+}
+
+namespace {
+// A dialogue view of the fixture's message that belongs to no text box.
+VS::Render::TextBoxText MessageView(const InformationFixture& fixture) {
+  VS::Render::TextBoxText view;
+  view.text =
+      std::span(reinterpret_cast<const std::uint8_t*>(fixture.message.data()),
+                fixture.message.size());
+  view.kind = 2;
+  view.speaker_texture = 32;
+  view.brightness = 128;
+  view.speed = 1;
+  return view;
+}
+}  // namespace
+
+TEST_CASE("Render text drawers draw a caller's text into the caller's layers",
+          "[render][text][boundary]") {
+  InformationFixture fixture;
+  std::array<std::uint32_t, 4> layers{};
+  VS::Render::TextBoxText view = MessageView(fixture);
+  const auto draws = GENERATE(1, 3);
+  for (int draw = 0; draw < draws; ++draw) {
+    fixture.ResetPackets();
+    ClearOTag(layers.data(), static_cast<int>(layers.size()));
+    const std::optional<VS::Render::ProgressiveTextResult> result =
+        VS::Render::DrawLiveProgressiveText(view, {}, {}, layers.data());
+    CHECK(result.has_value());
+    CHECK_FALSE(view.done);
+    CHECK(view.previous_chunks == 1);
+    // The glyph goes in front of the last of the four layers.
+    CHECK(nextPrim(&layers[3]) == fixture.memory.data() + 8);
+    CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+          fixture.memory.data() + 8 + 6 * sizeof(std::uint32_t));
+  }
+  fixture.ResetPackets();
+  ClearOTag(layers.data(), static_cast<int>(layers.size()));
+  CHECK(isendprim(&layers[3]));
+  VS::Render::DrawLiveScaledText(view, 1 << 16, layers.data());
+  CHECK_FALSE(isendprim(&layers[3]));
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor !=
+        fixture.memory.data() + 8);
+}
+
+TEST_CASE("Render text drawers refuse missing layers",
+          "[render][text][boundary]") {
+  InformationFixture fixture;
+  VS::Render::TextBoxText view = MessageView(fixture);
+  const std::uint64_t refused = VS::Render::RefusedLiveTextCount();
+  CHECK_FALSE(
+      VS::Render::DrawLiveProgressiveText(view, {}, {}, nullptr).has_value());
+  VS::Render::DrawLiveScaledText(view, 1 << 16, nullptr);
+  CHECK(VS::Render::RefusedLiveTextCount() == refused + 2);
+  CHECK(view.previous_chunks == 0);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+        fixture.memory.data() + 8);
+}
+
+TEST_CASE("Text box drawers refuse a box outside the dialogue text boxes",
+          "[render][text][boundary]") {
+  InformationFixture fixture;
+  VS::Menu::TextBoxState outside{};
+  outside.flags.kind = 2;
+  outside.flags.speaker_texture = 32;
+  outside.brightness = 128;
+  outside.speed = 1;
+  // NOLINTNEXTLINE(build/include_what_you_use): C text member, not std::string.
+  outside.text = fixture.message.data();
+  const std::uint64_t refused = VS::Menu::RefusedLiveTextBoxCount();
+  VS::Menu::DrawLiveProgressiveTextBoxText(&outside);
+  VS::Menu::DrawLiveScaledTextBoxText(&outside, 1 << 16);
+  CHECK(VS::Menu::RefusedLiveTextBoxCount() == refused + 2);
+  CHECK_FALSE(outside.flags.done);
+  CHECK(outside.previous_chunks == 0);
+  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+        fixture.memory.data() + 8);
 }

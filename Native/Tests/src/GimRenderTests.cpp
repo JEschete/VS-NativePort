@@ -9,6 +9,7 @@
 #include <span>
 
 #include "Actors/Spawning.hpp"
+#include "Battle/StringContextLive.hpp"
 #include "Battle/TargetingState.hpp"
 #include "Boot/OverlayReset.hpp"
 #include "Content/DiscLayout.h"
@@ -30,6 +31,7 @@
 #include "Menu/Status/TerminalControllersLive.hpp"
 #include "Menu/TextBox.hpp"
 #include "Menu/TextBoxFramesLive.hpp"
+#include "Menu/TextBoxTextLive.hpp"
 #include "Render/Display.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/Frame.hpp"
@@ -73,7 +75,7 @@ int Tests_EncodedTextFormatting(void) {
   VS::Battle::stringContext.integers[1] = 7;
   VS::Battle::stringContext.integers[2] = 0;
   VS::Battle::stringContext.strings[0] = reinterpret_cast<char*>(nested);
-  char* end = VS::Render::FormatLiveEncodedText(output + 1, format);
+  char* end = VS::Battle::FormatLiveEncodedText(output + 1, format);
   int passed = end == output + sizeof expected &&
                memcmp(output + 1, expected, sizeof expected) == 0 &&
                output[0] == 0x55 && output[sizeof expected + 1] == 0x55;
@@ -83,7 +85,7 @@ int Tests_EncodedTextFormatting(void) {
   memset(small, 0x55, sizeof small);
   const uint64_t refused = VS::Render::RefusedLiveEncodedTextCount();
   passed =
-      passed && VS::Render::FormatLiveEncodedText(small, format) == small &&
+      passed && VS::Battle::FormatLiveEncodedText(small, format) == small &&
       static_cast<unsigned char>(small[0]) == VS::Core::TextCode::kTerminator &&
       small[1] == 0x55 &&
       VS::Render::RefusedLiveEncodedTextCount() == refused + 1;
@@ -198,7 +200,7 @@ int Tests_ScaledDialogueGlyphs(void) {
   box.frame_y = 20;
   VS::Render::FrameScratchpad().primitive_cursor = memory + 8;
   ClearOTag(ordering, 34);
-  VS::Render::DrawLiveScaledTextBoxText(&box, 1 << 16);
+  VS::Menu::DrawLiveScaledTextBoxText(&box, 1 << 16);
   passed = passed &&
            VS::Render::FrameScratchpad().primitive_cursor == glyph + 3 &&
            glyph[1].x0 == 23 && glyph[2].x0 == 10 && glyph[2].y0 == 33 &&
@@ -207,7 +209,7 @@ int Tests_ScaledDialogueGlyphs(void) {
   ClearOTag(ordering, 34);
   box.speed = 100;
   box.speaker_pause = 1;
-  VS::Render::DrawLiveProgressiveTextBoxText(&box);
+  VS::Menu::DrawLiveProgressiveTextBoxText(&box);
   passed = passed && box.flags.done && box.previous_chunks == 4 &&
            VS::Render::FrameScratchpad().primitive_cursor ==
                memory + 8 + std::size_t{3} * 6 * sizeof(std::uint32_t);

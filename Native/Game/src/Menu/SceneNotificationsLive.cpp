@@ -10,6 +10,7 @@
 #include <span>
 
 #include "Battle/ActionTable.hpp"
+#include "Battle/StringContextLive.hpp"
 #include "Battle/TargetingState.hpp"
 #include "Battle/TextBoxes.hpp"
 #include "Content/StringTables.hpp"
@@ -129,7 +130,7 @@ class LiveHost final : public SceneNotificationHost {
   }
   bool CanFormat(SceneNotificationText source, SceneNotificationText subject,
                  std::size_t capacity) const override {
-    auto arguments = Render::LiveEncodedTextArguments();
+    auto arguments = VS::Battle::LiveEncodedTextArguments();
     arguments.strings[0] = subject;
     const auto bytes = Render::EncodedTextBytes(source, arguments);
     return bytes && *bytes <= capacity;
@@ -157,7 +158,7 @@ class LiveHost final : public SceneNotificationHost {
   }
   bool Format(std::span<std::uint8_t> destination,
               SceneNotificationText source) override {
-    auto arguments = Render::LiveEncodedTextArguments();
+    auto arguments = VS::Battle::LiveEncodedTextArguments();
     arguments.strings[0] = subject_;
     return Render::FormatEncodedText(destination, source, arguments)
         .has_value();
