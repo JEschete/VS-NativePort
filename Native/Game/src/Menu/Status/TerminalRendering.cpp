@@ -17,7 +17,7 @@ constexpr int kVerticalOrbitScale = 4;
 constexpr int kCameraClip = 4096;
 }  // namespace
 
-// decomp: _fadeScreenLeft (src/MENU/MENU4.PRG/120.c:2081)
+// decomp: fadeScreenLeft (src/MENU/MENU4.PRG/120.c:2083; was _fadeScreenLeft)
 bool DrawModelSlideFade(Render::PacketQueue& queue, bool enabled,
                         bool framebuffer) {
   if (!enabled) {
@@ -41,7 +41,8 @@ bool DrawModelSlideFade(Render::PacketQueue& queue, bool enabled,
   return queue.Emit(packet);
 }
 
-// decomp: _drawMenuBackground (src/MENU/MENU4.PRG/120.c:2121)
+// decomp: drawMenuBackground (src/MENU/MENU4.PRG/120.c:2123; was
+// _drawMenuBackground)
 bool DrawBackground(Render::PacketQueue& queue, bool framebuffer) {
   const std::array gradient{
       Render::PackTagWord(kGradientWords, queue.ChainLink()),
@@ -91,7 +92,7 @@ bool DrawBackground(Render::PacketQueue& queue, bool framebuffer) {
   return queue.Emit(framebuffer_gradient);
 }
 
-// decomp: _drawScreen (src/MENU/MENU4.PRG/120.c:2190)
+// decomp: drawScreen (src/MENU/MENU4.PRG/120.c:2192; was _drawScreen)
 TerminalResult DrawFrame(TerminalFrameHost& host) {
   const auto model = host.ModelCamera();
   if (!model) {

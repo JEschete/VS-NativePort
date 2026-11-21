@@ -71,10 +71,12 @@ class TimeAttackLoadHost {
   virtual bool FreeTextureBlock(const TimeAttackState& state) = 0;
 };
 
-// decomp: _initTimeAttackEnd, MENUF.PRG/3B8.c:256 (0x8010310C).
+// decomp: initTimeAttackEnd, src/MENU/MENUF.PRG/3B8.c:270; was
+// _initTimeAttackEnd (0x8010310C).
 GameClearStep InitializeTimeAttackResults(TimeAttackState& state,
                                           TimeAttackLoadHost& host);
-// decomp: _initTimeAttackStart, MENUF.PRG/3B8.c:372 (0x80103530).
+// decomp: initTimeAttackStart, src/MENU/MENUF.PRG/3B8.c:386; was
+// _initTimeAttackStart (0x80103530).
 GameClearStep InitializeTimeAttackStart(TimeAttackState& state,
                                         TimeAttackLoadHost& host);
 
@@ -122,10 +124,12 @@ class TimeAttackScreenHost {
   virtual void RetireTexturePages(const TexturePageLoan& loan) = 0;
 };
 
-// decomp: _renderTimeAttackEnd, MENUF.PRG/3B8.c:905 (0x80103D88).
+// decomp: renderTimeAttackEnd, src/MENU/MENUF.PRG/3B8.c:918; was
+// _renderTimeAttackEnd (0x80103D88).
 GameClearStep UpdateTimeAttackResults(TimeAttackState& state, bool confirm,
                                       TimeAttackScreenHost& host);
-// decomp: _renderTimeAttackStart, MENUF.PRG/3B8.c:1014 (0x8010412C).
+// decomp: renderTimeAttackStart, src/MENU/MENUF.PRG/3B8.c:1027; was
+// _renderTimeAttackStart (0x8010412C).
 GameClearStep UpdateTimeAttackStart(TimeAttackState& state, bool confirm,
                                     TimeAttackScreenHost& host);
 
@@ -153,14 +157,14 @@ class ResultsPresentationHost {
   virtual void FinishScreen() = 0;
 };
 
-// decomp: _initMenu, MENUF.PRG/3B8.c:59 (0x80102C54).
+// decomp: initMenu, src/MENU/MENUF.PRG/3B8.c:73; was _initMenu (0x80102C54).
 // Unknown selectors refuse instead of returning the original stale register.
 std::optional<int> InitializeResultsScreen(std::uint8_t selector,
                                            ResultsPresentationHost& host);
-// decomp: _execMenu, MENUF.PRG/3B8.c:453 (0x801037A0).
+// decomp: execMenu, src/MENU/MENUF.PRG/3B8.c:467; was _execMenu (0x801037A0).
 std::optional<int> UpdateResultsPresentation(std::uint8_t selector,
                                              ResultsPresentationHost& host);
-// decomp: vs_menuF_exec, MENUF.PRG/3B8.c:23 (0x80102BB8).
+// decomp: vs_menuF_exec, src/MENU/MENUF.PRG/3B8.c:32 (0x80102BB8).
 // Only the first byte belongs to this entry. Initialization increments the
 // pre-callback byte; presentation completion clears it after the callback.
 std::optional<int> UpdateResultsScreen(std::span<std::uint8_t> caller_state,

@@ -22,40 +22,40 @@ struct ActionRangeView;
 // call without an action state, a sphere or a range view is refused with an
 // error on the "battle.targeting" channel.
 namespace VS::Battle {
-// decomp: BATTLE.PRG func_800704D8 (src/BATTLE/BATTLE.PRG/146C.c:3578)
+// decomp: BATTLE.PRG func_800704D8 (src/BATTLE/BATTLE.PRG/146C.c:3288)
 void LiveReturnToBattleActionMenu();
-// decomp: BATTLE.PRG func_8007053C (src/BATTLE/BATTLE.PRG/146C.c:3588)
+// decomp: BATTLE.PRG func_8007053C (src/BATTLE/BATTLE.PRG/146C.c:3298)
 void LiveFilterAreaActionTargets();
-// decomp: BATTLE.PRG func_800708EC (src/BATTLE/BATTLE.PRG/146C.c:3660)
+// decomp: BATTLE.PRG func_800708EC (src/BATTLE/BATTLE.PRG/146C.c:3368)
 void LiveSetSingleActionTarget();
-// decomp: BATTLE.PRG func_80070B04 (src/BATTLE/BATTLE.PRG/146C.c:3695)
+// decomp: BATTLE.PRG func_80070B04 (src/BATTLE/BATTLE.PRG/146C.c:3404)
 void LiveSetAllActionTargets();
-// decomp: BATTLE.PRG func_80070CAC (src/BATTLE/BATTLE.PRG/146C.c:3728)
+// decomp: BATTLE.PRG func_80070CAC (src/BATTLE/BATTLE.PRG/146C.c:3438)
 void LiveCollectEnvironmentActionTargets();
-// decomp: BATTLE.PRG func_80072BA8 (src/BATTLE/BATTLE.PRG/146C.c:4416)
+// decomp: BATTLE.PRG func_80072BA8 (src/BATTLE/BATTLE.PRG/146C.c:4143)
 void LiveInitializeActionTargeting(int action_id);
-// decomp: BATTLE.PRG func_80072EC4 (src/BATTLE/BATTLE.PRG/146C.c:4489)
+// decomp: BATTLE.PRG func_80072EC4 (src/BATTLE/BATTLE.PRG/146C.c:4216)
 void LiveBeginActorActionSelection(int source_actor_slot,
                                    std::uint16_t action_id);
 // decomp: BATTLE.PRG func_800C4794 (src/BATTLE/BATTLE.PRG/5BF94.c:640): 1
 // when the player confirmed or cancelled (a cancel sets the pad to 1).
 int LiveUpdateSphereTargetPosition(VS::Core::Gte::SVECTOR* target_position);
-// decomp: BATTLE.PRG func_800C58F8 (src/BATTLE/BATTLE.PRG/5BF94.c:1058): 1
+// decomp: BATTLE.PRG func_800C58F8 (src/BATTLE/BATTLE.PRG/5BF94.c:876): 1
 // when the list closed; a null target resets the list.
 int LiveUpdateTargetSelectionMenu(std::uint8_t* target);
-// decomp: BATTLE.PRG func_800E5600 (src/BATTLE/BATTLE.PRG/7CD68.c:459); the
+// decomp: BATTLE.PRG func_800E5600 (src/BATTLE/BATTLE.PRG/7CD68.c:96); the
 // first argument is unused, as in the original.
 int LiveCalculateActionAreaReach(std::intptr_t unused, int action_id,
                                  std::uint32_t maximum_reach);
-// decomp: BATTLE.PRG func_800E5698 (src/BATTLE/BATTLE.PRG/7CD68.c:476)
+// decomp: BATTLE.PRG func_800E5698 (src/BATTLE/BATTLE.PRG/7CD68.c:113)
 int LiveCalculateActionRangeSquared(
     VS::Battle::Ai::ActionRangeView* actor_range_view, int action_id);
 // func_800E5698 for typed callers, from the weapon range in the actor's stats.
 int LiveCalculateActorActionRangeSquared(const VS::Battle::ActorStats* stats,
                                          int action_id);
-// decomp: BATTLE.PRG func_800C51B4 (src/BATTLE/BATTLE.PRG/5BF94.c:890)
+// decomp: BATTLE.PRG func_800C51B4 (src/BATTLE/BATTLE.PRG/5BF94.c:708)
 void LiveUpdateTargetSelectionHighlight(int mode);
-// decomp: BATTLE.PRG func_800E5568 (src/BATTLE/BATTLE.PRG/7CD68.c:437); a null
+// decomp: BATTLE.PRG func_800E5568 (src/BATTLE/BATTLE.PRG/7CD68.c:74); a null
 // range shape is refused and reads as 0.
 int LiveCalculateRangeShapeExtent(
     const VS::Battle::Ai::ActionRangeShape* range_shape);

@@ -3,8 +3,9 @@
 #include "Effects/Plugins/Plg143.hpp"
 
 namespace VS::Effects::Plg143 {
-// decomp: D_800FB664 (PLG143.BIN/0.c:5; closedRings.h:58)
+// decomp: vs_effect_mistralEdge_0_colors (src/EFFECT/closedRings.h:58; was
+// D_800FB664; src/EFFECT/closedRings.h:58)
 plugins::RingPalette tiledRingColorFactors;
-// decomp: D_800FB684 (PLG143.BIN/0.c:7; closedRings.h:58)
+// decomp: D_800FB684 (PLG143.BIN/0.c:7; src/EFFECT/closedRings.h:58)
 plugins::RingPalette closedRingColorFactors;
 }  // namespace VS::Effects::Plg143

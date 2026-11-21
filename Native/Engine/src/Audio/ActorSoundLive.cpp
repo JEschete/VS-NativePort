@@ -247,7 +247,7 @@ std::optional<SfxMix> LiveActorSoundMix(int actor_index) {
   return mix;
 }
 
-// decomp: BATTLE.PRG func_800AD62C (src/BATTLE/BATTLE.PRG/40564.c:2789)
+// decomp: BATTLE.PRG func_800AD62C (src/BATTLE/BATTLE.PRG/40564.c:2209)
 void LiveActorSoundPanAndVolume(int actor_index, int* output_pan,
                                 int* output_volume) {
   if (output_pan == nullptr) {
@@ -272,7 +272,7 @@ void LivePlayActorModelSound(const VS::Actors::ModelInstance* model_instance,
          PlayActorModelSound(host, ModelSound(*model_instance), sound_index));
 }
 
-// decomp: BATTLE.PRG func_800AE68C (src/BATTLE/BATTLE.PRG/44F14.c:685)
+// decomp: BATTLE.PRG func_800AE68C (src/BATTLE/BATTLE.PRG/44F14.c:667)
 void LivePlayActorModelSoundVariant(int actor_index, int variant_index) {
   LiveActorSoundHost host;
   Report("PlayActorModelSoundVariant",
@@ -293,7 +293,7 @@ void LivePlayActorSoundPair(const VS::Actors::ActorRecord* source_actor,
              {.first = first_effect_id, .second = second_effect_id}));
 }
 
-// decomp: BATTLE.PRG func_800AE7D8 (src/BATTLE/BATTLE.PRG/44F14.c:728)
+// decomp: BATTLE.PRG func_800AE7D8 (src/BATTLE/BATTLE.PRG/44F14.c:707)
 void LivePlayGimmickSoundPair(const VS::Field::GimmickInstance* gimmick,
                               int first_effect_id, int second_effect_id) {
   if (gimmick == nullptr) {
@@ -330,7 +330,7 @@ void LivePlayActorSurfaceContactSound(int actor_index,
                                       contact_sound_code));
 }
 
-// decomp: BATTLE.PRG func_8007C8A4 (src/BATTLE/BATTLE.PRG/146C.c:8917)
+// decomp: BATTLE.PRG func_8007C8A4 (src/BATTLE/BATTLE.PRG/146C.c:8872)
 void LivePlayActorScriptSound(int actor_index, int sound_index) {
   LiveActorSoundHost host;
   Report("PlayActorScriptSound",

@@ -199,7 +199,7 @@ static_assert(std::is_same_v<decltype(&QueueLiveWeaponDpRecovery), Mediator>);
 static_assert(std::is_same_v<decltype(&QueueLiveRiskRecovery), Mediator>);
 }  // namespace
 
-// decomp: func_80084EEC (src/BATTLE/BATTLE.PRG/146C.c:12882).
+// decomp: func_80084EEC (src/BATTLE/BATTLE.PRG/146C.c:12728).
 void QueueLiveWeaponPpRecovery(ActionDefinition* action,
                                VS::Battle::HitResult* source,
                                VS::Battle::HitResult* target, int hit,
@@ -207,7 +207,7 @@ void QueueLiveWeaponPpRecovery(ActionDefinition* action,
   LiveQueue queue(action, source, target, hit, execute);
   QueueWeaponPpRecovery(queue);
 }
-// decomp: func_80084F40 (src/BATTLE/BATTLE.PRG/146C.c:12890).
+// decomp: func_80084F40 (src/BATTLE/BATTLE.PRG/146C.c:12735).
 void QueueLiveWeaponDpRecovery(ActionDefinition* action,
                                VS::Battle::HitResult* source,
                                VS::Battle::HitResult* target, int hit,
@@ -215,7 +215,7 @@ void QueueLiveWeaponDpRecovery(ActionDefinition* action,
   LiveQueue queue(action, source, target, hit, execute);
   QueueWeaponDpRecovery(queue);
 }
-// decomp: func_80084F94 (src/BATTLE/BATTLE.PRG/146C.c:12898).
+// decomp: func_80084F94 (src/BATTLE/BATTLE.PRG/146C.c:12742).
 void QueueLiveRiskRecovery(ActionDefinition* action,
                            VS::Battle::HitResult* source,
                            VS::Battle::HitResult* target, int hit,
@@ -224,7 +224,7 @@ void QueueLiveRiskRecovery(ActionDefinition* action,
   QueueRiskRecovery(queue);
 }
 
-// decomp: func_80084B70 (src/BATTLE/BATTLE.PRG/146C.c:12789).
+// decomp: func_80084B70 (src/BATTLE/BATTLE.PRG/146C.c:12641).
 void QueueLiveHitDamageAndEquipmentWear(ActionDefinition* action,
                                         VS::Battle::HitResult* source,
                                         VS::Battle::HitResult* target, int hit,
@@ -232,13 +232,13 @@ void QueueLiveHitDamageAndEquipmentWear(ActionDefinition* action,
   LiveQueue queue(action, source, target, hit, execute);
   QueueHitDamageAndEquipmentWear(queue, execute != 0);
 }
-// decomp: func_80084CAC (src/BATTLE/BATTLE.PRG/146C.c:12820).
+// decomp: func_80084CAC (src/BATTLE/BATTLE.PRG/146C.c:12671).
 void QueueLiveMpDrain(ActionDefinition* action, VS::Battle::HitResult* source,
                       VS::Battle::HitResult* target, int hit, int execute) {
   LiveQueue queue(action, source, target, hit, execute);
   QueueMpDrain(queue);
 }
-// decomp: func_80084D44 (src/BATTLE/BATTLE.PRG/146C.c:12835).
+// decomp: func_80084D44 (src/BATTLE/BATTLE.PRG/146C.c:12685).
 void QueueLiveWeaponPpDrain(ActionDefinition* action,
                             VS::Battle::HitResult* source,
                             VS::Battle::HitResult* target, int hit,
@@ -246,7 +246,7 @@ void QueueLiveWeaponPpDrain(ActionDefinition* action,
   LiveQueue queue(action, source, target, hit, execute);
   QueueWeaponPpDrain(queue);
 }
-// decomp: func_80084DA8 (src/BATTLE/BATTLE.PRG/146C.c:12847).
+// decomp: func_80084DA8 (src/BATTLE/BATTLE.PRG/146C.c:12696).
 void QueueLiveShieldPpDrain(ActionDefinition* action,
                             VS::Battle::HitResult* source,
                             VS::Battle::HitResult* target, int hit,
@@ -254,14 +254,14 @@ void QueueLiveShieldPpDrain(ActionDefinition* action,
   LiveQueue queue(action, source, target, hit, execute);
   QueueShieldPpDrain(queue);
 }
-// decomp: func_80084E28 (src/BATTLE/BATTLE.PRG/146C.c:12862).
+// decomp: func_80084E28 (src/BATTLE/BATTLE.PRG/146C.c:12710).
 void QueueLiveHpRecovery(ActionDefinition* action,
                          VS::Battle::HitResult* source,
                          VS::Battle::HitResult* target, int hit, int execute) {
   LiveQueue queue(action, source, target, hit, execute);
   QueueHpRecovery(queue);
 }
-// decomp: func_80084EA0 (src/BATTLE/BATTLE.PRG/146C.c:12874).
+// decomp: func_80084EA0 (src/BATTLE/BATTLE.PRG/146C.c:12721).
 void QueueLiveMpRecovery(ActionDefinition* action,
                          VS::Battle::HitResult* source,
                          VS::Battle::HitResult* target, int hit, int execute) {

@@ -5,7 +5,8 @@
 #include "Audio/MusicVoiceConflicts.hpp"
 
 namespace VS::Audio::Seq {
-// decomp: func_80015BAC (SLUS_010.40/25AC.c:2326); original 80015BAC-80015C98.
+// decomp: Sound_ReconcileSavedMusicVoices (src/SLUS_010.40/25AC.c:2446; was
+// func_80015BAC); original 80015BAC-80015C98.
 std::uint32_t ReleaseSavedVoiceConflicts(const MusicLayerVoices& playing,
                                          const MusicLayerVoices& saved,
                                          MusicChannelVoices& saved_channels,

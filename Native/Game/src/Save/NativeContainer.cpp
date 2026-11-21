@@ -145,7 +145,7 @@ bool UpdateClosing(ContainerSaveState& state, ContainerSaveHost& host) {
 
 }  // namespace
 
-// decomp: MENU7.PRG vs_menu7_saveContainerMenu (src/MENU/MENU7.PRG/260.c:3944)
+// decomp: MENU7.PRG vs_menu7_saveContainerMenu (src/MENU/MENU7.PRG/260.c:697)
 bool UpdateContainerSave(ContainerSaveState& state, ContainerSaveHost& host) {
   switch (state) {
     case ContainerSaveState::kInitialize:

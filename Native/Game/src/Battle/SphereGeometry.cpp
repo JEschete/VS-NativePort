@@ -220,7 +220,7 @@ void AppendMirroredVertices(std::uint16_t command,
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800C085C (src/BATTLE/BATTLE.PRG/573B8.c:523).
+// decomp: BATTLE.PRG func_800C085C (src/BATTLE/BATTLE.PRG/57B1C.c:175).
 Core::Math::Mat3 BuildSphereVolumeTransform(const TargetVolumeExtents& extents,
                                             std::int32_t angle) noexcept {
   const auto rotation = math::BuildEulerRotationMatrix(
@@ -239,7 +239,7 @@ Core::Math::Mat3 BuildSphereVolumeTransform(const TargetVolumeExtents& extents,
   return transform;
 }
 
-// decomp: BATTLE.PRG func_800C0758 (src/BATTLE/BATTLE.PRG/573B8.c:495).
+// decomp: BATTLE.PRG func_800C0758 (src/BATTLE/BATTLE.PRG/57B1C.c:147).
 std::optional<std::size_t> AppendSphereArcVertices(
     const SphereArcBasis& basis, std::span<const std::int16_t> sine_samples,
     std::int32_t phase, std::int32_t segments,
@@ -270,7 +270,7 @@ std::optional<std::size_t> AppendSphereArcVertices(
   return index;
 }
 
-// decomp: BATTLE.PRG func_800C2254 (src/BATTLE/BATTLE.PRG/58578.c:821).
+// decomp: BATTLE.PRG func_800C2254 (src/BATTLE/BATTLE.PRG/58578.c:770).
 std::optional<std::size_t> AppendSphereCircleVertices(
     const SphereArcBasis& basis, std::int32_t angle,
     std::span<TargetWireVertex> output, std::size_t index) noexcept {
@@ -293,7 +293,7 @@ std::optional<std::size_t> AppendSphereCircleVertices(
   return index;
 }
 
-// decomp: BATTLE.PRG func_800C2368 (src/BATTLE/BATTLE.PRG/58578.c:845).
+// decomp: BATTLE.PRG func_800C2368 (src/BATTLE/BATTLE.PRG/58578.c:794).
 std::optional<SphereConeAppendResult> AppendSphereConeVertices(
     std::int32_t step, std::int32_t radius, std::span<TargetWireVertex> output,
     std::size_t index) noexcept {

@@ -13,7 +13,7 @@ namespace VS::Actors {
 inline constexpr std::size_t kPlaceholderActorNameBytes = 20;
 inline constexpr std::size_t kBodyModelIds = 256;
 
-// decomp: D_800FAB18 (src/BATTLE/INITBTL.PRG/18.c)
+// decomp: D_800FAB18 (src/BATTLE/INITBTL.PRG/18.c:48)
 extern const CharacterInit kAshleyInitialLoadout;
 // decomp: D_8004FDD0 (D_8004FDD0@SLUS_010.40)
 extern std::array<char, kPlaceholderActorNameBytes> placeholderActorName;

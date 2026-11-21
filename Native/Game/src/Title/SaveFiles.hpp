@@ -23,7 +23,7 @@ inline constexpr std::size_t kSaveUiPageOneRows = 256;
 inline constexpr std::size_t kSaveFontPages = 2;
 inline constexpr std::size_t kDebugFontWords = 4928;
 
-// decomp: fontTable_t (src/TITLE/TITLE.PRG/22C.c:3112)
+// decomp: FontTable (src/TITLE/TITLE.PRG/22C.c:115-118; was fontTable_t)
 // One 4-bit font page and its palettes.
 struct SaveMenuFontRecord {
   /* 0x0000 */ std::uint8_t indexed_pixels[kSaveFontRows][kSaveAtlasRowBytes];
@@ -31,14 +31,14 @@ struct SaveMenuFontRecord {
                                      [kSaveFontPaletteColors];
 };
 
-// decomp: menuBg_t (src/TITLE/TITLE.PRG/22C.c:3122)
+// decomp: MenuBg (src/TITLE/TITLE.PRG/22C.c:125-128; was menuBg_t)
 struct SaveMenuBackgroundRecord {
   /* 0x0000 */ std::uint16_t palette[kSaveBackgroundColors];
   /* 0x0200 */ std::uint8_t indexed_pixels[kSaveBackgroundRows]
                                           [kSaveBackgroundRowBytes];
 };
 
-// decomp: uiTable_t (src/TITLE/TITLE.PRG/22C.c:3117)
+// decomp: UiTable (src/TITLE/TITLE.PRG/22C.c:120-123; was uiTable_t)
 // The two 4-bit UI pages.
 struct SaveMenuUiRecord {
   /* 0x0000 */ std::uint8_t page_zero_pixels[kSaveUiPageZeroRows]

@@ -14,7 +14,7 @@ struct StickPosition {
   int r_stick_y;
 };
 
-// decomp: vs_main_buttonsPressed.ports[0].lowByte (src/SLUS_010.40/main.h:482):
+// decomp: vs_main_buttonsPressed.ports[0].lowByte (src/SLUS_010.40/main.c:907):
 // the first pad's L2, R2, L1, R1, Triangle, Circle, Cross and Square bits.
 [[nodiscard]] constexpr std::uint8_t LowButtonByte(
     std::uint32_t buttons) noexcept {

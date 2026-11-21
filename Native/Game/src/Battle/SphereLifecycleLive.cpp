@@ -122,7 +122,7 @@ void WriteState(VS::Battle::TargetSphereSetupView& sphere,
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800C031C (src/BATTLE/BATTLE.PRG/573B8.c:363).
+// decomp: BATTLE.PRG func_800C031C (src/BATTLE/BATTLE.PRG/57B1C.c:14).
 void InitializeLiveSphere(VS::Battle::TargetSphereSetupView* sphere) {
   auto& legacy = RequiredSphere(sphere, "sphere initialization");
   SphereLifecycleState state = ReadState(legacy);
@@ -138,7 +138,7 @@ void InitializeLiveSphere(VS::Battle::TargetSphereSetupView* sphere) {
   }
 }
 
-// decomp: BATTLE.PRG func_800C05B4 (src/BATTLE/BATTLE.PRG/573B8.c:436).
+// decomp: BATTLE.PRG func_800C05B4 (src/BATTLE/BATTLE.PRG/57B1C.c:87).
 void FreeLiveSphere(VS::Battle::TargetSphereSetupView*& sphere,
                     SphereReleaseFunction release) {
   if (sphere == nullptr) return;
@@ -147,7 +147,7 @@ void FreeLiveSphere(VS::Battle::TargetSphereSetupView*& sphere,
   sphere = nullptr;
 }
 
-// decomp: BATTLE.PRG func_800C05EC (src/BATTLE/BATTLE.PRG/573B8.c:444).
+// decomp: BATTLE.PRG func_800C05EC (src/BATTLE/BATTLE.PRG/57B1C.c:95).
 void SetLiveSphereVolumes(VS::Battle::TargetSphereSetupView* sphere,
                           const VS::Battle::TargetSphereSpec* primary,
                           const VS::Battle::TargetSphereSpec* secondary,
@@ -180,7 +180,7 @@ void SetLiveSphereVolumes(VS::Battle::TargetSphereSetupView* sphere,
   }
 }
 
-// decomp: BATTLE.PRG func_800C06E0 (src/BATTLE/BATTLE.PRG/573B8.c:475).
+// decomp: BATTLE.PRG func_800C06E0 (src/BATTLE/BATTLE.PRG/57B1C.c:127).
 void ClearLivePrimarySphereVolume(VS::Battle::TargetSphereSetupView* sphere) {
   if (sphere == nullptr) return;
   auto state = ReadState(*sphere);
@@ -188,7 +188,7 @@ void ClearLivePrimarySphereVolume(VS::Battle::TargetSphereSetupView* sphere) {
   WriteState(*sphere, state);
 }
 
-// decomp: BATTLE.PRG func_800C0700 (src/BATTLE/BATTLE.PRG/573B8.c:482).
+// decomp: BATTLE.PRG func_800C0700 (src/BATTLE/BATTLE.PRG/57B1C.c:134).
 void SetLiveSecondarySphereVolume(
     VS::Battle::TargetSphereSetupView* sphere,
     const VS::Battle::TargetSphereSpec* secondary) {
@@ -200,7 +200,7 @@ void SetLiveSecondarySphereVolume(
   WriteState(legacy, state);
 }
 
-// decomp: BATTLE.PRG func_800C0738 (src/BATTLE/BATTLE.PRG/573B8.c:488).
+// decomp: BATTLE.PRG func_800C0738 (src/BATTLE/BATTLE.PRG/57B1C.c:140).
 void ClearLiveSecondarySphereVolume(VS::Battle::TargetSphereSetupView* sphere) {
   if (sphere == nullptr) return;
   auto state = ReadState(*sphere);
@@ -208,7 +208,7 @@ void ClearLiveSecondarySphereVolume(VS::Battle::TargetSphereSetupView* sphere) {
   WriteState(*sphere, state);
 }
 
-// decomp: BATTLE.PRG func_800C16DC (src/BATTLE/BATTLE.PRG/58578.c:470).
+// decomp: BATTLE.PRG func_800C16DC (src/BATTLE/BATTLE.PRG/58578.c:419).
 void ClearLiveSphereTargets(VS::Battle::TargetSphereSetupView* sphere) {
   if (sphere == nullptr) return;
   auto state = ReadState(*sphere);
@@ -216,7 +216,7 @@ void ClearLiveSphereTargets(VS::Battle::TargetSphereSetupView* sphere) {
   WriteState(*sphere, state);
 }
 
-// decomp: BATTLE.PRG func_800C4734 (src/BATTLE/BATTLE.PRG/5BE50.c:93).
+// decomp: BATTLE.PRG func_800C4734 (src/BATTLE/BATTLE.PRG/58578.c:1099).
 int LiveSphereInteractionMode(const VS::Battle::TargetSphereSetupView* sphere,
                               bool override_button) {
   if (sphere == nullptr) return 0;
@@ -224,7 +224,7 @@ int LiveSphereInteractionMode(const VS::Battle::TargetSphereSetupView* sphere,
   return SphereInteractionMode(&state, override_button);
 }
 
-// decomp: BATTLE.PRG func_800C031C (src/BATTLE/BATTLE.PRG/573B8.c:363).
+// decomp: BATTLE.PRG func_800C031C (src/BATTLE/BATTLE.PRG/57B1C.c:14).
 void InitializeSphereEntry() {
   ResetTargetPages();
   if (VS::Battle::targetSphere == nullptr) {
@@ -243,7 +243,7 @@ void InitializeSphereEntry() {
   InitializeLiveSphere(VS::Battle::targetSphere);
 }
 
-// decomp: BATTLE.PRG func_800C05EC (src/BATTLE/BATTLE.PRG/573B8.c:444).
+// decomp: BATTLE.PRG func_800C05EC (src/BATTLE/BATTLE.PRG/57B1C.c:95).
 void SetSphereVolumesEntry(VS::Battle::TargetSphereSpec* primary,
                            VS::Battle::TargetSphereSpec* secondary,
                            std::uint8_t area_target_count,
@@ -253,28 +253,28 @@ void SetSphereVolumesEntry(VS::Battle::TargetSphereSpec* primary,
                        VS::Battle::reuseSphereVolumes);
 }
 
-// decomp: BATTLE.PRG func_800C06E0 (src/BATTLE/BATTLE.PRG/573B8.c:475).
+// decomp: BATTLE.PRG func_800C06E0 (src/BATTLE/BATTLE.PRG/57B1C.c:127).
 void ClearPrimarySphereVolumeEntry() {
   ClearLivePrimarySphereVolume(VS::Battle::targetSphere);
 }
 
-// decomp: BATTLE.PRG func_800C0700 (src/BATTLE/BATTLE.PRG/573B8.c:482).
+// decomp: BATTLE.PRG func_800C0700 (src/BATTLE/BATTLE.PRG/57B1C.c:134).
 void SetSecondarySphereVolumeEntry(VS::Battle::TargetSphereSpec* secondary) {
   SetLiveSecondarySphereVolume(VS::Battle::targetSphere, secondary);
 }
 
-// decomp: BATTLE.PRG func_800C0738 (src/BATTLE/BATTLE.PRG/573B8.c:488).
+// decomp: BATTLE.PRG func_800C0738 (src/BATTLE/BATTLE.PRG/57B1C.c:140).
 void ClearSecondarySphereVolumeEntry() {
   ClearLiveSecondarySphereVolume(VS::Battle::targetSphere);
 }
 
-// decomp: BATTLE.PRG func_800C16DC (src/BATTLE/BATTLE.PRG/58578.c:470).
+// decomp: BATTLE.PRG func_800C16DC (src/BATTLE/BATTLE.PRG/58578.c:419).
 void ClearSphereTargetsEntry() {
   ResetTargetPages();
   ClearLiveSphereTargets(VS::Battle::targetSphere);
 }
 
-// decomp: BATTLE.PRG func_800C4734 (src/BATTLE/BATTLE.PRG/5BE50.c:93).
+// decomp: BATTLE.PRG func_800C4734 (src/BATTLE/BATTLE.PRG/58578.c:1099).
 int SphereInteractionModeEntry() {
   return LiveSphereInteractionMode(
       VS::Battle::targetSphere,

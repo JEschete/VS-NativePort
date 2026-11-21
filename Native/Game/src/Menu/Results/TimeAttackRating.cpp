@@ -116,8 +116,9 @@ std::int32_t CountingTimeAttackTime(std::int32_t time, std::int32_t timer) {
   return (minutes << kMinutesShift) | (seconds << kSecondsShift) | shown;
 }
 
-// decomp: MENUF.PRG _renderTimeAttackResultsHeader
-// (src/MENU/MENUF.PRG/3B8.c:1654), 0x8010559C
+// decomp: MENUF.PRG renderTimeAttackResultsHeader
+// (src/MENU/MENUF.PRG/3B8.c:1666; was _renderTimeAttackResultsHeader),
+// 0x8010559C
 ResultsDrawResult DrawTimeAttackResultsHeading(
     std::span<const Render::TextureRegion> atlas, std::int32_t x,
     std::int32_t y, std::int32_t timer, TimeAttackResultsDrawHost& host) {
@@ -139,8 +140,8 @@ ResultsDrawResult DrawTimeAttackResultsHeading(
   return ResultsDrawResult::kDrawn;
 }
 
-// decomp: MENUF.PRG _renderTimeAttackRating (src/MENU/MENUF.PRG/3B8.c:1678),
-// 0x8010564C
+// decomp: MENUF.PRG renderTimeAttackRating (src/MENU/MENUF.PRG/3B8.c:1690; was
+// _renderTimeAttackRating), 0x8010564C
 ResultsDrawResult DrawTimeAttackRating(
     std::span<const Render::TextureRegion> atlas, std::int32_t x,
     std::int32_t y, std::int32_t timer, std::int32_t time,
@@ -155,8 +156,8 @@ ResultsDrawResult DrawTimeAttackRating(
   return ResultsDrawResult::kDrawn;
 }
 
-// decomp: MENUF.PRG _renderTimeAttackRatingWipe
-// (src/MENU/MENUF.PRG/3B8.c:1708), 0x801056E8
+// decomp: MENUF.PRG renderTimeAttackRatingWipe
+// (src/MENU/MENUF.PRG/3B8.c:1720; was _renderTimeAttackRatingWipe), 0x801056E8
 ResultsDrawResult DrawTimeAttackRatingWipe(
     std::span<const Render::TextureRegion> atlas, std::int32_t x,
     std::int32_t y, std::int32_t timer, std::int32_t time,
@@ -173,8 +174,8 @@ ResultsDrawResult DrawTimeAttackRatingWipe(
   return ResultsDrawResult::kDrawn;
 }
 
-// decomp: MENUF.PRG _renderHeaderAndTime (src/MENU/MENUF.PRG/3B8.c:1743),
-// 0x80105790
+// decomp: MENUF.PRG renderHeaderAndTime (src/MENU/MENUF.PRG/3B8.c:1755; was
+// _renderHeaderAndTime), 0x80105790
 ResultsDrawResult DrawTimeAttackTime(
     std::span<const Render::TextureRegion> atlas, std::int32_t x,
     std::int32_t y, std::int32_t timer, std::int32_t time,
@@ -182,8 +183,9 @@ ResultsDrawResult DrawTimeAttackTime(
   return DrawLabelledTime(atlas, x, y, timer, time, false, host);
 }
 
-// decomp: MENUF.PRG _renderHeaderAndIncrementalTime
-// (src/MENU/MENUF.PRG/3B8.c:1762), 0x8010581C
+// decomp: MENUF.PRG renderHeaderAndIncrementalTime
+// (src/MENU/MENUF.PRG/3B8.c:1774; was _renderHeaderAndIncrementalTime),
+// 0x8010581C
 ResultsDrawResult DrawCountingTimeAttackTime(
     std::span<const Render::TextureRegion> atlas, std::int32_t x,
     std::int32_t y, std::int32_t timer, std::int32_t time,
@@ -191,8 +193,8 @@ ResultsDrawResult DrawCountingTimeAttackTime(
   return DrawLabelledTime(atlas, x, y, timer, time, true, host);
 }
 
-// decomp: MENUF.PRG _renderNewRecord (src/MENU/MENUF.PRG/3B8.c:1801),
-// 0x801059B8
+// decomp: MENUF.PRG renderNewRecord (src/MENU/MENUF.PRG/3B8.c:1813; was
+// _renderNewRecord), 0x801059B8
 ResultsDrawResult DrawNewRecord(std::span<const Render::TextureRegion> atlas,
                                 std::int32_t x, std::int32_t y,
                                 std::int32_t timer,
@@ -206,8 +208,8 @@ ResultsDrawResult DrawNewRecord(std::span<const Render::TextureRegion> atlas,
   return ResultsDrawResult::kDrawn;
 }
 
-// decomp: MENUF.PRG _renderAllStoredTimes (src/MENU/MENUF.PRG/3B8.c:1816),
-// 0x801059FC
+// decomp: MENUF.PRG renderAllStoredTimes (src/MENU/MENUF.PRG/3B8.c:1828; was
+// _renderAllStoredTimes), 0x801059FC
 ResultsDrawResult DrawLeaderboard(std::span<const Render::TextureRegion> atlas,
                                   std::int32_t x, std::int32_t y,
                                   std::int32_t timer, std::uint8_t course,
@@ -229,8 +231,8 @@ ResultsDrawResult DrawLeaderboard(std::span<const Render::TextureRegion> atlas,
   return ResultsDrawResult::kDrawn;
 }
 
-// decomp: MENUF.PRG _renderStoredTime (src/MENU/MENUF.PRG/3B8.c:1849),
-// 0x80105B30
+// decomp: MENUF.PRG renderStoredTime (src/MENU/MENUF.PRG/3B8.c:1861; was
+// _renderStoredTime), 0x80105B30
 ResultsDrawResult DrawLeaderboardEntry(
     std::span<const Render::TextureRegion> atlas, std::int32_t x,
     std::int32_t y, std::int32_t slot, std::int32_t timer, std::uint8_t course,

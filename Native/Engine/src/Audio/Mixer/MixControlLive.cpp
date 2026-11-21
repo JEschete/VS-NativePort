@@ -512,7 +512,8 @@ class LiveDispatchHost final : public DispatchHost {
 };
 }  // namespace
 
-// decomp: SLUS_010.40 Sound_Cmd_A4_unk (src/SLUS_010.40/25AC.c:3427)
+// decomp: SLUS_010.40 Sound_Cmd_A4_SetSfxPitchMod (src/SLUS_010.40/25AC.c:3614;
+// was Sound_Cmd_A4_unk)
 void LiveSetSoundEffectPitchScale(VS::Audio::CommandParams* params) {
   if (!HasParams("SetSoundEffectPitchScale", params)) return;
   RunCommand("SetSoundEffectPitchScale",
@@ -522,7 +523,8 @@ void LiveSetSoundEffectPitchScale(VS::Audio::CommandParams* params) {
              });
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_A5_unk (src/SLUS_010.40/25AC.c:3453)
+// decomp: SLUS_010.40 Sound_Cmd_A5_FadeSfxPitchMod
+// (src/SLUS_010.40/25AC.c:3640; was Sound_Cmd_A5_unk)
 void LiveSlideSoundEffectPitchScale(VS::Audio::CommandParams* params) {
   if (!HasParams("SlideSoundEffectPitchScale", params)) return;
   RunCommand("SlideSoundEffectPitchScale", [params](CommandState& state,
@@ -533,7 +535,8 @@ void LiveSlideSoundEffectPitchScale(VS::Audio::CommandParams* params) {
   });
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_AC_unk (src/SLUS_010.40/25AC.c:3481)
+// decomp: SLUS_010.40 Sound_Cmd_AC_SetAllSfxPitchMod
+// (src/SLUS_010.40/25AC.c:3668; was Sound_Cmd_AC_unk)
 void LiveSetWorldSoundEffectPitchScale(VS::Audio::CommandParams* params) {
   if (!HasParams("SetWorldSoundEffectPitchScale", params)) return;
   RunCommand("SetWorldSoundEffectPitchScale",
@@ -542,7 +545,8 @@ void LiveSetWorldSoundEffectPitchScale(VS::Audio::CommandParams* params) {
              });
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_AD_unk (src/SLUS_010.40/25AC.c:3494)
+// decomp: SLUS_010.40 Sound_Cmd_AD_FadeAllSfxPitchMod
+// (src/SLUS_010.40/25AC.c:3681; was Sound_Cmd_AD_unk)
 void LiveSlideWorldSoundEffectPitchScale(VS::Audio::CommandParams* params) {
   if (!HasParams("SlideWorldSoundEffectPitchScale", params)) return;
   RunCommand("SlideWorldSoundEffectPitchScale",
@@ -551,7 +555,8 @@ void LiveSlideWorldSoundEffectPitchScale(VS::Audio::CommandParams* params) {
              });
 }
 
-// decomp: SLUS_010.40 func_8001833C (src/SLUS_010.40/25AC.c:3515)
+// decomp: SLUS_010.40 Sound_Cmd_D0_SetTempoScale (src/SLUS_010.40/25AC.c:3702;
+// was func_8001833C)
 void LiveSetTempoScale(VS::Audio::CommandParams* params) {
   if (!HasParams("SetTempoScale", params)) return;
   Seq::LevelSlide slide = LoadTempoScale();
@@ -559,17 +564,20 @@ void LiveSetTempoScale(VS::Audio::CommandParams* params) {
   StoreTempoScale(slide);
 }
 
-// decomp: SLUS_010.40 func_80018358 (src/SLUS_010.40/25AC.c:3521)
+// decomp: SLUS_010.40 Sound_Cmd_D1_FadeTempoScale (src/SLUS_010.40/25AC.c:3708;
+// was func_80018358)
 void LiveSlideTempoScale(VS::Audio::CommandParams* params) {
   SlideTempo("SlideTempoScale", params, &SlideTempoScale);
 }
 
-// decomp: SLUS_010.40 func_800183C0 (src/SLUS_010.40/25AC.c:3532)
+// decomp: SLUS_010.40 Sound_Cmd_D2_FadeTempoScaleFrom
+// (src/SLUS_010.40/25AC.c:3720; was func_800183C0)
 void LiveSetTempoScaleRamp(VS::Audio::CommandParams* params) {
   SlideTempo("SetTempoScaleRamp", params, &SetTempoScaleRamp);
 }
 
-// decomp: SLUS_010.40 func_80018434 (src/SLUS_010.40/25AC.c:3546)
+// decomp: SLUS_010.40 Sound_Cmd_D4_SetMasterPitchScale
+// (src/SLUS_010.40/25AC.c:3734; was func_80018434)
 void LiveSetMusicPitchScale(VS::Audio::CommandParams* params) {
   if (!HasParams("SetMusicPitchScale", params)) return;
   Seq::LevelSlide slide = LoadMusicPitchScale();
@@ -577,22 +585,26 @@ void LiveSetMusicPitchScale(VS::Audio::CommandParams* params) {
   StoreMusicPitchScale(slide);
 }
 
-// decomp: SLUS_010.40 func_80018450 (src/SLUS_010.40/25AC.c:3552)
+// decomp: SLUS_010.40 Sound_Cmd_D5_FadeMasterPitchScale
+// (src/SLUS_010.40/25AC.c:3740; was func_80018450)
 void LiveSlideMusicPitchScale(VS::Audio::CommandParams* params) {
   SlideMusicPitch("SlideMusicPitchScale", params, &SlideMusicPitchScale);
 }
 
-// decomp: SLUS_010.40 func_800184B8 (src/SLUS_010.40/25AC.c:3568)
+// decomp: SLUS_010.40 Sound_Cmd_D6_FadeMasterPitchScaleFrom
+// (src/SLUS_010.40/25AC.c:3756; was func_800184B8)
 void LiveSetMusicPitchScaleRamp(VS::Audio::CommandParams* params) {
   SlideMusicPitch("SetMusicPitchScaleRamp", params, &SetMusicPitchScaleRamp);
 }
 
-// decomp: SLUS_010.40 func_8001852C (src/SLUS_010.40/25AC.c:3582)
+// decomp: SLUS_010.40 Sound_Cmd_F0_StopMusic (src/SLUS_010.40/25AC.c:3770; was
+// func_8001852C)
 void LiveStopMusicAndCancelReplacement(VS::Audio::CommandParams* /*params*/) {
   RunCommand("StopMusicAndCancelReplacement", &StopMusicAndCancelReplacement);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_11_StopAllMusic (src/SLUS_010.40/25AC.c:3594)
+// decomp: SLUS_010.40 Sound_Cmd_11_StopMusicById (src/SLUS_010.40/25AC.c:3782;
+// was Sound_Cmd_11_StopAllMusic)
 void LiveStopMatchingMusic(VS::Audio::CommandParams* params) {
   if (!HasParams("StopMatchingMusic", params)) return;
   RunCommand("StopMatchingMusic",
@@ -601,24 +613,28 @@ void LiveStopMatchingMusic(VS::Audio::CommandParams* params) {
              });
 }
 
-// decomp: SLUS_010.40 func_80018608 (src/SLUS_010.40/25AC.c:3607)
+// decomp: SLUS_010.40 Sound_Cmd_F1_StopSfx (src/SLUS_010.40/25AC.c:3794; was
+// func_80018608)
 void LiveStopWorldSoundEffects(VS::Audio::CommandParams* /*params*/) {
   RunCommand("StopWorldSoundEffects", [](CommandState& state, ControlHost&) {
     StopWorldSoundEffects(state);
   });
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_80_unk (src/SLUS_010.40/25AC.c:3626)
+// decomp: SLUS_010.40 Sound_Cmd_80_SetModeStereo (src/SLUS_010.40/25AC.c:3813;
+// was Sound_Cmd_80_unk)
 void LiveEnableStereoOutput(VS::Audio::CommandParams* /*params*/) {
   RunCommand("EnableStereoOutput", &EnableStereoOutput);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_81_unk (src/SLUS_010.40/25AC.c:3637)
+// decomp: SLUS_010.40 Sound_Cmd_81_SetModeMono (src/SLUS_010.40/25AC.c:3824;
+// was Sound_Cmd_81_unk)
 void LiveEnableMonoOutput(VS::Audio::CommandParams* /*params*/) {
   RunCommand("EnableMonoOutput", &EnableMonoOutput);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_90_unk (src/SLUS_010.40/25AC.c:3648)
+// decomp: SLUS_010.40 Sound_Cmd_90_SetMutedMusicChannelMask
+// (src/SLUS_010.40/25AC.c:3835; was Sound_Cmd_90_unk)
 void LiveSetMusicMuteMask(VS::Audio::CommandParams* params) {
   if (!HasParams("SetMusicMuteMask", params)) return;
   RunCommand("SetMusicMuteMask", [params](CommandState& state, ControlHost&) {
@@ -626,7 +642,8 @@ void LiveSetMusicMuteMask(VS::Audio::CommandParams* params) {
   });
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_92_unk (src/SLUS_010.40/25AC.c:3660)
+// decomp: SLUS_010.40 Sound_Cmd_92_SetMusicJumpThreshold
+// (src/SLUS_010.40/25AC.c:3847; was Sound_Cmd_92_unk)
 void LiveSetMusicJumpThreshold(VS::Audio::CommandParams* params) {
   if (!HasParams("SetMusicJumpThreshold", params)) return;
   RunCommand("SetMusicJumpThreshold",
@@ -635,24 +652,28 @@ void LiveSetMusicJumpThreshold(VS::Audio::CommandParams* params) {
              });
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_9B_unk (src/SLUS_010.40/25AC.c:3665)
+// decomp: SLUS_010.40 Sound_Cmd_9B_SuspendMusic (src/SLUS_010.40/25AC.c:3852;
+// was Sound_Cmd_9B_unk)
 void LivePauseMusic(VS::Audio::CommandParams* /*params*/) {
   RunCommand("PauseMusic", &PauseMusic);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_9A_unk (src/SLUS_010.40/25AC.c:3698)
+// decomp: SLUS_010.40 Sound_Cmd_9A_RestoreMusic (src/SLUS_010.40/25AC.c:3885;
+// was Sound_Cmd_9A_unk)
 void LiveResumeMusic(VS::Audio::CommandParams* /*params*/) {
   RunCommand("ResumeMusic", [](CommandState& state, ControlHost& host) {
     ResumeMusic(state, host);
   });
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_9D_unk (src/SLUS_010.40/25AC.c:3722)
+// decomp: SLUS_010.40 Sound_Cmd_9D_SuspendSfx (src/SLUS_010.40/25AC.c:3909; was
+// Sound_Cmd_9D_unk)
 void LivePauseWorldSoundEffects(VS::Audio::CommandParams* /*params*/) {
   RunCommand("PauseWorldSoundEffects", &PauseWorldSoundEffects);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_9C_unk (src/SLUS_010.40/25AC.c:3761)
+// decomp: SLUS_010.40 Sound_Cmd_9C_RestoreSfx (src/SLUS_010.40/25AC.c:3948; was
+// Sound_Cmd_9C_unk)
 void LiveResumeWorldSoundEffects(VS::Audio::CommandParams* /*params*/) {
   RunCommand("ResumeWorldSoundEffects",
              [](CommandState& state, ControlHost& host) {
@@ -660,18 +681,19 @@ void LiveResumeWorldSoundEffects(VS::Audio::CommandParams* /*params*/) {
              });
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_11_Nop (src/SLUS_010.40/25AC.c:3804)
+// decomp: SLUS_010.40 Sound_Cmd_11_Nop (src/SLUS_010.40/25AC.c:3991)
 void LiveIgnoreCommand(VS::Audio::CommandParams* /*params*/) {
   IgnoreCommand();
 }
 
-// decomp: SLUS_010.40 Sound_SetReverbMode (src/SLUS_010.40/25AC.c:3806)
+// decomp: SLUS_010.40 Sound_SetReverbMode (src/SLUS_010.40/25AC.c:3993)
 void LiveSetReverbMode(int mode) {
   LiveReverb host;
   SetReverbMode(host, mode);
 }
 
-// decomp: SLUS_010.40 func_80018C30 (src/SLUS_010.40/25AC.c:3818)
+// decomp: SLUS_010.40 Sound_ExecuteSoundVm2Function
+// (src/SLUS_010.40/25AC.c:4005; was func_80018C30)
 unsigned LiveDispatchCommand(unsigned command) {
   LiveDispatchHost host;
   DispatchState state = LoadDispatch();

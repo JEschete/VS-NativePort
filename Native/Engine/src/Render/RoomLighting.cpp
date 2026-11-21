@@ -86,7 +86,7 @@ RoomLightTriangle DecodeRoomLightTriangle(
   return triangle;
 }
 
-// decomp: BATTLE.PRG func_80098C3C (src/BATTLE/BATTLE.PRG/2EA3C.s:1857).
+// decomp: BATTLE.PRG func_80098C3C (src/BATTLE/BATTLE.PRG/2EA3C.s:1760).
 std::optional<RoomLightRgb> InterpolateRoomLightTriangle(
     RoomLightPoint point, const RoomLightTriangle& triangle) {
   const auto& corners = triangle.corners;
@@ -119,7 +119,7 @@ std::optional<RoomLightRgb> InterpolateRoomLightTriangle(
   return RoomLightRgb{channels[0], channels[1], channels[2]};
 }
 
-// decomp: BATTLE.PRG func_80098B38 (src/BATTLE/BATTLE.PRG/2EA3C.s:1782).
+// decomp: BATTLE.PRG func_80098B38 (src/BATTLE/BATTLE.PRG/2EA3C.s:1688).
 RoomLightColor SampleRoomLighting(std::span<const std::byte> lighting,
                                   RoomLightPoint point, RoomLightLayer layer,
                                   RoomLightColor current) {

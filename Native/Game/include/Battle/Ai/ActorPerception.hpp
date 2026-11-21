@@ -134,7 +134,7 @@ class TargetPerceptionWorld {
       const = 0;
 };
 
-// decomp: checkExtent (src/BATTLE/BATTLE.PRG/6FC00.c:646), inlined in
+// decomp: checkExtent (src/BATTLE/BATTLE.PRG/6FC00.c:146), inlined in
 // func_800D87E8.
 // Whether terrain blocks the line from the target to the observer at body
 // height (the target's frame shape, 128 without one).
@@ -142,7 +142,7 @@ class TargetPerceptionWorld {
     const TargetPerceptionWorld& world, const PerceivingObserver& observer,
     int target, Core::Math::Position3 target_position);
 
-// decomp: checkHeight (src/BATTLE/BATTLE.PRG/6FC00.c:660), inlined in
+// decomp: checkHeight (src/BATTLE/BATTLE.PRG/6FC00.c:154), inlined in
 // func_800D87E8.
 // Whether terrain blocks the line at both actors' point heights, taken as
 // magnitudes (64 for a target without a frame shape).
@@ -150,7 +150,7 @@ class TargetPerceptionWorld {
     const TargetPerceptionWorld& world, const PerceivingObserver& observer,
     int target, Core::Math::Position3 target_position);
 
-// decomp: func_800D87E8 (src/BATTLE/BATTLE.PRG/6FC00.c:679).
+// decomp: func_800D87E8 (src/BATTLE/BATTLE.PRG/6FC00.c:162).
 // Refreshes the observer's distance to and relation with one target: line of
 // sight (one height per call, alternating), view cone, activity, the marked
 // tile, occlusion by nearer actors, and hostility decay. False refuses a
@@ -172,7 +172,7 @@ struct PerceptionRoom {
                          const PerceptionRoom&) = default;
 };
 
-// decomp: func_800D8EF4 prologue (src/BATTLE/BATTLE.PRG/6FC00.c:1003).
+// decomp: func_800D8EF4 prologue (src/BATTLE/BATTLE.PRG/6FC00.c:328).
 // Clears the engagement flag and the approach moves and raises the room's
 // readiness level, saturating at 0xFFFE.
 void BeginActorPerception(PerceptionRoom& room);
@@ -310,7 +310,7 @@ class ActorPerceptionWorld {
       PerceivingActor& actor) = 0;
 };
 
-// decomp: func_800D8EF4 loop body (src/BATTLE/BATTLE.PRG/6FC00.c:1009).
+// decomp: func_800D8EF4 loop body (src/BATTLE/BATTLE.PRG/6FC00.c:324-547).
 // One listed actor's frame: command-state gates, the frame-budget check,
 // movement recovery, stall and detour timers on an unchanged tile, the
 // command-change reaction, position and movement history, target

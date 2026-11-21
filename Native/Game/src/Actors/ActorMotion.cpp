@@ -160,7 +160,7 @@ void StepTransitionComponent(std::int16_t& root, std::int16_t& position,
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_8009DC38 (src/BATTLE/BATTLE.PRG/30DB0.c:2304)
+// decomp: BATTLE.PRG func_8009DC38 (src/BATTLE/BATTLE.PRG/30DB0.c:2369)
 void StopActorMotion(ActorMotion& actor) {
   ClearActorMovementModes(actor);
   actor.move_frames = 0;
@@ -169,7 +169,7 @@ void StopActorMotion(ActorMotion& actor) {
   actor.root_motion.y = 0;
 }
 
-// decomp: BATTLE.PRG func_8009DC8C (src/BATTLE/BATTLE.PRG/30DB0.c:2315)
+// decomp: BATTLE.PRG func_8009DC8C (src/BATTLE/BATTLE.PRG/30DB0.c:2380)
 void ClearActorMovementModes(ActorMotion& actor) {
   actor.jump_countdown = 0;
   actor.movement_mode = 0;
@@ -179,7 +179,7 @@ void ClearActorMovementModes(ActorMotion& actor) {
   actor.movement_pending = false;
 }
 
-// decomp: BATTLE.PRG func_8009E180 (src/BATTLE/BATTLE.PRG/30DB0.c:2491)
+// decomp: BATTLE.PRG func_8009E180 (src/BATTLE/BATTLE.PRG/30DB0.c:2557)
 int ActorFacingDeltaToPoint(const ActorMotion& actor,
                             const MotionVector* target) {
   if (target == nullptr) return 0;
@@ -195,14 +195,14 @@ int ActorFacingDeltaToPoint(const ActorMotion& actor,
   return heading;
 }
 
-// decomp: BATTLE.PRG func_800A0ABC (src/BATTLE/BATTLE.PRG/30DB0.c:4015)
+// decomp: BATTLE.PRG func_800A0ABC (src/BATTLE/BATTLE.PRG/30DB0.c:4134)
 void ResetActorRunMomentum(ActorMotion& actor) {
   actor.momentum_distance = 0;
   actor.run_frames = 0;
   actor.is_running = false;
 }
 
-// decomp: BATTLE.PRG func_800A0AFC (src/BATTLE/BATTLE.PRG/30DB0.c:4025)
+// decomp: BATTLE.PRG func_800A0AFC (src/BATTLE/BATTLE.PRG/30DB0.c:4144)
 void SetActorWalkRunSpeeds(ActorMotion& actor, int walk_speed_fixed,
                            int run_speed_fixed) {
   actor.walk_speed = static_cast<std::uint8_t>(walk_speed_fixed / kAngleOne);
@@ -210,7 +210,7 @@ void SetActorWalkRunSpeeds(ActorMotion& actor, int walk_speed_fixed,
   if (walk_speed_fixed >= run_speed_fixed) actor.run_speed = kUnlimitedRunSpeed;
 }
 
-// decomp: BATTLE.PRG func_800A0B5C (src/BATTLE/BATTLE.PRG/30DB0.c:4037)
+// decomp: BATTLE.PRG func_800A0B5C (src/BATTLE/BATTLE.PRG/30DB0.c:4156)
 void SetActorTravelStepCounts(ActorMotion& actor, int move_steps_per_tile,
                               int turn_steps_per_revolution) {
   actor.move_rate =
@@ -219,13 +219,13 @@ void SetActorTravelStepCounts(ActorMotion& actor, int move_steps_per_tile,
       Unsigned16(turn_steps_per_revolution < 0 ? 1 : turn_steps_per_revolution);
 }
 
-// decomp: BATTLE.PRG func_800A0BA0 (src/BATTLE/BATTLE.PRG/30DB0.c:4056)
+// decomp: BATTLE.PRG func_800A0BA0 (src/BATTLE/BATTLE.PRG/30DB0.c:4175)
 TravelStepCounts ActorTravelStepCounts(const ActorMotion& actor) {
   return {.move_steps_per_tile = actor.move_rate,
           .turn_steps_per_revolution = actor.turn_rate};
 }
 
-// decomp: BATTLE.PRG func_800A2FBC (src/BATTLE/BATTLE.PRG/3A1A0.c:239)
+// decomp: BATTLE.PRG func_800A2FBC (src/BATTLE/BATTLE.PRG/3A1A0.c:223)
 void StepActorTransitionDisplacement(ActorMotion& actor) {
   const int frames = actor.transition_frames;
   StepTransitionComponent(actor.root_motion.x, actor.position.x, frames);
@@ -253,8 +253,8 @@ void ClearActorMovementRequest(ActorMotion& actor) {
   actor.request_facing = 0;
 }
 
-// decomp: BATTLE.PRG func_800AC690_getProfile
-// (src/BATTLE/BATTLE.PRG/40564.c:2278)
+// decomp: BATTLE.PRG func_800AC690
+// (src/BATTLE/BATTLE.PRG/40564.c:1981; was func_800AC690_getProfile)
 int ActorJumpAnimationProfile(const ActorMotion& actor) {
   if (actor.action_animation_state != 0) return kActionAnimationProfile;
   if (actor.is_jumping) return kJumpingProfile;
@@ -263,7 +263,8 @@ int ActorJumpAnimationProfile(const ActorMotion& actor) {
   return actor.jump_profile & kJumpProfileMask;
 }
 
-// decomp: BATTLE.PRG func_800A97EC (src/BATTLE/BATTLE.PRG/40564.c:522)
+// decomp: BATTLE.PRG moveActorToTile (src/BATTLE/BATTLE.PRG/40564.c:457; was
+// func_800A97EC)
 void MoveActorToTileAtRate(MotionTerrainHost& terrain, ActorMotion& actor,
                            PackedTile tile, int move_steps_per_tile,
                            int turn_steps_per_revolution) {
@@ -289,7 +290,8 @@ void MoveActorToTileAtRate(MotionTerrainHost& terrain, ActorMotion& actor,
   actor.route_uses_duration = false;
 }
 
-// decomp: BATTLE.PRG func_800A9988 (src/BATTLE/BATTLE.PRG/40564.c:574)
+// decomp: BATTLE.PRG moveActorToCoordinate (src/BATTLE/BATTLE.PRG/40564.c:509;
+// was func_800A9988)
 void MoveActorToPositionAtRate(MotionTerrainHost& terrain, ActorMotion& actor,
                                const MotionVector& target,
                                int move_steps_per_tile,
@@ -336,7 +338,8 @@ void MoveActorToPositionAtRate(MotionTerrainHost& terrain, ActorMotion& actor,
   actor.route_uses_duration = false;
 }
 
-// decomp: BATTLE.PRG func_800A9C54 (src/BATTLE/BATTLE.PRG/40564.c:661)
+// decomp: BATTLE.PRG slideActorToTile (src/BATTLE/BATTLE.PRG/40564.c:596; was
+// func_800A9C54)
 void TranslateActorToTileAtRate(MotionTerrainHost& terrain, ActorMotion& actor,
                                 PackedTile tile, int move_steps_per_tile) {
   const int rate = move_steps_per_tile == kRateFromActor ? actor.move_rate
@@ -345,7 +348,8 @@ void TranslateActorToTileAtRate(MotionTerrainHost& terrain, ActorMotion& actor,
   SetCurrentTile(actor, tile);
 }
 
-// decomp: BATTLE.PRG func_800A9CDC (src/BATTLE/BATTLE.PRG/40564.c:676)
+// decomp: BATTLE.PRG turnActorToFaceTile (src/BATTLE/BATTLE.PRG/40564.c:611;
+// was func_800A9CDC)
 void TurnActorTowardTileAtRate(ActorMotion& actor, PackedTile tile,
                                int turn_steps_per_revolution) {
   const int rate = turn_steps_per_revolution == kRateFromActor
@@ -354,7 +358,7 @@ void TurnActorTowardTileAtRate(ActorMotion& actor, PackedTile tile,
   SetActorTileTurn(actor, tile, kStepsFromDistance, rate);
 }
 
-// decomp: BATTLE.PRG func_800A9D24 (src/BATTLE/BATTLE.PRG/40564.c:687)
+// decomp: BATTLE.PRG func_800A9D24 (src/BATTLE/BATTLE.PRG/40564.c:622)
 void TranslateActorByAtRate(ActorMotion& actor, const MotionVector& translation,
                             int move_steps_per_tile) {
   WithMoveRate(actor, move_steps_per_tile, [&] {
@@ -362,7 +366,8 @@ void TranslateActorByAtRate(ActorMotion& actor, const MotionVector& translation,
   });
 }
 
-// decomp: BATTLE.PRG func_800A9D90 (src/BATTLE/BATTLE.PRG/40564.c:705)
+// decomp: BATTLE.PRG slideActorToCoordinate (src/BATTLE/BATTLE.PRG/40564.c:640;
+// was func_800A9D90)
 void TranslateActorToAtRate(ActorMotion& actor, const MotionVector& target,
                             int move_steps_per_tile) {
   const MotionVector translation = OffsetTo(actor, target);
@@ -371,14 +376,16 @@ void TranslateActorToAtRate(ActorMotion& actor, const MotionVector& target,
   });
 }
 
-// decomp: BATTLE.PRG func_800A9E38 (src/BATTLE/BATTLE.PRG/40564.c:728)
+// decomp: BATTLE.PRG turnActorToRelativeFacing
+// (src/BATTLE/BATTLE.PRG/40564.c:663; was func_800A9E38)
 void TurnActorByAtRate(ActorMotion& actor, std::int16_t yaw_delta,
                        int turn_steps_per_revolution) {
   WithTurnRate(actor, turn_steps_per_revolution,
                [&] { SetActorYawTurn(actor, yaw_delta, kStepsFromDistance); });
 }
 
-// decomp: BATTLE.PRG func_800A9EB4 (src/BATTLE/BATTLE.PRG/40564.c:746)
+// decomp: BATTLE.PRG turnActorToFacing (src/BATTLE/BATTLE.PRG/40564.c:681; was
+// func_800A9EB4)
 void TurnActorToAtRate(ActorMotion& actor, std::int16_t target_yaw,
                        int turn_steps_per_revolution) {
   const std::int16_t delta = WrapShortYaw(Narrow16(target_yaw - actor.facing));
@@ -386,7 +393,7 @@ void TurnActorToAtRate(ActorMotion& actor, std::int16_t target_yaw,
                [&] { SetActorYawTurn(actor, delta, kStepsFromDistance); });
 }
 
-// decomp: BATTLE.PRG func_800A9F64 (src/BATTLE/BATTLE.PRG/40564.c:774)
+// decomp: BATTLE.PRG func_800A9F64 (src/BATTLE/BATTLE.PRG/40564.c:709)
 void RotateActorByAtRate(ActorMotion& actor, const MotionVector& rotation_delta,
                          int turn_steps_per_revolution) {
   WithTurnRate(actor, turn_steps_per_revolution, [&] {
@@ -394,7 +401,7 @@ void RotateActorByAtRate(ActorMotion& actor, const MotionVector& rotation_delta,
   });
 }
 
-// decomp: BATTLE.PRG func_800A9FD0 (src/BATTLE/BATTLE.PRG/40564.c:793)
+// decomp: BATTLE.PRG func_800A9FD0 (src/BATTLE/BATTLE.PRG/40564.c:728)
 void RotateActorToAtRate(ActorMotion& actor,
                          const MotionVector& target_rotation,
                          int turn_steps_per_revolution) {
@@ -406,7 +413,7 @@ void RotateActorToAtRate(ActorMotion& actor,
                [&] { SetActorRotation(actor, delta, kStepsFromDistance); });
 }
 
-// decomp: BATTLE.PRG func_800AA108 (src/BATTLE/BATTLE.PRG/40564.c:842)
+// decomp: BATTLE.PRG func_800AA108 (src/BATTLE/BATTLE.PRG/40564.c:777)
 void MoveActorToTileOverTime(MotionTerrainHost& terrain, ActorMotion& actor,
                              PackedTile tile, int move_steps, int turn_steps) {
   actor.route_move_rate = Unsigned16(move_steps);
@@ -424,7 +431,7 @@ void MoveActorToTileOverTime(MotionTerrainHost& terrain, ActorMotion& actor,
   actor.route_uses_duration = true;
 }
 
-// decomp: BATTLE.PRG func_800AA218 (src/BATTLE/BATTLE.PRG/40564.c:874)
+// decomp: BATTLE.PRG func_800AA218 (src/BATTLE/BATTLE.PRG/40564.c:809)
 void TranslateActorToTileOverTime(MotionTerrainHost& terrain,
                                   ActorMotion& actor, PackedTile tile,
                                   int move_steps) {
@@ -432,7 +439,7 @@ void TranslateActorToTileOverTime(MotionTerrainHost& terrain,
   SetCurrentTile(actor, tile);
 }
 
-// decomp: BATTLE.PRG func_800AA290 (src/BATTLE/BATTLE.PRG/40564.c:886)
+// decomp: BATTLE.PRG func_800AA290 (src/BATTLE/BATTLE.PRG/40564.c:821)
 // The original samples the support height with an unset target height,
 // which the floor-only probe never reads.
 void SetActorTileTranslation(MotionTerrainHost& terrain, ActorMotion& actor,
@@ -465,13 +472,13 @@ void SetActorTileTranslation(MotionTerrainHost& terrain, ActorMotion& actor,
   actor.move_frames = Unsigned16(move_steps);
 }
 
-// decomp: BATTLE.PRG func_800AA454 (src/BATTLE/BATTLE.PRG/40564.c:948)
+// decomp: BATTLE.PRG func_800AA454 (src/BATTLE/BATTLE.PRG/40564.c:883)
 void TurnActorTowardTileOverTime(ActorMotion& actor, PackedTile tile,
                                  int turn_steps) {
   SetActorTileTurn(actor, tile, turn_steps, actor.turn_rate);
 }
 
-// decomp: BATTLE.PRG func_800AA490 (src/BATTLE/BATTLE.PRG/40564.c:953)
+// decomp: BATTLE.PRG func_800AA490 (src/BATTLE/BATTLE.PRG/40564.c:888)
 void SetActorTileTurn(ActorMotion& actor, PackedTile tile, int turn_steps,
                       int turn_steps_per_revolution) {
   const int delta_x = tile.x - actor.current_tile.x;
@@ -501,19 +508,19 @@ void SetActorTileTurn(ActorMotion& actor, PackedTile tile, int turn_steps,
   actor.facing = Narrow16((actor.facing + actor.facing_delta) & kAngleMask);
 }
 
-// decomp: BATTLE.PRG func_800AA600 (src/BATTLE/BATTLE.PRG/40564.c:1016)
+// decomp: BATTLE.PRG func_800AA600 (src/BATTLE/BATTLE.PRG/40564.c:951)
 void SetActorMotion(ActorMotion& actor, const MotionVector& translation,
                     int move_steps) {
   SetActorTranslation(actor, translation, move_steps);
 }
 
-// decomp: BATTLE.PRG func_800AA620 (src/BATTLE/BATTLE.PRG/40564.c:1018)
+// decomp: BATTLE.PRG func_800AA620 (src/BATTLE/BATTLE.PRG/40564.c:953)
 void TranslateActorToOverTime(ActorMotion& actor, const MotionVector& target,
                               int move_steps) {
   SetActorTranslation(actor, OffsetTo(actor, target), move_steps);
 }
 
-// decomp: BATTLE.PRG func_800AA698 (src/BATTLE/BATTLE.PRG/40564.c:1032)
+// decomp: BATTLE.PRG func_800AA698 (src/BATTLE/BATTLE.PRG/40564.c:967)
 void SetActorTranslation(ActorMotion& actor, const MotionVector& translation,
                          int move_steps) {
   actor.root_motion.x = translation.x;
@@ -537,20 +544,20 @@ void SetActorTranslation(ActorMotion& actor, const MotionVector& translation,
       static_cast<std::uint8_t>(actor.position.z / kTileUnits);
 }
 
-// decomp: BATTLE.PRG func_800AA82C (src/BATTLE/BATTLE.PRG/40564.c:1089)
+// decomp: BATTLE.PRG func_800AA82C (src/BATTLE/BATTLE.PRG/40564.c:1024)
 void SetActorYawMotion(ActorMotion& actor, std::int16_t yaw_delta,
                        int turn_steps) {
   SetActorYawTurn(actor, yaw_delta, turn_steps);
 }
 
-// decomp: BATTLE.PRG func_800AA850 (src/BATTLE/BATTLE.PRG/40564.c:1091)
+// decomp: BATTLE.PRG func_800AA850 (src/BATTLE/BATTLE.PRG/40564.c:1026)
 void TurnActorToOverTime(ActorMotion& actor, std::uint16_t target_yaw,
                          int turn_steps) {
   SetActorYawTurn(actor, WrapShortYaw(Narrow16(target_yaw - actor.facing)),
                   turn_steps);
 }
 
-// decomp: BATTLE.PRG func_800AA8D0 (src/BATTLE/BATTLE.PRG/40564.c:1115)
+// decomp: BATTLE.PRG func_800AA8D0 (src/BATTLE/BATTLE.PRG/40564.c:1050)
 void TurnActorToAtAngularSpeed(ActorMotion& actor, std::int16_t target_yaw,
                                int angular_speed) {
   const std::int16_t delta = WrapShortYaw(Narrow16(target_yaw - actor.facing));
@@ -561,7 +568,7 @@ void TurnActorToAtAngularSpeed(ActorMotion& actor, std::int16_t target_yaw,
   SetActorYawTurn(actor, delta, turn_steps);
 }
 
-// decomp: BATTLE.PRG func_800AA984 (src/BATTLE/BATTLE.PRG/40564.c:1149)
+// decomp: BATTLE.PRG func_800AA984 (src/BATTLE/BATTLE.PRG/40564.c:1084)
 void SetActorYawTurn(ActorMotion& actor, std::int16_t yaw_delta,
                      int turn_steps) {
   actor.facing_delta = yaw_delta;
@@ -580,14 +587,14 @@ void SetActorYawTurn(ActorMotion& actor, std::int16_t yaw_delta,
   RecenterYaw(actor);
 }
 
-// decomp: BATTLE.PRG func_800AAA68 (src/BATTLE/BATTLE.PRG/40564.c:1195)
+// decomp: BATTLE.PRG func_800AAA68 (src/BATTLE/BATTLE.PRG/40564.c:1130)
 void SetActorRotationMotion(ActorMotion& actor,
                             const MotionVector& rotation_delta,
                             int turn_steps) {
   SetActorRotation(actor, rotation_delta, turn_steps);
 }
 
-// decomp: BATTLE.PRG func_800AAA88 (src/BATTLE/BATTLE.PRG/40564.c:1197)
+// decomp: BATTLE.PRG func_800AAA88 (src/BATTLE/BATTLE.PRG/40564.c:1132)
 void SetActorRotation(ActorMotion& actor, const MotionVector& rotation_delta,
                       int turn_steps) {
   actor.rotation_step_x = rotation_delta.x;
@@ -616,7 +623,8 @@ void SetActorRotation(ActorMotion& actor, const MotionVector& rotation_delta,
       Narrow16((actor.rotation_z + actor.rotation_step_z) & kAngleMask);
 }
 
-// decomp: BATTLE.PRG func_800AABD0 (src/BATTLE/BATTLE.PRG/40564.c:1244)
+// decomp: BATTLE.PRG setActorScale (src/BATTLE/BATTLE.PRG/40564.c:1179; was
+// func_800AABD0)
 void ScaleActorToOverTime(ActorMotion& actor, const MotionVector& target_scale,
                           int scale_steps) {
   if (scale_steps == 0) {
@@ -637,7 +645,8 @@ void ScaleActorToOverTime(ActorMotion& actor, const MotionVector& target_scale,
   actor.scale_frames = Unsigned16(scale_steps);
 }
 
-// decomp: BATTLE.PRG func_800AC540 (src/BATTLE/BATTLE.PRG/40564.c:2233)
+// decomp: BATTLE.PRG processActorMove (src/BATTLE/BATTLE.PRG/40564.c:1936; was
+// func_800AC540)
 void UpdateActorRoute(ActorRouteHost& host) {
   switch (host.Route().phase) {
     case kRouteTurning: {
@@ -665,14 +674,16 @@ void UpdateActorRoute(ActorRouteHost& host) {
   }
 }
 
-// decomp: BATTLE.PRG func_8007CFF8 (src/BATTLE/BATTLE.PRG/146C.c:9163)
+// decomp: BATTLE.PRG walkActorToCoordinate (src/BATTLE/BATTLE.PRG/146C.c:9129;
+// was func_8007CFF8)
 void BeginScriptedActorPath(ScriptedPathHost& host,
                             const MotionVector& target) {
   host.SetCollisionBypass(kScriptedPathBypass);
   host.SetNavigationOverride(target.x, target.z);
 }
 
-// decomp: BATTLE.PRG func_8007D03C (src/BATTLE/BATTLE.PRG/146C.c:9169)
+// decomp: BATTLE.PRG isActorWalkDone (src/BATTLE/BATTLE.PRG/146C.c:9135; was
+// func_8007D03C)
 bool IsScriptedActorPathFinished(ScriptedPathHost& host) {
   const int status = host.NavigationStatus();
   if (status == static_cast<int>(ScriptedPathStatus::kArrived)) {
@@ -682,7 +693,7 @@ bool IsScriptedActorPathFinished(ScriptedPathHost& host) {
   return status == static_cast<int>(ScriptedPathStatus::kUntracked);
 }
 
-// decomp: BATTLE.PRG func_8007D260 (src/BATTLE/BATTLE.PRG/146C.c:9232)
+// decomp: BATTLE.PRG func_8007D260 (src/BATTLE/BATTLE.PRG/146C.c:9223)
 void ResetActorMovement(std::uint8_t* battle_command_state,
                         ActorMotion* motion) {
   if (battle_command_state != nullptr &&

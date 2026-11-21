@@ -331,25 +331,27 @@ class LiveDispatcherWorld final
 };
 }  // namespace
 
-// decomp: _renderItemCategory (src/MENU/items0.h:46-81).
+// decomp: renderItemCategory (src/MENU/items0.h:46-81; was
+// _renderItemCategory).
 void DrawLiveItemCategoryIcons(int animation_step, int highlight_selected) {
   LiveIconWorld world;
   DrawItemCategoryIcons(world, animation_step, highlight_selected);
 }
 
-// decomp: _armorStatusView (src/MENU/items1.h:464-544).
+// decomp: armorStatusView (src/MENU/items1.h:469-549; was _armorStatusView).
 int UpdateLiveArmorDetails(int item_info) {
   LiveItemWorld world(Category::kArmor);
   return UpdateArmorDetails(armorState, world, Selection(item_info));
 }
 
-// decomp: _gemStatusView (src/MENU/items1.h:554-630).
+// decomp: gemStatusView (src/MENU/items1.h:559-635; was _gemStatusView).
 int UpdateLiveGemDetails(int item_info) {
   LiveItemWorld world(Category::kGem);
   return UpdateGemDetails(gemState, world, Selection(item_info));
 }
 
-// decomp: _itemStatusDispatcher (src/MENU/items1.h:640-688).
+// decomp: itemStatusDispatcher (src/MENU/items1.h:645-693; was
+// _itemStatusDispatcher).
 int UpdateLiveItemDetails(int item_info) {
   LiveDispatcherWorld world;
   return UpdateItemDetails(detailDispatcher, world, DispatchEntry(item_info));

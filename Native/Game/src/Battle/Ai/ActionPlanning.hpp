@@ -19,7 +19,7 @@ inline constexpr std::size_t kTimedStatusFlagWords = 344;
 inline constexpr std::size_t kPassCandidates = 16;
 inline constexpr std::size_t kCandidateExclusionBytes = 256;
 
-// decomp: D_80069BBC (src/BATTLE/BATTLE.PRG/6E4CCShared.h:509)
+// decomp: D_80069BBC (src/BATTLE/BATTLE.PRG/74088.c:103)
 extern std::array<std::uint32_t, kTimedStatusFlagWords> kTimedStatusFlags;
 // decomp: D_800F58E8 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:528)
 extern VS::Battle::ActorStats* planningStatsSnapshot;

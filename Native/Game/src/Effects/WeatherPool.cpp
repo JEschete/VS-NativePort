@@ -62,7 +62,7 @@ void SetSpawnState(WeatherPoolState& state, std::int32_t count,
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_8008E8F8 (146C.c:17445).
+// decomp: BATTLE.PRG func_8008E8F8 (src/BATTLE/BATTLE.PRG/146C.c:17324).
 Field::WeatherParticlesId AllocateWeatherParticles(
     WeatherPoolHost& host, Field::WeatherParticlesId current) {
   if (current != Field::WeatherParticlesId::kNone) {
@@ -71,7 +71,7 @@ Field::WeatherParticlesId AllocateWeatherParticles(
   return host.AllocateParticles(kWeatherParticleBufferBytes);
 }
 
-// decomp: BATTLE.PRG func_8008EA90 (146C.c:17500).
+// decomp: BATTLE.PRG func_8008EA90 (src/BATTLE/BATTLE.PRG/146C.c:17377).
 bool InitializeRoomWeather(WeatherPoolHost& host,
                            std::optional<std::int16_t> room_weather_kind,
                            std::int32_t suppress_rain) {
@@ -83,13 +83,13 @@ bool InitializeRoomWeather(WeatherPoolHost& host,
   return true;
 }
 
-// decomp: BATTLE.PRG func_8008EB04 (146C.c:17525).
+// decomp: BATTLE.PRG func_8008EB04 (src/BATTLE/BATTLE.PRG/146C.c:17402).
 RoomWeatherReport RoomWeatherStateOf(std::uint8_t kind,
                                      std::int16_t intensity) {
   return {.kind = kind, .intensity = intensity};
 }
 
-// decomp: BATTLE.PRG func_80090A1C (146C.c:18200).
+// decomp: BATTLE.PRG func_80090A1C (src/BATTLE/BATTLE.PRG/146C.c:18075).
 WeatherParticle ResetFallingWeatherParticle(
     WeatherPoolHost& host, WeatherParticle particle,
     const std::optional<Field::WeatherArea>& area) {
@@ -110,7 +110,7 @@ WeatherParticle ResetFallingWeatherParticle(
   return particle;
 }
 
-// decomp: BATTLE.PRG func_8008F29C (146C.c:17723).
+// decomp: BATTLE.PRG func_8008F29C (src/BATTLE/BATTLE.PRG/146C.c:17600).
 bool InitializeFallingWeatherParticles(
     WeatherPoolHost& host, WeatherPoolState& state,
     std::span<WeatherParticle> particles,
@@ -124,7 +124,7 @@ bool InitializeFallingWeatherParticles(
   return Fits(particles, count);
 }
 
-// decomp: BATTLE.PRG func_8008F30C (146C.c:17737).
+// decomp: BATTLE.PRG func_8008F30C (src/BATTLE/BATTLE.PRG/146C.c:17614).
 bool InitializeScreenWeatherParticles(WeatherPoolHost& host,
                                       WeatherPoolState& state,
                                       std::span<WeatherParticle> particles,
@@ -143,7 +143,7 @@ bool InitializeScreenWeatherParticles(WeatherPoolHost& host,
   return Fits(particles, count);
 }
 
-// decomp: BATTLE.PRG func_80090B28 (146C.c:18221).
+// decomp: BATTLE.PRG func_80090B28 (src/BATTLE/BATTLE.PRG/146C.c:18096).
 WeatherVelocity WeatherVelocityOf(WeatherPoolHost& host,
                                   const WeatherWind& wind) {
   const std::int32_t azimuth_sine = host.Sine(wind.azimuth);

@@ -11,7 +11,7 @@ struct SVECTOR;
 namespace VS::Battle {
 // decomp: F00731 func_80095C18 (src/BATTLE/BATTLE.PRG/2842C.c:2399).
 void LiveDrawActorMarker(int actor, int kind);
-// decomp: F00733 func_8009627C (src/BATTLE/BATTLE.PRG/2842C.c:2582).
+// decomp: F00733 func_8009627C (src/BATTLE/BATTLE.PRG/2842C.c:2570).
 void LiveDrawActorMarkers();
 // decomp: F00737 func_8009651C (src/BATTLE/BATTLE.PRG/2842C.c:2642).
 void LiveDrawOffscreenActorArrow(VS::Core::Gte::SVECTOR* position,

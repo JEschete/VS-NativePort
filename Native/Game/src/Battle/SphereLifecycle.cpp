@@ -17,13 +17,13 @@ std::uint16_t EncodeSphereEdge(int x0, int y0, int x1, int y1) noexcept {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800C031C (src/BATTLE/BATTLE.PRG/573B8.c:363).
+// decomp: BATTLE.PRG func_800C031C (src/BATTLE/BATTLE.PRG/57B1C.c:14).
 void InitializeSphereState(SphereLifecycleState& state) noexcept {
   state = {};
   state.selected_target = -1;
 }
 
-// decomp: BATTLE.PRG func_800C031C (src/BATTLE/BATTLE.PRG/573B8.c:363).
+// decomp: BATTLE.PRG func_800C031C (src/BATTLE/BATTLE.PRG/57B1C.c:14).
 bool BuildSphereWireEdges(std::span<std::uint16_t> edges) noexcept {
   if (edges.size() < kSphereWireEdgeCount) return false;
 
@@ -71,7 +71,7 @@ bool BuildSphereWireEdges(std::span<std::uint16_t> edges) noexcept {
   return index == kSphereWireEdgeCount;
 }
 
-// decomp: BATTLE.PRG func_800C05EC (src/BATTLE/BATTLE.PRG/573B8.c:444).
+// decomp: BATTLE.PRG func_800C05EC (src/BATTLE/BATTLE.PRG/57B1C.c:95).
 std::optional<SphereVolumeSetResult> SetSphereVolumes(
     SphereLifecycleState& state, const SphereVolume& primary,
     const SphereVolume* secondary, std::uint8_t area_target_count,
@@ -105,29 +105,29 @@ std::optional<SphereVolumeSetResult> SetSphereVolumes(
   return SphereVolumeSetResult::kSecondaryDisabled;
 }
 
-// decomp: BATTLE.PRG func_800C06E0 (src/BATTLE/BATTLE.PRG/573B8.c:475).
+// decomp: BATTLE.PRG func_800C06E0 (src/BATTLE/BATTLE.PRG/57B1C.c:127).
 void ClearPrimarySphereVolume(SphereLifecycleState& state) noexcept {
   state.primary_volume.kind = 0;
 }
 
-// decomp: BATTLE.PRG func_800C0700 (src/BATTLE/BATTLE.PRG/573B8.c:482).
+// decomp: BATTLE.PRG func_800C0700 (src/BATTLE/BATTLE.PRG/57B1C.c:134).
 void SetSecondarySphereVolume(SphereLifecycleState& state,
                               const SphereVolume& secondary) noexcept {
   state.secondary_volume = secondary;
   state.wire_shape = 0;
 }
 
-// decomp: BATTLE.PRG func_800C0738 (src/BATTLE/BATTLE.PRG/573B8.c:488).
+// decomp: BATTLE.PRG func_800C0738 (src/BATTLE/BATTLE.PRG/57B1C.c:140).
 void ClearSecondarySphereVolume(SphereLifecycleState& state) noexcept {
   state.secondary_volume.kind = 0;
 }
 
-// decomp: BATTLE.PRG func_800C16DC (src/BATTLE/BATTLE.PRG/58578.c:470).
+// decomp: BATTLE.PRG func_800C16DC (src/BATTLE/BATTLE.PRG/58578.c:419).
 void ClearSphereTargetCount(SphereLifecycleState& state) noexcept {
   state.target_count = 0;
 }
 
-// decomp: BATTLE.PRG func_800C4734 (src/BATTLE/BATTLE.PRG/5BE50.c:93).
+// decomp: BATTLE.PRG func_800C4734 (src/BATTLE/BATTLE.PRG/58578.c:1099).
 int SphereInteractionMode(const SphereLifecycleState* state,
                           bool override_button) noexcept {
   if (state == nullptr || state->wire_shape != 0) return 0;

@@ -4,8 +4,10 @@
 #include "Effects/Plugins/PluginData.hpp"
 
 namespace VS::Effects::Plg160 {
-// decomp: D_800FB31C (PLG160.BIN/0.c:5; closedRings.h:58)
+// decomp: vs_effect_scytheWind_0_colors (src/EFFECT/closedRings.h:58; was
+// D_800FB31C; src/EFFECT/closedRings.h:58)
 extern plugins::RingPalette tiledRingColorFactors;
-// decomp: D_800FB33C (PLG160.BIN/0.c:7; rings.h:20)
+// decomp: vs_effect_scytheWind_1_colors (src/EFFECT/rings.h:20; was D_800FB33C;
+// src/EFFECT/rings.h:20)
 extern plugins::RingPaletteBytes ringColorFactors;
 }  // namespace VS::Effects::Plg160

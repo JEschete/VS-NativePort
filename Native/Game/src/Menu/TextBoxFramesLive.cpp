@@ -205,7 +205,7 @@ std::int32_t FlipLiveTextBoxShapePoint(std::int32_t packed_shape_point,
                             static_cast<std::uint32_t>(flip_axes)));
 }
 
-// decomp: BATTLE.PRG func_800CD3E4 (src/BATTLE/BATTLE.PRG/5BF94.c:4715).
+// decomp: BATTLE.PRG func_800CD3E4 (src/BATTLE/BATTLE.PRG/5BF94.c:4280).
 void DrawLiveTextBoxFrame(std::int32_t index) {
   try {
     DrawFrame(index);

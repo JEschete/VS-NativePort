@@ -136,25 +136,25 @@ class LiveWorld final : public ContainerItemRowsWorld {
 };
 }  // namespace
 
-// decomp: func_801069B0 (src/MENU/MENUD.PRG/234.c:2061), 801069B0.
+// decomp: func_801069B0 (src/MENU/MENUD.PRG/234.c:2062), 801069B0.
 int FindLivePendingTransfer(int category, int slot) {
   LiveWorld world;
   return FindPendingTransfer({category, slot}, world);
 }
 
-// decomp: func_80106A04 (src/MENU/MENUD.PRG/234.c:2073), 80106A04.
+// decomp: func_80106A04 (src/MENU/MENUD.PRG/234.c:2074), 80106A04.
 void AppendLivePendingTransfer(int category, int slot) {
   LiveWorld world;
   AppendPendingTransfer({category, slot}, world);
 }
 
-// decomp: func_80106A50 (src/MENU/MENUD.PRG/234.c:2088), 80106A50.
+// decomp: func_80106A50 (src/MENU/MENUD.PRG/234.c:2089), 80106A50.
 void RebuildLivePendingTransfers() {
   LiveWorld world;
   RebuildPendingTransfers(world);
 }
 
-// decomp: func_80106C64 (src/MENU/MENUD.PRG/234.c:2145), 80106C64.
+// decomp: func_80106C64 (src/MENU/MENUD.PRG/234.c:2146), 80106C64.
 int BuildLiveItemRows(int category, char** text, int* row_types,
                       char* descriptions) {
   LiveWorld world(text, row_types, descriptions);

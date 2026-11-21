@@ -444,7 +444,8 @@ void PlayCountSounds(bool counting_started, bool count_reached,
 }
 }  // namespace
 
-// decomp: ENDING.PRG _do_updateClearGameStats (src/ENDING/ENDING.PRG/D4.c:1502)
+// decomp: ENDING.PRG do_updateClearGameStats (src/ENDING/ENDING.PRG/D4.c:1560;
+// was _do_updateClearGameStats)
 void CommitClearProgress(ClearProgress& progress,
                          std::span<const std::uint32_t> countable_room_bits,
                          ProgressHost& host) {
@@ -469,14 +470,16 @@ void CommitClearProgress(ClearProgress& progress,
   progress.entry_room = kClearEntryRoom;
 }
 
-// decomp: ENDING.PRG _updateClearGameStats (src/ENDING/ENDING.PRG/D4.c:1549)
+// decomp: ENDING.PRG updateClearGameStats (src/ENDING/ENDING.PRG/D4.c:1613; was
+// _updateClearGameStats)
 void UpdateClearProgress(ClearProgress& progress,
                          std::span<const std::uint32_t> countable_room_bits,
                          ProgressHost& host) {
   CommitClearProgress(progress, countable_room_bits, host);
 }
 
-// decomp: ENDING.PRG _updateTitles (src/ENDING/ENDING.PRG/D4.c:1570)
+// decomp: ENDING.PRG updateTitles (src/ENDING/ENDING.PRG/D4.c:1648; was
+// _updateTitles)
 void AwardClearTitles(ClearProgress& progress,
                       std::span<const std::uint32_t> countable_room_bits) {
   ScoreRecord& score = progress.score;
@@ -505,7 +508,8 @@ void AwardClearTitles(ClearProgress& progress,
   if (flags.chest_key_obtained) score.titles |= kTitleChestKey;
 }
 
-// decomp: ENDING.PRG func_8006BD78 (src/ENDING/ENDING.PRG/D4.c:1677)
+// decomp: ENDING.PRG congratulationsScreen (src/ENDING/ENDING.PRG/D4.c:1774;
+// was func_8006BD78)
 void ShowClearResults(ResultsState& state, ClearProgress& progress,
                       const ResultsTables& tables, ResultsHost& host) {
   state.load_phase = kLoadAtlas;
@@ -524,7 +528,8 @@ void ShowClearResults(ResultsState& state, ClearProgress& progress,
   } while (!is_complete);
 }
 
-// decomp: ENDING.PRG func_8006BE04 (src/ENDING/ENDING.PRG/D4.c:1698)
+// decomp: ENDING.PRG initCongratulationsScreen
+// (src/ENDING/ENDING.PRG/D4.c:1803; was func_8006BE04)
 bool LoadClearResultsStep(ResultsState& state, ClearProgress& progress,
                           const ResultsTables& tables, ResultsHost& host) {
   switch (state.load_phase) {
@@ -554,8 +559,8 @@ bool LoadClearResultsStep(ResultsState& state, ClearProgress& progress,
   }
 }
 
-// decomp: ENDING.PRG _renderCongratulationsScreen
-// (src/ENDING/ENDING.PRG/D4.c:1844)
+// decomp: ENDING.PRG renderCongratulationsScreen
+// (src/ENDING/ENDING.PRG/D4.c:1958; was _renderCongratulationsScreen)
 bool DrawClearResults(ResultsState& state, const ResultsTables& tables,
                       ResultsHost& host) {
   if (!state.is_leaving) {
@@ -592,7 +597,8 @@ bool DrawClearResults(ResultsState& state, const ResultsTables& tables,
   return false;
 }
 
-// decomp: ENDING.PRG func_8006C3CC (src/ENDING/ENDING.PRG/D4.c:1887)
+// decomp: ENDING.PRG fadeIn (src/ENDING/ENDING.PRG/D4.c:2013; was
+// func_8006C3CC)
 void DrawRankBackground(int fade_frame, DisplayHost& host) {
   const int fade = ClampFade(fade_frame);
   if (fade <= 0) return;
@@ -616,7 +622,8 @@ void DrawRankBackground(int fade_frame, DisplayHost& host) {
   }
 }
 
-// decomp: ENDING.PRG _renderCongratulations (src/ENDING/ENDING.PRG/D4.c:1925)
+// decomp: ENDING.PRG renderCongratulations (src/ENDING/ENDING.PRG/D4.c:2171;
+// was _renderCongratulations)
 void DrawCongratulations(ScreenPoint origin, int fade_frame,
                          const ResultsTables& tables, ResultsHost& host) {
   const int fade = ClampFade(fade_frame);
@@ -634,7 +641,8 @@ void DrawCongratulations(ScreenPoint origin, int fade_frame,
                {x + first_width, origin.y}, {colors[1], colors[2]});
 }
 
-// decomp: ENDING.PRG _renderScore (src/ENDING/ENDING.PRG/D4.c:1946)
+// decomp: ENDING.PRG renderScore (src/ENDING/ENDING.PRG/D4.c:2197; was
+// _renderScore)
 void DrawScore(ScreenPoint origin, int fade_frame, const ResultsState& state,
                const ResultsTables& tables, ResultsHost& host) {
   const int fade = ClampFade(fade_frame);
@@ -646,7 +654,8 @@ void DrawScore(ScreenPoint origin, int fade_frame, const ResultsState& state,
              painter);
 }
 
-// decomp: ENDING.PRG _renderIncrementalScore (src/ENDING/ENDING.PRG/D4.c:1996)
+// decomp: ENDING.PRG renderIncrementalScore (src/ENDING/ENDING.PRG/D4.c:2247;
+// was _renderIncrementalScore)
 void DrawCountingScore(ScreenPoint origin, int animation_frame,
                        ResultsState& state, const ResultsTables& tables,
                        ResultsHost& host) {
@@ -673,7 +682,8 @@ void DrawCountingScore(ScreenPoint origin, int animation_frame,
              painter);
 }
 
-// decomp: ENDING.PRG _renderMapCompletion (src/ENDING/ENDING.PRG/D4.c:2070)
+// decomp: ENDING.PRG renderMapCompletion (src/ENDING/ENDING.PRG/D4.c:2319; was
+// _renderMapCompletion)
 void DrawMapCompletion(ScreenPoint origin, int fade_frame,
                        const ResultsState& state, const ResultsTables& tables,
                        ResultsHost& host) {
@@ -685,8 +695,8 @@ void DrawMapCompletion(ScreenPoint origin, int fade_frame,
              0, painter);
 }
 
-// decomp: ENDING.PRG _renderIncrementalMapCompletion
-// (src/ENDING/ENDING.PRG/D4.c:2113)
+// decomp: ENDING.PRG renderIncrementalMapCompletion
+// (src/ENDING/ENDING.PRG/D4.c:2363; was _renderIncrementalMapCompletion)
 void DrawCountingMapCompletion(ScreenPoint origin, int fade_frame,
                                ResultsState& state, const ResultsTables& tables,
                                ResultsHost& host) {
@@ -717,8 +727,8 @@ void DrawCountingMapCompletion(ScreenPoint origin, int fade_frame,
              wipe_edge, painter);
 }
 
-// decomp: ENDING.PRG _renderRiskbreakerRankHeader
-// (src/ENDING/ENDING.PRG/D4.c:2181)
+// decomp: ENDING.PRG renderRiskbreakerRankHeader
+// (src/ENDING/ENDING.PRG/D4.c:2430; was _renderRiskbreakerRankHeader)
 void DrawRiskbreakerRankHeading(ScreenPoint origin, int timer,
                                 const ResultsTables& tables,
                                 ResultsHost& host) {
@@ -730,7 +740,8 @@ void DrawRiskbreakerRankHeading(ScreenPoint origin, int timer,
                Faded(tables.tints.rank_heading, fade));
 }
 
-// decomp: ENDING.PRG _renderRiskbreakerRank (src/ENDING/ENDING.PRG/D4.c:2197)
+// decomp: ENDING.PRG renderRiskbreakerRank (src/ENDING/ENDING.PRG/D4.c:2449;
+// was _renderRiskbreakerRank)
 void DrawRiskbreakerRank(ScreenPoint origin, int timer,
                          const ResultsState& state, const ResultsTables& tables,
                          ResultsHost& host) {
@@ -760,7 +771,8 @@ void DrawRiskbreakerRank(ScreenPoint origin, int timer,
   }
 }
 
-// decomp: ENDING.PRG _determineRank (src/ENDING/ENDING.PRG/D4.c:2255)
+// decomp: ENDING.PRG determineRank (src/ENDING/ENDING.PRG/D4.c:2514; was
+// _determineRank)
 void DetermineRiskbreakerRank(ResultsState& state, const ScoreRecord& score,
                               const ResultsTables& tables) {
   const int titles = std::popcount(score.titles & kRankedTitleMask);
@@ -781,7 +793,8 @@ void DetermineRiskbreakerRank(ResultsState& state, const ScoreRecord& score,
   }
 }
 
-// decomp: ENDING.PRG _updateScore (src/ENDING/ENDING.PRG/D4.c:2277)
+// decomp: ENDING.PRG updateScore (src/ENDING/ENDING.PRG/D4.c:2544; was
+// _updateScore)
 void CalculateClearScore(ResultsState& state, const ScoreRecord& score) {
   std::uint32_t total = 0;
   for (std::size_t index = 0; index < kEnemyClassCount; ++index) {

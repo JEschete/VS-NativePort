@@ -296,15 +296,15 @@ void StoreRating(CubePuzzleRating rating) {
 }
 }  // namespace
 
-// decomp: MENUF.PRG _pulseCubePuzzleEnd (src/MENU/MENUF.PRG/3B8.c:1294),
-// 0x80104A50
+// decomp: MENUF.PRG pulseCubePuzzleEnd (src/MENU/MENUF.PRG/3B8.c:1307; was
+// _pulseCubePuzzleEnd), 0x80104A50
 void LivePulseCubePuzzleClut(int blend_weight) {
   LiveClutTarget target;
   PulseCubePuzzleClut(LiveClut(), blend_weight, target);
 }
 
-// decomp: MENUF.PRG _initCubePuzzleStart (src/MENU/MENUF.PRG/3B8.c:2260),
-// 0x80107A8C
+// decomp: MENUF.PRG initCubePuzzleStart (src/MENU/MENUF.PRG/3B8.c:2268; was
+// _initCubePuzzleStart), 0x80107A8C
 int LiveInitializeCubePuzzleStart() {
   LiveCubePuzzleLoad host("start", iqLoad, DiscFileFor(DisFile::kIq));
   CubePuzzleScreen screen = LiveScreen();
@@ -316,8 +316,8 @@ int LiveInitializeCubePuzzleStart() {
   return Finished(load);
 }
 
-// decomp: MENUF.PRG _initCubePuzzleEnd (src/MENU/MENUF.PRG/3B8.c:2351),
-// 0x80107D4C
+// decomp: MENUF.PRG initCubePuzzleEnd (src/MENU/MENUF.PRG/3B8.c:2359; was
+// _initCubePuzzleEnd), 0x80107D4C
 int LiveInitializeCubePuzzleResults() {
   LiveCubePuzzleLoad host("results", iqLoad, DiscFileFor(DisFile::kIq));
   CubePuzzleScreen screen = LiveScreen();
@@ -340,8 +340,8 @@ int LiveInitializeCubePuzzleResults() {
   return Finished(load);
 }
 
-// decomp: MENUF.PRG _initCubePuzzleQuit (src/MENU/MENUF.PRG/3B8.c:2363),
-// 0x80107D98
+// decomp: MENUF.PRG initCubePuzzleQuit (src/MENU/MENUF.PRG/3B8.c:2371; was
+// _initCubePuzzleQuit), 0x80107D98
 int LiveInitializeCubePuzzleQuit() {
   LiveCubePuzzleLoad host("quit", escLoad, DiscFileFor(DisFile::kEsc));
   CubePuzzleScreen screen = LiveScreen();
@@ -351,8 +351,8 @@ int LiveInitializeCubePuzzleQuit() {
   return Finished(load);
 }
 
-// decomp: MENUF.PRG _renderCubePuzzleStart (src/MENU/MENUF.PRG/3B8.c:2432),
-// 0x80107FC0
+// decomp: MENUF.PRG renderCubePuzzleStart (src/MENU/MENUF.PRG/3B8.c:2440; was
+// _renderCubePuzzleStart), 0x80107FC0
 int LiveUpdateCubePuzzleStart() {
   LiveCubePuzzleScreen host;
   CubePuzzleScreen screen = LiveScreen();
@@ -362,8 +362,8 @@ int LiveUpdateCubePuzzleStart() {
   return Finished(step);
 }
 
-// decomp: MENUF.PRG _renderCubePuzzleEnd (src/MENU/MENUF.PRG/3B8.c:2477),
-// 0x801080E4
+// decomp: MENUF.PRG renderCubePuzzleEnd (src/MENU/MENUF.PRG/3B8.c:2485; was
+// _renderCubePuzzleEnd), 0x801080E4
 int LiveUpdateCubePuzzleResults() {
   LiveCubePuzzleScreen host;
   CubePuzzleScreen screen = LiveScreen();
@@ -379,8 +379,8 @@ int LiveUpdateCubePuzzleResults() {
   return Finished(step);
 }
 
-// decomp: MENUF.PRG _renderCubePuzzleQuit (src/MENU/MENUF.PRG/3B8.c:2566),
-// 0x801083AC
+// decomp: MENUF.PRG renderCubePuzzleQuit (src/MENU/MENUF.PRG/3B8.c:2574; was
+// _renderCubePuzzleQuit), 0x801083AC
 int LiveUpdateCubePuzzleQuit() {
   LiveCubePuzzleScreen host;
   CubePuzzleScreen screen = LiveScreen();

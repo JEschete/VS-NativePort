@@ -35,7 +35,7 @@ struct TimelineKeyAdvance {
                          const TimelineKeyAdvance&) = default;
 };
 
-// decomp: func_800D5780 (src/BATTLE/BATTLE.PRG/5BF94.c:7933): nullopt once the
+// decomp: func_800D5780 (src/BATTLE/BATTLE.PRG/5BF94.c:6927): nullopt once the
 // track has no more keys.
 [[nodiscard]] std::optional<TimelineKeyAdvance> AdvanceTimelineKey(
     std::int16_t key_index, std::uint8_t key_count, std::uint8_t kind);
@@ -50,13 +50,13 @@ struct ParticleKeyTiming {
                          const ParticleKeyTiming&) = default;
 };
 
-// decomp: func_800D5700 (src/BATTLE/BATTLE.PRG/5BF94.c:7920)
+// decomp: func_800D5700 (src/BATTLE/BATTLE.PRG/5BF94.c:6914)
 [[nodiscard]] ParticleKeyTiming ParticleKeyTimingOf(std::uint32_t key);
 
 // The frames a segmented effect curve lasts (LiveSegmentedEffectCurveDuration).
 using CurveDuration = std::function<auto(std::uint8_t curve)->std::int32_t>;
 
-// decomp: func_800D5738 (src/BATTLE/BATTLE.PRG/5BF94.c:7927): a camera shake
+// decomp: func_800D5738 (src/BATTLE/BATTLE.PRG/5BF94.c:6921): a camera shake
 // key lasts as long as the curve in bits 4-8 of its second word; the timer
 // keeps the duration's low 16 bits.
 [[nodiscard]] std::int16_t ShakeKeyTimer(std::uint32_t parameters,
@@ -115,28 +115,28 @@ class ColourTrackHost {
 // then shifts the colours it names and advances the track: false once the
 // track has no more keys. Only visible actors are shifted.
 
-// decomp: func_800D5F8C (src/BATTLE/BATTLE.PRG/5BF94.c:8128): the emitter
+// decomp: func_800D5F8C (src/BATTLE/BATTLE.PRG/5BF94.c:7122): the emitter
 // actor's colours.
 [[nodiscard]] bool TickSourceActorColourTrack(const ColourKey& key,
                                               std::int16_t timeline_frame,
                                               const CommandEndpoint& emit_from,
                                               ColourTrackHost& host);
-// decomp: func_800D6048 (src/BATTLE/BATTLE.PRG/5BF94.c:8144): every action
+// decomp: func_800D6048 (src/BATTLE/BATTLE.PRG/5BF94.c:7138): every action
 // target actor's colours when `all_targets`, otherwise the receiver's.
 [[nodiscard]] bool TickTargetActorColourTrack(
     const ColourKey& key, std::int16_t timeline_frame,
     std::span<const CommandEndpoint> action_targets,
     const CommandEndpoint& emit_to, bool all_targets, ColourTrackHost& host);
-// decomp: func_800D61AC (src/BATTLE/BATTLE.PRG/5BF94.c:8172): the colours of
+// decomp: func_800D61AC (src/BATTLE/BATTLE.PRG/5BF94.c:7166): the colours of
 // the action's other actors.
 [[nodiscard]] bool TickOtherActorColourTrack(
     const ColourKey& key, std::int16_t timeline_frame,
     std::span<const std::uint8_t> other_actors, ColourTrackHost& host);
-// decomp: func_800D6298 (src/BATTLE/BATTLE.PRG/5BF94.c:8189)
+// decomp: func_800D6298 (src/BATTLE/BATTLE.PRG/5BF94.c:7183)
 [[nodiscard]] bool TickSceneColourTrack(const ColourKey& key,
                                         std::int16_t timeline_frame,
                                         ColourTrackHost& host);
-// decomp: func_800D6310 (src/BATTLE/BATTLE.PRG/5BF94.c:8201)
+// decomp: func_800D6310 (src/BATTLE/BATTLE.PRG/5BF94.c:7195)
 [[nodiscard]] bool TickBackgroundColourTrack(const ColourKey& key,
                                              std::int16_t timeline_frame,
                                              ColourTrackHost& host);

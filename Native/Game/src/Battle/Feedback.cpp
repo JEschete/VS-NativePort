@@ -15,7 +15,7 @@ using Render::PackScreenWord;
 
 constexpr std::uint32_t kUvVShift = 8;
 
-// decomp: vs_getUV (src/include/gpu.h:112)
+// decomp: vs_getUV (src/include/gpu.h:116)
 constexpr std::uint16_t PackUv(std::uint32_t u, std::uint32_t v) noexcept {
   return static_cast<std::uint16_t>(u | (v << kUvVShift));
 }

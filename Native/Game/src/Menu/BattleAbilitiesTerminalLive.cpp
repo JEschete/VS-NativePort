@@ -379,7 +379,7 @@ class LiveScreenHost final : public AbilityScreenHost {
 };
 }  // namespace
 
-// decomp binding: _mapAbility (src/MENU/MENU2.PRG/64.c:166).
+// decomp binding: mapAbility (src/MENU/MENU2.PRG/64.c:175; was _mapAbility).
 void LiveToggleButtonAssignment(int type, int button, int ability_index) {
   if ((type != static_cast<int>(AbilityMenuType::kChain) &&
        type != static_cast<int>(AbilityMenuType::kDefense)) ||
@@ -392,7 +392,7 @@ void LiveToggleButtonAssignment(int type, int button, int ability_index) {
                          static_cast<AssignmentButton>(button), ability_index);
 }
 
-// decomp binding: _abilityMenu (src/MENU/MENU2.PRG/64.c:217).
+// decomp binding: abilityMenu (src/MENU/MENU2.PRG/64.c:226; was _abilityMenu).
 int LiveUpdateAssignments() {
   AbilityRowsState rows{
       .count = menuAbilityCount,
@@ -407,26 +407,28 @@ int LiveUpdateAssignments() {
   return result;
 }
 
-// decomp binding: _chainAbilityMenu (src/MENU/MENU2.PRG/64.c:492).
+// decomp binding: chainAbilityMenu (src/MENU/MENU2.PRG/64.c:501; was
+// _chainAbilityMenu).
 int LiveUpdateChainAbilityMenu(int initialize) {
   LiveListHost host;
   return UpdateChainAbilityMenu(chainAbilityList, host, initialize != 0);
 }
 
-// decomp binding: _defenseAbilityMenu (src/MENU/MENU2.PRG/64.c:553).
+// decomp binding: defenseAbilityMenu (src/MENU/MENU2.PRG/64.c:562; was
+// _defenseAbilityMenu).
 int LiveUpdateDefenseAbilityMenu(int initialize) {
   LiveListHost host;
   return UpdateDefenseAbilityMenu(defenseAbilityList, host, initialize != 0);
 }
 
-// decomp binding: _setNextAbilityUnlockPointsRemaining
-// (src/MENU/MENU2.PRG/64.c:612).
+// decomp binding: setNextAbilityUnlockPointsRemaining
+// (src/MENU/MENU2.PRG/64.c:621; was _setNextAbilityUnlockPointsRemaining).
 void LiveDrawNextUnlockPoints(int x_offset) {
   LivePointsHost host;
   DrawNextUnlockPoints(x_offset, host);
 }
 
-// decomp binding: vs_menu2_exec (src/MENU/MENU2.PRG/64.c:656).
+// decomp binding: vs_menu2_exec (src/MENU/MENU2.PRG/64.c:665).
 int LiveUpdateAbilityScreen(std::uint8_t* phase) {
   if (phase == nullptr) {
     Refuse("ability screen has no state byte");

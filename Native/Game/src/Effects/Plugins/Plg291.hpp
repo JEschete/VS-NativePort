@@ -6,8 +6,10 @@
 #include "Effects/Plugins/PluginData.hpp"
 
 namespace VS::Effects::Plg291 {
-// decomp: D_800FD4D8 (PLG291.BIN/F8.c:5; trailEffect.h:70)
+// decomp: vs_effect_plg291_0_origin_state (src/EFFECT/trailEffect.h:70; was
+// D_800FD4D8; src/EFFECT/trailEffect.h:70)
 extern std::int32_t trailEmissionCounter;
-// decomp: D_800FD4DC (PLG291.BIN/F8.c:10; closedRings.h:58)
+// decomp: vs_effect_plg291_2_colors (src/EFFECT/closedRings.h:58; was
+// D_800FD4DC; src/EFFECT/closedRings.h:58)
 extern plugins::RingPalette closedRingColorFactors;
 }  // namespace VS::Effects::Plg291

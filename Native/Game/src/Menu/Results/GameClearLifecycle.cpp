@@ -358,7 +358,7 @@ void StopReel(GameClearScreen& screen, GameClearScreenHost& host) {
 }
 }  // namespace
 
-// decomp: _addHealBonus, src/MENU/MENUF.PRG/3B8.c:2865.
+// decomp: addHealBonus, src/MENU/MENUF.PRG/3B8.c:2873; was _addHealBonus.
 HealingScoreRecord ApplyHealingScoreBonus(HealingScoreRecord record) noexcept {
   record.misc_score =
       std::min(record.misc_score + kHealingBonus -
@@ -368,7 +368,7 @@ HealingScoreRecord ApplyHealingScoreBonus(HealingScoreRecord record) noexcept {
   return record;
 }
 
-// decomp: func_80103748, src/MENU/MENUF.PRG/3B8.c:436.
+// decomp: func_80103748, src/MENU/MENUF.PRG/3B8.c:450.
 void QueueResultsMusic(std::uint32_t current_music, ResultsMusicHost& host) {
   const bool boss = current_music - kBossMusicFirst < kBossMusicCount ||
                     current_music - kLateBossMusicFirst < kLateBossMusicCount;
@@ -376,7 +376,7 @@ void QueueResultsMusic(std::uint32_t current_music, ResultsMusicHost& host) {
                      kMusicSlot);
 }
 
-// decomp: _renderStatWheel, src/MENU/MENUF.PRG/3B8.c:1996.
+// decomp: renderStatWheel, src/MENU/MENUF.PRG/3B8.c:2008; was _renderStatWheel.
 ResultsDrawResult DrawBonusReel(const BonusReelScene& scene,
                                 ResultsPoint origin, std::int32_t timer,
                                 std::int32_t screen_state,
@@ -417,7 +417,8 @@ ResultsDrawResult DrawBonusReel(const BonusReelScene& scene,
   return full ? ResultsDrawResult::kFull : ResultsDrawResult::kDrawn;
 }
 
-// decomp: _renderAnimatedStatWheel, src/MENU/MENUF.PRG/3B8.c:2168.
+// decomp: renderAnimatedStatWheel, src/MENU/MENUF.PRG/3B8.c:2179; was
+// _renderAnimatedStatWheel.
 ResultsDrawResult DrawBonusReelTexture(
     std::span<const Render::TextureRegion> atlas, ResultsPoint origin,
     std::int32_t texture_index, ResultsDrawTarget& target) {
@@ -437,7 +438,8 @@ ResultsDrawResult DrawBonusReelTexture(
   return full ? ResultsDrawResult::kFull : ResultsDrawResult::kDrawn;
 }
 
-// decomp: _initCongratulationsScreen, src/MENU/MENUF.PRG/3B8.c:118.
+// decomp: initCongratulationsScreen, src/MENU/MENUF.PRG/3B8.c:132; was
+// _initCongratulationsScreen.
 GameClearStep InitializeGameClear(GameClearState& game,
                                   GameClearInitHost& host) {
   if (game.init_phase < 0 || game.init_phase > 2) {
@@ -478,7 +480,8 @@ GameClearStep InitializeGameClear(GameClearState& game,
   return GameClearStep::kComplete;
 }
 
-// decomp: _renderCongratulationsScreen, src/MENU/MENUF.PRG/3B8.c:755.
+// decomp: renderCongratulationsScreen, src/MENU/MENUF.PRG/3B8.c:769; was
+// _renderCongratulationsScreen.
 GameClearStep UpdateGameClear(GameClearScreen& screen,
                               std::span<const BonusReel> reels, bool confirm,
                               GameClearScreenHost& host) {

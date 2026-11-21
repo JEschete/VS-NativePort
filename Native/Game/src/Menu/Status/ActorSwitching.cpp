@@ -192,7 +192,8 @@ void DrawUnknownValues(VitalsHost& host, std::int32_t& y) {
 }
 }  // namespace
 
-// decomp: MENU4.PRG _initEquipmentScreen (120.c:528).
+// decomp: MENU4.PRG initEquipmentScreen (src/MENU/MENU4.PRG/120.c:532; was
+// _initEquipmentScreen).
 void BeginVitalsTransition(VitalsPanelState& state, std::int32_t actor,
                            VitalsHost& host) {
   if (actor == 0) {
@@ -207,7 +208,8 @@ void BeginVitalsTransition(VitalsPanelState& state, std::int32_t actor,
   state.shown_actor = static_cast<std::uint8_t>(actor);
 }
 
-// decomp: MENU4.PRG _getNextValidActor (120.c:548).
+// decomp: MENU4.PRG getNextValidActor (src/MENU/MENU4.PRG/120.c:552; was
+// _getNextValidActor).
 std::optional<std::int32_t> FindNextInspectableActor(
     InspectableActorRoster& roster, std::int32_t current, std::int32_t step) {
   // After the first probe the candidate is one of 15 slots, so 15 probes
@@ -225,7 +227,8 @@ std::optional<std::int32_t> FindNextInspectableActor(
   return std::nullopt;
 }
 
-// decomp: MENU4.PRG _switchCurrentActor (120.c:579).
+// decomp: MENU4.PRG switchCurrentActor (src/MENU/MENU4.PRG/120.c:583; was
+// _switchCurrentActor).
 bool AnimateActorSwitch(ActorSwitchState& state, std::int32_t request,
                         ActorSwitchHost& host) {
   namespace phase = actor_switch_phase;
@@ -284,7 +287,8 @@ bool AnimateActorSwitch(ActorSwitchState& state, std::int32_t request,
   }
 }
 
-// decomp: MENU4.PRG _renderUnknownValue (120.c:692).
+// decomp: MENU4.PRG renderUnknownValue (src/MENU/MENU4.PRG/120.c:696; was
+// _renderUnknownValue).
 void DrawUnanalyzedValue(VitalsHost& host, std::int32_t xy, bool with_max) {
   if (with_max) {
     for (int digit = 0; digit < kUnknownDigits; ++digit) {
@@ -307,7 +311,8 @@ void DrawUnanalyzedValue(VitalsHost& host, std::int32_t xy, bool with_max) {
   }
 }
 
-// decomp: MENU4.PRG _renderStatBar (120.c:721).
+// decomp: MENU4.PRG renderStatBar (src/MENU/MENU4.PRG/120.c:725; was
+// _renderStatBar).
 void DrawVitalBar(VitalsHost& host, std::int32_t color_index,
                   std::int32_t current, std::int32_t max, std::int32_t xy) {
   if (max == 0) {
@@ -323,7 +328,8 @@ void DrawVitalBar(VitalsHost& host, std::int32_t color_index,
   host.DrawGauge(color_index & kColorMask, fill, xy);
 }
 
-// decomp: MENU4.PRG _renderBasicStats (120.c:741).
+// decomp: MENU4.PRG renderBasicStats (src/MENU/MENU4.PRG/120.c:745; was
+// _renderBasicStats).
 bool DrawVitals(VitalsPanelState& state, const VitalsFrame& frame,
                 VitalsHost& host) {
   if (!frame.selected.has_value()) return false;
@@ -359,7 +365,8 @@ bool DrawVitals(VitalsPanelState& state, const VitalsFrame& frame,
   return true;
 }
 
-// decomp: MENU4.PRG _getLimbCount (120.c:1114).
+// decomp: MENU4.PRG getLimbCount (src/MENU/MENU4.PRG/120.c:1117; was
+// _getLimbCount).
 std::int32_t LimbCount(std::span<const std::uint8_t> limb_name_indices) {
   const std::size_t limit =
       std::min(limb_name_indices.size(), kStatusLimbSlots);
@@ -368,7 +375,8 @@ std::int32_t LimbCount(std::span<const std::uint8_t> limb_name_indices) {
   return static_cast<std::int32_t>(unnamed - named.begin());
 }
 
-// decomp: MENU4.PRG _getEquipmentListRowCount (120.c:1132).
+// decomp: MENU4.PRG getEquipmentListRowCount (src/MENU/MENU4.PRG/120.c:1135;
+// was _getEquipmentListRowCount).
 std::int32_t EquipmentRowCount(std::span<const std::uint8_t> limb_name_indices,
                                std::uint16_t accessory_id) {
   constexpr std::int32_t kWeaponAndShieldRows = 2;

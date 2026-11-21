@@ -99,8 +99,8 @@ void Refuse(std::string_view call, std::string_view reason) {
 
 class LiveTrailSegmentHost final : public TrailSegmentHost {
  public:
-  // decomp: 5BF94.c:4903 (RotAverage4 of the segment's corners; the
-  // interpolation and flag outputs were never read).
+  // decomp: src/BATTLE/BATTLE.PRG/5BF94.c:4903 (RotAverage4 of the segment's
+  // corners; the interpolation and flag outputs were never read).
   TrailProjection Project(
       const std::array<TrailPoint, kTrailCorners>& corners) override {
     std::array<SVECTOR, kTrailCorners> vertices{};
@@ -125,9 +125,9 @@ class LiveTrailSegmentHost final : public TrailSegmentHost {
   std::uint32_t DrawBuffer() override {
     return static_cast<std::uint32_t>(VS::Render::frameBuf) & 1U;
   }
-  // decomp: 5BF94.c:4931 and 4954 (addPrim at the segment's depth). The
-  // original wrote past the primitive buffer when it was full; a quad
-  // without room or outside the scene table is dropped here.
+  // decomp: src/BATTLE/BATTLE.PRG/5BF94.c:4931 and 4954 (addPrim at the
+  // segment's depth). The original wrote past the primitive buffer when it was
+  // full; a quad without room or outside the scene table is dropped here.
   void Submit(const RingQuad& quad, std::uint8_t code,
               std::int32_t depth) override {
     std::uint32_t* const entry =
@@ -208,8 +208,8 @@ class LiveBoneTrailHost final : public BoneTrailHost {
     }
     slot_->renderer_state = nullptr;
   }
-  // decomp: 5BF94.c:4973-4974 (func_800A1AF8; a refused bone leaves the
-  // sample as it was).
+  // decomp: src/BATTLE/BATTLE.PRG/5BF94.c:4973-4974 (func_800A1AF8; a refused
+  // bone leaves the sample as it was).
   void SampleBone(std::uint8_t actor, std::uint8_t bone,
                   Actors::BoneEndpoint endpoint, TrailPoint& point) override {
     SVECTOR position = VectorOf(point);
@@ -254,7 +254,8 @@ class LiveBoneTrailChains final : public BoneTrailChains {
   }
 };
 
-// decomp: 5BF94.c:5670-5678 (the request on the stack, then func_800CF3F8).
+// decomp: src/BATTLE/BATTLE.PRG/5BF94.c:5670-5678 (the request on the stack,
+// then func_800CF3F8).
 void Begin(const BoneTrailRequest& trail) {
   LiveActionEffectRequest request{};
   request.effect_id = trail.effect_id;
@@ -270,7 +271,7 @@ void Begin(const BoneTrailRequest& trail) {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800CDCBC (src/BATTLE/BATTLE.PRG/5BF94.c:4898).
+// decomp: BATTLE.PRG func_800CDCBC (src/BATTLE/BATTLE.PRG/5BF94.c:4463).
 void LiveDrawTrailSegment(const BoneTrail* trail, int base_weight,
                           int tip_weight) {
   if (trail == nullptr) {
@@ -280,7 +281,7 @@ void LiveDrawTrailSegment(const BoneTrail* trail, int base_weight,
   DrawSegment(*trail, {.base = base_weight, .tip = tip_weight});
 }
 
-// decomp: BATTLE.PRG func_800CE174 (src/BATTLE/BATTLE.PRG/5BF94.c:4958).
+// decomp: BATTLE.PRG func_800CE174 (src/BATTLE/BATTLE.PRG/5BF94.c:4523).
 int LiveUpdateBoneTrail(LiveRendererSlot* slot, unsigned int command,
                         int parameter) {
   if (slot == nullptr) {
@@ -294,18 +295,18 @@ int LiveUpdateBoneTrail(LiveRendererSlot* slot, unsigned int command,
              : 0;
 }
 
-// decomp: BATTLE.PRG func_800CF7A8 (src/BATTLE/BATTLE.PRG/5BF94.c:5666).
+// decomp: BATTLE.PRG func_800CF7A8 (src/BATTLE/BATTLE.PRG/5BF94.c:5231).
 void LiveSpawnBoneTrail(int actor, int bone, int color, int texture) {
   Begin(MakeBoneTrailRequest(actor, bone, color, texture));
 }
 
-// decomp: BATTLE.PRG func_800CF830 (src/BATTLE/BATTLE.PRG/5BF94.c:5681).
+// decomp: BATTLE.PRG func_800CF830 (src/BATTLE/BATTLE.PRG/5BF94.c:5246).
 void LiveFadeBoneTrails() {
   LiveBoneTrailChains chains;
   FadeBoneTrails(chains);
 }
 
-// decomp: BATTLE.PRG func_800CF92C (src/BATTLE/BATTLE.PRG/5BF94.c:5714).
+// decomp: BATTLE.PRG func_800CF92C (src/BATTLE/BATTLE.PRG/5BF94.c:5279).
 void LiveClampTrailTexturePoint(int u_offset, int v_offset, int screen,
                                 std::uint16_t* uv) {
   if (uv == nullptr) {
@@ -317,7 +318,7 @@ void LiveClampTrailTexturePoint(int u_offset, int v_offset, int screen,
   *uv = static_cast<std::uint16_t>(texel.u | (texel.v << kByteBits));
 }
 
-// decomp: BATTLE.PRG func_800CF988 (src/BATTLE/BATTLE.PRG/5BF94.c:5738).
+// decomp: BATTLE.PRG func_800CF988 (src/BATTLE/BATTLE.PRG/5BF94.c:5303).
 void LiveMapTrailFramebufferTexture(VS::Render::TrailPacket* packet,
                                     int u_offset, int v_offset, int flags) {
   if (packet == nullptr) {
@@ -341,12 +342,12 @@ void LiveMapTrailFramebufferTexture(VS::Render::TrailPacket* packet,
   packet->uv3 = packed(quad.uvs.back());
 }
 
-// decomp: BATTLE.PRG func_8006C480 (src/BATTLE/BATTLE.PRG/146C.c:1923).
+// decomp: BATTLE.PRG func_8006C480 (src/BATTLE/BATTLE.PRG/146C.c:1565).
 void LiveStartWeaponTrail(int actor, int bone) {
   Begin(MakeWeaponTrailRequest(actor, bone));
 }
 
-// decomp: BATTLE.PRG func_8006C4A4 (src/BATTLE/BATTLE.PRG/146C.c:1925).
+// decomp: BATTLE.PRG func_8006C4A4 (src/BATTLE/BATTLE.PRG/146C.c:1567).
 void LiveFadeWeaponTrails() {
   LiveBoneTrailChains chains;
   FadeWeaponTrails(chains);

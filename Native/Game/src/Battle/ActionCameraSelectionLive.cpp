@@ -189,7 +189,7 @@ class LiveSelectionWorld final : public ActionSelectionWorld {
 };
 }  // namespace
 
-// decomp: func_80077F14 (src/BATTLE/BATTLE.PRG/146C.c:6821)
+// decomp: func_80077F14 (src/BATTLE/BATTLE.PRG/146C.c:6668)
 void LiveActionTargetLimbPosition(int actor, int limb, SVECTOR* output) {
   Require(output != nullptr);
   ActionPoint point{};
@@ -199,14 +199,14 @@ void LiveActionTargetLimbPosition(int actor, int limb, SVECTOR* output) {
   output->vy = point.y;
   output->vz = point.z;
 }
-// decomp: func_80077F70 (src/BATTLE/BATTLE.PRG/146C.c:6833)
+// decomp: func_80077F70 (src/BATTLE/BATTLE.PRG/146C.c:6680)
 int LiveActionTargetDistance() {
   LiveCamera world;
   const auto distance = ActionTargetDistance(world);
   if (!distance) Refuse();
   return distance.value();
 }
-// decomp: func_800780A8 (src/BATTLE/BATTLE.PRG/146C.c:6863)
+// decomp: func_800780A8 (src/BATTLE/BATTLE.PRG/146C.c:6710)
 void LiveActionCameraMidpoint(SVECTOR* output) {
   Require(output != nullptr);
   ActionPoint point{};
@@ -216,27 +216,28 @@ void LiveActionCameraMidpoint(SVECTOR* output) {
   output->vz = point.z;
   output->vy = point.y;
 }
-// decomp: func_8007820C (src/BATTLE/BATTLE.PRG/146C.c:6886)
+// decomp: func_8007820C (src/BATTLE/BATTLE.PRG/146C.c:6733)
 void LiveStepCameraTowardActionMidpoint(int execute) {
   LiveCamera world;
   Require(StepCameraTowardActionMidpoint(execute, world));
 }
-// decomp: func_80078248 (src/BATTLE/BATTLE.PRG/146C.c:6896)
+// decomp: func_80078248 (src/BATTLE/BATTLE.PRG/146C.c:6743)
 void LiveUpdateInitialTargetSelection() {
   LiveSelectionWorld world;
   Require(UpdateInitialTargetSelection(world));
 }
-// decomp: func_800782E4 (src/BATTLE/BATTLE.PRG/146C.c:6912)
+// decomp: func_800782E4 (src/BATTLE/BATTLE.PRG/146C.c:6759)
 void LiveUpdateActionAreaSelection() {
   LiveSelectionWorld world;
   Require(UpdateActionAreaSelection(world));
 }
-// decomp: func_80078364 (src/BATTLE/BATTLE.PRG/146C.c:6927)
+// decomp: func_80078364 (src/BATTLE/BATTLE.PRG/146C.c:6774)
 void LiveUpdateFinalTargetSelection() {
   LiveSelectionWorld world;
   Require(UpdateFinalTargetSelection(world));
 }
-// decomp: _handleCombatCameraZoom (src/BATTLE/BATTLE.PRG/146C.c:6958)
+// decomp: handleCombatCameraZoom (src/BATTLE/BATTLE.PRG/146C.c:6805; was
+// _handleCombatCameraZoom)
 void LiveUpdateActionCameraZoom() {
   LiveCamera world;
   const int mode = world.CameraMode();

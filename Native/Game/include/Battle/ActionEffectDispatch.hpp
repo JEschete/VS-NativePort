@@ -49,9 +49,9 @@ class ActionEffectWorld {
   virtual void SetWeaponKills(std::uint8_t category, std::uint16_t kills) = 0;
 };
 
-// decomp: func_80085008 (src/BATTLE/BATTLE.PRG/146C.c:12930).
+// decomp: func_80085008 (src/BATTLE/BATTLE.PRG/146C.c:12767).
 void DeriveLimbInjuryStatuses(LimbInjuryQueue& queue);
 // This entry's final arguments precede the mediator's in the opposite order.
-// decomp: func_80085390 (src/BATTLE/BATTLE.PRG/146C.c:13012).
+// decomp: func_80085390 (src/BATTLE/BATTLE.PRG/146C.c:12849).
 void ApplyActionHitEffect(ActionEffectWorld& world, int execute, int hit);
 }  // namespace VS::Battle

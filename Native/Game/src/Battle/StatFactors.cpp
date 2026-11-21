@@ -40,9 +40,9 @@ std::optional<std::int16_t> TargetMissingVital(StatFactorResource resource,
 }
 }  // namespace
 
-// decomp: _previousHitFactor0 (src/BATTLE/BATTLE.PRG/146C.c:11640),
-// _previousHitFactor1 (:11659), _previousHitFactor2 (:12146).
-// Original entries 0x80082144, 0x80082234, 0x80083524 share all 27
+// decomp: previousHitFactor0 (src/BATTLE/BATTLE.PRG/146C.c:11571; was
+// _previousHitFactor0), _previousHitFactor1 (:11659), _previousHitFactor2
+// (:12146). Original entries 0x80082144, 0x80082234, 0x80083524 share all 27
 // instructions.
 std::optional<std::int16_t> ScalePreviousTargetHit(int hit,
                                                    StatFactorWorld& world) {
@@ -52,12 +52,13 @@ std::optional<std::int16_t> ScalePreviousTargetHit(int hit,
   if (!amount) return std::nullopt;
   return WithQueueOffset(ScaleHit(amount.value(), factor.value()), world);
 }
-// decomp: _hpLostFactor (src/BATTLE/BATTLE.PRG/146C.c:11650).
+// decomp: hpLostFactor (src/BATTLE/BATTLE.PRG/146C.c:11581; was _hpLostFactor).
 std::optional<std::int16_t> ScaleSourceMissingHp(int hit,
                                                  StatFactorWorld& world) {
   return MissingVital(hit, StatFactorResource::kHp, world);
 }
-// decomp: _factorCurrentHp (src/BATTLE/BATTLE.PRG/146C.c:11669).
+// decomp: factorCurrentHp (src/BATTLE/BATTLE.PRG/146C.c:11599; was
+// _factorCurrentHp).
 std::optional<std::int16_t> ScaleTargetCurrentHp(int hit,
                                                  StatFactorWorld& world) {
   const auto hp = world.TargetHp();
@@ -68,14 +69,15 @@ std::optional<std::int16_t> ScaleTargetCurrentHp(int hit,
       (static_cast<std::int32_t>(hp.value()) * factor.value()) / kPercent,
       world);
 }
-// decomp: _getWeaponPp (src/BATTLE/BATTLE.PRG/146C.c:11678).
+// decomp: getWeaponPp (src/BATTLE/BATTLE.PRG/146C.c:11607; was _getWeaponPp).
 std::optional<std::int16_t> WeaponPpWithChainOffset(StatFactorWorld& world) {
   const auto pp = world.WeaponPp();
   if (!pp) return std::nullopt;
   return WithQueueOffset(pp.value(), world);
 }
-// decomp: _factorMagicDamageReceived (src/BATTLE/BATTLE.PRG/146C.c:11686),
-// _factorMagicDamageReceivedOfType (:12156); byte-identical F00417/F00427.
+// decomp: factorMagicDamageReceived (src/BATTLE/BATTLE.PRG/146C.c:11614; was
+// _factorMagicDamageReceived), _factorMagicDamageReceivedOfType (:12156);
+// byte-identical F00417/F00427.
 std::optional<std::int16_t> ScaleIncomingSpellDamage(int hit,
                                                      StatFactorWorld& world) {
   const auto type = world.SelectedActionType();
@@ -83,7 +85,8 @@ std::optional<std::int16_t> ScaleIncomingSpellDamage(int hit,
   if (type.value() != 1) return 0;
   return ScaleIncomingDamage(hit, world);
 }
-// decomp: _factorDamageReceived (src/BATTLE/BATTLE.PRG/146C.c:12208).
+// decomp: factorDamageReceived (src/BATTLE/BATTLE.PRG/146C.c:12126; was
+// _factorDamageReceived).
 std::optional<std::int16_t> ScaleIncomingDamage(int hit,
                                                 StatFactorWorld& world) {
   const auto effect = world.PrimaryHpEffect();
@@ -96,13 +99,14 @@ std::optional<std::int16_t> ScaleIncomingDamage(int hit,
   return Core::Math::WrapSigned16(
       static_cast<std::uint32_t>(ScaleHit(amount.value(), factor.value())));
 }
-// decomp: _mpLostFactor (src/BATTLE/BATTLE.PRG/146C.c:11720).
+// decomp: mpLostFactor (src/BATTLE/BATTLE.PRG/146C.c:11646; was _mpLostFactor).
 std::optional<std::int16_t> ScaleSourceMissingMp(int hit,
                                                  StatFactorWorld& world) {
   return MissingVital(hit, StatFactorResource::kMp, world);
 }
-// decomp: _factorPhysicalDamageReceived0 (src/BATTLE/BATTLE.PRG/146C.c:11703),
-// _factorPhysicalDamageReceived1 (:12174); byte-identical F00418/F00428.
+// decomp: factorPhysicalDamageReceived0 (src/BATTLE/BATTLE.PRG/146C.c:11630;
+// was _factorPhysicalDamageReceived0), _factorPhysicalDamageReceived1 (:12174);
+// byte-identical F00418/F00428.
 std::optional<std::int16_t> ScaleIncomingPhysicalDamage(
     int hit, StatFactorWorld& world) {
   const auto type = world.SelectedActionType();
@@ -110,15 +114,18 @@ std::optional<std::int16_t> ScaleIncomingPhysicalDamage(
   if (type.value() == 1) return 0;
   return ScaleIncomingDamage(hit, world);
 }
-// decomp: _getRecoverableHp (src/BATTLE/BATTLE.PRG/146C.c:12130).
+// decomp: getRecoverableHp (src/BATTLE/BATTLE.PRG/146C.c:12053; was
+// _getRecoverableHp).
 std::optional<std::int16_t> TargetMissingHp(StatFactorWorld& world) {
   return TargetMissingVital(StatFactorResource::kHp, world);
 }
-// decomp: _getRecoverableMp (src/BATTLE/BATTLE.PRG/146C.c:12138).
+// decomp: getRecoverableMp (src/BATTLE/BATTLE.PRG/146C.c:12060; was
+// _getRecoverableMp).
 std::optional<std::int16_t> TargetMissingMp(StatFactorWorld& world) {
   return TargetMissingVital(StatFactorResource::kMp, world);
 }
-// decomp: _factorSpellCost (src/BATTLE/BATTLE.PRG/146C.c:12191).
+// decomp: factorSpellCost (src/BATTLE/BATTLE.PRG/146C.c:12110; was
+// _factorSpellCost).
 std::optional<std::int16_t> ScaleIncomingSpellCost(int hit,
                                                    StatFactorWorld& world) {
   const auto type = world.SelectedActionType();
@@ -130,7 +137,8 @@ std::optional<std::int16_t> ScaleIncomingSpellCost(int hit,
   if (!factor) return std::nullopt;
   return static_cast<std::int16_t>((cost.value() * factor.value()) / kTenths);
 }
-// decomp: _getEquippedShieldDp (src/BATTLE/BATTLE.PRG/146C.c:12221).
+// decomp: getEquippedShieldDp (src/BATTLE/BATTLE.PRG/146C.c:12138; was
+// _getEquippedShieldDp).
 std::optional<std::int16_t> SourceShieldPp(StatFactorWorld& world) {
   const auto pp = world.ShieldPp();
   if (!pp) return std::nullopt;

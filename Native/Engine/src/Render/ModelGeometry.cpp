@@ -691,7 +691,7 @@ struct ShadowProjection {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800B3A68 (src/BATTLE/BATTLE.PRG/4B16C.s:84).
+// decomp: BATTLE.PRG func_800B3A68 (src/BATTLE/BATTLE.PRG/4B16C.s:63).
 ModelProjectionResult ProjectModelVertices(const ModelCounts& counts,
                                            std::span<const std::byte> model,
                                            std::size_t matrix_count,
@@ -810,7 +810,7 @@ std::uint32_t ModelAppearanceMaterial(std::uint32_t state) {
                                            : kAppearanceAdditiveBlend);
 }
 
-// decomp: BATTLE.PRG func_800B3CF0 (src/BATTLE/BATTLE.PRG/4B16C.s:254).
+// decomp: BATTLE.PRG func_800B3CF0 (src/BATTLE/BATTLE.PRG/4B16C.s:229).
 ModelDrawStatus DrawModelFlatPolygons(const ModelPolygonSource& source,
                                       std::uint32_t tint,
                                       const ModelSurface& surface,
@@ -818,7 +818,7 @@ ModelDrawStatus DrawModelFlatPolygons(const ModelPolygonSource& source,
   return DrawPolygons(source, {.colored = false, .tint = tint}, surface, queue);
 }
 
-// decomp: BATTLE.PRG func_800B4594 (src/BATTLE/BATTLE.PRG/4B16C.s:835).
+// decomp: BATTLE.PRG func_800B4594 (src/BATTLE/BATTLE.PRG/4B16C.s:794).
 ModelDrawStatus DrawModelGouraudPolygons(const ModelPolygonSource& source,
                                          std::uint32_t tint,
                                          const ModelSurface& surface,
@@ -826,7 +826,7 @@ ModelDrawStatus DrawModelGouraudPolygons(const ModelPolygonSource& source,
   return DrawPolygons(source, {.colored = true, .tint = tint}, surface, queue);
 }
 
-// decomp: BATTLE.PRG func_800B516C (src/BATTLE/BATTLE.PRG/4B16C.s:1646).
+// decomp: BATTLE.PRG func_800B516C (src/BATTLE/BATTLE.PRG/4B16C.s:1574).
 ModelDrawStatus DrawModelFlatPolygonsWithOverrides(
     const ModelPolygonSource& source, std::uint32_t tint,
     const ModelSurface& surface, const ModelOverrides& overrides,
@@ -840,7 +840,7 @@ ModelDrawStatus DrawModelFlatPolygonsWithOverrides(
       surface, queue);
 }
 
-// decomp: BATTLE.PRG func_800B5C30 (src/BATTLE/BATTLE.PRG/4B16C.s:2387).
+// decomp: BATTLE.PRG func_800B5C30 (src/BATTLE/BATTLE.PRG/4B16C.s:2299).
 ModelDrawStatus DrawModelGouraudPolygonsWithOverrides(
     const ModelPolygonSource& source, std::uint32_t tint,
     const ModelSurface& surface, const ModelOverrides& overrides,
@@ -854,7 +854,7 @@ ModelDrawStatus DrawModelGouraudPolygonsWithOverrides(
       surface, queue);
 }
 
-// decomp: BATTLE.PRG func_800B4B14 (src/BATTLE/BATTLE.PRG/4B16C.s:1208).
+// decomp: BATTLE.PRG func_800B4B14 (src/BATTLE/BATTLE.PRG/4B16C.s:1153).
 ActorShadowResult DrawActorGroundShadow(const ActorShadowSource& actor,
                                         const ModelTransform& camera,
                                         const ModelVertex& root_offset,

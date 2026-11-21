@@ -14,7 +14,7 @@
 namespace VS::Effects {
 // decomp: func_800D0548_arg1 (src/BATTLE/BATTLE.PRG/battleEffect.h:281):
 // one of an effect instance's 16 transforms (D_800F53B8_t.unk1C,
-// battleEffect.h:350).
+// src/BATTLE/BATTLE.PRG/battleEffect.h:350).
 struct LiveTransformSlot {
   // Accumulated rotation of the animated local transform.
   std::array<std::int16_t, Core::Math::kMatrixOrder> rotation;

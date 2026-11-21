@@ -14,9 +14,9 @@ struct DiscQueueSlot;
 }  // namespace VS::Content
 
 namespace VS::Menu::Score {  // NOLINT(readability-identifier-naming)
-// decomp: _gazetteRow (src/MENU/MENU9.PRG/238.c:363): one row of the Gazette's
-// title, statistics and time trial lists. The original compiled its char
-// fields unsigned (-funsigned-char).
+// decomp: GazetteRow (src/MENU/MENU9.PRG/238.c:361-370; was _gazetteRow): one
+// row of the Gazette's title, statistics and time trial lists. The original
+// compiled its char fields unsigned (-funsigned-char).
 struct ListRow {
   std::uint8_t selected = 0;
   // Title list: nonzero when the title is unlocked; the time trials set 1.
@@ -38,8 +38,8 @@ inline constexpr std::size_t kEnemyEntryBytes = 0x2C;
 inline constexpr std::size_t kCursorMemoryBytes = 8;
 }  // namespace screen_layout
 
-// decomp: _monBinData_t (src/MENU/MENU9.PRG/238.c:377): one enemy's record in
-// MON.BIN, read in place from the file's bytes.
+// decomp: MonBinData (src/MENU/MENU9.PRG/238.c:372-384; was _monBinData_t): one
+// enemy's record in MON.BIN, read in place from the file's bytes.
 struct EnemyEntry {
   std::int16_t zud_id = 0;
   std::int16_t class_id = 0;

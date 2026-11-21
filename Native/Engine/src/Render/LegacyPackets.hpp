@@ -154,7 +154,7 @@ struct ClosedRingTexCoord {
   std::uint8_t reserved1;
 };
 
-// decomp: vs_gridPrim (src/EFFECT/grids.h:21)
+// decomp: vs_GridPrim (src/EFFECT/grids.h:33-38; was vs_gridPrim)
 struct GridPacket {
   std::int32_t tag;
   VS::Legacy::POLY_FT4 poly;
@@ -162,7 +162,7 @@ struct GridPacket {
   std::int32_t reserved30[kFlatQuadPacketPaddingWords];
 };
 
-// decomp: vs_mesh10Prim (src/EFFECT/meshes10.h:21)
+// decomp: vs_Mesh10Prim (src/EFFECT/meshes10.h:26-30; was vs_mesh10Prim)
 struct Mesh10Packet {
   std::int32_t tag;
   VS::Legacy::POLY_GT3 poly;

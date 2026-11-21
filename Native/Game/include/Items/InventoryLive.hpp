@@ -9,10 +9,10 @@
 // copied callers use. Categories are the menu categories 0-7; another is
 // refused and reported.
 namespace VS::Items {
-// decomp: vs_main_inventory (src/SLUS_010.40/gameState.h:155): Ashley's
+// decomp: vs_main_inventory (src/SLUS_010.40/main.c:1046): Ashley's
 // carried items.
 extern InventoryContents inventory;
-// decomp: vs_main_inventoryIndices (src/SLUS_010.40/gameState.h:157): the
+// decomp: vs_main_inventoryIndices (src/SLUS_010.40/main.c:4806): the
 // menus' item order.
 extern InventoryIndices inventoryIndices;
 

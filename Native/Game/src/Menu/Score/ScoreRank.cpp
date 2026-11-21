@@ -174,10 +174,11 @@ std::uint32_t TimeBonus(std::uint32_t score, std::uint32_t minutes) {
 }
 }  // namespace
 
-// decomp: MENUF.PRG _calculateScore (src/MENU/MENUF.PRG/3B8.c:2801),
-// 0x80108AB0-0x80108E34; also the shared body of MENU9.PRG _calculateScore
-// (src/MENU/MENU9.PRG/238.c:2842), 0x80107C34-0x80107FB8. Both compile to the
-// same 226 instructions; only the clear count load (lw vs lhu) differs.
+// decomp: MENUF.PRG calculateScore (src/MENU/MENUF.PRG/3B8.c:2809; was
+// _calculateScore), 0x80108AB0-0x80108E34; also the shared body of MENU9.PRG
+// calculateScore (src/MENU/MENU9.PRG/238.c:2845; was _calculateScore),
+// 0x80107C34-0x80107FB8. Both compile to the same 226 instructions; only the
+// clear count load (lw vs lhu) differs.
 std::uint32_t ScoreFromRecord(const ScoreRecord& record,
                               std::uint32_t clear_count) noexcept {
   // Per-kill and per-attack points by class (238.c:2844-2845).
@@ -208,10 +209,11 @@ std::uint32_t ScoreFromRecord(const ScoreRecord& record,
   return score > kMaxScore ? kMaxScore : score;
 }
 
-// decomp: MENUF.PRG _determineRank (src/MENU/MENUF.PRG/3B8.c:2774),
-// 0x80108A0C-0x80108AAC; also the shared body of MENU9.PRG
-// _determineCharacterRank (src/MENU/MENU9.PRG/238.c:2633),
-// 0x80107600-0x801076A0. Only the rank store width (sw vs sh) differs.
+// decomp: MENUF.PRG determineRank (src/MENU/MENUF.PRG/3B8.c:2782; was
+// _determineRank), 0x80108A0C-0x80108AAC; also the shared body of MENU9.PRG
+// determineCharacterRank (src/MENU/MENU9.PRG/238.c:2636; was
+// _determineCharacterRank), 0x80107600-0x801076A0. Only the rank store width
+// (sw vs sh) differs.
 std::optional<std::size_t> RiskbreakerRankIndex(std::uint32_t titles,
                                                 std::uint32_t score) noexcept {
   // Rank rows: titles needed (signed halfwords) and unsigned score needed.
@@ -230,8 +232,8 @@ std::optional<std::size_t> RiskbreakerRankIndex(std::uint32_t titles,
   return std::nullopt;
 }
 
-// decomp: MENU9.PRG _determineCharacterRank (src/MENU/MENU9.PRG/238.c:2633),
-// 0x80107600-0x801076A0.
+// decomp: MENU9.PRG determineCharacterRank (src/MENU/MENU9.PRG/238.c:2636; was
+// _determineCharacterRank), 0x80107600-0x801076A0.
 std::optional<std::uint16_t> DetermineRiskbreakerRank(
     std::uint32_t titles, std::uint32_t score) noexcept {
   const auto rank = RiskbreakerRankIndex(titles, score);
@@ -241,8 +243,8 @@ std::optional<std::uint16_t> DetermineRiskbreakerRank(
   return static_cast<std::uint16_t>(*rank);
 }
 
-// decomp: MENU9.PRG _setTitleFlags (src/MENU/MENU9.PRG/238.c:2662),
-// 0x801076A4-0x80107A94.
+// decomp: MENU9.PRG setTitleFlags (src/MENU/MENU9.PRG/238.c:2665; was
+// _setTitleFlags), 0x801076A4-0x80107A94.
 std::uint32_t AwardTitles(const ScoreRecord& record, std::uint16_t clear_count,
                           const TitleConditions& conditions) noexcept {
   std::uint32_t titles =
@@ -253,15 +255,16 @@ std::uint32_t AwardTitles(const ScoreRecord& record, std::uint16_t clear_count,
   return titles;
 }
 
-// decomp: MENU9.PRG _calculateScore (src/MENU/MENU9.PRG/238.c:2842),
-// 0x80107C34-0x80107FB8. The clear count is the screen's u_short copy (lhu).
+// decomp: MENU9.PRG calculateScore (src/MENU/MENU9.PRG/238.c:2845; was
+// _calculateScore), 0x80107C34-0x80107FB8. The clear count is the screen's
+// u_short copy (lhu).
 std::uint32_t CalculateScore(const ScoreRecord& record,
                              std::uint16_t clear_count) noexcept {
   return ScoreFromRecord(record, std::uint32_t{clear_count});
 }
 
-// decomp: MENU9.PRG _calculateProgress (src/MENU/MENU9.PRG/238.c:418),
-// 0x801031BC-0x80103378.
+// decomp: MENU9.PRG calculateProgress (src/MENU/MENU9.PRG/238.c:425; was
+// _calculateProgress), 0x801031BC-0x80103378.
 ScoreScreenProgress CalculateProgress(ProgressWorld& world,
                                       ProgressHost& host) {
   auto& alias_word = world.room_flags[kRoomFlagAliasWord];

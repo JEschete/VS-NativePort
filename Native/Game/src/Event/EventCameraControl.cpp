@@ -50,7 +50,7 @@ std::optional<std::int32_t> OrbitReturnLift(std::uint8_t distance_index) {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800BE3A0 (F01237, src/BATTLE/BATTLE.PRG/4A0A8.c:4026,
+// decomp: BATTLE.PRG func_800BE3A0 (F01237, src/BATTLE/BATTLE.PRG/4DEA8.c:4676,
 // 0x800BE3A0-0x800BE3D0)
 void StopEventCameraMotion(EventCameraTracks& tracks) {
   tracks.eye.motion_mode = kEventCameraTrackIdle;
@@ -61,13 +61,13 @@ void StopEventCameraMotion(EventCameraTracks& tracks) {
   tracks.look_at.follow_request = 0;
 }
 
-// decomp: BATTLE.PRG func_800BB33C (F01193, src/BATTLE/BATTLE.PRG/4A0A8.c:2761,
-// 0x800BB33C-0x800BB35C)
+// decomp: BATTLE.PRG vs_battle_script_DE (F01193,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:3410; was func_800BB33C, 0x800BB33C-0x800BB35C)
 void CommandStopCameraMotion(EventCameraTracks& tracks) {
   StopEventCameraMotion(tracks);
 }
 
-// decomp: BATTLE.PRG func_800BE36C (F01236, src/BATTLE/BATTLE.PRG/4A0A8.c:4018,
+// decomp: BATTLE.PRG func_800BE36C (F01236, src/BATTLE/BATTLE.PRG/4DEA8.c:4668,
 // 0x800BE36C-0x800BE3A0)
 void SetEventCameraFollowing(EventCameraTracks& tracks,
                              std::uint8_t look_at_follow,
@@ -78,8 +78,8 @@ void SetEventCameraFollowing(EventCameraTracks& tracks,
   tracks.eye.following = 0;
 }
 
-// decomp: BATTLE.PRG func_800BB35C (F01194, src/BATTLE/BATTLE.PRG/4A0A8.c:2767,
-// 0x800BB35C-0x800BB38C)
+// decomp: BATTLE.PRG vs_battle_script_DF (F01194,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:3416; was func_800BB35C, 0x800BB35C-0x800BB38C)
 bool CommandSetCameraFollowing(ScriptCommand command,
                                EventCameraTracks& tracks) {
   if (command.size() < kSetCameraFollowingLength) return false;
@@ -90,8 +90,8 @@ bool CommandSetCameraFollowing(ScriptCommand command,
   return true;
 }
 
-// decomp: BATTLE.PRG func_800BB3BC (F01196, src/BATTLE/BATTLE.PRG/4A0A8.c:2780,
-// 0x800BB3BC-0x800BB41C)
+// decomp: BATTLE.PRG vs_battle_script_E9 (F01196,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:3429; was func_800BB3BC, 0x800BB3BC-0x800BB41C)
 std::optional<FieldCameraReturnRequest> CommandRestoreFieldCamera(
     ScriptCommand command) {
   if (command.size() < kRestoreFieldCameraLength) return std::nullopt;
@@ -106,7 +106,7 @@ std::optional<FieldCameraReturnRequest> CommandRestoreFieldCamera(
   return request;
 }
 
-// decomp: BATTLE.PRG func_800BC1CC (F01220, src/BATTLE/BATTLE.PRG/4A0A8.c:3173,
+// decomp: BATTLE.PRG func_800BC1CC (F01220, src/BATTLE/BATTLE.PRG/4DEA8.c:3823,
 // 0x800BC1CC-0x800BC2E8)
 bool ConsumeFieldCameraOverride(std::uint8_t& skip_next_field_camera_restore) {
   if (skip_next_field_camera_restore == 0) return false;
@@ -114,7 +114,7 @@ bool ConsumeFieldCameraOverride(std::uint8_t& skip_next_field_camera_restore) {
   return true;
 }
 
-// decomp: BATTLE.PRG func_800BC1CC (F01220, src/BATTLE/BATTLE.PRG/4A0A8.c:3173,
+// decomp: BATTLE.PRG func_800BC1CC (F01220, src/BATTLE/BATTLE.PRG/4DEA8.c:3823,
 // 0x800BC1CC-0x800BC2E8)
 FieldCameraReturnGlide RestoreEventFieldCamera(
     EventCameraTracks& tracks, FieldCameraReturnRequest request,
@@ -140,7 +140,7 @@ FieldCameraReturnGlide RestoreEventFieldCamera(
   return glide;
 }
 
-// decomp: BATTLE.PRG func_800BE3D0 (F01238, src/BATTLE/BATTLE.PRG/4A0A8.c:4039,
+// decomp: BATTLE.PRG func_800BE3D0 (F01238, src/BATTLE/BATTLE.PRG/4DEA8.c:4689,
 // 0x800BE3D0-0x800BE53C)
 bool StartEventCameraOrbitReturn(EventCameraTracks& tracks,
                                  SavedFieldCameraView view,

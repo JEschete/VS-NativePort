@@ -77,7 +77,7 @@ static_assert(sizeof(GimmickObjectInfo) == kGimmickObjectInfoBytes);
 
 // decomp: D_800F45E0_t (src/BATTLE/BATTLE.PRG/entity.h:514-522 declares
 // the first 0x178 bytes; the rest of the 0x1880-byte record was named from
-// its readers when copied, 3A1A0.h:633).
+// its readers when copied, src/BATTLE/BATTLE.PRG/entity.h:522).
 struct GimmickInstance {
   char bone_count;
   char reserved1;
@@ -266,8 +266,8 @@ struct GimmickInstance {
   std::int32_t reserved187c;
 };
 
-// decomp: func_800A0024_t (BATTLE.PRG 30DB0.c:24 when copied; no longer
-// declared upstream)
+// decomp: func_800A0024 (BATTLE.PRG src/BATTLE/BATTLE.PRG/30DB0.c:3754-3789;
+// was func_800A0024_t when copied; no longer declared upstream)
 struct GimmickSnapshot {
   std::uint8_t tile_x;
   std::uint8_t height_above_ground;

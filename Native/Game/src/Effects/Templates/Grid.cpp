@@ -21,7 +21,7 @@ constexpr std::size_t kGridSpans = kGridLines - 1;
 constexpr std::int32_t kGridSpanDivisor = static_cast<std::int32_t>(kGridSpans);
 constexpr std::int32_t kGridQuadDivisor = 4;
 // The texture page's blend mode bits and the base page and CLUT words
-// (decomp grids.h:68-70).
+// (decomp src/EFFECT/grids.h:68-70).
 constexpr unsigned kBlendShift = 5;
 constexpr std::uint8_t kLowBits = 7;
 constexpr std::uint16_t kGridPageBase = 0x18;
@@ -59,7 +59,7 @@ struct GridFrame {
   std::int32_t z_spacing{};
 };
 
-// decomp: grids.h:113-120 (the spacing accumulators and the phases).
+// decomp: src/EFFECT/grids.h:113-120 (the spacing accumulators and the phases).
 void AdvanceGridMotion(GridFrame& frame, const SurfaceForces& forces,
                        Vec3 jitter) noexcept {
   GridState& state = frame.state;
@@ -76,7 +76,7 @@ void AdvanceGridMotion(GridFrame& frame, const SurfaceForces& forces,
   state.z_phase = Halfword(math::WrappingAdd(state.z_phase, jitter.y));
 }
 
-// decomp: grids.h:75-112 (the definition sampled at the grid's age).
+// decomp: src/EFFECT/grids.h:75-112 (the definition sampled at the grid's age).
 std::optional<GridFrame> BeginGridTick(GridHost& host) {
   std::optional<GridFrame> opened = OpenSurfaceTick<GridFrame>(host);
   if (!opened.has_value()) {
@@ -106,8 +106,9 @@ std::optional<GridFrame> BeginGridTick(GridHost& host) {
   return opened;
 }
 
-// decomp: grids.h:121-136: the nine lines of one axis, mirrored about
-// `origin`, the gap growing by `force` plus an accumulating `acceleration`.
+// decomp: src/EFFECT/grids.h:121-136: the nine lines of one axis, mirrored
+// about `origin`, the gap growing by `force` plus an accumulating
+// `acceleration`.
 std::array<std::int32_t, kGridLines> GridLines(
     std::int32_t origin, std::int32_t spacing, std::int32_t force,
     std::int32_t acceleration) noexcept {
@@ -124,8 +125,8 @@ std::array<std::int32_t, kGridLines> GridLines(
   return lines;
 }
 
-// decomp: grids.h:137-152: every point sways along x by the sine of its
-// row's x phase and along z by the cosine of its z phase.
+// decomp: src/EFFECT/grids.h:137-152: every point sways along x by the sine of
+// its row's x phase and along z by the cosine of its z phase.
 std::array<RingPoint, kGridPoints> GridPoints(const GridFrame& frame) {
   const SurfaceScratch& scratch = frame.scratch;
   const SurfaceForces forces = scratch.forces.value_or(SurfaceForces{});
@@ -161,8 +162,9 @@ std::array<RingPoint, kGridPoints> GridPoints(const GridFrame& frame) {
   return points;
 }
 
-// decomp: grids.h:183-194: the nine texture coordinates of one axis from
-// the scroll before this tick; the scroll advances by `step` modulo `size`.
+// decomp: src/EFFECT/grids.h:183-194: the nine texture coordinates of one axis
+// from the scroll before this tick; the scroll advances by `step` modulo
+// `size`.
 std::array<std::uint8_t, kGridLines> GridCoordinates(
     std::uint8_t origin, std::uint8_t& scroll, std::int32_t step,
     std::int32_t size) noexcept {
@@ -179,8 +181,8 @@ std::array<std::uint8_t, kGridLines> GridCoordinates(
   return coordinates;
 }
 
-// decomp: grids.h:153-260: the colour, the texture coordinates, projection and
-// the eight by eight quads.
+// decomp: src/EFFECT/grids.h:153-260: the colour, the texture coordinates,
+// projection and the eight by eight quads.
 void DrawGrid(GridFrame& frame,
               const std::array<RingPoint, kGridPoints>& points,
               GridHost& host) {
@@ -230,7 +232,7 @@ void DrawGrid(GridFrame& frame,
 }
 }  // namespace
 
-// decomp: grids.h:59-74 (the create command).
+// decomp: src/EFFECT/grids.h:59-74 (the create command).
 GridState CreateGridState(RingPlan plan,
                           const SurfaceDefinition& definition) noexcept {
   const auto blend = static_cast<std::uint16_t>(
@@ -284,7 +286,7 @@ std::array<std::uint32_t, kGridPacketWords> EncodeGridPacket(
   return words;
 }
 
-// decomp: EFFECT VS_GRID_FUNCTION (src/EFFECT/grids.h:23).
+// decomp: EFFECT VS_GRID_FUNCTION (src/EFFECT/grids.h:40).
 bool Grid(SurfaceCommand command, std::int32_t packed, GridHost& host) {
   const auto create = [&host](RingPlan plan,
                               const SurfaceDefinition& definition) {
@@ -305,145 +307,169 @@ bool Grid(SurfaceCommand command, std::int32_t packed, GridHost& host) {
 }  // namespace VS::Effects::Templates
 
 namespace VS::Effects {
-// decomp: PLG053.BIN func_800F9818 (src/EFFECT/PLG053.BIN/18.c:8).
+// decomp: PLG053.BIN vs_effect_explosionLv1_0 (src/EFFECT/grids.h:40; was
+// func_800F9818).
 bool Plg053::Grid(Templates::SurfaceCommand command, std::int32_t packed,
                   Templates::GridHost& host) {
   return Templates::Grid(command, packed, host);
 }
 
-// decomp: PLG061.BIN func_800FA3B0 (src/EFFECT/PLG061.BIN/18.c:12).
+// decomp: PLG061.BIN vs_effect_flameSphereLv1_1 (src/EFFECT/grids.h:40; was
+// func_800FA3B0).
 bool Plg061::Grid(Templates::SurfaceCommand command, std::int32_t packed,
                   Templates::GridHost& host) {
   return Templates::Grid(command, packed, host);
 }
 
-// decomp: PLG073.BIN func_800FE3EC (src/EFFECT/PLG073.BIN/F8.c:23).
+// decomp: PLG073.BIN vs_effect_radialSurgeLv1_4 (src/EFFECT/grids.h:40; was
+// func_800FE3EC).
 bool Plg073::Grid(Templates::SurfaceCommand command, std::int32_t packed,
                   Templates::GridHost& host) {
   return Templates::Grid(command, packed, host);
 }
 
-// decomp: PLG077.BIN func_800FB294 (src/EFFECT/PLG077.BIN/18.c:341).
+// decomp: PLG077.BIN vs_effect_meteorLv1_2 (src/EFFECT/grids.h:40; was
+// func_800FB294).
 bool Plg077::Grid(Templates::SurfaceCommand command, std::int32_t packed,
                   Templates::GridHost& host) {
   return Templates::Grid(command, packed, host);
 }
 
-// decomp: PLG082.BIN func_800FB5CC (src/EFFECT/PLG082.BIN/128.c:20).
+// decomp: PLG082.BIN vs_effect_thunderbolt_1 (src/EFFECT/grids.h:40; was
+// func_800FB5CC).
 bool Plg082::Grid(Templates::SurfaceCommand command, std::int32_t packed,
                   Templates::GridHost& host) {
   return Templates::Grid(command, packed, host);
 }
 
-// decomp: PLG085.BIN func_800F9818 (src/EFFECT/PLG085.BIN/18.c:2).
+// decomp: PLG085.BIN vs_effect_acidFlow_0 (src/EFFECT/grids.h:40; was
+// func_800F9818).
 bool Plg085::Grid(Templates::SurfaceCommand command, std::int32_t packed,
                   Templates::GridHost& host) {
   return Templates::Grid(command, packed, host);
 }
 
-// decomp: PLG086.BIN func_800FB720 (src/EFFECT/PLG086.BIN/F8.c:16).
+// decomp: PLG086.BIN vs_effect_judgment_2 (src/EFFECT/grids.h:40; was
+// func_800FB720).
 bool Plg086::Grid(Templates::SurfaceCommand command, std::int32_t packed,
                   Templates::GridHost& host) {
   return Templates::Grid(command, packed, host);
 }
 
-// decomp: PLG087.BIN func_800FB4F8 (src/EFFECT/PLG087.BIN/1F0.c:18).
+// decomp: PLG087.BIN vs_effect_apocalypse_2 (src/EFFECT/grids.h:40; was
+// func_800FB4F8).
 bool Plg087::Grid(Templates::SurfaceCommand command, std::int32_t packed,
                   Templates::GridHost& host) {
   return Templates::Grid(command, packed, host);
 }
 
-// decomp: PLG128.BIN func_800FC2BC (src/EFFECT/PLG128.BIN/F8.c:58).
+// decomp: PLG128.BIN vs_effect_bloodySin_3 (src/EFFECT/grids.h:40; was
+// func_800FC2BC).
 bool Plg128::Grid(Templates::SurfaceCommand command, std::int32_t packed,
                   Templates::GridHost& host) {
   return Templates::Grid(command, packed, host);
 }
 
-// decomp: PLG137.BIN func_800FC524 (src/EFFECT/PLG137.BIN/F8.c:17).
+// decomp: PLG137.BIN vs_effect_cherryRonde_2 (src/EFFECT/grids.h:40; was
+// func_800FC524).
 bool Plg137::Grid(Templates::SurfaceCommand command, std::int32_t packed,
                   Templates::GridHost& host) {
   return Templates::Grid(command, packed, host);
 }
 
-// decomp: PLG138.BIN func_800FB2F4 (src/EFFECT/PLG138.BIN/18.c:9).
+// decomp: PLG138.BIN vs_effect_papillonReel_2 (src/EFFECT/grids.h:40; was
+// func_800FB2F4).
 bool Plg138::Grid(Templates::SurfaceCommand command, std::int32_t packed,
                   Templates::GridHost& host) {
   return Templates::Grid(command, packed, host);
 }
 
-// decomp: PLG139.BIN func_800FA710 (src/EFFECT/PLG139.BIN/18.c:6).
+// decomp: PLG139.BIN vs_effect_sunder_1 (src/EFFECT/grids.h:40; was
+// func_800FA710).
 bool Plg139::Grid(Templates::SurfaceCommand command, std::int32_t packed,
                   Templates::GridHost& host) {
   return Templates::Grid(command, packed, host);
 }
 
-// decomp: PLG142.BIN func_800F9818 (src/EFFECT/PLG142.BIN/18.c:8).
+// decomp: PLG142.BIN vs_effect_adventSign_0 (src/EFFECT/grids.h:40; was
+// func_800F9818).
 bool Plg142::Grid(Templates::SurfaceCommand command, std::int32_t packed,
                   Templates::GridHost& host) {
   return Templates::Grid(command, packed, host);
 }
 
-// decomp: PLG150.BIN func_800FA710 (src/EFFECT/PLG150.BIN/18.c:6).
+// decomp: PLG150.BIN vs_effect_emeticBomb_1 (src/EFFECT/grids.h:40; was
+// func_800FA710).
 bool Plg150::Grid(Templates::SurfaceCommand command, std::int32_t packed,
                   Templates::GridHost& host) {
   return Templates::Grid(command, packed, host);
 }
 
-// decomp: PLG152.BIN func_800F9928 (src/EFFECT/PLG152.BIN/128.c:8).
+// decomp: PLG152.BIN vs_effect_riskbreak_0 (src/EFFECT/grids.h:40; was
+// func_800F9928).
 bool Plg152::Grid(Templates::SurfaceCommand command, std::int32_t packed,
                   Templates::GridHost& host) {
   return Templates::Grid(command, packed, host);
 }
 
-// decomp: PLG156.BIN func_800FB5CC (src/EFFECT/PLG156.BIN/128.c:14).
+// decomp: PLG156.BIN vs_effect_quickshock_1 (src/EFFECT/grids.h:40; was
+// func_800FB5CC).
 bool Plg156::Grid(Templates::SurfaceCommand command, std::int32_t packed,
                   Templates::GridHost& host) {
   return Templates::Grid(command, packed, host);
 }
 
-// decomp: PLG161.BIN func_800FD4F4 (src/EFFECT/PLG161.BIN/F8.c:20).
+// decomp: PLG161.BIN vs_effect_gigaTempest_3 (src/EFFECT/grids.h:40; was
+// func_800FD4F4).
 bool Plg161::Grid(Templates::SurfaceCommand command, std::int32_t packed,
                   Templates::GridHost& host) {
   return Templates::Grid(command, packed, host);
 }
 
-// decomp: PLG165.BIN func_800FC8D0 (src/EFFECT/PLG165.BIN/F8.c:21).
+// decomp: PLG165.BIN vs_effect_deathWail_2 (src/EFFECT/grids.h:40; was
+// func_800FC8D0).
 bool Plg165::Grid(Templates::SurfaceCommand command, std::int32_t packed,
                   Templates::GridHost& host) {
   return Templates::Grid(command, packed, host);
 }
 
-// decomp: PLG168.BIN func_800FD104 (src/EFFECT/PLG168.BIN/1F0.c:36).
+// decomp: PLG168.BIN vs_effect_vertigo_2 (src/EFFECT/grids.h:40; was
+// func_800FD104).
 bool Plg168::Grid(Templates::SurfaceCommand command, std::int32_t packed,
                   Templates::GridHost& host) {
   return Templates::Grid(command, packed, host);
 }
 
-// decomp: PLG170.BIN func_800FBF6C (src/EFFECT/PLG170.BIN/18.c:21).
+// decomp: PLG170.BIN vs_effect_retribution_3 (src/EFFECT/grids.h:40; was
+// func_800FBF6C).
 bool Plg170::Grid(Templates::SurfaceCommand command, std::int32_t packed,
                   Templates::GridHost& host) {
   return Templates::Grid(command, packed, host);
 }
 
-// decomp: PLG242.BIN func_800FA7F0 (src/EFFECT/PLG242.BIN/F8.c:6).
+// decomp: PLG242.BIN vs_effect_plg242_1 (src/EFFECT/grids.h:40; was
+// func_800FA7F0).
 bool Plg242::Grid(Templates::SurfaceCommand command, std::int32_t packed,
                   Templates::GridHost& host) {
   return Templates::Grid(command, packed, host);
 }
 
-// decomp: PLG272.BIN func_800F9818 (src/EFFECT/PLG272.BIN/18.c:8).
+// decomp: PLG272.BIN vs_effect_plg272_0 (src/EFFECT/grids.h:40; was
+// func_800F9818).
 bool Plg272::Grid(Templates::SurfaceCommand command, std::int32_t packed,
                   Templates::GridHost& host) {
   return Templates::Grid(command, packed, host);
 }
 
-// decomp: PLG291.BIN func_800FBA18 (src/EFFECT/PLG291.BIN/F8.c:18).
+// decomp: PLG291.BIN vs_effect_plg291_1 (src/EFFECT/grids.h:40; was
+// func_800FBA18).
 bool Plg291::Grid(Templates::SurfaceCommand command, std::int32_t packed,
                   Templates::GridHost& host) {
   return Templates::Grid(command, packed, host);
 }
 
-// decomp: PLG297.BIN func_800FB3FC (src/EFFECT/PLG297.BIN/18.c:17).
+// decomp: PLG297.BIN vs_effect_plg297_2 (src/EFFECT/grids.h:40; was
+// func_800FB3FC).
 bool Plg297::Grid(Templates::SurfaceCommand command, std::int32_t packed,
                   Templates::GridHost& host) {
   return Templates::Grid(command, packed, host);

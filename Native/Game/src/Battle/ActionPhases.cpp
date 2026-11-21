@@ -2,7 +2,7 @@
 #include "Battle/ActionPhases.hpp"
 
 namespace VS::Battle {
-// decomp: func_80069D14 (src/BATTLE/BATTLE.PRG/146C.c:761).
+// decomp: func_80069D14 (src/BATTLE/BATTLE.PRG/146C.c:413).
 void ReleaseQueuedActorAttacks(ActionPhaseWorld& world) {
   constexpr std::uint8_t kAttackOpcode = 0x18;
   for (int slot = 0; slot < Actors::kCommandActorSlots; ++slot) {
@@ -15,14 +15,14 @@ void ReleaseQueuedActorAttacks(ActionPhaseWorld& world) {
   }
 }
 
-// decomp: func_8006F5FC (src/BATTLE/BATTLE.PRG/146C.c:3228).
+// decomp: func_8006F5FC (src/BATTLE/BATTLE.PRG/146C.c:2931).
 void WaitForPostActionMovement(ActionPhaseWorld& world) {
   world.SetControlMode(Field::FieldControlMode::kGimmickMotion);
   world.SetPhase(ActionPhase::kInitial);
   world.RestoreIdle(0);
 }
 
-// decomp: func_8006FBCC (src/BATTLE/BATTLE.PRG/146C.c:3388).
+// decomp: func_8006FBCC (src/BATTLE/BATTLE.PRG/146C.c:3092).
 void BeginPostActionRecovery(std::int32_t reward_mode,
                              ActionPhaseWorld& world) {
   constexpr std::uint32_t kPresent = 1;
@@ -43,7 +43,7 @@ void BeginPostActionRecovery(std::int32_t reward_mode,
   world.SetPhase(ActionPhase::kRecovery);
 }
 
-// decomp: func_8006FCBC (src/BATTLE/BATTLE.PRG/146C.c:3408).
+// decomp: func_8006FCBC (src/BATTLE/BATTLE.PRG/146C.c:3113).
 void BeginActionTrailFade(const ActionPhaseSource& source,
                           ActionPhaseWorld& world) {
   world.SetPhase(ActionPhase::kTrailFade);
@@ -51,17 +51,17 @@ void BeginActionTrailFade(const ActionPhaseSource& source,
   world.FadeTrails(source.Actor(), bone);
 }
 
-// decomp: func_8006FD0C (src/BATTLE/BATTLE.PRG/146C.c:3418).
+// decomp: func_8006FD0C (src/BATTLE/BATTLE.PRG/146C.c:3123).
 void FinishBattleAbilitySequence(ActionPhaseWorld& world) {
   world.SetPhase(ActionPhase::kAbilityFinished);
 }
 
-// decomp: func_80072B9C (src/BATTLE/BATTLE.PRG/146C.c:4414).
+// decomp: func_80072B9C (src/BATTLE/BATTLE.PRG/146C.c:4141).
 void ResetActionPhase(ActionPhaseWorld& world) {
   world.SetPhase(ActionPhase::kInitial);
 }
 
-// decomp: func_800734C0 (src/BATTLE/BATTLE.PRG/146C.c:4646).
+// decomp: func_800734C0 (src/BATTLE/BATTLE.PRG/146C.c:4373).
 void BeginAshleyWeaponToggle(ActionPhaseWorld& world) {
   for (int slot = 0; slot < Actors::kCommandActorSlots; ++slot) {
     world.RestoreIdle(slot);

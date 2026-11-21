@@ -46,20 +46,20 @@ int LiveFloorHeight(int world_x, int world_z) {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800E5EC0 (src/BATTLE/BATTLE.PRG/7CD68.c:760).
+// decomp: BATTLE.PRG func_800E5EC0 (src/BATTLE/BATTLE.PRG/7CD68.c:286).
 void FloodFillLiveAiTerrainHeights(int x, int z, int height) {
   Require(FloodFillAiTerrainHeights(LiveMaps(), LiveDirections(), x, z, height),
           "Special terrain fill refused its start tile");
 }
 
-// decomp: BATTLE.PRG func_800E5FDC (src/BATTLE/BATTLE.PRG/7CD68.c:779).
+// decomp: BATTLE.PRG func_800E5FDC (src/BATTLE/BATTLE.PRG/7CD68.c:305).
 int FindLiveAdjacentAiGroundHeight(int x, int z) {
   return FindAdjacentAiGroundHeight(LiveMaps().tile_flags, LiveFloorHeight,
                                     LiveDirections(), x, z)
       .value_or(-1);
 }
 
-// decomp: BATTLE.PRG func_800E6098 (src/BATTLE/BATTLE.PRG/7CD68.c:795).
+// decomp: BATTLE.PRG func_800E6098 (src/BATTLE/BATTLE.PRG/7CD68.c:321).
 void BuildLiveAiSpecialTerrainHeights() {
   BuildAiSpecialTerrainHeights(LiveMaps(), LiveFloorHeight, LiveDirections());
 }

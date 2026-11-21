@@ -272,11 +272,12 @@ class LiveCameraEffectHost final : public CameraEffectHost {
 };
 }  // namespace
 
-// decomp: PLG128.BIN func_800FDEC4 (F02068, src/EFFECT/PLG128.BIN/F8.c:146,
-// 0x800FDEC4-0x800FE3D0). The original allocated the state unchecked and left
-// the fields creation does not write as the heap held them; this clears them.
-// Neither frees the state: the effect runtime's slot release
-// (EffectInstancesLive.cpp) does once a command returns 0.
+// decomp: PLG128.BIN vs_effect_bloodySin_5 (F02068,
+// src/EFFECT/PLG128.BIN/F8.c:120; was func_800FDEC4, 0x800FDEC4-0x800FE3D0).
+// The original allocated the state unchecked and left the fields creation does
+// not write as the heap held them; this clears them. Neither frees the state:
+// the effect runtime's slot release (EffectInstancesLive.cpp) does once a
+// command returns 0.
 int UpdateLiveEffectCamera(LiveRendererSlot* slot, unsigned int command,
                            int packed) {
   if (slot == nullptr) {

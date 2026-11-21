@@ -25,9 +25,9 @@ PicturePage OtherPage(PicturePage page) {
 
 }  // namespace
 
-// decomp: TITLE.PRG _initIntroMovie (src/TITLE/TITLE.PRG/22C.c:3649)
-// The original cleared both picture pages when the first frame's size became
-// known.
+// decomp: TITLE.PRG initIntroMovie (src/TITLE/TITLE.PRG/22C.c:660; was
+// _initIntroMovie) The original cleared both picture pages when the first
+// frame's size became known.
 void Start(Host& host) {
   host.ClearPicturePages();
   host.SetDrawPage(PicturePage::kUpper);
@@ -36,24 +36,26 @@ void Start(Host& host) {
   host.SetStartTick(host.Tick());
 }
 
-// decomp: TITLE.PRG _stopIntroMovie (src/TITLE/TITLE.PRG/22C.c:3670)
+// decomp: TITLE.PRG stopIntroMovie (src/TITLE/TITLE.PRG/22C.c:681; was
+// _stopIntroMovie)
 void Stop(Host& host) {
   host.SetPlaying(false);
   host.CloseMovie();
 }
 
-// decomp: TITLE.PRG _stopMovieIfComplete (src/TITLE/TITLE.PRG/22C.c:3686)
+// decomp: TITLE.PRG stopMovieIfComplete (src/TITLE/TITLE.PRG/22C.c:697; was
+// _stopMovieIfComplete)
 void StopAfterAudioTail(Host& host) {
   if (host.IsPlaying() && ElapsedTicks(host) >= kSoundtrackTicks) {
     Stop(host);
   }
 }
 
-// decomp: TITLE.PRG _playIntroMovie (src/TITLE/TITLE.PRG/22C.c:3693)
-// Each pass draws into the current page, flips the draw page, waits for the
-// next tick (the original's vertical blank) and polls the pads; the drawn page
-// is shown and the display enabled from the second shown frame. Elapsed ticks
-// wrap like the original's unsigned VSync(-1) difference.
+// decomp: TITLE.PRG playIntroMovie (src/TITLE/TITLE.PRG/22C.c:704; was
+// _playIntroMovie) Each pass draws into the current page, flips the draw page,
+// waits for the next tick (the original's vertical blank) and polls the pads;
+// the drawn page is shown and the display enabled from the second shown frame.
+// Elapsed ticks wrap like the original's unsigned VSync(-1) difference.
 PlaybackResult Play(Host& host) {
   bool shown_first = false;
   while (true) {

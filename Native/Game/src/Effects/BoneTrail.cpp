@@ -242,14 +242,14 @@ std::optional<RingColor> TrailPaletteColor(const TrailPalettes& palettes,
   return std::nullopt;
 }
 
-// decomp: BATTLE.PRG func_800CF92C (src/BATTLE/BATTLE.PRG/5BF94.c:5714).
+// decomp: BATTLE.PRG func_800CF92C (src/BATTLE/BATTLE.PRG/5BF94.c:5279).
 RingUv ClampTrailTexturePoint(std::int32_t u_offset, std::int32_t v_offset,
                               std::uint32_t screen) noexcept {
   return {.u = ClampTexel(math::WrappingAdd(ScreenX(screen), u_offset)),
           .v = ClampTexel(math::WrappingAdd(ScreenY(screen), v_offset))};
 }
 
-// decomp: BATTLE.PRG func_800CF988 (src/BATTLE/BATTLE.PRG/5BF94.c:5738).
+// decomp: BATTLE.PRG func_800CF988 (src/BATTLE/BATTLE.PRG/5BF94.c:5303).
 void MapTrailFramebufferTexture(RingQuad& frame_quad, std::int32_t u_offset,
                                 std::int32_t v_offset, std::uint16_t flags,
                                 std::uint32_t draw_buffer) {
@@ -272,7 +272,7 @@ void MapTrailFramebufferTexture(RingQuad& frame_quad, std::int32_t u_offset,
   }
 }
 
-// decomp: BATTLE.PRG func_800CDCBC (src/BATTLE/BATTLE.PRG/5BF94.c:4898).
+// decomp: BATTLE.PRG func_800CDCBC (src/BATTLE/BATTLE.PRG/5BF94.c:4463).
 TrailSegmentDraw DrawTrailSegment(const BoneTrail& trail,
                                   TrailSegmentWeights weights,
                                   TrailSegmentHost& host) {
@@ -308,7 +308,7 @@ TrailSegmentDraw DrawTrailSegment(const BoneTrail& trail,
   return TrailSegmentDraw::kDrawn;
 }
 
-// decomp: BATTLE.PRG func_800CE174 (src/BATTLE/BATTLE.PRG/5BF94.c:4958).
+// decomp: BATTLE.PRG func_800CE174 (src/BATTLE/BATTLE.PRG/5BF94.c:4523).
 bool UpdateBoneTrail(RendererCommand command, std::uint32_t parameter,
                      BoneTrailHost& host) {
   switch (command) {
@@ -325,7 +325,7 @@ bool UpdateBoneTrail(RendererCommand command, std::uint32_t parameter,
   return true;
 }
 
-// decomp: BATTLE.PRG func_800CF7A8 (src/BATTLE/BATTLE.PRG/5BF94.c:5666).
+// decomp: BATTLE.PRG func_800CF7A8 (src/BATTLE/BATTLE.PRG/5BF94.c:5231).
 BoneTrailRequest MakeBoneTrailRequest(std::int32_t actor, std::int32_t bone,
                                       std::int32_t color,
                                       std::int32_t texture) noexcept {
@@ -344,13 +344,13 @@ BoneTrailRequest MakeBoneTrailRequest(std::int32_t actor, std::int32_t bone,
           .parameter = config.Pack()};
 }
 
-// decomp: BATTLE.PRG func_8006C480 (src/BATTLE/BATTLE.PRG/146C.c:1923).
+// decomp: BATTLE.PRG func_8006C480 (src/BATTLE/BATTLE.PRG/146C.c:1565).
 BoneTrailRequest MakeWeaponTrailRequest(std::int32_t actor,
                                         std::int32_t bone) noexcept {
   return MakeBoneTrailRequest(actor, bone, 0, 0);
 }
 
-// decomp: BATTLE.PRG func_800CF830 (src/BATTLE/BATTLE.PRG/5BF94.c:5681).
+// decomp: BATTLE.PRG func_800CF830 (src/BATTLE/BATTLE.PRG/5BF94.c:5246).
 void FadeBoneTrails(BoneTrailChains& chains) {
   for (LiveEffectInstance* instance = chains.FirstInstance();
        instance != nullptr; instance = chains.NextInstance(*instance)) {
@@ -363,6 +363,6 @@ void FadeBoneTrails(BoneTrailChains& chains) {
   }
 }
 
-// decomp: BATTLE.PRG func_8006C4A4 (src/BATTLE/BATTLE.PRG/146C.c:1925).
+// decomp: BATTLE.PRG func_8006C4A4 (src/BATTLE/BATTLE.PRG/146C.c:1567).
 void FadeWeaponTrails(BoneTrailChains& chains) { FadeBoneTrails(chains); }
 }  // namespace VS::Effects

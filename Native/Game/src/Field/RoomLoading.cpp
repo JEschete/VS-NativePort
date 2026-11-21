@@ -358,7 +358,8 @@ void UploadZoneTexture(ZoneTextureHost& host,
   host.UploadImage(area, pixels);
 }
 
-// decomp: BATTLE.PRG _finishLoadZnd (146C.c:14862-14873)
+// decomp: BATTLE.PRG finishLoadZnd (src/BATTLE/BATTLE.PRG/146C.c:14697-14755;
+// was _finishLoadZnd)
 void SwitchZoneMusic(ZoneLoadHost& host, int music_id) {
   host.StopAndFreeCurrentMusic();
   for (int slot = 1; slot <= kZoneMusicSlots; ++slot) {
@@ -595,7 +596,7 @@ struct EnemySlot {
   return {.choice = SlotChoice::kNoFreeSlot};
 }
 
-// decomp: BATTLE.PRG func_80089114 (146C.c:15041-15100)
+// decomp: BATTLE.PRG func_80089114 (src/BATTLE/BATTLE.PRG/146C.c:14772-15008)
 [[nodiscard]] EnemySlot ChooseEnemySlot(RoomActorSpawnHost& host,
                                         ReservedSlots& reserved, int named,
                                         bool secondary) {

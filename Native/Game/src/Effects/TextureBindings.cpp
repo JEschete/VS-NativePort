@@ -50,8 +50,9 @@ void ValidateFrames(Bytes bytes, std::size_t begin, std::size_t end,
 }
 }  // namespace
 
-// decomp: _parsePfileBlock1 (src/BATTLE/BATTLE.PRG/6F014.c:512);
-// original binder independently checked in BATTLE.PRG at 0x800D7A14.
+// decomp: parsePfileBlock1 (src/BATTLE/BATTLE.PRG/6E4CC.c:141; was
+// _parsePfileBlock1); original binder independently checked in BATTLE.PRG at
+// 0x800D7A14.
 TextureBlockLayout BindEffectTextureTables(Bytes block,
                                            const EffectTextureOwner& owner) {
   const std::size_t count = Read<std::uint16_t>(block, 0);

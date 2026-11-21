@@ -76,7 +76,7 @@ void ResolveSources(ActionSequenceWorld& world) {
 }
 }  // namespace
 
-// decomp: func_80078748 (src/BATTLE/BATTLE.PRG/146C.c:7025).
+// decomp: func_80078748 (src/BATTLE/BATTLE.PRG/146C.c:6872).
 void WaitForActionEffectReady(ActionSequenceWorld& world) {
   auto& action = world.Queued();
   constexpr std::uint32_t kEffectReady = 0x08000100;
@@ -88,7 +88,7 @@ void WaitForActionEffectReady(ActionSequenceWorld& world) {
   }
 }
 
-// decomp: func_800787F0 (src/BATTLE/BATTLE.PRG/146C.c:7035).
+// decomp: func_800787F0 (src/BATTLE/BATTLE.PRG/146C.c:6883).
 void StartReadyActionAnimation(ActionSequenceWorld& world) {
   constexpr std::uint32_t kAnimationBlocked = 2;
   if ((world.EffectBusyFlags() & kAnimationBlocked) == 0) {
@@ -97,7 +97,7 @@ void StartReadyActionAnimation(ActionSequenceWorld& world) {
   }
 }
 
-// decomp: func_80079050 (src/BATTLE/BATTLE.PRG/146C.c:7356).
+// decomp: func_80079050 (src/BATTLE/BATTLE.PRG/146C.c:7208).
 void WaitForActionResolution(ActionSequenceWorld& world) {
   if (world.Queued().RebuildPlans() == 0) {
     world.ReleaseAttacks();
@@ -105,7 +105,7 @@ void WaitForActionResolution(ActionSequenceWorld& world) {
   }
 }
 
-// decomp: func_800790BC (src/BATTLE/BATTLE.PRG/146C.c:7364).
+// decomp: func_800790BC (src/BATTLE/BATTLE.PRG/146C.c:7216).
 TargetRecoveryStatus WaitForTargetRecovery(ActionSequenceWorld& world) {
   auto readiness = CheckReadiness(world);
   if (!readiness.ready) return TargetRecoveryStatus::kWaiting;
@@ -130,7 +130,7 @@ TargetRecoveryStatus WaitForTargetRecovery(ActionSequenceWorld& world) {
   return TargetRecoveryStatus::kStarted;
 }
 
-// decomp: func_800793C0 (src/BATTLE/BATTLE.PRG/146C.c:7435).
+// decomp: func_800793C0 (src/BATTLE/BATTLE.PRG/146C.c:7286).
 void FinishActionSequence(ActionSequenceWorld& world) {
   const auto camera_mode = world.CameraMode();
   constexpr int kAlternateCamera = 3;

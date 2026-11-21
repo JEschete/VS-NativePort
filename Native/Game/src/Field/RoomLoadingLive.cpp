@@ -264,9 +264,10 @@ std::array<ReadRecord, 2> readRecords{};
                                    : zoneContext.room_data;
 }
 
-// decomp: BATTLE.PRG _loadZnd and _loadMpd (146C.c:14803-14818 and
-// 15254-15269). A block that cannot be taken leaves no request, which the
-// wait refuses; the original read into a null block.
+// decomp: BATTLE.PRG _loadZnd and loadMpd
+// (src/BATTLE/BATTLE.PRG/146C.c:15124-15140; was _loadMpd and 15254-15269). A
+// block that cannot be taken leaves no request, which the wait refuses; the
+// original read into a null block.
 void BeginLiveRead(LoadedFile file, Content::DiscFileExtent extent) {
   VS::Content::DiscQueueSlot* request =
       Content::AllocateLiveDiscRequest(extent);
@@ -519,7 +520,8 @@ class LiveSections : public Host {
  public:
   void ClearRoomTint() override { LiveClearRoomTint(); }
 
-  // decomp: BATTLE.PRG _loadMpdRoomSection (146C.c:15681-15703)
+  // decomp: BATTLE.PRG loadMpdRoomSection
+  // (src/BATTLE/BATTLE.PRG/146C.c:15551-15573; was _loadMpdRoomSection)
   bool StoreRoomSections(int owner_room_index, const RoomSectionLayout& layout,
                          std::span<const std::byte> sections) override {
     auto* block = static_cast<std::byte*>(
@@ -555,7 +557,8 @@ class LiveSections : public Host {
                              VS::Field::roomData.geometry);
   }
 
-  // decomp: BATTLE.PRG _loadMpdRoomSection (146C.c:15726-15729)
+  // decomp: BATTLE.PRG loadMpdRoomSection
+  // (src/BATTLE/BATTLE.PRG/146C.c:15533-15619; was _loadMpdRoomSection)
   void PrepareMinimapScene() override {
     const auto scene = LiveRoomSection(RoomSectionId::kMinimapScene);
     ResolveLiveSceneRoomData(scene.data(), scene.size());
@@ -582,7 +585,8 @@ class LiveSections : public Host {
     MarkEntranceDoorOnSceneMapEntry(door);
   }
 
-  // decomp: BATTLE.PRG _loadMpdRoomSection (146C.c:15735-15743)
+  // decomp: BATTLE.PRG loadMpdRoomSection
+  // (src/BATTLE/BATTLE.PRG/146C.c:15605-15613; was _loadMpdRoomSection)
   void InitializeRoomSystems() override {
     ResetGimmickAnimationQueueEntry();
     LiveInitializeRoomEffects();
@@ -609,7 +613,7 @@ class LiveSections : public Host {
     static_cast<void>(LiveReleaseRoomEffects());
   }
 
-  // decomp: BATTLE.PRG func_8008ABF0 (146C.c:15780-15784)
+  // decomp: BATTLE.PRG func_8008ABF0 (src/BATTLE/BATTLE.PRG/146C.c:15650-15654)
   // #311: the block starts at the first present section; the original freed
   // the geometry and leaked the block of a room without one. A section the
   // heap did not give (a test's own record) is not freed.
@@ -736,7 +740,7 @@ class LiveEntrance : public Host {
     Actors::TranslateLiveActorByAtRate(0, &offset, 0);
   }
 
-  // decomp: BATTLE.PRG func_80089888 (146C.c:15184-15188)
+  // decomp: BATTLE.PRG func_80089888 (src/BATTLE/BATTLE.PRG/146C.c:15052-15056)
   void SettleAshley() override {
     VS::Actors::ActorLocationQuery location{};
     static_cast<void>(Actors::LiveActorPlacement(0, &location));
@@ -762,7 +766,8 @@ class LivePlacements : public Host {
     return {static_cast<const std::byte*>(data), bytes};
   }
 
-  // decomp: BATTLE.PRG _loadMpdEnemySection (146C.c:15241-15250)
+  // decomp: BATTLE.PRG loadMpdEnemySection
+  // (src/BATTLE/BATTLE.PRG/146C.c:15108-15118; was _loadMpdEnemySection)
   void StorePlacements(std::span<const std::byte> records) override {
     if (records.empty()) {
       ClearPlacements();
@@ -787,7 +792,8 @@ class LivePlacements : public Host {
 class LiveZoneLoadHost final
     : public LiveFileReads<LiveReporting<ZoneLoadHost>> {
  public:
-  // decomp: BATTLE.PRG _loadMpdLbas (146C.c:14774)
+  // decomp: BATTLE.PRG loadMpdLbas (src/BATTLE/BATTLE.PRG/146C.c:14645; was
+  // _loadMpdLbas)
   void StoreRoomFiles(std::span<const Content::DiscFileExtent> files) override {
     zoneContext.room_files = nullptr;
     roomFiles = {};
@@ -806,7 +812,8 @@ class LiveZoneLoadHost final
     roomFiles = {.table = table, .count = files.size()};
   }
 
-  // decomp: BATTLE.PRG _loadZndEnemies (146C.c:14783)
+  // decomp: BATTLE.PRG loadZndEnemies (src/BATTLE/BATTLE.PRG/146C.c:14654; was
+  // _loadZndEnemies)
   void StoreZoneEnemies(std::span<const Content::DiscFileExtent> zud_files,
                         std::span<const std::byte> templates) override {
     zoneContext.zone_enemy_count = static_cast<int>(zud_files.size());
@@ -913,7 +920,8 @@ class LiveZoneLoadHost final
 
   void SetMusicSlot(int slot) override { zoneContext.music_slot = slot; }
 
-  // decomp: BATTLE.PRG _finishLoadZnd (146C.c:14876-14878)
+  // decomp: BATTLE.PRG finishLoadZnd (src/BATTLE/BATTLE.PRG/146C.c:14697-14755;
+  // was _finishLoadZnd)
   void FinishZoneMusic(int music_id) override {
     zoneContext.music_id = music_id;
     zoneContext.music_fade_enabled = 1;
@@ -927,8 +935,9 @@ class LiveZoneReleaseHost final : public ZoneReleaseHost {
     VS::Event::ReleaseZoneEventResources();
   }
 
-  // decomp: BATTLE.PRG func_80089098 (146C.c:14889-14896); the original
-  // left the freed tables set.
+  // decomp: BATTLE.PRG func_80089098
+  // (src/BATTLE/BATTLE.PRG/146C.c:14757-14768); the original left the freed
+  // tables set.
   void FreeZoneTables() override {
     FreeLowEnd(zoneContext.zone_enemies);
     FreeLowEnd(zoneContext.zud_files);
@@ -961,7 +970,7 @@ class LiveRoomLoadHost final
                : 0;
   }
 
-  // decomp: BATTLE.PRG func_80089DC0 (146C.c:15296-15299)
+  // decomp: BATTLE.PRG func_80089DC0 (src/BATTLE/BATTLE.PRG/146C.c:15296-15299)
   void AllocatePrimitiveBuffers() override {
     VS::Render::legacyPrimitiveBuffers[0] =
         Core::Memory::AllocateLiveFromLowEnd(kPrimitiveBufferBytes);
@@ -1030,8 +1039,9 @@ class LiveRoomLoadHost final
     zoneContext.bounds = bounds;
   }
 
-  // decomp: BATTLE.PRG func_80089DC0 (146C.c:15338-15344): the halfwords at
-  // 0x48, 0x4A, 0x4C, 0x50, 0x52 and 0x54.
+  // decomp: BATTLE.PRG func_80089DC0
+  // (src/BATTLE/BATTLE.PRG/146C.c:15338-15344): the halfwords at 0x48, 0x4A,
+  // 0x4C, 0x50, 0x52 and 0x54.
   void ClearRoomResetWords() override {
     zoneContext.reserved48 = 0;
     zoneContext.reserved4c = static_cast<int>(
@@ -1091,7 +1101,7 @@ class LiveRoomLoadHost final
     VS::Battle::RemoveLiveActorStatuses(statuses, stats);
   }
 
-  // decomp: BATTLE.PRG func_80089DC0 (146C.c:15392-15405)
+  // decomp: BATTLE.PRG func_80089DC0 (src/BATTLE/BATTLE.PRG/146C.c:15142-15348)
   void ResetRoomEntryState() override {
     roomGeometryDrawMode = 0;
     isFirstPersonViewEnabled = 0;
@@ -1122,7 +1132,7 @@ class LiveRoomLoadHost final
     return sphericalCamera.preferred_distance;
   }
 
-  // decomp: BATTLE.PRG func_80089DC0 (146C.c:15414-15435)
+  // decomp: BATTLE.PRG func_80089DC0 (src/BATTLE/BATTLE.PRG/146C.c:15142-15348)
   void ResetCamera(const RoomEntryCamera& camera) override {
     Render::SetLiveCameraNearClip(kQ12Unit / kNearClipDivisor);
     Render::SetLiveCameraProjectionDistance(kQ12Unit /
@@ -1138,7 +1148,7 @@ class LiveRoomLoadHost final
     // The original also cleared the write-only D_800F1908 (146C.c:15305).
   }
 
-  // decomp: BATTLE.PRG func_80089DC0 (146C.c:15437-15449)
+  // decomp: BATTLE.PRG func_80089DC0 (src/BATTLE/BATTLE.PRG/146C.c:15142-15348)
   void FrameCameraOnAshley() override {
     VS::Actors::ActorLocationQuery ashley{};
     static_cast<void>(Actors::LiveActorPlacement(0, &ashley));
@@ -1187,7 +1197,7 @@ class LiveRoomLoadHost final
 
   void PrepareCutsceneActors() override { Event::PrepareLiveCutsceneActors(); }
 
-  // decomp: BATTLE.PRG func_80089DC0 (146C.c:15466-15471)
+  // decomp: BATTLE.PRG func_80089DC0 (src/BATTLE/BATTLE.PRG/146C.c:15142-15348)
   void EnterExploration() override {
     LiveShowPrimaryRoomGeometry();
     Actors::EnableAllLiveActorModels();
@@ -1219,7 +1229,7 @@ class LiveRoomUnloadHost final
     VS::Boot::ResetGameplayInspection();
   }
 
-  // decomp: BATTLE.PRG func_8008A3A0 (146C.c:15495-15501)
+  // decomp: BATTLE.PRG func_8008A3A0 (src/BATTLE/BATTLE.PRG/146C.c:15359-15389)
   void DrawTransitionFrame() override {
     const int buffer = VS::Render::frameBuf;
     if (buffer < 0 ||

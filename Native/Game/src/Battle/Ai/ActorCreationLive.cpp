@@ -449,7 +449,7 @@ class LiveCreationHost final : public ActorCreationHost {
 };
 }  // namespace
 
-// decomp: func_800E6178 (src/BATTLE/BATTLE.PRG/7CD68.c:934).
+// decomp: func_800E6178 (src/BATTLE/BATTLE.PRG/7CD68.c:342).
 int CreateLiveActorAiState(VS::Battle::Actor* actor, int options) {
   Require(actor != nullptr, "AI creation requires an actor");
   VS::Core::Debugf(

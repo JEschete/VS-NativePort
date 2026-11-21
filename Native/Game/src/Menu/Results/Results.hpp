@@ -12,7 +12,7 @@
 #include "Render/Images.hpp"
 
 namespace VS::Menu::Results {
-// decomp: disIndices (src/MENU/MENUF.PRG/3B8.c:491): named entries of the
+// decomp: disIndices (src/MENU/MENUF.PRG/3B8.c:505): named entries of the
 // results atlas (kDisMap). Entries 0-9 are the digits.
 enum class DisIndex : std::uint8_t {
   kCommonZero,

@@ -109,7 +109,7 @@ class LiveActorAiFrame final : public VS::Battle::Ai::ActorAiFrame {
 }  // namespace
 
 namespace VS::Battle::Ai {
-// decomp: BATTLE.PRG func_800E65DC (src/BATTLE/BATTLE.PRG/7DDDC.s:8).
+// decomp: BATTLE.PRG func_800E65DC (src/BATTLE/BATTLE.PRG/7DDDC.s:14).
 int CacheLiveActorAiWorkingState() {
   static_assert(std::size(frameContext.actors) == kFrameActorSlots);
   static_assert(std::size(VS::Battle::Ai::actorAiStates) == kFrameActorSlots);
@@ -164,7 +164,7 @@ void RunLiveActorAiUpdateStages() {
   }
 }
 
-// decomp: BATTLE.PRG func_800E4358 (src/BATTLE/BATTLE.PRG/7B5DC.s:433).
+// decomp: BATTLE.PRG func_800E4358 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:477).
 void TickLiveActorDecisionTimers(VS::Battle::Ai::PerceptionUpdateView* view) {
   VS::Battle::Ai::ActorAiState* state = AsActorAiState(view);
   DecisionTimers timers{state->decision_delay, state->min_action_delay};
@@ -173,7 +173,7 @@ void TickLiveActorDecisionTimers(VS::Battle::Ai::PerceptionUpdateView* view) {
   state->min_action_delay = timers.min_action_delay;
 }
 
-// decomp: BATTLE.PRG func_800E6828 (src/BATTLE/BATTLE.PRG/7E028.s:8).
+// decomp: BATTLE.PRG func_800E6828 (src/BATTLE/BATTLE.PRG/7DDDC.s:165).
 void InitializeLiveActorLocomotionMode(VS::Battle::Ai::AiCreationView* view) {
   VS::Battle::Ai::ActorAiState* state = AsActorAiState(view);
   LocomotionState locomotion{state->locomotion_flags, state->movement_flags,
@@ -183,7 +183,7 @@ void InitializeLiveActorLocomotionMode(VS::Battle::Ai::AiCreationView* view) {
   state->locomotion_mode = locomotion.mode;
 }
 
-// decomp: BATTLE.PRG func_800E685C (src/BATTLE/BATTLE.PRG/7E05C.s:16).
+// decomp: BATTLE.PRG func_800E685C (src/BATTLE/BATTLE.PRG/7DDDC.s:182).
 void SetLiveActorVerticalMovementSteps(int actor_id, int walk_step,
                                        int run_step) {
   if (static_cast<unsigned>(actor_id) >= kFrameActorSlots) {

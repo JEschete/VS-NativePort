@@ -154,7 +154,7 @@ class FlightMovementWorld {
   virtual void BeginGroundMovement(FlightMover& mover, int angle) = 0;
 };
 
-// decomp: func_800E02B4 (src/BATTLE/BATTLE.PRG/771A8.c:798).
+// decomp: func_800E02B4 (src/BATTLE/BATTLE.PRG/770A4.c:335).
 // What blocks the direction (0-7): 1 for a moving platform, an actor ID + 1
 // for another active actor, 0 for nothing; the answer is cached. The probe is
 // the actor's position, moved its maximum range along the direction and
@@ -164,7 +164,7 @@ class FlightMovementWorld {
     FlightMovementWorld& world, const FlightMover& mover, int direction,
     bool ahead);
 
-// decomp: func_800E0678 (src/BATTLE/BATTLE.PRG/771A8.c:904).
+// decomp: func_800E0678 (src/BATTLE/BATTLE.PRG/770A4.c:420).
 // Whether the actor can fly one tile in the direction (0-7): nothing ahead
 // blocks it, the tile is inside the room, unflagged, not the previous tile,
 // and the actor's flight height keeps it below a ceiling. The answer is
@@ -174,7 +174,7 @@ class FlightMovementWorld {
                                                     const FlightMover& mover,
                                                     int direction);
 
-// decomp: func_800E0918 (src/BATTLE/BATTLE.PRG/771A8.c:985).
+// decomp: func_800E0918 (src/BATTLE/BATTLE.PRG/770A4.c:471).
 // Moves an actor between flight and the ground: under a ceiling too low to
 // fly, a flying actor on a free tile lands (BeginTerrainMovement) and a
 // walking one keeps walking. A walking actor that is `toward_destination`
@@ -184,7 +184,7 @@ class FlightMovementWorld {
     FlightMovementWorld& world, FlightMover& mover, int angle,
     bool toward_destination);
 
-// decomp: func_800E0A68 (src/BATTLE/BATTLE.PRG/771A8.c:1064).
+// decomp: func_800E0A68 (src/BATTLE/BATTLE.PRG/770A4.c:501).
 // Flies toward the destination: hovering onto an approach target's flagged
 // tile, settling over the destination, following the heading when the way is
 // blocked, or gliding over the ground between, climbing first when it rises.
@@ -194,7 +194,7 @@ class FlightMovementWorld {
 [[nodiscard]] bool UpdateFlightMovement(FlightMovementWorld& world,
                                         FlightMover& mover, int angle);
 
-// decomp: func_800E1238 (src/BATTLE/BATTLE.PRG/771A8.c:1278).
+// decomp: func_800E1238 (src/BATTLE/BATTLE.PRG/770A4.c:753).
 // Flies one step along `angle`, or the heading when the way is blocked,
 // descending when every reachable neighbour is lower. Returns false when the
 // world refuses; the mover may then be partly updated.

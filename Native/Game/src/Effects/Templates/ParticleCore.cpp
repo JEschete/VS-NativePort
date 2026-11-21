@@ -30,7 +30,7 @@ constexpr std::uint32_t kHighHalfwordMask = 0xFFFF0000;
 constexpr std::int32_t kColorCurveScale = 2;
 constexpr std::int32_t kChannelMaximum = 255;
 constexpr std::uint8_t kChannelWithoutCurve = 128;
-// decomp: particleRender.h depth bias targets.
+// decomp: src/EFFECT/particleRender.h depth bias targets.
 constexpr std::int32_t kBackDepth = 0x7FE;
 constexpr std::int32_t kFrontDepthA = -15;
 constexpr std::int32_t kFrontDepthB = -13;
@@ -64,7 +64,8 @@ constexpr std::size_t kTpageCorner = 1;
 }  // namespace
 
 std::int32_t ParticleSetCapacity(math::ScalarSpan interval) noexcept {
-  // decomp: particleDispatch.h:22-30, the greater endpoint as a halfword.
+  // decomp: src/EFFECT/particleDispatch.h:22-30, the greater endpoint as a
+  // halfword.
   const std::int32_t greater = std::max(interval.end, interval.start);
   const std::int32_t endpoint =
       math::WrapSigned16(static_cast<std::uint32_t>(greater));

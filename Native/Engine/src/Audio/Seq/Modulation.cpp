@@ -59,7 +59,7 @@ std::uint16_t ToggleDelay(std::uint8_t delay) {
 }
 }  // namespace
 
-// decomp: SLUS_010.40 SoundVM_B4_Vibrato (src/SLUS_010.40/25AC.c:5462)
+// decomp: SLUS_010.40 SoundVM_B4_Vibrato (src/SLUS_010.40/25AC.c:5650)
 CommandResult EnableVibrato(ChannelState& channel, Operands operands,
                             VoiceCommandHost& host) {
   if (operands.size() < kOscillatorOperands) return Truncated();
@@ -88,7 +88,7 @@ CommandResult EnableVibrato(ChannelState& channel, Operands operands,
   return Applied(kOscillatorOperands);
 }
 
-// decomp: SLUS_010.40 SoundVM_B5_VibratoDepth (src/SLUS_010.40/25AC.c:5507)
+// decomp: SLUS_010.40 SoundVM_B5_VibratoDepth (src/SLUS_010.40/25AC.c:5694)
 CommandResult SetVibratoDepth(ChannelState& channel, Operands operands) {
   if (operands.empty()) return Truncated();
   channel.vibrato_depth = static_cast<std::uint16_t>(operands[0] << kByteShift);
@@ -97,7 +97,7 @@ CommandResult SetVibratoDepth(ChannelState& channel, Operands operands) {
 }
 
 // decomp: SLUS_010.40 SoundVM_DD_VibratoDepthSlide
-// (src/SLUS_010.40/25AC.c:5540)
+// (src/SLUS_010.40/25AC.c:5726)
 CommandResult SlideVibratoDepth(ChannelState& channel, Operands operands) {
   if (operands.size() < 2) return Truncated();
   const std::uint16_t length = TickCount(operands[0]);
@@ -107,14 +107,15 @@ CommandResult SlideVibratoDepth(ChannelState& channel, Operands operands) {
   return Applied(2);
 }
 
-// decomp: SLUS_010.40 SoundVM_B6_DisableVibrato (src/SLUS_010.40/25AC.c:5560)
+// decomp: SLUS_010.40 SoundVM_B6_DisableVibrato (src/SLUS_010.40/25AC.c:5745)
 void DisableVibrato(ChannelState& channel) {
   channel.vibrato_pitch = 0;
   channel.update_flags &= ~kVibratoActive;
   channel.voice.dirty_flags |= kSampleRateDirty;
 }
 
-// decomp: SLUS_010.40 SoundVM_B8_Tremelo (src/SLUS_010.40/25AC.c:5568)
+// decomp: SLUS_010.40 SoundVM_B8_Tremolo (src/SLUS_010.40/25AC.c:5752; was
+// SoundVM_B8_Tremelo)
 CommandResult EnableTremolo(ChannelState& channel, Operands operands,
                             VoiceCommandHost& host) {
   if (operands.size() < kOscillatorOperands) return Truncated();
@@ -139,15 +140,16 @@ CommandResult EnableTremolo(ChannelState& channel, Operands operands,
   return Applied(kOscillatorOperands);
 }
 
-// decomp: SLUS_010.40 SoundVM_B9_TremeloDepth (src/SLUS_010.40/25AC.c:5598)
+// decomp: SLUS_010.40 SoundVM_B9_TremoloDepth (src/SLUS_010.40/25AC.c:5781; was
+// SoundVM_B9_TremeloDepth)
 CommandResult SetTremoloDepth(ChannelState& channel, Operands operands) {
   if (operands.empty()) return Truncated();
   channel.tremolo_depth = TremoloDepth(operands[0]);
   return Applied(1);
 }
 
-// decomp: SLUS_010.40 SoundVM_DE_TremeloDepthSlide
-// (src/SLUS_010.40/25AC.c:5604)
+// decomp: SLUS_010.40 SoundVM_DE_TremoloDepthSlide
+// (src/SLUS_010.40/25AC.c:5786; was SoundVM_DE_TremeloDepthSlide)
 CommandResult SlideTremoloDepth(ChannelState& channel, Operands operands) {
   if (operands.size() < 2) return Truncated();
   const std::uint16_t length = TickCount(operands[0]);
@@ -157,14 +159,15 @@ CommandResult SlideTremoloDepth(ChannelState& channel, Operands operands) {
   return Applied(2);
 }
 
-// decomp: SLUS_010.40 SoundVM_BA_DisableTremelo (src/SLUS_010.40/25AC.c:5623)
+// decomp: SLUS_010.40 SoundVM_BA_DisableTremolo (src/SLUS_010.40/25AC.c:5804;
+// was SoundVM_BA_DisableTremelo)
 void DisableTremolo(ChannelState& channel) {
   channel.tremolo_volume = 0;
   channel.update_flags &= ~kTremoloActive;
   channel.voice.dirty_flags |= kVolumeDirty;
 }
 
-// decomp: SLUS_010.40 SoundVM_BC_AutoPan (src/SLUS_010.40/25AC.c:5631)
+// decomp: SLUS_010.40 SoundVM_BC_AutoPan (src/SLUS_010.40/25AC.c:5811)
 CommandResult EnableAutoPan(ChannelState& channel, Operands operands,
                             VoiceCommandHost& host) {
   if (operands.size() < 2) return Truncated();
@@ -178,7 +181,7 @@ CommandResult EnableAutoPan(ChannelState& channel, Operands operands,
   return Applied(2);
 }
 
-// decomp: SLUS_010.40 SoundVM_BD_AutoPanDepth (src/SLUS_010.40/25AC.c:5649)
+// decomp: SLUS_010.40 SoundVM_BD_AutoPanDepth (src/SLUS_010.40/25AC.c:5828)
 CommandResult SetAutoPanDepth(ChannelState& channel, Operands operands) {
   if (operands.empty()) return Truncated();
   channel.auto_pan_depth =
@@ -187,7 +190,7 @@ CommandResult SetAutoPanDepth(ChannelState& channel, Operands operands) {
 }
 
 // decomp: SLUS_010.40 SoundVM_DF_AutoPanDepthSlide
-// (src/SLUS_010.40/25AC.c:5655)
+// (src/SLUS_010.40/25AC.c:5833)
 CommandResult SlideAutoPanDepth(ChannelState& channel, Operands operands) {
   if (operands.size() < 2) return Truncated();
   const std::uint16_t length = TickCount(operands[0]);
@@ -197,7 +200,7 @@ CommandResult SlideAutoPanDepth(ChannelState& channel, Operands operands) {
   return Applied(2);
 }
 
-// decomp: SLUS_010.40 SoundVM_BE_DisableAutoPan (src/SLUS_010.40/25AC.c:5676)
+// decomp: SLUS_010.40 SoundVM_BE_DisableAutoPan (src/SLUS_010.40/25AC.c:5853)
 void DisableAutoPan(ChannelState& channel) {
   channel.auto_pan_offset = 0;
   channel.update_flags &= ~kAutoPanActive;
@@ -205,7 +208,7 @@ void DisableAutoPan(ChannelState& channel) {
 }
 
 // decomp: SLUS_010.40 SoundVM_C4_EnableNoiseVoices
-// (src/SLUS_010.40/25AC.c:5684)
+// (src/SLUS_010.40/25AC.c:5860)
 void EnableNoise(ChannelState& channel, VoiceCommandHost& host,
                  std::uint32_t channel_bits) {
   host.SetVoiceMode(channel.kind, VoiceMode::kNoise, channel_bits, true);
@@ -213,7 +216,7 @@ void EnableNoise(ChannelState& channel, VoiceCommandHost& host,
 }
 
 // decomp: SLUS_010.40 SoundVM_C5_DisableNoiseVoices
-// (src/SLUS_010.40/25AC.c:5695)
+// (src/SLUS_010.40/25AC.c:5870)
 void DisableNoise(ChannelState& channel, VoiceCommandHost& host,
                   std::uint32_t channel_bits) {
   host.SetVoiceMode(channel.kind, VoiceMode::kNoise, channel_bits, false);
@@ -221,7 +224,7 @@ void DisableNoise(ChannelState& channel, VoiceCommandHost& host,
   channel.noise_timer = 0;
 }
 
-// decomp: SLUS_010.40 SoundVM_C6_EnableFmVoices (src/SLUS_010.40/25AC.c:5707)
+// decomp: SLUS_010.40 SoundVM_C6_EnableFmVoices (src/SLUS_010.40/25AC.c:5881)
 void EnableFrequencyModulation(ChannelState& channel, VoiceCommandHost& host,
                                std::uint32_t channel_bits) {
   if (IsMusic(channel) ||
@@ -232,7 +235,7 @@ void EnableFrequencyModulation(ChannelState& channel, VoiceCommandHost& host,
   host.RequestVoiceUpdate(kVoiceModeUpdate);
 }
 
-// decomp: SLUS_010.40 SoundVM_C7_DisableFmVoices (src/SLUS_010.40/25AC.c:5718)
+// decomp: SLUS_010.40 SoundVM_C7_DisableFmVoices (src/SLUS_010.40/25AC.c:5891)
 void DisableFrequencyModulation(ChannelState& channel, VoiceCommandHost& host,
                                 std::uint32_t channel_bits) {
   host.SetVoiceMode(channel.kind, VoiceMode::kFrequencyModulation, channel_bits,
@@ -242,7 +245,7 @@ void DisableFrequencyModulation(ChannelState& channel, VoiceCommandHost& host,
 }
 
 // decomp: SLUS_010.40 SoundVM_C2_EnableReverbVoices
-// (src/SLUS_010.40/25AC.c:5730)
+// (src/SLUS_010.40/25AC.c:5902)
 void EnableReverb(ChannelState& channel, VoiceCommandHost& host,
                   std::uint32_t channel_bits) {
   host.SetVoiceMode(channel.kind, VoiceMode::kReverb, channel_bits, true);
@@ -250,7 +253,7 @@ void EnableReverb(ChannelState& channel, VoiceCommandHost& host,
 }
 
 // decomp: SLUS_010.40 SoundVM_C3_DisableReverbVoices
-// (src/SLUS_010.40/25AC.c:5741)
+// (src/SLUS_010.40/25AC.c:5912)
 void DisableReverb(ChannelState& channel, VoiceCommandHost& host,
                    std::uint32_t channel_bits) {
   host.SetVoiceMode(channel.kind, VoiceMode::kReverb, channel_bits, false);
@@ -258,7 +261,7 @@ void DisableReverb(ChannelState& channel, VoiceCommandHost& host,
 }
 
 // decomp: SLUS_010.40 SoundVM_AC_NoiseClockFrequency
-// (src/SLUS_010.40/25AC.c:5776)
+// (src/SLUS_010.40/25AC.c:5939)
 CommandResult SetNoiseClock(ChannelState& channel, Operands operands,
                             VoiceCommandHost& host) {
   if (operands.empty()) return Truncated();
@@ -274,7 +277,7 @@ CommandResult SetNoiseClock(ChannelState& channel, Operands operands,
 }
 
 // decomp: SLUS_010.40 SoundVM_CE_EnableNoiseAndDelayToggle
-// (src/SLUS_010.40/25AC.c:6072)
+// (src/SLUS_010.40/25AC.c:6219)
 CommandResult EnableTimedNoise(ChannelState& channel, Operands operands,
                                VoiceCommandHost& host,
                                std::uint32_t channel_bits) {
@@ -285,7 +288,7 @@ CommandResult EnableTimedNoise(ChannelState& channel, Operands operands,
 }
 
 // decomp: SLUS_010.40 SoundVM_CF_ToggleNoiseOnDelay
-// (src/SLUS_010.40/25AC.c:6089)
+// (src/SLUS_010.40/25AC.c:6236)
 CommandResult SetNoiseToggleDelay(ChannelState& channel, Operands operands) {
   if (operands.empty()) return Truncated();
   channel.noise_timer = ToggleDelay(operands[0]);
@@ -293,7 +296,7 @@ CommandResult SetNoiseToggleDelay(ChannelState& channel, Operands operands) {
 }
 
 // decomp: SLUS_010.40 SoundVM_D2_EnableFmAndDelayToggle
-// (src/SLUS_010.40/25AC.c:6100)
+// (src/SLUS_010.40/25AC.c:6246)
 CommandResult EnableTimedFrequencyModulation(ChannelState& channel,
                                              Operands operands,
                                              VoiceCommandHost& host,
@@ -304,7 +307,7 @@ CommandResult EnableTimedFrequencyModulation(ChannelState& channel,
   return Applied(1);
 }
 
-// decomp: SLUS_010.40 SoundVM_D3_ToggleFmDelay (src/SLUS_010.40/25AC.c:6116)
+// decomp: SLUS_010.40 SoundVM_D3_ToggleFmDelay (src/SLUS_010.40/25AC.c:6262)
 CommandResult SetFrequencyModulationToggleDelay(ChannelState& channel,
                                                 Operands operands) {
   if (operands.empty()) return Truncated();
@@ -313,7 +316,7 @@ CommandResult SetFrequencyModulationToggleDelay(ChannelState& channel,
 }
 
 // decomp: SLUS_010.40 SoundVM_CB_DisableVoiceModes
-// (src/SLUS_010.40/25AC.c:6127)
+// (src/SLUS_010.40/25AC.c:6272)
 void ResetVoiceEffects(ChannelState& channel, VoiceCommandHost& host,
                        std::uint32_t channel_bits) {
   channel.update_flags &= ~kVoiceEffectFlags;
@@ -325,31 +328,31 @@ void ResetVoiceEffects(ChannelState& channel, VoiceCommandHost& host,
 }
 
 // decomp: SLUS_010.40 SoundVM_D4_EnablePlaybackRateSidechain
-// (src/SLUS_010.40/25AC.c:6138)
+// (src/SLUS_010.40/25AC.c:6283)
 void EnablePitchSidechain(ChannelState& channel) {
   channel.update_flags |= kPitchSidechainActive;
 }
 
 // decomp: SLUS_010.40 SoundVM_D5_DisablePlaybackRateSidechain
-// (src/SLUS_010.40/25AC.c:6144)
+// (src/SLUS_010.40/25AC.c:6289)
 void DisablePitchSidechain(ChannelState& channel) {
   channel.update_flags &= ~kPitchSidechainActive;
 }
 
 // decomp: SLUS_010.40 SoundVM_D6_EnablePitchVolumeSidechain
-// (src/SLUS_010.40/25AC.c:6150)
+// (src/SLUS_010.40/25AC.c:6295)
 void EnableVolumeSidechain(ChannelState& channel) {
   channel.update_flags |= kVolumeSidechainActive;
 }
 
 // decomp: SLUS_010.40 SoundVM_D7_DisablePitchVolumeSidechain
-// (src/SLUS_010.40/25AC.c:6156)
+// (src/SLUS_010.40/25AC.c:6301)
 void DisableVolumeSidechain(ChannelState& channel) {
   channel.update_flags &= ~kVolumeSidechainActive;
 }
 
 // decomp: SLUS_010.40 SoundVM_E1_SetRandomPitchDepth
-// (src/SLUS_010.40/25AC.c:6221)
+// (src/SLUS_010.40/25AC.c:6361)
 CommandResult SetRandomPitchDepth(ChannelState& channel, Operands operands) {
   if (operands.empty()) return Truncated();
   channel.random_pitch_depth = operands[0];
@@ -357,7 +360,7 @@ CommandResult SetRandomPitchDepth(ChannelState& channel, Operands operands) {
 }
 
 // decomp: SLUS_010.40 SoundVM_E2_ResetRandomPitchDepth
-// (src/SLUS_010.40/25AC.c:6227)
+// (src/SLUS_010.40/25AC.c:6367)
 void ResetRandomPitchDepth(ChannelState& channel) {
   channel.random_pitch_depth = 0;
 }

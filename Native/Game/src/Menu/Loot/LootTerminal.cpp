@@ -660,8 +660,8 @@ void LoadScreenText(std::uint8_t& step, LootTerminalHost& host) {
 }
 }  // namespace
 
-// decomp: _topLevelMenuTransition (src/MENU/MENUB.PRG/260.c:61),
-// original MENUB.PRG [0x801066CC, 0x80106B80).
+// decomp: topLevelMenuTransition (src/MENU/MENUB.PRG/260.c:64; was
+// _topLevelMenuTransition), original MENUB.PRG [0x801066CC, 0x80106B80).
 std::int32_t UpdateInventoryTransition(InventoryTransitionState& state,
                                        LootTerminalHost& host,
                                        std::optional<LootCategory> category) {
@@ -713,7 +713,7 @@ std::int32_t UpdateInventoryTransition(InventoryTransitionState& state,
   return 0;
 }
 
-// decomp: _disassembleItem (src/MENU/MENUB.PRG/260.c:232),
+// decomp: disassembleItem (src/MENU/MENUB.PRG/260.c:235; was _disassembleItem),
 // original MENUB.PRG [0x80106B80, 0x801073E0).
 std::int32_t UpdateDisassembly(DisassemblyState& state, LootTerminalHost& host,
                                std::optional<std::size_t> row) {
@@ -790,8 +790,8 @@ std::int32_t UpdateDisassembly(DisassemblyState& state, LootTerminalHost& host,
   return 0;
 }
 
-// decomp: _consolidateMiscItems (src/MENU/MENUB.PRG/260.c:458),
-// original MENUB.PRG [0x801073E0, 0x80107C54).
+// decomp: consolidateMiscItems (src/MENU/MENUB.PRG/260.c:461; was
+// _consolidateMiscItems), original MENUB.PRG [0x801073E0, 0x80107C54).
 std::int32_t UpdateStackConsolidation(StackConsolidationState& state,
                                       LootTerminalHost& host,
                                       std::optional<std::size_t> row) {
@@ -872,8 +872,8 @@ std::int32_t UpdateStackConsolidation(StackConsolidationState& state,
   return 0;
 }
 
-// decomp: _processLootMenu (src/MENU/MENUB.PRG/260.c:1622),
-// original MENUB.PRG [0x80109750, 0x80109E90).
+// decomp: processLootMenu (src/MENU/MENUB.PRG/260.c:1625; was
+// _processLootMenu), original MENUB.PRG [0x80109750, 0x80109E90).
 std::int32_t UpdateLootSelection(LootSelectionState& state,
                                  LootTerminalHost& host, bool initialize) {
   auto& runtime = host.Runtime();
@@ -938,7 +938,7 @@ std::int32_t UpdateLootSelection(LootSelectionState& state,
   return 0;
 }
 
-// decomp: vs_menuB_exec (src/MENU/MENUB.PRG/260.c:1951),
+// decomp: vs_menuB_exec (src/MENU/MENUB.PRG/260.c:1954),
 // original MENUB.PRG [0x80109E90, 0x8010A24C).
 std::int32_t UpdateLootScreen(std::uint8_t& step, LootTerminalHost& host) {
   auto& runtime = host.Runtime();

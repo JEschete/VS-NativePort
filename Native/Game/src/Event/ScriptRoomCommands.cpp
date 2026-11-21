@@ -45,7 +45,8 @@ constexpr std::size_t kFourthOperand = 4;
 
 }  // namespace
 
-// decomp: BATTLE.PRG func_800B9770 (4A0A8.c:1966).
+// decomp: BATTLE.PRG vs_battle_script_60_setCloudstoneMoving
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2508; was func_800B9770).
 ScriptFlow ScriptSetGimmickVisibility(const ScriptInstruction& instruction,
                                       ScriptVmHost& host) {
   if (!InstructionFits(instruction, kSetGimmickVisibilityLength, host)) {
@@ -58,8 +59,9 @@ ScriptFlow ScriptSetGimmickVisibility(const ScriptInstruction& instruction,
   return Advance();
 }
 
-// decomp: BATTLE.PRG func_800B979C (4A0A8.c:1972). The original spreads the
-// operand's sign bit over the preserve flag (0 or 0xFF) and sets the depth
+// decomp: BATTLE.PRG vs_battle_script_61_overrideFogDepth
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2520; was func_800B979C). The original spreads
+// the operand's sign bit over the preserve flag (0 or 0xFF) and sets the depth
 // only while that flag is set.
 ScriptFlow ScriptOverrideDepthCueDistance(const ScriptInstruction& instruction,
                                           ScriptVmHost& host) {
@@ -77,8 +79,9 @@ ScriptFlow ScriptOverrideDepthCueDistance(const ScriptInstruction& instruction,
   return Advance();
 }
 
-// decomp: BATTLE.PRG func_800B97E4 (4A0A8.c:1982). The mode byte is stored
-// zero-extended into the draw mode word.
+// decomp: BATTLE.PRG vs_battle_script_62_setFirstPersonRendering
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2539; was func_800B97E4). The mode byte is
+// stored zero-extended into the draw mode word.
 ScriptFlow ScriptSetRoomLightingMode(const ScriptInstruction& instruction,
                                      ScriptVmHost& host) {
   if (!InstructionFits(instruction, kSetRoomLightingModeLength, host)) {
@@ -89,7 +92,8 @@ ScriptFlow ScriptSetRoomLightingMode(const ScriptInstruction& instruction,
   return Advance();
 }
 
-// decomp: BATTLE.PRG func_800B9818 (4A0A8.c:1994).
+// decomp: BATTLE.PRG vs_battle_script_64_showGeometry
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2559; was func_800B9818).
 ScriptFlow ScriptShowGeometryGroup(const ScriptInstruction& instruction,
                                    ScriptVmHost& host) {
   if (!InstructionFits(instruction, kShowGeometryGroupLength, host)) {
@@ -101,7 +105,8 @@ ScriptFlow ScriptShowGeometryGroup(const ScriptInstruction& instruction,
   return Advance();
 }
 
-// decomp: BATTLE.PRG func_800B983C (4A0A8.c:2000).
+// decomp: BATTLE.PRG vs_battle_script_65_hideGeometry
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2571; was func_800B983C).
 ScriptFlow ScriptHideGeometryGroup(const ScriptInstruction& instruction,
                                    ScriptVmHost& host) {
   if (!InstructionFits(instruction, kHideGeometryGroupLength, host)) {
@@ -113,7 +118,8 @@ ScriptFlow ScriptHideGeometryGroup(const ScriptInstruction& instruction,
   return Advance();
 }
 
-// decomp: BATTLE.PRG func_800B9860 (4A0A8.c:2006).
+// decomp: BATTLE.PRG vs_battle_script_66_swapGeometryFlags
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2583; was func_800B9860).
 ScriptFlow ScriptSwapGeometryGroupFlags(const ScriptInstruction& instruction,
                                         ScriptVmHost& host) {
   if (!InstructionFits(instruction, kSwapGeometryGroupFlagsLength, host)) {
@@ -126,8 +132,9 @@ ScriptFlow ScriptSwapGeometryGroupFlags(const ScriptInstruction& instruction,
   return Advance();
 }
 
-// decomp: BATTLE.PRG func_800B988C (4A0A8.c:2012). The script orders the
-// operands x, layer, z, blocked; func_8008B808 takes x, z, layer, blocked.
+// decomp: BATTLE.PRG vs_battle_script_67_setTileBlocked
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2598; was func_800B988C). The script orders
+// the operands x, layer, z, blocked; func_8008B808 takes x, z, layer, blocked.
 ScriptFlow ScriptSetCollisionTileMode(const ScriptInstruction& instruction,
                                       ScriptVmHost& host) {
   if (!InstructionFits(instruction, kSetCollisionTileModeLength, host)) {
@@ -142,7 +149,8 @@ ScriptFlow ScriptSetCollisionTileMode(const ScriptInstruction& instruction,
   return Advance();
 }
 
-// decomp: BATTLE.PRG func_800BA288 (4A0A8.c:2268). The bias byte is signed.
+// decomp: BATTLE.PRG vs_battle_script_7D (src/BATTLE/BATTLE.PRG/4DEA8.c:2916;
+// was func_800BA288). The bias byte is signed.
 ScriptFlow ScriptAdjustGeometryDepthBias(const ScriptInstruction& instruction,
                                          ScriptVmHost& host) {
   if (!InstructionFits(instruction, kAdjustGeometryDepthBiasLength, host)) {
@@ -156,8 +164,9 @@ ScriptFlow ScriptAdjustGeometryDepthBias(const ScriptInstruction& instruction,
   return Advance();
 }
 
-// decomp: BATTLE.PRG func_800B9F28 (4A0A8.c:2160). The byte is stored as
-// the background's enabled flag unchanged.
+// decomp: BATTLE.PRG vs_battle_script_73 (src/BATTLE/BATTLE.PRG/4DEA8.c:2805;
+// was func_800B9F28). The byte is stored as the background's enabled flag
+// unchanged.
 ScriptFlow ScriptSetRoomBackgroundVisible(const ScriptInstruction& instruction,
                                           ScriptVmHost& host) {
   if (!InstructionFits(instruction, kSetRoomBackgroundVisibleLength, host)) {
@@ -168,8 +177,9 @@ ScriptFlow ScriptSetRoomBackgroundVisible(const ScriptInstruction& instruction,
   return Advance();
 }
 
-// decomp: BATTLE.PRG func_800B9F4C (4A0A8.c:2166). Whether the reads were
-// queued is ignored; the wait opcode follows them.
+// decomp: BATTLE.PRG vs_battle_script_74 (src/BATTLE/BATTLE.PRG/4DEA8.c:2811;
+// was func_800B9F4C). Whether the reads were queued is ignored; the wait opcode
+// follows them.
 ScriptFlow ScriptLoadRoomBackground(const ScriptInstruction& instruction,
                                     ScriptVmHost& host) {
   if (!InstructionFits(instruction, kLoadRoomBackgroundLength, host)) {
@@ -181,16 +191,17 @@ ScriptFlow ScriptLoadRoomBackground(const ScriptInstruction& instruction,
   return Advance();
 }
 
-// decomp: BATTLE.PRG func_800B9F70 (4A0A8.c:2172): returns
-// func_8008F0FC() == 0, holding on every step before the last.
+// decomp: BATTLE.PRG vs_battle_script_75 (src/BATTLE/BATTLE.PRG/4DEA8.c:2817;
+// was func_800B9F70): returns func_8008F0FC() == 0, holding on every step
+// before the last.
 ScriptFlow ScriptWaitForRoomBackground(const ScriptInstruction& /*instruction*/,
                                        ScriptVmHost& host) {
   const bool loaded = host.FinishTiledBackgroundLoad();
   return loaded ? Advance() : Hold();
 }
 
-// decomp: BATTLE.PRG func_800B9F90 (4A0A8.c:2174): returns
-// (D_800F4C2C == 2) * 4, read after the release.
+// decomp: BATTLE.PRG vs_battle_script_76 (src/BATTLE/BATTLE.PRG/4DEA8.c:2822;
+// was func_800B9F90): returns (D_800F4C2C == 2) * 4, read after the release.
 ScriptFlow ScriptFreeRoomBackground(const ScriptInstruction& /*instruction*/,
                                     ScriptVmHost& host) {
   host.ReleaseTiledBackground();
@@ -200,8 +211,9 @@ ScriptFlow ScriptFreeRoomBackground(const ScriptInstruction& /*instruction*/,
   return Advance();
 }
 
-// decomp: BATTLE.PRG func_800BA218 (4A0A8.c:2256). Each offset is a
-// little-endian halfword sign-extended by vs_battle_getShort.
+// decomp: BATTLE.PRG vs_battle_script_7B (src/BATTLE/BATTLE.PRG/4DEA8.c:2904;
+// was func_800BA218). Each offset is a little-endian halfword sign-extended by
+// vs_battle_getShort.
 ScriptFlow ScriptSetBackgroundOffset(const ScriptInstruction& instruction,
                                      ScriptVmHost& host) {
   if (!InstructionFits(instruction, kSetBackgroundOffsetLength, host)) {
@@ -214,8 +226,9 @@ ScriptFlow ScriptSetBackgroundOffset(const ScriptInstruction& instruction,
   return Advance();
 }
 
-// decomp: BATTLE.PRG func_800BA264 (4A0A8.c:2262). The operand is reduced
-// to 0 or 1 before func_8007BDD8 takes it as the disabled flag.
+// decomp: BATTLE.PRG vs_battle_script_7C (src/BATTLE/BATTLE.PRG/4DEA8.c:2910;
+// was func_800BA264). The operand is reduced to 0 or 1 before func_8007BDD8
+// takes it as the disabled flag.
 ScriptFlow ScriptSetFirstPersonView(const ScriptInstruction& instruction,
                                     ScriptVmHost& host) {
   if (!InstructionFits(instruction, kSetFirstPersonViewLength, host)) {
@@ -226,7 +239,8 @@ ScriptFlow ScriptSetFirstPersonView(const ScriptInstruction& instruction,
   return Advance();
 }
 
-// decomp: BATTLE.PRG func_800BA2B4 (4A0A8.c:2274). Both bytes are signed.
+// decomp: BATTLE.PRG vs_battle_script_7E (src/BATTLE/BATTLE.PRG/4DEA8.c:2922;
+// was func_800BA2B4). Both bytes are signed.
 ScriptFlow ScriptSetBackgroundParallax(const ScriptInstruction& instruction,
                                        ScriptVmHost& host) {
   if (!InstructionFits(instruction, kSetBackgroundParallaxLength, host)) {
@@ -238,11 +252,11 @@ ScriptFlow ScriptSetBackgroundParallax(const ScriptInstruction& instruction,
   return Advance();
 }
 
-// decomp: BATTLE.PRG func_800B9FC0 (4A0A8.c:2180). The weather is selected
-// first. An immediate change leaves a running tween's frames, start and
-// deltas alone. The tween's deltas are kept in halfwords, as the original's
-// were; the wind direction's is first moved towards the short way round by
-// one full turn at most.
+// decomp: BATTLE.PRG vs_battle_script_77 (src/BATTLE/BATTLE.PRG/4DEA8.c:2828;
+// was func_800B9FC0). The weather is selected first. An immediate change leaves
+// a running tween's frames, start and deltas alone. The tween's deltas are kept
+// in halfwords, as the original's were; the wind direction's is first moved
+// towards the short way round by one full turn at most.
 ScriptFlow ScriptSetEnvironmentParticles(const ScriptInstruction& instruction,
                                          ScriptVmHost& host) {
   if (!InstructionFits(instruction, kSetEnvironmentParticlesLength, host)) {
@@ -287,8 +301,9 @@ ScriptFlow ScriptSetEnvironmentParticles(const ScriptInstruction& instruction,
   return Advance();
 }
 
-// decomp: BATTLE.PRG func_800BA0E4 (4A0A8.c:2211). Only the operand's low
-// bit is inverted; func_80091314 stores the result as the enabled flag.
+// decomp: BATTLE.PRG vs_battle_script_78 (src/BATTLE/BATTLE.PRG/4DEA8.c:2859;
+// was func_800BA0E4). Only the operand's low bit is inverted; func_80091314
+// stores the result as the enabled flag.
 ScriptFlow ScriptSetParticleVariationEnabled(
     const ScriptInstruction& instruction, ScriptVmHost& host) {
   if (!InstructionFits(instruction, kSetParticleVariationEnabledLength, host)) {
@@ -299,8 +314,9 @@ ScriptFlow ScriptSetParticleVariationEnabled(
   return Advance();
 }
 
-// decomp: BATTLE.PRG func_800BA108 (4A0A8.c:2217). Muting while already
-// muted keeps the first saved sound; the saved sound is a halfword.
+// decomp: BATTLE.PRG vs_battle_script_7A (src/BATTLE/BATTLE.PRG/4DEA8.c:2865;
+// was func_800BA108). Muting while already muted keeps the first saved sound;
+// the saved sound is a halfword.
 ScriptFlow ScriptMuteEnvironmentSound(const ScriptInstruction& instruction,
                                       ScriptVmHost& host) {
   if (!InstructionFits(instruction, kMuteEnvironmentSoundLength, host)) {
@@ -325,8 +341,8 @@ ScriptFlow ScriptMuteEnvironmentSound(const ScriptInstruction& instruction,
   return Advance();
 }
 
-// decomp: BATTLE.PRG func_800BA194 (4A0A8.c:2238). The effect byte is read
-// whatever the mode.
+// decomp: BATTLE.PRG vs_battle_script_79 (src/BATTLE/BATTLE.PRG/4DEA8.c:2886;
+// was func_800BA194). The effect byte is read whatever the mode.
 ScriptFlow ScriptControlRoomAnimation(const ScriptInstruction& instruction,
                                       ScriptVmHost& host) {
   if (!InstructionFits(instruction, kControlRoomAnimationLength, host)) {

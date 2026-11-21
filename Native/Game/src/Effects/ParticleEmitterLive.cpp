@@ -414,7 +414,7 @@ class LiveEmissionHost final : public ParticleEmissionHost {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800D2ADC (src/BATTLE/BATTLE.PRG/5BF94.c:6935-7502).
+// decomp: BATTLE.PRG func_800D2ADC (src/BATTLE/BATTLE.PRG/5BF94.c:6497).
 // Preserves the existing event-call parameter order.
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 void EmitLiveParticleEvent(LiveEffectInstance* instance, int event,

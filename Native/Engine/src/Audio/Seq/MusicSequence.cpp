@@ -199,7 +199,8 @@ std::uint32_t EnabledChannels(std::uint32_t mask) {
 }
 }  // namespace
 
-// decomp: SLUS_010.40 func_80015C9C (src/SLUS_010.40/25AC.c:2330)
+// decomp: SLUS_010.40 Sound_ResetChannel (src/SLUS_010.40/25AC.c:2499; was
+// func_80015C9C)
 void ResetSoundEffectChannel(
     SequenceChannel& channel, std::uint32_t program_start,
     const Samples::InstrumentRecord& first_instrument) {
@@ -236,7 +237,8 @@ void ResetSoundEffectChannel(
   SelectChannelInstrument(state, 0, first_instrument);
 }
 
-// decomp: SLUS_010.40 func_80015D38 (src/SLUS_010.40/25AC.c:2363)
+// decomp: SLUS_010.40 ChannelMaskToVoiceMask (src/SLUS_010.40/25AC.c:2532; was
+// func_80015D38)
 std::uint32_t AssignedVoiceMask(
     std::span<const std::uint32_t, kMusicChannelCount> assigned_voices,
     std::uint32_t channel_mask) {
@@ -267,7 +269,7 @@ std::optional<SequenceHeader> ReadSequenceHeader(
   return header;
 }
 
-// decomp: SLUS_010.40 Sound_LoadAkaoSequence (src/SLUS_010.40/25AC.c:2380)
+// decomp: SLUS_010.40 Sound_LoadAkaoSequence (src/SLUS_010.40/25AC.c:2548)
 LoadResult LoadMusicSequence(
     MusicStartState& state, std::span<const std::uint8_t> sequence,
     const Samples::InstrumentRecord& first_instrument) {
@@ -308,7 +310,8 @@ LoadResult LoadMusicSequence(
   return result;
 }
 
-// decomp: SLUS_010.40 Sound_KillMusicConfig (src/SLUS_010.40/25AC.c:2506)
+// decomp: SLUS_010.40 Sound_KillMusicContext (src/SLUS_010.40/25AC.c:2678; was
+// Sound_KillMusicConfig)
 std::optional<std::uint32_t> ReleaseMusicConfiguration(
     MusicLayerState& layer, MusicChannels& channels, std::uint32_t owned_voices,
     std::uint32_t music_id_filter) {
@@ -354,7 +357,7 @@ void SlideReverbFromSecondary(MusicStartState& state) {
 }
 }  // namespace
 
-// decomp: SLUS_010.40 Sound_SetMusicSequence (src/SLUS_010.40/25AC.c:2847)
+// decomp: SLUS_010.40 Sound_SetMusicSequence (src/SLUS_010.40/25AC.c:3016)
 std::uint32_t RestoreMusicSequence(MusicStartState& state,
                                    const SequenceHeader& header,
                                    bool swap_with_saved) {
@@ -441,7 +444,7 @@ void KeepCurrentTrack(MusicCommandState& state, MusicHost& host) {
 }  // namespace
 
 // decomp: SLUS_010.40 Sound_Cmd_10_StartFieldMusic
-// (src/SLUS_010.40/25AC.c:2958)
+// (src/SLUS_010.40/25AC.c:3136)
 void StartOrResumeMusic(MusicCommandState& state, MusicHost& host,
                         const MusicCommand& command) {
   if (state.saved_music_id != 0 && state.saved_music_id == command.param3) {
@@ -452,14 +455,15 @@ void StartOrResumeMusic(MusicCommandState& state, MusicHost& host,
   state.active.music_id = static_cast<std::uint16_t>(command.param3);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_40_PushMusicState (src/SLUS_010.40/25AC.c:2969)
+// decomp: SLUS_010.40 Sound_Cmd_40_PushMusicState (src/SLUS_010.40/25AC.c:3147)
 void SaveCurrentMusic(MusicCommandState& state, MusicHost& host) {
   if (state.active.active_channels == 0) return;
   host.SaveSnapshot(state);
   host.MapSavedInstrumentsToBaseBank(state);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_19_Unk (src/SLUS_010.40/25AC.c:2983)
+// decomp: SLUS_010.40 Sound_Cmd_19_SetMusicLevelImmediate
+// (src/SLUS_010.40/25AC.c:3162; was Sound_Cmd_19_Unk)
 void StartMusicLayer(MusicCommandState& state, MusicHost& host,
                      const MusicCommand& command) {
   KeepCurrentTrack(state, host);
@@ -471,7 +475,8 @@ void StartMusicLayer(MusicCommandState& state, MusicHost& host,
   state.mix_behavior &= ~kSavedMusicFade;
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_1A_Unk (src/SLUS_010.40/25AC.c:3001)
+// decomp: SLUS_010.40 Sound_Cmd_1A_StartMasterAndMusicVolumeFade
+// (src/SLUS_010.40/25AC.c:3181; was Sound_Cmd_1A_Unk)
 void CrossfadeMusicLayers(MusicCommandState& state, MusicHost& host,
                           const MusicCommand& command) {
   if (state.saved_music_id != 0 && state.saved_music_id == command.param3) {
@@ -503,14 +508,16 @@ void CrossfadeMusicLayers(MusicCommandState& state, MusicHost& host,
   host.ReleaseSavedVoiceConflicts(state);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_12_unk (src/SLUS_010.40/25AC.c:3034)
+// decomp: SLUS_010.40 Sound_Cmd_12_PlayFieldMusicLooped
+// (src/SLUS_010.40/25AC.c:3216; was Sound_Cmd_12_unk)
 void StartMusicWithLoopCounter(MusicCommandState& state, MusicHost& host,
                                const MusicCommand& command) {
   StartOrResumeMusic(state, host, command);
   state.music_loops_remaining = command.param4 != 0 ? command.param4 - 1 : 0;
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_C0_unk (src/SLUS_010.40/25AC.c:3123)
+// decomp: SLUS_010.40 Sound_Cmd_C0_SetMasterVolumeByMusicId
+// (src/SLUS_010.40/25AC.c:3304; was Sound_Cmd_C0_unk)
 void SetMusicVolume(MusicCommandState& state, MusicHost& host,
                     const MusicCommand& command) {
   const std::optional<ChannelGroup> group = LayerPlaying(state, command.param1);
@@ -521,7 +528,8 @@ void SetMusicVolume(MusicCommandState& state, MusicHost& host,
   host.InvalidateMusicVolumes(state, *group);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_C1_unk (src/SLUS_010.40/25AC.c:3147)
+// decomp: SLUS_010.40 Sound_Cmd_C1_FadeMasterVolumeByMusicId
+// (src/SLUS_010.40/25AC.c:3328; was Sound_Cmd_C1_unk)
 void FadeMusicVolume(MusicCommandState& state, MusicHost& host,
                      const MusicCommand& command) {
   const std::int32_t ticks = FadeTicks(command.param2);
@@ -535,7 +543,8 @@ void FadeMusicVolume(MusicCommandState& state, MusicHost& host,
   host.InvalidateMusicVolumes(state, *group);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_C2_unk (src/SLUS_010.40/25AC.c:3184)
+// decomp: SLUS_010.40 Sound_Cmd_C2_FadeMasterVolumeFromByMusicId
+// (src/SLUS_010.40/25AC.c:3365; was Sound_Cmd_C2_unk)
 void FadeMusicVolumeFrom(MusicCommandState& state, MusicHost& host,
                          const MusicCommand& command) {
   const std::int32_t ticks = FadeTicks(command.param2);
@@ -549,7 +558,8 @@ void FadeMusicVolumeFrom(MusicCommandState& state, MusicHost& host,
   host.InvalidateMusicVolumes(state, *group);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_C8_unk (src/SLUS_010.40/25AC.c:3216)
+// decomp: SLUS_010.40 Sound_Cmd_C8_SetCdVolume (src/SLUS_010.40/25AC.c:3398;
+// was Sound_Cmd_C8_unk)
 void SetDiscVolume(MusicCommandState& state, MusicHost& host,
                    const MusicCommand& command) {
   state.disc_volume.length = 0;
@@ -557,7 +567,8 @@ void SetDiscVolume(MusicCommandState& state, MusicHost& host,
   host.WriteDiscVolume(state);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_C9_unk (src/SLUS_010.40/25AC.c:3223)
+// decomp: SLUS_010.40 Sound_Cmd_C9_FadeCdVolume (src/SLUS_010.40/25AC.c:3405;
+// was Sound_Cmd_C9_unk)
 void FadeDiscVolume(MusicCommandState& state, const MusicCommand& command) {
   const std::int32_t ticks = FadeTicks(command.param1);
   state.disc_volume.length = static_cast<std::int16_t>(ticks);
@@ -566,7 +577,8 @@ void FadeDiscVolume(MusicCommandState& state, const MusicCommand& command) {
       ticks);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_CA_unk (src/SLUS_010.40/25AC.c:3237)
+// decomp: SLUS_010.40 Sound_Cmd_CA_FadeCdVolumeFrom
+// (src/SLUS_010.40/25AC.c:3419; was Sound_Cmd_CA_unk)
 void FadeDiscVolumeFrom(MusicCommandState& state, const MusicCommand& command) {
   const std::int32_t ticks = FadeTicks(command.param1);
   state.disc_volume.length = static_cast<std::int16_t>(ticks);

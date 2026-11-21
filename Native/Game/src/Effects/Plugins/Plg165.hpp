@@ -4,6 +4,7 @@
 #include <cstdint>
 
 namespace VS::Effects::Plg165 {
-// decomp: D_800FE38C (PLG165.BIN/F8.c:5; trailEffect.h:70)
+// decomp: vs_effect_deathWail_0_origin_state (src/EFFECT/trailEffect.h:70; was
+// D_800FE38C; src/EFFECT/trailEffect.h:70)
 extern std::int32_t trailEmissionCounter;
 }  // namespace VS::Effects::Plg165

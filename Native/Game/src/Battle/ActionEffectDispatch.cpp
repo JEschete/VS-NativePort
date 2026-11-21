@@ -56,7 +56,7 @@ void CountWeaponKill(ActionEffectWorld& world, int execute) {
 }
 }  // namespace
 
-// decomp: func_80085008 (src/BATTLE/BATTLE.PRG/146C.c:12930).
+// decomp: func_80085008 (src/BATTLE/BATTLE.PRG/146C.c:12767).
 void DeriveLimbInjuryStatuses(LimbInjuryQueue& queue) {
   const auto first = queue.MobilityLimb(0);
   const auto second = queue.MobilityLimb(1);
@@ -81,7 +81,7 @@ void DeriveLimbInjuryStatuses(LimbInjuryQueue& queue) {
   }
 }
 
-// decomp: func_80085390 (src/BATTLE/BATTLE.PRG/146C.c:13012).
+// decomp: func_80085390 (src/BATTLE/BATTLE.PRG/146C.c:12849).
 void ApplyActionHitEffect(ActionEffectWorld& world, int execute, int hit) {
   if (!world.TargetPosition() && world.TargetActorId() == kExemptActor) {
     world.QueueExemptDamage();

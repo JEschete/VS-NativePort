@@ -2,7 +2,8 @@
 #include "Effects/Plugins/Plg047.hpp"
 
 namespace VS::Effects::Plg047 {
-// decomp: D_800FA76C (PLG047.BIN/0.c:5; closedRings.h:58)
+// decomp: vs_effect_vulcanLance_0_colors (src/EFFECT/closedRings.h:58; was
+// D_800FA76C; src/EFFECT/closedRings.h:58)
 const plugins::RingPalette kClosedRingColorFactors = {
     {0xFF, 0xFF, 0xFF, 0x00}, {0x80, 0x80, 0x80, 0x00},
     {0xFF, 0x80, 0x00, 0x00}, {0x00, 0x80, 0xFF, 0x00},

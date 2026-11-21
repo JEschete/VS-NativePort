@@ -78,14 +78,14 @@ bool HasActiveWaypoint(
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800E5A74 (src/BATTLE/BATTLE.PRG/7CD68.c:595).
+// decomp: BATTLE.PRG func_800E5A74 (src/BATTLE/BATTLE.PRG/7CD68.c:200).
 std::uint32_t ApplySavedAiSettingsFlags(std::uint32_t settings,
                                         std::uint16_t saved_flags) {
   return ((saved_flags & kFlagBits) << kFlagsShift) |
          (settings & ~kSavedAiSettingsMask);
 }
 
-// decomp: BATTLE.PRG func_800E5A9C (src/BATTLE/BATTLE.PRG/7CD68.c:689).
+// decomp: BATTLE.PRG func_800E5A9C (src/BATTLE/BATTLE.PRG/7CD68.c:205).
 ActorAiSettings ApplyActorAiSettings(const ActorAiSettingsSource& source,
                                      const ActorAiSettingsTables& tables) {
   const std::uint32_t settings = source.settings;

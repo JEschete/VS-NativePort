@@ -7,7 +7,7 @@
 
 #include "Effects/Templates/RingCore.hpp"
 
-// The closed ring template (decomp src/EFFECT/closedRings.h:41
+// The closed ring template (decomp src/EFFECT/closedRings.h:60
 // vs_closedRing): sixteen points per row around the whole circle, drawn as
 // two bands of sixteen textured quads, the last closing the ring onto column
 // 0 (DrawSixteenColumnRing). One copy of the texture spans four or sixteen

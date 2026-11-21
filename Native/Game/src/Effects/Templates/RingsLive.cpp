@@ -299,9 +299,9 @@ class LiveRingHost final : public RingHost {
   LiveEffectInstance* instance_ = nullptr;
 };
 
-// decomp: rings.h:41-55, closedRings.h:63-75 and tiledRings.h:57-69 (the
-// create command). The original indexed the definition and allocated the
-// state unchecked and left reserved_2 as the heap held it.
+// decomp: src/EFFECT/rings.h:41-55, src/EFFECT/closedRings.h:63-75 and
+// tiledRings.h:57-69 (the create command). The original indexed the definition
+// and allocated the state unchecked and left reserved_2 as the heap held it.
 void LiveRingHost::Create(const RingState& state, RingTextureSource source) {
   const LiveParticleDefinition* definition = Definition(state.definition_index);
   if (definition == nullptr) {
@@ -458,9 +458,9 @@ std::optional<RingTexture> LiveRingHost::AdvanceTexture() {
                      .h = texture.h};
 }
 
-// decomp: rings.h:274-280 (addPrim at the quad's depth). The original wrote
-// past the primitive buffer when it was full; a quad without room or outside
-// the scene table is dropped here.
+// decomp: src/EFFECT/rings.h:274-280 (addPrim at the quad's depth). The
+// original wrote past the primitive buffer when it was full; a quad without
+// room or outside the scene table is dropped here.
 void LiveRingHost::Submit(const RingQuad& quad, std::int32_t depth) {
   std::uint32_t* const entry =
       Render::LiveFrameOrderingEntry(Render::LiveOrderingBase::kScene, depth);
@@ -484,8 +484,8 @@ void LiveRingHost::Submit(const RingQuad& quad, std::int32_t depth) {
   VS::Render::FrameScratchpad().primitive_cursor = packet + kRingPacketWords;
 }
 
-// decomp: rings.h:283-293 (the tick event through the transform's world
-// matrix, by way of the scratch vector and aim point).
+// decomp: src/EFFECT/rings.h:283-293 (the tick event through the transform's
+// world matrix, by way of the scratch vector and aim point).
 Vec3 LiveRingHost::TransformByActor(RingPoint point) {
   const MATRIX& world =
       instance_->transforms[definition_->transform_index].world;

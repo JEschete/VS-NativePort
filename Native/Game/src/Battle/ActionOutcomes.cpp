@@ -39,7 +39,8 @@ void PlayHitSound(std::uint8_t impact, int source_actor, ActionPoint point,
 }
 }  // namespace
 
-// decomp: _enemyDefeated (src/BATTLE/BATTLE.PRG/146C.c:1824).
+// decomp: enemyDefeated (src/BATTLE/BATTLE.PRG/146C.c:1466; was
+// _enemyDefeated).
 void ResolveEnemyDefeat(int source_actor, int count_kill,
                         EnemyDefeatRecord& enemy) {
   if (enemy.Spawn() == kDynamicSpawn || enemy.Defeated()) return;
@@ -51,7 +52,7 @@ void ResolveEnemyDefeat(int source_actor, int count_kill,
   enemy.MarkDefeated();
 }
 
-// decomp: func_8006C5AC (src/BATTLE/BATTLE.PRG/146C.c:1955).
+// decomp: func_8006C5AC (src/BATTLE/BATTLE.PRG/146C.c:1597).
 int PlayWeaponHitSounds(int source_actor, ActionOutcomeWorld& world) {
   auto& action = world.Queued();
   for (std::size_t index = 0; index < action.Count(); ++index) {
@@ -63,7 +64,7 @@ int PlayWeaponHitSounds(int source_actor, ActionOutcomeWorld& world) {
   return 1;
 }
 
-// decomp: func_8006CA20 (src/BATTLE/BATTLE.PRG/146C.c:2106).
+// decomp: func_8006CA20 (src/BATTLE/BATTLE.PRG/146C.c:1748).
 void ApplyActionSourceEffects(int source_actor, ActionOutcomeWorld& world) {
   if (source_actor >= kActionActorSlots) return;
   auto& action = world.Queued();
@@ -77,7 +78,7 @@ void ApplyActionSourceEffects(int source_actor, ActionOutcomeWorld& world) {
   action.ApplyPrimaryResult();
 }
 
-// decomp: func_80074A20 (src/BATTLE/BATTLE.PRG/146C.c:5315).
+// decomp: func_80074A20 (src/BATTLE/BATTLE.PRG/146C.c:5045).
 int BeginActorDefeatAnimation(int actor, ActorDefeatWorld& world) {
   world.RefreshReservations(actor);
   if (!world.HasActor(actor)) return 0;
@@ -91,7 +92,7 @@ int BeginActorDefeatAnimation(int actor, ActorDefeatWorld& world) {
   return world.Spawn(actor) != kDynamicSpawn || actor == 0 ? 1 : 0;
 }
 
-// decomp: func_800F9818 (src/BATTLE/INITBTL.PRG/18.c:240).
+// decomp: func_800F9818 (src/BATTLE/INITBTL.PRG/18.c:251).
 void ApplyLearnedActionUnlocks(LearnedActionWorld& world) {
   constexpr std::uint8_t kFirstBit = 0x80;
   for (std::size_t index = 0; index < Save::kLearnedActionCount; ++index) {

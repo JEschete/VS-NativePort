@@ -74,7 +74,7 @@ std::uint16_t DecodeCollisionFlags(std::uint32_t cell) noexcept {
   return static_cast<std::uint16_t>(flags);
 }
 
-// decomp: BATTLE.PRG func_800E6F9C (src/BATTLE/BATTLE.PRG/7E05C.s:582), the
+// decomp: BATTLE.PRG func_800E6F9C (src/BATTLE/BATTLE.PRG/7CD68.c:338), the
 // map-building half.
 std::optional<RoomAiGrid> BuildRoomAiMap(const RoomAiSource& source) {
   if ((source.auxiliary &&
@@ -141,7 +141,7 @@ std::optional<RoomAiGrid> BuildRoomAiMap(const RoomAiSource& source) {
   return result;
 }
 
-// decomp: BATTLE.PRG func_800E6F9C (src/BATTLE/BATTLE.PRG/7E05C.s:582).
+// decomp: BATTLE.PRG func_800E6F9C (src/BATTLE/BATTLE.PRG/7CD68.c:338).
 void InitializeRoomAiMap(RoomAiRuntime& runtime) {
   const std::optional<RoomAiGrid> grid = BuildRoomAiMap(runtime.CurrentRoom());
   if (!grid) {
@@ -153,12 +153,12 @@ void InitializeRoomAiMap(RoomAiRuntime& runtime) {
   runtime.RefreshDerivedRoomState();
 }
 
-// decomp: BATTLE.PRG func_800E6158 (src/BATTLE/BATTLE.PRG/7CD68.c:814).
+// decomp: BATTLE.PRG func_800E6158 (src/BATTLE/BATTLE.PRG/7CD68.c:340).
 void InitializeRoomNavigation(RoomAiRuntime& runtime) {
   InitializeRoomAiMap(runtime);
 }
 
-// decomp: BATTLE.PRG func_800E6F1C (src/BATTLE/BATTLE.PRG/7E05C.s:541).
+// decomp: BATTLE.PRG func_800E6F1C (src/BATTLE/BATTLE.PRG/6E4CCPrivate.h:80).
 void FreeRoomAiState(RoomAiRuntime& runtime) {
   runtime.FreeActorAiStates();
   runtime.ReleaseRoomAiMap();

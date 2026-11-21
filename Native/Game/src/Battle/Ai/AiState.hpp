@@ -62,7 +62,7 @@ struct RoomAiState {
       special_actors;
 };
 
-// decomp: func_800DCAA0_t2 (src/BATTLE/BATTLE.PRG/6F014.c:96)
+// decomp: func_800DCAA0_t2 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:80)
 struct CandidateFlags {
   std::uint32_t opaque0_bit0 : 1;
   std::uint32_t opaque0_bit1 : 1;
@@ -77,7 +77,7 @@ inline constexpr std::size_t kCandidateFlagsBytes = 0x4;
 static_assert(sizeof(CandidateFlags) == kCandidateFlagsBytes,
               "CandidateFlags must keep its PS1 layout");
 
-// decomp: func_800DCAA0_t (src/BATTLE/BATTLE.PRG/6F014.c:112)
+// decomp: func_800DCAA0_t (src/BATTLE/BATTLE.PRG/6E4CCShared.h:96)
 struct ActionCandidateRecord {
   std::int32_t opaque0;
   std::uint32_t row : 3;
@@ -469,7 +469,8 @@ struct ActorAiState {
 inline constexpr std::size_t kEngagementDataReserved04Bytes = 4;
 inline constexpr std::size_t kEngagementDataReserved18Bytes = 0x24;
 
-// decomp: func_800DEB10_t2 (src/BATTLE/BATTLE.PRG/6F014.c:85)
+// decomp: func_800DEB10 (src/BATTLE/BATTLE.PRG/74088.c:856-906; was
+// func_800DEB10_t2)
 struct EngagementData {
   void* native_pointer0;  // PS1 pointer slot 0x0
   std::array<std::uint8_t, kEngagementDataReserved04Bytes> reserved0_4;
@@ -486,7 +487,8 @@ struct EngagementData {
   VS::Battle::ActorStats* stats;
 };
 
-// decomp: func_800E1238_t (src/BATTLE/BATTLE.PRG/6F014.c:139)
+// decomp: func_800E1238 (src/BATTLE/BATTLE.PRG/770A4.c:753-803; was
+// func_800E1238_t)
 struct ModelStatePrefix {
   std::int32_t reserved0;
   std::int32_t reserved4;

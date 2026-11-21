@@ -137,15 +137,16 @@ std::span<std::uint16_t> LiveContainerCategoryOrder(
   return {};
 }
 
-// decomp: func_801031A0 (src/MENU/MENUD.PRG/234.c:259)
+// decomp: func_801031A0 (src/MENU/MENUD.PRG/234.c:262)
 void PreviewLiveTransferredMisc() { static_cast<void>(Preview(false)); }
 
-// decomp: func_80103270 (src/MENU/MENUD.PRG/234.c:276)
+// decomp: func_80103270 (src/MENU/MENUD.PRG/234.c:279)
 void RefreshLiveMiscTransferCount() {
   VS::Menu::container::transferredMiscCount = Preview(true);
 }
 
-// decomp: _copyContainerItem (src/MENU/MENUD.PRG/234.c:283)
+// decomp: copyContainerItem (src/MENU/MENUD.PRG/234.c:286; was
+// _copyContainerItem)
 int CopyLiveContainerItem(int category_flags, VS::Items::ContainerData* target,
                           int source_slot, VS::Items::ContainerData* source) {
   const auto flags = static_cast<unsigned>(category_flags);
@@ -159,7 +160,8 @@ int CopyLiveContainerItem(int category_flags, VS::Items::ContainerData* target,
   return CopyContainerItem(transfer, target_world, source_slot, source_world);
 }
 
-// decomp: _defragmentContainerItems (src/MENU/MENUD.PRG/234.c:498)
+// decomp: defragmentContainerItems (src/MENU/MENUD.PRG/234.c:501; was
+// _defragmentContainerItems)
 void RebuildLiveContainerCategoryIndices(int category,
                                          VS::Items::Container* container) {
   const auto typed_category = Category(category);
@@ -168,19 +170,22 @@ void RebuildLiveContainerCategoryIndices(int category,
   RebuildContainerCategoryIndices(typed_category, order, world);
 }
 
-// decomp: _copyInventoryToContainer (src/MENU/MENUD.PRG/234.c:555)
+// decomp: copyInventoryToContainer (src/MENU/MENUD.PRG/234.c:558; was
+// _copyInventoryToContainer)
 void SnapshotLiveGadgetBag() {
   LiveBag world;
   SnapshotGadgetBag(world);
 }
 
-// decomp: _copyContainerToInventory (src/MENU/MENUD.PRG/234.c:592)
+// decomp: copyContainerToInventory (src/MENU/MENUD.PRG/234.c:595; was
+// _copyContainerToInventory)
 void CommitLiveGadgetBag() {
   LiveBag world;
   CommitGadgetBag(world);
 }
 
-// decomp: _getParentItemIndex (src/MENU/MENUD.PRG/234.c:625)
+// decomp: getParentItemIndex (src/MENU/MENUD.PRG/234.c:628; was
+// _getParentItemIndex)
 int LiveContainerParentWeaponIndex(int category, int index,
                                    VS::Items::ContainerData* container) {
   if (category != static_cast<int>(ItemCategory::kBlade) &&
@@ -193,7 +198,8 @@ int LiveContainerParentWeaponIndex(int category, int index,
                                     world);
 }
 
-// decomp: _getSetShieldIndex (src/MENU/MENUD.PRG/234.c:645)
+// decomp: getSetShieldIndex (src/MENU/MENUD.PRG/234.c:647; was
+// _getSetShieldIndex)
 int LiveContainerParentShieldIndex(int category, int index,
                                    VS::Items::ContainerData* container) {
   if (category != static_cast<int>(ItemCategory::kGem)) return 0;

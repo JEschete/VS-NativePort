@@ -7,19 +7,21 @@
 
 namespace VS::Field {
 
-// decomp: vs_battle_screenTransitionStep (BATTLE/BATTLE.PRG 146C.h): the
-// Field::TransitionStep.
+// decomp: vs_battle_screenTransitionStep (BATTLE/BATTLE.PRG
+// src/BATTLE/BATTLE.PRG/camera.h:57): the Field::TransitionStep.
 extern unsigned int screenTransitionStep;
-// decomp: vs_battle_screenTransitionEffect (BATTLE/BATTLE.PRG 146C.h): the
-// fade or wipe style (Render::ScreenTransitionStyleOf).
+// decomp: vs_battle_screenTransitionEffect (BATTLE/BATTLE.PRG
+// src/BATTLE/BATTLE.PRG/camera.h:58): the fade or wipe style
+// (Render::ScreenTransitionStyleOf).
 extern int screenTransitionEffect;
-// decomp: vs_battle_screenTransitionAlpha (BATTLE/BATTLE.PRG 146C.h): 0
-// clear to 255 covered.
+// decomp: vs_battle_screenTransitionAlpha (BATTLE/BATTLE.PRG
+// src/BATTLE/BATTLE.PRG/camera.h:52): 0 clear to 255 covered.
 extern int screenTransitionAlpha;
-// decomp: vs_battle_screenTransitionWipeAngle (BATTLE/BATTLE.PRG 146C.h).
+// decomp: vs_battle_screenTransitionWipeAngle (BATTLE/BATTLE.PRG
+// src/BATTLE/BATTLE.PRG/camera.h:59).
 extern int screenTransitionWipeAngle;
-// decomp: vs_battle_screenTransitionSpeed (BATTLE/BATTLE.PRG 146C.h): the
-// alpha change per frame.
+// decomp: vs_battle_screenTransitionSpeed (BATTLE/BATTLE.PRG
+// src/BATTLE/BATTLE.PRG/camera.h:60): the alpha change per frame.
 extern int screenTransitionSpeed;
 
 }  // namespace VS::Field

@@ -11,7 +11,7 @@ constexpr int kWorkspaceBusyDiagnostic = 0x66;
 constexpr int kWorkspaceNotOwnedDiagnostic = 0x67;
 }  // namespace
 
-// decomp: BATTLE.PRG func_8007E180 (src/BATTLE/BATTLE.PRG/146C.c:9562)
+// decomp: BATTLE.PRG func_8007E180 (src/BATTLE/BATTLE.PRG/146C.c:9552)
 bool AcquireOverlayWorkspace(OverlayWorkspaceHost& host,
                              std::int32_t owner_tag) {
   if (host.Owner() != 0) {
@@ -22,7 +22,7 @@ bool AcquireOverlayWorkspace(OverlayWorkspaceHost& host,
   return true;
 }
 
-// decomp: BATTLE.PRG func_8007E1C0 (src/BATTLE/BATTLE.PRG/146C.c:9572)
+// decomp: BATTLE.PRG func_8007E1C0 (src/BATTLE/BATTLE.PRG/146C.c:9562)
 bool ReleaseOverlayWorkspace(OverlayWorkspaceHost& host,
                              std::int32_t owner_tag) {
   if (std::int32_t{host.Owner()} != owner_tag) {

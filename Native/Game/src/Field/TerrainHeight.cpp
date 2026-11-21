@@ -57,12 +57,12 @@ std::uint16_t TerrainGrid::Cell(int x, int z) const {
   return rows_[static_cast<std::size_t>(z)][static_cast<std::size_t>(x)];
 }
 
-// decomp: func_800E4320 (src/BATTLE/BATTLE.PRG/7B5DC.s:413).
+// decomp: func_800E4320 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:476).
 int GroundHeightFlagsAtTile(TerrainGrid grid, int x, int z) {
   return UnwrappedHeight(grid.Cell(x, z));
 }
 
-// decomp: func_800E42EC (src/BATTLE/BATTLE.PRG/7B5DC.s:387).
+// decomp: func_800E42EC (src/BATTLE/BATTLE.PRG/6E4CCShared.h:475).
 int GroundHeightAtTile(TerrainGrid grid, int x, int z) {
   return WrappedHeight(GroundHeightFlagsAtTile(grid, x, z));
 }
@@ -84,13 +84,13 @@ int GroundHeightFlagsAtWorldPosition(TerrainGrid grid, int x, int z) {
   return GroundHeightFlagsAtTile(grid, x >> kTileShift, z >> kTileShift);
 }
 
-// decomp: func_800E42E0 (src/BATTLE/BATTLE.PRG/7B5DC.s:378).
+// decomp: func_800E42E0 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:474).
 int GroundHeightAtPackedTile(TerrainGrid grid,
                              Core::Math::TileCoordinate tile) {
   return WrappedHeight(GroundHeightFlagsAtPackedTile(grid, tile));
 }
 
-// decomp: func_800E42D4 (src/BATTLE/BATTLE.PRG/7B5DC.s:371).
+// decomp: func_800E42D4 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:473).
 int GroundHeightAtWorldPosition(TerrainGrid grid, int x, int z) {
   return WrappedHeight(GroundHeightFlagsAtWorldPosition(grid, x, z));
 }

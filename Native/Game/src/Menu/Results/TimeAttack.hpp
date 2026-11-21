@@ -8,8 +8,8 @@
 #include "Content/DiscQueue.hpp"
 
 namespace VS::Menu::Results {
-// decomp: _disFileIndices (src/MENU/MENUF.PRG/3B8.c:44): the results screens'
-// DIS image files.
+// decomp: disFileIndices (src/MENU/MENUF.PRG/3B8.c:58; was _disFileIndices):
+// the results screens' DIS image files.
 enum class DisFile : std::uint8_t { kRank, kTime, kAttack, kIq, kEsc };
 
 // One DIS file per DisFile, kRank through kEsc.

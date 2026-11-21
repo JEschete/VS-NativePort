@@ -42,7 +42,7 @@ void ShiftEndpoint(const CommandEndpoint& endpoint, const ColourShift& shift,
 }
 }  // namespace
 
-// decomp: func_800D5780 (src/BATTLE/BATTLE.PRG/5BF94.c:7933)
+// decomp: func_800D5780 (src/BATTLE/BATTLE.PRG/5BF94.c:6927)
 std::optional<TimelineKeyAdvance> AdvanceTimelineKey(std::int16_t key_index,
                                                      std::uint8_t key_count,
                                                      std::uint8_t kind) {
@@ -52,7 +52,7 @@ std::optional<TimelineKeyAdvance> AdvanceTimelineKey(std::int16_t key_index,
                             .setup = SetupOf(kind)};
 }
 
-// decomp: func_800D5700 (src/BATTLE/BATTLE.PRG/5BF94.c:7920)
+// decomp: func_800D5700 (src/BATTLE/BATTLE.PRG/5BF94.c:6914)
 ParticleKeyTiming ParticleKeyTimingOf(std::uint32_t key) {
   return {.timer = static_cast<std::int16_t>((key >> kParticleTimerShift) &
                                              kParticleTimerMask),
@@ -60,7 +60,7 @@ ParticleKeyTiming ParticleKeyTimingOf(std::uint32_t key) {
               (key >> kParticleParameterShift) & kParticleParameterMask)};
 }
 
-// decomp: func_800D5738 (src/BATTLE/BATTLE.PRG/5BF94.c:7927)
+// decomp: func_800D5738 (src/BATTLE/BATTLE.PRG/5BF94.c:6921)
 std::int16_t ShakeKeyTimer(std::uint32_t parameters,
                            const CurveDuration& duration) {
   const auto curve = static_cast<std::uint8_t>(
@@ -76,7 +76,7 @@ ColourShift ColourShiftOf(const ColourKey& key) {
           .blue = Offset(key.blue)};
 }
 
-// decomp: func_800D5F8C (src/BATTLE/BATTLE.PRG/5BF94.c:8128)
+// decomp: func_800D5F8C (src/BATTLE/BATTLE.PRG/5BF94.c:7122)
 bool TickSourceActorColourTrack(const ColourKey& key,
                                 std::int16_t timeline_frame,
                                 const CommandEndpoint& emit_from,
@@ -86,7 +86,7 @@ bool TickSourceActorColourTrack(const ColourKey& key,
   return host.AdvanceKey();
 }
 
-// decomp: func_800D6048 (src/BATTLE/BATTLE.PRG/5BF94.c:8144)
+// decomp: func_800D6048 (src/BATTLE/BATTLE.PRG/5BF94.c:7138)
 bool TickTargetActorColourTrack(const ColourKey& key,
                                 std::int16_t timeline_frame,
                                 std::span<const CommandEndpoint> action_targets,
@@ -104,7 +104,7 @@ bool TickTargetActorColourTrack(const ColourKey& key,
   return host.AdvanceKey();
 }
 
-// decomp: func_800D61AC (src/BATTLE/BATTLE.PRG/5BF94.c:8172)
+// decomp: func_800D61AC (src/BATTLE/BATTLE.PRG/5BF94.c:7166)
 bool TickOtherActorColourTrack(const ColourKey& key,
                                std::int16_t timeline_frame,
                                std::span<const std::uint8_t> other_actors,
@@ -117,7 +117,7 @@ bool TickOtherActorColourTrack(const ColourKey& key,
   return host.AdvanceKey();
 }
 
-// decomp: func_800D6298 (src/BATTLE/BATTLE.PRG/5BF94.c:8189)
+// decomp: func_800D6298 (src/BATTLE/BATTLE.PRG/5BF94.c:7183)
 bool TickSceneColourTrack(const ColourKey& key, std::int16_t timeline_frame,
                           ColourTrackHost& host) {
   if (key.frame != timeline_frame) return true;
@@ -125,7 +125,7 @@ bool TickSceneColourTrack(const ColourKey& key, std::int16_t timeline_frame,
   return host.AdvanceKey();
 }
 
-// decomp: func_800D6310 (src/BATTLE/BATTLE.PRG/5BF94.c:8201)
+// decomp: func_800D6310 (src/BATTLE/BATTLE.PRG/5BF94.c:7195)
 bool TickBackgroundColourTrack(const ColourKey& key,
                                std::int16_t timeline_frame,
                                ColourTrackHost& host) {

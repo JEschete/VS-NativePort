@@ -128,7 +128,7 @@ class TargetApproachWorld {
   virtual void RefreshTargetTile(TargetApproacher& approacher) = 0;
 };
 
-// decomp: func_800E24EC (src/BATTLE/BATTLE.PRG/771A8.c:1973).
+// decomp: func_800E24EC (src/BATTLE/BATTLE.PRG/770A4.c:1290).
 // Moves toward the target (target_id) and keeps it at `range`. A moved,
 // changed or 181-call-old target restarts the approach. An active, reachable
 // target sets the range mode by distance with hysteresis: far walks or runs
@@ -143,7 +143,7 @@ class TargetApproachWorld {
 [[nodiscard]] std::optional<bool> UpdateTargetApproachMovement(
     TargetApproachWorld& world, TargetApproacher& approacher, int option);
 
-// decomp: func_800E2B2C (src/BATTLE/BATTLE.PRG/771A8.c:2185).
+// decomp: func_800E2B2C (src/BATTLE/BATTLE.PRG/770A4.c:1494).
 // Turns toward a visible target whose tile changed, after `facing_delay`
 // frames; a pending reaction or a lost target hesitates instead. Returns
 // whether the actor turned or is still hesitating; targeting itself stands.

@@ -26,13 +26,14 @@ enum class TextureFormat : std::uint8_t {
   kDirect16Bit = 2
 };
 
-// decomp: vs_battle_geomOffset (src/BATTLE/BATTLE.PRG/2EA3C.h:7)
+// decomp: vs_GeomOffset (src/BATTLE/BATTLE.PRG/2EA3C.h:13-16; was
+// vs_battle_geomOffset)
 struct ScreenOffset {
   std::int32_t x;
   std::int32_t y;
 };
 
-// decomp: vs_camera_t (src/include/scratch.h:10)
+// decomp: vs_Camera (src/include/scratch.h:6-11; was vs_camera_t)
 struct Camera {
   VS::Core::Gte::VECTOR position;
   VS::Core::Gte::VECTOR look_at;
@@ -40,8 +41,8 @@ struct Camera {
   std::int32_t far_clip;
 };
 
-// decomp: vs_scratch_t (src/include/scratch.h:20). The original's pointers
-// were 4 bytes; natively they widen the record.
+// decomp: vs_Scratch (src/include/scratch.h:13-21; was vs_scratch_t). The
+// original's pointers were 4 bytes; natively they widen the record.
 struct FrameScratch {
   void* primitive_cursor;
   void* ordering_table;
@@ -52,7 +53,7 @@ struct FrameScratch {
   Camera camera;
 };
 
-// decomp: vs_scratch (src/include/scratch.h): the frame's drawing context,
+// decomp: vs_scratch (src/include/scratch.h:23): the frame's drawing context,
 // which the original kept at the start of the scratchpad. Render owns it
 // (Frame.cpp); the frame setup rewrites it every frame.
 extern FrameScratch frameScratch;

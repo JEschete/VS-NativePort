@@ -165,64 +165,70 @@ intptr_t RunCommand(Handler handler, const std::uint8_t* command,
 }
 }  // namespace
 
-// decomp: func_800BA2E0 (src/BATTLE/BATTLE.PRG/4A0A8.c:2280), opcode 0x80
+// decomp: vs_battle_script_80_playSfx (src/BATTLE/BATTLE.PRG/4DEA8.c:2928; was
+// func_800BA2E0), opcode 0x80
 std::intptr_t VS::Event::ScriptPlaySoundCommandOpcode(
     std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptPlaySoundCommand, command,
                     event::kPlaySoundLength);
 }
 
-// decomp: func_800BA35C (src/BATTLE/BATTLE.PRG/4A0A8.c:2292), opcode 0x81
+// decomp: vs_battle_script_81 (src/BATTLE/BATTLE.PRG/4DEA8.c:2940; was
+// func_800BA35C), opcode 0x81
 std::intptr_t VS::Event::CommandPlayActorSfxOpcode(std::uint8_t* command,
                                                    std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandPlayActorSfx, command,
                     event::kPlayActorSfxLength);
 }
 
-// decomp: func_800BA39C (src/BATTLE/BATTLE.PRG/4A0A8.c:2298), opcode 0x82
+// decomp: vs_battle_script_82_fadeSfxVolume
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2946; was func_800BA39C), opcode 0x82
 std::intptr_t VS::Event::CommandSlideSfxVolumeOpcode(
     std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandSlideSfxVolume, command,
                     event::kSlideSfxVolumeLength);
 }
 
-// decomp: func_800BA3E4 (src/BATTLE/BATTLE.PRG/4A0A8.c:2304), opcode 0x83
+// decomp: vs_battle_script_83_stopAllSfx (src/BATTLE/BATTLE.PRG/4DEA8.c:2952;
+// was func_800BA3E4), opcode 0x83
 std::intptr_t VS::Event::CommandStopAllSfxOpcode(std::uint8_t* command,
                                                  std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandStopAllSfx, command,
                     event::kStopAllSfxLength);
 }
 
-// decomp: func_800BA404 (src/BATTLE/BATTLE.PRG/4A0A8.c:2310), opcode 0x84
+// decomp: vs_battle_script_84_evictSfx (src/BATTLE/BATTLE.PRG/4DEA8.c:2958; was
+// func_800BA404), opcode 0x84
 std::intptr_t VS::Event::CommandStopSfxOpcode(std::uint8_t* command,
                                               std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandStopSfx, command, event::kStopSfxLength);
 }
 
-// decomp: vs_battle_script_loadSfxSlot (src/BATTLE/BATTLE.PRG/4A0A8.c:2316),
-// opcode 0x85
+// decomp: vs_battle_script_85_loadSfxSlot (src/BATTLE/BATTLE.PRG/4DEA8.c:2964;
+// was vs_battle_script_loadSfxSlot), opcode 0x85
 std::intptr_t VS::Event::CommandLoadSfxSlotOpcode(std::uint8_t* command,
                                                   std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandLoadSfxSlot, command,
                     event::kLoadSfxSlotLength);
 }
 
-// decomp: vs_battle_script_freeSfxSlot (src/BATTLE/BATTLE.PRG/4A0A8.c:2322),
-// opcode 0x86
+// decomp: vs_battle_script_86_freeSfxSlot (src/BATTLE/BATTLE.PRG/4DEA8.c:2970;
+// was vs_battle_script_freeSfxSlot), opcode 0x86
 std::intptr_t VS::Event::CommandWaitSfxSlotReleaseOpcode(
     std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandWaitSfxSlotRelease, command,
                     event::kWaitSfxSlotReleaseLength);
 }
 
-// decomp: vs_battle_script_freeSfx (src/BATTLE/BATTLE.PRG/4A0A8.c:2327), opcode
-// 0x87
+// decomp: vs_battle_script_87_freeSfx (src/BATTLE/BATTLE.PRG/4DEA8.c:2975; was
+// vs_battle_script_freeSfx), opcode 0x87
 std::intptr_t VS::Event::CommandFreeSfxOpcode(std::uint8_t* command,
                                               std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandFreeSfx, command, event::kFreeSfxLength);
 }
 
-// decomp: vs_battle_script_setCurrentSfx (src/BATTLE/BATTLE.PRG/4A0A8.c:2333),
+// decomp: vs_battle_script_88_setCurrentSfx
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2981; was vs_battle_script_setCurrentSfx),
 // opcode 0x88
 std::intptr_t VS::Event::CommandSelectSfxBankOpcode(
     std::uint8_t* command, std::int16_t /*thread_id*/) {
@@ -230,7 +236,8 @@ std::intptr_t VS::Event::CommandSelectSfxBankOpcode(
                     event::kSelectSfxBankLength);
 }
 
-// decomp: vs_battle_script_loadSoundFile (src/BATTLE/BATTLE.PRG/4A0A8.c:2339),
+// decomp: vs_battle_script_89_loadSoundFile
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2987; was vs_battle_script_loadSoundFile),
 // opcode 0x89
 std::intptr_t VS::Event::CommandLoadEventMusicOpcode(
     std::uint8_t* command, std::int16_t /*thread_id*/) {
@@ -238,14 +245,16 @@ std::intptr_t VS::Event::CommandLoadEventMusicOpcode(
                     event::kLoadEventMusicLength);
 }
 
-// decomp: func_800BA52C (src/BATTLE/BATTLE.PRG/4A0A8.c:2347), opcode 0x8F
+// decomp: vs_battle_script_8F_crossfadeMusic
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2995; was func_800BA52C), opcode 0x8F
 std::intptr_t VS::Event::CommandCrossfadeMusicOpcode(
     std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandCrossfadeMusic, command,
                     event::kCrossfadeMusicLength);
 }
 
-// decomp: vs_battle_script_loadMusicSlot (src/BATTLE/BATTLE.PRG/4A0A8.c:2354),
+// decomp: vs_battle_script_90_loadMusicSlot
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:3002; was vs_battle_script_loadMusicSlot),
 // opcode 0x90
 std::intptr_t VS::Event::CommandLoadMusicSlotOpcode(
     std::uint8_t* command, std::int16_t /*thread_id*/) {
@@ -253,69 +262,78 @@ std::intptr_t VS::Event::CommandLoadMusicSlotOpcode(
                     event::kLoadMusicSlotLength);
 }
 
-// decomp: vs_battle_script_freeMusic (src/BATTLE/BATTLE.PRG/4A0A8.c:2360),
-// opcode 0x91
+// decomp: vs_battle_script_91_freeMusic (src/BATTLE/BATTLE.PRG/4DEA8.c:3008;
+// was vs_battle_script_freeMusic), opcode 0x91
 std::intptr_t VS::Event::CommandFreeMusicOpcode(std::uint8_t* command,
                                                 std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandFreeMusic, command, event::kFreeMusicLength);
 }
 
-// decomp: func_800BA5E8 (src/BATTLE/BATTLE.PRG/4A0A8.c:2366), opcode 0x92
+// decomp: vs_battle_script_92_playMusic (src/BATTLE/BATTLE.PRG/4DEA8.c:3014;
+// was func_800BA5E8), opcode 0x92
 std::intptr_t VS::Event::CommandPlayMusicOpcode(std::uint8_t* command,
                                                 std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandPlayMusic, command, event::kPlayMusicLength);
 }
 
-// decomp: func_800BA61C (src/BATTLE/BATTLE.PRG/4A0A8.c:2372), opcode 0x93
+// decomp: vs_battle_script_93_fadeMusicVolume
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:3020; was func_800BA61C), opcode 0x93
 std::intptr_t VS::Event::CommandSlideMusicVolumeOpcode(
     std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandSlideMusicVolume, command,
                     event::kSlideMusicVolumeLength);
 }
 
-// decomp: func_800BA650 (src/BATTLE/BATTLE.PRG/4A0A8.c:2378), opcode 0x94
+// decomp: vs_battle_script_94_fadeMusicTempo
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:3026; was func_800BA650), opcode 0x94
 std::intptr_t VS::Event::CommandSlideMusicTempoOpcode(
     std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandSlideMusicTempo, command,
                     event::kSlideMusicTempoLength);
 }
 
-// decomp: func_800BA684 (src/BATTLE/BATTLE.PRG/4A0A8.c:2384), opcode 0x95
+// decomp: vs_battle_script_95_fadeMusicPitch
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:3032; was func_800BA684), opcode 0x95
 std::intptr_t VS::Event::CommandSlideMusicPitchOpcode(
     std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandSlideMusicPitch, command,
                     event::kSlideMusicPitchLength);
 }
 
-// decomp: func_800BA6B8 (src/BATTLE/BATTLE.PRG/4A0A8.c:2390), opcode 0x96
+// decomp: vs_battle_script_96_stopMusic (src/BATTLE/BATTLE.PRG/4DEA8.c:3038;
+// was func_800BA6B8), opcode 0x96
 std::intptr_t VS::Event::CommandStopMusicOpcode(std::uint8_t* command,
                                                 std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandStopMusic, command, event::kStopMusicLength);
 }
 
-// decomp: func_800BA6E0 (src/BATTLE/BATTLE.PRG/4A0A8.c:2396), opcode 0x97
+// decomp: vs_battle_script_97_waitMusicSilent
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:3044; was func_800BA6E0), opcode 0x97
 std::intptr_t VS::Event::CommandWaitMusicSlotOpcode(
     std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandWaitMusicSlot, command,
                     event::kWaitMusicSlotLength);
 }
 
-// decomp: func_800BA72C (src/BATTLE/BATTLE.PRG/4A0A8.c:2408), opcode 0x98
+// decomp: vs_battle_script_98_pushMusicState
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:3056; was func_800BA72C), opcode 0x98
 std::intptr_t VS::Event::CommandPushMusicStateOpcode(
     std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandPushMusicState, command,
                     event::kPushMusicStateLength);
 }
 
-// decomp: vs_battle_script_clearMusicLoadSlot
-// (src/BATTLE/BATTLE.PRG/4A0A8.c:2414), opcode 0x99
+// decomp: vs_battle_script_99_clearMusicLoadSlot
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:3062; was
+// vs_battle_script_clearMusicLoadSlot), opcode 0x99
 std::intptr_t VS::Event::CommandWaitMusicSlotLoadOpcode(
     std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandWaitMusicSlotLoad, command,
                     event::kWaitMusicSlotLoadLength);
 }
 
-// decomp: vs_battle_script_loadSoundFile2 (src/BATTLE/BATTLE.PRG/4A0A8.c:2419),
+// decomp: vs_battle_script_9D_loadSoundFile2
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:3067; was vs_battle_script_loadSoundFile2),
 // opcode 0x9D
 std::intptr_t VS::Event::CommandLoadSoundFileOpcode(
     std::uint8_t* command, std::int16_t /*thread_id*/) {
@@ -323,51 +341,58 @@ std::intptr_t VS::Event::CommandLoadSoundFileOpcode(
                     event::kLoadSoundFileLength);
 }
 
-// decomp: vs_battle_script_processSoundQueue
-// (src/BATTLE/BATTLE.PRG/4A0A8.c:2425), opcode 0x9E
+// decomp: vs_battle_script_9E_processSoundQueue
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:3073; was vs_battle_script_processSoundQueue),
+// opcode 0x9E
 std::intptr_t VS::Event::CommandWaitSoundQueueOpcode(
     std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandWaitSoundQueue, command,
                     event::kWaitSoundQueueLength);
 }
 
-// decomp: func_800BA7BC (src/BATTLE/BATTLE.PRG/4A0A8.c:2430), opcode 0x9A
+// decomp: vs_battle_script_9A_waitMusicBar (src/BATTLE/BATTLE.PRG/4DEA8.c:3078;
+// was func_800BA7BC), opcode 0x9A
 std::intptr_t VS::Event::CommandWaitMusicTimerOpcode(
     std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandWaitMusicTimer, command,
                     event::kWaitMusicTimerLength);
 }
 
-// decomp: func_800BA800 (src/BATTLE/BATTLE.PRG/4A0A8.c:2436), opcode 0x9B
+// decomp: vs_battle_script_9B_fadeSfxPitch (src/BATTLE/BATTLE.PRG/4DEA8.c:3084;
+// was func_800BA800), opcode 0x9B
 std::intptr_t VS::Event::CommandSlideSfxPitchOpcode(
     std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandSlideSfxPitch, command,
                     event::kSlideSfxPitchLength);
 }
 
-// decomp: func_800BA848 (src/BATTLE/BATTLE.PRG/4A0A8.c:2442), opcode 0x9C
+// decomp: vs_battle_script_9C_fadeSfxPan (src/BATTLE/BATTLE.PRG/4DEA8.c:3090;
+// was func_800BA848), opcode 0x9C
 std::intptr_t VS::Event::CommandSlideSfxPanOpcode(std::uint8_t* command,
                                                   std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandSlideSfxPan, command,
                     event::kSlideSfxPanLength);
 }
 
-// decomp: func_800BA890 (src/BATTLE/BATTLE.PRG/4A0A8.c:2448), opcode 0x9F
+// decomp: vs_battle_script_9F_queueMusic (src/BATTLE/BATTLE.PRG/4DEA8.c:3096;
+// was func_800BA890), opcode 0x9F
 std::intptr_t VS::Event::CommandResumeMusicSlotOpcode(
     std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandResumeMusicSlot, command,
                     event::kResumeMusicSlotLength);
 }
 
-// decomp: func_800BAAF0 (src/BATTLE/BATTLE.PRG/4A0A8.c:2513), opcode 0xA8
+// decomp: vs_battle_script_A8_setMusicJumpThreshold
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:3163; was func_800BAAF0), opcode 0xA8
 std::intptr_t VS::Event::CommandSetMusicJumpThresholdOpcode(
     std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandSetMusicJumpThreshold, command,
                     event::kSetMusicJumpThresholdLength);
 }
 
-// decomp: vs_battle_script_playMenuSelectSfx
-// (src/BATTLE/BATTLE.PRG/4A0A8.c:2874), opcode 0xF2
+// decomp: vs_battle_script_F2_playMenuSelectSfx
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:3523; was vs_battle_script_playMenuSelectSfx),
+// opcode 0xF2
 std::intptr_t VS::Event::CommandPlayMenuSelectSfxOpcode(
     std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandPlayMenuSelectSfx, command,

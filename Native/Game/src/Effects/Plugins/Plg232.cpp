@@ -3,6 +3,7 @@
 #include "Effects/Plugins/Plg232.hpp"
 
 namespace VS::Effects::Plg232 {
-// decomp: D_800FBA00 (PLG232.BIN/E0.c:5; trailEffect.h:70)
+// decomp: vs_effect_plg232_0_origin_state (src/EFFECT/trailEffect.h:70; was
+// D_800FBA00; src/EFFECT/trailEffect.h:70)
 std::int32_t trailEmissionCounter;
 }  // namespace VS::Effects::Plg232

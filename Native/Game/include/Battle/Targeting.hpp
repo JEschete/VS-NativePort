@@ -501,33 +501,33 @@ class TargetSelectionHost {
   virtual void DismissInformationBox() = 0;
 };
 
-// decomp: BATTLE.PRG func_8006F630 (src/BATTLE/BATTLE.PRG/146C.c:3235)
+// decomp: BATTLE.PRG func_8006F630 (src/BATTLE/BATTLE.PRG/146C.c:2938)
 void PopulateActionTargetPreview(const ActionTargetingHost& host,
                                  ActionTargetPreview& preview,
                                  const ActionPreviewResult& result);
-// decomp: BATTLE.PRG func_800704D8 (src/BATTLE/BATTLE.PRG/146C.c:3578)
+// decomp: BATTLE.PRG func_800704D8 (src/BATTLE/BATTLE.PRG/146C.c:3288)
 void ReturnToBattleActionMenu(ActionTargetingHost& host);
-// decomp: BATTLE.PRG func_8007053C (src/BATTLE/BATTLE.PRG/146C.c:3588)
+// decomp: BATTLE.PRG func_8007053C (src/BATTLE/BATTLE.PRG/146C.c:3298)
 void FilterAreaActionTargets(ActionTargetingHost& host);
-// decomp: BATTLE.PRG func_8007087C (src/BATTLE/BATTLE.PRG/146C.c:3650): the
+// decomp: BATTLE.PRG func_8007087C (src/BATTLE/BATTLE.PRG/146C.c:3358): the
 // point half a turn from the source's facing, at its height.
 [[nodiscard]] std::optional<TargetPoint> AimActionBehindSource(
     const ActionTargetingHost& host, int source_actor, TargetPoint focus);
-// decomp: BATTLE.PRG func_800708EC (src/BATTLE/BATTLE.PRG/146C.c:3660)
+// decomp: BATTLE.PRG func_800708EC (src/BATTLE/BATTLE.PRG/146C.c:3368)
 void SetSingleActionTarget(ActionTargetingHost& host);
-// decomp: BATTLE.PRG func_80070B04 (src/BATTLE/BATTLE.PRG/146C.c:3695)
+// decomp: BATTLE.PRG func_80070B04 (src/BATTLE/BATTLE.PRG/146C.c:3404)
 void SetAllActionTargets(ActionTargetingHost& host);
-// decomp: BATTLE.PRG func_80070CAC (src/BATTLE/BATTLE.PRG/146C.c:3728)
+// decomp: BATTLE.PRG func_80070CAC (src/BATTLE/BATTLE.PRG/146C.c:3438)
 void CollectEnvironmentActionTargets(ActionTargetingHost& host);
-// decomp: BATTLE.PRG func_800719FC (src/BATTLE/BATTLE.PRG/146C.c:4086)
+// decomp: BATTLE.PRG func_800719FC (src/BATTLE/BATTLE.PRG/146C.c:3803)
 void CollectSourceAreaActionTargets(ActionTargetingHost& host);
-// decomp: BATTLE.PRG func_80071F68 (src/BATTLE/BATTLE.PRG/146C.c:4176)
+// decomp: BATTLE.PRG func_80071F68 (src/BATTLE/BATTLE.PRG/146C.c:3898)
 void CollectDirectActionTargets(ActionTargetingHost& host, int source_slot);
-// decomp: BATTLE.PRG func_80072734 (src/BATTLE/BATTLE.PRG/146C.c:4329)
+// decomp: BATTLE.PRG func_80072734 (src/BATTLE/BATTLE.PRG/146C.c:4054)
 void CollectGroundAreaActionTargets(ActionTargetingHost& host, int source_slot);
-// decomp: BATTLE.PRG func_80072BA8 (src/BATTLE/BATTLE.PRG/146C.c:4416)
+// decomp: BATTLE.PRG func_80072BA8 (src/BATTLE/BATTLE.PRG/146C.c:4143)
 void InitializeActionTargeting(ActionTargetingHost& host, int action_id);
-// decomp: BATTLE.PRG func_80072EC4 (src/BATTLE/BATTLE.PRG/146C.c:4489)
+// decomp: BATTLE.PRG func_80072EC4 (src/BATTLE/BATTLE.PRG/146C.c:4216)
 void BeginActorActionSelection(ActionTargetingHost& host, int source_slot,
                                int action_id);
 
@@ -536,43 +536,44 @@ void BeginActorActionSelection(ActionTargetingHost& host, int source_slot,
 // the target's pad.
 [[nodiscard]] bool UpdateSphereTargetPosition(TargetSelectionHost& host,
                                               TargetPoint& target);
-// decomp: BATTLE.PRG func_800C513C (src/BATTLE/BATTLE.PRG/5BF94.c:869)
+// decomp: BATTLE.PRG func_800C513C (src/BATTLE/BATTLE.PRG/5BF94.c:687)
 void ClearTargetActorHighlight(TargetSelectionHost& host, int actor,
                                int pulse_slot);
-// decomp: BATTLE.PRG func_800C5164 (src/BATTLE/BATTLE.PRG/5BF94.c:876)
+// decomp: BATTLE.PRG func_800C5164 (src/BATTLE/BATTLE.PRG/5BF94.c:694)
 void SetTargetActorHighlight(TargetSelectionHost& host, int actor,
                              int pulse_flags, int pulse_slot);
-// decomp: BATTLE.PRG func_800C518C (src/BATTLE/BATTLE.PRG/5BF94.c:883)
+// decomp: BATTLE.PRG func_800C518C (src/BATTLE/BATTLE.PRG/5BF94.c:701)
 void SetTargetActorColorOverride(TargetSelectionHost& host, int actor,
                                  bool tinted);
-// decomp: BATTLE.PRG func_800C51B4 (src/BATTLE/BATTLE.PRG/5BF94.c:890):
+// decomp: BATTLE.PRG func_800C51B4 (src/BATTLE/BATTLE.PRG/5BF94.c:708):
 // mode bit 0 clears the old highlight and bit 1 highlights the selection.
 void UpdateTargetSelectionHighlight(TargetSelectionHost& host, int mode);
-// decomp: BATTLE.PRG func_800C5360 (src/BATTLE/BATTLE.PRG/5BF94.c:939)
+// decomp: BATTLE.PRG func_800C5360 (src/BATTLE/BATTLE.PRG/5BF94.c:757)
 void AppendTargetGroupToColumn(const TargetSelectionHost& host,
                                TargetColumns& columns, int group);
-// decomp: BATTLE.PRG func_800C553C (src/BATTLE/BATTLE.PRG/5BF94.c:970)
+// decomp: BATTLE.PRG func_800C553C (src/BATTLE/BATTLE.PRG/5BF94.c:788)
 [[nodiscard]] TargetColumns BuildTargetSelectionColumns(
     const TargetSelectionHost& host);
-// decomp: BATTLE.PRG func_800C56C0 (src/BATTLE/BATTLE.PRG/5BF94.c:1006)
+// decomp: BATTLE.PRG func_800C56C0 (src/BATTLE/BATTLE.PRG/5BF94.c:824)
 void DismissTargetSelectionRows(TargetSelectionHost& host);
-// decomp: BATTLE.PRG func_800C5798 (src/BATTLE/BATTLE.PRG/5BF94.c:1021)
+// decomp: BATTLE.PRG func_800C5798 (src/BATTLE/BATTLE.PRG/5BF94.c:839)
 void InitTargetSelectionRow(TargetSelectionHost& host, int target_index,
                             TargetListRow row);
-// decomp: BATTLE.PRG _getStatusString (src/BATTLE/BATTLE.PRG/5BF94.c:1045)
+// decomp: BATTLE.PRG getStatusString (src/BATTLE/BATTLE.PRG/5BF94.c:863; was
+// _getStatusString)
 [[nodiscard]] TargetText FirstTargetStatusText(std::uint32_t status_mask);
-// decomp: BATTLE.PRG func_800C58F8 (src/BATTLE/BATTLE.PRG/5BF94.c:1058):
+// decomp: BATTLE.PRG func_800C58F8 (src/BATTLE/BATTLE.PRG/5BF94.c:876):
 // one frame of the target list; `target` gets the chosen preview or
 // kNoPreviewSelected, and the result is whether the list closed.
 [[nodiscard]] bool UpdateTargetSelectionMenu(TargetSelectionHost& host,
                                              int& target);
 
-// decomp: BATTLE.PRG func_800E5568 (src/BATTLE/BATTLE.PRG/7CD68.c:437)
+// decomp: BATTLE.PRG func_800E5568 (src/BATTLE/BATTLE.PRG/7CD68.c:74)
 [[nodiscard]] int CalculateRangeShapeExtent(const RangeShape& shape);
-// decomp: BATTLE.PRG func_800E5600 (src/BATTLE/BATTLE.PRG/7CD68.c:459)
+// decomp: BATTLE.PRG func_800E5600 (src/BATTLE/BATTLE.PRG/7CD68.c:96)
 [[nodiscard]] int CalculateActionAreaReach(const TargetingActionView& action,
                                            std::uint32_t maximum_reach);
-// decomp: BATTLE.PRG func_800E5698 (src/BATTLE/BATTLE.PRG/7CD68.c:476)
+// decomp: BATTLE.PRG func_800E5698 (src/BATTLE/BATTLE.PRG/7CD68.c:113)
 [[nodiscard]] int CalculateActionRangeSquared(const TargetingActionView& action,
                                               const RangeShape& weapon_range);
 }  // namespace VS::Battle

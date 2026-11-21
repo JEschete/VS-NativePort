@@ -8,7 +8,8 @@ namespace VS::Render {
 inline constexpr std::size_t kActorTextureSlotCount = 25;
 inline constexpr std::size_t kWeaponTextureSlotCount = 20;
 
-// decomp: vs_battle_texInfo_t (src/BATTLE/BATTLE.PRG/30DB0.h:50)
+// decomp: TexInfo (src/BATTLE/BATTLE.PRG/30DB0.h:33-38; was
+// vs_battle_texInfo_t)
 struct TextureSlot {
   std::int16_t texture_page;
   std::int16_t palette;

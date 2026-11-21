@@ -7,7 +7,7 @@
 #include "Core/Diagnostics.hpp"
 
 namespace VS::Battle::Ai {
-// decomp: BATTLE.PRG func_800DC424 (src/BATTLE/BATTLE.PRG/73C24.s:8). The
+// decomp: BATTLE.PRG func_800DC424 (src/BATTLE/BATTLE.PRG/7399C.s:195). The
 // original walks vs_battle_actors and stores each actor's ID, HP/MP pairs,
 // statuses and weapon/shield DP in its 0x18-byte row; it reads stats without a
 // check, so a reading without stats is rejected instead.

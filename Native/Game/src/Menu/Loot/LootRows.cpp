@@ -21,8 +21,8 @@ using VS::Items::ItemsStatus;
 
 constexpr std::uint8_t kLastVisibleRow = kVisibleLootRows - 1;
 
-// decomp: _updateLootList's tail (260.c:921-942): keeps the selection in
-// range and, past the first page, one row below it visible.
+// decomp: _updateLootList's tail (src/MENU/MENUB.PRG/260.c:921-942): keeps the
+// selection in range and, past the first page, one row below it visible.
 void ClampCursor(LootCursor& cursor) {
   const std::int32_t count = cursor.count;
   const std::int32_t last_row = count - 1;
@@ -146,8 +146,8 @@ void StageDrop(LootStaging& staging, StagedDrop drop, ItemCategory category,
 }
 }  // namespace
 
-// decomp: MENU/MENUB.PRG _updateLootList (260.c:907-943);
-// MIPS 0x801080f0-0x8010822b.
+// decomp: MENU/MENUB.PRG updateLootList (src/MENU/MENUB.PRG/260.c:910-946; was
+// _updateLootList); MIPS 0x801080f0-0x8010822b.
 void RefreshClaimableRows(LootStaging& staging, ClaimCheck& check) {
   const auto rows =
       std::min<std::size_t>(staging.cursor.count, staging.rows.size());
@@ -157,8 +157,8 @@ void RefreshClaimableRows(LootStaging& staging, ClaimCheck& check) {
   ClampCursor(staging.cursor);
 }
 
-// decomp: MENU/MENUB.PRG _addLootToList (260.c:950-956);
-// MIPS 0x8010822c-0x80108263.
+// decomp: MENU/MENUB.PRG addLootToList (src/MENU/MENUB.PRG/260.c:953-959; was
+// _addLootToList); MIPS 0x8010822c-0x80108263.
 bool AppendLootRow(LootStaging& staging, ItemCategory category,
                    std::int32_t slot) {
   auto& cursor = staging.cursor;
@@ -172,8 +172,9 @@ bool AppendLootRow(LootStaging& staging, ItemCategory category,
   return true;
 }
 
-// decomp: MENU/MENUB.PRG _itemIncludesItemsInCategory (260.c:968-1010);
-// MIPS 0x80108264-0x8010837b.
+// decomp: MENU/MENUB.PRG itemIncludesItemsInCategory
+// (src/MENU/MENUB.PRG/260.c:971-1013; was _itemIncludesItemsInCategory); MIPS
+// 0x80108264-0x8010837b.
 CategoryCount CountContainedCategory(ItemCategory counted, const LootRow& row,
                                      const InventoryContents& inventory) {
   switch (counted) {
@@ -201,17 +202,18 @@ CategoryCount CountContainedCategory(ItemCategory counted, const LootRow& row,
   return gems;
 }
 
-// decomp: MENU/MENUB.PRG _droppableUnderCurrentDifficulty (260.c:1113-1116);
+// decomp: MENU/MENUB.PRG droppableUnderCurrentDifficulty
+// (src/MENU/MENUB.PRG/260.c:1116-1119; was _droppableUnderCurrentDifficulty);
 // MIPS 0x801086dc-0x801086f3.
 std::int32_t DropDifficultyMatch(std::int32_t difficulty_flags,
                                  std::uint8_t difficulty) {
   return difficulty_flags & (difficulty + 1);
 }
 
-// decomp: MENU/MENUB.PRG _applyLootList (260.c:1124-1168);
-// MIPS 0x801086f4-0x801088d3.
-// Native: a drop that gets no row or bag room stays in `record` for the next
-// batch (see StageDrop); the original added it as row index 0xFF.
+// decomp: MENU/MENUB.PRG applyLootList (src/MENU/MENUB.PRG/260.c:1127-1170; was
+// _applyLootList); MIPS 0x801086f4-0x801088d3. Native: a drop that gets no row
+// or bag room stays in `record` for the next batch (see StageDrop); the
+// original added it as row index 0xFF.
 void StageDropRecord(const BattleLoot& record, std::size_t record_index,
                      LootStaging& staging, ClaimCheck& check) {
   const auto stage = [&staging, record_index](
@@ -264,10 +266,9 @@ void StageDropRecord(const BattleLoot& record, std::size_t record_index,
   RefreshClaimableRows(staging, check);
 }
 
-// decomp: MENU/MENUB.PRG _applyAllLootLists (260.c:1174-1186);
-// MIPS 0x801088d4-0x80108937.
-// Native: the batch and cursor restart here; the original's caller cleared
-// the count and offset.
+// decomp: MENU/MENUB.PRG applyAllLootLists (src/MENU/MENUB.PRG/260.c:1176-1188;
+// was _applyAllLootLists); MIPS 0x801088d4-0x80108937. Native: the batch and
+// cursor restart here; the original's caller cleared the count and offset.
 void BuildStagedInventory(std::span<const BattleLoot> records,
                           LootStaging& staging, ClaimCheck& check) {
   staging.inventory = {};
@@ -296,8 +297,8 @@ bool AdvanceStagedInventory(std::span<BattleLoot> records, LootStaging& staging,
   return staging.cursor.count != 0;
 }
 
-// decomp: MENU/MENUB.PRG _setKeyFlag (260.c:2108-2113);
-// MIPS 0x8010a24c-0x8010a27f.
+// decomp: MENU/MENUB.PRG setKeyFlag (src/MENU/MENUB.PRG/260.c:2111-2116; was
+// _setKeyFlag); MIPS 0x8010a24c-0x8010a27f.
 std::optional<std::int16_t> ClaimedKeyFlag(std::int32_t item_id) {
   if (item_id < kFirstKeyItemId) return std::nullopt;
   return Core::Math::WrapSigned16(static_cast<std::uint32_t>(

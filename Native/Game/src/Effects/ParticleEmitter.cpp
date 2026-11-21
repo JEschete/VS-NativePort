@@ -695,7 +695,7 @@ ParticleEmissionResult Emitter::Run() {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800D2ADC (src/BATTLE/BATTLE.PRG/5BF94.c:6935-7502).
+// decomp: BATTLE.PRG func_800D2ADC (src/BATTLE/BATTLE.PRG/5BF94.c:6497).
 ParticleEmissionResult EmitParticleEvent(
     const ParticleEmissionDefinition& definition,
     const ParticleEmissionContext& context, ParticleEmissionScratch& scratch,

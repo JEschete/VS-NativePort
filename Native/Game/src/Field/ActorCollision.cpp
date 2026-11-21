@@ -488,7 +488,7 @@ TerrainMotionResult Blocked() {
   return {.motion = TerrainMotion::kBlocked, .climb = std::nullopt};
 }
 
-// decomp: BATTLE.PRG func_800A76BC (src/BATTLE/BATTLE.PRG/3A1A0.c:2443).
+// decomp: BATTLE.PRG func_800A76BC (src/BATTLE/BATTLE.PRG/3A1A0.c:1888).
 // One probe and its opposite serve every test, as in the original: a probe
 // the rules refuse keeps the height and support word of the last one taken.
 class TerrainMotionPass {
@@ -936,7 +936,7 @@ std::int32_t CollisionDiagonalReach(std::int32_t radius) {
 }
 
 // decomp: BATTLE.PRG vs_battleRelativeSampleHeight
-// (src/BATTLE/BATTLE.PRG/3A1A0.c:80)
+// (src/BATTLE/BATTLE.PRG/3A1A0.c:53)
 std::int32_t RelativeCollisionSampleHeight(const CollisionSamples& samples,
                                            std::int32_t sector,
                                            std::int32_t offset,
@@ -1036,7 +1036,7 @@ bool IsHangingActorObstructed(ActorCollisionHost& host, CollisionActor& actor) {
                              [](std::uint8_t blocked) { return blocked != 0; });
 }
 
-// decomp: BATTLE.PRG func_800A6798 (src/BATTLE/BATTLE.PRG/3A1A0.c:1960)
+// decomp: BATTLE.PRG func_800A6798 (src/BATTLE/BATTLE.PRG/3A1A0.c:1387)
 bool CanActorHangFromLedge(ActorCollisionHost& host, CollisionActor& actor,
                            MotionVector& offset, MotionVector& motion) {
   if (actor.ledge_height <= host.Probe().position.y) return false;
@@ -1062,7 +1062,7 @@ bool CanActorHangFromLedge(ActorCollisionHost& host, CollisionActor& actor,
   return valid;
 }
 
-// decomp: BATTLE.PRG func_800A69B4 (src/BATTLE/BATTLE.PRG/3A1A0.c:2009)
+// decomp: BATTLE.PRG func_800A69B4 (src/BATTLE/BATTLE.PRG/3A1A0.c:1436)
 bool HasActorLedgeSideSupport(ActorCollisionHost& host,
                               const CollisionActor& actor) {
   const MotionVector side =
@@ -1070,7 +1070,7 @@ bool HasActorLedgeSideSupport(ActorCollisionHost& host,
   return HasLedgeSupportBothSides(host, side.x, side.z);
 }
 
-// decomp: BATTLE.PRG func_800A6EE8 (src/BATTLE/BATTLE.PRG/3A1A0.c:2175)
+// decomp: BATTLE.PRG func_800A6EE8 (src/BATTLE/BATTLE.PRG/3A1A0.c:1620)
 std::int32_t SampleActorSupportHeight(ActorCollisionHost& host,
                                       MotionVector origin,
                                       std::int32_t offset_x,
@@ -1093,7 +1093,7 @@ std::int32_t SampleActorSupportHeight(ActorCollisionHost& host,
   return sample == SupportSample::kShadow ? origin.y : kNoSupportHeight;
 }
 
-// decomp: BATTLE.PRG func_800A70DC (src/BATTLE/BATTLE.PRG/3A1A0.c:2256).
+// decomp: BATTLE.PRG func_800A70DC (src/BATTLE/BATTLE.PRG/3A1A0.c:1701).
 // A cell the centre lookup misses reads as kAbsentCellWord (#288).
 void SampleActorCollisionPerimeter(ActorCollisionHost& host,
                                    CollisionActor& actor,
@@ -1114,7 +1114,7 @@ void SampleActorCollisionPerimeter(ActorCollisionHost& host,
   if (actor.movement_mode != 0) OpenTurnSector(samples, actor);
 }
 
-// decomp: BATTLE.PRG func_800A7524 (src/BATTLE/BATTLE.PRG/3A1A0.c:2355)
+// decomp: BATTLE.PRG func_800A7524 (src/BATTLE/BATTLE.PRG/3A1A0.c:1800)
 void ApplyActorWallRepulsion(const CollisionSamples& samples,
                              CollisionActor& actor, MotionVector& motion) {
   if (!actor.wall_contact) return;
@@ -1140,7 +1140,7 @@ TerrainMotionResult ResolveActorTerrainMotion(ActorCollisionHost& host,
   return probe_only ? pass.ProbeOnly() : pass.Resolve();
 }
 
-// decomp: BATTLE.PRG func_800A8B34 (src/BATTLE/BATTLE.PRG/3A1A0.c:3008).
+// decomp: BATTLE.PRG func_800A8B34 (src/BATTLE/BATTLE.PRG/3A1A0.c:1890).
 // The probe's w takes the supporting platform layer (low byte) and gimmick
 // slot (high byte) once the probe reaches the platform test.
 std::int32_t ClassifyActorTerrainProbe(ActorCollisionHost& host,
@@ -1184,7 +1184,7 @@ std::int32_t ClassifyActorTerrainProbe(ActorCollisionHost& host,
   return ClimbSteps(height - limit);
 }
 
-// decomp: BATTLE.PRG func_800A8E84 (src/BATTLE/BATTLE.PRG/40564.c:186)
+// decomp: BATTLE.PRG func_800A8E84 (src/BATTLE/BATTLE.PRG/40564.c:122)
 bool IsActorPositionUnoccupied(ActorCollisionHost& host,
                                const CollisionActor& actor,
                                const MotionVector& position) {

@@ -557,16 +557,17 @@ void ResetLiveEquipmentDetailsStatics() {
 }
 }  // namespace VS::Menu::Framework
 
-// decomp: D_80102488 (MENU/MAINMENU.PRG C48.c)
+// decomp: D_80102488 (MENU/MAINMENU.PRG src/MENU/MAINMENU.PRG/58EC.c:36)
 std::int16_t VS::Menu::Framework::comparisonStatDeltas
     [VS::Menu::Framework::kComparisonStatCount];
-// decomp: D_80102490 (MENU/MAINMENU.PRG C48.c)
+// decomp: D_80102490 (MENU/MAINMENU.PRG src/MENU/MAINMENU.PRG/58EC.c:39)
 std::int16_t VS::Menu::Framework::comparisonStatTotals
     [VS::Menu::Framework::kComparisonStatCount];
-// decomp: D_80102498 (MENU/MAINMENU.PRG C48.c)
+// decomp: D_80102498 (MENU/MAINMENU.PRG src/MENU/MAINMENU.PRG/58EC.c:42)
 std::int16_t VS::Menu::Framework::comparisonAccessoryStats
     [VS::Menu::Framework::kComparisonStatCount];
-// decomp: _rangeRiskData (MENU/MAINMENU.PRG C48.c)
+// decomp: rangeRiskData (MENU/MAINMENU.PRG src/MENU/MAINMENU.PRG/58EC.c:33; was
+// _rangeRiskData)
 char VS::Menu::Framework::rangeRiskData[VS::Menu::Framework::kRangeRiskBytes];
 // decomp: vs_mainMenu_weapons .. vs_mainMenu_gems (MENU/MAINMENU.PRG)
 VS::Items::InventoryWeapon* VS::Menu::Framework::weapons;
@@ -589,11 +590,11 @@ char VS::Menu::Framework::itemStatPage;
 // decomp: vs_mainMenu_selectedStatusViewElement (MENU/MAINMENU.PRG)
 std::uint8_t VS::Menu::Framework::selectedStatusViewElement;
 // decomp: vs_mainMenu_statusViewCursorPositions (MENU/MAINMENU.PRG
-// 2D10.c:830): the module image values.
+// src/MENU/MAINMENU.PRG/2D10.c:832): the module image values.
 int VS::Menu::Framework::statusViewCursorPositions
     [VS::Menu::Framework::kStatusViewElementCount];
 // decomp: vs_mainMenu_statusViewNavigationMap (MENU/MAINMENU.PRG
-// 2D10.c:823): the module image values.
+// src/MENU/MAINMENU.PRG/2D10.c:825): the module image values.
 std::uint8_t VS::Menu::Framework::statusViewNavigationMap
     [VS::Menu::Framework::kStatusViewElementCount]
     [VS::Menu::Framework::kStatusViewDirections];

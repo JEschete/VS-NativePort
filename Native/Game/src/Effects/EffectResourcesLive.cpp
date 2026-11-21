@@ -661,7 +661,7 @@ EffectPurgeTables LiveEffectPurgeTables() {
           .entry_point_count = kEntryPointCount};
 }
 
-// decomp: BATTLE.PRG func_800D7814 (src/BATTLE/BATTLE.PRG/6F014.c:446)
+// decomp: BATTLE.PRG func_800D7814 (src/BATTLE/BATTLE.PRG/6E4CC.c:75)
 void LiveInitializeEffectResources() {
   EffectResourceState state = LoadLiveEffectResourceState();
   EffectResourceContext context = LoadLiveEffectResourceContext();
@@ -670,24 +670,24 @@ void LiveInitializeEffectResources() {
   StoreLiveEffectResourceContext(context);
 }
 
-// decomp: BATTLE.PRG func_800D7890 (src/BATTLE/BATTLE.PRG/6F014.c:460)
+// decomp: BATTLE.PRG func_800D7890 (src/BATTLE/BATTLE.PRG/6E4CC.c:89)
 void LiveSelectEffectResourceContext(int use_primary_context) {
   EffectResourceContext context = LoadLiveEffectResourceContext();
   SelectEffectResourceContext(context, use_primary_context);
   StoreLiveEffectResourceContext(context);
 }
 
-// decomp: BATTLE.PRG func_800D78B8 (src/BATTLE/BATTLE.PRG/6F014.c:471)
+// decomp: BATTLE.PRG func_800D78B8 (src/BATTLE/BATTLE.PRG/6E4CC.c:100)
 void LiveSaveEffectResourceContext() {
   UpdateContext(&SaveEffectResourceContext);
 }
 
-// decomp: BATTLE.PRG func_800D78CC (src/BATTLE/BATTLE.PRG/6F014.c:473)
+// decomp: BATTLE.PRG func_800D78CC (src/BATTLE/BATTLE.PRG/6E4CC.c:102)
 void LiveRestoreEffectResourceContext() {
   UpdateContext(&RestoreEffectResourceContext);
 }
 
-// decomp: BATTLE.PRG func_800D78F0 (src/BATTLE/BATTLE.PRG/6F014.c:477)
+// decomp: BATTLE.PRG func_800D78F0 (src/BATTLE/BATTLE.PRG/6E4CC.c:106)
 void LiveUpdateParticleGravityAndDrag() {
   LiveParticleForceHost host;
   const ParticleForceStatus status = UpdateParticleGravityAndDrag(
@@ -700,35 +700,36 @@ void LiveUpdateParticleGravityAndDrag() {
   }
 }
 
-// decomp: BATTLE.PRG vs_battle_loadEffPurge (src/BATTLE/BATTLE.PRG/6F014.c:570)
+// decomp: BATTLE.PRG loadEffPurge (src/BATTLE/BATTLE.PRG/6E4CC.c:199; was
+// vs_battle_loadEffPurge)
 int LiveLoadEffectPurgeOverlay() {
   return PollLoader("purge overlay load", &LoadEffectPurgeOverlay);
 }
 
-// decomp: BATTLE.PRG func_800D7BF8 (src/BATTLE/BATTLE.PRG/6F014.c:580)
+// decomp: BATTLE.PRG func_800D7BF8 (src/BATTLE/BATTLE.PRG/6E4CC.c:209)
 int LiveLoadEffectPackage() {
   return PollLoader("package load", &LoadEffectPackage);
 }
 
-// decomp: BATTLE.PRG func_800D7C5C (src/BATTLE/BATTLE.PRG/6F014.c:592)
+// decomp: BATTLE.PRG func_800D7C5C (src/BATTLE/BATTLE.PRG/6E4CC.c:221)
 void LiveReleaseEffectPackageResources() {
   EffectResourceState state = LoadLiveEffectResourceState();
   ReleaseEffectPackageResources(state, ResourceHost());
   StoreLiveEffectResourceState(state);
 }
 
-// decomp: BATTLE.PRG func_800D7CFC (src/BATTLE/BATTLE.PRG/6F014.c:612)
+// decomp: BATTLE.PRG func_800D7CFC (src/BATTLE/BATTLE.PRG/6E4CC.c:241)
 int LiveUpdateEffectTextureLoading() {
   return PollLoader("texture load", &UpdateEffectTextureLoading);
 }
 
-// decomp: BATTLE.PRG func_800D7EF4 (src/BATTLE/BATTLE.PRG/6F014.c:681)
+// decomp: BATTLE.PRG func_800D7EF4 (src/BATTLE/BATTLE.PRG/6E4CC.c:310)
 int LiveUpdateEffectPluginLoading() {
   return PollLoader("plugin load", &UpdateEffectPluginLoading);
 }
 
 // decomp: BATTLE.PRG vs_battle_setEffectExec
-// (src/BATTLE/BATTLE.PRG/6F014.c:725)
+// (src/BATTLE/BATTLE.PRG/6E4CC.c:354)
 bool LiveSetEffectRenderer(PluginEntry entry, int index) {
   EffectRendererTable renderers{};
   if (static_cast<std::size_t>(entry) >= kEntryPointCount ||
@@ -740,7 +741,7 @@ bool LiveSetEffectRenderer(PluginEntry entry, int index) {
   return true;
 }
 
-// decomp: BATTLE.PRG func_800D8060 (src/BATTLE/BATTLE.PRG/6F014.c:746)
+// decomp: BATTLE.PRG func_800D8060 (src/BATTLE/BATTLE.PRG/6E4CC.c:375)
 void LiveBindEffectPackageBlocks(void* package) {
   const std::optional<std::span<std::byte>> bytes = PackageBytes(package);
   if (!bytes) {
@@ -751,14 +752,14 @@ void LiveBindEffectPackageBlocks(void* package) {
   static_cast<void>(BindLiveEffectPackage(*bytes));
 }
 
-// decomp: EFFPURGE.BIN func_800F9800 (src/EFFECT/EFFPURGE.BIN/0.c:590)
+// decomp: EFFPURGE.BIN func_800F9800 (src/EFFECT/EFFPURGE.BIN/0.c:609)
 int LiveInvokeAllPluginUpdates(LiveRendererSlot* /*slot*/,
                                unsigned int /*command*/, int /*packed*/) {
   LivePluginUpdateHost host;
   return InvokeAllPluginUpdates(host).result;
 }
 
-// decomp: EFFPURGE.BIN vs_effpurge_exec (src/EFFECT/EFFPURGE.BIN/0.c:911)
+// decomp: EFFPURGE.BIN vs_effpurge_exec (src/EFFECT/EFFPURGE.BIN/0.c:930)
 void LiveConfigureEffectResources() {
   const int effect_id = actionRequest.effect_id;
   EffectResourceState state = LoadLiveEffectResourceState();

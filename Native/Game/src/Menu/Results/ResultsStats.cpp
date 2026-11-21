@@ -55,54 +55,54 @@ bool RaiseVital(AshleyStatHost& host, Vital maximum, Vital current,
 }
 }  // namespace
 
-// decomp: MENUF.PRG _getTotalStrength (src/MENU/MENUF.PRG/3B8.c:2880),
-// 0x80108EA8-0x80108EC8.
+// decomp: MENUF.PRG getTotalStrength (src/MENU/MENUF.PRG/3B8.c:2888; was
+// _getTotalStrength), 0x80108EA8-0x80108EC8.
 std::optional<std::int32_t> AshleyTotalStrength(AshleyStatHost& host) {
   return ReadAttribute(host, &AshleyResultStats::total_strength);
 }
 
-// decomp: MENUF.PRG _getTotalIntelligence (src/MENU/MENUF.PRG/3B8.c:2882),
-// 0x80108EC8-0x80108EE8.
+// decomp: MENUF.PRG getTotalIntelligence (src/MENU/MENUF.PRG/3B8.c:2890; was
+// _getTotalIntelligence), 0x80108EC8-0x80108EE8.
 std::optional<std::int32_t> AshleyTotalIntelligence(AshleyStatHost& host) {
   return ReadAttribute(host, &AshleyResultStats::total_intelligence);
 }
 
-// decomp: MENUF.PRG _getTotalAgility (src/MENU/MENUF.PRG/3B8.c:2887),
-// 0x80108EE8-0x80108F08.
+// decomp: MENUF.PRG getTotalAgility (src/MENU/MENUF.PRG/3B8.c:2895; was
+// _getTotalAgility), 0x80108EE8-0x80108F08.
 std::optional<std::int32_t> AshleyTotalAgility(AshleyStatHost& host) {
   return ReadAttribute(host, &AshleyResultStats::total_agility);
 }
 
-// decomp: MENUF.PRG _raiseMaxStrength (src/MENU/MENUF.PRG/3B8.c:2889),
-// 0x80108F08-0x80108F98.
+// decomp: MENUF.PRG raiseMaxStrength (src/MENU/MENUF.PRG/3B8.c:2897; was
+// _raiseMaxStrength), 0x80108F08-0x80108F98.
 bool ApplyStrengthBonus(AshleyStatHost& host, std::int32_t amount) {
   return RaiseAttribute(host, &AshleyResultStats::total_strength,
                         &AshleyResultStats::strength, amount);
 }
 
-// decomp: MENUF.PRG _raiseMaxIntelligence (src/MENU/MENUF.PRG/3B8.c:2904),
-// 0x80108F98-0x80109028.
+// decomp: MENUF.PRG raiseMaxIntelligence (src/MENU/MENUF.PRG/3B8.c:2912; was
+// _raiseMaxIntelligence), 0x80108F98-0x80109028.
 bool ApplyIntelligenceBonus(AshleyStatHost& host, std::int32_t amount) {
   return RaiseAttribute(host, &AshleyResultStats::total_intelligence,
                         &AshleyResultStats::intelligence, amount);
 }
 
-// decomp: MENUF.PRG _raiseMaxAgility (src/MENU/MENUF.PRG/3B8.c:2919),
-// 0x80109028-0x801090B8.
+// decomp: MENUF.PRG raiseMaxAgility (src/MENU/MENUF.PRG/3B8.c:2927; was
+// _raiseMaxAgility), 0x80109028-0x801090B8.
 bool ApplyAgilityBonus(AshleyStatHost& host, std::int32_t amount) {
   return RaiseAttribute(host, &AshleyResultStats::total_agility,
                         &AshleyResultStats::agility, amount);
 }
 
-// decomp: MENUF.PRG _raiseMaxHP (src/MENU/MENUF.PRG/3B8.c:2934),
-// 0x801090B8-0x80109148.
+// decomp: MENUF.PRG raiseMaxHP (src/MENU/MENUF.PRG/3B8.c:2942; was
+// _raiseMaxHP), 0x801090B8-0x80109148.
 bool ApplyHpBonus(AshleyStatHost& host, std::int32_t amount) {
   return RaiseVital(host, &AshleyResultStats::max_hp,
                     &AshleyResultStats::current_hp, amount);
 }
 
-// decomp: MENUF.PRG _raiseMaxMP (src/MENU/MENUF.PRG/3B8.c:2949),
-// 0x80109148-0x801091D8.
+// decomp: MENUF.PRG raiseMaxMP (src/MENU/MENUF.PRG/3B8.c:2957; was
+// _raiseMaxMP), 0x80109148-0x801091D8.
 bool ApplyMpBonus(AshleyStatHost& host, std::int32_t amount) {
   return RaiseVital(host, &AshleyResultStats::max_mp,
                     &AshleyResultStats::current_mp, amount);

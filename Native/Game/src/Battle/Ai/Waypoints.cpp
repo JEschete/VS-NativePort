@@ -28,7 +28,7 @@ int TileCentre(std::uint8_t tile) { return (tile << kTileShift) + kTileCentre; }
 }  // namespace
 
 // decomp: nearestWaypointValue (src/BATTLE/BATTLE.PRG/74088.c:946) and
-// patrolWaypoint (src/BATTLE/BATTLE.PRG/771A8.c:1857).
+// nextWaypoint (src/BATTLE/BATTLE.PRG/770A4.c:1247; was patrolWaypoint).
 std::optional<std::uint16_t> WaypointValue(std::span<const std::uint16_t> row,
                                            int index) {
   if (index < 0 || static_cast<std::size_t>(index) >= row.size()) {
@@ -46,7 +46,7 @@ std::optional<std::span<const std::uint16_t>> WaypointsFrom(
   return row.subspan(static_cast<std::size_t>(index));
 }
 
-// decomp: func_800DD7CC (src/BATTLE/BATTLE.PRG/74088.c:957).
+// decomp: func_800DD7CC (src/BATTLE/BATTLE.PRG/74088.c:407).
 std::optional<WaypointSearch> FindNearestActiveWaypoint(
     std::span<const std::uint16_t, kRoomWaypointCount> waypoints,
     Core::Math::Position3 position, Field::TerrainGrid special_heights) {
@@ -73,7 +73,7 @@ std::optional<WaypointSearch> FindNearestActiveWaypoint(
   return search;
 }
 
-// decomp: func_800E23AC (src/BATTLE/BATTLE.PRG/771A8.c:1863).
+// decomp: func_800E23AC (src/BATTLE/BATTLE.PRG/770A4.c:1276).
 std::optional<WaypointTile> UpdateWaypointPatrol(
     PatrolCursor& cursor, std::span<const std::uint16_t> routes,
     WaypointTile tile, PatrolRandom& random) {

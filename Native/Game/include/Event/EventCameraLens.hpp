@@ -118,24 +118,25 @@ class EventCameraLensHost {
   [[nodiscard]] virtual int Sine(int angle) = 0;
 };
 
-// decomp: BATTLE.PRG func_800BDC9C (F01232, 4A0A8.c:3862,
-// 0x800BDC9C-0x800BDF6C) Opcodes 0xEA-0xEC start a lens tween or set the lens
-// value at once; 0xEF starts the first idle shake oscillator, or stops both
-// when its amplitude is zero. The result is the opcode's return value: 0 for
-// those opcodes, and for any other opcode byte the register value the
-// original fell through with (0xEA below 0xEC, 0xEF from 0xEC up). Nullopt
-// for a command shorter than its opcode's length, with nothing changed.
+// decomp: BATTLE.PRG vs_battle_script_EA_EB_EC_EE_EF_camera (F01232,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:4512; was func_800BDC9C, 0x800BDC9C-0x800BDF6C)
+// Opcodes 0xEA-0xEC start a lens tween or set the lens value at once; 0xEF
+// starts the first idle shake oscillator, or stops both when its amplitude is
+// zero. The result is the opcode's return value: 0 for those opcodes, and for
+// any other opcode byte the register value the original fell through with (0xEA
+// below 0xEC, 0xEF from 0xEC up). Nullopt for a command shorter than its
+// opcode's length, with nothing changed.
 [[nodiscard]] std::optional<std::intptr_t> CommandCameraLensOrShake(
     ScriptCommand command, EventCameraLenses& lenses, EventCameraShake& shake);
 
-// decomp: BATTLE.PRG func_800BDF6C (F01233, 4A0A8.c:3927,
+// decomp: BATTLE.PRG func_800BDF6C (F01233, src/BATTLE/BATTLE.PRG/4DEA8.c:4577,
 // 0x800BDF6C-0x800BE01C) Advances an active lens tween by half the tick speed,
 // clamped to its duration, and stores the eased value. The eased fraction is
 // left in `fraction_scratch`.
 void UpdateEventLensTween(EventLensTween& tween, std::int32_t& fraction_scratch,
                           EventCameraLensHost& host);
 
-// decomp: BATTLE.PRG func_800BE01C (F01234, 4A0A8.c:3945,
+// decomp: BATTLE.PRG func_800BE01C (F01234, src/BATTLE/BATTLE.PRG/4DEA8.c:4595,
 // 0x800BE01C-0x800BE180) Advances an active oscillator and stores its
 // displacement. False for an idle oscillator, with nothing changed. A known
 // envelope shape stores its envelope in `envelope_scratch`; another shape uses
@@ -144,7 +145,7 @@ void UpdateEventLensTween(EventLensTween& tween, std::int32_t& fraction_scratch,
                                               std::int32_t& envelope_scratch,
                                               EventCameraLensHost& host);
 
-// decomp: BATTLE.PRG func_800BE180 (F01235, 4A0A8.c:3983,
+// decomp: BATTLE.PRG func_800BE180 (F01235, src/BATTLE/BATTLE.PRG/4DEA8.c:4633,
 // 0x800BE180-0x800BE36C) Updates both oscillators in order and sums their
 // displacements per axis into the eye and look-at offsets, which change only
 // while an oscillator is active. The sums wrap at 16 bits.

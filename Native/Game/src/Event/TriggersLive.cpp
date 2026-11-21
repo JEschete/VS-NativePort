@@ -19,7 +19,7 @@
 
 namespace VS::Event {
 namespace {
-// decomp: BATTLE.PRG func_800BEC58 (src/BATTLE/BATTLE.PRG/4A0A8.c:4302).
+// decomp: BATTLE.PRG func_800BEC58 (src/BATTLE/BATTLE.PRG/4DEA8.c:4945).
 class LiveRoomTriggerHost final : public RoomTriggerHost {
  public:
   void Refuse(RoomTriggerRefusal reason, std::size_t location) override {

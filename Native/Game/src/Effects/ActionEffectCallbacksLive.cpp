@@ -96,42 +96,42 @@ int BeginLivePrimaryEffectRequest(const PrimaryEffectRequest& request,
 }
 
 // decomp: BATTLE.PRG func_8006CDB8 (F00064,
-// src/BATTLE/BATTLE.PRG/146C.c:2149, 0x8006CDB8-0x8006CDD8)
+// src/BATTLE/BATTLE.PRG/146C.c:1851, 0x8006CDB8-0x8006CDD8)
 void LiveSignalActorEffectAnimation(int actor_index) {
   LiveHost host;
   SignalActorEffectAnimation(actor_index, host);
 }
 
 // decomp: BATTLE.PRG func_8006D028 (F00068,
-// src/BATTLE/BATTLE.PRG/146C.c:2211, 0x8006D028-0x8006D064)
+// src/BATTLE/BATTLE.PRG/146C.c:1913, 0x8006D028-0x8006D064)
 void LiveTintActionActorRed(int actor_index, int /*unused*/) {
   LiveHost host;
   TintActionActorRed(actor_index, host);
 }
 
 // decomp: BATTLE.PRG func_8006D064 (F00069,
-// src/BATTLE/BATTLE.PRG/146C.c:2217, 0x8006D064-0x8006D0A4)
+// src/BATTLE/BATTLE.PRG/146C.c:1919, 0x8006D064-0x8006D0A4)
 void LiveRestoreActionActorTint() {
   LiveHost host;
   RestoreActionActorTint(host);
 }
 
 // decomp: BATTLE.PRG func_800733F8 (F00119,
-// src/BATTLE/BATTLE.PRG/146C.c:4613, 0x800733F8-0x80073484)
+// src/BATTLE/BATTLE.PRG/146C.c:4340, 0x800733F8-0x80073484)
 void LiveBeginAshleyStandaloneEffect(int effect_id) {
   LiveHost host;
   BeginAshleyStandaloneEffect(static_cast<std::uint16_t>(effect_id), host);
 }
 
 // decomp: BATTLE.PRG func_80073484 (F00120,
-// src/BATTLE/BATTLE.PRG/146C.c:4638, 0x80073484-0x800734C0)
+// src/BATTLE/BATTLE.PRG/146C.c:4365, 0x80073484-0x800734C0)
 void LiveEndAshleyStandaloneEffect() {
   LiveHost host;
   EndAshleyStandaloneEffect(host);
 }
 
 // decomp: BATTLE.PRG func_80074294 (F00143,
-// src/BATTLE/BATTLE.PRG/146C.c:5064, 0x80074294-0x800742A4)
+// src/BATTLE/BATTLE.PRG/146C.c:4794, 0x80074294-0x800742A4)
 int LiveActionEffectBusyFlags() {
   LiveHost host;
   return static_cast<int>(ActionEffectBusyFlags(host));

@@ -241,28 +241,28 @@ BankSfx BankEffect(const void* bank, std::int32_t index) {
 }
 }  // namespace
 
-// decomp: SLUS_010.40 vs_main_playSfx (src/SLUS_010.40/main.c:9816)
+// decomp: SLUS_010.40 vs_main_playSfx (src/SLUS_010.40/main.c:2838)
 void LivePlaySfx(int group, int effect_id, int pan, int volume) {
   RunPlay([&](SfxState& state, SfxHost& host) {
     PlaySfx(state, host, group, effect_id, {.pan = pan, .volume = volume});
   });
 }
 
-// decomp: SLUS_010.40 vs_main_playSfxDefault (src/SLUS_010.40/main.c:9877)
+// decomp: SLUS_010.40 vs_main_playSfxDefault (src/SLUS_010.40/main.c:2918)
 void LivePlaySfxCentered(int group, int effect_id) {
   RunPlay([&](SfxState& state, SfxHost& host) {
     PlaySfxCentered(state, host, group, effect_id);
   });
 }
 
-// decomp: SLUS_010.40 vs_main_computeSfxPan (src/SLUS_010.40/main.c:9879)
+// decomp: SLUS_010.40 vs_main_computeSfxPan (src/SLUS_010.40/main.c:2920)
 int LiveSfxPanAndVolume(int screen_xy, int depth) {
   const SfxMix mix = SfxPanAndVolume({.screen_xy = screen_xy, .depth = depth});
   return static_cast<int>((static_cast<std::uint32_t>(mix.pan) << kPanShift) +
                           static_cast<std::uint32_t>(mix.volume));
 }
 
-// decomp: SLUS_010.40 vs_main_panSfx (src/SLUS_010.40/main.c:9937)
+// decomp: SLUS_010.40 vs_main_panSfx (src/SLUS_010.40/main.c:2977)
 void LivePlayWorldSfx(int group, int effect_id, SVECTOR* point) {
   if (point == nullptr) {
     VS::Core::LogError(kLogChannel,
@@ -276,7 +276,8 @@ void LivePlayWorldSfx(int group, int effect_id, SVECTOR* point) {
   });
 }
 
-// decomp: SLUS_010.40 func_80045B28 (src/SLUS_010.40/main.c:9950)
+// decomp: SLUS_010.40 resolveSfxData (src/SLUS_010.40/main.c:2992; was
+// func_80045B28)
 std::intptr_t LiveResolveSfxProgram(int group, int effect_id) {
   LiveSfxHost host;
   const std::optional<DataRef> program =
@@ -285,7 +286,8 @@ std::intptr_t LiveResolveSfxProgram(int group, int effect_id) {
   return static_cast<std::intptr_t>(static_cast<std::uintptr_t>(*program));
 }
 
-// decomp: SLUS_010.40 func_80045BFC (src/SLUS_010.40/main.c:9975)
+// decomp: SLUS_010.40 vs_main_fadeSfxVolume (src/SLUS_010.40/main.c:3023; was
+// func_80045BFC)
 void LiveFadeSfxVolume(int group, int effect_id, int target_volume,
                        int fade_ticks) {
   LiveSfxHost host;
@@ -293,7 +295,8 @@ void LiveFadeSfxVolume(int group, int effect_id, int target_volume,
                 {.target = target_volume, .ticks = fade_ticks});
 }
 
-// decomp: SLUS_010.40 func_80045C74 (src/SLUS_010.40/main.c:9994)
+// decomp: SLUS_010.40 vs_main_fadeSfxPitch (src/SLUS_010.40/main.c:3038; was
+// func_80045C74)
 void LiveFadeSfxPitch(int group, int effect_id, int target_pitch_scale,
                       int fade_ticks) {
   LiveSfxHost host;
@@ -301,26 +304,30 @@ void LiveFadeSfxPitch(int group, int effect_id, int target_pitch_scale,
                {.target = target_pitch_scale, .ticks = fade_ticks});
 }
 
-// decomp: SLUS_010.40 func_80045CEC (src/SLUS_010.40/main.c:10012)
+// decomp: SLUS_010.40 vs_main_fadeSfxPan (src/SLUS_010.40/main.c:3054; was
+// func_80045CEC)
 void LiveFadeSfxPan(int group, int effect_id, int target_pan, int fade_ticks) {
   LiveSfxHost host;
   FadeSfxPan(LoadState(), host, {.group = group, .effect_id = effect_id},
              {.target = target_pan, .ticks = fade_ticks});
 }
 
-// decomp: SLUS_010.40 func_80045D64 (src/SLUS_010.40/main.c:10028)
+// decomp: SLUS_010.40 vs_main_evictSfx (src/SLUS_010.40/main.c:3070; was
+// func_80045D64)
 void LiveStopSfx(int group, int effect_id) {
   LiveSfxHost host;
   StopSfx(LoadState(), host, {.group = group, .effect_id = effect_id});
 }
 
-// decomp: SLUS_010.40 func_80045DC0 (src/SLUS_010.40/main.c:10043)
+// decomp: SLUS_010.40 vs_main_stopAllSfx (src/SLUS_010.40/main.c:3086; was
+// func_80045DC0)
 void LiveStopAllSfxPlayback() {
   LiveSfxHost host;
   StopAllSfxPlayback(host);
 }
 
-// decomp: SLUS_010.40 func_800461CC (src/SLUS_010.40/main.c:10178)
+// decomp: SLUS_010.40 vs_main_playBankSfx (src/SLUS_010.40/main.c:3241; was
+// func_800461CC)
 void LivePlayBankSfx(int group, const void* bank, unsigned index, int pan,
                      int volume) {
   RunPlay([&](SfxState& state, SfxHost& host) {
@@ -330,7 +337,8 @@ void LivePlayBankSfx(int group, const void* bank, unsigned index, int pan,
   });
 }
 
-// decomp: SLUS_010.40 func_800462E8 (src/SLUS_010.40/main.c:10215)
+// decomp: SLUS_010.40 vs_main_playBankSfxDefault (src/SLUS_010.40/main.c:3287;
+// was func_800462E8)
 void LivePlayBankSfxCentered(int group, const void* bank, unsigned index) {
   RunPlay([&](SfxState& state, SfxHost& host) {
     PlayBankSfxCentered(state, host, group,
@@ -338,13 +346,15 @@ void LivePlayBankSfxCentered(int group, const void* bank, unsigned index) {
   });
 }
 
-// decomp: SLUS_010.40 func_8004644C (src/SLUS_010.40/main.c:10285)
+// decomp: SLUS_010.40 vs_main_evictBankSfx (src/SLUS_010.40/main.c:3354; was
+// func_8004644C)
 void LiveStopBankSfx(int group, const void* bank, int index) {
   LiveSfxHost host;
   StopBankSfx(host, group, BankEffect(bank, index));
 }
 
-// decomp: SLUS_010.40 func_80046494 (src/SLUS_010.40/main.c:10299)
+// decomp: SLUS_010.40 vs_main_fadeBankSfxVolume (src/SLUS_010.40/main.c:3369;
+// was func_80046494)
 void LiveFadeBankSfxVolume(int group, const void* bank, int index,
                            int target_volume, int fade_ticks) {
   LiveSfxHost host;

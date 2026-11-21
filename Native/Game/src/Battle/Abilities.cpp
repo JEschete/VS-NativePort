@@ -314,7 +314,7 @@ bool HandleAbilityInput(const ActionRequestView& action, int margin, int timer,
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_80069C6C (src/BATTLE/BATTLE.PRG/146C.c:735)
+// decomp: BATTLE.PRG func_80069C6C (src/BATTLE/BATTLE.PRG/146C.c:386)
 void ArmDefenseAbilityTimingWindow(int target_actor_slot, AbilityHost& host) {
   if (target_actor_slot != 0 || host.QueuedAction().primary_actor == 0) {
     return;
@@ -327,8 +327,8 @@ void ArmDefenseAbilityTimingWindow(int target_actor_slot, AbilityHost& host) {
   }
 }
 
-// decomp: BATTLE.PRG _isArtOrAbilityUnlocked
-// (src/BATTLE/BATTLE.PRG/146C.c:3270)
+// decomp: BATTLE.PRG isArtOrAbilityUnlocked
+// (src/BATTLE/BATTLE.PRG/146C.c:2974; was _isArtOrAbilityUnlocked)
 PendingAbilityUnlocks PendingBattleAbilityUnlocks(const AbilityHost& host) {
   PendingAbilityUnlocks pending;
   const int category = host.EquippedWeaponCategory() % kWeaponCategories;
@@ -346,7 +346,7 @@ PendingAbilityUnlocks PendingBattleAbilityUnlocks(const AbilityHost& host) {
   return pending;
 }
 
-// decomp: BATTLE.PRG func_8006F89C (src/BATTLE/BATTLE.PRG/146C.c:3312)
+// decomp: BATTLE.PRG func_8006F89C (src/BATTLE/BATTLE.PRG/146C.c:3016)
 void BeginPendingAbilityReward(AbilityHost& host) {
   const int mode = host.RecoveryRewardMode();
   if (mode == kRewardWait) {
@@ -362,7 +362,7 @@ void BeginPendingAbilityReward(AbilityHost& host) {
   }
 }
 
-// decomp: BATTLE.PRG func_8006FA20 (src/BATTLE/BATTLE.PRG/146C.c:3352)
+// decomp: BATTLE.PRG func_8006FA20 (src/BATTLE/BATTLE.PRG/146C.c:3056)
 void GrantPendingAbilityUnlock(AbilityHost& host) {
   if (IsNewActionLearned(host)) {
     const int action_id = host.Selection().action_id;
@@ -378,7 +378,7 @@ void GrantPendingAbilityUnlock(AbilityHost& host) {
   host.OpenAbilityUnlockMenu(pending);
 }
 
-// decomp: BATTLE.PRG func_8006FD1C (src/BATTLE/BATTLE.PRG/146C.c:3420)
+// decomp: BATTLE.PRG func_8006FD1C (src/BATTLE/BATTLE.PRG/146C.c:3125)
 void AdvanceBattleAbilitySequence(AbilityHost& host) {
   host.SetTickSpeed(kChainTickSpeed);
   const ActionRequestView action = host.QueuedAction();
@@ -403,7 +403,7 @@ void AdvanceBattleAbilitySequence(AbilityHost& host) {
   }
 }
 
-// decomp: BATTLE.PRG func_80078828 (src/BATTLE/BATTLE.PRG/146C.c:7043)
+// decomp: BATTLE.PRG func_80078828 (src/BATTLE/BATTLE.PRG/146C.c:6891)
 bool CanTriggerBattleAbility(int ability_input_slot, const AbilityHost& host) {
   const ActionRequestView action = host.QueuedAction();
   if (action.primary_targets_position || action.target_count == 0 ||
@@ -481,15 +481,15 @@ void UpdateBattleAbilityTiming(AbilityHost& host) {
   if (!host.EffectsBusy()) AdvanceBattleAbilitySequence(host);
 }
 
-// decomp: BATTLE.PRG vs_battle_isActionUnlocked
-// (src/BATTLE/BATTLE.PRG/146C.c:9241)
+// decomp: BATTLE.PRG isActionUnlocked
+// (src/BATTLE/BATTLE.PRG/146C.c:9232; was vs_battle_isActionUnlocked)
 bool IsActionUnlocked(std::uint32_t action_id, const AbilityHost& host) {
   return action_id - 1 < kLastUnlockableAction &&
          host.ActionDefinitionUnlocked(static_cast<int>(action_id));
 }
 
-// decomp: BATTLE.PRG vs_battle_setActionUnlocked
-// (src/BATTLE/BATTLE.PRG/146C.c:9249)
+// decomp: BATTLE.PRG setActionUnlocked
+// (src/BATTLE/BATTLE.PRG/146C.c:9240; was vs_battle_setActionUnlocked)
 void UnlockAction(std::uint32_t action_id, AbilityHost& host) {
   if (action_id - 1 < kLastUnlockableAction) {
     host.SetActionDefinitionUnlocked(static_cast<int>(action_id));
@@ -497,7 +497,7 @@ void UnlockAction(std::uint32_t action_id, AbilityHost& host) {
 }
 
 // decomp: BATTLE.PRG vs_battle_isSpellClassUnlocked
-// (src/BATTLE/BATTLE.PRG/5BF94.c:3631)
+// (src/BATTLE/BATTLE.PRG/5BF94.c:3197)
 bool HasUnlockedSpellClass(int spell_class, const AbilityHost& host) {
   const int count = host.SpellClassCount(spell_class);
   for (int index = 0; index < count; ++index) {
@@ -509,7 +509,8 @@ bool HasUnlockedSpellClass(int spell_class, const AbilityHost& host) {
   return false;
 }
 
-// decomp: BATTLE.PRG _breakArtsUnlocked (src/BATTLE/BATTLE.PRG/5BF94.c:3643)
+// decomp: BATTLE.PRG breakArtsUnlocked (src/BATTLE/BATTLE.PRG/5BF94.c:3209; was
+// _breakArtsUnlocked)
 bool HasUnlockedWeaponBreakArt(const AbilityHost& host) {
   const int first = kFirstBreakArtAction +
                     (host.EquippedWeaponCategory() - 1) * kBreakArtsPerCategory;
@@ -520,7 +521,7 @@ bool HasUnlockedWeaponBreakArt(const AbilityHost& host) {
 }
 
 // decomp: BATTLE.PRG vs_battle_chainAbilitiesUnlocked
-// (src/BATTLE/BATTLE.PRG/5BF94.c:3657)
+// (src/BATTLE/BATTLE.PRG/5BF94.c:3223)
 bool HasUnlockedBattleAbility(int defense, const AbilityHost& host) {
   const AbilityKind kind =
       defense == 0 ? AbilityKind::kChain : AbilityKind::kDefense;

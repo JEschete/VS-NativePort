@@ -14,10 +14,10 @@
 #include "Effects/Templates/RingCore.hpp"
 
 // The code the five templates share (decomp src/EFFECT/grids.h:23,
-// meshes10.h:29, surfaces.h:34, mirroredSurfaces.h:34 and
-// rotatingSurfaces.h:34): curve sampling with the anchor switch, the doubled
-// colour channels, the tick event and the lifetime, and for the three sheets
-// their create, motion, row colours and drawing.
+// src/EFFECT/meshes10.h:29, src/EFFECT/surfaces.h:62, mirroredSurfaces.h:34 and
+// src/EFFECT/rotatingSurfaces.h:34): curve sampling with the anchor switch, the
+// doubled colour channels, the tick event and the lifetime, and for the three
+// sheets their create, motion, row colours and drawing.
 namespace VS::Effects::Templates {
 namespace {
 namespace math = Core::Math;
@@ -124,10 +124,10 @@ void EmitSurfaceTickEvent(const SurfaceDefinition& definition, Vec3 position,
                                  math::WrappingMultiply(at.z, kEventScale)});
 }
 
-// decomp: surfaces.h:75-93, mirroredSurfaces.h:75-93 and
-// rotatingSurfaces.h:83-101 (the row intensities of the create command).
-// The original read past a one-entry curve for the last row; that row reads
-// the curve's only entry here.
+// decomp: src/EFFECT/surfaces.h:75-93, mirroredSurfaces.h:75-93 and
+// src/EFFECT/rotatingSurfaces.h:83-101 (the row intensities of the create
+// command). The original read past a one-entry curve for the last row; that row
+// reads the curve's only entry here.
 std::array<std::int32_t, kMirrorSurfaceRows> SheetFactors(
     std::span<const std::uint8_t> curve, std::size_t rows) noexcept {
   std::array<std::int32_t, kMirrorSurfaceRows> factors{};
@@ -158,9 +158,10 @@ void CreateSheet(RingPlan plan, const SurfaceDefinition& definition,
                                       .program = definition.ring_positions});
 }
 
-// decomp: grids.h:77-94, surfaces.h:100-118, mirroredSurfaces.h:100-118,
-// rotatingSurfaces.h:108-125 and meshes10.h:65-82 (the flags, the anchored
-// position and the extent).
+// decomp: src/EFFECT/grids.h:77-94, src/EFFECT/surfaces.h:100-118,
+// mirroredSurfaces.h:100-118, src/EFFECT/rotatingSurfaces.h:108-125 and
+// src/EFFECT/meshes10.h:65-82 (the flags, the anchored position and the
+// extent).
 void SampleSurfacePlacement(const SurfaceTickInputs& inputs, std::int32_t age,
                             SurfaceScratch& scratch, SurfaceHost& host) {
   const SurfaceDefinition& definition = inputs.definition;
@@ -170,8 +171,9 @@ void SampleSurfacePlacement(const SurfaceTickInputs& inputs, std::int32_t age,
                                       definition.curves.extent, age, host);
 }
 
-// decomp: surfaces.h:98-136, mirroredSurfaces.h:98-136 and
-// rotatingSurfaces.h:106-141 (the sampling and the radius and height).
+// decomp: src/EFFECT/surfaces.h:98-136, mirroredSurfaces.h:98-136 and
+// src/EFFECT/rotatingSurfaces.h:106-141 (the sampling and the radius and
+// height).
 std::optional<SheetFrame> BeginSheetTick(SheetHost& host) {
   std::optional<SheetFrame> opened = OpenSurfaceTick<SheetFrame>(host);
   if (!opened.has_value()) {
@@ -220,9 +222,9 @@ void GrowSheetRow(SheetRowGrowth& growth,
       growth.height, math::WrappingAdd(growth.height_step, forces.force_max.y));
 }
 
-// decomp: surfaces.h:137-152 and mirroredSurfaces.h:137-172 (the points of
-// each row): x and z scale by the radius and y by the height, a flipped row
-// negating the profile's y before the product.
+// decomp: src/EFFECT/surfaces.h:137-152 and mirroredSurfaces.h:137-172 (the
+// points of each row): x and z scale by the radius and y by the height, a
+// flipped row negating the profile's y before the product.
 SheetPoints ScaleSheetProfile(const SheetFrame& frame, SurfaceProfile profile,
                               std::span<const SheetProfileRow> rows) {
   SheetPoints points{};
@@ -272,8 +274,9 @@ RingQuadUvs SheetQuadUvs(const RingTexture& texture, SurfaceTextureSpan span,
           RingUv{right, bottom}};
 }
 
-// decomp: surfaces.h:176-251, mirroredSurfaces.h:196-272 and
-// rotatingSurfaces.h:211-289: projection, texture step and the quads.
+// decomp: src/EFFECT/surfaces.h:176-251, mirroredSurfaces.h:196-272 and
+// src/EFFECT/rotatingSurfaces.h:211-289: projection, texture step and the
+// quads.
 void DrawSheet(const SheetFrame& frame, std::span<const RingPoint> points,
                SurfaceTextureSpan span, SheetHost& host) {
   const std::size_t rows =

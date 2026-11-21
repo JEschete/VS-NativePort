@@ -243,7 +243,7 @@ std::array<DIRENTRY, kDirectoryCapacity> liveDirectoryEntries{};
 
 class LiveCardHost final : public CardHost {
  public:
-  // decomp: _testMemcardEvents (src/TITLE/TITLE.PRG/22C.c:61,
+  // decomp: testMemcardEvents (src/MENU/memcard.h:67; was _testMemcardEvents,
   // src/MENU/MENU7.PRG/260.c:172) polls the kernel's card events with
   // TestEvent. No kernel event is ever delivered natively, so TestEvent's
   // result is the constant 0 (not fired) for every descriptor.

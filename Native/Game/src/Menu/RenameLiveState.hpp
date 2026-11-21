@@ -8,9 +8,10 @@
 
 namespace VS::Menu::Rename {
 
-// decomp: _renderRenameMenuStrings (MENU/MENU8.PRG 21A0.c): halfword offsets,
-// the strings, then the character grid; ModuleData.cpp fills it from the disc
-// string table.
+// decomp: renderRenameMenuStrings (MENU/MENU8.PRG
+// src/MENU/MENU8.PRG/21A0.c:129; was _renderRenameMenuStrings): halfword
+// offsets, the strings, then the character grid; ModuleData.cpp fills it from
+// the disc string table.
 inline constexpr int kMenuStringCount = 208;
 extern std::uint16_t renderRenameMenuStrings[kMenuStringCount];
 

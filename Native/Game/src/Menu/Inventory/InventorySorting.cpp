@@ -38,7 +38,8 @@ Record EquipmentRecord(const Items::InventoryContents& inventory,
 }
 }  // namespace
 
-// decomp: _sortWeapons (MENU/items1.h:731); MENU3 80103CC8..80103E23.
+// decomp: sortWeapons (src/MENU/items1.h:736; was _sortWeapons); MENU3
+// 80103CC8..80103E23.
 void SortWeapons(SortingWorld& world, std::int32_t stat) {
   auto order = world.FixedOrder(Items::ItemCategory::kWeapon);
   Items::WeaponLoadout target{};
@@ -52,7 +53,8 @@ void SortWeapons(SortingWorld& world, std::int32_t stat) {
       });
 }
 
-// decomp: _sortShields (MENU/items1.h:827); MENU3 80103F00..8010406B.
+// decomp: sortShields (src/MENU/items1.h:832; was _sortShields); MENU3
+// 80103F00..8010406B.
 void SortShields(SortingWorld& world, std::int32_t stat) {
   auto order = world.FixedOrder(Items::ItemCategory::kShield);
   Items::ShieldLoadout target{};
@@ -66,7 +68,8 @@ void SortShields(SortingWorld& world, std::int32_t stat) {
       });
 }
 
-// decomp: _sortMisc (MENU/items1.h:899); MENU3 8010408C..801041CB.
+// decomp: sortMisc (src/MENU/items1.h:904; was _sortMisc); MENU3
+// 8010408C..801041CB.
 void SortMisc(SortingWorld& world, std::int32_t stat) {
   auto order = world.FixedOrder(Items::ItemCategory::kMisc);
   Framework::sorting::StableOrder(
@@ -80,7 +83,8 @@ bool HasEquipmentProjection(std::int32_t category) {
   return Framework::sorting::HasEquipmentProjection(category);
 }
 
-// decomp: _copyEquipment (MENU/items1.h:994); MENU3 801042C4..8010439B.
+// decomp: copyEquipment (src/MENU/items1.h:999; was _copyEquipment); MENU3
+// 801042C4..8010439B.
 void CopyEquipmentStats(Items::EquipmentPart& target, std::int32_t category,
                         std::int32_t index, SortingWorld& world) {
   if (!HasEquipmentProjection(category)) return;
@@ -91,7 +95,8 @@ void CopyEquipmentStats(Items::EquipmentPart& target, std::int32_t category,
       });
 }
 
-// decomp: _sortEquipment (MENU/items1.h:1017); MENU3 8010439C..8010452F.
+// decomp: sortEquipment (src/MENU/items1.h:1021; was _sortEquipment); MENU3
+// 8010439C..8010452F.
 void SortEquipment(SortingWorld& world, std::int32_t category,
                    std::int32_t stat) {
   if (category < 0 ||

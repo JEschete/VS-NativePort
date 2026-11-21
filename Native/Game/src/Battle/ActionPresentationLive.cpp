@@ -404,22 +404,22 @@ std::uint8_t LiveWorld::SourceModel(int slot) {
          kModelNibble;
 }
 }  // namespace
-// decomp: func_80070278 (src/BATTLE/BATTLE.PRG/146C.c:3510).
+// decomp: func_80070278 (src/BATTLE/BATTLE.PRG/146C.c:3219).
 void StartLiveActionAnimation() {
   LiveWorld world;
   Require(StartActionAnimation(world));
 }
-// decomp: func_800704B0 (src/BATTLE/BATTLE.PRG/146C.c:3572).
+// decomp: func_800704B0 (src/BATTLE/BATTLE.PRG/146C.c:3282).
 void AdvanceLiveActionEffectPhase() {
   LiveWorld world;
   AdvanceActionEffectPhase(world);
 }
-// decomp: func_80070F28 (src/BATTLE/BATTLE.PRG/146C.c:3775).
+// decomp: func_80070F28 (src/BATTLE/BATTLE.PRG/146C.c:3487).
 void CommitLiveSelectedAction(int target_selection_mode) {
   LiveWorld world;
   Require(CommitSelectedAction(target_selection_mode, world));
 }
-// decomp: func_8007138C (src/BATTLE/BATTLE.PRG/146C.c:3906).
+// decomp: func_8007138C (src/BATTLE/BATTLE.PRG/146C.c:3618).
 void StartLiveActionPresentation() {
   LiveWorld world;
   Require(StartActionPresentation(world));

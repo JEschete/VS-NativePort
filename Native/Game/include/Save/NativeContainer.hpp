@@ -68,7 +68,7 @@ class ContainerSaveHost {
   virtual void ReportInvalidState(unsigned state) = 0;
 };
 
-// decomp: MENU7.PRG vs_menu7_saveContainerMenu (src/MENU/MENU7.PRG/260.c:3944)
+// decomp: MENU7.PRG vs_menu7_saveContainerMenu (src/MENU/MENU7.PRG/260.c:697)
 // Advances the submenu once; returns true when it has finished and reset.
 bool UpdateContainerSave(ContainerSaveState& state, ContainerSaveHost& host);
 

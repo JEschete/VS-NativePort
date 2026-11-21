@@ -130,7 +130,8 @@ class LiveCostWorld final : public ActionCostWorld {
 };
 }  // namespace
 
-// decomp: _getActionCost (src/BATTLE/BATTLE.PRG/146C.c:13075), WORD3.
+// decomp: getActionCost (src/BATTLE/BATTLE.PRG/146C.c:12913; was
+// _getActionCost), WORD3.
 std::uint32_t LiveActionCostAndAvailability(std::uint32_t action,
                                             VS::Battle::ActorStats* actor,
                                             int update) {
@@ -141,12 +142,12 @@ std::uint32_t LiveActionCostAndAvailability(std::uint32_t action,
                      action, owner ? &owner.value() : nullptr, update, world))
       .Packed();
 }
-// decomp: func_80085978 (src/BATTLE/BATTLE.PRG/146C.c:13167), VOID2.
+// decomp: func_80085978 (src/BATTLE/BATTLE.PRG/146C.c:13005), VOID2.
 void LivePreviewActorActionCost(int action, int slot) {
   LiveCostWorld world;
   if (!PreviewActorActionCost(action, slot, world)) Refuse();
 }
-// decomp: func_800859B4 (src/BATTLE/BATTLE.PRG/146C.c:13172), VOID3.
+// decomp: func_800859B4 (src/BATTLE/BATTLE.PRG/146C.c:13010), VOID3.
 void LiveAddActionRecoveryDelay(std::uint32_t action,
                                 VS::Battle::ActorStats* actor, int execute) {
   LiveCostWorld world;
@@ -157,7 +158,7 @@ void LiveAddActionRecoveryDelay(std::uint32_t action,
     Refuse();
   }
 }
-// decomp: vs_battle_getActionFlags (src/BATTLE/BATTLE.PRG/146C.c:15566), INT2.
+// decomp: vs_battle_getActionFlags (src/BATTLE/BATTLE.PRG/146C.c:15436), INT2.
 int LiveActorActionRestrictionFlags(int slot, int action) {
   LiveCostWorld world;
   return static_cast<int>(

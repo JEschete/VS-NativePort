@@ -301,7 +301,7 @@ PoseTrackResult ApplyPoseTracks(const AnimationClip& clip, int bones,
   return result;
 }
 
-// decomp: BATTLE.PRG func_800AF960 (src/BATTLE/BATTLE.PRG/44F14.c:1225)
+// decomp: BATTLE.PRG func_800AF960 (src/BATTLE/BATTLE.PRG/44F14.c:1150)
 // The unused original; func_800AFA28 inlines the same shadow blend step.
 void AdvanceShadowBlend(ShadowBlend& shadow) {
   if (shadow.level_frames != 0) {
@@ -357,7 +357,7 @@ void AdvanceSkeletalAnimation(SkeletalAnimationHost& host) {
   host.ApplyPoseTracks({.first = first_frame, .last = last_frame});
 }
 
-// decomp: BATTLE.PRG func_800B147C (src/BATTLE/BATTLE.PRG/48C7C.s:10-184).
+// decomp: BATTLE.PRG func_800B147C (src/BATTLE/BATTLE.PRG/48C7C.s:6).
 // Full copies use the native pose extent, not the assembly's fixed byte count.
 // A zero-length blend no longer divides by zero (#261).
 PoseBlend BlendActorPose(PoseKeys& destination, const PoseKeys& source,

@@ -65,31 +65,31 @@ std::optional<EnvelopeRate> ReleaseEnvelope(int rate, std::uint32_t mode) {
   return DecodeAkaoEnvelope(0, upper).release;
 }
 
-// decomp: SetVoiceKeyOn (src/SLUS_010.40/25AC.c:1102).
+// decomp: SetVoiceKeyOn (src/SLUS_010.40/25AC.c:1222).
 VoiceMaskResult KeyOnVoices(VoiceOutputHost& host, std::uint32_t mask) {
   return VisitVoices(mask, [&](std::uint32_t voice, bool selected) {
     if (selected) host.KeyOn(voice);
   });
 }
 
-// decomp: SetVoiceKeyOff (src/SLUS_010.40/25AC.c:1108).
+// decomp: SetVoiceKeyOff (src/SLUS_010.40/25AC.c:1228).
 VoiceMaskResult KeyOffVoices(VoiceOutputHost& host, std::uint32_t mask) {
   return VisitVoices(mask, [&](std::uint32_t voice, bool selected) {
     if (selected) host.KeyOff(voice);
   });
 }
 
-// decomp: SetVoiceReverbMode (src/SLUS_010.40/25AC.c:1114).
+// decomp: SetVoiceReverbMode (src/SLUS_010.40/25AC.c:1234).
 VoiceMaskResult SetVoiceReverbMask(VoiceOutputHost& host, std::uint32_t mask) {
   return SetModeMask(host, mask, VoiceMode::kReverb);
 }
 
-// decomp: SetVoiceNoiseMode (src/SLUS_010.40/25AC.c:1120).
+// decomp: SetVoiceNoiseMode (src/SLUS_010.40/25AC.c:1240).
 VoiceMaskResult SetVoiceNoiseMask(VoiceOutputHost& host, std::uint32_t mask) {
   return SetModeMask(host, mask, VoiceMode::kNoise);
 }
 
-// decomp: SetVoiceFmMode (src/SLUS_010.40/25AC.c:1126).
+// decomp: SetVoiceFmMode (src/SLUS_010.40/25AC.c:1246).
 VoiceMaskResult SetVoiceFrequencyModulationMask(VoiceOutputHost& host,
                                                 std::uint32_t mask) {
   constexpr std::uint32_t kUnmodulatedVoice = 1;
@@ -97,7 +97,7 @@ VoiceMaskResult SetVoiceFrequencyModulationMask(VoiceOutputHost& host,
                      VoiceMode::kFrequencyModulation);
 }
 
-// decomp: SetVoiceVolume (src/SLUS_010.40/25AC.c:1132).
+// decomp: SetVoiceVolume (src/SLUS_010.40/25AC.c:1252).
 VoiceStatus SetVoiceVolume(VoiceOutputHost& host, int voice, std::uint32_t left,
                            std::uint32_t right, std::uint32_t scale) {
   if (!ValidVoice(voice)) return VoiceStatus::kInvalidVoice;
@@ -107,7 +107,7 @@ VoiceStatus SetVoiceVolume(VoiceOutputHost& host, int voice, std::uint32_t left,
   return VoiceStatus::kApplied;
 }
 
-// decomp: SetVoiceSampleRate (src/SLUS_010.40/25AC.c:1148).
+// decomp: SetVoiceSampleRate (src/SLUS_010.40/25AC.c:1269).
 VoiceStatus SetVoiceSampleRate(VoiceOutputHost& host, int voice,
                                int sample_rate) {
   if (!ValidVoice(voice)) return VoiceStatus::kInvalidVoice;
@@ -120,7 +120,7 @@ VoiceStatus SetVoiceSampleRate(VoiceOutputHost& host, int voice,
   return VoiceStatus::kApplied;
 }
 
-// decomp: SetVoiceAdsrReleaseRateAndMode (src/SLUS_010.40/25AC.c:1301).
+// decomp: SetVoiceAdsrReleaseRateAndMode (src/SLUS_010.40/25AC.c:1422).
 VoiceStatus SetVoiceReleaseRateAndMode(VoiceOutputHost& host, int voice,
                                        int rate, std::uint32_t mode) {
   if (!ValidVoice(voice)) return VoiceStatus::kInvalidVoice;
@@ -166,9 +166,10 @@ std::optional<BankHeader> ReadBankHeader(std::span<const std::byte> bytes) {
                     Word(bytes, kInstrumentCountWord)};
 }
 
-// decomp: func_800135D8 (src/SLUS_010.40/25AC.c:1033), with
-// Sound_CopyAndRelocateInstruments (25AC.c:970) copying the records. Decoded
-// bank assets replace its SPU sample transfer.
+// decomp: Sound_LoadInstrumentBank (src/SLUS_010.40/25AC.c:1035; was
+// func_800135D8), with Sound_CopyAndRelocateInstruments
+// (src/SLUS_010.40/25AC.c:973) copying the records. Decoded bank assets replace
+// its SPU sample transfer.
 BankUploadResult UploadBank(SampleBankHost& host,
                             std::span<const std::byte> header,
                             int first_instrument,

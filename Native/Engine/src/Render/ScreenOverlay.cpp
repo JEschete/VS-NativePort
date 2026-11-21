@@ -95,7 +95,7 @@ void ResetFramebufferEffect(FramebufferEffect& effect) noexcept {
   effect.settings = FramebufferEffectSettings{};
 }
 
-// decomp: BATTLE.PRG func_8007D3F8 (src/BATTLE/BATTLE.PRG/146C.c:9278).
+// decomp: BATTLE.PRG func_8007D3F8 (src/BATTLE/BATTLE.PRG/146C.c:9269).
 void InitializeFramebufferEffect(FramebufferEffect& effect,
                                  FramebufferEffectPackets& packets) {
   packets.Forget();
@@ -238,44 +238,44 @@ bool SetFramebufferEffectEnabled(FramebufferEffect& effect,
   return true;
 }
 
-// decomp: BATTLE.PRG func_8007DDAC (src/BATTLE/BATTLE.PRG/146C.c:9430).
+// decomp: BATTLE.PRG func_8007DDAC (src/BATTLE/BATTLE.PRG/146C.c:9420).
 void SetFramebufferEffectRoll(FramebufferEffectSettings& settings,
                               std::int32_t angle) noexcept {
   settings.roll = Halfword(angle);
 }
 
-// decomp: BATTLE.PRG func_8007DDB8 (src/BATTLE/BATTLE.PRG/146C.c:9432).
+// decomp: BATTLE.PRG func_8007DDB8 (src/BATTLE/BATTLE.PRG/146C.c:9422).
 void SetFramebufferEffectScale(FramebufferEffectSettings& settings,
                                FramebufferEffectPair scale) noexcept {
   settings.scale = scale;
 }
 
-// decomp: BATTLE.PRG func_8007DDD4 (src/BATTLE/BATTLE.PRG/146C.c:9438).
+// decomp: BATTLE.PRG func_8007DDD4 (src/BATTLE/BATTLE.PRG/146C.c:9428).
 void SetFramebufferEffectTint(FramebufferEffectSettings& settings,
                               FramebufferEffectTint tint) noexcept {
   settings.tint = tint;
 }
 
-// decomp: BATTLE.PRG func_8007DDF8 (src/BATTLE/BATTLE.PRG/146C.c:9440).
+// decomp: BATTLE.PRG func_8007DDF8 (src/BATTLE/BATTLE.PRG/146C.c:9430).
 // The original also copied two words the effect never reads.
 void SetFramebufferEffectOffset(FramebufferEffectSettings& settings,
                                 FramebufferEffectPair offset) noexcept {
   settings.offset = offset;
 }
 
-// decomp: BATTLE.PRG func_8007DE2C (src/BATTLE/BATTLE.PRG/146C.c:9442).
+// decomp: BATTLE.PRG func_8007DE2C (src/BATTLE/BATTLE.PRG/146C.c:9432).
 void SetFramebufferEffectBlendMode(FramebufferEffectSettings& settings,
                                    std::int32_t blend_mode) noexcept {
   settings.blend_mode = blend_mode;
 }
 
-// decomp: BATTLE.PRG func_8007DE38 (src/BATTLE/BATTLE.PRG/146C.c:9444).
+// decomp: BATTLE.PRG func_8007DE38 (src/BATTLE/BATTLE.PRG/146C.c:9434).
 void SetFramebufferEffectParameter(FramebufferEffectSettings& settings,
                                    std::int32_t parameter) noexcept {
   settings.parameter = parameter;
 }
 
-// decomp: BATTLE.PRG func_8007DE44 (src/BATTLE/BATTLE.PRG/146C.c:9446).
+// decomp: BATTLE.PRG func_8007DE44 (src/BATTLE/BATTLE.PRG/146C.c:9436).
 bool SetFramebufferEffectDepth(FramebufferEffectSettings& settings,
                                std::uint32_t depth) noexcept {
   if (depth >= kFramebufferEffectDepthLimit) {
@@ -285,62 +285,62 @@ bool SetFramebufferEffectDepth(FramebufferEffectSettings& settings,
   return true;
 }
 
-// decomp: BATTLE.PRG func_8007DE5C (src/BATTLE/BATTLE.PRG/146C.c:9453).
+// decomp: BATTLE.PRG func_8007DE5C (src/BATTLE/BATTLE.PRG/146C.c:9443).
 void SetFramebufferEffectPreviousFrame(
     FramebufferEffectSettings& settings,
     std::int32_t uses_previous_frame) noexcept {
   settings.uses_previous_frame = uses_previous_frame;
 }
 
-// decomp: BATTLE.PRG func_8007DE68 (src/BATTLE/BATTLE.PRG/146C.c:9455).
+// decomp: BATTLE.PRG func_8007DE68 (src/BATTLE/BATTLE.PRG/146C.c:9445).
 std::int32_t FramebufferEffectStateCode(
     const FramebufferEffect& effect) noexcept {
   return static_cast<std::int32_t>(effect.phase);
 }
 
-// decomp: BATTLE.PRG func_8007DE78 (src/BATTLE/BATTLE.PRG/146C.c:9457).
+// decomp: BATTLE.PRG func_8007DE78 (src/BATTLE/BATTLE.PRG/146C.c:9447).
 std::int16_t ReadFramebufferEffectRoll(
     const FramebufferEffectSettings& settings) noexcept {
   return settings.roll;
 }
 
-// decomp: BATTLE.PRG func_8007DE88 (src/BATTLE/BATTLE.PRG/146C.c:9459).
+// decomp: BATTLE.PRG func_8007DE88 (src/BATTLE/BATTLE.PRG/146C.c:9449).
 FramebufferEffectPair ReadFramebufferEffectScale(
     const FramebufferEffectSettings& settings) noexcept {
   return {settings.scale.x, settings.scale.x};
 }
 
-// decomp: BATTLE.PRG func_8007DEA8 (src/BATTLE/BATTLE.PRG/146C.c:9466).
+// decomp: BATTLE.PRG func_8007DEA8 (src/BATTLE/BATTLE.PRG/146C.c:9456).
 FramebufferEffectTint ReadFramebufferEffectTint(
     const FramebufferEffectSettings& settings) noexcept {
   return settings.tint;
 }
 
-// decomp: BATTLE.PRG func_8007DECC (src/BATTLE/BATTLE.PRG/146C.c:9468).
+// decomp: BATTLE.PRG func_8007DECC (src/BATTLE/BATTLE.PRG/146C.c:9458).
 FramebufferEffectPair ReadFramebufferEffectOffset(
     const FramebufferEffectSettings& settings) noexcept {
   return settings.offset;
 }
 
-// decomp: BATTLE.PRG func_8007DF00 (src/BATTLE/BATTLE.PRG/146C.c:9470).
+// decomp: BATTLE.PRG func_8007DF00 (src/BATTLE/BATTLE.PRG/146C.c:9460).
 std::int32_t ReadFramebufferEffectBlendMode(
     const FramebufferEffectSettings& settings) noexcept {
   return settings.blend_mode;
 }
 
-// decomp: BATTLE.PRG func_8007DF10 (src/BATTLE/BATTLE.PRG/146C.c:9472).
+// decomp: BATTLE.PRG func_8007DF10 (src/BATTLE/BATTLE.PRG/146C.c:9462).
 std::int32_t ReadFramebufferEffectParameter(
     const FramebufferEffectSettings& settings) noexcept {
   return settings.parameter;
 }
 
-// decomp: BATTLE.PRG func_8007DF20 (src/BATTLE/BATTLE.PRG/146C.c:9474).
+// decomp: BATTLE.PRG func_8007DF20 (src/BATTLE/BATTLE.PRG/146C.c:9464).
 std::uint32_t ReadFramebufferEffectDepth(
     const FramebufferEffectSettings& settings) noexcept {
   return settings.depth;
 }
 
-// decomp: BATTLE.PRG func_8007DF30 (src/BATTLE/BATTLE.PRG/146C.c:9476).
+// decomp: BATTLE.PRG func_8007DF30 (src/BATTLE/BATTLE.PRG/146C.c:9466).
 std::int32_t ReadFramebufferEffectPreviousFrame(
     const FramebufferEffectSettings& settings) noexcept {
   return settings.uses_previous_frame;
@@ -427,7 +427,8 @@ void AdvanceScreenTransition(ScreenTransition& transition) noexcept {
   }
 }
 
-// decomp: BATTLE.PRG _drawScreenTransition (src/BATTLE/BATTLE.PRG/146C.c:2223).
+// decomp: BATTLE.PRG drawScreenTransition (src/BATTLE/BATTLE.PRG/146C.c:1925;
+// was _drawScreenTransition).
 void DrawScreenTransition(ScreenTransition& transition,
                           ScreenTransitionTarget& target,
                           ScreenTransformer& transformer) {

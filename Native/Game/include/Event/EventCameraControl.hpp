@@ -86,8 +86,9 @@ class EventFieldCameraHost {
   EventFieldCameraHost(EventFieldCameraHost&&) = delete;
   EventFieldCameraHost& operator=(EventFieldCameraHost&&) = delete;
 
-  // decomp: BATTLE.PRG vs_battle_initialiseCameraFromSpherical
-  // (src/BATTLE/BATTLE.PRG/146C.c:9071) Turns the field camera to `facing`
+  // decomp: BATTLE.PRG initialiseCameraFromSpherical
+  // (src/BATTLE/BATTLE.PRG/146C.c:9037; was
+  // vs_battle_initialiseCameraFromSpherical) Turns the field camera to `facing`
   // eighths (-1 keeps the yaw) at distance preset `distance_mode` (1 near,
   // 2 far, any other keeps the distance) around Ashley and returns its eye
   // and look-at.
@@ -122,45 +123,47 @@ struct SavedFieldCameraView {
   std::uint8_t distance_index = 0;
 };
 
-// decomp: BATTLE.PRG func_800BE3A0 (F01237, src/BATTLE/BATTLE.PRG/4A0A8.c:4026,
+// decomp: BATTLE.PRG func_800BE3A0 (F01237, src/BATTLE/BATTLE.PRG/4DEA8.c:4676,
 // 0x800BE3A0-0x800BE3D0) Puts both tracks at rest (the eye first) and clears
 // their follow requests.
 void StopEventCameraMotion(EventCameraTracks& tracks);
 
-// decomp: BATTLE.PRG func_800BB33C (F01193, src/BATTLE/BATTLE.PRG/4A0A8.c:2761,
-// 0x800BB33C-0x800BB35C) Opcode 0xDE: stops both tracks. It reads no operand.
+// decomp: BATTLE.PRG vs_battle_script_DE (F01193,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:3410; was func_800BB33C, 0x800BB33C-0x800BB35C)
+// Opcode 0xDE: stops both tracks. It reads no operand.
 void CommandStopCameraMotion(EventCameraTracks& tracks);
 
-// decomp: BATTLE.PRG func_800BE36C (F01236, src/BATTLE/BATTLE.PRG/4A0A8.c:4018,
+// decomp: BATTLE.PRG func_800BE36C (F01236, src/BATTLE/BATTLE.PRG/4DEA8.c:4668,
 // 0x800BE36C-0x800BE3A0) Sets each track's follow request; neither follows
 // until the track update starts it.
 void SetEventCameraFollowing(EventCameraTracks& tracks,
                              std::uint8_t look_at_follow,
                              std::uint8_t eye_follow);
 
-// decomp: BATTLE.PRG func_800BB35C (F01194, src/BATTLE/BATTLE.PRG/4A0A8.c:2767,
-// 0x800BB35C-0x800BB38C) Opcode 0xDF: operand bit 0 asks the look-at to
-// follow and bit 1 the eye. False, changing nothing, for a command shorter
-// than kSetCameraFollowingLength.
+// decomp: BATTLE.PRG vs_battle_script_DF (F01194,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:3416; was func_800BB35C, 0x800BB35C-0x800BB38C)
+// Opcode 0xDF: operand bit 0 asks the look-at to follow and bit 1 the eye.
+// False, changing nothing, for a command shorter than
+// kSetCameraFollowingLength.
 [[nodiscard]] bool CommandSetCameraFollowing(ScriptCommand command,
                                              EventCameraTracks& tracks);
 
-// decomp: BATTLE.PRG func_800BB3BC (F01196, src/BATTLE/BATTLE.PRG/4A0A8.c:2780,
-// 0x800BB3BC-0x800BB41C) Opcode 0xE9's field view: facing operand 0xFF keeps
-// the yaw and the others turn half round ((facing + 4) & 7); distance operand
-// 0 keeps the distance. nullopt for a command shorter than
-// kRestoreFieldCameraLength.
+// decomp: BATTLE.PRG vs_battle_script_E9 (F01196,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:3429; was func_800BB3BC, 0x800BB3BC-0x800BB41C)
+// Opcode 0xE9's field view: facing operand 0xFF keeps the yaw and the others
+// turn half round ((facing + 4) & 7); distance operand 0 keeps the distance.
+// nullopt for a command shorter than kRestoreFieldCameraLength.
 [[nodiscard]] std::optional<FieldCameraReturnRequest> CommandRestoreFieldCamera(
     ScriptCommand command);
 
-// decomp: BATTLE.PRG func_800BC1CC (F01220, src/BATTLE/BATTLE.PRG/4A0A8.c:3173,
+// decomp: BATTLE.PRG func_800BC1CC (F01220, src/BATTLE/BATTLE.PRG/4DEA8.c:3823,
 // 0x800BC1CC-0x800BC2E8), its first half: a set field camera override
 // (EventFieldCameraOverride) skips one restore. Clears it and returns true
 // when set.
 [[nodiscard]] bool ConsumeFieldCameraOverride(
     std::uint8_t& skip_next_field_camera_restore);
 
-// decomp: BATTLE.PRG func_800BC1CC (F01220, src/BATTLE/BATTLE.PRG/4A0A8.c:3173,
+// decomp: BATTLE.PRG func_800BC1CC (F01220, src/BATTLE/BATTLE.PRG/4DEA8.c:3823,
 // 0x800BC1CC-0x800BC2E8), its second half: places the field camera, makes it
 // both tracks' destination and glides there over the distance left (current
 // less destination) by kFieldReturnTravelPerFrame through
@@ -170,7 +173,7 @@ FieldCameraReturnGlide RestoreEventFieldCamera(
     EventCameraTracks& tracks, FieldCameraReturnRequest request,
     EventFieldCameraHost& field_camera, EventCameraTrackHost& motion);
 
-// decomp: BATTLE.PRG func_800BE3D0 (F01238, src/BATTLE/BATTLE.PRG/4A0A8.c:4039,
+// decomp: BATTLE.PRG func_800BE3D0 (F01238, src/BATTLE/BATTLE.PRG/4DEA8.c:4689,
 // 0x800BE3D0-0x800BE53C) Starts the eye an eighth turn to one side of the
 // saved field view (orbit_side 0 before it, 1 after it), raised by its height
 // offset, and orbits it back with the look-at gliding along. False when the

@@ -215,7 +215,8 @@ SamplesOf<Emitter> Transparency(std::string_view overlay,
   return sampled.samples;
 }
 
-// decomp: src/EFFECT/trails5.h:27 and trails9.h:27 VS_TRAIL_ORIGIN_FUNCTION.
+// decomp: src/EFFECT/trailEffect.h:72 and src/EFFECT/trailEffect.h:72
+// VS_TRAIL_ORIGIN_FUNCTION.
 template <typename Emitter>
 void GenerateOrigins(const LiveParticleDefinition& definition,
                      LiveParticleEmitterScratch& scratch,
@@ -288,8 +289,9 @@ class LiveTrailEmitterHost final : public TrailEmitterHost {
 
   bool BeginTick() override;
 
-  // decomp: trails5.h:736-742 and trails9.h:745-751 (the first tick runs
-  // origin, target, control and init).
+  // decomp: src/EFFECT/trailEffect.h:713-846 and
+  // src/EFFECT/trailEffect.h:713-846 (the first tick runs origin, target,
+  // control and init).
   void InitializeTrails() override {
     Emitter& state = *State();
     LiveParticleEmitterScratch& scratch = EmitterWorkspace();
@@ -412,8 +414,8 @@ bool LiveTrailEmitterHost<Emitter>::BeginTick() {
   return true;
 }
 
-// decomp: trails5.h:744-745 and trails9.h:753-754 (every tick runs update and
-// render).
+// decomp: src/EFFECT/trailEffect.h:713-846 and src/EFFECT/trailEffect.h:713-846
+// (every tick runs update and render).
 template <typename Emitter>
 void LiveTrailEmitterHost<Emitter>::DrawTrails() {
   Emitter& state = *State();
@@ -436,8 +438,8 @@ void LiveTrailEmitterHost<Emitter>::DrawTrails() {
   EmitTickEvents(event);
 }
 
-// decomp: trails5.h:752-800 and trails9.h:761-798 (tick events at each
-// trail's newest sample).
+// decomp: src/EFFECT/trailEffect.h:713-846 and src/EFFECT/trailEffect.h:713-846
+// (tick events at each trail's newest sample).
 template <typename Emitter>
 void LiveTrailEmitterHost<Emitter>::EmitTickEvents(std::size_t event) {
   constexpr std::size_t kSplineSampleCount =
@@ -494,7 +496,7 @@ int UpdateEmitter(LiveRendererSlot* slot, unsigned int command, int packed,
 }
 }  // namespace
 
-// decomp: src/EFFECT/trails5.h:27 VS_TRAIL_ORIGIN_FUNCTION.
+// decomp: src/EFFECT/trailEffect.h:72 VS_TRAIL_ORIGIN_FUNCTION.
 void GenerateLiveTrailOrigins(const LiveParticleDefinition& definition,
                               LiveParticleEmitterScratch& scratch,
                               LiveEffectInstance& instance,
@@ -503,13 +505,13 @@ void GenerateLiveTrailOrigins(const LiveParticleDefinition& definition,
   GenerateOrigins(definition, scratch, instance, state, overlay);
 }
 
-// decomp: src/EFFECT/trails5.h:677 VS_TRAIL_DISPATCH_FUNCTION.
+// decomp: src/EFFECT/trailEffect.h:713 VS_TRAIL_DISPATCH_FUNCTION.
 int UpdateLiveTrailEmitter(LiveRendererSlot* slot, unsigned int command,
                            int packed, const LiveTrailOverlay& overlay) {
   return UpdateEmitter<LiveTrailState>(slot, command, packed, overlay);
 }
 
-// decomp: src/EFFECT/trails9.h:27 VS_TRAIL_ORIGIN_FUNCTION.
+// decomp: src/EFFECT/trailEffect.h:72 VS_TRAIL_ORIGIN_FUNCTION.
 void GenerateLiveTrailNineOrigins(const LiveParticleDefinition& definition,
                                   LiveParticleEmitterScratch& scratch,
                                   LiveEffectInstance& instance,
@@ -518,7 +520,7 @@ void GenerateLiveTrailNineOrigins(const LiveParticleDefinition& definition,
   GenerateOrigins(definition, scratch, instance, state, overlay);
 }
 
-// decomp: src/EFFECT/trails9.h:685 VS_TRAIL_DISPATCH_FUNCTION.
+// decomp: src/EFFECT/trailEffect.h:713 VS_TRAIL_DISPATCH_FUNCTION.
 int UpdateLiveTrailNineEmitter(LiveRendererSlot* slot, unsigned int command,
                                int packed,
                                const LiveTrailNineOverlay& overlay) {

@@ -934,23 +934,23 @@ std::span<const std::uint8_t> LiveLootInventoryText() {
   return lootText.bytes;
 }
 
-// decomp: _sortItems (src/MENU/items1.h:1077), separately compiled in both
-// overlays.
+// decomp: sortItems (src/MENU/items1.h:1081; was _sortItems), separately
+// compiled in both overlays.
 int UpdateLiveSortMenu(int initialize) {
   return SortLive(ItemRowsContext::kItemMenu, initialize);
 }
 int UpdateLiveLootSortMenu(int initialize) {
   return SortLive(ItemRowsContext::kLoot, initialize);
 }
-// decomp: _discardMenu (src/MENU/items1.h:1185).
+// decomp: discardMenu (src/MENU/items1.h:1189; was _discardMenu).
 int UpdateLiveDiscardMenu(int initialize) {
   return DiscardLive(ItemRowsContext::kItemMenu, initialize);
 }
 int UpdateLiveLootDiscardMenu(int initialize) {
   return DiscardLive(ItemRowsContext::kLoot, initialize);
 }
-// decomp: _itemNavigation (src/MENU/items2.h:201), MENU3 _ITEMMENU versus
-// MENUB.
+// decomp: itemNavigation (src/MENU/items2.h:206; was _itemNavigation), MENU3
+// _ITEMMENU versus MENUB.
 int UpdateLiveItemList(int initialize) {
   return NavigateLive(ItemRowsContext::kItemMenu, initialize);
 }

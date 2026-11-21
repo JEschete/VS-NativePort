@@ -246,7 +246,7 @@ void DrawLeftTargetLabelLinkEntry(int anchor_xy, int ring_xy, int pulse_head) {
                           pulse_head, canvas);
 }
 
-// decomp: BATTLE.PRG func_800C1D84 (src/BATTLE/BATTLE.PRG/58578.c:645),
+// decomp: BATTLE.PRG func_800C1D84 (src/BATTLE/BATTLE.PRG/58578.c:594),
 // F01300.
 int AreTargetLabelsSettledEntry() {
   const VS::Battle::TargetSphereRecord& sphere =
@@ -286,7 +286,7 @@ void UpdateSphereTargetLabelsEntry() {
   }
 }
 
-// decomp: BATTLE.PRG func_800C4650 (src/BATTLE/BATTLE.PRG/5BE50.c:65),
+// decomp: BATTLE.PRG func_800C4650 (src/BATTLE/BATTLE.PRG/58578.c:1071),
 // F01310.
 void UpdateSphereTargetHighlightsEntry(TargetLabelLine* targets, int count) {
   if (count <= 0) return;

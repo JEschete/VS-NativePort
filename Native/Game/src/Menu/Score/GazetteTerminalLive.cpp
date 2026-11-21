@@ -735,7 +735,8 @@ class LiveScreenHost final : public GazetteScreenHost {
 };
 }  // namespace
 
-// decomp: _setEnemyDescription (src/MENU/MENU9.PRG/238.c:1414).
+// decomp: setEnemyDescription (src/MENU/MENU9.PRG/238.c:1419; was
+// _setEnemyDescription).
 void ShowLiveEnemyDescription() {
   EnemyRows enemies;
   LiveEnemyListHost host;
@@ -748,7 +749,7 @@ void ShowLiveEnemyDescription() {
       Label(miscInfo, menu9_misc_info::index::kEnemyNotDefeated), host));
 }
 
-// decomp: _renderEnemyNo (src/MENU/MENU9.PRG/238.c:1878).
+// decomp: renderEnemyNo (src/MENU/MENU9.PRG/238.c:1883; was _renderEnemyNo).
 void DrawLiveEnemyNumber(int x, int y, int number, int dimmed) {
   LiveEnemyNumberTarget target;
   if (!DrawEnemyNumber({x, y, number, dimmed != 0}, target)) {
@@ -756,7 +757,7 @@ void DrawLiveEnemyNumber(int x, int y, int number, int dimmed) {
   }
 }
 
-// decomp: _initEnemyList (src/MENU/MENU9.PRG/238.c:1916).
+// decomp: initEnemyList (src/MENU/MENU9.PRG/238.c:1921; was _initEnemyList).
 void InitializeLiveEnemyList() {
   EnemyRows enemies;
   std::array<std::uint32_t, kEnemyDefeatFlagWords> flags{};
@@ -773,7 +774,8 @@ void InitializeLiveEnemyList() {
   StoreEnemies(enemies, true);
 }
 
-// decomp: _renderEnemyMenu (src/MENU/MENU9.PRG/238.c:1972).
+// decomp: renderEnemyMenu (src/MENU/MENU9.PRG/238.c:1977; was
+// _renderEnemyMenu).
 void RenderLiveEnemyList(int step) {
   EnemyRows enemies;
   if (!ReadEnemies(enemies)) {
@@ -789,7 +791,8 @@ void RenderLiveEnemyList(int step) {
   }
 }
 
-// decomp: _renderEnemyDetailScreen (src/MENU/MENU9.PRG/238.c:2069).
+// decomp: renderEnemyDetailScreen (src/MENU/MENU9.PRG/238.c:2074; was
+// _renderEnemyDetailScreen).
 void RenderLiveEnemyViewer(int step, int transition) {
   EnemyRows enemies;
   if (hideUi == 0 && !ReadEnemies(enemies)) {
@@ -805,7 +808,8 @@ void RenderLiveEnemyViewer(int step, int transition) {
                         host));
 }
 
-// decomp: _renderEnemyNavigation (src/MENU/MENU9.PRG/238.c:2782).
+// decomp: renderEnemyNavigation (src/MENU/MENU9.PRG/238.c:2785; was
+// _renderEnemyNavigation).
 void DrawLiveEnemyNavigation(int direction) {
   LiveEnemyNavigationHost host;
   if (!DrawEnemyNavigation(direction, enemyNavigationState, hideUi != 0,
@@ -814,7 +818,7 @@ void DrawLiveEnemyNavigation(int direction) {
   }
 }
 
-// decomp: _menuInput (src/MENU/MENU9.PRG/238.c:548).
+// decomp: menuInput (src/MENU/MENU9.PRG/238.c:553; was _menuInput).
 int UpdateLiveGazette() {
   auto state = ReadState();
   auto cursor = ReadCursor();
@@ -833,7 +837,7 @@ int UpdateLiveGazette() {
   return result.value_or(0);
 }
 
-// decomp: vs_menu9_exec (src/MENU/MENU9.PRG/238.c:269).
+// decomp: vs_menu9_exec (src/MENU/MENU9.PRG/238.c:276).
 int UpdateLiveGazetteScreen(std::uint8_t* phase) {
   if (phase == nullptr) {
     Refuse("null score-screen phase");

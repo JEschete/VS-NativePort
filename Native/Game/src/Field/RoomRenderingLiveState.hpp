@@ -10,17 +10,18 @@
 
 namespace VS::Field {
 
-// decomp: D_800F190C (BATTLE/BATTLE.PRG 146C.c:15521): 1 while the field
-// (room, actors and effects) draws behind the menus.
+// decomp: D_800F190C (BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/146C.h:58): 1
+// while the field (room, actors and effects) draws behind the menus.
 extern int isFieldRenderingEnabled;
-// decomp: D_800F1BA4 (BATTLE/BATTLE.PRG 146C.c:16010): nonzero while the
-// room's animations, effects and weather hold still.
+// decomp: D_800F1BA4 (BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/146C.h:48):
+// nonzero while the room's animations, effects and weather hold still.
 extern std::uint16_t areRoomUpdatesPaused;
-// decomp: D_800F1BA8 (BATTLE/BATTLE.PRG 146C.c:15953): the room's 1024
-// palette colours (low heap, 18.c:595), or null before a session starts.
+// decomp: D_800F1BA8 (BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/146C.h:49): the
+// room's 1024 palette colours (low heap, 18.c:595), or null before a session
+// starts.
 extern std::uint16_t* roomPalettes;
-// decomp: D_800F1BB0 (BATTLE/BATTLE.PRG 146C.c:15995): the room tint's
-// channel offsets, strength and on switch.
+// decomp: D_800F1BB0 (BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/146C.c:357): the
+// room tint's channel offsets, strength and on switch.
 extern VS::Field::RoomTintRecord roomTint;
 
 }  // namespace VS::Field

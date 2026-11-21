@@ -149,199 +149,239 @@ int LiveCheckActionHitPrerequisite(ActionDefinition* action,
 
 // The prerequisite table slots (decomp: _attackPrerequisiteFunctions,
 // src/BATTLE/BATTLE.PRG/146C.c:628), with the dispatch ABI.
-// decomp: _hitPrerequisiteNever0..3 (146C.c:10146, 10180, 10186, 10192)
+// decomp: hitPrerequisiteNever0..3 (src/BATTLE/BATTLE.PRG/146C.c:10132; was
+// _hitPrerequisiteNever0, 10180, 10186, 10192)
 int VS::Battle::RejectAttackPrerequisiteSlot(
     ActionDefinition* /*action*/, std::uint8_t* target_result_bytes) {
   return RunRule(battle::RejectAttackPrerequisite, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteAlways0..2 (146C.c:10152, 10158, 10164)
+// decomp: hitPrerequisiteAlways0..2 (src/BATTLE/BATTLE.PRG/146C.c:10134; was
+// _hitPrerequisiteAlways0, 10158, 10164)
 int VS::Battle::AcceptAttackPrerequisiteSlot(
     ActionDefinition* /*action*/, std::uint8_t* target_result_bytes) {
   return RunRule(battle::AcceptAttackPrerequisite, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteUndead (146C.c:10170)
+// decomp: hitPrerequisiteUndead (src/BATTLE/BATTLE.PRG/146C.c:10140; was
+// _hitPrerequisiteUndead)
 int VS::Battle::IsAttackTargetUndeadSlot(ActionDefinition* /*action*/,
                                          std::uint8_t* target_result_bytes) {
   return RunRule(battle::IsAttackTargetUndead, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteNotUndead (146C.c:10175)
+// decomp: hitPrerequisiteNotUndead (src/BATTLE/BATTLE.PRG/146C.c:10145; was
+// _hitPrerequisiteNotUndead)
 int VS::Battle::IsAttackTargetLivingSlot(ActionDefinition* /*action*/,
                                          std::uint8_t* target_result_bytes) {
   return RunRule(battle::IsAttackTargetLiving, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteCanApplyStrDown (146C.c:10198)
+// decomp: hitPrerequisiteCanApplyStrDown (src/BATTLE/BATTLE.PRG/146C.c:10156;
+// was _hitPrerequisiteCanApplyStrDown)
 int VS::Battle::CanApplyStrengthDownSlot(ActionDefinition* /*action*/,
                                          std::uint8_t* target_result_bytes) {
   return RunRule(battle::CanApplyStrengthDown, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteCanApplyIntDown (146C.c:10204)
+// decomp: hitPrerequisiteCanApplyIntDown (src/BATTLE/BATTLE.PRG/146C.c:10161;
+// was _hitPrerequisiteCanApplyIntDown)
 int VS::Battle::CanApplyIntelligenceDownSlot(
     ActionDefinition* /*action*/, std::uint8_t* target_result_bytes) {
   return RunRule(battle::CanApplyIntelligenceDown, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteCanApplyAglDown (146C.c:10210)
+// decomp: hitPrerequisiteCanApplyAglDown (src/BATTLE/BATTLE.PRG/146C.c:10166;
+// was _hitPrerequisiteCanApplyAglDown)
 int VS::Battle::CanApplyAgilityDownSlot(ActionDefinition* /*action*/,
                                         std::uint8_t* target_result_bytes) {
   return RunRule(battle::CanApplyAgilityDown, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteCanApplyEquipDown (146C.c:10216)
+// decomp: hitPrerequisiteCanApplyEquipDown (src/BATTLE/BATTLE.PRG/146C.c:10171;
+// was _hitPrerequisiteCanApplyEquipDown)
 int VS::Battle::CanApplyEquipmentDownSlot(ActionDefinition* /*action*/,
                                           std::uint8_t* target_result_bytes) {
   return RunRule(battle::CanApplyEquipmentDown, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteCanApplyHalfMove (146C.c:10250)
+// decomp: hitPrerequisiteCanApplyHalfMove (src/BATTLE/BATTLE.PRG/146C.c:10205;
+// was _hitPrerequisiteCanApplyHalfMove)
 int VS::Battle::CanApplyHalfMovementSlot(ActionDefinition* /*action*/,
                                          std::uint8_t* target_result_bytes) {
   return RunRule(battle::CanApplyHalfMovement, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteCanApplyStrUp (146C.c:10256)
+// decomp: hitPrerequisiteCanApplyStrUp (src/BATTLE/BATTLE.PRG/146C.c:10210; was
+// _hitPrerequisiteCanApplyStrUp)
 int VS::Battle::CanApplyStrengthUpSlot(ActionDefinition* /*action*/,
                                        std::uint8_t* target_result_bytes) {
   return RunRule(battle::CanApplyStrengthUp, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteCanApplyIntUp (146C.c:10261)
+// decomp: hitPrerequisiteCanApplyIntUp (src/BATTLE/BATTLE.PRG/146C.c:10215; was
+// _hitPrerequisiteCanApplyIntUp)
 int VS::Battle::CanApplyIntelligenceUpSlot(ActionDefinition* /*action*/,
                                            std::uint8_t* target_result_bytes) {
   return RunRule(battle::CanApplyIntelligenceUp, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteCanApplyAglUp (146C.c:10266)
+// decomp: hitPrerequisiteCanApplyAglUp (src/BATTLE/BATTLE.PRG/146C.c:10220; was
+// _hitPrerequisiteCanApplyAglUp)
 int VS::Battle::CanApplyAgilityUpSlot(ActionDefinition* /*action*/,
                                       std::uint8_t* target_result_bytes) {
   return RunRule(battle::CanApplyAgilityUp, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteCanApplyEquipUp (146C.c:10271)
+// decomp: hitPrerequisiteCanApplyEquipUp (src/BATTLE/BATTLE.PRG/146C.c:10225;
+// was _hitPrerequisiteCanApplyEquipUp)
 int VS::Battle::CanApplyEquipmentUpSlot(ActionDefinition* /*action*/,
                                         std::uint8_t* target_result_bytes) {
   return RunRule(battle::CanApplyEquipmentUp, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteCanApplyQuicken (146C.c:10305)
+// decomp: hitPrerequisiteCanApplyQuicken (src/BATTLE/BATTLE.PRG/146C.c:10259;
+// was _hitPrerequisiteCanApplyQuicken)
 int VS::Battle::CanApplyQuickenSlot(ActionDefinition* /*action*/,
                                     std::uint8_t* target_result_bytes) {
   return RunRule(battle::CanApplyQuicken, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteCanApplySilence (146C.c:10311)
+// decomp: hitPrerequisiteCanApplySilence (src/BATTLE/BATTLE.PRG/146C.c:10264;
+// was _hitPrerequisiteCanApplySilence)
 int VS::Battle::CanApplySilenceSlot(ActionDefinition* /*action*/,
                                     std::uint8_t* target_result_bytes) {
   return RunRule(battle::CanApplySilence, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteCanApplyMagicWard (146C.c:10317)
+// decomp: hitPrerequisiteCanApplyMagicWard (src/BATTLE/BATTLE.PRG/146C.c:10269;
+// was _hitPrerequisiteCanApplyMagicWard)
 int VS::Battle::CanApplyMagicWardSlot(ActionDefinition* /*action*/,
                                       std::uint8_t* target_result_bytes) {
   return RunRule(battle::CanApplyMagicWard, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteCanApplyRegen (146C.c:10323)
+// decomp: hitPrerequisiteCanApplyRegen (src/BATTLE/BATTLE.PRG/146C.c:10274; was
+// _hitPrerequisiteCanApplyRegen)
 int VS::Battle::CanApplyRegenerationSlot(ActionDefinition* /*action*/,
                                          std::uint8_t* target_result_bytes) {
   return RunRule(battle::CanApplyRegeneration, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteCanApplyParalysis (146C.c:10329)
+// decomp: hitPrerequisiteCanApplyParalysis (src/BATTLE/BATTLE.PRG/146C.c:10279;
+// was _hitPrerequisiteCanApplyParalysis)
 int VS::Battle::CanApplyParalysisSlot(ActionDefinition* /*action*/,
                                       std::uint8_t* target_result_bytes) {
   return RunRule(battle::CanApplyParalysis, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteCanApplyPoison (146C.c:10335)
+// decomp: hitPrerequisiteCanApplyPoison (src/BATTLE/BATTLE.PRG/146C.c:10284;
+// was _hitPrerequisiteCanApplyPoison)
 int VS::Battle::CanApplyPoisonSlot(ActionDefinition* /*action*/,
                                    std::uint8_t* target_result_bytes) {
   return RunRule(battle::CanApplyPoison, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteCanApplyNumbness (146C.c:10341)
+// decomp: hitPrerequisiteCanApplyNumbness (src/BATTLE/BATTLE.PRG/146C.c:10289;
+// was _hitPrerequisiteCanApplyNumbness)
 int VS::Battle::CanApplyNumbnessSlot(ActionDefinition* /*action*/,
                                      std::uint8_t* target_result_bytes) {
   return RunRule(battle::CanApplyNumbness, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteCanApplyCurse (146C.c:10347)
+// decomp: hitPrerequisiteCanApplyCurse (src/BATTLE/BATTLE.PRG/146C.c:10294; was
+// _hitPrerequisiteCanApplyCurse)
 int VS::Battle::CanApplyCurseSlot(ActionDefinition* /*action*/,
                                   std::uint8_t* target_result_bytes) {
   return RunRule(battle::CanApplyCurse, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteCanApplyAirAttackUp (146C.c:10353)
+// decomp: hitPrerequisiteCanApplyAirAttackUp
+// (src/BATTLE/BATTLE.PRG/146C.c:10299; was _hitPrerequisiteCanApplyAirAttackUp)
 int VS::Battle::CanApplyAirAttackUpSlot(ActionDefinition* /*action*/,
                                         std::uint8_t* target_result_bytes) {
   return RunRule(battle::CanApplyAirAttackUp, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteCanApplyFireAttackUp (146C.c:10363)
+// decomp: hitPrerequisiteCanApplyFireAttackUp
+// (src/BATTLE/BATTLE.PRG/146C.c:10308; was
+// _hitPrerequisiteCanApplyFireAttackUp)
 int VS::Battle::CanApplyFireAttackUpSlot(ActionDefinition* /*action*/,
                                          std::uint8_t* target_result_bytes) {
   return RunRule(battle::CanApplyFireAttackUp, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteCanApplyEarthAttackUp (146C.c:10373)
+// decomp: hitPrerequisiteCanApplyEarthAttackUp
+// (src/BATTLE/BATTLE.PRG/146C.c:10317; was
+// _hitPrerequisiteCanApplyEarthAttackUp)
 int VS::Battle::CanApplyEarthAttackUpSlot(ActionDefinition* /*action*/,
                                           std::uint8_t* target_result_bytes) {
   return RunRule(battle::CanApplyEarthAttackUp, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteCanApplyWaterAttackUp (146C.c:10383)
+// decomp: hitPrerequisiteCanApplyWaterAttackUp
+// (src/BATTLE/BATTLE.PRG/146C.c:10326; was
+// _hitPrerequisiteCanApplyWaterAttackUp)
 int VS::Battle::CanApplyWaterAttackUpSlot(ActionDefinition* /*action*/,
                                           std::uint8_t* target_result_bytes) {
   return RunRule(battle::CanApplyWaterAttackUp, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteCanApplyAirDefenseUp (146C.c:10393)
+// decomp: hitPrerequisiteCanApplyAirDefenseUp
+// (src/BATTLE/BATTLE.PRG/146C.c:10335; was
+// _hitPrerequisiteCanApplyAirDefenseUp)
 int VS::Battle::CanApplyAirDefenseUpSlot(ActionDefinition* /*action*/,
                                          std::uint8_t* target_result_bytes) {
   return RunRule(battle::CanApplyAirDefenseUp, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteCanApplyFireDefenseUp (146C.c:10418)
+// decomp: hitPrerequisiteCanApplyFireDefenseUp
+// (src/BATTLE/BATTLE.PRG/146C.c:10359; was
+// _hitPrerequisiteCanApplyFireDefenseUp)
 int VS::Battle::CanApplyFireDefenseUpSlot(ActionDefinition* /*action*/,
                                           std::uint8_t* target_result_bytes) {
   return RunRule(battle::CanApplyFireDefenseUp, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteCanApplyEarthDefenseUp (146C.c:10442)
+// decomp: hitPrerequisiteCanApplyEarthDefenseUp
+// (src/BATTLE/BATTLE.PRG/146C.c:10382; was
+// _hitPrerequisiteCanApplyEarthDefenseUp)
 int VS::Battle::CanApplyEarthDefenseUpSlot(ActionDefinition* /*action*/,
                                            std::uint8_t* target_result_bytes) {
   return RunRule(battle::CanApplyEarthDefenseUp, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteCanApplyWaterDefenseUp (146C.c:10466)
+// decomp: hitPrerequisiteCanApplyWaterDefenseUp
+// (src/BATTLE/BATTLE.PRG/146C.c:10405; was
+// _hitPrerequisiteCanApplyWaterDefenseUp)
 int VS::Battle::CanApplyWaterDefenseUpSlot(ActionDefinition* /*action*/,
                                            std::uint8_t* target_result_bytes) {
   return RunRule(battle::CanApplyWaterDefenseUp, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteCanApplyBanish (146C.c:10491)
+// decomp: hitPrerequisiteCanApplyBanish (src/BATTLE/BATTLE.PRG/146C.c:10429;
+// was _hitPrerequisiteCanApplyBanish)
 int VS::Battle::CanApplyBanishSlot(ActionDefinition* /*action*/,
                                    std::uint8_t* target_result_bytes) {
   return RunRule(battle::CanApplyBanish, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteCanApplyExorcise (146C.c:10497)
+// decomp: hitPrerequisiteCanApplyExorcise (src/BATTLE/BATTLE.PRG/146C.c:10434;
+// was _hitPrerequisiteCanApplyExorcise)
 int VS::Battle::CanApplyExorciseSlot(ActionDefinition* /*action*/,
                                      std::uint8_t* target_result_bytes) {
   return RunRule(battle::CanApplyExorcise, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteCanApplyDrain (146C.c:10507)
+// decomp: hitPrerequisiteCanApplyDrain (src/BATTLE/BATTLE.PRG/146C.c:10443; was
+// _hitPrerequisiteCanApplyDrain)
 int VS::Battle::CanApplyDrainSlot(ActionDefinition* /*action*/,
                                   std::uint8_t* target_result_bytes) {
   return RunRule(battle::CanApplyDrain, target_result_bytes);
 }
 
-// decomp: _hitPrerequisiteUnused0..2 (146C.c:10517, 10519, 10521)
+// decomp: hitPrerequisiteUnused0..2 (src/BATTLE/BATTLE.PRG/146C.c:10452; was
+// _hitPrerequisiteUnused0, 10519, 10521)
 int VS::Battle::IgnoreAttackPrerequisiteSlot(
     ActionDefinition* /*action*/, std::uint8_t* target_result_bytes) {
   return RunRule(battle::IgnoreAttackPrerequisite, target_result_bytes);

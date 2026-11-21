@@ -87,8 +87,9 @@ class LiveWeaponModeHost final : public event::WeaponModeHost {
 };
 }  // namespace
 
-// decomp: func_800B9DB4 (src/BATTLE/BATTLE.PRG/4A0A8.c:2158): the opcode reads
-// its mode at byte 1 and its transition variant at byte 2.
+// decomp: vs_battle_script_72 (src/BATTLE/BATTLE.PRG/4DEA8.c:2747; was
+// func_800B9DB4): the opcode reads its mode at byte 1 and its transition
+// variant at byte 2.
 std::intptr_t VS::Event::ScriptSetAshleyBattleModeOpcode(std::uint8_t* command,
                                                          std::int16_t) {
   Require(command != nullptr, "Script weapon-mode command is missing");

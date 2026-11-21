@@ -290,7 +290,7 @@ std::optional<bool> GuardRadial(CandidateMovementWorld& world,
 }
 }  // namespace
 
-// decomp: func_800D9E18 (src/BATTLE/BATTLE.PRG/71618.c:511).
+// decomp: func_800D9E18 (src/BATTLE/BATTLE.PRG/71618.c:16).
 std::optional<int> MoveForActionCandidate(CandidateMovementWorld& world,
                                           CandidateMover& mover,
                                           std::size_t handle) {
@@ -332,7 +332,7 @@ std::optional<int> MoveForActionCandidate(CandidateMovementWorld& world,
   }
 }
 
-// decomp: func_800DA1D4 (src/BATTLE/BATTLE.PRG/71618.c:610).
+// decomp: func_800DA1D4 (src/BATTLE/BATTLE.PRG/71618.c:138).
 std::optional<int> UpdateCombatPursuit(CandidateMovementWorld& world,
                                        CandidateMover& mover) {
   switch (mover.action_status) {
@@ -347,7 +347,7 @@ std::optional<int> UpdateCombatPursuit(CandidateMovementWorld& world,
   }
 }
 
-// decomp: func_800DA4BC (src/BATTLE/BATTLE.PRG/71618.c:788).
+// decomp: func_800DA4BC (src/BATTLE/BATTLE.PRG/71618.c:239).
 std::optional<int> TryApproachPlannedTarget(CandidateMovementWorld& world,
                                             CandidateMover& mover,
                                             std::size_t handle) {
@@ -400,13 +400,13 @@ std::optional<int> FollowLinkedActor(CandidateMovementWorld& world,
 }
 }  // namespace
 
-// decomp: func_800DA5CC (src/BATTLE/BATTLE.PRG/71618.c:814).
+// decomp: func_800DA5CC (src/BATTLE/BATTLE.PRG/71618.c:265).
 std::optional<int> UpdateCloseFollowBehavior(CandidateMovementWorld& world,
                                              CandidateMover& mover) {
   return FollowLinkedActor(world, mover, kCloseFollowDistance, 1);
 }
 
-// decomp: func_800DAAD8 (src/BATTLE/BATTLE.PRG/71618.c:958).
+// decomp: func_800DAAD8 (src/BATTLE/BATTLE.PRG/71618.c:414).
 std::optional<int> UpdateEscortCombatBehavior(CandidateMovementWorld& world,
                                               CandidateMover& mover) {
   const auto followed =
@@ -444,7 +444,7 @@ std::optional<int> UpdateEscortCombatBehavior(CandidateMovementWorld& world,
   return 0;
 }
 
-// decomp: func_800DA6A4 (src/BATTLE/BATTLE.PRG/71618.c:839).
+// decomp: func_800DA6A4 (src/BATTLE/BATTLE.PRG/71618.c:295).
 std::optional<int> UpdateEnemyPursuitBehavior(CandidateMovementWorld& world,
                                               CandidateMover& mover) {
   if (mover.fleeing != 0) return world.Flee(mover, 1);
@@ -461,7 +461,7 @@ std::optional<int> UpdateEnemyPursuitBehavior(CandidateMovementWorld& world,
   return UpdateCombatPursuit(world, mover);
 }
 
-// decomp: func_800DA738 (src/BATTLE/BATTLE.PRG/71618.c:854).
+// decomp: func_800DA738 (src/BATTLE/BATTLE.PRG/71618.c:313).
 std::optional<int> UpdateGuardMovementBehavior(CandidateMovementWorld& world,
                                                CandidateMover& mover) {
   const auto threat = world.FindRelated(mover, kEnemy, true);

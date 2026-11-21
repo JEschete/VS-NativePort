@@ -3,8 +3,10 @@
 #include "Effects/Plugins/Plg081.hpp"
 
 namespace VS::Effects::Plg081 {
-// decomp: D_800FC24C (PLG081.BIN/0.c:7; rings.h:20)
+// decomp: vs_effect_tornado_1_colors (src/EFFECT/rings.h:20; was D_800FC24C;
+// src/EFFECT/rings.h:20)
 plugins::RingPaletteBytes ringColorFactors;
-// decomp: D_800FC26C (PLG081.BIN/0.c:10; closedRings.h:58)
+// decomp: vs_effect_tornado_2_colors (src/EFFECT/closedRings.h:58; was
+// D_800FC26C; src/EFFECT/closedRings.h:58)
 plugins::RingPalette closedRingColorFactors;
 }  // namespace VS::Effects::Plg081

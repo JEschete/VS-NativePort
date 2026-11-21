@@ -203,7 +203,7 @@ class GroundDirectionProbe {
                                                  int direction) = 0;
 };
 
-// decomp: func_800D954C (src/BATTLE/BATTLE.PRG/70D4C.s:12).
+// decomp: func_800D954C (src/BATTLE/BATTLE.PRG/70D4C.s:6).
 // 1 when the tile is free, -1 when another actor stands on it and 0 for the
 // previous tile, a tile outside the room or a blocked cell. Nothing refuses a
 // room without bounded maps or an invalid collision actor list.
@@ -211,7 +211,7 @@ class GroundDirectionProbe {
     GroundNavigationWorld& world, const GroundNavigator& navigator,
     std::uint32_t tile);
 
-// decomp: func_800D96C8 (src/BATTLE/BATTLE.PRG/70D4C.s:123).
+// decomp: func_800D96C8 (src/BATTLE/BATTLE.PRG/70D4C.s:112).
 // 1 when the step from one tile to the next is walkable and closer to the
 // destination, -1 inside the approach radius and 0 otherwise. Nothing refuses
 // a direction outside 0..7, a room without bounded maps, an invalid collision
@@ -220,21 +220,21 @@ class GroundDirectionProbe {
     GroundNavigationWorld& world, const GroundNavigator& navigator,
     std::uint32_t from, std::uint32_t to, int direction);
 
-// decomp: func_800D98E8 (src/BATTLE/BATTLE.PRG/70D4C.s:279).
+// decomp: func_800D98E8 (src/BATTLE/BATTLE.PRG/70D4C.s:262).
 // One more than the ID of the first actor ahead in the direction, cached per
 // frame; 0 when none. Nothing refuses as CanTraverseTileEdge.
 [[nodiscard]] std::optional<int> DirectionalBlockingActor(
     GroundNavigationWorld& world, const GroundNavigator& navigator,
     int direction);
 
-// decomp: D_800D9B6C (src/BATTLE/BATTLE.PRG/70D4C.s:458).
+// decomp: func_800D9B6C (src/BATTLE/BATTLE.PRG/70D4C.s:441; was D_800D9B6C).
 // Whether the actor can walk a fine step in the direction, cached per frame.
 // Nothing refuses as CanTraverseTileEdge or a missing region cell.
 [[nodiscard]] std::optional<bool> CanWalkInDirection(
     GroundNavigationWorld& world, const GroundNavigator& navigator,
     int direction);
 
-// decomp: func_800DB93C (src/BATTLE/BATTLE.PRG/72B70.s:483).
+// decomp: func_800DB93C (src/BATTLE/BATTLE.PRG/72B70.s:446).
 // The first tile past a gap in the direction with its edge status in bits
 // 24-31, the tile itself when it is no gap and 0 outside the room. Nothing
 // refuses as CanTraverseTileEdge.
@@ -242,31 +242,31 @@ class GroundDirectionProbe {
     GroundNavigationWorld& world, const GroundNavigator& navigator,
     std::uint32_t tile, int direction, std::uint32_t from);
 
-// decomp: func_800E3BC8 (src/BATTLE/BATTLE.PRG/7B3C8.s:11).
+// decomp: func_800E3BC8 (src/BATTLE/BATTLE.PRG/7B3C8.s:6).
 // Stores the next tile toward the destination as the detour boundary.
 void SetDetourBoundary(GroundNavigator& navigator);
 
-// decomp: func_800E3CDC (src/BATTLE/BATTLE.PRG/7B3C8.s:90).
+// decomp: func_800E3CDC (src/BATTLE/BATTLE.PRG/7B3C8.s:84).
 // Counts repeat visits, waits after five and returns the flags with a fresh
 // detour step budget.
 [[nodiscard]] std::uint32_t RefreshDetourProgress(GroundNavigationWorld& world,
                                                   GroundNavigator& navigator,
                                                   std::uint32_t flags);
 
-// decomp: func_800E3D5C (src/BATTLE/BATTLE.PRG/7B55C.s:9).
+// decomp: func_800E3D5C (src/BATTLE/BATTLE.PRG/7B3C8.s:122).
 // The four cardinal probe results, direction 0 in bit 3. Nothing when a probe
 // refuses.
 [[nodiscard]] std::optional<int> CardinalPassabilityMask(
     GroundNavigator& navigator, GroundDirectionProbe& probe);
 
-// decomp: func_800E3DDC (src/BATTLE/BATTLE.PRG/7B5DC.s:10).
+// decomp: func_800E3DDC (src/BATTLE/BATTLE.PRG/7B3C8.s:157).
 // Restarts a spent or stopped detour with a random turn side and stores the
 // cardinal mask in bits 18-21. Nothing refuses a refused probe or hesitation.
 [[nodiscard]] std::optional<std::uint32_t> InitializeObstacleDetour(
     GroundNavigationWorld& world, GroundNavigator& navigator,
     std::uint32_t flags, GroundDirectionProbe& probe);
 
-// decomp: func_800E2F5C (src/BATTLE/BATTLE.PRG/771A8.c:2388).
+// decomp: func_800E2F5C (src/BATTLE/BATTLE.PRG/770A4.c:1619).
 // Follows an active obstacle detour (navigation_flags) one step around the
 // obstacle: 5 keeps walking the detour heading, 14 steps to next_tile and -1
 // ends this step, setting the stop bit when the detour is spent or leaves the
@@ -278,7 +278,7 @@ void SetDetourBoundary(GroundNavigator& navigator);
     GroundNavigationWorld& world, GroundNavigator& navigator,
     GroundDirectionProbe& probe, int blocked_flag_bit);
 
-// decomp: func_800E4180 (src/BATTLE/BATTLE.PRG/7B5DC.s).
+// decomp: func_800E4180 (src/BATTLE/BATTLE.PRG/7B3C8.s:413).
 // Starts or continues a hesitation turn of kind 1 or 2 (3 only polls) and
 // returns 1 while two or more turns remain. Nothing refuses a slot outside
 // 0..6, a kind outside 1..3 or an unloaded length table.
@@ -293,7 +293,7 @@ struct VerticalMovementStep {
   int code = 0;
 };
 
-// decomp: func_800E4764 (src/BATTLE/BATTLE.PRG/7BDD4.s:145).
+// decomp: func_800E4764 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:484).
 // The configured climb or descent step, preferring the current gait. Nothing
 // refuses a running actor without a configured step.
 [[nodiscard]] std::optional<VerticalMovementStep>
@@ -314,7 +314,7 @@ SelectActorVerticalMovementStep(const GroundNavigator& navigator);
     GroundNavigationWorld& world, const GroundNavigator& navigator,
     std::uint32_t tile, int direction, int steps);
 
-// decomp: func_800E4BD8 (src/BATTLE/BATTLE.PRG/7BDD4.s:527).
+// decomp: func_800E4BD8 (src/BATTLE/BATTLE.PRG/6E4CCPrivate.h:113).
 // Clears a contact occupancy bit (the bit number modulo 32 of an 8-bit mask).
 void ClearAiContactOccupancy(GroundNavigationWorld& world, int bit);
 
@@ -322,31 +322,31 @@ void ClearAiContactOccupancy(GroundNavigationWorld& world, int bit);
 // Sets a contact occupancy bit.
 void SetAiContactOccupancy(GroundNavigationWorld& world, int bit);
 
-// decomp: func_800E4B10 (src/BATTLE/BATTLE.PRG/7BDD4.s:431).
+// decomp: func_800E4B10 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:488).
 // Holds the current tile and issues the terrain movement intent.
 void BeginAiTerrainMovement(GroundNavigationWorld& world,
                             GroundNavigator& navigator);
 
-// decomp: func_800E4B18 (src/BATTLE/BATTLE.PRG/7BDD4.s:438).
+// decomp: func_800E4B18 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:489).
 // Holds the current tile and issues the alternate terrain movement intent.
 void BeginAiAlternateTerrainMovement(GroundNavigationWorld& world,
                                      GroundNavigator& navigator);
 
-// decomp: func_800E4B2C (src/BATTLE/BATTLE.PRG/7BDD4.s:449).
+// decomp: func_800E4B2C (src/BATTLE/BATTLE.PRG/6E4CCShared.h:490).
 // Continues a route link, recovers at the destination or moves toward the
 // destination tile's centre. False refuses a link without route gates, a
 // link index outside 0..7 or a refused occupancy test.
 bool MoveActorTowardDestinationTile(GroundNavigationWorld& world,
                                     GroundNavigator& navigator);
 
-// decomp: func_800E4B70 (src/BATTLE/BATTLE.PRG/7BDD4.s:473).
+// decomp: func_800E4B70 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:491).
 // Height-filtered movement, route continuation or a directional ground move
 // at the angle. False refuses as MoveActorTowardDestinationTile or
 // ResolveDirectionalMovement.
 bool BeginAiGroundMovement(GroundNavigationWorld& world,
                            GroundNavigator& navigator, int angle);
 
-// decomp: func_800E50A0 (src/BATTLE/BATTLE.PRG/7C7E0.s:66).
+// decomp: func_800E50A0 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:500).
 // Ground, flight or radial movement for the locomotion mode, toward the tile
 // (kind 0) or along the angle (kind 1). False refuses a mode outside 0..2, a
 // kind outside 0..1 or a refused ground move.
@@ -359,7 +359,7 @@ bool DispatchAiLocomotionMode(GroundNavigationWorld& world,
 bool BeginAiMovementTowardPoint(GroundNavigationWorld& world,
                                 GroundNavigator& navigator, int kind);
 
-// decomp: func_800E3600 (src/BATTLE/BATTLE.PRG/771A8.c:2549;
+// decomp: func_800E3600 (src/BATTLE/BATTLE.PRG/770A4.c:1800;
 // nonmatchings/771A8/func_800E3600.s).
 // Walks or flies (mode 2-3) toward the angle: follows an active detour, steps
 // down a descent, walks the heading or a cardinal, takes an adjacent tile or

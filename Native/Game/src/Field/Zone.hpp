@@ -19,7 +19,8 @@ struct MpdEnemySpawn;
 namespace VS::Field {
 
 // decomp: ZoneContext (src/BATTLE/BATTLE.PRG/zone.h:45-73, formerly
-// _zoneContext_t); bounds is upstream's ZoneContextBounds (mpd.h:166-171).
+// _zoneContext_t); bounds is upstream's ZoneContextBounds
+// (src/BATTLE/BATTLE.PRG/mpd.h:166-171).
 struct ZoneContext {
   std::int32_t zone_id = 0;
   // Each room's MPD file extent, indexed by room id.

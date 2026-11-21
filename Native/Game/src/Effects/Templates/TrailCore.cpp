@@ -34,8 +34,9 @@ math::Vec2 SampleTrailPlane(const TrailPlaneRange& range, std::uint8_t curve,
                                         host.SampleCurve(curve, distance));
 }
 
-// decomp: trails5.h:380-404 (init's first step) and trails5.h:407-446 (each
-// update's speed change); trails9.h:387-412 and 414-454 are the same.
+// decomp: src/EFFECT/trailEffect.h:424-451 (init's first step) and
+// src/EFFECT/trailEffect.h:453-493 (each update's speed change);
+// src/EFFECT/trailEffect.h:424-451 and 414-454 are the same.
 template <std::size_t History>
 std::int32_t TrailSpeedStep(const BasicTrailRecord<History>& trail,
                             std::int32_t remaining) noexcept {

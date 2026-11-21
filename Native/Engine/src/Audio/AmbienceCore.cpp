@@ -2,7 +2,7 @@
 #include "Audio/Ambience.hpp"
 
 namespace VS::Audio {
-// decomp: BATTLE.PRG func_8008E480 (src/BATTLE/BATTLE.PRG/146C.c:17323)
+// decomp: BATTLE.PRG func_8008E480 (src/BATTLE/BATTLE.PRG/146C.c:17202)
 void SetRoomAmbienceDucked(AmbienceHost& host, bool ducked) {
   host.DuckRoomEffectSound(ducked);
   host.DuckWeatherAmbientSound(ducked);

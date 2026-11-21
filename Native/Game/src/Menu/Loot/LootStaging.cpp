@@ -40,32 +40,34 @@ int CopyItem(ItemCategory category, InventoryContents& target,
 }
 }  // namespace
 
-// decomp: MENU/MENUB.PRG _copyBladeToInventory (260.c:712-730);
-// MIPS 0x80107c54-0x80107ce7.
+// decomp: MENU/MENUB.PRG copyBladeToInventory
+// (src/MENU/MENUB.PRG/260.c:715-733; was _copyBladeToInventory); MIPS
+// 0x80107c54-0x80107ce7.
 int StageBlade(const Items::InventoryBlade& blade, int weapon_index,
                Items::InventoryContents& inventory) {
   return StagePart(ItemCategory::kBlade, &InventoryContents::blades, blade,
                    weapon_index, inventory);
 }
 
-// decomp: MENU/MENUB.PRG _copyGripToInventory (260.c:739-757);
-// MIPS 0x80107ce8-0x80107d7b.
+// decomp: MENU/MENUB.PRG copyGripToInventory (src/MENU/MENUB.PRG/260.c:742-760;
+// was _copyGripToInventory); MIPS 0x80107ce8-0x80107d7b.
 int StageGrip(const Items::InventoryGrip& grip, int weapon_index,
               Items::InventoryContents& inventory) {
   return StagePart(ItemCategory::kGrip, &InventoryContents::grips, grip,
                    weapon_index, inventory);
 }
 
-// decomp: MENU/MENUB.PRG _copyGemToInventory (260.c:766-784);
-// MIPS 0x80107d7c-0x80107e0f.
+// decomp: MENU/MENUB.PRG copyGemToInventory (src/MENU/MENUB.PRG/260.c:769-787;
+// was _copyGemToInventory); MIPS 0x80107d7c-0x80107e0f.
 int StageGem(const Items::InventoryGem& gem, int item_index,
              Items::InventoryContents& inventory) {
   return StagePart(ItemCategory::kGem, &InventoryContents::gems, gem,
                    item_index, inventory);
 }
 
-// decomp: MENU/MENUB.PRG _copyWeaponToInventory (260.c:792-820);
-// MIPS 0x80107e10-0x80107f1b.
+// decomp: MENU/MENUB.PRG copyWeaponToInventory
+// (src/MENU/MENUB.PRG/260.c:795-823; was _copyWeaponToInventory); MIPS
+// 0x80107e10-0x80107f1b.
 int StageWeapon(const Items::LootedWeapon& looted_weapon,
                 Items::InventoryContents& inventory) {
   InventoryContents source{};
@@ -83,16 +85,18 @@ int StageWeapon(const Items::LootedWeapon& looted_weapon,
   return CopyItem(ItemCategory::kWeapon, inventory, source);
 }
 
-// decomp: MENU/MENUB.PRG _copyArmorToInventory (260.c:827-844);
-// MIPS 0x80107f1c-0x80107f9b.
+// decomp: MENU/MENUB.PRG copyArmorToInventory
+// (src/MENU/MENUB.PRG/260.c:830-847; was _copyArmorToInventory); MIPS
+// 0x80107f1c-0x80107f9b.
 int StageArmor(const Items::InventoryArmor& armor,
                Items::InventoryContents& inventory) {
   return StagePart(ItemCategory::kArmor, &InventoryContents::armor, armor, 0,
                    inventory);
 }
 
-// decomp: MENU/MENUB.PRG _copyShieldToInventory (260.c:852-879);
-// MIPS 0x80107f9c-0x8010808b.
+// decomp: MENU/MENUB.PRG copyShieldToInventory
+// (src/MENU/MENUB.PRG/260.c:855-882; was _copyShieldToInventory); MIPS
+// 0x80107f9c-0x8010808b.
 int StageShield(const Items::LootedShield& looted_shield,
                 Items::InventoryContents& inventory) {
   const auto gem_count = static_cast<std::int32_t>(
@@ -127,8 +131,8 @@ int StageShield(const Items::LootedShield& looted_shield,
   return index;
 }
 
-// decomp: MENU/MENUB.PRG _copyMiscToInventory (260.c:886-902);
-// MIPS 0x8010808c-0x801080ef.
+// decomp: MENU/MENUB.PRG copyMiscToInventory (src/MENU/MENUB.PRG/260.c:889-905;
+// was _copyMiscToInventory); MIPS 0x8010808c-0x801080ef.
 int StageMiscItem(const Items::LootedItem& looted_item,
                   Items::InventoryContents& inventory) {
   const auto slot =

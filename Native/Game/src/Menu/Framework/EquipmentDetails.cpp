@@ -115,8 +115,9 @@ constexpr int kBarPercent = 100;
 constexpr int kBarLines = 4;
 constexpr int kPositiveBarTop = 66;
 constexpr int kNegativeBarBottom = 0x45;
-// decomp: local statics of _renderStatPage (C48.c:819, C48.c:831):
-// vs_getRGB0(LineF2, r, g, b) words.
+// decomp: local statics of renderStatPage (src/MENU/MAINMENU.PRG/C48.c:811; was
+// _renderStatPage, src/MENU/MAINMENU.PRG/C48.c:831): vs_getRGB0(LineF2, r, g,
+// b) words.
 constexpr std::array<std::uint32_t, kBarLines> kPositiveBarColors{
     0x40817318,
     0x40D0E030,
@@ -159,9 +160,10 @@ constexpr std::uint8_t kEnabledPagePalette = 0;
 constexpr std::uint8_t kDisabledPagePalette = 3;
 constexpr std::uint8_t kCurrentPagePalette = 1;
 
-// decomp: local statics of _renderStatPage (C48.c:797, C48.c:882): the
-// header texts (null between the pages) and the page tabs, whose font style
-// bytes 1, 11 and 24 mark the class, affinity and type tabs.
+// decomp: local statics of renderStatPage (src/MENU/MAINMENU.PRG/C48.c:789; was
+// _renderStatPage, src/MENU/MAINMENU.PRG/C48.c:882): the header texts (null
+// between the pages) and the page tabs, whose font style bytes 1, 11 and 24
+// mark the class, affinity and type tabs.
 constexpr std::array<const char*, 19> kStatHeaders{
     "#HUMAN", "#BEAST", "#UNDEAD", "#PHANTOM",  "#DRAGON",
     "#EVIL",  nullptr,  nullptr,   "#PHYSICAL", "#AIR",
@@ -195,8 +197,8 @@ constexpr std::uint8_t kActorMask = 0xF;
 constexpr int kBattleActorCount = 16;
 constexpr std::size_t kAttackStatNames = 4;
 constexpr std::size_t kDefenseStatNames = 8;
-// decomp: local statics of vs_mainMenu_renderEquipStats (C48.c:1074,
-// C48.c:1096).
+// decomp: local statics of vs_mainMenu_renderEquipStats
+// (src/MENU/MAINMENU.PRG/C48.c:1074, src/MENU/MAINMENU.PRG/C48.c:1096).
 constexpr std::array<const char*, 2> kRangeRiskNames{"#RANGE", "#RISK"};
 constexpr std::array<const char*, 11> kPrimaryStatNames{
     "#STRENGTH",    "#INTELLIGENCE", "#AGILITY", nullptr,
@@ -886,7 +888,7 @@ void DrawPrimaryStatRows(EquipmentDetailsContext& ctx, std::uint32_t position,
 }  // namespace
 
 // decomp: MAINMENU.PRG vs_mainMenu_resetStats
-// (src/MENU/MAINMENU.PRG/2D10.c:351)
+// (src/MENU/MAINMENU.PRG/2D10.c:353)
 void ResetEquipmentStats(EquipmentDetailsState& state) {
   state.stats.fill(0);
   SetDpPp(state, {0, 0, 0, 0});
@@ -894,7 +896,7 @@ void ResetEquipmentStats(EquipmentDetailsState& state) {
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_setStatsFromWeapon
-// (src/MENU/MAINMENU.PRG/2D10.c:358)
+// (src/MENU/MAINMENU.PRG/2D10.c:360)
 void SetWeaponStats(EquipmentDetailsContext& ctx, int weapon) {
   auto& state = ctx.state;
   ResetEquipmentStats(state);
@@ -917,7 +919,7 @@ void SetWeaponStats(EquipmentDetailsContext& ctx, int weapon) {
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_setStatsFromBlade
-// (src/MENU/MAINMENU.PRG/2D10.c:407)
+// (src/MENU/MAINMENU.PRG/2D10.c:409)
 void SetBladeStats(EquipmentDetailsContext& ctx, int blade) {
   auto& state = ctx.state;
   const auto record = ctx.host.Rows().Blade(blade);
@@ -938,7 +940,7 @@ void SetBladeStats(EquipmentDetailsContext& ctx, int blade) {
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_setStatsFromGrip
-// (src/MENU/MAINMENU.PRG/2D10.c:427)
+// (src/MENU/MAINMENU.PRG/2D10.c:429)
 void SetGripStats(EquipmentDetailsContext& ctx, int grip) {
   auto& state = ctx.state;
   const auto record = ctx.host.Rows().Grip(grip);
@@ -955,7 +957,7 @@ void SetGripStats(EquipmentDetailsContext& ctx, int grip) {
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_setStatsFromShield
-// (src/MENU/MAINMENU.PRG/2D10.c:443)
+// (src/MENU/MAINMENU.PRG/2D10.c:445)
 void SetShieldStats(EquipmentDetailsContext& ctx, int shield) {
   auto& state = ctx.state;
   ResetEquipmentStats(state);
@@ -975,7 +977,7 @@ void SetShieldStats(EquipmentDetailsContext& ctx, int shield) {
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_setStatsFromArmor
-// (src/MENU/MAINMENU.PRG/2D10.c:484)
+// (src/MENU/MAINMENU.PRG/2D10.c:486)
 void SetArmorStats(EquipmentDetailsContext& ctx, int armor) {
   auto& state = ctx.state;
   bool accessory = false;
@@ -997,7 +999,7 @@ void SetArmorStats(EquipmentDetailsContext& ctx, int armor) {
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_setStatsFromGem
-// (src/MENU/MAINMENU.PRG/2D10.c:531)
+// (src/MENU/MAINMENU.PRG/2D10.c:533)
 void SetGemStats(EquipmentDetailsContext& ctx, int gem) {
   auto& state = ctx.state;
   const auto record = ctx.host.Rows().Gem(gem);
@@ -1014,7 +1016,8 @@ void SetGemStats(EquipmentDetailsContext& ctx, int gem) {
                       stat_page::kClassEnabled | stat_page::kAffinityEnabled);
 }
 
-// decomp: MAINMENU.PRG _weaponStatusView (src/MENU/MAINMENU.PRG/2D10.c:556)
+// decomp: MAINMENU.PRG weaponStatusView (src/MENU/MAINMENU.PRG/2D10.c:558; was
+// _weaponStatusView)
 std::optional<TextRef> SelectWeaponDetailRow(EquipmentDetailsContext& ctx,
                                              int row) {
   auto description = NoGemsText(ctx);
@@ -1034,7 +1037,8 @@ std::optional<TextRef> SelectWeaponDetailRow(EquipmentDetailsContext& ctx,
   return description;
 }
 
-// decomp: MAINMENU.PRG _bladeStatusView (src/MENU/MAINMENU.PRG/2D10.c:620)
+// decomp: MAINMENU.PRG bladeStatusView (src/MENU/MAINMENU.PRG/2D10.c:622; was
+// _bladeStatusView)
 std::optional<TextRef> BladeDetailDescription(EquipmentDetailsContext& ctx) {
   auto& rows = ctx.host.Rows();
   const auto blade = rows.Blade(ctx.state.item);
@@ -1045,7 +1049,8 @@ std::optional<TextRef> BladeDetailDescription(EquipmentDetailsContext& ctx) {
   return FormatBladeRow(rows, *blade, rows.StringBuffer()).description;
 }
 
-// decomp: MAINMENU.PRG _gripStatusView (src/MENU/MAINMENU.PRG/2D10.c:638)
+// decomp: MAINMENU.PRG gripStatusView (src/MENU/MAINMENU.PRG/2D10.c:640; was
+// _gripStatusView)
 std::optional<TextRef> GripDetailDescription(EquipmentDetailsContext& ctx) {
   auto& rows = ctx.host.Rows();
   const auto grip = rows.Grip(ctx.state.item);
@@ -1056,7 +1061,8 @@ std::optional<TextRef> GripDetailDescription(EquipmentDetailsContext& ctx) {
   return FormatGripRow(rows, *grip, rows.StringBuffer()).description;
 }
 
-// decomp: MAINMENU.PRG _shieldStatusView (src/MENU/MAINMENU.PRG/2D10.c:656)
+// decomp: MAINMENU.PRG shieldStatusView (src/MENU/MAINMENU.PRG/2D10.c:658; was
+// _shieldStatusView)
 std::optional<TextRef> SelectShieldDetailRow(EquipmentDetailsContext& ctx,
                                              int row) {
   auto description = NoGemsText(ctx);
@@ -1086,7 +1092,8 @@ std::optional<TextRef> SelectShieldDetailRow(EquipmentDetailsContext& ctx,
   return description;
 }
 
-// decomp: MAINMENU.PRG _armorStatusView (src/MENU/MAINMENU.PRG/2D10.c:703)
+// decomp: MAINMENU.PRG armorStatusView (src/MENU/MAINMENU.PRG/2D10.c:705; was
+// _armorStatusView)
 std::optional<TextRef> ArmorDetailDescription(EquipmentDetailsContext& ctx) {
   auto& rows = ctx.host.Rows();
   const auto armor = rows.Armor(ctx.state.item);
@@ -1097,7 +1104,8 @@ std::optional<TextRef> ArmorDetailDescription(EquipmentDetailsContext& ctx) {
   return FormatInventoryArmorRow(rows, *armor, rows.StringBuffer()).description;
 }
 
-// decomp: MAINMENU.PRG _gemStatusView (src/MENU/MAINMENU.PRG/2D10.c:722)
+// decomp: MAINMENU.PRG gemStatusView (src/MENU/MAINMENU.PRG/2D10.c:724; was
+// _gemStatusView)
 std::optional<TextRef> GemDetailDescription(EquipmentDetailsContext& ctx) {
   auto& rows = ctx.host.Rows();
   const auto gem = rows.Gem(ctx.state.item);
@@ -1109,12 +1117,13 @@ std::optional<TextRef> GemDetailDescription(EquipmentDetailsContext& ctx) {
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_resetStatusViewCursor
-// (src/MENU/MAINMENU.PRG/2D10.c:734)
+// (src/MENU/MAINMENU.PRG/2D10.c:736)
 void ResetItemDetailCursor(EquipmentDetailsState& state) {
   state.selected = kFirstDetailElement;
 }
 
-// decomp: MAINMENU.PRG _isUiElementReachable (src/MENU/MAINMENU.PRG/2D10.c:750)
+// decomp: MAINMENU.PRG isUiElementReachable (src/MENU/MAINMENU.PRG/2D10.c:752;
+// was _isUiElementReachable)
 bool IsItemDetailElementReachable(EquipmentDetailsContext& ctx, int element) {
   const auto& state = ctx.state;
   if (element >= kFirstDetailElement && element <= kLastComponentElement) {
@@ -1146,7 +1155,7 @@ bool IsItemDetailElementReachable(EquipmentDetailsContext& ctx, int element) {
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_renderStatusView
-// (src/MENU/MAINMENU.PRG/2D10.c:837)
+// (src/MENU/MAINMENU.PRG/2D10.c:839)
 void UpdateItemDetails(EquipmentDetailsContext& ctx) {
   auto& state = ctx.state;
   if (state.selected >= kStatusViewElementCount) {
@@ -1176,13 +1185,15 @@ void UpdateItemDetails(EquipmentDetailsContext& ctx) {
   DrawItemDetailCursor(ctx);
 }
 
-// decomp: MAINMENU.PRG _subtract (src/MENU/MAINMENU.PRG/C48.c:668)
+// decomp: MAINMENU.PRG subtract (src/MENU/MAINMENU.PRG/C48.c:660; was
+// _subtract)
 std::uint16_t OffsetStatBarCoordinate(int panel_x, int scanline_offset,
                                       int edge_base_x) {
   return static_cast<std::uint16_t>(panel_x - (scanline_offset - edge_base_x));
 }
 
-// decomp: MAINMENU.PRG _renderStatPage (src/MENU/MAINMENU.PRG/C48.c:673)
+// decomp: MAINMENU.PRG renderStatPage (src/MENU/MAINMENU.PRG/C48.c:665; was
+// _renderStatPage)
 void DrawEquipmentStatPage(EquipmentDetailsContext& ctx, int x_offset) {
   auto view = StatPageViewOf(ctx.state);
   if (!view) {
@@ -1196,7 +1207,8 @@ void DrawEquipmentStatPage(EquipmentDetailsContext& ctx, int x_offset) {
   DrawStatPageTabs(ctx, x_offset);
 }
 
-// decomp: MAINMENU.PRG _getNextStatPage (src/MENU/MAINMENU.PRG/C48.c:902)
+// decomp: MAINMENU.PRG getNextStatPage (src/MENU/MAINMENU.PRG/C48.c:894; was
+// _getNextStatPage)
 std::optional<std::uint8_t> NextEnabledStatPage(
     const EquipmentDetailsState& state, int page) {
   auto next = static_cast<std::uint32_t>(page);
@@ -1210,7 +1222,7 @@ std::optional<std::uint8_t> NextEnabledStatPage(
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_updateStatPage
-// (src/MENU/MAINMENU.PRG/C48.c:911)
+// (src/MENU/MAINMENU.PRG/C48.c:903)
 void SetEnabledStatPages(EquipmentDetailsContext& ctx, int enabled) {
   auto& state = ctx.state;
   constexpr std::uint32_t kShiftMask = 31;
@@ -1272,7 +1284,7 @@ void UpdateEquipmentStatPages(EquipmentDetailsContext& ctx, int command) {
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_setRangeRisk
-// (src/MENU/MAINMENU.PRG/C48.c:973)
+// (src/MENU/MAINMENU.PRG/C48.c:965)
 void SetRangeAndRisk(EquipmentDetailsState& state,
                      const RangeRiskValues& range_risk) {
   for (std::size_t i = 0; i < range_risk.size(); ++i) {
@@ -1364,7 +1376,7 @@ void UpdatePrimaryStatPanel(EquipmentDetailsContext& ctx, int animate) {
   DrawPrimaryStatRows(ctx, position, known);
 }
 
-// decomp: MAINMENU.PRG vs_mainMenu_setDpPp (src/MENU/MAINMENU.PRG/C48.c:1126)
+// decomp: MAINMENU.PRG vs_mainMenu_setDpPp (src/MENU/MAINMENU.PRG/C48.c:1118)
 void SetDpPp(EquipmentDetailsState& state, const DpPpValues& dp_pp) {
   const auto [current_dp, max_dp, current_pp, max_pp] = dp_pp;
   state.current_pp = static_cast<std::uint16_t>(current_pp);

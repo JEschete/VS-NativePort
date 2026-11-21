@@ -87,7 +87,7 @@ class LiveContainmentQuery final : public SphereContainmentQuery {
 };
 }  // namespace
 
-// decomp: func_800C0FA8 (src/BATTLE/BATTLE.PRG/58578.c:170).
+// decomp: func_800C0FA8 (src/BATTLE/BATTLE.PRG/58578.c:119).
 SphereContainmentTransform BuildLiveTargetVolumeTestTransform(
     const TargetVolume* volume) {
   return BuildTargetVolumeTestTransform(Geometry(RequiredVolume(volume)));
@@ -109,7 +109,7 @@ int IsLivePointInTargetCylinder(const TargetVolume* volume,
                                  shift_height_origin);
 }
 
-// decomp: func_800C123C (src/BATTLE/BATTLE.PRG/58578.c:299).
+// decomp: func_800C123C (src/BATTLE/BATTLE.PRG/58578.c:248).
 int IsLivePointInTargetCone(const TargetVolume* volume,
                             std::span<const std::uint16_t> point,
                             int shift_height_origin) {
@@ -126,7 +126,7 @@ int IsLivePointInTargetPrism(const TargetVolume* volume,
   return IsPointInTargetPrism(geometry, RequiredPoint(point), rectangular);
 }
 
-// decomp: func_800C1564 (src/BATTLE/BATTLE.PRG/58578.c:411).
+// decomp: func_800C1564 (src/BATTLE/BATTLE.PRG/58578.c:360).
 int IsLivePointInTargetVolume(TargetVolume* volume,
                               std::span<const std::uint16_t> point) {
   static_cast<void>(RequiredVolume(volume));

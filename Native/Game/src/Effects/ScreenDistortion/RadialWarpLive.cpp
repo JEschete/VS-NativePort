@@ -95,7 +95,7 @@ class OrderingTablePackets final : public PrimitivePacketCursor {
 };
 }  // namespace
 
-// decomp: SCREFF2.PRG func_800F9BD8 (src/GIM/SCREFF2.PRG/3D8.s:9).
+// decomp: SCREFF2.PRG func_800F9BD8 (src/GIM/SCREFF2.PRG/0.c:126).
 void WarpLivePolygonVertices() {
   if (screenEffectOverlay == nullptr ||
       VS::Render::FrameScratchpad().ordering_table == nullptr) {

@@ -220,7 +220,8 @@ int UpdateActiveAssignments(AbilityRowsState& rows, AssignmentState& state,
 }
 }  // namespace
 
-// decomp: _mapAbility (src/MENU/MENU2.PRG/64.c:166; 0x80102B5C).
+// decomp: mapAbility (src/MENU/MENU2.PRG/64.c:175; was _mapAbility;
+// 0x80102B5C).
 bool ToggleButtonAssignment(AssignmentHost& host, AbilityMenuType type,
                             AssignmentButton button, int ability_index) {
   const auto slot = static_cast<std::size_t>(button);
@@ -248,7 +249,8 @@ bool ToggleButtonAssignment(AssignmentHost& host, AbilityMenuType type,
   return true;
 }
 
-// decomp: _abilityMenu (src/MENU/MENU2.PRG/64.c:217; 0x80102CAC).
+// decomp: abilityMenu (src/MENU/MENU2.PRG/64.c:226; was _abilityMenu;
+// 0x80102CAC).
 int UpdateAssignments(AbilityRowsState& rows, AssignmentState& state,
                       AssignmentHost& host) {
   if (!ValidateRows(rows, host)) return 0;

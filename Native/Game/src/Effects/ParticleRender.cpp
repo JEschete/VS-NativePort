@@ -1,4 +1,4 @@
-// decomp: func_800D6E44 (src/BATTLE/BATTLE.PRG/6E644.s:19).
+// decomp: func_800D6E44 (src/BATTLE/BATTLE.PRG/6E4CC.c:73).
 // C counterpart: rood-boi pc/src/effect_particles.c:86-368,
 // revision 3be5ba38b008cad919a2b1ca196432c8d4817335 (CC0-1.0).
 #include "Effects/ParticleRender.hpp"
@@ -137,7 +137,7 @@ ParticleQuad BuildParticleQuad(const ParticleTexture& texture,
   return quad;
 }
 
-// decomp: func_800D6E44 (src/BATTLE/BATTLE.PRG/6E644.s:19).
+// decomp: func_800D6E44 (src/BATTLE/BATTLE.PRG/6E4CC.c:73).
 void DrawAnimatedSpriteParticles(std::span<const std::size_t> particles,
                                  ParticleRenderer& renderer) {
   std::size_t quads = 0;
@@ -186,7 +186,7 @@ void DrawAnimatedSpriteParticles(std::span<const std::size_t> particles,
   renderer.Finish(particles.size(), quads);
 }
 
-// decomp: func_800D6E24 (src/BATTLE/BATTLE.PRG/5BF94.c:8554).
+// decomp: func_800D6E24 (src/BATTLE/BATTLE.PRG/6E4CC.c:70).
 void DrawEffectParticleList(std::span<const std::size_t> particles,
                             ParticleRenderer& renderer) {
   DrawAnimatedSpriteParticles(particles, renderer);

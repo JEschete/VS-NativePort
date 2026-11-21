@@ -316,7 +316,7 @@ void ForSelected(EffectState& state, Select select, Apply apply) {
 }
 }  // namespace
 
-// decomp: SLUS_010.40 Sound_EvictSfxVoice (src/SLUS_010.40/25AC.c:2539)
+// decomp: SLUS_010.40 Sound_EvictSfxVoice (src/SLUS_010.40/25AC.c:2711)
 // A negative release (the channel pair path) names its channel with the
 // original's shift count; counts outside 0-31 are refused.
 void ReleaseMatchingVoices(EffectState& state, EffectHost& host,
@@ -334,7 +334,7 @@ void ReleaseMatchingVoices(EffectState& state, EffectHost& host,
   }
 }
 
-// decomp: SLUS_010.40 func_8001653C (src/SLUS_010.40/25AC.c:2638)
+// decomp: SLUS_010.40 func_8001653C (src/SLUS_010.40/25AC.c:2810)
 // The voice mask shifts by the bank slot's low five bits, as the original's
 // sllv does.
 void StartChannelProgram(EffectState& state, EffectHost& host,
@@ -385,7 +385,7 @@ void StartChannelProgram(EffectState& state, EffectHost& host,
   }
 }
 
-// decomp: SLUS_010.40 FreeVoiceChannels (src/SLUS_010.40/25AC.c:2690)
+// decomp: SLUS_010.40 FreeVoiceChannels (src/SLUS_010.40/25AC.c:2862)
 // The original clears the active layer's note bit through a null layer when
 // no music plays; that update is refused.
 void DetachMusicVoice(EffectState& state, EffectHost& host,
@@ -402,7 +402,7 @@ void DetachMusicVoice(EffectState& state, EffectHost& host,
   }
 }
 
-// decomp: SLUS_010.40 Sound_PlaySfxProgram (src/SLUS_010.40/25AC.c:2709)
+// decomp: SLUS_010.40 Sound_PlaySfxProgram (src/SLUS_010.40/25AC.c:2881)
 void PlayProgramPair(EffectState& state, EffectHost& host,
                      const EffectCommand& command, const ProgramPair& programs,
                      bool skip_release) {
@@ -431,7 +431,7 @@ void PlayProgramPair(EffectState& state, EffectHost& host,
   state.driver_update_flags |= kVoiceUpdate;
 }
 
-// decomp: SLUS_010.40 Sound_GetProgramCounters (src/SLUS_010.40/25AC.c:2777)
+// decomp: SLUS_010.40 Sound_GetProgramCounters (src/SLUS_010.40/25AC.c:2948)
 // The original reads ids 0x180-0x3FF past the offsets table.
 ProgramPair ProgramCounters(EffectHost& host, std::uint32_t effect_id) {
   const std::optional<SharedTables> tables = host.Tables();
@@ -450,7 +450,7 @@ ProgramPair ProgramCounters(EffectHost& host, std::uint32_t effect_id) {
 }
 
 // decomp: SLUS_010.40 Sound_MarkActiveChannelsVolumeDirty
-// (src/SLUS_010.40/25AC.c:2797)
+// (src/SLUS_010.40/25AC.c:2968)
 void InvalidateMusicChannelVolumes(
     std::uint32_t active_channels,
     std::span<std::uint32_t, Seq::kMusicChannelCount> dirty_flags) {
@@ -462,7 +462,7 @@ void InvalidateMusicChannelVolumes(
 }
 
 // decomp: SLUS_010.40 Sound_MarkScheduledSfxChannelsVolumeDirty
-// (src/SLUS_010.40/25AC.c:2822) The original loops forever over active voices
+// (src/SLUS_010.40/25AC.c:2993) The original loops forever over active voices
 // below voice 12.
 void InvalidateSoundEffectVolumes(EffectState& state, EffectHost& host) {
   const std::uint32_t active = state.scheduler.active_voices;
@@ -477,8 +477,8 @@ void InvalidateSoundEffectVolumes(EffectState& state, EffectHost& host) {
   }
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_34_unk (src/SLUS_010.40/25AC.c:3046)
-// The second program arrives in the 32-bit second word.
+// decomp: SLUS_010.40 Sound_Cmd_34_PlaySfxDirect (src/SLUS_010.40/25AC.c:3228;
+// was Sound_Cmd_34_unk) The second program arrives in the 32-bit second word.
 void PlayInterfaceProgramPair(EffectState& state, EffectHost& host,
                               EffectCommand& command) {
   const auto first =
@@ -495,7 +495,8 @@ void PlayInterfaceProgramPair(EffectState& state, EffectHost& host,
   PlayProgramPair(state, host, command, programs, false);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_30_unk (src/SLUS_010.40/25AC.c:3061)
+// decomp: SLUS_010.40 Sound_Cmd_30_PlaySfxProtected
+// (src/SLUS_010.40/25AC.c:3243; was Sound_Cmd_30_unk)
 void PlayInterfaceProgram(EffectState& state, EffectHost& host,
                           EffectCommand& command) {
   const ProgramPair programs = ProgramCounters(host, FirstWord(command.first));
@@ -505,16 +506,18 @@ void PlayInterfaceProgram(EffectState& state, EffectHost& host,
   PlayShared(state, host, command, programs);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_20_unk (src/SLUS_010.40/25AC.c:3074)
+// decomp: SLUS_010.40 Sound_Cmd_20_PlaySfx (src/SLUS_010.40/25AC.c:3256; was
+// Sound_Cmd_20_unk)
 void PlaySharedProgram(EffectState& state, EffectHost& host,
                        EffectCommand& command) {
   const ProgramPair programs = ProgramCounters(host, FirstWord(command.first));
   PlayShared(state, host, command, programs);
 }
 
-// decomp: SLUS_010.40 func_8001733C (src/SLUS_010.40/25AC.c:3085)
-// The original reads every entry without bounds and counts a count of zero
-// or less down through every 32-bit value; both are refused.
+// decomp: SLUS_010.40 Sound_Cmd_24_PlaySfxFromPointer
+// (src/SLUS_010.40/25AC.c:3266; was func_8001733C) The original reads every
+// entry without bounds and counts a count of zero or less down through every
+// 32-bit value; both are refused.
 void PlayBlobPrograms(EffectState& state, EffectHost& host,
                       EffectCommand& command) {
   const auto blob =
@@ -546,14 +549,16 @@ void PlayBlobPrograms(EffectState& state, EffectHost& host,
   }
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_21_unk (src/SLUS_010.40/25AC.c:3118)
+// decomp: SLUS_010.40 Sound_Cmd_21_EvictSfxVoice (src/SLUS_010.40/25AC.c:3299;
+// was Sound_Cmd_21_unk)
 void StopPrograms(EffectState& state, EffectHost& host,
                   const EffectCommand& command) {
   ReleaseMatchingVoices(state, host, command.first,
                         static_cast<std::int32_t>(command.second));
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_A0_unk (src/SLUS_010.40/25AC.c:3250)
+// decomp: SLUS_010.40 Sound_Cmd_A0_SetSfxVolumeMod
+// (src/SLUS_010.40/25AC.c:3432; was Sound_Cmd_A0_unk)
 void SetProgramVolume(EffectState& state, const EffectCommand& command) {
   ForSelected(
       state,
@@ -563,9 +568,10 @@ void SetProgramVolume(EffectState& state, const EffectCommand& command) {
       [&](EffectChannel& channel) { SetVolume(channel, command.third); });
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_A1_unk (src/SLUS_010.40/25AC.c:3276)
-// A third word whose low half is zero but which is not zero divides by zero
-// in the original; that fade runs over one tick.
+// decomp: SLUS_010.40 Sound_Cmd_A1_FadeSfxVolumeMod
+// (src/SLUS_010.40/25AC.c:3458; was Sound_Cmd_A1_unk) A third word whose low
+// half is zero but which is not zero divides by zero in the original; that fade
+// runs over one tick.
 void FadeProgramVolume(EffectState& state, EffectHost& host,
                        const EffectCommand& command) {
   ForSelected(
@@ -578,14 +584,16 @@ void FadeProgramVolume(EffectState& state, EffectHost& host,
       });
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_A8_unk (src/SLUS_010.40/25AC.c:3302)
+// decomp: SLUS_010.40 Sound_Cmd_A8_SetAllSfxVolumeMod
+// (src/SLUS_010.40/25AC.c:3486; was Sound_Cmd_A8_unk)
 void SetSceneVolume(EffectState& state, const EffectCommand& command) {
   ForSelected(state, SceneSelected, [&](EffectChannel& channel) {
     SetVolume(channel, FirstWord(command.first));
   });
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_A9_unk (src/SLUS_010.40/25AC.c:3318)
+// decomp: SLUS_010.40 Sound_Cmd_A9_FadeAllSfxVolumeMod
+// (src/SLUS_010.40/25AC.c:3502; was Sound_Cmd_A9_unk)
 void FadeSceneVolume(EffectState& state, EffectHost& host,
                      const EffectCommand& command) {
   ForSelected(state, SceneSelected, [&](EffectChannel& channel) {
@@ -593,7 +601,8 @@ void FadeSceneVolume(EffectState& state, EffectHost& host,
   });
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_A2_unk (src/SLUS_010.40/25AC.c:3339)
+// decomp: SLUS_010.40 Sound_Cmd_A2_SetSfxPanMod (src/SLUS_010.40/25AC.c:3523;
+// was Sound_Cmd_A2_unk)
 void SetProgramPan(EffectState& state, const EffectCommand& command) {
   ForSelected(
       state,
@@ -603,7 +612,8 @@ void SetProgramPan(EffectState& state, const EffectCommand& command) {
       [&](EffectChannel& channel) { SetPan(channel, command.third); });
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_A3_unk (src/SLUS_010.40/25AC.c:3365)
+// decomp: SLUS_010.40 Sound_Cmd_A3_FadeSfxPanMod (src/SLUS_010.40/25AC.c:3549;
+// was Sound_Cmd_A3_unk)
 void FadeProgramPan(EffectState& state, EffectHost& host,
                     const EffectCommand& command) {
   ForSelected(
@@ -616,14 +626,16 @@ void FadeProgramPan(EffectState& state, EffectHost& host,
       });
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_AA_unk (src/SLUS_010.40/25AC.c:3391)
+// decomp: SLUS_010.40 Sound_Cmd_AA_SetAllSfxPanMod
+// (src/SLUS_010.40/25AC.c:3577; was Sound_Cmd_AA_unk)
 void SetScenePan(EffectState& state, const EffectCommand& command) {
   ForSelected(state, SceneSelected, [&](EffectChannel& channel) {
     SetPan(channel, FirstWord(command.first));
   });
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_AB_unk (src/SLUS_010.40/25AC.c:3407)
+// decomp: SLUS_010.40 Sound_Cmd_AB_FadeAllSfxPanMod
+// (src/SLUS_010.40/25AC.c:3593; was Sound_Cmd_AB_unk)
 void FadeScenePan(EffectState& state, EffectHost& host,
                   const EffectCommand& command) {
   ForSelected(state, SceneSelected, [&](EffectChannel& channel) {

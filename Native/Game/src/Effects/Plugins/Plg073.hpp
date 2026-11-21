@@ -6,10 +6,13 @@
 #include "Effects/Plugins/PluginData.hpp"
 
 namespace VS::Effects::Plg073 {
-// decomp: D_800FEF3C (PLG073.BIN/F8.c:5; closedRings.h:58)
+// decomp: vs_effect_radialSurgeLv1_0_colors (src/EFFECT/closedRings.h:58; was
+// D_800FEF3C; src/EFFECT/closedRings.h:58)
 extern plugins::RingPalette tiledRingColorFactors;
-// decomp: D_800FEF5C (PLG073.BIN/F8.c:7; rings.h:20)
+// decomp: vs_effect_radialSurgeLv1_1_colors (src/EFFECT/rings.h:20; was
+// D_800FEF5C; src/EFFECT/rings.h:20)
 extern plugins::RingPaletteBytes ringColorFactors;
-// decomp: D_800FEF7C (PLG073.BIN/F8.c:9; trailEffect.h:70)
+// decomp: vs_effect_radialSurgeLv1_2_origin_state (src/EFFECT/trailEffect.h:70;
+// was D_800FEF7C; src/EFFECT/trailEffect.h:70)
 extern std::int32_t trailEmissionCounter;
 }  // namespace VS::Effects::Plg073

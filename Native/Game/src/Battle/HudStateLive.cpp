@@ -43,13 +43,14 @@ HudState ReadLiveHudState() {
   };
 }
 
-// decomp: F00235 func_8007BD8C (src/BATTLE/BATTLE.PRG/146C.c:8561).
+// decomp: F00235 setUiHidden (src/BATTLE/BATTLE.PRG/146C.c:8503; was
+// func_8007BD8C).
 int SetLiveGameplayHudHidden(int command) {
   LiveGameplayHudWorld world;
   return SetGameplayHudHidden(world, command);
 }
 
-// decomp: F01356 vs_battle_getStatusFlags (src/BATTLE/BATTLE.PRG/5BF94.c:3158).
+// decomp: F01356 vs_battle_getStatusFlags (src/BATTLE/BATTLE.PRG/5BF94.c:2709).
 int LiveStatusIconFlags(VS::Battle::ActorStats* stats) {
   if (stats == nullptr) Refuse("Status icon flags require actor stats");
   const HudStatusView status{std::bit_cast<std::uint32_t>(stats->statuses)};
@@ -64,42 +65,42 @@ int LiveStatusIconFlags(VS::Battle::ActorStats* stats) {
   return std::bit_cast<std::int32_t>(icons.value());
 }
 
-// decomp: F01357 vs_battle_getLimbStatus (src/BATTLE/BATTLE.PRG/5BF94.c:3174).
+// decomp: F01357 vs_battle_getLimbStatus (src/BATTLE/BATTLE.PRG/5BF94.c:2725).
 int LiveLimbCondition(LimbStats* limb) {
   if (limb == nullptr) Refuse("Limb condition requires limb stats");
   const HudLimbHealthView status{limb->hp, limb->max_hp};
   return static_cast<int>(LimbCondition(status));
 }
 
-// decomp: F01359 func_800C9F88 (src/BATTLE/BATTLE.PRG/5BF94.c:3239).
+// decomp: F01359 func_800C9F88 (src/BATTLE/BATTLE.PRG/5BF94.c:2790).
 void ShowLiveShortcutHud() {
   HudState state;
   ShowShortcutHud(state);
   VS::Battle::shortcutHudRequested = static_cast<char>(state.shortcut);
 }
 
-// decomp: F01382 func_800CB550 (src/BATTLE/BATTLE.PRG/5BF94.c:3838).
+// decomp: F01382 func_800CB550 (src/BATTLE/BATTLE.PRG/5BF94.c:3404).
 void ShowLivePuzzleTimer() {
   HudState state;
   ShowPuzzleTimer(state);
   VS::Battle::lowerScreenUiState = static_cast<char>(state.lower_screen);
 }
 
-// decomp: F01383 func_800CB560 (src/BATTLE/BATTLE.PRG/5BF94.c:3840).
+// decomp: F01383 func_800CB560 (src/BATTLE/BATTLE.PRG/5BF94.c:3406).
 void HideLivePuzzleTimer() {
   HudState state;
   HidePuzzleTimer(state);
   VS::Battle::lowerScreenUiState = static_cast<char>(state.lower_screen);
 }
 
-// decomp: F01385 func_800CB654 (src/BATTLE/BATTLE.PRG/5BF94.c:3867).
+// decomp: F01385 func_800CB654 (src/BATTLE/BATTLE.PRG/5BF94.c:3433).
 void SetLiveHudHidden(int command) {
   HudState state;
   SetHudHidden(state, HudVisibilityCommand{static_cast<std::uint8_t>(command)});
   VS::Battle::hudHidden = static_cast<char>(state.visibility.value);
 }
 
-// decomp: F01386 func_800CB660 (src/BATTLE/BATTLE.PRG/5BF94.c:3869).
+// decomp: F01386 func_800CB660 (src/BATTLE/BATTLE.PRG/5BF94.c:3435).
 void SetLiveHudBattleMode(int command) {
   HudState state;
   SetHudBattleMode(state,

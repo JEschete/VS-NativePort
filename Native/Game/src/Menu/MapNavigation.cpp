@@ -59,12 +59,13 @@ void Translate(std::span<const RoomVertices> rooms, MapPoint offset) {
 }
 }  // namespace
 
-// decomp: MENU5.PRG func_8010467C (4D8.c:1048).
+// decomp: MENU5.PRG func_8010467C (src/MENU/MENU5.PRG/4D8.c:1054).
 void MarkAllRoomsVisited(std::span<MapRoom> rooms) {
   for (MapRoom& room : rooms) room.visited = 1;
 }
 
-// decomp: MENU5.PRG _setCenterpoint (4D8.c:1578).
+// decomp: MENU5.PRG setCenterpoint (src/MENU/MENU5.PRG/4D8.c:1583; was
+// _setCenterpoint).
 MapPoint RoomCenterOf(std::span<const MapVertex> vertices) {
   MapVertex minimum{kEmptyMinimum, kEmptyMinimum, kEmptyMinimum};
   MapVertex maximum{kEmptyMaximum, kEmptyMaximum, kEmptyMaximum};
@@ -81,7 +82,8 @@ MapPoint RoomCenterOf(std::span<const MapVertex> vertices) {
           .z = Midpoint(minimum.z, maximum.z)};
 }
 
-// decomp: MENU5.PRG _snapMapToRoom (4D8.c:1511).
+// decomp: MENU5.PRG snapMapToRoom (src/MENU/MENU5.PRG/4D8.c:1516; was
+// _snapMapToRoom).
 bool CenterOnRoom(std::span<const RoomVertices> rooms, std::size_t room,
                   MapPoint& center) {
   if (room >= rooms.size()) return false;
@@ -91,14 +93,16 @@ bool CenterOnRoom(std::span<const RoomVertices> rooms, std::size_t room,
   return true;
 }
 
-// decomp: MENU5.PRG _smoothMapToCenterpoint (4D8.c:1629), the step.
+// decomp: MENU5.PRG smoothMapToCenterpoint (src/MENU/MENU5.PRG/4D8.c:1634; was
+// _smoothMapToCenterpoint), the step.
 MapPoint CenteringStepOf(MapPoint remaining) {
   return {.x = StepOf(remaining.x),
           .y = StepOf(remaining.y),
           .z = StepOf(remaining.z)};
 }
 
-// decomp: MENU5.PRG _smoothMapToCenterpoint (4D8.c:1629).
+// decomp: MENU5.PRG smoothMapToCenterpoint (src/MENU/MENU5.PRG/4D8.c:1634; was
+// _smoothMapToCenterpoint).
 void AnimateCentering(std::span<const RoomVertices> rooms, MapPoint& center) {
   if (center == MapPoint{}) return;
   const MapPoint step = CenteringStepOf(center);
@@ -108,7 +112,8 @@ void AnimateCentering(std::span<const RoomVertices> rooms, MapPoint& center) {
             .z = Wrap(WrappingSubtract(center.z, step.z))};
 }
 
-// decomp: MENU5.PRG _scaleRoomVertices (4D8.c:1728).
+// decomp: MENU5.PRG scaleRoomVertices (src/MENU/MENU5.PRG/4D8.c:1733; was
+// _scaleRoomVertices).
 void ScaleRoomVertices(std::span<const RoomVertices> rooms,
                        std::int32_t factor) {
   for (const RoomVertices room : rooms) {
@@ -120,7 +125,8 @@ void ScaleRoomVertices(std::span<const RoomVertices> rooms,
   }
 }
 
-// decomp: MENU5.PRG _getCurrentRoomIndex (4D8.c:1834).
+// decomp: MENU5.PRG getCurrentRoomIndex (src/MENU/MENU5.PRG/4D8.c:1839; was
+// _getCurrentRoomIndex).
 InitialRoom InitialRoomOf(
     std::span<const MapRoom> rooms,
     const std::optional<Field::SceneRoomAddress>& current) {
@@ -141,7 +147,8 @@ InitialRoom InitialRoomOf(
           .current = -1};
 }
 
-// decomp: MENU5.PRG _updateRoomIndex (4D8.c:1862).
+// decomp: MENU5.PRG updateRoomIndex (src/MENU/MENU5.PRG/4D8.c:1867; was
+// _updateRoomIndex).
 std::optional<std::int32_t> SelectAdjacentVisitedRoom(
     MapNavigationHost& host, std::span<const RoomLink> links,
     std::span<const MapRoom> rooms, std::int32_t selected,

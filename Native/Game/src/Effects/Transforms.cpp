@@ -507,7 +507,7 @@ std::size_t ReadTransformDefinitions(
   return count;
 }
 
-// decomp: BATTLE.PRG func_800CFEF0 (src/BATTLE/BATTLE.PRG/5BF94.c:5940)
+// decomp: BATTLE.PRG func_800CFEF0 (src/BATTLE/BATTLE.PRG/5BF94.c:5505)
 std::size_t InitializeTransformStates(
     std::span<const TransformDefinition> definitions,
     const TransformEndpoints& endpoints, std::span<TransformState> states) {
@@ -536,7 +536,7 @@ std::size_t InitializeTransformStates(
   return count;
 }
 
-// decomp: BATTLE.PRG func_800D01E4 (src/BATTLE/BATTLE.PRG/5BF94.c:6020)
+// decomp: BATTLE.PRG func_800D01E4 (src/BATTLE/BATTLE.PRG/5BF94.c:5590)
 TransformStatus InterpolateTransformPosition(
     const TransformDefinition& definition, TransformState& state,
     TransformHost& host) {
@@ -566,7 +566,7 @@ TransformStatus InterpolateTransformPosition(
   return TransformStatus::kApplied;
 }
 
-// decomp: BATTLE.PRG func_800D037C (src/BATTLE/BATTLE.PRG/5BF94.c:6047)
+// decomp: BATTLE.PRG func_800D037C (src/BATTLE/BATTLE.PRG/5BF94.c:5617)
 TransformStatus InterpolateTransformSpline(
     const TransformDefinition& definition, TransformState& state,
     TransformHost& host) {
@@ -599,7 +599,7 @@ TransformStatus InterpolateTransformSpline(
   return TransformStatus::kApplied;
 }
 
-// decomp: BATTLE.PRG func_800D0548 (src/BATTLE/BATTLE.PRG/5BF94.c:6076)
+// decomp: BATTLE.PRG func_800D0548 (src/BATTLE/BATTLE.PRG/5BF94.c:5646)
 TransformStatus AdvanceTransformMotion(const TransformDefinition& definition,
                                        TransformState& state,
                                        TransformHost& host) {
@@ -621,7 +621,7 @@ TransformStatus AdvanceTransformMotion(const TransformDefinition& definition,
   return status;
 }
 
-// decomp: BATTLE.PRG func_800D05F4 (src/BATTLE/BATTLE.PRG/5BF94.c:6093)
+// decomp: BATTLE.PRG func_800D05F4 (src/BATTLE/BATTLE.PRG/5BF94.c:5663)
 void BuildTransformSplineControls(const TransformDefinition& definition,
                                   TransformState& state, TransformHost& host) {
   const MotionLine line = LineOf(definition, state, false);
@@ -663,7 +663,7 @@ void BuildTransformSplineControls(const TransformDefinition& definition,
                                                       .depth = second_depth})));
 }
 
-// decomp: BATTLE.PRG func_800D0984 (src/BATTLE/BATTLE.PRG/5BF94.c:6152)
+// decomp: BATTLE.PRG func_800D0984 (src/BATTLE/BATTLE.PRG/5BF94.c:5722)
 void BuildCameraAttachment(TransformState& state, TransformHost& host,
                            bool offset_toward_camera) {
   const TransformCameraView camera = host.FrameCamera();
@@ -679,14 +679,14 @@ void BuildCameraAttachment(TransformState& state, TransformHost& host,
   }
 }
 
-// decomp: BATTLE.PRG func_800D0B08 (src/BATTLE/BATTLE.PRG/5BF94.c:6182)
+// decomp: BATTLE.PRG func_800D0B08 (src/BATTLE/BATTLE.PRG/5BF94.c:5752)
 Math::Transform3 BuildEffectOriginAttachment(TransformHost& host) {
   const TransformPoint origin = host.EffectOrigin();
   return Math::TranslationTransform(
       {.x = origin.x, .y = origin.y, .z = origin.z});
 }
 
-// decomp: BATTLE.PRG func_800D0B30 (src/BATTLE/BATTLE.PRG/5BF94.c:6184)
+// decomp: BATTLE.PRG func_800D0B30 (src/BATTLE/BATTLE.PRG/5BF94.c:5754)
 std::optional<Math::Transform3> BuildAnimatedLocalTransform(
     const TransformDefinition& definition,
     std::array<std::int16_t, Math::kMatrixOrder>& rotation,
@@ -720,7 +720,7 @@ std::optional<Math::Transform3> BuildAnimatedLocalTransform(
                           .translation = translation};
 }
 
-// decomp: BATTLE.PRG func_800D0C60 (src/BATTLE/BATTLE.PRG/5BF94.c:6204)
+// decomp: BATTLE.PRG func_800D0C60 (src/BATTLE/BATTLE.PRG/5BF94.c:5774)
 TransformStatus ResolveTransformAttachment(TransformState& state,
                                            TransformHost& host) {
   if (state.actor < kCameraAttachment) {
@@ -746,7 +746,7 @@ TransformStatus ResolveTransformAttachment(TransformState& state,
   return TransformStatus::kApplied;
 }
 
-// decomp: BATTLE.PRG func_800D0D08 (src/BATTLE/BATTLE.PRG/5BF94.c:6227)
+// decomp: BATTLE.PRG func_800D0D08 (src/BATTLE/BATTLE.PRG/5BF94.c:5797)
 TransformPass UpdateEffectTransforms(
     std::span<const TransformDefinition> definitions,
     std::span<TransformState> states, TransformHost& host) {

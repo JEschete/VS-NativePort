@@ -79,20 +79,23 @@ EffectTarget Target(std::intptr_t effect, int tag_mask) {
 }
 }  // namespace
 
-// decomp: SLUS_010.40 func_80012468 (src/SLUS_010.40/25AC.c:465)
+// decomp: SLUS_010.40 Sound_SetMusicJumpThreshold (src/SLUS_010.40/25AC.c:466;
+// was func_80012468)
 void LiveSetMusicBranchThreshold(void* threshold) {
   LiveControl host;
   SetMusicBranchThreshold(
       host, static_cast<std::int32_t>(std::bit_cast<std::intptr_t>(threshold)));
 }
 
-// decomp: SLUS_010.40 func_8001286C (src/SLUS_010.40/25AC.c:607)
+// decomp: SLUS_010.40 Sound_SetMasterVolumeByMusicId
+// (src/SLUS_010.40/25AC.c:608; was func_8001286C)
 void LiveSetMusicVolume(std::uint32_t music_id, int volume) {
   LiveControl host;
   SetMusicVolume(host, music_id, volume);
 }
 
-// decomp: SLUS_010.40 func_800128A0 (src/SLUS_010.40/25AC.c:614)
+// decomp: SLUS_010.40 Sound_FadeMasterVolumeByMusicId
+// (src/SLUS_010.40/25AC.c:615; was func_800128A0)
 void LiveFadeMusicVolume(std::uint32_t music_id, int fade_ticks,
                          int target_volume) {
   LiveControl host;
@@ -100,7 +103,8 @@ void LiveFadeMusicVolume(std::uint32_t music_id, int fade_ticks,
                   {.ticks = fade_ticks, .target = target_volume});
 }
 
-// decomp: SLUS_010.40 func_8001264C (src/SLUS_010.40/25AC.c:538)
+// decomp: SLUS_010.40 Sound_FadeSfxVolumeMod (src/SLUS_010.40/25AC.c:539; was
+// func_8001264C)
 void LiveFadeSoundEffectVolume(std::intptr_t effect, int tag_mask,
                                int fade_ticks, int target_volume) {
   LiveControl host;
@@ -108,7 +112,8 @@ void LiveFadeSoundEffectVolume(std::intptr_t effect, int tag_mask,
                         {.ticks = fade_ticks, .target = target_volume});
 }
 
-// decomp: SLUS_010.40 func_80012738 (src/SLUS_010.40/25AC.c:568)
+// decomp: SLUS_010.40 Sound_FadeSfxPanMod (src/SLUS_010.40/25AC.c:569; was
+// func_80012738)
 void LiveFadeSoundEffectPan(std::intptr_t effect, int tag_mask, int fade_ticks,
                             int target_pan) {
   LiveControl host;
@@ -116,7 +121,8 @@ void LiveFadeSoundEffectPan(std::intptr_t effect, int tag_mask, int fade_ticks,
                      {.ticks = fade_ticks, .target = target_pan});
 }
 
-// decomp: SLUS_010.40 func_80012824 (src/SLUS_010.40/25AC.c:598)
+// decomp: SLUS_010.40 Sound_FadeSfxPitchMod (src/SLUS_010.40/25AC.c:599; was
+// func_80012824)
 void LiveFadeSoundEffectPitch(std::intptr_t effect, int tag_mask,
                               int fade_ticks, int target_pitch_scale) {
   LiveControl host;
@@ -124,19 +130,22 @@ void LiveFadeSoundEffectPitch(std::intptr_t effect, int tag_mask,
                        {.ticks = fade_ticks, .target = target_pitch_scale});
 }
 
-// decomp: SLUS_010.40 func_80012918 (src/SLUS_010.40/25AC.c:631)
+// decomp: SLUS_010.40 Sound_SetCdVolume (src/SLUS_010.40/25AC.c:632; was
+// func_80012918)
 void LiveSetDiscVolume(int volume) {
   LiveControl host;
   SetDiscVolume(host, volume);
 }
 
-// decomp: SLUS_010.40 func_80012940 (src/SLUS_010.40/25AC.c:637)
+// decomp: SLUS_010.40 Sound_FadeCdVolume (src/SLUS_010.40/25AC.c:638; was
+// func_80012940)
 void LiveFadeDiscVolume(int fade_ticks, int target_volume) {
   LiveControl host;
   FadeDiscVolume(host, {.ticks = fade_ticks, .target = target_volume});
 }
 
-// decomp: SLUS_010.40 func_80012970 (src/SLUS_010.40/25AC.c:644)
+// decomp: SLUS_010.40 Sound_FadeCdVolumeFrom (src/SLUS_010.40/25AC.c:645; was
+// func_80012970)
 void LiveFadeDiscVolumeFrom(int fade_ticks, int start_volume,
                             int target_volume) {
   LiveControl host;
@@ -145,64 +154,72 @@ void LiveFadeDiscVolumeFrom(int fade_ticks, int start_volume,
       {.ticks = fade_ticks, .start = start_volume, .target = target_volume});
 }
 
-// decomp: SLUS_010.40 func_800129D0 (src/SLUS_010.40/25AC.c:658)
+// decomp: SLUS_010.40 Sound_FadeTempoScale (src/SLUS_010.40/25AC.c:659; was
+// func_800129D0)
 void LiveFadeMusicTempoScale(int fade_ticks, int target_tempo_scale) {
   LiveControl host;
   FadeMusicTempoScale(host,
                       {.ticks = fade_ticks, .target = target_tempo_scale});
 }
 
-// decomp: SLUS_010.40 func_80012A6C (src/SLUS_010.40/25AC.c:679)
+// decomp: SLUS_010.40 Sound_FadeMasterPitchScale (src/SLUS_010.40/25AC.c:680;
+// was func_80012A6C)
 int LiveFadeMusicPitchScale(int fade_ticks, int target_pitch_scale) {
   LiveControl host;
   return FadeMusicPitchScale(
       host, {.ticks = fade_ticks, .target = target_pitch_scale});
 }
 
-// decomp: SLUS_010.40 func_80012B78 (src/SLUS_010.40/25AC.c:715)
+// decomp: SLUS_010.40 Sound_StopMusic (src/SLUS_010.40/25AC.c:716; was
+// func_80012B78)
 void LiveStopAllMusic() {
   LiveControl host;
   StopAllMusic(host);
 }
 
-// decomp: SLUS_010.40 func_80012B98 (src/SLUS_010.40/25AC.c:717)
+// decomp: SLUS_010.40 Sound_StopSfx (src/SLUS_010.40/25AC.c:718; was
+// func_80012B98)
 void LiveStopSceneSoundEffects() {
   LiveControl host;
   StopSceneSoundEffects(host);
 }
 
-// decomp: SLUS_010.40 func_800132C4 (src/SLUS_010.40/25AC.c:928)
+// decomp: SLUS_010.40 Sound_StartCutsceneStream (src/SLUS_010.40/25AC.c:931;
+// was func_800132C4)
 void LiveStartCutsceneStream(void* stream, int pan, int reverb) {
   LiveControl host;
   StartCutsceneStream(
       host, {.stream = Reference(stream), .pan = pan, .reverb = reverb});
 }
 
-// decomp: SLUS_010.40 func_80013328 (src/SLUS_010.40/25AC.c:938)
+// decomp: SLUS_010.40 Sound_StopCutsceneStream (src/SLUS_010.40/25AC.c:941; was
+// func_80013328)
 void LiveStopCutsceneStream() {
   LiveControl host;
   StopCutsceneStream(host);
 }
 
-// decomp: SLUS_010.40 func_80013348 (src/SLUS_010.40/25AC.c:940)
+// decomp: SLUS_010.40 Sound_SetCutsceneVolume (src/SLUS_010.40/25AC.c:943; was
+// func_80013348)
 void LiveSetCutsceneVolume(int volume) {
   LiveControl host;
   SetCutsceneVolume(host, volume);
 }
 
-// decomp: SLUS_010.40 func_80013378 (src/SLUS_010.40/25AC.c:946)
+// decomp: SLUS_010.40 Sound_FadeOutCutscene (src/SLUS_010.40/25AC.c:949; was
+// func_80013378)
 void LiveFadeCutsceneVolume(int fade_ticks, int target_volume) {
   LiveControl host;
   FadeCutsceneVolume(host, {.ticks = fade_ticks, .target = target_volume});
 }
 
-// decomp: SLUS_010.40 func_800133B0 (src/SLUS_010.40/25AC.c:953)
+// decomp: SLUS_010.40 func_800133B0 (src/SLUS_010.40/25AC.c:956)
 void LiveSetCutscenePan(int pan) {
   LiveControl host;
   SetCutscenePan(host, pan);
 }
 
-// decomp: SLUS_010.40 func_800133E0 (src/SLUS_010.40/25AC.c:959)
+// decomp: SLUS_010.40 func_800133E0 (src/SLUS_010.40/25AC.c:962)
 unsigned LiveSoundEffectChannelIds(std::intptr_t* effects) {
   if (effects == nullptr) {
     Seq::ReportRefusal("SoundEffectChannelIds", "no effect id buffer");

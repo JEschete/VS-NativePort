@@ -70,7 +70,7 @@ void SwapColorPairs(std::span<std::byte> polygon, std::size_t corners) {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_8009195C (src/BATTLE/BATTLE.PRG/2842C.c:550)
+// decomp: BATTLE.PRG func_8009195C (src/BATTLE/BATTLE.PRG/2842C.c:536)
 std::optional<std::size_t> FindRoomGeometryGroup(
     std::span<const std::byte> geometry, int group_index) {
   if (geometry.empty()) {
@@ -99,19 +99,22 @@ std::optional<std::size_t> FindRoomGeometryGroup(
   return offset;
 }
 
-// decomp: BATTLE.PRG func_80091998 (src/BATTLE/BATTLE.PRG/2842C.c:562)
+// decomp: BATTLE.PRG showGeometryObject (src/BATTLE/BATTLE.PRG/2842C.c:548; was
+// func_80091998)
 bool ShowRoomGeometryGroup(std::span<std::byte> geometry, int group_index) {
   return UpdateGroupFlags(geometry, group_index, room_effects::kGroupHiddenFlag,
                           0);
 }
 
-// decomp: BATTLE.PRG func_800919D8 (src/BATTLE/BATTLE.PRG/2842C.c:572)
+// decomp: BATTLE.PRG hideGeometryObject (src/BATTLE/BATTLE.PRG/2842C.c:558; was
+// func_800919D8)
 bool HideRoomGeometryGroup(std::span<std::byte> geometry, int group_index) {
   return UpdateGroupFlags(geometry, group_index, 0,
                           room_effects::kGroupHiddenFlag);
 }
 
-// decomp: BATTLE.PRG func_80091A1C (src/BATTLE/BATTLE.PRG/2842C.c:582)
+// decomp: BATTLE.PRG swapGeometryFlags (src/BATTLE/BATTLE.PRG/2842C.c:568; was
+// func_80091A1C)
 bool SetRoomGeometryGroupPosition(std::span<std::byte> geometry,
                                   int group_index,
                                   const RoomEffectPosition& position) {
@@ -138,7 +141,7 @@ bool SwapRoomGeometryGroupFlags(std::span<std::byte> geometry,
   return true;
 }
 
-// decomp: BATTLE.PRG func_80091A78 (src/BATTLE/BATTLE.PRG/2842C.c:596)
+// decomp: BATTLE.PRG func_80091A78 (src/BATTLE/BATTLE.PRG/2842C.c:582)
 bool AddRoomGeometryDepthBias(std::span<std::byte> geometry, int group_index,
                               int depth_bias) {
   const auto group = FindRoomGeometryGroup(geometry, group_index);
@@ -153,7 +156,7 @@ bool AddRoomGeometryDepthBias(std::span<std::byte> geometry, int group_index,
   return true;
 }
 
-// decomp: BATTLE.PRG func_80091AC0 (src/BATTLE/BATTLE.PRG/2842C.c:606)
+// decomp: BATTLE.PRG func_80091AC0 (src/BATTLE/BATTLE.PRG/2842C.c:592)
 bool DisableRoomGeometryGroup(std::span<std::byte> geometry, int group_index) {
   return UpdateGroupFlags(geometry, group_index, 0,
                           room_effects::kGroupDisabledFlag);
@@ -525,9 +528,9 @@ bool UpdateRoomRotationEffect(SwingEffect& effect,
   return false;
 }
 
-// decomp: BATTLE.PRG func_80092540 (src/BATTLE/BATTLE.PRG/2842C.c:855),
-// func_80092F6C (2842C.c:1156) and func_800936F0 (2842C.c:1315) share this
-// machine code.
+// decomp: BATTLE.PRG func_80092540 (src/BATTLE/BATTLE.PRG/2842C.c:841),
+// func_80092F6C (src/BATTLE/BATTLE.PRG/2842C.c:1142) and func_800936F0
+// (src/BATTLE/BATTLE.PRG/2842C.c:1301) share this machine code.
 bool SkipRoomEffectCommand() { return false; }
 
 namespace {
@@ -891,7 +894,7 @@ void CreateRoomEffectObjects(RoomEffectInstance& instance,
   }
 }
 
-// decomp: BATTLE.PRG func_80092914 (src/BATTLE/BATTLE.PRG/2842C.c:988)
+// decomp: BATTLE.PRG func_80092914 (src/BATTLE/BATTLE.PRG/2842C.c:974)
 void FinishRoomEffectSetup() {}
 
 // decomp: BATTLE.PRG func_8009291C (src/BATTLE/BATTLE.PRG/2842C.c:990)
@@ -1190,7 +1193,7 @@ RoomEffectCommandResult SetRoomEffectRadialVelocity(
   return RoomEffectCommandResult::kAdvance;
 }
 
-// decomp: BATTLE.PRG func_80092E14 (src/BATTLE/BATTLE.PRG/2842C.c:1123)
+// decomp: BATTLE.PRG func_80092E14 (src/BATTLE/BATTLE.PRG/2842C.c:1109)
 RoomEffectCommandResult SetRoomEffectVelocity(
     RoomEffectObject& object, const RoomEffectCommand& command) {
   object.velocity = {command.SignedHalf(kVelocityX),
@@ -1204,7 +1207,7 @@ RoomEffectCommandResult SetRoomEffectVelocity(
   return RoomEffectCommandResult::kAdvance;
 }
 
-// decomp: BATTLE.PRG func_80092E7C (src/BATTLE/BATTLE.PRG/2842C.c:1134)
+// decomp: BATTLE.PRG func_80092E7C (src/BATTLE/BATTLE.PRG/2842C.c:1120)
 RoomEffectCommandResult SetRoomEffectTransform(RoomEffectObject& object,
                                                const RoomEffectCommand& command,
                                                std::span<std::byte> geometry) {
@@ -1302,7 +1305,7 @@ constexpr std::int32_t kDuckFadeTicks = 8;
 constexpr auto kSwingKind = std::to_underlying(RoomTextureEffectKind::kSwing);
 }  // namespace
 
-// decomp: BATTLE.PRG func_80092EDC (src/BATTLE/BATTLE.PRG/2842C.c:1142)
+// decomp: BATTLE.PRG func_80092EDC (src/BATTLE/BATTLE.PRG/2842C.c:1128)
 void WriteRoomEffectTransform(const RoomEffectObject& object,
                               std::span<std::byte> geometry) {
   const auto group = ObjectGroup(object, geometry);
@@ -1322,7 +1325,7 @@ void WriteRoomEffectTransform(const RoomEffectObject& object,
   word(kRotationZWord, rotation.z);
 }
 
-// decomp: BATTLE.PRG func_80092F74 (src/BATTLE/BATTLE.PRG/2842C.c:1162)
+// decomp: BATTLE.PRG func_80092F74 (src/BATTLE/BATTLE.PRG/2842C.c:1147)
 RoomEffectCommandResult HideRoomEffectObject(const RoomEffectObject& object,
                                              std::span<std::byte> geometry) {
   const auto group = ObjectGroup(object, geometry);
@@ -1332,7 +1335,7 @@ RoomEffectCommandResult HideRoomEffectObject(const RoomEffectObject& object,
   return RoomEffectCommandResult::kAdvance;
 }
 
-// decomp: BATTLE.PRG func_80092F98 (src/BATTLE/BATTLE.PRG/2842C.c:1170)
+// decomp: BATTLE.PRG func_80092F98 (src/BATTLE/BATTLE.PRG/2842C.c:1155)
 RoomEffectCommandResult ExecuteRoomEffectShowGroup(
     const RoomEffectCommand& command, std::span<std::byte> geometry) {
   ShowRoomGeometryGroup(geometry, command.Word(kWordOperand));
@@ -1402,7 +1405,7 @@ bool StepRoomEffectDampedMotion(RoomEffectObject& object,
   return false;
 }
 
-// decomp: BATTLE.PRG func_8009352C (src/BATTLE/BATTLE.PRG/2842C.c:1269)
+// decomp: BATTLE.PRG func_8009352C (src/BATTLE/BATTLE.PRG/2842C.c:1254)
 RoomEffectCommandResult ExecuteRoomEffectPlaySound(
     const RoomEffectCommand& command, RoomEffectState& state,
     RoomEffectHost& host) {
@@ -1419,7 +1422,7 @@ RoomEffectCommandResult ExecuteRoomEffectPlaySound(
   return RoomEffectCommandResult::kAdvance;
 }
 
-// decomp: BATTLE.PRG func_800935B8 (src/BATTLE/BATTLE.PRG/2842C.c:1283)
+// decomp: BATTLE.PRG func_800935B8 (src/BATTLE/BATTLE.PRG/2842C.c:1269)
 RoomEffectCommandResult ExecuteRoomEffectStopSound(
     const RoomEffectCommand& command, RoomEffectState& state,
     RoomEffectHost& host) {
@@ -1430,7 +1433,7 @@ RoomEffectCommandResult ExecuteRoomEffectStopSound(
   return RoomEffectCommandResult::kAdvance;
 }
 
-// decomp: BATTLE.PRG func_800935F8 (src/BATTLE/BATTLE.PRG/2842C.c:1292)
+// decomp: BATTLE.PRG func_800935F8 (src/BATTLE/BATTLE.PRG/2842C.c:1278)
 RoomEffectCommandResult ExecuteRoomEffectStartEffect(
     const RoomEffectCommand& command, RoomEffectState& state,
     RoomEffectHost& host) {
@@ -1438,14 +1441,14 @@ RoomEffectCommandResult ExecuteRoomEffectStartEffect(
   return RoomEffectCommandResult::kAdvance;
 }
 
-// decomp: BATTLE.PRG func_8009361C (src/BATTLE/BATTLE.PRG/2842C.c:1298)
+// decomp: BATTLE.PRG func_8009361C (src/BATTLE/BATTLE.PRG/2842C.c:1284)
 RoomEffectCommandResult ExecuteRoomEffectHideGroup(
     const RoomEffectCommand& command, std::span<std::byte> geometry) {
   HideRoomGeometryGroup(geometry, command.Word(kWordOperand));
   return RoomEffectCommandResult::kAdvance;
 }
 
-// decomp: BATTLE.PRG func_80093640 (src/BATTLE/BATTLE.PRG/2842C.c:1304)
+// decomp: BATTLE.PRG func_80093640 (src/BATTLE/BATTLE.PRG/2842C.c:1290)
 RoomEffectCommandResult ExecuteRoomEffectStopScript(
     const RoomEffectCommand& command, RoomEffectState& state,
     RoomEffectHost& host) {
@@ -1468,7 +1471,7 @@ RoomEffectCommandResult ExecuteRoomEffectStopScript(
   return RoomEffectCommandResult::kAdvance;
 }
 
-// decomp: BATTLE.PRG func_800936F8 (src/BATTLE/BATTLE.PRG/2842C.c:1321)
+// decomp: BATTLE.PRG func_800936F8 (src/BATTLE/BATTLE.PRG/2842C.c:1306)
 bool ToggleRoomEffectUpdates(RoomEffectState& state, int effect_index) {
   if (effect_index < 0) {
     VS::Core::LogWarn(kChannel,
@@ -1489,7 +1492,7 @@ bool ToggleRoomEffectUpdates(RoomEffectState& state, int effect_index) {
   return true;
 }
 
-// decomp: BATTLE.PRG func_80093764 (src/BATTLE/BATTLE.PRG/2842C.c:1334)
+// decomp: BATTLE.PRG func_80093764 (src/BATTLE/BATTLE.PRG/2842C.c:1319)
 std::uint8_t IsRoomEffectActive(const RoomEffectState& state,
                                 int effect_index) {
   if (effect_index < 0 ||
@@ -1573,7 +1576,7 @@ void FinishRoomTiltRotation(const RoomEffectState& state, RoomEffectHost& host,
       });
 }
 
-// decomp: BATTLE.PRG func_800938AC (src/BATTLE/BATTLE.PRG/2842C.c:1389)
+// decomp: BATTLE.PRG func_800938AC (src/BATTLE/BATTLE.PRG/2842C.c:1374)
 void DuckRoomEffectSound(const RoomEffectState& state, RoomEffectHost& host,
                          bool ducked) {
   if (HasSound(state, host)) {
@@ -1582,7 +1585,7 @@ void DuckRoomEffectSound(const RoomEffectState& state, RoomEffectHost& host,
   }
 }
 
-// decomp: BATTLE.PRG func_80093A14 (src/BATTLE/BATTLE.PRG/2842C.c:1448)
+// decomp: BATTLE.PRG func_80093A14 (src/BATTLE/BATTLE.PRG/2842C.c:1435)
 void RestoreRoomEffectSoundVolume(RoomEffectState& state,
                                   RoomEffectHost& host) {
   state.sound_restored = true;
@@ -1591,7 +1594,7 @@ void RestoreRoomEffectSoundVolume(RoomEffectState& state,
   }
 }
 
-// decomp: BATTLE.PRG func_80093A70 (src/BATTLE/BATTLE.PRG/2842C.c:1456)
+// decomp: BATTLE.PRG func_80093A70 (src/BATTLE/BATTLE.PRG/2842C.c:1444)
 void RestartRoomEffectSound(const RoomEffectState& state,
                             RoomEffectHost& host) {
   if (HasSound(state, host)) {
@@ -1599,7 +1602,7 @@ void RestartRoomEffectSound(const RoomEffectState& state,
   }
 }
 
-// decomp: BATTLE.PRG func_80098B1C (src/BATTLE/BATTLE.PRG/2EA3C.s:1770): a
+// decomp: BATTLE.PRG func_80098B1C (src/BATTLE/BATTLE.PRG/2EA3C.s:1679): a
 // tail jump to the code 0x14 bytes into section E.
 bool CallRoomEntryPoint(RoomEffectHost& host) {
   const auto section = host.EntryPointSection();

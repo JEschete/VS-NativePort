@@ -352,7 +352,8 @@ RoomEventCopy RoomEventSections::Copy(const RoomEventInput& input) {
   }
 }
 
-// decomp: BATTLE.PRG _loadMpdClearedScriptDoorSections (4A0A8.c:4201).
+// decomp: BATTLE.PRG loadMpdClearedScriptDoorSections
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:4850; was _loadMpdClearedScriptDoorSections).
 RoomEventLoad LoadRoomEventSections(RoomEventInput input,
                                     RoomEventSectionHost& host) {
   constexpr std::int16_t kWaitingForRoom = 1;
@@ -393,7 +394,7 @@ RoomEventLoad LoadRoomEventSections(RoomEventInput input,
   return RoomEventLoadResult::kReady;
 }
 
-// decomp: BATTLE.PRG func_800BEB34 (4A0A8.c:4250).
+// decomp: BATTLE.PRG func_800BEB34 (src/BATTLE/BATTLE.PRG/4DEA8.c:4899).
 void FreeRoomEventSections(RoomEventSectionHost& host) {
   constexpr std::int16_t kStopForRoom = 3;
   if (host.RoomChangeState() == kStopForRoom) {
@@ -402,10 +403,10 @@ void FreeRoomEventSections(RoomEventSectionHost& host) {
   host.PublishSections({});
 }
 
-// decomp: BATTLE.PRG func_800BEBEC (4A0A8.c:4273).
+// decomp: BATTLE.PRG func_800BEBEC (src/BATTLE/BATTLE.PRG/4DEA8.c:4922).
 void ReleaseZoneEventResources() {}
 
-// decomp: BATTLE.PRG func_800BEC58 (src/BATTLE/BATTLE.PRG/4A0A8.c:4302)
+// decomp: BATTLE.PRG func_800BEC58 (src/BATTLE/BATTLE.PRG/4DEA8.c:4945)
 RoomTriggerResult EvaluateRoomEventTriggers(const RoomTriggerQuery& query,
                                             ScriptCommand section,
                                             RoomTriggerHost& host) {

@@ -214,12 +214,13 @@ class ZoneTableHost : public virtual RoomLoadReporter {
       std::span<const std::byte> templates) = 0;
 };
 
-// decomp: BATTLE.PRG _loadMpdLbas (146C.c:14774)
-// An empty table is reported and stored, as the original stored it.
+// decomp: BATTLE.PRG loadMpdLbas (src/BATTLE/BATTLE.PRG/146C.c:14645; was
+// _loadMpdLbas) An empty table is reported and stored, as the original stored
+// it.
 void LoadZoneRoomFileTable(ZoneTableHost& host,
                            std::span<const std::byte> table);
-// decomp: BATTLE.PRG _loadZndEnemies (146C.c:14783)
-// A malformed section is refused and clears the tables.
+// decomp: BATTLE.PRG loadZndEnemies (src/BATTLE/BATTLE.PRG/146C.c:14654; was
+// _loadZndEnemies) A malformed section is refused and clears the tables.
 void LoadZoneEnemyTemplates(ZoneTableHost& host,
                             std::span<const std::byte> section);
 
@@ -246,10 +247,10 @@ class ZoneTextureHost : public virtual RoomLoadReporter {
                            std::span<const std::byte> pixels) = 0;
 };
 
-// decomp: BATTLE.PRG _loadZndTims (146C.c:15608)
-// The section starts with four table sizes; only the first table, a count
-// and that many sized TIMs, is read. Palette TIMs fill the room palette rows
-// they cover; the others are uploaded 320 columns left and 256 lines down.
+// decomp: BATTLE.PRG loadZndTims (src/BATTLE/BATTLE.PRG/146C.c:15478; was
+// _loadZndTims) The section starts with four table sizes; only the first table,
+// a count and that many sized TIMs, is read. Palette TIMs fill the room palette
+// rows they cover; the others are uploaded 320 columns left and 256 lines down.
 // A missing first table (a size of 0 or less, which the original read
 // through a null pointer) uploads nothing. A TIM that does not parse is
 // skipped; a section shorter than its sizes or a TIM size leaving the table
@@ -285,10 +286,11 @@ class ZoneLoadHost : public RoomFileReadHost,
   virtual void FinishZoneMusic(int music_id) = 0;
 };
 
-// decomp: BATTLE.PRG _loadZnd (146C.c:14803)
+// decomp: BATTLE.PRG loadZnd (src/BATTLE/BATTLE.PRG/146C.c:14674; was _loadZnd)
 // An id outside the zone table is refused (false).
 bool QueueZoneLoad(ZoneLoadHost& host, int zone_id);
-// decomp: BATTLE.PRG _finishLoadZnd (146C.c:14826)
+// decomp: BATTLE.PRG finishLoadZnd (src/BATTLE/BATTLE.PRG/146C.c:14697; was
+// _finishLoadZnd)
 void FinishZoneLoad(ZoneLoadHost& host, int zone_id);
 
 class ZoneReleaseHost {
@@ -305,12 +307,13 @@ class ZoneReleaseHost {
   virtual void FreeZoneTables() = 0;
 };
 
-// decomp: BATTLE.PRG func_80089098 (146C.c:14886)
-// The original's empty cleanup hook (_vsBattleNop2, 146C.c:16031) is
-// VS::Core::NoOperation and is not called here.
+// decomp: BATTLE.PRG func_80089098 (src/BATTLE/BATTLE.PRG/146C.c:14757)
+// The original's empty cleanup hook (_vsBattleNop2,
+// src/BATTLE/BATTLE.PRG/146C.c:16031) is VS::Core::NoOperation and is not
+// called here.
 void ReleaseZoneData(ZoneReleaseHost& host);
 
-// decomp: BATTLE.PRG func_80089104 (146C.c:14899)
+// decomp: BATTLE.PRG func_80089104 (src/BATTLE/BATTLE.PRG/146C.c:14770)
 // The zone's music id (the original's D_800F18A8 view).
 [[nodiscard]] int ZoneSoundFileId(int zone_music_id);
 
@@ -422,7 +425,7 @@ class RoomActorSpawnHost : public virtual RoomLoadReporter,
   virtual void FreeCachedZud() = 0;
 };
 
-// decomp: BATTLE.PRG func_80089114 (146C.c:14901)
+// decomp: BATTLE.PRG func_80089114 (src/BATTLE/BATTLE.PRG/146C.c:14901)
 // Spawns each shown placement, then records the placements' hidden flags
 // (at most kRememberedHiddenFlags) and frees the cached ZUD. An enemy
 // template outside the zone and an explicit slot outside the actor slots
@@ -476,13 +479,14 @@ class RoomEntranceHost {
   virtual void SettleAshley() = 0;
 };
 
-// decomp: BATTLE.PRG func_80089888 (146C.c:15142)
+// decomp: BATTLE.PRG func_80089888 (src/BATTLE/BATTLE.PRG/146C.c:15010)
 void PlaceAshleyAtRoomEntrance(RoomEntranceHost& host);
 
-// decomp: BATTLE.PRG func_80089A00 (146C.c:15190)
-// Selects the remembered room for `room` (or the oldest, cleared) and makes
-// it the most recent. A remembered room returns each placement's hidden
-// flag, its remembered one where it has one; the oldest room returns none.
+// decomp: BATTLE.PRG selectZoneEnemyCache (src/BATTLE/BATTLE.PRG/146C.c:15058;
+// was func_80089A00) Selects the remembered room for `room` (or the oldest,
+// cleared) and makes it the most recent. A remembered room returns each
+// placement's hidden flag, its remembered one where it has one; the oldest room
+// returns none.
 struct HiddenFlag {
   std::size_t placement_index = 0;
   std::uint8_t hidden = 0;
@@ -510,7 +514,8 @@ class RoomPlacementHost {
   virtual void StorePlacements(std::span<const std::byte> records) = 0;
 };
 
-// decomp: BATTLE.PRG _loadMpdEnemySection (146C.c:15238)
+// decomp: BATTLE.PRG loadMpdEnemySection (src/BATTLE/BATTLE.PRG/146C.c:15108;
+// was _loadMpdEnemySection)
 void LoadRoomEnemyPlacements(RoomPlacementHost& host,
                              std::span<const std::byte> section);
 
@@ -601,26 +606,27 @@ class RoomSectionHost : public virtual RoomLoadReporter {
   virtual void FreeRoomSections() = 0;
 };
 
-// decomp: BATTLE.PRG _loadMpdRoomSection (146C.c:15663)
-// False when every section is empty or the sections are malformed (refused).
-// A short section-E or collision map header is refused and left unresolved.
+// decomp: BATTLE.PRG loadMpdRoomSection (src/BATTLE/BATTLE.PRG/146C.c:15533;
+// was _loadMpdRoomSection) False when every section is empty or the sections
+// are malformed (refused). A short section-E or collision map header is refused
+// and left unresolved.
 bool LoadRoomSections(RoomSectionHost& host, int owner_room_index,
                       std::span<const std::byte> data);
-// decomp: BATTLE.PRG func_8008ABF0 (146C.c:15774)
+// decomp: BATTLE.PRG func_8008ABF0 (src/BATTLE/BATTLE.PRG/146C.c:15644)
 bool ReleaseOwnedRoomSections(RoomSectionHost& host, int owner_room_index);
 
 // The loaded room's sections, each bounded by its length.
 using RoomSections = std::array<std::span<std::byte>, kRoomSectionCount>;
 
-// decomp: BATTLE.PRG func_8008B6FC (146C.c:16061)
+// decomp: BATTLE.PRG func_8008B6FC (src/BATTLE/BATTLE.PRG/146C.c:15931)
 [[nodiscard]] std::span<std::byte> RoomAuxiliaryData(
     const RoomSections& sections);
-// decomp: BATTLE.PRG func_8008C478 (146C.c:16467)
+// decomp: BATTLE.PRG func_8008C478 (src/BATTLE/BATTLE.PRG/146C.c:16341)
 // The 8-byte record `index`; empty when it lies outside the section.
 inline constexpr std::size_t kSupplementalRecordBytes = 8;
 [[nodiscard]] std::span<std::byte> RoomSupplementalRecord(
     const RoomSections& sections, int index);
-// decomp: BATTLE.PRG func_8008E470 (146C.c:17321)
+// decomp: BATTLE.PRG func_8008E470 (src/BATTLE/BATTLE.PRG/146C.c:17200)
 [[nodiscard]] bool IsRoomAudioSequenceAbsent(const RoomSections& sections);
 
 // The room environment section's fields (VS::Field::MpdEnvironment).
@@ -643,23 +649,25 @@ struct RoomEnvironmentProperties {
 [[nodiscard]] std::optional<RoomEnvironmentProperties>
 DecodeRoomEnvironmentProperties(std::span<const std::byte> section);
 
-// decomp: BATTLE.PRG vs_battle_inWorkshop (146C.c:16798)
+// decomp: BATTLE.PRG vs_battle_inWorkshop (src/BATTLE/BATTLE.PRG/146C.c:16672)
 // The workshop the room is (0 for none).
 [[nodiscard]] int IsCurrentRoomWorkshop(
     const RoomEnvironmentProperties& environment);
-// decomp: BATTLE.PRG func_8008D3E8 (146C.c:16800)
+// decomp: BATTLE.PRG func_8008D3E8 (src/BATTLE/BATTLE.PRG/146C.c:16674)
 [[nodiscard]] int RoomEnvironmentFlags(
     const RoomEnvironmentProperties& environment);
-// decomp: BATTLE.PRG vs_battle_getCurrentSceneId (146C.c:16802)
+// decomp: BATTLE.PRG vs_battle_getCurrentSceneId
+// (src/BATTLE/BATTLE.PRG/146C.c:16676)
 [[nodiscard]] int CurrentSceneId(const RoomEnvironmentProperties& environment);
-// decomp: BATTLE.PRG func_8008D418 (146C.c:16804)
+// decomp: BATTLE.PRG func_8008D418 (src/BATTLE/BATTLE.PRG/146C.c:16678)
 // The zone in the high half and the room, sign-extended, ORed in.
 [[nodiscard]] int RoomFallDestination(
     const RoomEnvironmentProperties& environment);
-// decomp: BATTLE.PRG func_8008E4AC (146C.c:17329)
+// decomp: BATTLE.PRG func_8008E4AC (src/BATTLE/BATTLE.PRG/146C.c:17208)
 [[nodiscard]] int RoomEnvironmentParameter(
     const RoomEnvironmentProperties& environment);
-// decomp: BATTLE.PRG _getRoomTrapLevel (146C.c:17331)
+// decomp: BATTLE.PRG getRoomTrapLevel (src/BATTLE/BATTLE.PRG/146C.c:17210; was
+// _getRoomTrapLevel)
 [[nodiscard]] int RoomTrapLevel(const RoomEnvironmentProperties& environment);
 
 // --- Loading and unloading the room
@@ -803,14 +811,14 @@ class RoomLoadHost : public RoomFileReadHost,
   virtual void InvalidateControllerConnections() = 0;
 };
 
-// decomp: BATTLE.PRG func_80088CAC (146C.c:14766)
+// decomp: BATTLE.PRG func_80088CAC (src/BATTLE/BATTLE.PRG/146C.c:14637)
 // Clears the room enemy memory, first resetting the scene timer when it
 // resets per scene.
 void BeginSceneActorTransition(RoomLoadHost& host);
-// decomp: BATTLE.PRG _loadMpd (146C.c:15254)
+// decomp: BATTLE.PRG loadMpd (src/BATTLE/BATTLE.PRG/146C.c:15124; was _loadMpd)
 // An id outside the zone's room file table is refused (false).
 bool QueueRoomLoad(RoomLoadHost& host, int room_id);
-// decomp: BATTLE.PRG func_80089DC0 (146C.c:15272)
+// decomp: BATTLE.PRG func_80089DC0 (src/BATTLE/BATTLE.PRG/146C.c:15272)
 // A room id outside the table, a failed read or a malformed file is refused
 // once the primitive buffers are taken (so the unload stays balanced) and
 // leaves the room unloaded. A room without an environment section is
@@ -831,7 +839,7 @@ class RoomActorRemovalHost {
   virtual void RemoveActor(int slot) = 0;
 };
 
-// decomp: BATTLE.PRG func_8008A364 (146C.c:15480)
+// decomp: BATTLE.PRG func_8008A364 (src/BATTLE/BATTLE.PRG/146C.c:15350)
 // Removes the actors in slots 2-15.
 void RemoveRoomActors(RoomActorRemovalHost& host);
 
@@ -857,6 +865,6 @@ class RoomUnloadHost : public RoomSectionHost, public RoomActorRemovalHost {
   virtual void FreePrimitiveBuffers() = 0;
 };
 
-// decomp: BATTLE.PRG func_8008A3A0 (146C.c:15489)
+// decomp: BATTLE.PRG func_8008A3A0 (src/BATTLE/BATTLE.PRG/146C.c:15359)
 void UnloadCurrentRoom(RoomUnloadHost& host);
 }  // namespace VS::Field

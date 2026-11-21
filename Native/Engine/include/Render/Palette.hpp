@@ -4,7 +4,8 @@
 #include <cstdint>
 
 namespace VS::Render {
-// decomp: D_800F4538_unk58_2 (src/BATTLE/BATTLE.PRG/3A1A0.h:38)
+// decomp: D_800F4538 (src/BATTLE/BATTLE.PRG/entity.h:524; was
+// D_800F4538_unk58_2)
 struct ColorCode {
   std::uint8_t red = 0;
   std::uint8_t green = 0;

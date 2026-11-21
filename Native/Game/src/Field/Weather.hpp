@@ -26,6 +26,7 @@ struct WeatherParticleRecord {
 static_assert(sizeof(WeatherParticleRecord) == kWeatherParticleRecordBytes);
 
 // The screen weather fade.
-// decomp: D_800F1DC7 (D_800F1DC7@BATTLE/BATTLE.PRG, 146C.c:367)
+// decomp: D_800F1DC7 (D_800F1DC7@BATTLE/BATTLE.PRG,
+// src/BATTLE/BATTLE.PRG/146C.c:367)
 extern std::uint8_t screenWeatherFade;
 }  // namespace VS::Field

@@ -126,7 +126,8 @@ GimmickReactionResult SquashReaction(GimmickReactionState state,
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800B101C (44F14.c:1919), 236 MIPS words.
+// decomp: BATTLE.PRG func_800B101C (src/BATTLE/BATTLE.PRG/44F14.c:1919), 236
+// MIPS words.
 GimmickReactionResult UpdateGimmickReactionAnimation(
     const GimmickReactionTables& tables, GimmickReactionHost& host) {
   const auto state = host.State();

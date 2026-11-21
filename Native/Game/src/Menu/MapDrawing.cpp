@@ -193,7 +193,8 @@ struct RoomDraw {
   }
 };
 
-// decomp: MENU5.PRG _renderRoom (4D8.c:1132-1145): the vertex pass.
+// decomp: MENU5.PRG renderRoom (src/MENU/MENU5.PRG/4D8.c:1137-1150; was
+// _renderRoom): the vertex pass.
 [[nodiscard]] bool ProjectVertices(RoomDrawHost& host,
                                    std::span<const std::byte> room,
                                    const Section& vertices,
@@ -218,8 +219,8 @@ struct RoomDraw {
   return true;
 }
 
-// decomp: MENU5.PRG _renderRoom (4D8.c:1159-1238): the G3 and G4 fills, each
-// at the farthest of its corners.
+// decomp: MENU5.PRG renderRoom (src/MENU/MENU5.PRG/4D8.c:1164-1243; was
+// _renderRoom): the G3 and G4 fills, each at the farthest of its corners.
 void DrawFills(const RoomDraw& draw, const RoomLayout& layout,
                const Rgb& fill) {
   for (std::size_t index = 0; index < layout.triangles.count; ++index) {
@@ -260,9 +261,9 @@ void DrawFills(const RoomDraw& draw, const RoomLayout& layout,
   return first - 1 < second ? second - 1 : first - 1;
 }
 
-// decomp: MENU5.PRG _renderRoom (4D8.c:1240-1339): each outline as four
-// semi-transparent glow lines a pixel left, up, right and down, then the
-// core line, brighter in the current room.
+// decomp: MENU5.PRG renderRoom (src/MENU/MENU5.PRG/4D8.c:1117-1514; was
+// _renderRoom): each outline as four semi-transparent glow lines a pixel left,
+// up, right and down, then the core line, brighter in the current room.
 void DrawOutlines(const RoomDraw& draw, const RoomLayout& layout) {
   constexpr std::array<std::array<std::int32_t, 2>, kQuadCorners> kGlowOffsets{
       {{-1, 0}, {0, -1}, {1, 0}, {0, 1}}};
@@ -290,7 +291,8 @@ void DrawOutlines(const RoomDraw& draw, const RoomLayout& layout) {
   }
 }
 
-// decomp: MENU5.PRG _renderRoom (4D8.c:1341-1377): the dim edges.
+// decomp: MENU5.PRG renderRoom (src/MENU/MENU5.PRG/4D8.c:1117-1514; was
+// _renderRoom): the dim edges.
 void DrawDimEdges(const RoomDraw& draw, const RoomLayout& layout) {
   const Rgb& color = draw.IsCurrent() ? kCurrentDimEdge : kOtherDimEdge;
   for (std::size_t index = 0; index < layout.dim_edges.count; ++index) {
@@ -340,9 +342,9 @@ struct MarkerKinds {
   return otherwise;
 }
 
-// decomp: MENU5.PRG _renderRoom (4D8.c:1445-1472): one of the offered
-// kinds, cycling every 32 frames. A negative frame counter picks none,
-// where the original indexes before its array.
+// decomp: MENU5.PRG renderRoom (src/MENU/MENU5.PRG/4D8.c:1117-1514; was
+// _renderRoom): one of the offered kinds, cycling every 32 frames. A negative
+// frame counter picks none, where the original indexes before its array.
 void DrawOfferedKind(const RoomDraw& draw, const MarkerKinds& offered,
                      const ProjectedVertex& row) {
   const RoomContext& context = draw.context;
@@ -376,8 +378,8 @@ void DrawOfferedKind(const RoomDraw& draw, const MarkerKinds& offered,
   }
 }
 
-// decomp: MENU5.PRG _renderRoom (4D8.c:1387-1497): one marker. A shown door
-// state draws its own icon and no cross.
+// decomp: MENU5.PRG renderRoom (src/MENU/MENU5.PRG/4D8.c:1117-1514; was
+// _renderRoom): one marker. A shown door state draws its own icon and no cross.
 void DrawMarker(const RoomDraw& draw, std::size_t marker, const Entry& entry) {
   const auto [vertex, label_id, flags, state_id] = entry;
   const ProjectedVertex& row = draw.Row(vertex);
@@ -471,8 +473,8 @@ void StepSlide(ControlsHost& host, ControlsState& state) {
   }
 }
 
-// decomp: MENU5.PRG _drawUIControls (4D8.c:2032-2148): the buttons and the
-// captions the commands state shades.
+// decomp: MENU5.PRG drawUIControls (src/MENU/MENU5.PRG/4D8.c:1996-2156; was
+// _drawUIControls): the buttons and the captions the commands state shades.
 void DrawLegend(ControlsHost& host, std::int32_t offset,
                 std::int16_t commands_state) {
   constexpr std::array<std::pair<Framework::ButtonIcon, LegendPlace>,
@@ -609,7 +611,8 @@ void DrawLetters(CompassHost& host, const CompassCorners& corners) {
 }
 }  // namespace
 
-// decomp: MENU5.PRG _renderRoom (4D8.c:1112).
+// decomp: MENU5.PRG renderRoom (src/MENU/MENU5.PRG/4D8.c:1117; was
+// _renderRoom).
 RoomDrawResult DrawRoom(RoomDrawHost& host, std::span<const std::byte> room,
                         const RoomContext& context, RoomWorkspace& workspace) {
   const auto layout = LayoutOf(room);
@@ -630,7 +633,7 @@ RoomDrawResult DrawRoom(RoomDrawHost& host, std::span<const std::byte> room,
   return RoomDrawResult::kDrawn;
 }
 
-// decomp: MENU5.PRG _renderMap (4D8.c:1081).
+// decomp: MENU5.PRG renderMap (src/MENU/MENU5.PRG/4D8.c:1086; was _renderMap).
 void DrawVisitedRooms(VisitedRoomsHost& host, std::int32_t geom_x,
                       std::int32_t geom_y, std::span<const MapRoom> rooms) {
   const ScreenOffset centered{.x = WrappingAdd(geom_x, kMapCenter.x),
@@ -646,7 +649,7 @@ void DrawVisitedRooms(VisitedRoomsHost& host, std::int32_t geom_x,
   host.SetScreenOffset(previous);
 }
 
-// decomp: MENU5.PRG renderMapLabels (4D8.c:2450).
+// decomp: MENU5.PRG renderMapLabels (src/MENU/MENU5.PRG/4D8.c:2455).
 bool DrawLabels(LabelDrainHost& host, std::int32_t commands_state, bool hide_ui,
                 std::span<const MapLabel> labels, std::int32_t count) {
   if (commands_state == kHiddenCommandsState || hide_ui) return true;
@@ -665,7 +668,8 @@ bool DrawLabels(LabelDrainHost& host, std::int32_t commands_state, bool hide_ui,
   return count <= 0 || static_cast<std::size_t>(count) <= labels.size();
 }
 
-// decomp: MENU5.PRG _drawUIControlsBackground (4D8.c:1965).
+// decomp: MENU5.PRG drawUIControlsBackground (src/MENU/MENU5.PRG/4D8.c:1970;
+// was _drawUIControlsBackground).
 bool DrawControlBackdrop(BackdropHost& host, std::int32_t x, std::int32_t y,
                          std::int32_t width, std::int32_t height) {
   const std::int32_t last = WrappingSubtract(WrappingAdd(y, height), 1);
@@ -689,7 +693,8 @@ bool DrawControlBackdrop(BackdropHost& host, std::int32_t x, std::int32_t y,
   return true;
 }
 
-// decomp: MENU5.PRG _drawUIControls (4D8.c:1991).
+// decomp: MENU5.PRG drawUIControls (src/MENU/MENU5.PRG/4D8.c:1996; was
+// _drawUIControls).
 bool DrawControls(ControlsHost& host, ControlsState& state,
                   const ControlsFrame& frame) {
   constexpr LegendPlace kCaptionPlace{.x = 28, .y = 18};
@@ -721,7 +726,8 @@ bool DrawControls(ControlsHost& host, ControlsState& state,
   return true;
 }
 
-// decomp: MENU5.PRG _computeRotatedRect (4D8.c:2377).
+// decomp: MENU5.PRG computeRotatedRect (src/MENU/MENU5.PRG/4D8.c:2382; was
+// _computeRotatedRect).
 CompassCorners ComputeCompassCorners(std::int32_t center_x,
                                      std::int32_t center_y, std::int32_t width,
                                      std::int32_t height, std::int32_t sine,
@@ -750,7 +756,8 @@ CompassCorners ComputeCompassCorners(std::int32_t center_x,
   return corners;
 }
 
-// decomp: MENU5.PRG _renderCompass (4D8.c:2272).
+// decomp: MENU5.PRG renderCompass (src/MENU/MENU5.PRG/4D8.c:2277; was
+// _renderCompass).
 CompassCorners DrawCompass(CompassHost& host, std::int32_t x, std::int32_t y,
                            std::int32_t angle, std::int32_t roll) {
   for (std::int32_t tick = 0; tick < kTicks; ++tick) {

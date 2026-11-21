@@ -595,7 +595,8 @@ bool PlaybackLayersValid(const char* operation) {
 }
 }  // namespace
 
-// decomp: SLUS_010.40 func_8001A8D8 (src/SLUS_010.40/25AC.c:4760)
+// decomp: SLUS_010.40 Sound_ProcessAkaoVM (src/SLUS_010.40/25AC.c:4972; was
+// func_8001A8D8)
 void LiveExecuteChannelStep(VS::Audio::SeqChannel* channel, int channel_bit) {
   if (channel == nullptr || VS::Audio::Seq::activeMusicConfig == nullptr) {
     ReportRefusal("ExecuteChannelStep", "no channel or music layer");
@@ -608,7 +609,8 @@ void LiveExecuteChannelStep(VS::Audio::SeqChannel* channel, int channel_bit) {
   host.StoreStep(state);
 }
 
-// decomp: SLUS_010.40 func_80019A58 (src/SLUS_010.40/25AC.c:4287)
+// decomp: SLUS_010.40 Sound_MainLoop (src/SLUS_010.40/25AC.c:4497; was
+// func_80019A58)
 std::int32_t LiveTickPlayback() {
   if (!PlaybackLayersValid("TickPlayback")) return 0;
   LivePlaybackHost host;
@@ -619,7 +621,7 @@ std::int32_t LiveTickPlayback() {
   return cost;
 }
 
-// decomp: SLUS_010.40 func_8001924C (src/SLUS_010.40/25AC.c:4024)
+// decomp: SLUS_010.40 func_8001924C (src/SLUS_010.40/25AC.c:4230)
 void LiveUpdateGlobalSlides() {
   if (!PlaybackLayersValid("UpdateGlobalSlides")) return;
   LivePlaybackHost host;
@@ -629,8 +631,8 @@ void LiveUpdateGlobalSlides() {
   StorePlayback(state);
 }
 
-// decomp: SLUS_010.40 Sound_ClearVoiceFromSchedulerState
-// (src/SLUS_010.40/25AC.c:4970)
+// decomp: SLUS_010.40 Sound_ClearVoiceFromSfxState
+// (src/SLUS_010.40/25AC.c:5184; was Sound_ClearVoiceFromSchedulerState)
 void LiveReleaseSoundEffectVoice(VS::Audio::SeqChannel* channel,
                                  int voice_bit) {
   if (channel == nullptr) {

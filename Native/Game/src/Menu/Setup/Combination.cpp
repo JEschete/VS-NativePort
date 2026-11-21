@@ -1201,7 +1201,8 @@ ArmorRecipe DecodeArmorRecipe(
           .agility = record[kArmorAgilityByte]};
 }
 
-// decomp: MENUC.PRG _setClassAffinities (src/MENU/MENUC.PRG/168.c:4759)
+// decomp: MENUC.PRG setClassAffinities (src/MENU/MENUC.PRG/168.c:4763; was
+// _setClassAffinities)
 void CombineClassOrAffinityValues(const Items::PartClasses& first,
                                   const Items::PartClasses& second,
                                   Items::PartClasses& result,
@@ -1233,7 +1234,8 @@ void CombineClassOrAffinityValues(const Items::PartClasses& first,
   }
 }
 
-// decomp: MENUC.PRG _setTypeValues (src/MENU/MENUC.PRG/168.c:4864)
+// decomp: MENUC.PRG setTypeValues (src/MENU/MENUC.PRG/168.c:4868; was
+// _setTypeValues)
 void CombinePhysicalTypeValues(const Items::PartTypes& first,
                                const Items::PartTypes& second,
                                Items::PartTypes& result,
@@ -1251,7 +1253,8 @@ void CombinePhysicalTypeValues(const Items::PartTypes& first,
   }
 }
 
-// decomp: MENUC.PRG _combineBlades (src/MENU/MENUC.PRG/168.c:4934)
+// decomp: MENUC.PRG combineBlades (src/MENU/MENUC.PRG/168.c:4938; was
+// _combineBlades)
 std::expected<Items::InventoryBlade, std::string> BuildCombinedBlade(
     const Items::InventoryBlade& first, const Items::InventoryBlade& second,
     const RecipeBook& recipes, const MaterialBonuses& bonuses) {
@@ -1298,7 +1301,8 @@ std::expected<Items::InventoryBlade, std::string> BuildCombinedBlade(
   return result;
 }
 
-// decomp: MENUC.PRG _combineShields (src/MENU/MENUC.PRG/168.c:5012)
+// decomp: MENUC.PRG combineShields (src/MENU/MENUC.PRG/168.c:5017; was
+// _combineShields)
 std::expected<Items::InventoryArmor, std::string> BuildCombinedShield(
     const Items::InventoryArmor& first, const Items::InventoryArmor& second,
     const RecipeBook& recipes, const MaterialBonuses& bonuses) {
@@ -1320,7 +1324,8 @@ std::expected<Items::InventoryArmor, std::string> BuildCombinedShield(
   return result;
 }
 
-// decomp: MENUC.PRG _combineArmor (src/MENU/MENUC.PRG/168.c:5061)
+// decomp: MENUC.PRG combineArmor (src/MENU/MENUC.PRG/168.c:5067; was
+// _combineArmor)
 std::expected<Items::InventoryArmor, std::string> BuildCombinedArmor(
     const Items::InventoryArmor& first, const Items::InventoryArmor& second,
     const RecipeBook& recipes, const MaterialBonuses& bonuses) {
@@ -1392,7 +1397,7 @@ std::expected<RecipeBook, std::string> DecodeRecipeFile(
   return book;
 }
 
-// decomp: MENUC.PRG _loadSyd (src/MENU/MENUC.PRG/168.c:2658)
+// decomp: MENUC.PRG loadSyd (src/MENU/MENUC.PRG/168.c:2666; was _loadSyd)
 int LoadCombinationRecipes(Context& context, int id) {
   CombinationState& combination = context.state.combination;
   if (id != 0) {
@@ -1421,7 +1426,7 @@ int LoadCombinationRecipes(Context& context, int id) {
   return 0;
 }
 
-// decomp: MENUC.PRG _setItemRow (src/MENU/MENUC.PRG/168.c:2696)
+// decomp: MENUC.PRG setItemRow (src/MENU/MENUC.PRG/168.c:2704; was _setItemRow)
 MenuRow& SetCombinationResultRow(Context& context, int item_type, int item_id) {
   MenuRow& row = context.host.SetMenuItem(
       kResultRow, item_id == 0
@@ -1431,7 +1436,8 @@ MenuRow& SetCombinationResultRow(Context& context, int item_type, int item_id) {
   return row;
 }
 
-// decomp: MENUC.PRG _initItemRow (src/MENU/MENUC.PRG/168.c:2710)
+// decomp: MENUC.PRG initItemRow (src/MENU/MENUC.PRG/168.c:2718; was
+// _initItemRow)
 MenuRow& AnimateCombinationResult(Context& context, int item_type,
                                   int item_id) {
   MenuRow& row = SetCombinationResultRow(context, item_type, item_id);
@@ -1441,7 +1447,8 @@ MenuRow& AnimateCombinationResult(Context& context, int item_type,
   return row;
 }
 
-// decomp: MENUC.PRG _setCombineBladeUi (src/MENU/MENUC.PRG/168.c:2735)
+// decomp: MENUC.PRG setCombineBladeUi (src/MENU/MENUC.PRG/168.c:2743; was
+// _setCombineBladeUi)
 void PreviewBladeCombination(Context& context, int selection) {
   const int mask = BuildPreview<BladeKind>(context);
   const Items::InventoryBlade& blade = context.state.combination.blade;
@@ -1462,12 +1469,14 @@ void PreviewBladeCombination(Context& context, int selection) {
   }
 }
 
-// decomp: MENUC.PRG _selectBlade (src/MENU/MENUC.PRG/168.c:2801)
+// decomp: MENUC.PRG selectBlade (src/MENU/MENUC.PRG/168.c:2809; was
+// _selectBlade)
 int SelectCombinationBlade(Context& context, int slot) {
   return SelectIngredient<BladeKind>(context, slot);
 }
 
-// decomp: MENUC.PRG _setBladeMenuItem (src/MENU/MENUC.PRG/168.c:2919)
+// decomp: MENUC.PRG setBladeMenuItem (src/MENU/MENUC.PRG/168.c:2927; was
+// _setBladeMenuItem)
 void SetCombinationBladeRow(Context& context, MenuRow& row,
                             const Items::InventoryBlade& blade) {
   row.row_icon = blade.category;
@@ -1484,19 +1493,22 @@ void SetCombinationBladeRow(Context& context, MenuRow& row,
   }
 }
 
-// decomp: MENUC.PRG _combineBladeMenu (src/MENU/MENUC.PRG/168.c:2939)
+// decomp: MENUC.PRG combineBladeMenu (src/MENU/MENUC.PRG/168.c:2946; was
+// _combineBladeMenu)
 int UpdateBladeCombination(Context& context, bool initialize) {
   return UpdateCombinationMenu<BladeKind>(context, initialize);
 }
 
-// decomp: MENUC.PRG _setShieldUi (src/MENU/MENUC.PRG/168.c:3317)
+// decomp: MENUC.PRG setShieldUi (src/MENU/MENUC.PRG/168.c:3324; was
+// _setShieldUi)
 void SetShieldBaseStats(Context& context,
                         const Items::InventoryShield& shield) {
   context.host.ResetEquipmentStats();
   ShowArmorValues(context, shield.base, kShieldSubtype);
 }
 
-// decomp: MENUC.PRG _initCombineShields (src/MENU/MENUC.PRG/168.c:3353)
+// decomp: MENUC.PRG initCombineShields (src/MENU/MENUC.PRG/168.c:3360; was
+// _initCombineShields)
 void PreviewShieldCombination(Context& context, int selection) {
   const int mask = BuildPreview<ShieldKind>(context);
   const Items::InventoryShield& shield = context.state.combination.shield;
@@ -1515,7 +1527,8 @@ void PreviewShieldCombination(Context& context, int selection) {
   }
 }
 
-// decomp: MENUC.PRG _initUiShield (src/MENU/MENUC.PRG/168.c:3404)
+// decomp: MENUC.PRG initUiShield (src/MENU/MENUC.PRG/168.c:3411; was
+// _initUiShield)
 Framework::ItemRowText SetShieldRowWithoutGems(
     Context& context, const Items::InventoryShield& shield,
     std::span<std::uint8_t> buffer) {
@@ -1525,12 +1538,14 @@ Framework::ItemRowText SetShieldRowWithoutGems(
                                              buffer);
 }
 
-// decomp: MENUC.PRG _selectShields (src/MENU/MENUC.PRG/168.c:3421)
+// decomp: MENUC.PRG selectShields (src/MENU/MENUC.PRG/168.c:3428; was
+// _selectShields)
 int SelectCombinationShield(Context& context, int slot) {
   return SelectIngredient<ShieldKind>(context, slot);
 }
 
-// decomp: MENUC.PRG _setShieldMenuItem (src/MENU/MENUC.PRG/168.c:3548)
+// decomp: MENUC.PRG setShieldMenuItem (src/MENU/MENUC.PRG/168.c:3555; was
+// _setShieldMenuItem)
 void SetCombinationShieldRow(MenuRow& row,
                              const Items::InventoryShield& shield) {
   row.row_icon = kShieldRowIcon;
@@ -1538,12 +1553,14 @@ void SetCombinationShieldRow(MenuRow& row,
   row.outset_icon = shield.is_equipped != 0 ? 1 : 0;
 }
 
-// decomp: MENUC.PRG _combineShieldMenu (src/MENU/MENUC.PRG/168.c:3562)
+// decomp: MENUC.PRG combineShieldMenu (src/MENU/MENUC.PRG/168.c:3568; was
+// _combineShieldMenu)
 int UpdateShieldCombination(Context& context, bool initialize) {
   return UpdateCombinationMenu<ShieldKind>(context, initialize);
 }
 
-// decomp: MENUC.PRG _initCombineArmor (src/MENU/MENUC.PRG/168.c:3947)
+// decomp: MENUC.PRG initCombineArmor (src/MENU/MENUC.PRG/168.c:3952; was
+// _initCombineArmor)
 void PreviewArmorCombination(Context& context, int selection) {
   const int mask = BuildPreview<ArmorKind>(context);
   const Items::InventoryArmor& armor = context.state.combination.armor;
@@ -1558,24 +1575,27 @@ void PreviewArmorCombination(Context& context, int selection) {
   }
 }
 
-// decomp: MENUC.PRG _initUiArmor (src/MENU/MENUC.PRG/168.c:4019)
+// decomp: MENUC.PRG initUiArmor (src/MENU/MENUC.PRG/168.c:4024; was
+// _initUiArmor)
 int SelectCombinationArmor(Context& context, int slot) {
   return SelectIngredient<ArmorKind>(context, slot);
 }
 
-// decomp: MENUC.PRG _setArmorMenuItem (src/MENU/MENUC.PRG/168.c:4126)
+// decomp: MENUC.PRG setArmorMenuItem (src/MENU/MENUC.PRG/168.c:4131; was
+// _setArmorMenuItem)
 void SetCombinationArmorRow(MenuRow& row, const Items::InventoryArmor& armor) {
   row.row_icon = static_cast<std::uint8_t>(armor.category + kArmorRowIconBase);
   row.material = static_cast<std::uint8_t>(armor.material);
   row.outset_icon = armor.limb != 0 ? 1 : 0;
 }
 
-// decomp: MENUC.PRG _combineArmorMenu (src/MENU/MENUC.PRG/168.c:4140)
+// decomp: MENUC.PRG combineArmorMenu (src/MENU/MENUC.PRG/168.c:4144; was
+// _combineArmorMenu)
 int UpdateArmorCombination(Context& context, bool initialize) {
   return UpdateCombinationMenu<ArmorKind>(context, initialize);
 }
 
-// decomp: MENUC.PRG _countItems (src/MENU/MENUC.PRG/168.c:4428)
+// decomp: MENUC.PRG countItems (src/MENU/MENUC.PRG/168.c:4432; was _countItems)
 int CountCombinationIngredients(Context& context, int category) {
   const Items::InventoryContents& inventory = context.host.Inventory();
   switch (category) {
@@ -1595,7 +1615,8 @@ int CountCombinationIngredients(Context& context, int category) {
   }
 }
 
-// decomp: MENUC.PRG _combineTopMenu (src/MENU/MENUC.PRG/168.c:4455)
+// decomp: MENUC.PRG combineTopMenu (src/MENU/MENUC.PRG/168.c:4459; was
+// _combineTopMenu)
 int UpdateCombinationCategory(Context& context, bool initialize) {
   CategoryState& menu = context.state.combination.category;
   if (initialize) {

@@ -141,7 +141,7 @@ std::optional<std::optional<std::uint32_t>> EmbeddedProgram(
 }
 }  // namespace
 
-// decomp: SLUS_010.40 SoundVM_A0_FinishChannel (src/SLUS_010.40/25AC.c:4989)
+// decomp: SLUS_010.40 SoundVM_A0_FinishChannel (src/SLUS_010.40/25AC.c:5203)
 ControlResult FinishChannel(ControlState& state, ProgramData /*program*/,
                             std::uint32_t voice_bit) {
   if (state.kind == Driver::ChannelKind::kMusic) {
@@ -166,7 +166,8 @@ ControlResult FinishChannel(ControlState& state, ProgramData /*program*/,
   return {};
 }
 
-// decomp: SLUS_010.40 SoundVM_FE1F_unk (src/SLUS_010.40/25AC.c:5011)
+// decomp: SLUS_010.40 SoundVM_FE1F_FinishIfMusicQueued
+// (src/SLUS_010.40/25AC.c:5225; was SoundVM_FE1F_unk)
 ControlResult FinishChannelOnReplacement(ControlState& state,
                                          ProgramData program,
                                          std::uint32_t voice_bit) {
@@ -176,22 +177,22 @@ ControlResult FinishChannelOnReplacement(ControlState& state,
   return {};
 }
 
-// decomp: SLUS_010.40 SoundVM_XX_Unimplemented (src/SLUS_010.40/25AC.c:6233)
+// decomp: SLUS_010.40 SoundVM_XX_Unimplemented (src/SLUS_010.40/25AC.c:6373)
 ControlResult StopOnInvalidInstruction(ControlState& state, ProgramData program,
                                        std::uint32_t voice_bit) {
   return FinishChannel(state, program, voice_bit);
 }
 
-// decomp: SLUS_010.40 SoundVM_nop (src/SLUS_010.40/25AC.c:5227)
-// decomp: SLUS_010.40 SoundVM_CD_DEBUG (src/SLUS_010.40/25AC.c:5758)
-// decomp: SLUS_010.40 SoundVM_D1_DEBUG (src/SLUS_010.40/25AC.c:5771)
+// decomp: SLUS_010.40 SoundVM_nop (src/SLUS_010.40/25AC.c:5435)
+// decomp: SLUS_010.40 SoundVM_CD_DEBUG (src/SLUS_010.40/25AC.c:5927)
+// decomp: SLUS_010.40 SoundVM_D1_DEBUG (src/SLUS_010.40/25AC.c:5937)
 ControlResult IgnoreInstruction(ControlState& /*state*/,
                                 ProgramData /*program*/,
                                 std::uint32_t /*voice_bit*/) {
   return {};
 }
 
-// decomp: SLUS_010.40 SoundVM_FE00_SetTempo (src/SLUS_010.40/25AC.c:5018)
+// decomp: SLUS_010.40 SoundVM_FE00_SetTempo (src/SLUS_010.40/25AC.c:5232)
 ControlResult SetTempo(ControlState& state, ProgramData program,
                        std::uint32_t /*voice_bit*/) {
   const auto operands = ReadOperands(state, program, 2);
@@ -202,7 +203,7 @@ ControlResult SetTempo(ControlState& state, ProgramData program,
   return {};
 }
 
-// decomp: SLUS_010.40 SoundVM_FE01_SetTempoSlide (src/SLUS_010.40/25AC.c:5027)
+// decomp: SLUS_010.40 SoundVM_FE01_SetTempoSlide (src/SLUS_010.40/25AC.c:5240)
 ControlResult SlideTempo(ControlState& state, ProgramData program,
                          std::uint32_t /*voice_bit*/) {
   const auto operands = ReadOperands(state, program, kSlideOperands);
@@ -220,7 +221,7 @@ ControlResult SlideTempo(ControlState& state, ProgramData program,
 }
 
 // decomp: SLUS_010.40 SoundVM_FE02_SetMasterReverbDepth
-// (src/SLUS_010.40/25AC.c:5048)
+// (src/SLUS_010.40/25AC.c:5261)
 ControlResult SetReverbDepth(ControlState& state, ProgramData program,
                              std::uint32_t /*voice_bit*/) {
   const auto operands = ReadOperands(state, program, 2);
@@ -234,7 +235,7 @@ ControlResult SetReverbDepth(ControlState& state, ProgramData program,
 }
 
 // decomp: SLUS_010.40 SoundVM_FE03_SetMasterReverbSlide
-// (src/SLUS_010.40/25AC.c:5063)
+// (src/SLUS_010.40/25AC.c:5276)
 ControlResult SlideReverbDepth(ControlState& state, ProgramData program,
                                std::uint32_t /*voice_bit*/) {
   const auto operands = ReadOperands(state, program, kSlideOperands);
@@ -252,7 +253,7 @@ ControlResult SlideReverbDepth(ControlState& state, ProgramData program,
 }
 
 // decomp: SLUS_010.40 SoundVM_FE06_JumpRelativeOffset
-// (src/SLUS_010.40/25AC.c:5085)
+// (src/SLUS_010.40/25AC.c:5299)
 ControlResult JumpRelative(ControlState& state, ProgramData program,
                            std::uint32_t /*voice_bit*/) {
   const auto operands = ReadOperands(state, program, kRelativeJumpOperands);
@@ -265,7 +266,7 @@ ControlResult JumpRelative(ControlState& state, ProgramData program,
 }
 
 // decomp: SLUS_010.40 SoundVM_FE07_JumpRelativeWithThreshold
-// (src/SLUS_010.40/25AC.c:5092)
+// (src/SLUS_010.40/25AC.c:5306)
 ControlResult JumpAtThreshold(ControlState& state, ProgramData program,
                               std::uint32_t /*voice_bit*/) {
   const auto operands = ReadOperands(state, program, kRelativeJumpOperands + 1);
@@ -282,7 +283,7 @@ ControlResult JumpAtThreshold(ControlState& state, ProgramData program,
 }
 
 // decomp: SLUS_010.40 SoundVM_FE0E_CallRelativeOffset
-// (src/SLUS_010.40/25AC.c:5111)
+// (src/SLUS_010.40/25AC.c:5325)
 ControlResult CallRelative(ControlState& state, ProgramData program,
                            std::uint32_t /*voice_bit*/) {
   const auto operands = ReadOperands(state, program, kRelativeJumpOperands);
@@ -295,7 +296,7 @@ ControlResult CallRelative(ControlState& state, ProgramData program,
   return {};
 }
 
-// decomp: SLUS_010.40 SoundVM_FE0F_Return (src/SLUS_010.40/25AC.c:5119)
+// decomp: SLUS_010.40 SoundVM_FE0F_Return (src/SLUS_010.40/25AC.c:5333)
 ControlResult ReturnFromCall(ControlState& state, ProgramData program,
                              std::uint32_t /*voice_bit*/) {
   if (!Inside(program, state.program.return_address)) {
@@ -305,7 +306,7 @@ ControlResult ReturnFromCall(ControlState& state, ProgramData program,
   return {};
 }
 
-// decomp: SLUS_010.40 SoundVM_FE0C_unk (src/SLUS_010.40/25AC.c:5221)
+// decomp: SLUS_010.40 SoundVM_FE0C_unk (src/SLUS_010.40/25AC.c:5430)
 ControlResult SetSequenceControlValue(ControlState& state, ProgramData program,
                                       std::uint32_t /*voice_bit*/) {
   const auto operands = ReadOperands(state, program, 1);
@@ -315,7 +316,8 @@ ControlResult SetSequenceControlValue(ControlState& state, ProgramData program,
   return {};
 }
 
-// decomp: SLUS_010.40 SoundVM_FE10_unk (src/SLUS_010.40/25AC.c:5892)
+// decomp: SLUS_010.40 SoundVM_FE10_SetVoiceAllocStart
+// (src/SLUS_010.40/25AC.c:6047; was SoundVM_FE10_unk)
 ControlResult SetVoiceAllocationStart(ControlState& state, ProgramData program,
                                       std::uint32_t /*voice_bit*/) {
   const auto operands = ReadOperands(state, program, 1);
@@ -325,7 +327,8 @@ ControlResult SetVoiceAllocationStart(ControlState& state, ProgramData program,
   return {};
 }
 
-// decomp: SLUS_010.40 SoundVM_FE11_unk (src/SLUS_010.40/25AC.c:5898)
+// decomp: SLUS_010.40 SoundVM_FE11_ResetVoiceAllocStart
+// (src/SLUS_010.40/25AC.c:6053; was SoundVM_FE11_unk)
 ControlResult ResetVoiceAllocationStart(ControlState& state,
                                         ProgramData /*program*/,
                                         std::uint32_t /*voice_bit*/) {
@@ -333,7 +336,7 @@ ControlResult ResetVoiceAllocationStart(ControlState& state,
   return {};
 }
 
-// decomp: SLUS_010.40 SoundVM_C8_LoopPoint (src/SLUS_010.40/25AC.c:5904)
+// decomp: SLUS_010.40 SoundVM_C8_LoopPoint (src/SLUS_010.40/25AC.c:6059)
 ControlResult PushLoop(ControlState& state, ProgramData /*program*/,
                        std::uint32_t /*voice_bit*/) {
   ProgramState& program = state.program;
@@ -346,7 +349,7 @@ ControlResult PushLoop(ControlState& state, ProgramData /*program*/,
   return {};
 }
 
-// decomp: SLUS_010.40 SoundVM_C9_LoopN (src/SLUS_010.40/25AC.c:5914)
+// decomp: SLUS_010.40 SoundVM_C9_LoopN (src/SLUS_010.40/25AC.c:6068)
 ControlResult RepeatLoop(ControlState& state, ProgramData program,
                          std::uint32_t /*voice_bit*/) {
   const auto operands = ReadOperands(state, program, 1);
@@ -365,20 +368,20 @@ ControlResult RepeatLoop(ControlState& state, ProgramData program,
 }
 
 // decomp: SLUS_010.40 SoundVM_FE08_JumpOnNthLoopPass
-// (src/SLUS_010.40/25AC.c:5941)
+// (src/SLUS_010.40/25AC.c:6094)
 ControlResult JumpOnLoopPass(ControlState& state, ProgramData program,
                              std::uint32_t /*voice_bit*/) {
   return JumpOnPass(state, program, false);
 }
 
 // decomp: SLUS_010.40 SoundVM_FE09_JumpAndPopStackOnNthLoopPass
-// (src/SLUS_010.40/25AC.c:5969)
+// (src/SLUS_010.40/25AC.c:6122)
 ControlResult ExitLoopOnPass(ControlState& state, ProgramData program,
                              std::uint32_t /*voice_bit*/) {
   return JumpOnPass(state, program, true);
 }
 
-// decomp: SLUS_010.40 SoundVM_CA_LoopInf (src/SLUS_010.40/25AC.c:5992)
+// decomp: SLUS_010.40 SoundVM_CA_LoopInf (src/SLUS_010.40/25AC.c:6145)
 ControlResult RepeatLoopForever(ControlState& state, ProgramData program,
                                 std::uint32_t /*voice_bit*/) {
   ProgramState& position = state.program;
@@ -387,7 +390,7 @@ ControlResult RepeatLoopForever(ControlState& state, ProgramData program,
   return ReturnToLoopStart(position, program, iterations);
 }
 
-// decomp: SLUS_010.40 SoundVM_FE15_unk (src/SLUS_010.40/25AC.c:6050)
+// decomp: SLUS_010.40 SoundVM_FE15_unk (src/SLUS_010.40/25AC.c:6199)
 ControlResult SetTimerDivisors(ControlState& state, ProgramData program,
                                std::uint32_t /*voice_bit*/) {
   const auto operands = ReadOperands(state, program, 2);
@@ -401,7 +404,7 @@ ControlResult SetTimerDivisors(ControlState& state, ProgramData program,
   return {};
 }
 
-// decomp: SLUS_010.40 SoundVM_FE16_unk (src/SLUS_010.40/25AC.c:6059)
+// decomp: SLUS_010.40 SoundVM_FE16_unk (src/SLUS_010.40/25AC.c:6207)
 ControlResult SetTimerCount(ControlState& state, ProgramData program,
                             std::uint32_t /*voice_bit*/) {
   const auto operands = ReadOperands(state, program, 2);
@@ -411,9 +414,10 @@ ControlResult SetTimerCount(ControlState& state, ProgramData program,
   return {};
 }
 
-// decomp: SLUS_010.40 SoundVM_FE0B_unk (src/SLUS_010.40/25AC.c:6162)
-// The program counter stays on the operands: the caller starts the programs
-// and then advances it past their four bytes, as the original does.
+// decomp: SLUS_010.40 SoundVM_FE0B_PlaySfxProgram (src/SLUS_010.40/25AC.c:6307;
+// was SoundVM_FE0B_unk) The program counter stays on the operands: the caller
+// starts the programs and then advances it past their four bytes, as the
+// original does.
 ControlResult PlayEmbeddedSoundEffect(ControlState& state, ProgramData program,
                                       std::uint32_t /*voice_bit*/) {
   const auto operands = ReadOperands(state, program, kEmbeddedOperands);
@@ -431,7 +435,8 @@ ControlResult PlayEmbeddedSoundEffect(ControlState& state, ProgramData program,
           static_cast<std::uint32_t>(state.volume >> kEmbeddedVolumeShift)}};
 }
 
-// decomp: SLUS_010.40 SoundVM_FE1C_unk (src/SLUS_010.40/25AC.c:6202)
+// decomp: SLUS_010.40 SoundVM_FE1C_SetKeymap (src/SLUS_010.40/25AC.c:6345; was
+// SoundVM_FE1C_unk)
 ControlResult SelectNoteRemapTable(ControlState& state, ProgramData program,
                                    std::uint32_t /*voice_bit*/) {
   const auto operands = ReadOperands(state, program, 1);
@@ -442,7 +447,7 @@ ControlResult SelectNoteRemapTable(ControlState& state, ProgramData program,
 }
 
 // decomp: SLUS_010.40 SoundVM_FE1D_MarkVoicesKeyed
-// (src/SLUS_010.40/25AC.c:6209)
+// (src/SLUS_010.40/25AC.c:6351)
 ControlResult MarkChannelKeyed(ControlState& state, ProgramData /*program*/,
                                std::uint32_t voice_bit) {
   state.layer.keyed_voices |= voice_bit;
@@ -450,7 +455,7 @@ ControlResult MarkChannelKeyed(ControlState& state, ProgramData /*program*/,
 }
 
 // decomp: SLUS_010.40 SoundVM_FE1E_ClearVoicesKeyed
-// (src/SLUS_010.40/25AC.c:6215)
+// (src/SLUS_010.40/25AC.c:6356)
 ControlResult ClearChannelKeyed(ControlState& state, ProgramData /*program*/,
                                 std::uint32_t voice_bit) {
   state.layer.keyed_voices &= ~voice_bit;

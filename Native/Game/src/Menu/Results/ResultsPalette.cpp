@@ -31,8 +31,8 @@ constexpr std::int32_t kMaskBit = 0x8000;
 }
 }  // namespace
 
-// decomp: MENUF.PRG _pulseTimeAttackEnd (src/MENU/MENUF.PRG/3B8.c:1256),
-// 0x80104914
+// decomp: MENUF.PRG pulseTimeAttackEnd (src/MENU/MENUF.PRG/3B8.c:1269; was
+// _pulseTimeAttackEnd), 0x80104914
 void PulseTimeAttackClut(std::span<std::uint16_t, kResultsClutWords> clut,
                          std::int32_t blend_weight, ResultsClutTarget& target) {
   PulseResultsClut(clut,
@@ -42,8 +42,8 @@ void PulseTimeAttackClut(std::span<std::uint16_t, kResultsClutWords> clut,
                    blend_weight, target);
 }
 
-// decomp: MENUF.PRG _pulseCubePuzzleEnd (src/MENU/MENUF.PRG/3B8.c:1294),
-// 0x80104A50
+// decomp: MENUF.PRG pulseCubePuzzleEnd (src/MENU/MENUF.PRG/3B8.c:1307; was
+// _pulseCubePuzzleEnd), 0x80104A50
 void PulseCubePuzzleClut(std::span<std::uint16_t, kResultsClutWords> clut,
                          std::int32_t blend_weight, ResultsClutTarget& target) {
   PulseResultsClut(clut, kCubePuzzlePulseRows, blend_weight, target);

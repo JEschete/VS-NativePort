@@ -13,14 +13,14 @@
 #include "Effects/TrailEmitter.hpp"
 
 // The records, services and arithmetic shared by the five- and nine-sample
-// trail stages (decomp src/EFFECT/trails5.h and trails9.h, which differ only
-// in their history length). A trail is a four-point spline from an origin to
-// an attraction target; it draws as a ribbon through its five (or nine)
-// newest samples of that spline. TrailEmitter.hpp places the origins and runs
-// the emitter's lifecycle; the target, control, init, update and render stages
-// (TrailTarget.cpp ... TrailRender.cpp) work on the value records here. The
-// effect package, the emitter scratch, the GTE, the texture animation and the
-// frame's ordering table are reached through TrailHost or TrailNineHost
+// trail stages (decomp src/EFFECT/trails5.h and src/EFFECT/trails9.h, which
+// differ only in their history length). A trail is a four-point spline from an
+// origin to an attraction target; it draws as a ribbon through its five (or
+// nine) newest samples of that spline. TrailEmitter.hpp places the origins and
+// runs the emitter's lifecycle; the target, control, init, update and render
+// stages (TrailTarget.cpp ... TrailRender.cpp) work on the value records here.
+// The effect package, the emitter scratch, the GTE, the texture animation and
+// the frame's ordering table are reached through TrailHost or TrailNineHost
 // (TrailsLive.hpp binds them).
 namespace VS::Effects::Templates {
 inline constexpr std::size_t kTrailSplinePoints = 4;

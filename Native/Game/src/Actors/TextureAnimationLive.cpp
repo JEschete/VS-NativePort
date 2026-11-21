@@ -219,7 +219,7 @@ void StoreScrolling(const TextureScrolling& scrolling,
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800AAD4C (src/BATTLE/BATTLE.PRG/40564.c:1301)
+// decomp: BATTLE.PRG func_800AAD4C (src/BATTLE/BATTLE.PRG/40564.c:1236)
 int SetLiveActorTextureAnimation(int actor_id, int channel, int timeline,
                                  int command) {
   constexpr const char* kOperation = "SetActorTextureAnimation";
@@ -243,7 +243,7 @@ int SetLiveActorTextureAnimation(int actor_id, int channel, int timeline,
   return 0;
 }
 
-// decomp: BATTLE.PRG func_800AAE9C (src/BATTLE/BATTLE.PRG/40564.c:1357)
+// decomp: BATTLE.PRG func_800AAE9C (src/BATTLE/BATTLE.PRG/40564.c:1292)
 void UpdateLiveActorTextureAnimations(VS::Actors::ActorRecord* actor) {
   if (actor == nullptr) {
     WarnActorRefused("UpdateActorTextureAnimations", "null actor");
@@ -321,7 +321,7 @@ void UploadLiveActorTextureFrame(VS::Actors::ActorRecord* actor, int channel,
   QueueMove(move);
 }
 
-// decomp: BATTLE.PRG func_800AB2AC (src/BATTLE/BATTLE.PRG/40564.c:1486)
+// decomp: BATTLE.PRG func_800AB2AC (src/BATTLE/BATTLE.PRG/40564.c:1421)
 void ResetLiveActorTextureFrames(int bank_index) {
   const int shared_bank = VS::Actors::sharedSequenceBankIndex;
   // Another bank restarts nothing; the original read no rows for it.
@@ -338,7 +338,7 @@ void ResetLiveActorTextureFrames(int bank_index) {
   }
 }
 
-// decomp: BATTLE.PRG func_800AB358 (src/BATTLE/BATTLE.PRG/40564.c:1502)
+// decomp: BATTLE.PRG func_800AB358 (src/BATTLE/BATTLE.PRG/40564.c:1437)
 void UploadLiveActorTextureOverlay(int actor_id, TextureOverlayCopy copy) {
   constexpr const char* kOperation = "UploadActorTextureOverlay";
   if (SheetPage() == 0) return;

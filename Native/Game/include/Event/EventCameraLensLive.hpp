@@ -22,15 +22,16 @@ struct ShakeOscillator;
 // Restores the cold-boot state (all zero) at a session boundary.
 void ResetLiveEventCameraScratch() noexcept;
 
-// decomp: BATTLE.PRG func_800BDC9C (F01232, 4A0A8.c:3862), opcodes 0xEA-0xEC
-// and 0xEF are bound by VS::Event::CommandCameraLensOrShakeOpcode
+// decomp: BATTLE.PRG vs_battle_script_EA_EB_EC_EE_EF_camera (F01232,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:4512; was func_800BDC9C), opcodes 0xEA-0xEC and
+// 0xEF are bound by VS::Event::CommandCameraLensOrShakeOpcode
 // (ScriptControlOpcodes.hpp).
 
-// decomp: BATTLE.PRG func_800BDF6C (F01233, 4A0A8.c:3927)
+// decomp: BATTLE.PRG func_800BDF6C (F01233, src/BATTLE/BATTLE.PRG/4DEA8.c:4577)
 void UpdateEventLensTweenEntry(LensTween* lens_tween);
-// decomp: BATTLE.PRG func_800BE01C (F01234, 4A0A8.c:3945)
+// decomp: BATTLE.PRG func_800BE01C (F01234, src/BATTLE/BATTLE.PRG/4DEA8.c:4595)
 // One of CameraState::shake_oscillators (workspace offsets 0x1A6 and 0x1B2).
 int UpdateEventShakeOscillatorEntry(ShakeOscillator* oscillator);
-// decomp: BATTLE.PRG func_800BE180 (F01235, 4A0A8.c:3983)
+// decomp: BATTLE.PRG func_800BE180 (F01235, src/BATTLE/BATTLE.PRG/4DEA8.c:4633)
 void UpdateEventCameraShakeEntry();
 }  // namespace VS::Event

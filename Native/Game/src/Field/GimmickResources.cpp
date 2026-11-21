@@ -11,7 +11,8 @@
 #include "Core/Math/ScalarMath.hpp"
 
 namespace VS::Field {
-// decomp: BATTLE.PRG func_80099900 (30DB0.c:273),24MIPS LB/LBU/IDmask/store.
+// decomp: BATTLE.PRG func_80099900 (src/BATTLE/BATTLE.PRG/30DB0.c:259),24MIPS
+// LB/LBU/IDmask/store.
 std::optional<std::size_t> FindSharedGimmickModel(
     std::span<const GimmickResourceSlot> slots, std::int8_t excluded_slot,
     std::uint8_t requested_kind) {
@@ -93,7 +94,8 @@ bool AdjustGimmickStack(std::size_t slot, GimmickCreationState& state,
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_8009998C (30DB0.c:290),248MIPS publish/init/stack.
+// decomp: BATTLE.PRG func_8009998C (src/BATTLE/BATTLE.PRG/30DB0.c:290),248MIPS
+// publish/init/stack.
 int CreateGimmickInstance(Content::ActorAssetRequest& request,
                           GimmickCreationHost& host) {
   if (request.target_slot < 0) return Content::kAssetRefused;
@@ -136,7 +138,7 @@ int CreateGimmickInstance(Content::ActorAssetRequest& request,
   return Content::kAssetDone;
 }
 
-// decomp: BATTLE.PRG func_80099D6C (30DB0.c:399),68MIPS
+// decomp: BATTLE.PRG func_80099D6C (src/BATTLE/BATTLE.PRG/30DB0.c:399),68MIPS
 // shared/free/remove/clear.
 int ReleaseGimmickInstance(std::int32_t slot,
                            std::span<const GimmickResourceSlot> slots,
@@ -160,7 +162,8 @@ int ReleaseGimmickInstance(std::int32_t slot,
   return 0;
 }
 
-// decomp: BATTLE.PRG func_80099960 (30DB0.c:288),11MIPS copies0xE0bytes.
+// decomp: BATTLE.PRG func_80099960 (src/BATTLE/BATTLE.PRG/30DB0.c:274),11MIPS
+// copies0xE0bytes.
 bool SetGimmickPaletteTable(GimmickPaletteTable& table,
                             std::span<const std::byte> palette_bytes) {
   if (palette_bytes.size() < sizeof(table)) return false;

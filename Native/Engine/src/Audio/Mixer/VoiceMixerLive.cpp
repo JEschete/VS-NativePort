@@ -468,7 +468,7 @@ void ModulateLiveChannel(const char* operation, VS::Audio::SeqChannel* channel,
 }  // namespace
 
 // decomp: SLUS_010.40 Sound_UpdateSlidesAndDelays
-// (src/SLUS_010.40/25AC.c:1400)
+// (src/SLUS_010.40/25AC.c:1521)
 void LiveUpdateChannelSlidesAndDelays(VS::Audio::SeqChannel* channel,
                                       unsigned channel_bit,
                                       Driver::ChannelKind kind) {
@@ -493,19 +493,20 @@ void LiveUpdateChannelSlidesAndDelays(VS::Audio::SeqChannel* channel,
   VS::Audio::Driver::controlLatches.update_flags = state.driver_update_flags;
 }
 
-// decomp: SLUS_010.40 func_8001436C (src/SLUS_010.40/25AC.c:1566)
+// decomp: SLUS_010.40 Sound_UpdateModulation (src/SLUS_010.40/25AC.c:1688; was
+// func_8001436C)
 void LiveUpdateMusicChannelModulation(VS::Audio::SeqChannel* channel) {
   ModulateLiveChannel("UpdateMusicChannelModulation", channel, true,
                       &UpdateMusicChannelModulation);
 }
 
-// decomp: SLUS_010.40 func_800147CC (src/SLUS_010.40/25AC.c:1678)
+// decomp: SLUS_010.40 func_800147CC (src/SLUS_010.40/25AC.c:1801)
 void LiveUpdateSoundEffectModulation(VS::Audio::SeqChannel* channel) {
   ModulateLiveChannel("UpdateSoundEffectModulation", channel, false,
                       &UpdateSoundEffectModulation);
 }
 
-// decomp: SLUS_010.40 func_80015220 (src/SLUS_010.40/25AC.c:2027)
+// decomp: SLUS_010.40 func_80015220 (src/SLUS_010.40/25AC.c:2148)
 void LiveCommitPlaybackVoices() {
   RunMixerPass("CommitPlaybackVoices", [](MixerState& state, MixerHost& host) {
     CommitPlaybackVoices(state, LivePanGains(), host);
@@ -513,7 +514,7 @@ void LiveCommitPlaybackVoices() {
 }
 
 // decomp: SLUS_010.40 Sound_ProcessKeyOffRequests
-// (src/SLUS_010.40/25AC.c:2187)
+// (src/SLUS_010.40/25AC.c:2308)
 void LiveReleasePendingVoices() {
   RunMixerPass("ReleasePendingVoices", [](MixerState& state, MixerHost& host) {
     ReleasePendingVoices(state, host);

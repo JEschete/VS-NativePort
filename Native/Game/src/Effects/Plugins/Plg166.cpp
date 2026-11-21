@@ -3,10 +3,14 @@
 #include "Effects/Plugins/Plg166.hpp"
 
 namespace VS::Effects::Plg166 {
-// decomp: D_800FCEC0 (PLG166.BIN/0.c:7; sphericalSurfaceVertices.h:21)
+// decomp: vs_effect_sanctusFlare_1_vertices
+// (src/EFFECT/sphericalSurfaceVertices.h:21; was D_800FCEC0;
+// src/EFFECT/sphericalSurfaceVertices.h:21)
 plugins::SurfaceProfile mirrorSurfaceVertices;
-// decomp: D_800FD140 (PLG166.BIN/0.c:10; closedRings.h:58)
+// decomp: vs_effect_sanctusFlare_2_colors (src/EFFECT/closedRings.h:58; was
+// D_800FD140; src/EFFECT/closedRings.h:58)
 plugins::RingPalette closedRingColorFactors;
-// decomp: D_800FD160 (PLG166.BIN/0.c:13; rings.h:20)
+// decomp: vs_effect_sanctusFlare_3_colors (src/EFFECT/rings.h:20; was
+// D_800FD160; src/EFFECT/rings.h:20)
 plugins::RingPaletteBytes ringColorFactors;
 }  // namespace VS::Effects::Plg166

@@ -30,7 +30,8 @@ bool HasGem(const std::array<std::uint8_t, kHitModifierGemCount>& gems,
 }
 }  // namespace
 
-// decomp: _getAttackGemBuff (src/BATTLE/BATTLE.PRG/146C.c:9712).
+// decomp: getAttackGemBuff (src/BATTLE/BATTLE.PRG/146C.c:9702; was
+// _getAttackGemBuff).
 std::optional<std::int16_t> AttackGemHitBonus(const HitModifierStats* stats,
                                               HitModifierWorld& world) {
   if (stats == nullptr) return std::nullopt;
@@ -43,7 +44,8 @@ std::optional<std::int16_t> AttackGemHitBonus(const HitModifierStats* stats,
   return HasGem(stats->weapon_gems, gem) ? kGemBonus : 0;
 }
 
-// decomp: _getDefenseGemBuff (src/BATTLE/BATTLE.PRG/146C.c:9741).
+// decomp: getDefenseGemBuff (src/BATTLE/BATTLE.PRG/146C.c:9731; was
+// _getDefenseGemBuff).
 std::optional<std::int16_t> DefenseGemHitBonus(const HitModifierStats* stats,
                                                int hit,
                                                HitModifierWorld& world) {
@@ -73,12 +75,13 @@ std::optional<std::int16_t> DefenseGemHitBonus(const HitModifierStats* stats,
   return static_cast<std::int16_t>(bonus);
 }
 
-// decomp: func_8007E97C (src/BATTLE/BATTLE.PRG/146C.c:9867).
+// decomp: func_8007E97C (src/BATTLE/BATTLE.PRG/146C.c:9855).
 int PreviousHitSuccessThreshold(std::int32_t previous_result) {
   return previous_result != 0 ? kPercent : kFailureThreshold;
 }
 
-// decomp: _getHitGemModifier (src/BATTLE/BATTLE.PRG/146C.c:9875).
+// decomp: getHitGemModifier (src/BATTLE/BATTLE.PRG/146C.c:9861; was
+// _getHitGemModifier).
 std::optional<int> GemHitChance(const HitModifierTarget* source,
                                 const HitModifierTarget* target, int hit,
                                 HitModifierWorld& world) {
@@ -100,7 +103,8 @@ std::optional<int> GemHitChance(const HitModifierTarget* source,
   return chance;
 }
 
-// decomp: _getRiskModifier (src/BATTLE/BATTLE.PRG/146C.c:10045).
+// decomp: getRiskModifier (src/BATTLE/BATTLE.PRG/146C.c:10031; was
+// _getRiskModifier).
 std::optional<int> RiskHitChance(const HitModifierTarget* source,
                                  HitModifierWorld& world) {
   if (source == nullptr) return std::nullopt;
@@ -111,7 +115,8 @@ std::optional<int> RiskHitChance(const HitModifierTarget* source,
   return rate == kFailureThreshold ? kBelowFailureThreshold : rate;
 }
 
-// decomp: _getChainEvasionModifier (src/BATTLE/BATTLE.PRG/146C.c:10057).
+// decomp: getChainEvasionModifier (src/BATTLE/BATTLE.PRG/146C.c:10042; was
+// _getChainEvasionModifier).
 std::optional<int> ChainHitChance(const HitModifierTarget* target,
                                   HitModifierWorld& world) {
   if (target == nullptr) return std::nullopt;

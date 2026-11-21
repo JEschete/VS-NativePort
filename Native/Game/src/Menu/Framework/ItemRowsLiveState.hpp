@@ -9,17 +9,20 @@
 #include "Menu/Framework/ItemRows.hpp"
 
 namespace VS::Menu::Framework {
-// decomp: vs_mainMenu_itemHelp (MENU/MAINMENU.PRG 2D10.c): ITEMHELP.BIN in
-// the loaded block, or stale after the block is freed.
+// decomp: vs_mainMenu_itemHelp (MENU/MAINMENU.PRG
+// src/MENU/MAINMENU.PRG/58EC.c:54): ITEMHELP.BIN in the loaded block, or stale
+// after the block is freed.
 extern std::uint16_t* itemHelp;
-// decomp: vs_mainMenu_itemNames (MENU/MAINMENU.PRG 2D10.c): the loaded block
-// (ITEMNAME.BIN first), or null when no block is loaded.
+// decomp: vs_mainMenu_itemNames (MENU/MAINMENU.PRG
+// src/MENU/MAINMENU.PRG/2D10.h:235): the loaded block (ITEMNAME.BIN first), or
+// null when no block is loaded.
 extern char (*itemNames)[kItemNameRowBytes];
-// decomp: vs_mainMenu_menu12Text (MENU/MAINMENU.PRG 2D10.c): MENU12.BIN in
-// the loaded block.
+// decomp: vs_mainMenu_menu12Text (MENU/MAINMENU.PRG
+// src/MENU/MAINMENU.PRG/58EC.c:48): MENU12.BIN in the loaded block.
 extern std::uint16_t* menu12Text;
-// decomp: vs_mainMenu_weaponHands (MENU/MAINMENU.PRG 2D10.c): per blade
-// category, 0 for one-handed and 1 for two-handed.
+// decomp: vs_mainMenu_weaponHands (MENU/MAINMENU.PRG
+// src/MENU/MAINMENU.PRG/2D10.c:131): per blade category, 0 for one-handed and 1
+// for two-handed.
 inline constexpr int kWeaponHandCategories = 10;
 extern std::uint8_t weaponHands[kWeaponHandCategories];
 }  // namespace VS::Menu::Framework

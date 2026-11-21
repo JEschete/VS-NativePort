@@ -129,7 +129,7 @@ class LiveTickHost final : public ParticleTickHost {
 };
 }  // namespace
 
-// decomp: BATTLE.PRG func_800CFAAC (src/BATTLE/BATTLE.PRG/5BF94.c:5770)
+// decomp: BATTLE.PRG func_800CFAAC (src/BATTLE/BATTLE.PRG/5BF94.c:5335)
 void LiveStepParticleEndpointTowardStart(LiveParticleLinePacket* packet) {
   if (packet == nullptr) {
     Refuse("step endpoint", "no line");
@@ -142,7 +142,7 @@ void LiveStepParticleEndpointTowardStart(LiveParticleLinePacket* packet) {
   line.y1 = static_cast<std::int16_t>(stepped >> kHalfwordBits);
 }
 
-// decomp: BATTLE.PRG func_800D2A38 (src/BATTLE/BATTLE.PRG/5BF94.c:6915)
+// decomp: BATTLE.PRG func_800D2A38 (src/BATTLE/BATTLE.PRG/5BF94.c:6483)
 void LiveSetParticleSpawnPosition(LiveParticleEmitterScratch* scratch,
                                   Particle* particle) {
   if (scratch == nullptr || particle == nullptr) {
@@ -160,7 +160,7 @@ void LiveSetParticleSpawnPosition(LiveParticleEmitterScratch* scratch,
   StoreWide(particle->motion.position, spawn.position);
 }
 
-// decomp: BATTLE.PRG func_800D4C18 (src/BATTLE/BATTLE.PRG/5BF94.c:7658)
+// decomp: BATTLE.PRG func_800D4C18 (src/BATTLE/BATTLE.PRG/5BF94.c:6650)
 int LiveTickEffectParticles(Instance* instance) {
   if (instance == nullptr) {
     Refuse("tick", "no instance");
@@ -171,7 +171,7 @@ int LiveTickEffectParticles(Instance* instance) {
   return 1;
 }
 
-// decomp: BATTLE.PRG func_800D52A4 (src/BATTLE/BATTLE.PRG/5BF94.c:7830)
+// decomp: BATTLE.PRG func_800D52A4 (src/BATTLE/BATTLE.PRG/5BF94.c:6822)
 void LiveIntegrateParticleMotion(Particle* first) {
   LiveMotionRecords records;
   IntegrateParticleMotion(first, records, LoadLiveParticleForces());

@@ -105,7 +105,8 @@ void CheckMac0(std::int64_t value, std::uint32_t& flag) {
 }
 }  // namespace
 
-// decomp: SLUS_010.40 RotTrans (libgte), the RTV0TR operation.
+// decomp: SLUS_010.40 RotTrans (src/SLUS_010.40/libgte/SMP_04.s:5),
+// 0x800417EC, the RTV0TR operation.
 RotatedVertex RotateTranslateVertex(const Transform3& transform,
                                     Position3 vertex) noexcept {
   RotatedVertex result = RotateTranslateUnsummarized(transform, vertex);
@@ -113,8 +114,8 @@ RotatedVertex RotateTranslateVertex(const Transform3& transform,
   return result;
 }
 
-// decomp: SLUS_010.40 RotTransPers (src/SLUS_010.40/libgte/SMP_02.s,
-// 0x80041814), the RTPS operation. The reciprocal divide, screen and
+// decomp: SLUS_010.40 RotTransPers (src/SLUS_010.40/libgte/SMP_02.s:5),
+// 0x80041814, the RTPS operation. The reciprocal divide, screen and
 // depth-cue sums are wider than a word: SX2/SY2 and IR0 saturate from the
 // wide sums while MAC0 keeps the low word.
 PerspectiveVertex ProjectVertex(const Transform3& transform,

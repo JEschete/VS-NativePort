@@ -201,7 +201,7 @@ enum class CardEventGroup : std::uint8_t {
 };
 
 // _memcardEventHandler's results (decomp memcardEventHandler_e,
-// src/MENU/MENU7.PRG/260.c:38). A card that was
+// src/MENU/memcard.h:56). A card that was
 // cleared after reporting unformatted adds four.
 enum class CardReadiness : std::uint8_t {
   kPending = 0,

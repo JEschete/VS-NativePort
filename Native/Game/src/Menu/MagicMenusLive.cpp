@@ -361,19 +361,22 @@ int RunLiveSchool(School school, unsigned int init) {
 }
 }  // namespace
 
-// decomp: _warlockMagicMenu (src/MENU/MENU0.PRG/84.c:164).
+// decomp: warlockMagicMenu (src/MENU/MENU0.PRG/84.c:177; was
+// _warlockMagicMenu).
 int UpdateWarlockMenuLive(unsigned int init_shortcut_invoked) {
   return RunLiveSchool(School::kWarlock, init_shortcut_invoked);
 }
-// decomp: _shamanMagicMenu (src/MENU/MENU0.PRG/84.c:512).
+// decomp: shamanMagicMenu (src/MENU/MENU0.PRG/84.c:525; was _shamanMagicMenu).
 int UpdateShamanMenuLive(unsigned int init_shortcut_invoked) {
   return RunLiveSchool(School::kShaman, init_shortcut_invoked);
 }
-// decomp: _sorcererMagicMenu (src/MENU/MENU0.PRG/84.c:613).
+// decomp: sorcererMagicMenu (src/MENU/MENU0.PRG/84.c:628; was
+// _sorcererMagicMenu).
 int UpdateSorcererMenuLive(unsigned int init_shortcut_invoked) {
   return RunLiveSchool(School::kSorcerer, init_shortcut_invoked);
 }
-// decomp: _enchanterMagicMenu (src/MENU/MENU0.PRG/84.c:713).
+// decomp: enchanterMagicMenu (src/MENU/MENU0.PRG/84.c:729; was
+// _enchanterMagicMenu).
 int UpdateEnchanterMenuLive(unsigned int init_shortcut_invoked) {
   return RunLiveSchool(School::kEnchanter, init_shortcut_invoked);
 }

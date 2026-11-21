@@ -906,6 +906,9 @@
     <None Include="..\..\ledger\modernization.py">
       <Filter>tools\ledger</Filter>
     </None>
+    <None Include="..\..\ledger\provenance.py">
+      <Filter>tools\ledger</Filter>
+    </None>
     <None Include="..\..\ledger\reconcile_locations.py">
       <Filter>tools\ledger</Filter>
     </None>
@@ -925,6 +928,9 @@
       <Filter>tools\ledger</Filter>
     </None>
     <None Include="..\..\ledger\test_modernization.py">
+      <Filter>tools\ledger</Filter>
+    </None>
+    <None Include="..\..\ledger\test_provenance.py">
       <Filter>tools\ledger</Filter>
     </None>
     <None Include="..\..\lint\.gitignore">

@@ -13,8 +13,8 @@ struct ActionDefinition;
 // a hit past the action's two hits, a rule past the table and an absent
 // target actor are refused with a warning on the "battle.targeting" channel.
 namespace VS::Battle {
-// decomp: _canPerformAttack (src/BATTLE/BATTLE.PRG/146C.c:10523): 1 when the
-// hit's prerequisite lets it apply, else 0.
+// decomp: canPerformAttack (src/BATTLE/BATTLE.PRG/146C.c:10458; was
+// _canPerformAttack): 1 when the hit's prerequisite lets it apply, else 0.
 int LiveCheckActionHitPrerequisite(VS::Battle::ActionDefinition* action,
                                    unsigned char* target_result_bytes,
                                    int hit_number);

@@ -3,10 +3,11 @@
 #include "Effects/Plugins/Plg162.hpp"
 
 namespace VS::Effects::Plg162 {
-// decomp: D_800FD18C (PLG162.BIN/0.c:6; closedRings.h:58)
+// decomp: D_800FD18C (PLG162.BIN/0.c:6; src/EFFECT/closedRings.h:58)
 plugins::RingPaletteBytes ringColorFactors;
-// decomp: D_800FD1AC (PLG162.BIN/0.c:10; rings.h:20)
+// decomp: vs_effect_spiralScourge_2_colors (src/EFFECT/rings.h:20; was
+// D_800FD1AC; src/EFFECT/rings.h:20)
 plugins::RingPaletteBytes ringColorFactors2;
-// decomp: D_800FD1CC (PLG162.BIN/0.c:13; closedRings.h:58)
+// decomp: D_800FD1CC (PLG162.BIN/0.c:13; src/EFFECT/closedRings.h:58)
 plugins::RingPalette closedRingColorFactors;
 }  // namespace VS::Effects::Plg162

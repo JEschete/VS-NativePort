@@ -47,19 +47,19 @@ std::optional<EffectTables> BoundTables(PlaybackHost& host) {
 }
 }  // namespace
 
-// decomp: SLUS_010.40 InitSound (src/SLUS_010.40/25AC.c:195)
+// decomp: SLUS_010.40 InitSound (src/SLUS_010.40/25AC.c:196)
 std::int32_t Initialize(PlaybackHost& host) {
   host.StartDriver();
   return 0;
 }
 
-// decomp: SLUS_010.40 TeardownSound (src/SLUS_010.40/25AC.c:201)
+// decomp: SLUS_010.40 TeardownSound (src/SLUS_010.40/25AC.c:202)
 std::int32_t Shutdown(PlaybackHost& host) {
   host.StopDriver();
   return 0;
 }
 
-// decomp: SLUS_010.40 Sound_BindAkaoSfxBlob (src/SLUS_010.40/25AC.c:207)
+// decomp: SLUS_010.40 Sound_BindAkaoSfxBlob (src/SLUS_010.40/25AC.c:208)
 std::int32_t BindSoundEffectPrograms(PlaybackHost& host,
                                      std::span<std::byte> blob) {
   if (blob.size() < sizeof(std::uint32_t)) {
@@ -84,7 +84,7 @@ std::int32_t BindSoundEffectPrograms(PlaybackHost& host,
   return not_akao;
 }
 
-// decomp: SLUS_010.40 func_80011E40 (src/SLUS_010.40/25AC.c:223)
+// decomp: SLUS_010.40 func_80011E40 (src/SLUS_010.40/25AC.c:224)
 std::int32_t ActivePlaybackFlags(PlaybackHost& host) {
   const PlaybackStatus status = host.Status();
   std::int32_t flags =
@@ -98,7 +98,8 @@ std::int32_t ActivePlaybackFlags(PlaybackHost& host) {
   return flags;
 }
 
-// decomp: SLUS_010.40 func_80011EBC (src/SLUS_010.40/25AC.c:243)
+// decomp: SLUS_010.40 Sound_GetMusicVolumeById (src/SLUS_010.40/25AC.c:244; was
+// func_80011EBC)
 std::int32_t MusicVolume(PlaybackHost& host, std::uint32_t music_id) {
   const PlaybackStatus status = host.Status();
   if (status.active.music_id == music_id) {
@@ -110,7 +111,8 @@ std::int32_t MusicVolume(PlaybackHost& host, std::uint32_t music_id) {
   return 0;
 }
 
-// decomp: SLUS_010.40 func_80011F08 (src/SLUS_010.40/25AC.c:256)
+// decomp: SLUS_010.40 Sound_GetLoadedMusicBankIds (src/SLUS_010.40/25AC.c:257;
+// was func_80011F08)
 std::int32_t PackedMusicSampleBankIds(PlaybackHost& host) {
   const MusicBankIds ids = host.MusicBanks();
   const std::uint32_t packed =
@@ -119,7 +121,7 @@ std::int32_t PackedMusicSampleBankIds(PlaybackHost& host) {
   return static_cast<std::int32_t>(packed);
 }
 
-// decomp: SLUS_010.40 func_80011F24 (src/SLUS_010.40/25AC.c:261)
+// decomp: SLUS_010.40 func_80011F24 (src/SLUS_010.40/25AC.c:262)
 std::int32_t LongestMusicFade(PlaybackHost& host, std::int32_t fade_selectors) {
   const PlaybackStatus status = host.Status();
   std::int32_t longest = 0;
@@ -137,7 +139,8 @@ std::int32_t LongestMusicFade(PlaybackHost& host, std::int32_t fade_selectors) {
   return longest;
 }
 
-// decomp: SLUS_010.40 func_80011F90 (src/SLUS_010.40/25AC.c:278)
+// decomp: SLUS_010.40 Sound_GetMusicPosition (src/SLUS_010.40/25AC.c:279; was
+// func_80011F90)
 std::int32_t MusicPosition(PlaybackHost& host) {
   const Seq::MusicLayerState layer = host.Status().active;
   const std::uint32_t top = layer.timer_top;
@@ -145,29 +148,34 @@ std::int32_t MusicPosition(PlaybackHost& host) {
   return static_cast<std::int32_t>((top << kHalfwordBits) | (upper + 1));
 }
 
-// decomp: SLUS_010.40 func_80011FB4 (src/SLUS_010.40/25AC.c:286)
+// decomp: SLUS_010.40 Sound_StartFieldMusic (src/SLUS_010.40/25AC.c:287; was
+// func_80011FB4)
 std::uint32_t StartMusic(PlaybackHost& host, DataRef sequence) {
   return Dispatched(host, Command::kStartMusic, sequence);
 }
 
-// decomp: SLUS_010.40 func_80011FDC (src/SLUS_010.40/25AC.c:292)
+// decomp: SLUS_010.40 Sound_StopMusicById (src/SLUS_010.40/25AC.c:293; was
+// func_80011FDC)
 void StopMusic(PlaybackHost& host, std::uint32_t music_id) {
   host.Dispatch(Command::kStopMusic,
                 {.first = static_cast<std::intptr_t>(music_id)});
 }
 
-// decomp: SLUS_010.40 func_80012004 (src/SLUS_010.40/25AC.c:298)
+// decomp: SLUS_010.40 Sound_PushMusicState (src/SLUS_010.40/25AC.c:299; was
+// func_80012004)
 void SaveMusicState(PlaybackHost& host) {
   host.Dispatch(Command::kSaveMusic, {});
 }
 
-// decomp: SLUS_010.40 func_80012024 (src/SLUS_010.40/25AC.c:300)
+// decomp: SLUS_010.40 Sound_ClearSuspendedMusic (src/SLUS_010.40/25AC.c:301;
+// was func_80012024)
 std::int32_t InvalidateSavedMusicId(PlaybackHost& host) {
   host.ClearSavedMusicId();
   return 0;
 }
 
-// decomp: SLUS_010.40 func_80012034 (src/SLUS_010.40/25AC.c:308)
+// decomp: SLUS_010.40 Sound_SetMusicLevelImmediate (src/SLUS_010.40/25AC.c:309;
+// was func_80012034)
 std::uint32_t StartLayeredMusic(PlaybackHost& host, DataRef sequence,
                                 std::int32_t volume) {
   const std::uint32_t music_id =
@@ -176,7 +184,8 @@ std::uint32_t StartLayeredMusic(PlaybackHost& host, DataRef sequence,
   return music_id;
 }
 
-// decomp: SLUS_010.40 func_80012080 (src/SLUS_010.40/25AC.c:318)
+// decomp: SLUS_010.40 Sound_StartMasterAndMusicVolumeFade
+// (src/SLUS_010.40/25AC.c:319; was func_80012080)
 std::uint32_t CrossfadeMusic(PlaybackHost& host, DataRef sequence,
                              std::uint32_t fade_ticks,
                              std::int32_t target_volume) {
@@ -188,7 +197,8 @@ std::uint32_t CrossfadeMusic(PlaybackHost& host, DataRef sequence,
       .value;
 }
 
-// decomp: SLUS_010.40 func_800120B8 (src/SLUS_010.40/25AC.c:326)
+// decomp: SLUS_010.40 Sound_StartFieldMusicLooped (src/SLUS_010.40/25AC.c:327;
+// was func_800120B8)
 void StartMusicAtLoop(PlaybackHost& host, DataRef sequence,
                       std::int32_t loop_count) {
   host.Dispatch(
@@ -196,12 +206,13 @@ void StartMusicAtLoop(PlaybackHost& host, DataRef sequence,
       {.first = sequence, .second = static_cast<std::uint32_t>(loop_count)});
 }
 
-// decomp: SLUS_010.40 func_800120E8 (src/SLUS_010.40/25AC.c:333)
+// decomp: SLUS_010.40 Sound_QueueMusic (src/SLUS_010.40/25AC.c:334; was
+// func_800120E8)
 std::uint32_t QueueMusicTransition(PlaybackHost& host, DataRef sequence) {
   return Dispatched(host, Command::kQueueMusicTransition, sequence);
 }
 
-// decomp: SLUS_010.40 func_80012110 (src/SLUS_010.40/25AC.c:339)
+// decomp: SLUS_010.40 func_80012110 (src/SLUS_010.40/25AC.c:340)
 MusicPair StartMusicPair(PlaybackHost& host, DataRef primary,
                          DataRef secondary) {
   const CommandResult result =
@@ -210,12 +221,13 @@ MusicPair StartMusicPair(PlaybackHost& host, DataRef primary,
   return {.first = result.first, .second = result.second};
 }
 
-// decomp: SLUS_010.40 func_8001215C (src/SLUS_010.40/25AC.c:350)
+// decomp: SLUS_010.40 func_8001215C (src/SLUS_010.40/25AC.c:351)
 void RequestMusicLayerSwap(PlaybackHost& host) {
   host.Dispatch(Command::kSwapMusicLayers, {});
 }
 
-// decomp: SLUS_010.40 func_8001217C (src/SLUS_010.40/25AC.c:352)
+// decomp: SLUS_010.40 Sound_PlaySfx (src/SLUS_010.40/25AC.c:353; was
+// func_8001217C)
 std::int32_t PlaySoundEffect(PlaybackHost& host, std::uint32_t effect_id,
                              std::int32_t effect_tag, std::int32_t pan,
                              std::int32_t volume) {
@@ -238,7 +250,8 @@ std::int32_t PlaySoundEffect(PlaybackHost& host, std::uint32_t effect_id,
   return static_cast<std::int32_t>(program_offset);
 }
 
-// decomp: SLUS_010.40 func_800121F0 (src/SLUS_010.40/25AC.c:365)
+// decomp: SLUS_010.40 Sound_PlaySfxFromPointer (src/SLUS_010.40/25AC.c:366; was
+// func_800121F0)
 std::optional<DataRef> PlaySoundEffectBlob(PlaybackHost& host, DataRef program,
                                            std::int32_t effect_tag,
                                            std::int32_t pan,
@@ -257,7 +270,8 @@ std::optional<DataRef> PlaySoundEffectBlob(PlaybackHost& host, DataRef program,
   return program;
 }
 
-// decomp: SLUS_010.40 func_80012288 (src/SLUS_010.40/25AC.c:381)
+// decomp: SLUS_010.40 Sound_EvictSfx (src/SLUS_010.40/25AC.c:382; was
+// func_80012288)
 void StopSoundEffects(PlaybackHost& host, EffectSelector selector,
                       std::int32_t effect_tag_mask) {
   host.Dispatch(Command::kStopSoundEffects,
@@ -265,14 +279,16 @@ void StopSoundEffects(PlaybackHost& host, EffectSelector selector,
                  .second = Masked(effect_tag_mask, kEffectTagMask)});
 }
 
-// decomp: SLUS_010.40 func_800122C4 (src/SLUS_010.40/25AC.c:388)
+// decomp: SLUS_010.40 Sound_PlaySfxProtected (src/SLUS_010.40/25AC.c:389; was
+// func_800122C4)
 void PlayInterfaceSound(PlaybackHost& host, std::uint32_t effect_id) {
   host.Dispatch(
       Command::kPlayInterfaceSound,
       {.first = static_cast<std::intptr_t>(effect_id & kEffectIdMask)});
 }
 
-// decomp: SLUS_010.40 func_800122F0 (src/SLUS_010.40/25AC.c:394)
+// decomp: SLUS_010.40 Sound_GetAllSfxUnkFlags (src/SLUS_010.40/25AC.c:395; was
+// func_800122F0)
 std::int32_t ActiveSoundEffectTags(PlaybackHost& host) {
   const std::uint32_t active = host.Status().active_voices;
   if (active == 0) return 0;
@@ -285,7 +301,8 @@ std::int32_t ActiveSoundEffectTags(PlaybackHost& host) {
   return static_cast<std::int32_t>(tags & kEffectVoiceBits);
 }
 
-// decomp: SLUS_010.40 func_80012358 (src/SLUS_010.40/25AC.c:421)
+// decomp: SLUS_010.40 Sound_GetPlayingSfxByGroup (src/SLUS_010.40/25AC.c:422;
+// was func_80012358)
 EffectSelector SoundEffectIdForTag(PlaybackHost& host,
                                    std::int32_t effect_tag) {
   if (effect_tag == 0) return EffectSelector::kNone;
@@ -299,7 +316,8 @@ EffectSelector SoundEffectIdForTag(PlaybackHost& host,
   return EffectSelector::kNone;
 }
 
-// decomp: SLUS_010.40 func_800123C8 (src/SLUS_010.40/25AC.c:439)
+// decomp: SLUS_010.40 Sound_SfxHasVoiceFlag (src/SLUS_010.40/25AC.c:440; was
+// func_800123C8)
 std::int32_t UsesSoundEffectTags(PlaybackHost& host, EffectSource source) {
   if (const auto* const program = std::get_if<DataRef>(&source)) {
     const std::span<const std::byte> bytes = host.ProgramBytes(*program);
@@ -320,7 +338,8 @@ std::int32_t UsesSoundEffectTags(PlaybackHost& host, EffectSource source) {
   return (tables->bank_selectors[id] & kSharedEffectUsesTags) != 0 ? 1 : 0;
 }
 
-// decomp: SLUS_010.40 vs_sound_setMonoSound (src/SLUS_010.40/25AC.c:450)
+// decomp: SLUS_010.40 Sound_SetSpeakerMode (src/SLUS_010.40/25AC.c:451; was
+// vs_sound_setMonoSound)
 void SetMonoOutput(PlaybackHost& host, std::int32_t mono_enabled) {
   host.Dispatch(mono_enabled == kMonoRequested ? Command::kMonoOutput
                                                : Command::kStereoOutput,

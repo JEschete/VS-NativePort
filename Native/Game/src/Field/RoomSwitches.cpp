@@ -100,8 +100,8 @@ bool DoorCoversAdjacentTile(const RoomDoorPlacement& door,
 
 }  // namespace
 
-// decomp: BATTLE.PRG func_8008BC04 (146C.c:16215), first-record activation
-// guard.
+// decomp: BATTLE.PRG func_8008BC04 (src/BATTLE/BATTLE.PRG/146C.c:16086),
+// first-record activation guard.
 std::optional<std::size_t> InteractiveDoorAtTile(
     std::span<const RoomDoorPlacement> doors, const RoomDoorTileQuery& query) {
   if (doors.empty() || doors.front().activation == 0) return std::nullopt;
@@ -116,7 +116,8 @@ std::optional<std::size_t> InteractiveDoorAtTile(
   return std::nullopt;
 }
 
-// decomp: BATTLE.PRG func_8008BD74 (146C.c:16262), original packed XOR5.
+// decomp: BATTLE.PRG func_8008BD74 (src/BATTLE/BATTLE.PRG/146C.c:16133),
+// original packed XOR5.
 bool ToggleDoorCollision(RoomDoorCollisionHost& host) {
   const auto primary = host.State();
   if (!primary) return false;
@@ -130,8 +131,8 @@ bool ToggleDoorCollision(RoomDoorCollisionHost& host) {
   return true;
 }
 
-// decomp: BATTLE.PRG func_8008BEBC (146C.c:16290), original busy/sigil/delay
-// order.
+// decomp: BATTLE.PRG func_8008BEBC (src/BATTLE/BATTLE.PRG/146C.c:16161),
+// original busy/sigil/delay order.
 bool BeginDoorToggle(RoomDoorAnimationHost& host) {
   const auto initial = host.State(DoorMember::kPrimary);
   if (!initial || initial->busy != 0 || !host.QueueAvailable()) return false;
@@ -155,7 +156,7 @@ bool BeginDoorToggle(RoomDoorAnimationHost& host) {
   return accepted;
 }
 
-// decomp: BATTLE.PRG func_8008BF48 (146C.c:16309),
+// decomp: BATTLE.PRG func_8008BF48 (src/BATTLE/BATTLE.PRG/146C.c:16180),
 // sounds/effects/close/linked/queue.
 bool StartDoorAnimation(RoomDoorAnimationHost& host) {
   auto state = host.State(DoorMember::kPrimary);
@@ -184,8 +185,8 @@ bool StartDoorAnimation(RoomDoorAnimationHost& host) {
   return host.Queue(GimmickAnimationKind::kFinishDoor);
 }
 
-// decomp: BATTLE.PRG func_8008C1C8 (146C.c:16389), wait then open/clear both
-// records.
+// decomp: BATTLE.PRG func_8008C1C8 (src/BATTLE/BATTLE.PRG/146C.c:16260), wait
+// then open/clear both records.
 bool FinishDoorAnimation(RoomDoorAnimationHost& host) {
   auto state = host.State(DoorMember::kPrimary);
   if (!state || host.EffectActive(state->effect)) return false;
@@ -215,7 +216,8 @@ bool FinishDoorAnimation(RoomDoorAnimationHost& host) {
   return true;
 }
 
-// decomp: BATTLE.PRG func_8008E6DC (146C.c:17399), original first-match SB1.
+// decomp: BATTLE.PRG func_8008E6DC (src/BATTLE/BATTLE.PRG/146C.c:17278),
+// original first-match SB1.
 bool MarkSigilDoorUnlocked(const SigilDoorTables& tables,
                            const SigilDoorRoomQuery& query,
                            std::span<std::byte> flags) {
@@ -225,7 +227,8 @@ bool MarkSigilDoorUnlocked(const SigilDoorTables& tables,
   return true;
 }
 
-// decomp: BATTLE.PRG func_8008E7BC (146C.c:17419), original LBU unlock byte.
+// decomp: BATTLE.PRG func_8008E7BC (src/BATTLE/BATTLE.PRG/146C.c:17298),
+// original LBU unlock byte.
 std::uint8_t RoomSigilDoorUnlockByte(const SigilDoorTables& tables,
                                      const SigilDoorRoomQuery& query,
                                      std::span<const std::byte> flags) {
@@ -235,7 +238,7 @@ std::uint8_t RoomSigilDoorUnlockByte(const SigilDoorTables& tables,
              : 0;
 }
 
-// decomp: BATTLE.PRG func_8008D658 (src/BATTLE/BATTLE.PRG/146C.c:16883).
+// decomp: BATTLE.PRG func_8008D658 (src/BATTLE/BATTLE.PRG/146C.c:16757).
 bool ToggleRoomSwitch(RoomSwitchHost& host) {
   auto state = host.State();
   if (!state) {
@@ -261,7 +264,7 @@ bool ToggleRoomSwitch(RoomSwitchHost& host) {
   return true;
 }
 
-// decomp: BATTLE.PRG func_8008D5FC (src/BATTLE/BATTLE.PRG/146C.c:16870).
+// decomp: BATTLE.PRG func_8008D5FC (src/BATTLE/BATTLE.PRG/146C.c:16744).
 // #320: refused queue admission must not leave marker1/activation20 latched.
 bool BeginSwitchToggle(RoomSwitchStartHost& host) {
   const auto state = host.State();

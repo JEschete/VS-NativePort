@@ -41,14 +41,14 @@ std::int16_t Q12(std::int32_t value) {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_8008B4C8 (src/BATTLE/BATTLE.PRG/146C.c:16012)
+// decomp: BATTLE.PRG func_8008B4C8 (src/BATTLE/BATTLE.PRG/146C.c:15882)
 std::uint8_t SetMinimapVisible(std::uint8_t& visibility, std::int32_t visible) {
   visibility = static_cast<std::uint8_t>(visible);
   return visibility;
 }
 
 // decomp: BATTLE.PRG vs_battle_setRoomsUnk0
-// (src/BATTLE/BATTLE.PRG/146C.c:16014)
+// (src/BATTLE/BATTLE.PRG/146C.c:15884)
 bool RestoreSceneRoomVisits(std::span<std::byte> scene,
                             const RoomVisitFlags& room_flags,
                             RoomLocationIndex& locations) {
@@ -79,7 +79,7 @@ bool RestoreSceneRoomVisits(std::span<std::byte> scene,
   return true;
 }
 
-// decomp: BATTLE.PRG func_8008B590 (src/BATTLE/BATTLE.PRG/146C.c:16033)
+// decomp: BATTLE.PRG func_8008B590 (src/BATTLE/BATTLE.PRG/146C.c:15903)
 MinimapRotation BuildMinimapRotation(std::int32_t yaw_angle) {
   const std::int32_t sine = Core::Math::Sine(yaw_angle);
   const std::int32_t cosine = Core::Math::Cosine(yaw_angle);
@@ -97,7 +97,7 @@ MinimapRotation BuildMinimapRotation(std::int32_t yaw_angle) {
 }
 
 // decomp: BATTLE.PRG vs_battle_getMapCompletion
-// (src/BATTLE/BATTLE.PRG/146C.c:17367)
+// (src/BATTLE/BATTLE.PRG/146C.c:17246)
 std::int32_t MapCompletionPercent(RoomVisitFlags& room_flags,
                                   const RoomVisitFlags& countable_rooms) {
   if ((room_flags[kMarkedWord] & kMarkingVisit) != 0) {

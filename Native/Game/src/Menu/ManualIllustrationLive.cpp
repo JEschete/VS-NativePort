@@ -156,17 +156,18 @@ class LiveDiagramLineTarget final : public DiagramLineTarget {
 };
 }  // namespace
 
-// decomp: MENUE.PRG _copySprites (494.c:481).
+// decomp: MENUE.PRG copySprites (src/MENU/MENUE.PRG/494.c:485; was
+// _copySprites).
 void LiveUploadSpriteTiles(std::uint32_t const* buffer, int count) {
   UploadLive(buffer, count, false);
 }
 
-// decomp: MENUE.PRG _copyCluts (494.c:498).
+// decomp: MENUE.PRG copyCluts (src/MENU/MENUE.PRG/494.c:502; was _copyCluts).
 void LiveUploadCluts(std::uint32_t* buffer, int count) {
   UploadLive(buffer, count, true);
 }
 
-// decomp: MENUE.PRG _drawSprite (494.c:629).
+// decomp: MENUE.PRG drawSprite (src/MENU/MENUE.PRG/494.c:633; was _drawSprite).
 void LiveDrawIllustration(std::int16_t* data) {
   const auto record = LivePayloadTail(reinterpret_cast<std::int16_t*>(data));
   if (!record) {
@@ -180,7 +181,8 @@ void LiveDrawIllustration(std::int16_t* data) {
   }
 }
 
-// decomp: MENUE.PRG _drawContentLines (494.c:883).
+// decomp: MENUE.PRG drawContentLines (src/MENU/MENUE.PRG/494.c:887; was
+// _drawContentLines).
 void LiveDrawDiagramLines() {
   const auto help_text =
       LivePayloadTail(reinterpret_cast<std::int16_t*>(helpText));
@@ -195,7 +197,8 @@ void LiveDrawDiagramLines() {
   }
 }
 
-// decomp: MENUE.PRG _getAnimationState (494.c:940).
+// decomp: MENUE.PRG getAnimationState (src/MENU/MENUE.PRG/494.c:944; was
+// _getAnimationState).
 std::int16_t LiveAdvanceVisibilityAnimation(VisibilityAnimation* state) {
   if (state == nullptr) {
     Refuse("Manual visibility animation is null");

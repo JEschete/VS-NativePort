@@ -117,7 +117,7 @@ class LiveWorld final : public Framework::LiveDetailInputWorld<DetailsWorld> {
 };
 }  // namespace
 
-// decomp: vs_menuD_initUiWeapon, MENU/MENUD.PRG/234.c:21; 80102A34.
+// decomp: vs_menuD_initUiWeapon, src/MENU/MENUD.PRG/234.c:25; 80102A34.
 void BuildLiveWeaponStats(VS::Items::WeaponLoadout* target,
                           const VS::Items::InventoryWeapon* source,
                           VS::Items::ContainerData* container) {
@@ -129,7 +129,7 @@ void BuildLiveWeaponStats(VS::Items::WeaponLoadout* target,
   *target = native;
 }
 
-// decomp: vs_menuD_initUiShield, MENU/MENUD.PRG/234.c:57; 80102BB0.
+// decomp: vs_menuD_initUiShield, src/MENU/MENUD.PRG/234.c:61; 80102BB0.
 void BuildLiveShieldStats(VS::Items::ShieldLoadout* target,
                           const VS::Items::InventoryShield* source,
                           VS::Items::ContainerData* container) {
@@ -140,7 +140,7 @@ void BuildLiveShieldStats(VS::Items::ShieldLoadout* target,
   *target = native;
 }
 
-// decomp: func_80103D50, MENU/MENUD.PRG/234.c:659; 80103D50.
+// decomp: func_80103D50, src/MENU/MENUD.PRG/234.c:660; 80103D50.
 void SetLivePanelVisibility(char visibility) {
   PanelVisibility panels;
   SetPanelVisibility(panels, static_cast<std::uint8_t>(visibility));
@@ -149,31 +149,32 @@ void SetLivePanelVisibility(char visibility) {
   controlsPanelMode = static_cast<std::uint8_t>(panels.controls);
 }
 
-// decomp: _pollItemNavigation, MENU/MENUD.PRG/234.c:666; 80103D6C.
+// decomp: pollItemNavigation, src/MENU/MENUD.PRG/234.c:667; was
+// _pollItemNavigation; 80103D6C.
 int PollLiveDetailsPaging(int category, int page) {
   LiveWorld world(category);
   return PollDetailsPaging(world, {page}).index;
 }
 
-// decomp: func_80103F64, MENU/MENUD.PRG/234.c:735; 80103F64.
+// decomp: func_80103F64, src/MENU/MENUD.PRG/234.c:736; 80103F64.
 void BeginLiveDetailsTransition(int selected_row) {
   LiveWorld world;
   BeginDetailsTransition(world, {selected_row});
 }
 
-// decomp: func_80104034, MENU/MENUD.PRG/234.c:767; 80104034.
+// decomp: func_80104034, src/MENU/MENUD.PRG/234.c:768; 80104034.
 void InitializeLiveDetailsLayout(int selected_row, int stat_pages) {
   LiveWorld world;
   InitializeDetailsLayout(world, {selected_row}, stat_pages);
 }
 
-// decomp: func_80104114, MENU/MENUD.PRG/234.c:789; 80104114.
+// decomp: func_80104114, src/MENU/MENUD.PRG/234.c:790; 80104114.
 int SelectLiveDetailsItem(int category, int page) {
   LiveWorld world(category);
   return SelectDetailsItem(world, {page});
 }
 
-// decomp: func_80104170, MENU/MENUD.PRG/234.c:796; 80104170.
+// decomp: func_80104170, src/MENU/MENUD.PRG/234.c:797; 80104170.
 void ExitLiveDetailsView(int hide_dp_pp) {
   LiveWorld world;
   ExitDetailsView(world, hide_dp_pp != 0);

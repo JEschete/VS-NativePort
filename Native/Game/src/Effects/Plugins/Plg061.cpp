@@ -3,10 +3,14 @@
 #include "Effects/Plugins/Plg061.hpp"
 
 namespace VS::Effects::Plg061 {
-// decomp: D_800FCA90 (PLG061.BIN/18.c:5; sphericalSurfaceVertices.h:21)
+// decomp: vs_effect_flameSphereLv1_0_vertices
+// (src/EFFECT/sphericalSurfaceVertices.h:21; was D_800FCA90;
+// src/EFFECT/sphericalSurfaceVertices.h:21)
 plugins::SurfaceProfile surfaceVertices;
-// decomp: D_800FCD10 (PLG061.BIN/18.c:9; rings.h:20)
+// decomp: vs_effect_flameSphereLv1_2_colors (src/EFFECT/rings.h:20; was
+// D_800FCD10; src/EFFECT/rings.h:20)
 plugins::RingPaletteBytes ringColorFactors;
-// decomp: D_800FCD30 (PLG061.BIN/18.c:11; closedRings.h:58)
+// decomp: vs_effect_flameSphereLv1_3_colors (src/EFFECT/closedRings.h:58; was
+// D_800FCD30; src/EFFECT/closedRings.h:58)
 plugins::RingPalette closedRingColorFactors;
 }  // namespace VS::Effects::Plg061

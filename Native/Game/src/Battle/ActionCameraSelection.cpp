@@ -60,14 +60,14 @@ bool TrackAndPresent(ActionCameraWorld& world) {
 }
 }  // namespace
 
-// decomp: func_80077F14 (src/BATTLE/BATTLE.PRG/146C.c:6821)
+// decomp: func_80077F14 (src/BATTLE/BATTLE.PRG/146C.c:6668)
 bool ActionTargetLimbPosition(int actor, int limb, ActionPoint& output,
                               ActionCameraWorld& world) {
   const int bone = limb == -1 ? 0 : world.BoneTag(actor, limb);
   return world.BonePosition(actor, bone, output);
 }
 
-// decomp: func_80077F70 (src/BATTLE/BATTLE.PRG/146C.c:6833)
+// decomp: func_80077F70 (src/BATTLE/BATTLE.PRG/146C.c:6680)
 std::optional<std::int32_t> ActionTargetDistance(ActionCameraWorld& world) {
   const auto points = Endpoints(false, world);
   if (!points) return std::nullopt;
@@ -85,7 +85,7 @@ std::optional<std::int32_t> ActionTargetDistance(ActionCameraWorld& world) {
   return SquareRootInteger(squared);
 }
 
-// decomp: func_800780A8 (src/BATTLE/BATTLE.PRG/146C.c:6863)
+// decomp: func_800780A8 (src/BATTLE/BATTLE.PRG/146C.c:6710)
 bool ActionCameraMidpoint(ActionPoint& output, ActionCameraWorld& world) {
   const auto points = Endpoints(true, world);
   if (!points) return false;
@@ -99,7 +99,7 @@ bool ActionCameraMidpoint(ActionPoint& output, ActionCameraWorld& world) {
   return true;
 }
 
-// decomp: func_8007820C (src/BATTLE/BATTLE.PRG/146C.c:6886)
+// decomp: func_8007820C (src/BATTLE/BATTLE.PRG/146C.c:6733)
 bool StepCameraTowardActionMidpoint(int execute, ActionCameraWorld& world) {
   ActionPoint midpoint{};
   if (!ActionCameraMidpoint(midpoint, world)) return false;
@@ -107,7 +107,7 @@ bool StepCameraTowardActionMidpoint(int execute, ActionCameraWorld& world) {
   return true;
 }
 
-// decomp: func_80078248 (src/BATTLE/BATTLE.PRG/146C.c:6896)
+// decomp: func_80078248 (src/BATTLE/BATTLE.PRG/146C.c:6743)
 bool UpdateInitialTargetSelection(ActionSelectionWorld& world) {
   auto* initial = world.Current();
   if (initial == nullptr) return false;
@@ -125,7 +125,7 @@ bool UpdateInitialTargetSelection(ActionSelectionWorld& world) {
   return true;
 }
 
-// decomp: func_800782E4 (src/BATTLE/BATTLE.PRG/146C.c:6912)
+// decomp: func_800782E4 (src/BATTLE/BATTLE.PRG/146C.c:6759)
 bool UpdateActionAreaSelection(ActionSelectionWorld& world) {
   auto* initial = world.Current();
   if (initial == nullptr) return false;
@@ -140,7 +140,7 @@ bool UpdateActionAreaSelection(ActionSelectionWorld& world) {
   return true;
 }
 
-// decomp: func_80078364 (src/BATTLE/BATTLE.PRG/146C.c:6927)
+// decomp: func_80078364 (src/BATTLE/BATTLE.PRG/146C.c:6774)
 bool UpdateFinalTargetSelection(ActionSelectionWorld& world) {
   auto* initial = world.Current();
   if (initial == nullptr) return false;
@@ -176,7 +176,8 @@ bool UpdateFinalTargetSelection(ActionSelectionWorld& world) {
   return true;
 }
 
-// decomp: _handleCombatCameraZoom (src/BATTLE/BATTLE.PRG/146C.c:6958)
+// decomp: handleCombatCameraZoom (src/BATTLE/BATTLE.PRG/146C.c:6805; was
+// _handleCombatCameraZoom)
 bool UpdateActionCameraZoom(ActionCameraWorld& world) {
   if (!CameraActive(world.CameraMode())) return true;
   const auto zoom = world.Zoom();

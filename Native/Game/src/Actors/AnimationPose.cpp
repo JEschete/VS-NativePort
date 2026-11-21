@@ -511,7 +511,7 @@ ClipLookup LookupAnimationClip(std::span<const std::uint8_t> bank, int index,
   return lookup;
 }
 
-// decomp: BATTLE.PRG func_800AD494 (src/BATTLE/BATTLE.PRG/40564.c:2719)
+// decomp: BATTLE.PRG func_800AD494 (src/BATTLE/BATTLE.PRG/40564.c:2138)
 // The bank comes from its owner's registered extent instead of a pointer, and
 // a map entry or header past that extent is refused instead of read.
 AnimationHeader FindActorAnimationHeader(const AnimationBankLimits& limits,
@@ -575,7 +575,7 @@ ClipEvents FindClipEvents(const AnimationClipRef& clip) {
   return {.status = ClipEventsStatus::kStarts, .cursor = *cursor};
 }
 
-// decomp: BATTLE.PRG func_800ACFA0 (src/BATTLE/BATTLE.PRG/40564.c:2561)
+// decomp: BATTLE.PRG func_800ACFA0 (src/BATTLE/BATTLE.PRG/40564.c:1996)
 // The original also cleared the key's delta cursor 339 halfwords on; callers
 // clear the paired delta themselves.
 std::optional<PoseVector> DecodeInitialPoseVector(
@@ -594,7 +594,7 @@ std::optional<PoseVector> DecodeInitialPoseVector(
       .word = base == kNoClip ? kOwnBaseKeyCursor : std::uint16_t{0}};
 }
 
-// decomp: BATTLE.PRG func_800AD008 (src/BATTLE/BATTLE.PRG/40564.c:2623)
+// decomp: BATTLE.PRG func_800AD008 (src/BATTLE/BATTLE.PRG/40564.c:2027)
 // The pose-override unwind and the header lookup stay with the caller. Keys
 // decode into a copy that is committed only when the whole clip start lay
 // inside its bank, and pose writes stop at the pose's bone capacity.
@@ -639,7 +639,7 @@ void BlendActorPoseHalfway(PoseKeys& destination, const PoseKeys& source,
   }
 }
 
-// decomp: BATTLE.PRG func_800AF844 (src/BATTLE/BATTLE.PRG/44F14.c:1192)
+// decomp: BATTLE.PRG func_800AF844 (src/BATTLE/BATTLE.PRG/44F14.c:1117)
 void AlignPoseRotationBranches(PoseKeyArray& destination,
                                const PoseKeyArray& source, int bones) {
   const std::size_t count = PoseBoneCount(bones);
@@ -656,7 +656,7 @@ void AlignPoseRotationBranches(PoseKeyArray& destination,
   }
 }
 
-// decomp: BATTLE.PRG func_800AF6E8 (src/BATTLE/BATTLE.PRG/44F14.c:1146)
+// decomp: BATTLE.PRG func_800AF6E8 (src/BATTLE/BATTLE.PRG/44F14.c:1071)
 void UpdateActorAnimationBlend(AnimationBlendHost& host) {
   host.AdvanceAnimation();
   BlendClock clock = host.Clock();
@@ -787,7 +787,7 @@ void UpdateMotionAndLookAt(MotionLookHost& host, bool skip_tweens) {
   host.SetLookAngles(*angles);
 }
 
-// decomp: BATTLE.PRG func_800B26B8 (src/BATTLE/BATTLE.PRG/49268.c:246)
+// decomp: BATTLE.PRG func_800B26B8 (src/BATTLE/BATTLE.PRG/49EB8.c:23)
 // Returns the transform instead of leaving it in the model workspace and the
 // GTE registers, which nothing read afterwards.
 Core::Math::Transform3 ApplyLockedBoneTransform(

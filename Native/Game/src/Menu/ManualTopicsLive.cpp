@@ -147,7 +147,8 @@ std::string_view PageRefusal(PageTextError error) {
 }
 }  // namespace
 
-// decomp: MENUE.PRG _setMenuRows (494.c:76).
+// decomp: MENUE.PRG setMenuRows (src/MENU/MENUE.PRG/494.c:82; was
+// _setMenuRows).
 void LiveSetTopicRows(int row_count, int highlighted_row, char** strings) {
   if (row_count < 1) {
     Refuse("Manual topic list has no rows");
@@ -165,13 +166,14 @@ void LiveSetTopicRows(int row_count, int highlighted_row, char** strings) {
   }
 }
 
-// decomp: MENUE.PRG _getSelectedRow (494.c:104).
+// decomp: MENUE.PRG getSelectedRow (src/MENU/MENUE.PRG/494.c:110; was
+// _getSelectedRow).
 int LiveGetSelectedTopicRow() {
   LiveTopicMenuHost host;
   return GetSelectedTopicRow(host);
 }
 
-// decomp: MENUE.PRG _topMenu (494.c:450).
+// decomp: MENUE.PRG topMenu (src/MENU/MENUE.PRG/494.c:454; was _topMenu).
 int LiveUpdateTopicMenu(int init) {
   TopicMenuState state{.step = topMenuState, .selected_row = menuSelectedRow};
   LiveTopicMenuHost host;
@@ -187,7 +189,8 @@ int LiveUpdateTopicMenu(int init) {
   return *result;
 }
 
-// decomp: MENUE.PRG _getRoundedLineCount (494.c:514).
+// decomp: MENUE.PRG getRoundedLineCount (src/MENU/MENUE.PRG/494.c:518; was
+// _getRoundedLineCount).
 int LiveLastPageLineOffset() {
   const auto help_text = HelpText();
   if (!help_text.has_value()) {
@@ -202,7 +205,8 @@ int LiveLastPageLineOffset() {
   return LastPageLineOffset(*line_count);
 }
 
-// decomp: MENUE.PRG _copyNextPageText (494.c:531).
+// decomp: MENUE.PRG copyNextPageText (src/MENU/MENUE.PRG/494.c:535; was
+// _copyNextPageText).
 void LiveCopyPageText() {
   const auto help_text = HelpText();
   if (!help_text.has_value()) {

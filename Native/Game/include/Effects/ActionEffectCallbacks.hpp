@@ -105,7 +105,7 @@ class ActionEffectCallbackHost : public PrimaryEffectSink {
 };
 
 // decomp: BATTLE.PRG func_8006CDB8 (F00064,
-// src/BATTLE/BATTLE.PRG/146C.c:2149, 0x8006CDB8-0x8006CDD8)
+// src/BATTLE/BATTLE.PRG/146C.c:1851, 0x8006CDB8-0x8006CDD8)
 void SignalActorEffectAnimation(std::int32_t actor,
                                 ActionEffectCallbackHost& host);
 
@@ -115,12 +115,12 @@ void SignalActorEffectAnimation(std::int32_t actor,
 [[nodiscard]] ActorColorTransform ActionTintRestore(std::int32_t actor);
 
 // decomp: BATTLE.PRG func_8006D028 (F00068,
-// src/BATTLE/BATTLE.PRG/146C.c:2211, 0x8006D028-0x8006D064)
+// src/BATTLE/BATTLE.PRG/146C.c:1913, 0x8006D028-0x8006D064)
 // Remembers `actor` as the tinted actor, then tints it red.
 void TintActionActorRed(std::int32_t actor, ActionEffectCallbackHost& host);
 
 // decomp: BATTLE.PRG func_8006D064 (F00069,
-// src/BATTLE/BATTLE.PRG/146C.c:2217, 0x8006D064-0x8006D0A4)
+// src/BATTLE/BATTLE.PRG/146C.c:1919, 0x8006D064-0x8006D0A4)
 // Restores the remembered actor's palette, then forgets it (actor 0).
 void RestoreActionActorTint(ActionEffectCallbackHost& host);
 
@@ -130,20 +130,20 @@ void RestoreActionActorTint(ActionEffectCallbackHost& host);
     std::uint16_t effect_id);
 
 // decomp: BATTLE.PRG func_800733F8 (F00119,
-// src/BATTLE/BATTLE.PRG/146C.c:4613, 0x800733F8-0x80073484)
+// src/BATTLE/BATTLE.PRG/146C.c:4340, 0x800733F8-0x80073484)
 // Enters the standalone effect mode, begins the effect, slows the clock and
 // hides the HUD and the minimap.
 void BeginAshleyStandaloneEffect(std::uint16_t effect_id,
                                  ActionEffectCallbackHost& host);
 
 // decomp: BATTLE.PRG func_80073484 (F00120,
-// src/BATTLE/BATTLE.PRG/146C.c:4638, 0x80073484-0x800734C0)
+// src/BATTLE/BATTLE.PRG/146C.c:4365, 0x80073484-0x800734C0)
 // Returns to exploration at the normal clock and shows the HUD and the
 // minimap.
 void EndAshleyStandaloneEffect(ActionEffectCallbackHost& host);
 
 // decomp: BATTLE.PRG func_80074294 (F00143,
-// src/BATTLE/BATTLE.PRG/146C.c:5064, 0x80074294-0x800742A4)
+// src/BATTLE/BATTLE.PRG/146C.c:4794, 0x80074294-0x800742A4)
 // The primary and secondary busy bits.
 [[nodiscard]] std::uint32_t ActionEffectBusyFlags(
     ActionEffectCallbackHost& host);

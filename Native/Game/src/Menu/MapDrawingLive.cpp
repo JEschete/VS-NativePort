@@ -511,7 +511,7 @@ class LiveControlsHost final : public ControlsHost {
 };
 }  // namespace
 
-// decomp: MENU5.PRG _renderMap (4D8.c:1081).
+// decomp: MENU5.PRG renderMap (src/MENU/MENU5.PRG/4D8.c:1086; was _renderMap).
 void LiveDrawVisitedRooms(Field::MapScene* scene) {
   constexpr std::string_view kCall = "DrawVisitedRooms";
   const auto bytes = SceneBytes(scene);
@@ -542,7 +542,8 @@ void LiveDrawVisitedRooms(Field::MapScene* scene) {
   DrawVisitedRooms(host, geomOffsetX, geomOffsetY, records);
 }
 
-// decomp: MENU5.PRG _renderRoom (4D8.c:1112).
+// decomp: MENU5.PRG renderRoom (src/MENU/MENU5.PRG/4D8.c:1117; was
+// _renderRoom).
 int LiveDrawRoom(int room_index, void* room_data, int zone_id, int map_id) {
   const auto room = RoomBytes(room_data);
   if (!room) {
@@ -552,7 +553,8 @@ int LiveDrawRoom(int room_index, void* room_data, int zone_id, int map_id) {
   return DrawRoomBytes(*room, room_index, zone_id, map_id);
 }
 
-// decomp: MENU5.PRG _drawUIControlsBackground (4D8.c:1965).
+// decomp: MENU5.PRG drawUIControlsBackground (src/MENU/MENU5.PRG/4D8.c:1970;
+// was _drawUIControlsBackground).
 void LiveDrawControlBackdrop(int x, int y, int w, int h) {
   LiveBackdropHost host;
   if (!DrawControlBackdrop(host, x, y, w, h)) {
@@ -560,7 +562,8 @@ void LiveDrawControlBackdrop(int x, int y, int w, int h) {
   }
 }
 
-// decomp: MENU5.PRG _drawUIControls (4D8.c:1991).
+// decomp: MENU5.PRG drawUIControls (src/MENU/MENU5.PRG/4D8.c:1996; was
+// _drawUIControls).
 void LiveDrawControls() {
   ControlsState state{.animation_state = uiAnimationState,
                       .x_offset = legendOffset};
@@ -573,13 +576,15 @@ void LiveDrawControls() {
   legendOffset = state.x_offset;
 }
 
-// decomp: MENU5.PRG _renderCompass (4D8.c:2272).
+// decomp: MENU5.PRG renderCompass (src/MENU/MENU5.PRG/4D8.c:2277; was
+// _renderCompass).
 void LiveDrawCompass(int x, int y, int angle) {
   LiveCompassHost host;
   StoreCompassBounds(DrawCompass(host, x, y, angle, cameraAngles.vz));
 }
 
-// decomp: MENU5.PRG _computeRotatedRect (4D8.c:2377).
+// decomp: MENU5.PRG computeRotatedRect (src/MENU/MENU5.PRG/4D8.c:2382; was
+// _computeRotatedRect).
 void LiveComputeCompassCorners(int center_x, int center_y, int width,
                                int height, int angle) {
   const std::int32_t sine = Core::Math::Sine(angle);
@@ -588,7 +593,7 @@ void LiveComputeCompassCorners(int center_x, int center_y, int width,
       ComputeCompassCorners(center_x, center_y, width, height, sine, cosine));
 }
 
-// decomp: MENU5.PRG renderMapLabels (4D8.c:2450).
+// decomp: MENU5.PRG renderMapLabels (src/MENU/MENU5.PRG/4D8.c:2455).
 void LiveDrawLabels() {
   LiveLabelHost host;
   if (!DrawLabels(host, menuCommandsState, triggerHideUi != 0, Labels(),

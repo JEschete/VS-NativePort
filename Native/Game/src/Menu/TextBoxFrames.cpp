@@ -205,7 +205,7 @@ bool ValidFace(const FrameFace& face, std::size_t initialized_vertices) {
 
 }  // namespace
 
-// decomp: F01413 func_800CD0FC (BATTLE/BATTLE.PRG/5BF94.c:4633).
+// decomp: F01413 func_800CD0FC (src/BATTLE/BATTLE.PRG/5BF94.c:4198).
 bool DrawInformationBoxHeader(InformationBoxWorld& world, std::int32_t y,
                               std::uint32_t kind) {
   constexpr std::size_t kHeaderCount = 3;
@@ -213,7 +213,7 @@ bool DrawInformationBoxHeader(InformationBoxWorld& world, std::int32_t y,
   return kind >= kHeaderCount || world.DrawHeader(kind, kHeaderX, y);
 }
 
-// decomp: F01414 func_800CD158 (BATTLE/BATTLE.PRG/5BF94.c:4642).
+// decomp: F01414 func_800CD158 (src/BATTLE/BATTLE.PRG/5BF94.c:4207).
 bool DrawInformationBoxBackdrop(InformationBoxWorld& world) {
   constexpr std::int32_t kScreenWidth = 320;
   constexpr std::int32_t kScreenHeight = 240;
@@ -268,7 +268,7 @@ bool DrawInformationBoxBackdrop(InformationBoxWorld& world) {
   return true;
 }
 
-// decomp: F01415 func_800CD3A0 (BATTLE/BATTLE.PRG/5BF94.c:4697).
+// decomp: F01415 func_800CD3A0 (src/BATTLE/BATTLE.PRG/5BF94.c:4262).
 std::uint32_t FlipTextBoxShapePoint(std::uint32_t packed_shape_point,
                                     std::uint32_t flip_axes) {
   constexpr std::uint32_t kByteMask = 255;
@@ -284,7 +284,7 @@ std::uint32_t FlipTextBoxShapePoint(std::uint32_t packed_shape_point,
   return point;
 }
 
-// decomp: BATTLE.PRG func_800CD3E4 (src/BATTLE/BATTLE.PRG/5BF94.c:4715).
+// decomp: BATTLE.PRG func_800CD3E4 (src/BATTLE/BATTLE.PRG/5BF94.c:4280).
 std::expected<FrameDefinition, FrameDecodeError> DecodeTextBoxFrame(
     std::span<const std::uint8_t> bytes) {
   if (bytes.size() < kRecordBytes) {
@@ -343,7 +343,7 @@ std::expected<FrameDefinition, FrameDecodeError> DecodeTextBoxFrame(
   return frame;
 }
 
-// decomp: BATTLE.PRG func_800CD3E4 (src/BATTLE/BATTLE.PRG/5BF94.c:4715).
+// decomp: BATTLE.PRG func_800CD3E4 (src/BATTLE/BATTLE.PRG/5BF94.c:4280).
 std::expected<void, FrameDecodeError> DrawTextBoxFrame(
     Render::PacketQueue& foreground, Render::PacketQueue& shadow,
     std::span<const std::uint8_t> bytes, const FrameRequest& request) {

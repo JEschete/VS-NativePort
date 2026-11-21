@@ -14,13 +14,14 @@
 
 // The commands, sampling, colour, depth and lifetime rules shared by five
 // effect templates: the grid (decomp src/EFFECT/grids.h), the ten-vertex mesh
-// (meshes10.h) and three sheets of sixteen-point rows around a vertical axis,
-// the surface (surfaces.h), the mirrored surface (mirroredSurfaces.h) and the
-// rotating surface (rotatingSurfaces.h). Points, projections, textures,
-// colours and sheet quads are the ring records (RingCore.hpp). Every
-// function works on value records; the effect package, the emitter scratch,
-// the GTE, the texture animation and the frame ordering table are reached
-// through SurfaceHost (SurfacesLive.hpp binds it).
+// (src/EFFECT/meshes10.h) and three sheets of sixteen-point rows around a
+// vertical axis, the surface (src/EFFECT/surfaces.h), the mirrored surface
+// (src/EFFECT/mirroredSurfaces.h) and the rotating surface
+// (src/EFFECT/rotatingSurfaces.h). Points, projections, textures, colours and
+// sheet quads are the ring records (RingCore.hpp). Every function works on
+// value records; the effect package, the emitter scratch, the GTE, the texture
+// animation and the frame ordering table are reached through SurfaceHost
+// (SurfacesLive.hpp binds it).
 namespace VS::Effects::Templates {
 inline constexpr std::size_t kSurfaceColumns = kClosedRingColumns;
 inline constexpr std::size_t kSurfaceRows = 5;

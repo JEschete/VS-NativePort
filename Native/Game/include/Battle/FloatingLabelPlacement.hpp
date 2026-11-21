@@ -185,6 +185,6 @@ std::optional<std::int32_t> QueueEquipmentStatChange(
 bool DrawEquipmentStatChange(FloatingLabelFeedbackWorld& world,
                              FloatingLabelScreenPoint origin,
                              const FloatingLabelRecord& label);
-// decomp: F00742 func_800971D4 (src/BATTLE/BATTLE.PRG/2842C.c:2881).
+// decomp: F00742 func_800971D4 (src/BATTLE/BATTLE.PRG/2842C.c:2869).
 bool CommitEquipmentStatChanges(FloatingLabelRecords& records);
 }  // namespace VS::Battle

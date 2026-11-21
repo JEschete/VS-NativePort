@@ -59,9 +59,9 @@ constexpr unsigned kBackgroundPaletteTarget = 2;
 
 }  // namespace
 
-// decomp: BATTLE.PRG func_800B9A40 (4A0A8.c:2049). Phase 0 starts the
-// fade-out, phase 5 (the covered screen) ends the wait and every other phase
-// keeps waiting.
+// decomp: BATTLE.PRG vs_battle_script_69 (src/BATTLE/BATTLE.PRG/4DEA8.c:2636;
+// was func_800B9A40). Phase 0 starts the fade-out, phase 5 (the covered screen)
+// ends the wait and every other phase keeps waiting.
 ScriptFlow ScriptFadeOutAndWait(const ScriptInstruction& instruction,
                                 ScriptVmHost& host) {
   if (!InstructionFits(instruction, kFadeOutAndWaitLength, host)) {
@@ -77,7 +77,8 @@ ScriptFlow ScriptFadeOutAndWait(const ScriptInstruction& instruction,
   return Hold();
 }
 
-// decomp: BATTLE.PRG func_800B9A94 (4A0A8.c:2061).
+// decomp: BATTLE.PRG vs_battle_script_6A (src/BATTLE/BATTLE.PRG/4DEA8.c:2648;
+// was func_800B9A94).
 ScriptFlow ScriptFadeIn(const ScriptInstruction& instruction,
                         ScriptVmHost& host) {
   if (!InstructionFits(instruction, kFadeInLength, host)) {
@@ -87,7 +88,8 @@ ScriptFlow ScriptFadeIn(const ScriptInstruction& instruction,
   return Advance();
 }
 
-// decomp: BATTLE.PRG func_800B9AC4 (4A0A8.c:2067).
+// decomp: BATTLE.PRG vs_battle_script_6B (src/BATTLE/BATTLE.PRG/4DEA8.c:2654;
+// was func_800B9AC4).
 ScriptFlow ScriptSetWipeAngle(const ScriptInstruction& instruction,
                               ScriptVmHost& host) {
   if (!InstructionFits(instruction, kSetWipeAngleLength, host)) {
@@ -98,7 +100,8 @@ ScriptFlow ScriptSetWipeAngle(const ScriptInstruction& instruction,
   return Advance();
 }
 
-// decomp: BATTLE.PRG func_800B9AE8 (4A0A8.c:2073).
+// decomp: BATTLE.PRG vs_battle_script_6C (src/BATTLE/BATTLE.PRG/4DEA8.c:2660;
+// was func_800B9AE8).
 ScriptFlow ScriptConfigureScreenTransition(const ScriptInstruction& instruction,
                                            ScriptVmHost& host) {
   if (!InstructionFits(instruction, kConfigureScreenTransitionLength, host)) {
@@ -108,8 +111,8 @@ ScriptFlow ScriptConfigureScreenTransition(const ScriptInstruction& instruction,
   return Advance();
 }
 
-// decomp: BATTLE.PRG func_800B9B18 (4A0A8.c:2079). Switch values 2 and 3
-// leave their system unchanged.
+// decomp: BATTLE.PRG vs_battle_script_6D (src/BATTLE/BATTLE.PRG/4DEA8.c:2666;
+// was func_800B9B18). Switch values 2 and 3 leave their system unchanged.
 ScriptFlow ScriptSetRoomDisplayFlags(const ScriptInstruction& instruction,
                                      ScriptVmHost& host) {
   if (!InstructionFits(instruction, kSetRoomDisplayFlagsLength, host)) {
@@ -149,14 +152,16 @@ ScriptFlow ScriptSetRoomDisplayFlags(const ScriptInstruction& instruction,
   return Advance();
 }
 
-// decomp: BATTLE.PRG func_800B9BF8 (4A0A8.c:2110).
+// decomp: BATTLE.PRG vs_battle_script_6E (src/BATTLE/BATTLE.PRG/4DEA8.c:2697;
+// was func_800B9BF8).
 ScriptFlow ScriptWaitForScreenTransition(
     const ScriptInstruction& /*instruction*/, ScriptVmHost& host) {
   return host.ScreenTransitionPhase() != kScreenTransitionIdle ? Hold()
                                                                : Advance();
 }
 
-// decomp: BATTLE.PRG func_800B9C18 (4A0A8.c:2112).
+// decomp: BATTLE.PRG vs_battle_script_6F (src/BATTLE/BATTLE.PRG/4DEA8.c:2702;
+// was func_800B9C18).
 ScriptFlow ScriptTogglePaletteHook(const ScriptInstruction& instruction,
                                    ScriptVmHost& host) {
   if (!InstructionFits(instruction, kTogglePaletteHookLength, host)) {
@@ -168,9 +173,9 @@ ScriptFlow ScriptTogglePaletteHook(const ScriptInstruction& instruction,
   return Advance();
 }
 
-// decomp: BATTLE.PRG func_800B9C58 (4A0A8.c:2122). The selector halfword at
-// operand 2 is read unaligned; the duration shift is the R3000's sllv, which
-// uses the operand modulo 32.
+// decomp: BATTLE.PRG vs_battle_script_70 (src/BATTLE/BATTLE.PRG/4DEA8.c:2712;
+// was func_800B9C58). The selector halfword at operand 2 is read unaligned; the
+// duration shift is the R3000's sllv, which uses the operand modulo 32.
 ScriptFlow ScriptTransformPalettes(const ScriptInstruction& instruction,
                                    ScriptVmHost& host) {
   if (!InstructionFits(instruction, kTransformPalettesLength, host)) {

@@ -40,7 +40,8 @@ bool MirrorSurface(SurfaceTextureSpan span, SurfaceCommand command,
 }  // namespace VS::Effects::Templates
 
 namespace VS::Effects {
-// decomp: PLG146.BIN func_800FA8D0 (src/EFFECT/PLG146.BIN/1D8.c:6).
+// decomp: PLG146.BIN vs_effect_blackNebula_1 (src/EFFECT/surfaces.h:62; was
+// func_800FA8D0).
 bool Plg146::MirrorSurface(Templates::SurfaceCommand command,
                            std::int32_t packed,
                            Templates::SurfaceProfile profile,
@@ -50,7 +51,8 @@ bool Plg146::MirrorSurface(Templates::SurfaceCommand command,
       host);
 }
 
-// decomp: PLG158.BIN func_800FA398 (src/EFFECT/PLG158.BIN/0.c:13).
+// decomp: PLG158.BIN vs_effect_hexFlux_1 (src/EFFECT/surfaces.h:62; was
+// func_800FA398).
 bool Plg158::MirrorSurface(Templates::SurfaceCommand command,
                            std::int32_t packed,
                            Templates::SurfaceProfile profile,
@@ -60,7 +62,8 @@ bool Plg158::MirrorSurface(Templates::SurfaceCommand command,
       host);
 }
 
-// decomp: PLG166.BIN func_800FA6B8 (src/EFFECT/PLG166.BIN/0.c:11).
+// decomp: PLG166.BIN vs_effect_sanctusFlare_1 (src/EFFECT/surfaces.h:62; was
+// func_800FA6B8).
 bool Plg166::MirrorSurface(Templates::SurfaceCommand command,
                            std::int32_t packed,
                            Templates::SurfaceProfile profile,
@@ -70,7 +73,8 @@ bool Plg166::MirrorSurface(Templates::SurfaceCommand command,
       host);
 }
 
-// decomp: PLG170.BIN func_800F9818 (src/EFFECT/PLG170.BIN/18.c:8).
+// decomp: PLG170.BIN vs_effect_retribution_0 (src/EFFECT/surfaces.h:62; was
+// func_800F9818).
 bool Plg170::MirrorSurface(Templates::SurfaceCommand command,
                            std::int32_t packed,
                            Templates::SurfaceProfile profile,
@@ -80,7 +84,8 @@ bool Plg170::MirrorSurface(Templates::SurfaceCommand command,
       host);
 }
 
-// decomp: PLG273.BIN func_800F9800 (src/EFFECT/PLG273.BIN/0.c:2).
+// decomp: PLG273.BIN vs_effect_plg273_0 (src/EFFECT/surfaces.h:62; was
+// func_800F9800).
 bool Plg273::MirrorSurface(Templates::SurfaceCommand command,
                            std::int32_t packed,
                            Templates::SurfaceProfile profile,
@@ -89,7 +94,8 @@ bool Plg273::MirrorSurface(Templates::SurfaceCommand command,
                                   command, packed, profile, host);
 }
 
-// decomp: PLG297.BIN func_800F9818 (src/EFFECT/PLG297.BIN/18.c:8).
+// decomp: PLG297.BIN vs_effect_plg297_0 (src/EFFECT/surfaces.h:62; was
+// func_800F9818).
 bool Plg297::MirrorSurface(Templates::SurfaceCommand command,
                            std::int32_t packed,
                            Templates::SurfaceProfile profile,
@@ -99,7 +105,8 @@ bool Plg297::MirrorSurface(Templates::SurfaceCommand command,
       host);
 }
 
-// decomp: PLG300.BIN func_800F9910 (src/EFFECT/PLG300.BIN/110.c:8).
+// decomp: PLG300.BIN vs_effect_plg300_0 (src/EFFECT/surfaces.h:62; was
+// func_800F9910).
 bool Plg300::MirrorSurface(Templates::SurfaceCommand command,
                            std::int32_t packed,
                            Templates::SurfaceProfile profile,

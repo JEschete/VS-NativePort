@@ -110,22 +110,23 @@ class HudOrchestrationWorld {
   virtual bool DrawStatusIcon(const SlidingHudStatusIcon& icon) = 0;
 };
 
-// decomp: F00729 func_80095B70 (src/BATTLE/BATTLE.PRG/2842C.c:2379).
+// decomp: F00729 func_80095B70 (src/BATTLE/BATTLE.PRG/2842C.c:2367).
 void SetActorMarkersHidden(HudFeedbackState& state, std::int32_t command);
 // Slot zero fills all sixteen command bytes. The two flag commands have
 // priority over replacing a nonzero slot's low seven bits.
 // decomp: F00730 func_80095B7C (src/BATTLE/BATTLE.PRG/2842C.c:2381).
 bool SetActorMarker(std::span<std::byte, kActorMarkerCount> markers,
                     std::int32_t slot, std::int32_t command);
-// decomp: F00743 func_8009722C (src/BATTLE/BATTLE.PRG/2842C.c:2893).
+// decomp: F00743 func_8009722C (src/BATTLE/BATTLE.PRG/2842C.c:2881).
 void SuppressAshleyStatusLabels(HudFeedbackState& state);
-// decomp: F01361 func_800C9FE8 (src/BATTLE/BATTLE.PRG/5BF94.c:3249).
+// decomp: F01361 func_800C9FE8 (src/BATTLE/BATTLE.PRG/5BF94.c:2800).
 bool DrawShortcutHud(HudOrchestrationWorld& world);
-// decomp: F01362 func_800CA2DC (src/BATTLE/BATTLE.PRG/5BF94.c:3307).
+// decomp: F01362 func_800CA2DC (src/BATTLE/BATTLE.PRG/5BF94.c:2857).
 bool DrawBattleHud(HudOrchestrationWorld& world);
 // The clock's bytes are zero-extended, including nominally signed fields.
 // The punctuation and terminator belong to the native text owner and survive.
-// decomp: F01384 _renderTimer (src/BATTLE/BATTLE.PRG/5BF94.c:3844).
+// decomp: F01384 renderTimer (src/BATTLE/BATTLE.PRG/5BF94.c:3410; was
+// _renderTimer).
 void FormatPuzzleTimer(const State::SceneTime& time, std::uint8_t hundredths,
                        std::span<char, kPuzzleTimerTextBytes> text);
 }  // namespace VS::Battle

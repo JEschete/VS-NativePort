@@ -69,13 +69,13 @@ class CutsceneHost {
   virtual void EnterFieldExploration() = 0;
 };
 
-// decomp: BATTLE.PRG func_80073718 (src/BATTLE/BATTLE.PRG/146C.c:4720)
+// decomp: BATTLE.PRG func_80073718 (src/BATTLE/BATTLE.PRG/146C.c:4447)
 [[nodiscard]] bool PrepareCutsceneActors(CutsceneHost& host);
-// decomp: BATTLE.PRG func_80073870 (src/BATTLE/BATTLE.PRG/146C.c:4761)
+// decomp: BATTLE.PRG func_80073870 (src/BATTLE/BATTLE.PRG/146C.c:4488)
 [[nodiscard]] bool StartPreparedCutscene(CutsceneHost& host);
-// decomp: BATTLE.PRG func_80073898 (src/BATTLE/BATTLE.PRG/146C.c:4767)
+// decomp: BATTLE.PRG func_80073898 (src/BATTLE/BATTLE.PRG/146C.c:4494)
 [[nodiscard]] bool BeginQueuedCutscene(CutsceneHost& host);
-// decomp: BATTLE.PRG func_800738E4 (src/BATTLE/BATTLE.PRG/146C.c:4777)
+// decomp: BATTLE.PRG func_800738E4 (src/BATTLE/BATTLE.PRG/146C.c:4504)
 void EndFieldCutscene(CutsceneHost& host);
 
 }  // namespace VS::Event

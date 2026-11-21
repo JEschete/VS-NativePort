@@ -174,8 +174,9 @@ std::optional<std::int32_t> QueueActorValueLabel(
   return 0;
 }
 
-// decomp: vs_battle_renderBattleAbilityTimingResult
-// (src/BATTLE/BATTLE.PRG/2842C.c:1643)
+// decomp: renderBattleAbilityTimingResult
+// (src/BATTLE/BATTLE.PRG/2842C.c:1631; was
+// vs_battle_renderBattleAbilityTimingResult)
 std::optional<std::int32_t> QueueAbilityTimingResult(
     std::int32_t timing_result, FloatingLabelProducerWorld& world) {
   if (!RemoveFirstLabel(world, true, [](const FloatingLabelRecord& label) {
@@ -225,7 +226,7 @@ std::optional<std::int32_t> QueueChainCount(std::int32_t chain_count,
   return 0;
 }
 
-// decomp: func_80093FEC (src/BATTLE/BATTLE.PRG/2842C.c:1695)
+// decomp: func_80093FEC (src/BATTLE/BATTLE.PRG/2842C.c:1683)
 std::optional<std::int32_t> QueueActorStatusLabels(
     std::int32_t actor_slot, std::int32_t status_mask, std::int32_t label_flags,
     FloatingLabelProducerWorld& world) {

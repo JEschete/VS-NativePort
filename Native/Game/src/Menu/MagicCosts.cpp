@@ -57,7 +57,7 @@ constexpr MenuItem kHeaderItem{
     .selected = 1,
 };
 
-// decomp: _savePointData (src/MENU/MENU0.PRG/84.c:95).
+// decomp: savePointData (src/MENU/MENU0.PRG/84.c:112; was _savePointData).
 constexpr std::array<std::uint32_t, kSavePointCount> kOriginalSavePointWords{
     0x0305001B, 0x0801000E, 0x04030199, 0x0C0C001C, 0x070C0028, 0x040200CD,
     0x0F070035, 0x08060093, 0x060000CE, 0x09080106, 0x09080111, 0x0C030098,
@@ -298,7 +298,7 @@ std::int32_t PackTeleportDestination(
 }
 
 // decomp: D_800F18EC_t executeAbility bits
-// (src/BATTLE/BATTLE.PRG/5BF94.h:160).
+// (src/BATTLE/BATTLE.PRG/battleUi.h:162).
 TeleportDestination UnpackTeleportDestination(std::int32_t packed) noexcept {
   const auto word = static_cast<std::uint32_t>(packed);
   return TeleportDestination{
@@ -312,7 +312,7 @@ TeleportDestination UnpackTeleportDestination(std::int32_t packed) noexcept {
   };
 }
 
-// decomp: MENU0.PRG _setMPCost (src/MENU/MENU0.PRG/84.c:18).
+// decomp: MENU0.PRG setMPCost (src/MENU/MENU0.PRG/84.c:23; was _setMPCost).
 void SetSpellMpCost(int signed_action_id, Host& host) {
   if (signed_action_id == std::numeric_limits<int>::min()) {
     host.Refuse("Magic spell action id cannot be negated");
@@ -340,7 +340,8 @@ void SetSpellMpCost(int signed_action_id, Host& host) {
       disabled);
 }
 
-// decomp: MENU0.PRG _setMPCostDirect (src/MENU/MENU0.PRG/84.c:64).
+// decomp: MENU0.PRG setMPCostDirect (src/MENU/MENU0.PRG/84.c:69; was
+// _setMPCostDirect).
 void SetTeleportMpCost(int mp_cost, int disabled, Host& host) {
   if (mp_cost < 0 || mp_cost > kMaxFormattedMpCost) {
     host.Refuse("Magic teleport MP cost is outside the formatted range");
@@ -352,7 +353,8 @@ void SetTeleportMpCost(int mp_cost, int disabled, Host& host) {
                          kCostValueX, disabled);
 }
 
-// decomp: MENU0.PRG _getTeleportCost (src/MENU/MENU0.PRG/84.c:117).
+// decomp: MENU0.PRG getTeleportCost (src/MENU/MENU0.PRG/84.c:128; was
+// _getTeleportCost).
 std::optional<int> TeleportMpCost(int target_save_point, int current_room_id,
                                   const SavePointTable& save_points) {
   if (target_save_point < 0 ||
@@ -375,7 +377,8 @@ std::optional<int> TeleportMpCost(int target_save_point, int current_room_id,
   return cost;
 }
 
-// decomp: MENU0.PRG _teleportMenu (src/MENU/MENU0.PRG/15AC.c:22).
+// decomp: MENU0.PRG teleportMenu (src/MENU/MENU0.PRG/15AC.c:23; was
+// _teleportMenu).
 TeleportMenuResult UpdateTeleportMenu(int init, TeleportMenuState& state,
                                       Host& host) {
   if (init != 0) {
@@ -401,7 +404,8 @@ TeleportMenuResult UpdateTeleportMenu(int init, TeleportMenuState& state,
   return {};
 }
 
-// decomp: MENU0.PRG _setMenuHeader (src/MENU/MENU0.PRG/15AC.c:148).
+// decomp: MENU0.PRG setMenuHeader (src/MENU/MENU0.PRG/15AC.c:148; was
+// _setMenuHeader).
 void CreateHeader(Host& host) {
   const std::span<const std::uint16_t> strings = host.BattleMenuStrings();
   const std::size_t index = host.MagicHeaderIndex();

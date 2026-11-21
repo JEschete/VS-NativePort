@@ -70,7 +70,7 @@ int BuildupMarker(std::uint16_t engaged_frames) {
 }
 }  // namespace
 
-// decomp: func_800D820C (src/BATTLE/BATTLE.PRG/6FA0C.s:9).
+// decomp: func_800D820C (src/BATTLE/BATTLE.PRG/6FA0C.s:6).
 bool SetActorAwarenessIndicator(AwarenessMarkers& markers, int actor_id,
                                 int marker) {
   if (!IsEngagementSlot(actor_id)) {
@@ -81,25 +81,25 @@ bool SetActorAwarenessIndicator(AwarenessMarkers& markers, int actor_id,
   return true;
 }
 
-// decomp: func_800D821C (src/BATTLE/BATTLE.PRG/6FA0C.s:18).
+// decomp: func_800D821C (src/BATTLE/BATTLE.PRG/6FA0C.s:13).
 bool ResetActorAwarenessIndicator(AwarenessMarkers& markers, int actor_id) {
   return SetActorAwarenessIndicator(markers, actor_id, 0) &&
          SetActorAwarenessIndicator(markers, actor_id, kAwarenessMarkerReset);
 }
 
-// decomp: func_800D8260 (src/BATTLE/BATTLE.PRG/6FA60.c:407).
+// decomp: func_800D8260 (src/BATTLE/BATTLE.PRG/6FA0C.c:22).
 void SetTemporaryAwarenessIndicator(TemporaryAwareness& awareness, int marker,
                                     int frames) {
   awareness.marker = static_cast<std::uint16_t>(marker);
   awareness.frames_remaining = static_cast<std::uint8_t>(frames);
 }
 
-// decomp: func_800D826C (src/BATTLE/BATTLE.PRG/6FA6C.s:10).
+// decomp: func_800D826C (src/BATTLE/BATTLE.PRG/6FA0C.c:28).
 bool IsEngagementReady(std::uint16_t engaged_frames) {
   return engaged_frames >= kEngagementReadyFrames;
 }
 
-// decomp: func_800D8280 (src/BATTLE/BATTLE.PRG/6FA6C.s:22).
+// decomp: func_800D8280 (src/BATTLE/BATTLE.PRG/6FA0C.c:30).
 bool UpdateTemporaryAwarenessIndicator(AwarenessMarkers& markers, int actor_id,
                                        TemporaryAwareness& awareness) {
   if (awareness.frames_remaining == 0) return true;
@@ -112,7 +112,7 @@ bool UpdateTemporaryAwarenessIndicator(AwarenessMarkers& markers, int actor_id,
   return SetActorAwarenessIndicator(markers, actor_id, marker);
 }
 
-// decomp: func_800D82A8 (src/BATTLE/BATTLE.PRG/6FA6C.s:37).
+// decomp: func_800D82A8 (src/BATTLE/BATTLE.PRG/6FA0C.c:41).
 std::optional<bool> DisengageActorById(EngagementTable& table, int actor_id) {
   if (!IsEngagementSlot(actor_id)) {
     return Refuse("AI disengagement actor ID is outside the AI state table");
@@ -122,7 +122,7 @@ std::optional<bool> DisengageActorById(EngagementTable& table, int actor_id) {
   return true;
 }
 
-// decomp: func_800D82CC (src/BATTLE/BATTLE.PRG/6FA6C.s:53).
+// decomp: func_800D82CC (src/BATTLE/BATTLE.PRG/6FA0C.c:48).
 std::optional<bool> DisengageActor(EngagementHost& host, int actor_id,
                                    EngagementTimers& timers,
                                    EngagementRoster& roster) {
@@ -149,7 +149,7 @@ std::optional<bool> DisengageActor(EngagementHost& host, int actor_id,
   return true;
 }
 
-// decomp: func_800D836C (src/BATTLE/BATTLE.PRG/6FA6C.s:99).
+// decomp: func_800D836C (src/BATTLE/BATTLE.PRG/6FA0C.c:67).
 std::optional<bool> TryEngageActor(EngagementHost& host, int actor_id,
                                    EngagementTimers& timers,
                                    EngagementRoster* roster) {
@@ -176,7 +176,7 @@ std::optional<bool> TryEngageActor(EngagementHost& host, int actor_id,
   return true;
 }
 
-// decomp: func_800DBF00 (src/BATTLE/BATTLE.PRG/73700.c:414).
+// decomp: func_800DBF00 (src/BATTLE/BATTLE.PRG/73700.c:13).
 bool UnlinkEngagedActor(EngagedList& list, int actor_id) {
   if (!IsEngagementSlot(actor_id)) {
     Refuse("AI engaged-list removal actor ID is outside the AI state table");
@@ -214,7 +214,7 @@ bool UnlinkEngagedActor(EngagedList& list, int actor_id) {
   return true;
 }
 
-// decomp: func_800DBFE4 (src/BATTLE/BATTLE.PRG/73700.c:463).
+// decomp: func_800DBFE4 (src/BATTLE/BATTLE.PRG/73700.c:43).
 bool UpdateEngagementBuildup(EngagementBuildupHost& host, int actor_id,
                              EngagementTimers& timers,
                              EngagementRoster* roster) {
@@ -250,7 +250,7 @@ bool UpdateEngagementBuildup(EngagementBuildupHost& host, int actor_id,
   return true;
 }
 
-// decomp: func_800DC0D0 (src/BATTLE/BATTLE.PRG/73700.c:499).
+// decomp: func_800DC0D0 (src/BATTLE/BATTLE.PRG/73700.c:80).
 bool AnimateEngagementPhase(EngagedList& list) {
   // The list is built by pushing onto its head, so it cannot revisit a member;
   // the original would loop forever on such a list.

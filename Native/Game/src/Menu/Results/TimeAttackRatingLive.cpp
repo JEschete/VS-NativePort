@@ -107,54 +107,56 @@ std::array<TrialScoreRow, kTimeAttackCourses> LiveCourseScores() {
 }
 }  // namespace
 
-// decomp: MENUF.PRG _renderTimeAttackResultsHeader
-// (src/MENU/MENUF.PRG/3B8.c:1654), 0x8010559C
+// decomp: MENUF.PRG renderTimeAttackResultsHeader
+// (src/MENU/MENUF.PRG/3B8.c:1666; was _renderTimeAttackResultsHeader),
+// 0x8010559C
 void LiveDrawTimeAttackResultsHeading(int x, int y, int timer) {
   LiveResultsHost host;
   Report(DrawTimeAttackResultsHeading(LiveResultsAtlas(), x, y, timer, host));
 }
 
-// decomp: MENUF.PRG _renderTimeAttackRating (src/MENU/MENUF.PRG/3B8.c:1678),
-// 0x8010564C
+// decomp: MENUF.PRG renderTimeAttackRating (src/MENU/MENUF.PRG/3B8.c:1690; was
+// _renderTimeAttackRating), 0x8010564C
 void LiveDrawTimeAttackRating(int x, int y, int fade_timer) {
   LiveResultsHost host;
   Report(DrawTimeAttackRating(LiveResultsAtlas(), x, y, fade_timer,
                               timeTrialTime, host));
 }
 
-// decomp: MENUF.PRG _renderTimeAttackRatingWipe
-// (src/MENU/MENUF.PRG/3B8.c:1708), 0x801056E8
+// decomp: MENUF.PRG renderTimeAttackRatingWipe
+// (src/MENU/MENUF.PRG/3B8.c:1720; was _renderTimeAttackRatingWipe), 0x801056E8
 void LiveDrawTimeAttackRatingWipe(int x, int y, int timer) {
   LiveResultsHost host;
   Report(DrawTimeAttackRatingWipe(LiveResultsAtlas(), x, y, timer,
                                   timeTrialTime, host));
 }
 
-// decomp: MENUF.PRG _renderHeaderAndTime (src/MENU/MENUF.PRG/3B8.c:1743),
-// 0x80105790
+// decomp: MENUF.PRG renderHeaderAndTime (src/MENU/MENUF.PRG/3B8.c:1755; was
+// _renderHeaderAndTime), 0x80105790
 void LiveDrawTimeAttackTime(int x, int y, int fade_timer) {
   LiveResultsHost host;
   Report(DrawTimeAttackTime(LiveResultsAtlas(), x, y, fade_timer, timeTrialTime,
                             host));
 }
 
-// decomp: MENUF.PRG _renderHeaderAndIncrementalTime
-// (src/MENU/MENUF.PRG/3B8.c:1762), 0x8010581C
+// decomp: MENUF.PRG renderHeaderAndIncrementalTime
+// (src/MENU/MENUF.PRG/3B8.c:1774; was _renderHeaderAndIncrementalTime),
+// 0x8010581C
 void LiveDrawCountingTimeAttackTime(int x, int y, int timer) {
   LiveResultsHost host;
   Report(DrawCountingTimeAttackTime(LiveResultsAtlas(), x, y, timer,
                                     timeTrialTime, host));
 }
 
-// decomp: MENUF.PRG _renderNewRecord (src/MENU/MENUF.PRG/3B8.c:1801),
-// 0x801059B8
+// decomp: MENUF.PRG renderNewRecord (src/MENU/MENUF.PRG/3B8.c:1813; was
+// _renderNewRecord), 0x801059B8
 void LiveDrawNewRecord(int x, int y, int timer) {
   LiveResultsHost host;
   Report(DrawNewRecord(LiveResultsAtlas(), x, y, timer, host));
 }
 
-// decomp: MENUF.PRG _renderAllStoredTimes (src/MENU/MENUF.PRG/3B8.c:1816),
-// 0x801059FC
+// decomp: MENUF.PRG renderAllStoredTimes (src/MENU/MENUF.PRG/3B8.c:1828; was
+// _renderAllStoredTimes), 0x801059FC
 void LiveDrawLeaderboard(int x, int y, int timer) {
   LiveResultsHost host;
   const auto scores = LiveCourseScores();
@@ -162,8 +164,8 @@ void LiveDrawLeaderboard(int x, int y, int timer) {
                          newTimeSlot, scores, host));
 }
 
-// decomp: MENUF.PRG _renderStoredTime (src/MENU/MENUF.PRG/3B8.c:1849),
-// 0x80105B30
+// decomp: MENUF.PRG renderStoredTime (src/MENU/MENUF.PRG/3B8.c:1861; was
+// _renderStoredTime), 0x80105B30
 void LiveDrawLeaderboardEntry(int x, int y, int slot, int timer) {
   LiveResultsHost host;
   const auto scores = LiveCourseScores();

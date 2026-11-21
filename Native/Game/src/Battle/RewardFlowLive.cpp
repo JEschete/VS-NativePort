@@ -198,47 +198,47 @@ void UpdateLiveRewardResultsDialog() {
   LiveWorld world;
   UpdateRewardResultsDialog(world);
 }
-// decomp: BATTLE.PRG func_800797BC (src/BATTLE/BATTLE.PRG/146C.c:7516)
+// decomp: BATTLE.PRG func_800797BC (src/BATTLE/BATTLE.PRG/146C.c:7368)
 void UpdateLiveLootResults() {
   LiveWorld world;
   UpdateLootResults(world);
 }
-// decomp: BATTLE.PRG func_8007980C (src/BATTLE/BATTLE.PRG/146C.c:7526)
+// decomp: BATTLE.PRG func_8007980C (src/BATTLE/BATTLE.PRG/146C.c:7378)
 void UpdateLiveAbilityUnlockDelay() {
   LiveWorld world;
   UpdateAbilityUnlockDelay(world);
 }
-// decomp: BATTLE.PRG func_8007983C (src/BATTLE/BATTLE.PRG/146C.c:7533)
+// decomp: BATTLE.PRG func_8007983C (src/BATTLE/BATTLE.PRG/146C.c:7385)
 void UpdateLiveAbilityUnlockResults() {
   LiveWorld world;
   UpdateAbilityUnlockResults(world);
 }
-// decomp: BATTLE.PRG func_8007B884 (src/BATTLE/BATTLE.PRG/146C.c:8402)
+// decomp: BATTLE.PRG func_8007B884 (src/BATTLE/BATTLE.PRG/146C.c:8331)
 void UpdateLivePendingLootDialog() {
   LiveWorld world;
   UpdatePendingLootDialog(world);
 }
-// decomp: BATTLE.PRG func_8007B908 (src/BATTLE/BATTLE.PRG/146C.c:8418)
+// decomp: BATTLE.PRG func_8007B908 (src/BATTLE/BATTLE.PRG/146C.c:8347)
 void WaitForLiveRewardUnlockEffects() {
   LiveWorld world;
   WaitForRewardUnlockEffects(world);
 }
-// decomp: BATTLE.PRG func_8007B938 (src/BATTLE/BATTLE.PRG/146C.c:8425)
+// decomp: BATTLE.PRG func_8007B938 (src/BATTLE/BATTLE.PRG/146C.c:8354)
 void UpdateLiveRewardUnlockDialog() {
   LiveWorld world;
   UpdateRewardUnlockDialog(world);
 }
-// decomp: BATTLE.PRG func_8007B9A0 (src/BATTLE/BATTLE.PRG/146C.c:8436)
+// decomp: BATTLE.PRG func_8007B9A0 (src/BATTLE/BATTLE.PRG/146C.c:8365)
 void BeginLiveEventRewardResults() {
   LiveWorld world;
   BeginEventRewardResults(world);
 }
-// decomp: BATTLE.PRG func_8007B9CC (src/BATTLE/BATTLE.PRG/146C.c:8443)
+// decomp: BATTLE.PRG func_8007B9CC (src/BATTLE/BATTLE.PRG/146C.c:8372)
 void BeginLivePostActionRewards() {
   LiveWorld world;
   BeginPostActionRewards(world);
 }
-// decomp: BATTLE.PRG func_8007B9FC (src/BATTLE/BATTLE.PRG/146C.c:8450)
+// decomp: BATTLE.PRG func_8007B9FC (src/BATTLE/BATTLE.PRG/146C.c:8379)
 int UpdateLiveRewardSequence() {
   LiveWorld world;
   return UpdateRewardSequence(world);

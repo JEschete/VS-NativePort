@@ -39,9 +39,9 @@ struct RowPlacement {
   std::int32_t lift{};
 };
 
-// decomp: rotatingSurfaces.h:163-179: the four columns of the first quarter
-// at the row's angle, each repeated a quarter turn further three times; x
-// and z of each copy are the previous copy's (-z, x).
+// decomp: src/EFFECT/rotatingSurfaces.h:163-179: the four columns of the first
+// quarter at the row's angle, each repeated a quarter turn further three times;
+// x and z of each copy are the previous copy's (-z, x).
 [[nodiscard]] std::array<RingPoint, kSurfaceColumns> TurnRow(
     const RowPlacement& at) {
   const math::Vec3& origin = at.origin;
@@ -64,7 +64,7 @@ struct RowPlacement {
 }
 }  // namespace
 
-// decomp: rotatingSurfaces.h:144-155 (the turn of one tick).
+// decomp: src/EFFECT/rotatingSurfaces.h:144-155 (the turn of one tick).
 std::int32_t RotatingSurfaceStep(math::Vec2 speed, SurfaceHost& host) {
   if (speed.x == speed.y) {
     return speed.x;
@@ -76,7 +76,7 @@ std::int32_t RotatingSurfaceStep(math::Vec2 speed, SurfaceHost& host) {
   return math::WrappingAdd(SurfaceRemainder(host.Rand(), width), low);
 }
 
-// decomp: rotatingSurfaces.h:156-187 (the points of the five rows).
+// decomp: src/EFFECT/rotatingSurfaces.h:156-187 (the points of the five rows).
 SheetPoints RotatingSurfacePoints(SheetFrame& frame, std::int32_t step) {
   frame.state.angle = math::WrappingAdd(frame.state.angle, step);
   const math::Vec3 origin = frame.scratch.position;
@@ -107,7 +107,7 @@ SheetPoints RotatingSurfacePoints(SheetFrame& frame, std::int32_t step) {
 }
 
 // decomp: EFFECT VS_ROTATING_SURFACE_FUNCTION
-// (src/EFFECT/rotatingSurfaces.h:34).
+// (src/EFFECT/rotatingSurfaces.h:43).
 bool RotatingSurface(SurfaceTextureSpan span, SurfaceCommand command,
                      std::int32_t packed, SheetHost& host) {
   return RunSheet(command, packed, kSurfaceRows, span, host,
@@ -120,134 +120,153 @@ bool RotatingSurface(SurfaceTextureSpan span, SurfaceCommand command,
 }  // namespace VS::Effects::Templates
 
 namespace VS::Effects {
-// decomp: PLG049.BIN func_800FD51C (src/EFFECT/PLG049.BIN/E0.c:24).
+// decomp: PLG049.BIN vs_spiritSurge_3 (src/EFFECT/rotatingSurfaces.h:43; was
+// func_800FD51C).
 bool Plg049::RotatingSurface(Templates::SurfaceCommand command,
                              std::int32_t packed, Templates::SheetHost& host) {
   return Templates::RotatingSurface(
       Templates::SurfaceTextureSpan::kSixteenColumns, command, packed, host);
 }
 
-// decomp: PLG065.BIN func_800F98F8 (src/EFFECT/PLG065.BIN/F8.c:8).
+// decomp: PLG065.BIN vs_effect_gaeaStrikeLv1_0
+// (src/EFFECT/rotatingSurfaces.h:43; was func_800F98F8).
 bool Plg065::RotatingSurface(Templates::SurfaceCommand command,
                              std::int32_t packed, Templates::SheetHost& host) {
   return Templates::RotatingSurface(
       Templates::SurfaceTextureSpan::kSixteenColumns, command, packed, host);
 }
 
-// decomp: PLG073.BIN func_800FD534 (src/EFFECT/PLG073.BIN/F8.c:20).
-// decomp: PLG074.BIN func_800FD534 (src/EFFECT/PLG074.BIN/F8.c:21).
+// decomp: PLG073.BIN vs_effect_radialSurgeLv1_3
+// (src/EFFECT/rotatingSurfaces.h:43; was func_800FD534). decomp: PLG074.BIN
+// func_800FD534 (src/EFFECT/PLG074.BIN/F8.c:21).
 bool Plg073::RotatingSurface(Templates::SurfaceCommand command,
                              std::int32_t packed, Templates::SheetHost& host) {
   return Templates::RotatingSurface(
       Templates::SurfaceTextureSpan::kSixteenColumns, command, packed, host);
 }
 
-// decomp: PLG081.BIN func_800F9800 (src/EFFECT/PLG081.BIN/0.c:8).
+// decomp: PLG081.BIN vs_effect_tornado_0 (src/EFFECT/rotatingSurfaces.h:43; was
+// func_800F9800).
 bool Plg081::RotatingSurface(Templates::SurfaceCommand command,
                              std::int32_t packed, Templates::SheetHost& host) {
   return Templates::RotatingSurface(
       Templates::SurfaceTextureSpan::kSixteenColumns, command, packed, host);
 }
 
-// decomp: PLG086.BIN func_800FA868 (src/EFFECT/PLG086.BIN/F8.c:13).
+// decomp: PLG086.BIN vs_effect_judgment_1 (src/EFFECT/rotatingSurfaces.h:43;
+// was func_800FA868).
 bool Plg086::RotatingSurface(Templates::SurfaceCommand command,
                              std::int32_t packed, Templates::SheetHost& host) {
   return Templates::RotatingSurface(
       Templates::SurfaceTextureSpan::kSixteenColumns, command, packed, host);
 }
 
-// decomp: PLG128.BIN func_800FB400 (src/EFFECT/PLG128.BIN/F8.c:56).
+// decomp: PLG128.BIN vs_effect_bloodySin_2 (src/EFFECT/rotatingSurfaces.h:43;
+// was func_800FB400).
 bool Plg128::RotatingSurface(Templates::SurfaceCommand command,
                              std::int32_t packed, Templates::SheetHost& host) {
   return Templates::RotatingSurface(Templates::SurfaceTextureSpan::kFourColumns,
                                     command, packed, host);
 }
 
-// decomp: PLG129.BIN func_800FC6EC (src/EFFECT/PLG129.BIN/0.c:23).
+// decomp: PLG129.BIN vs_effect_lastAscension_4
+// (src/EFFECT/rotatingSurfaces.h:43; was func_800FC6EC).
 bool Plg129::RotatingSurface(Templates::SurfaceCommand command,
                              std::int32_t packed, Templates::SheetHost& host) {
   return Templates::RotatingSurface(Templates::SurfaceTextureSpan::kFourColumns,
                                     command, packed, host);
 }
 
-// decomp: PLG138.BIN func_800F9818 (src/EFFECT/PLG138.BIN/18.c:2).
+// decomp: PLG138.BIN vs_effect_papillonReel_0
+// (src/EFFECT/rotatingSurfaces.h:43; was func_800F9818).
 bool Plg138::RotatingSurface(Templates::SurfaceCommand command,
                              std::int32_t packed, Templates::SheetHost& host) {
   return Templates::RotatingSurface(
       Templates::SurfaceTextureSpan::kSixteenColumns, command, packed, host);
 }
 
-// decomp: PLG142.BIN func_800FBEFC (src/EFFECT/PLG142.BIN/18.c:22).
+// decomp: PLG142.BIN vs_effect_adventSign_3 (src/EFFECT/rotatingSurfaces.h:43;
+// was func_800FBEFC).
 bool Plg142::RotatingSurface(Templates::SurfaceCommand command,
                              std::int32_t packed, Templates::SheetHost& host) {
   return Templates::RotatingSurface(Templates::SurfaceTextureSpan::kFourColumns,
                                     command, packed, host);
 }
 
-// decomp: PLG158.BIN func_800FBF7C (src/EFFECT/PLG158.BIN/0.c:24).
+// decomp: PLG158.BIN vs_effect_hexFlux_3 (src/EFFECT/rotatingSurfaces.h:43; was
+// func_800FBF7C).
 bool Plg158::RotatingSurface(Templates::SurfaceCommand command,
                              std::int32_t packed, Templates::SheetHost& host) {
   return Templates::RotatingSurface(Templates::SurfaceTextureSpan::kFourColumns,
                                     command, packed, host);
 }
 
-// decomp: PLG161.BIN func_800F98F8 (src/EFFECT/PLG161.BIN/F8.c:2).
+// decomp: PLG161.BIN vs_effect_gigaTempest_0 (src/EFFECT/rotatingSurfaces.h:43;
+// was func_800F98F8).
 bool Plg161::RotatingSurface(Templates::SurfaceCommand command,
                              std::int32_t packed, Templates::SheetHost& host) {
   return Templates::RotatingSurface(
       Templates::SurfaceTextureSpan::kSixteenColumns, command, packed, host);
 }
 
-// decomp: PLG162.BIN func_800FA740 (src/EFFECT/PLG162.BIN/0.c:336).
+// decomp: PLG162.BIN vs_effect_spiralScourge_1
+// (src/EFFECT/rotatingSurfaces.h:43; was func_800FA740).
 bool Plg162::RotatingSurface(Templates::SurfaceCommand command,
                              std::int32_t packed, Templates::SheetHost& host) {
   return Templates::RotatingSurface(
       Templates::SurfaceTextureSpan::kSixteenColumns, command, packed, host);
 }
 
-// decomp: PLG165.BIN func_800FBA18 (src/EFFECT/PLG165.BIN/F8.c:18).
+// decomp: PLG165.BIN vs_effect_deathWail_1 (src/EFFECT/rotatingSurfaces.h:43;
+// was func_800FBA18).
 bool Plg165::RotatingSurface(Templates::SurfaceCommand command,
                              std::int32_t packed, Templates::SheetHost& host) {
   return Templates::RotatingSurface(
       Templates::SurfaceTextureSpan::kSixteenColumns, command, packed, host);
 }
 
-// decomp: PLG166.BIN func_800F9800 (src/EFFECT/PLG166.BIN/0.c:8).
+// decomp: PLG166.BIN vs_effect_sanctusFlare_0
+// (src/EFFECT/rotatingSurfaces.h:43; was func_800F9800).
 bool Plg166::RotatingSurface(Templates::SurfaceCommand command,
                              std::int32_t packed, Templates::SheetHost& host) {
   return Templates::RotatingSurface(
       Templates::SurfaceTextureSpan::kSixteenColumns, command, packed, host);
 }
 
-// decomp: PLG167.BIN func_800FA84C (src/EFFECT/PLG167.BIN/E0.c:12).
+// decomp: PLG167.BIN vs_effect_lotusPalm_1 (src/EFFECT/rotatingSurfaces.h:43;
+// was func_800FA84C).
 bool Plg167::RotatingSurface(Templates::SurfaceCommand command,
                              std::int32_t packed, Templates::SheetHost& host) {
   return Templates::RotatingSurface(
       Templates::SurfaceTextureSpan::kSixteenColumns, command, packed, host);
 }
 
-// decomp: PLG170.BIN func_800FA48C (src/EFFECT/PLG170.BIN/18.c:14).
+// decomp: PLG170.BIN vs_effect_retribution_1 (src/EFFECT/rotatingSurfaces.h:43;
+// was func_800FA48C).
 bool Plg170::RotatingSurface(Templates::SurfaceCommand command,
                              std::int32_t packed, Templates::SheetHost& host) {
   return Templates::RotatingSurface(Templates::SurfaceTextureSpan::kFourColumns,
                                     command, packed, host);
 }
 
-// decomp: PLG236.BIN func_800FA770 (src/EFFECT/PLG236.BIN/0.c:15).
+// decomp: PLG236.BIN vs_effect_plg236_1 (src/EFFECT/rotatingSurfaces.h:43; was
+// func_800FA770).
 bool Plg236::RotatingSurface(Templates::SurfaceCommand command,
                              std::int32_t packed, Templates::SheetHost& host) {
   return Templates::RotatingSurface(Templates::SurfaceTextureSpan::kFourColumns,
                                     command, packed, host);
 }
 
-// decomp: PLG246.BIN func_800F9800 (src/EFFECT/PLG246.BIN/0.c:2).
+// decomp: PLG246.BIN vs_effect_246_0 (src/EFFECT/rotatingSurfaces.h:43; was
+// func_800F9800).
 bool Plg246::RotatingSurface(Templates::SurfaceCommand command,
                              std::int32_t packed, Templates::SheetHost& host) {
   return Templates::RotatingSurface(
       Templates::SurfaceTextureSpan::kSixteenColumns, command, packed, host);
 }
 
-// decomp: PLG250.BIN func_800F9800 (src/EFFECT/PLG250.BIN/0.c:10).
+// decomp: PLG250.BIN vs_effect_plg250_0 (src/EFFECT/rotatingSurfaces.h:43; was
+// func_800F9800).
 bool Plg250::RotatingSurface(Templates::SurfaceCommand command,
                              std::int32_t packed, Templates::SheetHost& host) {
   return Templates::RotatingSurface(Templates::SurfaceTextureSpan::kFourColumns,

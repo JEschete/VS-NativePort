@@ -152,6 +152,6 @@ struct StateFlags {
 };
 static_assert(sizeof(StateFlags) == kStateFlagsBytes);
 
-// decomp: vs_main_stateFlags (main.h:496)
+// decomp: vs_main_stateFlags (src/SLUS_010.40/main.c:4805)
 extern StateFlags stateFlags;
 }  // namespace VS::State

@@ -280,8 +280,9 @@ bool ValidSelector(std::uint8_t selector) {
 }
 }  // namespace
 
-// decomp: _initTimeAttackEnd, MENUF.PRG/3B8.c:256; instructions
-// 0x8010310C..0x80103530, including the return delay slot.
+// decomp: initTimeAttackEnd, src/MENU/MENUF.PRG/3B8.c:270; was
+// _initTimeAttackEnd; instructions 0x8010310C..0x80103530, including the return
+// delay slot.
 GameClearStep InitializeTimeAttackResults(TimeAttackState& state,
                                           TimeAttackLoadHost& host) {
   if (state.init_phase < 0 || state.init_phase > kLoadedPhase) {
@@ -307,8 +308,8 @@ GameClearStep InitializeTimeAttackResults(TimeAttackState& state,
                                       : GameClearStep::kRefused;
 }
 
-// decomp: _initTimeAttackStart, MENUF.PRG/3B8.c:372; instructions
-// 0x80103530..0x80103748.
+// decomp: initTimeAttackStart, src/MENU/MENUF.PRG/3B8.c:386; was
+// _initTimeAttackStart; instructions 0x80103530..0x80103748.
 GameClearStep InitializeTimeAttackStart(TimeAttackState& state,
                                         TimeAttackLoadHost& host) {
   if (state.init_phase < 0 || state.init_phase > kLoadedPhase) {
@@ -327,8 +328,8 @@ GameClearStep InitializeTimeAttackStart(TimeAttackState& state,
   return GameClearStep::kComplete;
 }
 
-// decomp: _renderTimeAttackEnd, MENUF.PRG/3B8.c:905; instructions
-// 0x80103D88..0x8010412C.
+// decomp: renderTimeAttackEnd, src/MENU/MENUF.PRG/3B8.c:918; was
+// _renderTimeAttackEnd; instructions 0x80103D88..0x8010412C.
 GameClearStep UpdateTimeAttackResults(TimeAttackState& state, bool confirm,
                                       TimeAttackScreenHost& host) {
   if (state.phase < 0 || state.phase > kResultDone || state.new_slot < 0 ||
@@ -362,8 +363,9 @@ GameClearStep UpdateTimeAttackResults(TimeAttackState& state, bool confirm,
   return GameClearStep::kPending;
 }
 
-// decomp: _renderTimeAttackStart, MENUF.PRG/3B8.c:1014; instructions
-// 0x8010412C..0x8010459C. The table at 0x801096D0 is data, not code.
+// decomp: renderTimeAttackStart, src/MENU/MENUF.PRG/3B8.c:1027; was
+// _renderTimeAttackStart; instructions 0x8010412C..0x8010459C. The table at
+// 0x801096D0 is data, not code.
 GameClearStep UpdateTimeAttackStart(TimeAttackState& state, bool confirm,
                                     TimeAttackScreenHost& host) {
   if (state.phase < 0 || state.phase > kStartDone) {
@@ -407,7 +409,8 @@ GameClearStep UpdateTimeAttackStart(TimeAttackState& state, bool confirm,
   return GameClearStep::kPending;
 }
 
-// decomp: _initMenu, MENUF.PRG/3B8.c:59 (0x80102C54..0x80102D10).
+// decomp: initMenu, src/MENU/MENUF.PRG/3B8.c:73; was _initMenu
+// (0x80102C54..0x80102D10).
 std::optional<int> InitializeResultsScreen(std::uint8_t selector,
                                            ResultsPresentationHost& host) {
   if (!ValidSelector(selector)) return std::nullopt;
@@ -420,7 +423,8 @@ std::optional<int> InitializeResultsScreen(std::uint8_t selector,
   return host.Initialize(presentation);
 }
 
-// decomp: _execMenu, MENUF.PRG/3B8.c:453 (0x801037A0..0x8010384C).
+// decomp: execMenu, src/MENU/MENUF.PRG/3B8.c:467; was _execMenu
+// (0x801037A0..0x8010384C).
 std::optional<int> UpdateResultsPresentation(std::uint8_t selector,
                                              ResultsPresentationHost& host) {
   if (!ValidSelector(selector)) return std::nullopt;
@@ -429,7 +433,7 @@ std::optional<int> UpdateResultsPresentation(std::uint8_t selector,
   return host.Update(presentation);
 }
 
-// decomp: vs_menuF_exec, MENUF.PRG/3B8.c:23 (0x80102BB8..0x80102C54).
+// decomp: vs_menuF_exec, src/MENU/MENUF.PRG/3B8.c:32 (0x80102BB8..0x80102C54).
 std::optional<int> UpdateResultsScreen(std::span<std::uint8_t> caller_state,
                                        std::uint8_t selector,
                                        ResultsPresentationHost& host) {

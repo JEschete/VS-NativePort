@@ -155,30 +155,30 @@ inline constexpr std::int64_t kMaxEnemyBannerLines = 512;
 // top.
 [[nodiscard]] std::int64_t EnemyBannerLineCount(const PanelRect& rect) noexcept;
 
-// decomp: MENU9.PRG _renderEnemyInfoBg (src/MENU/MENU9.PRG/238.c:1552). A
-// banner of gradient lines, each a pixel shorter than the one above, so its
-// right edge slants; then a black flat quad two pixels down and right whose
-// bottom right corner follows the slant, and the opaque panel page. A
-// gradient outside the palette or more than kMaxEnemyBannerLines lines are
-// refused.
+// decomp: MENU9.PRG renderEnemyInfoBg (src/MENU/MENU9.PRG/238.c:1557; was
+// _renderEnemyInfoBg). A banner of gradient lines, each a pixel shorter than
+// the one above, so its right edge slants; then a black flat quad two pixels
+// down and right whose bottom right corner follows the slant, and the opaque
+// panel page. A gradient outside the palette or more than kMaxEnemyBannerLines
+// lines are refused.
 PanelDrawResult DrawEnemyBanner(const PanelRect& rect, std::int32_t gradient,
                                 PanelTarget& target);
 
-// decomp: MENU9.PRG _renderGradientQuad (src/MENU/MENU9.PRG/238.c:1594). A
-// left-to-right gradient quad over `rect`, its black shadow two pixels down
-// and right, and the opaque panel page. A gradient outside the palette is
-// refused.
+// decomp: MENU9.PRG renderGradientQuad (src/MENU/MENU9.PRG/238.c:1599; was
+// _renderGradientQuad). A left-to-right gradient quad over `rect`, its black
+// shadow two pixels down and right, and the opaque panel page. A gradient
+// outside the palette is refused.
 PanelDrawResult DrawGradientPanel(const PanelRect& rect, std::int32_t gradient,
                                   PanelTarget& target);
 
-// decomp: MENU9.PRG _renderFooterBg (src/MENU/MENU9.PRG/238.c:1645). An
-// eight-pixel additive fade from `top` down across the 320-pixel screen,
-// black below it to y 240, and the additive page.
+// decomp: MENU9.PRG renderFooterBg (src/MENU/MENU9.PRG/238.c:1650; was
+// _renderFooterBg). An eight-pixel additive fade from `top` down across the
+// 320-pixel screen, black below it to y 240, and the additive page.
 void DrawFooterBackground(std::int32_t top, PanelTarget& target);
 
-// decomp: MENU9.PRG _renderScreenEdgeFade (src/MENU/MENU9.PRG/238.c:2146).
-// Additive 64-pixel fades in from the screen's left and right edges, and the
-// additive page, in the edge fade slot.
+// decomp: MENU9.PRG renderScreenEdgeFade (src/MENU/MENU9.PRG/238.c:2151; was
+// _renderScreenEdgeFade). Additive 64-pixel fades in from the screen's left and
+// right edges, and the additive page, in the edge fade slot.
 void DrawViewerEdgeFade(PanelTarget& target);
 
 // VS::Render::Camera's position and angles VECTORs: x, y, z and the pad word.
@@ -191,10 +191,10 @@ struct CameraPose {
   friend bool operator==(const CameraPose&, const CameraPose&) = default;
 };
 
-// decomp: MENU9.PRG _restoreCamera (src/MENU/MENU9.PRG/238.c:1402). The
-// frame camera's position and angles become the backups the score screen
-// took on entry (_cameraPositionBackup, _cameraAnglesBackup), all four words
-// of each, pad included.
+// decomp: MENU9.PRG restoreCamera (src/MENU/MENU9.PRG/238.c:1407; was
+// _restoreCamera). The frame camera's position and angles become the backups
+// the score screen took on entry (_cameraPositionBackup, _cameraAnglesBackup),
+// all four words of each, pad included.
 void RestoreCamera(const CameraPose& backup, CameraPose& camera) noexcept;
 
 // _cameraAngles (pitch about x, yaw about y, roll about z), _cameraDistance
@@ -220,11 +220,12 @@ struct ViewerCamera {
   friend bool operator==(const ViewerCamera&, const ViewerCamera&) = default;
 };
 
-// decomp: MENU9.PRG _buildCameraMatrix (src/MENU/MENU9.PRG/238.c:1474). The
-// eye orbits `distance` from the origin: x is sin(yaw) * distance then *
-// cos(pitch), z the same with cos(yaw) and -distance, each product divided
-// by 4096 with truncation in 32 bits, and y is sin(pitch) * -distance / 4096
-// less half the height offset; each component keeps its low 16 bits.
+// decomp: MENU9.PRG buildCameraMatrix (src/MENU/MENU9.PRG/238.c:1479; was
+// _buildCameraMatrix). The eye orbits `distance` from the origin: x is sin(yaw)
+// * distance then * cos(pitch), z the same with cos(yaw) and -distance, each
+// product divided by 4096 with truncation in 32 bits, and y is sin(pitch) *
+// -distance / 4096 less half the height offset; each component keeps its low 16
+// bits.
 [[nodiscard]] ViewerCamera BuildViewerCamera(
     const ViewerCameraSettings& settings) noexcept;
 
@@ -274,13 +275,13 @@ inline constexpr std::int32_t kOverviewSteps = 8;
 // the 32-bit word.
 [[nodiscard]] std::string OverviewScoreText(std::uint32_t score);
 
-// decomp: MENU9.PRG _renderTopMenu (src/MENU/MENU9.PRG/238.c:1679). Below
-// kOverviewSteps the edge fade first; then, with the projection centred at
-// x 0x80 - ((8 - step) << 5) and y 0xF0 and restored afterwards, Ashley's
-// preview through the viewer camera; then "SCORE" and the score in the top
-// panel and the rank caption in the bottom one, sliding in by 16 pixels a
-// step, and the footer rising by 6 pixels a step from y 236. All arithmetic
-// wraps in 32 bits.
+// decomp: MENU9.PRG renderTopMenu (src/MENU/MENU9.PRG/238.c:1684; was
+// _renderTopMenu). Below kOverviewSteps the edge fade first; then, with the
+// projection centred at x 0x80 - ((8 - step) << 5) and y 0xF0 and restored
+// afterwards, Ashley's preview through the viewer camera; then "SCORE" and the
+// score in the top panel and the rank caption in the bottom one, sliding in by
+// 16 pixels a step, and the footer rising by 6 pixels a step from y 236. All
+// arithmetic wraps in 32 bits.
 void RenderOverview(OverviewHost& host, std::int32_t animation_step,
                     std::uint32_t score);
 }  // namespace VS::Menu::Score

@@ -55,7 +55,7 @@ extern std::array<Actors::WeaponModel*, 1> previewWeaponModelAliases;
 // decomp: D_800F4594 (src/BATTLE/BATTLE.PRG/battleUnk.h:35): the original's
 // alias of the preview shield model slot.
 extern std::int32_t previewShieldModelAlias;
-// decomp: vs_main_statusEffectParams (src/SLUS_010.40/modifiers.h:40)
+// decomp: vs_main_statusEffectParams (src/SLUS_010.40/main.c:524)
 extern std::array<StatusEffectParams, kStatusEffectCount> statusEffectParams;
 
 }  // namespace VS::Battle

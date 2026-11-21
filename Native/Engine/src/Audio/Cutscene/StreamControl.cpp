@@ -69,15 +69,17 @@ bool ApplyStreamGains(StreamHost& host) {
   return true;
 }
 
-// decomp: Sound_Cmd_9F_unk (src/SLUS_010.40/25AC.c:3786). Pausing the voices
-// replaces zeroing their sample rates.
+// decomp: Sound_Cmd_9F_SuspendCutsceneAudio (src/SLUS_010.40/25AC.c:3973; was
+// Sound_Cmd_9F_unk). Pausing the voices replaces zeroing their sample rates.
 bool PauseStream(StreamHost& host) { return SetPairPaused(host, true); }
 
-// decomp: Sound_Cmd_9E_unk (src/SLUS_010.40/25AC.c:3794).
+// decomp: Sound_Cmd_9E_RestoreCutsceneAudio (src/SLUS_010.40/25AC.c:3981; was
+// Sound_Cmd_9E_unk).
 bool ResumeStream(StreamHost& host) { return SetPairPaused(host, false); }
 
-// decomp: IRQCallbackProc (src/SLUS_010.40/25AC.c:6238). The voices are
-// unpaused first so a paused stream does not hold its pair.
+// decomp: Sound_Cutscene_StopStream (src/SLUS_010.40/25AC.c:6378; was
+// IRQCallbackProc). The voices are unpaused first so a paused stream does not
+// hold its pair.
 std::uint32_t StopStreamVoices(StreamHost& host) {
   const auto voices = host.Voices();
   if (voices.mask == 0) return 0;
@@ -88,10 +90,11 @@ std::uint32_t StopStreamVoices(StreamHost& host) {
   return voices.mask;
 }
 
-// decomp: func_8001D698 (src/SLUS_010.40/25AC.c:6511).
+// decomp: Sound_Cmd_E2_StopCutsceneStream (src/SLUS_010.40/25AC.c:6647; was
+// func_8001D698).
 std::uint32_t StopStream(StreamHost& host) { return StopStreamVoices(host); }
 
-// decomp: Sound_Cutscene_StartStream (src/SLUS_010.40/25AC.c:6294). The bound
+// decomp: Sound_Cutscene_StartStream (src/SLUS_010.40/25AC.c:6432). The bound
 // stream's decoded channels replace the SPU transfer the original starts.
 StreamStatus StartStream(StreamHost& host, StreamSourceId source,
                          std::uint32_t pan, bool reverb) {
@@ -126,8 +129,8 @@ StreamStatus StartStream(StreamHost& host, StreamSourceId source,
   return StreamStatus::kApplied;
 }
 
-// decomp: func_8001D644 (src/SLUS_010.40/25AC.c:6503). An invalid pan is
-// refused before the playing stream stops.
+// decomp: Sound_Cmd_E0_RestartCutsceneStream (src/SLUS_010.40/25AC.c:6640; was
+// func_8001D644). An invalid pan is refused before the playing stream stops.
 StreamStatus ReplaceStream(StreamHost& host, StreamSourceId source,
                            std::uint32_t pan, bool reverb) {
   if (!ValidPan(pan)) return StreamStatus::kInvalidPan;
@@ -135,7 +138,7 @@ StreamStatus ReplaceStream(StreamHost& host, StreamSourceId source,
   return StartStream(host, source, pan, reverb);
 }
 
-// decomp: Sound_Cmd_E4_SetCutsceneVolume (src/SLUS_010.40/25AC.c:6513).
+// decomp: Sound_Cmd_E4_SetCutsceneVolume (src/SLUS_010.40/25AC.c:6649).
 StreamStatus SetStreamVolume(StreamHost& host, std::uint32_t volume) {
   if (volume > kMaximumStreamVolume) return StreamStatus::kInvalidVolume;
   host.SetVolume(volume);
@@ -143,7 +146,7 @@ StreamStatus SetStreamVolume(StreamHost& host, std::uint32_t volume) {
   return StreamStatus::kApplied;
 }
 
-// decomp: Sound_Cmd_E5_FadeOutCutscene (src/SLUS_010.40/25AC.c:6525). A zero
+// decomp: Sound_Cmd_E5_FadeOutCutscene (src/SLUS_010.40/25AC.c:6661). A zero
 // duration slides in one tick.
 StreamStatus SlideStreamVolume(StreamHost& host, std::uint32_t ticks,
                                std::uint32_t target) {
@@ -159,7 +162,8 @@ StreamStatus SlideStreamVolume(StreamHost& host, std::uint32_t ticks,
   return StreamStatus::kApplied;
 }
 
-// decomp: func_8001D7A8 (src/SLUS_010.40/25AC.c:6537).
+// decomp: Sound_Cmd_E6_SetCutscenePan (src/SLUS_010.40/25AC.c:6673; was
+// func_8001D7A8).
 StreamStatus SetStreamPan(StreamHost& host, std::uint32_t pan) {
   if (!ValidPan(pan)) return StreamStatus::kInvalidPan;
   host.SetPan(pan);
@@ -169,9 +173,9 @@ StreamStatus SetStreamPan(StreamHost& host, std::uint32_t pan) {
 }  // namespace VS::Audio::Cutscene
 
 namespace VS::Audio {
-// decomp: func_80046608 (src/SLUS_010.40/main.c:10339). The original stores
-// the stream pointer in unk14[22]; the native slot also requires a valid AKAO
-// stream with exported channel assets.
+// decomp: vs_main_setCutsceneStreamSlot3 (src/SLUS_010.40/main.c:3422; was
+// func_80046608). The original stores the stream pointer in unk14[22]; the
+// native slot also requires a valid AKAO stream with exported channel assets.
 RoomStreamBinding BindRoomCutsceneStream(Cutscene::StreamHost& host,
                                          std::span<const std::uint8_t> bytes) {
   if (host.SlotBound()) return {0, RoomStreamStatus::kSlotOccupied, {}};
@@ -185,8 +189,8 @@ RoomStreamBinding BindRoomCutsceneStream(Cutscene::StreamHost& host,
   return {kRoomStreamHandle, RoomStreamStatus::kBound, {}};
 }
 
-// decomp: func_80046634 (src/SLUS_010.40/main.c:10348). func_80013328's 0xE2
-// stop command becomes a direct stop.
+// decomp: vs_main_clearCutsceneStreamSlot3 (src/SLUS_010.40/main.c:3432; was
+// func_80046634). func_80013328's 0xE2 stop command becomes a direct stop.
 int UnbindRoomCutsceneStream(Cutscene::StreamHost& host) {
   if (!host.SlotBound()) return 0;
   Cutscene::StopStreamVoices(host);

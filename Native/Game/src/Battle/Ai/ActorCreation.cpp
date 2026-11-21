@@ -246,7 +246,7 @@ void Finalize(ActorCreationHost& host, const CreationActor& actor,
 }
 }  // namespace
 
-// decomp: func_800E6178 (src/BATTLE/BATTLE.PRG/7CD68.c:934).
+// decomp: func_800E6178 (src/BATTLE/BATTLE.PRG/7CD68.c:342).
 std::optional<bool> CreateActorAiState(ActorCreationHost& host,
                                        const CreationActor& actor,
                                        std::int16_t saved_flags) {

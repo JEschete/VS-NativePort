@@ -88,7 +88,7 @@ class StatusLifecycleWorld {
 
 // Only mobility indices actually dereferenced must be below the limb count;
 // zero means no limb. Refusal precedes the operation's writes.
-// decomp: func_8007C31C (src/BATTLE/BATTLE.PRG/146C.c:8736).
+// decomp: func_8007C31C (src/BATTLE/BATTLE.PRG/146C.c:8687).
 bool PreserveAshleyStatuses(StatusLifecycleState& state,
                             StatusLifecycleWorld& world);
 // decomp: func_80086754 (src/BATTLE/BATTLE.PRG/146C.c:13532).
@@ -98,7 +98,7 @@ bool RemoveActorStatuses(StatusLifecycleState& state, std::uint32_t requested,
 void InflictActorStatuses(StatusLifecycleState& state, std::uint32_t requested,
                           const StatusDurations& durations,
                           StatusLifecycleWorld& world);
-// decomp: func_80087EF4 (src/BATTLE/BATTLE.PRG/146C.c:14376).
+// decomp: func_80087EF4 (src/BATTLE/BATTLE.PRG/146C.c:14243).
 bool UpdateActorStatusTimers(StatusLifecycleState& state,
                              const StatusDurations& durations,
                              const LimbStatusMasks& limb_statuses,

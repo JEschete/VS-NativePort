@@ -35,7 +35,7 @@ struct SpecialTerrainMaps {
   SpecialHeightCells heights;
 };
 
-// decomp: func_800E5EC0 (src/BATTLE/BATTLE.PRG/7CD68.c:760).
+// decomp: func_800E5EC0 (src/BATTLE/BATTLE.PRG/7CD68.c:286).
 // Stores the low ten bits of the height, marked assigned, in the tile and in
 // every special tile connected to it through the even (orthogonal) direction
 // steps whose height is not yet assigned. Other height bits are kept. False
@@ -44,7 +44,7 @@ bool FloodFillAiTerrainHeights(SpecialTerrainMaps maps,
                                const NavigationDirectionCodes& directions,
                                int x, int z, int height);
 
-// decomp: func_800E5FDC (src/BATTLE/BATTLE.PRG/7CD68.c:779).
+// decomp: func_800E5FDC (src/BATTLE/BATTLE.PRG/7CD68.c:305).
 // The floor height at the centre of the first even-direction neighbor inside
 // the grid without ground-blocking flags, as the original's 16-bit floor
 // height shifted right by six; the height may be negative. Nothing when no
@@ -53,7 +53,7 @@ bool FloodFillAiTerrainHeights(SpecialTerrainMaps maps,
     TileFlagCells tile_flags, const FloorHeightQuery& floor_height,
     const NavigationDirectionCodes& directions, int x, int z);
 
-// decomp: func_800E6098 (src/BATTLE/BATTLE.PRG/7CD68.c:795).
+// decomp: func_800E6098 (src/BATTLE/BATTLE.PRG/7CD68.c:321).
 // Scans rows z, then columns x, and fills each special tile whose height is
 // not yet assigned from its adjacent ground height when that height is not
 // negative. The scan order decides which height a region receives.

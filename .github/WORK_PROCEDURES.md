@@ -39,7 +39,9 @@ history. Verify each change with the smallest builds, Catch2 tags, replays and q
 
 - Keep typed cores separate from checked live bindings. A live binding refuses a missing pointer or an out-of-range
   index instead of reading through it.
-- Add `// decomp: <symbol> (<source file>:<line>)` provenance to translated code.
+- Add `// decomp: [OVERLAY ]<symbol> (src/<path>:<line>)` provenance to translated code, citing the symbol's
+  definition in `resources\rood-reverse`; after a decomp rename write `(src/<path>:<line>; was <old name>)`.
+  `python tools\ledger\provenance.py --check` validates the citations ([QUALITY.md](../Docs/QUALITY.md)).
 - The copier is retired (plan D24): edit copied code in place and keep its provenance. Write new headers as C++
   ([CPP_HEADERS.md](../Docs/CPP_HEADERS.md)). Never hand-edit `.vcxproj` files; run
   `python tools\scaffold\gen_solution.py`.

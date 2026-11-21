@@ -45,9 +45,10 @@ static_assert(std::size(VS::Menu::Inventory::menuText) ==
               "_menuText holds 472 halfwords");
 
 std::uint64_t refusals = 0;
-// decomp: the slot menus' statics (16C.c:347-350, 507-511, 687-691,
-// 864-867), _dispatchEquipMenu's currentEquipMenu (16C.c:1033) and
-// _equipMenu's selectedRow and state (16C.c:1060-1061).
+// decomp: the slot menus' statics (src/MENU/MENU3.PRG/16C.c:347-350, 507-511,
+// 687-691, 864-867), _dispatchEquipMenu's currentEquipMenu
+// (src/MENU/MENU3.PRG/16C.c:1028) and _equipMenu's selectedRow and state
+// (src/MENU/MENU3.PRG/16C.c:30).
 AccessoryMenuState accessoryMenu;
 WeaponMenuState weaponMenu;
 ShieldMenuState shieldMenu;
@@ -55,7 +56,8 @@ ArmorMenuState armorMenu;
 std::uint8_t currentMenu = 0;
 EquipmentMenuState equipmentMenu;
 
-// decomp: _dispatchEquipMenu's equipMenuHandlers (16C.c:1030).
+// decomp: _dispatchEquipMenu's equipMenuHandlers
+// (src/MENU/MENU3.PRG/16C.c:1025).
 constexpr EquipmentMenuHandlers kLiveHandlers{
     UpdateLiveArmorMenu,
     UpdateLiveWeaponMenu,

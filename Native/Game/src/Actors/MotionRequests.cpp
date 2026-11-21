@@ -23,7 +23,7 @@ std::int16_t NarrowFacing(int facing) {
   return std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(facing));
 }
 
-// decomp: BATTLE.PRG func_800ACF54 (src/BATTLE/BATTLE.PRG/40564.c:2548)
+// decomp: BATTLE.PRG func_800ACF54 (src/BATTLE/BATTLE.PRG/40564.c:1983)
 GroundedHistory SaveActorGroundedTransform(const GroundedPose& pose) {
   GroundedHistory history{.previous_tile = pose.tile,
                           .position = pose.position,
@@ -35,7 +35,7 @@ GroundedHistory SaveActorGroundedTransform(const GroundedPose& pose) {
   return history;
 }
 
-// decomp: BATTLE.PRG func_800B63AC (src/BATTLE/BATTLE.PRG/4A0A8.c:340)
+// decomp: BATTLE.PRG func_800B63AC (src/BATTLE/BATTLE.PRG/4B16C.s:2809)
 void BeginTileJump(MotionActor& actor, PackedTile target, int speed,
                    int facing) {
   if (actor.Jumping()) {
@@ -48,14 +48,14 @@ void BeginTileJump(MotionActor& actor, PackedTile target, int speed,
   }
 }
 
-// decomp: BATTLE.PRG func_800B6404 (src/BATTLE/BATTLE.PRG/4A0A8.c:368)
+// decomp: BATTLE.PRG func_800B6404 (src/BATTLE/BATTLE.PRG/4B16C.s:2834)
 void BeginAirborneTileJump(MotionActor& actor, PackedTile target, int speed,
                            int facing) {
   actor.SetJumpFlags(false, true);
   Jump(actor, JumpEntry::kAirborne, target, speed, facing);
 }
 
-// decomp: BATTLE.PRG func_800B6438 (src/BATTLE/BATTLE.PRG/4A0A8.c:383)
+// decomp: BATTLE.PRG func_800B6438 (src/BATTLE/BATTLE.PRG/4B16C.s:2850)
 void BeginNavigationJump(MotionActor& actor, PackedTile target, int speed,
                          int facing) {
   actor.SetJumpFlags(true, true);
@@ -63,7 +63,7 @@ void BeginNavigationJump(MotionActor& actor, PackedTile target, int speed,
   Jump(actor, JumpEntry::kNavigation, target, speed, facing);
 }
 
-// decomp: BATTLE.PRG func_800B6580 (src/BATTLE/BATTLE.PRG/4A0A8.c:490)
+// decomp: BATTLE.PRG func_800B6580 (src/BATTLE/BATTLE.PRG/4B16C.s:2949)
 void BeginTeleport(MotionActor& actor, PackedTile target, int facing) {
   // The route keeps the tile word, clears Z and carries the facing.
   const MotionVector route{
@@ -78,24 +78,24 @@ void BeginTeleport(MotionActor& actor, PackedTile target, int facing) {
   }
 }
 
-// decomp: BATTLE.PRG func_800B65E8 (src/BATTLE/BATTLE.PRG/4A0A8.c:522)
+// decomp: BATTLE.PRG func_800B65E8 (src/BATTLE/BATTLE.PRG/4B16C.s:2978)
 void BeginTileTravel(MotionActor& actor, const MotionVector& target,
                      int facing) {
   Travel(actor, target, facing, TravelPose::kTile);
 }
 
-// decomp: BATTLE.PRG func_800B65F4 (src/BATTLE/BATTLE.PRG/4A0A8.c:531)
+// decomp: BATTLE.PRG func_800B65F4 (src/BATTLE/BATTLE.PRG/4B16C.s:2984)
 void BeginTimedTravel(MotionActor& actor, const MotionVector& target,
                       int facing) {
   Travel(actor, target, facing, TravelPose::kTimed);
 }
 
-// decomp: BATTLE.PRG func_800B6500 (src/BATTLE/BATTLE.PRG/4A0A8.c:445)
+// decomp: BATTLE.PRG func_800B6500 (src/BATTLE/BATTLE.PRG/4B16C.s:2909)
 void QueueGroundOffset(MotionActor& actor, const MotionVector& step) {
   actor.QueueGroundOffset(step);
 }
 
-// decomp: BATTLE.PRG func_800B6530 (src/BATTLE/BATTLE.PRG/4A0A8.c:459)
+// decomp: BATTLE.PRG func_800B6530 (src/BATTLE/BATTLE.PRG/4B16C.s:2923)
 void QueueMovementVector(MotionActor& actor, const MotionVector& step,
                          int facing) {
   actor.QueueMovement({.mode = MotionMode::kVector,
@@ -104,7 +104,7 @@ void QueueMovementVector(MotionActor& actor, const MotionVector& step,
                        .facing = NarrowFacing(facing)});
 }
 
-// decomp: BATTLE.PRG func_800B653C (src/BATTLE/BATTLE.PRG/4A0A8.c:467)
+// decomp: BATTLE.PRG func_800B653C (src/BATTLE/BATTLE.PRG/4B16C.s:2929)
 void QueueFlightMovement(MotionActor& actor, const MotionVector& step,
                          int speed, int facing) {
   actor.QueueMovement({.mode = MotionMode::kFlight,
@@ -113,7 +113,7 @@ void QueueFlightMovement(MotionActor& actor, const MotionVector& step,
                        .facing = NarrowFacing(facing)});
 }
 
-// decomp: BATTLE.PRG func_800B6634 (src/BATTLE/BATTLE.PRG/4A0A8.c:551)
+// decomp: BATTLE.PRG func_800B6634 (src/BATTLE/BATTLE.PRG/4B16C.s:3003)
 void TurnNavigationActor(MotionActor& actor, int facing) {
   actor.TurnAtRate(NarrowFacing(facing),
                    actor.CollisionRadius() < kLargeActorRadius
@@ -122,7 +122,7 @@ void TurnNavigationActor(MotionActor& actor, int facing) {
   actor.PlayTurnAnimation(facing);
 }
 
-// decomp: BATTLE.PRG func_800B668C (src/BATTLE/BATTLE.PRG/4A0A8.c:578)
+// decomp: BATTLE.PRG func_800B668C (src/BATTLE/BATTLE.PRG/4B16C.s:3029)
 bool TurnActorAtSpeed(MotionActor& actor, std::int16_t facing, int speed) {
   if (speed == 0) return false;
   actor.TurnAtAngularSpeed(facing, speed);

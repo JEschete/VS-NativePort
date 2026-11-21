@@ -8,18 +8,23 @@
 // input is refused with a throttled warning: the parent links return 0, the
 // row builders return 0 rows and the restore leaves the rows untouched.
 namespace VS::Menu::Inventory {
-// decomp: MENU3.PRG _getParentWeaponIndex (items2.h:11).
+// decomp: MENU3.PRG getParentWeaponIndex (src/MENU/items2.h:16; was
+// _getParentWeaponIndex).
 int LiveParentWeaponIndex(int item_category, int index);
-// decomp: MENU3.PRG _getParentShieldIndex (items2.h:38).
+// decomp: MENU3.PRG getParentShieldIndex (src/MENU/items2.h:43; was
+// _getParentShieldIndex).
 int LiveParentShieldIndex(int item_category, int item_index);
-// decomp: MENU3.PRG _populateItemRows (items2.h:60), with _ITEMMENU: misc rows
-// record their actions in miscActions (Inventory.hpp).
+// decomp: MENU3.PRG populateItemRows (src/MENU/items2.h:65; was
+// _populateItemRows), with _ITEMMENU: misc rows record their actions in
+// miscActions (Inventory.hpp).
 int LiveBuildItemRows(int item_category, char* menu_text[], int row_types[],
                       char* text_buf);
-// decomp: MENUB.PRG _populateItemRows (items2.h:60), without _ITEMMENU.
+// decomp: MENUB.PRG populateItemRows (src/MENU/items2.h:65; was
+// _populateItemRows), without _ITEMMENU.
 int LiveBuildLootItemRows(int item_category, char* menu_text[], int row_types[],
                           char* text_buf);
-// decomp: MENU3.PRG _restoreItemMenu (items2.h:175).
+// decomp: MENU3.PRG restoreItemMenu (src/MENU/items2.h:180; was
+// _restoreItemMenu).
 void LiveRestoreItemRows(int item_category);
 // Refusals since start-up.
 [[nodiscard]] std::uint64_t ItemListRowsLiveRefusalCount() noexcept;

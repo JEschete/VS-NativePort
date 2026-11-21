@@ -190,8 +190,8 @@ class LiveGazetteMenu final : public GazetteMenuHost {
 };
 }  // namespace
 
-// decomp: MENU9.PRG _renderScrollableMenuItem
-// (src/MENU/MENU9.PRG/238.c:54), 80102A7C
+// decomp: MENU9.PRG renderScrollableMenuItem
+// (src/MENU/MENU9.PRG/238.c:61; was _renderScrollableMenuItem), 80102A7C
 void RenderLiveScrollableRow(Framework::MenuRow* row) {
   std::uint32_t* before = RowOrderingEntry();
   if (row == nullptr || before == nullptr) {
@@ -202,7 +202,8 @@ void RenderLiveScrollableRow(Framework::MenuRow* row) {
   RenderScrollableRow(host, liveAnimation, *row);
 }
 
-// decomp: MENU9.PRG _setRows (src/MENU/MENU9.PRG/238.c:196), 80102E10
+// decomp: MENU9.PRG setRows (src/MENU/MENU9.PRG/238.c:203; was _setRows),
+// 80102E10
 void RestoreLiveTopMenuCursor(int row_count, int absolute_row, char* text[]) {
   if (text == nullptr && row_count > 0) {
     Refuse("top menu rows without text");
@@ -212,26 +213,29 @@ void RestoreLiveTopMenuCursor(int row_count, int absolute_row, char* text[]) {
   RestoreTopMenuCursor(host, row_count, absolute_row);
 }
 
-// decomp: MENU9.PRG _getSelectedRow (src/MENU/MENU9.PRG/238.c:228), 80102F0C
+// decomp: MENU9.PRG getSelectedRow (src/MENU/MENU9.PRG/238.c:235; was
+// _getSelectedRow), 80102F0C
 int LiveSelectedTopMenuRow() {
   LiveGazetteMenu host;
   return GetSelectedTopMenuRow(host);
 }
 
-// decomp: MENU9.PRG _topMenu (src/MENU/MENU9.PRG/238.c:1430), 80104BD0
+// decomp: MENU9.PRG topMenu (src/MENU/MENU9.PRG/238.c:1435; was _topMenu),
+// 80104BD0
 int UpdateLiveTopMenu(int initialize) {
   LiveGazetteMenu host;
   return UpdateTopMenu(host, liveTopMenu, initialize);
 }
 
-// decomp: MENU9.PRG _clearMenuExceptRow8 (src/MENU/MENU9.PRG/238.c:258),
-// 80102FB8
+// decomp: MENU9.PRG clearMenuExceptRow8 (src/MENU/MENU9.PRG/238.c:265; was
+// _clearMenuExceptRow8), 80102FB8
 void ClearLiveMenuExceptRow8() {
   LiveGazetteMenu host;
   ClearMenuExceptRow8(host);
 }
 
-// decomp: MENU9.PRG _menuReady (src/MENU/MENU9.PRG/238.c:264), 80102FD8
+// decomp: MENU9.PRG menuReady (src/MENU/MENU9.PRG/238.c:271; was _menuReady),
+// 80102FD8
 void PollLiveMenuReady() {
   LiveGazetteMenu host;
   PollMenuReady(host);

@@ -210,7 +210,8 @@ void StoreSwitchState(const ActorSwitchState& state) {
 }
 }  // namespace
 
-// decomp: MENU4.PRG _initEquipmentScreen (120.c:528).
+// decomp: MENU4.PRG initEquipmentScreen (src/MENU/MENU4.PRG/120.c:532; was
+// _initEquipmentScreen).
 void LiveBeginVitalsTransition(int actor) {
   VitalsPanelState state = LoadVitalsState();
   LiveVitalsHost host(VitalsChain());
@@ -218,7 +219,8 @@ void LiveBeginVitalsTransition(int actor) {
   StoreVitalsState(state);
 }
 
-// decomp: MENU4.PRG _getNextValidActor (120.c:548).
+// decomp: MENU4.PRG getNextValidActor (src/MENU/MENU4.PRG/120.c:552; was
+// _getNextValidActor).
 int LiveFindNextInspectableActor(int current_actor, int target_actor) {
   LiveRoster roster;
   const std::optional<std::int32_t> next =
@@ -230,7 +232,8 @@ int LiveFindNextInspectableActor(int current_actor, int target_actor) {
   return *next;
 }
 
-// decomp: MENU4.PRG _switchCurrentActor (120.c:579).
+// decomp: MENU4.PRG switchCurrentActor (src/MENU/MENU4.PRG/120.c:583; was
+// _switchCurrentActor).
 int LiveAnimateActorSwitch(int init) {
   ActorSwitchState state = LoadSwitchState();
   LiveActorSwitchHost host;
@@ -239,19 +242,22 @@ int LiveAnimateActorSwitch(int init) {
   return complete ? 1 : 0;
 }
 
-// decomp: MENU4.PRG _renderUnknownValue (120.c:692).
+// decomp: MENU4.PRG renderUnknownValue (src/MENU/MENU4.PRG/120.c:696; was
+// _renderUnknownValue).
 void LiveDrawUnanalyzedValue(int xy, int with_max, std::uint32_t* before) {
   LiveVitalsHost host(before);
   DrawUnanalyzedValue(host, xy, with_max != 0);
 }
 
-// decomp: MENU4.PRG _renderStatBar (120.c:721).
+// decomp: MENU4.PRG renderStatBar (src/MENU/MENU4.PRG/120.c:725; was
+// _renderStatBar).
 void LiveDrawVitalBar(int color_index, int current, int max, int xy) {
   LiveVitalsHost host(VitalsChain());
   DrawVitalBar(host, color_index, current, max, xy);
 }
 
-// decomp: MENU4.PRG _renderBasicStats (120.c:741).
+// decomp: MENU4.PRG renderBasicStats (src/MENU/MENU4.PRG/120.c:745; was
+// _renderBasicStats).
 void LiveDrawVitals() {
   VitalsPanelState state = LoadVitalsState();
   const VitalsFrame frame{.selected = VitalsOf(SelectedSlot()),
@@ -265,7 +271,8 @@ void LiveDrawVitals() {
   if (!drawn) Refuse("DrawVitals", "no stats record for the shown actor");
 }
 
-// decomp: MENU4.PRG _getLimbCount (120.c:1114).
+// decomp: MENU4.PRG getLimbCount (src/MENU/MENU4.PRG/120.c:1117; was
+// _getLimbCount).
 int LiveLimbCount(int actor) {
   const VS::Battle::ActorStats* const stats = StatsOf(actor);
   if (stats == nullptr) {
@@ -275,7 +282,8 @@ int LiveLimbCount(int actor) {
   return LimbCount(LimbNamesOf(*stats));
 }
 
-// decomp: MENU4.PRG _getEquipmentListRowCount (120.c:1132).
+// decomp: MENU4.PRG getEquipmentListRowCount (src/MENU/MENU4.PRG/120.c:1135;
+// was _getEquipmentListRowCount).
 int LiveEquipmentRowCount() {
   const VS::Battle::ActorStats* const stats = StatsOf(SelectedSlot());
   if (stats == nullptr) {

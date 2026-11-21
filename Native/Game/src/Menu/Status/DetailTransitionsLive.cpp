@@ -70,7 +70,8 @@ class LiveTransitionHost final : public DetailTransitionHost {
 };
 }  // namespace
 
-// decomp: _updateEquipmentDetailSelection (src/MENU/MENU4.PRG/120.c:462)
+// decomp: updateEquipmentDetailSelection (src/MENU/MENU4.PRG/120.c:466; was
+// _updateEquipmentDetailSelection)
 int NavigateLiveDetailElements(unsigned int selected, int flags) {
   Framework::StatusViewNavigation links{};
   for (std::size_t row = 0; row < links.size(); ++row) {
@@ -91,25 +92,26 @@ int NavigateLiveDetailElements(unsigned int selected, int flags) {
   return *result;
 }
 
-// decomp: _setActiveRow (src/MENU/MENU4.PRG/120.c:1299)
+// decomp: setActiveRow (src/MENU/MENU4.PRG/120.c:1302; was _setActiveRow)
 void HoistLiveEquipmentRow(int row) {
   LiveTransitionHost host;
   static_cast<void>(HoistEquipmentRow(host, row));
 }
 
-// decomp: _animateEquipmentDetailTransition (src/MENU/MENU4.PRG/120.c:1318)
+// decomp: animateEquipmentDetailTransition (src/MENU/MENU4.PRG/120.c:1321; was
+// _animateEquipmentDetailTransition)
 void BeginLiveDetailTransition(int row) {
   LiveTransitionHost host;
   static_cast<void>(BeginDetailTransition(host, row));
 }
 
-// decomp: _initUi (src/MENU/MENU4.PRG/120.c:1348)
+// decomp: initUi (src/MENU/MENU4.PRG/120.c:1351; was _initUi)
 void InitializeLiveDetailPanel(int row, int class_affinity) {
   LiveTransitionHost host;
   static_cast<void>(InitializeDetailPanel(host, row, class_affinity));
 }
 
-// decomp: _setWeaponRow (src/MENU/MENU4.PRG/120.c:1358)
+// decomp: setWeaponRow (src/MENU/MENU4.PRG/120.c:1361; was _setWeaponRow)
 void SetLiveWeaponComponentRow(int row, VS::Items::WeaponLoadout* weapon,
                                int init) {
   if (weapon == nullptr) {
@@ -123,7 +125,7 @@ void SetLiveWeaponComponentRow(int row, VS::Items::WeaponLoadout* weapon,
   static_cast<void>(SetWeaponComponentRow(host, row, *weapon, (init & 1) != 0));
 }
 
-// decomp: _setShieldRow (src/MENU/MENU4.PRG/120.c:1418)
+// decomp: setShieldRow (src/MENU/MENU4.PRG/120.c:1421; was _setShieldRow)
 void SetLiveShieldGemRow(int row, VS::Items::ShieldLoadout* shield, int init) {
   if (shield == nullptr) {
     Refuse("status transition: missing shield");
@@ -136,7 +138,8 @@ void SetLiveShieldGemRow(int row, VS::Items::ShieldLoadout* shield, int init) {
   static_cast<void>(SetShieldGemRow(host, row, *shield, (init & 1) != 0));
 }
 
-// decomp: _exitEquipmentDetail (src/MENU/MENU4.PRG/120.c:1463)
+// decomp: exitEquipmentDetail (src/MENU/MENU4.PRG/120.c:1466; was
+// _exitEquipmentDetail)
 void ExitLiveEquipmentDetails(int clear_dp_pp) {
   if (!RowsAvailable()) {
     return;

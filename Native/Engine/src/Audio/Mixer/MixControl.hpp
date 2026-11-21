@@ -14,6 +14,6 @@ struct CommandParams {
   std::uint32_t ext_param2;
 };
 
-// decomp: FSoundCommandHandler (src/SLUS_010.40/25AC.c:77)
+// decomp: FSoundCommandHandler (src/SLUS_010.40/25AC.c:96)
 using CommandHandler = void (*)(CommandParams*);
 }  // namespace VS::Audio

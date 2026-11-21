@@ -141,14 +141,15 @@ std::uint32_t CellPassability(std::uint32_t cell_word) {
   return (cell_word >> kPassabilityShift) & kPassabilityMask;
 }
 
-// decomp: BATTLE.PRG func_8008B6EC (src/BATTLE/BATTLE.PRG/146C.c:16059)
+// decomp: BATTLE.PRG getRoomTileMap (src/BATTLE/BATTLE.PRG/146C.c:15929; was
+// func_8008B6EC)
 std::span<const std::uint32_t> RoomCollisionCells(const CollisionCells& cells) {
   const std::span<const std::uint32_t> room = cells.room;
   return room;
 }
 
-// decomp: BATTLE.PRG _getCollisionMapDimensions
-// (src/BATTLE/BATTLE.PRG/146C.c:16063)
+// decomp: BATTLE.PRG getCollisionMapDimensions
+// (src/BATTLE/BATTLE.PRG/146C.c:15933; was _getCollisionMapDimensions)
 std::int32_t CollisionMapDimensions(std::optional<CollisionMapHeader> map) {
   if (!map) return 0;
   const auto rows = static_cast<std::uint32_t>(map->height)
@@ -159,9 +160,9 @@ std::int32_t CollisionMapDimensions(std::optional<CollisionMapHeader> map) {
   return static_cast<std::int32_t>(rows | columns);
 }
 
-// decomp: BATTLE.PRG _getMapBounds (src/BATTLE/BATTLE.PRG/146C.c:16072). The
-// original returns the section pointer; a section shorter than one record is
-// treated as missing.
+// decomp: BATTLE.PRG getMapBounds (src/BATTLE/BATTLE.PRG/146C.c:15942; was
+// _getMapBounds). The original returns the section pointer; a section shorter
+// than one record is treated as missing.
 std::optional<CameraBounds> RoomCameraBounds(
     std::span<const std::byte> zone_bounds) {
   if (zone_bounds.size() < sizeof(CameraBounds)) return std::nullopt;
@@ -170,7 +171,7 @@ std::optional<CameraBounds> RoomCameraBounds(
   return bounds;
 }
 
-// decomp: BATTLE.PRG func_8008B764 (src/BATTLE/BATTLE.PRG/146C.c:16080). The
+// decomp: BATTLE.PRG func_8008B764 (src/BATTLE/BATTLE.PRG/146C.c:15950). The
 // original reads past the cell and platform tables and through a missing
 // collision map; those lookups find no cell.
 std::optional<CollisionCellRef> CollisionCellAt(const CollisionCells& cells,
@@ -189,9 +190,9 @@ std::optional<CollisionCellRef> CollisionCellAt(const CollisionCells& cells,
   return CollisionCellRef{.source = CollisionCellSource::kRoom, .index = index};
 }
 
-// decomp: BATTLE.PRG func_8008B808 (src/BATTLE/BATTLE.PRG/146C.c:16099). The
-// original writes any index the arguments form; cells outside the tables are
-// refused.
+// decomp: BATTLE.PRG setTileBlocked (src/BATTLE/BATTLE.PRG/146C.c:15973; was
+// func_8008B808). The original writes any index the arguments form; cells
+// outside the tables are refused.
 std::optional<CollisionCellRef> SetCollisionCellBlocked(
     const CollisionCells& cells, std::int32_t tile_x, std::int32_t tile_z,
     std::int32_t layer) {
@@ -214,7 +215,7 @@ std::uint32_t BlockedCellWord(std::uint32_t cell_word, std::int32_t blocked) {
          (passability << kPassabilityShift);
 }
 
-// decomp: BATTLE.PRG func_800A8D64 (src/BATTLE/BATTLE.PRG/40564.c:139). The
+// decomp: BATTLE.PRG func_800A8D64 (src/BATTLE/BATTLE.PRG/40564.c:75). The
 // unused passabilities 6 and 7 find no cell, as the jump table's bound does.
 std::optional<CollisionCellRef> FindCollisionCellAtPosition(
     const CollisionCells& cells, std::int16_t world_x, std::int16_t world_z,
@@ -250,7 +251,7 @@ std::optional<CollisionCellRef> FindCollisionCellAtPosition(
   return cell;
 }
 
-// decomp: BATTLE.PRG func_8008DA24 (src/BATTLE/BATTLE.PRG/146C.c:17000). The
+// decomp: BATTLE.PRG func_8008DA24 (src/BATTLE/BATTLE.PRG/146C.c:16874). The
 // weights are the GTE NCLIP products 32 * |offset - 16| per axis.
 std::int16_t InterpolatedFloorHeight(std::span<const std::byte> collision_map,
                                      std::int32_t world_x,
@@ -294,7 +295,7 @@ std::int16_t InterpolatedFloorHeight(std::span<const std::byte> collision_map,
   return PackHeight(base, code);
 }
 
-// decomp: BATTLE.PRG func_8008DC7C (src/BATTLE/BATTLE.PRG/146C.c:17083)
+// decomp: BATTLE.PRG func_8008DC7C (src/BATTLE/BATTLE.PRG/146C.c:16957)
 std::int16_t FloorHeightAt(std::span<const std::byte> collision_map,
                            std::int32_t world_x, std::int32_t world_z) {
   const auto header = ReadCollisionMapHeader(collision_map);
@@ -306,7 +307,7 @@ std::int16_t FloorHeightAt(std::span<const std::byte> collision_map,
   return PackHeight(DecodedHeight(header->height_origin, code), code);
 }
 
-// decomp: BATTLE.PRG func_8008DD0C (src/BATTLE/BATTLE.PRG/146C.c:17097)
+// decomp: BATTLE.PRG func_8008DD0C (src/BATTLE/BATTLE.PRG/146C.c:16971)
 std::int16_t CeilingHeightAt(std::span<const std::byte> collision_map,
                              std::int32_t world_x, std::int32_t world_z) {
   const auto header = ReadCollisionMapHeader(collision_map);
@@ -317,7 +318,7 @@ std::int16_t CeilingHeightAt(std::span<const std::byte> collision_map,
   return ceiling > 0 ? kCeilingBelowOrigin : PackHeight(ceiling, code);
 }
 
-// decomp: BATTLE.PRG func_8008DDA8 (src/BATTLE/BATTLE.PRG/146C.c:17118)
+// decomp: BATTLE.PRG func_8008DDA8 (src/BATTLE/BATTLE.PRG/146C.c:16992)
 FloorAndCeiling FloorAndCeilingHeightsAt(
     std::span<const std::byte> collision_map, std::int32_t world_x,
     std::int32_t world_z) {
@@ -329,7 +330,7 @@ FloorAndCeiling FloorAndCeilingHeightsAt(
   return heights;
 }
 
-// decomp: BATTLE.PRG func_800A3BC4 (src/BATTLE/BATTLE.PRG/3A1A0.c:652)
+// decomp: BATTLE.PRG func_800A3BC4 (src/BATTLE/BATTLE.PRG/3A1A0.c:640)
 std::int32_t RoomCeilingHeight(std::span<const std::byte> collision_map,
                                std::int32_t world_x, std::int32_t world_z) {
   const std::int16_t packed = CeilingHeightAt(collision_map, world_x, world_z);
@@ -368,7 +369,7 @@ std::size_t SnapRoomActorsToSupport(
   return moved;
 }
 
-// decomp: BATTLE.PRG func_800A92B8 (src/BATTLE/BATTLE.PRG/40564.c:343)
+// decomp: BATTLE.PRG func_800A92B8 (src/BATTLE/BATTLE.PRG/40564.c:278)
 GimmickSupport GimmickSupportHeight(GimmickSlots gimmicks, std::int32_t tile_x,
                                     std::int32_t tile_z) {
   std::int32_t lowest = kNoGimmickSupport;
@@ -385,7 +386,7 @@ GimmickSupport GimmickSupportHeight(GimmickSlots gimmicks, std::int32_t tile_x,
   return GimmickSupport{.height = GimmickTop(lowest), .gimmick_index = index};
 }
 
-// decomp: BATTLE.PRG func_800B13CC (src/BATTLE/BATTLE.PRG/44F14.c:2020)
+// decomp: BATTLE.PRG func_800B13CC (src/BATTLE/BATTLE.PRG/44F14.c:1972)
 std::int32_t GimmickSupportHeightBelow(GimmickSlots gimmicks,
                                        std::int32_t tile_x, std::int32_t tile_z,
                                        std::int32_t reference_height) {
@@ -416,7 +417,7 @@ bool IsPointOnMovingPlatform(std::span<const PlatformContact> platforms,
          world_z >= platform->z - kPlatformReach;
 }
 
-// decomp: BATTLE.PRG func_800A9378 (src/BATTLE/BATTLE.PRG/40564.c:377). Modes
+// decomp: BATTLE.PRG func_800A9378 (src/BATTLE/BATTLE.PRG/40564.c:312). Modes
 // 1 and 3 report the platform's top (+96) without making it the support.
 PlatformContactHeight MovingPlatformContactHeight(
     std::span<const PlatformContact> platforms, PlatformProbe probe,
@@ -450,7 +451,7 @@ PlatformContactHeight MovingPlatformContactHeight(
   return {};
 }
 
-// decomp: BATTLE.PRG func_800A0A1C (src/BATTLE/BATTLE.PRG/30DB0.c:3994)
+// decomp: BATTLE.PRG func_800A0A1C (src/BATTLE/BATTLE.PRG/30DB0.c:4113)
 void SetActorCollisionBypass(ActorCollisionFlags& actors,
                              std::int32_t actor_index, std::int32_t flags) {
   if (!actors.Bypass(actor_index)) return;
@@ -459,7 +460,7 @@ void SetActorCollisionBypass(ActorCollisionFlags& actors,
                                    .ignored = (flags & 2) != 0});
 }
 
-// decomp: BATTLE.PRG func_800A0A74 (src/BATTLE/BATTLE.PRG/30DB0.c:4003). An
+// decomp: BATTLE.PRG func_800A0A74 (src/BATTLE/BATTLE.PRG/30DB0.c:4122). An
 // empty slot returns the null record pointer, 0.
 std::int32_t ActorCollisionBypass(const ActorCollisionFlags& actors,
                                   std::int32_t actor_index) {

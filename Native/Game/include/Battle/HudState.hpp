@@ -96,14 +96,14 @@ struct HudLimbHealthView {
 // Only set status bits require their corresponding table entries. An empty
 // mapping is valid when no mapped status is present; missing used entries
 // refuse. decomp: F01356 vs_battle_getStatusFlags
-// (src/BATTLE/BATTLE.PRG/5BF94.c:3158).
+// (src/BATTLE/BATTLE.PRG/5BF94.c:2709).
 std::optional<std::uint32_t> StatusIconFlags(
     HudStatusView status, std::span<const std::uint16_t> upper_status_icons);
 
 // Signed halfword HP, strict quarter/three-quarter comparisons; no division,
 // clamp, or positive-max-HP precondition. Equipment and other limb data are
 // unused. decomp: F01357 vs_battle_getLimbStatus
-// (src/BATTLE/BATTLE.PRG/5BF94.c:3174).
+// (src/BATTLE/BATTLE.PRG/5BF94.c:2725).
 HudLimbCondition LimbCondition(HudLimbHealthView limb);
 
 class GameplayHudWorld {
@@ -115,21 +115,22 @@ class GameplayHudWorld {
 
 // This composed command tests the full word and returns it unchanged, unlike
 // SetHudHidden's byte command. The HUD write precedes the field-overlay
-// service. decomp: F00235 func_8007BD8C (src/BATTLE/BATTLE.PRG/146C.c:8561).
+// service. decomp: F00235 setUiHidden (src/BATTLE/BATTLE.PRG/146C.c:8503; was
+// func_8007BD8C).
 std::int32_t SetGameplayHudHidden(GameplayHudWorld& world,
                                   std::int32_t command);
 
 // Requests opening without restarting the shortcut animation.
-// decomp: F01359 func_800C9F88 (src/BATTLE/BATTLE.PRG/5BF94.c:3239).
+// decomp: F01359 func_800C9F88 (src/BATTLE/BATTLE.PRG/5BF94.c:2790).
 void ShowShortcutHud(HudState& state);
 // Both timer commands replace the entire lower-screen byte, including the
 // menu-background bit; they do not change the scene timer itself.
-// decomp: F01382 func_800CB550 (src/BATTLE/BATTLE.PRG/5BF94.c:3838).
+// decomp: F01382 func_800CB550 (src/BATTLE/BATTLE.PRG/5BF94.c:3404).
 void ShowPuzzleTimer(HudState& state);
-// decomp: F01383 func_800CB560 (src/BATTLE/BATTLE.PRG/5BF94.c:3840).
+// decomp: F01383 func_800CB560 (src/BATTLE/BATTLE.PRG/5BF94.c:3406).
 void HidePuzzleTimer(HudState& state);
-// decomp: F01385 func_800CB654 (src/BATTLE/BATTLE.PRG/5BF94.c:3867).
+// decomp: F01385 func_800CB654 (src/BATTLE/BATTLE.PRG/5BF94.c:3433).
 void SetHudHidden(HudState& state, HudVisibilityCommand visibility);
-// decomp: F01386 func_800CB660 (src/BATTLE/BATTLE.PRG/5BF94.c:3869).
+// decomp: F01386 func_800CB660 (src/BATTLE/BATTLE.PRG/5BF94.c:3435).
 void SetHudBattleMode(HudState& state, HudBattleModeCommand mode);
 }  // namespace VS::Battle

@@ -8,8 +8,9 @@
 
 namespace VS::Actors {
 
-// decomp: D_800F2458 (BATTLE/BATTLE.PRG 30DB0.c): the projected vertices of
-// the model being drawn and the model scale.
+// decomp: D_800F2458 (BATTLE/BATTLE.PRG
+// src/BATTLE/BATTLE.PRG/30DB0Private.h:5): the projected vertices of the model
+// being drawn and the model scale.
 extern ModelRenderContext modelRenderContext;
 
 }  // namespace VS::Actors

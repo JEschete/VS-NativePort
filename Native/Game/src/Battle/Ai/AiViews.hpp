@@ -867,7 +867,8 @@ inline constexpr std::size_t kMoveTargetViewReserved8Bytes = 0x2C;
 inline constexpr std::size_t kMoveTargetViewReserved3838Bytes = 28;
 inline constexpr std::size_t kMoveTargetViewReserved386cBytes = 252;
 
-// decomp: func_800D8400_t (src/BATTLE/BATTLE.PRG/6FC00.c:426)
+// decomp: func_800D8400 (src/BATTLE/BATTLE.PRG/6FC00.c:29-94; was
+// func_800D8400_t)
 struct MoveTargetView {
   std::array<std::uint8_t, kMoveTargetViewReserved0Bytes> reserved0;
   std::uint8_t movement_disabled;
@@ -1115,7 +1116,8 @@ struct RadialRetreatView {
   std::int32_t candidate_count;
 };
 
-// decomp: func_800DFA54_t (src/BATTLE/BATTLE.PRG/6F014.c:49)
+// decomp: func_800DFA54 (src/BATTLE/BATTLE.PRG/770A4.c:87-103; was
+// func_800DFA54_t)
 struct RouteGateTile {
   std::uint8_t opaque0;
   std::uint8_t opaque1;
@@ -1625,7 +1627,7 @@ inline constexpr std::size_t kEscortEntryViewBytes = 0x10;
 static_assert(sizeof(EscortEntryView) == kEscortEntryViewBytes,
               "EscortEntryView must keep its PS1 layout");
 
-// decomp: func_800E5A74_t (src/BATTLE/BATTLE.PRG/6F014.c:19)
+// decomp: func_800E5A74_t (src/BATTLE/BATTLE.PRG/7CD68.c:17)
 struct SavedSettingsPair {
   std::int32_t reserved0;
   std::uint16_t saved_flags;

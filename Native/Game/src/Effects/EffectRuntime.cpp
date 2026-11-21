@@ -195,7 +195,7 @@ void PlayTracks(PrimaryEffectRuntime& runtime) {
 }
 }  // namespace
 
-// decomp: func_800CE67C (src/BATTLE/BATTLE.PRG/5BF94.c:5054)
+// decomp: func_800CE67C (src/BATTLE/BATTLE.PRG/5BF94.c:4619)
 void ResetEffectInstances(EffectRuntimeRecords& records) {
   SetPrimaryEffectPhase(records.primary, PrimaryEffectPhase::kIdle);
   records.primary.started_tracks = 0;
@@ -212,14 +212,14 @@ void ResetEffectInstances(EffectRuntimeRecords& records) {
   records.tokens = {};
 }
 
-// decomp: func_800CE64C (src/BATTLE/BATTLE.PRG/5BF94.c:5047)
+// decomp: func_800CE64C (src/BATTLE/BATTLE.PRG/5BF94.c:4612)
 void InitEffectRuntime(EffectRuntimeStartup& startup) {
   startup.ResetInstances();
   startup.InitializeResources();
   startup.ResetParticlePoolReferences();
 }
 
-// decomp: func_800CE9B0 (src/BATTLE/BATTLE.PRG/5BF94.c:5170)
+// decomp: func_800CE9B0 (src/BATTLE/BATTLE.PRG/5BF94.c:4735)
 bool UpdatePrimaryEffects(PrimaryEffectRuntime& runtime) {
   switch (runtime.Primary().phase) {
     case PrimaryEffectPhase::kIdle:
@@ -253,7 +253,7 @@ bool UpdatePrimaryEffects(PrimaryEffectRuntime& runtime) {
   return true;
 }
 
-// decomp: func_800CED60 (src/BATTLE/BATTLE.PRG/5BF94.c:5321)
+// decomp: func_800CED60 (src/BATTLE/BATTLE.PRG/5BF94.c:4886)
 std::uint8_t UpdateSecondaryEffects(SecondaryEffectRuntime& runtime) {
   std::uint8_t busy = 0;
   LiveEffectInstance* instance = runtime.FirstSecondary();
@@ -266,7 +266,7 @@ std::uint8_t UpdateSecondaryEffects(SecondaryEffectRuntime& runtime) {
   return busy;
 }
 
-// decomp: func_800CEF74 (src/BATTLE/BATTLE.PRG/5BF94.c:5399)
+// decomp: func_800CEF74 (src/BATTLE/BATTLE.PRG/5BF94.c:4964)
 TrackStart StartEffectTrack(int track, PrimaryEffectRuntime& runtime) {
   runtime.SelectPackage(ActivePackage::kAction);
   if (!CanStartTrack(runtime.Primary())) {
@@ -290,7 +290,7 @@ TrackStart StartEffectTrack(int track, PrimaryEffectRuntime& runtime) {
   return TrackStart::kStarted;
 }
 
-// decomp: func_800CF060 (src/BATTLE/BATTLE.PRG/5BF94.c:5427)
+// decomp: func_800CF060 (src/BATTLE/BATTLE.PRG/5BF94.c:4992)
 std::uint8_t UpdateEffectRuntime(EffectRuntimeFrame& frame) {
   frame.SetBufferIndex(static_cast<std::uint8_t>(1U - frame.BufferIndex()));
   frame.SelectPackage(ActivePackage::kAction);
@@ -304,7 +304,7 @@ std::uint8_t UpdateEffectRuntime(EffectRuntimeFrame& frame) {
   return static_cast<std::uint8_t>((primary_busy ? 1U : 0U) | secondary_busy);
 }
 
-// decomp: func_800CF0E8 (src/BATTLE/BATTLE.PRG/5BF94.c:5444)
+// decomp: func_800CF0E8 (src/BATTLE/BATTLE.PRG/5BF94.c:5009)
 std::uint8_t BeginActionEffect(const ActionEffectStart& start,
                                PrimaryEffectRuntime& runtime) {
   runtime.StoreActionRequest();
@@ -321,7 +321,7 @@ std::uint8_t BeginActionEffect(const ActionEffectStart& start,
   return runtime.PrimaryToken();
 }
 
-// decomp: func_800CF1A8 (src/BATTLE/BATTLE.PRG/5BF94.c:5462)
+// decomp: func_800CF1A8 (src/BATTLE/BATTLE.PRG/5BF94.c:5027)
 void ClearPrimaryEffects(PrimaryEffectRuntime& runtime) {
   LiveEffectInstance* instance = runtime.FirstPrimary();
   runtime.StopVibration();
@@ -347,7 +347,7 @@ std::uint8_t SecondaryBusyBits(std::uint16_t effect_id) {
                                            : kDefaultBusyBits;
 }
 
-// decomp: func_800CF218 (src/BATTLE/BATTLE.PRG/5BF94.c:5479)
+// decomp: func_800CF218 (src/BATTLE/BATTLE.PRG/5BF94.c:5044)
 std::uint8_t SpawnSecondaryEffects(const SecondaryEffectRequest& request,
                                    std::int32_t parameter,
                                    SecondaryEffectSpawner& spawner) {
@@ -375,7 +375,7 @@ std::uint8_t SpawnSecondaryEffects(const SecondaryEffectRequest& request,
   return token;
 }
 
-// decomp: func_800CF3F8 (src/BATTLE/BATTLE.PRG/5BF94.c:5532)
+// decomp: func_800CF3F8 (src/BATTLE/BATTLE.PRG/5BF94.c:5097)
 std::uint8_t BeginSecondaryEffects(const SecondaryEffectRequest& request,
                                    std::int32_t parameter,
                                    SecondaryEffectSpawner& spawner) {
@@ -385,7 +385,7 @@ std::uint8_t BeginSecondaryEffects(const SecondaryEffectRequest& request,
   return SpawnSecondaryEffects(request, parameter, spawner);
 }
 
-// decomp: func_800CF8BC (src/BATTLE/BATTLE.PRG/5BF94.c:5697)
+// decomp: func_800CF8BC (src/BATTLE/BATTLE.PRG/5BF94.c:5262)
 SourceActorEffect MakeSourceActorEffect(std::uint8_t actor) {
   return {.effect_id = kSourceActorEffectId,
           .target_count = 1,
@@ -399,6 +399,6 @@ SourceActorEffect MakeSourceActorEffect(std::uint8_t actor) {
           .target_z = 0};
 }
 
-// decomp: func_800CF920 (src/BATTLE/BATTLE.PRG/5BF94.c:5712)
+// decomp: func_800CF920 (src/BATTLE/BATTLE.PRG/5BF94.c:5277)
 void ClearActionEffectMode(std::uint8_t& action_variant) { action_variant = 0; }
 }  // namespace VS::Effects

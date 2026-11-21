@@ -6,8 +6,9 @@
 
 namespace VS::Items {
 
-// decomp: vs_battle_miscItemInvoked (BATTLE/BATTLE.PRG 5BF94.h): the misc
-// stack slot the item menu last invoked; ConsumeMiscItem searches from it.
+// decomp: vs_battle_miscItemInvoked (BATTLE/BATTLE.PRG
+// src/BATTLE/BATTLE.PRG/battleUi.h:305): the misc stack slot the item menu last
+// invoked; ConsumeMiscItem searches from it.
 extern unsigned char miscItemInvoked;
 
 }  // namespace VS::Items

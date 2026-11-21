@@ -3,8 +3,11 @@
 #include "Effects/Plugins/Plg272.hpp"
 
 namespace VS::Effects::Plg272 {
-// decomp: D_800FBE70 (PLG272.BIN/18.c:8; closedRings.h:58)
+// decomp: vs_effect_plg272_1_colors (src/EFFECT/closedRings.h:58; was
+// D_800FBE70; src/EFFECT/closedRings.h:58)
 plugins::RingPalette closedRingColorFactors;
-// decomp: D_800FBE90 (PLG272.BIN/18.c:10; sphericalSurfaceVertices.h:21)
+// decomp: vs_effect_plg272_2_vertices
+// (src/EFFECT/sphericalSurfaceVertices.h:21; was D_800FBE90;
+// src/EFFECT/sphericalSurfaceVertices.h:21)
 plugins::SurfaceProfile surfaceVertices;
 }  // namespace VS::Effects::Plg272

@@ -38,26 +38,29 @@ class DetailTransitionHost {
 };
 
 // Invalid links and cycles without a selectable element are refused.
-// decomp: _updateEquipmentDetailSelection (src/MENU/MENU4.PRG/120.c:462)
+// decomp: updateEquipmentDetailSelection (src/MENU/MENU4.PRG/120.c:466; was
+// _updateEquipmentDetailSelection)
 [[nodiscard]] std::optional<std::uint8_t> NavigateDetailElements(
     const DetailNavigation& input);
-// decomp: _setActiveRow (src/MENU/MENU4.PRG/120.c:1299)
+// decomp: setActiveRow (src/MENU/MENU4.PRG/120.c:1302; was _setActiveRow)
 [[nodiscard]] bool HoistEquipmentRow(DetailTransitionHost& host, int row);
-// decomp: _animateEquipmentDetailTransition (src/MENU/MENU4.PRG/120.c:1318)
+// decomp: animateEquipmentDetailTransition (src/MENU/MENU4.PRG/120.c:1321; was
+// _animateEquipmentDetailTransition)
 [[nodiscard]] bool BeginDetailTransition(DetailTransitionHost& host, int row);
-// decomp: _initUi (src/MENU/MENU4.PRG/120.c:1348)
+// decomp: initUi (src/MENU/MENU4.PRG/120.c:1351; was _initUi)
 [[nodiscard]] bool InitializeDetailPanel(DetailTransitionHost& host, int row,
                                          int class_affinity);
 // These rows borrow their loadout and text; no inventory owner is changed.
-// decomp: _setWeaponRow (src/MENU/MENU4.PRG/120.c:1358)
+// decomp: setWeaponRow (src/MENU/MENU4.PRG/120.c:1361; was _setWeaponRow)
 Framework::MenuRow* SetWeaponComponentRow(Framework::ItemRowsHost& host,
                                           int row,
                                           const Items::WeaponLoadout& weapon,
                                           bool slide_in);
-// decomp: _setShieldRow (src/MENU/MENU4.PRG/120.c:1418)
+// decomp: setShieldRow (src/MENU/MENU4.PRG/120.c:1421; was _setShieldRow)
 Framework::MenuRow* SetShieldGemRow(Framework::ItemRowsHost& host, int row,
                                     const Items::ShieldLoadout& shield,
                                     bool slide_in);
-// decomp: _exitEquipmentDetail (src/MENU/MENU4.PRG/120.c:1463)
+// decomp: exitEquipmentDetail (src/MENU/MENU4.PRG/120.c:1466; was
+// _exitEquipmentDetail)
 void ExitEquipmentDetails(DetailTransitionHost& host, bool clear_dp_pp);
 }  // namespace VS::Menu::Status

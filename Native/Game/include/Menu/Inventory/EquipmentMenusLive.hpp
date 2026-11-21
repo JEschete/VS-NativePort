@@ -15,18 +15,22 @@
 // dispatch row outside the top menu and a top-menu row or text outside its
 // table are refused with a throttled warning and return 0.
 namespace VS::Menu::Inventory {
-// decomp: MENU3.PRG _equipAccessoryMenu (src/MENU/MENU3.PRG/16C.c:343)
+// decomp: MENU3.PRG equipAccessoryMenu (src/MENU/MENU3.PRG/16C.c:338; was
+// _equipAccessoryMenu)
 int UpdateLiveAccessoryMenu(int initialize);
-// decomp: MENU3.PRG _equipWeaponMenu (src/MENU/MENU3.PRG/16C.c:503)
+// decomp: MENU3.PRG equipWeaponMenu (src/MENU/MENU3.PRG/16C.c:498; was
+// _equipWeaponMenu)
 int UpdateLiveWeaponMenu(int initialize);
-// decomp: MENU3.PRG _equipShieldMenu (src/MENU/MENU3.PRG/16C.c:683)
+// decomp: MENU3.PRG equipShieldMenu (src/MENU/MENU3.PRG/16C.c:678; was
+// _equipShieldMenu)
 int UpdateLiveShieldMenu(int initialize);
-// decomp: MENU3.PRG _equipArmorMenu (src/MENU/MENU3.PRG/16C.c:856)
+// decomp: MENU3.PRG equipArmorMenu (src/MENU/MENU3.PRG/16C.c:851; was
+// _equipArmorMenu)
 int UpdateLiveArmorMenu(int body_part);
-// decomp: MENU3.PRG _dispatchEquipMenu (src/MENU/MENU3.PRG/16C.c:1028)
-// Calls through LiveEquipmentMenuHandlers().
+// decomp: MENU3.PRG dispatchEquipMenu (src/MENU/MENU3.PRG/16C.c:1023; was
+// _dispatchEquipMenu) Calls through LiveEquipmentMenuHandlers().
 int DispatchLiveEquipmentMenu(int row);
-// decomp: MENU3.PRG _equipMenu (src/MENU/MENU3.PRG/16C.c:1054)
+// decomp: MENU3.PRG equipMenu (src/MENU/MENU3.PRG/16C.c:1049; was _equipMenu)
 int UpdateLiveEquipmentMenu(int initialize);
 // _dispatchEquipMenu's handler table bound to the Live slot menus, in the
 // original's order (armor, weapon, shield, accessory).

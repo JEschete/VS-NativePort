@@ -35,7 +35,8 @@ std::int32_t CountSlots(std::span<const std::uint8_t> references,
 }
 }  // namespace
 
-// decomp: _getWeaponsubItemCount (src/MENU/MENUD.PRG/234.c:1959)
+// decomp: getWeaponsubItemCount (src/MENU/MENUD.PRG/234.c:1960; was
+// _getWeaponsubItemCount)
 std::int32_t CountContainerWeaponGems(std::int32_t weapon_slot,
                                       ContainerWorld& source) {
   const auto weapon =
@@ -45,7 +46,8 @@ std::int32_t CountContainerWeaponGems(std::int32_t weapon_slot,
   return CountSlots(weapon.gems, grip.gem_slots, source);
 }
 
-// decomp: _getShieldsubItemCount (src/MENU/MENUD.PRG/234.c:1971)
+// decomp: getShieldsubItemCount (src/MENU/MENUD.PRG/234.c:1972; was
+// _getShieldsubItemCount)
 std::int32_t CountContainerShieldGems(std::int32_t shield_slot,
                                       ContainerWorld& source) {
   const auto shield =

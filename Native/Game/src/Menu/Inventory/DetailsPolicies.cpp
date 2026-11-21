@@ -17,7 +17,7 @@ void SetPanelVisibility(PanelVisibility& panels, std::uint8_t visibility) {
   panels = {visibility, visibility, visibility};
 }
 
-// decomp: _itemPaging (src/MENU/items0.h:15-41).
+// decomp: itemPaging (src/MENU/items0.h:15-41; was _itemPaging).
 DetailPage PollDetailsPaging(DetailsWorld& world, DetailPage page) {
   if ((world.HeldButtons() & kPagingButtons) == kPagingButtons) {
     return page;
@@ -41,7 +41,8 @@ DetailPage PollDetailsPaging(DetailsWorld& world, DetailPage page) {
   return page;
 }
 
-// decomp: _startMenuTransition (src/MENU/items0.h:87-102).
+// decomp: startMenuTransition (src/MENU/items0.h:87-102; was
+// _startMenuTransition).
 void BeginDetailsTransition(DetailsWorld& world, DetailRowId selected) {
   world.ClearRows();
   auto& category = world.Row(kCategoryHeaderRow);
@@ -54,7 +55,7 @@ void BeginDetailsTransition(DetailsWorld& world, DetailRowId selected) {
   item.sub_text = nullptr;
 }
 
-// decomp: _initMenuLayout (src/MENU/items1.h:21-30).
+// decomp: initMenuLayout (src/MENU/items1.h:26-35; was _initMenuLayout).
 void InitializeDetailsLayout(DetailsWorld& world, DetailRowId selected,
                              std::int32_t stat_pages) {
   world.SetPreviewLayout(PreviewLayout::kDetails);
@@ -65,7 +66,7 @@ void InitializeDetailsLayout(DetailsWorld& world, DetailRowId selected,
   world.MovePrimaryStats(StatPanelMotion::kOpen);
 }
 
-// decomp: _getItemIndex (src/MENU/items1.h:54-61).
+// decomp: getItemIndex (src/MENU/items1.h:59-66; was _getItemIndex).
 InventorySlot SelectDetailsItem(DetailsWorld& world, DetailPage page) {
   world.RememberPage({0, static_cast<std::uint8_t>(page.index)});
   const auto order = world.DisplayOrder();
@@ -75,7 +76,7 @@ InventorySlot SelectDetailsItem(DetailsWorld& world, DetailPage page) {
   return InventorySlot{order[static_cast<std::size_t>(page.index)]};
 }
 
-// decomp: _exitStatusView (src/MENU/items1.h:74-88).
+// decomp: exitStatusView (src/MENU/items1.h:79-93; was _exitStatusView).
 void ExitDetailsView(DetailsWorld& world, bool clear_dp_pp) {
   world.PlayLeaveSound();
   world.ClearRows();

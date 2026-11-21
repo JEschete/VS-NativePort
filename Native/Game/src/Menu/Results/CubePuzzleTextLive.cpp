@@ -76,55 +76,58 @@ CubePuzzleClock LivePuzzleClock() {
 }
 }  // namespace
 
-// decomp: MENUF.PRG _renderGivingUp (src/MENU/MENUF.PRG/3B8.c:2610), 0x801084F4
+// decomp: MENUF.PRG renderGivingUp (src/MENU/MENUF.PRG/3B8.c:2618; was
+// _renderGivingUp), 0x801084F4
 void LiveDrawGivingUp(int draw_y, int fade_timer) {
   LiveCubePuzzleTextHost host;
   Report(DrawGivingUp(LiveResultsAtlas(), draw_y, fade_timer, host));
 }
 
-// decomp: MENUF.PRG _renderChicken (src/MENU/MENUF.PRG/3B8.c:2624), 0x80108564
+// decomp: MENUF.PRG renderChicken (src/MENU/MENUF.PRG/3B8.c:2632; was
+// _renderChicken), 0x80108564
 void LiveDrawChicken(int draw_y, int fade_timer) {
   LiveCubePuzzleTextHost host;
   Report(DrawChicken(LiveResultsAtlas(), draw_y, fade_timer, host));
 }
 
-// decomp: MENUF.PRG _renderEvolveOrDie (src/MENU/MENUF.PRG/3B8.c:2640),
-// 0x801085D4
+// decomp: MENUF.PRG renderEvolveOrDie (src/MENU/MENUF.PRG/3B8.c:2648; was
+// _renderEvolveOrDie), 0x801085D4
 void LiveDrawEvolveOrDie(int x, int y, int step) {
   LiveCubePuzzleTextHost host;
   Report(DrawEvolveOrDie(LiveResultsAtlas(), x, y, step, host));
 }
 
-// decomp: MENUF.PRG _renderFoodchain (src/MENU/MENUF.PRG/3B8.c:2664),
-// 0x80108688
+// decomp: MENUF.PRG renderFoodchain (src/MENU/MENUF.PRG/3B8.c:2672; was
+// _renderFoodchain), 0x80108688
 void LiveDrawFoodChain(int x, int y, int timer) {
   LiveCubePuzzleTextHost host;
   Report(DrawFoodChain(LiveResultsAtlas(), x, y, timer, host));
 }
 
-// decomp: MENUF.PRG _renderAverageTimeHeader (src/MENU/MENUF.PRG/3B8.c:2687),
-// 0x8010873C
+// decomp: MENUF.PRG renderAverageTimeHeader (src/MENU/MENUF.PRG/3B8.c:2695; was
+// _renderAverageTimeHeader), 0x8010873C
 void LiveDrawAverageTimeHeading(int x, int y, int timer) {
   LiveCubePuzzleTextHost host;
   Report(DrawAverageTimeHeading(LiveResultsAtlas(), x, y, timer, host));
 }
 
-// decomp: MENUF.PRG _renderCubePuzzleTime (src/MENU/MENUF.PRG/3B8.c:2699),
-// 0x80108784
+// decomp: MENUF.PRG renderCubePuzzleTime (src/MENU/MENUF.PRG/3B8.c:2707; was
+// _renderCubePuzzleTime), 0x80108784
 void LiveDrawCubePuzzleParTime(int x, int y, int timer) {
   LiveCubePuzzleTextHost host;
   Report(DrawCubePuzzleParTime(x, y, timer, puzzleParTime, host));
 }
 
-// decomp: MENUF.PRG _renderCubePuzzleRank (src/MENU/MENUF.PRG/3B8.c:2712),
-// 0x8010880C
+// decomp: MENUF.PRG renderCubePuzzleRank (src/MENU/MENUF.PRG/3B8.c:2720; was
+// _renderCubePuzzleRank), 0x8010880C
 void LiveDrawCubePuzzleRank(int x, int y, int timer, int rank) {
   LiveCubePuzzleTextHost host;
   Report(DrawCubePuzzleRank(LiveResultsAtlas(), x, y, timer, rank, host));
 }
 
-// decomp: MENUF.PRG _renderCubePuzzleIncrementalTime
-// (src/MENU/MENUF.PRG/3B8.c:2732), 0x8010887C
+// decomp: MENUF.PRG renderCubePuzzleIncrementalTime
+// (src/MENU/MENUF.PRG/3B8.c:2740; was _renderCubePuzzleIncrementalTime),
+// 0x8010887C
 void LiveDrawCountingCubePuzzleTime(int x, int y, int timer) {
   LiveCubePuzzleTextHost host;
   Report(DrawCountingCubePuzzleTime(LiveResultsAtlas(), x, y, timer,

@@ -42,7 +42,7 @@ struct WaypointTile {
 }
 
 // decomp: nearestWaypointValue (src/BATTLE/BATTLE.PRG/74088.c:946) and
-// patrolWaypoint (src/BATTLE/BATTLE.PRG/771A8.c:1857).
+// nextWaypoint (src/BATTLE/BATTLE.PRG/770A4.c:1247; was patrolWaypoint).
 // The waypoint at `index`. Nothing refuses an index outside the row, which
 // the original read past.
 [[nodiscard]] std::optional<std::uint16_t> WaypointValue(
@@ -68,7 +68,7 @@ struct WaypointSearch {
   std::optional<NearestWaypoint> nearest;
 };
 
-// decomp: func_800DD7CC (src/BATTLE/BATTLE.PRG/74088.c:957).
+// decomp: func_800DD7CC (src/BATTLE/BATTLE.PRG/74088.c:407).
 // The active waypoint whose tile centre, at the special terrain's ground
 // height there, is nearest the position. Distances are SquaredVectorLength
 // (each delta reduced to 16 bits) compared unsigned; the first of equally
@@ -98,7 +98,7 @@ class PatrolRandom {
   virtual int NextMasked(int range) = 0;
 };
 
-// decomp: func_800E23AC (src/BATTLE/BATTLE.PRG/771A8.c:1863).
+// decomp: func_800E23AC (src/BATTLE/BATTLE.PRG/770A4.c:1276).
 // Walks the cursor's route row. At the current waypoint's tile the cursor
 // steps by its direction to the next active waypoint and waits ten checks.
 // Elsewhere the cooldown counts down, a value below 2^rate is drawn and the

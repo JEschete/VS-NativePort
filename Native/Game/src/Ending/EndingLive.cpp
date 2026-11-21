@@ -913,7 +913,8 @@ void LiveRunStaffRoll() {
   host.PublishState();
 }
 
-// decomp: ENDING.PRG _do_updateClearGameStats (src/ENDING/ENDING.PRG/D4.c:1502)
+// decomp: ENDING.PRG do_updateClearGameStats (src/ENDING/ENDING.PRG/D4.c:1560;
+// was _do_updateClearGameStats)
 void LiveCommitClearProgress() {
   ClearProgress progress = LoadProgress();
   const RoomBits rooms = CountableRoomBits();
@@ -922,7 +923,8 @@ void LiveCommitClearProgress() {
   StoreProgress(progress);
 }
 
-// decomp: ENDING.PRG func_8006C3CC (src/ENDING/ENDING.PRG/D4.c:1887)
+// decomp: ENDING.PRG fadeIn (src/ENDING/ENDING.PRG/D4.c:2013; was
+// func_8006C3CC)
 void LiveDrawRankBackground(int fade_frame) {
   LiveFrameHost host;
   DrawRankBackground(fade_frame, host);

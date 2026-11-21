@@ -4,6 +4,7 @@
 #include <cstdint>
 
 namespace VS::Effects::Plg156 {
-// decomp: D_800FC11C (PLG156.BIN/128.c:5; particleSetup.h:35)
+// decomp: vs_effect_quickshock_0_origin_state (src/EFFECT/particleSetup.h:35;
+// was D_800FC11C; src/EFFECT/particleSetup.h:35)
 extern std::int32_t particleEmissionCounter;
 }  // namespace VS::Effects::Plg156

@@ -4,10 +4,13 @@
 #include <cstdint>
 
 namespace VS::Effects::Plg266 {
-// decomp: D_800FEEA0 (PLG266.BIN/2E8.c:5; particleSetup.h:35)
+// decomp: vs_effect_plg266_0_origin_state (src/EFFECT/particleSetup.h:35; was
+// D_800FEEA0; src/EFFECT/particleSetup.h:35)
 extern std::int32_t particleEmissionCounter;
-// decomp: D_800FEEA4 (PLG266.BIN/2E8.c:10; particleSetup.h:35)
+// decomp: vs_effect_plg266_1_origin_state (src/EFFECT/particleSetup.h:35; was
+// D_800FEEA4; src/EFFECT/particleSetup.h:35)
 extern std::int32_t particleEmissionCounter2;
-// decomp: D_800FEEA8 (PLG266.BIN/2E8.c:15; trailEffect.h:70)
+// decomp: vs_effect_plg266_2_origin_state (src/EFFECT/trailEffect.h:70; was
+// D_800FEEA8; src/EFFECT/trailEffect.h:70)
 extern std::int32_t trailEmissionCounter;
 }  // namespace VS::Effects::Plg266

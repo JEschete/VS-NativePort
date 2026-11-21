@@ -322,14 +322,15 @@ void VS::Audio::Driver::ConfigureOutputChannel(VS::Audio::SeqChannel* channel) {
   channel->voice.dirty_flags = 0;
 }
 
-// decomp: SpuSetNoiseClock, SLUS_010.40/libspu/S_SNC.c.
+// decomp: SpuSetNoiseClock, src/SLUS_010.40/libspu/S_SNC.c:3.
 void VS::Audio::Driver::SetOutputNoiseClock(int clock) {
   constexpr int kMaximumClock = 63;
   Engine().SetNoiseClock(
       static_cast<unsigned>(std::clamp(clock, 0, kMaximumClock)));
 }
 
-// decomp: SLUS_010.40/libspu/S_SRMT.c, S_SRMD.c, S_SR.c and S_GRMT.c.
+// decomp: src/SLUS_010.40/libspu/S_SRMT.c, src/SLUS_010.40/libspu/S_SRMD.c,
+// src/SLUS_010.40/libspu/S_SR.c and src/SLUS_010.40/libspu/S_GRMT.c.
 int VS::Audio::Driver::OutputReverbMode() {
   return static_cast<int>(reverbControls.preset);
 }

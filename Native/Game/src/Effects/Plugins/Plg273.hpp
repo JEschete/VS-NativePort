@@ -4,6 +4,8 @@
 #include "Effects/Plugins/PluginData.hpp"
 
 namespace VS::Effects::Plg273 {
-// decomp: D_800FA474 (PLG273.BIN/0.c:7; sphericalSurfaceVertices.h:21)
+// decomp: vs_effect_plg273_0_vertices
+// (src/EFFECT/sphericalSurfaceVertices.h:21; was D_800FA474;
+// src/EFFECT/sphericalSurfaceVertices.h:21)
 extern plugins::SurfaceProfile mirrorSurfaceVertices;
 }  // namespace VS::Effects::Plg273

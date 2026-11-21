@@ -162,26 +162,26 @@ class HostilityHost {
   virtual void RequestReaction(HostilityState& state, int value, int range) = 0;
 };
 
-// decomp: func_800E4C28 (src/BATTLE/BATTLE.PRG/7BDD4.s:550).
+// decomp: func_800E4C28 (src/BATTLE/BATTLE.PRG/6E4CCPrivate.h:50).
 // Clears tile (x, z)'s reservation bit. Nothing happens without a grid;
 // false refuses a tile outside it.
 bool ReleaseAiDestinationTile(std::span<std::uint16_t> tile_flags, int x,
                               int z);
 
-// decomp: func_800E678C (src/BATTLE/BATTLE.PRG/7DE94.s:91).
+// decomp: func_800E678C (src/BATTLE/BATTLE.PRG/7DDDC.s:120).
 // Clears the navigation reset, releases the next tile when it lies in the
 // room's reservable range and, for a route gate holder, the room flag the
 // gate reserves. False refuses a room range reaching outside the grid.
 bool ReleaseActorAiReservations(ReservationState& state, CleanupRoom& room,
                                 std::span<std::uint16_t> tile_flags);
 
-// decomp: func_800E6764 (src/BATTLE/BATTLE.PRG/7DE94.s:73).
+// decomp: func_800E6764 (src/BATTLE/BATTLE.PRG/7DDDC.s:107).
 // Releases an AI actor's reservations and flags its navigation for a reset.
 // Nothing happens without an AI state; false refuses an ID outside the slots
 // or a missing room.
 bool ForceReleaseActorAiReservations(ActorCleanupHost& host, int actor_id);
 
-// decomp: func_800E6700 (src/BATTLE/BATTLE.PRG/7DE94.s:42).
+// decomp: func_800E6700 (src/BATTLE/BATTLE.PRG/7DDDC.s:82).
 // Releases an AI actor's reservations when its command is one that frees
 // them (opcodes 11, 12, 18, 21 and 23) and its model is neither moving nor
 // reacting. False refuses an ID outside the slots, a missing actor record or
@@ -200,32 +200,32 @@ bool FreeActorNavigationOverride(ActorCleanupHost& host, int actor_id);
 // without a model.
 bool ReleaseActorAiContactOccupancy(ActorCleanupHost& host, int actor_id);
 
-// decomp: func_800E7608 (src/BATTLE/BATTLE.PRG/7E05C.s:1052).
+// decomp: func_800E7608 (src/BATTLE/BATTLE.PRG/6E4CCPrivate.h:86).
 // Unlinks every AI actor following `actor_id`, then disengages it. False
 // refuses an ID outside the slots.
 bool ClearActorAiLinksAndPlan(ActorCleanupHost& host, int actor_id);
 
-// decomp: func_800E6694 (src/BATTLE/BATTLE.PRG/7DE94.s:9).
+// decomp: func_800E6694 (src/BATTLE/BATTLE.PRG/7DDDC.s:52).
 // The actor's AI flags for its save record, or -1 without an AI state.
 // Nothing refuses an ID outside the slots.
 [[nodiscard]] std::optional<std::int16_t> PackActorAiPersistenceFlags(
     const ActorCleanupHost& host, int actor_id);
 
-// decomp: func_800E6B24 (src/BATTLE/BATTLE.PRG/7E05C.s:241).
+// decomp: func_800E6B24 (src/BATTLE/BATTLE.PRG/7DDDC.s:389).
 // Clears an AI actor's navigation reset. False refuses an ID outside the
 // slots.
 bool ClearActorAiNavigationReset(ActorCleanupHost& host, int actor_id);
 
-// decomp: func_800E6EAC (src/BATTLE/BATTLE.PRG/7E05C.s:504).
+// decomp: func_800E6EAC (src/BATTLE/BATTLE.PRG/6E4CC.h:13).
 // The AI extension hook the frame loop calls; it does nothing.
 void InitializeActorAiExtensionHook();
 
-// decomp: func_800E7660 (src/BATTLE/BATTLE.PRG/7E05C.s:1080).
+// decomp: func_800E7660 (src/BATTLE/BATTLE.PRG/7CD68.c:63).
 // Gives the arena a zeroed orbiting boss state with the initial cooldown.
 // False refuses an exhausted heap.
 bool AllocateOrbitingBossState(ActorCleanupHost& host);
 
-// decomp: func_800E7454 (src/BATTLE/BATTLE.PRG/7E05C.s:924).
+// decomp: func_800E7454 (src/BATTLE/BATTLE.PRG/6E4CCPrivate.h:83).
 // Removes an actor leaving the battle from the attribute mask, the other
 // actors' links, the room's special actors and engagement, frees its
 // navigation override and AI state, and frees the orbiting boss state with
@@ -234,7 +234,7 @@ bool AllocateOrbitingBossState(ActorCleanupHost& host);
 // engagement.
 bool FreeActorAiState(ActorCleanupHost& host, TeardownActor& actor);
 
-// decomp: func_800E48A8 (src/BATTLE/BATTLE.PRG/7BDD4.s:246).
+// decomp: func_800E48A8 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:485).
 // Draws a random value below `range` and, unless the actor follows a
 // navigation override or already waits, makes it wait 30 frames before
 // reacting with command flags `value` when the draw is below `range`.
@@ -242,7 +242,7 @@ bool FreeActorAiState(ActorCleanupHost& host, TeardownActor& actor);
 bool SetActorAiReactionWithDelay(ReactionDelayState& state,
                                  ReactionDelayHost& host, int value, int range);
 
-// decomp: func_800DC784 (src/BATTLE/BATTLE.PRG/73C84.s:246).
+// decomp: func_800DC784 (src/BATTLE/BATTLE.PRG/7399C.s:434).
 // Classifies `target` as hostile; an actor not already hostile toward it
 // is alerted, shows the hostility indicator and reacts after a delay. False
 // refuses a target outside the slots.

@@ -566,7 +566,7 @@ void LiveBackgroundHost::UploadTimClut(BackgroundBufferId buffer, int row,
                              static_cast<std::uint32_t>(count));
 }
 
-// decomp: BATTLE.PRG func_8008E88C (src/BATTLE/BATTLE.PRG/146C.c:17431)
+// decomp: BATTLE.PRG func_8008E88C (src/BATTLE/BATTLE.PRG/146C.c:17310)
 void LiveInitializeRoomBackground() {
   RoomWeatherState weather = LoadLiveRoomWeatherState();
   RunLive([&weather](BackgroundHost& host, RoomBackgroundState& state) {
@@ -575,14 +575,14 @@ void LiveInitializeRoomBackground() {
   StoreLiveRoomWeatherState(weather);
 }
 
-// decomp: BATTLE.PRG func_8008E938 (src/BATTLE/BATTLE.PRG/146C.c:17453)
+// decomp: BATTLE.PRG func_8008E938 (src/BATTLE/BATTLE.PRG/146C.c:17332)
 void LiveInitializeRoomBackgroundColors() {
   RunLive([](BackgroundHost& host, RoomBackgroundState& state) {
     InitializeRoomBackgroundColors(host, state);
   });
 }
 
-// decomp: BATTLE.PRG func_8008EAE4 (src/BATTLE/BATTLE.PRG/146C.c:17517)
+// decomp: BATTLE.PRG func_8008EAE4 (src/BATTLE/BATTLE.PRG/146C.c:17394)
 void LiveSetBackgroundParallaxScale(int parallax_x, int parallax_y) {
   RunLive([parallax_x, parallax_y](BackgroundHost& /*host*/,
                                    RoomBackgroundState& state) {
@@ -590,17 +590,17 @@ void LiveSetBackgroundParallaxScale(int parallax_x, int parallax_y) {
   });
 }
 
-// decomp: BATTLE.PRG func_8008EAF8 (src/BATTLE/BATTLE.PRG/146C.c:17523)
+// decomp: BATTLE.PRG func_8008EAF8 (src/BATTLE/BATTLE.PRG/146C.c:17400)
 void LiveSetTiledBackgroundEnabled(int enabled) {
   RunLive([enabled](BackgroundHost& /*host*/, RoomBackgroundState& state) {
     SetTiledBackgroundEnabled(state, enabled);
   });
 }
 
-// decomp: BATTLE.PRG func_8008EB24 (src/BATTLE/BATTLE.PRG/146C.c:17531)
+// decomp: BATTLE.PRG func_8008EB24 (src/BATTLE/BATTLE.PRG/146C.c:17408)
 int* LiveRoomBackgroundColors() { return backgroundGradientColors; }
 
-// decomp: BATTLE.PRG func_8008EB30 (src/BATTLE/BATTLE.PRG/146C.c:17533)
+// decomp: BATTLE.PRG func_8008EB30 (src/BATTLE/BATTLE.PRG/146C.c:17410)
 void LiveSetRoomBackgroundColors(const int* gradient_colors) {
   if (gradient_colors == nullptr) {
     RefuseNull("SetRoomBackgroundColors");
@@ -614,7 +614,7 @@ void LiveSetRoomBackgroundColors(const int* gradient_colors) {
   });
 }
 
-// decomp: BATTLE.PRG func_8008EC48 (src/BATTLE/BATTLE.PRG/146C.c:17571)
+// decomp: BATTLE.PRG func_8008EC48 (src/BATTLE/BATTLE.PRG/146C.c:17448)
 void LiveDrawRoomBackground(const VECTOR* rotation_override) {
   std::optional<CameraVector> rotation;
   if (rotation_override != nullptr) {
@@ -625,7 +625,7 @@ void LiveDrawRoomBackground(const VECTOR* rotation_override) {
   });
 }
 
-// decomp: BATTLE.PRG func_8008EFCC (src/BATTLE/BATTLE.PRG/146C.c:17638)
+// decomp: BATTLE.PRG func_8008EFCC (src/BATTLE/BATTLE.PRG/146C.c:17515)
 int LiveQueueTiledBackgroundLoad(int texture_page) {
   return RunLive(
       [texture_page](BackgroundHost& host, RoomBackgroundState& state) {
@@ -633,14 +633,14 @@ int LiveQueueTiledBackgroundLoad(int texture_page) {
       });
 }
 
-// decomp: BATTLE.PRG func_8008F0FC (src/BATTLE/BATTLE.PRG/146C.c:17680)
+// decomp: BATTLE.PRG func_8008F0FC (src/BATTLE/BATTLE.PRG/146C.c:17557)
 int LiveFinishTiledBackgroundLoad() {
   return RunLive([](BackgroundHost& host, RoomBackgroundState& state) {
     return FinishTiledBackgroundLoad(host, state);
   });
 }
 
-// decomp: BATTLE.PRG func_8008F234 (src/BATTLE/BATTLE.PRG/146C.c:17710)
+// decomp: BATTLE.PRG func_8008F234 (src/BATTLE/BATTLE.PRG/146C.c:17587)
 int LiveReleaseTiledBackground() {
   return RunLive([](BackgroundHost& host, RoomBackgroundState& state) {
     return ReleaseTiledBackground(host, state);

@@ -191,7 +191,8 @@ class LiveContentTarget final : public PageContentTarget {
 };
 }  // namespace
 
-// decomp: MENUE.PRG _drawContent (494.c:577)
+// decomp: MENUE.PRG drawContent (src/MENU/MENUE.PRG/494.c:581; was
+// _drawContent)
 void LiveDrawPageContent() {
   const auto help_text = HelpText();
   if (!help_text) {
@@ -215,7 +216,7 @@ void LiveDrawPageContent() {
   }
 }
 
-// decomp: MENUE.PRG _setPageBg (494.c:716)
+// decomp: MENUE.PRG setPageBg (src/MENU/MENUE.PRG/494.c:720; was _setPageBg)
 void LiveDrawPageBackground(int x, int y, int w, int h, int color) {
   DrawChecked("Manual page background colour is outside its palette",
               [&](PagePrimitiveTarget& target) {
@@ -224,7 +225,8 @@ void LiveDrawPageBackground(int x, int y, int w, int h, int color) {
               });
 }
 
-// decomp: MENUE.PRG _fadeMenuUpper (494.c:740)
+// decomp: MENUE.PRG fadeMenuUpper (src/MENU/MENUE.PRG/494.c:744; was
+// _fadeMenuUpper)
 void LiveDrawUpperScrollFade() {
   const PageArrowState arrow = ArrowState();
   DrawChecked("Manual upper scroll fade refused",
@@ -234,7 +236,8 @@ void LiveDrawUpperScrollFade() {
               });
 }
 
-// decomp: MENUE.PRG _fadeMenuLower (494.c:791)
+// decomp: MENUE.PRG fadeMenuLower (src/MENU/MENUE.PRG/494.c:795; was
+// _fadeMenuLower)
 void LiveDrawLowerScrollFade() {
   const PageArrowState arrow = ArrowState();
   DrawChecked("Manual lower scroll fade refused",
@@ -244,7 +247,8 @@ void LiveDrawLowerScrollFade() {
               });
 }
 
-// decomp: MENUE.PRG _drawPaginationArrow (494.c:844)
+// decomp: MENUE.PRG drawPaginationArrow (src/MENU/MENUE.PRG/494.c:848; was
+// _drawPaginationArrow)
 void LiveDrawPageArrow(PageArrow arrow) {
   if (arrow != PageArrow::kUp && arrow != PageArrow::kDown) {
     Refuse("Manual page arrow type is unknown");
@@ -257,7 +261,8 @@ void LiveDrawPageArrow(PageArrow arrow) {
   });
 }
 
-// decomp: MENUE.PRG _drawControlsBg (494.c:962)
+// decomp: MENUE.PRG drawControlsBg (src/MENU/MENUE.PRG/494.c:966; was
+// _drawControlsBg)
 void LiveDrawControlsBackground(int x, int y, int w, int h) {
   DrawChecked("Manual control hint box is taller than VRAM",
               [&](PagePrimitiveTarget& target) {

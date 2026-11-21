@@ -135,7 +135,8 @@ void ApplyRow(const ItemRowsInput& input,
 }
 }  // namespace
 
-// decomp: MENU3.PRG _getParentWeaponIndex (items2.h:11).
+// decomp: MENU3.PRG getParentWeaponIndex (src/MENU/items2.h:16; was
+// _getParentWeaponIndex).
 std::optional<std::uint16_t> ParentWeaponIndex(
     std::int32_t category, std::int32_t index,
     const Items::InventoryContents& inventory) {
@@ -159,7 +160,8 @@ std::optional<std::uint16_t> ParentWeaponIndex(
   return 0;
 }
 
-// decomp: MENU3.PRG _getParentShieldIndex (items2.h:38).
+// decomp: MENU3.PRG getParentShieldIndex (src/MENU/items2.h:43; was
+// _getParentShieldIndex).
 std::optional<std::uint8_t> ParentShieldIndex(
     std::int32_t category, std::int32_t index,
     const Items::InventoryContents& inventory) {
@@ -171,8 +173,9 @@ std::optional<std::uint8_t> ParentShieldIndex(
                                    Items::kShieldGemSlotMask);
 }
 
-// decomp: MENU3.PRG _populateItemRows (items2.h:60). The order and the
-// capacity bound the list; every row is checked before the first is written.
+// decomp: MENU3.PRG populateItemRows (src/MENU/items2.h:65; was
+// _populateItemRows). The order and the capacity bound the list; every row is
+// checked before the first is written.
 std::expected<std::int32_t, ItemRowsRefusal> BuildItemRows(
     const ItemRowsInput& input, const Items::InventoryContents& inventory,
     ItemRowsWorld& world) {
@@ -199,8 +202,8 @@ std::expected<std::int32_t, ItemRowsRefusal> BuildItemRows(
   return static_cast<std::int32_t>(count);
 }
 
-// decomp: MENU3.PRG _restoreItemMenu (items2.h:175). Each row's cursor read
-// follows its state update.
+// decomp: MENU3.PRG restoreItemMenu (src/MENU/items2.h:180; was
+// _restoreItemMenu). Each row's cursor read follows its state update.
 std::expected<void, ItemRowsRefusal> RestoreItemRows(
     ItemRowsRestoreWorld& world, std::int32_t category) {
   const auto memory_index = Core::Math::WrappingMultiply(

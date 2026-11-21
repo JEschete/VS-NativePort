@@ -6,7 +6,7 @@
 
 namespace VS::Field {
 
-// decomp: BATTLE.PRG func_8008C070 (src/BATTLE/BATTLE.PRG/146C.c:16338).
+// decomp: BATTLE.PRG func_8008C070 (src/BATTLE/BATTLE.PRG/146C.c:16209).
 // #318: original8008C08C increments before the bounded search can refuse.
 bool QueueGimmickAnimation(GimmickAnimationKind kind,
                            GimmickAnimationQueueHost& host) {
@@ -33,7 +33,7 @@ bool QueueGimmickAnimation(GimmickAnimationKind kind,
   return true;
 }
 
-// decomp: BATTLE.PRG func_8008C0C0 (src/BATTLE/BATTLE.PRG/146C.c:16353).
+// decomp: BATTLE.PRG func_8008C0C0 (src/BATTLE/BATTLE.PRG/146C.c:16224).
 // CPU8008C12C-8008C140 uses signed-byte switch countdown; door delay wraps8.
 std::size_t UpdateGimmickAnimationQueue(GimmickAnimationDispatchHost& host) {
   if (host.PendingCount() <= 0) {
@@ -91,7 +91,7 @@ std::size_t UpdateGimmickAnimationQueue(GimmickAnimationDispatchHost& host) {
   return retired;
 }
 
-// decomp: BATTLE.PRG func_8008B6B4 (src/BATTLE/BATTLE.PRG/146C.c:16052).
+// decomp: BATTLE.PRG func_8008B6B4 (src/BATTLE/BATTLE.PRG/146C.c:15922).
 void ResetGimmickAnimationQueue(GimmickAnimationResetHost& host) {
   host.ClearPendingCount();
   host.ClearMarkerTicks();

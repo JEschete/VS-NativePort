@@ -88,27 +88,27 @@ class CandidateMovementWorld : public DecisionActorList {
 
 // Nothing denotes a refused missing record or invalid index, with a
 // diagnostic. Integer results otherwise preserve the original return value.
-// decomp: func_800D9E18 (src/BATTLE/BATTLE.PRG/71618.c:511).
+// decomp: func_800D9E18 (src/BATTLE/BATTLE.PRG/71618.c:16).
 std::optional<int> MoveForActionCandidate(CandidateMovementWorld& world,
                                           CandidateMover& mover,
                                           std::size_t candidate);
-// decomp: func_800DA1D4 (src/BATTLE/BATTLE.PRG/71618.c:610).
+// decomp: func_800DA1D4 (src/BATTLE/BATTLE.PRG/71618.c:138).
 std::optional<int> UpdateCombatPursuit(CandidateMovementWorld& world,
                                        CandidateMover& mover);
-// decomp: func_800DA4BC (src/BATTLE/BATTLE.PRG/71618.c:788).
+// decomp: func_800DA4BC (src/BATTLE/BATTLE.PRG/71618.c:239).
 std::optional<int> TryApproachPlannedTarget(CandidateMovementWorld& world,
                                             CandidateMover& mover,
                                             std::size_t candidate);
-// decomp: func_800DA5CC (src/BATTLE/BATTLE.PRG/71618.c:814).
+// decomp: func_800DA5CC (src/BATTLE/BATTLE.PRG/71618.c:265).
 std::optional<int> UpdateCloseFollowBehavior(CandidateMovementWorld& world,
                                              CandidateMover& mover);
-// decomp: func_800DAAD8 (src/BATTLE/BATTLE.PRG/71618.c:958).
+// decomp: func_800DAAD8 (src/BATTLE/BATTLE.PRG/71618.c:414).
 std::optional<int> UpdateEscortCombatBehavior(CandidateMovementWorld& world,
                                               CandidateMover& mover);
-// decomp: func_800DA6A4 (src/BATTLE/BATTLE.PRG/71618.c:839).
+// decomp: func_800DA6A4 (src/BATTLE/BATTLE.PRG/71618.c:295).
 std::optional<int> UpdateEnemyPursuitBehavior(CandidateMovementWorld& world,
                                               CandidateMover& mover);
-// decomp: func_800DA738 (src/BATTLE/BATTLE.PRG/71618.c:854).
+// decomp: func_800DA738 (src/BATTLE/BATTLE.PRG/71618.c:313).
 std::optional<int> UpdateGuardMovementBehavior(CandidateMovementWorld& world,
                                                CandidateMover& mover);
 }  // namespace VS::Battle::Ai

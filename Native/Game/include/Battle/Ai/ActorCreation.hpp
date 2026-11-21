@@ -155,7 +155,7 @@ class ActorCreationHost {
   [[nodiscard]] virtual bool RebuildActionPlans(CreatedAiState& state) = 0;
 };
 
-// decomp: func_800E6178 (src/BATTLE/BATTLE.PRG/7CD68.c:934).
+// decomp: func_800E6178 (src/BATTLE/BATTLE.PRG/7CD68.c:342).
 // Marks the actor's attribute bit (kinds 0x15), gives an auxiliary actor
 // whose model object ID is 2 or 4 the room's first free special actor slot,
 // and, for AI kinds (0x05), creates its AI state. `saved_flags` are the

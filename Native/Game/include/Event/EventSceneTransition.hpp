@@ -108,40 +108,42 @@ class SceneTransitionHost {
                                            std::uint8_t speed) = 0;
 };
 
-// decomp: BATTLE.PRG func_800B91C4 (F01099, 4A0A8.c:1780)
-// Opcode 0x53: forgets the remembered enemies of the room in byte 2 of the
-// zone in byte 1, so they spawn again.
+// decomp: BATTLE.PRG vs_battle_script_53_forgetZoneEnemies (F01099,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:2196; was func_800B91C4) Opcode 0x53: forgets
+// the remembered enemies of the room in byte 2 of the zone in byte 1, so they
+// spawn again.
 ScriptStep ScriptClearRoomActorCache(ScriptCommand command,
                                      SceneTransitionHost& host);
 
-// decomp: BATTLE.PRG func_800B92D0 (F01104, 4A0A8.c:1813)
-// Opcode 0x58: byte 1 is 1 to show the gameplay HUD and 0 to hide it. The
-// hide command is the whole byte with its low bit flipped, as the original
-// passed it.
+// decomp: BATTLE.PRG vs_battle_script_58_setUiVisible (F01104,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:2267; was func_800B92D0) Opcode 0x58: byte 1 is
+// 1 to show the gameplay HUD and 0 to hide it. The hide command is the whole
+// byte with its low bit flipped, as the original passed it.
 ScriptStep ScriptSetHudVisible(ScriptCommand command,
                                SceneTransitionHost& host);
 
-// decomp: BATTLE.PRG func_800B92F4 (F01105, 4A0A8.c:1819)
-// Opcode 0x59: the first run opens the Results reward sequence (modes 10-14),
-// the post-action rewards (15) or game menu `mode` (any other), sets
-// `menu_transition_active` (isMenuTransitionActive, D_800F4BF8) and
-// holds. Later runs hold until the sequence or menu ends, then clear the flag
-// and advance and yield. Modes 10-12 and 14 also reset the Results screen
-// flag to the game clear when their sequence ends; the time attack start (13)
-// keeps its screen so the game clear mode later shows the time attack's
-// results, and 15 leaves the flag alone.
+// decomp: BATTLE.PRG vs_battle_script_59_openMenu (F01105,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:2282; was func_800B92F4) Opcode 0x59: the first
+// run opens the Results reward sequence (modes 10-14), the post-action rewards
+// (15) or game menu `mode` (any other), sets `menu_transition_active`
+// (isMenuTransitionActive, D_800F4BF8) and holds. Later runs hold until the
+// sequence or menu ends, then clear the flag and advance and yield. Modes 10-12
+// and 14 also reset the Results screen flag to the game clear when their
+// sequence ends; the time attack start (13) keeps its screen so the game clear
+// mode later shows the time attack's results, and 15 leaves the flag alone.
 ScriptStep ScriptRunMenuTransition(ScriptCommand command,
                                    bool& menu_transition_active,
                                    SceneTransitionHost& host);
 
-// decomp: BATTLE.PRG func_800B98C0 (F01120, 4A0A8.c:2018)
-// Opcode 0x68: with no change in progress, starts the scripted transition to
-// room byte 2 of zone byte 1 (0 keeps the zone) entering on tile (byte 3,
-// byte 5) on surface byte 4 with facing quadrant byte 6, with effect byte 8
-// and speed byte 9. Byte 7 holds the entry step (bit 0), the reserved entry bit
-// (bit 1), whether the event keeps running in the new room (bit 2) and, for a
-// zone, the zone music switch (bit 3). Holds until the room loader reports the
-// arrival, then clears `room_change_state` and advances.
+// decomp: BATTLE.PRG vs_battle_script_68 (F01120,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:2605; was func_800B98C0) Opcode 0x68: with no
+// change in progress, starts the scripted transition to room byte 2 of zone
+// byte 1 (0 keeps the zone) entering on tile (byte 3, byte 5) on surface byte 4
+// with facing quadrant byte 6, with effect byte 8 and speed byte 9. Byte 7
+// holds the entry step (bit 0), the reserved entry bit (bit 1), whether the
+// event keeps running in the new room (bit 2) and, for a zone, the zone music
+// switch (bit 3). Holds until the room loader reports the arrival, then clears
+// `room_change_state` and advances.
 ScriptStep ScriptChangeRoom(ScriptCommand command,
                             std::int16_t& room_change_state,
                             SceneTransitionHost& host);

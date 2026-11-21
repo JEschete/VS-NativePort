@@ -74,12 +74,12 @@ constexpr auto kRefusedStep = TextureAnimationStep::kRefused;
 constexpr TextureAnimationAdvance kRefused{.step = kRefusedStep};
 }  // namespace
 
-// decomp: BATTLE.PRG func_800D6CCC (src/BATTLE/BATTLE.PRG/5BF94.c:8501)
+// decomp: BATTLE.PRG func_800D6CCC (src/BATTLE/BATTLE.PRG/6E4CC.c:17)
 void ClearTextureAnimation(TextureAnimationState& state) noexcept {
   state = {};
 }
 
-// decomp: BATTLE.PRG func_800D6CF0 (src/BATTLE/BATTLE.PRG/5BF94.c:8513)
+// decomp: BATTLE.PRG func_800D6CF0 (src/BATTLE/BATTLE.PRG/6E4CC.c:29)
 void RestartTextureAnimation(TextureAnimationState& state,
                              std::uint8_t texture_index) noexcept {
   state.texture_index = texture_index;
@@ -87,7 +87,7 @@ void RestartTextureAnimation(TextureAnimationState& state,
   state.frame_timer = 0;
 }
 
-// decomp: BATTLE.PRG func_800D6D24 (src/BATTLE/BATTLE.PRG/5BF94.c:8521)
+// decomp: BATTLE.PRG func_800D6D24 (src/BATTLE/BATTLE.PRG/6E4CC.c:37)
 TextureAnimationAdvance AdvanceTextureAnimation(
     TextureAnimationState& state, std::span<const std::byte> program) noexcept {
   if (state.frame_timer != 0) {

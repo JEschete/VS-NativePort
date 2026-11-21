@@ -103,7 +103,8 @@ void DrawLeader(MapMarkerHost& host, std::int32_t x, std::int32_t y,
 }
 }  // namespace
 
-// decomp: MENU5.PRG _renderDefaultIcon (4D8.c:106).
+// decomp: MENU5.PRG renderDefaultIcon (src/MENU/MENU5.PRG/4D8.c:116; was
+// _renderDefaultIcon).
 void DrawAshleyMarker(MapMarkerHost& host, std::int32_t id,
                       std::int32_t position, std::int32_t brightness,
                       SpriteList list) {
@@ -118,7 +119,8 @@ void DrawAshleyMarker(MapMarkerHost& host, std::int32_t id,
        .list = list});
 }
 
-// decomp: MENU5.PRG _renderIcon (4D8.c:2158).
+// decomp: MENU5.PRG renderIcon (src/MENU/MENU5.PRG/4D8.c:2163; was
+// _renderIcon).
 bool DrawFeatureMarker(MapMarkerHost& host, std::span<const MarkerRect> icons,
                        std::int32_t id, std::int32_t x, std::int32_t y) {
   if (id < 0 || static_cast<std::size_t>(id) >= icons.size()) return false;
@@ -127,7 +129,8 @@ bool DrawFeatureMarker(MapMarkerHost& host, std::span<const MarkerRect> icons,
   return true;
 }
 
-// decomp: MENU5.PRG _addMapLabel (4D8.c:2441).
+// decomp: MENU5.PRG addMapLabel (src/MENU/MENU5.PRG/4D8.c:2446; was
+// _addMapLabel).
 bool QueueLabel(std::span<MapLabel> labels, std::int32_t& count, std::int32_t x,
                 std::int32_t y, std::int32_t kind, std::int32_t id) {
   if (count < 0 || static_cast<std::size_t>(count) >= labels.size()) {
@@ -139,7 +142,7 @@ bool QueueLabel(std::span<MapLabel> labels, std::int32_t& count, std::int32_t x,
   return true;
 }
 
-// decomp: MENU5.PRG func_80107630 (4D8.c:2180).
+// decomp: MENU5.PRG func_80107630 (src/MENU/MENU5.PRG/4D8.c:2185).
 bool DrawDoorStateMarker(MapMarkerHost& host,
                          const std::array<MarkerRect, 2>& upper,
                          const std::array<MarkerRect, 2>& lower,
@@ -158,13 +161,15 @@ bool DrawDoorStateMarker(MapMarkerHost& host,
                     door_name);
 }
 
-// decomp: MENU5.PRG _insertLine (4D8.c:2258).
+// decomp: MENU5.PRG insertLine (src/MENU/MENU5.PRG/4D8.c:2263; was
+// _insertLine).
 void AppendLabelLine(MapMarkerHost& host, std::int32_t x0, std::int32_t y0,
                      std::int32_t x1, std::int32_t y1) {
   host.AddLabelLine({.from = {Wrap(x0), Wrap(y0)}, .to = {Wrap(x1), Wrap(y1)}});
 }
 
-// decomp: MENU5.PRG _renderDoorName (4D8.c:2227).
+// decomp: MENU5.PRG renderDoorName (src/MENU/MENU5.PRG/4D8.c:2232; was
+// _renderDoorName).
 bool DrawDoorLabel(MapMarkerHost& host,
                    std::span<const std::uint16_t> door_names,
                    std::int32_t& label_y, std::int32_t x, std::int32_t y,
@@ -182,7 +187,8 @@ bool DrawDoorLabel(MapMarkerHost& host,
   return true;
 }
 
-// decomp: MENU5.PRG _renderConnectingMapName (4D8.c:2403).
+// decomp: MENU5.PRG renderConnectingMapName (src/MENU/MENU5.PRG/4D8.c:2408; was
+// _renderConnectingMapName).
 bool DrawConnectingAreaLabel(MapMarkerHost& host,
                              std::span<const std::uint16_t> area_names,
                              std::span<const std::uint32_t> area_flags,
@@ -211,7 +217,7 @@ bool DrawConnectingAreaLabel(MapMarkerHost& host,
   return true;
 }
 
-// decomp: MENU5.PRG func_8010839C (4D8.c:2471).
+// decomp: MENU5.PRG func_8010839C (src/MENU/MENU5.PRG/4D8.c:2476).
 bool ShouldDrawDoorStateMarker(MapMarkerHost& host, std::int32_t state_id,
                                std::int32_t zone_id, std::int32_t map_id,
                                std::uint8_t state_flag) {

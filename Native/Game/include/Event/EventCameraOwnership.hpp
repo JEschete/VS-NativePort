@@ -122,43 +122,45 @@ class EventCameraOriginHost {
   EventCameraOriginHost(EventCameraOriginHost&&) = delete;
   EventCameraOriginHost& operator=(EventCameraOriginHost&&) = delete;
 
-  // decomp: BATTLE.PRG func_800BFE50 (src/BATTLE/BATTLE.PRG/573B8.c:156)
+  // decomp: BATTLE.PRG resolveActorId (src/BATTLE/BATTLE.PRG/573B8.c:110; was
+  // func_800BFE50)
   [[nodiscard]] virtual int ResolveActorReference(std::uint16_t reference) = 0;
-  // decomp: BATTLE.PRG func_800A1108 (src/BATTLE/BATTLE.PRG/30DB0.c:4182)
-  // The actor's or slot gimmick's position; nullopt for an empty slot.
+  // decomp: BATTLE.PRG vs_battle_getActorPosition
+  // (src/BATTLE/BATTLE.PRG/30DB0.c:4299; was func_800A1108) The actor's or slot
+  // gimmick's position; nullopt for an empty slot.
   [[nodiscard]] virtual std::optional<Core::Math::Position3> ActorPosition(
       int actor) = 0;
 };
 
-// decomp: BATTLE.PRG func_800BBBE8 (F01214, 4A0A8.c:3014,
+// decomp: BATTLE.PRG func_800BBBE8 (F01214, src/BATTLE/BATTLE.PRG/4DEA8.c:3664,
 // 0x800BBBE8-0x800BBDDC) The start state from the field camera: each track
 // starts at its field position with the other track's position as its partner.
 [[nodiscard]] EventCameraStart StartEventCamera(
     Core::Math::Vec3 field_eye, Core::Math::Vec3 field_look_at) noexcept;
 
-// decomp: BATTLE.PRG func_800BBE04 (F01216, 4A0A8.c:3084,
+// decomp: BATTLE.PRG func_800BBE04 (F01216, src/BATTLE/BATTLE.PRG/4DEA8.c:3734,
 // 0x800BBE04-0x800BBE10) The stored field camera override: the request's low
 // byte (a byte store).
 [[nodiscard]] std::uint8_t EventFieldCameraOverride(int request) noexcept;
 
-// decomp: BATTLE.PRG func_800BBE94 (F01218, 4A0A8.c:3101,
+// decomp: BATTLE.PRG func_800BBE94 (F01218, src/BATTLE/BATTLE.PRG/4DEA8.c:3751,
 // 0x800BBE94-0x800BBF14) Recomputes the offset from the origin actor's
 // position. An empty slot gives a zero offset; the original stored stale stack
 // bytes.
 void UpdateEventCameraOrigin(EventCameraOrigin& origin,
                              EventCameraOriginHost& host);
 
-// decomp: BATTLE.PRG func_800BBE10 (F01217, 4A0A8.c:3086,
+// decomp: BATTLE.PRG func_800BBE10 (F01217, src/BATTLE/BATTLE.PRG/4DEA8.c:3736,
 // 0x800BBE10-0x800BBE94) Returning to the world origin from an actor moves both
 // camera positions by the old offset into world space. Leaving the world origin
 // moves nothing.
 void SetEventCameraOriginActor(EventCameraOrigin& origin, std::uint16_t actor,
                                EventCameraOriginHost& host);
 
-// decomp: BATTLE.PRG func_800BB38C (F01195, 4A0A8.c:2774,
-// 0x800BB38C-0x800BB3BC) Opcode 0xE8. The resolved actor is truncated to 16
-// bits. False for a command shorter than kSetCameraOriginActorLength, with
-// nothing changed.
+// decomp: BATTLE.PRG vs_battle_script_E8 (F01195,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:3423; was func_800BB38C, 0x800BB38C-0x800BB3BC)
+// Opcode 0xE8. The resolved actor is truncated to 16 bits. False for a command
+// shorter than kSetCameraOriginActorLength, with nothing changed.
 [[nodiscard]] bool CommandSetCameraOriginActor(ScriptCommand command,
                                                EventCameraOrigin& origin,
                                                EventCameraOriginHost& host);

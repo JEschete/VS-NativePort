@@ -11,13 +11,13 @@ constexpr std::uint32_t kSlotMask = kFrameActorSlots - 1;
 constexpr std::uint32_t kActorMask = (1u << kFrameActorSlots) - 1;
 }  // namespace
 
-// decomp: BATTLE.PRG func_800E4358 (src/BATTLE/BATTLE.PRG/7B5DC.s:433).
+// decomp: BATTLE.PRG func_800E4358 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:477).
 void TickActorDecisionTimers(DecisionTimers& timers) {
   if (timers.decision_delay != 0) --timers.decision_delay;
   if (timers.min_action_delay != 0) --timers.min_action_delay;
 }
 
-// decomp: BATTLE.PRG func_800E6828 (src/BATTLE/BATTLE.PRG/7E028.s:8).
+// decomp: BATTLE.PRG func_800E6828 (src/BATTLE/BATTLE.PRG/7DDDC.s:165).
 void InitializeActorLocomotionMode(LocomotionState& state) {
   state.movement_flags = static_cast<std::uint16_t>(
       state.locomotion_flags | (state.locomotion_flags >> CHAR_BIT));
@@ -30,7 +30,7 @@ void InitializeActorLocomotionMode(LocomotionState& state) {
   }
 }
 
-// decomp: BATTLE.PRG func_800E685C (src/BATTLE/BATTLE.PRG/7E05C.s:16).
+// decomp: BATTLE.PRG func_800E685C (src/BATTLE/BATTLE.PRG/7DDDC.s:182).
 void SetActorVerticalMovementSteps(VerticalMovementSteps& steps, int walk_step,
                                    int run_step) {
   const auto packed = static_cast<std::uint32_t>(walk_step) |
@@ -41,7 +41,7 @@ void SetActorVerticalMovementSteps(VerticalMovementSteps& steps, int walk_step,
       static_cast<std::uint8_t>(walk_step > run_step ? walk_step : run_step);
 }
 
-// decomp: BATTLE.PRG func_800E511C (src/BATTLE/BATTLE.PRG/7C7E0.s:108).
+// decomp: BATTLE.PRG func_800E511C (src/BATTLE/BATTLE.PRG/6E4CCPrivate.h:92).
 std::uint32_t NextPerceptionTarget(std::uint32_t attribute_mask,
                                    std::uint32_t previous) {
   const std::uint32_t mask = attribute_mask & kActorMask;
@@ -54,7 +54,7 @@ std::uint32_t NextPerceptionTarget(std::uint32_t attribute_mask,
   return target;
 }
 
-// decomp: BATTLE.PRG func_800E65DC (src/BATTLE/BATTLE.PRG/7DDDC.s:8).
+// decomp: BATTLE.PRG func_800E65DC (src/BATTLE/BATTLE.PRG/7DDDC.s:14).
 std::optional<TerrainRegionWindow> LocateTerrainRegions(
     std::size_t auxiliary_bytes) {
   if (auxiliary_bytes < kTerrainRegionOffset) return std::nullopt;
@@ -71,7 +71,7 @@ std::uint32_t PackRoomBounds(
   return bounds;
 }
 
-// decomp: BATTLE.PRG func_800E65DC (src/BATTLE/BATTLE.PRG/7DDDC.s:8).
+// decomp: BATTLE.PRG func_800E65DC (src/BATTLE/BATTLE.PRG/7DDDC.s:14).
 std::optional<WorkingStateWindow> CacheActorAiWorkingState(
     const WorkingStateSource& source) {
   WorkingStateWindow window;

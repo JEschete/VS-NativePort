@@ -780,8 +780,9 @@ constexpr std::array kPolledEvents = {
 
 }  // namespace
 
-// decomp: MENU7.PRG _testMemcardEvents (src/MENU/MENU7.PRG/260.c:172),
-// TITLE.PRG _testMemcardEvents (src/TITLE/TITLE.PRG/22C.c:61)
+// decomp: MENU7.PRG testMemcardEvents (src/MENU/memcard.h:67; was
+// _testMemcardEvents), TITLE.PRG testMemcardEvents (src/MENU/memcard.h:67; was
+// _testMemcardEvents)
 CardEvent PollEvents(CardHost& card, CardEventGroup group) {
   for (const CardEvent event : kPolledEvents) {
     if (card.TestEvent(group, event)) {
@@ -791,25 +792,27 @@ CardEvent PollEvents(CardHost& card, CardEventGroup group) {
   return CardEvent::kNone;
 }
 
-// decomp: MENU7.PRG _resetMemcardEvents (src/MENU/MENU7.PRG/260.c:187),
-// TITLE.PRG _resetMemcardEvents (src/TITLE/TITLE.PRG/22C.c:73): testing an
-// event clears it.
+// decomp: MENU7.PRG resetMemcardEvents (src/MENU/memcard.h:82; was
+// _resetMemcardEvents), TITLE.PRG resetMemcardEvents (src/MENU/memcard.h:82;
+// was _resetMemcardEvents): testing an event clears it.
 void ClearEvents(CardHost& card, CardEventGroup group) {
   for (const CardEvent event : kPolledEvents) {
     static_cast<void>(card.TestEvent(group, event));
   }
 }
 
-// decomp: MENU7.PRG _memcardMakeFilename (src/MENU/MENU7.PRG/260.c:238),
-// TITLE.PRG _memcardMakeFilename (src/TITLE/TITLE.PRG/22C.c:110)
+// decomp: MENU7.PRG memcardMakeFilename (src/MENU/memcard.h:133; was
+// _memcardMakeFilename), TITLE.PRG memcardMakeFilename (src/MENU/memcard.h:133;
+// was _memcardMakeFilename)
 CardFilename BuildSaveFilename(std::int32_t channel, std::int32_t file_number) {
   return FilenameFor(
       channel,
       NarrowChar(static_cast<std::uint32_t>(file_number) + kDigitZero));
 }
 
-// decomp: MENU7.PRG _memcardMakeTempFilename (src/MENU/MENU7.PRG/260.c:254),
-// TITLE.PRG _memcardMakeTempFilename (src/TITLE/TITLE.PRG/22C.c:121)
+// decomp: MENU7.PRG memcardMakeTempFilename (src/MENU/memcard.h:149; was
+// _memcardMakeTempFilename), TITLE.PRG memcardMakeTempFilename
+// (src/MENU/memcard.h:149; was _memcardMakeTempFilename)
 CardFilename BuildTemporaryFilename(std::int32_t channel,
                                     std::int32_t file_number) {
   return FilenameFor(
@@ -817,8 +820,9 @@ CardFilename BuildTemporaryFilename(std::int32_t channel,
       NarrowChar(static_cast<std::uint32_t>(file_number) + kTemporaryBase));
 }
 
-// decomp: MENU7.PRG _getNewestSaveFile (src/MENU/MENU7.PRG/260.c:278),
-// TITLE.PRG _getNewestSaveFile (src/TITLE/TITLE.PRG/22C.c:192)
+// decomp: MENU7.PRG getNewestSaveFile (src/MENU/memcard.h:176; was
+// _getNewestSaveFile), TITLE.PRG getNewestSaveFile (src/MENU/memcard.h:176; was
+// _getNewestSaveFile)
 std::size_t NewestSaveSlot(ConstSummaryTable summaries) {
   std::uint32_t newest = 0;
   std::size_t newest_slot = 0;
@@ -833,9 +837,10 @@ std::size_t NewestSaveSlot(ConstSummaryTable summaries) {
   return newest_slot;
 }
 
-// decomp: MENU7.PRG _findCurrentSaveOnActiveMemcard
-// (src/MENU/MENU7.PRG/260.c:300), TITLE.PRG _findCurrentSaveOnActiveMemcard
-// (src/TITLE/TITLE.PRG/22C.c:209)
+// decomp: MENU7.PRG findCurrentSaveOnActiveMemcard
+// (src/MENU/memcard.h:198; was _findCurrentSaveOnActiveMemcard), TITLE.PRG
+// findCurrentSaveOnActiveMemcard (src/MENU/memcard.h:198; was
+// _findCurrentSaveOnActiveMemcard)
 std::optional<std::size_t> FindMatchingSaveSlot(
     ConstSummaryTable summaries,
     std::span<const std::byte, kSettingsBytes> settings) {
@@ -856,9 +861,10 @@ std::optional<std::size_t> FindMatchingSaveSlot(
   return std::nullopt;
 }
 
-// decomp: MENU7.PRG _memcardFileNumberFromFilename
-// (src/MENU/MENU7.PRG/260.c:323), TITLE.PRG _memcardFileNumberFromFilename
-// (src/TITLE/TITLE.PRG/22C.c:226)
+// decomp: MENU7.PRG memcardFileNumberFromFilename
+// (src/MENU/memcard.h:221; was _memcardFileNumberFromFilename), TITLE.PRG
+// memcardFileNumberFromFilename (src/MENU/memcard.h:221; was
+// _memcardFileNumberFromFilename)
 std::optional<SaveFileNumber> ParseSaveFileNumber(std::string_view name) {
   if (name.size() <= kNameNumberIndex || !name.starts_with(kGameCode)) {
     return std::nullopt;
@@ -875,9 +881,9 @@ std::optional<SaveFileNumber> ParseSaveFileNumber(std::string_view name) {
   return std::nullopt;
 }
 
-// decomp: MENU7.PRG _verifySaveChecksums (src/MENU/MENU7.PRG/260.c:355),
-// TITLE.PRG _verifySaveChecksums (src/TITLE/TITLE.PRG/22C.c:284). The
-// originals read the bytes unsigned (lbu).
+// decomp: MENU7.PRG verifySaveChecksums (src/MENU/memcard.h:253; was
+// _verifySaveChecksums), TITLE.PRG verifySaveChecksums (src/MENU/memcard.h:253;
+// was _verifySaveChecksums). The originals read the bytes unsigned (lbu).
 std::expected<bool, SaveImageError> HasChecksumError(
     std::span<const std::byte> image, std::size_t block_count) {
   if (block_count > kImageBlockCount ||
@@ -895,8 +901,8 @@ std::expected<bool, SaveImageError> HasChecksumError(
   return BlockChecksum(image, kChecksumBlock) != 0;
 }
 
-// decomp: MENU7.PRG _decode (src/MENU/MENU7.PRG/260.c:388), TITLE.PRG _decode
-// (src/TITLE/TITLE.PRG/22C.c:314)
+// decomp: MENU7.PRG decode (src/MENU/memcard.h:286; was _decode), TITLE.PRG
+// decode (src/MENU/memcard.h:286; was _decode)
 void DecodeSaveBytes(std::uint32_t key, std::span<std::byte> bytes) {
   for (std::byte& value : bytes) {
     key *= kCipherMultiplier;
@@ -906,8 +912,9 @@ void DecodeSaveBytes(std::uint32_t key, std::span<std::byte> bytes) {
   }
 }
 
-// decomp: MENU7.PRG _readSaveFileInfo (src/MENU/MENU7.PRG/260.c:404),
-// TITLE.PRG _readSaveFileInfo (src/TITLE/TITLE.PRG/22C.c:322)
+// decomp: MENU7.PRG readSaveFileInfo (src/MENU/memcard.h:302; was
+// _readSaveFileInfo), TITLE.PRG readSaveFileInfo (src/MENU/memcard.h:302; was
+// _readSaveFileInfo)
 bool ReadSaveSummary(CardHost& card, SummaryTable summaries,
                      std::int32_t channel, std::int32_t file_number) {
   if (file_number < 1 || file_number > static_cast<std::int32_t>(kSlotCount)) {
@@ -940,8 +947,9 @@ bool ReadSaveSummary(CardHost& card, SummaryTable summaries,
   return false;
 }
 
-// decomp: MENU7.PRG _memcardSaveIdExists (src/MENU/MENU7.PRG/260.c:439),
-// TITLE.PRG _memcardSaveIdExists (src/TITLE/TITLE.PRG/22C.c:354)
+// decomp: MENU7.PRG memcardSaveIdExists (src/MENU/memcard.h:337; was
+// _memcardSaveIdExists), TITLE.PRG memcardSaveIdExists (src/MENU/memcard.h:337;
+// was _memcardSaveIdExists)
 bool HasSaveSuffix(const CardDirectory& directory, char suffix) {
   return std::ranges::any_of(
       directory, [suffix](const std::optional<CardDirectoryEntry>& entry) {
@@ -954,8 +962,9 @@ bool HasSaveSuffix(const CardDirectory& directory, char suffix) {
       });
 }
 
-// decomp: MENU7.PRG _deleteRedundantTempFiles (src/MENU/MENU7.PRG/260.c:458),
-// TITLE.PRG _deleteRedundantTempFiles (src/TITLE/TITLE.PRG/22C.c:368)
+// decomp: MENU7.PRG deleteRedundantTempFiles (src/MENU/memcard.h:356; was
+// _deleteRedundantTempFiles), TITLE.PRG deleteRedundantTempFiles
+// (src/MENU/memcard.h:356; was _deleteRedundantTempFiles)
 std::expected<std::uint8_t, CardError> DeleteRedundantTemporaryFiles(
     CardHost& card, const CardDirectory& directory, std::int32_t channel) {
   std::uint8_t erased = 0;
@@ -973,8 +982,9 @@ std::expected<std::uint8_t, CardError> DeleteRedundantTemporaryFiles(
   return erased;
 }
 
-// decomp: MENU7.PRG _initSaveFileInfo (src/MENU/MENU7.PRG/260.c:480),
-// TITLE.PRG _initSaveFileInfo (src/TITLE/TITLE.PRG/22C.c:385)
+// decomp: MENU7.PRG initSaveFileInfo (src/MENU/memcard.h:377; was
+// _initSaveFileInfo), TITLE.PRG initSaveFileInfo (src/MENU/memcard.h:377; was
+// _initSaveFileInfo)
 std::expected<void, CardError> ScanSaveDirectory(CardHost& card,
                                                  CardDirectory& directory,
                                                  SummaryTable summaries,
@@ -1027,8 +1037,9 @@ std::expected<void, CardError> ScanSaveDirectory(CardHost& card,
   return {};
 }
 
-// decomp: MENU7.PRG _createSaveFile (src/MENU/MENU7.PRG/260.c:543), TITLE.PRG
-// _createSaveFile (src/TITLE/TITLE.PRG/22C.c:443)
+// decomp: MENU7.PRG createSaveFile (src/MENU/memcard.h:443; was
+// _createSaveFile), TITLE.PRG createSaveFile (src/MENU/memcard.h:443; was
+// _createSaveFile)
 std::expected<void, CardError> CreateSaveFile(CardHost& card, std::int32_t port,
                                               std::int32_t file_number) {
   const CardFilename name = BuildSaveFilename(ChannelOf(port), file_number);
@@ -1043,8 +1054,9 @@ std::expected<void, CardError> CreateSaveFile(CardHost& card, std::int32_t port,
   return {};
 }
 
-// decomp: MENU7.PRG _memcardEventHandler (src/MENU/MENU7.PRG/260.c:563),
-// TITLE.PRG _memcardEventHandler (src/TITLE/TITLE.PRG/22C.c:457)
+// decomp: MENU7.PRG memcardEventHandler (src/MENU/memcard.h:463; was
+// _memcardEventHandler), TITLE.PRG memcardEventHandler (src/MENU/memcard.h:463;
+// was _memcardEventHandler)
 CardReadiness AdvanceCardReadiness(CardReadinessState& state, CardHost& card,
                                    std::int32_t begin_port) {
   if (begin_port != 0) {
@@ -1070,8 +1082,9 @@ CardReadiness AdvanceCardReadiness(CardReadinessState& state, CardHost& card,
   return CardReadiness::kPending;
 }
 
-// decomp: MENU7.PRG _applyLoadedSaveFile (src/MENU/MENU7.PRG/260.c:681),
-// TITLE.PRG _applyLoadedSaveFile (src/TITLE/TITLE.PRG/22C.c:569)
+// decomp: MENU7.PRG applyLoadedSaveFile (src/MENU/memcard.h:581; was
+// _applyLoadedSaveFile), TITLE.PRG applyLoadedSaveFile (src/MENU/memcard.h:581;
+// was _applyLoadedSaveFile)
 std::expected<void, SaveImageError> ValidateAndApplyLoadedSave(
     SaveStateHost& state, SaveImage incoming, bool apply) {
   const auto record = incoming.subspan<kSummaryOffset, kRecordBytes>();
@@ -1112,7 +1125,8 @@ std::expected<void, SaveImageError> ValidateAndApplyLoadedSave(
   return {};
 }
 
-// decomp: MENU7.PRG _packageGameSaveData (src/MENU/MENU7.PRG/260.c:735)
+// decomp: MENU7.PRG packageGameSaveData (src/MENU/memcard.h:637; was
+// _packageGameSaveData)
 std::expected<void, SaveImageError> PackageGameSave(SaveStateHost& state,
                                                     SaveWorkspace workspace,
                                                     ConstSummaryTable summaries,
@@ -1121,8 +1135,8 @@ std::expected<void, SaveImageError> PackageGameSave(SaveStateHost& state,
                      PackageKind::kGame);
 }
 
-// decomp: MENU7.PRG _loadSaveData (src/MENU/MENU7.PRG/260.c:871),
-// TITLE.PRG _loadSaveData (src/TITLE/TITLE.PRG/22C.c:745)
+// decomp: MENU7.PRG loadSaveData (src/MENU/memcard.h:771; was _loadSaveData),
+// TITLE.PRG loadSaveData (src/MENU/memcard.h:771; was _loadSaveData)
 TransferStatus ReadSaveStep(SaveReadState& state, SaveTransfer& transfer,
                             std::int32_t request) {
   if (request != 0) {
@@ -1152,8 +1166,8 @@ TransferStatus ReadSaveStep(SaveReadState& state, SaveTransfer& transfer,
   return StatusAfter(state.errors);
 }
 
-// decomp: MENU7.PRG _saveFile (src/MENU/MENU7.PRG/260.c:960),
-// TITLE.PRG _saveFile (src/TITLE/TITLE.PRG/22C.c:826)
+// decomp: MENU7.PRG saveFile (src/MENU/memcard.h:860; was _saveFile),
+// TITLE.PRG saveFile (src/MENU/memcard.h:860; was _saveFile)
 TransferStatus WriteSaveStep(SaveWriteState& state, SaveReadState& read_state,
                              SaveTransfer& transfer,
                              const CardDirectory& directory,
@@ -1198,7 +1212,8 @@ TransferStatus WriteSaveStep(SaveWriteState& state, SaveReadState& read_state,
   return StatusAfter(state.errors);
 }
 
-// decomp: MENU7.PRG _loadIntroSaveFile (src/MENU/MENU7.PRG/260.c:3315)
+// decomp: MENU7.PRG loadIntroSaveFile (src/MENU/MENU7.PRG/260.c:68; was
+// _loadIntroSaveFile)
 IntroSnapshotResult LoadIntroSnapshotStep(IntroSnapshotHost& intro,
                                           SaveStateHost& state,
                                           std::int32_t action) {
@@ -1217,15 +1232,17 @@ IntroSnapshotResult LoadIntroSnapshotStep(IntroSnapshotHost& intro,
   return IntroSnapshotResult::kPending;
 }
 
-// decomp: TITLE.PRG _keystreamBits (src/TITLE/TITLE.PRG/22C.c:50): the shift
-// is a variable srlv, so 32 bits returns the whole seed.
+// decomp: TITLE.PRG getRandBits (src/TITLE/TITLE.PRG/22C.c:33; was
+// _keystreamBits): the shift is a variable srlv, so 32 bits returns the whole
+// seed.
 std::uint32_t NextCipherBits(CipherState& cipher, std::int32_t bits) {
   const std::uint32_t seed = cipher.seed;
   cipher.seed = seed * kCipherMultiplier;
   return seed >> ((kWordBits - static_cast<std::uint32_t>(bits)) & kShiftMask);
 }
 
-// decomp: TITLE.PRG _packageGameSaveData (src/TITLE/TITLE.PRG/22C.c:616)
+// decomp: TITLE.PRG packageGameSaveData (src/MENU/memcard.h:637; was
+// _packageGameSaveData)
 std::expected<void, SaveImageError> PackageClearSave(
     SaveStateHost& state, SaveWorkspace workspace, ConstSummaryTable summaries,
     std::int32_t target_file) {
@@ -1233,7 +1250,8 @@ std::expected<void, SaveImageError> PackageClearSave(
                      PackageKind::kClear);
 }
 
-// decomp: TITLE.PRG _saveFileExists (src/TITLE/TITLE.PRG/22C.c:3189)
+// decomp: TITLE.PRG saveFileExists (src/TITLE/TITLE.PRG/22C.c:200; was
+// _saveFileExists)
 bool AnySaveFileExists(TitleCardProbeHost& host) {
   host.BeginResources();
   do {

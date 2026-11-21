@@ -5,7 +5,7 @@
 #include "Core/Memory/HeapLive.hpp"
 
 namespace VS::Battle {
-// decomp: BATTLE.PRG func_800C05B4 (src/BATTLE/BATTLE.PRG/573B8.c:436).
+// decomp: BATTLE.PRG func_800C05B4 (src/BATTLE/BATTLE.PRG/57B1C.c:87).
 void FreeSphereEntry() {
   ResetTargetPages();
   if (VS::Battle::targetSphere == nullptr) return;

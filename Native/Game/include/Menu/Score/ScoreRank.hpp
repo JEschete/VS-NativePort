@@ -92,38 +92,43 @@ class ProgressHost {
   virtual void BackupCamera() = 0;
 };
 
-// decomp: MENUF.PRG _calculateScore (3B8.c:2801), also the body of MENU9.PRG
-// _calculateScore (238.c:2842). The shared score policy: kills and weapon
-// attacks by class, cleared boss trials, the chain bonus, clear_count (the
-// 32-bit value the original multiplies) times 100000, the completion-time
-// multiplier, then the streak and misc scores, in wrapping unsigned 32-bit
-// arithmetic, clamped to kMaxScore.
+// decomp: MENUF.PRG calculateScore (src/MENU/MENUF.PRG/3B8.c:2809; was
+// _calculateScore), also the body of MENU9.PRG calculateScore
+// (src/MENU/MENU9.PRG/238.c:2845; was _calculateScore). The shared score
+// policy: kills and weapon attacks by class, cleared boss trials, the chain
+// bonus, clear_count (the 32-bit value the original multiplies) times 100000,
+// the completion-time multiplier, then the streak and misc scores, in wrapping
+// unsigned 32-bit arithmetic, clamped to kMaxScore.
 [[nodiscard]] std::uint32_t ScoreFromRecord(const ScoreRecord& record,
                                             std::uint32_t clear_count) noexcept;
 
-// decomp: MENUF.PRG _determineRank (3B8.c:2774), also the body of MENU9.PRG
-// _determineCharacterRank (238.c:2633). The shared rank policy: the first of
-// the sixteen rows whose title count (titles bits 0-15) and unsigned score
-// thresholds are met.
+// decomp: MENUF.PRG determineRank (src/MENU/MENUF.PRG/3B8.c:2782; was
+// _determineRank), also the body of MENU9.PRG determineCharacterRank
+// (src/MENU/MENU9.PRG/238.c:2636; was _determineCharacterRank). The shared rank
+// policy: the first of the sixteen rows whose title count (titles bits 0-15)
+// and unsigned score thresholds are met.
 [[nodiscard]] std::optional<std::size_t> RiskbreakerRankIndex(
     std::uint32_t titles, std::uint32_t score) noexcept;
 
-// decomp: MENU9.PRG _determineCharacterRank (238.c:2633).
+// decomp: MENU9.PRG determineCharacterRank (src/MENU/MENU9.PRG/238.c:2636; was
+// _determineCharacterRank).
 [[nodiscard]] std::optional<std::uint16_t> DetermineRiskbreakerRank(
     std::uint32_t titles, std::uint32_t score) noexcept;
 
-// decomp: MENU9.PRG _setTitleFlags (238.c:2662). Returns record.titles with
-// every earned title bit set.
+// decomp: MENU9.PRG setTitleFlags (src/MENU/MENU9.PRG/238.c:2665; was
+// _setTitleFlags). Returns record.titles with every earned title bit set.
 [[nodiscard]] std::uint32_t AwardTitles(
     const ScoreRecord& record, std::uint16_t clear_count,
     const TitleConditions& conditions) noexcept;
 
-// decomp: MENU9.PRG _calculateScore (238.c:2842).
+// decomp: MENU9.PRG calculateScore (src/MENU/MENU9.PRG/238.c:2845; was
+// _calculateScore).
 [[nodiscard]] std::uint32_t CalculateScore(const ScoreRecord& record,
                                            std::uint16_t clear_count) noexcept;
 
-// decomp: MENU9.PRG _calculateProgress (238.c:418). Updates world's room
-// flags and record (best map completion and chest count, then the titles)
-// and returns the statics it computes.
+// decomp: MENU9.PRG calculateProgress (src/MENU/MENU9.PRG/238.c:425; was
+// _calculateProgress). Updates world's room flags and record (best map
+// completion and chest count, then the titles) and returns the statics it
+// computes.
 ScoreScreenProgress CalculateProgress(ProgressWorld& world, ProgressHost& host);
 }  // namespace VS::Menu::Score

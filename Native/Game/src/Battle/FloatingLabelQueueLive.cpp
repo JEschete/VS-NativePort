@@ -95,7 +95,7 @@ class LiveFloatingLabelQueue final : public FloatingLabelQueueView {
 };
 }  // namespace
 
-// decomp: F00712 func_80093AB4 (src/BATTLE/BATTLE.PRG/2842C.c:1465).
+// decomp: F00712 func_80093AB4 (src/BATTLE/BATTLE.PRG/2842C.c:1453).
 void ResetLiveFloatingLabels() {
   LiveFloatingLabelQueue queue;
   if (!ResetFloatingLabels(queue, {VS::Battle::actorMarkersHidden,
@@ -123,7 +123,7 @@ int QueueLiveWorldLockedLabelEntry(std::uint16_t* position) {
   return QueueLiveWorldLockedLabel({position, kFloatingLabelAxes});
 }
 
-// decomp: F00721 func_80094AF8 (src/BATTLE/BATTLE.PRG/2842C.c:2067).
+// decomp: F00721 func_80094AF8 (src/BATTLE/BATTLE.PRG/2842C.c:2055).
 void AdvanceLiveFloatingLabelQueue(VS::Battle::FloatingLabel* label) {
   if (label == nullptr) {
     Refuse("Floating-label advance has no label owner");

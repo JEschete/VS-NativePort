@@ -191,8 +191,9 @@ std::uint32_t TextAnchor::Word() const {
          ((frame_part & kKindMask) << kAnchorFramePartShift);
 }
 
-// decomp: BATTLE.PRG vs_battle_setTextBox (F01329, 5BF94.c:1536,
-// 0x800C6BF0-0x800C6C8C): the non-null branch.
+// decomp: BATTLE.PRG vs_battle_setTextBox (F01329,
+// src/BATTLE/BATTLE.PRG/5BF94.c:1082, 0x800C6BF0-0x800C6C8C): the non-null
+// branch.
 void StartTextBoxText(TextBox& box, TextBoxHost& host, const char* text) {
   box.text = text;
   box.speed = kTextStartSpeed;
@@ -206,14 +207,14 @@ void StartTextBoxText(TextBox& box, TextBoxHost& host, const char* text) {
   }
 }
 
-// decomp: BATTLE.PRG vs_battle_setTextBox (F01329, 5BF94.c:1553): the null
-// branch's poll.
+// decomp: BATTLE.PRG vs_battle_setTextBox (F01329,
+// src/BATTLE/BATTLE.PRG/5BF94.c:1099): the null branch's poll.
 bool TextBoxTextPending(const TextBox& box) {
   return box.speed != kTextBoxFinishedSpeed && box.speed != 0;
 }
 
-// decomp: BATTLE.PRG vs_battle_setTextBox (F01329, 5BF94.c:1536,
-// 0x800C6BF0-0x800C6C8C).
+// decomp: BATTLE.PRG vs_battle_setTextBox (F01329,
+// src/BATTLE/BATTLE.PRG/5BF94.c:1082, 0x800C6BF0-0x800C6C8C).
 int SetTextBoxText(TextBox& box, TextBoxHost& host, const char* text) {
   if (text != nullptr) {
     StartTextBoxText(box, host, text);
@@ -222,10 +223,11 @@ int SetTextBoxText(TextBox& box, TextBoxHost& host, const char* text) {
   return TextBoxTextPending(box) ? -1 : 0;
 }
 
-// decomp: BATTLE.PRG vs_battle_selectTextBox (F01330, 5BF94.c:1559,
-// 0x800C6C8C-0x800C7010). Deviation: a corrupt selector (count past eight or
-// a used order entry past the boxes) is refused before anything changes;
-// the original indexed past the order array and the boxes.
+// decomp: BATTLE.PRG selectTextBox (F01330, src/BATTLE/BATTLE.PRG/5BF94.c:1105;
+// was vs_battle_selectTextBox, 0x800C6C8C-0x800C7010). Deviation: a corrupt
+// selector (count past eight or a used order entry past the boxes) is refused
+// before anything changes; the original indexed past the order array and the
+// boxes.
 std::optional<int> SelectTextBoxChoice(TextBoxes boxes,
                                        TextBoxSelector& selector,
                                        TextBoxHost& host, std::uint8_t box_mask,
@@ -266,13 +268,14 @@ TextBoxLayout InformationTextBoxLayout(std::int32_t header) {
   };
 }
 
-// decomp: BATTLE.PRG vs_battle_initInformationTextBox (F01343, 5BF94.c:2653,
-// 0x800C8E04-0x800C8E48).
+// decomp: BATTLE.PRG vs_battle_initInformationTextBox (F01343,
+// src/BATTLE/BATTLE.PRG/5BF94.c:2204, 0x800C8E04-0x800C8E48).
 void InitInformationTextBox(TextBoxes boxes, std::int32_t header) {
   InitTextBox(boxes[kInformationTextBox], InformationTextBoxLayout(header));
 }
 
-// decomp: BATTLE.PRG _dismissAllTextBoxes (F01378, 5BF94.c:3757,
+// decomp: BATTLE.PRG dismissAllTextBoxes (F01378,
+// src/BATTLE/BATTLE.PRG/5BF94.c:3323; was _dismissAllTextBoxes,
 // 0x800CB268-0x800CB2B8): every box is dismissed, none skipped.
 bool DismissAllTextBoxes(TextBoxes boxes, TextBoxHost& host) {
   bool all_closed = true;
@@ -282,8 +285,9 @@ bool DismissAllTextBoxes(TextBoxes boxes, TextBoxHost& host) {
   return all_closed;
 }
 
-// decomp: BATTLE.PRG vs_battle_getTextBox (F01409, 5BF94.c:4544,
-// 0x800CCDF4-0x800CCE10). Deviation: ids outside the boxes are refused.
+// decomp: BATTLE.PRG vs_battle_getTextBox (F01409,
+// src/BATTLE/BATTLE.PRG/5BF94.c:4110, 0x800CCDF4-0x800CCE10). Deviation: ids
+// outside the boxes are refused.
 std::optional<std::size_t> TextBoxIndex(std::int32_t id) {
   if (id < 0 || static_cast<std::size_t>(id) >= kTextBoxCount) {
     return std::nullopt;
@@ -291,7 +295,7 @@ std::optional<std::size_t> TextBoxIndex(std::int32_t id) {
   return static_cast<std::size_t>(id);
 }
 
-// decomp: BATTLE.PRG func_800CCE10 (F01410, 5BF94.c:4546,
+// decomp: BATTLE.PRG func_800CCE10 (F01410, src/BATTLE/BATTLE.PRG/5BF94.c:4112,
 // 0x800CCE10-0x800CCF08). Deviations: a preset outside `presets` is refused
 // (the original read past D_800EC284), and the result's top two bits are 0
 // rather than the caller's stale register bits.
@@ -331,9 +335,9 @@ std::optional<TextAnchor> TextBoxAnchor(
   };
 }
 
-// decomp: BATTLE.PRG vs_battle_initTextBox (F01411, 5BF94.c:4567,
-// 0x800CCF08-0x800CD064). The text, printed chunks, frame rectangle and
-// speaker pause are left as they were.
+// decomp: BATTLE.PRG vs_battle_initTextBox (F01411,
+// src/BATTLE/BATTLE.PRG/5BF94.c:4132, 0x800CCF08-0x800CD064). The text, printed
+// chunks, frame rectangle and speaker pause are left as they were.
 void InitTextBox(TextBox& box, const TextBoxLayout& layout) {
   box.flags = TextBoxFlags::FromWord(
       (static_cast<std::uint32_t>(layout.flags) & kLayoutFlagsMask) |
@@ -385,9 +389,9 @@ void InitTextBox(TextBox& box, const TextBoxLayout& layout) {
   }
 }
 
-// decomp: BATTLE.PRG vs_battle_dismissTextBox (F01412, 5BF94.c:4613,
-// 0x800CD064-0x800CD0FC). The speaker's animation stops even for a closed
-// box.
+// decomp: BATTLE.PRG vs_battle_dismissTextBox (F01412,
+// src/BATTLE/BATTLE.PRG/5BF94.c:4178, 0x800CD064-0x800CD0FC). The speaker's
+// animation stops even for a closed box.
 bool DismissTextBox(TextBox& box, TextBoxHost& host) {
   if (box.flags.HasSpeaker()) {
     host.AnimateSpeaker(box.flags.speaker_texture, 0, 0);

@@ -252,7 +252,7 @@ void DrawLeftTargetLabelLink(LabelScreenPoint anchor, LabelScreenPoint ring,
   DrawTargetLabelLink(anchor, ring, pulse_head, kLeftward, canvas);
 }
 
-// decomp: BATTLE.PRG func_800C1D84 (src/BATTLE/BATTLE.PRG/58578.c:645),
+// decomp: BATTLE.PRG func_800C1D84 (src/BATTLE/BATTLE.PRG/58578.c:594),
 // F01300, 0x800C1D84-0x800C1DC0.
 bool AreTargetLabelsSettled(
     std::span<const SphereTargetLabel, kSphereTargetLabelCount>
@@ -344,7 +344,7 @@ void UpdateSphereTargetLabels(
   }
 }
 
-// decomp: BATTLE.PRG func_800C4650 (src/BATTLE/BATTLE.PRG/5BE50.c:65),
+// decomp: BATTLE.PRG func_800C4650 (src/BATTLE/BATTLE.PRG/58578.c:1071),
 // F01310, 0x800C4650-0x800C4704.
 void UpdateSphereTargetHighlights(std::span<const ActionTargetPreview> targets,
                                   SphereTargetHighlightHost& host) {

@@ -63,24 +63,28 @@ std::int32_t PlaySlotMusic(MusicHost& host, std::int32_t id, Start start) {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_8007BE10 (src/BATTLE/BATTLE.PRG/146C.c:8579)
+// decomp: BATTLE.PRG func_8007BE10 (src/BATTLE/BATTLE.PRG/146C.c:8522)
 std::int32_t SetZoneMusicSwitchEnabled(MusicHost& host, std::int32_t enabled) {
   host.StoreZoneMusicSwitch(enabled);
   return enabled;
 }
 
-// decomp: SLUS_010.40 func_80044D94 (src/SLUS_010.40/main.c:9490)
+// decomp: SLUS_010.40 vs_main_getMusicPosition (src/SLUS_010.40/main.c:2473;
+// was func_80044D94)
 std::int32_t MusicBeatPosition(MusicHost& host) { return host.MusicPosition(); }
 
-// decomp: SLUS_010.40 func_80044DB4 (src/SLUS_010.40/main.c:9492)
+// decomp: SLUS_010.40 vs_main_pushMusicState (src/SLUS_010.40/main.c:2475; was
+// func_80044DB4)
 void SaveMusicPlaybackState(MusicHost& host) { host.SaveMusicState(); }
 
-// decomp: SLUS_010.40 func_80044DD4 (src/SLUS_010.40/main.c:9494)
+// decomp: SLUS_010.40 vs_main_setMusicJumpThreshold
+// (src/SLUS_010.40/main.c:2477; was func_80044DD4)
 void SetMusicJumpThreshold(MusicHost& host, std::int32_t threshold) {
   host.SetMusicBranchThreshold(threshold);
 }
 
-// decomp: SLUS_010.40 func_80044DF4 (src/SLUS_010.40/main.c:9496)
+// decomp: SLUS_010.40 vs_main_stopMusicSlot (src/SLUS_010.40/main.c:2482; was
+// func_80044DF4)
 std::int32_t StopMusicSlotPlayback(MusicHost& host, std::int32_t id) {
   if (id == 0) {
     host.StopAllMusic();
@@ -104,14 +108,16 @@ std::int32_t StopMusicSlotPlayback(MusicHost& host, std::int32_t id) {
   return 1;
 }
 
-// decomp: SLUS_010.40 func_80044EC8 (src/SLUS_010.40/main.c:9525)
+// decomp: SLUS_010.40 vs_main_queueMusicSlot (src/SLUS_010.40/main.c:2516; was
+// func_80044EC8)
 std::int32_t ResumeMusicSlot(MusicHost& host, std::int32_t id) {
   return PlaySlotMusic(host, id, [&host](BankBuffer music) {
     return host.QueueMusicTransition(music);
   });
 }
 
-// decomp: SLUS_010.40 func_80044F60 (src/SLUS_010.40/main.c:9545)
+// decomp: SLUS_010.40 vs_main_playMusicSlotFadeIn (src/SLUS_010.40/main.c:2541;
+// was func_80044F60)
 std::int32_t CrossfadeMusicSlot(MusicHost& host, std::int32_t id,
                                 std::int32_t target_volume,
                                 std::uint32_t fade_ticks) {
@@ -120,7 +126,8 @@ std::int32_t CrossfadeMusicSlot(MusicHost& host, std::int32_t id,
   });
 }
 
-// decomp: SLUS_010.40 func_80045000 (src/SLUS_010.40/main.c:9565)
+// decomp: SLUS_010.40 vs_main_playMusicSlot (src/SLUS_010.40/main.c:2568; was
+// func_80045000)
 std::int32_t PlayMusicSlot(MusicHost& host, std::int32_t id,
                            Control::Fade volume) {
   return PlaySlotMusic(host, id, [&](BankBuffer music) {
@@ -131,10 +138,10 @@ std::int32_t PlayMusicSlot(MusicHost& host, std::int32_t id,
   });
 }
 
-// decomp: SLUS_010.40 vs_main_getcurrentMusicSlot (src/SLUS_010.40/main.c:9587)
+// decomp: SLUS_010.40 vs_main_getcurrentMusicSlot (src/SLUS_010.40/main.c:2595)
 std::int32_t CurrentMusicSlot(MusicHost& host) { return host.Playback().slot; }
 
-// decomp: SLUS_010.40 vs_main_getCurrentMusicId (src/SLUS_010.40/main.c:9592)
+// decomp: SLUS_010.40 vs_main_getCurrentMusicId (src/SLUS_010.40/main.c:2597)
 std::int32_t CurrentMusicId(MusicHost& host) {
   const std::int32_t slot = host.Playback().slot;
   if (slot == 0) return 0;
@@ -143,7 +150,7 @@ std::int32_t CurrentMusicId(MusicHost& host) {
   return host.Music(*index).id;
 }
 
-// decomp: SLUS_010.40 vs_main_loadMusicSlot (src/SLUS_010.40/main.c:9600)
+// decomp: SLUS_010.40 vs_main_loadMusicSlot (src/SLUS_010.40/main.c:2605)
 std::int32_t LoadMusicSlot(MusicHost& host, std::int32_t id,
                            std::int32_t target_slot) {
   const std::optional<std::size_t> index =
@@ -182,7 +189,8 @@ std::int32_t LoadMusicSlot(MusicHost& host, std::int32_t id,
   return target_slot;
 }
 
-// decomp: SLUS_010.40 _loadMusicIntoFreeSlot (src/SLUS_010.40/main.c:9643)
+// decomp: SLUS_010.40 loadMusicIntoFreeSlot (src/SLUS_010.40/main.c:2651; was
+// _loadMusicIntoFreeSlot)
 std::int32_t LoadMusicIntoFreeSlot(MusicHost& host, std::int32_t id) {
   for (std::size_t index = 0; index < kMusicSlotCount; ++index) {
     if (host.Music(index).data == BankBuffer::kNone) {
@@ -192,7 +200,7 @@ std::int32_t LoadMusicIntoFreeSlot(MusicHost& host, std::int32_t id) {
   return 0;
 }
 
-// decomp: SLUS_010.40 vs_main_clearMusicLoadSlot (src/SLUS_010.40/main.c:9655)
+// decomp: SLUS_010.40 vs_main_clearMusicLoadSlot (src/SLUS_010.40/main.c:2664)
 std::int32_t PollMusicSlotLoad(MusicHost& host, std::uint32_t slot) {
   if (slot - 1U >= kMusicSlotCount) return kLoadIdle;
   const std::size_t index = slot - 1U;
@@ -211,7 +219,7 @@ std::int32_t PollMusicSlotLoad(MusicHost& host, std::uint32_t slot) {
   return loaded ? kLoadIdle : kLoadFailed;
 }
 
-// decomp: SLUS_010.40 vs_main_clearMusicLoadQueue (src/SLUS_010.40/main.c:9677)
+// decomp: SLUS_010.40 vs_main_clearMusicLoadQueue (src/SLUS_010.40/main.c:2692)
 std::int32_t PollMusicLoads(MusicHost& host) {
   std::int32_t loads = kLoadIdle;
   for (std::uint32_t slot = 1; slot <= kMusicSlotCount; ++slot) {
@@ -221,7 +229,7 @@ std::int32_t PollMusicLoads(MusicHost& host) {
 }
 
 // decomp: SLUS_010.40 vs_main_loadAndWaitMusicSlot
-// (src/SLUS_010.40/main.c:9691)
+// (src/SLUS_010.40/main.c:2704)
 std::int32_t LoadMusicSlotBlocking(MusicHost& host, std::int32_t id,
                                    std::int32_t target_slot) {
   const std::int32_t loaded = LoadMusicSlot(host, id, target_slot);
@@ -234,8 +242,8 @@ std::int32_t LoadMusicSlotBlocking(MusicHost& host, std::int32_t id,
   return loaded;
 }
 
-// decomp: SLUS_010.40 _loadMusicIntoFreeSlotAndClearQueue
-// (src/SLUS_010.40/main.c:9704)
+// decomp: SLUS_010.40 loadMusicIntoFreeSlotAndClearQueue
+// (src/SLUS_010.40/main.c:2717; was _loadMusicIntoFreeSlotAndClearQueue)
 std::int32_t LoadFreeMusicSlotBlocking(MusicHost& host, std::int32_t id) {
   const std::int32_t loaded = LoadMusicIntoFreeSlot(host, id);
   if (loaded != 0) {
@@ -244,7 +252,7 @@ std::int32_t LoadFreeMusicSlotBlocking(MusicHost& host, std::int32_t id) {
   return loaded;
 }
 
-// decomp: SLUS_010.40 vs_main_freeMusic (src/SLUS_010.40/main.c:9717)
+// decomp: SLUS_010.40 vs_main_freeMusic (src/SLUS_010.40/main.c:2730)
 std::int32_t FreeMusicSlot(MusicHost& host, std::int32_t id) {
   if (StopMusicSlotPlayback(host, id) == 0) return 0;
   const std::optional<std::size_t> index = SlotIndex(id);
@@ -261,7 +269,8 @@ std::int32_t FreeMusicSlot(MusicHost& host, std::int32_t id) {
   return 1;
 }
 
-// decomp: SLUS_010.40 func_800454B8 (src/SLUS_010.40/main.c:9733)
+// decomp: SLUS_010.40 vs_main_getMusicSlotVolume (src/SLUS_010.40/main.c:2748;
+// was func_800454B8)
 std::int32_t MusicSlotVolume(MusicHost& host, std::int32_t id) {
   if (id == 0) return 0;
   const std::optional<std::size_t> index = CheckedSlotIndex(host, id);
@@ -271,12 +280,14 @@ std::int32_t MusicSlotVolume(MusicHost& host, std::int32_t id) {
   return host.MusicVolume(handle);
 }
 
-// decomp: SLUS_010.40 func_8004550C (src/SLUS_010.40/main.c:9743)
+// decomp: SLUS_010.40 vs_main_getMusicSlotVolume2 (src/SLUS_010.40/main.c:2760;
+// was func_8004550C)
 std::int32_t QueryMusicSlotVolume(MusicHost& host, std::int32_t id) {
   return MusicSlotVolume(host, id);
 }
 
-// decomp: SLUS_010.40 func_8004552C (src/SLUS_010.40/main.c:9745)
+// decomp: SLUS_010.40 vs_main_fadeMusicVolume (src/SLUS_010.40/main.c:2762; was
+// func_8004552C)
 std::int32_t FadeMusicSlotVolume(MusicHost& host, std::int32_t id,
                                  Control::Fade volume) {
   const MusicPlayback playback = host.Playback();
@@ -285,7 +296,8 @@ std::int32_t FadeMusicSlotVolume(MusicHost& host, std::int32_t id,
   return 1;
 }
 
-// decomp: SLUS_010.40 func_80045574 (src/SLUS_010.40/main.c:9754)
+// decomp: SLUS_010.40 vs_main_fadeMusicTempo (src/SLUS_010.40/main.c:2773; was
+// func_80045574)
 std::int32_t FadeMusicSlotTempo(MusicHost& host, std::int32_t id,
                                 Control::Fade tempo_scale) {
   if (host.Playback().slot != id) return 0;
@@ -293,7 +305,8 @@ std::int32_t FadeMusicSlotTempo(MusicHost& host, std::int32_t id,
   return 1;
 }
 
-// decomp: SLUS_010.40 func_800455AC (src/SLUS_010.40/main.c:9763)
+// decomp: SLUS_010.40 vs_main_fadeMusicPitch (src/SLUS_010.40/main.c:2783; was
+// func_800455AC)
 std::int32_t FadeMusicSlotPitch(MusicHost& host, std::int32_t id,
                                 Control::Fade pitch_scale) {
   if (host.Playback().slot != id) return 0;
@@ -301,7 +314,7 @@ std::int32_t FadeMusicSlotPitch(MusicHost& host, std::int32_t id,
   return 1;
 }
 
-// decomp: SLUS_010.40 vs_main_stopMusic (src/SLUS_010.40/main.c:9776)
+// decomp: SLUS_010.40 vs_main_stopMusic (src/SLUS_010.40/main.c:2797)
 void StopAndFreeCurrentMusic(MusicHost& host) {
   const std::int32_t id = host.Playback().slot;
   if (id == 0) return;

@@ -309,14 +309,16 @@ void StoreNavigationFrame(const StatusEffectNavigationFrame& frame) {
 }
 }  // namespace
 
-// decomp: _drawStatusIndicator (MENU4.PRG 120.c:847).
+// decomp: drawStatusIndicator (MENU4.PRG src/MENU/MENU4.PRG/120.c:851; was
+// _drawStatusIndicator).
 void LiveDrawLimbConditionIndicator(int condition, int position, int dimming) {
   Report(
       "DrawLimbConditionIndicator",
       DrawLiveIndicator(
           {.condition = condition, .position = position, .dimming = dimming}));
 }
-// decomp: _drawLimbLeaderLine (MENU4.PRG 120.c:870).
+// decomp: drawLimbLeaderLine (MENU4.PRG src/MENU/MENU4.PRG/120.c:874; was
+// _drawLimbLeaderLine).
 void LiveDrawLimbLeaderLine(int limb, int position, int unused_fade,
                             int opacity) {
   (void)unused_fade;
@@ -324,12 +326,14 @@ void LiveDrawLimbLeaderLine(int limb, int position, int unused_fade,
       "DrawLimbLeaderLine",
       DrawLiveLeader({.limb = limb, .position = position, .opacity = opacity}));
 }
-// decomp: _renderStatusIcons (MENU4.PRG 120.c:913).
+// decomp: renderStatusIcons (MENU4.PRG src/MENU/MENU4.PRG/120.c:916; was
+// _renderStatusIcons).
 void LiveDrawStatusEffectIcons(VS::Battle::ActorStats* actor,
                                int animation_step) {
   Report("DrawStatusEffectIcons", DrawLiveIcons(actor, animation_step));
 }
-// decomp: _navigateStatusModifiers (MENU4.PRG 120.c:961).
+// decomp: navigateStatusModifiers (MENU4.PRG src/MENU/MENU4.PRG/120.c:964; was
+// _navigateStatusModifiers).
 int LiveNavigateStatusEffects(VS::Battle::ActorStats* actor,
                               int selection_active) {
   std::optional<StatusEffectTarget> target;
@@ -354,7 +358,8 @@ int LiveNavigateStatusEffects(VS::Battle::ActorStats* actor,
   }
   return *result;
 }
-// decomp: _renderLimbUi (MENU4.PRG 120.c:1146).
+// decomp: renderLimbUi (MENU4.PRG src/MENU/MENU4.PRG/120.c:1149; was
+// _renderLimbUi).
 int LiveUpdateLimbPanel(int request) {
   const auto result = UpdateLivePanel(request);
   if (!result) {
@@ -363,7 +368,8 @@ int LiveUpdateLimbPanel(int request) {
   }
   return *result;
 }
-// decomp: _renderSelectedLimbCondition (MENU4.PRG 120.c:2228).
+// decomp: renderSelectedLimbCondition (MENU4.PRG src/MENU/MENU4.PRG/120.c:2231;
+// was _renderSelectedLimbCondition).
 void LiveShowSelectedLimbCondition() {
   const auto selected = SelectedLimb();
   if (!selected) {
@@ -401,7 +407,8 @@ void LiveShowSelectedLimbCondition() {
          ShowSelectedLimbCondition(selectedElement, text, arguments, output,
                                    host));
 }
-// decomp: _renderSelectedLimbStats (MENU4.PRG 120.c:2246).
+// decomp: renderSelectedLimbStats (MENU4.PRG src/MENU/MENU4.PRG/120.c:2248; was
+// _renderSelectedLimbStats).
 void LivePopulateSelectedLimbDefense() {
   const auto selected = SelectedLimb();
   if (!selected) {

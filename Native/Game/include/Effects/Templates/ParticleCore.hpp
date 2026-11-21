@@ -12,15 +12,15 @@
 #include "Core/Math/ScalarMath.hpp"
 
 // The state, sampling and packet rules shared by the particle-set templates
-// (decomp src/EFFECT/particleDispatch.h, particleSetup.h, particleRender.h and
-// particleLineRender.h). A particle set is up to eight Catmull-Rom ribbons,
-// each spanning four control points: the origin stage places point 0, the
-// target stage point 3 and the control stage the two inner points; the render
-// stages draw each ribbon as eight textured quads or eight lines. Every
-// function works on value records; the effect package, the slot state and its
-// control points, the emitter scratch, the GTE, the texture animation and the
-// frame's ordering table are reached through ParticleSetHost
-// (ParticlesLive.hpp binds it).
+// (decomp src/EFFECT/particleDispatch.h, src/EFFECT/particleSetup.h,
+// src/EFFECT/particleRender.h and src/EFFECT/particleLineRender.h). A particle
+// set is up to eight Catmull-Rom ribbons, each spanning four control points:
+// the origin stage places point 0, the target stage point 3 and the control
+// stage the two inner points; the render stages draw each ribbon as eight
+// textured quads or eight lines. Every function works on value records; the
+// effect package, the slot state and its control points, the emitter scratch,
+// the GTE, the texture animation and the frame's ordering table are reached
+// through ParticleSetHost (ParticlesLive.hpp binds it).
 namespace VS::Effects::Templates {
 // Ribbons a set holds (the dispatcher clamps its count to this).
 inline constexpr std::size_t kParticleSetCapacity = 8;

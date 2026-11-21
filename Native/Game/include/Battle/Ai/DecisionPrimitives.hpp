@@ -92,26 +92,26 @@ struct ActorRandomState {
   std::int32_t step = 0;
 };
 
-// decomp: func_800DBC60 (src/BATTLE/BATTLE.PRG/73460.s:8).
+// decomp: func_800DBC60 (src/BATTLE/BATTLE.PRG/72B70.s:658).
 // The action waits for the actor's minimum delay when the actor uses the
 // room's delay, or when a harmful action targets a slot without a gimmick.
 [[nodiscard]] bool DoesActionRequireCooldown(const ActionCooldown& cooldown,
                                              const ActionCandidate& candidate,
                                              bool target_is_gimmick);
 
-// decomp: func_800DBCB4 (src/BATTLE/BATTLE.PRG/73460.s:38).
+// decomp: func_800DBCB4 (src/BATTLE/BATTLE.PRG/72B70.s:683).
 [[nodiscard]] bool IsActionCooldownReady(const ActionCooldown& cooldown,
                                          const ActionCandidate& candidate,
                                          bool target_is_gimmick);
 
-// decomp: func_800DBCEC (src/BATTLE/BATTLE.PRG/73460.s:59).
+// decomp: func_800DBCEC (src/BATTLE/BATTLE.PRG/72B70.s:700).
 // Whether a hostile battle actor stands next to the gimmick's tile. The
 // original returns zero in that case. Nothing refuses a hostile actor without
 // a model.
 [[nodiscard]] std::optional<bool> HasNearbyEnemy(
     GridTile gimmick, std::span<const ActorProximity> actors);
 
-// decomp: func_800DBD80 (src/BATTLE/BATTLE.PRG/73580.s:11).
+// decomp: func_800DBD80 (src/BATTLE/BATTLE.PRG/72B70.s:740).
 // Whether the candidate may run now: it is weighted, the room is ready, its
 // delay has passed, the target is in range and sight, and Ashley is standing.
 // Nothing refuses a gate the host cannot answer.
@@ -127,21 +127,21 @@ struct ConditionScoreTerms {
   std::int16_t dp = 0;
 };
 
-// decomp: func_800DC284 (src/BATTLE/BATTLE.PRG/7399C.s:79).
+// decomp: func_800DC284 (src/BATTLE/BATTLE.PRG/7399C.s:71).
 // Six times the status score (wrapping) plus four times HP, MP and twice DP.
 // Nothing refuses a total outside the signed 32-bit range, where the
 // original's `add` traps.
 [[nodiscard]] std::optional<std::int32_t> ScoreActorCondition(
     const ConditionScoreTerms& terms);
 
-// decomp: func_800DC484 (src/BATTLE/BATTLE.PRG/73C84.s:10).
+// decomp: func_800DC484 (src/BATTLE/BATTLE.PRG/7399C.s:222).
 // The action's harmful AI flag (bit 15), inverted for action 0x60 against an
 // enemy of class 2.
 [[nodiscard]] unsigned IsActionHarmfulToActor(unsigned action,
                                               std::uint16_t ai_flags,
                                               unsigned enemy_class);
 
-// decomp: func_800DC48C (src/BATTLE/BATTLE.PRG/73C84.s:16).
+// decomp: func_800DC48C (src/BATTLE/BATTLE.PRG/7399C.s:227).
 // The action's beneficial AI flag (bit 14). For action 0x60 against an enemy
 // of class 2 it is the flags above bit 13 with bit 14 inverted, which can be 2
 // or 3 when the harmful bit is also set.
@@ -149,7 +149,7 @@ struct ConditionScoreTerms {
                                                  std::uint16_t ai_flags,
                                                  unsigned enemy_class);
 
-// decomp: func_800DC4F0 (src/BATTLE/BATTLE.PRG/73C84.s:49).
+// decomp: func_800DC4F0 (src/BATTLE/BATTLE.PRG/7399C.s:255).
 // Caches the first candidate for each limb action slot whose action may serve
 // as a fallback, recording the slot even when the cache is full. Nothing
 // refuses a slot outside the limb table, a count outside the cache or missing
@@ -158,23 +158,23 @@ std::optional<bool> CacheFallbackActionCandidate(
     FallbackCandidateCache& cache, const ActionCandidate& candidate,
     bool fallback_eligible);
 
-// decomp: func_800DC574 (src/BATTLE/BATTLE.PRG/73C84.s:89).
+// decomp: func_800DC574 (src/BATTLE/BATTLE.PRG/7399C.s:288).
 // Rolls each ranked candidate against its weight (at most 0x4C of 0x80) and
 // promotes the first winner with an action to the front, re-sorting the rest.
 // Nothing refuses more than kCandidateCapacity entries.
 std::optional<bool> PromoteRandomizedActionCandidate(
     std::span<RankedCandidate> ranking, CandidateRandom& random);
 
-// decomp: func_800E45D4 (src/BATTLE/BATTLE.PRG/7BDD4.s:10).
+// decomp: func_800E45D4 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:480).
 // Advances the accumulator by the step and masks it with `range - 1`. Nothing
 // refuses a range below 1 or a sum outside the signed 32-bit range, where the
 // original's `add` traps.
 std::optional<int> NextActorRandomMasked(ActorRandomState& state, int range);
 
-// decomp: func_800E4FB0 (src/BATTLE/BATTLE.PRG/7C7B0.s:8).
+// decomp: func_800E4FB0 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:499).
 [[nodiscard]] bool IsAiTargetBeyondNearRadius(std::uint32_t distance_squared);
 
-// decomp: func_800DB8AC (src/BATTLE/BATTLE.PRG/72B70.s:439).
+// decomp: func_800DB8AC (src/BATTLE/BATTLE.PRG/72B70.s:407).
 // Whether the actor may approach its target: it is already engaged, or it is
 // rested, the target is active and the room has an engagement slot for it.
 // The original reads the room only for a rested actor, so `roster` may be

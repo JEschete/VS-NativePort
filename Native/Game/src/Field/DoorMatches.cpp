@@ -6,7 +6,7 @@
 #include <vector>
 
 namespace VS::Field {
-// decomp: BATTLE.PRG func_8008BAC8 (src/BATTLE/BATTLE.PRG/146C.c:16185).
+// decomp: BATTLE.PRG func_8008BAC8 (src/BATTLE/BATTLE.PRG/146C.c:16057).
 void TransitionDoorsAtTile(std::span<const DoorTile> doors, int x, int z,
                            int layer, std::vector<std::size_t>& matches) {
   matches.clear();

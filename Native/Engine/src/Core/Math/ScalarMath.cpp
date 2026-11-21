@@ -168,16 +168,17 @@ double AngleRadians(std::int32_t angle) noexcept {
 }  // namespace
 
 // decomp: SLUS_010.40 rsin (src/SLUS_010.40/31724.s:13); BATTLE.PRG
-// func_80098AB8 (src/BATTLE/BATTLE.PRG/2EA3C.s) and ENDING.PRG func_800688D4
-// (src/ENDING/ENDING.PRG/D4.c:187) are copies. Rounding sin to Q12 reproduces
-// every _trig_table (0x80040210) entry the octant folding reads.
+// func_80098AB8 (src/BATTLE/BATTLE.PRG/2EA3C.s:1647) and ENDING.PRG sine
+// (src/ENDING/ENDING.PRG/D4.c:29; was func_800688D4) are copies. Rounding sin
+// to Q12 reproduces every _trig_table (0x80040210) entry the octant folding
+// reads.
 std::int32_t Sine(std::int32_t angle) noexcept {
   return static_cast<std::int32_t>(
       std::lround(std::sin(AngleRadians(angle)) * kFixedOne));
 }
 
 // decomp: SLUS_010.40 rcos (src/SLUS_010.40/31724.s:9) and BATTLE.PRG
-// func_80098AB4 (src/BATTLE/BATTLE.PRG/2EA3C.s): rsin of angle + 1024.
+// func_80098AB4 (src/BATTLE/BATTLE.PRG/2EA3C.s:1643): rsin of angle + 1024.
 std::int32_t Cosine(std::int32_t angle) noexcept {
   return static_cast<std::int32_t>(
       std::lround(std::cos(AngleRadians(angle)) * kFixedOne));
@@ -208,7 +209,8 @@ std::int32_t Arctangent2(std::int32_t y, std::int32_t x) noexcept {
   return y < 0 ? -angle : angle;
 }
 
-// decomp: BATTLE.PRG _atan2FixedPoint (src/BATTLE/BATTLE.PRG/4A0A8.c:4177).
+// decomp: BATTLE.PRG atan2FixedPoint (src/BATTLE/BATTLE.PRG/4DEA8.c:4826; was
+// _atan2FixedPoint).
 std::int32_t FixedAtan2(std::int32_t y, std::int32_t x) noexcept {
   return Arctangent2(y >> kFixedAtan2InputShift, x >> kFixedAtan2InputShift);
 }
@@ -227,7 +229,8 @@ std::int32_t SquareRootFixed(std::int32_t value) noexcept {
                                              : root.sample >> -shift);
 }
 
-// decomp: BATTLE.PRG vs_battle_clamp (src/BATTLE/BATTLE.PRG/2842C.c:390).
+// decomp: BATTLE.PRG clamp (src/BATTLE/BATTLE.PRG/2842C.c:376; was
+// vs_battle_clamp).
 std::int16_t ClampSignedShort(std::int16_t value, std::int32_t first_bound,
                               std::int32_t second_bound) noexcept {
   const std::int16_t first =
@@ -237,7 +240,7 @@ std::int16_t ClampSignedShort(std::int16_t value, std::int32_t first_bound,
   return std::clamp(value, std::min(first, second), std::max(first, second));
 }
 
-// decomp: BATTLE.PRG vs_battle_toBCD (src/BATTLE/BATTLE.PRG/5BF94.c:4494).
+// decomp: BATTLE.PRG vs_battle_toBCD (src/BATTLE/BATTLE.PRG/5BF94.c:4060).
 std::int32_t SplitDecimalDigit(std::int32_t value) noexcept {
   constexpr std::int32_t kDecimalBase = 10;
   constexpr std::int32_t kNibbleScale = 16;
@@ -245,7 +248,8 @@ std::int32_t SplitDecimalDigit(std::int32_t value) noexcept {
          WrappingMultiply(value / kDecimalBase, kNibbleScale);
 }
 
-// decomp: BATTLE.PRG _fixedPointMult (src/BATTLE/BATTLE.PRG/4A0A8.c:4163).
+// decomp: BATTLE.PRG fixedPointMult (src/BATTLE/BATTLE.PRG/4DEA8.c:4812; was
+// _fixedPointMult).
 std::int32_t MultiplyFixed(std::int32_t left, std::int32_t right) noexcept {
   return static_cast<std::int32_t>(static_cast<std::uint32_t>(
       static_cast<std::uint64_t>(std::int64_t{left} * right) >>
@@ -260,7 +264,7 @@ Vec3 SquareVectorComponents(Vec3 input) noexcept {
   return Vec3{x * x, y * y, z * z};
 }
 
-// decomp: SLUS_010.40 func_80041C68 (src/SLUS_010.40/32154.s:280).
+// decomp: SLUS_010.40 func_80041C68 (src/SLUS_010.40/31724.h:5).
 Mat3 MultiplyMatrixIntoRight(const Mat3& left, const Mat3& right) noexcept {
   return MultiplyQ12(left, right, SaturateToHalfword);
 }
@@ -270,18 +274,18 @@ Mat3 MultiplyMatrixIntoLeft(const Mat3& left, const Mat3& right) noexcept {
   return MultiplyMatrixIntoRight(left, right);
 }
 
-// decomp: BATTLE.PRG func_800989B8 (src/BATTLE/BATTLE.PRG/2EA3C.s:1664).
+// decomp: BATTLE.PRG func_800989B8 (src/BATTLE/BATTLE.PRG/2EA3C.s:1580).
 Mat3 MultiplyRotationMatrixInPlace(const Mat3& left,
                                    const Mat3& right) noexcept {
   return MultiplyMatrixIntoRight(left, right);
 }
 
-// decomp: BATTLE.PRG func_800B196C (src/BATTLE/BATTLE.PRG/48C7C.s:365).
+// decomp: BATTLE.PRG func_800B196C (src/BATTLE/BATTLE.PRG/48C7C.s:332).
 Mat3 PremultiplyRotationMatrix(const Mat3& left, const Mat3& right) noexcept {
   return MultiplyMatrixIntoRight(left, right);
 }
 
-// decomp: SLUS_010.40 vs_gte_rsqrt (src/SLUS_010.40/32154.s:207).
+// decomp: SLUS_010.40 vs_gte_rsqrt (src/SLUS_010.40/32154.h:5).
 std::int32_t SquareRootInteger(std::int32_t value) noexcept {
   if (value <= 0) {
     return 0;
@@ -293,14 +297,14 @@ std::int32_t SquareRootInteger(std::int32_t value) noexcept {
                                    kFixedFractionBits);
 }
 
-// decomp: BATTLE.PRG func_800988BC (src/BATTLE/BATTLE.PRG/2EA3C.s:1597).
-// func_800B16F4 (src/BATTLE/BATTLE.PRG/48C7C.s:188) and SLUS_010.40
+// decomp: BATTLE.PRG func_800988BC (src/BATTLE/BATTLE.PRG/2EA3C.s:1514).
+// func_800B16F4 (src/BATTLE/BATTLE.PRG/48C7C.s:179) and SLUS_010.40
 // func_80041104 (src/SLUS_010.40/31724.s:147) have identical octant blocks.
 SineCosine LookupRotationSineCosine(std::int32_t angle) noexcept {
   return SineCosine{Sine(angle), Cosine(angle)};
 }
 
-// decomp: BATTLE.PRG func_8009874C (src/BATTLE/BATTLE.PRG/2EA3C.s:1499) and
+// decomp: BATTLE.PRG func_8009874C (src/BATTLE/BATTLE.PRG/2EA3C.s:1430) and
 // SLUS_010.40 RotMatrixYXZ_gte (src/SLUS_010.40/31724.s:47), which computes
 // the same elements from the same products.
 // Keep the GPF stages' two extra fractional bits until each final sum.
@@ -333,7 +337,7 @@ Mat3 BuildEulerRotationMatrix(Angles3 rotation) noexcept {
   return output;
 }
 
-// decomp: BATTLE.PRG func_800B17F0 (src/BATTLE/BATTLE.PRG/48C7C.s:254).
+// decomp: BATTLE.PRG func_800B17F0 (src/BATTLE/BATTLE.PRG/48C7C.s:245).
 Mat3 BuildEulerRotationMatrixQuadrant(Angles3 rotation) noexcept {
   const std::int32_t sin_x = Sine(rotation.x);
   const std::int32_t cos_x = Cosine(rotation.x);
@@ -371,7 +375,7 @@ Mat3 BuildEulerRotationMatrixQuadrant(Angles3 rotation) noexcept {
 }
 
 // decomp: SLUS_010.40 ScaleMatrix (src/SLUS_010.40/31C0C.s); BATTLE.PRG
-// func_800B396C (src/BATTLE/BATTLE.PRG/4B16C.s:8) is identical.
+// func_800B396C (src/BATTLE/BATTLE.PRG/4B16C.s:6) is identical.
 Mat3 ScaleMatrixColumns(const Mat3& matrix, Vec3 scale) noexcept {
   const std::array<std::int16_t, kDimensions> factors{
       static_cast<std::int16_t>(scale.x), static_cast<std::int16_t>(scale.y),

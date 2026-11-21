@@ -3,6 +3,7 @@
 #include "Effects/Plugins/Plg085.hpp"
 
 namespace VS::Effects::Plg085 {
-// decomp: D_800FB260 (PLG085.BIN/18.c:5; closedRings.h:58)
+// decomp: vs_effect_acidFlow_1_colors (src/EFFECT/closedRings.h:58; was
+// D_800FB260; src/EFFECT/closedRings.h:58)
 plugins::RingPalette tiledRingColorFactors;
 }  // namespace VS::Effects::Plg085

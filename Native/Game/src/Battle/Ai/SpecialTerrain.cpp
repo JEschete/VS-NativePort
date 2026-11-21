@@ -63,7 +63,7 @@ void AssignHeight(SpecialTerrainMaps maps, std::size_t cell,
 }
 }  // namespace
 
-// decomp: func_800E5EC0 (src/BATTLE/BATTLE.PRG/7CD68.c:760).
+// decomp: func_800E5EC0 (src/BATTLE/BATTLE.PRG/7CD68.c:286).
 // The original recursed once per tile, up to 1024 deep. Every tile is
 // assigned the same value and marked before its neighbors are examined, so
 // marking tiles as they are queued assigns exactly the same tiles.
@@ -98,7 +98,7 @@ bool FloodFillAiTerrainHeights(SpecialTerrainMaps maps,
   return true;
 }
 
-// decomp: func_800E5FDC (src/BATTLE/BATTLE.PRG/7CD68.c:779).
+// decomp: func_800E5FDC (src/BATTLE/BATTLE.PRG/7CD68.c:305).
 std::optional<std::int16_t> FindAdjacentAiGroundHeight(
     TileFlagCells tile_flags, const FloorHeightQuery& floor_height,
     const NavigationDirectionCodes& directions, int x, int z) {
@@ -122,7 +122,7 @@ std::optional<std::int16_t> FindAdjacentAiGroundHeight(
   return std::nullopt;
 }
 
-// decomp: func_800E6098 (src/BATTLE/BATTLE.PRG/7CD68.c:795).
+// decomp: func_800E6098 (src/BATTLE/BATTLE.PRG/7CD68.c:321).
 void BuildAiSpecialTerrainHeights(SpecialTerrainMaps maps,
                                   const FloorHeightQuery& floor_height,
                                   const NavigationDirectionCodes& directions) {

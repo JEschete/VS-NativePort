@@ -96,7 +96,8 @@ void LiveContainerWorld::Write(ItemCategory category, std::size_t index,
   Items::Refuse(reason);
 }
 
-// decomp: _getContainerIndicesOffset (src/MENU/MENUD.PRG/234.c:85)
+// decomp: getContainerIndicesOffset (src/MENU/MENUD.PRG/234.c:89; was
+// _getContainerIndicesOffset)
 std::uint16_t* LiveContainerCategoryIndices(int category,
                                             VS::Items::Container* container) {
   LiveContainerWorld world;
@@ -105,7 +106,8 @@ std::uint16_t* LiveContainerCategoryIndices(int category,
   return IndexPointer(container->indices, offset);
 }
 
-// decomp: _getContainerItemIndex (src/MENU/MENUD.PRG/234.c:97)
+// decomp: getContainerItemIndex (src/MENU/MENUD.PRG/234.c:101; was
+// _getContainerItemIndex)
 int FindLiveContainerItemRow(int category, int index, std::uint16_t* indices) {
   const auto typed_category = Category(category);
   LiveContainerWorld world;
@@ -113,7 +115,8 @@ int FindLiveContainerItemRow(int category, int index, std::uint16_t* indices) {
                               Order(typed_category, indices), world);
 }
 
-// decomp: _setContainerItemIndex (src/MENU/MENUD.PRG/234.c:109)
+// decomp: setContainerItemIndex (src/MENU/MENUD.PRG/234.c:113; was
+// _setContainerItemIndex)
 void AppendLiveContainerItemIndex(int category, int index,
                                   std::uint16_t* indices) {
   const auto typed_category = Category(category);
@@ -122,27 +125,31 @@ void AppendLiveContainerItemIndex(int category, int index,
                            Order(typed_category, indices), world);
 }
 
-// decomp: _initContainerObject (src/MENU/MENUD.PRG/234.c:121)
+// decomp: initContainerObject (src/MENU/MENUD.PRG/234.c:125; was
+// _initContainerObject)
 void ClearLiveContainerItem(int category, int index,
                             VS::Items::ContainerData* container) {
   LiveContainerWorld world(container);
   ClearContainerItem(Category(category), index, world);
 }
 
-// decomp: _getContainerItemId (src/MENU/MENUD.PRG/234.c:191)
+// decomp: getContainerItemId (src/MENU/MENUD.PRG/234.c:194; was
+// _getContainerItemId)
 int LiveContainerItemId(int category, int index,
                         VS::Items::ContainerData* container) {
   LiveContainerWorld world(container);
   return ContainerItemId(Category(category), index, world);
 }
 
-// decomp: _countContainerItems (src/MENU/MENUD.PRG/234.c:221)
+// decomp: countContainerItems (src/MENU/MENUD.PRG/234.c:224; was
+// _countContainerItems)
 int CountLiveContainerItems(int category, VS::Items::ContainerData* container) {
   LiveContainerWorld world(container);
   return CountContainerItems(Category(category), world);
 }
 
-// decomp: _getEmptyContainerSlot (src/MENU/MENUD.PRG/234.c:234)
+// decomp: getEmptyContainerSlot (src/MENU/MENUD.PRG/234.c:237; was
+// _getEmptyContainerSlot)
 int FindLiveEmptyContainerSlot(int category,
                                VS::Items::ContainerData* container) {
   LiveContainerWorld world(container);

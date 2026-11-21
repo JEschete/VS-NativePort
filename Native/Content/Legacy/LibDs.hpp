@@ -18,7 +18,7 @@ struct CdlATV {
 };
 static_assert(sizeof(CdlATV) == 0x4, "CdlATV must keep its PS1 layout");
 
-// decomp: DslLOC (include/psx/libds.h:103-109). A BCD disc position.
+// decomp: DslLOC (include/psx/libds.h:104-109). A BCD disc position.
 struct DslLOC {
   std::uint8_t minute;
   std::uint8_t second;
@@ -35,10 +35,11 @@ struct DslFILTER {
 };
 static_assert(sizeof(DslFILTER) == 0x4, "DslFILTER must keep its PS1 layout");
 
-// decomp: DsInit (include/psx/libds.h:231), called at boot (main.c:1153).
+// decomp: DsInit (include/psx/libds.h:231), called at boot
+// (src/SLUS_010.40/main.c:1153).
 int DsInit();
 // decomp: DsGetSector (include/psx/libds.h:247), called by the sector
-// callback (main.c:1925-1927).
+// callback (src/SLUS_010.40/main.c:1925-1927).
 int DsGetSector(void* madr, int size);
 
 }  // namespace VS::Legacy

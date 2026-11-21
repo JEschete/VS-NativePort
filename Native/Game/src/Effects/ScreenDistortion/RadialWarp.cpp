@@ -139,7 +139,7 @@ void WarpPacket(PrimitivePacketCursor& packet, const RadialScales& scales,
 }
 }  // namespace
 
-// decomp: SCREFF2.PRG func_800F9BD8 (src/GIM/SCREFF2.PRG/3D8.s:9).
+// decomp: SCREFF2.PRG func_800F9BD8 (src/GIM/SCREFF2.PRG/0.c:126).
 void WarpPolygonVertices(RadialWarpSettings settings,
                          std::span<const std::uint8_t> root_table,
                          PrimitivePacketCursor& packets) {

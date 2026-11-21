@@ -79,7 +79,7 @@ std::optional<BankBuffer> ReadMenuFile(SoundBankHost& host,
 }
 }  // namespace
 
-// decomp: SLUS_010.40 vs_main_loadSfxSlot (src/SLUS_010.40/main.c:10045)
+// decomp: SLUS_010.40 vs_main_loadSfxSlot (src/SLUS_010.40/main.c:3088)
 std::int32_t LoadSfxBankSlot(SoundBankHost& host, std::int32_t id,
                              std::uint32_t slot) {
   const std::optional<std::size_t> index = SfxSlotIndex(slot);
@@ -100,7 +100,7 @@ std::int32_t LoadSfxBankSlot(SoundBankHost& host, std::int32_t id,
   return static_cast<std::int32_t>(slot);
 }
 
-// decomp: SLUS_010.40 _loadSfx (src/SLUS_010.40/main.c:10077)
+// decomp: SLUS_010.40 loadSfx (src/SLUS_010.40/main.c:3122; was _loadSfx)
 std::int32_t LoadSfxBankIntoFreeSlot(SoundBankHost& host, std::int32_t id) {
   for (std::size_t index = 0; index < kSfxBankSlotCount; ++index) {
     if (host.SfxBank(index).data == BankBuffer::kNone) {
@@ -110,7 +110,7 @@ std::int32_t LoadSfxBankIntoFreeSlot(SoundBankHost& host, std::int32_t id) {
   return 0;
 }
 
-// decomp: SLUS_010.40 vs_main_freeSfxQueueSlot (src/SLUS_010.40/main.c:10089)
+// decomp: SLUS_010.40 vs_main_freeSfxQueueSlot (src/SLUS_010.40/main.c:3135)
 std::int32_t PollSfxBankSlotLoad(SoundBankHost& host, std::uint32_t slot) {
   const std::optional<std::size_t> index = SfxSlotIndex(slot);
   if (!index) return kLoadIdle;
@@ -132,7 +132,8 @@ std::int32_t PollSfxBankSlotLoad(SoundBankHost& host, std::uint32_t slot) {
   }
 }
 
-// decomp: SLUS_010.40 _freeSfxSlots (src/SLUS_010.40/main.c:10111)
+// decomp: SLUS_010.40 freeSfxSlots (src/SLUS_010.40/main.c:3163; was
+// _freeSfxSlots)
 std::int32_t PollSfxBankLoads(SoundBankHost& host) {
   std::int32_t loads = kLoadIdle;
   for (std::uint32_t slot = 1; slot <= kSfxBankSlotCount; ++slot) {
@@ -141,7 +142,8 @@ std::int32_t PollSfxBankLoads(SoundBankHost& host) {
   return loads;
 }
 
-// decomp: SLUS_010.40 _loadAndFreeSfx (src/SLUS_010.40/main.c:10121)
+// decomp: SLUS_010.40 loadAndFreeSfx (src/SLUS_010.40/main.c:3175; was
+// _loadAndFreeSfx)
 std::int32_t LoadSfxBankBlocking(SoundBankHost& host, std::int32_t id) {
   const std::int32_t slot = LoadSfxBankIntoFreeSlot(host, id);
   if (slot != 0) {
@@ -150,7 +152,7 @@ std::int32_t LoadSfxBankBlocking(SoundBankHost& host, std::int32_t id) {
   return slot;
 }
 
-// decomp: SLUS_010.40 vs_main_setCurrentSfx (src/SLUS_010.40/main.c:10134)
+// decomp: SLUS_010.40 vs_main_setCurrentSfx (src/SLUS_010.40/main.c:3188)
 std::int32_t SelectSfxBankSlot(SoundBankHost& host, std::int32_t slot) {
   const std::optional<std::size_t> index =
       SfxSlotIndex(static_cast<std::uint32_t>(slot));
@@ -159,7 +161,7 @@ std::int32_t SelectSfxBankSlot(SoundBankHost& host, std::int32_t slot) {
   return 1;
 }
 
-// decomp: SLUS_010.40 vs_main_freeSfx (src/SLUS_010.40/main.c:10143)
+// decomp: SLUS_010.40 vs_main_freeSfx (src/SLUS_010.40/main.c:3199)
 std::int32_t FreeSfxBankSlot(SoundBankHost& host, std::uint32_t slot) {
   const std::optional<std::size_t> index = SfxSlotIndex(slot);
   if (!index) return 0;
@@ -175,7 +177,8 @@ std::int32_t FreeSfxBankSlot(SoundBankHost& host, std::uint32_t slot) {
   return 1;
 }
 
-// decomp: SLUS_010.40 func_80046168 (src/SLUS_010.40/main.c:10161)
+// decomp: SLUS_010.40 vs_main_setSfxSlot3Data (src/SLUS_010.40/main.c:3221; was
+// func_80046168)
 std::int32_t BindRoomSfxBank(SoundBankHost& host, BankBuffer bank) {
   SfxBankSlot slot = host.SfxBank(kRoomSfxBankIndex);
   if (slot.data != BankBuffer::kNone) return 0;
@@ -184,7 +187,8 @@ std::int32_t BindRoomSfxBank(SoundBankHost& host, BankBuffer bank) {
   return 1;
 }
 
-// decomp: SLUS_010.40 func_80046194 (src/SLUS_010.40/main.c:10170)
+// decomp: SLUS_010.40 vs_main_clearSfxSlot3 (src/SLUS_010.40/main.c:3231; was
+// func_80046194)
 std::int32_t UnbindRoomSfxBank(SoundBankHost& host) {
   StopBankSoundEffects(host, kRoomSfxBankEffectTags);
   SfxBankSlot slot = host.SfxBank(kRoomSfxBankIndex);
@@ -193,7 +197,8 @@ std::int32_t UnbindRoomSfxBank(SoundBankHost& host) {
   return 1;
 }
 
-// decomp: SLUS_010.40 _loadSoundFile (src/SLUS_010.40/main.c:10359)
+// decomp: SLUS_010.40 loadSoundFile (src/SLUS_010.40/main.c:3446; was
+// _loadSoundFile)
 void LoadWaveBankFile(SoundBankHost& host, std::int32_t file) {
   const Playback::MusicBankIds loaded = host.MusicBanks();
   if (loaded.bank == file || loaded.alternate == file) return;
@@ -211,7 +216,7 @@ void LoadWaveBankFile(SoundBankHost& host, std::int32_t file) {
   host.StoreWaveBank(bank);
 }
 
-// decomp: SLUS_010.40 vs_main_loadSoundFile (src/SLUS_010.40/main.c:10394)
+// decomp: SLUS_010.40 vs_main_loadSoundFile (src/SLUS_010.40/main.c:3475)
 void LoadMappedWaveBank(SoundBankHost& host, std::int32_t id) {
   const std::optional<std::int32_t> file = host.MappedWaveBankFile(id);
   if (!file) {
@@ -221,7 +226,7 @@ void LoadMappedWaveBank(SoundBankHost& host, std::int32_t id) {
   LoadWaveBankFile(host, *file);
 }
 
-// decomp: SLUS_010.40 vs_main_processSoundQueue (src/SLUS_010.40/main.c:10396)
+// decomp: SLUS_010.40 vs_main_processSoundQueue (src/SLUS_010.40/main.c:3489)
 std::int32_t UpdateWaveBankLoad(SoundBankHost& host) {
   const WaveBankSlot bank = host.WaveBank();
   if (bank.request.mark != RequestMark::kActive) return kLoadIdle;
@@ -251,13 +256,13 @@ std::int32_t UpdateWaveBankLoad(SoundBankHost& host) {
 }
 
 // decomp: SLUS_010.40 vs_main_loadAndWaitSoundSlot
-// (src/SLUS_010.40/main.c:10439)
+// (src/SLUS_010.40/main.c:3531)
 void LoadWaveBankBlocking(SoundBankHost& host, std::int32_t id) {
   LoadMappedWaveBank(host, id);
   while (UpdateWaveBankLoad(host) != kLoadIdle) host.WaitFrame();
 }
 
-// decomp: SLUS_010.40 vs_main_setMonoSound (src/SLUS_010.40/main.c:10448)
+// decomp: SLUS_010.40 vs_main_setMonoSound (src/SLUS_010.40/main.c:3540)
 void SetMonoOutput(SoundBankHost& host, std::int32_t mono_enabled) {
   host.SetMonoOutput(mono_enabled);
 }
@@ -289,7 +294,7 @@ void InitializeMenuSoundBanks(SoundBankHost& host) {
   host.StoreEffectTagCursors(EffectTagCursors{});
 }
 
-// decomp: SLUS_010.40 vs_main_resetSound (src/SLUS_010.40/main.c:10480)
+// decomp: SLUS_010.40 vs_main_resetSound (src/SLUS_010.40/main.c:3582)
 void ResetSoundSlots(SoundBankHost& host) {
   host.ResetCutsceneStream();
   host.StoreSoundSlots(SoundSlots{});

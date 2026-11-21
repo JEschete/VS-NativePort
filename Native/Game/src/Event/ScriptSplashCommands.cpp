@@ -65,17 +65,18 @@ constexpr std::size_t kTweenDurationOperand = 6;
 
 }  // namespace
 
-// decomp: BATTLE.PRG func_800B6724 (src/BATTLE/BATTLE.PRG/4A0A8.c:609). The
-// original read the set's loading bit through a missing set; the host
-// answers false and reports it.
+// decomp: BATTLE.PRG vs_battle_script_0C_waitGimLoad
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:390; was func_800B6724). The original read the
+// set's loading bit through a missing set; the host answers false and reports
+// it.
 ScriptFlow ScriptWaitForSplashFile(const ScriptInstruction& /*instruction*/,
                                    ScriptVmHost& host) {
   return HoldWhen(host.SplashImageLoading());
 }
 
-// decomp: BATTLE.PRG vs_battle_script_loadGim
-// (src/BATTLE/BATTLE.PRG/4A0A8.c:851). The image id halfword is sign-extended;
-// the host refuses an unknown id.
+// decomp: BATTLE.PRG vs_battle_script_16_loadGim
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:708; was vs_battle_script_loadGim). The image
+// id halfword is sign-extended; the host refuses an unknown id.
 ScriptFlow ScriptLoadSplashImage(const ScriptInstruction& instruction,
                                  ScriptVmHost& host) {
   if (const auto command =
@@ -86,9 +87,10 @@ ScriptFlow ScriptLoadSplashImage(const ScriptInstruction& instruction,
   return HoldWhen(false);
 }
 
-// decomp: BATTLE.PRG func_800B7014 (src/BATTLE/BATTLE.PRG/4A0A8.c:857). The
-// tween stops before the layer changes, so the frame update cannot overwrite
-// the new placement.
+// decomp: BATTLE.PRG vs_battle_script_17_showGimImage
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:725; was func_800B7014). The tween stops
+// before the layer changes, so the frame update cannot overwrite the new
+// placement.
 ScriptFlow ScriptConfigureSplashLayer(const ScriptInstruction& instruction,
                                       ScriptVmHost& host) {
   const auto operands =
@@ -111,9 +113,10 @@ ScriptFlow ScriptConfigureSplashLayer(const ScriptInstruction& instruction,
   return HoldWhen(false);
 }
 
-// decomp: BATTLE.PRG func_800B70E8 (src/BATTLE/BATTLE.PRG/4A0A8.c:879). The
-// start values are the layer's halfwords and brightness byte; the deltas
-// wrap to 16 bits as the original's stores did.
+// decomp: BATTLE.PRG vs_battle_script_18_tweenGimImage
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:762; was func_800B70E8). The start values are
+// the layer's halfwords and brightness byte; the deltas wrap to 16 bits as the
+// original's stores did.
 ScriptFlow ScriptTweenSplashLayer(const ScriptInstruction& instruction,
                                   ScriptVmHost& host) {
   const auto operands = Operands(instruction, kTweenSplashLayerLength, host);
@@ -154,7 +157,8 @@ ScriptFlow ScriptTweenSplashLayer(const ScriptInstruction& instruction,
   return HoldWhen(false);
 }
 
-// decomp: BATTLE.PRG func_800B71C4 (src/BATTLE/BATTLE.PRG/4A0A8.c:905).
+// decomp: BATTLE.PRG vs_battle_script_19_unloadGim
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:791; was func_800B71C4).
 ScriptFlow ScriptFreeSplashImage(const ScriptInstruction& /*instruction*/,
                                  ScriptVmHost& host) {
   host.ReleaseSplashImages();
@@ -163,7 +167,8 @@ ScriptFlow ScriptFreeSplashImage(const ScriptInstruction& /*instruction*/,
              : HoldWhen(false);
 }
 
-// decomp: BATTLE.PRG func_800B71F4 (src/BATTLE/BATTLE.PRG/4A0A8.c:911).
+// decomp: BATTLE.PRG vs_battle_script_1A_waitGimTweens
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:801; was func_800B71F4).
 ScriptFlow ScriptWaitForSplashTween(const ScriptInstruction& /*instruction*/,
                                     ScriptVmHost& host) {
   for (int layer = 0; layer < static_cast<int>(kImageTweenCount); ++layer) {

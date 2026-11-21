@@ -348,25 +348,25 @@ class LiveWorld final : public LiveDetailWorld<EquipmentDetailWorld> {
 };
 }  // namespace
 
-// decomp: _weaponStatusView (src/MENU/items1.h:98-185).
+// decomp: weaponStatusView (src/MENU/items1.h:103-190; was _weaponStatusView).
 int UpdateLiveWeaponDetails(int item_info) {
   LiveWorld world(Category::kWeapon);
   return UpdateWeaponDetails(detailStates[0], world, Selection(item_info));
 }
 
-// decomp: _bladeStatusView (src/MENU/items1.h:195-265).
+// decomp: bladeStatusView (src/MENU/items1.h:200-270; was _bladeStatusView).
 int UpdateLiveBladeDetails(int item_info) {
   LiveWorld world(Category::kBlade);
   return UpdateBladeDetails(detailStates[1], world, Selection(item_info));
 }
 
-// decomp: _gripStatusView (src/MENU/items1.h:275-355).
+// decomp: gripStatusView (src/MENU/items1.h:280-360; was _gripStatusView).
 int UpdateLiveGripDetails(int item_info) {
   LiveWorld world(Category::kGrip);
   return UpdateGripDetails(detailStates[2], world, Selection(item_info));
 }
 
-// decomp: _shieldStatusView (src/MENU/items1.h:365-454).
+// decomp: shieldStatusView (src/MENU/items1.h:370-459; was _shieldStatusView).
 int UpdateLiveShieldDetails(int item_info) {
   LiveWorld world(Category::kShield);
   return UpdateShieldDetails(detailStates[kShieldControllerIndex], world,

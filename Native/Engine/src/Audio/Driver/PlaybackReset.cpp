@@ -50,7 +50,8 @@ bool ChannelResetFor(ChannelKind kind, std::size_t index, ChannelReset& reset) {
   return true;
 }
 
-// decomp: SLUS_010.40 func_8001369C (src/SLUS_010.40/25AC.c:1058)
+// decomp: SLUS_010.40 Sound_Setup (src/SLUS_010.40/25AC.c:1068; was
+// func_8001369C)
 void ResetPlaybackState(PlaybackResetHost& host) {
   const PlaybackReset reset = DefaultPlaybackReset();
   host.ResetOutput();

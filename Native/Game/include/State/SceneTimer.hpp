@@ -58,30 +58,31 @@ class SceneTimerHost {
 // the low byte up, with the original's signed C division.
 [[nodiscard]] SceneTime UnpackSceneTime(int packed_time) noexcept;
 
-// decomp: BATTLE.PRG func_8007BBD8 (146C.c:8511). Only a counting-down
-// timer takes the packed time; the time is mirrored and the HUD shown.
+// decomp: BATTLE.PRG startBattleTimer (src/BATTLE/BATTLE.PRG/146C.c:8445; was
+// func_8007BBD8). Only a counting-down timer takes the packed time; the time is
+// mirrored and the HUD shown.
 void StartSceneTimer(SceneTimer& timer, int mode, int reset_scope,
                      int packed_time, ScriptFlags& flags, SceneTimerHost& host);
-// decomp: BATTLE.PRG func_8007BCCC (146C.c:8534). Stops and clears the time,
-// keeping the paused mode and scope.
+// decomp: BATTLE.PRG stopBattleTimer (src/BATTLE/BATTLE.PRG/146C.c:8470; was
+// func_8007BCCC). Stops and clears the time, keeping the paused mode and scope.
 void ResetSceneTimer(SceneTimer& timer, ScriptFlags& flags,
                      SceneTimerHost& host);
-// decomp: BATTLE.PRG func_8007BD3C (146C.c:8548). A pause saves and stops
-// the mode; a resume restores the saved mode. A second pause saves the
-// stopped mode.
+// decomp: BATTLE.PRG func_8007BD3C (src/BATTLE/BATTLE.PRG/146C.c:8484). A pause
+// saves and stops the mode; a resume restores the saved mode. A second pause
+// saves the stopped mode.
 void SetSceneTimerPaused(SceneTimer& timer, bool paused, SceneTimerHost& host);
-// decomp: BATTLE.PRG func_8007C36C (146C.c:8740): the speed after a
-// request; only kNormalTickSpeed and kSlowedTickSpeed are taken.
+// decomp: BATTLE.PRG func_8007C36C (src/BATTLE/BATTLE.PRG/146C.c:8694): the
+// speed after a request; only kNormalTickSpeed and kSlowedTickSpeed are taken.
 [[nodiscard]] int SelectTickSpeed(int current, int requested) noexcept;
-// decomp: BATTLE.PRG func_800882F4 (146C.c:14499), up to its trigger check.
-// Advances a running timer by `tick_speed` frames and mirrors it. Returns
-// true when its frames are then 0 (a countdown at or past its end, or
-// counting up at each whole second): the caller then evaluates the room's
-// kSceneTimerExpiryTrigger triggers, after storing the timer, since a fired
-// event may restart or reset it. Counting up stops at one hour. A countdown
-// whose frames never land on 0 (odd frames at an even speed) wraps without
-// ending, as the original did. The frames mirror shows hundredths of a
-// second with a random jitter of up to 3.
+// decomp: BATTLE.PRG updateBattleTimer (src/BATTLE/BATTLE.PRG/146C.c:14368; was
+// func_800882F4), up to its trigger check. Advances a running timer by
+// `tick_speed` frames and mirrors it. Returns true when its frames are then 0
+// (a countdown at or past its end, or counting up at each whole second): the
+// caller then evaluates the room's kSceneTimerExpiryTrigger triggers, after
+// storing the timer, since a fired event may restart or reset it. Counting up
+// stops at one hour. A countdown whose frames never land on 0 (odd frames at an
+// even speed) wraps without ending, as the original did. The frames mirror
+// shows hundredths of a second with a random jitter of up to 3.
 [[nodiscard]] bool AdvanceSceneTimer(SceneTimer& timer, int tick_speed,
                                      ScriptFlags& flags, SceneTimerHost& host);
 }  // namespace VS::State

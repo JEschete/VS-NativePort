@@ -56,14 +56,14 @@ void ActionHit::SetPosition(ActionPoint point) {
   hp = point.z;
   mp = point.tag;
 }
-// decomp: func_800856F8 (src/BATTLE/BATTLE.PRG/146C.c:13058).
+// decomp: func_800856F8 (src/BATTLE/BATTLE.PRG/146C.c:12896).
 void ClearActionRequest(ActionRequest& request) { request = {}; }
-// decomp: func_80085718 (src/BATTLE/BATTLE.PRG/146C.c:13060).
+// decomp: func_80085718 (src/BATTLE/BATTLE.PRG/146C.c:12898).
 void InitializeActionHit(ActionHit& hit) {
   hit = {};
   hit.impact = kNeutralImpact;
 }
-// decomp: func_80085A34 (src/BATTLE/BATTLE.PRG/146C.c:13186).
+// decomp: func_80085A34 (src/BATTLE/BATTLE.PRG/146C.c:13024).
 void FinalizeActionHit(ActionHit& hit) {
   if (hit.position_kind != 0) return;
   if (hit.threshold == kFailedThreshold) hit.threshold = 0;
@@ -357,7 +357,7 @@ bool ActionPreviewWorld::Resolve(std::uint32_t action, ActionRequest& result,
                                  ActionRequest& source, int execute) {
   return ResolveActionTargets(action, result, source, execute, *this);
 }
-// decomp: func_8008631C (src/BATTLE/BATTLE.PRG/146C.c:13421).
+// decomp: func_8008631C (src/BATTLE/BATTLE.PRG/146C.c:13285).
 std::optional<std::uint32_t> PreviewActionAgainstLimb(
     std::uint32_t action, int source, int target, int limb,
     ActionRequest& result, ActionPreviewWorld& world) {
@@ -365,7 +365,7 @@ std::optional<std::uint32_t> PreviewActionAgainstLimb(
   AddPreviewTarget(request, target, limb);
   return FinishPreview(action, source, result, request, world);
 }
-// decomp: func_800863A4 (src/BATTLE/BATTLE.PRG/146C.c:13436).
+// decomp: func_800863A4 (src/BATTLE/BATTLE.PRG/146C.c:13300).
 std::optional<std::uint32_t> PreviewActionAgainstActor(
     std::uint32_t action, int source, int target, int limb,
     ActionRequest& result, ActionPreviewWorld& world) {

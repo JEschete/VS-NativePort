@@ -117,46 +117,46 @@ class MotionActor {
 // The low halfword of a facing, as the original stores it.
 [[nodiscard]] std::int16_t NarrowFacing(int facing);
 
-// decomp: BATTLE.PRG func_800ACF54 (src/BATTLE/BATTLE.PRG/40564.c:2548)
+// decomp: BATTLE.PRG func_800ACF54 (src/BATTLE/BATTLE.PRG/40564.c:1983)
 [[nodiscard]] GroundedHistory SaveActorGroundedTransform(
     const GroundedPose& pose);
 
-// decomp: BATTLE.PRG func_800B63AC (src/BATTLE/BATTLE.PRG/4A0A8.c:340)
+// decomp: BATTLE.PRG func_800B63AC (src/BATTLE/BATTLE.PRG/4B16C.s:2809)
 // A jumping actor takes the airborne entry and a locked one the navigation
 // entry; otherwise the jump uses the plain profile.
 void BeginTileJump(MotionActor& actor, PackedTile target, int speed,
                    int facing);
-// decomp: BATTLE.PRG func_800B6404 (src/BATTLE/BATTLE.PRG/4A0A8.c:368)
+// decomp: BATTLE.PRG func_800B6404 (src/BATTLE/BATTLE.PRG/4B16C.s:2834)
 void BeginAirborneTileJump(MotionActor& actor, PackedTile target, int speed,
                            int facing);
-// decomp: BATTLE.PRG func_800B6438 (src/BATTLE/BATTLE.PRG/4A0A8.c:383)
+// decomp: BATTLE.PRG func_800B6438 (src/BATTLE/BATTLE.PRG/4B16C.s:2850)
 void BeginNavigationJump(MotionActor& actor, PackedTile target, int speed,
                          int facing);
 
-// decomp: BATTLE.PRG func_800B6580 (src/BATTLE/BATTLE.PRG/4A0A8.c:490)
+// decomp: BATTLE.PRG func_800B6580 (src/BATTLE/BATTLE.PRG/4B16C.s:2949)
 // Starts every idle actor along the companion chain; the chain ends at the
 // first busy actor, so cyclic links end once each actor is reacting.
 void BeginTeleport(MotionActor& actor, PackedTile target, int facing);
-// decomp: BATTLE.PRG func_800B65E8 (src/BATTLE/BATTLE.PRG/4A0A8.c:522)
+// decomp: BATTLE.PRG func_800B65E8 (src/BATTLE/BATTLE.PRG/4B16C.s:2978)
 void BeginTileTravel(MotionActor& actor, const MotionVector& target,
                      int facing);
-// decomp: BATTLE.PRG func_800B65F4 (src/BATTLE/BATTLE.PRG/4A0A8.c:531)
+// decomp: BATTLE.PRG func_800B65F4 (src/BATTLE/BATTLE.PRG/4B16C.s:2984)
 void BeginTimedTravel(MotionActor& actor, const MotionVector& target,
                       int facing);
 
-// decomp: BATTLE.PRG func_800B6500 (src/BATTLE/BATTLE.PRG/4A0A8.c:445)
+// decomp: BATTLE.PRG func_800B6500 (src/BATTLE/BATTLE.PRG/4B16C.s:2909)
 void QueueGroundOffset(MotionActor& actor, const MotionVector& step);
-// decomp: BATTLE.PRG func_800B6530 (src/BATTLE/BATTLE.PRG/4A0A8.c:459)
+// decomp: BATTLE.PRG func_800B6530 (src/BATTLE/BATTLE.PRG/4B16C.s:2923)
 // The facing doubles as the request distance.
 void QueueMovementVector(MotionActor& actor, const MotionVector& step,
                          int facing);
-// decomp: BATTLE.PRG func_800B653C (src/BATTLE/BATTLE.PRG/4A0A8.c:467)
+// decomp: BATTLE.PRG func_800B653C (src/BATTLE/BATTLE.PRG/4B16C.s:2929)
 void QueueFlightMovement(MotionActor& actor, const MotionVector& step,
                          int speed, int facing);
 
-// decomp: BATTLE.PRG func_800B6634 (src/BATTLE/BATTLE.PRG/4A0A8.c:551)
+// decomp: BATTLE.PRG func_800B6634 (src/BATTLE/BATTLE.PRG/4B16C.s:3003)
 void TurnNavigationActor(MotionActor& actor, int facing);
-// decomp: BATTLE.PRG func_800B668C (src/BATTLE/BATTLE.PRG/4A0A8.c:578)
+// decomp: BATTLE.PRG func_800B668C (src/BATTLE/BATTLE.PRG/4B16C.s:3029)
 // Refuses (returns false, changing nothing) a zero angular speed, which the
 // turn consumer divides by.
 [[nodiscard]] bool TurnActorAtSpeed(MotionActor& actor, std::int16_t facing,

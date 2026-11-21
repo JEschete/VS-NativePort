@@ -3,8 +3,10 @@
 #include "Effects/Plugins/Plg148.hpp"
 
 namespace VS::Effects::Plg148 {
-// decomp: D_800FC8F8 (PLG148.BIN/E0.c:5; trailEffect.h:70)
+// decomp: vs_effect_accursedUmbra_0_origin_state (src/EFFECT/trailEffect.h:70;
+// was D_800FC8F8; src/EFFECT/trailEffect.h:70)
 std::int32_t trailEmissionCounter;
-// decomp: D_800FC8FC (PLG148.BIN/E0.c:7; closedRings.h:58)
+// decomp: vs_effect_accursedUmbra_1_colors (src/EFFECT/closedRings.h:58; was
+// D_800FC8FC; src/EFFECT/closedRings.h:58)
 plugins::RingPalette tiledRingColorFactors;
 }  // namespace VS::Effects::Plg148

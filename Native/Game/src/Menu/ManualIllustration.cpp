@@ -166,14 +166,15 @@ UploadResult UploadGrid(std::span<const std::uint32_t> words,
 }
 }  // namespace
 
-// decomp: MENUE.PRG _copySprites (494.c:481).
+// decomp: MENUE.PRG copySprites (src/MENU/MENUE.PRG/494.c:485; was
+// _copySprites).
 UploadResult UploadSpriteTiles(std::span<const std::uint32_t> words,
                                std::int32_t count, ImageUploader& uploader) {
   return UploadGrid(words, count, kMaxSpriteTiles, kTileWords, SpriteTileRect,
                     uploader);
 }
 
-// decomp: MENUE.PRG _copyCluts (494.c:498).
+// decomp: MENUE.PRG copyCluts (src/MENU/MENUE.PRG/494.c:502; was _copyCluts).
 UploadResult UploadCluts(std::span<const std::uint32_t> words,
                          std::int32_t count, ImageUploader& uploader) {
   return UploadGrid(words, count, kMaxCluts, kClutWords, ClutRect, uploader);
@@ -204,7 +205,8 @@ void StoreAnimation(
   halfwords[kAnimationHidden] = animation.hidden;
 }
 
-// decomp: MENUE.PRG _getAnimationState (494.c:940).
+// decomp: MENUE.PRG getAnimationState (src/MENU/MENUE.PRG/494.c:944; was
+// _getAnimationState).
 std::int16_t AdvanceVisibilityAnimation(
     VisibilityAnimation& animation) noexcept {
   if (animation.current_frame >= kAnimationFrames) {
@@ -240,7 +242,7 @@ std::uint16_t IllustrationClut(std::int16_t palette) noexcept {
       static_cast<std::uint32_t>(column + kClutColumnBase) | clut_row);
 }
 
-// decomp: MENUE.PRG _drawSprite (494.c:629).
+// decomp: MENUE.PRG drawSprite (src/MENU/MENUE.PRG/494.c:633; was _drawSprite).
 DrawResult DrawIllustration(std::span<std::int16_t> record,
                             std::int32_t scroll_position,
                             IllustrationTarget& target) {
@@ -291,7 +293,8 @@ DrawResult DrawIllustration(std::span<std::int16_t> record,
   return DrawResult::kDrawn;
 }
 
-// decomp: MENUE.PRG _drawContentLines (494.c:883).
+// decomp: MENUE.PRG drawContentLines (src/MENU/MENUE.PRG/494.c:887; was
+// _drawContentLines).
 DrawResult DrawDiagramLines(std::span<std::int16_t> help_text,
                             std::int32_t scroll_position,
                             DiagramLineTarget& target) {

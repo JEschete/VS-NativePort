@@ -90,35 +90,38 @@ class BattleActorHost {
   virtual void RebuildActionPlans() = 0;
 };
 
-// decomp: BATTLE.PRG func_8007CF64 (src/BATTLE/BATTLE.PRG/146C.c:9139)
-// Whether `id` names a battle actor table slot; the original read any index.
+// decomp: BATTLE.PRG getActor (src/BATTLE/BATTLE.PRG/146C.c:9105; was
+// func_8007CF64) Whether `id` names a battle actor table slot; the original
+// read any index.
 [[nodiscard]] bool IsBattleActorSlot(int id);
-// decomp: BATTLE.PRG func_8007C1D8 (src/BATTLE/BATTLE.PRG/146C.c:8686)
+// decomp: BATTLE.PRG func_8007C1D8 (src/BATTLE/BATTLE.PRG/146C.c:8629)
 void SetActorHostile(BattleActorHost& host, int id, bool hostile);
 // The HP percentage, at least 1 while any HP remains. A living actor with no
 // maximum HP (which the original divided by) is reported at 1.
 [[nodiscard]] int HpPercentage(int current_hp, int max_hp);
-// decomp: BATTLE.PRG func_8007C218 (src/BATTLE/BATTLE.PRG/146C.c:8697)
+// decomp: BATTLE.PRG func_8007C218 (src/BATTLE/BATTLE.PRG/146C.c:8640)
 // 0 for an actor without stats; the original read an empty slot's stats.
 [[nodiscard]] int ActorHpPercentage(BattleActorHost& host, int id);
-// decomp: BATTLE.PRG func_8007C28C (src/BATTLE/BATTLE.PRG/146C.c:8714)
+// decomp: BATTLE.PRG fullyRestoreActor (src/BATTLE/BATTLE.PRG/146C.c:8661; was
+// func_8007C28C)
 void RestoreActorVitals(BattleActorHost& host, int id);
-// decomp: BATTLE.PRG func_8007CF18 (src/BATTLE/BATTLE.PRG/146C.c:9127)
+// decomp: BATTLE.PRG func_8007CF18 (src/BATTLE/BATTLE.PRG/146C.c:9093)
 // The first room actor with the model, or kModelNotFoundSlot.
 [[nodiscard]] int FindActorByModelId(BattleActorHost& host, int model_id);
-// decomp: BATTLE.PRG func_8007CF80 (src/BATTLE/BATTLE.PRG/146C.c:9141)
+// decomp: BATTLE.PRG func_8007CF80 (src/BATTLE/BATTLE.PRG/146C.c:9107)
 [[nodiscard]] int CountActorsByDisposition(BattleActorHost& host, int kind);
-// decomp: BATTLE.PRG func_8007CFCC (src/BATTLE/BATTLE.PRG/146C.c:9155)
+// decomp: BATTLE.PRG func_8007CFCC (src/BATTLE/BATTLE.PRG/146C.c:9121)
 [[nodiscard]] bool IsActorRetainedAfterDefeat(BattleActorHost& host, int id);
-// decomp: BATTLE.PRG func_8007D08C (src/BATTLE/BATTLE.PRG/146C.c:9179)
-// Disabling suspends the actor's logic and clears its markers; enabling
-// resumes only an actor whose logic was suspended.
+// decomp: BATTLE.PRG setActorAwake (src/BATTLE/BATTLE.PRG/146C.c:9153; was
+// func_8007D08C) Disabling suspends the actor's logic and clears its markers;
+// enabling resumes only an actor whose logic was suspended.
 void SetActorLogicEnabled(BattleActorHost& host, int id, bool enabled);
-// decomp: BATTLE.PRG func_8007D15C (src/BATTLE/BATTLE.PRG/146C.c:9199)
-// Every room actor but Ashley.
+// decomp: BATTLE.PRG setActorsAwake (src/BATTLE/BATTLE.PRG/146C.c:9179; was
+// func_8007D15C) Every room actor but Ashley.
 void SetOtherActorLogicEnabled(BattleActorHost& host, bool enabled);
-// decomp: BATTLE.PRG func_8007D1A8 (src/BATTLE/BATTLE.PRG/146C.c:9209)
-// Takes the actor out of (or back into) the room actor list, locking its
-// animation while detached, and refreshes the AI when the list changed.
+// decomp: BATTLE.PRG setActorInactive (src/BATTLE/BATTLE.PRG/146C.c:9195; was
+// func_8007D1A8) Takes the actor out of (or back into) the room actor list,
+// locking its animation while detached, and refreshes the AI when the list
+// changed.
 void SetActorDetached(BattleActorHost& host, int id, bool detached);
 }  // namespace VS::Actors

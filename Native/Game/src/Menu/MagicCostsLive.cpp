@@ -210,7 +210,8 @@ class LiveHost final : public Host {
 };
 }  // namespace
 
-// decomp: MENU0.PRG _teleportMenu (src/MENU/MENU0.PRG/15AC.c:22).
+// decomp: MENU0.PRG teleportMenu (src/MENU/MENU0.PRG/15AC.c:23; was
+// _teleportMenu).
 int UpdateTeleportMenuLive(int init) {
   LiveHost host;
   const TeleportMenuResult result =
@@ -221,25 +222,28 @@ int UpdateTeleportMenuLive(int init) {
   return result.selection;
 }
 
-// decomp: MENU0.PRG _setMenuHeader (src/MENU/MENU0.PRG/15AC.c:148).
+// decomp: MENU0.PRG setMenuHeader (src/MENU/MENU0.PRG/15AC.c:148; was
+// _setMenuHeader).
 void CreateHeaderLive() {
   LiveHost host;
   CreateHeader(host);
 }
 
-// decomp: MENU0.PRG _setMPCost (src/MENU/MENU0.PRG/84.c:18).
+// decomp: MENU0.PRG setMPCost (src/MENU/MENU0.PRG/84.c:23; was _setMPCost).
 void SetSpellMpCostLive(int id) {
   LiveHost host;
   SetSpellMpCost(id, host);
 }
 
-// decomp: MENU0.PRG _setMPCostDirect (src/MENU/MENU0.PRG/84.c:64).
+// decomp: MENU0.PRG setMPCostDirect (src/MENU/MENU0.PRG/84.c:69; was
+// _setMPCostDirect).
 void SetTeleportMpCostLive(int cost_decimal, int disabled) {
   LiveHost host;
   SetTeleportMpCost(cost_decimal, disabled, host);
 }
 
-// decomp: MENU0.PRG _getTeleportCost (src/MENU/MENU0.PRG/84.c:117).
+// decomp: MENU0.PRG getTeleportCost (src/MENU/MENU0.PRG/84.c:128; was
+// _getTeleportCost).
 int TeleportMpCostLive(int target_save_point) {
   LiveHost host;
   const std::optional<int> cost = TeleportMpCost(

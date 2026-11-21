@@ -23,7 +23,7 @@ inline constexpr std::int32_t kFirstKeyItemId = 458;
 // The script flag of key item `id` is id + kKeyItemFlagBase.
 inline constexpr std::int32_t kKeyItemFlagBase = 438;
 
-// decomp: _lootListItem (src/MENU/MENUB.PRG/260.c:29)
+// decomp: LootListItem (src/MENU/MENUB.PRG/260.c:27-32; was _lootListItem)
 struct LootRow {
   // An Items::ItemCategory value.
   std::uint8_t category{};

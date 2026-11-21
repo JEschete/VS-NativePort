@@ -101,7 +101,7 @@ struct FrameShape {
   std::array<std::uint16_t, kMarkerQuadVertices> uvs;
 };
 
-// decomp: D_80068F04 and D_80068F64 (src/BATTLE/BATTLE.PRG/2842C.c): the
+// decomp: D_80068F04 and D_80068F64 (src/BATTLE/BATTLE.PRG/2842C.c:1485): the
 // frame corners around the marker point and their texture coordinates.
 constexpr std::array<FrameShape, 6> kFrameShapes{{
     {{{{-6, -22}, {18, -22}, {-6, 1}, {18, 1}}},
@@ -118,7 +118,7 @@ constexpr std::array<FrameShape, 6> kFrameShapes{{
      {0x11B3, 0x119F, 0x1EB3, 0x1E9F}},
 }};
 
-// decomp: D_80068F94 (src/BATTLE/BATTLE.PRG/2842C.c): the icon offsets.
+// decomp: D_80068F94 (src/BATTLE/BATTLE.PRG/2842C.c:1493): the icon offsets.
 constexpr std::array<MarkerScreenPoint, 6> kIconOffsets{{
     {-2, -16},
     {-14, -16},
@@ -426,7 +426,7 @@ bool DrawActorMarker(ActorMarkerWorld& world, ActorMarkerState& state,
   return DrawAwarenessMarker(world, state, actor, NormalizedKind(kind));
 }
 
-// decomp: BATTLE.PRG func_8009627C (F00733, src/BATTLE/BATTLE.PRG/2842C.c:2582,
+// decomp: BATTLE.PRG func_8009627C (F00733, src/BATTLE/BATTLE.PRG/2842C.c:2570,
 // 0x8009627C-0x800962E4)
 bool DrawActorMarkers(ActorMarkerWorld& world, ActorMarkerState& state) {
   if (state.hidden != 0) return true;

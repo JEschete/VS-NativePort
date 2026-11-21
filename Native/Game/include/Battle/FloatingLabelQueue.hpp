@@ -50,7 +50,7 @@ class FloatingLabelQueueView {
   virtual bool ClearAllLabels() = 0;
 };
 
-// decomp: F00712 func_80093AB4 (src/BATTLE/BATTLE.PRG/2842C.c:1465).
+// decomp: F00712 func_80093AB4 (src/BATTLE/BATTLE.PRG/2842C.c:1453).
 bool ResetFloatingLabels(FloatingLabelQueueView& queue,
                          FloatingLabelResetView state);
 // The borrowed coordinates are read after reserve, individually in write order:
@@ -58,7 +58,7 @@ bool ResetFloatingLabels(FloatingLabelQueueView& queue,
 // decomp: F00713 func_80093B04 (src/BATTLE/BATTLE.PRG/2842C.c:1475).
 bool QueueWorldLockedLabel(FloatingLabelQueueView& queue,
                            std::span<const std::int16_t> position);
-// decomp: F00721 func_80094AF8 (src/BATTLE/BATTLE.PRG/2842C.c:2067).
+// decomp: F00721 func_80094AF8 (src/BATTLE/BATTLE.PRG/2842C.c:2055).
 void AdvanceFloatingLabelQueue(FloatingLabelTimingView label);
 // Reserve does not publish or increment Count. At capacity it evicts the
 // oldest record, clears the final record and leaves Count unchanged.

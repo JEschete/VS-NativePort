@@ -6,8 +6,10 @@
 #include "Effects/Plugins/PluginData.hpp"
 
 namespace VS::Effects::Plg050 {
-// decomp: D_800FC624 (PLG050.BIN/E0.c:5; rings.h:20)
+// decomp: vs_effect_darkChant_0_colors (src/EFFECT/rings.h:20; was D_800FC624;
+// src/EFFECT/rings.h:20)
 extern plugins::RingPaletteBytes ringColorFactors;
-// decomp: D_800FC644 (PLG050.BIN/E0.c:7; trailEffect.h:70)
+// decomp: vs_effect_darkChant_1_origin_state (src/EFFECT/trailEffect.h:70; was
+// D_800FC644; src/EFFECT/trailEffect.h:70)
 extern std::int32_t trailEmissionCounter;
 }  // namespace VS::Effects::Plg050

@@ -205,8 +205,8 @@ void UpdateTrack(CameraTrack& record, std::int32_t tick_speed,
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800BC2E8 (F01221, src/BATTLE/BATTLE.PRG/4A0A8.c:3200,
-// 0x800BC2E8-0x800BC9E0)
+// decomp: BATTLE.PRG vs_battle_script_Cx_Dx_camera (F01221,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:3850; was func_800BC2E8, 0x800BC2E8-0x800BC9E0)
 std::intptr_t CommandCameraMotionEntry(std::uint8_t* instruction,
                                        std::int16_t /*thread_index*/) {
   constexpr const char* kOperation = "CommandCameraMotion";
@@ -234,7 +234,7 @@ std::intptr_t CommandCameraMotionEntry(std::uint8_t* instruction,
   return kUnassignedResult;
 }
 
-// decomp: BATTLE.PRG func_800BCA8C (F01223, src/BATTLE/BATTLE.PRG/4A0A8.c:3389,
+// decomp: BATTLE.PRG func_800BCA8C (F01223, src/BATTLE/BATTLE.PRG/4DEA8.c:4039,
 // 0x800BCA8C-0x800BCFB4)
 void UpdateEventCameraTrackEntry(CameraTrack* track, CameraTrack* /*other*/) {
   constexpr const char* kOperation = "UpdateEventCameraTrack";
@@ -242,7 +242,7 @@ void UpdateEventCameraTrackEntry(CameraTrack* track, CameraTrack* /*other*/) {
               kOperation);
 }
 
-// decomp: BATTLE.PRG func_800BCFB4 (F01224, src/BATTLE/BATTLE.PRG/4A0A8.c:3502,
+// decomp: BATTLE.PRG func_800BCFB4 (F01224, src/BATTLE/BATTLE.PRG/4DEA8.c:4152,
 // 0x800BCFB4-0x800BD2B8)
 void AdvanceTerrainCameraTrackEntry(CameraTrack* track) {
   constexpr const char* kOperation = "AdvanceTerrainCameraTrack";
@@ -256,7 +256,7 @@ void AdvanceTerrainCameraTrackEntry(CameraTrack* track) {
   StoreVector(camera.last_terrain_position, last_terrain_position);
 }
 
-// decomp: BATTLE.PRG func_800BD2B8 (F01225, src/BATTLE/BATTLE.PRG/4A0A8.c:3556,
+// decomp: BATTLE.PRG func_800BD2B8 (F01225, src/BATTLE/BATTLE.PRG/4DEA8.c:4206,
 // 0x800BD2B8-0x800BD444)
 int EventCameraGroundClearanceEntry(MATRIX* probe) {
   if (probe == nullptr) {
@@ -266,7 +266,7 @@ int EventCameraGroundClearanceEntry(MATRIX* probe) {
   return EventCameraGroundClearance(Core::Math::TransformOf(*probe), host);
 }
 
-// decomp: BATTLE.PRG func_800BE53C (F01239, src/BATTLE/BATTLE.PRG/4A0A8.c:4074,
+// decomp: BATTLE.PRG func_800BE53C (F01239, src/BATTLE/BATTLE.PRG/4DEA8.c:4723,
 // 0x800BE53C-0x800BE5A4)
 void ScaleEventCameraTrackDurationEntry(CameraTrack* track) {
   CameraTrack& record = RequiredTrack(track, "ScaleEventCameraTrackDuration");
@@ -275,7 +275,7 @@ void ScaleEventCameraTrackDurationEntry(CameraTrack* track) {
   record.duration_frames = state.duration_frames;
 }
 
-// decomp: BATTLE.PRG func_800BE5A4 (F01240, src/BATTLE/BATTLE.PRG/4A0A8.c:4082,
+// decomp: BATTLE.PRG func_800BE5A4 (F01240, src/BATTLE/BATTLE.PRG/4DEA8.c:4731,
 // 0x800BE5A4-0x800BE628)
 void ScaleEventCameraDurationEntry(std::int16_t selector) {
   CameraState& camera = RequiredCamera("ScaleEventCameraDuration");
@@ -286,8 +286,8 @@ void ScaleEventCameraDurationEntry(std::int16_t selector) {
   camera.eye.duration_frames = eye.duration_frames;
 }
 
-// decomp: BATTLE.PRG _setVectorImm (F01246, src/BATTLE/BATTLE.PRG/4A0A8.c:4148,
-// 0x800BE7B8-0x800BE824)
+// decomp: BATTLE.PRG setVectorImm (F01246, src/BATTLE/BATTLE.PRG/4DEA8.c:4797;
+// was _setVectorImm, 0x800BE7B8-0x800BE824)
 VECTOR* ReadScriptFixedVectorEntry(VECTOR* destination,
                                    std::uint8_t* operands) {
   constexpr const char* kOperation = "ReadScriptFixedVector";
@@ -301,10 +301,10 @@ VECTOR* ReadScriptFixedVectorEntry(VECTOR* destination,
 }
 }  // namespace VS::Event
 
-// decomp: BATTLE.PRG func_800BC2E8 (F01221,
-// src/BATTLE/BATTLE.PRG/4A0A8.c:3200), opcodes 0xC0-0xDF in the normal and
-// skip tables and the field camera and orbit return commands ScriptCamera.cpp
-// issues.
+// decomp: BATTLE.PRG vs_battle_script_Cx_Dx_camera (F01221,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:3850; was func_800BC2E8), opcodes 0xC0-0xDF in
+// the normal and skip tables and the field camera and orbit return commands
+// ScriptCamera.cpp issues.
 std::intptr_t VS::Event::CommandCameraMotionOpcode(std::uint8_t* instruction,
                                                    std::int16_t thread_index) {
   return VS::Event::CommandCameraMotionEntry(instruction, thread_index);

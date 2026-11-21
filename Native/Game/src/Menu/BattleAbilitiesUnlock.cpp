@@ -210,8 +210,9 @@ void CopyRow(std::span<std::uint16_t> destination, const AbilityRowText& row) {
 }
 }  // namespace
 
-// decomp: _breakArtUnlocked (src/MENU/MENU2.PRG/143C.c:27;
-// MENU2.PRG 0x80103C3C-0x80103DD8, including the return delay slot).
+// decomp: breakArtUnlocked (src/MENU/MENU2.PRG/143C.c:31; was
+// _breakArtUnlocked; MENU2.PRG 0x80103C3C-0x80103DD8, including the return
+// delay slot).
 int UpdateBreakArtUnlock(BreakArtUnlockState& state, UnlockProgress& progress,
                          BreakArtUnlockHost& host, bool initialize) {
   if (initialize) {
@@ -245,8 +246,8 @@ int UpdateBreakArtUnlock(BreakArtUnlockState& state, UnlockProgress& progress,
   return 0;
 }
 
-// decomp: _getAbilityDescription (src/MENU/MENU2.PRG/143C.c:81;
-// MENU2.PRG 0x80103DD8-0x80103E20).
+// decomp: getAbilityDescription (src/MENU/MENU2.PRG/143C.c:85; was
+// _getAbilityDescription; MENU2.PRG 0x80103DD8-0x80103E20).
 std::span<const std::uint16_t> UnlockDescription(
     int ability, std::span<const std::uint16_t> ability_strings,
     std::span<const std::uint16_t> menu_strings, std::size_t fallback_offset) {
@@ -270,8 +271,8 @@ std::span<const std::uint16_t> UnlockDescription(
                                          : std::span<const std::uint16_t>{};
 }
 
-// decomp: _battleAbilityUnlocked (src/MENU/MENU2.PRG/143C.c:125;
-// MENU2.PRG 0x80103E20-0x80104578).
+// decomp: battleAbilityUnlocked (src/MENU/MENU2.PRG/143C.c:129; was
+// _battleAbilityUnlocked; MENU2.PRG 0x80103E20-0x80104578).
 int UpdateAbilityUnlock(AbilityUnlockState& state, UnlockProgress& progress,
                         AbilityUnlockHost& host, bool initialize) {
   if (initialize) return InitializeAbilityUnlock(state, progress, host);
@@ -311,7 +312,7 @@ int UpdateAbilityUnlock(AbilityUnlockState& state, UnlockProgress& progress,
   return 0;
 }
 
-// decomp: vs_menu2_actionUnlock (src/MENU/MENU2.PRG/143C.c:422;
+// decomp: vs_menu2_actionUnlock (src/MENU/MENU2.PRG/143C.c:426;
 // MENU2.PRG 0x80104578-0x80104690).
 int UpdateUnlockNotifications(std::uint8_t& state,
                               UnlockNotificationHost& host) {
@@ -349,7 +350,7 @@ int UpdateUnlockNotifications(std::uint8_t& state,
   return 0;
 }
 
-// decomp: _setRiskCost (src/MENU/MENU2.PRG/64.c:15;
+// decomp: setRiskCost (src/MENU/MENU2.PRG/64.c:22; was _setRiskCost;
 // MENU2.PRG 0x80102864-0x80102928). The original action cost is one unsigned
 // byte.
 void SetRiskCost(RiskCostState& state, std::uint8_t cost, RiskCostHost& host) {
@@ -366,7 +367,7 @@ void SetRiskCost(RiskCostState& state, std::uint8_t cost, RiskCostHost& host) {
                          kRiskValueX, false);
 }
 
-// decomp: _initAbilityMenu (src/MENU/MENU2.PRG/64.c:64;
+// decomp: initAbilityMenu (src/MENU/MENU2.PRG/64.c:73; was _initAbilityMenu;
 // MENU2.PRG 0x80102928-0x80102B5C).
 int CreateAbilityRows(AbilityRowsState& state, AbilityRowsHost& host, int count,
                       AbilityMenuType type,

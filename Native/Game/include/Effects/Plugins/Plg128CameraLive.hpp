@@ -14,7 +14,8 @@ struct LiveRendererSlot;
 // (PackageExtents.hpp) and the instance's transform table; a camera whose data
 // is missing is stopped with a diagnostic instead of indexing past it.
 namespace VS::Effects::Plg128 {
-// decomp: PLG128.BIN func_800FDEC4 (F8.c:146).
+// decomp: PLG128.BIN vs_effect_bloodySin_5 (src/EFFECT/PLG128.BIN/F8.c:120; was
+// func_800FDEC4).
 int UpdateLiveEffectCamera(LiveRendererSlot* slot, unsigned int command,
                            int packed);
 }  // namespace VS::Effects::Plg128

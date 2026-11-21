@@ -154,8 +154,8 @@ Field::DoorRecord ScriptedDoor(ScriptCommand command) {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800B91C4 (F01099, src/BATTLE/BATTLE.PRG/4A0A8.c:1780,
-// 0x800B91C4-0x800B91F0)
+// decomp: BATTLE.PRG vs_battle_script_53_forgetZoneEnemies (F01099,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:2196; was func_800B91C4, 0x800B91C4-0x800B91F0)
 ScriptStep ScriptClearRoomActorCache(ScriptCommand command,
                                      SceneTransitionHost& host) {
   if (!HasOperands(command, kClearRoomActorCacheLength, host)) {
@@ -167,8 +167,8 @@ ScriptStep ScriptClearRoomActorCache(ScriptCommand command,
   return ScriptStep::kAdvance;
 }
 
-// decomp: BATTLE.PRG func_800B92D0 (F01104, src/BATTLE/BATTLE.PRG/4A0A8.c:1813,
-// 0x800B92D0-0x800B92F4)
+// decomp: BATTLE.PRG vs_battle_script_58_setUiVisible (F01104,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:2267; was func_800B92D0, 0x800B92D0-0x800B92F4)
 ScriptStep ScriptSetHudVisible(ScriptCommand command,
                                SceneTransitionHost& host) {
   if (!HasOperands(command, kSetHudVisibleLength, host)) {
@@ -180,8 +180,8 @@ ScriptStep ScriptSetHudVisible(ScriptCommand command,
   return ScriptStep::kAdvance;
 }
 
-// decomp: BATTLE.PRG func_800B92F4 (F01105, src/BATTLE/BATTLE.PRG/4A0A8.c:1819,
-// 0x800B92F4-0x800B94D8)
+// decomp: BATTLE.PRG vs_battle_script_59_openMenu (F01105,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:2282; was func_800B92F4, 0x800B92F4-0x800B94D8)
 ScriptStep ScriptRunMenuTransition(ScriptCommand command,
                                    bool& menu_transition_active,
                                    SceneTransitionHost& host) {
@@ -197,8 +197,8 @@ ScriptStep ScriptRunMenuTransition(ScriptCommand command,
   return ScriptStep::kHold;
 }
 
-// decomp: BATTLE.PRG func_800B98C0 (F01120, src/BATTLE/BATTLE.PRG/4A0A8.c:2018,
-// 0x800B98C0-0x800B9A40)
+// decomp: BATTLE.PRG vs_battle_script_68 (F01120,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:2605; was func_800B98C0, 0x800B98C0-0x800B9A40)
 ScriptStep ScriptChangeRoom(ScriptCommand command,
                             std::int16_t& room_change_state,
                             SceneTransitionHost& host) {

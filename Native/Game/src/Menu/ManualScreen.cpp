@@ -272,15 +272,16 @@ std::int32_t LeaveHelp(HelpPagesHost& host, std::int32_t result) {
 }
 }  // namespace
 
-// decomp: MENUE.PRG func_80102E9C (src/MENU/MENUE.PRG/494.c:132), 0x80102E9C
+// decomp: MENUE.PRG func_80102E9C (src/MENU/MENUE.PRG/494.c:138), 0x80102E9C
 void ClearMenuExceptRow8(ScreenHost& host) {
   host.ClearMenuExcept(kUnusedKeptRow);
 }
 
-// decomp: MENUE.PRG _menuReady (src/MENU/MENUE.PRG/494.c:134), 0x80102EBC
+// decomp: MENUE.PRG menuReady (src/MENU/MENUE.PRG/494.c:140; was _menuReady),
+// 0x80102EBC
 void PollMenuReady(ScreenHost& host) { static_cast<void>(host.MenuRowsIdle()); }
 
-// decomp: MENUE.PRG vs_menuE_exec (src/MENU/MENUE.PRG/494.c:142), 0x80102EDC
+// decomp: MENUE.PRG vs_menuE_exec (src/MENU/MENUE.PRG/494.c:148), 0x80102EDC
 std::int32_t UpdateScreen(ScreenHost& host, std::uint8_t& step,
                           ScreenState& state) {
   switch (step) {
@@ -343,7 +344,8 @@ std::int32_t UpdateScreen(ScreenHost& host, std::uint8_t& step,
   return 0;
 }
 
-// decomp: MENUE.PRG _initMenuState (src/MENU/MENUE.PRG/494.c:219), 0x801030A4
+// decomp: MENUE.PRG initMenuState (src/MENU/MENUE.PRG/494.c:225; was
+// _initMenuState), 0x801030A4
 std::int32_t InitHelpState(HelpPagesHost& host, HelpPagesState& state) {
   if (host.CursorMemorySetting() == 0) {
     host.ClearDisplayState();
@@ -358,7 +360,8 @@ std::int32_t InitHelpState(HelpPagesHost& host, HelpPagesState& state) {
   return 1;
 }
 
-// decomp: MENUE.PRG _showMenu (src/MENU/MENUE.PRG/494.c:245), 0x80103110
+// decomp: MENUE.PRG showMenu (src/MENU/MENUE.PRG/494.c:251; was _showMenu),
+// 0x80103110
 std::int32_t UpdateHelpPages(HelpPagesHost& host, HelpPagesState& state) {
   switch (state.step) {
     case kHelpStart:

@@ -441,8 +441,8 @@ std::size_t CameraMotionCommandLength(std::uint8_t opcode) {
   return kCommandLengths.at(LowNibble(opcode));
 }
 
-// decomp: BATTLE.PRG _setVectorImm (F01246, src/BATTLE/BATTLE.PRG/4A0A8.c:4148,
-// 0x800BE7B8-0x800BE824)
+// decomp: BATTLE.PRG setVectorImm (F01246, src/BATTLE/BATTLE.PRG/4DEA8.c:4797;
+// was _setVectorImm, 0x800BE7B8-0x800BE824)
 Core::Math::Vec3 ReadScriptFixedVector(
     std::span<const std::uint8_t, kScriptFixedVectorBytes> operands) {
   constexpr std::int32_t kUnit = 1 << kFractionBits;
@@ -453,7 +453,7 @@ Core::Math::Vec3 ReadScriptFixedVector(
           .z = OperandHalf(bytes, 2 * kHalfBytes) * kUnit};
 }
 
-// decomp: BATTLE.PRG func_800BD2B8 (F01225, src/BATTLE/BATTLE.PRG/4A0A8.c:3556,
+// decomp: BATTLE.PRG func_800BD2B8 (F01225, src/BATTLE/BATTLE.PRG/4DEA8.c:4206,
 // 0x800BD2B8-0x800BD444)
 std::int32_t EventCameraGroundClearance(const Core::Math::Transform3& probe,
                                         EventCameraFloorHost& host) {
@@ -469,7 +469,7 @@ std::int32_t EventCameraGroundClearance(const Core::Math::Transform3& probe,
   return lowest * (1 << kFractionBits);
 }
 
-// decomp: BATTLE.PRG func_800BCFB4 (F01224, src/BATTLE/BATTLE.PRG/4A0A8.c:3502,
+// decomp: BATTLE.PRG func_800BCFB4 (F01224, src/BATTLE/BATTLE.PRG/4DEA8.c:4152,
 // 0x800BCFB4-0x800BD2B8)
 void AdvanceTerrainCameraTrack(EventCameraTrack& track,
                                Core::Math::Vec3& last_terrain_position,
@@ -511,7 +511,7 @@ void AdvanceTerrainCameraTrack(EventCameraTrack& track,
   track.computed_position = next;
 }
 
-// decomp: BATTLE.PRG func_800BCA8C (F01223, src/BATTLE/BATTLE.PRG/4A0A8.c:3389,
+// decomp: BATTLE.PRG func_800BCA8C (F01223, src/BATTLE/BATTLE.PRG/4DEA8.c:4039,
 // 0x800BCA8C-0x800BCFB4)
 void UpdateEventCameraTrack(EventCameraTrack& track,
                             Core::Math::Vec3& last_terrain_position,
@@ -528,8 +528,8 @@ void UpdateEventCameraTrack(EventCameraTrack& track,
   FinishFrame(track, host);
 }
 
-// decomp: BATTLE.PRG func_800BC2E8 (F01221, src/BATTLE/BATTLE.PRG/4A0A8.c:3200,
-// 0x800BC2E8-0x800BC9E0)
+// decomp: BATTLE.PRG vs_battle_script_Cx_Dx_camera (F01221,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:3850; was func_800BC2E8, 0x800BC2E8-0x800BC9E0)
 CameraMotionOutcome CommandCameraMotion(ScriptCommand command,
                                         EventCameraTracks& tracks,
                                         EventCameraTrackHost& host) {
@@ -592,7 +592,7 @@ CameraMotionOutcome CommandCameraMotion(ScriptCommand command,
   return CameraMotionOutcome::kApplied;
 }
 
-// decomp: BATTLE.PRG func_800BE53C (F01239, src/BATTLE/BATTLE.PRG/4A0A8.c:4074,
+// decomp: BATTLE.PRG func_800BE53C (F01239, src/BATTLE/BATTLE.PRG/4DEA8.c:4723,
 // 0x800BE53C-0x800BE5A4)
 void ScaleEventCameraTrackDuration(EventCameraTrack& track) {
   const std::int32_t distance =
@@ -604,7 +604,7 @@ void ScaleEventCameraTrackDuration(EventCameraTrack& track) {
       kDurationDistanceDivisor));
 }
 
-// decomp: BATTLE.PRG func_800BE5A4 (F01240, src/BATTLE/BATTLE.PRG/4A0A8.c:4082,
+// decomp: BATTLE.PRG func_800BE5A4 (F01240, src/BATTLE/BATTLE.PRG/4DEA8.c:4731,
 // 0x800BE5A4-0x800BE628)
 void ScaleEventCameraDuration(EventCameraTrack& look_at, EventCameraTrack& eye,
                               std::int16_t selector) {

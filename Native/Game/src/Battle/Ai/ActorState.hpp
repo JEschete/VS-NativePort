@@ -39,11 +39,11 @@ using WordPair = std::array<std::uint16_t, 2>;
 using TerrainMaskTable = std::array<std::uint8_t, kTerrainRejectMaskBytes>;
 using RangeTable = std::array<std::uint32_t, kPerceptionRangeTableWords>;
 
-// decomp: D_80069C18 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:510)
+// decomp: D_80069C18 (src/BATTLE/BATTLE.PRG/7EE98.c:336)
 extern TerrainMaskTable kTerrainRejectMasks;
-// decomp: D_80069C1C (src/BATTLE/BATTLE.PRG/6E4CCShared.h:511)
+// decomp: D_80069C1C (src/BATTLE/BATTLE.PRG/7EE98.c:338)
 extern RangeTable kPerceptionRangesSquared;
-// decomp: D_80069C3C (src/BATTLE/BATTLE.PRG/6E4CCShared.h:512)
+// decomp: D_80069C3C (src/BATTLE/BATTLE.PRG/7EE98.c:340)
 extern std::array<WanderTiming, kWanderTimingPresetCount> kWanderTimingPresets;
 // decomp: D_800F1790 (src/BATTLE/BATTLE.PRG/7CD68.c:66)
 extern std::array<DecisionCallback, kDecisionCallbackCount> decisionCallbacks;

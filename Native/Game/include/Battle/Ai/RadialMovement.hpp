@@ -84,7 +84,7 @@ class RadialMovementWorld {
   virtual void BeginTerrainMovement(RadialMover& mover) = 0;
 };
 
-// decomp: func_800E1388 (src/BATTLE/BATTLE.PRG/771A8.c:1330).
+// decomp: func_800E1388 (src/BATTLE/BATTLE.PRG/770A4.c:805).
 // Sets the destination to the tile `distance` units from `source` along
 // `angle`, shortened by an eighth up to seven times until the tile is free,
 // then clamped to the room bounds. The original kept the tag and top bytes of
@@ -96,7 +96,7 @@ class RadialMovementWorld {
                                                  int angle,
                                                  std::uint32_t distance);
 
-// decomp: func_800E153C (src/BATTLE/BATTLE.PRG/771A8.c:1389).
+// decomp: func_800E153C (src/BATTLE/BATTLE.PRG/770A4.c:840).
 // Walks toward the destination: one farther than the move distance is
 // reprojected from the actor's tile at that distance along the angle between
 // them, and actors projecting their destination step straight there when it
@@ -107,7 +107,7 @@ class RadialMovementWorld {
 [[nodiscard]] bool MoveToRadialDestination(RadialMovementWorld& world,
                                            RadialMover& mover, int angle);
 
-// decomp: func_800E1764 (src/BATTLE/BATTLE.PRG/771A8.c:1437).
+// decomp: func_800E1764 (src/BATTLE/BATTLE.PRG/770A4.c:896).
 // Projects destinations along `angle` and its opposite, keeps the one farther
 // from the move point (the opposite one on a tie) and walks to it
 // (MoveToRadialDestination). Returns false when the world refuses; the mover
@@ -115,7 +115,7 @@ class RadialMovementWorld {
 [[nodiscard]] bool MoveAwayFromReference(RadialMovementWorld& world,
                                          RadialMover& mover, int angle);
 
-// decomp: func_800E2CCC (src/BATTLE/BATTLE.PRG/771A8.c:2272).
+// decomp: func_800E2CCC (src/BATTLE/BATTLE.PRG/770A4.c:1554).
 // Recovers an actor that cannot move. A flying actor stalled for more than
 // 120 calls on a free tile drops its reservations and starts terrain
 // movement. Otherwise it turns toward its movement target, its point, or the

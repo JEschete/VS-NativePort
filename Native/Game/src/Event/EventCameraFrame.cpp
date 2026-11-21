@@ -53,7 +53,7 @@ constexpr std::array kStepOrder{
 };
 }  // namespace
 
-// decomp: BATTLE.PRG func_800BD610 (F01228, src/BATTLE/BATTLE.PRG/4A0A8.c:3663)
+// decomp: BATTLE.PRG func_800BD610 (F01228, src/BATTLE/BATTLE.PRG/4DEA8.c:4313)
 std::uint8_t EventCameraCompletionMask(
     const EventCameraProgress& progress) noexcept {
   std::uint8_t mask = 0;
@@ -71,7 +71,8 @@ std::uint8_t EventCameraCompletionMask(
   return mask;
 }
 
-// decomp: BATTLE.PRG func_800BB41C (F01197, src/BATTLE/BATTLE.PRG/4A0A8.c:2788)
+// decomp: BATTLE.PRG vs_battle_script_E0 (F01197,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:3437; was func_800BB41C)
 std::optional<std::intptr_t> CommandWaitCameraTracks(ScriptCommand command,
                                                      std::uint8_t completion) {
   if (command.size() < kWaitCameraTracksLength) return std::nullopt;
@@ -79,8 +80,8 @@ std::optional<std::intptr_t> CommandWaitCameraTracks(ScriptCommand command,
   return (awaited & completion) != awaited ? 1 : 0;
 }
 
-// decomp: BATTLE.PRG vs_battle_applyCameraState (F01219,
-// src/BATTLE/BATTLE.PRG/4A0A8.c:3117)
+// decomp: BATTLE.PRG applyCameraState (F01219,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:3767; was vs_battle_applyCameraState)
 void ApplyEventCameraState(EventCameraFrame& frame, bool use_field_camera,
                            std::uint8_t preserve_texture_lod,
                            EventCameraOutputPort& output) {
@@ -130,7 +131,7 @@ void ApplyEventCameraState(EventCameraFrame& frame, bool use_field_camera,
                });
 }
 
-// decomp: BATTLE.PRG func_800BC9E0 (F01222, src/BATTLE/BATTLE.PRG/4A0A8.c:3371)
+// decomp: BATTLE.PRG func_800BC9E0 (F01222, src/BATTLE/BATTLE.PRG/4DEA8.c:4021)
 void UpdateEventCameraTracks(EventCameraStepPort& steps) {
   const EventCameraPair current = steps.CurrentPositions();
   steps.SetPartnerPositions({.look_at = current.eye, .eye = current.look_at});

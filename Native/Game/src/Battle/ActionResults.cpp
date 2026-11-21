@@ -210,7 +210,7 @@ void ApplyStatuses(ActorVitalsAccess& stats, int target,
 }  // namespace
 
 // decomp: BATTLE.PRG func_8006CB04 (146C/func_8006CB04.s); compared with
-// rood-boi's PC 146C.c callback.
+// rood-boi's PC src/BATTLE/BATTLE.PRG/146C.c callback.
 void ApplyActionTargetEffects(int actor_id, ActionTargetEffects& effects) {
   if (actor_id >= kActionActorSlots) {
     if ((static_cast<unsigned>(actor_id) & kWorldLabelIdMask) ==
@@ -245,7 +245,8 @@ void ApplyActionTargetEffects(int actor_id, ActionTargetEffects& effects) {
   }
 }
 
-// decomp: _applyBattleAbilityEffect (src/BATTLE/BATTLE.PRG/146C.c:14018).
+// decomp: applyBattleAbilityEffect (src/BATTLE/BATTLE.PRG/146C.c:13884; was
+// _applyBattleAbilityEffect).
 bool ApplyActorActionResult(ActorActionResultWorld& world) {
   world.CommitEquipmentStats();
   auto hit = world.ReadHit();

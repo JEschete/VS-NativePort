@@ -18,6 +18,11 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: false
+      # The provenance check reads the pinned decomp; no other submodule is fetched. A failed fetch fails the job.
+      - name: Fetch the pinned decomp submodule
+        run: git submodule update --init --depth 1 resources/rood-reverse
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -51,6 +56,8 @@ jobs:
         run: python -m unittest discover -s tools\ledger -p test_boundaries.py -v
       - name: Verify regression controls
         run: python -m unittest discover -s tools\test -p test_regression.py -v
+      - name: Verify decomp provenance controls
+        run: python -m unittest discover -s tools\ledger -p test_provenance.py -v
       - name: Check the modernization ledger
         run: python tools\ledger\modernization.py --check
       - name: Check the platform hazard ledger
@@ -61,6 +68,8 @@ jobs:
         run: python tools\ledger\boundaries.py --check
       - name: Check the regression baseline
         run: python tools\test\regression.py static
+      - name: Check decomp provenance citations
+        run: python tools\ledger\provenance.py --check
 
   source:
     name: Source quality

@@ -35,7 +35,7 @@ std::uint16_t ReplaceField(std::uint16_t word, std::uint32_t mask,
 }
 }  // namespace
 
-// decomp: SLUS_010.40 SoundVM_B3_ResetAdsr (src/SLUS_010.40/25AC.c:5366)
+// decomp: SLUS_010.40 SoundVM_B3_ResetAdsr (src/SLUS_010.40/25AC.c:5558)
 CommandStatus ResetEnvelope(ChannelState& channel, VoiceCommandHost& host) {
   const std::optional<Samples::InstrumentRecord> instrument =
       host.Instrument(channel.instrument_index);
@@ -48,7 +48,7 @@ CommandStatus ResetEnvelope(ChannelState& channel, VoiceCommandHost& host) {
   return CommandStatus::kApplied;
 }
 
-// decomp: SLUS_010.40 SoundVM_AD_AttackRate (src/SLUS_010.40/25AC.c:5796)
+// decomp: SLUS_010.40 SoundVM_AD_AttackRate (src/SLUS_010.40/25AC.c:5959)
 CommandResult SetAttackRate(ChannelState& channel, Operands operands) {
   if (operands.empty()) return Truncated();
   channel.voice.adsr_lower =
@@ -59,7 +59,7 @@ CommandResult SetAttackRate(ChannelState& channel, Operands operands) {
   return Applied(1);
 }
 
-// decomp: SLUS_010.40 SoundVM_AE_DecayRate (src/SLUS_010.40/25AC.c:5807)
+// decomp: SLUS_010.40 SoundVM_AE_DecayRate (src/SLUS_010.40/25AC.c:5969)
 CommandResult SetDecayRate(ChannelState& channel, Operands operands) {
   if (operands.empty()) return Truncated();
   channel.voice.adsr_lower =
@@ -69,7 +69,7 @@ CommandResult SetDecayRate(ChannelState& channel, Operands operands) {
   return Applied(1);
 }
 
-// decomp: SLUS_010.40 SoundVM_AF_SustainLevel (src/SLUS_010.40/25AC.c:5816)
+// decomp: SLUS_010.40 SoundVM_AF_SustainLevel (src/SLUS_010.40/25AC.c:5977)
 CommandResult SetSustainLevel(ChannelState& channel, Operands operands) {
   if (operands.empty()) return Truncated();
   channel.voice.adsr_lower =
@@ -78,7 +78,7 @@ CommandResult SetSustainLevel(ChannelState& channel, Operands operands) {
   return Applied(1);
 }
 
-// decomp: SLUS_010.40 SoundVM_B1_SustainRate (src/SLUS_010.40/25AC.c:5825)
+// decomp: SLUS_010.40 SoundVM_B1_SustainRate (src/SLUS_010.40/25AC.c:5985)
 CommandResult SetSustainRate(ChannelState& channel, Operands operands) {
   if (operands.empty()) return Truncated();
   channel.voice.adsr_upper = ReplaceField(
@@ -89,7 +89,7 @@ CommandResult SetSustainRate(ChannelState& channel, Operands operands) {
   return Applied(1);
 }
 
-// decomp: SLUS_010.40 SoundVM_B2_ReleaseRate (src/SLUS_010.40/25AC.c:5836)
+// decomp: SLUS_010.40 SoundVM_B2_ReleaseRate (src/SLUS_010.40/25AC.c:5995)
 CommandResult SetReleaseRate(ChannelState& channel, Operands operands) {
   if (operands.empty()) return Truncated();
   channel.voice.adsr_upper =
@@ -99,7 +99,7 @@ CommandResult SetReleaseRate(ChannelState& channel, Operands operands) {
   return Applied(1);
 }
 
-// decomp: SLUS_010.40 SoundVM_B7_AttackMode (src/SLUS_010.40/25AC.c:5847)
+// decomp: SLUS_010.40 SoundVM_B7_AttackMode (src/SLUS_010.40/25AC.c:6005)
 CommandResult SetAttackMode(ChannelState& channel, Operands operands) {
   if (operands.empty()) return Truncated();
   const std::uint16_t mode =
@@ -110,7 +110,7 @@ CommandResult SetAttackMode(ChannelState& channel, Operands operands) {
   return Applied(1);
 }
 
-// decomp: SLUS_010.40 SoundVM_BB_SustainMode (src/SLUS_010.40/25AC.c:5860)
+// decomp: SLUS_010.40 SoundVM_BB_SustainMode (src/SLUS_010.40/25AC.c:6017)
 CommandResult SetSustainMode(ChannelState& channel, Operands operands) {
   if (operands.empty()) return Truncated();
   std::uint16_t mode = 0;
@@ -127,7 +127,7 @@ CommandResult SetSustainMode(ChannelState& channel, Operands operands) {
   return Applied(1);
 }
 
-// decomp: SLUS_010.40 SoundVM_BF_ReleaseMode (src/SLUS_010.40/25AC.c:5880)
+// decomp: SLUS_010.40 SoundVM_BF_ReleaseMode (src/SLUS_010.40/25AC.c:6036)
 CommandResult SetReleaseMode(ChannelState& channel, Operands operands) {
   if (operands.empty()) return Truncated();
   const std::uint16_t mode =
@@ -139,7 +139,7 @@ CommandResult SetReleaseMode(ChannelState& channel, Operands operands) {
 }
 
 // decomp: SLUS_010.40 SoundVM_B0_DecayRateAndSustainLevel
-// (src/SLUS_010.40/25AC.c:6066)
+// (src/SLUS_010.40/25AC.c:6213)
 CommandResult SetDecayAndSustain(ChannelState& channel, Operands operands) {
   if (operands.size() < 2) return Truncated();
   static_cast<void>(SetDecayRate(channel, operands));

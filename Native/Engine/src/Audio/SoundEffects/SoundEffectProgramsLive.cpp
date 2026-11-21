@@ -335,7 +335,7 @@ std::optional<ProgramStart> ProgramAt(const std::uint8_t* program) {
 }
 }  // namespace
 
-// decomp: SLUS_010.40 Sound_EvictSfxVoice (src/SLUS_010.40/25AC.c:2539)
+// decomp: SLUS_010.40 Sound_EvictSfxVoice (src/SLUS_010.40/25AC.c:2711)
 void LiveReleaseMatchingVoices(std::intptr_t selector, int flags) {
   RunEffects("ReleaseMatchingVoices",
              [&](EffectState& state, LiveEffectHost& host) {
@@ -344,7 +344,7 @@ void LiveReleaseMatchingVoices(std::intptr_t selector, int flags) {
              });
 }
 
-// decomp: SLUS_010.40 Sound_PlaySfxProgram (src/SLUS_010.40/25AC.c:2709)
+// decomp: SLUS_010.40 Sound_PlaySfxProgram (src/SLUS_010.40/25AC.c:2881)
 void LivePlayProgramPair(VS::Audio::CommandParams* params,
                          std::uint8_t* first_program,
                          std::uint8_t* second_program, int skip_release) {
@@ -358,7 +358,7 @@ void LivePlayProgramPair(VS::Audio::CommandParams* params,
 }
 
 // decomp: SLUS_010.40 Sound_MarkActiveChannelsVolumeDirty
-// (src/SLUS_010.40/25AC.c:2797) Only the channels up to the layer's highest
+// (src/SLUS_010.40/25AC.c:2968) Only the channels up to the layer's highest
 // active channel are touched, as in the original.
 void LiveInvalidateMusicChannelVolumes(VS::Audio::MusicConfig* layer,
                                        VS::Audio::SeqChannel* channels) {
@@ -381,7 +381,7 @@ void LiveInvalidateMusicChannelVolumes(VS::Audio::MusicConfig* layer,
 }
 
 // decomp: SLUS_010.40 Sound_MarkScheduledSfxChannelsVolumeDirty
-// (src/SLUS_010.40/25AC.c:2822)
+// (src/SLUS_010.40/25AC.c:2993)
 void LiveInvalidateSoundEffectVolumes() {
   RunEffects("InvalidateSoundEffectVolumes",
              [](EffectState& state, LiveEffectHost& host) {
@@ -389,32 +389,38 @@ void LiveInvalidateSoundEffectVolumes() {
              });
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_34_unk (src/SLUS_010.40/25AC.c:3046)
+// decomp: SLUS_010.40 Sound_Cmd_34_PlaySfxDirect (src/SLUS_010.40/25AC.c:3228;
+// was Sound_Cmd_34_unk)
 void LivePlayInterfaceProgramPair(VS::Audio::CommandParams* params) {
   RunCommand("34 PlayInterfaceProgramPair", params, PlayInterfaceProgramPair);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_30_unk (src/SLUS_010.40/25AC.c:3061)
+// decomp: SLUS_010.40 Sound_Cmd_30_PlaySfxProtected
+// (src/SLUS_010.40/25AC.c:3243; was Sound_Cmd_30_unk)
 void LivePlayInterfaceProgram(VS::Audio::CommandParams* params) {
   RunCommand("30 PlayInterfaceProgram", params, PlayInterfaceProgram);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_20_unk (src/SLUS_010.40/25AC.c:3074)
+// decomp: SLUS_010.40 Sound_Cmd_20_PlaySfx (src/SLUS_010.40/25AC.c:3256; was
+// Sound_Cmd_20_unk)
 void LivePlaySharedProgram(VS::Audio::CommandParams* params) {
   RunCommand("20 PlaySharedProgram", params, PlaySharedProgram);
 }
 
-// decomp: SLUS_010.40 func_8001733C (src/SLUS_010.40/25AC.c:3085)
+// decomp: SLUS_010.40 Sound_Cmd_24_PlaySfxFromPointer
+// (src/SLUS_010.40/25AC.c:3266; was func_8001733C)
 void LivePlayBlobPrograms(VS::Audio::CommandParams* params) {
   RunCommand("24 PlayBlobPrograms", params, PlayBlobPrograms);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_21_unk (src/SLUS_010.40/25AC.c:3118)
+// decomp: SLUS_010.40 Sound_Cmd_21_EvictSfxVoice (src/SLUS_010.40/25AC.c:3299;
+// was Sound_Cmd_21_unk)
 void LiveStopPrograms(VS::Audio::CommandParams* params) {
   RunCommand("21 StopPrograms", params, StopPrograms);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_A0_unk (src/SLUS_010.40/25AC.c:3250)
+// decomp: SLUS_010.40 Sound_Cmd_A0_SetSfxVolumeMod
+// (src/SLUS_010.40/25AC.c:3432; was Sound_Cmd_A0_unk)
 void LiveSetProgramVolume(VS::Audio::CommandParams* params) {
   RunCommand("A0 SetProgramVolume", params,
              [](EffectState& state, EffectHost&, EffectCommand& command) {
@@ -422,12 +428,14 @@ void LiveSetProgramVolume(VS::Audio::CommandParams* params) {
              });
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_A1_unk (src/SLUS_010.40/25AC.c:3276)
+// decomp: SLUS_010.40 Sound_Cmd_A1_FadeSfxVolumeMod
+// (src/SLUS_010.40/25AC.c:3458; was Sound_Cmd_A1_unk)
 void LiveFadeProgramVolume(VS::Audio::CommandParams* params) {
   RunCommand("A1 FadeProgramVolume", params, FadeProgramVolume);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_A8_unk (src/SLUS_010.40/25AC.c:3302)
+// decomp: SLUS_010.40 Sound_Cmd_A8_SetAllSfxVolumeMod
+// (src/SLUS_010.40/25AC.c:3486; was Sound_Cmd_A8_unk)
 void LiveSetSceneVolume(VS::Audio::CommandParams* params) {
   RunCommand("A8 SetSceneVolume", params,
              [](EffectState& state, EffectHost&, EffectCommand& command) {
@@ -435,12 +443,14 @@ void LiveSetSceneVolume(VS::Audio::CommandParams* params) {
              });
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_A9_unk (src/SLUS_010.40/25AC.c:3318)
+// decomp: SLUS_010.40 Sound_Cmd_A9_FadeAllSfxVolumeMod
+// (src/SLUS_010.40/25AC.c:3502; was Sound_Cmd_A9_unk)
 void LiveFadeSceneVolume(VS::Audio::CommandParams* params) {
   RunCommand("A9 FadeSceneVolume", params, FadeSceneVolume);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_A2_unk (src/SLUS_010.40/25AC.c:3339)
+// decomp: SLUS_010.40 Sound_Cmd_A2_SetSfxPanMod (src/SLUS_010.40/25AC.c:3523;
+// was Sound_Cmd_A2_unk)
 void LiveSetProgramPan(VS::Audio::CommandParams* params) {
   RunCommand("A2 SetProgramPan", params,
              [](EffectState& state, EffectHost&, EffectCommand& command) {
@@ -448,12 +458,14 @@ void LiveSetProgramPan(VS::Audio::CommandParams* params) {
              });
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_A3_unk (src/SLUS_010.40/25AC.c:3365)
+// decomp: SLUS_010.40 Sound_Cmd_A3_FadeSfxPanMod (src/SLUS_010.40/25AC.c:3549;
+// was Sound_Cmd_A3_unk)
 void LiveFadeProgramPan(VS::Audio::CommandParams* params) {
   RunCommand("A3 FadeProgramPan", params, FadeProgramPan);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_AA_unk (src/SLUS_010.40/25AC.c:3391)
+// decomp: SLUS_010.40 Sound_Cmd_AA_SetAllSfxPanMod
+// (src/SLUS_010.40/25AC.c:3577; was Sound_Cmd_AA_unk)
 void LiveSetScenePan(VS::Audio::CommandParams* params) {
   RunCommand("AA SetScenePan", params,
              [](EffectState& state, EffectHost&, EffectCommand& command) {
@@ -461,7 +473,8 @@ void LiveSetScenePan(VS::Audio::CommandParams* params) {
              });
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_AB_unk (src/SLUS_010.40/25AC.c:3407)
+// decomp: SLUS_010.40 Sound_Cmd_AB_FadeAllSfxPanMod
+// (src/SLUS_010.40/25AC.c:3593; was Sound_Cmd_AB_unk)
 void LiveFadeScenePan(VS::Audio::CommandParams* params) {
   RunCommand("AB FadeScenePan", params, FadeScenePan);
 }

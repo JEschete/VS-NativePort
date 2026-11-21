@@ -174,7 +174,7 @@ std::int32_t BuildPendingRows(ContainerItemRowsWorld& world) {
 }
 }  // namespace
 
-// decomp: func_801069B0 (src/MENU/MENUD.PRG/234.c:2061), 801069B0.
+// decomp: func_801069B0 (src/MENU/MENUD.PRG/234.c:2062), 801069B0.
 std::int32_t FindPendingTransfer(PendingTransferKey key,
                                  PendingTransferWorld& world) {
   const auto sought = KeyWord(key);
@@ -187,7 +187,7 @@ std::int32_t FindPendingTransfer(PendingTransferKey key,
   return 0;
 }
 
-// decomp: func_80106A04 (src/MENU/MENUD.PRG/234.c:2073), 80106A04.
+// decomp: func_80106A04 (src/MENU/MENUD.PRG/234.c:2074), 80106A04.
 void AppendPendingTransfer(PendingTransferKey key,
                            PendingTransferWorld& world) {
   const auto pending = world.PendingTransfers();
@@ -200,7 +200,7 @@ void AppendPendingTransfer(PendingTransferKey key,
   }
 }
 
-// decomp: func_80106A50 (src/MENU/MENUD.PRG/234.c:2088), 80106A50.
+// decomp: func_80106A50 (src/MENU/MENUD.PRG/234.c:2089), 80106A50.
 void RebuildPendingTransfers(PendingTransferWorld& world) {
   const auto pending = world.PendingTransfers();
   for (std::size_t row = 0; row < kPendingTransferEntries; ++row) {
@@ -235,7 +235,7 @@ void RebuildPendingTransfers(PendingTransferWorld& world) {
   }
 }
 
-// decomp: func_80106C64 (src/MENU/MENUD.PRG/234.c:2145), 80106C64.
+// decomp: func_80106C64 (src/MENU/MENUD.PRG/234.c:2146), 80106C64.
 std::int32_t BuildItemRows(Items::ItemCategory category,
                            ContainerItemRowsWorld& world) {
   if (category == Items::ItemCategory::kManage) return BuildPendingRows(world);

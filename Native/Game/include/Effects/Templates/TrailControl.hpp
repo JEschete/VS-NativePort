@@ -7,9 +7,9 @@
 #include "Effects/Templates/TrailCore.hpp"
 
 // The control stage of the five- and nine-sample trails (decomp
-// src/EFFECT/trails5.h:278 and trails9.h:278 VS_TRAIL_CONTROL_FUNCTION): the
-// two inner spline points that bend each trail between its origin and its
-// target.
+// src/EFFECT/trailEffect.h:324 and src/EFFECT/trailEffect.h:324
+// VS_TRAIL_CONTROL_FUNCTION): the two inner spline points that bend each trail
+// between its origin and its target.
 namespace VS::Effects::Templates {
 // For every trail, samples the mass, gravity-scale and speed planes and the
 // direction, direction-jitter and force vectors into the scratch, then places

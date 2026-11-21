@@ -54,7 +54,8 @@ std::uint32_t ActionCost::Packed() const {
          (std::uint32_t{effective_type} << kTypeShift) + cost;
 }
 
-// decomp: _getActionCost (src/BATTLE/BATTLE.PRG/146C.c:13075).
+// decomp: getActionCost (src/BATTLE/BATTLE.PRG/146C.c:12913; was
+// _getActionCost).
 std::optional<ActionCost> ActionCostAndAvailability(std::uint32_t action,
                                                     ActionCostActor* actor,
                                                     int update,
@@ -108,7 +109,7 @@ std::optional<ActionCost> ActionCostWorld::Evaluate(std::uint32_t action,
   return ActionCostAndAvailability(action, actor, update, *this);
 }
 
-// decomp: func_80085978 (src/BATTLE/BATTLE.PRG/146C.c:13167).
+// decomp: func_80085978 (src/BATTLE/BATTLE.PRG/146C.c:13005).
 bool PreviewActorActionCost(int action, int slot, ActionCostWorld& world) {
   const auto actor = world.Actor(slot);
   if (!actor) return false;
@@ -116,7 +117,7 @@ bool PreviewActorActionCost(int action, int slot, ActionCostWorld& world) {
       .has_value();
 }
 
-// decomp: func_800859B4 (src/BATTLE/BATTLE.PRG/146C.c:13172).
+// decomp: func_800859B4 (src/BATTLE/BATTLE.PRG/146C.c:13010).
 bool AddActionRecoveryDelay(std::uint32_t action, ActionCostActor* actor,
                             int execute, ActionCostWorld& world) {
   if (execute == 0 || action - kFirstDelayExcluded < kDelayExcludedCount) {
@@ -134,7 +135,7 @@ bool AddActionRecoveryDelay(std::uint32_t action, ActionCostActor* actor,
   return true;
 }
 
-// decomp: vs_battle_getActionFlags (src/BATTLE/BATTLE.PRG/146C.c:15566).
+// decomp: vs_battle_getActionFlags (src/BATTLE/BATTLE.PRG/146C.c:15436).
 std::optional<std::uint32_t> ActorActionRestrictionFlags(
     int slot, int action, ActionCostWorld& world) {
   const auto record = world.Actor(slot);

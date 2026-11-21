@@ -549,7 +549,8 @@ bool CleanupOwner(TimeAttackAsset asset, const TexturePageLoan& loan) {
 }
 }  // namespace
 
-// decomp: _initTimeAttackEnd, MENUF.PRG/3B8.c:256 (0x8010310C).
+// decomp: initTimeAttackEnd, src/MENU/MENUF.PRG/3B8.c:270; was
+// _initTimeAttackEnd (0x8010310C).
 int LiveInitializeTimeAttackResults() {
   auto state = LoadState();
   LiveLoad host(TimeAttackAsset::kResults);
@@ -558,7 +559,8 @@ int LiveInitializeTimeAttackResults() {
   return Return(step);
 }
 
-// decomp: _initTimeAttackStart, MENUF.PRG/3B8.c:372 (0x80103530).
+// decomp: initTimeAttackStart, src/MENU/MENUF.PRG/3B8.c:386; was
+// _initTimeAttackStart (0x80103530).
 int LiveInitializeTimeAttackStart() {
   auto state = LoadState();
   LiveLoad host(TimeAttackAsset::kStart);
@@ -567,7 +569,8 @@ int LiveInitializeTimeAttackStart() {
   return Return(step);
 }
 
-// decomp: _renderTimeAttackEnd, MENUF.PRG/3B8.c:905 (0x80103D88).
+// decomp: renderTimeAttackEnd, src/MENU/MENUF.PRG/3B8.c:918; was
+// _renderTimeAttackEnd (0x80103D88).
 int LiveUpdateTimeAttackResults() {
   auto state = LoadState();
   if (state.phase <= kResultsClosingPhase && !ValidCourse()) return 0;
@@ -578,7 +581,8 @@ int LiveUpdateTimeAttackResults() {
   return Return(step);
 }
 
-// decomp: _renderTimeAttackStart, MENUF.PRG/3B8.c:1014 (0x8010412C).
+// decomp: renderTimeAttackStart, src/MENU/MENUF.PRG/3B8.c:1027; was
+// _renderTimeAttackStart (0x8010412C).
 int LiveUpdateTimeAttackStart() {
   auto state = LoadState();
   if (state.phase < kResultsClosingPhase && !ValidCourse()) return 0;
@@ -589,21 +593,21 @@ int LiveUpdateTimeAttackStart() {
   return Return(step);
 }
 
-// decomp: _initMenu, MENUF.PRG/3B8.c:59 (0x80102C54).
+// decomp: initMenu, src/MENU/MENUF.PRG/3B8.c:73; was _initMenu (0x80102C54).
 int LiveInitializeResultsScreen() {
   LivePresentations host;
   return Return(InitializeResultsScreen(
       static_cast<std::uint8_t>(VS::State::stateFlags.menu_f_submenu), host));
 }
 
-// decomp: _execMenu, MENUF.PRG/3B8.c:453 (0x801037A0).
+// decomp: execMenu, src/MENU/MENUF.PRG/3B8.c:467; was _execMenu (0x801037A0).
 int LiveUpdateResultsPresentation() {
   LivePresentations host;
   return Return(UpdateResultsPresentation(
       static_cast<std::uint8_t>(VS::State::stateFlags.menu_f_submenu), host));
 }
 
-// decomp: vs_menuF_exec, MENUF.PRG/3B8.c:23 (0x80102BB8).
+// decomp: vs_menuF_exec, src/MENU/MENUF.PRG/3B8.c:32 (0x80102BB8).
 int LiveUpdateResultsScreen(unsigned char* caller_state) {
   LivePresentations host;
   const auto bytes = caller_state == nullptr

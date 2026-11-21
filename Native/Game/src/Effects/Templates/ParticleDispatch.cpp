@@ -11,7 +11,8 @@ namespace VS::Effects::Templates {
 namespace {
 namespace math = Core::Math;
 
-// decomp: particleDispatch.h:14-44, the slot state and its control points.
+// decomp: src/EFFECT/particleDispatch.h:14-44, the slot state and its control
+// points.
 bool CreateSet(const ParticleDispatchOptions& options, std::int32_t packed,
                ParticleSetHost& host) {
   const ParticleSetPlan plan = PlanParticleSet(packed);
@@ -33,8 +34,8 @@ void RunStage(ParticleStage stage, ParticleSetFrame& frame,
   }
 }
 
-// decomp: particleDispatch.h:46-80, one tick; false once the lifetime runs
-// out. The stages work on a frame the host publishes after them.
+// decomp: src/EFFECT/particleDispatch.h:46-80, one tick; false once the
+// lifetime runs out. The stages work on a frame the host publishes after them.
 bool TickSet(const ParticleDispatchOptions& options, ParticleSetHost& host) {
   const std::optional<ParticleSetState> state = host.State();
   if (!state) {
@@ -78,7 +79,7 @@ bool TickSet(const ParticleDispatchOptions& options, ParticleSetHost& host) {
   return alive;
 }
 
-// decomp: particleDispatch.h:82-84, the set ends on its next tick.
+// decomp: src/EFFECT/particleDispatch.h:82-84, the set ends on its next tick.
 bool ExpireSet(ParticleSetHost& host) {
   std::optional<ParticleSetState> state = host.State();
   if (state) {
@@ -90,7 +91,7 @@ bool ExpireSet(ParticleSetHost& host) {
 }  // namespace
 
 // decomp: EFFECT VS_PARTICLE_DISPATCH_FUNCTION
-// (src/EFFECT/particleDispatch.h:3).
+// (src/EFFECT/particleDispatch.h:8).
 bool ParticleDispatch(const ParticleDispatchOptions& options,
                       ParticleCommand command, std::int32_t packed,
                       ParticleSetHost& host) {
@@ -102,7 +103,7 @@ bool ParticleDispatch(const ParticleDispatchOptions& options,
     case ParticleCommand::kExpire:
       return ExpireSet(host);
     case ParticleCommand::kStop:
-      // decomp: particleDispatch.h:86-89.
+      // decomp: src/EFFECT/particleDispatch.h:8-88.
       host.Release();
       return false;
     default:
@@ -112,7 +113,8 @@ bool ParticleDispatch(const ParticleDispatchOptions& options,
 }  // namespace VS::Effects::Templates
 
 namespace VS::Effects {
-// decomp: PLG045.BIN func_800FB320 (src/EFFECT/PLG045.BIN/110.c:5).
+// decomp: PLG045.BIN vs_effect_lightningBolt_0
+// (src/EFFECT/particleDispatch.h:8; was func_800FB320).
 bool Plg045::ParticleDispatch(Templates::ParticleCommand command,
                               std::int32_t packed,
                               Templates::ParticleSetHost& host) {
@@ -120,7 +122,8 @@ bool Plg045::ParticleDispatch(Templates::ParticleCommand command,
                                      host);
 }
 
-// decomp: PLG057.BIN func_800FB4E0 (src/EFFECT/PLG057.BIN/2D0.c:7).
+// decomp: PLG057.BIN vs_effect_thunderBurstLv1_0
+// (src/EFFECT/particleDispatch.h:8; was func_800FB4E0).
 bool Plg057::ParticleDispatch(Templates::ParticleCommand command,
                               std::int32_t packed,
                               Templates::ParticleSetHost& host) {
@@ -128,7 +131,8 @@ bool Plg057::ParticleDispatch(Templates::ParticleCommand command,
                                      host);
 }
 
-// decomp: PLG065.BIN func_800FD6C0 (src/EFFECT/PLG065.BIN/F8.c:40).
+// decomp: PLG065.BIN vs_effect_gaeaStrikeLv1_3
+// (src/EFFECT/particleDispatch.h:8; was func_800FD6C0).
 bool Plg065::ParticleDispatch(Templates::ParticleCommand command,
                               std::int32_t packed,
                               Templates::ParticleSetHost& host) {
@@ -136,7 +140,8 @@ bool Plg065::ParticleDispatch(Templates::ParticleCommand command,
                                      host);
 }
 
-// decomp: PLG082.BIN func_800FB338 (src/EFFECT/PLG082.BIN/128.c:13).
+// decomp: PLG082.BIN vs_effect_thunderbolt_0 (src/EFFECT/particleDispatch.h:8;
+// was func_800FB338).
 bool Plg082::ParticleDispatch(Templates::ParticleCommand command,
                               std::int32_t packed,
                               Templates::ParticleSetHost& host) {
@@ -144,7 +149,8 @@ bool Plg082::ParticleDispatch(Templates::ParticleCommand command,
                                      host);
 }
 
-// decomp: PLG087.BIN func_800FF4E8 (src/EFFECT/PLG087.BIN/1F0.c:52).
+// decomp: PLG087.BIN vs_effect_apocalypse_4 (src/EFFECT/particleDispatch.h:8;
+// was func_800FF4E8).
 bool Plg087::ParticleDispatch(Templates::ParticleCommand command,
                               std::int32_t packed,
                               Templates::ParticleSetHost& host) {
@@ -152,7 +158,8 @@ bool Plg087::ParticleDispatch(Templates::ParticleCommand command,
                                      host);
 }
 
-// decomp: PLG114.BIN func_800FB418 (src/EFFECT/PLG114.BIN/208.c:7).
+// decomp: PLG114.BIN vs_effect_numbingNeedle_0
+// (src/EFFECT/particleDispatch.h:8; was func_800FB418).
 bool Plg114::ParticleDispatch(Templates::ParticleCommand command,
                               std::int32_t packed,
                               Templates::ParticleSetHost& host) {
@@ -160,7 +167,8 @@ bool Plg114::ParticleDispatch(Templates::ParticleCommand command,
                                      host);
 }
 
-// decomp: PLG114.BIN func_800FCA2C (src/EFFECT/PLG114.BIN/208.c:35).
+// decomp: PLG114.BIN vs_effect_numbingNeedle_1
+// (src/EFFECT/particleDispatch.h:8; was func_800FCA2C).
 bool Plg114::ParticleDispatch2(Templates::ParticleCommand command,
                                std::int32_t packed,
                                Templates::ParticleSetHost& host) {
@@ -168,7 +176,8 @@ bool Plg114::ParticleDispatch2(Templates::ParticleCommand command,
                                      host);
 }
 
-// decomp: PLG146.BIN func_800FC8C4 (src/EFFECT/PLG146.BIN/1D8.c:31).
+// decomp: PLG146.BIN vs_effect_blackNebula_2 (src/EFFECT/particleDispatch.h:8;
+// was func_800FC8C4).
 bool Plg146::ParticleDispatch(Templates::ParticleCommand command,
                               std::int32_t packed,
                               Templates::ParticleSetHost& host) {
@@ -176,7 +185,8 @@ bool Plg146::ParticleDispatch(Templates::ParticleCommand command,
                                      host);
 }
 
-// decomp: PLG147.BIN func_800FB89C (src/EFFECT/PLG147.BIN/F8.c:27).
+// decomp: PLG147.BIN vs_effect_bearClaw_1 (src/EFFECT/particleDispatch.h:8; was
+// func_800FB89C).
 bool Plg147::ParticleDispatch(Templates::ParticleCommand command,
                               std::int32_t packed,
                               Templates::ParticleSetHost& host) {
@@ -184,7 +194,8 @@ bool Plg147::ParticleDispatch(Templates::ParticleCommand command,
                                      host);
 }
 
-// decomp: PLG152.BIN func_800FBE88 (src/EFFECT/PLG152.BIN/128.c:16).
+// decomp: PLG152.BIN vs_effect_riskbreak_1 (src/EFFECT/particleDispatch.h:8;
+// was func_800FBE88).
 bool Plg152::ParticleDispatch(Templates::ParticleCommand command,
                               std::int32_t packed,
                               Templates::ParticleSetHost& host) {
@@ -192,7 +203,8 @@ bool Plg152::ParticleDispatch(Templates::ParticleCommand command,
                                      host);
 }
 
-// decomp: PLG153.BIN func_800FCA50 (src/EFFECT/PLG153.BIN/110.c:17).
+// decomp: PLG153.BIN vs_effect_gravisAether_2 (src/EFFECT/particleDispatch.h:8;
+// was func_800FCA50).
 bool Plg153::ParticleDispatch(Templates::ParticleCommand command,
                               std::int32_t packed,
                               Templates::ParticleSetHost& host) {
@@ -200,7 +212,8 @@ bool Plg153::ParticleDispatch(Templates::ParticleCommand command,
                                      host);
 }
 
-// decomp: PLG156.BIN func_800FB338 (src/EFFECT/PLG156.BIN/128.c:7).
+// decomp: PLG156.BIN vs_effect_quickshock_0 (src/EFFECT/particleDispatch.h:8;
+// was func_800FB338).
 bool Plg156::ParticleDispatch(Templates::ParticleCommand command,
                               std::int32_t packed,
                               Templates::ParticleSetHost& host) {
@@ -208,7 +221,8 @@ bool Plg156::ParticleDispatch(Templates::ParticleCommand command,
                                      host);
 }
 
-// decomp: PLG168.BIN func_800FCE90 (src/EFFECT/PLG168.BIN/1F0.c:33).
+// decomp: PLG168.BIN vs_effect_vertigo_1 (src/EFFECT/particleDispatch.h:8; was
+// func_800FCE90).
 bool Plg168::ParticleDispatch(Templates::ParticleCommand command,
                               std::int32_t packed,
                               Templates::ParticleSetHost& host) {
@@ -216,7 +230,8 @@ bool Plg168::ParticleDispatch(Templates::ParticleCommand command,
                                      host);
 }
 
-// decomp: PLG224.BIN func_800FAC78 (src/EFFECT/PLG224.BIN/F8.c:23).
+// decomp: PLG224.BIN vs_effect_plg224_0 (src/EFFECT/particleDispatch.h:8; was
+// func_800FAC78).
 bool Plg224::ParticleDispatch(Templates::ParticleCommand command,
                               std::int32_t packed,
                               Templates::ParticleSetHost& host) {
@@ -224,7 +239,8 @@ bool Plg224::ParticleDispatch(Templates::ParticleCommand command,
                                      host);
 }
 
-// decomp: PLG255.BIN func_800FCE78 (src/EFFECT/PLG255.BIN/1D8.c:33).
+// decomp: PLG255.BIN vs_effect_plg255_1 (src/EFFECT/particleDispatch.h:8; was
+// func_800FCE78).
 bool Plg255::ParticleDispatch(Templates::ParticleCommand command,
                               std::int32_t packed,
                               Templates::ParticleSetHost& host) {
@@ -232,7 +248,8 @@ bool Plg255::ParticleDispatch(Templates::ParticleCommand command,
                                      host);
 }
 
-// decomp: PLG263.BIN func_800FDA1C (src/EFFECT/PLG263.BIN/110.c:349).
+// decomp: PLG263.BIN vs_effect_plg263_3 (src/EFFECT/particleDispatch.h:8; was
+// func_800FDA1C).
 bool Plg263::ParticleDispatch(Templates::ParticleCommand command,
                               std::int32_t packed,
                               Templates::ParticleSetHost& host) {
@@ -240,7 +257,8 @@ bool Plg263::ParticleDispatch(Templates::ParticleCommand command,
                                      host);
 }
 
-// decomp: PLG265.BIN func_800FBD60 (src/EFFECT/PLG265.BIN/2E8.c:27).
+// decomp: PLG265.BIN vs_effect_plg265_1 (src/EFFECT/particleDispatch.h:8; was
+// func_800FBD60).
 bool Plg265::ParticleDispatch(Templates::ParticleCommand command,
                               std::int32_t packed,
                               Templates::ParticleSetHost& host) {
@@ -248,7 +266,8 @@ bool Plg265::ParticleDispatch(Templates::ParticleCommand command,
                                      host);
 }
 
-// decomp: PLG265.BIN func_800FFB04 (src/EFFECT/PLG265.BIN/2E8.c:45).
+// decomp: PLG265.BIN vs_effect_plg265_3 (src/EFFECT/particleDispatch.h:8; was
+// func_800FFB04).
 bool Plg265::ParticleDispatch2(Templates::ParticleCommand command,
                                std::int32_t packed,
                                Templates::ParticleSetHost& host) {
@@ -256,7 +275,8 @@ bool Plg265::ParticleDispatch2(Templates::ParticleCommand command,
                                      host);
 }
 
-// decomp: PLG266.BIN func_800FB4F8 (src/EFFECT/PLG266.BIN/2E8.c:7).
+// decomp: PLG266.BIN vs_effect_plg266_0 (src/EFFECT/particleDispatch.h:8; was
+// func_800FB4F8).
 bool Plg266::ParticleDispatch(Templates::ParticleCommand command,
                               std::int32_t packed,
                               Templates::ParticleSetHost& host) {
@@ -264,7 +284,8 @@ bool Plg266::ParticleDispatch(Templates::ParticleCommand command,
                                      host);
 }
 
-// decomp: PLG266.BIN func_800FCB0C (src/EFFECT/PLG266.BIN/2E8.c:35).
+// decomp: PLG266.BIN vs_effect_plg266_1 (src/EFFECT/particleDispatch.h:8; was
+// func_800FCB0C).
 bool Plg266::ParticleDispatch2(Templates::ParticleCommand command,
                                std::int32_t packed,
                                Templates::ParticleSetHost& host) {
@@ -272,7 +293,8 @@ bool Plg266::ParticleDispatch2(Templates::ParticleCommand command,
                                      host);
 }
 
-// decomp: PLG300.BIN func_800FBF94 (src/EFFECT/PLG300.BIN/110.c:17).
+// decomp: PLG300.BIN vs_effect_plg300_1 (src/EFFECT/particleDispatch.h:8; was
+// func_800FBF94).
 bool Plg300::ParticleDispatch(Templates::ParticleCommand command,
                               std::int32_t packed,
                               Templates::ParticleSetHost& host) {
@@ -280,7 +302,8 @@ bool Plg300::ParticleDispatch(Templates::ParticleCommand command,
                                      host);
 }
 
-// decomp: PLG301.BIN func_800FB320 (src/EFFECT/PLG301.BIN/110.c:13).
+// decomp: PLG301.BIN vs_effect_plg301_0 (src/EFFECT/particleDispatch.h:8; was
+// func_800FB320).
 bool Plg301::ParticleDispatch(Templates::ParticleCommand command,
                               std::int32_t packed,
                               Templates::ParticleSetHost& host) {

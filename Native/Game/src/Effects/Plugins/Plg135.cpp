@@ -3,8 +3,10 @@
 #include "Effects/Plugins/Plg135.hpp"
 
 namespace VS::Effects::Plg135 {
-// decomp: D_800FC96C (PLG135.BIN/E0.c:5; closedRings.h:58)
+// decomp: vs_effect_rendingGale_0_colors (src/EFFECT/closedRings.h:58; was
+// D_800FC96C; src/EFFECT/closedRings.h:58)
 plugins::RingPalette closedRingColorFactors;
-// decomp: D_800FC98C (PLG135.BIN/E0.c:7; trailEffect.h:70)
+// decomp: vs_effect_rendingGale_1_origin_state (src/EFFECT/trailEffect.h:70;
+// was D_800FC98C; src/EFFECT/trailEffect.h:70)
 std::int32_t trailEmissionCounter;
 }  // namespace VS::Effects::Plg135

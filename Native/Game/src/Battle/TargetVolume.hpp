@@ -22,9 +22,10 @@ inline constexpr std::size_t kSphereReservedB70Bytes = 0x3800;
 inline constexpr std::size_t kSphereWireEdgeSlots = 0x302;
 inline constexpr std::size_t kSetupTerrainRowFlagBytes = 0x64;
 
-// decomp: D_800EB9B8_t2 (the earlier decomp's 573B8.c:31), upstream
-// func_800C1564_t (src/BATTLE/BATTLE.PRG/57B1C.h:23): one sphere volume, set
-// as a whole; only its kind byte is read.
+// decomp: D_800EB9B8 (the earlier decomp's src/BATTLE/BATTLE.PRG/58578.h:43;
+// was D_800EB9B8_t2), upstream func_800C1564_t
+// (src/BATTLE/BATTLE.PRG/57B1C.h:23): one sphere volume, set as a whole; only
+// its kind byte is read.
 struct TargetSphereSpec {
   std::uint8_t kind;
   std::uint8_t reserved1;
@@ -50,9 +51,10 @@ struct SphereTargetLabelRecord {
   char* text;
 };
 
-// decomp: D_800EB9B8_t as the earlier decomp's 573B8.c:55 declared it, upstream
-// D_800EB9B8_t (src/BATTLE/BATTLE.PRG/58578.h:41): TargetSphereRecord while
-// its volumes are set up, with the two volumes as separate members.
+// decomp: D_800EB9B8_t as the earlier decomp's src/BATTLE/BATTLE.PRG/573B8.c:55
+// declared it, upstream D_800EB9B8_t (src/BATTLE/BATTLE.PRG/58578.h:41):
+// TargetSphereRecord while its volumes are set up, with the two volumes as
+// separate members.
 struct TargetSphereSetupView {
   TargetSphereSpec primary_volume;
   TargetSphereSpec secondary_volume;

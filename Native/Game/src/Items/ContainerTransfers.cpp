@@ -221,7 +221,8 @@ void ClearBagRecords(ContainerWorld& world) {
 }
 }  // namespace
 
-// decomp: _copyContainerItem (src/MENU/MENUD.PRG/234.c:283)
+// decomp: copyContainerItem (src/MENU/MENUD.PRG/234.c:286; was
+// _copyContainerItem)
 std::int32_t CopyContainerItem(ContainerTransfer transfer,
                                ContainerWorld& target, std::int32_t source_slot,
                                ContainerWorld& source) {
@@ -281,7 +282,7 @@ std::int32_t CopyContainerItem(ContainerTransfer transfer,
   return slot + 1;
 }
 
-// decomp: func_801031A0 (src/MENU/MENUD.PRG/234.c:259)
+// decomp: func_801031A0 (src/MENU/MENUD.PRG/234.c:262)
 void PreviewTransferredMisc(ContainerWorld& preview, ContainerWorld& other,
                             ContainerWorld& staged,
                             std::span<const std::uint16_t> pending) {
@@ -304,7 +305,7 @@ void PreviewTransferredMisc(ContainerWorld& preview, ContainerWorld& other,
   }
 }
 
-// decomp: func_80103270 (src/MENU/MENUD.PRG/234.c:276)
+// decomp: func_80103270 (src/MENU/MENUD.PRG/234.c:279)
 std::uint16_t RefreshMiscTransferCount(ContainerWorld& preview,
                                        ContainerWorld& other,
                                        ContainerWorld& staged,
@@ -314,7 +315,8 @@ std::uint16_t RefreshMiscTransferCount(ContainerWorld& preview,
       CountContainerItems(ItemCategory::kMisc, preview));
 }
 
-// decomp: _defragmentContainerItems (src/MENU/MENUD.PRG/234.c:498)
+// decomp: defragmentContainerItems (src/MENU/MENUD.PRG/234.c:501; was
+// _defragmentContainerItems)
 void RebuildContainerCategoryIndices(ItemCategory category,
                                      std::span<std::uint16_t> order,
                                      ContainerWorld& world) {
@@ -360,7 +362,8 @@ void RebuildContainerCategoryIndices(ItemCategory category,
   }
 }
 
-// decomp: _copyInventoryToContainer (src/MENU/MENUD.PRG/234.c:555)
+// decomp: copyInventoryToContainer (src/MENU/MENUD.PRG/234.c:558; was
+// _copyInventoryToContainer)
 void SnapshotGadgetBag(GadgetBagWorld& world) {
   ClearBagRecords(world.Bag());
   world.ClearBagOrder();
@@ -381,7 +384,8 @@ void SnapshotGadgetBag(GadgetBagWorld& world) {
   }
 }
 
-// decomp: _copyContainerToInventory (src/MENU/MENUD.PRG/234.c:592)
+// decomp: copyContainerToInventory (src/MENU/MENUD.PRG/234.c:595; was
+// _copyContainerToInventory)
 void CommitGadgetBag(GadgetBagWorld& world) {
   for (std::size_t value = 0; value < kRecordCategories; ++value) {
     const auto category = static_cast<ItemCategory>(value);
@@ -408,7 +412,8 @@ void CommitGadgetBag(GadgetBagWorld& world) {
   }
 }
 
-// decomp: _getParentItemIndex (src/MENU/MENUD.PRG/234.c:625)
+// decomp: getParentItemIndex (src/MENU/MENUD.PRG/234.c:628; was
+// _getParentItemIndex)
 std::uint16_t ContainerParentWeaponIndex(ItemCategory category,
                                          std::int32_t index,
                                          ContainerWorld& world) {
@@ -423,7 +428,8 @@ std::uint16_t ContainerParentWeaponIndex(ItemCategory category,
   return (parent & kShieldGemFlag) != 0 ? 0 : parent;
 }
 
-// decomp: _getSetShieldIndex (src/MENU/MENUD.PRG/234.c:645)
+// decomp: getSetShieldIndex (src/MENU/MENUD.PRG/234.c:647; was
+// _getSetShieldIndex)
 std::uint16_t ContainerParentShieldIndex(ItemCategory category,
                                          std::int32_t index,
                                          ContainerWorld& world) {

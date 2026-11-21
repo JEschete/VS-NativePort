@@ -42,8 +42,8 @@ void SetDoorField(EntryDoor& door, DoorField field, unsigned value) {
 
 }  // namespace
 
-// decomp: SLUS_010.40 func_80042CB0 (src/SLUS_010.40/main.c:8375), the
-// door fields
+// decomp: SLUS_010.40 vs_main_captureSaveState (src/SLUS_010.40/main.c:1237;
+// was func_80042CB0), the door fields
 EntryDoor PlaceEntryDoor(const EntryDoor& pending, TilePlacement placement,
                          std::uint16_t flag_id) {
   EntryDoor door = pending;
@@ -56,9 +56,9 @@ EntryDoor PlaceEntryDoor(const EntryDoor& pending, TilePlacement placement,
   return door;
 }
 
-// decomp: SLUS_010.40 func_80042CB0 (src/SLUS_010.40/main.c:8375), the
-// learned-action loop. The original shifts a char held in a register; the
-// copied C read four bytes through `*(int*)&actionsLearned`.
+// decomp: SLUS_010.40 vs_main_captureSaveState (src/SLUS_010.40/main.c:1237;
+// was func_80042CB0), the learned-action loop. The original shifts a char held
+// in a register; the copied C read four bytes through `*(int*)&actionsLearned`.
 LearnedActions PackLearnedActions(SnapshotHost& host) {
   LearnedActions learned{};
   for (std::size_t index = 0; index < kLearnedActionBytes; ++index) {
@@ -73,14 +73,16 @@ LearnedActions PackLearnedActions(SnapshotHost& host) {
   return learned;
 }
 
-// decomp: SLUS_010.40 func_80042CA0 (src/SLUS_010.40/main.c:8373)
+// decomp: SLUS_010.40 vs_main_setCharacterRestorePending
+// (src/SLUS_010.40/main.c:1232; was func_80042CA0)
 void MarkAshleySnapshotValid(std::span<std::byte, kAshleySnapshotBytes> bytes) {
   const auto is_pending = bytes.first<kPendingFlagBytes>();
   std::ranges::fill(is_pending, std::byte{0});
   is_pending[0] = std::byte{1};
 }
 
-// decomp: SLUS_010.40 func_80042CB0 (src/SLUS_010.40/main.c:8375)
+// decomp: SLUS_010.40 vs_main_captureSaveState (src/SLUS_010.40/main.c:1237;
+// was func_80042CB0)
 void CaptureAshleySnapshot(SnapshotHost& host) {
   host.StoreEntryDoor(PlaceEntryDoor(host.PendingDestinationDoor(),
                                      host.AshleyPlacement(),

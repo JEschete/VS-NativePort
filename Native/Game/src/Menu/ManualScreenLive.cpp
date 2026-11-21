@@ -385,19 +385,20 @@ class LiveHelpPagesHost final : public HelpPagesHost {
 };
 }  // namespace
 
-// decomp: MENUE.PRG func_80102E9C (src/MENU/MENUE.PRG/494.c:132), 0x80102E9C
+// decomp: MENUE.PRG func_80102E9C (src/MENU/MENUE.PRG/494.c:138), 0x80102E9C
 void LiveClearMenuExceptRow8() {
   LiveScreenHost host;
   ClearMenuExceptRow8(host);
 }
 
-// decomp: MENUE.PRG _menuReady (src/MENU/MENUE.PRG/494.c:134), 0x80102EBC
+// decomp: MENUE.PRG menuReady (src/MENU/MENUE.PRG/494.c:140; was _menuReady),
+// 0x80102EBC
 void LivePollMenuReady() {
   LiveScreenHost host;
   PollMenuReady(host);
 }
 
-// decomp: MENUE.PRG vs_menuE_exec (src/MENU/MENUE.PRG/494.c:142), 0x80102EDC
+// decomp: MENUE.PRG vs_menuE_exec (src/MENU/MENUE.PRG/494.c:148), 0x80102EDC
 int LiveUpdateScreen(std::uint8_t* state) {
   if (state == nullptr) {
     RefuseLive("Manual screen step is null");
@@ -407,7 +408,8 @@ int LiveUpdateScreen(std::uint8_t* state) {
   return UpdateScreen(host, *state, manualScreen);
 }
 
-// decomp: MENUE.PRG _initMenuState (src/MENU/MENUE.PRG/494.c:219), 0x801030A4
+// decomp: MENUE.PRG initMenuState (src/MENU/MENUE.PRG/494.c:225; was
+// _initMenuState), 0x801030A4
 int LiveInitHelpState() {
   HelpPagesState state = LoadHelpState();
   LiveHelpPagesHost host(state);
@@ -416,7 +418,8 @@ int LiveInitHelpState() {
   return result;
 }
 
-// decomp: MENUE.PRG _showMenu (src/MENU/MENUE.PRG/494.c:245), 0x80103110
+// decomp: MENUE.PRG showMenu (src/MENU/MENUE.PRG/494.c:251; was _showMenu),
+// 0x80103110
 int LiveUpdateHelpPages() {
   HelpPagesState state = LoadHelpState();
   LiveHelpPagesHost host(state);

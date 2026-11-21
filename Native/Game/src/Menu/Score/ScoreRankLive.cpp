@@ -135,19 +135,22 @@ TitleConditions ReadLiveTitleConditions() {
   return conditions;
 }
 
-// decomp: MENU9.PRG _setTitleFlags (src/MENU/MENU9.PRG/238.c:2662).
+// decomp: MENU9.PRG setTitleFlags (src/MENU/MENU9.PRG/238.c:2665; was
+// _setTitleFlags).
 void AwardLiveTitles() {
   const std::uint32_t titles =
       AwardTitles(ReadLiveScoreRecord(), clearCount, ReadLiveTitleConditions());
   VS::State::scoreData.titles = static_cast<int>(titles);
 }
 
-// decomp: MENU9.PRG _calculateScore (src/MENU/MENU9.PRG/238.c:2842).
+// decomp: MENU9.PRG calculateScore (src/MENU/MENU9.PRG/238.c:2845; was
+// _calculateScore).
 void CalculateLiveScore() {
   VS::Menu::Score::score = CalculateScore(ReadLiveScoreRecord(), clearCount);
 }
 
-// decomp: MENU9.PRG _determineCharacterRank (src/MENU/MENU9.PRG/238.c:2633).
+// decomp: MENU9.PRG determineCharacterRank (src/MENU/MENU9.PRG/238.c:2636; was
+// _determineCharacterRank).
 void DetermineLiveRiskbreakerRank() {
   const auto rank = DetermineRiskbreakerRank(
       static_cast<std::uint32_t>(VS::State::scoreData.titles),
@@ -157,7 +160,8 @@ void DetermineLiveRiskbreakerRank() {
   }
 }
 
-// decomp: MENU9.PRG _calculateProgress (src/MENU/MENU9.PRG/238.c:418).
+// decomp: MENU9.PRG calculateProgress (src/MENU/MENU9.PRG/238.c:425; was
+// _calculateProgress).
 int CalculateLiveProgress() {
   ProgressWorld world = ReadLiveProgressWorld();
   LiveProgressHost host;

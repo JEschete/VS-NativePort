@@ -7,8 +7,8 @@
 
 namespace VS::Items {
 
-// decomp: _lootListHead (BATTLE/BATTLE.PRG 146C.h): the newest entry; each
-// node is a game heap block.
+// decomp: lootListHead (BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/menuState.h:37;
+// was _lootListHead): the newest entry; each node is a game heap block.
 extern VS::Items::LootListNode* lootListHead;
 
 }  // namespace VS::Items

@@ -15,9 +15,9 @@ constexpr std::int32_t kVariationDrawBound = 11;
 constexpr std::uint32_t kVariationCentre = 5;
 }  // namespace
 
-// decomp: BATTLE.PRG _itemRecovery (src/BATTLE/BATTLE.PRG/146C.c:12109)
-// The original indexed the hits with any index and took two hit results it
-// never read.
+// decomp: BATTLE.PRG itemRecovery (src/BATTLE/BATTLE.PRG/146C.c:12032; was
+// _itemRecovery) The original indexed the hits with any index and took two hit
+// results it never read.
 std::optional<std::int16_t> CalculateItemRecovery(const ItemAction& action,
                                                   std::int32_t hit_index,
                                                   bool add_random_variation,

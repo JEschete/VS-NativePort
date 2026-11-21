@@ -52,7 +52,8 @@ std::expected<std::uint32_t, TopicError> TopicTextOffset(
 }
 }  // namespace
 
-// decomp: MENUE.PRG _setMenuRows (494.c:76), cursorMemories[4] and [5].
+// decomp: MENUE.PRG setMenuRows (src/MENU/MENUE.PRG/494.c:82; was
+// _setMenuRows), cursorMemories[4] and [5].
 TopicCursor TopicCursorFor(std::int32_t row_count,
                            std::int32_t highlighted_row) noexcept {
   if (row_count < kVisibleTopicRows || highlighted_row < kTopRows) {
@@ -70,7 +71,8 @@ TopicCursor TopicCursorFor(std::int32_t row_count,
               WrappingSubtract(highlighted_row, kMiddleTopicRow))};
 }
 
-// decomp: MENUE.PRG _setMenuRows (494.c:76).
+// decomp: MENUE.PRG setMenuRows (src/MENU/MENUE.PRG/494.c:82; was
+// _setMenuRows).
 std::expected<void, TopicError> SetTopicRows(
     TopicMenuHost& host, std::int32_t row_count, std::int32_t highlighted_row,
     std::span<const std::uint32_t> text_offsets) {
@@ -92,7 +94,8 @@ std::expected<void, TopicError> SetTopicRows(
   return {};
 }
 
-// decomp: MENUE.PRG _getSelectedRow (494.c:104).
+// decomp: MENUE.PRG getSelectedRow (src/MENU/MENUE.PRG/494.c:110; was
+// _getSelectedRow).
 std::int32_t GetSelectedTopicRow(TopicMenuHost& host) {
   const std::int32_t row = host.SelectedRow();
   if (row < kNoTopicSelected) {
@@ -105,7 +108,8 @@ std::int32_t GetSelectedTopicRow(TopicMenuHost& host) {
   return row;
 }
 
-// decomp: MENUE.PRG _topMenu (494.c:450), the strings loop.
+// decomp: MENUE.PRG topMenu (src/MENU/MENUE.PRG/494.c:454; was _topMenu), the
+// strings loop.
 std::expected<TopicTextOffsetArray, TopicError> TopicTextOffsets(
     std::span<const std::uint16_t> topic_table) {
   if (topic_table.size() < kTopicStrings) {
@@ -127,7 +131,7 @@ std::expected<TopicTextOffsetArray, TopicError> TopicTextOffsets(
   return offsets;
 }
 
-// decomp: MENUE.PRG _topMenu (494.c:450).
+// decomp: MENUE.PRG topMenu (src/MENU/MENUE.PRG/494.c:454; was _topMenu).
 std::expected<std::int32_t, TopicError> UpdateTopicMenu(
     TopicMenuState& state, bool reset,
     std::span<const std::uint16_t> topic_table, std::int32_t current_topic,
@@ -164,7 +168,8 @@ std::expected<std::uint16_t, PageTextError> HelpLineCount(
   return ReadHalfword(help_text, kLineTableByte);
 }
 
-// decomp: MENUE.PRG _getRoundedLineCount (494.c:514).
+// decomp: MENUE.PRG getRoundedLineCount (src/MENU/MENUE.PRG/494.c:518; was
+// _getRoundedLineCount).
 std::int32_t LastPageLineOffset(std::uint16_t line_count) noexcept {
   std::int32_t lines = line_count;
   const std::int32_t remainder = lines % kLinesPerPage;
@@ -174,7 +179,7 @@ std::int32_t LastPageLineOffset(std::uint16_t line_count) noexcept {
   return std::max(lines - kLinesPerPage, 0);
 }
 
-// decomp: MENUE.PRG _vsStrcpy (494.c:561).
+// decomp: MENUE.PRG vsStrcpy (src/MENU/MENUE.PRG/494.c:565; was _vsStrcpy).
 std::expected<std::size_t, PageTextError> CopyEncodedLine(
     std::span<const std::uint8_t> source, std::span<std::uint8_t> destination) {
   // Bytes are read and written in the original's order, so a refusal names
@@ -217,7 +222,8 @@ std::expected<std::size_t, PageTextError> CopyEncodedLine(
   return written + 1;
 }
 
-// decomp: MENUE.PRG _copyNextPageText (494.c:531).
+// decomp: MENUE.PRG copyNextPageText (src/MENU/MENUE.PRG/494.c:535; was
+// _copyNextPageText).
 std::expected<std::size_t, PageTextError> ComposePageText(
     std::span<const std::uint8_t> help_text, std::int32_t scroll_position,
     std::span<std::uint8_t, kPageTextCapacity> page) {

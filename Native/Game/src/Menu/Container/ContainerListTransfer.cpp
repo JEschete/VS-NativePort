@@ -232,7 +232,7 @@ void InitializeItemList(std::int32_t direction, ItemListState& state,
   state.step = kListBuild;
 }
 
-// decomp: case 0/1 of func_80107490 (234.c:2433).
+// decomp: case 0/1 of func_80107490 (src/MENU/MENUD.PRG/234.c:2433).
 void BuildList(Category category, ItemListState& state, TransferWorld& world) {
   if (state.step == kListInitialize) world.InitializeInformationBox();
   world.AcquireItemRows();
@@ -330,7 +330,8 @@ void PickRow(Category category, ItemListState& state, TransferWorld& world) {
   state.step = kListMove;
 }
 
-// decomp: case 2 of func_80107490 (234.c:2476). nullopt falls into case 3.
+// decomp: case 2 of func_80107490 (src/MENU/MENUD.PRG/234.c:2476). nullopt
+// falls into case 3.
 std::optional<StepResult> Browse(Category category, ItemListState& state,
                                  TransferWorld& world) {
   world.SetFlag(TransferFlag::kControlsMode, 1);
@@ -360,7 +361,7 @@ std::optional<StepResult> Browse(Category category, ItemListState& state,
   return Done();
 }
 
-// decomp: case 3 of func_80107490 (234.c:2560).
+// decomp: case 3 of func_80107490 (src/MENU/MENUD.PRG/234.c:2560).
 StepResult SwitchCategory(Category category, ItemListState& state,
                           TransferWorld& world) {
   const auto held = world.HeldButtons();
@@ -456,7 +457,7 @@ void MoveRow(Category category, std::int32_t source, std::int32_t target,
   order[static_cast<std::size_t>(source) - 1] = target_token;
 }
 
-// decomp: case 6 of func_80107490 (234.c:2611).
+// decomp: case 6 of func_80107490 (src/MENU/MENUD.PRG/234.c:2611).
 std::int32_t MoveSelectedRow(Category category, ItemListState& state,
                              TransferWorld& world) {
   if ((world.PressedButtons() & kButtonSquare) != 0) {
@@ -479,7 +480,7 @@ std::int32_t MoveSelectedRow(Category category, ItemListState& state,
   return 0;
 }
 
-// decomp: case 7 of func_80107490 (234.c:2647).
+// decomp: case 7 of func_80107490 (src/MENU/MENUD.PRG/234.c:2647).
 std::int32_t CloseDetails(ItemListState& state, TransferWorld& world) {
   const auto result = world.UpdateItemDetails(0);
   if (result == 0) return 0;
@@ -814,7 +815,7 @@ std::int32_t UpdateActionChoice(Category category, ItemListState& state,
   return 0;
 }
 
-// decomp: case 10 of func_80107490 (234.c:2880).
+// decomp: case 10 of func_80107490 (src/MENU/MENUD.PRG/234.c:2880).
 void JumpToParent(Category category, ItemListState& state,
                   TransferWorld& world) {
   if (!world.RowsIdle()) return;
@@ -861,7 +862,7 @@ std::int32_t AwaitDialog(std::int32_t result, bool reset_information,
   return 0;
 }
 
-// decomp: case 13 of func_80107490 (234.c:2934).
+// decomp: case 13 of func_80107490 (src/MENU/MENUD.PRG/234.c:2934).
 void BuildPendingList(Category category, ItemListState& state,
                       TransferWorld& world) {
   if (!world.RowsIdle()) return;
@@ -904,7 +905,7 @@ void CommitPendingTransfers(TransferWorld& world) {
   }
 }
 
-// decomp: case 15 of func_80107490 (234.c:2964).
+// decomp: case 15 of func_80107490 (src/MENU/MENUD.PRG/234.c:2964).
 std::int32_t ConfirmTransfers(ItemListState& state, TransferWorld& world) {
   const auto result = world.UpdateTransferConfirmation(0);
   if (result == 0) return 0;
@@ -1400,7 +1401,8 @@ std::optional<std::int32_t> ChooseDirection(TransferDirectionState& state,
 }
 }  // namespace
 
-// decomp: MENUD.PRG _setWeaponUi (234.c:810)
+// decomp: MENUD.PRG setWeaponUi (src/MENU/MENUD.PRG/234.c:811; was
+// _setWeaponUi)
 WeaponRow BuildWeaponRow(Framework::ItemTextHost& host,
                          const Items::InventoryWeapon& weapon,
                          Items::ContainerWorld& records,
@@ -1412,7 +1414,8 @@ WeaponRow BuildWeaponRow(Framework::ItemTextHost& host,
   return {text, status};
 }
 
-// decomp: MENUD.PRG _setShieldUi (234.c:820)
+// decomp: MENUD.PRG setShieldUi (src/MENU/MENUD.PRG/234.c:821; was
+// _setShieldUi)
 Framework::ItemRowText BuildShieldRow(Framework::ItemTextHost& host,
                                       const Items::InventoryShield& shield,
                                       Items::ContainerWorld& records,
@@ -1422,7 +1425,7 @@ Framework::ItemRowText BuildShieldRow(Framework::ItemTextHost& host,
   return Framework::FormatShieldRow(host, loadout, buffer);
 }
 
-// decomp: MENUD.PRG func_80107490 (234.c:2393)
+// decomp: MENUD.PRG func_80107490 (src/MENU/MENUD.PRG/234.c:2394)
 std::int32_t UpdateItemList(std::int32_t direction, ItemListState& state,
                             TransferWorld& world) {
   if (direction != 0) {
@@ -1437,7 +1440,7 @@ std::int32_t UpdateItemList(std::int32_t direction, ItemListState& state,
   }
 }
 
-// decomp: MENUD.PRG func_801089BC (234.c:3037)
+// decomp: MENUD.PRG func_801089BC (src/MENU/MENUD.PRG/234.c:3040)
 std::int32_t UpdateTransferDirection(std::int32_t initialize,
                                      TransferDirectionState& state,
                                      TransferWorld& world) {
@@ -1470,7 +1473,7 @@ std::int32_t UpdateTransferDirection(std::int32_t initialize,
   return 0;
 }
 
-// decomp: MENUD.PRG vs_menuD_exec (234.c:3130)
+// decomp: MENUD.PRG vs_menuD_exec (src/MENU/MENUD.PRG/234.c:3133)
 std::int32_t UpdateScreen(std::uint8_t& step, ScreenState& state,
                           TransferWorld& world) {
   world.PublishActiveRecords();

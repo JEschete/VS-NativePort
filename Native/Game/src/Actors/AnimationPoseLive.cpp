@@ -154,7 +154,7 @@ struct LiveHeader {
   std::uint8_t* address = nullptr;
 };
 
-// decomp: BATTLE.PRG func_800AD494 (src/BATTLE/BATTLE.PRG/40564.c:2719)
+// decomp: BATTLE.PRG func_800AD494 (src/BATTLE/BATTLE.PRG/40564.c:2138)
 LiveHeader FindLiveHeader(const VS::Actors::ActorRecord& actor,
                           int animation_id) {
   LiveAnimationBanks banks(actor);
@@ -776,7 +776,7 @@ int RestartLiveAnimationEvents(VS::Actors::ActorRecord& actor) {
   return 0;
 }
 
-// decomp: BATTLE.PRG func_800AD494 (src/BATTLE/BATTLE.PRG/40564.c:2719)
+// decomp: BATTLE.PRG func_800AD494 (src/BATTLE/BATTLE.PRG/40564.c:2138)
 // A bank without a registered extent, or a map entry or header outside it,
 // is reported and refused instead of returned.
 std::intptr_t FindLiveActorAnimationHeader(void* actor, int animation_id,
@@ -810,7 +810,7 @@ std::intptr_t FindLiveActorAnimationHeader(void* actor, int animation_id,
   return 0;
 }
 
-// decomp: BATTLE.PRG func_800AD008 (src/BATTLE/BATTLE.PRG/40564.c:2623)
+// decomp: BATTLE.PRG func_800AD008 (src/BATTLE/BATTLE.PRG/40564.c:2027)
 void InitializeLiveActorAnimationPose(VS::Actors::ActorRecord* actor,
                                       VS::Actors::AnimationPose* pose) {
   if (actor == nullptr || pose == nullptr) {
@@ -841,7 +841,7 @@ void InitializeLiveActorAnimationPose(VS::Actors::ActorRecord* actor,
   }
 }
 
-// decomp: BATTLE.PRG func_800AF6E8 (src/BATTLE/BATTLE.PRG/44F14.c:1146)
+// decomp: BATTLE.PRG func_800AF6E8 (src/BATTLE/BATTLE.PRG/44F14.c:1071)
 void UpdateLiveActorAnimationBlend(VS::Actors::ActorRecord* actor) {
   if (actor == nullptr) {
     VS::Core::Errorf(kChannel, "Animation blend requires an actor");
@@ -861,7 +861,7 @@ void UpdateLiveMotionAndLookAt(VS::Actors::ActorRecord* actor,
   UpdateLiveMotion(*actor, skip_tweens != 0);
 }
 
-// decomp: BATTLE.PRG func_800B26B8 (src/BATTLE/BATTLE.PRG/49268.c:246)
+// decomp: BATTLE.PRG func_800B26B8 (src/BATTLE/BATTLE.PRG/49EB8.c:23)
 void ApplyLiveLockedBoneTransform(VS::Actors::ActorRecord* actor,
                                   const MATRIX* parent, int bone, int saved) {
   if (actor == nullptr || parent == nullptr || bone < 0 ||

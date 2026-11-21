@@ -12,18 +12,18 @@
 #include <cstdint>
 
 namespace VS::Event {
-// decomp: BATTLE.PRG func_800BE36C (F01236, 4A0A8.c:4018)
+// decomp: BATTLE.PRG func_800BE36C (F01236, src/BATTLE/BATTLE.PRG/4DEA8.c:4668)
 // Each request keeps its low byte.
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
 void SetEventCameraFollowingEntry(int look_at_follow, int eye_follow);
-// decomp: BATTLE.PRG func_800BE3A0 (F01237, 4A0A8.c:4026)
+// decomp: BATTLE.PRG func_800BE3A0 (F01237, src/BATTLE/BATTLE.PRG/4DEA8.c:4676)
 void StopEventCameraMotionEntry();
-// decomp: BATTLE.PRG func_800BC1CC (F01220, 4A0A8.c:3173)
+// decomp: BATTLE.PRG func_800BC1CC (F01220, src/BATTLE/BATTLE.PRG/4DEA8.c:3823)
 // The distance mode narrows to the original's halfword. A set override is
 // consumed without the workspace, as the original did.
 void RestoreEventFieldCameraEntry(std::int16_t field_facing,
                                   int field_distance_mode);
-// decomp: BATTLE.PRG func_800BE3D0 (F01238, 4A0A8.c:4039)
+// decomp: BATTLE.PRG func_800BE3D0 (F01238, src/BATTLE/BATTLE.PRG/4DEA8.c:4689)
 // Reads the saved field view from script flags 0xAF and 0xB0 and warns for a
 // distance index past the height offsets.
 void StartEventCameraOrbitReturnEntry(char orbit_side);

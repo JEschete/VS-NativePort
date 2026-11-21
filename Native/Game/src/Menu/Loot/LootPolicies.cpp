@@ -368,8 +368,8 @@ std::optional<std::int32_t> ChooseOrganize(OrganizeMenu& menu,
 }
 }  // namespace
 
-// decomp: MENUB.PRG _displayInventoryCapacities
-// (src/MENU/MENUB.PRG/260.c:1015), 8010837C
+// decomp: MENUB.PRG displayInventoryCapacities
+// (src/MENU/MENUB.PRG/260.c:1018; was _displayInventoryCapacities), 8010837C
 bool RenderBagCapacities(std::int32_t edge_x, const CapacityPanel& panel,
                          CapacityHost& host) {
   if (panel.capacities.size() < kListedCategories) return false;
@@ -383,8 +383,8 @@ bool RenderBagCapacities(std::int32_t edge_x, const CapacityPanel& panel,
   return true;
 }
 
-// decomp: MENUB.PRG _displayCurrentLoot (src/MENU/MENUB.PRG/260.c:1192),
-// 80108938
+// decomp: MENUB.PRG displayCurrentLoot (src/MENU/MENUB.PRG/260.c:1194; was
+// _displayCurrentLoot), 80108938
 ItemsStatus RenderLootRows(std::int32_t x, LootRowsView& view,
                            const Items::InventoryContents& inventory,
                            LootRowsHost& host) {
@@ -420,8 +420,8 @@ ItemsStatus RenderLootRows(std::int32_t x, LootRowsView& view,
   return status;
 }
 
-// decomp: MENUB.PRG _populateLootItem (src/MENU/MENUB.PRG/260.c:1319),
-// 80108E78
+// decomp: MENUB.PRG populateLootItem (src/MENU/MENUB.PRG/260.c:1321; was
+// _populateLootItem), 80108E78
 ItemsStatus ShowLootDescription(const LootRow& row, DescriptionHost& host) {
   if (row.category >= kListedCategories) {
     return ItemsStatus::kCategoryOutOfRange;
@@ -435,8 +435,8 @@ ItemsStatus ShowLootDescription(const LootRow& row, DescriptionHost& host) {
   return ItemsStatus::kOk;
 }
 
-// decomp: MENUB.PRG _discardItems (src/MENU/MENUB.PRG/260.c:1377), 801090A4
-// (the init != 0 half)
+// decomp: MENUB.PRG discardItems (src/MENU/MENUB.PRG/260.c:1379; was
+// _discardItems), 801090A4 (the init != 0 half)
 ItemsStatus InitLeaveConfirmation(LeaveConfirmation& prompt,
                                   const LeaveContext& context,
                                   const Items::InventoryContents& inventory) {
@@ -471,8 +471,8 @@ ItemsStatus InitLeaveConfirmation(LeaveConfirmation& prompt,
   return status;
 }
 
-// decomp: MENUB.PRG _discardItems (src/MENU/MENUB.PRG/260.c:1377), 801090A4
-// (the per-frame half)
+// decomp: MENUB.PRG discardItems (src/MENU/MENUB.PRG/260.c:1379; was
+// _discardItems), 801090A4 (the per-frame half)
 std::optional<std::int32_t> UpdateLeaveConfirmation(LeaveConfirmation& prompt,
                                                     bool claimed,
                                                     const PromptInput& input,
@@ -517,8 +517,8 @@ std::optional<std::int32_t> UpdateLeaveConfirmation(LeaveConfirmation& prompt,
   return 0;
 }
 
-// decomp: MENUB.PRG _organizeInventory (src/MENU/MENUB.PRG/260.c:1510),
-// 80109444 (the loot != NULL half)
+// decomp: MENUB.PRG organizeInventory (src/MENU/MENUB.PRG/260.c:1513; was
+// _organizeInventory), 80109444 (the loot != NULL half)
 ItemsStatus InitOrganizeMenu(OrganizeMenu& menu, const LootRow& row,
                              const Items::InventoryContents& inventory,
                              PromptHost& host) {
@@ -548,8 +548,8 @@ ItemsStatus InitOrganizeMenu(OrganizeMenu& menu, const LootRow& row,
   return ItemsStatus::kOk;
 }
 
-// decomp: MENUB.PRG _organizeInventory (src/MENU/MENUB.PRG/260.c:1510),
-// 80109444 (the per-frame half)
+// decomp: MENUB.PRG organizeInventory (src/MENU/MENUB.PRG/260.c:1513; was
+// _organizeInventory), 80109444 (the per-frame half)
 std::optional<std::int32_t> UpdateOrganizeMenu(OrganizeMenu& menu,
                                                const PromptInput& input,
                                                PromptHost& host) {

@@ -23,7 +23,7 @@ std::optional<std::size_t> HeldStream(EffectStreamHost& host,
 }
 }  // namespace
 
-// decomp: SLUS_010.40 vs_main_streamXa (src/SLUS_010.40/main.c:9358)
+// decomp: SLUS_010.40 vs_main_streamXa (src/SLUS_010.40/main.c:2324)
 bool BeginXaStream(XaStreamDrive& drive, std::int32_t sector,
                    std::int32_t byte_count) {
   if (drive.state != Content::DiscDriveState::kIdle) return false;
@@ -40,17 +40,19 @@ bool BeginXaStream(XaStreamDrive& drive, std::int32_t sector,
   return true;
 }
 
-// decomp: SLUS_010.40 vs_main_checkStreamXaEnd (src/SLUS_010.40/main.c:9376)
+// decomp: SLUS_010.40 vs_main_checkStreamXaEnd (src/SLUS_010.40/main.c:2341)
 bool RequestXaStreamStop(XaStreamDrive& drive) {
   if (drive.state != Content::DiscDriveState::kStreamXa) return false;
   drive.state = Content::DiscDriveState::kStreamXaEnd;
   return true;
 }
 
-// decomp: SLUS_010.40 func_800464DC (src/SLUS_010.40/main.c:10310)
+// decomp: SLUS_010.40 stopCutsceneStream (src/SLUS_010.40/main.c:3381; was
+// func_800464DC)
 void StopCutsceneStream(EffectStreamHost& host) { host.StopCutsceneStream(); }
 
-// decomp: SLUS_010.40 func_800464FC (src/SLUS_010.40/main.c:10312)
+// decomp: SLUS_010.40 startCutsceneStream (src/SLUS_010.40/main.c:3383; was
+// func_800464FC)
 bool PlayCutsceneStreamSlot(EffectStreamHost& host, std::uint32_t slot,
                             SfxMix mix) {
   const std::optional<std::size_t> index = HeldStream(host, slot);
@@ -61,13 +63,15 @@ bool PlayCutsceneStreamSlot(EffectStreamHost& host, std::uint32_t slot,
   return true;
 }
 
-// decomp: SLUS_010.40 func_80046578 (src/SLUS_010.40/main.c:10324)
+// decomp: SLUS_010.40 vs_main_startCutsceneStreamDefault
+// (src/SLUS_010.40/main.c:3399; was func_80046578)
 void PlayCutsceneStreamSlotCentered(EffectStreamHost& host,
                                     std::uint32_t slot) {
   PlayCutsceneStreamSlot(host, slot, SfxMix{});
 }
 
-// decomp: SLUS_010.40 func_8004659C (src/SLUS_010.40/main.c:10326)
+// decomp: SLUS_010.40 freeCutsceneStream (src/SLUS_010.40/main.c:3404; was
+// func_8004659C)
 bool FreeCutsceneStreamSlot(EffectStreamHost& host, std::uint32_t slot) {
   const std::optional<std::size_t> index = HeldStream(host, slot);
   if (!index) return false;

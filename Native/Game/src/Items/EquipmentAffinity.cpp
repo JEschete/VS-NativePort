@@ -71,7 +71,8 @@ struct AffinityPair {
 };
 using AffinityPairs = std::array<AffinityPair, kAffinityCount>;
 
-// decomp: _triggerArmorAffinityChange's switch (146C.c:10773).
+// decomp: _triggerArmorAffinityChange's switch
+// (src/BATTLE/BATTLE.PRG/146C.c:10773).
 constexpr AffinityPairs kOpposingAffinities{{
     {0, 0},
     {3, 1},
@@ -81,7 +82,8 @@ constexpr AffinityPairs kOpposingAffinities{{
     {6, 5},
     {5, 6},
 }};
-// decomp: _triggerWeaponAffinityChange's switch (146C.c:10892).
+// decomp: _triggerWeaponAffinityChange's switch
+// (src/BATTLE/BATTLE.PRG/146C.c:10892).
 constexpr AffinityPairs kMatchingAffinities{{
     {0, 0},
     {1, 3},
@@ -152,8 +154,8 @@ void RebuildGemmedClassAffinity(const EquipmentPart& part, const Gems& gems,
 }
 }  // namespace
 
-// decomp: BATTLE.PRG _calculateArmorClassAffinity
-// (src/BATTLE/BATTLE.PRG/146C.c:9582)
+// decomp: BATTLE.PRG calculateArmorClassAffinity
+// (src/BATTLE/BATTLE.PRG/146C.c:9572; was _calculateArmorClassAffinity)
 void RebuildArmorClassAffinity(ArmorLoadout& armor) {
   const auto& part = armor.armor;
   SetCurrentRows(
@@ -162,22 +164,22 @@ void RebuildArmorClassAffinity(ArmorLoadout& armor) {
       [&](std::size_t i) { return std::int16_t{part.affinities[i]}; });
 }
 
-// decomp: BATTLE.PRG _calculateShieldClassAffinity
-// (src/BATTLE/BATTLE.PRG/146C.c:9600)
+// decomp: BATTLE.PRG calculateShieldClassAffinity
+// (src/BATTLE/BATTLE.PRG/146C.c:9590; was _calculateShieldClassAffinity)
 void RebuildShieldClassAffinity(ShieldLoadout& shield) {
   RebuildGemmedClassAffinity(shield.base, shield.gems, shield.class_affinity,
                              shield.affinity_modifiers);
 }
 
-// decomp: BATTLE.PRG _calculateWeaponClassAffinity
-// (src/BATTLE/BATTLE.PRG/146C.c:9622)
+// decomp: BATTLE.PRG calculateWeaponClassAffinity
+// (src/BATTLE/BATTLE.PRG/146C.c:9612; was _calculateWeaponClassAffinity)
 void RebuildWeaponClassAffinity(WeaponLoadout& weapon) {
   RebuildGemmedClassAffinity(weapon.blade, weapon.gems, weapon.class_affinity,
                              weapon.affinity_modifiers);
 }
 
-// decomp: BATTLE.PRG _triggerArmorAffinityChange
-// (src/BATTLE/BATTLE.PRG/146C.c:10773)
+// decomp: BATTLE.PRG triggerArmorAffinityChange
+// (src/BATTLE/BATTLE.PRG/146C.c:10708; was _triggerArmorAffinityChange)
 ItemsStatus GrowOpposingEquipmentAffinity(const ItemAction& action,
                                           EquipmentPart& equipment,
                                           std::int32_t affinity,
@@ -187,8 +189,8 @@ ItemsStatus GrowOpposingEquipmentAffinity(const ItemAction& action,
                       host);
 }
 
-// decomp: BATTLE.PRG _triggerWeaponAffinityChange
-// (src/BATTLE/BATTLE.PRG/146C.c:10892)
+// decomp: BATTLE.PRG triggerWeaponAffinityChange
+// (src/BATTLE/BATTLE.PRG/146C.c:10827; was _triggerWeaponAffinityChange)
 ItemsStatus GrowMatchingEquipmentAffinity(const ItemAction& action,
                                           EquipmentPart& equipment,
                                           std::int32_t affinity,
@@ -198,8 +200,9 @@ ItemsStatus GrowMatchingEquipmentAffinity(const ItemAction& action,
                       host);
 }
 
-// decomp: BATTLE.PRG _triggerClassChange (src/BATTLE/BATTLE.PRG/146C.c:11011)
-// The original also took the action, which it never read.
+// decomp: BATTLE.PRG triggerClassChange (src/BATTLE/BATTLE.PRG/146C.c:10946;
+// was _triggerClassChange) The original also took the action, which it never
+// read.
 ItemsStatus GrowEquipmentClass(EquipmentPart& equipment,
                                std::int32_t class_index, GrowthNotices notices,
                                EquipmentGrowthHost& host) {
@@ -329,7 +332,7 @@ ItemsStatus GrowDefenderEquipmentRatings(const ItemAction& action,
   return status;
 }
 
-// decomp: BATTLE.PRG func_80080F78 (src/BATTLE/BATTLE.PRG/146C.c:11178)
+// decomp: BATTLE.PRG func_80080F78 (src/BATTLE/BATTLE.PRG/146C.c:11112)
 ItemsStatus GrowAttackerWeaponRatings(const ItemAction& action,
                                       WeaponLoadout& weapon, bool shows_notices,
                                       HitRatings defender,

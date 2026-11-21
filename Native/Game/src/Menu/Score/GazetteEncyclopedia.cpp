@@ -196,7 +196,8 @@ void DrawIdentification(std::int32_t selected, std::int32_t slide,
 }
 }  // namespace
 
-// decomp: _setEnemyDescription (src/MENU/MENU9.PRG/238.c:1414), 80104B40.
+// decomp: setEnemyDescription (src/MENU/MENU9.PRG/238.c:1419; was
+// _setEnemyDescription), 80104B40.
 bool ShowEnemyDescription(std::span<const GazetteEnemy> enemies,
                           std::int32_t selected, GazetteText locked_description,
                           EnemyListHost& host) {
@@ -214,7 +215,8 @@ bool ShowEnemyDescription(std::span<const GazetteEnemy> enemies,
   return true;
 }
 
-// decomp: _renderEnemyNo (src/MENU/MENU9.PRG/238.c:1878), 80105BCC.
+// decomp: renderEnemyNo (src/MENU/MENU9.PRG/238.c:1883; was _renderEnemyNo),
+// 80105BCC.
 bool DrawEnemyNumber(const EnemyNumber& number, EnemyQuadTarget& target) {
   if (number.value < 0 || number.value > kMaximumEnemyNumber) return false;
   auto x = math::WrappingAdd(number.x, kDigitRightOffset);
@@ -248,7 +250,8 @@ bool DrawEnemyNumber(const EnemyNumber& number, EnemyQuadTarget& target) {
   return true;
 }
 
-// decomp: _initEnemyList (src/MENU/MENU9.PRG/238.c:1916), 80105D8C.
+// decomp: initEnemyList (src/MENU/MENU9.PRG/238.c:1921; was _initEnemyList),
+// 80105D8C.
 bool InitializeEnemyList(std::span<GazetteEnemy> enemies,
                          std::span<const std::uint32_t> flags) {
   if (enemies.size() < kEncyclopediaEnemies) return false;
@@ -291,7 +294,8 @@ bool InitializeEnemyList(std::span<GazetteEnemy> enemies,
   return true;
 }
 
-// decomp: _renderEnemyMenu (src/MENU/MENU9.PRG/238.c:1972), 80105F00.
+// decomp: renderEnemyMenu (src/MENU/MENU9.PRG/238.c:1977; was
+// _renderEnemyMenu), 80105F00.
 bool RenderEnemyList(std::span<GazetteEnemy> enemies,
                      GazetteRecordCursor cursor, std::int32_t step,
                      GazetteRecordAnimation& animation, GazetteText locked_name,
@@ -332,7 +336,8 @@ bool RenderEnemyList(std::span<GazetteEnemy> enemies,
   return true;
 }
 
-// decomp: _renderEnemyDetailScreen (src/MENU/MENU9.PRG/238.c:2069), 801061F8.
+// decomp: renderEnemyDetailScreen (src/MENU/MENU9.PRG/238.c:2074; was
+// _renderEnemyDetailScreen), 801061F8.
 bool RenderEnemyViewer(std::span<const GazetteEnemy> enemies,
                        const EnemyViewerPresentation& presentation,
                        EnemyViewerHost& host) {
@@ -376,7 +381,8 @@ bool RenderEnemyViewer(std::span<const GazetteEnemy> enemies,
   return true;
 }
 
-// decomp: _renderEnemyNavigation (src/MENU/MENU9.PRG/238.c:2782), 80107A98.
+// decomp: renderEnemyNavigation (src/MENU/MENU9.PRG/238.c:2785; was
+// _renderEnemyNavigation), 80107A98.
 bool DrawEnemyNavigation(std::int32_t direction, std::int32_t animation_step,
                          bool hide_ui, EnemyNavigationHost& host) {
   if (hide_ui) return true;

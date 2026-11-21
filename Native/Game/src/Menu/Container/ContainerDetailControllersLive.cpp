@@ -544,53 +544,56 @@ class LiveDispatcherWorld final
 };
 }  // namespace
 
-// decomp: func_80103E24 (src/MENU/MENUD.PRG/234.c:700).
+// decomp: func_80103E24 (src/MENU/MENUD.PRG/234.c:701).
 void DrawLiveCategoryIcons(int animation_step, int details_phase) {
   LiveIconWorld world;
   DrawCategoryIcons(world, animation_step, details_phase);
 }
 
-// decomp: _weaponNavigation (src/MENU/MENUD.PRG/234.c:829).
+// decomp: weaponNavigation (src/MENU/MENUD.PRG/234.c:830; was
+// _weaponNavigation).
 int UpdateLiveWeaponDetails(int selection) {
   LiveControllerWorld world(Category::kWeapon);
   return UpdateWeaponDetails(State(Category::kWeapon), world,
                              Selection(selection));
 }
 
-// decomp: _bladeNavigation (src/MENU/MENUD.PRG/234.c:902).
+// decomp: bladeNavigation (src/MENU/MENUD.PRG/234.c:903; was _bladeNavigation).
 int UpdateLiveBladeDetails(int selection) {
   LiveControllerWorld world(Category::kBlade);
   return UpdateBladeDetails(State(Category::kBlade), world,
                             Selection(selection));
 }
 
-// decomp: _gripNavigation (src/MENU/MENUD.PRG/234.c:965).
+// decomp: gripNavigation (src/MENU/MENUD.PRG/234.c:966; was _gripNavigation).
 int UpdateLiveGripDetails(int selection) {
   LiveControllerWorld world(Category::kGrip);
   return UpdateGripDetails(State(Category::kGrip), world, Selection(selection));
 }
 
-// decomp: _shieldNavigation (src/MENU/MENUD.PRG/234.c:1037).
+// decomp: shieldNavigation (src/MENU/MENUD.PRG/234.c:1038; was
+// _shieldNavigation).
 int UpdateLiveShieldDetails(int selection) {
   LiveControllerWorld world(Category::kShield);
   return UpdateShieldDetails(State(Category::kShield), world,
                              Selection(selection));
 }
 
-// decomp: _armorNavigation (src/MENU/MENUD.PRG/234.c:1110).
+// decomp: armorNavigation (src/MENU/MENUD.PRG/234.c:1111; was
+// _armorNavigation).
 int UpdateLiveArmorDetails(int selection) {
   LiveControllerWorld world(Category::kArmor);
   return UpdateArmorDetails(State(Category::kArmor), world,
                             Selection(selection));
 }
 
-// decomp: _gemNavigation (src/MENU/MENUD.PRG/234.c:1176).
+// decomp: gemNavigation (src/MENU/MENUD.PRG/234.c:1177; was _gemNavigation).
 int UpdateLiveGemDetails(int selection) {
   LiveControllerWorld world(Category::kGem);
   return UpdateGemDetails(State(Category::kGem), world, Selection(selection));
 }
 
-// decomp: func_80105008 (src/MENU/MENUD.PRG/234.c:1235).
+// decomp: func_80105008 (src/MENU/MENUD.PRG/234.c:1236).
 int UpdateLiveItemDetails(int selection) {
   LiveDispatcherWorld world;
   return UpdateItemDetails(detailDispatcher, world, Dispatch(selection));

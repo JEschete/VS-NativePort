@@ -552,7 +552,8 @@ class LiveHost final : public Host {
   Framework::LiveItemRowsHost rows_;
 };
 
-// decomp: MENUC.PRG _loadSyd (src/MENU/MENUC.PRG/168.c:2658), its request.
+// decomp: MENUC.PRG loadSyd (src/MENU/MENUC.PRG/168.c:2666; was _loadSyd), its
+// request.
 void LiveHost::StartRecipeLoad(RecipeKind kind) {
   const auto index = static_cast<std::size_t>(kind);
   if (index >= kRecipeFiles.size()) {
@@ -620,7 +621,7 @@ int RunWithLiveHost(const Call& call) {
 }
 }  // namespace
 
-// decomp: MENUC.PRG vs_menuC_exec (src/MENU/MENUC.PRG/168.c:4550)
+// decomp: MENUC.PRG vs_menuC_exec (src/MENU/MENUC.PRG/168.c:4554)
 int UpdateLiveSetup(std::uint8_t& step) {
   return RunWithLiveHost([&step](Context& ctx) { return Update(ctx, step); });
 }

@@ -171,7 +171,8 @@ struct AxisClamp {
 
 }  // namespace
 
-// decomp: vs_battle_script_showTextBox (src/BATTLE/BATTLE.PRG/4A0A8.c:707).
+// decomp: vs_battle_script_11_showTextBox (src/BATTLE/BATTLE.PRG/4DEA8.c:529;
+// was vs_battle_script_showTextBox).
 std::expected<ScriptCommand, DialogStringError> ResolveDialogString(
     ScriptCommand table, std::size_t index) {
   constexpr std::size_t kHalfwordBytes = 2;

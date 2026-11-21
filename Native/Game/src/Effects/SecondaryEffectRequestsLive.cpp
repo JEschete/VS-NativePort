@@ -124,7 +124,7 @@ class LiveWorld final : public ActionImpactWorld {
 };
 }  // namespace
 
-// decomp: func_8006C4C4 (src/BATTLE/BATTLE.PRG/146C.c:1927)
+// decomp: func_8006C4C4 (src/BATTLE/BATTLE.PRG/146C.c:1569)
 void LiveQueueActionHitEffect(int effect_id, VS::Battle::HitResult* hit_result,
                               int target_limb) {
   if (hit_result == nullptr) {
@@ -137,13 +137,13 @@ void LiveQueueActionHitEffect(int effect_id, VS::Battle::HitResult* hit_result,
       static_cast<std::uint8_t>(target_limb), world));
 }
 
-// decomp: func_8006C84C (src/BATTLE/BATTLE.PRG/146C.c:2044)
+// decomp: func_8006C84C (src/BATTLE/BATTLE.PRG/146C.c:1686)
 int LiveQueueActionImpactEffects(int attacker_index) {
   LiveWorld world;
   return QueueActionImpactEffects(attacker_index, world);
 }
 
-// decomp: func_8006F450 (src/BATTLE/BATTLE.PRG/146C.c:3171)
+// decomp: func_8006F450 (src/BATTLE/BATTLE.PRG/146C.c:2874)
 void LiveSpawnGroundPlaneImpactEffect(
     std::uint16_t* world_position_components) {
   if (world_position_components == nullptr) {
@@ -157,7 +157,7 @@ void LiveSpawnGroundPlaneImpactEffect(
       static_cast<std::int16_t>(world_position_components[kZ]), sink);
 }
 
-// decomp: func_8006F4B0 (src/BATTLE/BATTLE.PRG/146C.c:3187)
+// decomp: func_8006F4B0 (src/BATTLE/BATTLE.PRG/146C.c:2890)
 void LiveSpawnTrapTileEffect(VS::Actors::ActorLocation* actor_location) {
   if (actor_location == nullptr) {
     Refuse("null trap location");
@@ -173,7 +173,7 @@ void LiveSpawnTrapTileEffect(VS::Actors::ActorLocation* actor_location) {
       sink));
 }
 
-// decomp: func_8006F848 (src/BATTLE/BATTLE.PRG/146C.c:3298)
+// decomp: func_8006F848 (src/BATTLE/BATTLE.PRG/146C.c:3002)
 void LiveSpawnAbilityLearnedEffect() {
   LiveWorld sink;
   SpawnAbilityLearnedEffect(sink);

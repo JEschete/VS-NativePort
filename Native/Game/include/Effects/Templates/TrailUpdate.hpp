@@ -7,8 +7,8 @@
 #include "Effects/Templates/TrailCore.hpp"
 
 // The update stage of the five- and nine-sample trails (decomp
-// src/EFFECT/trails5.h:407 and trails9.h:414 VS_TRAIL_UPDATE_FUNCTION): moves
-// every live trail one step along its spline.
+// src/EFFECT/trailEffect.h:453 and src/EFFECT/trailEffect.h:453
+// VS_TRAIL_UPDATE_FUNCTION): moves every live trail one step along its spline.
 namespace VS::Effects::Templates {
 // Skips trails whose collapse counter is zero. Once the curve distance
 // reaches a trail's step count it counts the collapse down, and drops the

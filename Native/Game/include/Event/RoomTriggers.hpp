@@ -97,13 +97,15 @@ class RoomEventSectionHost {
   virtual void ReleaseScriptActorControl() = 0;
 };
 
-// decomp: _loadMpdClearedScriptDoorSections (4A0A8.c:4201).
-// Allocation/extent failure leaves the previously published state unchanged.
+// decomp: loadMpdClearedScriptDoorSections (src/BATTLE/BATTLE.PRG/4DEA8.c:4850;
+// was _loadMpdClearedScriptDoorSections). Allocation/extent failure leaves the
+// previously published state unchanged.
 [[nodiscard]] RoomEventLoad LoadRoomEventSections(RoomEventInput input,
                                                   RoomEventSectionHost& host);
-// decomp: func_800BEB34 (4A0A8.c:4250).
+// decomp: func_800BEB34 (src/BATTLE/BATTLE.PRG/4DEA8.c:4899).
 void FreeRoomEventSections(RoomEventSectionHost& host);
-// decomp: func_800BEBEC (4A0A8.c:4273), an original no-op.
+// decomp: func_800BEBEC (src/BATTLE/BATTLE.PRG/4DEA8.c:4922), an original
+// no-op.
 void ReleaseZoneEventResources();
 
 enum class RoomTriggerRequest : std::uint16_t {
@@ -200,7 +202,7 @@ class RoomTriggerHost {
   [[nodiscard]] virtual int GimmickSupportHeight(TriggerTile tile) = 0;
 };
 
-// decomp: BATTLE.PRG func_800BEC58 (src/BATTLE/BATTLE.PRG/4A0A8.c:4302)
+// decomp: BATTLE.PRG func_800BEC58 (src/BATTLE/BATTLE.PRG/4DEA8.c:4945)
 // The imported offset table has at most sixteen records. Each read is bounded
 // by the supplied section, including a short table with an early sentinel.
 [[nodiscard]] RoomTriggerResult EvaluateRoomEventTriggers(

@@ -28,7 +28,7 @@ struct InnerRanges {
   ParticlePoint speed_jitter{};
 };
 
-// decomp: particleSetup.h:322-333.
+// decomp: src/EFFECT/particleSetup.h:322-333.
 [[nodiscard]] InnerRanges SampleInnerRanges(const ParticleSetFrame& frame,
                                             ParticleSetHost& host) {
   const ParticleSetDefinition& definition = frame.inputs.definition;
@@ -50,7 +50,7 @@ struct InnerRanges {
 }
 
 // The speed `speed` moved by a centred draw within `jitter` (none for a zero
-// jitter). decomp: particleSetup.h:335-353.
+// jitter). decomp: src/EFFECT/particleSetup.h:335-353.
 [[nodiscard]] std::int32_t JitteredSpeed(std::int32_t speed,
                                          std::int16_t jitter,
                                          ParticleSetHost& host) {
@@ -69,7 +69,7 @@ struct InnerRanges {
 }
 
 // The radius `range.x` plus a draw below `range.y` (none for zero).
-// decomp: particleSetup.h:355-365.
+// decomp: src/EFFECT/particleSetup.h:260-356.
 [[nodiscard]] std::int32_t JitteredRadius(Core::Math::Vec2 range,
                                           ParticleSetHost& host) {
   if (range.y == 0) {
@@ -79,7 +79,7 @@ struct InnerRanges {
 }
 
 // The angle `base` moved by a draw across [-jitter, jitter) (none for zero).
-// decomp: particleSetup.h:367-377.
+// decomp: src/EFFECT/particleSetup.h:260-356.
 [[nodiscard]] std::int32_t JitteredAngle(std::int32_t base, std::int32_t jitter,
                                          ParticleSetHost& host) {
   if (jitter == 0) {
@@ -97,7 +97,7 @@ struct InnerRanges {
           ParticleFixed(math::Sine(angle), radius), depth};
 }
 
-// decomp: particleSetup.h:312-396, one ribbon's two inner points.
+// decomp: src/EFFECT/particleSetup.h:260-356, one ribbon's two inner points.
 void PlaceInnerPoints(ParticleControlSet& points, ParticleSetFrame& frame,
                       ParticleSetHost& host) {
   ParticleSetScratch& scratch = frame.scratch;
@@ -157,143 +157,175 @@ void ParticleControl(ParticleSetFrame& frame, ParticleSetHost& host) {
 }  // namespace VS::Effects::Templates
 
 namespace VS::Effects {
-// decomp: PLG045.BIN func_800FA2B0 (src/EFFECT/PLG045.BIN/110.c:3).
+// decomp: PLG045.BIN vs_effect_lightningBolt_0_control
+// (src/EFFECT/particleSetup.h:260; was func_800FA2B0).
 void Plg045::ParticleControl(Templates::ParticleSetFrame& frame,
                              Templates::ParticleSetHost& host) {
   Templates::ParticleControl(frame, host);
 }
 
-// decomp: PLG057.BIN func_800FA470 (src/EFFECT/PLG057.BIN/2D0.c:5).
+// decomp: PLG057.BIN vs_effect_thunderBurstLv1_0_control
+// (src/EFFECT/particleSetup.h:260; was func_800FA470).
 void Plg057::ParticleControl(Templates::ParticleSetFrame& frame,
                              Templates::ParticleSetHost& host) {
   Templates::ParticleControl(frame, host);
 }
 
-// decomp: PLG065.BIN func_800FCCE0 (src/EFFECT/PLG065.BIN/F8.c:22).
-// decomp: PLG065.BIN func_800FCCE0 (src/EFFECT/PLG065.BIN/F8.c:38).
+// decomp: PLG065.BIN vs_effect_gaeaStrikeLv1_3_control
+// (src/EFFECT/particleSetup.h:260; was func_800FCCE0). decomp: PLG065.BIN
+// vs_effect_gaeaStrikeLv1_3_control (src/EFFECT/particleSetup.h:260; was
+// func_800FCCE0).
 void Plg065::ParticleControl(Templates::ParticleSetFrame& frame,
                              Templates::ParticleSetHost& host) {
   Templates::ParticleControl(frame, host);
 }
 
-// decomp: PLG082.BIN func_800FA2C8 (src/EFFECT/PLG082.BIN/128.c:11).
+// decomp: PLG082.BIN vs_effect_thunderbolt_0_control
+// (src/EFFECT/particleSetup.h:260; was func_800FA2C8).
 void Plg082::ParticleControl(Templates::ParticleSetFrame& frame,
                              Templates::ParticleSetHost& host) {
   Templates::ParticleControl(frame, host);
 }
 
-// decomp: PLG087.BIN func_800FEB08 (src/EFFECT/PLG087.BIN/1F0.c:34).
-// decomp: PLG087.BIN func_800FEB08 (src/EFFECT/PLG087.BIN/1F0.c:50).
+// decomp: PLG087.BIN vs_effect_apocalypse_4_control
+// (src/EFFECT/particleSetup.h:260; was func_800FEB08). decomp: PLG087.BIN
+// vs_effect_apocalypse_4_control (src/EFFECT/particleSetup.h:260; was
+// func_800FEB08).
 void Plg087::ParticleControl(Templates::ParticleSetFrame& frame,
                              Templates::ParticleSetHost& host) {
   Templates::ParticleControl(frame, host);
 }
 
-// decomp: PLG114.BIN func_800FA3A8 (src/EFFECT/PLG114.BIN/208.c:5).
+// decomp: PLG114.BIN vs_effect_numbingNeedle_0_control
+// (src/EFFECT/particleSetup.h:260; was func_800FA3A8).
 void Plg114::ParticleControl(Templates::ParticleSetFrame& frame,
                              Templates::ParticleSetHost& host) {
   Templates::ParticleControl(frame, host);
 }
 
-// decomp: PLG114.BIN func_800FC04C (src/EFFECT/PLG114.BIN/208.c:17).
-// decomp: PLG114.BIN func_800FC04C (src/EFFECT/PLG114.BIN/208.c:33).
+// decomp: PLG114.BIN vs_effect_numbingNeedle_1_control
+// (src/EFFECT/particleSetup.h:260; was func_800FC04C). decomp: PLG114.BIN
+// vs_effect_numbingNeedle_1_control (src/EFFECT/particleSetup.h:260; was
+// func_800FC04C).
 void Plg114::ParticleControl2(Templates::ParticleSetFrame& frame,
                               Templates::ParticleSetHost& host) {
   Templates::ParticleControl(frame, host);
 }
 
-// decomp: PLG146.BIN func_800FBEE4 (src/EFFECT/PLG146.BIN/1D8.c:13).
-// decomp: PLG146.BIN func_800FBEE4 (src/EFFECT/PLG146.BIN/1D8.c:29).
+// decomp: PLG146.BIN vs_effect_blackNebula_2_control
+// (src/EFFECT/particleSetup.h:260; was func_800FBEE4). decomp: PLG146.BIN
+// vs_effect_blackNebula_2_control (src/EFFECT/particleSetup.h:260; was
+// func_800FBEE4).
 void Plg146::ParticleControl(Templates::ParticleSetFrame& frame,
                              Templates::ParticleSetHost& host) {
   Templates::ParticleControl(frame, host);
 }
 
-// decomp: PLG147.BIN func_800FAEBC (src/EFFECT/PLG147.BIN/F8.c:9).
-// decomp: PLG147.BIN func_800FAEBC (src/EFFECT/PLG147.BIN/F8.c:25).
+// decomp: PLG147.BIN vs_effect_bearClaw_1_control
+// (src/EFFECT/particleSetup.h:260; was func_800FAEBC). decomp: PLG147.BIN
+// vs_effect_bearClaw_1_control (src/EFFECT/particleSetup.h:260; was
+// func_800FAEBC).
 void Plg147::ParticleControl(Templates::ParticleSetFrame& frame,
                              Templates::ParticleSetHost& host) {
   Templates::ParticleControl(frame, host);
 }
 
-// decomp: PLG152.BIN func_800FAE18 (src/EFFECT/PLG152.BIN/128.c:14).
+// decomp: PLG152.BIN vs_effect_riskbreak_1_control
+// (src/EFFECT/particleSetup.h:260; was func_800FAE18).
 void Plg152::ParticleControl(Templates::ParticleSetFrame& frame,
                              Templates::ParticleSetHost& host) {
   Templates::ParticleControl(frame, host);
 }
 
-// decomp: PLG153.BIN func_800FB9E0 (src/EFFECT/PLG153.BIN/110.c:15).
+// decomp: PLG153.BIN vs_effect_gravisAether_2_control
+// (src/EFFECT/particleSetup.h:260; was func_800FB9E0).
 void Plg153::ParticleControl(Templates::ParticleSetFrame& frame,
                              Templates::ParticleSetHost& host) {
   Templates::ParticleControl(frame, host);
 }
 
-// decomp: PLG156.BIN func_800FA2C8 (src/EFFECT/PLG156.BIN/128.c:5).
+// decomp: PLG156.BIN vs_effect_quickshock_0_control
+// (src/EFFECT/particleSetup.h:260; was func_800FA2C8).
 void Plg156::ParticleControl(Templates::ParticleSetFrame& frame,
                              Templates::ParticleSetHost& host) {
   Templates::ParticleControl(frame, host);
 }
 
-// decomp: PLG168.BIN func_800FC4B0 (src/EFFECT/PLG168.BIN/1F0.c:15).
-// decomp: PLG168.BIN func_800FC4B0 (src/EFFECT/PLG168.BIN/1F0.c:31).
+// decomp: PLG168.BIN vs_effect_vertigo_1_control
+// (src/EFFECT/particleSetup.h:260; was func_800FC4B0). decomp: PLG168.BIN
+// vs_effect_vertigo_1_control (src/EFFECT/particleSetup.h:260; was
+// func_800FC4B0).
 void Plg168::ParticleControl(Templates::ParticleSetFrame& frame,
                              Templates::ParticleSetHost& host) {
   Templates::ParticleControl(frame, host);
 }
 
-// decomp: PLG224.BIN func_800FA298 (src/EFFECT/PLG224.BIN/F8.c:5).
-// decomp: PLG224.BIN func_800FA298 (src/EFFECT/PLG224.BIN/F8.c:21).
+// decomp: PLG224.BIN vs_effect_plg224_0_control
+// (src/EFFECT/particleSetup.h:260; was func_800FA298). decomp: PLG224.BIN
+// vs_effect_plg224_0_control (src/EFFECT/particleSetup.h:260; was
+// func_800FA298).
 void Plg224::ParticleControl(Templates::ParticleSetFrame& frame,
                              Templates::ParticleSetHost& host) {
   Templates::ParticleControl(frame, host);
 }
 
-// decomp: PLG255.BIN func_800FC498 (src/EFFECT/PLG255.BIN/1D8.c:15).
-// decomp: PLG255.BIN func_800FC498 (src/EFFECT/PLG255.BIN/1D8.c:31).
+// decomp: PLG255.BIN vs_effect_plg255_1_control
+// (src/EFFECT/particleSetup.h:260; was func_800FC498). decomp: PLG255.BIN
+// vs_effect_plg255_1_control (src/EFFECT/particleSetup.h:260; was
+// func_800FC498).
 void Plg255::ParticleControl(Templates::ParticleSetFrame& frame,
                              Templates::ParticleSetHost& host) {
   Templates::ParticleControl(frame, host);
 }
 
-// decomp: PLG263.BIN func_800FC9AC (src/EFFECT/PLG263.BIN/110.c:347).
+// decomp: PLG263.BIN vs_effect_plg263_3_control
+// (src/EFFECT/particleSetup.h:260; was func_800FC9AC).
 void Plg263::ParticleControl(Templates::ParticleSetFrame& frame,
                              Templates::ParticleSetHost& host) {
   Templates::ParticleControl(frame, host);
 }
 
-// decomp: PLG265.BIN func_800FB380 (src/EFFECT/PLG265.BIN/2E8.c:9).
-// decomp: PLG265.BIN func_800FB380 (src/EFFECT/PLG265.BIN/2E8.c:25).
+// decomp: PLG265.BIN vs_effect_plg265_1_control
+// (src/EFFECT/particleSetup.h:260; was func_800FB380). decomp: PLG265.BIN
+// vs_effect_plg265_1_control (src/EFFECT/particleSetup.h:260; was
+// func_800FB380).
 void Plg265::ParticleControl(Templates::ParticleSetFrame& frame,
                              Templates::ParticleSetHost& host) {
   Templates::ParticleControl(frame, host);
 }
 
-// decomp: PLG265.BIN func_800FEA94 (src/EFFECT/PLG265.BIN/2E8.c:43).
+// decomp: PLG265.BIN vs_effect_plg265_3_control
+// (src/EFFECT/particleSetup.h:260; was func_800FEA94).
 void Plg265::ParticleControl2(Templates::ParticleSetFrame& frame,
                               Templates::ParticleSetHost& host) {
   Templates::ParticleControl(frame, host);
 }
 
-// decomp: PLG266.BIN func_800FA488 (src/EFFECT/PLG266.BIN/2E8.c:5).
+// decomp: PLG266.BIN vs_effect_plg266_0_control
+// (src/EFFECT/particleSetup.h:260; was func_800FA488).
 void Plg266::ParticleControl(Templates::ParticleSetFrame& frame,
                              Templates::ParticleSetHost& host) {
   Templates::ParticleControl(frame, host);
 }
 
-// decomp: PLG266.BIN func_800FC12C (src/EFFECT/PLG266.BIN/2E8.c:17).
-// decomp: PLG266.BIN func_800FC12C (src/EFFECT/PLG266.BIN/2E8.c:33).
+// decomp: PLG266.BIN vs_effect_plg266_1_control
+// (src/EFFECT/particleSetup.h:260; was func_800FC12C). decomp: PLG266.BIN
+// vs_effect_plg266_1_control (src/EFFECT/particleSetup.h:260; was
+// func_800FC12C).
 void Plg266::ParticleControl2(Templates::ParticleSetFrame& frame,
                               Templates::ParticleSetHost& host) {
   Templates::ParticleControl(frame, host);
 }
 
-// decomp: PLG300.BIN func_800FAF24 (src/EFFECT/PLG300.BIN/110.c:15).
+// decomp: PLG300.BIN vs_effect_plg300_1_control
+// (src/EFFECT/particleSetup.h:260; was func_800FAF24).
 void Plg300::ParticleControl(Templates::ParticleSetFrame& frame,
                              Templates::ParticleSetHost& host) {
   Templates::ParticleControl(frame, host);
 }
 
-// decomp: PLG301.BIN func_800FA2B0 (src/EFFECT/PLG301.BIN/110.c:11).
+// decomp: PLG301.BIN vs_effect_plg301_0_control
+// (src/EFFECT/particleSetup.h:260; was func_800FA2B0).
 void Plg301::ParticleControl(Templates::ParticleSetFrame& frame,
                              Templates::ParticleSetHost& host) {
   Templates::ParticleControl(frame, host);

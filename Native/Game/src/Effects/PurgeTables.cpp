@@ -428,7 +428,7 @@ const EffectRenderer kEffectEntryPoints[kEntryPointCount] = {
     VS::Effects::Templates::UpdateLivePlg301ClosedRing,
 };
 
-// decomp: src/EFFECT/EFFPURGE.BIN/0.c:157
+// decomp: src/EFFECT/EFFPURGE.BIN/0.c:125-139
 #define FBC_DEFAULT {VS_E000_0_FBC_LBA - VS_E000_P_LBA, VS_E000_0_FBC_SIZE}
 // decomp: src/EFFECT/EFFPURGE.BIN/0.c:158
 #define FBC(x) {VS_E##x##_1_FBC_LBA - VS_E000_P_LBA, VS_E##x##_1_FBC_SIZE}
@@ -878,7 +878,7 @@ const std::uint8_t kFbtCounts[kEffectCount] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 };
 
-// decomp: src/EFFECT/EFFPURGE.BIN/0.c:263
+// decomp: src/EFFECT/EFFPURGE.BIN/0.c:245
 #define FBT(x) {VS_E##x##_FBT_LBA - VS_E000_P_LBA, VS_E##x##_FBT_SIZE}
 // decomp: fbtFiles (_fbtFiles@src/EFFECT/EFFPURGE.BIN/0.c:265)
 const EffectFileExtent kFbtFiles[kTextureFileCount] = {
@@ -1046,9 +1046,9 @@ const std::uint8_t kFbtSlots[kTextureSlotCount] = {
     3, 1, 2, 3, 1, 0,
 };
 
-// decomp: src/EFFECT/EFFPURGE.BIN/0.c:375
+// decomp: src/EFFECT/EFFPURGE.BIN/0.c:357
 #define P(x) {VS_E##x##_P_LBA - VS_E000_P_LBA, VS_E##x##_P_SIZE}
-// decomp: src/EFFECT/EFFPURGE.BIN/0.c:376
+// decomp: src/EFFECT/EFFPURGE.BIN/0.c:358
 #define P_DEFAULT P(000)
 // decomp: pFiles (_pFiles@src/EFFECT/EFFPURGE.BIN/0.c:378)
 const EffectFileExtent kPackageFiles[kEffectCount] = {
@@ -1114,9 +1114,9 @@ const EffectFileExtent kPackageFiles[kEffectCount] = {
 #undef P_DEFAULT
 #undef P
 
-// decomp: src/EFFECT/EFFPURGE.BIN/0.c:561
+// decomp: src/EFFECT/EFFPURGE.BIN/0.c:580
 #define PLG(x) {VS_PLG##x##_BIN_LBA - VS_E000_P_LBA, VS_PLG##x##_BIN_SIZE}
-// decomp: src/EFFECT/EFFPURGE.BIN/0.c:562
+// decomp: src/EFFECT/EFFPURGE.BIN/0.c:581
 #define PLG_NONE {0x0000, 0x0000}
 // decomp: plgFiles (_plgFiles@src/EFFECT/EFFPURGE.BIN/0.c:564)
 const EffectFileExtent kPluginFiles[kPluginFileCount] = {

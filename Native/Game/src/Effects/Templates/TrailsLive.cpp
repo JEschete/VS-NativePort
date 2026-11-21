@@ -438,8 +438,9 @@ const LiveTransformSlot* LiveTrailHost<History>::Transform(
   return nullptr;
 }
 
-// decomp: trails5.h:257-260 and trails9.h:257-260. The original indexed the
-// transform unchecked.
+// decomp: src/EFFECT/trailEffect.h:288-322 and
+// src/EFFECT/trailEffect.h:288-322. The original indexed the transform
+// unchecked.
 template <std::size_t History>
 std::optional<Vec3> LiveTrailHost<History>::AttractionTranslation() {
   const LiveTransformSlot* transform =
@@ -453,8 +454,8 @@ std::optional<Vec3> LiveTrailHost<History>::AttractionTranslation() {
               static_cast<std::int32_t>(world.t[2])};
 }
 
-// decomp: trails5.h:499-505 and trails9.h:506-512 (the effect transform's
-// view, or the frame's view matrix).
+// decomp: src/EFFECT/trailEffect.h:495-711 and src/EFFECT/trailEffect.h:495-711
+// (the effect transform's view, or the frame's view matrix).
 template <std::size_t History>
 bool LiveTrailHost<History>::BeginProjection(bool effect_view) {
   if (!effect_view) {
@@ -496,9 +497,10 @@ bool LiveTrailHost<History>::TextureTableBound(std::size_t table) const {
          package.texture_tables[table] != nullptr;
 }
 
-// decomp: trails5.h:507-509 and trails9.h:514-516. The original stepped the
-// animation and read the frame's texture unchecked; a table the package
-// lacks, or a frame without texture info, leaves the trails undrawn this tick.
+// decomp: src/EFFECT/trailEffect.h:495-711 and
+// src/EFFECT/trailEffect.h:495-711. The original stepped the animation and read
+// the frame's texture unchecked; a table the package lacks, or a frame without
+// texture info, leaves the trails undrawn this tick.
 template <std::size_t History>
 std::optional<RingTexture> LiveTrailHost<History>::AdvanceTexture() {
   LiveParticleTextureAnimation& animation = *context_.texture;
@@ -539,10 +541,10 @@ std::array<std::uint8_t, History> LiveTrailHost<History>::Transparency() {
   return samples;
 }
 
-// decomp: trails5.h:597-610 and 646-659, trails9.h:604-617 and 653-666
-// (addPrim at the quad's depth). The original wrote past the primitive buffer
-// when it was full and indexed the ordering table unchecked; such a quad is
-// dropped here.
+// decomp: src/EFFECT/trailEffect.h:495-711 and 646-659,
+// src/EFFECT/trailEffect.h:495-711 and 653-666 (addPrim at the quad's depth).
+// The original wrote past the primitive buffer when it was full and indexed the
+// ordering table unchecked; such a quad is dropped here.
 template <std::size_t History>
 void LiveTrailHost<History>::Submit(const RingQuad& quad, std::int32_t depth) {
   std::uint32_t* const bucket =
@@ -622,7 +624,8 @@ void RunStage(BasicTrailStage<LegacyTrail<Trail>::kHistory> stage,
   }
 }
 
-// The trails9.h overlays' stage instances are byte-identical (TrailTarget.cpp
+// The src/EFFECT/trails9.h overlays' stage instances are byte-identical
+// (TrailTarget.cpp
 // ... TrailRender.cpp carry each one's decomp provenance).
 const TrailNineStages& NineStages() {
   static constexpr TrailNineStages kStages{&TrailNineTarget, &TrailNineControl,
@@ -648,8 +651,8 @@ void RunLiveTrailNineStage(TrailNineStage stage,
 }
 
 // Each entry is its overlay's VS_TRAIL_DISPATCH_FUNCTION instance
-// (trails5.h:677): the emitter lifecycle (TrailEmitter.cpp) with the
-// overlay's own emission cursor (VS_TRAIL_CORNER_STATE) and its five stage
+// (src/EFFECT/trailEffect.h:713): the emitter lifecycle (TrailEmitter.cpp) with
+// the overlay's own emission cursor (VS_TRAIL_CORNER_STATE) and its five stage
 // instances (TrailTarget.cpp ... TrailRender.cpp, which carry the decomp
 // provenance). PLG057 shares its first cursor with the nine-sample trails, so
 // its five-sample trails use the second.

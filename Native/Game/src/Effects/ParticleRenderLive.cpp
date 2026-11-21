@@ -1,4 +1,4 @@
-// decomp: func_800D6E44 (src/BATTLE/BATTLE.PRG/6E644.s:19) live binding.
+// decomp: func_800D6E44 (src/BATTLE/BATTLE.PRG/6E4CC.c:73) live binding.
 // C counterpart: rood-boi pc/src/effect_particles.c:86-368,
 // revision 3be5ba38b008cad919a2b1ca196432c8d4817335 (CC0-1.0).
 #include "Effects/ParticleRenderLive.hpp"

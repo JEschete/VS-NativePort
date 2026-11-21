@@ -212,7 +212,8 @@ const char* RefusalReason(SceneNotificationResult result) {
 }
 }  // namespace
 
-// decomp: F01379 vs_battle_displaySceneMessage (5BF94.c:3771).
+// decomp: F01379 displaySceneMessage (src/BATTLE/BATTLE.PRG/5BF94.c:3337; was
+// vs_battle_displaySceneMessage).
 void ShowLiveSceneNotification(std::int32_t kind, std::int32_t subject,
                                std::int32_t timed) {
   SceneNotificationState state;
@@ -223,7 +224,7 @@ void ShowLiveSceneNotification(std::int32_t kind, std::int32_t subject,
   if (result != SceneNotificationResult::kShown) Refuse(RefusalReason(result));
 }
 
-// decomp: F01380 func_800CB45C (5BF94.c:3802).
+// decomp: F01380 func_800CB45C (src/BATTLE/BATTLE.PRG/5BF94.c:3368).
 std::int32_t IsLiveSceneNotificationPending() {
   SceneNotificationState state;
   if (!Load(state)) return 1;
@@ -243,7 +244,7 @@ bool CleanupLiveSceneNotificationOwnedState() {
   return true;
 }
 
-// decomp: F01381 func_800CB50C (5BF94.c:3829).
+// decomp: F01381 func_800CB50C (src/BATTLE/BATTLE.PRG/5BF94.c:3395).
 void ReleaseLiveSceneNotification() {
   static_cast<void>(CleanupLiveSceneNotificationOwnedState());
 }

@@ -340,7 +340,7 @@ int RunLiveAnalyzeGrid(LiveRendererSlot* slot, unsigned int command, int packed,
 }
 }  // namespace
 
-// decomp: vs_effect_analyze (src/EFFECT/PLG005.BIN/18.c:35).
+// decomp: vs_effect_analyze_0 (src/EFFECT/grids.h:40; was vs_effect_analyze).
 int UpdateLivePlg005AnalyzeGrid(LiveRendererSlot* slot, unsigned int command,
                                 int packed) {
   return RunLiveAnalyzeGrid(slot, command, packed, Plg005::UpdateAnalyzeGrid);

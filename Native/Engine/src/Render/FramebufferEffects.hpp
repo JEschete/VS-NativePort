@@ -4,7 +4,7 @@
 #include <cstdint>
 
 namespace VS::Render {
-// decomp: D_800F1A68_t (src/BATTLE/BATTLE.PRG/146C.h:726)
+// decomp: D_800F1A68 (src/BATTLE/BATTLE.PRG/146C.c:350; was D_800F1A68_t)
 struct FramebufferEffectTranslation {
   std::int32_t x;
   std::int32_t y;

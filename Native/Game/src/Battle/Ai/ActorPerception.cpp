@@ -224,7 +224,7 @@ std::uint32_t EncodePerceivedRelation(const PerceivedRelation& relation) {
          Put(relation.marked, kMarkedBit);
 }
 
-// decomp: checkExtent (src/BATTLE/BATTLE.PRG/6FC00.c:646).
+// decomp: checkExtent (src/BATTLE/BATTLE.PRG/6FC00.c:146).
 bool IsTargetOccludedAtBodyHeight(const TargetPerceptionWorld& world,
                                   const PerceivingObserver& observer,
                                   int target, Position3 target_position) {
@@ -234,7 +234,7 @@ bool IsTargetOccludedAtBodyHeight(const TargetPerceptionWorld& world,
                                        extent, observer.body_height);
 }
 
-// decomp: checkHeight (src/BATTLE/BATTLE.PRG/6FC00.c:660).
+// decomp: checkHeight (src/BATTLE/BATTLE.PRG/6FC00.c:154).
 bool IsTargetOccludedAtPointHeight(const TargetPerceptionWorld& world,
                                    const PerceivingObserver& observer,
                                    int target, Position3 target_position) {
@@ -246,7 +246,7 @@ bool IsTargetOccludedAtPointHeight(const TargetPerceptionWorld& world,
       std::abs(static_cast<int>(observer.point_height)));
 }
 
-// decomp: func_800D87E8 (src/BATTLE/BATTLE.PRG/6FC00.c:679).
+// decomp: func_800D87E8 (src/BATTLE/BATTLE.PRG/6FC00.c:162).
 bool UpdateTargetPerception(TargetPerceptionWorld& world,
                             PerceivingObserver& observer, int target) {
   if (target < 0 || target >= kPerceptionSlots) return false;
@@ -288,7 +288,7 @@ bool UpdateTargetPerception(TargetPerceptionWorld& world,
   return true;
 }
 
-// decomp: func_800D8EF4 (src/BATTLE/BATTLE.PRG/6FC00.c:1003).
+// decomp: func_800D8EF4 (src/BATTLE/BATTLE.PRG/6FC00.c:328).
 void BeginActorPerception(PerceptionRoom& room) {
   constexpr std::uint16_t kReadinessCeiling = 0xFFFE;
   room.candidate_engaged = 0;
@@ -535,7 +535,7 @@ Step FinishFrame(ActorPerceptionWorld& world, PerceivingActor& actor) {
 }
 }  // namespace
 
-// decomp: func_800D8EF4 (src/BATTLE/BATTLE.PRG/6FC00.c:1009).
+// decomp: func_800D8EF4 (src/BATTLE/BATTLE.PRG/6FC00.c:324-547).
 bool UpdatePerceivingActor(ActorPerceptionWorld& world,
                            PerceivingActor& actor) {
   const int flags = actor.battle.command_state;

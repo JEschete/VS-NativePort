@@ -43,24 +43,26 @@ class LiveEventCameraTrackHost final : public EventCameraTrackHost {
       int actor, int tag) override;
 };
 
-// decomp: BATTLE.PRG func_800BC2E8 (F01221, 4A0A8.c:3200), opcodes 0xC0-0xDF
+// decomp: BATTLE.PRG vs_battle_script_Cx_Dx_camera (F01221,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:3850; was func_800BC2E8), opcodes 0xC0-0xDF
 // Operation 6 has no case: it warns and returns -1 where the original
 // returned its epilogue address.
 std::intptr_t CommandCameraMotionEntry(std::uint8_t* instruction,
                                        std::int16_t thread_index);
-// decomp: BATTLE.PRG func_800BCA8C (F01223, 4A0A8.c:3389)
+// decomp: BATTLE.PRG func_800BCA8C (F01223, src/BATTLE/BATTLE.PRG/4DEA8.c:4039)
 // `other` is the original's unread second argument.
 void UpdateEventCameraTrackEntry(CameraTrack* track, CameraTrack* other);
-// decomp: BATTLE.PRG func_800BCFB4 (F01224, 4A0A8.c:3502)
+// decomp: BATTLE.PRG func_800BCFB4 (F01224, src/BATTLE/BATTLE.PRG/4DEA8.c:4152)
 void AdvanceTerrainCameraTrackEntry(CameraTrack* track);
-// decomp: BATTLE.PRG func_800BD2B8 (F01225, 4A0A8.c:3556)
+// decomp: BATTLE.PRG func_800BD2B8 (F01225, src/BATTLE/BATTLE.PRG/4DEA8.c:4206)
 // Reads the probe frame from the record; the GTE registers are untouched.
 int EventCameraGroundClearanceEntry(VS::Core::Gte::MATRIX* probe);
-// decomp: BATTLE.PRG func_800BE53C (F01239, 4A0A8.c:4074)
+// decomp: BATTLE.PRG func_800BE53C (F01239, src/BATTLE/BATTLE.PRG/4DEA8.c:4723)
 void ScaleEventCameraTrackDurationEntry(CameraTrack* track);
-// decomp: BATTLE.PRG func_800BE5A4 (F01240, 4A0A8.c:4082)
+// decomp: BATTLE.PRG func_800BE5A4 (F01240, src/BATTLE/BATTLE.PRG/4DEA8.c:4731)
 void ScaleEventCameraDurationEntry(std::int16_t selector);
-// decomp: BATTLE.PRG _setVectorImm (F01246, 4A0A8.c:4148)
+// decomp: BATTLE.PRG setVectorImm (F01246, src/BATTLE/BATTLE.PRG/4DEA8.c:4797;
+// was _setVectorImm)
 VS::Core::Gte::VECTOR* ReadScriptFixedVectorEntry(
     VS::Core::Gte::VECTOR* destination, std::uint8_t* operands);
 }  // namespace VS::Event

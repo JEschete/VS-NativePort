@@ -65,13 +65,13 @@ std::optional<SecondaryEffectPhase> ToSecondaryEffectPhase(std::int32_t value) {
   }
 }
 
-// decomp: BATTLE.PRG func_800CF484 (src/BATTLE/BATTLE.PRG/5BF94.c:5548)
+// decomp: BATTLE.PRG func_800CF484 (src/BATTLE/BATTLE.PRG/5BF94.c:5113)
 void SetSecondaryEffectPhase(std::int16_t& context_phase,
                              SecondaryEffectPhase phase) {
   context_phase = std::to_underlying(phase);
 }
 
-// decomp: BATTLE.PRG func_800CE714 (src/BATTLE/BATTLE.PRG/5BF94.c:5074)
+// decomp: BATTLE.PRG func_800CE714 (src/BATTLE/BATTLE.PRG/5BF94.c:4639)
 void InitEffectInstance(const EffectSpawn& spawn, EffectInstanceStart& record) {
   record.Begin(
       {.priority = static_cast<std::uint8_t>(spawn.priority),
@@ -84,19 +84,19 @@ void InitEffectInstance(const EffectSpawn& spawn, EffectInstanceStart& record) {
   record.TakeEndpoints();
 }
 
-// decomp: BATTLE.PRG func_800CE83C (src/BATTLE/BATTLE.PRG/5BF94.c:5114)
+// decomp: BATTLE.PRG func_800CE83C (src/BATTLE/BATTLE.PRG/5BF94.c:4679)
 LiveEffectInstance* CreatePrimaryEffectInstance(
     std::int32_t priority, EffectInstanceChain& primaries) {
   return CreateEffectInstance(priority, primaries);
 }
 
-// decomp: BATTLE.PRG func_800CF55C (src/BATTLE/BATTLE.PRG/5BF94.c:5593)
+// decomp: BATTLE.PRG func_800CF55C (src/BATTLE/BATTLE.PRG/5BF94.c:5158)
 LiveEffectInstance* CreateSecondaryEffectInstance(
     std::int32_t priority, EffectInstanceChain& secondaries) {
   return CreateEffectInstance(priority, secondaries);
 }
 
-// decomp: BATTLE.PRG func_800CE8F4 (src/BATTLE/BATTLE.PRG/5BF94.c:5139)
+// decomp: BATTLE.PRG func_800CE8F4 (src/BATTLE/BATTLE.PRG/5BF94.c:4704)
 void DestroyPrimaryEffectInstance(LiveEffectInstance& instance,
                                   EffectInstanceChain& primaries) {
   static_cast<void>(Unlink(primaries, instance));
@@ -112,7 +112,7 @@ void DestroyPrimaryEffectInstance(LiveEffectInstance& instance,
   primaries.Free(instance);
 }
 
-// decomp: BATTLE.PRG func_800CF614 (src/BATTLE/BATTLE.PRG/5BF94.c:5617)
+// decomp: BATTLE.PRG func_800CF614 (src/BATTLE/BATTLE.PRG/5BF94.c:5182)
 void DestroySecondaryEffectInstance(LiveEffectInstance& instance,
                                     EffectInstanceChain& secondaries) {
   static_cast<void>(Unlink(secondaries, instance));
@@ -121,7 +121,7 @@ void DestroySecondaryEffectInstance(LiveEffectInstance& instance,
   secondaries.Free(instance);
 }
 
-// decomp: BATTLE.PRG func_800CF694 (src/BATTLE/BATTLE.PRG/5BF94.c:5636)
+// decomp: BATTLE.PRG func_800CF694 (src/BATTLE/BATTLE.PRG/5BF94.c:5201)
 LiveRendererSlot* AttachEffectRenderer(RendererChain& renderers,
                                        EffectRenderer renderer,
                                        std::int32_t parameters) {
@@ -135,7 +135,7 @@ LiveRendererSlot* AttachEffectRenderer(RendererChain& renderers,
   return slot;
 }
 
-// decomp: BATTLE.PRG func_800CF70C (src/BATTLE/BATTLE.PRG/5BF94.c:5647)
+// decomp: BATTLE.PRG func_800CF70C (src/BATTLE/BATTLE.PRG/5BF94.c:5212)
 bool DetachEffectRenderer(RendererChain& renderers, LiveRendererSlot& slot) {
   if (!Unlink(renderers, slot)) {
     return false;
@@ -144,7 +144,7 @@ bool DetachEffectRenderer(RendererChain& renderers, LiveRendererSlot& slot) {
   return true;
 }
 
-// decomp: BATTLE.PRG func_800D4910 (src/BATTLE/BATTLE.PRG/5BF94.c:7582)
+// decomp: BATTLE.PRG func_800D4910 (src/BATTLE/BATTLE.PRG/5BF94.c:6575)
 void UpdateEffectRenderers(LiveEffectInstance& instance,
                            EffectRendererUpdates& renderers) {
   LiveRendererSlot* slot = renderers.FirstRenderer(instance);

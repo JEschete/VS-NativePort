@@ -36,17 +36,21 @@ struct CameraTransitionRecord {
   std::int32_t transition_frames;
 };
 
-// decomp: _firstPersonViewEnabled (BATTLE/BATTLE.PRG 146C.c:648): 1 while
+// decomp: firstPersonViewEnabled (BATTLE/BATTLE.PRG
+// src/BATTLE/BATTLE.PRG/146C.c:319; was _firstPersonViewEnabled): 1 while
 // Select may enter the first-person view.
 extern int isFirstPersonViewEnabled;
-// decomp: vs_battle_cameraTransition (BATTLE/BATTLE.PRG 146C.h:1119): the
-// first-person transition's high-end heap record, null outside the view.
+// decomp: vs_battle_cameraTransition (BATTLE/BATTLE.PRG
+// src/BATTLE/BATTLE.PRG/camera.h:56): the first-person transition's high-end
+// heap record, null outside the view.
 extern CameraTransitionRecord* cameraTransition;
-// decomp: D_800F19C8 (BATTLE/BATTLE.PRG 146C.c:666): 1 while the
+// decomp: firstPersonRendering (BATTLE/BATTLE.PRG
+// src/BATTLE/BATTLE.PRG/146CPrivate.h:362; was D_800F19C8): 1 while the
 // first-person view hides the room's occluding geometry.
 extern int roomGeometryDrawMode;
-// decomp: vs_battle_cameraCurrentSpherical (BATTLE/BATTLE.PRG 146C.h:1096):
-// the orbit's angles, quarter turn, zoom and tracking speed.
+// decomp: vs_battle_cameraCurrentSpherical (BATTLE/BATTLE.PRG
+// src/BATTLE/BATTLE.PRG/camera.h:50): the orbit's angles, quarter turn, zoom
+// and tracking speed.
 extern SphericalCamera sphericalCamera;
 
 }  // namespace VS::Field

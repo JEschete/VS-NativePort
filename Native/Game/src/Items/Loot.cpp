@@ -24,7 +24,8 @@ void CopyPresentGems(std::span<InventoryGem, kWeaponGemCount> looted,
 }
 }  // namespace
 
-// decomp: BATTLE.PRG _dropWeaponRand (src/BATTLE/BATTLE.PRG/146C.c:1608)
+// decomp: BATTLE.PRG dropWeaponRand (src/BATTLE/BATTLE.PRG/146C.c:1251; was
+// _dropWeaponRand)
 bool RollEnemyWeaponDrop(LootedWeapon& looted, const WeaponLoadout& base,
                          ItemRandom& random) {
   if (!DrawDrops(base.drop_rate, random)) return false;
@@ -36,7 +37,8 @@ bool RollEnemyWeaponDrop(LootedWeapon& looted, const WeaponLoadout& base,
   return true;
 }
 
-// decomp: BATTLE.PRG _dropShieldRand (src/BATTLE/BATTLE.PRG/146C.c:1632)
+// decomp: BATTLE.PRG dropShieldRand (src/BATTLE/BATTLE.PRG/146C.c:1275; was
+// _dropShieldRand)
 bool RollEnemyShieldDrop(LootedShield& looted, const ShieldLoadout& base,
                          ItemRandom& random) {
   if (!DrawDrops(base.drop_rate, random)) return false;
@@ -46,7 +48,8 @@ bool RollEnemyShieldDrop(LootedShield& looted, const ShieldLoadout& base,
   return true;
 }
 
-// decomp: BATTLE.PRG _dropAccessoryRand (src/BATTLE/BATTLE.PRG/146C.c:1652)
+// decomp: BATTLE.PRG dropAccessoryRand (src/BATTLE/BATTLE.PRG/146C.c:1295; was
+// _dropAccessoryRand)
 bool RollEnemyAccessoryDrop(LootedArmor& looted,
                             const AccessorySpawnLoadout& base,
                             ItemRandom& random) {
@@ -56,7 +59,8 @@ bool RollEnemyAccessoryDrop(LootedArmor& looted,
   return true;
 }
 
-// decomp: BATTLE.PRG _dropArmorRand (src/BATTLE/BATTLE.PRG/146C.c:1665)
+// decomp: BATTLE.PRG dropArmorRand (src/BATTLE/BATTLE.PRG/146C.c:1308; was
+// _dropArmorRand)
 bool RollEnemyArmorDrop(std::span<LootedArmor, kLootArmorSlots> looted,
                         const ArmorLoadout& base, ItemRandom& random) {
   if (!DrawDrops(base.drop_rate, random)) return false;
@@ -69,7 +73,8 @@ bool RollEnemyArmorDrop(std::span<LootedArmor, kLootArmorSlots> looted,
   return true;
 }
 
-// decomp: BATTLE.PRG _dropMisc (src/BATTLE/BATTLE.PRG/146C.c:1684)
+// decomp: BATTLE.PRG dropMisc (src/BATTLE/BATTLE.PRG/146C.c:1327; was
+// _dropMisc)
 bool CopyGuaranteedEnemyItemDrops(
     BattleLoot& looted,
     std::span<const MiscItemStack, kGuaranteedDropCount> base) {
@@ -85,7 +90,8 @@ bool CopyGuaranteedEnemyItemDrops(
   return dropped;
 }
 
-// decomp: BATTLE.PRG _dropMiscRand (src/BATTLE/BATTLE.PRG/146C.c:1705)
+// decomp: BATTLE.PRG dropMiscRand (src/BATTLE/BATTLE.PRG/146C.c:1348; was
+// _dropMiscRand)
 bool RollEnemyItemDrop(BattleLoot& looted, const MiscItemDrop& base,
                        ItemRandom& random) {
   auto& item = looted.misc[kRandomDropSlot];
@@ -96,9 +102,9 @@ bool RollEnemyItemDrop(BattleLoot& looted, const MiscItemDrop& base,
   return true;
 }
 
-// decomp: BATTLE.PRG _dropLoot (src/BATTLE/BATTLE.PRG/146C.c:1720)
-// The original rolled into the reserved node; an enemy already listed (or one
-// that dropped nothing) gives the node back.
+// decomp: BATTLE.PRG dropLoot (src/BATTLE/BATTLE.PRG/146C.c:1363; was
+// _dropLoot) The original rolled into the reserved node; an enemy already
+// listed (or one that dropped nothing) gives the node back.
 void QueueEnemyLoot(const EnemyDrops& enemy, LootList& list,
                     ItemRandom& random) {
   if (!list.ReserveEntry()) return;
@@ -120,7 +126,7 @@ void QueueEnemyLoot(const EnemyDrops& enemy, LootList& list,
   list.ReleaseReservedEntry();
 }
 
-// decomp: BATTLE.PRG func_8006FB48 (src/BATTLE/BATTLE.PRG/146C.c:3372)
+// decomp: BATTLE.PRG func_8006FB48 (src/BATTLE/BATTLE.PRG/146C.c:3076)
 void OpenPendingEnemyLoot(const LootList& list, LootFlowHost& flow) {
   if (flow.RewardStage() <= kEnemyLootRewardStage) {
     flow.WaitForPostActionMovement();
@@ -133,7 +139,7 @@ void OpenPendingEnemyLoot(const LootList& list, LootFlowHost& flow) {
   flow.OpenEnemyLootList();
 }
 
-// decomp: BATTLE.PRG func_8007BA98 (src/BATTLE/BATTLE.PRG/146C.c:8470)
+// decomp: BATTLE.PRG func_8007BA98 (src/BATTLE/BATTLE.PRG/146C.c:8399)
 void PresentScriptedLoot(
     std::span<const MiscItemStack, kGuaranteedDropCount> items, LootList& list,
     LootFlowHost& flow) {
@@ -152,7 +158,7 @@ void PresentScriptedLoot(
   flow.OpenScriptedLootList();
 }
 
-// decomp: BATTLE.PRG func_8008A6FC (src/BATTLE/BATTLE.PRG/146C.c:15596)
+// decomp: BATTLE.PRG func_8008A6FC (src/BATTLE/BATTLE.PRG/146C.c:15466)
 // Resetting the loot pages first is a port fix: room exit and a Combat Lab
 // stop drop the menu's references before the entries are freed.
 void ClearRoomLootList(LootList& list, LootFlowHost& flow) {
@@ -160,7 +166,7 @@ void ClearRoomLootList(LootList& list, LootFlowHost& flow) {
   list.Clear();
 }
 
-// decomp: BATTLE.PRG func_8008D508 (src/BATTLE/BATTLE.PRG/146C.c:16832)
+// decomp: BATTLE.PRG func_8008D508 (src/BATTLE/BATTLE.PRG/146C.c:16706)
 std::optional<std::size_t> TreasureChestAtTile(
     std::span<const TreasureChest> chests, std::int32_t tile_x,
     std::int32_t tile_z, std::int32_t tile_layer) {
@@ -173,7 +179,7 @@ std::optional<std::size_t> TreasureChestAtTile(
   return static_cast<std::size_t>(chest - chests.begin());
 }
 
-// decomp: BATTLE.PRG func_8008D710 (src/BATTLE/BATTLE.PRG/146C.c:16903)
+// decomp: BATTLE.PRG func_8008D710 (src/BATTLE/BATTLE.PRG/146C.c:16777)
 void RestoreRoomChestStates(std::span<TreasureChest> chests,
                             ChestStateHost& host) {
   for (auto& chest : chests) {
@@ -190,14 +196,14 @@ void RestoreRoomChestStates(std::span<TreasureChest> chests,
   }
 }
 
-// decomp: BATTLE.PRG func_8008E370 (src/BATTLE/BATTLE.PRG/146C.c:17285)
+// decomp: BATTLE.PRG func_8008E370 (src/BATTLE/BATTLE.PRG/146C.c:17164)
 std::size_t RoomTreasureChests(std::optional<std::uint32_t> section_bytes) {
   return section_bytes ? *section_bytes / sizeof(TreasureChest) : 0;
 }
 
-// decomp: BATTLE.PRG _loadMpdLootSection (src/BATTLE/BATTLE.PRG/146C.c:17389)
-// The original wrote the first record even when the section was too short to
-// hold one.
+// decomp: BATTLE.PRG loadMpdLootSection (src/BATTLE/BATTLE.PRG/146C.c:17268;
+// was _loadMpdLootSection) The original wrote the first record even when the
+// section was too short to hold one.
 ItemsStatus LoadRoomChestLoot(std::span<TreasureChest> chests,
                               const BattleLoot& loot) {
   if (chests.empty()) return ItemsStatus::kNoChests;

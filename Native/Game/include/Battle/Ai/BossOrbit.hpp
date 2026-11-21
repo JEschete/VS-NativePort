@@ -155,7 +155,7 @@ class BossOrbitWorld {
   virtual void QueueBattleCommand(const ActorCommandPacket& packet) = 0;
 };
 
-// decomp: func_800E7698 (src/BATTLE/BATTLE.PRG/7EE98.c:506).
+// decomp: func_800E7698 (src/BATTLE/BATTLE.PRG/7EE98.c:16).
 // One step of the retreat: phase 0 aims away from the centre and starts the
 // path; each call moves by the next path entry along that angle and the
 // model flag marks the first 14 steps. At the path's end the boss recovers
@@ -166,14 +166,14 @@ class BossOrbitWorld {
                                                           OrbitingBoss& boss,
                                                           ArenaOrbit& orbit);
 
-// decomp: func_800E78F4 (src/BATTLE/BATTLE.PRG/7EE98.c:553).
+// decomp: func_800E78F4 (src/BATTLE/BATTLE.PRG/7EE98.c:63).
 // Whether the candidate ranked first is off cooldown and its threshold is
 // below the room's readiness level. Nothing for an empty first ranking slot
 // or without the room AI state.
 [[nodiscard]] std::optional<bool> IsBossActionReady(BossOrbitWorld& world,
                                                     OrbitingBoss& boss);
 
-// decomp: func_800E7960 (src/BATTLE/BATTLE.PRG/7EE98.c:599).
+// decomp: func_800E7960 (src/BATTLE/BATTLE.PRG/7EE98.c:77).
 // Circles the centre: eases the radius to 1024 and the saved height to 160,
 // accelerates toward facing the player when an action is ready and away
 // otherwise, requests a move at 75% and 25% HP or at random while slow and
@@ -183,7 +183,7 @@ class BossOrbitWorld {
                                            OrbitingBoss& boss,
                                            ArenaOrbit& orbit);
 
-// decomp: func_800E7F8C (src/BATTLE/BATTLE.PRG/7EE98.c:753).
+// decomp: func_800E7F8C (src/BATTLE/BATTLE.PRG/7EE98.c:261).
 // The boss's decision behaviour: engages when ready, counts the move
 // cooldown down and follows the arena progress. Orbiting restores a saved
 // plan, circles and starts a requested move while its core limb lives;

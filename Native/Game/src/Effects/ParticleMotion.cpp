@@ -93,7 +93,7 @@ void AgeParticle(LiveParticle& particle, ParticleTickHost& host) {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800CFAAC (src/BATTLE/BATTLE.PRG/5BF94.c:5770)
+// decomp: BATTLE.PRG func_800CFAAC (src/BATTLE/BATTLE.PRG/5BF94.c:5335)
 std::uint32_t StepScreenPointToward(std::uint32_t point,
                                     std::uint32_t target) noexcept {
   if (point == target) {
@@ -118,7 +118,7 @@ std::uint32_t StepScreenPointToward(std::uint32_t point,
   return x | (y << kHalfwordBits);
 }
 
-// decomp: BATTLE.PRG func_800D2A38 (src/BATTLE/BATTLE.PRG/5BF94.c:6915)
+// decomp: BATTLE.PRG func_800D2A38 (src/BATTLE/BATTLE.PRG/5BF94.c:6483)
 ParticleSpawn PlaceParticleSpawn(std::uint32_t flags, ParticleOffset offset,
                                  Vec3 origin, ParticleRotation& rotation) {
   const Vec3 aim = (flags & kParticleRotateSpawnOffset) != 0
@@ -127,7 +127,7 @@ ParticleSpawn PlaceParticleSpawn(std::uint32_t flags, ParticleOffset offset,
   return {.aim = aim, .position = Add(origin, Fixed(aim))};
 }
 
-// decomp: BATTLE.PRG func_800D52A4 (src/BATTLE/BATTLE.PRG/5BF94.c:7830)
+// decomp: BATTLE.PRG func_800D52A4 (src/BATTLE/BATTLE.PRG/5BF94.c:6822)
 void StepParticleMotion(ParticleMotionState& state,
                         const ParticleForces& forces) {
   StepAxis(state.position.x, state.velocity.x, state.force.x, forces.gravity.x,
@@ -151,7 +151,7 @@ void IntegrateParticleMotion(LiveParticle* first,
   }
 }
 
-// decomp: BATTLE.PRG func_800D4C18 (src/BATTLE/BATTLE.PRG/5BF94.c:7658)
+// decomp: BATTLE.PRG func_800D4C18 (src/BATTLE/BATTLE.PRG/5BF94.c:6650)
 void TickEffectParticles(LiveParticle* first, ParticleTickHost& host) {
   host.Integrate(first);
   host.Draw();

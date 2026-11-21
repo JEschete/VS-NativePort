@@ -324,7 +324,8 @@ RingQuadUvs SixteenColumnRingUvs(std::size_t texture_columns,
   if (band >= kRingBands || texture_columns == 0) {
     return {};
   }
-  // decomp: closedRings.h VS_CLOSED_RING_TEXTURE_COLUMN, column & (N - 1).
+  // decomp: src/EFFECT/closedRings.h VS_CLOSED_RING_TEXTURE_COLUMN, column & (N
+  // - 1).
   const std::size_t tile = column & (texture_columns - 1);
   const std::uint8_t left =
       RingTextureStep(texture.u, texture.w, tile, texture_columns);

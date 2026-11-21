@@ -91,7 +91,7 @@ bool UpdateSelected(DecisionUpdateWorld& world) {
 }
 }  // namespace
 
-// decomp: func_800DAC80 (src/BATTLE/BATTLE.PRG/71618.c:1006).
+// decomp: func_800DAC80 (src/BATTLE/BATTLE.PRG/71618.c:458).
 std::optional<int> TryExecuteActionCandidate(ActionExecutionWorld& world,
                                              std::size_t handle) {
   if (!world.Candidate(handle)) {
@@ -122,7 +122,7 @@ std::optional<int> TryExecuteActionCandidate(ActionExecutionWorld& world,
   return 1;
 }
 
-// decomp: func_800DAD9C (src/BATTLE/BATTLE.PRG/71618.c:1093).
+// decomp: func_800DAD9C (src/BATTLE/BATTLE.PRG/71618.c:490).
 std::optional<int> TryExecutePlannedActions(ActionExecutionWorld& world) {
   for (int rank = 0;; ++rank) {
     const int count = world.CandidateCount();
@@ -138,7 +138,7 @@ std::optional<int> TryExecutePlannedActions(ActionExecutionWorld& world) {
   return ExecuteFallback(world);
 }
 
-// decomp: func_800DAED0 (src/BATTLE/BATTLE.PRG/71618.c:1128).
+// decomp: func_800DAED0 (src/BATTLE/BATTLE.PRG/71618.c:527).
 bool UpdateActorDecisions(DecisionUpdateWorld& world) {
   const auto head = world.ActorHead();
   if (head == 0 || !world.ActorId(head)) {

@@ -320,7 +320,7 @@ void StoreHeadTracking(const HeadTracking& tracking,
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_8009E228 (src/BATTLE/BATTLE.PRG/30DB0.c:2525)
+// decomp: BATTLE.PRG func_8009E228 (src/BATTLE/BATTLE.PRG/30DB0.c:2591)
 int LiveActorPitchToPoint(const VS::Actors::ActorRecord* actor,
                           const SVECTOR* target) {
   if (target == nullptr) return 0;
@@ -335,7 +335,8 @@ int LiveActorPitchToPoint(const VS::Actors::ActorRecord* actor,
                       root.vy);
 }
 
-// decomp: BATTLE.PRG func_8009FC60 (src/BATTLE/BATTLE.PRG/30DB0.c:3512)
+// decomp: BATTLE.PRG setActorLook (src/BATTLE/BATTLE.PRG/30DB0.c:3612; was
+// func_8009FC60)
 int SetLiveActorHeadTracking(int actor_id, int target, const SVECTOR* aim,
                              int step) {
   VS::Actors::ActorRecord* actor =
@@ -358,7 +359,7 @@ int SetLiveActorHeadTracking(int actor_id, int target, const SVECTOR* aim,
   return 0;
 }
 
-// decomp: BATTLE.PRG func_8009FD38 (src/BATTLE/BATTLE.PRG/30DB0.c:3540)
+// decomp: BATTLE.PRG func_8009FD38 (src/BATTLE/BATTLE.PRG/30DB0.c:3640)
 void ResetLiveActorHeadTrackingSpeed(VS::Actors::ActorRecord* actor) {
   if (actor == nullptr) {
     WarnActorRefused("ResetActorHeadTrackingSpeed", "no actor record");
@@ -367,7 +368,7 @@ void ResetLiveActorHeadTrackingSpeed(VS::Actors::ActorRecord* actor) {
   actor->head_tracking.pad = HeadTrackingSpeed(actor->collision_radius);
 }
 
-// decomp: BATTLE.PRG func_800A1178 (src/BATTLE/BATTLE.PRG/30DB0.c:4200)
+// decomp: BATTLE.PRG func_800A1178 (src/BATTLE/BATTLE.PRG/30DB0.c:4317)
 int LiveActorTaggedBoneMatrix(int actor_id, int tag, MATRIX* matrix_out,
                               std::uint32_t* length_out) {
   const int bone =
@@ -377,7 +378,7 @@ int LiveActorTaggedBoneMatrix(int actor_id, int tag, MATRIX* matrix_out,
   return 0;
 }
 
-// decomp: BATTLE.PRG func_800A11D8 (src/BATTLE/BATTLE.PRG/30DB0.c:4210)
+// decomp: BATTLE.PRG func_800A11D8 (src/BATTLE/BATTLE.PRG/30DB0.c:4327)
 void LiveActorBoneMatrix(int actor_id, int bone, MATRIX* matrix_out,
                          std::uint32_t* length_out) {
   constexpr const char* kOperation = "ActorBoneMatrix";
@@ -396,7 +397,7 @@ void LiveActorBoneMatrix(int actor_id, int bone, MATRIX* matrix_out,
   *length_out = static_cast<std::uint32_t>(*length);
 }
 
-// decomp: BATTLE.PRG func_800A1280 (src/BATTLE/BATTLE.PRG/30DB0.c:4224)
+// decomp: BATTLE.PRG func_800A1280 (src/BATTLE/BATTLE.PRG/30DB0.c:4341)
 int ProjectLiveActorTaggedBone(int actor_id, int tag, SVECTOR* screen_out,
                                int endpoint) {
   constexpr const char* kOperation = "ProjectActorTaggedBone";
@@ -441,7 +442,7 @@ int ProjectLiveActorTaggedBone(int actor_id, int tag, SVECTOR* screen_out,
   return 0;
 }
 
-// decomp: BATTLE.PRG func_800A13EC (src/BATTLE/BATTLE.PRG/30DB0.c:4280)
+// decomp: BATTLE.PRG func_800A13EC (src/BATTLE/BATTLE.PRG/30DB0.c:4397)
 int ProjectLiveActorBone(int actor_id, int bone, int* screen_out,
                          int endpoint) {
   const int status =
@@ -491,7 +492,7 @@ int LiveActorBoneTag(int actor_id, int bone, int kind) {
   return value ? *value : kSkeletonNoLimbGroup;
 }
 
-// decomp: BATTLE.PRG func_800A1720 (src/BATTLE/BATTLE.PRG/38C1C.c:195)
+// decomp: BATTLE.PRG func_800A1720 (src/BATTLE/BATTLE.PRG/38C1C.c:166)
 int LiveActorAnchorMatrix(int actor_id, int selector, MATRIX* matrix_out,
                           int* length_out) {
   if (selector != kGroundAnchorSelector) {
@@ -510,7 +511,7 @@ int LiveActorAnchorMatrix(int actor_id, int selector, MATRIX* matrix_out,
   return 0;
 }
 
-// decomp: BATTLE.PRG func_800A17BC (src/BATTLE/BATTLE.PRG/38C1C.c:216)
+// decomp: BATTLE.PRG func_800A17BC (src/BATTLE/BATTLE.PRG/38C1C.c:187)
 int LiveActorBoneWorldMatrix(int actor_id, int selector, MATRIX* matrix_out,
                              int* length_out) {
   constexpr const char* kOperation = "ActorBoneWorldMatrix";
@@ -581,20 +582,20 @@ int LiveActorTaggedBonePosition(int actor_id, int tag, SVECTOR* position_out,
   return LiveActorBoneEndpointPosition(actor_id, bone, position_out, endpoint);
 }
 
-// decomp: BATTLE.PRG func_800A1AF8 (src/BATTLE/BATTLE.PRG/38C1C.c:300)
+// decomp: BATTLE.PRG func_800A1AF8 (src/BATTLE/BATTLE.PRG/38C1C.c:271)
 int LiveActorBonePosition(int actor_id, int bone, SVECTOR* position_out,
                           int endpoint) {
   return LiveActorBoneEndpointPosition(actor_id, bone, position_out, endpoint);
 }
 
-// decomp: BATTLE.PRG func_800A1B28 (src/BATTLE/BATTLE.PRG/38C1C.c:311)
+// decomp: BATTLE.PRG func_800A1B28 (src/BATTLE/BATTLE.PRG/38C1C.c:282)
 int LiveActorHighGroupBonePosition(int actor_id, int limb,
                                    SVECTOR* position_out, int endpoint) {
   return LimbGroupBonePosition(actor_id, limb, BoneTagKind::kHighLimb,
                                position_out, endpoint);
 }
 
-// decomp: BATTLE.PRG func_800A1B9C (src/BATTLE/BATTLE.PRG/38C1C.c:328)
+// decomp: BATTLE.PRG func_800A1B9C (src/BATTLE/BATTLE.PRG/38C1C.c:299)
 int LiveActorLowGroupBonePosition(int actor_id, int limb, SVECTOR* position_out,
                                   int endpoint) {
   return LimbGroupBonePosition(actor_id, limb, BoneTagKind::kLowLimb,

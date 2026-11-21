@@ -711,7 +711,8 @@ std::optional<std::size_t> RowEntry(int initialize) {
 }
 }  // namespace
 
-// decomp: _topLevelMenuTransition (src/MENU/MENUB.PRG/260.c:61).
+// decomp: topLevelMenuTransition (src/MENU/MENUB.PRG/260.c:64; was
+// _topLevelMenuTransition).
 int UpdateLiveInventoryTransition(int initialize) {
   if (initialize < 0 || initialize > static_cast<int>(LootCategory::kManage)) {
     Refuse("loot inventory entry is not an item category");
@@ -723,27 +724,29 @@ int UpdateLiveInventoryTransition(int initialize) {
     return UpdateInventoryTransition(controllers.transition, host, category);
   });
 }
-// decomp: _disassembleItem (src/MENU/MENUB.PRG/260.c:232).
+// decomp: disassembleItem (src/MENU/MENUB.PRG/260.c:235; was _disassembleItem).
 int UpdateLiveDisassembly(int initialize) {
   const auto row = RowEntry(initialize);
   return Execute(Controller::kDisassembly, [&](auto& host) {
     return UpdateDisassembly(controllers.disassembly, host, row);
   });
 }
-// decomp: _consolidateMiscItems (src/MENU/MENUB.PRG/260.c:458).
+// decomp: consolidateMiscItems (src/MENU/MENUB.PRG/260.c:461; was
+// _consolidateMiscItems).
 int UpdateLiveStackConsolidation(int initialize) {
   const auto row = RowEntry(initialize);
   return Execute(Controller::kConsolidation, [&](auto& host) {
     return UpdateStackConsolidation(controllers.consolidation, host, row);
   });
 }
-// decomp: _processLootMenu (src/MENU/MENUB.PRG/260.c:1622).
+// decomp: processLootMenu (src/MENU/MENUB.PRG/260.c:1625; was
+// _processLootMenu).
 int UpdateLiveLootSelection(int initialize) {
   return Execute(Controller::kSelection, [&](auto& host) {
     return UpdateLootSelection(controllers.selection, host, initialize != 0);
   });
 }
-// decomp: vs_menuB_exec (src/MENU/MENUB.PRG/260.c:1951).
+// decomp: vs_menuB_exec (src/MENU/MENUB.PRG/260.c:1954).
 int UpdateLiveLootScreen(unsigned char* step) {
   if (step == nullptr) Refuse("loot screen without a caller-owned state");
   return Execute(Controller::kScreen,

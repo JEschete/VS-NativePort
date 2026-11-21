@@ -185,8 +185,8 @@ ComponentDescription SelectGem(ComponentContext& context,
 }
 }  // namespace
 
-// decomp: _initBladeDescription (src/MENU/MENU4.PRG/120.c:228);
-// original MENU4.PRG [0x80102F64, 0x80103080).
+// decomp: initBladeDescription (src/MENU/MENU4.PRG/120.c:234; was
+// _initBladeDescription); original MENU4.PRG [0x80102F64, 0x80103080).
 ComponentDescription FormatBladeDescription(Framework::ItemTextHost& host,
                                             const Items::EquipmentPart& blade,
                                             std::span<std::uint8_t> buffer) {
@@ -214,7 +214,7 @@ ComponentDescription FormatBladeDescription(Framework::ItemTextHost& host,
                             text::kWeaponDescTemplateOffset);
 }
 
-// decomp: _initGripInfo (src/MENU/MENU4.PRG/120.c:254);
+// decomp: initGripInfo (src/MENU/MENU4.PRG/120.c:260; was _initGripInfo);
 // original MENU4.PRG [0x80103080, 0x80103118).
 ComponentDescription FormatGripDescription(Framework::ItemTextHost& host,
                                            const Items::EquipmentPart& grip,
@@ -226,7 +226,7 @@ ComponentDescription FormatGripDescription(Framework::ItemTextHost& host,
                             text::kGripTemplateOffset);
 }
 
-// decomp: _initGemInfo (src/MENU/MENU4.PRG/120.c:275);
+// decomp: initGemInfo (src/MENU/MENU4.PRG/120.c:280; was _initGemInfo);
 // original MENU4.PRG [0x80103118, 0x8010317C).
 ComponentDescription CopyGemDescription(Framework::ItemTextHost& host,
                                         const Items::EquipmentPart& gem,
@@ -240,8 +240,8 @@ ComponentDescription CopyGemDescription(Framework::ItemTextHost& host,
   return kBufferText;
 }
 
-// decomp: _drawWeaponInfoRow (src/MENU/MENU4.PRG/120.c:293);
-// original MENU4.PRG [0x8010317C, 0x801032C4).
+// decomp: drawWeaponInfoRow (src/MENU/MENU4.PRG/120.c:297; was
+// _drawWeaponInfoRow); original MENU4.PRG [0x8010317C, 0x801032C4).
 ComponentDescription SelectWeaponComponent(ComponentContext& context, int row,
                                            const Items::WeaponLoadout& weapon) {
   if (!ValidMenuRow(context.text, row)) {
@@ -273,8 +273,8 @@ ComponentDescription SelectWeaponComponent(ComponentContext& context, int row,
   return Highlight(context, row, description);
 }
 
-// decomp: _drawShieldInfoRow (src/MENU/MENU4.PRG/120.c:339);
-// original MENU4.PRG [0x801032C4, 0x801033A4).
+// decomp: drawShieldInfoRow (src/MENU/MENU4.PRG/120.c:343; was
+// _drawShieldInfoRow); original MENU4.PRG [0x801032C4, 0x801033A4).
 ComponentDescription SelectShieldComponent(ComponentContext& context, int row,
                                            const Items::ShieldLoadout& shield) {
   if (!ValidMenuRow(context.text, row)) {
@@ -294,16 +294,16 @@ ComponentDescription SelectShieldComponent(ComponentContext& context, int row,
   return Highlight(context, row, description);
 }
 
-// decomp: _drawArmorInfoRow (src/MENU/MENU4.PRG/120.c:368);
-// original MENU4.PRG [0x801033A4, 0x801033D4).
+// decomp: drawArmorInfoRow (src/MENU/MENU4.PRG/120.c:372; was
+// _drawArmorInfoRow); original MENU4.PRG [0x801033A4, 0x801033D4).
 ComponentDescription ArmorDescription(Framework::ItemTextHost& host,
                                       const Items::ArmorLoadout& armor,
                                       std::span<std::uint8_t> buffer) {
   return RowDescription(Framework::FormatArmorRow(host, armor, buffer));
 }
 
-// decomp: _drawAccessoryInfoRow (src/MENU/MENU4.PRG/120.c:383);
-// original MENU4.PRG [0x801033D4, 0x8010341C).
+// decomp: drawAccessoryInfoRow (src/MENU/MENU4.PRG/120.c:387; was
+// _drawAccessoryInfoRow); original MENU4.PRG [0x801033D4, 0x8010341C).
 ComponentDescription AccessoryDescription(
     Framework::ItemTextHost& host,
     const Items::AccessorySpawnLoadout& accessory,
@@ -317,8 +317,9 @@ ComponentDescription AccessoryDescription(
       Framework::FormatInventoryArmorRow(host, inventory, buffer));
 }
 
-// decomp: _equipmentDetailElementSelectable (src/MENU/MENU4.PRG/120.c:401);
-// original MENU4.PRG [0x8010341C, 0x801034BC).
+// decomp: equipmentDetailElementSelectable (src/MENU/MENU4.PRG/120.c:405; was
+// _equipmentDetailElementSelectable); original MENU4.PRG [0x8010341C,
+// 0x801034BC).
 bool IsDetailElementSelectable(int element, std::uint32_t flags,
                                std::uint8_t stat_page) {
   switch (static_cast<DetailElement>(element)) {

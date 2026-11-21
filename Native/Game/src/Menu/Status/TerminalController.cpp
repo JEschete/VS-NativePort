@@ -700,7 +700,7 @@ std::string_view TerminalErrorText(TerminalError error) noexcept {
   return "unknown terminal refusal";
 }
 
-// decomp: vs_menu4_exec (src/MENU/MENU4.PRG/120.c:2270)
+// decomp: vs_menu4_exec (src/MENU/MENU4.PRG/120.c:2272)
 TerminalResult UpdateStatusTerminal(StatusTerminalState& state,
                                     StatusTerminalHost& host,
                                     std::uint8_t& menu_state) {

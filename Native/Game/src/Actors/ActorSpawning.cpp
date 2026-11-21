@@ -577,7 +577,7 @@ std::optional<AshleyEquipment> ChooseAshleyEquipment(
   return equipment;
 }
 
-// decomp: BATTLE.PRG func_800765B0 (src/BATTLE/BATTLE.PRG/146C.c:6064)
+// decomp: BATTLE.PRG func_800765B0 (src/BATTLE/BATTLE.PRG/146C.c:5877)
 SpawnedActor CreateAuxiliaryActor(ActorSpawnHost& host, int index, int actor_id,
                                   SpawnPlacement placement, int material) {
   if (index == kAnyAuxiliarySlot) {
@@ -628,7 +628,7 @@ SpawnedActor CreateAuxiliaryActor(ActorSpawnHost& host, int index, int actor_id,
   return actor;
 }
 
-// decomp: BATTLE.PRG func_80076784 (src/BATTLE/BATTLE.PRG/146C.c:6128)
+// decomp: BATTLE.PRG func_80076784 (src/BATTLE/BATTLE.PRG/146C.c:5941)
 void ApplyActorInitialStats(ActorSpawnHost& host, std::size_t slot,
                             const CharacterTemplate& character,
                             bool randomize) {
@@ -637,7 +637,7 @@ void ApplyActorInitialStats(ActorSpawnHost& host, std::size_t slot,
   }
 }
 
-// decomp: BATTLE.PRG func_80076D50 (src/BATTLE/BATTLE.PRG/146C.c:6292)
+// decomp: BATTLE.PRG func_80076D50 (src/BATTLE/BATTLE.PRG/146C.c:6104)
 void InitializeActorDefaults(ActorSpawnHost& host, std::size_t slot,
                              int model_id, int blade_id, int shield_id,
                              int flags) {
@@ -646,7 +646,7 @@ void InitializeActorDefaults(ActorSpawnHost& host, std::size_t slot,
   }
 }
 
-// decomp: BATTLE.PRG func_80076F24 (src/BATTLE/BATTLE.PRG/146C.c:6367)
+// decomp: BATTLE.PRG func_80076F24 (src/BATTLE/BATTLE.PRG/146C.c:6179)
 void InitializeActorFromTemplate(ActorSpawnHost& host, std::size_t slot,
                                  const CharacterTemplate& character,
                                  int blade_id, int shield_id, int flags,
@@ -656,7 +656,7 @@ void InitializeActorFromTemplate(ActorSpawnHost& host, std::size_t slot,
   }
 }
 
-// decomp: BATTLE.PRG func_80077078 (src/BATTLE/BATTLE.PRG/146C.c:6423)
+// decomp: BATTLE.PRG func_80077078 (src/BATTLE/BATTLE.PRG/146C.c:6234)
 int QueueActorModelLoad(ActorSpawnHost& host, SpawnedActor actor, int index,
                         int model_id, SpawnPlacement placement, int flags) {
   if (actor == SpawnedActor::kNone) {
@@ -666,7 +666,8 @@ int QueueActorModelLoad(ActorSpawnHost& host, SpawnedActor actor, int index,
   return QueueModelLoad(host, actor, index, model_id, placement, flags);
 }
 
-// decomp: BATTLE.PRG func_80077130 (src/BATTLE/BATTLE.PRG/146C.c:6455)
+// decomp: BATTLE.PRG setActorWeaponModel (src/BATTLE/BATTLE.PRG/146C.c:6270;
+// was func_80077130)
 void QueueEquipmentModelLoad(ActorSpawnHost& host, SpawnedActor actor,
                              int actor_id, int model_id, EquipmentHand hand,
                              int material) {
@@ -677,7 +678,7 @@ void QueueEquipmentModelLoad(ActorSpawnHost& host, SpawnedActor actor,
   QueueEquipment(host, actor, actor_id, model_id, hand, material);
 }
 
-// decomp: BATTLE.PRG func_80077240 (src/BATTLE/BATTLE.PRG/146C.c:6493)
+// decomp: BATTLE.PRG func_80077240 (src/BATTLE/BATTLE.PRG/146C.c:6307)
 SpawnedActor AllocateActorWithEquipment(ActorSpawnHost& host, int actor_id,
                                         int model_id, int blade_model,
                                         int blade_material, int shield_model,
@@ -692,7 +693,7 @@ SpawnedActor AllocateActorWithEquipment(ActorSpawnHost& host, int actor_id,
                           shield_model, shield_material, placement, flags);
 }
 
-// decomp: BATTLE.PRG func_800773BC (src/BATTLE/BATTLE.PRG/146C.c:6536)
+// decomp: BATTLE.PRG func_800773BC (src/BATTLE/BATTLE.PRG/146C.c:6352)
 void RegisterLoadedActor(ActorSpawnHost& host, SpawnedActor actor,
                          std::size_t slot, int model_id, int blade_id,
                          int shield_id, int flags) {
@@ -710,7 +711,7 @@ void RegisterLoadedActor(ActorSpawnHost& host, SpawnedActor actor,
   Register(host, actor, slot, model_id, blade_id, shield_id, flags);
 }
 
-// decomp: BATTLE.PRG func_800774FC (src/BATTLE/BATTLE.PRG/146C.c:6562)
+// decomp: BATTLE.PRG func_800774FC (src/BATTLE/BATTLE.PRG/146C.c:6377)
 // The original allocated through func_80077240 and linked Ashley's list while
 // registering; the leader link is checked before AllocateActorWithEquipment
 // so a refused link allocates nothing.
@@ -946,7 +947,7 @@ SpawnedActor SpawnRoomEnemy(ActorSpawnHost& host, int actor_id,
   return actor;
 }
 
-// decomp: BATTLE.PRG func_8007C8F8 (src/BATTLE/BATTLE.PRG/146C.c:8926)
+// decomp: BATTLE.PRG func_8007C8F8 (src/BATTLE/BATTLE.PRG/146C.c:8881)
 int QueueAshleyModelLoad(ActorSpawnHost& host, int model_id) {
   ActorAssetRequest request{};
   request.model_id = static_cast<std::int16_t>(model_id);
@@ -955,7 +956,8 @@ int QueueAshleyModelLoad(ActorSpawnHost& host, int model_id) {
   return host.QueueAsset(request) + 1;
 }
 
-// decomp: BATTLE.PRG func_8007C928 (src/BATTLE/BATTLE.PRG/146C.c:8936)
+// decomp: BATTLE.PRG spawnModelActor (src/BATTLE/BATTLE.PRG/146C.c:8891; was
+// func_8007C928)
 int QueueScriptedActorSpawn(ActorSpawnHost& host, std::uint32_t actor_id,
                             int model_id, SpawnPlacement placement) {
   if (actor_id >= kSpawnActorSlots) {
@@ -978,7 +980,8 @@ int QueueScriptedActorSpawn(ActorSpawnHost& host, std::uint32_t actor_id,
   return request + 1;
 }
 
-// decomp: BATTLE.PRG func_8007CA20 (src/BATTLE/BATTLE.PRG/146C.c:8962)
+// decomp: BATTLE.PRG setActorWeaponModels (src/BATTLE/BATTLE.PRG/146C.c:8920;
+// was func_8007CA20)
 void LoadActorEquipmentModels(ActorSpawnHost& host, int actor_id,
                               int blade_model, int shield_model) {
   const std::optional<std::size_t> slot = CheckedSlot(host, actor_id);
@@ -994,7 +997,8 @@ void LoadActorEquipmentModels(ActorSpawnHost& host, int actor_id,
                  0);
 }
 
-// decomp: BATTLE.PRG func_8007CAA4 (src/BATTLE/BATTLE.PRG/146C.c:8971)
+// decomp: BATTLE.PRG restoreActorWeaponModels
+// (src/BATTLE/BATTLE.PRG/146C.c:8933; was func_8007CAA4)
 void RefreshActorEquipmentModels(ActorSpawnHost& host, int actor_id) {
   const std::optional<std::size_t> slot = CheckedSlot(host, actor_id);
   if (!slot) {
@@ -1023,7 +1027,7 @@ void RefreshActorEquipmentModels(ActorSpawnHost& host, int actor_id) {
   }
 }
 
-// decomp: INITBTL.PRG func_800F9AD8 (src/BATTLE/INITBTL.PRG/18.c:310)
+// decomp: INITBTL.PRG func_800F9AD8 (src/BATTLE/INITBTL.PRG/18.c:323)
 void RestoreAshleyRuntimeState(ActorSpawnHost& host) {
   if (host.Character() == SpawnedActor::kNone) {
     host.Refuse(SpawnRefusal::kNoCharacter);
@@ -1042,7 +1046,7 @@ void RestoreAshleyRuntimeState(ActorSpawnHost& host) {
   host.RestoreCamera(snapshot.camera_pitch, snapshot.camera_distance);
 }
 
-// decomp: INITBTL.PRG func_800F9CCC (src/BATTLE/INITBTL.PRG/18.c:361)
+// decomp: INITBTL.PRG func_800F9CCC (src/BATTLE/INITBTL.PRG/18.c:374)
 void SpawnAshleyWithEquipment(ActorSpawnHost& host) {
   const AshleyInventory inventory = host.ReadAshleyInventory();
   const std::optional<AshleyEquipment> equipment =

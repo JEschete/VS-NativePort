@@ -7,7 +7,7 @@
 #include <type_traits>
 
 namespace VS::Actors {
-// decomp: D_800F4538_unk1864 (src/BATTLE/BATTLE.PRG/entity.h:28-41)
+// decomp: D_800F4538_unk1864 (src/BATTLE/BATTLE.PRG/entity.h:29-41)
 struct ShadowBlendRecord {
   // RGB in the low three bytes (49EB8.c writes bytes 0-2 of unk0).
   /* 0x00 */ std::int32_t color;

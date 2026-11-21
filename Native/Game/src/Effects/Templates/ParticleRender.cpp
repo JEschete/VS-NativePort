@@ -56,9 +56,9 @@ struct RibbonEdge {
          (static_cast<std::uint32_t>(y) << kHalfwordBits);
 }
 
-// decomp: particleRender.h:91-105, the nine phases with the seven inner
-// ones jittered within `jitter` (a zero jitter keeps the draw whole, as the
-// R3000 divide leaves it).
+// decomp: src/EFFECT/particleRender.h:91-105, the nine phases with the seven
+// inner ones jittered within `jitter` (a zero jitter keeps the draw whole, as
+// the R3000 divide leaves it).
 [[nodiscard]] RibbonPhases JitteredPhases(std::int32_t jitter,
                                           ParticleSetHost& host) {
   RibbonPhases phases{};
@@ -73,8 +73,8 @@ struct RibbonEdge {
   return phases;
 }
 
-// decomp: particleRender.h:107-111, the screen direction of each segment
-// turned back a quarter.
+// decomp: src/EFFECT/particleRender.h:107-111, the screen direction of each
+// segment turned back a quarter.
 [[nodiscard]] RibbonAngles ScreenAngles(const RibbonScreens& screens) {
   RibbonAngles angles{};
   for (std::size_t segment = 0; segment < kParticleSegments; ++segment) {
@@ -108,9 +108,9 @@ struct RibbonEdge {
           .minus = PackScreen(x - across, y - down)};
 }
 
-// decomp: particleRender.h:83-245, one ribbon's eight quads. The last half
-// width becomes the next ribbon's phase jitter, as the original reused one
-// variable for both.
+// decomp: src/EFFECT/particleRender.h:83-245, one ribbon's eight quads. The
+// last half width becomes the next ribbon's phase jitter, as the original
+// reused one variable for both.
 void DrawRibbon(const ParticleControlSet& points, const RibbonPaint& paint,
                 std::int32_t& jitter, ParticleSetFrame& frame,
                 ParticleSetHost& host) {
@@ -165,7 +165,7 @@ void DrawRibbon(const ParticleControlSet& points, const RibbonPaint& paint,
 }  // namespace
 
 // decomp: EFFECT VS_PARTICLE_RENDER_FUNCTION
-// (src/EFFECT/particleRender.h:17).
+// (src/EFFECT/particleRender.h:21).
 void ParticleRender(ParticleSetFrame& frame, ParticleSetHost& host) {
   const ParticleSetDefinition& definition = frame.inputs.definition;
   std::int32_t jitter = SampleRibbonJitter(frame, host);
@@ -193,73 +193,85 @@ void ParticleRender(ParticleSetFrame& frame, ParticleSetHost& host) {
 }  // namespace VS::Effects::Templates
 
 namespace VS::Effects {
-// decomp: PLG045.BIN func_800FA760 (src/EFFECT/PLG045.BIN/110.c:4).
+// decomp: PLG045.BIN vs_effect_lightningBolt_0_render
+// (src/EFFECT/particleRender.h:21; was func_800FA760).
 void Plg045::ParticleRender(Templates::ParticleSetFrame& frame,
                             Templates::ParticleSetHost& host) {
   Templates::ParticleRender(frame, host);
 }
 
-// decomp: PLG057.BIN func_800FA920 (src/EFFECT/PLG057.BIN/2D0.c:6).
+// decomp: PLG057.BIN vs_effect_thunderBurstLv1_0_render
+// (src/EFFECT/particleRender.h:21; was func_800FA920).
 void Plg057::ParticleRender(Templates::ParticleSetFrame& frame,
                             Templates::ParticleSetHost& host) {
   Templates::ParticleRender(frame, host);
 }
 
-// decomp: PLG082.BIN func_800FA778 (src/EFFECT/PLG082.BIN/128.c:12).
+// decomp: PLG082.BIN vs_effect_thunderbolt_0_render
+// (src/EFFECT/particleRender.h:21; was func_800FA778).
 void Plg082::ParticleRender(Templates::ParticleSetFrame& frame,
                             Templates::ParticleSetHost& host) {
   Templates::ParticleRender(frame, host);
 }
 
-// decomp: PLG114.BIN func_800FA858 (src/EFFECT/PLG114.BIN/208.c:6).
+// decomp: PLG114.BIN vs_effect_numbingNeedle_0_render
+// (src/EFFECT/particleRender.h:21; was func_800FA858).
 void Plg114::ParticleRender(Templates::ParticleSetFrame& frame,
                             Templates::ParticleSetHost& host) {
   Templates::ParticleRender(frame, host);
 }
 
-// decomp: PLG152.BIN func_800FB2C8 (src/EFFECT/PLG152.BIN/128.c:15).
+// decomp: PLG152.BIN vs_effect_riskbreak_1_render
+// (src/EFFECT/particleRender.h:21; was func_800FB2C8).
 void Plg152::ParticleRender(Templates::ParticleSetFrame& frame,
                             Templates::ParticleSetHost& host) {
   Templates::ParticleRender(frame, host);
 }
 
-// decomp: PLG153.BIN func_800FBE90 (src/EFFECT/PLG153.BIN/110.c:16).
+// decomp: PLG153.BIN vs_effect_gravisAether_2_render
+// (src/EFFECT/particleRender.h:21; was func_800FBE90).
 void Plg153::ParticleRender(Templates::ParticleSetFrame& frame,
                             Templates::ParticleSetHost& host) {
   Templates::ParticleRender(frame, host);
 }
 
-// decomp: PLG156.BIN func_800FA778 (src/EFFECT/PLG156.BIN/128.c:6).
+// decomp: PLG156.BIN vs_effect_quickshock_0_render
+// (src/EFFECT/particleRender.h:21; was func_800FA778).
 void Plg156::ParticleRender(Templates::ParticleSetFrame& frame,
                             Templates::ParticleSetHost& host) {
   Templates::ParticleRender(frame, host);
 }
 
-// decomp: PLG263.BIN func_800FCE5C (src/EFFECT/PLG263.BIN/110.c:348).
+// decomp: PLG263.BIN vs_effect_plg263_3_render (src/EFFECT/particleRender.h:21;
+// was func_800FCE5C).
 void Plg263::ParticleRender(Templates::ParticleSetFrame& frame,
                             Templates::ParticleSetHost& host) {
   Templates::ParticleRender(frame, host);
 }
 
-// decomp: PLG265.BIN func_800FEF44 (src/EFFECT/PLG265.BIN/2E8.c:44).
+// decomp: PLG265.BIN vs_effect_plg265_3_render (src/EFFECT/particleRender.h:21;
+// was func_800FEF44).
 void Plg265::ParticleRender(Templates::ParticleSetFrame& frame,
                             Templates::ParticleSetHost& host) {
   Templates::ParticleRender(frame, host);
 }
 
-// decomp: PLG266.BIN func_800FA938 (src/EFFECT/PLG266.BIN/2E8.c:6).
+// decomp: PLG266.BIN vs_effect_plg266_0_render (src/EFFECT/particleRender.h:21;
+// was func_800FA938).
 void Plg266::ParticleRender(Templates::ParticleSetFrame& frame,
                             Templates::ParticleSetHost& host) {
   Templates::ParticleRender(frame, host);
 }
 
-// decomp: PLG300.BIN func_800FB3D4 (src/EFFECT/PLG300.BIN/110.c:16).
+// decomp: PLG300.BIN vs_effect_plg300_1_render (src/EFFECT/particleRender.h:21;
+// was func_800FB3D4).
 void Plg300::ParticleRender(Templates::ParticleSetFrame& frame,
                             Templates::ParticleSetHost& host) {
   Templates::ParticleRender(frame, host);
 }
 
-// decomp: PLG301.BIN func_800FA760 (src/EFFECT/PLG301.BIN/110.c:12).
+// decomp: PLG301.BIN vs_effect_plg301_0_render (src/EFFECT/particleRender.h:21;
+// was func_800FA760).
 void Plg301::ParticleRender(Templates::ParticleSetFrame& frame,
                             Templates::ParticleSetHost& host) {
   Templates::ParticleRender(frame, host);

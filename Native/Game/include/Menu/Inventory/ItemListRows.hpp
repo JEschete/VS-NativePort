@@ -77,14 +77,16 @@ enum class ItemRowsRefusal : std::uint8_t {
   kStalled,
 };
 
-// decomp: MENU3.PRG _getParentWeaponIndex (items2.h:11). The one-based weapon
-// holding a blade or grip, or a gem set in a weapon; 0 for anything else.
-// Returns nullopt when a category that reads a table names a slot outside it.
+// decomp: MENU3.PRG getParentWeaponIndex (src/MENU/items2.h:16; was
+// _getParentWeaponIndex). The one-based weapon holding a blade or grip, or a
+// gem set in a weapon; 0 for anything else. Returns nullopt when a category
+// that reads a table names a slot outside it.
 [[nodiscard]] std::optional<std::uint16_t> ParentWeaponIndex(
     std::int32_t category, std::int32_t index,
     const Items::InventoryContents& inventory);
-// decomp: MENU3.PRG _getParentShieldIndex (items2.h:38). The one-based shield
-// holding a gem (kShieldGemFlag set), or 0.
+// decomp: MENU3.PRG getParentShieldIndex (src/MENU/items2.h:43; was
+// _getParentShieldIndex). The one-based shield holding a gem (kShieldGemFlag
+// set), or 0.
 [[nodiscard]] std::optional<std::uint8_t> ParentShieldIndex(
     std::int32_t category, std::int32_t index,
     const Items::InventoryContents& inventory);
@@ -119,8 +121,8 @@ class ItemRowsWorld {
   virtual void StoreMiscAction(std::size_t row, std::uint8_t action) = 0;
 };
 
-// decomp: MENU3.PRG _populateItemRows (items2.h:60). Returns the row count. A
-// refusal writes nothing.
+// decomp: MENU3.PRG populateItemRows (src/MENU/items2.h:65; was
+// _populateItemRows). Returns the row count. A refusal writes nothing.
 [[nodiscard]] std::expected<std::int32_t, ItemRowsRefusal> BuildItemRows(
     const ItemRowsInput& input, const Items::InventoryContents& inventory,
     ItemRowsWorld& world);
@@ -141,8 +143,9 @@ class ItemRowsRestoreWorld {
   [[nodiscard]] virtual std::span<const std::uint8_t> CursorMemory() = 0;
 };
 
-// decomp: MENU3.PRG _restoreItemMenu (items2.h:175). Finishes the list
-// animation, settles sliding rows and reselects the remembered row.
+// decomp: MENU3.PRG restoreItemMenu (src/MENU/items2.h:180; was
+// _restoreItemMenu). Finishes the list animation, settles sliding rows and
+// reselects the remembered row.
 [[nodiscard]] std::expected<void, ItemRowsRefusal> RestoreItemRows(
     ItemRowsRestoreWorld& world, std::int32_t category);
 }  // namespace VS::Menu::Inventory

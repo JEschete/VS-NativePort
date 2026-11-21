@@ -91,7 +91,7 @@ constexpr std::uint8_t kGreenHighMask = 0x3;
 }
 }  // namespace
 
-// decomp: func_800D5170 (src/BATTLE/BATTLE.PRG/5BF94.c:7804)
+// decomp: func_800D5170 (src/BATTLE/BATTLE.PRG/5BF94.c:6796)
 std::optional<std::uint8_t> ReadScriptByte(ScriptCursor& cursor) {
   const std::size_t at = cursor.offset;
   if (at >= cursor.program.size()) return std::nullopt;
@@ -99,7 +99,7 @@ std::optional<std::uint8_t> ReadScriptByte(ScriptCursor& cursor) {
   return std::to_integer<std::uint8_t>(cursor.program[at]);
 }
 
-// decomp: func_800D5198 (src/BATTLE/BATTLE.PRG/5BF94.c:7806)
+// decomp: func_800D5198 (src/BATTLE/BATTLE.PRG/5BF94.c:6798)
 std::optional<std::uint16_t> ReadScriptHalfword(ScriptCursor& cursor) {
   ScriptCursor read = cursor;
   const auto low = ReadScriptByte(read);
@@ -110,7 +110,7 @@ std::optional<std::uint16_t> ReadScriptHalfword(ScriptCursor& cursor) {
   return static_cast<std::uint16_t>(*low | (*high << kHighByteShift));
 }
 
-// decomp: func_800D46DC (src/BATTLE/BATTLE.PRG/5BF94.c:7506)
+// decomp: func_800D46DC (src/BATTLE/BATTLE.PRG/5BF94.c:6499)
 bool BranchScriptIf(bool condition, ScriptCursor& cursor) {
   if (!condition) {
     cursor.offset = static_cast<std::uint16_t>(cursor.offset + kOperandBytes);
@@ -122,7 +122,7 @@ bool BranchScriptIf(bool condition, ScriptCursor& cursor) {
   return true;
 }
 
-// decomp: func_800D4720 (src/BATTLE/BATTLE.PRG/5BF94.c:7515)
+// decomp: func_800D4720 (src/BATTLE/BATTLE.PRG/5BF94.c:6508)
 ScriptStep YieldScriptAt(ScriptCursor& cursor) {
   const auto target = ReadScriptHalfword(cursor);
   if (!target) return ScriptStep::kEnd;
@@ -130,7 +130,7 @@ ScriptStep YieldScriptAt(ScriptCursor& cursor) {
   return ScriptStep::kYield;
 }
 
-// decomp: func_800D474C (src/BATTLE/BATTLE.PRG/5BF94.c:7521)
+// decomp: func_800D474C (src/BATTLE/BATTLE.PRG/5BF94.c:6514)
 ScriptStep JumpScript(ScriptCursor& cursor) {
   const auto target = ReadScriptHalfword(cursor);
   if (!target) return ScriptStep::kEnd;
@@ -138,10 +138,10 @@ ScriptStep JumpScript(ScriptCursor& cursor) {
   return ScriptStep::kContinue;
 }
 
-// decomp: func_800D47C0 (src/BATTLE/BATTLE.PRG/5BF94.c:7538)
+// decomp: func_800D47C0 (src/BATTLE/BATTLE.PRG/5BF94.c:6531)
 ScriptStep EndScript() { return ScriptStep::kEnd; }
 
-// decomp: func_800D4DA8 (src/BATTLE/BATTLE.PRG/5BF94.c:7711)
+// decomp: func_800D4DA8 (src/BATTLE/BATTLE.PRG/5BF94.c:6706)
 ScriptStep ContinueScript() { return ScriptStep::kContinue; }
 
 ScriptStep StepFromHandlerResult(std::int32_t result) {
@@ -167,7 +167,7 @@ std::int32_t HandlerResult(ScriptStep step) {
   return kYieldResult;
 }
 
-// decomp: func_800D51D8 (src/BATTLE/BATTLE.PRG/5BF94.c:7813)
+// decomp: func_800D51D8 (src/BATTLE/BATTLE.PRG/5BF94.c:6805)
 ScriptRun RunScript(ScriptMachine& machine) {
   for (;;) {
     const auto opcode = machine.NextOpcode();
@@ -178,7 +178,7 @@ ScriptRun RunScript(ScriptMachine& machine) {
   }
 }
 
-// decomp: func_800D47C8 (src/BATTLE/BATTLE.PRG/5BF94.c:7540)
+// decomp: func_800D47C8 (src/BATTLE/BATTLE.PRG/5BF94.c:6533)
 OpcodeStep SetScriptSelector(ScriptCursor& cursor, std::int32_t& selector) {
   const auto value = ReadScriptByte(cursor);
   if (!value) return std::unexpected(ScriptRefusal::kOperand);
@@ -186,19 +186,19 @@ OpcodeStep SetScriptSelector(ScriptCursor& cursor, std::int32_t& selector) {
   return ScriptStep::kContinue;
 }
 
-// decomp: func_800D487C (src/BATTLE/BATTLE.PRG/5BF94.c:7563)
+// decomp: func_800D487C (src/BATTLE/BATTLE.PRG/5BF94.c:6556)
 OpcodeStep BranchIfRenderersFinished(bool renderers_attached,
                                      ScriptCursor& cursor) {
   return Branch(!renderers_attached, cursor);
 }
 
-// decomp: func_800D48E4 (src/BATTLE/BATTLE.PRG/5BF94.c:7576)
+// decomp: func_800D48E4 (src/BATTLE/BATTLE.PRG/5BF94.c:6569)
 OpcodeStep BranchIfActionVariantCleared(std::uint8_t variant,
                                         ScriptCursor& cursor) {
   return Branch(variant == 0, cursor);
 }
 
-// decomp: func_800D4AB4 (src/BATTLE/BATTLE.PRG/5BF94.c:7625)
+// decomp: func_800D4AB4 (src/BATTLE/BATTLE.PRG/5BF94.c:6618)
 ScriptStep LoadActionVariantRegister(std::uint8_t variant,
                                      const ActionVariantValues& values,
                                      ScriptRegisters& registers) {
@@ -208,7 +208,7 @@ ScriptStep LoadActionVariantRegister(std::uint8_t variant,
   return ScriptStep::kContinue;
 }
 
-// decomp: func_800D4AEC (src/BATTLE/BATTLE.PRG/5BF94.c:7633)
+// decomp: func_800D4AEC (src/BATTLE/BATTLE.PRG/5BF94.c:6626)
 OpcodeStep SetScriptRegister(ScriptCursor& cursor, ScriptRegisters& registers) {
   return ReadRegisterOperands(cursor).transform(
       [&registers](const RegisterOperands& operands) {
@@ -218,7 +218,7 @@ OpcodeStep SetScriptRegister(ScriptCursor& cursor, ScriptRegisters& registers) {
       });
 }
 
-// decomp: func_800D4B34 (src/BATTLE/BATTLE.PRG/5BF94.c:7639)
+// decomp: func_800D4B34 (src/BATTLE/BATTLE.PRG/5BF94.c:6632)
 OpcodeStep BranchIfScriptRegisterEqual(ScriptCursor& cursor,
                                        const ScriptRegisters& registers) {
   return ReadRegisterOperands(cursor).and_then(
@@ -227,7 +227,7 @@ OpcodeStep BranchIfScriptRegisterEqual(ScriptCursor& cursor,
       });
 }
 
-// decomp: func_800D4B90 (src/BATTLE/BATTLE.PRG/5BF94.c:7645)
+// decomp: func_800D4B90 (src/BATTLE/BATTLE.PRG/5BF94.c:6638)
 OpcodeStep BranchIfParticleCountEqual(std::uint8_t particle_count,
                                       ScriptCursor& cursor) {
   const auto count = ReadScriptByte(cursor);
@@ -235,13 +235,13 @@ OpcodeStep BranchIfParticleCountEqual(std::uint8_t particle_count,
   return Branch(*count == particle_count, cursor);
 }
 
-// decomp: func_800D4D98 (src/BATTLE/BATTLE.PRG/5BF94.c:7705)
+// decomp: func_800D4D98 (src/BATTLE/BATTLE.PRG/5BF94.c:6700)
 ScriptStep ClearActionVariant(std::uint8_t& variant) {
   variant = 0;
   return ScriptStep::kContinue;
 }
 
-// decomp: func_800D49A4 (src/BATTLE/BATTLE.PRG/5BF94.c:7602)
+// decomp: func_800D49A4 (src/BATTLE/BATTLE.PRG/5BF94.c:6595)
 ScriptStep SetActionEffectVerticalOffset(std::uint16_t effect_id,
                                          const ScriptRegisters& registers,
                                          std::span<std::int32_t> heights) {
@@ -256,14 +256,14 @@ ScriptStep SetActionEffectVerticalOffset(std::uint16_t effect_id,
   return ScriptStep::kContinue;
 }
 
-// decomp: func_800D4D64 (src/BATTLE/BATTLE.PRG/5BF94.c:7697)
+// decomp: func_800D4D64 (src/BATTLE/BATTLE.PRG/5BF94.c:6692)
 std::optional<std::uint8_t> SourceActorToSignal(std::uint16_t source_type,
                                                 std::uint8_t actor) {
   if (source_type != kActorPartEndpoint) return std::nullopt;
   return actor;
 }
 
-// decomp: func_800D4F00 (src/BATTLE/BATTLE.PRG/5BF94.c:7749)
+// decomp: func_800D4F00 (src/BATTLE/BATTLE.PRG/5BF94.c:6744)
 OpcodeStep SetParticleColorCurves(ScriptCursor& cursor,
                                   std::span<ParticleColorCurves> curves) {
   ColorOperands operands{};
@@ -280,7 +280,7 @@ OpcodeStep SetParticleColorCurves(ScriptCursor& cursor,
   return ScriptStep::kContinue;
 }
 
-// decomp: func_800D4FB4 (src/BATTLE/BATTLE.PRG/5BF94.c:7762)
+// decomp: func_800D4FB4 (src/BATTLE/BATTLE.PRG/5BF94.c:6757)
 OpcodeStep ApplyPairedColorPreset(std::uint16_t preset,
                                   std::span<const PairedColorPreset> presets,
                                   std::span<ParticleColorCurves> curves) {
@@ -294,7 +294,7 @@ OpcodeStep ApplyPairedColorPreset(std::uint16_t preset,
   return ScriptStep::kContinue;
 }
 
-// decomp: func_800D5088 (src/BATTLE/BATTLE.PRG/5BF94.c:7785)
+// decomp: func_800D5088 (src/BATTLE/BATTLE.PRG/5BF94.c:6780)
 OpcodeStep ApplyColorPresetTable(std::uint16_t preset,
                                  std::span<const ColorPresetTable> tables,
                                  std::span<ParticleColorCurves> curves) {
@@ -314,7 +314,7 @@ OpcodeStep ApplyColorPresetTable(std::uint16_t preset,
   return ScriptStep::kContinue;
 }
 
-// decomp: func_800D5048 (src/BATTLE/BATTLE.PRG/5BF94.c:7776)
+// decomp: func_800D5048 (src/BATTLE/BATTLE.PRG/5BF94.c:6771)
 std::optional<std::uint8_t> CompleteChildScript(
     std::optional<std::uint8_t> parent_children) {
   return parent_children.transform([](std::uint8_t children) {
@@ -322,7 +322,7 @@ std::optional<std::uint8_t> CompleteChildScript(
   });
 }
 
-// decomp: func_800CE644 (src/BATTLE/BATTLE.PRG/5BF94.c:5045)
+// decomp: func_800CE644 (src/BATTLE/BATTLE.PRG/5BF94.c:4610)
 std::string_view DescribeEffectDiagnostic(std::int32_t code) {
   switch (code) {
     case static_cast<std::int32_t>(EffectDiagnostic::kParticlePoolExhausted):
@@ -334,13 +334,13 @@ std::string_view DescribeEffectDiagnostic(std::int32_t code) {
   }
 }
 
-// decomp: func_800D5150 (src/BATTLE/BATTLE.PRG/5BF94.c:7799)
+// decomp: func_800D5150 (src/BATTLE/BATTLE.PRG/5BF94.c:6794)
 ScriptDiagnosticStep ReportInvalidInstruction() {
   return {.diagnostic = EffectDiagnostic::kInvalidInstruction,
           .step = ScriptStep::kYield};
 }
 
-// decomp: func_800D48A4 (src/BATTLE/BATTLE.PRG/5BF94.c:7569)
+// decomp: func_800D48A4 (src/BATTLE/BATTLE.PRG/5BF94.c:6562)
 OpcodeStep LoadTimelineImmediate(ScriptCursor& cursor, ScriptEffectHost& host) {
   const auto timeline = ReadScriptByte(cursor);
   if (!timeline) return std::unexpected(ScriptRefusal::kOperand);
@@ -349,7 +349,7 @@ OpcodeStep LoadTimelineImmediate(ScriptCursor& cursor, ScriptEffectHost& host) {
   return ScriptStep::kContinue;
 }
 
-// decomp: func_800D4DB0 (src/BATTLE/BATTLE.PRG/5BF94.c:7713)
+// decomp: func_800D4DB0 (src/BATTLE/BATTLE.PRG/5BF94.c:6708)
 OpcodeStep LoadRegisterTimeline(ScriptCursor& cursor,
                                 const ScriptRegisters& registers,
                                 bool has_parent, const TimelineRemap& remap,
@@ -370,7 +370,7 @@ OpcodeStep LoadRegisterTimeline(ScriptCursor& cursor,
   return ScriptStep::kContinue;
 }
 
-// decomp: func_800D4E5C (src/BATTLE/BATTLE.PRG/5BF94.c:7728)
+// decomp: func_800D4E5C (src/BATTLE/BATTLE.PRG/5BF94.c:6723)
 OpcodeStep TickTimelineFromScript(ScriptCursor& cursor, bool has_timeline,
                                   ScriptEffectHost& host) {
   const auto child_offset = ReadScriptHalfword(cursor);
@@ -380,38 +380,38 @@ OpcodeStep TickTimelineFromScript(ScriptCursor& cursor, bool has_timeline,
   return ScriptStep::kContinue;
 }
 
-// decomp: func_800D4E90 (src/BATTLE/BATTLE.PRG/5BF94.c:7734)
+// decomp: func_800D4E90 (src/BATTLE/BATTLE.PRG/5BF94.c:6729)
 OpcodeStep BranchIfTimelineFinished(std::optional<std::uint32_t> active_tracks,
                                     ScriptCursor& cursor) {
   if (!active_tracks) return std::unexpected(ScriptRefusal::kTimeline);
   return Branch(*active_tracks == 0, cursor);
 }
 
-// decomp: func_800D4EC0 (src/BATTLE/BATTLE.PRG/5BF94.c:7740)
+// decomp: func_800D4EC0 (src/BATTLE/BATTLE.PRG/5BF94.c:6735)
 ScriptStep FreeScriptTimeline(bool has_timeline, ScriptEffectHost& host) {
   if (has_timeline) host.FreeTimeline();
   return ScriptStep::kContinue;
 }
 
-// decomp: func_800D4984 (src/BATTLE/BATTLE.PRG/5BF94.c:7596)
+// decomp: func_800D4984 (src/BATTLE/BATTLE.PRG/5BF94.c:6589)
 ScriptStep TickScriptTransforms(ScriptEffectHost& host) {
   host.UpdateTransforms();
   return ScriptStep::kContinue;
 }
 
-// decomp: func_800D4A94 (src/BATTLE/BATTLE.PRG/5BF94.c:7619)
+// decomp: func_800D4A94 (src/BATTLE/BATTLE.PRG/5BF94.c:6612)
 ScriptStep InitializeScriptTransforms(ScriptEffectHost& host) {
   host.InitializeTransforms();
   return ScriptStep::kContinue;
 }
 
-// decomp: func_800D4D44 (src/BATTLE/BATTLE.PRG/5BF94.c:7691)
+// decomp: func_800D4D44 (src/BATTLE/BATTLE.PRG/5BF94.c:6686)
 ScriptStep RefreshParticleEnvironment(ScriptEffectHost& host) {
   host.UpdateParticleEnvironment();
   return ScriptStep::kContinue;
 }
 
-// decomp: func_800D4778 (src/BATTLE/BATTLE.PRG/5BF94.c:7527)
+// decomp: func_800D4778 (src/BATTLE/BATTLE.PRG/5BF94.c:6520)
 OpcodeStep SpawnChildScript(ScriptCursor& cursor, ScriptEffectHost& host) {
   const auto script_offset = ReadScriptHalfword(cursor);
   if (!script_offset) return std::unexpected(ScriptRefusal::kOperand);
@@ -419,7 +419,7 @@ OpcodeStep SpawnChildScript(ScriptCursor& cursor, ScriptEffectHost& host) {
   return ScriptStep::kContinue;
 }
 
-// decomp: func_800D47F4 (src/BATTLE/BATTLE.PRG/5BF94.c:7546)
+// decomp: func_800D47F4 (src/BATTLE/BATTLE.PRG/5BF94.c:6539)
 OpcodeStep AttachScriptRenderer(ScriptCursor& cursor,
                                 std::int32_t instance_parameter,
                                 ScriptEffectHost& host) {
@@ -443,13 +443,13 @@ OpcodeStep AttachScriptRenderer(ScriptCursor& cursor,
   return ScriptStep::kContinue;
 }
 
-// decomp: func_800D4910 (src/BATTLE/BATTLE.PRG/5BF94.c:7582)
+// decomp: func_800D4910 (src/BATTLE/BATTLE.PRG/5BF94.c:6575)
 ScriptStep TickScriptRenderers(ScriptEffectHost& host) {
   host.UpdateRenderers();
   return ScriptStep::kContinue;
 }
 
-// decomp: func_800D4BD0 (src/BATTLE/BATTLE.PRG/5BF94.c:7651)
+// decomp: func_800D4BD0 (src/BATTLE/BATTLE.PRG/5BF94.c:6644)
 OpcodeStep EmitRegisterParticles(ScriptCursor& cursor,
                                  const ScriptRegisters& registers,
                                  ScriptEffectHost& host) {

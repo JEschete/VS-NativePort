@@ -176,7 +176,8 @@ class LiveRecordHost final : public GazetteRecordHost {
 };
 }  // namespace
 
-// decomp: _setTitleRows (src/MENU/MENU9.PRG/238.c:1722), 801056B8.
+// decomp: setTitleRows (src/MENU/MENU9.PRG/238.c:1727; was _setTitleRows),
+// 801056B8.
 void CreateLiveTitleRows() {
   auto rows = Rows();
   if (!CreateTitleRows(rows,
@@ -188,7 +189,8 @@ void CreateLiveTitleRows() {
   StoreRows(rows, true);
 }
 
-// decomp: _renderTitleMenu (src/MENU/MENU9.PRG/238.c:1756), 8010579C.
+// decomp: renderTitleMenu (src/MENU/MENU9.PRG/238.c:1761; was
+// _renderTitleMenu), 8010579C.
 void RenderLiveTitles(std::int32_t presentation_step) {
   auto rows = Rows();
   LiveRecordHost host;
@@ -200,7 +202,8 @@ void RenderLiveTitles(std::int32_t presentation_step) {
   }
 }
 
-// decomp: _renderTitleNo (src/MENU/MENU9.PRG/238.c:1835), 80105A0C.
+// decomp: renderTitleNo (src/MENU/MENU9.PRG/238.c:1840; was _renderTitleNo),
+// 80105A0C.
 void DrawLiveTitleNumber(std::int32_t x, std::int32_t y, std::int32_t number,
                          std::int32_t dimmed) {
   LiveNumberTarget target;
@@ -209,7 +212,8 @@ void DrawLiveTitleNumber(std::int32_t x, std::int32_t y, std::int32_t number,
   }
 }
 
-// decomp: _setStatText (src/MENU/MENU9.PRG/238.c:2201), 80106780.
+// decomp: setStatText (src/MENU/MENU9.PRG/238.c:2206; was _setStatText),
+// 80106780.
 void CreateLiveStatisticRows() {
   auto rows = Rows();
   if (!CreateStatisticRows(rows, StatisticLabels())) {
@@ -219,7 +223,8 @@ void CreateLiveStatisticRows() {
   StoreRows(std::span(rows).first(kGazetteStatisticCount), true);
 }
 
-// decomp: _renderBossRushDetails (src/MENU/MENU9.PRG/238.c:2226), 80106808.
+// decomp: renderBossRushDetails (src/MENU/MENU9.PRG/238.c:2231; was
+// _renderBossRushDetails), 80106808.
 void RenderLiveStatistics(std::int32_t presentation_step) {
   auto rows = Rows();
   const GazetteStatisticsValues values{

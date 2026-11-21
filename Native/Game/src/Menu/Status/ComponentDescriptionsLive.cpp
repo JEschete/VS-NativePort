@@ -71,28 +71,30 @@ void FormatPart(VS::Items::EquipmentPart* part, char* menu_text[],
 }
 }  // namespace
 
-// decomp: _initBladeDescription (src/MENU/MENU4.PRG/120.c:228)
+// decomp: initBladeDescription (src/MENU/MENU4.PRG/120.c:234; was
+// _initBladeDescription)
 void FormatLiveBladeDescription(VS::Items::EquipmentPart* blade,
                                 char* menu_text[], int* row_types) {
   static_cast<void>(row_types);
   FormatPart(blade, menu_text, FormatBladeDescription);
 }
 
-// decomp: _initGripInfo (src/MENU/MENU4.PRG/120.c:254)
+// decomp: initGripInfo (src/MENU/MENU4.PRG/120.c:260; was _initGripInfo)
 void FormatLiveGripDescription(VS::Items::EquipmentPart* grip,
                                char* menu_text[], int* row_types) {
   static_cast<void>(row_types);
   FormatPart(grip, menu_text, FormatGripDescription);
 }
 
-// decomp: _initGemInfo (src/MENU/MENU4.PRG/120.c:275)
+// decomp: initGemInfo (src/MENU/MENU4.PRG/120.c:280; was _initGemInfo)
 void CopyLiveGemDescription(VS::Items::EquipmentPart* gem, char* menu_text[],
                             int* row_types) {
   static_cast<void>(row_types);
   FormatPart(gem, menu_text, CopyGemDescription);
 }
 
-// decomp: _drawWeaponInfoRow (src/MENU/MENU4.PRG/120.c:293)
+// decomp: drawWeaponInfoRow (src/MENU/MENU4.PRG/120.c:297; was
+// _drawWeaponInfoRow)
 char* SelectLiveWeaponComponent(int row, VS::Items::WeaponLoadout* weapon) {
   if (weapon == nullptr) {
     Refuse("status component: missing weapon");
@@ -104,7 +106,8 @@ char* SelectLiveWeaponComponent(int row, VS::Items::WeaponLoadout* weapon) {
   return Resolve(SelectWeaponComponent(context, row, *weapon), host);
 }
 
-// decomp: _drawShieldInfoRow (src/MENU/MENU4.PRG/120.c:339)
+// decomp: drawShieldInfoRow (src/MENU/MENU4.PRG/120.c:343; was
+// _drawShieldInfoRow)
 char* SelectLiveShieldComponent(int row, VS::Items::ShieldLoadout* shield) {
   if (shield == nullptr) {
     Refuse("status component: missing shield");
@@ -116,7 +119,8 @@ char* SelectLiveShieldComponent(int row, VS::Items::ShieldLoadout* shield) {
   return Resolve(SelectShieldComponent(context, row, *shield), host);
 }
 
-// decomp: _drawArmorInfoRow (src/MENU/MENU4.PRG/120.c:368)
+// decomp: drawArmorInfoRow (src/MENU/MENU4.PRG/120.c:372; was
+// _drawArmorInfoRow)
 char* LiveArmorDescription(VS::Items::ArmorLoadout* armor) {
   if (armor == nullptr) {
     Refuse("status component: missing armor");
@@ -126,7 +130,8 @@ char* LiveArmorDescription(VS::Items::ArmorLoadout* armor) {
   return Resolve(ArmorDescription(host, *armor, host.StringBuffer()), host);
 }
 
-// decomp: _drawAccessoryInfoRow (src/MENU/MENU4.PRG/120.c:383)
+// decomp: drawAccessoryInfoRow (src/MENU/MENU4.PRG/120.c:387; was
+// _drawAccessoryInfoRow)
 char* LiveAccessoryDescription(VS::Items::AccessorySpawnLoadout* accessory) {
   if (accessory == nullptr) {
     Refuse("status component: missing accessory");
@@ -137,7 +142,8 @@ char* LiveAccessoryDescription(VS::Items::AccessorySpawnLoadout* accessory) {
                  host);
 }
 
-// decomp: _equipmentDetailElementSelectable (src/MENU/MENU4.PRG/120.c:401)
+// decomp: equipmentDetailElementSelectable (src/MENU/MENU4.PRG/120.c:405; was
+// _equipmentDetailElementSelectable)
 int IsLiveDetailElementSelectable(int element, int flags) {
   return static_cast<int>(IsDetailElementSelectable(
       element, static_cast<std::uint32_t>(flags),

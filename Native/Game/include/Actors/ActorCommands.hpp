@@ -151,7 +151,7 @@ class ActorCommandHost {
                                                   std::uint16_t action) = 0;
 };
 
-// decomp: BATTLE.PRG func_800753F8 (src/BATTLE/BATTLE.PRG/146C.c:5577)
+// decomp: BATTLE.PRG func_800753F8 (src/BATTLE/BATTLE.PRG/146C.c:5328)
 // Takes each of the command's x, z and y arguments (Q12) whole when it is
 // within 0x7FFF, or else 8 units (0x8000) of it, as one step of whole units
 // and leaves the rest queued. The step's fourth halfword is zero (the
@@ -235,7 +235,7 @@ class AshleyMovementHost {
   virtual void BeginJumpMovement(int direction, int distance) = 0;
 };
 
-// decomp: BATTLE.PRG func_8006E7F0 (src/BATTLE/BATTLE.PRG/146C.c:2837)
+// decomp: BATTLE.PRG func_8006E7F0 (src/BATTLE/BATTLE.PRG/146C.c:2539)
 // During a door transition Ashley walks in along the door's entry facing (or
 // stands); otherwise the stick or direction pad moves her relative to the
 // camera, R2 or the walk-only state slows her and Square jumps.

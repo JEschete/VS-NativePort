@@ -85,7 +85,8 @@ extern std::uint8_t* legacyDiscReadBuffer;
 // decomp: cdReadLoc (src/SLUS_010.40/main.c:847).
 extern Legacy::DslLOC legacyDiscReadLocation;
 // decomp: cdaTrack, cdaMinute, cdaSecond and cdaPeak
-// (src/SLUS_010.40/main.c:848-851), set by diskPcmReadReady (main.c:2018-2021).
+// (src/SLUS_010.40/main.c:851), set by diskPcmReadReady
+// (src/SLUS_010.40/main.c:2018-2021).
 extern std::int32_t legacyXaReadyBcdField;
 extern std::int32_t legacyXaReadyByteThree;
 extern std::int32_t legacyXaReadyByteFour;

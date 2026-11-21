@@ -116,7 +116,8 @@ SceneTransitionHost& LiveSceneTransitionHost() {
 }
 }  // namespace VS::Event
 
-// decomp: BATTLE.PRG func_800B91C4 (F01099, src/BATTLE/BATTLE.PRG/4A0A8.c:1780,
+// decomp: BATTLE.PRG vs_battle_script_53_forgetZoneEnemies (F01099,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:2196; was func_800B91C4,
 // 0x800B91C4-0x800B91F0), opcode 0x53 in the normal and skip tables.
 std::intptr_t VS::Event::ScriptClearRoomActorCacheOpcode(
     std::uint8_t* instruction, std::int16_t /*thread_index*/) {
@@ -128,7 +129,8 @@ std::intptr_t VS::Event::ScriptClearRoomActorCacheOpcode(
       command, event::LiveSceneTransitionHost()));
 }
 
-// decomp: BATTLE.PRG func_800B92D0 (F01104, src/BATTLE/BATTLE.PRG/4A0A8.c:1813,
+// decomp: BATTLE.PRG vs_battle_script_58_setUiVisible (F01104,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:2267; was func_800B92D0,
 // 0x800B92D0-0x800B92F4), opcode 0x58 in the normal and skip tables.
 std::intptr_t VS::Event::ScriptSetHudVisibleOpcode(
     std::uint8_t* instruction, std::int16_t /*thread_index*/) {
@@ -139,7 +141,8 @@ std::intptr_t VS::Event::ScriptSetHudVisibleOpcode(
       event::ScriptSetHudVisible(command, event::LiveSceneTransitionHost()));
 }
 
-// decomp: BATTLE.PRG func_800B92F4 (F01105, src/BATTLE/BATTLE.PRG/4A0A8.c:1819,
+// decomp: BATTLE.PRG vs_battle_script_59_openMenu (F01105,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:2282; was func_800B92F4,
 // 0x800B92F4-0x800B94D8), opcode 0x59 in the normal and skip tables. The
 // active flag is written only when the opcode sets or clears it, as the
 // original wrote it, so a hold keeps whatever nonzero byte it found.
@@ -156,7 +159,8 @@ std::intptr_t VS::Event::ScriptRunMenuTransitionOpcode(
   return static_cast<std::intptr_t>(step);
 }
 
-// decomp: BATTLE.PRG func_800B98C0 (F01120, src/BATTLE/BATTLE.PRG/4A0A8.c:2018,
+// decomp: BATTLE.PRG vs_battle_script_68 (F01120,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:2605; was func_800B98C0,
 // 0x800B98C0-0x800B9A40), opcode 0x68 in the normal and skip tables.
 std::intptr_t VS::Event::ScriptChangeRoomOpcode(std::uint8_t* instruction,
                                                 std::int16_t /*thread_index*/) {

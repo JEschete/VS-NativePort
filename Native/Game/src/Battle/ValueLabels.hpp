@@ -24,7 +24,7 @@ static_assert(sizeof(ValueLabelKey) == kValueLabelKeyBytes,
 
 inline constexpr std::size_t kFloatingLabelTextBytes = 4;
 
-// decomp: D_800F1BAC_t (src/BATTLE/BATTLE.PRG/146C.h:22-37)
+// decomp: D_800F1BAC_t (src/BATTLE/BATTLE.PRG/146C.h:23-37)
 struct FloatingLabel {
   VS::Core::Gte::SVECTOR position;
   ValueLabelKey key;

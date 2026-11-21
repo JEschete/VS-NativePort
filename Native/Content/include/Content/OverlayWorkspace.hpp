@@ -9,8 +9,9 @@
 // framework); 0 means the workspace is free.
 namespace VS::Content {
 
-// The stored owner tag (decomp D_800F18F8, BATTLE.PRG 146C.c). The live
-// binding (OverlayWorkspaceLive.hpp) keeps it in the legacy byte.
+// The stored owner tag (decomp D_800F18F8, BATTLE.PRG
+// src/BATTLE/BATTLE.PRG/146C.c). The live binding (OverlayWorkspaceLive.hpp)
+// keeps it in the legacy byte.
 class OverlayWorkspaceHost {
  public:
   OverlayWorkspaceHost() = default;

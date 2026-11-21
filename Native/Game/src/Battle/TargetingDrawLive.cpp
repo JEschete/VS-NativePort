@@ -72,7 +72,7 @@ class LiveWireCanvas final : public TargetWireCanvas {
 };
 }  // namespace
 
-// decomp: BATTLE.PRG func_800C0B50 (src/BATTLE/BATTLE.PRG/58350.s:8).
+// decomp: BATTLE.PRG func_800C0B50 (src/BATTLE/BATTLE.PRG/57B1C.c:294).
 void DrawLiveSphereVolumeWireframe(TargetVolume* shape, int color) {
   const auto* sphere = reinterpret_cast<VS::Battle::TargetSphereRecord*>(
       VS::Battle::targetSphere);

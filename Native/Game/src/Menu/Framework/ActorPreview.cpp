@@ -110,7 +110,7 @@ void DrawCompanionPass(ActorPreviewHost& host, const PreviewActor& actor) {
   host.MoveActor(kPreviewActorSlot, after.companion, -1);
 }
 
-// decomp: MAINMENU.PRG func_800F9EB8 (src/MENU/MAINMENU.PRG/224.c:239-256)
+// decomp: MAINMENU.PRG func_800F9EB8 (src/MENU/MAINMENU.PRG/224.c:173-255)
 void DrawPreviewWeapons(ActorPreviewHost& host, const PreviewActor& actor) {
   for (int weapon = 0; weapon < kWeaponModelsPerActor; ++weapon) {
     const int slot = kPreviewWeaponModelSlot + weapon;
@@ -128,7 +128,7 @@ void DrawPreviewWeapons(ActorPreviewHost& host, const PreviewActor& actor) {
 }
 }  // namespace
 
-// decomp: MAINMENU.PRG func_800F9A24 (src/MENU/MAINMENU.PRG/224.c:10)
+// decomp: MAINMENU.PRG func_800F9A24 (src/MENU/MAINMENU.PRG/224.c:14)
 void LoadActorPreview(ActorPreviewHost& host, int source_slot) {
   CloneActorPreview(host, source_slot);
   ResetActorPreviewPose(host);
@@ -141,7 +141,7 @@ void LoadActorPreview(ActorPreviewHost& host, int source_slot) {
   host.PlayAnimation(kPreviewActorSlot, kPreviewAnimation);
 }
 
-// decomp: MAINMENU.PRG func_800F9A78 (src/MENU/MAINMENU.PRG/224.c:20)
+// decomp: MAINMENU.PRG func_800F9A78 (src/MENU/MAINMENU.PRG/224.c:24)
 void CloneActorPreview(ActorPreviewHost& host, int source_slot) {
   // The original indexed the actor table unchecked and read a missing
   // record's model (224.c:29-33).

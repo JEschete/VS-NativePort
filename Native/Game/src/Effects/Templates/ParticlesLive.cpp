@@ -382,9 +382,9 @@ std::optional<ParticleSetDefinition> LiveParticleHost::Definition(
   return TypedDefinition(*definition);
 }
 
-// decomp: particleDispatch.h:14-44 (the create command). The original
-// allocated unchecked and left the record's other fields as the heap held
-// them; a set without room is refused here, and a capacity that is not
+// decomp: src/EFFECT/particleDispatch.h:14-44 (the create command). The
+// original allocated unchecked and left the record's other fields as the heap
+// held them; a set without room is refused here, and a capacity that is not
 // positive allocates no control points.
 void LiveParticleHost::Create(const ParticleSetState& state,
                               std::int32_t capacity,
@@ -623,10 +623,10 @@ std::optional<ParticleTexture> LiveParticleHost::AdvanceTexture() {
                          .h = texture.h};
 }
 
-// decomp: particleRender.h:166-198 and particleLineRender.h:111-126 (addPrim
-// at the segment's depth). The original wrote past the primitive buffer when
-// it was full; a packet without room or outside the scene table is dropped
-// here.
+// decomp: src/EFFECT/particleRender.h:166-198 and
+// src/EFFECT/particleLineRender.h:111-126 (addPrim at the segment's depth). The
+// original wrote past the primitive buffer when it was full; a packet without
+// room or outside the scene table is dropped here.
 std::optional<std::pair<std::uint32_t*, std::uint32_t*>>
 LiveParticleHost::Reserve(std::int32_t depth, std::size_t words) {
   std::uint32_t* const entry =

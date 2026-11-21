@@ -222,8 +222,9 @@ class LiveCameraSteps final : public EventCameraStepPort {
 };
 }  // namespace
 
-// decomp: BATTLE.PRG vs_battle_applyCameraState (F01219,
-// src/BATTLE/BATTLE.PRG/4A0A8.c:3117, 0x800BBF14-0x800BC1CC)
+// decomp: BATTLE.PRG applyCameraState (F01219,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:3767; was vs_battle_applyCameraState,
+// 0x800BBF14-0x800BC1CC)
 void ApplyEventCameraStateEntry() {
   CameraState* camera = LiveCamera("ApplyEventCameraState");
   if (camera == nullptr) return;
@@ -234,7 +235,7 @@ void ApplyEventCameraStateEntry() {
   StoreFrame(*camera, frame);
 }
 
-// decomp: BATTLE.PRG func_800BC9E0 (F01222, src/BATTLE/BATTLE.PRG/4A0A8.c:3371,
+// decomp: BATTLE.PRG func_800BC9E0 (F01222, src/BATTLE/BATTLE.PRG/4DEA8.c:4021,
 // 0x800BC9E0-0x800BCA8C)
 void UpdateEventCameraTracksEntry() {
   CameraState* camera = LiveCamera("UpdateEventCameraTracks");
@@ -243,7 +244,7 @@ void UpdateEventCameraTracksEntry() {
   UpdateEventCameraTracks(steps);
 }
 
-// decomp: BATTLE.PRG func_800BD610 (F01228, src/BATTLE/BATTLE.PRG/4A0A8.c:3663,
+// decomp: BATTLE.PRG func_800BD610 (F01228, src/BATTLE/BATTLE.PRG/4DEA8.c:4313,
 // 0x800BD610-0x800BD6C4)
 int EventCameraCompletionMaskEntry() {
   CameraState* camera = LiveCamera("EventCameraCompletionMask");
@@ -256,7 +257,8 @@ std::uint64_t RefusedEventCameraFrameCount() noexcept {
 }
 }  // namespace VS::Event
 
-// decomp: BATTLE.PRG func_800BB41C (F01197, src/BATTLE/BATTLE.PRG/4A0A8.c:2788,
+// decomp: BATTLE.PRG vs_battle_script_E0 (F01197,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:3437; was func_800BB41C,
 // 0x800BB41C-0x800BB450), opcode 0xE0.
 std::intptr_t VS::Event::CommandWaitCameraTracksOpcode(
     std::uint8_t* instruction, std::int16_t /*thread_index*/) {

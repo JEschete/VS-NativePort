@@ -109,51 +109,66 @@ class ScriptEffectHost {
   virtual void SetScanlineOverlay(std::uint8_t enabled) = 0;
 };
 
-// decomp: func_800BA8BC (src/BATTLE/BATTLE.PRG/4A0A8.c:2454), opcode 0xA0:
-// starts an effect on an actor, holding while a named actor is unavailable.
+// decomp: vs_battle_script_A0 (src/BATTLE/BATTLE.PRG/4DEA8.c:3102; was
+// func_800BA8BC), opcode 0xA0: starts an effect on an actor, holding while a
+// named actor is unavailable.
 ScriptStep CommandPlayActorEffect(ScriptCommand command,
                                   ScriptEffectHost& host);
-// decomp: func_800BA90C (src/BATTLE/BATTLE.PRG/4A0A8.c:2461), opcode 0xA1
+// decomp: vs_battle_script_A1 (src/BATTLE/BATTLE.PRG/4DEA8.c:3108; was
+// func_800BA90C), opcode 0xA1
 ScriptStep CommandAdvanceEffectStage(ScriptCommand command,
                                      ScriptEffectHost& host);
-// decomp: func_800BA94C (src/BATTLE/BATTLE.PRG/4A0A8.c:2470), opcode 0xA2:
-// holds until the scripted effect reaches a state; a skip clears it first.
+// decomp: vs_battle_script_A2 (src/BATTLE/BATTLE.PRG/4DEA8.c:3117; was
+// func_800BA94C), opcode 0xA2: holds until the scripted effect reaches a state;
+// a skip clears it first.
 ScriptStep CommandWaitEffectState(ScriptCommand command,
                                   ScriptEffectHost& host);
-// decomp: func_800BAA04 (src/BATTLE/BATTLE.PRG/4A0A8.c:2487), opcode 0xA3
+// decomp: vs_battle_script_A3 (src/BATTLE/BATTLE.PRG/4DEA8.c:3134; was
+// func_800BAA04), opcode 0xA3
 ScriptStep CommandYieldEffectRelease(ScriptCommand command,
                                      ScriptEffectHost& host);
-// decomp: func_800BAA34 (src/BATTLE/BATTLE.PRG/4A0A8.c:2493), opcode 0xA4
+// decomp: vs_battle_script_A4 (src/BATTLE/BATTLE.PRG/4DEA8.c:3140; was
+// func_800BAA34), opcode 0xA4
 ScriptStep CommandWaitEffectContinuation(ScriptCommand command,
                                          ScriptEffectHost& host);
-// decomp: func_800BAA58 (src/BATTLE/BATTLE.PRG/4A0A8.c:2495), opcode 0xA5:
-// clears the effects, then holds until they are idle or finished.
+// decomp: vs_battle_script_A5 (src/BATTLE/BATTLE.PRG/4DEA8.c:3145; was
+// func_800BAA58), opcode 0xA5: clears the effects, then holds until they are
+// idle or finished.
 ScriptStep CommandWaitEffectRelease(ScriptCommand command,
                                     ScriptEffectHost& host);
-// decomp: func_800BAACC (src/BATTLE/BATTLE.PRG/4A0A8.c:2507), opcode 0xA6
+// decomp: vs_battle_script_A6 (src/BATTLE/BATTLE.PRG/4DEA8.c:3157; was
+// func_800BAACC), opcode 0xA6
 ScriptStep CommandMarkEffectStageReady(ScriptCommand command,
                                        ScriptEffectHost& host);
-// decomp: func_800BAB14 (src/BATTLE/BATTLE.PRG/4A0A8.c:2519), opcode 0xA9
+// decomp: vs_battle_script_A9 (src/BATTLE/BATTLE.PRG/4DEA8.c:3169; was
+// func_800BAB14), opcode 0xA9
 ScriptStep CommandPlayVibrationPattern(ScriptCommand command,
                                        ScriptEffectHost& host);
-// decomp: func_800BABCC (src/BATTLE/BATTLE.PRG/4A0A8.c:2537), opcode 0xAA
+// decomp: vs_battle_script_AA (src/BATTLE/BATTLE.PRG/4DEA8.c:3187; was
+// func_800BABCC), opcode 0xAA
 ScriptStep CommandSetActorTrail(ScriptCommand command, ScriptEffectHost& host);
-// decomp: func_800BB288 (src/BATTLE/BATTLE.PRG/4A0A8.c:2733), opcode 0xB8
+// decomp: vs_battle_script_B8 (src/BATTLE/BATTLE.PRG/4DEA8.c:3382; was
+// func_800BB288), opcode 0xB8
 ScriptStep CommandWaitScreenEffectLoad(ScriptCommand command,
                                        ScriptEffectHost& host);
-// decomp: func_800BB2B8 (src/BATTLE/BATTLE.PRG/4A0A8.c:2741), opcode 0xBB
+// decomp: vs_battle_script_BB (src/BATTLE/BATTLE.PRG/4DEA8.c:3390; was
+// func_800BB2B8), opcode 0xBB
 ScriptStep CommandSetScreenDistortion(ScriptCommand command,
                                       ScriptEffectHost& host);
-// decomp: func_800BB2E4 (src/BATTLE/BATTLE.PRG/4A0A8.c:2747), opcode 0xBC
+// decomp: vs_battle_script_BC (src/BATTLE/BATTLE.PRG/4DEA8.c:3396; was
+// func_800BB2E4), opcode 0xBC
 ScriptStep CommandLoadScreenEffects(ScriptCommand command,
                                     ScriptEffectHost& host);
-// decomp: func_800BB304 (src/BATTLE/BATTLE.PRG/4A0A8.c:2753), opcode 0xBD
+// decomp: vs_battle_script_BD (src/BATTLE/BATTLE.PRG/4DEA8.c:3402; was
+// func_800BB304), opcode 0xBD
 ScriptStep CommandReservedScreenEffect(ScriptCommand command,
                                        ScriptEffectHost& host);
-// decomp: func_800BB30C (src/BATTLE/BATTLE.PRG/4A0A8.c:2755), opcode 0xBE
+// decomp: vs_battle_script_BE (src/BATTLE/BATTLE.PRG/4DEA8.c:3404; was
+// func_800BB30C), opcode 0xBE
 ScriptStep CommandFreeScreenEffects(ScriptCommand command,
                                     ScriptEffectHost& host);
-// decomp: func_800BB4F0 (src/BATTLE/BATTLE.PRG/4A0A8.c:2821), opcode 0xF3
+// decomp: vs_battle_script_F3 (src/BATTLE/BATTLE.PRG/4DEA8.c:3470; was
+// func_800BB4F0), opcode 0xF3
 ScriptStep CommandSetScanlineOverlay(ScriptCommand command,
                                      ScriptEffectHost& host);
 
@@ -177,7 +192,7 @@ class ScanlineCanvas {
 // The grey a darkened scanline subtracts.
 inline constexpr int kScanlineGrey = 0x20;
 
-// decomp: func_800BB874 (src/BATTLE/BATTLE.PRG/4A0A8.c:2937): darkens every
+// decomp: func_800BB874 (src/BATTLE/BATTLE.PRG/4DEA8.c:3586): darkens every
 // other row of the viewport, alternating rows every two frames. Takes the
 // overlay's frame counter and returns it advanced.
 [[nodiscard]] std::uint16_t DrawEventScanlineOverlay(std::uint16_t frame,
@@ -225,7 +240,7 @@ class ImageTweenHost {
                                const ImageLayerPlacement& placement) = 0;
 };
 
-// decomp: func_800BB9B0 (src/BATTLE/BATTLE.PRG/4A0A8.c:2971): advances each
+// decomp: func_800BB9B0 (src/BATTLE/BATTLE.PRG/4DEA8.c:3620): advances each
 // running tween by half the frame's ticks and places its layer.
 void UpdateEventImageTweens(std::span<SplashTween> tweens, int tick_speed,
                             ImageTweenHost& host);
@@ -246,7 +261,7 @@ struct WeatherTween {
   std::int16_t delta_intensity = 0;
 };
 
-// decomp: func_800BBAFC (src/BATTLE/BATTLE.PRG/4A0A8.c:2995): advances a
+// decomp: func_800BBAFC (src/BATTLE/BATTLE.PRG/4DEA8.c:3645): advances a
 // running tween one frame and updates its current values. Returns whether
 // it ran, so the caller applies them to the weather.
 [[nodiscard]] bool UpdateEventWeatherTween(WeatherTween& tween);

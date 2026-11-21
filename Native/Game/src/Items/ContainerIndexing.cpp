@@ -145,7 +145,8 @@ void ContainerStorage::Write(ItemCategory category, std::size_t index,
   throw std::out_of_range(std::string(reason));
 }
 
-// decomp: _getContainerIndicesOffset (src/MENU/MENUD.PRG/234.c:85)
+// decomp: getContainerIndicesOffset (src/MENU/MENUD.PRG/234.c:89; was
+// _getContainerIndicesOffset)
 std::size_t ContainerCategoryIndices(ItemCategory category,
                                      ContainerWorld& world) {
   const auto category_index = CategoryIndex(category, world);
@@ -156,7 +157,8 @@ std::size_t ContainerCategoryIndices(ItemCategory category,
   return offset;
 }
 
-// decomp: _getContainerItemIndex (src/MENU/MENUD.PRG/234.c:97)
+// decomp: getContainerItemIndex (src/MENU/MENUD.PRG/234.c:101; was
+// _getContainerItemIndex)
 std::int32_t FindContainerItemRow(ItemCategory category, std::int32_t index,
                                   std::span<const std::uint16_t> indices,
                                   ContainerWorld& world) {
@@ -172,7 +174,8 @@ std::int32_t FindContainerItemRow(ItemCategory category, std::int32_t index,
   return 0;
 }
 
-// decomp: _setContainerItemIndex (src/MENU/MENUD.PRG/234.c:109)
+// decomp: setContainerItemIndex (src/MENU/MENUD.PRG/234.c:113; was
+// _setContainerItemIndex)
 void AppendContainerItemIndex(ItemCategory category, std::int32_t index,
                               std::span<std::uint16_t> indices,
                               ContainerWorld& world) {
@@ -188,7 +191,8 @@ void AppendContainerItemIndex(ItemCategory category, std::int32_t index,
   }
 }
 
-// decomp: _initContainerObject (src/MENU/MENUD.PRG/234.c:121)
+// decomp: initContainerObject (src/MENU/MENUD.PRG/234.c:125; was
+// _initContainerObject)
 void ClearContainerItem(ItemCategory category, std::int32_t index,
                         ContainerWorld& world) {
   CategoryIndex(category, world);
@@ -199,7 +203,8 @@ void ClearContainerItem(ItemCategory category, std::int32_t index,
   world.Write(category, slot, Cleared(category, slot));
 }
 
-// decomp: _getContainerItemId (src/MENU/MENUD.PRG/234.c:191)
+// decomp: getContainerItemId (src/MENU/MENUD.PRG/234.c:194; was
+// _getContainerItemId)
 std::uint16_t ContainerItemId(ItemCategory category, std::int32_t index,
                               ContainerWorld& world) {
   CategoryIndex(category, world);
@@ -226,7 +231,8 @@ std::uint16_t ContainerItemId(ItemCategory category, std::int32_t index,
   std::terminate();
 }
 
-// decomp: _countContainerItems (src/MENU/MENUD.PRG/234.c:221)
+// decomp: countContainerItems (src/MENU/MENUD.PRG/234.c:224; was
+// _countContainerItems)
 std::int32_t CountContainerItems(ItemCategory category, ContainerWorld& world) {
   std::int32_t count = 0;
   for (std::int32_t index = 0; index < CheckedCapacity(category, world);
@@ -236,7 +242,8 @@ std::int32_t CountContainerItems(ItemCategory category, ContainerWorld& world) {
   return count;
 }
 
-// decomp: _getEmptyContainerSlot (src/MENU/MENUD.PRG/234.c:234)
+// decomp: getEmptyContainerSlot (src/MENU/MENUD.PRG/234.c:237; was
+// _getEmptyContainerSlot)
 std::int32_t FindEmptyContainerSlot(ItemCategory category,
                                     ContainerWorld& world) {
   std::int32_t index = 0;

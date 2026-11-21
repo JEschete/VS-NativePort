@@ -326,7 +326,8 @@ class EquipmentHost final : public HostBase<EquipmentTerminalHost> {
 
 // NOLINTNEXTLINE(readability-identifier-naming): the catalog's component.
 namespace VS::Menu::Status {
-// decomp: _equipmentDetailScreen (src/MENU/MENU4.PRG/120.c:1482)
+// decomp: equipmentDetailScreen (src/MENU/MENU4.PRG/120.c:1485; was
+// _equipmentDetailScreen)
 int LiveUpdateEquipmentDetails(int row) {
   if (!terminal_live::Workspace()) {
     return 0;
@@ -336,7 +337,7 @@ int LiveUpdateEquipmentDetails(int row) {
       "equipment details",
       UpdateEquipmentDetails(terminal_live::detailState, host, row));
 }
-// decomp: _equipmentScreen (src/MENU/MENU4.PRG/120.c:1875)
+// decomp: equipmentScreen (src/MENU/MENU4.PRG/120.c:1877; was _equipmentScreen)
 int LiveUpdateEquipmentList(int element) {
   if (!terminal_live::Workspace()) {
     return 0;

@@ -355,7 +355,7 @@ constexpr int kPromptPitch = 16;
 constexpr int kPromptCursorTop = 10;
 
 // libcard's event results (decomp memcardEventHandler_e,
-// src/MENU/MENU7.PRG/260.c:38) and maskedHandler's (decomp maskedHandler_e,
+// src/MENU/memcard.h:56) and maskedHandler's (decomp maskedHandler_e,
 // 260.c:1629).
 constexpr int kReadinessPending = 0;
 constexpr int kReadinessReady = 1;
@@ -2129,7 +2129,8 @@ void ReminderInput(TitleHost& host, State& state) {
 }
 }  // namespace
 
-// decomp: MENU7.PRG _drawSaveInfoUI (src/MENU/MENU7.PRG/260.c:1222)
+// decomp: MENU7.PRG drawSaveInfoUI (src/MENU/memcard.h:1123; was
+// _drawSaveInfoUI)
 void DrawSummaryLabel(Host& host, std::int32_t position, Label label) {
   const auto index = static_cast<std::size_t>(label);
   if (index >= kLabelCount) {
@@ -2143,8 +2144,8 @@ void DrawSummaryLabel(Host& host, std::int32_t position, Label label) {
                       .page = kInterfacePage});
 }
 
-// decomp: MENU7.PRG _renderInteger (src/MENU/MENU7.PRG/260.c:1239)
-// decomp: TITLE.PRG _drawInteger (src/TITLE/TITLE.PRG/22C.c:1129)
+// decomp: MENU7.PRG drawInteger (src/MENU/memcard.h:1140; was _renderInteger)
+// decomp: TITLE.PRG drawInteger (src/MENU/memcard.h:1140; was _drawInteger)
 // A zero divisor draws nothing; the original divided by it.
 void DrawInteger(ImmediatePacketTarget& target, std::int32_t position,
                  std::uint32_t value, std::uint32_t divisor) {
@@ -2163,8 +2164,8 @@ void DrawInteger(ImmediatePacketTarget& target, std::int32_t position,
   } while (divisor != 0);
 }
 
-// decomp: MENU7.PRG _countDigits (src/MENU/MENU7.PRG/260.c:1253)
-// decomp: TITLE.PRG _countDigits (src/TITLE/TITLE.PRG/22C.c:1140)
+// decomp: MENU7.PRG countDigits (src/MENU/memcard.h:1154; was _countDigits)
+// decomp: TITLE.PRG countDigits (src/MENU/memcard.h:1154; was _countDigits)
 int DecimalDigitCount(int value) noexcept {
   int digits = 0;
   do {
@@ -2174,7 +2175,7 @@ int DecimalDigitCount(int value) noexcept {
   return digits;
 }
 
-// decomp: MENU7.PRG _drawHPMP (src/MENU/MENU7.PRG/260.c:1270)
+// decomp: MENU7.PRG drawHPMP (src/MENU/memcard.h:1171; was _drawHPMP)
 // More than three digits in either value is refused after the bar and the
 // label; the original read past its divisor table.
 void DrawHpMpSummary(Host& host, std::int32_t position, Stat stat,
@@ -2219,7 +2220,8 @@ void DrawHpMpSummary(Host& host, std::int32_t position, Stat stat,
               kDigitDivisors[max_digits]);
 }
 
-// decomp: MENU7.PRG _fileProcessingAnim (src/MENU/MENU7.PRG/260.c:1353)
+// decomp: MENU7.PRG fileProcessingAnim (src/MENU/memcard.h:1254; was
+// _fileProcessingAnim)
 void DrawTransferProgress(Context& context, std::int32_t x, std::int32_t y) {
   std::uint32_t left = Word(x) - kTransferTrail;
   left = std::max(left, kTransferLeftLimit);
@@ -2248,7 +2250,8 @@ void DrawTransferProgress(Context& context, std::int32_t x, std::int32_t y) {
   }
 }
 
-// decomp: MENU7.PRG _fileProcessingCompleteAnim (src/MENU/MENU7.PRG/260.c:1400)
+// decomp: MENU7.PRG fileProcessingCompleteAnim (src/MENU/memcard.h:1301; was
+// _fileProcessingCompleteAnim)
 void DrawTransferComplete(Context& context, std::int32_t colour,
                           std::int32_t y) {
   const std::uint32_t base = Word(colour);
@@ -2281,7 +2284,7 @@ void DrawTransferComplete(Context& context, std::int32_t colour,
   }
 }
 
-// decomp: MENU7.PRG _initFileMenu (src/MENU/MENU7.PRG/260.c:1447)
+// decomp: MENU7.PRG initFileMenu (src/MENU/memcard.h:1349; was _initFileMenu)
 void ResetElements(Context& context) {
   context.host.SetCardMessage(std::nullopt);
   context.state.cursor_color = 0;
@@ -2292,7 +2295,8 @@ void ResetElements(Context& context) {
   context.state.elements.fill(Element{});
 }
 
-// decomp: MENU7.PRG _initFileMenuElement (src/MENU/MENU7.PRG/260.c:1463)
+// decomp: MENU7.PRG initFileMenuElement (src/MENU/memcard.h:1365; was
+// _initFileMenuElement)
 Element* InitializeElement(Context& context, int id, std::uint32_t position,
                            std::uint32_t size,
                            std::span<const std::uint8_t> text) {
@@ -2318,7 +2322,8 @@ Element* InitializeElement(Context& context, int id, std::uint32_t position,
   return &element;
 }
 
-// decomp: MENU7.PRG _clearFileMenuElement (src/MENU/MENU7.PRG/260.c:1504)
+// decomp: MENU7.PRG clearFileMenuElement (src/MENU/memcard.h:1406; was
+// _clearFileMenuElement)
 void ClearElement(Context& context, int id) {
   if (!ValidElement(id)) {
     context.host.Refuse(
@@ -2329,16 +2334,17 @@ void ClearElement(Context& context, int id) {
   ElementAt(context.state, id) = Element{};
 }
 
-// decomp: MENU7.PRG _fileMenuElementsActive (src/MENU/MENU7.PRG/260.c:1512)
+// decomp: MENU7.PRG fileMenuElementsActive (src/MENU/memcard.h:1414; was
+// _fileMenuElementsActive)
 bool AreAnimationsComplete(const State& state) {
   return std::ranges::all_of(state.elements, [](const Element& element) {
     return element.state < static_cast<std::uint8_t>(ElementState::kAnimateX);
   });
 }
 
-// decomp: MENU7.PRG _printCharacter (src/MENU/MENU7.PRG/260.c:1524)
-// A glyph past the width table draws nothing and keeps x; the original read
-// past the table.
+// decomp: MENU7.PRG printCharacter (src/MENU/memcard.h:1426; was
+// _printCharacter) A glyph past the width table draws nothing and keeps x; the
+// original read past the table.
 int DrawGlyph(ImmediatePacketTarget& target, std::uint32_t glyph, int x, int y,
               int clut) {
   if ((glyph >> kByteShift) == kSpacingGlyphPage) {
@@ -2362,7 +2368,8 @@ int DrawGlyph(ImmediatePacketTarget& target, std::uint32_t glyph, int x, int y,
   return x + kGlyphWidths[glyph];
 }
 
-// decomp: MENU7.PRG _findCurrentSave (src/MENU/MENU7.PRG/260.c:1572)
+// decomp: MENU7.PRG findCurrentSave (src/MENU/memcard.h:1474; was
+// _findCurrentSave)
 int FindCurrentDataSaveStep(Context& context, bool init) {
   if (init) {
     context.state.data_save_search = {};
@@ -2372,7 +2379,8 @@ int FindCurrentDataSaveStep(Context& context, bool init) {
                         &context.host);
 }
 
-// decomp: MENU7.PRG maskedHandler (src/MENU/MENU7.PRG/260.c:1640)
+// decomp: MENU7.PRG memcardMaskedHandler (src/MENU/memcard.h:1542; was
+// maskedHandler)
 int CheckCardStep(Context& context, int port_mask) {
   CardHost& host = context.host;
   if (port_mask != 0) {
@@ -2401,8 +2409,8 @@ int CheckCardStep(Context& context, int port_mask) {
   return kMaskedError;
 }
 
-// decomp: MENU7.PRG _printString (src/MENU/MENU7.PRG/260.c:1675)
-// decomp: TITLE.PRG _printString (src/TITLE/TITLE.PRG/22C.c:1520)
+// decomp: MENU7.PRG printString (src/MENU/memcard.h:1577; was _printString)
+// decomp: TITLE.PRG printString (src/MENU/memcard.h:1577; was _printString)
 // The span's end ends the text.
 void DrawText(ImmediatePacketTarget& target, std::uint8_t& arrow,
               std::span<const std::uint8_t> text, int x, int y, int clut) {
@@ -2436,9 +2444,9 @@ void DrawText(ImmediatePacketTarget& target, std::uint8_t& arrow,
   }
 }
 
-// decomp: MENU7.PRG _intepolateMenuItemBgColour (src/MENU/MENU7.PRG/260.c:1738)
-// decomp: TITLE.PRG _intepolateMenuItemBgColour
-// (src/TITLE/TITLE.PRG/22C.c:1577)
+// decomp: MENU7.PRG intepolateMenuItemBgColour (src/MENU/memcard.h:1640; was
+// _intepolateMenuItemBgColour) decomp: TITLE.PRG intepolateMenuItemBgColour
+// (src/MENU/memcard.h:1640; was _intepolateMenuItemBgColour)
 std::optional<std::uint32_t> ElementBackgroundColor(
     std::uint32_t outer, std::uint32_t inner) noexcept {
   std::uint32_t color1 = 0;
@@ -2457,7 +2465,8 @@ std::optional<std::uint32_t> ElementBackgroundColor(
   return Render::BlendRgb(color1, color2, outer);
 }
 
-// decomp: MENU7.PRG _drawFileMenuElement (src/MENU/MENU7.PRG/260.c:1765)
+// decomp: MENU7.PRG drawFileMenuElement (src/MENU/memcard.h:1667; was
+// _drawFileMenuElement)
 void DrawElement(Context& context, Element& element) {
   if (element.selected != 0) {
     element.outer_blend = kBlendSteps;
@@ -2491,7 +2500,7 @@ void DrawElement(Context& context, Element& element) {
   }
 }
 
-// decomp: MENU7.PRG _drawFileMenu (src/MENU/MENU7.PRG/260.c:1951)
+// decomp: MENU7.PRG drawFileMenu (src/MENU/memcard.h:1854; was _drawFileMenu)
 void DrawFrame(Context& context, int frame_buffer) {
   Host& host = context.host;
   const std::uint32_t buffer_x = frame_buffer != 0 ? Word(kScreenWidth) : 0;
@@ -2514,8 +2523,9 @@ void DrawFrame(Context& context, int frame_buffer) {
   DrawFrameFooter(context);
 }
 
-// decomp: MENU7.PRG _drawFileMenuBg (src/MENU/MENU7.PRG/260.c:2078)
-// decomp: TITLE.PRG _drawFileMenuBg (src/TITLE/TITLE.PRG/22C.c:1908)
+// decomp: MENU7.PRG drawFileMenuBg (src/MENU/memcard.h:1981; was
+// _drawFileMenuBg) decomp: TITLE.PRG drawFileMenuBg (src/MENU/memcard.h:1981;
+// was _drawFileMenuBg)
 void DrawBackground(ImmediatePacketTarget& target) {
   Sprite(target, {.position = kBackgroundRightPosition,
                   .uv_clut = kBackgroundUvClut,
@@ -2527,7 +2537,8 @@ void DrawBackground(ImmediatePacketTarget& target) {
                   .page = kLeftBackgroundPage});
 }
 
-// decomp: MENU7.PRG _promptConfirm (src/MENU/MENU7.PRG/260.c:2092)
+// decomp: MENU7.PRG promptConfirm (src/MENU/promptConfirm.h:14; was
+// _promptConfirm)
 int UpdateConfirmation(Context& context, bool init) {
   State& state = context.state;
   if (init) {
@@ -2563,7 +2574,8 @@ int UpdateConfirmation(Context& context, bool init) {
   return 0;
 }
 
-// decomp: MENU7.PRG _promptOverwrite (src/MENU/MENU7.PRG/260.c:2161)
+// decomp: MENU7.PRG promptOverwrite (src/MENU/promptConfirm.h:83; was
+// _promptOverwrite)
 int UpdateOverwritePrompt(Context& context, bool init) {
   State& state = context.state;
   if (init) {
@@ -2584,7 +2596,8 @@ int UpdateOverwritePrompt(Context& context, bool init) {
   return 0;
 }
 
-// decomp: MENU7.PRG _promptFormat (src/MENU/MENU7.PRG/260.c:2199)
+// decomp: MENU7.PRG promptFormat (src/MENU/promptConfirm.h:119; was
+// _promptFormat)
 int UpdateFormatPrompt(Context& context, int init_port) {
   State& state = context.state;
   Host& host = context.host;
@@ -2637,7 +2650,8 @@ int UpdateFormatPrompt(Context& context, int init_port) {
       return 0;
   }
 }
-// decomp: MENU7.PRG _showSaveFilesMenu (src/MENU/MENU7.PRG/260.c:2277)
+// decomp: MENU7.PRG showSaveFilesMenu (src/MENU/showSaveFilesMenu.h:20; was
+// _showSaveFilesMenu)
 int UpdateSaveFiles(Context& context, int init_port) {
   Host& host = context.host;
   FileList& list = context.state.save_files;
@@ -2726,7 +2740,8 @@ int UpdateSaveFiles(Context& context, int init_port) {
   return 0;
 }
 
-// decomp: MENU7.PRG _selectSaveMemoryCard (src/MENU/MENU7.PRG/260.c:2537)
+// decomp: MENU7.PRG selectSaveMemoryCard (src/MENU/selectSaveMemoryCard.h:13;
+// was _selectSaveMemoryCard)
 int UpdateSaveCard(Context& context, int init_port) {
   CardPicker& picker = context.state.save_card;
   if (const std::optional<int> shared =
@@ -2755,7 +2770,8 @@ int UpdateSaveCard(Context& context, int init_port) {
   return 0;
 }
 
-// decomp: MENU7.PRG _showLoadFilesMenu (src/MENU/MENU7.PRG/260.c:2878)
+// decomp: MENU7.PRG showLoadFilesMenu (src/MENU/showLoadFilesMenu.h:14; was
+// _showLoadFilesMenu)
 int UpdateLoadFiles(Context& context, int init_port) {
   State& state = context.state;
   Host& host = context.host;
@@ -2830,7 +2846,8 @@ int UpdateLoadFiles(Context& context, int init_port) {
   return 0;
 }
 
-// decomp: MENU7.PRG _selectLoadMemoryCard (src/MENU/MENU7.PRG/260.c:3063)
+// decomp: MENU7.PRG selectLoadMemoryCard (src/MENU/selectLoadMemoryCard.h:13;
+// was _selectLoadMemoryCard)
 int UpdateLoadCard(Context& context, int init_port) {
   CardPicker& picker = context.state.load_card;
   if (const std::optional<int> shared =
@@ -2863,8 +2880,9 @@ int UpdateLoadCard(Context& context, int init_port) {
   return 0;
 }
 
-// decomp: MENU7.PRG _initGameOver (src/MENU/MENU7.PRG/260.c:3395)
-// A load polled before it was requested is refused and frees the buffer.
+// decomp: MENU7.PRG initGameOver (src/MENU/MENU7.PRG/260.c:148; was
+// _initGameOver) A load polled before it was requested is refused and frees the
+// buffer.
 int LoadGameOverAssetsStep(Context& context, bool begin) {
   Host& host = context.host;
   std::int32_t& step = context.state.game_over_load_step;
@@ -2893,7 +2911,8 @@ int LoadGameOverAssetsStep(Context& context, bool begin) {
   }
 }
 
-// decomp: MENU7.PRG _setMenuItemClut (src/MENU/MENU7.PRG/260.c:3434)
+// decomp: MENU7.PRG setMenuItemClut (src/MENU/MENU7.PRG/260.c:187; was
+// _setMenuItemClut)
 void BlendGameOverTextClut(std::span<std::uint16_t, kClutColors> clut,
                            int factor,
                            std::span<const std::uint16_t, kClutColors> from,
@@ -2914,7 +2933,8 @@ void BlendGameOverTextClut(std::span<std::uint16_t, kClutColors> clut,
   }
 }
 
-// decomp: MENU7.PRG _displayGameOverScreen (src/MENU/MENU7.PRG/260.c:3475)
+// decomp: MENU7.PRG displayGameOverScreen (src/MENU/MENU7.PRG/260.c:228; was
+// _displayGameOverScreen)
 int UpdateGameOverChoices(Context& context, bool init) {
   Host& host = context.host;
   GameOverChoices& choices = context.state.game_over;
@@ -2944,7 +2964,7 @@ int UpdateGameOverChoices(Context& context, bool init) {
   return 0;
 }
 
-// decomp: MENU7.PRG vs_menu7_gameOver (src/MENU/MENU7.PRG/260.c:3603)
+// decomp: MENU7.PRG vs_menu7_gameOver (src/MENU/MENU7.PRG/260.c:356)
 int UpdateGameOver(Context& context, std::uint8_t& step) {
   State& state = context.state;
   Host& host = context.host;
@@ -3012,7 +3032,8 @@ int UpdateGameOver(Context& context, std::uint8_t& step) {
   return 0;
 }
 
-// decomp: MENU7.PRG _promptYesNo (src/MENU/MENU7.PRG/260.c:3727)
+// decomp: MENU7.PRG promptYesNo (src/MENU/MENU7.PRG/260.c:480; was
+// _promptYesNo)
 int UpdateContainerConfirmation(Context& context, int init) {
   State& state = context.state;
   if (init != 0) {
@@ -3046,9 +3067,9 @@ int UpdateContainerConfirmation(Context& context, int init) {
   return 0;
 }
 
-// decomp: MENU7.PRG _getContainerIndexOffset (src/MENU/MENU7.PRG/260.c:3804)
-// A section past the capacity table stops at its end; the original read
-// past it.
+// decomp: MENU7.PRG getContainerIndexOffset (src/MENU/MENU7.PRG/260.c:557; was
+// _getContainerIndexOffset) A section past the capacity table stops at its end;
+// the original read past it.
 std::size_t ContainerIndexSection(int section) noexcept {
   const auto sections = std::min(static_cast<std::size_t>(std::max(section, 0)),
                                  kContainerCapacities.size());
@@ -3059,9 +3080,9 @@ std::size_t ContainerIndexSection(int section) noexcept {
   return offset;
 }
 
-// decomp: MENU7.PRG _copyContainer (src/MENU/MENU7.PRG/260.c:3821)
-// The renumbering lives on the stack; the original took it from the high
-// end of the heap.
+// decomp: MENU7.PRG copyContainer (src/MENU/MENU7.PRG/260.c:574; was
+// _copyContainer) The renumbering lives on the stack; the original took it from
+// the high end of the heap.
 void CopySelectedContainerItems(ContainerData& target,
                                 const ContainerData& source,
                                 const ContainerIndices& to_copy) {
@@ -3110,7 +3131,8 @@ void CopySelectedContainerItems(ContainerData& target,
               [](Items::InventoryMisc& /*item*/) {});
 }
 
-// decomp: MENU7.PRG _drawPlayTime (src/MENU/MENU7.PRG/260.c:4157)
+// decomp: MENU7.PRG drawPlayTime (src/MENU/MENU7.PRG/260.c:913; was
+// _drawPlayTime)
 void DrawPlayTime(Context& context) {
   Host& host = context.host;
   std::array<char, kPlayTimeBytes>& text = context.state.play_time;
@@ -3141,7 +3163,7 @@ void DrawPlayTime(Context& context) {
   host.DrawCompactText("PLAY    TIME", kPlayTimeLabelPosition);
 }
 
-// decomp: MENU7.PRG vs_menu7_dataMenu (src/MENU/MENU7.PRG/260.c:4187)
+// decomp: MENU7.PRG vs_menu7_dataMenu (src/MENU/MENU7.PRG/260.c:943)
 int UpdateDataMenu(Context& context, std::uint8_t& step) {
   Host& host = context.host;
   if (step < kDataClose) {
@@ -3208,7 +3230,8 @@ int UpdateDataMenu(Context& context, std::uint8_t& step) {
   return 0;
 }
 
-// decomp: TITLE.PRG _findCurrentSave (src/TITLE/TITLE.PRG/22C.c:1427)
+// decomp: TITLE.PRG findCurrentSave (src/MENU/memcard.h:1474; was
+// _findCurrentSave)
 int FindCurrentSaveStep(TitleContext& context, bool init) {
   if (init) {
     context.state.title_save_search = {};
@@ -3217,7 +3240,8 @@ int FindCurrentSaveStep(TitleContext& context, bool init) {
   return StepSaveSearch(context.host, context.state.title_save_search, nullptr);
 }
 
-// decomp: TITLE.PRG _initSaveScreen (src/TITLE/TITLE.PRG/22C.c:3074)
+// decomp: TITLE.PRG initSaveScreen (src/TITLE/TITLE.PRG/22C.c:80; was
+// _initSaveScreen)
 void InitializeDisplay(TitleHost& host) {
   host.SetFrameBuffer(0);
   host.PutDisplay(kScreenWidth, 0);
@@ -3225,7 +3249,8 @@ void InitializeDisplay(TitleHost& host) {
   host.SetDisplayMask(true);
 }
 
-// decomp: TITLE.PRG _saveScreenSwapBuf (src/TITLE/TITLE.PRG/22C.c:3093)
+// decomp: TITLE.PRG saveScreenSwapBuf (src/TITLE/TITLE.PRG/22C.c:99; was
+// _saveScreenSwapBuf)
 void SwapBuffers(TitleHost& host) {
   const auto buffer = static_cast<std::uint8_t>(1 - host.FrameBuffer());
   host.SetFrameBuffer(buffer);
@@ -3233,8 +3258,9 @@ void SwapBuffers(TitleHost& host) {
   host.PutDisplay(kScreenWidth - offset, offset);
 }
 
-// decomp: TITLE.PRG _saveScreenConfirmation (src/TITLE/TITLE.PRG/22C.c:3226)
-// An option whose text index lies past the table is refused and left out.
+// decomp: TITLE.PRG saveScreenConfirmation (src/TITLE/TITLE.PRG/22C.c:237; was
+// _saveScreenConfirmation) An option whose text index lies past the table is
+// refused and left out.
 int UpdateClearSaveReminder(TitleContext& context, bool init) {
   State& state = context.state;
   TitleHost& host = context.host;
@@ -3278,7 +3304,8 @@ int UpdateClearSaveReminder(TitleContext& context, bool init) {
   return 0;
 }
 
-// decomp: TITLE.PRG _saveScreenExitScreen (src/TITLE/TITLE.PRG/22C.c:3299)
+// decomp: TITLE.PRG saveScreenExitScreen (src/TITLE/TITLE.PRG/22C.c:310; was
+// _saveScreenExitScreen)
 void DrawExitFade(TitleHost& host) {
   const int hidden = (1 - host.FrameBuffer()) * kScreenWidth;
   DimmedSprite(host, {.position = PackXy(kExitRightX, 0),

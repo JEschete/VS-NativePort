@@ -12,17 +12,21 @@ namespace VS::Event {
 struct AngleTween;
 struct TripleTween;
 
-// decomp: BATTLE.PRG func_800BB450 (F01198, 4A0A8.c:2793), opcode 0xE1, and
-// func_800BD444 (F01226, 4A0A8.c:3601), opcodes 0xE2 and 0xE3, and
-// func_800BD6C4 (F01229, 4A0A8.c:3691), opcodes 0xB9, 0xBA, 0xBF, 0xE4-0xE7
-// and 0xED, are bound by the Event_*Opcode entries in ScriptControlOpcodes.h.
+// decomp: BATTLE.PRG vs_battle_script_E1 (F01198,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:3442; was func_800BB450), opcode 0xE1, and
+// vs_battle_script_E2_E3_camera (F01226, src/BATTLE/BATTLE.PRG/4DEA8.c:4251;
+// was func_800BD444), opcodes 0xE2 and 0xE3, and
+// vs_battle_script_B9_BA_BF_E4_E5_E6_E7_ED (F01229,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:4341; was func_800BD6C4), opcodes 0xB9, 0xBA,
+// 0xBF, 0xE4-0xE7 and 0xED, are bound by the Event_*Opcode entries in
+// ScriptControlOpcodes.h.
 
-// decomp: BATTLE.PRG func_800BD57C (F01227, 4A0A8.c:3647)
+// decomp: BATTLE.PRG func_800BD57C (F01227, src/BATTLE/BATTLE.PRG/4DEA8.c:4297)
 void UpdateEventAngleTweenEntry(AngleTween* tween);
-// decomp: BATTLE.PRG func_800BDAB4 (F01230, 4A0A8.c:3812)
+// decomp: BATTLE.PRG func_800BDAB4 (F01230, src/BATTLE/BATTLE.PRG/4DEA8.c:4462)
 void UpdateEventScreenTransformsEntry();
-// decomp: BATTLE.PRG func_800BDBB4 (F01231, 4A0A8.c:3838) Returns 1 when the
-// tween advanced, else 0.
+// decomp: BATTLE.PRG func_800BDBB4 (F01231, src/BATTLE/BATTLE.PRG/4DEA8.c:4488)
+// Returns 1 when the tween advanced, else 0.
 int UpdateEventTripleTweenEntry(TripleTween* tween);
 
 // Missing workspaces, tweens and instructions the entries skipped.

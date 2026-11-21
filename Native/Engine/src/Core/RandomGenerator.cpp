@@ -35,7 +35,7 @@ void SeedBiosRand(u32 seed) {
   LogTrace("rng", "seed={}", seed);
 }
 
-// decomp: SLUS_010.40 _initRand (src/SLUS_010.40/main.c:8239)
+// decomp: SLUS_010.40 initRand (src/SLUS_010.40/main.c:1103; was _initRand)
 void Random::FillShuffleTable(Rand15& source, Table table, i32& index) {
   for (auto& entry : table) {
     entry = source.Next();
@@ -56,8 +56,8 @@ i32 Random::NextSmoothed(i32 max) {
   return NextAveraged(m_rand_, m_table_, m_index_, max);
 }
 
-// decomp: BATTLE.PRG vs_battle_keystreamBits
-// (src/BATTLE/BATTLE.PRG/5BF94.c:4496)
+// decomp: BATTLE.PRG vs_battle_getRandBits
+// (src/BATTLE/BATTLE.PRG/5BF94.c:4062; was vs_battle_keystreamBits)
 u32 Random::NextInterfaceRandomBits(u32& state, i32 bit_count) {
   const u32 previous = state;
   state = previous * kKeystreamMultiplier;
@@ -65,7 +65,7 @@ u32 Random::NextInterfaceRandomBits(u32& state, i32 bit_count) {
 }
 
 // decomp: BATTLE.PRG vs_battle_randUniformInt
-// (src/BATTLE/BATTLE.PRG/5BF94.c:5810) The span and the sum wrap at 32 bits as
+// (src/BATTLE/BATTLE.PRG/5BF94.c:5375) The span and the sum wrap at 32 bits as
 // the original's subu/addu do.
 i32 Random::RandomRangeExclusive(Rand15& source, i32 bound_a, i32 bound_b) {
   const i32 low = bound_b < bound_a ? bound_b : bound_a;
@@ -80,13 +80,13 @@ i32 Random::RandomRangeExclusive(Rand15& source, i32 bound_a, i32 bound_b) {
   return std::bit_cast<i32>(static_cast<u32>(offset) + static_cast<u32>(low));
 }
 
-// decomp: SLUS_010.40 _initRand (src/SLUS_010.40/main.c:8239)
+// decomp: SLUS_010.40 initRand (src/SLUS_010.40/main.c:1103; was _initRand)
 void Random::InitializeShuffleTable(Rand15& source, Table table, i32& index) {
   source.Seed(1);
   FillShuffleTable(source, table, index);
 }
 
-// decomp: SLUS_010.40 vs_main_getRand (src/SLUS_010.40/main.c:8251)
+// decomp: SLUS_010.40 vs_main_getRand (src/SLUS_010.40/main.c:1116)
 i32 Random::NextBounded(Rand15& source, Table table, i32& index, i32 max) {
   if (!InTable(index)) {
     LogWarn("rng", "shuffle cursor {} is outside the table; using {}", index,
@@ -116,7 +116,7 @@ i32 Random::NextBounded(Rand15& source, Table table, i32& index, i32 max) {
   return result >> Rand15::kValueBits;
 }
 
-// decomp: SLUS_010.40 vs_main_getRandSmoothed (src/SLUS_010.40/main.c:8277)
+// decomp: SLUS_010.40 vs_main_getRandSmoothed (src/SLUS_010.40/main.c:1127)
 i32 Random::NextAveraged(Rand15& source, Table table, i32& index, i32 max) {
   i32 sum = 0;
   for (int draw = 0; draw < kAveragedDraws; ++draw) {

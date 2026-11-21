@@ -76,12 +76,14 @@ struct ScoreData {
 };
 static_assert(sizeof(ScoreData) == kScoreDataBytes);
 
-// decomp: vs_main_actionsLearned (main.h:485): one bit per action.
+// decomp: vs_main_actionsLearned (src/SLUS_010.40/main.c:1040): one bit per
+// action.
 extern std::uint8_t learnedActionFlags[kLearnedActionFlagBytes];
-// decomp: vs_main_mapStatus (main.h:486)
+// decomp: vs_main_mapStatus (src/SLUS_010.40/main.c:1041)
 extern RoomVisitFlags roomVisitProgress;
-// decomp: vs_main_scoredata (main.h:484): the score screen's records.
+// decomp: vs_main_scoredata (src/SLUS_010.40/main.c:1038): the score screen's
+// records.
 extern ScoreData scoreData;
-// decomp: vs_main_artsStatus (main.h:489): break-art progress.
+// decomp: vs_main_artsStatus (src/SLUS_010.40/main.c:1043): break-art progress.
 extern ArtsStatus artsStatus;
 }  // namespace VS::State

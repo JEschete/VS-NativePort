@@ -143,7 +143,7 @@ void LiveActorVitalsAccess::Write(const ActorVitalsState& state) {
 
 VS::Battle::ActorStats& LiveActorVitalsAccess::Owner() { return stats_; }
 
-// decomp: func_800792E4 (src/BATTLE/BATTLE.PRG/146C.c:7413).
+// decomp: func_800792E4 (src/BATTLE/BATTLE.PRG/146C.c:7265).
 int ResolveLiveActorDefeat(int source, int target, int count_kill) {
   LiveVitalsWorld world;
   return Checked(ResolveActorDefeat(source, target, count_kill, world));
@@ -155,7 +155,7 @@ int UpdateLiveActorVitals() {
   return Checked(UpdateActorVitals(world));
 }
 
-// decomp: func_80088B6C (src/BATTLE/BATTLE.PRG/146C.c:14743).
+// decomp: func_80088B6C (src/BATTLE/BATTLE.PRG/146C.c:14614).
 int UpdateLiveRoomActorVitals() {
   LiveVitalsWorld world;
   return Checked(UpdateRoomActorVitals(world));

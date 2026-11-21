@@ -46,62 +46,62 @@ std::int16_t DoubledHp(const ActorActionResult& target) {
 }
 }  // namespace
 
-// decomp: func_80084390 (src/BATTLE/BATTLE.PRG/146C.c:12606).
+// decomp: func_80084390 (src/BATTLE/BATTLE.PRG/146C.c:12476).
 void QueueSpellTriggeredRecovery(TriggeredRecoveryQueue& queue) {
   if (queue.SelectedActionType() == 1) {
     QueueTriggeredRecovery(queue);
   }
 }
-// decomp: func_80084440 (src/BATTLE/BATTLE.PRG/146C.c:12617).
+// decomp: func_80084440 (src/BATTLE/BATTLE.PRG/146C.c:12486).
 void QueueNonSpellTriggeredRecovery(TriggeredRecoveryQueue& queue) {
   if (queue.SelectedActionType() != 1) {
     QueueTriggeredRecovery(queue);
   }
 }
-// decomp: func_800844F0 (src/BATTLE/BATTLE.PRG/146C.c:12628).
+// decomp: func_800844F0 (src/BATTLE/BATTLE.PRG/146C.c:12496).
 void QueuePhysicalAffinityRecovery(TriggeredRecoveryQueue& queue) {
   if (queue.SelectedAffinity() == kPhysicalAffinity) {
     QueueTriggeredRecovery(queue);
   }
 }
-// decomp: func_80084570 (src/BATTLE/BATTLE.PRG/146C.c:12639).
+// decomp: func_80084570 (src/BATTLE/BATTLE.PRG/146C.c:12506).
 void QueueAirAffinityRecovery(TriggeredRecoveryQueue& queue) {
   if (queue.SelectedAffinity() == kAirAffinity) {
     QueueTriggeredRecovery(queue);
   }
 }
-// decomp: func_800845F0 (src/BATTLE/BATTLE.PRG/146C.c:12650).
+// decomp: func_800845F0 (src/BATTLE/BATTLE.PRG/146C.c:12516).
 void QueueFireAffinityRecovery(TriggeredRecoveryQueue& queue) {
   if (queue.SelectedAffinity() == kFireAffinity) {
     QueueTriggeredRecovery(queue);
   }
 }
-// decomp: func_80084670 (src/BATTLE/BATTLE.PRG/146C.c:12661).
+// decomp: func_80084670 (src/BATTLE/BATTLE.PRG/146C.c:12526).
 void QueueEarthAffinityRecovery(TriggeredRecoveryQueue& queue) {
   if (queue.SelectedAffinity() == kEarthAffinity) {
     QueueTriggeredRecovery(queue);
   }
 }
-// decomp: func_800846F0 (src/BATTLE/BATTLE.PRG/146C.c:12672).
+// decomp: func_800846F0 (src/BATTLE/BATTLE.PRG/146C.c:12536).
 void QueueWaterAffinityRecovery(TriggeredRecoveryQueue& queue) {
   if (queue.SelectedAffinity() == kWaterAffinity) {
     QueueTriggeredRecovery(queue);
   }
 }
-// decomp: func_80084770 (src/BATTLE/BATTLE.PRG/146C.c:12683).
+// decomp: func_80084770 (src/BATTLE/BATTLE.PRG/146C.c:12546).
 void QueueLightAffinityRecovery(TriggeredRecoveryQueue& queue) {
   if (queue.SelectedAffinity() == kLightAffinity) {
     QueueTriggeredRecovery(queue);
   }
 }
 
-// decomp: func_800847F0 (src/BATTLE/BATTLE.PRG/146C.c:12694).
+// decomp: func_800847F0 (src/BATTLE/BATTLE.PRG/146C.c:12556).
 void QueueDarkAffinityRecovery(TriggeredRecoveryQueue& queue) {
   if (queue.SelectedAffinity() == kDarkAffinity) {
     QueueTriggeredRecovery(queue);
   }
 }
-// decomp: func_80084870 (src/BATTLE/BATTLE.PRG/146C.c:12705).
+// decomp: func_80084870 (src/BATTLE/BATTLE.PRG/146C.c:12566).
 void QueueDamageTriggeredRecovery(std::uint8_t primary_hp_mode,
                                   TriggeredRecoveryQueue& queue) {
   if (primary_hp_mode == 1 || primary_hp_mode == kCriticalHpDamage) {
@@ -109,64 +109,72 @@ void QueueDamageTriggeredRecovery(std::uint8_t primary_hp_mode,
   }
 }
 
-// decomp: _increaseStrengthRand (src/BATTLE/BATTLE.PRG/146C.c:12717).
+// decomp: increaseStrengthRand (src/BATTLE/BATTLE.PRG/146C.c:12577; was
+// _increaseStrengthRand).
 void QueueRandomStrengthIncrease(RandomStatQueue& queue) {
   QueueRandomStat(queue, ActionResultField::kStrength,
                   StatDirection::kIncrease);
 }
 
-// decomp: _increaseIntelligenceRand (src/BATTLE/BATTLE.PRG/146C.c:12726).
+// decomp: increaseIntelligenceRand (src/BATTLE/BATTLE.PRG/146C.c:12585; was
+// _increaseIntelligenceRand).
 void QueueRandomIntelligenceIncrease(RandomStatQueue& queue) {
   QueueRandomStat(queue, ActionResultField::kIntelligence,
                   StatDirection::kIncrease);
 }
 
-// decomp: _increaseAgilityRand (src/BATTLE/BATTLE.PRG/146C.c:12735).
+// decomp: increaseAgilityRand (src/BATTLE/BATTLE.PRG/146C.c:12593; was
+// _increaseAgilityRand).
 void QueueRandomAgilityIncrease(RandomStatQueue& queue) {
   QueueRandomStat(queue, ActionResultField::kAgility, StatDirection::kIncrease);
 }
 
-// decomp: _increaseMaxHpRand (src/BATTLE/BATTLE.PRG/146C.c:12744).
+// decomp: increaseMaxHpRand (src/BATTLE/BATTLE.PRG/146C.c:12601; was
+// _increaseMaxHpRand).
 void QueueRandomMaxHpIncrease(RandomStatQueue& queue) {
   QueueRandomStat(queue, ActionResultField::kMaxHp, StatDirection::kIncrease);
 }
 
-// decomp: _increaseMaxMpRand (src/BATTLE/BATTLE.PRG/146C.c:12753).
+// decomp: increaseMaxMpRand (src/BATTLE/BATTLE.PRG/146C.c:12609; was
+// _increaseMaxMpRand).
 void QueueRandomMaxMpIncrease(RandomStatQueue& queue) {
   QueueRandomStat(queue, ActionResultField::kMaxMp, StatDirection::kIncrease);
 }
 
-// decomp: _decreaseStrengthRand (src/BATTLE/BATTLE.PRG/146C.c:12762).
+// decomp: decreaseStrengthRand (src/BATTLE/BATTLE.PRG/146C.c:12617; was
+// _decreaseStrengthRand).
 void QueueRandomStrengthDecrease(RandomStatQueue& queue) {
   QueueRandomStat(queue, ActionResultField::kStrength,
                   StatDirection::kDecrease);
 }
 
-// decomp: _decreaseIntelligenceRand (src/BATTLE/BATTLE.PRG/146C.c:12771).
+// decomp: decreaseIntelligenceRand (src/BATTLE/BATTLE.PRG/146C.c:12625; was
+// _decreaseIntelligenceRand).
 void QueueRandomIntelligenceDecrease(RandomStatQueue& queue) {
   QueueRandomStat(queue, ActionResultField::kIntelligence,
                   StatDirection::kDecrease);
 }
 
-// decomp: _decreaseAglityRand (src/BATTLE/BATTLE.PRG/146C.c:12780).
+// decomp: decreaseAglityRand (src/BATTLE/BATTLE.PRG/146C.c:12633; was
+// _decreaseAglityRand).
 void QueueRandomAgilityDecrease(RandomStatQueue& queue) {
   QueueRandomStat(queue, ActionResultField::kAgility, StatDirection::kDecrease);
 }
 
 // decomp: func_80084228 / func_800842F0 / func_80084370
-// (src/BATTLE/BATTLE.PRG/146C.c:12547/12572/12599).
+// (src/BATTLE/BATTLE.PRG/146C.c:12470:12547/12572/12599).
 void MarkSourceActionSuccess(SourceActionOutcome& outcome) {
   outcome = SourceActionOutcome::kSuccess;
 }
 
-// decomp: func_80084248 (src/BATTLE/BATTLE.PRG/146C.c:12554).
+// decomp: func_80084248 (src/BATTLE/BATTLE.PRG/146C.c:12432).
 void QueueInstantDeath(InstantDeathQueue& queue) {
   queue.RemoveStatuses(StatusRuleId::kInstantDeathRemoval);
   const auto hp = queue.CurrentHp();
   queue.QueueHp({std::bit_cast<std::int16_t>(hp), 1});
 }
 
-// decomp: func_800842AC (src/BATTLE/BATTLE.PRG/146C.c:12563).
+// decomp: func_800842AC (src/BATTLE/BATTLE.PRG/146C.c:12440).
 bool QueueDamageBasedArmorWear(ActorActionResult& target) {
   if (target.limb < 0 ||
       static_cast<std::size_t>(target.limb) >= target.limbs.size()) {
@@ -181,14 +189,14 @@ bool QueueDamageBasedArmorWear(ActorActionResult& target) {
   return true;
 }
 
-// decomp: func_80084310 (src/BATTLE/BATTLE.PRG/146C.c:12579).
+// decomp: func_80084310 (src/BATTLE/BATTLE.PRG/146C.c:12454).
 void SetActionFlag64(bool execute, ActionScriptFlags& flags) {
   if (execute) {
     flags.Set(ActionScriptFlag::kFlag64, 1);
   }
 }
 
-// decomp: func_80084340 (src/BATTLE/BATTLE.PRG/146C.c:12589).
+// decomp: func_80084340 (src/BATTLE/BATTLE.PRG/146C.c:12462).
 void SetActionFlag32(bool execute, ActionScriptFlags& flags) {
   if (execute) {
     flags.Set(ActionScriptFlag::kFlag32, 1);

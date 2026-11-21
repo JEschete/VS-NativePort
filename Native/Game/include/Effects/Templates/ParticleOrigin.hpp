@@ -3,7 +3,7 @@
 
 #include "Effects/Templates/ParticleCore.hpp"
 
-// The particle-set origin stage (decomp src/EFFECT/particleSetup.h:36): places
+// The particle-set origin stage (decomp src/EFFECT/particleSetup.h:37): places
 // each ribbon's first control point around the sampled position, on a sphere,
 // on a box's faces or corners, or on a ring, optionally turned by the effect
 // transform's world rotation.

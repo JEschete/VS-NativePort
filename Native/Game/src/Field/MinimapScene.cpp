@@ -276,7 +276,8 @@ std::optional<SceneRoomAddress> CurrentSceneRoomAddress(
                           Half(scene, first_room + kRoomMapOffset)};
 }
 
-// decomp: BATTLE.PRG _getDoorId (src/BATTLE/BATTLE.PRG/146C.c:16954).
+// decomp: BATTLE.PRG getDoorId (src/BATTLE/BATTLE.PRG/146C.c:16828; was
+// _getDoorId).
 std::optional<std::uint8_t> SceneDoorId(std::span<const std::byte> scene,
                                         std::int32_t door_index) {
   if (door_index < 0) return std::nullopt;
@@ -286,7 +287,8 @@ std::optional<std::uint8_t> SceneDoorId(std::span<const std::byte> scene,
   return std::to_integer<std::uint8_t>((*doors)[index * kWordBytes + 1]);
 }
 
-// decomp: BATTLE.PRG vs_battle_setDoorEntered2 (146C.c:16974).
+// decomp: BATTLE.PRG setDoorEntered2 (src/BATTLE/BATTLE.PRG/146C.c:16848; was
+// vs_battle_setDoorEntered2).
 bool MarkEntranceDoorOnSceneMap(std::span<std::byte> scene,
                                 std::int32_t door_index) {
   if (door_index < 0) return false;
@@ -300,7 +302,7 @@ bool MarkEntranceDoorOnSceneMap(std::span<std::byte> scene,
 }
 
 // decomp: BATTLE.PRG vs_battle_initSceneAndGetRoomNames
-// (src/BATTLE/BATTLE.PRG/2EA3C.s:2085-2103).
+// (src/BATTLE/BATTLE.PRG/2EA3C.s:1974).
 std::size_t ResolveSceneRoomData(std::span<std::byte> scene) {
   std::vector<Room> rooms;
   std::size_t names = 0;
@@ -321,7 +323,7 @@ std::size_t ResolveSceneRoomData(std::span<std::byte> scene) {
   return names;
 }
 
-// decomp: BATTLE.PRG func_80098F8C (src/BATTLE/BATTLE.PRG/2EA3C.s:2109-2467).
+// decomp: BATTLE.PRG func_80098F8C (src/BATTLE/BATTLE.PRG/2EA3C.s:1995).
 void DrawMinimapScene(std::span<const std::byte> scene,
                       bool entry_door_pulse_visible,
                       MinimapRenderer& renderer) {

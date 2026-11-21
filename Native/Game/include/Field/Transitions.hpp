@@ -112,37 +112,39 @@ class TransitionHost {
   virtual void ReportRefusedLocation(int location_id) = 0;
 };
 
-// decomp: BATTLE.PRG func_8007C398 (146C.c:8748)
+// decomp: BATTLE.PRG func_8007C398 (src/BATTLE/BATTLE.PRG/146C.c:8702)
 [[nodiscard]] TransitionPhase ScreenTransitionPhase(TransitionStep step);
-// decomp: BATTLE.PRG func_8007C444 (146C.c:8774)
+// decomp: BATTLE.PRG setScreenTransition (src/BATTLE/BATTLE.PRG/146C.c:8728;
+// was func_8007C444)
 void ConfigureScreenTransition(Render::ScreenTransition& screen,
                                const ScreenTransitionStyle& style);
-// decomp: BATTLE.PRG func_8007C460 (146C.c:8781)
+// decomp: BATTLE.PRG setScreenTransitionWipeAngle
+// (src/BATTLE/BATTLE.PRG/146C.c:8735; was func_8007C460)
 void SetTransitionWipeAngle(Render::ScreenTransition& screen, int wipe_angle);
-// decomp: BATTLE.PRG func_8007C46C (146C.c:8783)
+// decomp: BATTLE.PRG func_8007C46C (src/BATTLE/BATTLE.PRG/146C.c:8740)
 // A room or zone exit already under way keeps its step.
 void BeginScreenFadeOut(Render::ScreenTransition& screen,
                         const ScreenTransitionStyle& style);
-// decomp: BATTLE.PRG func_8007C4AC (146C.c:8795)
+// decomp: BATTLE.PRG func_8007C4AC (src/BATTLE/BATTLE.PRG/146C.c:8752)
 void BeginScreenFadeIn(Render::ScreenTransition& screen,
                        const ScreenTransitionStyle& style);
-// decomp: BATTLE.PRG func_8007C4E0 (146C.c:8805)
+// decomp: BATTLE.PRG func_8007C4E0 (src/BATTLE/BATTLE.PRG/146C.c:8762)
 // Leaves through `door` to a room of the current zone.
 void BeginRoomTransition(RoomTransitionState& state, TransitionHost& host,
                          const DoorRecord& door, int effect, int speed);
-// decomp: BATTLE.PRG func_8007C580 (146C.c:8820)
+// decomp: BATTLE.PRG func_8007C580 (src/BATTLE/BATTLE.PRG/146C.c:8777)
 // Then takes the door under Ashley as the entrance.
 void BeginScriptedRoomTransition(RoomTransitionState& state,
                                  TransitionHost& host, const DoorRecord& door,
                                  int effect, int speed);
-// decomp: BATTLE.PRG func_8007C5C0 (146C.c:8830)
+// decomp: BATTLE.PRG func_8007C5C0 (src/BATTLE/BATTLE.PRG/146C.c:8786)
 void BeginZoneTransition(RoomTransitionState& state, TransitionHost& host,
                          const DoorRecord& door, int effect, int speed);
-// decomp: BATTLE.PRG func_8007C654 (146C.c:8843)
+// decomp: BATTLE.PRG func_8007C654 (src/BATTLE/BATTLE.PRG/146C.c:8799)
 void BeginScriptedZoneTransition(RoomTransitionState& state,
                                  TransitionHost& host, const DoorRecord& door,
                                  int effect, int speed);
-// decomp: BATTLE.PRG func_8007C694 (146C.c:8853)
+// decomp: BATTLE.PRG func_8007C694 (src/BATTLE/BATTLE.PRG/146C.c:8808)
 // Moves Ashley to a tile of the location's room, keeping her facing; a
 // location outside the table is refused and changes nothing.
 bool TeleportToLocation(RoomTransitionState& state, TransitionHost& host,
@@ -211,9 +213,9 @@ class TransitionPrimitiveTarget {
   virtual void SetTransitionAlpha(std::int32_t alpha) = 0;
 };
 
-// decomp: INITBTL.PRG _initTransitionState (18.c:468)
-// Sets up the fade, wipe and edge packets and their draw mode, then covers
-// the screen.
+// decomp: INITBTL.PRG initTransitionState (src/BATTLE/INITBTL.PRG/18.c:481; was
+// _initTransitionState) Sets up the fade, wipe and edge packets and their draw
+// mode, then covers the screen.
 void InitializeRoomTransitionPrimitives(
     TransitionPrimitiveTarget& target,
     const TransitionPrimitiveStyle& style = kTransitionPrimitiveStyle);

@@ -4,10 +4,13 @@
 #include "Effects/Plugins/PluginData.hpp"
 
 namespace VS::Effects::Plg154 {
-// decomp: D_800FB29C (PLG154.BIN/0.c:8; meshes10.h:38)
+// decomp: vs_effect_trinityPulse_0_vertices (src/EFFECT/meshes10.h:38; was
+// D_800FB29C; src/EFFECT/meshes10.h:38)
 extern plugins::Mesh10VertexTable mesh10Vertices;
-// decomp: D_800FB2EC (PLG154.BIN/0.c:8; meshes10.h:45)
+// decomp: vs_effect_trinityPulse_0_faces (src/EFFECT/meshes10.h:45; was
+// D_800FB2EC; src/EFFECT/meshes10.h:45)
 extern plugins::Mesh10FaceTable mesh10Faces;
-// decomp: D_800FB34C (PLG154.BIN/0.c:12; closedRings.h:58)
+// decomp: vs_effect_trinityPulse_1_colors (src/EFFECT/closedRings.h:58; was
+// D_800FB34C; src/EFFECT/closedRings.h:58)
 extern plugins::RingPalette closedRingColorFactors;
 }  // namespace VS::Effects::Plg154

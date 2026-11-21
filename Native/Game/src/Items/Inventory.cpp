@@ -36,8 +36,8 @@ std::int32_t MiscCount(const InventoryContents& inventory, std::int32_t id) {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG vs_battle_itemIdIsInInventory
-// (src/BATTLE/BATTLE.PRG/146C.c:9646)
+// decomp: BATTLE.PRG itemIdIsInInventory
+// (src/BATTLE/BATTLE.PRG/146C.c:9636; was vs_battle_itemIdIsInInventory)
 // The original compares the id unsigned, so a negative id is past every
 // category.
 std::int32_t InventoryItemCount(
@@ -67,8 +67,8 @@ std::int32_t InventoryItemCount(
   return MiscCount(inventory, id);
 }
 
-// decomp: BATTLE.PRG vs_battle_decreaseMiscCount
-// (src/BATTLE/BATTLE.PRG/5BF94.c:4454)
+// decomp: BATTLE.PRG decreaseMiscCount
+// (src/BATTLE/BATTLE.PRG/5BF94.c:4020; was vs_battle_decreaseMiscCount)
 bool ConsumeMiscItem(std::int32_t misc_id, std::uint8_t& invoked_slot,
                      InventoryContents& inventory) {
   if (misc_id < kFirstInvokedMiscId) invoked_slot = 0;
@@ -312,7 +312,7 @@ ItemCopy CopyMisc(const CopyRequest& request, const PartTables& tables) {
 }  // namespace
 
 // decomp: MAINMENU.PRG vs_mainMenu_unequipWeapon
-// (src/MENU/MAINMENU.PRG/2D10.c:1008)
+// (src/MENU/MAINMENU.PRG/2D10.c:1010)
 ItemsStatus UnequipWeapon(AshleyWeaponState& ashley,
                           InventoryContents& inventory, EquipStatusHost& host) {
   const auto status = EquipAshleyWeapon(ashley, nullptr, inventory, host);
@@ -321,7 +321,7 @@ ItemsStatus UnequipWeapon(AshleyWeaponState& ashley,
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_unequipShield
-// (src/MENU/MAINMENU.PRG/2D10.c:1019)
+// (src/MENU/MAINMENU.PRG/2D10.c:1021)
 ItemsStatus UnequipShield(ShieldLoadout& ashley_shield,
                           InventoryContents& inventory, EquipStatusHost& host) {
   const auto status =
@@ -330,7 +330,7 @@ ItemsStatus UnequipShield(ShieldLoadout& ashley_shield,
   return status;
 }
 
-// decomp: MAINMENU.PRG vs_mainMenu_initItem (src/MENU/MAINMENU.PRG/2D10.c:1030)
+// decomp: MAINMENU.PRG vs_mainMenu_initItem (src/MENU/MAINMENU.PRG/2D10.c:1032)
 // The original cleared the record before the table when a weapon had no blade
 // or grip, or a slot was outside its table.
 ItemsStatus ClearItemSlot(ItemCategory category, std::int32_t slot,
@@ -356,7 +356,8 @@ ItemsStatus ClearItemSlot(ItemCategory category, std::int32_t slot,
   return ItemsStatus::kOk;
 }
 
-// decomp: MAINMENU.PRG _getItemId (src/MENU/MAINMENU.PRG/2D10.c:1181)
+// decomp: MAINMENU.PRG getItemId (src/MENU/MAINMENU.PRG/2D10.c:1183; was
+// _getItemId)
 std::optional<std::uint16_t> ItemOccupancyId(
     ItemCategory category, std::size_t index,
     const InventoryContents& inventory) {
@@ -413,7 +414,7 @@ std::span<std::uint8_t> DisplayOrder(InventoryIndices& indices,
   return {};
 }
 
-// decomp: MAINMENU.PRG vs_mainMenu_findItem (src/MENU/MAINMENU.PRG/2D10.c:1222)
+// decomp: MAINMENU.PRG vs_mainMenu_findItem (src/MENU/MAINMENU.PRG/2D10.c:1224)
 std::int32_t FindDisplayPosition(std::span<const std::uint8_t> order,
                                  std::int32_t slot) {
   const auto listed = static_cast<std::int64_t>(slot) + 1;
@@ -422,7 +423,8 @@ std::int32_t FindDisplayPosition(std::span<const std::uint8_t> order,
   return static_cast<std::int32_t>(entry - order.begin()) + 1;
 }
 
-// decomp: MAINMENU.PRG _setItemIndex (src/MENU/MAINMENU.PRG/2D10.c:1241)
+// decomp: MAINMENU.PRG setItemIndex (src/MENU/MAINMENU.PRG/2D10.c:1243; was
+// _setItemIndex)
 void AppendDisplayIndex(std::span<std::uint8_t> order, std::int32_t slot) {
   const auto free = std::find(order.begin(), order.end(), std::uint8_t{0});
   if (free != order.end()) {
@@ -431,7 +433,7 @@ void AppendDisplayIndex(std::span<std::uint8_t> order, std::int32_t slot) {
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_rebuildInventory
-// (src/MENU/MAINMENU.PRG/2D10.c:1254)
+// (src/MENU/MAINMENU.PRG/2D10.c:1256)
 // The original read past the table for an entry naming a slot outside it;
 // such entries are dropped and reported.
 ItemsStatus RebuildDisplayIndices(ItemCategory category,
@@ -460,7 +462,7 @@ ItemsStatus RebuildDisplayIndices(ItemCategory category,
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_getItemCount
-// (src/MENU/MAINMENU.PRG/2D10.c:1307)
+// (src/MENU/MAINMENU.PRG/2D10.c:1309)
 std::int32_t CountItems(ItemCategory category,
                         const InventoryContents& inventory) {
   std::int32_t count = 0;
@@ -472,7 +474,7 @@ std::int32_t CountItems(ItemCategory category,
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_getFirstEmptyItemSlot
-// (src/MENU/MAINMENU.PRG/2D10.c:1321)
+// (src/MENU/MAINMENU.PRG/2D10.c:1323)
 std::size_t FirstEmptySlot(ItemCategory category,
                            const InventoryContents& inventory) {
   const std::size_t capacity = kCategoryCapacities[CategoryIndex(category)];
@@ -482,7 +484,7 @@ std::size_t FirstEmptySlot(ItemCategory category,
   return capacity;
 }
 
-// decomp: MAINMENU.PRG vs_mainMenu_copyItem (src/MENU/MAINMENU.PRG/2D10.c:1334)
+// decomp: MAINMENU.PRG vs_mainMenu_copyItem (src/MENU/MAINMENU.PRG/2D10.c:1336)
 // The probe before a misc merge is a port fix: a misc claim that cannot fit
 // whole leaves the inventory (and the loot row) unchanged.
 ItemCopy CopyItem(std::int32_t flags, InventoryContents& target,
@@ -530,7 +532,7 @@ ItemCopy CopyItem(std::int32_t flags, InventoryContents& target,
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_initInventory
-// (src/MENU/MAINMENU.PRG/C48.c:44)
+// (src/MENU/MAINMENU.PRG/C48.c:51)
 ItemsStatus StoreEquippedStats(EquippedLoadouts& ashley,
                                InventoryContents& inventory) {
   auto status = ItemsStatus::kOk;

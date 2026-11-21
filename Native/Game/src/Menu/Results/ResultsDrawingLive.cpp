@@ -92,14 +92,16 @@ LiveResultsAtlas() noexcept {
   return kDisMap;
 }
 
-// decomp: MENUF.PRG _renderTextureFadeIn (3B8.c:1877).
+// decomp: MENUF.PRG renderTextureFadeIn (src/MENU/MENUF.PRG/3B8.c:1889; was
+// _renderTextureFadeIn).
 void LiveDrawFadingTexture(int x, int y, int texture_index, int brightness) {
   const auto& atlas = LiveResultsAtlas();
   LiveResultsTarget target;
   Report(DrawFadingTexture(atlas, x, y, texture_index, brightness, target));
 }
 
-// decomp: MENUF.PRG _renderTextureFadeInClut (3B8.c:1914).
+// decomp: MENUF.PRG renderTextureFadeInClut (src/MENU/MENUF.PRG/3B8.c:1926; was
+// _renderTextureFadeInClut).
 void LiveDrawFadingTextureClut(int x, int y, int texture_index, int brightness,
                                int clut) {
   const auto& atlas = LiveResultsAtlas();
@@ -108,14 +110,16 @@ void LiveDrawFadingTextureClut(int x, int y, int texture_index, int brightness,
                                target));
 }
 
-// decomp: MENUF.PRG _renderTime (3B8.c:1951).
+// decomp: MENUF.PRG renderTime (src/MENU/MENUF.PRG/3B8.c:1963; was
+// _renderTime).
 void LiveDrawTime(int x, int y, int timer, int time, int is_new_record) {
   const auto& atlas = LiveResultsAtlas();
   LiveResultsTarget target;
   Report(DrawTime(atlas, x, y, timer, time, is_new_record != 0, target));
 }
 
-// decomp: MENUF.PRG _renderPressButtonPrompt (3B8.c:2117).
+// decomp: MENUF.PRG renderPressButtonPrompt (src/MENU/MENUF.PRG/3B8.c:2128; was
+// _renderPressButtonPrompt).
 void LiveDrawPressButtonPrompt(int x, int y, int slide_timer,
                                int bounce_timer) {
   LiveResultsTarget target;

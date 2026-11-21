@@ -29,27 +29,30 @@ enum class AttachmentRelease : std::int8_t {
   kNoParent = -2,
 };
 
-// decomp: BATTLE.PRG func_8009D468 (src/BATTLE/BATTLE.PRG/30DB0.c:2073)
+// decomp: BATTLE.PRG func_8009D468 (src/BATTLE/BATTLE.PRG/30DB0.c:2133)
 // Returns the actor to its standing pose with every tween, effect, layer and
 // movement request cleared, shown but frozen.
 void ResetActorMotionState(ActorStateHost& host, int id);
-// decomp: BATTLE.PRG func_8009D6F4 (src/BATTLE/BATTLE.PRG/30DB0.c:2147)
+// decomp: BATTLE.PRG func_8009D6F4 (src/BATTLE/BATTLE.PRG/30DB0.c:2207)
 void ResetAllActorMovement(ActorStateHost& host);
-// decomp: BATTLE.PRG func_8009F314 (src/BATTLE/BATTLE.PRG/30DB0.c:3202)
-// Drops a moving or airborne actor, then plays (or only marks) its death and
-// that of its companion models; a gimmick in an empty slot breaks instead.
+// decomp: BATTLE.PRG startActorDeath (src/BATTLE/BATTLE.PRG/30DB0.c:3291; was
+// func_8009F314) Drops a moving or airborne actor, then plays (or only marks)
+// its death and that of its companion models; a gimmick in an empty slot breaks
+// instead.
 void BeginActorDeath(ActorStateHost& host, int id, bool animate);
-// decomp: BATTLE.PRG func_8009F940 (src/BATTLE/BATTLE.PRG/30DB0.c:3388)
-// A nonzero slot takes the style; slot 0 clears the companion and keeps it.
+// decomp: BATTLE.PRG vs_battle_setActorEdgeHighlight
+// (src/BATTLE/BATTLE.PRG/30DB0.c:3487; was func_8009F940) A nonzero slot takes
+// the style; slot 0 clears the companion and keeps it.
 void SetActorCompanion(ActorStateHost& host, int id,
                        std::uint8_t companion_slot,
                        const std::optional<CompanionStyle>& style);
-// decomp: BATTLE.PRG func_8009FF08 (src/BATTLE/BATTLE.PRG/30DB0.c:3613)
-// Attaches the actor (to `point`, or to its current parent when there is
-// none) with its position, rotation and tweens cleared.
+// decomp: BATTLE.PRG attachActor (src/BATTLE/BATTLE.PRG/30DB0.c:3713; was
+// func_8009FF08) Attaches the actor (to `point`, or to its current parent when
+// there is none) with its position, rotation and tweens cleared.
 void AttachActorToParentBone(ActorStateHost& host, int id,
                              const std::optional<AttachPoint>& point);
-// decomp: BATTLE.PRG func_8009FFA8 (src/BATTLE/BATTLE.PRG/30DB0.c:3635)
-// Unlocks the actor from its parent once the parent has a skeleton.
+// decomp: BATTLE.PRG detachActor (src/BATTLE/BATTLE.PRG/30DB0.c:3735; was
+// func_8009FFA8) Unlocks the actor from its parent once the parent has a
+// skeleton.
 AttachmentRelease ReleaseActorAttachmentLock(ActorStateHost& host, int id);
 }  // namespace VS::Actors

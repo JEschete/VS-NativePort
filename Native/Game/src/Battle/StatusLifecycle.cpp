@@ -299,7 +299,7 @@ std::uint32_t RecoveredStatuses(const StatusLifecycleState& state,
 }
 }  // namespace
 
-// decomp: func_8007C31C (src/BATTLE/BATTLE.PRG/146C.c:8736).
+// decomp: func_8007C31C (src/BATTLE/BATTLE.PRG/146C.c:8687).
 bool PreserveAshleyStatuses(StatusLifecycleState& state,
                             StatusLifecycleWorld& world) {
   return RemoveActorStatuses(state, 0, world);
@@ -351,7 +351,7 @@ void InflictActorStatuses(StatusLifecycleState& state, std::uint32_t requested,
   InflictEquipment(state, requested, world);
 }
 
-// decomp: func_80087EF4 (src/BATTLE/BATTLE.PRG/146C.c:14376).
+// decomp: func_80087EF4 (src/BATTLE/BATTLE.PRG/146C.c:14243).
 bool UpdateActorStatusTimers(StatusLifecycleState& state,
                              const StatusDurations& durations,
                              const LimbStatusMasks& limb_statuses,

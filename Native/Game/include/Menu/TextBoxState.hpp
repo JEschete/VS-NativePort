@@ -177,7 +177,7 @@ class TextBoxHost {
 // Starts printing `text` (non-null) from its first page and starts the
 // speaker's talking animation (timeline speaker_animation + 1) unless the box
 // has no speaker. decomp: F01329 vs_battle_setTextBox
-// (src/BATTLE/BATTLE.PRG/5BF94.c:1536, 0x800C6BF0-0x800C6C8C).
+// (src/BATTLE/BATTLE.PRG/5BF94.c:1082, 0x800C6BF0-0x800C6C8C).
 void StartTextBoxText(TextBox& box, TextBoxHost& host, const char* text);
 // The text is still printing: speed is neither 0 nor finished.
 [[nodiscard]] bool TextBoxTextPending(const TextBox& box);
@@ -196,8 +196,9 @@ int SetTextBoxText(TextBox& box, TextBoxHost& host, const char* text);
 // A confirm still returns from any started selector. A move refuses (nullopt,
 // nothing changed) a selector whose count exceeds the eight boxes or whose
 // used order entries name no box; the original read past them.
-// decomp: F01330 vs_battle_selectTextBox
-// (src/BATTLE/BATTLE.PRG/5BF94.c:1559, 0x800C6C8C-0x800C7010).
+// decomp: F01330 selectTextBox
+// (src/BATTLE/BATTLE.PRG/5BF94.c:1105; was vs_battle_selectTextBox,
+// 0x800C6C8C-0x800C7010).
 [[nodiscard]] std::optional<int> SelectTextBoxChoice(
     TextBoxes boxes, TextBoxSelector& selector, TextBoxHost& host,
     std::uint8_t box_mask, const TextBoxSelectionInput& input);
@@ -206,17 +207,18 @@ int SetTextBoxText(TextBox& box, TextBoxHost& host, const char* text);
 // the header in frame_shape, x 0, y 1, four lines.
 [[nodiscard]] TextBoxLayout InformationTextBoxLayout(std::int32_t header);
 // decomp: F01343 vs_battle_initInformationTextBox
-// (src/BATTLE/BATTLE.PRG/5BF94.c:2653, 0x800C8E04-0x800C8E48).
+// (src/BATTLE/BATTLE.PRG/5BF94.c:2204, 0x800C8E04-0x800C8E48).
 void InitInformationTextBox(TextBoxes boxes, std::int32_t header);
 
 // Starts closing every box in index order; true when all eight were already
-// closed. decomp: F01378 _dismissAllTextBoxes
-// (src/BATTLE/BATTLE.PRG/5BF94.c:3757, 0x800CB268-0x800CB2B8).
+// closed. decomp: F01378 dismissAllTextBoxes
+// (src/BATTLE/BATTLE.PRG/5BF94.c:3323; was _dismissAllTextBoxes,
+// 0x800CB268-0x800CB2B8).
 [[nodiscard]] bool DismissAllTextBoxes(TextBoxes boxes, TextBoxHost& host);
 
 // The box index for a box id, refusing ids past the eight boxes (the
 // original returned an address past the array). decomp: F01409
-// vs_battle_getTextBox (src/BATTLE/BATTLE.PRG/5BF94.c:4544,
+// vs_battle_getTextBox (src/BATTLE/BATTLE.PRG/5BF94.c:4110,
 // 0x800CCDF4-0x800CCE10).
 [[nodiscard]] std::optional<std::size_t> TextBoxIndex(std::int32_t id);
 
@@ -224,7 +226,7 @@ void InitInformationTextBox(TextBoxes boxes, std::int32_t header);
 // preset's secondary anchor for facings 1 and 2 (orientation bits 2-3),
 // mirrored in x with alignment bit 1 flipped for facings 1 and 3, less half
 // the box size, wrapped to 12 bits. Refuses a preset past `presets`.
-// decomp: F01410 func_800CCE10 (src/BATTLE/BATTLE.PRG/5BF94.c:4546,
+// decomp: F01410 func_800CCE10 (src/BATTLE/BATTLE.PRG/5BF94.c:4112,
 // 0x800CCE10-0x800CCF08).
 [[nodiscard]] std::optional<TextAnchor> TextBoxAnchor(
     std::span<const TextAnchorPreset> presets,
@@ -235,14 +237,14 @@ void InitInformationTextBox(TextBoxes boxes, std::int32_t header);
 // box restarts at state 1 while an opening/open box keeps its state, text and
 // frame. Kinds 1 and 5 become shaped frames 0 and 2; kind 4 takes the
 // information box's fixed bottom layout. decomp: F01411 vs_battle_initTextBox
-// (src/BATTLE/BATTLE.PRG/5BF94.c:4567, 0x800CCF08-0x800CD064).
+// (src/BATTLE/BATTLE.PRG/5BF94.c:4132, 0x800CCF08-0x800CD064).
 void InitTextBox(TextBox& box, const TextBoxLayout& layout);
 
 // Stops the speaker's animation and starts closing an open box over 8 ticks
 // (open style 0). Returns true while the box is still visible (opening, open
 // or closing), false once closed. Closing is asynchronous:
 // UpdateTextBoxes counts the state down to 0. decomp: F01412
-// vs_battle_dismissTextBox (src/BATTLE/BATTLE.PRG/5BF94.c:4613,
+// vs_battle_dismissTextBox (src/BATTLE/BATTLE.PRG/5BF94.c:4178,
 // 0x800CD064-0x800CD0FC).
 [[nodiscard]] bool DismissTextBox(TextBox& box, TextBoxHost& host);
 }  // namespace VS::Menu

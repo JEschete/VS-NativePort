@@ -96,7 +96,7 @@ class LiveEffectStreams final : public EffectStreamHost {
 std::uint32_t SlotNumber(int slot) { return static_cast<std::uint32_t>(slot); }
 }  // namespace
 
-// decomp: SLUS_010.40 vs_main_streamXa (src/SLUS_010.40/main.c:9358)
+// decomp: SLUS_010.40 vs_main_streamXa (src/SLUS_010.40/main.c:2324)
 int LiveBeginXaStream(int sector, int byte_count) {
   XaStreamDrive drive = LoadDrive();
   if (!BeginXaStream(drive, sector, byte_count)) return 0;
@@ -104,7 +104,7 @@ int LiveBeginXaStream(int sector, int byte_count) {
   return 1;
 }
 
-// decomp: SLUS_010.40 vs_main_checkStreamXaEnd (src/SLUS_010.40/main.c:9376)
+// decomp: SLUS_010.40 vs_main_checkStreamXaEnd (src/SLUS_010.40/main.c:2341)
 int LiveRequestXaStreamStop() {
   XaStreamDrive drive = LoadDrive();
   if (!RequestXaStreamStop(drive)) return 0;
@@ -112,14 +112,16 @@ int LiveRequestXaStreamStop() {
   return 1;
 }
 
-// decomp: SLUS_010.40 func_800464DC (src/SLUS_010.40/main.c:10310)
+// decomp: SLUS_010.40 stopCutsceneStream (src/SLUS_010.40/main.c:3381; was
+// func_800464DC)
 void LiveStopCutsceneStream() {
   LiveEffectStreams host;
   StopCutsceneStream(host);
 }
 
-// decomp: SLUS_010.40 func_800464FC (src/SLUS_010.40/main.c:10312)
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
+// decomp: SLUS_010.40 startCutsceneStream (src/SLUS_010.40/main.c:3383; was
+// func_800464FC) NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the
+// original order.
 int LivePlayCutsceneStreamSlot(int slot, int pan, int volume) {
   LiveEffectStreams host;
   return PlayCutsceneStreamSlot(host, SlotNumber(slot),
@@ -128,13 +130,15 @@ int LivePlayCutsceneStreamSlot(int slot, int pan, int volume) {
              : 0;
 }
 
-// decomp: SLUS_010.40 func_80046578 (src/SLUS_010.40/main.c:10324)
+// decomp: SLUS_010.40 vs_main_startCutsceneStreamDefault
+// (src/SLUS_010.40/main.c:3399; was func_80046578)
 void LivePlayCutsceneStreamSlotCentered(int slot) {
   LiveEffectStreams host;
   PlayCutsceneStreamSlotCentered(host, SlotNumber(slot));
 }
 
-// decomp: SLUS_010.40 func_8004659C (src/SLUS_010.40/main.c:10326)
+// decomp: SLUS_010.40 freeCutsceneStream (src/SLUS_010.40/main.c:3404; was
+// func_8004659C)
 int LiveFreeCutsceneStreamSlot(int slot) {
   LiveEffectStreams host;
   return FreeCutsceneStreamSlot(host, SlotNumber(slot)) ? 1 : 0;

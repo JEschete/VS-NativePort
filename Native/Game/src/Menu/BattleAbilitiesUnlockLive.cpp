@@ -338,7 +338,8 @@ struct StagedRows {
 };
 }  // namespace
 
-// decomp binding: _breakArtUnlocked (src/MENU/MENU2.PRG/143C.c:27).
+// decomp binding: breakArtUnlocked (src/MENU/MENU2.PRG/143C.c:31; was
+// _breakArtUnlocked).
 int LiveUpdateBreakArtUnlock(int initialize) {
   LiveProgress progress;
   if (initialize != 0) {
@@ -353,7 +354,8 @@ int LiveUpdateBreakArtUnlock(int initialize) {
   return UpdateBreakArtUnlock(breakArtUnlock, progress, host, initialize != 0);
 }
 
-// decomp binding: _getAbilityDescription (src/MENU/MENU2.PRG/143C.c:81).
+// decomp binding: getAbilityDescription (src/MENU/MENU2.PRG/143C.c:85; was
+// _getAbilityDescription).
 char* LiveUnlockDescription(int ability) {
   const auto text =
       UnlockDescription(ability, battleAbilityStrings, battleAbilityMenuStrings,
@@ -365,14 +367,15 @@ char* LiveUnlockDescription(int ability) {
   return reinterpret_cast<char*>(const_cast<std::uint16_t*>(text.data()));
 }
 
-// decomp binding: _battleAbilityUnlocked (src/MENU/MENU2.PRG/143C.c:125).
+// decomp binding: battleAbilityUnlocked (src/MENU/MENU2.PRG/143C.c:129; was
+// _battleAbilityUnlocked).
 int LiveUpdateAbilityUnlock(int initialize) {
   LiveProgress progress;
   LiveAbilityHost host;
   return UpdateAbilityUnlock(abilityUnlock, progress, host, initialize != 0);
 }
 
-// decomp binding: vs_menu2_actionUnlock (src/MENU/MENU2.PRG/143C.c:422).
+// decomp binding: vs_menu2_actionUnlock (src/MENU/MENU2.PRG/143C.c:426).
 int LiveUpdateUnlockNotifications(char* state) {
   if (state == nullptr) {
     Refuse("missing unlock notification state");
@@ -385,7 +388,7 @@ int LiveUpdateUnlockNotifications(char* state) {
   return result;
 }
 
-// decomp binding: _setRiskCost (src/MENU/MENU2.PRG/64.c:15).
+// decomp binding: setRiskCost (src/MENU/MENU2.PRG/64.c:22; was _setRiskCost).
 void LiveSetRiskCost(int action) {
   if (!InRange(VS::Battle::actionDefinitions, action)) {
     Refuse("Risk action outside action table");
@@ -395,7 +398,8 @@ void LiveSetRiskCost(int action) {
   SetRiskCost(riskCost, VS::Battle::actionDefinitions[action].cost, host);
 }
 
-// decomp binding: _initAbilityMenu (src/MENU/MENU2.PRG/64.c:64).
+// decomp binding: initAbilityMenu (src/MENU/MENU2.PRG/64.c:73; was
+// _initAbilityMenu).
 int LiveCreateAbilityRows(int count, int type,
                           std::span<std::uint16_t* const> menu_text) {
   if (abilityText != nullptr) return 0;

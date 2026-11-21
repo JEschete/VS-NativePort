@@ -105,11 +105,14 @@ class EventCameraOutputPort {
   EventCameraOutputPort(EventCameraOutputPort&&) = delete;
   EventCameraOutputPort& operator=(EventCameraOutputPort&&) = delete;
 
-  // decomp: BATTLE.PRG vs_battle_initialiseCameraFromSpherical (146C.c:9071)
-  // with facing and mode -1: the field camera's look-at and position.
+  // decomp: BATTLE.PRG initialiseCameraFromSpherical
+  // (src/BATTLE/BATTLE.PRG/146C.c:9037; was
+  // vs_battle_initialiseCameraFromSpherical) with facing and mode -1: the field
+  // camera's look-at and position.
   [[nodiscard]] virtual EventCameraPair InitializeFieldCamera() = 0;
-  // decomp: BATTLE.PRG _atan2FixedPoint (4A0A8.c:4177): the angle of (x, y) in
-  // 4096-per-turn units after dropping six fraction bits.
+  // decomp: BATTLE.PRG atan2FixedPoint (src/BATTLE/BATTLE.PRG/4DEA8.c:4826; was
+  // _atan2FixedPoint): the angle of (x, y) in 4096-per-turn units after
+  // dropping six fraction bits.
   [[nodiscard]] virtual std::int32_t FixedAtan2(std::int32_t y,
                                                 std::int32_t x) = 0;
   // decomp: RotMatrix (SLUS_010.40 0x80041200), built at 0x1F8000F8 from the
@@ -121,21 +124,26 @@ class EventCameraOutputPort {
   [[nodiscard]] virtual Core::Math::Vec3 ApplyMatrix(
       const Core::Math::Mat3& rotation, Core::Math::Vec3 vector,
       EventShakeTarget target) = 0;
-  // decomp: BATTLE.PRG vs_battle_setCameraLookAt (146C.c:8146)
+  // decomp: BATTLE.PRG setCameraLookAt (src/BATTLE/BATTLE.PRG/146C.c:8076; was
+  // vs_battle_setCameraLookAt)
   virtual void SetLookAt(Core::Math::Vec3 look_at) = 0;
-  // decomp: BATTLE.PRG vs_battle_setCameraPosition (146C.c:8132)
+  // decomp: BATTLE.PRG setCameraPosition (src/BATTLE/BATTLE.PRG/146C.c:8062;
+  // was vs_battle_setCameraPosition)
   virtual void SetPosition(Core::Math::Vec3 position) = 0;
-  // decomp: BATTLE.PRG vs_battle_setCameraRoll (146C.c:8153)
+  // decomp: BATTLE.PRG setCameraRoll (src/BATTLE/BATTLE.PRG/146C.c:8083; was
+  // vs_battle_setCameraRoll)
   virtual void SetRoll(std::int16_t angle) = 0;
-  // decomp: BATTLE.PRG func_8007DDAC (146C.c:9430): the captured screen's
-  // rotation.
+  // decomp: BATTLE.PRG func_8007DDAC (src/BATTLE/BATTLE.PRG/146C.c:9420): the
+  // captured screen's rotation.
   virtual void SetScreenRotation(std::int16_t angle) = 0;
-  // decomp: BATTLE.PRG vs_battle_setProjectionDistance (146C.c:9047)
+  // decomp: BATTLE.PRG vs_battle_setProjectionDistance
+  // (src/BATTLE/BATTLE.PRG/146C.c:9013)
   virtual void SetProjectionDistance(std::int16_t distance) = 0;
-  // decomp: BATTLE.PRG vs_battle_setNearClip (146C.c:9041)
+  // decomp: BATTLE.PRG setNearClip (src/BATTLE/BATTLE.PRG/146C.c:9007; was
+  // vs_battle_setNearClip)
   virtual void SetNearClip(std::int16_t near_clip) = 0;
-  // decomp: BATTLE.PRG vs_battle_setFarClip (146C.c:9053), with the script
-  // backdrop flag (D_800F4C6A).
+  // decomp: BATTLE.PRG setFarClip (src/BATTLE/BATTLE.PRG/146C.c:9019; was
+  // vs_battle_setFarClip), with the script backdrop flag (D_800F4C6A).
   virtual void SetFarClip(std::int16_t far_clip,
                           std::uint8_t preserve_texture_lod) = 0;
 };
@@ -171,21 +179,23 @@ class EventCameraStepPort {
   virtual void Advance(EventCameraStep step) = 0;
 };
 
-// decomp: BATTLE.PRG func_800BD610 (F01228, 4A0A8.c:3663,
+// decomp: BATTLE.PRG func_800BD610 (F01228, src/BATTLE/BATTLE.PRG/4DEA8.c:4313,
 // 0x800BD610-0x800BD6C4) The kCamera*Idle bits of the parts at rest. The
 // shake is at rest when both oscillators' duration bytes, added unsigned, are
 // zero.
 [[nodiscard]] std::uint8_t EventCameraCompletionMask(
     const EventCameraProgress& progress) noexcept;
 
-// decomp: BATTLE.PRG func_800BB41C (F01197, 4A0A8.c:2788,
-// 0x800BB41C-0x800BB450) The wait opcode's result for `completion` (the
-// completion mask): 1 while any bit of its operand is not yet set, else 0.
-// Nullopt for a command shorter than kWaitCameraTracksLength.
+// decomp: BATTLE.PRG vs_battle_script_E0 (F01197,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:3437; was func_800BB41C, 0x800BB41C-0x800BB450)
+// The wait opcode's result for `completion` (the completion mask): 1 while any
+// bit of its operand is not yet set, else 0. Nullopt for a command shorter than
+// kWaitCameraTracksLength.
 [[nodiscard]] std::optional<std::intptr_t> CommandWaitCameraTracks(
     ScriptCommand command, std::uint8_t completion);
 
-// decomp: BATTLE.PRG vs_battle_applyCameraState (F01219, 4A0A8.c:3117,
+// decomp: BATTLE.PRG applyCameraState (F01219,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:3767; was vs_battle_applyCameraState,
 // 0x800BBF14-0x800BC1CC) Hands the look-at and eye to the field camera: with
 // `use_field_camera` (D_800F4BA0) both tracks take the field camera's
 // positions; otherwise the tracks' positions are used, moved by the origin
@@ -197,7 +207,7 @@ void ApplyEventCameraState(EventCameraFrame& frame, bool use_field_camera,
                            std::uint8_t preserve_texture_lod,
                            EventCameraOutputPort& output);
 
-// decomp: BATTLE.PRG func_800BC9E0 (F01222, 4A0A8.c:3371,
+// decomp: BATTLE.PRG func_800BC9E0 (F01222, src/BATTLE/BATTLE.PRG/4DEA8.c:4021,
 // 0x800BC9E0-0x800BCA8C) Makes each track's partner the other track's
 // current position, then advances the look-at and eye tracks, the camera and
 // screen rolls, the three lenses and the shake in that order.

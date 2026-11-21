@@ -53,7 +53,7 @@ void ApplyEnchantment(Items::ClassAffinityCurrent& affinity,
 }
 }  // namespace
 
-// decomp: func_80086EA4 (src/BATTLE/BATTLE.PRG/146C.c:13801).
+// decomp: func_80086EA4 (src/BATTLE/BATTLE.PRG/146C.c:13666).
 bool ApplyWeaponElementEnchantment(Items::WeaponLoadout& weapon,
                                    const ElementEnchantment& change) {
   if (weapon.blade.id == 0) return true;
@@ -62,7 +62,7 @@ bool ApplyWeaponElementEnchantment(Items::WeaponLoadout& weapon,
   return true;
 }
 
-// decomp: func_80086EF4 (src/BATTLE/BATTLE.PRG/146C.c:13811).
+// decomp: func_80086EF4 (src/BATTLE/BATTLE.PRG/146C.c:13676).
 bool ApplyArmorElementEnchantment(
     Items::ShieldLoadout& shield,
     std::span<Items::ArmorLoadout, Items::kLimbCount> armor,
@@ -84,7 +84,7 @@ bool ApplyArmorElementEnchantment(
   return true;
 }
 
-// decomp: func_80087578 (src/BATTLE/BATTLE.PRG/146C.c:14011).
+// decomp: func_80087578 (src/BATTLE/BATTLE.PRG/146C.c:13877).
 std::optional<bool> QueueActorStatChangeNumber(
     StatNumberWorld& world, const StatNumberRequest& request) {
   const auto spawn = world.RoomSpawnIndex(request.actor_slot);
@@ -100,7 +100,7 @@ std::optional<bool> QueueActorStatChangeNumber(
   return true;
 }
 
-// decomp: func_80088B8C (src/BATTLE/BATTLE.PRG/146C.c:14745).
+// decomp: func_80088B8C (src/BATTLE/BATTLE.PRG/146C.c:14616).
 bool UpdateTargetingRiskPenalty(std::int32_t& timer,
                                 TargetingRiskWorld& world) {
   if (world.ControlMode() != kRiskControlMode) return true;
@@ -132,6 +132,6 @@ bool UpdateTargetingRiskPenalty(std::int32_t& timer,
   return true;
 }
 
-// decomp: func_80088CA0 (src/BATTLE/BATTLE.PRG/146C.c:14764).
+// decomp: func_80088CA0 (src/BATTLE/BATTLE.PRG/146C.c:14635).
 void ResetTargetingRiskPenaltyTimer(std::int32_t& timer) { timer = 0; }
 }  // namespace VS::Battle

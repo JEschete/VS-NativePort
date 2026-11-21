@@ -81,7 +81,7 @@ constexpr int kByteBits = 8;
 }
 }  // namespace
 
-// decomp: BATTLE.PRG vs_battle_sampleCurve (src/BATTLE/BATTLE.PRG/5BF94.c:6324)
+// decomp: BATTLE.PRG vs_battle_sampleCurve (src/BATTLE/BATTLE.PRG/5BF94.c:5894)
 CurveSample SampleEffectCurve(const EffectCurveBlock& block,
                               std::int32_t curve_id,
                               std::int32_t distance) noexcept {
@@ -110,7 +110,7 @@ CurveSample SampleEffectCurve(const EffectCurveBlock& block,
   return Sampled(curve[static_cast<std::size_t>(sample)]);
 }
 
-// decomp: BATTLE.PRG func_800D1104 (src/BATTLE/BATTLE.PRG/5BF94.c:6314)
+// decomp: BATTLE.PRG func_800D1104 (src/BATTLE/BATTLE.PRG/5BF94.c:5884)
 CurveSweep SampleAllEffectCurves(const EffectCurveBlock& block,
                                  std::int32_t distance,
                                  std::span<std::int32_t> samples) noexcept {
@@ -133,7 +133,7 @@ CurveSweep SampleAllEffectCurves(const EffectCurveBlock& block,
   return sweep;
 }
 
-// decomp: BATTLE.PRG func_800D11F4 (src/BATTLE/BATTLE.PRG/5BF94.c:6335)
+// decomp: BATTLE.PRG func_800D11F4 (src/BATTLE/BATTLE.PRG/5BF94.c:5905)
 CurveSample SampleSegmentedEffectCurve(std::span<const std::uint8_t> table,
                                        std::int32_t curve_index,
                                        std::int32_t distance) noexcept {
@@ -173,7 +173,7 @@ CurveSample SampleSegmentedEffectCurve(std::span<const std::uint8_t> table,
   return Sampled(distance == 0 ? *value : -1);
 }
 
-// decomp: BATTLE.PRG func_800D12D8 (src/BATTLE/BATTLE.PRG/5BF94.c:6365)
+// decomp: BATTLE.PRG func_800D12D8 (src/BATTLE/BATTLE.PRG/5BF94.c:5935)
 CurveSample SegmentedEffectCurveDuration(std::span<const std::uint8_t> table,
                                          std::int32_t curve_index) noexcept {
   if (const auto refused = SegmentedPrologue(table, curve_index)) {

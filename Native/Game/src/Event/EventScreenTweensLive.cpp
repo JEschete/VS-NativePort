@@ -168,7 +168,7 @@ CameraState* LiveCamera(const char* operation) {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800BD57C (F01227, src/BATTLE/BATTLE.PRG/4A0A8.c:3647,
+// decomp: BATTLE.PRG func_800BD57C (F01227, src/BATTLE/BATTLE.PRG/4DEA8.c:4297,
 // 0x800BD57C-0x800BD610)
 void UpdateEventAngleTweenEntry(AngleTween* tween) {
   if (tween == nullptr) {
@@ -181,7 +181,7 @@ void UpdateEventAngleTweenEntry(AngleTween* tween) {
   StoreAngleTween(*tween, value);
 }
 
-// decomp: BATTLE.PRG func_800BDAB4 (F01230, src/BATTLE/BATTLE.PRG/4A0A8.c:3812,
+// decomp: BATTLE.PRG func_800BDAB4 (F01230, src/BATTLE/BATTLE.PRG/4DEA8.c:4462,
 // 0x800BDAB4-0x800BDBB4)
 void UpdateEventScreenTransformsEntry() {
   CameraState* camera = LiveCamera("UpdateEventScreenTransforms");
@@ -193,7 +193,7 @@ void UpdateEventScreenTransformsEntry() {
   StoreScreenTweens(*camera, tweens);
 }
 
-// decomp: BATTLE.PRG func_800BDBB4 (F01231, src/BATTLE/BATTLE.PRG/4A0A8.c:3838,
+// decomp: BATTLE.PRG func_800BDBB4 (F01231, src/BATTLE/BATTLE.PRG/4DEA8.c:4488,
 // 0x800BDBB4-0x800BDC9C)
 int UpdateEventTripleTweenEntry(TripleTween* tween) {
   if (tween == nullptr) {
@@ -213,7 +213,8 @@ std::uint64_t RefusedEventScreenTweenCount() noexcept {
 }
 }  // namespace VS::Event
 
-// decomp: BATTLE.PRG func_800BB450 (F01198, src/BATTLE/BATTLE.PRG/4A0A8.c:2793,
+// decomp: BATTLE.PRG vs_battle_script_E1 (F01198,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:3442; was func_800BB450,
 // 0x800BB450-0x800BB474), opcode 0xE1.
 std::intptr_t VS::Event::CommandSetScreenCaptureOpcode(
     std::uint8_t* instruction, std::int16_t /*thread_index*/) {
@@ -229,7 +230,8 @@ std::intptr_t VS::Event::CommandSetScreenCaptureOpcode(
   return 0;
 }
 
-// decomp: BATTLE.PRG func_800BD444 (F01226, src/BATTLE/BATTLE.PRG/4A0A8.c:3601,
+// decomp: BATTLE.PRG vs_battle_script_E2_E3_camera (F01226,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:4251; was func_800BD444,
 // 0x800BD444-0x800BD57C), opcodes 0xE2 and 0xE3.
 std::intptr_t VS::Event::CommandTweenCameraRollOpcode(
     std::uint8_t* instruction, std::int16_t /*thread_index*/) {
@@ -256,7 +258,8 @@ std::intptr_t VS::Event::CommandTweenCameraRollOpcode(
   return 0;
 }
 
-// decomp: BATTLE.PRG func_800BD6C4 (F01229, src/BATTLE/BATTLE.PRG/4A0A8.c:3691,
+// decomp: BATTLE.PRG vs_battle_script_B9_BA_BF_E4_E5_E6_E7_ED (F01229,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:4341; was func_800BD6C4,
 // 0x800BD6C4-0x800BDAB4), opcodes 0xB9, 0xBA, 0xBF, 0xE4-0xE7 and 0xED.
 std::intptr_t VS::Event::CommandScreenTransformOpcode(
     std::uint8_t* instruction, std::int16_t /*thread_index*/) {

@@ -160,9 +160,9 @@ struct PageRect {
 // The gradient palette (_colorStops0, _colorStops1): left and right colours.
 inline constexpr std::int32_t kPageGradients = 4;
 
-// decomp: MENUE.PRG _setPageBg (494.c:716). A left-to-right gradient quad
-// covering `rect`, then the dithered opaque texture page, both in the panel
-// slot. A gradient outside the palette is refused.
+// decomp: MENUE.PRG setPageBg (src/MENU/MENUE.PRG/494.c:720; was _setPageBg). A
+// left-to-right gradient quad covering `rect`, then the dithered opaque texture
+// page, both in the panel slot. A gradient outside the palette is refused.
 PageDrawResult DrawPageBackground(const PageRect& rect, std::int32_t gradient,
                                   PagePrimitiveTarget& target);
 
@@ -184,8 +184,8 @@ struct PageArrowState {
 [[nodiscard]] std::int32_t PageArrowTop(PageArrow arrow,
                                         std::int32_t animation_state) noexcept;
 
-// decomp: MENUE.PRG _drawPaginationArrow (494.c:844). A 16x16 raw-texture
-// arrow at x 152 in the fade slot.
+// decomp: MENUE.PRG drawPaginationArrow (src/MENU/MENUE.PRG/494.c:848; was
+// _drawPaginationArrow). A 16x16 raw-texture arrow at x 152 in the fade slot.
 void DrawPageArrow(PageArrow arrow, const PageArrowState& state,
                    PagePrimitiveTarget& target);
 
@@ -201,14 +201,14 @@ inline constexpr std::array<std::uint8_t, kScrollFadeRows> kScrollFadeLevels{
     128, 115, 121, 88, 76, 64, 53, 42, 33, 24, 17, 11, 6, 3, 1, 0,
 };
 
-// decomp: MENUE.PRG _fadeMenuUpper (494.c:740). The up arrow, then rows
-// 52-67 of the page background redrawn additively and darkened by additive
-// 320x1 tiles, row 52 strongest, then the dithered additive texture page,
-// all in the fade slot.
+// decomp: MENUE.PRG fadeMenuUpper (src/MENU/MENUE.PRG/494.c:744; was
+// _fadeMenuUpper). The up arrow, then rows 52-67 of the page background redrawn
+// additively and darkened by additive 320x1 tiles, row 52 strongest, then the
+// dithered additive texture page, all in the fade slot.
 void DrawUpperScrollFade(const PageArrowState& arrow,
                          PagePrimitiveTarget& target);
-// decomp: MENUE.PRG _fadeMenuLower (494.c:791). The down arrow and rows
-// 187 up to 172, row 187 strongest.
+// decomp: MENUE.PRG fadeMenuLower (src/MENU/MENUE.PRG/494.c:795; was
+// _fadeMenuLower). The down arrow and rows 187 up to 172, row 187 strongest.
 void DrawLowerScrollFade(const PageArrowState& arrow,
                          PagePrimitiveTarget& target);
 
@@ -227,10 +227,10 @@ struct ScrollFades {
 // through any height).
 inline constexpr std::int64_t kMaxControlRows = 512;
 
-// decomp: MENUE.PRG _drawControlsBg (494.c:962). One gradient line per row
-// but the last, each a pixel shorter than the one above, then a black quad
-// 2 pixels down and right whose bottom edge is `height` pixels shorter, all
-// in the panel slot.
+// decomp: MENUE.PRG drawControlsBg (src/MENU/MENUE.PRG/494.c:966; was
+// _drawControlsBg). One gradient line per row but the last, each a pixel
+// shorter than the one above, then a black quad 2 pixels down and right whose
+// bottom edge is `height` pixels shorter, all in the panel slot.
 PageDrawResult DrawControlsBackground(const PageRect& rect,
                                       PagePrimitiveTarget& target);
 
@@ -255,13 +255,13 @@ inline constexpr std::int16_t kContentClipWidth = 300;
 inline constexpr std::int16_t kContentClipHeight = 130;
 inline constexpr std::int16_t kRightFramebufferX = 320;
 
-// decomp: MENUE.PRG _drawContent (494.c:577). `help_text` is the help text
-// file as halfwords; its illustration list follows the 16-byte header and
-// the text section (word 0, in bytes): a count, then each record's halfword
-// offset from the list. The draw area set to `clip` and the panel clip are
-// linked around the diagram lines and illustrations, so the GPU, walking
-// the slot from its head, clips to the panel first and restores `clip`
-// after. A list outside `help_text` is refused.
+// decomp: MENUE.PRG drawContent (src/MENU/MENUE.PRG/494.c:581; was
+// _drawContent). `help_text` is the help text file as halfwords; its
+// illustration list follows the 16-byte header and the text section (word 0, in
+// bytes): a count, then each record's halfword offset from the list. The draw
+// area set to `clip` and the panel clip are linked around the diagram lines and
+// illustrations, so the GPU, walking the slot from its head, clips to the panel
+// first and restores `clip` after. A list outside `help_text` is refused.
 PageDrawResult DrawPageContent(std::span<const std::int16_t> help_text,
                                const Render::ScreenRect& clip,
                                PageContentTarget& target);

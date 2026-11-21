@@ -109,7 +109,7 @@ void SetGemmedClassAffinity(
 }  // namespace
 
 // decomp: BATTLE.PRG vs_battle_applyWeaponStats
-// (src/BATTLE/BATTLE.PRG/146C.c:968)
+// (src/BATTLE/BATTLE.PRG/146C.c:624)
 ItemsStatus BuildWeaponStatsFromParts(WeaponLoadout& target,
                                       const WeaponSpawnLoadout& source) {
   auto status = ItemsStatus::kOk;
@@ -146,7 +146,7 @@ ItemsStatus BuildWeaponStatsFromParts(WeaponLoadout& target,
 }
 
 // decomp: BATTLE.PRG vs_battle_applyShieldStats
-// (src/BATTLE/BATTLE.PRG/146C.c:1028)
+// (src/BATTLE/BATTLE.PRG/146C.c:683)
 void BuildShieldStatsFromParts(ShieldLoadout& target,
                                const ShieldSpawnLoadout& source) {
   target.base = source.base;
@@ -170,7 +170,8 @@ void BuildShieldStatsFromParts(ShieldLoadout& target,
                          target.baseline, target.affinity_modifiers);
 }
 
-// decomp: BATTLE.PRG _applyAccessoryStats (src/BATTLE/BATTLE.PRG/146C.c:1080)
+// decomp: BATTLE.PRG applyAccessoryStats (src/BATTLE/BATTLE.PRG/146C.c:734; was
+// _applyAccessoryStats)
 void BuildAccessoryStatsFromPart(AccessorySpawnLoadout& target,
                                  const AccessoryInit& source) {
   const auto& part = source.equipment;
@@ -191,7 +192,8 @@ void BuildAccessoryStatsFromPart(AccessorySpawnLoadout& target,
   }
 }
 
-// decomp: BATTLE.PRG _applyArmorStats (src/BATTLE/BATTLE.PRG/146C.c:1105)
+// decomp: BATTLE.PRG applyArmorStats (src/BATTLE/BATTLE.PRG/146C.c:759; was
+// _applyArmorStats)
 void BuildArmorStatsFromPart(ArmorLoadout& target, const ArmorInit& source) {
   const auto& part = source.equipment;
   target.armor = part;
@@ -268,7 +270,7 @@ void WriteClassAffinity(Record& target, const EquipmentPart& source) {
 }  // namespace
 
 // decomp: BATTLE.PRG vs_battle_copyInventoryBladeStats
-// (src/BATTLE/BATTLE.PRG/146C.c:1142)
+// (src/BATTLE/BATTLE.PRG/146C.c:796)
 void ReadInventoryBladeStats(EquipmentPart& target,
                              const InventoryBlade& source) {
   target.id = source.id;
@@ -288,7 +290,7 @@ void ReadInventoryBladeStats(EquipmentPart& target,
 }
 
 // decomp: BATTLE.PRG vs_battle_copyInventoryGripStats
-// (src/BATTLE/BATTLE.PRG/146C.c:1179)
+// (src/BATTLE/BATTLE.PRG/146C.c:832)
 void ReadInventoryGripStats(EquipmentPart& target,
                             const InventoryGrip& source) {
   target.id = source.id;
@@ -301,7 +303,7 @@ void ReadInventoryGripStats(EquipmentPart& target,
 }
 
 // decomp: BATTLE.PRG vs_battle_copyInventoryArmorStats
-// (src/BATTLE/BATTLE.PRG/146C.c:1198)
+// (src/BATTLE/BATTLE.PRG/146C.c:850)
 void ReadInventoryArmorStats(EquipmentPart& target,
                              const InventoryArmor& source) {
   target.id = source.id;
@@ -318,7 +320,7 @@ void ReadInventoryArmorStats(EquipmentPart& target,
 }
 
 // decomp: BATTLE.PRG vs_battle_copyInventoryGemStats
-// (src/BATTLE/BATTLE.PRG/146C.c:1235)
+// (src/BATTLE/BATTLE.PRG/146C.c:886)
 void ReadInventoryGemStats(EquipmentPart& target, const InventoryGem& source) {
   target.id = source.id;
   target.sub_id = static_cast<std::int8_t>(source.sub_id);
@@ -328,7 +330,7 @@ void ReadInventoryGemStats(EquipmentPart& target, const InventoryGem& source) {
   ReadClassAffinity(target, source);
 }
 
-// decomp: BATTLE.PRG vs_battle_applyWeapon (src/BATTLE/BATTLE.PRG/146C.c:1257)
+// decomp: BATTLE.PRG vs_battle_applyWeapon (src/BATTLE/BATTLE.PRG/146C.c:907)
 // The original assembled the parts in a high-end heap block; the parts here
 // are a local record.
 ItemsStatus LoadInventoryWeaponStats(WeaponLoadout& target,
@@ -367,7 +369,7 @@ ItemsStatus LoadInventoryWeaponStats(WeaponLoadout& target,
   return status;
 }
 
-// decomp: BATTLE.PRG vs_battle_applyShield (src/BATTLE/BATTLE.PRG/146C.c:1295)
+// decomp: BATTLE.PRG vs_battle_applyShield (src/BATTLE/BATTLE.PRG/146C.c:945)
 ItemsStatus LoadInventoryShieldStats(ShieldLoadout& target,
                                      const InventoryShield* source,
                                      const InventoryContents& inventory) {
@@ -391,7 +393,7 @@ ItemsStatus LoadInventoryShieldStats(ShieldLoadout& target,
   return status;
 }
 
-// decomp: BATTLE.PRG vs_battle_applyArmor (src/BATTLE/BATTLE.PRG/146C.c:1321)
+// decomp: BATTLE.PRG vs_battle_applyArmor (src/BATTLE/BATTLE.PRG/146C.c:971)
 void LoadInventoryArmorStats(ArmorLoadout& target,
                              const InventoryArmor* source) {
   ArmorInit part{};
@@ -404,7 +406,7 @@ void LoadInventoryArmorStats(ArmorLoadout& target,
 }
 
 // decomp: BATTLE.PRG vs_battle_applyAccessory
-// (src/BATTLE/BATTLE.PRG/146C.c:1338)
+// (src/BATTLE/BATTLE.PRG/146C.c:988)
 void LoadInventoryAccessoryStats(AccessorySpawnLoadout& target,
                                  const InventoryArmor* source) {
   AccessoryInit part{};
@@ -415,7 +417,7 @@ void LoadInventoryAccessoryStats(AccessorySpawnLoadout& target,
   BuildAccessoryStatsFromPart(target, part);
 }
 
-// decomp: BATTLE.PRG func_8006B214 (src/BATTLE/BATTLE.PRG/146C.c:1356)
+// decomp: BATTLE.PRG func_8006B214 (src/BATTLE/BATTLE.PRG/146C.c:1005)
 void RemoveEquipmentBoostOnEquip(EquipStatusHost& host) {
   if ((host.AshleyStatuses() & kEquipmentBoostStatus) != 0) {
     host.QueueStatusLabels(kEquipmentBoostStatus);
@@ -435,17 +437,17 @@ void EndStatuses(EquipStatusHost& host, std::int32_t mask) {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_8006B270 (src/BATTLE/BATTLE.PRG/146C.c:1366)
+// decomp: BATTLE.PRG func_8006B270 (src/BATTLE/BATTLE.PRG/146C.c:1015)
 void RemoveWeaponEnchantmentOnEquip(EquipStatusHost& host) {
   EndStatuses(host, kWeaponEnchantmentStatuses);
 }
 
-// decomp: BATTLE.PRG func_8006B2D4 (src/BATTLE/BATTLE.PRG/146C.c:1376)
+// decomp: BATTLE.PRG func_8006B2D4 (src/BATTLE/BATTLE.PRG/146C.c:1025)
 void RemoveArmorEnchantmentOnEquip(EquipStatusHost& host) {
   EndStatuses(host, kArmorEnchantmentStatuses);
 }
 
-// decomp: BATTLE.PRG vs_battle_equipWeapon (src/BATTLE/BATTLE.PRG/146C.c:1386)
+// decomp: BATTLE.PRG vs_battle_equipWeapon (src/BATTLE/BATTLE.PRG/146C.c:1035)
 // The actor callback the original ran after loading (vs_battle_nop0) has no
 // effect.
 ItemsStatus EquipAshleyWeapon(AshleyWeaponState& ashley,
@@ -474,7 +476,7 @@ ItemsStatus EquipAshleyWeapon(AshleyWeaponState& ashley,
   return status;
 }
 
-// decomp: BATTLE.PRG vs_battle_equipShield (src/BATTLE/BATTLE.PRG/146C.c:1411)
+// decomp: BATTLE.PRG vs_battle_equipShield (src/BATTLE/BATTLE.PRG/146C.c:1060)
 ItemsStatus EquipAshleyShield(ShieldLoadout& target,
                               const InventoryShield* shield,
                               const InventoryContents& inventory,
@@ -485,7 +487,7 @@ ItemsStatus EquipAshleyShield(ShieldLoadout& target,
   return status;
 }
 
-// decomp: BATTLE.PRG vs_battle_equipArmor (src/BATTLE/BATTLE.PRG/146C.c:1419)
+// decomp: BATTLE.PRG vs_battle_equipArmor (src/BATTLE/BATTLE.PRG/146C.c:1068)
 ItemsStatus EquipAshleyArmor(std::span<ArmorLoadout> limb_armor,
                              std::int32_t body_part,
                              const InventoryArmor* armor,
@@ -502,7 +504,7 @@ ItemsStatus EquipAshleyArmor(std::span<ArmorLoadout> limb_armor,
 }
 
 // decomp: BATTLE.PRG vs_battle_equipAccessory
-// (src/BATTLE/BATTLE.PRG/146C.c:1427)
+// (src/BATTLE/BATTLE.PRG/146C.c:1076)
 void EquipAshleyAccessory(AccessorySpawnLoadout& target,
                           const InventoryArmor* accessory,
                           EquipStatusHost& host) {
@@ -512,7 +514,7 @@ void EquipAshleyAccessory(AccessorySpawnLoadout& target,
 }
 
 // decomp: BATTLE.PRG vs_battle_copyUiBladeStats
-// (src/BATTLE/BATTLE.PRG/146C.c:1435)
+// (src/BATTLE/BATTLE.PRG/146C.c:1084)
 void WriteInventoryBladeStats(InventoryBlade& target,
                               const EquipmentPart& source) {
   constexpr auto kTypeFields = static_cast<std::uint8_t>(
@@ -535,7 +537,7 @@ void WriteInventoryBladeStats(InventoryBlade& target,
 }
 
 // decomp: BATTLE.PRG vs_battle_copyUiGripStats
-// (src/BATTLE/BATTLE.PRG/146C.c:1471)
+// (src/BATTLE/BATTLE.PRG/146C.c:1119)
 void WriteInventoryGripStats(InventoryGrip& target,
                              const EquipmentPart& source) {
   target.id = source.id;
@@ -547,7 +549,7 @@ void WriteInventoryGripStats(InventoryGrip& target,
 }
 
 // decomp: BATTLE.PRG vs_battle_copyUiGemStats
-// (src/BATTLE/BATTLE.PRG/146C.c:1489)
+// (src/BATTLE/BATTLE.PRG/146C.c:1136)
 void WriteInventoryGemStats(InventoryGem& target, const EquipmentPart& source) {
   target.id = source.id;
   target.sub_id = static_cast<std::uint8_t>(source.sub_id);
@@ -556,8 +558,8 @@ void WriteInventoryGemStats(InventoryGem& target, const EquipmentPart& source) {
   WriteClassAffinity(target, source);
 }
 
-// decomp: BATTLE.PRG vs_battle_copyUiEquipmentStats
-// (src/BATTLE/BATTLE.PRG/146C.c:1509)
+// decomp: BATTLE.PRG copyUiEquipmentStats
+// (src/BATTLE/BATTLE.PRG/146C.c:1156; was vs_battle_copyUiEquipmentStats)
 void WriteInventoryArmorStats(InventoryArmor& target,
                               const EquipmentPart& source) {
   target.id = static_cast<std::uint8_t>(source.id);
@@ -573,7 +575,7 @@ void WriteInventoryArmorStats(InventoryArmor& target,
 }
 
 // decomp: BATTLE.PRG vs_battle_copyUiWeaponStats
-// (src/BATTLE/BATTLE.PRG/146C.c:1545)
+// (src/BATTLE/BATTLE.PRG/146C.c:1191)
 ItemsStatus StoreInventoryWeaponStats(InventoryWeapon& target,
                                       WeaponLoadout& source,
                                       InventoryContents& inventory) {
@@ -604,7 +606,7 @@ ItemsStatus StoreInventoryWeaponStats(InventoryWeapon& target,
 }
 
 // decomp: BATTLE.PRG vs_battle_copyUiShieldStats
-// (src/BATTLE/BATTLE.PRG/146C.c:1572)
+// (src/BATTLE/BATTLE.PRG/146C.c:1217)
 // Unlike loading, storing uses the gem references without masking the shield
 // flag.
 ItemsStatus StoreInventoryShieldStats(InventoryShield& target,
@@ -627,7 +629,7 @@ ItemsStatus StoreInventoryShieldStats(InventoryShield& target,
 }
 
 // decomp: BATTLE.PRG vs_battle_copyUiArmorStats
-// (src/BATTLE/BATTLE.PRG/146C.c:1592)
+// (src/BATTLE/BATTLE.PRG/146C.c:1236)
 void StoreInventoryArmorStats(InventoryArmor& target, ArmorLoadout& source) {
   if (source.armor.id == 0) return;
   source.armor.current_dp = source.current_dp;
@@ -635,7 +637,7 @@ void StoreInventoryArmorStats(InventoryArmor& target, ArmorLoadout& source) {
 }
 
 // decomp: BATTLE.PRG vs_battle_copyUiAccessoryStats
-// (src/BATTLE/BATTLE.PRG/146C.c:1600)
+// (src/BATTLE/BATTLE.PRG/146C.c:1244)
 void StoreInventoryAccessoryStats(InventoryArmor& target,
                                   const AccessorySpawnLoadout& source) {
   if (source.accessory.id != 0) {

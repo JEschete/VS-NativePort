@@ -103,7 +103,7 @@ class LiveUpdateHost final : public TextBoxUpdateHost {
 };
 }  // namespace
 
-// decomp: F01392 func_800CB83C (src/BATTLE/BATTLE.PRG/5BF94.c:3936).
+// decomp: F01392 func_800CB83C (src/BATTLE/BATTLE.PRG/5BF94.c:3502).
 void UpdateLiveTextBoxes() {
   auto* destination = Render::LiveFrameOrderingEntry(
       Render::LiveOrderingBase::kScene, kTextOrderingSlot);

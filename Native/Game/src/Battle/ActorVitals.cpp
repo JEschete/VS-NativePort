@@ -103,7 +103,7 @@ std::optional<int> UpdateSlot(int slot, VitalsActor& actor,
 }
 }  // namespace
 
-// decomp: func_800792E4 (src/BATTLE/BATTLE.PRG/146C.c:7413).
+// decomp: func_800792E4 (src/BATTLE/BATTLE.PRG/146C.c:7265).
 std::optional<int> ResolveActorDefeat(int source, int target, int count_kill,
                                       ActorVitalsWorld& world) {
   auto* actor = world.ActorAt(target);
@@ -146,7 +146,7 @@ std::optional<int> UpdateActorVitals(ActorVitalsWorld& world) {
   return timer_result != 0 ? timer_result : outcome;
 }
 
-// decomp: func_80088B6C (src/BATTLE/BATTLE.PRG/146C.c:14743).
+// decomp: func_80088B6C (src/BATTLE/BATTLE.PRG/146C.c:14614).
 std::optional<int> UpdateRoomActorVitals(ActorVitalsWorld& world) {
   return UpdateActorVitals(world);
 }

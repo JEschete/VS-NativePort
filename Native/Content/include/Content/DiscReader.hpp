@@ -6,7 +6,8 @@
 namespace VS::Content {
 
 // The drive phases the request queue, the blocking reader and the XA stream
-// poll for (decomp vs_main_disk_t.state, SLUS_010.40 main.c:117).
+// poll for (decomp vs_main_disk_t.state, SLUS_010.40
+// src/SLUS_010.40/main.c:117).
 enum class DiscDrivePhase : std::uint8_t {
   kIdle,
   kSeekReady,

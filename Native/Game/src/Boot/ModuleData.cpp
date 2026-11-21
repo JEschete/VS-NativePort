@@ -143,46 +143,46 @@
 #include "Content/ModuleData.hpp"
 #include "Effects/TrailEmitterLive.hpp"
 
-// decomp: EFFECT/PLG074.BIN PLG074 trailEffect.h origin cursor; original image
-// matches PLG073 but mutable state remains overlay-local
+// decomp: EFFECT/PLG074.BIN PLG074 src/EFFECT/trailEffect.h origin cursor;
+// original image matches PLG073 but mutable state remains overlay-local
 int VS::Content::plg074TrailEmissionCounter[1];
-// decomp: BATTLE/BATTLE.PRG 4B16C.s:1208 eighteen packed signed16 X/Z vertices;
-// imported source data only
+// decomp: BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/4B16C.s:1153 eighteen packed
+// signed16 X/Z vertices; imported source data only
 unsigned int
     VS::Content::battleShadowVertices[VS::Content::kBattleShadowVertexWords];
-// decomp: BATTLE/BATTLE.PRG 4B16C.s:1208 twenty-four triangles with byte
-// offsets into projected shadow vertices
+// decomp: BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/4B16C.s:1153 twenty-four
+// triangles with byte offsets into projected shadow vertices
 unsigned int
     VS::Content::battleShadowFaces[VS::Content::kBattleShadowFaceWords];
 // decomp: BATTLE/BATTLE.PRG 7B5DC.s:func_800E4180 indexed hesitation lengths;
 // native module-owned data
 unsigned int VS::Content::battleAiHesitationLengths[1];
-// decomp: BATTLE/BATTLE.PRG 5BF94.c:2934 D_800EBA78 main menu help text; bytes
-// 316..319 open the gradient window
+// decomp: BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/5BF94.c:2934 D_800EBA78 main
+// menu help text; bytes 316..319 open the gradient window
 unsigned int VS::Content::battleMainMenuHelpText
     [VS::Content::kBattleMainMenuHelpTextWords];
-// decomp: BATTLE/BATTLE.PRG 58578.c INCLUDE_RODATA D_80069860; strings end at
-// jtbl_800698F8
+// decomp: BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/58578.c INCLUDE_RODATA
+// D_80069860; strings end at jtbl_800698F8
 unsigned int
     VS::Content::battleLimbNameBytes[VS::Content::kBattleLimbNameWords];
-// decomp: BATTLE/BATTLE.PRG 30DB0.c:_loadGimmick; three 16-byte headers plus
-// modelDataSize payloads
+// decomp: BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/30DB0.c:_loadGimmick; three
+// 16-byte headers plus modelDataSize payloads
 unsigned int VS::Content::battleGimmickTemplateBytes
     [VS::Content::kBattleGimmickTemplateWords];
-// decomp: BATTLE/BATTLE.PRG 5BF94.c:textbox frame vertices; nine styles precede
-// D_800EB588
+// decomp: BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/5BF94.c:textbox frame
+// vertices; nine styles precede D_800EB588
 unsigned int
     VS::Content::battleTextboxFrameBytes[VS::Content::kBattleTextboxFrameWords];
-// decomp: BATTLE/BATTLE.PRG 146C.c:func_8008E19C complete one-group/one-quad
-// marker definition; G00039-G00041 are interior aliases
+// decomp: BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/146C.c:func_8008E19C complete
+// one-group/one-quad marker definition; G00039-G00041 are interior aliases
 unsigned int VS::Content::battleTriggerMarkerBytes
     [VS::Content::kBattleTriggerMarkerWords];
-// decomp: BATTLE/BATTLE.PRG 146C.c:17537 D_80068C1C sky dome: 34 twelve-byte
-// vertices (colour word 2) and 64 four-byte faces; SetRoomBackgroundColors
-// patches the vertex colours
+// decomp: BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/146C.c:17537 D_80068C1C sky
+// dome: 34 twelve-byte vertices (colour word 2) and 64 four-byte faces;
+// SetRoomBackgroundColors patches the vertex colours
 unsigned int VS::Content::battleSkyDome[VS::Content::kBattleSkyDomeWords];
-// decomp: SLUS_010.40 25AC.c:LFO selectors include source-code bytes as
-// sample/control data; original PS-X EXE payload, never host code
+// decomp: SLUS_010.40 src/SLUS_010.40/25AC.c:LFO selectors include source-code
+// bytes as sample/control data; original PS-X EXE payload, never host code
 std::int16_t
     VS::Content::residentLfoSamples[VS::Content::kResidentLfoSampleCount];
 

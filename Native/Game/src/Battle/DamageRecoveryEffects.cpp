@@ -20,7 +20,7 @@ void AddChange(DamageRecoveryQueue& queue, ActionResultField field,
 }
 }  // namespace
 
-// decomp: func_80084B70 (src/BATTLE/BATTLE.PRG/146C.c:12789).
+// decomp: func_80084B70 (src/BATTLE/BATTLE.PRG/146C.c:12641).
 void QueueHitDamageAndEquipmentWear(DamageRecoveryQueue& queue, bool execute) {
   queue.CaptureDamageOwners();
   queue.ClearCriticalHit();
@@ -38,7 +38,7 @@ void QueueHitDamageAndEquipmentWear(DamageRecoveryQueue& queue, bool execute) {
   }
 }
 
-// decomp: func_80084CAC (src/BATTLE/BATTLE.PRG/146C.c:12820).
+// decomp: func_80084CAC (src/BATTLE/BATTLE.PRG/146C.c:12671).
 void QueueMpDrain(DamageRecoveryQueue& queue) {
   queue.CaptureTargetOwner();
   auto amount = queue.Calculate();
@@ -50,7 +50,7 @@ void QueueMpDrain(DamageRecoveryQueue& queue) {
   AddChange(queue, ActionResultField::kMp, amount, 1);
 }
 
-// decomp: func_80084D44 (src/BATTLE/BATTLE.PRG/146C.c:12835).
+// decomp: func_80084D44 (src/BATTLE/BATTLE.PRG/146C.c:12685).
 void QueueWeaponPpDrain(DamageRecoveryQueue& queue) {
   queue.CaptureTargetOwner();
   if (queue.HasWeapon()) {
@@ -59,7 +59,7 @@ void QueueWeaponPpDrain(DamageRecoveryQueue& queue) {
   }
 }
 
-// decomp: func_80084DA8 (src/BATTLE/BATTLE.PRG/146C.c:12847).
+// decomp: func_80084DA8 (src/BATTLE/BATTLE.PRG/146C.c:12696).
 void QueueShieldPpDrain(DamageRecoveryQueue& queue) {
   queue.CaptureTargetOwner();
   const auto mode = queue.SelectedPrimaryHpMode();
@@ -69,32 +69,32 @@ void QueueShieldPpDrain(DamageRecoveryQueue& queue) {
   }
 }
 
-// decomp: func_80084E28 (src/BATTLE/BATTLE.PRG/146C.c:12862).
+// decomp: func_80084E28 (src/BATTLE/BATTLE.PRG/146C.c:12710).
 void QueueHpRecovery(DamageRecoveryQueue& queue) {
   const auto amount = queue.Calculate();
   AddChange(queue, ActionResultField::kHp, amount, 2);
   if (!queue.TargetsPosition()) queue.RecoverLimbs(amount);
 }
 
-// decomp: func_80084EA0 (src/BATTLE/BATTLE.PRG/146C.c:12874).
+// decomp: func_80084EA0 (src/BATTLE/BATTLE.PRG/146C.c:12721).
 void QueueMpRecovery(DamageRecoveryQueue& queue) {
   const auto amount = queue.Calculate();
   AddChange(queue, ActionResultField::kMp, amount, 2);
 }
 
-// decomp: func_80084EEC (src/BATTLE/BATTLE.PRG/146C.c:12882).
+// decomp: func_80084EEC (src/BATTLE/BATTLE.PRG/146C.c:12728).
 void QueueWeaponPpRecovery(DamageRecoveryQueue& queue) {
   const auto amount = queue.Calculate();
   AddChange(queue, ActionResultField::kWeaponPp, amount, 2);
 }
 
-// decomp: func_80084F40 (src/BATTLE/BATTLE.PRG/146C.c:12890).
+// decomp: func_80084F40 (src/BATTLE/BATTLE.PRG/146C.c:12735).
 void QueueWeaponDpRecovery(DamageRecoveryQueue& queue) {
   const auto amount = queue.Calculate();
   AddChange(queue, ActionResultField::kWeaponDp, amount, 2);
 }
 
-// decomp: func_80084F94 (src/BATTLE/BATTLE.PRG/146C.c:12898).
+// decomp: func_80084F94 (src/BATTLE/BATTLE.PRG/146C.c:12742).
 void QueueRiskRecovery(DamageRecoveryQueue& queue) {
   const auto amount = queue.Calculate();
   if (amount != 0) AddChange(queue, ActionResultField::kRisk, amount, 2);

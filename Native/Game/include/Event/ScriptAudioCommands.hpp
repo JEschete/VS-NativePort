@@ -146,86 +146,111 @@ class ScriptAudioHost {
   virtual void SetMusicJumpThreshold(int threshold) = 0;
 };
 
-// decomp: func_800BA2E0 (src/BATTLE/BATTLE.PRG/4A0A8.c:2280), opcode 0x80:
-// plays a sound on a source's group; the ambient source plays only while the
-// ambience is suspended and records the sound it resumes with.
+// decomp: vs_battle_script_80_playSfx (src/BATTLE/BATTLE.PRG/4DEA8.c:2928; was
+// func_800BA2E0), opcode 0x80: plays a sound on a source's group; the ambient
+// source plays only while the ambience is suspended and records the sound it
+// resumes with.
 ScriptStep ScriptPlaySoundCommand(ScriptCommand command, ScriptAudioHost& host);
-// decomp: func_800BA35C (src/BATTLE/BATTLE.PRG/4A0A8.c:2292), opcode 0x81
+// decomp: vs_battle_script_81 (src/BATTLE/BATTLE.PRG/4DEA8.c:2940; was
+// func_800BA35C), opcode 0x81
 ScriptStep CommandPlayActorSfx(ScriptCommand command, ScriptAudioHost& host);
-// decomp: func_800BA39C (src/BATTLE/BATTLE.PRG/4A0A8.c:2298), opcode 0x82
+// decomp: vs_battle_script_82_fadeSfxVolume
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2946; was func_800BA39C), opcode 0x82
 ScriptStep CommandSlideSfxVolume(ScriptCommand command, ScriptAudioHost& host);
-// decomp: func_800BA3E4 (src/BATTLE/BATTLE.PRG/4A0A8.c:2304), opcode 0x83
+// decomp: vs_battle_script_83_stopAllSfx (src/BATTLE/BATTLE.PRG/4DEA8.c:2952;
+// was func_800BA3E4), opcode 0x83
 ScriptStep CommandStopAllSfx(ScriptCommand command, ScriptAudioHost& host);
-// decomp: func_800BA404 (src/BATTLE/BATTLE.PRG/4A0A8.c:2310), opcode 0x84
+// decomp: vs_battle_script_84_evictSfx (src/BATTLE/BATTLE.PRG/4DEA8.c:2958; was
+// func_800BA404), opcode 0x84
 ScriptStep CommandStopSfx(ScriptCommand command, ScriptAudioHost& host);
-// decomp: vs_battle_script_loadSfxSlot (src/BATTLE/BATTLE.PRG/4A0A8.c:2316),
-// opcode 0x85
+// decomp: vs_battle_script_85_loadSfxSlot (src/BATTLE/BATTLE.PRG/4DEA8.c:2964;
+// was vs_battle_script_loadSfxSlot), opcode 0x85
 ScriptStep CommandLoadSfxSlot(ScriptCommand command, ScriptAudioHost& host);
-// decomp: vs_battle_script_freeSfxSlot (src/BATTLE/BATTLE.PRG/4A0A8.c:2322),
-// opcode 0x86: holds while the slot's bank loads.
+// decomp: vs_battle_script_86_freeSfxSlot (src/BATTLE/BATTLE.PRG/4DEA8.c:2970;
+// was vs_battle_script_freeSfxSlot), opcode 0x86: holds while the slot's bank
+// loads.
 ScriptStep CommandWaitSfxSlotRelease(ScriptCommand command,
                                      ScriptAudioHost& host);
-// decomp: vs_battle_script_freeSfx (src/BATTLE/BATTLE.PRG/4A0A8.c:2327),
-// opcode 0x87: also ends the frame while a cutscene skip runs.
+// decomp: vs_battle_script_87_freeSfx (src/BATTLE/BATTLE.PRG/4DEA8.c:2975; was
+// vs_battle_script_freeSfx), opcode 0x87: also ends the frame while a cutscene
+// skip runs.
 ScriptStep CommandFreeSfx(ScriptCommand command, ScriptAudioHost& host);
-// decomp: vs_battle_script_setCurrentSfx
-// (src/BATTLE/BATTLE.PRG/4A0A8.c:2333), opcode 0x88
+// decomp: vs_battle_script_88_setCurrentSfx
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2981; was vs_battle_script_setCurrentSfx),
+// opcode 0x88
 ScriptStep CommandSelectSfxBank(ScriptCommand command, ScriptAudioHost& host);
-// decomp: vs_battle_script_loadSoundFile
-// (src/BATTLE/BATTLE.PRG/4A0A8.c:2339), opcode 0x89: loads the zone's music
-// and wave bank.
+// decomp: vs_battle_script_89_loadSoundFile
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2987; was vs_battle_script_loadSoundFile),
+// opcode 0x89: loads the zone's music and wave bank.
 ScriptStep CommandLoadEventMusic(ScriptCommand command, ScriptAudioHost& host);
-// decomp: func_800BA52C (src/BATTLE/BATTLE.PRG/4A0A8.c:2347), opcode 0x8F:
-// fades the current slot out and crossfades another in.
+// decomp: vs_battle_script_8F_crossfadeMusic
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2995; was func_800BA52C), opcode 0x8F: fades
+// the current slot out and crossfades another in.
 ScriptStep CommandCrossfadeMusic(ScriptCommand command, ScriptAudioHost& host);
-// decomp: vs_battle_script_loadMusicSlot
-// (src/BATTLE/BATTLE.PRG/4A0A8.c:2354), opcode 0x90
+// decomp: vs_battle_script_90_loadMusicSlot
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:3002; was vs_battle_script_loadMusicSlot),
+// opcode 0x90
 ScriptStep CommandLoadMusicSlot(ScriptCommand command, ScriptAudioHost& host);
-// decomp: vs_battle_script_freeMusic (src/BATTLE/BATTLE.PRG/4A0A8.c:2360),
-// opcode 0x91: also ends the frame while a cutscene skip runs.
+// decomp: vs_battle_script_91_freeMusic (src/BATTLE/BATTLE.PRG/4DEA8.c:3008;
+// was vs_battle_script_freeMusic), opcode 0x91: also ends the frame while a
+// cutscene skip runs.
 ScriptStep CommandFreeMusic(ScriptCommand command, ScriptAudioHost& host);
-// decomp: func_800BA5E8 (src/BATTLE/BATTLE.PRG/4A0A8.c:2366), opcode 0x92
+// decomp: vs_battle_script_92_playMusic (src/BATTLE/BATTLE.PRG/4DEA8.c:3014;
+// was func_800BA5E8), opcode 0x92
 ScriptStep CommandPlayMusic(ScriptCommand command, ScriptAudioHost& host);
-// decomp: func_800BA61C (src/BATTLE/BATTLE.PRG/4A0A8.c:2372), opcode 0x93
+// decomp: vs_battle_script_93_fadeMusicVolume
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:3020; was func_800BA61C), opcode 0x93
 ScriptStep CommandSlideMusicVolume(ScriptCommand command,
                                    ScriptAudioHost& host);
-// decomp: func_800BA650 (src/BATTLE/BATTLE.PRG/4A0A8.c:2378), opcode 0x94
+// decomp: vs_battle_script_94_fadeMusicTempo
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:3026; was func_800BA650), opcode 0x94
 ScriptStep CommandSlideMusicTempo(ScriptCommand command, ScriptAudioHost& host);
-// decomp: func_800BA684 (src/BATTLE/BATTLE.PRG/4A0A8.c:2384), opcode 0x95
+// decomp: vs_battle_script_95_fadeMusicPitch
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:3032; was func_800BA684), opcode 0x95
 ScriptStep CommandSlideMusicPitch(ScriptCommand command, ScriptAudioHost& host);
-// decomp: func_800BA6B8 (src/BATTLE/BATTLE.PRG/4A0A8.c:2390), opcode 0x96
+// decomp: vs_battle_script_96_stopMusic (src/BATTLE/BATTLE.PRG/4DEA8.c:3038;
+// was func_800BA6B8), opcode 0x96
 ScriptStep CommandStopMusic(ScriptCommand command, ScriptAudioHost& host);
-// decomp: func_800BA6E0 (src/BATTLE/BATTLE.PRG/4A0A8.c:2396), opcode 0x97:
-// holds while a playing slot is audible, then stops it.
+// decomp: vs_battle_script_97_waitMusicSilent
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:3044; was func_800BA6E0), opcode 0x97: holds
+// while a playing slot is audible, then stops it.
 ScriptStep CommandWaitMusicSlot(ScriptCommand command, ScriptAudioHost& host);
-// decomp: func_800BA72C (src/BATTLE/BATTLE.PRG/4A0A8.c:2408), opcode 0x98
+// decomp: vs_battle_script_98_pushMusicState
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:3056; was func_800BA72C), opcode 0x98
 ScriptStep CommandPushMusicState(ScriptCommand command, ScriptAudioHost& host);
-// decomp: vs_battle_script_clearMusicLoadSlot
-// (src/BATTLE/BATTLE.PRG/4A0A8.c:2414), opcode 0x99: holds while the slot's
+// decomp: vs_battle_script_99_clearMusicLoadSlot
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:3062; was
+// vs_battle_script_clearMusicLoadSlot), opcode 0x99: holds while the slot's
 // music loads.
 ScriptStep CommandWaitMusicSlotLoad(ScriptCommand command,
                                     ScriptAudioHost& host);
-// decomp: vs_battle_script_loadSoundFile2
-// (src/BATTLE/BATTLE.PRG/4A0A8.c:2419), opcode 0x9D
+// decomp: vs_battle_script_9D_loadSoundFile2
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:3067; was vs_battle_script_loadSoundFile2),
+// opcode 0x9D
 ScriptStep CommandLoadSoundFile(ScriptCommand command, ScriptAudioHost& host);
-// decomp: vs_battle_script_processSoundQueue
-// (src/BATTLE/BATTLE.PRG/4A0A8.c:2425), opcode 0x9E: holds while a wave bank
-// loads.
+// decomp: vs_battle_script_9E_processSoundQueue
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:3073; was vs_battle_script_processSoundQueue),
+// opcode 0x9E: holds while a wave bank loads.
 ScriptStep CommandWaitSoundQueue(ScriptCommand command, ScriptAudioHost& host);
-// decomp: func_800BA7BC (src/BATTLE/BATTLE.PRG/4A0A8.c:2430), opcode 0x9A:
-// holds until the music reaches a beat.
+// decomp: vs_battle_script_9A_waitMusicBar (src/BATTLE/BATTLE.PRG/4DEA8.c:3078;
+// was func_800BA7BC), opcode 0x9A: holds until the music reaches a beat.
 ScriptStep CommandWaitMusicTimer(ScriptCommand command, ScriptAudioHost& host);
-// decomp: func_800BA800 (src/BATTLE/BATTLE.PRG/4A0A8.c:2436), opcode 0x9B
+// decomp: vs_battle_script_9B_fadeSfxPitch (src/BATTLE/BATTLE.PRG/4DEA8.c:3084;
+// was func_800BA800), opcode 0x9B
 ScriptStep CommandSlideSfxPitch(ScriptCommand command, ScriptAudioHost& host);
-// decomp: func_800BA848 (src/BATTLE/BATTLE.PRG/4A0A8.c:2442), opcode 0x9C
+// decomp: vs_battle_script_9C_fadeSfxPan (src/BATTLE/BATTLE.PRG/4DEA8.c:3090;
+// was func_800BA848), opcode 0x9C
 ScriptStep CommandSlideSfxPan(ScriptCommand command, ScriptAudioHost& host);
-// decomp: func_800BA890 (src/BATTLE/BATTLE.PRG/4A0A8.c:2448), opcode 0x9F
+// decomp: vs_battle_script_9F_queueMusic (src/BATTLE/BATTLE.PRG/4DEA8.c:3096;
+// was func_800BA890), opcode 0x9F
 ScriptStep CommandResumeMusicSlot(ScriptCommand command, ScriptAudioHost& host);
-// decomp: func_800BAAF0 (src/BATTLE/BATTLE.PRG/4A0A8.c:2513), opcode 0xA8
+// decomp: vs_battle_script_A8_setMusicJumpThreshold
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:3163; was func_800BAAF0), opcode 0xA8
 ScriptStep CommandSetMusicJumpThreshold(ScriptCommand command,
                                         ScriptAudioHost& host);
-// decomp: vs_battle_script_playMenuSelectSfx
-// (src/BATTLE/BATTLE.PRG/4A0A8.c:2874), opcode 0xF2
+// decomp: vs_battle_script_F2_playMenuSelectSfx
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:3523; was vs_battle_script_playMenuSelectSfx),
+// opcode 0xF2
 ScriptStep CommandPlayMenuSelectSfx(ScriptCommand command,
                                     ScriptAudioHost& host);
 

@@ -121,25 +121,25 @@ class FieldModeHost {
   virtual void PlayAshleyActionPose(int pose) = 0;
 };
 
-// decomp: BATTLE.PRG func_8006C2FC (146C.c:1866)
+// decomp: BATTLE.PRG func_8006C2FC (src/BATTLE/BATTLE.PRG/146C.c:1508)
 void PauseFieldForInteractionDialog(FieldModeHost& host);
-// decomp: BATTLE.PRG func_8006C350 (146C.c:1880)
+// decomp: BATTLE.PRG func_8006C350 (src/BATTLE/BATTLE.PRG/146C.c:1522)
 void PauseFieldForObjectInteraction(FieldModeHost& host);
-// decomp: BATTLE.PRG func_8006C39C (146C.c:1893)
+// decomp: BATTLE.PRG func_8006C39C (src/BATTLE/BATTLE.PRG/146C.c:1535)
 void PauseFieldForMenu(FieldModeHost& host);
-// decomp: BATTLE.PRG func_8006C40C (146C.c:1907)
+// decomp: BATTLE.PRG func_8006C40C (src/BATTLE/BATTLE.PRG/146C.c:1549)
 void ResumeFieldAfterMenu(FieldModeHost& host);
-// decomp: BATTLE.PRG func_8006F5CC (146C.c:3221)
+// decomp: BATTLE.PRG func_8006F5CC (src/BATTLE/BATTLE.PRG/146C.c:2924)
 void EnterFieldExplorationMode(FieldModeHost& host);
-// decomp: BATTLE.PRG func_8007352C (146C.c:4659)
+// decomp: BATTLE.PRG func_8007352C (src/BATTLE/BATTLE.PRG/146C.c:4386)
 void BeginShortcutMenu(FieldModeHost& host);
-// decomp: BATTLE.PRG func_80073554 (146C.c:4665)
+// decomp: BATTLE.PRG func_80073554 (src/BATTLE/BATTLE.PRG/146C.c:4392)
 void EndShortcutMenu(FieldModeHost& host);
-// decomp: BATTLE.PRG func_8007357C (146C.c:4671)
+// decomp: BATTLE.PRG func_8007357C (src/BATTLE/BATTLE.PRG/146C.c:4398)
 void BeginBattleActionMenu(FieldModeHost& host);
-// decomp: BATTLE.PRG func_800735CC (146C.c:4679)
+// decomp: BATTLE.PRG func_800735CC (src/BATTLE/BATTLE.PRG/146C.c:4406)
 void CloseBattleActionMenu(FieldModeHost& host);
-// decomp: BATTLE.PRG func_800735F8 (146C.c:4686)
+// decomp: BATTLE.PRG func_800735F8 (src/BATTLE/BATTLE.PRG/146C.c:4413)
 // A break art, spell or item starts its action selection; anything else
 // returns to exploration and closes the menu, the teleport spell first
 // moving Ashley and paying its cost when she can.

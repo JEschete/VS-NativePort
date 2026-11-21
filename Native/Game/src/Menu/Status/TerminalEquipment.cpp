@@ -433,7 +433,8 @@ constexpr std::uint8_t kDetails = 5;
 }
 }  // namespace
 
-// decomp: _equipmentDetailScreen (src/MENU/MENU4.PRG/120.c:1482)
+// decomp: equipmentDetailScreen (src/MENU/MENU4.PRG/120.c:1485; was
+// _equipmentDetailScreen)
 TerminalResult UpdateEquipmentDetails(EquipmentDetailState& state,
                                       EquipmentTerminalHost& host, int row) {
   auto& frame = host.Frame();
@@ -491,7 +492,7 @@ TerminalResult UpdateEquipmentDetails(EquipmentDetailState& state,
   }
 }
 
-// decomp: _equipmentScreen (src/MENU/MENU4.PRG/120.c:1875)
+// decomp: equipmentScreen (src/MENU/MENU4.PRG/120.c:1877; was _equipmentScreen)
 TerminalResult UpdateEquipmentList(EquipmentListState& state,
                                    EquipmentDetailState& detail,
                                    EquipmentTerminalHost& host, int element) {

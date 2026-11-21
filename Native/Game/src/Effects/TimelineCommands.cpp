@@ -29,28 +29,28 @@ namespace {
 }
 }  // namespace
 
-// decomp: func_800D6388 (src/BATTLE/BATTLE.PRG/5BF94.c:8213)
+// decomp: func_800D6388 (src/BATTLE/BATTLE.PRG/5BF94.c:7207)
 ActionImpact TargetActionImpact(const CommandEndpoints& endpoints) {
   return ImpactOf(endpoints.target);
 }
 
-// decomp: func_800D63D0 (src/BATTLE/BATTLE.PRG/5BF94.c:8223)
+// decomp: func_800D63D0 (src/BATTLE/BATTLE.PRG/5BF94.c:7217)
 ActionImpact SourceActionImpact(const CommandEndpoints& endpoints) {
   return ImpactOf(endpoints.source);
 }
 
-// decomp: func_800D6418 (src/BATTLE/BATTLE.PRG/5BF94.c:8233)
+// decomp: func_800D6418 (src/BATTLE/BATTLE.PRG/5BF94.c:7227)
 std::optional<EndpointPoint> TargetRoomTile(const CommandEndpoints& endpoints) {
   return RoomPointOf(endpoints.target);
 }
 
-// decomp: func_800D6574 (src/BATTLE/BATTLE.PRG/5BF94.c:8259)
+// decomp: func_800D6574 (src/BATTLE/BATTLE.PRG/5BF94.c:7253)
 std::optional<std::uint8_t> TimelineSourceActorToSignal(
     const CommandEndpoints& endpoints) {
   return ActorOf(endpoints.source);
 }
 
-// decomp: func_800D65D8 (src/BATTLE/BATTLE.PRG/5BF94.c:8272)
+// decomp: func_800D65D8 (src/BATTLE/BATTLE.PRG/5BF94.c:7266)
 std::optional<WeaponBrightness> SourceWeaponBrightness(
     const CommandEndpoints& endpoints, std::uint8_t brightness) {
   const auto actor = ActorOf(endpoints.emit_from);
@@ -59,7 +59,7 @@ std::optional<WeaponBrightness> SourceWeaponBrightness(
       .actor = *actor, .enabled = brightness != 0, .brightness = brightness};
 }
 
-// decomp: func_800D6628 (src/BATTLE/BATTLE.PRG/5BF94.c:8285)
+// decomp: func_800D6628 (src/BATTLE/BATTLE.PRG/5BF94.c:7279)
 std::optional<ReactionSound> SourceReactionSound(
     const CommandEndpoints& endpoints, std::uint8_t variant,
     std::uint8_t last_variant, const RandomDraw& draw) {
@@ -78,12 +78,12 @@ std::optional<ReactionSound> SourceReactionSound(
       .actor = *actor, .variant = picked, .last_variant = picked};
 }
 
-// decomp: func_800D66CC (src/BATTLE/BATTLE.PRG/5BF94.c:8301)
+// decomp: func_800D66CC (src/BATTLE/BATTLE.PRG/5BF94.c:7295)
 std::optional<EndpointPoint> TargetGimmick(const CommandEndpoints& endpoints) {
   return RoomPointOf(endpoints.target);
 }
 
-// decomp: func_800D6860 (src/BATTLE/BATTLE.PRG/5BF94.c:8335)
+// decomp: func_800D6860 (src/BATTLE/BATTLE.PRG/5BF94.c:7329)
 std::optional<std::uint8_t> DefenseTimingTarget(
     const CommandEndpoints& endpoints) {
   return ActorOf(endpoints.emit_to);
@@ -94,7 +94,7 @@ std::optional<std::size_t> TransformSlotOf(std::uint8_t operand) {
   return operand;
 }
 
-// decomp: func_800D6448 (src/BATTLE/BATTLE.PRG/5BF94.c:8240)
+// decomp: func_800D6448 (src/BATTLE/BATTLE.PRG/5BF94.c:7234)
 void SpawnTransformWeaponTrail(TransformAnchor anchor,
                                std::uint8_t packed_style,
                                TimelineEffectHost& host) {
@@ -107,32 +107,32 @@ void SpawnTransformWeaponTrail(TransformAnchor anchor,
   host.RestoreResourceContext();
 }
 
-// decomp: func_800D64E4 (src/BATTLE/BATTLE.PRG/5BF94.c:8247)
+// decomp: func_800D64E4 (src/BATTLE/BATTLE.PRG/5BF94.c:7241)
 void FadeActionWeaponTrails(TimelineEffectHost& host) { host.FadeBoneTrails(); }
 
-// decomp: func_800D6508 (src/BATTLE/BATTLE.PRG/5BF94.c:8249)
+// decomp: func_800D6508 (src/BATTLE/BATTLE.PRG/5BF94.c:7243)
 std::uint16_t ResumeTransformMotion(std::uint16_t flags) {
   return static_cast<std::uint16_t>(flags | kTransformFrameAdvances);
 }
 
-// decomp: func_800D6538 (src/BATTLE/BATTLE.PRG/5BF94.c:8255)
+// decomp: func_800D6538 (src/BATTLE/BATTLE.PRG/5BF94.c:7249)
 std::uint8_t HoldTimelineFrame(std::uint8_t flags) {
   return static_cast<std::uint8_t>(flags | kTimelineFrameHeld);
 }
 
-// decomp: func_800D6554 (src/BATTLE/BATTLE.PRG/5BF94.c:8257)
+// decomp: func_800D6554 (src/BATTLE/BATTLE.PRG/5BF94.c:7251)
 void PauseMovingRoomObjects(TimelineEffectHost& host) {
   host.FreezeRoomObjects();
 }
 
-// decomp: func_800D65A8 (src/BATTLE/BATTLE.PRG/5BF94.c:8266)
+// decomp: func_800D65A8 (src/BATTLE/BATTLE.PRG/5BF94.c:7260)
 std::uint16_t InvalidateTransformAttachments(std::uint16_t flags) {
   constexpr std::uint16_t kResolved =
       kTransformAttachmentResolved | kTransformTargetResolved;
   return static_cast<std::uint16_t>(flags & ~kResolved);
 }
 
-// decomp: func_800D6894 (src/BATTLE/BATTLE.PRG/5BF94.c:8342)
+// decomp: func_800D6894 (src/BATTLE/BATTLE.PRG/5BF94.c:7336)
 bool TickActionControlTrack(const ActionControlKey& key,
                             std::int16_t timeline_frame,
                             ActionControlHost& host) {

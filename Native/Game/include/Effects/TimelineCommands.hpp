@@ -81,33 +81,33 @@ struct ReactionSound {
   friend bool operator==(const ReactionSound&, const ReactionSound&) = default;
 };
 
-// decomp: func_800D6388 (src/BATTLE/BATTLE.PRG/5BF94.c:8213)
+// decomp: func_800D6388 (src/BATTLE/BATTLE.PRG/5BF94.c:7207)
 [[nodiscard]] ActionImpact TargetActionImpact(
     const CommandEndpoints& endpoints);
-// decomp: func_800D63D0 (src/BATTLE/BATTLE.PRG/5BF94.c:8223)
+// decomp: func_800D63D0 (src/BATTLE/BATTLE.PRG/5BF94.c:7217)
 [[nodiscard]] ActionImpact SourceActionImpact(
     const CommandEndpoints& endpoints);
-// decomp: func_800D6418 (src/BATTLE/BATTLE.PRG/5BF94.c:8233): the room tile
+// decomp: func_800D6418 (src/BATTLE/BATTLE.PRG/5BF94.c:7227): the room tile
 // whose trap the target disables.
 [[nodiscard]] std::optional<EndpointPoint> TargetRoomTile(
     const CommandEndpoints& endpoints);
-// decomp: func_800D6574 (src/BATTLE/BATTLE.PRG/5BF94.c:8259)
+// decomp: func_800D6574 (src/BATTLE/BATTLE.PRG/5BF94.c:7253)
 [[nodiscard]] std::optional<std::uint8_t> TimelineSourceActorToSignal(
     const CommandEndpoints& endpoints);
-// decomp: func_800D65D8 (src/BATTLE/BATTLE.PRG/5BF94.c:8272): a brightness of
+// decomp: func_800D65D8 (src/BATTLE/BATTLE.PRG/5BF94.c:7266): a brightness of
 // 0 clears the override.
 [[nodiscard]] std::optional<WeaponBrightness> SourceWeaponBrightness(
     const CommandEndpoints& endpoints, std::uint8_t brightness);
-// decomp: func_800D6628 (src/BATTLE/BATTLE.PRG/5BF94.c:8285): variants from
+// decomp: func_800D6628 (src/BATTLE/BATTLE.PRG/5BF94.c:7279): variants from
 // kFixedReactionVariants on draw until the pick differs from `last_variant`.
 [[nodiscard]] std::optional<ReactionSound> SourceReactionSound(
     const CommandEndpoints& endpoints, std::uint8_t variant,
     std::uint8_t last_variant, const RandomDraw& draw);
-// decomp: func_800D66CC (src/BATTLE/BATTLE.PRG/5BF94.c:8301): the room object
+// decomp: func_800D66CC (src/BATTLE/BATTLE.PRG/5BF94.c:7295): the room object
 // the target unlocks.
 [[nodiscard]] std::optional<EndpointPoint> TargetGimmick(
     const CommandEndpoints& endpoints);
-// decomp: func_800D6860 (src/BATTLE/BATTLE.PRG/5BF94.c:8335): the actor whose
+// decomp: func_800D6860 (src/BATTLE/BATTLE.PRG/5BF94.c:7329): the actor whose
 // defense ability timing window opens.
 [[nodiscard]] std::optional<std::uint8_t> DefenseTimingTarget(
     const CommandEndpoints& endpoints);
@@ -163,22 +163,22 @@ class TimelineEffectHost {
   TimelineEffectHost& operator=(TimelineEffectHost&&) = default;
 };
 
-// decomp: func_800D6448 (src/BATTLE/BATTLE.PRG/5BF94.c:8240): spawns the
+// decomp: func_800D6448 (src/BATTLE/BATTLE.PRG/5BF94.c:7234): spawns the
 // trail of `packed_style` from the anchor with the action's resources.
 void SpawnTransformWeaponTrail(TransformAnchor anchor,
                                std::uint8_t packed_style,
                                TimelineEffectHost& host);
-// decomp: func_800D64E4 (src/BATTLE/BATTLE.PRG/5BF94.c:8247)
+// decomp: func_800D64E4 (src/BATTLE/BATTLE.PRG/5BF94.c:7241)
 void FadeActionWeaponTrails(TimelineEffectHost& host);
-// decomp: func_800D6508 (src/BATTLE/BATTLE.PRG/5BF94.c:8249): a transform's
+// decomp: func_800D6508 (src/BATTLE/BATTLE.PRG/5BF94.c:7243): a transform's
 // flags with its frame advancing again.
 [[nodiscard]] std::uint16_t ResumeTransformMotion(std::uint16_t flags);
-// decomp: func_800D6538 (src/BATTLE/BATTLE.PRG/5BF94.c:8255): the timeline
+// decomp: func_800D6538 (src/BATTLE/BATTLE.PRG/5BF94.c:7249): the timeline
 // flags holding its frame.
 [[nodiscard]] std::uint8_t HoldTimelineFrame(std::uint8_t flags);
-// decomp: func_800D6554 (src/BATTLE/BATTLE.PRG/5BF94.c:8257)
+// decomp: func_800D6554 (src/BATTLE/BATTLE.PRG/5BF94.c:7251)
 void PauseMovingRoomObjects(TimelineEffectHost& host);
-// decomp: func_800D65A8 (src/BATTLE/BATTLE.PRG/5BF94.c:8266): a transform's
+// decomp: func_800D65A8 (src/BATTLE/BATTLE.PRG/5BF94.c:7260): a transform's
 // flags with its attachment and target to resolve again.
 [[nodiscard]] std::uint16_t InvalidateTransformAttachments(std::uint16_t flags);
 
@@ -240,7 +240,7 @@ class ActionControlHost {
   ActionControlHost& operator=(ActionControlHost&&) = default;
 };
 
-// decomp: func_800D6894 (src/BATTLE/BATTLE.PRG/5BF94.c:8342): once the
+// decomp: func_800D6894 (src/BATTLE/BATTLE.PRG/5BF94.c:7336): once the
 // timeline reaches the key's frame, performs its command and advances the
 // track. False once the track has no more keys.
 [[nodiscard]] bool TickActionControlTrack(const ActionControlKey& key,

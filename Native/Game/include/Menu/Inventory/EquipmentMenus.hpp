@@ -220,17 +220,21 @@ class EquipmentMenusHost {
 // outside the tables, or a shield without Ashley's stats. A refusal on entry
 // changes nothing; one after the list's input leaves the menu waiting.
 
-// decomp: MENU3.PRG _equipAccessoryMenu (src/MENU/MENU3.PRG/16C.c:343)
+// decomp: MENU3.PRG equipAccessoryMenu (src/MENU/MENU3.PRG/16C.c:338; was
+// _equipAccessoryMenu)
 [[nodiscard]] std::optional<std::int32_t> UpdateAccessoryMenu(
     AccessoryMenuState& state, EquipmentMenusHost& host,
     std::int32_t initialize);
-// decomp: MENU3.PRG _equipWeaponMenu (src/MENU/MENU3.PRG/16C.c:503)
+// decomp: MENU3.PRG equipWeaponMenu (src/MENU/MENU3.PRG/16C.c:498; was
+// _equipWeaponMenu)
 [[nodiscard]] std::optional<std::int32_t> UpdateWeaponMenu(
     WeaponMenuState& state, EquipmentMenusHost& host, std::int32_t initialize);
-// decomp: MENU3.PRG _equipShieldMenu (src/MENU/MENU3.PRG/16C.c:683)
+// decomp: MENU3.PRG equipShieldMenu (src/MENU/MENU3.PRG/16C.c:678; was
+// _equipShieldMenu)
 [[nodiscard]] std::optional<std::int32_t> UpdateShieldMenu(
     ShieldMenuState& state, EquipmentMenusHost& host, std::int32_t initialize);
-// decomp: MENU3.PRG _equipArmorMenu (src/MENU/MENU3.PRG/16C.c:856)
+// decomp: MENU3.PRG equipArmorMenu (src/MENU/MENU3.PRG/16C.c:851; was
+// _equipArmorMenu)
 [[nodiscard]] std::optional<std::int32_t> UpdateArmorMenu(
     ArmorMenuState& state, EquipmentMenusHost& host, std::int32_t body_part);
 
@@ -239,15 +243,16 @@ class EquipmentMenusHost {
 using EquipmentMenuHandler = int (*)(int);
 using EquipmentMenuHandlers = std::array<EquipmentMenuHandler, kEquipmentMenus>;
 
-// decomp: MENU3.PRG _dispatchEquipMenu (src/MENU/MENU3.PRG/16C.c:1028)
-// Row 1 opens the weapon menu, 2 the shield's, 3-7 the armor's (part 1-5)
-// and 8 the accessory's; 0 updates the open one through `handlers`.
-// nullopt (nothing changed) for a row outside 0..8 or an unbound handler.
+// decomp: MENU3.PRG dispatchEquipMenu (src/MENU/MENU3.PRG/16C.c:1023; was
+// _dispatchEquipMenu) Row 1 opens the weapon menu, 2 the shield's, 3-7 the
+// armor's (part 1-5) and 8 the accessory's; 0 updates the open one through
+// `handlers`. nullopt (nothing changed) for a row outside 0..8 or an unbound
+// handler.
 [[nodiscard]] std::optional<std::int32_t> DispatchEquipmentMenu(
     std::uint8_t& current, const EquipmentMenuHandlers& handlers,
     std::int32_t row);
 
-// decomp: MENU3.PRG _equipMenu (src/MENU/MENU3.PRG/16C.c:1054)
+// decomp: MENU3.PRG equipMenu (src/MENU/MENU3.PRG/16C.c:1049; was _equipMenu)
 // Returns 0 until the menu closes, then the top menu's selection
 // (kEquipmentMenuBack or kEquipmentMenuQuit). nullopt is a refusal: a
 // highlighted row outside the menu or a _menuText offset outside the table.

@@ -30,7 +30,7 @@ static_assert(std::numeric_limits<
 VS::Field::DoorMatchList VS::Field::matchingDoorRecords{};
 
 namespace VS::Field {
-// decomp: BATTLE.PRG func_8008BAC8 (src/BATTLE/BATTLE.PRG/146C.c:16185).
+// decomp: BATTLE.PRG func_8008BAC8 (src/BATTLE/BATTLE.PRG/146C.c:16057).
 DoorMatchList* TransitionLiveDoorsAtTile(int x, int z, int layer) {
   matches.clear();
   matchingDoorRecords = {};

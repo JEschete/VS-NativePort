@@ -28,7 +28,7 @@ void BeginUnlockEffects(RewardWorld& world) {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_8007B410 (src/BATTLE/BATTLE.PRG/146C.c:8287)
+// decomp: BATTLE.PRG func_8007B410 (src/BATTLE/BATTLE.PRG/146C.c:8215)
 void BeginRewardPause(RewardWorld& world) {
   world.RoomPalettes(Field::kMenuRoomPaletteTransform);
   world.EnableClutAnimation(false);
@@ -39,7 +39,7 @@ void BeginRewardPause(RewardWorld& world) {
   world.SetInteractionPaused(true);
 }
 
-// decomp: BATTLE.PRG func_8007B470 (src/BATTLE/BATTLE.PRG/146C.c:8298)
+// decomp: BATTLE.PRG func_8007B470 (src/BATTLE/BATTLE.PRG/146C.c:8226)
 void EndRewardPause(RewardWorld& world) {
   world.EnableClutAnimation(true);
   world.SceneColors(Field::kResumeSceneColorTransform);
@@ -49,14 +49,14 @@ void EndRewardPause(RewardWorld& world) {
   world.SetInteractionPaused(false);
 }
 
-// decomp: BATTLE.PRG func_8007B4C4 (src/BATTLE/BATTLE.PRG/146C.c:8308)
+// decomp: BATTLE.PRG func_8007B4C4 (src/BATTLE/BATTLE.PRG/146C.c:8236)
 void ResumeAfterRewards(RewardWorld& world) {
   world.SetPhase(RewardPhase::kResume);
   EndRewardPause(world);
   if (world.FollowAction() != 0) world.RestoreIdlePose();
 }
 
-// decomp: BATTLE.PRG func_8007B508 (src/BATTLE/BATTLE.PRG/146C.c:8317)
+// decomp: BATTLE.PRG func_8007B508 (src/BATTLE/BATTLE.PRG/146C.c:8245)
 void CheckRewardUnlocks(RewardWorld& world) {
   const bool check_abilities = world.ScriptFlag(kUnlockStoryFlag) == 0 ||
                                world.ScriptFlag(kUnlockStoryFlag) == 2 ||
@@ -69,7 +69,7 @@ void CheckRewardUnlocks(RewardWorld& world) {
   ResumeAfterRewards(world);
 }
 
-// decomp: BATTLE.PRG func_8007B63C (src/BATTLE/BATTLE.PRG/146C.c:8346)
+// decomp: BATTLE.PRG func_8007B63C (src/BATTLE/BATTLE.PRG/146C.c:8275)
 void ShowPendingRewardUnlock(RewardWorld& world) {
   if (PendingAction(world)) {
     world.SetPhase(RewardPhase::kUnlockDialog);
@@ -87,7 +87,7 @@ void ShowPendingRewardUnlock(RewardWorld& world) {
       static_cast<std::uint16_t>(pending));
 }
 
-// decomp: BATTLE.PRG func_8007B764 (src/BATTLE/BATTLE.PRG/146C.c:8366)
+// decomp: BATTLE.PRG func_8007B764 (src/BATTLE/BATTLE.PRG/146C.c:8295)
 void OpenPendingLootRewards(RewardWorld& world) {
   if (world.ScriptFlag(kRewardStoryFlag) >= kResultsStage) {
     const auto owner = world.LootHead();
@@ -103,7 +103,7 @@ void OpenPendingLootRewards(RewardWorld& world) {
   ResumeAfterRewards(world);
 }
 
-// decomp: BATTLE.PRG func_8007B7DC (src/BATTLE/BATTLE.PRG/146C.c:8381)
+// decomp: BATTLE.PRG func_8007B7DC (src/BATTLE/BATTLE.PRG/146C.c:8310)
 void OpenRewardResults(RewardWorld& world) {
   if (world.ScriptFlag(kRewardStoryFlag) >= kResultsStage) {
     world.OpenResults();
@@ -114,7 +114,7 @@ void OpenRewardResults(RewardWorld& world) {
   OpenPendingLootRewards(world);
 }
 
-// decomp: BATTLE.PRG func_8007B834 (src/BATTLE/BATTLE.PRG/146C.c:8392)
+// decomp: BATTLE.PRG func_8007B834 (src/BATTLE/BATTLE.PRG/146C.c:8321)
 void UpdateRewardResultsDialog(RewardWorld& world) {
   world.UpdateMenu();
   if (world.MenuStatus() != kMenuBusy) {
@@ -124,7 +124,7 @@ void UpdateRewardResultsDialog(RewardWorld& world) {
   }
 }
 
-// decomp: BATTLE.PRG func_800797BC (src/BATTLE/BATTLE.PRG/146C.c:7516)
+// decomp: BATTLE.PRG func_800797BC (src/BATTLE/BATTLE.PRG/146C.c:7368)
 void UpdateLootResults(RewardDialogWorld& world) {
   world.UpdateMenu();
   if (world.MenuStatus() != kMenuBusy) {
@@ -134,14 +134,14 @@ void UpdateLootResults(RewardDialogWorld& world) {
   }
 }
 
-// decomp: BATTLE.PRG func_8007980C (src/BATTLE/BATTLE.PRG/146C.c:7526)
+// decomp: BATTLE.PRG func_8007980C (src/BATTLE/BATTLE.PRG/146C.c:7378)
 void UpdateAbilityUnlockDelay(RewardDialogWorld& world) {
   if ((world.EffectsBusyFlags() & kAbilityEffectsBusyMask) == 0) {
     world.GrantPendingAbilityUnlock();
   }
 }
 
-// decomp: BATTLE.PRG func_8007983C (src/BATTLE/BATTLE.PRG/146C.c:7533)
+// decomp: BATTLE.PRG func_8007983C (src/BATTLE/BATTLE.PRG/146C.c:7385)
 void UpdateAbilityUnlockResults(RewardDialogWorld& world) {
   world.UpdateMenu();
   if (world.MenuStatus() != kMenuBusy &&
@@ -153,7 +153,7 @@ void UpdateAbilityUnlockResults(RewardDialogWorld& world) {
   }
 }
 
-// decomp: BATTLE.PRG func_8007B884 (src/BATTLE/BATTLE.PRG/146C.c:8402)
+// decomp: BATTLE.PRG func_8007B884 (src/BATTLE/BATTLE.PRG/146C.c:8331)
 void UpdatePendingLootDialog(RewardDialogWorld& world) {
   world.UpdateMenu();
   if (world.MenuStatus() != kMenuBusy) {
@@ -167,14 +167,14 @@ void UpdatePendingLootDialog(RewardDialogWorld& world) {
   }
 }
 
-// decomp: BATTLE.PRG func_8007B908 (src/BATTLE/BATTLE.PRG/146C.c:8418)
+// decomp: BATTLE.PRG func_8007B908 (src/BATTLE/BATTLE.PRG/146C.c:8347)
 void WaitForRewardUnlockEffects(RewardDialogWorld& world) {
   if ((world.EffectsBusyFlags() & kAbilityEffectsBusyMask) == 0) {
     ShowPendingRewardUnlock(world);
   }
 }
 
-// decomp: BATTLE.PRG func_8007B938 (src/BATTLE/BATTLE.PRG/146C.c:8425)
+// decomp: BATTLE.PRG func_8007B938 (src/BATTLE/BATTLE.PRG/146C.c:8354)
 void UpdateRewardUnlockDialog(RewardDialogWorld& world) {
   world.UpdateMenu();
   if (world.MenuStatus() != kMenuBusy &&
@@ -186,21 +186,21 @@ void UpdateRewardUnlockDialog(RewardDialogWorld& world) {
   }
 }
 
-// decomp: BATTLE.PRG func_8007B9A0 (src/BATTLE/BATTLE.PRG/146C.c:8436)
+// decomp: BATTLE.PRG func_8007B9A0 (src/BATTLE/BATTLE.PRG/146C.c:8365)
 void BeginEventRewardResults(RewardDispatchWorld& world) {
   world.SetLootMenuOpened(0);
   world.SetFollowAction(0);
   OpenRewardResults(world);
 }
 
-// decomp: BATTLE.PRG func_8007B9CC (src/BATTLE/BATTLE.PRG/146C.c:8443)
+// decomp: BATTLE.PRG func_8007B9CC (src/BATTLE/BATTLE.PRG/146C.c:8372)
 void BeginPostActionRewards(RewardDispatchWorld& world) {
   world.SetLootMenuOpened(0);
   world.SetFollowAction(1);
   OpenPendingLootRewards(world);
 }
 
-// decomp: BATTLE.PRG func_8007B9FC (src/BATTLE/BATTLE.PRG/146C.c:8450)
+// decomp: BATTLE.PRG func_8007B9FC (src/BATTLE/BATTLE.PRG/146C.c:8379)
 int UpdateRewardSequence(RewardDispatchWorld& world) {
   const std::uint32_t phase = world.CurrentPhase();
   switch (phase) {

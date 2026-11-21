@@ -7,8 +7,9 @@
 
 namespace VS::Actors {
 
-// decomp: D_800F4438 (BATTLE/BATTLE.PRG 30DB0.c): Q12 x, y and z scales.
-// New actors take x, truncated to a halfword, as their model scale.
+// decomp: D_800F4438 (BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/30DB0.c:107): Q12
+// x, y and z scales. New actors take x, truncated to a halfword, as their model
+// scale.
 extern VS::Core::Gte::VECTOR roomActorScale;
 
 }  // namespace VS::Actors

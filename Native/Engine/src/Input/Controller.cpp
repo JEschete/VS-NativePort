@@ -305,7 +305,7 @@ const char* VibrationPresetErrorName(VibrationPresetError error) noexcept {
 }
 
 // decomp: BATTLE.PRG vs_battle_mapStickDeadZone
-// (src/BATTLE/BATTLE.PRG/5BE50.c:82)
+// (src/BATTLE/BATTLE.PRG/58578.c:1088)
 std::int32_t MapStickDeadZone(std::int32_t axis_byte) noexcept {
   if (axis_byte < kDeadZoneLow) {
     return axis_byte - kDeadZoneLow;
@@ -317,14 +317,15 @@ std::int32_t MapStickDeadZone(std::int32_t axis_byte) noexcept {
 }
 
 // decomp: SLUS_010.40 vs_main_padDisconnectAll
-// (src/SLUS_010.40/main.c:8454)
+// (src/SLUS_010.40/main.c:1313)
 void InvalidateControllerConnections(ControllerPorts& ports) noexcept {
   for (ControllerPortState& port : ports) {
     port.connected = false;
   }
 }
 
-// decomp: SLUS_010.40 _unlockPadModeSwitch (src/SLUS_010.40/main.c:8460)
+// decomp: SLUS_010.40 unlockPadModeSwitch (src/SLUS_010.40/main.c:1319; was
+// _unlockPadModeSwitch)
 void UnlockAnalogModeSwitch(ControllerPorts& ports, ControllerHost& host) {
   InvalidateControllerConnections(ports);
   if (host.QueryMode(ControllerPort::kFirst,
@@ -334,7 +335,8 @@ void UnlockAnalogModeSwitch(ControllerPorts& ports, ControllerHost& host) {
   }
 }
 
-// decomp: SLUS_010.40 _padResetDefaults (src/SLUS_010.40/main.c:8468)
+// decomp: SLUS_010.40 padResetDefaults (src/SLUS_010.40/main.c:1328; was
+// _padResetDefaults)
 void ConfigureControllerActuators(ControllerPortState& state,
                                   ControllerPort port, ControllerHost& host) {
   state.extended_id = static_cast<std::uint8_t>(
@@ -352,7 +354,7 @@ void ConfigureControllerActuators(ControllerPortState& state,
   static_cast<void>(host.AlignMotors(port));
 }
 
-// decomp: SLUS_010.40 vs_main_updatePadState (src/SLUS_010.40/main.c:8486)
+// decomp: SLUS_010.40 vs_main_updatePadState (src/SLUS_010.40/main.c:1349)
 std::uint32_t ReadControllerPort(ControllerPortState& state,
                                  ControllerPort port, const PadSample& sample,
                                  ControllerHost& host) {
@@ -378,7 +380,7 @@ std::uint32_t ReadControllerPort(ControllerPortState& state,
   return buttons;
 }
 
-// decomp: SLUS_010.40 vs_main_padConnect (src/SLUS_010.40/main.c:8531)
+// decomp: SLUS_010.40 vs_main_padConnect (src/SLUS_010.40/main.c:1400)
 void UpdateControllerConnection(ControllerPortState& state, ControllerPort port,
                                 ControllerHost& host) {
   const PadConnection connection = host.ConnectionState(port);
@@ -396,7 +398,8 @@ void UpdateControllerConnection(ControllerPortState& state, ControllerPort port,
   }
 }
 
-// decomp: SLUS_010.40 _padSetActData (src/SLUS_010.40/main.c:8551)
+// decomp: SLUS_010.40 padSetActData (src/SLUS_010.40/main.c:1426; was
+// _padSetActData)
 void SetMotorCommand(ControllerPortState& state, Motor motor,
                      std::uint8_t command) noexcept {
   switch (motor) {
@@ -410,7 +413,8 @@ void SetMotorCommand(ControllerPortState& state, Motor motor,
   }
 }
 
-// decomp: SLUS_010.40 _padGetActData (src/SLUS_010.40/main.c:8562)
+// decomp: SLUS_010.40 padGetActData (src/SLUS_010.40/main.c:1437; was
+// _padGetActData)
 std::uint8_t MotorCommand(const ControllerPortState& state,
                           Motor motor) noexcept {
   switch (motor) {
@@ -422,7 +426,8 @@ std::uint8_t MotorCommand(const ControllerPortState& state,
   return 0;
 }
 
-// decomp: SLUS_010.40 func_800433B4 (src/SLUS_010.40/main.c:8564)
+// decomp: SLUS_010.40 vs_main_setVibrationBank (src/SLUS_010.40/main.c:1442;
+// was func_800433B4)
 std::uint32_t StartVibrationPattern(VibrationState& vibration,
                                     std::span<const std::byte> pattern,
                                     std::uint32_t request,
@@ -443,7 +448,8 @@ std::uint32_t StartOwnedVibrationPattern(VibrationState& vibration,
                       owner);
 }
 
-// decomp: SLUS_010.40 func_80043470 (src/SLUS_010.40/main.c:8596)
+// decomp: SLUS_010.40 clearVibrationSlot (src/SLUS_010.40/main.c:1476; was
+// func_80043470)
 std::uint32_t ClearVibrationSlot(VibrationState& vibration,
                                  std::uint32_t slot_id) noexcept {
   if (!IsSlotId(slot_id)) {
@@ -458,7 +464,8 @@ std::uint32_t ClearVibrationSlot(VibrationState& vibration,
   return slot_id;
 }
 
-// decomp: SLUS_010.40 func_800434A4 (src/SLUS_010.40/main.c:8607)
+// decomp: SLUS_010.40 vs_main_stopVibration (src/SLUS_010.40/main.c:1487; was
+// func_800434A4)
 std::uint32_t StopVibrationPatterns(VibrationState& vibration,
                                     std::uint32_t selector,
                                     std::int32_t owner) noexcept {
@@ -477,31 +484,35 @@ std::uint32_t StopVibrationPatterns(VibrationState& vibration,
   return 1;
 }
 
-// decomp: SLUS_010.40 func_80043554 (src/SLUS_010.40/main.c:8630)
+// decomp: SLUS_010.40 pauseVibrationSlot (src/SLUS_010.40/main.c:1514; was
+// func_80043554)
 std::uint32_t PauseVibrationSlot(VibrationState& vibration,
                                  std::uint32_t slot_id) noexcept {
   return SetSlotPlaying(vibration, slot_id, false);
 }
 
-// decomp: SLUS_010.40 func_8004357C (src/SLUS_010.40/main.c:8637)
+// decomp: SLUS_010.40 pauseVibration (src/SLUS_010.40/main.c:1522; was
+// func_8004357C)
 std::uint32_t PauseVibrationPatterns(VibrationState& vibration,
                                      std::uint32_t selector) noexcept {
   return SetPatternsPlaying(vibration, selector, false);
 }
 
-// decomp: SLUS_010.40 func_800435DC (src/SLUS_010.40/main.c:8656)
+// decomp: SLUS_010.40 resumeVibrationSlot (src/SLUS_010.40/main.c:1541; was
+// func_800435DC)
 std::uint32_t ResumeVibrationSlot(VibrationState& vibration,
                                   std::uint32_t slot_id) noexcept {
   return SetSlotPlaying(vibration, slot_id, true);
 }
 
-// decomp: SLUS_010.40 func_80043608 (src/SLUS_010.40/main.c:8663)
+// decomp: SLUS_010.40 resumeVibration (src/SLUS_010.40/main.c:1549; was
+// func_80043608)
 std::uint32_t ResumeVibrationPatterns(VibrationState& vibration,
                                       std::uint32_t selector) noexcept {
   return SetPatternsPlaying(vibration, selector, true);
 }
 
-// decomp: SLUS_010.40 vs_main_resetPadAct (src/SLUS_010.40/main.c:8682)
+// decomp: SLUS_010.40 vs_main_resetPadAct (src/SLUS_010.40/main.c:1568)
 void ResetVibrationPatterns(VibrationState& vibration,
                             ControllerPorts& ports) noexcept {
   InvalidateControllerConnections(ports);
@@ -519,7 +530,7 @@ std::int32_t RoundMotorIntensityTowardZero(std::int32_t intensity) noexcept {
   return intensity < 0 ? intensity + kTowardZeroBias : intensity;
 }
 
-// decomp: SLUS_010.40 vs_main_setVibrateParams (src/SLUS_010.40/main.c:8698)
+// decomp: SLUS_010.40 vs_main_setVibrateParams (src/SLUS_010.40/main.c:1582)
 std::uint32_t UpdateVibrationPatterns(VibrationState& vibration,
                                       ControllerPortState& first_port,
                                       Vibration setting) noexcept {
@@ -554,7 +565,8 @@ std::uint32_t UpdateVibrationPatterns(VibrationState& vibration,
   return outside;
 }
 
-// decomp: SLUS_010.40 func_800438C8 (src/SLUS_010.40/main.c:8769)
+// decomp: SLUS_010.40 vs_main_vibrationOnEffect (src/SLUS_010.40/main.c:1659;
+// was func_800438C8)
 std::expected<std::uint32_t, VibrationPresetError> PlayVibrationPreset(
     VibrationState& vibration, std::span<const std::byte> presets,
     std::int32_t index) noexcept {
@@ -585,7 +597,7 @@ std::expected<std::uint32_t, VibrationPresetError> PlayVibrationPreset(
                                kFreeVibrationSlot, kPresetVibrationOwner);
 }
 
-// decomp: SLUS_010.40 vs_main_processPadState (src/SLUS_010.40/main.c:8789)
+// decomp: SLUS_010.40 vs_main_processPadState (src/SLUS_010.40/main.c:1671)
 ControllerFrame UpdateControllers(ControllerState& state,
                                   DeviceSettings& settings,
                                   ControllerHost& host,

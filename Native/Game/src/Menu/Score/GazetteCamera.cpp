@@ -150,7 +150,8 @@ std::int64_t EnemyBannerLineCount(const PanelRect& rect) noexcept {
   return end > rect.y ? std::int64_t{end} - rect.y : 0;
 }
 
-// decomp: MENU9.PRG _renderEnemyInfoBg (src/MENU/MENU9.PRG/238.c:1552)
+// decomp: MENU9.PRG renderEnemyInfoBg (src/MENU/MENU9.PRG/238.c:1557; was
+// _renderEnemyInfoBg)
 PanelDrawResult DrawEnemyBanner(const PanelRect& rect, std::int32_t gradient,
                                 PanelTarget& target) {
   const std::int64_t lines = EnemyBannerLineCount(rect);
@@ -181,7 +182,8 @@ PanelDrawResult DrawEnemyBanner(const PanelRect& rect, std::int32_t gradient,
   return PanelDrawResult::kDrawn;
 }
 
-// decomp: MENU9.PRG _renderGradientQuad (src/MENU/MENU9.PRG/238.c:1594)
+// decomp: MENU9.PRG renderGradientQuad (src/MENU/MENU9.PRG/238.c:1599; was
+// _renderGradientQuad)
 PanelDrawResult DrawGradientPanel(const PanelRect& rect, std::int32_t gradient,
                                   PanelTarget& target) {
   if (!InPalette(gradient)) {
@@ -198,7 +200,8 @@ PanelDrawResult DrawGradientPanel(const PanelRect& rect, std::int32_t gradient,
   return PanelDrawResult::kDrawn;
 }
 
-// decomp: MENU9.PRG _renderFooterBg (src/MENU/MENU9.PRG/238.c:1645)
+// decomp: MENU9.PRG renderFooterBg (src/MENU/MENU9.PRG/238.c:1650; was
+// _renderFooterBg)
 void DrawFooterBackground(std::int32_t top, PanelTarget& target) {
   const std::int32_t fade_bottom = WrappingAdd(top, kFooterFadeHeight);
   target.DrawShadedQuad(
@@ -215,7 +218,8 @@ void DrawFooterBackground(std::int32_t top, PanelTarget& target) {
   target.SetTexturePage(kPanelSlot, kAdditiveTexturePage);
 }
 
-// decomp: MENU9.PRG _renderScreenEdgeFade (src/MENU/MENU9.PRG/238.c:2146)
+// decomp: MENU9.PRG renderScreenEdgeFade (src/MENU/MENU9.PRG/238.c:2151; was
+// _renderScreenEdgeFade)
 void DrawViewerEdgeFade(PanelTarget& target) {
   target.DrawShadedQuad(
       kEdgeFadeSlot,
@@ -234,13 +238,15 @@ void DrawViewerEdgeFade(PanelTarget& target) {
   target.SetTexturePage(kEdgeFadeSlot, kAdditiveTexturePage);
 }
 
-// decomp: MENU9.PRG _restoreCamera (src/MENU/MENU9.PRG/238.c:1402)
+// decomp: MENU9.PRG restoreCamera (src/MENU/MENU9.PRG/238.c:1407; was
+// _restoreCamera)
 void RestoreCamera(const CameraPose& backup, CameraPose& camera) noexcept {
   camera.position = backup.position;
   camera.angles = backup.angles;
 }
 
-// decomp: MENU9.PRG _buildCameraMatrix (src/MENU/MENU9.PRG/238.c:1474)
+// decomp: MENU9.PRG buildCameraMatrix (src/MENU/MENU9.PRG/238.c:1479; was
+// _buildCameraMatrix)
 ViewerCamera BuildViewerCamera(const ViewerCameraSettings& settings) noexcept {
   const std::int32_t distance = settings.distance;
   const std::int32_t negative_distance = WrappingNegate(distance);
@@ -278,7 +284,8 @@ std::string OverviewScoreText(std::uint32_t score) {
   return "#" + std::to_string(static_cast<std::int32_t>(score));
 }
 
-// decomp: MENU9.PRG _renderTopMenu (src/MENU/MENU9.PRG/238.c:1679)
+// decomp: MENU9.PRG renderTopMenu (src/MENU/MENU9.PRG/238.c:1684; was
+// _renderTopMenu)
 void RenderOverview(OverviewHost& host, std::int32_t animation_step,
                     std::uint32_t score) {
   if (animation_step < kOverviewSteps) {

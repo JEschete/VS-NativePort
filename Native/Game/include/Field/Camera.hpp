@@ -246,122 +246,142 @@ class CameraHost {
   virtual void FreeTransition() = 0;
 };
 
-// decomp: BATTLE.PRG func_80069D78 (src/BATTLE/BATTLE.PRG/146C.c:776)
+// decomp: BATTLE.PRG func_80069D78 (src/BATTLE/BATTLE.PRG/146C.c:428)
 void UpdateCameraFacingState(FieldCameraState& state);
-// decomp: BATTLE.PRG _addMinDelta (src/BATTLE/BATTLE.PRG/146C.c:2389)
-// base + step, unless the step is zero or overshoots the remaining distance,
-// which is then added instead.
+// decomp: BATTLE.PRG addMinDelta (src/BATTLE/BATTLE.PRG/146C.c:2091; was
+// _addMinDelta) base + step, unless the step is zero or overshoots the
+// remaining distance, which is then added instead.
 [[nodiscard]] std::int32_t AddCameraStepWithFallback(std::int32_t base,
                                                      std::int32_t step,
                                                      std::int32_t remaining);
-// decomp: BATTLE.PRG _add_min (src/BATTLE/BATTLE.PRG/146C.c:2409)
+// decomp: BATTLE.PRG add_min (src/BATTLE/BATTLE.PRG/146C.c:2111; was _add_min)
 // base + whichever of step and remaining is nearer zero on remaining's side.
 [[nodiscard]] std::int32_t AddClampedCameraStep(std::int32_t base,
                                                 std::int32_t step,
                                                 std::int32_t remaining);
-// decomp: BATTLE.PRG _clampPositionToZoneBounds (146C.c:2426)
-// Keeps a Q12 look-at inside the zone's bounds less the orbit's radius,
-// snapped to whole units, and holds its height unless it moved far.
+// decomp: BATTLE.PRG clampPositionToZoneBounds
+// (src/BATTLE/BATTLE.PRG/146C.c:2128; was _clampPositionToZoneBounds) Keeps a
+// Q12 look-at inside the zone's bounds less the orbit's radius, snapped to
+// whole units, and holds its height unless it moved far.
 [[nodiscard]] CameraVector ClampCameraLookAtToZone(
     CameraHost& host, const FieldCameraState& state,
     const CameraVector& position);
-// decomp: BATTLE.PRG _computeStepAndDisplacement (146C.c:2481)
-// `target` is in world units.
+// decomp: BATTLE.PRG computeStepAndDisplacement
+// (src/BATTLE/BATTLE.PRG/146C.c:2183; was _computeStepAndDisplacement) `target`
+// is in world units.
 [[nodiscard]] CameraTrackingStep ComputeCameraTrackingStep(
     CameraHost& host, FieldCameraState& state,
     const Actors::MotionVector& target, bool clamp_to_zone,
     std::int32_t max_speed);
-// decomp: BATTLE.PRG _stepTowardTarget (src/BATTLE/BATTLE.PRG/146C.c:2569)
-// Returns the tracking speed.
+// decomp: BATTLE.PRG stepTowardTarget (src/BATTLE/BATTLE.PRG/146C.c:2271; was
+// _stepTowardTarget) Returns the tracking speed.
 std::int32_t StepCameraLookAtTowardTarget(CameraHost& host,
                                           FieldCameraState& state,
                                           const Actors::MotionVector& target,
                                           bool clamp_to_zone,
                                           std::int32_t max_speed);
-// decomp: BATTLE.PRG _snapLookAtToPosition (146C.c:2597)
+// decomp: BATTLE.PRG snapLookAtToPosition (src/BATTLE/BATTLE.PRG/146C.c:2299;
+// was _snapLookAtToPosition)
 void TrackCameraLookAtWithinDeadZone(CameraHost& host, FieldCameraState& state,
                                      const CameraVector& target);
-// decomp: BATTLE.PRG func_8006E158 (src/BATTLE/BATTLE.PRG/146C.c:2641)
+// decomp: BATTLE.PRG func_8006E158 (src/BATTLE/BATTLE.PRG/146C.c:2343)
 void UpdateCameraOrbitInput(CameraHost& host, FieldCameraState& state);
-// decomp: BATTLE.PRG func_8006E640 (src/BATTLE/BATTLE.PRG/146C.c:2794)
+// decomp: BATTLE.PRG func_8006E640 (src/BATTLE/BATTLE.PRG/146C.c:2496)
 void TrackActionCameraTarget(CameraHost& host, FieldCameraState& state,
                              int actor_id);
-// decomp: BATTLE.PRG func_8006EBF8 (src/BATTLE/BATTLE.PRG/146C.c:2965)
+// decomp: BATTLE.PRG func_8006EBF8 (src/BATTLE/BATTLE.PRG/146C.c:2668)
 void UpdateAshleyFollowCamera(CameraHost& host, FieldCameraState& state);
-// decomp: BATTLE.PRG func_8006EC7C (src/BATTLE/BATTLE.PRG/146C.c:2984)
+// decomp: BATTLE.PRG func_8006EC7C (src/BATTLE/BATTLE.PRG/146C.c:2687)
 void UpdateFirstPersonCamera(CameraHost& host, FieldCameraState& state);
-// decomp: BATTLE.PRG func_8006EF10 (src/BATTLE/BATTLE.PRG/146C.c:3044)
+// decomp: BATTLE.PRG func_8006EF10 (src/BATTLE/BATTLE.PRG/146C.c:2747)
 void StorePreferredActionCameraDistance(CameraHost& host,
                                         const FieldCameraState& state);
-// decomp: BATTLE.PRG _computeCameraTransition (146C.c:3058)
-// Refused (logged) without a transition record.
+// decomp: BATTLE.PRG computeCameraTransition
+// (src/BATTLE/BATTLE.PRG/146C.c:2761; was _computeCameraTransition) Refused
+// (logged) without a transition record.
 void ComputeFirstPersonCameraTransition(CameraHost& host,
                                         FieldCameraState& state,
                                         const CameraVector& target);
-// decomp: BATTLE.PRG _stepCameraTransition (146C.c:3121)
-// True once the camera reaches the target height. Refused (logged, false)
-// without a transition record.
+// decomp: BATTLE.PRG stepCameraTransition (src/BATTLE/BATTLE.PRG/146C.c:2824;
+// was _stepCameraTransition) True once the camera reaches the target height.
+// Refused (logged, false) without a transition record.
 bool StepFirstPersonCameraTransition(CameraHost& host, FieldCameraState& state);
-// decomp: BATTLE.PRG _initBattleCameraTransition (146C.c:4544)
-// Refused (logged) when the heap cannot hold the transition.
+// decomp: BATTLE.PRG initBattleCameraTransition
+// (src/BATTLE/BATTLE.PRG/146C.c:4271; was _initBattleCameraTransition) Refused
+// (logged) when the heap cannot hold the transition.
 void BeginFirstPersonView(CameraHost& host, FieldCameraState& state);
-// decomp: BATTLE.PRG _endBattleCameraTransition (146C.c:4591)
-// Without a transition record the camera is left as it is (logged).
+// decomp: BATTLE.PRG endBattleCameraTransition
+// (src/BATTLE/BATTLE.PRG/146C.c:4318; was _endBattleCameraTransition) Without a
+// transition record the camera is left as it is (logged).
 void EndFirstPersonView(CameraHost& host, FieldCameraState& state);
-// decomp: BATTLE.PRG func_80074580 (src/BATTLE/BATTLE.PRG/146C.c:5165)
+// decomp: BATTLE.PRG func_80074580 (src/BATTLE/BATTLE.PRG/146C.c:4895)
 void UpdateFirstPersonViewEntry(CameraHost& host, FieldCameraState& state);
-// decomp: BATTLE.PRG _checkFirstPersonViewExit (146C.c:5179)
-// Refused (logged) without a transition record.
+// decomp: BATTLE.PRG checkFirstPersonViewExit
+// (src/BATTLE/BATTLE.PRG/146C.c:4909; was _checkFirstPersonViewExit) Refused
+// (logged) without a transition record.
 void CheckFirstPersonViewExit(CameraHost& host, FieldCameraState& state);
-// decomp: BATTLE.PRG func_80074744 (src/BATTLE/BATTLE.PRG/146C.c:5222)
+// decomp: BATTLE.PRG func_80074744 (src/BATTLE/BATTLE.PRG/146C.c:4952)
 void UpdateFirstPersonViewExit(CameraHost& host, FieldCameraState& state);
-// decomp: BATTLE.PRG func_80074B14 (src/BATTLE/BATTLE.PRG/146C.c:5339)
+// decomp: BATTLE.PRG func_80074B14 (src/BATTLE/BATTLE.PRG/146C.c:5069)
 void UpdateCameraTileConstraint(CameraHost& host, const FieldCameraState& state,
                                 int actor_id, const Actors::PackedTile& tile);
-// decomp: BATTLE.PRG _isLookAtAtDestination (146C.c:6788)
+// decomp: BATTLE.PRG func_80077DF0_t (src/BATTLE/BATTLE.PRG/146C.c:118; was
+// _isLookAtAtDestination)
 [[nodiscard]] bool IsCameraLookAtOnAshley(CameraHost& host,
                                           const FieldCameraState& state);
-// decomp: BATTLE.PRG func_80077EC4 (src/BATTLE/BATTLE.PRG/146C.c:6811)
+// decomp: BATTLE.PRG func_80077EC4 (src/BATTLE/BATTLE.PRG/146C.c:6658)
 void ResetCameraToAshley(CameraHost& host, FieldCameraState& state);
-// decomp: BATTLE.PRG vs_battle_syncCameraAnglesFromPosition (146C.c:8057)
-// Sets the camera's yaw and pitch from its position and look-at and returns
-// the yaw; `orbit`, when given, also receives them and the distance.
+// decomp: BATTLE.PRG syncCameraAnglesFromPosition
+// (src/BATTLE/BATTLE.PRG/146C.c:7987; was
+// vs_battle_syncCameraAnglesFromPosition) Sets the camera's yaw and pitch from
+// its position and look-at and returns the yaw; `orbit`, when given, also
+// receives them and the distance.
 std::int32_t SyncCameraAnglesFromPosition(FieldCameraState& state,
                                           OrbitAngles* orbit);
-// decomp: BATTLE.PRG _computeSphericalOffset (146C.c:8092)
+// decomp: BATTLE.PRG computeSphericalOffset (src/BATTLE/BATTLE.PRG/146C.c:8022;
+// was _computeSphericalOffset)
 [[nodiscard]] CameraVector ComputeSphericalCameraPosition(
     const CameraVector& base, const OrbitAngles& angles);
-// decomp: BATTLE.PRG _setCameraPositionFromAngles (146C.c:8104)
+// decomp: BATTLE.PRG setCameraPositionFromAngles
+// (src/BATTLE/BATTLE.PRG/146C.c:8034; was _setCameraPositionFromAngles)
 void SetCameraPositionFromAngles(FieldCameraState& state,
                                  const OrbitAngles& angles);
-// decomp: BATTLE.PRG _setCameraLookAtFromAngles (146C.c:8110)
+// decomp: BATTLE.PRG setCameraLookAtFromAngles
+// (src/BATTLE/BATTLE.PRG/146C.c:8040; was _setCameraLookAtFromAngles)
 void SetCameraLookAtFromAngles(FieldCameraState& state,
                                const OrbitAngles& angles);
-// decomp: BATTLE.PRG vs_battle_getCameraPosition (146C.c:8125)
+// decomp: BATTLE.PRG getCameraPosition (src/BATTLE/BATTLE.PRG/146C.c:8055; was
+// vs_battle_getCameraPosition)
 [[nodiscard]] CameraVector CameraPosition(const FieldCameraState& state);
-// decomp: BATTLE.PRG vs_battle_setCameraPosition (146C.c:8132)
+// decomp: BATTLE.PRG setCameraPosition (src/BATTLE/BATTLE.PRG/146C.c:8062; was
+// vs_battle_setCameraPosition)
 void SetCameraPosition(FieldCameraState& state, const CameraVector& position);
-// decomp: BATTLE.PRG vs_battle_getCameraLookAt (146C.c:8139)
+// decomp: BATTLE.PRG getCameraLookAt (src/BATTLE/BATTLE.PRG/146C.c:8069; was
+// vs_battle_getCameraLookAt)
 [[nodiscard]] CameraVector CameraLookAt(const FieldCameraState& state);
-// decomp: BATTLE.PRG vs_battle_setCameraLookAt (146C.c:8146)
+// decomp: BATTLE.PRG setCameraLookAt (src/BATTLE/BATTLE.PRG/146C.c:8076; was
+// vs_battle_setCameraLookAt)
 void SetCameraLookAt(FieldCameraState& state, const CameraVector& look_at);
-// decomp: BATTLE.PRG vs_battle_setCameraRoll (146C.c:8153)
+// decomp: BATTLE.PRG setCameraRoll (src/BATTLE/BATTLE.PRG/146C.c:8083; was
+// vs_battle_setCameraRoll)
 void SetCameraRoll(FieldCameraState& state, std::int32_t roll);
-// decomp: BATTLE.PRG vs_battle_getCameraRoll (146C.c:8155)
+// decomp: BATTLE.PRG getCameraRoll (src/BATTLE/BATTLE.PRG/146C.c:8085; was
+// vs_battle_getCameraRoll)
 [[nodiscard]] std::int32_t CameraRoll(const FieldCameraState& state);
-// decomp: BATTLE.PRG func_8007BDD8 (src/BATTLE/BATTLE.PRG/146C.c:8573)
+// decomp: BATTLE.PRG func_8007BDD8 (src/BATTLE/BATTLE.PRG/146C.c:8516)
 // Returns the new enabled flag.
 std::int32_t SetFirstPersonViewDisabled(CameraHost& host,
                                         FieldCameraState& state,
                                         std::int32_t disabled);
-// decomp: BATTLE.PRG vs_battle_initialiseCameraFromSpherical (146C.c:9071)
-// A facing of -1 keeps the yaw; mode 1 selects the near distance and 2 the
-// far one. When `look_at_is_view_camera`, the look-at is written to the view
-// camera before it is clamped (the original's aliasing for
-// ResetCameraToAshley).
+// decomp: BATTLE.PRG initialiseCameraFromSpherical
+// (src/BATTLE/BATTLE.PRG/146C.c:9037; was
+// vs_battle_initialiseCameraFromSpherical) A facing of -1 keeps the yaw; mode 1
+// selects the near distance and 2 the far one. When `look_at_is_view_camera`,
+// the look-at is written to the view camera before it is clamped (the
+// original's aliasing for ResetCameraToAshley).
 [[nodiscard]] CameraPlacement InitializeSphericalCamera(
     CameraHost& host, FieldCameraState& state, std::int32_t facing,
     std::int32_t mode, bool look_at_is_view_camera);
-// decomp: BATTLE.PRG func_8007CE74 (src/BATTLE/BATTLE.PRG/146C.c:9106)
+// decomp: BATTLE.PRG func_8007CE74 (src/BATTLE/BATTLE.PRG/146C.c:9072)
 void SetCameraPitchPreset(FieldCameraState& state, std::int32_t pitch);
 }  // namespace VS::Field

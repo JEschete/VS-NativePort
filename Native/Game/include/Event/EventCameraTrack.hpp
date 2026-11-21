@@ -93,7 +93,7 @@ class EventCameraFloorHost {
   EventCameraFloorHost(EventCameraFloorHost&&) = delete;
   EventCameraFloorHost& operator=(EventCameraFloorHost&&) = delete;
 
-  // decomp: BATTLE.PRG func_8008DC7C (src/BATTLE/BATTLE.PRG/146C.c:17083)
+  // decomp: BATTLE.PRG func_8008DC7C (src/BATTLE/BATTLE.PRG/146C.c:16957)
   // The floor height at a world position, or the missing-floor value.
   [[nodiscard]] virtual std::int16_t FloorHeight(std::int32_t world_x,
                                                  std::int32_t world_z) = 0;
@@ -106,10 +106,12 @@ class EventCameraTrackHost : public EventCameraFloorHost {
   [[nodiscard]] virtual std::int32_t Ease(std::uint8_t curve,
                                           std::uint8_t frame,
                                           std::uint8_t duration) = 0;
-  // decomp: BATTLE.PRG func_800BFE50 (src/BATTLE/BATTLE.PRG/573B8.c:156)
+  // decomp: BATTLE.PRG resolveActorId (src/BATTLE/BATTLE.PRG/573B8.c:110; was
+  // func_800BFE50)
   [[nodiscard]] virtual int ResolveActorReference(std::uint16_t reference) = 0;
-  // decomp: BATTLE.PRG func_800A1108 (src/BATTLE/BATTLE.PRG/30DB0.c:4182)
-  // The actor's or slot gimmick's facing; nullopt for an empty slot.
+  // decomp: BATTLE.PRG vs_battle_getActorPosition
+  // (src/BATTLE/BATTLE.PRG/30DB0.c:4299; was func_800A1108) The actor's or slot
+  // gimmick's facing; nullopt for an empty slot.
   [[nodiscard]] virtual std::optional<std::int16_t> ActorFacing(int actor) = 0;
   // decomp: BATTLE.PRG func_800A190C (src/BATTLE/BATTLE.PRG/38C1C.c:246)
   // The endpoint of the actor's bone with `tag`; nullopt when the query
@@ -133,13 +135,13 @@ enum class CameraMotionOutcome : std::uint8_t {
 // script's opcode size for every assigned operation, 1 for the others.
 [[nodiscard]] std::size_t CameraMotionCommandLength(std::uint8_t opcode);
 
-// decomp: BATTLE.PRG _setVectorImm (F01246, 4A0A8.c:4148,
-// 0x800BE7B8-0x800BE824) Three signed halfword operands in whole units, as a
-// 20.12 fixed vector.
+// decomp: BATTLE.PRG setVectorImm (F01246, src/BATTLE/BATTLE.PRG/4DEA8.c:4797;
+// was _setVectorImm, 0x800BE7B8-0x800BE824) Three signed halfword operands in
+// whole units, as a 20.12 fixed vector.
 [[nodiscard]] Core::Math::Vec3 ReadScriptFixedVector(
     std::span<const std::uint8_t, kScriptFixedVectorBytes> operands);
 
-// decomp: BATTLE.PRG func_800BD2B8 (F01225, 4A0A8.c:3556,
+// decomp: BATTLE.PRG func_800BD2B8 (F01225, src/BATTLE/BATTLE.PRG/4DEA8.c:4206,
 // 0x800BD2B8-0x800BD444) The lowest floor under four probes 80 units to each
 // side of and 150 ahead of the `probe` frame's origin, less 200 units, in
 // 20.12 fixed point. Only the floor heights' low 15 bits count, so the
@@ -148,7 +150,7 @@ enum class CameraMotionOutcome : std::uint8_t {
 [[nodiscard]] std::int32_t EventCameraGroundClearance(
     const Core::Math::Transform3& probe, EventCameraFloorHost& host);
 
-// decomp: BATTLE.PRG func_800BCFB4 (F01224, 4A0A8.c:3502,
+// decomp: BATTLE.PRG func_800BCFB4 (F01224, src/BATTLE/BATTLE.PRG/4DEA8.c:4152,
 // 0x800BCFB4-0x800BD2B8) One terrain glide step towards the destination, at
 // most ten step lengths ahead, turning up where the floor rises above the
 // path. A step that would land on `last_terrain_position` ends the motion;
@@ -160,7 +162,7 @@ void AdvanceTerrainCameraTrack(EventCameraTrack& track,
                                Core::Math::Vec3& last_terrain_position,
                                EventCameraFloorHost& host);
 
-// decomp: BATTLE.PRG func_800BCA8C (F01223, 4A0A8.c:3389,
+// decomp: BATTLE.PRG func_800BCA8C (F01223, src/BATTLE/BATTLE.PRG/4DEA8.c:4039,
 // 0x800BCA8C-0x800BCFB4) Advances the track by half `tick_speed` frames
 // (except the terrain glide), recomputes its position for the motion mode and
 // blends it into the follow path. A bone the host cannot find counts as the
@@ -172,25 +174,25 @@ void UpdateEventCameraTrack(EventCameraTrack& track,
                             std::int32_t tick_speed,
                             EventCameraTrackHost& host);
 
-// decomp: BATTLE.PRG func_800BC2E8 (F01221, 4A0A8.c:3200,
-// 0x800BC2E8-0x800BC9E0) Opcodes 0xC0-0xDF: sets a track's destination or
-// starts its motion. The terrain glide's step length is the R3000 quotient of
-// the distance by the duration (-1 for a zero duration). A bone the host
-// cannot find counts as the origin for operation 7 and as (0, facing, 0) for
-// operation 10, which is what the original's scratch held; an empty facing
-// slot counts as facing 0.
+// decomp: BATTLE.PRG vs_battle_script_Cx_Dx_camera (F01221,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:3850; was func_800BC2E8, 0x800BC2E8-0x800BC9E0)
+// Opcodes 0xC0-0xDF: sets a track's destination or starts its motion. The
+// terrain glide's step length is the R3000 quotient of the distance by the
+// duration (-1 for a zero duration). A bone the host cannot find counts as the
+// origin for operation 7 and as (0, facing, 0) for operation 10, which is what
+// the original's scratch held; an empty facing slot counts as facing 0.
 [[nodiscard]] CameraMotionOutcome CommandCameraMotion(
     ScriptCommand command, EventCameraTracks& tracks,
     EventCameraTrackHost& host);
 
-// decomp: BATTLE.PRG func_800BE53C (F01239, 4A0A8.c:4074,
+// decomp: BATTLE.PRG func_800BE53C (F01239, src/BATTLE/BATTLE.PRG/4DEA8.c:4723,
 // 0x800BE53C-0x800BE5A4) The duration scaled by the whole-unit distance left
 // to the destination over 1000, truncated to a byte. A distance whose wrapped
 // sum of squared whole units is negative counts as 0; the original's square
 // root read before its table there.
 void ScaleEventCameraTrackDuration(EventCameraTrack& track);
 
-// decomp: BATTLE.PRG func_800BE5A4 (F01240, 4A0A8.c:4082,
+// decomp: BATTLE.PRG func_800BE5A4 (F01240, src/BATTLE/BATTLE.PRG/4DEA8.c:4731,
 // 0x800BE5A4-0x800BE628) Scales the look-at track's duration for
 // kScaleLookAtDuration, both to their mean for kScaleBothDurations and the
 // eye's otherwise.

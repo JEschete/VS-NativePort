@@ -803,7 +803,7 @@ void VS::Field::ApplyGimmickInteractionCommandEntry(
   static_cast<void>(VS::Field::ApplyLiveGimmickInteractionCommand(actor, mode));
 }
 
-// decomp: BATTLE.PRG func_800A0024 (src/BATTLE/BATTLE.PRG/30DB0.c:3654).
+// decomp: BATTLE.PRG func_800A0024 (src/BATTLE/BATTLE.PRG/30DB0.c:3754).
 // Original 800A0034 tests inherited s0 before the slot load at 800A004C.
 int VS::Field::GimmickPlacementEntry(
     int gimmick_slot, VS::Field::GimmickSnapshot* output_snapshot) {

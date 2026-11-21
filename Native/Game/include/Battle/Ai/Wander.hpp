@@ -99,7 +99,7 @@ enum class WanderTileChoice : std::int8_t {
   kComplete = 1,  // the goal moved and the chain is longer than the range
 };
 
-// decomp: func_800E1BB8 (src/BATTLE/BATTLE.PRG/771A8.c:1638).
+// decomp: func_800E1BB8 (src/BATTLE/BATTLE.PRG/770A4.c:1012).
 // Extends the actor's wander chain: from the goal (the tile, when the chain
 // is empty) it draws one of the even directions to a neighbour that is not
 // blocked, keeps the goal's area unless the actor is stuck and has no 0x20
@@ -111,10 +111,10 @@ enum class WanderTileChoice : std::int8_t {
     WanderWorld& world, WanderActor& actor, std::uint32_t tile,
     std::uint32_t range);
 
-// decomp: wanderRandomHeading (src/BATTLE/BATTLE.PRG/771A8.c:1700).
-// A heading within a quarter of a direction either side of `direction`'s
-// centre, in 4096-per-turn units wrapped to a signed halfword: direction 0
-// gives -256..255.
+// decomp: randomHeading (src/BATTLE/BATTLE.PRG/770A4.c:1083; was
+// wanderRandomHeading). A heading within a quarter of a direction either side
+// of `direction`'s centre, in 4096-per-turn units wrapped to a signed halfword:
+// direction 0 gives -256..255.
 [[nodiscard]] std::int16_t RandomWanderHeading(WanderWorld& world,
                                                int direction);
 
@@ -123,7 +123,7 @@ enum class WanderTileChoice : std::int8_t {
 // next phase, then the movement recovery.
 void StartWanderWalk(WanderWorld& world, WanderActor& actor);
 
-// decomp: func_800E1EAC (src/BATTLE/BATTLE.PRG/771A8.c:1717).
+// decomp: func_800E1EAC (src/BATTLE/BATTLE.PRG/770A4.c:1092).
 // One wander tick for an actor in the area around `tile` within `range`. The
 // timer alternates move and rest periods (and holds an actor in behaviour
 // mode 1 for 30 ticks); while resting the actor recovers. Ranges of 63 and

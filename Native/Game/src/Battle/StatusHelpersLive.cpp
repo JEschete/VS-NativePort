@@ -97,7 +97,7 @@ class LiveTargetingRiskWorld final : public TargetingRiskWorld {
 };
 }  // namespace
 
-// decomp: func_80086EA4 (src/BATTLE/BATTLE.PRG/146C.c:13801).
+// decomp: func_80086EA4 (src/BATTLE/BATTLE.PRG/146C.c:13666).
 void ApplyLiveWeaponElementEnchantment(VS::Battle::ActorStats* pointer,
                                        int increased, int decreased,
                                        int amount) {
@@ -109,7 +109,7 @@ void ApplyLiveWeaponElementEnchantment(VS::Battle::ActorStats* pointer,
   stats.weapon = weapon;
 }
 
-// decomp: func_80086EF4 (src/BATTLE/BATTLE.PRG/146C.c:13811).
+// decomp: func_80086EF4 (src/BATTLE/BATTLE.PRG/146C.c:13676).
 void ApplyLiveArmorElementEnchantment(VS::Battle::ActorStats* pointer,
                                       int increased, int decreased,
                                       int amount) {
@@ -139,7 +139,7 @@ void ApplyLiveArmorElementEnchantment(VS::Battle::ActorStats* pointer,
   }
 }
 
-// decomp: func_80087578 (src/BATTLE/BATTLE.PRG/146C.c:14011).
+// decomp: func_80087578 (src/BATTLE/BATTLE.PRG/146C.c:13877).
 void QueueLiveActorStatChangeNumber(int actor_slot, int limb_tag,
                                     int encoded_amount, int label_flags) {
   LiveStatNumberWorld world;
@@ -149,14 +149,14 @@ void QueueLiveActorStatChangeNumber(int actor_slot, int limb_tag,
   Require(queued.has_value(), "Stat number refused a missing or invalid actor");
 }
 
-// decomp: func_80088B8C (src/BATTLE/BATTLE.PRG/146C.c:14745).
+// decomp: func_80088B8C (src/BATTLE/BATTLE.PRG/146C.c:14616).
 void UpdateLiveTargetingRiskPenalty() {
   LiveTargetingRiskWorld world;
   Require(UpdateTargetingRiskPenalty(VS::Battle::targetingRiskTimer, world),
           "Targeting risk refused its required state");
 }
 
-// decomp: func_80088CA0 (src/BATTLE/BATTLE.PRG/146C.c:14764).
+// decomp: func_80088CA0 (src/BATTLE/BATTLE.PRG/146C.c:14635).
 void ResetLiveTargetingRiskPenaltyTimer() {
   ResetTargetingRiskPenaltyTimer(VS::Battle::targetingRiskTimer);
 }

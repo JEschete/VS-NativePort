@@ -3,12 +3,17 @@
 #include "Effects/Plugins/Plg170.hpp"
 
 namespace VS::Effects::Plg170 {
-// decomp: D_800FE5C4 (PLG170.BIN/18.c:5; sphericalSurfaceVertices.h:21)
+// decomp: vs_effect_retribution_0_vertices
+// (src/EFFECT/sphericalSurfaceVertices.h:21; was D_800FE5C4;
+// src/EFFECT/sphericalSurfaceVertices.h:21)
 plugins::SurfaceProfile mirrorSurfaceVertices;
-// decomp: D_800FE844 (PLG170.BIN/18.c:11; rings.h:20)
+// decomp: vs_effect_retribution_2_colors (src/EFFECT/rings.h:20; was
+// D_800FE844; src/EFFECT/rings.h:20)
 plugins::RingPaletteBytes ringColorFactors;
-// decomp: D_800FE864 (PLG170.BIN/18.c:16; sphericalSurfaceVertices.h:21)
+// decomp: D_800FE864 (PLG170.BIN/18.c:16;
+// src/EFFECT/sphericalSurfaceVertices.h:21)
 plugins::SurfaceProfile surfaceVertices;
-// decomp: D_800FEAE4 (PLG170.BIN/18.c:19; closedRings.h:58)
+// decomp: vs_effect_retribution_5_colors (src/EFFECT/closedRings.h:58; was
+// D_800FEAE4; src/EFFECT/closedRings.h:58)
 plugins::RingPalette closedRingColorFactors;
 }  // namespace VS::Effects::Plg170

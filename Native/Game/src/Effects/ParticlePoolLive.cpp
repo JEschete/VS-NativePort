@@ -155,13 +155,13 @@ class LiveForces {
 };
 }  // namespace
 
-// decomp: BATTLE.PRG func_800D268C (src/BATTLE/BATTLE.PRG/5BF94.c:6777)
+// decomp: BATTLE.PRG func_800D268C (src/BATTLE/BATTLE.PRG/5BF94.c:6345)
 void LiveResetParticlePoolReferences() {
   LivePool pool;
   ResetParticlePoolReferences(pool.Pool());
 }
 
-// decomp: BATTLE.PRG func_800D2698 (src/BATTLE/BATTLE.PRG/5BF94.c:6779)
+// decomp: BATTLE.PRG func_800D2698 (src/BATTLE/BATTLE.PRG/5BF94.c:6347)
 void LiveAcquireParticlePool(int count) {
   LiveParticleRecords records;
   LivePool pool;
@@ -170,7 +170,7 @@ void LiveAcquireParticlePool(int count) {
   }
 }
 
-// decomp: BATTLE.PRG func_800D278C (src/BATTLE/BATTLE.PRG/5BF94.c:6805)
+// decomp: BATTLE.PRG func_800D278C (src/BATTLE/BATTLE.PRG/5BF94.c:6373)
 void LiveReleaseParticlePool() {
   LiveParticleRecords records;
   LivePool pool;
@@ -179,7 +179,7 @@ void LiveReleaseParticlePool() {
   }
 }
 
-// decomp: BATTLE.PRG func_800D27F0 (src/BATTLE/BATTLE.PRG/5BF94.c:6818)
+// decomp: BATTLE.PRG func_800D27F0 (src/BATTLE/BATTLE.PRG/5BF94.c:6386)
 Particle* LiveAllocateEffectParticle(Instance* instance) {
   if (instance == nullptr) {
     Refuse("allocate", "no instance");
@@ -197,7 +197,7 @@ Particle* LiveAllocateEffectParticle(Instance* instance) {
   return particle;
 }
 
-// decomp: BATTLE.PRG func_800D2888 (src/BATTLE/BATTLE.PRG/5BF94.c:6847)
+// decomp: BATTLE.PRG func_800D2888 (src/BATTLE/BATTLE.PRG/5BF94.c:6415)
 void LiveReleaseEffectParticle(Particle* particle, Instance* instance) {
   if (particle == nullptr || instance == nullptr) {
     Refuse("release particle", "no particle or instance");
@@ -209,7 +209,7 @@ void LiveReleaseEffectParticle(Particle* particle, Instance* instance) {
   ReleaseEffectParticle(*particle, pool.Pool(), list.List(), records);
 }
 
-// decomp: BATTLE.PRG func_800D2904 (src/BATTLE/BATTLE.PRG/5BF94.c:6865)
+// decomp: BATTLE.PRG func_800D2904 (src/BATTLE/BATTLE.PRG/5BF94.c:6433)
 void LiveReleaseAllEffectParticles(Instance* instance) {
   if (instance == nullptr) {
     Refuse("release all", "no instance");
@@ -221,7 +221,7 @@ void LiveReleaseAllEffectParticles(Instance* instance) {
   ReleaseAllEffectParticles(pool.Pool(), list.List(), records);
 }
 
-// decomp: BATTLE.PRG func_800D5260 (src/BATTLE/BATTLE.PRG/5BF94.c:7826)
+// decomp: BATTLE.PRG func_800D5260 (src/BATTLE/BATTLE.PRG/5BF94.c:6818)
 void LiveSetParticleGravity(VECTOR* gravity) {
   if (gravity == nullptr) {
     Refuse("gravity", "no vector");
@@ -234,7 +234,7 @@ void LiveSetParticleGravity(VECTOR* gravity) {
   particleGravity.pad = gravity->pad;
 }
 
-// decomp: BATTLE.PRG func_800D5294 (src/BATTLE/BATTLE.PRG/5BF94.c:7828)
+// decomp: BATTLE.PRG func_800D5294 (src/BATTLE/BATTLE.PRG/5BF94.c:6820)
 void LiveSetParticleDrag(int* drag) {
   if (drag == nullptr) {
     Refuse("drag", "no value");

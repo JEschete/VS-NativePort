@@ -4,8 +4,10 @@
 #include "Effects/Plugins/PluginData.hpp"
 
 namespace VS::Effects::Plg142 {
-// decomp: D_800FCDB8 (PLG142.BIN/18.c:8; closedRings.h:58)
+// decomp: vs_effect_adventSign_1_colors (src/EFFECT/closedRings.h:58; was
+// D_800FCDB8; src/EFFECT/closedRings.h:58)
 extern plugins::RingPalette closedRingColorFactors;
-// decomp: D_800FCDD8 (PLG142.BIN/18.c:10; rings.h:20)
+// decomp: vs_effect_adventSign_2_colors (src/EFFECT/rings.h:20; was D_800FCDD8;
+// src/EFFECT/rings.h:20)
 extern plugins::RingPaletteBytes ringColorFactors;
 }  // namespace VS::Effects::Plg142

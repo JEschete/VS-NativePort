@@ -48,8 +48,9 @@ std::optional<Message> SelectMessage(const SceneNotificationHost& host,
 }
 }  // namespace
 
-// decomp: F01379 vs_battle_displaySceneMessage
-// (src/BATTLE/BATTLE.PRG/5BF94.c:3771, 800CB2B8-800CB45C).
+// decomp: F01379 displaySceneMessage
+// (src/BATTLE/BATTLE.PRG/5BF94.c:3337; was vs_battle_displaySceneMessage,
+// 800CB2B8-800CB45C).
 SceneNotificationResult ShowSceneNotification(SceneNotificationState& state,
                                               SceneNotificationHost& host,
                                               std::int32_t kind,
@@ -81,7 +82,7 @@ SceneNotificationResult ShowSceneNotification(SceneNotificationState& state,
   return SceneNotificationResult::kShown;
 }
 
-// decomp: F01380 func_800CB45C (src/BATTLE/BATTLE.PRG/5BF94.c:3802).
+// decomp: F01380 func_800CB45C (src/BATTLE/BATTLE.PRG/5BF94.c:3368).
 std::int32_t IsSceneNotificationPending(SceneNotificationState& state,
                                         SceneNotificationHost& host,
                                         std::int32_t tick_speed) {
@@ -98,7 +99,7 @@ std::int32_t IsSceneNotificationPending(SceneNotificationState& state,
   return Core::Math::WrappingSubtract(0, host.PollText());
 }
 
-// decomp: F01381 func_800CB50C (src/BATTLE/BATTLE.PRG/5BF94.c:3829).
+// decomp: F01381 func_800CB50C (src/BATTLE/BATTLE.PRG/5BF94.c:3395).
 void ReleaseSceneNotification(SceneNotificationState& state,
                               SceneNotificationHost& host) {
   if (state.buffer.empty()) return;

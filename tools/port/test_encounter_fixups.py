@@ -4392,7 +4392,9 @@ int arg01 = arg0;'''
         ) as stream:
             row = next(item for item in csv.DictReader(stream)
                        if item["id"] == "F01099")
-        self.assertEqual(row["name"], "func_800B91C4")
+        # #493: the catalog follows the decomp's current name and keeps the one the native code was written against.
+        self.assertEqual(row["name"], "vs_battle_script_53_forgetZoneEnemies")
+        self.assertEqual(row["previous_name"], "func_800B91C4")
         self.assertEqual(row["final_name"], "Event::ScriptClearRoomActorCache")
         self.assertEqual(
             row["final_location"], r"Native\Game\src\Event\EventSceneTransition.cpp"

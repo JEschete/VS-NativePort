@@ -106,7 +106,7 @@ void BeginEasedTransition(EffectCameraState& state,
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800D1930 (src/BATTLE/BATTLE.PRG/5BF94.c:6474)
+// decomp: BATTLE.PRG func_800D1930 (src/BATTLE/BATTLE.PRG/5BF94.c:6044)
 void ResetEffectCameraMotion(EffectCameraState& state) noexcept {
   state.enabled_channels = 0;
   state.transition_mode = 0;
@@ -117,7 +117,7 @@ void ResetEffectCameraMotion(EffectCameraState& state) noexcept {
   }
 }
 
-// decomp: BATTLE.PRG func_800D1B18 (src/BATTLE/BATTLE.PRG/5BF94.c:6516)
+// decomp: BATTLE.PRG func_800D1B18 (src/BATTLE/BATTLE.PRG/5BF94.c:6086)
 void CaptureEffectCamera(EffectCameraHost& host, EffectCameraPose& pose) {
   const FieldCameraSnapshot field = host.CurrentCamera();
   pose.position = field.position;
@@ -128,7 +128,7 @@ void CaptureEffectCamera(EffectCameraHost& host, EffectCameraPose& pose) {
   pose.far_clip = field.far_clip;
 }
 
-// decomp: BATTLE.PRG func_800D1B80 (src/BATTLE/BATTLE.PRG/5BF94.c:6526)
+// decomp: BATTLE.PRG func_800D1B80 (src/BATTLE/BATTLE.PRG/5BF94.c:6096)
 void ApplyEffectCamera(const EffectCameraPose& pose, EffectCameraHost& host) {
   const std::int32_t dx =
       Whole(Math::WrappingSubtract(pose.position.x, pose.look_at.x));
@@ -167,14 +167,14 @@ void ApplyEffectCamera(const EffectCameraPose& pose, EffectCameraHost& host) {
   });
 }
 
-// decomp: BATTLE.PRG func_800D1DE4 (src/BATTLE/BATTLE.PRG/5BF94.c:6564)
+// decomp: BATTLE.PRG func_800D1DE4 (src/BATTLE/BATTLE.PRG/5BF94.c:6132)
 void EnableCameraShakeChannels(EffectCameraState& state,
                                std::int32_t channel_mask) noexcept {
   state.enabled_channels = static_cast<std::uint8_t>(
       state.enabled_channels | static_cast<std::uint32_t>(channel_mask));
 }
 
-// decomp: BATTLE.PRG func_800D1DFC (src/BATTLE/BATTLE.PRG/5BF94.c:6566)
+// decomp: BATTLE.PRG func_800D1DFC (src/BATTLE/BATTLE.PRG/5BF94.c:6134)
 void DisableCameraShakeChannels(EffectCameraState& state,
                                 std::int32_t channel_mask) noexcept {
   if (channel_mask != 0) {
@@ -185,13 +185,13 @@ void DisableCameraShakeChannels(EffectCameraState& state,
   state.enabled_channels = 0;
 }
 
-// decomp: BATTLE.PRG func_800D1E20 (src/BATTLE/BATTLE.PRG/5BF94.c:6575)
+// decomp: BATTLE.PRG func_800D1E20 (src/BATTLE/BATTLE.PRG/5BF94.c:6143)
 void SetEffectCameraTransitionMode(EffectCameraState& state,
                                    std::int32_t transition_mode) noexcept {
   state.transition_mode = static_cast<std::uint32_t>(transition_mode);
 }
 
-// decomp: BATTLE.PRG func_800D1E2C (src/BATTLE/BATTLE.PRG/5BF94.c:6577)
+// decomp: BATTLE.PRG func_800D1E2C (src/BATTLE/BATTLE.PRG/5BF94.c:6145)
 std::uint8_t CameraShakePhaseStep(const CameraShakeChannel& channel,
                                   EffectCameraHost& host) {
   if (!channel.step_uses_curve) {
@@ -201,7 +201,7 @@ std::uint8_t CameraShakePhaseStep(const CameraShakeChannel& channel,
       host.SampleCurve(channel.step_curve, channel.phase).value);
 }
 
-// decomp: BATTLE.PRG func_800D1E78 (src/BATTLE/BATTLE.PRG/5BF94.c:6589)
+// decomp: BATTLE.PRG func_800D1E78 (src/BATTLE/BATTLE.PRG/5BF94.c:6157)
 std::uint8_t RandomCameraShakePhaseStep(const CameraShakeChannel& channel,
                                         EffectCameraHost& host) {
   const std::int32_t limit =
@@ -214,7 +214,7 @@ std::uint8_t RandomCameraShakePhaseStep(const CameraShakeChannel& channel,
   return static_cast<std::uint8_t>(host.Random() % limit);
 }
 
-// decomp: BATTLE.PRG func_800D1EF0 (src/BATTLE/BATTLE.PRG/5BF94.c:6606)
+// decomp: BATTLE.PRG func_800D1EF0 (src/BATTLE/BATTLE.PRG/5BF94.c:6174)
 void StartCameraShakeChannels(EffectCameraState& state, EffectCameraHost& host,
                               std::int32_t channel_mask,
                               const CameraShakeSettings& settings) {
@@ -238,7 +238,7 @@ void StartCameraShakeChannels(EffectCameraState& state, EffectCameraHost& host,
   }
 }
 
-// decomp: BATTLE.PRG func_800D1FEC (src/BATTLE/BATTLE.PRG/5BF94.c:6626)
+// decomp: BATTLE.PRG func_800D1FEC (src/BATTLE/BATTLE.PRG/5BF94.c:6194)
 void StopCameraShakeChannels(EffectCameraState& state,
                              std::int32_t channel_mask) noexcept {
   for (int i = 0; i < kCameraShakeChannels; ++i) {
@@ -249,7 +249,7 @@ void StopCameraShakeChannels(EffectCameraState& state,
   }
 }
 
-// decomp: BATTLE.PRG func_800D206C (src/BATTLE/BATTLE.PRG/5BF94.c:6638)
+// decomp: BATTLE.PRG func_800D206C (src/BATTLE/BATTLE.PRG/5BF94.c:6206)
 void UpdateCameraShakeChannels(EffectCameraState& state,
                                EffectCameraHost& host) {
   for (int i = 0; i < kCameraShakeChannels; ++i) {
@@ -277,24 +277,24 @@ void UpdateCameraShakeChannels(EffectCameraState& state,
   }
 }
 
-// decomp: BATTLE.PRG func_800D21C0 (src/BATTLE/BATTLE.PRG/5BF94.c:6681)
+// decomp: BATTLE.PRG func_800D21C0 (src/BATTLE/BATTLE.PRG/5BF94.c:6249)
 void InterpolateEffectCameraLinear(EffectCameraState& state) noexcept {
   InterpolatePose(state, Math::InterpolateTimedVector,
                   Math::InterpolateTimedScalar);
 }
 
-// decomp: BATTLE.PRG func_800D236C (src/BATTLE/BATTLE.PRG/5BF94.c:6708)
+// decomp: BATTLE.PRG func_800D236C (src/BATTLE/BATTLE.PRG/5BF94.c:6276)
 void InterpolateEffectCameraCosine(EffectCameraState& state) noexcept {
   InterpolatePose(state, Math::InterpolateCosineVector,
                   Math::InterpolateCosineScalar);
 }
 
-// decomp: BATTLE.PRG func_800D2518 (src/BATTLE/BATTLE.PRG/5BF94.c:6735)
+// decomp: BATTLE.PRG func_800D2518 (src/BATTLE/BATTLE.PRG/5BF94.c:6303)
 void HoldEffectCameraStartPose(EffectCameraState& state) noexcept {
   state.camera = state.motion_ends[0];
 }
 
-// decomp: BATTLE.PRG func_800D2560 (src/BATTLE/BATTLE.PRG/5BF94.c:6737)
+// decomp: BATTLE.PRG func_800D2560 (src/BATTLE/BATTLE.PRG/5BF94.c:6305)
 void UpdateEffectCameraMotion(EffectCameraState& state,
                               EffectCameraHost& host) {
   const bool had_transition = state.transition_mode != 0;
@@ -336,7 +336,7 @@ void UpdateEffectCameraMotion(EffectCameraState& state,
   }
 }
 
-// decomp: BATTLE.PRG func_800D66FC (src/BATTLE/BATTLE.PRG/5BF94.c:8308)
+// decomp: BATTLE.PRG func_800D66FC (src/BATTLE/BATTLE.PRG/5BF94.c:7302)
 void FocusCameraOnEffectTransform(EffectCameraState& state,
                                   EffectCameraHost& host,
                                   Math::Vec3 transform_translation,
@@ -347,7 +347,7 @@ void FocusCameraOnEffectTransform(EffectCameraState& state,
   BeginEasedTransition(state, duration_frames);
 }
 
-// decomp: BATTLE.PRG func_800D67C4 (src/BATTLE/BATTLE.PRG/5BF94.c:8323)
+// decomp: BATTLE.PRG func_800D67C4 (src/BATTLE/BATTLE.PRG/5BF94.c:7317)
 void RestoreActionEffectCamera(EffectCameraState& state, EffectCameraHost& host,
                                std::uint8_t duration_frames) {
   CaptureEffectCamera(host, state.motion_ends[0]);

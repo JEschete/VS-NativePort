@@ -114,8 +114,9 @@ struct DialogPlacement {
   bool fits = false;
 };
 
-// decomp: func_800B6B98 (src/BATTLE/BATTLE.PRG/4A0A8.c:741): places a box of
-// `columns` by `lines` at `anchor` from `origin`, clamped to the screen.
+// decomp: tryTextBoxPlacement (src/BATTLE/BATTLE.PRG/4DEA8.c:574; was
+// func_800B6B98): places a box of `columns` by `lines` at `anchor` from
+// `origin`, clamped to the screen.
 [[nodiscard]] DialogPlacement CalcDialogAnchorPlacement(
     DialogOrigin origin, const DialogAnchor& anchor, int columns, int lines);
 
@@ -166,37 +167,46 @@ class ScriptDialogHost {
   virtual void SetDialogInteger(int slot, int value) = 0;
 };
 
-// decomp: vs_battle_script_initTextBox (src/BATTLE/BATTLE.PRG/4A0A8.c:672),
-// opcode 0x10: lays out a box, centred on itself or on another open box.
+// decomp: vs_battle_script_10_initTextBox (src/BATTLE/BATTLE.PRG/4DEA8.c:489;
+// was vs_battle_script_initTextBox), opcode 0x10: lays out a box, centred on
+// itself or on another open box.
 ScriptStep ScriptInitDialogBox(ScriptCommand command, ScriptDialogHost& host);
-// decomp: vs_battle_script_showTextBox (src/BATTLE/BATTLE.PRG/4A0A8.c:707),
-// opcode 0x11: shows a string, optionally holding until the box closes.
+// decomp: vs_battle_script_11_showTextBox (src/BATTLE/BATTLE.PRG/4DEA8.c:529;
+// was vs_battle_script_showTextBox), opcode 0x11: shows a string, optionally
+// holding until the box closes.
 ScriptStep ScriptShowDialogText(ScriptCommand command, ScriptDialogHost& host);
-// decomp: vs_battle_script_dismissTextBox
-// (src/BATTLE/BATTLE.PRG/4A0A8.c:733), opcode 0x12
+// decomp: vs_battle_script_12_dismissTextBox
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:567; was vs_battle_script_dismissTextBox),
+// opcode 0x12
 ScriptStep ScriptDismissDialogBox(ScriptCommand command,
                                   ScriptDialogHost& host);
-// decomp: func_800B6D48 (src/BATTLE/BATTLE.PRG/4A0A8.c:794), opcode 0x13:
-// opens a box on the first side of an actor that fits on screen, or on the
-// side that needs the least clamping.
+// decomp: vs_battle_script_13_initTextBoxNearActor
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:630; was func_800B6D48), opcode 0x13: opens a
+// box on the first side of an actor that fits on screen, or on the side that
+// needs the least clamping.
 ScriptStep ScriptInitActorDialogBox(ScriptCommand command,
                                     ScriptDialogHost& host);
-// decomp: func_800B6F8C (src/BATTLE/BATTLE.PRG/4A0A8.c:838), opcode 0x14
+// decomp: vs_battle_script_14_dismissTextBoxAndWait
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:683; was func_800B6F8C), opcode 0x14
 ScriptStep ScriptWaitForDialogDismissal(ScriptCommand command,
                                         ScriptDialogHost& host);
-// decomp: vs_battle_script_setStringContextInt
-// (src/BATTLE/BATTLE.PRG/4A0A8.c:916), opcode 0x1B: copies one or two script
+// decomp: vs_battle_script_1B_setPrintfArgInt
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:816; was
+// vs_battle_script_setStringContextInt), opcode 0x1B: copies one or two script
 // flags into a string integer, as a signed or unsigned byte or half.
 ScriptStep ScriptSetDialogInteger(ScriptCommand command,
                                   ScriptDialogHost& host);
-// decomp: func_800B7358 (src/BATTLE/BATTLE.PRG/4A0A8.c:941), opcode 0x1D
+// decomp: vs_battle_script_1D_setTextBoxAnimationDuration
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:848; was func_800B7358), opcode 0x1D
 ScriptStep ScriptSetDialogTransitionDuration(ScriptCommand command,
                                              ScriptDialogHost& host);
-// decomp: vs_battle_script_selectTextBox (src/BATTLE/BATTLE.PRG/4A0A8.c:947),
-// opcode 0x1C: holds until the player picks a box and stores the choice.
+// decomp: vs_battle_script_1C_selectTextBox (src/BATTLE/BATTLE.PRG/4DEA8.c:861;
+// was vs_battle_script_selectTextBox), opcode 0x1C: holds until the player
+// picks a box and stores the choice.
 ScriptStep ScriptSelectDialogChoice(ScriptCommand command,
                                     ScriptDialogHost& host);
-// decomp: func_800B9564 (src/BATTLE/BATTLE.PRG/4A0A8.c:1897), opcode 0x5B
+// decomp: vs_battle_script_5B_setTextBoxSpeaker
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2405; was func_800B9564), opcode 0x5B
 ScriptStep ScriptSetDialogSpeaker(ScriptCommand command,
                                   ScriptDialogHost& host);
 

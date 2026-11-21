@@ -150,167 +150,172 @@ void Run(VS::Audio::SeqChannel* channel, int channel_bit, const char* name,
 }
 }  // namespace
 
-// decomp: SLUS_010.40 SoundVM_A0_FinishChannel (src/SLUS_010.40/25AC.c:4989)
+// decomp: SLUS_010.40 SoundVM_A0_FinishChannel (src/SLUS_010.40/25AC.c:5203)
 void LiveFinishChannel(VS::Audio::SeqChannel* channel, int channel_bit) {
   Run(channel, channel_bit, "A0 FinishChannel", LayerUse::kMusicChannels,
       FinishChannel);
 }
 
-// decomp: SLUS_010.40 SoundVM_FE1F_unk (src/SLUS_010.40/25AC.c:5011)
+// decomp: SLUS_010.40 SoundVM_FE1F_FinishIfMusicQueued
+// (src/SLUS_010.40/25AC.c:5225; was SoundVM_FE1F_unk)
 void LiveFinishChannelOnReplacement(VS::Audio::SeqChannel* channel,
                                     int channel_bit) {
   Run(channel, channel_bit, "FE1F FinishChannelOnReplacement",
       LayerUse::kAlways, FinishChannelOnReplacement);
 }
 
-// decomp: SLUS_010.40 SoundVM_XX_Unimplemented (src/SLUS_010.40/25AC.c:6233)
+// decomp: SLUS_010.40 SoundVM_XX_Unimplemented (src/SLUS_010.40/25AC.c:6373)
 void LiveStopOnInvalidInstruction(VS::Audio::SeqChannel* channel,
                                   int channel_bit) {
   Run(channel, channel_bit, "StopOnInvalidInstruction",
       LayerUse::kMusicChannels, StopOnInvalidInstruction);
 }
 
-// decomp: SLUS_010.40 SoundVM_CD_DEBUG (src/SLUS_010.40/25AC.c:5758)
-// decomp: SLUS_010.40 SoundVM_D1_DEBUG (src/SLUS_010.40/25AC.c:5771)
+// decomp: SLUS_010.40 SoundVM_CD_DEBUG (src/SLUS_010.40/25AC.c:5927)
+// decomp: SLUS_010.40 SoundVM_D1_DEBUG (src/SLUS_010.40/25AC.c:5937)
 void LiveIgnoreInstruction(VS::Audio::SeqChannel* channel, int channel_bit) {
   Run(channel, channel_bit, "IgnoreInstruction", LayerUse::kNone,
       IgnoreInstruction);
 }
 
-// decomp: SLUS_010.40 SoundVM_FE00_SetTempo (src/SLUS_010.40/25AC.c:5018)
+// decomp: SLUS_010.40 SoundVM_FE00_SetTempo (src/SLUS_010.40/25AC.c:5232)
 void LiveSetTempo(VS::Audio::SeqChannel* channel, int channel_bit) {
   Run(channel, channel_bit, "FE00 SetTempo", LayerUse::kAlways, SetTempo);
 }
 
-// decomp: SLUS_010.40 SoundVM_FE01_SetTempoSlide (src/SLUS_010.40/25AC.c:5027)
+// decomp: SLUS_010.40 SoundVM_FE01_SetTempoSlide (src/SLUS_010.40/25AC.c:5240)
 void LiveSlideTempo(VS::Audio::SeqChannel* channel, int channel_bit) {
   Run(channel, channel_bit, "FE01 SlideTempo", LayerUse::kAlways, SlideTempo);
 }
 
 // decomp: SLUS_010.40 SoundVM_FE02_SetMasterReverbDepth
-// (src/SLUS_010.40/25AC.c:5048)
+// (src/SLUS_010.40/25AC.c:5261)
 void LiveSetReverbDepth(VS::Audio::SeqChannel* channel, int channel_bit) {
   Run(channel, channel_bit, "FE02 SetReverbDepth", LayerUse::kAlways,
       SetReverbDepth);
 }
 
 // decomp: SLUS_010.40 SoundVM_FE03_SetMasterReverbSlide
-// (src/SLUS_010.40/25AC.c:5063)
+// (src/SLUS_010.40/25AC.c:5276)
 void LiveSlideReverbDepth(VS::Audio::SeqChannel* channel, int channel_bit) {
   Run(channel, channel_bit, "FE03 SlideReverbDepth", LayerUse::kAlways,
       SlideReverbDepth);
 }
 
 // decomp: SLUS_010.40 SoundVM_FE06_JumpRelativeOffset
-// (src/SLUS_010.40/25AC.c:5085)
+// (src/SLUS_010.40/25AC.c:5299)
 void LiveJumpRelative(VS::Audio::SeqChannel* channel, int channel_bit) {
   Run(channel, channel_bit, "FE06 JumpRelative", LayerUse::kNone, JumpRelative);
 }
 
 // decomp: SLUS_010.40 SoundVM_FE07_JumpRelativeWithThreshold
-// (src/SLUS_010.40/25AC.c:5092)
+// (src/SLUS_010.40/25AC.c:5306)
 void LiveJumpAtThreshold(VS::Audio::SeqChannel* channel, int channel_bit) {
   Run(channel, channel_bit, "FE07 JumpAtThreshold", LayerUse::kAlways,
       JumpAtThreshold);
 }
 
 // decomp: SLUS_010.40 SoundVM_FE0E_CallRelativeOffset
-// (src/SLUS_010.40/25AC.c:5111)
+// (src/SLUS_010.40/25AC.c:5325)
 void LiveCallRelative(VS::Audio::SeqChannel* channel, int channel_bit) {
   Run(channel, channel_bit, "FE0E CallRelative", LayerUse::kNone, CallRelative);
 }
 
-// decomp: SLUS_010.40 SoundVM_FE0F_Return (src/SLUS_010.40/25AC.c:5119)
+// decomp: SLUS_010.40 SoundVM_FE0F_Return (src/SLUS_010.40/25AC.c:5333)
 void LiveReturnFromCall(VS::Audio::SeqChannel* channel, int channel_bit) {
   Run(channel, channel_bit, "FE0F ReturnFromCall", LayerUse::kNone,
       ReturnFromCall);
 }
 
-// decomp: SLUS_010.40 SoundVM_FE0C_unk (src/SLUS_010.40/25AC.c:5221)
+// decomp: SLUS_010.40 SoundVM_FE0C_unk (src/SLUS_010.40/25AC.c:5430)
 void LiveSetSequenceControlValue(VS::Audio::SeqChannel* channel,
                                  int channel_bit) {
   Run(channel, channel_bit, "FE0C SetSequenceControlValue", LayerUse::kAlways,
       SetSequenceControlValue);
 }
 
-// decomp: SLUS_010.40 SoundVM_FE10_unk (src/SLUS_010.40/25AC.c:5892)
+// decomp: SLUS_010.40 SoundVM_FE10_SetVoiceAllocStart
+// (src/SLUS_010.40/25AC.c:6047; was SoundVM_FE10_unk)
 void LiveSetVoiceAllocationStart(VS::Audio::SeqChannel* channel,
                                  int channel_bit) {
   Run(channel, channel_bit, "FE10 SetVoiceAllocationStart", LayerUse::kAlways,
       SetVoiceAllocationStart);
 }
 
-// decomp: SLUS_010.40 SoundVM_FE11_unk (src/SLUS_010.40/25AC.c:5898)
+// decomp: SLUS_010.40 SoundVM_FE11_ResetVoiceAllocStart
+// (src/SLUS_010.40/25AC.c:6053; was SoundVM_FE11_unk)
 void LiveResetVoiceAllocationStart(VS::Audio::SeqChannel* channel,
                                    int channel_bit) {
   Run(channel, channel_bit, "FE11 ResetVoiceAllocationStart", LayerUse::kAlways,
       ResetVoiceAllocationStart);
 }
 
-// decomp: SLUS_010.40 SoundVM_C8_LoopPoint (src/SLUS_010.40/25AC.c:5904)
+// decomp: SLUS_010.40 SoundVM_C8_LoopPoint (src/SLUS_010.40/25AC.c:6059)
 void LivePushLoop(VS::Audio::SeqChannel* channel, int channel_bit) {
   Run(channel, channel_bit, "C8 PushLoop", LayerUse::kNone, PushLoop);
 }
 
-// decomp: SLUS_010.40 SoundVM_C9_LoopN (src/SLUS_010.40/25AC.c:5914)
+// decomp: SLUS_010.40 SoundVM_C9_LoopN (src/SLUS_010.40/25AC.c:6068)
 void LiveRepeatLoop(VS::Audio::SeqChannel* channel, int channel_bit) {
   Run(channel, channel_bit, "C9 RepeatLoop", LayerUse::kNone, RepeatLoop);
 }
 
 // decomp: SLUS_010.40 SoundVM_FE08_JumpOnNthLoopPass
-// (src/SLUS_010.40/25AC.c:5941)
+// (src/SLUS_010.40/25AC.c:6094)
 void LiveJumpOnLoopPass(VS::Audio::SeqChannel* channel, int channel_bit) {
   Run(channel, channel_bit, "FE08 JumpOnLoopPass", LayerUse::kNone,
       JumpOnLoopPass);
 }
 
 // decomp: SLUS_010.40 SoundVM_FE09_JumpAndPopStackOnNthLoopPass
-// (src/SLUS_010.40/25AC.c:5969)
+// (src/SLUS_010.40/25AC.c:6122)
 void LiveExitLoopOnPass(VS::Audio::SeqChannel* channel, int channel_bit) {
   Run(channel, channel_bit, "FE09 ExitLoopOnPass", LayerUse::kNone,
       ExitLoopOnPass);
 }
 
-// decomp: SLUS_010.40 SoundVM_CA_LoopInf (src/SLUS_010.40/25AC.c:5992)
+// decomp: SLUS_010.40 SoundVM_CA_LoopInf (src/SLUS_010.40/25AC.c:6145)
 void LiveRepeatLoopForever(VS::Audio::SeqChannel* channel, int channel_bit) {
   Run(channel, channel_bit, "CA RepeatLoopForever", LayerUse::kNone,
       RepeatLoopForever);
 }
 
-// decomp: SLUS_010.40 SoundVM_FE15_unk (src/SLUS_010.40/25AC.c:6050)
+// decomp: SLUS_010.40 SoundVM_FE15_unk (src/SLUS_010.40/25AC.c:6199)
 void LiveSetTimerDivisors(VS::Audio::SeqChannel* channel, int channel_bit) {
   Run(channel, channel_bit, "FE15 SetTimerDivisors", LayerUse::kAlways,
       SetTimerDivisors);
 }
 
-// decomp: SLUS_010.40 SoundVM_FE16_unk (src/SLUS_010.40/25AC.c:6059)
+// decomp: SLUS_010.40 SoundVM_FE16_unk (src/SLUS_010.40/25AC.c:6207)
 void LiveSetTimerCount(VS::Audio::SeqChannel* channel, int channel_bit) {
   Run(channel, channel_bit, "FE16 SetTimerCount", LayerUse::kAlways,
       SetTimerCount);
 }
 
-// decomp: SLUS_010.40 SoundVM_FE0B_unk (src/SLUS_010.40/25AC.c:6162)
+// decomp: SLUS_010.40 SoundVM_FE0B_PlaySfxProgram (src/SLUS_010.40/25AC.c:6307;
+// was SoundVM_FE0B_unk)
 void LivePlayEmbeddedSoundEffect(VS::Audio::SeqChannel* channel,
                                  int channel_bit) {
   Run(channel, channel_bit, "FE0B PlayEmbeddedSoundEffect", LayerUse::kNone,
       PlayEmbeddedSoundEffect);
 }
 
-// decomp: SLUS_010.40 SoundVM_FE1C_unk (src/SLUS_010.40/25AC.c:6202)
+// decomp: SLUS_010.40 SoundVM_FE1C_SetKeymap (src/SLUS_010.40/25AC.c:6345; was
+// SoundVM_FE1C_unk)
 void LiveSelectNoteRemapTable(VS::Audio::SeqChannel* channel, int channel_bit) {
   Run(channel, channel_bit, "FE1C SelectNoteRemapTable", LayerUse::kAlways,
       SelectNoteRemapTable);
 }
 
 // decomp: SLUS_010.40 SoundVM_FE1D_MarkVoicesKeyed
-// (src/SLUS_010.40/25AC.c:6209)
+// (src/SLUS_010.40/25AC.c:6351)
 void LiveMarkChannelKeyed(VS::Audio::SeqChannel* channel, int channel_bit) {
   Run(channel, channel_bit, "FE1D MarkChannelKeyed", LayerUse::kAlways,
       MarkChannelKeyed);
 }
 
 // decomp: SLUS_010.40 SoundVM_FE1E_ClearVoicesKeyed
-// (src/SLUS_010.40/25AC.c:6215)
+// (src/SLUS_010.40/25AC.c:6356)
 void LiveClearChannelKeyed(VS::Audio::SeqChannel* channel, int channel_bit) {
   Run(channel, channel_bit, "FE1E ClearChannelKeyed", LayerUse::kAlways,
       ClearChannelKeyed);

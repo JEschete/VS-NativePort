@@ -179,8 +179,9 @@ std::optional<Framework::ItemRowText> WeaponText(
 }
 }  // namespace
 
-// decomp: _updateEquipmentDetailSelection (src/MENU/MENU4.PRG/120.c:462);
-// original MENU4.PRG [0x801034BC, 0x80103608).
+// decomp: updateEquipmentDetailSelection (src/MENU/MENU4.PRG/120.c:466; was
+// _updateEquipmentDetailSelection); original MENU4.PRG [0x801034BC,
+// 0x80103608).
 std::optional<std::uint8_t> NavigateDetailElements(
     const DetailNavigation& input) {
   if (input.selected >= Framework::kStatusViewElementCount ||
@@ -211,7 +212,7 @@ std::optional<std::uint8_t> NavigateDetailElements(
   return std::nullopt;
 }
 
-// decomp: _setActiveRow (src/MENU/MENU4.PRG/120.c:1299);
+// decomp: setActiveRow (src/MENU/MENU4.PRG/120.c:1302; was _setActiveRow);
 // original MENU4.PRG [0x80104AEC, 0x80104B38).
 bool HoistEquipmentRow(DetailTransitionHost& host, int row) {
   auto* item = EquipmentRow(host, row);
@@ -226,8 +227,9 @@ bool HoistEquipmentRow(DetailTransitionHost& host, int row) {
   return true;
 }
 
-// decomp: _animateEquipmentDetailTransition (src/MENU/MENU4.PRG/120.c:1318);
-// original MENU4.PRG [0x80104B38, 0x80104C0C).
+// decomp: animateEquipmentDetailTransition (src/MENU/MENU4.PRG/120.c:1321; was
+// _animateEquipmentDetailTransition); original MENU4.PRG [0x80104B38,
+// 0x80104C0C).
 bool BeginDetailTransition(DetailTransitionHost& host, int row) {
   auto* item = EquipmentRow(host, row);
   if (item == nullptr) {
@@ -258,7 +260,7 @@ bool BeginDetailTransition(DetailTransitionHost& host, int row) {
   return true;
 }
 
-// decomp: _initUi (src/MENU/MENU4.PRG/120.c:1348);
+// decomp: initUi (src/MENU/MENU4.PRG/120.c:1351; was _initUi);
 // original MENU4.PRG [0x80104C0C, 0x80104C40).
 bool InitializeDetailPanel(DetailTransitionHost& host, int row,
                            int class_affinity) {
@@ -270,7 +272,7 @@ bool InitializeDetailPanel(DetailTransitionHost& host, int row,
   return true;
 }
 
-// decomp: _setWeaponRow (src/MENU/MENU4.PRG/120.c:1358);
+// decomp: setWeaponRow (src/MENU/MENU4.PRG/120.c:1361; was _setWeaponRow);
 // original MENU4.PRG [0x80104C40, 0x80104DFC).
 Framework::MenuRow* SetWeaponComponentRow(Framework::ItemRowsHost& host,
                                           int row,
@@ -299,7 +301,7 @@ Framework::MenuRow* SetWeaponComponentRow(Framework::ItemRowsHost& host,
   return item;
 }
 
-// decomp: _setShieldRow (src/MENU/MENU4.PRG/120.c:1418);
+// decomp: setShieldRow (src/MENU/MENU4.PRG/120.c:1421; was _setShieldRow);
 // original MENU4.PRG [0x80104DFC, 0x80104F2C).
 Framework::MenuRow* SetShieldGemRow(Framework::ItemRowsHost& host, int row,
                                     const Items::ShieldLoadout& shield,
@@ -327,8 +329,8 @@ Framework::MenuRow* SetShieldGemRow(Framework::ItemRowsHost& host, int row,
   return item;
 }
 
-// decomp: _exitEquipmentDetail (src/MENU/MENU4.PRG/120.c:1463);
-// original MENU4.PRG [0x80104F2C, 0x80104F80).
+// decomp: exitEquipmentDetail (src/MENU/MENU4.PRG/120.c:1466; was
+// _exitEquipmentDetail); original MENU4.PRG [0x80104F2C, 0x80104F80).
 void ExitEquipmentDetails(DetailTransitionHost& host, bool clear_dp_pp) {
   host.PlayLeaveSound();
   host.ClearRowsExcept(Framework::kNoRow);

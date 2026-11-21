@@ -225,43 +225,49 @@ void EnterDispatcher(DispatcherState& state, DispatcherWorld& world,
 }
 }  // namespace
 
-// decomp: _weaponNavigation (src/MENU/MENUD.PRG/234.c:829-900).
+// decomp: weaponNavigation (src/MENU/MENUD.PRG/234.c:830-901; was
+// _weaponNavigation).
 std::int32_t UpdateWeaponDetails(ControllerState& state, ControllerWorld& world,
                                  std::optional<ControllerEntry> entry) {
   return UpdateController(state, world, entry, kWeapon);
 }
 
-// decomp: _bladeNavigation (src/MENU/MENUD.PRG/234.c:902-963).
+// decomp: bladeNavigation (src/MENU/MENUD.PRG/234.c:903-964; was
+// _bladeNavigation).
 std::int32_t UpdateBladeDetails(ControllerState& state, ControllerWorld& world,
                                 std::optional<ControllerEntry> entry) {
   return UpdateController(state, world, entry, kBlade);
 }
 
-// decomp: _gripNavigation (src/MENU/MENUD.PRG/234.c:965-1035).
+// decomp: gripNavigation (src/MENU/MENUD.PRG/234.c:966-1036; was
+// _gripNavigation).
 std::int32_t UpdateGripDetails(ControllerState& state, ControllerWorld& world,
                                std::optional<ControllerEntry> entry) {
   return UpdateController(state, world, entry, kGrip);
 }
 
-// decomp: _shieldNavigation (src/MENU/MENUD.PRG/234.c:1037-1108).
+// decomp: shieldNavigation (src/MENU/MENUD.PRG/234.c:1038-1109; was
+// _shieldNavigation).
 std::int32_t UpdateShieldDetails(ControllerState& state, ControllerWorld& world,
                                  std::optional<ControllerEntry> entry) {
   return UpdateController(state, world, entry, kShield);
 }
 
-// decomp: _armorNavigation (src/MENU/MENUD.PRG/234.c:1110-1174).
+// decomp: armorNavigation (src/MENU/MENUD.PRG/234.c:1111-1175; was
+// _armorNavigation).
 std::int32_t UpdateArmorDetails(ControllerState& state, ControllerWorld& world,
                                 std::optional<ControllerEntry> entry) {
   return UpdateController(state, world, entry, kArmor);
 }
 
-// decomp: _gemNavigation (src/MENU/MENUD.PRG/234.c:1176-1233).
+// decomp: gemNavigation (src/MENU/MENUD.PRG/234.c:1177-1234; was
+// _gemNavigation).
 std::int32_t UpdateGemDetails(ControllerState& state, ControllerWorld& world,
                               std::optional<ControllerEntry> entry) {
   return UpdateController(state, world, entry, kGem);
 }
 
-// decomp: func_80105008 (src/MENU/MENUD.PRG/234.c:1235-1271).
+// decomp: func_80105008 (src/MENU/MENUD.PRG/234.c:1236-1272).
 std::int32_t UpdateItemDetails(DispatcherState& state, DispatcherWorld& world,
                                std::optional<DispatchEntry> entry) {
   if (entry.has_value()) {

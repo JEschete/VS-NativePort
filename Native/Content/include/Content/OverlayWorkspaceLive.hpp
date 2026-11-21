@@ -6,9 +6,9 @@
 // int owner tag and 1/0 result.
 namespace VS::Content {
 
-// decomp: D_800F18F8 (BATTLE/BATTLE.PRG 146C.c): the claiming owner tag, 0
-// when free. OverlayWorkspaceLive.cpp defines it; the game loop's page
-// initialization still clears it directly.
+// decomp: D_800F18F8 (BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/146C.c:328): the
+// claiming owner tag, 0 when free. OverlayWorkspaceLive.cpp defines it; the
+// game loop's page initialization still clears it directly.
 extern char overlayWorkspaceOwner;
 
 int AcquireLiveOverlayWorkspace(int owner_tag);

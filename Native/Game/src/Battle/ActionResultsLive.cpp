@@ -215,7 +215,8 @@ void ApplyLiveActionTargetEffects(int actor_id, SVECTOR* position) {
   ApplyActionTargetEffects(actor_id, effects);
 }
 
-// decomp: _applyBattleAbilityEffect (src/BATTLE/BATTLE.PRG/146C.c:14018).
+// decomp: applyBattleAbilityEffect (src/BATTLE/BATTLE.PRG/146C.c:13884; was
+// _applyBattleAbilityEffect).
 void ApplyLiveActorActionResult(VS::Battle::HitResult* hit) {
   if (hit == nullptr) {
     VS::Core::LogError("combat", "Action result requires a hit");

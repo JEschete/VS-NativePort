@@ -66,7 +66,7 @@ std::array<std::int16_t, kLimbCount> LimbArmorDpLoss() {
 }  // namespace
 
 // decomp: BATTLE.PRG vs_battle_applyWeaponStats
-// (src/BATTLE/BATTLE.PRG/146C.c:968)
+// (src/BATTLE/BATTLE.PRG/146C.c:624)
 void BuildLiveWeaponStatsFromParts(
     VS::Items::WeaponLoadout* target,
     const VS::Items::WeaponSpawnLoadout* source) {
@@ -81,7 +81,7 @@ void BuildLiveWeaponStatsFromParts(
 }
 
 // decomp: BATTLE.PRG vs_battle_applyShieldStats
-// (src/BATTLE/BATTLE.PRG/146C.c:1028)
+// (src/BATTLE/BATTLE.PRG/146C.c:683)
 void BuildLiveShieldStatsFromParts(
     VS::Items::ShieldLoadout* target,
     const VS::Items::ShieldSpawnLoadout* source) {
@@ -94,7 +94,8 @@ void BuildLiveShieldStatsFromParts(
   *target = shield;
 }
 
-// decomp: BATTLE.PRG _applyAccessoryStats (src/BATTLE/BATTLE.PRG/146C.c:1080)
+// decomp: BATTLE.PRG applyAccessoryStats (src/BATTLE/BATTLE.PRG/146C.c:734; was
+// _applyAccessoryStats)
 void BuildLiveAccessoryStatsFromPart(VS::Items::AccessorySpawnLoadout* target,
                                      const VS::Items::AccessoryInit* source) {
   if (target == nullptr || source == nullptr) {
@@ -106,7 +107,8 @@ void BuildLiveAccessoryStatsFromPart(VS::Items::AccessorySpawnLoadout* target,
   *target = accessory;
 }
 
-// decomp: BATTLE.PRG _applyArmorStats (src/BATTLE/BATTLE.PRG/146C.c:1105)
+// decomp: BATTLE.PRG applyArmorStats (src/BATTLE/BATTLE.PRG/146C.c:759; was
+// _applyArmorStats)
 void BuildLiveArmorStatsFromPart(VS::Items::ArmorLoadout* target,
                                  const VS::Items::ArmorInit* source) {
   if (target == nullptr || source == nullptr) {
@@ -119,7 +121,7 @@ void BuildLiveArmorStatsFromPart(VS::Items::ArmorLoadout* target,
 }
 
 // decomp: BATTLE.PRG vs_battle_copyInventoryBladeStats
-// (src/BATTLE/BATTLE.PRG/146C.c:1142)
+// (src/BATTLE/BATTLE.PRG/146C.c:796)
 void ReadLiveInventoryBladeStats(VS::Items::EquipmentPart* target,
                                  const VS::Items::InventoryBlade* source) {
   if (target == nullptr || source == nullptr) {
@@ -130,7 +132,7 @@ void ReadLiveInventoryBladeStats(VS::Items::EquipmentPart* target,
 }
 
 // decomp: BATTLE.PRG vs_battle_copyInventoryGripStats
-// (src/BATTLE/BATTLE.PRG/146C.c:1179)
+// (src/BATTLE/BATTLE.PRG/146C.c:832)
 void ReadLiveInventoryGripStats(VS::Items::EquipmentPart* target,
                                 const VS::Items::InventoryGrip* source) {
   if (target == nullptr || source == nullptr) {
@@ -141,7 +143,7 @@ void ReadLiveInventoryGripStats(VS::Items::EquipmentPart* target,
 }
 
 // decomp: BATTLE.PRG vs_battle_copyInventoryArmorStats
-// (src/BATTLE/BATTLE.PRG/146C.c:1198)
+// (src/BATTLE/BATTLE.PRG/146C.c:850)
 void ReadLiveInventoryArmorStats(VS::Items::EquipmentPart* target,
                                  const VS::Items::InventoryArmor* source) {
   if (target == nullptr || source == nullptr) {
@@ -152,7 +154,7 @@ void ReadLiveInventoryArmorStats(VS::Items::EquipmentPart* target,
 }
 
 // decomp: BATTLE.PRG vs_battle_copyInventoryGemStats
-// (src/BATTLE/BATTLE.PRG/146C.c:1235)
+// (src/BATTLE/BATTLE.PRG/146C.c:886)
 void ReadLiveInventoryGemStats(VS::Items::EquipmentPart* target,
                                const VS::Items::InventoryGem* source) {
   if (target == nullptr || source == nullptr) {
@@ -162,7 +164,7 @@ void ReadLiveInventoryGemStats(VS::Items::EquipmentPart* target,
   ReadInventoryGemStats(*target, *source);
 }
 
-// decomp: BATTLE.PRG vs_battle_applyWeapon (src/BATTLE/BATTLE.PRG/146C.c:1257)
+// decomp: BATTLE.PRG vs_battle_applyWeapon (src/BATTLE/BATTLE.PRG/146C.c:907)
 void LoadLiveInventoryWeaponStats(VS::Items::WeaponLoadout* target,
                                   const VS::Items::InventoryWeapon* source) {
   if (target == nullptr) {
@@ -175,7 +177,7 @@ void LoadLiveInventoryWeaponStats(VS::Items::WeaponLoadout* target,
   *target = weapon;
 }
 
-// decomp: BATTLE.PRG vs_battle_applyShield (src/BATTLE/BATTLE.PRG/146C.c:1295)
+// decomp: BATTLE.PRG vs_battle_applyShield (src/BATTLE/BATTLE.PRG/146C.c:945)
 void LoadLiveInventoryShieldStats(VS::Items::ShieldLoadout* target,
                                   const VS::Items::InventoryShield* source) {
   if (target == nullptr) {
@@ -188,7 +190,7 @@ void LoadLiveInventoryShieldStats(VS::Items::ShieldLoadout* target,
   *target = shield;
 }
 
-// decomp: BATTLE.PRG vs_battle_applyArmor (src/BATTLE/BATTLE.PRG/146C.c:1321)
+// decomp: BATTLE.PRG vs_battle_applyArmor (src/BATTLE/BATTLE.PRG/146C.c:971)
 void LoadLiveInventoryArmorStats(VS::Items::ArmorLoadout* target,
                                  const VS::Items::InventoryArmor* source) {
   if (target == nullptr) {
@@ -201,7 +203,7 @@ void LoadLiveInventoryArmorStats(VS::Items::ArmorLoadout* target,
 }
 
 // decomp: BATTLE.PRG vs_battle_applyAccessory
-// (src/BATTLE/BATTLE.PRG/146C.c:1338)
+// (src/BATTLE/BATTLE.PRG/146C.c:988)
 void LoadLiveInventoryAccessoryStats(VS::Items::AccessorySpawnLoadout* target,
                                      const VS::Items::InventoryArmor* source) {
   if (target == nullptr) {
@@ -213,7 +215,7 @@ void LoadLiveInventoryAccessoryStats(VS::Items::AccessorySpawnLoadout* target,
   *target = accessory;
 }
 
-// decomp: BATTLE.PRG vs_battle_equipWeapon (src/BATTLE/BATTLE.PRG/146C.c:1386)
+// decomp: BATTLE.PRG vs_battle_equipWeapon (src/BATTLE/BATTLE.PRG/146C.c:1035)
 void EquipLiveAshleyWeapon(const VS::Items::InventoryWeapon* weapon) {
   auto* stats = AshleyStats("EquipAshleyWeapon");
   if (stats == nullptr) return;
@@ -227,7 +229,7 @@ void EquipLiveAshleyWeapon(const VS::Items::InventoryWeapon* weapon) {
   WarnRefusal("EquipAshleyWeapon", status);
 }
 
-// decomp: BATTLE.PRG vs_battle_equipShield (src/BATTLE/BATTLE.PRG/146C.c:1411)
+// decomp: BATTLE.PRG vs_battle_equipShield (src/BATTLE/BATTLE.PRG/146C.c:1060)
 void EquipLiveAshleyShield(const VS::Items::InventoryShield* shield) {
   auto* stats = AshleyStats("EquipAshleyShield");
   if (stats == nullptr) return;
@@ -239,7 +241,7 @@ void EquipLiveAshleyShield(const VS::Items::InventoryShield* shield) {
   WarnRefusal("EquipAshleyShield", status);
 }
 
-// decomp: BATTLE.PRG vs_battle_equipArmor (src/BATTLE/BATTLE.PRG/146C.c:1419)
+// decomp: BATTLE.PRG vs_battle_equipArmor (src/BATTLE/BATTLE.PRG/146C.c:1068)
 void EquipLiveAshleyArmor(int body_part,
                           const VS::Items::InventoryArmor* armor) {
   auto* stats = AshleyStats("EquipAshleyArmor");
@@ -259,7 +261,7 @@ void EquipLiveAshleyArmor(int body_part,
 }
 
 // decomp: BATTLE.PRG vs_battle_equipAccessory
-// (src/BATTLE/BATTLE.PRG/146C.c:1427)
+// (src/BATTLE/BATTLE.PRG/146C.c:1076)
 void EquipLiveAshleyAccessory(const VS::Items::InventoryArmor* accessory) {
   auto* stats = AshleyStats("EquipAshleyAccessory");
   if (stats == nullptr) return;
@@ -270,7 +272,7 @@ void EquipLiveAshleyAccessory(const VS::Items::InventoryArmor* accessory) {
 }
 
 // decomp: BATTLE.PRG vs_battle_copyUiBladeStats
-// (src/BATTLE/BATTLE.PRG/146C.c:1435)
+// (src/BATTLE/BATTLE.PRG/146C.c:1084)
 void WriteLiveInventoryBladeStats(VS::Items::InventoryBlade* target,
                                   const VS::Items::EquipmentPart* source) {
   if (target == nullptr || source == nullptr) {
@@ -281,7 +283,7 @@ void WriteLiveInventoryBladeStats(VS::Items::InventoryBlade* target,
 }
 
 // decomp: BATTLE.PRG vs_battle_copyUiGripStats
-// (src/BATTLE/BATTLE.PRG/146C.c:1471)
+// (src/BATTLE/BATTLE.PRG/146C.c:1119)
 void WriteLiveInventoryGripStats(VS::Items::InventoryGrip* target,
                                  const VS::Items::EquipmentPart* source) {
   if (target == nullptr || source == nullptr) {
@@ -292,7 +294,7 @@ void WriteLiveInventoryGripStats(VS::Items::InventoryGrip* target,
 }
 
 // decomp: BATTLE.PRG vs_battle_copyUiGemStats
-// (src/BATTLE/BATTLE.PRG/146C.c:1489)
+// (src/BATTLE/BATTLE.PRG/146C.c:1136)
 void WriteLiveInventoryGemStats(VS::Items::InventoryGem* target,
                                 const VS::Items::EquipmentPart* source) {
   if (target == nullptr || source == nullptr) {
@@ -302,8 +304,8 @@ void WriteLiveInventoryGemStats(VS::Items::InventoryGem* target,
   WriteInventoryGemStats(*target, *source);
 }
 
-// decomp: BATTLE.PRG vs_battle_copyUiEquipmentStats
-// (src/BATTLE/BATTLE.PRG/146C.c:1509)
+// decomp: BATTLE.PRG copyUiEquipmentStats
+// (src/BATTLE/BATTLE.PRG/146C.c:1156; was vs_battle_copyUiEquipmentStats)
 void WriteLiveInventoryArmorStats(VS::Items::InventoryArmor* target,
                                   const VS::Items::EquipmentPart* source) {
   if (target == nullptr || source == nullptr) {
@@ -314,7 +316,7 @@ void WriteLiveInventoryArmorStats(VS::Items::InventoryArmor* target,
 }
 
 // decomp: BATTLE.PRG vs_battle_copyUiWeaponStats
-// (src/BATTLE/BATTLE.PRG/146C.c:1545)
+// (src/BATTLE/BATTLE.PRG/146C.c:1191)
 // `target` is usually a weapon of the inventory itself: the inventory is
 // committed first so the record's new name is not overwritten.
 void StoreLiveInventoryWeaponStats(VS::Items::InventoryWeapon* target,
@@ -334,7 +336,7 @@ void StoreLiveInventoryWeaponStats(VS::Items::InventoryWeapon* target,
 }
 
 // decomp: BATTLE.PRG vs_battle_copyUiAccessoryStats
-// (src/BATTLE/BATTLE.PRG/146C.c:1600)
+// (src/BATTLE/BATTLE.PRG/146C.c:1244)
 void StoreLiveInventoryAccessoryStats(
     VS::Items::InventoryArmor* target,
     const VS::Items::AccessorySpawnLoadout* source) {
@@ -345,8 +347,8 @@ void StoreLiveInventoryAccessoryStats(
   StoreInventoryAccessoryStats(*target, *source);
 }
 
-// decomp: BATTLE.PRG _calculateArmorClassAffinity
-// (src/BATTLE/BATTLE.PRG/146C.c:9582)
+// decomp: BATTLE.PRG calculateArmorClassAffinity
+// (src/BATTLE/BATTLE.PRG/146C.c:9572; was _calculateArmorClassAffinity)
 void RebuildLiveArmorClassAffinity(VS::Battle::ActorStats* actor_stats,
                                    int limb_index) {
   if (actor_stats == nullptr) {
@@ -363,8 +365,8 @@ void RebuildLiveArmorClassAffinity(VS::Battle::ActorStats* actor_stats,
   limb_armor = armor;
 }
 
-// decomp: BATTLE.PRG _calculateShieldClassAffinity
-// (src/BATTLE/BATTLE.PRG/146C.c:9600)
+// decomp: BATTLE.PRG calculateShieldClassAffinity
+// (src/BATTLE/BATTLE.PRG/146C.c:9590; was _calculateShieldClassAffinity)
 void RebuildLiveShieldClassAffinity(VS::Battle::ActorStats* actor_stats) {
   if (actor_stats == nullptr) {
     WarnNullRecord("RebuildShieldClassAffinity");
@@ -375,8 +377,8 @@ void RebuildLiveShieldClassAffinity(VS::Battle::ActorStats* actor_stats) {
   actor_stats->shield = shield;
 }
 
-// decomp: BATTLE.PRG _calculateWeaponClassAffinity
-// (src/BATTLE/BATTLE.PRG/146C.c:9622)
+// decomp: BATTLE.PRG calculateWeaponClassAffinity
+// (src/BATTLE/BATTLE.PRG/146C.c:9612; was _calculateWeaponClassAffinity)
 void RebuildLiveWeaponClassAffinity(VS::Battle::ActorStats* actor_stats) {
   if (actor_stats == nullptr) {
     WarnNullRecord("RebuildWeaponClassAffinity");
@@ -387,9 +389,9 @@ void RebuildLiveWeaponClassAffinity(VS::Battle::ActorStats* actor_stats) {
   actor_stats->weapon = weapon;
 }
 
-// decomp: BATTLE.PRG _adjustDpPp (src/BATTLE/BATTLE.PRG/146C.c:10689)
-// The attacker's weapon and the defender's shield and armour are disjoint, so
-// an actor hitting itself commits both sides.
+// decomp: BATTLE.PRG adjustDpPp (src/BATTLE/BATTLE.PRG/146C.c:10624; was
+// _adjustDpPp) The attacker's weapon and the defender's shield and armour are
+// disjoint, so an actor hitting itself commits both sides.
 void ConsumeLiveHitEquipmentDp(const ActionDefinition* action,
                                VS::Battle::ActorStats* source,
                                VS::Battle::ActorStats* target, int amount) {
@@ -407,7 +409,7 @@ void ConsumeLiveHitEquipmentDp(const ActionDefinition* action,
   WarnRefusal("ConsumeHitEquipmentDp", status);
 }
 
-// decomp: BATTLE.PRG func_800803A4 (src/BATTLE/BATTLE.PRG/146C.c:10721)
+// decomp: BATTLE.PRG func_800803A4 (src/BATTLE/BATTLE.PRG/146C.c:10656)
 void AccumulateLiveHitEquipmentPp(const ActionDefinition* action,
                                   VS::Battle::ActorStats* source_stats,
                                   VS::Battle::ActorStats* target_stats,
@@ -446,7 +448,7 @@ void GrowLiveDefenderEquipmentRatings(const ActionDefinition* action,
   WarnRefusal("GrowDefenderEquipmentRatings", status);
 }
 
-// decomp: BATTLE.PRG func_80080F78 (src/BATTLE/BATTLE.PRG/146C.c:11178)
+// decomp: BATTLE.PRG func_80080F78 (src/BATTLE/BATTLE.PRG/146C.c:11112)
 void GrowLiveAttackerWeaponRatings(const ActionDefinition* action,
                                    VS::Battle::ActorStats* attacker_stats,
                                    int defender_class_id,
@@ -466,7 +468,8 @@ void GrowLiveAttackerWeaponRatings(const ActionDefinition* action,
   WarnRefusal("GrowAttackerWeaponRatings", status);
 }
 
-// decomp: BATTLE.PRG _itemRecovery (src/BATTLE/BATTLE.PRG/146C.c:12109)
+// decomp: BATTLE.PRG itemRecovery (src/BATTLE/BATTLE.PRG/146C.c:12032; was
+// _itemRecovery)
 std::int16_t CalculateLiveItemRecovery(
     ActionDefinition* action, VS::Battle::HitResult* /*attacker_result*/,
     VS::Battle::HitResult* /*target_result*/, int hit_index,

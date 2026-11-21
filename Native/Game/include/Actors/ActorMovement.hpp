@@ -247,12 +247,12 @@ void BeginActorJumpToTile(MovementHost& host, MovementActor& actor,
 void ApplyActorGroundOffset(MovementHost& host, MovementActor& actor);
 // decomp: BATTLE.PRG func_800A2790 (src/BATTLE/BATTLE.PRG/38C1C.c:677)
 void ApplyActorFlightMovement(MovementHost& host, MovementActor& actor);
-// decomp: BATTLE.PRG func_800A291C (src/BATTLE/BATTLE.PRG/38C1C.c:712)
+// decomp: BATTLE.PRG func_800A291C (src/BATTLE/BATTLE.PRG/38C1C.c:701)
 void ApplyActorMovementVector(MovementActor& actor);
 // decomp: BATTLE.PRG func_800A29A0 (src/BATTLE/BATTLE.PRG/3A1A0.c:86)
 // An absent parent or companion counts as settled.
 void UpdateActorTeleportTransition(MovementHost& host, MovementActor& actor);
-// decomp: BATTLE.PRG func_800A2C48 (src/BATTLE/BATTLE.PRG/3A1A0.c:153)
+// decomp: BATTLE.PRG func_800A2C48 (src/BATTLE/BATTLE.PRG/3A1A0.c:126)
 // Cancels along the companion chain; each actor is cancelled once, so a
 // cyclic chain ends.
 void CancelActorTeleportTransition(MovementHost& host, MovementActor& actor);
@@ -269,15 +269,15 @@ void UpdateActorPlatformContact(MovementHost& host, MovementActor& actor,
 void UpdateRoomActorMovement(MovementHost& host);
 // decomp: BATTLE.PRG func_800A4E68 (src/BATTLE/BATTLE.PRG/3A1A0.c:1199)
 void UpdateActorMovement(MovementHost& host, int id);
-// decomp: BATTLE.PRG func_800A5280 (src/BATTLE/BATTLE.PRG/3A1A0.c:1347)
+// decomp: BATTLE.PRG func_800A5280 (src/BATTLE/BATTLE.PRG/3A1A0.c:1345)
 // The original's status result is never read; a step blocked before any
 // probe climbs 0 (#294).
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
 void MoveActorWithCollision(MovementHost& host, int id, int direction,
                             int distance, const MoveInput& input);
-// decomp: BATTLE.PRG func_800A6660 (src/BATTLE/BATTLE.PRG/3A1A0.c:1920)
+// decomp: BATTLE.PRG func_800A6660 (src/BATTLE/BATTLE.PRG/3A1A0.c:1347)
 void UpdateActorSteering(MovementActor& actor, int target_facing,
                          bool restart_turn);
-// decomp: BATTLE.PRG func_800AC690 (src/BATTLE/BATTLE.PRG/40564.c:2297)
+// decomp: BATTLE.PRG func_800AC690 (src/BATTLE/BATTLE.PRG/40564.c:1981)
 void UpdateActorJumpAndFall(MovementHost& host, int id, MovementActor& actor);
 }  // namespace VS::Actors

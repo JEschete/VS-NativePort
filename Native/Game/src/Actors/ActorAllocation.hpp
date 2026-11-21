@@ -27,7 +27,7 @@ struct ActorAndStats {
   VS::Battle::ActorStats stats;
 };
 
-// decomp: Actor_dat2 (src/BATTLE/BATTLE.PRG/actor.h:151-162)
+// decomp: Actor_dat2 (src/BATTLE/BATTLE.PRG/actor.h:152-162)
 struct ActorCore {
   ActorAndStats actor;
   VS::Actors::ModelInstance model;

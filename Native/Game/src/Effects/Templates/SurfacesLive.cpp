@@ -266,9 +266,9 @@ std::optional<SurfaceDefinition> LiveSurfaceServices::CreateDefinition(
   return TypedDefinition(*definition);
 }
 
-// decomp: surfaces.h:69-90, mirroredSurfaces.h:69-90 and
-// rotatingSurfaces.h:78-99 (the row intensities). The original read the
-// transparency curve unchecked, from index 0 rather than the sampler's 1;
+// decomp: src/EFFECT/surfaces.h:69-90, mirroredSurfaces.h:69-90 and
+// src/EFFECT/rotatingSurfaces.h:78-99 (the row intensities). The original read
+// the transparency curve unchecked, from index 0 rather than the sampler's 1;
 // a curve the package lacks, or one without entries, leaves every row at
 // full intensity here.
 std::span<const std::uint8_t> LiveSurfaceServices::FactorCurve(
@@ -451,11 +451,11 @@ std::optional<RingTexture> LiveSurfaceServices::AdvanceTexture(
                      .h = texture.h};
 }
 
-// decomp: grids.h:237-257, meshes10.h:208-233, surfaces.h:200-247,
-// mirroredSurfaces.h:220-268 and rotatingSurfaces.h:236-286 (addPrim at the
-// primitive's depth). The original wrote past the primitive buffer when it
-// was full; a primitive without room or outside the scene table is dropped
-// here.
+// decomp: src/EFFECT/grids.h:237-257, src/EFFECT/meshes10.h:208-233,
+// src/EFFECT/surfaces.h:200-247, mirroredSurfaces.h:220-268 and
+// src/EFFECT/rotatingSurfaces.h:236-286 (addPrim at the primitive's depth). The
+// original wrote past the primitive buffer when it was full; a primitive
+// without room or outside the scene table is dropped here.
 void LiveSurfaceServices::Submit(std::span<const std::uint32_t> words,
                                  std::int32_t depth) const {
   std::uint32_t* const entry =
@@ -479,8 +479,8 @@ void LiveSurfaceServices::Submit(std::span<const std::uint32_t> words,
   VS::Render::FrameScratchpad().primitive_cursor = packet + words.size();
 }
 
-// decomp: meshes10.h:236-248 (the tick event through the transform's world
-// matrix, by way of the scratch vector and aim point).
+// decomp: src/EFFECT/meshes10.h:236-248 (the tick event through the transform's
+// world matrix, by way of the scratch vector and aim point).
 Vec3 LiveSurfaceServices::TransformByActor(RingPoint point) const {
   const MATRIX& world =
       instance_->transforms[definition_->transform_index].world;
@@ -523,8 +523,9 @@ void* LiveSurfaceServices::AllocateState(std::size_t bytes) const {
   return state;
 }
 
-// decomp: meshes10.h:44-50, surfaces.h:91-93, mirroredSurfaces.h:91-93 and
-// rotatingSurfaces.h:100-102 (the animation a create starts).
+// decomp: src/EFFECT/meshes10.h:52-256, src/EFFECT/surfaces.h:91-93,
+// mirroredSurfaces.h:91-93 and src/EFFECT/rotatingSurfaces.h:100-102 (the
+// animation a create starts).
 void LiveSurfaceServices::StartAnimation(
     LiveParticleTextureAnimation& animation, SurfaceAnimation source) const {
   const int tables = VS::Effects::package->texture_table_count;
@@ -642,10 +643,11 @@ class LiveSurfaceHost final : public SurfaceRecordHost<Record> {
   LiveSurfaceHost(LiveRendererSlot& slot, std::string_view name)
       : slot_(slot), services_(name) {}
 
-  // decomp: grids.h:40-62, meshes10.h:40-51, surfaces.h:56-94,
-  // mirroredSurfaces.h:56-94 and rotatingSurfaces.h:65-103 (the create
-  // command). The original allocated the state unchecked and left the
-  // reserved fields as the heap held them.
+  // decomp: src/EFFECT/grids.h:40-62, src/EFFECT/meshes10.h:52-256,
+  // src/EFFECT/surfaces.h:62-373, mirroredSurfaces.h:56-94 and
+  // src/EFFECT/rotatingSurfaces.h:65-103 (the create command). The original
+  // allocated the state unchecked and left the reserved fields as the heap held
+  // them.
   void Create(const Record& state,
               std::optional<SurfaceAnimation> animation) override {
     auto* live = static_cast<Live*>(services_.AllocateState(sizeof(Live)));

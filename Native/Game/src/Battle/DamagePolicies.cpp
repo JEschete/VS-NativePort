@@ -26,7 +26,7 @@ void AddShare(HitLimbAmounts hit, ArmorLossAmounts armor_loss, std::size_t limb,
 }
 }  // namespace
 
-// decomp: func_8007FE5C (src/BATTLE/BATTLE.PRG/146C.c:10534).
+// decomp: func_8007FE5C (src/BATTLE/BATTLE.PRG/146C.c:10469).
 // Original [0x8007FE5C,0x8007FF8C): presence, not a stacking per-gem bonus.
 std::int16_t ApplyDamageGemMultiplier(std::uint8_t action_type,
                                       std::int16_t damage, DamageGems weapon,
@@ -55,7 +55,7 @@ void ClearHitLimbArmorLoss(ArmorLossAmounts armor_loss) {
   std::fill_n(armor_loss.begin(), Items::kLimbCount, 0);
 }
 
-// decomp: func_80080000 (src/BATTLE/BATTLE.PRG/146C.c:10612).
+// decomp: func_80080000 (src/BATTLE/BATTLE.PRG/146C.c:10547).
 // Original [0x80080000,0x800801E0), SLUS jump table at 0x80068A90.
 bool DistributeHitLimbDamage(std::uint8_t category, int selected_limb,
                              std::int16_t amount,
@@ -93,7 +93,7 @@ bool DistributeHitLimbDamage(std::uint8_t category, int selected_limb,
   return true;
 }
 
-// decomp: func_800801E0 (src/BATTLE/BATTLE.PRG/146C.c:10664).
+// decomp: func_800801E0 (src/BATTLE/BATTLE.PRG/146C.c:10599).
 // Original [0x800801E0,0x800802C4): no DP reset, including total cancellation.
 void DistributeLimbRecovery(
     std::int16_t amount,
@@ -114,17 +114,18 @@ void DistributeLimbRecovery(
   }
 }
 
-// decomp: _getLastValue (src/BATTLE/BATTLE.PRG/146C.c:11237).
+// decomp: getLastValue (src/BATTLE/BATTLE.PRG/146C.c:11170; was _getLastValue).
 std::int16_t LastActionStatValue(std::uint32_t last_value) {
   return Narrow(last_value);
 }
-// decomp: _factorLastValue (src/BATTLE/BATTLE.PRG/146C.c:12228).
+// decomp: factorLastValue (src/BATTLE/BATTLE.PRG/146C.c:12144; was
+// _factorLastValue).
 std::int16_t ScaleLastActionStatValue(std::uint32_t last_value,
                                       std::uint8_t factor) {
   constexpr std::uint32_t kTenths = 10;
   const std::uint32_t product = last_value * factor;
   return Narrow(product / kTenths);
 }
-// decomp: _getRisk (src/BATTLE/BATTLE.PRG/146C.c:12241).
+// decomp: getRisk (src/BATTLE/BATTLE.PRG/146C.c:12156; was _getRisk).
 std::int16_t TargetRisk(std::uint16_t risk) { return Narrow(risk); }
 }  // namespace VS::Battle

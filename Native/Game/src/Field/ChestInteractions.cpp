@@ -67,7 +67,8 @@ std::int32_t RoomObjectLockedNotification(const RoomObjectLockState& state) {
 
 }  // namespace
 
-// decomp: BATTLE.PRG func_8008A4FC (146C.c:15530), original53MIPS.
+// decomp: BATTLE.PRG func_8008A4FC (src/BATTLE/BATTLE.PRG/146C.c:15400),
+// original53MIPS.
 std::uint8_t CurrentSavePointId(SavePointQueryHost& host) {
   constexpr std::int16_t kSavePointKind = 16;
   const auto placement = host.PlayerPlacement();
@@ -87,7 +88,8 @@ std::uint8_t CurrentSavePointId(SavePointQueryHost& host) {
   return trigger && trigger->kind == kSavePointKind ? trigger->activation : 0;
 }
 
-// decomp: BATTLE.PRG func_8009E634 (30DB0.c:2695), original51MIPS.
+// decomp: BATTLE.PRG func_8009E634 (src/BATTLE/BATTLE.PRG/30DB0.c:2761),
+// original51MIPS.
 bool RefreshAshleyInteractionTile(const AshleyInteractionTileState& state,
                                   AshleyInteractionTileHost& host) {
   constexpr std::uint32_t kFirstShortReachAnimation = 0x47;
@@ -116,7 +118,8 @@ bool RefreshAshleyInteractionTile(const AshleyInteractionTileState& state,
       static_cast<std::int32_t>(state.tile_z) + (along_x ? 0 : reach));
 }
 
-// decomp: scripted-fall door in BATTLE.PRG func_80074BAC (146C.c:5365).
+// decomp: scripted-fall door in BATTLE.PRG func_80074BAC
+// (src/BATTLE/BATTLE.PRG/146C.c:5094).
 DoorRecord BuildScriptedFallDoor(const ScriptedFallDestination& destination,
                                  const Actors::PackedTile& tile) {
   constexpr unsigned kFallFacingShift = 6;
@@ -134,7 +137,8 @@ DoorRecord BuildScriptedFallDoor(const ScriptedFallDestination& destination,
               static_cast<std::uint8_t>(tile.spare >> kFallFacingShift)};
 }
 
-// decomp: fall tail of BATTLE.PRG func_80074BAC (146C.c:5365), 800750CC-75184.
+// decomp: fall tail of BATTLE.PRG func_80074BAC
+// (src/BATTLE/BATTLE.PRG/146C.c:5094), 800750CC-75184.
 AshleyFallResult CheckAshleyFall(std::int32_t actor,
                                  const Actors::ActorPlacementView& placement,
                                  bool pit, AshleyFallHost& host) {
@@ -243,7 +247,7 @@ bool TryAshleyTileDoor(std::int32_t actor, const Actors::PackedTile& lookup,
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_80074BAC (src/BATTLE/BATTLE.PRG/146C.c:5365).
+// decomp: BATTLE.PRG func_80074BAC (src/BATTLE/BATTLE.PRG/146C.c:5094).
 bool CheckAshleyTileTriggers(std::int32_t actor,
                              const Actors::ActorPlacementView& placement,
                              AshleyTileTriggerHost& host) {
@@ -286,7 +290,7 @@ bool CheckAshleyTileTriggers(std::int32_t actor,
          AshleyFallResult::kHandled;
 }
 
-// decomp: BATTLE.PRG func_800751B8 (src/BATTLE/BATTLE.PRG/146C.c:5514).
+// decomp: BATTLE.PRG func_800751B8 (src/BATTLE/BATTLE.PRG/146C.c:5262).
 ActorTileTriggerResult CheckActorTrapAndFallTriggers(
     std::int32_t actor, const Actors::ActorPlacementView& placement,
     ActorTileTriggerHost& host) {
@@ -332,7 +336,7 @@ ActorTileTriggerResult CheckActorTrapAndFallTriggers(
   return ActorTileTriggerResult::kNone;
 }
 
-// decomp: BATTLE.PRG func_80073E30 (src/BATTLE/BATTLE.PRG/146C.c:4935).
+// decomp: BATTLE.PRG func_80073E30 (src/BATTLE/BATTLE.PRG/146C.c:4665).
 bool TryOpenChest(ChestTarget target, ChestInteractionHost& host) {
   const auto chest = host.Chest(target);
   if (!chest) {
@@ -360,7 +364,7 @@ bool TryOpenChest(ChestTarget target, ChestInteractionHost& host) {
   return can_open && host.StartAnimation(target);
 }
 
-// decomp: BATTLE.PRG func_80074050 (src/BATTLE/BATTLE.PRG/146C.c:4993).
+// decomp: BATTLE.PRG func_80074050 (src/BATTLE/BATTLE.PRG/146C.c:4723).
 bool BeginChestInteraction(ChestTarget target, std::int32_t actor,
                            ChestInteractionHost& host) {
   const auto chest = host.Chest(target);
@@ -374,7 +378,7 @@ bool BeginChestInteraction(ChestTarget target, std::int32_t actor,
   return true;
 }
 
-// decomp: BATTLE.PRG func_800742A4 (src/BATTLE/BATTLE.PRG/146C.c:5066).
+// decomp: BATTLE.PRG func_800742A4 (src/BATTLE/BATTLE.PRG/146C.c:4796).
 bool FinishChestInteraction(ChestInteractionHost& host) {
   const auto target = host.SelectedChest();
   const auto chest = target ? host.Chest(*target) : std::nullopt;
@@ -387,7 +391,7 @@ bool FinishChestInteraction(ChestInteractionHost& host) {
   return true;
 }
 
-// decomp: BATTLE.PRG func_800743E0 (src/BATTLE/BATTLE.PRG/146C.c:5107).
+// decomp: BATTLE.PRG func_800743E0 (src/BATTLE/BATTLE.PRG/146C.c:4837).
 bool OpenChestContents(ChestInteractionHost& host) {
   const auto target = host.SelectedChest();
   const auto chest = target ? host.Chest(*target) : std::nullopt;
@@ -420,7 +424,7 @@ bool OpenChestContents(ChestInteractionHost& host) {
   return true;
 }
 
-// decomp: BATTLE.PRG func_800744B8 (src/BATTLE/BATTLE.PRG/146C.c:5139).
+// decomp: BATTLE.PRG func_800744B8 (src/BATTLE/BATTLE.PRG/146C.c:4869).
 bool UpdateChestContentsSelection(ChestInteractionHost& host) {
   const auto target = host.SelectedChest();
   const auto chest = target ? host.Chest(*target) : std::nullopt;
@@ -448,7 +452,7 @@ bool UpdateChestContentsSelection(ChestInteractionHost& host) {
   return false;
 }
 
-// decomp: BATTLE.PRG func_800741D4 (src/BATTLE/BATTLE.PRG/146C.c:5044).
+// decomp: BATTLE.PRG func_800741D4 (src/BATTLE/BATTLE.PRG/146C.c:4774).
 bool DispatchTrapOrChestInteraction(InteractionDispatchHost& host) {
   const auto target = host.Target();
   if (host.TrapMode()) {
@@ -467,7 +471,7 @@ bool DispatchTrapOrChestInteraction(InteractionDispatchHost& host) {
   return host.DispatchChest(*chest);
 }
 
-// decomp: BATTLE.PRG func_80074314 (src/BATTLE/BATTLE.PRG/146C.c:5080).
+// decomp: BATTLE.PRG func_80074314 (src/BATTLE/BATTLE.PRG/146C.c:4810).
 bool FinishTrapInteraction(TrapFinishHost& host) {
   const auto target = host.Target();
   if (!target) {
@@ -480,7 +484,7 @@ bool FinishTrapInteraction(TrapFinishHost& host) {
   return disabled;
 }
 
-// decomp: BATTLE.PRG func_80073F7C (src/BATTLE/BATTLE.PRG/146C.c:4973).
+// decomp: BATTLE.PRG func_80073F7C (src/BATTLE/BATTLE.PRG/146C.c:4703).
 bool BeginTrapInteraction(TrapTarget target, std::int32_t actor,
                           TrapSelectionHost& host) {
   if (!host.Valid(target, actor)) {
@@ -496,7 +500,7 @@ bool BeginTrapInteraction(TrapTarget target, std::int32_t actor,
   return true;
 }
 
-// decomp: BATTLE.PRG func_80073D30 (src/BATTLE/BATTLE.PRG/146C.c:4909).
+// decomp: BATTLE.PRG func_80073D30 (src/BATTLE/BATTLE.PRG/146C.c:4639).
 bool TriggerActorTrap(TrapTarget target, const TrapActionInput& input,
                       TrapActionHost& host) {
   if (input.actor < 0 || input.actor >= kTrapActorSlots ||
@@ -520,7 +524,7 @@ bool TriggerActorTrap(TrapTarget target, const TrapActionInput& input,
       .source_position = std::nullopt});
 }
 
-// decomp: BATTLE.PRG func_80074120 (src/BATTLE/BATTLE.PRG/146C.c:5019).
+// decomp: BATTLE.PRG func_80074120 (src/BATTLE/BATTLE.PRG/146C.c:4749).
 bool WaitForChestCameraFocus(InteractionCameraHost& host) {
   const auto focus = host.Focus();
   if (!focus) {
@@ -530,7 +534,7 @@ bool WaitForChestCameraFocus(InteractionCameraHost& host) {
          (host.AshleyStateFlags() & kInteractionAnimationReady) == 0;
 }
 
-// decomp: BATTLE.PRG func_8007418C (src/BATTLE/BATTLE.PRG/146C.c:5034).
+// decomp: BATTLE.PRG func_8007418C (src/BATTLE/BATTLE.PRG/146C.c:4764).
 std::optional<std::int32_t> StepTrapCameraFocus(InteractionCameraHost& host) {
   const auto focus = host.Focus();
   if (!focus) {
@@ -539,7 +543,7 @@ std::optional<std::int32_t> StepTrapCameraFocus(InteractionCameraHost& host) {
   return host.StepLookAt(*focus, 0, kInteractionCameraSpeed);
 }
 
-// decomp: BATTLE.PRG func_8007424C (src/BATTLE/BATTLE.PRG/146C.c:5055).
+// decomp: BATTLE.PRG func_8007424C (src/BATTLE/BATTLE.PRG/146C.c:4785).
 bool IsChestAnimationReady(InteractionCameraHost& host) {
   if ((host.AshleyStateFlags() & kInteractionAnimationReady) == 0) {
     return false;
@@ -547,7 +551,7 @@ bool IsChestAnimationReady(InteractionCameraHost& host) {
   return !host.NotificationPending();
 }
 
-// decomp: BATTLE.PRG func_80074374 (src/BATTLE/BATTLE.PRG/146C.c:5089).
+// decomp: BATTLE.PRG func_80074374 (src/BATTLE/BATTLE.PRG/146C.c:4819).
 std::optional<std::int32_t> TrackInteractionCameraToAshley(
     InteractionCameraHost& host) {
   auto point = host.AshleyPosition();
@@ -561,7 +565,7 @@ std::optional<std::int32_t> TrackInteractionCameraToAshley(
   return host.AshleyTransitionPose() ? 0 : speed;
 }
 
-// decomp: BATTLE.PRG func_80074798 (src/BATTLE/BATTLE.PRG/146C.c:5232).
+// decomp: BATTLE.PRG func_80074798 (src/BATTLE/BATTLE.PRG/146C.c:4962).
 FacingTile TileInFrontOfActor(const VS::Actors::ActorPlacementView& actor) {
   const auto rounded = static_cast<std::uint16_t>(
       (static_cast<std::uint16_t>(actor.position.w) + kFacingRoundBias) &
@@ -588,7 +592,7 @@ FacingTile TileInFrontOfActor(const VS::Actors::ActorPlacementView& actor) {
   return tile;
 }
 
-// decomp: BATTLE.PRG func_80074860 (src/BATTLE/BATTLE.PRG/146C.c:5260).
+// decomp: BATTLE.PRG func_80074860 (src/BATTLE/BATTLE.PRG/146C.c:4990).
 bool TryTriggerFacingTileEvent(std::int32_t actor, FacingEventHost& host) {
   if (actor < 0 || actor >= kTrapActorSlots) {
     return false;
@@ -601,7 +605,7 @@ bool TryTriggerFacingTileEvent(std::int32_t actor, FacingEventHost& host) {
   return host.EvaluateInteraction(tile);
 }
 
-// decomp: BATTLE.PRG func_800748B8 (src/BATTLE/BATTLE.PRG/146C.c:5271).
+// decomp: BATTLE.PRG func_800748B8 (src/BATTLE/BATTLE.PRG/146C.c:5001).
 std::optional<RoomObjectTarget> FindFacingRoomObject(std::int32_t actor,
                                                      FacingResourceHost& host) {
   if (actor < 0 || actor >= kTrapActorSlots) {
@@ -621,7 +625,7 @@ std::optional<RoomObjectTarget> FindFacingRoomObject(std::int32_t actor,
   return object;
 }
 
-// decomp: BATTLE.PRG func_80074950 (src/BATTLE/BATTLE.PRG/146C.c:5290).
+// decomp: BATTLE.PRG func_80074950 (src/BATTLE/BATTLE.PRG/146C.c:5020).
 std::optional<ChestTarget> FindFacingUnlootedChest(std::int32_t actor,
                                                    FacingResourceHost& host) {
   if (actor < 0 || actor >= kTrapActorSlots) {
@@ -647,21 +651,22 @@ std::optional<ChestTarget> FindFacingUnlootedChest(std::int32_t actor,
                                          : std::nullopt;
 }
 
-// decomp: BATTLE.PRG func_80073AA4 (src/BATTLE/BATTLE.PRG/146C.c:4823).
+// decomp: BATTLE.PRG func_80073AA4 (src/BATTLE/BATTLE.PRG/146C.c:4553).
 void BeginObjectInteractionWait(ObjectInteractionWaitHost& host) {
   host.SetControlMode(FieldControlMode::kObjectInteractionWait);
   host.PauseField();
 }
 
-// decomp: BATTLE.PRG func_80073ACC (src/BATTLE/BATTLE.PRG/146C.c:4829).
+// decomp: BATTLE.PRG func_80073ACC (src/BATTLE/BATTLE.PRG/146C.c:4559).
 void EndObjectInteractionWait(ObjectInteractionWaitHost& host) {
   host.ReleaseNotification();
   host.ResumeField();
   host.EnterExploration();
 }
 
-// decomp: BATTLE.PRG func_80073AFC (src/BATTLE/BATTLE.PRG/146C.c:4836).
-// decomp: BATTLE.PRG func_8006CE70 (146C.c:2163),110MIPS8006CE70-D024.
+// decomp: BATTLE.PRG func_80073AFC (src/BATTLE/BATTLE.PRG/146C.c:4566).
+// decomp: BATTLE.PRG func_8006CE70
+// (src/BATTLE/BATTLE.PRG/146C.c:1865),110MIPS8006CE70-D024.
 bool ApplyUnlockEffectToRoomObject(
     const std::optional<UnlockEffectTarget>& target, const TrapPosition& point,
     UnlockEffectHost& host) {

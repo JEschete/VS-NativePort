@@ -28,8 +28,8 @@ static_assert(std::endian::native == std::endian::little,
   return std::bit_cast<PlayTime>(packed);
 }
 
-// decomp: SLUS_010.40 vs_main_gametimeUpdate (main.c:8188), its clock part:
-// advances by `tick_speed` frames, carrying whole seconds, minutes and
-// hours, unless the clock has reached kMaxPlayTimeHours.
+// decomp: SLUS_010.40 vs_main_gametimeUpdate (src/SLUS_010.40/main.c:1050), its
+// clock part: advances by `tick_speed` frames, carrying whole seconds, minutes
+// and hours, unless the clock has reached kMaxPlayTimeHours.
 void AdvancePlayTime(PlayTime& time, int tick_speed) noexcept;
 }  // namespace VS::State

@@ -20,7 +20,7 @@ class LiveAmbienceHost final : public AmbienceHost {
 };
 }  // namespace
 
-// decomp: BATTLE.PRG func_8008E480 (src/BATTLE/BATTLE.PRG/146C.c:17323)
+// decomp: BATTLE.PRG func_8008E480 (src/BATTLE/BATTLE.PRG/146C.c:17202)
 void LiveSetRoomAmbienceDucked(int duck_enabled) {
   LiveAmbienceHost host;
   SetRoomAmbienceDucked(host, duck_enabled != 0);

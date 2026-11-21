@@ -36,7 +36,7 @@ constexpr std::int16_t Element(std::int32_t value) noexcept {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG vs_battle_lookAt (src/BATTLE/BATTLE.PRG/146C.c:8209).
+// decomp: BATTLE.PRG vs_battle_lookAt (src/BATTLE/BATTLE.PRG/146C.c:8139).
 Mat3 BuildLookAtOrientation(Vec3 from, Vec3 to) noexcept {
   const Vec3 world_up{0, -kFixedOne, 0};
   const Vec3 forward = NormalizeVector(SubtractVectors(to, from)).direction;
@@ -50,8 +50,9 @@ Mat3 BuildLookAtOrientation(Vec3 from, Vec3 to) noexcept {
   return matrix;
 }
 
-// decomp: BATTLE.PRG _vecToRotMatrix (src/BATTLE/BATTLE.PRG/4A0A8.c:4179).
-// The angles were halfword SVECTOR members; Arctangent2 stays within them.
+// decomp: BATTLE.PRG vecToRotMatrix (src/BATTLE/BATTLE.PRG/4DEA8.c:4828; was
+// _vecToRotMatrix). The angles were halfword SVECTOR members; Arctangent2 stays
+// within them.
 Mat3 DirectionRotationMatrix(Vec3 direction) noexcept {
   const std::int32_t x = Element(direction.x >> kFractionBits);
   const std::int32_t y = Element(direction.y >> kFractionBits);
@@ -89,7 +90,7 @@ Mat3 BuildRotationXyz(Angles3 rotation) noexcept {
   return matrix;
 }
 
-// decomp: BATTLE.PRG func_800CFE7C (src/BATTLE/BATTLE.PRG/5BF94.c:5922).
+// decomp: BATTLE.PRG func_800CFE7C (src/BATTLE/BATTLE.PRG/5BF94.c:5487).
 Mat3 IdentityRotation() noexcept {
   Mat3 matrix;
   matrix.m[0][0] = kFixedOne;
@@ -98,7 +99,7 @@ Mat3 IdentityRotation() noexcept {
   return matrix;
 }
 
-// decomp: BATTLE.PRG func_800CFE98 (src/BATTLE/BATTLE.PRG/5BF94.c:5932).
+// decomp: BATTLE.PRG func_800CFE98 (src/BATTLE/BATTLE.PRG/5BF94.c:5497).
 Transform3 TranslationTransform(Position3 translation) noexcept {
   return Transform3{IdentityRotation(),
                     Vec3{translation.x, translation.y, translation.z}};

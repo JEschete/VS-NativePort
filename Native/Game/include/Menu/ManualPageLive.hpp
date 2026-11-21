@@ -13,19 +13,24 @@
 // missing ordering-table entry or a primitive buffer without room for the
 // whole call is refused with a throttled warning, drawing nothing.
 namespace VS::Menu::manual {
-// decomp: MENUE.PRG _drawContent (494.c:577).
+// decomp: MENUE.PRG drawContent (src/MENU/MENUE.PRG/494.c:581; was
+// _drawContent).
 void LiveDrawPageContent();
-// decomp: MENUE.PRG _setPageBg (494.c:716).
+// decomp: MENUE.PRG setPageBg (src/MENU/MENUE.PRG/494.c:720; was _setPageBg).
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
 void LiveDrawPageBackground(int x, int y, int w, int h, int color);
-// decomp: MENUE.PRG _fadeMenuUpper (494.c:740).
+// decomp: MENUE.PRG fadeMenuUpper (src/MENU/MENUE.PRG/494.c:744; was
+// _fadeMenuUpper).
 void LiveDrawUpperScrollFade();
-// decomp: MENUE.PRG _fadeMenuLower (494.c:791).
+// decomp: MENUE.PRG fadeMenuLower (src/MENU/MENUE.PRG/494.c:795; was
+// _fadeMenuLower).
 void LiveDrawLowerScrollFade();
-// decomp: MENUE.PRG _drawPaginationArrow (494.c:844).
+// decomp: MENUE.PRG drawPaginationArrow (src/MENU/MENUE.PRG/494.c:848; was
+// _drawPaginationArrow).
 void LiveDrawPageArrow(PageArrow arrow);
-// decomp: MENUE.PRG _drawControlsBg (494.c:962).
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
+// decomp: MENUE.PRG drawControlsBg (src/MENU/MENUE.PRG/494.c:966; was
+// _drawControlsBg). NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the
+// original order.
 void LiveDrawControlsBackground(int x, int y, int w, int h);
 // Refusals logged since start-up.
 [[nodiscard]] std::uint64_t LivePageRefusalCount();

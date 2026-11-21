@@ -2,7 +2,8 @@
 #include "Effects/Plugins/Plg044.hpp"
 
 namespace VS::Effects::Plg044 {
-// decomp: D_800FA6F8 (PLG044.BIN/0.c:5; closedRings.h:58)
+// decomp: vs_effect_solidShock_0_colors (src/EFFECT/closedRings.h:58; was
+// D_800FA6F8; src/EFFECT/closedRings.h:58)
 const plugins::RingPalette kTiledRingColorFactors = {
     {0xFF, 0xFF, 0xFF, 0x00}, {0x80, 0x80, 0x80, 0x00},
     {0xFF, 0x80, 0x00, 0x00}, {0x00, 0x80, 0xFF, 0x00},

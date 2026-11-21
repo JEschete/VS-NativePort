@@ -497,14 +497,14 @@ SoundEffectSlot SlotOf(const VS::Actors::ModelEffectSlot& live) {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800770FC (src/BATTLE/BATTLE.PRG/146C.c:6444)
+// decomp: BATTLE.PRG func_800770FC (src/BATTLE/BATTLE.PRG/146C.c:6254)
 void QueueLiveActorBaseSequenceLoad(VS::Battle::Actor* /*actor*/,
                                     int actor_id) {
   LiveAnimationHost host;
   QueueActorBaseSequenceLoad(host, actor_id);
 }
 
-// decomp: BATTLE.PRG func_800771E0 (src/BATTLE/BATTLE.PRG/146C.c:6480)
+// decomp: BATTLE.PRG func_800771E0 (src/BATTLE/BATTLE.PRG/146C.c:6294)
 void QueueLiveActorWeaponSequenceLoad(char* actor_bytes, int actor_id,
                                       int weapon_category, int spawn_flags) {
   std::optional<int> equipped;
@@ -517,100 +517,108 @@ void QueueLiveActorWeaponSequenceLoad(char* actor_bytes, int actor_id,
                                spawn_flags);
 }
 
-// decomp: BATTLE.PRG func_8007C348 (src/BATTLE/BATTLE.PRG/146C.c:8738)
+// decomp: BATTLE.PRG triggerActorDeath (src/BATTLE/BATTLE.PRG/146C.c:8689; was
+// func_8007C348)
 void InterruptLiveActorAction(int actor_id, int animate) {
   LiveAnimationHost host;
   InterruptActorAction(host, actor_id, animate);
 }
 
-// decomp: BATTLE.PRG func_8007CB84 (src/BATTLE/BATTLE.PRG/146C.c:8997)
+// decomp: BATTLE.PRG enqueueEsq (src/BATTLE/BATTLE.PRG/146C.c:8963; was
+// func_8007CB84)
 void QueueLiveSharedSequenceLoad(int index, int weapon_id) {
   LiveAnimationHost host;
   QueueSharedSequenceLoad(host, index, weapon_id);
 }
 
-// decomp: BATTLE.PRG func_8007CBBC (src/BATTLE/BATTLE.PRG/146C.c:9008)
+// decomp: BATTLE.PRG unloadEsqAndEtm (src/BATTLE/BATTLE.PRG/146C.c:8974; was
+// func_8007CBBC)
 int UnloadLiveSharedSequence(int bank) {
   LiveAnimationHost host;
   return UnloadSharedSequence(host, bank);
 }
 
-// decomp: BATTLE.PRG func_8007CBDC (src/BATTLE/BATTLE.PRG/146C.c:9010)
+// decomp: BATTLE.PRG enqueueEsqAndEtm (src/BATTLE/BATTLE.PRG/146C.c:8976; was
+// func_8007CBDC)
 void QueueLiveSharedSequenceWithTextures(int index, int weapon_id,
                                          int texture_slot) {
   LiveAnimationHost host;
   QueueSharedSequenceWithTextures(host, index, weapon_id, texture_slot);
 }
 
-// decomp: BATTLE.PRG vs_battle_loadEtm (src/BATTLE/BATTLE.PRG/146C.c:9022)
+// decomp: BATTLE.PRG enqueueEtm (src/BATTLE/BATTLE.PRG/146C.c:8988; was
+// vs_battle_loadEtm)
 void QueueLiveSequenceEffectTextures(int index, int weapon_id,
                                      int texture_slot) {
   LiveAnimationHost host;
   QueueSequenceEffectTextures(host, index, weapon_id, texture_slot);
 }
 
-// decomp: BATTLE.PRG func_8007CC4C (src/BATTLE/BATTLE.PRG/146C.c:9033)
+// decomp: BATTLE.PRG unloadEtm (src/BATTLE/BATTLE.PRG/146C.c:8999; was
+// func_8007CC4C)
 void ReleaseLiveSequenceEffectTextures(int bank) {
   LiveAnimationHost host;
   ReleaseSequenceEffectTextures(host, bank);
 }
 
-// decomp: BATTLE.PRG func_8007CC6C (src/BATTLE/BATTLE.PRG/146C.c:9035)
+// decomp: BATTLE.PRG selectEventData (src/BATTLE/BATTLE.PRG/146C.c:9001; was
+// func_8007CC6C)
 void SetLiveSharedSequenceBank(int bank) {
   LiveAnimationHost host;
   SetSharedSequenceBank(host, bank);
 }
 
-// decomp: BATTLE.PRG func_8007CC8C (src/BATTLE/BATTLE.PRG/146C.c:9037)
+// decomp: BATTLE.PRG func_8007CC8C (src/BATTLE/BATTLE.PRG/146C.c:9003)
 void ReadLiveSharedSequenceBank() {
   LiveAnimationHost host;
   SharedSequenceBank(host);
 }
 
-// decomp: BATTLE.PRG func_8007CEA0 (src/BATTLE/BATTLE.PRG/146C.c:9115)
+// decomp: BATTLE.PRG func_8007CEA0 (src/BATTLE/BATTLE.PRG/146C.c:9081)
 void ReturnLiveActorToIdle(int actor_id) {
   LiveAnimationHost host;
   ReturnActorToIdle(host, actor_id);
 }
 
-// decomp: BATTLE.PRG func_8007CEC0 (src/BATTLE/BATTLE.PRG/146C.c:9117)
+// decomp: BATTLE.PRG func_8007CEC0 (src/BATTLE/BATTLE.PRG/146C.c:9083)
 void ReturnAllLiveActorsToIdle() {
   LiveAnimationHost host;
   ReturnAllActorsToIdle(host);
 }
 
-// decomp: BATTLE.PRG func_8009CE9C (src/BATTLE/BATTLE.PRG/30DB0.c:1894)
+// decomp: BATTLE.PRG func_8009CE9C (src/BATTLE/BATTLE.PRG/30DB0.c:1954)
 int SelectLiveSharedSequenceBank(unsigned int bank) {
   LiveAnimationHost host;
   return SelectSharedSequenceBank(host, static_cast<int>(bank));
 }
 
-// decomp: BATTLE.PRG func_8009CFA0 (src/BATTLE/BATTLE.PRG/30DB0.c:1918)
+// decomp: BATTLE.PRG func_8009CFA0 (src/BATTLE/BATTLE.PRG/30DB0.c:1978)
 int LiveSharedSequenceBankId() {
   LiveAnimationHost host;
   return SharedSequenceBankId(host);
 }
 
-// decomp: BATTLE.PRG func_8009D854 (src/BATTLE/BATTLE.PRG/30DB0.c:2188)
+// decomp: BATTLE.PRG func_8009D854 (src/BATTLE/BATTLE.PRG/30DB0.c:2252)
 void RequestLiveActorAnimationAdvance(int actor_id) {
   LiveAnimationHost host;
   RequestActorAnimationAdvance(host, actor_id);
 }
 
-// decomp: BATTLE.PRG func_8009D934 (src/BATTLE/BATTLE.PRG/30DB0.c:2219)
+// decomp: BATTLE.PRG func_8009D934 (src/BATTLE/BATTLE.PRG/30DB0.c:2283)
 void SetLiveActorWeaponDrawn(int actor_id, int weapon_drawn,
                              int transition_mode) {
   LiveAnimationHost host;
   SetActorWeaponDrawn(host, actor_id, weapon_drawn, transition_mode);
 }
 
-// decomp: BATTLE.PRG func_8009DBDC (src/BATTLE/BATTLE.PRG/30DB0.c:2296)
+// decomp: BATTLE.PRG playWeaponSfx (src/BATTLE/BATTLE.PRG/30DB0.c:2361; was
+// func_8009DBDC)
 void PlayLiveActorWeaponDrawSound(int actor_id, int sound_offset) {
   LiveAnimationHost host;
   PlayActorWeaponDrawSound(host, actor_id, sound_offset);
 }
 
-// decomp: BATTLE.PRG func_8009E070 (src/BATTLE/BATTLE.PRG/30DB0.c:2451)
+// decomp: BATTLE.PRG func_8009E070 (src/BATTLE/BATTLE.PRG/30DB0.c:2517)
 void PlayLiveActorActionPose(int actor_id, const std::int16_t* facing_target,
                              int pose_kind) {
   constexpr std::size_t kX = 0;
@@ -623,37 +631,37 @@ void PlayLiveActorActionPose(int actor_id, const std::int16_t* facing_target,
   PlayActorActionPose(host, actor_id, target ? &*target : nullptr, pose_kind);
 }
 
-// decomp: BATTLE.PRG func_8009E480 (src/BATTLE/BATTLE.PRG/30DB0.c:2619)
+// decomp: BATTLE.PRG func_8009E480 (src/BATTLE/BATTLE.PRG/30DB0.c:2685)
 int IsLiveAshleyTransitionPose() {
   LiveAnimationHost host;
   return IsAshleyTransitionPose(host) ? 1 : 0;
 }
 
-// decomp: BATTLE.PRG func_8009E4B0 (src/BATTLE/BATTLE.PRG/30DB0.c:2627)
+// decomp: BATTLE.PRG func_8009E4B0 (src/BATTLE/BATTLE.PRG/30DB0.c:2693)
 int IsLiveActorActionAnimationBusy(int actor_id) {
   LiveAnimationHost host;
   return static_cast<int>(IsActorActionAnimationBusy(host, actor_id));
 }
 
-// decomp: BATTLE.PRG func_8009E5C4 (src/BATTLE/BATTLE.PRG/30DB0.c:2685)
+// decomp: BATTLE.PRG func_8009E5C4 (src/BATTLE/BATTLE.PRG/30DB0.c:2751)
 void RestoreLiveActorIdlePose(int actor_id) {
   LiveAnimationHost host;
   RestoreActorIdlePose(host, actor_id);
 }
 
-// decomp: BATTLE.PRG func_8009E614 (src/BATTLE/BATTLE.PRG/30DB0.c:2693)
+// decomp: BATTLE.PRG func_8009E614 (src/BATTLE/BATTLE.PRG/30DB0.c:2759)
 void RestoreLiveActorNeutralPose(int actor_id) {
   LiveAnimationHost host;
   RestoreActorNeutralPose(host, actor_id);
 }
 
-// decomp: BATTLE.PRG func_8009E700 (src/BATTLE/BATTLE.PRG/30DB0.c:2727)
+// decomp: BATTLE.PRG func_8009E700 (src/BATTLE/BATTLE.PRG/30DB0.c:2801)
 void RestoreLiveActorBasePose(int actor_id, int animation) {
   LiveAnimationHost host;
   RestoreActorBasePose(host, actor_id, animation);
 }
 
-// decomp: BATTLE.PRG func_8009F8DC (src/BATTLE/BATTLE.PRG/30DB0.c:3373)
+// decomp: BATTLE.PRG func_8009F8DC (src/BATTLE/BATTLE.PRG/30DB0.c:3472)
 int LiveAnimationBattleWindowFrame(int actor_id) {
   LiveAnimationHost host;
   return AnimationBattleWindowFrame(host, actor_id);
@@ -665,7 +673,8 @@ void SetLiveActorSoundOverrides(int actor_id,
   SetActorSoundOverrides(host, actor_id, sound_override);
 }
 
-// decomp: BATTLE.PRG func_8009F990 (src/BATTLE/BATTLE.PRG/30DB0.c:3401)
+// decomp: BATTLE.PRG setActorsSfxOverride (src/BATTLE/BATTLE.PRG/30DB0.c:3501;
+// was func_8009F990)
 void SetLiveActorSoundOverrides(int actor_id,
                                 VS::Actors::ModelEffectSlot* sound_override) {
   if (sound_override == nullptr) {
@@ -675,7 +684,8 @@ void SetLiveActorSoundOverrides(int actor_id,
   SetLiveActorSoundOverrides(actor_id, SlotOf(*sound_override));
 }
 
-// decomp: BATTLE.PRG func_8009F9F4 (src/BATTLE/BATTLE.PRG/30DB0.c:3414)
+// decomp: BATTLE.PRG setActorSfxOverride (src/BATTLE/BATTLE.PRG/30DB0.c:3514;
+// was func_8009F9F4)
 void ApplyLiveActorSoundOverrides(int actor_id,
                                   VS::Actors::ModelEffectSlot* sound_override) {
   if (sound_override == nullptr) {
@@ -686,13 +696,14 @@ void ApplyLiveActorSoundOverrides(int actor_id,
   ApplyActorSoundOverrides(host, actor_id, SlotOf(*sound_override));
 }
 
-// decomp: BATTLE.PRG func_8009FBD8 (src/BATTLE/BATTLE.PRG/30DB0.c:3480)
+// decomp: BATTLE.PRG setActorMoveAnimation (src/BATTLE/BATTLE.PRG/30DB0.c:3580;
+// was func_8009FBD8)
 int SetLiveActorTravelAnimation(int actor_id, int animation) {
   LiveAnimationHost host;
   return SetActorTravelAnimation(host, actor_id, animation);
 }
 
-// decomp: BATTLE.PRG func_8009FC20 (src/BATTLE/BATTLE.PRG/30DB0.c:3498)
+// decomp: BATTLE.PRG func_8009FC20 (src/BATTLE/BATTLE.PRG/30DB0.c:3598)
 int LiveActorTravelAnimation(int actor_id, int* animation_out) {
   if (animation_out == nullptr) {
     VS::Core::LogWarn("actors", "Travel animation refused: null output");
@@ -705,7 +716,8 @@ int LiveActorTravelAnimation(int actor_id, int* animation_out) {
   return 0;
 }
 
-// decomp: BATTLE.PRG func_800A01C8 (src/BATTLE/BATTLE.PRG/30DB0.c:3710)
+// decomp: BATTLE.PRG queueActorAnimation (src/BATTLE/BATTLE.PRG/30DB0.c:3811;
+// was func_800A01C8)
 int QueueLiveActorAnimation(int actor_id, int animation, int blend_frames,
                             int start_frame) {
   LiveAnimationHost host;
@@ -713,14 +725,16 @@ int QueueLiveActorAnimation(int actor_id, int animation, int blend_frames,
                              start_frame);
 }
 
-// decomp: BATTLE.PRG func_800A0204 (src/BATTLE/BATTLE.PRG/30DB0.c:3725)
+// decomp: BATTLE.PRG vs_battle_setActorAnimation
+// (src/BATTLE/BATTLE.PRG/30DB0.c:3826; was func_800A0204)
 int PlayLiveActorAnimation(int actor_id, int animation, int /*unused*/,
                            int blend_frames) {
   LiveAnimationHost host;
   return PlayActorAnimation(host, actor_id, animation, blend_frames);
 }
 
-// decomp: BATTLE.PRG func_800A0618 (src/BATTLE/BATTLE.PRG/30DB0.c:3850)
+// decomp: BATTLE.PRG setActorAnimationFromFrame
+// (src/BATTLE/BATTLE.PRG/30DB0.c:3969; was func_800A0618)
 int PlayLiveActorAnimationAtFrame(int actor_id, int animation, int blend_frames,
                                   int start_frame) {
   LiveAnimationHost host;
@@ -728,13 +742,14 @@ int PlayLiveActorAnimationAtFrame(int actor_id, int animation, int blend_frames,
                                    start_frame);
 }
 
-// decomp: BATTLE.PRG func_800A0870 (src/BATTLE/BATTLE.PRG/30DB0.c:3948)
+// decomp: BATTLE.PRG func_800A0870 (src/BATTLE/BATTLE.PRG/30DB0.c:4067)
 void SetLiveActorTransitionMode(int control) {
   LiveAnimationHost host;
   SetActorTransitionMode(host, control);
 }
 
-// decomp: BATTLE.PRG func_800A09D8 (src/BATTLE/BATTLE.PRG/30DB0.c:3987)
+// decomp: BATTLE.PRG setActorInactiveFlag (src/BATTLE/BATTLE.PRG/30DB0.c:4106;
+// was func_800A09D8)
 void SetLiveActorAnimationLocked(int actor_id, int locked) {
   LiveAnimationHost host;
   SetActorAnimationLocked(host, actor_id, locked);
@@ -746,7 +761,7 @@ void PlayLiveActorTurnAnimation(int actor_id, int target_facing) {
   PlayActorTurnAnimation(host, actor_id, target_facing);
 }
 
-// decomp: BATTLE.PRG func_800A6AA0 (src/BATTLE/BATTLE.PRG/3A1A0.c:2032)
+// decomp: BATTLE.PRG func_800A6AA0 (src/BATTLE/BATTLE.PRG/3A1A0.c:1459)
 int UpdateLiveActorLocomotionAnimation(VS::Actors::ActorRecord* actor,
                                        int speed, int /*direction*/) {
   if (actor == nullptr) {
@@ -758,7 +773,7 @@ int UpdateLiveActorLocomotionAnimation(VS::Actors::ActorRecord* actor,
   return 0;
 }
 
-// decomp: BATTLE.PRG func_800AC440 (src/BATTLE/BATTLE.PRG/40564.c:2199)
+// decomp: BATTLE.PRG func_800AC440 (src/BATTLE/BATTLE.PRG/40564.c:1902)
 void SetLiveActorBonePoseLock(VS::Actors::ActorRecord* actor, int bone,
                               int lock) {
   if (actor == nullptr) {
@@ -769,7 +784,7 @@ void SetLiveActorBonePoseLock(VS::Actors::ActorRecord* actor, int bone,
   SetActorBonePoseLock(host, host.Attach(*actor), bone, lock);
 }
 
-// decomp: BATTLE.PRG func_800AC500 (src/BATTLE/BATTLE.PRG/40564.c:2221)
+// decomp: BATTLE.PRG func_800AC500 (src/BATTLE/BATTLE.PRG/40564.c:1924)
 void ClearLiveActorBonePoseLocks(VS::Actors::ActorRecord* actor) {
   if (actor == nullptr) {
     VS::Core::LogWarn("actors", "Bone pose lock clear refused: null actor");

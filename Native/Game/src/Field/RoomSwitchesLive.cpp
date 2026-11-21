@@ -451,7 +451,7 @@ int VS::Field::FinishDoorAnimationEntry(VS::Field::MpdLockTrigger* door) {
   return target && VS::Field::FinishLiveDoorAnimation(*target);
 }
 
-// decomp: BATTLE.PRG func_8008BC04 (146C.c:16215).
+// decomp: BATTLE.PRG func_8008BC04 (src/BATTLE/BATTLE.PRG/146C.c:16086).
 VS::Field::MpdLockTrigger* VS::Field::InteractiveDoorAtTileEntry(
     int tile_x, int tile_z, int floor_layer) {
   const auto target = VS::Field::FindLiveInteractiveDoorAtTile(
@@ -459,27 +459,27 @@ VS::Field::MpdLockTrigger* VS::Field::InteractiveDoorAtTileEntry(
   return target ? VS::Field::ResolveLiveRoomObjectTarget(*target) : nullptr;
 }
 
-// decomp: BATTLE.PRG func_8008E6DC (146C.c:17399).
+// decomp: BATTLE.PRG func_8008E6DC (src/BATTLE/BATTLE.PRG/146C.c:17278).
 void VS::Field::MarkSigilDoorUnlockedEntry(int sigil_index) {
   static_cast<void>(VS::Field::MarkLiveSigilDoorUnlocked(
       static_cast<std::uint32_t>(sigil_index)));
 }
 
-// decomp: BATTLE.PRG func_8008E7BC (146C.c:17419).
+// decomp: BATTLE.PRG func_8008E7BC (src/BATTLE/BATTLE.PRG/146C.c:17298).
 int VS::Field::IsRoomSigilDoorUnlockedEntry(int zone_id, int map_id,
                                             unsigned int sigil_index) {
   return VS::Field::LiveRoomSigilDoorUnlockByte(
       {.zone_id = zone_id, .map_id = map_id, .sigil_index = sigil_index});
 }
 
-// decomp: BATTLE.PRG func_8008D658 (src/BATTLE/BATTLE.PRG/146C.c:16883).
+// decomp: BATTLE.PRG func_8008D658 (src/BATTLE/BATTLE.PRG/146C.c:16757).
 void VS::Field::ToggleRoomSwitchEntry(
     VS::Field::MpdLockTrigger* switch_trigger) {
   LiveRoomSwitchHost host(switch_trigger);
   static_cast<void>(VS::Field::ToggleRoomSwitch(host));
 }
 
-// decomp: BATTLE.PRG func_8008D5FC (src/BATTLE/BATTLE.PRG/146C.c:16870).
+// decomp: BATTLE.PRG func_8008D5FC (src/BATTLE/BATTLE.PRG/146C.c:16744).
 void VS::Field::BeginSwitchToggleEntry(
     VS::Field::MpdLockTrigger* switch_trigger) {
   LiveRoomSwitchStartHost host(switch_trigger);

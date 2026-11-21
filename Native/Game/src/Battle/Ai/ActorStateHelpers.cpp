@@ -5,7 +5,7 @@
 #include "Core/Diagnostics.hpp"
 
 namespace VS::Battle::Ai {
-// decomp: BATTLE.PRG func_800E4C64 (src/BATTLE/BATTLE.PRG/7BDD4.s:571).
+// decomp: BATTLE.PRG func_800E4C64 (src/BATTLE/BATTLE.PRG/146C.c:279).
 void ResetActorAiReactionDelay(ActorReactionDelays& actors, int actor_id) {
   if (actor_id < 0 || actor_id >= kAiActorSlotCount) {
     VS::Core::Errorf("ai", "reaction delay actor ID is out of bounds: %d",

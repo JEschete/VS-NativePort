@@ -16,12 +16,12 @@ constexpr std::array<SheetProfileRow, kSurfaceRows> kSurfaceRowOrder = {
 };
 }  // namespace
 
-// decomp: surfaces.h:137-152 (the points of the five rows).
+// decomp: src/EFFECT/surfaces.h:137-152 (the points of the five rows).
 SheetPoints SurfacePoints(const SheetFrame& frame, SurfaceProfile profile) {
   return ScaleSheetProfile(frame, profile, kSurfaceRowOrder);
 }
 
-// decomp: EFFECT VS_SURFACE_FUNCTION (src/EFFECT/surfaces.h:34).
+// decomp: EFFECT VS_SURFACE_FUNCTION (src/EFFECT/surfaces.h:62).
 bool Surface(SurfaceTextureSpan span, SurfaceCommand command,
              std::int32_t packed, SurfaceProfile profile, SheetHost& host) {
   return RunSheet(command, packed, kSurfaceRows, span, host,
@@ -32,7 +32,8 @@ bool Surface(SurfaceTextureSpan span, SurfaceCommand command,
 }  // namespace VS::Effects::Templates
 
 namespace VS::Effects {
-// decomp: PLG061.BIN func_800F9818 (src/EFFECT/PLG061.BIN/18.c:8).
+// decomp: PLG061.BIN vs_effect_flameSphereLv1_0 (src/EFFECT/surfaces.h:62; was
+// func_800F9818).
 bool Plg061::Surface(Templates::SurfaceCommand command, std::int32_t packed,
                      Templates::SurfaceProfile profile,
                      Templates::SheetHost& host) {
@@ -40,7 +41,8 @@ bool Plg061::Surface(Templates::SurfaceCommand command, std::int32_t packed,
                             command, packed, profile, host);
 }
 
-// decomp: PLG077.BIN func_800FBDE4 (src/EFFECT/PLG077.BIN/18.c:344).
+// decomp: PLG077.BIN vs_effect_meteorLv1_3 (src/EFFECT/surfaces.h:62; was
+// func_800FBDE4).
 bool Plg077::Surface(Templates::SurfaceCommand command, std::int32_t packed,
                      Templates::SurfaceProfile profile,
                      Templates::SheetHost& host) {
@@ -48,7 +50,8 @@ bool Plg077::Surface(Templates::SurfaceCommand command, std::int32_t packed,
                             command, packed, profile, host);
 }
 
-// decomp: PLG087.BIN func_800F99F0 (src/EFFECT/PLG087.BIN/1F0.c:8).
+// decomp: PLG087.BIN vs_effect_apocalypse_0 (src/EFFECT/surfaces.h:62; was
+// func_800F99F0).
 bool Plg087::Surface(Templates::SurfaceCommand command, std::int32_t packed,
                      Templates::SurfaceProfile profile,
                      Templates::SheetHost& host) {
@@ -56,7 +59,8 @@ bool Plg087::Surface(Templates::SurfaceCommand command, std::int32_t packed,
                             command, packed, profile, host);
 }
 
-// decomp: PLG128.BIN func_800F98F8 (src/EFFECT/PLG128.BIN/F8.c:44).
+// decomp: PLG128.BIN vs_effect_bloodySin_0 (src/EFFECT/surfaces.h:62; was
+// func_800F98F8).
 bool Plg128::Surface(Templates::SurfaceCommand command, std::int32_t packed,
                      Templates::SurfaceProfile profile,
                      Templates::SheetHost& host) {
@@ -64,7 +68,8 @@ bool Plg128::Surface(Templates::SurfaceCommand command, std::int32_t packed,
                             command, packed, profile, host);
 }
 
-// decomp: PLG128.BIN func_800FCE0C (src/EFFECT/PLG128.BIN/F8.c:61).
+// decomp: PLG128.BIN vs_effect_bloodySin_4 (src/EFFECT/surfaces.h:62; was
+// func_800FCE0C).
 bool Plg128::Surface2(Templates::SurfaceCommand command, std::int32_t packed,
                       Templates::SurfaceProfile profile,
                       Templates::SheetHost& host) {
@@ -72,7 +77,8 @@ bool Plg128::Surface2(Templates::SurfaceCommand command, std::int32_t packed,
                             command, packed, profile, host);
 }
 
-// decomp: PLG129.BIN func_800FAF30 (src/EFFECT/PLG129.BIN/0.c:12).
+// decomp: PLG129.BIN vs_effect_lastAscension_2 (src/EFFECT/surfaces.h:62; was
+// func_800FAF30).
 bool Plg129::Surface(Templates::SurfaceCommand command, std::int32_t packed,
                      Templates::SurfaceProfile profile,
                      Templates::SheetHost& host) {
@@ -80,7 +86,8 @@ bool Plg129::Surface(Templates::SurfaceCommand command, std::int32_t packed,
                             command, packed, profile, host);
 }
 
-// decomp: PLG150.BIN func_800FB260 (src/EFFECT/PLG150.BIN/18.c:9).
+// decomp: PLG150.BIN vs_effect_emeticBomb_2 (src/EFFECT/surfaces.h:62; was
+// func_800FB260).
 bool Plg150::Surface(Templates::SurfaceCommand command, std::int32_t packed,
                      Templates::SurfaceProfile profile,
                      Templates::SheetHost& host) {
@@ -88,7 +95,8 @@ bool Plg150::Surface(Templates::SurfaceCommand command, std::int32_t packed,
                             command, packed, profile, host);
 }
 
-// decomp: PLG158.BIN func_800F9800 (src/EFFECT/PLG158.BIN/0.c:8).
+// decomp: PLG158.BIN vs_effect_hexFlux_0 (src/EFFECT/surfaces.h:62; was
+// func_800F9800).
 bool Plg158::Surface(Templates::SurfaceCommand command, std::int32_t packed,
                      Templates::SurfaceProfile profile,
                      Templates::SheetHost& host) {
@@ -96,7 +104,8 @@ bool Plg158::Surface(Templates::SurfaceCommand command, std::int32_t packed,
                             command, packed, profile, host);
 }
 
-// decomp: PLG170.BIN func_800FCABC (src/EFFECT/PLG170.BIN/18.c:24).
+// decomp: PLG170.BIN vs_effect_retribution_4 (src/EFFECT/surfaces.h:62; was
+// func_800FCABC).
 bool Plg170::Surface(Templates::SurfaceCommand command, std::int32_t packed,
                      Templates::SurfaceProfile profile,
                      Templates::SheetHost& host) {
@@ -104,7 +113,8 @@ bool Plg170::Surface(Templates::SurfaceCommand command, std::int32_t packed,
                             command, packed, profile, host);
 }
 
-// decomp: PLG263.BIN func_800F9910 (src/EFFECT/PLG263.BIN/110.c:2).
+// decomp: PLG263.BIN vs_effect_plg263_0 (src/EFFECT/surfaces.h:62; was
+// func_800F9910).
 bool Plg263::Surface(Templates::SurfaceCommand command, std::int32_t packed,
                      Templates::SurfaceProfile profile,
                      Templates::SheetHost& host) {
@@ -112,7 +122,8 @@ bool Plg263::Surface(Templates::SurfaceCommand command, std::int32_t packed,
                             command, packed, profile, host);
 }
 
-// decomp: PLG272.BIN func_800FB2D8 (src/EFFECT/PLG272.BIN/18.c:16).
+// decomp: PLG272.BIN vs_effect_plg272_2 (src/EFFECT/surfaces.h:62; was
+// func_800FB2D8).
 bool Plg272::Surface(Templates::SurfaceCommand command, std::int32_t packed,
                      Templates::SurfaceProfile profile,
                      Templates::SheetHost& host) {

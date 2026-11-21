@@ -138,8 +138,8 @@ Position3 AddPositions(Position3 left, Position3 right) {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800BDC9C (F01232, src/BATTLE/BATTLE.PRG/4A0A8.c:3862,
-// 0x800BDC9C-0x800BDF6C)
+// decomp: BATTLE.PRG vs_battle_script_EA_EB_EC_EE_EF_camera (F01232,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:4512; was func_800BDC9C, 0x800BDC9C-0x800BDF6C)
 std::optional<std::intptr_t> CommandCameraLensOrShake(ScriptCommand command,
                                                       EventCameraLenses& lenses,
                                                       EventCameraShake& shake) {
@@ -169,7 +169,7 @@ std::optional<std::intptr_t> CommandCameraLensOrShake(ScriptCommand command,
   }
 }
 
-// decomp: BATTLE.PRG func_800BDF6C (F01233, src/BATTLE/BATTLE.PRG/4A0A8.c:3927,
+// decomp: BATTLE.PRG func_800BDF6C (F01233, src/BATTLE/BATTLE.PRG/4DEA8.c:4577,
 // 0x800BDF6C-0x800BE01C)
 void UpdateEventLensTween(EventLensTween& tween, std::int32_t& fraction_scratch,
                           EventCameraLensHost& host) {
@@ -186,7 +186,7 @@ void UpdateEventLensTween(EventLensTween& tween, std::int32_t& fraction_scratch,
   tween.changed = 1;
 }
 
-// decomp: BATTLE.PRG func_800BE01C (F01234, src/BATTLE/BATTLE.PRG/4A0A8.c:3945,
+// decomp: BATTLE.PRG func_800BE01C (F01234, src/BATTLE/BATTLE.PRG/4DEA8.c:4595,
 // 0x800BE01C-0x800BE180)
 bool UpdateEventShakeOscillator(EventShakeOscillator& oscillator,
                                 std::int32_t& envelope_scratch,
@@ -211,7 +211,7 @@ bool UpdateEventShakeOscillator(EventShakeOscillator& oscillator,
   return true;
 }
 
-// decomp: BATTLE.PRG func_800BE180 (F01235, src/BATTLE/BATTLE.PRG/4A0A8.c:3983,
+// decomp: BATTLE.PRG func_800BE180 (F01235, src/BATTLE/BATTLE.PRG/4DEA8.c:4633,
 // 0x800BE180-0x800BE36C)
 void UpdateEventCameraShake(EventCameraShake& shake,
                             EventCameraScratch& scratch,

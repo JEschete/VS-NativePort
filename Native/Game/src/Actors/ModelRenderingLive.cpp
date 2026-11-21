@@ -214,8 +214,8 @@ class LiveRoomModelPass final : public RoomModelPassHost {
     }
   }
 
-  // decomp: 44F14.c:960-971. The route may release the slot; the original
-  // kept writing through its pointer.
+  // decomp: src/BATTLE/BATTLE.PRG/44F14.c:960-971. The route may release the
+  // slot; the original kept writing through its pointer.
   void StepFrozenAnimation(std::size_t slot) override {
     VS::Actors::ActorRecord* actor = RoomActor(slot);
     if (actor == nullptr) return;
@@ -284,8 +284,8 @@ class LiveRoomModelPass final : public RoomModelPassHost {
                            .attachment_bone = weapon->attachment_bone};
   }
 
-  // decomp: 44F14.c:1056. The attachment bone indexes the owner's bone
-  // matrices, which the original did not bound.
+  // decomp: src/BATTLE/BATTLE.PRG/44F14.c:1056. The attachment bone indexes the
+  // owner's bone matrices, which the original did not bound.
   void DrawWeapon(std::size_t index) override {
     VS::Actors::WeaponModel* weapon = weaponModels[index];
     if (weapon == nullptr) return;
@@ -325,7 +325,7 @@ class LiveRoomModelPass final : public RoomModelPassHost {
     static_cast<void>(VS::Field::UpdateLiveGimmickMotion(object));
   }
 
-  // decomp: 44F14.c:1108-1113.
+  // decomp: src/BATTLE/BATTLE.PRG/44F14.c:1108-1113.
   void CenterGimmick(std::size_t index) override {
     const VS::Field::GimmickInstance* object =
         VS::Field::gimmickInstances[index];
@@ -537,7 +537,7 @@ void UpdateAndDrawLiveRoomActors(MATRIX* camera) {
   UpdateAndDrawRoomModels(host);
 }
 
-// decomp: BATTLE.PRG func_800B07DC (src/BATTLE/BATTLE.PRG/44F14.c:1695)
+// decomp: BATTLE.PRG func_800B07DC (src/BATTLE/BATTLE.PRG/44F14.c:1623)
 void TransformLiveActorRootOffset(VS::Actors::ActorRecord* actor) {
   if (actor == nullptr) {
     WarnActorRefused("TransformActorRootOffset", "no actor record");
@@ -635,7 +635,7 @@ void DrawLiveActorWeaponModel(VS::Actors::WeaponModel* weapon, MATRIX* source) {
   DrawWeaponForOwner(*weapon, *owner);
 }
 
-// decomp: INITBTL.PRG func_800FA7B0 (src/BATTLE/INITBTL.PRG/FB0.c:19)
+// decomp: INITBTL.PRG func_800FA7B0 (src/BATTLE/INITBTL.PRG/FB0.c:21)
 void InitializeLiveActorModelResources() {
   VS::Actors::forcedModelOverrides = 0;
   VS::Content::ClearLiveActorAssetQueue();

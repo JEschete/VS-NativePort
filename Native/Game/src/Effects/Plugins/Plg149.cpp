@@ -3,6 +3,7 @@
 #include "Effects/Plugins/Plg149.hpp"
 
 namespace VS::Effects::Plg149 {
-// decomp: D_800FA424 (PLG149.BIN/0.c:5; rings.h:20)
+// decomp: vs_effect_ironRipper_0_colors (src/EFFECT/rings.h:20; was D_800FA424;
+// src/EFFECT/rings.h:20)
 plugins::RingPaletteBytes ringColorFactors;
 }  // namespace VS::Effects::Plg149

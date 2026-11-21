@@ -7,7 +7,7 @@
 #include "Audio/SeqSequencer.hpp"
 
 namespace VS::Audio {
-// decomp: D_800378C0_t (src/SLUS_010.40/25AC.c:65)
+// decomp: D_800378C0_t (src/SLUS_010.40/25AC.c:76)
 struct LegacyCommandArguments {
   void* param1;
   std::int32_t param2;

@@ -229,24 +229,24 @@ class EnemyPreviewHost {
 // kEnemyPreviewFailed (resetting the step) when the load failed.
 int LoadEnemyPreview(EnemyPreviewHost& host, EnemyPreviewState& state,
                      int zud_id);
-// decomp: MENU9.PRG vs_menu9_freeZud (F02837, src/MENU/MENU9.PRG/57BC.c:42)
+// decomp: MENU9.PRG vs_menu9_freeZud (F02837, src/MENU/MENU9.PRG/57BC.c:44)
 // Cancels any queued part and releases the records bound in the model
 // buffer before freeing it; a record that cannot be released keeps it.
 void FreeEnemyPreview(EnemyPreviewHost& host, EnemyPreviewState& state);
-// decomp: MENU9.PRG func_801080C8 (F02838, src/MENU/MENU9.PRG/57BC.c:49)
+// decomp: MENU9.PRG func_801080C8 (F02838, src/MENU/MENU9.PRG/57BC.c:53)
 void InitializeAshleyPreviewPose(EnemyPreviewHost& host);
 // decomp: MENU9.PRG vs_menu9_loadZudFile (F02839,
-// src/MENU/MENU9.PRG/592C.c:171): false, holding nothing new, when no read
+// src/MENU/MENU9.PRG/592C.c:172): false, holding nothing new, when no read
 // was queued.
 [[nodiscard]] bool QueueEnemyModelRead(EnemyPreviewHost& host,
                                        EnemyPreviewState& state, int zud_id);
 // decomp: MENU9.PRG vs_menu9_parseZudFile (F02840,
-// src/MENU/MENU9.PRG/592C.c:203): 1 while the read or the queue is pending
+// src/MENU/MENU9.PRG/592C.c:206): 1 while the read or the queue is pending
 // or after the parts are queued, 0 once no file block is held, and
 // kEnemyPreviewFailed once a failed read, part or submission has abandoned
 // the load.
 int LoadEnemyModelParts(EnemyPreviewHost& host, EnemyPreviewState& state);
 // decomp: MENU9.PRG vs_menu9_freeZudFile (F02841,
-// src/MENU/MENU9.PRG/592C.c:295)
+// src/MENU/MENU9.PRG/592C.c:300)
 void FreeEnemyModelBuffer(EnemyPreviewHost& host, EnemyPreviewState& state);
 }  // namespace VS::Menu::Score

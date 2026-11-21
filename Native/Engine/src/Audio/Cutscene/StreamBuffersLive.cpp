@@ -217,53 +217,57 @@ class LiveStreamBuffers final : public StreamBufferHost {
 }  // namespace
 
 // decomp: SLUS_010.40 Sound_Cutscene_FindFreeVoicePair
-// (src/SLUS_010.40/25AC.c:6254)
+// (src/SLUS_010.40/25AC.c:6394)
 int LiveFindFreeVoicePair() {
   LiveStreamBuffers host;
   return FindFreeVoicePair(host).value_or(-1);
 }
 
-// decomp: SLUS_010.40 func_8001CE60 (src/SLUS_010.40/25AC.c:6284)
+// decomp: SLUS_010.40 Sound_Cutscene_OnFirstHalfTransferred
+// (src/SLUS_010.40/25AC.c:6422; was func_8001CE60)
 void LiveUploadSecondMonoBuffer() {
   LiveStreamBuffers host;
   Report("upload the second mono stream buffer", UploadSecondMonoBuffer(host));
 }
 
 // decomp: SLUS_010.40 Sound_Cutscene_OnInitialTransferComplete
-// (src/SLUS_010.40/25AC.c:6426)
+// (src/SLUS_010.40/25AC.c:6563)
 void LiveBeginMonoPlayback() {
   LiveStreamBuffers host;
   Report("begin mono stream playback", BeginMonoPlayback(host));
 }
 
-// decomp: SLUS_010.40 func_8001D3D4 (src/SLUS_010.40/25AC.c:6436)
+// decomp: SLUS_010.40 Sound_Cutscene_OnInitialTransferCompleteStereo
+// (src/SLUS_010.40/25AC.c:6573; was func_8001D3D4)
 void LiveBeginStereoPlayback() {
   LiveStreamBuffers host;
   Report("begin stereo stream playback", BeginStereoPlayback(host));
 }
 
 // decomp: SLUS_010.40 Sound_Cutscene_OnBufferAComplete
-// (src/SLUS_010.40/25AC.c:6477)
+// (src/SLUS_010.40/25AC.c:6614)
 void LiveRefillMonoFirstBuffer() {
   LiveStreamBuffers host;
   Report("refill the first mono stream buffer", RefillMonoFirstBuffer(host));
 }
 
 // decomp: SLUS_010.40 Sound_Cutscene_OnBufferBComplete
-// (src/SLUS_010.40/25AC.c:6483)
+// (src/SLUS_010.40/25AC.c:6620)
 void LiveRefillMonoSecondBuffer() {
   LiveStreamBuffers host;
   Report("refill the second mono stream buffer", RefillMonoSecondBuffer(host));
 }
 
-// decomp: SLUS_010.40 func_8001D5E4 (src/SLUS_010.40/25AC.c:6491)
+// decomp: SLUS_010.40 Sound_Cutscene_OnStereoBufferAComplete
+// (src/SLUS_010.40/25AC.c:6628; was func_8001D5E4)
 void LiveRefillStereoFirstBuffer() {
   LiveStreamBuffers host;
   Report("refill the first stereo stream buffers",
          RefillStereoFirstBuffer(host));
 }
 
-// decomp: SLUS_010.40 func_8001D614 (src/SLUS_010.40/25AC.c:6496)
+// decomp: SLUS_010.40 Sound_Cutscene_OnStereoBufferBComplete
+// (src/SLUS_010.40/25AC.c:6634; was func_8001D614)
 void LiveRefillStereoSecondBuffer() {
   LiveStreamBuffers host;
   Report("refill the second stereo stream buffers",

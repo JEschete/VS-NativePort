@@ -195,7 +195,7 @@ void RunDraw(std::string_view call, Draw draw) {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_8008F440 (146C.c:17758).
+// decomp: BATTLE.PRG func_8008F440 (src/BATTLE/BATTLE.PRG/146C.c:17635).
 void LiveDrawRainParticles() {
   const WeatherFrame frame = LiveFrame();
   const std::optional<Field::WeatherArea> area = weather_live::Area();
@@ -207,7 +207,7 @@ void LiveDrawRainParticles() {
           });
 }
 
-// decomp: BATTLE.PRG func_8008F9A4 (146C.c:17864).
+// decomp: BATTLE.PRG func_8008F9A4 (src/BATTLE/BATTLE.PRG/146C.c:17741).
 void LiveInitializeRisingEmberParticles(int particle_count, int weather_kind) {
   const std::optional<Field::WeatherArea> area = weather_live::Area();
   if (!area) {
@@ -224,7 +224,7 @@ void LiveInitializeRisingEmberParticles(int particle_count, int weather_kind) {
   weather_live::StoreState(state);
 }
 
-// decomp: BATTLE.PRG func_8008FA14 (146C.c:17878).
+// decomp: BATTLE.PRG func_8008FA14 (src/BATTLE/BATTLE.PRG/146C.c:17755).
 void LiveResetRisingEmberParticle(
     VS::Field::WeatherParticleRecord* weather_particle) {
   const std::optional<Field::WeatherArea> area = weather_live::Area();
@@ -243,7 +243,7 @@ void LiveResetRisingEmberParticle(
           pool, weather_live::ParticleOf(*weather_particle), *area));
 }
 
-// decomp: BATTLE.PRG func_8008FAC8 (146C.c:17889).
+// decomp: BATTLE.PRG func_8008FAC8 (src/BATTLE/BATTLE.PRG/146C.c:17766).
 void LiveDrawRisingEmberParticles() {
   const std::optional<Field::WeatherArea> area = weather_live::Area();
   if (!area) {
@@ -260,7 +260,7 @@ void LiveDrawRisingEmberParticles() {
           });
 }
 
-// decomp: BATTLE.PRG func_8008FDC4 (146C.c:17938).
+// decomp: BATTLE.PRG func_8008FDC4 (src/BATTLE/BATTLE.PRG/146C.c:17938).
 void LiveDrawSnowParticles() {
   const WeatherFrame frame = LiveFrame();
   const std::optional<Field::WeatherArea> area = weather_live::Area();
@@ -272,7 +272,7 @@ void LiveDrawSnowParticles() {
           });
 }
 
-// decomp: BATTLE.PRG func_80090434 (146C.c:18072).
+// decomp: BATTLE.PRG func_80090434 (src/BATTLE/BATTLE.PRG/146C.c:18072).
 void LiveDrawScreenWeatherParticles() {
   const WeatherFrame frame = LiveFrame();
   const WeatherPoint reference = LiveReference();

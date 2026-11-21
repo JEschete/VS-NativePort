@@ -242,7 +242,7 @@ int SelectedRowResult(Host& host) {
 }
 }  // namespace
 
-// decomp: MENU1.PRG _setHPCost (src/MENU/MENU1.PRG/30.c:13).
+// decomp: MENU1.PRG setHPCost (src/MENU/MENU1.PRG/30.c:16; was _setHPCost).
 void SetHpCost(int action_id, Host& host) {
   if (action_id < 0 || action_id >= kActionNameCount) {
     host.Refuse("Break Arts action id exceeds the action table");
@@ -262,8 +262,8 @@ void SetHpCost(int action_id, Host& host) {
                          kCostValueX, disabled);
 }
 
-// decomp: MENU1.PRG _setNextArtUnlockPointsRemaining
-// (src/MENU/MENU1.PRG/30.c:45).
+// decomp: MENU1.PRG setNextArtUnlockPointsRemaining
+// (src/MENU/MENU1.PRG/30.c:48; was _setNextArtUnlockPointsRemaining).
 void DrawNextUnlockPoints(int x_offset, int weapon_category, int row,
                           Host& host) {
   if (weapon_category < 0 ||
@@ -296,7 +296,8 @@ void DrawNextUnlockPoints(int x_offset, int weapon_category, int row,
   host.DrawCompactText(points_text, position + kNextPointsTextOffset);
 }
 
-// decomp: MENU1.PRG _weaponArtsMenu (src/MENU/MENU1.PRG/30.c:104).
+// decomp: MENU1.PRG weaponArtsMenu (src/MENU/MENU1.PRG/30.c:107; was
+// _weaponArtsMenu).
 namespace {
 int SetArtListTitle(int type_cursor_memory, Context& context) {
   ArtListState& state = context.state.art_list;
@@ -461,8 +462,8 @@ bool AdvanceArtListAnimation(Context& context) {
 }
 }  // namespace
 
-// decomp: MENU1.PRG _weaponArtsMenu
-// (src/MENU/MENU1.PRG/30.c:104).
+// decomp: MENU1.PRG weaponArtsMenu
+// (src/MENU/MENU1.PRG/30.c:107; was _weaponArtsMenu).
 int UpdateArtList(int type_cursor_memory, Context& context) {
   if (type_cursor_memory != 0) {
     return SetArtListTitle(type_cursor_memory, context);
@@ -575,8 +576,8 @@ std::optional<int> WaitForCategorySelection(Context& context) {
 }
 }  // namespace
 
-// decomp: MENU1.PRG _weaponCategoriesMenu
-// (src/MENU/MENU1.PRG/30.c:266).
+// decomp: MENU1.PRG weaponCategoriesMenu
+// (src/MENU/MENU1.PRG/30.c:269; was _weaponCategoriesMenu).
 int UpdateWeaponCategories(int initialize, Context& context) {
   CategoryState& state = context.state.categories;
   Host& host = context.host;
@@ -612,7 +613,8 @@ int UpdateWeaponCategories(int initialize, Context& context) {
   return result.value_or(0);
 }
 
-// decomp: MENU1.PRG _setMenuHeader (src/MENU/MENU1.PRG/30.c:344).
+// decomp: MENU1.PRG setMenuHeader (src/MENU/MENU1.PRG/30.c:347; was
+// _setMenuHeader).
 void CreateHeader(Host& host) {
   if (!SetMenuItem(host,
                    {.row = kHeaderRow,
@@ -627,7 +629,7 @@ void CreateHeader(Host& host) {
   host.InitializeInformationBox();
 }
 
-// decomp: MENU1.PRG vs_menu1_exec (src/MENU/MENU1.PRG/30.c:358).
+// decomp: MENU1.PRG vs_menu1_exec (src/MENU/MENU1.PRG/30.c:361).
 namespace {
 int InitializeArtsMenu(Context& context, std::uint8_t& step,
                        bool read_equipped_category) {

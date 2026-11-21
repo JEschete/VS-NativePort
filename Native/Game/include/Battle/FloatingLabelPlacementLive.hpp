@@ -24,6 +24,6 @@ int LiveQueueEquipmentStatChange(int equipment_kind, int stat_label_kind,
 // decomp: F00739 func_8009695C (src/BATTLE/BATTLE.PRG/2842C.c:2765).
 void LiveDrawEquipmentStatChange(int x, int y,
                                  VS::Battle::FloatingLabel* label);
-// decomp: F00742 func_800971D4 (src/BATTLE/BATTLE.PRG/2842C.c:2881).
+// decomp: F00742 func_800971D4 (src/BATTLE/BATTLE.PRG/2842C.c:2869).
 void LiveCommitEquipmentStatChanges();
 }  // namespace VS::Battle

@@ -18,7 +18,7 @@ constexpr int kDirectionMask = kFlightDirectionCount - 1;
 constexpr int kSegmentSampleShift = 4;
 }  // namespace
 
-// decomp: BATTLE.PRG func_800E0850 (src/BATTLE/BATTLE.PRG/771A8.c:942).
+// decomp: BATTLE.PRG func_800E0850 (src/BATTLE/BATTLE.PRG/770A4.c:449).
 int LowestReachableGroundHeight(const FlightNeighborhood& neighborhood,
                                 std::uint32_t movement_angle) {
   int minimum_height = 0;
@@ -40,7 +40,7 @@ int LowestReachableGroundHeight(const FlightNeighborhood& neighborhood,
   return minimum_height;
 }
 
-// decomp: BATTLE.PRG func_800E6A6C (src/BATTLE/BATTLE.PRG/7E05C.s:187). Each
+// decomp: BATTLE.PRG func_800E6A6C (src/BATTLE/BATTLE.PRG/7DDDC.s:337). Each
 // sample keeps the low 15 bits of func_800E4318's value (sll/sra 17), the
 // narrowing GroundHeightAtWorldPosition applies (#343).
 int MinimumAiGroundHeightAlongSegment(Field::TerrainGrid terrain, int start_x,
@@ -59,7 +59,7 @@ int MinimumAiGroundHeightAlongSegment(Field::TerrainGrid terrain, int start_x,
   return minimum_height;
 }
 
-// decomp: BATTLE.PRG func_800E75EC (src/BATTLE/BATTLE.PRG/7E05C.s:1041).
+// decomp: BATTLE.PRG func_800E75EC (src/BATTLE/BATTLE.PRG/3A1A0.c:41).
 int RoomNavigationCeilingHeight(const RoomAiRuntime& runtime) {
   const std::optional<RoomAiSettings> settings = runtime.PublishedSettings();
   return settings ? settings->flight_ceiling : 0;

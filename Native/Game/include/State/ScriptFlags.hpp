@@ -41,15 +41,16 @@ class ScriptFlags {
                        ScriptFlagObserver* observer = nullptr) noexcept;
 
   [[nodiscard]] bool Contains(int id) const noexcept;
-  // decomp: BATTLE.PRG vs_battle_getStateFlag (4A0A8.c:4275). An id outside
-  // the flags reads 0; the original read past the record.
+  // decomp: BATTLE.PRG getStateFlag (src/BATTLE/BATTLE.PRG/4DEA8.c:4924; was
+  // vs_battle_getStateFlag). An id outside the flags reads 0; the original read
+  // past the record.
   [[nodiscard]] std::uint8_t Get(int id) const noexcept;
-  // decomp: BATTLE.PRG vs_battle_setStateFlag (4A0A8.c:4281). Returns false
-  // and stores nothing for an id outside the flags; the original wrote past
-  // the record.
+  // decomp: BATTLE.PRG vs_battle_setStateFlag
+  // (src/BATTLE/BATTLE.PRG/4DEA8.c:4930). Returns false and stores nothing for
+  // an id outside the flags; the original wrote past the record.
   bool Set(int id, std::uint8_t value) noexcept;
-  // decomp: BATTLE.PRG func_800BEB9C (4A0A8.c:4263): clears the zone flags,
-  // one write each, unless `preserve`.
+  // decomp: BATTLE.PRG func_800BEB9C (src/BATTLE/BATTLE.PRG/4DEA8.c:4912):
+  // clears the zone flags, one write each, unless `preserve`.
   void ResetZone(bool preserve) noexcept;
 
  private:

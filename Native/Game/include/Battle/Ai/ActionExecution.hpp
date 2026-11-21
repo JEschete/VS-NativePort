@@ -86,11 +86,11 @@ class DecisionUpdateWorld : public DecisionActorList {
 };
 
 // Missing values denote a diagnosed refusal, not an unsuccessful action.
-// decomp: func_800DAC80 (src/BATTLE/BATTLE.PRG/71618.c:1006).
+// decomp: func_800DAC80 (src/BATTLE/BATTLE.PRG/71618.c:458).
 std::optional<int> TryExecuteActionCandidate(ActionExecutionWorld& world,
                                              std::size_t candidate);
-// decomp: func_800DAD9C (src/BATTLE/BATTLE.PRG/71618.c:1093).
+// decomp: func_800DAD9C (src/BATTLE/BATTLE.PRG/71618.c:490).
 std::optional<int> TryExecutePlannedActions(ActionExecutionWorld& world);
-// decomp: func_800DAED0 (src/BATTLE/BATTLE.PRG/71618.c:1128).
+// decomp: func_800DAED0 (src/BATTLE/BATTLE.PRG/71618.c:527).
 bool UpdateActorDecisions(DecisionUpdateWorld& world);
 }  // namespace VS::Battle::Ai

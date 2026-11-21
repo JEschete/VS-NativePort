@@ -49,13 +49,14 @@ std::uint8_t FacingQuadrant(std::int16_t facing) {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG vs_battle_setDoorEntered (146C.c:15751), 8008AB68-AB7C.
+// decomp: BATTLE.PRG vs_battle_setDoorEntered
+// (src/BATTLE/BATTLE.PRG/146C.c:15621), 8008AB68-AB7C.
 std::uint8_t EnteredDoorReloadByte(std::int16_t entered_door_id) {
   return static_cast<std::uint8_t>(static_cast<std::int32_t>(entered_door_id) +
                                    1);
 }
 
-// decomp: BATTLE.PRG func_8008B8F8 (src/BATTLE/BATTLE.PRG/146C.c:16127).
+// decomp: BATTLE.PRG func_8008B8F8 (src/BATTLE/BATTLE.PRG/146C.c:16000).
 void SetEntranceDoorRecord(EntranceDoorState& state,
                            const std::optional<DoorRecord>& door,
                            EntranceDoorHost& host) {
@@ -68,7 +69,7 @@ void SetEntranceDoorRecord(EntranceDoorState& state,
   state.entered_door_id = scene_id ? static_cast<std::int16_t>(*scene_id) : -1;
 }
 
-// decomp: BATTLE.PRG func_8008B960 (src/BATTLE/BATTLE.PRG/146C.c:16140).
+// decomp: BATTLE.PRG func_8008B960 (src/BATTLE/BATTLE.PRG/146C.c:16013).
 std::optional<DoorRecord> FindEntranceDoorNearTile(
     std::span<const DoorRecord> doors, std::int32_t tile_x, std::int32_t tile_z,
     std::int32_t floor_layer) {

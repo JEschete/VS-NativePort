@@ -105,7 +105,8 @@ struct SeqChannel {
   VoiceParams voice;
 };
 
-// decomp: FSoundChannelConfig (src/include/sound.h:492)
+// decomp: FSoundMusicContext (src/include/sound.h:446-492; was
+// FSoundChannelConfig)
 struct MusicConfig {
   std::int32_t status_flags;
   std::int32_t active_channels;

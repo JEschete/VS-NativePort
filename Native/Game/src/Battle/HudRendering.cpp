@@ -97,7 +97,8 @@ HudShortcutTone RestrictedTone(std::uint32_t restrictions, std::uint32_t mask) {
 }
 }  // namespace
 
-// decomp: F01354 _renderStatBar (src/BATTLE/BATTLE.PRG/5BF94.c:3088).
+// decomp: F01354 renderStatBar (src/BATTLE/BATTLE.PRG/5BF94.c:2639; was
+// _renderStatBar).
 bool DrawHudStatGauge(HudGaugeWorld& world, const HudGaugeValue& gauge) {
   if (static_cast<std::size_t>(gauge.kind) >= kHudGaugeCount) return false;
   const auto anchor = world.GaugePosition(gauge.kind);
@@ -121,7 +122,7 @@ bool DrawHudStatGauge(HudGaugeWorld& world, const HudGaugeValue& gauge) {
        .packed_size = Signed(label.value().width | kGaugeLabelHeight)});
 }
 
-// decomp: F01355 func_800C9CB4 (src/BATTLE/BATTLE.PRG/5BF94.c:3112).
+// decomp: F01355 func_800C9CB4 (src/BATTLE/BATTLE.PRG/5BF94.c:2663).
 bool DrawSlidingStatusIcon(HudStatusIconWorld& world,
                            const SlidingHudStatusIcon& icon) {
   if (icon.icon == kAbsentHudStatusIcon || world.SlideOffset() != 0) {
@@ -169,7 +170,7 @@ bool DrawSlidingStatusIcon(HudStatusIconWorld& world,
       StatusSprite(x, width, kIconRow, uv | kStatusOverlayClut));
 }
 
-// decomp: F01358 func_800C9EB8 (src/BATTLE/BATTLE.PRG/5BF94.c:3197).
+// decomp: F01358 func_800C9EB8 (src/BATTLE/BATTLE.PRG/5BF94.c:2748).
 std::optional<HudShortcutTone> ShortcutIconBrightness(HudShortcutWorld& world,
                                                       std::int32_t shortcut) {
   const auto restrictions = world.ActionRestrictions();
@@ -197,7 +198,7 @@ std::optional<HudShortcutTone> ShortcutIconBrightness(HudShortcutWorld& world,
                           : HudShortcutTone::kHidden;
 }
 
-// decomp: F01360 func_800C9F98 (src/BATTLE/BATTLE.PRG/5BF94.c:3241).
+// decomp: F01360 func_800C9F98 (src/BATTLE/BATTLE.PRG/5BF94.c:2792).
 bool DrawShortcutButtonMarker(HudSpriteWorld& world, std::int32_t position,
                               std::int32_t brightness_transparency) {
   return world.DrawSprite(

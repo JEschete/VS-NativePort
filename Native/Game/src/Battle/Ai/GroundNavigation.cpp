@@ -327,7 +327,7 @@ std::optional<bool> InsideApproachRadius(const GroundNavigationWorld& world,
 
 }  // namespace
 
-// decomp: func_800D98E8 (src/BATTLE/BATTLE.PRG/70D4C.s:279).
+// decomp: func_800D98E8 (src/BATTLE/BATTLE.PRG/70D4C.s:262).
 std::optional<int> DirectionalBlockingActor(GroundNavigationWorld& world,
                                             const GroundNavigator& navigator,
                                             int direction) {
@@ -342,7 +342,7 @@ std::optional<int> DirectionalBlockingActor(GroundNavigationWorld& world,
   return result;
 }
 
-// decomp: func_800D954C (src/BATTLE/BATTLE.PRG/70D4C.s:12).
+// decomp: func_800D954C (src/BATTLE/BATTLE.PRG/70D4C.s:6).
 std::optional<int> DestinationOccupancy(GroundNavigationWorld& world,
                                         const GroundNavigator& navigator,
                                         std::uint32_t packed) {
@@ -372,7 +372,7 @@ std::optional<int> DestinationOccupancy(GroundNavigationWorld& world,
   return *found != 0 ? -1 : 1;
 }
 
-// decomp: func_800D96C8 (src/BATTLE/BATTLE.PRG/70D4C.s:123).
+// decomp: func_800D96C8 (src/BATTLE/BATTLE.PRG/70D4C.s:112).
 std::optional<int> CanTraverseTileEdge(GroundNavigationWorld& world,
                                        const GroundNavigator& navigator,
                                        std::uint32_t from, std::uint32_t to,
@@ -1170,7 +1170,7 @@ enum class LocomotionRoute {
 };
 }  // namespace
 
-// decomp: D_800D9B6C (src/BATTLE/BATTLE.PRG/70D4C.s:458).
+// decomp: func_800D9B6C (src/BATTLE/BATTLE.PRG/70D4C.s:441; was D_800D9B6C).
 std::optional<bool> CanWalkInDirection(GroundNavigationWorld& world,
                                        const GroundNavigator& navigator,
                                        int direction) {
@@ -1196,7 +1196,7 @@ std::optional<bool> CanWalkInDirection(GroundNavigationWorld& world,
   return !blocked;
 }
 
-// decomp: func_800DB93C (src/BATTLE/BATTLE.PRG/72B70.s:483).
+// decomp: func_800DB93C (src/BATTLE/BATTLE.PRG/72B70.s:446).
 std::optional<std::uint32_t> FindGapLandingTile(
     GroundNavigationWorld& world, const GroundNavigator& navigator,
     std::uint32_t tile, int direction, std::uint32_t from) {
@@ -1238,7 +1238,7 @@ std::optional<std::uint32_t> FindGapLandingTile(
   return std::nullopt;
 }
 
-// decomp: func_800E3BC8 (src/BATTLE/BATTLE.PRG/7B3C8.s:11).
+// decomp: func_800E3BC8 (src/BATTLE/BATTLE.PRG/7B3C8.s:6).
 void SetDetourBoundary(GroundNavigator& navigator) {
   const auto target = Unpack(navigator.destination);
   const auto tile = Unpack(navigator.tile);
@@ -1248,7 +1248,7 @@ void SetDetourBoundary(GroundNavigator& navigator) {
                                (x << kPathXShift) | (z << kPathZShift);
 }
 
-// decomp: func_800E3CDC (src/BATTLE/BATTLE.PRG/7B3C8.s:90).
+// decomp: func_800E3CDC (src/BATTLE/BATTLE.PRG/7B3C8.s:84).
 std::uint32_t RefreshDetourProgress(GroundNavigationWorld& world,
                                     GroundNavigator& navigator,
                                     std::uint32_t flags) {
@@ -1271,7 +1271,7 @@ std::uint32_t RefreshDetourProgress(GroundNavigationWorld& world,
   return (flags & ~kPathStepMask) | (steps << kPathStepShift);
 }
 
-// decomp: func_800E3D5C (src/BATTLE/BATTLE.PRG/7B55C.s:9).
+// decomp: func_800E3D5C (src/BATTLE/BATTLE.PRG/7B3C8.s:122).
 std::optional<int> CardinalPassabilityMask(GroundNavigator& navigator,
                                            GroundDirectionProbe& probe) {
   int result = 0;
@@ -1284,7 +1284,7 @@ std::optional<int> CardinalPassabilityMask(GroundNavigator& navigator,
   return result;
 }
 
-// decomp: func_800E2F5C (src/BATTLE/BATTLE.PRG/771A8.c:2388).
+// decomp: func_800E2F5C (src/BATTLE/BATTLE.PRG/770A4.c:1619).
 std::optional<int> FollowObstacleDetour(GroundNavigationWorld& world,
                                         GroundNavigator& navigator,
                                         GroundDirectionProbe& probe,
@@ -1299,7 +1299,7 @@ std::optional<int> FollowObstacleDetour(GroundNavigationWorld& world,
   return action;
 }
 
-// decomp: func_800E3DDC (src/BATTLE/BATTLE.PRG/7B5DC.s:10).
+// decomp: func_800E3DDC (src/BATTLE/BATTLE.PRG/7B3C8.s:157).
 std::optional<std::uint32_t> InitializeObstacleDetour(
     GroundNavigationWorld& world, GroundNavigator& navigator,
     std::uint32_t flags, GroundDirectionProbe& probe) {
@@ -1322,7 +1322,7 @@ std::optional<std::uint32_t> InitializeObstacleDetour(
          (static_cast<std::uint32_t>(*mask) << kPathCellShift);
 }
 
-// decomp: func_800E4180 (src/BATTLE/BATTLE.PRG/7B5DC.s).
+// decomp: func_800E4180 (src/BATTLE/BATTLE.PRG/7B3C8.s:413).
 std::optional<int> UpdateHesitationTurn(GroundNavigationWorld& world,
                                         GroundNavigator& navigator, int chance,
                                         int kind, int slot) {
@@ -1366,7 +1366,7 @@ std::optional<int> UpdateHesitationTurn(GroundNavigationWorld& world,
   return count >= 2 ? 1 : 0;
 }
 
-// decomp: func_800E4764 (src/BATTLE/BATTLE.PRG/7BDD4.s:145).
+// decomp: func_800E4764 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:484).
 std::optional<VerticalMovementStep> SelectActorVerticalMovementStep(
     const GroundNavigator& navigator) {
   std::size_t index = navigator.gait != 0 ? 0 : 1;
@@ -1468,7 +1468,7 @@ std::optional<std::uint32_t> FindAiDescentTile(GroundNavigationWorld& world,
   return std::nullopt;
 }
 
-// decomp: func_800E4BD8 (src/BATTLE/BATTLE.PRG/7BDD4.s:527).
+// decomp: func_800E4BD8 (src/BATTLE/BATTLE.PRG/6E4CCPrivate.h:113).
 void ClearAiContactOccupancy(GroundNavigationWorld& world, int bit) {
   const std::uint32_t mask = ~ContactBit(bit);
   ApplyContactMask(world, mask);
@@ -1480,7 +1480,7 @@ void SetAiContactOccupancy(GroundNavigationWorld& world, int bit) {
   ApplyContactMask(world, mask);
 }
 
-// decomp: func_800E4B10 (src/BATTLE/BATTLE.PRG/7BDD4.s:431).
+// decomp: func_800E4B10 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:488).
 void BeginAiTerrainMovement(GroundNavigationWorld& world,
                             GroundNavigator& navigator) {
   navigator.stall_counter = 0;
@@ -1488,7 +1488,7 @@ void BeginAiTerrainMovement(GroundNavigationWorld& world,
   world.IssueCommand(navigator, kTerrainIntent);
 }
 
-// decomp: func_800E4B18 (src/BATTLE/BATTLE.PRG/7BDD4.s:438).
+// decomp: func_800E4B18 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:489).
 void BeginAiAlternateTerrainMovement(GroundNavigationWorld& world,
                                      GroundNavigator& navigator) {
   navigator.stall_counter = 0;
@@ -1496,8 +1496,8 @@ void BeginAiAlternateTerrainMovement(GroundNavigationWorld& world,
   world.IssueCommand(navigator, kAlternateTerrainIntent);
 }
 
-// decomp: func_800E4B2C (src/BATTLE/BATTLE.PRG/7BDD4.s:449); the continuation
-// is L800DF8A4 (src/BATTLE/BATTLE.PRG/766FC.s).
+// decomp: func_800E4B2C (src/BATTLE/BATTLE.PRG/6E4CCShared.h:490); the
+// continuation is L800DF8A4 (src/BATTLE/BATTLE.PRG/766FC.s).
 bool MoveActorTowardDestinationTile(GroundNavigationWorld& world,
                                     GroundNavigator& navigator) {
   if (navigator.route_gate != 0) return ContinueRouteLink(world, navigator);
@@ -1512,7 +1512,7 @@ bool MoveActorTowardDestinationTile(GroundNavigationWorld& world,
   return true;
 }
 
-// decomp: func_800E4B70 (src/BATTLE/BATTLE.PRG/7BDD4.s:473).
+// decomp: func_800E4B70 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:491).
 bool BeginAiGroundMovement(GroundNavigationWorld& world,
                            GroundNavigator& navigator, int angle) {
   if (navigator.height_filtered_movement != 0) {
@@ -1525,7 +1525,7 @@ bool BeginAiGroundMovement(GroundNavigationWorld& world,
   return ResolveDirectionalMovement(world, navigator, Angle(angle), 1);
 }
 
-// decomp: func_800E50A0 (src/BATTLE/BATTLE.PRG/7C7E0.s:66).
+// decomp: func_800E50A0 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:500).
 bool DispatchAiLocomotionMode(GroundNavigationWorld& world,
                               GroundNavigator& navigator, int kind, int angle) {
   if (navigator.locomotion_mode >= kLocomotionModes || kind < 0 || kind > 1) {
@@ -1571,7 +1571,7 @@ bool BeginAiMovementTowardPoint(GroundNavigationWorld& world,
                               navigator.move_z - navigator.z));
 }
 
-// decomp: func_800E3600 (src/BATTLE/BATTLE.PRG/771A8.c:2549;
+// decomp: func_800E3600 (src/BATTLE/BATTLE.PRG/770A4.c:1800;
 // nonmatchings/771A8/func_800E3600.s). C counterpart: 771A8.c:2266.
 bool ResolveDirectionalMovement(GroundNavigationWorld& world,
                                 GroundNavigator& navigator, int angle,

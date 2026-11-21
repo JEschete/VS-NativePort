@@ -71,86 +71,95 @@ inline constexpr std::uint8_t kToggleRoomAnimation = 1;
 inline constexpr unsigned kDepthCueOverrideBit = 0x8000;
 inline constexpr unsigned kDepthCueDepthMask = 0x7FF;
 
-// decomp: BATTLE.PRG func_800B9770 (src/BATTLE/BATTLE.PRG/4A0A8.c:1966)
-// Opcode 0x60: shows or hides a moving platform.
+// decomp: BATTLE.PRG vs_battle_script_60_setCloudstoneMoving
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2508; was func_800B9770) Opcode 0x60: shows or
+// hides a moving platform.
 ScriptFlow ScriptSetGimmickVisibility(const ScriptInstruction& instruction,
                                       ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800B979C (src/BATTLE/BATTLE.PRG/4A0A8.c:1972)
-// Opcode 0x61: keeps a scripted texture LOD depth, or releases it to the
-// camera's far clip.
+// decomp: BATTLE.PRG vs_battle_script_61_overrideFogDepth
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2520; was func_800B979C) Opcode 0x61: keeps a
+// scripted texture LOD depth, or releases it to the camera's far clip.
 ScriptFlow ScriptOverrideDepthCueDistance(const ScriptInstruction& instruction,
                                           ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800B97E4 (src/BATTLE/BATTLE.PRG/4A0A8.c:1982)
-// Opcode 0x62: selects the room geometry's draw mode.
+// decomp: BATTLE.PRG vs_battle_script_62_setFirstPersonRendering
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2539; was func_800B97E4) Opcode 0x62: selects
+// the room geometry's draw mode.
 ScriptFlow ScriptSetRoomLightingMode(const ScriptInstruction& instruction,
                                      ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800B9818 (src/BATTLE/BATTLE.PRG/4A0A8.c:1994)
-// Opcode 0x64.
+// decomp: BATTLE.PRG vs_battle_script_64_showGeometry
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2559; was func_800B9818) Opcode 0x64.
 ScriptFlow ScriptShowGeometryGroup(const ScriptInstruction& instruction,
                                    ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800B983C (src/BATTLE/BATTLE.PRG/4A0A8.c:2000)
-// Opcode 0x65.
+// decomp: BATTLE.PRG vs_battle_script_65_hideGeometry
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2571; was func_800B983C) Opcode 0x65.
 ScriptFlow ScriptHideGeometryGroup(const ScriptInstruction& instruction,
                                    ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800B9860 (src/BATTLE/BATTLE.PRG/4A0A8.c:2006)
-// Opcode 0x66.
+// decomp: BATTLE.PRG vs_battle_script_66_swapGeometryFlags
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2583; was func_800B9860) Opcode 0x66.
 ScriptFlow ScriptSwapGeometryGroupFlags(const ScriptInstruction& instruction,
                                         ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800B988C (src/BATTLE/BATTLE.PRG/4A0A8.c:2012)
-// Opcode 0x67: blocks or unblocks a collision cell. The operands are the
-// tile x, the layer, the tile z and the blocked byte.
+// decomp: BATTLE.PRG vs_battle_script_67_setTileBlocked
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2598; was func_800B988C) Opcode 0x67: blocks
+// or unblocks a collision cell. The operands are the tile x, the layer, the
+// tile z and the blocked byte.
 ScriptFlow ScriptSetCollisionTileMode(const ScriptInstruction& instruction,
                                       ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800BA288 (src/BATTLE/BATTLE.PRG/4A0A8.c:2268)
-// Opcode 0x7D: adds a signed depth bias to a geometry group.
+// decomp: BATTLE.PRG vs_battle_script_7D (src/BATTLE/BATTLE.PRG/4DEA8.c:2916;
+// was func_800BA288) Opcode 0x7D: adds a signed depth bias to a geometry group.
 ScriptFlow ScriptAdjustGeometryDepthBias(const ScriptInstruction& instruction,
                                          ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800B9F28 (src/BATTLE/BATTLE.PRG/4A0A8.c:2160)
-// Opcode 0x73: shows or hides the room's tiled background.
+// decomp: BATTLE.PRG vs_battle_script_73 (src/BATTLE/BATTLE.PRG/4DEA8.c:2805;
+// was func_800B9F28) Opcode 0x73: shows or hides the room's tiled background.
 ScriptFlow ScriptSetRoomBackgroundVisible(const ScriptInstruction& instruction,
                                           ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800B9F4C (src/BATTLE/BATTLE.PRG/4A0A8.c:2166)
-// Opcode 0x74: queues the tiled background's reads into a texture page.
+// decomp: BATTLE.PRG vs_battle_script_74 (src/BATTLE/BATTLE.PRG/4DEA8.c:2811;
+// was func_800B9F4C) Opcode 0x74: queues the tiled background's reads into a
+// texture page.
 ScriptFlow ScriptLoadRoomBackground(const ScriptInstruction& instruction,
                                     ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800B9F70 (src/BATTLE/BATTLE.PRG/4A0A8.c:2172)
-// Opcode 0x75: holds until the tiled background's load finishes.
+// decomp: BATTLE.PRG vs_battle_script_75 (src/BATTLE/BATTLE.PRG/4DEA8.c:2817;
+// was func_800B9F70) Opcode 0x75: holds until the tiled background's load
+// finishes.
 ScriptFlow ScriptWaitForRoomBackground(const ScriptInstruction& instruction,
                                        ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800B9F90 (src/BATTLE/BATTLE.PRG/4A0A8.c:2174)
-// Opcode 0x76: releases the tiled background, then yields while a cutscene
-// is being skipped.
+// decomp: BATTLE.PRG vs_battle_script_76 (src/BATTLE/BATTLE.PRG/4DEA8.c:2822;
+// was func_800B9F90) Opcode 0x76: releases the tiled background, then yields
+// while a cutscene is being skipped.
 ScriptFlow ScriptFreeRoomBackground(const ScriptInstruction& instruction,
                                     ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800BA218 (src/BATTLE/BATTLE.PRG/4A0A8.c:2256)
-// Opcode 0x7B: the tiled background's signed scroll offsets.
+// decomp: BATTLE.PRG vs_battle_script_7B (src/BATTLE/BATTLE.PRG/4DEA8.c:2904;
+// was func_800BA218) Opcode 0x7B: the tiled background's signed scroll offsets.
 ScriptFlow ScriptSetBackgroundOffset(const ScriptInstruction& instruction,
                                      ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800BA264 (src/BATTLE/BATTLE.PRG/4A0A8.c:2262)
-// Opcode 0x7C: a nonzero operand disables the first-person view.
+// decomp: BATTLE.PRG vs_battle_script_7C (src/BATTLE/BATTLE.PRG/4DEA8.c:2910;
+// was func_800BA264) Opcode 0x7C: a nonzero operand disables the first-person
+// view.
 ScriptFlow ScriptSetFirstPersonView(const ScriptInstruction& instruction,
                                     ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800BA2B4 (src/BATTLE/BATTLE.PRG/4A0A8.c:2274)
-// Opcode 0x7E: the tiled background's signed parallax scales.
+// decomp: BATTLE.PRG vs_battle_script_7E (src/BATTLE/BATTLE.PRG/4DEA8.c:2922;
+// was func_800BA2B4) Opcode 0x7E: the tiled background's signed parallax
+// scales.
 ScriptFlow ScriptSetBackgroundParallax(const ScriptInstruction& instruction,
                                        ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800B9FC0 (src/BATTLE/BATTLE.PRG/4A0A8.c:2180)
-// Opcode 0x77: selects the room weather, then sets its intensity and wind
-// or starts the weather tween towards them.
+// decomp: BATTLE.PRG vs_battle_script_77 (src/BATTLE/BATTLE.PRG/4DEA8.c:2828;
+// was func_800B9FC0) Opcode 0x77: selects the room weather, then sets its
+// intensity and wind or starts the weather tween towards them.
 ScriptFlow ScriptSetEnvironmentParticles(const ScriptInstruction& instruction,
                                          ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800BA0E4 (src/BATTLE/BATTLE.PRG/4A0A8.c:2211)
-// Opcode 0x78: a zero operand enables the weather's random variation.
+// decomp: BATTLE.PRG vs_battle_script_78 (src/BATTLE/BATTLE.PRG/4DEA8.c:2859;
+// was func_800BA0E4) Opcode 0x78: a zero operand enables the weather's random
+// variation.
 ScriptFlow ScriptSetParticleVariationEnabled(
     const ScriptInstruction& instruction, ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800BA108 (src/BATTLE/BATTLE.PRG/4A0A8.c:2217)
-// Opcode 0x7A: a nonzero operand mutes the weather ambience of a room with
-// no ambient sound section, saving it; zero restores the saved ambience.
+// decomp: BATTLE.PRG vs_battle_script_7A (src/BATTLE/BATTLE.PRG/4DEA8.c:2865;
+// was func_800BA108) Opcode 0x7A: a nonzero operand mutes the weather ambience
+// of a room with no ambient sound section, saving it; zero restores the saved
+// ambience.
 ScriptFlow ScriptMuteEnvironmentSound(const ScriptInstruction& instruction,
                                       ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800BA194 (src/BATTLE/BATTLE.PRG/4A0A8.c:2238)
-// Opcode 0x79: starts a room effect, first finishing an active one while a
-// cutscene is skipped, or toggles its updates.
+// decomp: BATTLE.PRG vs_battle_script_79 (src/BATTLE/BATTLE.PRG/4DEA8.c:2886;
+// was func_800BA194) Opcode 0x79: starts a room effect, first finishing an
+// active one while a cutscene is skipped, or toggles its updates.
 ScriptFlow ScriptControlRoomAnimation(const ScriptInstruction& instruction,
                                       ScriptVmHost& host);
 

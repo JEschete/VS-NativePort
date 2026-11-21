@@ -7,7 +7,7 @@
 
 using VS::Legacy::DR_STP;
 
-// decomp: vs_scratch (src/include/scratch.h): the frame's drawing context.
+// decomp: vs_scratch (src/include/scratch.h:23): the frame's drawing context.
 VS::Render::FrameScratch VS::Render::frameScratch{};
 
 // decomp: D_800F1870 (D_800F1870@BATTLE/BATTLE.PRG)

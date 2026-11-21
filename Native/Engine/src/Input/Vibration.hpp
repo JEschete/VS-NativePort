@@ -1,6 +1,6 @@
 #pragma once
 // The vibration preset directory and its one pattern (decomp: D_8004A504,
-// main.c:139), read by PlayLiveVibrationPreset.
+// src/SLUS_010.40/main.c:139), read by PlayLiveVibrationPreset.
 #include <array>
 #include <cstddef>
 #include <cstdint>

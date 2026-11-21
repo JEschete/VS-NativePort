@@ -313,7 +313,7 @@ std::optional<battle::TargetingActionView> ActionView(int action_id) {
       .shaped_area = action.ai_flags.shaped_area != 0};
 }
 
-// decomp: BATTLE.PRG func_800E5698 (src/BATTLE/BATTLE.PRG/7CD68.c:476); a
+// decomp: BATTLE.PRG func_800E5698 (src/BATTLE/BATTLE.PRG/7CD68.c:113); a
 // weapon-ranged action without the attacker's weapon range is refused as 0.
 int ActionRangeSquared(int action_id,
                        std::optional<battle::RangeShape> weapon_range) {

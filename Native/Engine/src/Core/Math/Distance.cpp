@@ -18,7 +18,7 @@ std::uint32_t Square(std::int32_t component) noexcept {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800E4660 (src/BATTLE/BATTLE.PRG/7BDD4.s:68).
+// decomp: BATTLE.PRG func_800E4660 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:419).
 // mtc2 IR1-IR3, SQR 0, then LIR sums of MAC1-MAC3 with a wrapping addu/add.
 std::uint32_t SquaredVectorLength(std::int32_t delta_x, std::int32_t delta_y,
                                   std::int32_t delta_z) noexcept {
@@ -27,7 +27,7 @@ std::uint32_t SquaredVectorLength(std::int32_t delta_x, std::int32_t delta_y,
          Square(GteComponent(static_cast<std::uint32_t>(delta_z)));
 }
 
-// decomp: BATTLE.PRG func_800E4624 (src/BATTLE/BATTLE.PRG/7BDD4.s:49).
+// decomp: BATTLE.PRG func_800E4624 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:482).
 // Loads both short vectors, raises y by each offset and falls through to the
 // shared square; the original word loads become decoded Position3 values.
 std::int32_t SquaredDistanceWithHeightOffsets(
@@ -58,7 +58,7 @@ std::uint32_t SquaredTileDistanceFromComponents(
   return SquaredVectorLength(GteComponent(delta_x), 0, GteComponent(delta_z));
 }
 
-// decomp: BATTLE.PRG func_800E45F4 (src/BATTLE/BATTLE.PRG/7BDD4.s:23).
+// decomp: BATTLE.PRG func_800E45F4 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:481).
 // C counterpart: rood-boi pc/src/battle_movement.c:153 (CC0-1.0).
 // Unpacks the first tile into t0/t1 and falls through to the component entry.
 std::uint32_t SquaredTileDistance(TileCoordinate first,

@@ -112,6 +112,7 @@ class ActorActionResultWorld {
 // Callbacks observe committed writes; the target slot/stats owner are cached,
 // while hit fields and stats are reread after callbacks. False refuses missing
 // stats or the selected armor limb, only when that limb is actually used.
-// decomp: _applyBattleAbilityEffect (src/BATTLE/BATTLE.PRG/146C.c:14018).
+// decomp: applyBattleAbilityEffect (src/BATTLE/BATTLE.PRG/146C.c:13884; was
+// _applyBattleAbilityEffect).
 bool ApplyActorActionResult(ActorActionResultWorld& world);
 }  // namespace VS::Battle

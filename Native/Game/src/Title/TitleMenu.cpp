@@ -69,8 +69,8 @@ constexpr std::uint32_t kNeutralSprite = 0x64808080;
 constexpr std::uint32_t kGreyLevel = 0x010101;
 
 // _menuItemTextClut and the _menuItemOutlineClut that follows it in the
-// module (TITLE.PRG data, 22C.c:3763): _setMenuItemClut indexes past the
-// text palettes into the outline palettes as rows 2 and 3.
+// module (TITLE.PRG data, src/TITLE/TITLE.PRG/22C.c:772-782): _setMenuItemClut
+// indexes past the text palettes into the outline palettes as rows 2 and 3.
 // decomp: TITLE.PRG _menuItemTextClut (TITLE/TITLE.PRG data)
 // decomp: TITLE.PRG _menuItemOutlineClut (TITLE/TITLE.PRG data)
 [[nodiscard]] constexpr std::uint16_t Rgb5551(int red, int green, int blue,
@@ -982,29 +982,34 @@ int ShowMenu(Context& context, int& menu_item) {
 }
 }  // namespace
 
-// decomp: TITLE.PRG _playNewGameSfx (src/TITLE/TITLE.PRG/22C.c:18)
+// decomp: TITLE.PRG playNewGameSfx (src/TITLE/TITLE.PRG/22C.c:18; was
+// _playNewGameSfx)
 void PlayNewGameSounds(Host& host) {
   for (const int effect : kNewGameSounds) {
     host.PlaySoundEffect(effect);
   }
 }
 
-// decomp: TITLE.PRG _playMenuChangeSfx (src/TITLE/TITLE.PRG/22C.c:25)
+// decomp: TITLE.PRG playMenuChangeSfx (src/TITLE/TITLE.PRG/22C.c:25; was
+// _playMenuChangeSfx)
 void PlayMenuChangeSound(Host& host) {
   host.PlaySoundEffect(Sound(Menu::MenuSound::kChange));
 }
 
-// decomp: TITLE.PRG _playMenuSelectSfx (src/TITLE/TITLE.PRG/22C.c:27)
+// decomp: TITLE.PRG playMenuSelectSfx (src/TITLE/TITLE.PRG/22C.c:27; was
+// _playMenuSelectSfx)
 void PlayMenuSelectSound(Host& host) {
   host.PlaySoundEffect(Sound(Menu::MenuSound::kSelect));
 }
 
-// decomp: TITLE.PRG _playMenuLeaveSfx (src/TITLE/TITLE.PRG/22C.c:29)
+// decomp: TITLE.PRG playMenuLeaveSfx (src/TITLE/TITLE.PRG/22C.c:29; was
+// _playMenuLeaveSfx)
 void PlayMenuLeaveSound(Host& host) {
   host.PlaySoundEffect(Sound(Menu::MenuSound::kLeave));
 }
 
-// decomp: TITLE.PRG _gameLoadScreen (src/TITLE/TITLE.PRG/22C.c:3129)
+// decomp: TITLE.PRG gameLoadScreen (src/TITLE/TITLE.PRG/22C.c:140; was
+// _gameLoadScreen)
 int ShowContinueScreen(Host& host) {
   enum class Phase : std::uint8_t { kInitialize, kLoadCardResources, kRun };
   PrepareFileScreen(host);
@@ -1037,7 +1042,8 @@ int ShowContinueScreen(Host& host) {
   }
 }
 
-// decomp: TITLE.PRG _gameSaveScreen (src/TITLE/TITLE.PRG/22C.c:3313)
+// decomp: TITLE.PRG gameSaveScreen (src/TITLE/TITLE.PRG/22C.c:324; was
+// _gameSaveScreen)
 void ShowClearSaveScreen(Host& host) {
   PrepareFileScreen(host);
   ClearSaveScreen screen;
@@ -1050,8 +1056,8 @@ void ShowClearSaveScreen(Host& host) {
   host.SetDisplayEnabled(false);
 }
 
-// decomp: TITLE.PRG _displayPublisherAndDeveloper
-// (src/TITLE/TITLE.PRG/22C.c:3579)
+// decomp: TITLE.PRG displayPublisherAndDeveloper
+// (src/TITLE/TITLE.PRG/22C.c:590; was _displayPublisherAndDeveloper)
 void ShowPublisherAndDeveloper(Host& host) {
   host.ClearImage(kLogoClear);
   host.UploadImage(Image::kPublisherPalette, kPublisherPaletteArea);
@@ -1065,7 +1071,8 @@ void ShowPublisherAndDeveloper(Host& host) {
   host.SetDisplayEnabled(false);
 }
 
-// decomp: TITLE.PRG _setMenuItemFadeIn (src/TITLE/TITLE.PRG/22C.c:3761)
+// decomp: TITLE.PRG setMenuItemFadeIn (src/TITLE/TITLE.PRG/22C.c:772; was
+// _setMenuItemFadeIn)
 void InitializeMenuItem(State& state, int item, std::uint8_t position) {
   if (!ValidItem(item)) {
     return;
@@ -1081,7 +1088,8 @@ void InitializeMenuItem(State& state, int item, std::uint8_t position) {
       .text_blend_factor = 0};
 }
 
-// decomp: TITLE.PRG _copyTitleBgData (src/TITLE/TITLE.PRG/22C.c:3773)
+// decomp: TITLE.PRG copyTitleBgData (src/TITLE/TITLE.PRG/22C.c:784; was
+// _copyTitleBgData)
 void LoadBackgroundTextures(Host& host) {
   constexpr std::size_t kImageHalfwords =
       kBackgroundHalfwords + Halfwords(kMenuStripArea);
@@ -1107,10 +1115,10 @@ void LoadBackgroundTextures(Host& host) {
   host.FreeLow(image);
 }
 
-// decomp: TITLE.PRG _initTitleScreen (src/TITLE/TITLE.PRG/22C.c:3821). The
-// original spun until VSync(1) reported scanline 248 so the display change
-// landed in the vertical blank; a native frame changes its display whole, so
-// there is no scanline to wait for.
+// decomp: TITLE.PRG initTitleScreen (src/TITLE/TITLE.PRG/22C.c:832; was
+// _initTitleScreen). The original spun until VSync(1) reported scanline 248 so
+// the display change landed in the vertical blank; a native frame changes its
+// display whole, so there is no scanline to wait for.
 void InitializeTitleDisplay(Host& host) {
   constexpr DisplaySetup kTitleDisplay{.display = {512, 16, 512, 480},
                                        .screen = {0, 8, 0, 224},
@@ -1120,7 +1128,7 @@ void InitializeTitleDisplay(Host& host) {
   host.WaitTick();
 }
 
-// decomp: TITLE.PRG _initMenu (src/TITLE/TITLE.PRG/22C.c:3838)
+// decomp: TITLE.PRG initMenu (src/TITLE/TITLE.PRG/22C.c:849; was _initMenu)
 std::span<std::uint16_t> InitializeMenu(Context& context, int item) {
   State& state = context.state;
   Host& host = context.host;
@@ -1149,14 +1157,14 @@ std::span<std::uint16_t> InitializeMenu(Context& context, int item) {
   return capture;
 }
 
-// decomp: TITLE.PRG _freeHeap (src/TITLE/TITLE.PRG/22C.c:3867)
+// decomp: TITLE.PRG freeHeap (src/TITLE/TITLE.PRG/22C.c:878; was _freeHeap)
 void ReleaseMenuCapture(Host& host, std::span<std::uint16_t> capture) {
   if (!capture.empty()) {
     host.FreeLow(capture);
   }
 }
 
-// decomp: TITLE.PRG _fadeInMenu (src/TITLE/TITLE.PRG/22C.c:3869)
+// decomp: TITLE.PRG fadeInMenu (src/TITLE/TITLE.PRG/22C.c:880; was _fadeInMenu)
 void BlendMenuBackground(Host& host, std::span<std::uint16_t> capture,
                          int factor) {
   if (CaptureHolds(host, capture)) {
@@ -1174,7 +1182,8 @@ void BlendMenuBackground(Host& host, std::span<std::uint16_t> capture,
   host.UpdateControllers();
 }
 
-// decomp: TITLE.PRG _fadeInMenuCopyright (src/TITLE/TITLE.PRG/22C.c:3914)
+// decomp: TITLE.PRG fadeInMenuCopyright (src/TITLE/TITLE.PRG/22C.c:925; was
+// _fadeInMenuCopyright)
 void BlendCopyright(Host& host, std::span<std::uint16_t> capture, int factor) {
   const std::span<const std::uint16_t> copyright = host.CopyrightPixels();
   const bool valid = CaptureHolds(host, capture);
@@ -1200,7 +1209,8 @@ void BlendCopyright(Host& host, std::span<std::uint16_t> capture, int factor) {
   }
 }
 
-// decomp: TITLE.PRG _setMenuItemClut (src/TITLE/TITLE.PRG/22C.c:3957)
+// decomp: TITLE.PRG setMenuItemClut (src/TITLE/TITLE.PRG/22C.c:968; was
+// _setMenuItemClut)
 void BlendMenuItemClut(Host& host, int item, int factor, int from, int to) {
   if (!ValidItem(item) || from < 0 || to < 0 ||
       from >= static_cast<int>(kPaletteRows) ||
@@ -1218,7 +1228,8 @@ void BlendMenuItemClut(Host& host, int item, int factor, int from, int to) {
   host.LoadImage(PaletteArea(kTextPaletteRow + item), palette);
 }
 
-// decomp: TITLE.PRG _setTitleMenuState (src/TITLE/TITLE.PRG/22C.c:3997)
+// decomp: TITLE.PRG setTitleMenuState (src/TITLE/TITLE.PRG/22C.c:1008; was
+// _setTitleMenuState)
 void UpdateMenuAnimation(Context& context) {
   for (std::size_t index = 0; index < kMenuItemCount; ++index) {
     MenuItem& item = context.state.items.at(index);
@@ -1228,7 +1239,8 @@ void UpdateMenuAnimation(Context& context) {
   }
 }
 
-// decomp: TITLE.PRG _drawTitleMenuItems (src/TITLE/TITLE.PRG/22C.c:4073)
+// decomp: TITLE.PRG drawTitleMenuItems (src/TITLE/TITLE.PRG/22C.c:1089; was
+// _drawTitleMenuItems)
 void DrawMenuItems(Context& context) {
   const State& state = context.state;
   for (std::size_t index = kMenuItemCount; index-- > 0;) {
@@ -1252,8 +1264,8 @@ void DrawMenuItems(Context& context) {
   }
 }
 
-// decomp: TITLE.PRG _drawTitleMenu (src/TITLE/TITLE.PRG/22C.c:4183): drawn
-// once for each interlaced field.
+// decomp: TITLE.PRG drawTitleMenu (src/TITLE/TITLE.PRG/22C.c:1193; was
+// _drawTitleMenu): drawn once for each interlaced field.
 void DrawMenu(Context& context) {
   Host& host = context.host;
   UpdateMenuAnimation(context);
@@ -1270,14 +1282,16 @@ void DrawMenu(Context& context) {
   }
 }
 
-// decomp: TITLE.PRG _drawAndSyncTitleMenu (src/TITLE/TITLE.PRG/22C.c:4227)
+// decomp: TITLE.PRG drawAndSyncTitleMenu (src/TITLE/TITLE.PRG/22C.c:1232; was
+// _drawAndSyncTitleMenu)
 void DrawMenuAndPollInput(Context& context) {
   DrawMenu(context);
   context.host.WaitTick();
   context.host.UpdateControllers();
 }
 
-// decomp: TITLE.PRG _menuVibrationSettings (src/TITLE/TITLE.PRG/22C.c:4246)
+// decomp: TITLE.PRG menuVibrationSettings (src/TITLE/TITLE.PRG/22C.c:1251; was
+// _menuVibrationSettings)
 void ShowVibrationSettings(Context& context) {
   const MenuItemId choice =
       context.host.Settings().vibration == Input::Vibration::kOn
@@ -1286,7 +1300,8 @@ void ShowVibrationSettings(Context& context) {
   ShowSettingsMenu(context, kVibrationMenu, static_cast<int>(choice));
 }
 
-// decomp: TITLE.PRG _menuSoundSettings (src/TITLE/TITLE.PRG/22C.c:4353)
+// decomp: TITLE.PRG menuSoundSettings (src/TITLE/TITLE.PRG/22C.c:1358; was
+// _menuSoundSettings)
 void ShowSoundSettings(Context& context) {
   const MenuItemId choice =
       context.host.Settings().sound_output == Input::SoundOutput::kMono
@@ -1295,11 +1310,12 @@ void ShowSoundSettings(Context& context) {
   ShowSettingsMenu(context, kSoundMenu, static_cast<int>(choice));
 }
 
-// decomp: TITLE.PRG _nop (src/TITLE/TITLE.PRG/22C.c:4461)
+// decomp: TITLE.PRG noop (src/TITLE/TITLE.PRG/22C.c:1466; was _nop)
 int NewGameChoice() noexcept { return static_cast<int>(MenuItemId::kNewGame); }
 
-// decomp: TITLE.PRG _initEnvironment (src/TITLE/TITLE.PRG/22C.c:4463). The
-// host's settings are already 0 or 1 (Settings.hpp), which the original's
+// decomp: TITLE.PRG initEnvironment (src/TITLE/TITLE.PRG/22C.c:1468; was
+// _initEnvironment). The host's settings are already 0 or 1 (Settings.hpp),
+// which the original's
 // `!= 0` normalization produced.
 void InitializeSettings(Context& context) {
   Host& host = context.host;
@@ -1316,7 +1332,7 @@ void InitializeSettings(Context& context) {
   host.SetGameModes({.difficulty = 1, .puzzle_mode = 1});
 }
 
-// decomp: TITLE.PRG vs_title_exec (src/TITLE/TITLE.PRG/22C.c:4491)
+// decomp: TITLE.PRG vs_title_exec (src/TITLE/TITLE.PRG/22C.c:1496)
 int Run(Context& context) {
   Host& host = context.host;
   if (host.ClearSavePending()) {
@@ -1337,7 +1353,8 @@ int Run(Context& context) {
   return selection;
 }
 
-// decomp: TITLE.PRG _initScreen (src/TITLE/TITLE.PRG/22C.c:4658)
+// decomp: TITLE.PRG initScreen (src/TITLE/TITLE.PRG/22C.c:1663; was
+// _initScreen)
 void InitializeGameDisplay(Host& host, const GameDisplayRequest& request) {
   host.SetDisplayEnabled(false);
   host.SetGeometryOffset(request.width / 2, request.height / 2);
@@ -1347,7 +1364,8 @@ void InitializeGameDisplay(Host& host, const GameDisplayRequest& request) {
   host.ShowFrameBuffer(host.FrameBuffer());
 }
 
-// decomp: TITLE.PRG _renderScreen (src/TITLE/TITLE.PRG/22C.c:4684)
+// decomp: TITLE.PRG renderScreen (src/TITLE/TITLE.PRG/22C.c:1689; was
+// _renderScreen)
 void PresentGameFrame(Host& host) {
   const int buffer = host.FrameBuffer() == 0 ? 1 : 0;
   host.SetFrameBuffer(buffer);
@@ -1357,8 +1375,8 @@ void PresentGameFrame(Host& host) {
   host.DrawOrderingTable();
 }
 
-// decomp: TITLE.PRG _initGameData (src/TITLE/TITLE.PRG/22C.c:4698). The
-// native session reset comes first.
+// decomp: TITLE.PRG initGameData (src/TITLE/TITLE.PRG/22C.c:1703; was
+// _initGameData). The native session reset comes first.
 void InitializeNewGameData(Host& host) {
   host.ResetSession();
   InitializeGameDisplay(host, kNewGameDisplay);
@@ -1373,7 +1391,8 @@ void InitializeNewGameData(Host& host) {
   host.SetEntryDoor(kNewGameDoor);
 }
 
-// decomp: TITLE.PRG _setTitleExitFlags (src/TITLE/TITLE.PRG/22C.c:4741)
+// decomp: TITLE.PRG setTitleExitFlags (src/TITLE/TITLE.PRG/22C.c:1748; was
+// _setTitleExitFlags)
 void PrepareExit(Host& host, int cause) { host.ApplyExit(PlanExit(cause)); }
 
 // vs_title_exec and _menuVibrationSettings/_menuSoundSettings

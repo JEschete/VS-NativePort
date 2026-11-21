@@ -107,7 +107,7 @@ class LiveWorld final : public StorageCapacityWorld,
 };
 }  // namespace
 
-// decomp: func_80106464 (src/MENU/MENUD.PRG/234.c:1925)
+// decomp: func_80106464 (src/MENU/MENUD.PRG/234.c:1926)
 void DrawLiveCapacityCount(int limit, int position, int occupied) {
   LiveWorld world;
   DrawCapacityCount(world, {.limit = limit,
@@ -115,32 +115,32 @@ void DrawLiveCapacityCount(int limit, int position, int occupied) {
                             .occupied = occupied});
 }
 
-// decomp: func_80106504 (src/MENU/MENUD.PRG/234.c:1940)
+// decomp: func_80106504 (src/MENU/MENUD.PRG/234.c:1941)
 void DrawLiveStorageCapacities() {
   LiveWorld world;
   DrawStorageCapacities(world);
 }
 
-// decomp: func_801066DC (src/MENU/MENUD.PRG/234.c:1983)
+// decomp: func_801066DC (src/MENU/MENUD.PRG/234.c:1984)
 int WouldExceedLiveCapacity(int category, int additional) {
   LiveWorld world;
   return WouldExceedCapacity(Category(category), additional, world) ? 1 : 0;
 }
 
-// decomp: func_80106784 (src/MENU/MENUD.PRG/234.c:1995)
+// decomp: func_80106784 (src/MENU/MENUD.PRG/234.c:1996)
 int LiveTransferCapacityError(int category, int slot) {
   LiveWorld world;
   return static_cast<int>(
       TransferCapacityError({Category(category), slot}, world));
 }
 
-// decomp: func_801068BC (src/MENU/MENUD.PRG/234.c:2040)
+// decomp: func_801068BC (src/MENU/MENUD.PRG/234.c:2041)
 void UndoLivePendingTransfer(int row) {
   LiveWorld world;
   UndoPendingTransfer(row, world);
 }
 
-// decomp: func_80106948 (src/MENU/MENUD.PRG/234.c:2054)
+// decomp: func_80106948 (src/MENU/MENUD.PRG/234.c:2055)
 void StageLiveItemTransfer(int category, int slot) {
   LiveWorld world;
   StageItemTransfer({Category(category), slot}, world);

@@ -45,7 +45,7 @@ std::uint16_t PanPosition(std::uint8_t value) {
 }
 
 // decomp: SLUS_010.40 Sound_CopyInstrumentInfoToChannel
-// (src/SLUS_010.40/25AC.c:4953)
+// (src/SLUS_010.40/25AC.c:5167)
 void ApplyInstrument(VoiceState& voice,
                      const Samples::InstrumentRecord& instrument,
                      std::uint32_t sample_start) {
@@ -91,7 +91,7 @@ void ApplyFineTune(ChannelState& channel, std::int16_t fine_tune) {
 }  // namespace
 
 // decomp: SLUS_010.40 SoundVM_A3_ChannelMasterVolume
-// (src/SLUS_010.40/25AC.c:5125)
+// (src/SLUS_010.40/25AC.c:5338)
 CommandResult SetVolumeBalance(ChannelState& channel, Operands operands) {
   if (operands.empty()) return Truncated();
   channel.volume_balance =
@@ -101,7 +101,7 @@ CommandResult SetVolumeBalance(ChannelState& channel, Operands operands) {
 }
 
 // decomp: SLUS_010.40 SoundVM_FE12_VolumeBalanceSlide
-// (src/SLUS_010.40/25AC.c:5132)
+// (src/SLUS_010.40/25AC.c:5345)
 CommandResult SlideVolumeBalance(ChannelState& channel, Operands operands) {
   if (operands.size() < 2) return Truncated();
   const std::uint16_t length = TickCount(operands[0]);
@@ -114,7 +114,7 @@ CommandResult SlideVolumeBalance(ChannelState& channel, Operands operands) {
   return Applied(2);
 }
 
-// decomp: SLUS_010.40 SoundVM_A8_ChannelVolume (src/SLUS_010.40/25AC.c:5154)
+// decomp: SLUS_010.40 SoundVM_A8_ChannelVolume (src/SLUS_010.40/25AC.c:5367)
 CommandResult SetVolume(ChannelState& channel, Operands operands) {
   if (operands.empty()) return Truncated();
   channel.volume = VolumeLevel(operands[0]);
@@ -125,7 +125,7 @@ CommandResult SetVolume(ChannelState& channel, Operands operands) {
 }
 
 // decomp: SLUS_010.40 SoundVM_A9_ChannelVolumeSlide
-// (src/SLUS_010.40/25AC.c:5163)
+// (src/SLUS_010.40/25AC.c:5375)
 CommandResult SlideVolume(ChannelState& channel, Operands operands) {
   if (operands.size() < 2) return Truncated();
   const std::uint16_t length = TickCount(operands[0]);
@@ -139,7 +139,8 @@ CommandResult SlideVolume(ChannelState& channel, Operands operands) {
   return Applied(2);
 }
 
-// decomp: SLUS_010.40 SoundVM_FE19_unk (src/SLUS_010.40/25AC.c:5187)
+// decomp: SLUS_010.40 SoundVM_FE19_KeyOnVolumeSlide
+// (src/SLUS_010.40/25AC.c:5398; was SoundVM_FE19_unk)
 CommandResult SetKeyOnVolumeRamp(ChannelState& channel, Operands operands) {
   if (operands.size() < kKeyOnRampOperands) return Truncated();
   channel.key_on_volume = VolumeLevel(operands[0]);
@@ -150,17 +151,19 @@ CommandResult SetKeyOnVolumeRamp(ChannelState& channel, Operands operands) {
   return Applied(kKeyOnRampOperands);
 }
 
-// decomp: SLUS_010.40 SoundVM_FE1A_unk (src/SLUS_010.40/25AC.c:5209)
+// decomp: SLUS_010.40 SoundVM_FE1A_SetChannelTenuto
+// (src/SLUS_010.40/25AC.c:5419; was SoundVM_FE1A_unk)
 void EnableFullNoteLength(ChannelState& channel) {
   channel.update_flags |= kFullNoteLengthActive;
 }
 
-// decomp: SLUS_010.40 SoundVM_FE1B_unk (src/SLUS_010.40/25AC.c:5215)
+// decomp: SLUS_010.40 SoundVM_FE1B_UnsetChannelTenuto
+// (src/SLUS_010.40/25AC.c:5424; was SoundVM_FE1B_unk)
 void DisableFullNoteLength(ChannelState& channel) {
   channel.update_flags &= ~kFullNoteLengthActive;
 }
 
-// decomp: SLUS_010.40 SoundVM_unused1 (src/SLUS_010.40/25AC.c:5234)
+// decomp: SLUS_010.40 SoundVM_unused1 (src/SLUS_010.40/25AC.c:5440)
 CommandResult SetEffectVolumeScale(ChannelState& channel, Operands operands) {
   if (operands.empty()) return Truncated();
   channel.effect_volume = static_cast<std::int16_t>(operands[0] << kByteShift);
@@ -171,7 +174,7 @@ CommandResult SetEffectVolumeScale(ChannelState& channel, Operands operands) {
   return Applied(1);
 }
 
-// decomp: SLUS_010.40 SoundVM_unused2 (src/SLUS_010.40/25AC.c:5246)
+// decomp: SLUS_010.40 SoundVM_unused2 (src/SLUS_010.40/25AC.c:5449)
 CommandResult SlideEffectVolumeScale(ChannelState& channel, Operands operands) {
   if (operands.size() < 2) return Truncated();
   const std::uint16_t length = TickCount(operands[0]);
@@ -184,7 +187,7 @@ CommandResult SlideEffectVolumeScale(ChannelState& channel, Operands operands) {
   return Applied(2);
 }
 
-// decomp: SLUS_010.40 SoundVM_AA_ChannelPan (src/SLUS_010.40/25AC.c:5264)
+// decomp: SLUS_010.40 SoundVM_AA_ChannelPan (src/SLUS_010.40/25AC.c:5464)
 CommandResult SetPan(ChannelState& channel, Operands operands) {
   if (operands.empty()) return Truncated();
   channel.pan = PanPosition(operands[0]);
@@ -193,7 +196,7 @@ CommandResult SetPan(ChannelState& channel, Operands operands) {
   return Applied(1);
 }
 
-// decomp: SLUS_010.40 SoundVM_AB_ChannelPanSlide (src/SLUS_010.40/25AC.c:5274)
+// decomp: SLUS_010.40 SoundVM_AB_ChannelPanSlide (src/SLUS_010.40/25AC.c:5473)
 CommandResult SlidePan(ChannelState& channel, Operands operands) {
   if (operands.size() < 2) return Truncated();
   const std::uint16_t length = TickCount(operands[0]);
@@ -205,26 +208,26 @@ CommandResult SlidePan(ChannelState& channel, Operands operands) {
   return Applied(2);
 }
 
-// decomp: SLUS_010.40 SoundVM_A5_SetOctave (src/SLUS_010.40/25AC.c:5296)
+// decomp: SLUS_010.40 SoundVM_A5_SetOctave (src/SLUS_010.40/25AC.c:5494)
 CommandResult SetOctave(ChannelState& channel, Operands operands) {
   if (operands.empty()) return Truncated();
   channel.octave = operands[0];
   return Applied(1);
 }
 
-// decomp: SLUS_010.40 SoundVM_A6_IncreaseOctave (src/SLUS_010.40/25AC.c:5302)
+// decomp: SLUS_010.40 SoundVM_A6_IncreaseOctave (src/SLUS_010.40/25AC.c:5499)
 void IncreaseOctave(ChannelState& channel) {
   channel.octave =
       static_cast<std::uint16_t>((channel.octave + 1) & kOctaveMask);
 }
 
-// decomp: SLUS_010.40 SoundVM_A7_DecreaseOctave (src/SLUS_010.40/25AC.c:5308)
+// decomp: SLUS_010.40 SoundVM_A7_DecreaseOctave (src/SLUS_010.40/25AC.c:5504)
 void DecreaseOctave(ChannelState& channel) {
   channel.octave =
       static_cast<std::uint16_t>((channel.octave - 1) & kOctaveMask);
 }
 
-// decomp: SLUS_010.40 SoundVM_A1_LoadInstrument (src/SLUS_010.40/25AC.c:5314)
+// decomp: SLUS_010.40 SoundVM_A1_LoadInstrument (src/SLUS_010.40/25AC.c:5509)
 CommandResult LoadInstrument(ChannelState& channel, Operands operands,
                              VoiceCommandHost& host) {
   if (operands.empty()) return Truncated();
@@ -234,14 +237,14 @@ CommandResult LoadInstrument(ChannelState& channel, Operands operands,
 }
 
 // decomp: SLUS_010.40 SoundVM_FE0A_ClearInstrument
-// (src/SLUS_010.40/25AC.c:5329)
+// (src/SLUS_010.40/25AC.c:5523)
 CommandResult LoadSilentInstrument(ChannelState& channel, Operands operands,
                                    VoiceCommandHost& host) {
   if (operands.empty()) return Truncated();
   return SelectInstrument(channel, host, operands[0], kSilentSampleStart);
 }
 
-// decomp: SLUS_010.40 SoundVM_FE14_ChangePatch (src/SLUS_010.40/25AC.c:5343)
+// decomp: SLUS_010.40 SoundVM_FE14_ChangePatch (src/SLUS_010.40/25AC.c:5536)
 CommandResult SelectPatch(ChannelState& channel, Operands operands,
                           VoiceCommandHost& host) {
   if (operands.empty()) return Truncated();
@@ -265,7 +268,7 @@ CommandResult SelectPatch(ChannelState& channel, Operands operands,
 }
 
 // decomp: SLUS_010.40 SoundVM_C0_ChannelTranspose_Absolute
-// (src/SLUS_010.40/25AC.c:5378)
+// (src/SLUS_010.40/25AC.c:5569)
 CommandResult SetTranspose(ChannelState& channel, Operands operands) {
   if (operands.empty()) return Truncated();
   channel.transpose = Signed(operands[0]);
@@ -273,7 +276,7 @@ CommandResult SetTranspose(ChannelState& channel, Operands operands) {
 }
 
 // decomp: SLUS_010.40 SoundVM_C1_ChannelTranspose_Relative
-// (src/SLUS_010.40/25AC.c:5384)
+// (src/SLUS_010.40/25AC.c:5575)
 CommandResult AddTranspose(ChannelState& channel, Operands operands) {
   if (operands.empty()) return Truncated();
   channel.transpose =
@@ -281,7 +284,7 @@ CommandResult AddTranspose(ChannelState& channel, Operands operands) {
   return Applied(1);
 }
 
-// decomp: SLUS_010.40 SoundVM_A4_PitchBendSlide (src/SLUS_010.40/25AC.c:5390)
+// decomp: SLUS_010.40 SoundVM_A4_PitchBendSlide (src/SLUS_010.40/25AC.c:5581)
 CommandResult SetPitchBendSlide(ChannelState& channel, Operands operands) {
   if (operands.size() < 2) return Truncated();
   channel.pitch_bend_slide_length = TickCount(operands[0]);
@@ -289,7 +292,7 @@ CommandResult SetPitchBendSlide(ChannelState& channel, Operands operands) {
   return Applied(2);
 }
 
-// decomp: SLUS_010.40 SoundVM_DA_EnablePortamento (src/SLUS_010.40/25AC.c:5402)
+// decomp: SLUS_010.40 SoundVM_DA_EnablePortamento (src/SLUS_010.40/25AC.c:5592)
 CommandResult EnablePortamento(ChannelState& channel, Operands operands) {
   if (operands.empty()) return Truncated();
   channel.portamento_steps = TickCount(operands[0]);
@@ -300,11 +303,11 @@ CommandResult EnablePortamento(ChannelState& channel, Operands operands) {
 }
 
 // decomp: SLUS_010.40 SoundVM_DB_DisablePortamento
-// (src/SLUS_010.40/25AC.c:5417)
+// (src/SLUS_010.40/25AC.c:5606)
 void DisablePortamento(ChannelState& channel) { channel.portamento_steps = 0; }
 
 // decomp: SLUS_010.40 SoundVM_D8_ChannelFineTune_Absolute
-// (src/SLUS_010.40/25AC.c:5423)
+// (src/SLUS_010.40/25AC.c:5611)
 CommandResult SetFineTune(ChannelState& channel, Operands operands) {
   if (operands.empty()) return Truncated();
   ApplyFineTune(channel, Signed(operands[0]));
@@ -312,7 +315,7 @@ CommandResult SetFineTune(ChannelState& channel, Operands operands) {
 }
 
 // decomp: SLUS_010.40 SoundVM_D9_ChannelFineTune_Relative
-// (src/SLUS_010.40/25AC.c:5442)
+// (src/SLUS_010.40/25AC.c:5630)
 CommandResult AddFineTune(ChannelState& channel, Operands operands) {
   if (operands.empty()) return Truncated();
   ApplyFineTune(channel, static_cast<std::int16_t>(channel.fine_tune +
@@ -320,11 +323,11 @@ CommandResult AddFineTune(ChannelState& channel, Operands operands) {
   return Applied(1);
 }
 
-// decomp: SLUS_010.40 SoundVM_CC_EnableLegato (src/SLUS_010.40/25AC.c:5752)
+// decomp: SLUS_010.40 SoundVM_CC_EnableLegato (src/SLUS_010.40/25AC.c:5922)
 void EnableLegato(ChannelState& channel) { channel.play_modes = kLegatoPlay; }
 
 // decomp: SLUS_010.40 SoundVM_D0_EnableSustainedNote
-// (src/SLUS_010.40/25AC.c:5763)
+// (src/SLUS_010.40/25AC.c:5929)
 void EnableSustainedSoundEffect(ChannelState& channel) {
   if (channel.kind != Driver::ChannelKind::kMusic) {
     channel.play_modes = kFullLengthPlay;
@@ -332,7 +335,7 @@ void EnableSustainedSoundEffect(ChannelState& channel) {
 }
 
 // decomp: SLUS_010.40 SoundVM_A2_OverwriteNextNoteLength
-// (src/SLUS_010.40/25AC.c:6001)
+// (src/SLUS_010.40/25AC.c:6153)
 CommandResult SetNextNoteLength(ChannelState& channel, Operands operands) {
   if (operands.empty()) return Truncated();
   const std::uint8_t length = operands[0];
@@ -343,7 +346,7 @@ CommandResult SetNextNoteLength(ChannelState& channel, Operands operands) {
   return Applied(1);
 }
 
-// decomp: SLUS_010.40 SoundVM_DC_FixNoteLength (src/SLUS_010.40/25AC.c:6015)
+// decomp: SLUS_010.40 SoundVM_DC_FixNoteLength (src/SLUS_010.40/25AC.c:6167)
 CommandResult SetFixedNoteLength(ChannelState& channel, Operands operands) {
   if (operands.empty()) return Truncated();
   std::int32_t length = Signed(operands[0]);
@@ -360,20 +363,21 @@ CommandResult SetFixedNoteLength(ChannelState& channel, Operands operands) {
 }
 
 // decomp: SLUS_010.40 SoundVM_FE04_ClearKeymapTable
-// (src/SLUS_010.40/25AC.c:6032)
+// (src/SLUS_010.40/25AC.c:6183)
 void EnableDrumKeymap(ChannelState& channel, VoiceCommandHost& host) {
   if (!host.HasDrumKeymap()) return;
   channel.update_flags =
       (channel.update_flags & ~kInstrumentFlags) | kDrumKeymapActive;
 }
 
-// decomp: SLUS_010.40 SoundVM_FE05_MuteVoice (src/SLUS_010.40/25AC.c:6043)
+// decomp: SLUS_010.40 SoundVM_FE05_MuteVoice (src/SLUS_010.40/25AC.c:6193)
 void MuteInstrument(ChannelState& channel) {
   channel.voice.volume_scale = 0;
   channel.update_flags &= ~kDrumKeymapActive;
 }
 
-// decomp: SLUS_010.40 SoundVM_E0_unk (src/SLUS_010.40/25AC.c:6196)
+// decomp: SLUS_010.40 SoundVM_E0_DeferSfxStop (src/SLUS_010.40/25AC.c:6340; was
+// SoundVM_E0_unk)
 void EnableLoopBoundaryStop(ChannelState& channel) {
   channel.update_flags |= kLoopBoundaryStop;
 }

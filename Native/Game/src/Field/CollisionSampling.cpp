@@ -35,7 +35,7 @@ T ReadAt(std::span<const std::byte> bytes, std::size_t offset) {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_80099514 (src/BATTLE/BATTLE.PRG/2EA3C.s:2494). The
+// decomp: BATTLE.PRG func_80099514 (src/BATTLE/BATTLE.PRG/2EA3C.s:2363). The
 // original reads the live room map without checks; out-of-map samples and
 // short maps report kCollisionHeightInvalid instead.
 std::uint8_t SampleCollisionHeightCode(std::span<const std::byte> collision_map,

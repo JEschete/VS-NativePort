@@ -133,7 +133,7 @@ bool RunAnalyzeGrid(AnalyzeGridCommand command, AnalyzeGridPlan plan,
 }
 }  // namespace
 
-// decomp: vs_effect_analyze (src/EFFECT/PLG005.BIN/18.c:35).
+// decomp: vs_effect_analyze_0 (src/EFFECT/grids.h:40; was vs_effect_analyze).
 // Original instructions: PLG005.BIN 800F9818-800FA368 (exclusive).
 bool Plg005::UpdateAnalyzeGrid(AnalyzeGridCommand command, AnalyzeGridPlan plan,
                                AnalyzeGridHost& host) {

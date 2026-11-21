@@ -223,7 +223,7 @@ std::array<std::uint32_t, kTexturePageWords> PackTexturePage(
   return {kTexturePageCommand | (texture_page & kTexturePageMask), 0};
 }
 
-// decomp: MENUE.PRG _setPageBg (494.c:716)
+// decomp: MENUE.PRG setPageBg (src/MENU/MENUE.PRG/494.c:720; was _setPageBg)
 PageDrawResult DrawPageBackground(const PageRect& rect, std::int32_t gradient,
                                   PagePrimitiveTarget& target) {
   if (gradient < 0 || gradient >= kPageGradients) {
@@ -259,7 +259,8 @@ std::int32_t PageArrowTop(PageArrow arrow,
              : (animation_state >> kArrowFallShift) + kUpArrowReturn;
 }
 
-// decomp: MENUE.PRG _drawPaginationArrow (494.c:844)
+// decomp: MENUE.PRG drawPaginationArrow (src/MENU/MENUE.PRG/494.c:848; was
+// _drawPaginationArrow)
 void DrawPageArrow(PageArrow arrow, const PageArrowState& state,
                    PagePrimitiveTarget& target) {
   const std::int32_t top = PageArrowTop(arrow, state.animation_state);
@@ -286,7 +287,8 @@ void DrawPageArrow(PageArrow arrow, const PageArrowState& state,
        .semi_transparent = false});
 }
 
-// decomp: MENUE.PRG _fadeMenuUpper (494.c:740)
+// decomp: MENUE.PRG fadeMenuUpper (src/MENU/MENUE.PRG/494.c:744; was
+// _fadeMenuUpper)
 void DrawUpperScrollFade(const PageArrowState& arrow,
                          PagePrimitiveTarget& target) {
   DrawScrollFade(
@@ -294,7 +296,8 @@ void DrawUpperScrollFade(const PageArrowState& arrow,
       [](std::int32_t row) { return kUpperFadeTop + row; }, target);
 }
 
-// decomp: MENUE.PRG _fadeMenuLower (494.c:791)
+// decomp: MENUE.PRG fadeMenuLower (src/MENU/MENUE.PRG/494.c:795; was
+// _fadeMenuLower)
 void DrawLowerScrollFade(const PageArrowState& arrow,
                          PagePrimitiveTarget& target) {
   DrawScrollFade(
@@ -307,7 +310,8 @@ ScrollFades VisibleScrollFades(std::int32_t scroll_position,
   return {.upper = scroll_position > 0, .lower = scroll_position < line_count};
 }
 
-// decomp: MENUE.PRG _drawControlsBg (494.c:962)
+// decomp: MENUE.PRG drawControlsBg (src/MENU/MENUE.PRG/494.c:966; was
+// _drawControlsBg)
 PageDrawResult DrawControlsBackground(const PageRect& rect,
                                       PagePrimitiveTarget& target) {
   // The loop runs while i < (y + h) - 1 in wrapping 32-bit arithmetic.
@@ -345,7 +349,8 @@ PageDrawResult DrawControlsBackground(const PageRect& rect,
   return PageDrawResult::kDrawn;
 }
 
-// decomp: MENUE.PRG _drawContent (494.c:577)
+// decomp: MENUE.PRG drawContent (src/MENU/MENUE.PRG/494.c:581; was
+// _drawContent)
 PageDrawResult DrawPageContent(std::span<const std::int16_t> help_text,
                                const Render::ScreenRect& clip,
                                PageContentTarget& target) {

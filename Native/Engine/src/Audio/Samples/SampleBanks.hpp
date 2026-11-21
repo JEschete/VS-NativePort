@@ -16,7 +16,7 @@ struct MusicSampleBankIds {
   std::int32_t reservedc;
 };
 
-// decomp: D_80039BC8_t (src/SLUS_010.40/25AC.c:73)
+// decomp: g_Sound_AkaoLoadState (src/SLUS_010.40/25AC.c:157; was D_80039BC8_t)
 struct LegacyBankStreamState {
   std::int32_t* instrument_destination;  // next g_InstrumentInfo word to fill
   // The next SPU transfer address (D_80039BCC); zero starts a new stream.

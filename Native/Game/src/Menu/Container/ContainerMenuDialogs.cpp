@@ -247,8 +247,9 @@ std::int32_t PollQuantity(DiscardMenuState& state,
 }
 }  // namespace
 
-// decomp: _displaySortMenu (src/MENU/MENUD.PRG/234.c:1601-1678),
-// 80105ACC..80105D23 including the true terminal delay instruction.
+// decomp: displaySortMenu (src/MENU/MENUD.PRG/234.c:1602-1679; was
+// _displaySortMenu), 80105ACC..80105D23 including the true terminal delay
+// instruction.
 std::int32_t UpdateSortMenu(SortMenuState& state, MenuDialogWorld& world,
                             std::optional<Category> entry) {
   if (entry.has_value()) {
@@ -289,7 +290,7 @@ std::int32_t UpdateSortMenu(SortMenuState& state, MenuDialogWorld& world,
   return 0;
 }
 
-// decomp: _discardMenu (src/MENU/MENUD.PRG/234.c:1680-1923),
+// decomp: discardMenu (src/MENU/MENUD.PRG/234.c:1681-1920; was _discardMenu),
 // 80105D24..80106463; caller action rows own equipment/attachment restrictions.
 std::int32_t UpdateDiscardMenu(DiscardMenuState& state,
                                DiscardPresentation& presentation,
@@ -339,7 +340,7 @@ std::int32_t UpdateDiscardMenu(DiscardMenuState& state,
   return 0;
 }
 
-// decomp: func_801071D8 (src/MENU/MENUD.PRG/234.c:2309-2330),
+// decomp: func_801071D8 (src/MENU/MENUD.PRG/234.c:2310-2331),
 // 801071D8..801072AF; each row borrow precedes its current cursor-memory read.
 void RestoreItemRows(ItemRowRestoreWorld& world, std::int32_t category) {
   while (world.ListAnimationRow() < kListAnimationComplete) {
@@ -362,7 +363,7 @@ void RestoreItemRows(ItemRowRestoreWorld& world, std::int32_t category) {
   }
 }
 
-// decomp: func_801072B0 (src/MENU/MENUD.PRG/234.c:2332-2391),
+// decomp: func_801072B0 (src/MENU/MENUD.PRG/234.c:2333-2392),
 // 801072B0..8010748F; full-word results are reloaded after external callbacks.
 std::int32_t UpdateTransferConfirmation(TransferConfirmationState& state,
                                         MenuDialogWorld& world,

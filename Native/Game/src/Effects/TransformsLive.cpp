@@ -241,7 +241,7 @@ TransformHost& LiveTransformHost() {
   return host;
 }
 
-// decomp: BATTLE.PRG func_800CFEF0 (src/BATTLE/BATTLE.PRG/5BF94.c:5940)
+// decomp: BATTLE.PRG func_800CFEF0 (src/BATTLE/BATTLE.PRG/5BF94.c:5505)
 void LiveInitializeTransformStates(LiveEffectInstance* instance) {
   if (instance == nullptr) {
     ReportRefusal("initialize", "no effect instance");
@@ -260,7 +260,7 @@ void LiveInitializeTransformStates(LiveEffectInstance* instance) {
   StoreStates(*instance, loaded);
 }
 
-// decomp: BATTLE.PRG func_800D0D08 (src/BATTLE/BATTLE.PRG/5BF94.c:6227)
+// decomp: BATTLE.PRG func_800D0D08 (src/BATTLE/BATTLE.PRG/5BF94.c:5797)
 void LiveUpdateEffectTransforms(LiveEffectInstance* instance) {
   if (instance == nullptr) {
     ReportRefusal("update", "no effect instance");

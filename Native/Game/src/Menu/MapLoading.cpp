@@ -26,7 +26,8 @@ constexpr std::int16_t kAreaNameTargetX = 0xB4;
 }
 }  // namespace
 
-// decomp: MENU5.PRG _configureMapMenu (4D8.c:129), the cursor.
+// decomp: MENU5.PRG configureMapMenu (src/MENU/MENU5.PRG/4D8.c:139; was
+// _configureMapMenu), the cursor.
 AreaListCursor AreaListCursorOf(std::int32_t row_count, std::int32_t area) {
   const std::int32_t row = area & kAreaRowMask;
   if (row_count <= kVisibleAreaRows || row < kVisibleAreaRows) {
@@ -42,7 +43,8 @@ AreaListCursor AreaListCursorOf(std::int32_t row_count, std::int32_t area) {
           .first_row = LowByte(row - kCenteredCursorRow)};
 }
 
-// decomp: MENU5.PRG _configureMapMenu (4D8.c:129).
+// decomp: MENU5.PRG configureMapMenu (src/MENU/MENU5.PRG/4D8.c:139; was
+// _configureMapMenu).
 void ConfigureAreaList(AreaMenuHost& host, std::int32_t row_count,
                        std::int32_t current_area, std::int32_t& current_row) {
   if (current_row == -1) current_row = current_area;
@@ -59,7 +61,8 @@ void ConfigureAreaList(AreaMenuHost& host, std::int32_t row_count,
   host.SetCursorMemorySetting(setting);
 }
 
-// decomp: MENU5.PRG _mapSelection (4D8.c:175).
+// decomp: MENU5.PRG mapSelection (src/MENU/MENU5.PRG/4D8.c:185; was
+// _mapSelection).
 std::int32_t PollAreaSelection(AreaMenuHost& host) {
   const std::int32_t row = host.SelectedRow();
   if (row < kAreaSelectionPending) {
@@ -70,7 +73,8 @@ std::int32_t PollAreaSelection(AreaMenuHost& host) {
   return row;
 }
 
-// decomp: MENU5.PRG _mapSelectionMenu (4D8.c:979).
+// decomp: MENU5.PRG mapSelectionMenu (src/MENU/MENU5.PRG/4D8.c:984; was
+// _mapSelectionMenu).
 std::int32_t UpdateAreaSelection(AreaMenuHost& host, AreaSelection& selection,
                                  const AreaSelectionInput& input,
                                  std::span<std::int32_t> scene_rows,
@@ -106,7 +110,8 @@ std::int32_t UpdateAreaSelection(AreaMenuHost& host, AreaSelection& selection,
   return kAreaSelectionPending;
 }
 
-// decomp: MENU5.PRG _setMenuItemMapName (4D8.c:188).
+// decomp: MENU5.PRG setMenuItemMapName (src/MENU/MENU5.PRG/4D8.c:198; was
+// _setMenuItemMapName).
 AreaNameRow AreaNameRowOf(std::int32_t font_color) {
   return {.placement = kAreaNamePlacement,
           .state = kAreaNameState,
@@ -115,12 +120,13 @@ AreaNameRow AreaNameRowOf(std::int32_t font_color) {
           .font_color = LowByte(font_color)};
 }
 
-// decomp: MENU5.PRG _menuReady (4D8.c:204).
+// decomp: MENU5.PRG menuReady (src/MENU/MENU5.PRG/4D8.c:214; was _menuReady).
 void PollMenuReady(MenuReadyHost& host) {
   static_cast<void>(host.MenuRowsIdle());
 }
 
-// decomp: MENU5.PRG _loadMapBackground (4D8.c:206).
+// decomp: MENU5.PRG loadMapBackground (src/MENU/MENU5.PRG/4D8.c:216; was
+// _loadMapBackground).
 std::int32_t LoadBackground(BackgroundLoadHost& host, std::int32_t& step,
                             std::int32_t begin) {
   if (begin != 0) {
@@ -151,7 +157,8 @@ std::int32_t LoadBackground(BackgroundLoadHost& host, std::int32_t& step,
   }
 }
 
-// decomp: MENU5.PRG _loadArmFile (4D8.c:448).
+// decomp: MENU5.PRG loadArmFile (src/MENU/MENU5.PRG/4D8.c:458; was
+// _loadArmFile).
 SceneMapLoad LoadSceneMap(SceneMapHost& host, SceneMapView& view,
                           SceneMapProgress& progress,
                           std::span<const DiscFileRange> files) {

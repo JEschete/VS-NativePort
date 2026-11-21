@@ -53,8 +53,8 @@ constexpr Rgb kHeadingLight{.r = 200, .g = 180, .b = 160};
 }
 }  // namespace
 
-// decomp: MENUF.PRG _renderTimeAttackHeader (src/MENU/MENUF.PRG/3B8.c:1146),
-// 0x8010459C
+// decomp: MENUF.PRG renderTimeAttackHeader (src/MENU/MENUF.PRG/3B8.c:1159; was
+// _renderTimeAttackHeader), 0x8010459C
 ResultsDrawResult DrawTimeAttackHeading(
     std::span<const Render::TextureRegion> atlas, std::int32_t x,
     std::int32_t y, std::int32_t timer, TimeAttackDrawHost& host) {
@@ -79,7 +79,8 @@ ResultsDrawResult DrawTimeAttackHeading(
   return ResultsDrawResult::kDrawn;
 }
 
-// decomp: MENUF.PRG _renderCourse (src/MENU/MENUF.PRG/3B8.c:1175), 0x80104650
+// decomp: MENUF.PRG renderCourse (src/MENU/MENUF.PRG/3B8.c:1188; was
+// _renderCourse), 0x80104650
 ResultsDrawResult DrawCourseNumber(std::span<const Render::TextureRegion> atlas,
                                    std::int32_t x, std::int32_t y,
                                    std::int32_t timer, std::uint8_t course,
@@ -102,7 +103,8 @@ ResultsDrawResult DrawCourseNumber(std::span<const Render::TextureRegion> atlas,
   return ResultsDrawResult::kDrawn;
 }
 
-// decomp: MENUF.PRG _renderBossName (src/MENU/MENUF.PRG/3B8.c:1195), 0x801046F8
+// decomp: MENUF.PRG renderBossName (src/MENU/MENUF.PRG/3B8.c:1208; was
+// _renderBossName), 0x801046F8
 ResultsDrawResult DrawBossName(std::span<const Render::TextureRegion> atlas,
                                std::int32_t x, std::int32_t y,
                                std::int32_t timer, std::uint8_t course,
@@ -133,8 +135,8 @@ ResultsDrawResult DrawBossName(std::span<const Render::TextureRegion> atlas,
   return ResultsDrawResult::kDrawn;
 }
 
-// decomp: MENUF.PRG _renderBestTimeHeader (src/MENU/MENUF.PRG/3B8.c:1226),
-// 0x801047D4
+// decomp: MENUF.PRG renderBestTimeHeader (src/MENU/MENUF.PRG/3B8.c:1239; was
+// _renderBestTimeHeader), 0x801047D4
 ResultsDrawResult DrawBestTime(
     std::span<const Render::TextureRegion> atlas, std::int32_t x,
     std::int32_t y, std::int32_t timer, std::uint8_t course,
@@ -160,8 +162,8 @@ ResultsDrawResult DrawBestTime(
   return ResultsDrawResult::kDrawn;
 }
 
-// decomp: MENUF.PRG _renderStartCountdown (src/MENU/MENUF.PRG/3B8.c:1248),
-// 0x8010489C
+// decomp: MENUF.PRG renderStartCountdown (src/MENU/MENUF.PRG/3B8.c:1261; was
+// _renderStartCountdown), 0x8010489C
 ResultsDrawResult DrawStartCountdown(
     std::span<const Render::TextureRegion> atlas, std::int32_t x,
     std::int32_t y, std::int32_t timer, TimeAttackDrawHost& host) {

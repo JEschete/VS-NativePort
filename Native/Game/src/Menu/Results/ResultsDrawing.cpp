@@ -118,7 +118,8 @@ std::optional<Render::UiTexturedQuad> FadingTextureQuad(
   return quad;
 }
 
-// decomp: MENUF.PRG _renderTextureFadeIn (3B8.c:1877).
+// decomp: MENUF.PRG renderTextureFadeIn (src/MENU/MENUF.PRG/3B8.c:1889; was
+// _renderTextureFadeIn).
 ResultsDrawResult DrawFadingTexture(
     std::span<const Render::TextureRegion> atlas, std::int32_t x,
     std::int32_t y, std::int32_t texture_index, std::int32_t brightness,
@@ -127,7 +128,8 @@ ResultsDrawResult DrawFadingTexture(
                     target);
 }
 
-// decomp: MENUF.PRG _renderTextureFadeInClut (3B8.c:1914).
+// decomp: MENUF.PRG renderTextureFadeInClut (src/MENU/MENUF.PRG/3B8.c:1926; was
+// _renderTextureFadeInClut).
 ResultsDrawResult DrawFadingTextureClut(
     std::span<const Render::TextureRegion> atlas, std::int32_t x,
     std::int32_t y, std::int32_t texture_index, std::int32_t brightness,
@@ -151,7 +153,8 @@ std::array<char, kResultsTimeGlyphs> TimeGlyphs(std::int32_t time) {
   return glyphs;
 }
 
-// decomp: MENUF.PRG _renderTime (3B8.c:1951).
+// decomp: MENUF.PRG renderTime (src/MENU/MENUF.PRG/3B8.c:1963; was
+// _renderTime).
 ResultsDrawResult DrawTime(std::span<const Render::TextureRegion> atlas,
                            std::int32_t x, std::int32_t y, std::int32_t timer,
                            std::int32_t time, bool is_new_record,
@@ -225,7 +228,8 @@ std::optional<PressButtonPromptLayout> PressButtonPrompt(ResultsPoint origin,
   return layout;
 }
 
-// decomp: MENUF.PRG _renderPressButtonPrompt (3B8.c:2117).
+// decomp: MENUF.PRG renderPressButtonPrompt (src/MENU/MENUF.PRG/3B8.c:2128; was
+// _renderPressButtonPrompt).
 ResultsDrawResult DrawPressButtonPrompt(std::int32_t x, std::int32_t y,
                                         std::int32_t slide, std::int32_t bounce,
                                         ResultsDrawTarget& target) {

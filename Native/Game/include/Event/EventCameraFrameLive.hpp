@@ -9,16 +9,18 @@
 #include <cstdint>
 
 namespace VS::Event {
-// decomp: BATTLE.PRG func_800BB41C (F01197, 4A0A8.c:2788), opcode 0xE0 (the
+// decomp: BATTLE.PRG vs_battle_script_E0 (F01197,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:3437; was func_800BB41C), opcode 0xE0 (the
 // camera wait), is bound by VS::Event::CommandWaitCameraTracksOpcode
 // (ScriptControlOpcodes.hpp).
 
-// decomp: BATTLE.PRG vs_battle_applyCameraState (F01219, 4A0A8.c:3117)
+// decomp: BATTLE.PRG applyCameraState (F01219,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:3767; was vs_battle_applyCameraState)
 void ApplyEventCameraStateEntry();
-// decomp: BATTLE.PRG func_800BC9E0 (F01222, 4A0A8.c:3371)
+// decomp: BATTLE.PRG func_800BC9E0 (F01222, src/BATTLE/BATTLE.PRG/4DEA8.c:4021)
 void UpdateEventCameraTracksEntry();
-// decomp: BATTLE.PRG func_800BD610 (F01228, 4A0A8.c:3663) The completion
-// bits, or 0 without a workspace.
+// decomp: BATTLE.PRG func_800BD610 (F01228, src/BATTLE/BATTLE.PRG/4DEA8.c:4313)
+// The completion bits, or 0 without a workspace.
 int EventCameraCompletionMaskEntry();
 
 // Missing workspaces and instructions the entries skipped.

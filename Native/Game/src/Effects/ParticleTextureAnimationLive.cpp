@@ -114,7 +114,7 @@ void SelectFrame(Animation& animation, std::uint16_t frame) {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800D6CCC (src/BATTLE/BATTLE.PRG/5BF94.c:8501)
+// decomp: BATTLE.PRG func_800D6CCC (src/BATTLE/BATTLE.PRG/6E4CC.c:17)
 void LiveClearParticleTextureState(Animation* animation) {
   if (animation == nullptr) {
     Refuse("clear", "no animation");
@@ -127,7 +127,7 @@ void LiveClearParticleTextureState(Animation* animation) {
   Store(*animation, state);
 }
 
-// decomp: BATTLE.PRG func_800D6CF0 (src/BATTLE/BATTLE.PRG/5BF94.c:8513)
+// decomp: BATTLE.PRG func_800D6CF0 (src/BATTLE/BATTLE.PRG/6E4CC.c:29)
 void LiveInitializeParticleTextureAnimation(Animation* animation,
                                             int texture_index,
                                             int program_index) {
@@ -159,7 +159,7 @@ void LiveInitializeParticleTextureAnimation(Animation* animation,
   }
 }
 
-// decomp: BATTLE.PRG func_800D6D24 (src/BATTLE/BATTLE.PRG/5BF94.c:8521)
+// decomp: BATTLE.PRG func_800D6D24 (src/BATTLE/BATTLE.PRG/6E4CC.c:37)
 void LiveAdvanceParticleTextureAnimation(Animation* animation) {
   if (animation == nullptr) {
     Refuse("advance", "no animation");

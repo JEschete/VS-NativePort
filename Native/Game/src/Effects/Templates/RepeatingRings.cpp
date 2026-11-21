@@ -69,10 +69,11 @@ void DrawSpecialRing(const RingFrame& frame, RingOrientation orientation,
 }
 }  // namespace
 
-// decomp: PLG077.BIN 18.c:37-339; PLG162.BIN 0.c:32-334;
-// PLG300.BIN 110.c:355-656. The complete lifecycle shares RingCore's motion,
-// closed sixteen-column geometry and child-event path; UV/corner orientation
-// and the foreground ordering entry are the three original body policies.
+// decomp: PLG077.BIN src/EFFECT/closedRings.h:60-378; PLG162.BIN 0.c:32-334;
+// PLG300.BIN src/EFFECT/closedRings.h:60-378. The complete lifecycle shares
+// RingCore's motion, closed sixteen-column geometry and child-event path;
+// UV/corner orientation and the foreground ordering entry are the three
+// original body policies.
 bool UpdateRepeatingRing(RepeatingRingStyle style, RingCommand command,
                          std::int32_t packed,
                          std::span<const RingPaletteEntry> palette,
@@ -114,7 +115,8 @@ bool Plg052::RepeatingRing(RingCommand command, std::int32_t packed,
                                         host);
 }
 
-// decomp: F01998 PLG077.BIN func_800FA324 (src/EFFECT/PLG077.BIN/18.c:37).
+// decomp: F01998 PLG077.BIN vs_effect_meteorLv1_1 (src/EFFECT/closedRings.h:60;
+// was func_800FA324).
 bool Plg077::RepeatingRing(RingCommand command, std::int32_t packed,
                            std::span<const RingPaletteEntry> palette,
                            RingHost& host) {
@@ -123,7 +125,8 @@ bool Plg077::RepeatingRing(RingCommand command, std::int32_t packed,
                                         host);
 }
 
-// decomp: F02209 PLG162.BIN func_800F9800 (src/EFFECT/PLG162.BIN/0.c:32).
+// decomp: F02209 PLG162.BIN vs_effect_spiralScourge_0
+// (src/EFFECT/closedRings.h:60; was func_800F9800).
 bool Plg162::TransposedRing(RingCommand command, std::int32_t packed,
                             std::span<const RingPaletteEntry> palette,
                             RingHost& host) {
@@ -132,7 +135,8 @@ bool Plg162::TransposedRing(RingCommand command, std::int32_t packed,
                                         host);
 }
 
-// decomp: F02289 PLG236.BIN func_800FB62C (src/EFFECT/PLG236.BIN/0.c:41).
+// decomp: F02289 PLG236.BIN vs_effect_plg236_2 (src/EFFECT/closedRings.h:60;
+// was func_800FB62C).
 bool Plg236::TransposedRing(RingCommand command, std::int32_t packed,
                             std::span<const RingPaletteEntry> palette,
                             RingHost& host) {
@@ -141,7 +145,8 @@ bool Plg236::TransposedRing(RingCommand command, std::int32_t packed,
                                         host);
 }
 
-// decomp: F02323 PLG263.BIN func_800FB0CC (src/EFFECT/PLG263.BIN/110.c:40).
+// decomp: F02323 PLG263.BIN vs_effect_plg263_2 (src/EFFECT/closedRings.h:60;
+// was func_800FB0CC).
 bool Plg263::TransposedRing(RingCommand command, std::int32_t packed,
                             std::span<const RingPaletteEntry> palette,
                             RingHost& host) {
@@ -150,7 +155,8 @@ bool Plg263::TransposedRing(RingCommand command, std::int32_t packed,
                                         host);
 }
 
-// decomp: F02397 PLG300.BIN func_800FC228 (src/EFFECT/PLG300.BIN/110.c:48).
+// decomp: F02397 PLG300.BIN vs_effect_plg300_2 (src/EFFECT/closedRings.h:60;
+// was func_800FC228).
 bool Plg300::RepeatingRing(RingCommand command, std::int32_t packed,
                            std::span<const RingPaletteEntry> palette,
                            RingHost& host) {
@@ -159,7 +165,8 @@ bool Plg300::RepeatingRing(RingCommand command, std::int32_t packed,
                                         host);
 }
 
-// decomp: F02398 PLG300.BIN func_800FD198 (src/EFFECT/PLG300.BIN/110.c:355).
+// decomp: F02398 PLG300.BIN vs_effect_plg300_3 (src/EFFECT/closedRings.h:60;
+// was func_800FD198).
 bool Plg300::ForegroundRepeatingRing(RingCommand command, std::int32_t packed,
                                      std::span<const RingPaletteEntry> palette,
                                      RingHost& host) {

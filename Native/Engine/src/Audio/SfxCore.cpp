@@ -265,7 +265,8 @@ std::optional<Selection> SelectBankEffect(SfxHost& host, std::int32_t group,
 }
 }  // namespace
 
-// decomp: SLUS_010.40 func_80045630 (src/SLUS_010.40/main.c:9785)
+// decomp: SLUS_010.40 playSfxPool0Default (src/SLUS_010.40/main.c:2807; was
+// func_80045630)
 void PlaySfxOnPrimaryChannel(SfxState& state, SfxHost& host,
                              std::int32_t effect_id) {
   host.PlaySoundEffect(effect_id & kBuiltInSfxIdMask,
@@ -273,7 +274,8 @@ void PlaySfxOnPrimaryChannel(SfxState& state, SfxHost& host,
                        SfxMix{});
 }
 
-// decomp: SLUS_010.40 func_80045684 (src/SLUS_010.40/main.c:9794)
+// decomp: SLUS_010.40 playSfxById (src/SLUS_010.40/main.c:2816; was
+// func_80045684)
 void PlayBuiltInSfxChannel(SfxHost& host, std::int32_t effect_id,
                            std::int32_t effect_tag, const SfxMix& mix) {
   if (effect_tag == kEffectTagGroup200 &&
@@ -284,7 +286,8 @@ void PlayBuiltInSfxChannel(SfxHost& host, std::int32_t effect_id,
   host.PlaySoundEffect(effect_id, effect_tag, mix);
 }
 
-// decomp: SLUS_010.40 func_800456EC (src/SLUS_010.40/main.c:9805)
+// decomp: SLUS_010.40 playSfxFromPointer (src/SLUS_010.40/main.c:2827; was
+// func_800456EC)
 void PlaySfxProgramChannel(SfxHost& host, DataRef program,
                            std::int32_t effect_tag, const SfxMix& mix) {
   if (effect_tag == kEffectTagGroup200 &&
@@ -294,7 +297,7 @@ void PlaySfxProgramChannel(SfxHost& host, DataRef program,
   host.PlaySoundEffectProgram(program, effect_tag, mix);
 }
 
-// decomp: SLUS_010.40 vs_main_playSfx (src/SLUS_010.40/main.c:9816)
+// decomp: SLUS_010.40 vs_main_playSfx (src/SLUS_010.40/main.c:2838)
 // Groups 0x100 and 0x200 play on group 0x200's current tag without advancing
 // it, as the original does.
 void PlaySfx(SfxState& state, SfxHost& host, std::int32_t group,
@@ -329,13 +332,13 @@ void PlaySfx(SfxState& state, SfxHost& host, std::int32_t group,
   }
 }
 
-// decomp: SLUS_010.40 vs_main_playSfxDefault (src/SLUS_010.40/main.c:9877)
+// decomp: SLUS_010.40 vs_main_playSfxDefault (src/SLUS_010.40/main.c:2918)
 void PlaySfxCentered(SfxState& state, SfxHost& host, std::int32_t group,
                      std::int32_t effect_id) {
   PlaySfx(state, host, group, effect_id, SfxMix{});
 }
 
-// decomp: SLUS_010.40 vs_main_computeSfxPan (src/SLUS_010.40/main.c:9879)
+// decomp: SLUS_010.40 vs_main_computeSfxPan (src/SLUS_010.40/main.c:2920)
 SfxMix SfxPanAndVolume(const SfxProjection& projection) {
   const std::int32_t x =
       static_cast<std::int16_t>(projection.screen_xy) - kScreenCenterX;
@@ -349,22 +352,22 @@ SfxMix SfxPanAndVolume(const SfxProjection& projection) {
           .volume = kFullSfxVolume - (depth >> kDepthShift)};
 }
 
-// decomp: SLUS_010.40 _do_panSfx (src/SLUS_010.40/main.c:9927)
+// decomp: SLUS_010.40 do_panSfx (src/SLUS_010.40/main.c:2966; was _do_panSfx)
 void PlayProjectedSfx(SfxState& state, SfxHost& host, std::int32_t group,
                       std::int32_t effect_id, const SfxProjection& projection) {
   const SfxMix mix = SfxPanAndVolume(projection);
   if (mix.volume > 0) PlaySfx(state, host, group, effect_id, mix);
 }
 
-// decomp: SLUS_010.40 vs_main_panSfx (src/SLUS_010.40/main.c:9937)
+// decomp: SLUS_010.40 vs_main_panSfx (src/SLUS_010.40/main.c:2977)
 void PlayWorldSfx(SfxState& state, SfxHost& host, std::int32_t group,
                   std::int32_t effect_id, const SfxPoint& point) {
   PlayProjectedSfx(state, host, group, effect_id, host.Project(point));
 }
 
-// decomp: SLUS_010.40 func_80045B28 (src/SLUS_010.40/main.c:9950)
-// Both banked groups resolve within the selected slot's bank, as the
-// original does; the original reads it without checks.
+// decomp: SLUS_010.40 resolveSfxData (src/SLUS_010.40/main.c:2992; was
+// func_80045B28) Both banked groups resolve within the selected slot's bank, as
+// the original does; the original reads it without checks.
 std::optional<DataRef> ResolveSfxProgram(const SfxState& state, SfxHost& host,
                                          std::int32_t group,
                                          std::int32_t effect_id) {
@@ -387,36 +390,42 @@ std::optional<DataRef> ResolveSfxProgram(const SfxState& state, SfxHost& host,
   }
 }
 
-// decomp: SLUS_010.40 func_80045BFC (src/SLUS_010.40/main.c:9975)
+// decomp: SLUS_010.40 vs_main_fadeSfxVolume (src/SLUS_010.40/main.c:3023; was
+// func_80045BFC)
 void FadeSfxVolume(const SfxState& state, SfxHost& host,
                    const SfxTarget& target, const SfxFadeSpec& spec) {
   FadeTarget(state, host, SfxFade::kVolume, target, spec);
 }
 
-// decomp: SLUS_010.40 func_80045C74 (src/SLUS_010.40/main.c:9994)
+// decomp: SLUS_010.40 vs_main_fadeSfxPitch (src/SLUS_010.40/main.c:3038; was
+// func_80045C74)
 void FadeSfxPitch(const SfxState& state, SfxHost& host, const SfxTarget& target,
                   const SfxFadeSpec& spec) {
   FadeTarget(state, host, SfxFade::kPitch, target, spec);
 }
 
-// decomp: SLUS_010.40 func_80045CEC (src/SLUS_010.40/main.c:10012)
+// decomp: SLUS_010.40 vs_main_fadeSfxPan (src/SLUS_010.40/main.c:3054; was
+// func_80045CEC)
 void FadeSfxPan(const SfxState& state, SfxHost& host, const SfxTarget& target,
                 const SfxFadeSpec& spec) {
   FadeTarget(state, host, SfxFade::kPan, target, spec);
 }
 
-// decomp: SLUS_010.40 func_80045D64 (src/SLUS_010.40/main.c:10028)
+// decomp: SLUS_010.40 vs_main_evictSfx (src/SLUS_010.40/main.c:3070; was
+// func_80045D64)
 void StopSfx(const SfxState& state, SfxHost& host, const SfxTarget& target) {
   const std::optional<Selection> selection = Select(state, host, target);
   if (!selection) return;
   host.StopSoundEffects(selection->selector, selection->effect_tag_mask);
 }
 
-// decomp: SLUS_010.40 func_80045DC0 (src/SLUS_010.40/main.c:10043)
+// decomp: SLUS_010.40 vs_main_stopAllSfx (src/SLUS_010.40/main.c:3086; was
+// func_80045DC0)
 void StopAllSfxPlayback(SfxHost& host) { host.StopSceneSoundEffects(); }
 
-// decomp: SLUS_010.40 func_800461CC (src/SLUS_010.40/main.c:10178)
-// The index compares unsigned with the bank's count, as the original's does.
+// decomp: SLUS_010.40 vs_main_playBankSfx (src/SLUS_010.40/main.c:3241; was
+// func_800461CC) The index compares unsigned with the bank's count, as the
+// original's does.
 void PlayBankSfx(SfxState& state, SfxHost& host, std::int32_t group,
                  const BankSfx& effect, const SfxMix& mix) {
   const SfxRequest request{.group = group, .effect_id = effect.index};
@@ -439,15 +448,16 @@ void PlayBankSfx(SfxState& state, SfxHost& host, std::int32_t group,
   PlaySfxProgramChannel(host, program, BankTag(state, host, group), mix);
 }
 
-// decomp: SLUS_010.40 func_800462E8 (src/SLUS_010.40/main.c:10215)
+// decomp: SLUS_010.40 vs_main_playBankSfxDefault (src/SLUS_010.40/main.c:3287;
+// was func_800462E8)
 void PlayBankSfxCentered(SfxState& state, SfxHost& host, std::int32_t group,
                          const BankSfx& effect) {
   PlayBankSfx(state, host, group, effect, SfxMix{});
 }
 
-// decomp: SLUS_010.40 func_80046310 (src/SLUS_010.40/main.c:10220)
-// The screen x is the projection's remainder by 0x10000, as the original's
-// is: a point above the screen's top edge takes the left edge's pan.
+// decomp: SLUS_010.40 do_panBankSfx (src/SLUS_010.40/main.c:3292; was
+// func_80046310) The screen x is the projection's remainder by 0x10000, as the
+// original's is: a point above the screen's top edge takes the left edge's pan.
 void PlayProjectedBankSfx(SfxState& state, SfxHost& host, std::int32_t group,
                           const BankSfx& effect,
                           const SfxProjection& projection) {
@@ -459,13 +469,15 @@ void PlayProjectedBankSfx(SfxState& state, SfxHost& host, std::int32_t group,
   if (mix.volume > 0) PlayBankSfx(state, host, group, effect, mix);
 }
 
-// decomp: SLUS_010.40 func_800463BC (src/SLUS_010.40/main.c:10272)
+// decomp: SLUS_010.40 panBankSfx (src/SLUS_010.40/main.c:3341; was
+// func_800463BC)
 void PlayWorldBankSfx(SfxState& state, SfxHost& host, std::int32_t group,
                       const BankSfx& effect, const SfxPoint& point) {
   PlayProjectedBankSfx(state, host, group, effect, host.Project(point));
 }
 
-// decomp: SLUS_010.40 func_8004644C (src/SLUS_010.40/main.c:10285)
+// decomp: SLUS_010.40 vs_main_evictBankSfx (src/SLUS_010.40/main.c:3354; was
+// func_8004644C)
 void StopBankSfx(SfxHost& host, std::int32_t group, const BankSfx& effect) {
   const std::optional<Selection> selection =
       SelectBankEffect(host, group, effect);
@@ -473,7 +485,8 @@ void StopBankSfx(SfxHost& host, std::int32_t group, const BankSfx& effect) {
   host.StopSoundEffects(selection->selector, selection->effect_tag_mask);
 }
 
-// decomp: SLUS_010.40 func_80046494 (src/SLUS_010.40/main.c:10299)
+// decomp: SLUS_010.40 vs_main_fadeBankSfxVolume (src/SLUS_010.40/main.c:3369;
+// was func_80046494)
 void FadeBankSfxVolume(SfxHost& host, std::int32_t group, const BankSfx& effect,
                        const SfxFadeSpec& spec) {
   const std::optional<Selection> selection =

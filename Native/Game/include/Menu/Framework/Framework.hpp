@@ -188,7 +188,7 @@ constexpr void SetExecuteAbility(ActionSelection& selection,
       (static_cast<std::uint32_t>(item) << kExecuteAbilityItemShift));
 }
 
-// decomp: ashleyRenderMode (src/MENU/_renderAshley.h:11)
+// decomp: ashleyRenderMode (src/MENU/renderAshley.h:14)
 enum class AshleyRenderMode : std::int32_t { kRender, kInit, kRestore };
 
 // vs_MenuState (BATTLE.PRG battleUi.h:83) without its disc request (the host

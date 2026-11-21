@@ -368,19 +368,20 @@ bool DrawFrameChecked() {
 
 // NOLINTNEXTLINE(readability-identifier-naming): the catalog's component.
 namespace VS::Menu::Status {
-// decomp: _fadeScreenLeft (src/MENU/MENU4.PRG/120.c:2081)
+// decomp: fadeScreenLeft (src/MENU/MENU4.PRG/120.c:2083; was _fadeScreenLeft)
 void LiveDrawModelSlideFade() {
   if (!terminal_live::DrawFadeChecked()) {
     terminal_live::Refuse("model fade frame storage");
   }
 }
-// decomp: _drawMenuBackground (src/MENU/MENU4.PRG/120.c:2121)
+// decomp: drawMenuBackground (src/MENU/MENU4.PRG/120.c:2123; was
+// _drawMenuBackground)
 void LiveDrawBackground() {
   if (!terminal_live::DrawBackgroundChecked()) {
     terminal_live::Refuse("background frame storage");
   }
 }
-// decomp: _drawScreen (src/MENU/MENU4.PRG/120.c:2190)
+// decomp: drawScreen (src/MENU/MENU4.PRG/120.c:2192; was _drawScreen)
 void LiveDrawFrame() { static_cast<void>(terminal_live::DrawFrameChecked()); }
 
 void ResetLiveTerminalControllersModuleData() {

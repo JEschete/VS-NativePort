@@ -8,7 +8,7 @@
 // SYSTEM.DAT: the battle interface's images, palette and menu data, read
 // once when the battle program starts. The file opens with eight
 // little-endian u32 offsets from its start (decomp System_dat_h, INITBTL.PRG
-// 18.c:23):
+// src/BATTLE/INITBTL.PRG/18.c:39):
 //   0, 1, 3, 4, 5  an image: i16 x, y, w, h, then w*h 16-bit pixels
 //   2              a palette: i16 x (the colour count), i16, then colours
 //   6              a fixed image: i16 w, h, then pixels, placed at (768, 240)
@@ -40,7 +40,7 @@ struct VramRect {
   std::int16_t h = 0;
 };
 
-// decomp: System_dat_h (src/BATTLE/INITBTL.PRG/18.c:23), upstream
+// decomp: System_dat_h (src/BATTLE/INITBTL.PRG/18.c:39), upstream
 // src/BATTLE/INITBTL.PRG/18.c:30-39: the file's leading section offsets, in
 // SystemDatSection order.
 struct SystemDatHeader {

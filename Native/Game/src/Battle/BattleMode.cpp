@@ -14,12 +14,14 @@ constexpr int kCalmKind = 8;
 constexpr int kPlayerSlot = 0;
 }  // namespace
 
-// decomp: BATTLE.PRG func_8007C088 (src/BATTLE/BATTLE.PRG/146C.c:8655)
+// decomp: BATTLE.PRG isWeaponDrawn (src/BATTLE/BATTLE.PRG/146C.c:8598; was
+// func_8007C088)
 bool IsActorWeaponDrawn(int actor_slot, const BattleModeHost& host) {
   return (host.ActorWeaponDrawn(actor_slot) & kWeaponDrawnBit) != 0;
 }
 
-// decomp: BATTLE.PRG func_8007C0AC (src/BATTLE/BATTLE.PRG/146C.c:8657)
+// decomp: BATTLE.PRG setWeaponDrawn (src/BATTLE/BATTLE.PRG/146C.c:8600; was
+// func_8007C0AC)
 void SetActorBattleMode(int actor_slot, int battle_mode, BattleModeHost& host) {
   if (battle_mode == kToggleWeapon) {
     const int toggled = host.ActorWeaponDrawn(actor_slot) ^ kWeaponDrawnBit;

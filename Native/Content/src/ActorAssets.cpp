@@ -261,7 +261,7 @@ bool IsDispatchedKind(std::uint8_t kind) {
 }  // namespace
 
 // decomp: BATTLE.PRG vs_battle_getEmptyObjectDataSlot
-// (src/BATTLE/BATTLE.PRG/30DB0.c:149)
+// (src/BATTLE/BATTLE.PRG/30DB0.c:124)
 int FindFreeActorAssetRequest(const ActorAssetHost& host) {
   for (int i = 0; i < kActorAssetRequestCount; ++i) {
     if (host.RequestKind(i) == 0) {
@@ -272,7 +272,7 @@ int FindFreeActorAssetRequest(const ActorAssetHost& host) {
 }
 
 // decomp: BATTLE.PRG vs_battle_populateDataSlot
-// (src/BATTLE/BATTLE.PRG/30DB0.c:162)
+// (src/BATTLE/BATTLE.PRG/30DB0.c:137)
 int QueueActorAssetRequest(ActorAssetHost& host,
                            const ActorAssetRequest& request) {
   const int slot = FindFreeActorAssetRequest(host);
@@ -944,7 +944,7 @@ int DiscardRefusedWeapon(ActorAssetHost& host, int slot, int result) {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG _loadWep (src/BATTLE/BATTLE.PRG/30DB0.c:523)
+// decomp: BATTLE.PRG loadWep (src/BATTLE/BATTLE.PRG/30DB0.c:511; was _loadWep)
 int UpdateWeaponModelLoad(ActorAssetHost& host, ActorAssetLoadState& state,
                           ActorAssetRequest& request) {
   if (request.model_id == 0 || request.model_id >= kFirstInvalidWeaponModel) {
@@ -981,7 +981,8 @@ int UpdateWeaponModelLoad(ActorAssetHost& host, ActorAssetLoadState& state,
   return result;
 }
 
-// decomp: BATTLE.PRG _parseWep (src/BATTLE/BATTLE.PRG/30DB0.c:598)
+// decomp: BATTLE.PRG parseWep (src/BATTLE/BATTLE.PRG/30DB0.c:586; was
+// _parseWep)
 int ParseWeaponModel(ActorAssetHost& host, ActorAssetLoadState& state,
                      ActorAssetRequest& request) {
   const int target = TargetSlot(request);
@@ -1021,7 +1022,8 @@ int ParseWeaponModel(ActorAssetHost& host, ActorAssetLoadState& state,
                               ParseWeaponFile(host, state, request, model));
 }
 
-// decomp: BATTLE.PRG _loadMaterialPalette (src/BATTLE/BATTLE.PRG/30DB0.c:855)
+// decomp: BATTLE.PRG loadMaterialPalette (src/BATTLE/BATTLE.PRG/30DB0.c:843;
+// was _loadMaterialPalette)
 bool LoadWeaponMaterialPalette(ActorAssetHost& host, int slot, int material) {
   if (!ValidWeaponSlot(host, slot) || !host.WeaponSummary(slot).present) {
     host.Refuse("weapon palette record", slot);
@@ -1743,7 +1745,7 @@ int FindSharedActorModel(const ActorAssetHost& host,
   return 0;
 }
 
-// decomp: BATTLE.PRG _loadShp (src/BATTLE/BATTLE.PRG/30DB0.c:944)
+// decomp: BATTLE.PRG loadShp (src/BATTLE/BATTLE.PRG/30DB0.c:932; was _loadShp)
 int UpdateActorModelLoad(ActorAssetHost& host, ActorAssetLoadState& state,
                          ActorAssetRequest& request) {
   switch (state.model_phase) {
@@ -1841,7 +1843,8 @@ int ParseBoundActorModel(ActorAssetHost& host, ActorAssetLoadState& state,
 }
 }  // namespace
 
-// decomp: BATTLE.PRG _parseShp (src/BATTLE/BATTLE.PRG/30DB0.c:1026)
+// decomp: BATTLE.PRG parseShp (src/BATTLE/BATTLE.PRG/30DB0.c:1014; was
+// _parseShp)
 int ParseActorModel(ActorAssetHost& host, ActorAssetLoadState& state,
                     ActorAssetRequest& request) {
   const int target = TargetSlot(request);
@@ -1871,7 +1874,7 @@ int ParseActorModel(ActorAssetHost& host, ActorAssetLoadState& state,
                           ParseBoundActorModel(host, state, request));
 }
 
-// decomp: BATTLE.PRG func_8009CFB0 (src/BATTLE/BATTLE.PRG/30DB0.c:1920)
+// decomp: BATTLE.PRG func_8009CFB0 (src/BATTLE/BATTLE.PRG/30DB0.c:1980)
 int ReleaseActorModel(ActorAssetHost& host, int slot) {
   if (slot < 0 || slot >= kActorRecordSlots ||
       !host.ActorSummary(slot).present) {
@@ -2291,7 +2294,7 @@ int UpdateActorSequenceLoad(ActorAssetHost& host, ActorAssetLoadState& state,
   return WaitForFileRead(host, state.model_phase, AssetFileStream::kSequence);
 }
 
-// decomp: BATTLE.PRG func_8009C378 (src/BATTLE/BATTLE.PRG/30DB0.c:1608)
+// decomp: BATTLE.PRG func_8009C378 (src/BATTLE/BATTLE.PRG/30DB0.c:1621)
 bool CopyWeaponSequence(ActorAssetHost& host, AssetAddress destination,
                         AssetAddress source) {
   const std::optional<std::size_t> source_size = host.SequenceBankSize(source);
@@ -2547,7 +2550,7 @@ int FinishBankEffectTexture(ActorAssetHost& host, ActorAssetLoadState& state,
 }
 }  // namespace
 
-// decomp: BATTLE.PRG _loadSeq (src/BATTLE/BATTLE.PRG/30DB0.c:1617)
+// decomp: BATTLE.PRG loadSeq (src/BATTLE/BATTLE.PRG/30DB0.c:1630; was _loadSeq)
 int ParseActorSequence(ActorAssetHost& host, ActorAssetLoadState& state,
                        ActorAssetRequest& request) {
   switch (state.sequence_parse_phase) {
@@ -2584,7 +2587,7 @@ int ParseActorSequence(ActorAssetHost& host, ActorAssetLoadState& state,
   return result;
 }
 
-// decomp: BATTLE.PRG func_8009CAEC (src/BATTLE/BATTLE.PRG/30DB0.c:1795)
+// decomp: BATTLE.PRG func_8009CAEC (src/BATTLE/BATTLE.PRG/30DB0.c:1841)
 bool BindSharedActorSequence(const SharedSequenceBank& bank, int bank_index,
                              std::span<const std::uint8_t> ids_by_kind,
                              ActorAssetRecord& actor) {
@@ -2693,7 +2696,7 @@ int ReleaseSpecialSequence(ActorAssetHost& host, int target) {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_8009CC20 (src/BATTLE/BATTLE.PRG/30DB0.c:1828)
+// decomp: BATTLE.PRG func_8009CC20 (src/BATTLE/BATTLE.PRG/30DB0.c:1874)
 int ReleaseActorSequence(ActorAssetHost& host, int target, int kind) {
   switch (kind) {
     case kBattleSequence:
@@ -2709,7 +2712,7 @@ int ReleaseActorSequence(ActorAssetHost& host, int target, int kind) {
   }
 }
 
-// decomp: BATTLE.PRG func_8009D208 (src/BATTLE/BATTLE.PRG/30DB0.c:1996)
+// decomp: BATTLE.PRG func_8009D208 (src/BATTLE/BATTLE.PRG/30DB0.c:2056)
 int ReleaseSequenceEffectTexture(ActorAssetHost& host, int bank) {
   if (bank < kFirstEffectBank || bank > kLastEffectBank) {
     return -1;
@@ -2800,7 +2803,7 @@ int UploadEffectTexture(ActorAssetHost& host, ActorAssetLoadState& state,
 }
 }  // namespace
 
-// decomp: BATTLE.PRG _loadEtm (src/BATTLE/BATTLE.PRG/30DB0.c:2008)
+// decomp: BATTLE.PRG loadEtm (src/BATTLE/BATTLE.PRG/30DB0.c:2068; was _loadEtm)
 int UpdateSequenceEffectTextureLoad(ActorAssetHost& host,
                                     ActorAssetLoadState& state,
                                     const ActorAssetRequest& request) {

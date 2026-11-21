@@ -28,13 +28,13 @@ MovementCommand MakeTileTargetCommand(int direction, int distance, int facing) {
           static_cast<std::uint32_t>(distance)};
 }
 
-// decomp: BATTLE.PRG func_800B64CC (src/BATTLE/BATTLE.PRG/4A0A8.c:428).
+// decomp: BATTLE.PRG func_800B64CC (src/BATTLE/BATTLE.PRG/4B16C.s:2893).
 void QueueNavigationTileTarget(ActorMovementRequests& requests, int actor_id,
                                int direction, int distance, int facing) {
   Store(requests, actor_id, MakeTileTargetCommand(direction, distance, facing));
 }
 
-// decomp: BATTLE.PRG func_800B64A8 (src/BATTLE/BATTLE.PRG/4A0A8.c:415). The
+// decomp: BATTLE.PRG func_800B64A8 (src/BATTLE/BATTLE.PRG/4B16C.s:2881). The
 // original queues a tile target and then clears its mode; nothing observes the
 // request in between, so one idle write is equivalent.
 void SetDirectMovement(ActorMovementRequests& requests, int actor_id,

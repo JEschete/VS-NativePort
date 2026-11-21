@@ -16,10 +16,10 @@ struct ElementEnchantment {
 
 // Missing equipment is untouched. An equipped record requires indices in
 // its eight affinity slots; refusal leaves all records unchanged.
-// decomp: func_80086EA4 (src/BATTLE/BATTLE.PRG/146C.c:13801).
+// decomp: func_80086EA4 (src/BATTLE/BATTLE.PRG/146C.c:13666).
 bool ApplyWeaponElementEnchantment(Items::WeaponLoadout& weapon,
                                    const ElementEnchantment& change);
-// decomp: func_80086EF4 (src/BATTLE/BATTLE.PRG/146C.c:13811).
+// decomp: func_80086EF4 (src/BATTLE/BATTLE.PRG/146C.c:13676).
 bool ApplyArmorElementEnchantment(
     Items::ShieldLoadout& shield,
     std::span<Items::ArmorLoadout, Items::kLimbCount> armor,
@@ -41,7 +41,7 @@ class StatNumberWorld {
   virtual void QueueValueLabel(const StatNumberRequest& request) = 0;
 };
 
-// decomp: func_80087578 (src/BATTLE/BATTLE.PRG/146C.c:14011).
+// decomp: func_80087578 (src/BATTLE/BATTLE.PRG/146C.c:13877).
 // True queues a label, false suppresses it, nothing refuses a missing actor.
 std::optional<bool> QueueActorStatChangeNumber(
     StatNumberWorld& world, const StatNumberRequest& request);
@@ -65,10 +65,10 @@ class TargetingRiskWorld {
   virtual void SetPlayerRisk(std::uint16_t risk) = 0;
 };
 
-// decomp: func_80088B8C (src/BATTLE/BATTLE.PRG/146C.c:14745).
+// decomp: func_80088B8C (src/BATTLE/BATTLE.PRG/146C.c:14616).
 // Only active targeting advances the signed clock. Target/player reads are
 // lazy; a required missing record is refused before advancing it.
 bool UpdateTargetingRiskPenalty(std::int32_t& timer, TargetingRiskWorld& world);
-// decomp: func_80088CA0 (src/BATTLE/BATTLE.PRG/146C.c:14764).
+// decomp: func_80088CA0 (src/BATTLE/BATTLE.PRG/146C.c:14635).
 void ResetTargetingRiskPenaltyTimer(std::int32_t& timer);
 }  // namespace VS::Battle

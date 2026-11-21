@@ -113,27 +113,29 @@ TimeAttackDrawHost& LiveTimeAttackDrawHost() {
   return host;
 }
 
-// decomp: MENUF.PRG _renderTimeAttackHeader (src/MENU/MENUF.PRG/3B8.c:1146),
-// 0x8010459C
+// decomp: MENUF.PRG renderTimeAttackHeader (src/MENU/MENUF.PRG/3B8.c:1159; was
+// _renderTimeAttackHeader), 0x8010459C
 void LiveDrawTimeAttackHeading(int x, int y, int timer) {
   LiveTimeAttackHost host;
   Report(DrawTimeAttackHeading(LiveResultsAtlas(), x, y, timer, host));
 }
 
-// decomp: MENUF.PRG _renderCourse (src/MENU/MENUF.PRG/3B8.c:1175), 0x80104650
+// decomp: MENUF.PRG renderCourse (src/MENU/MENUF.PRG/3B8.c:1188; was
+// _renderCourse), 0x80104650
 void LiveDrawCourseNumber(int x, int y, int timer) {
   LiveTimeAttackHost host;
   Report(DrawCourseNumber(LiveResultsAtlas(), x, y, timer, LiveCourse(), host));
 }
 
-// decomp: MENUF.PRG _renderBossName (src/MENU/MENUF.PRG/3B8.c:1195), 0x801046F8
+// decomp: MENUF.PRG renderBossName (src/MENU/MENUF.PRG/3B8.c:1208; was
+// _renderBossName), 0x801046F8
 void LiveDrawBossName(int x, int y, int timer) {
   LiveTimeAttackHost host;
   Report(DrawBossName(LiveResultsAtlas(), x, y, timer, LiveCourse(), host));
 }
 
-// decomp: MENUF.PRG _renderBestTimeHeader (src/MENU/MENUF.PRG/3B8.c:1226),
-// 0x801047D4
+// decomp: MENUF.PRG renderBestTimeHeader (src/MENU/MENUF.PRG/3B8.c:1239; was
+// _renderBestTimeHeader), 0x801047D4
 void LiveDrawBestTime(int x, int y, int timer) {
   LiveTimeAttackHost host;
   const auto scores = LiveFirstPlaceScores();
@@ -141,15 +143,15 @@ void LiveDrawBestTime(int x, int y, int timer) {
                       host));
 }
 
-// decomp: MENUF.PRG _renderStartCountdown (src/MENU/MENUF.PRG/3B8.c:1248),
-// 0x8010489C
+// decomp: MENUF.PRG renderStartCountdown (src/MENU/MENUF.PRG/3B8.c:1261; was
+// _renderStartCountdown), 0x8010489C
 void LiveDrawStartCountdown(int x, int y, int timer) {
   LiveTimeAttackHost host;
   Report(DrawStartCountdown(LiveResultsAtlas(), x, y, timer, host));
 }
 
-// decomp: MENUF.PRG _pulseTimeAttackEnd (src/MENU/MENUF.PRG/3B8.c:1256),
-// 0x80104914
+// decomp: MENUF.PRG pulseTimeAttackEnd (src/MENU/MENUF.PRG/3B8.c:1269; was
+// _pulseTimeAttackEnd), 0x80104914
 void LivePulseTimeAttackClut(int blend_weight) {
   LiveClutTarget target;
   PulseTimeAttackClut(std::span(clutBuf), blend_weight, target);

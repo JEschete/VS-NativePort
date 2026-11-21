@@ -317,7 +317,7 @@ bool DrawStatusCount(HudOrchestrationWorld& world,
 }
 }  // namespace
 
-// decomp: F00729 func_80095B70 (src/BATTLE/BATTLE.PRG/2842C.c:2379).
+// decomp: F00729 func_80095B70 (src/BATTLE/BATTLE.PRG/2842C.c:2367).
 void SetActorMarkersHidden(HudFeedbackState& state, std::int32_t command) {
   state.marker_visibility_command =
       math::WrapSigned16(static_cast<std::uint32_t>(command));
@@ -346,12 +346,12 @@ bool SetActorMarker(std::span<std::byte, kActorMarkerCount> markers,
   return true;
 }
 
-// decomp: F00743 func_8009722C (src/BATTLE/BATTLE.PRG/2842C.c:2893).
+// decomp: F00743 func_8009722C (src/BATTLE/BATTLE.PRG/2842C.c:2881).
 void SuppressAshleyStatusLabels(HudFeedbackState& state) {
   state.ashley_label_suppression = 1;
 }
 
-// decomp: F01361 func_800C9FE8 (src/BATTLE/BATTLE.PRG/5BF94.c:3249).
+// decomp: F01361 func_800C9FE8 (src/BATTLE/BATTLE.PRG/5BF94.c:2800).
 bool DrawShortcutHud(HudOrchestrationWorld& world) {
   const auto before = world.Presentation();
   if (before.commands.shortcut != 0) {
@@ -410,7 +410,7 @@ bool DrawShortcutHud(HudOrchestrationWorld& world) {
   return true;
 }
 
-// decomp: F01362 func_800CA2DC (src/BATTLE/BATTLE.PRG/5BF94.c:3307).
+// decomp: F01362 func_800CA2DC (src/BATTLE/BATTLE.PRG/5BF94.c:2857).
 bool DrawBattleHud(HudOrchestrationWorld& world) {
   world.DrawShortcutPanel();
   if (!DrawIndicator(world)) return false;
@@ -451,7 +451,8 @@ bool DrawBattleHud(HudOrchestrationWorld& world) {
   return DrawStatusCount(world, statuses);
 }
 
-// decomp: F01384 _renderTimer (src/BATTLE/BATTLE.PRG/5BF94.c:3844).
+// decomp: F01384 renderTimer (src/BATTLE/BATTLE.PRG/5BF94.c:3410; was
+// _renderTimer).
 void FormatPuzzleTimer(const State::SceneTime& time, std::uint8_t hundredths,
                        std::span<char, kPuzzleTimerTextBytes> text) {
   std::array<std::uint8_t, kTimerParts> parts{

@@ -19,25 +19,25 @@
 
 namespace VS::Legacy {
 
-// decomp: P_TAG (libgpu.h)
+// decomp: P_TAG (include/psx/libgpu.h:386)
 struct P_TAG {
   std::uint32_t addr : 24;
   std::uint32_t len : 8;
   std::uint8_t r0, g0, b0, code;
 };
 
-// decomp: RECT (libgpu.h)
+// decomp: RECT (include/psx/libgpu.h:345)
 struct RECT {
   std::int16_t x, y, w, h;
 };
 
-// decomp: DR_ENV (libgpu.h)
+// decomp: DR_ENV (include/psx/libgpu.h:358)
 struct DR_ENV {
   std::uint32_t tag;
   std::uint32_t code[15];
 };
 
-// decomp: DRAWENV (libgpu.h)
+// decomp: DRAWENV (include/psx/libgpu.h:363)
 struct DRAWENV {
   RECT clip;
   std::int16_t ofs[2];
@@ -47,51 +47,51 @@ struct DRAWENV {
   DR_ENV dr_env;
 };
 
-// decomp: DISPENV (libgpu.h)
+// decomp: DISPENV (include/psx/libgpu.h:375)
 struct DISPENV {
   RECT disp;
   RECT screen;
   std::uint8_t isinter, isrgb24, pad0, pad1;
 };
 
-// decomp: DR_AREA (libgpu.h)
+// decomp: DR_AREA (include/psx/libgpu.h:615)
 struct DR_AREA {
   std::uint32_t tag;
   std::uint32_t code[2];
 };
 
-// decomp: DR_MODE (libgpu.h)
+// decomp: DR_MODE (include/psx/libgpu.h:605)
 struct DR_MODE {
   std::uint32_t tag;
   std::uint32_t code[2];
 };
 
-// decomp: DR_MOVE (libgpu.h)
+// decomp: DR_MOVE (include/psx/libgpu.h:625)
 struct DR_MOVE {
   std::uint32_t tag;
   std::uint32_t code[5];
 };
 
-// decomp: DR_STP (libgpu.h)
+// decomp: DR_STP (include/psx/libgpu.h:641)
 struct DR_STP {
   std::uint32_t tag;
   std::uint32_t code[2];
 };
 
-// decomp: DR_TPAGE (libgpu.h)
+// decomp: DR_TPAGE (include/psx/libgpu.h:636)
 struct DR_TPAGE {
   std::uint32_t tag;
   std::uint32_t code[1];
 };
 
-// decomp: LINE_F2 (libgpu.h)
+// decomp: LINE_F2 (include/psx/libgpu.h:491)
 struct LINE_F2 {
   std::uint32_t tag;
   std::uint8_t r0, g0, b0, code;
   std::int16_t x0, y0, x1, y1;
 };
 
-// decomp: LINE_G2 (libgpu.h)
+// decomp: LINE_G2 (include/psx/libgpu.h:498)
 struct LINE_G2 {
   std::uint32_t tag;
   std::uint8_t r0, g0, b0, code;
@@ -100,7 +100,7 @@ struct LINE_G2 {
   std::int16_t x1, y1;
 };
 
-// decomp: LINE_G4 (libgpu.h)
+// decomp: LINE_G4 (include/psx/libgpu.h:536)
 struct LINE_G4 {
   std::uint32_t tag;
   std::uint8_t r0, g0, b0, code;
@@ -114,21 +114,21 @@ struct LINE_G4 {
   std::uint32_t pad;
 };
 
-// decomp: POLY_F3 (libgpu.h)
+// decomp: POLY_F3 (include/psx/libgpu.h:396)
 struct POLY_F3 {
   std::uint32_t tag;
   std::uint8_t r0, g0, b0, code;
   std::int16_t x0, y0, x1, y1, x2, y2;
 };
 
-// decomp: POLY_F4 (libgpu.h)
+// decomp: POLY_F4 (include/psx/libgpu.h:404)
 struct POLY_F4 {
   std::uint32_t tag;
   std::uint8_t r0, g0, b0, code;
   std::int16_t x0, y0, x1, y1, x2, y2, x3, y3;
 };
 
-// decomp: POLY_FT4 (libgpu.h)
+// decomp: POLY_FT4 (include/psx/libgpu.h:424)
 struct POLY_FT4 {
   std::uint32_t tag;
   std::uint8_t r0, g0, b0, code;
@@ -146,7 +146,7 @@ struct POLY_FT4 {
   std::uint16_t pad2;
 };
 
-// decomp: POLY_G3 (libgpu.h)
+// decomp: POLY_G3 (include/psx/libgpu.h:437)
 struct POLY_G3 {
   std::uint32_t tag;
   std::uint8_t r0, g0, b0, code;
@@ -157,7 +157,7 @@ struct POLY_G3 {
   std::int16_t x2, y2;
 };
 
-// decomp: POLY_G4 (libgpu.h)
+// decomp: POLY_G4 (include/psx/libgpu.h:447)
 struct POLY_G4 {
   std::uint32_t tag;
   std::uint8_t r0, g0, b0, code;
@@ -170,7 +170,7 @@ struct POLY_G4 {
   std::int16_t x3, y3;
 };
 
-// decomp: POLY_GT3 (libgpu.h)
+// decomp: POLY_GT3 (include/psx/libgpu.h:459)
 struct POLY_GT3 {
   std::uint32_t tag;
   std::uint8_t r0, g0, b0, code;
@@ -187,9 +187,9 @@ struct POLY_GT3 {
   std::uint16_t pad2;
 };
 
-// decomp: POLY_GT4 (libgpu.h). Its first three vertices repeat POLY_GT3 by
-// design (the PS1 packet layouts), which is not copy/paste to extract.
-// jscpd:ignore-start
+// decomp: POLY_GT4 (include/psx/libgpu.h:472). Its first three vertices repeat
+// POLY_GT3 by design (the PS1 packet layouts), which is not copy/paste to
+// extract. jscpd:ignore-start
 struct POLY_GT4 {
   std::uint32_t tag;
   std::uint8_t r0, g0, b0, code;
@@ -211,7 +211,7 @@ struct POLY_GT4 {
 };
 // jscpd:ignore-end
 
-// decomp: SPRT (libgpu.h)
+// decomp: SPRT (include/psx/libgpu.h:552)
 struct SPRT {
   std::uint32_t tag;
   std::uint8_t r0, g0, b0, code;
@@ -221,7 +221,7 @@ struct SPRT {
   std::int16_t w, h;
 };
 
-// decomp: SPRT_8 (libgpu.h)
+// decomp: SPRT_8 (include/psx/libgpu.h:567)
 struct SPRT_8 {
   std::uint32_t tag;
   std::uint8_t r0, g0, b0, code;
@@ -230,7 +230,7 @@ struct SPRT_8 {
   std::uint16_t clut;
 };
 
-// decomp: TILE (libgpu.h)
+// decomp: TILE (include/psx/libgpu.h:577)
 struct TILE {
   std::uint32_t tag;
   std::uint8_t r0, g0, b0, code;
@@ -238,7 +238,8 @@ struct TILE {
   std::int16_t w, h;
 };
 
-// decomp: TIM_IMAGE (libgpu.h); native pointers, not a PS1 layout
+// decomp: TIM_IMAGE (include/psx/libgpu.h:684); native pointers, not a PS1
+// layout
 struct TIM_IMAGE {
   std::uint32_t mode;
   RECT* crect;
@@ -283,7 +284,7 @@ constexpr void Store(Field& field, Value value) {
 }
 }  // namespace detail
 
-// decomp: setVector (libgpu.h)
+// decomp: setVector (include/psx/libgpu.h:82)
 template <class V, class X, class Y, class Z>
 constexpr void setVector(V* v, X x, Y y, Z z) {
   detail::Store(v->vx, x);
@@ -291,7 +292,7 @@ constexpr void setVector(V* v, X x, Y y, Z z) {
   detail::Store(v->vz, z);
 }
 
-// decomp: setRECT (libgpu.h)
+// decomp: setRECT (include/psx/libgpu.h:104)
 template <class R, class X, class Y, class W, class H>
 constexpr void setRECT(R* r, X x, Y y, W w, H h) {
   detail::Store(r->x, x);
@@ -300,7 +301,7 @@ constexpr void setRECT(R* r, X x, Y y, W w, H h) {
   detail::Store(r->h, h);
 }
 
-// decomp: setRGB0 (libgpu.h)
+// decomp: setRGB0 (include/psx/libgpu.h:119)
 template <class P, class R, class G, class B>
 constexpr void setRGB0(P* p, R r, G g, B b) {
   detail::Store(p->r0, r);
@@ -308,7 +309,7 @@ constexpr void setRGB0(P* p, R r, G g, B b) {
   detail::Store(p->b0, b);
 }
 
-// decomp: setRGB1 (libgpu.h)
+// decomp: setRGB1 (include/psx/libgpu.h:122)
 template <class P, class R, class G, class B>
 constexpr void setRGB1(P* p, R r, G g, B b) {
   detail::Store(p->r1, r);
@@ -316,7 +317,7 @@ constexpr void setRGB1(P* p, R r, G g, B b) {
   detail::Store(p->b1, b);
 }
 
-// decomp: setRGB2 (libgpu.h)
+// decomp: setRGB2 (include/psx/libgpu.h:125)
 template <class P, class R, class G, class B>
 constexpr void setRGB2(P* p, R r, G g, B b) {
   detail::Store(p->r2, r);
@@ -324,7 +325,7 @@ constexpr void setRGB2(P* p, R r, G g, B b) {
   detail::Store(p->b2, b);
 }
 
-// decomp: setRGB3 (libgpu.h)
+// decomp: setRGB3 (include/psx/libgpu.h:128)
 template <class P, class R, class G, class B>
 constexpr void setRGB3(P* p, R r, G g, B b) {
   detail::Store(p->r3, r);
@@ -332,14 +333,14 @@ constexpr void setRGB3(P* p, R r, G g, B b) {
   detail::Store(p->b3, b);
 }
 
-// decomp: setXY0 (libgpu.h)
+// decomp: setXY0 (include/psx/libgpu.h:134)
 template <class P, class X, class Y>
 constexpr void setXY0(P* p, X x, Y y) {
   detail::Store(p->x0, x);
   detail::Store(p->y0, y);
 }
 
-// decomp: setXY2 (libgpu.h)
+// decomp: setXY2 (include/psx/libgpu.h:137)
 template <class P, class X0, class Y0, class X1, class Y1>
 constexpr void setXY2(P* p, X0 x0, Y0 y0, X1 x1, Y1 y1) {
   setXY0(p, x0, y0);
@@ -347,7 +348,7 @@ constexpr void setXY2(P* p, X0 x0, Y0 y0, X1 x1, Y1 y1) {
   detail::Store(p->y1, y1);
 }
 
-// decomp: setXY3 (libgpu.h)
+// decomp: setXY3 (include/psx/libgpu.h:141)
 template <class P, class X0, class Y0, class X1, class Y1, class X2, class Y2>
 constexpr void setXY3(P* p, X0 x0, Y0 y0, X1 x1, Y1 y1, X2 x2, Y2 y2) {
   setXY2(p, x0, y0, x1, y1);
@@ -355,7 +356,7 @@ constexpr void setXY3(P* p, X0 x0, Y0 y0, X1 x1, Y1 y1, X2 x2, Y2 y2) {
   detail::Store(p->y2, y2);
 }
 
-// decomp: setXY4 (libgpu.h)
+// decomp: setXY4 (include/psx/libgpu.h:146)
 template <class P, class X0, class Y0, class X1, class Y1, class X2, class Y2,
           class X3, class Y3>
 constexpr void setXY4(P* p, X0 x0, Y0 y0, X1 x1, Y1 y1, X2 x2, Y2 y2, X3 x3,
@@ -365,21 +366,21 @@ constexpr void setXY4(P* p, X0 x0, Y0 y0, X1 x1, Y1 y1, X2 x2, Y2 y2, X3 x3,
   detail::Store(p->y3, y3);
 }
 
-// decomp: setWH (libgpu.h)
+// decomp: setWH (include/psx/libgpu.h:161)
 template <class P, class W, class H>
 constexpr void setWH(P* p, W w, H h) {
   detail::Store(p->w, w);
   detail::Store(p->h, h);
 }
 
-// decomp: setUV0 (libgpu.h)
+// decomp: setUV0 (include/psx/libgpu.h:166)
 template <class P, class U, class V>
 constexpr void setUV0(P* p, U u, V v) {
   detail::Store(p->u0, u);
   detail::Store(p->v0, v);
 }
 
-// decomp: setUV3 (libgpu.h)
+// decomp: setUV3 (include/psx/libgpu.h:169)
 template <class P, class U0, class V0, class U1, class V1, class U2, class V2>
 constexpr void setUV3(P* p, U0 u0, V0 v0, U1 u1, V1 v1, U2 u2, V2 v2) {
   setUV0(p, u0, v0);
@@ -389,7 +390,7 @@ constexpr void setUV3(P* p, U0 u0, V0 v0, U1 u1, V1 v1, U2 u2, V2 v2) {
   detail::Store(p->v2, v2);
 }
 
-// decomp: setUV4 (libgpu.h)
+// decomp: setUV4 (include/psx/libgpu.h:174)
 template <class P, class U0, class V0, class U1, class V1, class U2, class V2,
           class U3, class V3>
 constexpr void setUV4(P* p, U0 u0, V0 v0, U1 u1, V1 v1, U2 u2, V2 v2, U3 u3,
@@ -399,33 +400,34 @@ constexpr void setUV4(P* p, U0 u0, V0 v0, U1 u1, V1 v1, U2 u2, V2 v2, U3 u3,
   detail::Store(p->v3, v3);
 }
 
-// decomp: getTPage (libgpu.h): texture mode, blend rate, then the page's
-// x / 64 in bits 0-3 and y / 256 in bits 4 and 11.
+// decomp: getTPage (include/psx/libgpu.h:259): texture mode, blend rate, then
+// the page's x / 64 in bits 0-3 and y / 256 in bits 4 and 11.
 template <class Tp, class Abr, class X, class Y>
 constexpr auto getTPage(Tp tp, Abr abr, X x, Y y) {
   return ((tp & 0x3) << 7) | ((abr & 0x3) << 5) | ((y & 0x100) >> 4) |
          ((x & 0x3FF) >> 6) | ((y & 0x200) << 2);
 }
 
-// decomp: getClut (libgpu.h): y in bits 6 and up, x / 16 in bits 0-5.
+// decomp: getClut (include/psx/libgpu.h:263): y in bits 6 and up, x / 16 in
+// bits 0-5.
 template <class X, class Y>
 constexpr auto getClut(X x, Y y) {
   return (y << 6) | ((x >> 4) & 0x3F);
 }
 
-// decomp: setTPage (libgpu.h)
+// decomp: setTPage (include/psx/libgpu.h:110)
 template <class P, class Tp, class Abr, class X, class Y>
 constexpr void setTPage(P* p, Tp tp, Abr abr, X x, Y y) {
   detail::Store(p->tpage, getTPage(tp, abr, x, y));
 }
 
-// decomp: setClut (libgpu.h)
+// decomp: setClut (include/psx/libgpu.h:113)
 template <class P, class X, class Y>
 constexpr void setClut(P* p, X x, Y y) {
   detail::Store(p->clut, getClut(x, y));
 }
 
-// decomp: _get_mode (libgpu.h): the E1 draw-mode command word.
+// decomp: _get_mode (include/psx/libgpu.h:275): the E1 draw-mode command word.
 template <class Dfe, class Dtd, class TPage>
 constexpr auto _get_mode(Dfe dfe, Dtd dtd, TPage tpage) {
   return 0xE1000000u | (dtd ? 0x200 : 0) | (dfe ? 0x400 : 0) | (tpage & 0x9FF);
@@ -452,69 +454,70 @@ inline std::uint32_t GpuLinkOf(T x) {
   }
 }
 
-// decomp: setlen (libgpu.h)
+// decomp: setlen (include/psx/libgpu.h:236)
 template <class P, class L>
 void setlen(P* p, L len) {
   reinterpret_cast<P_TAG*>(p)->len = static_cast<std::uint8_t>(len);
 }
 
-// decomp: setaddr (libgpu.h): takes a packet pointer or a copied link word.
+// decomp: setaddr (include/psx/libgpu.h:237): takes a packet pointer or a
+// copied link word.
 template <class P, class A>
 void setaddr(P* p, A addr) {
   reinterpret_cast<P_TAG*>(p)->addr = GpuLinkOf(addr);
 }
 
-// decomp: setcode (libgpu.h)
+// decomp: setcode (include/psx/libgpu.h:238)
 template <class P, class C>
 void setcode(P* p, C code) {
   reinterpret_cast<P_TAG*>(p)->code = static_cast<std::uint8_t>(code);
 }
 
-// decomp: getcode (libgpu.h)
+// decomp: getcode (include/psx/libgpu.h:241)
 template <class P>
 std::uint8_t getcode(const P* p) {
   return reinterpret_cast<const P_TAG*>(p)->code;
 }
 
-// decomp: getaddr (libgpu.h)
+// decomp: getaddr (include/psx/libgpu.h:242)
 template <class P>
 std::uint32_t getaddr(const P* p) {
   return static_cast<std::uint32_t>(reinterpret_cast<const P_TAG*>(p)->addr);
 }
 
-// decomp: nextPrim (libgpu.h)
+// decomp: nextPrim (include/psx/libgpu.h:244)
 template <class P>
 void* nextPrim(const P* p) {
   return GpuPointer(getaddr(p));
 }
 
-// decomp: isendprim (libgpu.h)
+// decomp: isendprim (include/psx/libgpu.h:245)
 template <class P>
 bool isendprim(const P* p) {
   return getaddr(p) == kGpuLinkEnd;
 }
 
-// decomp: addPrim (libgpu.h): `p` takes the table entry's link, then the
-// entry links to `p`.
+// decomp: addPrim (include/psx/libgpu.h:247): `p` takes the table entry's link,
+// then the entry links to `p`.
 template <class O, class P>
 void addPrim(O* ot, P* p) {
   setaddr(p, getaddr(ot));
   setaddr(ot, p);
 }
 
-// decomp: catPrim (libgpu.h)
+// decomp: catPrim (include/psx/libgpu.h:250)
 template <class P0, class P1>
 void catPrim(P0* p0, P1* p1) {
   setaddr(p0, p1);
 }
 
-// decomp: termPrim (libgpu.h)
+// decomp: termPrim (include/psx/libgpu.h:251)
 template <class P>
 void termPrim(P* p) {
   reinterpret_cast<P_TAG*>(p)->addr = kGpuLinkEnd;
 }
 
-// decomp: setSemiTrans (libgpu.h)
+// decomp: setSemiTrans (include/psx/libgpu.h:253)
 template <class P, class Abe>
 void setSemiTrans(P* p, Abe abe) {
   if (abe) {
@@ -524,7 +527,7 @@ void setSemiTrans(P* p, Abe abe) {
   }
 }
 
-// decomp: setShadeTex (libgpu.h)
+// decomp: setShadeTex (include/psx/libgpu.h:256)
 template <class P, class Tge>
 void setShadeTex(P* p, Tge tge) {
   if (tge) {
@@ -534,85 +537,85 @@ void setShadeTex(P* p, Tge tge) {
   }
 }
 
-// decomp: setPolyF3 (libgpu.h)
+// decomp: setPolyF3 (include/psx/libgpu.h:316)
 template <class P>
 void setPolyF3(P* p) {
   setlen(p, 4);
   setcode(p, 0x20);
 }
 
-// decomp: setPolyF4 (libgpu.h)
+// decomp: setPolyF4 (include/psx/libgpu.h:320)
 template <class P>
 void setPolyF4(P* p) {
   setlen(p, 5);
   setcode(p, 0x28);
 }
 
-// decomp: setPolyFT4 (libgpu.h)
+// decomp: setPolyFT4 (include/psx/libgpu.h:321)
 template <class P>
 void setPolyFT4(P* p) {
   setlen(p, 9);
   setcode(p, 0x2C);
 }
 
-// decomp: setPolyG3 (libgpu.h)
+// decomp: setPolyG3 (include/psx/libgpu.h:318)
 template <class P>
 void setPolyG3(P* p) {
   setlen(p, 6);
   setcode(p, 0x30);
 }
 
-// decomp: setPolyG4 (libgpu.h)
+// decomp: setPolyG4 (include/psx/libgpu.h:322)
 template <class P>
 void setPolyG4(P* p) {
   setlen(p, 8);
   setcode(p, 0x38);
 }
 
-// decomp: setPolyGT4 (libgpu.h)
+// decomp: setPolyGT4 (include/psx/libgpu.h:323)
 template <class P>
 void setPolyGT4(P* p) {
   setlen(p, 12);
   setcode(p, 0x3C);
 }
 
-// decomp: setSprt (libgpu.h)
+// decomp: setSprt (include/psx/libgpu.h:327)
 template <class P>
 void setSprt(P* p) {
   setlen(p, 4);
   setcode(p, 0x64);
 }
 
-// decomp: setSprt8 (libgpu.h)
+// decomp: setSprt8 (include/psx/libgpu.h:325)
 template <class P>
 void setSprt8(P* p) {
   setlen(p, 3);
   setcode(p, 0x74);
 }
 
-// decomp: setTile (libgpu.h)
+// decomp: setTile (include/psx/libgpu.h:332)
 template <class P>
 void setTile(P* p) {
   setlen(p, 3);
   setcode(p, 0x60);
 }
 
-// decomp: setLineF2 (libgpu.h)
+// decomp: setLineF2 (include/psx/libgpu.h:333)
 template <class P>
 void setLineF2(P* p) {
   setlen(p, 3);
   setcode(p, 0x40);
 }
 
-// decomp: setLineG2 (libgpu.h)
+// decomp: setLineG2 (include/psx/libgpu.h:334)
 template <class P>
 void setLineG2(P* p) {
   setlen(p, 4);
   setcode(p, 0x50);
 }
 
-// decomp: setLineG4 (libgpu.h): the polyline's terminator word and the unused
-// vertex pads.
+// decomp: setLineG4 (include/psx/libgpu.h:339): the polyline's terminator word
+// and the unused vertex pads.
 template <class P>
 void setLineG4(P* p) {
   setlen(p, 9);

@@ -474,7 +474,7 @@ void UpdateScreenFade(const WeatherFrame& frame, WeatherPoolState& state) {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_8008F440 (146C.c:17758).
+// decomp: BATTLE.PRG func_8008F440 (src/BATTLE/BATTLE.PRG/146C.c:17635).
 bool DrawRainParticles(WeatherPoolHost& pool, WeatherRenderHost& render,
                        const WeatherFrame& frame,
                        std::span<WeatherParticle> particles, std::int16_t count,
@@ -492,7 +492,7 @@ bool DrawRainParticles(WeatherPoolHost& pool, WeatherRenderHost& render,
   return Fits(particles, count);
 }
 
-// decomp: BATTLE.PRG func_8008FA14 (146C.c:17878).
+// decomp: BATTLE.PRG func_8008FA14 (src/BATTLE/BATTLE.PRG/146C.c:17755).
 WeatherParticle ResetRisingEmberParticle(WeatherPoolHost& pool,
                                          WeatherParticle particle,
                                          const Field::WeatherArea& area) {
@@ -508,7 +508,7 @@ WeatherParticle ResetRisingEmberParticle(WeatherPoolHost& pool,
   return particle;
 }
 
-// decomp: BATTLE.PRG func_8008F9A4 (146C.c:17864).
+// decomp: BATTLE.PRG func_8008F9A4 (src/BATTLE/BATTLE.PRG/146C.c:17741).
 bool InitializeRisingEmberParticles(WeatherPoolHost& pool,
                                     WeatherPoolState& state,
                                     std::span<WeatherParticle> particles,
@@ -523,7 +523,7 @@ bool InitializeRisingEmberParticles(WeatherPoolHost& pool,
   return Fits(particles, count);
 }
 
-// decomp: BATTLE.PRG func_8008FAC8 (146C.c:17889).
+// decomp: BATTLE.PRG func_8008FAC8 (src/BATTLE/BATTLE.PRG/146C.c:17766).
 bool DrawRisingEmberParticles(WeatherPoolHost& pool, WeatherRenderHost& render,
                               const WeatherFrame& frame,
                               std::span<WeatherParticle> particles,
@@ -566,7 +566,7 @@ bool DrawRisingEmberParticles(WeatherPoolHost& pool, WeatherRenderHost& render,
   return Fits(particles, count);
 }
 
-// decomp: BATTLE.PRG func_8008FDC4 (146C.c:17938).
+// decomp: BATTLE.PRG func_8008FDC4 (src/BATTLE/BATTLE.PRG/146C.c:17938).
 bool DrawSnowParticles(WeatherPoolHost& pool, WeatherRenderHost& render,
                        const WeatherFrame& frame,
                        std::span<WeatherParticle> particles, std::int16_t count,
@@ -584,7 +584,7 @@ bool DrawSnowParticles(WeatherPoolHost& pool, WeatherRenderHost& render,
   return Fits(particles, count);
 }
 
-// decomp: BATTLE.PRG func_80090434 (146C.c:18072).
+// decomp: BATTLE.PRG func_80090434 (src/BATTLE/BATTLE.PRG/146C.c:18072).
 bool DrawScreenWeatherParticles(WeatherPoolHost& pool,
                                 WeatherRenderHost& render,
                                 const WeatherFrame& frame,

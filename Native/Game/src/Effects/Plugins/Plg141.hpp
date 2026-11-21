@@ -4,6 +4,7 @@
 #include <cstdint>
 
 namespace VS::Effects::Plg141 {
-// decomp: D_800FBA00 (PLG141.BIN/E0.c:5; trailEffect.h:70)
+// decomp: vs_effect_swallowSlash_0_origin_state (src/EFFECT/trailEffect.h:70;
+// was D_800FBA00; src/EFFECT/trailEffect.h:70)
 extern std::int32_t trailEmissionCounter;
 }  // namespace VS::Effects::Plg141

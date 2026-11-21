@@ -244,7 +244,7 @@ class LiveMapNavigationHost final : public MapNavigationHost {
 };
 }  // namespace
 
-// decomp: MENU5.PRG func_8010467C (4D8.c:1048).
+// decomp: MENU5.PRG func_8010467C (src/MENU/MENU5.PRG/4D8.c:1054).
 void LiveMarkAllRoomsVisited(int* scene) {
   constexpr std::string_view kCall = "MarkAllRoomsVisited";
   const auto live = LiveSceneOf(kCall, scene);
@@ -257,7 +257,8 @@ void LiveMarkAllRoomsVisited(int* scene) {
   }
 }
 
-// decomp: MENU5.PRG _snapMapToRoom (4D8.c:1511).
+// decomp: MENU5.PRG snapMapToRoom (src/MENU/MENU5.PRG/4D8.c:1516; was
+// _snapMapToRoom).
 void LiveCenterOnRoom(Field::MapScene* scene, int room_id) {
   constexpr std::string_view kCall = "CenterOnRoom";
   const auto live = LiveSceneOf(kCall, scene);
@@ -278,7 +279,8 @@ void LiveCenterOnRoom(Field::MapScene* scene, int room_id) {
   SetCenterPoint(center);
 }
 
-// decomp: MENU5.PRG _setCenterpoint (4D8.c:1578).
+// decomp: MENU5.PRG setCenterpoint (src/MENU/MENU5.PRG/4D8.c:1583; was
+// _setCenterpoint).
 void LiveSetRoomCenterTarget(Field::MapScene* scene, int room_id) {
   constexpr std::string_view kCall = "SetRoomCenterTarget";
   const auto live = LiveSceneOf(kCall, scene);
@@ -293,7 +295,8 @@ void LiveSetRoomCenterTarget(Field::MapScene* scene, int room_id) {
       RoomCenterOf(vertices->Rooms()[static_cast<std::size_t>(room_id)]));
 }
 
-// decomp: MENU5.PRG _smoothMapToCenterpoint (4D8.c:1629).
+// decomp: MENU5.PRG smoothMapToCenterpoint (src/MENU/MENU5.PRG/4D8.c:1634; was
+// _smoothMapToCenterpoint).
 void LiveAnimateCentering(Field::MapScene* scene) {
   constexpr std::string_view kCall = "AnimateCentering";
   MapPoint center = CenterPoint();
@@ -307,7 +310,8 @@ void LiveAnimateCentering(Field::MapScene* scene) {
   SetCenterPoint(center);
 }
 
-// decomp: MENU5.PRG _scaleRoomVertices (4D8.c:1728).
+// decomp: MENU5.PRG scaleRoomVertices (src/MENU/MENU5.PRG/4D8.c:1733; was
+// _scaleRoomVertices).
 void LiveScaleRoomVertices(Field::MapScene* scene, int factor) {
   constexpr std::string_view kCall = "ScaleRoomVertices";
   const auto live = LiveSceneOf(kCall, scene);
@@ -318,7 +322,8 @@ void LiveScaleRoomVertices(Field::MapScene* scene, int factor) {
   vertices->Store();
 }
 
-// decomp: MENU5.PRG _getCurrentRoomIndex (4D8.c:1834).
+// decomp: MENU5.PRG getCurrentRoomIndex (src/MENU/MENU5.PRG/4D8.c:1839; was
+// _getCurrentRoomIndex).
 int LiveInitialRoomIndex(Field::MapScene* scene) {
   constexpr std::string_view kCall = "InitialRoomIndex";
   const auto live = LiveSceneOf(kCall, scene);
@@ -338,7 +343,8 @@ int LiveInitialRoomIndex(Field::MapScene* scene) {
   return initial.selected;
 }
 
-// decomp: MENU5.PRG _updateRoomIndex (4D8.c:1862).
+// decomp: MENU5.PRG updateRoomIndex (src/MENU/MENU5.PRG/4D8.c:1867; was
+// _updateRoomIndex).
 void LiveSelectAdjacentVisitedRoom(int search_forward) {
   constexpr std::string_view kCall = "SelectAdjacentVisitedRoom";
   const auto live = LiveSceneOf(kCall, VS::Battle::sceneBuffer);

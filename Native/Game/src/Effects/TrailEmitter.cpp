@@ -236,35 +236,47 @@ SampledTransparency<Samples> SampleTransparency(
 }
 }  // namespace
 
-// decomp: EFFECT VS_TRAIL_ORIGIN_FUNCTION (src/EFFECT/trails5.h:27).
+// decomp: EFFECT VS_TRAIL_ORIGIN_FUNCTION (src/EFFECT/trailEffect.h:72).
 // decomp: PLG074 func_800FB414 (src/EFFECT/trails5.h:27).
-// decomp: PLG057.BIN func_800FD894 (src/EFFECT/PLG057.BIN/2D0.c:24).
-// decomp: PLG073.BIN func_800FB414 (src/EFFECT/PLG073.BIN/F8.c:10).
-// decomp: PLG086.BIN func_800FC270 (src/EFFECT/PLG086.BIN/F8.c:19).
-// decomp: PLG087.BIN func_800FC048 (src/EFFECT/PLG087.BIN/1F0.c:21).
-// decomp: PLG128.BIN func_800FE3D0 (src/EFFECT/PLG128.BIN/F8.c:252).
-// decomp: PLG134.BIN func_800F98E0 (src/EFFECT/PLG134.BIN/E0.c:8).
-// decomp: PLG137.BIN func_800FA404 (src/EFFECT/PLG137.BIN/F8.c:7).
-// decomp: PLG141.BIN func_800F98E0 (src/EFFECT/PLG141.BIN/E0.c:2).
-// decomp: PLG146.BIN func_800FD75C (src/EFFECT/PLG146.BIN/1D8.c:39).
-// decomp: PLG148.BIN func_800F98E0 (src/EFFECT/PLG148.BIN/E0.c:2).
-// decomp: PLG242.BIN func_800FB340 (src/EFFECT/PLG242.BIN/F8.c:9).
-// decomp: PLG255.BIN func_800F99D8 (src/EFFECT/PLG255.BIN/1D8.c:2).
-// decomp: PLG265.BIN func_800FBFD4 (src/EFFECT/PLG265.BIN/2E8.c:30).
-// decomp: PLG266.BIN func_800FCD80 (src/EFFECT/PLG266.BIN/2E8.c:38).
-// decomp: PLG291.BIN func_800F98F8 (src/EFFECT/PLG291.BIN/F8.c:8).
-// decomp: EFFECT VS_TRAIL_ORIGIN_FUNCTION (src/EFFECT/trails9.h:27).
-// decomp: PLG049.BIN func_800F98E0 (src/EFFECT/PLG049.BIN/E0.c:1).
-// decomp: PLG050.BIN func_800FA504 (src/EFFECT/PLG050.BIN/E0.c:6).
-// decomp: PLG057.BIN func_800FB774 (src/EFFECT/PLG057.BIN/2D0.c:14).
-// decomp: PLG069.BIN func_800FA3EC (src/EFFECT/PLG069.BIN/E0.c:7).
-// decomp: PLG135.BIN func_800FA84C (src/EFFECT/PLG135.BIN/E0.c:12).
-// decomp: PLG161.BIN func_800FB3D4 (src/EFFECT/PLG161.BIN/F8.c:10).
-// decomp: PLG165.BIN func_800F98F8 (src/EFFECT/PLG165.BIN/F8.c:8).
-// decomp: PLG167.BIN func_800FB704 (src/EFFECT/PLG167.BIN/E0.c:15).
-// decomp: PLG168.BIN func_800F99F0 (src/EFFECT/PLG168.BIN/1F0.c:2).
-// decomp: PLG169.BIN func_800F98E0 (src/EFFECT/PLG169.BIN/E0.c:8).
-// decomp: PLG232.BIN func_800F98E0 (src/EFFECT/PLG232.BIN/E0.c:2).
+// decomp: PLG057.BIN vs_effect_thunderBurstLv1_2_origin
+// (src/EFFECT/trailEffect.h:72; was func_800FD894). decomp: PLG073.BIN
+// vs_effect_radialSurgeLv1_2_origin (src/EFFECT/trailEffect.h:72; was
+// func_800FB414). decomp: PLG086.BIN vs_effect_judgment_3_origin
+// (src/EFFECT/trailEffect.h:72; was func_800FC270). decomp: PLG087.BIN
+// vs_effect_apocalypse_3_origin (src/EFFECT/trailEffect.h:72; was
+// func_800FC048). decomp: PLG128.BIN vs_effect_bloodySin_6_origin
+// (src/EFFECT/trailEffect.h:72; was func_800FE3D0). decomp: PLG134.BIN
+// vs_effect_wyrmScorn_0_origin (src/EFFECT/trailEffect.h:72; was
+// func_800F98E0). decomp: PLG137.BIN vs_effect_cherryRonde_1_origin
+// (src/EFFECT/trailEffect.h:72; was func_800FA404). decomp: PLG141.BIN
+// vs_effect_swallowSlash_0_origin (src/EFFECT/trailEffect.h:72; was
+// func_800F98E0). decomp: PLG146.BIN vs_effect_blackNebula_4_origin
+// (src/EFFECT/trailEffect.h:72; was func_800FD75C). decomp: PLG148.BIN
+// vs_effect_accursedUmbra_0_origin (src/EFFECT/trailEffect.h:72; was
+// func_800F98E0). decomp: PLG242.BIN vs_effect_plg242_2_origin
+// (src/EFFECT/trailEffect.h:72; was func_800FB340). decomp: PLG255.BIN
+// vs_effect_plg255_0_origin (src/EFFECT/trailEffect.h:72; was func_800F99D8).
+// decomp: PLG265.BIN vs_effect_plg265_2_origin (src/EFFECT/trailEffect.h:72;
+// was func_800FBFD4). decomp: PLG266.BIN vs_effect_plg266_2_origin
+// (src/EFFECT/trailEffect.h:72; was func_800FCD80). decomp: PLG291.BIN
+// vs_effect_plg291_0_origin (src/EFFECT/trailEffect.h:72; was func_800F98F8).
+// decomp: EFFECT VS_TRAIL_ORIGIN_FUNCTION (src/EFFECT/trailEffect.h:72).
+// decomp: PLG049.BIN vs_spiritSurge_0_origin (src/EFFECT/trailEffect.h:72; was
+// func_800F98E0). decomp: PLG050.BIN vs_effect_darkChant_1_origin
+// (src/EFFECT/trailEffect.h:72; was func_800FA504). decomp: PLG057.BIN
+// vs_effect_thunderBurstLv1_1_origin (src/EFFECT/trailEffect.h:72; was
+// func_800FB774). decomp: PLG069.BIN vs_effect_avalancheLv1_1_origin
+// (src/EFFECT/trailEffect.h:72; was func_800FA3EC). decomp: PLG135.BIN
+// vs_effect_rendingGale_1_origin (src/EFFECT/trailEffect.h:72; was
+// func_800FA84C). decomp: PLG161.BIN vs_effect_gigaTempest_2_origin
+// (src/EFFECT/trailEffect.h:72; was func_800FB3D4). decomp: PLG165.BIN
+// vs_effect_deathWail_0_origin (src/EFFECT/trailEffect.h:72; was
+// func_800F98F8). decomp: PLG167.BIN vs_effect_lotusPalm_2_origin
+// (src/EFFECT/trailEffect.h:72; was func_800FB704). decomp: PLG168.BIN
+// vs_effect_vertigo_0_origin (src/EFFECT/trailEffect.h:72; was func_800F99F0).
+// decomp: PLG169.BIN vs_effect_vermillionAura_0_origin
+// (src/EFFECT/trailEffect.h:72; was func_800F98E0). decomp: PLG232.BIN
+// vs_effect_plg232_0_origin (src/EFFECT/trailEffect.h:72; was func_800F98E0).
 // The nine-sample origin stage is the five-sample one over a nine-sample
 // state; only the trail record type differs.
 void GenerateTrailOrigins(const TrailOriginRequest& request,
@@ -312,13 +324,15 @@ std::optional<std::uint8_t> TrailCountFor(std::int16_t interval,
       std::min<std::size_t>(static_cast<std::size_t>(interval), limit));
 }
 
-// decomp: trails5.h:710-722 (setup samples of the transparency curve).
+// decomp: src/EFFECT/trailEffect.h:713-846 (setup samples of the transparency
+// curve).
 SampledTrailTransparency SampleTrailTransparency(
     std::span<const std::uint8_t> curve) {
   return SampleTransparency<kTrailTransparencySamples>(curve);
 }
 
-// decomp: trails9.h:716-734 (setup samples of the transparency curve).
+// decomp: src/EFFECT/trailEffect.h:713-846 (setup samples of the transparency
+// curve).
 SampledTransparency<kTrailNineTransparencySamples> SampleTrailNineTransparency(
     std::span<const std::uint8_t> curve) {
   return SampleTransparency<kTrailNineTransparencySamples>(curve);
@@ -329,38 +343,46 @@ TrailVector TrailEventPosition(TrailVector point) {
           WrapMul(point.z, kOne)};
 }
 
-// decomp: EFFECT VS_TRAIL_DISPATCH_FUNCTION (src/EFFECT/trails5.h:677).
+// decomp: EFFECT VS_TRAIL_DISPATCH_FUNCTION (src/EFFECT/trailEffect.h:713).
 // decomp: PLG074 func_800FCFEC (src/EFFECT/trails5.h:677).
-// decomp: PLG057.BIN func_800FF46C (src/EFFECT/PLG057.BIN/2D0.c:31).
-// decomp: PLG073.BIN func_800FCFEC (src/EFFECT/PLG073.BIN/F8.c:17).
-// decomp: PLG086.BIN func_800FDE48 (src/EFFECT/PLG086.BIN/F8.c:26).
-// decomp: PLG087.BIN func_800FDC20 (src/EFFECT/PLG087.BIN/1F0.c:28).
-// decomp: PLG128.BIN func_800FFFA8 (src/EFFECT/PLG128.BIN/F8.c:259).
-// decomp: PLG134.BIN func_800FB4B8 (src/EFFECT/PLG134.BIN/E0.c:15).
-// decomp: PLG137.BIN func_800FBFDC (src/EFFECT/PLG137.BIN/F8.c:14).
-// decomp: PLG141.BIN func_800FB4B8 (src/EFFECT/PLG141.BIN/E0.c:9).
-// decomp: PLG146.BIN func_800FF334 (src/EFFECT/PLG146.BIN/1D8.c:46).
-// decomp: PLG148.BIN func_800FB4B8 (src/EFFECT/PLG148.BIN/E0.c:9).
-// decomp: PLG242.BIN func_800FCF18 (src/EFFECT/PLG242.BIN/F8.c:16).
-// decomp: PLG255.BIN func_800FB5B0 (src/EFFECT/PLG255.BIN/1D8.c:9).
-// decomp: PLG265.BIN func_800FDBAC (src/EFFECT/PLG265.BIN/2E8.c:37).
-// decomp: PLG266.BIN func_800FE958 (src/EFFECT/PLG266.BIN/2E8.c:45).
-// decomp: PLG291.BIN func_800FB4D0 (src/EFFECT/PLG291.BIN/F8.c:15).
-// decomp: EFFECT VS_TRAIL_DISPATCH_FUNCTION (src/EFFECT/trails9.h:685).
-// decomp: PLG049.BIN vs_spiritSurge_renderTrails
-// (src/EFFECT/PLG049.BIN/E0.c:7). decomp: PLG050.BIN func_800FC0E4
-// (src/EFFECT/PLG050.BIN/E0.c:13). decomp: PLG057.BIN func_800FD354
-// (src/EFFECT/PLG057.BIN/2D0.c:21). decomp: PLG069.BIN func_800FBFCC
-// (src/EFFECT/PLG069.BIN/E0.c:14). decomp: PLG135.BIN func_800FC42C
-// (src/EFFECT/PLG135.BIN/E0.c:19). decomp: PLG161.BIN func_800FCFB4
-// (src/EFFECT/PLG161.BIN/F8.c:17). decomp: PLG165.BIN func_800FB4D8
-// (src/EFFECT/PLG165.BIN/F8.c:15). decomp: PLG167.BIN func_800FD2E4
-// (src/EFFECT/PLG167.BIN/E0.c:22). decomp: PLG168.BIN func_800FB5D0
-// (src/EFFECT/PLG168.BIN/1F0.c:9). decomp: PLG169.BIN func_800FB4C0
-// (src/EFFECT/PLG169.BIN/E0.c:15). decomp: PLG232.BIN func_800FB4C0
-// (src/EFFECT/PLG232.BIN/E0.c:9). The nine-sample lifecycle differs only in
-// what the host allocates: at most eight trails and nine transparency samples
-// (TrailEmitterLive.cpp).
+// decomp: PLG057.BIN vs_effect_thunderBurstLv1_2 (src/EFFECT/trailEffect.h:713;
+// was func_800FF46C). decomp: PLG073.BIN vs_effect_radialSurgeLv1_2
+// (src/EFFECT/trailEffect.h:713; was func_800FCFEC). decomp: PLG086.BIN
+// vs_effect_judgment_3 (src/EFFECT/trailEffect.h:713; was func_800FDE48).
+// decomp: PLG087.BIN vs_effect_apocalypse_3 (src/EFFECT/trailEffect.h:713; was
+// func_800FDC20). decomp: PLG128.BIN vs_effect_bloodySin_6
+// (src/EFFECT/trailEffect.h:713; was func_800FFFA8). decomp: PLG134.BIN
+// vs_effect_wyrmScorn_0 (src/EFFECT/trailEffect.h:713; was func_800FB4B8).
+// decomp: PLG137.BIN vs_effect_cherryRonde_1 (src/EFFECT/trailEffect.h:713; was
+// func_800FBFDC). decomp: PLG141.BIN vs_effect_swallowSlash_0
+// (src/EFFECT/trailEffect.h:713; was func_800FB4B8). decomp: PLG146.BIN
+// vs_effect_blackNebula_4 (src/EFFECT/trailEffect.h:713; was func_800FF334).
+// decomp: PLG148.BIN vs_effect_accursedUmbra_0 (src/EFFECT/trailEffect.h:713;
+// was func_800FB4B8). decomp: PLG242.BIN vs_effect_plg242_2
+// (src/EFFECT/trailEffect.h:713; was func_800FCF18). decomp: PLG255.BIN
+// vs_effect_plg255_0 (src/EFFECT/trailEffect.h:713; was func_800FB5B0). decomp:
+// PLG265.BIN vs_effect_plg265_2 (src/EFFECT/trailEffect.h:713; was
+// func_800FDBAC). decomp: PLG266.BIN vs_effect_plg266_2
+// (src/EFFECT/trailEffect.h:713; was func_800FE958). decomp: PLG291.BIN
+// vs_effect_plg291_0 (src/EFFECT/trailEffect.h:713; was func_800FB4D0). decomp:
+// EFFECT VS_TRAIL_DISPATCH_FUNCTION (src/EFFECT/trailEffect.h:713). decomp:
+// PLG049.BIN vs_spiritSurge_0 (src/EFFECT/trailEffect.h:713; was
+// vs_spiritSurge_renderTrails). decomp: PLG050.BIN vs_effect_darkChant_1
+// (src/EFFECT/trailEffect.h:713; was func_800FC0E4). decomp: PLG057.BIN
+// vs_effect_thunderBurstLv1_1 (src/EFFECT/trailEffect.h:713; was
+// func_800FD354). decomp: PLG069.BIN vs_effect_avalancheLv1_1
+// (src/EFFECT/trailEffect.h:713; was func_800FBFCC). decomp: PLG135.BIN
+// vs_effect_rendingGale_1 (src/EFFECT/trailEffect.h:713; was func_800FC42C).
+// decomp: PLG161.BIN vs_effect_gigaTempest_2 (src/EFFECT/trailEffect.h:713; was
+// func_800FCFB4). decomp: PLG165.BIN vs_effect_deathWail_0
+// (src/EFFECT/trailEffect.h:713; was func_800FB4D8). decomp: PLG167.BIN
+// vs_effect_lotusPalm_2 (src/EFFECT/trailEffect.h:713; was func_800FD2E4).
+// decomp: PLG168.BIN vs_effect_vertigo_0 (src/EFFECT/trailEffect.h:713; was
+// func_800FB5D0). decomp: PLG169.BIN vs_effect_vermillionAura_0
+// (src/EFFECT/trailEffect.h:713; was func_800FB4C0). decomp: PLG232.BIN
+// vs_effect_plg232_0 (src/EFFECT/trailEffect.h:713; was func_800FB4C0). The
+// nine-sample lifecycle differs only in what the host allocates: at most eight
+// trails and nine transparency samples (TrailEmitterLive.cpp).
 bool UpdateTrailEmitter(TrailEmitterCommand command, std::int32_t packed,
                         TrailEmitterHost& host) {
   switch (command) {

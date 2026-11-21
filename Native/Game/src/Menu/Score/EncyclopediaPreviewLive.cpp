@@ -416,24 +416,24 @@ int LoadLiveEnemyPreview(int zud_id) {
   return LoadEnemyPreview(Host(), liveState, zud_id);
 }
 
-// decomp: MENU9.PRG vs_menu9_freeZud (F02837, src/MENU/MENU9.PRG/57BC.c:42)
+// decomp: MENU9.PRG vs_menu9_freeZud (F02837, src/MENU/MENU9.PRG/57BC.c:44)
 void FreeLiveEnemyPreview() { FreeEnemyPreview(Host(), liveState); }
 
-// decomp: MENU9.PRG func_801080C8 (F02838, src/MENU/MENU9.PRG/57BC.c:49)
+// decomp: MENU9.PRG func_801080C8 (F02838, src/MENU/MENU9.PRG/57BC.c:53)
 void InitializeLiveAshleyPreviewPose() { InitializeAshleyPreviewPose(Host()); }
 
 // decomp: MENU9.PRG vs_menu9_loadZudFile (F02839,
-// src/MENU/MENU9.PRG/592C.c:171)
+// src/MENU/MENU9.PRG/592C.c:172)
 bool QueueLiveEnemyModelRead(int zud_id) {
   return QueueEnemyModelRead(Host(), liveState, zud_id);
 }
 
 // decomp: MENU9.PRG vs_menu9_parseZudFile (F02840,
-// src/MENU/MENU9.PRG/592C.c:203)
+// src/MENU/MENU9.PRG/592C.c:206)
 int LoadLiveEnemyModelParts() { return LoadEnemyModelParts(Host(), liveState); }
 
 // decomp: MENU9.PRG vs_menu9_freeZudFile (F02841,
-// src/MENU/MENU9.PRG/592C.c:295)
+// src/MENU/MENU9.PRG/592C.c:300)
 void FreeLiveEnemyModelBuffer() { FreeEnemyModelBuffer(Host(), liveState); }
 
 bool CleanupLiveEnemyPreviewOwnedState() {

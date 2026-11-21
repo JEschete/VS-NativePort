@@ -37,8 +37,8 @@ inline constexpr std::size_t kTextureLoadClutOffset = 0x34;
 static_assert(offsetof(LiveTextureLoadList, is_clut) == kTextureLoadClutOffset);
 }  // namespace layout
 
-// decomp: D_800F5630 (BATTLE/BATTLE.PRG 6F014.c:612): the texture asset
-// being loaded.
+// decomp: D_800F5630 (BATTLE/BATTLE.PRG
+// src/BATTLE/BATTLE.PRG/6E4CCShared.h:514): the texture asset being loaded.
 extern int textureLoadIndex;
 // decomp: D_800F5638 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:515): the
 // effect's CLUT and texture page files.
@@ -46,18 +46,21 @@ extern LiveTextureLoadList textureLoads;
 // decomp: vs_battle_pfileBuf (BATTLE/BATTLE.PRG 0x800F567C): the loaded
 // package (high heap).
 extern void* packageBuffer;
-// decomp: D_800F5680 (BATTLE/BATTLE.PRG 6F014.c:612): the texture load
-// state (0 idle, 1 loading, 2 loaded).
+// decomp: D_800F5680 (BATTLE/BATTLE.PRG
+// src/BATTLE/BATTLE.PRG/6E4CCShared.h:516): the texture load state (0 idle, 1
+// loading, 2 loaded).
 extern std::uint32_t textureLoadState;
-// decomp: D_800F5684 (BATTLE/BATTLE.PRG 6F014.c:570): nonzero once the
-// purge overlay's workspace was acquired.
+// decomp: D_800F5684 (BATTLE/BATTLE.PRG
+// src/BATTLE/BATTLE.PRG/6E4CCPrivate.h:116): nonzero once the purge overlay's
+// workspace was acquired.
 extern int purgeOverlayLoaded;
 // decomp: vs_battle_pFileLoadContext
 // (src/BATTLE/BATTLE.PRG/battleEffect.h:421): the package file, in sectors
 // past E000.P.
 extern EffectFileExtent packageFile;
-// decomp: D_800F568C (BATTLE/BATTLE.PRG 6F014.c:549): the disc request in
-// flight, or null.
+// decomp: D_800F568C (BATTLE/BATTLE.PRG
+// src/BATTLE/BATTLE.PRG/6E4CCShared.h:517): the disc request in flight, or
+// null.
 extern VS::Content::DiscQueueSlot* resourceReadSlot;
 // decomp: _plgLoadState (BATTLE/BATTLE.PRG 0x800F5690): the plugin load
 // state (0 idle, 1 acquire the overlay, 2 loading, 3 loaded).
@@ -65,13 +68,15 @@ extern std::uint32_t pluginLoadState;
 // decomp: plgLoadContext (_plgLoadContext@
 // src/BATTLE/BATTLE.PRG/6E4CCShared.h:538): the plugin file.
 extern EffectFileExtent pluginFile;
-// decomp: D_800F56A0 (BATTLE/BATTLE.PRG 6F014.c:612): the texture staging
-// buffer (high heap).
+// decomp: D_800F56A0 (BATTLE/BATTLE.PRG
+// src/BATTLE/BATTLE.PRG/6E4CCShared.h:518): the texture staging buffer (high
+// heap).
 extern std::uint32_t* textureLoadBuffer;
 // decomp: _plgEntryPointCount (BATTLE/BATTLE.PRG 0x800F56A4): the plugin's
 // renderers.
 extern int pluginEntryPointCount;
-// decomp: D_800F5874 (BATTLE/BATTLE.PRG 6F014.c:592): bit n set while
-// texture page n holds an effect texture.
+// decomp: D_800F5874 (BATTLE/BATTLE.PRG
+// src/BATTLE/BATTLE.PRG/6E4CCShared.h:521): bit n set while texture page n
+// holds an effect texture.
 extern int loadedTextureSlots;
 }  // namespace VS::Effects

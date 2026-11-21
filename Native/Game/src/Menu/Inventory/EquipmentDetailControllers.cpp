@@ -174,28 +174,28 @@ std::int32_t UpdateController(EquipmentDetailState& state,
 }
 }  // namespace
 
-// decomp: _weaponStatusView (src/MENU/items1.h:98-185).
+// decomp: weaponStatusView (src/MENU/items1.h:103-190; was _weaponStatusView).
 std::int32_t UpdateWeaponDetails(EquipmentDetailState& state,
                                  EquipmentDetailWorld& world,
                                  std::optional<DetailSelection> selection) {
   return UpdateController(state, world, selection, kWeaponRules);
 }
 
-// decomp: _bladeStatusView (src/MENU/items1.h:195-265).
+// decomp: bladeStatusView (src/MENU/items1.h:200-270; was _bladeStatusView).
 std::int32_t UpdateBladeDetails(EquipmentDetailState& state,
                                 EquipmentDetailWorld& world,
                                 std::optional<DetailSelection> selection) {
   return UpdateController(state, world, selection, kBladeRules);
 }
 
-// decomp: _gripStatusView (src/MENU/items1.h:275-355).
+// decomp: gripStatusView (src/MENU/items1.h:280-360; was _gripStatusView).
 std::int32_t UpdateGripDetails(EquipmentDetailState& state,
                                EquipmentDetailWorld& world,
                                std::optional<DetailSelection> selection) {
   return UpdateController(state, world, selection, kGripRules);
 }
 
-// decomp: _shieldStatusView (src/MENU/items1.h:365-454).
+// decomp: shieldStatusView (src/MENU/items1.h:370-459; was _shieldStatusView).
 std::int32_t UpdateShieldDetails(EquipmentDetailState& state,
                                  EquipmentDetailWorld& world,
                                  std::optional<DetailSelection> selection) {

@@ -28,9 +28,9 @@ struct RoomRenderState {
   RoomTintState tint{};
 };
 
-// decomp: BATTLE.PRG func_8008A4DC (146C.c:15521)
+// decomp: BATTLE.PRG func_8008A4DC (src/BATTLE/BATTLE.PRG/146C.c:15391)
 void SetFieldRenderingEnabled(RoomRenderState& state, bool enabled);
-// decomp: BATTLE.PRG func_8008B4BC (146C.c:16010)
+// decomp: BATTLE.PRG func_8008B4BC (src/BATTLE/BATTLE.PRG/146C.c:15880)
 // Pauses or resumes the room's animations and effects.
 void SetRoomAnimationsPaused(RoomRenderState& state, bool paused);
 
@@ -41,22 +41,22 @@ struct TintColor {
   std::uint8_t blue = 0;
 };
 
-// decomp: BATTLE.PRG func_8008B430 (146C.c:15995)
+// decomp: BATTLE.PRG func_8008B430 (src/BATTLE/BATTLE.PRG/146C.c:15865)
 // A black colour at zero strength switches the tint off and keeps its last
 // parameters; any other turns it on. Each channel becomes a signed offset
 // and the strength keeps its low halfword, as the original stored them.
 void SetRoomTint(RoomTintState& tint, const TintColor& color, int strength);
-// decomp: BATTLE.PRG func_8008B4B0 (146C.c:16008)
+// decomp: BATTLE.PRG func_8008B4B0 (src/BATTLE/BATTLE.PRG/146C.c:15878)
 void ClearRoomTint(RoomTintState& tint);
 
-// decomp: BATTLE.PRG func_8008B28C (146C.c:15939)
+// decomp: BATTLE.PRG func_8008B28C (src/BATTLE/BATTLE.PRG/146C.c:15809)
 // The room animation clock after a frame: unchanged while paused, else
 // advanced by the tick speed and kept to 16 bits.
 [[nodiscard]] std::uint16_t AdvanceRoomAnimationClock(bool paused,
                                                       std::uint16_t ticks,
                                                       int tick_speed);
 
-// decomp: BATTLE.PRG func_8008B2C0 (146C.c:15946)
+// decomp: BATTLE.PRG func_8008B2C0 (src/BATTLE/BATTLE.PRG/146C.c:15816)
 // Shows or hides the room when one is loaded; false when none is.
 bool SetRoomRenderingEnabled(RoomDisplay& display, bool enabled);
 
@@ -71,7 +71,7 @@ inline constexpr int kUploadedRoomPaletteRows = 3;
 inline constexpr std::size_t kGimmickPaletteFirstColor(
     kRoomPaletteRowColors* kUploadedRoomPaletteRows);
 
-// decomp: BATTLE.PRG func_8008B2E0 (146C.c:15953)
+// decomp: BATTLE.PRG func_8008B2E0 (src/BATTLE/BATTLE.PRG/146C.c:15823)
 // Copies `colors` into palette `row` from colour `first`. The original's
 // word copy moves whole pairs, so an odd last colour is not copied. False
 // (nothing copied) when the colours would leave the palettes.
@@ -95,7 +95,7 @@ class RoomPaletteHost {
   virtual void SetGimmickPalettes(std::span<std::uint16_t> palettes) = 0;
 };
 
-// decomp: BATTLE.PRG func_8008B320 (146C.c:15958)
+// decomp: BATTLE.PRG func_8008B320 (src/BATTLE/BATTLE.PRG/146C.c:15828)
 // Uploads rows 0-2 and hands row 3 on to the gimmicks; false (nothing done)
 // when the palettes are shorter than the room's four rows.
 bool UploadRoomPalettes(std::span<std::uint16_t> palettes,
@@ -107,13 +107,13 @@ inline constexpr std::size_t kRoomPolygonTextureIdOffset = 0x1E;
 // The room loader's texture page offset (146C.c:15663 passes 11).
 inline constexpr int kRoomTextureIdOffset = 11;
 
-// decomp: BATTLE.PRG func_8008B390 (146C.c:15966)
+// decomp: BATTLE.PRG func_8008B390 (src/BATTLE/BATTLE.PRG/146C.c:15836)
 // Adds `offset` to every polygon's texture id, wrapping at 16 bits. A group
 // whose polygon block leaves the geometry is skipped and logged; the number
 // of groups rewritten is returned.
 int OffsetRoomTextureIds(std::span<std::byte> geometry, int offset);
 
-// decomp: BATTLE.PRG func_8008C40C (146C.c:16449)
+// decomp: BATTLE.PRG func_8008C40C (src/BATTLE/BATTLE.PRG/146C.c:16320)
 // Re-enables every geometry group the occlusion disabled.
 void ClearGeometryOcclusion(std::span<std::byte> geometry);
 
@@ -129,7 +129,7 @@ struct OcclusionQuery {
   int camera_yaw = 0;
 };
 
-// decomp: BATTLE.PRG func_8008C2C0 (146C.c:16412)
+// decomp: BATTLE.PRG func_8008C2C0 (src/BATTLE/BATTLE.PRG/146C.c:16283)
 // With view triggers: clears the occlusion, then disables the geometry
 // groups of the first trigger matching the query and reports whether one
 // did. A truncated trigger record ends the walk and is logged.
@@ -157,7 +157,7 @@ class RoomGeometryHost {
   virtual void TintDrawnPrimitives(const Render::RoomTint& tint) = 0;
 };
 
-// decomp: BATTLE.PRG func_8008B1FC (146C.c:15926)
+// decomp: BATTLE.PRG func_8008B1FC (src/BATTLE/BATTLE.PRG/146C.c:15796)
 // Draws the room geometry and tints it when the tint is on; false (logged,
 // nothing drawn) when the geometry is refused.
 bool DrawRoomGeometry(const RoomTintState& tint, RoomGeometryHost& host);
@@ -272,7 +272,7 @@ class RoomSceneHost {
   virtual void DrawMinimapFrame(const MinimapFrameColors& colors) = 0;
 };
 
-// decomp: BATTLE.PRG func_8008AC78 (146C.c:15791)
+// decomp: BATTLE.PRG func_8008AC78 (src/BATTLE/BATTLE.PRG/146C.c:15791)
 // Draws one frame of the room: markers, gimmicks, a room effect step per two
 // ticks unless paused, shadows and weather, then the shown room's geometry
 // and its sliding minimap with the optional frame.

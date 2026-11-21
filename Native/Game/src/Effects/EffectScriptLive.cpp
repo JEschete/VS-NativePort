@@ -423,7 +423,7 @@ class InstanceMachine final : public ScriptMachine {
 };
 }  // namespace
 
-// decomp: func_800D46DC (src/BATTLE/BATTLE.PRG/5BF94.c:7506)
+// decomp: func_800D46DC (src/BATTLE/BATTLE.PRG/5BF94.c:6499)
 void LiveBranchEffectScriptIf(int condition, LiveEffectInstance* instance) {
   if (instance == nullptr) {
     ReportRefusal("branch");
@@ -434,43 +434,43 @@ void LiveBranchEffectScriptIf(int condition, LiveEffectInstance* instance) {
   Settle(*instance, cursor, !moved);
 }
 
-// decomp: func_800D4720 (src/BATTLE/BATTLE.PRG/5BF94.c:7515)
+// decomp: func_800D4720 (src/BATTLE/BATTLE.PRG/5BF94.c:6508)
 int LiveYieldEffectScriptAtOffset(LiveEffectInstance* instance) {
   return RunStep(instance, "yield",
                  [](ScriptCursor& cursor) { return YieldScriptAt(cursor); });
 }
 
-// decomp: func_800D474C (src/BATTLE/BATTLE.PRG/5BF94.c:7521)
+// decomp: func_800D474C (src/BATTLE/BATTLE.PRG/5BF94.c:6514)
 int LiveJumpEffectScript(LiveEffectInstance* instance) {
   return RunStep(instance, "jump",
                  [](ScriptCursor& cursor) { return JumpScript(cursor); });
 }
 
-// decomp: func_800D47C0 (src/BATTLE/BATTLE.PRG/5BF94.c:7538)
+// decomp: func_800D47C0 (src/BATTLE/BATTLE.PRG/5BF94.c:6531)
 int LiveEndEffectScript(LiveEffectInstance* /*instance*/) {
   return HandlerResult(EndScript());
 }
 
-// decomp: func_800D4DA8 (src/BATTLE/BATTLE.PRG/5BF94.c:7711)
+// decomp: func_800D4DA8 (src/BATTLE/BATTLE.PRG/5BF94.c:6706)
 int LiveContinueEffectScript(LiveEffectInstance* /*instance*/) {
   return HandlerResult(ContinueScript());
 }
 
-// decomp: func_800D5170 (src/BATTLE/BATTLE.PRG/5BF94.c:7804)
+// decomp: func_800D5170 (src/BATTLE/BATTLE.PRG/5BF94.c:6796)
 std::uint8_t LiveReadScriptByte(LiveEffectInstance* instance) {
   return ReadOperand<std::uint8_t>(
       instance, "read byte",
       [](ScriptCursor& cursor) { return ReadScriptByte(cursor); });
 }
 
-// decomp: func_800D5198 (src/BATTLE/BATTLE.PRG/5BF94.c:7806)
+// decomp: func_800D5198 (src/BATTLE/BATTLE.PRG/5BF94.c:6798)
 std::uint16_t LiveReadScriptHalfword(LiveEffectInstance* instance) {
   return ReadOperand<std::uint16_t>(
       instance, "read halfword",
       [](ScriptCursor& cursor) { return ReadScriptHalfword(cursor); });
 }
 
-// decomp: func_800D51D8 (src/BATTLE/BATTLE.PRG/5BF94.c:7813)
+// decomp: func_800D51D8 (src/BATTLE/BATTLE.PRG/5BF94.c:6805)
 int LiveRunEffectScript(LiveEffectInstance* instance) {
   if (instance == nullptr) {
     ReportRefusal("run");
@@ -480,7 +480,7 @@ int LiveRunEffectScript(LiveEffectInstance* instance) {
   return RunScript(machine) == ScriptRun::kEnded ? 0 : 1;
 }
 
-// decomp: func_800D47C8 (src/BATTLE/BATTLE.PRG/5BF94.c:7540)
+// decomp: func_800D47C8 (src/BATTLE/BATTLE.PRG/5BF94.c:6533)
 int LiveSetEffectScriptSelector(LiveEffectInstance* instance) {
   return RunOpcode(instance, "set selector",
                    [](LiveEffectInstance& /*effect*/, ScriptCursor& cursor) {
@@ -488,7 +488,7 @@ int LiveSetEffectScriptSelector(LiveEffectInstance* instance) {
                    });
 }
 
-// decomp: func_800D487C (src/BATTLE/BATTLE.PRG/5BF94.c:7563)
+// decomp: func_800D487C (src/BATTLE/BATTLE.PRG/5BF94.c:6556)
 int LiveBranchIfEffectRenderersFinished(LiveEffectInstance* instance) {
   return RunOpcode(instance, "branch if renderers finished",
                    [](LiveEffectInstance& effect, ScriptCursor& cursor) {
@@ -497,7 +497,7 @@ int LiveBranchIfEffectRenderersFinished(LiveEffectInstance* instance) {
                    });
 }
 
-// decomp: func_800D48E4 (src/BATTLE/BATTLE.PRG/5BF94.c:7576)
+// decomp: func_800D48E4 (src/BATTLE/BATTLE.PRG/5BF94.c:6569)
 int LiveBranchIfActionVariantCleared(LiveEffectInstance* instance) {
   return RunOpcode(instance, "branch if action variant cleared",
                    [](LiveEffectInstance& /*effect*/, ScriptCursor& cursor) {
@@ -505,7 +505,7 @@ int LiveBranchIfActionVariantCleared(LiveEffectInstance* instance) {
                    });
 }
 
-// decomp: func_800D4AB4 (src/BATTLE/BATTLE.PRG/5BF94.c:7625)
+// decomp: func_800D4AB4 (src/BATTLE/BATTLE.PRG/5BF94.c:6618)
 int LiveLoadActionVariantRegister(LiveEffectInstance* instance) {
   return RunOpcode(instance, "load action variant register",
                    [](LiveEffectInstance& effect, ScriptCursor& /*cursor*/) {
@@ -517,7 +517,7 @@ int LiveLoadActionVariantRegister(LiveEffectInstance* instance) {
                    });
 }
 
-// decomp: func_800D4AEC (src/BATTLE/BATTLE.PRG/5BF94.c:7633)
+// decomp: func_800D4AEC (src/BATTLE/BATTLE.PRG/5BF94.c:6626)
 int LiveSetEffectScriptRegister(LiveEffectInstance* instance) {
   return RunOpcode(instance, "set register",
                    [](LiveEffectInstance& effect, ScriptCursor& cursor) {
@@ -529,7 +529,7 @@ int LiveSetEffectScriptRegister(LiveEffectInstance* instance) {
                    });
 }
 
-// decomp: func_800D4B34 (src/BATTLE/BATTLE.PRG/5BF94.c:7639)
+// decomp: func_800D4B34 (src/BATTLE/BATTLE.PRG/5BF94.c:6632)
 int LiveBranchIfEffectRegisterEqual(LiveEffectInstance* instance) {
   return RunOpcode(instance, "branch if register equal",
                    [](LiveEffectInstance& effect, ScriptCursor& cursor) {
@@ -538,7 +538,7 @@ int LiveBranchIfEffectRegisterEqual(LiveEffectInstance* instance) {
                    });
 }
 
-// decomp: func_800D4B90 (src/BATTLE/BATTLE.PRG/5BF94.c:7645)
+// decomp: func_800D4B90 (src/BATTLE/BATTLE.PRG/5BF94.c:6638)
 int LiveBranchIfParticleCountEqual(LiveEffectInstance* instance) {
   return RunOpcode(instance, "branch if particle count equal",
                    [](LiveEffectInstance& effect, ScriptCursor& cursor) {
@@ -548,12 +548,12 @@ int LiveBranchIfParticleCountEqual(LiveEffectInstance* instance) {
                    });
 }
 
-// decomp: func_800D4D98 (src/BATTLE/BATTLE.PRG/5BF94.c:7705)
+// decomp: func_800D4D98 (src/BATTLE/BATTLE.PRG/5BF94.c:6700)
 int LiveClearScriptActionVariant(LiveEffectInstance* /*instance*/) {
   return HandlerResult(ClearActionVariant(actionVariant));
 }
 
-// decomp: func_800D49A4 (src/BATTLE/BATTLE.PRG/5BF94.c:7602)
+// decomp: func_800D49A4 (src/BATTLE/BATTLE.PRG/5BF94.c:6595)
 int LiveSetActionEffectVerticalOffset(LiveEffectInstance* instance) {
   if (instance == nullptr) {
     ReportRefusal("vertical offset");
@@ -574,7 +574,7 @@ int LiveSetActionEffectVerticalOffset(LiveEffectInstance* instance) {
   return HandlerResult(step);
 }
 
-// decomp: func_800D4D64 (src/BATTLE/BATTLE.PRG/5BF94.c:7697)
+// decomp: func_800D4D64 (src/BATTLE/BATTLE.PRG/5BF94.c:6692)
 int LiveSignalSourceActorFromScript(LiveEffectInstance* instance) {
   if (instance == nullptr) {
     ReportRefusal("signal source actor");
@@ -588,7 +588,7 @@ int LiveSignalSourceActorFromScript(LiveEffectInstance* instance) {
   return HandlerResult(ContinueScript());
 }
 
-// decomp: func_800D4F00 (src/BATTLE/BATTLE.PRG/5BF94.c:7749)
+// decomp: func_800D4F00 (src/BATTLE/BATTLE.PRG/5BF94.c:6744)
 int LiveSetParticleColorCurvesFromScript(LiveEffectInstance* instance) {
   return RunOpcode(instance, "set particle colour curves",
                    [](LiveEffectInstance& /*effect*/, ScriptCursor& cursor) {
@@ -599,7 +599,7 @@ int LiveSetParticleColorCurvesFromScript(LiveEffectInstance* instance) {
                    });
 }
 
-// decomp: func_800D4FB4 (src/BATTLE/BATTLE.PRG/5BF94.c:7762)
+// decomp: func_800D4FB4 (src/BATTLE/BATTLE.PRG/5BF94.c:6757)
 int LiveApplyPairedParticleColorPreset(LiveEffectInstance* instance) {
   return RunOpcode(
       instance, "apply paired colour preset",
@@ -613,7 +613,7 @@ int LiveApplyPairedParticleColorPreset(LiveEffectInstance* instance) {
       });
 }
 
-// decomp: func_800D5048 (src/BATTLE/BATTLE.PRG/5BF94.c:7776)
+// decomp: func_800D5048 (src/BATTLE/BATTLE.PRG/5BF94.c:6771)
 int LiveCompleteChildEffectScript(LiveEffectInstance* instance) {
   if (instance == nullptr) {
     ReportRefusal("complete child");
@@ -633,7 +633,7 @@ int LiveCompleteChildEffectScript(LiveEffectInstance* instance) {
   return HandlerResult(ContinueScript());
 }
 
-// decomp: func_800D5088 (src/BATTLE/BATTLE.PRG/5BF94.c:7785)
+// decomp: func_800D5088 (src/BATTLE/BATTLE.PRG/5BF94.c:6780)
 int LiveApplyParticleColorPresetTable(LiveEffectInstance* instance) {
   return RunOpcode(
       instance, "apply colour preset table",
@@ -647,14 +647,14 @@ int LiveApplyParticleColorPresetTable(LiveEffectInstance* instance) {
       });
 }
 
-// decomp: func_800D5150 (src/BATTLE/BATTLE.PRG/5BF94.c:7799)
+// decomp: func_800D5150 (src/BATTLE/BATTLE.PRG/5BF94.c:6794)
 int LiveReportInvalidEffectInstruction(LiveEffectInstance* /*instance*/) {
   const ScriptDiagnosticStep report = ReportInvalidInstruction();
   LiveReportEffectDiagnostic(static_cast<int>(report.diagnostic));
   return HandlerResult(report.step);
 }
 
-// decomp: func_800D48A4 (src/BATTLE/BATTLE.PRG/5BF94.c:7569)
+// decomp: func_800D48A4 (src/BATTLE/BATTLE.PRG/5BF94.c:6562)
 int LiveLoadEffectTimelineImmediate(LiveEffectInstance* instance) {
   return RunOpcode(instance, "load timeline",
                    [](LiveEffectInstance& effect, ScriptCursor& cursor) {
@@ -663,7 +663,7 @@ int LiveLoadEffectTimelineImmediate(LiveEffectInstance* instance) {
                    });
 }
 
-// decomp: func_800D4DB0 (src/BATTLE/BATTLE.PRG/5BF94.c:7713)
+// decomp: func_800D4DB0 (src/BATTLE/BATTLE.PRG/5BF94.c:6708)
 int LiveLoadEffectTimelineFromRegister(LiveEffectInstance* instance) {
   return RunOpcode(instance, "load register timeline",
                    [](LiveEffectInstance& effect, ScriptCursor& cursor) {
@@ -676,7 +676,7 @@ int LiveLoadEffectTimelineFromRegister(LiveEffectInstance* instance) {
                    });
 }
 
-// decomp: func_800D4E5C (src/BATTLE/BATTLE.PRG/5BF94.c:7728)
+// decomp: func_800D4E5C (src/BATTLE/BATTLE.PRG/5BF94.c:6723)
 int LiveTickEffectTimelineFromScript(LiveEffectInstance* instance) {
   return RunOpcode(instance, "tick timeline",
                    [](LiveEffectInstance& effect, ScriptCursor& cursor) {
@@ -686,7 +686,7 @@ int LiveTickEffectTimelineFromScript(LiveEffectInstance* instance) {
                    });
 }
 
-// decomp: func_800D4E90 (src/BATTLE/BATTLE.PRG/5BF94.c:7734)
+// decomp: func_800D4E90 (src/BATTLE/BATTLE.PRG/5BF94.c:6729)
 int LiveBranchIfEffectTimelineFinished(LiveEffectInstance* instance) {
   return RunOpcode(
       instance, "branch if timeline finished",
@@ -699,7 +699,7 @@ int LiveBranchIfEffectTimelineFinished(LiveEffectInstance* instance) {
       });
 }
 
-// decomp: func_800D4EC0 (src/BATTLE/BATTLE.PRG/5BF94.c:7740)
+// decomp: func_800D4EC0 (src/BATTLE/BATTLE.PRG/5BF94.c:6735)
 int LiveFreeEffectScriptTimeline(LiveEffectInstance* instance) {
   return RunHostStep(instance, "free timeline",
                      [](LiveEffectInstance& effect, ScriptEffectHost& host) {
@@ -708,7 +708,7 @@ int LiveFreeEffectScriptTimeline(LiveEffectInstance* instance) {
                      });
 }
 
-// decomp: func_800D4984 (src/BATTLE/BATTLE.PRG/5BF94.c:7596)
+// decomp: func_800D4984 (src/BATTLE/BATTLE.PRG/5BF94.c:6589)
 int LiveTickEffectTransforms(LiveEffectInstance* instance) {
   return RunHostStep(
       instance, "tick transforms",
@@ -717,7 +717,7 @@ int LiveTickEffectTransforms(LiveEffectInstance* instance) {
       });
 }
 
-// decomp: func_800D4A94 (src/BATTLE/BATTLE.PRG/5BF94.c:7619)
+// decomp: func_800D4A94 (src/BATTLE/BATTLE.PRG/5BF94.c:6612)
 int LiveInitializeScriptEffectTransforms(LiveEffectInstance* instance) {
   return RunHostStep(
       instance, "initialize transforms",
@@ -726,7 +726,7 @@ int LiveInitializeScriptEffectTransforms(LiveEffectInstance* instance) {
       });
 }
 
-// decomp: func_800D4D44 (src/BATTLE/BATTLE.PRG/5BF94.c:7691)
+// decomp: func_800D4D44 (src/BATTLE/BATTLE.PRG/5BF94.c:6686)
 int LiveRefreshScriptParticleEnvironment(LiveEffectInstance* instance) {
   return RunHostStep(
       instance, "refresh particle environment",
@@ -735,7 +735,7 @@ int LiveRefreshScriptParticleEnvironment(LiveEffectInstance* instance) {
       });
 }
 
-// decomp: func_800D4778 (src/BATTLE/BATTLE.PRG/5BF94.c:7527)
+// decomp: func_800D4778 (src/BATTLE/BATTLE.PRG/5BF94.c:6520)
 int LiveSpawnEffectScript(LiveEffectInstance* instance) {
   return RunOpcode(instance, "spawn script",
                    [](LiveEffectInstance& effect, ScriptCursor& cursor) {
@@ -744,7 +744,7 @@ int LiveSpawnEffectScript(LiveEffectInstance* instance) {
                    });
 }
 
-// decomp: func_800D47F4 (src/BATTLE/BATTLE.PRG/5BF94.c:7546)
+// decomp: func_800D47F4 (src/BATTLE/BATTLE.PRG/5BF94.c:6539)
 int LiveAttachScriptRenderer(LiveEffectInstance* instance) {
   return RunOpcode(instance, "attach renderer",
                    [](LiveEffectInstance& effect, ScriptCursor& cursor) {
@@ -754,7 +754,7 @@ int LiveAttachScriptRenderer(LiveEffectInstance* instance) {
                    });
 }
 
-// decomp: func_800D4910 (src/BATTLE/BATTLE.PRG/5BF94.c:7582)
+// decomp: func_800D4910 (src/BATTLE/BATTLE.PRG/5BF94.c:6575)
 int LiveTickEffectRenderers(LiveEffectInstance* instance) {
   return RunHostStep(
       instance, "tick renderers",
@@ -763,7 +763,7 @@ int LiveTickEffectRenderers(LiveEffectInstance* instance) {
       });
 }
 
-// decomp: func_800D4BD0 (src/BATTLE/BATTLE.PRG/5BF94.c:7651)
+// decomp: func_800D4BD0 (src/BATTLE/BATTLE.PRG/5BF94.c:6644)
 int LiveEmitParticlesFromScriptRegister(LiveEffectInstance* instance) {
   return RunOpcode(instance, "emit register particles",
                    [](LiveEffectInstance& effect, ScriptCursor& cursor) {
@@ -773,7 +773,7 @@ int LiveEmitParticlesFromScriptRegister(LiveEffectInstance* instance) {
                    });
 }
 
-// decomp: func_800CE644 (src/BATTLE/BATTLE.PRG/5BF94.c:5045)
+// decomp: func_800CE644 (src/BATTLE/BATTLE.PRG/5BF94.c:4610)
 void LiveReportEffectDiagnostic(int code) {
   if (!ShouldReport(reportedDiagnostics)) return;
   const std::string_view description = DescribeEffectDiagnostic(code);

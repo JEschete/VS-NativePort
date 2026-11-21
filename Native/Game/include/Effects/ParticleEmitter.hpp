@@ -208,7 +208,7 @@ struct ParticleEmissionResult {
   std::optional<Core::Math::Mat3> rotation{};
 };
 
-// decomp: BATTLE.PRG func_800D2ADC (5BF94.c:6935-7502).
+// decomp: BATTLE.PRG func_800D2ADC (src/BATTLE/BATTLE.PRG/5BF94.c:6497).
 // Allocation order is oldest first; every subsequent pass visits newest
 // first. RNG order, low-word products, halfword stores and unhandled switch
 // modes follow the original. Empty/full pools retain the #73 no-emission

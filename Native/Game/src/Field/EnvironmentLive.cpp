@@ -216,28 +216,28 @@ void LiveUpdateRoomWeather() {
   });
 }
 
-// decomp: BATTLE.PRG func_80091314 (src/BATTLE/BATTLE.PRG/2842C.c:428)
+// decomp: BATTLE.PRG func_80091314 (src/BATTLE/BATTLE.PRG/2842C.c:414)
 void LiveSetWeatherVariationEnabled(int enabled) {
   RunLive([enabled](WeatherHost& /*host*/, RoomWeatherState& state) {
     SetWeatherVariationEnabled(state, enabled);
   });
 }
 
-// decomp: BATTLE.PRG func_80091320 (src/BATTLE/BATTLE.PRG/2842C.c:430)
+// decomp: BATTLE.PRG func_80091320 (src/BATTLE/BATTLE.PRG/2842C.c:416)
 void LiveSetWeatherIntensity(int intensity) {
   RunLive([intensity](WeatherHost& host, RoomWeatherState& state) {
     SetWeatherIntensity(host, state, intensity);
   });
 }
 
-// decomp: BATTLE.PRG func_8009134C (src/BATTLE/BATTLE.PRG/2842C.c:437)
+// decomp: BATTLE.PRG func_8009134C (src/BATTLE/BATTLE.PRG/2842C.c:423)
 void LiveSetWeatherWindAngles(int azimuth, int elevation) {
   RunLive([azimuth, elevation](WeatherHost& host, RoomWeatherState& state) {
     SetWeatherWindAngles(host, state, azimuth, elevation);
   });
 }
 
-// decomp: BATTLE.PRG func_80091378 (src/BATTLE/BATTLE.PRG/2842C.c:444)
+// decomp: BATTLE.PRG func_80091378 (src/BATTLE/BATTLE.PRG/2842C.c:430)
 void LiveReleaseWeatherParticles() {
   RunLive([](WeatherHost& host, RoomWeatherState& state) {
     ReleaseWeatherParticles(host, state);
@@ -251,14 +251,14 @@ int LiveSetWeatherAmbientSound(int sound) {
   });
 }
 
-// decomp: BATTLE.PRG func_80091468 (src/BATTLE/BATTLE.PRG/2842C.c:472)
+// decomp: BATTLE.PRG func_80091468 (src/BATTLE/BATTLE.PRG/2842C.c:458)
 void LiveSetRoomBackgroundOffset(int offset_x, int offset_y) {
   RoomBackgroundState state = LoadLiveRoomBackgroundState();
   SetRoomBackgroundOffset(state, offset_x, offset_y);
   StoreLiveRoomBackgroundState(state);
 }
 
-// decomp: BATTLE.PRG func_800918E8 (src/BATTLE/BATTLE.PRG/2842C.c:539)
+// decomp: BATTLE.PRG func_800918E8 (src/BATTLE/BATTLE.PRG/2842C.c:525)
 void LiveDuckWeatherAmbientSound(int ducked) {
   RunLive([ducked](WeatherHost& host, const RoomWeatherState& state) {
     DuckWeatherAmbientSound(host, state, ducked);

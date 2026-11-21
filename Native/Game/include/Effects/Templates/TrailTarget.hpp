@@ -7,8 +7,9 @@
 #include "Effects/Templates/TrailCore.hpp"
 
 // The target stage of the five- and nine-sample trails (decomp
-// src/EFFECT/trails5.h:243 and trails9.h:243 VS_TRAIL_TARGET_FUNCTION): the
-// attraction target every new trail heads for, its last spline point.
+// src/EFFECT/trailEffect.h:288 and src/EFFECT/trailEffect.h:288
+// VS_TRAIL_TARGET_FUNCTION): the attraction target every new trail heads for,
+// its last spline point.
 namespace VS::Effects::Templates {
 // Samples the attraction offset and jitter into the scratch (as signed
 // halfwords), moves the offset by the attraction transform's translation or

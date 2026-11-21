@@ -1370,7 +1370,7 @@ void ApplyActorFlightMovement(MovementHost& host, MovementActor& actor) {
   }
 }
 
-// decomp: BATTLE.PRG func_800A291C (src/BATTLE/BATTLE.PRG/38C1C.c:712)
+// decomp: BATTLE.PRG func_800A291C (src/BATTLE/BATTLE.PRG/38C1C.c:701)
 void ApplyActorMovementVector(MovementActor& actor) {
   ActorMotion& motion = actor.motion;
   const MotionVector& step = actor.request_step;
@@ -1439,7 +1439,7 @@ void UpdateActorTeleportTransition(MovementHost& host, MovementActor& actor) {
   }
 }
 
-// decomp: BATTLE.PRG func_800A2C48 (src/BATTLE/BATTLE.PRG/3A1A0.c:153)
+// decomp: BATTLE.PRG func_800A2C48 (src/BATTLE/BATTLE.PRG/3A1A0.c:126)
 // The route target is the original's shared_sequences[4] alias.
 void CancelActorTeleportTransition(MovementHost& host, MovementActor& actor) {
   std::array<bool, kActorSlots> cancelled{};
@@ -1603,7 +1603,7 @@ void UpdateActorMovement(MovementHost& host, int id) {
   ClearActorMovementRequest(actor.motion);
 }
 
-// decomp: BATTLE.PRG func_800A5280 (src/BATTLE/BATTLE.PRG/3A1A0.c:1347)
+// decomp: BATTLE.PRG func_800A5280 (src/BATTLE/BATTLE.PRG/3A1A0.c:1345)
 void MoveActorWithCollision(MovementHost& host, int id, int direction,
                             int distance, const MoveInput& input) {
   if (id < 0 || id >= kActorSlots) return;
@@ -1642,7 +1642,7 @@ constexpr int kTurnFramesPerDelta = 32;
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800A6660 (src/BATTLE/BATTLE.PRG/3A1A0.c:1920)
+// decomp: BATTLE.PRG func_800A6660 (src/BATTLE/BATTLE.PRG/3A1A0.c:1347)
 void UpdateActorSteering(MovementActor& actor, int target_facing,
                          bool restart_turn) {
   ActorMotion& motion = actor.motion;
@@ -1987,7 +1987,7 @@ void UpdateLanding(MovementHost& host, int id, MovementActor& actor,
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800AC690 (src/BATTLE/BATTLE.PRG/40564.c:2297)
+// decomp: BATTLE.PRG func_800AC690 (src/BATTLE/BATTLE.PRG/40564.c:1981)
 void UpdateActorJumpAndFall(MovementHost& host, int id, MovementActor& actor) {
   const int profile = ActorJumpAnimationProfile(actor.motion);
   switch (actor.motion.movement_mode) {

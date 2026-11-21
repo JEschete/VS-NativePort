@@ -268,86 +268,91 @@ class LiveSoundBanks final : public SoundBankHost {
 };
 }  // namespace
 
-// decomp: SLUS_010.40 vs_main_loadSfxSlot (src/SLUS_010.40/main.c:10045)
+// decomp: SLUS_010.40 vs_main_loadSfxSlot (src/SLUS_010.40/main.c:3088)
 int LiveLoadSfxBankSlot(int id, unsigned slot) {
   LiveSoundBanks host("LoadSfxBankSlot");
   return LoadSfxBankSlot(host, id, slot);
 }
 
-// decomp: SLUS_010.40 _loadSfx (src/SLUS_010.40/main.c:10077)
+// decomp: SLUS_010.40 loadSfx (src/SLUS_010.40/main.c:3122; was _loadSfx)
 int LiveLoadSfxBankIntoFreeSlot(int id) {
   LiveSoundBanks host("LoadSfxBankIntoFreeSlot");
   return LoadSfxBankIntoFreeSlot(host, id);
 }
 
-// decomp: SLUS_010.40 vs_main_freeSfxQueueSlot (src/SLUS_010.40/main.c:10089)
+// decomp: SLUS_010.40 vs_main_freeSfxQueueSlot (src/SLUS_010.40/main.c:3135)
 int LivePollSfxBankSlotLoad(unsigned slot) {
   LiveSoundBanks host("PollSfxBankSlotLoad");
   return PollSfxBankSlotLoad(host, slot);
 }
 
-// decomp: SLUS_010.40 _freeSfxSlots (src/SLUS_010.40/main.c:10111)
+// decomp: SLUS_010.40 freeSfxSlots (src/SLUS_010.40/main.c:3163; was
+// _freeSfxSlots)
 int LivePollSfxBankLoads() {
   LiveSoundBanks host("PollSfxBankLoads");
   return PollSfxBankLoads(host);
 }
 
-// decomp: SLUS_010.40 _loadAndFreeSfx (src/SLUS_010.40/main.c:10121)
+// decomp: SLUS_010.40 loadAndFreeSfx (src/SLUS_010.40/main.c:3175; was
+// _loadAndFreeSfx)
 int LiveLoadSfxBankBlocking(int id) {
   LiveSoundBanks host("LoadSfxBankBlocking");
   return LoadSfxBankBlocking(host, id);
 }
 
-// decomp: SLUS_010.40 vs_main_setCurrentSfx (src/SLUS_010.40/main.c:10134)
+// decomp: SLUS_010.40 vs_main_setCurrentSfx (src/SLUS_010.40/main.c:3188)
 int LiveSelectSfxBankSlot(int slot) {
   LiveSoundBanks host("SelectSfxBankSlot");
   return SelectSfxBankSlot(host, slot);
 }
 
-// decomp: SLUS_010.40 vs_main_freeSfx (src/SLUS_010.40/main.c:10143)
+// decomp: SLUS_010.40 vs_main_freeSfx (src/SLUS_010.40/main.c:3199)
 int LiveFreeSfxBankSlot(unsigned slot) {
   LiveSoundBanks host("FreeSfxBankSlot");
   return FreeSfxBankSlot(host, slot);
 }
 
-// decomp: SLUS_010.40 func_80046168 (src/SLUS_010.40/main.c:10161)
+// decomp: SLUS_010.40 vs_main_setSfxSlot3Data (src/SLUS_010.40/main.c:3221; was
+// func_80046168)
 int LiveBindRoomSfxBank(std::uintptr_t bank_address) {
   LiveSoundBanks host("BindRoomSfxBank");
   return BindRoomSfxBank(host, BufferAt(bank_address));
 }
 
-// decomp: SLUS_010.40 func_80046194 (src/SLUS_010.40/main.c:10170)
+// decomp: SLUS_010.40 vs_main_clearSfxSlot3 (src/SLUS_010.40/main.c:3231; was
+// func_80046194)
 int LiveUnbindRoomSfxBank() {
   LiveSoundBanks host("UnbindRoomSfxBank");
   return UnbindRoomSfxBank(host);
 }
 
-// decomp: SLUS_010.40 _loadSoundFile (src/SLUS_010.40/main.c:10359)
+// decomp: SLUS_010.40 loadSoundFile (src/SLUS_010.40/main.c:3446; was
+// _loadSoundFile)
 void LiveLoadWaveBankFile(int file) {
   LiveSoundBanks host("LoadWaveBankFile");
   LoadWaveBankFile(host, file);
 }
 
-// decomp: SLUS_010.40 vs_main_loadSoundFile (src/SLUS_010.40/main.c:10394)
+// decomp: SLUS_010.40 vs_main_loadSoundFile (src/SLUS_010.40/main.c:3475)
 void LiveLoadMappedWaveBank(int id) {
   LiveSoundBanks host("LoadMappedWaveBank");
   LoadMappedWaveBank(host, id);
 }
 
-// decomp: SLUS_010.40 vs_main_processSoundQueue (src/SLUS_010.40/main.c:10396)
+// decomp: SLUS_010.40 vs_main_processSoundQueue (src/SLUS_010.40/main.c:3489)
 int LiveUpdateWaveBankLoad() {
   LiveSoundBanks host("UpdateWaveBankLoad");
   return UpdateWaveBankLoad(host);
 }
 
 // decomp: SLUS_010.40 vs_main_loadAndWaitSoundSlot
-// (src/SLUS_010.40/main.c:10439)
+// (src/SLUS_010.40/main.c:3531)
 void LiveLoadWaveBankBlocking(int id) {
   LiveSoundBanks host("LoadWaveBankBlocking");
   LoadWaveBankBlocking(host, id);
 }
 
-// decomp: SLUS_010.40 vs_main_setMonoSound (src/SLUS_010.40/main.c:10448)
+// decomp: SLUS_010.40 vs_main_setMonoSound (src/SLUS_010.40/main.c:3540)
 void LiveSetMonoOutput(int mono_enabled) {
   LiveSoundBanks host("SetMonoOutput");
   SetMonoOutput(host, mono_enabled);
@@ -364,7 +369,7 @@ void LiveInitializeMenuSoundBanks() {
   InitializeMenuSoundBanks(host);
 }
 
-// decomp: SLUS_010.40 vs_main_resetSound (src/SLUS_010.40/main.c:10480)
+// decomp: SLUS_010.40 vs_main_resetSound (src/SLUS_010.40/main.c:3582)
 void LiveResetSoundSlots() {
   LiveSoundBanks host("ResetSoundSlots");
   ResetSoundSlots(host);

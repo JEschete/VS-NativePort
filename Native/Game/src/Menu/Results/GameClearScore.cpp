@@ -220,7 +220,8 @@ void TintFade(const std::array<Glyph, N>& glyphs, std::int32_t timer,
 }
 }  // namespace
 
-// decomp: MENUF.PRG _renderCongratulations (3B8.c:1332)
+// decomp: MENUF.PRG renderCongratulations (src/MENU/MENUF.PRG/3B8.c:1345; was
+// _renderCongratulations)
 ResultsDrawResult DrawCongratulations(
     std::span<const Render::TextureRegion> atlas, std::int32_t x,
     std::int32_t y, std::int32_t timer, GameClearDrawHost& host) {
@@ -246,7 +247,8 @@ ResultsDrawResult DrawCongratulations(
   return ResultsDrawResult::kDrawn;
 }
 
-// decomp: MENUF.PRG _renderScore (3B8.c:1357)
+// decomp: MENUF.PRG renderScore (src/MENU/MENUF.PRG/3B8.c:1370; was
+// _renderScore)
 ResultsDrawResult DrawScore(std::span<const Render::TextureRegion> atlas,
                             std::int32_t x, std::int32_t y, std::int32_t timer,
                             std::uint32_t score, GameClearDrawHost& host) {
@@ -263,7 +265,8 @@ ResultsDrawResult DrawScore(std::span<const Render::TextureRegion> atlas,
   return ResultsDrawResult::kDrawn;
 }
 
-// decomp: MENUF.PRG _renderIncrementalScore (3B8.c:1409)
+// decomp: MENUF.PRG renderIncrementalScore (src/MENU/MENUF.PRG/3B8.c:1422; was
+// _renderIncrementalScore)
 ResultsDrawResult DrawCountingScore(
     std::span<const Render::TextureRegion> atlas, std::int32_t x,
     std::int32_t y, std::int32_t timer, std::uint32_t score,
@@ -293,7 +296,8 @@ ResultsDrawResult DrawCountingScore(
   return ResultsDrawResult::kDrawn;
 }
 
-// decomp: MENUF.PRG _renderMapCompletion (3B8.c:1486)
+// decomp: MENUF.PRG renderMapCompletion (src/MENU/MENUF.PRG/3B8.c:1499; was
+// _renderMapCompletion)
 ResultsDrawResult DrawMapCompletion(
     std::span<const Render::TextureRegion> atlas, std::int32_t x,
     std::int32_t y, std::int32_t timer, std::uint32_t completion,
@@ -311,7 +315,8 @@ ResultsDrawResult DrawMapCompletion(
   return ResultsDrawResult::kDrawn;
 }
 
-// decomp: MENUF.PRG _renderIncrementalMapCompletion (3B8.c:1527)
+// decomp: MENUF.PRG renderIncrementalMapCompletion
+// (src/MENU/MENUF.PRG/3B8.c:1540; was _renderIncrementalMapCompletion)
 ResultsDrawResult DrawCountingMapCompletion(
     std::span<const Render::TextureRegion> atlas, std::int32_t x,
     std::int32_t y, std::int32_t timer, std::uint32_t completion,
@@ -342,7 +347,8 @@ ResultsDrawResult DrawCountingMapCompletion(
   return ResultsDrawResult::kDrawn;
 }
 
-// decomp: MENUF.PRG _renderRiskbreakerRankHeader (3B8.c:1598)
+// decomp: MENUF.PRG renderRiskbreakerRankHeader (src/MENU/MENUF.PRG/3B8.c:1610;
+// was _renderRiskbreakerRankHeader)
 ResultsDrawResult DrawRiskbreakerRankHeading(
     std::span<const Render::TextureRegion> atlas, std::int32_t x,
     std::int32_t y, std::int32_t timer, GameClearDrawHost& host) {
@@ -360,7 +366,8 @@ ResultsDrawResult DrawRiskbreakerRankHeading(
   return ResultsDrawResult::kDrawn;
 }
 
-// decomp: MENUF.PRG _renderRiskbreakerRank (3B8.c:1618)
+// decomp: MENUF.PRG renderRiskbreakerRank (src/MENU/MENUF.PRG/3B8.c:1630; was
+// _renderRiskbreakerRank)
 ResultsDrawResult DrawRiskbreakerRank(
     std::span<const Render::TextureRegion> atlas, std::int32_t x,
     // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.

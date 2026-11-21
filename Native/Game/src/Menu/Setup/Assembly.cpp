@@ -1295,7 +1295,8 @@ std::int32_t PackGems(const GemIds& gems) {
   return static_cast<std::int32_t>(packed);
 }
 
-// decomp: MENUC.PRG _pushSelectionHistory (src/MENU/MENUC.PRG/168.c:56)
+// decomp: MENUC.PRG pushSelectionHistory (src/MENU/MENUC.PRG/168.c:66; was
+// _pushSelectionHistory)
 void RecordSlotSelection(Context& context, int index) {
   std::array<std::uint32_t, kSlotHistoryCount>& history =
       context.state.slot_history;
@@ -1311,7 +1312,8 @@ void RecordSlotSelection(Context& context, int index) {
       *std::ranges::max_element(history) + 1;
 }
 
-// decomp: MENUC.PRG _popSelectionHistory (src/MENU/MENUC.PRG/168.c:83)
+// decomp: MENUC.PRG popSelectionHistory (src/MENU/MENUC.PRG/168.c:93; was
+// _popSelectionHistory)
 int PopSlotSelection(Context& context, int index) {
   std::array<std::uint32_t, kSlotHistoryCount>& history =
       context.state.slot_history;
@@ -1332,7 +1334,8 @@ int PopSlotSelection(Context& context, int index) {
   return static_cast<int>(latest - history.begin()) + 1;
 }
 
-// decomp: MENUC.PRG _disassembleWeapon (src/MENU/MENUC.PRG/168.c:310)
+// decomp: MENUC.PRG disassembleWeapon (src/MENU/MENUC.PRG/168.c:320; was
+// _disassembleWeapon)
 void DisassembleWeapon(Context& context, int weapon_index) {
   Items::InventoryContents& inventory = context.host.Inventory();
   Items::InventoryWeapon* weapon = InventorySlot(
@@ -1361,7 +1364,8 @@ void DisassembleWeapon(Context& context, int weapon_index) {
   RebuildWeaponOrder(context);
 }
 
-// decomp: MENUC.PRG _assembleWeapon (src/MENU/MENUC.PRG/168.c:345)
+// decomp: MENUC.PRG assembleWeapon (src/MENU/MENUC.PRG/168.c:355; was
+// _assembleWeapon)
 void AssembleWeapon(Context& context, int blade_index, int grip_index,
                     const GemIds& gems) {
   Items::InventoryContents& inventory = context.host.Inventory();
@@ -1391,7 +1395,8 @@ void AssembleWeapon(Context& context, int blade_index, int grip_index,
   RebuildWeaponOrder(context);
 }
 
-// decomp: MENUC.PRG _disassembleShield (src/MENU/MENUC.PRG/168.c:384)
+// decomp: MENUC.PRG disassembleShield (src/MENU/MENUC.PRG/168.c:394; was
+// _disassembleShield)
 void DetachShieldGems(Context& context, int shield_index) {
   Items::InventoryShield* shield = InventorySlot(
       context, context.host.Inventory().shields, shield_index + 1, "shield");
@@ -1403,7 +1408,8 @@ void DetachShieldGems(Context& context, int shield_index) {
                     .first(GemSlotCount(context, shield->base.gem_slots)));
 }
 
-// decomp: MENUC.PRG _isValidGrip (src/MENU/MENUC.PRG/168.c:403)
+// decomp: MENUC.PRG isValidGrip (src/MENU/MENUC.PRG/168.c:413; was
+// _isValidGrip)
 bool IsGripCompatible(Context& context, const Items::InventoryBlade* blade,
                       const Items::InventoryGrip* grip) {
   if (blade == nullptr || grip == nullptr) {
@@ -1423,7 +1429,7 @@ bool IsGripCompatible(Context& context, const Items::InventoryBlade* blade,
   return ((1U << blade->category) & kGripBladeCategories[grip->category]) != 0;
 }
 
-// decomp: MENUC.PRG _setUiStats (src/MENU/MENUC.PRG/168.c:730)
+// decomp: MENUC.PRG setUiStats (src/MENU/MENUC.PRG/168.c:739; was _setUiStats)
 void SetAssemblyStats(Context& context, int blade, int grip) {
   context.host.ResetEquipmentStats();
   context.host.SetRangeAndRisk(0, 0, 0, 1);
@@ -1439,7 +1445,8 @@ void SetAssemblyStats(Context& context, int blade, int grip) {
   context.host.UpdateDpPpBars(kAssemblyDpPp);
 }
 
-// decomp: MENUC.PRG _assembleBladeMenuHeader (src/MENU/MENUC.PRG/168.c:764)
+// decomp: MENUC.PRG assembleBladeMenuHeader (src/MENU/MENUC.PRG/168.c:773; was
+// _assembleBladeMenuHeader)
 void SetAssemblyHeader(Context& context, int blade_grip) {
   const int text = blade_grip & kHeaderTextMask;
   MenuRow& row = context.host.SetMenuItem(
@@ -1453,28 +1460,32 @@ void SetAssemblyHeader(Context& context, int blade_grip) {
   }
 }
 
-// decomp: MENUC.PRG _assembleBladeMenu (src/MENU/MENUC.PRG/168.c:802)
+// decomp: MENUC.PRG assembleBladeMenu (src/MENU/MENUC.PRG/168.c:811; was
+// _assembleBladeMenu)
 int SelectAssemblyBlade(Context& context, int params) {
   return SelectPart<BladePart>(context, params);
 }
 
-// decomp: MENUC.PRG _assembleGripMenu (src/MENU/MENUC.PRG/168.c:923)
+// decomp: MENUC.PRG assembleGripMenu (src/MENU/MENUC.PRG/168.c:932; was
+// _assembleGripMenu)
 int SelectAssemblyGrip(Context& context, int params) {
   return SelectPart<GripPart>(context, params);
 }
 
-// decomp: MENUC.PRG _attachGem (src/MENU/MENUC.PRG/168.c:1045)
+// decomp: MENUC.PRG attachGem (src/MENU/MENUC.PRG/168.c:1054; was _attachGem)
 int SelectGem(Context& context, int params) {
   return SelectPart<GemPart>(context, params);
 }
 
-// decomp: MENUC.PRG _leaveAssembleMenu (src/MENU/MENUC.PRG/168.c:1150)
+// decomp: MENUC.PRG leaveAssembleMenu (src/MENU/MENUC.PRG/168.c:1159; was
+// _leaveAssembleMenu)
 int CancelAssembly(Context& context) {
   DisassembleWeapon(context, context.state.combining_item);
   return LeaveItemSelection(context, true);
 }
 
-// decomp: MENUC.PRG _assembleMenu (src/MENU/MENUC.PRG/168.c:1164)
+// decomp: MENUC.PRG assembleMenu (src/MENU/MENUC.PRG/168.c:1173; was
+// _assembleMenu)
 int UpdateAssembly(Context& context, bool initialize) {
   AssemblyState& assembly = context.state.assembly;
   if (initialize) {
@@ -1519,7 +1530,8 @@ int UpdateAssembly(Context& context, bool initialize) {
   return 0;
 }
 
-// decomp: MENUC.PRG _addGemSelector (src/MENU/MENUC.PRG/168.c:1599)
+// decomp: MENUC.PRG addGemSelector (src/MENU/MENUC.PRG/168.c:1608; was
+// _addGemSelector)
 void CreateEmptyGemSlotRow(Context& context, int row) {
   MenuRow& slot = context.host.SetMenuItem({.row = row + kDetailRow,
                                             .x = kOffscreenX,
@@ -1532,7 +1544,7 @@ void CreateEmptyGemSlotRow(Context& context, int row) {
   slot.font_color = 1;
 }
 
-// decomp: MENUC.PRG _attachGems (src/MENU/MENUC.PRG/168.c:1616)
+// decomp: MENUC.PRG attachGems (src/MENU/MENUC.PRG/168.c:1624; was _attachGems)
 int RestoreGemsAndLeaveSelection(Context& context, const GemIds& gems,
                                  bool is_shield) {
   const std::span<std::uint8_t> attached = AttachedGems(context, is_shield);
@@ -1550,7 +1562,8 @@ int RestoreGemsAndLeaveSelection(Context& context, const GemIds& gems,
   return LeaveItemSelection(context, true);
 }
 
-// decomp: MENUC.PRG _attachGemsMenu (src/MENU/MENUC.PRG/168.c:1666)
+// decomp: MENUC.PRG attachGemsMenu (src/MENU/MENUC.PRG/168.c:1674; was
+// _attachGemsMenu)
 int UpdateGemAttachment(Context& context, int category) {
   GemAttachmentState& attachment = context.state.gem_attachment;
   EquipmentScreenState& screen = attachment.screen;
@@ -1600,7 +1613,8 @@ int UpdateGemAttachment(Context& context, int category) {
   return 0;
 }
 
-// decomp: MENUC.PRG _attachGemsTopMenu (src/MENU/MENUC.PRG/168.c:2016)
+// decomp: MENUC.PRG attachGemsTopMenu (src/MENU/MENUC.PRG/168.c:2024; was
+// _attachGemsTopMenu)
 int UpdateGemCategoryMenu(Context& context, bool initialize) {
   CategoryState& menu = context.state.gem_category;
   if (initialize) {

@@ -232,28 +232,28 @@ bool UpdateScriptedRoute(ScriptedRouteHost& host, int actor_id) {
 }
 }  // namespace
 
-// decomp: func_800E4C1C (src/BATTLE/BATTLE.PRG/7BDD4.s:542).
+// decomp: func_800E4C1C (src/BATTLE/BATTLE.PRG/6E4CCPrivate.h:47).
 bool ReserveAiDestinationTile(NavigationGrid& grid, int x, int z) {
   return SetTileFlag(grid, x, z, kReservedTileFlag);
 }
 
-// decomp: func_800E68EC (src/BATTLE/BATTLE.PRG/7E05C.s:72).
+// decomp: func_800E68EC (src/BATTLE/BATTLE.PRG/7DDDC.s:226).
 bool MarkAiTileDynamicObstacle(NavigationGrid& grid, int x, int z) {
   return SetTileFlag(grid, x, z, kDynamicObstacleFlag);
 }
 
-// decomp: func_800E6898 (src/BATTLE/BATTLE.PRG/7E05C.s:38-69).
+// decomp: func_800E6898 (src/BATTLE/BATTLE.PRG/7DDDC.s:200).
 bool AddAiTileOccupant(NavigationGrid& grid, TileOccupantPlacement placement) {
   return ChangeOccupancy(grid, placement, kDynamicObstacleFlag);
 }
 
-// decomp: func_800E68A0 (src/BATTLE/BATTLE.PRG/7E05C.s:46-69).
+// decomp: func_800E68A0 (src/BATTLE/BATTLE.PRG/7DDDC.s:205).
 bool RemoveAiTileOccupant(NavigationGrid& grid,
                           TileOccupantPlacement placement) {
   return ChangeOccupancy(grid, placement, -kDynamicObstacleFlag);
 }
 
-// decomp: func_800E4690 (src/BATTLE/BATTLE.PRG/7BDD4.s:72).
+// decomp: func_800E4690 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:483).
 std::optional<bool> IsAdjacentTileStepBlocked(
     Field::TerrainGrid terrain, const NavigationDirectionCodes& directions,
     int x, int z, int direction) {
@@ -280,7 +280,7 @@ std::optional<bool> IsAdjacentTileStepBlocked(
          kMaximumGroundStep;
 }
 
-// decomp: func_800E6B4C (src/BATTLE/BATTLE.PRG/7E05C.s:257).
+// decomp: func_800E6B4C (src/BATTLE/BATTLE.PRG/7DDDC.s:401).
 // Its allocation held a temporary PS1 stack, not terrain data. The bounded
 // 32x32 builder uses the native game fiber's existing 16 MiB stack.
 bool BuildAiTerrainHeightsWithWorkspace(SpecialTerrainBuilder& builder) {
@@ -302,7 +302,7 @@ std::uint32_t VisiblePlatformMask(
   return mask;
 }
 
-// decomp: func_800DC638 (src/BATTLE/BATTLE.PRG/73C84.s:149-243).
+// decomp: func_800DC638 (src/BATTLE/BATTLE.PRG/7399C.s:343).
 bool UpdateRouteGateAvailability(
     std::span<std::uint32_t, kRouteWordCount> routes,
     std::span<const RouteGateEnd, kRouteGateEndCount> ends,
@@ -329,7 +329,8 @@ std::optional<bool> HasActorNavigationState(
   return table.HasTileFlags() && table.HasActorState(actor_id);
 }
 
-// decomp: func_800E5154 (src/BATTLE/BATTLE.PRG/7C7E0.s:122), shared $a3 = 1.
+// decomp: func_800E5154 (src/BATTLE/BATTLE.PRG/6E4CCPrivate.h:53), shared $a3
+// = 1.
 std::optional<int> ActorNavigationOverrideStatus(
     const NavigationOverrideTable& table, int actor_id) {
   constexpr int kUnavailable = 2;
@@ -363,7 +364,7 @@ bool CopyActorNavigationOverrideState(NavigationOverrideCopy& copy,
   return true;
 }
 
-// decomp: func_800E527C (src/BATTLE/BATTLE.PRG/7C7E0.s:216-256).
+// decomp: func_800E527C (src/BATTLE/BATTLE.PRG/6E4CCPrivate.h:44).
 bool SetActorNavigationOverride(NavigationOverrideHost& host, int actor_id,
                                 int x, int z) {
   const auto present = HasActorNavigationState(host, actor_id);
@@ -393,7 +394,7 @@ bool SetActorNavigationOverride(NavigationOverrideHost& host, int actor_id,
   return true;
 }
 
-// decomp: func_800E5308 (src/BATTLE/BATTLE.PRG/7C7E0.s:260-421).
+// decomp: func_800E5308 (src/BATTLE/BATTLE.PRG/6E4CCPrivate.h:95).
 bool UpdateActorNavigationOverrides(ScriptedRouteHost& host) {
   host.BeginUpdate();
   int visited = 0;

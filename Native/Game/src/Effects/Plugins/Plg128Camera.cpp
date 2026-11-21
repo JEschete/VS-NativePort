@@ -220,7 +220,7 @@ std::optional<CameraAnchors> GatherCameraAnchors(
   return anchors;
 }
 
-// decomp: PLG128.BIN func_800FD9A4 (F02064, src/EFFECT/PLG128.BIN/F8.c:66,
+// decomp: PLG128.BIN func_800FD9A4 (F02064, src/EFFECT/PLG128.BIN/F8.c:36,
 // 0x800FD9A4-0x800FDA04)
 void BuildCameraOffsetTransform(CameraEffectHost& host,
                                 CameraEffectState& state, Vec3 translation) {
@@ -249,7 +249,7 @@ void ResolveCameraEndpoints(CameraEffectState& state, CameraScratch& scratch,
   state.target = Widen(scratch.attraction_offset);
 }
 
-// decomp: PLG128.BIN func_800FDC80 (F02066, src/EFFECT/PLG128.BIN/F8.c:111,
+// decomp: PLG128.BIN func_800FDC80 (F02066, src/EFFECT/PLG128.BIN/F8.c:81,
 // 0x800FDC80-0x800FDE78)
 void ResolveActorFacingCamera(CameraEffectState& state, CameraScratch& scratch,
                               const CameraAnchors& anchors) noexcept {
@@ -265,7 +265,7 @@ void ResolveActorFacingCamera(CameraEffectState& state, CameraScratch& scratch,
                   ScaleQ12(back, Core::Math::Cosine(anchors.facing)))};
 }
 
-// decomp: PLG128.BIN func_800FDE78 (F02067, src/EFFECT/PLG128.BIN/F8.c:136,
+// decomp: PLG128.BIN func_800FDE78 (F02067, src/EFFECT/PLG128.BIN/F8.c:108,
 // 0x800FDE78-0x800FDEC4). The scratch argument is unused.
 void StoreCameraEndpoints(CameraEffectState& state) noexcept {
   state.end_camera.position = {ToFixed(state.position.x),
@@ -275,8 +275,8 @@ void StoreCameraEndpoints(CameraEffectState& state) noexcept {
                               ToFixed(state.target.z)};
 }
 
-// decomp: PLG128.BIN func_800FDEC4 (F02068, src/EFFECT/PLG128.BIN/F8.c:146,
-// 0x800FDEC4-0x800FE3D0)
+// decomp: PLG128.BIN vs_effect_bloodySin_5 (F02068,
+// src/EFFECT/PLG128.BIN/F8.c:120; was func_800FDEC4, 0x800FDEC4-0x800FE3D0)
 std::int32_t UpdateEffectCamera(CameraEffectHost& host,
                                 CameraEffectState& state,
                                 CameraScratch& scratch, std::uint32_t command,

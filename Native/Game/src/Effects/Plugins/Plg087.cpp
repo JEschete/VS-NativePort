@@ -3,12 +3,17 @@
 #include "Effects/Plugins/Plg087.hpp"
 
 namespace VS::Effects::Plg087 {
-// decomp: D_800FF75C (PLG087.BIN/1F0.c:6; sphericalSurfaceVertices.h:21)
+// decomp: vs_effect_apocalypse_0_vertices
+// (src/EFFECT/sphericalSurfaceVertices.h:21; was D_800FF75C;
+// src/EFFECT/sphericalSurfaceVertices.h:21)
 plugins::SurfaceProfile surfaceVertices;
-// decomp: D_800FF9DC (PLG087.BIN/1F0.c:9; closedRings.h:58)
+// decomp: vs_effect_apocalypse_1_colors (src/EFFECT/closedRings.h:58; was
+// D_800FF9DC; src/EFFECT/closedRings.h:58)
 plugins::RingPalette closedRingColorFactors;
-// decomp: D_800FF9FC (PLG087.BIN/1F0.c:13; trailEffect.h:70)
+// decomp: vs_effect_apocalypse_3_origin_state (src/EFFECT/trailEffect.h:70; was
+// D_800FF9FC; src/EFFECT/trailEffect.h:70)
 std::int32_t trailEmissionCounter;
-// decomp: D_800FFA00 (PLG087.BIN/1F0.c:16; particleSetup.h:35)
+// decomp: vs_effect_apocalypse_4_origin_state (src/EFFECT/particleSetup.h:35;
+// was D_800FFA00; src/EFFECT/particleSetup.h:35)
 std::int32_t particleEmissionCounter;
 }  // namespace VS::Effects::Plg087

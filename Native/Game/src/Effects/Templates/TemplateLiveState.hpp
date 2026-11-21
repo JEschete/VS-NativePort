@@ -16,9 +16,9 @@
 
 namespace VS::Effects {
 // decomp: vs_RingState (src/EFFECT/effectCommon.h:22): the state of the ring
-// (rings.h:34), closed ring (closedRings.h:80), tiled ring and transposed
-// ring templates; the last two are closedRings.h variants (tiledRings.h,
-// VS_CLOSED_RING_TRANSPOSED).
+// (src/EFFECT/rings.h:34), closed ring (src/EFFECT/closedRings.h:80), tiled
+// ring and transposed ring templates; the last two are src/EFFECT/closedRings.h
+// variants (src/EFFECT/tiledRings.h, VS_CLOSED_RING_TRANSPOSED).
 struct LiveRingState {
   // Ticks left, from the create argument's low byte; 0 runs until stopped,
   // and a stop sets 1 so the next tick ends the effect (rings.h:57, 277-288).
@@ -115,7 +115,7 @@ using LiveMirrorSurfaceState = LiveSheetState<Templates::kMirrorSurfaceRows>;
 
 // decomp: vs_RotatingSurfaceState (src/EFFECT/rotatingSurfaces.h:29): the
 // surface state with an angle the sampled spin advances
-// (rotatingSurfaces.h:143-157).
+// (src/EFFECT/rotatingSurfaces.h:143-157).
 struct LiveRotatingSurfaceState {
   std::uint8_t lifetime;
   std::uint8_t effect;

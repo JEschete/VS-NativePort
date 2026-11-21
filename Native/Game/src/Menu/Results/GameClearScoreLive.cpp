@@ -78,19 +78,22 @@ class LiveGameClearHost final : public GameClearDrawHost {
 
 }  // namespace
 
-// decomp: MENUF.PRG _renderCongratulations (3B8.c:1332)
+// decomp: MENUF.PRG renderCongratulations (src/MENU/MENUF.PRG/3B8.c:1345; was
+// _renderCongratulations)
 void LiveDrawCongratulations(int x, int y, int timer) {
   LiveGameClearHost host;
   Report(DrawCongratulations(LiveResultsAtlas(), x, y, timer, host));
 }
 
-// decomp: MENUF.PRG _renderScore (3B8.c:1357)
+// decomp: MENUF.PRG renderScore (src/MENU/MENUF.PRG/3B8.c:1370; was
+// _renderScore)
 void LiveDrawScore(int x, int y, int timer, int /*unused*/) {
   LiveGameClearHost host;
   Report(DrawScore(LiveResultsAtlas(), x, y, timer, score, host));
 }
 
-// decomp: MENUF.PRG _renderIncrementalScore (3B8.c:1409)
+// decomp: MENUF.PRG renderIncrementalScore (src/MENU/MENUF.PRG/3B8.c:1422; was
+// _renderIncrementalScore)
 void LiveDrawCountingScore(int x, int y, int timer, int /*unused*/) {
   LiveGameClearHost host;
   CountingReadout readout{.shown = onScreenScore,
@@ -101,14 +104,16 @@ void LiveDrawCountingScore(int x, int y, int timer, int /*unused*/) {
   incrementingScore = readout.counting;
 }
 
-// decomp: MENUF.PRG _renderMapCompletion (3B8.c:1486)
+// decomp: MENUF.PRG renderMapCompletion (src/MENU/MENUF.PRG/3B8.c:1499; was
+// _renderMapCompletion)
 void LiveDrawMapCompletion(int x, int y, int timer, int /*unused*/) {
   LiveGameClearHost host;
   Report(
       DrawMapCompletion(LiveResultsAtlas(), x, y, timer, mapCompletion, host));
 }
 
-// decomp: MENUF.PRG _renderIncrementalMapCompletion (3B8.c:1527)
+// decomp: MENUF.PRG renderIncrementalMapCompletion
+// (src/MENU/MENUF.PRG/3B8.c:1540; was _renderIncrementalMapCompletion)
 void LiveDrawCountingMapCompletion(int x, int y, int timer, int /*unused*/) {
   LiveGameClearHost host;
   CountingReadout readout{.shown = onScreenMapCompletion,
@@ -119,13 +124,15 @@ void LiveDrawCountingMapCompletion(int x, int y, int timer, int /*unused*/) {
   incrementingMapCompletion = readout.counting;
 }
 
-// decomp: MENUF.PRG _renderRiskbreakerRankHeader (3B8.c:1598)
+// decomp: MENUF.PRG renderRiskbreakerRankHeader (src/MENU/MENUF.PRG/3B8.c:1610;
+// was _renderRiskbreakerRankHeader)
 void LiveDrawRiskbreakerRankHeading(int x, int y, int timer) {
   LiveGameClearHost host;
   Report(DrawRiskbreakerRankHeading(LiveResultsAtlas(), x, y, timer, host));
 }
 
-// decomp: MENUF.PRG _renderRiskbreakerRank (3B8.c:1618)
+// decomp: MENUF.PRG renderRiskbreakerRank (src/MENU/MENUF.PRG/3B8.c:1630; was
+// _renderRiskbreakerRank)
 void LiveDrawRiskbreakerRank(int x, int y, int timer) {
   LiveGameClearHost host;
   Report(DrawRiskbreakerRank(LiveResultsAtlas(), x, y, timer, rank,

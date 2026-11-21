@@ -238,7 +238,8 @@ void GrowSpellDefense(const Calculation& c, int hit, int random,
 }
 }  // namespace
 
-// decomp: _getPhysicalAttackDamage (src/BATTLE/BATTLE.PRG/146C.c:11271).
+// decomp: getPhysicalAttackDamage (src/BATTLE/BATTLE.PRG/146C.c:11202; was
+// _getPhysicalAttackDamage).
 std::optional<std::int16_t> CalculatePhysicalHitDamage(
     const DamageTarget* source, const DamageTarget* target, int hit, int random,
     bool apply_statuses, DamageWorld& world) {
@@ -274,14 +275,16 @@ std::optional<std::int16_t> CalculatePhysicalHitDamage(
   }
   return value;
 }
-// decomp: _getPhysicalAttackDamageWithoutStatusModifiers
-// (src/BATTLE/BATTLE.PRG/146C.c:11467).
+// decomp: getPhysicalAttackDamageWithoutStatusModifiers
+// (src/BATTLE/BATTLE.PRG/146C.c:11398; was
+// _getPhysicalAttackDamageWithoutStatusModifiers).
 std::optional<std::int16_t> PhysicalDamageWithoutDebuffs(
     const DamageTarget* source, const DamageTarget* target, int hit, int random,
     DamageWorld& world) {
   return CalculatePhysicalHitDamage(source, target, hit, random, false, world);
 }
-// decomp: _getMagicAttackDamage (src/BATTLE/BATTLE.PRG/146C.c:11473).
+// decomp: getMagicAttackDamage (src/BATTLE/BATTLE.PRG/146C.c:11404; was
+// _getMagicAttackDamage).
 std::optional<std::int16_t> CalculateSpellHitDamage(const DamageTarget* source,
                                                     const DamageTarget* target,
                                                     int hit, int random,
@@ -299,7 +302,8 @@ std::optional<std::int16_t> CalculateSpellHitDamage(const DamageTarget* source,
   GrowSpellDefense(c, hit, random, world);
   return value;
 }
-// decomp: _hpHealed (src/BATTLE/BATTLE.PRG/146C.c:11850).
+// decomp: calculateHpHealed (src/BATTLE/BATTLE.PRG/146C.c:11774; was
+// _hpHealed).
 std::optional<std::int16_t> CalculateSpellHealing(const DamageTarget* source,
                                                   const DamageTarget* target,
                                                   int hit, int random,
@@ -318,8 +322,9 @@ std::optional<std::int16_t> CalculateSpellHealing(const DamageTarget* source,
   GrowSpellDefense(c, hit, random, world);
   return value;
 }
-// decomp: _getPhysicalAttackDamageWithStatusModifiers
-// (src/BATTLE/BATTLE.PRG/146C.c:12235).
+// decomp: getPhysicalAttackDamageWithStatusModifiers
+// (src/BATTLE/BATTLE.PRG/146C.c:12150; was
+// _getPhysicalAttackDamageWithStatusModifiers).
 std::optional<std::int16_t> PhysicalDamageWithDebuffs(
     const DamageTarget* source, const DamageTarget* target, int hit, int random,
     DamageWorld& world) {

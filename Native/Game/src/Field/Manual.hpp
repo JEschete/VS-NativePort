@@ -22,7 +22,7 @@ struct ManualDisplayState {
 };
 static_assert(sizeof(ManualDisplayState) == kManualDisplayStateBytes);
 
-// decomp: vs_battle_manualDisplayState (menuState.h:38,
+// decomp: vs_battle_manualDisplayState (src/BATTLE/BATTLE.PRG/menuState.h:38,
 // vs_battle_manualDisplayState@BATTLE/BATTLE.PRG)
 extern ManualDisplayState manualDisplayState;
 }  // namespace VS::Field

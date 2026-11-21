@@ -185,7 +185,8 @@ std::span<TreasureChest> LiveRoomChestRecords() {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG _dropLoot (src/BATTLE/BATTLE.PRG/146C.c:1720)
+// decomp: BATTLE.PRG dropLoot (src/BATTLE/BATTLE.PRG/146C.c:1363; was
+// _dropLoot)
 void QueueLiveEnemyLoot(const VS::Battle::Actor* enemy) {
   const auto drops = ToEnemyDrops(enemy);
   if (!drops) {
@@ -197,14 +198,14 @@ void QueueLiveEnemyLoot(const VS::Battle::Actor* enemy) {
   QueueEnemyLoot(*drops, list, random);
 }
 
-// decomp: BATTLE.PRG func_8006FB48 (src/BATTLE/BATTLE.PRG/146C.c:3372)
+// decomp: BATTLE.PRG func_8006FB48 (src/BATTLE/BATTLE.PRG/146C.c:3076)
 void OpenLivePendingEnemyLoot() {
   const LiveLootList list;
   LiveLootFlowHost flow;
   OpenPendingEnemyLoot(list, flow);
 }
 
-// decomp: BATTLE.PRG func_8007BA98 (src/BATTLE/BATTLE.PRG/146C.c:8470)
+// decomp: BATTLE.PRG func_8007BA98 (src/BATTLE/BATTLE.PRG/146C.c:8399)
 // The original stored the id's low 16 bits and the count's low byte.
 void PresentLiveScriptedLoot(int id0, int count0, int id1, int count1) {
   const std::array<MiscItemStack, kGuaranteedDropCount> items{{
@@ -216,14 +217,14 @@ void PresentLiveScriptedLoot(int id0, int count0, int id1, int count1) {
   PresentScriptedLoot(items, list, flow);
 }
 
-// decomp: BATTLE.PRG func_8008A6FC (src/BATTLE/BATTLE.PRG/146C.c:15596)
+// decomp: BATTLE.PRG func_8008A6FC (src/BATTLE/BATTLE.PRG/146C.c:15466)
 void ClearLiveRoomLootList() {
   LiveLootList list;
   LiveLootFlowHost flow;
   ClearRoomLootList(list, flow);
 }
 
-// decomp: BATTLE.PRG func_8008D508 (src/BATTLE/BATTLE.PRG/146C.c:16832)
+// decomp: BATTLE.PRG func_8008D508 (src/BATTLE/BATTLE.PRG/146C.c:16706)
 TreasureChest* FindLiveTreasureChestAtTile(int tile_x, int tile_z,
                                            int tile_layer) {
   const auto chests = LiveRoomChestRecords();
@@ -231,13 +232,13 @@ TreasureChest* FindLiveTreasureChestAtTile(int tile_x, int tile_z,
   return index ? &chests[*index] : nullptr;
 }
 
-// decomp: BATTLE.PRG func_8008D710 (src/BATTLE/BATTLE.PRG/146C.c:16903)
+// decomp: BATTLE.PRG func_8008D710 (src/BATTLE/BATTLE.PRG/146C.c:16777)
 void RestoreLiveRoomChestStates() {
   LiveChestStateHost host;
   RestoreRoomChestStates(LiveRoomChestRecords(), host);
 }
 
-// decomp: BATTLE.PRG func_8008E370 (src/BATTLE/BATTLE.PRG/146C.c:17285)
+// decomp: BATTLE.PRG func_8008E370 (src/BATTLE/BATTLE.PRG/146C.c:17164)
 // A room with a chest section of less than one record keeps its (non-null)
 // records with a count of 0, as the original returned.
 TreasureChest* LiveRoomTreasureChests(int* chest_count_out) {
@@ -250,7 +251,8 @@ TreasureChest* LiveRoomTreasureChests(int* chest_count_out) {
   return chests.data();
 }
 
-// decomp: BATTLE.PRG _loadMpdLootSection (src/BATTLE/BATTLE.PRG/146C.c:17389)
+// decomp: BATTLE.PRG loadMpdLootSection (src/BATTLE/BATTLE.PRG/146C.c:17268;
+// was _loadMpdLootSection)
 void LoadLiveRoomChestLoot(const void* loot_section) {
   if (loot_section == nullptr) {
     WarnNullRecord("LoadRoomChestLoot");

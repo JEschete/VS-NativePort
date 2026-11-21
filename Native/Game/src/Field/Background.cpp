@@ -150,7 +150,7 @@ void DrawSkyDome(BackgroundHost& host,
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_8008E88C (src/BATTLE/BATTLE.PRG/146C.c:17431)
+// decomp: BATTLE.PRG func_8008E88C (src/BATTLE/BATTLE.PRG/146C.c:17310)
 void InitializeRoomBackground(BackgroundHost& host, RoomBackgroundState& state,
                               RoomWeatherState& weather) {
   state.texture_read = BackgroundReadId::kNone;
@@ -166,7 +166,7 @@ void InitializeRoomBackground(BackgroundHost& host, RoomBackgroundState& state,
   InitializeRoomBackgroundColors(host, state);
 }
 
-// decomp: BATTLE.PRG func_8008E938 (src/BATTLE/BATTLE.PRG/146C.c:17453)
+// decomp: BATTLE.PRG func_8008E938 (src/BATTLE/BATTLE.PRG/146C.c:17332)
 void InitializeRoomBackgroundColors(BackgroundHost& host,
                                     RoomBackgroundState& state) {
   state.offset_x = 0;
@@ -207,7 +207,7 @@ void InitializeRoomBackgroundColors(BackgroundHost& host,
   host.StoreWeatherArea(area);
 }
 
-// decomp: BATTLE.PRG func_8008EAE4 (src/BATTLE/BATTLE.PRG/146C.c:17517)
+// decomp: BATTLE.PRG func_8008EAE4 (src/BATTLE/BATTLE.PRG/146C.c:17394)
 void SetBackgroundParallaxScale(RoomBackgroundState& state,
                                 std::int32_t parallax_x,
                                 std::int32_t parallax_y) {
@@ -215,18 +215,18 @@ void SetBackgroundParallaxScale(RoomBackgroundState& state,
   state.parallax_y = Math::WrapSigned16(static_cast<std::uint32_t>(parallax_y));
 }
 
-// decomp: BATTLE.PRG func_8008EAF8 (src/BATTLE/BATTLE.PRG/146C.c:17523)
+// decomp: BATTLE.PRG func_8008EAF8 (src/BATTLE/BATTLE.PRG/146C.c:17400)
 void SetTiledBackgroundEnabled(RoomBackgroundState& state,
                                std::int32_t enabled) {
   state.tiled_enabled = static_cast<std::uint8_t>(enabled);
 }
 
-// decomp: BATTLE.PRG func_8008EB24 (src/BATTLE/BATTLE.PRG/146C.c:17531)
+// decomp: BATTLE.PRG func_8008EB24 (src/BATTLE/BATTLE.PRG/146C.c:17408)
 const GradientColors& RoomBackgroundColors(const RoomBackgroundState& state) {
   return state.gradient_colors;
 }
 
-// decomp: BATTLE.PRG func_8008EB30 (src/BATTLE/BATTLE.PRG/146C.c:17533)
+// decomp: BATTLE.PRG func_8008EB30 (src/BATTLE/BATTLE.PRG/146C.c:17410)
 void SetRoomBackgroundColors(BackgroundHost& host, RoomBackgroundState& state,
                              const GradientColors& colors) {
   const GradientColors source = colors;
@@ -248,7 +248,7 @@ void SetRoomBackgroundColors(BackgroundHost& host, RoomBackgroundState& state,
   host.StoreSkyDomeColors(dome);
 }
 
-// decomp: BATTLE.PRG func_8008EC48 (src/BATTLE/BATTLE.PRG/146C.c:17571)
+// decomp: BATTLE.PRG func_8008EC48 (src/BATTLE/BATTLE.PRG/146C.c:17448)
 void DrawRoomBackground(BackgroundHost& host, const RoomBackgroundState& state,
                         const std::optional<CameraVector>& rotation_override) {
   if (state.tiled_enabled != 0 && state.layout != BackgroundBufferId::kNone) {
@@ -285,7 +285,7 @@ void DrawRoomBackground(BackgroundHost& host, const RoomBackgroundState& state,
   DrawSkyDome(host, rotation_override);
 }
 
-// decomp: BATTLE.PRG func_8008EFCC (src/BATTLE/BATTLE.PRG/146C.c:17638)
+// decomp: BATTLE.PRG func_8008EFCC (src/BATTLE/BATTLE.PRG/146C.c:17515)
 std::int32_t QueueTiledBackgroundLoad(BackgroundHost& host,
                                       RoomBackgroundState& state,
                                       std::int32_t texture_page) {
@@ -328,7 +328,7 @@ std::int32_t QueueTiledBackgroundLoad(BackgroundHost& host,
   return 0;
 }
 
-// decomp: BATTLE.PRG func_8008F0FC (src/BATTLE/BATTLE.PRG/146C.c:17680)
+// decomp: BATTLE.PRG func_8008F0FC (src/BATTLE/BATTLE.PRG/146C.c:17557)
 std::int32_t FinishTiledBackgroundLoad(BackgroundHost& host,
                                        RoomBackgroundState& state) {
   if (state.texture_read != BackgroundReadId::kNone &&
@@ -372,7 +372,7 @@ std::int32_t FinishTiledBackgroundLoad(BackgroundHost& host,
   return 0;
 }
 
-// decomp: BATTLE.PRG func_8008F234 (src/BATTLE/BATTLE.PRG/146C.c:17710)
+// decomp: BATTLE.PRG func_8008F234 (src/BATTLE/BATTLE.PRG/146C.c:17587)
 std::int32_t ReleaseTiledBackground(BackgroundHost& host,
                                     RoomBackgroundState& state) {
   state.tiled_enabled = 0;

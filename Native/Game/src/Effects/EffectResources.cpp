@@ -154,7 +154,7 @@ void RefusePluginLoad(EffectResourceState& state) noexcept {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800D7814 (src/BATTLE/BATTLE.PRG/6F014.c:446)
+// decomp: BATTLE.PRG func_800D7814 (src/BATTLE/BATTLE.PRG/6E4CC.c:75)
 void InitializeEffectResources(EffectResourceState& state,
                                EffectResourceContext& context,
                                EffectLifecycleHost& host) {
@@ -168,36 +168,39 @@ void InitializeEffectResources(EffectResourceState& state,
   host.BindEmptyPackage(context.current);
 }
 
-// decomp: BATTLE.PRG func_800D7890 (src/BATTLE/BATTLE.PRG/6F014.c:460)
+// decomp: BATTLE.PRG func_800D7890 (src/BATTLE/BATTLE.PRG/6E4CC.c:89)
 void SelectEffectResourceContext(EffectResourceContext& context,
                                  std::int32_t use_action_package) noexcept {
   context.current =
       use_action_package == 0 ? context.secondary : context.action;
 }
 
-// decomp: BATTLE.PRG func_800D78B8 (src/BATTLE/BATTLE.PRG/6F014.c:471)
+// decomp: BATTLE.PRG func_800D78B8 (src/BATTLE/BATTLE.PRG/6E4CC.c:100)
 void SaveEffectResourceContext(EffectResourceContext& context) noexcept {
   context.saved = context.current;
 }
 
-// decomp: BATTLE.PRG func_800D78CC (src/BATTLE/BATTLE.PRG/6F014.c:473)
+// decomp: BATTLE.PRG func_800D78CC (src/BATTLE/BATTLE.PRG/6E4CC.c:102)
 void RestoreEffectResourceContext(EffectResourceContext& context) noexcept {
   context.current = context.saved;
 }
 
-// decomp: BATTLE.PRG _parsePfileBlock5 (src/BATTLE/BATTLE.PRG/6F014.c:475)
+// decomp: BATTLE.PRG parsePfileBlock5 (src/BATTLE/BATTLE.PRG/6E4CC.c:104; was
+// _parsePfileBlock5)
 void BindParticleDefinitions(EffectPackageBlocks& blocks,
                              std::span<std::byte> block) noexcept {
   blocks.particle_definitions = block;
 }
 
-// decomp: BATTLE.PRG _parsePfileBlock3 (src/BATTLE/BATTLE.PRG/6F014.c:490)
+// decomp: BATTLE.PRG parsePfileBlock3 (src/BATTLE/BATTLE.PRG/6E4CC.c:119; was
+// _parsePfileBlock3)
 void BindEffectTimelines(EffectPackageBlocks& blocks,
                          std::span<std::byte> block) noexcept {
   blocks.timelines = block;
 }
 
-// decomp: BATTLE.PRG _parsePfileCurveBlock (src/BATTLE/BATTLE.PRG/6F014.c:492)
+// decomp: BATTLE.PRG parsePfileCurveBlock (src/BATTLE/BATTLE.PRG/6E4CC.c:121;
+// was _parsePfileCurveBlock)
 CurveBinding BindEffectCurves(EffectPackageBlocks& blocks,
                               std::span<std::byte> block) noexcept {
   blocks.curve_block = block;
@@ -233,25 +236,29 @@ CurveBinding BindEffectCurves(EffectPackageBlocks& blocks,
   return binding;
 }
 
-// decomp: BATTLE.PRG _parsePfileBlock8 (src/BATTLE/BATTLE.PRG/6F014.c:506)
+// decomp: BATTLE.PRG parsePfileBlock8 (src/BATTLE/BATTLE.PRG/6E4CC.c:135; was
+// _parsePfileBlock8)
 void BindEffectPrograms(EffectPackageBlocks& blocks,
                         std::span<std::byte> block) noexcept {
   blocks.programs = block;
 }
 
-// decomp: BATTLE.PRG _parsePfileBlock9 (src/BATTLE/BATTLE.PRG/6F014.c:508)
+// decomp: BATTLE.PRG parsePfileBlock9 (src/BATTLE/BATTLE.PRG/6E4CC.c:137; was
+// _parsePfileBlock9)
 void BindEffectPackageParameters(EffectPackageBlocks& blocks,
                                  std::span<std::byte> block) noexcept {
   blocks.parameters = block;
 }
 
-// decomp: BATTLE.PRG _parsePfileBlock10 (src/BATTLE/BATTLE.PRG/6F014.c:510)
+// decomp: BATTLE.PRG parsePfileBlock10 (src/BATTLE/BATTLE.PRG/6E4CC.c:139; was
+// _parsePfileBlock10)
 void BindEffectTransformDefinitions(EffectPackageBlocks& blocks,
                                     std::span<std::byte> block) noexcept {
   blocks.transform_definitions = block;
 }
 
-// decomp: BATTLE.PRG _parsePfileBlock2 (src/BATTLE/BATTLE.PRG/6F014.c:524)
+// decomp: BATTLE.PRG parsePfileBlock2 (src/BATTLE/BATTLE.PRG/6E4CC.c:153; was
+// _parsePfileBlock2)
 void BindParticleAnimationTable(EffectPackageBlocks& blocks,
                                 std::span<std::byte> block) noexcept {
   blocks.animation_table = block;
@@ -261,7 +268,7 @@ void BindParticleAnimationTable(EffectPackageBlocks& blocks,
                                      std::span<const std::byte>(block), 0));
 }
 
-// decomp: BATTLE.PRG func_800D7A90 (src/BATTLE/BATTLE.PRG/6F014.c:530)
+// decomp: BATTLE.PRG func_800D7A90 (src/BATTLE/BATTLE.PRG/6E4CC.c:159)
 std::optional<std::span<std::byte>> ParticleAnimationData(
     const EffectPackageBlocks& blocks, std::int32_t index) noexcept {
   const auto table = blocks.animation_table;
@@ -277,20 +284,23 @@ std::optional<std::span<std::byte>> ParticleAnimationData(
   return table.subspan(offset);
 }
 
-// decomp: BATTLE.PRG _parsePfileBlock11 (src/BATTLE/BATTLE.PRG/6F014.c:535)
+// decomp: BATTLE.PRG parsePfileBlock11 (src/BATTLE/BATTLE.PRG/6E4CC.c:164; was
+// _parsePfileBlock11)
 void BindEffectSoundSequences(EffectPackageBlocks& blocks,
                               std::span<std::byte> block) noexcept {
   blocks.sound_sequences = block;
 }
 
-// decomp: BATTLE.PRG _parsePfileBlock12 (src/BATTLE/BATTLE.PRG/6F014.c:537)
+// decomp: BATTLE.PRG parsePfileBlock12 (src/BATTLE/BATTLE.PRG/6E4CC.c:166; was
+// _parsePfileBlock12)
 void BindEffectSoundBank(EffectPackageBlocks& blocks,
                          std::span<std::byte> block, EffectPackageHost& host) {
   blocks.sound_bank = block;
   host.BindSoundBank(block);
 }
 
-// decomp: BATTLE.PRG _parsePfileBlock13 (src/BATTLE/BATTLE.PRG/6F014.c:543)
+// decomp: BATTLE.PRG parsePfileBlock13 (src/BATTLE/BATTLE.PRG/6E4CC.c:172; was
+// _parsePfileBlock13)
 void BindEffectAuxiliarySoundBank(EffectPackageBlocks& blocks,
                                   std::span<std::byte> block,
                                   EffectPackageHost& host) {
@@ -298,7 +308,7 @@ void BindEffectAuxiliarySoundBank(EffectPackageBlocks& blocks,
   blocks.auxiliary_sound_handle = host.BindAuxiliarySound(block);
 }
 
-// decomp: BATTLE.PRG func_800D8060 (src/BATTLE/BATTLE.PRG/6F014.c:746)
+// decomp: BATTLE.PRG func_800D8060 (src/BATTLE/BATTLE.PRG/6E4CC.c:375)
 PackageWalk BindEffectPackageBlocks(std::span<std::byte> package,
                                     EffectPackageBlocks& blocks,
                                     EffectPackageHost& host) {
@@ -396,7 +406,7 @@ std::optional<PackageParameters> ReadPackageParameters(
   return parameters;
 }
 
-// decomp: BATTLE.PRG func_800D78F0 (src/BATTLE/BATTLE.PRG/6F014.c:477)
+// decomp: BATTLE.PRG func_800D78F0 (src/BATTLE/BATTLE.PRG/6E4CC.c:106)
 ParticleForceStatus UpdateParticleGravityAndDrag(
     std::span<const std::byte> parameters,
     std::span<const std::int32_t> curve_samples, ParticleForceHost& host) {
@@ -416,7 +426,8 @@ ParticleForceStatus UpdateParticleGravityAndDrag(
   return ParticleForceStatus::kApplied;
 }
 
-// decomp: BATTLE.PRG _loadfile (src/BATTLE/BATTLE.PRG/6F014.c:549)
+// decomp: BATTLE.PRG loadfile (src/BATTLE/BATTLE.PRG/6E4CC.c:178; was
+// _loadfile)
 ResourcePoll PollEffectResourceRead(EffectResourceState& state,
                                     EffectResourceHost& host, DiscRead read,
                                     EffectBuffer destination) {
@@ -444,7 +455,8 @@ ResourcePoll PollEffectResourceRead(EffectResourceState& state,
   return {.pending = true};
 }
 
-// decomp: BATTLE.PRG vs_battle_loadEffPurge (src/BATTLE/BATTLE.PRG/6F014.c:570)
+// decomp: BATTLE.PRG loadEffPurge (src/BATTLE/BATTLE.PRG/6E4CC.c:199; was
+// vs_battle_loadEffPurge)
 ResourcePoll LoadEffectPurgeOverlay(EffectResourceState& state,
                                     EffectResourceHost& host) {
   if (!state.purge_overlay_loaded) {
@@ -455,7 +467,7 @@ ResourcePoll LoadEffectPurgeOverlay(EffectResourceState& state,
                                 host.PurgeOverlayBuffer());
 }
 
-// decomp: BATTLE.PRG func_800D7BF8 (src/BATTLE/BATTLE.PRG/6F014.c:580)
+// decomp: BATTLE.PRG func_800D7BF8 (src/BATTLE/BATTLE.PRG/6E4CC.c:209)
 ResourcePoll LoadEffectPackage(EffectResourceState& state,
                                EffectResourceHost& host) {
   if (state.package_buffer.id == EffectBufferId::kNone) {
@@ -467,7 +479,7 @@ ResourcePoll LoadEffectPackage(EffectResourceState& state,
   return PollEffectResourceRead(state, host, read, state.package_buffer);
 }
 
-// decomp: BATTLE.PRG func_800D7C5C (src/BATTLE/BATTLE.PRG/6F014.c:592)
+// decomp: BATTLE.PRG func_800D7C5C (src/BATTLE/BATTLE.PRG/6E4CC.c:221)
 void ReleaseEffectPackageResources(EffectResourceState& state,
                                    EffectResourceHost& host) {
   for (std::uint32_t page = kEffectTexturePageBase; page < kPageEnd; ++page) {
@@ -483,7 +495,7 @@ void ReleaseEffectPackageResources(EffectResourceState& state,
   }
 }
 
-// decomp: BATTLE.PRG func_800D7CFC (src/BATTLE/BATTLE.PRG/6F014.c:612)
+// decomp: BATTLE.PRG func_800D7CFC (src/BATTLE/BATTLE.PRG/6E4CC.c:241)
 ResourcePoll UpdateEffectTextureLoading(EffectResourceState& state,
                                         EffectResourceHost& host) {
   if (state.texture_state == TextureLoadState::kIdle &&
@@ -506,7 +518,7 @@ ResourcePoll UpdateEffectTextureLoading(EffectResourceState& state,
   return {.pending = false, .refusal = ResourceRefusal::kUnknownState};
 }
 
-// decomp: BATTLE.PRG func_800D7EF4 (src/BATTLE/BATTLE.PRG/6F014.c:681)
+// decomp: BATTLE.PRG func_800D7EF4 (src/BATTLE/BATTLE.PRG/6E4CC.c:310)
 ResourcePoll UpdateEffectPluginLoading(EffectResourceState& state,
                                        EffectResourceHost& host) {
   switch (state.plugin_state) {
@@ -534,13 +546,13 @@ ResourcePoll UpdateEffectPluginLoading(EffectResourceState& state,
   return {.pending = false, .refusal = ResourceRefusal::kUnknownState};
 }
 
-// decomp: BATTLE.PRG func_800D7FB4 (src/BATTLE/BATTLE.PRG/6F014.c:712)
+// decomp: BATTLE.PRG func_800D7FB4 (src/BATTLE/BATTLE.PRG/6E4CC.c:341)
 void ConfigureEffectPackageLoad(EffectResourceState& state,
                                 EffectFileExtent file) noexcept {
   state.package_file = file;
 }
 
-// decomp: BATTLE.PRG vs_battle_configurePlg (src/BATTLE/BATTLE.PRG/6F014.c:718)
+// decomp: BATTLE.PRG vs_battle_configurePlg (src/BATTLE/BATTLE.PRG/6E4CC.c:347)
 void ConfigureEffectPluginLoad(EffectResourceState& state,
                                EffectFileExtent file,
                                std::int32_t entry_count) noexcept {
@@ -549,7 +561,7 @@ void ConfigureEffectPluginLoad(EffectResourceState& state,
 }
 
 // decomp: BATTLE.PRG vs_battle_setEffectExec
-// (src/BATTLE/BATTLE.PRG/6F014.c:725)
+// (src/BATTLE/BATTLE.PRG/6E4CC.c:354)
 bool SetEffectRenderer(EffectRendererTable& renderers, PluginEntry entry,
                        std::int32_t index) noexcept {
   if (index < 0 || static_cast<std::size_t>(index) >= renderers.size()) {
@@ -559,14 +571,14 @@ bool SetEffectRenderer(EffectRendererTable& renderers, PluginEntry entry,
   return true;
 }
 
-// decomp: BATTLE.PRG func_800D7FFC (src/BATTLE/BATTLE.PRG/6F014.c:730)
+// decomp: BATTLE.PRG func_800D7FFC (src/BATTLE/BATTLE.PRG/6E4CC.c:359)
 void SetEffectTextureAssetCount(EffectResourceState& state,
                                 std::int32_t asset_count) noexcept {
   state.textures.asset_count = asset_count;
 }
 
 // decomp: BATTLE.PRG vs_battle_configureEffectFbLoad
-// (src/BATTLE/BATTLE.PRG/6F014.c:732)
+// (src/BATTLE/BATTLE.PRG/6E4CC.c:361)
 bool ConfigureEffectTextureAsset(EffectResourceState& state,
                                  const TextureAsset& asset,
                                  std::int32_t index) noexcept {
@@ -578,26 +590,26 @@ bool ConfigureEffectTextureAsset(EffectResourceState& state,
   return true;
 }
 
-// decomp: BATTLE.PRG func_800D8038 (src/BATTLE/BATTLE.PRG/6F014.c:740)
+// decomp: BATTLE.PRG func_800D8038 (src/BATTLE/BATTLE.PRG/6E4CC.c:369)
 void SetEffectTextureLoadState(EffectResourceState& state,
                                TextureLoadState load_state) noexcept {
   state.texture_state = load_state;
 }
 
-// decomp: BATTLE.PRG func_800D8044 (src/BATTLE/BATTLE.PRG/6F014.c:742)
+// decomp: BATTLE.PRG func_800D8044 (src/BATTLE/BATTLE.PRG/6E4CC.c:371)
 TextureLoadState EffectTextureLoadState(
     const EffectResourceState& state) noexcept {
   return state.texture_state;
 }
 
 // decomp: BATTLE.PRG vs_battle_setPlgLoadState
-// (src/BATTLE/BATTLE.PRG/6F014.c:744)
+// (src/BATTLE/BATTLE.PRG/6E4CC.c:373)
 void SetEffectPluginLoadState(EffectResourceState& state,
                               PluginLoadState load_state) noexcept {
   state.plugin_state = load_state;
 }
 
-// decomp: EFFPURGE.BIN func_800F9800 (src/EFFECT/EFFPURGE.BIN/0.c:590)
+// decomp: EFFPURGE.BIN func_800F9800 (src/EFFECT/EFFPURGE.BIN/0.c:609)
 PluginUpdateSweep InvokeAllPluginUpdates(PluginUpdateHost& host) {
   PluginUpdateSweep sweep{};
   const std::size_t count = host.EntryCount();
@@ -609,7 +621,7 @@ PluginUpdateSweep InvokeAllPluginUpdates(PluginUpdateHost& host) {
   return sweep;
 }
 
-// decomp: EFFPURGE.BIN vs_effpurge_exec (src/EFFECT/EFFPURGE.BIN/0.c:911)
+// decomp: EFFPURGE.BIN vs_effpurge_exec (src/EFFECT/EFFPURGE.BIN/0.c:930)
 EffectPurgeConfiguration ConfigureEffectResources(
     EffectResourceState& state, EffectRendererTable& renderers,
     const EffectPurgeTables& tables, std::int32_t effect_id,

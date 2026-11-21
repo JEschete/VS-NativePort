@@ -120,16 +120,19 @@ class MenuHost {
 };
 
 // A missing result is an explicit refusal, never a selected spell or exit.
-// decomp: _warlockMagicMenu (src/MENU/MENU0.PRG/84.c:164).
+// decomp: warlockMagicMenu (src/MENU/MENU0.PRG/84.c:177; was
+// _warlockMagicMenu).
 std::optional<int> UpdateWarlockMenu(unsigned int init, SpellMenuState& state,
                                      MenuHost& host);
-// decomp: _shamanMagicMenu (src/MENU/MENU0.PRG/84.c:512).
+// decomp: shamanMagicMenu (src/MENU/MENU0.PRG/84.c:525; was _shamanMagicMenu).
 std::optional<int> UpdateShamanMenu(unsigned int init, SpellMenuState& state,
                                     MenuHost& host);
-// decomp: _sorcererMagicMenu (src/MENU/MENU0.PRG/84.c:613).
+// decomp: sorcererMagicMenu (src/MENU/MENU0.PRG/84.c:628; was
+// _sorcererMagicMenu).
 std::optional<int> UpdateSorcererMenu(unsigned int init, SpellMenuState& state,
                                       MenuHost& host);
-// decomp: _enchanterMagicMenu (src/MENU/MENU0.PRG/84.c:713).
+// decomp: enchanterMagicMenu (src/MENU/MENU0.PRG/84.c:729; was
+// _enchanterMagicMenu).
 std::optional<int> UpdateEnchanterMenu(unsigned int init, SpellMenuState& state,
                                        MenuHost& host);
 }  // namespace VS::Menu::Magic

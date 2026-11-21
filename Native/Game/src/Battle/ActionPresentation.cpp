@@ -153,7 +153,7 @@ int PreparePresentation(PresentationAction& action,
   return 1;
 }
 }  // namespace
-// decomp: func_80070278 (src/BATTLE/BATTLE.PRG/146C.c:3510).
+// decomp: func_80070278 (src/BATTLE/BATTLE.PRG/146C.c:3219).
 bool StartActionAnimation(ActionPresentationWorld& world) {
   world.SetField(AbilityField::kAbilityWindow, 0);
   world.SetField(AbilityField::kAbilityTimer, 0);
@@ -192,12 +192,12 @@ bool StartActionAnimation(ActionPresentationWorld& world) {
   world.SetPhase(kAnimationPhase);
   return true;
 }
-// decomp: func_800704B0 (src/BATTLE/BATTLE.PRG/146C.c:3572).
+// decomp: func_800704B0 (src/BATTLE/BATTLE.PRG/146C.c:3282).
 void AdvanceActionEffectPhase(ActionPresentationWorld& world) {
   world.SetPhase(kEffectPhase);
   world.ClearEffectMode();
 }
-// decomp: func_80070F28 (src/BATTLE/BATTLE.PRG/146C.c:3775).
+// decomp: func_80070F28 (src/BATTLE/BATTLE.PRG/146C.c:3487).
 bool CommitSelectedAction(int target_selection_mode,
                           ActionPresentationWorld& world) {
   world.PrepareCamera();
@@ -285,7 +285,7 @@ bool BuildActionPresentationRequest(PresentationAction& action,
   }
   return true;
 }
-// decomp: func_8007138C (src/BATTLE/BATTLE.PRG/146C.c:3906).
+// decomp: func_8007138C (src/BATTLE/BATTLE.PRG/146C.c:3618).
 bool StartActionPresentation(ActionPresentationWorld& world) {
   world.SetField(AbilityField::kAbilityInputSucceeded, 0);
   world.SetField(AbilityField::kAbilityInputAttempted,

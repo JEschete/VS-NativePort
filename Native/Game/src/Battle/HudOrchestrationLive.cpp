@@ -327,7 +327,7 @@ class LiveHudOrchestrationWorld final : public HudOrchestrationWorld {
 };
 }  // namespace
 
-// decomp: F00729 func_80095B70 (src/BATTLE/BATTLE.PRG/2842C.c:2379).
+// decomp: F00729 func_80095B70 (src/BATTLE/BATTLE.PRG/2842C.c:2367).
 void SetLiveActorMarkersHidden(int command) {
   HudFeedbackState state;
   SetActorMarkersHidden(state, command);
@@ -343,14 +343,14 @@ void SetLiveActorMarker(int actor_slot, int command) {
   }
 }
 
-// decomp: F00743 func_8009722C (src/BATTLE/BATTLE.PRG/2842C.c:2893).
+// decomp: F00743 func_8009722C (src/BATTLE/BATTLE.PRG/2842C.c:2881).
 void SuppressLiveAshleyStatusLabels() {
   HudFeedbackState state;
   SuppressAshleyStatusLabels(state);
   VS::Battle::ashleyStatusLabelsSuppressed = state.ashley_label_suppression;
 }
 
-// decomp: F01361 func_800C9FE8 (src/BATTLE/BATTLE.PRG/5BF94.c:3249).
+// decomp: F01361 func_800C9FE8 (src/BATTLE/BATTLE.PRG/5BF94.c:2800).
 void DrawLiveShortcutHud() {
   LiveHudOrchestrationWorld world(false);
   if (!DrawShortcutHud(world)) {
@@ -358,7 +358,7 @@ void DrawLiveShortcutHud() {
   }
 }
 
-// decomp: F01362 func_800CA2DC (src/BATTLE/BATTLE.PRG/5BF94.c:3307).
+// decomp: F01362 func_800CA2DC (src/BATTLE/BATTLE.PRG/5BF94.c:2857).
 void DrawLiveBattleHud() {
   LiveHudOrchestrationWorld world(true);
   if (!DrawBattleHud(world)) {
@@ -366,7 +366,8 @@ void DrawLiveBattleHud() {
   }
 }
 
-// decomp: F01384 _renderTimer (src/BATTLE/BATTLE.PRG/5BF94.c:3844).
+// decomp: F01384 renderTimer (src/BATTLE/BATTLE.PRG/5BF94.c:3410; was
+// _renderTimer).
 void DrawLivePuzzleTimer(const State::SceneTimer* timer) {
   if (timer == nullptr) Refuse("Puzzle HUD requires its scene timer");
   const State::SceneTime& time = timer->time;

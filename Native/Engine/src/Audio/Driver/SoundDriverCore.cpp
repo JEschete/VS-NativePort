@@ -60,32 +60,35 @@ std::int32_t ScaledVolume(std::int16_t volume, std::int32_t scale) {
 }
 }  // namespace
 
-// decomp: SLUS_010.40 _spuWriteComplete (src/SLUS_010.40/25AC.c:989)
+// decomp: SLUS_010.40 ClearSpuTransferCallback (src/SLUS_010.40/25AC.c:992; was
+// _spuWriteComplete)
 void CompleteSampleTransfer(SoundDriverHost& host) {
   host.SetTransferCallback(TransferCallback::kNone);
   host.SetTransferState(kTransferIdle);
 }
 
-// decomp: SLUS_010.40 spuSetTransferCallback (src/SLUS_010.40/25AC.c:995)
+// decomp: SLUS_010.40 SetSpuTransferCallback (src/SLUS_010.40/25AC.c:998; was
+// spuSetTransferCallback)
 void ArmSampleTransferCallback(SoundDriverHost& host) {
   host.SetTransferState(kTransferBusy);
   host.SetTransferCallback(TransferCallback::kCompleteTransfer);
 }
 
-// decomp: SLUS_010.40 _writeSpu (src/SLUS_010.40/25AC.c:1001)
+// decomp: SLUS_010.40 WriteSpu (src/SLUS_010.40/25AC.c:1004; was _writeSpu)
 void WriteSampleMemory(SoundDriverHost& host, std::span<const std::byte> data) {
   host.SetTransferState(kTransferBusy);
   host.SetTransferCallback(TransferCallback::kCompleteTransfer);
   host.WriteSampleMemory(data);
 }
 
-// decomp: SLUS_010.40 _readSpu (src/SLUS_010.40/25AC.c:1008)
+// decomp: SLUS_010.40 ReadSpu (src/SLUS_010.40/25AC.c:1011; was _readSpu)
 void ReadSampleMemory(SoundDriverHost& host, std::span<std::byte> data) {
   ArmSampleTransferCallback(host);
   host.ReadSampleMemory(data);
 }
 
-// decomp: SLUS_010.40 _waitTransferAvailable (src/SLUS_010.40/25AC.c:1014)
+// decomp: SLUS_010.40 WaitForSpuTransfer (src/SLUS_010.40/25AC.c:1017; was
+// _waitTransferAvailable)
 bool WaitForSampleTransfer(SoundDriverHost& host) {
   for (std::uint32_t poll = 0; poll < kTransferPollLimit; ++poll) {
     if (host.TransferState() != kTransferBusy) return true;
@@ -94,7 +97,7 @@ bool WaitForSampleTransfer(SoundDriverHost& host) {
   return false;
 }
 
-// decomp: SLUS_010.40 StartSound (src/SLUS_010.40/25AC.c:1060)
+// decomp: SLUS_010.40 Sound_Start (src/SLUS_010.40/25AC.c:1180; was StartSound)
 bool Start(SoundDriverHost& host) {
   host.ResetPlayback();
   if (!Retry(host, DriverRefusal::kTickTimerUnavailable,
@@ -114,7 +117,7 @@ bool Start(SoundDriverHost& host) {
          });
 }
 
-// decomp: SLUS_010.40 StopSound (src/SLUS_010.40/25AC.c:1085)
+// decomp: SLUS_010.40 Sound_Stop (src/SLUS_010.40/25AC.c:1205; was StopSound)
 bool Stop(SoundDriverHost& host) {
   const bool stopped =
       Retry(host, DriverRefusal::kTickTimerUnavailable,
@@ -127,7 +130,7 @@ bool Stop(SoundDriverHost& host) {
   return stopped;
 }
 
-// decomp: SLUS_010.40 SetVoiceStartAddr (src/SLUS_010.40/25AC.c:1153)
+// decomp: SLUS_010.40 SetVoiceStartAddr (src/SLUS_010.40/25AC.c:1274)
 void SetVoiceStartAddress(SoundDriverHost& host, std::int32_t voice,
                           std::uint32_t address) {
   if (!ValidVoice(host, voice)) return;
@@ -135,7 +138,7 @@ void SetVoiceStartAddress(SoundDriverHost& host, std::int32_t voice,
                           Halfword(address >> kAddressShift));
 }
 
-// decomp: SLUS_010.40 SetVoiceRepeatAddr (src/SLUS_010.40/25AC.c:1158)
+// decomp: SLUS_010.40 SetVoiceRepeatAddr (src/SLUS_010.40/25AC.c:1279)
 void SetVoiceLoopAddress(SoundDriverHost& host, std::int32_t voice,
                          std::uint32_t address) {
   if (!ValidVoice(host, voice)) return;
@@ -143,14 +146,14 @@ void SetVoiceLoopAddress(SoundDriverHost& host, std::int32_t voice,
                           Halfword(address >> kAddressShift));
 }
 
-// decomp: SLUS_010.40 SetVoiceAdsrLower (src/SLUS_010.40/25AC.c:1163)
+// decomp: SLUS_010.40 SetVoiceAdsrLower (src/SLUS_010.40/25AC.c:1284)
 void SetVoiceEnvelopeLower(SoundDriverHost& host, std::int32_t voice,
                            std::uint16_t value) {
   if (!ValidVoice(host, voice)) return;
   host.WriteVoiceRegister(Bits(voice), VoiceRegister::kEnvelopeLower, value);
 }
 
-// decomp: SLUS_010.40 SetVoiceAdsrUpper (src/SLUS_010.40/25AC.c:1168)
+// decomp: SLUS_010.40 SetVoiceAdsrUpper (src/SLUS_010.40/25AC.c:1289)
 void SetVoiceEnvelopeUpper(SoundDriverHost& host, std::int32_t voice,
                            std::uint16_t value) {
   if (!ValidVoice(host, voice)) return;
@@ -158,7 +161,7 @@ void SetVoiceEnvelopeUpper(SoundDriverHost& host, std::int32_t voice,
 }
 
 // decomp: SLUS_010.40 SetVoiceAdsrAttackRateAndMode
-// (src/SLUS_010.40/25AC.c:1262)
+// (src/SLUS_010.40/25AC.c:1383)
 void SetVoiceAttackRateAndMode(SoundDriverHost& host, std::int32_t voice,
                                std::int32_t attack_step,
                                std::uint32_t attack_mode) {
@@ -171,7 +174,7 @@ void SetVoiceAttackRateAndMode(SoundDriverHost& host, std::int32_t voice,
                           Halfword(mode | step | (lower & kAttackKeptBits)));
 }
 
-// decomp: SLUS_010.40 SetVoiceAdsrDecayRate (src/SLUS_010.40/25AC.c:1274)
+// decomp: SLUS_010.40 SetVoiceAdsrDecayRate (src/SLUS_010.40/25AC.c:1395)
 void SetVoiceDecayRate(SoundDriverHost& host, std::int32_t voice,
                        std::int32_t decay_rate) {
   if (!ValidVoice(host, voice)) return;
@@ -182,7 +185,7 @@ void SetVoiceDecayRate(SoundDriverHost& host, std::int32_t voice,
                           Halfword((lower & kDecayKeptBits) | rate));
 }
 
-// decomp: SLUS_010.40 SetVoiceAdsrSustainLevel (src/SLUS_010.40/25AC.c:1283)
+// decomp: SLUS_010.40 SetVoiceAdsrSustainLevel (src/SLUS_010.40/25AC.c:1404)
 void SetVoiceSustainLevel(SoundDriverHost& host, std::int32_t voice,
                           std::int32_t sustain_level) {
   if (!ValidVoice(host, voice)) return;
@@ -194,7 +197,7 @@ void SetVoiceSustainLevel(SoundDriverHost& host, std::int32_t voice,
 }
 
 // decomp: SLUS_010.40 SetVoiceAdsrSustainRateAndDirection
-// (src/SLUS_010.40/25AC.c:1290)
+// (src/SLUS_010.40/25AC.c:1411)
 void SetVoiceSustainRateAndMode(SoundDriverHost& host, std::int32_t voice,
                                 std::int32_t sustain_rate,
                                 std::uint32_t sustain_direction) {
@@ -209,7 +212,7 @@ void SetVoiceSustainRateAndMode(SoundDriverHost& host, std::int32_t voice,
       Halfword((upper & kSustainKeptBits) | direction | rate));
 }
 
-// decomp: SLUS_010.40 SetVoiceParams (src/SLUS_010.40/25AC.c:1312)
+// decomp: SLUS_010.40 SetVoiceParams (src/SLUS_010.40/25AC.c:1433)
 void WriteVoiceParameters(SoundDriverHost& host, std::int32_t voice,
                           VoiceParameters& parameters,
                           std::int32_t volume_scale) {
@@ -238,7 +241,7 @@ void WriteVoiceParameters(SoundDriverHost& host, std::int32_t voice,
                           Halfword(parameters.loop_start >> kAddressShift));
 }
 
-// decomp: SLUS_010.40 SetVoiceParamsByFlags (src/SLUS_010.40/25AC.c:1342)
+// decomp: SLUS_010.40 SetVoiceParamsByFlags (src/SLUS_010.40/25AC.c:1463)
 void WriteDirtyVoiceParameters(SoundDriverHost& host, std::uint32_t voice,
                                VoiceParameters& parameters) {
   std::uint32_t flags = parameters.dirty_flags;

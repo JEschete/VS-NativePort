@@ -1019,7 +1019,7 @@ RememberedSpawn DecodeRemembered(const VS::Actors::RoomActorRecord& record) {
   return decoded;
 }
 
-// decomp: BATTLE.PRG func_800765B0 (src/BATTLE/BATTLE.PRG/146C.c:6064)
+// decomp: BATTLE.PRG func_800765B0 (src/BATTLE/BATTLE.PRG/146C.c:5877)
 VS::Battle::Actor* CreateLiveAuxiliaryActor(int index, int actor_id,
                                             const SpawnPlacement* placement,
                                             int material, int /*unused*/) {
@@ -1033,7 +1033,7 @@ VS::Battle::Actor* CreateLiveAuxiliaryActor(int index, int actor_id,
       CreateAuxiliaryActor(host, index, actor_id, *placement, material));
 }
 
-// decomp: BATTLE.PRG func_800774FC (src/BATTLE/BATTLE.PRG/146C.c:6562)
+// decomp: BATTLE.PRG func_800774FC (src/BATTLE/BATTLE.PRG/146C.c:6377)
 VS::Battle::Actor* CreateLiveActorWithEquipment(
     int actor_id, int model_id, int blade_model, int blade_material,
     int shield_model, int shield_material, const SpawnPlacement* placement,
@@ -1065,13 +1065,14 @@ VS::Battle::Actor* SpawnLiveRoomEnemy(int actor_id,
                      DecodeCharacterTemplate(*init), flags));
 }
 
-// decomp: BATTLE.PRG func_8007C8F8 (src/BATTLE/BATTLE.PRG/146C.c:8926)
+// decomp: BATTLE.PRG func_8007C8F8 (src/BATTLE/BATTLE.PRG/146C.c:8881)
 int QueueLiveAshleyModelLoad(int model_id) {
   LiveActorSpawnHost host("QueueAshleyModelLoad");
   return QueueAshleyModelLoad(host, model_id);
 }
 
-// decomp: BATTLE.PRG func_8007C928 (src/BATTLE/BATTLE.PRG/146C.c:8936)
+// decomp: BATTLE.PRG spawnModelActor (src/BATTLE/BATTLE.PRG/146C.c:8891; was
+// func_8007C928)
 int QueueLiveScriptedActorSpawn(unsigned actor_id, int model_id,
                                 const SpawnPlacement* placement) {
   constexpr const char* kOperation = "QueueScriptedActorSpawn";
@@ -1088,31 +1089,34 @@ int QueueLiveScriptedActorSpawn(unsigned actor_id, int model_id,
   return QueueScriptedActorSpawn(host, actor_id, model_id, *placement);
 }
 
-// decomp: BATTLE.PRG func_8007CA20 (src/BATTLE/BATTLE.PRG/146C.c:8962)
+// decomp: BATTLE.PRG setActorWeaponModels (src/BATTLE/BATTLE.PRG/146C.c:8920;
+// was func_8007CA20)
 void LoadLiveActorEquipmentModels(int actor_id, int blade_model,
                                   int shield_model) {
   LiveActorSpawnHost host("LoadActorEquipmentModels");
   LoadActorEquipmentModels(host, actor_id, blade_model, shield_model);
 }
 
-// decomp: BATTLE.PRG func_8007CAA4 (src/BATTLE/BATTLE.PRG/146C.c:8971)
+// decomp: BATTLE.PRG restoreActorWeaponModels
+// (src/BATTLE/BATTLE.PRG/146C.c:8933; was func_8007CAA4)
 void RefreshLiveActorEquipmentModels(int actor_id) {
   LiveActorSpawnHost host("RefreshActorEquipmentModels");
   RefreshActorEquipmentModels(host, actor_id);
 }
 
-// decomp: BATTLE.PRG func_8007D340 (src/BATTLE/BATTLE.PRG/146C.c:9256)
+// decomp: BATTLE.PRG despawnActor (src/BATTLE/BATTLE.PRG/146C.c:9247; was
+// func_8007D340)
 void RemoveLiveScriptedActor(int actor_id) {
   static_cast<void>(RemoveLiveActorAtSlot(static_cast<unsigned>(actor_id), 0));
 }
 
-// decomp: INITBTL.PRG func_800F9AD8 (src/BATTLE/INITBTL.PRG/18.c:310)
+// decomp: INITBTL.PRG func_800F9AD8 (src/BATTLE/INITBTL.PRG/18.c:323)
 void RestoreLiveAshleyRuntimeState() {
   LiveActorSpawnHost host("RestoreAshleyRuntimeState");
   RestoreAshleyRuntimeState(host);
 }
 
-// decomp: INITBTL.PRG func_800F9CCC (src/BATTLE/INITBTL.PRG/18.c:361)
+// decomp: INITBTL.PRG func_800F9CCC (src/BATTLE/INITBTL.PRG/18.c:374)
 void SpawnLiveAshleyWithEquipment() {
   LiveActorSpawnHost host("SpawnAshleyWithEquipment");
   SpawnAshleyWithEquipment(host);

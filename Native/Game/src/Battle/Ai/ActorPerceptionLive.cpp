@@ -503,7 +503,7 @@ void UpdateListedActor(VS::Battle::Actor& battle) {
 }
 }  // namespace
 
-// decomp: func_800D87E8 (src/BATTLE/BATTLE.PRG/6FC00.c:679).
+// decomp: func_800D87E8 (src/BATTLE/BATTLE.PRG/6FC00.c:162).
 void UpdateLiveTargetPerception(VS::Battle::Ai::PerceptionView* state,
                                 int target) {
   Require(state != nullptr, "AI target perception requires an AI state");
@@ -513,7 +513,7 @@ void UpdateLiveTargetPerception(VS::Battle::Ai::PerceptionView* state,
           "table with models");
 }
 
-// decomp: func_800D8EF4 (src/BATTLE/BATTLE.PRG/6FC00.c:983).
+// decomp: func_800D8EF4 (src/BATTLE/BATTLE.PRG/6FC00.c:324).
 void UpdateLiveActorPerception() {
   VS::Battle::Ai::RoomAiState* room = VS::Battle::Ai::roomAiState;
   Require(room != nullptr, "AI perception requires the room AI state");

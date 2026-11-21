@@ -217,7 +217,8 @@ class LiveMenuDialogWorld final : public MenuDialogWorld,
 };
 }  // namespace
 
-// decomp: _displaySortMenu (src/MENU/MENUD.PRG/234.c:1601), 80105ACC.
+// decomp: displaySortMenu (src/MENU/MENUD.PRG/234.c:1602; was
+// _displaySortMenu), 80105ACC.
 int UpdateLiveSortMenu(int category_selection) {
   LiveMenuDialogWorld world;
   const auto entry =
@@ -228,7 +229,8 @@ int UpdateLiveSortMenu(int category_selection) {
   return UpdateSortMenu(sortMenu, world, entry);
 }
 
-// decomp: _discardMenu (src/MENU/MENUD.PRG/234.c:1680), 80105D24.
+// decomp: discardMenu (src/MENU/MENUD.PRG/234.c:1681; was _discardMenu),
+// 80105D24.
 int UpdateLiveDiscardMenu(int packed_selection) {
   LiveMenuDialogWorld world;
   std::optional<DiscardEntry> entry;
@@ -242,13 +244,13 @@ int UpdateLiveDiscardMenu(int packed_selection) {
   return UpdateDiscardMenu(discardMenu, discardPresentation, world, entry);
 }
 
-// decomp: func_801071D8 (src/MENU/MENUD.PRG/234.c:2309), 801071D8.
+// decomp: func_801071D8 (src/MENU/MENUD.PRG/234.c:2310), 801071D8.
 void RestoreLiveItemRows(int category) {
   LiveMenuDialogWorld world;
   RestoreItemRows(world, category);
 }
 
-// decomp: func_801072B0 (src/MENU/MENUD.PRG/234.c:2332), 801072B0.
+// decomp: func_801072B0 (src/MENU/MENUD.PRG/234.c:2333), 801072B0.
 int UpdateLiveTransferConfirmation(int initialize) {
   LiveMenuDialogWorld world;
   return UpdateTransferConfirmation(transferMenu, world, initialize != 0);

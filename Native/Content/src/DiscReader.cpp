@@ -49,7 +49,8 @@ void FailCommand(DiscDriveHost& host) {
 
 }  // namespace
 
-// decomp: SLUS_010.40 func_800443CC (src/SLUS_010.40/main.c:9164)
+// decomp: SLUS_010.40 diskUpdate (src/SLUS_010.40/main.c:2083; was
+// func_800443CC)
 void UpdateDiscCommands(DiscDriveHost& host) {
   switch (host.Phase()) {
     case DiscDrivePhase::kReadInit: {
@@ -90,7 +91,7 @@ void UpdateDiscCommands(DiscDriveHost& host) {
   }
 }
 
-// decomp: SLUS_010.40 _diskReset (src/SLUS_010.40/main.c:9385)
+// decomp: SLUS_010.40 diskReset (src/SLUS_010.40/main.c:2351; was _diskReset)
 // The original ended with VSync(3) so the drive could apply its new
 // DslSetmode speed. Extracted-data reads have no drive mode, and nothing in
 // the title session depends on those frames: every tick consumer measures

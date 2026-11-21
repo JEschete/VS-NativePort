@@ -134,7 +134,7 @@ bool LeaveEngagement(ActorCleanupHost& host, int actor_id, bool has_state) {
 }
 }  // namespace
 
-// decomp: func_800E4C28 (src/BATTLE/BATTLE.PRG/7BDD4.s:550).
+// decomp: func_800E4C28 (src/BATTLE/BATTLE.PRG/6E4CCPrivate.h:50).
 bool ReleaseAiDestinationTile(std::span<std::uint16_t> tile_flags, int x,
                               int z) {
   if (tile_flags.empty()) return true;
@@ -151,7 +151,7 @@ bool ReleaseAiDestinationTile(std::span<std::uint16_t> tile_flags, int x,
   return true;
 }
 
-// decomp: func_800E678C (src/BATTLE/BATTLE.PRG/7DE94.s:91).
+// decomp: func_800E678C (src/BATTLE/BATTLE.PRG/7DDDC.s:120).
 bool ReleaseActorAiReservations(ReservationState& state, CleanupRoom& room,
                                 std::span<std::uint16_t> tile_flags) {
   state.navigation_reset = 0;
@@ -172,7 +172,7 @@ bool ReleaseActorAiReservations(ReservationState& state, CleanupRoom& room,
   return true;
 }
 
-// decomp: func_800E6764 (src/BATTLE/BATTLE.PRG/7DE94.s:73).
+// decomp: func_800E6764 (src/BATTLE/BATTLE.PRG/7DDDC.s:107).
 bool ForceReleaseActorAiReservations(ActorCleanupHost& host, int actor_id) {
   if (!IsCleanupSlot(actor_id)) {
     return Refuse("AI reservation release actor ID is outside the AI slots");
@@ -180,7 +180,7 @@ bool ForceReleaseActorAiReservations(ActorCleanupHost& host, int actor_id) {
   return ReleaseHostReservations(host, actor_id, 1);
 }
 
-// decomp: func_800E6700 (src/BATTLE/BATTLE.PRG/7DE94.s:42).
+// decomp: func_800E6700 (src/BATTLE/BATTLE.PRG/7DDDC.s:82).
 bool RefreshActorAiReservations(ActorCleanupHost& host, int actor_id) {
   if (!IsCleanupSlot(actor_id)) {
     return Refuse("AI reservation refresh actor ID is outside the AI slots");
@@ -239,7 +239,7 @@ bool ReleaseActorAiContactOccupancy(ActorCleanupHost& host, int actor_id) {
   return true;
 }
 
-// decomp: func_800E7608 (src/BATTLE/BATTLE.PRG/7E05C.s:1052).
+// decomp: func_800E7608 (src/BATTLE/BATTLE.PRG/6E4CCPrivate.h:86).
 bool ClearActorAiLinksAndPlan(ActorCleanupHost& host, int actor_id) {
   if (!IsCleanupSlot(actor_id)) {
     return Refuse("AI link clearing actor ID is outside the AI slots");
@@ -249,7 +249,7 @@ bool ClearActorAiLinksAndPlan(ActorCleanupHost& host, int actor_id) {
   return true;
 }
 
-// decomp: func_800E6694 (src/BATTLE/BATTLE.PRG/7DE94.s:9).
+// decomp: func_800E6694 (src/BATTLE/BATTLE.PRG/7DDDC.s:52).
 std::optional<std::int16_t> PackActorAiPersistenceFlags(
     const ActorCleanupHost& host, int actor_id) {
   if (!IsCleanupSlot(actor_id)) {
@@ -272,7 +272,7 @@ std::optional<std::int16_t> PackActorAiPersistenceFlags(
                                    idle | (timer << kPackedTimerShift));
 }
 
-// decomp: func_800E6B24 (src/BATTLE/BATTLE.PRG/7E05C.s:241).
+// decomp: func_800E6B24 (src/BATTLE/BATTLE.PRG/7DDDC.s:389).
 bool ClearActorAiNavigationReset(ActorCleanupHost& host, int actor_id) {
   if (!IsCleanupSlot(actor_id)) {
     return Refuse("AI navigation reset actor ID is outside the AI slots");
@@ -284,11 +284,11 @@ bool ClearActorAiNavigationReset(ActorCleanupHost& host, int actor_id) {
   return true;
 }
 
-// decomp: func_800E6EAC (src/BATTLE/BATTLE.PRG/7E05C.s:504).
+// decomp: func_800E6EAC (src/BATTLE/BATTLE.PRG/6E4CC.h:13).
 // The original's return delay slot only changes caller-saved t0.
 void InitializeActorAiExtensionHook() {}
 
-// decomp: func_800E7660 (src/BATTLE/BATTLE.PRG/7E05C.s:1080).
+// decomp: func_800E7660 (src/BATTLE/BATTLE.PRG/7CD68.c:63).
 bool AllocateOrbitingBossState(ActorCleanupHost& host) {
   if (!host.AllocateOrbitingBossState(kOrbitingBossInitialCooldown)) {
     return Refuse("AI orbiting boss state allocation failed");
@@ -296,7 +296,7 @@ bool AllocateOrbitingBossState(ActorCleanupHost& host) {
   return true;
 }
 
-// decomp: func_800E7454 (src/BATTLE/BATTLE.PRG/7E05C.s:924).
+// decomp: func_800E7454 (src/BATTLE/BATTLE.PRG/6E4CCPrivate.h:83).
 bool FreeActorAiState(ActorCleanupHost& host, TeardownActor& actor) {
   if (!host.HasTileFlagMap()) return true;
   if (actor.id < 0 || actor.id >= host.BattleActorSlots()) {
@@ -331,7 +331,7 @@ bool FreeActorAiState(ActorCleanupHost& host, TeardownActor& actor) {
   return true;
 }
 
-// decomp: func_800E48A8 (src/BATTLE/BATTLE.PRG/7BDD4.s:246).
+// decomp: func_800E48A8 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:485).
 bool SetActorAiReactionWithDelay(ReactionDelayState& state,
                                  ReactionDelayHost& host, int value,
                                  int range) {
@@ -346,7 +346,7 @@ bool SetActorAiReactionWithDelay(ReactionDelayState& state,
   return true;
 }
 
-// decomp: func_800DC784 (src/BATTLE/BATTLE.PRG/73C84.s:246).
+// decomp: func_800DC784 (src/BATTLE/BATTLE.PRG/7399C.s:434).
 bool MakeTargetHostile(HostilityState& state, HostilityHost& host, int target) {
   if (!IsCleanupSlot(target)) {
     return Refuse("AI hostility target is outside the AI slots");

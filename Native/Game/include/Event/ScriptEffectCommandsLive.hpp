@@ -7,13 +7,13 @@
 #include "Event/ScriptEffectCommands.hpp"
 
 namespace VS::Event {
-// decomp: func_800BB874 (src/BATTLE/BATTLE.PRG/4A0A8.c:2937): draws the
+// decomp: func_800BB874 (src/BATTLE/BATTLE.PRG/4DEA8.c:3586): draws the
 // overlay into the frame's primitive buffer. A frame whose buffer cannot
 // hold it is skipped.
 void DrawLiveScanlineOverlay();
-// decomp: func_800BB9B0 (src/BATTLE/BATTLE.PRG/4A0A8.c:2971)
+// decomp: func_800BB9B0 (src/BATTLE/BATTLE.PRG/4DEA8.c:3620)
 void UpdateLiveImageTweens();
-// decomp: func_800BBAFC (src/BATTLE/BATTLE.PRG/4A0A8.c:2995)
+// decomp: func_800BBAFC (src/BATTLE/BATTLE.PRG/4DEA8.c:3645)
 void UpdateLiveWeatherTween();
 // The splash tween record (D_800F4B30) of `layer`; idle past the records.
 [[nodiscard]] SplashTween LiveSplashTween(int layer);

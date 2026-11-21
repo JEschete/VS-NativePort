@@ -14,23 +14,29 @@
 // bound armor table and a missing preview actor or Ashley model slot are
 // refused with a throttled warning.
 namespace VS::Menu::Inventory {
-// decomp: MENU3.PRG _populateMenuRows (16C.c:39). menu_text holds a name and
-// a description string (or NULL) per row.
+// decomp: MENU3.PRG populateMenuRows (src/MENU/MENU3.PRG/16C.c:38; was
+// _populateMenuRows). menu_text holds a name and a description string (or NULL)
+// per row.
 void LiveCreateEquipmentRows(int count, std::uint16_t** menu_text,
                              int* row_types);
-// decomp: MENU3.PRG _getSelectedItemRow (16C.c:101).
+// decomp: MENU3.PRG getSelectedItemRow (src/MENU/MENU3.PRG/16C.c:100; was
+// _getSelectedItemRow).
 int LiveSelectedEquipmentRow();
-// decomp: MENU3.PRG _processEquipSubMenu (16C.c:111).
+// decomp: MENU3.PRG processEquipSubMenu (src/MENU/MENU3.PRG/16C.c:107; was
+// _processEquipSubMenu).
 void UpdateLiveEquipmentChoices(int has_sfx);
-// decomp: MENU3.PRG _populateUiAccessory (16C.c:311).
+// decomp: MENU3.PRG populateUiAccessory (src/MENU/MENU3.PRG/16C.c:306; was
+// _populateUiAccessory).
 void SetLiveAccessoryPreviewStats(int accessory_id);
-// decomp: MENU3.PRG _loadObjectData (68C4.c:12). A refusal returns 0, as a
-// finished reload does, so the caller stops waiting.
+// decomp: MENU3.PRG loadObjectData (src/MENU/MENU3.PRG/68C4.c:13; was
+// _loadObjectData). A refusal returns 0, as a finished reload does, so the
+// caller stops waiting.
 int ReloadLiveEquipmentModels(int category, int wep_id, int material);
-// decomp: MENU3.PRG func_80109320 (68C4.c:87). Returns 1 for a two-handed
-// weapon category.
+// decomp: MENU3.PRG func_80109320 (src/MENU/MENU3.PRG/68C4.c:90). Returns 1 for
+// a two-handed weapon category.
 int LiveIsTwoHandedWeapon(int category);
-// decomp: MENU3.PRG _populateDataSlot (68C4.c:100).
+// decomp: MENU3.PRG populateDataSlot (src/MENU/MENU3.PRG/68C4.c:103; was
+// _populateDataSlot).
 void QueueLiveEquipmentModel(int wep_id, int material);
 // MENU3.PRG reloads restore _processEquipSubMenu's cursor static
 // (VS::Boot::ResetMenu3Statics).

@@ -206,7 +206,7 @@ struct AppliedAction {
   std::span<const ReactionHit> targets;
 };
 
-// decomp: func_800DD000 (src/BATTLE/BATTLE.PRG/74088.c:716).
+// decomp: func_800DD000 (src/BATTLE/BATTLE.PRG/74088.c:220).
 // Reacts to each of the action's hits on this actor by another actor. A
 // holding actor (behaviour mode 1) is released (2). Help from Ashley may begin
 // an alliance with her, while help from an actor hostile to Ashley ends one.
@@ -220,7 +220,7 @@ struct AppliedAction {
 [[nodiscard]] bool ApplyActorActionReaction(ActorReactionHost& host,
                                             const AppliedAction& applied);
 
-// decomp: func_800DD344 (src/BATTLE/BATTLE.PRG/74088.c:782).
+// decomp: func_800DD344 (src/BATTLE/BATTLE.PRG/74088.c:304).
 // While allied with Ashley, reclassifies each room actor: itself, Ashley and
 // noncombatants as allies (2), an actor hostile to Ashley outside such an
 // alliance as hostile (3, clearing its grievance counter) and the rest as
@@ -243,7 +243,7 @@ class ActionNotificationHost {
   virtual void ApplyRelationshipChanges() = 0;
 };
 
-// decomp: func_800DEEA4 (src/BATTLE/BATTLE.PRG/74088.c:1596).
+// decomp: func_800DEEA4 (src/BATTLE/BATTLE.PRG/74088.c:969).
 // Unless the acting entry is skipped, lets the acting actor engage again at
 // once, then has every AI actor react to the action. False refuses, doing
 // nothing, an unskipped acting actor outside the AI slots.

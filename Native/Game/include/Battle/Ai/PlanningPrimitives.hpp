@@ -254,22 +254,24 @@ class CandidateEvaluationHost {
   virtual std::optional<std::span<const CandidateCondition>> Conditions() = 0;
 };
 
-// decomp: BATTLE.PRG func_800DCAA0 (74088.c:513; 0x800DCAA0-0x800DCBD4).
-// Aimed previews wrap their coordinate arithmetic to signed halfwords.
-// Unavailable actions leave the snapshot alone; false refuses invalid inputs.
+// decomp: BATTLE.PRG func_800DCAA0 (src/BATTLE/BATTLE.PRG/74088.c:58;
+// 0x800DCAA0-0x800DCBD4). Aimed previews wrap their coordinate arithmetic to
+// signed halfwords. Unavailable actions leave the snapshot alone; false refuses
+// invalid inputs.
 bool SimulateActionCandidate(CandidateSimulationHost& host,
                              const ActionCandidate& candidate,
                              CandidateSimulationMode mode);
 
-// decomp: BATTLE.PRG func_800DCBD8 (74088.c:539; 0x800DCBD8-0x800DCC90).
-// The first nonignored matching target supplies a byte threshold. The scaled
-// weight wraps to eight bits, rather than saturating.
+// decomp: BATTLE.PRG func_800DCBD8 (src/BATTLE/BATTLE.PRG/74088.c:84;
+// 0x800DCBD8-0x800DCC90). The first nonignored matching target supplies a byte
+// threshold. The scaled weight wraps to eight bits, rather than saturating.
 void UpdateCandidateHitWeight(ActionCandidate& candidate,
                               std::span<const SimulatedActorEffect> targets);
 
-// decomp: BATTLE.PRG func_800DCC94 (74088.c:620; 0x800DCC94-0x800DCFFC).
-// Rejection changes only the score. Otherwise capture precedes the optional
-// simulation, then condition scores accumulate with the original word wrapping.
+// decomp: BATTLE.PRG func_800DCC94 (src/BATTLE/BATTLE.PRG/74088.c:164;
+// 0x800DCC94-0x800DCFFC). Rejection changes only the score. Otherwise capture
+// precedes the optional simulation, then condition scores accumulate with the
+// original word wrapping.
 bool EvaluateActionCandidate(ActionCandidate& candidate,
                              const CandidateEvaluationOptions& options,
                              CandidateEvaluationHost& host);
@@ -280,24 +282,25 @@ bool EvaluateActionCandidate(ActionCandidate& candidate,
 // (0x800DCDD4-0x800DCF5C), so they have no symbol or address of their own.
 // Ratios are not narrowed here; the scoring narrows them to halfwords.
 
-// decomp: BATTLE.PRG _getStatusScore (74088.c:565), inlined in func_800DCC94.
-// The weights of the actor's set status bits (bit 12 only when the actor's AI
-// state enables action costs), less 128 at zero HP and a further 84 below
-// 44/128 of maximum HP.
+// decomp: BATTLE.PRG getStatusScore (src/BATTLE/BATTLE.PRG/74088.c:105; was
+// _getStatusScore), inlined in func_800DCC94. The weights of the actor's set
+// status bits (bit 12 only when the actor's AI state enables action costs),
+// less 128 at zero HP and a further 84 below 44/128 of maximum HP.
 [[nodiscard]] std::int32_t ActorStatusConditionScore(
     const ActorCondition& condition, bool action_cost_enabled);
 
-// decomp: BATTLE.PRG _getHpRatio (74088.c:590), inlined in func_800DCC94.
-// HP scaled to 128 at the maximum and truncated toward zero; zero without a
-// maximum.
+// decomp: BATTLE.PRG getHpRatio (src/BATTLE/BATTLE.PRG/74088.c:131; was
+// _getHpRatio), inlined in func_800DCC94. HP scaled to 128 at the maximum and
+// truncated toward zero; zero without a maximum.
 [[nodiscard]] std::int32_t ActorHpRatio(const ActorCondition& condition);
 
-// decomp: BATTLE.PRG _getMpRatio (74088.c:598), inlined in func_800DCC94.
-// MP scaled like the HP ratio.
+// decomp: BATTLE.PRG getMpRatio (src/BATTLE/BATTLE.PRG/74088.c:140; was
+// _getMpRatio), inlined in func_800DCC94. MP scaled like the HP ratio.
 [[nodiscard]] std::int32_t ActorMpRatio(const ActorCondition& condition);
 
-// decomp: BATTLE.PRG _getExtraRatio (74088.c:606), inlined in func_800DCC94.
-// The weapon's and the shield's DP, each scaled like the HP ratio, summed.
+// decomp: BATTLE.PRG getExtraRatio (src/BATTLE/BATTLE.PRG/74088.c:149; was
+// _getExtraRatio), inlined in func_800DCC94. The weapon's and the shield's DP,
+// each scaled like the HP ratio, summed.
 [[nodiscard]] std::int32_t ActorEquipmentDpRatio(
     const ActorCondition& condition);
 
@@ -330,9 +333,10 @@ class FallbackActionHost {
   [[nodiscard]] virtual bool IgnoresSight(unsigned action) const = 0;
 };
 
-// decomp: func_800DD604 (74088.c:899), 114MIPS at 800DD604-800DD7C8.
-// Refresh all 24 slots and keep the first greatest positive unsigned range.
-// No eligible slot clears only the action; false refuses invalid host data.
+// decomp: func_800DD604 (src/BATTLE/BATTLE.PRG/74088.c:368), 114MIPS at
+// 800DD604-800DD7C8. Refresh all 24 slots and keep the first greatest positive
+// unsigned range. No eligible slot clears only the action; false refuses
+// invalid host data.
 bool SelectFallbackAction(ActionCandidate& choice, FallbackActionHost& host);
 
 struct PlanningVital {
@@ -370,10 +374,11 @@ class PlanningSimulationHost {
   virtual bool RefreshSlot(std::size_t index, int row, int column) = 0;
 };
 
-// decomp: func_800DE030 (74088.c:1167), 237MIPS at 800DE030-800DE3E0.
-// Advance the wrapping readiness clock, recover limbs/resources and expire
-// statuses, then refresh each actor's restrictions and all 24 action slots.
-// False diagnoses invalid host data; earlier clock/actor writes remain visible.
+// decomp: func_800DE030 (src/BATTLE/BATTLE.PRG/74088.c:591), 237MIPS at
+// 800DE030-800DE3E0. Advance the wrapping readiness clock, recover
+// limbs/resources and expire statuses, then refresh each actor's restrictions
+// and all 24 action slots. False diagnoses invalid host data; earlier
+// clock/actor writes remain visible.
 bool AdvancePlanningSimulation(std::int32_t time_step,
                                const PlanningSimulationRules& rules,
                                PlanningSimulationHost& host);
@@ -428,11 +433,11 @@ class CandidateEnumerationHost {
   virtual int Random() = 0;
 };
 
-// decomp: func_800DD918 (74088.c:1007), 454MIPS at 800DD918-800DE02C.
-// Evaluate the baseline, then enumerate each slot's live targets. Cache before
-// appending strict score improvements; limb/aimed passes retain first winners
-// and the original draw order. Invalid slots, actor IDs or evaluations fail
-// explicitly without undoing earlier callback effects.
+// decomp: func_800DD918 (src/BATTLE/BATTLE.PRG/74088.c:442), 454MIPS at
+// 800DD918-800DE02C. Evaluate the baseline, then enumerate each slot's live
+// targets. Cache before appending strict score improvements; limb/aimed passes
+// retain first winners and the original draw order. Invalid slots, actor IDs or
+// evaluations fail explicitly without undoing earlier callback effects.
 bool EnumerateActionCandidates(std::uint16_t readiness_threshold,
                                CandidateEnumerationHost& host);
 
@@ -452,22 +457,22 @@ class ActionTargetingHost {
   [[nodiscard]] virtual bool SlotExcludesSelf(int row, int column) const = 0;
 };
 
-// decomp: func_800E4C8C (src/BATTLE/BATTLE.PRG/7BDD4.s:585).
+// decomp: func_800E4C8C (src/BATTLE/BATTLE.PRG/6E4CCShared.h:494).
 // Remembers the first-ranked target and the actor's tile for 900 frames. False
 // when the ranking is empty or memory is disabled; nothing refuses a count
 // past the ranking, an empty first entry or a target without a placement.
 std::optional<bool> RememberAiActionTarget(TargetMemoryHost& host);
 
-// decomp: func_800E4CE8 (src/BATTLE/BATTLE.PRG/7C4E8.c:407).
+// decomp: func_800E4CE8 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:495).
 // Forgets the remembered target by marking the previous-tile word; the
 // remembered target tile and its frames stay as they were.
 void ForgetAiActionTarget(TargetMemoryHost& host);
 
-// decomp: func_800DC2E0 (src/BATTLE/BATTLE.PRG/73AE0.s:9).
+// decomp: func_800DC2E0 (src/BATTLE/BATTLE.PRG/7399C.s:97).
 void CopyActionCandidate(ActionCandidate& destination,
                          const ActionCandidate& source);
 
-// decomp: func_800DC30C (src/BATTLE/BATTLE.PRG/73B0C.s:9).
+// decomp: func_800DC30C (src/BATTLE/BATTLE.PRG/7399C.s:111).
 // Restores (adds) or spends (subtracts) a simulated stat clamped to
 // [0, maximum]; a negative maximum is stored when the result is not negative.
 // The subtraction is always evaluated, as the original's trapping `sub` is;
@@ -476,20 +481,20 @@ void CopyActionCandidate(ActionCandidate& destination,
     std::int16_t value, std::int16_t maximum, std::int32_t delta,
     bool restores);
 
-// decomp: func_800DC344 (src/BATTLE/BATTLE.PRG/73B0C.s:30).
+// decomp: func_800DC344 (src/BATTLE/BATTLE.PRG/7399C.s:130).
 // Appends a weighted candidate and excludes its target/action pair from
 // further planning. False for a zero weight or a full list; nothing refuses a
 // count outside the list or a missing exclusion table.
 std::optional<bool> AppendActionCandidate(CandidateList& list,
                                           const ActionCandidate& candidate);
 
-// decomp: func_800DC3CC (src/BATTLE/BATTLE.PRG/73B0C.s:70);
+// decomp: func_800DC3CC (src/BATTLE/BATTLE.PRG/7399C.s:167);
 // partition: func_800E6974 / L800E6958 (src/BATTLE/BATTLE.PRG/7E05C.s:114).
 // Orders the ranking by descending score with the original partition's tie
 // order. False refuses more than kCandidateCapacity entries.
 [[nodiscard]] bool SortActionCandidates(std::span<RankedCandidate> ranking);
 
-// decomp: func_800DC3E8 (src/BATTLE/BATTLE.PRG/73B0C.s:81).
+// decomp: func_800DC3E8 (src/BATTLE/BATTLE.PRG/7399C.s:177).
 // Copies the kPlanningStatSnapshot fields of a stats record.
 void CopyPlanningActorStats(
     std::span<const std::byte, kActorStatsRecordBytes> source,
@@ -508,17 +513,19 @@ struct PlanningStatsSnapshot {
   std::array<bool, kBattleActorSlotCount> captured_slots{};
 };
 
-// decomp: snapshotActorStats (74088.c:1295), inlined at 800DE4EC-800DE558.
-// Storage belongs to the caller. Only the original stat-copy ranges change.
+// decomp: snapshotActorStats (src/BATTLE/BATTLE.PRG/74088.c:690), inlined at
+// 800DE4EC-800DE558. Storage belongs to the caller. Only the original stat-copy
+// ranges change.
 bool SnapshotPlanningActorStats(PlanningStatsSnapshot& snapshot,
                                 std::span<const PlanningActorStats> actors);
 
-// decomp: restoreActorStats (74088.c:1309), inlined at 800DE898-800DE8F8.
-// Restore the current actor list; refuse uncaptured slots before any writes.
+// decomp: restoreActorStats (src/BATTLE/BATTLE.PRG/74088.c:707), inlined at
+// 800DE898-800DE8F8. Restore the current actor list; refuse uncaptured slots
+// before any writes.
 bool RestorePlanningActorStats(const PlanningStatsSnapshot& snapshot,
                                std::span<const PlanningActorStats> actors);
 
-// decomp: func_800E4CF4 (src/BATTLE/BATTLE.PRG/7C4F4.s:10).
+// decomp: func_800E4CF4 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:496).
 // Whether the candidate's action may target the actor: an allied or hostile
 // actor with AI state, a beneficial action only on a non-hostile actor whose
 // restrictions the action addresses, a harmful one only on a hostile actor,
@@ -528,14 +535,14 @@ bool RestorePlanningActorStats(const PlanningStatsSnapshot& snapshot,
     const ActionTargetingHost& host, const ActionCandidate& candidate,
     int actor_id);
 
-// decomp: func_800E4DF8 (src/BATTLE/BATTLE.PRG/7C4F4.s:82).
+// decomp: func_800E4DF8 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:497).
 // Records whether a limb action slot is usable: the limb has at least 2 HP,
 // statuses allow it, and the actor can pay its MP, HP or weapon PP cost.
 // Nothing refuses a slot or action ID outside its table.
 std::optional<bool> RefreshAiActionUsability(ActionUsabilityHost& host, int row,
                                              int column);
 
-// decomp: func_800E4F14 (src/BATTLE/BATTLE.PRG/7C4F4.s:162).
+// decomp: func_800E4F14 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:498).
 // The actor's resource restrictions; a zero threshold disables the MP and
 // spell-blocking checks.
 [[nodiscard]] ActorResourceConditions RefreshAiResourceRestrictions(
@@ -583,7 +590,7 @@ class ActionMetadataHost {
   virtual void SetActionCostThreshold(std::uint8_t threshold) = 0;
 };
 
-// decomp: func_800E5710 (src/BATTLE/BATTLE.PRG/7CD68.c:526), 162 instructions
+// decomp: func_800E5710 (src/BATTLE/BATTLE.PRG/7CD68.c:131), 162 instructions
 // at 800E5710-800E5994. The player (actor 0) only sets threshold 1. Otherwise
 // each slot's range, 16-bit area reach, long-range and fallback flags are
 // rebuilt; the self-exclusion and obstruction flags are only ever set, the

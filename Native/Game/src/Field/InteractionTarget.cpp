@@ -9,7 +9,8 @@ constexpr std::int32_t kTrapTileWorldUnits = 128;
 constexpr std::int32_t kDisabledTrapActivation = 1;
 }  // namespace
 
-// decomp: BATTLE.PRG func_8008D438 (146C.c:16810), 52 MIPS words.
+// decomp: BATTLE.PRG func_8008D438 (src/BATTLE/BATTLE.PRG/146C.c:16684), 52
+// MIPS words.
 std::optional<TrapTarget> FindRoomTriggerAtTile(
     std::span<const RoomTriggerInfo> records, const RoomTriggerTile& tile,
     bool suppress_panels) {
@@ -26,7 +27,8 @@ std::optional<TrapTarget> FindRoomTriggerAtTile(
   return std::nullopt;
 }
 
-// decomp: BATTLE.PRG func_8008DEAC (146C.c:17147), 26 MIPS words.
+// decomp: BATTLE.PRG func_8008DEAC (src/BATTLE/BATTLE.PRG/146C.c:17021), 26
+// MIPS words.
 bool SetRoomTriggerEnabled(std::optional<TrapTarget> target,
                            std::int32_t activation,
                            RoomTriggerActivationHost& host) {
@@ -48,7 +50,8 @@ bool SetRoomTriggerEnabled(std::optional<TrapTarget> target,
   return true;
 }
 
-// decomp: BATTLE.PRG func_8006CDD8 (146C.c:2151), 30 MIPS words.
+// decomp: BATTLE.PRG func_8006CDD8 (src/BATTLE/BATTLE.PRG/146C.c:1853), 30 MIPS
+// words.
 bool DisableTrapAtPosition(TrapWorldPosition position, TrapDisableHost& host) {
   const auto target = host.Find(
       {position.x / kTrapTileWorldUnits, position.z / kTrapTileWorldUnits, 0});

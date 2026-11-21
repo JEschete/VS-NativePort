@@ -734,7 +734,7 @@ bool DrawEquipmentStatChange(FloatingLabelFeedbackWorld& world,
   return true;
 }
 
-// decomp: F00742 func_800971D4 (src/BATTLE/BATTLE.PRG/2842C.c:2881).
+// decomp: F00742 func_800971D4 (src/BATTLE/BATTLE.PRG/2842C.c:2869).
 bool CommitEquipmentStatChanges(FloatingLabelRecords& records) {
   for (std::int32_t index = 0; index < records.LabelCount(); ++index) {
     auto record = records.Label(index);

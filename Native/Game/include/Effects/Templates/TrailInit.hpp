@@ -7,8 +7,8 @@
 #include "Effects/Templates/TrailCore.hpp"
 
 // The init stage of the five- and nine-sample trails (decomp
-// src/EFFECT/trails5.h:380 and trails9.h:387 VS_TRAIL_INIT_FUNCTION): starts
-// every trail at its origin.
+// src/EFFECT/trailEffect.h:424 and src/EFFECT/trailEffect.h:424
+// VS_TRAIL_INIT_FUNCTION): starts every trail at its origin.
 namespace VS::Effects::Templates {
 // Stores the lifetime plane's start values in the scratch and, for every
 // trail, draws a step count between them (zero becomes one; the record keeps

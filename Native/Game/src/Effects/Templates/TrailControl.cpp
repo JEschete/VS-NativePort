@@ -162,7 +162,7 @@ void SpreadTrails(const TrailDefinition& definition, TrailScratch& scratch,
 }
 }  // namespace
 
-// decomp: EFFECT VS_TRAIL_CONTROL_FUNCTION (src/EFFECT/trails5.h:278).
+// decomp: EFFECT VS_TRAIL_CONTROL_FUNCTION (src/EFFECT/trailEffect.h:324).
 // The original transformed through the GTE and left the look-at matrix
 // loaded; the render stage loads its own before projecting.
 void TrailControl(const TrailDefinition& definition, TrailScratch& scratch,
@@ -171,18 +171,23 @@ void TrailControl(const TrailDefinition& definition, TrailScratch& scratch,
   SpreadTrails<kTrailHistory>(definition, scratch, trails, distance, host);
 }
 
-// decomp: EFFECT VS_TRAIL_CONTROL_FUNCTION (src/EFFECT/trails9.h:278).
-// decomp: PLG049.BIN func_800FA294 (src/EFFECT/PLG049.BIN/E0.c:3).
-// decomp: PLG050.BIN func_800FAEB8 (src/EFFECT/PLG050.BIN/E0.c:9).
-// decomp: PLG057.BIN func_800FC128 (src/EFFECT/PLG057.BIN/2D0.c:17).
-// decomp: PLG069.BIN func_800FADA0 (src/EFFECT/PLG069.BIN/E0.c:10).
-// decomp: PLG135.BIN func_800FB200 (src/EFFECT/PLG135.BIN/E0.c:15).
-// decomp: PLG161.BIN func_800FBD88 (src/EFFECT/PLG161.BIN/F8.c:13).
-// decomp: PLG165.BIN func_800FA2AC (src/EFFECT/PLG165.BIN/F8.c:11).
-// decomp: PLG167.BIN func_800FC0B8 (src/EFFECT/PLG167.BIN/E0.c:18).
-// decomp: PLG168.BIN func_800FA3A4 (src/EFFECT/PLG168.BIN/1F0.c:5).
-// decomp: PLG169.BIN func_800FA294 (src/EFFECT/PLG169.BIN/E0.c:11).
-// decomp: PLG232.BIN func_800FA294 (src/EFFECT/PLG232.BIN/E0.c:5).
+// decomp: EFFECT VS_TRAIL_CONTROL_FUNCTION (src/EFFECT/trailEffect.h:324).
+// decomp: PLG049.BIN vs_spiritSurge_0_control (src/EFFECT/trailEffect.h:324;
+// was func_800FA294). decomp: PLG050.BIN vs_effect_darkChant_1_control
+// (src/EFFECT/trailEffect.h:324; was func_800FAEB8). decomp: PLG057.BIN
+// vs_effect_thunderBurstLv1_1_control (src/EFFECT/trailEffect.h:324; was
+// func_800FC128). decomp: PLG069.BIN vs_effect_avalancheLv1_1_control
+// (src/EFFECT/trailEffect.h:324; was func_800FADA0). decomp: PLG135.BIN
+// vs_effect_rendingGale_1_control (src/EFFECT/trailEffect.h:324; was
+// func_800FB200). decomp: PLG161.BIN vs_effect_gigaTempest_2_control
+// (src/EFFECT/trailEffect.h:324; was func_800FBD88). decomp: PLG165.BIN
+// vs_effect_deathWail_0_control (src/EFFECT/trailEffect.h:324; was
+// func_800FA2AC). decomp: PLG167.BIN vs_effect_lotusPalm_2_control
+// (src/EFFECT/trailEffect.h:324; was func_800FC0B8). decomp: PLG168.BIN
+// vs_effect_vertigo_0_control (src/EFFECT/trailEffect.h:324; was
+// func_800FA3A4). decomp: PLG169.BIN vs_effect_vermillionAura_0_control
+// (src/EFFECT/trailEffect.h:324; was func_800FA294). decomp: PLG232.BIN
+// vs_effect_plg232_0_control (src/EFFECT/trailEffect.h:324; was func_800FA294).
 // The plugin instances are byte-identical; each overlay's renderer-slot entry
 // (TrailsLive.cpp) binds this one definition.
 void TrailNineControl(const TrailDefinition& definition, TrailScratch& scratch,
@@ -193,7 +198,8 @@ void TrailNineControl(const TrailDefinition& definition, TrailScratch& scratch,
 }  // namespace VS::Effects::Templates
 
 namespace VS::Effects {
-// decomp: PLG057.BIN func_800FE248 (src/EFFECT/PLG057.BIN/2D0.c:27).
+// decomp: PLG057.BIN vs_effect_thunderBurstLv1_2_control
+// (src/EFFECT/trailEffect.h:324; was func_800FE248).
 void Plg057::TrailControl(const Templates::TrailDefinition& definition,
                           Templates::TrailScratch& scratch,
                           std::span<Templates::TrailRecord> trails,
@@ -201,8 +207,9 @@ void Plg057::TrailControl(const Templates::TrailDefinition& definition,
   Templates::TrailControl(definition, scratch, trails, distance, host);
 }
 
-// decomp: PLG073.BIN func_800FBDC8 (src/EFFECT/PLG073.BIN/F8.c:13).
-// decomp: PLG074.BIN func_800FBDC8 (src/EFFECT/PLG074.BIN/F8.c:11).
+// decomp: PLG073.BIN vs_effect_radialSurgeLv1_2_control
+// (src/EFFECT/trailEffect.h:324; was func_800FBDC8). decomp: PLG074.BIN
+// func_800FBDC8 (src/EFFECT/PLG074.BIN/F8.c:11).
 void Plg073::TrailControl(const Templates::TrailDefinition& definition,
                           Templates::TrailScratch& scratch,
                           std::span<Templates::TrailRecord> trails,
@@ -210,7 +217,8 @@ void Plg073::TrailControl(const Templates::TrailDefinition& definition,
   Templates::TrailControl(definition, scratch, trails, distance, host);
 }
 
-// decomp: PLG086.BIN func_800FCC24 (src/EFFECT/PLG086.BIN/F8.c:22).
+// decomp: PLG086.BIN vs_effect_judgment_3_control
+// (src/EFFECT/trailEffect.h:324; was func_800FCC24).
 void Plg086::TrailControl(const Templates::TrailDefinition& definition,
                           Templates::TrailScratch& scratch,
                           std::span<Templates::TrailRecord> trails,
@@ -218,7 +226,8 @@ void Plg086::TrailControl(const Templates::TrailDefinition& definition,
   Templates::TrailControl(definition, scratch, trails, distance, host);
 }
 
-// decomp: PLG087.BIN func_800FC9FC (src/EFFECT/PLG087.BIN/1F0.c:24).
+// decomp: PLG087.BIN vs_effect_apocalypse_3_control
+// (src/EFFECT/trailEffect.h:324; was func_800FC9FC).
 void Plg087::TrailControl(const Templates::TrailDefinition& definition,
                           Templates::TrailScratch& scratch,
                           std::span<Templates::TrailRecord> trails,
@@ -226,7 +235,8 @@ void Plg087::TrailControl(const Templates::TrailDefinition& definition,
   Templates::TrailControl(definition, scratch, trails, distance, host);
 }
 
-// decomp: PLG128.BIN func_800FED84 (src/EFFECT/PLG128.BIN/F8.c:255).
+// decomp: PLG128.BIN vs_effect_bloodySin_6_control
+// (src/EFFECT/trailEffect.h:324; was func_800FED84).
 void Plg128::TrailControl(const Templates::TrailDefinition& definition,
                           Templates::TrailScratch& scratch,
                           std::span<Templates::TrailRecord> trails,
@@ -234,7 +244,8 @@ void Plg128::TrailControl(const Templates::TrailDefinition& definition,
   Templates::TrailControl(definition, scratch, trails, distance, host);
 }
 
-// decomp: PLG134.BIN func_800FA294 (src/EFFECT/PLG134.BIN/E0.c:11).
+// decomp: PLG134.BIN vs_effect_wyrmScorn_0_control
+// (src/EFFECT/trailEffect.h:324; was func_800FA294).
 void Plg134::TrailControl(const Templates::TrailDefinition& definition,
                           Templates::TrailScratch& scratch,
                           std::span<Templates::TrailRecord> trails,
@@ -242,7 +253,8 @@ void Plg134::TrailControl(const Templates::TrailDefinition& definition,
   Templates::TrailControl(definition, scratch, trails, distance, host);
 }
 
-// decomp: PLG137.BIN func_800FADB8 (src/EFFECT/PLG137.BIN/F8.c:10).
+// decomp: PLG137.BIN vs_effect_cherryRonde_1_control
+// (src/EFFECT/trailEffect.h:324; was func_800FADB8).
 void Plg137::TrailControl(const Templates::TrailDefinition& definition,
                           Templates::TrailScratch& scratch,
                           std::span<Templates::TrailRecord> trails,
@@ -250,7 +262,8 @@ void Plg137::TrailControl(const Templates::TrailDefinition& definition,
   Templates::TrailControl(definition, scratch, trails, distance, host);
 }
 
-// decomp: PLG141.BIN func_800FA294 (src/EFFECT/PLG141.BIN/E0.c:5).
+// decomp: PLG141.BIN vs_effect_swallowSlash_0_control
+// (src/EFFECT/trailEffect.h:324; was func_800FA294).
 void Plg141::TrailControl(const Templates::TrailDefinition& definition,
                           Templates::TrailScratch& scratch,
                           std::span<Templates::TrailRecord> trails,
@@ -258,7 +271,8 @@ void Plg141::TrailControl(const Templates::TrailDefinition& definition,
   Templates::TrailControl(definition, scratch, trails, distance, host);
 }
 
-// decomp: PLG146.BIN func_800FE110 (src/EFFECT/PLG146.BIN/1D8.c:42).
+// decomp: PLG146.BIN vs_effect_blackNebula_4_control
+// (src/EFFECT/trailEffect.h:324; was func_800FE110).
 void Plg146::TrailControl(const Templates::TrailDefinition& definition,
                           Templates::TrailScratch& scratch,
                           std::span<Templates::TrailRecord> trails,
@@ -266,7 +280,8 @@ void Plg146::TrailControl(const Templates::TrailDefinition& definition,
   Templates::TrailControl(definition, scratch, trails, distance, host);
 }
 
-// decomp: PLG148.BIN func_800FA294 (src/EFFECT/PLG148.BIN/E0.c:5).
+// decomp: PLG148.BIN vs_effect_accursedUmbra_0_control
+// (src/EFFECT/trailEffect.h:324; was func_800FA294).
 void Plg148::TrailControl(const Templates::TrailDefinition& definition,
                           Templates::TrailScratch& scratch,
                           std::span<Templates::TrailRecord> trails,
@@ -274,7 +289,8 @@ void Plg148::TrailControl(const Templates::TrailDefinition& definition,
   Templates::TrailControl(definition, scratch, trails, distance, host);
 }
 
-// decomp: PLG242.BIN func_800FBCF4 (src/EFFECT/PLG242.BIN/F8.c:12).
+// decomp: PLG242.BIN vs_effect_plg242_2_control (src/EFFECT/trailEffect.h:324;
+// was func_800FBCF4).
 void Plg242::TrailControl(const Templates::TrailDefinition& definition,
                           Templates::TrailScratch& scratch,
                           std::span<Templates::TrailRecord> trails,
@@ -282,7 +298,8 @@ void Plg242::TrailControl(const Templates::TrailDefinition& definition,
   Templates::TrailControl(definition, scratch, trails, distance, host);
 }
 
-// decomp: PLG255.BIN func_800FA38C (src/EFFECT/PLG255.BIN/1D8.c:5).
+// decomp: PLG255.BIN vs_effect_plg255_0_control (src/EFFECT/trailEffect.h:324;
+// was func_800FA38C).
 void Plg255::TrailControl(const Templates::TrailDefinition& definition,
                           Templates::TrailScratch& scratch,
                           std::span<Templates::TrailRecord> trails,
@@ -290,7 +307,8 @@ void Plg255::TrailControl(const Templates::TrailDefinition& definition,
   Templates::TrailControl(definition, scratch, trails, distance, host);
 }
 
-// decomp: PLG265.BIN func_800FC988 (src/EFFECT/PLG265.BIN/2E8.c:33).
+// decomp: PLG265.BIN vs_effect_plg265_2_control (src/EFFECT/trailEffect.h:324;
+// was func_800FC988).
 void Plg265::TrailControl(const Templates::TrailDefinition& definition,
                           Templates::TrailScratch& scratch,
                           std::span<Templates::TrailRecord> trails,
@@ -298,7 +316,8 @@ void Plg265::TrailControl(const Templates::TrailDefinition& definition,
   Templates::TrailControl(definition, scratch, trails, distance, host);
 }
 
-// decomp: PLG266.BIN func_800FD734 (src/EFFECT/PLG266.BIN/2E8.c:41).
+// decomp: PLG266.BIN vs_effect_plg266_2_control (src/EFFECT/trailEffect.h:324;
+// was func_800FD734).
 void Plg266::TrailControl(const Templates::TrailDefinition& definition,
                           Templates::TrailScratch& scratch,
                           std::span<Templates::TrailRecord> trails,
@@ -306,7 +325,8 @@ void Plg266::TrailControl(const Templates::TrailDefinition& definition,
   Templates::TrailControl(definition, scratch, trails, distance, host);
 }
 
-// decomp: PLG291.BIN func_800FA2AC (src/EFFECT/PLG291.BIN/F8.c:11).
+// decomp: PLG291.BIN vs_effect_plg291_0_control (src/EFFECT/trailEffect.h:324;
+// was func_800FA2AC).
 void Plg291::TrailControl(const Templates::TrailDefinition& definition,
                           Templates::TrailScratch& scratch,
                           std::span<Templates::TrailRecord> trails,

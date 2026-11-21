@@ -164,31 +164,33 @@ std::span<std::byte> BufferOf(char* data, unsigned size) {
 }
 }  // namespace
 
-// decomp: SLUS_010.40 StartSound (src/SLUS_010.40/25AC.c:1060)
+// decomp: SLUS_010.40 Sound_Start (src/SLUS_010.40/25AC.c:1180; was StartSound)
 void LiveStart() {
   LiveSoundDriver host("StartSound");
   Start(host);
 }
 
-// decomp: SLUS_010.40 StopSound (src/SLUS_010.40/25AC.c:1085)
+// decomp: SLUS_010.40 Sound_Stop (src/SLUS_010.40/25AC.c:1205; was StopSound)
 void LiveStop() {
   LiveSoundDriver host("StopSound");
   Stop(host);
 }
 
-// decomp: SLUS_010.40 _spuWriteComplete (src/SLUS_010.40/25AC.c:989)
+// decomp: SLUS_010.40 ClearSpuTransferCallback (src/SLUS_010.40/25AC.c:992; was
+// _spuWriteComplete)
 void LiveCompleteSampleTransfer() {
   LiveSoundDriver host("CompleteSampleTransfer");
   CompleteSampleTransfer(host);
 }
 
-// decomp: SLUS_010.40 spuSetTransferCallback (src/SLUS_010.40/25AC.c:995)
+// decomp: SLUS_010.40 SetSpuTransferCallback (src/SLUS_010.40/25AC.c:998; was
+// spuSetTransferCallback)
 void LiveArmSampleTransferCallback() {
   LiveSoundDriver host("ArmSampleTransferCallback");
   ArmSampleTransferCallback(host);
 }
 
-// decomp: SLUS_010.40 _writeSpu (src/SLUS_010.40/25AC.c:1001)
+// decomp: SLUS_010.40 WriteSpu (src/SLUS_010.40/25AC.c:1004; was _writeSpu)
 void LiveWriteSampleMemory(char* data, unsigned size) {
   if (data == nullptr && size != 0) {
     Seq::ReportRefusal("WriteSampleMemory", "no source buffer");
@@ -199,7 +201,7 @@ void LiveWriteSampleMemory(char* data, unsigned size) {
   WriteSampleMemory(host, BufferOf(data, size));
 }
 
-// decomp: SLUS_010.40 _readSpu (src/SLUS_010.40/25AC.c:1008)
+// decomp: SLUS_010.40 ReadSpu (src/SLUS_010.40/25AC.c:1011; was _readSpu)
 void LiveReadSampleMemory(char* data, unsigned size) {
   if (data == nullptr && size != 0) {
     Seq::ReportRefusal("ReadSampleMemory", "no destination buffer");
@@ -209,46 +211,47 @@ void LiveReadSampleMemory(char* data, unsigned size) {
   ReadSampleMemory(host, BufferOf(data, size));
 }
 
-// decomp: SLUS_010.40 _waitTransferAvailable (src/SLUS_010.40/25AC.c:1014)
+// decomp: SLUS_010.40 WaitForSpuTransfer (src/SLUS_010.40/25AC.c:1017; was
+// _waitTransferAvailable)
 void LiveWaitForSampleTransfer() {
   LiveSoundDriver host("WaitForSampleTransfer");
   WaitForSampleTransfer(host);
 }
 
-// decomp: SLUS_010.40 SetVoiceStartAddr (src/SLUS_010.40/25AC.c:1153)
+// decomp: SLUS_010.40 SetVoiceStartAddr (src/SLUS_010.40/25AC.c:1274)
 void LiveSetVoiceStartAddress(int voice, unsigned address) {
   LiveSoundDriver host("SetVoiceStartAddress");
   SetVoiceStartAddress(host, voice, address);
 }
 
-// decomp: SLUS_010.40 SetVoiceRepeatAddr (src/SLUS_010.40/25AC.c:1158)
+// decomp: SLUS_010.40 SetVoiceRepeatAddr (src/SLUS_010.40/25AC.c:1279)
 void LiveSetVoiceLoopAddress(int voice, unsigned address) {
   LiveSoundDriver host("SetVoiceLoopAddress");
   SetVoiceLoopAddress(host, voice, address);
 }
 
 // decomp: SLUS_010.40 SetVoiceAdsrAttackRateAndMode
-// (src/SLUS_010.40/25AC.c:1262)
+// (src/SLUS_010.40/25AC.c:1383)
 void LiveSetVoiceAttackRateAndMode(int voice, int attack_step,
                                    unsigned attack_mode) {
   LiveSoundDriver host("SetVoiceAttackRateAndMode");
   SetVoiceAttackRateAndMode(host, voice, attack_step, attack_mode);
 }
 
-// decomp: SLUS_010.40 SetVoiceAdsrDecayRate (src/SLUS_010.40/25AC.c:1274)
+// decomp: SLUS_010.40 SetVoiceAdsrDecayRate (src/SLUS_010.40/25AC.c:1395)
 void LiveSetVoiceDecayRate(int voice, int decay_rate) {
   LiveSoundDriver host("SetVoiceDecayRate");
   SetVoiceDecayRate(host, voice, decay_rate);
 }
 
-// decomp: SLUS_010.40 SetVoiceAdsrSustainLevel (src/SLUS_010.40/25AC.c:1283)
+// decomp: SLUS_010.40 SetVoiceAdsrSustainLevel (src/SLUS_010.40/25AC.c:1404)
 void LiveSetVoiceSustainLevel(int voice, int sustain_level) {
   LiveSoundDriver host("SetVoiceSustainLevel");
   SetVoiceSustainLevel(host, voice, sustain_level);
 }
 
 // decomp: SLUS_010.40 SetVoiceAdsrSustainRateAndDirection
-// (src/SLUS_010.40/25AC.c:1290)
+// (src/SLUS_010.40/25AC.c:1411)
 void LiveSetVoiceSustainRateAndMode(int voice, int sustain_rate,
                                     unsigned sustain_direction) {
   LiveSoundDriver host("SetVoiceSustainRateAndMode");

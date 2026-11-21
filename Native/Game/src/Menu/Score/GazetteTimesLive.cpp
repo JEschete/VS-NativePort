@@ -167,8 +167,8 @@ class LiveTimeTrialHost final : public TimeTrialHost {
 };
 }  // namespace
 
-// decomp: _printFastestClearTime (src/MENU/MENU9.PRG/238.c:2400),
-// MENU9.PRG 80106DE0.
+// decomp: printFastestClearTime (src/MENU/MENU9.PRG/238.c:2405; was
+// _printFastestClearTime), MENU9.PRG 80106DE0.
 std::size_t FormatLiveFastestClearTime(std::span<char> destination,
                                        std::int32_t round_index,
                                        std::int32_t completion_minutes) {
@@ -182,8 +182,8 @@ std::size_t FormatLiveFastestClearTime(std::span<char> destination,
   return written;
 }
 
-// decomp: _printBossRushMenuRow (src/MENU/MENU9.PRG/238.c:2461),
-// MENU9.PRG 80106F9C.
+// decomp: printBossRushMenuRow (src/MENU/MENU9.PRG/238.c:2466; was
+// _printBossRushMenuRow), MENU9.PRG 80106F9C.
 void CreateLiveTimeTrialRows() {
   auto rows = Rows();
   if (!CreateTimeTrialRows(rows, Scores(), Labels())) {
@@ -202,16 +202,17 @@ void CreateLiveTimeTrialRows() {
   StoreAnimation(rows);
 }
 
-// decomp: _leaveBossRushMenu (src/MENU/MENU9.PRG/238.c:2488),
-// MENU9.PRG 80107090.
+// decomp: leaveBossRushMenu (src/MENU/MENU9.PRG/238.c:2492; was
+// _leaveBossRushMenu), MENU9.PRG 80107090.
 void LeaveLiveTimeTrialMenu() {
   auto rows = Rows();
   LiveTimeTrialHost host;
   if (LeaveTimeTrialMenu(rows, host)) StoreAnimation(rows);
 }
 
-// decomp: _renderBossRushRecords (src/MENU/MENU9.PRG/238.c:2507),
-// MENU9.PRG 80107120; cursorAnimStep at 801098A0 starts at zero on reload.
+// decomp: renderBossRushRecords (src/MENU/MENU9.PRG/238.c:2511; was
+// _renderBossRushRecords), MENU9.PRG 80107120; cursorAnimStep at 801098A0
+// starts at zero on reload.
 void RenderLiveTimeTrialRecords(std::int32_t presentation_step) {
   auto rows = Rows();
   LiveTimeTrialHost host;

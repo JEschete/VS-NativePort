@@ -372,7 +372,7 @@ int LoadEnemyPreview(EnemyPreviewHost& host, EnemyPreviewState& state,
 }
 
 // decomp: MENU9.PRG vs_menu9_freeZud (F02837,
-// src/MENU/MENU9.PRG/57BC.c:42-47, 0x80108098-0x801080C4)
+// src/MENU/MENU9.PRG/57BC.c:44-49, 0x80108098-0x801080C4)
 void FreeEnemyPreview(EnemyPreviewHost& host, EnemyPreviewState& state) {
   // Native (#48): the original released actors 1 and 16 whatever they held
   // and freed the buffer under any part still queued. Queued parts are
@@ -390,7 +390,7 @@ void FreeEnemyPreview(EnemyPreviewHost& host, EnemyPreviewState& state) {
 }
 
 // decomp: MENU9.PRG func_801080C8 (F02838,
-// src/MENU/MENU9.PRG/57BC.c:49-59, 0x801080C8-0x80108128)
+// src/MENU/MENU9.PRG/57BC.c:53-63, 0x801080C8-0x80108128)
 void InitializeAshleyPreviewPose(EnemyPreviewHost& host) {
   host.SetAnimation(kEnemyPreviewActorSlot, kAshleyPreviewAnimation);
   host.SetWeaponDrawn(kEnemyPreviewActorSlot, false);
@@ -400,7 +400,7 @@ void InitializeAshleyPreviewPose(EnemyPreviewHost& host) {
 }
 
 // decomp: MENU9.PRG vs_menu9_loadZudFile (F02839,
-// src/MENU/MENU9.PRG/592C.c:171-201, 0x8010812C-0x80108238)
+// src/MENU/MENU9.PRG/592C.c:172-202, 0x8010812C-0x80108238)
 bool QueueEnemyModelRead(EnemyPreviewHost& host, EnemyPreviewState& state,
                          int zud_id) {
   // The original indexed its 256-entry tables unchecked.
@@ -465,7 +465,7 @@ bool QueueEnemyModelRead(EnemyPreviewHost& host, EnemyPreviewState& state,
 }
 
 // decomp: MENU9.PRG vs_menu9_parseZudFile (F02840,
-// src/MENU/MENU9.PRG/592C.c:203-293, 0x8010823C-0x801084E0)
+// src/MENU/MENU9.PRG/592C.c:206-296, 0x8010823C-0x801084E0)
 int LoadEnemyModelParts(EnemyPreviewHost& host, EnemyPreviewState& state) {
   if (state.read != AssetAddress::kNone) {
     const EnemyPreviewRead read = host.ReadStatus(state.read);
@@ -500,7 +500,7 @@ int LoadEnemyModelParts(EnemyPreviewHost& host, EnemyPreviewState& state) {
 }
 
 // decomp: MENU9.PRG vs_menu9_freeZudFile (F02841,
-// src/MENU/MENU9.PRG/592C.c:295-299, 0x801084E4-0x80108510)
+// src/MENU/MENU9.PRG/592C.c:300-304, 0x801084E4-0x80108510)
 void FreeEnemyModelBuffer(EnemyPreviewHost& host, EnemyPreviewState& state) {
   // The original freed a null buffer as well; there is nothing to release.
   if (state.model_buffer != AssetAddress::kNone) {

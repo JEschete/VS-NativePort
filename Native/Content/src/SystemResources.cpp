@@ -126,7 +126,8 @@ class Loader {
 };
 }  // namespace
 
-// decomp: INITBTL.PRG _loadSystemDat (src/BATTLE/INITBTL.PRG/18.c:258)
+// decomp: INITBTL.PRG loadSystemDat (src/BATTLE/INITBTL.PRG/18.c:269; was
+// _loadSystemDat)
 SystemResourcesLoad LoadSystemResources(SystemResourcesHost& host) {
   const std::span<std::byte> buffer = host.AcquireBuffer(kSystemDatBytes);
   if (buffer.size() < kSystemDatBytes) {

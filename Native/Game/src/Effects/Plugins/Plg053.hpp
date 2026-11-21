@@ -4,6 +4,7 @@
 #include "Effects/Plugins/PluginData.hpp"
 
 namespace VS::Effects::Plg053 {
-// decomp: D_800FB2D4 (PLG053.BIN/18.c:7; closedRings.h:58)
+// decomp: vs_effect_explosionLv1_1_colors (src/EFFECT/closedRings.h:58; was
+// D_800FB2D4; src/EFFECT/closedRings.h:58)
 extern plugins::RingPalette closedRingColorFactors;
 }  // namespace VS::Effects::Plg053

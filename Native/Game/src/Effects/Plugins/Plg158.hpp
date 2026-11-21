@@ -4,10 +4,14 @@
 #include "Effects/Plugins/PluginData.hpp"
 
 namespace VS::Effects::Plg158 {
-// decomp: D_800FCE38 (PLG158.BIN/0.c:6; sphericalSurfaceVertices.h:21)
+// decomp: D_800FCE38 (PLG158.BIN/0.c:6;
+// src/EFFECT/sphericalSurfaceVertices.h:21)
 extern plugins::SurfaceProfile surfaceVertices;
-// decomp: D_800FD0B8 (PLG158.BIN/0.c:8; sphericalSurfaceVertices.h:21)
+// decomp: vs_effect_hexFlux_1_vertices
+// (src/EFFECT/sphericalSurfaceVertices.h:21; was D_800FD0B8;
+// src/EFFECT/sphericalSurfaceVertices.h:21)
 extern plugins::SurfaceProfile mirrorSurfaceVertices;
-// decomp: D_800FD338 (PLG158.BIN/0.c:11; closedRings.h:58)
+// decomp: vs_effect_hexFlux_2_colors (src/EFFECT/closedRings.h:58; was
+// D_800FD338; src/EFFECT/closedRings.h:58)
 extern plugins::RingPalette closedRingColorFactors;
 }  // namespace VS::Effects::Plg158

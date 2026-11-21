@@ -98,7 +98,8 @@ static_assert(item_text::kItem0Name == itemname_text::index::kItem0);
 static_assert(item_text::kWoodName == itemname_text::index::kWood);
 static_assert(sizeof(*itemNames) == kItemNameRowBytes);
 
-// decomp: vs_mainMenu_weaponHands' module image values (2D10.c:157).
+// decomp: vs_mainMenu_weaponHands' module image values
+// (src/MENU/MAINMENU.PRG/2D10.c:157).
 constexpr std::array<std::uint8_t, kWeaponHandCategories> kInitialWeaponHands{
     0, 0, 1, 0, 1, 0, 1, 1, 1, 0,
 };
@@ -498,15 +499,18 @@ void ResetLiveItemRowsStatics() {
 }
 }  // namespace VS::Menu::Framework
 
-// decomp: vs_mainMenu_itemHelp (MENU/MAINMENU.PRG 2D10.c:42)
+// decomp: vs_mainMenu_itemHelp (MENU/MAINMENU.PRG
+// src/MENU/MAINMENU.PRG/58EC.c:54)
 std::uint16_t* VS::Menu::Framework::itemHelp = nullptr;
-// decomp: vs_mainMenu_itemNames (MENU/MAINMENU.PRG 2D10.c:150): the module
-// image value is null.
+// decomp: vs_mainMenu_itemNames (MENU/MAINMENU.PRG
+// src/MENU/MAINMENU.PRG/2D10.h:235): the module image value is null.
 char (*VS::Menu::Framework::itemNames)[VS::Menu::Framework::kItemNameRowBytes] =
     nullptr;
-// decomp: vs_mainMenu_menu12Text (MENU/MAINMENU.PRG 2D10.c:1132)
+// decomp: vs_mainMenu_menu12Text (MENU/MAINMENU.PRG
+// src/MENU/MAINMENU.PRG/58EC.c:48)
 std::uint16_t* VS::Menu::Framework::menu12Text = nullptr;
-// decomp: vs_mainMenu_weaponHands (MENU/MAINMENU.PRG 2D10.c:157)
+// decomp: vs_mainMenu_weaponHands (MENU/MAINMENU.PRG
+// src/MENU/MAINMENU.PRG/2D10.c:131)
 std::uint8_t VS::Menu::Framework::weaponHands
     [VS::Menu::Framework::kWeaponHandCategories] = {0, 0, 1, 0, 1,
                                                     0, 1, 1, 1, 0};

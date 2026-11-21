@@ -31,7 +31,8 @@ constexpr int kFirstCompanionSlot = 2;
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_8009D7E8 (src/BATTLE/BATTLE.PRG/30DB0.c:2173)
+// decomp: BATTLE.PRG setActorSway (src/BATTLE/BATTLE.PRG/30DB0.c:2237; was
+// func_8009D7E8)
 void SetActorPaletteFade(PaletteFade& fade, int fade_parameter) {
   if (fade_parameter == 0) {
     fade.active = false;
@@ -43,7 +44,7 @@ void SetActorPaletteFade(PaletteFade& fade, int fade_parameter) {
   fade.reverse = false;
 }
 
-// decomp: BATTLE.PRG func_8009D88C (src/BATTLE/BATTLE.PRG/30DB0.c:2195)
+// decomp: BATTLE.PRG func_8009D88C (src/BATTLE/BATTLE.PRG/30DB0.c:2259)
 void ResetActorWeaponVisibilityBlend(
     std::span<std::optional<WeaponAppearance>> weapons) {
   for (auto& weapon : weapons) {
@@ -55,21 +56,21 @@ void ResetActorWeaponVisibilityBlend(
   }
 }
 
-// decomp: BATTLE.PRG func_8009F898 (src/BATTLE/BATTLE.PRG/30DB0.c:3363)
+// decomp: BATTLE.PRG func_8009F898 (src/BATTLE/BATTLE.PRG/30DB0.c:3462)
 void SetWeaponBrightnessOverride(WeaponAppearance& weapon, bool enabled,
                                  std::uint8_t brightness) {
   weapon.brightness = brightness;
   weapon.brightness_override = enabled;
 }
 
-// decomp: BATTLE.PRG func_8009FB64 (src/BATTLE/BATTLE.PRG/30DB0.c:3467)
+// decomp: BATTLE.PRG func_8009FB64 (src/BATTLE/BATTLE.PRG/30DB0.c:3567)
 std::int16_t SetRoomActorScale(Core::Math::Vec3& stored,
                                Core::Math::Vec3 room_scale) {
   stored = room_scale;
   return Core::Math::WrapSigned16(static_cast<std::uint32_t>(room_scale.x));
 }
 
-// decomp: BATTLE.PRG func_8009FD5C (src/BATTLE/BATTLE.PRG/30DB0.c:3548)
+// decomp: BATTLE.PRG func_8009FD5C (src/BATTLE/BATTLE.PRG/30DB0.c:3648)
 PalettePulseChange EnableModelPalettePulse(PalettePulseRequest& request,
                                            int pulse_flags, int pulse_slot) {
   PalettePulseChange change;
@@ -90,7 +91,7 @@ PalettePulseChange EnableModelPalettePulse(PalettePulseRequest& request,
   return change;
 }
 
-// decomp: BATTLE.PRG func_8009FE74 (src/BATTLE/BATTLE.PRG/30DB0.c:3586)
+// decomp: BATTLE.PRG func_8009FE74 (src/BATTLE/BATTLE.PRG/30DB0.c:3686)
 AppearanceStatus DisableModelPalettePulse(PalettePulseRequest& request,
                                           int pulse_slot) {
   if (pulse_slot == kEveryPalettePulseSlot) {
@@ -102,7 +103,7 @@ AppearanceStatus DisableModelPalettePulse(PalettePulseRequest& request,
   return AppearanceStatus::kOk;
 }
 
-// decomp: BATTLE.PRG func_800A06B8 (src/BATTLE/BATTLE.PRG/30DB0.c:3877)
+// decomp: BATTLE.PRG func_800A06B8 (src/BATTLE/BATTLE.PRG/30DB0.c:3996)
 void BeginActorShadowBlend(ShadowBlend& shadow, ShadowRates rates,
                            int blend_frames) {
   shadow.radius_frames = 0;
@@ -121,7 +122,7 @@ void BeginActorShadowBlend(ShadowBlend& shadow, ShadowRates rates,
   shadow.radius_frames = static_cast<std::uint8_t>(blend_frames);
 }
 
-// decomp: BATTLE.PRG func_800A071C (src/BATTLE/BATTLE.PRG/30DB0.c:3894)
+// decomp: BATTLE.PRG func_800A071C (src/BATTLE/BATTLE.PRG/30DB0.c:4013)
 void ActorFadeParameters(const ActorColors& colors,
                          Render::ColorCode& fade_color) {
   fade_color.red = colors.fade[0];
@@ -129,16 +130,17 @@ void ActorFadeParameters(const ActorColors& colors,
   fade_color.blue = colors.fade[2];
 }
 
-// decomp: BATTLE.PRG func_800A0768 (src/BATTLE/BATTLE.PRG/30DB0.c:3907)
+// decomp: BATTLE.PRG func_800A0768 (src/BATTLE/BATTLE.PRG/30DB0.c:4026)
 void SetActorFadeParameters(ActorColors& colors,
                             const Render::ColorCode& fade_color) {
   colors.fade = {fade_color.red, fade_color.green, fade_color.blue};
 }
 
-// decomp: BATTLE.PRG func_800A07B4 (src/BATTLE/BATTLE.PRG/30DB0.c:3920)
+// decomp: BATTLE.PRG func_800A07B4 (src/BATTLE/BATTLE.PRG/30DB0.c:4039)
 Render::ColorCode ActorTint(const ActorColors& colors) { return colors.tint; }
 
-// decomp: BATTLE.PRG func_800A07FC (src/BATTLE/BATTLE.PRG/30DB0.c:3930)
+// decomp: BATTLE.PRG setActorLightColor (src/BATTLE/BATTLE.PRG/30DB0.c:4049;
+// was func_800A07FC)
 void SetActorTint(ActorColors& colors,
                   const std::optional<Render::ColorCode>& tint) {
   colors.custom_tint = tint.has_value();
@@ -158,7 +160,7 @@ std::optional<int> AppearanceTransitionState(int transition_kind) {
   }
 }
 
-// decomp: BATTLE.PRG func_800AC37C (src/BATTLE/BATTLE.PRG/40564.c:2179)
+// decomp: BATTLE.PRG func_800AC37C (src/BATTLE/BATTLE.PRG/40564.c:1882)
 bool StartActorAppearanceTransition(AppearanceTransitionActors& actors,
                                     int actor_id, int transition_kind) {
   const std::optional<int> state = AppearanceTransitionState(transition_kind);

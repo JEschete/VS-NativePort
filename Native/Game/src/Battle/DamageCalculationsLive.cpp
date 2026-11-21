@@ -151,7 +151,8 @@ std::int16_t Calculate(Calculator function, ActionDefinition* action,
                           to ? &to.value() : nullptr, hit, random, world));
 }
 }  // namespace
-// decomp: _getPhysicalAttackDamage (src/BATTLE/BATTLE.PRG/146C.c:11271).
+// decomp: getPhysicalAttackDamage (src/BATTLE/BATTLE.PRG/146C.c:11202; was
+// _getPhysicalAttackDamage).
 std::int16_t LiveCalculatePhysicalHitDamage(ActionDefinition* action,
                                             VS::Battle::HitResult* source,
                                             VS::Battle::HitResult* target,
@@ -163,8 +164,9 @@ std::int16_t LiveCalculatePhysicalHitDamage(ActionDefinition* action,
       from ? &from.value() : nullptr, to ? &to.value() : nullptr, hit, random,
       apply_statuses != 0, world));
 }
-// decomp: _getPhysicalAttackDamageWithoutStatusModifiers
-// (src/BATTLE/BATTLE.PRG/146C.c:11467).
+// decomp: getPhysicalAttackDamageWithoutStatusModifiers
+// (src/BATTLE/BATTLE.PRG/146C.c:11398; was
+// _getPhysicalAttackDamageWithoutStatusModifiers).
 std::int16_t LivePhysicalDamageWithoutDebuffs(ActionDefinition* action,
                                               VS::Battle::HitResult* source,
                                               VS::Battle::HitResult* target,
@@ -172,7 +174,8 @@ std::int16_t LivePhysicalDamageWithoutDebuffs(ActionDefinition* action,
   return Calculate(PhysicalDamageWithoutDebuffs, action, source, target, hit,
                    random);
 }
-// decomp: _getMagicAttackDamage (src/BATTLE/BATTLE.PRG/146C.c:11473).
+// decomp: getMagicAttackDamage (src/BATTLE/BATTLE.PRG/146C.c:11404; was
+// _getMagicAttackDamage).
 std::int16_t LiveCalculateSpellHitDamage(ActionDefinition* action,
                                          VS::Battle::HitResult* source,
                                          VS::Battle::HitResult* target, int hit,
@@ -180,15 +183,17 @@ std::int16_t LiveCalculateSpellHitDamage(ActionDefinition* action,
   return Calculate(CalculateSpellHitDamage, action, source, target, hit,
                    random);
 }
-// decomp: _hpHealed (src/BATTLE/BATTLE.PRG/146C.c:11850).
+// decomp: calculateHpHealed (src/BATTLE/BATTLE.PRG/146C.c:11774; was
+// _hpHealed).
 std::int16_t LiveCalculateSpellHealing(ActionDefinition* action,
                                        VS::Battle::HitResult* source,
                                        VS::Battle::HitResult* target, int hit,
                                        int random) {
   return Calculate(CalculateSpellHealing, action, source, target, hit, random);
 }
-// decomp: _getPhysicalAttackDamageWithStatusModifiers
-// (src/BATTLE/BATTLE.PRG/146C.c:12235).
+// decomp: getPhysicalAttackDamageWithStatusModifiers
+// (src/BATTLE/BATTLE.PRG/146C.c:12150; was
+// _getPhysicalAttackDamageWithStatusModifiers).
 std::int16_t LivePhysicalDamageWithDebuffs(ActionDefinition* action,
                                            VS::Battle::HitResult* source,
                                            VS::Battle::HitResult* target,

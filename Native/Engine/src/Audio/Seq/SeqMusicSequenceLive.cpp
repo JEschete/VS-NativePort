@@ -298,7 +298,8 @@ void RunCommand(const char* operation, VS::Audio::CommandParams* params,
 }
 }  // namespace
 
-// decomp: SLUS_010.40 func_80015C9C (src/SLUS_010.40/25AC.c:2330)
+// decomp: SLUS_010.40 Sound_ResetChannel (src/SLUS_010.40/25AC.c:2499; was
+// func_80015C9C)
 void LiveResetSoundEffectChannel(VS::Audio::SeqChannel* channel,
                                  std::uint8_t* program_start) {
   const std::optional<LiveProgramMemory> region =
@@ -318,7 +319,7 @@ void LiveResetSoundEffectChannel(VS::Audio::SeqChannel* channel,
   StoreSequenceChannel(*channel, record, *region);
 }
 
-// decomp: SLUS_010.40 Sound_LoadAkaoSequence (src/SLUS_010.40/25AC.c:2380)
+// decomp: SLUS_010.40 Sound_LoadAkaoSequence (src/SLUS_010.40/25AC.c:2548)
 void LiveLoadMusicSequence(VS::Audio::AkaoSequenceFile* sequence) {
   VS::Audio::MusicConfig* active = VS::Audio::Seq::activeMusicConfig;
   const std::optional<LiveProgramMemory> memory = SequenceMemory(sequence);
@@ -349,7 +350,8 @@ void LiveLoadMusicSequence(VS::Audio::AkaoSequenceFile* sequence) {
   }
 }
 
-// decomp: SLUS_010.40 Sound_KillMusicConfig (src/SLUS_010.40/25AC.c:2506)
+// decomp: SLUS_010.40 Sound_KillMusicContext (src/SLUS_010.40/25AC.c:2678; was
+// Sound_KillMusicConfig)
 void LiveReleaseMusicConfiguration(VS::Audio::MusicConfig* config,
                                    VS::Audio::SeqChannel* channels,
                                    unsigned music_id_filter) {
@@ -384,7 +386,7 @@ void LiveReleaseMusicConfiguration(VS::Audio::MusicConfig* config,
   }
 }
 
-// decomp: SLUS_010.40 Sound_SetMusicSequence (src/SLUS_010.40/25AC.c:2847)
+// decomp: SLUS_010.40 Sound_SetMusicSequence (src/SLUS_010.40/25AC.c:3016)
 // The original moves every program pointer of the restored track by the
 // distance between the old and new sequence; here each pointer into the old
 // sequence moves to the same offset in the new one, and pointers elsewhere
@@ -444,12 +446,12 @@ void LiveRestoreMusicSequence(VS::Audio::AkaoSequenceFile* sequence,
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_10_StartFieldMusic
-// (src/SLUS_010.40/25AC.c:2958)
+// (src/SLUS_010.40/25AC.c:3136)
 void LiveStartOrResumeMusic(VS::Audio::CommandParams* params) {
   RunCommand("StartOrResumeMusic", params, &StartOrResumeMusic);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_40_PushMusicState (src/SLUS_010.40/25AC.c:2969)
+// decomp: SLUS_010.40 Sound_Cmd_40_PushMusicState (src/SLUS_010.40/25AC.c:3147)
 void LiveSaveCurrentMusic(VS::Audio::CommandParams* params) {
   if (VS::Audio::Seq::activeMusicConfig == nullptr) {
     ReportRefusal("SaveCurrentMusic", "no active music layer");
@@ -461,42 +463,50 @@ void LiveSaveCurrentMusic(VS::Audio::CommandParams* params) {
   StoreMusicCommand(state);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_19_Unk (src/SLUS_010.40/25AC.c:2983)
+// decomp: SLUS_010.40 Sound_Cmd_19_SetMusicLevelImmediate
+// (src/SLUS_010.40/25AC.c:3162; was Sound_Cmd_19_Unk)
 void LiveStartMusicLayer(VS::Audio::CommandParams* params) {
   RunCommand("StartMusicLayer", params, &StartMusicLayer);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_1A_Unk (src/SLUS_010.40/25AC.c:3001)
+// decomp: SLUS_010.40 Sound_Cmd_1A_StartMasterAndMusicVolumeFade
+// (src/SLUS_010.40/25AC.c:3181; was Sound_Cmd_1A_Unk)
 void LiveCrossfadeMusicLayers(VS::Audio::CommandParams* params) {
   RunCommand("CrossfadeMusicLayers", params, &CrossfadeMusicLayers);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_12_unk (src/SLUS_010.40/25AC.c:3034)
+// decomp: SLUS_010.40 Sound_Cmd_12_PlayFieldMusicLooped
+// (src/SLUS_010.40/25AC.c:3216; was Sound_Cmd_12_unk)
 void LiveStartMusicWithLoopCounter(VS::Audio::CommandParams* params) {
   RunCommand("StartMusicWithLoopCounter", params, &StartMusicWithLoopCounter);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_C0_unk (src/SLUS_010.40/25AC.c:3123)
+// decomp: SLUS_010.40 Sound_Cmd_C0_SetMasterVolumeByMusicId
+// (src/SLUS_010.40/25AC.c:3304; was Sound_Cmd_C0_unk)
 void LiveSetMusicVolume(VS::Audio::CommandParams* params) {
   RunCommand("SetMusicVolume", params, &SetMusicVolume);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_C1_unk (src/SLUS_010.40/25AC.c:3147)
+// decomp: SLUS_010.40 Sound_Cmd_C1_FadeMasterVolumeByMusicId
+// (src/SLUS_010.40/25AC.c:3328; was Sound_Cmd_C1_unk)
 void LiveFadeMusicVolume(VS::Audio::CommandParams* params) {
   RunCommand("FadeMusicVolume", params, &FadeMusicVolume);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_C2_unk (src/SLUS_010.40/25AC.c:3184)
+// decomp: SLUS_010.40 Sound_Cmd_C2_FadeMasterVolumeFromByMusicId
+// (src/SLUS_010.40/25AC.c:3365; was Sound_Cmd_C2_unk)
 void LiveFadeMusicVolumeFrom(VS::Audio::CommandParams* params) {
   RunCommand("FadeMusicVolumeFrom", params, &FadeMusicVolumeFrom);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_C8_unk (src/SLUS_010.40/25AC.c:3216)
+// decomp: SLUS_010.40 Sound_Cmd_C8_SetCdVolume (src/SLUS_010.40/25AC.c:3398;
+// was Sound_Cmd_C8_unk)
 void LiveSetDiscVolume(VS::Audio::CommandParams* params) {
   RunCommand("SetDiscVolume", params, &SetDiscVolume);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_C9_unk (src/SLUS_010.40/25AC.c:3223)
+// decomp: SLUS_010.40 Sound_Cmd_C9_FadeCdVolume (src/SLUS_010.40/25AC.c:3405;
+// was Sound_Cmd_C9_unk)
 void LiveFadeDiscVolume(VS::Audio::CommandParams* params) {
   RunCommand(
       "FadeDiscVolume", params,
@@ -504,7 +514,8 @@ void LiveFadeDiscVolume(VS::Audio::CommandParams* params) {
          const MusicCommand& command) { FadeDiscVolume(state, command); });
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_CA_unk (src/SLUS_010.40/25AC.c:3237)
+// decomp: SLUS_010.40 Sound_Cmd_CA_FadeCdVolumeFrom
+// (src/SLUS_010.40/25AC.c:3419; was Sound_Cmd_CA_unk)
 void LiveFadeDiscVolumeFrom(VS::Audio::CommandParams* params) {
   RunCommand(
       "FadeDiscVolumeFrom", params,

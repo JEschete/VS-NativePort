@@ -98,7 +98,8 @@ std::optional<PlatformContact> ContactOf(const MovingPlatformRoom& room,
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_8008CEB0 (146C.c:16688),260MIPS shadow geometry.
+// decomp: BATTLE.PRG func_8008CEB0 (src/BATTLE/BATTLE.PRG/146C.c:16562),260MIPS
+// shadow geometry.
 std::optional<MovingPlatformShadow> BuildMovingPlatformShadow(
     const MovingPlatformPose& platform,
     const MovingPlatformShadowSurface& surface) {
@@ -157,7 +158,8 @@ void DrawMovingPlatformShadows(std::span<const MovingPlatformPose> platforms,
   }
 }
 
-// decomp: BATTLE.PRG func_8008C538 (146C.c:16489),95MIPS reset/geometry/entry.
+// decomp: BATTLE.PRG func_8008C538 (src/BATTLE/BATTLE.PRG/146C.c:16363),95MIPS
+// reset/geometry/entry.
 MovingPlatformInitialization InitializeMovingPlatforms(
     const MovingPlatformRoom& room, std::uint16_t entrance_flags) {
   constexpr std::uint8_t kInitialBounceFrame = 7;
@@ -179,7 +181,8 @@ MovingPlatformInitialization InitializeMovingPlatforms(
   return initialization;
 }
 
-// decomp: BATTLE.PRG func_8008D2C0 (146C.c:16763),68MIPS visible order/SH.
+// decomp: BATTLE.PRG func_8008D2C0 (src/BATTLE/BATTLE.PRG/146C.c:16637),68MIPS
+// visible order/SH.
 std::vector<PlatformContact> CollectMovingPlatformPositions(
     const MovingPlatformRoom& room) {
   std::vector<PlatformContact> contacts;
@@ -206,7 +209,7 @@ std::vector<PlatformContact> CollectMovingPlatformPositions(
   return contacts;
 }
 
-// decomp: BATTLE.PRG func_8008E4DC (146C.c:17333),69MIPS
+// decomp: BATTLE.PRG func_8008E4DC (src/BATTLE/BATTLE.PRG/146C.c:17212),69MIPS
 // palette/group/effect/SB.
 bool SetPlatformFreezeAppearance(
     MovingPlatformAppearanceState& state, std::int32_t requested,
@@ -226,8 +229,8 @@ bool SetPlatformFreezeAppearance(
   return host.StoreTint(state.tint);
 }
 
-// decomp: BATTLE.PRG func_8008C49C (146C.c:16475),31MIPS rider 7 bits then
-// bounce.
+// decomp: BATTLE.PRG func_8008C49C (src/BATTLE/BATTLE.PRG/146C.c:16349),31MIPS
+// rider 7 bits then bounce.
 void SetMovingPlatformActor(MovingPlatformControlState& state,
                             std::int32_t rider, std::int16_t freeze_frames) {
   constexpr std::uint8_t kRiderMask = 0x7F;
@@ -235,14 +238,15 @@ void SetMovingPlatformActor(MovingPlatformControlState& state,
   if (rider >= 0 && freeze_frames == 0) state.bounce_frame = 0;
 }
 
-// decomp: BATTLE.PRG func_8008D594 (146C.c:16855), original SB input low byte.
+// decomp: BATTLE.PRG func_8008D594 (src/BATTLE/BATTLE.PRG/146C.c:16729),
+// original SB input low byte.
 void SetMovingPlatformsPaused(MovingPlatformRuntimeState& state,
                               std::int32_t paused) {
   state.paused = static_cast<std::uint8_t>(paused);
 }
 
-// decomp: BATTLE.PRG func_8008D5A0 (146C.c:16857), appearance before SH
-// duration.
+// decomp: BATTLE.PRG func_8008D5A0 (src/BATTLE/BATTLE.PRG/146C.c:16731),
+// appearance before SH duration.
 bool FreezeMovingPlatforms(MovingPlatformRuntimeState& state,
                            std::int32_t freeze_frames,
                            MovingPlatformFreezeHost& host) {
@@ -253,14 +257,16 @@ bool FreezeMovingPlatforms(MovingPlatformRuntimeState& state,
   return true;
 }
 
-// decomp: BATTLE.PRG func_8006CE50 (146C.c:2161), original8MIPS.
+// decomp: BATTLE.PRG func_8006CE50 (src/BATTLE/BATTLE.PRG/146C.c:1863),
+// original8MIPS.
 bool FreezeRoomGimmicksTemporarily(MovingPlatformRuntimeState& state,
                                    MovingPlatformFreezeHost& host) {
   constexpr std::int32_t kTemporaryFreezeFrames = 180;
   return FreezeMovingPlatforms(state, kTemporaryFreezeFrames, host);
 }
 
-// decomp: BATTLE.PRG func_8008E224 (146C.c:17243), original44MIPS.
+// decomp: BATTLE.PRG setCloudstoneMoving (src/BATTLE/BATTLE.PRG/146C.c:17122;
+// was func_8008E224), original44MIPS.
 bool SetMovingPlatformVisibility(std::int32_t visibility,
                                  MovingPlatformVisibilityHost& host) {
   constexpr std::uint32_t kHiddenBit = 1;
@@ -273,15 +279,16 @@ bool SetMovingPlatformVisibility(std::int32_t visibility,
   return !geometry || host.StoreGeometryHidden(*current_hidden);
 }
 
-// decomp: BATTLE.PRG func_8008E320 (146C.c:17273), LHU ticks only for waiting1.
+// decomp: BATTLE.PRG func_8008E320 (src/BATTLE/BATTLE.PRG/146C.c:17152), LHU
+// ticks only for waiting1.
 std::optional<std::uint16_t> MovingPlatformDwellTicks(
     const std::optional<MovingPlatformControlState>& platform) {
   if (!platform || !platform->waiting) return std::nullopt;
   return platform->motion_ticks;
 }
 
-// decomp: BATTLE.PRG func_8008E2D4 (146C.c:17262),19MIPS selected two-bit
-// point.
+// decomp: BATTLE.PRG func_8008E2D4 (src/BATTLE/BATTLE.PRG/146C.c:17141),19MIPS
+// selected two-bit point.
 std::optional<MovingPlatformWaypointSelection> MovingPlatformTargetWaypoint(
     std::uint8_t current_waypoint,
     std::span<const MovingPlatformWaypoint> waypoints) {
@@ -291,8 +298,8 @@ std::optional<MovingPlatformWaypointSelection> MovingPlatformTargetWaypoint(
   return MovingPlatformWaypointSelection{index, waypoints[index]};
 }
 
-// decomp: BATTLE.PRG func_8008C6B4 (146C.c:16528),125MIPS reset/field wrap
-// order.
+// decomp: BATTLE.PRG func_8008C6B4 (src/BATTLE/BATTLE.PRG/146C.c:16402),125MIPS
+// reset/field wrap order.
 bool ResetMovingPlatformWaypoint(
     MovingPlatformWaypointState& state,
     std::span<const MovingPlatformWaypoint> waypoints, std::int32_t waypoint) {
@@ -320,7 +327,8 @@ bool ResetMovingPlatformWaypoint(
   return true;
 }
 
-// decomp: BATTLE.PRG func_8008C8A8 (146C.c:16570), substep8008C9FC-CDAC.
+// decomp: BATTLE.PRG func_8008C8A8 (src/BATTLE/BATTLE.PRG/146C.c:16444),
+// substep8008C9FC-CDAC.
 bool AdvanceMovingPlatformMotion(
     MovingPlatformMotionState& state,
     std::span<const MovingPlatformWaypoint> waypoints,
@@ -380,7 +388,8 @@ bool AdvanceMovingPlatformMotion(
   return true;
 }
 
-// decomp: BATTLE.PRG func_8008C8A8 (146C.c:16570),386MIPS frame gates/order.
+// decomp: BATTLE.PRG func_8008C8A8 (src/BATTLE/BATTLE.PRG/146C.c:16444),386MIPS
+// frame gates/order.
 bool UpdateMovingPlatforms(MovingPlatformUpdateState& state,
                            std::span<MovingPlatformMotionRecord> platforms,
                            std::span<const std::int16_t> bounce_offsets,
@@ -453,7 +462,8 @@ std::optional<PlatformContact> MovingPlatformPlacement(
 }
 
 // decomp: BATTLE.PRG func_800A4A24 (F00920 src/BATTLE/BATTLE.PRG/3A1A0.c:1089,
-// F00938 40564.c:120). The original returned its local contact array.
+// F00938 src/BATTLE/BATTLE.PRG/40564.c:120). The original returned its local
+// contact array.
 std::optional<PlatformContact> FindMovingPlatformById(
     const MovingPlatformRoom& room, int support_layer) {
   const auto index = PlatformIndex(room, support_layer);

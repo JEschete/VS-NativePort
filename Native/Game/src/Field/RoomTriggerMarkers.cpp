@@ -56,7 +56,7 @@ std::int16_t DecodeFloorHeight(std::uint16_t code) {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_8008DF14 (src/BATTLE/BATTLE.PRG/146C.c:17164).
+// decomp: BATTLE.PRG func_8008DF14 (src/BATTLE/BATTLE.PRG/146C.c:17038).
 void DrawRoomTriggerMarkers(std::span<FloorTriggerMarker> triggers,
                             const TriggerMarkerFrame& frame,
                             TriggerMarkerAnimation& animation,
@@ -80,7 +80,7 @@ void DrawRoomTriggerMarkers(std::span<FloorTriggerMarker> triggers,
   }
 }
 
-// decomp: BATTLE.PRG func_8008E19C (src/BATTLE/BATTLE.PRG/146C.c:17216).
+// decomp: BATTLE.PRG func_8008E19C (src/BATTLE/BATTLE.PRG/146C.c:17090).
 void DrawRoomTriggerMarker(int world_x, int world_z, std::int16_t height,
                            std::uint32_t brightness,
                            RoomTriggerMarkerRenderer& renderer) {

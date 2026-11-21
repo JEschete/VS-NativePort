@@ -5,8 +5,9 @@
 
 namespace VS::Event {
 
-// decomp: func_800B9DB4 (src/BATTLE/BATTLE.PRG/4A0A8.c:2158;
-// original nonmatchings/4A0A8/func_800B9DB4.s, 0x800B9DB4-0x800B9F24).
+// decomp: vs_battle_script_72 (src/BATTLE/BATTLE.PRG/4DEA8.c:2747; was
+// func_800B9DB4; original nonmatchings/4A0A8/func_800B9DB4.s,
+// 0x800B9DB4-0x800B9F24).
 ScriptStep ScriptSetAshleyBattleMode(WeaponModeCommand command,
                                      WeaponModeHost& host) {
   const int mode = command.mode;

@@ -136,7 +136,7 @@ void UpdateBox(TextBoxUpdateHost& host, std::size_t index) {
 }
 }  // namespace
 
-// decomp: func_800CB83C (src/BATTLE/BATTLE.PRG/5BF94.c:3936,
+// decomp: func_800CB83C (src/BATTLE/BATTLE.PRG/5BF94.c:3502,
 // original instructions 800CB83C-800CBBCC).
 TextBoxUpdateStatus UpdateTextBoxes(TextBoxUpdateHost& host) {
   for (std::size_t index = kTextBoxCount; index-- > 0;) {

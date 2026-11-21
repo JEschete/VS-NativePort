@@ -254,7 +254,8 @@ void StartTrackPair(DispatchState& state, DispatchHost& host) {
 }
 }  // namespace
 
-// decomp: SLUS_010.40 Sound_Cmd_A4_unk (src/SLUS_010.40/25AC.c:3427)
+// decomp: SLUS_010.40 Sound_Cmd_A4_SetSfxPitchMod (src/SLUS_010.40/25AC.c:3614;
+// was Sound_Cmd_A4_unk)
 void SetSoundEffectPitchScale(CommandState& state, EffectSelection selection,
                               std::uint32_t pitch_word) {
   for (std::size_t i = 0; i < kWorldEffectChannelCount; ++i) {
@@ -269,7 +270,8 @@ void SetSoundEffectPitchScale(CommandState& state, EffectSelection selection,
   }
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_A5_unk (src/SLUS_010.40/25AC.c:3453)
+// decomp: SLUS_010.40 Sound_Cmd_A5_FadeSfxPitchMod
+// (src/SLUS_010.40/25AC.c:3640; was Sound_Cmd_A5_unk)
 void SlideSoundEffectPitchScale(CommandState& state, EffectSelection selection,
                                 std::uint32_t length_word,
                                 std::uint32_t target_word,
@@ -283,7 +285,8 @@ void SlideSoundEffectPitchScale(CommandState& state, EffectSelection selection,
   }
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_AC_unk (src/SLUS_010.40/25AC.c:3481)
+// decomp: SLUS_010.40 Sound_Cmd_AC_SetAllSfxPitchMod
+// (src/SLUS_010.40/25AC.c:3668; was Sound_Cmd_AC_unk)
 void SetWorldSoundEffectPitchScale(CommandState& state,
                                    const Seq::MusicCommand& command) {
   for (std::size_t i = 0; i < kWorldEffectChannelCount; ++i) {
@@ -295,7 +298,8 @@ void SetWorldSoundEffectPitchScale(CommandState& state,
   }
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_AD_unk (src/SLUS_010.40/25AC.c:3494)
+// decomp: SLUS_010.40 Sound_Cmd_AD_FadeAllSfxPitchMod
+// (src/SLUS_010.40/25AC.c:3681; was Sound_Cmd_AD_unk)
 void SlideWorldSoundEffectPitchScale(CommandState& state,
                                      const Seq::MusicCommand& command,
                                      CommandRefusalSink& sink) {
@@ -308,47 +312,54 @@ void SlideWorldSoundEffectPitchScale(CommandState& state,
   }
 }
 
-// decomp: SLUS_010.40 func_8001833C (src/SLUS_010.40/25AC.c:3515)
+// decomp: SLUS_010.40 Sound_Cmd_D0_SetTempoScale (src/SLUS_010.40/25AC.c:3702;
+// was func_8001833C)
 void SetTempoScale(Seq::LevelSlide& tempo_scale, std::int8_t scale) {
   tempo_scale.value = std::int32_t{scale} * kScaleOne;
   tempo_scale.length = 0;
 }
 
-// decomp: SLUS_010.40 func_80018358 (src/SLUS_010.40/25AC.c:3521)
+// decomp: SLUS_010.40 Sound_Cmd_D1_FadeTempoScale (src/SLUS_010.40/25AC.c:3708;
+// was func_80018358)
 void SlideTempoScale(Seq::LevelSlide& tempo_scale,
                      const Seq::MusicCommand& command,
                      CommandRefusalSink& sink) {
   SlideScale(tempo_scale, command, sink);
 }
 
-// decomp: SLUS_010.40 func_800183C0 (src/SLUS_010.40/25AC.c:3532)
+// decomp: SLUS_010.40 Sound_Cmd_D2_FadeTempoScaleFrom
+// (src/SLUS_010.40/25AC.c:3720; was func_800183C0)
 void SetTempoScaleRamp(Seq::LevelSlide& tempo_scale,
                        const Seq::MusicCommand& command,
                        CommandRefusalSink& sink) {
   RampScale(tempo_scale, command, sink);
 }
 
-// decomp: SLUS_010.40 func_80018434 (src/SLUS_010.40/25AC.c:3546)
+// decomp: SLUS_010.40 Sound_Cmd_D4_SetMasterPitchScale
+// (src/SLUS_010.40/25AC.c:3734; was func_80018434)
 void SetMusicPitchScale(Seq::LevelSlide& pitch_scale, std::int8_t scale) {
   pitch_scale.value = std::int32_t{scale} * kScaleOne;
   pitch_scale.length = 0;
 }
 
-// decomp: SLUS_010.40 func_80018450 (src/SLUS_010.40/25AC.c:3552)
+// decomp: SLUS_010.40 Sound_Cmd_D5_FadeMasterPitchScale
+// (src/SLUS_010.40/25AC.c:3740; was func_80018450)
 void SlideMusicPitchScale(Seq::LevelSlide& pitch_scale,
                           const Seq::MusicCommand& command,
                           CommandRefusalSink& sink) {
   SlideScale(pitch_scale, command, sink);
 }
 
-// decomp: SLUS_010.40 func_800184B8 (src/SLUS_010.40/25AC.c:3568)
+// decomp: SLUS_010.40 Sound_Cmd_D6_FadeMasterPitchScaleFrom
+// (src/SLUS_010.40/25AC.c:3756; was func_800184B8)
 void SetMusicPitchScaleRamp(Seq::LevelSlide& pitch_scale,
                             const Seq::MusicCommand& command,
                             CommandRefusalSink& sink) {
   RampScale(pitch_scale, command, sink);
 }
 
-// decomp: SLUS_010.40 func_8001852C (src/SLUS_010.40/25AC.c:3582)
+// decomp: SLUS_010.40 Sound_Cmd_F0_StopMusic (src/SLUS_010.40/25AC.c:3770; was
+// func_8001852C)
 void StopMusicAndCancelReplacement(CommandState& state, ControlHost& host) {
   if (state.active) {
     host.ReleaseMusic(state, Seq::ChannelGroup::kMusic, 0);
@@ -362,7 +373,8 @@ void StopMusicAndCancelReplacement(CommandState& state, ControlHost& host) {
   state.music_queued = false;
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_11_StopAllMusic (src/SLUS_010.40/25AC.c:3594)
+// decomp: SLUS_010.40 Sound_Cmd_11_StopMusicById (src/SLUS_010.40/25AC.c:3782;
+// was Sound_Cmd_11_StopAllMusic)
 void StopMatchingMusic(CommandState& state, const Seq::MusicCommand& command,
                        ControlHost& host) {
   if (state.active) {
@@ -376,7 +388,8 @@ void StopMatchingMusic(CommandState& state, const Seq::MusicCommand& command,
   }
 }
 
-// decomp: SLUS_010.40 func_80018608 (src/SLUS_010.40/25AC.c:3607)
+// decomp: SLUS_010.40 Sound_Cmd_F1_StopSfx (src/SLUS_010.40/25AC.c:3794; was
+// func_80018608)
 void StopWorldSoundEffects(CommandState& state) {
   for (std::size_t i = 0; i < kWorldEffectChannelCount; ++i) {
     EffectControl& effect = state.effects[i];
@@ -395,17 +408,20 @@ void StopWorldSoundEffects(CommandState& state) {
   state.driver_update_flags |= Seq::kVoiceModeUpdate | Seq::kNoiseClockUpdate;
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_80_unk (src/SLUS_010.40/25AC.c:3626)
+// decomp: SLUS_010.40 Sound_Cmd_80_SetModeStereo (src/SLUS_010.40/25AC.c:3813;
+// was Sound_Cmd_80_unk)
 void EnableStereoOutput(CommandState& state, ControlHost& host) {
   SetOutputMode(state, host, kStereoOutput);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_81_unk (src/SLUS_010.40/25AC.c:3637)
+// decomp: SLUS_010.40 Sound_Cmd_81_SetModeMono (src/SLUS_010.40/25AC.c:3824;
+// was Sound_Cmd_81_unk)
 void EnableMonoOutput(CommandState& state, ControlHost& host) {
   SetOutputMode(state, host, kMonoOutput);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_90_unk (src/SLUS_010.40/25AC.c:3648)
+// decomp: SLUS_010.40 Sound_Cmd_90_SetMutedMusicChannelMask
+// (src/SLUS_010.40/25AC.c:3835; was Sound_Cmd_90_unk)
 void SetMusicMuteMask(CommandState& state, const Seq::MusicCommand& command) {
   state.muted_music_channels = static_cast<std::int32_t>(command.param1);
   for (std::uint32_t& dirty : state.music_dirty_flags) {
@@ -413,7 +429,8 @@ void SetMusicMuteMask(CommandState& state, const Seq::MusicCommand& command) {
   }
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_92_unk (src/SLUS_010.40/25AC.c:3660)
+// decomp: SLUS_010.40 Sound_Cmd_92_SetMusicJumpThreshold
+// (src/SLUS_010.40/25AC.c:3847; was Sound_Cmd_92_unk)
 void SetMusicJumpThreshold(CommandState& state,
                            const Seq::MusicCommand& command,
                            CommandRefusalSink& sink) {
@@ -424,7 +441,8 @@ void SetMusicJumpThreshold(CommandState& state,
   state.active->jump_threshold = static_cast<std::uint16_t>(command.param1);
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_9B_unk (src/SLUS_010.40/25AC.c:3665)
+// decomp: SLUS_010.40 Sound_Cmd_9B_SuspendMusic (src/SLUS_010.40/25AC.c:3852;
+// was Sound_Cmd_9B_unk)
 void PauseMusic(CommandState& state, ControlHost& host) {
   if (!state.active) {
     host.Refuse(CommandRefusal::kActiveLayerMissing);
@@ -445,7 +463,8 @@ void PauseMusic(CommandState& state, ControlHost& host) {
   state.stream_control_flags |= kMusicPaused;
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_9A_unk (src/SLUS_010.40/25AC.c:3698)
+// decomp: SLUS_010.40 Sound_Cmd_9A_RestoreMusic (src/SLUS_010.40/25AC.c:3885;
+// was Sound_Cmd_9A_unk)
 void ResumeMusic(CommandState& state, CommandRefusalSink& sink) {
   if (!state.active) {
     sink.Refuse(CommandRefusal::kActiveLayerMissing);
@@ -463,7 +482,8 @@ void ResumeMusic(CommandState& state, CommandRefusalSink& sink) {
   state.stream_control_flags &= ~kMusicPaused;
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_9D_unk (src/SLUS_010.40/25AC.c:3722)
+// decomp: SLUS_010.40 Sound_Cmd_9D_SuspendSfx (src/SLUS_010.40/25AC.c:3909; was
+// Sound_Cmd_9D_unk)
 void PauseWorldSoundEffects(CommandState& state, ControlHost& host) {
   if (state.scheduler.active_voices != 0) {
     std::uint32_t voices = state.scheduler.active_voices;
@@ -488,7 +508,8 @@ void PauseWorldSoundEffects(CommandState& state, ControlHost& host) {
   state.stream_control_flags |= kEffectsPaused;
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_9C_unk (src/SLUS_010.40/25AC.c:3761)
+// decomp: SLUS_010.40 Sound_Cmd_9C_RestoreSfx (src/SLUS_010.40/25AC.c:3948; was
+// Sound_Cmd_9C_unk)
 void ResumeWorldSoundEffects(CommandState& state, CommandRefusalSink& sink) {
   const std::uint32_t paused = state.scheduler.paused_effect_voices;
   if (paused != 0) {
@@ -507,10 +528,10 @@ void ResumeWorldSoundEffects(CommandState& state, CommandRefusalSink& sink) {
   state.stream_control_flags &= ~kEffectsPaused;
 }
 
-// decomp: SLUS_010.40 Sound_Cmd_11_Nop (src/SLUS_010.40/25AC.c:3804)
+// decomp: SLUS_010.40 Sound_Cmd_11_Nop (src/SLUS_010.40/25AC.c:3991)
 void IgnoreCommand() {}
 
-// decomp: SLUS_010.40 Sound_SetReverbMode (src/SLUS_010.40/25AC.c:3806)
+// decomp: SLUS_010.40 Sound_SetReverbMode (src/SLUS_010.40/25AC.c:3993)
 void SetReverbMode(ReverbHost& host, std::int32_t mode) {
   if (host.ReverbMode() == mode) return;
   host.EnableReverb(false);
@@ -527,7 +548,8 @@ std::optional<AkaoHeader> ReadAkaoHeader(std::span<const std::uint8_t> bytes) {
                     HalfAt(bytes, kAkaoReverbModeAt)};
 }
 
-// decomp: SLUS_010.40 func_80018C30 (src/SLUS_010.40/25AC.c:3818)
+// decomp: SLUS_010.40 Sound_ExecuteSoundVm2Function
+// (src/SLUS_010.40/25AC.c:4005; was func_80018C30)
 std::uint32_t DispatchCommand(DispatchState& state, DispatchHost& host,
                               std::uint32_t command) {
   std::uint32_t result = 0;

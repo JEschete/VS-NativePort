@@ -55,7 +55,7 @@ auto Vitals(const VS::Battle::ActorStats& stats) {
 }
 }  // namespace
 
-// decomp: func_8007FE5C (src/BATTLE/BATTLE.PRG/146C.c:10534).
+// decomp: func_8007FE5C (src/BATTLE/BATTLE.PRG/146C.c:10469).
 std::int16_t LiveApplyDamageGemMultiplier(ActionDefinition* action,
                                           std::int16_t damage,
                                           VS::Battle::ActorStats* source,
@@ -70,7 +70,7 @@ std::int16_t LiveApplyDamageGemMultiplier(ActionDefinition* action,
                                   damage, weapon, shield);
 }
 
-// decomp: func_80080000 (src/BATTLE/BATTLE.PRG/146C.c:10612).
+// decomp: func_80080000 (src/BATTLE/BATTLE.PRG/146C.c:10547).
 void LiveDistributeHitLimbDamage(ActionDefinition* action,
                                  VS::Battle::HitResult* hit,
                                  std::int16_t amount) {
@@ -106,7 +106,7 @@ void LiveDistributeHitLimbDamage(ActionDefinition* action,
   CommitAmounts(*hit, amounts);
 }
 
-// decomp: func_800801E0 (src/BATTLE/BATTLE.PRG/146C.c:10664).
+// decomp: func_800801E0 (src/BATTLE/BATTLE.PRG/146C.c:10599).
 void LiveDistributeLimbRecovery(ActionDefinition*, VS::Battle::HitResult* hit,
                                 std::int16_t amount) {
   const auto* stats = StatsOf(hit);
@@ -116,12 +116,13 @@ void LiveDistributeLimbRecovery(ActionDefinition*, VS::Battle::HitResult* hit,
   DistributeLimbRecovery(amount, vitals, amounts, VS::Battle::limbArmorDpLoss);
   CommitAmounts(*hit, amounts);
 }
-// decomp: _getLastValue (src/BATTLE/BATTLE.PRG/146C.c:11237).
+// decomp: getLastValue (src/BATTLE/BATTLE.PRG/146C.c:11170; was _getLastValue).
 std::int16_t LiveLastActionStatValue(ActionDefinition*, VS::Battle::HitResult*,
                                      VS::Battle::HitResult*, int, int) {
   return LastActionStatValue(VS::Battle::lastActionStatValue);
 }
-// decomp: _factorLastValue (src/BATTLE/BATTLE.PRG/146C.c:12228).
+// decomp: factorLastValue (src/BATTLE/BATTLE.PRG/146C.c:12144; was
+// _factorLastValue).
 std::int16_t LiveScaleLastActionStatValue(ActionDefinition* action,
                                           VS::Battle::HitResult*,
                                           VS::Battle::HitResult*, int hit,
@@ -132,7 +133,7 @@ std::int16_t LiveScaleLastActionStatValue(ActionDefinition* action,
       VS::Battle::lastActionStatValue,
       static_cast<std::uint8_t>(action->hits[hit].stat_factor));
 }
-// decomp: _getRisk (src/BATTLE/BATTLE.PRG/146C.c:12241).
+// decomp: getRisk (src/BATTLE/BATTLE.PRG/146C.c:12156; was _getRisk).
 std::int16_t LiveTargetRisk(ActionDefinition*, VS::Battle::HitResult*,
                             VS::Battle::HitResult* target, int, int) {
   const auto* stats = StatsOf(target);

@@ -24,7 +24,7 @@ inline constexpr std::size_t kCameraViewGapBytes = 0x8;
 inline constexpr std::size_t kBoneViewLeadBytes = 0x4C;
 }  // namespace layout
 
-// decomp: D_1F80035C_t (src/BATTLE/BATTLE.PRG/30DB0.h:43)
+// decomp: D_1F80035C_t (src/BATTLE/BATTLE.PRG/30DB0.h:31)
 struct ModelScratchpad {
   std::uint8_t reserved0[layout::kModelScratchpadLeadBytes];
   std::uint16_t texture_page;

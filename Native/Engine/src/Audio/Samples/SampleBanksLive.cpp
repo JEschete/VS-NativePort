@@ -225,39 +225,44 @@ void StoreChannelInstrument(VS::Audio::SeqChannel& channel,
 }
 }  // namespace
 
-// decomp: SLUS_010.40 func_80012BB8 (src/SLUS_010.40/25AC.c:719)
+// decomp: SLUS_010.40 Sound_LoadAkaoBankBlocking (src/SLUS_010.40/25AC.c:720;
+// was func_80012BB8)
 void LiveLoadBank(void* bank, int wait) {
   LiveBankLoads host("LoadBank");
   LoadBank(host, HeaderBytes(bank), wait != 0);
 }
 
-// decomp: SLUS_010.40 vs_sound_spuTransferring (src/SLUS_010.40/25AC.c:725)
+// decomp: SLUS_010.40 IsSpuTransferring (src/SLUS_010.40/25AC.c:726; was
+// vs_sound_spuTransferring)
 int LiveTransferStatus() {
   LiveBankLoads host("TransferStatus");
   return TransferStatus(host);
 }
 
-// decomp: SLUS_010.40 func_80012EBC (src/SLUS_010.40/25AC.c:807)
+// decomp: SLUS_010.40 Sound_ResetMusicBankIds (src/SLUS_010.40/25AC.c:808; was
+// func_80012EBC)
 int LiveClearMusicBankIds() {
   LiveBankLoads host("ClearMusicBankIds");
   ClearMusicBankIds(host);
   return 0;
 }
 
-// decomp: SLUS_010.40 func_80013188 (src/SLUS_010.40/25AC.c:894)
+// decomp: SLUS_010.40 Sound_LoadMusicBank (src/SLUS_010.40/25AC.c:897; was
+// func_80013188)
 int LiveLoadMusicBank(void* bank, int wait) {
   LiveBankLoads host("LoadMusicBank");
   return LoadMusicBank(host, HeaderBytes(bank), wait != 0) ? 1 : 0;
 }
 
-// decomp: SLUS_010.40 func_800131DC (src/SLUS_010.40/25AC.c:903)
+// decomp: SLUS_010.40 Sound_LoadSfxBank (src/SLUS_010.40/25AC.c:906; was
+// func_800131DC)
 int LiveLoadSoundEffectBank(void* bank, int slot, int wait) {
   LiveBankLoads host("LoadSoundEffectBank");
   LoadSoundEffectBank(host, HeaderBytes(bank), slot, wait != 0);
   return 0;
 }
 
-// decomp: SLUS_010.40 Sound_IsNotAkaoFile (src/SLUS_010.40/25AC.c:984)
+// decomp: SLUS_010.40 Sound_IsNotAkaoFile (src/SLUS_010.40/25AC.c:987)
 int LiveSequenceMagicDifference(const void* data) {
   if (data == nullptr) {
     Seq::ReportRefusal("SequenceMagicDifference", "the sequence is null");
@@ -269,7 +274,7 @@ int LiveSequenceMagicDifference(const void* data) {
 }
 
 // decomp: SLUS_010.40 Sound_MapInstrumentToAltSampleBank
-// (src/SLUS_010.40/25AC.c:2303)
+// (src/SLUS_010.40/25AC.c:2421)
 std::uint16_t LiveMapInstrumentToAlternateBank(unsigned music_flags,
                                                VS::Audio::SeqChannel* channel) {
   if (channel == nullptr) return 0;
@@ -281,7 +286,7 @@ std::uint16_t LiveMapInstrumentToAlternateBank(unsigned music_flags,
 }
 
 // decomp: SLUS_010.40 Sound_MapInstrumentToBaseSampleBank
-// (src/SLUS_010.40/25AC.c:2315)
+// (src/SLUS_010.40/25AC.c:2434)
 std::uint16_t LiveMapInstrumentToBaseBank(unsigned music_flags,
                                           VS::Audio::SeqChannel* channel) {
   if (channel == nullptr) return 0;
@@ -291,7 +296,7 @@ std::uint16_t LiveMapInstrumentToBaseBank(unsigned music_flags,
   return index;
 }
 
-// decomp: SLUS_010.40 func_80016DA8 (src/SLUS_010.40/25AC.c:2941)
+// decomp: SLUS_010.40 func_80016DA8 (src/SLUS_010.40/25AC.c:3119)
 int LiveSoundEffectBankSlot(int selector) {
   LiveBankLoads host("SoundEffectBankSlot");
   return SoundEffectBankSlot(host, selector);

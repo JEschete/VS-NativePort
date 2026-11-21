@@ -7,7 +7,7 @@
 #include "Effects/Templates/RingCore.hpp"
 #include "Effects/Templates/SurfaceCore.hpp"
 
-// The surface template (decomp src/EFFECT/surfaces.h:34 vs_surface): five
+// The surface template (decomp src/EFFECT/surfaces.h:62 vs_surface): five
 // rows of sixteen points from the overlay's unit profile, scaled out by a
 // radius and up by a height that both grow from row to row, drawn as four
 // bands of sixteen Gouraud-shaded quads (DrawSheet), each row coloured by its

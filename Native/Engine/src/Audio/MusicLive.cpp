@@ -191,149 +191,162 @@ class LiveMusic final : public MusicHost {
 };
 }  // namespace
 
-// decomp: BATTLE.PRG func_8007BE10 (src/BATTLE/BATTLE.PRG/146C.c:8579)
+// decomp: BATTLE.PRG func_8007BE10 (src/BATTLE/BATTLE.PRG/146C.c:8522)
 int LiveSetZoneMusicSwitchEnabled(int enabled) {
   LiveMusic host("SetZoneMusicSwitchEnabled");
   return SetZoneMusicSwitchEnabled(host, enabled);
 }
 
-// decomp: SLUS_010.40 func_80044D94 (src/SLUS_010.40/main.c:9490)
+// decomp: SLUS_010.40 vs_main_getMusicPosition (src/SLUS_010.40/main.c:2473;
+// was func_80044D94)
 int LiveMusicBeatPosition() {
   LiveMusic host("MusicBeatPosition");
   return MusicBeatPosition(host);
 }
 
-// decomp: SLUS_010.40 func_80044DB4 (src/SLUS_010.40/main.c:9492)
+// decomp: SLUS_010.40 vs_main_pushMusicState (src/SLUS_010.40/main.c:2475; was
+// func_80044DB4)
 void LiveSaveMusicPlaybackState() {
   LiveMusic host("SaveMusicPlaybackState");
   SaveMusicPlaybackState(host);
 }
 
-// decomp: SLUS_010.40 func_80044DD4 (src/SLUS_010.40/main.c:9494)
+// decomp: SLUS_010.40 vs_main_setMusicJumpThreshold
+// (src/SLUS_010.40/main.c:2477; was func_80044DD4)
 void LiveSetMusicJumpThreshold(int threshold) {
   LiveMusic host("SetMusicJumpThreshold");
   SetMusicJumpThreshold(host, threshold);
 }
 
-// decomp: SLUS_010.40 func_80044DF4 (src/SLUS_010.40/main.c:9496)
+// decomp: SLUS_010.40 vs_main_stopMusicSlot (src/SLUS_010.40/main.c:2482; was
+// func_80044DF4)
 int LiveStopMusicSlotPlayback(int id) {
   LiveMusic host("StopMusicSlotPlayback");
   return StopMusicSlotPlayback(host, id);
 }
 
-// decomp: SLUS_010.40 func_80044EC8 (src/SLUS_010.40/main.c:9525)
+// decomp: SLUS_010.40 vs_main_queueMusicSlot (src/SLUS_010.40/main.c:2516; was
+// func_80044EC8)
 int LiveResumeMusicSlot(int id) {
   LiveMusic host("ResumeMusicSlot");
   return ResumeMusicSlot(host, id);
 }
 
-// decomp: SLUS_010.40 func_80044F60 (src/SLUS_010.40/main.c:9545)
+// decomp: SLUS_010.40 vs_main_playMusicSlotFadeIn (src/SLUS_010.40/main.c:2541;
+// was func_80044F60)
 int LiveCrossfadeMusicSlot(int id, int target_volume, unsigned fade_ticks) {
   LiveMusic host("CrossfadeMusicSlot");
   return CrossfadeMusicSlot(host, id, target_volume, fade_ticks);
 }
 
-// decomp: SLUS_010.40 func_80045000 (src/SLUS_010.40/main.c:9565)
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
+// decomp: SLUS_010.40 vs_main_playMusicSlot (src/SLUS_010.40/main.c:2568; was
+// func_80045000) NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the
+// original order.
 int LivePlayMusicSlot(int id, int target_volume, int fade_ticks) {
   LiveMusic host("PlayMusicSlot");
   return PlayMusicSlot(host, id,
                        {.ticks = fade_ticks, .target = target_volume});
 }
 
-// decomp: SLUS_010.40 vs_main_getcurrentMusicSlot (src/SLUS_010.40/main.c:9587)
+// decomp: SLUS_010.40 vs_main_getcurrentMusicSlot (src/SLUS_010.40/main.c:2595)
 int LiveCurrentMusicSlot() {
   LiveMusic host("CurrentMusicSlot");
   return CurrentMusicSlot(host);
 }
 
-// decomp: SLUS_010.40 vs_main_getCurrentMusicId (src/SLUS_010.40/main.c:9592)
+// decomp: SLUS_010.40 vs_main_getCurrentMusicId (src/SLUS_010.40/main.c:2597)
 int LiveCurrentMusicId() {
   LiveMusic host("CurrentMusicId");
   return CurrentMusicId(host);
 }
 
-// decomp: SLUS_010.40 vs_main_loadMusicSlot (src/SLUS_010.40/main.c:9600)
+// decomp: SLUS_010.40 vs_main_loadMusicSlot (src/SLUS_010.40/main.c:2605)
 int LiveLoadMusicSlot(int id, int target_slot) {
   LiveMusic host("LoadMusicSlot");
   return LoadMusicSlot(host, id, target_slot);
 }
 
-// decomp: SLUS_010.40 _loadMusicIntoFreeSlot (src/SLUS_010.40/main.c:9643)
+// decomp: SLUS_010.40 loadMusicIntoFreeSlot (src/SLUS_010.40/main.c:2651; was
+// _loadMusicIntoFreeSlot)
 int LiveLoadMusicIntoFreeSlot(int id) {
   LiveMusic host("LoadMusicIntoFreeSlot");
   return LoadMusicIntoFreeSlot(host, id);
 }
 
-// decomp: SLUS_010.40 vs_main_clearMusicLoadSlot (src/SLUS_010.40/main.c:9655)
+// decomp: SLUS_010.40 vs_main_clearMusicLoadSlot (src/SLUS_010.40/main.c:2664)
 int LivePollMusicSlotLoad(unsigned slot) {
   LiveMusic host("PollMusicSlotLoad");
   return PollMusicSlotLoad(host, slot);
 }
 
-// decomp: SLUS_010.40 vs_main_clearMusicLoadQueue (src/SLUS_010.40/main.c:9677)
+// decomp: SLUS_010.40 vs_main_clearMusicLoadQueue (src/SLUS_010.40/main.c:2692)
 int LivePollMusicLoads() {
   LiveMusic host("PollMusicLoads");
   return PollMusicLoads(host);
 }
 
 // decomp: SLUS_010.40 vs_main_loadAndWaitMusicSlot
-// (src/SLUS_010.40/main.c:9691)
+// (src/SLUS_010.40/main.c:2704)
 int LiveLoadMusicSlotBlocking(int id, int target_slot) {
   LiveMusic host("LoadMusicSlotBlocking");
   return LoadMusicSlotBlocking(host, id, target_slot);
 }
 
-// decomp: SLUS_010.40 _loadMusicIntoFreeSlotAndClearQueue
-// (src/SLUS_010.40/main.c:9704)
+// decomp: SLUS_010.40 loadMusicIntoFreeSlotAndClearQueue
+// (src/SLUS_010.40/main.c:2717; was _loadMusicIntoFreeSlotAndClearQueue)
 int LiveLoadFreeMusicSlotBlocking(int id) {
   LiveMusic host("LoadFreeMusicSlotBlocking");
   return LoadFreeMusicSlotBlocking(host, id);
 }
 
-// decomp: SLUS_010.40 vs_main_freeMusic (src/SLUS_010.40/main.c:9717)
+// decomp: SLUS_010.40 vs_main_freeMusic (src/SLUS_010.40/main.c:2730)
 int LiveFreeMusicSlot(int id) {
   LiveMusic host("FreeMusicSlot");
   return FreeMusicSlot(host, id);
 }
 
-// decomp: SLUS_010.40 func_800454B8 (src/SLUS_010.40/main.c:9733)
+// decomp: SLUS_010.40 vs_main_getMusicSlotVolume (src/SLUS_010.40/main.c:2748;
+// was func_800454B8)
 int LiveMusicSlotVolume(int id) {
   LiveMusic host("MusicSlotVolume");
   return MusicSlotVolume(host, id);
 }
 
-// decomp: SLUS_010.40 func_8004550C (src/SLUS_010.40/main.c:9743)
+// decomp: SLUS_010.40 vs_main_getMusicSlotVolume2 (src/SLUS_010.40/main.c:2760;
+// was func_8004550C)
 int LiveQueryMusicSlotVolume(int id) {
   LiveMusic host("QueryMusicSlotVolume");
   return QueryMusicSlotVolume(host, id);
 }
 
-// decomp: SLUS_010.40 func_8004552C (src/SLUS_010.40/main.c:9745)
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
+// decomp: SLUS_010.40 vs_main_fadeMusicVolume (src/SLUS_010.40/main.c:2762; was
+// func_8004552C) NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the
+// original order.
 int LiveFadeMusicSlotVolume(int id, int target_volume, int fade_ticks) {
   LiveMusic host("FadeMusicSlotVolume");
   return FadeMusicSlotVolume(host, id,
                              {.ticks = fade_ticks, .target = target_volume});
 }
 
-// decomp: SLUS_010.40 func_80045574 (src/SLUS_010.40/main.c:9754)
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
+// decomp: SLUS_010.40 vs_main_fadeMusicTempo (src/SLUS_010.40/main.c:2773; was
+// func_80045574) NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the
+// original order.
 int LiveFadeMusicSlotTempo(int id, int target_scale, int fade_ticks) {
   LiveMusic host("FadeMusicSlotTempo");
   return FadeMusicSlotTempo(host, id,
                             {.ticks = fade_ticks, .target = target_scale});
 }
 
-// decomp: SLUS_010.40 func_800455AC (src/SLUS_010.40/main.c:9763)
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
+// decomp: SLUS_010.40 vs_main_fadeMusicPitch (src/SLUS_010.40/main.c:2783; was
+// func_800455AC) NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the
+// original order.
 int LiveFadeMusicSlotPitch(int id, int target_scale, int fade_ticks) {
   LiveMusic host("FadeMusicSlotPitch");
   return FadeMusicSlotPitch(host, id,
                             {.ticks = fade_ticks, .target = target_scale});
 }
 
-// decomp: SLUS_010.40 vs_main_stopMusic (src/SLUS_010.40/main.c:9776)
+// decomp: SLUS_010.40 vs_main_stopMusic (src/SLUS_010.40/main.c:2797)
 void LiveStopAndFreeCurrentMusic() {
   LiveMusic host("StopAndFreeCurrentMusic");
   StopAndFreeCurrentMusic(host);

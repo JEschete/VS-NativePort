@@ -21,10 +21,10 @@ using AbilityPointTable = std::array<std::uint16_t, kAbilityRequirementCount>;
 
 // decomp: vs_battle_characterState (src/BATTLE/BATTLE.PRG/actor.h:173)
 extern VS::Battle::Actor* characterState;
-// decomp: vs_main_artsPointsRequirements (src/SLUS_010.40/actions.h:65)
+// decomp: vs_main_artsPointsRequirements (src/SLUS_010.40/main.c:722)
 extern BreakArtPointTable breakArtPointRequirements;
 // decomp: vs_main_battleAbilitiesPointsRequirements
-// (src/SLUS_010.40/actions.h:66)
+// (src/SLUS_010.40/main.c:751)
 extern AbilityPointTable battleAbilityPointRequirements;
 
 }  // namespace VS::Battle

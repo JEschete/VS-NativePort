@@ -680,7 +680,8 @@ void UpdateTimeTrials(GazetteState& state, GazetteCursorMemory& cursor,
 }
 }  // namespace
 
-// decomp: _menuInput (src/MENU/MENU9.PRG/238.c:548), 8010337C-80104AF8.
+// decomp: menuInput (src/MENU/MENU9.PRG/238.c:553; was _menuInput),
+// 8010337C-80104AF8.
 std::optional<std::int32_t> UpdateGazette(GazetteState& state,
                                           GazetteCursorMemory& cursor,
                                           const GazetteInput& input,
@@ -746,7 +747,7 @@ std::optional<std::int32_t> UpdateGazette(GazetteState& state,
   return 0;
 }
 
-// decomp: vs_menu9_exec (src/MENU/MENU9.PRG/238.c:269), 80102FF8-801031BC.
+// decomp: vs_menu9_exec (src/MENU/MENU9.PRG/238.c:276), 80102FF8-801031BC.
 int UpdateGazetteScreen(std::uint8_t& phase, GazetteScreenState& state,
                         GazetteScreenEnvironment& environment,
                         GazetteScreenHost& host) {

@@ -32,7 +32,7 @@ constexpr std::int32_t CrossLane(std::int64_t first, std::int64_t second,
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_80096254 (src/BATTLE/BATTLE.PRG/2842C.c:2576).
+// decomp: BATTLE.PRG func_80096254 (src/BATTLE/BATTLE.PRG/2842C.c:2564).
 std::int32_t AddPackedScreenCoordinates(std::int32_t left,
                                         std::int32_t right) noexcept {
   const std::uint32_t low =
@@ -45,26 +45,31 @@ std::int32_t AddPackedScreenCoordinates(std::int32_t left,
   return static_cast<std::int32_t>(low | high);
 }
 
-// decomp: BATTLE.PRG _vectorAdd (src/BATTLE/BATTLE.PRG/4A0A8.c:4106),
-// _addSVectorToVector (src/BATTLE/BATTLE.PRG/5BF94.c:5911), vs_battle_addVector
-// (5BF94.c:6887) and vs_battle_addVecToSvec (5BF94.c:6894).
+// decomp: BATTLE.PRG vectorAdd (src/BATTLE/BATTLE.PRG/4DEA8.c:4755; was
+// _vectorAdd), addSVectorToVector (src/BATTLE/BATTLE.PRG/5BF94.c:5477; was
+// _addSVectorToVector), addVectors (src/BATTLE/BATTLE.PRG/5BF94.c:6455; was
+// vs_battle_addVector) and vs_battle_addVecToSvec
+// (src/BATTLE/BATTLE.PRG/5BF94.c:6462).
 Vec3 AddVectors(Vec3 left, Vec3 right) noexcept {
   return Vec3{WrappingAdd(left.x, right.x), WrappingAdd(left.y, right.y),
               WrappingAdd(left.z, right.z)};
 }
 
-// decomp: BATTLE.PRG _vectorSubtract (src/BATTLE/BATTLE.PRG/4A0A8.c:4112).
+// decomp: BATTLE.PRG vectorSubtract (src/BATTLE/BATTLE.PRG/4DEA8.c:4761; was
+// _vectorSubtract).
 Vec3 SubtractVectors(Vec3 left, Vec3 right) noexcept {
   return Vec3{WrappingSubtract(left.x, right.x),
               WrappingSubtract(left.y, right.y),
               WrappingSubtract(left.z, right.z)};
 }
 
-// decomp: BATTLE.PRG _copyVector (src/BATTLE/BATTLE.PRG/4A0A8.c:4125),
-// vs_battle_svecToVec (5BF94.c:6901) and vs_battle_vecToSvec (5BF94.c:6908).
+// decomp: BATTLE.PRG vectorCopy (src/BATTLE/BATTLE.PRG/4DEA8.c:4774; was
+// _copyVector), vs_battle_svecToVec (src/BATTLE/BATTLE.PRG/5BF94.c:6469) and
+// vs_battle_vecToSvec (src/BATTLE/BATTLE.PRG/5BF94.c:6476).
 Vec3 CopyVector(Vec3 source) noexcept { return source; }
 
-// decomp: BATTLE.PRG _absMax3 (src/BATTLE/BATTLE.PRG/5BF94.c:5827).
+// decomp: BATTLE.PRG absMax3 (src/BATTLE/BATTLE.PRG/5BF94.c:5393; was
+// _absMax3).
 std::int32_t GreatestMagnitudeComponent(Vec3 components) noexcept {
   const std::int32_t first = Magnitude(components.x);
   const std::int32_t second = Magnitude(components.y);
@@ -75,19 +80,21 @@ std::int32_t GreatestMagnitudeComponent(Vec3 components) noexcept {
   return first < third ? components.z : components.x;
 }
 
-// decomp: BATTLE.PRG _absMax2 (src/BATTLE/BATTLE.PRG/5BF94.c:5849).
+// decomp: BATTLE.PRG absMax2 (src/BATTLE/BATTLE.PRG/5BF94.c:5414; was
+// _absMax2).
 std::int32_t LargerMagnitude(std::int32_t first, std::int32_t second) noexcept {
   return Magnitude(first) < Magnitude(second) ? second : first;
 }
 
-// decomp: BATTLE.PRG _vectorFixedPointMult
-// (src/BATTLE/BATTLE.PRG/4A0A8.c:4118).
+// decomp: BATTLE.PRG vectorFixedPointMult
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:4767; was _vectorFixedPointMult).
 Vec3 ScaleFixedVector(Vec3 source, std::int32_t scale) noexcept {
   return Vec3{MultiplyFixed(source.x, scale), MultiplyFixed(source.y, scale),
               MultiplyFixed(source.z, scale)};
 }
 
-// decomp: BATTLE.PRG _vectorMagnitude (src/BATTLE/BATTLE.PRG/4A0A8.c:4131).
+// decomp: BATTLE.PRG vectorMagnitude (src/BATTLE/BATTLE.PRG/4DEA8.c:4780; was
+// _vectorMagnitude).
 std::int32_t FixedVectorMagnitude(Vec3 source) noexcept {
   const std::int32_t x = source.x >> kFractionBits;
   const std::int32_t y = source.y >> kFractionBits;
@@ -98,14 +105,14 @@ std::int32_t FixedVectorMagnitude(Vec3 source) noexcept {
   return WrappingMultiply(SquareRootInteger(squared), kFixedOne);
 }
 
-// decomp: BATTLE.PRG _sVectorToFixedPointVector
-// (src/BATTLE/BATTLE.PRG/4A0A8.c:4155).
+// decomp: BATTLE.PRG sVectorToFixedPointVector
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:4804; was _sVectorToFixedPointVector).
 Vec3 ShortVectorToFixed(Position3 source) noexcept {
   return Vec3{source.x * kFixedOne, source.y * kFixedOne, source.z * kFixedOne};
 }
 
-// decomp: BATTLE.PRG _toNormalIntegerVector
-// (src/BATTLE/BATTLE.PRG/4A0A8.c:4193).
+// decomp: BATTLE.PRG toNormalIntegerVector
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:4842; was _toNormalIntegerVector).
 Vec3 NormalizeFixedVector(Vec3 source) noexcept {
   return NormalizeVector(Vec3{source.x >> kFractionBits,
                               source.y >> kFractionBits,

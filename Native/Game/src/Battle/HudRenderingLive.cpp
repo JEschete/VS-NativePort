@@ -249,7 +249,8 @@ class LiveHudShortcutWorld final : public HudShortcutWorld {
 };
 }  // namespace
 
-// decomp: F01354 _renderStatBar (src/BATTLE/BATTLE.PRG/5BF94.c:3088).
+// decomp: F01354 renderStatBar (src/BATTLE/BATTLE.PRG/5BF94.c:2639; was
+// _renderStatBar).
 void DrawLiveHudStatGauge(int color_index, int current, int maximum) {
   if (color_index < 0 ||
       static_cast<std::size_t>(color_index) >= kHudGaugeCount) {
@@ -263,7 +264,7 @@ void DrawLiveHudStatGauge(int color_index, int current, int maximum) {
   }
 }
 
-// decomp: F01355 func_800C9CB4 (src/BATTLE/BATTLE.PRG/5BF94.c:3112).
+// decomp: F01355 func_800C9CB4 (src/BATTLE/BATTLE.PRG/5BF94.c:2663).
 void DrawLiveSlidingStatusIcon(int icon, int slide, int slot) {
   LiveHudIconWorld world;
   if (!DrawSlidingStatusIcon(world,
@@ -272,7 +273,7 @@ void DrawLiveSlidingStatusIcon(int icon, int slide, int slot) {
   }
 }
 
-// decomp: F01358 func_800C9EB8 (src/BATTLE/BATTLE.PRG/5BF94.c:3197).
+// decomp: F01358 func_800C9EB8 (src/BATTLE/BATTLE.PRG/5BF94.c:2748).
 int LiveShortcutIconBrightness(int shortcut) {
   LiveHudShortcutWorld world;
   const auto tone = ShortcutIconBrightness(world, shortcut);
@@ -280,7 +281,7 @@ int LiveShortcutIconBrightness(int shortcut) {
   return static_cast<int>(tone.value());
 }
 
-// decomp: F01360 func_800C9F98 (src/BATTLE/BATTLE.PRG/5BF94.c:3241).
+// decomp: F01360 func_800C9F98 (src/BATTLE/BATTLE.PRG/5BF94.c:2792).
 void DrawLiveShortcutButtonMarker(int position, int brightness_transparency) {
   LiveHudIconWorld world;
   if (!DrawShortcutButtonMarker(world, position, brightness_transparency)) {

@@ -215,7 +215,7 @@ void SaveLiveActorGroundedTransform(VS::Actors::ActorRecord* actor) {
   instance.previous_facing = history.previous_facing;
 }
 
-// decomp: BATTLE.PRG func_800B63AC (src/BATTLE/BATTLE.PRG/4A0A8.c:340)
+// decomp: BATTLE.PRG func_800B63AC (src/BATTLE/BATTLE.PRG/4B16C.s:2809)
 void BeginLiveTileJump(int actor_id, int* target, int speed, int facing) {
   BeginLiveTileJump(actor_id, Tile(target), speed, facing);
 }
@@ -225,7 +225,7 @@ void BeginLiveTileJump(int actor_id, PackedTile target, int speed, int facing) {
   BeginTileJump(actor, target, speed, facing);
 }
 
-// decomp: BATTLE.PRG func_800B6404 (src/BATTLE/BATTLE.PRG/4A0A8.c:368)
+// decomp: BATTLE.PRG func_800B6404 (src/BATTLE/BATTLE.PRG/4B16C.s:2834)
 void BeginLiveAirborneTileJump(int actor_id, int* target, int speed,
                                int facing) {
   BeginLiveAirborneTileJump(actor_id, Tile(target), speed, facing);
@@ -237,7 +237,7 @@ void BeginLiveAirborneTileJump(int actor_id, PackedTile target, int speed,
   BeginAirborneTileJump(actor, target, speed, facing);
 }
 
-// decomp: BATTLE.PRG func_800B6438 (src/BATTLE/BATTLE.PRG/4A0A8.c:383)
+// decomp: BATTLE.PRG func_800B6438 (src/BATTLE/BATTLE.PRG/4B16C.s:2850)
 void BeginLiveNavigationJump(int actor_id, int* target, int speed, int facing) {
   BeginLiveNavigationJump(actor_id, Tile(target), speed, facing);
 }
@@ -248,7 +248,7 @@ void BeginLiveNavigationJump(int actor_id, PackedTile target, int speed,
   BeginNavigationJump(actor, target, speed, facing);
 }
 
-// decomp: BATTLE.PRG func_800B6580 (src/BATTLE/BATTLE.PRG/4A0A8.c:490)
+// decomp: BATTLE.PRG func_800B6580 (src/BATTLE/BATTLE.PRG/4B16C.s:2949)
 void BeginLiveTeleport(int actor_id, int* target, int facing) {
   BeginLiveTeleport(actor_id, Tile(target), facing);
 }
@@ -258,7 +258,7 @@ void BeginLiveTeleport(int actor_id, PackedTile target, int facing) {
   BeginTeleport(actor, target, facing);
 }
 
-// decomp: BATTLE.PRG func_800B65E8 (src/BATTLE/BATTLE.PRG/4A0A8.c:522)
+// decomp: BATTLE.PRG func_800B65E8 (src/BATTLE/BATTLE.PRG/4B16C.s:2978)
 void BeginLiveTileTravel(int actor_id, int* target, int facing) {
   BeginLiveTileTravel(actor_id, Route(target), facing);
 }
@@ -268,7 +268,7 @@ void BeginLiveTileTravel(int actor_id, const MotionVector& route, int facing) {
   BeginTileTravel(actor, route, facing);
 }
 
-// decomp: BATTLE.PRG func_800B65F4 (src/BATTLE/BATTLE.PRG/4A0A8.c:531)
+// decomp: BATTLE.PRG func_800B65F4 (src/BATTLE/BATTLE.PRG/4B16C.s:2984)
 void BeginLiveTimedTravel(int actor_id, int* target, int facing) {
   BeginLiveTimedTravel(actor_id, Route(target), facing);
 }
@@ -278,7 +278,7 @@ void BeginLiveTimedTravel(int actor_id, const MotionVector& route, int facing) {
   BeginTimedTravel(actor, route, facing);
 }
 
-// decomp: BATTLE.PRG func_800B6500 (src/BATTLE/BATTLE.PRG/4A0A8.c:445)
+// decomp: BATTLE.PRG func_800B6500 (src/BATTLE/BATTLE.PRG/4B16C.s:2909)
 void QueueLiveGroundOffset(int actor_id, SVECTOR* step) {
   QueueLiveGroundOffset(actor_id, Step(step));
 }
@@ -288,7 +288,7 @@ void QueueLiveGroundOffset(int actor_id, const MotionVector& step) {
   QueueGroundOffset(actor, step);
 }
 
-// decomp: BATTLE.PRG func_800B6530 (src/BATTLE/BATTLE.PRG/4A0A8.c:459)
+// decomp: BATTLE.PRG func_800B6530 (src/BATTLE/BATTLE.PRG/4B16C.s:2923)
 void QueueLiveMovementVector(int actor_id, SVECTOR* step, int facing) {
   QueueLiveMovementVector(actor_id, Step(step), facing);
 }
@@ -299,7 +299,7 @@ void QueueLiveMovementVector(int actor_id, const MotionVector& step,
   QueueMovementVector(actor, step, facing);
 }
 
-// decomp: BATTLE.PRG func_800B653C (src/BATTLE/BATTLE.PRG/4A0A8.c:467)
+// decomp: BATTLE.PRG func_800B653C (src/BATTLE/BATTLE.PRG/4B16C.s:2929)
 void QueueLiveFlightMovement(int actor_id, SVECTOR* step, int speed,
                              int facing) {
   QueueLiveFlightMovement(actor_id, Step(step), speed, facing);
@@ -311,13 +311,13 @@ void QueueLiveFlightMovement(int actor_id, const MotionVector& step, int speed,
   QueueFlightMovement(actor, step, speed, facing);
 }
 
-// decomp: BATTLE.PRG func_800B6634 (src/BATTLE/BATTLE.PRG/4A0A8.c:551)
+// decomp: BATTLE.PRG func_800B6634 (src/BATTLE/BATTLE.PRG/4B16C.s:3003)
 void TurnLiveNavigationActor(int actor_id, int facing) {
   LiveMotionActor actor(actor_id);
   TurnNavigationActor(actor, facing);
 }
 
-// decomp: BATTLE.PRG func_800B668C (src/BATTLE/BATTLE.PRG/4A0A8.c:578)
+// decomp: BATTLE.PRG func_800B668C (src/BATTLE/BATTLE.PRG/4B16C.s:3029)
 void TurnLiveActorAtSpeed(int actor_id, std::int16_t facing, int speed) {
   LiveMotionActor actor(actor_id);
   if (!TurnActorAtSpeed(actor, facing, speed)) {

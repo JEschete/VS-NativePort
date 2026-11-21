@@ -544,143 +544,164 @@ class ScriptVmHost {
   virtual void ToggleRoomEffectUpdates(int effect) = 0;
 };
 
-// decomp: BATTLE.PRG func_800AACDC (src/BATTLE/BATTLE.PRG/40564.c:1280)
+// decomp: BATTLE.PRG func_800AACDC (src/BATTLE/BATTLE.PRG/40564.c:1215)
 // Copies the 18x36 texture block at (470, 384) back to (16, 400).
 void RestoreScriptTextureRectangle(ScriptVmHost& host);
 
 // The opcode handlers. Each reads its operands from the instruction, which
 // must hold them; a shorter one is refused without reading its operands.
-// decomp: BATTLE.PRG vs_battle_invalidOpcode
-// (src/BATTLE/BATTLE.PRG/4A0A8.c:588)
+// decomp: BATTLE.PRG vs_battle_script_invalidOpcode
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:356; was vs_battle_invalidOpcode)
 ScriptFlow ScriptReportInvalidOpcode(const ScriptInstruction& instruction,
                                      ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800B66E4 (src/BATTLE/BATTLE.PRG/4A0A8.c:597)
+// decomp: BATTLE.PRG vs_battle_script_nop (src/BATTLE/BATTLE.PRG/4DEA8.c:368;
+// was func_800B66E4)
 ScriptFlow ScriptNoOperation(const ScriptInstruction& instruction,
                              ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800B66EC (src/BATTLE/BATTLE.PRG/4A0A8.c:599)
+// decomp: BATTLE.PRG vs_battle_script_yield (src/BATTLE/BATTLE.PRG/4DEA8.c:373;
+// was func_800B66EC)
 ScriptFlow ScriptYieldFrame(const ScriptInstruction& instruction,
                             ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800B66F4 (src/BATTLE/BATTLE.PRG/4A0A8.c:601)
+// decomp: BATTLE.PRG vs_battle_script_0A_waitEvtLoad
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:378; was func_800B66F4)
 ScriptFlow ScriptWaitForEventFile(const ScriptInstruction& instruction,
                                   ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800B6744 (src/BATTLE/BATTLE.PRG/4A0A8.c:611)
+// decomp: BATTLE.PRG vs_battle_script_0D_beginSkippable
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:400; was func_800B6744)
 ScriptFlow ScriptBeginSkippableCutscene(const ScriptInstruction& instruction,
                                         ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800B6778 (src/BATTLE/BATTLE.PRG/4A0A8.c:618)
-// Resets the palettes and texture block a skip left behind, then scans from
-// `scan` for the sound restore marker before the next 0x0F: with the marker
-// the room sound stays as the script left it, without it the room's effect
-// sound restarts.
+// decomp: BATTLE.PRG endScriptSkip (src/BATTLE/BATTLE.PRG/4DEA8.c:412; was
+// func_800B6778) Resets the palettes and texture block a skip left behind, then
+// scans from `scan` for the sound restore marker before the next 0x0F: with the
+// marker the room sound stays as the script left it, without it the room's
+// effect sound restarts.
 void FinishSkippedCutscene(ScriptLocation scan, ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800B6868 (src/BATTLE/BATTLE.PRG/4A0A8.c:642)
+// decomp: BATTLE.PRG vs_battle_script_0E_endSkippableBody
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:447; was func_800B6868)
 ScriptFlow ScriptEndCutsceneAndJump(const ScriptInstruction& instruction,
                                     ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800B68C4 (src/BATTLE/BATTLE.PRG/4A0A8.c:653)
+// decomp: BATTLE.PRG vs_battle_script_0F_endSkipHandler
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:464; was func_800B68C4)
 ScriptFlow ScriptEndCutscene(const ScriptInstruction& instruction,
                              ScriptVmHost& host);
-// decomp: BATTLE.PRG vs_battle_script_buttonPressed
-// (src/BATTLE/BATTLE.PRG/4A0A8.c:843)
+// decomp: BATTLE.PRG vs_battle_script_15_waitButtonPressed
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:693; was vs_battle_script_buttonPressed)
 ScriptFlow ScriptWaitForButtonAndYield(const ScriptInstruction& instruction,
                                        ScriptVmHost& host);
-// decomp: BATTLE.PRG vs_battle_script_jumpFwdIfFlag
-// (src/BATTLE/BATTLE.PRG/4A0A8.c:1543)
+// decomp: BATTLE.PRG vs_battle_script_40_jumpFwdUnlessFlagImm
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1835; was vs_battle_script_jumpFwdIfFlag)
 ScriptFlow ScriptBranchOnFlagImmediate(const ScriptInstruction& instruction,
                                        ScriptVmHost& host);
-// decomp: BATTLE.PRG vs_battle_script_jumpFwdIfFlags
-// (src/BATTLE/BATTLE.PRG/4A0A8.c:1589)
+// decomp: BATTLE.PRG vs_battle_script_41_jumpFwdUnlessFlag
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1899; was vs_battle_script_jumpFwdIfFlags)
 ScriptFlow ScriptBranchOnFlagPair(const ScriptInstruction& instruction,
                                   ScriptVmHost& host);
-// decomp: BATTLE.PRG vs_battle_script_jumpFwd
-// (src/BATTLE/BATTLE.PRG/4A0A8.c:1630) Opcodes 0x42, 0x45, 0x4B and 0x4C.
+// decomp: BATTLE.PRG vs_battle_script_42_jumpFwdElse
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1951; was vs_battle_script_jumpFwd) Opcodes
+// 0x42, 0x45, 0x4B and 0x4C.
 ScriptFlow ScriptJumpForward(const ScriptInstruction& instruction,
                              ScriptVmHost& host);
-// decomp: BATTLE.PRG vs_battle_script_setFlagImmContext
-// (src/BATTLE/BATTLE.PRG/4A0A8.c:1640)
+// decomp: BATTLE.PRG vs_battle_script_46_switchOnFlag
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1972; was vs_battle_script_setFlagImmContext)
 ScriptFlow ScriptCacheFlagValue(const ScriptInstruction& instruction,
                                 ScriptVmHost& host);
-// decomp: BATTLE.PRG vs_battle_script_jumpFwdIfFlagContext
-// (src/BATTLE/BATTLE.PRG/4A0A8.c:1646)
+// decomp: BATTLE.PRG vs_battle_script_47_jumpFwdCase
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1985; was
+// vs_battle_script_jumpFwdIfFlagContext)
 ScriptFlow ScriptBranchOnCachedFlag(const ScriptInstruction& instruction,
                                     ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800B8C44 (src/BATTLE/BATTLE.PRG/4A0A8.c:1654)
-// Returns to the call of special operation 16; with none saved it advances.
+// decomp: BATTLE.PRG vs_battle_script_48_endSceneReset
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1997; was func_800B8C44) Returns to the call
+// of special operation 16; with none saved it advances.
 ScriptFlow ScriptReturnToSavedAddress(const ScriptInstruction& instruction,
                                       ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800B8C54 (src/BATTLE/BATTLE.PRG/4A0A8.c:1656)
+// decomp: BATTLE.PRG vs_battle_script_49_setLoopCounter
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2009; was func_800B8C54)
 ScriptFlow ScriptSetLoopCounter(const ScriptInstruction& instruction,
                                 ScriptVmHost& host);
-// decomp: BATTLE.PRG vs_battle_script_jumpBackIf
-// (src/BATTLE/BATTLE.PRG/4A0A8.c:1664)
+// decomp: BATTLE.PRG vs_battle_script_4A_loopCondition
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2024; was vs_battle_script_jumpBackIf)
 ScriptFlow ScriptLoopBackward(const ScriptInstruction& instruction,
                               ScriptVmHost& host);
-// decomp: BATTLE.PRG vs_battle_script_setFlagImm
-// (src/BATTLE/BATTLE.PRG/4A0A8.c:1685) Division and remainder by zero give the
-// R3000's results.
+// decomp: BATTLE.PRG vs_battle_script_50_modifyFlagImm
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2066; was vs_battle_script_setFlagImm)
+// Division and remainder by zero give the R3000's results.
 ScriptFlow ScriptApplyImmediateFlagOperation(
     const ScriptInstruction& instruction, ScriptVmHost& host);
-// decomp: BATTLE.PRG vs_battle_script_setFlag
-// (src/BATTLE/BATTLE.PRG/4A0A8.c:1720)
+// decomp: BATTLE.PRG vs_battle_script_51_modifyFlag
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2119; was vs_battle_script_setFlag)
 ScriptFlow ScriptApplyFlagPairOperation(const ScriptInstruction& instruction,
                                         ScriptVmHost& host);
-// decomp: BATTLE.PRG vs_battle_script_setFlagIfItemInInventory
-// (src/BATTLE/BATTLE.PRG/4A0A8.c:1773)
+// decomp: BATTLE.PRG vs_battle_script_52_setFlagToItemCount
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2181; was
+// vs_battle_script_setFlagIfItemInInventory)
 ScriptFlow ScriptStoreInventoryItemPresence(
     const ScriptInstruction& instruction, ScriptVmHost& host);
-// decomp: BATTLE.PRG vs_battle_script_setFlagIfButton
-// (src/BATTLE/BATTLE.PRG/4A0A8.c:1798)
+// decomp: BATTLE.PRG vs_battle_script_56_setFlagToButtons
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2237; was vs_battle_script_setFlagIfButton)
 ScriptFlow ScriptStoreButtonState(const ScriptInstruction& instruction,
                                   ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800B94D8 (src/BATTLE/BATTLE.PRG/4A0A8.c:1886)
+// decomp: BATTLE.PRG vs_battle_script_5A_setBattleTimer
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2387; was func_800B94D8)
 ScriptFlow ScriptConfigureTimer(const ScriptInstruction& instruction,
                                 ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800B96B0 (src/BATTLE/BATTLE.PRG/4A0A8.c:1934)
+// decomp: BATTLE.PRG vs_battle_script_5E_waitFramesOrButton
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2458; was func_800B96B0)
 ScriptFlow ScriptWaitForButtonOrTimeout(const ScriptInstruction& instruction,
                                         ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800B9724 (src/BATTLE/BATTLE.PRG/4A0A8.c:1948)
+// decomp: BATTLE.PRG vs_battle_script_5F_defineEasing
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2483; was func_800B9724)
 ScriptFlow ScriptConfigureEasingCurve(const ScriptInstruction& instruction,
                                       ScriptVmHost& host);
-// decomp: BATTLE.PRG vs_battle_script_specialOp
-// (src/BATTLE/BATTLE.PRG/4A0A8.c:2651)
+// decomp: BATTLE.PRG vs_battle_script_B7_specialOp
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:3300; was vs_battle_script_specialOp)
 ScriptFlow CommandSpecialOperation(const ScriptInstruction& instruction,
                                    ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800BB474 (src/BATTLE/BATTLE.PRG/4A0A8.c:2799)
+// decomp: BATTLE.PRG vs_battle_script_F0 (src/BATTLE/BATTLE.PRG/4DEA8.c:3448;
+// was func_800BB474)
 ScriptFlow CommandWaitFrames(const ScriptInstruction& instruction,
                              ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800BB4CC (src/BATTLE/BATTLE.PRG/4A0A8.c:2815)
+// decomp: BATTLE.PRG vs_battle_script_F1 (src/BATTLE/BATTLE.PRG/4DEA8.c:3464;
+// was func_800BB4CC)
 ScriptFlow CommandSetTickSpeed(const ScriptInstruction& instruction,
                                ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800BB504 (src/BATTLE/BATTLE.PRG/4A0A8.c:2827)
+// decomp: BATTLE.PRG vs_battle_script_F4 (src/BATTLE/BATTLE.PRG/4DEA8.c:3476;
+// was func_800BB504)
 ScriptFlow CommandWaitScriptContext(const ScriptInstruction& instruction,
                                     ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800BB554 (src/BATTLE/BATTLE.PRG/4A0A8.c:2837)
+// decomp: BATTLE.PRG vs_battle_script_F5 (src/BATTLE/BATTLE.PRG/4DEA8.c:3486;
+// was func_800BB554)
 ScriptFlow CommandStartScriptContext(const ScriptInstruction& instruction,
                                      ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800BB5A4 (src/BATTLE/BATTLE.PRG/4A0A8.c:2843)
+// decomp: BATTLE.PRG vs_battle_script_F6 (src/BATTLE/BATTLE.PRG/4DEA8.c:3492;
+// was func_800BB5A4)
 ScriptFlow CommandStopScriptContext(const ScriptInstruction& instruction,
                                     ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800BB5AC (src/BATTLE/BATTLE.PRG/4A0A8.c:2845)
+// decomp: BATTLE.PRG vs_battle_script_F7 (src/BATTLE/BATTLE.PRG/4DEA8.c:3494;
+// was func_800BB5AC)
 ScriptFlow CommandLoadNextEvent(const ScriptInstruction& instruction,
                                 ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800BB604 (src/BATTLE/BATTLE.PRG/4A0A8.c:2854)
+// decomp: BATTLE.PRG vs_battle_script_FE_FF
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:3503; was func_800BB604)
 ScriptFlow CommandFinishEvent(const ScriptInstruction& instruction,
                               ScriptVmHost& host);
 
-// decomp: BATTLE.PRG func_800BEB00 (src/BATTLE/BATTLE.PRG/4A0A8.c:4246)
+// decomp: BATTLE.PRG func_800BEB00 (src/BATTLE/BATTLE.PRG/4DEA8.c:4895)
 [[nodiscard]] PlaybackPhase EventPlaybackState(const ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800BEB10 (src/BATTLE/BATTLE.PRG/4A0A8.c:4248)
+// decomp: BATTLE.PRG func_800BEB10 (src/BATTLE/BATTLE.PRG/4DEA8.c:4897)
 // The source in the top nibble over the event id.
 [[nodiscard]] std::int16_t PendingEventSelector(const ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800BEC30 (src/BATTLE/BATTLE.PRG/4A0A8.c:4287)
+// decomp: BATTLE.PRG func_800BEC30 (src/BATTLE/BATTLE.PRG/4DEA8.c:4936)
 // Confirms a requested event; always 1.
 int RequestEventStart(ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800BF5F0 (src/BATTLE/BATTLE.PRG/4A0A8.c:4588)
-// Reads the script header at `data` (the dialog strings, frame styles and
-// vibration patterns) and resets the threads and per-event state. A header
-// or table outside its region refuses the complete header, clearing borrowed
-// views and every cursor. True only when the script can start.
+// decomp: BATTLE.PRG parseEvt (src/BATTLE/BATTLE.PRG/4DEA8.c:5289; was
+// func_800BF5F0) Reads the script header at `data` (the dialog strings, frame
+// styles and vibration patterns) and resets the threads and per-event state. A
+// header or table outside its region refuses the complete header, clearing
+// borrowed views and every cursor. True only when the script can start.
 [[nodiscard]] bool InitializeEventScriptData(ScriptLocation data,
                                              ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800BF850 (src/BATTLE/BATTLE.PRG/4A0A8.c:4633)
+// decomp: BATTLE.PRG func_800BF850 (src/BATTLE/BATTLE.PRG/4DEA8.c:5343)
 // Advances event playback by a frame: 0 while idle or awaiting the start,
 // else 2. A failed startup reports a refusal and returns to idle; its frame
 // still returns 2, not a success or failure code.
@@ -690,7 +711,7 @@ int UpdateEventPlayback(ScriptVmHost& host);
 // finishes it, starting a requested skip on thread 0 first; true when the
 // script finished (or the thread had no cursor).
 bool ExecuteScriptThread(ScriptThreadId thread, ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800BFD9C (src/BATTLE/BATTLE.PRG/573B8.c:133)
+// decomp: BATTLE.PRG func_800BFD9C (src/BATTLE/BATTLE.PRG/573B8.c:87)
 void ReleaseScriptActorControl(ScriptVmHost& host);
 // Whether `instruction` holds its opcode's `length` bytes. A shorter one is
 // refused with kShortInstruction so the opcode reads none of its operands.
@@ -704,11 +725,11 @@ void ReleaseScriptActorControl(ScriptVmHost& host);
               static_cast<int>(instruction.bytes.size()));
   return false;
 }
-// decomp: BATTLE.PRG func_800BFE34 (src/BATTLE/BATTLE.PRG/573B8.c:154)
+// decomp: BATTLE.PRG func_800BFE34 (src/BATTLE/BATTLE.PRG/573B8.c:108)
 [[nodiscard]] int OpcodeSize(std::uint8_t opcode, const ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800BFE50 (src/BATTLE/BATTLE.PRG/573B8.c:156)
-// A model id (top nibble 0) through the actor table, a slot (1) or the
-// reference itself.
+// decomp: BATTLE.PRG resolveActorId (src/BATTLE/BATTLE.PRG/573B8.c:110; was
+// func_800BFE50) A model id (top nibble 0) through the actor table, a slot (1)
+// or the reference itself.
 [[nodiscard]] int ResolveScriptActorReference(std::uint16_t reference,
                                               ScriptVmHost& host);
 // decomp: BATTLE.PRG func_800BFEBC (src/BATTLE/BATTLE.PRG/573B8.c:168)
@@ -718,14 +739,14 @@ void ReleaseScriptActorControl(ScriptVmHost& host);
                                              std::int16_t frame,
                                              std::int16_t duration,
                                              ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800C00E8 (src/BATTLE/BATTLE.PRG/573B8.c:223)
+// decomp: BATTLE.PRG func_800C00E8 (src/BATTLE/BATTLE.PRG/573B8.c:177)
 // Reads the current event id's file into `destination`.
 [[nodiscard]] bool QueueEventScriptLoad(EventBuffer destination,
                                         ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800C0150 (src/BATTLE/BATTLE.PRG/573B8.c:231)
+// decomp: BATTLE.PRG func_800C0150 (src/BATTLE/BATTLE.PRG/573B8.c:185)
 void ResetCutsceneActorsToIdle(ScriptVmHost& host);
-// decomp: INITBTL.PRG _initScriptFunctionTable
-// (src/BATTLE/INITBTL.PRG/12AC.c:69)
+// decomp: INITBTL.PRG initScriptFunctionTable
+// (src/BATTLE/INITBTL.PRG/12AC.c:116; was _initScriptFunctionTable)
 [[nodiscard]] bool InitializeScriptOpcodeTable(ScriptVmHost& host);
 
 }  // namespace VS::Event

@@ -176,7 +176,7 @@ void StoreBack(const ActorCommandState& snapshot,
 }
 }  // namespace
 
-// decomp: func_800DEEFC (src/BATTLE/BATTLE.PRG/766FC.s:14); the typed
+// decomp: func_800DEEFC (src/BATTLE/BATTLE.PRG/766FC.s:6); the typed
 // dispatcher is VS::Battle::Ai::IssueActorCommand.
 void IssueLiveActorCommand(VS::Battle::Ai::ActorAiState* state, int action) {
   Require(state != nullptr && action >= 0 && action < kCommandIntentCount,

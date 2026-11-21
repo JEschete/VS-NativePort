@@ -9,8 +9,9 @@
 #include "Legacy/Psx.hpp"
 
 namespace VS::Menu::Files {
-// decomp: _containerStrings (MENU/MENU7.PRG 260.c): halfword offsets, then
-// the strings; ModuleData.cpp fills it from the disc string table.
+// decomp: containerStrings (MENU/MENU7.PRG src/MENU/MENU7.PRG/260.c:470; was
+// _containerStrings): halfword offsets, then the strings; ModuleData.cpp fills
+// it from the disc string table.
 inline constexpr int kContainerStringCount = 895;
 extern std::uint16_t containerStrings[kContainerStringCount];
 // decomp: _dataNotSaved (MENU/MENU7.PRG 260.c)

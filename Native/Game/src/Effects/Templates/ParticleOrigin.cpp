@@ -58,8 +58,8 @@ struct RingPosition {
 
 // Turns the offset by the transform's world rotation when the definition
 // asks, then stores it, moved to the sampled position, as the ribbon's first
-// point. decomp: particleSetup.h:96-105 (ApplyRotMatrix with the translation
-// cleared, then the position added as halfwords).
+// point. decomp: src/EFFECT/particleSetup.h:96-105 (ApplyRotMatrix with the
+// translation cleared, then the position added as halfwords).
 void PlaceOrigin(ParticleSetFrame& frame, std::size_t ribbon,
                  ParticlePoint offset) {
   ParticleSetScratch& scratch = frame.scratch;
@@ -73,8 +73,8 @@ void PlaceOrigin(ParticleSetFrame& frame, std::size_t ribbon,
       math::AddVectors(ParticleVector(offset), scratch.position));
 }
 
-// decomp: particleSetup.h:77-107, a point on the extent's ellipsoid at two
-// random angles.
+// decomp: src/EFFECT/particleSetup.h:77-107, a point on the extent's ellipsoid
+// at two random angles.
 void PlaceOnSphere(ParticleSetFrame& frame, ParticleSetHost& host) {
   ParticleSetScratch& scratch = frame.scratch;
   const std::size_t ribbons = ParticleRibbons(frame);
@@ -96,8 +96,8 @@ void PlaceOnSphere(ParticleSetFrame& frame, ParticleSetHost& host) {
   }
 }
 
-// decomp: particleSetup.h:117-156, the face `face` of the box, drawing the
-// two other axes across it. Another value leaves `point` as it was.
+// decomp: src/EFFECT/particleSetup.h:117-156, the face `face` of the box,
+// drawing the two other axes across it. Another value leaves `point` as it was.
 [[nodiscard]] ParticlePoint OnBoxFace(std::int32_t face, ParticlePoint point,
                                       const Vec3& extent,
                                       ParticleSetHost& host) {
@@ -127,8 +127,8 @@ void PlaceOnSphere(ParticleSetFrame& frame, ParticleSetHost& host) {
   return point;
 }
 
-// decomp: particleSetup.h:159-181, the corner whose bits 0-2 select the
-// positive x, y and z sides.
+// decomp: src/EFFECT/particleSetup.h:159-181, the corner whose bits 0-2 select
+// the positive x, y and z sides.
 [[nodiscard]] ParticlePoint OnBoxCorner(std::int32_t corner,
                                         const Vec3& extent) noexcept {
   return {Side(extent.x, (corner & kCornerX) != 0),
@@ -136,9 +136,9 @@ void PlaceOnSphere(ParticleSetFrame& frame, ParticleSetHost& host) {
           Side(extent.z, (corner & kCornerZ) != 0)};
 }
 
-// decomp: particleSetup.h:109-195. A point keeps its previous offset for the
-// fixed placement; the corners step the overlay's emission cursor, which is
-// stored back after the loop as the original's register copy was.
+// decomp: src/EFFECT/particleSetup.h:109-195. A point keeps its previous offset
+// for the fixed placement; the corners step the overlay's emission cursor,
+// which is stored back after the loop as the original's register copy was.
 void PlaceOnBox(ParticleEmissionCounter counter, ParticleSetFrame& frame,
                 ParticleSetHost& host) {
   const auto placement = static_cast<ParticlePlacement>(frame.scratch.flags &
@@ -167,9 +167,9 @@ void PlaceOnBox(ParticleEmissionCounter counter, ParticleSetFrame& frame,
   host.StoreEmissionCounter(counter, corner);
 }
 
-// decomp: particleSetup.h:197-220, the ring's segment and position counts:
-// four each, or the definition's (a zero segment count is one and a zero
-// position count takes the segment count). False for the unused shape.
+// decomp: src/EFFECT/particleSetup.h:37-219, the ring's segment and position
+// counts: four each, or the definition's (a zero segment count is one and a
+// zero position count takes the segment count). False for the unused shape.
 [[nodiscard]] bool CountRing(ParticleShape shape,
                              const ParticleSetDefinition& definition,
                              ParticleSetScratch& scratch) noexcept {
@@ -211,9 +211,9 @@ void PlaceOnBox(ParticleEmissionCounter counter, ParticleSetFrame& frame,
       ParticleFixed(math::WrappingSubtract(end, start), weight), start));
 }
 
-// decomp: particleSetup.h:223-259. Each point advances the emission cursor
-// one ring position and lands on it (corners) or at a random weight between
-// the cursor's first position and it.
+// decomp: src/EFFECT/particleSetup.h:37-219. Each point advances the emission
+// cursor one ring position and lands on it (corners) or at a random weight
+// between the cursor's first position and it.
 void PlaceOnRing(ParticleEmissionCounter counter, ParticleSetFrame& frame,
                  ParticleSetHost& host) {
   ParticleSetScratch& scratch = frame.scratch;
@@ -245,7 +245,7 @@ void PlaceOnRing(ParticleEmissionCounter counter, ParticleSetFrame& frame,
 }
 }  // namespace
 
-// decomp: EFFECT VS_PARTICLE_ORIGIN_FUNCTION (src/EFFECT/particleSetup.h:36).
+// decomp: EFFECT VS_PARTICLE_ORIGIN_FUNCTION (src/EFFECT/particleSetup.h:37).
 void ParticleOrigin(ParticleEmissionCounter counter, ParticleSetFrame& frame,
                     ParticleSetHost& host) {
   const ParticleSetDefinition& definition = frame.inputs.definition;
@@ -281,164 +281,191 @@ void ParticleOrigin(ParticleEmissionCounter counter, ParticleSetFrame& frame,
 }  // namespace VS::Effects::Templates
 
 namespace VS::Effects {
-// decomp: PLG045.BIN func_800F9910 (src/EFFECT/PLG045.BIN/110.c:1).
+// decomp: PLG045.BIN vs_effect_lightningBolt_0_origin
+// (src/EFFECT/particleSetup.h:37; was func_800F9910).
 void Plg045::ParticleOrigin(Templates::ParticleSetFrame& frame,
                             Templates::ParticleSetHost& host) {
   Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg045, frame,
                             host);
 }
 
-// decomp: PLG057.BIN func_800F9AD0 (src/EFFECT/PLG057.BIN/2D0.c:2).
+// decomp: PLG057.BIN vs_effect_thunderBurstLv1_0_origin
+// (src/EFFECT/particleSetup.h:37; was func_800F9AD0).
 void Plg057::ParticleOrigin(Templates::ParticleSetFrame& frame,
                             Templates::ParticleSetHost& host) {
   Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg057, frame,
                             host);
 }
 
-// decomp: PLG065.BIN func_800FC340 (src/EFFECT/PLG065.BIN/F8.c:19).
-// decomp: PLG065.BIN func_800FC340 (src/EFFECT/PLG065.BIN/F8.c:35).
+// decomp: PLG065.BIN vs_effect_gaeaStrikeLv1_3_origin
+// (src/EFFECT/particleSetup.h:37; was func_800FC340). decomp: PLG065.BIN
+// vs_effect_gaeaStrikeLv1_3_origin (src/EFFECT/particleSetup.h:37; was
+// func_800FC340).
 void Plg065::ParticleOrigin(Templates::ParticleSetFrame& frame,
                             Templates::ParticleSetHost& host) {
   Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg065, frame,
                             host);
 }
 
-// decomp: PLG082.BIN func_800F9928 (src/EFFECT/PLG082.BIN/128.c:8).
+// decomp: PLG082.BIN vs_effect_thunderbolt_0_origin
+// (src/EFFECT/particleSetup.h:37; was func_800F9928).
 void Plg082::ParticleOrigin(Templates::ParticleSetFrame& frame,
                             Templates::ParticleSetHost& host) {
   Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg082, frame,
                             host);
 }
 
-// decomp: PLG087.BIN func_800FE168 (src/EFFECT/PLG087.BIN/1F0.c:31).
-// decomp: PLG087.BIN func_800FE168 (src/EFFECT/PLG087.BIN/1F0.c:47).
+// decomp: PLG087.BIN vs_effect_apocalypse_4_origin
+// (src/EFFECT/particleSetup.h:37; was func_800FE168). decomp: PLG087.BIN
+// vs_effect_apocalypse_4_origin (src/EFFECT/particleSetup.h:37; was
+// func_800FE168).
 void Plg087::ParticleOrigin(Templates::ParticleSetFrame& frame,
                             Templates::ParticleSetHost& host) {
   Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg087, frame,
                             host);
 }
 
-// decomp: PLG114.BIN func_800F9A08 (src/EFFECT/PLG114.BIN/208.c:2).
+// decomp: PLG114.BIN vs_effect_numbingNeedle_0_origin
+// (src/EFFECT/particleSetup.h:37; was func_800F9A08).
 void Plg114::ParticleOrigin(Templates::ParticleSetFrame& frame,
                             Templates::ParticleSetHost& host) {
   Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg114, frame,
                             host);
 }
 
-// decomp: PLG114.BIN func_800FB6AC (src/EFFECT/PLG114.BIN/208.c:14).
-// decomp: PLG114.BIN func_800FB6AC (src/EFFECT/PLG114.BIN/208.c:30).
+// decomp: PLG114.BIN vs_effect_numbingNeedle_1_origin
+// (src/EFFECT/particleSetup.h:37; was func_800FB6AC). decomp: PLG114.BIN
+// vs_effect_numbingNeedle_1_origin (src/EFFECT/particleSetup.h:37; was
+// func_800FB6AC).
 void Plg114::ParticleOrigin2(Templates::ParticleSetFrame& frame,
                              Templates::ParticleSetHost& host) {
   Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg114Second,
                             frame, host);
 }
 
-// decomp: PLG146.BIN func_800FB544 (src/EFFECT/PLG146.BIN/1D8.c:10).
-// decomp: PLG146.BIN func_800FB544 (src/EFFECT/PLG146.BIN/1D8.c:26).
+// decomp: PLG146.BIN vs_effect_blackNebula_2_origin
+// (src/EFFECT/particleSetup.h:37; was func_800FB544). decomp: PLG146.BIN
+// vs_effect_blackNebula_2_origin (src/EFFECT/particleSetup.h:37; was
+// func_800FB544).
 void Plg146::ParticleOrigin(Templates::ParticleSetFrame& frame,
                             Templates::ParticleSetHost& host) {
   Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg146, frame,
                             host);
 }
 
-// decomp: PLG147.BIN func_800FA51C (src/EFFECT/PLG147.BIN/F8.c:6).
-// decomp: PLG147.BIN func_800FA51C (src/EFFECT/PLG147.BIN/F8.c:22).
+// decomp: PLG147.BIN vs_effect_bearClaw_1_origin
+// (src/EFFECT/particleSetup.h:37; was func_800FA51C). decomp: PLG147.BIN
+// vs_effect_bearClaw_1_origin (src/EFFECT/particleSetup.h:37; was
+// func_800FA51C).
 void Plg147::ParticleOrigin(Templates::ParticleSetFrame& frame,
                             Templates::ParticleSetHost& host) {
   Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg147, frame,
                             host);
 }
 
-// decomp: PLG152.BIN func_800FA478 (src/EFFECT/PLG152.BIN/128.c:11).
+// decomp: PLG152.BIN vs_effect_riskbreak_1_origin
+// (src/EFFECT/particleSetup.h:37; was func_800FA478).
 void Plg152::ParticleOrigin(Templates::ParticleSetFrame& frame,
                             Templates::ParticleSetHost& host) {
   Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg152, frame,
                             host);
 }
 
-// decomp: PLG153.BIN func_800FB040 (src/EFFECT/PLG153.BIN/110.c:12).
+// decomp: PLG153.BIN vs_effect_gravisAether_2_origin
+// (src/EFFECT/particleSetup.h:37; was func_800FB040).
 void Plg153::ParticleOrigin(Templates::ParticleSetFrame& frame,
                             Templates::ParticleSetHost& host) {
   Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg153, frame,
                             host);
 }
 
-// decomp: PLG156.BIN func_800F9928 (src/EFFECT/PLG156.BIN/128.c:2).
+// decomp: PLG156.BIN vs_effect_quickshock_0_origin
+// (src/EFFECT/particleSetup.h:37; was func_800F9928).
 void Plg156::ParticleOrigin(Templates::ParticleSetFrame& frame,
                             Templates::ParticleSetHost& host) {
   Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg156, frame,
                             host);
 }
 
-// decomp: PLG168.BIN func_800FBB10 (src/EFFECT/PLG168.BIN/1F0.c:12).
-// decomp: PLG168.BIN func_800FBB10 (src/EFFECT/PLG168.BIN/1F0.c:28).
+// decomp: PLG168.BIN vs_effect_vertigo_1_origin (src/EFFECT/particleSetup.h:37;
+// was func_800FBB10). decomp: PLG168.BIN vs_effect_vertigo_1_origin
+// (src/EFFECT/particleSetup.h:37; was func_800FBB10).
 void Plg168::ParticleOrigin(Templates::ParticleSetFrame& frame,
                             Templates::ParticleSetHost& host) {
   Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg168, frame,
                             host);
 }
 
-// decomp: PLG224.BIN func_800F98F8 (src/EFFECT/PLG224.BIN/F8.c:2).
-// decomp: PLG224.BIN func_800F98F8 (src/EFFECT/PLG224.BIN/F8.c:18).
+// decomp: PLG224.BIN vs_effect_plg224_0_origin (src/EFFECT/particleSetup.h:37;
+// was func_800F98F8). decomp: PLG224.BIN vs_effect_plg224_0_origin
+// (src/EFFECT/particleSetup.h:37; was func_800F98F8).
 void Plg224::ParticleOrigin(Templates::ParticleSetFrame& frame,
                             Templates::ParticleSetHost& host) {
   Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg224, frame,
                             host);
 }
 
-// decomp: PLG255.BIN func_800FBAF8 (src/EFFECT/PLG255.BIN/1D8.c:12).
-// decomp: PLG255.BIN func_800FBAF8 (src/EFFECT/PLG255.BIN/1D8.c:28).
+// decomp: PLG255.BIN vs_effect_plg255_1_origin (src/EFFECT/particleSetup.h:37;
+// was func_800FBAF8). decomp: PLG255.BIN vs_effect_plg255_1_origin
+// (src/EFFECT/particleSetup.h:37; was func_800FBAF8).
 void Plg255::ParticleOrigin(Templates::ParticleSetFrame& frame,
                             Templates::ParticleSetHost& host) {
   Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg255, frame,
                             host);
 }
 
-// decomp: PLG263.BIN func_800FC00C (src/EFFECT/PLG263.BIN/110.c:344).
+// decomp: PLG263.BIN vs_effect_plg263_3_origin (src/EFFECT/particleSetup.h:37;
+// was func_800FC00C).
 void Plg263::ParticleOrigin(Templates::ParticleSetFrame& frame,
                             Templates::ParticleSetHost& host) {
   Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg263, frame,
                             host);
 }
 
-// decomp: PLG265.BIN func_800FA9E0 (src/EFFECT/PLG265.BIN/2E8.c:6).
-// decomp: PLG265.BIN func_800FA9E0 (src/EFFECT/PLG265.BIN/2E8.c:22).
+// decomp: PLG265.BIN vs_effect_plg265_1_origin (src/EFFECT/particleSetup.h:37;
+// was func_800FA9E0). decomp: PLG265.BIN vs_effect_plg265_1_origin
+// (src/EFFECT/particleSetup.h:37; was func_800FA9E0).
 void Plg265::ParticleOrigin(Templates::ParticleSetFrame& frame,
                             Templates::ParticleSetHost& host) {
   Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg265, frame,
                             host);
 }
 
-// decomp: PLG265.BIN func_800FE0F4 (src/EFFECT/PLG265.BIN/2E8.c:40).
+// decomp: PLG265.BIN vs_effect_plg265_3_origin (src/EFFECT/particleSetup.h:37;
+// was func_800FE0F4).
 void Plg265::ParticleOrigin2(Templates::ParticleSetFrame& frame,
                              Templates::ParticleSetHost& host) {
   Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg265Second,
                             frame, host);
 }
 
-// decomp: PLG266.BIN func_800F9AE8 (src/EFFECT/PLG266.BIN/2E8.c:2).
+// decomp: PLG266.BIN vs_effect_plg266_0_origin (src/EFFECT/particleSetup.h:37;
+// was func_800F9AE8).
 void Plg266::ParticleOrigin(Templates::ParticleSetFrame& frame,
                             Templates::ParticleSetHost& host) {
   Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg266, frame,
                             host);
 }
 
-// decomp: PLG266.BIN func_800FB78C (src/EFFECT/PLG266.BIN/2E8.c:14).
-// decomp: PLG266.BIN func_800FB78C (src/EFFECT/PLG266.BIN/2E8.c:30).
+// decomp: PLG266.BIN vs_effect_plg266_1_origin (src/EFFECT/particleSetup.h:37;
+// was func_800FB78C). decomp: PLG266.BIN vs_effect_plg266_1_origin
+// (src/EFFECT/particleSetup.h:37; was func_800FB78C).
 void Plg266::ParticleOrigin2(Templates::ParticleSetFrame& frame,
                              Templates::ParticleSetHost& host) {
   Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg266Second,
                             frame, host);
 }
 
-// decomp: PLG300.BIN func_800FA584 (src/EFFECT/PLG300.BIN/110.c:12).
+// decomp: PLG300.BIN vs_effect_plg300_1_origin (src/EFFECT/particleSetup.h:37;
+// was func_800FA584).
 void Plg300::ParticleOrigin(Templates::ParticleSetFrame& frame,
                             Templates::ParticleSetHost& host) {
   Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg300, frame,
                             host);
 }
 
-// decomp: PLG301.BIN func_800F9910 (src/EFFECT/PLG301.BIN/110.c:8).
+// decomp: PLG301.BIN vs_effect_plg301_0_origin (src/EFFECT/particleSetup.h:37;
+// was func_800F9910).
 void Plg301::ParticleOrigin(Templates::ParticleSetFrame& frame,
                             Templates::ParticleSetHost& host) {
   Templates::ParticleOrigin(Templates::ParticleEmissionCounter::kPlg301, frame,

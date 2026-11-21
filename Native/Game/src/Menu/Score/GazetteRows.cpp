@@ -165,8 +165,8 @@ std::vector<std::int32_t> PlainRowTypes(std::int32_t row_count) {
 }
 }  // namespace
 
-// decomp: MENU9.PRG _renderScrollableMenuItem
-// (src/MENU/MENU9.PRG/238.c:54), 80102A7C
+// decomp: MENU9.PRG renderScrollableMenuItem
+// (src/MENU/MENU9.PRG/238.c:61; was _renderScrollableMenuItem), 80102A7C
 void RenderScrollableRow(ScrollableRowHost& host,
                          ScrollableRowAnimation& animation,
                          Framework::MenuRow& row) {
@@ -203,7 +203,8 @@ TopMenuCursor TopMenuCursorOf(std::int32_t row_count,
       .first_row = static_cast<std::uint8_t>(absolute_row - kTopMenuMiddleRow)};
 }
 
-// decomp: MENU9.PRG _setRows (src/MENU/MENU9.PRG/238.c:196), 80102E10
+// decomp: MENU9.PRG setRows (src/MENU/MENU9.PRG/238.c:203; was _setRows),
+// 80102E10
 void RestoreTopMenuCursor(GazetteMenuHost& host, std::int32_t row_count,
                           std::int32_t absolute_row) {
   if (row_count < 0 || row_count > kMaxTopMenuRows) {
@@ -218,7 +219,8 @@ void RestoreTopMenuCursor(GazetteMenuHost& host, std::int32_t row_count,
   host.SetCursorMemorySetting(setting);
 }
 
-// decomp: MENU9.PRG _getSelectedRow (src/MENU/MENU9.PRG/238.c:228), 80102F0C
+// decomp: MENU9.PRG getSelectedRow (src/MENU/MENU9.PRG/238.c:235; was
+// _getSelectedRow), 80102F0C
 std::int32_t GetSelectedTopMenuRow(GazetteMenuHost& host) {
   const std::int32_t row = host.SelectedRow();
   if (row < kTopMenuPending) {
@@ -229,7 +231,8 @@ std::int32_t GetSelectedTopMenuRow(GazetteMenuHost& host) {
   return row;
 }
 
-// decomp: MENU9.PRG _topMenu (src/MENU/MENU9.PRG/238.c:1430), 80104BD0
+// decomp: MENU9.PRG topMenu (src/MENU/MENU9.PRG/238.c:1435; was _topMenu),
+// 80104BD0
 std::int32_t UpdateTopMenu(GazetteMenuHost& host, TopMenuState& state,
                            std::int32_t initialize) {
   if (initialize != 0) state = {};
@@ -249,13 +252,14 @@ std::int32_t UpdateTopMenu(GazetteMenuHost& host, TopMenuState& state,
   return kTopMenuPending;
 }
 
-// decomp: MENU9.PRG _clearMenuExceptRow8 (src/MENU/MENU9.PRG/238.c:258),
-// 80102FB8
+// decomp: MENU9.PRG clearMenuExceptRow8 (src/MENU/MENU9.PRG/238.c:265; was
+// _clearMenuExceptRow8), 80102FB8
 void ClearMenuExceptRow8(GazetteMenuHost& host) {
   host.ClearMenuExcept(kUnusedKeptRow);
 }
 
-// decomp: MENU9.PRG _menuReady (src/MENU/MENU9.PRG/238.c:264), 80102FD8
+// decomp: MENU9.PRG menuReady (src/MENU/MENU9.PRG/238.c:271; was _menuReady),
+// 80102FD8
 void PollMenuReady(GazetteMenuHost& host) {
   static_cast<void>(host.MenuRowsIdle());
 }

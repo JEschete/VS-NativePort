@@ -63,16 +63,16 @@ const VS::Items::InventoryContents& OrAshleyInventory(
 }
 }  // namespace
 
-// decomp: BATTLE.PRG vs_battle_itemIdIsInInventory
-// (src/BATTLE/BATTLE.PRG/146C.c:9646)
+// decomp: BATTLE.PRG itemIdIsInInventory
+// (src/BATTLE/BATTLE.PRG/146C.c:9636; was vs_battle_itemIdIsInInventory)
 int CountLiveInventoryItem(int id) {
   const std::span<const std::uint32_t, kItemIdCategoryCount> upper_ids(
       VS::Items::itemCategoryUpperIds);
   return InventoryItemCount(id, upper_ids, VS::Items::inventory);
 }
 
-// decomp: BATTLE.PRG vs_battle_decreaseMiscCount
-// (src/BATTLE/BATTLE.PRG/5BF94.c:4454)
+// decomp: BATTLE.PRG decreaseMiscCount
+// (src/BATTLE/BATTLE.PRG/5BF94.c:4020; was vs_battle_decreaseMiscCount)
 int ConsumeLiveMiscItem(int misc_id) {
   std::uint8_t invoked_slot = miscItemInvoked;
   const bool consumed =
@@ -84,7 +84,7 @@ int ConsumeLiveMiscItem(int misc_id) {
 
 namespace VS::Items::Inventory {
 // decomp: MAINMENU.PRG vs_mainMenu_unequipWeapon
-// (src/MENU/MAINMENU.PRG/2D10.c:1008)
+// (src/MENU/MAINMENU.PRG/2D10.c:1010)
 void UnequipLiveWeapon() {
   auto* stats = Live::AshleyStats("UnequipWeapon");
   if (stats == nullptr) return;
@@ -100,7 +100,7 @@ void UnequipLiveWeapon() {
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_unequipShield
-// (src/MENU/MAINMENU.PRG/2D10.c:1019)
+// (src/MENU/MAINMENU.PRG/2D10.c:1021)
 void UnequipLiveShield() {
   auto* stats = Live::AshleyStats("UnequipShield");
   if (stats == nullptr) return;
@@ -114,7 +114,7 @@ void UnequipLiveShield() {
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_initItem
-// (src/MENU/MAINMENU.PRG/2D10.c:1030)
+// (src/MENU/MAINMENU.PRG/2D10.c:1032)
 void ClearLiveItemSlot(int category, int slot) {
   const auto typed_category = ToCategory(category, "ClearItemSlot");
   if (!typed_category) return;
@@ -124,7 +124,7 @@ void ClearLiveItemSlot(int category, int slot) {
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_findItem
-// (src/MENU/MAINMENU.PRG/2D10.c:1222)
+// (src/MENU/MAINMENU.PRG/2D10.c:1224)
 int FindLiveDisplayPosition(int category, int slot) {
   const auto typed_category = ToListedCategory(category, "FindDisplayPosition");
   if (!typed_category) return 0;
@@ -133,7 +133,7 @@ int FindLiveDisplayPosition(int category, int slot) {
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_rebuildInventory
-// (src/MENU/MAINMENU.PRG/2D10.c:1254)
+// (src/MENU/MAINMENU.PRG/2D10.c:1256)
 void RebuildLiveDisplayIndices(int category) {
   const auto typed_category =
       ToListedCategory(category, "RebuildDisplayIndices");
@@ -144,7 +144,7 @@ void RebuildLiveDisplayIndices(int category) {
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_getItemCount
-// (src/MENU/MAINMENU.PRG/2D10.c:1307)
+// (src/MENU/MAINMENU.PRG/2D10.c:1309)
 int CountLiveItems(int category,
                    const VS::Items::InventoryContents* inventory) {
   const auto typed_category = ToCategory(category, "CountItems");
@@ -153,7 +153,7 @@ int CountLiveItems(int category,
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_getFirstEmptyItemSlot
-// (src/MENU/MAINMENU.PRG/2D10.c:1321)
+// (src/MENU/MAINMENU.PRG/2D10.c:1323)
 int FindLiveFirstEmptySlot(int category,
                            const VS::Items::InventoryContents* inventory) {
   const auto typed_category = ToCategory(category, "FirstEmptySlot");
@@ -164,7 +164,7 @@ int FindLiveFirstEmptySlot(int category,
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_copyItem
-// (src/MENU/MAINMENU.PRG/2D10.c:1334)
+// (src/MENU/MAINMENU.PRG/2D10.c:1336)
 // A misc copy rebuilds Ashley's misc display order and merges into the
 // target's stacks in that order, whichever inventory the target is.
 int CopyLiveItem(int flags, VS::Items::InventoryContents* target,
@@ -190,7 +190,7 @@ int CopyLiveItem(int flags, VS::Items::InventoryContents* target,
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_initInventory
-// (src/MENU/MAINMENU.PRG/C48.c:44)
+// (src/MENU/MAINMENU.PRG/C48.c:51)
 void StoreLiveEquippedStats() {
   auto* stats = Live::AshleyStats("StoreEquippedStats");
   if (stats == nullptr) return;

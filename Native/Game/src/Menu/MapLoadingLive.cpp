@@ -371,7 +371,8 @@ SceneMapView ReadLiveMapView() { return ViewOfGlobals(); }
 
 void WriteLiveMapView(const SceneMapView& view) { StoreView(view); }
 
-// decomp: MENU5.PRG _configureMapMenu (4D8.c:129).
+// decomp: MENU5.PRG configureMapMenu (src/MENU/MENU5.PRG/4D8.c:139; was
+// _configureMapMenu).
 void LiveConfigureAreaList(int row_count, int current_map, char* menu_text[]) {
   if (row_count < 0) {
     Refuse("ConfigureAreaList", "negative row count");
@@ -385,13 +386,15 @@ void LiveConfigureAreaList(int row_count, int current_map, char* menu_text[]) {
   ConfigureAreaList(host, row_count, current_map, currentMapRow);
 }
 
-// decomp: MENU5.PRG _mapSelection (4D8.c:175).
+// decomp: MENU5.PRG mapSelection (src/MENU/MENU5.PRG/4D8.c:185; was
+// _mapSelection).
 int LivePollAreaSelection() {
   LiveAreaMenu host(nullptr);
   return PollAreaSelection(host);
 }
 
-// decomp: MENU5.PRG _setMenuItemMapName (4D8.c:188).
+// decomp: MENU5.PRG setMenuItemMapName (src/MENU/MENU5.PRG/4D8.c:198; was
+// _setMenuItemMapName).
 void LiveShowAreaName(char* map_name, char font_color) {
   if (map_name == nullptr) {
     Refuse("ShowAreaName", "no area name");
@@ -411,19 +414,21 @@ void LiveShowAreaName(char* map_name, char font_color) {
   row->font_color = area.font_color;
 }
 
-// decomp: MENU5.PRG _menuReady (4D8.c:204).
+// decomp: MENU5.PRG menuReady (src/MENU/MENU5.PRG/4D8.c:214; was _menuReady).
 void LivePollMenuReady() {
   LiveMenuReady host;
   PollMenuReady(host);
 }
 
-// decomp: MENU5.PRG _loadMapBackground (4D8.c:206).
+// decomp: MENU5.PRG loadMapBackground (src/MENU/MENU5.PRG/4D8.c:216; was
+// _loadMapBackground).
 int LiveLoadBackground(int begin_background_load) {
   LiveBackground host;
   return LoadBackground(host, background.step, begin_background_load);
 }
 
-// decomp: MENU5.PRG _loadArmFile (4D8.c:448).
+// decomp: MENU5.PRG loadArmFile (src/MENU/MENU5.PRG/4D8.c:458; was
+// _loadArmFile).
 int LiveLoadSceneMap() {
   if (VS::Battle::sceneBuffer != nullptr &&
       (currentScene < 0 || currentScene >= kSceneCount)) {
@@ -447,7 +452,8 @@ int LiveLoadSceneMap() {
   return result == SceneMapLoad::kLoaded ? 1 : 0;
 }
 
-// decomp: MENU5.PRG _mapSelectionMenu (4D8.c:979).
+// decomp: MENU5.PRG mapSelectionMenu (src/MENU/MENU5.PRG/4D8.c:984; was
+// _mapSelectionMenu).
 int LiveUpdateAreaSelection(int initialize) {
   if (initialize != 0 || areaSelection.step == 0) {
     for (std::int32_t scene = 1; scene < kSceneCount; ++scene) {

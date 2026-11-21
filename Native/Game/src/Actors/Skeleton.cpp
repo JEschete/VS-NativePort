@@ -114,7 +114,7 @@ std::optional<std::int32_t> BoneTagValue(const BoneLabels& bone,
   return std::nullopt;
 }
 
-// decomp: BATTLE.PRG func_8009E228 (src/BATTLE/BATTLE.PRG/30DB0.c:2525)
+// decomp: BATTLE.PRG func_8009E228 (src/BATTLE/BATTLE.PRG/30DB0.c:2591)
 std::int32_t PitchToPoint(Vec3 origin, Vec3 target,
                           std::int32_t root_height) noexcept {
   const std::int32_t horizontal = Core::Math::SquareRootInteger(
@@ -124,13 +124,14 @@ std::int32_t PitchToPoint(Vec3 origin, Vec3 target,
                                  horizontal);
 }
 
-// decomp: BATTLE.PRG func_8009FD38 (src/BATTLE/BATTLE.PRG/30DB0.c:3540)
+// decomp: BATTLE.PRG func_8009FD38 (src/BATTLE/BATTLE.PRG/30DB0.c:3640)
 std::int16_t HeadTrackingSpeed(std::uint16_t collision_radius) noexcept {
   return collision_radius > kWideActorRadius ? kWideHeadTrackingStep
                                              : kHeadTrackingStep;
 }
 
-// decomp: BATTLE.PRG func_8009FC60 (src/BATTLE/BATTLE.PRG/30DB0.c:3512)
+// decomp: BATTLE.PRG setActorLook (src/BATTLE/BATTLE.PRG/30DB0.c:3612; was
+// func_8009FC60)
 HeadTracking StartHeadTracking(const HeadTracking& current,
                                const HeadTrackingRequest& request,
                                const ActorLook& look) noexcept {
@@ -187,7 +188,7 @@ Vec3 BoneEndpointPoint(const Transform3& transform, std::int32_t length,
 }
 
 // decomp: BATTLE.PRG func_800A190C (src/BATTLE/BATTLE.PRG/38C1C.c:246) and
-// func_800A1280 (30DB0.c:4224), selector 0xFB.
+// func_800A1280 (src/BATTLE/BATTLE.PRG/30DB0.c:4341), selector 0xFB.
 Vec3 TargetPoint(Vec3 position, std::int32_t height) noexcept {
   return Halfwords(
       Vec3{position.x, WrappingSubtract(position.y, height), position.z});

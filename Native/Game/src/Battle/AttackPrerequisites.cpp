@@ -66,8 +66,8 @@ bool IsUndead(const PrerequisiteTarget& target) {
   return TargetEnemyClass(target) == kUndeadEnemyClass;
 }
 
-// decomp: _attackPrerequisiteFunctions (src/BATTLE/BATTLE.PRG/146C.c:628),
-// in the original slot order.
+// decomp: attackPrerequisiteFunctions (src/BATTLE/BATTLE.PRG/146C.c:301; was
+// _attackPrerequisiteFunctions), in the original slot order.
 constexpr std::array<PrerequisiteRule, kPrerequisiteCount> kRules{
     RejectAttackPrerequisite,
     AcceptAttackPrerequisite,
@@ -112,215 +112,231 @@ constexpr std::array<PrerequisiteRule, kPrerequisiteCount> kRules{
 };
 }  // namespace
 
-// decomp: BATTLE.PRG _hitPrerequisiteCanApplyEffect
-// (src/BATTLE/BATTLE.PRG/146C.c:10133)
+// decomp: BATTLE.PRG hitPrerequisiteCanApplyEffect
+// (src/BATTLE/BATTLE.PRG/146C.c:10118; was _hitPrerequisiteCanApplyEffect)
 bool IsStatusEffectBlocked(int effect, const PrerequisiteTarget& target) {
   const StatusEffectRule rule = target.EffectRule(effect);
   return (rule.status_flags & target.StatusImmunities()) != 0 ||
          (rule.blocking_statuses & target.Statuses()) != 0;
 }
 
-// decomp: BATTLE.PRG _getEnemyClass (src/BATTLE/BATTLE.PRG/146C.c:10144)
+// decomp: BATTLE.PRG getEnemyClass (src/BATTLE/BATTLE.PRG/146C.c:10130; was
+// _getEnemyClass)
 int TargetEnemyClass(const PrerequisiteTarget& target) {
   return target.EnemyClass();
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteNever0..3
-// (src/BATTLE/BATTLE.PRG/146C.c:10146, 10180, 10186, 10192)
+// decomp: BATTLE.PRG hitPrerequisiteNever0..3
+// (src/BATTLE/BATTLE.PRG/146C.c:10132; was _hitPrerequisiteNever0, 10180,
+// 10186, 10192)
 bool RejectAttackPrerequisite(const PrerequisiteTarget& /*target*/) {
   return false;
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteAlways0..2
-// (src/BATTLE/BATTLE.PRG/146C.c:10152, 10158, 10164)
+// decomp: BATTLE.PRG hitPrerequisiteAlways0..2
+// (src/BATTLE/BATTLE.PRG/146C.c:10134; was _hitPrerequisiteAlways0, 10158,
+// 10164)
 bool AcceptAttackPrerequisite(const PrerequisiteTarget& /*target*/) {
   return true;
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteUndead
-// (src/BATTLE/BATTLE.PRG/146C.c:10170)
+// decomp: BATTLE.PRG hitPrerequisiteUndead
+// (src/BATTLE/BATTLE.PRG/146C.c:10140; was _hitPrerequisiteUndead)
 bool IsAttackTargetUndead(const PrerequisiteTarget& target) {
   return target.Valid() && IsUndead(target);
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteNotUndead
-// (src/BATTLE/BATTLE.PRG/146C.c:10175)
+// decomp: BATTLE.PRG hitPrerequisiteNotUndead
+// (src/BATTLE/BATTLE.PRG/146C.c:10145; was _hitPrerequisiteNotUndead)
 bool IsAttackTargetLiving(const PrerequisiteTarget& target) {
   return target.Valid() && !IsUndead(target);
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteCanApplyStrDown
-// (src/BATTLE/BATTLE.PRG/146C.c:10198)
+// decomp: BATTLE.PRG hitPrerequisiteCanApplyStrDown
+// (src/BATTLE/BATTLE.PRG/146C.c:10156; was _hitPrerequisiteCanApplyStrDown)
 bool CanApplyStrengthDown(const PrerequisiteTarget& target) {
   return CanApply(Effect::kStrengthDown, target);
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteCanApplyIntDown
-// (src/BATTLE/BATTLE.PRG/146C.c:10204)
+// decomp: BATTLE.PRG hitPrerequisiteCanApplyIntDown
+// (src/BATTLE/BATTLE.PRG/146C.c:10161; was _hitPrerequisiteCanApplyIntDown)
 bool CanApplyIntelligenceDown(const PrerequisiteTarget& target) {
   return CanApply(Effect::kIntelligenceDown, target);
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteCanApplyAglDown
-// (src/BATTLE/BATTLE.PRG/146C.c:10210)
+// decomp: BATTLE.PRG hitPrerequisiteCanApplyAglDown
+// (src/BATTLE/BATTLE.PRG/146C.c:10166; was _hitPrerequisiteCanApplyAglDown)
 bool CanApplyAgilityDown(const PrerequisiteTarget& target) {
   return CanApply(Effect::kAgilityDown, target);
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteCanApplyEquipDown
-// (src/BATTLE/BATTLE.PRG/146C.c:10216): armour, a shield or a blade.
+// decomp: BATTLE.PRG hitPrerequisiteCanApplyEquipDown
+// (src/BATTLE/BATTLE.PRG/146C.c:10171; was _hitPrerequisiteCanApplyEquipDown):
+// armour, a shield or a blade.
 bool CanApplyEquipmentDown(const PrerequisiteTarget& target) {
   return CanApply(Effect::kEquipmentDown, target) && HasAnyEquipment(target);
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteCanApplyHalfMove
-// (src/BATTLE/BATTLE.PRG/146C.c:10250)
+// decomp: BATTLE.PRG hitPrerequisiteCanApplyHalfMove
+// (src/BATTLE/BATTLE.PRG/146C.c:10205; was _hitPrerequisiteCanApplyHalfMove)
 bool CanApplyHalfMovement(const PrerequisiteTarget& target) {
   return CanApply(Effect::kHalfMovement, target);
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteCanApplyStrUp
-// (src/BATTLE/BATTLE.PRG/146C.c:10256)
+// decomp: BATTLE.PRG hitPrerequisiteCanApplyStrUp
+// (src/BATTLE/BATTLE.PRG/146C.c:10210; was _hitPrerequisiteCanApplyStrUp)
 bool CanApplyStrengthUp(const PrerequisiteTarget& target) {
   return CanApply(Effect::kStrengthUp, target);
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteCanApplyIntUp
-// (src/BATTLE/BATTLE.PRG/146C.c:10261)
+// decomp: BATTLE.PRG hitPrerequisiteCanApplyIntUp
+// (src/BATTLE/BATTLE.PRG/146C.c:10215; was _hitPrerequisiteCanApplyIntUp)
 bool CanApplyIntelligenceUp(const PrerequisiteTarget& target) {
   return CanApply(Effect::kIntelligenceUp, target);
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteCanApplyAglUp
-// (src/BATTLE/BATTLE.PRG/146C.c:10266)
+// decomp: BATTLE.PRG hitPrerequisiteCanApplyAglUp
+// (src/BATTLE/BATTLE.PRG/146C.c:10220; was _hitPrerequisiteCanApplyAglUp)
 bool CanApplyAgilityUp(const PrerequisiteTarget& target) {
   return CanApply(Effect::kAgilityUp, target);
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteCanApplyEquipUp
-// (src/BATTLE/BATTLE.PRG/146C.c:10271): armour, a shield or a blade.
+// decomp: BATTLE.PRG hitPrerequisiteCanApplyEquipUp
+// (src/BATTLE/BATTLE.PRG/146C.c:10225; was _hitPrerequisiteCanApplyEquipUp):
+// armour, a shield or a blade.
 bool CanApplyEquipmentUp(const PrerequisiteTarget& target) {
   return CanApply(Effect::kEquipmentUp, target) && HasAnyEquipment(target);
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteCanApplyQuicken
-// (src/BATTLE/BATTLE.PRG/146C.c:10305)
+// decomp: BATTLE.PRG hitPrerequisiteCanApplyQuicken
+// (src/BATTLE/BATTLE.PRG/146C.c:10259; was _hitPrerequisiteCanApplyQuicken)
 bool CanApplyQuicken(const PrerequisiteTarget& target) {
   return CanApply(Effect::kQuicken, target);
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteCanApplySilence
-// (src/BATTLE/BATTLE.PRG/146C.c:10311)
+// decomp: BATTLE.PRG hitPrerequisiteCanApplySilence
+// (src/BATTLE/BATTLE.PRG/146C.c:10264; was _hitPrerequisiteCanApplySilence)
 bool CanApplySilence(const PrerequisiteTarget& target) {
   return CanApply(Effect::kSilence, target);
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteCanApplyMagicWard
-// (src/BATTLE/BATTLE.PRG/146C.c:10317)
+// decomp: BATTLE.PRG hitPrerequisiteCanApplyMagicWard
+// (src/BATTLE/BATTLE.PRG/146C.c:10269; was _hitPrerequisiteCanApplyMagicWard)
 bool CanApplyMagicWard(const PrerequisiteTarget& target) {
   return CanApply(Effect::kMagicWard, target);
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteCanApplyRegen
-// (src/BATTLE/BATTLE.PRG/146C.c:10323)
+// decomp: BATTLE.PRG hitPrerequisiteCanApplyRegen
+// (src/BATTLE/BATTLE.PRG/146C.c:10274; was _hitPrerequisiteCanApplyRegen)
 bool CanApplyRegeneration(const PrerequisiteTarget& target) {
   return CanApply(Effect::kRegeneration, target);
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteCanApplyParalysis
-// (src/BATTLE/BATTLE.PRG/146C.c:10329)
+// decomp: BATTLE.PRG hitPrerequisiteCanApplyParalysis
+// (src/BATTLE/BATTLE.PRG/146C.c:10279; was _hitPrerequisiteCanApplyParalysis)
 bool CanApplyParalysis(const PrerequisiteTarget& target) {
   return CanApply(Effect::kParalysis, target);
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteCanApplyPoison
-// (src/BATTLE/BATTLE.PRG/146C.c:10335)
+// decomp: BATTLE.PRG hitPrerequisiteCanApplyPoison
+// (src/BATTLE/BATTLE.PRG/146C.c:10284; was _hitPrerequisiteCanApplyPoison)
 bool CanApplyPoison(const PrerequisiteTarget& target) {
   return CanApply(Effect::kPoison, target);
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteCanApplyNumbness
-// (src/BATTLE/BATTLE.PRG/146C.c:10341)
+// decomp: BATTLE.PRG hitPrerequisiteCanApplyNumbness
+// (src/BATTLE/BATTLE.PRG/146C.c:10289; was _hitPrerequisiteCanApplyNumbness)
 bool CanApplyNumbness(const PrerequisiteTarget& target) {
   return CanApply(Effect::kNumbness, target);
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteCanApplyCurse
-// (src/BATTLE/BATTLE.PRG/146C.c:10347)
+// decomp: BATTLE.PRG hitPrerequisiteCanApplyCurse
+// (src/BATTLE/BATTLE.PRG/146C.c:10294; was _hitPrerequisiteCanApplyCurse)
 bool CanApplyCurse(const PrerequisiteTarget& target) {
   return CanApply(Effect::kCurse, target);
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteCanApplyAirAttackUp
-// (src/BATTLE/BATTLE.PRG/146C.c:10353): needs a blade.
+// decomp: BATTLE.PRG hitPrerequisiteCanApplyAirAttackUp
+// (src/BATTLE/BATTLE.PRG/146C.c:10299; was
+// _hitPrerequisiteCanApplyAirAttackUp): needs a blade.
 bool CanApplyAirAttackUp(const PrerequisiteTarget& target) {
   return CanApply(Effect::kAirAttackUp, target) && target.BladeId() != 0;
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteCanApplyFireAttackUp
-// (src/BATTLE/BATTLE.PRG/146C.c:10363): needs a blade.
+// decomp: BATTLE.PRG hitPrerequisiteCanApplyFireAttackUp
+// (src/BATTLE/BATTLE.PRG/146C.c:10308; was
+// _hitPrerequisiteCanApplyFireAttackUp): needs a blade.
 bool CanApplyFireAttackUp(const PrerequisiteTarget& target) {
   return CanApply(Effect::kFireAttackUp, target) && target.BladeId() != 0;
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteCanApplyEarthAttackUp
-// (src/BATTLE/BATTLE.PRG/146C.c:10373): needs a blade.
+// decomp: BATTLE.PRG hitPrerequisiteCanApplyEarthAttackUp
+// (src/BATTLE/BATTLE.PRG/146C.c:10317; was
+// _hitPrerequisiteCanApplyEarthAttackUp): needs a blade.
 bool CanApplyEarthAttackUp(const PrerequisiteTarget& target) {
   return CanApply(Effect::kEarthAttackUp, target) && target.BladeId() != 0;
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteCanApplyWaterAttackUp
-// (src/BATTLE/BATTLE.PRG/146C.c:10383): needs a blade.
+// decomp: BATTLE.PRG hitPrerequisiteCanApplyWaterAttackUp
+// (src/BATTLE/BATTLE.PRG/146C.c:10326; was
+// _hitPrerequisiteCanApplyWaterAttackUp): needs a blade.
 bool CanApplyWaterAttackUp(const PrerequisiteTarget& target) {
   return CanApply(Effect::kWaterAttackUp, target) && target.BladeId() != 0;
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteCanApplyAirDefenseUp
-// (src/BATTLE/BATTLE.PRG/146C.c:10393): needs armour or a shield.
+// decomp: BATTLE.PRG hitPrerequisiteCanApplyAirDefenseUp
+// (src/BATTLE/BATTLE.PRG/146C.c:10335; was
+// _hitPrerequisiteCanApplyAirDefenseUp): needs armour or a shield.
 bool CanApplyAirDefenseUp(const PrerequisiteTarget& target) {
   return CanApply(Effect::kAirDefenseUp, target) && HasDefensiveGear(target);
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteCanApplyFireDefenseUp
-// (src/BATTLE/BATTLE.PRG/146C.c:10418): needs armour or a shield.
+// decomp: BATTLE.PRG hitPrerequisiteCanApplyFireDefenseUp
+// (src/BATTLE/BATTLE.PRG/146C.c:10359; was
+// _hitPrerequisiteCanApplyFireDefenseUp): needs armour or a shield.
 bool CanApplyFireDefenseUp(const PrerequisiteTarget& target) {
   return CanApply(Effect::kFireDefenseUp, target) && HasDefensiveGear(target);
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteCanApplyEarthDefenseUp
-// (src/BATTLE/BATTLE.PRG/146C.c:10442): needs armour or a shield.
+// decomp: BATTLE.PRG hitPrerequisiteCanApplyEarthDefenseUp
+// (src/BATTLE/BATTLE.PRG/146C.c:10382; was
+// _hitPrerequisiteCanApplyEarthDefenseUp): needs armour or a shield.
 bool CanApplyEarthDefenseUp(const PrerequisiteTarget& target) {
   return CanApply(Effect::kEarthDefenseUp, target) && HasDefensiveGear(target);
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteCanApplyWaterDefenseUp
-// (src/BATTLE/BATTLE.PRG/146C.c:10466): needs armour or a shield.
+// decomp: BATTLE.PRG hitPrerequisiteCanApplyWaterDefenseUp
+// (src/BATTLE/BATTLE.PRG/146C.c:10405; was
+// _hitPrerequisiteCanApplyWaterDefenseUp): needs armour or a shield.
 bool CanApplyWaterDefenseUp(const PrerequisiteTarget& target) {
   return CanApply(Effect::kWaterDefenseUp, target) && HasDefensiveGear(target);
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteCanApplyBanish
-// (src/BATTLE/BATTLE.PRG/146C.c:10491)
+// decomp: BATTLE.PRG hitPrerequisiteCanApplyBanish
+// (src/BATTLE/BATTLE.PRG/146C.c:10429; was _hitPrerequisiteCanApplyBanish)
 bool CanApplyBanish(const PrerequisiteTarget& target) {
   return CanApply(Effect::kBanish, target);
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteCanApplyExorcise
-// (src/BATTLE/BATTLE.PRG/146C.c:10497): undead targets only.
+// decomp: BATTLE.PRG hitPrerequisiteCanApplyExorcise
+// (src/BATTLE/BATTLE.PRG/146C.c:10434; was _hitPrerequisiteCanApplyExorcise):
+// undead targets only.
 bool CanApplyExorcise(const PrerequisiteTarget& target) {
   return CanApply(Effect::kSpiritDrain, target) && IsUndead(target);
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteCanApplyDrain
-// (src/BATTLE/BATTLE.PRG/146C.c:10507): living targets only.
+// decomp: BATTLE.PRG hitPrerequisiteCanApplyDrain
+// (src/BATTLE/BATTLE.PRG/146C.c:10443; was _hitPrerequisiteCanApplyDrain):
+// living targets only.
 bool CanApplyDrain(const PrerequisiteTarget& target) {
   return CanApply(Effect::kSpiritDrain, target) && !IsUndead(target);
 }
 
-// decomp: BATTLE.PRG _hitPrerequisiteUnused0..2
-// (src/BATTLE/BATTLE.PRG/146C.c:10517, 10519, 10521). The original body is
-// `jr ra` alone, so it returns the dispatcher's v0: the slot's own non-zero
-// address (_canPerformAttack loads it into v0 for `jalr v0`). The hit passes.
+// decomp: BATTLE.PRG hitPrerequisiteUnused0..2
+// (src/BATTLE/BATTLE.PRG/146C.c:10452; was _hitPrerequisiteUnused0, 10519,
+// 10521). The original body is `jr ra` alone, so it returns the dispatcher's
+// v0: the slot's own non-zero address (_canPerformAttack loads it into v0 for
+// `jalr v0`). The hit passes.
 bool IgnoreAttackPrerequisite(const PrerequisiteTarget& /*target*/) {
   return true;
 }
@@ -332,7 +348,8 @@ PrerequisiteRule AttackPrerequisiteRule(int rule) {
   return kRules[static_cast<std::size_t>(rule)];
 }
 
-// decomp: BATTLE.PRG _canPerformAttack (src/BATTLE/BATTLE.PRG/146C.c:10523)
+// decomp: BATTLE.PRG canPerformAttack (src/BATTLE/BATTLE.PRG/146C.c:10458; was
+// _canPerformAttack)
 bool CheckActionHitPrerequisite(const HitPrerequisiteRequest& request,
                                 const PrerequisiteTarget& target) {
   if (request.hit_number != 0 && request.rule == kFollowUpRule &&

@@ -59,8 +59,8 @@ constexpr unsigned kWeaponPpAction = 4;
 constexpr unsigned kRememberedTargetShift = 24;
 constexpr std::uint32_t kRememberedTileMask = 0xFFFFFF;
 
-// decomp: BATTLE.PRG statusScores (74088.c:567); the 32 signed bytes at
-// 0x80069BD0 in BATTLE.PRG, one weight per status bit.
+// decomp: BATTLE.PRG statusScores (src/BATTLE/BATTLE.PRG/74088.c:107); the 32
+// signed bytes at 0x80069BD0 in BATTLE.PRG, one weight per status bit.
 constexpr std::array<std::int8_t, 32> kStatusScores = {
     -51, -39, -39, -39, -26, -51, 50, -13, 12, -13, 12, 25, -51, -26, -45, -26,
     -39, 76,  19,  -13, 12,  12,  12, 12,  12, 12,  12, 12, 12,  0,   0,   0,
@@ -448,7 +448,8 @@ bool IsActionUsable(const ActionCost& action, const ActorResources& resources) {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800DC888 (74088.c:473), original134MIPS.
+// decomp: BATTLE.PRG func_800DC888 (src/BATTLE/BATTLE.PRG/74088.c:17),
+// original134MIPS.
 bool ApplySimulatedActionResults(
     std::span<ActorCondition> conditions, const ActionCost& action,
     const SimulatedActorEffect& performer,
@@ -474,7 +475,8 @@ bool ApplySimulatedActionResults(
   return true;
 }
 
-// decomp: BATTLE.PRG func_800DCAA0 (74088.c:513), original78MIPS.
+// decomp: BATTLE.PRG func_800DCAA0 (src/BATTLE/BATTLE.PRG/74088.c:58),
+// original78MIPS.
 bool SimulateActionCandidate(CandidateSimulationHost& host,
                              const ActionCandidate& candidate,
                              CandidateSimulationMode mode) {
@@ -504,7 +506,8 @@ bool SimulateActionCandidate(CandidateSimulationHost& host,
   return true;
 }
 
-// decomp: BATTLE.PRG func_800DCBD8 (74088.c:539), original47MIPS.
+// decomp: BATTLE.PRG func_800DCBD8 (src/BATTLE/BATTLE.PRG/74088.c:84),
+// original47MIPS.
 void UpdateCandidateHitWeight(ActionCandidate& candidate,
                               std::span<const SimulatedActorEffect> targets) {
   const auto found = std::find_if(
@@ -516,7 +519,8 @@ void UpdateCandidateHitWeight(ActionCandidate& candidate,
                       (threshold >> kHitWeightSmallShift));
 }
 
-// decomp: BATTLE.PRG func_800DCC94 (74088.c:620), original219MIPS.
+// decomp: BATTLE.PRG func_800DCC94 (src/BATTLE/BATTLE.PRG/74088.c:164),
+// original219MIPS.
 bool EvaluateActionCandidate(ActionCandidate& candidate,
                              const CandidateEvaluationOptions& options,
                              CandidateEvaluationHost& host) {
@@ -573,8 +577,9 @@ bool EvaluateActionCandidate(ActionCandidate& candidate,
   return true;
 }
 
-// decomp: BATTLE.PRG _getStatusScore (74088.c:565), inlined in func_800DCC94
-// (0x800DCDD4-0x800DCF5C, original99MIPS with the three ratios).
+// decomp: BATTLE.PRG getStatusScore (src/BATTLE/BATTLE.PRG/74088.c:105; was
+// _getStatusScore), inlined in func_800DCC94 (0x800DCDD4-0x800DCF5C,
+// original99MIPS with the three ratios).
 std::int32_t ActorStatusConditionScore(const ActorCondition& condition,
                                        bool action_cost_enabled) {
   std::int32_t score = 0;
@@ -591,23 +596,27 @@ std::int32_t ActorStatusConditionScore(const ActorCondition& condition,
   return score;
 }
 
-// decomp: BATTLE.PRG _getHpRatio (74088.c:590), inlined in func_800DCC94.
+// decomp: BATTLE.PRG getHpRatio (src/BATTLE/BATTLE.PRG/74088.c:131; was
+// _getHpRatio), inlined in func_800DCC94.
 std::int32_t ActorHpRatio(const ActorCondition& condition) {
   return ConditionRatio(condition.hp, condition.max_hp);
 }
 
-// decomp: BATTLE.PRG _getMpRatio (74088.c:598), inlined in func_800DCC94.
+// decomp: BATTLE.PRG getMpRatio (src/BATTLE/BATTLE.PRG/74088.c:140; was
+// _getMpRatio), inlined in func_800DCC94.
 std::int32_t ActorMpRatio(const ActorCondition& condition) {
   return ConditionRatio(condition.mp, condition.max_mp);
 }
 
-// decomp: BATTLE.PRG _getExtraRatio (74088.c:606), inlined in func_800DCC94.
+// decomp: BATTLE.PRG getExtraRatio (src/BATTLE/BATTLE.PRG/74088.c:149; was
+// _getExtraRatio), inlined in func_800DCC94.
 std::int32_t ActorEquipmentDpRatio(const ActorCondition& condition) {
   return ConditionRatio(condition.weapon_dp, condition.weapon_max_dp) +
          ConditionRatio(condition.shield_dp, condition.shield_max_dp);
 }
 
-// decomp: BATTLE.PRG func_800D85D8 (6FC00.c:515), original132MIPS.
+// decomp: BATTLE.PRG func_800D85D8 (src/BATTLE/BATTLE.PRG/6FC00.c:96),
+// original132MIPS.
 std::optional<bool> RefreshActionCandidateReadiness(
     CandidateReadinessHost& host) {
   for (std::size_t rank = 0;; ++rank) {
@@ -730,7 +739,8 @@ void ActionCandidate::SetRange(unsigned range) {
       WithField(words_[kOptionWord], kRangeShift, kRangeBits, range);
 }
 
-// decomp: func_800DD604 (74088.c:899), 114MIPS at 800DD604-800DD7C8.
+// decomp: func_800DD604 (src/BATTLE/BATTLE.PRG/74088.c:368), 114MIPS at
+// 800DD604-800DD7C8.
 bool EnumerateActionCandidates(std::uint16_t readiness_threshold,
                                CandidateEnumerationHost& host) {
   ActionCandidate baseline;
@@ -867,7 +877,7 @@ bool SelectFallbackAction(ActionCandidate& choice, FallbackActionHost& host) {
   return true;
 }
 
-// decomp: func_800E4C8C (src/BATTLE/BATTLE.PRG/7BDD4.s:585).
+// decomp: func_800E4C8C (src/BATTLE/BATTLE.PRG/6E4CCShared.h:494).
 // C reference: rood-boi battle_movement.c:1749, revision e59320ca (CC0-1.0).
 std::optional<bool> RememberAiActionTarget(TargetMemoryHost& host) {
   const int count = host.CandidateCount();
@@ -893,18 +903,18 @@ std::optional<bool> RememberAiActionTarget(TargetMemoryHost& host) {
   return true;
 }
 
-// decomp: func_800E4CE8 (src/BATTLE/BATTLE.PRG/7C4E8.c:407).
+// decomp: func_800E4CE8 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:495).
 void ForgetAiActionTarget(TargetMemoryHost& host) {
   host.SetPreviousTile(kForgottenTargetTile);
 }
 
-// decomp: func_800DC2E0 (src/BATTLE/BATTLE.PRG/73AE0.s:9).
+// decomp: func_800DC2E0 (src/BATTLE/BATTLE.PRG/7399C.s:97).
 void CopyActionCandidate(ActionCandidate& destination,
                          const ActionCandidate& source) {
   destination = source;
 }
 
-// decomp: func_800DC30C (src/BATTLE/BATTLE.PRG/73B0C.s:9).
+// decomp: func_800DC30C (src/BATTLE/BATTLE.PRG/7399C.s:111).
 std::optional<std::int16_t> ApplySimulatedStatDelta(std::int16_t value,
                                                     std::int16_t maximum,
                                                     std::int32_t delta,
@@ -922,7 +932,7 @@ std::optional<std::int16_t> ApplySimulatedStatDelta(std::int16_t value,
   return static_cast<std::int16_t>(next);
 }
 
-// decomp: func_800DC344 (src/BATTLE/BATTLE.PRG/73B0C.s:30).
+// decomp: func_800DC344 (src/BATTLE/BATTLE.PRG/7399C.s:130).
 std::optional<bool> AppendActionCandidate(CandidateList& list,
                                           const ActionCandidate& candidate) {
   const int count = list.Count();
@@ -941,7 +951,7 @@ std::optional<bool> AppendActionCandidate(CandidateList& list,
   return true;
 }
 
-// decomp: func_800DC3CC (src/BATTLE/BATTLE.PRG/73B0C.s:70);
+// decomp: func_800DC3CC (src/BATTLE/BATTLE.PRG/7399C.s:167);
 // partition: func_800E6974 / L800E6958 (src/BATTLE/BATTLE.PRG/7E05C.s:114).
 // Equal scores must retain the original midpoint partition's tie ordering.
 bool SortActionCandidates(std::span<RankedCandidate> ranking) {
@@ -966,7 +976,7 @@ bool SortActionCandidates(std::span<RankedCandidate> ranking) {
   return true;
 }
 
-// decomp: func_800DC3E8 (src/BATTLE/BATTLE.PRG/73B0C.s:81).
+// decomp: func_800DC3E8 (src/BATTLE/BATTLE.PRG/7399C.s:177).
 void CopyPlanningActorStats(
     std::span<const std::byte, kActorStatsRecordBytes> source,
     std::span<std::byte, kActorStatsRecordBytes> destination) {
@@ -977,7 +987,8 @@ void CopyPlanningActorStats(
   }
 }
 
-// decomp: snapshotActorStats (74088.c:1295), original28MIPS in func_800DE3E4.
+// decomp: snapshotActorStats (src/BATTLE/BATTLE.PRG/74088.c:690),
+// original28MIPS in func_800DE3E4.
 bool SnapshotPlanningActorStats(PlanningStatsSnapshot& snapshot,
                                 std::span<const PlanningActorStats> actors) {
   if (!ValidPlanningStatsRows(snapshot, actors)) {
@@ -994,7 +1005,8 @@ bool SnapshotPlanningActorStats(PlanningStatsSnapshot& snapshot,
   return true;
 }
 
-// decomp: restoreActorStats (74088.c:1309), original25MIPS in func_800DE3E4.
+// decomp: restoreActorStats (src/BATTLE/BATTLE.PRG/74088.c:707), original25MIPS
+// in func_800DE3E4.
 bool RestorePlanningActorStats(const PlanningStatsSnapshot& snapshot,
                                std::span<const PlanningActorStats> actors) {
   if (!ValidPlanningStatsRows(snapshot, actors) ||
@@ -1013,7 +1025,7 @@ bool RestorePlanningActorStats(const PlanningStatsSnapshot& snapshot,
   return true;
 }
 
-// decomp: func_800E4CF4 (src/BATTLE/BATTLE.PRG/7C4F4.s:10).
+// decomp: func_800E4CF4 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:496).
 std::optional<bool> CanAiActionAffectActor(const ActionTargetingHost& host,
                                            const ActionCandidate& candidate,
                                            int actor_id) {
@@ -1049,7 +1061,7 @@ std::optional<bool> CanAiActionAffectActor(const ActionTargetingHost& host,
   return !(host.SlotExcludesSelf(row, column) && actor_id == host.ActorId());
 }
 
-// decomp: func_800E4DF8 (src/BATTLE/BATTLE.PRG/7C4F4.s:82).
+// decomp: func_800E4DF8 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:497).
 std::optional<bool> RefreshAiActionUsability(ActionUsabilityHost& host, int row,
                                              int column) {
   if (!IsSlot(row, column)) {
@@ -1070,7 +1082,7 @@ std::optional<bool> RefreshAiActionUsability(ActionUsabilityHost& host, int row,
   return usable;
 }
 
-// decomp: func_800E4F14 (src/BATTLE/BATTLE.PRG/7C4F4.s:162).
+// decomp: func_800E4F14 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:498).
 ActorResourceConditions RefreshAiResourceRestrictions(
     const ActorResources& resources, std::uint8_t action_cost_threshold) {
   const unsigned hp = resources.hp;
@@ -1087,7 +1099,7 @@ ActorResourceConditions RefreshAiResourceRestrictions(
   };
 }
 
-// decomp: func_800E5710 (src/BATTLE/BATTLE.PRG/7CD68.c:526).
+// decomp: func_800E5710 (src/BATTLE/BATTLE.PRG/7CD68.c:131).
 bool BuildAiActionMetadata(ActionMetadataHost& host) {
   if (host.ActorId() == 0) {
     host.SetActionCostThreshold(kPlayerActionCostThreshold);

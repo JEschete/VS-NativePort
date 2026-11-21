@@ -91,20 +91,21 @@ class HudShortcutWorld {
 
 // Packed coordinate arithmetic carries and wraps across the two halfwords.
 // The maximum-number renderer's returned pen is consumed unchanged.
-// decomp: F01354 _renderStatBar (src/BATTLE/BATTLE.PRG/5BF94.c:3088).
+// decomp: F01354 renderStatBar (src/BATTLE/BATTLE.PRG/5BF94.c:2639; was
+// _renderStatBar).
 bool DrawHudStatGauge(HudGaugeWorld& world, const HudGaugeValue& gauge);
 // Suppressed icons do not require a texture or a render target. Negative and
 // overshooting slides retain the original packed widths, without clamping.
-// decomp: F01355 func_800C9CB4 (src/BATTLE/BATTLE.PRG/5BF94.c:3112).
+// decomp: F01355 func_800C9CB4 (src/BATTLE/BATTLE.PRG/5BF94.c:2663).
 bool DrawSlidingStatusIcon(HudStatusIconWorld& world,
                            const SlidingHudStatusIcon& icon);
 // Restrictions are sampled first, including for a noncanonical shortcut.
 // Only the selected unlock service is called.
-// decomp: F01358 func_800C9EB8 (src/BATTLE/BATTLE.PRG/5BF94.c:3197).
+// decomp: F01358 func_800C9EB8 (src/BATTLE/BATTLE.PRG/5BF94.c:2748).
 std::optional<HudShortcutTone> ShortcutIconBrightness(HudShortcutWorld& world,
                                                       std::int32_t shortcut);
 // Brightness includes its original semi-transparency flag.
-// decomp: F01360 func_800C9F98 (src/BATTLE/BATTLE.PRG/5BF94.c:3241).
+// decomp: F01360 func_800C9F98 (src/BATTLE/BATTLE.PRG/5BF94.c:2792).
 bool DrawShortcutButtonMarker(HudSpriteWorld& world, std::int32_t position,
                               std::int32_t brightness_transparency);
 }  // namespace VS::Battle

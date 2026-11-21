@@ -79,7 +79,7 @@ StreamVoiceGains VoiceGains(
 }  // namespace
 
 // decomp: SLUS_010.40 Sound_Cutscene_FindFreeVoicePair
-// (src/SLUS_010.40/25AC.c:6254)
+// (src/SLUS_010.40/25AC.c:6394)
 std::optional<std::int32_t> FindFreeVoicePair(StreamBufferHost& host) {
   std::uint32_t busy = 0;
   do {
@@ -96,7 +96,8 @@ std::optional<std::int32_t> FindFreeVoicePair(StreamBufferHost& host) {
   return std::nullopt;
 }
 
-// decomp: SLUS_010.40 func_8001CE60 (src/SLUS_010.40/25AC.c:6284)
+// decomp: SLUS_010.40 Sound_Cutscene_OnFirstHalfTransferred
+// (src/SLUS_010.40/25AC.c:6422; was func_8001CE60)
 StreamBufferStatus UploadSecondMonoBuffer(StreamBufferHost& host) {
   const StreamBufferState state = host.State();
   if (!ChunkFits(host, state.chunk, std::size_t{2} * kMonoBufferBytes)) {
@@ -109,7 +110,7 @@ StreamBufferStatus UploadSecondMonoBuffer(StreamBufferHost& host) {
   return StreamBufferStatus::kApplied;
 }
 
-// decomp: SLUS_010.40 Sound_Cutscene_InitVoice (src/SLUS_010.40/25AC.c:6358)
+// decomp: SLUS_010.40 Sound_Cutscene_InitVoice (src/SLUS_010.40/25AC.c:6495)
 StreamBufferStatus InitializeStreamVoice(StreamBufferHost& host,
                                          const StreamVoiceSetup& setup) {
   if (!ValidVoice(setup.voice)) return StreamBufferStatus::kInvalidVoice;
@@ -123,7 +124,7 @@ StreamBufferStatus InitializeStreamVoice(StreamBufferHost& host,
 }
 
 // decomp: SLUS_010.40 Sound_Cutscene_BeginPlayback
-// (src/SLUS_010.40/25AC.c:6404)
+// (src/SLUS_010.40/25AC.c:6541)
 StreamBufferStatus BeginStreamPlayback(StreamBufferHost& host,
                                        const StreamPlaybackStart& start) {
   StreamBufferState state = host.State();
@@ -151,7 +152,7 @@ StreamBufferStatus BeginStreamPlayback(StreamBufferHost& host,
 }
 
 // decomp: SLUS_010.40 Sound_Cutscene_OnInitialTransferComplete
-// (src/SLUS_010.40/25AC.c:6426)
+// (src/SLUS_010.40/25AC.c:6563)
 StreamBufferStatus BeginMonoPlayback(StreamBufferHost& host) {
   const std::int32_t voice = host.State().voice;
   if (!ValidPair(voice)) return StreamBufferStatus::kInvalidVoice;
@@ -166,7 +167,8 @@ StreamBufferStatus BeginMonoPlayback(StreamBufferHost& host) {
                                     .next = StreamRefill::kMonoFirst});
 }
 
-// decomp: SLUS_010.40 func_8001D3D4 (src/SLUS_010.40/25AC.c:6436)
+// decomp: SLUS_010.40 Sound_Cutscene_OnInitialTransferCompleteStereo
+// (src/SLUS_010.40/25AC.c:6573; was func_8001D3D4)
 StreamBufferStatus BeginStereoPlayback(StreamBufferHost& host) {
   const std::int32_t voice = host.State().voice;
   if (!ValidPair(voice)) return StreamBufferStatus::kInvalidVoice;
@@ -184,7 +186,7 @@ StreamBufferStatus BeginStereoPlayback(StreamBufferHost& host) {
 }
 
 // decomp: SLUS_010.40 Sound_Cutscene_LoadNextBuffer
-// (src/SLUS_010.40/25AC.c:6444)
+// (src/SLUS_010.40/25AC.c:6581)
 StreamBufferStatus RefillStreamBuffer(StreamBufferHost& host,
                                       const StreamRefillBuffers& refill) {
   StreamBufferState state = host.State();
@@ -222,7 +224,7 @@ StreamBufferStatus RefillStreamBuffer(StreamBufferHost& host,
 }
 
 // decomp: SLUS_010.40 Sound_Cutscene_OnBufferAComplete
-// (src/SLUS_010.40/25AC.c:6477)
+// (src/SLUS_010.40/25AC.c:6614)
 StreamBufferStatus RefillMonoFirstBuffer(StreamBufferHost& host) {
   return RefillStreamBuffer(host, {.left_address = kFirstBufferAddress,
                                    .right_address = kFirstBufferAddress,
@@ -231,7 +233,7 @@ StreamBufferStatus RefillMonoFirstBuffer(StreamBufferHost& host) {
 }
 
 // decomp: SLUS_010.40 Sound_Cutscene_OnBufferBComplete
-// (src/SLUS_010.40/25AC.c:6483)
+// (src/SLUS_010.40/25AC.c:6620)
 StreamBufferStatus RefillMonoSecondBuffer(StreamBufferHost& host) {
   return RefillStreamBuffer(host, {.left_address = kSecondBufferAddress,
                                    .right_address = kSecondBufferAddress,
@@ -239,7 +241,8 @@ StreamBufferStatus RefillMonoSecondBuffer(StreamBufferHost& host) {
                                    .next = StreamRefill::kMonoFirst});
 }
 
-// decomp: SLUS_010.40 func_8001D5E4 (src/SLUS_010.40/25AC.c:6491)
+// decomp: SLUS_010.40 Sound_Cutscene_OnStereoBufferAComplete
+// (src/SLUS_010.40/25AC.c:6628; was func_8001D5E4)
 StreamBufferStatus RefillStereoFirstBuffer(StreamBufferHost& host) {
   return RefillStreamBuffer(host, {.left_address = kFirstBufferAddress,
                                    .right_address = kFirstRightBufferAddress,
@@ -247,7 +250,8 @@ StreamBufferStatus RefillStereoFirstBuffer(StreamBufferHost& host) {
                                    .next = StreamRefill::kStereoSecond});
 }
 
-// decomp: SLUS_010.40 func_8001D614 (src/SLUS_010.40/25AC.c:6496)
+// decomp: SLUS_010.40 Sound_Cutscene_OnStereoBufferBComplete
+// (src/SLUS_010.40/25AC.c:6634; was func_8001D614)
 StreamBufferStatus RefillStereoSecondBuffer(StreamBufferHost& host) {
   return RefillStreamBuffer(host, {.left_address = kSecondBufferAddress,
                                    .right_address = kSecondRightBufferAddress,

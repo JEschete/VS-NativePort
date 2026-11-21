@@ -139,31 +139,32 @@ void SetLivePanelVisibility(char visibility) {
       static_cast<std::uint8_t>(panels.status_command);
 }
 
-// decomp: _itemPaging (src/MENU/items0.h:15-41).
+// decomp: itemPaging (src/MENU/items0.h:15-41; was _itemPaging).
 int PollLiveDetailsPaging(int category, int page) {
   LiveWorld world(category);
   return PollDetailsPaging(world, DetailPage{page}).index;
 }
 
-// decomp: _startMenuTransition (src/MENU/items0.h:87-102).
+// decomp: startMenuTransition (src/MENU/items0.h:87-102; was
+// _startMenuTransition).
 void BeginLiveDetailsTransition(int selected_row) {
   LiveWorld world;
   BeginDetailsTransition(world, DetailRowId{selected_row});
 }
 
-// decomp: _initMenuLayout (src/MENU/items1.h:21-30).
+// decomp: initMenuLayout (src/MENU/items1.h:26-35; was _initMenuLayout).
 void InitializeLiveDetailsLayout(int selected_row, int stat_pages) {
   LiveWorld world;
   InitializeDetailsLayout(world, DetailRowId{selected_row}, stat_pages);
 }
 
-// decomp: _getItemIndex (src/MENU/items1.h:54-61).
+// decomp: getItemIndex (src/MENU/items1.h:59-66; was _getItemIndex).
 int SelectLiveDetailsItem(int category, int page) {
   LiveWorld world(category);
   return SelectDetailsItem(world, DetailPage{page}).one_based;
 }
 
-// decomp: _exitStatusView (src/MENU/items1.h:74-88).
+// decomp: exitStatusView (src/MENU/items1.h:79-93; was _exitStatusView).
 void ExitLiveDetailsView(int clear_dp_pp) {
   LiveWorld world;
   ExitDetailsView(world, clear_dp_pp != 0);

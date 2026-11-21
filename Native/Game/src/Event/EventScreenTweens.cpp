@@ -179,7 +179,8 @@ std::optional<std::size_t> ScreenTransformLength(std::uint8_t opcode) noexcept {
   return std::nullopt;
 }
 
-// decomp: BATTLE.PRG func_800BB450 (F01198, 4A0A8.c:2793).
+// decomp: BATTLE.PRG vs_battle_script_E1 (F01198,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:3442; was func_800BB450).
 bool CommandSetScreenCapture(ScriptCommand command,
                              EventScreenEffectPort& screen) {
   if (command.size() < kSetScreenCaptureLength) return false;
@@ -187,7 +188,8 @@ bool CommandSetScreenCapture(ScriptCommand command,
   return true;
 }
 
-// decomp: BATTLE.PRG func_800BD444 (F01226, 4A0A8.c:3601).
+// decomp: BATTLE.PRG vs_battle_script_E2_E3_camera (F01226,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:4251; was func_800BD444).
 bool CommandTweenCameraRoll(ScriptCommand command, EventAngleTween& camera_roll,
                             EventAngleTween& screen_roll) {
   if (command.size() < kTweenRollLength) return false;
@@ -224,7 +226,8 @@ bool CommandTweenCameraRoll(ScriptCommand command, EventAngleTween& camera_roll,
   return true;
 }
 
-// decomp: BATTLE.PRG func_800BD57C (F01227, 4A0A8.c:3647).
+// decomp: BATTLE.PRG func_800BD57C (F01227,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:4297).
 void UpdateEventAngleTween(EventAngleTween& tween, std::int32_t tick_speed,
                            EventTweenEasing& easing) {
   if (tween.duration <= 0) return;
@@ -236,7 +239,8 @@ void UpdateEventAngleTween(EventAngleTween& tween, std::int32_t tick_speed,
   tween.changed = 1;
 }
 
-// decomp: BATTLE.PRG func_800BD6C4 (F01229, 4A0A8.c:3691).
+// decomp: BATTLE.PRG vs_battle_script_B9_BA_BF_E4_E5_E6_E7_ED (F01229,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:4341; was func_800BD6C4).
 std::optional<std::int32_t> CommandScreenTransform(
     ScriptCommand command, EventScreenTweens& tweens,
     EventScreenEffectPort& screen) {
@@ -272,7 +276,8 @@ std::optional<std::int32_t> CommandScreenTransform(
   return 0;
 }
 
-// decomp: BATTLE.PRG func_800BDBB4 (F01231, 4A0A8.c:3838).
+// decomp: BATTLE.PRG func_800BDBB4 (F01231,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:4488).
 std::optional<std::int32_t> UpdateEventTripleTween(EventScreenTween& tween,
                                                    std::int32_t tick_speed,
                                                    EventTweenEasing& easing) {
@@ -289,7 +294,8 @@ std::optional<std::int32_t> UpdateEventTripleTween(EventScreenTween& tween,
   return eased;
 }
 
-// decomp: BATTLE.PRG func_800BDAB4 (F01230, 4A0A8.c:3812).
+// decomp: BATTLE.PRG func_800BDAB4 (F01230,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:4462).
 void UpdateEventScreenTransforms(EventScreenTweens& tweens,
                                  std::int32_t tick_speed,
                                  EventTweenEasing& easing,

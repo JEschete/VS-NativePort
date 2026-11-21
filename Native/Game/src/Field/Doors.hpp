@@ -19,7 +19,7 @@ struct DoorFlagIdWord {
 static_assert(sizeof(DoorFlagIdWord) == 0x2);
 
 // decomp: _mpdRoomDoorSection2, upstream vs_TargetTile
-// (src/SLUS_010.40/zoneState.h:30-35)
+// (src/SLUS_010.40/zoneState.h:31-36)
 struct DoorTileLocation {
   std::uint16_t tile_x : 5;
   std::uint16_t tile_z : 5;
@@ -48,7 +48,8 @@ extern MpdDoorRecord pendingDestinationDoor;
 // decomp: vs_battle_doorEntered (src/BATTLE/BATTLE.PRG/mpd.h:256)
 extern std::int16_t enteredDoorId;
 // decomp: D_800F1CC8 (src/BATTLE/BATTLE.PRG/146C.h:52). The original also
-// reads its tile location halfword as D_800F1CCA (146C.c:360, 16396).
+// reads its tile location halfword as D_800F1CCA
+// (src/BATTLE/BATTLE.PRG/146C.c:360, 16396).
 extern MpdDoorRecord entranceDoorRecord;
 
 }  // namespace VS::Field

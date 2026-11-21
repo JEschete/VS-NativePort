@@ -316,12 +316,12 @@ void ApplyWeatherIntensity(WeatherHost& host, RoomWeatherState& state) {
   state.intensity_scale = Half(scale + (scale >> 1) + (scale >> 2));
 }
 
-// decomp: BATTLE.PRG func_80091314 (src/BATTLE/BATTLE.PRG/2842C.c:428)
+// decomp: BATTLE.PRG func_80091314 (src/BATTLE/BATTLE.PRG/2842C.c:414)
 void SetWeatherVariationEnabled(RoomWeatherState& state, std::int32_t enabled) {
   state.variation_enabled = static_cast<std::uint8_t>(enabled);
 }
 
-// decomp: BATTLE.PRG func_80091320 (src/BATTLE/BATTLE.PRG/2842C.c:430)
+// decomp: BATTLE.PRG func_80091320 (src/BATTLE/BATTLE.PRG/2842C.c:416)
 void SetWeatherIntensity(WeatherHost& host, RoomWeatherState& state,
                          std::int32_t intensity) {
   state.intensity = Half(intensity);
@@ -329,7 +329,7 @@ void SetWeatherIntensity(WeatherHost& host, RoomWeatherState& state,
   host.RecalculateWeatherVelocity();
 }
 
-// decomp: BATTLE.PRG func_8009134C (src/BATTLE/BATTLE.PRG/2842C.c:437)
+// decomp: BATTLE.PRG func_8009134C (src/BATTLE/BATTLE.PRG/2842C.c:423)
 void SetWeatherWindAngles(WeatherHost& host, RoomWeatherState& state,
                           std::int32_t azimuth, std::int32_t elevation) {
   state.wind_direction = Half(azimuth);
@@ -337,7 +337,7 @@ void SetWeatherWindAngles(WeatherHost& host, RoomWeatherState& state,
   host.RecalculateWeatherVelocity();
 }
 
-// decomp: BATTLE.PRG func_80091378 (src/BATTLE/BATTLE.PRG/2842C.c:444)
+// decomp: BATTLE.PRG func_80091378 (src/BATTLE/BATTLE.PRG/2842C.c:430)
 void ReleaseWeatherParticles(WeatherHost& host, RoomWeatherState& state) {
   state.particle_count = 0;
   state.particle_capacity = 0;
@@ -366,7 +366,7 @@ std::int32_t SetWeatherAmbientSound(WeatherHost& host, RoomWeatherState& state,
   return previous;
 }
 
-// decomp: BATTLE.PRG func_80091468 (src/BATTLE/BATTLE.PRG/2842C.c:472)
+// decomp: BATTLE.PRG func_80091468 (src/BATTLE/BATTLE.PRG/2842C.c:458)
 void SetRoomBackgroundOffset(RoomBackgroundState& state, std::int32_t offset_x,
                              std::int32_t offset_y) {
   state.offset_x = Half(offset_x);
@@ -428,7 +428,7 @@ void DrawRoomBackgroundTiles(BackgroundHost& host,
                 .height = kScreenHeight});
 }
 
-// decomp: BATTLE.PRG func_800918E8 (src/BATTLE/BATTLE.PRG/2842C.c:539)
+// decomp: BATTLE.PRG func_800918E8 (src/BATTLE/BATTLE.PRG/2842C.c:525)
 void DuckWeatherAmbientSound(WeatherHost& host, const RoomWeatherState& state,
                              std::int32_t ducked) {
   if (state.ambient_sound_id < 0) return;

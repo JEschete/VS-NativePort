@@ -199,7 +199,8 @@ class TransferWorld {
                                  std::int32_t count) = 0;
 };
 
-// decomp: func_80107490's statics (234.c:2395-2399) and D_80109A60.
+// decomp: func_80107490's statics (src/MENU/MENUD.PRG/234.c:2395-2399) and
+// D_80109A60.
 struct ItemListState {
   std::uint8_t step = 0;
   bool category_empty = false;
@@ -230,24 +231,26 @@ struct WeaponRow {
   Items::ItemsStatus status{};
 };
 
-// decomp: MENUD.PRG _setWeaponUi (234.c:810)
+// decomp: MENUD.PRG setWeaponUi (src/MENU/MENUD.PRG/234.c:811; was
+// _setWeaponUi)
 [[nodiscard]] WeaponRow BuildWeaponRow(Framework::ItemTextHost& host,
                                        const Items::InventoryWeapon& weapon,
                                        Items::ContainerWorld& records,
                                        std::span<std::uint8_t> buffer);
-// decomp: MENUD.PRG _setShieldUi (234.c:820)
+// decomp: MENUD.PRG setShieldUi (src/MENU/MENUD.PRG/234.c:821; was
+// _setShieldUi)
 [[nodiscard]] Framework::ItemRowText BuildShieldRow(
     Framework::ItemTextHost& host, const Items::InventoryShield& shield,
     Items::ContainerWorld& records, std::span<std::uint8_t> buffer);
-// decomp: MENUD.PRG func_80107490 (234.c:2393)
+// decomp: MENUD.PRG func_80107490 (src/MENU/MENUD.PRG/234.c:2394)
 [[nodiscard]] std::int32_t UpdateItemList(std::int32_t direction,
                                           ItemListState& state,
                                           TransferWorld& world);
-// decomp: MENUD.PRG func_801089BC (234.c:3037)
+// decomp: MENUD.PRG func_801089BC (src/MENU/MENUD.PRG/234.c:3040)
 [[nodiscard]] std::int32_t UpdateTransferDirection(
     std::int32_t initialize, TransferDirectionState& state,
     TransferWorld& world);
-// decomp: MENUD.PRG vs_menuD_exec (234.c:3130)
+// decomp: MENUD.PRG vs_menuD_exec (src/MENU/MENUD.PRG/234.c:3133)
 [[nodiscard]] std::int32_t UpdateScreen(std::uint8_t& step, ScreenState& state,
                                         TransferWorld& world);
 }  // namespace VS::Menu::container

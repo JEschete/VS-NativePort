@@ -316,7 +316,8 @@ void TakeInput(EquipmentRowsState& state, EquipmentRowsHost& host,
 }
 }  // namespace
 
-// decomp: MENU3.PRG _populateMenuRows (src/MENU/MENU3.PRG/16C.c:39)
+// decomp: MENU3.PRG populateMenuRows (src/MENU/MENU3.PRG/16C.c:38; was
+// _populateMenuRows)
 bool CreateEquipmentRows(EquipmentRowsState& state, EquipmentRowsHost& host,
                          std::span<const EquipmentRowSource> rows) {
   if (rows.empty() || rows.size() > kEquipmentRowCapacity ||
@@ -348,12 +349,14 @@ bool CreateEquipmentRows(EquipmentRowsState& state, EquipmentRowsHost& host,
   return true;
 }
 
-// decomp: MENU3.PRG _getSelectedItemRow (src/MENU/MENU3.PRG/16C.c:101)
+// decomp: MENU3.PRG getSelectedItemRow (src/MENU/MENU3.PRG/16C.c:100; was
+// _getSelectedItemRow)
 std::int32_t SelectedEquipmentRow(const EquipmentRowsState& state) {
   return state.text.data() != nullptr ? -1 : state.selected_row;
 }
 
-// decomp: MENU3.PRG _processEquipSubMenu (src/MENU/MENU3.PRG/16C.c:111)
+// decomp: MENU3.PRG processEquipSubMenu (src/MENU/MENU3.PRG/16C.c:107; was
+// _processEquipSubMenu)
 bool UpdateEquipmentChoices(EquipmentRowsState& state, EquipmentRowsHost& host,
                             const EquipmentChoiceInput& input,
                             std::int32_t has_sfx) {
@@ -386,7 +389,8 @@ bool UpdateEquipmentChoices(EquipmentRowsState& state, EquipmentRowsHost& host,
   return true;
 }
 
-// decomp: MENU3.PRG _populateUiAccessory (src/MENU/MENU3.PRG/16C.c:311)
+// decomp: MENU3.PRG populateUiAccessory (src/MENU/MENU3.PRG/16C.c:306; was
+// _populateUiAccessory)
 bool SetAccessoryPreviewStats(AccessoryPreviewHost& host,
                               std::int32_t accessory) {
   if (accessory < 0 || (accessory != 0 && !host.HasAccessory(accessory - 1))) {
@@ -417,7 +421,8 @@ bool SetAccessoryPreviewStats(AccessoryPreviewHost& host,
   return true;
 }
 
-// decomp: MENU3.PRG _loadObjectData (src/MENU/MENU3.PRG/68C4.c:12)
+// decomp: MENU3.PRG loadObjectData (src/MENU/MENU3.PRG/68C4.c:13; was
+// _loadObjectData)
 ModelReload ReloadEquipmentModels(std::uint8_t& step, EquipmentModelHost& host,
                                   const EquipmentModelChoice& choice) {
   if (!host.HasPreviewActor()) {
@@ -486,7 +491,7 @@ ModelReload ReloadEquipmentModels(std::uint8_t& step, EquipmentModelHost& host,
   return ModelReload::kLoading;
 }
 
-// decomp: MENU3.PRG func_80109320 (src/MENU/MENU3.PRG/68C4.c:87)
+// decomp: MENU3.PRG func_80109320 (src/MENU/MENU3.PRG/68C4.c:90)
 bool IsTwoHandedWeapon(std::int32_t category) {
   if (category < kFirstTwoHandedCategory) {
     return false;
@@ -497,7 +502,8 @@ bool IsTwoHandedWeapon(std::int32_t category) {
   return (category & 1) != 0;
 }
 
-// decomp: MENU3.PRG _populateDataSlot (src/MENU/MENU3.PRG/68C4.c:100)
+// decomp: MENU3.PRG populateDataSlot (src/MENU/MENU3.PRG/68C4.c:103; was
+// _populateDataSlot)
 bool QueueEquipmentModel(EquipmentModelHost& host, std::int32_t model_id,
                          std::int32_t material) {
   if (model_id == 0) {

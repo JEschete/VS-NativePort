@@ -14,8 +14,9 @@ namespace VS::Battle::Ai {
 namespace {
 constexpr unsigned kSelfClassification = 2;
 constexpr std::uint8_t kNoncombatCategory = 3;
-// decomp: BATTLE.PRG categories at 0x80069C0C (7E05C.s:857), indexed by the
-// source category and whether the target is a combatant other than Ashley.
+// decomp: BATTLE.PRG categories at 0x80069C0C
+// (src/BATTLE/BATTLE.PRG/7CD68.c:62), indexed by the source category and
+// whether the target is a combatant other than Ashley.
 using CategoryRow = std::array<std::uint8_t, 2>;
 using CategoryTable = std::array<CategoryRow, kRelationCategoryCount>;
 constexpr CategoryTable kClassByCategory{{{3, 2}, {1, 1}, {1, 2}, {2, 3}}};
@@ -252,7 +253,7 @@ bool ShareAllyHostility(ActorReactionHost& host,
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800E7370 (src/BATTLE/BATTLE.PRG/7E05C.s:857).
+// decomp: BATTLE.PRG func_800E7370 (src/BATTLE/BATTLE.PRG/7CD68.c:62).
 bool InitializeActorAiRelations(ActorRelationTable& actors, int actor) {
   std::uint32_t pending = Bit(actor);
   std::uint32_t visited = 0;
@@ -280,7 +281,7 @@ bool InitializeActorAiRelations(ActorRelationTable& actors, int actor) {
   return true;
 }
 
-// decomp: BATTLE.PRG func_800DC19C (src/BATTLE/BATTLE.PRG/7399C.s:11).
+// decomp: BATTLE.PRG func_800DC19C (src/BATTLE/BATTLE.PRG/7399C.s:6).
 void EndAshleyAlliance(AshleyAllianceActor& actor) {
   actor.SetReactionCount(0);
   if (!actor.AllianceActive()) return;
@@ -293,7 +294,7 @@ void EndAshleyAlliance(AshleyAllianceActor& actor) {
   actor.QueueReaction(kRecoveryCommand, kRecoveryRange);
 }
 
-// decomp: BATTLE.PRG func_800DC210 (src/BATTLE/BATTLE.PRG/7399C.s:43).
+// decomp: BATTLE.PRG func_800DC210 (src/BATTLE/BATTLE.PRG/7399C.s:38).
 void TryBeginAshleyAlliance(AshleyAllianceActor& actor, bool forced) {
   if (!forced) {
     if ((actor.Roll() & kRollMask) >= kFavorableThreshold) return;
@@ -319,7 +320,7 @@ SavedAshleyRelation DecodeSavedAshleyRelation(std::uint16_t options) {
   };
 }
 
-// decomp: BATTLE.PRG func_800E72D0 (src/BATTLE/BATTLE.PRG/7E05C.s:810).
+// decomp: BATTLE.PRG func_800E72D0 (src/BATTLE/BATTLE.PRG/7CD68.c:61).
 void ApplySavedActorAiRelations(SavedRelationActors& actors) {
   for (const std::uint8_t actor : actors.RoomActors()) {
     const std::int16_t options = actors.SavedOptions(actor);
@@ -331,7 +332,7 @@ void ApplySavedActorAiRelations(SavedRelationActors& actors) {
   }
 }
 
-// decomp: BATTLE.PRG func_800E5998 (src/BATTLE/BATTLE.PRG/7CD68.c:573).
+// decomp: BATTLE.PRG func_800E5998 (src/BATTLE/BATTLE.PRG/7CD68.c:178).
 bool ResolveAiLinkedActors(LinkedActorTable& actors) {
   const std::span<const LinkGroupActor> listed = actors.FollowingActors();
   // The original reads a missing state through a null table entry. Only
@@ -353,7 +354,7 @@ bool ResolveAiLinkedActors(LinkedActorTable& actors) {
   return true;
 }
 
-// decomp: BATTLE.PRG func_800DD000 (src/BATTLE/BATTLE.PRG/74088.c:716).
+// decomp: BATTLE.PRG func_800DD000 (src/BATTLE/BATTLE.PRG/74088.c:220).
 bool ApplyActorActionReaction(ActorReactionHost& host,
                               const AppliedAction& applied) {
   if (applied.acting.skipped) return true;
@@ -378,7 +379,7 @@ bool ApplyActorActionReaction(ActorReactionHost& host,
   return true;
 }
 
-// decomp: BATTLE.PRG func_800DD344 (src/BATTLE/BATTLE.PRG/74088.c:782).
+// decomp: BATTLE.PRG func_800DD344 (src/BATTLE/BATTLE.PRG/74088.c:304).
 bool PropagateActorRelationships(ActorReactionHost& host,
                                  std::span<const std::uint8_t> room_actors) {
   const ReactionSettings settings = host.Settings();
@@ -397,7 +398,7 @@ bool PropagateActorRelationships(ActorReactionHost& host,
   return ShareAllyHostility(host, room_actors);
 }
 
-// decomp: BATTLE.PRG func_800DEEA4 (src/BATTLE/BATTLE.PRG/74088.c:1596).
+// decomp: BATTLE.PRG func_800DEEA4 (src/BATTLE/BATTLE.PRG/74088.c:969).
 bool NotifyActionRelationshipChanges(ActionNotificationHost& host,
                                      const ReactionHit& acting) {
   if (!acting.skipped) {

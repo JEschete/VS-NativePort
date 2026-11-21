@@ -185,6 +185,35 @@ count. Include-graph consumers are a static measure over every preprocessor
 branch, so they can overcount a conditional include. Stored records are
 references, not fresh runs; rerun what a closure claim depends on.
 
+### Decomp provenance citations
+
+`tools\ledger\provenance.py --check` (CI, after fetching only the pinned
+`resources\rood-reverse` submodule) reads every `// decomp:` comment under
+`Native\` and the `file`/`line`/`name` columns of `FUNCTION_CATALOG.csv`. A
+citation is `[OVERLAY ]NAME (src/PATH:LINE[-END][; was OLD])`: PATH is relative
+to the decomp root and LINE is where NAME is defined there (function header,
+`INCLUDE_ASM` line, data, type or macro definition, assembly label); END is a line
+inside that definition. A local cites its declaration in the enclosing function,
+and a name-less location must lie inside a definition. When the decomp renames a
+symbol, NAME is its current name and `; was OLD` (catalog: `previous_name`) keeps
+the name the native code was written against. Template catalog rows keep their
+`VS_*_FUNCTION` macro name.
+
+The check fails on a citation that does not resolve and is not listed in
+`Docs\ledgers\PROVENANCE_UNRESOLVED.csv` (keyed by file, name and cited text, each
+with a reason), on a listed row that resolves now or matches no citation, and on
+a missing decomp root. After a submodule update, run
+`python tools\ledger\provenance.py --sync --previous <export of the old pin>`:
+it maps names by identity (address in a `func_`/`D_` name or in the
+`symbol_addrs.txt` lists, template role, or the definitions around a static in
+the splat layout) and rewrites the comments, the catalog and the unresolved
+ledger. Then run clang-format on the changed files.
+
+```powershell
+.\.venv-3\Scripts\python.exe tools\ledger\provenance.py --check
+.\.venv-3\Scripts\python.exe -m unittest discover -s tools\ledger -p test_provenance.py -v
+```
+
 ## Event dispatch contract audit
 
 After generation, validate the event-handler C ABI and both 256-entry dispatch

@@ -137,14 +137,15 @@ std::optional<std::int16_t> PanelAmount(const TrapPanelHit& hit,
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_8007F434 (src/BATTLE/BATTLE.PRG/146C.c:10124)
+// decomp: BATTLE.PRG func_8007F434 (src/BATTLE/BATTLE.PRG/146C.c:10109)
 bool RollRiskLockBreak(std::uint16_t risk, TrapRandom& random) {
   const std::int32_t percent = std::min(
       ((risk + kRiskPercentBase) * kPercent) / kRiskPercentScale, kPercent);
   return random.NextBounded(kPercent) < percent + kLockBreakBonus;
 }
 
-// decomp: BATTLE.PRG _damageFromTrapPanel (src/BATTLE/BATTLE.PRG/146C.c:11730)
+// decomp: BATTLE.PRG damageFromTrapPanel (src/BATTLE/BATTLE.PRG/146C.c:11655;
+// was _damageFromTrapPanel)
 std::optional<std::int16_t> CalculateTrapPanelDamage(
     const TrapPanelHit& hit, const TrapPanelTarget& target,
     std::int32_t trap_level, bool add_random_variation, TrapRandom& random) {
@@ -157,8 +158,8 @@ std::optional<std::int16_t> CalculateTrapPanelDamage(
   return damage;
 }
 
-// decomp: BATTLE.PRG _hpHealedFromHealPanel
-// (src/BATTLE/BATTLE.PRG/146C.c:11992)
+// decomp: BATTLE.PRG hpHealedFromHealPanel
+// (src/BATTLE/BATTLE.PRG/146C.c:11916; was _hpHealedFromHealPanel)
 std::optional<std::int16_t> CalculateHealingPanelRecovery(
     const TrapPanelHit& hit, const TrapPanelTarget& target,
     std::int32_t trap_level, bool add_random_variation, TrapRandom& random) {

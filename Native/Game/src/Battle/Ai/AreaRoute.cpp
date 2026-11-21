@@ -311,7 +311,7 @@ int SquaredDistance(int x, int z, std::uint16_t endpoint) {
 }
 }  // namespace
 
-// decomp: func_800DF9A8 (src/BATTLE/BATTLE.PRG/771A8.c:459).
+// decomp: func_800DF9A8 (src/BATTLE/BATTLE.PRG/770A4.c:67).
 std::optional<RouteGateExit> ResolveRouteGateExit(RouteGateEnds ends,
                                                   std::uint32_t entry_tile) {
   const int x = RouteTileX(entry_tile);
@@ -327,7 +327,7 @@ std::optional<RouteGateExit> ResolveRouteGateExit(RouteGateEnds ends,
   return std::nullopt;
 }
 
-// decomp: func_800DFA54 (src/BATTLE/BATTLE.PRG/771A8.c:480).
+// decomp: func_800DFA54 (src/BATTLE/BATTLE.PRG/770A4.c:87).
 std::optional<RouteGateEnd> FindNearestRouteGateEntry(RouteGateEnds ends,
                                                       int platform,
                                                       std::int32_t world_x,
@@ -348,7 +348,7 @@ std::optional<RouteGateEnd> FindNearestRouteGateEntry(RouteGateEnds ends,
   return ends[link * 2];
 }
 
-// decomp: func_800DFAF8 (src/BATTLE/BATTLE.PRG/771A8.c:498).
+// decomp: func_800DFAF8 (src/BATTLE/BATTLE.PRG/770A4.c:105).
 std::optional<int> FindRouteGateAtTile(
     RouteGateEnds ends, std::span<const Field::PlatformContact> positions,
     std::uint32_t tile, bool match_entry_end) {
@@ -408,7 +408,7 @@ std::optional<CommandIntent> SetNavigationAreaFromTile(
   return CommandIntent::kMoveDestination;
 }
 
-// decomp: func_800DFBCC (src/BATTLE/BATTLE.PRG/771A8.c:587).
+// decomp: func_800DFBCC (src/BATTLE/BATTLE.PRG/770A4.c:130).
 std::optional<CommandIntent> ResolveNavigationAreaRoute(AreaRouteWorld& world,
                                                         AreaRouteActor& actor,
                                                         int index, int area) {
@@ -517,7 +517,7 @@ std::optional<DestinationRoute> RouteToDestinationArea(AreaRouteWorld& world,
 }
 }  // namespace
 
-// decomp: func_800E19FC (src/BATTLE/BATTLE.PRG/771A8.c:1540).
+// decomp: func_800E19FC (src/BATTLE/BATTLE.PRG/770A4.c:961).
 std::optional<AreaMovementStep> UpdateNavigationAreaMovement(
     AreaRouteWorld& world, AreaMovementActor& actor) {
   actor.near_target_detour = 0;
@@ -552,7 +552,7 @@ std::optional<AreaMovementStep> UpdateNavigationAreaMovement(
                           .clear_direction_cache = stuck};
 }
 
-// decomp: func_800E1850 (src/BATTLE/BATTLE.PRG/771A8.c:1455).
+// decomp: func_800E1850 (src/BATTLE/BATTLE.PRG/770A4.c:916).
 std::optional<std::uint8_t> FilterDirectionsByGroundHeight(
     std::uint8_t mask, std::uint32_t tile, int maximum_height,
     const NavigationDirectionCodes& directions, Field::TerrainGrid terrain) {
@@ -583,7 +583,7 @@ constexpr std::uint32_t kWalkingResults = 0xA0;
 constexpr unsigned kResultShiftMask = 31;
 }  // namespace
 
-// decomp: func_800E1908 (src/BATTLE/BATTLE.PRG/771A8.c:1517).
+// decomp: func_800E1908 (src/BATTLE/BATTLE.PRG/770A4.c:936).
 std::optional<HeightFilteredMove> MoveWithHeightFilteredDirections(
     HeightFilteredMoveWorld& world, const HeightFilteredMover& actor) {
   const int x = RouteTileX(actor.tile);

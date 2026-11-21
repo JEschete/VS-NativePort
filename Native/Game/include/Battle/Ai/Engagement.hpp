@@ -112,38 +112,38 @@ class EngagementTable {
   virtual void DisengageActorState(int actor_id) = 0;
 };
 
-// decomp: func_800D820C (src/BATTLE/BATTLE.PRG/6FA0C.s:9).
+// decomp: func_800D820C (src/BATTLE/BATTLE.PRG/6FA0C.s:6).
 // Shows a marker over the actor; Ashley (ID 0) has none. False refuses an ID
 // outside the AI state table.
 bool SetActorAwarenessIndicator(AwarenessMarkers& markers, int actor_id,
                                 int marker);
 
-// decomp: func_800D821C (src/BATTLE/BATTLE.PRG/6FA0C.s:18).
+// decomp: func_800D821C (src/BATTLE/BATTLE.PRG/6FA0C.s:13).
 // Clears the marker, then shows the reset marker.
 bool ResetActorAwarenessIndicator(AwarenessMarkers& markers, int actor_id);
 
-// decomp: func_800D8260 (src/BATTLE/BATTLE.PRG/6FA60.c:407).
+// decomp: func_800D8260 (src/BATTLE/BATTLE.PRG/6FA0C.c:22).
 // Starts a temporary marker for `frames` frames. The AI state keeps the
 // marker's low 16 bits and the count's low 8 bits, as the original's halfword
 // and byte stores did.
 void SetTemporaryAwarenessIndicator(TemporaryAwareness& awareness, int marker,
                                     int frames);
 
-// decomp: func_800D826C (src/BATTLE/BATTLE.PRG/6FA6C.s:10).
+// decomp: func_800D826C (src/BATTLE/BATTLE.PRG/6FA0C.c:28).
 [[nodiscard]] bool IsEngagementReady(std::uint16_t engaged_frames);
 
-// decomp: func_800D8280 (src/BATTLE/BATTLE.PRG/6FA6C.s:22).
+// decomp: func_800D8280 (src/BATTLE/BATTLE.PRG/6FA0C.c:30).
 // Counts a temporary marker down, showing it until its last frame clears it.
 // False refuses an ID outside the AI state table.
 bool UpdateTemporaryAwarenessIndicator(AwarenessMarkers& markers, int actor_id,
                                        TemporaryAwareness& awareness);
 
-// decomp: func_800D82A8 (src/BATTLE/BATTLE.PRG/6FA6C.s:37).
+// decomp: func_800D82A8 (src/BATTLE/BATTLE.PRG/6FA0C.c:41).
 // Disengages the actor with AI state `actor_id`; Ashley and empty slots are
 // ignored. Nothing refuses an ID outside the AI state table.
 std::optional<bool> DisengageActorById(EngagementTable& table, int actor_id);
 
-// decomp: func_800D82CC (src/BATTLE/BATTLE.PRG/6FA6C.s:53).
+// decomp: func_800D82CC (src/BATTLE/BATTLE.PRG/6FA0C.c:48).
 // Removes an engaged actor from the roster, starts its rejoin timers and
 // clears its marker. False when it was not engaged; nothing refuses an ID
 // outside the mask, an empty roster or an empty battle actor list.
@@ -151,7 +151,7 @@ std::optional<bool> DisengageActor(EngagementHost& host, int actor_id,
                                    EngagementTimers& timers,
                                    EngagementRoster& roster);
 
-// decomp: func_800D836C (src/BATTLE/BATTLE.PRG/6FA6C.s:99).
+// decomp: func_800D836C (src/BATTLE/BATTLE.PRG/6FA0C.c:67).
 // Whether the actor is engaged, adding it to the roster when the room allows
 // another engagement. The original reads the room only for an actor that is
 // not yet engaged, so `roster` may be null for an engaged actor. Nothing
@@ -161,7 +161,7 @@ std::optional<bool> TryEngageActor(EngagementHost& host, int actor_id,
                                    EngagementTimers& timers,
                                    EngagementRoster* roster);
 
-// decomp: func_800DBF00 (src/BATTLE/BATTLE.PRG/73700.c:414).
+// decomp: func_800DBF00 (src/BATTLE/BATTLE.PRG/73700.c:13).
 // Resets the actor's phase, shows the falling pose and removes the actor from
 // the engaged list. A leaving tail moves to its successor or wraps to the
 // head, and the tail is cleared when the list empties. An actor outside the
@@ -169,7 +169,7 @@ std::optional<bool> TryEngageActor(EngagementHost& host, int actor_id,
 // ID outside the slots or a walk that revisits an actor.
 bool UnlinkEngagedActor(EngagedList& list, int actor_id);
 
-// decomp: func_800DBFE4 (src/BATTLE/BATTLE.PRG/73700.c:463).
+// decomp: func_800DBFE4 (src/BATTLE/BATTLE.PRG/73700.c:43).
 // Advances an engaged actor's buildup and shows its marker step. After
 // kEngagementBuildupLimitFrames the actor remembers its target and leaves;
 // the grace and cooldown timers then count down. The 16-bit buildup counter
@@ -180,7 +180,7 @@ bool UpdateEngagementBuildup(EngagementBuildupHost& host, int actor_id,
                              EngagementTimers& timers,
                              EngagementRoster* roster);
 
-// decomp: func_800DC0D0 (src/BATTLE/BATTLE.PRG/73700.c:499).
+// decomp: func_800DC0D0 (src/BATTLE/BATTLE.PRG/73700.c:80).
 // Steps the phase of each engaged actor that does not classify Ashley as an
 // ally (kAllyClassification), until one turns at 0 or kEngagementPhaseTurn. A
 // turning actor takes the matching pose and the walk stops there. Phases wrap

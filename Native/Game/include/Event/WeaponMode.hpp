@@ -38,7 +38,8 @@ inline constexpr int kTransitionAnimationBase = 109;
 inline constexpr int kDrawnIdleAnimation = 101;
 inline constexpr int kSheathedIdleAnimation = 6;
 
-// decomp: func_800B9DB4 (src/BATTLE/BATTLE.PRG/4A0A8.c:2158).
+// decomp: vs_battle_script_72 (src/BATTLE/BATTLE.PRG/4DEA8.c:2747; was
+// func_800B9DB4).
 ScriptStep ScriptSetAshleyBattleMode(WeaponModeCommand command,
                                      WeaponModeHost& host);
 

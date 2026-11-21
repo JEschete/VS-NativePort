@@ -56,12 +56,14 @@ enum class UploadResult : std::uint8_t {
 // The VRAM area of palette `index` (0 to kMaxCluts - 1).
 [[nodiscard]] Render::ScreenRect ClutRect(std::int32_t index) noexcept;
 
-// decomp: MENUE.PRG _copySprites (494.c:481). `count` tiles of kTileWords
-// words each; a count of 0 or less uploads nothing.
+// decomp: MENUE.PRG copySprites (src/MENU/MENUE.PRG/494.c:485; was
+// _copySprites). `count` tiles of kTileWords words each; a count of 0 or less
+// uploads nothing.
 UploadResult UploadSpriteTiles(std::span<const std::uint32_t> words,
                                std::int32_t count, ImageUploader& uploader);
-// decomp: MENUE.PRG _copyCluts (494.c:498). `count` palettes of kClutWords
-// words each; a count of 0 or less uploads nothing.
+// decomp: MENUE.PRG copyCluts (src/MENU/MENUE.PRG/494.c:502; was _copyCluts).
+// `count` palettes of kClutWords words each; a count of 0 or less uploads
+// nothing.
 UploadResult UploadCluts(std::span<const std::uint32_t> words,
                          std::int32_t count, ImageUploader& uploader);
 
@@ -91,10 +93,11 @@ void StoreAnimation(
     const VisibilityAnimation& animation,
     std::span<std::int16_t, kAnimationHalfwords> halfwords) noexcept;
 
-// decomp: MENUE.PRG _getAnimationState (494.c:940). Past the last frame the
-// stored hidden value is returned unchanged; otherwise the current frame's
-// mask bit decides it, and the frame advances once the timer reaches the
-// frame duration, restarting after frame 15 when the animation repeats.
+// decomp: MENUE.PRG getAnimationState (src/MENU/MENUE.PRG/494.c:944; was
+// _getAnimationState). Past the last frame the stored hidden value is returned
+// unchanged; otherwise the current frame's mask bit decides it, and the frame
+// advances once the timer reaches the frame duration, restarting after frame 15
+// when the animation repeats.
 std::int16_t AdvanceVisibilityAnimation(
     VisibilityAnimation& animation) noexcept;
 
@@ -149,9 +152,9 @@ enum class DrawResult : std::uint8_t {
 // (768, 496)).
 [[nodiscard]] std::uint16_t IllustrationClut(std::int16_t palette) noexcept;
 
-// decomp: MENUE.PRG _drawSprite (494.c:629). Draws the record's tiles that
-// fall in the content panel's rows 39-184 after scrolling by 13 pixels per
-// line.
+// decomp: MENUE.PRG drawSprite (src/MENU/MENUE.PRG/494.c:633; was _drawSprite).
+// Draws the record's tiles that fall in the content panel's rows 39-184 after
+// scrolling by 13 pixels per line.
 DrawResult DrawIllustration(std::span<std::int16_t> record,
                             std::int32_t scroll_position,
                             IllustrationTarget& target);
@@ -179,10 +182,10 @@ class DiagramLineTarget {
   virtual void DrawLine(const DiagramLine& line) = 0;
 };
 
-// decomp: MENUE.PRG _drawContentLines (494.c:883). `help_text` is the help
-// text file as halfwords: words 0 and 1 are the text and illustration
-// section sizes in bytes, word 2 enables the lines, and the line section
-// follows the 16-byte header and both sections.
+// decomp: MENUE.PRG drawContentLines (src/MENU/MENUE.PRG/494.c:887; was
+// _drawContentLines). `help_text` is the help text file as halfwords: words 0
+// and 1 are the text and illustration section sizes in bytes, word 2 enables
+// the lines, and the line section follows the 16-byte header and both sections.
 DrawResult DrawDiagramLines(std::span<std::int16_t> help_text,
                             std::int32_t scroll_position,
                             DiagramLineTarget& target);

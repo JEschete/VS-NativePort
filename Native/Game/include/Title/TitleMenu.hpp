@@ -295,70 +295,90 @@ struct Context {
   Host& host;
 };
 
-// decomp: TITLE.PRG _playNewGameSfx (src/TITLE/TITLE.PRG/22C.c:18)
+// decomp: TITLE.PRG playNewGameSfx (src/TITLE/TITLE.PRG/22C.c:18; was
+// _playNewGameSfx)
 void PlayNewGameSounds(Host& host);
-// decomp: TITLE.PRG _playMenuChangeSfx (src/TITLE/TITLE.PRG/22C.c:25)
+// decomp: TITLE.PRG playMenuChangeSfx (src/TITLE/TITLE.PRG/22C.c:25; was
+// _playMenuChangeSfx)
 void PlayMenuChangeSound(Host& host);
-// decomp: TITLE.PRG _playMenuSelectSfx (src/TITLE/TITLE.PRG/22C.c:27)
+// decomp: TITLE.PRG playMenuSelectSfx (src/TITLE/TITLE.PRG/22C.c:27; was
+// _playMenuSelectSfx)
 void PlayMenuSelectSound(Host& host);
-// decomp: TITLE.PRG _playMenuLeaveSfx (src/TITLE/TITLE.PRG/22C.c:29)
+// decomp: TITLE.PRG playMenuLeaveSfx (src/TITLE/TITLE.PRG/22C.c:29; was
+// _playMenuLeaveSfx)
 void PlayMenuLeaveSound(Host& host);
-// decomp: TITLE.PRG _gameLoadScreen (src/TITLE/TITLE.PRG/22C.c:3129)
+// decomp: TITLE.PRG gameLoadScreen (src/TITLE/TITLE.PRG/22C.c:140; was
+// _gameLoadScreen)
 int ShowContinueScreen(Host& host);
-// decomp: TITLE.PRG _gameSaveScreen (src/TITLE/TITLE.PRG/22C.c:3313)
+// decomp: TITLE.PRG gameSaveScreen (src/TITLE/TITLE.PRG/22C.c:324; was
+// _gameSaveScreen)
 void ShowClearSaveScreen(Host& host);
-// decomp: TITLE.PRG _displayPublisherAndDeveloper
-// (src/TITLE/TITLE.PRG/22C.c:3579)
+// decomp: TITLE.PRG displayPublisherAndDeveloper
+// (src/TITLE/TITLE.PRG/22C.c:590; was _displayPublisherAndDeveloper)
 void ShowPublisherAndDeveloper(Host& host);
-// decomp: TITLE.PRG _setMenuItemFadeIn (src/TITLE/TITLE.PRG/22C.c:3761)
+// decomp: TITLE.PRG setMenuItemFadeIn (src/TITLE/TITLE.PRG/22C.c:772; was
+// _setMenuItemFadeIn)
 void InitializeMenuItem(State& state, int item, std::uint8_t position);
-// decomp: TITLE.PRG _copyTitleBgData (src/TITLE/TITLE.PRG/22C.c:3773)
+// decomp: TITLE.PRG copyTitleBgData (src/TITLE/TITLE.PRG/22C.c:784; was
+// _copyTitleBgData)
 void LoadBackgroundTextures(Host& host);
-// decomp: TITLE.PRG _initTitleScreen (src/TITLE/TITLE.PRG/22C.c:3821)
+// decomp: TITLE.PRG initTitleScreen (src/TITLE/TITLE.PRG/22C.c:832; was
+// _initTitleScreen)
 void InitializeTitleDisplay(Host& host);
-// decomp: TITLE.PRG _initMenu (src/TITLE/TITLE.PRG/22C.c:3838): the capture
-// block, empty when the heap had no room.
+// decomp: TITLE.PRG initMenu (src/TITLE/TITLE.PRG/22C.c:849; was _initMenu):
+// the capture block, empty when the heap had no room.
 std::span<std::uint16_t> InitializeMenu(Context& context, int item);
-// decomp: TITLE.PRG _freeHeap (src/TITLE/TITLE.PRG/22C.c:3867)
+// decomp: TITLE.PRG freeHeap (src/TITLE/TITLE.PRG/22C.c:878; was _freeHeap)
 void ReleaseMenuCapture(Host& host, std::span<std::uint16_t> capture);
-// decomp: TITLE.PRG _fadeInMenu (src/TITLE/TITLE.PRG/22C.c:3869)
+// decomp: TITLE.PRG fadeInMenu (src/TITLE/TITLE.PRG/22C.c:880; was _fadeInMenu)
 void BlendMenuBackground(Host& host, std::span<std::uint16_t> capture,
                          int factor);
-// decomp: TITLE.PRG _fadeInMenuCopyright (src/TITLE/TITLE.PRG/22C.c:3914)
+// decomp: TITLE.PRG fadeInMenuCopyright (src/TITLE/TITLE.PRG/22C.c:925; was
+// _fadeInMenuCopyright)
 void BlendCopyright(Host& host, std::span<std::uint16_t> capture, int factor);
-// decomp: TITLE.PRG _setMenuItemClut (src/TITLE/TITLE.PRG/22C.c:3957):
-// the item's palette `factor` sixteenths of the way from palette row `from`
-// to row `to`.
+// decomp: TITLE.PRG setMenuItemClut (src/TITLE/TITLE.PRG/22C.c:968; was
+// _setMenuItemClut): the item's palette `factor` sixteenths of the way from
+// palette row `from` to row `to`.
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
 void BlendMenuItemClut(Host& host, int item, int factor, int from, int to);
-// decomp: TITLE.PRG _setTitleMenuState (src/TITLE/TITLE.PRG/22C.c:3997)
+// decomp: TITLE.PRG setTitleMenuState (src/TITLE/TITLE.PRG/22C.c:1008; was
+// _setTitleMenuState)
 void UpdateMenuAnimation(Context& context);
-// decomp: TITLE.PRG _drawTitleMenuItems (src/TITLE/TITLE.PRG/22C.c:4073)
+// decomp: TITLE.PRG drawTitleMenuItems (src/TITLE/TITLE.PRG/22C.c:1089; was
+// _drawTitleMenuItems)
 void DrawMenuItems(Context& context);
-// decomp: TITLE.PRG _drawTitleMenu (src/TITLE/TITLE.PRG/22C.c:4183)
+// decomp: TITLE.PRG drawTitleMenu (src/TITLE/TITLE.PRG/22C.c:1193; was
+// _drawTitleMenu)
 void DrawMenu(Context& context);
-// decomp: TITLE.PRG _drawAndSyncTitleMenu (src/TITLE/TITLE.PRG/22C.c:4227)
+// decomp: TITLE.PRG drawAndSyncTitleMenu (src/TITLE/TITLE.PRG/22C.c:1232; was
+// _drawAndSyncTitleMenu)
 void DrawMenuAndPollInput(Context& context);
-// decomp: TITLE.PRG _menuVibrationSettings (src/TITLE/TITLE.PRG/22C.c:4246)
+// decomp: TITLE.PRG menuVibrationSettings (src/TITLE/TITLE.PRG/22C.c:1251; was
+// _menuVibrationSettings)
 void ShowVibrationSettings(Context& context);
-// decomp: TITLE.PRG _menuSoundSettings (src/TITLE/TITLE.PRG/22C.c:4353)
+// decomp: TITLE.PRG menuSoundSettings (src/TITLE/TITLE.PRG/22C.c:1358; was
+// _menuSoundSettings)
 void ShowSoundSettings(Context& context);
-// decomp: TITLE.PRG _nop (src/TITLE/TITLE.PRG/22C.c:4461): New Game.
+// decomp: TITLE.PRG noop (src/TITLE/TITLE.PRG/22C.c:1466; was _nop): New Game.
 [[nodiscard]] int NewGameChoice() noexcept;
-// decomp: TITLE.PRG _initEnvironment (src/TITLE/TITLE.PRG/22C.c:4463)
+// decomp: TITLE.PRG initEnvironment (src/TITLE/TITLE.PRG/22C.c:1468; was
+// _initEnvironment)
 void InitializeSettings(Context& context);
-// decomp: TITLE.PRG vs_title_exec (src/TITLE/TITLE.PRG/22C.c:4491): the
+// decomp: TITLE.PRG vs_title_exec (src/TITLE/TITLE.PRG/22C.c:1496): the
 // MenuItemId the title left with, never kTimeout.
 int Run(Context& context);
-// decomp: TITLE.PRG _initScreen (src/TITLE/TITLE.PRG/22C.c:4658)
+// decomp: TITLE.PRG initScreen (src/TITLE/TITLE.PRG/22C.c:1663; was
+// _initScreen)
 void InitializeGameDisplay(Host& host, const GameDisplayRequest& request);
-// decomp: TITLE.PRG _renderScreen (src/TITLE/TITLE.PRG/22C.c:4684). The
-// original returned vs_main_gametimeUpdate's VSync result, which no caller
-// read.
+// decomp: TITLE.PRG renderScreen (src/TITLE/TITLE.PRG/22C.c:1689; was
+// _renderScreen). The original returned vs_main_gametimeUpdate's VSync result,
+// which no caller read.
 void PresentGameFrame(Host& host);
-// decomp: TITLE.PRG _initGameData (src/TITLE/TITLE.PRG/22C.c:4698)
+// decomp: TITLE.PRG initGameData (src/TITLE/TITLE.PRG/22C.c:1703; was
+// _initGameData)
 void InitializeNewGameData(Host& host);
-// decomp: TITLE.PRG _setTitleExitFlags (src/TITLE/TITLE.PRG/22C.c:4741)
+// decomp: TITLE.PRG setTitleExitFlags (src/TITLE/TITLE.PRG/22C.c:1748; was
+// _setTitleExitFlags)
 void PrepareExit(Host& host, int cause);
 
 // The policies the functions above apply, for the tests.

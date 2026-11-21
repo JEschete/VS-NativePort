@@ -746,7 +746,8 @@ void DrawSlide(Context& ctx) {
 }
 }  // namespace
 
-// decomp: MENU8.PRG _insertDeleteHandler (src/MENU/MENU8.PRG/21A0.c:29)
+// decomp: MENU8.PRG insertDeleteHandler (src/MENU/MENU8.PRG/21A0.c:34; was
+// _insertDeleteHandler)
 int EditNameAtCursor(Context& ctx, int position) {
   const Framework::Buttons buttons = ctx.host.Input();
   ctx.state.nav_icon_pulse = true;
@@ -780,7 +781,8 @@ int EditNameAtCursor(Context& ctx, int position) {
   return position;
 }
 
-// decomp: MENU8.PRG _copyNormalizedString (src/MENU/MENU8.PRG/21A0.c:92)
+// decomp: MENU8.PRG copyNormalizedString (src/MENU/MENU8.PRG/21A0.c:97; was
+// _copyNormalizedString)
 bool CopyTrimmedName(Context& ctx, std::span<std::uint8_t, kNameBytes> out) {
   const std::array<std::uint8_t, kNameColumns>& name = ctx.state.name;
   std::size_t end = 0;
@@ -808,7 +810,8 @@ bool CopyTrimmedName(Context& ctx, std::span<std::uint8_t, kNameBytes> out) {
   return false;
 }
 
-// decomp: MENU8.PRG _renderRenameMenu (src/MENU/MENU8.PRG/21A0.c:133)
+// decomp: MENU8.PRG renderRenameMenu (src/MENU/MENU8.PRG/21A0.c:138; was
+// _renderRenameMenu)
 void DrawFrame(Context& ctx, int x_offset) {
   DrawCommandIcons(ctx, x_offset);
   DrawCommandBars(ctx, x_offset);
@@ -821,7 +824,8 @@ void DrawFrame(Context& ctx, int x_offset) {
   DrawBackdrop(ctx, x_offset);
 }
 
-// decomp: MENU8.PRG _highlightSelection (src/MENU/MENU8.PRG/21A0.c:318)
+// decomp: MENU8.PRG highlightSelection (src/MENU/MENU8.PRG/21A0.c:324; was
+// _highlightSelection)
 void DrawSelectionBox(Context& ctx, const Box& box) {
   const auto corner = [](int x, int y) {
     return Word(x) | (Word(y) << Framework::kHalfwordShift);
@@ -835,7 +839,8 @@ void DrawSelectionBox(Context& ctx, const Box& box) {
   EmitPacket(ctx.host.Queue(kOverlayFront), packet);
 }
 
-// decomp: MENU8.PRG _highlightCharSelection (src/MENU/MENU8.PRG/21A0.c:346)
+// decomp: MENU8.PRG highlightCharSelection (src/MENU/MENU8.PRG/21A0.c:352; was
+// _highlightCharSelection)
 int HighlightGridCharacter(Context& ctx, int cursor_step, GridCell cell) {
   const int x = cell.column * kGridColumnPitch;
   const int y = cell.row * kGridRowPitch;
@@ -848,7 +853,8 @@ int HighlightGridCharacter(Context& ctx, int cursor_step, GridCell cell) {
                        (Word(y + kGridCursorY) << Framework::kHalfwordShift));
 }
 
-// decomp: MENU8.PRG _confirmationScreen (src/MENU/MENU8.PRG/21A0.c:364)
+// decomp: MENU8.PRG confirmationScreen (src/MENU/MENU8.PRG/21A0.c:370; was
+// _confirmationScreen)
 int UpdateConfirmation(Context& ctx, bool initialize) {
   State& state = ctx.state;
   Host& host = ctx.host;
@@ -910,7 +916,8 @@ int UpdateConfirmation(Context& ctx, bool initialize) {
   return 0;
 }
 
-// decomp: MENU8.PRG _updateMenuSelection (src/MENU/MENU8.PRG/21A0.c:445)
+// decomp: MENU8.PRG updateMenuSelection (src/MENU/MENU8.PRG/21A0.c:451; was
+// _updateMenuSelection)
 void SetCommandHighlight(Context& ctx, int row) {
   // Rows 33 to 37 follow the name row; none of them matches a command.
   constexpr int kFirstHighlightRow = 4;
@@ -924,7 +931,8 @@ void SetCommandHighlight(Context& ctx, int row) {
   }
 }
 
-// decomp: MENU8.PRG _renameMenuInput (src/MENU/MENU8.PRG/21A0.c:463)
+// decomp: MENU8.PRG renameMenuInput (src/MENU/MENU8.PRG/21A0.c:469; was
+// _renameMenuInput)
 int UpdateNameEditor(Context& ctx, bool initialize) {
   State& state = ctx.state;
   if (initialize) {
@@ -986,7 +994,7 @@ int UpdateNameEditor(Context& ctx, bool initialize) {
   return 0;
 }
 
-// decomp: MENU8.PRG vs_menu8_execRename (src/MENU/MENU8.PRG/21A0.c:820)
+// decomp: MENU8.PRG vs_menu8_execRename (src/MENU/MENU8.PRG/21A0.c:826)
 int Update(Context& ctx, std::uint8_t& step) {
   State& state = ctx.state;
   switch (step) {

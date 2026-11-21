@@ -213,7 +213,8 @@ class LiveOverviewHost final : public OverviewHost {
 };
 }  // namespace
 
-// decomp: MENU9.PRG _restoreCamera (src/MENU/MENU9.PRG/238.c:1402)
+// decomp: MENU9.PRG restoreCamera (src/MENU/MENU9.PRG/238.c:1407; was
+// _restoreCamera)
 void RestoreLiveCamera() {
   VS::Render::Camera& frame_camera = VS::Render::FrameScratchpad().camera;
   CameraPose camera{.position = CameraVectorOf(frame_camera.position),
@@ -225,7 +226,8 @@ void RestoreLiveCamera() {
   StoreCameraVector(frame_camera.angles, camera.angles);
 }
 
-// decomp: MENU9.PRG _buildCameraMatrix (src/MENU/MENU9.PRG/238.c:1474)
+// decomp: MENU9.PRG buildCameraMatrix (src/MENU/MENU9.PRG/238.c:1479; was
+// _buildCameraMatrix)
 void BuildLiveViewerCamera(MATRIX* camera_matrix) {
   if (camera_matrix == nullptr) {
     Refuse("null viewer camera matrix");
@@ -234,7 +236,8 @@ void BuildLiveViewerCamera(MATRIX* camera_matrix) {
   Core::Math::StoreTransform(*camera_matrix, BuildAndStoreViewerCamera());
 }
 
-// decomp: MENU9.PRG _renderEnemyInfoBg (src/MENU/MENU9.PRG/238.c:1552)
+// decomp: MENU9.PRG renderEnemyInfoBg (src/MENU/MENU9.PRG/238.c:1557; was
+// _renderEnemyInfoBg)
 void DrawLiveEnemyBanner(int x, int y, int width, int height, int gradient) {
   const PanelRect rect{.x = x, .y = y, .width = width, .height = height};
   DrawChecked("enemy banner colour or height outside its bounds",
@@ -243,21 +246,25 @@ void DrawLiveEnemyBanner(int x, int y, int width, int height, int gradient) {
               });
 }
 
-// decomp: MENU9.PRG _renderGradientQuad (src/MENU/MENU9.PRG/238.c:1594)
+// decomp: MENU9.PRG renderGradientQuad (src/MENU/MENU9.PRG/238.c:1599; was
+// _renderGradientQuad)
 void DrawLiveGradientPanel(int x, int y, int width, int height, int gradient) {
   DrawPanel({.x = x, .y = y, .width = width, .height = height}, gradient);
 }
 
-// decomp: MENU9.PRG _renderFooterBg (src/MENU/MENU9.PRG/238.c:1645)
+// decomp: MENU9.PRG renderFooterBg (src/MENU/MENU9.PRG/238.c:1650; was
+// _renderFooterBg)
 void DrawLiveFooterBackground(int top) { DrawFooter(top); }
 
-// decomp: MENU9.PRG _renderTopMenu (src/MENU/MENU9.PRG/238.c:1679)
+// decomp: MENU9.PRG renderTopMenu (src/MENU/MENU9.PRG/238.c:1684; was
+// _renderTopMenu)
 void RenderLiveOverview(int animation_step) {
   LiveOverviewHost host;
   RenderOverview(host, animation_step, VS::Menu::Score::score);
 }
 
-// decomp: MENU9.PRG _renderScreenEdgeFade (src/MENU/MENU9.PRG/238.c:2146)
+// decomp: MENU9.PRG renderScreenEdgeFade (src/MENU/MENU9.PRG/238.c:2151; was
+// _renderScreenEdgeFade)
 void DrawLiveViewerEdgeFade() { DrawEdgeFade(); }
 
 std::uint64_t LiveGazetteCameraRefusals() noexcept { return refusals; }

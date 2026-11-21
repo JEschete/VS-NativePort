@@ -47,18 +47,18 @@ std::optional<PrimaryEffectPhase> ToPrimaryEffectPhase(std::uint32_t value) {
   return phase;
 }
 
-// decomp: func_800CEEBC (src/BATTLE/BATTLE.PRG/5BF94.c:5373)
+// decomp: func_800CEEBC (src/BATTLE/BATTLE.PRG/5BF94.c:4938)
 bool CanStartTrack(const PrimaryEffectState& state) {
   return PlaysTracks(state.phase) && state.started_tracks < state.track_count &&
          state.pending_tracks != 0;
 }
 
-// decomp: func_800CEF0C (src/BATTLE/BATTLE.PRG/5BF94.c:5382)
+// decomp: func_800CEF0C (src/BATTLE/BATTLE.PRG/5BF94.c:4947)
 std::int32_t PlayableTrackCount(const PrimaryEffectState& state) {
   return PlaysTracks(state.phase) ? state.track_count : 0;
 }
 
-// decomp: func_800CEF38 (src/BATTLE/BATTLE.PRG/5BF94.c:5391)
+// decomp: func_800CEF38 (src/BATTLE/BATTLE.PRG/5BF94.c:4956)
 bool RequeueTrack(PrimaryEffectState& state, int track) {
   if (track < 0 || track >= kPrimaryEffectTracks) {
     return false;
@@ -68,23 +68,23 @@ bool RequeueTrack(PrimaryEffectState& state, int track) {
   return true;
 }
 
-// decomp: func_800CEF64 (src/BATTLE/BATTLE.PRG/5BF94.c:5397)
+// decomp: func_800CEF64 (src/BATTLE/BATTLE.PRG/5BF94.c:4962)
 bool IsPrimaryEffectLoaded(const PrimaryEffectState& state) {
   return state.loaded;
 }
 
-// decomp: func_800CF478 (src/BATTLE/BATTLE.PRG/5BF94.c:5546)
+// decomp: func_800CF478 (src/BATTLE/BATTLE.PRG/5BF94.c:5111)
 void SetPrimaryEffectPhase(PrimaryEffectState& state,
                            PrimaryEffectPhase phase) {
   state.phase = phase;
 }
 
-// decomp: func_800CF48C (src/BATTLE/BATTLE.PRG/5BF94.c:5550)
+// decomp: func_800CF48C (src/BATTLE/BATTLE.PRG/5BF94.c:5115)
 PrimaryEffectPhase PrimaryEffectPhaseOf(const PrimaryEffectState& state) {
   return state.phase;
 }
 
-// decomp: func_800CF49C (src/BATTLE/BATTLE.PRG/5BF94.c:5552). The original
+// decomp: func_800CF49C (src/BATTLE/BATTLE.PRG/5BF94.c:5117). The original
 // also skipped a word whose bits 1-31 were all taken without scanning it.
 std::optional<std::uint8_t> AllocateEffectToken(EffectTokenPool& pool) {
   for (std::size_t word = 0; word < pool.size(); ++word) {
@@ -98,7 +98,7 @@ std::optional<std::uint8_t> AllocateEffectToken(EffectTokenPool& pool) {
   return std::nullopt;
 }
 
-// decomp: func_800CF514 (src/BATTLE/BATTLE.PRG/5BF94.c:5582)
+// decomp: func_800CF514 (src/BATTLE/BATTLE.PRG/5BF94.c:5147)
 bool ReleaseEffectToken(EffectTokenPool& pool, int token) {
   if (token < 0 || token >= kEffectTokens) {
     return false;

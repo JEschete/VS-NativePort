@@ -74,7 +74,7 @@ constexpr RowPlacement kHintPlacement{
 };
 // VS_menuText_INDEX_equipWeapon: the first row's hint.
 constexpr std::size_t kHintTextIndex = 12;
-// decomp: _equipMenu's equipMenuRowTypes (16C.c:1058).
+// decomp: _equipMenu's equipMenuRowTypes (src/MENU/MENU3.PRG/16C.c:1053).
 constexpr std::array<std::int32_t, kEquipmentTopRows> kTopRowTypes{
     0x78, 0x79, 0x69, 0x6A, 0x68, 0x6D, 0x6B, 0x7A,
 };

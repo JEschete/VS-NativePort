@@ -60,7 +60,7 @@ constexpr std::array kImpactKindEffects{
 constexpr std::uint8_t kAbilityLearnedPart = 0xFD;
 }  // namespace
 
-// decomp: func_8006C4C4 (src/BATTLE/BATTLE.PRG/146C.c:1927)
+// decomp: func_8006C4C4 (src/BATTLE/BATTLE.PRG/146C.c:1569)
 SingleTargetEffectRequest ActionHitEffectRequest(
     std::uint16_t effect_id, const QueuedEffectAction& action,
     const ImpactTarget& target, std::uint8_t limb, std::int32_t bone_tag) {
@@ -81,7 +81,7 @@ SingleTargetEffectRequest ActionHitEffectRequest(
   return request;
 }
 
-// decomp: func_8006C4C4 (src/BATTLE/BATTLE.PRG/146C.c:1927)
+// decomp: func_8006C4C4 (src/BATTLE/BATTLE.PRG/146C.c:1569)
 bool QueueActionHitEffect(std::uint16_t effect_id, const ImpactTarget& target,
                           std::uint8_t limb, ActionImpactWorld& world) {
   const std::optional<QueuedEffectAction> action = world.QueuedAction();
@@ -96,7 +96,7 @@ bool QueueActionHitEffect(std::uint16_t effect_id, const ImpactTarget& target,
   return true;
 }
 
-// decomp: func_8006C84C (src/BATTLE/BATTLE.PRG/146C.c:2044)
+// decomp: func_8006C84C (src/BATTLE/BATTLE.PRG/146C.c:1686)
 std::optional<ImpactEffectChoice> ChooseImpactEffect(std::uint16_t action,
                                                      const ImpactTarget& target,
                                                      ActionImpactWorld& world) {
@@ -120,7 +120,7 @@ std::optional<ImpactEffectChoice> ChooseImpactEffect(std::uint16_t action,
   return std::nullopt;
 }
 
-// decomp: func_8006C84C (src/BATTLE/BATTLE.PRG/146C.c:2044)
+// decomp: func_8006C84C (src/BATTLE/BATTLE.PRG/146C.c:1686)
 std::int32_t QueueActionImpactEffects(std::int32_t attacker,
                                       ActionImpactWorld& world) {
   for (std::size_t index = 0;; ++index) {
@@ -139,7 +139,7 @@ std::int32_t QueueActionImpactEffects(std::int32_t attacker,
   return 1;
 }
 
-// decomp: func_8006F450 (src/BATTLE/BATTLE.PRG/146C.c:3171)
+// decomp: func_8006F450 (src/BATTLE/BATTLE.PRG/146C.c:2874)
 SingleTargetEffectRequest GroundPlaneImpactEffectRequest(std::int16_t x,
                                                          std::int16_t z) {
   return {.effect_id = kGroundPlaneImpactEffect,
@@ -147,13 +147,13 @@ SingleTargetEffectRequest GroundPlaneImpactEffectRequest(std::int16_t x,
           .target = PositionEndpoint({.x = x, .y = 0, .z = z})};
 }
 
-// decomp: func_8006F450 (src/BATTLE/BATTLE.PRG/146C.c:3171)
+// decomp: func_8006F450 (src/BATTLE/BATTLE.PRG/146C.c:2874)
 void SpawnGroundPlaneImpactEffect(std::int16_t x, std::int16_t z,
                                   SecondaryEffectSink& sink) {
   sink.Begin(GroundPlaneImpactEffectRequest(x, z), kSecondaryRequestParameter);
 }
 
-// decomp: func_8006F4B0 (src/BATTLE/BATTLE.PRG/146C.c:3187)
+// decomp: func_8006F4B0 (src/BATTLE/BATTLE.PRG/146C.c:2890)
 SingleTargetEffectRequest TrapTileEffectRequest(const TrapTile& tile) {
   return {.effect_id = kTrapTileEffect,
           .source = PlayerSource(),
@@ -162,7 +162,7 @@ SingleTargetEffectRequest TrapTileEffectRequest(const TrapTile& tile) {
                                       .z = TileCentre(tile.tile_z)})};
 }
 
-// decomp: func_8006F4B0 (src/BATTLE/BATTLE.PRG/146C.c:3187)
+// decomp: func_8006F4B0 (src/BATTLE/BATTLE.PRG/146C.c:2890)
 bool SpawnTrapTileEffect(const TrapTile& tile, SecondaryEffectSink& sink) {
   const SingleTargetEffectRequest request = TrapTileEffectRequest(tile);
   if ((sink.BusyFlags() & kTrapEffectBusyBit) != 0) return false;
@@ -170,7 +170,7 @@ bool SpawnTrapTileEffect(const TrapTile& tile, SecondaryEffectSink& sink) {
   return true;
 }
 
-// decomp: func_8006F848 (src/BATTLE/BATTLE.PRG/146C.c:3298)
+// decomp: func_8006F848 (src/BATTLE/BATTLE.PRG/146C.c:3002)
 SingleTargetEffectRequest AbilityLearnedEffectRequest() {
   return {.effect_id = kAbilityLearnedEffect,
           .source = PositionEndpoint({}),
@@ -179,7 +179,7 @@ SingleTargetEffectRequest AbilityLearnedEffectRequest() {
                      .part = kAbilityLearnedPart}};
 }
 
-// decomp: func_8006F848 (src/BATTLE/BATTLE.PRG/146C.c:3298)
+// decomp: func_8006F848 (src/BATTLE/BATTLE.PRG/146C.c:3002)
 void SpawnAbilityLearnedEffect(SecondaryEffectSink& sink) {
   sink.Begin(AbilityLearnedEffectRequest(), kSecondaryRequestParameter);
 }

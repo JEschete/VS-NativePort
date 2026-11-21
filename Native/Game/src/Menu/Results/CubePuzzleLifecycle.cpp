@@ -214,8 +214,8 @@ std::optional<CubePuzzleRecord> FindCubePuzzleRecord(
   return std::nullopt;
 }
 
-// decomp: MENUF.PRG _initCubePuzzleStart (src/MENU/MENUF.PRG/3B8.c:2260),
-// 0x80107A8C
+// decomp: MENUF.PRG initCubePuzzleStart (src/MENU/MENUF.PRG/3B8.c:2268; was
+// _initCubePuzzleStart), 0x80107A8C
 CubePuzzleLoad InitializeCubePuzzleStart(
     CubePuzzleScreen& screen, CubePuzzleRating& rating,
     std::span<std::uint16_t, kResultsClutWords> clut,
@@ -224,8 +224,8 @@ CubePuzzleLoad InitializeCubePuzzleStart(
                           kCubePuzzleStartImages, &rating, clut, host);
 }
 
-// decomp: MENUF.PRG _initCubePuzzleEnd (src/MENU/MENUF.PRG/3B8.c:2351),
-// 0x80107D4C
+// decomp: MENUF.PRG initCubePuzzleEnd (src/MENU/MENUF.PRG/3B8.c:2359; was
+// _initCubePuzzleEnd), 0x80107D4C
 CubePuzzleLoad InitializeCubePuzzleResults(
     CubePuzzleScreen& screen, CubePuzzleRating& rating, CubePuzzleTimer& timer,
     std::span<std::uint16_t, kResultsClutWords> clut,
@@ -239,8 +239,8 @@ CubePuzzleLoad InitializeCubePuzzleResults(
   return InitializeCubePuzzleStart(screen, rating, clut, host);
 }
 
-// decomp: MENUF.PRG _initCubePuzzleQuit (src/MENU/MENUF.PRG/3B8.c:2363),
-// 0x80107D98
+// decomp: MENUF.PRG initCubePuzzleQuit (src/MENU/MENUF.PRG/3B8.c:2371; was
+// _initCubePuzzleQuit), 0x80107D98
 CubePuzzleLoad InitializeCubePuzzleQuit(
     CubePuzzleScreen& screen, std::span<std::uint16_t, kResultsClutWords> clut,
     CubePuzzleLoadHost& host) {
@@ -265,8 +265,8 @@ std::int32_t CubePuzzleRank(CubePuzzleClock clock, CubePuzzleRating rating) {
   return std::clamp(kTopRank - (rating.rank_cap + steps), 0, kTopRank);
 }
 
-// decomp: MENUF.PRG _renderCubePuzzleStart (src/MENU/MENUF.PRG/3B8.c:2432),
-// 0x80107FC0
+// decomp: MENUF.PRG renderCubePuzzleStart (src/MENU/MENUF.PRG/3B8.c:2440; was
+// _renderCubePuzzleStart), 0x80107FC0
 CubePuzzleScreenStep UpdateCubePuzzleStart(CubePuzzleScreen& screen,
                                            bool confirm_pressed,
                                            CubePuzzleScreenHost& host) {
@@ -291,8 +291,8 @@ CubePuzzleScreenStep UpdateCubePuzzleStart(CubePuzzleScreen& screen,
   return CubePuzzleScreenStep::kFinished;
 }
 
-// decomp: MENUF.PRG _renderCubePuzzleEnd (src/MENU/MENUF.PRG/3B8.c:2477),
-// 0x801080E4
+// decomp: MENUF.PRG renderCubePuzzleEnd (src/MENU/MENUF.PRG/3B8.c:2485; was
+// _renderCubePuzzleEnd), 0x801080E4
 CubePuzzleScreenStep UpdateCubePuzzleResults(CubePuzzleScreen& screen,
                                              CubePuzzleRating rating,
                                              CubePuzzleClock clock,
@@ -337,8 +337,8 @@ CubePuzzleScreenStep UpdateCubePuzzleResults(CubePuzzleScreen& screen,
   return CubePuzzleScreenStep::kFinished;
 }
 
-// decomp: MENUF.PRG _renderCubePuzzleQuit (src/MENU/MENUF.PRG/3B8.c:2566),
-// 0x801083AC
+// decomp: MENUF.PRG renderCubePuzzleQuit (src/MENU/MENUF.PRG/3B8.c:2574; was
+// _renderCubePuzzleQuit), 0x801083AC
 CubePuzzleScreenStep UpdateCubePuzzleQuit(CubePuzzleScreen& screen,
                                           bool confirm_pressed,
                                           CubePuzzleScreenHost& host) {

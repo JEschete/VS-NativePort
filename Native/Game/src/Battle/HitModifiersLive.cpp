@@ -93,7 +93,8 @@ T Checked(std::optional<T> result) {
 }
 }  // namespace
 
-// decomp: _getAttackGemBuff (src/BATTLE/BATTLE.PRG/146C.c:9712).
+// decomp: getAttackGemBuff (src/BATTLE/BATTLE.PRG/146C.c:9702; was
+// _getAttackGemBuff).
 std::int16_t AttackLiveGemHitBonus(ActionDefinition* action,
                                    VS::Battle::ActorStats* stats) {
   LiveHitModifierWorld world(action);
@@ -101,7 +102,8 @@ std::int16_t AttackLiveGemHitBonus(ActionDefinition* action,
   return Checked(AttackGemHitBonus(Pointer(state), world));
 }
 
-// decomp: _getDefenseGemBuff (src/BATTLE/BATTLE.PRG/146C.c:9741).
+// decomp: getDefenseGemBuff (src/BATTLE/BATTLE.PRG/146C.c:9731; was
+// _getDefenseGemBuff).
 std::int16_t DefenseLiveGemHitBonus(ActionDefinition* action,
                                     VS::Battle::ActorStats* stats, int hit) {
   LiveHitModifierWorld world(action);
@@ -109,14 +111,15 @@ std::int16_t DefenseLiveGemHitBonus(ActionDefinition* action,
   return Checked(DefenseGemHitBonus(Pointer(state), hit, world));
 }
 
-// decomp: func_8007E97C (src/BATTLE/BATTLE.PRG/146C.c:9867).
+// decomp: func_8007E97C (src/BATTLE/BATTLE.PRG/146C.c:9855).
 int PreviousLiveHitSuccessThreshold(ActionDefinition*, VS::Battle::HitResult*,
                                     VS::Battle::HitResult*, int, int) {
   return PreviousHitSuccessThreshold(
       std::bit_cast<std::int32_t>(VS::Battle::previousHitResult));
 }
 
-// decomp: _getHitGemModifier (src/BATTLE/BATTLE.PRG/146C.c:9875).
+// decomp: getHitGemModifier (src/BATTLE/BATTLE.PRG/146C.c:9861; was
+// _getHitGemModifier).
 int LiveGemHitChance(ActionDefinition* action, VS::Battle::HitResult* source,
                      VS::Battle::HitResult* target, int hit, int) {
   LiveHitModifierWorld world(action);
@@ -125,7 +128,8 @@ int LiveGemHitChance(ActionDefinition* action, VS::Battle::HitResult* source,
   return Checked(GemHitChance(Pointer(from), Pointer(to), hit, world));
 }
 
-// decomp: _getRiskModifier (src/BATTLE/BATTLE.PRG/146C.c:10045).
+// decomp: getRiskModifier (src/BATTLE/BATTLE.PRG/146C.c:10031; was
+// _getRiskModifier).
 int LiveRiskHitChance(ActionDefinition*, VS::Battle::HitResult* source,
                       VS::Battle::HitResult*, int, int) {
   LiveHitModifierWorld world;
@@ -133,7 +137,8 @@ int LiveRiskHitChance(ActionDefinition*, VS::Battle::HitResult* source,
   return Checked(RiskHitChance(Pointer(from), world));
 }
 
-// decomp: _getChainEvasionModifier (src/BATTLE/BATTLE.PRG/146C.c:10057).
+// decomp: getChainEvasionModifier (src/BATTLE/BATTLE.PRG/146C.c:10042; was
+// _getChainEvasionModifier).
 int LiveChainHitChance(ActionDefinition*, VS::Battle::HitResult*,
                        VS::Battle::HitResult* target, int, int) {
   LiveHitModifierWorld world;

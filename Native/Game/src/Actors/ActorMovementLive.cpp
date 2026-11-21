@@ -545,7 +545,7 @@ void BeginLiveActorJumpToTile(VS::Actors::ActorRecord* actor, PackedTile target,
               });
 }
 
-// decomp: BATTLE.PRG func_800A2C48 (src/BATTLE/BATTLE.PRG/3A1A0.c:153)
+// decomp: BATTLE.PRG func_800A2C48 (src/BATTLE/BATTLE.PRG/3A1A0.c:126)
 void CancelLiveActorTeleportTransition(VS::Actors::ActorRecord* actor) {
   WithPointer(actor, "Actor teleport cancel",
               [](LiveMovementHost& host, MovementActor& moving) {
@@ -586,7 +586,7 @@ void UpdateLiveActorMovement(int actor_id) {
   UpdateActorMovement(host, actor_id);
 }
 
-// decomp: BATTLE.PRG func_800AC690 (src/BATTLE/BATTLE.PRG/40564.c:2297)
+// decomp: BATTLE.PRG func_800AC690 (src/BATTLE/BATTLE.PRG/40564.c:1981)
 void UpdateLiveActorJumpAndFall(int actor_id, VS::Actors::ActorRecord* actor) {
   WithPointer(actor, "Actor jump and fall",
               [actor_id](LiveMovementHost& host, MovementActor& moving) {

@@ -40,7 +40,7 @@ std::array<std::int16_t, kSpatialDimensions> WorldPoint(
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800C0B50 (src/BATTLE/BATTLE.PRG/58350.s:8).
+// decomp: BATTLE.PRG func_800C0B50 (src/BATTLE/BATTLE.PRG/57B1C.c:294).
 void DrawSphereVolumeWireframe(const TargetWireState& wire,
                                const TargetWireVolume& volume,
                                std::uint32_t color, TargetWireCanvas& canvas) {

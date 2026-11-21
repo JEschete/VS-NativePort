@@ -144,7 +144,7 @@ EventCameraScratch& LiveEventCameraScratch() noexcept { return cameraScratch; }
 
 void ResetLiveEventCameraScratch() noexcept { cameraScratch = {}; }
 
-// decomp: BATTLE.PRG func_800BDF6C (F01233, src/BATTLE/BATTLE.PRG/4A0A8.c:3927,
+// decomp: BATTLE.PRG func_800BDF6C (F01233, src/BATTLE/BATTLE.PRG/4DEA8.c:4577,
 // 0x800BDF6C-0x800BE01C)
 void UpdateEventLensTweenEntry(LensTween* lens_tween) {
   if (lens_tween == nullptr) Refuse("UpdateEventLensTween", "missing tween");
@@ -154,7 +154,7 @@ void UpdateEventLensTweenEntry(LensTween* lens_tween) {
   StoreLens(*lens_tween, tween);
 }
 
-// decomp: BATTLE.PRG func_800BE01C (F01234, src/BATTLE/BATTLE.PRG/4A0A8.c:3945,
+// decomp: BATTLE.PRG func_800BE01C (F01234, src/BATTLE/BATTLE.PRG/4DEA8.c:4595,
 // 0x800BE01C-0x800BE180)
 int UpdateEventShakeOscillatorEntry(ShakeOscillator* oscillator) {
   if (oscillator == nullptr) {
@@ -168,7 +168,7 @@ int UpdateEventShakeOscillatorEntry(ShakeOscillator* oscillator) {
   return active ? 1 : 0;
 }
 
-// decomp: BATTLE.PRG func_800BE180 (F01235, src/BATTLE/BATTLE.PRG/4A0A8.c:3983,
+// decomp: BATTLE.PRG func_800BE180 (F01235, src/BATTLE/BATTLE.PRG/4DEA8.c:4633,
 // 0x800BE180-0x800BE36C)
 void UpdateEventCameraShakeEntry() {
   CameraState& camera = RequiredCamera("UpdateEventCameraShake");
@@ -179,7 +179,8 @@ void UpdateEventCameraShakeEntry() {
 }
 }  // namespace VS::Event
 
-// decomp: BATTLE.PRG func_800BDC9C (F01232, src/BATTLE/BATTLE.PRG/4A0A8.c:3862,
+// decomp: BATTLE.PRG vs_battle_script_EA_EB_EC_EE_EF_camera (F01232,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:4512; was func_800BDC9C,
 // 0x800BDC9C-0x800BDF6C), opcodes 0xEA-0xEC, 0xEE and 0xEF in the normal and
 // skip tables. 0xEE returns the original's fall-through value 0xEF, which the
 // script VM refuses as a pointer result.

@@ -306,21 +306,21 @@ class LiveWorld final : public ActionPreviewWorld {
   std::vector<std::unique_ptr<LiveActor>> owners_;
 };
 }  // namespace
-// decomp: func_800856F8 (src/BATTLE/BATTLE.PRG/146C.c:13058).
+// decomp: func_800856F8 (src/BATTLE/BATTLE.PRG/146C.c:12896).
 void ClearLiveActionRequest(void* request) {
   if (request == nullptr) Refuse();
   ActionRequest value;
   ClearActionRequest(value);
   std::memcpy(request, &value, sizeof value);
 }
-// decomp: func_80085718 (src/BATTLE/BATTLE.PRG/146C.c:13060).
+// decomp: func_80085718 (src/BATTLE/BATTLE.PRG/146C.c:12898).
 void InitializeLiveActionHit(VS::Battle::HitResult* hit) {
   if (hit == nullptr) Refuse();
   ActionHit value;
   InitializeActionHit(value);
   *hit = std::bit_cast<VS::Battle::HitResult>(value);
 }
-// decomp: func_80085A34 (src/BATTLE/BATTLE.PRG/146C.c:13186).
+// decomp: func_80085A34 (src/BATTLE/BATTLE.PRG/146C.c:13024).
 void FinalizeLiveActionHit(HitStatusView* hit) {
   if (hit == nullptr) Refuse();
   auto value = std::bit_cast<ActionHit>(*hit);
@@ -342,7 +342,7 @@ void ResolveLiveActionTargets(int action, ActionRequestRecord* result,
   }
   world.Publish();
 }
-// decomp: func_8008631C (src/BATTLE/BATTLE.PRG/146C.c:13421).
+// decomp: func_8008631C (src/BATTLE/BATTLE.PRG/146C.c:13285).
 int PreviewLiveActionAgainstLimb(int action, int source, int target, int limb,
                                  void* result) {
   if (result == nullptr) Refuse();
@@ -353,7 +353,7 @@ int PreviewLiveActionAgainstLimb(int action, int source, int target, int limb,
       Checked(PreviewActionAgainstLimb(static_cast<std::uint32_t>(action),
                                        source, target, limb, output, world)));
 }
-// decomp: func_800863A4 (src/BATTLE/BATTLE.PRG/146C.c:13436).
+// decomp: func_800863A4 (src/BATTLE/BATTLE.PRG/146C.c:13300).
 int PreviewLiveActionAgainstActor(int action, int source, int target, int limb,
                                   SVECTOR* source_position,
                                   SVECTOR* target_position,

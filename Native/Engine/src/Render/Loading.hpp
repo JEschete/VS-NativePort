@@ -8,7 +8,7 @@
 namespace VS::Render {
 inline constexpr std::size_t kLoadingScreenPixelWords = 1260;
 
-// decomp: imgHeader_t (src/SLUS_010.40/main.c:134)
+// decomp: ImgHeader (src/SLUS_010.40/main.c:192-197; was imgHeader_t)
 struct LegacyImageSize {
   std::uint8_t width_low;
   std::uint8_t width_high;

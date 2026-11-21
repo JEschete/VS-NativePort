@@ -1002,7 +1002,7 @@ void ReturnToCategory(Context& context, CategoryState& menu, int subtitle_row,
   }
 }
 
-// decomp: MENUC.PRG _drawOk (src/MENU/MENUC.PRG/168.c:19)
+// decomp: MENUC.PRG drawOk (src/MENU/MENUC.PRG/168.c:29; was _drawOk)
 void DrawConfirmationLabel(Context& context, int row, int brightness) {
   const std::int32_t level =
       (Core::Math::Sine(brightness * kBlinkAngleScale) >> kBlinkShift) +
@@ -1012,7 +1012,8 @@ void DrawConfirmationLabel(Context& context, int row, int brightness) {
       static_cast<std::uint32_t>(level) * kGreyStep);
 }
 
-// decomp: MENUC.PRG _setMenuTitle (src/MENU/MENUC.PRG/168.c:29)
+// decomp: MENUC.PRG setMenuTitle (src/MENU/MENUC.PRG/168.c:39; was
+// _setMenuTitle)
 void SetTitleRow(Context& context, int row_id, std::size_t text_offset) {
   MenuRow& row =
       context.host.SetMenuItem({.row = row_id,
@@ -1026,7 +1027,8 @@ void SetTitleRow(Context& context, int row_id, std::size_t text_offset) {
   row.selected = 1;
 }
 
-// decomp: MENUC.PRG _initMenuItem (src/MENU/MENUC.PRG/168.c:110)
+// decomp: MENUC.PRG initMenuItem (src/MENU/MENUC.PRG/168.c:120; was
+// _initMenuItem)
 void InitializeEquipmentHeader(Context& context, std::size_t text_offset,
                                int icon) {
   MenuRow& row = context.host.SetMenuItem(kEquipmentHeader,
@@ -1046,7 +1048,8 @@ void InitializeEquipmentHeader(Context& context, std::size_t text_offset,
   context.host.UpdatePrimaryStatPanel(kShowPanel);
 }
 
-// decomp: MENUC.PRG _copyMenuItem (src/MENU/MENUC.PRG/168.c:141)
+// decomp: MENUC.PRG copyMenuItem (src/MENU/MENUC.PRG/168.c:151; was
+// _copyMenuItem)
 void MoveMenuRow(Context& context, int source, int target) {
   if (source != target) {
     context.host.MenuItem(target) = context.host.MenuItem(source);
@@ -1054,7 +1057,8 @@ void MoveMenuRow(Context& context, int source, int target) {
   }
 }
 
-// decomp: MENUC.PRG _confirmationPrompt (src/MENU/MENUC.PRG/168.c:155)
+// decomp: MENUC.PRG confirmationPrompt (src/MENU/MENUC.PRG/168.c:165; was
+// _confirmationPrompt)
 int UpdateConfirmationPrompt(Context& context, bool initialize) {
   PromptState& prompt = context.state.confirmation;
   if (initialize) {
@@ -1099,7 +1103,8 @@ int UpdateConfirmationPrompt(Context& context, bool initialize) {
   return action;
 }
 
-// decomp: MENUC.PRG _confirmCombine (src/MENU/MENUC.PRG/168.c:225)
+// decomp: MENUC.PRG confirmCombine (src/MENU/MENUC.PRG/168.c:235; was
+// _confirmCombine)
 int UpdateThreeChoicePrompt(Context& context, int cancel_row) {
   PromptState& prompt = context.state.three_choice;
   if (cancel_row != 0) {
@@ -1159,7 +1164,8 @@ int UpdateThreeChoicePrompt(Context& context, int cancel_row) {
   return action;
 }
 
-// decomp: MENUC.PRG _leaveItemSlotSelection (src/MENU/MENUC.PRG/168.c:419)
+// decomp: MENUC.PRG leaveItemSlotSelection (src/MENU/MENUC.PRG/168.c:429; was
+// _leaveItemSlotSelection)
 int LeaveItemSelection(Context& context, bool hide_equipment_panels) {
   context.host.PlaySound(MenuSound::kLeave);
   context.host.ClearMenuExcept(kNoRow);
@@ -1173,7 +1179,8 @@ int LeaveItemSelection(Context& context, bool hide_equipment_panels) {
   return Pressed(context.host.Input(), pad::kTriangle) ? -2 : -1;
 }
 
-// decomp: MENUC.PRG _populateItemsList (src/MENU/MENUC.PRG/168.c:450)
+// decomp: MENUC.PRG populateItemsList (src/MENU/MENUC.PRG/168.c:460; was
+// _populateItemsList)
 void BuildItemList(Context& context, std::span<const RowText> texts,
                    std::span<const std::int32_t> row_types) {
   ItemListState& list = List(context);
@@ -1235,12 +1242,14 @@ void BuildItemList(Context& context, std::span<const RowText> texts,
   list.row_info_unused = RowInfo(flags);
 }
 
-// decomp: MENUC.PRG _getSelectedRow (src/MENU/MENUC.PRG/168.c:511)
+// decomp: MENUC.PRG getSelectedRow (src/MENU/MENUC.PRG/168.c:521; was
+// _getSelectedRow)
 int GetSelectedItemRow(const State& state) {
   return state.item_list.open ? -1 : state.item_list.selection;
 }
 
-// decomp: MENUC.PRG _navigateItemsList (src/MENU/MENUC.PRG/168.c:518)
+// decomp: MENUC.PRG navigateItemsList (src/MENU/MENUC.PRG/168.c:528; was
+// _navigateItemsList)
 void UpdateItemList(Context& context, int flags) {
   ItemListState& list = List(context);
   if (list.step < kItemListVisibleRows) {
@@ -1269,7 +1278,8 @@ void UpdateItemList(Context& context, int flags) {
   }
 }
 
-// decomp: MENUC.PRG _initMenuHeader (src/MENU/MENUC.PRG/168.c:784)
+// decomp: MENUC.PRG initMenuHeader (src/MENU/MENUC.PRG/168.c:793; was
+// _initMenuHeader)
 void AnimateItemHeader(Context& context, int row) {
   MenuRow& header = context.host.MenuItem(row);
   header.state = RowState::kSlideXy;
@@ -1277,7 +1287,8 @@ void AnimateItemHeader(Context& context, int row) {
   header.target1 = kListTopY;
 }
 
-// decomp: MENUC.PRG _disassembleMenu (src/MENU/MENUC.PRG/168.c:2100)
+// decomp: MENUC.PRG disassembleMenu (src/MENU/MENUC.PRG/168.c:2108; was
+// _disassembleMenu)
 int UpdateDisassembly(Context& context, int category) {
   EquipmentScreenState& screen = context.state.disassembly;
   if (category != 0) {
@@ -1352,7 +1363,8 @@ int UpdateDisassembly(Context& context, int category) {
   return 0;
 }
 
-// decomp: MENUC.PRG _disassembleTopMenu (src/MENU/MENUC.PRG/168.c:2285)
+// decomp: MENUC.PRG disassembleTopMenu (src/MENU/MENUC.PRG/168.c:2293; was
+// _disassembleTopMenu)
 int UpdateDisassemblyCategory(Context& context, bool initialize) {
   CategoryState& menu = context.state.disassembly_category;
   if (initialize) {
@@ -1449,7 +1461,8 @@ int AnswerRename(Context& context) {
 
 }  // namespace
 
-// decomp: MENUC.PRG _renameWeaponMenu (src/MENU/MENUC.PRG/168.c:2374)
+// decomp: MENUC.PRG renameWeaponMenu (src/MENU/MENUC.PRG/168.c:2382; was
+// _renameWeaponMenu)
 int UpdateWeaponRename(Context& context, bool initialize) {
   EquipmentScreenState& screen = context.state.rename;
   if (initialize) {
@@ -1520,7 +1533,7 @@ int UpdateWeaponRename(Context& context, bool initialize) {
   return 0;
 }
 
-// decomp: MENUC.PRG _repairMenu (src/MENU/MENUC.PRG/168.c:2509)
+// decomp: MENUC.PRG repairMenu (src/MENU/MENUC.PRG/168.c:2517; was _repairMenu)
 int UpdateRepair(Context& context, bool initialize) {
   RepairState& repair = context.state.repair;
   if (initialize) {
@@ -1587,7 +1600,7 @@ int UpdateRepair(Context& context, bool initialize) {
   return 0;
 }
 
-// decomp: MENUC.PRG vs_menuC_exec (src/MENU/MENUC.PRG/168.c:4550)
+// decomp: MENUC.PRG vs_menuC_exec (src/MENU/MENUC.PRG/168.c:4554)
 int Update(Context& context, std::uint8_t& step) {
   switch (step) {
     case kTopEnter:
@@ -1639,7 +1652,7 @@ int Update(Context& context, std::uint8_t& step) {
   return 0;
 }
 
-// decomp: MENUC.PRG _loadObject (src/MENU/MENUC.PRG/9258.c:7)
+// decomp: MENUC.PRG loadObject (src/MENU/MENUC.PRG/9258.c:9; was _loadObject)
 int ReloadAshleyEquipment(Context& context, int mode) {
   if (mode == kShieldReload) {
     context.host.ReleaseWeaponModel(1);

@@ -146,12 +146,14 @@ class EventTweenEasing {
   virtual void RecordEasedFraction(std::int32_t fraction) = 0;
 };
 
-// decomp: BATTLE.PRG func_800BB450 (F01198, 4A0A8.c:2793) Opcode 0xE1.
-// False for a command shorter than kSetScreenCaptureLength, with nothing set.
+// decomp: BATTLE.PRG vs_battle_script_E1 (F01198,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:3442; was func_800BB450) Opcode 0xE1. False for
+// a command shorter than kSetScreenCaptureLength, with nothing set.
 [[nodiscard]] bool CommandSetScreenCapture(ScriptCommand command,
                                            EventScreenEffectPort& screen);
 
-// decomp: BATTLE.PRG func_800BD444 (F01226, 4A0A8.c:3601) Opcodes 0xE2 (the
+// decomp: BATTLE.PRG vs_battle_script_E2_E3_camera (F01226,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:4251; was func_800BD444) Opcodes 0xE2 (the
 // camera roll) and 0xE3 (the captured screen roll). A zero duration sets the
 // angle at once; otherwise the tween takes the shorter way round unless the
 // direction nibble forces a negative (0) or positive (2) turn. False, with
@@ -162,13 +164,14 @@ class EventTweenEasing {
                                           EventAngleTween& camera_roll,
                                           EventAngleTween& screen_roll);
 
-// decomp: BATTLE.PRG func_800BD57C (F01227, 4A0A8.c:3647) Advances a running
-// roll by half of `tick_speed` and marks it changed; it stops once the elapsed
-// time reaches the duration.
+// decomp: BATTLE.PRG func_800BD57C (F01227, src/BATTLE/BATTLE.PRG/4DEA8.c:4297)
+// Advances a running roll by half of `tick_speed` and marks it changed; it
+// stops once the elapsed time reaches the duration.
 void UpdateEventAngleTween(EventAngleTween& tween, std::int32_t tick_speed,
                            EventTweenEasing& easing);
 
-// decomp: BATTLE.PRG func_800BD6C4 (F01229, 4A0A8.c:3691) Opcodes 0xB9, 0xBA,
+// decomp: BATTLE.PRG vs_battle_script_B9_BA_BF_E4_E5_E6_E7_ED (F01229,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:4341; was func_800BD6C4) Opcodes 0xB9, 0xBA,
 // 0xBF, 0xE4-0xE7 and 0xED. Returns the script result: 1 while a radial warp
 // tween is still running (0xED waits), else 0. Nothing for a short command
 // or another opcode, with nothing changed.
@@ -176,15 +179,16 @@ void UpdateEventAngleTween(EventAngleTween& tween, std::int32_t tick_speed,
     ScriptCommand command, EventScreenTweens& tweens,
     EventScreenEffectPort& screen);
 
-// decomp: BATTLE.PRG func_800BDBB4 (F01231, 4A0A8.c:3838) Advances a running
-// tween by half of `tick_speed` and returns its eased fraction, or nothing for
-// an idle tween. It stops only when the elapsed time equals the duration.
+// decomp: BATTLE.PRG func_800BDBB4 (F01231, src/BATTLE/BATTLE.PRG/4DEA8.c:4488)
+// Advances a running tween by half of `tick_speed` and returns its eased
+// fraction, or nothing for an idle tween. It stops only when the elapsed time
+// equals the duration.
 [[nodiscard]] std::optional<std::int32_t> UpdateEventTripleTween(
     EventScreenTween& tween, std::int32_t tick_speed, EventTweenEasing& easing);
 
-// decomp: BATTLE.PRG func_800BDAB4 (F01230, 4A0A8.c:3812) Advances the four
-// tweens in order and applies each running one to the captured screen or the
-// radial warp.
+// decomp: BATTLE.PRG func_800BDAB4 (F01230, src/BATTLE/BATTLE.PRG/4DEA8.c:4462)
+// Advances the four tweens in order and applies each running one to the
+// captured screen or the radial warp.
 void UpdateEventScreenTransforms(EventScreenTweens& tweens,
                                  std::int32_t tick_speed,
                                  EventTweenEasing& easing,

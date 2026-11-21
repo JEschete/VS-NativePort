@@ -225,7 +225,7 @@ static_assert(std::is_same_v<decltype(&SetLiveActionFlag64), Mediator>);
 static_assert(std::is_same_v<decltype(&SetLiveActionFlag32), Mediator>);
 }  // namespace
 
-// decomp: func_800847F0 (src/BATTLE/BATTLE.PRG/146C.c:12694).
+// decomp: func_800847F0 (src/BATTLE/BATTLE.PRG/146C.c:12556).
 void QueueLiveDarkAffinityRecovery(ActionDefinition* action,
                                    VS::Battle::HitResult* source,
                                    VS::Battle::HitResult* target, int hit,
@@ -233,7 +233,7 @@ void QueueLiveDarkAffinityRecovery(ActionDefinition* action,
   LiveTriggeredRecoveryQueue queue(action, source, target, hit, execute);
   QueueDarkAffinityRecovery(queue);
 }
-// decomp: func_80084870 (src/BATTLE/BATTLE.PRG/146C.c:12705).
+// decomp: func_80084870 (src/BATTLE/BATTLE.PRG/146C.c:12566).
 void QueueLiveDamageTriggeredRecovery(ActionDefinition* action,
                                       VS::Battle::HitResult* source,
                                       VS::Battle::HitResult* target, int hit,
@@ -247,7 +247,7 @@ void QueueLiveDamageTriggeredRecovery(ActionDefinition* action,
       queue);
 }
 
-// decomp: func_80084390 (src/BATTLE/BATTLE.PRG/146C.c:12606).
+// decomp: func_80084390 (src/BATTLE/BATTLE.PRG/146C.c:12476).
 void QueueLiveSpellTriggeredRecovery(ActionDefinition* action,
                                      VS::Battle::HitResult* source,
                                      VS::Battle::HitResult* target, int hit,
@@ -255,7 +255,7 @@ void QueueLiveSpellTriggeredRecovery(ActionDefinition* action,
   LiveTriggeredRecoveryQueue queue(action, source, target, hit, execute);
   QueueSpellTriggeredRecovery(queue);
 }
-// decomp: func_80084440 (src/BATTLE/BATTLE.PRG/146C.c:12617).
+// decomp: func_80084440 (src/BATTLE/BATTLE.PRG/146C.c:12486).
 void QueueLiveNonSpellTriggeredRecovery(ActionDefinition* action,
                                         VS::Battle::HitResult* source,
                                         VS::Battle::HitResult* target, int hit,
@@ -263,7 +263,7 @@ void QueueLiveNonSpellTriggeredRecovery(ActionDefinition* action,
   LiveTriggeredRecoveryQueue queue(action, source, target, hit, execute);
   QueueNonSpellTriggeredRecovery(queue);
 }
-// decomp: func_800844F0 (src/BATTLE/BATTLE.PRG/146C.c:12628).
+// decomp: func_800844F0 (src/BATTLE/BATTLE.PRG/146C.c:12496).
 void QueueLivePhysicalAffinityRecovery(ActionDefinition* action,
                                        VS::Battle::HitResult* source,
                                        VS::Battle::HitResult* target, int hit,
@@ -271,7 +271,7 @@ void QueueLivePhysicalAffinityRecovery(ActionDefinition* action,
   LiveTriggeredRecoveryQueue queue(action, source, target, hit, execute);
   QueuePhysicalAffinityRecovery(queue);
 }
-// decomp: func_80084570 (src/BATTLE/BATTLE.PRG/146C.c:12639).
+// decomp: func_80084570 (src/BATTLE/BATTLE.PRG/146C.c:12506).
 void QueueLiveAirAffinityRecovery(ActionDefinition* action,
                                   VS::Battle::HitResult* source,
                                   VS::Battle::HitResult* target, int hit,
@@ -279,7 +279,7 @@ void QueueLiveAirAffinityRecovery(ActionDefinition* action,
   LiveTriggeredRecoveryQueue queue(action, source, target, hit, execute);
   QueueAirAffinityRecovery(queue);
 }
-// decomp: func_800845F0 (src/BATTLE/BATTLE.PRG/146C.c:12650).
+// decomp: func_800845F0 (src/BATTLE/BATTLE.PRG/146C.c:12516).
 void QueueLiveFireAffinityRecovery(ActionDefinition* action,
                                    VS::Battle::HitResult* source,
                                    VS::Battle::HitResult* target, int hit,
@@ -287,7 +287,7 @@ void QueueLiveFireAffinityRecovery(ActionDefinition* action,
   LiveTriggeredRecoveryQueue queue(action, source, target, hit, execute);
   QueueFireAffinityRecovery(queue);
 }
-// decomp: func_80084670 (src/BATTLE/BATTLE.PRG/146C.c:12661).
+// decomp: func_80084670 (src/BATTLE/BATTLE.PRG/146C.c:12526).
 void QueueLiveEarthAffinityRecovery(ActionDefinition* action,
                                     VS::Battle::HitResult* source,
                                     VS::Battle::HitResult* target, int hit,
@@ -295,7 +295,7 @@ void QueueLiveEarthAffinityRecovery(ActionDefinition* action,
   LiveTriggeredRecoveryQueue queue(action, source, target, hit, execute);
   QueueEarthAffinityRecovery(queue);
 }
-// decomp: func_800846F0 (src/BATTLE/BATTLE.PRG/146C.c:12672).
+// decomp: func_800846F0 (src/BATTLE/BATTLE.PRG/146C.c:12536).
 void QueueLiveWaterAffinityRecovery(ActionDefinition* action,
                                     VS::Battle::HitResult* source,
                                     VS::Battle::HitResult* target, int hit,
@@ -303,7 +303,7 @@ void QueueLiveWaterAffinityRecovery(ActionDefinition* action,
   LiveTriggeredRecoveryQueue queue(action, source, target, hit, execute);
   QueueWaterAffinityRecovery(queue);
 }
-// decomp: func_80084770 (src/BATTLE/BATTLE.PRG/146C.c:12683).
+// decomp: func_80084770 (src/BATTLE/BATTLE.PRG/146C.c:12546).
 void QueueLiveLightAffinityRecovery(ActionDefinition* action,
                                     VS::Battle::HitResult* source,
                                     VS::Battle::HitResult* target, int hit,
@@ -312,14 +312,16 @@ void QueueLiveLightAffinityRecovery(ActionDefinition* action,
   QueueLightAffinityRecovery(queue);
 }
 
-// decomp: _increaseStrengthRand (src/BATTLE/BATTLE.PRG/146C.c:12717).
+// decomp: increaseStrengthRand (src/BATTLE/BATTLE.PRG/146C.c:12577; was
+// _increaseStrengthRand).
 void QueueLiveRandomStrengthIncrease(ActionDefinition*, VS::Battle::HitResult*,
                                      VS::Battle::HitResult* target, int, int) {
   LiveRandomStatQueue queue(HitOf(target));
   QueueRandomStrengthIncrease(queue);
 }
 
-// decomp: _increaseIntelligenceRand (src/BATTLE/BATTLE.PRG/146C.c:12726).
+// decomp: increaseIntelligenceRand (src/BATTLE/BATTLE.PRG/146C.c:12585; was
+// _increaseIntelligenceRand).
 void QueueLiveRandomIntelligenceIncrease(ActionDefinition*,
                                          VS::Battle::HitResult*,
                                          VS::Battle::HitResult* target, int,
@@ -328,35 +330,40 @@ void QueueLiveRandomIntelligenceIncrease(ActionDefinition*,
   QueueRandomIntelligenceIncrease(queue);
 }
 
-// decomp: _increaseAgilityRand (src/BATTLE/BATTLE.PRG/146C.c:12735).
+// decomp: increaseAgilityRand (src/BATTLE/BATTLE.PRG/146C.c:12593; was
+// _increaseAgilityRand).
 void QueueLiveRandomAgilityIncrease(ActionDefinition*, VS::Battle::HitResult*,
                                     VS::Battle::HitResult* target, int, int) {
   LiveRandomStatQueue queue(HitOf(target));
   QueueRandomAgilityIncrease(queue);
 }
 
-// decomp: _increaseMaxHpRand (src/BATTLE/BATTLE.PRG/146C.c:12744).
+// decomp: increaseMaxHpRand (src/BATTLE/BATTLE.PRG/146C.c:12601; was
+// _increaseMaxHpRand).
 void QueueLiveRandomMaxHpIncrease(ActionDefinition*, VS::Battle::HitResult*,
                                   VS::Battle::HitResult* target, int, int) {
   LiveRandomStatQueue queue(HitOf(target));
   QueueRandomMaxHpIncrease(queue);
 }
 
-// decomp: _increaseMaxMpRand (src/BATTLE/BATTLE.PRG/146C.c:12753).
+// decomp: increaseMaxMpRand (src/BATTLE/BATTLE.PRG/146C.c:12609; was
+// _increaseMaxMpRand).
 void QueueLiveRandomMaxMpIncrease(ActionDefinition*, VS::Battle::HitResult*,
                                   VS::Battle::HitResult* target, int, int) {
   LiveRandomStatQueue queue(HitOf(target));
   QueueRandomMaxMpIncrease(queue);
 }
 
-// decomp: _decreaseStrengthRand (src/BATTLE/BATTLE.PRG/146C.c:12762).
+// decomp: decreaseStrengthRand (src/BATTLE/BATTLE.PRG/146C.c:12617; was
+// _decreaseStrengthRand).
 void QueueLiveRandomStrengthDecrease(ActionDefinition*, VS::Battle::HitResult*,
                                      VS::Battle::HitResult* target, int, int) {
   LiveRandomStatQueue queue(HitOf(target));
   QueueRandomStrengthDecrease(queue);
 }
 
-// decomp: _decreaseIntelligenceRand (src/BATTLE/BATTLE.PRG/146C.c:12771).
+// decomp: decreaseIntelligenceRand (src/BATTLE/BATTLE.PRG/146C.c:12625; was
+// _decreaseIntelligenceRand).
 void QueueLiveRandomIntelligenceDecrease(ActionDefinition*,
                                          VS::Battle::HitResult*,
                                          VS::Battle::HitResult* target, int,
@@ -365,7 +372,8 @@ void QueueLiveRandomIntelligenceDecrease(ActionDefinition*,
   QueueRandomIntelligenceDecrease(queue);
 }
 
-// decomp: _decreaseAglityRand (src/BATTLE/BATTLE.PRG/146C.c:12780).
+// decomp: decreaseAglityRand (src/BATTLE/BATTLE.PRG/146C.c:12633; was
+// _decreaseAglityRand).
 void QueueLiveRandomAgilityDecrease(ActionDefinition*, VS::Battle::HitResult*,
                                     VS::Battle::HitResult* target, int, int) {
   LiveRandomStatQueue queue(HitOf(target));
@@ -373,7 +381,7 @@ void QueueLiveRandomAgilityDecrease(ActionDefinition*, VS::Battle::HitResult*,
 }
 
 // decomp: func_80084228 / func_800842F0 / func_80084370
-// (src/BATTLE/BATTLE.PRG/146C.c:12547/12572/12599).
+// (src/BATTLE/BATTLE.PRG/146C.c:12470:12547/12572/12599).
 void MarkLiveSourceActionSuccess(ActionDefinition*,
                                  VS::Battle::HitResult* source,
                                  VS::Battle::HitResult*, int, int) {
@@ -383,14 +391,14 @@ void MarkLiveSourceActionSuccess(ActionDefinition*,
   hit.source_result = static_cast<std::uint8_t>(outcome);
 }
 
-// decomp: func_80084248 (src/BATTLE/BATTLE.PRG/146C.c:12554).
+// decomp: func_80084248 (src/BATTLE/BATTLE.PRG/146C.c:12432).
 void QueueLiveInstantDeath(ActionDefinition*, VS::Battle::HitResult*,
                            VS::Battle::HitResult* target, int, int) {
   LiveInstantDeathQueue queue(HitOf(target));
   QueueInstantDeath(queue);
 }
 
-// decomp: func_800842AC (src/BATTLE/BATTLE.PRG/146C.c:12563).
+// decomp: func_800842AC (src/BATTLE/BATTLE.PRG/146C.c:12440).
 void QueueLiveDamageBasedArmorWear(ActionDefinition*, VS::Battle::HitResult*,
                                    VS::Battle::HitResult* target, int, int) {
   auto& hit = HitOf(target);
@@ -408,14 +416,14 @@ void QueueLiveDamageBasedArmorWear(ActionDefinition*, VS::Battle::HitResult*,
   hit.armor_dp_effect = armor.mode;
 }
 
-// decomp: func_80084310 (src/BATTLE/BATTLE.PRG/146C.c:12579).
+// decomp: func_80084310 (src/BATTLE/BATTLE.PRG/146C.c:12454).
 void SetLiveActionFlag64(ActionDefinition*, VS::Battle::HitResult*,
                          VS::Battle::HitResult*, int, int execute) {
   LiveActionScriptFlags flags;
   SetActionFlag64(execute != 0, flags);
 }
 
-// decomp: func_80084340 (src/BATTLE/BATTLE.PRG/146C.c:12589).
+// decomp: func_80084340 (src/BATTLE/BATTLE.PRG/146C.c:12462).
 void SetLiveActionFlag32(ActionDefinition*, VS::Battle::HitResult*,
                          VS::Battle::HitResult*, int, int execute) {
   LiveActionScriptFlags flags;

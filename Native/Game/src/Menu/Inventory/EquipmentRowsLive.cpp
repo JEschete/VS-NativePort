@@ -62,7 +62,7 @@ constexpr int kPreviewActor = 1;
 constexpr int kAdvanceAllBones = 1;
 constexpr int kWeaponDrawTransition = 1;
 std::uint64_t refusals = 0;
-// decomp: _processEquipSubMenu's cursor static (16C.c:113).
+// decomp: _processEquipSubMenu's cursor static (src/MENU/MENU3.PRG/16C.c:113).
 std::uint8_t cursorAnimation = 0;
 
 void Refuse(std::string_view reason) {

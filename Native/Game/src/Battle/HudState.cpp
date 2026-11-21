@@ -35,7 +35,7 @@ bool HudState::SuppressesLimbDisplay() const {
   return (lower_screen & kMenuBackgroundBit) != 0;
 }
 
-// decomp: F01356 vs_battle_getStatusFlags (src/BATTLE/BATTLE.PRG/5BF94.c:3158).
+// decomp: F01356 vs_battle_getStatusFlags (src/BATTLE/BATTLE.PRG/5BF94.c:2709).
 std::optional<std::uint32_t> StatusIconFlags(
     HudStatusView status, std::span<const std::uint16_t> upper_status_icons) {
   std::uint32_t icons =
@@ -49,7 +49,7 @@ std::optional<std::uint32_t> StatusIconFlags(
   return icons;
 }
 
-// decomp: F01357 vs_battle_getLimbStatus (src/BATTLE/BATTLE.PRG/5BF94.c:3174).
+// decomp: F01357 vs_battle_getLimbStatus (src/BATTLE/BATTLE.PRG/5BF94.c:2725).
 HudLimbCondition LimbCondition(HudLimbHealthView limb) {
   const std::int32_t hp = limb.hp;
   const std::int32_t max_hp = limb.max_hp;
@@ -63,7 +63,8 @@ HudLimbCondition LimbCondition(HudLimbHealthView limb) {
   return HudLimbCondition::kExcellent;
 }
 
-// decomp: F00235 func_8007BD8C (src/BATTLE/BATTLE.PRG/146C.c:8561).
+// decomp: F00235 setUiHidden (src/BATTLE/BATTLE.PRG/146C.c:8503; was
+// func_8007BD8C).
 std::int32_t SetGameplayHudHidden(GameplayHudWorld& world,
                                   std::int32_t command) {
   if (command != 0) {
@@ -76,27 +77,27 @@ std::int32_t SetGameplayHudHidden(GameplayHudWorld& world,
   return command;
 }
 
-// decomp: F01359 func_800C9F88 (src/BATTLE/BATTLE.PRG/5BF94.c:3239).
+// decomp: F01359 func_800C9F88 (src/BATTLE/BATTLE.PRG/5BF94.c:2790).
 void ShowShortcutHud(HudState& state) {
   state.shortcut = static_cast<std::uint8_t>(ShortcutHudRequest::kOpen);
 }
 
-// decomp: F01382 func_800CB550 (src/BATTLE/BATTLE.PRG/5BF94.c:3838).
+// decomp: F01382 func_800CB550 (src/BATTLE/BATTLE.PRG/5BF94.c:3404).
 void ShowPuzzleTimer(HudState& state) {
   state.lower_screen = static_cast<std::uint8_t>(LowerScreenUi::kPuzzleTimer);
 }
 
-// decomp: F01383 func_800CB560 (src/BATTLE/BATTLE.PRG/5BF94.c:3840).
+// decomp: F01383 func_800CB560 (src/BATTLE/BATTLE.PRG/5BF94.c:3406).
 void HidePuzzleTimer(HudState& state) {
   state.lower_screen = static_cast<std::uint8_t>(LowerScreenUi::kIdle);
 }
 
-// decomp: F01385 func_800CB654 (src/BATTLE/BATTLE.PRG/5BF94.c:3867).
+// decomp: F01385 func_800CB654 (src/BATTLE/BATTLE.PRG/5BF94.c:3433).
 void SetHudHidden(HudState& state, HudVisibilityCommand visibility) {
   state.visibility = visibility;
 }
 
-// decomp: F01386 func_800CB660 (src/BATTLE/BATTLE.PRG/5BF94.c:3869).
+// decomp: F01386 func_800CB660 (src/BATTLE/BATTLE.PRG/5BF94.c:3435).
 void SetHudBattleMode(HudState& state, HudBattleModeCommand mode) {
   state.battle_mode = mode;
 }

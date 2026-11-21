@@ -136,20 +136,23 @@ void AnimatePoints(AbilityScreenAnimation& animation, AbilityScreenHost& host) {
 }
 }  // namespace
 
-// decomp: _chainAbilityMenu (src/MENU/MENU2.PRG/64.c:492; 0x801034FC).
+// decomp: chainAbilityMenu (src/MENU/MENU2.PRG/64.c:501; was _chainAbilityMenu;
+// 0x801034FC).
 int UpdateChainAbilityMenu(AbilityListState& state, AbilityListHost& host,
                            bool initialize) {
   return UpdateLearnedAbilities(AbilityKind::kChain, state, host, initialize);
 }
 
-// decomp: _defenseAbilityMenu (src/MENU/MENU2.PRG/64.c:553; 0x80103670).
+// decomp: defenseAbilityMenu (src/MENU/MENU2.PRG/64.c:562; was
+// _defenseAbilityMenu; 0x80103670).
 int UpdateDefenseAbilityMenu(AbilityListState& state, AbilityListHost& host,
                              bool initialize) {
   return UpdateLearnedAbilities(AbilityKind::kDefense, state, host, initialize);
 }
 
-// decomp: _setNextAbilityUnlockPointsRemaining
-// (src/MENU/MENU2.PRG/64.c:612; 0x801037E4).
+// decomp: setNextAbilityUnlockPointsRemaining
+// (src/MENU/MENU2.PRG/64.c:621; was _setNextAbilityUnlockPointsRemaining;
+// 0x801037E4).
 void DrawNextUnlockPoints(int x_offset, UnlockPointsHost& host) {
   const int count = host.UnlockCount();
   if (count == kAllAbilitiesUnlocked) return;
@@ -179,7 +182,7 @@ void DrawNextUnlockPoints(int x_offset, UnlockPointsHost& host) {
                        screen + kPointValueOffset);
 }
 
-// decomp: vs_menu2_exec (src/MENU/MENU2.PRG/64.c:656; 0x801038D4).
+// decomp: vs_menu2_exec (src/MENU/MENU2.PRG/64.c:665; 0x801038D4).
 int UpdateAbilityScreen(std::uint8_t& phase, AbilityScreenAnimation& animation,
                         AbilityScreenHost& host) {
   switch (static_cast<AbilityScreenPhase>(phase)) {

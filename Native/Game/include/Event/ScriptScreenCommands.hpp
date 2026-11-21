@@ -43,40 +43,42 @@ inline constexpr unsigned kPaletteModeMask = 0xF;
 inline constexpr unsigned kShiftAmountMask = 31;
 inline constexpr unsigned kPaletteDurationMask = 0x1F;
 
-// decomp: BATTLE.PRG func_800B9A40 (src/BATTLE/BATTLE.PRG/4A0A8.c:2049)
-// Opcode 0x69: starts the fade-out on an idle transition and holds until the
-// transition reports the covered screen.
+// decomp: BATTLE.PRG vs_battle_script_69 (src/BATTLE/BATTLE.PRG/4DEA8.c:2636;
+// was func_800B9A40) Opcode 0x69: starts the fade-out on an idle transition and
+// holds until the transition reports the covered screen.
 ScriptFlow ScriptFadeOutAndWait(const ScriptInstruction& instruction,
                                 ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800B9A94 (src/BATTLE/BATTLE.PRG/4A0A8.c:2061)
-// Opcode 0x6A.
+// decomp: BATTLE.PRG vs_battle_script_6A (src/BATTLE/BATTLE.PRG/4DEA8.c:2648;
+// was func_800B9A94) Opcode 0x6A.
 ScriptFlow ScriptFadeIn(const ScriptInstruction& instruction,
                         ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800B9AC4 (src/BATTLE/BATTLE.PRG/4A0A8.c:2067)
-// Opcode 0x6B.
+// decomp: BATTLE.PRG vs_battle_script_6B (src/BATTLE/BATTLE.PRG/4DEA8.c:2654;
+// was func_800B9AC4) Opcode 0x6B.
 ScriptFlow ScriptSetWipeAngle(const ScriptInstruction& instruction,
                               ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800B9AE8 (src/BATTLE/BATTLE.PRG/4A0A8.c:2073)
-// Opcode 0x6C: the style of later room transitions.
+// decomp: BATTLE.PRG vs_battle_script_6C (src/BATTLE/BATTLE.PRG/4DEA8.c:2660;
+// was func_800B9AE8) Opcode 0x6C: the style of later room transitions.
 ScriptFlow ScriptConfigureScreenTransition(const ScriptInstruction& instruction,
                                            ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800B9B18 (src/BATTLE/BATTLE.PRG/4A0A8.c:2079)
-// Opcode 0x6D: the display, then the primary room geometry, then the actor
-// models.
+// decomp: BATTLE.PRG vs_battle_script_6D (src/BATTLE/BATTLE.PRG/4DEA8.c:2666;
+// was func_800B9B18) Opcode 0x6D: the display, then the primary room geometry,
+// then the actor models.
 ScriptFlow ScriptSetRoomDisplayFlags(const ScriptInstruction& instruction,
                                      ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800B9BF8 (src/BATTLE/BATTLE.PRG/4A0A8.c:2110)
-// Opcode 0x6E: holds while any screen transition runs. It reads no operand.
+// decomp: BATTLE.PRG vs_battle_script_6E (src/BATTLE/BATTLE.PRG/4DEA8.c:2697;
+// was func_800B9BF8) Opcode 0x6E: holds while any screen transition runs. It
+// reads no operand.
 ScriptFlow ScriptWaitForScreenTransition(const ScriptInstruction& instruction,
                                          ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800B9C18 (src/BATTLE/BATTLE.PRG/4A0A8.c:2112)
-// Opcode 0x6F: runs one of two palette hooks, both empty in this executable.
+// decomp: BATTLE.PRG vs_battle_script_6F (src/BATTLE/BATTLE.PRG/4DEA8.c:2702;
+// was func_800B9C18) Opcode 0x6F: runs one of two palette hooks, both empty in
+// this executable.
 ScriptFlow ScriptTogglePaletteHook(const ScriptInstruction& instruction,
                                    ScriptVmHost& host);
-// decomp: BATTLE.PRG func_800B9C58 (src/BATTLE/BATTLE.PRG/4A0A8.c:2122)
-// Opcode 0x70: transforms the selected actors' (target 0), the scene's (1) or
-// the background's (2) colours; other targets do nothing. The actor
-// selection runs until the host returns kSelectionEnd.
+// decomp: BATTLE.PRG vs_battle_script_70 (src/BATTLE/BATTLE.PRG/4DEA8.c:2712;
+// was func_800B9C58) Opcode 0x70: transforms the selected actors' (target 0),
+// the scene's (1) or the background's (2) colours; other targets do nothing.
+// The actor selection runs until the host returns kSelectionEnd.
 ScriptFlow ScriptTransformPalettes(const ScriptInstruction& instruction,
                                    ScriptVmHost& host);
 

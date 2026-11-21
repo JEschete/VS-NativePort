@@ -77,14 +77,16 @@ struct ActorDisplay {
     const GimmickView& gimmick);
 [[nodiscard]] ActorDisplay DecodeActorDisplayFlags(std::uint32_t flags);
 
-// decomp: BATTLE.PRG func_800A0BE0 (src/BATTLE/BATTLE.PRG/30DB0.c:4065)
-// The actor's state flags, a gimmick's display flags for an actor slot with
-// no record, or 0. The weapon models are the record's own slot's.
+// decomp: BATTLE.PRG vs_battle_getActorFlags
+// (src/BATTLE/BATTLE.PRG/30DB0.c:4184; was func_800A0BE0) The actor's state
+// flags, a gimmick's display flags for an actor slot with no record, or 0. The
+// weapon models are the record's own slot's.
 [[nodiscard]] std::uint32_t ActorStateFlags(ActorStateHost& host, int id);
-// decomp: BATTLE.PRG func_800A087C (src/BATTLE/BATTLE.PRG/30DB0.c:3950)
-// Applies the display flags to the actor, its weapon models (two per actor
-// id) and its companion chain, or to the gimmick in an empty slot. A
-// companion chain that repeats stops after one pass over the actor table.
+// decomp: BATTLE.PRG vs_battle_setActorFlags
+// (src/BATTLE/BATTLE.PRG/30DB0.c:4069; was func_800A087C) Applies the display
+// flags to the actor, its weapon models (two per actor id) and its companion
+// chain, or to the gimmick in an empty slot. A companion chain that repeats
+// stops after one pass over the actor table.
 void SetActorDisplayFlags(ActorStateHost& host, int id, std::uint32_t flags);
 
 // The roster slots the model switches cover, with their battle actors.
@@ -93,12 +95,12 @@ class ActorModelToggleHost : public DisplayFlagsHost {
   [[nodiscard]] virtual bool HasBattleActor(std::size_t slot) = 0;
 };
 
-// decomp: BATTLE.PRG func_8007BF6C (src/BATTLE/BATTLE.PRG/146C.c:8623)
+// decomp: BATTLE.PRG func_8007BF6C (src/BATTLE/BATTLE.PRG/146C.c:8566)
 void EnableActorModel(ActorModelToggleHost& host, std::size_t slot);
-// decomp: BATTLE.PRG func_8007BFC0 (src/BATTLE/BATTLE.PRG/146C.c:8630)
+// decomp: BATTLE.PRG func_8007BFC0 (src/BATTLE/BATTLE.PRG/146C.c:8573)
 void EnableAllActorModels(ActorModelToggleHost& host);
-// decomp: BATTLE.PRG func_8007BFF8 (src/BATTLE/BATTLE.PRG/146C.c:8639)
+// decomp: BATTLE.PRG func_8007BFF8 (src/BATTLE/BATTLE.PRG/146C.c:8582)
 void DisableActorModel(ActorModelToggleHost& host, std::size_t slot);
-// decomp: BATTLE.PRG func_8007C050 (src/BATTLE/BATTLE.PRG/146C.c:8646)
+// decomp: BATTLE.PRG func_8007C050 (src/BATTLE/BATTLE.PRG/146C.c:8589)
 void DisableAllActorModels(ActorModelToggleHost& host);
 }  // namespace VS::Actors

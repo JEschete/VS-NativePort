@@ -71,7 +71,8 @@ std::int32_t PackPosition(std::int16_t low, std::int16_t high) {
 
 }  // namespace
 
-// decomp: BATTLE.PRG func_8009F794 (30DB0.c:3320), 49 MIPS words.
+// decomp: BATTLE.PRG func_8009F794 (src/BATTLE/BATTLE.PRG/30DB0.c:3419), 49
+// MIPS words.
 std::optional<std::size_t> FindGimmickBelow(
     std::span<const GimmickQueryState> gimmicks,
     const GimmickQueryState& reference) {
@@ -94,7 +95,8 @@ std::optional<std::size_t> FindGimmickBelow(
   return selected;
 }
 
-// decomp: BATTLE.PRG func_800A91DC (40564.c:317), 55 MIPS words.
+// decomp: BATTLE.PRG func_800A91DC (src/BATTLE/BATTLE.PRG/40564.c:249), 55 MIPS
+// words.
 std::optional<std::size_t> FindTopGimmickAtTile(
     std::span<const GimmickQueryState> gimmicks, const GimmickTileQuery& query,
     bool require_idle_mode) {
@@ -119,7 +121,8 @@ std::optional<std::size_t> FindTopGimmickAtTile(
   return selected;
 }
 
-// decomp: BATTLE.PRG func_8009F858 (30DB0.c:3348), 16 MIPS words.
+// decomp: BATTLE.PRG func_8009F858 (src/BATTLE/BATTLE.PRG/30DB0.c:3447), 16
+// MIPS words.
 std::optional<std::uint8_t> GimmickSubtype(
     std::span<const GimmickQueryState> gimmicks, std::int32_t slot) {
   if (slot < 0 || static_cast<std::size_t>(slot) >= kGimmickQuerySlots ||
@@ -133,7 +136,8 @@ std::optional<std::uint8_t> GimmickSubtype(
   return state.subtype;
 }
 
-// decomp: BATTLE.PRG func_800A47C4 (3A1A0.c:1022), 25 MIPS words.
+// decomp: BATTLE.PRG func_800A47C4 (src/BATTLE/BATTLE.PRG/3A1A0.c:1022), 25
+// MIPS words.
 bool AreGimmicksMoving(std::span<const GimmickQueryState> gimmicks) {
   const auto count = std::min(gimmicks.size(), kGimmickQuerySlots);
   for (const auto& state : gimmicks.first(count)) {
@@ -146,7 +150,8 @@ bool AreGimmicksMoving(std::span<const GimmickQueryState> gimmicks) {
   return false;
 }
 
-// decomp: MAINMENU.PRG func_800FA188 (224.c:261), 44 MIPS words.
+// decomp: MAINMENU.PRG func_800FA188 (src/MENU/MAINMENU.PRG/224.c:261), 44 MIPS
+// words.
 GimmickStackMeasure MeasureTileStack(
     std::span<const GimmickQueryState> gimmicks,
     const GimmickTileQuery& query) {
@@ -163,7 +168,8 @@ GimmickStackMeasure MeasureTileStack(
   return result;
 }
 
-// decomp: MAINMENU.PRG func_800FA238 (224.c:286), 37 MIPS words.
+// decomp: MAINMENU.PRG func_800FA238 (src/MENU/MAINMENU.PRG/224.c:286), 37 MIPS
+// words.
 bool IsGimmickWithinHeightBand(std::span<const GimmickQueryState> gimmicks,
                                const GimmickTileQuery& query,
                                std::int32_t minimum_height) {
@@ -179,7 +185,8 @@ bool IsGimmickWithinHeightBand(std::span<const GimmickQueryState> gimmicks,
   return false;
 }
 
-// decomp: BATTLE.PRG func_800A0104 (30DB0.c:3690), 49 MIPS words.
+// decomp: BATTLE.PRG func_800A0104 (src/BATTLE/BATTLE.PRG/30DB0.c:3791), 49
+// MIPS words.
 bool SetGimmickOrientation(std::int32_t orientation,
                            std::span<const GimmickOrientationRow> rotations,
                            GimmickOrientationHost& host) {
@@ -200,7 +207,8 @@ bool SetGimmickOrientation(std::int32_t orientation,
          host.ResetRotation();
 }
 
-// decomp: BATTLE.PRG func_800A3DB4 (3A1A0.c:708), 46 MIPS words.
+// decomp: BATTLE.PRG func_800A3DB4 (src/BATTLE/BATTLE.PRG/3A1A0.c:708), 46 MIPS
+// words.
 bool CanPlaceGimmickAtPoint(const GimmickPlacementPoint& point,
                             GimmickPointHost& host) {
   const auto height = host.SupportHeight(point);
@@ -295,7 +303,8 @@ bool DropSupportedActors(std::size_t top_slot, GimmickStackDropHost& host) {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_8009F530 (30DB0.c:3256), 153 MIPS words.
+// decomp: BATTLE.PRG func_8009F530 (src/BATTLE/BATTLE.PRG/30DB0.c:3350), 153
+// MIPS words.
 bool DropUnsupportedGimmickStack(std::int32_t slot,
                                  GimmickStackDropHost& host) {
   if (slot < 0 || static_cast<std::size_t>(slot) >= kGimmickQuerySlots) {
@@ -371,7 +380,8 @@ std::optional<std::size_t> GroundGimmickAhead(
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800A38E0 (3A1A0.c:522), 185 MIPS words.
+// decomp: BATTLE.PRG func_800A38E0 (src/BATTLE/BATTLE.PRG/3A1A0.c:522), 185
+// MIPS words.
 std::optional<std::size_t> FindInteractableGimmickAhead(
     std::int32_t actor_slot, GimmickInteractionQueryHost& host) {
   if (actor_slot < 0 ||
@@ -503,8 +513,8 @@ bool RecenterInteractingActor(std::int32_t actor_slot,
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800A3E6C (3A1A0.c:728), 217 MIPS words and seven-way
-// table80069460.
+// decomp: BATTLE.PRG func_800A3E6C (src/BATTLE/BATTLE.PRG/3A1A0.c:728), 217
+// MIPS words and seven-way table80069460.
 bool BeginGimmickInteraction(std::int32_t actor_slot,
                              GimmickInteractionStartHost& host) {
   if (actor_slot < 0 ||
@@ -627,7 +637,8 @@ bool ApplyGimmickAttachCommand(GimmickInteractionCommandHost& host) {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800A41D0 (3A1A0.c:842), 177 MIPS words.
+// decomp: BATTLE.PRG func_800A41D0 (src/BATTLE/BATTLE.PRG/3A1A0.c:842), 177
+// MIPS words.
 bool ApplyGimmickInteractionCommand(std::int32_t mode,
                                     GimmickInteractionCommandHost& host) {
   if (mode == kGimmickPushCommand) return ApplyGimmickPushCommand(host);
@@ -635,7 +646,7 @@ bool ApplyGimmickInteractionCommand(std::int32_t mode,
   return ApplyGimmickAttachCommand(host);
 }
 
-// decomp: BATTLE.PRG func_800A0024 (src/BATTLE/BATTLE.PRG/30DB0.c:3654).
+// decomp: BATTLE.PRG func_800A0024 (src/BATTLE/BATTLE.PRG/30DB0.c:3754).
 // CPU 800A0054-800A00E8: stationary checks, wrapped height and packed stores.
 std::optional<GimmickPlacementSnapshot> GimmickPlacement(
     std::int32_t slot, GimmickPlacementHost& host) {

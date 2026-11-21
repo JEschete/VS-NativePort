@@ -266,7 +266,7 @@ ActionAnimationResult PlayDefenseAnimation(int slot,
   return Result::kComplete;
 }
 
-// decomp: func_8009DF3C (src/BATTLE/BATTLE.PRG/30DB0.c:2408), F00819.
+// decomp: func_8009DF3C (src/BATTLE/BATTLE.PRG/30DB0.c:2473), F00819.
 ActionAnimationResult SetEnemyCombatPose(int slot, int mode,
                                          ActionReactionWorld& world) {
   auto* actor = world.Actor(slot);
@@ -370,7 +370,7 @@ ActionAnimationResult PlayChainAbilityAnimation(int slot, int ability,
   return Result::kComplete;
 }
 
-// decomp: func_8009EE9C (src/BATTLE/BATTLE.PRG/30DB0.c:3040), F00832.
+// decomp: func_8009EE9C (src/BATTLE/BATTLE.PRG/30DB0.c:3120), F00832.
 // The prefix is exactly F00818, including callback-current player cleanup.
 ActionAnimationResult PlayDefenseAbilityAnimation(int slot,
                                                   ActionReactionWorld& world) {
@@ -426,7 +426,7 @@ ActionAnimationResult PlayBreakArtAnimation(int slot, int mode,
   return Result::kComplete;
 }
 
-// decomp: func_800A2574 (src/BATTLE/BATTLE.PRG/38C1C.c:625), F00891.
+// decomp: func_800A2574 (src/BATTLE/BATTLE.PRG/38C1C.c:614), F00891.
 ActionAnimationResult FinishEnemyCombatPose(int slot, int facing,
                                             ActionReactionWorld& world) {
   auto* actor = world.Actor(slot);

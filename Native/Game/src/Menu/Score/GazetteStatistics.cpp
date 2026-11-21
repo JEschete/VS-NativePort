@@ -190,7 +190,7 @@ void DrawStatisticValue(const GazetteRecordRow& row, StatisticText& value,
 }
 }  // namespace
 
-// decomp: _setTitleRows (src/MENU/MENU9.PRG/238.c:1722),
+// decomp: setTitleRows (src/MENU/MENU9.PRG/238.c:1727; was _setTitleRows),
 // MENU9.PRG 801056B8-8010579C.
 bool CreateTitleRows(std::span<GazetteRecordRow> rows, std::uint32_t titles,
                      const GazetteTitleLabels& labels) {
@@ -216,8 +216,8 @@ bool CreateTitleRows(std::span<GazetteRecordRow> rows, std::uint32_t titles,
   return true;
 }
 
-// decomp: _renderTitleMenu (src/MENU/MENU9.PRG/238.c:1756),
-// MENU9.PRG 8010579C-80105A0C.
+// decomp: renderTitleMenu (src/MENU/MENU9.PRG/238.c:1761; was
+// _renderTitleMenu), MENU9.PRG 8010579C-80105A0C.
 bool RenderTitles(std::span<GazetteRecordRow> rows, GazetteRecordCursor cursor,
                   std::int32_t presentation_step,
                   GazetteRecordAnimation& animation, GazetteRecordHost& host) {
@@ -247,7 +247,7 @@ bool RenderTitles(std::span<GazetteRecordRow> rows, GazetteRecordCursor cursor,
   return true;
 }
 
-// decomp: _renderTitleNo (src/MENU/MENU9.PRG/238.c:1835),
+// decomp: renderTitleNo (src/MENU/MENU9.PRG/238.c:1840; was _renderTitleNo),
 // MENU9.PRG 80105A0C-80105BCC. The bounded decimal replaces sprintf (#65).
 bool DrawTitleNumber(const TitleNumber& number, TitleNumberTarget& target) {
   if (number.value < 0 || number.value > kMaximumTitleNumber) return false;
@@ -280,7 +280,7 @@ bool DrawTitleNumber(const TitleNumber& number, TitleNumberTarget& target) {
   return true;
 }
 
-// decomp: _setStatText (src/MENU/MENU9.PRG/238.c:2201),
+// decomp: setStatText (src/MENU/MENU9.PRG/238.c:2206; was _setStatText),
 // MENU9.PRG 80106780-80106808.
 bool CreateStatisticRows(std::span<GazetteRecordRow> rows,
                          const GazetteStatisticLabels& labels) {
@@ -301,8 +301,9 @@ bool CreateStatisticRows(std::span<GazetteRecordRow> rows,
   return true;
 }
 
-// decomp: _renderBossRushDetails (src/MENU/MENU9.PRG/238.c:2226),
-// MENU9.PRG 80106808-80106CEC. This is the general statistics page.
+// decomp: renderBossRushDetails (src/MENU/MENU9.PRG/238.c:2231; was
+// _renderBossRushDetails), MENU9.PRG 80106808-80106CEC. This is the general
+// statistics page.
 bool RenderStatistics(std::span<GazetteRecordRow> rows,
                       const GazetteStatisticsValues& values,
                       GazetteRecordCursor cursor,

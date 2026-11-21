@@ -227,7 +227,8 @@ int BuildLiveRows(ItemRowsContext context, int item_category, char* menu_text[],
 }
 }  // namespace
 
-// decomp: MENU3.PRG _getParentWeaponIndex (items2.h:11), 80104EC0.
+// decomp: MENU3.PRG getParentWeaponIndex (src/MENU/items2.h:16; was
+// _getParentWeaponIndex), 80104EC0.
 int LiveParentWeaponIndex(int item_category, int index) {
   const auto parent =
       ParentWeaponIndex(item_category, index, VS::Items::inventory);
@@ -239,7 +240,8 @@ int LiveParentWeaponIndex(int item_category, int index) {
   return *parent;
 }
 
-// decomp: MENU3.PRG _getParentShieldIndex (items2.h:38), 80104F50.
+// decomp: MENU3.PRG getParentShieldIndex (src/MENU/items2.h:43; was
+// _getParentShieldIndex), 80104F50.
 int LiveParentShieldIndex(int item_category, int item_index) {
   const auto parent =
       ParentShieldIndex(item_category, item_index, VS::Items::inventory);
@@ -251,21 +253,24 @@ int LiveParentShieldIndex(int item_category, int item_index) {
   return *parent;
 }
 
-// decomp: MENU3.PRG _populateItemRows (items2.h:60), 80104F94.
+// decomp: MENU3.PRG populateItemRows (src/MENU/items2.h:65; was
+// _populateItemRows), 80104F94.
 int LiveBuildItemRows(int item_category, char* menu_text[], int row_types[],
                       char* text_buf) {
   return BuildLiveRows(ItemRowsContext::kItemMenu, item_category, menu_text,
                        row_types, text_buf);
 }
 
-// decomp: MENUB.PRG _populateItemRows (items2.h:60), 80105088.
+// decomp: MENUB.PRG populateItemRows (src/MENU/items2.h:65; was
+// _populateItemRows), 80105088.
 int LiveBuildLootItemRows(int item_category, char* menu_text[], int row_types[],
                           char* text_buf) {
   return BuildLiveRows(ItemRowsContext::kLoot, item_category, menu_text,
                        row_types, text_buf);
 }
 
-// decomp: MENU3.PRG _restoreItemMenu (items2.h:175), 80105314.
+// decomp: MENU3.PRG restoreItemMenu (src/MENU/items2.h:180; was
+// _restoreItemMenu), 80105314.
 void LiveRestoreItemRows(int item_category) {
   LiveRestoreWorld world;
   const auto restored = RestoreItemRows(world, item_category);

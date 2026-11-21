@@ -13,17 +13,19 @@
 namespace VS::Menu::manual {
 struct VisibilityAnimation;
 
-// decomp: MENUE.PRG _copySprites (494.c:481).
+// decomp: MENUE.PRG copySprites (src/MENU/MENUE.PRG/494.c:485; was
+// _copySprites).
 void LiveUploadSpriteTiles(std::uint32_t const* buffer, int count);
-// decomp: MENUE.PRG _copyCluts (494.c:498).
+// decomp: MENUE.PRG copyCluts (src/MENU/MENUE.PRG/494.c:502; was _copyCluts).
 void LiveUploadCluts(std::uint32_t* buffer, int count);
-// decomp: MENUE.PRG _drawSprite (494.c:629). `data` points into the help
-// text file.
+// decomp: MENUE.PRG drawSprite (src/MENU/MENUE.PRG/494.c:633; was _drawSprite).
+// `data` points into the help text file.
 void LiveDrawIllustration(std::int16_t* data);
-// decomp: MENUE.PRG _drawContentLines (494.c:883).
+// decomp: MENUE.PRG drawContentLines (src/MENU/MENUE.PRG/494.c:887; was
+// _drawContentLines).
 void LiveDrawDiagramLines();
-// decomp: MENUE.PRG _getAnimationState (494.c:940). Returns 0 after a
-// logged refusal of a null state.
+// decomp: MENUE.PRG getAnimationState (src/MENU/MENUE.PRG/494.c:944; was
+// _getAnimationState). Returns 0 after a logged refusal of a null state.
 std::int16_t LiveAdvanceVisibilityAnimation(VisibilityAnimation* state);
 // Refusals logged since start-up.
 [[nodiscard]] std::uint64_t LiveIllustrationRefusalCount();

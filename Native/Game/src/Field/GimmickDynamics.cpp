@@ -235,7 +235,8 @@ bool CountdownMove(GimmickDynamicsHost& host, GimmickDynamicsState state) {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800B0908 (44F14.c:1717), 453 MIPS words.
+// decomp: BATTLE.PRG func_800B0908 (src/BATTLE/BATTLE.PRG/44F14.c:1717), 453
+// MIPS words.
 bool UpdateGimmickMotion(GimmickDynamicsHost& host) {
   auto state = host.State();
   if (!state) return false;

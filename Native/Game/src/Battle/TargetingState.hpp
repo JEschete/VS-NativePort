@@ -14,7 +14,7 @@
 namespace VS::Battle {
 
 // One target candidate of the target list or the sphere's target lists.
-// decomp: D_800F19CC_t5 (src/BATTLE/BATTLE.PRG/57B1C.h:24-38)
+// decomp: D_800F19CC_t5 (src/BATTLE/BATTLE.PRG/57B1C.h:25-38)
 struct TargetPreview {
   VS::Core::Gte::SVECTOR position;
   std::uint8_t kind;

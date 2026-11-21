@@ -197,14 +197,16 @@ class LiveCalculationWorld final : public ActionCalculationWorld {
 };
 }  // namespace
 
-// decomp: _getAgilityDifference (src/BATTLE/BATTLE.PRG/146C.c:9890).
+// decomp: getAgilityDifference (src/BATTLE/BATTLE.PRG/146C.c:9876; was
+// _getAgilityDifference).
 int LiveAgilityHitChance(ActionDefinition* action,
                          VS::Battle::HitResult* source,
                          VS::Battle::HitResult* target, int hit, int variance) {
   return CalculateAttributes(AgilityHitChance, action, source, target, hit,
                              variance);
 }
-// decomp: _getIntelligenceDifference (src/BATTLE/BATTLE.PRG/146C.c:9941).
+// decomp: getIntelligenceDifference (src/BATTLE/BATTLE.PRG/146C.c:9927; was
+// _getIntelligenceDifference).
 int LiveIntelligenceHitChance(ActionDefinition* action,
                               VS::Battle::HitResult* source,
                               VS::Battle::HitResult* target, int hit,
@@ -212,7 +214,8 @@ int LiveIntelligenceHitChance(ActionDefinition* action,
   return CalculateAttributes(IntelligenceHitChance, action, source, target, hit,
                              variance);
 }
-// decomp: _getAgilityDifference2 (src/BATTLE/BATTLE.PRG/146C.c:9992).
+// decomp: getAgilityDifference2 (src/BATTLE/BATTLE.PRG/146C.c:9978; was
+// _getAgilityDifference2).
 int LiveCostAdjustedAgilityHitChance(ActionDefinition* action,
                                      VS::Battle::HitResult* source,
                                      VS::Battle::HitResult* target, int hit,
@@ -220,13 +223,15 @@ int LiveCostAdjustedAgilityHitChance(ActionDefinition* action,
   return CalculateAttributes(CostAdjustedAgilityHitChance, action, source,
                              target, hit, variance);
 }
-// decomp: _doesAttackHit (src/BATTLE/BATTLE.PRG/146C.c:10075).
+// decomp: doesAttackHit (src/BATTLE/BATTLE.PRG/146C.c:10059; was
+// _doesAttackHit).
 int LiveRollActionHit(ActionDefinition* action, VS::Battle::HitResult* source,
                       VS::Battle::HitResult* target, int hit, int execute) {
   LiveCalculationWorld world(action, source, target);
   return Checked(RollActionHit(hit, execute, world));
 }
-// decomp: _calculateStatChange (src/BATTLE/BATTLE.PRG/146C.c:12248).
+// decomp: calculateStatChange (src/BATTLE/BATTLE.PRG/146C.c:12162; was
+// _calculateStatChange).
 std::int16_t LiveCalculateActionStatChange(ActionDefinition* action,
                                            VS::Battle::HitResult* source,
                                            VS::Battle::HitResult* target,

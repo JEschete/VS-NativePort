@@ -155,7 +155,7 @@ class ScreenHost final : public HostBase<StatusTerminalHost> {
 
 // NOLINTNEXTLINE(readability-identifier-naming): the catalog's component.
 namespace VS::Menu::Status {
-// decomp: vs_menu4_exec (src/MENU/MENU4.PRG/120.c:2270)
+// decomp: vs_menu4_exec (src/MENU/MENU4.PRG/120.c:2272)
 int LiveUpdateStatusTerminal(std::uint8_t* state) {
   const auto address = reinterpret_cast<std::uintptr_t>(state);
   const auto start =

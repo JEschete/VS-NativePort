@@ -37,7 +37,7 @@ inline constexpr std::size_t kCandidateEntryViewBytes = 0x14;
 static_assert(sizeof(CandidateEntryView) == kCandidateEntryViewBytes,
               "CandidateEntryView must keep its PS1 layout");
 
-// decomp: func_800DC888_t (src/BATTLE/BATTLE.PRG/6F014.c:253)
+// decomp: func_800DC888_t (src/BATTLE/BATTLE.PRG/6E4CCShared.h:37)
 struct ActionTiming {
   std::uint32_t actor_id : 4;
   std::uint32_t reserved0_bit4 : 28;
@@ -58,7 +58,8 @@ static_assert(sizeof(ActionTiming) == kActionTimingBytes,
 inline constexpr std::size_t kEngagementActorReserved8Bytes = 0xC;
 inline constexpr std::size_t kEngagementActorReserved20Bytes = 0x18;
 
-// decomp: func_800DEB10_t (src/BATTLE/BATTLE.PRG/6F014.c:278)
+// decomp: func_800DEB10 (src/BATTLE/BATTLE.PRG/74088.c:856-906; was
+// func_800DEB10_t)
 struct EngagementActor {
   std::uint8_t target_actor;
   std::uint8_t reserved1;
@@ -87,7 +88,8 @@ inline constexpr std::size_t kEngagementActorBytes = 0x44;
 static_assert(sizeof(EngagementActor) == kEngagementActorBytes,
               "EngagementActor must keep its PS1 layout");
 
-// decomp: func_800DEEA4_t (src/BATTLE/BATTLE.PRG/6F014.c:287)
+// decomp: func_800DEEA4 (src/BATTLE/BATTLE.PRG/74088.c:969-982; was
+// func_800DEEA4_t)
 struct ReactionRecord {
   std::uint16_t action_id;
   std::array<std::uint8_t, 2> reserved2;
@@ -100,7 +102,7 @@ inline constexpr std::size_t kReactionRecordBytes = 0x4C;
 static_assert(sizeof(ReactionRecord) == kReactionRecordBytes,
               "ReactionRecord must keep its PS1 layout");
 
-// decomp: func_800E5568_t (src/BATTLE/BATTLE.PRG/6F014.c:27)
+// decomp: func_800E5568_t (src/BATTLE/BATTLE.PRG/7CD68.c:48)
 struct ActionRangeShape {
   std::uint8_t range_x;
   std::uint8_t range_y;
@@ -114,7 +116,7 @@ static_assert(sizeof(ActionRangeShape) == kActionRangeShapeBytes,
 
 inline constexpr std::size_t kActionRangeViewReserved00Bytes = 84;
 
-// decomp: func_800E5698_t (src/BATTLE/BATTLE.PRG/6F014.c:37)
+// decomp: func_800E5698_t (src/BATTLE/BATTLE.PRG/7CD68.c:58)
 struct ActionRangeView {
   std::array<std::uint8_t, kActionRangeViewReserved00Bytes> reserved0_0;
   void* native_pointer54;  // PS1 pointer slot 0x54
@@ -124,7 +126,7 @@ struct ActionRangeView {
 
 inline constexpr std::size_t kActionRangeView2Reserved0Bytes = 0x38;
 
-// decomp: func_800E5698_t2 (src/BATTLE/BATTLE.PRG/6F014.c:32)
+// decomp: func_800E5698_t2 (src/BATTLE/BATTLE.PRG/7CD68.c:53)
 struct ActionRangeView2 {
   std::array<std::uint8_t, kActionRangeView2Reserved0Bytes> reserved0;
   ActionRangeShape weapon_range;

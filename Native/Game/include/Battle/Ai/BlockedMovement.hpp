@@ -40,7 +40,7 @@ struct AdjacentMover {
   std::uint32_t tile = 0;          // 0x34
 };
 
-// decomp: func_800D8400 (src/BATTLE/BATTLE.PRG/6FC00.c:430).
+// decomp: func_800D8400 (src/BATTLE/BATTLE.PRG/6FC00.c:29).
 // The tile next to the actor for a step: with equal `first` and `second` in
 // the direction `direction`, otherwise in the axis direction nearest the
 // angle `direction` and then in `first`, or `second` when `first` is that
@@ -73,12 +73,12 @@ struct MovementHistory {
                          const MovementHistory&) = default;
 };
 
-// decomp: historyRepeats (src/BATTLE/BATTLE.PRG/6FC00.c:960), inlined in
+// decomp: historyRepeats (src/BATTLE/BATTLE.PRG/6FC00.c:18), inlined in
 // func_800D8EF4 at 0x800D928C-0x800D92B4.
 // Whether the first four x samples equal the last four, and likewise z.
 [[nodiscard]] bool HasRepeatingMovementHistory(const MovementHistory& history);
 
-// decomp: historyStalled (src/BATTLE/BATTLE.PRG/6FC00.c:966), inlined in
+// decomp: historyStalled (src/BATTLE/BATTLE.PRG/6FC00.c:24), inlined in
 // func_800D8EF4 at 0x800D927C-0x800D92B4.
 // Whether all eight samples are written and the history repeats.
 [[nodiscard]] bool IsMovementHistoryStalled(const MovementHistory& history);
@@ -89,7 +89,7 @@ struct MovementRandomStates {
   std::int32_t saved = 0;   // D_800F58C4
 };
 
-// decomp: func_800D9538 (src/BATTLE/BATTLE.PRG/6FC00.c:1178).
+// decomp: func_800D9538 (src/BATTLE/BATTLE.PRG/6FC00.c:549).
 // Saves the frame's random state.
 void SaveMovementRandomState(MovementRandomStates& states);
 
@@ -134,7 +134,7 @@ class BlockedMovementWorld {
   virtual void DispatchLocomotion(BlockedMover& mover) = 0;
 };
 
-// decomp: func_800DB0BC (src/BATTLE/BATTLE.PRG/71618.c:1212).
+// decomp: func_800DB0BC (src/BATTLE/BATTLE.PRG/71618.c:584).
 // Detours an actor whose tile has not changed. Nothing happens while the
 // arena orbit is active; an actor that moved clears its detour step. A stuck
 // actor is marked; at step 0 it stores two lateral directions from the angle

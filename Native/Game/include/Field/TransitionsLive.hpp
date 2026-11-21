@@ -17,34 +17,37 @@ namespace VS::Field {
 [[nodiscard]] RoomTransitionState LoadLiveRoomTransition();
 void StoreLiveRoomTransition(const RoomTransitionState& state);
 
-// decomp: BATTLE.PRG func_8007C398 (src/BATTLE/BATTLE.PRG/146C.c:8748)
+// decomp: BATTLE.PRG func_8007C398 (src/BATTLE/BATTLE.PRG/146C.c:8702)
 int LiveScreenTransitionPhase();
-// decomp: BATTLE.PRG func_8007C444 (src/BATTLE/BATTLE.PRG/146C.c:8774)
+// decomp: BATTLE.PRG setScreenTransition (src/BATTLE/BATTLE.PRG/146C.c:8728;
+// was func_8007C444)
 void LiveConfigureScreenTransition(int effect, int speed, int wipe_angle);
-// decomp: BATTLE.PRG func_8007C460 (src/BATTLE/BATTLE.PRG/146C.c:8781)
+// decomp: BATTLE.PRG setScreenTransitionWipeAngle
+// (src/BATTLE/BATTLE.PRG/146C.c:8735; was func_8007C460)
 void LiveSetTransitionWipeAngle(int wipe_angle);
-// decomp: BATTLE.PRG func_8007C46C (src/BATTLE/BATTLE.PRG/146C.c:8783)
+// decomp: BATTLE.PRG func_8007C46C (src/BATTLE/BATTLE.PRG/146C.c:8740)
 void LiveBeginScreenFadeOut(int effect, int speed, int wipe_angle);
-// decomp: BATTLE.PRG func_8007C4AC (src/BATTLE/BATTLE.PRG/146C.c:8795)
+// decomp: BATTLE.PRG func_8007C4AC (src/BATTLE/BATTLE.PRG/146C.c:8752)
 void LiveBeginScreenFadeIn(int effect, int speed, int wipe_angle);
-// decomp: BATTLE.PRG func_8007C4E0 (src/BATTLE/BATTLE.PRG/146C.c:8805)
+// decomp: BATTLE.PRG func_8007C4E0 (src/BATTLE/BATTLE.PRG/146C.c:8762)
 // A null door is refused with a warning on the "field" channel; returns 0.
 int LiveBeginRoomTransition(const VS::Field::MpdDoorRecord* door, int effect,
                             int speed);
-// decomp: BATTLE.PRG func_8007C580 (src/BATTLE/BATTLE.PRG/146C.c:8820)
+// decomp: BATTLE.PRG func_8007C580 (src/BATTLE/BATTLE.PRG/146C.c:8777)
 void LiveBeginScriptedRoomTransition(const VS::Field::MpdDoorRecord* door,
                                      int effect, int speed);
-// decomp: BATTLE.PRG func_8007C5C0 (src/BATTLE/BATTLE.PRG/146C.c:8830)
+// decomp: BATTLE.PRG func_8007C5C0 (src/BATTLE/BATTLE.PRG/146C.c:8786)
 int LiveBeginZoneTransition(const VS::Field::MpdDoorRecord* door, int effect,
                             int speed);
-// decomp: BATTLE.PRG func_8007C654 (src/BATTLE/BATTLE.PRG/146C.c:8843)
+// decomp: BATTLE.PRG func_8007C654 (src/BATTLE/BATTLE.PRG/146C.c:8799)
 void LiveBeginScriptedZoneTransition(const VS::Field::MpdDoorRecord* door,
                                      int effect, int speed);
-// decomp: BATTLE.PRG func_8007C694 (src/BATTLE/BATTLE.PRG/146C.c:8853)
+// decomp: BATTLE.PRG func_8007C694 (src/BATTLE/BATTLE.PRG/146C.c:8808)
 // A location outside the table is refused with a warning; returns 0.
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
 int LiveTeleportToLocation(int location_id, int tile_x, int tile_z, int effect,
                            int speed);
-// decomp: INITBTL.PRG _initTransitionState (src/BATTLE/INITBTL.PRG/18.c:468)
+// decomp: INITBTL.PRG initTransitionState (src/BATTLE/INITBTL.PRG/18.c:481; was
+// _initTransitionState)
 void LiveInitializeRoomTransitionPrimitives();
 }  // namespace VS::Field

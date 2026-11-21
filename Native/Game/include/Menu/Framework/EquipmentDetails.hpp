@@ -84,7 +84,7 @@ using PrimaryStatValues = std::array<int, kPrimaryStats + 1>;
 using DpPpValues = std::array<int, kDpPpValues>;
 
 // decomp: vs_mainMenu_statusViewCursorPositions' module image values
-// (2D10.c:830).
+// (src/MENU/MAINMENU.PRG/2D10.c:830).
 inline constexpr StatusViewCursorPositions kStatusViewCursorPositions{
     PackXy(66, 28),   PackXy(-4, 28),   PackXy(0, 50),    PackXy(0, 66),
     PackXy(0, 82),    PackXy(0, 98),    PackXy(0, 114),   PackXy(0, 130),
@@ -95,7 +95,8 @@ inline constexpr StatusViewCursorPositions kStatusViewCursorPositions{
 };
 
 // decomp: vs_mainMenu_statusViewNavigationMap's module image values
-// (2D10.c:823): the element up, down, left and right of each element.
+// (src/MENU/MAINMENU.PRG/2D10.c:823): the element up, down, left and right of
+// each element.
 inline constexpr StatusViewNavigation kStatusViewNavigation{{
     {0, 2, 1, 10},   {1, 2, 1, 0},    {1, 3, 2, 11},   {2, 4, 3, 12},
     {3, 5, 4, 13},   {4, 6, 5, 14},   {5, 7, 6, 16},   {6, 8, 7, 17},

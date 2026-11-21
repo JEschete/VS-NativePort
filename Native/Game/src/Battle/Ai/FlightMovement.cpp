@@ -240,7 +240,7 @@ FlightTile ClassifyFlightTile(FlightMovementWorld& world,
   return FlightTile::kOpen;
 }
 
-// decomp: func_800E0850 (src/BATTLE/BATTLE.PRG/771A8.c:942), through
+// decomp: func_800E0850 (src/BATTLE/BATTLE.PRG/770A4.c:449), through
 // LowestReachableGroundHeight with the battle flight test; nothing when the
 // world refuses.
 std::optional<int> LowestReachableHeight(FlightMovementWorld& world,
@@ -279,7 +279,7 @@ std::optional<int> LowestReachableHeight(FlightMovementWorld& world,
   return lowest;
 }
 
-// decomp: func_800E6A6C (src/BATTLE/BATTLE.PRG/7E05C.s:187), after checking
+// decomp: func_800E6A6C (src/BATTLE/BATTLE.PRG/7DDDC.s:337), after checking
 // that each of its samples lies inside the terrain; nothing when one does not.
 std::optional<int> LowestSegmentHeight(Field::TerrainGrid terrain, int start_x,
                                        int start_z, int end_x, int end_z) {
@@ -591,7 +591,7 @@ bool GlideTowardDestination(FlightMovementWorld& world, FlightMover& mover,
 }
 }  // namespace
 
-// decomp: func_800E02B4 (src/BATTLE/BATTLE.PRG/771A8.c:798).
+// decomp: func_800E02B4 (src/BATTLE/BATTLE.PRG/770A4.c:335).
 std::optional<int> FlightDirectionObstruction(FlightMovementWorld& world,
                                               const FlightMover& mover,
                                               int direction, bool ahead) {
@@ -621,7 +621,7 @@ std::optional<int> FlightDirectionObstruction(FlightMovementWorld& world,
   return answer;
 }
 
-// decomp: func_800E0678 (src/BATTLE/BATTLE.PRG/771A8.c:904).
+// decomp: func_800E0678 (src/BATTLE/BATTLE.PRG/770A4.c:420).
 std::optional<bool> CanFlyInDirection(FlightMovementWorld& world,
                                       const FlightMover& mover, int direction) {
   if (!ValidDirection(direction, "test")) return std::nullopt;
@@ -645,7 +645,7 @@ std::optional<bool> CanFlyInDirection(FlightMovementWorld& world,
   return tile == FlightTile::kOpen;
 }
 
-// decomp: func_800E0918 (src/BATTLE/BATTLE.PRG/771A8.c:985).
+// decomp: func_800E0918 (src/BATTLE/BATTLE.PRG/770A4.c:471).
 std::optional<bool> UpdateFlightGroundTransition(FlightMovementWorld& world,
                                                  FlightMover& mover, int angle,
                                                  bool toward_destination) {
@@ -684,7 +684,7 @@ std::optional<bool> UpdateFlightGroundTransition(FlightMovementWorld& world,
   return true;
 }
 
-// decomp: func_800E0A68 (src/BATTLE/BATTLE.PRG/771A8.c:1064).
+// decomp: func_800E0A68 (src/BATTLE/BATTLE.PRG/770A4.c:501).
 bool UpdateFlightMovement(FlightMovementWorld& world, FlightMover& mover,
                           int angle) {
   const auto transition =
@@ -736,7 +736,7 @@ bool UpdateFlightMovement(FlightMovementWorld& world, FlightMover& mover,
   return true;
 }
 
-// decomp: func_800E1238 (src/BATTLE/BATTLE.PRG/771A8.c:1278).
+// decomp: func_800E1238 (src/BATTLE/BATTLE.PRG/770A4.c:753).
 bool UpdateFlightDirectionalMovement(FlightMovementWorld& world,
                                      FlightMover& mover, int angle) {
   const auto transition =

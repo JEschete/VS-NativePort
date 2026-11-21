@@ -222,7 +222,7 @@ void WriteLiveStatusState(const StatusLifecycleState& state,
   Store(state, stats);
 }
 
-// decomp: func_8007C31C (src/BATTLE/BATTLE.PRG/146C.c:8736).
+// decomp: func_8007C31C (src/BATTLE/BATTLE.PRG/146C.c:8687).
 void PreserveLiveAshleyStatuses() {
   Require(VS::Battle::characterState != nullptr,
           "Preserving statuses requires Ashley");
@@ -246,7 +246,7 @@ void InflictLiveActorStatuses(int requested, VS::Battle::ActorStats* stats) {
   });
 }
 
-// decomp: func_80087EF4 (src/BATTLE/BATTLE.PRG/146C.c:14376).
+// decomp: func_80087EF4 (src/BATTLE/BATTLE.PRG/146C.c:14243).
 void UpdateLiveActorStatusTimers(VS::Battle::ActorStats* stats) {
   LimbStatusMasks flags{};
   for (std::size_t index = 0; index < flags.size(); ++index) {

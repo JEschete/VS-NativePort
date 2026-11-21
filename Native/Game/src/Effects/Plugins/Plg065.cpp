@@ -3,10 +3,14 @@
 #include "Effects/Plugins/Plg065.hpp"
 
 namespace VS::Effects::Plg065 {
-// decomp: D_800FD934 (PLG065.BIN/F8.c:7; closedRings.h:58)
+// decomp: vs_effect_gaeaStrikeLv1_1_colors (src/EFFECT/closedRings.h:58; was
+// D_800FD934; src/EFFECT/closedRings.h:58)
 plugins::RingPalette closedRingColorFactors;
-// decomp: D_800FD954 (PLG065.BIN/F8.c:9; rings.h:20)
+// decomp: vs_effect_gaeaStrikeLv1_2_colors (src/EFFECT/rings.h:20; was
+// D_800FD954; src/EFFECT/rings.h:20)
 plugins::RingPaletteBytes ringColorFactors;
-// decomp: D_800FD974 (PLG065.BIN/F8.c:12; particleSetup.h:35)
+// decomp: vs_effect_gaeaStrikeLv1_3_origin_state
+// (src/EFFECT/particleSetup.h:35; was D_800FD974;
+// src/EFFECT/particleSetup.h:35)
 std::int32_t particleEmissionCounter;
 }  // namespace VS::Effects::Plg065

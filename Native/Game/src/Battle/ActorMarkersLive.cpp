@@ -182,7 +182,7 @@ void LiveDrawActorMarker(int actor, int kind) {
   WriteMarkers(state);
 }
 
-// decomp: F00733 func_8009627C (src/BATTLE/BATTLE.PRG/2842C.c:2582).
+// decomp: F00733 func_8009627C (src/BATTLE/BATTLE.PRG/2842C.c:2570).
 void LiveDrawActorMarkers() {
   LiveActorMarkerWorld world;
   ActorMarkerState state = ReadMarkers();

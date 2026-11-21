@@ -212,8 +212,8 @@ void DrawRecordPanels(const TimeTrialScores& scores, std::size_t selected,
 }
 }  // namespace
 
-// decomp: _printFastestClearTime (src/MENU/MENU9.PRG/238.c:2400),
-// MENU9.PRG 80106DE0-80106F9C.
+// decomp: printFastestClearTime (src/MENU/MENU9.PRG/238.c:2405; was
+// _printFastestClearTime), MENU9.PRG 80106DE0-80106F9C.
 std::size_t FormatFastestClearTime(std::span<std::uint8_t> destination,
                                    const FastestClearTime& value,
                                    TimeTrialText no_clear) noexcept {
@@ -241,8 +241,8 @@ std::size_t FormatFastestClearTime(std::span<std::uint8_t> destination,
   return next;
 }
 
-// decomp: _printBossRushMenuRow (src/MENU/MENU9.PRG/238.c:2461),
-// MENU9.PRG 80106F9C-80107090.
+// decomp: printBossRushMenuRow (src/MENU/MENU9.PRG/238.c:2466; was
+// _printBossRushMenuRow), MENU9.PRG 80106F9C-80107090.
 bool CreateTimeTrialRows(std::span<TimeTrialRow> rows,
                          const TimeTrialScores& scores,
                          const TimeTrialLabels& labels) {
@@ -270,8 +270,8 @@ bool CreateTimeTrialRows(std::span<TimeTrialRow> rows,
   return true;
 }
 
-// decomp: _leaveBossRushMenu (src/MENU/MENU9.PRG/238.c:2488),
-// MENU9.PRG 80107090-80107120.
+// decomp: leaveBossRushMenu (src/MENU/MENU9.PRG/238.c:2492; was
+// _leaveBossRushMenu), MENU9.PRG 80107090-80107120.
 bool LeaveTimeTrialMenu(std::span<TimeTrialRow> rows, TimeTrialHost& host) {
   if (rows.size() < kTimeTrialCount) {
     host.Refuse("time trial rows shorter than eight");
@@ -290,8 +290,8 @@ bool LeaveTimeTrialMenu(std::span<TimeTrialRow> rows, TimeTrialHost& host) {
   return true;
 }
 
-// decomp: _renderBossRushRecords (src/MENU/MENU9.PRG/238.c:2507),
-// MENU9.PRG 80107120-80107600.
+// decomp: renderBossRushRecords (src/MENU/MENU9.PRG/238.c:2511; was
+// _renderBossRushRecords), MENU9.PRG 80107120-80107600.
 bool RenderTimeTrialRecords(std::span<TimeTrialRow> rows,
                             const TimeTrialScores& scores,
                             TimeTrialId selected_trial,

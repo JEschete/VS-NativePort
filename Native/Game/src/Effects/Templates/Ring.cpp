@@ -24,7 +24,7 @@ std::array<RingPoint, kRingRows * kOpenRingColumns> OpenRingPoints(
   const math::Vec3 jitter =
       frame.scratch.direction_jitter.value_or(math::Vec3{});
   const auto segments = static_cast<std::int32_t>(kOpenRingSegments);
-  // decomp: rings.h angleB, (-jitter.vy) / 2 truncated toward zero.
+  // decomp: src/EFFECT/rings.h angleB, (-jitter.vy) / 2 truncated toward zero.
   const std::int32_t spread_start =
       math::R3000Quotient(math::WrappingNegate(jitter.y), kJitterCentre);
   for (std::size_t column = 0; column < kOpenRingColumns; ++column) {
@@ -124,7 +124,8 @@ bool Ring(RingOrientation orientation, RingCommand command, std::int32_t packed,
 }  // namespace VS::Effects::Templates
 
 namespace VS::Effects {
-// decomp: PLG049.BIN func_800FBA00 (src/EFFECT/PLG049.BIN/E0.c:10).
+// decomp: PLG049.BIN vs_spiritSurge_1 (src/EFFECT/rings.h:22; was
+// func_800FBA00).
 bool Plg049::Ring(Templates::RingCommand command, std::int32_t packed,
                   std::span<const Templates::RingPaletteEntry> palette,
                   Templates::RingHost& host) {
@@ -132,7 +133,8 @@ bool Plg049::Ring(Templates::RingCommand command, std::int32_t packed,
                          palette, host);
 }
 
-// decomp: PLG050.BIN func_800F98E0 (src/EFFECT/PLG050.BIN/E0.c:2).
+// decomp: PLG050.BIN vs_effect_darkChant_0 (src/EFFECT/rings.h:22; was
+// func_800F98E0).
 bool Plg050::Ring(Templates::RingCommand command, std::int32_t packed,
                   std::span<const Templates::RingPaletteEntry> palette,
                   Templates::RingHost& host) {
@@ -140,7 +142,8 @@ bool Plg050::Ring(Templates::RingCommand command, std::int32_t packed,
                          palette, host);
 }
 
-// decomp: PLG061.BIN func_800FAF00 (src/EFFECT/PLG061.BIN/18.c:15).
+// decomp: PLG061.BIN vs_effect_flameSphereLv1_2 (src/EFFECT/rings.h:22; was
+// func_800FAF00).
 bool Plg061::Ring(Templates::RingCommand command, std::int32_t packed,
                   std::span<const Templates::RingPaletteEntry> palette,
                   Templates::RingHost& host) {
@@ -148,7 +151,8 @@ bool Plg061::Ring(Templates::RingCommand command, std::int32_t packed,
                          palette, host);
 }
 
-// decomp: PLG065.BIN func_800FB71C (src/EFFECT/PLG065.BIN/F8.c:15).
+// decomp: PLG065.BIN vs_effect_gaeaStrikeLv1_2 (src/EFFECT/rings.h:22; was
+// func_800FB71C).
 bool Plg065::Ring(Templates::RingCommand command, std::int32_t packed,
                   std::span<const Templates::RingPaletteEntry> palette,
                   Templates::RingHost& host) {
@@ -156,8 +160,9 @@ bool Plg065::Ring(Templates::RingCommand command, std::int32_t packed,
                          palette, host);
 }
 
-// decomp: PLG073.BIN func_800FA7F0 (src/EFFECT/PLG073.BIN/F8.c:6).
-// decomp: PLG074.BIN func_800FA7F0 (src/EFFECT/PLG074.BIN/F8.c:5).
+// decomp: PLG073.BIN vs_effect_radialSurgeLv1_1 (src/EFFECT/rings.h:22; was
+// func_800FA7F0). decomp: PLG074.BIN func_800FA7F0
+// (src/EFFECT/PLG074.BIN/F8.c:5).
 bool Plg073::Ring(Templates::RingCommand command, std::int32_t packed,
                   std::span<const Templates::RingPaletteEntry> palette,
                   Templates::RingHost& host) {
@@ -165,7 +170,8 @@ bool Plg073::Ring(Templates::RingCommand command, std::int32_t packed,
                          palette, host);
 }
 
-// decomp: PLG081.BIN func_800FA6B8 (src/EFFECT/PLG081.BIN/0.c:11).
+// decomp: PLG081.BIN vs_effect_tornado_1 (src/EFFECT/rings.h:22; was
+// func_800FA6B8).
 bool Plg081::Ring(Templates::RingCommand command, std::int32_t packed,
                   std::span<const Templates::RingPaletteEntry> palette,
                   Templates::RingHost& host) {
@@ -173,7 +179,8 @@ bool Plg081::Ring(Templates::RingCommand command, std::int32_t packed,
                          palette, host);
 }
 
-// decomp: PLG129.BIN func_800F9800 (src/EFFECT/PLG129.BIN/0.c:2).
+// decomp: PLG129.BIN vs_effect_lastAscension_0 (src/EFFECT/rings.h:22; was
+// func_800F9800).
 bool Plg129::Ring(Templates::RingCommand command, std::int32_t packed,
                   std::span<const Templates::RingPaletteEntry> palette,
                   Templates::RingHost& host) {
@@ -181,9 +188,9 @@ bool Plg129::Ring(Templates::RingCommand command, std::int32_t packed,
                          packed, palette, host);
 }
 
-// decomp: PLG129.BIN func_800FBAC8 (src/EFFECT/PLG129.BIN/0.c:17).
-// rings.h:323 undefines VS_RING_TRANSPOSED before this second instance is
-// compiled, so it draws upright (the generated copy transposed it).
+// decomp: PLG129.BIN vs_effect_lastAscension_3 (src/EFFECT/rings.h:22; was
+// func_800FBAC8). rings.h:323 undefines VS_RING_TRANSPOSED before this second
+// instance is compiled, so it draws upright (the generated copy transposed it).
 bool Plg129::Ring2(Templates::RingCommand command, std::int32_t packed,
                    std::span<const Templates::RingPaletteEntry> palette,
                    Templates::RingHost& host) {
@@ -191,7 +198,8 @@ bool Plg129::Ring2(Templates::RingCommand command, std::int32_t packed,
                          palette, host);
 }
 
-// decomp: PLG138.BIN func_800FA6D0 (src/EFFECT/PLG138.BIN/18.c:5).
+// decomp: PLG138.BIN vs_effect_papillonReel_1 (src/EFFECT/rings.h:22; was
+// func_800FA6D0).
 bool Plg138::Ring(Templates::RingCommand command, std::int32_t packed,
                   std::span<const Templates::RingPaletteEntry> palette,
                   Templates::RingHost& host) {
@@ -199,7 +207,8 @@ bool Plg138::Ring(Templates::RingCommand command, std::int32_t packed,
                          palette, host);
 }
 
-// decomp: PLG142.BIN func_800FB2D8 (src/EFFECT/PLG142.BIN/18.c:16).
+// decomp: PLG142.BIN vs_effect_adventSign_2 (src/EFFECT/rings.h:22; was
+// func_800FB2D8).
 bool Plg142::Ring(Templates::RingCommand command, std::int32_t packed,
                   std::span<const Templates::RingPaletteEntry> palette,
                   Templates::RingHost& host) {
@@ -207,7 +216,8 @@ bool Plg142::Ring(Templates::RingCommand command, std::int32_t packed,
                          palette, host);
 }
 
-// decomp: PLG146.BIN func_800FCB38 (src/EFFECT/PLG146.BIN/1D8.c:34).
+// decomp: PLG146.BIN vs_effect_blackNebula_3 (src/EFFECT/rings.h:22; was
+// func_800FCB38).
 bool Plg146::Ring(Templates::RingCommand command, std::int32_t packed,
                   std::span<const Templates::RingPaletteEntry> palette,
                   Templates::RingHost& host) {
@@ -215,7 +225,8 @@ bool Plg146::Ring(Templates::RingCommand command, std::int32_t packed,
                          packed, palette, host);
 }
 
-// decomp: PLG147.BIN func_800F98F8 (src/EFFECT/PLG147.BIN/F8.c:2).
+// decomp: PLG147.BIN vs_effect_bearClaw_0 (src/EFFECT/rings.h:22; was
+// func_800F98F8).
 bool Plg147::Ring(Templates::RingCommand command, std::int32_t packed,
                   std::span<const Templates::RingPaletteEntry> palette,
                   Templates::RingHost& host) {
@@ -223,7 +234,8 @@ bool Plg147::Ring(Templates::RingCommand command, std::int32_t packed,
                          palette, host);
 }
 
-// decomp: PLG149.BIN func_800F9800 (src/EFFECT/PLG149.BIN/0.c:2).
+// decomp: PLG149.BIN vs_effect_ironRipper_0 (src/EFFECT/rings.h:22; was
+// func_800F9800).
 bool Plg149::Ring(Templates::RingCommand command, std::int32_t packed,
                   std::span<const Templates::RingPaletteEntry> palette,
                   Templates::RingHost& host) {
@@ -231,7 +243,8 @@ bool Plg149::Ring(Templates::RingCommand command, std::int32_t packed,
                          palette, host);
 }
 
-// decomp: PLG150.BIN func_800FBDF8 (src/EFFECT/PLG150.BIN/18.c:13).
+// decomp: PLG150.BIN vs_effect_emeticBomb_3 (src/EFFECT/rings.h:22; was
+// func_800FBDF8).
 bool Plg150::Ring(Templates::RingCommand command, std::int32_t packed,
                   std::span<const Templates::RingPaletteEntry> palette,
                   Templates::RingHost& host) {
@@ -239,7 +252,8 @@ bool Plg150::Ring(Templates::RingCommand command, std::int32_t packed,
                          packed, palette, host);
 }
 
-// decomp: PLG153.BIN func_800FA41C (src/EFFECT/PLG153.BIN/110.c:7).
+// decomp: PLG153.BIN vs_effect_gravisAether_1 (src/EFFECT/rings.h:22; was
+// func_800FA41C).
 bool Plg153::Ring(Templates::RingCommand command, std::int32_t packed,
                   std::span<const Templates::RingPaletteEntry> palette,
                   Templates::RingHost& host) {
@@ -247,7 +261,8 @@ bool Plg153::Ring(Templates::RingCommand command, std::int32_t packed,
                          packed, palette, host);
 }
 
-// decomp: PLG160.BIN func_800FA6F8 (src/EFFECT/PLG160.BIN/0.c:6).
+// decomp: PLG160.BIN vs_effect_scytheWind_1 (src/EFFECT/rings.h:22; was
+// func_800FA6F8).
 bool Plg160::Ring(Templates::RingCommand command, std::int32_t packed,
                   std::span<const Templates::RingPaletteEntry> palette,
                   Templates::RingHost& host) {
@@ -255,7 +270,8 @@ bool Plg160::Ring(Templates::RingCommand command, std::int32_t packed,
                          palette, host);
 }
 
-// decomp: PLG161.BIN func_800FA7B0 (src/EFFECT/PLG161.BIN/F8.c:5).
+// decomp: PLG161.BIN vs_effect_gigaTempest_1 (src/EFFECT/rings.h:22; was
+// func_800FA7B0).
 bool Plg161::Ring(Templates::RingCommand command, std::int32_t packed,
                   std::span<const Templates::RingPaletteEntry> palette,
                   Templates::RingHost& host) {
@@ -263,9 +279,9 @@ bool Plg161::Ring(Templates::RingCommand command, std::int32_t packed,
                          packed, palette, host);
 }
 
-// decomp: PLG161.BIN func_800FE044 (src/EFFECT/PLG161.BIN/F8.c:23).
-// rings.h:323 undefines VS_RING_TRANSPOSED before this second instance is
-// compiled, so it draws upright (the generated copy transposed it).
+// decomp: PLG161.BIN vs_effect_gigaTempest_4 (src/EFFECT/rings.h:22; was
+// func_800FE044). rings.h:323 undefines VS_RING_TRANSPOSED before this second
+// instance is compiled, so it draws upright (the generated copy transposed it).
 bool Plg161::Ring2(Templates::RingCommand command, std::int32_t packed,
                    std::span<const Templates::RingPaletteEntry> palette,
                    Templates::RingHost& host) {
@@ -273,7 +289,8 @@ bool Plg161::Ring2(Templates::RingCommand command, std::int32_t packed,
                          palette, host);
 }
 
-// decomp: PLG162.BIN func_800FB5F8 (src/EFFECT/PLG162.BIN/0.c:339).
+// decomp: PLG162.BIN vs_effect_spiralScourge_2 (src/EFFECT/rings.h:22; was
+// func_800FB5F8).
 bool Plg162::Ring(Templates::RingCommand command, std::int32_t packed,
                   std::span<const Templates::RingPaletteEntry> palette,
                   Templates::RingHost& host) {
@@ -281,7 +298,8 @@ bool Plg162::Ring(Templates::RingCommand command, std::int32_t packed,
                          palette, host);
 }
 
-// decomp: PLG166.BIN func_800FC29C (src/EFFECT/PLG166.BIN/0.c:20).
+// decomp: PLG166.BIN vs_effect_sanctusFlare_3 (src/EFFECT/rings.h:22; was
+// func_800FC29C).
 bool Plg166::Ring(Templates::RingCommand command, std::int32_t packed,
                   std::span<const Templates::RingPaletteEntry> palette,
                   Templates::RingHost& host) {
@@ -289,7 +307,8 @@ bool Plg166::Ring(Templates::RingCommand command, std::int32_t packed,
                          packed, palette, host);
 }
 
-// decomp: PLG169.BIN func_800FBA00 (src/EFFECT/PLG169.BIN/E0.c:18).
+// decomp: PLG169.BIN vs_effect_vermillionAura_1 (src/EFFECT/rings.h:22; was
+// func_800FBA00).
 bool Plg169::Ring(Templates::RingCommand command, std::int32_t packed,
                   std::span<const Templates::RingPaletteEntry> palette,
                   Templates::RingHost& host) {
@@ -297,7 +316,8 @@ bool Plg169::Ring(Templates::RingCommand command, std::int32_t packed,
                          palette, host);
 }
 
-// decomp: PLG170.BIN func_800FB348 (src/EFFECT/PLG170.BIN/18.c:16).
+// decomp: PLG170.BIN vs_effect_retribution_2 (src/EFFECT/rings.h:22; was
+// func_800FB348).
 bool Plg170::Ring(Templates::RingCommand command, std::int32_t packed,
                   std::span<const Templates::RingPaletteEntry> palette,
                   Templates::RingHost& host) {
@@ -305,7 +325,8 @@ bool Plg170::Ring(Templates::RingCommand command, std::int32_t packed,
                          packed, palette, host);
 }
 
-// decomp: PLG198.BIN func_800F9800 (src/EFFECT/PLG198.BIN/0.c:2).
+// decomp: PLG198.BIN vs_effect_hpUp_0 (src/EFFECT/rings.h:22; was
+// func_800F9800).
 bool Plg198::Ring(Templates::RingCommand command, std::int32_t packed,
                   std::span<const Templates::RingPaletteEntry> palette,
                   Templates::RingHost& host) {
@@ -313,7 +334,8 @@ bool Plg198::Ring(Templates::RingCommand command, std::int32_t packed,
                          packed, palette, host);
 }
 
-// decomp: PLG236.BIN func_800FC56C (src/EFFECT/PLG236.BIN/0.c:345).
+// decomp: PLG236.BIN vs_effect_plg236_3 (src/EFFECT/rings.h:22; was
+// func_800FC56C).
 bool Plg236::Ring(Templates::RingCommand command, std::int32_t packed,
                   std::span<const Templates::RingPaletteEntry> palette,
                   Templates::RingHost& host) {
@@ -321,7 +343,8 @@ bool Plg236::Ring(Templates::RingCommand command, std::int32_t packed,
                          packed, palette, host);
 }
 
-// decomp: PLG263.BIN func_800FA4A8 (src/EFFECT/PLG263.BIN/110.c:6).
+// decomp: PLG263.BIN vs_effect_plg263_1 (src/EFFECT/rings.h:22; was
+// func_800FA4A8).
 bool Plg263::Ring(Templates::RingCommand command, std::int32_t packed,
                   std::span<const Templates::RingPaletteEntry> palette,
                   Templates::RingHost& host) {
@@ -329,7 +352,8 @@ bool Plg263::Ring(Templates::RingCommand command, std::int32_t packed,
                          palette, host);
 }
 
-// decomp: PLG297.BIN func_800FBF4C (src/EFFECT/PLG297.BIN/18.c:20).
+// decomp: PLG297.BIN vs_effect_plg297_3 (src/EFFECT/rings.h:22; was
+// func_800FBF4C).
 bool Plg297::Ring(Templates::RingCommand command, std::int32_t packed,
                   std::span<const Templates::RingPaletteEntry> palette,
                   Templates::RingHost& host) {

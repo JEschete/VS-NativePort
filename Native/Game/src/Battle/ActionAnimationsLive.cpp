@@ -217,7 +217,7 @@ void PlayLiveDefenseAnimation(int slot, SVECTOR* target) {
   LiveWorld world(target);
   Require(PlayDefenseAnimation(slot, world));
 }
-// decomp: func_8009DF3C (src/BATTLE/BATTLE.PRG/30DB0.c:2408), F00819.
+// decomp: func_8009DF3C (src/BATTLE/BATTLE.PRG/30DB0.c:2473), F00819.
 void SetLiveEnemyCombatPose(int slot, int mode) {
   LiveWorld world(nullptr);
   Require(SetEnemyCombatPose(slot, mode, world));
@@ -243,7 +243,7 @@ void PlayLiveChainAbilityAnimation(int slot, SVECTOR* target, int ability,
   LiveWorld world(target);
   Require(PlayChainAbilityAnimation(slot, ability, sequence, world));
 }
-// decomp: func_8009EE9C (src/BATTLE/BATTLE.PRG/30DB0.c:3040), F00832.
+// decomp: func_8009EE9C (src/BATTLE/BATTLE.PRG/30DB0.c:3120), F00832.
 void PlayLiveDefenseAbilityAnimation(int slot, SVECTOR* target,
                                      int /*unused*/) {
   LiveWorld world(target);
@@ -259,7 +259,7 @@ void PlayLiveBreakArtAnimation(int slot, SVECTOR* target, int mode) {
   LiveWorld world(target);
   Require(PlayBreakArtAnimation(slot, mode, world));
 }
-// decomp: func_800A2574 (src/BATTLE/BATTLE.PRG/38C1C.c:625), F00891.
+// decomp: func_800A2574 (src/BATTLE/BATTLE.PRG/38C1C.c:614), F00891.
 void FinishLiveEnemyCombatPose(int slot, std::int16_t facing) {
   LiveWorld world(nullptr);
   Require(FinishEnemyCombatPose(slot, facing, world));

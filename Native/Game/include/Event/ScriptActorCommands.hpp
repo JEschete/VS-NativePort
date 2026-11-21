@@ -272,147 +272,194 @@ class ScriptActorHost {
 };
 
 // Selections and actor activity (BATTLE.PRG 4A0A8.c).
-// decomp: func_800BB68C (src/BATTLE/BATTLE.PRG/4A0A8.c:2880)
+// decomp: expandActorSelector (src/BATTLE/BATTLE.PRG/4DEA8.c:3529; was
+// func_800BB68C)
 [[nodiscard]] ActorSelection BuildScriptActorSelection(ScriptActorHost& host,
                                                        std::uint16_t selector);
-// decomp: func_800BB788 (src/BATTLE/BATTLE.PRG/4A0A8.c:2910)
+// decomp: nextActor (src/BATTLE/BATTLE.PRG/4DEA8.c:3559; was func_800BB788)
 [[nodiscard]] int NextScriptSelectedActor(ScriptActorHost& host,
                                           ActorSelection& selection);
-// decomp: func_800BAF6C (src/BATTLE/BATTLE.PRG/4A0A8.c:2634): `enabled` is
+// decomp: func_800BAF6C (src/BATTLE/BATTLE.PRG/4DEA8.c:3283): `enabled` is
 // the script's byte, passed on unchanged to the other actors' logic switch.
 void SetEventActorActivity(ScriptActorHost& host, int enabled);
-// decomp: func_800BB7C4 (src/BATTLE/BATTLE.PRG/4A0A8.c:2920): projects the
-// anchor above the actor's tagged bone into `anchor` and returns its z, the
-// screen heading from the bone endpoint to the anchor point. The anchor's w
-// is the caller's until the projection writes it.
+// decomp: getActorScreenPosition (src/BATTLE/BATTLE.PRG/4DEA8.c:3569; was
+// func_800BB7C4): projects the anchor above the actor's tagged bone into
+// `anchor` and returns its z, the screen heading from the bone endpoint to the
+// anchor point. The anchor's w is the caller's until the projection writes it.
 int ActorDialogAnchor(ScriptActorHost& host, int actor,
                       Actors::MotionVector& anchor);
 
 // Opcode handlers; each returns how the event VM continues.
-// decomp: func_800B7428 (src/BATTLE/BATTLE.PRG/4A0A8.c:967), opcode 0x1E
+// decomp: vs_battle_script_1E_actorDeath (src/BATTLE/BATTLE.PRG/4DEA8.c:893;
+// was func_800B7428), opcode 0x1E
 ScriptStep ScriptResetActorGroupState(ScriptCommand command,
                                       ScriptActorHost& host);
-// decomp: func_800B7490 (src/BATTLE/BATTLE.PRG/4A0A8.c:983), opcode 0x1F
+// decomp: vs_battle_script_1F_getActorTile (src/BATTLE/BATTLE.PRG/4DEA8.c:919;
+// was func_800B7490), opcode 0x1F
 ScriptStep ScriptStoreActorTile(ScriptCommand command, ScriptActorHost& host);
-// decomp: func_800B7574 (src/BATTLE/BATTLE.PRG/4A0A8.c:1009), opcode 0x20
+// decomp: vs_battle_script_20_spawnActor (src/BATTLE/BATTLE.PRG/4DEA8.c:958;
+// was func_800B7574), opcode 0x20
 ScriptStep ScriptSpawnActor(ScriptCommand command, ScriptActorHost& host);
-// decomp: func_800B75F4 (src/BATTLE/BATTLE.PRG/4A0A8.c:1022), opcode 0x21
+// decomp: vs_battle_script_21_walkActorToTile
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:980; was func_800B75F4), opcode 0x21
 ScriptStep ScriptNavigateActorToTile(ScriptCommand command,
                                      ScriptActorHost& host);
-// decomp: func_800B76A8 (src/BATTLE/BATTLE.PRG/4A0A8.c:1040), opcode 0x22
+// decomp: vs_battle_script_22_playAnimation
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1011; was func_800B76A8), opcode 0x22
 ScriptStep ScriptPlayActorAnimation(ScriptCommand command,
                                     ScriptActorHost& host);
-// decomp: func_800B770C (src/BATTLE/BATTLE.PRG/4A0A8.c:1047), opcode 0x23
+// decomp: vs_battle_script_23_setActorFlags
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1032; was func_800B770C), opcode 0x23
 ScriptStep ScriptSetActorGroupFlags(ScriptCommand command,
                                     ScriptActorHost& host);
-// decomp: func_800B77DC (src/BATTLE/BATTLE.PRG/4A0A8.c:1080), opcode 0x24
+// decomp: vs_battle_script_24_setActorSfxPanVolume
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1082; was func_800B77DC), opcode 0x24
 ScriptStep ScriptSetActorSoundMix(ScriptCommand command, ScriptActorHost& host);
-// decomp: func_800B784C (src/BATTLE/BATTLE.PRG/4A0A8.c:1097), opcode 0x25
+// decomp: vs_battle_script_25_moveActorToTile
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1116; was func_800B784C), opcode 0x25
 ScriptStep ScriptWalkActorToTile(ScriptCommand command, ScriptActorHost& host);
-// decomp: func_800B792C (src/BATTLE/BATTLE.PRG/4A0A8.c:1116), opcode 0x26
+// decomp: vs_battle_script_26_moveActorToCoordinate
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1153; was func_800B792C), opcode 0x26
 ScriptStep ScriptWalkActorToWorldPos(ScriptCommand command,
                                      ScriptActorHost& host);
-// decomp: func_800B7A98 (src/BATTLE/BATTLE.PRG/4A0A8.c:1148), opcode 0x27
+// decomp: vs_battle_script_27_slideActorToTile
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1196; was func_800B7A98), opcode 0x27
 ScriptStep ScriptSlideActorToTile(ScriptCommand command, ScriptActorHost& host);
-// decomp: func_800B7B58 (src/BATTLE/BATTLE.PRG/4A0A8.c:1167), opcode 0x28
+// decomp: vs_battle_script_28_slideActorToCoordinate
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1229; was func_800B7B58), opcode 0x28
 ScriptStep ScriptSlideActorToWorldPos(ScriptCommand command,
                                       ScriptActorHost& host);
-// decomp: func_800B7C90 (src/BATTLE/BATTLE.PRG/4A0A8.c:1200), opcode 0x29
+// decomp: vs_battle_script_29_attachActor (src/BATTLE/BATTLE.PRG/4DEA8.c:1269;
+// was func_800B7C90), opcode 0x29
 ScriptStep ScriptSetActorAttachment(ScriptCommand command,
                                     ScriptActorHost& host);
-// decomp: func_800B7D10 (src/BATTLE/BATTLE.PRG/4A0A8.c:1212), opcode 0x2A
+// decomp: vs_battle_script_2A_walkActorToCoordinate
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1290; was func_800B7D10), opcode 0x2A
 ScriptStep ScriptNavigateActorToWorldPos(ScriptCommand command,
                                          ScriptActorHost& host);
-// decomp: func_800B7DC4 (src/BATTLE/BATTLE.PRG/4A0A8.c:1230), opcode 0x2B
+// decomp: vs_battle_script_2B_turnActorToFacing
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1321; was func_800B7DC4), opcode 0x2B
 ScriptStep ScriptTurnActorToFacing(ScriptCommand command,
                                    ScriptActorHost& host);
-// decomp: func_800B7EF0 (src/BATTLE/BATTLE.PRG/4A0A8.c:1266), opcode 0x2C
+// decomp: vs_battle_script_2C_turnActorToFaceActor
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1373; was func_800B7EF0), opcode 0x2C
 ScriptStep ScriptFaceOtherActor(ScriptCommand command, ScriptActorHost& host);
-// decomp: func_800B7F84 (src/BATTLE/BATTLE.PRG/4A0A8.c:1285), opcode 0x2D
+// decomp: vs_battle_script_2D_turnActorToFaceTile
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1394; was func_800B7F84), opcode 0x2D
 ScriptStep ScriptFaceTile(ScriptCommand command, ScriptActorHost& host);
-// decomp: func_800B804C (src/BATTLE/BATTLE.PRG/4A0A8.c:1299), opcode 0x2E
+// decomp: vs_battle_script_2E_setActorScale
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1420; was func_800B804C), opcode 0x2E
 ScriptStep ScriptScaleActor(ScriptCommand command, ScriptActorHost& host);
-// decomp: func_800B80B4 (src/BATTLE/BATTLE.PRG/4A0A8.c:1309), opcode 0x2F
+// decomp: vs_battle_script_2F_despawnActor (src/BATTLE/BATTLE.PRG/4DEA8.c:1436;
+// was func_800B80B4), opcode 0x2F
 ScriptStep ScriptRemoveActorGroup(ScriptCommand command, ScriptActorHost& host);
-// decomp: func_800B810C (src/BATTLE/BATTLE.PRG/4A0A8.c:1324), opcode 0x30
+// decomp: vs_battle_script_30_waitActorActivity
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1461; was func_800B810C), opcode 0x30
 ScriptStep ScriptWaitForActorFlags(ScriptCommand command,
                                    ScriptActorHost& host);
-// decomp: func_800B81A0 (src/BATTLE/BATTLE.PRG/4A0A8.c:1344), opcode 0x31
+// decomp: vs_battle_script_31_setActorLightColor
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1483; was func_800B81A0), opcode 0x31
 ScriptStep ScriptSetActorColorOverride(ScriptCommand command,
                                        ScriptActorHost& host);
-// decomp: func_800B822C (src/BATTLE/BATTLE.PRG/4A0A8.c:1360), opcode 0x32
+// decomp: vs_battle_script_32_queueAnimation
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1508; was func_800B822C), opcode 0x32
 ScriptStep ScriptQueueActorAnimation(ScriptCommand command,
                                      ScriptActorHost& host);
-// decomp: func_800B8290 (src/BATTLE/BATTLE.PRG/4A0A8.c:1367), opcode 0x33
+// decomp: vs_battle_script_33_rotateActor (src/BATTLE/BATTLE.PRG/4DEA8.c:1527;
+// was func_800B8290), opcode 0x33
 ScriptStep ScriptRotateActorAxes(ScriptCommand command, ScriptActorHost& host);
-// decomp: func_800B8360 (src/BATTLE/BATTLE.PRG/4A0A8.c:1390), opcode 0x34
+// decomp: vs_battle_script_34_setActorLookAngles
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1556; was func_800B8360), opcode 0x34
 ScriptStep ScriptSetActorHeadAngles(ScriptCommand command,
                                     ScriptActorHost& host);
-// decomp: func_800B83D4 (src/BATTLE/BATTLE.PRG/4A0A8.c:1408), opcode 0x35
+// decomp: vs_battle_script_35_playAnimationFromFrame
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1586; was func_800B83D4), opcode 0x35
 ScriptStep ScriptPlayActorAnimationAtFrame(ScriptCommand command,
                                            ScriptActorHost& host);
-// decomp: func_800B8438 (src/BATTLE/BATTLE.PRG/4A0A8.c:1415), opcode 0x36
+// decomp: vs_battle_script_36_queueAnimationFromFrame
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1598; was func_800B8438), opcode 0x36
 ScriptStep ScriptQueueActorAnimationAtFrame(ScriptCommand command,
                                             ScriptActorHost& host);
-// decomp: func_800B849C (src/BATTLE/BATTLE.PRG/4A0A8.c:1422), opcode 0x37
+// decomp: vs_battle_script_37_setActorMoveAnimation
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1614; was func_800B849C), opcode 0x37
 ScriptStep ScriptSetActorIdleAnimation(ScriptCommand command,
                                        ScriptActorHost& host);
-// decomp: func_800B8510 (src/BATTLE/BATTLE.PRG/4A0A8.c:1434), opcode 0x38
+// decomp: vs_battle_script_38_setActorLookTarget
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1634; was func_800B8510), opcode 0x38
 ScriptStep ScriptLookAtActor(ScriptCommand command, ScriptActorHost& host);
-// decomp: func_800B8590 (src/BATTLE/BATTLE.PRG/4A0A8.c:1454), opcode 0x39
+// decomp: vs_battle_script_39_setActorLookPosition
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1667; was func_800B8590), opcode 0x39
 ScriptStep ScriptLookAtWorldPos(ScriptCommand command, ScriptActorHost& host);
-// decomp: func_800B860C (src/BATTLE/BATTLE.PRG/4A0A8.c:1471), opcode 0x3A
+// decomp: vs_battle_script_3A_enqueueEventData
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1697; was func_800B860C), opcode 0x3A
 ScriptStep ScriptLoadObjectModel(ScriptCommand command, ScriptActorHost& host);
-// decomp: func_800B86E8 (src/BATTLE/BATTLE.PRG/4A0A8.c:1488), opcode 0x3B
+// decomp: vs_battle_script_3B_waitDataQueueEmpty
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1719; was func_800B86E8), opcode 0x3B
 ScriptStep ScriptWaitForObjectLoad(ScriptCommand command,
                                    ScriptActorHost& host);
-// decomp: func_800B8708 (src/BATTLE/BATTLE.PRG/4A0A8.c:1490), opcode 0x3C
+// decomp: vs_battle_script_3C_unloadEventData
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1730; was func_800B8708), opcode 0x3C
 ScriptStep ScriptReleaseObjectModel(ScriptCommand command,
                                     ScriptActorHost& host);
-// decomp: func_800B8764 (src/BATTLE/BATTLE.PRG/4A0A8.c:1500), opcode 0x3D
+// decomp: vs_battle_script_3D_selectEventData
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1746; was func_800B8764), opcode 0x3D
 ScriptStep ScriptSelectObjectTextureBank(ScriptCommand command,
                                          ScriptActorHost& host);
-// decomp: func_800B8788 (src/BATTLE/BATTLE.PRG/4A0A8.c:1506), opcode 0x3E
+// decomp: vs_battle_script_3E_setActorEdgeHighlight
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1762; was func_800B8788), opcode 0x3E
 ScriptStep ScriptSetActorOverlayPass(ScriptCommand command,
                                      ScriptActorHost& host);
-// decomp: func_800B884C (src/BATTLE/BATTLE.PRG/4A0A8.c:1526), opcode 0x3F
+// decomp: vs_battle_script_3F_setWeaponDrawn
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1807; was func_800B884C), opcode 0x3F
 ScriptStep ScriptSetActorWeaponDrawn(ScriptCommand command,
                                      ScriptActorHost& host);
-// decomp: func_800B91F0 (src/BATTLE/BATTLE.PRG/4A0A8.c:1786), opcode 0x54
+// decomp: vs_battle_script_54_playWeaponSfx
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2210; was func_800B91F0), opcode 0x54
 ScriptStep ScriptPlayActorAnimationSound(ScriptCommand command,
                                          ScriptActorHost& host);
-// decomp: func_800B9230 (src/BATTLE/BATTLE.PRG/4A0A8.c:1792), opcode 0x55
+// decomp: vs_battle_script_55_setActorsAwake
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2223; was func_800B9230), opcode 0x55
 ScriptStep ScriptSetNpcUpdatesEnabled(ScriptCommand command,
                                       ScriptActorHost& host);
-// decomp: func_800B92A0 (src/BATTLE/BATTLE.PRG/4A0A8.c:1807), opcode 0x57
+// decomp: vs_battle_script_57_fullyRestoreActor
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2254; was func_800B92A0), opcode 0x57
 ScriptStep ScriptRestoreActorVitals(ScriptCommand command,
                                     ScriptActorHost& host);
-// decomp: func_800B9608 (src/BATTLE/BATTLE.PRG/4A0A8.c:1916), opcode 0x5C
+// decomp: vs_battle_script_5C_setActorWeaponModels
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2425; was func_800B9608), opcode 0x5C
 ScriptStep ScriptSetActorEquipmentModels(ScriptCommand command,
                                          ScriptActorHost& host);
-// decomp: func_800B9670 (src/BATTLE/BATTLE.PRG/4A0A8.c:1928), opcode 0x5D:
-// starts or stops the actor's root spin.
+// decomp: vs_battle_script_5D_setActorSway (src/BATTLE/BATTLE.PRG/4DEA8.c:2444;
+// was func_800B9670), opcode 0x5D: starts or stops the actor's root spin.
 ScriptStep ScriptSetActorYawOscillation(ScriptCommand command,
                                         ScriptActorHost& host);
-// decomp: func_800B97F8 (src/BATTLE/BATTLE.PRG/4A0A8.c:1988), opcode 0x63
+// decomp: vs_battle_script_63_statusUnk (src/BATTLE/BATTLE.PRG/4DEA8.c:2547;
+// was func_800B97F8), opcode 0x63
 ScriptStep ScriptClearAshleyStatusEffects(ScriptCommand command,
                                           ScriptActorHost& host);
-// decomp: func_800B9D74 (src/BATTLE/BATTLE.PRG/4A0A8.c:2151), opcode 0x71
+// decomp: vs_battle_script_71 (src/BATTLE/BATTLE.PRG/4DEA8.c:2741; was
+// func_800B9D74), opcode 0x71
 ScriptStep ScriptSetActorRenderMode(ScriptCommand command,
                                     ScriptActorHost& host);
-// decomp: func_800BAC38 (src/BATTLE/BATTLE.PRG/4A0A8.c:2549), opcode 0xB1
+// decomp: vs_battle_script_B1 (src/BATTLE/BATTLE.PRG/4DEA8.c:3199; was
+// func_800BAC38), opcode 0xB1
 ScriptStep CommandSetEnteredDoor(ScriptCommand command, ScriptActorHost& host);
-// decomp: func_800BAC5C (src/BATTLE/BATTLE.PRG/4A0A8.c:2555), opcode 0xB2
+// decomp: vs_battle_script_B2 (src/BATTLE/BATTLE.PRG/4DEA8.c:3205; was
+// func_800BAC5C), opcode 0xB2
 ScriptStep CommandStoreActorRangeBearing(ScriptCommand command,
                                          ScriptActorHost& host);
-// decomp: func_800BAD78 (src/BATTLE/BATTLE.PRG/4A0A8.c:2575), opcode 0xB3
+// decomp: vs_battle_script_B3 (src/BATTLE/BATTLE.PRG/4DEA8.c:3225; was
+// func_800BAD78), opcode 0xB3
 ScriptStep CommandSetActorActivity(ScriptCommand command,
                                    ScriptActorHost& host);
-// decomp: func_800BADE0 (src/BATTLE/BATTLE.PRG/4A0A8.c:2590), opcode 0xB4
+// decomp: vs_battle_script_B4 (src/BATTLE/BATTLE.PRG/4DEA8.c:3240; was
+// func_800BADE0), opcode 0xB4
 ScriptStep CommandAwardMiscLoot(ScriptCommand command, ScriptActorHost& host);
-// decomp: func_800BAE74 (src/BATTLE/BATTLE.PRG/4A0A8.c:2606), opcode 0xB5
+// decomp: vs_battle_script_B5 (src/BATTLE/BATTLE.PRG/4DEA8.c:3255; was
+// func_800BAE74), opcode 0xB5
 ScriptStep CommandConsumeMiscItem(ScriptCommand command, ScriptActorHost& host);
-// decomp: func_800BAEA0 (src/BATTLE/BATTLE.PRG/4A0A8.c:2612), opcode 0xB6
+// decomp: vs_battle_script_B6 (src/BATTLE/BATTLE.PRG/4DEA8.c:3261; was
+// func_800BAEA0), opcode 0xB6
 ScriptStep CommandStoreActorDistance(ScriptCommand command,
                                      ScriptActorHost& host);
 

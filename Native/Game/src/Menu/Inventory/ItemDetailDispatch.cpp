@@ -104,21 +104,22 @@ void EnterDispatcher(ItemDetailDispatcherState& state,
 }
 }  // namespace
 
-// decomp: _armorStatusView (src/MENU/items1.h:464-544).
+// decomp: armorStatusView (src/MENU/items1.h:469-549; was _armorStatusView).
 std::int32_t UpdateArmorDetails(EquipmentDetailState& state,
                                 ItemDetailWorld& world,
                                 std::optional<DetailSelection> selection) {
   return UpdateController(state, world, selection, true);
 }
 
-// decomp: _gemStatusView (src/MENU/items1.h:554-630).
+// decomp: gemStatusView (src/MENU/items1.h:559-635; was _gemStatusView).
 std::int32_t UpdateGemDetails(EquipmentDetailState& state,
                               ItemDetailWorld& world,
                               std::optional<DetailSelection> selection) {
   return UpdateController(state, world, selection, false);
 }
 
-// decomp: _itemStatusDispatcher (src/MENU/items1.h:640-688).
+// decomp: itemStatusDispatcher (src/MENU/items1.h:645-693; was
+// _itemStatusDispatcher).
 std::int32_t UpdateItemDetails(ItemDetailDispatcherState& state,
                                ItemDetailDispatcherWorld& world,
                                std::optional<DetailDispatchEntry> entry) {

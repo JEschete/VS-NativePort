@@ -142,7 +142,7 @@ std::optional<TargetPlacement> RequirePlacement(const MovementHost& host,
 }
 }  // namespace
 
-// decomp: func_800E4BB8 (src/BATTLE/BATTLE.PRG/7BDD4.s:497).
+// decomp: func_800E4BB8 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:492).
 std::uint32_t RefreshAiMovementCooldown(std::uint32_t navigation_flags,
                                         bool movement_enabled) {
   navigation_flags &= ~kResetNavigationBits;
@@ -150,7 +150,7 @@ std::uint32_t RefreshAiMovementCooldown(std::uint32_t navigation_flags,
   return navigation_flags;
 }
 
-// decomp: func_800DB4AC (src/BATTLE/BATTLE.PRG/72B70.s:102).
+// decomp: func_800DB4AC (src/BATTLE/BATTLE.PRG/72B70.s:93).
 std::optional<int> SetMovementBehavior(
     MovementState& state, std::span<const std::uint16_t> patrol_routes,
     int mode) {
@@ -167,7 +167,7 @@ std::optional<int> SetMovementBehavior(
   return EnterMode(state, movement_mode, row);
 }
 
-// decomp: func_800E4904 (src/BATTLE/BATTLE.PRG/7BDD4.s:279).
+// decomp: func_800E4904 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:487).
 bool RefreshAiTargetTile(MovementState& state, const MovementHost& host) {
   const int target = state.pursuit.target_id;
   if (!IsActorSlot(target)) {
@@ -198,7 +198,7 @@ bool RefreshAiTargetTile(MovementState& state, const MovementHost& host) {
   return true;
 }
 
-// decomp: func_800E48F8 (src/BATTLE/BATTLE.PRG/7BDD4.s:270).
+// decomp: func_800E48F8 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:486).
 bool RefreshAiTargetTileWhenTracking(MovementState& state,
                                      const MovementHost& host) {
   if (state.requested_mode != static_cast<int>(MovementMode::kPursuit)) {
@@ -207,7 +207,7 @@ bool RefreshAiTargetTileWhenTracking(MovementState& state,
   return RefreshAiTargetTile(state, host);
 }
 
-// decomp: func_800DB370 (src/BATTLE/BATTLE.PRG/72B70.s:11).
+// decomp: func_800DB370 (src/BATTLE/BATTLE.PRG/72B70.s:6).
 std::optional<int> ApproachActor(MovementState& state, MovementHost& host,
                                  const ApproachRequest& request) {
   const int target = request.target;
@@ -252,20 +252,20 @@ std::optional<int> ApproachActor(MovementState& state, MovementHost& host,
              : 0;
 }
 
-// decomp: func_800DB5B8 (src/BATTLE/BATTLE.PRG/72B70.s:192).
+// decomp: func_800DB5B8 (src/BATTLE/BATTLE.PRG/72B70.s:176).
 void WanderAroundTile(MovementState& state, MovementHost& host,
                       std::uint32_t tile, int radius) {
   EnterMode(state, MovementMode::kWander);
   host.UpdateWander(state, tile, static_cast<std::uint32_t>(radius));
 }
 
-// decomp: func_800DB5B0 (src/BATTLE/BATTLE.PRG/72B70.s:182).
+// decomp: func_800DB5B0 (src/BATTLE/BATTLE.PRG/72B70.s:171).
 void WanderAroundSavedCenter(MovementState& state, MovementHost& host) {
   WanderAroundTile(state, host, state.wander_center,
                    state.wander_center_radius);
 }
 
-// decomp: func_800DB5DC (src/BATTLE/BATTLE.PRG/72B70.s:209);
+// decomp: func_800DB5DC (src/BATTLE/BATTLE.PRG/72B70.s:188);
 // completion tail L800E5030 (src/BATTLE/BATTLE.PRG/7C7E0.s:34).
 void MoveToTile(MovementState& state, MovementHost& host, std::uint32_t tile,
                 int radius) {
@@ -285,7 +285,7 @@ void MoveToTile(MovementState& state, MovementHost& host, std::uint32_t tile,
   }
 }
 
-// decomp: func_800DB5FC (src/BATTLE/BATTLE.PRG/72B70.s:225). The original
+// decomp: func_800DB5FC (src/BATTLE/BATTLE.PRG/72B70.s:199). The original
 // skips the patrol when its third argument register is zero; every native
 // caller patrols.
 bool PatrolWaypoints(MovementState& state, MovementHost& host) {
@@ -297,7 +297,7 @@ bool PatrolWaypoints(MovementState& state, MovementHost& host) {
   return true;
 }
 
-// decomp: func_800DB61C (src/BATTLE/BATTLE.PRG/72B70.s:239).
+// decomp: func_800DB61C (src/BATTLE/BATTLE.PRG/72B70.s:209).
 std::optional<int> FleeVisibleEnemies(MovementState& state, MovementHost& host,
                                       int kind) {
   const auto roster = host.BattleActors();
@@ -341,7 +341,7 @@ std::optional<int> FleeVisibleEnemies(MovementState& state, MovementHost& host,
   return EnterMode(state, MovementMode::kFlee);
 }
 
-// decomp: func_800DB74C (src/BATTLE/BATTLE.PRG/72B70.s:325).
+// decomp: func_800DB74C (src/BATTLE/BATTLE.PRG/72B70.s:292).
 std::optional<int> TrackActorPosition(MovementState& state, MovementHost& host,
                                       int target) {
   if (!IsActorSlot(target)) {
@@ -357,7 +357,7 @@ std::optional<int> TrackActorPosition(MovementState& state, MovementHost& host,
              : 0;
 }
 
-// decomp: func_800DBB2C (src/BATTLE/BATTLE.PRG/72B70.s:620).
+// decomp: func_800DBB2C (src/BATTLE/BATTLE.PRG/72B70.s:576).
 std::optional<RelatedActor> FindActorByRelationship(const MovementState& state,
                                                     const MovementHost& host,
                                                     int relation,
@@ -384,8 +384,8 @@ std::optional<RelatedActor> FindActorByRelationship(const MovementState& state,
   return RelatedActor{};
 }
 
-// decomp: func_800E437C (src/BATTLE/BATTLE.PRG/7B5DC.s:451). The direction
-// is scaled with func_80041AF4's reciprocal-root table.
+// decomp: func_800E437C (src/BATTLE/BATTLE.PRG/6E4CCShared.h:478). The
+// direction is scaled with func_80041AF4's reciprocal-root table.
 int TargetFacingCosine(Core::Math::Position3 from, Core::Math::Position3 to,
                        int angle, std::uint32_t distance) {
   constexpr int kQ12 = 4096;
@@ -404,7 +404,7 @@ int TargetFacingCosine(Core::Math::Position3 from, Core::Math::Position3 to,
   return std::clamp(dot >> kQ12Shift, -kQ12, kQ12);
 }
 
-// decomp: func_800D9DD8 (src/BATTLE/BATTLE.PRG/70D4C.s:627).
+// decomp: func_800D9DD8 (src/BATTLE/BATTLE.PRG/70D4C.s:608).
 bool SelectActionMovementMode(MovementState& state, MovementHost& host) {
   constexpr std::uint8_t kMoveInPlace = 1;
   constexpr std::uint8_t kWalkToWaypoint = 2;
@@ -428,7 +428,7 @@ bool SelectActionMovementMode(MovementState& state, MovementHost& host) {
   return true;
 }
 
-// decomp: func_800DC810 (src/BATTLE/BATTLE.PRG/73C84.s:290).
+// decomp: func_800DC810 (src/BATTLE/BATTLE.PRG/7399C.s:474).
 bool ApplyActionRelationshipChanges(RelationshipChangeHost& host) {
   const auto roster = host.BattleActors();
   if (!roster) {

@@ -164,7 +164,8 @@ class LiveMapMarkerHost final : public MapMarkerHost {
 };
 }  // namespace
 
-// decomp: MENU5.PRG _renderDefaultIcon (4D8.c:106).
+// decomp: MENU5.PRG renderDefaultIcon (src/MENU/MENU5.PRG/4D8.c:116; was
+// _renderDefaultIcon).
 void LiveDrawAshleyMarker(int id, int xy, int brightness,
                           std::uint32_t* next_prim) {
   LiveMapMarkerHost host("DrawAshleyMarker", next_prim);
@@ -173,7 +174,8 @@ void LiveDrawAshleyMarker(int id, int xy, int brightness,
       next_prim == nullptr ? SpriteList::kOverlay : SpriteList::kCaller);
 }
 
-// decomp: MENU5.PRG _renderIcon (4D8.c:2158).
+// decomp: MENU5.PRG renderIcon (src/MENU/MENU5.PRG/4D8.c:2163; was
+// _renderIcon).
 void LiveDrawFeatureMarker(int id, int x, int y) {
   constexpr std::string_view kCall = "DrawFeatureMarker";
   LiveMapMarkerHost host(kCall);
@@ -182,7 +184,7 @@ void LiveDrawFeatureMarker(int id, int x, int y) {
   }
 }
 
-// decomp: MENU5.PRG func_80107630 (4D8.c:2180).
+// decomp: MENU5.PRG func_80107630 (src/MENU/MENU5.PRG/4D8.c:2185).
 void LiveDrawDoorStateMarker(int x, int y, int id) {
   constexpr std::string_view kCall = "DrawDoorStateMarker";
   std::uint8_t flag = 0;
@@ -197,7 +199,8 @@ void LiveDrawDoorStateMarker(int x, int y, int id) {
   }
 }
 
-// decomp: MENU5.PRG _renderDoorName (4D8.c:2227).
+// decomp: MENU5.PRG renderDoorName (src/MENU/MENU5.PRG/4D8.c:2232; was
+// _renderDoorName).
 void LiveDrawDoorLabel(int x, int y, int door_id) {
   constexpr std::string_view kCall = "DrawDoorLabel";
   LiveMapMarkerHost host(kCall);
@@ -206,13 +209,15 @@ void LiveDrawDoorLabel(int x, int y, int door_id) {
   }
 }
 
-// decomp: MENU5.PRG _insertLine (4D8.c:2258).
+// decomp: MENU5.PRG insertLine (src/MENU/MENU5.PRG/4D8.c:2263; was
+// _insertLine).
 void LiveAppendLabelLine(int x0, int y0, int x1, int y1) {
   LiveMapMarkerHost host("AppendLabelLine");
   AppendLabelLine(host, x0, y0, x1, y1);
 }
 
-// decomp: MENU5.PRG _renderConnectingMapName (4D8.c:2403).
+// decomp: MENU5.PRG renderConnectingMapName (src/MENU/MENU5.PRG/4D8.c:2408; was
+// _renderConnectingMapName).
 void LiveDrawConnectingAreaLabel(int x, int y, int map_id) {
   constexpr std::string_view kCall = "DrawConnectingAreaLabel";
   std::array<std::uint32_t, std::size(VS::State::roomVisitProgress.area_flags)>
@@ -226,14 +231,15 @@ void LiveDrawConnectingAreaLabel(int x, int y, int map_id) {
   }
 }
 
-// decomp: MENU5.PRG _addMapLabel (4D8.c:2441).
+// decomp: MENU5.PRG addMapLabel (src/MENU/MENU5.PRG/4D8.c:2446; was
+// _addMapLabel).
 void LiveQueueLabel(int x, int y, int type, int label_id) {
   if (!QueueLabel(Labels(), mapLabelCount, x, y, type, label_id)) {
     Refuse("QueueLabel", "label queue full");
   }
 }
 
-// decomp: MENU5.PRG func_8010839C (4D8.c:2471).
+// decomp: MENU5.PRG func_8010839C (src/MENU/MENU5.PRG/4D8.c:2476).
 int LiveShouldDrawDoorStateMarker(int door_state_id, int zone_id, int map_id) {
   constexpr std::string_view kCall = "ShouldDrawDoorStateMarker";
   std::uint8_t flag = 0;

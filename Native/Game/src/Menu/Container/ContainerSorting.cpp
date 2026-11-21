@@ -32,8 +32,8 @@ Record Read(Items::ContainerWorld& records, Items::ItemCategory category,
 
 }  // namespace
 
-// decomp: _sortWeaponsByStat (MENU/MENUD.PRG/234.c:1306-1356);
-// original instructions 801051F8..80105377.
+// decomp: sortWeaponsByStat (src/MENU/MENUD.PRG/234.c:1307-1357; was
+// _sortWeaponsByStat); original instructions 801051F8..80105377.
 void SortWeapons(SortingWorld& world, std::int32_t stat) {
   auto& source = world.SourceRecords();
   auto order = world.Order(kWeapon);
@@ -48,8 +48,8 @@ void SortWeapons(SortingWorld& world, std::int32_t stat) {
               });
 }
 
-// decomp: _sortShieldsByStat (MENU/MENUD.PRG/234.c:1388-1435);
-// original instructions 80105454..801055CF.
+// decomp: sortShieldsByStat (src/MENU/MENUD.PRG/234.c:1389-1436; was
+// _sortShieldsByStat); original instructions 80105454..801055CF.
 void SortShields(SortingWorld& world, std::int32_t stat) {
   auto& source = world.SourceRecords();
   auto order = world.Order(kShield);
@@ -63,8 +63,8 @@ void SortShields(SortingWorld& world, std::int32_t stat) {
               });
 }
 
-// decomp: _sortItemsByStat (MENU/MENUD.PRG/234.c:1445-1487);
-// original instructions 801055F0..8010574B.
+// decomp: sortItemsByStat (src/MENU/MENUD.PRG/234.c:1446-1488; was
+// _sortItemsByStat); original instructions 801055F0..8010574B.
 void SortMisc(SortingWorld& world, std::int32_t stat) {
   auto& source = world.SourceRecords();
   auto order = world.Order(kMisc);
@@ -79,9 +79,10 @@ bool HasEquipmentProjection(std::int32_t category) {
   return Framework::sorting::HasEquipmentProjection(category);
 }
 
-// decomp: _sortEquipment (MENU/MENUD.PRG/234.c:1528-1547);
-// original instructions 80105844..8010592B. Both actual callers supply
-// F02968's independent stack output, not byte-overlapping container storage.
+// decomp: sortEquipment (src/MENU/MENUD.PRG/234.c:1529-1548; was
+// _sortEquipment); original instructions 80105844..8010592B. Both actual
+// callers supply F02968's independent stack output, not byte-overlapping
+// container storage.
 void CopyEquipmentStats(Items::EquipmentPart& target, std::int32_t category,
                         const Items::ContainerRecord* source,
                         Items::ContainerWorld& records) {
@@ -99,8 +100,8 @@ void CopyEquipmentStats(Items::EquipmentPart& target, std::int32_t category,
       });
 }
 
-// decomp: _copyEquipmentByStat (MENU/MENUD.PRG/234.c:1549-1599);
-// original instructions 8010592C..80105ACB.
+// decomp: copyEquipmentByStat (src/MENU/MENUD.PRG/234.c:1550-1600; was
+// _copyEquipmentByStat); original instructions 8010592C..80105ACB.
 void SortEquipment(SortingWorld& world, std::int32_t category,
                    std::int32_t stat) {
   if (category < 0 ||

@@ -24,8 +24,8 @@ struct LocationDestination {
                          const LocationDestination&) = default;
 };
 
-// decomp: BATTLE.PRG _getLocationId (146C.c:8899)
-// The first location naming the room, or kUnknownLocationId.
+// decomp: BATTLE.PRG getLocationId (src/BATTLE/BATTLE.PRG/146C.c:8854; was
+// _getLocationId) The first location naming the room, or kUnknownLocationId.
 [[nodiscard]] int FindLocationId(std::span<const LocationDestination> locations,
                                  int zone_id, int room_id);
 
@@ -35,8 +35,9 @@ struct CurrentRoom {
   int room_id = 0;
 };
 
-// decomp: BATTLE.PRG vs_battle_getCurrentRoomId (146C.c:8912)
-// The location id of the loaded room, or kUnknownLocationId.
+// decomp: BATTLE.PRG vs_battle_getCurrentRoomId
+// (src/BATTLE/BATTLE.PRG/146C.c:8867) The location id of the loaded room, or
+// kUnknownLocationId.
 [[nodiscard]] int CurrentRoomId(std::span<const LocationDestination> locations,
                                 const CurrentRoom& room);
 
@@ -78,10 +79,11 @@ class RoomVisitHost {
   virtual void ReportRefusedVisit(const char* record, int id) = 0;
 };
 
-// decomp: BATTLE.PRG _setRoomSeen (146C.c:3205)
-// Records the current room and its area once a room visit is pending.
+// decomp: BATTLE.PRG setRoomSeen (src/BATTLE/BATTLE.PRG/146C.c:2908; was
+// _setRoomSeen) Records the current room and its area once a room visit is
+// pending.
 void MarkCurrentRoomVisited(RoomVisitState& state, RoomVisitHost& host);
-// decomp: BATTLE.PRG func_8007C4D4 (146C.c:8803)
+// decomp: BATTLE.PRG func_8007C4D4 (src/BATTLE/BATTLE.PRG/146C.c:8760)
 void CancelPendingRoomVisit(RoomVisitState& state);
 
 // The loaded room's display (VS::Field::roomData isLoaded, displayFlag and
@@ -96,15 +98,15 @@ struct RoomDisplay {
   friend bool operator==(const RoomDisplay&, const RoomDisplay&) = default;
 };
 
-// decomp: BATTLE.PRG func_8008AB80 (146C.c:15756)
+// decomp: BATTLE.PRG func_8008AB80 (src/BATTLE/BATTLE.PRG/146C.c:15626)
 // Shows the room when it is loaded and `owner_room_index` owns it; true then.
 bool EnableOwnedRoomRendering(RoomDisplay& display, int owner_room_index);
-// decomp: BATTLE.PRG func_8008ABB8 (146C.c:15765)
+// decomp: BATTLE.PRG func_8008ABB8 (src/BATTLE/BATTLE.PRG/146C.c:15635)
 bool DisableOwnedRoomRendering(RoomDisplay& display, int owner_room_index);
-// decomp: BATTLE.PRG func_8007BF2C (146C.c:8619)
+// decomp: BATTLE.PRG func_8007BF2C (src/BATTLE/BATTLE.PRG/146C.c:8562)
 // Shows the primary room's geometry; true when it owns the loaded room.
 bool ShowPrimaryRoomGeometry(RoomDisplay& display);
-// decomp: BATTLE.PRG func_8007BF4C (146C.c:8621)
+// decomp: BATTLE.PRG func_8007BF4C (src/BATTLE/BATTLE.PRG/146C.c:8564)
 bool HidePrimaryRoomGeometry(RoomDisplay& display);
 
 // The records a gameplay session clears, the low-heap buffers it takes (in
@@ -172,7 +174,7 @@ class RoomRuntimeHost {
   virtual void ApplyBackgroundReferenceColors() = 0;
 };
 
-// decomp: INITBTL.PRG func_800FA6B8 (18.c:595)
+// decomp: INITBTL.PRG func_800FA6B8 (src/BATTLE/INITBTL.PRG/18.c:609)
 void InitializeRoomRuntimeState(
     RoomRuntimeHost& host,
     const RoomRuntimeDefaults& defaults = kRoomRuntimeDefaults);

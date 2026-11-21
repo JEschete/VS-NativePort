@@ -51,7 +51,7 @@ constexpr std::uint16_t RaisedPp(std::uint16_t pp, std::uint16_t max_pp,
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_8007FF8C (src/BATTLE/BATTLE.PRG/146C.c:10594)
+// decomp: BATTLE.PRG func_8007FF8C (src/BATTLE/BATTLE.PRG/146C.c:10529)
 // The original scanned the gems through the actor record (byte 0xCA); it took
 // an argument it never read. No code calls it.
 std::int16_t ApplyPpGemMultiplier(std::int16_t base_pp_amount,
@@ -61,7 +61,8 @@ std::int16_t ApplyPpGemMultiplier(std::int16_t base_pp_amount,
   return static_cast<std::int16_t>(base_pp_amount * percent / kWholePercent);
 }
 
-// decomp: BATTLE.PRG _adjustDpPp (src/BATTLE/BATTLE.PRG/146C.c:10689)
+// decomp: BATTLE.PRG adjustDpPp (src/BATTLE/BATTLE.PRG/146C.c:10624; was
+// _adjustDpPp)
 ItemsStatus ConsumeHitEquipmentDp(
     const ItemAction& action, WeaponLoadout& attacker_weapon,
     DefenderEquipment& defender,
@@ -82,7 +83,7 @@ ItemsStatus ConsumeHitEquipmentDp(
   return ItemsStatus::kOk;
 }
 
-// decomp: BATTLE.PRG func_800803A4 (src/BATTLE/BATTLE.PRG/146C.c:10721)
+// decomp: BATTLE.PRG func_800803A4 (src/BATTLE/BATTLE.PRG/146C.c:10656)
 ItemsStatus AccumulateHitEquipmentPp(const ItemAction& action,
                                      WeaponLoadout& attacker_weapon,
                                      DefenderEquipment& defender,

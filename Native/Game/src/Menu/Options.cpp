@@ -16,9 +16,9 @@ struct ChoiceSpec {
   int first_text;
   int row_info;
 };
-// decomp: MENU8.PRG _simpleMapOptionMenu .. _vibrationOptionMenu
-// (src/MENU/MENU8.PRG/88.c:20-486), text::menu8_prg::menu::index
-// kFrame .. kVibrationOn.
+// decomp: MENU8.PRG _simpleMapOptionMenu .. vibrationOptionMenu
+// (src/MENU/MENU8.PRG/88.c:488-543; was _vibrationOptionMenu),
+// text::menu8_prg::menu::index kFrame .. kVibrationOn.
 constexpr std::array<ChoiceSpec, kChoiceCount> kChoiceSpecs{{
     {.rows = 3, .first_text = 20, .row_info = 0x246},
     {.rows = 2, .first_text = 26, .row_info = 0x247},
@@ -30,8 +30,8 @@ constexpr std::array<ChoiceSpec, kChoiceCount> kChoiceSpecs{{
     {.rows = 2, .first_text = 50, .row_info = 0x24D},
     {.rows = 2, .first_text = 54, .row_info = 0x24E},
 }};
-// decomp: _simpleMapValues (src/MENU/MENU8.PRG/88.c): the simple map setting
-// each of its rows selects.
+// decomp: simpleMapValues (src/MENU/MENU8.PRG/88.c:16; was _simpleMapValues):
+// the simple map setting each of its rows selects.
 constexpr std::array<std::uint8_t, kMaxChoiceRows> kSimpleMapValues{3, 1, 0};
 
 // The settings list.
@@ -137,8 +137,9 @@ bool CreateChoiceRows(Context& ctx, Choice choice) {
   return true;
 }
 
-// decomp: MENU8.PRG _simpleMapOptionMenu (src/MENU/MENU8.PRG/88.c:20) and its
-// eight siblings share this body; the vibration choice tests the motor.
+// decomp: MENU8.PRG simpleMapOptionMenu (src/MENU/MENU8.PRG/88.c:24; was
+// _simpleMapOptionMenu) and its eight siblings share this body; the vibration
+// choice tests the motor.
 int UpdateChoice(Context& ctx, Choice choice, int init) {
   ChoiceState& local = ctx.state.choices[Index(choice)];
   if (init != 0) {
@@ -310,7 +311,7 @@ void RunChoice(Context& ctx, std::uint8_t& step) {
 }
 
 // decomp: vs_menu8_exec's ExitToMenu and ExitToBattle states
-// (src/MENU/MENU8.PRG/88.c:806-822).
+// (src/MENU/MENU8.PRG/88.c:799-815).
 int CloseScreen(Context& ctx, std::uint8_t& step, bool to_battle) {
   ctx.host.DismissInformationBox();
   ctx.host.SetCommandLabel(Framework::MenuCommand::kNone);
@@ -325,52 +326,61 @@ int CloseScreen(Context& ctx, std::uint8_t& step, bool to_battle) {
 }
 }  // namespace
 
-// decomp: MENU8.PRG _simpleMapOptionMenu (src/MENU/MENU8.PRG/88.c:20)
+// decomp: MENU8.PRG simpleMapOptionMenu (src/MENU/MENU8.PRG/88.c:24; was
+// _simpleMapOptionMenu)
 int UpdateSimpleMapChoice(Context& ctx, int init) {
   return UpdateChoice(ctx, Choice::kSimpleMap, init);
 }
 
-// decomp: MENU8.PRG _abilityTimingOptionMenu (src/MENU/MENU8.PRG/88.c:80)
+// decomp: MENU8.PRG abilityTimingOptionMenu (src/MENU/MENU8.PRG/88.c:85; was
+// _abilityTimingOptionMenu)
 int UpdateAbilityTimingChoice(Context& ctx, int init) {
   return UpdateChoice(ctx, Choice::kAbilityTiming, init);
 }
 
-// decomp: MENU8.PRG _weaponStatusOptionMenu (src/MENU/MENU8.PRG/88.c:138)
+// decomp: MENU8.PRG weaponStatusOptionMenu (src/MENU/MENU8.PRG/88.c:142; was
+// _weaponStatusOptionMenu)
 int UpdateWeaponStatusChoice(Context& ctx, int init) {
   return UpdateChoice(ctx, Choice::kWeaponStatus, init);
 }
 
-// decomp: MENU8.PRG _armorStatusOptionMenu (src/MENU/MENU8.PRG/88.c:196)
+// decomp: MENU8.PRG armorStatusOptionMenu (src/MENU/MENU8.PRG/88.c:199; was
+// _armorStatusOptionMenu)
 int UpdateArmorStatusChoice(Context& ctx, int init) {
   return UpdateChoice(ctx, Choice::kArmorStatus, init);
 }
 
-// decomp: MENU8.PRG _cursorMemoryOptionMenu (src/MENU/MENU8.PRG/88.c:255)
+// decomp: MENU8.PRG cursorMemoryOptionMenu (src/MENU/MENU8.PRG/88.c:256; was
+// _cursorMemoryOptionMenu)
 int UpdateCursorMemoryChoice(Context& ctx, int init) {
   return UpdateChoice(ctx, Choice::kCursorMemory, init);
 }
 
-// decomp: MENU8.PRG _informationOptionMenu (src/MENU/MENU8.PRG/88.c:313)
+// decomp: MENU8.PRG informationOptionMenu (src/MENU/MENU8.PRG/88.c:313; was
+// _informationOptionMenu)
 int UpdateInformationChoice(Context& ctx, int init) {
   return UpdateChoice(ctx, Choice::kInformation, init);
 }
 
-// decomp: MENU8.PRG _puzzleModeOptionMenu (src/MENU/MENU8.PRG/88.c:370)
+// decomp: MENU8.PRG puzzleModeOptionMenu (src/MENU/MENU8.PRG/88.c:372; was
+// _puzzleModeOptionMenu)
 int UpdatePuzzleModeChoice(Context& ctx, int init) {
   return UpdateChoice(ctx, Choice::kPuzzleMode, init);
 }
 
-// decomp: MENU8.PRG _soundOptionMenu (src/MENU/MENU8.PRG/88.c:429)
+// decomp: MENU8.PRG soundOptionMenu (src/MENU/MENU8.PRG/88.c:429; was
+// _soundOptionMenu)
 int UpdateSoundChoice(Context& ctx, int init) {
   return UpdateChoice(ctx, Choice::kSound, init);
 }
 
-// decomp: MENU8.PRG _vibrationOptionMenu (src/MENU/MENU8.PRG/88.c:486)
+// decomp: MENU8.PRG vibrationOptionMenu (src/MENU/MENU8.PRG/88.c:488; was
+// _vibrationOptionMenu)
 int UpdateVibrationChoice(Context& ctx, int init) {
   return UpdateChoice(ctx, Choice::kVibration, init);
 }
 
-// decomp: MENU8.PRG vs_menu8_exec (src/MENU/MENU8.PRG/88.c:551)
+// decomp: MENU8.PRG vs_menu8_exec (src/MENU/MENU8.PRG/88.c:553)
 int Update(Context& ctx, std::uint8_t& step) {
   switch (static_cast<Step>(step)) {
     case Step::kWaitReady:

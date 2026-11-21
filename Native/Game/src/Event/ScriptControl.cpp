@@ -900,32 +900,36 @@ void RunEventFrame(ScriptVmHost& host) {
 
 }  // namespace
 
-// decomp: BATTLE.PRG 40564.c:1280, 800AACDC; fixed source/destination
-// rectangle.
+// decomp: BATTLE.PRG src/BATTLE/BATTLE.PRG/40564.c:1280, 800AACDC; fixed
+// source/destination rectangle.
 void RestoreScriptTextureRectangle(ScriptVmHost& host) {
   host.MoveTextureRectangle(kSkipTextureMove);
 }
 
-// decomp: BATTLE.PRG 4A0A8.c:588, 800B66A8; report then continue.
+// decomp: BATTLE.PRG src/BATTLE/BATTLE.PRG/4DEA8.c:356, 800B66A8; report then
+// continue.
 ScriptFlow ScriptReportInvalidOpcode(const ScriptInstruction& instruction,
                                      ScriptVmHost& host) {
   host.NoteInvalidOpcode(instruction);
   return Advance();
 }
 
-// decomp: BATTLE.PRG func_800B66E4 (4A0A8.c:597), returns 0.
+// decomp: BATTLE.PRG vs_battle_script_nop (src/BATTLE/BATTLE.PRG/4DEA8.c:368;
+// was func_800B66E4), returns 0.
 ScriptFlow ScriptNoOperation(const ScriptInstruction& /*instruction*/,
                              ScriptVmHost& /*host*/) {
   return Advance();
 }
 
-// decomp: BATTLE.PRG func_800B66EC (4A0A8.c:599), returns 4.
+// decomp: BATTLE.PRG vs_battle_script_yield (src/BATTLE/BATTLE.PRG/4DEA8.c:373;
+// was func_800B66EC), returns 4.
 ScriptFlow ScriptYieldFrame(const ScriptInstruction& /*instruction*/,
                             ScriptVmHost& /*host*/) {
   return Yield();
 }
 
-// decomp: BATTLE.PRG 4A0A8.c:601, 800B66F4; completion state 4 releases wait.
+// decomp: BATTLE.PRG src/BATTLE/BATTLE.PRG/4DEA8.c:378, 800B66F4; completion
+// state 4 releases wait.
 ScriptFlow ScriptWaitForEventFile(const ScriptInstruction& /*instruction*/,
                                   ScriptVmHost& host) {
   if (host.EventFile() == EventFileStatus::kFailed) {
@@ -935,7 +939,8 @@ ScriptFlow ScriptWaitForEventFile(const ScriptInstruction& /*instruction*/,
   return host.EventFile() == EventFileStatus::kLoading ? Hold() : Advance();
 }
 
-// decomp: BATTLE.PRG 4A0A8.c:611, 800B6744; low-bit music policy/forced yield.
+// decomp: BATTLE.PRG src/BATTLE/BATTLE.PRG/4DEA8.c:400, 800B6744; low-bit music
+// policy/forced yield.
 ScriptFlow ScriptBeginSkippableCutscene(const ScriptInstruction& instruction,
                                         ScriptVmHost& host) {
   if (!Fits(instruction, kOneOperandBytes, host)) {
@@ -947,8 +952,8 @@ ScriptFlow ScriptBeginSkippableCutscene(const ScriptInstruction& instruction,
   return host.SkipForced() ? Yield() : Advance();
 }
 
-// decomp: BATTLE.PRG 4A0A8.c:618, 800B6778; end/marker/stride at
-// 800B67DC-800B6830.
+// decomp: BATTLE.PRG src/BATTLE/BATTLE.PRG/4DEA8.c:412, 800B6778;
+// end/marker/stride at 800B67DC-800B6830.
 void FinishSkippedCutscene(ScriptLocation scan, ScriptVmHost& host) {
   ResetSkippedPalettes(host);
   RestoreScriptTextureRectangle(host);
@@ -960,7 +965,8 @@ void FinishSkippedCutscene(ScriptLocation scan, ScriptVmHost& host) {
   host.SetFlag(kSkipActiveFlag, 0);
 }
 
-// decomp: BATTLE.PRG 4A0A8.c:642, 800B6868; skip snapshot before clearing.
+// decomp: BATTLE.PRG src/BATTLE/BATTLE.PRG/4DEA8.c:447, 800B6868; skip snapshot
+// before clearing.
 ScriptFlow ScriptEndCutsceneAndJump(const ScriptInstruction& instruction,
                                     ScriptVmHost& host) {
   if (!Fits(instruction, kTwoOperandBytes, host)) {
@@ -971,13 +977,15 @@ ScriptFlow ScriptEndCutsceneAndJump(const ScriptInstruction& instruction,
       ScriptFlow::JumpBy(OperandHalf(Bytes(instruction), kFirstOperand)), host);
 }
 
-// decomp: BATTLE.PRG 4A0A8.c:653, 800B68C4; independently reviewed plain end.
+// decomp: BATTLE.PRG src/BATTLE/BATTLE.PRG/4DEA8.c:464, 800B68C4; independently
+// reviewed plain end.
 ScriptFlow ScriptEndCutscene(const ScriptInstruction& instruction,
                              ScriptVmHost& host) {
   return EndCutscene(instruction, Advance(), host);
 }
 
-// decomp: BATTLE.PRG 4A0A8.c:843, 800B6FB0; byte mask over the pressed word.
+// decomp: BATTLE.PRG src/BATTLE/BATTLE.PRG/4DEA8.c:693, 800B6FB0; byte mask
+// over the pressed word.
 ScriptFlow ScriptWaitForButtonAndYield(const ScriptInstruction& instruction,
                                        ScriptVmHost& host) {
   if (!Fits(instruction, kOneOperandBytes, host)) {
@@ -987,7 +995,8 @@ ScriptFlow ScriptWaitForButtonAndYield(const ScriptInstruction& instruction,
   return (host.HeldButtons() & buttons) != 0 ? Yield() : Hold();
 }
 
-// decomp: BATTLE.PRG vs_battle_script_jumpFwdIfFlag (4A0A8.c:1543).
+// decomp: BATTLE.PRG vs_battle_script_40_jumpFwdUnlessFlagImm
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1835; was vs_battle_script_jumpFwdIfFlag).
 ScriptFlow ScriptBranchOnFlagImmediate(const ScriptInstruction& instruction,
                                        ScriptVmHost& host) {
   if (!Fits(instruction, kFiveOperandBytes, host)) {
@@ -1002,7 +1011,8 @@ ScriptFlow ScriptBranchOnFlagImmediate(const ScriptInstruction& instruction,
   return ScriptFlow::JumpBy(OperandHalf(command, kFourthOperand));
 }
 
-// decomp: BATTLE.PRG vs_battle_script_jumpFwdIfFlags (4A0A8.c:1589).
+// decomp: BATTLE.PRG vs_battle_script_41_jumpFwdUnlessFlag
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1899; was vs_battle_script_jumpFwdIfFlags).
 ScriptFlow ScriptBranchOnFlagPair(const ScriptInstruction& instruction,
                                   ScriptVmHost& host) {
   if (!Fits(instruction, kFiveOperandBytes, host)) {
@@ -1026,7 +1036,8 @@ ScriptFlow ScriptJumpForward(const ScriptInstruction& instruction,
   return ScriptFlow::JumpBy(OperandHalf(Bytes(instruction), kFirstOperand));
 }
 
-// decomp: BATTLE.PRG vs_battle_script_setFlagImmContext (4A0A8.c:1640).
+// decomp: BATTLE.PRG vs_battle_script_46_switchOnFlag
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1972; was vs_battle_script_setFlagImmContext).
 ScriptFlow ScriptCacheFlagValue(const ScriptInstruction& instruction,
                                 ScriptVmHost& host) {
   if (!Fits(instruction, kTwoOperandBytes, host)) {
@@ -1037,7 +1048,9 @@ ScriptFlow ScriptCacheFlagValue(const ScriptInstruction& instruction,
   return Advance();
 }
 
-// decomp: BATTLE.PRG vs_battle_script_jumpFwdIfFlagContext (4A0A8.c:1646).
+// decomp: BATTLE.PRG vs_battle_script_47_jumpFwdCase
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1985; was
+// vs_battle_script_jumpFwdIfFlagContext).
 ScriptFlow ScriptBranchOnCachedFlag(const ScriptInstruction& instruction,
                                     ScriptVmHost& host) {
   if (!Fits(instruction, kThreeOperandBytes, host)) {
@@ -1051,7 +1064,8 @@ ScriptFlow ScriptBranchOnCachedFlag(const ScriptInstruction& instruction,
   return Advance();
 }
 
-// decomp: BATTLE.PRG func_800B8C44 (4A0A8.c:1654).
+// decomp: BATTLE.PRG vs_battle_script_48_endSceneReset
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:1997; was func_800B8C44).
 ScriptFlow ScriptReturnToSavedAddress(const ScriptInstruction& /*instruction*/,
                                       ScriptVmHost& host) {
   const ScriptLocation saved = host.SubroutineReturn();
@@ -1061,7 +1075,8 @@ ScriptFlow ScriptReturnToSavedAddress(const ScriptInstruction& /*instruction*/,
   return saved.Present() ? ScriptFlow::JumpTo(saved) : Advance();
 }
 
-// decomp: BATTLE.PRG func_800B8C54 (4A0A8.c:1656).
+// decomp: BATTLE.PRG vs_battle_script_49_setLoopCounter
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2009; was func_800B8C54).
 ScriptFlow ScriptSetLoopCounter(const ScriptInstruction& instruction,
                                 ScriptVmHost& host) {
   if (!Fits(instruction, kTwoOperandBytes, host)) {
@@ -1080,7 +1095,8 @@ ScriptFlow ScriptSetLoopCounter(const ScriptInstruction& instruction,
   return Advance();
 }
 
-// decomp: BATTLE.PRG vs_battle_script_jumpBackIf (4A0A8.c:1664).
+// decomp: BATTLE.PRG vs_battle_script_4A_loopCondition
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2024; was vs_battle_script_jumpBackIf).
 ScriptFlow ScriptLoopBackward(const ScriptInstruction& instruction,
                               ScriptVmHost& host) {
   if (!Fits(instruction, kThreeOperandBytes, host)) {
@@ -1103,7 +1119,8 @@ ScriptFlow ScriptLoopBackward(const ScriptInstruction& instruction,
   return remaining != 0 ? back : Advance();
 }
 
-// decomp: BATTLE.PRG vs_battle_script_setFlagImm (4A0A8.c:1685).
+// decomp: BATTLE.PRG vs_battle_script_50_modifyFlagImm
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2066; was vs_battle_script_setFlagImm).
 ScriptFlow ScriptApplyImmediateFlagOperation(
     const ScriptInstruction& instruction, ScriptVmHost& host) {
   if (!Fits(instruction, kThreeOperandBytes, host)) {
@@ -1127,7 +1144,8 @@ ScriptFlow ScriptApplyImmediateFlagOperation(
   return Advance();
 }
 
-// decomp: BATTLE.PRG vs_battle_script_setFlag (4A0A8.c:1720).
+// decomp: BATTLE.PRG vs_battle_script_51_modifyFlag
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2119; was vs_battle_script_setFlag).
 ScriptFlow ScriptApplyFlagPairOperation(const ScriptInstruction& instruction,
                                         ScriptVmHost& host) {
   if (!Fits(instruction, kThreeOperandBytes, host)) {
@@ -1166,7 +1184,8 @@ ScriptFlow ScriptApplyFlagPairOperation(const ScriptInstruction& instruction,
   return Advance();
 }
 
-// decomp: BATTLE.PRG 4A0A8.c:1773, 800B9170; count is narrowed at 800B91AC.
+// decomp: BATTLE.PRG src/BATTLE/BATTLE.PRG/4DEA8.c:2181, 800B9170; count is
+// narrowed at 800B91AC.
 ScriptFlow ScriptStoreInventoryItemPresence(
     const ScriptInstruction& instruction, ScriptVmHost& host) {
   if (!Fits(instruction, kFourOperandBytes, host)) {
@@ -1180,7 +1199,8 @@ ScriptFlow ScriptStoreInventoryItemPresence(
   return Advance();
 }
 
-// decomp: BATTLE.PRG 4A0A8.c:1798, 800B9254; packed selector at 800B9264.
+// decomp: BATTLE.PRG src/BATTLE/BATTLE.PRG/4DEA8.c:2237, 800B9254; packed
+// selector at 800B9264.
 ScriptFlow ScriptStoreButtonState(const ScriptInstruction& instruction,
                                   ScriptVmHost& host) {
   if (!Fits(instruction, kTwoOperandBytes, host)) {
@@ -1196,7 +1216,8 @@ ScriptFlow ScriptStoreButtonState(const ScriptInstruction& instruction,
   return Advance();
 }
 
-// decomp: BATTLE.PRG 4A0A8.c:1886, 800B94D8; packed bytes occupy bits 8-31.
+// decomp: BATTLE.PRG src/BATTLE/BATTLE.PRG/4DEA8.c:2387, 800B94D8; packed bytes
+// occupy bits 8-31.
 ScriptFlow ScriptConfigureTimer(const ScriptInstruction& instruction,
                                 ScriptVmHost& host) {
   if (!Fits(instruction, kSixOperandBytes, host)) {
@@ -1223,7 +1244,8 @@ ScriptFlow ScriptConfigureTimer(const ScriptInstruction& instruction,
   return Advance();
 }
 
-// decomp: BATTLE.PRG 4A0A8.c:1934, 800B96B0; initialize before consumption.
+// decomp: BATTLE.PRG src/BATTLE/BATTLE.PRG/4DEA8.c:2458, 800B96B0; initialize
+// before consumption.
 ScriptFlow ScriptWaitForButtonOrTimeout(const ScriptInstruction& instruction,
                                         ScriptVmHost& host) {
   if (!Fits(instruction, kTwoOperandBytes, host) ||
@@ -1241,7 +1263,8 @@ ScriptFlow ScriptWaitForButtonOrTimeout(const ScriptInstruction& instruction,
   return flow;
 }
 
-// decomp: BATTLE.PRG 4A0A8.c:1948, 800B9724; two-byte slot and signed nibble.
+// decomp: BATTLE.PRG src/BATTLE/BATTLE.PRG/4DEA8.c:2483, 800B9724; two-byte
+// slot and signed nibble.
 ScriptFlow ScriptConfigureEasingCurve(const ScriptInstruction& instruction,
                                       ScriptVmHost& host) {
   if (!Fits(instruction, kOneOperandBytes, host)) {
@@ -1260,7 +1283,8 @@ ScriptFlow ScriptConfigureEasingCurve(const ScriptInstruction& instruction,
   return Advance();
 }
 
-// decomp: BATTLE.PRG 4A0A8.c:2651, 800BB028; selectors 0-17 at 8006967C.
+// decomp: BATTLE.PRG src/BATTLE/BATTLE.PRG/4DEA8.c:3300, 800BB028; selectors
+// 0-17 at 8006967C.
 ScriptFlow CommandSpecialOperation(const ScriptInstruction& instruction,
                                    ScriptVmHost& host) {
   if (!Fits(instruction, kTwoOperandBytes, host)) {
@@ -1308,7 +1332,8 @@ ScriptFlow CommandSpecialOperation(const ScriptInstruction& instruction,
   return Advance();
 }
 
-// decomp: BATTLE.PRG func_800BB474 (4A0A8.c:2799).
+// decomp: BATTLE.PRG vs_battle_script_F0 (src/BATTLE/BATTLE.PRG/4DEA8.c:3448;
+// was func_800BB474).
 ScriptFlow CommandWaitFrames(const ScriptInstruction& instruction,
                              ScriptVmHost& host) {
   if (!Fits(instruction, kOneOperandBytes, host) ||
@@ -1319,7 +1344,8 @@ ScriptFlow CommandWaitFrames(const ScriptInstruction& instruction,
                 instruction, host);
 }
 
-// decomp: BATTLE.PRG func_800BB4CC (4A0A8.c:2815).
+// decomp: BATTLE.PRG vs_battle_script_F1 (src/BATTLE/BATTLE.PRG/4DEA8.c:3464;
+// was func_800BB4CC).
 ScriptFlow CommandSetTickSpeed(const ScriptInstruction& instruction,
                                ScriptVmHost& host) {
   if (!Fits(instruction, kOneOperandBytes, host)) {
@@ -1329,7 +1355,8 @@ ScriptFlow CommandSetTickSpeed(const ScriptInstruction& instruction,
   return Advance();
 }
 
-// decomp: BATTLE.PRG func_800BB504 (4A0A8.c:2827).
+// decomp: BATTLE.PRG vs_battle_script_F4 (src/BATTLE/BATTLE.PRG/4DEA8.c:3476;
+// was func_800BB504).
 ScriptFlow CommandWaitScriptContext(const ScriptInstruction& instruction,
                                     ScriptVmHost& host) {
   if (!Fits(instruction, kOneOperandBytes, host)) {
@@ -1344,7 +1371,8 @@ ScriptFlow CommandWaitScriptContext(const ScriptInstruction& instruction,
   return host.ThreadCursor(thread).Present() ? Hold() : Advance();
 }
 
-// decomp: BATTLE.PRG func_800BB554 (4A0A8.c:2837).
+// decomp: BATTLE.PRG vs_battle_script_F5 (src/BATTLE/BATTLE.PRG/4DEA8.c:3486;
+// was func_800BB554).
 ScriptFlow CommandStartScriptContext(const ScriptInstruction& instruction,
                                      ScriptVmHost& host) {
   if (!Fits(instruction, kThreeOperandBytes, host)) {
@@ -1366,14 +1394,15 @@ ScriptFlow CommandStartScriptContext(const ScriptInstruction& instruction,
   return ScriptFlow::JumpBy(OperandHalf(command, kSecondOperand));
 }
 
-// decomp: BATTLE.PRG func_800BB5A4 (4A0A8.c:2843), returns 3.
+// decomp: BATTLE.PRG vs_battle_script_F6 (src/BATTLE/BATTLE.PRG/4DEA8.c:3492;
+// was func_800BB5A4), returns 3.
 ScriptFlow CommandStopScriptContext(const ScriptInstruction& /*instruction*/,
                                     ScriptVmHost& /*host*/) {
   return {.kind = ScriptFlowKind::kStop};
 }
 
-// decomp: BATTLE.PRG 4A0A8.c:2845, 800BB5AC; allocate/queue before chained
-// flag.
+// decomp: BATTLE.PRG src/BATTLE/BATTLE.PRG/4DEA8.c:3494, 800BB5AC;
+// allocate/queue before chained flag.
 ScriptFlow CommandLoadNextEvent(const ScriptInstruction& instruction,
                                 ScriptVmHost& host) {
   if (!Fits(instruction, kTwoOperandBytes, host)) {
@@ -1399,8 +1428,8 @@ ScriptFlow CommandLoadNextEvent(const ScriptInstruction& instruction,
   return Advance();
 }
 
-// decomp: BATTLE.PRG 4A0A8.c:2854, 800BB604; all eight dismissals precede
-// finish.
+// decomp: BATTLE.PRG src/BATTLE/BATTLE.PRG/4DEA8.c:3503, 800BB604; all eight
+// dismissals precede finish.
 ScriptFlow CommandFinishEvent(const ScriptInstruction& /*instruction*/,
                               ScriptVmHost& host) {
   int open_text_boxes = 0;
@@ -1416,12 +1445,14 @@ ScriptFlow CommandFinishEvent(const ScriptInstruction& /*instruction*/,
   return ScriptFlow::Of(ScriptFlowKind::kFinish);
 }
 
-// decomp: BATTLE.PRG 4A0A8.c:4246, 800BEB00; playback byte query.
+// decomp: BATTLE.PRG src/BATTLE/BATTLE.PRG/4DEA8.c:4895, 800BEB00; playback
+// byte query.
 PlaybackPhase EventPlaybackState(const ScriptVmHost& host) {
   return host.Phase();
 }
 
-// decomp: BATTLE.PRG 4A0A8.c:4248, 800BEB10; source nibble/event halfword.
+// decomp: BATTLE.PRG src/BATTLE/BATTLE.PRG/4DEA8.c:4897, 800BEB10; source
+// nibble/event halfword.
 std::int16_t PendingEventSelector(const ScriptVmHost& host) {
   constexpr unsigned kSourceShift = 12;
   return static_cast<std::int16_t>(
@@ -1429,7 +1460,8 @@ std::int16_t PendingEventSelector(const ScriptVmHost& host) {
       static_cast<std::uint16_t>(host.EventId()));
 }
 
-// decomp: BATTLE.PRG 4A0A8.c:4287, 800BEC30; requested phase latches start.
+// decomp: BATTLE.PRG src/BATTLE/BATTLE.PRG/4DEA8.c:4936, 800BEC30; requested
+// phase latches start.
 int RequestEventStart(ScriptVmHost& host) {
   if (host.Phase() == PlaybackPhase::kRequested) {
     host.SetStartConfirmed(true);
@@ -1437,7 +1469,8 @@ int RequestEventStart(ScriptVmHost& host) {
   return 1;
 }
 
-// decomp: BATTLE.PRG func_800BF5F0 (4A0A8.c:4588).
+// decomp: BATTLE.PRG parseEvt (src/BATTLE/BATTLE.PRG/4DEA8.c:5289; was
+// func_800BF5F0).
 bool InitializeEventScriptData(ScriptLocation data, ScriptVmHost& host) {
   if (host.EventFile() != EventFileStatus::kNone) {
     host.Refuse(ScriptVmRefusal::kEventFileBusy, host.EventId());
@@ -1474,7 +1507,7 @@ bool InitializeEventScriptData(ScriptLocation data, ScriptVmHost& host) {
   return header;
 }
 
-// decomp: BATTLE.PRG func_800BF850 (4A0A8.c:4633).
+// decomp: BATTLE.PRG func_800BF850 (src/BATTLE/BATTLE.PRG/4DEA8.c:5343).
 int UpdateEventPlayback(ScriptVmHost& host) {
   switch (host.Phase()) {
     case PlaybackPhase::kIdle:
@@ -1494,7 +1527,7 @@ int UpdateEventPlayback(ScriptVmHost& host) {
   }
 }
 
-// decomp: BATTLE.PRG func_800BFBB8 (573B8.c:67).
+// decomp: BATTLE.PRG func_800BFBB8 (src/BATTLE/BATTLE.PRG/573B8.c:67).
 bool ExecuteScriptThread(ScriptThreadId script_thread, ScriptVmHost& host) {
   const int thread = static_cast<int>(script_thread);
   if (!ValidThread(thread, host)) {
@@ -1532,7 +1565,7 @@ bool ExecuteScriptThread(ScriptThreadId script_thread, ScriptVmHost& host) {
   return false;
 }
 
-// decomp: BATTLE.PRG func_800BFD9C (573B8.c:133).
+// decomp: BATTLE.PRG func_800BFD9C (src/BATTLE/BATTLE.PRG/573B8.c:87).
 void ReleaseScriptActorControl(ScriptVmHost& host) {
   for (int actor = 0; actor < kScriptControlledActorCount; ++actor) {
     if (host.ScriptControlledActor(actor)) {
@@ -1542,13 +1575,15 @@ void ReleaseScriptActorControl(ScriptVmHost& host) {
   host.FreeEventCamera();
 }
 
-// decomp: BATTLE.PRG 573B8.c:154, 800BFE34; byte-indexed instruction lengths.
+// decomp: BATTLE.PRG src/BATTLE/BATTLE.PRG/573B8.c:154, 800BFE34; byte-indexed
+// instruction lengths.
 int OpcodeSize(std::uint8_t opcode, const ScriptVmHost& host) {
   const std::span<const std::uint8_t> sizes = host.OpcodeSizes();
   return opcode < sizes.size() ? sizes[opcode] : 0;
 }
 
-// decomp: BATTLE.PRG 573B8.c:156, 800BFE50; model/slot/special reference forms.
+// decomp: BATTLE.PRG src/BATTLE/BATTLE.PRG/573B8.c:156, 800BFE50;
+// model/slot/special reference forms.
 int ResolveScriptActorReference(std::uint16_t reference, ScriptVmHost& host) {
   switch (reference >> kReferenceKindShift) {
     case kModelReference:
@@ -1589,7 +1624,8 @@ int EvaluateInterpolationCurve(std::int16_t mode, std::int16_t frame,
                  RaiseFraction(ratio(kOne), easing.power));
 }
 
-// decomp: BATTLE.PRG 573B8.c:223, 800C00E8; queue into owned selected buffer.
+// decomp: BATTLE.PRG src/BATTLE/BATTLE.PRG/573B8.c:177, 800C00E8; queue into
+// owned selected buffer.
 bool QueueEventScriptLoad(EventBuffer destination, ScriptVmHost& host) {
   if (host.EventFile() != EventFileStatus::kNone) {
     host.Refuse(ScriptVmRefusal::kEventFileBusy, host.EventId());
@@ -1602,7 +1638,8 @@ bool QueueEventScriptLoad(EventBuffer destination, ScriptVmHost& host) {
   return true;
 }
 
-// decomp: BATTLE.PRG 573B8.c:231, 800C0150; all 17 loaded actor slots.
+// decomp: BATTLE.PRG src/BATTLE/BATTLE.PRG/573B8.c:185, 800C0150; all 17 loaded
+// actor slots.
 void ResetCutsceneActorsToIdle(ScriptVmHost& host) {
   for (int actor = 0; actor < kScriptControlledActorCount; ++actor) {
     if (host.ActorPresent(actor)) {
@@ -1611,8 +1648,8 @@ void ResetCutsceneActorsToIdle(ScriptVmHost& host) {
   }
 }
 
-// decomp: INITBTL.PRG 12AC.c:69, 800FAAAC; reset and allocate event work
-// buffers.
+// decomp: INITBTL.PRG src/BATTLE/INITBTL.PRG/12AC.c:116, 800FAAAC; reset and
+// allocate event work buffers.
 bool InitializeScriptOpcodeTable(ScriptVmHost& host) {
   if (host.EventFile() != EventFileStatus::kNone) {
     host.CancelEventFile();

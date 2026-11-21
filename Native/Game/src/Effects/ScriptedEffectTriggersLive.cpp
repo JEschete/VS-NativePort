@@ -38,7 +38,7 @@ class LiveHost final : public ScriptedEffectTriggerHost {
 }  // namespace
 
 // decomp: BATTLE.PRG func_8007BE20 (F00238,
-// src/BATTLE/BATTLE.PRG/146C.c:8581, 0x8007BE20-0x8007BEC4)
+// src/BATTLE/BATTLE.PRG/146C.c:8524, 0x8007BE20-0x8007BEC4)
 void LiveStartScriptedActorEffect(int effect_id, int target_actor_index) {
   LiveHost host;
   StartScriptedActorEffect(static_cast<std::uint16_t>(effect_id),
@@ -46,21 +46,21 @@ void LiveStartScriptedActorEffect(int effect_id, int target_actor_index) {
 }
 
 // decomp: BATTLE.PRG func_8007BEC4 (F00239,
-// src/BATTLE/BATTLE.PRG/146C.c:8611, 0x8007BEC4-0x8007BEE4)
+// src/BATTLE/BATTLE.PRG/146C.c:8554, 0x8007BEC4-0x8007BEE4)
 void LiveReleaseScriptedEffectTrigger(int track_index) {
   LiveHost host;
   ReleaseScriptedEffectTrigger(track_index, host);
 }
 
 // decomp: BATTLE.PRG func_8007BEE4 (F00240,
-// src/BATTLE/BATTLE.PRG/146C.c:8613, 0x8007BEE4-0x8007BF04)
+// src/BATTLE/BATTLE.PRG/146C.c:8556, 0x8007BEE4-0x8007BF04)
 int LiveScriptedEffectPlaybackState() {
   LiveHost host;
   return ScriptedEffectPlaybackState(host);
 }
 
 // decomp: BATTLE.PRG func_8007BF0C (F00242,
-// src/BATTLE/BATTLE.PRG/146C.c:8617, 0x8007BF0C-0x8007BF2C)
+// src/BATTLE/BATTLE.PRG/146C.c:8560, 0x8007BF0C-0x8007BF2C)
 int LiveIsScriptedEffectTriggerReady() {
   LiveHost host;
   return IsScriptedEffectTriggerReady(host) ? 1 : 0;

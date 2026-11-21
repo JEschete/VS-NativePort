@@ -210,7 +210,8 @@ void WriteView(std::span<std::byte> record, const RoomView& view) {
   Write(record, kGroupTranslationOffset + 2 * kWord, view.translation.z);
 }
 
-// decomp: BATTLE.PRG func_800985AC / func_80098648 (2EA3C.s:1383, 1429).
+// decomp: BATTLE.PRG func_800985AC / func_80098648
+// (src/BATTLE/BATTLE.PRG/2EA3C.s:1364, 1429).
 [[nodiscard]] RoomView BuildRoomView(const RoomCamera& camera,
                                      const RoomPosition& position,
                                      const Math::Angles3& angles,
@@ -323,8 +324,8 @@ struct RecordProjection {
          ReadByte(record, offset + 2) << (2 * CHAR_BIT);
 }
 
-// decomp: BATTLE.PRG func_80097388 (2EA3C.s:104-500), the per-record
-// decode and projection ahead of the cull tests.
+// decomp: BATTLE.PRG func_80097388 (src/BATTLE/BATTLE.PRG/2EA3C.s:97), the
+// per-record decode and projection ahead of the cull tests.
 [[nodiscard]] RecordProjection ProjectRecord(std::span<const std::byte> record,
                                              std::size_t corners,
                                              std::uint32_t flags,
@@ -447,7 +448,7 @@ RoomPolygonResult RoomPolygonEmitter::EmitLeaf(
   return Write(polygon, leaf, false);
 }
 
-// decomp: BATTLE.PRG func_80097AEC (2EA3C.s:612).
+// decomp: BATTLE.PRG func_80097AEC (src/BATTLE/BATTLE.PRG/2EA3C.s:585).
 RoomPolygonResult RoomPolygonEmitter::SubdivideTriangle(
     const TriangleVertices& vertices, int levels,
     const RoomPolygonMaterial& material) {
@@ -479,7 +480,7 @@ RoomPolygonResult RoomPolygonEmitter::SubdivideTriangle(
   return total;
 }
 
-// decomp: BATTLE.PRG func_80097CF0 (2EA3C.s:752).
+// decomp: BATTLE.PRG func_80097CF0 (src/BATTLE/BATTLE.PRG/2EA3C.s:720).
 RoomPolygonResult RoomPolygonEmitter::SubdivideQuad(
     const QuadVertices& vertices, int levels,
     const RoomPolygonMaterial& material) {
@@ -516,9 +517,9 @@ RoomPolygonResult RoomPolygonEmitter::SubdivideQuad(
   return total;
 }
 
-// decomp: BATTLE.PRG func_80097388 (2EA3C.s:104-500), one record: screen and
-// near culling, backface culling unless command bit 0 is set, then either
-// subdivision or a single packet.
+// decomp: BATTLE.PRG func_80097388 (src/BATTLE/BATTLE.PRG/2EA3C.s:97), one
+// record: screen and near culling, backface culling unless command bit 0 is
+// set, then either subdivision or a single packet.
 RoomPolygonResult RoomPolygonEmitter::Queue(std::span<const std::byte> record,
                                             std::size_t corners,
                                             std::uint32_t flags,
@@ -716,21 +717,21 @@ bool WriteRoomGroupView(std::span<std::byte> geometry, std::size_t index,
   return true;
 }
 
-// decomp: BATTLE.PRG func_800985AC (src/BATTLE/BATTLE.PRG/2EA3C.s:1383).
+// decomp: BATTLE.PRG func_800985AC (src/BATTLE/BATTLE.PRG/2EA3C.s:1324).
 RoomView BuildRoomGeometryViewMatrix(const RoomCamera& camera,
                                      const RoomPosition& position,
                                      const Core::Math::Angles3& angles) {
   return BuildRoomView(camera, position, angles, false);
 }
 
-// decomp: BATTLE.PRG func_80098648 (src/BATTLE/BATTLE.PRG/2EA3C.s:1429).
+// decomp: BATTLE.PRG func_80098648 (src/BATTLE/BATTLE.PRG/2EA3C.s:1364).
 RoomView BuildScaleCompensatedRoomView(const RoomCamera& camera,
                                        const RoomPosition& position,
                                        const Core::Math::Angles3& angles) {
   return BuildRoomView(camera, position, angles, true);
 }
 
-// decomp: BATTLE.PRG func_800983F8 (src/BATTLE/BATTLE.PRG/2EA3C.s:1265).
+// decomp: BATTLE.PRG func_800983F8 (src/BATTLE/BATTLE.PRG/2EA3C.s:1210).
 bool UpdateRoomGroupTransforms(std::span<std::byte> geometry,
                                const RoomCamera& camera) {
   const auto count = GroupCount(geometry);
@@ -756,7 +757,7 @@ bool UpdateRoomGroupTransforms(std::span<std::byte> geometry,
   return true;
 }
 
-// decomp: BATTLE.PRG func_8009797C (src/BATTLE/BATTLE.PRG/2EA3C.s:506).
+// decomp: BATTLE.PRG func_8009797C (src/BATTLE/BATTLE.PRG/2EA3C.s:490).
 std::array<RoomPosition, kRoomTriangleCorners> DecodeRoomPolygonVertices(
     std::span<const std::byte, kRoomCoordinateBytes> coordinates,
     std::uint32_t coordinate_shift) {
@@ -798,7 +799,7 @@ std::int32_t RoomPolygonWinding(
   return static_cast<std::int32_t>(cross);
 }
 
-// decomp: BATTLE.PRG func_80097A10 (src/BATTLE/BATTLE.PRG/2EA3C.s:548).
+// decomp: BATTLE.PRG func_80097A10 (src/BATTLE/BATTLE.PRG/2EA3C.s:530).
 RoomTriangleProjection ProjectAndDecodeRoomPolygon(
     std::span<const std::byte, kRoomCoordinateBytes> coordinates,
     std::uint32_t coordinate_shift, RoomTransformer& transformer) {
@@ -815,7 +816,7 @@ RoomTriangleProjection ProjectAndDecodeRoomPolygon(
   return projection;
 }
 
-// decomp: BATTLE.PRG func_80097F70 (src/BATTLE/BATTLE.PRG/2EA3C.s:921).
+// decomp: BATTLE.PRG func_80097F70 (src/BATTLE/BATTLE.PRG/2EA3C.s:887).
 RoomVertex InterpolateRoomVertexMidpoint(const RoomVertex& first,
                                          const RoomVertex& second) {
   const auto half = [](std::int32_t left, std::int32_t right) {
@@ -839,7 +840,7 @@ RoomVertex InterpolateRoomVertexMidpoint(const RoomVertex& first,
   return midpoint;
 }
 
-// decomp: BATTLE.PRG func_80098014 (src/BATTLE/BATTLE.PRG/2EA3C.s:969).
+// decomp: BATTLE.PRG func_80098014 (src/BATTLE/BATTLE.PRG/2EA3C.s:931).
 bool IsRoomPolygonOnScreen(const RoomScreenBounds& projected,
                            const RoomScreenBounds& clip) {
   if (projected.left > projected.right || projected.top > projected.bottom) {
@@ -864,7 +865,7 @@ std::optional<std::uint32_t> ResolveRoomPolygonDepth(
   return static_cast<std::uint32_t>(biased);
 }
 
-// decomp: BATTLE.PRG func_800980F8 (src/BATTLE/BATTLE.PRG/2EA3C.s:1036).
+// decomp: BATTLE.PRG func_800980F8 (src/BATTLE/BATTLE.PRG/2EA3C.s:996).
 RoomLinkStatus LinkRoomPolygonByDepth(std::span<const std::uint32_t> packet,
                                       std::int32_t projected_depth,
                                       std::uint32_t flags,
@@ -882,7 +883,7 @@ RoomLinkStatus LinkRoomPolygonByDepth(std::span<const std::uint32_t> packet,
                                     : RoomLinkStatus::kBufferFull;
 }
 
-// decomp: BATTLE.PRG func_80097AEC (src/BATTLE/BATTLE.PRG/2EA3C.s:612).
+// decomp: BATTLE.PRG func_80097AEC (src/BATTLE/BATTLE.PRG/2EA3C.s:585).
 RoomPolygonResult SubdivideRoomTriangle(
     std::span<const RoomVertex, kRoomTriangleCorners> vertices, int levels,
     const RoomPolygonMaterial& material, const RoomClipState& clip,
@@ -897,7 +898,7 @@ RoomPolygonResult SubdivideRoomTriangle(
       .SubdivideTriangle(captured, levels, captured_material);
 }
 
-// decomp: BATTLE.PRG func_80097CF0 (src/BATTLE/BATTLE.PRG/2EA3C.s:752).
+// decomp: BATTLE.PRG func_80097CF0 (src/BATTLE/BATTLE.PRG/2EA3C.s:720).
 RoomPolygonResult SubdivideRoomQuad(
     std::span<const RoomVertex, kRoomQuadCorners> vertices, int levels,
     const RoomPolygonMaterial& material, const RoomClipState& clip,
@@ -912,7 +913,7 @@ RoomPolygonResult SubdivideRoomQuad(
       .SubdivideQuad(captured, levels, captured_material);
 }
 
-// decomp: BATTLE.PRG func_80097388 (src/BATTLE/BATTLE.PRG/2EA3C.s:104).
+// decomp: BATTLE.PRG func_80097388 (src/BATTLE/BATTLE.PRG/2EA3C.s:97).
 RoomPolygonResult DrawRoomGeometryPolygons(std::span<const std::byte> polygons,
                                            std::uint32_t flags,
                                            std::int32_t mode,
@@ -945,7 +946,7 @@ RoomPolygonResult DrawRoomGeometryPolygons(std::span<const std::byte> polygons,
   return total;
 }
 
-// decomp: BATTLE.PRG func_8009723C (src/BATTLE/BATTLE.PRG/2EA3C.s:10).
+// decomp: BATTLE.PRG func_8009723C (src/BATTLE/BATTLE.PRG/2EA3C.s:7).
 RoomDrawStatus DrawRoomGeometry(std::span<const std::byte> geometry,
                                 const RoomDrawPass& pass,
                                 const RoomClipState& clip,
@@ -979,7 +980,7 @@ void SetRoomPolygonNearClip(RoomClipState& clip, std::int32_t depth) {
   clip.near_depth = Math::WrapSigned16(static_cast<std::uint32_t>(depth));
 }
 
-// decomp: BATTLE.PRG func_8009817C (src/BATTLE/BATTLE.PRG/2EA3C.s:1078).
+// decomp: BATTLE.PRG func_8009817C (src/BATTLE/BATTLE.PRG/2EA3C.s:1035).
 void SetRoomPolygonFarClip(RoomClipState& clip, std::int32_t depth) {
   clip.far_depth = Math::WrapSigned16(static_cast<std::uint32_t>(depth));
 }
@@ -990,7 +991,7 @@ void SetRoomTextureLodDepth(RoomClipState& clip, std::int32_t depth) {
       Math::WrapSigned16(static_cast<std::uint32_t>(depth))));
 }
 
-// decomp: BATTLE.PRG func_800981B8 (src/BATTLE/BATTLE.PRG/2EA3C.s:1101).
+// decomp: BATTLE.PRG func_800981B8 (src/BATTLE/BATTLE.PRG/2EA3C.s:1053).
 void SetRoomPolygonScreenBounds(RoomClipState& clip,
                                 const RoomScreenBounds& bounds) {
   const auto wrap = [](std::int32_t edge) -> std::int32_t {
@@ -1033,7 +1034,7 @@ RoomDrawStatus DrawSkyDome(std::span<const std::byte> sky, const RoomView& view,
   return RoomDrawStatus::kDrawn;
 }
 
-// decomp: BATTLE.PRG func_80098E50 (src/BATTLE/BATTLE.PRG/2EA3C.s:2018).
+// decomp: BATTLE.PRG func_80098E50 (src/BATTLE/BATTLE.PRG/2EA3C.s:1901).
 std::uint32_t TintRoomPrimitiveColor(std::uint32_t color,
                                      const RoomColorAdjustment& adjustment) {
   const std::array<std::int16_t, kTintChannels> offsets{
@@ -1065,7 +1066,7 @@ std::uint32_t TintRoomPrimitiveColor(std::uint32_t color,
   return result;
 }
 
-// decomp: BATTLE.PRG func_80098D6C (src/BATTLE/BATTLE.PRG/2EA3C.s:1944).
+// decomp: BATTLE.PRG func_80098D6C (src/BATTLE/BATTLE.PRG/2EA3C.s:1837).
 // The whole walk is measured before any colour changes, so a truncated span
 // is left untouched.
 RoomTintStatus TintRoomGeometryPrimitives(std::span<std::uint32_t> packets,
@@ -1109,14 +1110,16 @@ RoomTintStatus TintRoomGeometryPrimitives(std::span<std::uint32_t> packets,
   return status;
 }
 
-// decomp: BATTLE.PRG vs_battle_getGeomOffset (2EA3C.s:2470).
+// decomp: BATTLE.PRG vs_battle_getGeomOffset
+// (src/BATTLE/BATTLE.PRG/2EA3C.s:2341).
 RoomScreenOffset GetProjectionScreenOffset(const RoomTransformer& transformer) {
   const RoomScreenOffset offset = transformer.ScreenOffset();
   return {static_cast<std::uint16_t>(offset.x),
           static_cast<std::uint16_t>(offset.y)};
 }
 
-// decomp: BATTLE.PRG vs_battle_setGeomOffset (2EA3C.s:2482).
+// decomp: BATTLE.PRG vs_battle_setGeomOffset
+// (src/BATTLE/BATTLE.PRG/2EA3C.s:2352).
 void SetProjectionScreenOffset(RoomTransformer& transformer,
                                const RoomScreenOffset& offset) {
   transformer.SetScreenOffset(offset);

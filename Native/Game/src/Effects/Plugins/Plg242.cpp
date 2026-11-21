@@ -3,8 +3,10 @@
 #include "Effects/Plugins/Plg242.hpp"
 
 namespace VS::Effects::Plg242 {
-// decomp: D_800FD460 (PLG242.BIN/F8.c:5; closedRings.h:58)
+// decomp: vs_effect_plg242_0_colors (src/EFFECT/closedRings.h:58; was
+// D_800FD460; src/EFFECT/closedRings.h:58)
 plugins::RingPalette tiledRingColorFactors;
-// decomp: D_800FD480 (PLG242.BIN/F8.c:9; trailEffect.h:70)
+// decomp: vs_effect_plg242_2_origin_state (src/EFFECT/trailEffect.h:70; was
+// D_800FD480; src/EFFECT/trailEffect.h:70)
 std::int32_t trailEmissionCounter;
 }  // namespace VS::Effects::Plg242

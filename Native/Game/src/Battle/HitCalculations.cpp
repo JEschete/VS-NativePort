@@ -134,14 +134,16 @@ std::optional<int> AdjustThreshold(int threshold,
 }
 }  // namespace
 
-// decomp: _getAgilityDifference (src/BATTLE/BATTLE.PRG/146C.c:9890).
+// decomp: getAgilityDifference (src/BATTLE/BATTLE.PRG/146C.c:9876; was
+// _getAgilityDifference).
 std::optional<int> AgilityHitChance(const HitModifierTarget* source,
                                     const HitModifierTarget* target, int hit,
                                     int variance, HitAttributeWorld& world) {
   return AttributeChance(source, target, hit, variance, AttributeKind::kAgility,
                          world);
 }
-// decomp: _getIntelligenceDifference (src/BATTLE/BATTLE.PRG/146C.c:9941).
+// decomp: getIntelligenceDifference (src/BATTLE/BATTLE.PRG/146C.c:9927; was
+// _getIntelligenceDifference).
 std::optional<int> IntelligenceHitChance(const HitModifierTarget* source,
                                          const HitModifierTarget* target,
                                          int hit, int variance,
@@ -149,7 +151,8 @@ std::optional<int> IntelligenceHitChance(const HitModifierTarget* source,
   return AttributeChance(source, target, hit, variance,
                          AttributeKind::kIntelligence, world);
 }
-// decomp: _getAgilityDifference2 (src/BATTLE/BATTLE.PRG/146C.c:9992).
+// decomp: getAgilityDifference2 (src/BATTLE/BATTLE.PRG/146C.c:9978; was
+// _getAgilityDifference2).
 std::optional<int> CostAdjustedAgilityHitChance(const HitModifierTarget* source,
                                                 const HitModifierTarget* target,
                                                 int hit, int variance,
@@ -157,7 +160,8 @@ std::optional<int> CostAdjustedAgilityHitChance(const HitModifierTarget* source,
   return AttributeChance(source, target, hit, variance,
                          AttributeKind::kCostAdjusted, world);
 }
-// decomp: _doesAttackHit (src/BATTLE/BATTLE.PRG/146C.c:10075).
+// decomp: doesAttackHit (src/BATTLE/BATTLE.PRG/146C.c:10059; was
+// _doesAttackHit).
 std::optional<int> RollActionHit(int hit, int execute,
                                  ActionCalculationWorld& world) {
   const auto initial = InitialThreshold(hit, execute, world);
@@ -180,7 +184,8 @@ std::optional<int> RollActionHit(int hit, int execute,
   }
   return chance < threshold ? 1 : 0;
 }
-// decomp: _calculateStatChange (src/BATTLE/BATTLE.PRG/146C.c:12248).
+// decomp: calculateStatChange (src/BATTLE/BATTLE.PRG/146C.c:12162; was
+// _calculateStatChange).
 std::optional<std::int16_t> CalculateActionStatChange(
     int hit, int execute, ActionCalculationWorld& world) {
   const auto exempt = Exempt(world);

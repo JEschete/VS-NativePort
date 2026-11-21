@@ -16,8 +16,9 @@ namespace VS::Menu::Framework {
 namespace {
 using Bytes = std::span<const std::uint8_t>;
 
-// decomp: local statics of vs_mainMenu_getEquipmentMaxStats (C48.c:204,
-// C48.c:213); the max table's fourth entry (8192) is never read.
+// decomp: local statics of vs_mainMenu_getEquipmentMaxStats
+// (src/MENU/MAINMENU.PRG/C48.c:204, src/MENU/MAINMENU.PRG/C48.c:213); the max
+// table's fourth entry (8192) is never read.
 constexpr std::array<int, 11> kSubmaxThresholds{
     10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 32767,
 };
@@ -317,7 +318,7 @@ std::optional<ItemRowText> GemSlotRow(ItemRowsHost& host, int reference) {
 }  // namespace
 
 // decomp: MAINMENU.PRG vs_mainMenu_getEquipmentMaxStats
-// (src/MENU/MAINMENU.PRG/C48.c:87)
+// (src/MENU/MAINMENU.PRG/C48.c:94)
 int EquipmentTitleRanks(const Items::ClassAffinityCurrent& totals) {
   int max_value = 0;
   int submax_value = 0;
@@ -355,7 +356,7 @@ int EquipmentTitleRanks(const Items::ClassAffinityCurrent& totals) {
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_setWeaponRow
-// (src/MENU/MAINMENU.PRG/2D10.c:130)
+// (src/MENU/MAINMENU.PRG/2D10.c:133)
 ItemRowText FormatWeaponRow(ItemTextHost& host,
                             const Items::WeaponLoadout& weapon,
                             std::span<std::uint8_t> buffer) {
@@ -381,7 +382,7 @@ ItemRowText FormatWeaponRow(ItemTextHost& host,
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_setWeaponRowFromInventory
-// (src/MENU/MAINMENU.PRG/2D10.c:169)
+// (src/MENU/MAINMENU.PRG/2D10.c:172)
 ItemRowText FormatInventoryWeaponRow(ItemTextHost& host,
                                      const Items::InventoryWeapon& weapon,
                                      std::span<std::uint8_t> buffer) {
@@ -398,7 +399,7 @@ ItemRowText FormatInventoryWeaponRow(ItemTextHost& host,
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_setBladeRow
-// (src/MENU/MAINMENU.PRG/2D10.c:185)
+// (src/MENU/MAINMENU.PRG/2D10.c:188)
 ItemRowText FormatBladeRow(ItemTextHost& host,
                            const Items::InventoryBlade& blade,
                            std::span<std::uint8_t> buffer) {
@@ -418,7 +419,7 @@ ItemRowText FormatBladeRow(ItemTextHost& host,
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_setGripRow
-// (src/MENU/MAINMENU.PRG/2D10.c:209)
+// (src/MENU/MAINMENU.PRG/2D10.c:212)
 ItemRowText FormatGripRow(ItemTextHost& host, const Items::InventoryGrip& grip,
                           std::span<std::uint8_t> buffer) {
   RowFormatter text(host, buffer);
@@ -433,7 +434,7 @@ ItemRowText FormatGripRow(ItemTextHost& host, const Items::InventoryGrip& grip,
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_setShieldRow
-// (src/MENU/MAINMENU.PRG/2D10.c:226)
+// (src/MENU/MAINMENU.PRG/2D10.c:229)
 ItemRowText FormatShieldRow(ItemTextHost& host,
                             const Items::ShieldLoadout& shield,
                             std::span<std::uint8_t> buffer) {
@@ -456,7 +457,7 @@ ItemRowText FormatShieldRow(ItemTextHost& host,
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_setShieldRowFromInventory
-// (src/MENU/MAINMENU.PRG/2D10.c:259)
+// (src/MENU/MAINMENU.PRG/2D10.c:262)
 ItemRowText FormatInventoryShieldRow(ItemTextHost& host,
                                      const Items::InventoryShield& shield,
                                      std::span<std::uint8_t> buffer) {
@@ -470,7 +471,7 @@ ItemRowText FormatInventoryShieldRow(ItemTextHost& host,
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_setArmorRow
-// (src/MENU/MAINMENU.PRG/2D10.c:273)
+// (src/MENU/MAINMENU.PRG/2D10.c:276)
 ItemRowText FormatArmorRow(ItemTextHost& host, const Items::ArmorLoadout& armor,
                            std::span<std::uint8_t> buffer) {
   const Items::EquipmentPart& base = armor.armor;
@@ -500,7 +501,7 @@ ItemRowText FormatArmorRow(ItemTextHost& host, const Items::ArmorLoadout& armor,
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_setArmorRowFromInventory
-// (src/MENU/MAINMENU.PRG/2D10.c:316)
+// (src/MENU/MAINMENU.PRG/2D10.c:318)
 ItemRowText FormatInventoryArmorRow(ItemTextHost& host,
                                     const Items::InventoryArmor& armor,
                                     std::span<std::uint8_t> buffer) {
@@ -510,7 +511,7 @@ ItemRowText FormatInventoryArmorRow(ItemTextHost& host,
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_setGemRow
-// (src/MENU/MAINMENU.PRG/2D10.c:325)
+// (src/MENU/MAINMENU.PRG/2D10.c:327)
 ItemRowText FormatGemRow(ItemTextHost& host, const Items::InventoryGem& gem,
                          std::span<std::uint8_t> buffer) {
   RowFormatter text(host, buffer);
@@ -521,7 +522,7 @@ ItemRowText FormatGemRow(ItemTextHost& host, const Items::InventoryGem& gem,
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_setMiscRow
-// (src/MENU/MAINMENU.PRG/2D10.c:338)
+// (src/MENU/MAINMENU.PRG/2D10.c:340)
 ItemRowText FormatMiscItemRow(ItemTextHost& host,
                               const Items::InventoryMisc& misc,
                               std::span<std::uint8_t> buffer) {
@@ -534,7 +535,7 @@ ItemRowText FormatMiscItemRow(ItemTextHost& host,
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_initWeaponDetailsRow
-// (src/MENU/MAINMENU.PRG/2D10.c:14)
+// (src/MENU/MAINMENU.PRG/2D10.c:19)
 MenuRow* CreateWeaponComponentRow(ItemRowsHost& host, int row, int weapon_index,
                                   bool slide_in) {
   const auto weapon = host.Weapon(weapon_index);
@@ -587,7 +588,7 @@ MenuRow* CreateWeaponComponentRow(ItemRowsHost& host, int row, int weapon_index,
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_initShieldDetailsRow
-// (src/MENU/MAINMENU.PRG/2D10.c:80)
+// (src/MENU/MAINMENU.PRG/2D10.c:84)
 MenuRow* CreateShieldGemRow(ItemRowsHost& host, int row, int shield_index,
                             bool slide_in) {
   const auto shield = host.Shield(shield_index);
@@ -620,7 +621,7 @@ MenuRow* CreateShieldGemRow(ItemRowsHost& host, int row, int shield_index,
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_loadItemText
-// (src/MENU/MAINMENU.PRG/2D10.c:1119)
+// (src/MENU/MAINMENU.PRG/2D10.c:1121)
 int LoadItemText(ItemTextLoadState& state, ItemTextLoadHost& host, bool load) {
   if (load) {
     host.StartItemTextLoad();
@@ -645,7 +646,7 @@ int LoadItemText(ItemTextLoadState& state, ItemTextLoadHost& host, bool load) {
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_ensureItemTextUnloaded
-// (src/MENU/MAINMENU.PRG/2D10.c:1161)
+// (src/MENU/MAINMENU.PRG/2D10.c:1163)
 int UnloadItemTextWhenReady(ItemTextLoadState& state, ItemTextLoadHost& host) {
   if (!host.ItemTextAllocated()) {
     return 1;

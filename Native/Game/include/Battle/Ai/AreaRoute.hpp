@@ -53,14 +53,14 @@ struct RouteGateExit {
   friend bool operator==(const RouteGateExit&, const RouteGateExit&) = default;
 };
 
-// decomp: func_800DF9A8 (src/BATTLE/BATTLE.PRG/771A8.c:459).
+// decomp: func_800DF9A8 (src/BATTLE/BATTLE.PRG/770A4.c:67).
 // The exit of the first link whose ground end is the entry tile: the platform
 // end of the other link of the same platform. Nothing when no ground end is
 // the entry tile; the original then copied the whole entry word.
 [[nodiscard]] std::optional<RouteGateExit> ResolveRouteGateExit(
     RouteGateEnds ends, std::uint32_t entry_tile);
 
-// decomp: func_800DFA54 (src/BATTLE/BATTLE.PRG/771A8.c:480).
+// decomp: func_800DFA54 (src/BATTLE/BATTLE.PRG/770A4.c:87).
 // The ground end of the platform's link whose platform end is the tile under
 // the world point (1/4096 units, 128 world units per tile), or of the
 // platform's first link when neither is. Nothing refuses a platform outside
@@ -69,7 +69,7 @@ struct RouteGateExit {
     RouteGateEnds ends, int platform, std::int32_t world_x,
     std::int32_t world_z);
 
-// decomp: func_800DFAF8 (src/BATTLE/BATTLE.PRG/771A8.c:498).
+// decomp: func_800DFAF8 (src/BATTLE/BATTLE.PRG/770A4.c:105).
 // The first link whose ground end (or platform end, without
 // match_entry_end) is the tile while its platform end is the tile under the
 // link platform's reported position, or -1. Positions are taken in report
@@ -172,7 +172,7 @@ class AreaRouteWorld {
 [[nodiscard]] std::optional<CommandIntent> SetNavigationAreaFromTile(
     const AreaRouteWorld& world, AreaRouteActor& actor, std::uint32_t tile);
 
-// decomp: func_800DFBCC (src/BATTLE/BATTLE.PRG/771A8.c:587).
+// decomp: func_800DFBCC (src/BATTLE/BATTLE.PRG/770A4.c:130).
 // Moves the actor toward the route from `area` into neighbour `index`. An
 // endpoint at the actor's tile steps along the route, boards an open platform
 // gate or turns toward its target; otherwise the destination becomes the
@@ -220,7 +220,7 @@ struct AreaMovementStep {
                          const AreaMovementStep&) = default;
 };
 
-// decomp: func_800E19FC (src/BATTLE/BATTLE.PRG/771A8.c:1540).
+// decomp: func_800E19FC (src/BATTLE/BATTLE.PRG/770A4.c:961).
 // Steers the actor toward its destination; byte 0x04 is cleared and the
 // target distance filter set first. Height-filtered movers walk the
 // height-filtered directions. When the destination lies in another area, an
@@ -235,7 +235,7 @@ struct AreaMovementStep {
 [[nodiscard]] std::optional<AreaMovementStep> UpdateNavigationAreaMovement(
     AreaRouteWorld& world, AreaMovementActor& actor);
 
-// decomp: func_800E1850 (src/BATTLE/BATTLE.PRG/771A8.c:1455).
+// decomp: func_800E1850 (src/BATTLE/BATTLE.PRG/770A4.c:916).
 // The blocked-direction mask (bit i for direction i) without each set
 // direction whose neighbouring tile's ground height (func_800E42EC) is greater
 // than `maximum_height`, compared signed. The tile packs x in byte 0 and z in
@@ -291,7 +291,7 @@ struct HeightFilteredMove {
                          const HeightFilteredMove&) = default;
 };
 
-// decomp: func_800E1908 (src/BATTLE/BATTLE.PRG/771A8.c:1517).
+// decomp: func_800E1908 (src/BATTLE/BATTLE.PRG/770A4.c:936).
 // Moves the actor from its position toward the movement point while its
 // tile's region cell holds the height-filtered mask
 // (FilterDirectionsByGroundHeight against the actor's y), then restores the

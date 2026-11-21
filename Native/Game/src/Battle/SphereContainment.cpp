@@ -104,7 +104,7 @@ math::Position3 SphereContainmentTransform::LocalPoint(
   return RotatePoint(origin, rotation, point);
 }
 
-// decomp: func_800C0FA8 (src/BATTLE/BATTLE.PRG/58578.c:170).
+// decomp: func_800C0FA8 (src/BATTLE/BATTLE.PRG/58578.c:119).
 SphereContainmentTransform BuildTargetVolumeTestTransform(
     const SphereVolumeGeometry& volume) noexcept {
   SphereContainmentTransform transform{.origin = volume.origin,
@@ -146,7 +146,7 @@ int IsPointInTargetCylinder(const SphereVolumeGeometry& volume,
              : 0;
 }
 
-// decomp: func_800C123C (src/BATTLE/BATTLE.PRG/58578.c:299).
+// decomp: func_800C123C (src/BATTLE/BATTLE.PRG/58578.c:248).
 int IsPointInTargetCone(const SphereVolumeGeometry& volume,
                         math::Position3 point,
                         int shift_height_origin) noexcept {
@@ -192,7 +192,7 @@ int IsPointInTargetPrism(const SphereVolumeGeometry& volume,
   return 1;
 }
 
-// decomp: func_800C1564 (src/BATTLE/BATTLE.PRG/58578.c:411).
+// decomp: func_800C1564 (src/BATTLE/BATTLE.PRG/58578.c:360).
 int IsPointInTargetVolume(SphereContainmentQuery& query) {
   const auto kind = query.Kind();
   const auto saved = query.Extents();

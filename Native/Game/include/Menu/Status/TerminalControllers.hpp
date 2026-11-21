@@ -157,11 +157,13 @@ class EquipmentTerminalHost : public TerminalCommonHost {
   [[nodiscard]] virtual bool StoreCursor() = 0;
 };
 
-// decomp: _equipmentDetailScreen (MENU4.PRG 120.c:1482, 80104F80..80105970).
+// decomp: equipmentDetailScreen (MENU4.PRG src/MENU/MENU4.PRG/120.c:1485; was
+// _equipmentDetailScreen, 80104F80..80105970).
 [[nodiscard]] TerminalResult UpdateEquipmentDetails(EquipmentDetailState& state,
                                                     EquipmentTerminalHost& host,
                                                     int row);
-// decomp: _equipmentScreen (MENU4.PRG 120.c:1875, 80105970..80105E94).
+// decomp: equipmentScreen (MENU4.PRG src/MENU/MENU4.PRG/120.c:1877; was
+// _equipmentScreen, 80105970..80105E94).
 [[nodiscard]] TerminalResult UpdateEquipmentList(EquipmentListState& state,
                                                  EquipmentDetailState& detail,
                                                  EquipmentTerminalHost& host,
@@ -196,11 +198,13 @@ struct StatusTerminalState {
                          const StatusTerminalState&) = default;
 };
 
-// decomp: _fadeScreenLeft (MENU4.PRG 120.c:2081, 80105E94..80105F60).
+// decomp: fadeScreenLeft (MENU4.PRG src/MENU/MENU4.PRG/120.c:2083; was
+// _fadeScreenLeft, 80105E94..80105F60).
 [[nodiscard]] bool DrawModelSlideFade(Render::PacketQueue& queue, bool enabled,
                                       bool framebuffer);
-// decomp: _drawMenuBackground (MENU4.PRG 120.c:2121, 80105F60..80106150).
-// The caller chooses scene[-1] when background_first, scene[2045] otherwise.
+// decomp: drawMenuBackground (MENU4.PRG src/MENU/MENU4.PRG/120.c:2123; was
+// _drawMenuBackground, 80105F60..80106150). The caller chooses scene[-1] when
+// background_first, scene[2045] otherwise.
 [[nodiscard]] bool DrawBackground(Render::PacketQueue& queue, bool framebuffer);
 
 struct TerminalModelCamera {
@@ -220,7 +224,8 @@ class TerminalFrameHost {
   [[nodiscard]] virtual bool LimbPanel() = 0;
   [[nodiscard]] virtual bool Vitals() = 0;
 };
-// decomp: _drawScreen (MENU4.PRG 120.c:2190, 80106150..80106308).
+// decomp: drawScreen (MENU4.PRG src/MENU/MENU4.PRG/120.c:2192; was _drawScreen,
+// 80106150..80106308).
 [[nodiscard]] TerminalResult DrawFrame(TerminalFrameHost& host);
 
 class StatusTerminalHost : public TerminalCommonHost {
@@ -247,8 +252,9 @@ class StatusTerminalHost : public TerminalCommonHost {
   [[nodiscard]] virtual bool DrawFrame() = 0;
   [[nodiscard]] virtual bool Prompt(int offset, bool available) = 0;
 };
-// decomp: vs_menu4_exec (MENU4.PRG 120.c:2270, 801064D4..80107448).
-// A byte state and a full signed-word return, not a byte-returning callback.
+// decomp: vs_menu4_exec (MENU4.PRG src/MENU/MENU4.PRG/120.c:2272,
+// 801064D4..80107448). A byte state and a full signed-word return, not a
+// byte-returning callback.
 [[nodiscard]] TerminalResult UpdateStatusTerminal(StatusTerminalState& state,
                                                   StatusTerminalHost& host,
                                                   std::uint8_t& menu_state);

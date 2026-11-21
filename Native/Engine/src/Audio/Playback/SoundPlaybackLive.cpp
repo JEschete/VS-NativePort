@@ -219,81 +219,91 @@ ScopedLiveEffectTables::~ScopedLiveEffectTables() {
   VS::Audio::Playback::soundEffectProgramData = saved_program_data_;
 }
 
-// decomp: SLUS_010.40 InitSound (src/SLUS_010.40/25AC.c:195)
+// decomp: SLUS_010.40 InitSound (src/SLUS_010.40/25AC.c:196)
 int LiveInitialize() {
   LivePlayback host("Initialize");
   return Initialize(host);
 }
 
-// decomp: SLUS_010.40 TeardownSound (src/SLUS_010.40/25AC.c:201)
+// decomp: SLUS_010.40 TeardownSound (src/SLUS_010.40/25AC.c:202)
 int LiveShutdown() {
   LivePlayback host("Shutdown");
   return Shutdown(host);
 }
 
-// decomp: SLUS_010.40 Sound_BindAkaoSfxBlob (src/SLUS_010.40/25AC.c:207)
+// decomp: SLUS_010.40 Sound_BindAkaoSfxBlob (src/SLUS_010.40/25AC.c:208)
 int LiveBindSoundEffectPrograms(void* blob) {
   LivePlayback host("BindSoundEffectPrograms");
   return BindSoundEffectPrograms(
       host, SequenceBytes(static_cast<std::uint8_t*>(blob)));
 }
 
-// decomp: SLUS_010.40 func_80011EBC (src/SLUS_010.40/25AC.c:243)
+// decomp: SLUS_010.40 Sound_GetMusicVolumeById (src/SLUS_010.40/25AC.c:244; was
+// func_80011EBC)
 int LiveMusicVolume(unsigned music_id) {
   LivePlayback host("MusicVolume");
   return MusicVolume(host, music_id);
 }
 
-// decomp: SLUS_010.40 func_80011F08 (src/SLUS_010.40/25AC.c:256)
+// decomp: SLUS_010.40 Sound_GetLoadedMusicBankIds (src/SLUS_010.40/25AC.c:257;
+// was func_80011F08)
 int LivePackedMusicSampleBankIds() {
   LivePlayback host("PackedMusicSampleBankIds");
   return PackedMusicSampleBankIds(host);
 }
 
-// decomp: SLUS_010.40 func_80011F90 (src/SLUS_010.40/25AC.c:278)
+// decomp: SLUS_010.40 Sound_GetMusicPosition (src/SLUS_010.40/25AC.c:279; was
+// func_80011F90)
 int LiveMusicPosition() {
   LivePlayback host("MusicPosition");
   return MusicPosition(host);
 }
 
-// decomp: SLUS_010.40 func_80011FB4 (src/SLUS_010.40/25AC.c:286)
+// decomp: SLUS_010.40 Sound_StartFieldMusic (src/SLUS_010.40/25AC.c:287; was
+// func_80011FB4)
 unsigned LiveStartMusic(void* sequence) {
   LivePlayback host("StartMusic");
   return StartMusic(host, Reference(sequence));
 }
 
-// decomp: SLUS_010.40 func_80011FDC (src/SLUS_010.40/25AC.c:292)
+// decomp: SLUS_010.40 Sound_StopMusicById (src/SLUS_010.40/25AC.c:293; was
+// func_80011FDC)
 void LiveStopMusic(unsigned music_id) {
   LivePlayback host("StopMusic");
   StopMusic(host, music_id);
 }
 
-// decomp: SLUS_010.40 func_80012004 (src/SLUS_010.40/25AC.c:298)
+// decomp: SLUS_010.40 Sound_PushMusicState (src/SLUS_010.40/25AC.c:299; was
+// func_80012004)
 void LiveSaveMusicState() {
   LivePlayback host("SaveMusicState");
   SaveMusicState(host);
 }
 
-// decomp: SLUS_010.40 func_80012024 (src/SLUS_010.40/25AC.c:300)
+// decomp: SLUS_010.40 Sound_ClearSuspendedMusic (src/SLUS_010.40/25AC.c:301;
+// was func_80012024)
 int LiveInvalidateSavedMusicId() {
   LivePlayback host("InvalidateSavedMusicId");
   return InvalidateSavedMusicId(host);
 }
 
-// decomp: SLUS_010.40 func_80012080 (src/SLUS_010.40/25AC.c:318)
+// decomp: SLUS_010.40 Sound_StartMasterAndMusicVolumeFade
+// (src/SLUS_010.40/25AC.c:319; was func_80012080)
 unsigned LiveCrossfadeMusic(void* sequence, unsigned fade_ticks,
                             int target_volume) {
   LivePlayback host("CrossfadeMusic");
   return CrossfadeMusic(host, Reference(sequence), fade_ticks, target_volume);
 }
 
-// decomp: SLUS_010.40 func_800120E8 (src/SLUS_010.40/25AC.c:333)
+// decomp: SLUS_010.40 Sound_QueueMusic (src/SLUS_010.40/25AC.c:334; was
+// func_800120E8)
 unsigned LiveQueueMusicTransition(void* sequence) {
   LivePlayback host("QueueMusicTransition");
   return QueueMusicTransition(host, Reference(sequence));
 }
 
-// decomp: SLUS_010.40 func_8001217C (src/SLUS_010.40/25AC.c:352)
+// decomp: SLUS_010.40 Sound_PlaySfx (src/SLUS_010.40/25AC.c:353; was
+// func_8001217C)
 int LivePlaySoundEffect(std::uint32_t effect_id, int effect_tag, int pan,
                         int volume) {
   LivePlayback host("PlaySoundEffect");
@@ -301,7 +311,8 @@ int LivePlaySoundEffect(std::uint32_t effect_id, int effect_tag, int pan,
                          effect_tag, pan, volume);
 }
 
-// decomp: SLUS_010.40 func_800121F0 (src/SLUS_010.40/25AC.c:365)
+// decomp: SLUS_010.40 Sound_PlaySfxFromPointer (src/SLUS_010.40/25AC.c:366; was
+// func_800121F0)
 std::uintptr_t LivePlaySoundEffectBlob(void* program, int effect_tag, int pan,
                                        int volume) {
   LivePlayback host("PlaySoundEffectBlob");
@@ -311,33 +322,38 @@ std::uintptr_t LivePlaySoundEffectBlob(void* program, int effect_tag, int pan,
   return static_cast<std::uintptr_t>(*played);
 }
 
-// decomp: SLUS_010.40 func_80012288 (src/SLUS_010.40/25AC.c:381)
+// decomp: SLUS_010.40 Sound_EvictSfx (src/SLUS_010.40/25AC.c:382; was
+// func_80012288)
 void LiveStopSoundEffects(std::intptr_t selector, int effect_tag_mask) {
   LivePlayback host("StopSoundEffects");
   StopSoundEffects(host, static_cast<EffectSelector>(selector),
                    effect_tag_mask);
 }
 
-// decomp: SLUS_010.40 func_80012358 (src/SLUS_010.40/25AC.c:421)
+// decomp: SLUS_010.40 Sound_GetPlayingSfxByGroup (src/SLUS_010.40/25AC.c:422;
+// was func_80012358)
 std::intptr_t LiveSoundEffectIdForTag(int effect_tag) {
   LivePlayback host("SoundEffectIdForTag");
   return static_cast<std::intptr_t>(SoundEffectIdForTag(host, effect_tag));
 }
 
-// decomp: SLUS_010.40 func_800123C8 (src/SLUS_010.40/25AC.c:439)
+// decomp: SLUS_010.40 Sound_SfxHasVoiceFlag (src/SLUS_010.40/25AC.c:440; was
+// func_800123C8)
 int LiveSharedEffectUsesTags(std::int32_t effect_id) {
   LivePlayback host("UsesSoundEffectTags");
   return UsesSoundEffectTags(
       host, SharedEffect{.id = static_cast<std::uint32_t>(effect_id)});
 }
 
-// decomp: SLUS_010.40 func_800123C8 (src/SLUS_010.40/25AC.c:439)
+// decomp: SLUS_010.40 Sound_SfxHasVoiceFlag (src/SLUS_010.40/25AC.c:440; was
+// func_800123C8)
 int LiveProgramUsesTags(void* program) {
   LivePlayback host("UsesSoundEffectTags");
   return UsesSoundEffectTags(host, Reference(program));
 }
 
-// decomp: SLUS_010.40 vs_sound_setMonoSound (src/SLUS_010.40/25AC.c:450)
+// decomp: SLUS_010.40 Sound_SetSpeakerMode (src/SLUS_010.40/25AC.c:451; was
+// vs_sound_setMonoSound)
 void LiveSetMonoOutput(int mono_enabled) {
   LivePlayback host("SetMonoOutput");
   SetMonoOutput(host, mono_enabled);

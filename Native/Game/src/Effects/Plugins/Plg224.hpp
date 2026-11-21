@@ -4,6 +4,7 @@
 #include <cstdint>
 
 namespace VS::Effects::Plg224 {
-// decomp: D_800FAEEC (PLG224.BIN/F8.c:6; particleSetup.h:35)
+// decomp: vs_effect_plg224_0_origin_state (src/EFFECT/particleSetup.h:35; was
+// D_800FAEEC; src/EFFECT/particleSetup.h:35)
 extern std::int32_t particleEmissionCounter;
 }  // namespace VS::Effects::Plg224

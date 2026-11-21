@@ -258,7 +258,8 @@ class DiscardedTransitionTarget final : public ScreenTransitionTarget {
 };
 }  // namespace
 
-// decomp: BATTLE.PRG _drawScreenTransition (src/BATTLE/BATTLE.PRG/146C.c:2223).
+// decomp: BATTLE.PRG drawScreenTransition (src/BATTLE/BATTLE.PRG/146C.c:1925;
+// was _drawScreenTransition).
 void DrawLiveScreenTransition(void* ordering_table) {
   ScreenTransition transition{
       VS::Field::screenTransitionAlpha, VS::Field::screenTransitionStep,
@@ -283,7 +284,7 @@ void DrawLiveScreenTransition(void* ordering_table) {
 // decomp: BATTLE.PRG func_8007D360 (src/BATTLE/BATTLE.PRG/146C.c:9258).
 void ResetLiveFramebufferEffect() { ResetFramebufferEffect(liveEffect); }
 
-// decomp: BATTLE.PRG func_8007D3F8 (src/BATTLE/BATTLE.PRG/146C.c:9278).
+// decomp: BATTLE.PRG func_8007D3F8 (src/BATTLE/BATTLE.PRG/146C.c:9269).
 void InitializeLiveFramebufferEffect() {
   LiveEffectPackets packets;
   InitializeFramebufferEffect(liveEffect, packets);
@@ -327,12 +328,12 @@ void SetLiveFramebufferEffectEnabled(int enabled) {
       SetFramebufferEffectEnabled(liveEffect, packets, enabled != 0));
 }
 
-// decomp: BATTLE.PRG func_8007DDAC (src/BATTLE/BATTLE.PRG/146C.c:9430).
+// decomp: BATTLE.PRG func_8007DDAC (src/BATTLE/BATTLE.PRG/146C.c:9420).
 void SetLiveFramebufferEffectRotation(int roll_angle) {
   SetFramebufferEffectRoll(liveEffect.settings, roll_angle);
 }
 
-// decomp: BATTLE.PRG func_8007DDB8 (src/BATTLE/BATTLE.PRG/146C.c:9432).
+// decomp: BATTLE.PRG func_8007DDB8 (src/BATTLE/BATTLE.PRG/146C.c:9422).
 void SetLiveFramebufferEffectScale(const FramebufferEffectTranslation* scale) {
   if (scale == nullptr) {
     ReportRefusal("null framebuffer effect scale");
@@ -341,7 +342,7 @@ void SetLiveFramebufferEffectScale(const FramebufferEffectTranslation* scale) {
   SetFramebufferEffectScale(liveEffect.settings, {scale->x, scale->y});
 }
 
-// decomp: BATTLE.PRG func_8007DDD4 (src/BATTLE/BATTLE.PRG/146C.c:9438).
+// decomp: BATTLE.PRG func_8007DDD4 (src/BATTLE/BATTLE.PRG/146C.c:9428).
 void SetLiveFramebufferEffectTint(const CVECTOR* tint) {
   if (tint == nullptr) {
     ReportRefusal("null framebuffer effect tint");
@@ -350,7 +351,7 @@ void SetLiveFramebufferEffectTint(const CVECTOR* tint) {
   SetFramebufferEffectTint(liveEffect.settings, {tint->r, tint->g, tint->b});
 }
 
-// decomp: BATTLE.PRG func_8007DDF8 (src/BATTLE/BATTLE.PRG/146C.c:9440).
+// decomp: BATTLE.PRG func_8007DDF8 (src/BATTLE/BATTLE.PRG/146C.c:9430).
 void SetLiveFramebufferEffectOffset(
     const FramebufferEffectTranslation* offset) {
   if (offset == nullptr) {
@@ -360,24 +361,24 @@ void SetLiveFramebufferEffectOffset(
   SetFramebufferEffectOffset(liveEffect.settings, {offset->x, offset->y});
 }
 
-// decomp: BATTLE.PRG func_8007DE2C (src/BATTLE/BATTLE.PRG/146C.c:9442).
+// decomp: BATTLE.PRG func_8007DE2C (src/BATTLE/BATTLE.PRG/146C.c:9432).
 void SetLiveFramebufferEffectBlendMode(int blend_mode) {
   SetFramebufferEffectBlendMode(liveEffect.settings, blend_mode);
 }
 
-// decomp: BATTLE.PRG func_8007DE44 (src/BATTLE/BATTLE.PRG/146C.c:9446). A
+// decomp: BATTLE.PRG func_8007DE44 (src/BATTLE/BATTLE.PRG/146C.c:9436). A
 // depth past the table is ignored, as in the original.
 void SetLiveFramebufferEffectDepth(std::uint32_t ordering_depth) {
   static_cast<void>(
       SetFramebufferEffectDepth(liveEffect.settings, ordering_depth));
 }
 
-// decomp: BATTLE.PRG func_8007DE5C (src/BATTLE/BATTLE.PRG/146C.c:9453).
+// decomp: BATTLE.PRG func_8007DE5C (src/BATTLE/BATTLE.PRG/146C.c:9443).
 void SetLiveFramebufferPreviousFrame(int use_previous_frame) {
   SetFramebufferEffectPreviousFrame(liveEffect.settings, use_previous_frame);
 }
 
-// decomp: BATTLE.PRG func_8007DE88 (src/BATTLE/BATTLE.PRG/146C.c:9459).
+// decomp: BATTLE.PRG func_8007DE88 (src/BATTLE/BATTLE.PRG/146C.c:9449).
 void ReadLiveFramebufferEffectScale(FramebufferEffectTranslation* output) {
   if (output == nullptr) {
     ReportRefusal("null framebuffer effect scale output");
@@ -390,7 +391,7 @@ void ReadLiveFramebufferEffectScale(FramebufferEffectTranslation* output) {
   output->reserved08 = 0;
 }
 
-// decomp: BATTLE.PRG func_8007DEA8 (src/BATTLE/BATTLE.PRG/146C.c:9466).
+// decomp: BATTLE.PRG func_8007DEA8 (src/BATTLE/BATTLE.PRG/146C.c:9456).
 void ReadLiveFramebufferEffectTint(CVECTOR* output) {
   if (output == nullptr) {
     ReportRefusal("null framebuffer effect tint output");
@@ -403,7 +404,7 @@ void ReadLiveFramebufferEffectTint(CVECTOR* output) {
   output->b = tint.blue;
 }
 
-// decomp: BATTLE.PRG func_8007DECC (src/BATTLE/BATTLE.PRG/146C.c:9468).
+// decomp: BATTLE.PRG func_8007DECC (src/BATTLE/BATTLE.PRG/146C.c:9458).
 void ReadLiveFramebufferEffectOffset(FramebufferEffectTranslation* output) {
   if (output == nullptr) {
     ReportRefusal("null framebuffer effect offset output");

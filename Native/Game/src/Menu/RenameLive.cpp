@@ -35,7 +35,8 @@
 #include "Render/GameFontLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 
-// decomp: _renderRenameMenuStrings (src/MENU/MENU8.PRG/21A0.c)
+// decomp: renderRenameMenuStrings (src/MENU/MENU8.PRG/21A0.c:129; was
+// _renderRenameMenuStrings)
 std::uint16_t VS::Menu::Rename::renderRenameMenuStrings
     [VS::Menu::Rename::kMenuStringCount];
 

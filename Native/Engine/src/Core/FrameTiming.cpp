@@ -43,7 +43,7 @@ void StepFrameCounterTicks(int step) {
   steppedTicks = 0;
 }
 
-// decomp: func_800E45B4 (src/BATTLE/BATTLE.PRG/7BDB4.s:7-16).
+// decomp: func_800E45B4 (src/BATTLE/BATTLE.PRG/6E4CCPrivate.h:89).
 // Preserve the elapsed-unit/16-bit-wrap contract using native monotonic time;
 // no hardware register, guest counter, or frame-wait time is represented.
 // Stepped replays wrap the same way, so the sum cannot overflow.

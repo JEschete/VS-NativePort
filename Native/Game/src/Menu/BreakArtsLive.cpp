@@ -298,41 +298,43 @@ class LiveHost final : public Host {
 
 }  // namespace
 
-// decomp: MENU1.PRG _setHPCost (src/MENU/MENU1.PRG/30.c:13).
+// decomp: MENU1.PRG setHPCost (src/MENU/MENU1.PRG/30.c:16; was _setHPCost).
 void SetHpCostLive(int action_id) {
   LiveHost host;
   SetHpCost(action_id, host);
 }
 
-// decomp: MENU1.PRG _setNextArtUnlockPointsRemaining
-// (src/MENU/MENU1.PRG/30.c:45).
+// decomp: MENU1.PRG setNextArtUnlockPointsRemaining
+// (src/MENU/MENU1.PRG/30.c:48; was _setNextArtUnlockPointsRemaining).
 void DrawNextUnlockPointsLive(int x_offset, int weapon_category, int row) {
   LiveHost host;
   DrawNextUnlockPoints(x_offset, weapon_category, row, host);
 }
 
-// decomp: MENU1.PRG _weaponArtsMenu (src/MENU/MENU1.PRG/30.c:104).
+// decomp: MENU1.PRG weaponArtsMenu (src/MENU/MENU1.PRG/30.c:107; was
+// _weaponArtsMenu).
 int UpdateArtListLive(int type_cursor_memory) {
   LiveHost host;
   Context context{.state = breakArtsState, .host = host};
   return UpdateArtList(type_cursor_memory, context);
 }
 
-// decomp: MENU1.PRG _weaponCategoriesMenu
-// (src/MENU/MENU1.PRG/30.c:266).
+// decomp: MENU1.PRG weaponCategoriesMenu
+// (src/MENU/MENU1.PRG/30.c:269; was _weaponCategoriesMenu).
 int UpdateWeaponCategoriesLive(int initialize) {
   LiveHost host;
   Context context{.state = breakArtsState, .host = host};
   return UpdateWeaponCategories(initialize, context);
 }
 
-// decomp: MENU1.PRG _setMenuHeader (src/MENU/MENU1.PRG/30.c:344).
+// decomp: MENU1.PRG setMenuHeader (src/MENU/MENU1.PRG/30.c:347; was
+// _setMenuHeader).
 void CreateHeaderLive() {
   LiveHost host;
   CreateHeader(host);
 }
 
-// decomp: MENU1.PRG vs_menu1_exec (src/MENU/MENU1.PRG/30.c:358).
+// decomp: MENU1.PRG vs_menu1_exec (src/MENU/MENU1.PRG/30.c:361).
 int UpdateLive(std::uint8_t* step) {
   if (step == nullptr) {
     LiveHost host;

@@ -225,7 +225,7 @@ struct TerrainHeights {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800C0990 (src/BATTLE/BATTLE.PRG/573B8.c:552).
+// decomp: BATTLE.PRG func_800C0990 (src/BATTLE/BATTLE.PRG/57B1C.c:204).
 std::optional<SphereWireLinePacket> DrawSphereWireLine(
     const TargetWirePoint& start, const TargetWirePoint& end,
     std::uint32_t color, std::int32_t intensity) noexcept {
@@ -280,7 +280,7 @@ void DrawSphere(const std::optional<SphereDrawVolumes>& volumes,
   port.DrawTargetPageHint();
 }
 
-// decomp: BATTLE.PRG func_800C282C (src/BATTLE/BATTLE.PRG/58578.c:965).
+// decomp: BATTLE.PRG func_800C282C (src/BATTLE/BATTLE.PRG/58578.c:914).
 SphereCameraBasis BuildSphereCameraBasis(std::int32_t yaw) noexcept {
   const std::int32_t cosine = math::Cosine(yaw);
   const std::int32_t sine = math::Sine(yaw);
@@ -291,7 +291,7 @@ SphereCameraBasis BuildSphereCameraBasis(std::int32_t yaw) noexcept {
       .yaw = math::WrapSigned16(static_cast<std::uint32_t>(yaw))};
 }
 
-// decomp: BATTLE.PRG func_800C28AC (src/BATTLE/BATTLE.PRG/58578.c:984).
+// decomp: BATTLE.PRG func_800C28AC (src/BATTLE/BATTLE.PRG/58578.c:933).
 std::optional<SpherePositionCursorFrame> DrawSpherePositionCursor(
     std::uint32_t screen_xy, std::int32_t lock_pitch, std::uint8_t blink,
     const SphereCursorTables& tables) noexcept {

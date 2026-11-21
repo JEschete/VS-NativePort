@@ -413,7 +413,7 @@ void SlidePitch(MixChannel& channel) {
 }  // namespace
 
 // decomp: SLUS_010.40 Sound_UpdateSlidesAndDelays
-// (src/SLUS_010.40/25AC.c:1400)
+// (src/SLUS_010.40/25AC.c:1521)
 void UpdateChannelSlidesAndDelays(MixChannel& channel, SlideState& state,
                                   std::uint32_t channel_bit, ChannelKind kind,
                                   RefusalSink& sink) {
@@ -424,7 +424,8 @@ void UpdateChannelSlidesAndDelays(MixChannel& channel, SlideState& state,
   SlidePitch(channel);
 }
 
-// decomp: SLUS_010.40 func_8001436C (src/SLUS_010.40/25AC.c:1566)
+// decomp: SLUS_010.40 Sound_UpdateModulation (src/SLUS_010.40/25AC.c:1688; was
+// func_8001436C)
 void UpdateMusicChannelModulation(
     MixChannel& channel, std::optional<std::uint16_t> previous_sample_rate,
     const MixLevels& levels, RefusalSink& sink) {
@@ -444,7 +445,7 @@ void UpdateMusicChannelModulation(
   ModulatePitch(channel, previous_sample_rate, scale, sink);
 }
 
-// decomp: SLUS_010.40 func_800147CC (src/SLUS_010.40/25AC.c:1678)
+// decomp: SLUS_010.40 func_800147CC (src/SLUS_010.40/25AC.c:1801)
 void UpdateSoundEffectModulation(
     MixChannel& channel, std::optional<std::uint16_t> previous_sample_rate,
     const MixLevels& levels, RefusalSink& sink) {
@@ -471,7 +472,7 @@ void UpdateSoundEffectModulation(
   ModulatePitch(channel, previous_sample_rate, scale, sink);
 }
 
-// decomp: SLUS_010.40 Sound_StealQuietestVoice (src/SLUS_010.40/25AC.c:1799)
+// decomp: SLUS_010.40 Sound_StealQuietestVoice (src/SLUS_010.40/25AC.c:1924)
 std::uint32_t StealQuietestVoice(MixerState& state, bool full_scan,
                                  RefusalSink& sink) {
   const std::optional<std::uint32_t> start =
@@ -490,7 +491,7 @@ std::uint32_t StealQuietestVoice(MixerState& state, bool full_scan,
   return voice;
 }
 
-// decomp: SLUS_010.40 Sound_FindFreeVoice (src/SLUS_010.40/25AC.c:1832)
+// decomp: SLUS_010.40 Sound_FindFreeVoice (src/SLUS_010.40/25AC.c:1957)
 std::uint32_t FindFreeVoice(const MixerState& state, bool from_first_voice,
                             RefusalSink& sink) {
   const std::optional<std::uint32_t> start =
@@ -502,7 +503,8 @@ std::uint32_t FindFreeVoice(const MixerState& state, bool from_first_voice,
   return kNoVoice;
 }
 
-// decomp: SLUS_010.40 func_80014D70 (src/SLUS_010.40/25AC.c:1863)
+// decomp: SLUS_010.40 Sound_AssignAndUpdateMusicVoice
+// (src/SLUS_010.40/25AC.c:1986; was func_80014D70)
 void ApplyMusicChannelVoices(MixerState& state, PanGains pan_gains,
                              LayerId layer, std::uint32_t channels,
                              std::uint32_t fixed_voices,
@@ -570,7 +572,7 @@ void ApplyMusicChannelVoices(MixerState& state, PanGains pan_gains,
 }
 
 // decomp: SLUS_010.40 UnassignVoicesFromChannels
-// (src/SLUS_010.40/25AC.c:1926)
+// (src/SLUS_010.40/25AC.c:2049)
 void UnassignVoice(MixerState& state, MusicChannels& channels,
                    std::uint32_t voice) {
   for (MixChannel& channel : channels) {
@@ -582,7 +584,7 @@ void UnassignVoice(MixerState& state, MusicChannels& channels,
   }
 }
 
-// decomp: SLUS_010.40 func_8001503C (src/SLUS_010.40/25AC.c:1956)
+// decomp: SLUS_010.40 func_8001503C (src/SLUS_010.40/25AC.c:2079)
 bool IsVoiceAssignedToChannels(const MusicChannels& channels,
                                std::uint32_t channel_mask,
                                std::uint32_t voice) {
@@ -595,7 +597,8 @@ bool IsVoiceAssignedToChannels(const MusicChannels& channels,
   return false;
 }
 
-// decomp: SLUS_010.40 func_80015080 (src/SLUS_010.40/25AC.c:1971)
+// decomp: SLUS_010.40 Sound_UpdateVoiceEnvelopeStates
+// (src/SLUS_010.40/25AC.c:2093; was func_80015080)
 void RefreshVoiceAvailability(MixerState& state, std::uint32_t reserved_voices,
                               MixerHost& host) {
   const Seq::MusicLayerState* active = ActiveConfig(state, host);
@@ -633,7 +636,7 @@ void RefreshVoiceAvailability(MixerState& state, std::uint32_t reserved_voices,
 }
 
 // decomp: SLUS_010.40 Sound_ApplyMasterFadeToChannelVolume
-// (src/SLUS_010.40/25AC.c:2006)
+// (src/SLUS_010.40/25AC.c:2128)
 void ApplySavedMusicMasterFade(Seq::MusicLayerState& layer, MasterFade& fade) {
   fade.saved_value = layer.master_volume;
   // The division by 127 truncates toward zero (the original's
@@ -644,7 +647,7 @@ void ApplySavedMusicMasterFade(Seq::MusicLayerState& layer, MasterFade& fade) {
 }
 
 // decomp: SLUS_010.40 Sound_RestoreChannelVolumeFromMasterFade
-// (src/SLUS_010.40/25AC.c:2020)
+// (src/SLUS_010.40/25AC.c:2142)
 void RestoreSavedMusicVolume(Seq::MusicLayerState& layer,
                              const MasterFade& fade) {
   layer.master_volume = fade.saved_value;
@@ -746,7 +749,7 @@ void CommitDriverUpdates(MixerState& state, MixerHost& host) {
 }
 }  // namespace
 
-// decomp: SLUS_010.40 func_80015220 (src/SLUS_010.40/25AC.c:2027)
+// decomp: SLUS_010.40 func_80015220 (src/SLUS_010.40/25AC.c:2148)
 void CommitPlaybackVoices(MixerState& state, PanGains pan_gains,
                           MixerHost& host) {
   const Seq::MusicLayerState* entry_active = ActiveConfig(state, host);
@@ -810,7 +813,7 @@ void CommitPlaybackVoices(MixerState& state, PanGains pan_gains,
 }
 
 // decomp: SLUS_010.40 ChannelMaskToVoiceMaskFiltered
-// (src/SLUS_010.40/25AC.c:2168)
+// (src/SLUS_010.40/25AC.c:2289)
 void AccumulateFilteredVoiceMask(const MusicChannels& channels,
                                  std::uint32_t& voice_mask,
                                  std::uint32_t channel_mask,
@@ -828,7 +831,7 @@ void AccumulateFilteredVoiceMask(const MusicChannels& channels,
 }
 
 // decomp: SLUS_010.40 Sound_ProcessKeyOffRequests
-// (src/SLUS_010.40/25AC.c:2187)
+// (src/SLUS_010.40/25AC.c:2308)
 void ReleasePendingVoices(MixerState& state, MixerHost& host) {
   Seq::MusicLayerState* active = ActiveConfig(state, host);
   if (active == nullptr) return;
@@ -869,7 +872,8 @@ void ReleasePendingVoices(MixerState& state, MixerHost& host) {
   if (voices != 0) host.KeyOff(voices);
 }
 
-// decomp: SLUS_010.40 func_80015970 (src/SLUS_010.40/25AC.c:2244)
+// decomp: SLUS_010.40 Sound_BuildVoiceModeMask (src/SLUS_010.40/25AC.c:2365;
+// was func_80015970)
 std::uint32_t BuildVoiceModeMask(MixerState& state,
                                  const VoiceModeRequest& request,
                                  RefusalSink& sink) {

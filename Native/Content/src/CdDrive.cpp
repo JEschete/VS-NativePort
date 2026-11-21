@@ -45,7 +45,8 @@ void RecountRequests(DiscRequestQueue& queue) {
 }
 }  // namespace
 
-// decomp: SLUS_010.40 _diskReadCallback (src/SLUS_010.40/main.c:9021)
+// decomp: SLUS_010.40 diskReadCallback (src/SLUS_010.40/main.c:1907; was
+// _diskReadCallback)
 void ReadSectorCallback(DiscTransfer& drive, DiscInterrupt interrupt,
                         DiscInterruptHost& host) {
   if (interrupt == DiscInterrupt::kDiskError ||
@@ -114,8 +115,8 @@ void ReadCommandCallback(DiscTransfer& drive, DiscInterrupt interrupt,
   }
 }
 
-// decomp: SLUS_010.40 _diskSeekCommandCallback
-// (src/SLUS_010.40/main.c:9090)
+// decomp: SLUS_010.40 diskSeekCommandCallback
+// (src/SLUS_010.40/main.c:1985; was _diskSeekCommandCallback)
 void SeekCommandCallback(DiscTransfer& drive, DiscInterrupt interrupt) {
   switch (interrupt) {
     case DiscInterrupt::kComplete:
@@ -130,7 +131,8 @@ void SeekCommandCallback(DiscTransfer& drive, DiscInterrupt interrupt) {
   }
 }
 
-// decomp: SLUS_010.40 _diskPcmReadReady (src/SLUS_010.40/main.c:9109)
+// decomp: SLUS_010.40 diskPcmReadReady (src/SLUS_010.40/main.c:2008; was
+// _diskPcmReadReady)
 bool XaReadyCallback(DiscTransfer& drive, DiscInterrupt interrupt,
                      std::span<const std::uint8_t> result,
                      DiscInterruptHost& host) {
@@ -174,14 +176,15 @@ bool XaReadyCallback(DiscTransfer& drive, DiscInterrupt interrupt,
 // decomp: SLUS_010.40 _diskGetState (src/SLUS_010.40/main.c:9131)
 DiscDriveState DiscState(const DiscTransfer& drive) { return drive.state; }
 
-// decomp: SLUS_010.40 _diskClearError (src/SLUS_010.40/main.c:9133)
+// decomp: SLUS_010.40 diskClearError (src/SLUS_010.40/main.c:2039; was
+// _diskClearError)
 void ClearDiscReadError(DiscTransfer& drive) {
   if (drive.state == DiscDriveState::kReadError) {
     drive.state = DiscDriveState::kIdle;
   }
 }
 
-// decomp: SLUS_010.40 vs_main_diskLoadFile (src/SLUS_010.40/main.c:9334)
+// decomp: SLUS_010.40 vs_main_diskLoadFile (src/SLUS_010.40/main.c:2310)
 DiscReadResult ReadDiscFileBlocking(DiscQueueHost& host,
                                     const DiscFileExtent& file,
                                     DiscDestination destination) {
@@ -205,7 +208,8 @@ bool ReadRefusedDiscFile(DiscQueueHost& host, const DiscFileExtent& file,
          DiscReadResult::kComplete;
 }
 
-// decomp: SLUS_010.40 _initCdQueue (src/SLUS_010.40/main.c:9401)
+// decomp: SLUS_010.40 initCdQueue (src/SLUS_010.40/main.c:2370; was
+// _initCdQueue)
 void InitializeDiscQueue(DiscRequestQueue& queue) {
   for (DiscRequest& request : queue.requests) {
     request.state = DiscRequestState::kFree;
@@ -215,7 +219,7 @@ void InitializeDiscQueue(DiscRequestQueue& queue) {
 }
 
 // decomp: SLUS_010.40 vs_main_allocateCdQueueSlot
-// (src/SLUS_010.40/main.c:9411)
+// (src/SLUS_010.40/main.c:2381)
 std::optional<std::size_t> AllocateDiscRequest(DiscRequestQueue& queue,
                                                const DiscFileExtent& file) {
   for (std::size_t index = 0; index < queue.requests.size(); ++index) {
@@ -230,7 +234,7 @@ std::optional<std::size_t> AllocateDiscRequest(DiscRequestQueue& queue,
   return std::nullopt;
 }
 
-// decomp: SLUS_010.40 vs_main_freeCdQueueSlot (src/SLUS_010.40/main.c:9425)
+// decomp: SLUS_010.40 vs_main_freeCdQueueSlot (src/SLUS_010.40/main.c:2396)
 bool ReleaseDiscRequest(DiscRequestQueue& queue, std::size_t index) {
   DiscRequest* const request = At(queue, index);
   if (request == nullptr) return false;
@@ -243,7 +247,7 @@ bool ReleaseDiscRequest(DiscRequestQueue& queue, std::size_t index) {
   return true;
 }
 
-// decomp: SLUS_010.40 vs_main_cdEnqueue (src/SLUS_010.40/main.c:9434)
+// decomp: SLUS_010.40 vs_main_cdEnqueue (src/SLUS_010.40/main.c:2407)
 bool EnqueueDiscRequest(DiscRequestQueue& queue, std::size_t index,
                         DiscDestination destination) {
   DiscRequest* const request = At(queue, index);
@@ -253,7 +257,7 @@ bool EnqueueDiscRequest(DiscRequestQueue& queue, std::size_t index,
 }
 
 // decomp: SLUS_010.40 vs_main_cdEnqueuePriority
-// (src/SLUS_010.40/main.c:9442)
+// (src/SLUS_010.40/main.c:2415)
 bool EnqueuePriorityDiscRequest(DiscRequestQueue& queue, std::size_t index,
                                 DiscDestination destination) {
   DiscRequest* const request = At(queue, index);
@@ -268,7 +272,8 @@ bool EnqueuePriorityDiscRequest(DiscRequestQueue& queue, std::size_t index,
   return true;
 }
 
-// decomp: SLUS_010.40 _processCdQueue (src/SLUS_010.40/main.c:9461)
+// decomp: SLUS_010.40 processCdQueue (src/SLUS_010.40/main.c:2435; was
+// _processCdQueue)
 void UpdateDiscQueue(DiscRequestQueue& queue, DiscQueueHost& host) {
   ResolveFailedDiscRequest(queue, host);
   host.CountFrameSinceRead();

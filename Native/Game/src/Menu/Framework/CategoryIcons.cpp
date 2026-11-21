@@ -16,9 +16,10 @@ constexpr std::int32_t kIconAnimationPitch = 8;
 constexpr std::int32_t kDetailHeaderY = 16;
 }  // namespace
 
-// decomp: _renderItemCategory (src/MENU/items0.h:46-81), instantiated in
-// MENU3.PRG 80102A3C..80102B77 and MENUB.PRG 80102B14..80102C4F;
-// func_80103E24 (src/MENU/MENUD.PRG/234.c:700-733), 80103E24..80103F63.
+// decomp: renderItemCategory (src/MENU/items0.h:46-81; was
+// _renderItemCategory), instantiated in MENU3.PRG 80102A3C..80102B77 and
+// MENUB.PRG 80102B14..80102C4F; func_80103E24
+// (src/MENU/MENUD.PRG/234.c:701-734), 80103E24..80103F63.
 void DrawCategoryIconStrip(CategoryIconWorld& world,
                            std::int32_t animation_step,
                            std::int32_t highlight_selected) {
@@ -51,7 +52,8 @@ void DrawCategoryIconStrip(CategoryIconWorld& world,
 }  // namespace VS::Menu::Framework
 
 namespace VS::Menu::Inventory {
-// decomp: _renderItemCategory (src/MENU/items0.h:46-81); MENU3/MENUB.
+// decomp: renderItemCategory (src/MENU/items0.h:46-81; was
+// _renderItemCategory); MENU3/MENUB.
 void DrawItemCategoryIcons(CategoryIconWorld& world,
                            std::int32_t animation_step,
                            std::int32_t highlight_selected) {
@@ -60,7 +62,7 @@ void DrawItemCategoryIcons(CategoryIconWorld& world,
 }  // namespace VS::Menu::Inventory
 
 namespace VS::Menu::container {
-// decomp: func_80103E24 (src/MENU/MENUD.PRG/234.c:700-733).
+// decomp: func_80103E24 (src/MENU/MENUD.PRG/234.c:701-734).
 void DrawCategoryIcons(CategoryIconWorld& world, std::int32_t animation_step,
                        std::int32_t details_phase) {
   Framework::DrawCategoryIconStrip(world, animation_step, details_phase);

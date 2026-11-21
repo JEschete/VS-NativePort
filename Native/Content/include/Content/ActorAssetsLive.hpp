@@ -49,7 +49,7 @@ struct LegacyActorAssetRequest {
 // The bytes of a loaded SEQ buffer (func_8009C378_t).
 inline constexpr std::size_t kSequenceBufferBytes = 0x7900;
 
-// decomp: func_8009C378_t (src/BATTLE/BATTLE.PRG/30DB0.h:9), upstream
+// decomp: func_8009C378_t (src/BATTLE/BATTLE.PRG/battleUnk.h:23), upstream
 // src/BATTLE/BATTLE.PRG/battleUnk.h:19-23: a loaded SEQ buffer whose two
 // section pointers stay struct-relative on-disc offsets.
 struct SequenceBuffer {
@@ -104,8 +104,9 @@ int ReleaseLiveSequenceEffectTexture(int bank);
 // reloads (MENU3.PRG _loadObjectData, the MENUC.PRG and MENU9.PRG model
 // previews).
 extern std::uint8_t objectDataLoadStep;
-// decomp: D_800E8F29 (BATTLE/BATTLE.PRG 30DB0.c): the parse phase of the
-// model being parsed; 1 while its primitives wait for the second frame.
+// decomp: D_800E8F29 (BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/30DB0.c:74): the
+// parse phase of the model being parsed; 1 while its primitives wait for the
+// second frame.
 extern unsigned char modelParseResetFlag;
 // Native (#492), not a module symbol: whether the model being parsed bound
 // its record (ActorAssetLoadState::model_record_bound); cleared with the

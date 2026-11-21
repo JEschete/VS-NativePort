@@ -82,17 +82,20 @@ class EquipmentRowsHost {
                                                 std::int32_t position) = 0;
 };
 
-// decomp: _populateMenuRows (16C.c:39). False (nothing changed) for no rows,
-// more than kEquipmentRowCapacity or a string shorter than its copy; false
-// with an empty text after a short allocation.
+// decomp: populateMenuRows (src/MENU/MENU3.PRG/16C.c:38; was
+// _populateMenuRows). False (nothing changed) for no rows, more than
+// kEquipmentRowCapacity or a string shorter than its copy; false with an empty
+// text after a short allocation.
 [[nodiscard]] bool CreateEquipmentRows(
     EquipmentRowsState& state, EquipmentRowsHost& host,
     std::span<const EquipmentRowSource> rows);
-// decomp: _getSelectedItemRow (16C.c:101). -1 while the list is open.
+// decomp: getSelectedItemRow (src/MENU/MENU3.PRG/16C.c:100; was
+// _getSelectedItemRow). -1 while the list is open.
 [[nodiscard]] std::int32_t SelectedEquipmentRow(
     const EquipmentRowsState& state);
-// decomp: _processEquipSubMenu (16C.c:111). False (nothing changed) for a
-// text, row or scroll position the list does not hold.
+// decomp: processEquipSubMenu (src/MENU/MENU3.PRG/16C.c:107; was
+// _processEquipSubMenu). False (nothing changed) for a text, row or scroll
+// position the list does not hold.
 [[nodiscard]] bool UpdateEquipmentChoices(EquipmentRowsState& state,
                                           EquipmentRowsHost& host,
                                           const EquipmentChoiceInput& input,
@@ -139,8 +142,9 @@ class AccessoryPreviewHost {
   virtual void SetStatPages(std::int32_t pages) = 0;
 };
 
-// decomp: _populateUiAccessory (16C.c:311). `accessory` is the 1-based armor
-// slot or 0; false (nothing changed) for a slot outside the armor table.
+// decomp: populateUiAccessory (src/MENU/MENU3.PRG/16C.c:306; was
+// _populateUiAccessory). `accessory` is the 1-based armor slot or 0; false
+// (nothing changed) for a slot outside the armor table.
 [[nodiscard]] bool SetAccessoryPreviewStats(AccessoryPreviewHost& host,
                                             std::int32_t accessory);
 
@@ -182,14 +186,16 @@ class EquipmentModelHost {
 // The preview's idle animation once the reload settles (68C4.c:79).
 inline constexpr std::uint8_t kPreviewSettledAnimation = 101;
 
-// decomp: _loadObjectData (68C4.c:12). `step` is vs_battle_loadObjectDataState.
-// Refused without the preview actor or Ashley's model slots.
+// decomp: loadObjectData (src/MENU/MENU3.PRG/68C4.c:13; was _loadObjectData).
+// `step` is vs_battle_loadObjectDataState. Refused without the preview actor or
+// Ashley's model slots.
 [[nodiscard]] ModelReload ReloadEquipmentModels(
     std::uint8_t& step, EquipmentModelHost& host,
     const EquipmentModelChoice& choice);
-// decomp: func_80109320 (68C4.c:87).
+// decomp: func_80109320 (src/MENU/MENU3.PRG/68C4.c:90).
 [[nodiscard]] bool IsTwoHandedWeapon(std::int32_t category);
-// decomp: _populateDataSlot (68C4.c:100). False without the model slot.
+// decomp: populateDataSlot (src/MENU/MENU3.PRG/68C4.c:103; was
+// _populateDataSlot). False without the model slot.
 [[nodiscard]] bool QueueEquipmentModel(EquipmentModelHost& host,
                                        std::int32_t model_id,
                                        std::int32_t material);

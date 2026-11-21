@@ -17,8 +17,8 @@
 
 namespace VS::Effects {
 // decomp: ActionEffectTarget.value.actor (src/BATTLE/BATTLE.PRG/
-// battleEffect.h:15-20): an actor endpoint's actor and part, kept in the
-// first four bytes of the endpoint's position.
+// src/BATTLE/BATTLE.PRG/battleEffect.h:15-20): an actor endpoint's actor and
+// part, kept in the first four bytes of the endpoint's position.
 struct LiveActorEndpoint {
   std::uint8_t actor;
   // The event actor slot a child track's next target names

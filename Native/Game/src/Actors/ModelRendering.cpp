@@ -253,7 +253,7 @@ std::uint16_t ClutId(VramPosition origin) noexcept {
       ((origin.x >> kClutColumnShift) & kClutColumnMask));
 }
 
-// decomp: INITBTL.PRG func_800FA7B0 (src/BATTLE/INITBTL.PRG/FB0.c:19), the
+// decomp: INITBTL.PRG func_800FA7B0 (src/BATTLE/INITBTL.PRG/FB0.c:21), the
 // two actor texture slot loops.
 TextureSlotIds ActorTextureSlotIds(std::size_t slot, std::int16_t origin_column,
                                    std::int16_t origin_page) noexcept {
@@ -276,7 +276,7 @@ TextureSlotIds ActorTextureSlotIds(std::size_t slot, std::int16_t origin_column,
   return ids;
 }
 
-// decomp: INITBTL.PRG func_800FA7B0 (src/BATTLE/INITBTL.PRG/FB0.c:19), the
+// decomp: INITBTL.PRG func_800FA7B0 (src/BATTLE/INITBTL.PRG/FB0.c:21), the
 // weapon texture slot loop.
 TextureSlotIds WeaponTextureSlotIds(std::size_t slot) noexcept {
   const auto pair = static_cast<std::uint32_t>(slot / 2);
@@ -303,7 +303,7 @@ Vec3 ActorRootOffset(Vec3 root_key, Vec3 instance_scale,
               Halfword(halved.z * scale / kUnitActorScale)};
 }
 
-// decomp: BATTLE.PRG func_800B07DC (src/BATTLE/BATTLE.PRG/44F14.c:1695).
+// decomp: BATTLE.PRG func_800B07DC (src/BATTLE/BATTLE.PRG/44F14.c:1623).
 RootTransform TransformRootOffset(Angles3 rotation, Vec3 offset,
                                   Vec3 position) noexcept {
   const Mat3 matrix = BuildEulerRotationMatrix(rotation);

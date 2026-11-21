@@ -418,7 +418,7 @@ struct InventoryBlade {
   std::uint8_t type_bits{};
   std::uint8_t reserved11{};
   // decomp: unk12, which the equipment part's recovery delay (unk14) is
-  // copied to and from (146C.c:815, 1103).
+  // copied to and from (src/BATTLE/BATTLE.PRG/146C.c:815, 1103).
   std::uint16_t recovery_delay{};
   WeaponRange range{};
   PartClasses classes{};
@@ -548,7 +548,7 @@ struct InventoryIndices {
 // The container's records in the inventory's table order and, per category,
 // its display order of 1-based slots (0 for an empty row).
 // decomp: vs_ContainerData, vs_ContainerIndices and vs_Container
-// (src/SLUS_010.40/inventory.h:118, 128, 133)
+// (src/SLUS_010.40/inventory.h:130, 128, 133)
 inline constexpr std::size_t kContainerWeapons = 32;
 inline constexpr std::size_t kContainerShields = 32;
 inline constexpr std::size_t kContainerBlades = 64;
@@ -585,7 +585,7 @@ struct Container {
 };
 
 // An enemy's guaranteed drop and its random drop chance.
-// decomp: UiMisc and UiMiscRand (src/BATTLE/BATTLE.PRG/uiEquipment.h:151, 157)
+// decomp: UiMisc and UiMiscRand (src/BATTLE/BATTLE.PRG/uiEquipment.h:153, 157)
 struct MiscItemStack {
   std::uint16_t id{};
   std::uint8_t count{};
@@ -677,9 +677,9 @@ struct BattleLoot {
 };
 
 // One enemy's loot in the battle's list. actor_id names the enemy that dropped
-// it; dropLoot (146C.c) ORs the drop rolls' results into it before listing the
-// node.
-// decomp: vs_LootListNode (src/BATTLE/BATTLE.PRG/menuState.h:27)
+// it; dropLoot (src/BATTLE/BATTLE.PRG/146C.c:1363) ORs the drop rolls' results
+// into it before listing the node. decomp: vs_LootListNode
+// (src/BATTLE/BATTLE.PRG/menuState.h:27)
 struct LootListNode {
   LootListNode* next{};
   std::int32_t actor_id{};

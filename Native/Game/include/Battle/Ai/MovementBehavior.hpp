@@ -198,13 +198,13 @@ class RelationshipChangeHost {
   virtual void PropagateRelationships(int actor_id) = 0;
 };
 
-// decomp: func_800E4BB8 (src/BATTLE/BATTLE.PRG/7BDD4.s:497).
+// decomp: func_800E4BB8 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:492).
 // Clears the navigation step flags and, for an actor allowed to move,
 // re-arms its movement flags.
 [[nodiscard]] std::uint32_t RefreshAiMovementCooldown(
     std::uint32_t navigation_flags, bool movement_enabled);
 
-// decomp: func_800DB4AC (src/BATTLE/BATTLE.PRG/72B70.s:102).
+// decomp: func_800DB4AC (src/BATTLE/BATTLE.PRG/72B70.s:93).
 // Requests `mode`; entering a new mode resets its progress and counter.
 // Returns `mode` when it is already current, otherwise 3 for pursuit, 6 for
 // wandering, 1 for patrol and -1 for the rest. Nothing refuses a mode outside
@@ -213,13 +213,13 @@ std::optional<int> SetMovementBehavior(
     MovementState& state, std::span<const std::uint16_t> patrol_routes,
     int mode);
 
-// decomp: func_800E4904 (src/BATTLE/BATTLE.PRG/7BDD4.s:279).
+// decomp: func_800E4904 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:487).
 // Aims the pursuit at the target's position in half tiles, or at its
 // platform's route gate. False refuses a target outside the slots, a target
 // without a model or a missing route gate.
 bool RefreshAiTargetTile(MovementState& state, const MovementHost& host);
 
-// decomp: func_800E48F8 (src/BATTLE/BATTLE.PRG/7BDD4.s:270).
+// decomp: func_800E48F8 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:486).
 // Refreshes the target tile while pursuit is requested.
 bool RefreshAiTargetTileWhenTracking(MovementState& state,
                                      const MovementHost& host);
@@ -232,7 +232,7 @@ struct ApproachRequest {
   int option = 0;
 };
 
-// decomp: func_800DB370 (src/BATTLE/BATTLE.PRG/72B70.s:11).
+// decomp: func_800DB370 (src/BATTLE/BATTLE.PRG/72B70.s:6).
 // Pursues the request's target to within its distance, via the target's
 // platform route gate when it rides one. Returns the pursuit mode result once
 // the approach moves, else 0. Nothing refuses a target outside the slots, a
@@ -240,27 +240,27 @@ struct ApproachRequest {
 std::optional<int> ApproachActor(MovementState& state, MovementHost& host,
                                  const ApproachRequest& request);
 
-// decomp: func_800DB5B8 (src/BATTLE/BATTLE.PRG/72B70.s:192).
+// decomp: func_800DB5B8 (src/BATTLE/BATTLE.PRG/72B70.s:176).
 // Wanders within `radius` tiles of `tile`. The radius is passed on unsigned,
 // as the original does.
 void WanderAroundTile(MovementState& state, MovementHost& host,
                       std::uint32_t tile, int radius);
 
-// decomp: func_800DB5B0 (src/BATTLE/BATTLE.PRG/72B70.s:182).
+// decomp: func_800DB5B0 (src/BATTLE/BATTLE.PRG/72B70.s:171).
 void WanderAroundSavedCenter(MovementState& state, MovementHost& host);
 
-// decomp: func_800DB5DC (src/BATTLE/BATTLE.PRG/72B70.s:209);
+// decomp: func_800DB5DC (src/BATTLE/BATTLE.PRG/72B70.s:188);
 // completion tail L800E5030 (src/BATTLE/BATTLE.PRG/7C7E0.s:34).
 // Walks to `tile`, stopping once within `radius` world units of its centre.
 // The radius is squared in 32 bits, as the original does.
 void MoveToTile(MovementState& state, MovementHost& host, std::uint32_t tile,
                 int radius);
 
-// decomp: func_800DB5FC (src/BATTLE/BATTLE.PRG/72B70.s:225).
+// decomp: func_800DB5FC (src/BATTLE/BATTLE.PRG/72B70.s:199).
 // Patrols the actor's waypoint row. False refuses a row outside the routes.
 bool PatrolWaypoints(MovementState& state, MovementHost& host);
 
-// decomp: func_800DB61C (src/BATTLE/BATTLE.PRG/72B70.s:239).
+// decomp: func_800DB61C (src/BATTLE/BATTLE.PRG/72B70.s:209).
 // Flees from the averaged position of every visible hostile actor, and keeps
 // fleeing for 90 frames after losing sight of them. Returns the flee mode
 // result, or 0 when there is nothing to flee. Nothing refuses an invalid
@@ -268,13 +268,13 @@ bool PatrolWaypoints(MovementState& state, MovementHost& host);
 std::optional<int> FleeVisibleEnemies(MovementState& state, MovementHost& host,
                                       int kind);
 
-// decomp: func_800DB74C (src/BATTLE/BATTLE.PRG/72B70.s:325).
+// decomp: func_800DB74C (src/BATTLE/BATTLE.PRG/72B70.s:292).
 // Turns to face `target`; returns the facing mode result once it turns,
 // else 0. Nothing refuses a target outside the slots or without a model.
 std::optional<int> TrackActorPosition(MovementState& state, MovementHost& host,
                                       int target);
 
-// decomp: func_800DBB2C (src/BATTLE/BATTLE.PRG/72B70.s:620).
+// decomp: func_800DBB2C (src/BATTLE/BATTLE.PRG/72B70.s:576).
 // The first other listed actor whose relationship class is `relation`, and
 // its tile when `want_tile`. A relation outside 0-3 matches no actor, as in
 // the original. Nothing refuses an invalid battle actor list or a matched
@@ -284,20 +284,20 @@ std::optional<RelatedActor> FindActorByRelationship(const MovementState& state,
                                                     int relation,
                                                     bool want_tile);
 
-// decomp: func_800E437C (src/BATTLE/BATTLE.PRG/7B5DC.s:451).
+// decomp: func_800E437C (src/BATTLE/BATTLE.PRG/6E4CCShared.h:478).
 // The Q12 cosine between facing `angle` and the horizontal direction from
 // `from` to `to`; 4096 when `distance` is 0.
 [[nodiscard]] int TargetFacingCosine(Core::Math::Position3 from,
                                      Core::Math::Position3 to, int angle,
                                      std::uint32_t distance);
 
-// decomp: func_800D9DD8 (src/BATTLE/BATTLE.PRG/70D4C.s:627).
+// decomp: func_800D9DD8 (src/BATTLE/BATTLE.PRG/70D4C.s:608).
 // Plans walking to the nearest waypoint when the best candidate's action is a
 // movement action, otherwise plans moving in place. False refuses a missing
 // best candidate.
 bool SelectActionMovementMode(MovementState& state, MovementHost& host);
 
-// decomp: func_800DC810 (src/BATTLE/BATTLE.PRG/73C84.s:290).
+// decomp: func_800DC810 (src/BATTLE/BATTLE.PRG/7399C.s:474).
 // Applies an action's reaction to every listed AI actor, then propagates the
 // relationship changes. False refuses an invalid battle actor list.
 bool ApplyActionRelationshipChanges(RelationshipChangeHost& host);

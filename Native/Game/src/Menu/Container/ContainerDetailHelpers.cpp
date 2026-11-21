@@ -26,7 +26,7 @@ Record ReadPart(Items::ContainerWorld& records, Items::ItemCategory category,
 }
 }  // namespace
 
-// decomp: vs_menuD_initUiWeapon, MENU/MENUD.PRG/234.c:21-55;
+// decomp: vs_menuD_initUiWeapon, src/MENU/MENUD.PRG/234.c:25-59;
 // original instructions 80102A34..80102BAF.
 Items::ItemsStatus BuildWeaponStats(Items::WeaponLoadout& target,
                                     const Items::InventoryWeapon* source,
@@ -59,7 +59,7 @@ Items::ItemsStatus BuildWeaponStats(Items::WeaponLoadout& target,
   return Items::BuildWeaponStatsFromParts(target, parts);
 }
 
-// decomp: vs_menuD_initUiShield, MENU/MENUD.PRG/234.c:57-78;
+// decomp: vs_menuD_initUiShield, src/MENU/MENUD.PRG/234.c:61-82;
 // original instructions 80102BB0..80102C93.
 void BuildShieldStats(Items::ShieldLoadout& target,
                       const Items::InventoryShield* source,
@@ -82,14 +82,14 @@ void BuildShieldStats(Items::ShieldLoadout& target,
   Items::BuildShieldStatsFromParts(target, parts);
 }
 
-// decomp: func_80103D50, MENU/MENUD.PRG/234.c:659-664;
+// decomp: func_80103D50, src/MENU/MENUD.PRG/234.c:660-665;
 // original instructions 80103D50..80103D6B.
 void SetPanelVisibility(PanelVisibility& panels, std::uint8_t visibility) {
   panels = {.title = visibility, .icons = visibility, .controls = visibility};
 }
 
-// decomp: _pollItemNavigation, MENU/MENUD.PRG/234.c:666-698;
-// original instructions 80103D6C..80103E23.
+// decomp: pollItemNavigation, src/MENU/MENUD.PRG/234.c:667-699; was
+// _pollItemNavigation; original instructions 80103D6C..80103E23.
 DetailPage PollDetailsPaging(DetailsWorld& world, DetailPage page) {
   if ((world.HeldButtons() & kShoulders) == kShoulders) return page;
   const auto count = world.ItemCount();
@@ -109,7 +109,7 @@ DetailPage PollDetailsPaging(DetailsWorld& world, DetailPage page) {
   return {selected};
 }
 
-// decomp: func_80103F64, MENU/MENUD.PRG/234.c:735-751;
+// decomp: func_80103F64, src/MENU/MENUD.PRG/234.c:736-752;
 // original instructions 80103F64..80103FD3.
 void BeginDetailsTransition(DetailsWorld& world, DetailRow selected) {
   world.ClearRows();
@@ -124,7 +124,7 @@ void BeginDetailsTransition(DetailsWorld& world, DetailRow selected) {
   item.unselectable = 0;
 }
 
-// decomp: func_80104034, MENU/MENUD.PRG/234.c:767-774;
+// decomp: func_80104034, src/MENU/MENUD.PRG/234.c:768-775;
 // original instructions 80104034..80104077.
 void InitializeDetailsLayout(DetailsWorld& world, DetailRow selected,
                              std::int32_t stat_pages) {
@@ -135,7 +135,7 @@ void InitializeDetailsLayout(DetailsWorld& world, DetailRow selected,
   world.MovePrimaryStats(PrimaryStatsMotion::kOpen);
 }
 
-// decomp: func_80104114, MENU/MENUD.PRG/234.c:789-794;
+// decomp: func_80104114, src/MENU/MENUD.PRG/234.c:790-795;
 // original instructions 80104114..8010416F.
 std::uint16_t SelectDetailsItem(DetailsWorld& world, DetailPage page) {
   world.RememberPage({0, static_cast<std::uint8_t>(page.index)});
@@ -146,7 +146,7 @@ std::uint16_t SelectDetailsItem(DetailsWorld& world, DetailPage page) {
   return order[static_cast<std::size_t>(page.index)];
 }
 
-// decomp: func_80104170, MENU/MENUD.PRG/234.c:796-808;
+// decomp: func_80104170, src/MENU/MENUD.PRG/234.c:797-809;
 // original instructions 80104170..801041DF.
 void ExitDetailsView(DetailsWorld& world, bool hide_dp_pp) {
   world.PlayLeaveSound();

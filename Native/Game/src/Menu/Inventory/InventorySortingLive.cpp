@@ -71,25 +71,25 @@ class LiveSortingWorld final : public Framework::LiveSortingKeys<SortingWorld> {
 };
 }  // namespace
 
-// decomp: _sortWeapons (MENU/items1.h:731).
+// decomp: sortWeapons (src/MENU/items1.h:736; was _sortWeapons).
 void SortLiveWeapons(int stat) {
   LiveSortingWorld world;
   SortWeapons(world, stat);
 }
 
-// decomp: _sortShields (MENU/items1.h:827).
+// decomp: sortShields (src/MENU/items1.h:832; was _sortShields).
 void SortLiveShields(int stat) {
   LiveSortingWorld world;
   SortShields(world, stat);
 }
 
-// decomp: _sortMisc (MENU/items1.h:899).
+// decomp: sortMisc (src/MENU/items1.h:904; was _sortMisc).
 void SortLiveMisc(int stat) {
   LiveSortingWorld world;
   SortMisc(world, stat);
 }
 
-// decomp: _copyEquipment (MENU/items1.h:994).
+// decomp: copyEquipment (src/MENU/items1.h:999; was _copyEquipment).
 void CopyLiveEquipmentStats(VS::Items::EquipmentPart* target, int category,
                             int index) {
   if (!HasEquipmentProjection(category)) return;
@@ -103,7 +103,7 @@ void CopyLiveEquipmentStats(VS::Items::EquipmentPart* target, int category,
   *target = output;
 }
 
-// decomp: _sortEquipment (MENU/items1.h:1017).
+// decomp: sortEquipment (src/MENU/items1.h:1021; was _sortEquipment).
 void SortLiveEquipment(int category, int stat) {
   LiveSortingWorld world;
   SortEquipment(world, category, stat);

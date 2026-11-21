@@ -255,7 +255,7 @@ std::optional<NavigationStep> WanderDirectionStep(
   return DecodeDirectionCode(directions[static_cast<std::size_t>(index)]);
 }
 
-// decomp: func_800E1BB8 (src/BATTLE/BATTLE.PRG/771A8.c:1638).
+// decomp: func_800E1BB8 (src/BATTLE/BATTLE.PRG/770A4.c:1012).
 std::optional<WanderTileChoice> ChooseNextWanderTile(WanderWorld& world,
                                                      WanderActor& actor,
                                                      std::uint32_t tile,
@@ -282,7 +282,8 @@ std::optional<WanderTileChoice> ChooseNextWanderTile(WanderWorld& world,
                              : WanderTileChoice::kExtended;
 }
 
-// decomp: wanderRandomHeading (src/BATTLE/BATTLE.PRG/771A8.c:1700).
+// decomp: randomHeading (src/BATTLE/BATTLE.PRG/770A4.c:1083; was
+// wanderRandomHeading).
 std::int16_t RandomWanderHeading(WanderWorld& world, int direction) {
   const int jitter = world.NextRandomMasked(kHeadingJitterRange);
   return static_cast<std::int16_t>(
@@ -299,7 +300,7 @@ void StartWanderWalk(WanderWorld& world, WanderActor& actor) {
   world.RecoverMovement(actor);
 }
 
-// decomp: func_800E1EAC (src/BATTLE/BATTLE.PRG/771A8.c:1717).
+// decomp: func_800E1EAC (src/BATTLE/BATTLE.PRG/770A4.c:1092).
 bool UpdateWanderMovement(WanderWorld& world, WanderActor& actor,
                           std::uint32_t tile, std::uint32_t range) {
   ++actor.timer;

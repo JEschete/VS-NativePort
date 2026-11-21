@@ -49,7 +49,7 @@ class LiveFieldCameraPlacementHost final : public EventFieldCameraHost {
 };
 }  // namespace
 
-// decomp: BATTLE.PRG func_800BE36C (F01236, src/BATTLE/BATTLE.PRG/4A0A8.c:4018,
+// decomp: BATTLE.PRG func_800BE36C (F01236, src/BATTLE/BATTLE.PRG/4DEA8.c:4668,
 // 0x800BE36C-0x800BE3A0)
 void SetEventCameraFollowingEntry(int look_at_follow, int eye_follow) {
   CameraState& camera = RequiredCamera("SetEventCameraFollowing");
@@ -59,7 +59,7 @@ void SetEventCameraFollowingEntry(int look_at_follow, int eye_follow) {
   StoreLiveEventCameraTracks(camera, tracks);
 }
 
-// decomp: BATTLE.PRG func_800BE3A0 (F01237, src/BATTLE/BATTLE.PRG/4A0A8.c:4026,
+// decomp: BATTLE.PRG func_800BE3A0 (F01237, src/BATTLE/BATTLE.PRG/4DEA8.c:4676,
 // 0x800BE3A0-0x800BE3D0)
 void StopEventCameraMotionEntry() {
   CameraState& camera = RequiredCamera("StopEventCameraMotion");
@@ -68,7 +68,7 @@ void StopEventCameraMotionEntry() {
   StoreLiveEventCameraTracks(camera, tracks);
 }
 
-// decomp: BATTLE.PRG func_800BC1CC (F01220, src/BATTLE/BATTLE.PRG/4A0A8.c:3173,
+// decomp: BATTLE.PRG func_800BC1CC (F01220, src/BATTLE/BATTLE.PRG/4DEA8.c:3823,
 // 0x800BC1CC-0x800BC2E8)
 void RestoreEventFieldCameraEntry(std::int16_t field_facing,
                                   int field_distance_mode) {
@@ -85,7 +85,7 @@ void RestoreEventFieldCameraEntry(std::int16_t field_facing,
   StoreLiveEventCameraTracks(camera, tracks);
 }
 
-// decomp: BATTLE.PRG func_800BE3D0 (F01238, src/BATTLE/BATTLE.PRG/4A0A8.c:4039,
+// decomp: BATTLE.PRG func_800BE3D0 (F01238, src/BATTLE/BATTLE.PRG/4DEA8.c:4689,
 // 0x800BE3D0-0x800BE53C)
 void StartEventCameraOrbitReturnEntry(char orbit_side) {
   constexpr const char* kOperation = "StartEventCameraOrbitReturn";
@@ -109,7 +109,8 @@ void StartEventCameraOrbitReturnEntry(char orbit_side) {
 }
 }  // namespace VS::Event
 
-// decomp: BATTLE.PRG func_800BB33C (F01193, src/BATTLE/BATTLE.PRG/4A0A8.c:2761,
+// decomp: BATTLE.PRG vs_battle_script_DE (F01193,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:3410; was func_800BB33C,
 // 0x800BB33C-0x800BB35C), opcode 0xDE in the normal and skip tables. It reads
 // no operand.
 std::intptr_t VS::Event::CommandStopCameraMotionOpcode(
@@ -123,7 +124,8 @@ std::intptr_t VS::Event::CommandStopCameraMotionOpcode(
   return 0;
 }
 
-// decomp: BATTLE.PRG func_800BB35C (F01194, src/BATTLE/BATTLE.PRG/4A0A8.c:2767,
+// decomp: BATTLE.PRG vs_battle_script_DF (F01194,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:3416; was func_800BB35C,
 // 0x800BB35C-0x800BB38C), opcode 0xDF in the normal and skip tables.
 std::intptr_t VS::Event::CommandSetCameraFollowingOpcode(
     std::uint8_t* instruction, std::int16_t /*thread_index*/) {
@@ -139,7 +141,8 @@ std::intptr_t VS::Event::CommandSetCameraFollowingOpcode(
   return 0;
 }
 
-// decomp: BATTLE.PRG func_800BB3BC (F01196, src/BATTLE/BATTLE.PRG/4A0A8.c:2780,
+// decomp: BATTLE.PRG vs_battle_script_E9 (F01196,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:3429; was func_800BB3BC,
 // 0x800BB3BC-0x800BB41C), opcode 0xE9 in the normal and skip tables. Marks the
 // restore as scripted even when the field camera override skipped it.
 std::intptr_t VS::Event::CommandRestoreFieldCameraOpcode(

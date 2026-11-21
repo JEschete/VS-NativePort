@@ -312,7 +312,8 @@ std::string_view LimbControllerErrorText(LimbControllerError error) noexcept {
   return "unknown controller error";
 }
 
-// decomp: _drawStatusIndicator (MENU4.PRG 120.c:847, 80103E58-80103EF7).
+// decomp: drawStatusIndicator (MENU4.PRG src/MENU/MENU4.PRG/120.c:851; was
+// _drawStatusIndicator, 80103E58-80103EF7).
 LimbControllerResult DrawLimbConditionIndicator(
     Render::PacketQueue& queue, std::span<const std::uint32_t> palette,
     const LimbIndicatorRequest& request) {
@@ -335,7 +336,8 @@ LimbControllerResult DrawLimbConditionIndicator(
   return ServiceResult(queue.Emit(packet));
 }
 
-// decomp: _drawLimbLeaderLine (MENU4.PRG 120.c:870, 80103EF8-80103FEB).
+// decomp: drawLimbLeaderLine (MENU4.PRG src/MENU/MENU4.PRG/120.c:874; was
+// _drawLimbLeaderLine, 80103EF8-80103FEB).
 LimbControllerResult DrawLimbLeaderLine(Render::PacketQueue& queue,
                                         const LimbLeaderRequest& request) {
   if (request.limb < 0 ||
@@ -367,7 +369,8 @@ LimbControllerResult DrawLimbLeaderLine(Render::PacketQueue& queue,
   return ServiceResult(queue.Emit(packet));
 }
 
-// decomp: _renderStatusIcons (MENU4.PRG 120.c:913, 80103FEC-80104133).
+// decomp: renderStatusIcons (MENU4.PRG src/MENU/MENU4.PRG/120.c:916; was
+// _renderStatusIcons, 80103FEC-80104133).
 LimbControllerResult DrawStatusEffectIcons(
     StatusIconHost& host, std::uint32_t flags, std::int32_t animation_step,
     std::span<const std::uint16_t, kStatusEffectSlots> texture_offsets) {
@@ -405,7 +408,8 @@ LimbControllerResult DrawStatusEffectIcons(
   return {};
 }
 
-// decomp: _navigateStatusModifiers (MENU4.PRG 120.c:961, 80104134-80104513).
+// decomp: navigateStatusModifiers (MENU4.PRG src/MENU/MENU4.PRG/120.c:964; was
+// _navigateStatusModifiers, 80104134-80104513).
 std::expected<std::int32_t, LimbControllerError> NavigateStatusEffects(
     StatusEffectNavigationState& state, StatusEffectNavigationFrame& frame,
     std::optional<StatusEffectTarget> target, bool selection_active,
@@ -447,7 +451,8 @@ std::expected<std::int32_t, LimbControllerError> NavigateStatusEffects(
   return 0;
 }
 
-// decomp: _renderLimbUi (MENU4.PRG 120.c:1146, 801045B8-80104AEB).
+// decomp: renderLimbUi (MENU4.PRG src/MENU/MENU4.PRG/120.c:1149; was
+// _renderLimbUi, 801045B8-80104AEB).
 std::expected<std::int32_t, LimbControllerError> UpdateLimbPanel(
     LimbPanelState& state, LimbPanelFrame& frame, std::int32_t request,
     LimbPanelHost& host) {
@@ -496,7 +501,8 @@ std::expected<std::int32_t, LimbControllerError> UpdateLimbPanel(
   return 0;
 }
 
-// decomp: _renderSelectedLimbCondition (120.c:2228, 80106308-801063F7).
+// decomp: renderSelectedLimbCondition (src/MENU/MENU4.PRG/120.c:2231; was
+// _renderSelectedLimbCondition, 80106308-801063F7).
 LimbControllerResult ShowSelectedLimbCondition(
     std::uint8_t limb, const SelectedLimbText& text,
     Render::EncodedTextArguments& arguments, std::span<std::uint8_t> output,
@@ -515,7 +521,8 @@ LimbControllerResult ShowSelectedLimbCondition(
                        host.SelectLimb(limb + 1));
 }
 
-// decomp: _renderSelectedLimbStats (120.c:2246, 801063F8-801064D3).
+// decomp: renderSelectedLimbStats (src/MENU/MENU4.PRG/120.c:2248; was
+// _renderSelectedLimbStats, 801063F8-801064D3).
 LimbControllerResult PopulateSelectedLimbDefense(
     std::uint8_t limb, const LimbDefenseView& defense,
     std::span<std::int16_t> equipment_stats, SelectedLimbHost& host) {

@@ -25,7 +25,7 @@ int FleeOrWander(DecisionActor& actor) {
 }
 }  // namespace
 
-// decomp: func_800DAA6C (src/BATTLE/BATTLE.PRG/71618.c:944).
+// decomp: func_800DAA6C (src/BATTLE/BATTLE.PRG/71618.c:397).
 int UpdatePatrolCombatBehavior(DecisionActor& actor) {
   if (actor.Fleeing()) {
     return FleeOrWander(actor);
@@ -102,7 +102,7 @@ int UpdateEngagementApproachBehavior(DecisionActor& actor) {
   return result != 0 ? result : actor.TrackActorPosition(kAshleyActor);
 }
 
-// decomp: BATTLE.PRG func_800DB7B4 (src/BATTLE/BATTLE.PRG/72B70.s:357).
+// decomp: BATTLE.PRG func_800DB7B4 (src/BATTLE/BATTLE.PRG/72B70.s:321).
 void UpdateActorLocomotionMode(DecisionActor& actor) {
   const int mode = actor.BehaviorMode();
   if (mode == 0) {
@@ -117,7 +117,7 @@ void UpdateActorLocomotionMode(DecisionActor& actor) {
   actor.IssueCommand(kStopCommand);
 }
 
-// decomp: BATTLE.PRG func_800DB820 (src/BATTLE/BATTLE.PRG/72B70.s:390).
+// decomp: BATTLE.PRG func_800DB820 (src/BATTLE/BATTLE.PRG/72B70.s:352).
 void DispatchMovementBehavior(DecisionActor& actor) {
   if (actor.TryExecutePlannedActions() || actor.TryRecoverBlockedMovement() ||
       actor.RunDecisionBehavior()) {

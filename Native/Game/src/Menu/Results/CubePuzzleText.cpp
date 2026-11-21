@@ -126,7 +126,8 @@ std::int32_t CountedCubePuzzleTime(std::int32_t timer, CubePuzzleClock clock) {
   return (minutes << kMinutesShift) | (seconds << kSecondsShift) | hundredths;
 }
 
-// decomp: MENUF.PRG _renderGivingUp (src/MENU/MENUF.PRG/3B8.c:2610), 0x801084F4
+// decomp: MENUF.PRG renderGivingUp (src/MENU/MENUF.PRG/3B8.c:2618; was
+// _renderGivingUp), 0x801084F4
 ResultsDrawResult DrawGivingUp(std::span<const Render::TextureRegion> atlas,
                                std::int32_t y, std::int32_t timer,
                                CubePuzzleTextHost& host) {
@@ -134,7 +135,8 @@ ResultsDrawResult DrawGivingUp(std::span<const Render::TextureRegion> atlas,
                          timer, host);
 }
 
-// decomp: MENUF.PRG _renderChicken (src/MENU/MENUF.PRG/3B8.c:2624), 0x80108564
+// decomp: MENUF.PRG renderChicken (src/MENU/MENUF.PRG/3B8.c:2632; was
+// _renderChicken), 0x80108564
 ResultsDrawResult DrawChicken(std::span<const Render::TextureRegion> atlas,
                               std::int32_t y, std::int32_t timer,
                               CubePuzzleTextHost& host) {
@@ -142,8 +144,8 @@ ResultsDrawResult DrawChicken(std::span<const Render::TextureRegion> atlas,
                          timer, host);
 }
 
-// decomp: MENUF.PRG _renderEvolveOrDie (src/MENU/MENUF.PRG/3B8.c:2640),
-// 0x801085D4
+// decomp: MENUF.PRG renderEvolveOrDie (src/MENU/MENUF.PRG/3B8.c:2648; was
+// _renderEvolveOrDie), 0x801085D4
 ResultsDrawResult DrawEvolveOrDie(std::span<const Render::TextureRegion> atlas,
                                   std::int32_t x, std::int32_t y,
                                   std::int32_t timer,
@@ -152,8 +154,8 @@ ResultsDrawResult DrawEvolveOrDie(std::span<const Render::TextureRegion> atlas,
                     {.x = x, .y = y}, timer, host);
 }
 
-// decomp: MENUF.PRG _renderFoodchain (src/MENU/MENUF.PRG/3B8.c:2664),
-// 0x80108688
+// decomp: MENUF.PRG renderFoodchain (src/MENU/MENUF.PRG/3B8.c:2672; was
+// _renderFoodchain), 0x80108688
 ResultsDrawResult DrawFoodChain(std::span<const Render::TextureRegion> atlas,
                                 std::int32_t x, std::int32_t y,
                                 std::int32_t timer, CubePuzzleTextHost& host) {
@@ -161,8 +163,8 @@ ResultsDrawResult DrawFoodChain(std::span<const Render::TextureRegion> atlas,
                     {.x = x, .y = y}, timer, host);
 }
 
-// decomp: MENUF.PRG _renderAverageTimeHeader (src/MENU/MENUF.PRG/3B8.c:2687),
-// 0x8010873C
+// decomp: MENUF.PRG renderAverageTimeHeader (src/MENU/MENUF.PRG/3B8.c:2695; was
+// _renderAverageTimeHeader), 0x8010873C
 ResultsDrawResult DrawAverageTimeHeading(
     std::span<const Render::TextureRegion> atlas, std::int32_t x,
     std::int32_t y, std::int32_t timer, CubePuzzleTextHost& host) {
@@ -181,8 +183,8 @@ ResultsDrawResult DrawAverageTimeHeading(
   return ResultsDrawResult::kDrawn;
 }
 
-// decomp: MENUF.PRG _renderCubePuzzleTime (src/MENU/MENUF.PRG/3B8.c:2699),
-// 0x80108784
+// decomp: MENUF.PRG renderCubePuzzleTime (src/MENU/MENUF.PRG/3B8.c:2707; was
+// _renderCubePuzzleTime), 0x80108784
 ResultsDrawResult DrawCubePuzzleParTime(std::int32_t x, std::int32_t y,
                                         std::int32_t timer,
                                         std::int16_t par_seconds,
@@ -195,8 +197,8 @@ ResultsDrawResult DrawCubePuzzleParTime(std::int32_t x, std::int32_t y,
   return ResultsDrawResult::kDrawn;
 }
 
-// decomp: MENUF.PRG _renderCubePuzzleRank (src/MENU/MENUF.PRG/3B8.c:2712),
-// 0x8010880C
+// decomp: MENUF.PRG renderCubePuzzleRank (src/MENU/MENUF.PRG/3B8.c:2720; was
+// _renderCubePuzzleRank), 0x8010880C
 ResultsDrawResult DrawCubePuzzleRank(
     std::span<const Render::TextureRegion> atlas, std::int32_t x,
     // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
@@ -220,8 +222,9 @@ ResultsDrawResult DrawCubePuzzleRank(
   return ResultsDrawResult::kDrawn;
 }
 
-// decomp: MENUF.PRG _renderCubePuzzleIncrementalTime
-// (src/MENU/MENUF.PRG/3B8.c:2732), 0x8010887C
+// decomp: MENUF.PRG renderCubePuzzleIncrementalTime
+// (src/MENU/MENUF.PRG/3B8.c:2740; was _renderCubePuzzleIncrementalTime),
+// 0x8010887C
 ResultsDrawResult DrawCountingCubePuzzleTime(
     std::span<const Render::TextureRegion> atlas, std::int32_t x,
     std::int32_t y, std::int32_t timer, CubePuzzleClock clock,

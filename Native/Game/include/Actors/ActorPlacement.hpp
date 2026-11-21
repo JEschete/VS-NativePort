@@ -34,8 +34,9 @@ struct ActorPlacementView {
 
 [[nodiscard]] bool IsFlightClass(int movement_class);
 
-// decomp: BATTLE.PRG func_800A1108 (src/BATTLE/BATTLE.PRG/30DB0.c:4182)
-// Nothing for a slot with neither an actor nor a gimmick.
+// decomp: BATTLE.PRG vs_battle_getActorPosition
+// (src/BATTLE/BATTLE.PRG/30DB0.c:4299; was func_800A1108) Nothing for a slot
+// with neither an actor nor a gimmick.
 [[nodiscard]] std::optional<ActorPlacementView> ActorPlacement(
     ActorStateHost& host, int id);
 // decomp: BATTLE.PRG func_800A30A0 (src/BATTLE/BATTLE.PRG/3A1A0.c:274)
@@ -53,7 +54,7 @@ void PlaceActorInRoom(ActorStateHost& host, int id, PackedTile tile,
 // the room's ceiling where it can.
 void SeparateActorFlightPlacement(ActorStateHost& host, int id,
                                   MotionVector& position);
-// decomp: BATTLE.PRG func_800A36E0 (src/BATTLE/BATTLE.PRG/3A1A0.c:448)
+// decomp: BATTLE.PRG func_800A36E0 (src/BATTLE/BATTLE.PRG/3A1A0.c:436)
 // The actor's saved tile (its current tile for a placed flyer), with its
 // facing in sixteenths in the spare byte.
 [[nodiscard]] std::optional<PackedTile> ActorSavedPlacement(

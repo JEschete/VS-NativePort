@@ -24,7 +24,7 @@ bool Commit(FloatingLabelQueueView& queue, std::int16_t count,
 }
 }  // namespace
 
-// decomp: F00712 func_80093AB4 (src/BATTLE/BATTLE.PRG/2842C.c:1465).
+// decomp: F00712 func_80093AB4 (src/BATTLE/BATTLE.PRG/2842C.c:1453).
 bool ResetFloatingLabels(FloatingLabelQueueView& queue,
                          FloatingLabelResetView state) {
   state.marker_visibility_command = 0;
@@ -55,7 +55,7 @@ bool QueueWorldLockedLabel(FloatingLabelQueueView& queue,
   return Commit(queue, count, slot.value());
 }
 
-// decomp: F00721 func_80094AF8 (src/BATTLE/BATTLE.PRG/2842C.c:2067).
+// decomp: F00721 func_80094AF8 (src/BATTLE/BATTLE.PRG/2842C.c:2055).
 void AdvanceFloatingLabelQueue(FloatingLabelTimingView label) {
   const auto waiting_steps = label.waiting_steps;
   label.elapsed_frames = 0;

@@ -246,6 +246,9 @@ def function_ids(workspace: gates.Workspace) -> dict[str, str]:
         if row["copy"] == "yes":
             names.setdefault(leaf(gates.c_symbol(row["final_name"])), row["id"])
             names.setdefault(row["name"], row["id"])
+            if row.get("previous_name"):
+                # Native code keeps the name it was written against; provenance.py records it when the decomp renames.
+                names.setdefault(row["previous_name"], row["id"])
     for row in read_csv(workspace.owned):
         if row["kind"] == "function":
             names[leaf(row["name"])] = row["id"]

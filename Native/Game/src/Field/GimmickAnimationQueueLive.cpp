@@ -292,20 +292,20 @@ bool QueueLiveGimmickAnimation(int kind, RoomObjectTarget target) {
 }
 }  // namespace VS::Field
 
-// decomp: BATTLE.PRG func_8008C070 (src/BATTLE/BATTLE.PRG/146C.c:16338).
+// decomp: BATTLE.PRG func_8008C070 (src/BATTLE/BATTLE.PRG/146C.c:16209).
 void VS::Field::QueueGimmickAnimationEntry(
     int queued_job_kind, VS::Field::MpdLockTrigger* lock_trigger) {
   static_cast<void>(
       VS::Field::QueueLiveGimmickAnimation(queued_job_kind, lock_trigger));
 }
 
-// decomp: BATTLE.PRG func_8008C0C0 (src/BATTLE/BATTLE.PRG/146C.c:16353).
+// decomp: BATTLE.PRG func_8008C0C0 (src/BATTLE/BATTLE.PRG/146C.c:16224).
 void VS::Field::UpdateGimmickAnimationQueueEntry() {
   LiveAnimationDispatchHost host;
   static_cast<void>(VS::Field::UpdateGimmickAnimationQueue(host));
 }
 
-// decomp: BATTLE.PRG func_8008B6B4 (src/BATTLE/BATTLE.PRG/146C.c:16052).
+// decomp: BATTLE.PRG func_8008B6B4 (src/BATTLE/BATTLE.PRG/146C.c:15922).
 void VS::Field::ResetGimmickAnimationQueueEntry() {
   LiveAnimationResetHost host;
   VS::Field::ResetGimmickAnimationQueue(host);

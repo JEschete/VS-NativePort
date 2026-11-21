@@ -4,10 +4,11 @@
 #include "Effects/Plugins/PluginData.hpp"
 
 namespace VS::Effects::Plg236 {
-// decomp: D_800FD190 (PLG236.BIN/0.c:6; closedRings.h:58)
+// decomp: D_800FD190 (PLG236.BIN/0.c:6; src/EFFECT/closedRings.h:58)
 extern plugins::RingPalette closedRingColorFactors;
-// decomp: D_800FD1B0 (PLG236.BIN/0.c:12; closedRings.h:58)
+// decomp: D_800FD1B0 (PLG236.BIN/0.c:12; src/EFFECT/closedRings.h:58)
 extern plugins::RingPaletteBytes ringColorFactors;
-// decomp: D_800FD1D0 (PLG236.BIN/0.c:15; rings.h:20)
+// decomp: vs_effect_plg236_3_colors (src/EFFECT/rings.h:20; was D_800FD1D0;
+// src/EFFECT/rings.h:20)
 extern plugins::RingPaletteBytes ringColorFactors2;
 }  // namespace VS::Effects::Plg236

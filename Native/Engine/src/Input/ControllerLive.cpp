@@ -28,7 +28,7 @@
 // decomp: SLUS_010.40 _portInfo, vs_main_buttonsReleased,
 // _buttonHeldFrameCount, vs_main_stickPosBuf, vs_main_buttonRepeat,
 // vs_main_buttonsPreviousState, vs_main_buttonsPressed, vs_main_buttonsState
-// and vs_main_settings (main.c), zero like the PS1 BSS.
+// and vs_main_settings (src/SLUS_010.40/main.c:1042), zero like the PS1 BSS.
 VS::Input::LegacyControllerPort
     VS::Input::controllerPorts[VS::Input::kControllerPortCount]{};
 int VS::Input::releasedButtons = 0;

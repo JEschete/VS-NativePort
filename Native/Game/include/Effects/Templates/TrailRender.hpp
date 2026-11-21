@@ -7,9 +7,9 @@
 #include "Effects/Templates/TrailCore.hpp"
 
 // The render stage of the five- and nine-sample trails (decomp
-// src/EFFECT/trails5.h:449 and trails9.h:456 VS_TRAIL_RENDER_FUNCTION): draws
-// every trail as a ribbon of textured, semi-transparent quads through its
-// history samples, newest first.
+// src/EFFECT/trailEffect.h:495 and src/EFFECT/trailEffect.h:495
+// VS_TRAIL_RENDER_FUNCTION): draws every trail as a ribbon of textured,
+// semi-transparent quads through its history samples, newest first.
 namespace VS::Effects::Templates {
 // Samples the acceleration vector into the scratch (its x, halved, is the
 // ribbon's half width) and the colour curves (each doubled and saturated at

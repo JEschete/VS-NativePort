@@ -84,7 +84,8 @@ extern ByteTable<kSharedSequenceIdsByKindBytes> sharedSequenceIdsByKind;
 extern std::uint8_t sharedSequenceBankIndex;
 // decomp: D_800E8FC0 (src/BATTLE/BATTLE.PRG/30DB0.h:43). Nonzero while the
 // first-person camera transition runs (func_800A0870); func_800B28A8
-// (49EB8.c:294) then draws every actor through the override drawers.
+// (src/BATTLE/BATTLE.PRG/49EB8.c:294) then draws every actor through the
+// override drawers.
 extern char forcedModelOverrides;
 // decomp: D_800E9090, upstream weaponCategorySfx
 // (src/BATTLE/BATTLE.PRG/30DB0.c:82)

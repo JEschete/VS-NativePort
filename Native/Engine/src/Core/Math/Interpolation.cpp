@@ -85,8 +85,8 @@ std::int32_t CombineAxis(const std::array<Vec3, kLagrangePoints>& points,
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800CFB68 (src/BATTLE/BATTLE.PRG/5BF94.c:5805) and
-// func_800CFE1C (5BF94.c:5905).
+// decomp: BATTLE.PRG func_800CFB68 (src/BATTLE/BATTLE.PRG/5BF94.c:5370) and
+// func_800CFE1C (src/BATTLE/BATTLE.PRG/5BF94.c:5470).
 std::int32_t InterpolateSevenBitScalar(ScalarSpan span,
                                        std::int32_t weight) noexcept {
   const std::int32_t step =
@@ -95,8 +95,8 @@ std::int32_t InterpolateSevenBitScalar(ScalarSpan span,
   return WrappingAdd(step, span.start);
 }
 
-// decomp: BATTLE.PRG vs_battle_lerpVector (src/BATTLE/BATTLE.PRG/5BF94.c:5866)
-// and vs_battle_lerpSvector (5BF94.c:5880).
+// decomp: BATTLE.PRG vs_battle_lerpVector (src/BATTLE/BATTLE.PRG/5BF94.c:5431)
+// and vs_battle_lerpSvector (src/BATTLE/BATTLE.PRG/5BF94.c:5445).
 Vec3 InterpolateSevenBitVector(
     const std::array<ScalarSpan, kMatrixOrder>& spans,
     std::int32_t weight) noexcept {
@@ -106,14 +106,15 @@ Vec3 InterpolateSevenBitVector(
 }
 
 // decomp: BATTLE.PRG vs_battle_lerp2DVector
-// (src/BATTLE/BATTLE.PRG/5BF94.c:5894).
+// (src/BATTLE/BATTLE.PRG/5BF94.c:5459).
 Vec2 InterpolateSevenBitPlane(const std::array<ScalarSpan, 2>& spans,
                               std::int32_t weight) noexcept {
   return Vec2{InterpolateSevenBitScalar(spans[0], weight),
               InterpolateSevenBitScalar(spans[1], weight)};
 }
 
-// decomp: BATTLE.PRG vs_battle_lerp (src/BATTLE/BATTLE.PRG/5BF94.c:6424).
+// decomp: BATTLE.PRG lerp (src/BATTLE/BATTLE.PRG/5BF94.c:5994; was
+// vs_battle_lerp).
 std::int32_t InterpolateThirteenBitScalar(ScalarSpan span,
                                           std::int32_t weight) noexcept {
   const std::int32_t step =
@@ -122,8 +123,8 @@ std::int32_t InterpolateThirteenBitScalar(ScalarSpan span,
   return WrappingAdd(span.start, step);
 }
 
-// decomp: BATTLE.PRG func_800D169C (src/BATTLE/BATTLE.PRG/5BF94.c:6430) and
-// func_800D17A8 (5BF94.c:6447).
+// decomp: BATTLE.PRG func_800D169C (src/BATTLE/BATTLE.PRG/5BF94.c:6000) and
+// func_800D17A8 (src/BATTLE/BATTLE.PRG/5BF94.c:6017).
 Vec3 InterpolateThirteenBitVector(Vec3 start, Vec3 end,
                                   std::int32_t weight) noexcept {
   return Vec3{InterpolateThirteenBitScalar({start.x, end.x}, weight),
@@ -131,34 +132,36 @@ Vec3 InterpolateThirteenBitVector(Vec3 start, Vec3 end,
               InterpolateThirteenBitScalar({start.z, end.z}, weight)};
 }
 
-// decomp: BATTLE.PRG func_800D1904 (src/BATTLE/BATTLE.PRG/5BF94.c:6469).
+// decomp: BATTLE.PRG func_800D1904 (src/BATTLE/BATTLE.PRG/5BF94.c:6039).
 std::int32_t InterpolateTimedScalar(ScalarSpan span,
                                     StepProgress progress) noexcept {
   return InterpolateThirteenBitScalar(span, TimedWeight(progress));
 }
 
-// decomp: BATTLE.PRG func_800D1778 (src/BATTLE/BATTLE.PRG/5BF94.c:6442) and
-// func_800D1884 (5BF94.c:6459).
+// decomp: BATTLE.PRG func_800D1778 (src/BATTLE/BATTLE.PRG/5BF94.c:6012) and
+// func_800D1884 (src/BATTLE/BATTLE.PRG/5BF94.c:6029).
 Vec3 InterpolateTimedVector(Vec3 start, Vec3 end,
                             StepProgress progress) noexcept {
   return InterpolateThirteenBitVector(start, end, TimedWeight(progress));
 }
 
-// decomp: BATTLE.PRG func_800CFC8C (src/BATTLE/BATTLE.PRG/5BF94.c:5859) and
-// func_800D18B4 (5BF94.c:6464), which compute the same sum.
+// decomp: BATTLE.PRG func_800CFC8C (src/BATTLE/BATTLE.PRG/5BF94.c:5424) and
+// func_800D18B4 (src/BATTLE/BATTLE.PRG/5BF94.c:6034), which compute the same
+// sum.
 std::int32_t InterpolateCosineScalar(ScalarSpan span,
                                      StepProgress progress) noexcept {
   return InterpolateThirteenBitScalar(span, CosineWeight(progress));
 }
 
-// decomp: BATTLE.PRG func_800D1718 (src/BATTLE/BATTLE.PRG/5BF94.c:6437) and
-// func_800D1824 (5BF94.c:6454).
+// decomp: BATTLE.PRG func_800D1718 (src/BATTLE/BATTLE.PRG/5BF94.c:6007) and
+// func_800D1824 (src/BATTLE/BATTLE.PRG/5BF94.c:6024).
 Vec3 InterpolateCosineVector(Vec3 start, Vec3 end,
                              StepProgress progress) noexcept {
   return InterpolateThirteenBitVector(start, end, CosineWeight(progress));
 }
 
-// decomp: BATTLE.PRG vs_battle_lerpRatio (src/BATTLE/BATTLE.PRG/5BF94.c:6382).
+// decomp: BATTLE.PRG lerpRatio (src/BATTLE/BATTLE.PRG/5BF94.c:5952; was
+// vs_battle_lerpRatio).
 std::int32_t InterpolateFixedPointRatio(ScalarSpan span,
                                         StepProgress ratio) noexcept {
   const std::int32_t scaled = WrappingMultiply(
@@ -167,7 +170,7 @@ std::int32_t InterpolateFixedPointRatio(ScalarSpan span,
 }
 
 // decomp: BATTLE.PRG vs_battle_splineInterpolate
-// (src/BATTLE/BATTLE.PRG/5BF94.c:6388).
+// (src/BATTLE/BATTLE.PRG/5BF94.c:5958).
 Vec3 InterpolateLagrangeVector(const std::array<Vec3, kLagrangePoints>& points,
                                std::int32_t phase) noexcept {
   const LagrangeWeights weights = WeightsAt(phase);
@@ -176,14 +179,14 @@ Vec3 InterpolateLagrangeVector(const std::array<Vec3, kLagrangePoints>& points,
               CombineAxis(points, &Vec3::z, weights)};
 }
 
-// decomp: BATTLE.PRG func_800D155C (src/BATTLE/BATTLE.PRG/5BF94.c:6412).
+// decomp: BATTLE.PRG func_800D155C (src/BATTLE/BATTLE.PRG/5BF94.c:5982).
 std::int32_t InterpolateLagrangeScalar(
     const std::array<std::int32_t, kLagrangePoints>& values,
     std::int32_t phase) noexcept {
   return Combine(values, WeightsAt(phase));
 }
 
-// decomp: ENDING.PRG _ease (src/ENDING/ENDING.PRG/D4.c:1293).
+// decomp: ENDING.PRG ease (src/ENDING/ENDING.PRG/D4.c:1322; was _ease).
 std::int32_t EvaluateEase(EaseCurve curve, StepProgress progress) noexcept {
   switch (curve) {
     case EaseCurve::kLinear:

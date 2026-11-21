@@ -167,12 +167,12 @@ using Mediator = VS::Battle::ActionEffectMediator;
 static_assert(std::is_same_v<decltype(&ApplyLiveActionHitEffect), Mediator>);
 }  // namespace
 
-// decomp: func_80085008 (src/BATTLE/BATTLE.PRG/146C.c:12930).
+// decomp: func_80085008 (src/BATTLE/BATTLE.PRG/146C.c:12767).
 void DeriveLiveLimbInjuryStatuses(VS::Battle::HitResult* hit) {
   LiveInjuryQueue queue(HitOf(hit));
   DeriveLimbInjuryStatuses(queue);
 }
-// decomp: func_80085390 (src/BATTLE/BATTLE.PRG/146C.c:13012).
+// decomp: func_80085390 (src/BATTLE/BATTLE.PRG/146C.c:12849).
 void ApplyLiveActionHitEffect(ActionDefinition* action,
                               VS::Battle::HitResult* source,
                               VS::Battle::HitResult* target, int execute,

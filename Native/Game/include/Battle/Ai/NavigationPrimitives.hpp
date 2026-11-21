@@ -98,28 +98,28 @@ struct RoomTileBounds {
   std::uint8_t max_z = 0;
 };
 
-// decomp: func_800E4C1C (src/BATTLE/BATTLE.PRG/7BDD4.s:542).
+// decomp: func_800E4C1C (src/BATTLE/BATTLE.PRG/6E4CCPrivate.h:47).
 // Reserves a destination tile; nothing without a flag map. False refuses a
 // tile outside the grid.
 bool ReserveAiDestinationTile(NavigationGrid& grid, int x, int z);
 
-// decomp: func_800E68EC (src/BATTLE/BATTLE.PRG/7E05C.s:72).
+// decomp: func_800E68EC (src/BATTLE/BATTLE.PRG/7DDDC.s:226).
 // Marks a tile as a dynamic obstacle; nothing without a flag map. False
 // refuses a tile outside the grid.
 bool MarkAiTileDynamicObstacle(NavigationGrid& grid, int x, int z);
 
-// decomp: func_800E6898 (src/BATTLE/BATTLE.PRG/7E05C.s:38-69).
+// decomp: func_800E6898 (src/BATTLE/BATTLE.PRG/7DDDC.s:200).
 // Raises the occupancy height under a gimmick by one dynamic step, wrapping
 // at 16 bits; nothing without a flag map. False refuses a missing height map
 // or a placement whose byte offset is odd or outside the map.
 bool AddAiTileOccupant(NavigationGrid& grid, TileOccupantPlacement placement);
 
-// decomp: func_800E68A0 (src/BATTLE/BATTLE.PRG/7E05C.s:46-69).
+// decomp: func_800E68A0 (src/BATTLE/BATTLE.PRG/7DDDC.s:205).
 // Lowers the occupancy height under a gimmick; refuses as AddAiTileOccupant.
 bool RemoveAiTileOccupant(NavigationGrid& grid,
                           TileOccupantPlacement placement);
 
-// decomp: func_800E4690 (src/BATTLE/BATTLE.PRG/7BDD4.s:72).
+// decomp: func_800E4690 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:483).
 // Whether stepping from a tile toward a neighbor is blocked: the neighbor is
 // outside the grid, has no ground or differs in height by 64 or more. Nothing
 // refuses a direction outside 0..7, a direction whose code is not a unit
@@ -136,7 +136,7 @@ class SpecialTerrainBuilder {
   virtual void BuildSpecialTerrainHeights() = 0;
 };
 
-// decomp: func_800E6B4C (src/BATTLE/BATTLE.PRG/7E05C.s:257).
+// decomp: func_800E6B4C (src/BATTLE/BATTLE.PRG/7DDDC.s:401).
 // Builds the special terrain heights. The original allocated a temporary PS1
 // stack, not terrain data, so no workspace is needed. False refuses a room
 // without its tile flag and height maps.
@@ -153,7 +153,7 @@ struct RouteGateEnd {
 [[nodiscard]] std::uint32_t VisiblePlatformMask(
     std::span<const std::int16_t> platform_indices);
 
-// decomp: func_800DC638 (src/BATTLE/BATTLE.PRG/73C84.s:149-243).
+// decomp: func_800DC638 (src/BATTLE/BATTLE.PRG/7399C.s:343).
 // Closes each platform-gated route and reopens a gate whose platform is
 // visible at a link end. False refuses, before any write, a first route word
 // gated only by its second platform while a platform is visible: the
@@ -224,8 +224,8 @@ class NavigationOverrideHost : public NavigationOverrideTable {
 [[nodiscard]] std::optional<bool> HasActorNavigationState(
     const NavigationOverrideTable& table, int actor_id);
 
-// decomp: func_800E5154 (src/BATTLE/BATTLE.PRG/7C7E0.s:122), shared $a3 = 1.
-// 2 without state or override, 0 once the tracked tile is the destination
+// decomp: func_800E5154 (src/BATTLE/BATTLE.PRG/6E4CCPrivate.h:53), shared $a3
+// = 1. 2 without state or override, 0 once the tracked tile is the destination
 // and 1 while moving. Nothing refuses an ID outside the table or an override
 // that tracks no tile.
 [[nodiscard]] std::optional<int> ActorNavigationOverrideStatus(
@@ -237,7 +237,7 @@ class NavigationOverrideHost : public NavigationOverrideTable {
 bool CopyActorNavigationOverrideState(NavigationOverrideCopy& copy,
                                       int actor_id);
 
-// decomp: func_800E527C (src/BATTLE/BATTLE.PRG/7C7E0.s:216-256).
+// decomp: func_800E527C (src/BATTLE/BATTLE.PRG/6E4CCPrivate.h:44).
 // Starts or restarts a scripted move to world (x, z); nothing for an actor
 // without navigation state. On repeat entry the original copies onto the
 // actor's own state, not its existing route. False refuses an ID outside the
@@ -318,7 +318,7 @@ class ScriptedRouteHost {
   virtual void SaveMovementRandomState() = 0;
 };
 
-// decomp: func_800E5308 (src/BATTLE/BATTLE.PRG/7C7E0.s:260-421).
+// decomp: func_800E5308 (src/BATTLE/BATTLE.PRG/6E4CCPrivate.h:95).
 // Advances each unsuspended actor's scripted route and finishes it on
 // arrival. False refuses, after the actors before it, an ID outside the
 // table, a route that does not match its actor, an actor without a model or

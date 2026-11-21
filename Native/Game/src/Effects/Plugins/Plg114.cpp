@@ -3,8 +3,12 @@
 #include "Effects/Plugins/Plg114.hpp"
 
 namespace VS::Effects::Plg114 {
-// decomp: D_800FCCA0 (PLG114.BIN/208.c:5; particleSetup.h:35)
+// decomp: vs_effect_numbingNeedle_0_origin_state
+// (src/EFFECT/particleSetup.h:35; was D_800FCCA0;
+// src/EFFECT/particleSetup.h:35)
 std::int32_t particleEmissionCounter;
-// decomp: D_800FCCA4 (PLG114.BIN/208.c:10; particleSetup.h:35)
+// decomp: vs_effect_numbingNeedle_1_origin_state
+// (src/EFFECT/particleSetup.h:35; was D_800FCCA4;
+// src/EFFECT/particleSetup.h:35)
 std::int32_t particleEmissionCounter2;
 }  // namespace VS::Effects::Plg114

@@ -126,17 +126,19 @@ std::optional<BankDeclaration> ReadBankDeclaration(
       .instrument_count = ReadWord(header, kHeaderInstrumentCountWord)};
 }
 
-// decomp: SLUS_010.40 func_80012BB8 (src/SLUS_010.40/25AC.c:719)
+// decomp: SLUS_010.40 Sound_LoadAkaoBankBlocking (src/SLUS_010.40/25AC.c:720;
+// was func_80012BB8)
 void LoadBank(BankLoadHost& host, std::span<const std::byte> bank, bool wait) {
   LoadDeclaredBank(host, bank, wait);
 }
 
-// decomp: SLUS_010.40 vs_sound_spuTransferring (src/SLUS_010.40/25AC.c:725)
+// decomp: SLUS_010.40 IsSpuTransferring (src/SLUS_010.40/25AC.c:726; was
+// vs_sound_spuTransferring)
 std::int32_t TransferStatus(BankLoadHost& host) {
   return host.TransferStatus();
 }
 
-// decomp: SLUS_010.40 func_80012C14 (src/SLUS_010.40/25AC.c:727)
+// decomp: SLUS_010.40 func_80012C14 (src/SLUS_010.40/25AC.c:728)
 MusicBankChoice ChooseMusicBankDestination(BankLoadHost& host,
                                            const BankDeclaration& bank) {
   MusicBankState state = host.MusicBanks();
@@ -167,7 +169,7 @@ MusicBankChoice ChooseMusicBankDestination(BankLoadHost& host,
           .destination = alternate ? kAlternateMusicBank : kMusicBank};
 }
 
-// decomp: SLUS_010.40 func_80012D9C (src/SLUS_010.40/25AC.c:768)
+// decomp: SLUS_010.40 func_80012D9C (src/SLUS_010.40/25AC.c:769)
 BankDestination ChooseSoundEffectBankDestination(BankLoadHost& host,
                                                  const BankDeclaration& bank,
                                                  std::int32_t slot) {
@@ -182,7 +184,7 @@ BankDestination ChooseSoundEffectBankDestination(BankLoadHost& host,
   return kSoundEffectBanks.at(index);
 }
 
-// decomp: SLUS_010.40 func_80012E50 (src/SLUS_010.40/25AC.c:797)
+// decomp: SLUS_010.40 func_80012E50 (src/SLUS_010.40/25AC.c:798)
 bool SelectMusicBank(BankLoadHost& host, std::int32_t bank_id) {
   MusicBankState state = host.MusicBanks();
   if (state.bank_id == bank_id) {
@@ -194,7 +196,8 @@ bool SelectMusicBank(BankLoadHost& host, std::int32_t bank_id) {
   return state.music_bank_selected;
 }
 
-// decomp: SLUS_010.40 func_80012EBC (src/SLUS_010.40/25AC.c:807)
+// decomp: SLUS_010.40 Sound_ResetMusicBankIds (src/SLUS_010.40/25AC.c:808; was
+// func_80012EBC)
 void ClearMusicBankIds(BankLoadHost& host) {
   MusicBankState state = host.MusicBanks();
   state.music_bank_selected = false;
@@ -203,7 +206,8 @@ void ClearMusicBankIds(BankLoadHost& host) {
   host.StoreMusicBanks(state);
 }
 
-// decomp: SLUS_010.40 func_80012EF0 (src/SLUS_010.40/25AC.c:815)
+// decomp: SLUS_010.40 Sound_StartAkaoBankStreaming (src/SLUS_010.40/25AC.c:816;
+// was func_80012EF0)
 void BeginBankStream(BankLoadHost& host) {
   BankStreamState stream = host.Stream();
   stream.sample_address = 0;
@@ -211,7 +215,8 @@ void BeginBankStream(BankLoadHost& host) {
   host.StoreStream(stream);
 }
 
-// decomp: SLUS_010.40 func_80012F10 (src/SLUS_010.40/25AC.c:822)
+// decomp: SLUS_010.40 Sound_StreamAkaoBankChunk (src/SLUS_010.40/25AC.c:823;
+// was func_80012F10)
 std::uint32_t UploadBankChunk(BankLoadHost& host,
                               std::span<const std::byte> chunk,
                               std::int32_t slot, bool wait) {
@@ -258,7 +263,8 @@ std::uint32_t UploadBankChunk(BankLoadHost& host,
   return stream.sample_bytes_remaining;
 }
 
-// decomp: SLUS_010.40 func_80013188 (src/SLUS_010.40/25AC.c:894)
+// decomp: SLUS_010.40 Sound_LoadMusicBank (src/SLUS_010.40/25AC.c:897; was
+// func_80013188)
 bool LoadMusicBank(BankLoadHost& host, std::span<const std::byte> bank,
                    bool wait) {
   const std::optional<BankDeclaration> declaration = ReadBankDeclaration(bank);
@@ -271,7 +277,8 @@ bool LoadMusicBank(BankLoadHost& host, std::span<const std::byte> bank,
   return choice.alternate;
 }
 
-// decomp: SLUS_010.40 func_800131DC (src/SLUS_010.40/25AC.c:903)
+// decomp: SLUS_010.40 Sound_LoadSfxBank (src/SLUS_010.40/25AC.c:906; was
+// func_800131DC)
 void LoadSoundEffectBank(BankLoadHost& host, std::span<const std::byte> bank,
                          std::int32_t slot, bool wait) {
   const std::optional<BankDeclaration> declaration = ReadBankDeclaration(bank);
@@ -284,7 +291,7 @@ void LoadSoundEffectBank(BankLoadHost& host, std::span<const std::byte> bank,
 }
 
 // decomp: SLUS_010.40 Sound_CopyAndRelocateInstruments
-// (src/SLUS_010.40/25AC.c:970)
+// (src/SLUS_010.40/25AC.c:973)
 std::size_t CopyRelocatedInstruments(std::span<const InstrumentRecord> source,
                                      std::span<InstrumentRecord> destination,
                                      std::uint32_t address_offset,
@@ -298,14 +305,15 @@ std::size_t CopyRelocatedInstruments(std::span<const InstrumentRecord> source,
   return copied;
 }
 
-// decomp: SLUS_010.40 Sound_IsNotAkaoFile (src/SLUS_010.40/25AC.c:984)
+// decomp: SLUS_010.40 Sound_IsNotAkaoFile (src/SLUS_010.40/25AC.c:987)
 std::optional<std::int32_t> SequenceMagicDifference(
     std::span<const std::byte> data) {
   if (data.size() < kWordBytes) return std::nullopt;
   return static_cast<std::int32_t>(ReadWord(data, 0) - kAkaoMagic);
 }
 
-// decomp: SLUS_010.40 func_80013588 (src/SLUS_010.40/25AC.c:1023)
+// decomp: SLUS_010.40 Sound_TryLoadInstrumentBank (src/SLUS_010.40/25AC.c:1026;
+// was func_80013588)
 std::int32_t LoadDeclaredBank(BankLoadHost& host,
                               std::span<const std::byte> bank, bool wait) {
   if (SequenceMagicDifference(bank) != 0) return -1;
@@ -319,7 +327,7 @@ std::int32_t LoadDeclaredBank(BankLoadHost& host,
 }
 
 // decomp: SLUS_010.40 Sound_MapInstrumentToAltSampleBank
-// (src/SLUS_010.40/25AC.c:2303)
+// (src/SLUS_010.40/25AC.c:2421)
 std::uint16_t MapInstrumentToAlternateBank(std::uint32_t music_flags,
                                            ChannelInstrument& channel) {
   if ((music_flags & static_cast<std::uint32_t>(kPlaysFromAlternateBank)) !=
@@ -335,7 +343,7 @@ std::uint16_t MapInstrumentToAlternateBank(std::uint32_t music_flags,
 }
 
 // decomp: SLUS_010.40 Sound_MapInstrumentToBaseSampleBank
-// (src/SLUS_010.40/25AC.c:2315)
+// (src/SLUS_010.40/25AC.c:2434)
 std::uint16_t MapInstrumentToBaseBank(std::uint32_t music_flags,
                                       ChannelInstrument& channel) {
   if ((music_flags & static_cast<std::uint32_t>(kPlaysFromAlternateBank)) !=
@@ -350,7 +358,7 @@ std::uint16_t MapInstrumentToBaseBank(std::uint32_t music_flags,
   return channel.instrument_index;
 }
 
-// decomp: SLUS_010.40 func_80016DA8 (src/SLUS_010.40/25AC.c:2941)
+// decomp: SLUS_010.40 func_80016DA8 (src/SLUS_010.40/25AC.c:3119)
 std::int32_t SoundEffectBankSlot(BankLoadHost& host, std::int32_t selector) {
   const std::int32_t bank_id = selector & kSoundEffectBankIdMask;
   if (bank_id == 0) return 0;

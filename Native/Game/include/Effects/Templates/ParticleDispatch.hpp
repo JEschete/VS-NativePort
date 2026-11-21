@@ -10,7 +10,7 @@
 #include "Effects/Templates/ParticleRender.hpp"
 #include "Effects/Templates/ParticleTarget.hpp"
 
-// The particle-set dispatcher (decomp src/EFFECT/particleDispatch.h:3): the
+// The particle-set dispatcher (decomp src/EFFECT/particleDispatch.h:8): the
 // renderer-slot commands of a set of up to eight ribbons. A tick samples the
 // ribbon count, reruns the origin and target stages whenever the cooldown
 // runs out, then runs the control and render stages.

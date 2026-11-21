@@ -3,8 +3,10 @@
 #include "Effects/Plugins/Plg167.hpp"
 
 namespace VS::Effects::Plg167 {
-// decomp: D_800FD824 (PLG167.BIN/E0.c:5; closedRings.h:58)
+// decomp: vs_effect_lotusPalm_0_colors (src/EFFECT/closedRings.h:58; was
+// D_800FD824; src/EFFECT/closedRings.h:58)
 plugins::RingPalette closedRingColorFactors;
-// decomp: D_800FD844 (PLG167.BIN/E0.c:9; trailEffect.h:70)
+// decomp: vs_effect_lotusPalm_2_origin_state (src/EFFECT/trailEffect.h:70; was
+// D_800FD844; src/EFFECT/trailEffect.h:70)
 std::int32_t trailEmissionCounter;
 }  // namespace VS::Effects::Plg167

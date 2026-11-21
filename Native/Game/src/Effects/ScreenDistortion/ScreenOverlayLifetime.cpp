@@ -8,13 +8,14 @@ namespace {
 constexpr std::uint8_t kPagesLent = 1;
 }  // namespace
 
-// decomp: BATTLE.PRG func_800CA97C (5BF94.c:3477).
+// decomp: BATTLE.PRG func_800CA97C (src/BATTLE/BATTLE.PRG/5BF94.c:3043).
 void ResetScreenOverlay(ScreenOverlayLifetime& lifetime) noexcept {
   lifetime = {};
   lifetime.controls.radial_warp.scale = kNeutralRadialWarpScale;
 }
 
-// decomp: BATTLE.PRG _loadScreff2 (5BF94.c:3873).
+// decomp: BATTLE.PRG loadScreff2 (src/BATTLE/BATTLE.PRG/5BF94.c:3439; was
+// _loadScreff2).
 void LoadScreenOverlay(ScreenOverlayLifetime& lifetime, std::int32_t begin_load,
                        ScreenOverlayLoader& loader) {
   if (begin_load != 0) {
@@ -34,7 +35,7 @@ void LoadScreenOverlay(ScreenOverlayLifetime& lifetime, std::int32_t begin_load,
   }
 }
 
-// decomp: BATTLE.PRG func_800CB708 (5BF94.c:3896).
+// decomp: BATTLE.PRG func_800CB708 (src/BATTLE/BATTLE.PRG/5BF94.c:3462).
 void DrawScreenOverlay(ScreenOverlayLifetime& lifetime,
                        ScreenOverlayLoader& loader,
                        ScreenOverlayPainter& painter) {
@@ -58,7 +59,7 @@ void DrawScreenOverlay(ScreenOverlayLifetime& lifetime,
   }
 }
 
-// decomp: BATTLE.PRG func_800CB79C (5BF94.c:3916).
+// decomp: BATTLE.PRG func_800CB79C (src/BATTLE/BATTLE.PRG/5BF94.c:3482).
 void AcquireScreenOverlay(ScreenOverlayLifetime& lifetime,
                           ScreenOverlayLoader& loader) {
   if (lifetime.attached) {
@@ -69,7 +70,7 @@ void AcquireScreenOverlay(ScreenOverlayLifetime& lifetime,
   LoadScreenOverlay(lifetime, 1, loader);
 }
 
-// decomp: BATTLE.PRG func_800CB7DC (5BF94.c:3925).
+// decomp: BATTLE.PRG func_800CB7DC (src/BATTLE/BATTLE.PRG/5BF94.c:3491).
 void ReleaseScreenOverlay(ScreenOverlayLifetime& lifetime,
                           ScreenOverlayLoader& loader,
                           FeedbackTexturePages& pages) {

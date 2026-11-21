@@ -11,10 +11,10 @@
 #include "Core/Math/ScalarMath.hpp"
 
 // The state, motion, geometry, colour and packet rules shared by the three
-// ring effect templates (decomp src/EFFECT/rings.h, closedRings.h and
-// tiledRings.h). A ring is three rows of points: its inner edge, a middle row
-// at the sampled inner-extent fraction and its outer edge, swept around the
-// ring's position. Every function works on value records; the effect
+// ring effect templates (decomp src/EFFECT/rings.h, src/EFFECT/closedRings.h
+// and src/EFFECT/tiledRings.h). A ring is three rows of points: its inner edge,
+// a middle row at the sampled inner-extent fraction and its outer edge, swept
+// around the ring's position. Every function works on value records; the effect
 // package, the emitter scratch, the GTE, the texture animation and the frame
 // ordering table are reached through RingHost (RingsLive.hpp binds it).
 namespace VS::Effects::Templates {

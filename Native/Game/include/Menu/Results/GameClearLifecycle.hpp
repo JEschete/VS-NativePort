@@ -17,7 +17,8 @@ struct HealingScoreRecord {
   std::uint16_t heal_count = 0;
 };
 
-// decomp: _addHealBonus, MENUF.PRG/3B8.c:2865 (0x80108E48).
+// decomp: addHealBonus, src/MENU/MENUF.PRG/3B8.c:2873; was _addHealBonus
+// (0x80108E48).
 [[nodiscard]] HealingScoreRecord ApplyHealingScoreBonus(
     HealingScoreRecord record) noexcept;
 
@@ -32,7 +33,7 @@ class ResultsMusicHost {
   virtual void LoadMusicSlot(std::uint32_t music, std::int32_t slot) = 0;
 };
 
-// decomp: func_80103748, MENUF.PRG/3B8.c:436.
+// decomp: func_80103748, src/MENU/MENUF.PRG/3B8.c:450.
 void QueueResultsMusic(std::uint32_t current_music, ResultsMusicHost& host);
 
 inline constexpr std::size_t kBonusReelCount = 3;
@@ -82,13 +83,15 @@ class BonusReelTarget {
   virtual bool SetDrawArea(const Render::ScreenRect& area) = 0;
 };
 
-// decomp: _renderStatWheel, MENUF.PRG/3B8.c:1996 (0x801060A8).
+// decomp: renderStatWheel, src/MENU/MENUF.PRG/3B8.c:2008; was _renderStatWheel
+// (0x801060A8).
 ResultsDrawResult DrawBonusReel(const BonusReelScene& scene,
                                 ResultsPoint origin, std::int32_t timer,
                                 std::int32_t screen_state,
                                 const BonusReelView& view,
                                 BonusReelTarget& target);
-// decomp: _renderAnimatedStatWheel, MENUF.PRG/3B8.c:2168 (0x80107698).
+// decomp: renderAnimatedStatWheel, src/MENU/MENUF.PRG/3B8.c:2179; was
+// _renderAnimatedStatWheel (0x80107698).
 ResultsDrawResult DrawBonusReelTexture(
     std::span<const Render::TextureRegion> atlas, ResultsPoint origin,
     std::int32_t texture_index, ResultsDrawTarget& target);
@@ -180,9 +183,10 @@ class GameClearInitHost {
   virtual void WriteWorld(const GameClearWorld& world) = 0;
 };
 
-// decomp: _initCongratulationsScreen, MENUF.PRG/3B8.c:118 (0x80102D10).
-// Fresh presentation does not reset the private state timer or counting
-// flags: the original only resets those on transition or overlay reload.
+// decomp: initCongratulationsScreen, src/MENU/MENUF.PRG/3B8.c:132; was
+// _initCongratulationsScreen (0x80102D10). Fresh presentation does not reset
+// the private state timer or counting flags: the original only resets those on
+// transition or overlay reload.
 GameClearStep InitializeGameClear(GameClearState& game,
                                   GameClearInitHost& host);
 
@@ -219,11 +223,11 @@ class GameClearScreenHost {
   virtual void FinishScreen() = 0;
 };
 
-// decomp: _renderCongratulationsScreen, MENUF.PRG/3B8.c:755 (0x8010384C).
-// Completion leaves both timers unchanged. The production caller owns
-// exiting: vs_menuF_exec resets its phase on completion, and the event menu
-// that runs it returns and closes, so it is not called again. Deliberately no
-// new once-only reward latch (#410).
+// decomp: renderCongratulationsScreen, src/MENU/MENUF.PRG/3B8.c:769; was
+// _renderCongratulationsScreen (0x8010384C). Completion leaves both timers
+// unchanged. The production caller owns exiting: vs_menuF_exec resets its phase
+// on completion, and the event menu that runs it returns and closes, so it is
+// not called again. Deliberately no new once-only reward latch (#410).
 GameClearStep UpdateGameClear(GameClearScreen& screen,
                               std::span<const BonusReel> reels, bool confirm,
                               GameClearScreenHost& host);

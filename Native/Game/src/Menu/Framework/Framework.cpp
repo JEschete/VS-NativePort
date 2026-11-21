@@ -337,7 +337,7 @@ void DrawRowGlyphs(Context& ctx, const MenuRow& row, int pen) {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG vs_battle_getMenuItem (src/BATTLE/BATTLE.PRG/5BF94.c:2658)
+// decomp: BATTLE.PRG vs_battle_getMenuItem (src/BATTLE/BATTLE.PRG/5BF94.c:2209)
 MenuRow& MenuItem(Context& ctx, int row) {
   const auto rows = ctx.host.Rows();
   if (row < 0 || static_cast<std::size_t>(row) >= rows.size()) {
@@ -348,7 +348,7 @@ MenuRow& MenuItem(Context& ctx, int row) {
   return rows[static_cast<std::size_t>(row)];
 }
 
-// decomp: BATTLE.PRG vs_battle_setMenuItem (src/BATTLE/BATTLE.PRG/5BF94.c:2660)
+// decomp: BATTLE.PRG vs_battle_setMenuItem (src/BATTLE/BATTLE.PRG/5BF94.c:2211)
 MenuRow& SetMenuItem(Context& ctx, const RowPlacement& placement,
                      std::span<const std::uint8_t> text) {
   MenuRow& row = MenuItem(ctx, placement.row);
@@ -411,7 +411,7 @@ MenuRow& SetMenuItem(Context& ctx, const RowPlacement& placement,
 }
 
 // decomp: BATTLE.PRG vs_battle_uiGradientStop
-// (src/BATTLE/BATTLE.PRG/5BF94.c:2721)
+// (src/BATTLE/BATTLE.PRG/5BF94.c:2272)
 std::uint32_t GradientStopColor(Context& ctx, std::uint32_t gradient,
                                 std::uint32_t color_index, int brightness) {
   std::uint32_t color0 = 0;
@@ -444,7 +444,7 @@ std::uint32_t GradientStopColor(Context& ctx, std::uint32_t gradient,
 }
 
 // decomp: BATTLE.PRG vs_battle_renderMenuItem
-// (src/BATTLE/BATTLE.PRG/5BF94.c:2737)
+// (src/BATTLE/BATTLE.PRG/5BF94.c:2288)
 void DrawMenuItem(Context& ctx, MenuRow& row) {
   int y = row.gradient_state;
   const int w = row.w;
@@ -509,7 +509,7 @@ void DrawMenuItem(Context& ctx, MenuRow& row) {
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_deactivateMenuItem
-// (src/MENU/MAINMENU.PRG/58EC.c:458)
+// (src/MENU/MAINMENU.PRG/58EC.c:465)
 void DeactivateRow(Context& ctx, int row) {
   MenuItem(ctx, row).state = RowState::kInactive;
 }
@@ -561,7 +561,7 @@ void ClearMenuExcept(Context& ctx, int row) {
   }
 }
 
-// decomp: MENU5.PRG _clearMenu (src/MENU/MENU5.PRG/4D8.c:201)
+// decomp: MENU5.PRG clearMenu (src/MENU/MENU5.PRG/4D8.c:212; was _clearMenu)
 void ClearMenuExceptTitle(Context& ctx) {
   constexpr int kTitleRow = 5;
   ClearMenuExcept(ctx, kTitleRow);
@@ -601,7 +601,8 @@ bool AreMenuRowsIdle(Context& ctx) {
   return true;
 }
 
-// decomp: MENU9.PRG _setMenuRow10 (src/MENU/MENU9.PRG/238.c:244)
+// decomp: MENU9.PRG setMenuRow10 (src/MENU/MENU9.PRG/238.c:252; was
+// _setMenuRow10)
 void ShowSecondaryTitle(Context& ctx, std::span<const std::uint8_t> text) {
   constexpr int kSecondaryTitleRow = 10;
   constexpr int kSecondaryTitleY = 34;
@@ -621,7 +622,8 @@ void ShowSecondaryTitle(Context& ctx, std::span<const std::uint8_t> text) {
   row.font_color = 1;
 }
 
-// decomp: MENU _continueMenuTransition (src/MENU/items0.h:107)
+// decomp: MENU continueMenuTransition (src/MENU/items0.h:107; was
+// _continueMenuTransition)
 void ContinueItemDetailsTransition(Context& ctx, int row) {
   constexpr int kDetailsRow = 31;
   constexpr int kDetailsX = 16;
@@ -635,7 +637,8 @@ void ContinueItemDetailsTransition(Context& ctx, int row) {
   item.target0 = kFirstRowY;
 }
 
-// decomp: MENU _switchItemStatusPage (src/MENU/items1.h:35)
+// decomp: MENU switchItemStatusPage (src/MENU/items1.h:40; was
+// _switchItemStatusPage)
 void UpdateItemDetailsSelection(Context& ctx, int row, const RowText& text,
                                 std::uint32_t row_type, int page) {
   constexpr int kDetailsRow = 31;
@@ -1042,7 +1045,7 @@ void SelectFromMainMenu(Context& ctx) {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG vs_battle_loadMenuPrg (src/BATTLE/BATTLE.PRG/5BF94.c:2576)
+// decomp: BATTLE.PRG vs_battle_loadMenuPrg (src/BATTLE/BATTLE.PRG/5BF94.c:2127)
 int LoadMenuOverlay(Context& ctx, int packed_menu_state) {
   const int sub_menu = packed_menu_state & kSubMenuMask;
   if (sub_menu == kQuitMenu) {
@@ -1085,7 +1088,7 @@ int LoadMenuOverlay(Context& ctx, int packed_menu_state) {
   return 0;
 }
 
-// decomp: BATTLE.PRG func_800C930C (src/BATTLE/BATTLE.PRG/5BF94.c:2829)
+// decomp: BATTLE.PRG func_800C930C (src/BATTLE/BATTLE.PRG/5BF94.c:2380)
 int UpdateMainMenuSelection(Context& ctx, int mode) {
   const Settings settings = ctx.host.MenuSettings();
   if (mode != 0) {
@@ -1099,7 +1102,8 @@ int UpdateMainMenuSelection(Context& ctx, int mode) {
   return SelectMainMenuEntry(ctx, settings.menu_flags);
 }
 
-// decomp: BATTLE.PRG func_800C97BC (src/BATTLE/BATTLE.PRG/5BF94.c:2966)
+// decomp: BATTLE.PRG updateMenu (src/BATTLE/BATTLE.PRG/5BF94.c:2517; was
+// func_800C97BC)
 void UpdateMenuOverlay(Context& ctx) {
   int packed_menu_state = ctx.state.control.current_menu;
   if (packed_menu_state == kMenuReturning) {
@@ -1134,7 +1138,7 @@ void UpdateMenuOverlay(Context& ctx) {
   }
 }
 
-// decomp: BATTLE.PRG vs_battle_drawCursor (src/BATTLE/BATTLE.PRG/5BF94.c:4523)
+// decomp: BATTLE.PRG vs_battle_drawCursor (src/BATTLE/BATTLE.PRG/5BF94.c:4089)
 int DrawMainMenuCursor(Context& ctx, int step, int position) {
   EmitSprite(
       ctx, kOverlayFront,
@@ -1147,7 +1151,8 @@ int DrawMainMenuCursor(Context& ctx, int step, int position) {
   return (step + 1) & static_cast<int>(kStepMask);
 }
 
-// decomp: MAINMENU.PRG _quitDelay (src/MENU/MAINMENU.PRG/C48.c:305)
+// decomp: MAINMENU.PRG quitDelay (src/MENU/MAINMENU.PRG/C48.c:297; was
+// _quitDelay)
 int QuitDelay(Context& ctx) {
   constexpr int kQuitFrames = 5;
   const int frames = ++ctx.state.main_menu.quit_delay;
@@ -1192,7 +1197,7 @@ void UpdateMainMenu(Context& ctx, int packed_menu_state) {
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_renderScreen
-// (src/MENU/MAINMENU.PRG/58EC.c:1709)
+// (src/MENU/MAINMENU.PRG/58EC.c:1719)
 void UpdateScreen(Context& ctx) {
   int fade = ctx.state.main_menu.background_fade_step;
   if (ctx.host.HasItems(ItemList::kRows)) {
@@ -1217,7 +1222,8 @@ void UpdateScreen(Context& ctx) {
   ctx.host.UpdateStatPanels();
 }
 
-// decomp: MENU5.PRG _setNextAction (src/MENU/MENU5.PRG/4D8.c:90)
+// decomp: MENU5.PRG setNextAction (src/MENU/MENU5.PRG/4D8.c:100; was
+// _setNextAction)
 void SetMenuVisible(Context& ctx, int display) {
   if (display != 0) {
     SetCommandLabel(ctx, MenuCommand::kMenu);
@@ -1310,7 +1316,8 @@ void PrepareWorkspace(Context& ctx) {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_800CA9C0 (src/BATTLE/BATTLE.PRG/5BF94.c:3484)
+// decomp: BATTLE.PRG vs_battle_initUi (src/BATTLE/BATTLE.PRG/5BF94.c:3050; was
+// func_800CA9C0)
 void InitGameInterface(Context& ctx,
                        std::span<const std::byte> interface_texture) {
   ctx.host.ResetBattleInterface();
@@ -1336,7 +1343,7 @@ void InitGameInterface(Context& ctx,
   }
 }
 
-// decomp: BATTLE.PRG func_800CAB40 (src/BATTLE/BATTLE.PRG/5BF94.c:3518)
+// decomp: BATTLE.PRG func_800CAB40 (src/BATTLE/BATTLE.PRG/5BF94.c:3084)
 void ResumeAfterActionSelection(Context& ctx) {
   ctx.state.action_selection.selection_kind = 0;
   ctx.state.action_selection.menu_status = kMenuOpen;
@@ -1355,7 +1362,7 @@ void ResumeAfterActionSelection(Context& ctx) {
   }
 }
 
-// decomp: BATTLE.PRG func_800CABE0 (src/BATTLE/BATTLE.PRG/5BF94.c:3535)
+// decomp: BATTLE.PRG func_800CABE0 (src/BATTLE/BATTLE.PRG/5BF94.c:3101)
 std::int32_t RestrictionFlagsOf(const RestrictionInputs& inputs, int mode) {
   std::int32_t flags = 0;
   if ((inputs.state_flags & kStateLocked) != 0) {
@@ -1385,7 +1392,7 @@ std::int32_t RestrictionFlagsOf(const RestrictionInputs& inputs, int mode) {
   return flags;
 }
 
-// decomp: BATTLE.PRG func_800CABE0 (src/BATTLE/BATTLE.PRG/5BF94.c:3535)
+// decomp: BATTLE.PRG func_800CABE0 (src/BATTLE/BATTLE.PRG/5BF94.c:3101)
 std::int32_t ActionRestrictionFlags(Context& ctx, int mode) {
   const auto inputs = ctx.host.Restrictions();
   if (!inputs) {
@@ -1395,7 +1402,8 @@ std::int32_t ActionRestrictionFlags(Context& ctx, int mode) {
   return RestrictionFlagsOf(*inputs, mode);
 }
 
-// decomp: BATTLE.PRG func_800CACD0 (src/BATTLE/BATTLE.PRG/5BF94.c:3575)
+// decomp: BATTLE.PRG openMenu (src/BATTLE/BATTLE.PRG/5BF94.c:3141; was
+// func_800CACD0)
 int OpenGameMenu(Context& ctx, int menu_state, int mode) {
   if (ctx.state.control.current_menu != kMenuClosed) {
     ctx.host.PlaySound(MenuSound::kInvalid);
@@ -1416,8 +1424,8 @@ int OpenGameMenu(Context& ctx, int menu_state, int mode) {
   return 1;
 }
 
-// decomp: BATTLE.PRG vs_battle_validateShortcutSelection
-// (src/BATTLE/BATTLE.PRG/5BF94.c:3673)
+// decomp: BATTLE.PRG validateShortcutSelection
+// (src/BATTLE/BATTLE.PRG/5BF94.c:3239; was vs_battle_validateShortcutSelection)
 int OpenShortcutMenu(Context& ctx, int shortcut) {
   bool none_unlocked = false;
   int menu_state = 0;
@@ -1447,28 +1455,29 @@ int OpenShortcutMenu(Context& ctx, int shortcut) {
   return opened;
 }
 
-// decomp: BATTLE.PRG func_800CB114 (src/BATTLE/BATTLE.PRG/5BF94.c:3714)
+// decomp: BATTLE.PRG freeMenuItems (src/BATTLE/BATTLE.PRG/5BF94.c:3280; was
+// func_800CB114)
 void ReleaseMenuRows(Context& ctx) {
   if (!ctx.host.Rows().empty()) {
     ctx.host.ReleaseWorkspace();
   }
 }
 
-// decomp: BATTLE.PRG func_800CB158 (src/BATTLE/BATTLE.PRG/5BF94.c:3723)
+// decomp: BATTLE.PRG func_800CB158 (src/BATTLE/BATTLE.PRG/5BF94.c:3289)
 void OpenLootListMenu(Context& ctx, LootListId lists) {
   ctx.state.loot_lists = lists;
   ctx.state.loot_entry = LootEntryId{};
   OpenGameMenu(ctx, kLootMenu, kEventMode);
 }
 
-// decomp: BATTLE.PRG func_800CB18C (src/BATTLE/BATTLE.PRG/5BF94.c:3730)
+// decomp: BATTLE.PRG func_800CB18C (src/BATTLE/BATTLE.PRG/5BF94.c:3296)
 void OpenLootEntryMenu(Context& ctx, LootEntryId entry) {
   ctx.state.loot_entry = entry;
   ctx.state.loot_lists = LootListId{};
   OpenGameMenu(ctx, kLootMenu, kEventMode);
 }
 
-// decomp: BATTLE.PRG func_800CB1C0 (src/BATTLE/BATTLE.PRG/5BF94.c:3737)
+// decomp: BATTLE.PRG func_800CB1C0 (src/BATTLE/BATTLE.PRG/5BF94.c:3303)
 void OpenChestStorageMenu(Context& ctx, int location) {
   OpenGameMenu(ctx, kDataMenu, kEventMode);
   ctx.state.save_location_id =
@@ -1476,21 +1485,21 @@ void OpenChestStorageMenu(Context& ctx, int location) {
   ctx.state.action_restrictions |= kContainerSave;
 }
 
-// decomp: BATTLE.PRG _setArtAndAbilityToUnlock
-// (src/BATTLE/BATTLE.PRG/5BF94.c:3744)
+// decomp: BATTLE.PRG setArtAndAbilityToUnlock
+// (src/BATTLE/BATTLE.PRG/5BF94.c:3310; was _setArtAndAbilityToUnlock)
 void OpenAbilityUnlockMenu(Context& ctx, int art, int ability) {
   ctx.state.unlocked_break_art = static_cast<std::uint8_t>(art);
   ctx.state.unlocked_battle_ability = static_cast<std::uint8_t>(ability);
   OpenGameMenu(ctx, kUnlockMenu, kEventMode);
 }
 
-// decomp: BATTLE.PRG func_800CB23C (src/BATTLE/BATTLE.PRG/5BF94.c:3751)
+// decomp: BATTLE.PRG func_800CB23C (src/BATTLE/BATTLE.PRG/5BF94.c:3317)
 void OpenChallengeMenu(Context& ctx) {
   OpenGameMenu(ctx, kChallengeMenu, kEventMode);
   ctx.state.opened_without_main_menu = 1;
 }
 
-// decomp: BATTLE.PRG func_800CB66C (src/BATTLE/BATTLE.PRG/5BF94.c:3871)
+// decomp: BATTLE.PRG func_800CB66C (src/BATTLE/BATTLE.PRG/5BF94.c:3437)
 ActionSelection& ActionSelectionState(Context& ctx) {
   return ctx.state.action_selection;
 }
@@ -1727,7 +1736,7 @@ void NavigateActions(Context& ctx, MenuRow& row) {
 }  // namespace
 
 // decomp: MAINMENU.PRG vs_mainMenu_addMenuActions
-// (src/MENU/MAINMENU.PRG/58EC.c:51)
+// (src/MENU/MAINMENU.PRG/58EC.c:61)
 void CreateActionRows(Context& ctx, int row_count, int sub_menu_id,
                       std::span<const RowText> texts,
                       std::span<const std::int32_t> row_types) {
@@ -1756,21 +1765,22 @@ void CreateActionRows(Context& ctx, int row_count, int sub_menu_id,
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_getSelectedAction
-// (src/MENU/MAINMENU.PRG/58EC.c:147)
+// (src/MENU/MAINMENU.PRG/58EC.c:157)
 int HighlightedActionRow(Context& ctx) {
   return ctx.state.main_menu.selected_item_action +
          ctx.state.main_menu.item_action_list_offset;
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_actionInputProcessed
-// (src/MENU/MAINMENU.PRG/58EC.c:152)
+// (src/MENU/MAINMENU.PRG/58EC.c:162)
 int ActionSelectionResult(Context& ctx) {
   return ctx.host.HasItems(ItemList::kActions)
              ? -1
              : ctx.state.main_menu.selected_item_action;
 }
 
-// decomp: MAINMENU.PRG _renderActionRow (src/MENU/MAINMENU.PRG/58EC.c:162)
+// decomp: MAINMENU.PRG renderActionRow (src/MENU/MAINMENU.PRG/58EC.c:172; was
+// _renderActionRow)
 MenuRow& CreateActionRow(Context& ctx, int row, int x) {
   const MainMenuStatics& menu = ctx.state.main_menu;
   const int item = menu.item_action_list_offset + row;
@@ -1791,7 +1801,7 @@ MenuRow& CreateActionRow(Context& ctx, int row, int x) {
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_renderItemActionMenu
-// (src/MENU/MAINMENU.PRG/58EC.c:180)
+// (src/MENU/MAINMENU.PRG/58EC.c:189)
 void UpdateActionMenu(Context& ctx) {
   MainMenuStatics& menu = ctx.state.main_menu;
   if (menu.action_menu_state < kListRows) {
@@ -1944,7 +1954,7 @@ void NavigateRows(Context& ctx, MenuRow& row) {
 }  // namespace
 
 // decomp: MAINMENU.PRG vs_mainmenu_setMenuRows
-// (src/MENU/MAINMENU.PRG/58EC.c:798)
+// (src/MENU/MAINMENU.PRG/58EC.c:809)
 void CreateMenuRows(Context& ctx, int row_count, int row_info,
                     std::span<const RowText> texts,
                     std::span<const std::int32_t> row_types) {
@@ -1968,7 +1978,7 @@ void CreateMenuRows(Context& ctx, int row_count, int row_info,
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_storeCursor
-// (src/MENU/MAINMENU.PRG/58EC.c:892)
+// (src/MENU/MAINMENU.PRG/58EC.c:903)
 int CloseRowsAndRememberCursor(Context& ctx) {
   const MainMenuStatics& menu = ctx.state.main_menu;
   ctx.host.FreeItems(ItemList::kRows);
@@ -1980,19 +1990,20 @@ int CloseRowsAndRememberCursor(Context& ctx) {
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_getConfirmedRow
-// (src/MENU/MAINMENU.PRG/58EC.c:903)
+// (src/MENU/MAINMENU.PRG/58EC.c:914)
 int HighlightedRow(Context& ctx) {
   return ctx.state.main_menu.selected_row + ctx.state.main_menu.sub_menu_page;
 }
 
 // decomp: MAINMENU.PRG vs_mainmenu_getSelectedRow
-// (src/MENU/MAINMENU.PRG/58EC.c:905)
+// (src/MENU/MAINMENU.PRG/58EC.c:916)
 int GetSelectedRow(Context& ctx) {
   return ctx.host.HasItems(ItemList::kRows) ? -1
                                             : ctx.state.main_menu.selected_row;
 }
 
-// decomp: MAINMENU.PRG _initItemRow (src/MENU/MAINMENU.PRG/58EC.c:910)
+// decomp: MAINMENU.PRG initItemRow (src/MENU/MAINMENU.PRG/58EC.c:921; was
+// _initItemRow)
 MenuRow& CreateListRow(Context& ctx, int row, int x) {
   const MainMenuStatics& menu = ctx.state.main_menu;
   const int info = menu.sub_menu_row_info;
@@ -2033,7 +2044,7 @@ MenuRow& CreateListRow(Context& ctx, int row, int x) {
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_renderItemsList
-// (src/MENU/MAINMENU.PRG/58EC.c:947)
+// (src/MENU/MAINMENU.PRG/58EC.c:958)
 void UpdateRowSelection(Context& ctx) {
   MainMenuStatics& menu = ctx.state.main_menu;
   if (menu.sub_menu_row_count == 0) {
@@ -2318,7 +2329,7 @@ void DrawScrollableBackground(Context& ctx, MenuRow& row, int scroll,
 }  // namespace
 
 // decomp: MAINMENU.PRG vs_mainMenu_printInformation
-// (src/MENU/MAINMENU.PRG/58EC.c:367)
+// (src/MENU/MAINMENU.PRG/58EC.c:374)
 void UpdateInformationVisibility(Context& ctx, int source_row,
                                  int action_menu_state) {
   if (action_menu_state < kInformationRowState) {
@@ -2347,12 +2358,13 @@ void UpdateInformationVisibility(Context& ctx, int source_row,
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_setMenuCommand
-// (src/MENU/MAINMENU.PRG/58EC.c:405)
+// (src/MENU/MAINMENU.PRG/58EC.c:412)
 void SetCommandLabel(Context& ctx, MenuCommand action) {
   ctx.state.main_menu.menu_action_next = std::to_underlying(action);
 }
 
-// decomp: MAINMENU.PRG _renderMenuCommand (src/MENU/MAINMENU.PRG/58EC.c:413)
+// decomp: MAINMENU.PRG renderMenuCommand (src/MENU/MAINMENU.PRG/58EC.c:420; was
+// _renderMenuCommand)
 void DrawCommandLabel(Context& ctx) {
   MainMenuStatics& menu = ctx.state.main_menu;
   const int action = menu.menu_action_current;
@@ -2387,11 +2399,11 @@ void DrawCommandLabel(Context& ctx) {
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_dismissInformationBox
-// (src/MENU/MAINMENU.PRG/58EC.c:464)
+// (src/MENU/MAINMENU.PRG/58EC.c:471)
 void DismissInformationBox(Context& ctx) { ctx.host.DismissInformationBox(); }
 
 // decomp: MAINMENU.PRG vs_mainMenu_initInformationBox
-// (src/MENU/MAINMENU.PRG/58EC.c:466)
+// (src/MENU/MAINMENU.PRG/58EC.c:473)
 void InitializeInformationBox(Context& ctx) {
   if (ctx.host.MenuSettings().information != 0) {
     ctx.host.InitInformationBox(InformationHeader::kInformation);
@@ -2401,7 +2413,7 @@ void InitializeInformationBox(Context& ctx) {
 }
 
 // decomp: MAINMENU.PRG vs_mainmenu_setInformationMessage
-// (src/MENU/MAINMENU.PRG/58EC.c:475)
+// (src/MENU/MAINMENU.PRG/58EC.c:482)
 void SetInformationMessage(Context& ctx,
                            std::span<const std::uint8_t> message) {
   auto& buffer = ctx.state.information_message;
@@ -2417,7 +2429,7 @@ void SetInformationMessage(Context& ctx,
 }
 
 // decomp: MAINMENU.PRG vs_mainmenu_setActionCost
-// (src/MENU/MAINMENU.PRG/58EC.c:652)
+// (src/MENU/MAINMENU.PRG/58EC.c:663)
 void SetActionCostText(Context& ctx, int index,
                        std::span<const std::uint8_t> text, int x_offset,
                        int disabled) {
@@ -2434,7 +2446,8 @@ void SetActionCostText(Context& ctx, int index,
   header.x = static_cast<std::uint8_t>(x_offset);
 }
 
-// decomp: MAINMENU.PRG _renderAbilityCost (src/MENU/MAINMENU.PRG/58EC.c:665)
+// decomp: MAINMENU.PRG renderAbilityCost (src/MENU/MAINMENU.PRG/58EC.c:676; was
+// _renderAbilityCost)
 void DrawActionCostPanel(Context& ctx) {
   std::uint8_t& step = ctx.state.main_menu.action_cost_panel_step;
   if (ctx.state.main_menu.display_action_cost != 0) {
@@ -2480,7 +2493,7 @@ void DrawActionCostPanel(Context& ctx) {
 }
 
 // decomp: MAINMENU.PRG vs_mainmenu_renderButton
-// (src/MENU/MAINMENU.PRG/58EC.c:487)
+// (src/MENU/MAINMENU.PRG/58EC.c:494)
 void DrawButtonIcon(Context& ctx, ButtonIcon button, int x, int y,
                     Layer layer) {
   const std::uint32_t id = std::to_underlying(button);
@@ -2496,7 +2509,7 @@ void DrawButtonIcon(Context& ctx, ButtonIcon button, int x, int y,
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_renderCursor
-// (src/MENU/MAINMENU.PRG/58EC.c:499)
+// (src/MENU/MAINMENU.PRG/58EC.c:506)
 int DrawCursor(Context& ctx, std::uint32_t step, std::uint32_t position) {
   std::uint8_t& color = ctx.state.main_menu.cursor_color;
   // The MIPS shift takes the low five bits of its count.
@@ -2515,7 +2528,7 @@ int DrawCursor(Context& ctx, std::uint32_t step, std::uint32_t position) {
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_renderIntColor
-// (src/MENU/MAINMENU.PRG/58EC.c:520)
+// (src/MENU/MAINMENU.PRG/58EC.c:527)
 std::uint32_t DrawColoredInteger(Context& ctx, const NumberText& number,
                                  Layer layer) {
   std::uint32_t position = number.position;
@@ -2542,7 +2555,7 @@ std::uint32_t DrawColoredInteger(Context& ctx, const NumberText& number,
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_renderIntWithThreshold
-// (src/MENU/MAINMENU.PRG/58EC.c:547)
+// (src/MENU/MAINMENU.PRG/58EC.c:554)
 std::uint32_t DrawComparedInteger(Context& ctx, std::int32_t value,
                                   std::uint32_t position,
                                   std::int32_t threshold, Layer layer) {
@@ -2558,14 +2571,15 @@ std::uint32_t DrawComparedInteger(Context& ctx, std::int32_t value,
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_renderIntColorDefault
-// (src/MENU/MAINMENU.PRG/58EC.c:562)
+// (src/MENU/MAINMENU.PRG/58EC.c:571)
 void DrawNeutralInteger(Context& ctx, std::int32_t value,
                         std::uint32_t position, Layer layer) {
   DrawColoredInteger(
       ctx, {.value = value, .position = position, .color = kGray}, layer);
 }
 
-// decomp: MAINMENU.PRG _renderFeatheredIcon (src/MENU/MAINMENU.PRG/58EC.c:571)
+// decomp: MAINMENU.PRG renderFeatheredIcon (src/MENU/MAINMENU.PRG/58EC.c:582;
+// was _renderFeatheredIcon)
 void DrawFeatheredRowIcon(Context& ctx, int direction, std::uint32_t position,
                           std::uint32_t uv_clut, Layer layer) {
   if (direction < 0) {
@@ -2584,7 +2598,8 @@ void DrawFeatheredRowIcon(Context& ctx, int direction, std::uint32_t position,
   }
 }
 
-// decomp: MAINMENU.PRG _renderItemMaterial (src/MENU/MAINMENU.PRG/58EC.c:594)
+// decomp: MAINMENU.PRG renderItemMaterial (src/MENU/MAINMENU.PRG/58EC.c:605;
+// was _renderItemMaterial)
 void DrawMaterialIndicator(Context& ctx, int material, std::uint32_t position) {
   const std::uint32_t uv =
       Word(((material / kMaterialsPerColumn) * kMaterialCell) + kMaterialU) |
@@ -2598,7 +2613,8 @@ void DrawMaterialIndicator(Context& ctx, int material, std::uint32_t position) {
               .texture = uv | (PackClut(clut_x, kClutRow) << kHalfwordShift)});
 }
 
-// decomp: MAINMENU.PRG _renderOutsetIcon (src/MENU/MAINMENU.PRG/58EC.c:609)
+// decomp: MAINMENU.PRG renderOutsetIcon (src/MENU/MAINMENU.PRG/58EC.c:620; was
+// _renderOutsetIcon)
 void DrawEquipmentStateIcon(Context& ctx, int icon, std::uint32_t position) {
   EmitSprite(ctx, kOverlayFront,
              {.position = position,
@@ -2608,7 +2624,7 @@ void DrawEquipmentStateIcon(Context& ctx, int icon, std::uint32_t position) {
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_renderMenuRowIcon
-// (src/MENU/MAINMENU.PRG/58EC.c:615)
+// (src/MENU/MAINMENU.PRG/58EC.c:626)
 void DrawRowIcon(Context& ctx, int icon, int x, int y) {
   int fade = icon >> kRowIconFadeShift;
   const int bright = (icon >> kRowIconBrightShift) & 1;
@@ -2640,7 +2656,7 @@ void DrawRowIcon(Context& ctx, int icon, int x, int y) {
 }
 
 // decomp: MAINMENU.PRG vs_mainmenu_renderButtonBackground
-// (src/MENU/MAINMENU.PRG/58EC.c:718)
+// (src/MENU/MAINMENU.PRG/58EC.c:729)
 void DrawButtonPromptBackground(Context& ctx, const Box& box) {
   for (int i = 0; i < box.h; ++i) {
     std::array<std::uint32_t, kGradientLineWords> packet{
@@ -2656,7 +2672,7 @@ void DrawButtonPromptBackground(Context& ctx, const Box& box) {
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_renderTabNavigation
-// (src/MENU/MAINMENU.PRG/58EC.c:1259)
+// (src/MENU/MAINMENU.PRG/58EC.c:1270)
 void DrawTabNavigation(Context& ctx, int mode) {
   std::uint8_t& step = ctx.state.main_menu.tab_arrow_step;
   std::uint32_t clut = PackClut(kTabIdleClutX, kClutRow) << kHalfwordShift;
@@ -2692,7 +2708,7 @@ void DrawTabNavigation(Context& ctx, int mode) {
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_renderRowLabel
-// (src/MENU/MAINMENU.PRG/58EC.c:1215)
+// (src/MENU/MAINMENU.PRG/58EC.c:1226)
 int DrawFeatheredRowCharacter(Context& ctx, std::uint32_t character, int x,
                               const MenuRow& row, Layer layer) {
   const bool reversed = (character >> kReversedShift) != 0;
@@ -2729,7 +2745,8 @@ int DrawFeatheredRowCharacter(Context& ctx, std::uint32_t character, int x,
   return x + widths[character];
 }
 
-// decomp: MAINMENU.PRG _renderScrollableRow (src/MENU/MAINMENU.PRG/58EC.c:1309)
+// decomp: MAINMENU.PRG renderScrollableRow (src/MENU/MAINMENU.PRG/58EC.c:1320;
+// was _renderScrollableRow)
 void DrawScrollableRow(Context& ctx, MenuRow& row) {
   MainMenuStatics& menu = ctx.state.main_menu;
   const int scroll = row.is_scrollable - 1;
@@ -2982,7 +2999,7 @@ void DrawRowParts(Context& ctx, MenuRow& row) {
 }  // namespace
 
 // decomp: MAINMENU.PRG vs_mainMenu_toggleBackgroundFade
-// (src/MENU/MAINMENU.PRG/58EC.c:448)
+// (src/MENU/MAINMENU.PRG/58EC.c:455)
 void SetBackgroundFade(Context& ctx, int fade_state) {
   MainMenuStatics& menu = ctx.state.main_menu;
   if (fade_state != 0) {
@@ -2993,7 +3010,7 @@ void SetBackgroundFade(Context& ctx, int fade_state) {
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_setBackgroundRenderPriority
-// (src/MENU/MAINMENU.PRG/58EC.c:739)
+// (src/MENU/MAINMENU.PRG/58EC.c:750)
 void SetBackgroundPriority(Context& ctx, int ot_offset, int brightness) {
   ctx.host.SetBackgroundRaised(ot_offset > 0);
   ctx.state.main_menu.background_ot_offset =
@@ -3003,7 +3020,7 @@ void SetBackgroundPriority(Context& ctx, int ot_offset, int brightness) {
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_unpackMenubg
-// (src/MENU/MAINMENU.PRG/58EC.c:751)
+// (src/MENU/MAINMENU.PRG/58EC.c:762)
 void LoadBackgroundTexture(Context& ctx, std::span<std::uint32_t> buffer) {
   const std::span<const std::uint8_t> source = ctx.host.BackgroundSource();
   if (source.size() < kBackgroundClutBytes ||
@@ -3034,7 +3051,8 @@ void LoadBackgroundTexture(Context& ctx, std::span<std::uint32_t> buffer) {
   SetBackgroundPriority(ctx, kMenuBackgroundOt, kFullBrightness);
 }
 
-// decomp: MAINMENU.PRG _renderBackground (src/MENU/MAINMENU.PRG/58EC.c:1172)
+// decomp: MAINMENU.PRG renderBackground (src/MENU/MAINMENU.PRG/58EC.c:1183; was
+// _renderBackground)
 void DrawBackground(Context& ctx, int brightness) {
   const Layer layer{.base = LayerBase::kScene,
                     .slot = ctx.state.main_menu.background_ot_offset};
@@ -3083,7 +3101,8 @@ void DrawBackground(Context& ctx, int brightness) {
               .texture = 0});
 }
 
-// decomp: MAINMENU.PRG _renderMenuItems (src/MENU/MAINMENU.PRG/58EC.c:1454)
+// decomp: MAINMENU.PRG renderMenuItems (src/MENU/MAINMENU.PRG/58EC.c:1465; was
+// _renderMenuItems)
 void UpdateAndDrawRows(Context& ctx) {
   for (int i = 0; i < static_cast<int>(kRowCount); ++i) {
     MenuRow& row = MenuItem(ctx, i);
@@ -3226,7 +3245,8 @@ void RenderAshley(Context& ctx, AshleyRenderMode mode) {
   }
 }
 
-// decomp: MENU5.PRG _buildYawMatrix (src/MENU/MENU5.PRG/4D8.c:1756)
+// decomp: MENU5.PRG buildYawMatrix (src/MENU/MENU5.PRG/4D8.c:1761; was
+// _buildYawMatrix)
 Core::Math::Mat3 BuildYawMatrix(std::int16_t angle) {
   const auto sine = static_cast<std::int16_t>(Core::Math::Sine(-angle));
   const auto cosine = static_cast<std::int16_t>(Core::Math::Cosine(-angle));
@@ -3236,7 +3256,8 @@ Core::Math::Mat3 BuildYawMatrix(std::int16_t angle) {
           {{cosine, 0, negative_sine}, {0, kMatrixOne, 0}, {sine, 0, cosine}}}};
 }
 
-// decomp: MENU5.PRG _buildPitchMatrix (src/MENU/MENU5.PRG/4D8.c:1772)
+// decomp: MENU5.PRG buildPitchMatrix (src/MENU/MENU5.PRG/4D8.c:1777; was
+// _buildPitchMatrix)
 Core::Math::Mat3 BuildPitchMatrix(std::int16_t angle) {
   const auto sine = static_cast<std::int16_t>(Core::Math::Sine(angle));
   const auto cosine = static_cast<std::int16_t>(Core::Math::Cosine(angle));
@@ -3246,14 +3267,14 @@ Core::Math::Mat3 BuildPitchMatrix(std::int16_t angle) {
           {{kMatrixOne, 0, 0}, {0, cosine, negative_sine}, {0, sine, cosine}}}};
 }
 
-// decomp: MAINMENU.PRG _getNextEmptyObjectDataSlot
-// (src/MENU/MAINMENU.PRG/C48.c:81)
+// decomp: MAINMENU.PRG getNextEmptyObjectDataSlot
+// (src/MENU/MAINMENU.PRG/C48.c:88; was _getNextEmptyObjectDataSlot)
 int NextFreeActorAssetRequest(Context& ctx) {
   ctx.host.UpdateActorAssetQueue();
   return ctx.host.FindFreeActorAssetRequest();
 }
 
-// decomp: MAINMENU.PRG _nop (src/MENU/MAINMENU.PRG/C48.c:73)
+// decomp: MAINMENU.PRG noop (src/MENU/MAINMENU.PRG/C48.c:81; was _nop)
 void NoOperation() {}
 
 namespace {
@@ -3330,7 +3351,8 @@ template <std::size_t N>
 }
 }  // namespace
 
-// decomp: MENU _getWeaponStatValue (src/MENU/items1.h:695)
+// decomp: MENU getWeaponStatValue (src/MENU/items1.h:700; was
+// _getWeaponStatValue)
 std::int32_t WeaponSortValue(Context& ctx, int stat, const SortStats& weapon) {
   if (const auto value = IdentitySortValue(stat, weapon)) {
     return *value;
@@ -3341,7 +3363,8 @@ std::int32_t WeaponSortValue(Context& ctx, int stat, const SortStats& weapon) {
   return SortElement(ctx, weapon.classes, stat - kSortFirstClass);
 }
 
-// decomp: MENU _getShieldStatValue (src/MENU/items1.h:792)
+// decomp: MENU getShieldStatValue (src/MENU/items1.h:797; was
+// _getShieldStatValue)
 std::int32_t ShieldSortValue(Context& ctx, int stat, const SortStats& shield) {
   if (stat == kSortMaterial) {
     return -shield.material;
@@ -3358,7 +3381,7 @@ std::int32_t ShieldSortValue(Context& ctx, int stat, const SortStats& shield) {
   return SortElement(ctx, shield.affinities, stat - kShieldFirstAffinity);
 }
 
-// decomp: MENU _getMiscStatValue (src/MENU/items1.h:888)
+// decomp: MENU getMiscStatValue (src/MENU/items1.h:893; was _getMiscStatValue)
 std::int32_t MiscSortValue(int stat, const MiscSortStats& misc) {
   if (stat == kSortCategory) {
     return -misc.id;
@@ -3366,7 +3389,8 @@ std::int32_t MiscSortValue(int stat, const MiscSortStats& misc) {
   return misc.count;
 }
 
-// decomp: MENU _getEquipmentStatValue (src/MENU/items1.h:949)
+// decomp: MENU getEquipmentStatValue (src/MENU/items1.h:954; was
+// _getEquipmentStatValue)
 std::int32_t EquipmentSortValue(Context& ctx, int stat,
                                 const SortStats& equipment) {
   if (const auto value = IdentitySortValue(stat, equipment)) {

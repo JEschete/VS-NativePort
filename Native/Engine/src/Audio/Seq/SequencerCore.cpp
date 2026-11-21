@@ -229,7 +229,7 @@ void ApplyKeymapEnvelope(VoiceState& voice, std::uint32_t update_flags,
 }
 }  // namespace
 
-// decomp: SLUS_010.40 func_8001A1F4 (src/SLUS_010.40/25AC.c:4550)
+// decomp: SLUS_010.40 func_8001A1F4 (src/SLUS_010.40/25AC.c:4760)
 std::int32_t ResolveSoundEffectInstrument(std::int32_t sample_bank_flags,
                                           std::int32_t instrument_index) {
   if (static_cast<std::uint32_t>(instrument_index) - kEffectBankFirst <
@@ -244,7 +244,7 @@ std::int32_t ResolveSoundEffectInstrument(std::int32_t sample_bank_flags,
   return instrument_index;
 }
 
-// decomp: SLUS_010.40 func_8001A22C (src/SLUS_010.40/25AC.c:4563)
+// decomp: SLUS_010.40 func_8001A22C (src/SLUS_010.40/25AC.c:4773)
 std::int32_t ResolveMusicInstrument(std::int32_t music_status_flags,
                                     std::uint32_t instrument_index) {
   if ((music_status_flags & kMusicAlternateBankFlag) != 0 &&
@@ -256,7 +256,7 @@ std::int32_t ResolveMusicInstrument(std::int32_t music_status_flags,
 }
 
 // decomp: SLUS_010.40 Sound_CopyInstrumentInfoToChannel
-// (src/SLUS_010.40/25AC.c:4953)
+// (src/SLUS_010.40/25AC.c:5167)
 void ApplyInstrumentParameters(VoiceState& voice,
                                const Samples::InstrumentRecord& instrument,
                                std::uint32_t sample_start) {
@@ -267,15 +267,16 @@ void ApplyInstrumentParameters(VoiceState& voice,
   voice.dirty_flags |= kInstrumentDirty;
 }
 
-// decomp: SLUS_010.40 func_8001B094 (src/SLUS_010.40/25AC.c:4963)
+// decomp: SLUS_010.40 Sound_SetInstrumentToChannel
+// (src/SLUS_010.40/25AC.c:5177; was func_8001B094)
 void SelectChannelInstrument(ChannelState& channel, std::uint16_t index,
                              const Samples::InstrumentRecord& instrument) {
   channel.instrument_index = index;
   ApplyInstrumentParameters(channel.voice, instrument, instrument.sample_start);
 }
 
-// decomp: SLUS_010.40 Sound_ClearVoiceFromSchedulerState
-// (src/SLUS_010.40/25AC.c:4970)
+// decomp: SLUS_010.40 Sound_ClearVoiceFromSfxState
+// (src/SLUS_010.40/25AC.c:5184; was Sound_ClearVoiceFromSchedulerState)
 void ReleaseSoundEffectVoice(VoiceSchedulerState& scheduler,
                              EffectIdentity& effect, std::uint32_t voice_bit) {
   const std::uint32_t keep = ~voice_bit;
@@ -290,9 +291,10 @@ void ReleaseSoundEffectVoice(VoiceSchedulerState& scheduler,
   effect.has_effect = false;
 }
 
-// decomp: SLUS_010.40 func_8001A4BC (src/SLUS_010.40/25AC.c:4637)
-// The original halves the pitch once per octave below the root note; after
-// 31 halvings the result no longer changes, so the shift is clamped there.
+// decomp: SLUS_010.40 Sound_CalculatePitch (src/SLUS_010.40/25AC.c:4847; was
+// func_8001A4BC) The original halves the pitch once per octave below the root
+// note; after 31 halvings the result no longer changes, so the shift is clamped
+// there.
 NotePitch CalculateNotePitch(
     std::span<const std::uint32_t, kSemitoneCount> semitone_pitches,
     const Samples::InstrumentRecord& instrument, const PitchRequest& request) {
@@ -518,7 +520,8 @@ class Lookahead {
 };
 }  // namespace
 
-// decomp: SLUS_010.40 func_80019FC4 (src/SLUS_010.40/25AC.c:4430)
+// decomp: SLUS_010.40 Sound_PeekNextOpcode (src/SLUS_010.40/25AC.c:4640; was
+// func_80019FC4)
 std::uint8_t PeekNextNote(StepState& state, StepHost& host) {
   Lookahead lookahead(state, host);
   if (const auto note = lookahead.Run()) return *note;
@@ -567,7 +570,7 @@ std::optional<Samples::InstrumentRecord> InstrumentFor(StepHost& host,
 }
 }  // namespace
 
-// decomp: SLUS_010.40 func_8001A258 (src/SLUS_010.40/25AC.c:4571)
+// decomp: SLUS_010.40 func_8001A258 (src/SLUS_010.40/25AC.c:4781)
 void SelectNotePatch(StepState& state, StepHost& host, std::uint32_t note_key) {
   ChannelState& channel = state.channel;
   const std::span<const std::uint8_t> keymap = host.ChannelKeymap();
@@ -585,7 +588,8 @@ void SelectNotePatch(StepState& state, StepHost& host, std::uint32_t note_key) {
   channel.voice.volume_scale = entry[kPatchVolumeScale];
 }
 
-// decomp: SLUS_010.40 func_8001A64C (src/SLUS_010.40/25AC.c:4686)
+// decomp: SLUS_010.40 Sound_PlayKeymapNote (src/SLUS_010.40/25AC.c:4897; was
+// func_8001A64C)
 std::optional<std::uint16_t> StartDrumNote(StepState& state, StepHost& host,
                                            std::uint32_t channel_bit,
                                            std::uint32_t drum_key) {
@@ -978,7 +982,8 @@ void FinishNote(StepState& state, StepHost& host) {
 }
 }  // namespace
 
-// decomp: SLUS_010.40 func_8001A8D8 (src/SLUS_010.40/25AC.c:4760)
+// decomp: SLUS_010.40 Sound_ProcessAkaoVM (src/SLUS_010.40/25AC.c:4972; was
+// func_8001A8D8)
 void ExecuteChannelStep(StepState& state, StepHost& host,
                         std::uint32_t channel_bit) {
   const std::uint32_t step = RunCommands(state, host, channel_bit);
@@ -1129,7 +1134,7 @@ void SlideEffects(PlaybackState& state, PlaybackHost& host) {
 }
 }  // namespace
 
-// decomp: SLUS_010.40 func_8001924C (src/SLUS_010.40/25AC.c:4024)
+// decomp: SLUS_010.40 func_8001924C (src/SLUS_010.40/25AC.c:4230)
 void UpdateGlobalSlides(PlaybackState& state, PlaybackHost& host) {
   state.random_pitch_phase = Add(state.random_pitch_phase, 1) & kPhaseMask;
   if (state.disc_volume.length != 0) {
@@ -1151,7 +1156,7 @@ void UpdateGlobalSlides(PlaybackState& state, PlaybackHost& host) {
   SlideEffects(state, host);
 }
 
-// decomp: SLUS_010.40 func_80019614 (src/SLUS_010.40/25AC.c:4138)
+// decomp: SLUS_010.40 func_80019614 (src/SLUS_010.40/25AC.c:4347)
 void AdvanceMusicTransition(PlaybackState& state, PlaybackHost& host) {
   std::uint32_t& latches = state.control_latches;
   if ((latches & kTransitionWaiting) == 0) return;
@@ -1282,9 +1287,10 @@ void RunMusicTick(PlaybackState& state, PlaybackHost& host,
 }
 }  // namespace
 
-// decomp: SLUS_010.40 func_80019704 (src/SLUS_010.40/25AC.c:4174)
-// While loops of the track remain to skip, the primary layer runs tick after
-// tick in one call; kFastForwardLimit bounds a skip the timer never ends.
+// decomp: SLUS_010.40 Music_UpdateChannels (src/SLUS_010.40/25AC.c:4383; was
+// func_80019704) While loops of the track remain to skip, the primary layer
+// runs tick after tick in one call; kFastForwardLimit bounds a skip the timer
+// never ends.
 std::int32_t UpdateMusicSequence(PlaybackState& state, PlaybackHost& host,
                                  ChannelGroup group) {
   MusicLayerState* layer = LayerOf(state, group);
@@ -1309,7 +1315,7 @@ std::int32_t UpdateMusicSequence(PlaybackState& state, PlaybackHost& host,
   return layer == nullptr ? 0 : layer->active_channels;
 }
 
-// decomp: SLUS_010.40 func_800199C4 (src/SLUS_010.40/25AC.c:4264)
+// decomp: SLUS_010.40 func_800199C4 (src/SLUS_010.40/25AC.c:4474)
 void UpdateSavedMusicFade(PlaybackState& state, PlaybackHost& host,
                           ChannelGroup group) {
   FadeTimer& fade = state.master_fade;
@@ -1445,7 +1451,8 @@ std::int32_t FinishTick(PlaybackState& state, PlaybackHost& host,
 }
 }  // namespace
 
-// decomp: SLUS_010.40 func_80019A58 (src/SLUS_010.40/25AC.c:4287)
+// decomp: SLUS_010.40 Sound_MainLoop (src/SLUS_010.40/25AC.c:4497; was
+// func_80019A58)
 std::int32_t TickPlayback(PlaybackState& state, PlaybackHost& host) {
   const std::int32_t start = host.ReadTimer();
   ++state.tick_counter;

@@ -17,15 +17,16 @@
 namespace VS::Menu::manual {
 struct ScreenState;
 
-// decomp: MENUE.PRG func_80102E9C (494.c:132).
+// decomp: MENUE.PRG func_80102E9C (src/MENU/MENUE.PRG/494.c:138).
 void LiveClearMenuExceptRow8();
-// decomp: MENUE.PRG _menuReady (494.c:134).
+// decomp: MENUE.PRG menuReady (src/MENU/MENUE.PRG/494.c:140; was _menuReady).
 void LivePollMenuReady();
-// decomp: MENUE.PRG vs_menuE_exec (494.c:142).
+// decomp: MENUE.PRG vs_menuE_exec (src/MENU/MENUE.PRG/494.c:148).
 int LiveUpdateScreen(std::uint8_t* state);
-// decomp: MENUE.PRG _initMenuState (494.c:219).
+// decomp: MENUE.PRG initMenuState (src/MENU/MENUE.PRG/494.c:225; was
+// _initMenuState).
 int LiveInitHelpState();
-// decomp: MENUE.PRG _showMenu (494.c:245).
+// decomp: MENUE.PRG showMenu (src/MENU/MENUE.PRG/494.c:251; was _showMenu).
 int LiveUpdateHelpPages();
 
 // Call where MENUE.PRG loads (VS::Boot::ResetMenueStatics): its reload zeroes

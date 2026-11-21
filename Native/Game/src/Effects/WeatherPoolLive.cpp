@@ -182,14 +182,14 @@ void StoreState(const WeatherPoolState& state) {
 }
 }  // namespace weather_live
 
-// decomp: BATTLE.PRG func_8008E8F8 (146C.c:17445).
+// decomp: BATTLE.PRG func_8008E8F8 (src/BATTLE/BATTLE.PRG/146C.c:17324).
 void LiveAllocateWeatherParticles() {
   weather_live::PoolHost host;
   VS::Field::weatherParticles = ParticlesOf(AllocateWeatherParticles(
       host, ParticlesIdOf(VS::Field::weatherParticles)));
 }
 
-// decomp: BATTLE.PRG func_8008EA90 (146C.c:17500).
+// decomp: BATTLE.PRG func_8008EA90 (src/BATTLE/BATTLE.PRG/146C.c:17377).
 int LiveInitializeRoomWeather(int suppress_rain) {
   const VS::Field::MpdEnvironment* const record =
       VS::Field::roomData.environment;
@@ -200,7 +200,7 @@ int LiveInitializeRoomWeather(int suppress_rain) {
   return InitializeRoomWeather(host, kind, suppress_rain) ? 1 : 0;
 }
 
-// decomp: BATTLE.PRG func_8008EB04 (146C.c:17525).
+// decomp: BATTLE.PRG func_8008EB04 (src/BATTLE/BATTLE.PRG/146C.c:17402).
 void LiveRoomWeatherState(int* weather_kind_output, int* intensity_output) {
   if (weather_kind_output == nullptr || intensity_output == nullptr) {
     Refuse("RoomWeatherState", "missing output");
@@ -213,7 +213,7 @@ void LiveRoomWeatherState(int* weather_kind_output, int* intensity_output) {
   *intensity_output = report.intensity;
 }
 
-// decomp: BATTLE.PRG func_8008F29C (146C.c:17723).
+// decomp: BATTLE.PRG func_8008F29C (src/BATTLE/BATTLE.PRG/146C.c:17600).
 void LiveInitializeFallingWeatherParticles(int particle_count,
                                            int weather_kind) {
   const std::optional<Field::WeatherArea> area = weather_live::Area();
@@ -225,7 +225,7 @@ void LiveInitializeFallingWeatherParticles(int particle_count,
            });
 }
 
-// decomp: BATTLE.PRG func_8008F30C (146C.c:17737).
+// decomp: BATTLE.PRG func_8008F30C (src/BATTLE/BATTLE.PRG/146C.c:17614).
 void LiveInitializeScreenWeatherParticles(int particle_count,
                                           int weather_kind) {
   RunSpawn("InitializeScreenWeatherParticles",
@@ -236,7 +236,7 @@ void LiveInitializeScreenWeatherParticles(int particle_count,
            });
 }
 
-// decomp: BATTLE.PRG func_80090A1C (146C.c:18200).
+// decomp: BATTLE.PRG func_80090A1C (src/BATTLE/BATTLE.PRG/146C.c:18075).
 void LiveResetFallingWeatherParticle(
     VS::Field::WeatherParticleRecord* weather_particle) {
   if (!weather_live::InBuffer(weather_particle)) {
@@ -251,7 +251,7 @@ void LiveResetFallingWeatherParticle(
                              weather_live::Area()));
 }
 
-// decomp: BATTLE.PRG func_80090B28 (146C.c:18221).
+// decomp: BATTLE.PRG func_80090B28 (src/BATTLE/BATTLE.PRG/146C.c:18096).
 void LiveRecalculateWeatherVelocity() {
   weather_live::PoolHost host;
   const WeatherVelocity velocity = WeatherVelocityOf(

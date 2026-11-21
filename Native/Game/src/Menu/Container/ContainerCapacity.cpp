@@ -37,7 +37,7 @@ std::uint16_t PendingToken(std::span<const std::uint16_t> pending,
 }
 }  // namespace
 
-// decomp: func_80106464 (src/MENU/MENUD.PRG/234.c:1925)
+// decomp: func_80106464 (src/MENU/MENUD.PRG/234.c:1926)
 void DrawCapacityCount(CapacityRenderer& renderer,
                        const CapacityReadout& readout) {
   renderer.DrawNumber({.value = readout.limit,
@@ -54,7 +54,7 @@ void DrawCapacityCount(CapacityRenderer& renderer,
                                     : Render::kCompactTextGray});
 }
 
-// decomp: func_80106504 (src/MENU/MENUD.PRG/234.c:1940)
+// decomp: func_80106504 (src/MENU/MENUD.PRG/234.c:1941)
 void DrawStorageCapacities(StorageCapacityWorld& world) {
   constexpr std::array<std::string_view, 2> kStorageLabels{"GADGET BAG",
                                                            "CONTAINER"};
@@ -89,7 +89,7 @@ void DrawStorageCapacities(StorageCapacityWorld& world) {
   }
 }
 
-// decomp: func_801066DC (src/MENU/MENUD.PRG/234.c:1983)
+// decomp: func_801066DC (src/MENU/MENUD.PRG/234.c:1984)
 bool WouldExceedCapacity(Items::ItemCategory category, std::int32_t additional,
                          CapacityTransferWorld& world) {
   auto& receiving = world.Receiving();
@@ -104,7 +104,7 @@ bool WouldExceedCapacity(Items::ItemCategory category, std::int32_t additional,
   return world.ReceivingLimit(category) < projected;
 }
 
-// decomp: func_80106784 (src/MENU/MENUD.PRG/234.c:1995)
+// decomp: func_80106784 (src/MENU/MENUD.PRG/234.c:1996)
 TransferError TransferCapacityError(TransferItem item,
                                     CapacityTransferWorld& world) {
   const auto pending = world.PendingTransfers();
@@ -145,7 +145,7 @@ TransferError TransferCapacityError(TransferItem item,
   return TransferError::kFits;
 }
 
-// decomp: func_801068BC (src/MENU/MENUD.PRG/234.c:2040)
+// decomp: func_801068BC (src/MENU/MENUD.PRG/234.c:2041)
 void UndoPendingTransfer(std::int32_t row, CapacityTransferWorld& world) {
   const auto pending = world.PendingTransfers();
   const auto token =
@@ -162,7 +162,7 @@ void UndoPendingTransfer(std::int32_t row, CapacityTransferWorld& world) {
   Items::ClearContainerItem(category, slot, current_staging);
 }
 
-// decomp: func_80106948 (src/MENU/MENUD.PRG/234.c:2054)
+// decomp: func_80106948 (src/MENU/MENUD.PRG/234.c:2055)
 void StageItemTransfer(TransferItem item, CapacityTransferWorld& world) {
   auto& staging = world.Staging();
   auto& active = world.Active();

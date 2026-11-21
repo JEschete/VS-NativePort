@@ -120,22 +120,24 @@ class LiveStatFactorWorld final : public StatFactorWorld {
 };
 }  // namespace
 
-// decomp: _previousHitFactor0 (src/BATTLE/BATTLE.PRG/146C.c:11640),
-// _previousHitFactor1 (:11659), _previousHitFactor2 (:12146).
+// decomp: previousHitFactor0 (src/BATTLE/BATTLE.PRG/146C.c:11571; was
+// _previousHitFactor0), _previousHitFactor1 (:11659), _previousHitFactor2
+// (:12146).
 std::int16_t LiveScalePreviousTargetHit(ActionDefinition* action,
                                         VS::Battle::HitResult*,
                                         VS::Battle::HitResult*, int hit, int) {
   LiveStatFactorWorld world(action, nullptr, nullptr);
   return Checked(ScalePreviousTargetHit(hit, world));
 }
-// decomp: _hpLostFactor (src/BATTLE/BATTLE.PRG/146C.c:11650).
+// decomp: hpLostFactor (src/BATTLE/BATTLE.PRG/146C.c:11581; was _hpLostFactor).
 std::int16_t LiveScaleSourceMissingHp(ActionDefinition* action,
                                       VS::Battle::HitResult* source,
                                       VS::Battle::HitResult*, int hit, int) {
   LiveStatFactorWorld world(action, source, nullptr);
   return Checked(ScaleSourceMissingHp(hit, world));
 }
-// decomp: _factorCurrentHp (src/BATTLE/BATTLE.PRG/146C.c:11669).
+// decomp: factorCurrentHp (src/BATTLE/BATTLE.PRG/146C.c:11599; was
+// _factorCurrentHp).
 std::int16_t LiveScaleTargetCurrentHp(ActionDefinition* action,
                                       VS::Battle::HitResult*,
                                       VS::Battle::HitResult* target, int hit,
@@ -143,15 +145,16 @@ std::int16_t LiveScaleTargetCurrentHp(ActionDefinition* action,
   LiveStatFactorWorld world(action, nullptr, target);
   return Checked(ScaleTargetCurrentHp(hit, world));
 }
-// decomp: _getWeaponPp (src/BATTLE/BATTLE.PRG/146C.c:11678).
+// decomp: getWeaponPp (src/BATTLE/BATTLE.PRG/146C.c:11607; was _getWeaponPp).
 std::int16_t LiveWeaponPpWithChainOffset(ActionDefinition*,
                                          VS::Battle::HitResult* source,
                                          VS::Battle::HitResult*, int, int) {
   LiveStatFactorWorld world(nullptr, source, nullptr);
   return Checked(WeaponPpWithChainOffset(world));
 }
-// decomp: _factorMagicDamageReceived (src/BATTLE/BATTLE.PRG/146C.c:11686),
-// _factorMagicDamageReceivedOfType (:12156); F00417/F00427 share this binding.
+// decomp: factorMagicDamageReceived (src/BATTLE/BATTLE.PRG/146C.c:11614; was
+// _factorMagicDamageReceived), _factorMagicDamageReceivedOfType (:12156);
+// F00417/F00427 share this binding.
 std::int16_t LiveScaleIncomingSpellDamage(ActionDefinition* action,
                                           VS::Battle::HitResult*,
                                           VS::Battle::HitResult*, int hit,
@@ -159,15 +162,16 @@ std::int16_t LiveScaleIncomingSpellDamage(ActionDefinition* action,
   LiveStatFactorWorld world(action, nullptr, nullptr);
   return Checked(ScaleIncomingSpellDamage(hit, world));
 }
-// decomp: _mpLostFactor (src/BATTLE/BATTLE.PRG/146C.c:11720).
+// decomp: mpLostFactor (src/BATTLE/BATTLE.PRG/146C.c:11646; was _mpLostFactor).
 std::int16_t LiveScaleSourceMissingMp(ActionDefinition* action,
                                       VS::Battle::HitResult* source,
                                       VS::Battle::HitResult*, int hit, int) {
   LiveStatFactorWorld world(action, source, nullptr);
   return Checked(ScaleSourceMissingMp(hit, world));
 }
-// decomp: _factorPhysicalDamageReceived0 (src/BATTLE/BATTLE.PRG/146C.c:11703),
-// _factorPhysicalDamageReceived1 (:12174); F00418/F00428 share this binding.
+// decomp: factorPhysicalDamageReceived0 (src/BATTLE/BATTLE.PRG/146C.c:11630;
+// was _factorPhysicalDamageReceived0), _factorPhysicalDamageReceived1 (:12174);
+// F00418/F00428 share this binding.
 std::int16_t LiveScaleIncomingPhysicalDamage(ActionDefinition* action,
                                              VS::Battle::HitResult*,
                                              VS::Battle::HitResult*, int hit,
@@ -175,33 +179,38 @@ std::int16_t LiveScaleIncomingPhysicalDamage(ActionDefinition* action,
   LiveStatFactorWorld world(action, nullptr, nullptr);
   return Checked(ScaleIncomingPhysicalDamage(hit, world));
 }
-// decomp: _getRecoverableHp (src/BATTLE/BATTLE.PRG/146C.c:12130).
+// decomp: getRecoverableHp (src/BATTLE/BATTLE.PRG/146C.c:12053; was
+// _getRecoverableHp).
 std::int16_t LiveTargetMissingHp(ActionDefinition*, VS::Battle::HitResult*,
                                  VS::Battle::HitResult* target, int, int) {
   LiveStatFactorWorld world(nullptr, nullptr, target);
   return Checked(TargetMissingHp(world));
 }
-// decomp: _getRecoverableMp (src/BATTLE/BATTLE.PRG/146C.c:12138).
+// decomp: getRecoverableMp (src/BATTLE/BATTLE.PRG/146C.c:12060; was
+// _getRecoverableMp).
 std::int16_t LiveTargetMissingMp(ActionDefinition*, VS::Battle::HitResult*,
                                  VS::Battle::HitResult* target, int, int) {
   LiveStatFactorWorld world(nullptr, nullptr, target);
   return Checked(TargetMissingMp(world));
 }
-// decomp: _factorSpellCost (src/BATTLE/BATTLE.PRG/146C.c:12191).
+// decomp: factorSpellCost (src/BATTLE/BATTLE.PRG/146C.c:12110; was
+// _factorSpellCost).
 std::int16_t LiveScaleIncomingSpellCost(ActionDefinition* action,
                                         VS::Battle::HitResult*,
                                         VS::Battle::HitResult*, int hit, int) {
   LiveStatFactorWorld world(action, nullptr, nullptr);
   return Checked(ScaleIncomingSpellCost(hit, world));
 }
-// decomp: _factorDamageReceived (src/BATTLE/BATTLE.PRG/146C.c:12208).
+// decomp: factorDamageReceived (src/BATTLE/BATTLE.PRG/146C.c:12126; was
+// _factorDamageReceived).
 std::int16_t LiveScaleIncomingDamage(ActionDefinition* action,
                                      VS::Battle::HitResult*,
                                      VS::Battle::HitResult*, int hit, int) {
   LiveStatFactorWorld world(action, nullptr, nullptr);
   return Checked(ScaleIncomingDamage(hit, world));
 }
-// decomp: _getEquippedShieldDp (src/BATTLE/BATTLE.PRG/146C.c:12221).
+// decomp: getEquippedShieldDp (src/BATTLE/BATTLE.PRG/146C.c:12138; was
+// _getEquippedShieldDp).
 std::int16_t LiveSourceShieldPp(ActionDefinition*,
                                 VS::Battle::HitResult* source,
                                 VS::Battle::HitResult*, int, int) {

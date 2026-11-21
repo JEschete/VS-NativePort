@@ -3,8 +3,10 @@
 #include "Effects/Plugins/Plg147.hpp"
 
 namespace VS::Effects::Plg147 {
-// decomp: D_800FBB10 (PLG147.BIN/F8.c:5; rings.h:20)
+// decomp: vs_effect_bearClaw_0_colors (src/EFFECT/rings.h:20; was D_800FBB10;
+// src/EFFECT/rings.h:20)
 plugins::RingPaletteBytes ringColorFactors;
-// decomp: D_800FBB30 (PLG147.BIN/F8.c:8; particleSetup.h:35)
+// decomp: vs_effect_bearClaw_1_origin_state (src/EFFECT/particleSetup.h:35; was
+// D_800FBB30; src/EFFECT/particleSetup.h:35)
 std::int32_t particleEmissionCounter;
 }  // namespace VS::Effects::Plg147

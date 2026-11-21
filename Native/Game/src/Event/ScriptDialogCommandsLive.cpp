@@ -276,23 +276,24 @@ void ReleaseLiveScriptDialogText() noexcept {
 
 }  // namespace VS::Event
 
-// decomp: vs_battle_script_initTextBox (src/BATTLE/BATTLE.PRG/4A0A8.c:672),
-// opcode 0x10
+// decomp: vs_battle_script_10_initTextBox (src/BATTLE/BATTLE.PRG/4DEA8.c:489;
+// was vs_battle_script_initTextBox), opcode 0x10
 std::intptr_t VS::Event::ScriptInitDialogBoxOpcode(std::uint8_t* command,
                                                    std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptInitDialogBox, command,
                     event::kInitDialogBoxLength);
 }
 
-// decomp: vs_battle_script_showTextBox (src/BATTLE/BATTLE.PRG/4A0A8.c:707),
-// opcode 0x11
+// decomp: vs_battle_script_11_showTextBox (src/BATTLE/BATTLE.PRG/4DEA8.c:529;
+// was vs_battle_script_showTextBox), opcode 0x11
 std::intptr_t VS::Event::ScriptShowDialogTextOpcode(
     std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptShowDialogText, command,
                     event::kShowDialogTextLength);
 }
 
-// decomp: vs_battle_script_dismissTextBox (src/BATTLE/BATTLE.PRG/4A0A8.c:733),
+// decomp: vs_battle_script_12_dismissTextBox
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:567; was vs_battle_script_dismissTextBox),
 // opcode 0x12
 std::intptr_t VS::Event::ScriptDismissDialogBoxOpcode(
     std::uint8_t* command, std::int16_t /*thread_id*/) {
@@ -300,44 +301,49 @@ std::intptr_t VS::Event::ScriptDismissDialogBoxOpcode(
                     event::kDismissDialogBoxLength);
 }
 
-// decomp: func_800B6D48 (src/BATTLE/BATTLE.PRG/4A0A8.c:794), opcode 0x13
+// decomp: vs_battle_script_13_initTextBoxNearActor
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:630; was func_800B6D48), opcode 0x13
 std::intptr_t VS::Event::ScriptInitActorDialogBoxOpcode(
     std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptInitActorDialogBox, command,
                     event::kInitActorDialogBoxLength);
 }
 
-// decomp: func_800B6F8C (src/BATTLE/BATTLE.PRG/4A0A8.c:838), opcode 0x14
+// decomp: vs_battle_script_14_dismissTextBoxAndWait
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:683; was func_800B6F8C), opcode 0x14
 std::intptr_t VS::Event::ScriptWaitForDialogDismissalOpcode(
     std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptWaitForDialogDismissal, command,
                     event::kWaitForDialogDismissalLength);
 }
 
-// decomp: vs_battle_script_setStringContextInt
-// (src/BATTLE/BATTLE.PRG/4A0A8.c:916), opcode 0x1B
+// decomp: vs_battle_script_1B_setPrintfArgInt
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:816; was
+// vs_battle_script_setStringContextInt), opcode 0x1B
 std::intptr_t VS::Event::ScriptSetDialogIntegerOpcode(
     std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptSetDialogInteger, command,
                     event::kSetDialogIntegerLength);
 }
 
-// decomp: func_800B7358 (src/BATTLE/BATTLE.PRG/4A0A8.c:941), opcode 0x1D
+// decomp: vs_battle_script_1D_setTextBoxAnimationDuration
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:848; was func_800B7358), opcode 0x1D
 std::intptr_t VS::Event::ScriptSetDialogTransitionDurationOpcode(
     std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptSetDialogTransitionDuration, command,
                     event::kSetDialogTransitionDurationLength);
 }
 
-// decomp: vs_battle_script_selectTextBox (src/BATTLE/BATTLE.PRG/4A0A8.c:947),
-// opcode 0x1C
+// decomp: vs_battle_script_1C_selectTextBox (src/BATTLE/BATTLE.PRG/4DEA8.c:861;
+// was vs_battle_script_selectTextBox), opcode 0x1C
 std::intptr_t VS::Event::ScriptSelectDialogChoiceOpcode(
     std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptSelectDialogChoice, command,
                     event::kSelectDialogChoiceLength);
 }
 
-// decomp: func_800B9564 (src/BATTLE/BATTLE.PRG/4A0A8.c:1897), opcode 0x5B
+// decomp: vs_battle_script_5B_setTextBoxSpeaker
+// (src/BATTLE/BATTLE.PRG/4DEA8.c:2405; was func_800B9564), opcode 0x5B
 std::intptr_t VS::Event::ScriptSetDialogSpeakerOpcode(
     std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptSetDialogSpeaker, command,

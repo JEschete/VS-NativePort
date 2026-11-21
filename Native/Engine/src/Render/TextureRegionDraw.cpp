@@ -62,7 +62,7 @@ int FeatherWeight(int wipe_edge_x, int x) {
 }
 }  // namespace
 
-// decomp: renderTextures.h _adjust (src/renderTextures.h:54)
+// decomp: src/renderTextures.h adjust (src/renderTextures.h:54; was _adjust)
 int BlendFlashComponent(int component, int weight) {
   const int blended =
       (component * weight) +
@@ -70,7 +70,8 @@ int BlendFlashComponent(int component, int weight) {
   return blended / kRegionFlashBlendWeights;
 }
 
-// decomp: renderTextures.h _renderTextureFadeInTint (src/renderTextures.h:3)
+// decomp: src/renderTextures.h _renderTextureFadeInTint
+// (src/renderTextures.h:3)
 void DrawTextureTintFade(const TextureRegion& region, int x, int y,
                          std::span<const RegionColor, 2> colors,
                          RegionQuadTarget& target) {
@@ -90,7 +91,7 @@ void DrawTextureTintFade(const TextureRegion& region, int x, int y,
   target.Draw(quad);
 }
 
-// decomp: renderTextures.h _renderTexturePopIn (src/renderTextures.h:60)
+// decomp: src/renderTextures.h _renderTexturePopIn (src/renderTextures.h:60)
 void DrawTextureFlashFade(const TextureRegion& region, int x, int y,
                           std::span<const RegionColor, 2> colors,
                           RegionQuadTarget& target) {
@@ -122,7 +123,7 @@ void DrawTextureFlashFade(const TextureRegion& region, int x, int y,
   target.Draw(quad);
 }
 
-// decomp: renderTextures.h _renderTextureWipe (src/renderTextures.h:130)
+// decomp: src/renderTextures.h _renderTextureWipe (src/renderTextures.h:130)
 void DrawTextureWipe(const TextureRegion& region, int x, int y,
                      std::span<const RegionColor, 2> colors, int wipe_edge_x,
                      RegionQuadTarget& target) {

@@ -134,7 +134,7 @@ constexpr std::int32_t kCentreX = 0xA0;
 constexpr std::int32_t kCentreY = 0x70;
 }  // namespace
 
-// decomp: GIM/SCREFF2.PRG func_800F9800 (0.c:8).
+// decomp: GIM/SCREFF2.PRG func_800F9800 (src/GIM/SCREFF2.PRG/0.c:14).
 void SetFeedbackLayer(ScreenOverlayControls& controls,
                       std::int32_t ordering_layer,
                       FeedbackTexturePages& pages) {
@@ -157,13 +157,13 @@ RadialWarpSettings RadialWarpFromWords(std::int32_t scale_word,
               static_cast<std::uint32_t>(growth_word))};
 }
 
-// decomp: GIM/SCREFF2.PRG func_800F9BC0 (0.c:114).
+// decomp: GIM/SCREFF2.PRG func_800F9BC0 (src/GIM/SCREFF2.PRG/0.c:120).
 void SetRadialWarp(ScreenOverlayControls& controls,
                    RadialWarpSettings settings) noexcept {
   controls.radial_warp = settings;
 }
 
-// decomp: GIM/SCREFF2.PRG func_800F9DE8 (5E8.c:8).
+// decomp: GIM/SCREFF2.PRG func_800F9DE8 (src/GIM/SCREFF2.PRG/0.c:221).
 void SetVignetteEnabled(ScreenOverlayControls& controls,
                         std::int32_t enabled) noexcept {
   controls.vignette_enabled = enabled;
@@ -173,7 +173,7 @@ std::int32_t FeedbackOrderingSlot(std::uint16_t feedback_layer) noexcept {
   return std::int32_t{feedback_layer} - kFeedbackLayerBias;
 }
 
-// decomp: GIM/SCREFF2.PRG func_800F986C (0.c:22).
+// decomp: GIM/SCREFF2.PRG func_800F986C (src/GIM/SCREFF2.PRG/0.c:28).
 void DrawFeedbackTiles(std::int32_t frame_buffer,
                        Render::PacketQueue& scene_head,
                        Render::PacketQueue& feedback_entry) {
@@ -235,7 +235,7 @@ void DrawFeedbackTiles(std::int32_t frame_buffer,
   LinkPacket(scene_head, restore);
 }
 
-// decomp: GIM/SCREFF2.PRG func_800F9DF8 (5E8.c:10).
+// decomp: GIM/SCREFF2.PRG func_800F9DF8 (src/GIM/SCREFF2.PRG/0.c:223).
 std::uint32_t EllipsePoint(std::int32_t angular_step,
                            std::int32_t radius) noexcept {
   std::int32_t scallop =
@@ -263,7 +263,7 @@ std::uint32_t EllipsePoint(std::int32_t angular_step,
          (static_cast<std::uint32_t>(y) << kHalfwordShift);
 }
 
-// decomp: GIM/SCREFF2.PRG func_800F9EBC (5E8.c:23).
+// decomp: GIM/SCREFF2.PRG func_800F9EBC (src/GIM/SCREFF2.PRG/0.c:236).
 void AppendVignetteCorner(std::uint32_t packed_corner_xy,
                           std::int32_t first_angular_step,
                           Render::PacketQueue& overlay) {
@@ -285,7 +285,7 @@ void AppendVignetteCorner(std::uint32_t packed_corner_xy,
   } while (step < end);
 }
 
-// decomp: GIM/SCREFF2.PRG func_800F9FB8 (5E8.c:41).
+// decomp: GIM/SCREFF2.PRG func_800F9FB8 (src/GIM/SCREFF2.PRG/0.c:254).
 void DrawVignette(Render::PacketQueue& overlay) {
   for (const VignetteCorner& corner : kVignetteCorners) {
     AppendVignetteCorner(corner.xy, corner.first_step, overlay);

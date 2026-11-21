@@ -110,26 +110,29 @@ struct VitalsFrame {
   VitalsLabelLayout labels{};
 };
 
-// decomp: MENU4.PRG _initEquipmentScreen (120.c:528).
-// Starts the panel's slide for `actor` (the slot + 1, or 0 to hide it).
+// decomp: MENU4.PRG initEquipmentScreen (src/MENU/MENU4.PRG/120.c:532; was
+// _initEquipmentScreen). Starts the panel's slide for `actor` (the slot + 1, or
+// 0 to hide it).
 void BeginVitalsTransition(VitalsPanelState& state, std::int32_t actor,
                            VitalsHost& host);
 
-// decomp: MENU4.PRG _renderUnknownValue (120.c:692).
-// Draws "???" (with "??? / " in front when `with_max`) right-aligned at `xy`.
+// decomp: MENU4.PRG renderUnknownValue (src/MENU/MENU4.PRG/120.c:696; was
+// _renderUnknownValue). Draws "???" (with "??? / " in front when `with_max`)
+// right-aligned at `xy`.
 void DrawUnanalyzedValue(VitalsHost& host, std::int32_t xy, bool with_max);
 
-// decomp: MENU4.PRG _renderStatBar (120.c:721).
-// `color_index` holds the colour in its low byte and whether the actor is
-// analyzed above it: an unanalyzed actor's bar is drawn full.
+// decomp: MENU4.PRG renderStatBar (src/MENU/MENU4.PRG/120.c:725; was
+// _renderStatBar). `color_index` holds the colour in its low byte and whether
+// the actor is analyzed above it: an unanalyzed actor's bar is drawn full.
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
 void DrawVitalBar(VitalsHost& host, std::int32_t color_index,
                   std::int32_t current, std::int32_t max, std::int32_t xy);
 
-// decomp: MENU4.PRG _renderBasicStats (120.c:741).
-// Advances the panel's slide and draws the HP/MP/RISK values, labels and
-// bars. False, with nothing changed, when the selected actor is missing, and
-// false, after the slide step, when the previous actor it slides away from is.
+// decomp: MENU4.PRG renderBasicStats (src/MENU/MENU4.PRG/120.c:745; was
+// _renderBasicStats). Advances the panel's slide and draws the HP/MP/RISK
+// values, labels and bars. False, with nothing changed, when the selected actor
+// is missing, and false, after the slide step, when the previous actor it
+// slides away from is.
 [[nodiscard]] bool DrawVitals(VitalsPanelState& state, const VitalsFrame& frame,
                               VitalsHost& host);
 
@@ -149,10 +152,11 @@ class InspectableActorRoster {
   virtual std::optional<std::uint16_t> Kind(std::int32_t slot) = 0;
 };
 
-// decomp: MENU4.PRG _getNextValidActor (120.c:548).
-// Steps `current` by `step` modulo 15 until it reaches an inspectable actor.
-// Absent where the original would read before VS::Battle::actors (a negative
-// remainder) or loop forever (no inspectable actor on the cycle).
+// decomp: MENU4.PRG getNextValidActor (src/MENU/MENU4.PRG/120.c:552; was
+// _getNextValidActor). Steps `current` by `step` modulo 15 until it reaches an
+// inspectable actor. Absent where the original would read before
+// VS::Battle::actors (a negative remainder) or loop forever (no inspectable
+// actor on the cycle).
 [[nodiscard]] std::optional<std::int32_t> FindNextInspectableActor(
     InspectableActorRoster& roster, std::int32_t current, std::int32_t step);
 
@@ -211,20 +215,22 @@ class ActorSwitchHost {
   virtual void LoadActorPreview(std::int32_t slot) = 0;
 };
 
-// decomp: MENU4.PRG _switchCurrentActor (120.c:579).
-// A nonzero `request` starts a switch to slot (request & 0xF) - 1, in reverse
-// when bit 4 is set, and returns false; zero steps the slide and returns true
-// once it is complete.
+// decomp: MENU4.PRG switchCurrentActor (src/MENU/MENU4.PRG/120.c:583; was
+// _switchCurrentActor). A nonzero `request` starts a switch to slot (request &
+// 0xF) - 1, in reverse when bit 4 is set, and returns false; zero steps the
+// slide and returns true once it is complete.
 bool AnimateActorSwitch(ActorSwitchState& state, std::int32_t request,
                         ActorSwitchHost& host);
 
-// decomp: MENU4.PRG _getLimbCount (120.c:1114).
-// The limbs before the first unnamed one, at most kStatusLimbSlots.
+// decomp: MENU4.PRG getLimbCount (src/MENU/MENU4.PRG/120.c:1117; was
+// _getLimbCount). The limbs before the first unnamed one, at most
+// kStatusLimbSlots.
 [[nodiscard]] std::int32_t LimbCount(
     std::span<const std::uint8_t> limb_name_indices);
 
-// decomp: MENU4.PRG _getEquipmentListRowCount (120.c:1132).
-// The weapon and shield rows, one per limb and one for an accessory.
+// decomp: MENU4.PRG getEquipmentListRowCount (src/MENU/MENU4.PRG/120.c:1135;
+// was _getEquipmentListRowCount). The weapon and shield rows, one per limb and
+// one for an accessory.
 [[nodiscard]] std::int32_t EquipmentRowCount(
     std::span<const std::uint8_t> limb_name_indices,
     std::uint16_t accessory_id);

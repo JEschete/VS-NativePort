@@ -16,7 +16,7 @@ constexpr std::size_t kOriginActorOperand = 1;
 constexpr std::uint32_t kLowByteMask = 0xFF;
 }  // namespace
 
-// decomp: BATTLE.PRG func_800BBBE8 (F01214, src/BATTLE/BATTLE.PRG/4A0A8.c:3014,
+// decomp: BATTLE.PRG func_800BBBE8 (F01214, src/BATTLE/BATTLE.PRG/4DEA8.c:3664,
 // 0x800BBBE8-0x800BBDDC)
 EventCameraStart StartEventCamera(Core::Math::Vec3 field_eye,
                                   Core::Math::Vec3 field_look_at) noexcept {
@@ -37,14 +37,14 @@ EventCameraStart StartEventCamera(Core::Math::Vec3 field_eye,
   return start;
 }
 
-// decomp: BATTLE.PRG func_800BBE04 (F01216, src/BATTLE/BATTLE.PRG/4A0A8.c:3084,
+// decomp: BATTLE.PRG func_800BBE04 (F01216, src/BATTLE/BATTLE.PRG/4DEA8.c:3734,
 // 0x800BBE04-0x800BBE10)
 std::uint8_t EventFieldCameraOverride(int request) noexcept {
   return static_cast<std::uint8_t>(static_cast<std::uint32_t>(request) &
                                    kLowByteMask);
 }
 
-// decomp: BATTLE.PRG func_800BBE94 (F01218, src/BATTLE/BATTLE.PRG/4A0A8.c:3101,
+// decomp: BATTLE.PRG func_800BBE94 (F01218, src/BATTLE/BATTLE.PRG/4DEA8.c:3751,
 // 0x800BBE94-0x800BBF14)
 void UpdateEventCameraOrigin(EventCameraOrigin& origin,
                              EventCameraOriginHost& host) {
@@ -59,7 +59,7 @@ void UpdateEventCameraOrigin(EventCameraOrigin& origin,
                       : Core::Math::Vec3{};
 }
 
-// decomp: BATTLE.PRG func_800BBE10 (F01217, src/BATTLE/BATTLE.PRG/4A0A8.c:3086,
+// decomp: BATTLE.PRG func_800BBE10 (F01217, src/BATTLE/BATTLE.PRG/4DEA8.c:3736,
 // 0x800BBE10-0x800BBE94)
 void SetEventCameraOriginActor(EventCameraOrigin& origin, std::uint16_t actor,
                                EventCameraOriginHost& host) {
@@ -73,8 +73,8 @@ void SetEventCameraOriginActor(EventCameraOrigin& origin, std::uint16_t actor,
   UpdateEventCameraOrigin(origin, host);
 }
 
-// decomp: BATTLE.PRG func_800BB38C (F01195, src/BATTLE/BATTLE.PRG/4A0A8.c:2774,
-// 0x800BB38C-0x800BB3BC)
+// decomp: BATTLE.PRG vs_battle_script_E8 (F01195,
+// src/BATTLE/BATTLE.PRG/4DEA8.c:3423; was func_800BB38C, 0x800BB38C-0x800BB3BC)
 bool CommandSetCameraOriginActor(ScriptCommand command,
                                  EventCameraOrigin& origin,
                                  EventCameraOriginHost& host) {

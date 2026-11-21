@@ -145,7 +145,7 @@ void WriteLiveTextBoxSelector(const TextBoxSelector& selector) {
   textBoxSelector.count = selector.count;
 }
 
-// decomp: F01329 vs_battle_setTextBox (src/BATTLE/BATTLE.PRG/5BF94.c:1536).
+// decomp: F01329 vs_battle_setTextBox (src/BATTLE/BATTLE.PRG/5BF94.c:1082).
 int SetLiveTextBoxText(int box_id, char* text) {
   const auto index = LiveIndex(box_id, "SetTextBoxText");
   if (!index.has_value()) return 0;
@@ -156,7 +156,8 @@ int SetLiveTextBoxText(int box_id, char* text) {
   return result;
 }
 
-// decomp: F01330 vs_battle_selectTextBox (src/BATTLE/BATTLE.PRG/5BF94.c:1559).
+// decomp: F01330 selectTextBox (src/BATTLE/BATTLE.PRG/5BF94.c:1105; was
+// vs_battle_selectTextBox).
 int SelectLiveTextBoxChoice(std::uint8_t box_mask) {
   LiveTextBoxHost host;
   LiveTextBoxes boxes = ReadLiveTextBoxes();
@@ -184,14 +185,15 @@ int SelectLiveTextBoxChoice(std::uint8_t box_mask) {
 }
 
 // decomp: F01343 vs_battle_initInformationTextBox
-// (src/BATTLE/BATTLE.PRG/5BF94.c:2653).
+// (src/BATTLE/BATTLE.PRG/5BF94.c:2204).
 void InitLiveInformationTextBox(InformationHeader header) {
   TextBox box = ReadLiveTextBox(kInformationTextBox);
   InitTextBox(box, InformationTextBoxLayout(static_cast<std::int32_t>(header)));
   WriteLiveTextBox(kInformationTextBox, box);
 }
 
-// decomp: F01378 _dismissAllTextBoxes (src/BATTLE/BATTLE.PRG/5BF94.c:3757).
+// decomp: F01378 dismissAllTextBoxes (src/BATTLE/BATTLE.PRG/5BF94.c:3323; was
+// _dismissAllTextBoxes).
 int DismissAllLiveTextBoxes() {
   LiveTextBoxHost host;
   LiveTextBoxes boxes = ReadLiveTextBoxes();
@@ -200,14 +202,14 @@ int DismissAllLiveTextBoxes() {
   return all_closed ? 1 : 0;
 }
 
-// decomp: F01409 vs_battle_getTextBox (src/BATTLE/BATTLE.PRG/5BF94.c:4544).
+// decomp: F01409 vs_battle_getTextBox (src/BATTLE/BATTLE.PRG/5BF94.c:4110).
 TextBoxState* LiveTextBox(int id) {
   const auto index = LiveIndex(id, "TextBox");
   if (!index.has_value()) return nullptr;
   return &std::span(textBoxes)[*index];
 }
 
-// decomp: F01410 func_800CCE10 (src/BATTLE/BATTLE.PRG/5BF94.c:4546).
+// decomp: F01410 func_800CCE10 (src/BATTLE/BATTLE.PRG/5BF94.c:4112).
 TextAnchor LiveTextBoxAnchor(int anchor_preset_index, int orientation_flags,
                              int text_column_count, int text_line_count) {
   const LiveAnchorPresets presets = ReadLiveAnchorPresets();
@@ -224,7 +226,7 @@ TextAnchor LiveTextBoxAnchor(int anchor_preset_index, int orientation_flags,
   return TextAnchor::FromWord(anchor->Word());
 }
 
-// decomp: F01411 vs_battle_initTextBox (src/BATTLE/BATTLE.PRG/5BF94.c:4567).
+// decomp: F01411 vs_battle_initTextBox (src/BATTLE/BATTLE.PRG/5BF94.c:4132).
 void InitLiveTextBox(int id, int flags, int x, int y, int chars_per_line,
                      int line_count, int center_x, int center_y) {
   const auto index = LiveIndex(id, "InitTextBox");
@@ -240,7 +242,7 @@ void InitLiveTextBox(int id, int flags, int x, int y, int chars_per_line,
   WriteLiveTextBox(*index, box);
 }
 
-// decomp: F01412 vs_battle_dismissTextBox (src/BATTLE/BATTLE.PRG/5BF94.c:4613).
+// decomp: F01412 vs_battle_dismissTextBox (src/BATTLE/BATTLE.PRG/5BF94.c:4178).
 int DismissLiveTextBox(int id) {
   const auto index = LiveIndex(id, "DismissTextBox");
   if (!index.has_value()) return 0;

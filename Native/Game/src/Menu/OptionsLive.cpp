@@ -23,7 +23,7 @@
 #include "Menu/TextBoxStateLive.hpp"
 #include "State/StateFlags.hpp"
 
-// decomp: _menuStrings (src/MENU/MENU8.PRG/88.c)
+// decomp: menuStringTable (src/MENU/MENU8.PRG/88.c:12; was _menuStrings)
 std::uint16_t
     VS::Menu::Options::menuStrings[VS::Menu::Options::kMenuStringCount];
 

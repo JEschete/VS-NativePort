@@ -542,7 +542,8 @@ bool CanAward(const GameClearScreen& screen, std::span<const BonusReel> reels) {
 }
 }  // namespace
 
-// decomp: _initCongratulationsScreen, src/MENU/MENUF.PRG/3B8.c:118.
+// decomp: initCongratulationsScreen, src/MENU/MENUF.PRG/3B8.c:132; was
+// _initCongratulationsScreen.
 int LiveInitializeGameClear() {
   auto game = LoadState();
   LiveInit host;
@@ -552,7 +553,7 @@ int LiveInitializeGameClear() {
   return step == GameClearStep::kComplete ? 1 : 0;
 }
 
-// decomp: func_80103748, src/MENU/MENUF.PRG/3B8.c:436.
+// decomp: func_80103748, src/MENU/MENUF.PRG/3B8.c:450.
 void LiveQueueResultsMusic() {
   class Host final : public ResultsMusicHost {
    public:
@@ -564,7 +565,8 @@ void LiveQueueResultsMusic() {
   QueueResultsMusic(VS::Audio::soundState.current_music_id, host);
 }
 
-// decomp: _renderCongratulationsScreen, src/MENU/MENUF.PRG/3B8.c:755.
+// decomp: renderCongratulationsScreen, src/MENU/MENUF.PRG/3B8.c:769; was
+// _renderCongratulationsScreen.
 int LiveUpdateGameClear() {
   auto game = LoadState();
   if (!CanAward(game.screen, kBuffReels)) {
@@ -579,19 +581,20 @@ int LiveUpdateGameClear() {
   return step == GameClearStep::kComplete ? 1 : 0;
 }
 
-// decomp: _renderStatWheel, src/MENU/MENUF.PRG/3B8.c:1996.
+// decomp: renderStatWheel, src/MENU/MENUF.PRG/3B8.c:2008; was _renderStatWheel.
 void LiveDrawBonusReel(int x, int y, int timer, int screen_state) {
   DrawLiveReel({.x = x, .y = y}, timer, screen_state, LoadState().screen.reel);
 }
 
-// decomp: _renderAnimatedStatWheel, src/MENU/MENUF.PRG/3B8.c:2168.
+// decomp: renderAnimatedStatWheel, src/MENU/MENUF.PRG/3B8.c:2179; was
+// _renderAnimatedStatWheel.
 void LiveDrawBonusReelTexture(int x, int y, int texture_index) {
   LiveRows target;
   Report(
       DrawBonusReelTexture(kDisMap, {.x = x, .y = y}, texture_index, target));
 }
 
-// decomp: _addHealBonus, src/MENU/MENUF.PRG/3B8.c:2865.
+// decomp: addHealBonus, src/MENU/MENUF.PRG/3B8.c:2873; was _addHealBonus.
 void LiveApplyHealingScoreBonus() {
   const auto healed =
       ApplyHealingScoreBonus({.misc_score = VS::State::scoreData.misc_score,

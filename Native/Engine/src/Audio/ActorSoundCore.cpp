@@ -84,7 +84,7 @@ bool WetWeather(const RoomWeather& weather) {
 }
 }  // namespace
 
-// decomp: BATTLE.PRG func_8006CD60 (src/BATTLE/BATTLE.PRG/146C.c:2144)
+// decomp: BATTLE.PRG func_8006CD60 (src/BATTLE/BATTLE.PRG/146C.c:1846)
 void PlayRandomActorImpactSound(ActorSoundHost& host, BankBuffer bank,
                                 const SfxMix& mix) {
   host.PlayBankSfx(
@@ -92,7 +92,7 @@ void PlayRandomActorImpactSound(ActorSoundHost& host, BankBuffer bank,
       host.BoundedRandom(kRandomImpactSoundCount) + kRandomImpactSound, mix);
 }
 
-// decomp: BATTLE.PRG func_800AD62C (src/BATTLE/BATTLE.PRG/40564.c:2789)
+// decomp: BATTLE.PRG func_800AD62C (src/BATTLE/BATTLE.PRG/40564.c:2209)
 std::optional<SfxMix> ActorSoundPanAndVolume(ActorSoundHost& host,
                                              std::int32_t actor) {
   const std::optional<ActorSoundRecord> record = host.ActorSound(actor);
@@ -121,7 +121,7 @@ ActorSoundStatus PlayActorModelSound(ActorSoundHost& host,
   return ActorSoundStatus::kDone;
 }
 
-// decomp: BATTLE.PRG func_800AE68C (src/BATTLE/BATTLE.PRG/44F14.c:685)
+// decomp: BATTLE.PRG func_800AE68C (src/BATTLE/BATTLE.PRG/44F14.c:667)
 ActorSoundStatus PlayActorModelSoundVariant(ActorSoundHost& host,
                                             std::int32_t actor,
                                             std::int32_t variant) {
@@ -142,7 +142,7 @@ ActorSoundStatus PlayActorSoundPair(ActorSoundHost& host, std::uint8_t actor,
   return ActorSoundStatus::kDone;
 }
 
-// decomp: BATTLE.PRG func_800AE7D8 (src/BATTLE/BATTLE.PRG/44F14.c:728)
+// decomp: BATTLE.PRG func_800AE7D8 (src/BATTLE/BATTLE.PRG/44F14.c:707)
 void PlayGimmickSoundPair(ActorSoundHost& host, const SfxPoint& position,
                           const ActorSoundPairIds& sounds) {
   host.PlayWorldSfx(kActorSoundGroup, sounds.first, position);
@@ -176,7 +176,7 @@ ActorSoundStatus PlayActorSurfaceContactSound(ActorSoundHost& host,
   return PlayActorModelSound(host, actor.model, sound);
 }
 
-// decomp: BATTLE.PRG func_8007C8A4 (src/BATTLE/BATTLE.PRG/146C.c:8917)
+// decomp: BATTLE.PRG func_8007C8A4 (src/BATTLE/BATTLE.PRG/146C.c:8872)
 ActorSoundStatus PlayActorScriptSound(ActorSoundHost& host, std::int32_t actor,
                                       std::int32_t sound_index) {
   if (actor < 0) return ActorSoundStatus::kNoActor;

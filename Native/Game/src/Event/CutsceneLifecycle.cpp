@@ -62,7 +62,7 @@ void RestoreMusic(CutsceneHost& host) {
 
 }  // namespace
 
-// decomp: BATTLE.PRG func_80073718 (src/BATTLE/BATTLE.PRG/146C.c:4720)
+// decomp: BATTLE.PRG func_80073718 (src/BATTLE/BATTLE.PRG/146C.c:4447)
 bool PrepareCutsceneActors(CutsceneHost& host) {
   const auto preferences = host.Preferences();
   if (!preferences) {
@@ -73,7 +73,7 @@ bool PrepareCutsceneActors(CutsceneHost& host) {
   return true;
 }
 
-// decomp: BATTLE.PRG func_80073870 (src/BATTLE/BATTLE.PRG/146C.c:4761)
+// decomp: BATTLE.PRG func_80073870 (src/BATTLE/BATTLE.PRG/146C.c:4488)
 bool StartPreparedCutscene(CutsceneHost& host) {
   const auto preferences = host.Preferences();
   if (!preferences) {
@@ -85,7 +85,7 @@ bool StartPreparedCutscene(CutsceneHost& host) {
   return true;
 }
 
-// decomp: BATTLE.PRG func_80073898 (src/BATTLE/BATTLE.PRG/146C.c:4767)
+// decomp: BATTLE.PRG func_80073898 (src/BATTLE/BATTLE.PRG/146C.c:4494)
 bool BeginQueuedCutscene(CutsceneHost& host) {
   if (host.PendingEventSelector() != 0) {
     host.SetPreparation(CutscenePreparation::kWaiting);
@@ -94,7 +94,7 @@ bool BeginQueuedCutscene(CutsceneHost& host) {
   return StartPreparedCutscene(host);
 }
 
-// decomp: BATTLE.PRG func_800738E4 (src/BATTLE/BATTLE.PRG/146C.c:4777)
+// decomp: BATTLE.PRG func_800738E4 (src/BATTLE/BATTLE.PRG/146C.c:4504)
 void EndFieldCutscene(CutsceneHost& host) {
   host.PauseMovingPlatforms(false);
   host.SetMarkersHidden(false);

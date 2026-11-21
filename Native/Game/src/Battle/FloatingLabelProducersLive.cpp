@@ -129,8 +129,9 @@ int LiveQueueActorValueLabel(int actor_slot, int limb_tag,
                 "value label");
 }
 
-// decomp: vs_battle_renderBattleAbilityTimingResult
-// (src/BATTLE/BATTLE.PRG/2842C.c:1643)
+// decomp: renderBattleAbilityTimingResult
+// (src/BATTLE/BATTLE.PRG/2842C.c:1631; was
+// vs_battle_renderBattleAbilityTimingResult)
 int LiveQueueAbilityTimingResult(int timing_result) {
   LiveProducerWorld world;
   return Result(QueueAbilityTimingResult(timing_result, world),
@@ -143,7 +144,7 @@ int LiveQueueChainCount(int chain_count) {
   return Result(QueueChainCount(chain_count, world), "chain count");
 }
 
-// decomp: func_80093FEC (src/BATTLE/BATTLE.PRG/2842C.c:1695)
+// decomp: func_80093FEC (src/BATTLE/BATTLE.PRG/2842C.c:1683)
 int LiveQueueActorStatusLabels(int actor_slot, int /*arg1*/, int status_mask,
                                int label_flags) {
   LiveProducerWorld world;

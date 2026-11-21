@@ -112,86 +112,111 @@ constexpr std::size_t kHelpTextWords = 80;
 }  // namespace
 }  // namespace VS::Menu::Framework
 
-// decomp: D_800EBA78 (BATTLE/BATTLE.PRG 5BF94.c:2934): the main menu help
-// text is VS::Content::battleMainMenuHelpText, filled from the module image
-// (ModuleData.cpp); its last word opens the gradient window.
+// decomp: D_800EBA78 (BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/5BF94.c:365): the
+// main menu help text is VS::Content::battleMainMenuHelpText, filled from the
+// module image (ModuleData.cpp); its last word opens the gradient window.
 
-// decomp: _loadedSubMenu (BATTLE/BATTLE.PRG 5BF94.c): the module image byte
-// is 0.
+// decomp: loadedSubMenu (BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/5BF94.c:358;
+// was _loadedSubMenu): the module image byte is 0.
 signed char VS::Menu::Framework::loadedSubMenu = 0;
-// decomp: vs_battle_menuItems (BATTLE/BATTLE.PRG 5BF94.c)
+// decomp: vs_battle_menuItems (BATTLE/BATTLE.PRG
+// src/BATTLE/BATTLE.PRG/battleUi.h:277)
 VS::Menu::Framework::MenuRow* VS::Menu::Framework::menuItems = nullptr;
-// decomp: D_800EB9C4 (BATTLE/BATTLE.PRG 5BF94.c)
+// decomp: D_800EB9C4 (BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/battleUi.h:275)
 VS::Items::LootListNode* VS::Menu::Framework::lootLists = nullptr;
-// decomp: D_800EB9C8 (BATTLE/BATTLE.PRG 5BF94.c)
+// decomp: D_800EB9C8 (BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/battleUi.h:276)
 VS::Items::BattleLoot* VS::Menu::Framework::lootEntry = nullptr;
-// decomp: D_800EB9CE (BATTLE/BATTLE.PRG 5BF94.c): the module image byte is 0.
+// decomp: D_800EB9CE (BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/5BF94.c:361): the
+// module image byte is 0.
 char VS::Menu::textBoxBufferIndex = 0;
-// decomp: _menuBgUnpackedBuf (BATTLE/BATTLE.PRG 5BF94.c)
+// decomp: menuBgUnpackedBuf (BATTLE/BATTLE.PRG
+// src/BATTLE/BATTLE.PRG/5BF94.c:363; was _menuBgUnpackedBuf)
 std::uint32_t* VS::Menu::Framework::menuBackgroundBuffer = nullptr;
-// decomp: D_800F4CC0 (BATTLE/BATTLE.PRG 5BF94.c)
+// decomp: D_800F4CC0 (BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/5BF94.c:419)
 int VS::Menu::Framework::mainMenuCursorAnimation = 0;
-// decomp: D_800F4CD0 (BATTLE/BATTLE.PRG 5BF94.c)
+// decomp: D_800F4CD0 (BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/5BF94.c:420)
 std::uint32_t
     VS::Menu::textBoxOrderingTables[VS::Menu::kTextBoxOrderingTableCount] = {};
-// decomp: vs_battle_shortcutInvoked (BATTLE/BATTLE.PRG 5BF94.c)
+// decomp: vs_battle_shortcutInvoked (BATTLE/BATTLE.PRG
+// src/BATTLE/BATTLE.PRG/battleUi.h:292)
 char VS::Menu::Framework::shortcutInvoked = 0;
-// decomp: D_800F4E6B (BATTLE/BATTLE.PRG 5BF94.c)
+// decomp: D_800F4E6B (BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/battleUi.h:293)
 char VS::Menu::saveLocationId = 0;
-// decomp: vs_battle_submenuStates (BATTLE/BATTLE.PRG 5BF94.c)
+// decomp: vs_battle_submenuStates (BATTLE/BATTLE.PRG
+// src/BATTLE/BATTLE.PRG/battleUi.h:297)
 char VS::Menu::Framework::submenuStates
     [VS::Menu::Framework::kSubmenuStateCount] = {};
-// decomp: vs_battle_rowTypeBuf (BATTLE/BATTLE.PRG 5BF94.c)
+// decomp: vs_battle_rowTypeBuf (BATTLE/BATTLE.PRG
+// src/BATTLE/BATTLE.PRG/battleUi.h:294)
 int* VS::Menu::Framework::rowTypeBuf = nullptr;
-// decomp: vs_battle_unlockedBreakArt (BATTLE/BATTLE.PRG 5BF94.c)
+// decomp: vs_battle_unlockedBreakArt (BATTLE/BATTLE.PRG
+// src/BATTLE/BATTLE.PRG/battleUi.h:295)
 char VS::Menu::Framework::unlockedBreakArt = 0;
-// decomp: vs_battle_stringBuf (BATTLE/BATTLE.PRG 5BF94.c)
+// decomp: vs_battle_stringBuf (BATTLE/BATTLE.PRG
+// src/BATTLE/BATTLE.PRG/battleUi.h:296)
 char* VS::Menu::Framework::stringBuf = nullptr;
-// decomp: D_800F4E98 (BATTLE/BATTLE.PRG 5BF94.c)
+// decomp: D_800F4E98 (BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/battleUi.h:299)
 VS::Menu::Framework::ActionSelection VS::Menu::Framework::actionSelection = {};
-// decomp: D_800F4EA0 (BATTLE/BATTLE.PRG 5BF94.c)
+// decomp: D_800F4EA0 (BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/battleUi.h:300)
 int VS::Menu::Framework::actionRestrictions = 0;
-// decomp: D_800F4EE8 (BATTLE/BATTLE.PRG 5BF94.c)
+// decomp: D_800F4EE8 (BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/battleUi.h:301)
 VS::Menu::Framework::MenuMemory VS::Menu::Framework::menuMemory = {};
-// decomp: vs_battle_unlockedBattleAbility (BATTLE/BATTLE.PRG 5BF94.c)
+// decomp: vs_battle_unlockedBattleAbility (BATTLE/BATTLE.PRG
+// src/BATTLE/BATTLE.PRG/battleUi.h:302)
 char VS::Menu::Framework::unlockedBattleAbility = 0;
-// decomp: D_800F4FDB (BATTLE/BATTLE.PRG 5BF94.c)
+// decomp: D_800F4FDB (BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/battleUi.h:303)
 char VS::Menu::Framework::openedWithoutMainMenu = 0;
-// decomp: vs_battle_menuState (BATTLE/BATTLE.PRG 5BF94.c)
+// decomp: vs_battle_menuState (BATTLE/BATTLE.PRG
+// src/BATTLE/BATTLE.PRG/battleUi.h:307)
 VS::Menu::Framework::LiveMenuControl VS::Menu::Framework::menuState = {};
-// decomp: _itemsText (MENU/MAINMENU.PRG 58EC.c)
+// decomp: itemsText (MENU/MAINMENU.PRG src/MENU/MAINMENU.PRG/58EC.c:801; was
+// _itemsText)
 std::uint16_t* VS::Menu::Framework::itemsText = nullptr;
-// decomp: _menuRowYOffset (MENU/MAINMENU.PRG 58EC.c)
+// decomp: menuRowYOffset (MENU/MAINMENU.PRG src/MENU/MAINMENU.PRG/58EC.c:806;
+// was _menuRowYOffset)
 char VS::Menu::Framework::menuRowYOffset = 0;
-// decomp: _selectedRow (MENU/MAINMENU.PRG 58EC.c)
+// decomp: selectedRow (MENU/MAINMENU.PRG src/MENU/MAINMENU.PRG/58EC.c:802; was
+// _selectedRow)
 int VS::Menu::Framework::selectedRow = 0;
-// decomp: _subMenuId (MENU/MAINMENU.PRG 58EC.c)
+// decomp: currentSubMenuId (MENU/MAINMENU.PRG src/MENU/MAINMENU.PRG/58EC.c:803;
+// was _subMenuId)
 std::uint8_t VS::Menu::Framework::subMenuId = 0;
-// decomp: _subMenuPage (MENU/MAINMENU.PRG 58EC.c)
+// decomp: subMenuPage (MENU/MAINMENU.PRG src/MENU/MAINMENU.PRG/58EC.c:805; was
+// _subMenuPage)
 char VS::Menu::Framework::subMenuPage = 0;
-// decomp: _subMenuRowCount (MENU/MAINMENU.PRG 58EC.c)
+// decomp: subMenuRowCount (MENU/MAINMENU.PRG src/MENU/MAINMENU.PRG/58EC.c:807;
+// was _subMenuRowCount)
 std::uint16_t VS::Menu::Framework::subMenuRowCount = 0;
-// decomp: _subMenuRowInfo (MENU/MAINMENU.PRG 58EC.c)
+// decomp: subMenuRowInfo (MENU/MAINMENU.PRG src/MENU/MAINMENU.PRG/58EC.c:804;
+// was _subMenuRowInfo)
 char VS::Menu::Framework::subMenuRowInfo = 0;
 // decomp: _textHeaders (MENU/MAINMENU.PRG 58EC.c)
 std::array<VS::Menu::Framework::TextHeader,
            VS::Menu::Framework::kTextHeaderCount>
     VS::Menu::Framework::textHeaders = {};
-// decomp: vs_mainMenu_actionMenuState (MENU/MAINMENU.PRG 58EC.c)
+// decomp: vs_mainMenu_actionMenuState (MENU/MAINMENU.PRG
+// src/MENU/MAINMENU.PRG/58EC.c:26)
 char VS::Menu::Framework::actionMenuState = 0;
-// decomp: vs_mainMenu_backgroundFadeStep (MENU/MAINMENU.PRG 58EC.c)
+// decomp: vs_mainMenu_backgroundFadeStep (MENU/MAINMENU.PRG
+// src/MENU/MAINMENU.PRG/58EC.c:405)
 int VS::Menu::Framework::backgroundFadeStep = 0;
-// decomp: vs_mainMenu_containerEmptyBackup (MENU/MAINMENU.PRG 58EC.c)
+// decomp: vs_mainMenu_containerEmptyBackup (MENU/MAINMENU.PRG
+// src/MENU/MAINMENU.PRG/58EC.c:59)
 char VS::Menu::Framework::containerEmptyBackup = 0;
-// decomp: vs_mainMenu_cursorColor (MENU/MAINMENU.PRG 58EC.c)
+// decomp: vs_mainMenu_cursorColor (MENU/MAINMENU.PRG
+// src/MENU/MAINMENU.PRG/58EC.c:403)
 char VS::Menu::Framework::cursorColor = 0;
-// decomp: vs_mainMenu_displayActionCost (MENU/MAINMENU.PRG 58EC.c)
+// decomp: vs_mainMenu_displayActionCost (MENU/MAINMENU.PRG
+// src/MENU/MAINMENU.PRG/58EC.c:402)
 char VS::Menu::Framework::displayActionCost = 0;
-// decomp: vs_mainMenu_hideMenu (MENU/MAINMENU.PRG 58EC.c)
+// decomp: vs_mainMenu_hideMenu (MENU/MAINMENU.PRG
+// src/MENU/MAINMENU.PRG/58EC.c:404)
 char VS::Menu::Framework::hideMenu = 0;
-// decomp: vs_mainMenu_itemsListRow (MENU/MAINMENU.PRG 58EC.c)
+// decomp: vs_mainMenu_itemsListRow (MENU/MAINMENU.PRG
+// src/MENU/MAINMENU.PRG/58EC.c:800)
 char VS::Menu::Framework::itemsListRow = 0;
-// decomp: vs_menu_inventoryStorage (MENU/MAINMENU.PRG C48.c)
+// decomp: vs_menu_inventoryStorage (MENU/MAINMENU.PRG
+// src/MENU/MAINMENU.PRG/C48.c:44)
 VS::Menu::container::InventoryStorage* VS::Menu::Framework::inventoryStorage =
     nullptr;
 

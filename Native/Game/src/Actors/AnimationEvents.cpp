@@ -829,7 +829,7 @@ AnimationEventRun RunAnimationEvents(AnimationEventHost& host,
   }
 }
 
-// decomp: BATTLE.PRG func_800AE46C (src/BATTLE/BATTLE.PRG/44F14.c:606)
+// decomp: BATTLE.PRG func_800AE46C (src/BATTLE/BATTLE.PRG/44F14.c:590)
 void IgnoreAnimationEvent() {}
 
 // decomp: BATTLE.PRG func_800AE47C (src/BATTLE/BATTLE.PRG/44F14.c:610)

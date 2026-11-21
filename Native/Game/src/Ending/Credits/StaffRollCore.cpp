@@ -741,7 +741,8 @@ void FillRippleGrid(RippleState& ripple) {
   }
 }
 
-// decomp: ENDING.PRG _renderPhantomPain (src/ENDING/ENDING.PRG/D4.c:218)
+// decomp: ENDING.PRG renderPhantomPain (src/ENDING/ENDING.PRG/D4.c:98; was
+// _renderPhantomPain)
 void DrawPhantomPainRipple(Element& element, RippleState& ripple,
                            StaffRollHost& host) {
   int brightness = 0;
@@ -800,7 +801,7 @@ void DrawPhantomPainRipple(Element& element, RippleState& ripple,
   }
 }
 
-// decomp: ENDING.PRG _renderFin (src/ENDING/ENDING.PRG/D4.c:325)
+// decomp: ENDING.PRG renderFin (src/ENDING/ENDING.PRG/D4.c:222; was _renderFin)
 void DrawFinCaption(Element& element, DisplayHost& host) {
   int brightness = 0;
   switch (element.phase) {
@@ -843,7 +844,8 @@ void DrawFinCaption(Element& element, DisplayHost& host) {
   host.ChangeTexturePage({kFinSlot, kFinTexturePage});
 }
 
-// decomp: ENDING.PRG _renderVagrantStory (src/ENDING/ENDING.PRG/D4.c:390)
+// decomp: ENDING.PRG renderVagrantStory (src/ENDING/ENDING.PRG/D4.c:308; was
+// _renderVagrantStory)
 void DrawScrollingTitleLogo(Element& element, const State& state,
                             DisplayHost& host) {
   int brightness = 0;
@@ -891,8 +893,8 @@ void DrawScrollingTitleLogo(Element& element, const State& state,
   host.ChangeTexturePage({kTextSlot, kLogoShadowTexturePage});
 }
 
-// decomp: ENDING.PRG _inverseDistanceFromScreencenter
-// (src/ENDING/ENDING.PRG/D4.c:468)
+// decomp: ENDING.PRG distanceFromScreencenter
+// (src/ENDING/ENDING.PRG/D4.c:395; was _inverseDistanceFromScreencenter)
 int DistanceFromScreenCenter(int x, int y) {
   const std::int64_t dx = static_cast<std::int64_t>(x) - kScreenCenterX;
   const std::int64_t dy = static_cast<std::int64_t>(y) - kScreenCenterY;
@@ -901,7 +903,8 @@ int DistanceFromScreenCenter(int x, int y) {
       static_cast<std::int32_t>((dx * dx) + (dy * dy)));
 }
 
-// decomp: ENDING.PRG func_80069388 (src/ENDING/ENDING.PRG/D4.c:475)
+// decomp: ENDING.PRG updateRadialFadePoly (src/ENDING/ENDING.PRG/D4.c:419; was
+// func_80069388)
 void ApplyRadialVertexFade(std::span<ShadedVertex, kQuadCorners> corners,
                            std::int16_t fade_step, bool fade_out) {
   const int base = fade_out
@@ -925,7 +928,8 @@ void ApplyRadialVertexFade(std::span<ShadedVertex, kQuadCorners> corners,
   }
 }
 
-// decomp: ENDING.PRG _renderllustration (src/ENDING/ENDING.PRG/D4.c:583)
+// decomp: ENDING.PRG renderllustration (src/ENDING/ENDING.PRG/D4.c:498; was
+// _renderllustration)
 void DrawIllustration(Element& element, State& state, StaffRollHost& host) {
   IllustrationState& illustration = state.illustration;
   const int background = state.background_brightness;
@@ -1006,7 +1010,8 @@ void DrawIllustration(Element& element, State& state, StaffRollHost& host) {
                        kIllustrationPageRow)});
 }
 
-// decomp: ENDING.PRG _creditsStrWidth (src/ENDING/ENDING.PRG/D4.c:672)
+// decomp: ENDING.PRG creditsStrWidth (src/ENDING/ENDING.PRG/D4.c:602; was
+// _creditsStrWidth)
 std::int16_t MeasureTextWidth(std::span<const std::uint8_t> text,
                               std::span<const std::uint8_t> glyph_widths) {
   std::int16_t width = 0;
@@ -1029,7 +1034,8 @@ std::int16_t MeasureTextWidth(std::span<const std::uint8_t> text,
   return width;
 }
 
-// decomp: ENDING.PRG _renderText (src/ENDING/ENDING.PRG/D4.c:711)
+// decomp: ENDING.PRG renderText (src/ENDING/ENDING.PRG/D4.c:636; was
+// _renderText)
 void DrawScrollingText(Element& element, const State& state,
                        StaffRollHost& host) {
   const auto text = ElementText(element, host.Script());
@@ -1052,7 +1058,8 @@ void DrawScrollingText(Element& element, const State& state,
   host.ChangeTexturePage({kTextSlot, kTextTexturePage});
 }
 
-// decomp: ENDING.PRG _renderCopyright (src/ENDING/ENDING.PRG/D4.c:831)
+// decomp: ENDING.PRG renderCopyright (src/ENDING/ENDING.PRG/D4.c:754; was
+// _renderCopyright)
 void DrawScrollingCopyright(Element& element, const State& state,
                             DisplayHost& host) {
   if (element.phase == kPhaseStart) {
@@ -1072,7 +1079,8 @@ void DrawScrollingCopyright(Element& element, const State& state,
   host.ChangeTexturePage({kTextSlot, kCopyrightTexturePage});
 }
 
-// decomp: ENDING.PRG _renderBackground (src/ENDING/ENDING.PRG/D4.c:865)
+// decomp: ENDING.PRG renderBackground (src/ENDING/ENDING.PRG/D4.c:792; was
+// _renderBackground)
 void DrawBackground(const State& state, DisplayHost& host) {
   const auto brightness = LowByte(state.background_brightness);
   SpriteDraw left = kBackgroundLeft;
@@ -1091,7 +1099,8 @@ void DrawBackground(const State& state, DisplayHost& host) {
   host.ChangeTexturePage({kBackdropSlot, kBackdropTexturePage});
 }
 
-// decomp: ENDING.PRG _backgroundFadeIn (src/ENDING/ENDING.PRG/D4.c:939)
+// decomp: ENDING.PRG screenFadeIn (src/ENDING/ENDING.PRG/D4.c:869; was
+// _backgroundFadeIn)
 void FadeInBackground(Element& element, State& state) {
   if (element.phase == kPhaseStart) {
     element.animation_frame = 0;
@@ -1107,7 +1116,8 @@ void FadeInBackground(Element& element, State& state) {
       static_cast<std::uint16_t>(eased / kEaseToBrightness);
 }
 
-// decomp: ENDING.PRG _backgroundFadeOut (src/ENDING/ENDING.PRG/D4.c:954)
+// decomp: ENDING.PRG screenFadeOut (src/ENDING/ENDING.PRG/D4.c:887; was
+// _backgroundFadeOut)
 void FadeOutBackground(Element& element, State& state) {
   if (element.phase == kPhaseStart) {
     element.phase = kPhaseFadeIn;
@@ -1124,7 +1134,8 @@ void FadeOutBackground(Element& element, State& state) {
       kFullBrightness - ((eased << kBrightnessShift) >> kFixedShift));
 }
 
-// decomp: ENDING.PRG func_8006A4D8 (src/ENDING/ENDING.PRG/D4.c:972)
+// decomp: ENDING.PRG renderFadeOut (src/ENDING/ENDING.PRG/D4.c:913; was
+// func_8006A4D8)
 void FadeOutForSkip(Element& element, State& state, DisplayHost& host) {
   if (element.phase == kPhaseStart) {
     element.animation_frame = 0;
@@ -1191,7 +1202,8 @@ void RunStaffRoll(State& state, StaffRollHost& host) {
   host.ShowClearResults();
 }
 
-// decomp: ENDING.PRG _setDrawEnv (src/ENDING/ENDING.PRG/D4.c:1070)
+// decomp: ENDING.PRG setDrawEnv (src/ENDING/ENDING.PRG/D4.c:1040; was
+// _setDrawEnv)
 DrawEnvironment ConfigureDrawEnvironment() {
   return {.clear_background = true,
           .dither = false,
@@ -1200,7 +1212,8 @@ DrawEnvironment ConfigureDrawEnvironment() {
           .texture_page = kDrawTexturePage};
 }
 
-// decomp: ENDING.PRG func_8006A888 (src/ENDING/ENDING.PRG/D4.c:1081)
+// decomp: ENDING.PRG renderCredits (src/ENDING/ENDING.PRG/D4.c:1060; was
+// func_8006A888)
 void RunFrames(State& state, StaffRollHost& host) {
   while (!state.has_finished) {
     BeginFrame(host);
@@ -1217,7 +1230,8 @@ void RunFrames(State& state, StaffRollHost& host) {
   }
 }
 
-// decomp: ENDING.PRG func_8006A9C0 (src/ENDING/ENDING.PRG/D4.c:1115)
+// decomp: ENDING.PRG loadTim (src/ENDING/ENDING.PRG/D4.c:1102; was
+// func_8006A9C0)
 bool UploadTexture(std::span<const std::byte> tim, DisplayHost& host) {
   const auto mode = ReadValue<std::int32_t>(tim, kTimModeOffset);
   if (!mode) {
@@ -1241,12 +1255,14 @@ bool UploadTexture(std::span<const std::byte> tim, DisplayHost& host) {
   return UploadTimBlock(tim, block, host);
 }
 
-// decomp: ENDING.PRG _resetElements (src/ENDING/ENDING.PRG/D4.c:1137)
+// decomp: ENDING.PRG resetElements (src/ENDING/ENDING.PRG/D4.c:1127; was
+// _resetElements)
 void ResetElements(State& state) {
   for (Element& element : state.elements) element.phase = kPhaseFree;
 }
 
-// decomp: ENDING.PRG _renderElements (src/ENDING/ENDING.PRG/D4.c:1146)
+// decomp: ENDING.PRG renderElements (src/ENDING/ENDING.PRG/D4.c:1141; was
+// _renderElements)
 int DrawElements(State& state, StaffRollHost& host) {
   int active = 0;
   for (Element& element : state.elements) {
@@ -1260,7 +1276,8 @@ int DrawElements(State& state, StaffRollHost& host) {
   return active;
 }
 
-// decomp: ENDING.PRG _addRenderer (src/ENDING/ENDING.PRG/D4.c:1164)
+// decomp: ENDING.PRG addRenderer (src/ENDING/ENDING.PRG/D4.c:1165; was
+// _addRenderer)
 Element* AddElement(State& state, ElementKind kind) {
   for (std::size_t index = 1; index < state.elements.size(); ++index) {
     if (state.elements[index].phase == kPhaseFree) {
@@ -1273,13 +1290,15 @@ Element* AddElement(State& state, ElementKind kind) {
   return nullptr;
 }
 
-// decomp: ENDING.PRG _replaceMainRenderer (src/ENDING/ENDING.PRG/D4.c:1181)
+// decomp: ENDING.PRG replaceMainRenderer (src/ENDING/ENDING.PRG/D4.c:1190; was
+// _replaceMainRenderer)
 Element* ReserveMainElement(State& state, ElementKind kind) {
   Element& main = state.elements.front();
   return main.phase == kPhaseFree ? StartElement(main, kind) : nullptr;
 }
 
-// decomp: ENDING.PRG _parseCreditsScript (src/ENDING/ENDING.PRG/D4.c:1193)
+// decomp: ENDING.PRG parseCreditsScript (src/ENDING/ENDING.PRG/D4.c:1207; was
+// _parseCreditsScript)
 void ExecuteScript(State& state, StaffRollHost& host) {
   if (state.script_delay_frames != 0) {
     --state.script_delay_frames;
@@ -1290,16 +1309,18 @@ void ExecuteScript(State& state, StaffRollHost& host) {
   }
 }
 
-// decomp: ENDING.PRG func_8006AF44 (src/ENDING/ENDING.PRG/D4.c:1307)
+// decomp: ENDING.PRG initTimDecompress (src/ENDING/ENDING.PRG/D4.c:1339; was
+// func_8006AF44)
 void QueueIllustrationDecode(DecoderState& decoder, std::size_t resource) {
   decoder.phase = DecodePhase::kQueued;
   decoder.resource = resource;
 }
 
-// decomp: ENDING.PRG func_8006AF64 (src/ENDING/ENDING.PRG/D4.c:1317). The
-// original decoded until VSync(1) was 200 scanlines past the frame start
-// (func_8006A888 kept the start) and resumed on the next frame; a native frame
-// has no scanline clock, so one step decodes the whole illustration.
+// decomp: ENDING.PRG decompressTim (src/ENDING/ENDING.PRG/D4.c:1352; was
+// func_8006AF64). The original decoded until VSync(1) was 200 scanlines past
+// the frame start (func_8006A888 kept the start) and resumed on the next frame;
+// a native frame has no scanline clock, so one step decodes the whole
+// illustration.
 bool DecodeIllustrationStep(State& state, StaffRollHost& host) {
   DecoderState& decoder = state.decoder;
   if (decoder.phase == DecodePhase::kIdle) return false;
@@ -1325,7 +1346,8 @@ bool DecodeIllustrationStep(State& state, StaffRollHost& host) {
   return false;
 }
 
-// decomp: ENDING.PRG func_8006B324 (src/ENDING/ENDING.PRG/D4.c:1390)
+// decomp: ENDING.PRG renderDebugString (src/ENDING/ENDING.PRG/D4.c:1444; was
+// func_8006B324)
 void DrawSmallText(ScreenPoint origin, int palette_row_offset,
                    std::span<const std::uint8_t> text, DisplayHost& host) {
   const auto palette = PaletteBits(kSmallTextPaletteX,
@@ -1349,7 +1371,8 @@ void DrawSmallText(ScreenPoint origin, int palette_row_offset,
   host.ChangeTexturePage({kOverlaySlot, kSmallTextTexturePage});
 }
 
-// decomp: ENDING.PRG func_8006B450 (src/ENDING/ENDING.PRG/D4.c:1438)
+// decomp: ENDING.PRG initVideo (src/ENDING/ENDING.PRG/D4.c:1487; was
+// func_8006B450)
 void InitializeDisplay(const DisplaySettings& settings, DisplayHost& host) {
   host.SetDisplayEnabled(false);
   host.SetGeometryOffset(settings.width / 2, settings.height / 2);
@@ -1368,9 +1391,9 @@ void InitializeDisplay(const DisplaySettings& settings, DisplayHost& host) {
   host.ResetPresentedFrameCount();
 }
 
-// decomp: ENDING.PRG _drawScreen (src/ENDING/ENDING.PRG/D4.c:1480). The
-// original returned vs_main_gametimeUpdate's VSync result, which no caller
-// read.
+// decomp: ENDING.PRG drawScreen (src/ENDING/ENDING.PRG/D4.c:1535; was
+// _drawScreen). The original returned vs_main_gametimeUpdate's VSync result,
+// which no caller read.
 void PresentFrame(int ordering_slot, DisplayHost& host) {
   const int buffer = host.FrameBuffer() == 0 ? 1 : 0;
   host.SetFrameBuffer(buffer);
@@ -1380,7 +1403,8 @@ void PresentFrame(int ordering_slot, DisplayHost& host) {
   host.CountPresentedFrame();
 }
 
-// decomp: ENDING.PRG func_8006B884 (src/ENDING/ENDING.PRG/D4.c:1539)
+// decomp: ENDING.PRG initEnvironment (src/ENDING/ENDING.PRG/D4.c:1600; was
+// func_8006B884)
 void AllocateRenderBuffers(DisplayHost& host) {
   InitializeDisplay(kStaffRollDisplay, host);
   host.ResetHeap();
@@ -1394,7 +1418,8 @@ void AllocateRenderBuffers(DisplayHost& host) {
                            kOrderingTableBytes);
 }
 
-// decomp: ENDING.PRG func_8006B930 (src/ENDING/ENDING.PRG/D4.c:1551)
+// decomp: ENDING.PRG beginFrame (src/ENDING/ENDING.PRG/D4.c:1619; was
+// func_8006B930)
 void BeginFrame(DisplayHost& host) {
   host.UpdateControllers();
   OrderingTableLayout layout = kOrderingTables;
@@ -1402,11 +1427,13 @@ void BeginFrame(DisplayHost& host) {
   host.BeginOrderingTables(layout);
 }
 
-// decomp: ENDING.PRG func_8006B9B4 (src/ENDING/ENDING.PRG/D4.c:1563)
+// decomp: ENDING.PRG streamEndingXa (src/ENDING/ENDING.PRG/D4.c:1634; was
+// func_8006B9B4)
 void StartMusic(StaffRollHost& host) {
   host.StartEndingMusic(kEndingMusicByteCount);
 }
 
-// decomp: ENDING.PRG _checkStreamXaEnd (src/ENDING/ENDING.PRG/D4.c:1568)
+// decomp: ENDING.PRG checkStreamXaEnd (src/ENDING/ENDING.PRG/D4.c:1639; was
+// _checkStreamXaEnd)
 void WaitForMusicEnd(StaffRollHost& host) { host.StopMusic(); }
 }  // namespace VS::Ending::Credits

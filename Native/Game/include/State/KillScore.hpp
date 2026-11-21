@@ -46,13 +46,13 @@ struct DefeatedEnemy {
   std::optional<ScoredEnemy> scored;
 };
 
-// decomp: BATTLE.PRG _updateEnemyKills (146C.c:1772). A scored enemy counts
-// toward its class (saturating), extends or restarts the enemy kill streak
-// and adds max HP times its streak bonuses to the streak score, capped at
-// kMaxStreakScore. Any enemy sub-type below kEnemyKillFlagCount sets its
-// kill flag. Returns false when the enemy class is outside the counted
-// classes: its count is refused, where the original wrote past the counts
-// into the record's reserved word.
+// decomp: BATTLE.PRG updateEnemyKills (src/BATTLE/BATTLE.PRG/146C.c:1414; was
+// _updateEnemyKills). A scored enemy counts toward its class (saturating),
+// extends or restarts the enemy kill streak and adds max HP times its streak
+// bonuses to the streak score, capped at kMaxStreakScore. Any enemy sub-type
+// below kEnemyKillFlagCount sets its kill flag. Returns false when the enemy
+// class is outside the counted classes: its count is refused, where the
+// original wrote past the counts into the record's reserved word.
 bool RecordEnemyKill(KillScore& score, const DefeatedEnemy& enemy) noexcept;
 
 // True for the actions that extend the weapon kill streak.
@@ -61,9 +61,9 @@ bool RecordEnemyKill(KillScore& score, const DefeatedEnemy& enemy) noexcept;
   return action_id < kWeaponStreakActionLimit;
 }
 
-// decomp: BATTLE.PRG _updateWeaponKillStreak (146C.c:1806). An action that
-// ExtendsWeaponKillStreak extends the weapon kill streak, restarting it when
-// the blade category changed.
+// decomp: BATTLE.PRG updateWeaponKillStreak (src/BATTLE/BATTLE.PRG/146C.c:1448;
+// was _updateWeaponKillStreak). An action that ExtendsWeaponKillStreak extends
+// the weapon kill streak, restarting it when the blade category changed.
 void UpdateWeaponKillStreak(KillScore& score, std::uint16_t action_id,
                             std::uint8_t blade_category) noexcept;
 }  // namespace VS::State

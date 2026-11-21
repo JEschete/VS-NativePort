@@ -84,7 +84,7 @@ std::optional<bool> CanActOnGimmick(const ActionExecutionHost& host,
 }
 }  // namespace
 
-// decomp: func_800DBC60 (src/BATTLE/BATTLE.PRG/73460.s:8).
+// decomp: func_800DBC60 (src/BATTLE/BATTLE.PRG/72B70.s:658).
 bool DoesActionRequireCooldown(const ActionCooldown& cooldown,
                                const ActionCandidate& candidate,
                                bool target_is_gimmick) {
@@ -92,7 +92,7 @@ bool DoesActionRequireCooldown(const ActionCooldown& cooldown,
          (candidate.Option(CandidateOption::kHarmful) && !target_is_gimmick);
 }
 
-// decomp: func_800DBCB4 (src/BATTLE/BATTLE.PRG/73460.s:38).
+// decomp: func_800DBCB4 (src/BATTLE/BATTLE.PRG/72B70.s:683).
 bool IsActionCooldownReady(const ActionCooldown& cooldown,
                            const ActionCandidate& candidate,
                            bool target_is_gimmick) {
@@ -101,7 +101,7 @@ bool IsActionCooldownReady(const ActionCooldown& cooldown,
           cooldown.minimum_action_delay == 0);
 }
 
-// decomp: func_800DBCEC (src/BATTLE/BATTLE.PRG/73460.s:59).
+// decomp: func_800DBCEC (src/BATTLE/BATTLE.PRG/72B70.s:700).
 // The original starts its walk at the actor pointer array itself, reading the
 // second array entry as an actor ID; only the listed actors are checked here.
 std::optional<bool> HasNearbyEnemy(GridTile gimmick,
@@ -119,7 +119,7 @@ std::optional<bool> HasNearbyEnemy(GridTile gimmick,
   return false;
 }
 
-// decomp: func_800DBD80 (src/BATTLE/BATTLE.PRG/73580.s:11).
+// decomp: func_800DBD80 (src/BATTLE/BATTLE.PRG/72B70.s:740).
 std::optional<bool> CanExecuteActionCandidate(
     const ActionExecutionHost& host, const ActionCandidate& candidate) {
   const unsigned target = candidate.TargetId();
@@ -153,7 +153,7 @@ std::optional<bool> CanExecuteActionCandidate(
          !relation.obstructed;
 }
 
-// decomp: func_800DC284 (src/BATTLE/BATTLE.PRG/7399C.s:79).
+// decomp: func_800DC284 (src/BATTLE/BATTLE.PRG/7399C.s:71).
 // The GTE sums the halfword terms exactly; only the final `add` can trap.
 std::optional<std::int32_t> ScoreActorCondition(
     const ConditionScoreTerms& terms) {
@@ -170,19 +170,19 @@ std::optional<std::int32_t> ScoreActorCondition(
   return score;
 }
 
-// decomp: func_800DC484 (src/BATTLE/BATTLE.PRG/73C84.s:10).
+// decomp: func_800DC484 (src/BATTLE/BATTLE.PRG/7399C.s:222).
 unsigned IsActionHarmfulToActor(unsigned action, std::uint16_t ai_flags,
                                 unsigned enemy_class) {
   return TargetingFlag(action, ai_flags, enemy_class, kHarmfulFlagBit);
 }
 
-// decomp: func_800DC48C (src/BATTLE/BATTLE.PRG/73C84.s:16).
+// decomp: func_800DC48C (src/BATTLE/BATTLE.PRG/7399C.s:227).
 unsigned IsActionBeneficialToActor(unsigned action, std::uint16_t ai_flags,
                                    unsigned enemy_class) {
   return TargetingFlag(action, ai_flags, enemy_class, kBeneficialFlagBit);
 }
 
-// decomp: func_800DC4F0 (src/BATTLE/BATTLE.PRG/73C84.s:49).
+// decomp: func_800DC4F0 (src/BATTLE/BATTLE.PRG/7399C.s:255).
 std::optional<bool> CacheFallbackActionCandidate(
     FallbackCandidateCache& cache, const ActionCandidate& candidate,
     bool fallback_eligible) {
@@ -208,7 +208,7 @@ std::optional<bool> CacheFallbackActionCandidate(
   return true;
 }
 
-// decomp: func_800DC574 (src/BATTLE/BATTLE.PRG/73C84.s:89).
+// decomp: func_800DC574 (src/BATTLE/BATTLE.PRG/7399C.s:288).
 // The original draws once even for an empty ranking; the only caller passes
 // at least one candidate, so an empty ranking draws nothing here.
 std::optional<bool> PromoteRandomizedActionCandidate(
@@ -232,7 +232,7 @@ std::optional<bool> PromoteRandomizedActionCandidate(
   return false;
 }
 
-// decomp: func_800E45D4 (src/BATTLE/BATTLE.PRG/7BDD4.s:10).
+// decomp: func_800E45D4 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:480).
 std::optional<int> NextActorRandomMasked(ActorRandomState& state, int range) {
   if (range <= 0) return Refuse("AI random mask requires a positive range");
   const auto current = std::bit_cast<std::int16_t>(
@@ -247,14 +247,14 @@ std::optional<int> NextActorRandomMasked(ActorRandomState& state, int range) {
                           (static_cast<std::uint32_t>(range) - 1));
 }
 
-// decomp: func_800E4FB0 (src/BATTLE/BATTLE.PRG/7C7B0.s:8).
+// decomp: func_800E4FB0 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:499).
 // The original's range adjustment for one actor kind never reaches the
 // comparison.
 bool IsAiTargetBeyondNearRadius(std::uint32_t distance_squared) {
   return distance_squared > kNearTargetDistanceSquared;
 }
 
-// decomp: func_800DB8AC (src/BATTLE/BATTLE.PRG/72B70.s:439).
+// decomp: func_800DB8AC (src/BATTLE/BATTLE.PRG/72B70.s:407).
 // The original also calls func_800DBCB4 and discards its result.
 std::optional<bool> CanApproachEngagedTarget(int actor_id,
                                              const EngagementTimers& timers,

@@ -283,7 +283,8 @@ void EncodeSwingEffect(const SwingEffect& effect,
 }
 
 // decomp: BATTLE.PRG func_80092548 (src/BATTLE/BATTLE.PRG/2842C.c:924) and
-// func_800927AC (2842C.c:963): the group ids are padded to four bytes.
+// func_800927AC (src/BATTLE/BATTLE.PRG/2842C.c:963): the group ids are padded
+// to four bytes.
 std::size_t ScriptPreambleBytes(std::uint8_t object_count) {
   const std::size_t remainder = object_count % kScriptIdAlignment;
   const std::size_t padding =

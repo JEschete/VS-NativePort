@@ -985,7 +985,7 @@ void PresentScreen(InventoryTerminalHost& host) {
 }
 }  // namespace
 
-// decomp: _sortItems (src/MENU/items1.h:1077); MENU3 80104530,
+// decomp: sortItems (src/MENU/items1.h:1081; was _sortItems); MENU3 80104530,
 // MENUB 80104608. Both originals dispatch shield criteria through
 // gripSortStats.
 std::int32_t UpdateSortMenu(InventorySortState& state,
@@ -1029,8 +1029,9 @@ std::int32_t UpdateSortMenu(InventorySortState& state,
   return 0;
 }
 
-// decomp: _discardMenu (src/MENU/items1.h:1185); MENU3 80104788,
-// MENUB 80104860. Item clearing remains the inventory callee's responsibility.
+// decomp: discardMenu (src/MENU/items1.h:1189; was _discardMenu); MENU3
+// 80104788, MENUB 80104860. Item clearing remains the inventory callee's
+// responsibility.
 std::int32_t UpdateDiscardMenu(InventoryDiscardState& state,
                                InventoryDiscardPresentation& presentation,
                                InventoryTerminalHost& host,
@@ -1094,8 +1095,9 @@ std::int32_t UpdateDiscardMenu(InventoryDiscardState& state,
   return 0;
 }
 
-// decomp: _itemNavigation (src/MENU/items2.h:201); MENU3 801053EC,
-// MENUB 80105454. Context differences are retained, including MENUB's merge.
+// decomp: itemNavigation (src/MENU/items2.h:206; was _itemNavigation); MENU3
+// 801053EC, MENUB 80105454. Context differences are retained, including MENUB's
+// merge.
 std::int32_t UpdateItemList(InventoryNavigationState& state,
                             InventoryTerminalHost& host,
                             ItemRowsContext context, std::int32_t initialize) {

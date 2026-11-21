@@ -4,8 +4,10 @@
 #include "Effects/Plugins/PluginData.hpp"
 
 namespace VS::Effects::Plg138 {
-// decomp: D_800FCD3C (PLG138.BIN/18.c:7; rings.h:20)
+// decomp: vs_effect_papillonReel_1_colors (src/EFFECT/rings.h:20; was
+// D_800FCD3C; src/EFFECT/rings.h:20)
 extern plugins::RingPaletteBytes ringColorFactors;
-// decomp: D_800FCD5C (PLG138.BIN/18.c:11; closedRings.h:58)
+// decomp: vs_effect_papillonReel_3_colors (src/EFFECT/closedRings.h:58; was
+// D_800FCD5C; src/EFFECT/closedRings.h:58)
 extern plugins::RingPalette tiledRingColorFactors;
 }  // namespace VS::Effects::Plg138

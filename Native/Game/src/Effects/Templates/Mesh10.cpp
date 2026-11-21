@@ -69,7 +69,7 @@ template <typename Curve>
                                std::numeric_limits<std::int16_t>::max()));
 }
 
-// decomp: meshes10.h:63-144 (the sampling and the two colours).
+// decomp: src/EFFECT/meshes10.h:63-144 (the sampling and the two colours).
 std::optional<Mesh10Frame> BeginMesh10Tick(Mesh10Host& host) {
   std::optional<Mesh10Frame> opened = OpenSurfaceTick<Mesh10Frame>(host);
   if (!opened.has_value()) {
@@ -86,9 +86,9 @@ std::optional<Mesh10Frame> BeginMesh10Tick(Mesh10Host& host) {
   return opened;
 }
 
-// decomp: meshes10.h:145-182: the model scaled (the first four vertices by
-// the extent, the rest by the attraction jitter), turned by the accumulated
-// rotation and moved to the position; each component saturates to a
+// decomp: src/EFFECT/meshes10.h:145-182: the model scaled (the first four
+// vertices by the extent, the rest by the attraction jitter), turned by the
+// accumulated rotation and moved to the position; each component saturates to a
 // halfword as the GTE's IR registers hold it.
 std::array<RingPoint, kMesh10Vertices> PlaceMesh10(Mesh10Frame& frame,
                                                    const Mesh10Model& model,
@@ -135,8 +135,8 @@ std::array<RingPoint, kMesh10Vertices> PlaceMesh10(Mesh10Frame& frame,
   return placed;
 }
 
-// decomp: meshes10.h:206-216: the triangle of `face` and its depth; nothing
-// for a face whose vertex, colour or texture offset falls outside the
+// decomp: src/EFFECT/meshes10.h:206-216: the triangle of `face` and its depth;
+// nothing for a face whose vertex, colour or texture offset falls outside the
 // tables (the original read past them).
 std::optional<DepthTriangle> FaceTriangle(const Mesh10Face& face,
                                           const Mesh10Faces& faces) {
@@ -164,8 +164,8 @@ std::optional<DepthTriangle> FaceTriangle(const Mesh10Face& face,
   return result;
 }
 
-// decomp: meshes10.h:183-237: projection, the texture coordinates and the
-// sixteen triangles.
+// decomp: src/EFFECT/meshes10.h:183-237: projection, the texture coordinates
+// and the sixteen triangles.
 void DrawMesh10(const Mesh10Frame& frame,
                 const std::array<RingPoint, kMesh10Vertices>& placed,
                 const Mesh10Model& model, SurfaceHost& host) {
@@ -195,7 +195,7 @@ void DrawMesh10(const Mesh10Frame& frame,
 }
 }  // namespace
 
-// decomp: meshes10.h:197-205.
+// decomp: src/EFFECT/meshes10.h:197-205.
 std::array<std::uint8_t, kMesh10UvBytes> Mesh10UvBytes(
     const RingTexture& texture) noexcept {
   const auto byte = [](std::int32_t value) {
@@ -240,7 +240,7 @@ std::array<std::uint32_t, kMesh10PacketWords> EncodeMesh10Packet(
   return words;
 }
 
-// decomp: EFFECT VS_MESH10_FUNCTION (src/EFFECT/meshes10.h:29).
+// decomp: EFFECT VS_MESH10_FUNCTION (src/EFFECT/meshes10.h:52).
 bool Mesh10(SurfaceCommand command, std::int32_t packed, Mesh10Model model,
             Mesh10Host& host) {
   const auto create = [&host](RingPlan plan,
@@ -259,7 +259,7 @@ bool Mesh10(SurfaceCommand command, std::int32_t packed, Mesh10Model model,
         PlaceMesh10(*frame, model, host);
     DrawMesh10(*frame, placed, model, host);
     host.PublishScratch(frame->scratch);
-    // decomp: meshes10.h:238-255 (the tick event).
+    // decomp: src/EFFECT/meshes10.h:238-255 (the tick event).
     EmitSurfaceTickEvent(frame->inputs.definition, frame->scratch.position,
                          host);
     return FinishSurfaceTick(frame->state, host);
@@ -269,43 +269,50 @@ bool Mesh10(SurfaceCommand command, std::int32_t packed, Mesh10Model model,
 }  // namespace VS::Effects::Templates
 
 namespace VS::Effects {
-// decomp: PLG069.BIN func_800F98E0 (src/EFFECT/PLG069.BIN/E0.c:2).
+// decomp: PLG069.BIN vs_effect_avalancheLv1_0 (src/EFFECT/meshes10.h:52; was
+// func_800F98E0).
 bool Plg069::Mesh10(Templates::SurfaceCommand command, std::int32_t packed,
                     Templates::Mesh10Model model, Templates::Mesh10Host& host) {
   return Templates::Mesh10(command, packed, model, host);
 }
 
-// decomp: PLG077.BIN func_800F9818 (src/EFFECT/PLG077.BIN/18.c:8).
+// decomp: PLG077.BIN vs_effect_meteorLv1_0 (src/EFFECT/meshes10.h:52; was
+// func_800F9818).
 bool Plg077::Mesh10(Templates::SurfaceCommand command, std::int32_t packed,
                     Templates::Mesh10Model model, Templates::Mesh10Host& host) {
   return Templates::Mesh10(command, packed, model, host);
 }
 
-// decomp: PLG129.BIN func_800FA424 (src/EFFECT/PLG129.BIN/0.c:7).
+// decomp: PLG129.BIN vs_effect_lastAscension_1 (src/EFFECT/meshes10.h:52; was
+// func_800FA424).
 bool Plg129::Mesh10(Templates::SurfaceCommand command, std::int32_t packed,
                     Templates::Mesh10Model model, Templates::Mesh10Host& host) {
   return Templates::Mesh10(command, packed, model, host);
 }
 
-// decomp: PLG137.BIN func_800F98F8 (src/EFFECT/PLG137.BIN/F8.c:2).
+// decomp: PLG137.BIN vs_effect_cherryRonde_0 (src/EFFECT/meshes10.h:52; was
+// func_800F98F8).
 bool Plg137::Mesh10(Templates::SurfaceCommand command, std::int32_t packed,
                     Templates::Mesh10Model model, Templates::Mesh10Host& host) {
   return Templates::Mesh10(command, packed, model, host);
 }
 
-// decomp: PLG153.BIN func_800F9910 (src/EFFECT/PLG153.BIN/110.c:2).
+// decomp: PLG153.BIN vs_effect_gravisAether_0 (src/EFFECT/meshes10.h:52; was
+// func_800F9910).
 bool Plg153::Mesh10(Templates::SurfaceCommand command, std::int32_t packed,
                     Templates::Mesh10Model model, Templates::Mesh10Host& host) {
   return Templates::Mesh10(command, packed, model, host);
 }
 
-// decomp: PLG154.BIN func_800F9800 (src/EFFECT/PLG154.BIN/0.c:8).
+// decomp: PLG154.BIN vs_effect_trinityPulse_0 (src/EFFECT/meshes10.h:52; was
+// func_800F9800).
 bool Plg154::Mesh10(Templates::SurfaceCommand command, std::int32_t packed,
                     Templates::Mesh10Model model, Templates::Mesh10Host& host) {
   return Templates::Mesh10(command, packed, model, host);
 }
 
-// decomp: PLG260.BIN func_800F9800 (src/EFFECT/PLG260.BIN/0.c:5).
+// decomp: PLG260.BIN vs_effect_plg260_0 (src/EFFECT/meshes10.h:52; was
+// func_800F9800).
 bool Plg260::Mesh10(Templates::SurfaceCommand command, std::int32_t packed,
                     Templates::Mesh10Model model, Templates::Mesh10Host& host) {
   return Templates::Mesh10(command, packed, model, host);
