@@ -1,9 +1,13 @@
+#include <algorithm>
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <limits>
+#include <span>
 #include <string>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
@@ -16,7 +20,10 @@
 #include "Legacy/Render/LibGpu.hpp"
 #include "Render/Device.hpp"
 #include "Render/Display.hpp"
+#include "Render/DrawList.hpp"
+#include "Render/DrawPolygon.hpp"
 #include "Render/Frame.hpp"
+#include "Render/FrameDrawListProbe.hpp"
 #include "Render/PageSpace.hpp"
 #include "Render/Render.hpp"
 #include "Render/RoomDraw.hpp"
@@ -83,6 +90,32 @@ void StoreGroup(Geometry& geometry, std::size_t index,
                 const VS::Render::RoomGroup& group) {
   REQUIRE(VS::Render::WriteRoomGroup(GeometryBytes(geometry), index, group));
 }
+
+// Opens the gameplay draw list over `table` for a test frame and abandons it
+// when the test leaves, even on a failed REQUIRE.
+class SceneListFrame {
+ public:
+  explicit SceneListFrame(std::span<std::uint32_t> table) : table_(table) {
+    Reopen();
+  }
+  ~SceneListFrame() {
+    static_cast<void>(VS::Render::GameFrameDrawList().Abandon());
+  }
+  SceneListFrame(const SceneListFrame&) = delete;
+  SceneListFrame& operator=(const SceneListFrame&) = delete;
+  SceneListFrame(SceneListFrame&&) = delete;
+  SceneListFrame& operator=(SceneListFrame&&) = delete;
+
+  // Starts a new frame, discarding the items of the last one.
+  void Reopen() {
+    static_cast<void>(VS::Render::GameFrameDrawList().Abandon());
+    REQUIRE(VS::Render::GameFrameDrawList().Open(
+        table_, VS::Render::DrawTarget{.surface = &VS::Render::GamePages()}));
+  }
+
+ private:
+  std::span<std::uint32_t> table_;
+};
 
 }  // namespace
 
@@ -262,10 +295,6 @@ TEST_CASE("Room polygons preserve UV order and bound native frame packets",
     group.view.rotation.m[axis][axis] = 4096;
   }
   group.view.translation.z = 1024;
-  const auto draw = [&](int mode) {
-    StoreGroup(geometry, 0, group);
-    return VS::Render::DrawLiveRoomGeometry(&geometry, sizeof geometry, mode);
-  };
   auto& room_clip = VS::Render::LiveRoomClipState();
   const auto saved_clip = room_clip;
   const std::int16_t anchor[3]{-64, -64, 0};
@@ -304,13 +333,21 @@ TEST_CASE("Room polygons preserve UV order and bound native frame packets",
   SetGeomOffset(160, 120);
   SetGeomScreen(256);
   ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
+  SceneListFrame scene(ordering);
+  // Each draw is a new frame, so item 0 is the first polygon it queued.
+  const auto draw = [&](int mode) {
+    StoreGroup(geometry, 0, group);
+    scene.Reopen();
+    return VS::Render::DrawLiveRoomGeometry(&geometry, sizeof geometry, mode);
+  };
+  const auto first = [] { return render_tests::ListedItemAt(0).polygon; };
+  constexpr VS::Render::DrawMaterial kRoomMaterial{
+      .gouraud = true, .textured = true, .page = {0x15}, .palette = {0x1234}};
   VS::Render::SetRoomPolygonNearClip(room_clip, 8);
   VS::Render::SetRoomTextureLodDepth(room_clip, 512);
   const auto saved_room = VS::Field::roomData;
   const auto saved_tint = VS::Field::roomTint;
   const auto saved_mode = VS::Field::roomGeometryDrawMode;
-  const auto saved_start = VS::Field::roomPrimitiveRangeStart;
-  const auto saved_end = VS::Field::roomPrimitiveRangeEnd;
   const auto saved_field_view = frame->view_matrix;
   for (int axis = 0; axis < 3; ++axis) {
     frame->view_matrix.m[axis][axis] = 4096;
@@ -321,40 +358,43 @@ TEST_CASE("Room polygons preserve UV order and bound native frame packets",
   VS::Render::ColorCode tint{1, 2, 3, 0};
   VS::Field::LiveSetRoomTint(&tint, 0);
   StoreGroup(geometry, 0, group);
+  // An item another producer queued before the room keeps its colours.
+  VS::Render::DrawPolygon earlier{.corner_count = 3};
+  earlier.corners[0].red = 128;
+  REQUIRE(VS::Render::GameFrameDrawList().Submit(earlier, 5).has_value());
   VS::Field::LiveDrawRoomGeometry(&geometry);
-  auto* tinted = reinterpret_cast<POLY_GT3*>(buffer);
-  CHECK(VS::Field::roomPrimitiveRangeStart == buffer);
-  CHECK(VS::Field::roomPrimitiveRangeEnd == buffer + sizeof(POLY_GT3));
-  CHECK(tinted->r0 == 132);
-  CHECK(tinted->g1 == 136);
-  CHECK(tinted->b2 == 140);
+  CHECK(VS::Render::GameFrameDrawList().ItemCount() == 2);
+  CHECK(render_tests::ListedItemAt(0).polygon == earlier);
+  const VS::Render::DrawPolygon tinted = render_tests::ListedItemAt(1).polygon;
+  CHECK(frame->primitive_cursor == buffer + sizeof(POLY_GT3));
+  CHECK(tinted.corners[0].red == 132);
+  CHECK(tinted.corners[1].green == 136);
+  CHECK(tinted.corners[2].blue == 140);
   VS::Field::roomData = saved_room;
   VS::Field::roomTint = saved_tint;
   VS::Field::roomGeometryDrawMode = saved_mode;
-  VS::Field::roomPrimitiveRangeStart = saved_start;
-  VS::Field::roomPrimitiveRangeEnd = saved_end;
   frame->view_matrix = saved_field_view;
   ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
   frame->primitive_cursor = buffer;
   draw(0);
-  auto* triangle = reinterpret_cast<POLY_GT3*>(buffer);
   CHECK(frame->primitive_cursor == buffer + sizeof(POLY_GT3));
-  CHECK(nextPrim(&ordering[256]) == triangle);
-  CHECK(triangle->code == 0x34);
-  CHECK(triangle->u0 == 10);
-  CHECK(triangle->v1 == 40);
-  CHECK(triangle->u2 == 50);
-  CHECK(triangle->v2 == 60);
-  CHECK(triangle->clut == 0x1234);
-  CHECK(triangle->tpage == 0x15);
+  const auto [triangle, slot] = render_tests::ListedItemAt(0);
+  CHECK(slot == 256);
+  CHECK(triangle.corner_count == 3);
+  CHECK(triangle.material == kRoomMaterial);
+  CHECK(triangle.corners[0].u == 10);
+  CHECK(triangle.corners[1].v == 40);
+  CHECK(triangle.corners[2].u == 50);
+  CHECK(triangle.corners[2].v == 60);
   for (unsigned flags : {0u, 0x800u}) {
     group.flags = flags;
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
     frame->primitive_cursor = buffer;
     draw(0);
-    const std::array<std::int16_t, 6> coordinates{triangle->x0, triangle->y0,
-                                                  triangle->x1, triangle->y1,
-                                                  triangle->x2, triangle->y2};
+    const auto drawn = first();
+    const std::array<std::int16_t, 6> coordinates{
+        drawn.corners[0].x, drawn.corners[0].y, drawn.corners[1].x,
+        drawn.corners[1].y, drawn.corners[2].x, drawn.corners[2].y};
     const std::array<std::int16_t, 6> expected =
         flags == 0 ? std::array<std::int16_t, 6>{144, 104, 398, 104, 144, 358}
                    : std::array<std::int16_t, 6>{144, 104, 175, 104, 144, 135};
@@ -369,51 +409,54 @@ TEST_CASE("Room polygons preserve UV order and bound native frame packets",
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
     frame->primitive_cursor = buffer;
     draw(0);
-    CHECK(triangle->u2 == (bias < 0 ? 50 : 25));
-    CHECK(triangle->tpage == (bias < 0 ? 0x15 : 0x14));
+    CHECK(first().corners[2].u == (bias < 0 ? 50 : 25));
+    CHECK(first().material.page.word == (bias < 0 ? 0x15 : 0x14));
   }
   group.flags = 0x800;
   frame->primitive_cursor = buffer;
   VS::Render::SetRoomTextureLodDepth(room_clip, 128);
   draw(0);
-  CHECK(triangle->u2 == 25);
-  CHECK(triangle->v2 == 30);
-  CHECK(triangle->tpage == 0x14);
+  CHECK(first().corners[2].u == 25);
+  CHECK(first().corners[2].v == 30);
+  CHECK(first().material.page.word == 0x14);
   frame->primitive_cursor = buffer;
   VS::Render::SetRoomTextureLodDepth(room_clip, 512);
   group.flags |= 0x6000;
   draw(1);
   CHECK(frame->primitive_cursor == buffer + 7 * sizeof(POLY_GT3));
-  CHECK(triangle->u1 == 20);
-  CHECK(triangle->v1 == 30);
-  CHECK(triangle->u2 == 30);
-  CHECK(triangle->v2 == 40);
+  CHECK(VS::Render::GameFrameDrawList().ItemCount() == 7);
+  CHECK(first().corners[1].u == 20);
+  CHECK(first().corners[1].v == 30);
+  CHECK(first().corners[2].u == 30);
+  CHECK(first().corners[2].v == 40);
   group.flags &= ~0x6000u;
   frame->primitive_cursor = buffer;
   geometry.triangles = 0;
   geometry.quads = 1;
   geometry.polygon[15] = 0x3D;
   draw(0);
-  auto* quad = reinterpret_cast<POLY_GT4*>(buffer);
   CHECK(frame->primitive_cursor == buffer + sizeof(POLY_GT4));
-  CHECK(quad->u3 == 70);
-  CHECK(quad->v3 == 80);
+  CHECK(first().corner_count == 4);
+  CHECK(first().corners[3].u == 70);
+  CHECK(first().corners[3].v == 80);
   frame->primitive_cursor = buffer;
   group.flags |= 0x6000;
   draw(1);
   CHECK(frame->primitive_cursor ==
         buffer + 4 * sizeof(POLY_GT4) + 4 * sizeof(POLY_GT3));
-  CHECK(quad->u1 == 20);
-  CHECK(quad->v1 == 30);
-  CHECK(quad->u2 == 30);
-  CHECK(quad->v2 == 40);
-  CHECK(quad->u3 == 40);
-  CHECK(quad->v3 == 50);
+  CHECK(VS::Render::GameFrameDrawList().ItemCount() == 8);
+  const auto quad = first();
+  CHECK(quad.corner_count == 4);
+  CHECK(quad.corners[1].u == 20);
+  CHECK(quad.corners[1].v == 30);
+  CHECK(quad.corners[2].u == 30);
+  CHECK(quad.corners[2].v == 40);
+  CHECK(quad.corners[3].u == 40);
+  CHECK(quad.corners[3].v == 50);
   frame->primitive_cursor = buffer + 0x20000 - 4;
   draw(0);
   CHECK(frame->primitive_cursor == buffer + 0x20000 - 4);
-  CHECK(memory.front() == 0xA5);
-  CHECK(memory.back() == 0xA5);
+  CHECK(VS::Render::GameFrameDrawList().ItemCount() == 0);
   struct FarDepthCase {
     int requested;
     int signed_halfword;
@@ -530,8 +573,9 @@ TEST_CASE("Room polygons preserve UV order and bound native frame packets",
     }
   }
   VS::Render::SetRoomPolygonScreenBounds(room_clip, {0, 0, 320, 224});
-  CHECK(memory.front() == 0xA5);
-  CHECK(memory.back() == 0xA5);
+  // No packet was written into the frame buffer.
+  CHECK(std::ranges::all_of(memory,
+                            [](unsigned char byte) { return byte == 0xA5; }));
   room_clip = saved_clip;
   VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
   VS::Render::frameBuf = saved_frame;
@@ -568,6 +612,7 @@ TEST_CASE("Sky background emits visible colored triangles behind room geometry",
   frame->primitive_cursor = buffer.data();
   frame->ordering_table = ordering.data();
   ClearOTagR(ordering.data(), 2048);
+  const SceneListFrame scene(ordering);
   VS::Core::Gte::Reset();
   static_assert(sizeof sky == VS::Render::kSkyDomeBytes);
   VS::Core::Gte::MATRIX view{};
@@ -576,14 +621,19 @@ TEST_CASE("Sky background emits visible colored triangles behind room geometry",
         VS::Render::RoomDrawStatus::kDrawn);
   CHECK(VS::Render::DrawLiveSkyDome(&sky, sizeof sky - 1, view) ==
         VS::Render::RoomDrawStatus::kInvalidGeometry);
-  auto* triangle = reinterpret_cast<POLY_G3*>(buffer.data());
   CHECK(frame->primitive_cursor == buffer.data() + sizeof(POLY_G3));
-  CHECK(nextPrim(&ordering[2047]) == triangle);
-  CHECK(triangle->x0 == 140);
-  CHECK(triangle->y0 == 100);
-  CHECK(triangle->r0 == 255);
-  CHECK(triangle->g1 == 255);
-  CHECK(triangle->b2 == 255);
+  CHECK(VS::Render::GameFrameDrawList().ItemCount() == 1);
+  const auto [triangle, slot] = render_tests::ListedItemAt(0);
+  CHECK(slot == 2047);
+  CHECK(triangle.material == VS::Render::DrawMaterial{.gouraud = true});
+  CHECK(triangle.corner_count == 3);
+  CHECK(triangle.corners[0].x == 140);
+  CHECK(triangle.corners[0].y == 100);
+  CHECK(triangle.corners[0].red == 255);
+  CHECK(triangle.corners[1].green == 255);
+  CHECK(triangle.corners[2].blue == 255);
+  CHECK(std::ranges::all_of(buffer,
+                            [](unsigned char byte) { return byte == 0; }));
   *frame = saved;
   VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
   VS::Render::frameBuf = saved_index;

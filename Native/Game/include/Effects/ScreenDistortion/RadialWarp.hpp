@@ -1,8 +1,11 @@
 #pragma once
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <span>
+
+#include "Render/DrawPolygon.hpp"
 
 // The radial screen warp scales every polygon vertex queued for the frame
 // toward or away from the screen centre by a factor that depends on its
@@ -19,6 +22,27 @@ struct RadialWarpSettings {
 
 // The resident arctangent/root lookup image the original indexed for radii.
 inline constexpr std::size_t kRadialWarpRootTableBytes = 1296;
+// Radii past the last entry use it.
+inline constexpr std::size_t kRadialWarpScaleEntries = 444;
+
+// One frame's warp: the per-radius scales built from the settings, over the
+// root lookup (which must outlive it).
+class RadialWarpField {
+ public:
+  RadialWarpField(RadialWarpSettings settings,
+                  std::span<const std::uint8_t> root_table);
+
+  // Warps a packed GP0 vertex word (x in the low halfword, y in the high).
+  // Aborts with a diagnostic when the radius lookup leaves the root table.
+  [[nodiscard]] std::uint32_t WarpPoint(std::uint32_t packed) const;
+  // Warps every corner of a typed polygon as WarpPoint warps its packet's
+  // vertex words.
+  void Warp(Render::DrawPolygon& polygon) const;
+
+ private:
+  std::array<std::uint16_t, kRadialWarpScaleEntries> scales_{};
+  std::span<const std::uint8_t> root_table_;
+};
 
 // The frame's primitive packets in drawing order. Words are a packet's payload
 // after its ordering tag; the warp rewrites only polygon coordinate words.
@@ -41,7 +65,6 @@ class PrimitivePacketCursor {
 // Warps the first polygon command of every packet (func_800F9BD8). Aborts
 // with a diagnostic when a polygon's vertices run past its packet or the
 // radius lookup leaves the root table.
-void WarpPolygonVertices(RadialWarpSettings settings,
-                         std::span<const std::uint8_t> root_table,
+void WarpPolygonVertices(const RadialWarpField& field,
                          PrimitivePacketCursor& packets);
 }  // namespace VS::Effects::ScreenDistortion

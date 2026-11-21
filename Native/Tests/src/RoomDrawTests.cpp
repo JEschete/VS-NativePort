@@ -11,19 +11,20 @@
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
-#include <catch2/generators/catch_generators.hpp>
 
 #include "Content/ModuleData.hpp"
 #include "Core/Gte.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Field/Room.hpp"
 #include "Legacy/Psx.hpp"
 #include "Render/Display.hpp"
+#include "Render/DrawList.hpp"
+#include "Render/DrawPolygon.hpp"
 #include "Render/Frame.hpp"
+#include "Render/FrameDrawListProbe.hpp"
+#include "Render/PageSpace.hpp"
 #include "Render/Render.hpp"
 #include "Render/RoomDraw.hpp"
 #include "Render/RoomDrawLive.hpp"
-#include "Render/UiPrimitives.hpp"
 
 using VS::Core::Gte::MATRIX;
 using VS::Core::Gte::SetGeomOffset;
@@ -31,7 +32,6 @@ using VS::Core::Gte::SetGeomScreen;
 using VS::Core::Gte::SVECTOR;
 
 using VS::Legacy::ClearOTagR;
-using VS::Legacy::nextPrim;
 
 namespace {
 namespace Render = VS::Render;
@@ -104,22 +104,57 @@ Render::PerspectiveRoomTransformer TestTransformer() {
   return transformer;
 }
 
+// The GP0 packet the original built for `polygon`, tag word zeroed: the word
+// layout the packet-era expectations below still describe.
+std::vector<std::uint32_t> PacketWords(const Render::DrawPolygon& polygon) {
+  const Render::DrawMaterial& material = polygon.material;
+  const std::uint32_t command =
+      0x20u | (material.gouraud ? 0x10u : 0u) |
+      (polygon.corner_count == Render::kDrawQuadCorners ? 0x08u : 0u) |
+      (material.textured ? 0x04u : 0u) |
+      (material.semi_transparent ? 0x02u : 0u) |
+      (material.raw_texture ? 0x01u : 0u);
+  std::vector<std::uint32_t> words{0};
+  for (std::size_t index = 0; index < polygon.corner_count; ++index) {
+    const Render::DrawCorner& corner = polygon.corners.at(index);
+    if (index == 0 || material.gouraud) {
+      const std::uint32_t color = corner.red |
+                                  std::uint32_t{corner.green} << 8 |
+                                  std::uint32_t{corner.blue} << 16;
+      words.push_back(index == 0 ? color | command << 24 : color);
+    }
+    words.push_back(static_cast<std::uint16_t>(corner.x) |
+                    std::uint32_t{static_cast<std::uint16_t>(corner.y)} << 16);
+    if (material.textured) {
+      std::uint32_t uv = corner.u | std::uint32_t{corner.v} << 8;
+      if (index == 0) uv |= std::uint32_t{material.palette.word} << 16;
+      if (index == 1) uv |= std::uint32_t{material.page.word} << 16;
+      words.push_back(uv);
+    }
+  }
+  return words;
+}
+
 struct RecordedPacket {
+  Render::DrawPolygon polygon;
   std::vector<std::uint32_t> words;
   std::uint32_t depth = 0;
 };
 
-// Records every accepted packet; refuses one that would exceed the capacity.
-class RecordingQueue final : public Render::RoomPacketQueue {
+// Records every accepted polygon with its packet words; refuses one whose
+// packet would exceed the capacity, as the frame buffer budget does.
+class RecordingQueue final : public Render::RoomDrawQueue {
  public:
   explicit RecordingQueue(std::size_t capacity_bytes = 0x20000)
       : capacity_(capacity_bytes) {}
 
-  bool Emit(std::span<const std::uint32_t> packet,
-            std::uint32_t depth) override {
-    if (packet.size_bytes() > capacity_ - used_) return false;
-    used_ += packet.size_bytes();
-    packets.push_back({{packet.begin(), packet.end()}, depth});
+  bool Submit(const Render::DrawPolygon& polygon, std::uint32_t slot) override {
+    auto words = PacketWords(polygon);
+    const std::size_t bytes = words.size() * kWordBytes;
+    CHECK(bytes == Render::RoomPacketEquivalentWords(polygon) * kWordBytes);
+    if (bytes > capacity_ - used_) return false;
+    used_ += bytes;
+    packets.push_back({polygon, std::move(words), slot});
     return true;
   }
 
@@ -202,7 +237,7 @@ Render::RoomPolygonResult Subdivide(bool quad, int levels,
                                     const Render::RoomPolygonMaterial& material,
                                     const Render::RoomClipState& clip,
                                     Render::RoomTransformer& transformer,
-                                    Render::RoomPacketQueue& queue) {
+                                    Render::RoomDrawQueue& queue) {
   const auto vertices = SquareVertices();
   if (quad) {
     return Render::SubdivideRoomQuad(std::span(vertices), levels, material,
@@ -447,47 +482,46 @@ std::uint32_t Tint(std::uint32_t color, std::int16_t strength, std::int16_t red,
   return Render::TintRoomPrimitiveColor(color, {strength, red, green, blue});
 }
 
-// A GT3 then a GT4 room packet starting at word 1, each followed by the two
-// padding words flag 2 describes.
-struct TintPackets {
-  std::array<std::uint32_t, 40> words{};
-  std::size_t extra;
-  std::size_t quad;
-  std::size_t end;
-
-  explicit TintPackets(std::uint32_t flags)
-      : extra((flags & 2) != 0 ? 2 : 0),
-        quad(11 + extra),
-        end(quad + 13 + extra) {
-    words.fill(0xB6B6B6B6);
-    words[1] = 0x09000012;
-    words[quad] = 0x0C000034;
-    for (std::uint32_t vertex = 0; vertex < 3; ++vertex) {
-      words[2 + std::size_t{vertex} * 3] = 0x34102030u + (vertex << 24);
-    }
-    for (std::uint32_t vertex = 0; vertex < 4; ++vertex) {
-      words[quad + 1 + std::size_t{vertex} * 3] = 0x3C102030u + (vertex << 24);
-    }
+// A Gouraud-textured triangle or quad whose corners carry distinct colours,
+// positions and texels; a triangle's unused fourth corner is filled too.
+Render::DrawPolygon TintPolygon(bool quad) {
+  Render::DrawPolygon polygon{
+      .material = {.gouraud = true,
+                   .textured = true,
+                   .page = {0x15},
+                   .palette = {0x1234}},
+      .corner_count = static_cast<std::uint8_t>(
+          quad ? Render::kDrawQuadCorners : Render::kDrawTriangleCorners)};
+  for (int index = 0; index < 4; ++index) {
+    const auto step = static_cast<std::uint8_t>(index * 0x40);
+    polygon.corners.at(static_cast<std::size_t>(index)) = {
+        .x = static_cast<std::int16_t>(index * 10 - 15),
+        .y = static_cast<std::int16_t>(index * 7),
+        .red = static_cast<std::uint8_t>(0x30 + step),
+        .green = 0x20,
+        .blue = static_cast<std::uint8_t>(0x10 + step / 2),
+        .u = step,
+        .v = static_cast<std::uint8_t>(255 - step)};
   }
+  return polygon;
+}
 
-  [[nodiscard]] std::span<std::uint32_t> Range() {
-    return std::span(words).subspan(1, end - 1);
+// `polygon` with each drawn corner's colour tinted by the reference formula.
+Render::DrawPolygon ReferenceTinted(Render::DrawPolygon polygon,
+                                    std::int16_t strength, std::int16_t red,
+                                    std::int16_t green, std::int16_t blue) {
+  for (std::size_t index = 0; index < polygon.corner_count; ++index) {
+    Render::DrawCorner& corner = polygon.corners.at(index);
+    const std::uint32_t color =
+        ReferenceTint(corner.red | std::uint32_t{corner.green} << 8 |
+                          std::uint32_t{corner.blue} << 16,
+                      strength, red, green, blue);
+    corner.red = static_cast<std::uint8_t>(color);
+    corner.green = static_cast<std::uint8_t>(color >> 8);
+    corner.blue = static_cast<std::uint8_t>(color >> 16);
   }
-
-  [[nodiscard]] auto Expected(bool include_quad = true) const {
-    auto expected = words;
-    for (std::uint32_t vertex = 0; vertex < 3; ++vertex) {
-      expected[2 + std::size_t{vertex} * 3] = 0x3418242Cu + (vertex << 24);
-    }
-    if (include_quad) {
-      for (std::uint32_t vertex = 0; vertex < 4; ++vertex) {
-        expected[quad + 1 + std::size_t{vertex} * 3] =
-            0x3C18242Cu + (vertex << 24);
-      }
-    }
-    return expected;
-  }
-};
+  return polygon;
+}
 
 constexpr Render::RoomTint kTint{-1, 1, 2, 0};
 
@@ -516,7 +550,8 @@ SkyDome OneFaceSky() {
 
 // --- Live frame ----------------------------------------------------------
 
-// A frame buffer and ordering table the Live binding draws into.
+// A frame buffer and scene ordering table the Live binding draws into, with
+// the gameplay draw list open over the table.
 struct LiveFrame {
   VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   int saved_framebuffer = VS::Render::frameBuf;
@@ -525,6 +560,7 @@ struct LiveFrame {
   std::vector<std::uint32_t> memory = std::vector<std::uint32_t>(
       0x20000 / sizeof(std::uint32_t) + 2, 0xA5A5A5A5);
   std::array<std::uint32_t, 2048> ordering{};
+  std::array<std::uint32_t, 2048> cleared{};
 
   LiveFrame() {
     VS::Render::FrameScratchpad() = {};
@@ -533,12 +569,15 @@ struct LiveFrame {
     VS::Render::FrameScratchpad().primitive_cursor = Buffer();
     VS::Render::FrameScratchpad().ordering_table = ordering.data();
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
+    cleared = ordering;
+    REQUIRE(Reopen());
     Render::LiveRoomClipState() = {};
     VS::Core::Gte::Reset();
     SetGeomScreen(256);
     SetGeomOffset(160, 120);
   }
   ~LiveFrame() {
+    static_cast<void>(Render::GameFrameDrawList().Abandon());
     VS::Render::FrameScratchpad() = saved_frame;
     VS::Render::frameBuf = saved_framebuffer;
     VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
@@ -550,6 +589,14 @@ struct LiveFrame {
   LiveFrame(LiveFrame&&) = delete;
   LiveFrame& operator=(LiveFrame&&) = delete;
 
+  // Starts a new frame of the draw list over the table.
+  bool Reopen() {
+    static_cast<void>(Render::GameFrameDrawList().Abandon());
+    return Render::GameFrameDrawList().Open(
+        std::span(ordering),
+        Render::DrawTarget{.surface = &Render::GamePages()});
+  }
+
   std::uint32_t* Buffer() { return memory.data() + 1; }
   [[nodiscard]] std::size_t Used() const {
     return static_cast<std::size_t>(
@@ -557,8 +604,36 @@ struct LiveFrame {
             VS::Render::FrameScratchpad().primitive_cursor) -
         reinterpret_cast<const std::byte*>(memory.data() + 1));
   }
+  // No packet was written: the frame buffer and table are as prepared.
+  [[nodiscard]] bool Untouched() const {
+    return std::ranges::all_of(
+               memory, [](std::uint32_t word) { return word == 0xA5A5A5A5; }) &&
+           std::ranges::equal(ordering, cleared);
+  }
 };
+
+using render_tests::ListedItems;
+// The frame buffer budget's measure is the size of the GP0 packet the original
+// wrote for each room polygon shape.
+[[nodiscard]] constexpr std::size_t PacketWordsOf(bool textured,
+                                                  std::size_t corners) {
+  Render::DrawPolygon polygon{};
+  polygon.material.gouraud = true;
+  polygon.material.textured = textured;
+  polygon.corner_count = static_cast<std::uint8_t>(corners);
+  return Render::RoomPacketEquivalentWords(polygon);
+}
 }  // namespace
+
+TEST_CASE("Room packet-equivalent words are the original's packet sizes",
+          "[render][room]") {
+  STATIC_REQUIRE(PacketWordsOf(true, Render::kDrawTriangleCorners) ==
+                 Render::kRoomTrianglePacketWords);
+  STATIC_REQUIRE(PacketWordsOf(true, Render::kDrawQuadCorners) ==
+                 Render::kRoomQuadPacketWords);
+  STATIC_REQUIRE(PacketWordsOf(false, Render::kDrawTriangleCorners) ==
+                 Render::kSkyDomePacketWords);
+}
 
 TEST_CASE("Room group records round-trip every field at the original layout",
           "[render][room]") {
@@ -741,7 +816,14 @@ TEST_CASE("Room projection decodes positions, screens, depths and winding",
   CHECK(projection.winding == -4096);
 }
 
-// Links one packet at `depth` with the signed `bias` in the flags' high half
+// A Gouraud-textured triangle or quad with every field set.
+Render::DrawPolygon LinkPolygon(bool quad) {
+  Render::DrawPolygon polygon = TintPolygon(quad);
+  polygon.material.semi_transparent = true;
+  return polygon;
+}
+
+// Links one polygon at `depth` with the signed `bias` in the flags' high half
 // and checks the result against the original near, far and slot rules.
 void CheckDepthLink(std::int32_t depth, int bias, int far_depth, bool quad) {
   CAPTURE(depth, bias, far_depth, quad);
@@ -753,12 +835,10 @@ void CheckDepthLink(std::int32_t depth, int bias, int far_depth, bool quad) {
   const auto flags =
       (static_cast<std::uint32_t>(static_cast<std::uint16_t>(bias)) << 16) |
       0xA5A5u;
-  std::vector<std::uint32_t> packet(
-      quad ? Render::kRoomQuadPacketWords : Render::kRoomTrianglePacketWords,
-      0x5A5A5A5A);
+  const Render::DrawPolygon polygon = LinkPolygon(quad);
   RecordingQueue queue;
   const auto status =
-      Render::LinkRoomPolygonByDepth(packet, depth, flags, clip, queue);
+      Render::LinkRoomPolygonByDepth(polygon, depth, flags, clip, queue);
   CHECK(Render::ResolveRoomPolygonDepth(depth, flags, clip).has_value() ==
         expected);
   if (!expected) {
@@ -769,7 +849,7 @@ void CheckDepthLink(std::int32_t depth, int bias, int far_depth, bool quad) {
   CHECK(status == Render::RoomLinkStatus::kLinked);
   REQUIRE(queue.packets.size() == 1);
   CHECK(queue.packets[0].depth == biased);
-  CHECK(queue.packets[0].words == packet);
+  CHECK(queue.packets[0].polygon == polygon);
 }
 
 TEST_CASE("Room depth links retain near, far and signed-bias boundaries",
@@ -788,17 +868,20 @@ TEST_CASE("Room depth links retain near, far and signed-bias boundaries",
   }
 }
 
-TEST_CASE("Room links refuse malformed packets and full queues",
+TEST_CASE("Room links refuse malformed polygons and full queues",
           "[render][room-link]") {
   Render::RoomClipState clip;
   RecordingQueue queue;
-  for (const std::size_t words : {0u, 9u, 11u, 12u, 14u}) {
-    const std::vector<std::uint32_t> packet(words);
-    CHECK(Render::LinkRoomPolygonByDepth(packet, 256, 0, clip, queue) ==
-          Render::RoomLinkStatus::kInvalidPacket);
+  constexpr std::array<std::uint8_t, 5> kCornerCounts{0, 1, 2, 5, 255};
+  for (const std::uint8_t corners : kCornerCounts) {
+    CAPTURE(corners);
+    Render::DrawPolygon polygon = LinkPolygon(true);
+    polygon.corner_count = corners;
+    CHECK(Render::LinkRoomPolygonByDepth(polygon, 256, 0, clip, queue) ==
+          Render::RoomLinkStatus::kInvalidPolygon);
   }
   CHECK(queue.packets.empty());
-  const std::vector<std::uint32_t> triangle(Render::kRoomTrianglePacketWords);
+  const Render::DrawPolygon triangle = LinkPolygon(false);
   RecordingQueue full(kTriangleBytes - 1);
   CHECK(Render::LinkRoomPolygonByDepth(triangle, 256, 0, clip, full) ==
         Render::RoomLinkStatus::kBufferFull);
@@ -809,7 +892,7 @@ TEST_CASE("Room links reject negative slots under a negative near clip",
           "[render][room-link]") {
   Render::RoomClipState clip;
   RecordingQueue queue;
-  const std::vector<std::uint32_t> triangle(Render::kRoomTrianglePacketWords);
+  const Render::DrawPolygon triangle = LinkPolygon(false);
   Render::SetRoomPolygonNearClip(clip, -32768);
   CHECK(Render::LinkRoomPolygonByDepth(triangle, 0, 0xFFFF0000u, clip, queue) ==
         Render::RoomLinkStatus::kRejected);
@@ -977,10 +1060,42 @@ TEST_CASE("Room batches refuse truncated or oversized polygon records",
   auto oversized = batch;
   const std::uint32_t count = 0x08000000;
   std::memcpy(oversized.data(), &count, sizeof count);
-  CHECK(
-      Render::DrawRoomGeometryPolygons(oversized, 0, 0, {}, transformer, queue)
-          .status == Render::RoomDrawStatus::kInvalidGeometry);
   CHECK(queue.packets.empty());
+}
+
+TEST_CASE(
+    "Room batches refuse commands that are not Gouraud-textured "
+    "polygons of the record's corner count",
+    "[render][room-batch]") {
+  struct Case {
+    std::size_t record;
+    unsigned char command;
+  };
+  // The triangle record starts at byte 8 and the quad record at 40; each
+  // keeps its no-cull bit so winding never hides the refusal.
+  constexpr std::array kCases{Case{8, 0x25}, Case{8, 0x15},  Case{8, 0x3D},
+                              Case{8, 0x75}, Case{40, 0x35}, Case{40, 0x2D},
+                              Case{40, 0xBD}};
+  for (const auto& entry : kCases) {
+    CAPTURE(entry.record, entry.command);
+    auto batch = Batch();
+    batch[entry.record + 15] = std::byte{entry.command};
+    auto transformer = TestTransformer();
+    RecordingQueue queue;
+    CHECK(Render::DrawRoomGeometryPolygons(batch, 0, 0, {}, transformer, queue)
+              .status == Render::RoomDrawStatus::kInvalidGeometry);
+    CHECK(queue.packets.size() == (entry.record == 8 ? 0u : 1u));
+  }
+  auto batch = Batch();
+  batch[8 + 15] = std::byte{0x37};
+  auto transformer = TestTransformer();
+  RecordingQueue queue;
+  CHECK(Render::DrawRoomGeometryPolygons(batch, 0, 0, {}, transformer, queue)
+            .emitted == 2);
+  REQUIRE(queue.packets.size() == 2);
+  CHECK(queue.packets[0].polygon.material.semi_transparent);
+  CHECK((queue.packets[0].words[1] >> 24) == 0x36u);
+  CHECK_FALSE(queue.packets[1].polygon.material.semi_transparent);
 }
 
 TEST_CASE("Room batches retain subdivision clipping and texture LOD",
@@ -1113,56 +1228,35 @@ TEST_CASE("Room color tint matches every signed16 strength",
   }
 }
 
-TEST_CASE("Room tint transforms GT3 and GT4 payloads without changing tags",
+TEST_CASE("Room tint adjusts every drawn corner colour and nothing else",
           "[render][room-tint]") {
-  const auto flags = GENERATE(0u, 1u, 2u, 3u);
-  TintPackets packets(flags);
-  const auto expected = packets.Expected();
-  CHECK(Render::TintRoomGeometryPrimitives(packets.Range(), kTint, flags) ==
-        Render::RoomTintStatus::kTinted);
-  CHECK(packets.words == expected);
+  for (const bool quad : {false, true}) {
+    CAPTURE(quad);
+    Render::DrawPolygon polygon = TintPolygon(quad);
+    const auto expected = ReferenceTinted(polygon, 0, -4, 4, 8);
+    Render::TintRoomPolygon(polygon, Render::RoomTintAdjustment(kTint));
+    CHECK(polygon == expected);
+    CHECK(polygon.corners[0].red == 0x2C);
+    CHECK(polygon.corners[0].green == 0x24);
+    CHECK(polygon.corners[0].blue == 0x18);
+    if (!quad) CHECK(polygon.corners[3] == TintPolygon(false).corners[3]);
+  }
 }
 
 TEST_CASE("Room tint postpass uses signed offsets and its strength",
           "[render][room-tint]") {
-  const auto flags = GENERATE(0u, 2u);
-  TintPackets packets(flags);
-  auto expected = packets.words;
-  for (std::size_t vertex = 0; vertex < 3; ++vertex) {
-    const auto index = 2 + vertex * 3;
-    expected[index] = ReferenceTint(expected[index], 2048, 508, -512, 12);
-  }
-  for (std::size_t vertex = 0; vertex < 4; ++vertex) {
-    const auto index = packets.quad + 1 + vertex * 3;
-    expected[index] = ReferenceTint(expected[index], 2048, 508, -512, 12);
-  }
-  CHECK(Render::TintRoomGeometryPrimitives(packets.Range(),
-                                           {127, -128, 3, 2048}, flags) ==
-        Render::RoomTintStatus::kTinted);
-  CHECK(packets.words == expected);
-}
-
-TEST_CASE("Room tint stops at foreign packets and refuses truncated ranges",
-          "[render][room-tint]") {
-  TintPackets foreign(0);
-  foreign.words[foreign.quad] = 0x08000034;
-  const auto stopped = foreign.Expected(false);
-  CHECK(Render::TintRoomGeometryPrimitives(foreign.Range(), kTint, 0) ==
-        Render::RoomTintStatus::kStoppedAtForeignPacket);
-  CHECK(foreign.words == stopped);
-  TintPackets truncated(0);
-  const auto untouched = truncated.words;
-  CHECK(Render::TintRoomGeometryPrimitives(
-            truncated.Range().first(truncated.Range().size() - 1), kTint, 0) ==
-        Render::RoomTintStatus::kTruncated);
-  CHECK(truncated.words == untouched);
-  CHECK(Render::TintRoomGeometryPrimitives({}, kTint, 0) ==
-        Render::RoomTintStatus::kTinted);
-  TintPackets zero(0);
-  const auto unchanged = zero.words;
-  CHECK(Render::TintRoomGeometryPrimitives(zero.Range(), {}, 0) ==
-        Render::RoomTintStatus::kTinted);
-  CHECK(zero.words == unchanged);
+  const auto adjustment = Render::RoomTintAdjustment({127, -128, 3, 2048});
+  CHECK(adjustment.strength == 2048);
+  CHECK(adjustment.red == 508);
+  CHECK(adjustment.green == -512);
+  CHECK(adjustment.blue == 12);
+  Render::DrawPolygon polygon = TintPolygon(true);
+  const auto expected = ReferenceTinted(polygon, 2048, 508, -512, 12);
+  Render::TintRoomPolygon(polygon, adjustment);
+  CHECK(polygon == expected);
+  Render::DrawPolygon untinted = TintPolygon(true);
+  Render::TintRoomPolygon(untinted, Render::RoomTintAdjustment({}));
+  CHECK(untinted == TintPolygon(true));
 }
 
 TEST_CASE("Sky dome emits rotated Gouraud faces at the farthest slot",
@@ -1177,6 +1271,7 @@ TEST_CASE("Sky dome emits rotated Gouraud faces at the farthest slot",
   const auto& packet = queue.packets.front();
   CHECK(packet.depth == Render::kRoomLastOrderingSlot);
   REQUIRE(packet.words.size() == Render::kSkyDomePacketWords);
+  CHECK(packet.polygon.material == Render::DrawMaterial{.gouraud = true});
   CHECK(ScreenX(packet.words[2]) == 140);
   CHECK(ScreenY(packet.words[2]) == 100);
   CHECK((packet.words[1] & 0xFF) == 255);
@@ -1278,77 +1373,178 @@ TEST_CASE("Projection screen offsets round-trip as unsigned halfwords",
         Render::RoomScreenOffset{0xFFFF, 5});
 }
 
-TEST_CASE("Live room draws link sized packets into the ordering table",
-          "[render][room][live]") {
+namespace {
+// The triangle and quad a live draw of Geometry(0) submits, both at `slot`.
+void CheckLiveRoomItems(std::size_t slot) {
+  const auto items = ListedItems();
+  REQUIRE(items.size() == 2);
+  CHECK(items[0].polygon.corner_count == Render::kDrawTriangleCorners);
+  CHECK(items[1].polygon.corner_count == Render::kDrawQuadCorners);
+  for (const auto& item : items) {
+    CHECK(item.slot == slot);
+    CHECK(item.polygon.material == Render::DrawMaterial{.gouraud = true,
+                                                        .textured = true,
+                                                        .page = {0x15},
+                                                        .palette = {0x1234}});
+  }
+}
+
+// A draw once the list is full is refused before it spends any of the frame
+// buffer budget.
+void CheckLiveRoomListCapacity(LiveFrame& frame,
+                               const std::vector<std::byte>& geometry) {
+  Render::FrameDrawList& list = Render::GameFrameDrawList();
+  const Render::DrawPolygon filler = LinkPolygon(false);
+  while (list.ItemCount() < Render::FrameDrawList::kCapacity) {
+    REQUIRE(list.Submit(filler, 0).has_value());
+  }
+  VS::Render::FrameScratchpad().primitive_cursor = frame.Buffer();
+  CHECK(Render::DrawLiveRoomGeometry(geometry.data(), geometry.size(), 0) ==
+        Render::RoomDrawStatus::kBufferFull);
+  CHECK(frame.Used() == 0);
+  CHECK(list.RefusedCount() == 1);
+}
+
+// Reversed ranges and ranges past the list are refused and change nothing;
+// an empty range is accepted, even once the list is closed.
+void CheckLiveRoomTintRanges(const Render::DrawPolygon& tinted,
+                             const Render::RoomTint& tint) {
+  CHECK(Render::TintLiveRoomGeometry(2, 2, tint));
+  CHECK_FALSE(Render::TintLiveRoomGeometry(3, 1, tint));
+  CHECK_FALSE(Render::TintLiveRoomGeometry(1, 5, tint));
+  CHECK(ListedItems()[1].polygon == tinted);
+  static_cast<void>(Render::GameFrameDrawList().Abandon());
+  CHECK_FALSE(Render::TintLiveRoomGeometry(0, 1, tint));
+  CHECK(Render::TintLiveRoomGeometry(0, 0, tint));
+}
+
+// Draws Geometry(0) between two `other` items, at slots 3 and 4, so items 1
+// and 2 of the list are the room's.
+void DrawLiveRoomBetween(const Render::DrawPolygon& other) {
+  Render::FrameDrawList& list = Render::GameFrameDrawList();
+  REQUIRE(list.Submit(other, 3).has_value());
+  const auto geometry = Geometry(0);
+  REQUIRE(Render::DrawLiveRoomGeometry(geometry.data(), geometry.size(), 0) ==
+          Render::RoomDrawStatus::kDrawn);
+  REQUIRE(list.Submit(other, 4).has_value());
+}
+
+// Only the room's items 1 and 2 changed from `before`, each by the reference
+// tint of RoomTint{-1, 1, 2, 0}.
+void CheckOnlyRoomTinted(const std::vector<render_tests::ListedItem>& before,
+                         const Render::DrawPolygon& other) {
+  const auto after = ListedItems();
+  REQUIRE(after.size() == 4);
+  CHECK(after[0].polygon == other);
+  CHECK(after[1].polygon == ReferenceTinted(before[1].polygon, 0, -4, 4, 8));
+  CHECK(after[2].polygon == ReferenceTinted(before[2].polygon, 0, -4, 4, 8));
+  CHECK(after[3].polygon == other);
+}
+}  // namespace
+
+TEST_CASE("Live room draws submit typed items at the frame's ordering slot",
+          "[render][room][live][typed-draw]") {
   LiveFrame frame;
   auto& clip = Render::LiveRoomClipState();
   CHECK(clip.near_depth == 8);
   const auto geometry = Geometry(0);
-  REQUIRE(Render::DrawLiveRoomGeometry(geometry.data(), geometry.size(), 0) ==
-          Render::RoomDrawStatus::kDrawn);
-  REQUIRE(frame.Used() == kTriangleBytes + kQuadBytes);
-  auto* triangle = frame.Buffer();
-  auto* quad = triangle + Render::kRoomTrianglePacketWords;
-  CHECK((triangle[0] >> 24) == 9);
-  CHECK((quad[0] >> 24) == 12);
-  CHECK(nextPrim(&frame.ordering[256]) == quad);
-  CHECK(nextPrim(quad) == triangle);
-  CHECK(frame.memory.back() == 0xA5A5A5A5);
+  for (int repeat = 0; repeat < 2; ++repeat) {
+    CAPTURE(repeat);
+    VS::Render::FrameScratchpad().primitive_cursor = frame.Buffer();
+    REQUIRE(Render::DrawLiveRoomGeometry(geometry.data(), geometry.size(), 0) ==
+            Render::RoomDrawStatus::kDrawn);
+    CHECK(frame.Used() == kTriangleBytes + kQuadBytes);
+    CHECK(frame.Untouched());
+    CHECK(Render::GameFrameDrawList().ItemCount() == 2);
+    CheckLiveRoomItems(256);
+    REQUIRE(frame.Reopen());
+  }
 }
 
-TEST_CASE("Live room draws refuse geometry overlapping unwritten packets",
-          "[render][room][live]") {
+TEST_CASE("Live room draws address the scene table from the ordering pointer",
+          "[render][room][live][typed-draw]") {
   LiveFrame frame;
   const auto geometry = Geometry(0);
-  const auto words = (geometry.size() + 3) / 4;
+  VS::Render::FrameScratchpad().ordering_table = frame.ordering.data() + 100;
+  REQUIRE(Render::DrawLiveRoomGeometry(geometry.data(), geometry.size(), 0) ==
+          Render::RoomDrawStatus::kDrawn);
+  CheckLiveRoomItems(356);
+}
+
+TEST_CASE("Live room draws leave geometry in the frame buffer intact",
+          "[render][room][live][typed-draw]") {
+  LiveFrame frame;
+  const auto geometry = Geometry(0);
   std::memcpy(frame.Buffer(), geometry.data(), geometry.size());
-  for (const std::size_t cursor : {std::size_t{0}, words - 1}) {
-    CAPTURE(cursor);
-    VS::Render::FrameScratchpad().primitive_cursor = frame.Buffer() + cursor;
-    CHECK(Render::DrawLiveRoomGeometry(frame.Buffer(), geometry.size(), 0) ==
-          Render::RoomDrawStatus::kInvalidGeometry);
-    CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
-          frame.Buffer() + cursor);
-  }
-  VS::Render::FrameScratchpad().primitive_cursor = frame.Buffer() + words;
   CHECK(Render::DrawLiveRoomGeometry(frame.Buffer(), geometry.size(), 0) ==
         Render::RoomDrawStatus::kDrawn);
-  CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
-        frame.Buffer() + words + Render::kRoomTrianglePacketWords +
-            Render::kRoomQuadPacketWords);
+  CHECK(std::memcmp(frame.Buffer(), geometry.data(), geometry.size()) == 0);
+  CHECK(frame.Used() == kTriangleBytes + kQuadBytes);
+  CHECK(Render::GameFrameDrawList().LiveCount() == 2);
 }
 
 TEST_CASE("Live room draws queue nothing before the frame is ready",
-          "[render][room][live]") {
+          "[render][room][live][typed-draw]") {
   LiveFrame frame;
   const auto geometry = Geometry(0);
-  VS::Render::FrameScratchpad().ordering_table = nullptr;
-  auto* before = VS::Render::FrameScratchpad().primitive_cursor;
-  CHECK(Render::DrawLiveRoomGeometry(geometry.data(), geometry.size(), 0) ==
-        Render::RoomDrawStatus::kDrawn);
-  CHECK(VS::Render::FrameScratchpad().primitive_cursor == before);
+  auto* const before = VS::Render::FrameScratchpad().primitive_cursor;
+  const auto check_nothing_queued = [&] {
+    CHECK(Render::DrawLiveRoomGeometry(geometry.data(), geometry.size(), 0) ==
+          Render::RoomDrawStatus::kDrawn);
+    CHECK(VS::Render::FrameScratchpad().primitive_cursor == before);
+    CHECK(Render::GameFrameDrawList().ItemCount() == 0);
+  };
+  SECTION("no ordering table") {
+    VS::Render::FrameScratchpad().ordering_table = nullptr;
+    check_nothing_queued();
+  }
+  SECTION("an ordering table the list was not opened over") {
+    std::array<std::uint32_t, 4> other{};
+    VS::Render::FrameScratchpad().ordering_table = other.data();
+    check_nothing_queued();
+  }
+  SECTION("no open draw list") {
+    static_cast<void>(Render::GameFrameDrawList().Abandon());
+    check_nothing_queued();
+  }
+  SECTION("a cursor outside the frame buffer") {
+    VS::Render::FrameScratchpad().primitive_cursor = frame.memory.data();
+    CHECK(Render::DrawLiveRoomGeometry(geometry.data(), geometry.size(), 0) ==
+          Render::RoomDrawStatus::kDrawn);
+    CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+          frame.memory.data());
+    CHECK(Render::GameFrameDrawList().ItemCount() == 0);
+  }
 }
 
-TEST_CASE("Live room tint is bounded by the current frame buffer",
-          "[render][room-tint][live]") {
+TEST_CASE("Live room draws keep the frame buffer budget and list capacity",
+          "[render][room][live][typed-draw]") {
   LiveFrame frame;
-  TintPackets packets(0);
-  std::ranges::copy(packets.words, frame.Buffer());
-  const VS::Field::RoomTintRecord tint{-1, 1, 2, 0, 0, 1};
-  CHECK(Render::TintLiveRoomGeometryPrimitives(
-      frame.Buffer() + 1, frame.Buffer() + packets.end, tint, 0));
-  CHECK(std::ranges::equal(packets.Expected(),
-                           std::span(frame.Buffer(), packets.words.size())));
-  const auto outside = packets.words;
-  CHECK_FALSE(Render::TintLiveRoomGeometryPrimitives(
-      packets.words.data() + 1, packets.words.data() + packets.end, tint, 0));
-  CHECK(packets.words == outside);
-  auto* bytes = reinterpret_cast<std::byte*>(frame.Buffer());
-  CHECK_FALSE(
-      Render::TintLiveRoomGeometryPrimitives(bytes + 1, bytes + 9, tint, 0));
-  CHECK_FALSE(Render::TintLiveRoomGeometryPrimitives(
-      frame.Buffer() + 1, frame.Buffer() + packets.end - 1, tint, 0));
-  CHECK(Render::TintLiveRoomGeometryPrimitives(nullptr, nullptr, tint, -1));
+  const auto geometry = Geometry(0);
+  auto* const last_triangle =
+      frame.Buffer() + (0x20000 - kTriangleBytes) / kWordBytes;
+  VS::Render::FrameScratchpad().primitive_cursor = last_triangle;
+  CHECK(Render::DrawLiveRoomGeometry(geometry.data(), geometry.size(), 0) ==
+        Render::RoomDrawStatus::kBufferFull);
+  CHECK(Render::GameFrameDrawList().ItemCount() == 1);
+  CHECK(frame.Used() == 0x20000);
+  CHECK(frame.Untouched());
+  REQUIRE(frame.Reopen());
+  CheckLiveRoomListCapacity(frame, geometry);
+}
+
+TEST_CASE("Live room tint adjusts only the room's draw items",
+          "[render][room-tint][live][typed-draw]") {
+  LiveFrame frame;
+  const Render::DrawPolygon other = TintPolygon(false);
+  DrawLiveRoomBetween(other);
+  const auto before = ListedItems();
+  REQUIRE(before.size() == 4);
+  const Render::RoomTint tint{-1, 1, 2, 0};
+  CHECK(Render::TintLiveRoomGeometry(1, 3, tint));
+  CheckOnlyRoomTinted(before, other);
+  const Render::DrawPolygon tinted = ListedItems()[1].polygon;
+  CheckLiveRoomTintRanges(tinted, tint);
 }
 
 TEST_CASE("Room draw entries no longer resolve through module addresses",

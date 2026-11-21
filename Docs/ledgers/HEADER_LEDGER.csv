@@ -841,7 +841,7 @@ S0404,source,Native/Game/src/Field/MapProgress.cpp,generated,no,,0,,,,,,,,,done,
 S0405,source,Native/Game/src/Field/Minimap.cpp,generated,no,,0,,,,,,,,,done,
 S0406,source,Native/Game/src/Field/MinimapSceneLive.cpp,owned,no,,0,,,,,,,,,done,
 S0407,source,Native/Game/src/Field/PlatformPlacementLive.cpp,owned,no,,0,,,,,,,,,done,
-S0408,source,Native/Game/src/Field/Room.cpp,generated,no,,0,,,,,,,,,done,
+S0408,source,Native/Game/src/Field/Room.cpp,generated,no,,0,,,,,,,,,retired,deleted: the room primitive range globals became draw-list item indices held by RoomRenderingLive.cpp around the room draw (#50)
 S0409,source,Native/Game/src/Field/RoomEffectsLive.cpp,owned,no,,0,,,,,,,,,done,
 S0410,source,Native/Game/src/Field/RoomLightingLive.cpp,owned,no,,0,,,,,,,,,done,
 S0411,source,Native/Game/src/Field/RoomLoadingLive.cpp,owned,no,,0,,,,,,,,,done,

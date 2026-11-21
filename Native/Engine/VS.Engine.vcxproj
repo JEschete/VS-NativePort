@@ -269,6 +269,7 @@
     <ClCompile Include="src\Render\DisplayControlLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Render\DrawList.cpp" />
     <ClCompile Include="src\Render\EncodedText.cpp" />
     <ClCompile Include="src\Render\EncodedTextLive.cpp" />
     <ClCompile Include="src\Render\Frame.cpp">
@@ -514,6 +515,8 @@
     <ClInclude Include="include\Render\Device.hpp" />
     <ClInclude Include="include\Render\DisplayControl.hpp" />
     <ClInclude Include="include\Render\DisplayControlLive.hpp" />
+    <ClInclude Include="include\Render\DrawList.hpp" />
+    <ClInclude Include="include\Render\DrawPolygon.hpp" />
     <ClInclude Include="include\Render\EncodedText.hpp" />
     <ClInclude Include="include\Render\EncodedTextLive.hpp" />
     <ClInclude Include="include\Render\GameFont.hpp" />

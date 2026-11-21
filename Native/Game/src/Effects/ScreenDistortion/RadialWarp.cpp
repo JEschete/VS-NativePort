@@ -14,7 +14,6 @@
 
 namespace VS::Effects::ScreenDistortion {
 namespace {
-constexpr std::size_t kScaleEntries = 444;
 constexpr unsigned kCommandGroupShift = 26;
 constexpr unsigned kFirstDrawGroup = 8;
 constexpr unsigned kEndDrawGroup = 56;
@@ -32,7 +31,7 @@ constexpr unsigned kFixedFractionBits = 12;
 constexpr unsigned kInitialScaleShift = 4;
 constexpr unsigned kStoredScaleShift = 3;
 constexpr unsigned kVertexScaleShift = 13;
-using RadialScales = std::array<std::uint16_t, kScaleEntries>;
+using RadialScales = std::array<std::uint16_t, kRadialWarpScaleEntries>;
 
 [[noreturn]] void InvalidWarp(const char* reason) {
   VS::Core::LogError("effects", "screen radial warp: {}", reason);
@@ -90,8 +89,8 @@ unsigned RadiusIndex(std::span<const std::uint8_t> root_table, std::int32_t x,
   const unsigned exponent =
       ((kWordShiftMask - even_leading) >> 1) & kWordShiftMask;
   const auto radius = SignedWord(sample << exponent) >> kFixedFractionBits;
-  return static_cast<unsigned>(radius) >= kScaleEntries
-             ? static_cast<unsigned>(kScaleEntries - 1)
+  return static_cast<unsigned>(radius) >= kRadialWarpScaleEntries
+             ? static_cast<unsigned>(kRadialWarpScaleEntries - 1)
              : static_cast<unsigned>(radius);
 }
 
@@ -113,8 +112,7 @@ std::uint32_t WarpPoint(std::uint32_t packed, const RadialScales& scales,
           << kCoordinateBits);
 }
 
-void WarpPacket(PrimitivePacketCursor& packet, const RadialScales& scales,
-                std::span<const std::uint8_t> root_table) {
+void WarpPacket(PrimitivePacketCursor& packet, const RadialWarpField& field) {
   const std::size_t words = packet.WordCount();
   std::size_t command = 0;
   unsigned group = 0;
@@ -134,16 +132,35 @@ void WarpPacket(PrimitivePacketCursor& packet, const RadialScales& scales,
   }
   for (unsigned vertex = 0; vertex < vertices; ++vertex) {
     const std::size_t index = first + std::size_t{vertex} * stride;
-    packet.SetWord(index, WarpPoint(packet.Word(index), scales, root_table));
+    packet.SetWord(index, field.WarpPoint(packet.Word(index)));
   }
 }
 }  // namespace
 
+RadialWarpField::RadialWarpField(RadialWarpSettings settings,
+                                 std::span<const std::uint8_t> root_table)
+    : scales_(BuildScales(settings)), root_table_(root_table) {}
+
+std::uint32_t RadialWarpField::WarpPoint(std::uint32_t packed) const {
+  return ScreenDistortion::WarpPoint(packed, scales_, root_table_);
+}
+
+void RadialWarpField::Warp(Render::DrawPolygon& polygon) const {
+  if (!polygon.HasValidCornerCount()) return;
+  for (std::size_t i = 0; i < polygon.corner_count; ++i) {
+    Render::DrawCorner& corner = polygon.corners[i];
+    const std::uint32_t warped = WarpPoint(
+        static_cast<std::uint16_t>(corner.x) |
+        (static_cast<std::uint32_t>(static_cast<std::uint16_t>(corner.y))
+         << kCoordinateBits));
+    corner.x = static_cast<std::int16_t>(static_cast<std::uint16_t>(warped));
+    corner.y = static_cast<std::int16_t>(warped >> kCoordinateBits);
+  }
+}
+
 // decomp: SCREFF2.PRG func_800F9BD8 (src/GIM/SCREFF2.PRG/0.c:126).
-void WarpPolygonVertices(RadialWarpSettings settings,
-                         std::span<const std::uint8_t> root_table,
+void WarpPolygonVertices(const RadialWarpField& field,
                          PrimitivePacketCursor& packets) {
-  const auto scales = BuildScales(settings);
-  while (packets.Advance()) WarpPacket(packets, scales, root_table);
+  while (packets.Advance()) WarpPacket(packets, field);
 }
 }  // namespace VS::Effects::ScreenDistortion

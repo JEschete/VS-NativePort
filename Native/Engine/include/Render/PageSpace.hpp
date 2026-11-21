@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <cstdint>
 #include <expected>
 #include <optional>
 #include <span>
@@ -9,6 +10,7 @@
 #include <vector>
 
 #include "Core/Types.hpp"
+#include "Render/DrawPolygon.hpp"
 
 namespace VS::Render {
 
@@ -65,8 +67,19 @@ class PageSpace {
   }
 
   // Executes one packet's command words (the words after the ordering-table
-  // tag). Returns words consumed.
+  // tag). Returns words consumed. Polygon commands decode into a DrawPolygon
+  // and draw through the same path as Draw.
   usize Execute(std::span<const u32> words);
+
+  // Draws a typed polygon with the current draw state, as the equivalent
+  // polygon packet would: corners are offset by the draw offset and clipped
+  // to the draw area, and a textured polygon makes its page and
+  // semi-transparency mode current. False, drawing nothing, when the corner
+  // count is not three or four.
+  bool Draw(const DrawPolygon& polygon);
+  // As above, additionally confined to `target` (pixels outside it are not
+  // written); the texture page still becomes current when nothing is drawn.
+  bool Draw(const DrawPolygon& polygon, const Rect& target);
 
   void ConfigureEffectPathTrace(std::optional<EffectPathTraceRange> range);
   void SetEffectPathTraceTick(u64 tick);
@@ -100,7 +113,11 @@ class PageSpace {
   void Rectangle(i32 x, i32 y, i32 w, i32 h, i32 u, i32 v, u32 color,
                  const Prim& p);
   void Line(Vertex a, Vertex b, const Prim& p);
-  void TracePrimitive(const u32* command, std::span<const Vertex> vertices,
+  // `command_address` identifies the packet a primitive came from (0 for a
+  // typed draw); `opcode` is its GP0 command byte.
+  bool DrawAt(const DrawPolygon& polygon, std::uintptr_t command_address);
+  void TracePrimitive(std::uintptr_t command_address, u32 opcode,
+                      std::span<const Vertex> vertices,
                       const Prim& primitive) const;
   void Plot(i32 x, i32 y, i32 r, i32 g, i32 b, i32 u, i32 v, const Prim& p,
             bool dither);

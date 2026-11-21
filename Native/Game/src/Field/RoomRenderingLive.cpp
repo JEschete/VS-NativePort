@@ -31,6 +31,7 @@
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.hpp"
 #include "Render/Display.hpp"
+#include "Render/DrawList.hpp"
 #include "Render/Palette.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/Render.hpp"
@@ -255,20 +256,17 @@ class LiveGeometryHost final : public RoomGeometryHost {
     Render::UpdateLiveRoomGroupTransforms(geometry_, Bytes());
   }
   void DrawGroups() override {
-    VS::Field::roomPrimitiveRangeStart = Scratch().primitive_cursor;
+    first_draw_ = Render::GameFrameDrawList().ItemCount();
     Render::DrawLiveRoomGeometry(geometry_, Bytes(), roomGeometryDrawMode);
-    VS::Field::roomPrimitiveRangeEnd = Scratch().primitive_cursor;
+    end_draw_ = Render::GameFrameDrawList().ItemCount();
   }
+  // decomp: BATTLE.PRG func_8008B1FC (src/BATTLE/BATTLE.PRG/146C.c:15801)
+  // bracketed the room's packets with the primitive cursor (D_800F1CC0,
+  // D_800F1BB8) and passed that range to the tint post-pass func_80098D6C;
+  // the room's typed draws are bracketed by their indices in the frame's draw
+  // list instead.
   void TintDrawnPrimitives(const Render::RoomTint& tint) override {
-    const VS::Field::RoomTintRecord packed{.red = tint.red,
-                                           .green = tint.green,
-                                           .blue = tint.blue,
-                                           .reserved03 = 0,
-                                           .strength = tint.strength,
-                                           .is_active = 1};
-    Render::TintLiveRoomGeometryPrimitives(VS::Field::roomPrimitiveRangeStart,
-                                           VS::Field::roomPrimitiveRangeEnd,
-                                           packed, 0);
+    Render::TintLiveRoomGeometry(first_draw_, end_draw_, tint);
   }
 
  private:
@@ -278,6 +276,8 @@ class LiveGeometryHost final : public RoomGeometryHost {
   }
 
   void* geometry_;
+  std::size_t first_draw_ = 0;
+  std::size_t end_draw_ = 0;
 };
 
 class LiveSceneHost final : public RoomSceneHost {

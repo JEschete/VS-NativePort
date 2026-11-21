@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <span>
 
 #include "Actors/ActorCommandsLive.hpp"
 #include "Actors/ActorMovementLive.hpp"
@@ -86,8 +87,10 @@
 #include "Render/CameraViewLive.hpp"
 #include "Render/Display.hpp"
 #include "Render/DisplayControlLive.hpp"
+#include "Render/DrawList.hpp"
 #include "Render/Frame.hpp"
 #include "Render/GimImagesLive.hpp"
+#include "Render/PageSpace.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/Render.hpp"
 #include "Render/ScreenOverlayLive.hpp"
@@ -110,6 +113,7 @@ namespace {
 constexpr int kOrderingTableLength = 0x822;
 constexpr std::ptrdiff_t kOverlayOrderingTableOffset = 2;
 constexpr std::ptrdiff_t kFieldOrderingTableOffset = 18;
+constexpr std::size_t kFieldOrderingTableEntries = 0x800;
 constexpr std::ptrdiff_t kMaskBitSlot = 0x820;
 constexpr std::ptrdiff_t kPresentSlot = 0x821;
 constexpr std::int32_t kGeometryOffsetX = 160;
@@ -210,6 +214,12 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     VS::Render::FrameScratchpad().ordering_table =
         ordering_table_ + kFieldOrderingTableOffset;
     ClearOTagR(ordering_table_, kOrderingTableLength);
+    // Typed scene items draw into the whole page space; feedback packets
+    // still narrow them through the draw area, as they narrow packets.
+    static_cast<void>(VS::Render::GameFrameDrawList().Open(
+        std::span(ordering_table_ + kFieldOrderingTableOffset,
+                  kFieldOrderingTableEntries),
+        VS::Render::DrawTarget{.surface = &VS::Render::GamePages()}));
     VS::Render::FrameScratchpad().primitive_cursor =
         VS::Render::legacyPrimitiveBuffers[VS::Render::frameBuf];
     AddPrim(ordering_table_,
@@ -538,6 +548,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     AddPrim(ordering_table_ + kMaskBitSlot, mask_bit);
     static_cast<void>(VS::Core::ElapsedFrameCounterTicks());
     VS::Render::PresentLiveFieldFrame(ordering_table_ + kPresentSlot);
+    static_cast<void>(VS::Render::GameFrameDrawList().Close());
     VS::Render::AdvanceLiveTexturePageRetirements();
   }
 

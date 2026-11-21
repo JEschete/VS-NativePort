@@ -6,17 +6,16 @@
 #include "Legacy/Psx.hpp"
 #include "Render/RoomDraw.hpp"
 
-namespace VS::Field {
-struct RoomTintRecord;
-}  // namespace VS::Field
 namespace VS::Render {
 struct ScreenOffset;
 }  // namespace VS::Render
 
 // Live binding for the MPD room geometry (RoomDraw.cpp): the GTE, the frame
-// camera and the current frame's primitive buffer. Room geometry is read
-// through the extent its section header records, and every packet is bounded
-// by the frame buffer the draw started in.
+// camera and the gameplay frame's draw list (Render/DrawList.hpp). Room
+// geometry is read through the extent its section header records; its
+// polygons become typed items in the scene table slots the frame's ordering
+// pointer names, and the primitive cursor advances by the size their packets
+// had, bounded by the frame buffer the draw started in.
 namespace VS::Render {
 // The clip and texture level-of-detail settings room polygons draw with,
 // owned here instead of in module statics.
@@ -29,7 +28,9 @@ namespace VS::Render {
 // Rebuilds the group views from the frame camera; false (and logged) when
 // the geometry is refused.
 bool UpdateLiveRoomGroupTransforms(void* geometry, std::size_t bytes);
-// Draws the visible groups into at most 64 KiB of the current frame buffer.
+// Draws the visible groups as items of the open scene draw list, within the
+// 64 KiB of the current frame buffer their packets had; nothing (logged)
+// when no scene list is open over the frame's ordering table.
 RoomDrawStatus DrawLiveRoomGeometry(const void* geometry, std::size_t bytes,
                                     int mode);
 void BuildLiveRoomGeometryViewMatrix(const VS::Core::Gte::VECTOR& position,
@@ -41,12 +42,10 @@ void BuildLiveScaleCompensatedRoomView(const VS::Core::Gte::VECTOR& position,
 // Draws the sky rotated by `view` at the farthest ordering entry.
 RoomDrawStatus DrawLiveSkyDome(const void* sky, std::size_t bytes,
                                const VS::Core::Gte::MATRIX& view);
-// Tints the room packets written between `start` and `end`, which must lie
-// in the current frame buffer; false (and logged) when the range is refused
-// or truncated.
-bool TintLiveRoomGeometryPrimitives(void* start, void* end,
-                                    const VS::Field::RoomTintRecord& tint,
-                                    int flags);
+// Tints the scene draw items with indices in [first, end), the range a room
+// draw added; false (and logged) when the range is not in the open list.
+bool TintLiveRoomGeometry(std::size_t first, std::size_t end,
+                          const RoomTint& tint);
 [[nodiscard]] VS::Render::ScreenOffset GetLiveProjectionScreenOffset();
 void SetLiveProjectionScreenOffset(const VS::Render::ScreenOffset& offset);
 }  // namespace VS::Render

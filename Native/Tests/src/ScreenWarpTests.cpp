@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <initializer_list>
 #include <span>
 #include <vector>
 
@@ -17,6 +18,10 @@
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Effects/ScreenEffectState.hpp"
 #include "Legacy/Psx.hpp"
+#include "Render/DrawList.hpp"
+#include "Render/DrawPolygon.hpp"
+#include "Render/FrameDrawListProbe.hpp"
+#include "Render/PageSpace.hpp"
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
 
@@ -316,4 +321,87 @@ TEST_CASE("Identity screen warp preserves all signed coordinate words",
   const auto before = fixture.triangle;
   VS::Effects::ScreenDistortion::WarpLivePolygonVertices();
   CHECK(fixture.triangle == before);
+}
+
+namespace {
+using WarpCorners = std::array<std::array<std::int16_t, 2>, 3>;
+// A typed triangle's corners as submitted and as the warp leaves them.
+constexpr WarpCorners kSubmittedCorners{{{32, 64}, {288, 64}, {160, 192}}};
+constexpr WarpCorners kWarpedCorners{{{96, 88}, {224, 88}, {160, 152}}};
+
+VS::Render::DrawPolygon WarpTriangle() {
+  VS::Render::DrawPolygon polygon{};
+  polygon.material.gouraud = true;
+  polygon.corner_count = VS::Render::kDrawTriangleCorners;
+  for (std::size_t corner = 0; corner < kSubmittedCorners.size(); ++corner) {
+    polygon.corners[corner].x = kSubmittedCorners[corner][0];
+    polygon.corners[corner].y = kSubmittedCorners[corner][1];
+  }
+  return polygon;
+}
+
+// Whether draw-list item `index` is a triangle with `corners`.
+bool ItemHasCorners(std::size_t index, const WarpCorners& corners) {
+  const VS::Render::DrawPolygon item =
+      render_tests::ListedItemAt(index).polygon;
+  for (std::size_t corner = 0; corner < corners.size(); ++corner) {
+    if (item.corners[corner].x != corners[corner][0] ||
+        item.corners[corner].y != corners[corner][1]) {
+      return false;
+    }
+  }
+  return item.corner_count == VS::Render::kDrawTriangleCorners;
+}
+
+// Submits the triangle to the frame draw list at each of `slots`.
+void SubmitTriangles(std::initializer_list<std::size_t> slots) {
+  const VS::Render::DrawPolygon polygon = WarpTriangle();
+  for (const std::size_t slot : slots) {
+    REQUIRE(VS::Render::GameFrameDrawList().Submit(polygon, slot).has_value());
+  }
+}
+
+// Checks that each item, in submission order, was warped exactly when its
+// `warped` entry is set.
+void CheckWarpedItems(std::initializer_list<bool> warped) {
+  std::size_t index = 0;
+  for (const bool moved : warped) {
+    CAPTURE(index);
+    CHECK(ItemHasCorners(index, moved ? kWarpedCorners : kSubmittedCorners));
+    ++index;
+  }
+}
+}  // namespace
+
+// #50: typed scene items are warped where their equivalent packets were: in
+// the slots the walk passes through (1..2046), after any packets added to the
+// slot later, and not past a link that ends the list.
+TEST_CASE("Screen warp warps typed scene items the walk reaches",
+          "[effects][screen-warp][typed-draw]") {
+  WarpFixture fixture;
+  VS::Legacy::ClearOTagR(fixture.ordering.data(),
+                         static_cast<int>(fixture.ordering.size()));
+  VS::Render::FrameDrawList& list = VS::Render::GameFrameDrawList();
+  struct Guard {
+    ~Guard() { static_cast<void>(VS::Render::GameFrameDrawList().Abandon()); }
+  } guard;
+  REQUIRE(
+      list.Open(std::span(fixture.ordering),
+                VS::Render::DrawTarget{.surface = &VS::Render::GamePages()}));
+
+  SECTION("slots 1 to 2046, behind later packets") {
+    SubmitTriangles({0, 1, 1000, 2046, 2047});
+    VS::Legacy::AddPrim(&fixture.ordering[1000], fixture.triangle.data());
+    VS::Effects::ScreenDistortion::WarpLivePolygonVertices();
+    CheckWarpedItems({false, true, true, true, false});
+    CHECK(fixture.triangle[2] == Point(96, 88));
+    CHECK(fixture.triangle[4] == Point(160, 152));
+  }
+
+  SECTION("not past a link that ends the list") {
+    fixture.ordering[500] = 0x00FFFFFF;
+    SubmitTriangles({1, 500, 1000});
+    VS::Effects::ScreenDistortion::WarpLivePolygonVertices();
+    CheckWarpedItems({false, false, true});
+  }
 }

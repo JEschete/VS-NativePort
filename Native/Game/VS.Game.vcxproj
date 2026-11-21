@@ -1031,7 +1031,6 @@
     <ClCompile Include="src\Field\PlatformPlacementLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Field\Room.cpp" />
     <ClCompile Include="src\Field\RoomEffects.cpp" />
     <ClCompile Include="src\Field\RoomEffectsCore.cpp" />
     <ClCompile Include="src\Field\RoomEffectsLive.cpp">

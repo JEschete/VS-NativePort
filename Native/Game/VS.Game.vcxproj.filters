@@ -2196,9 +2196,6 @@
     <ClCompile Include="src\Field\PlatformPlacementLive.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClCompile Include="src\Field\Room.cpp">
-      <Filter>src\Field</Filter>
-    </ClCompile>
     <ClInclude Include="src\Field\Room.hpp">
       <Filter>src\Field</Filter>
     </ClInclude>

@@ -98,9 +98,4 @@ struct RoomDataRecord {
   CameraBounds* zone_bounds;
 };
 
-// decomp: D_800F1BB8 (src/BATTLE/BATTLE.PRG/146C.c:358)
-extern void* roomPrimitiveRangeEnd;
-// decomp: D_800F1CC0 (src/BATTLE/BATTLE.PRG/146C.c:361)
-extern void* roomPrimitiveRangeStart;
-
 }  // namespace VS::Field

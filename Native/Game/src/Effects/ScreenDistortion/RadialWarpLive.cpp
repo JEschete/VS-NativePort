@@ -5,12 +5,14 @@
 #include <cstdint>
 #include <cstdlib>
 #include <span>
+#include <unordered_set>
 
 #include "Core/Log.hpp"
 #include "Core/Math/FixedPoint.hpp"
 #include "Effects/ScreenDistortion/RadialWarp.hpp"
 #include "Effects/ScreenEffectState.hpp"
 #include "Legacy/Psx.hpp"
+#include "Render/DrawList.hpp"
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
 
@@ -51,24 +53,36 @@ std::uint32_t* NextPacket(std::uint32_t* packet, const std::uint32_t* base) {
 }
 
 // Walks the frame ordering table from the last scene bucket, checking for a
-// cyclic list with a second cursor that advances two links per step.
+// cyclic list with a second cursor that advances two links per step. The
+// frame's typed draw items (Render/DrawList.hpp) are warped as the walk
+// follows the link their slot entry held, where their equivalent packets
+// would have been visited; a packet whose link ends the list ends the walk
+// unvisited.
 class OrderingTablePackets final : public PrimitivePacketCursor {
  public:
-  explicit OrderingTablePackets(std::uint32_t* base)
-      : base_(base), fast_(base + kLastSceneBucket) {}
+  OrderingTablePackets(std::uint32_t* base, const RadialWarpField& field,
+                       VS::Render::FrameDrawList& items)
+      : base_(base),
+        fast_(base + kLastSceneBucket),
+        field_(field),
+        items_(items) {}
 
   bool Advance() override {
     if (!started_) {
       started_ = true;
       packet_ = base_ + kLastSceneBucket;
+      walked_.insert(packet_);
       return true;
     }
+    WarpItemsBefore(TagWord(packet_) & kLinkMask);
     packet_ = NextPacket(packet_, base_);
     fast_ = NextPacket(NextPacket(fast_, base_), base_);
     if (packet_ != nullptr && packet_ == fast_) {
       InvalidLiveWarp("cyclic ordering list");
     }
-    return packet_ != nullptr;
+    if (packet_ == nullptr) return false;
+    walked_.insert(packet_);
+    return true;
   }
 
   std::size_t WordCount() const override {
@@ -88,9 +102,23 @@ class OrderingTablePackets final : public PrimitivePacketCursor {
     return {packet_ + 1, WordCount()};
   }
 
+  // Items at slot 0 are anchored at the table base, which the walk never
+  // passes through, so they stay unwarped like the packets the original
+  // linked there.
+  void WarpItemsBefore(std::uint32_t link) {
+    items_.ForEachItemBefore(
+        link, walked_,
+        [this](VS::Render::DrawPolygon& polygon, std::size_t /*slot*/) {
+          field_.Warp(polygon);
+        });
+  }
+
   std::uint32_t* base_;
   std::uint32_t* packet_{};
   std::uint32_t* fast_;
+  const RadialWarpField& field_;
+  VS::Render::FrameDrawList& items_;
+  std::unordered_set<const void*> walked_;
   bool started_{};
 };
 }  // namespace
@@ -106,9 +134,11 @@ void WarpLivePolygonVertices() {
           static_cast<std::uint16_t>(screenEffectOverlay->radial_warp_scale),
       .growth = screenEffectOverlay->radial_warp_growth,
   };
-  OrderingTablePackets packets(static_cast<std::uint32_t*>(
-      VS::Render::FrameScratchpad().ordering_table));
-  WarpPolygonVertices(settings, std::span(VS::Core::Math::kArcTangentTable),
-                      packets);
+  const RadialWarpField field(settings,
+                              std::span(VS::Core::Math::kArcTangentTable));
+  OrderingTablePackets packets(
+      static_cast<std::uint32_t*>(VS::Render::FrameScratchpad().ordering_table),
+      field, VS::Render::GameFrameDrawList());
+  WarpPolygonVertices(field, packets);
 }
 }  // namespace VS::Effects::ScreenDistortion

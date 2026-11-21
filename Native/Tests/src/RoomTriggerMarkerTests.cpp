@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -18,11 +19,13 @@
 #include "Field/TriggerMarkers.hpp"
 #include "Legacy/Psx.hpp"
 #include "Render/Display.hpp"
+#include "Render/DrawList.hpp"
+#include "Render/DrawPolygon.hpp"
 #include "Render/Frame.hpp"
+#include "Render/FrameDrawListProbe.hpp"
 #include "Render/PageSpace.hpp"
 #include "Render/RoomDraw.hpp"
 #include "Render/RoomDrawLive.hpp"
-#include "Render/UiPrimitives.hpp"
 #include "State/StateFlags.hpp"
 #include "State/Timers.hpp"
 
@@ -30,7 +33,6 @@ using VS::Core::Gte::SetGeomOffset;
 using VS::Core::Gte::SetGeomScreen;
 
 using VS::Legacy::ClearOTagR;
-using VS::Legacy::nextPrim;
 
 namespace {
 struct MarkerDefinition {
@@ -129,6 +131,7 @@ struct TriggerMarkerFixture {
   }
 
   ~TriggerMarkerFixture() {
+    static_cast<void>(VS::Render::GameFrameDrawList().Abandon());
     std::memcpy(VS::Content::battleTriggerMarkerBytes, saved_definition.data(),
                 sizeof saved_definition);
     VS::Field::roomData = saved_room;
@@ -155,16 +158,19 @@ struct TriggerMarkerFixture {
     VS::Render::FrameScratchpad().primitive_cursor = storage.data() + 1;
     VS::Render::FrameScratchpad().ordering_table = ordering.data();
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
+    static_cast<void>(VS::Render::GameFrameDrawList().Abandon());
+    REQUIRE(VS::Render::GameFrameDrawList().Open(
+        ordering, VS::Render::DrawTarget{.surface = &VS::Render::GamePages()}));
   }
 
-  const std::uint32_t* Packet(std::size_t index = 0) const {
-    return storage.data() + 1 + index * 13;
-  }
-
+  // Each marker still reserves its packet's space in the frame buffer, but
+  // the buffer itself is never written.
   void CheckPackets(unsigned count) const {
-    CHECK(VS::Render::FrameScratchpad().primitive_cursor == Packet(count));
-    CHECK(storage.front() == 0xDEADBEEF);
-    CHECK(storage.back() == 0xDEADBEEF);
+    CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
+          storage.data() + 1 + std::size_t{count} * kMarkerPacketWords);
+    CHECK(VS::Render::GameFrameDrawList().ItemCount() == count);
+    CHECK(std::ranges::all_of(
+        storage, [](std::uint32_t word) { return word == 0xDEADBEEF; }));
     std::array<unsigned int, 29> current_definition{};
     std::memcpy(current_definition.data(),
                 VS::Content::battleTriggerMarkerBytes,
@@ -172,19 +178,35 @@ struct TriggerMarkerFixture {
     CHECK(current_definition == expected_definition);
   }
 
-  void CheckMaterial() const {
-    const auto* packet = Packet();
-    CHECK((packet[1] >> 24) == 0x3E);
-    for (unsigned vertex = 0; vertex < 4; ++vertex) {
-      CHECK((packet[1 + vertex * 3] & 0xFFFFFF) == 0x494949);
+  static void CheckShade(const VS::Render::DrawPolygon& marker,
+                         std::uint8_t shade) {
+    for (unsigned corner = 0; corner < 4; ++corner) {
+      CHECK(marker.corners[corner].red == shade);
+      CHECK(marker.corners[corner].green == shade);
+      CHECK(marker.corners[corner].blue == shade);
     }
-    CHECK((packet[3] & 0xFFFF) == 0x140A);
-    CHECK((packet[6] & 0xFFFF) == 0x281E);
-    CHECK((packet[9] & 0xFFFF) == 0x3C32);
-    CHECK((packet[12] & 0xFFFF) == 0x5046);
-    CHECK((packet[3] >> 16) == 0x1234);
-    CHECK((packet[6] >> 16) == 0x15);
   }
+
+  static void CheckMaterial() {
+    const auto marker = render_tests::ListedItemAt(0).polygon;
+    // The original's GP0 0x3E: a semi-transparent, Gouraud-textured quad.
+    CHECK(marker.material == VS::Render::DrawMaterial{.gouraud = true,
+                                                      .textured = true,
+                                                      .semi_transparent = true,
+                                                      .page = {0x15},
+                                                      .palette = {0x1234}});
+    CHECK(marker.corner_count == 4);
+    CheckShade(marker, 0x49);
+    constexpr std::array<std::pair<std::uint8_t, std::uint8_t>, 4> kUv{
+        {{10, 20}, {30, 40}, {50, 60}, {70, 80}}};
+    for (unsigned corner = 0; corner < 4; ++corner) {
+      CHECK(marker.corners[corner].u == kUv[corner].first);
+      CHECK(marker.corners[corner].v == kUv[corner].second);
+    }
+  }
+
+  static constexpr std::size_t kMarkerPacketWords =
+      VS::Render::kRoomQuadPacketWords;
 };
 
 struct AnimationPixels {
@@ -231,15 +253,15 @@ TEST_CASE("Room trigger markers use the native view and preserve quad material",
                                                sizeof fixture.definition));
   VS::Field::DrawLiveRoomTriggerMarker(0, 0, 0, 73);
   fixture.CheckPackets(1);
-  fixture.CheckMaterial();
-  const auto* packet = fixture.Packet();
-  CHECK(static_cast<std::int16_t>(packet[2]) == 192);
-  CHECK(static_cast<std::int16_t>(packet[2] >> 16) == 88);
-  CHECK(static_cast<std::int16_t>(packet[5]) == 192);
-  CHECK(static_cast<std::int16_t>(packet[5] >> 16) == 104);
-  CHECK(static_cast<std::int16_t>(packet[8]) == 176);
-  CHECK(static_cast<std::int16_t>(packet[11] >> 16) == 104);
-  CHECK(nextPrim(&fixture.ordering[256]) == packet);
+  TriggerMarkerFixture::CheckMaterial();
+  const auto [marker, slot] = render_tests::ListedItemAt(0);
+  CHECK(marker.corners[0].x == 192);
+  CHECK(marker.corners[0].y == 88);
+  CHECK(marker.corners[1].x == 192);
+  CHECK(marker.corners[1].y == 104);
+  CHECK(marker.corners[2].x == 176);
+  CHECK(marker.corners[3].y == 104);
+  CHECK(slot == 256);
 }
 
 TEST_CASE("Room trigger marker definitions reject incomplete or unsafe shapes",
@@ -369,12 +391,10 @@ TEST_CASE("Room trigger marker entry uses fresh placement shade and view",
   VS::Render::FrameScratchpad().view_matrix.t[0] = 64;
   VS::Field::DrawLiveRoomTriggerMarker(128, 128, 0, 7);
   fixture.CheckPackets(1);
-  const auto* packet = fixture.Packet();
-  CHECK(static_cast<std::int16_t>(packet[2]) == 240);
-  CHECK(static_cast<std::int16_t>(packet[2] >> 16) == 56);
-  for (unsigned vertex = 0; vertex < 4; ++vertex) {
-    CHECK((packet[1 + vertex * 3] & 0xFFFFFF) == 0x070707);
-  }
+  const auto moved = render_tests::ListedItemAt(0).polygon;
+  CHECK(moved.corners[0].x == 240);
+  CHECK(moved.corners[0].y == 56);
+  TriggerMarkerFixture::CheckShade(moved, 7);
   fixture.ResetPackets();
   VS::Field::roomData.floor_triggers = nullptr;
   VS::Field::DrawLiveRoomTriggerMarkers();
@@ -386,9 +406,7 @@ TEST_CASE("Room trigger marker entry uses fresh placement shade and view",
   fixture.CheckPackets(1);
   CHECK(fixture.triggers[0].marker_fade == 2);
   CHECK(VS::Field::triggerMarkerFrameTicks == 1);
-  for (unsigned vertex = 0; vertex < 4; ++vertex) {
-    CHECK((fixture.Packet()[1 + vertex * 3] & 0xFFFFFF) == 0x020202);
-  }
+  TriggerMarkerFixture::CheckShade(render_tests::ListedItemAt(0).polygon, 2);
 }
 
 TEST_CASE("Room trigger marker height is applied before camera projection",
@@ -398,7 +416,7 @@ TEST_CASE("Room trigger marker height is applied before camera projection",
   VS::Field::DrawLiveRoomTriggerMarker(0, 0, height, 128);
   fixture.CheckPackets(1);
   const unsigned depth = static_cast<unsigned>((1024 + height) / 4);
-  CHECK(nextPrim(&fixture.ordering[depth]) == fixture.Packet());
+  CHECK(render_tests::ListedItemAt(0).slot == depth);
 }
 
 TEST_CASE("Room trigger marker animation retains wrap and single-step timing",

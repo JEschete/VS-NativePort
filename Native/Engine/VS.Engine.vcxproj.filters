@@ -573,6 +573,9 @@
     <ClCompile Include="src\Render\DisplayControlLive.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
+    <ClCompile Include="src\Render\DrawList.cpp">
+      <Filter>src\Render</Filter>
+    </ClCompile>
     <ClCompile Include="src\Render\EncodedText.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
@@ -1075,6 +1078,12 @@
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Render\DisplayControlLive.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\DrawList.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\DrawPolygon.hpp">
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Render\EncodedText.hpp">

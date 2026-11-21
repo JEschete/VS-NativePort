@@ -69,7 +69,7 @@ void PageSpace::SetEffectPathTraceTick(u64 tick) {
   }
 }
 
-void PageSpace::TracePrimitive(const u32* command,
+void PageSpace::TracePrimitive(std::uintptr_t command_address, u32 opcode,
                                std::span<const Vertex> vertices,
                                const Prim& primitive) const {
   if (!m_effectTrace || !primitive.semi ||
@@ -93,11 +93,11 @@ void PageSpace::TracePrimitive(const u32* command,
       "\"draw_area\":[{},{},{},{}],\"display\":[{},{},{},{}],"
       "\"display_lines\":[{},{}],"
       "\"vertices\":[{}]}}",
-      reinterpret_cast<std::uintptr_t>(command), *command >> 24,
-      primitive.textured, primitive.raw, primitive.clut, m_pageX, m_pageY,
-      m_depth, m_semiMode, m_offX, m_offY, m_areaX1, m_areaY1, m_areaX2,
-      m_areaY2, m_display.area.x, m_display.area.y, m_display.area.w,
-      m_display.area.h, m_display.screenY, m_display.screenH, points);
+      command_address, opcode, primitive.textured, primitive.raw,
+      primitive.clut, m_pageX, m_pageY, m_depth, m_semiMode, m_offX, m_offY,
+      m_areaX1, m_areaY1, m_areaX2, m_areaY2, m_display.area.x,
+      m_display.area.y, m_display.area.w, m_display.area.h, m_display.screenY,
+      m_display.screenH, points);
 }
 
 PageSpace& GamePages() {
@@ -212,45 +212,45 @@ usize PageSpace::Execute(std::span<const u32> w) {
     return 3;
   }
   if (cmd >= 0x20 && cmd < 0x40) {  // polygon
-    Prim p;
-    p.gouraud = cmd & 0x10;
+    DrawPolygon polygon;
+    DrawMaterial& material = polygon.material;
+    material.gouraud = cmd & 0x10;
     const bool quad = cmd & 0x08;
-    p.textured = cmd & 0x04;
-    p.semi = cmd & 0x02;
-    p.raw = cmd & 0x01;
+    material.textured = cmd & 0x04;
+    material.semi_transparent = cmd & 0x02;
+    material.raw_texture = cmd & 0x01;
     const int n = quad ? 4 : 3;
+    polygon.corner_count = static_cast<u8>(n);
     const usize required =
-        1 + n + (p.gouraud ? n - 1 : 0) + (p.textured ? n : 0);
+        1 + n + (material.gouraud ? n - 1 : 0) + (material.textured ? n : 0);
     if (w.size() < required) {
       return 0;
     }
-    Vertex v[4]{};
     usize i = 1;
     u32 col = color(w[0]);
     for (int k = 0; k < n; ++k) {
-      if (p.gouraud && k > 0) {
+      if (material.gouraud && k > 0) {
         col = color(w[i++]);
       }
-      if (i >= w.size()) {
-        return w.size();
-      }
-      v[k] = vertexAt(w[i++], col);
-      if (p.textured) {
+      DrawCorner& corner = polygon.corners[static_cast<usize>(k)];
+      const u32 xy = w[i++];
+      corner.x = static_cast<i16>(xy & 0xFFFF);
+      corner.y = static_cast<i16>(xy >> 16);
+      corner.red = static_cast<u8>(col);
+      corner.green = static_cast<u8>(col >> 8);
+      corner.blue = static_cast<u8>(col >> 16);
+      if (material.textured) {
         const u32 uv = w[i++];
-        v[k].u = static_cast<i32>(uv & 0xFF);
-        v[k].v = static_cast<i32>((uv >> 8) & 0xFF);
+        corner.u = static_cast<u8>(uv);
+        corner.v = static_cast<u8>(uv >> 8);
         if (k == 0) {
-          p.clut = static_cast<u16>(uv >> 16);
+          material.palette.word = static_cast<u16>(uv >> 16);
         } else if (k == 1) {
-          SetTexturePage(static_cast<u16>(uv >> 16));
+          material.page.word = static_cast<u16>(uv >> 16);
         }
       }
     }
-    TracePrimitive(w.data(), std::span(v, static_cast<usize>(n)), p);
-    Triangle(v[0], v[1], v[2], p);
-    if (quad) {
-      Triangle(v[1], v[2], v[3], p);
-    }
+    DrawAt(polygon, reinterpret_cast<std::uintptr_t>(w.data()));
     return i;
   }
   if (cmd >= 0x40 && cmd < 0x60) {  // line / polyline
@@ -281,7 +281,8 @@ usize PageSpace::Execute(std::span<const u32> w) {
       Vertex next = vertexAt(w[i++], col);
       if (m_effectTrace && p.semi) {
         const std::array segment{prev, next};
-        TracePrimitive(w.data(), segment, p);
+        TracePrimitive(reinterpret_cast<std::uintptr_t>(w.data()), cmd, segment,
+                       p);
       }
       Line(prev, next, p);
       prev = next;
@@ -338,7 +339,8 @@ usize PageSpace::Execute(std::span<const u32> w) {
         corners[corner].u = u + ((corner & 1) ? rw : 0);
         corners[corner].v = v + ((corner & 2) ? rh : 0);
       }
-      TracePrimitive(w.data(), corners, p);
+      TracePrimitive(reinterpret_cast<std::uintptr_t>(w.data()), cmd, corners,
+                     p);
     }
     Rectangle(origin.x, origin.y, rw, rh, u, v, col, p);
     return i;
@@ -378,6 +380,63 @@ usize PageSpace::Execute(std::span<const u32> w) {
     default:
       return 1;  // no-op, cache clear, or unsupported command
   }
+}
+
+bool PageSpace::DrawAt(const DrawPolygon& polygon,
+                       std::uintptr_t command_address) {
+  if (!polygon.HasValidCornerCount()) {
+    return false;
+  }
+  const DrawMaterial& material = polygon.material;
+  Prim p;
+  p.gouraud = material.gouraud;
+  p.textured = material.textured;
+  p.semi = material.semi_transparent;
+  p.raw = material.raw_texture;
+  if (p.textured) {
+    p.clut = material.palette.word;
+    SetTexturePage(material.page.word);
+  }
+  const usize n = polygon.corner_count;
+  std::array<Vertex, kDrawQuadCorners> v{};
+  for (usize k = 0; k < n; ++k) {
+    const DrawCorner& corner = polygon.corners[k];
+    const DrawCorner& shade = p.gouraud ? corner : polygon.corners[0];
+    v[k] = Vertex{Sext11(static_cast<u16>(corner.x)) + m_offX,
+                  Sext11(static_cast<u16>(corner.y)) + m_offY,
+                  shade.red,
+                  shade.green,
+                  shade.blue,
+                  p.textured ? corner.u : 0,
+                  p.textured ? corner.v : 0};
+  }
+  const bool quad = n == kDrawQuadCorners;
+  const u32 opcode = 0x20 | (p.gouraud ? 0x10 : 0) | (quad ? 0x08 : 0) |
+                     (p.textured ? 0x04 : 0) | (p.semi ? 0x02 : 0) |
+                     (p.raw ? 0x01 : 0);
+  TracePrimitive(command_address, opcode, std::span<const Vertex>(v.data(), n),
+                 p);
+  Triangle(v[0], v[1], v[2], p);
+  if (quad) {
+    Triangle(v[1], v[2], v[3], p);
+  }
+  return true;
+}
+
+bool PageSpace::Draw(const DrawPolygon& polygon) { return DrawAt(polygon, 0); }
+
+bool PageSpace::Draw(const DrawPolygon& polygon, const Rect& target) {
+  const i32 x1 = m_areaX1, y1 = m_areaY1, x2 = m_areaX2, y2 = m_areaY2;
+  m_areaX1 = std::max(x1, target.x);
+  m_areaY1 = std::max(y1, target.y);
+  m_areaX2 = std::min(x2, target.x + target.w - 1);
+  m_areaY2 = std::min(y2, target.y + target.h - 1);
+  const bool drawn = DrawAt(polygon, 0);
+  m_areaX1 = x1;
+  m_areaY1 = y1;
+  m_areaX2 = x2;
+  m_areaY2 = y2;
+  return drawn;
 }
 
 // ------------------------------------------------------------------------------------------------

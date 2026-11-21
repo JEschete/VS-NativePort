@@ -79,7 +79,9 @@ TEST_CASE("Typed radial warp scales triangle vertices toward the centre",
           "[effects][screen-warp][typed]") {
   const auto table = RootTable();
   FakePackets packets({Triangle()});
-  warp::WarpPolygonVertices({.scale = kHalfScale, .growth = 0}, table, packets);
+  warp::WarpPolygonVertices(
+      warp::RadialWarpField({.scale = kHalfScale, .growth = 0}, table),
+      packets);
   const auto& triangle = packets.Packet(0);
   CHECK(triangle[0] == kTriangleCommand);
   CHECK(triangle[1] == Point(96, 88));
@@ -94,7 +96,9 @@ TEST_CASE("Typed radial warp skips mode prefixes and visits every packet",
   auto prefixed = Triangle();
   prefixed.insert(prefixed.begin(), kModeCommand);
   FakePackets packets({{}, {kModeCommand}, prefixed, Triangle()});
-  warp::WarpPolygonVertices({.scale = kHalfScale, .growth = 0}, table, packets);
+  warp::WarpPolygonVertices(
+      warp::RadialWarpField({.scale = kHalfScale, .growth = 0}, table),
+      packets);
   CHECK(packets.Packet(0).empty());
   CHECK(packets.Packet(1) == std::vector<std::uint32_t>{kModeCommand});
   CHECK(packets.Packet(2)[0] == kModeCommand);
@@ -109,7 +113,9 @@ TEST_CASE("Typed radial warp leaves non-polygon draw commands untouched",
   const std::vector<std::uint32_t> line{kLineCommand, Point(0, 0),
                                         Point(320, 240)};
   FakePackets packets({line});
-  warp::WarpPolygonVertices({.scale = kHalfScale, .growth = 0}, table, packets);
+  warp::WarpPolygonVertices(
+      warp::RadialWarpField({.scale = kHalfScale, .growth = 0}, table),
+      packets);
   CHECK(packets.Packet(0) == line);
   CHECK(packets.Writes() == 0);
 }
@@ -118,8 +124,9 @@ TEST_CASE("Typed radial warp at identity scale rewrites the same coordinates",
           "[effects][screen-warp][typed]") {
   const auto table = RootTable();
   FakePackets packets({Triangle()});
-  warp::WarpPolygonVertices({.scale = kIdentityScale, .growth = 0}, table,
-                            packets);
+  warp::WarpPolygonVertices(
+      warp::RadialWarpField({.scale = kIdentityScale, .growth = 0}, table),
+      packets);
   CHECK(packets.Packet(0) == Triangle());
   CHECK(packets.Writes() == 3);
 }

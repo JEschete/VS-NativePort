@@ -522,7 +522,7 @@ NATIVE_HELPER_HEADERS = {
     **{f"VS::Render::{name}": r"Native\Engine\include\Render\RoomDrawLive.hpp"
        for name in ("LiveRoomClipState", "ValidateLiveRoomGeometry", "UpdateLiveRoomGroupTransforms",
                     "DrawLiveRoomGeometry", "BuildLiveRoomGeometryViewMatrix", "BuildLiveScaleCompensatedRoomView",
-                    "DrawLiveSkyDome", "TintLiveRoomGeometryPrimitives", "GetLiveProjectionScreenOffset",
+                    "DrawLiveSkyDome", "TintLiveRoomGeometry", "GetLiveProjectionScreenOffset",
                     "SetLiveProjectionScreenOffset")},
     **{name: r"Native\Game\include\Boot\SessionLive.hpp"
        for name in ("VS::Boot::JumpToLiveTitle", "VS::Boot::JumpToLiveGameLoop")},

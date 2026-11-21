@@ -4,22 +4,19 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <optional>
 #include <span>
 
 #include "Core/Diagnostics.hpp"
 #include "Core/Gte.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Field/Room.hpp"
 #include "Render/Display.hpp"
+#include "Render/DrawList.hpp"
 #include "Render/Frame.hpp"
 #include "Render/Render.hpp"
-#include "Render/UiPrimitives.hpp"
 
 using VS::Core::Gte::MATRIX;
 using VS::Core::Gte::VECTOR;
-
-using VS::Legacy::AddPrim;
-using VS::Legacy::setlen;
 
 namespace VS::Render {
 namespace {
@@ -59,48 +56,50 @@ static_assert(sizeof(VS::Core::Gte::Word) == sizeof(std::int32_t));
   return reinterpret_cast<std::uintptr_t>(legacyPrimitiveBuffers[frameBuf & 1]);
 }
 
-// Packets linked into the frame's ordering table from the primitive cursor,
-// at most `budget` bytes and never past the current frame buffer.
-class LiveRoomPacketQueue final : public RoomPacketQueue {
+// Room polygons submitted to the frame's draw list at the scene table slot
+// the frame's ordering pointer names. The packets the original linked from
+// the primitive cursor are not built; the cursor still advances by their
+// size, at most `budget` bytes and never past the current frame buffer, so
+// the producers after the room draw keep the buffer space, and the refusals
+// when it runs out, that they had beside the room's packets.
+class LiveRoomDrawQueue final : public RoomDrawQueue {
  public:
-  explicit LiveRoomPacketQueue(std::size_t budget) {
+  explicit LiveRoomDrawQueue(std::size_t budget) {
     const std::uintptr_t base = FrameBufferBase();
     begin_ =
         reinterpret_cast<std::uintptr_t>(FrameScratchpad().primitive_cursor);
+    const std::optional<std::size_t> first_slot = GameFrameDrawList().SlotOf(
+        static_cast<const std::uint32_t*>(FrameScratchpad().ordering_table));
     if (base == 0 || begin_ < base || begin_ - base > kPrimitiveBufferBytes ||
-        FrameScratchpad().ordering_table == nullptr) {
+        !first_slot.has_value()) {
       return;
     }
+    first_slot_ = *first_slot;
     limit_ = begin_ + std::min(budget, kPrimitiveBufferBytes - (begin_ - base));
     ready_ = true;
   }
 
   [[nodiscard]] bool Ready() const { return ready_; }
-  [[nodiscard]] std::uintptr_t Begin() const { return begin_; }
-  [[nodiscard]] std::uintptr_t Limit() const { return limit_; }
 
-  bool Emit(std::span<const std::uint32_t> packet,
-            std::uint32_t depth) override {
+  bool Submit(const DrawPolygon& polygon, std::uint32_t slot) override {
     const auto cursor =
         reinterpret_cast<std::uintptr_t>(FrameScratchpad().primitive_cursor);
-    if (!ready_ || packet.empty() || cursor < begin_ || cursor > limit_ ||
-        packet.size_bytes() > limit_ - cursor) {
+    const std::size_t bytes =
+        RoomPacketEquivalentWords(polygon) * sizeof(std::uint32_t);
+    if (!ready_ || cursor < begin_ || cursor > limit_ ||
+        bytes > limit_ - cursor ||
+        !GameFrameDrawList().Submit(polygon, first_slot_ + slot)) {
       return false;
     }
-    auto* slot =
-        static_cast<std::uint32_t*>(FrameScratchpad().primitive_cursor);
-    std::ranges::copy(packet, slot);
-    setlen(slot, packet.size() - 1);
-    AddPrim(
-        static_cast<std::uint32_t*>(FrameScratchpad().ordering_table) + depth,
-        slot);
-    FrameScratchpad().primitive_cursor = slot + packet.size();
+    FrameScratchpad().primitive_cursor =
+        static_cast<std::byte*>(FrameScratchpad().primitive_cursor) + bytes;
     return true;
   }
 
  private:
   std::uintptr_t begin_ = 0;
   std::uintptr_t limit_ = 0;
+  std::size_t first_slot_ = 0;
   bool ready_ = false;
 };
 
@@ -157,15 +156,15 @@ bool UpdateLiveRoomGroupTransforms(void* geometry, std::size_t bytes) {
 
 RoomDrawStatus DrawLiveRoomGeometry(const void* geometry, std::size_t bytes,
                                     int mode) {
-  LiveRoomPacketQueue queue(kRoomBatchBytes);
-  if (geometry == nullptr || !queue.Ready()) {
+  LiveRoomDrawQueue queue(kRoomBatchBytes);
+  if (geometry == nullptr) {
     return RoomDrawStatus::kDrawn;
   }
-  const auto start = reinterpret_cast<std::uintptr_t>(geometry);
-  if (start < queue.Limit() &&
-      (start >= queue.Begin() || queue.Begin() - start < bytes)) {
-    VS::Core::Debugf(kChannel, "Room geometry overlaps the primitive buffer");
-    return RoomDrawStatus::kInvalidGeometry;
+  if (!queue.Ready()) {
+    VS::Core::Debugf(kChannel,
+                     "Room geometry skipped: no frame buffer or open scene "
+                     "draw list");
+    return RoomDrawStatus::kDrawn;
   }
   PerspectiveRoomTransformer transformer = FrameTransformer();
   const RoomDrawPass pass{mode, FrameScratchpad().first_person_view_facing};
@@ -191,8 +190,14 @@ void BuildLiveScaleCompensatedRoomView(const VECTOR& position,
 
 RoomDrawStatus DrawLiveSkyDome(const void* sky, std::size_t bytes,
                                const MATRIX& view) {
-  LiveRoomPacketQueue queue(kPrimitiveBufferBytes);
-  if (sky == nullptr || !queue.Ready()) {
+  LiveRoomDrawQueue queue(kPrimitiveBufferBytes);
+  if (sky == nullptr) {
+    return RoomDrawStatus::kDrawn;
+  }
+  if (!queue.Ready()) {
+    VS::Core::Debugf(kChannel,
+                     "Sky dome skipped: no frame buffer or open scene draw "
+                     "list");
     return RoomDrawStatus::kDrawn;
   }
   PerspectiveRoomTransformer transformer = FrameTransformer();
@@ -204,31 +209,27 @@ RoomDrawStatus DrawLiveSkyDome(const void* sky, std::size_t bytes,
   return status;
 }
 
-bool TintLiveRoomGeometryPrimitives(void* start, void* end,
-                                    const VS::Field::RoomTintRecord& tint,
-                                    int flags) {
-  if (start == end) {
+// decomp: BATTLE.PRG func_80098D6C (src/BATTLE/BATTLE.PRG/2EA3C.s:1837),
+// which walked the packets between two primitive-cursor marks; the room's
+// items are the draw-list indices [first, end) instead.
+bool TintLiveRoomGeometry(std::size_t first, std::size_t end,
+                          const RoomTint& tint) {
+  FrameDrawList& items = GameFrameDrawList();
+  if (first == end) {
     return true;
   }
-  const auto first = reinterpret_cast<std::uintptr_t>(start);
-  const auto last = reinterpret_cast<std::uintptr_t>(end);
-  const std::uintptr_t base = FrameBufferBase();
-  if (start == nullptr || end == nullptr || base == 0 || first > last ||
-      (last - first) % sizeof(std::uint32_t) != 0 ||
-      first % alignof(std::uint32_t) != 0 || first < base ||
-      last - base > kPrimitiveBufferBytes) {
-    VS::Core::Debugf(kChannel, "Room tint range is outside the frame buffer");
+  if (!items.IsOpen() || first > end || end > items.ItemCount()) {
+    VS::Core::Debugf(kChannel,
+                     "Room tint range [%zu, %zu) is outside the frame's %zu "
+                     "draw items",
+                     first, end, items.ItemCount());
     return false;
   }
-  const std::span packets(static_cast<std::uint32_t*>(start),
-                          (last - first) / sizeof(std::uint32_t));
-  const RoomTint room_tint{tint.red, tint.green, tint.blue, tint.strength};
-  if (TintRoomGeometryPrimitives(packets, room_tint,
-                                 static_cast<std::uint32_t>(flags)) ==
-      RoomTintStatus::kTruncated) {
-    VS::Core::Debugf(kChannel, "Room tint range ends inside a packet");
-    return false;
-  }
+  const RoomColorAdjustment adjustment = RoomTintAdjustment(tint);
+  items.ForEachItem(first, end,
+                    [&adjustment](DrawPolygon& polygon, std::size_t /*slot*/) {
+                      TintRoomPolygon(polygon, adjustment);
+                    });
   return true;
 }
 

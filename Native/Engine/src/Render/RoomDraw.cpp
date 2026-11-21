@@ -1,7 +1,7 @@
 // Hand-maintained (tools/port/owned.csv).
 // MPD room geometry drawing (BATTLE.PRG 2EA3C.s) over bounded spans. The GTE
-// and the frame's ordering table are reached only through RoomTransformer and
-// RoomPacketQueue; RoomDrawLive.cpp binds both to the running frame.
+// and the frame's draw list are reached only through RoomTransformer and
+// RoomDrawQueue; RoomDrawLive.cpp binds both to the running frame.
 #include "Render/RoomDraw.hpp"
 
 #include <algorithm>
@@ -21,7 +21,6 @@ using QuadVertices = std::array<RoomVertex, kRoomQuadCorners>;
 
 constexpr std::size_t kGroupCountBytes = sizeof(std::uint32_t);
 constexpr std::size_t kPolygonCountBytes = 2 * sizeof(std::uint32_t);
-constexpr std::size_t kVertexPacketWords = 3;
 constexpr int kFixedFractionBits = 12;
 constexpr std::int32_t kFixedOneSquared = 1 << (2 * kFixedFractionBits);
 constexpr int kHalfwordBits = 16;
@@ -53,10 +52,11 @@ constexpr std::uint32_t kPackedCoordinateShift = 3;
 constexpr std::uint32_t kCoordinateShiftMask = 31;
 constexpr std::uint32_t kNoBackfaceCullCommand = 1;
 constexpr std::uint32_t kQuadCommandFlag = 8;
-constexpr std::uint32_t kPacketCommandMask = 0xFE;
-constexpr int kPacketCommandShift = 24;
-constexpr std::size_t kPalettePacketWord = 3;
-constexpr std::size_t kPagePacketWord = 6;
+// The command bits a room polygon must carry: a GP0 polygon (0x20), Gouraud
+// (0x10) and textured (0x04), with the high bits clear.
+constexpr std::uint32_t kPolygonCommandMask = 0xF4;
+constexpr std::uint32_t kGouraudTexturedPolygon = 0x34;
+constexpr std::uint32_t kSemiTransparentCommand = 2;
 constexpr std::uint32_t kLowDetailUvMask = 0x7F7F;
 constexpr std::uint32_t kMinimumSubdivisionArea = 512;
 constexpr std::int32_t kProjectedCoordinateBound = 1024;
@@ -76,7 +76,6 @@ constexpr std::size_t kSkyColorOffset = 8;
 constexpr std::int32_t kSkyDrawHeight = 240;
 constexpr std::int64_t kSkyCenterX = kRoomViewportWidth / 2;
 constexpr std::int64_t kSkyCenterY = kSkyDrawHeight / 2;
-constexpr std::uint32_t kSkyGouraudCommand = 0x30000000;
 
 constexpr std::size_t kTintChannels = 3;
 constexpr int kTintChannelFractionBits = 4;
@@ -84,9 +83,6 @@ constexpr std::int64_t kTintLuminanceRed = 5;
 constexpr std::int64_t kTintLuminanceGreen = 9;
 constexpr std::int64_t kTintLuminanceBlue = 2;
 constexpr int kTintOffsetScale = 4;
-constexpr std::uint32_t kTintPaddingFlag = 2;
-constexpr std::size_t kTintPaddingWords = 2;
-constexpr int kPacketLengthShift = 24;
 
 template <typename T>
 [[nodiscard]] T Read(std::span<const std::byte> bytes, std::size_t offset) {
@@ -119,6 +115,16 @@ void Write(std::span<std::byte> bytes, std::size_t offset, const T& value) {
 [[nodiscard]] std::int32_t ScreenY(std::int32_t screen) {
   return Math::WrapSigned16(static_cast<std::uint32_t>(screen) >>
                             kHalfwordBits);
+}
+
+// A packed screen position (x in the low halfword, y in the high) and a
+// 0xBBGGRR colour as a draw corner.
+[[nodiscard]] DrawCorner CornerAt(std::int32_t screen, std::uint32_t color) {
+  return {.x = static_cast<std::int16_t>(ScreenX(screen)),
+          .y = static_cast<std::int16_t>(ScreenY(screen)),
+          .red = static_cast<std::uint8_t>(color),
+          .green = static_cast<std::uint8_t>(color >> CHAR_BIT),
+          .blue = static_cast<std::uint8_t>(color >> (2 * CHAR_BIT))};
 }
 
 [[nodiscard]] std::int32_t Negate(std::int32_t value) {
@@ -368,7 +374,7 @@ bool Accumulate(RoomPolygonResult& total, const RoomPolygonResult& part) {
 class RoomPolygonEmitter {
  public:
   RoomPolygonEmitter(const RoomClipState& clip, RoomTransformer& transformer,
-                     RoomPacketQueue& queue)
+                     RoomDrawQueue& queue)
       : clip_(clip), transformer_(transformer), queue_(queue) {}
 
   RoomPolygonResult Queue(std::span<const std::byte> record,
@@ -388,42 +394,53 @@ class RoomPolygonEmitter {
 
   const RoomClipState& clip_;
   RoomTransformer& transformer_;
-  RoomPacketQueue& queue_;
+  RoomDrawQueue& queue_;
 };
 
-// The packet write and link shared by whole and subdivided polygons
+// The polygon write and link shared by whole and subdivided polygons
 // (2EA3C.s:395-470): Gouraud-textured, the half-resolution page past the
-// level-of-detail depth.
+// level-of-detail depth. The original packed a GT3 or GT4 packet whose
+// command was the record's with bit 0 (its no-cull flag) cleared; the same
+// fields now form the typed polygon. A command that would not have formed a
+// Gouraud-textured packet of this many corners is invalid geometry.
 RoomPolygonResult RoomPolygonEmitter::Write(const ProjectedPolygon& polygon,
                                             const RoomPolygonMaterial& material,
                                             bool low_detail) {
-  std::array<std::uint32_t, kRoomQuadPacketWords> packet{};
+  const bool quad_command = (material.command & kQuadCommandFlag) != 0;
+  if ((material.command & kPolygonCommandMask) != kGouraudTexturedPolygon ||
+      quad_command != (polygon.corners == kRoomQuadCorners)) {
+    return {RoomDrawStatus::kInvalidGeometry, 0};
+  }
   auto page = static_cast<std::uint16_t>(material.page);
   if (low_detail) {
     page = static_cast<std::uint16_t>(page - 1U);
   }
+  DrawPolygon draw{
+      .material = {.gouraud = true,
+                   .textured = true,
+                   .semi_transparent =
+                       (material.command & kSemiTransparentCommand) != 0,
+                   .page = {page},
+                   .palette = {static_cast<std::uint16_t>(material.clut)}},
+      .corner_count = static_cast<std::uint8_t>(polygon.corners)};
   for (std::size_t index = 0; index < polygon.corners; ++index) {
     const RoomVertex& vertex = polygon.vertices[index];
-    const std::size_t word = 1 + index * kVertexPacketWords;
-    packet[word] = vertex.color & kColorMask;
-    packet[word + 1] = static_cast<std::uint32_t>(polygon.screens[index]);
-    packet[word + 2] = low_detail
-                           ? (std::uint32_t{vertex.uv} >> 1) & kLowDetailUvMask
-                           : std::uint32_t{vertex.uv};
+    const std::uint32_t uv =
+        low_detail ? (std::uint32_t{vertex.uv} >> 1) & kLowDetailUvMask
+                   : std::uint32_t{vertex.uv};
+    DrawCorner& corner = draw.corners[index];
+    corner = CornerAt(polygon.screens[index], vertex.color);
+    corner.u = static_cast<std::uint8_t>(uv);
+    corner.v = static_cast<std::uint8_t>(uv >> CHAR_BIT);
   }
-  packet[1] |= (material.command & kPacketCommandMask) << kPacketCommandShift;
-  packet[kPalettePacketWord] |= material.clut << kHalfwordBits;
-  packet[kPagePacketWord] |= std::uint32_t{page} << kHalfwordBits;
-  const std::size_t words = 1 + polygon.corners * kVertexPacketWords;
-  switch (LinkRoomPolygonByDepth(
-      std::span<const std::uint32_t>(packet).first(words), polygon.depth,
-      material.flags, clip_, queue_)) {
+  switch (LinkRoomPolygonByDepth(draw, polygon.depth, material.flags, clip_,
+                                 queue_)) {
     case RoomLinkStatus::kLinked:
       return {RoomDrawStatus::kDrawn, 1};
     case RoomLinkStatus::kBufferFull:
       return {RoomDrawStatus::kBufferFull, 0};
     case RoomLinkStatus::kRejected:
-    case RoomLinkStatus::kInvalidPacket:
+    case RoomLinkStatus::kInvalidPolygon:
       break;
   }
   return {};
@@ -599,11 +616,10 @@ RoomPolygonResult RoomPolygonEmitter::Queue(std::span<const std::byte> record,
   return true;
 }
 
-using SkyPacket = std::array<std::uint32_t, kSkyDomePacketWords>;
-
-// One sky face as a Gouraud triangle centred on the 320x240 frame, or nothing
-// when it is behind the camera or off screen.
-[[nodiscard]] std::optional<SkyPacket> BuildSkyPacket(
+// One sky face as an opaque Gouraud triangle centred on the 320x240 frame, or
+// nothing when it is behind the camera or off screen. The original packed the
+// same corners into a G3 packet.
+[[nodiscard]] std::optional<DrawPolygon> BuildSkyPolygon(
     const std::array<Math::Vec3, kSkyDomeVertexCount>& positions,
     const std::array<std::uint32_t, kSkyDomeVertexCount>& colors,
     const std::array<std::size_t, kRoomTriangleCorners>& indices) {
@@ -612,7 +628,8 @@ using SkyPacket = std::array<std::uint32_t, kSkyDomePacketWords>;
       })) {
     return std::nullopt;
   }
-  SkyPacket packet{};
+  DrawPolygon polygon{.material = {.gouraud = true},
+                      .corner_count = kRoomTriangleCorners};
   std::int64_t left = INT64_MAX;
   std::int64_t right = INT64_MIN;
   std::int64_t top = INT64_MAX;
@@ -625,17 +642,16 @@ using SkyPacket = std::array<std::uint32_t, kSkyDomePacketWords>;
     right = std::max(right, x);
     top = std::min(top, y);
     bottom = std::max(bottom, y);
-    packet[1 + corner * 2] = colors[indices[corner]] & kColorMask;
-    packet[2 + corner * 2] = static_cast<std::uint16_t>(x) |
-                             std::uint32_t{static_cast<std::uint16_t>(y)}
-                                 << kHalfwordBits;
+    const auto screen = static_cast<std::int32_t>(
+        static_cast<std::uint16_t>(x) |
+        std::uint32_t{static_cast<std::uint16_t>(y)} << kHalfwordBits);
+    polygon.corners[corner] = CornerAt(screen, colors[indices[corner]]);
   }
   if (right < 0 || left >= kRoomViewportWidth || bottom < 0 ||
       top >= kRoomViewportHeight) {
     return std::nullopt;
   }
-  packet[1] |= kSkyGouraudCommand;
-  return packet;
+  return polygon;
 }
 }  // namespace
 
@@ -866,28 +882,27 @@ std::optional<std::uint32_t> ResolveRoomPolygonDepth(
 }
 
 // decomp: BATTLE.PRG func_800980F8 (src/BATTLE/BATTLE.PRG/2EA3C.s:996).
-RoomLinkStatus LinkRoomPolygonByDepth(std::span<const std::uint32_t> packet,
+RoomLinkStatus LinkRoomPolygonByDepth(const DrawPolygon& polygon,
                                       std::int32_t projected_depth,
                                       std::uint32_t flags,
                                       const RoomClipState& clip,
-                                      RoomPacketQueue& queue) {
-  if (packet.size() != kRoomTrianglePacketWords &&
-      packet.size() != kRoomQuadPacketWords) {
-    return RoomLinkStatus::kInvalidPacket;
+                                      RoomDrawQueue& queue) {
+  if (!polygon.HasValidCornerCount()) {
+    return RoomLinkStatus::kInvalidPolygon;
   }
   const auto depth = ResolveRoomPolygonDepth(projected_depth, flags, clip);
   if (!depth) {
     return RoomLinkStatus::kRejected;
   }
-  return queue.Emit(packet, *depth) ? RoomLinkStatus::kLinked
-                                    : RoomLinkStatus::kBufferFull;
+  return queue.Submit(polygon, *depth) ? RoomLinkStatus::kLinked
+                                       : RoomLinkStatus::kBufferFull;
 }
 
 // decomp: BATTLE.PRG func_80097AEC (src/BATTLE/BATTLE.PRG/2EA3C.s:585).
 RoomPolygonResult SubdivideRoomTriangle(
     std::span<const RoomVertex, kRoomTriangleCorners> vertices, int levels,
     const RoomPolygonMaterial& material, const RoomClipState& clip,
-    RoomTransformer& transformer, RoomPacketQueue& queue) {
+    RoomTransformer& transformer, RoomDrawQueue& queue) {
   if (levels < 0 || levels > kRoomMaximumSubdivisionLevels) {
     return {RoomDrawStatus::kInvalidLevels, 0};
   }
@@ -902,7 +917,7 @@ RoomPolygonResult SubdivideRoomTriangle(
 RoomPolygonResult SubdivideRoomQuad(
     std::span<const RoomVertex, kRoomQuadCorners> vertices, int levels,
     const RoomPolygonMaterial& material, const RoomClipState& clip,
-    RoomTransformer& transformer, RoomPacketQueue& queue) {
+    RoomTransformer& transformer, RoomDrawQueue& queue) {
   if (levels < 0 || levels > kRoomMaximumSubdivisionLevels) {
     return {RoomDrawStatus::kInvalidLevels, 0};
   }
@@ -919,7 +934,7 @@ RoomPolygonResult DrawRoomGeometryPolygons(std::span<const std::byte> polygons,
                                            std::int32_t mode,
                                            const RoomClipState& clip,
                                            RoomTransformer& transformer,
-                                           RoomPacketQueue& queue) {
+                                           RoomDrawQueue& queue) {
   const auto counts = ReadPolygonCounts(polygons);
   if (!counts) {
     return {RoomDrawStatus::kInvalidGeometry, 0};
@@ -951,7 +966,7 @@ RoomDrawStatus DrawRoomGeometry(std::span<const std::byte> geometry,
                                 const RoomDrawPass& pass,
                                 const RoomClipState& clip,
                                 RoomTransformer& transformer,
-                                RoomPacketQueue& queue) {
+                                RoomDrawQueue& queue) {
   if (!ValidateRoomGeometry(geometry)) {
     return RoomDrawStatus::kInvalidGeometry;
   }
@@ -1003,8 +1018,7 @@ void SetRoomPolygonScreenBounds(RoomClipState& clip,
 
 // decomp: BATTLE.PRG func_8009820C.
 RoomDrawStatus DrawSkyDome(std::span<const std::byte> sky, const RoomView& view,
-                           RoomTransformer& transformer,
-                           RoomPacketQueue& queue) {
+                           RoomTransformer& transformer, RoomDrawQueue& queue) {
   if (sky.size() < kSkyDomeBytes) {
     return RoomDrawStatus::kInvalidGeometry;
   }
@@ -1026,8 +1040,8 @@ RoomDrawStatus DrawSkyDome(std::span<const std::byte> sky, const RoomView& view,
     const std::array<std::size_t, kRoomTriangleCorners> indices{
         ReadByte(faces, offset), ReadByte(faces, offset + 1),
         ReadByte(faces, offset + 2)};
-    const auto packet = BuildSkyPacket(positions, colors, indices);
-    if (packet && !queue.Emit(*packet, kRoomLastOrderingSlot)) {
+    const auto polygon = BuildSkyPolygon(positions, colors, indices);
+    if (polygon && !queue.Submit(*polygon, kRoomLastOrderingSlot)) {
       return RoomDrawStatus::kBufferFull;
     }
   }
@@ -1066,48 +1080,29 @@ std::uint32_t TintRoomPrimitiveColor(std::uint32_t color,
   return result;
 }
 
-// decomp: BATTLE.PRG func_80098D6C (src/BATTLE/BATTLE.PRG/2EA3C.s:1837).
-// The whole walk is measured before any colour changes, so a truncated span
-// is left untouched.
-RoomTintStatus TintRoomGeometryPrimitives(std::span<std::uint32_t> packets,
-                                          const RoomTint& tint,
-                                          std::uint32_t flags) {
-  const std::size_t padding =
-      (flags & kTintPaddingFlag) != 0 ? kTintPaddingWords : 0;
-  const auto corners_of = [](std::uint32_t tag) -> std::size_t {
-    const std::size_t length = tag >> kPacketLengthShift;
-    return length == kRoomTriangleCorners * kVertexPacketWords ||
-                   length == kRoomQuadCorners * kVertexPacketWords
-               ? length / kVertexPacketWords
-               : 0;
-  };
-  RoomTintStatus status = RoomTintStatus::kTinted;
-  std::size_t end = 0;
-  while (end < packets.size()) {
-    const std::size_t corners = corners_of(packets[end]);
-    if (corners == 0) {
-      status = RoomTintStatus::kStoppedAtForeignPacket;
-      break;
-    }
-    const std::size_t words = 1 + corners * kVertexPacketWords + padding;
-    if (words > packets.size() - end) {
-      return RoomTintStatus::kTruncated;
-    }
-    end += words;
+RoomColorAdjustment RoomTintAdjustment(const RoomTint& tint) {
+  return {tint.strength, static_cast<std::int16_t>(tint.red * kTintOffsetScale),
+          static_cast<std::int16_t>(tint.green * kTintOffsetScale),
+          static_cast<std::int16_t>(tint.blue * kTintOffsetScale)};
+}
+
+// decomp: BATTLE.PRG func_80098D6C (src/BATTLE/BATTLE.PRG/2EA3C.s:1837), the
+// per-packet body: every corner colour through func_80098E50. The walk over
+// the frame's packets is now TintLiveRoomGeometry's walk over typed draws.
+void TintRoomPolygon(DrawPolygon& polygon,
+                     const RoomColorAdjustment& adjustment) {
+  const std::size_t corners =
+      std::min<std::size_t>(polygon.corner_count, polygon.corners.size());
+  for (std::size_t index = 0; index < corners; ++index) {
+    DrawCorner& corner = polygon.corners[index];
+    const std::uint32_t tinted = TintRoomPrimitiveColor(
+        corner.red | std::uint32_t{corner.green} << CHAR_BIT |
+            std::uint32_t{corner.blue} << (2 * CHAR_BIT),
+        adjustment);
+    corner.red = static_cast<std::uint8_t>(tinted);
+    corner.green = static_cast<std::uint8_t>(tinted >> CHAR_BIT);
+    corner.blue = static_cast<std::uint8_t>(tinted >> (2 * CHAR_BIT));
   }
-  const RoomColorAdjustment adjustment{
-      tint.strength, static_cast<std::int16_t>(tint.red * kTintOffsetScale),
-      static_cast<std::int16_t>(tint.green * kTintOffsetScale),
-      static_cast<std::int16_t>(tint.blue * kTintOffsetScale)};
-  for (std::size_t word = 0; word < end;) {
-    const std::size_t corners = corners_of(packets[word]);
-    for (std::size_t corner = 0; corner < corners; ++corner) {
-      std::uint32_t& color = packets[word + 1 + corner * kVertexPacketWords];
-      color = TintRoomPrimitiveColor(color, adjustment);
-    }
-    word += 1 + corners * kVertexPacketWords + padding;
-  }
-  return status;
 }
 
 // decomp: BATTLE.PRG vs_battle_getGeomOffset

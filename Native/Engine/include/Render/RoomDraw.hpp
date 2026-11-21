@@ -10,12 +10,13 @@
 #include "Core/Math/Matrix.hpp"
 #include "Core/Math/Projection.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Render/DrawPolygon.hpp"
 
 // MPD room geometry: group views, polygon decoding and projection,
 // subdivision, depth linking, the sky dome and the room tint post-pass. Every
 // read stays inside the byte span the caller supplies, clip settings are
-// passed explicitly, and packets reach the frame only through a
-// RoomPacketQueue.
+// passed explicitly, and polygons reach the frame only as typed draws
+// (Render/DrawPolygon.hpp) through a RoomDrawQueue; no GP0 packet is built.
 namespace VS::Render {
 // Bytes in one _mpdGeometryHeader group record (146C.h:31).
 inline constexpr std::size_t kRoomGroupRecordBytes = 64;
@@ -24,6 +25,9 @@ inline constexpr std::size_t kRoomTriangleRecordBytes = 32;
 inline constexpr std::size_t kRoomQuadRecordBytes = 40;
 // The packed base position and two delta triples every polygon starts with.
 inline constexpr std::size_t kRoomCoordinateBytes = 12;
+// The GP0 packets the original wrote, tag included: Gouraud-textured triangles
+// and quads, and the sky's Gouraud triangles. The frame buffer budget still
+// counts them (RoomPacketEquivalentWords).
 inline constexpr std::size_t kRoomTrianglePacketWords = 10;
 inline constexpr std::size_t kRoomQuadPacketWords = 13;
 inline constexpr int kRoomMaximumSubdivisionLevels = 3;
@@ -76,7 +80,9 @@ struct RoomScreenBounds {
                          const RoomScreenBounds&) = default;
 };
 
-// The group flags, command byte, palette and texture page a packet carries.
+// The group flags, the record's GP0 command byte (its material bits: 0x10
+// Gouraud, 0x08 quad, 0x04 textured, 0x02 semi-transparent; bit 0 disables
+// backface culling), palette and texture page a polygon carries.
 struct RoomPolygonMaterial {
   std::uint32_t flags = 0;
   std::uint32_t command = 0;
@@ -163,13 +169,21 @@ class PerspectiveRoomTransformer final : public RoomTransformer {
   Core::Math::PerspectiveProjection projection_;
 };
 
-class RoomPacketQueue {
+// The words, tag included, of the GP0 packet the original wrote for
+// `polygon`: the measure the frame buffer budget still counts.
+[[nodiscard]] constexpr std::size_t RoomPacketEquivalentWords(
+    const DrawPolygon& polygon) noexcept {
+  const std::size_t corners = polygon.corner_count;
+  return 1 + corners * (polygon.material.textured ? 2 : 1) +
+         (polygon.material.gouraud ? corners : 1);
+}
+
+class RoomDrawQueue {
  public:
-  virtual ~RoomPacketQueue() = default;
-  // Links `packet` (word 0 is its tag) at ordering entry `depth`. False when
-  // the packet does not fit in the space the queue was given.
-  virtual bool Emit(std::span<const std::uint32_t> packet,
-                    std::uint32_t depth) = 0;
+  virtual ~RoomDrawQueue() = default;
+  // Adds `polygon` at ordering slot `slot` (0 nearest to the viewer is drawn
+  // last). False when it does not fit in the space the queue was given.
+  virtual bool Submit(const DrawPolygon& polygon, std::uint32_t slot) = 0;
 };
 
 enum class RoomDrawStatus : std::uint8_t {
@@ -265,39 +279,41 @@ struct RoomTriangleProjection {
 enum class RoomLinkStatus : std::uint8_t {
   kLinked,
   kRejected,
-  kInvalidPacket,
+  kInvalidPolygon,
   kBufferFull,
 };
 
-// BATTLE.PRG func_800980F8 (2EA3C.s:1036): links a ten- or thirteen-word
-// packet at its resolved depth.
-RoomLinkStatus LinkRoomPolygonByDepth(std::span<const std::uint32_t> packet,
+// BATTLE.PRG func_800980F8 (2EA3C.s:1036): queues a triangle or quad at its
+// resolved depth, where the original linked its ten- or thirteen-word packet.
+RoomLinkStatus LinkRoomPolygonByDepth(const DrawPolygon& polygon,
                                       std::int32_t projected_depth,
                                       std::uint32_t flags,
                                       const RoomClipState& clip,
-                                      RoomPacketQueue& queue);
+                                      RoomDrawQueue& queue);
 
 // BATTLE.PRG func_80097AEC (2EA3C.s:612): splits into seven children per
 // level, recursing into the first four.
 RoomPolygonResult SubdivideRoomTriangle(
     std::span<const RoomVertex, kRoomTriangleCorners> vertices, int levels,
     const RoomPolygonMaterial& material, const RoomClipState& clip,
-    RoomTransformer& transformer, RoomPacketQueue& queue);
+    RoomTransformer& transformer, RoomDrawQueue& queue);
 // BATTLE.PRG func_80097CF0 (2EA3C.s:752): four child quads per level plus
 // four edge triangles.
 RoomPolygonResult SubdivideRoomQuad(
     std::span<const RoomVertex, kRoomQuadCorners> vertices, int levels,
     const RoomPolygonMaterial& material, const RoomClipState& clip,
-    RoomTransformer& transformer, RoomPacketQueue& queue);
+    RoomTransformer& transformer, RoomDrawQueue& queue);
 
 // BATTLE.PRG func_80097388 (2EA3C.s:104): one group's triangle and quad
-// records after their two counts. Bit 0 of `mode` enables subdivision.
+// records after their two counts. Bit 0 of `mode` enables subdivision. A
+// record whose command is not a Gouraud-textured polygon of its own corner
+// count is invalid geometry: the original's packet would not have been one.
 RoomPolygonResult DrawRoomGeometryPolygons(std::span<const std::byte> polygons,
                                            std::uint32_t flags,
                                            std::int32_t mode,
                                            const RoomClipState& clip,
                                            RoomTransformer& transformer,
-                                           RoomPacketQueue& queue);
+                                           RoomDrawQueue& queue);
 
 struct RoomDrawPass {
   // Bit 0 enables subdivision and skips alternate-pass groups.
@@ -313,7 +329,7 @@ RoomDrawStatus DrawRoomGeometry(std::span<const std::byte> geometry,
                                 const RoomDrawPass& pass,
                                 const RoomClipState& clip,
                                 RoomTransformer& transformer,
-                                RoomPacketQueue& queue);
+                                RoomDrawQueue& queue);
 
 // BATTLE.PRG func_80098160: the near depth, as a signed halfword.
 void SetRoomPolygonNearClip(RoomClipState& clip, std::int32_t depth);
@@ -332,8 +348,7 @@ void SetRoomPolygonScreenBounds(RoomClipState& clip,
 // frame. The original rotated by whatever view the caller had loaded into the
 // GTE; the view is now an argument.
 RoomDrawStatus DrawSkyDome(std::span<const std::byte> sky, const RoomView& view,
-                           RoomTransformer& transformer,
-                           RoomPacketQueue& queue);
+                           RoomTransformer& transformer, RoomDrawQueue& queue);
 
 // The tint parameters (D_800F1BB0_t): signed channel offsets and the Q12
 // strength of the fade toward grey.
@@ -359,20 +374,14 @@ struct RoomColorAdjustment {
 [[nodiscard]] std::uint32_t TintRoomPrimitiveColor(
     std::uint32_t color, const RoomColorAdjustment& adjustment);
 
-enum class RoomTintStatus : std::uint8_t {
-  kTinted,
-  // A packet that is not a room triangle or quad ended the walk.
-  kStoppedAtForeignPacket,
-  // A packet ran past the span; nothing was tinted.
-  kTruncated,
-};
+// The adjustment `tint` applies: its strength and its offsets scaled by four.
+[[nodiscard]] RoomColorAdjustment RoomTintAdjustment(const RoomTint& tint);
 
-// BATTLE.PRG func_80098D6C (2EA3C.s:1944): tints every vertex colour of the
-// room packets in `packets`. Flag 2 means each packet carries two trailing
-// words.
-RoomTintStatus TintRoomGeometryPrimitives(std::span<std::uint32_t> packets,
-                                          const RoomTint& tint,
-                                          std::uint32_t flags);
+// BATTLE.PRG func_80098D6C (2EA3C.s:1944), per polygon: tints every corner
+// colour. The original walked the frame's room packets; the live post-pass
+// (TintLiveRoomGeometry) now walks the room's typed draws instead.
+void TintRoomPolygon(DrawPolygon& polygon,
+                     const RoomColorAdjustment& adjustment);
 
 // BATTLE.PRG vs_battle_getGeomOffset (2EA3C.s:2470): each offset as an
 // unsigned halfword.

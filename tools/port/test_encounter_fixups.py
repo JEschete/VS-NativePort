@@ -1417,10 +1417,10 @@ int func_800F9800(void) {
         self.assertIn("ResolveRoomPolygonDepth(projected_depth, flags, clip)", core)
         self.assertIn("biased < 0", core)
         self.assertNotIn("FrameScratchpad", core)
-        self.assertIn(
-            "AddPrim( static_cast<std::uint32_t*>(FrameScratchpad().ordering_table) + depth,",
-            flat(live),
-        )
+        # #50: room polygons are typed draw-list items at the frame's ordering
+        # slot; no GP0 packet is linked into the ordering table.
+        self.assertIn("GameFrameDrawList().Submit(polygon, first_slot_ + slot)", flat(live))
+        self.assertNotIn("AddPrim", live)
         relaxed = Path(__file__).resolve().with_name("relaxed_sources.txt")
         self.assertFalse(relaxed.exists(), "every source compiles strictly (#483)")
 
@@ -1961,16 +1961,21 @@ int func_800F9800(void) {
 
     def test_room_tint_pass_shares_the_explicit_native_color_contract(self):
         for identity, name in (
-            ("F00769", "TintRoomGeometryPrimitives"),
+            ("F00769", "TintRoomPolygon"),
             ("F00770", "TintRoomPrimitiveColor"),
         ):
             self.assert_room_draw_owned_without_entry(identity, name)
         core, live = self.room_draw_sources()
         self.assertEqual(core.count("TintRoomPrimitiveColor("), 2)
         self.assertIn("tint.strength, static_cast<std::int16_t>(tint.red * kTintOffsetScale),", flat(core))
-        self.assertIn("return RoomTintStatus::kTruncated;", core)
         self.assertNotIn("VS::Field::RoomTintRecord", core)
-        self.assertIn("const VS::Field::RoomTintRecord& tint", flat(live))
+        # #50: the tint adjusts the room's draw-list items [first, end), not
+        # packets between two primitive-cursor marks.
+        self.assertIn(
+            "bool TintLiveRoomGeometry(std::size_t first, std::size_t end, const RoomTint& tint)",
+            flat(live),
+        )
+        self.assertIn("items.ForEachItem(first, end,", flat(live))
         root = Path(__file__).resolve().parents[2]
         self.assertFalse((root / r"Native\Engine\src\Render\RoomDraw.h").exists())
 

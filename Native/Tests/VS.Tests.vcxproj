@@ -470,6 +470,7 @@
     <ClCompile Include="src\TimelineTracksTests.cpp" />
     <ClCompile Include="src\TitleMenuTests.cpp" />
     <ClCompile Include="src\TrailEmitterTests.cpp" />
+    <ClCompile Include="src\TypedDrawTests.cpp" />
     <ClCompile Include="src\VibrationTests.cpp" />
     <ClCompile Include="src\ViewportBoundsTests.cpp" />
     <ClCompile Include="src\VignetteRenderTests.cpp" />
@@ -538,6 +539,7 @@
     <ClInclude Include="include\Menu\TextBoxUpdateLiveRestore.hpp" />
     <ClInclude Include="include\Menu\TimeAttackTerminalFixture.hpp" />
     <ClInclude Include="include\Menu\TimeAttackTerminalLiveFixture.hpp" />
+    <ClInclude Include="include\Render\FrameDrawListProbe.hpp" />
     <ClInclude Include="include\TestSupport\ActionAnimationsFixture.hpp" />
     <ClInclude Include="include\TestSupport\ActionCameraSelectionFixture.hpp" />
     <ClInclude Include="include\TestSupport\ActionPresentationFixture.hpp" />

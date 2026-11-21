@@ -17,6 +17,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/TransitionsLiveState.hpp"
 #include "Render/Display.hpp"
+#include "Render/DrawList.hpp"
 #include "Render/Frame.hpp"
 #include "Render/FramebufferEffects.hpp"
 #include "Render/Render.hpp"
@@ -298,6 +299,7 @@ bool AbandonLiveFrameBeforeHeapReset() {
       return false;
     }
   }
+  static_cast<void>(GameFrameDrawList().Abandon());
   std::ranges::fill(legacyOrderingTables, nullptr);
   std::ranges::fill(legacyPrimitiveBuffers, nullptr);
   legacyCurrentOrderingTable = nullptr;

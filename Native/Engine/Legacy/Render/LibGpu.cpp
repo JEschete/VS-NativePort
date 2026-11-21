@@ -10,6 +10,7 @@
 #include "Core/Unported.hpp"
 #include "Legacy/Psx.hpp"
 #include "Platform/CrashHandler.hpp"
+#include "Render/DrawList.hpp"
 #include "Render/Frame.hpp"
 #include "Render/PageSpace.hpp"
 
@@ -107,10 +108,14 @@ void* GpuPointer(std::uint32_t link) {
   return const_cast<void*>(t.pointers[link]);
 }
 
+// Typed draw items (Render/DrawList.hpp) are drawn as the walk follows the
+// link their slot entry held when they were submitted, where the equivalent
+// packet would have been.
 int GpuWalkList(const void* p) {
   int count = 0;
   const P_TAG* previous = nullptr;
   std::unordered_set<const void*> visited;
+  VS::Render::FrameDrawList& items = VS::Render::GameFrameDrawList();
   for (; p != nullptr;) {
     const P_TAG* tag = static_cast<const P_TAG*>(p);
     if (!visited.insert(p).second) {
@@ -135,7 +140,9 @@ int GpuWalkList(const void* p) {
     SubmitPacket(tag);
     ++count;
     previous = tag;
-    p = tag->addr == kGpuLinkEnd ? nullptr : GpuPointer(tag->addr);
+    const std::uint32_t link = tag->addr;
+    items.DrawBefore(link, visited);
+    p = link == kGpuLinkEnd ? nullptr : GpuPointer(link);
   }
   return count;
 }
@@ -228,6 +235,9 @@ std::uint16_t GetTPage(int tp, int abr, int x, int y) {
 
 std::uint32_t* ClearOTag(std::uint32_t* ot, int n) {
   // forward list: each entry links to the next, the last ends the list
+  if (n > 0) {
+    VS::Render::GameFrameDrawList().DiscardEntries(ot, static_cast<usize>(n));
+  }
   for (int i = 0; i < n; ++i) {
     ot[i] = 0;
     if (i + 1 < n) {
@@ -242,6 +252,9 @@ std::uint32_t* ClearOTag(std::uint32_t* ot, int n) {
 std::uint32_t* ClearOTagR(std::uint32_t* ot, int n) {
   // reverse list: each entry links to the previous, entry 0 ends the list;
   // drawing starts at ot[n - 1]
+  if (n > 0) {
+    VS::Render::GameFrameDrawList().DiscardEntries(ot, static_cast<usize>(n));
+  }
   for (int i = 0; i < n; ++i) {
     ot[i] = 0;
     if (i > 0) {

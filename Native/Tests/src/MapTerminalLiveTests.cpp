@@ -1213,9 +1213,6 @@ TEST_CASE("Original map caption survives module reset but not a cold session",
 TEST_CASE("Normal map exit leaves the stored view for the next field draw",
           "[map-terminal-integration][map-terminal-field][F02690][F04149]") {
   LiveWorld world(true);
-  const game_clear_live_tests::SavedGlobals<VS::Field::roomPrimitiveRangeStart,
-                                            VS::Field::roomPrimitiveRangeEnd>
-      saved_ranges;
   SetFieldView();
   std::uint8_t phase = 3;
   REQUIRE(map::LiveUpdateScreen(&phase) == 0);
