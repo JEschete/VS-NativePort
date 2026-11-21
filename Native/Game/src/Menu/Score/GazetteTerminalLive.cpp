@@ -56,6 +56,8 @@ namespace menu9_misc_info = VS::Content::text::menu9_prg::misc_info;
 namespace VS::Menu::Score {
 namespace {
 namespace memory = Core::Memory;
+static_assert(kGazettePreviewFailed == kEnemyPreviewFailed,
+              "the terminal's failed-preview result is the preview's");
 constexpr std::size_t kEnemyStride = 44;
 constexpr std::size_t kDescriptionOffset = 150 * kEnemyStride;
 constexpr std::size_t kModelOffset = 0;

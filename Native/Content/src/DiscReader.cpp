@@ -91,12 +91,16 @@ void UpdateDiscCommands(DiscDriveHost& host) {
 }
 
 // decomp: SLUS_010.40 _diskReset (src/SLUS_010.40/main.c:9385)
+// The original ended with VSync(3) so the drive could apply its new
+// DslSetmode speed. Extracted-data reads have no drive mode, and nothing in
+// the title session depends on those frames: every tick consumer measures
+// relative ticks, no input is polled and audio is idle. The reset therefore
+// completes without waiting (#48).
 void ResetDiscDrive(DiscDriveHost& host) {
   host.StopXaStream();
   host.ClearXaMarkers();
   host.SetPhase(DiscDrivePhase::kIdle);
   host.UseDirectBuffer();
-  host.WaitFrames(kDiscModeChangeFrames);
 }
 
 }  // namespace VS::Content

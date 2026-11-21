@@ -638,10 +638,7 @@ void DrawLiveActorWeaponModel(VS::Actors::WeaponModel* weapon, MATRIX* source) {
 // decomp: INITBTL.PRG func_800FA7B0 (src/BATTLE/INITBTL.PRG/FB0.c:19)
 void InitializeLiveActorModelResources() {
   VS::Actors::forcedModelOverrides = 0;
-  for (VS::Content::LegacyActorAssetRequest& request :
-       VS::Content::legacyActorAssetRequests) {
-    request.asset_kind = 0;
-  }
+  VS::Content::ClearLiveActorAssetQueue();
   for (std::size_t slot = 0; slot < kInitializedActorTextureSlots; ++slot) {
     const TextureSlotIds ids = ActorTextureSlotIds(
         slot, SlotOriginHalfword(slot, 0), SlotOriginHalfword(slot, 1));

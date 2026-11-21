@@ -3751,7 +3751,7 @@ int func_800F9800(void) {
         preview = "".join(
             (root / r"Native\Game\src\Menu\Score\EncyclopediaPreview.cpp").read_text(encoding="utf-8").split()
         )
-        self.assertIn("}else{read=host.ReadRefused(file,data);}", preview)
+        self.assertIn("}else{read=host.ReadRefused(file,data);if(read==AssetAddress::kNone){", preview)
         preview_live = (root / r"Native\Game\src\Menu\Score\EncyclopediaPreviewLive.cpp").read_text(encoding="utf-8")
         self.assertIn("Content::CompleteLiveRefusedDiscRequest(&disc, Pointer(destination))", preview_live)
         background = "".join((root / r"Native\Game\src\Field\Background.cpp").read_text(encoding="utf-8").split())

@@ -3,6 +3,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <map>
+#include <optional>
 #include <span>
 #include <stdexcept>
 #include <string>
@@ -34,12 +36,28 @@
 
 namespace {
 namespace score = VS::Menu::Score;
+using VS::Content::ActorAssetOutcome;
 using VS::Content::ActorAssetRequest;
+using VS::Content::ActorAssetTicket;
 using VS::Content::AssetAddress;
 
 constexpr auto At(std::uintptr_t value) {
   // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   return static_cast<AssetAddress>(value);
+}
+
+// The fake host issues tickets from 1, in submission order.
+constexpr auto Ticket(std::uint32_t value) {
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
+  return static_cast<ActorAssetTicket>(value);
+}
+
+// Whether a preview holds no read, heap block or ticket.
+bool HoldsNothing(const score::EnemyPreviewState& state) {
+  return state.read == AssetAddress::kNone &&
+         state.file == AssetAddress::kNone &&
+         state.model_buffer == AssetAddress::kNone &&
+         state.tickets == score::EnemyPreviewState{}.tickets;
 }
 
 constexpr AssetAddress kRead = At(0x1000);
@@ -80,12 +98,18 @@ struct FakeHost final : score::EnemyPreviewHost {
   score::EnemyPreviewFile file{
       .sector = 900, .bytes = 0x200, .palette_flag = 3};
   bool disc_queue_full = false;
+  bool read_records_full = false;
   bool heap_full = false;
   bool model_heap_full = false;
-  bool loaded = false;
-  int first_free = 0;
+  score::EnemyPreviewRead read_status = score::EnemyPreviewRead::kPending;
+  // Submissions past this count are refused.
+  std::size_t asset_capacity = 16;
+  bool cancel_refused = false;
+  std::vector<score::EnemyPreviewPart> bound_parts;
   std::vector<std::byte> bytes = ZudFile();
   std::vector<ActorAssetRequest> queued;
+  std::map<ActorAssetTicket, ActorAssetOutcome> outcomes;
+  std::uint32_t next_ticket = 1;
   std::vector<std::string> calls;
   std::vector<std::string> refusals;
 
@@ -110,10 +134,11 @@ struct FakeHost final : score::EnemyPreviewHost {
       AssetAddress destination) override {
     CHECK(destination == kFile);
     calls.emplace_back("ReadRefused");
-    return kRefusedRead;
+    return read_records_full ? AssetAddress::kNone : kRefusedRead;
   }
-  [[nodiscard]] bool ReadLoaded(AssetAddress /*read*/) const override {
-    return loaded;
+  [[nodiscard]] score::EnemyPreviewRead ReadStatus(
+      AssetAddress /*read*/) const override {
+    return read_status;
   }
   void ReleaseRead(AssetAddress read) override {
     calls.push_back(read == kRefusedRead ? "ReleaseRefusedRead"
@@ -148,15 +173,40 @@ struct FakeHost final : score::EnemyPreviewHost {
     if (block != kFile || size > bytes.size()) return {};
     return {bytes.data(), size};
   }
-  void QueueAsset(const ActorAssetRequest& request) override {
+  [[nodiscard]] std::optional<ActorAssetTicket> SubmitAsset(
+      const ActorAssetRequest& request) override {
+    if (queued.size() >= asset_capacity) return std::nullopt;
     queued.push_back(request);
+    const auto ticket = static_cast<ActorAssetTicket>(next_ticket++);
+    outcomes[ticket] = ActorAssetOutcome::kPending;
+    return ticket;
   }
   void UpdateAssetQueue() override { calls.emplace_back("UpdateAssetQueue"); }
-  [[nodiscard]] int FirstFreeAssetRequest() const override {
-    return first_free;
+  [[nodiscard]] ActorAssetOutcome AssetOutcome(
+      ActorAssetTicket ticket) override {
+    const auto found = outcomes.find(ticket);
+    return found == outcomes.end() ? ActorAssetOutcome::kUnknown
+                                   : found->second;
   }
-  void ReleaseModel(int slot) override {
-    calls.push_back("ReleaseModel:" + std::to_string(slot));
+  void ForgetAsset(ActorAssetTicket ticket) override {
+    calls.push_back("Forget:" +
+                    std::to_string(static_cast<std::uint32_t>(ticket)));
+    outcomes.erase(ticket);
+  }
+  [[nodiscard]] bool CancelAssets() override {
+    calls.emplace_back("CancelAssets");
+    if (cancel_refused) return false;
+    for (auto& [ticket, outcome] : outcomes) {
+      if (outcome == ActorAssetOutcome::kPending) {
+        outcome = ActorAssetOutcome::kCancelled;
+      }
+    }
+    return true;
+  }
+  [[nodiscard]] bool ReleasePart(AssetAddress /*buffer*/,
+                                 score::EnemyPreviewPart part) override {
+    calls.push_back("ReleasePart:" + std::to_string(static_cast<int>(part)));
+    return std::ranges::find(bound_parts, part) == bound_parts.end();
   }
   void ResetPreviewPose() override { calls.emplace_back("ResetPreviewPose"); }
   void SetWeaponDrawn(int slot, bool drawn) override {
@@ -187,6 +237,12 @@ struct FakeHost final : score::EnemyPreviewHost {
   [[nodiscard]] bool Called(std::string_view call) const {
     return std::ranges::find(calls, call) != calls.end();
   }
+
+  void LoadAll() {
+    for (auto& [ticket, outcome] : outcomes) {
+      outcome = ActorAssetOutcome::kLoaded;
+    }
+  }
 };
 
 AssetAddress Part(AssetAddress buffer, score::EnemyPreviewPart part) {
@@ -194,11 +250,64 @@ AssetAddress Part(AssetAddress buffer, score::EnemyPreviewPart part) {
                                      0x100 * static_cast<std::ptrdiff_t>(part));
 }
 
+// The calls abandoning a load whose parts are queued: the parts are
+// cancelled and forgotten, the records released and both blocks freed.
+std::vector<std::string> AbandonCalls(std::size_t parts) {
+  std::vector<std::string> calls{"CancelAssets"};
+  for (std::size_t ticket = 1; ticket <= parts; ++ticket) {
+    calls.push_back("Forget:" + std::to_string(ticket));
+  }
+  for (const char* part : {"ReleasePart:0", "ReleasePart:1", "ReleasePart:2",
+                           "ReleasePart:3", "FreeFile", "FreeModelBuffer"}) {
+    calls.emplace_back(part);
+  }
+  return calls;
+}
+
 // A state whose ZUD read has completed.
 score::EnemyPreviewState LoadedState(FakeHost& host, int zud_id) {
   score::EnemyPreviewState state;
-  score::QueueEnemyModelRead(host, state, zud_id);
-  host.loaded = true;
+  CHECK(score::QueueEnemyModelRead(host, state, zud_id));
+  host.read_status = score::EnemyPreviewRead::kLoaded;
+  host.calls.clear();
+  return state;
+}
+
+// A preview whose first step has queued its ZUD read.
+score::EnemyPreviewState ReadingState(FakeHost& host, int zud_id) {
+  score::EnemyPreviewState state;
+  REQUIRE(score::LoadEnemyPreview(host, state, zud_id) == 1);
+  host.calls.clear();
+  return state;
+}
+
+// A state whose parts have all loaded and whose file block is released.
+score::EnemyPreviewState PosedState(FakeHost& host, int zud_id) {
+  score::EnemyPreviewState state = LoadedState(host, zud_id);
+  CHECK(score::LoadEnemyModelParts(host, state) == 1);
+  host.LoadAll();
+  CHECK(score::LoadEnemyModelParts(host, state) == 1);
+  CHECK(score::LoadEnemyModelParts(host, state) == 0);
+  host.calls.clear();
+  return state;
+}
+
+// A state on the shared parts step whose five parts are queued and pending.
+score::EnemyPreviewState QueuedState(FakeHost& host, int zud_id) {
+  host.step = 1;
+  score::EnemyPreviewState state = LoadedState(host, zud_id);
+  CHECK(score::LoadEnemyPreview(host, state, zud_id) == 1);
+  host.calls.clear();
+  return state;
+}
+
+// A preview abandoned after its second part failed, whose queued parts the
+// asset queue refuses to cancel.
+score::EnemyPreviewState StuckState(FakeHost& host) {
+  score::EnemyPreviewState state = QueuedState(host, 7);
+  host.outcomes[Ticket(2)] = ActorAssetOutcome::kFailed;
+  host.cancel_refused = true;
+  CHECK(score::LoadEnemyPreview(host, state, 7) == score::kEnemyPreviewFailed);
   host.calls.clear();
   return state;
 }
@@ -216,39 +325,50 @@ TEST_CASE("Enemy preview steps queue the read and advance the shared step",
   CHECK(state.file_bytes == 0x200);
   CHECK(state.palette_flag == 3);
   CHECK(state.model_buffer == kEquippedBuffer);
+  // Both blocks exist before the read starts writing the file block.
   CHECK(host.calls ==
         std::vector<std::string>{"AllocateRead", "AllocateFile:512",
-                                 "EnqueueRead", "AllocateEquippedBuffer"});
+                                 "AllocateEquippedBuffer", "EnqueueRead"});
 }
 
 TEST_CASE("Enemy preview parts wait for the read", "[encyclopedia-preview]") {
   FakeHost host;
   score::EnemyPreviewState state;
   host.step = 1;
-  score::QueueEnemyModelRead(host, state, 7);
+  REQUIRE(score::QueueEnemyModelRead(host, state, 7));
   REQUIRE(score::LoadEnemyPreview(host, state, 7) == 1);
   CHECK(host.queued.empty());
-  host.loaded = true;
+  host.read_status = score::EnemyPreviewRead::kLoaded;
   REQUIRE(score::LoadEnemyPreview(host, state, 7) == 1);
   CHECK(host.queued.size() == 5);
   CHECK(state.read == AssetAddress::kNone);
+  CHECK(state.tickets ==
+        std::array{Ticket(1), Ticket(2), Ticket(3), Ticket(4), Ticket(5)});
 }
 
-TEST_CASE("Enemy preview releases the file after the queue drains",
+TEST_CASE("Enemy preview keeps the file while its own parts are loading",
           "[encyclopedia-preview]") {
   FakeHost host;
-  score::EnemyPreviewState state;
-  host.step = 1;
-  score::QueueEnemyModelRead(host, state, 7);
-  host.loaded = true;
-  REQUIRE(score::LoadEnemyPreview(host, state, 7) == 1);
-  REQUIRE(state.read == AssetAddress::kNone);
-  host.first_free = 2;
+  score::EnemyPreviewState state = QueuedState(host, 7);
+  host.outcomes[Ticket(1)] = ActorAssetOutcome::kLoaded;
   REQUIRE(score::LoadEnemyPreview(host, state, 7) == 1);
   CHECK(state.file == kFile);
-  host.first_free = 0;
+  CHECK(state.tickets[4] == Ticket(5));
+  CHECK(host.calls == std::vector<std::string>{"UpdateAssetQueue"});
+  CHECK(host.step == 1);
+}
+
+TEST_CASE("Enemy preview releases the file once its own parts have loaded",
+          "[encyclopedia-preview]") {
+  FakeHost host;
+  score::EnemyPreviewState state = QueuedState(host, 7);
+  host.LoadAll();
   REQUIRE(score::LoadEnemyPreview(host, state, 7) == 1);
   CHECK(state.file == AssetAddress::kNone);
+  CHECK(host.calls == std::vector<std::string>{
+                          "UpdateAssetQueue", "Forget:1", "Forget:2",
+                          "Forget:3", "Forget:4", "Forget:5", "FreeFile"});
+  CHECK(state.tickets == score::EnemyPreviewState{}.tickets);
   CHECK(host.step == 1);
   REQUIRE(score::LoadEnemyPreview(host, state, 7) == 1);
   CHECK(host.step == 2);
@@ -366,7 +486,7 @@ TEST_CASE("Enemy preview reads refuse ids past the file table",
   const int zud_id = GENERATE(-1, 256, 0x10000);
   FakeHost host;
   score::EnemyPreviewState state;
-  score::QueueEnemyModelRead(host, state, zud_id);
+  CHECK_FALSE(score::QueueEnemyModelRead(host, state, zud_id));
   CHECK(state == score::EnemyPreviewState{});
   CHECK(host.calls.empty());
   CHECK(host.refusals.size() == 1);
@@ -376,10 +496,10 @@ TEST_CASE("Enemy preview reads refuse while an earlier preview holds blocks",
           "[encyclopedia-preview]") {
   FakeHost host;
   score::EnemyPreviewState state;
-  score::QueueEnemyModelRead(host, state, 7);
+  REQUIRE(score::QueueEnemyModelRead(host, state, 7));
   const score::EnemyPreviewState held = state;
   host.calls.clear();
-  score::QueueEnemyModelRead(host, state, 8);
+  CHECK_FALSE(score::QueueEnemyModelRead(host, state, 8));
   CHECK(state == held);
   CHECK(host.calls.empty());
   CHECK(host.refusals.size() == 1);
@@ -390,64 +510,206 @@ TEST_CASE("Enemy preview reads fall back when the disc queue is full",
   FakeHost host;
   host.disc_queue_full = true;
   score::EnemyPreviewState state;
-  score::QueueEnemyModelRead(host, state, 7);
+  REQUIRE(score::QueueEnemyModelRead(host, state, 7));
   CHECK(state.read == kRefusedRead);
   CHECK(host.Called("ReadRefused"));
   CHECK_FALSE(host.Called("EnqueueRead"));
-  host.loaded = true;
+  host.read_status = score::EnemyPreviewRead::kLoaded;
   CHECK(score::LoadEnemyModelParts(host, state) == 1);
   CHECK(host.Called("ReleaseRefusedRead"));
   CHECK(host.queued.size() == 5);
 }
 
-TEST_CASE("Enemy preview reads refuse an exhausted heap",
+TEST_CASE("Enemy preview reads free both blocks when no read is recorded",
           "[encyclopedia-preview]") {
   FakeHost host;
-  host.heap_full = true;
+  host.disc_queue_full = true;
+  host.read_records_full = true;
   score::EnemyPreviewState state;
-  score::QueueEnemyModelRead(host, state, 7);
-  CHECK(state.read == AssetAddress::kNone);
-  CHECK(state.file == AssetAddress::kNone);
+  CHECK_FALSE(score::QueueEnemyModelRead(host, state, 7));
+  CHECK(state == score::EnemyPreviewState{});
+  CHECK(host.calls ==
+        std::vector<std::string>{"AllocateRead", "AllocateFile:512",
+                                 "AllocateEquippedBuffer", "ReadRefused",
+                                 "FreeModelBuffer", "FreeFile"});
+  CHECK(host.refusals.size() == 1);
+}
+
+TEST_CASE("Enemy preview reads refuse an exhausted heap before reading",
+          "[encyclopedia-preview]") {
+  FakeHost host;
+  const bool model_heap = GENERATE(false, true);
+  if (model_heap) {
+    host.model_heap_full = true;
+  } else {
+    host.heap_full = true;
+  }
+  score::EnemyPreviewState state;
+  CHECK_FALSE(score::QueueEnemyModelRead(host, state, 7));
+  CHECK(state == score::EnemyPreviewState{});
+  // No read started, so neither block has a write in flight.
+  CHECK_FALSE(host.Called("EnqueueRead"));
   CHECK(host.Called("ReleaseRead"));
-  CHECK_FALSE(host.Called("AllocateEquippedBuffer"));
+  CHECK(host.Called("AllocateEquippedBuffer") == model_heap);
+  CHECK(host.Called("FreeFile") == model_heap);
   CHECK(host.refusals.size() == 1);
   CHECK(score::LoadEnemyModelParts(host, state) == 0);
 }
 
-TEST_CASE("Enemy preview parts refuse short files and missing buffers",
+TEST_CASE("Enemy preview abandons short files and missing buffers",
           "[encyclopedia-preview]") {
   FakeHost host;
   const bool short_file = GENERATE(true, false);
-  if (short_file) {
-    host.file.bytes = 0x2F;
-  } else {
-    host.model_heap_full = true;
-  }
+  if (short_file) host.file.bytes = 0x2F;
   score::EnemyPreviewState state = LoadedState(host, 7);
+  if (!short_file) state.model_buffer = AssetAddress::kNone;
   host.refusals.clear();
-  CHECK(score::LoadEnemyModelParts(host, state) == 1);
+  CHECK(score::LoadEnemyModelParts(host, state) == score::kEnemyPreviewFailed);
   CHECK(host.queued.empty());
   CHECK(host.refusals.size() == 1);
   CHECK(state.read == AssetAddress::kNone);
-  CHECK(state.file == kFile);
+  CHECK(state.file == AssetAddress::kNone);
+  CHECK(state.model_buffer == AssetAddress::kNone);
+  std::vector<std::string> expected{"ReleaseRead"};
+  if (short_file) {
+    for (const char* part :
+         {"ReleasePart:0", "ReleasePart:1", "ReleasePart:2", "ReleasePart:3"}) {
+      expected.emplace_back(part);
+    }
+  }
+  expected.emplace_back("FreeFile");
+  if (short_file) expected.emplace_back("FreeModelBuffer");
+  CHECK(host.calls == expected);
 }
 
-TEST_CASE("Enemy preview parts refuse sections past the file",
+TEST_CASE("Enemy preview abandons parts queued before a section past the file",
+          "[encyclopedia-preview]") {
+  struct Case {
+    std::size_t word;
+    std::uint32_t value;
+    std::size_t queued;
+  };
+  const Case test = GENERATE(Case{0x14, 0x1000, 1},      // the weapon WEP
+                             Case{0x28, 0xFFFFFFF0, 3},  // the battle SEQ
+                             Case{0x0C, 0x1D1, 0});      // the enemy SHP
+  FakeHost host;
+  PutWord(host.bytes, test.word, test.value);
+  score::EnemyPreviewState state = LoadedState(host, 7);
+  CHECK(score::LoadEnemyModelParts(host, state) == score::kEnemyPreviewFailed);
+  CHECK(host.refusals.size() == 1);
+  CHECK(host.queued.size() == test.queued);
+  std::vector<std::string> expected = AbandonCalls(test.queued);
+  // With nothing queued there is nothing to cancel.
+  if (test.queued == 0) expected.erase(expected.begin());
+  expected.insert(expected.begin(), "ReleaseRead");
+  CHECK(host.calls == expected);
+  CHECK(host.outcomes.empty());
+  CHECK(state.tickets == score::EnemyPreviewState{}.tickets);
+  CHECK(state.file == AssetAddress::kNone);
+  CHECK(state.model_buffer == AssetAddress::kNone);
+}
+
+TEST_CASE("A part the asset queue refuses abandons the parts before it",
           "[encyclopedia-preview]") {
   FakeHost host;
-  PutWord(host.bytes, 0x14, 0x1000);
-  PutWord(host.bytes, 0x28, 0xFFFFFFF0);
+  host.asset_capacity = 2;
   score::EnemyPreviewState state = LoadedState(host, 7);
-  CHECK(score::LoadEnemyModelParts(host, state) == 1);
-  CHECK(host.refusals.size() == 2);
-  REQUIRE(host.queued.size() == 3);
-  CHECK(host.queued[1].target_slot == 3);
-  CHECK(host.queued[2].data == At(0x100B0));
-  PutWord(host.bytes, 0x0C, 0x1D1);
-  host.queued.clear();
-  state = LoadedState(host, 7);
-  CHECK(score::LoadEnemyModelParts(host, state) == 1);
+  CHECK(score::LoadEnemyModelParts(host, state) == score::kEnemyPreviewFailed);
+  CHECK(host.queued.size() == 2);
+  std::vector<std::string> expected = AbandonCalls(2);
+  expected.insert(expected.begin(), "ReleaseRead");
+  CHECK(host.calls == expected);
+  CHECK(host.outcomes.empty());
+  CHECK(host.refusals.size() == 1);
+}
+
+TEST_CASE("A failed ZUD read abandons the preview and allows a new load",
+          "[encyclopedia-preview]") {
+  FakeHost host;
+  score::EnemyPreviewState state = ReadingState(host, 7);
+  host.read_status = score::EnemyPreviewRead::kFailed;
+  CHECK(score::LoadEnemyPreview(host, state, 7) == score::kEnemyPreviewFailed);
+  CHECK(host.step == 0);
   CHECK(host.queued.empty());
+  CHECK(host.calls == std::vector<std::string>{"ReleaseRead", "ReleasePart:0",
+                                               "ReleasePart:1", "ReleasePart:2",
+                                               "ReleasePart:3", "FreeFile",
+                                               "FreeModelBuffer"});
+  CHECK(HoldsNothing(state));
+  host.read_status = score::EnemyPreviewRead::kPending;
+  CHECK(score::LoadEnemyPreview(host, state, 8) == 1);
+  CHECK(host.step == 1);
+  CHECK(state.zud_id == 8);
+  CHECK(state.read == kRead);
+}
+
+TEST_CASE("A failed, cancelled or lost part abandons the preview",
+          "[encyclopedia-preview]") {
+  const ActorAssetOutcome outcome =
+      GENERATE(ActorAssetOutcome::kFailed, ActorAssetOutcome::kCancelled,
+               ActorAssetOutcome::kUnknown);
+  FakeHost host;
+  score::EnemyPreviewState state = QueuedState(host, 7);
+  host.outcomes[Ticket(1)] = ActorAssetOutcome::kLoaded;
+  if (outcome == ActorAssetOutcome::kUnknown) {
+    host.outcomes.erase(Ticket(3));
+  } else {
+    host.outcomes[Ticket(3)] = outcome;
+  }
+  CHECK(score::LoadEnemyPreview(host, state, 7) == score::kEnemyPreviewFailed);
+  CHECK(host.step == 0);
+  std::vector<std::string> expected = AbandonCalls(5);
+  expected.insert(expected.begin(), "UpdateAssetQueue");
+  CHECK(host.calls == expected);
+  CHECK(host.outcomes.empty());
+  CHECK(HoldsNothing(state));
+}
+
+TEST_CASE("An abandoned preview keeps its blocks while its parts stay queued",
+          "[encyclopedia-preview]") {
+  FakeHost host;
+  score::EnemyPreviewState state = QueuedState(host, 7);
+  host.outcomes[Ticket(2)] = ActorAssetOutcome::kFailed;
+  host.cancel_refused = true;
+  CHECK(score::LoadEnemyPreview(host, state, 7) == score::kEnemyPreviewFailed);
+  CHECK(host.calls ==
+        std::vector<std::string>{"UpdateAssetQueue", "CancelAssets"});
+  CHECK(state.file == kFile);
+  CHECK(state.model_buffer == kEquippedBuffer);
+  CHECK(state.tickets[0] == Ticket(1));
+}
+
+TEST_CASE("A new load retries a refused cancellation and is refused with it",
+          "[encyclopedia-preview]") {
+  FakeHost host;
+  score::EnemyPreviewState state = StuckState(host);
+  const score::EnemyPreviewState stuck = state;
+  CHECK(score::LoadEnemyPreview(host, state, 8) == score::kEnemyPreviewFailed);
+  CHECK(std::ranges::count(host.calls, "CancelAssets") == 1);
+  CHECK(host.step == 0);
+  CHECK(state == stuck);
+}
+
+TEST_CASE("A new load abandons the old parts once they can be cancelled",
+          "[encyclopedia-preview]") {
+  FakeHost host;
+  score::EnemyPreviewState state = StuckState(host);
+  REQUIRE(score::LoadEnemyPreview(host, state, 8) ==
+          score::kEnemyPreviewFailed);
+  host.cancel_refused = false;
+  host.calls.clear();
+  host.read_status = score::EnemyPreviewRead::kPending;
+  CHECK(score::LoadEnemyPreview(host, state, 8) == 1);
+  std::vector<std::string> expected = AbandonCalls(5);
+  for (const char* call : {"AllocateRead", "AllocateFile:512",
+                           "AllocateEquippedBuffer", "EnqueueRead"}) {
+    expected.emplace_back(call);
+  }
+  CHECK(host.calls == expected);
+  CHECK(host.outcomes.empty());
+  CHECK(host.step == 1);
+  CHECK(state.zud_id == 8);
+  CHECK(state.tickets == score::EnemyPreviewState{}.tickets);
 }
 
 TEST_CASE("ZUD sections fit only within the file", "[encyclopedia-preview]") {
@@ -468,38 +730,84 @@ TEST_CASE("ZUD sections fit only within the file", "[encyclopedia-preview]") {
   CHECK_FALSE(score::ParseZudHeader(std::span(file).first(0x2F)).has_value());
 }
 
-TEST_CASE("Freeing the preview releases both actors and the buffer once",
+TEST_CASE("Freeing the preview releases its own records and the buffer once",
           "[encyclopedia-preview]") {
   FakeHost host;
-  score::EnemyPreviewState state = LoadedState(host, 7);
+  score::EnemyPreviewState state = PosedState(host, 7);
   score::FreeEnemyPreview(host, state);
-  CHECK(host.calls == std::vector<std::string>{"ReleaseModel:1",
-                                               "ReleaseModel:16",
+  CHECK(host.calls == std::vector<std::string>{"ReleasePart:0", "ReleasePart:1",
+                                               "ReleasePart:2", "ReleasePart:3",
                                                "FreeModelBuffer"});
   CHECK(state.model_buffer == AssetAddress::kNone);
   host.calls.clear();
   score::FreeEnemyModelBuffer(host, state);
+  score::FreeEnemyPreview(host, state);
   CHECK(host.calls.empty());
+  CHECK(host.refusals.empty());
+}
+
+TEST_CASE("Freeing the preview keeps a buffer a record stays bound in",
+          "[encyclopedia-preview]") {
+  FakeHost host;
+  score::EnemyPreviewState state = PosedState(host, 7);
+  host.bound_parts = {score::EnemyPreviewPart::kWeapon};
+  score::FreeEnemyPreview(host, state);
+  CHECK(host.calls == std::vector<std::string>{"ReleasePart:0", "ReleasePart:1",
+                                               "ReleasePart:2",
+                                               "ReleasePart:3"});
+  CHECK(state.model_buffer == kEquippedBuffer);
+  CHECK(host.refusals.size() == 1);
+}
+
+TEST_CASE("Freeing a loading preview cancels its parts before its blocks",
+          "[encyclopedia-preview]") {
+  FakeHost host;
+  host.step = 1;
+  score::EnemyPreviewState state = LoadedState(host, 7);
+  REQUIRE(score::LoadEnemyModelParts(host, state) == 1);
+  host.calls.clear();
+  score::FreeEnemyPreview(host, state);
+  CHECK(host.calls == AbandonCalls(5));
+  CHECK(host.outcomes.empty());
+  CHECK(host.step == 0);
+  CHECK(state.file == AssetAddress::kNone);
+  CHECK(state.model_buffer == AssetAddress::kNone);
+  CHECK(state.tickets == score::EnemyPreviewState{}.tickets);
+}
+
+TEST_CASE("Freeing the preview keeps blocks a read or queued part still uses",
+          "[encyclopedia-preview]") {
+  FakeHost host;
+  const bool reading = GENERATE(true, false);
+  score::EnemyPreviewState state = LoadedState(host, 7);
+  if (!reading) {
+    REQUIRE(score::LoadEnemyModelParts(host, state) == 1);
+    host.cancel_refused = true;
+  }
+  host.calls.clear();
+  host.refusals.clear();
+  const score::EnemyPreviewState held = state;
+  score::FreeEnemyPreview(host, state);
+  CHECK(state == held);
+  CHECK(host.refusals.size() == 1);
+  CHECK(host.calls == (reading ? std::vector<std::string>{}
+                               : std::vector<std::string>{"CancelAssets"}));
 }
 
 TEST_CASE("Switching enemies reads the next enemy after the release",
           "[encyclopedia-preview]") {
   FakeHost host;
-  score::EnemyPreviewState state = LoadedState(host, 31);
-  REQUIRE(score::LoadEnemyModelParts(host, state) == 1);
-  REQUIRE(score::LoadEnemyModelParts(host, state) == 1);
-  REQUIRE(score::LoadEnemyModelParts(host, state) == 0);
+  score::EnemyPreviewState state = PosedState(host, 31);
   score::FreeEnemyPreview(host, state);
   host.calls.clear();
-  host.loaded = false;
-  score::QueueEnemyModelRead(host, state, 7);
+  host.read_status = score::EnemyPreviewRead::kPending;
+  REQUIRE(score::QueueEnemyModelRead(host, state, 7));
   CHECK(host.refusals.empty());
   CHECK(state.zud_id == 7);
   CHECK(state.variant == 0);
   CHECK(state.read == kRead);
   CHECK(state.model_buffer == kEquippedBuffer);
 }
-
 TEST_CASE("Ashley preview pose sets the encyclopedia animation",
           "[encyclopedia-preview]") {
   FakeHost host;
@@ -534,6 +842,13 @@ struct LivePreviewFixture {
     score::ResetLiveEnemyPreview();
   }
   ~LivePreviewFixture() {
+    // Completion entries outlive the queue; a test's pending tickets would
+    // fill the table for the tests after it.
+    VS::Content::ClearLiveActorAssetQueue();
+    for (const ActorAssetTicket ticket :
+         score::LiveEnemyPreviewState().tickets) {
+      VS::Content::ForgetLiveActorAsset(ticket);
+    }
     std::memcpy(VS::Content::discRequestSlots.data(), saved_slots.data(),
                 sizeof VS::Content::discRequestSlots);
     VS::Content::discRequestCounts = saved_counts;
@@ -569,18 +884,42 @@ void CheckAttachmentStrides(bool companion, const std::uint8_t* buffer) {
   }
 }
 
-void CheckColdPreviewRelease(const score::EnemyPreviewState& before,
-                             std::uint64_t expected_read_generation = 0) {
-  CHECK(score::LiveEnemyPreviewState() == score::EnemyPreviewState{});
+// Both of a live preview's heap blocks have been returned.
+void CheckLiveBlocksFreed(const score::EnemyPreviewState& before) {
   CHECK_FALSE(
       VS::Core::Memory::LivePayloadCapacity(Pointer(before.file)).has_value());
   CHECK_FALSE(
       VS::Core::Memory::LivePayloadCapacity(Pointer(before.model_buffer))
           .has_value());
+}
+
+void CheckColdPreviewRelease(const score::EnemyPreviewState& before,
+                             std::uint64_t expected_read_generation = 0) {
+  CHECK(score::LiveEnemyPreviewState() == score::EnemyPreviewState{});
+  CheckLiveBlocksFreed(before);
   CHECK(VS::Content::LiveDiscRequestGeneration(
             Pointer<VS::Content::DiscQueueSlot>(before.read)) ==
         expected_read_generation);
   CHECK(VS::Content::objectDataLoadStep == 0);
+}
+
+// A live preview abandoned during its ZUD read holds nothing, has released
+// the read's queue slot and both blocks, and has reset the shared step.
+void CheckLiveReadAbandoned(const score::EnemyPreviewState& before) {
+  CHECK(HoldsNothing(score::LiveEnemyPreviewState()));
+  CHECK(VS::Content::LiveDiscRequestGeneration(
+            Pointer<VS::Content::DiscQueueSlot>(before.read)) == 0);
+  CheckLiveBlocksFreed(before);
+  CHECK(VS::Content::objectDataLoadStep == 0);
+}
+
+// Whether the live asset queue has forgotten every one of the tickets.
+bool LiveTicketsForgotten(
+    const std::array<ActorAssetTicket, score::kEnemyPreviewParts>& tickets) {
+  return std::ranges::all_of(tickets, [](ActorAssetTicket ticket) {
+    return VS::Content::LiveActorAssetCompletion(ticket).outcome ==
+           ActorAssetOutcome::kUnknown;
+  });
 }
 
 void DiscardUnparsedPreview(const score::EnemyPreviewState& before,
@@ -736,6 +1075,10 @@ void FinishPreviewParts() {
     REQUIRE(score::LoadLiveEnemyModelParts() == 1);
   }
   REQUIRE(VS::Content::FindLiveFreeActorAssetRequest() == 0);
+  // Every part loaded: the tickets are forgotten and the file freed.
+  const score::EnemyPreviewState& state = score::LiveEnemyPreviewState();
+  CHECK(state.file == AssetAddress::kNone);
+  CHECK(state.tickets == score::EnemyPreviewState{}.tickets);
 }
 
 std::span<std::byte> BindForeignPreviewActor() {
@@ -808,33 +1151,51 @@ TEST_CASE("Live enemy preview places parts at native record strides",
   CheckAttachmentStrides(companion, buffer);
 }
 
-TEST_CASE("Live enemy preview releases the file after the queue drains",
+TEST_CASE("Live enemy preview abandons parts a queue reset drops",
           "[encyclopedia-preview][encyclopedia-preview-live]") {
   LivePreviewFixture fixture;
-  score::QueueLiveEnemyModelRead(7);
+  REQUIRE(score::QueueLiveEnemyModelRead(7));
   score::EnemyPreviewState& state = score::LiveEnemyPreviewState();
-  REQUIRE(state.read != AssetAddress::kNone);
-  const auto* file = Pointer(state.file);
-  const auto* buffer = Pointer(state.model_buffer);
+  const score::EnemyPreviewState before = state;
   Pointer<VS::Content::DiscQueueSlot>(state.read)->state =
       VS::Content::DiscRequestState::kLoaded;
   std::ranges::copy(ZudFile(), Pointer(state.file));
   REQUIRE(score::LoadLiveEnemyModelParts() == 1);
-  VS::Content::legacyActorAssetRequests.fill({});
-  REQUIRE(score::LoadLiveEnemyModelParts() == 1);
-  CHECK(state.file == AssetAddress::kNone);
-  CHECK_FALSE(VS::Core::Memory::LivePayloadCapacity(file).has_value());
+  const auto tickets = state.tickets;
+  REQUIRE(tickets[4] != ActorAssetTicket::kNone);
+  // The battle start-up's reset drops every queued request; the preview
+  // must not wait on, or free its blocks under, parts that never complete.
+  VS::Content::ClearLiveActorAssetQueue();
+  const std::uint64_t refusals = score::LiveEnemyPreviewRefusals();
+  CHECK(score::LoadLiveEnemyModelParts() == score::kEnemyPreviewFailed);
+  CHECK(score::LiveEnemyPreviewRefusals() > refusals);
+  CHECK(HoldsNothing(state));
+  CheckLiveBlocksFreed(before);
+  CHECK(LiveTicketsForgotten(tickets));
   CHECK(score::LoadLiveEnemyModelParts() == 0);
-  score::FreeLiveEnemyModelBuffer();
-  CHECK(state.model_buffer == AssetAddress::kNone);
-  CHECK_FALSE(VS::Core::Memory::LivePayloadCapacity(buffer).has_value());
+}
+
+TEST_CASE("Live enemy preview abandons a failed ZUD read and loads again",
+          "[encyclopedia-preview][encyclopedia-preview-live]") {
+  LivePreviewFixture fixture;
+  REQUIRE(score::LoadLiveEnemyPreview(7) == 1);
+  const score::EnemyPreviewState before = score::LiveEnemyPreviewState();
+  Pointer<VS::Content::DiscQueueSlot>(before.read)->state =
+      VS::Content::DiscRequestState::kError;
+  CHECK(score::LoadLiveEnemyPreview(7) == score::kEnemyPreviewFailed);
+  CheckLiveReadAbandoned(before);
+  REQUIRE(score::LoadLiveEnemyPreview(8) == 1);
+  const score::EnemyPreviewState& state = score::LiveEnemyPreviewState();
+  CHECK(VS::Content::objectDataLoadStep == 1);
+  CHECK(state.zud_id == 8);
+  CHECK(state.read != AssetAddress::kNone);
 }
 
 TEST_CASE("Live enemy preview refuses ids past the file table",
           "[encyclopedia-preview][encyclopedia-preview-live]") {
   LivePreviewFixture fixture;
   const std::uint64_t before = score::LiveEnemyPreviewRefusals();
-  score::QueueLiveEnemyModelRead(256);
+  CHECK_FALSE(score::QueueLiveEnemyModelRead(256));
   CHECK(score::LiveEnemyPreviewRefusals() == before + 1);
   CHECK(score::LiveEnemyPreviewState() == score::EnemyPreviewState{});
   CHECK(
@@ -899,7 +1260,7 @@ TEST_CASE("Only completed MENU9 abandons a pending or loaded preview read",
   CheckColdPreviewRelease(before);
 }
 
-TEST_CASE("Actual heap replacement abandons queued preview borrows",
+TEST_CASE("Actual heap replacement cancels queued preview parts",
           "[encyclopedia-preview][gazette-preview-lifecycle]") {
   PreviewLifecycleFixture fixture;
   const auto before = QueuePreviewParts(true);
@@ -922,7 +1283,9 @@ TEST_CASE("Preview cleanup preserves a foreign active model read",
   REQUIRE(score::CleanupLiveEnemyPreviewOwnedState());
   CheckColdPreviewRelease(before);
   CheckForeignModelRead(file, read, generation);
-  REQUIRE(VS::Content::CancelLiveActorAssetBorrows({}, foreign));
+  // The foreign request is unowned, so nothing cancels it but a reset; the
+  // fixture restores the read and loader state it leaves.
+  VS::Content::ClearLiveActorAssetQueue();
   VS::Core::Memory::FreeLiveFromLowEnd(foreign.data());
 }
 
@@ -1019,7 +1382,7 @@ TEST_CASE("Preview cleanup preserves foreign actors queue order and tail",
   CHECK(VS::Content::legacyActorAssetRequests[15].variant == tail.variant);
   CHECK(VS::Content::legacyActorAssetRequests[15].destination ==
         tail.destination);
-  REQUIRE(VS::Content::CancelLiveActorAssetBorrows({}, foreign));
+  VS::Content::ClearLiveActorAssetQueue();
   CHECK(VS::Content::ReleaseLiveActorModel(1) == 0);
   VS::Core::Memory::FreeLiveFromLowEnd(foreign.data());
 }

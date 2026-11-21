@@ -140,23 +140,40 @@ class FakeAssetHost final : public Content::ActorAssetHost {
   std::uint8_t RequestKind(int slot) const override {
     return requests.at(Index(slot)).kind;
   }
-  void StoreRequest(int slot, const ActorAssetRequest& request) override {
+  void StoreRequest(int slot, const ActorAssetRequest& request,
+                    const Content::ActorAssetIdentity& identity) override {
     requests.at(Index(slot)) = request;
+    identities.at(Index(slot)) = identity;
   }
+  Content::ActorAssetIdentity RequestIdentity(int slot) const override {
+    if (RequestKind(slot) == 0) return {};
+    const Content::ActorAssetIdentity identity = identities.at(Index(slot));
+    return completions.Pending(identity) ? identity
+                                         : Content::ActorAssetIdentity{};
+  }
+  Content::ActorAssetCompletions& Completions() override { return completions; }
   void OnRequestQueued(const ActorAssetRequest& request) override {
     queued.push_back(request);
   }
   void MoveRequest(int from, int to) override {
     requests.at(Index(to)) = requests.at(Index(from));
+    identities.at(Index(to)) = identities.at(Index(from));
   }
   void ClearRequestKind(int slot) override {
     requests.at(Index(slot)).kind = 0;
+    identities.at(Index(slot)) = {};
   }
   int ProcessHeadRequest(ActorAssetKind kind) override {
     processed.push_back(kind);
     return process_result;
   }
   void OnHeadRequestDone(int result) override { finished.push_back(result); }
+  bool AbandonHeadRequest(ActorAssetKind kind) override {
+    abandoned.push_back(kind);
+    if (!abandon_head) return false;
+    Content::AbandonActorAssetLoad(*this, load_state, requests.at(0));
+    return true;
+  }
 
   AssetAddress AllocateHigh(std::size_t bytes) override {
     return Allocate(bytes, high_blocks);
@@ -399,10 +416,17 @@ class FakeAssetHost final : public Content::ActorAssetHost {
   }
 
   std::array<ActorAssetRequest, Content::kActorAssetRequestCount> requests{};
+  std::array<Content::ActorAssetIdentity, Content::kActorAssetRequestCount>
+      identities{};
+  Content::ActorAssetCompletions completions;
   std::vector<ActorAssetRequest> queued;
   std::vector<ActorAssetKind> processed;
   std::vector<int> finished;
   int process_result = kAssetDone;
+  bool abandon_head = true;
+  std::vector<ActorAssetKind> abandoned;
+  // The loader state AbandonHeadRequest abandons.
+  Content::ActorAssetLoadState load_state;
 
   bool refuse_allocations = false;
   std::vector<AssetAddress> high_blocks;
@@ -819,6 +843,314 @@ TEST_CASE("Battle asset queue reports a head request the loader refuses",
   CHECK(Content::UpdateActorAssetQueue(host) == -1);
   CHECK(host.processed == std::vector{ActorAssetKind::kWeaponModelLoad});
   CHECK(host.finished == std::vector{kAssetRefused});
+}
+
+namespace {
+constexpr auto kPreviewOwner = Content::ActorAssetOwner::kEnemyPreview;
+
+ActorAssetRequest PartRequest(int model) {
+  return Request(ActorAssetKind::kWeaponModelParse, 2, model);
+}
+
+Content::ActorAssetTicket Submit(FakeAssetHost& host, int model) {
+  const std::optional<Content::ActorAssetTicket> ticket =
+      Content::SubmitActorAssetRequest(host, PartRequest(model), kPreviewOwner);
+  REQUIRE(ticket.has_value());
+  if (!ticket) {
+    throw std::logic_error("REQUIRE did not stop the test");
+  }
+  return *ticket;
+}
+
+Content::ActorAssetTicket IssueTicket(FakeAssetHost& host) {
+  const std::optional<Content::ActorAssetTicket> ticket =
+      host.completions.Issue(kPreviewOwner);
+  REQUIRE(ticket.has_value());
+  if (!ticket) {
+    throw std::logic_error("REQUIRE did not stop the test");
+  }
+  return *ticket;
+}
+
+Content::ActorAssetOutcome Outcome(FakeAssetHost& host,
+                                   Content::ActorAssetTicket ticket) {
+  return Content::FindActorAssetCompletion(host, ticket).outcome;
+}
+
+// A ticket's outcome with the loader result it recorded.
+std::pair<Content::ActorAssetOutcome, int> Completed(
+    FakeAssetHost& host, Content::ActorAssetTicket ticket) {
+  const Content::ActorAssetCompletion completion =
+      Content::FindActorAssetCompletion(host, ticket);
+  return {completion.outcome, completion.result};
+}
+
+// The model ids of the occupied request slots, in slot order.
+std::vector<int> QueuedModels(const FakeAssetHost& host) {
+  std::vector<int> models;
+  for (const ActorAssetRequest& slot : host.requests) {
+    if (slot.kind != 0) models.push_back(slot.model_id);
+  }
+  return models;
+}
+
+std::ptrdiff_t IssuedTickets(const FakeAssetHost& host) {
+  return std::ranges::count_if(
+      host.completions.Entries(), [](const Content::ActorAssetCompletion& e) {
+        return e.identity.ticket != Content::ActorAssetTicket::kNone;
+      });
+}
+}  // namespace
+
+TEST_CASE("Owned asset requests carry their tickets through the queue",
+          "[content-slice][content][actor-assets][asset-ownership]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  const Content::ActorAssetTicket first = Submit(host, 1);
+  const Content::ActorAssetTicket second = Submit(host, 2);
+  CHECK(first != second);
+  CHECK(host.queued.size() == 2);
+  CHECK(host.RequestIdentity(1) ==
+        Content::ActorAssetIdentity{.owner = kPreviewOwner, .ticket = second});
+  host.process_result = kAssetDone;
+  CHECK(Content::UpdateActorAssetQueue(host) == 1);
+  // The shift carries the second request's identity to the head.
+  CHECK(host.requests[0].model_id == 2);
+  CHECK(host.RequestIdentity(0).ticket == second);
+}
+
+TEST_CASE("Owned asset requests complete their tickets with the result",
+          "[content-slice][content][actor-assets][asset-ownership]") {
+  using Content::ActorAssetOutcome;
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  const Content::ActorAssetTicket first = Submit(host, 1);
+  const Content::ActorAssetTicket second = Submit(host, 2);
+  host.process_result = kAssetPending;
+  CHECK(Content::UpdateActorAssetQueue(host) == 1);
+  CHECK(Outcome(host, first) == ActorAssetOutcome::kPending);
+  host.process_result = kAssetDone;
+  CHECK(Content::UpdateActorAssetQueue(host) == 1);
+  CHECK(Completed(host, first) ==
+        std::pair{ActorAssetOutcome::kLoaded, kAssetDone});
+  host.process_result = kAssetRefused;
+  CHECK(Content::UpdateActorAssetQueue(host) == -1);
+  CHECK(Completed(host, second) ==
+        std::pair{ActorAssetOutcome::kFailed, kAssetRefused});
+  host.completions.Forget(first);
+  CHECK(Outcome(host, first) == ActorAssetOutcome::kUnknown);
+  CHECK(Outcome(host, second) == ActorAssetOutcome::kFailed);
+}
+
+TEST_CASE(
+    "Asset submissions refuse unowned, unownable and unqueueable requests",
+    "[content-slice][content][actor-assets][asset-ownership]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  CHECK_FALSE(Content::SubmitActorAssetRequest(
+      host, PartRequest(1), Content::ActorAssetOwner::kUnowned));
+  CHECK_FALSE(Content::SubmitActorAssetRequest(
+      host, Request(ActorAssetKind::kSequenceLoad, 0, 1), kPreviewOwner));
+  ActorAssetRequest common = Request(ActorAssetKind::kSequenceParse, 0, 1);
+  common.sub_kind = 1;
+  CHECK_FALSE(Content::SubmitActorAssetRequest(host, common, kPreviewOwner));
+  CHECK(host.refusals ==
+        std::vector<std::string>(3, "unownable asset request"));
+  for (ActorAssetRequest& slot : host.requests) {
+    slot.kind = 1;
+  }
+  CHECK_FALSE(
+      Content::SubmitActorAssetRequest(host, PartRequest(2), kPreviewOwner));
+  CHECK(host.queued.empty());
+  CHECK(IssuedTickets(host) == 0);
+}
+
+TEST_CASE("Asset submissions own a common sequence parse",
+          "[content-slice][content][actor-assets][asset-ownership]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  ActorAssetRequest common = Request(ActorAssetKind::kSequenceParse, 0, 1);
+  common.sub_kind = 0;
+  CHECK(Content::SubmitActorAssetRequest(host, common, kPreviewOwner));
+  CHECK(host.queued == std::vector{common});
+  CHECK(IssuedTickets(host) == 1);
+  CHECK(host.refusals.empty());
+}
+
+TEST_CASE("A full ticket table cancels the tickets no request carries",
+          "[content-slice][content][actor-assets][asset-ownership]") {
+  using Content::ActorAssetOutcome;
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  const Content::ActorAssetTicket queued = Submit(host, 1);
+  std::vector<Content::ActorAssetTicket> dropped;
+  while (!host.completions.Full()) {
+    dropped.push_back(IssueTicket(host));
+  }
+  // Every entry stays until its owner forgets it.
+  CHECK_FALSE(
+      Content::SubmitActorAssetRequest(host, PartRequest(2), kPreviewOwner));
+  CHECK(host.refusals.back() == "asset ticket table full");
+  CHECK(Outcome(host, queued) == ActorAssetOutcome::kPending);
+  CHECK(std::ranges::all_of(dropped, [&](Content::ActorAssetTicket ticket) {
+    return host.completions.Find(ticket).outcome ==
+           ActorAssetOutcome::kCancelled;
+  }));
+  host.completions.Forget(dropped.front());
+  const Content::ActorAssetTicket next = Submit(host, 2);
+  CHECK(Outcome(host, next) == ActorAssetOutcome::kPending);
+  // A pending ticket whose request a raw slot clear dropped reads cancelled.
+  host.ClearRequestKind(0);
+  CHECK(Outcome(host, queued) == ActorAssetOutcome::kCancelled);
+  CHECK(Outcome(host, next) == ActorAssetOutcome::kPending);
+}
+
+TEST_CASE("Cancelling an owner's requests compacts the rest of the queue",
+          "[content-slice][content][actor-assets][asset-ownership]") {
+  using Content::ActorAssetOutcome;
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  CHECK(Content::QueueActorAssetRequest(
+            host, Request(ActorAssetKind::kSequenceLoad, 0, 10)) == 0);
+  const Content::ActorAssetTicket owned = Submit(host, 11);
+  CHECK(Content::QueueActorAssetRequest(
+            host, Request(ActorAssetKind::kSequenceLoad, 0, 12)) == 2);
+  const Content::ActorAssetTicket last_ticket = IssueTicket(host);
+  host.StoreRequest(15, PartRequest(15),
+                    {.owner = kPreviewOwner, .ticket = last_ticket});
+  CHECK_FALSE(Content::CancelActorAssetRequests(
+      host, Content::ActorAssetOwner::kUnowned));
+  CHECK(Content::CancelActorAssetRequests(host, kPreviewOwner));
+  CHECK(host.abandoned.empty());
+  CHECK(QueuedModels(host) == std::vector{10, 12});
+  CHECK(Completed(host, owned) ==
+        std::pair{ActorAssetOutcome::kCancelled, kAssetRefused});
+  CHECK(Outcome(host, last_ticket) == ActorAssetOutcome::kCancelled);
+}
+
+TEST_CASE("Cancelling an owned head abandons its loader or changes nothing",
+          "[content-slice][content][actor-assets][asset-ownership]") {
+  using Content::ActorAssetOutcome;
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  const Content::ActorAssetTicket head = Submit(host, 1);
+  CHECK(Content::QueueActorAssetRequest(
+            host, Request(ActorAssetKind::kSequenceLoad, 0, 2)) == 1);
+  host.abandon_head = false;
+  CHECK_FALSE(Content::CancelActorAssetRequests(host, kPreviewOwner));
+  CHECK(host.abandoned == std::vector{ActorAssetKind::kWeaponModelParse});
+  CHECK(QueuedModels(host) == std::vector{1, 2});
+  CHECK(Outcome(host, head) == ActorAssetOutcome::kPending);
+  host.abandon_head = true;
+  CHECK(Content::CancelActorAssetRequests(host, kPreviewOwner));
+  CHECK(QueuedModels(host) == std::vector{2});
+  CHECK(host.RequestIdentity(0) == Content::ActorAssetIdentity{});
+  CHECK(Outcome(host, head) == ActorAssetOutcome::kCancelled);
+}
+
+TEST_CASE("Clearing the asset queue cancels every owned request",
+          "[content-slice][content][actor-assets][asset-ownership]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  const Content::ActorAssetTicket head = Submit(host, 1);
+  CHECK(Content::QueueActorAssetRequest(
+            host, Request(ActorAssetKind::kSequenceLoad, 0, 2)) == 1);
+  const Content::ActorAssetTicket tail = Submit(host, 3);
+  Content::ClearActorAssetQueue(host);
+  CHECK(std::ranges::all_of(host.requests, [](const ActorAssetRequest& slot) {
+    return slot.kind == 0;
+  }));
+  CHECK(host.abandoned.empty());
+  CHECK(Outcome(host, head) == Content::ActorAssetOutcome::kCancelled);
+  CHECK(Outcome(host, tail) == Content::ActorAssetOutcome::kCancelled);
+}
+
+namespace {
+// A weapon parse stopped waiting on its primitives with its record bound;
+// returns the parse request the queue head would hold.
+ActorAssetRequest WeaponParseAwaitingPrimitives(FakeAssetHost& host,
+                                                ActorAssetLoadState& state) {
+  AddWeaponFile(host);
+  ActorAssetRequest request = WeaponRequest(host);
+  StepWeaponLoad(host, state, request, 2);
+  REQUIRE(state.parse_phase == 1);
+  REQUIRE(host.weapons[4].has_value());
+  REQUIRE(host.low_blocks.size() == 1);
+  request.kind = static_cast<std::uint8_t>(ActorAssetKind::kWeaponModelParse);
+  return request;
+}
+
+// Runs a fresh weapon load from its first step until it stops pending.
+int LoadWeaponAfresh(FakeAssetHost& host) {
+  ActorAssetLoadState state;
+  ActorAssetRequest request = WeaponRequest(host);
+  int result = kAssetPending;
+  for (int step = 0; step < 4 && result == kAssetPending; ++step) {
+    result = Content::UpdateWeaponModelLoad(host, state, request);
+  }
+  return result;
+}
+}  // namespace
+
+TEST_CASE("Abandoning a weapon parse waiting on its primitives discards it",
+          "[content-slice][content][actor-assets][asset-ownership]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  ActorAssetLoadState state;
+  const ActorAssetRequest request = WeaponParseAwaitingPrimitives(host, state);
+  Content::AbandonActorAssetLoad(host, state, request);
+  CHECK(state.parse_phase == 0);
+  CHECK_FALSE(host.weapons[4].has_value());
+  CHECK(host.low_frees == host.low_blocks);
+  CHECK(host.forgotten_geometry == host.low_blocks);
+  CHECK(std::ranges::all_of(host.weapon_textures, [](const auto& slot) {
+    return slot.references == 0;
+  }));
+  // The slot parses again from the start.
+  CHECK(LoadWeaponAfresh(host) == kAssetDone);
+  CHECK(Required(host.weapons[4]).bone_count == 2);
+}
+
+TEST_CASE("Abandoning an actor model load frees its file block",
+          "[content-slice][content][actor-assets][asset-ownership]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  AddShpTables(host);
+  host.read_finished = false;
+  ActorAssetLoadState state;
+  ActorAssetRequest request = Request(ActorAssetKind::kActorModelLoad, 3, 20);
+  REQUIRE(Content::UpdateActorModelLoad(host, state, request) == kAssetPending);
+  REQUIRE(host.high_blocks.size() == 1);
+  Content::AbandonActorAssetLoad(host, state, request);
+  CHECK(host.high_frees == host.high_blocks);
+  CHECK(state.model_phase == 0);
+  CHECK(state.model_file == AssetAddress::kNone);
+  CHECK_FALSE(host.actors[3].has_value());
+  // Unownable requests leave the loader alone.
+  ActorAssetLoadState sequence_state;
+  sequence_state.sequence_parse_phase = 1;
+  Content::AbandonActorAssetLoad(host, sequence_state,
+                                 Request(ActorAssetKind::kSequenceLoad, 0, 1));
+  CHECK(sequence_state.sequence_parse_phase == 1);
+}
+
+TEST_CASE("Idle loaders release their parse cursors",
+          "[content-slice][content][actor-assets][asset-ownership]") {
+  ActorAssetLoadState state;
+  state.weapon_cursor = Address(0x100);
+  state.model_cursor = Address(0x200);
+  state.sequence_cursor = Address(0x300);
+  state.parse_phase = 1;
+  state.sequence_parse_phase = 2;
+  ActorAssetLoadState busy = state;
+  Content::ReleaseIdleActorAssetCursors(busy);
+  CHECK(busy == state);
+  state.parse_phase = 0;
+  state.sequence_parse_phase = 0;
+  Content::ReleaseIdleActorAssetCursors(state);
+  CHECK(state.weapon_cursor == AssetAddress::kNone);
+  CHECK(state.model_cursor == AssetAddress::kNone);
+  CHECK(state.sequence_cursor == AssetAddress::kNone);
 }
 
 TEST_CASE("Ashley auxiliary sequence requests preserve kind and selector",

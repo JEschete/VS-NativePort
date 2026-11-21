@@ -280,7 +280,7 @@ int QueueActorAssetRequest(ActorAssetHost& host,
     return -1;
   }
   host.OnRequestQueued(request);
-  host.StoreRequest(slot, request);
+  host.StoreRequest(slot, request, {});
   return slot;
 }
 
@@ -290,6 +290,7 @@ int QueueActorAssetRequest(ActorAssetHost& host,
 // slowest one while a model parsed (D_800E8FC4, D_800F457C, D_800F4580,
 // D_800F45D8). No caller read the record, and a native frame has no scanline
 // clock, so the profile is not kept.
+// Native (#48): a finished owned request completes its ticket.
 int UpdateActorAssetQueue(ActorAssetHost& host) {
   const std::uint8_t kind = host.RequestKind(0);
   if (kind == 0) {
@@ -298,11 +299,18 @@ int UpdateActorAssetQueue(ActorAssetHost& host) {
   if (!IsDispatchedKind(kind)) {
     return -1;
   }
+  const ActorAssetIdentity identity = host.RequestIdentity(0);
   const int result = host.ProcessHeadRequest(static_cast<ActorAssetKind>(kind));
   if (result == kAssetPending) {
     return 1;
   }
   host.OnHeadRequestDone(result);
+  if (identity.ticket != ActorAssetTicket::kNone) {
+    static_cast<void>(host.Completions().Complete(
+        identity.ticket,
+        result < 0 ? ActorAssetOutcome::kFailed : ActorAssetOutcome::kLoaded,
+        result));
+  }
   // The original shifts slots 1..14 down and clears slot 14; slot 15 never
   // moves.
   constexpr int kLastShifted = kActorAssetRequestCount - 2;
@@ -327,8 +335,185 @@ void QueueAshleyWeaponSequence(ActorAssetHost& host, int sequence_id) {
   request.material = static_cast<std::uint8_t>(sequence_id);
   const int slot = FindFreeActorAssetRequest(host);
   if (slot != -1) {
-    host.StoreRequest(slot, request);
+    host.StoreRequest(slot, request, {});
   }
+}
+
+std::optional<ActorAssetTicket> ActorAssetCompletions::Issue(
+    ActorAssetOwner owner) {
+  if (owner == ActorAssetOwner::kUnowned) return std::nullopt;
+  const auto free = std::ranges::find(
+      entries_, ActorAssetTicket::kNone,
+      [](const ActorAssetCompletion& entry) { return entry.identity.ticket; });
+  if (free == entries_.end()) return std::nullopt;
+  // Skip 0 and any serial still held after the counter wraps.
+  ActorAssetTicket ticket = ActorAssetTicket::kNone;
+  while (ticket == ActorAssetTicket::kNone ||
+         Find(ticket).outcome != ActorAssetOutcome::kUnknown) {
+    ++serial_;
+    ticket = static_cast<ActorAssetTicket>(serial_);
+  }
+  *free = {.identity = {.owner = owner, .ticket = ticket},
+           .outcome = ActorAssetOutcome::kPending,
+           .result = kAssetPending};
+  return ticket;
+}
+
+bool ActorAssetCompletions::Complete(ActorAssetTicket ticket,
+                                     ActorAssetOutcome outcome, int result) {
+  if (ticket == ActorAssetTicket::kNone) return false;
+  for (ActorAssetCompletion& entry : entries_) {
+    if (entry.identity.ticket == ticket &&
+        entry.outcome == ActorAssetOutcome::kPending) {
+      entry.outcome = outcome;
+      entry.result = result;
+      return true;
+    }
+  }
+  return false;
+}
+
+ActorAssetCompletion ActorAssetCompletions::Find(
+    ActorAssetTicket ticket) const {
+  if (ticket == ActorAssetTicket::kNone) return {};
+  for (const ActorAssetCompletion& entry : entries_) {
+    if (entry.identity.ticket == ticket) return entry;
+  }
+  return {};
+}
+
+void ActorAssetCompletions::Forget(ActorAssetTicket ticket) {
+  if (ticket == ActorAssetTicket::kNone) return;
+  for (ActorAssetCompletion& entry : entries_) {
+    if (entry.identity.ticket == ticket) entry = {};
+  }
+}
+
+bool ActorAssetCompletions::Pending(const ActorAssetIdentity& identity) const {
+  if (identity.ticket == ActorAssetTicket::kNone) return false;
+  const ActorAssetCompletion entry = Find(identity.ticket);
+  return entry.identity == identity &&
+         entry.outcome == ActorAssetOutcome::kPending;
+}
+
+bool ActorAssetCompletions::Full() const {
+  return std::ranges::none_of(entries_, [](const ActorAssetCompletion& entry) {
+    return entry.identity.ticket == ActorAssetTicket::kNone;
+  });
+}
+
+namespace {
+// The owner of the request in `slot`, when it is owned and queued.
+std::optional<ActorAssetIdentity> OwnedRequest(const ActorAssetHost& host,
+                                               int slot) {
+  if (host.RequestKind(slot) == 0) return std::nullopt;
+  const ActorAssetIdentity identity = host.RequestIdentity(slot);
+  if (identity.ticket == ActorAssetTicket::kNone) return std::nullopt;
+  return identity;
+}
+
+void CancelTicket(ActorAssetHost& host, ActorAssetTicket ticket) {
+  static_cast<void>(host.Completions().Complete(
+      ticket, ActorAssetOutcome::kCancelled, kAssetRefused));
+}
+
+// Cancels the pending tickets no queued request carries (a request removed
+// by a path that skipped CancelActorAssetRequests or ClearActorAssetQueue).
+void CancelOrphanedTickets(ActorAssetHost& host) {
+  std::array<ActorAssetIdentity, kActorAssetRequestCount> queued{};
+  for (int slot = 0; slot < kActorAssetRequestCount; ++slot) {
+    queued[static_cast<std::size_t>(slot)] =
+        OwnedRequest(host, slot).value_or(ActorAssetIdentity{});
+  }
+  std::array<ActorAssetTicket, ActorAssetCompletions::kCapacity> orphans{};
+  std::size_t count = 0;
+  for (const ActorAssetCompletion& entry : host.Completions().Entries()) {
+    if (entry.outcome == ActorAssetOutcome::kPending &&
+        std::ranges::find(queued, entry.identity) == queued.end()) {
+      orphans[count++] = entry.identity.ticket;
+    }
+  }
+  for (std::size_t i = 0; i < count; ++i) CancelTicket(host, orphans[i]);
+}
+}  // namespace
+
+bool IsOwnableActorAssetRequest(const ActorAssetRequest& request) {
+  switch (static_cast<ActorAssetKind>(request.kind)) {
+    case ActorAssetKind::kActorModelLoad:
+    case ActorAssetKind::kActorModelParse:
+    case ActorAssetKind::kWeaponModelParse:
+      return true;
+    case ActorAssetKind::kSequenceParse:
+      return request.sub_kind == 0;
+    default:
+      return false;
+  }
+}
+
+std::optional<ActorAssetTicket> SubmitActorAssetRequest(
+    ActorAssetHost& host, const ActorAssetRequest& request,
+    ActorAssetOwner owner) {
+  if (owner == ActorAssetOwner::kUnowned ||
+      !IsOwnableActorAssetRequest(request)) {
+    host.Refuse("unownable asset request", request.kind);
+    return std::nullopt;
+  }
+  const int slot = FindFreeActorAssetRequest(host);
+  if (slot == -1) return std::nullopt;
+  ActorAssetCompletions& completions = host.Completions();
+  if (completions.Full()) CancelOrphanedTickets(host);
+  const std::optional<ActorAssetTicket> ticket = completions.Issue(owner);
+  if (!ticket) {
+    host.Refuse("asset ticket table full", static_cast<std::int64_t>(owner));
+    return std::nullopt;
+  }
+  host.OnRequestQueued(request);
+  host.StoreRequest(slot, request, {.owner = owner, .ticket = *ticket});
+  return ticket;
+}
+
+bool CancelActorAssetRequests(ActorAssetHost& host, ActorAssetOwner owner) {
+  if (owner == ActorAssetOwner::kUnowned) return false;
+  const auto owns = [&](int slot) {
+    const std::optional<ActorAssetIdentity> identity = OwnedRequest(host, slot);
+    return identity && identity->owner == owner;
+  };
+  if (owns(0) && !host.AbandonHeadRequest(
+                     static_cast<ActorAssetKind>(host.RequestKind(0)))) {
+    return false;
+  }
+  // As the queue's shift, slot 15 never moves.
+  constexpr int kImmobile = kActorAssetRequestCount - 1;
+  int destination = 0;
+  for (int source = 0; source < kImmobile; ++source) {
+    if (owns(source)) {
+      CancelTicket(host, host.RequestIdentity(source).ticket);
+      continue;
+    }
+    if (destination != source) host.MoveRequest(source, destination);
+    ++destination;
+  }
+  while (destination < kImmobile) host.ClearRequestKind(destination++);
+  if (owns(kImmobile)) {
+    CancelTicket(host, host.RequestIdentity(kImmobile).ticket);
+    host.ClearRequestKind(kImmobile);
+  }
+  return true;
+}
+
+void ClearActorAssetQueue(ActorAssetHost& host) {
+  for (int slot = 0; slot < kActorAssetRequestCount; ++slot) {
+    host.ClearRequestKind(slot);
+  }
+  CancelOrphanedTickets(host);
+}
+
+ActorAssetCompletion FindActorAssetCompletion(ActorAssetHost& host,
+                                              ActorAssetTicket ticket) {
+  if (host.Completions().Find(ticket).outcome == ActorAssetOutcome::kPending) {
+    CancelOrphanedTickets(host);
+  }
+  return host.Completions().Find(ticket);
 }
 
 // decomp: BATTLE.PRG func_80099E7C (src/BATTLE/BATTLE.PRG/30DB0.c:445)
@@ -726,14 +911,12 @@ bool WeaponGeometryShared(const ActorAssetHost& host, int slot,
   return false;
 }
 
-// Native (#491): the original's parse could not fail. A refused parse
-// discards the record it bound with what it allocated: no release reaches
-// a record whose bone count is 0, or frees geometry before FinishWeaponModel
-// sets the record's actor.
-int DiscardRefusedWeapon(ActorAssetHost& host, int slot, int result) {
-  if (result != kAssetRefused || !host.WeaponSummary(slot).present) {
-    return result;
-  }
+// Native (#48, #491): discards a weapon record a parse bound but did not
+// finish, with what it allocated: no release reaches a record whose bone
+// count is 0, or frees geometry before FinishWeaponModel sets the record's
+// actor.
+void DiscardWeaponRecord(ActorAssetHost& host, int slot) {
+  if (!host.WeaponSummary(slot).present) return;
   const WeaponAssetRecord model = host.LoadWeapon(slot);
   const bool fixed = slot < kFixedGeometrySlots &&
                      model.geometry == host.WeaponGeometryBuffer(slot);
@@ -751,6 +934,12 @@ int DiscardRefusedWeapon(ActorAssetHost& host, int slot, int result) {
     }
   }
   host.ClearWeaponSlot(slot);
+}
+
+// Native (#491): the original's parse could not fail. A refused parse
+// discards the record it bound.
+int DiscardRefusedWeapon(ActorAssetHost& host, int slot, int result) {
+  if (result == kAssetRefused) DiscardWeaponRecord(host, slot);
   return result;
 }
 }  // namespace
@@ -1673,6 +1862,63 @@ int ReleaseActorModel(ActorAssetHost& host, int slot) {
   }
   host.ClearActorSlot(slot);
   return 0;
+}
+
+// Native (#48): the original never abandoned a request. An owner's
+// cancellation abandons its head between frames: a parse waiting to fix its
+// primitives has bound a record, placed its texture and allocated its
+// model, so the record is released (actors) or discarded (weapons) with
+// them.
+void AbandonActorAssetLoad(ActorAssetHost& host, ActorAssetLoadState& state,
+                           const ActorAssetRequest& request) {
+  if (!IsOwnableActorAssetRequest(request)) return;
+  const bool mid_parse = state.parse_phase == kParseFixPrimitives;
+  const int target = TargetSlot(request);
+  switch (static_cast<ActorAssetKind>(request.kind)) {
+    case ActorAssetKind::kActorModelLoad:
+    case ActorAssetKind::kActorModelParse:
+      if (mid_parse && target >= 0 && target < kActorRecordSlots &&
+          host.ActorSummary(target).present) {
+        static_cast<void>(ReleaseActorModel(host, target));
+      }
+      // The host has cancelled the file's read; it frees the file unless the
+      // host has.
+      if (state.model_file_allocated) {
+        state.model_file_allocated = false;
+        host.FreeHigh(state.model_file);
+      }
+      state.model_phase = kPhaseStart;
+      state.parse_phase = 0;
+      state.model_file = AssetAddress::kNone;
+      state.model_cursor = AssetAddress::kNone;
+      state.model_palette_words = 0;
+      state.model_header_word = 0;
+      state.model_texture_width = 0;
+      state.model_texture_height = 0;
+      break;
+    case ActorAssetKind::kWeaponModelParse:
+      if (mid_parse && target >= 0 && target < kWeaponModelSlots) {
+        DiscardWeaponRecord(host, target);
+      }
+      state.parse_phase = 0;
+      state.weapon_cursor = AssetAddress::kNone;
+      break;
+    default:
+      state.sequence_parse_phase = kPhaseStart;
+      state.sequence_cursor = AssetAddress::kNone;
+      break;
+  }
+}
+
+void ReleaseIdleActorAssetCursors(ActorAssetLoadState& state) {
+  // Weapon and model parses share the fix-primitives phase.
+  if (state.parse_phase == 0) {
+    state.weapon_cursor = AssetAddress::kNone;
+    state.model_cursor = AssetAddress::kNone;
+  }
+  if (state.sequence_parse_phase == kPhaseStart) {
+    state.sequence_cursor = AssetAddress::kNone;
+  }
 }
 
 namespace {

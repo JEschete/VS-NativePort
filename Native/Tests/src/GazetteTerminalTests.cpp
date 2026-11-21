@@ -33,6 +33,24 @@ const Call& Find(const Calls& calls, std::int64_t kind) {
   return found == calls.end() ? empty : *found;
 }
 
+// The rank box's little-endian X halfword.
+int BoxX(std::span<const std::uint8_t> box) {
+  return box[fixture::kBoxX] | (box[fixture::kBoxX + 1] << 8);
+}
+
+// The call kinds of a replacement preview that fails: the navigation and
+// viewer draws (47, 47, 48), freeing the old preview when the switch was
+// starting (44), the failed load (43), showing a hidden menu again (46), then
+// the rank box move (25) and the list description (49).
+std::vector<std::int64_t> ReplacementFailureKinds(bool starting, bool hidden) {
+  std::vector<std::int64_t> kinds{47, 47, 48};
+  if (starting) kinds.push_back(44);
+  kinds.push_back(43);
+  if (hidden) kinds.push_back(46);
+  kinds.insert(kinds.end(), {25, 49});
+  return kinds;
+}
+
 bool List(fixture::EnemyData& data, fixture::EncyclopediaHost& host,
           score::GazetteRecordCursor cursor, int step,
           score::GazetteRecordAnimation& animation) {
@@ -770,6 +788,64 @@ TEST_CASE(
   CHECK(host.state.camera.distance == 1001);
   CHECK(host.state.selected_enemy == 77);
   CHECK(host.calls == Calls{{43, 0}});
+}
+
+TEST_CASE("An enemy preview that cannot start keeps the list open",
+          "[gazette-terminal][gazette-preview-failure]") {
+  fixture::TerminalHost host;
+  host.state.phase = score::GazettePhase::kEnemies;
+  host.input.pressed = 0x20;
+  host.data.enemies[0].unlocked = 1;
+  host.data.enemies[0].model_id = 9;
+  host.preview_result = score::kGazettePreviewFailed;
+  REQUIRE(host.Tick() == 0);
+  CHECK(host.refusals == 1);
+  CHECK(host.state.phase == score::GazettePhase::kEnemies);
+  CHECK(host.state.next_result == 0);
+  CHECK(Find(host.calls, 43) == Call{43, 9});
+  // The next confirm tries again.
+  host.preview_result = 1;
+  REQUIRE(host.Tick() == 0);
+  CHECK(host.state.phase == score::GazettePhase::kLeaveEnemies);
+  CHECK(host.state.next_result == 2);
+}
+
+TEST_CASE("An enemy preview that fails to load returns to the list",
+          "[gazette-terminal][gazette-preview-failure]") {
+  fixture::TerminalHost host;
+  host.state.phase = score::GazettePhase::kWaitForPreview;
+  host.state.camera.distance = 1001;
+  host.cursor.enemies = {20, 4};
+  host.preview_result = score::kGazettePreviewFailed;
+  REQUIRE(host.Tick() == 0);
+  CHECK(host.refusals == 1);
+  CHECK(host.state.phase == score::GazettePhase::kEnemies);
+  CHECK(host.state.selected_enemy == 24);
+  CHECK(host.state.animation_step == 0);
+  CHECK(host.state.next_result == 0);
+  CHECK(host.state.camera.distance == 1001);
+  CHECK(Kinds(host.calls) == std::vector<std::int64_t>{43, 49});
+}
+
+TEST_CASE("A replacement preview that fails restores the menu and rank box",
+          "[gazette-terminal][gazette-preview-failure]") {
+  fixture::TerminalHost host;
+  const bool starting = GENERATE(true, false);
+  const int hidden = GENERATE(0, 1);
+  host.state.phase = starting ? score::GazettePhase::kSwitchLeave
+                              : score::GazettePhase::kSwitchLoad;
+  host.state.selected_enemy = 1;
+  host.state.hide_ui = hidden;
+  host.cursor.enemies = {10, 2};
+  host.preview_result = score::kGazettePreviewFailed;
+  REQUIRE(host.Tick() == 0);
+  CHECK(host.refusals == 1);
+  CHECK(host.state.phase == score::GazettePhase::kEnemies);
+  CHECK(host.state.selected_enemy == 12);
+  CHECK(Kinds(host.calls) == ReplacementFailureKinds(starting, hidden != 0));
+  if (hidden != 0) CHECK(Find(host.calls, 46) == Call{46, 1});
+  // LeaveViewer's eight 16-unit steps, in one move.
+  CHECK(BoxX(host.box) == 128);
 }
 
 TEST_CASE(

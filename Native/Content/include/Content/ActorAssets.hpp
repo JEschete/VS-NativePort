@@ -126,6 +126,68 @@ struct ActorAssetRequest {
                          const ActorAssetRequest&) = default;
 };
 
+// Native (#48): request ownership. An owner submits a request through
+// SubmitActorAssetRequest and holds the ticket it returns; the queue records
+// the request's outcome against the ticket (loaded, failed or cancelled)
+// until the owner forgets it. Requests queued through QueueActorAssetRequest
+// stay unowned, as all of the original's were.
+enum class ActorAssetOwner : std::uint8_t {
+  kUnowned = 0,
+  kEnemyPreview = 1,
+};
+
+enum class ActorAssetTicket : std::uint32_t { kNone = 0 };
+
+enum class ActorAssetOutcome : std::uint8_t {
+  // No such ticket: never issued, or forgotten.
+  kUnknown,
+  kPending,
+  kLoaded,
+  kFailed,
+  kCancelled,
+};
+
+struct ActorAssetIdentity {
+  ActorAssetOwner owner = ActorAssetOwner::kUnowned;
+  ActorAssetTicket ticket = ActorAssetTicket::kNone;
+
+  friend bool operator==(const ActorAssetIdentity&,
+                         const ActorAssetIdentity&) = default;
+};
+
+// A ticket's outcome. `result` is the loader's result for kLoaded and
+// kFailed, and kAssetRefused for kCancelled.
+struct ActorAssetCompletion {
+  ActorAssetIdentity identity;
+  ActorAssetOutcome outcome = ActorAssetOutcome::kUnknown;
+  int result = kAssetPending;
+
+  friend bool operator==(const ActorAssetCompletion&,
+                         const ActorAssetCompletion&) = default;
+};
+
+// The tickets issued and their outcomes, until their owners forget them.
+class ActorAssetCompletions {
+ public:
+  static constexpr std::size_t kCapacity = 32;
+
+  // A new pending ticket for `owner`; none for kUnowned or a full table.
+  [[nodiscard]] std::optional<ActorAssetTicket> Issue(ActorAssetOwner owner);
+  // Records the outcome of a pending ticket; false when it is not pending.
+  bool Complete(ActorAssetTicket ticket, ActorAssetOutcome outcome, int result);
+  [[nodiscard]] ActorAssetCompletion Find(ActorAssetTicket ticket) const;
+  void Forget(ActorAssetTicket ticket);
+  [[nodiscard]] bool Pending(const ActorAssetIdentity& identity) const;
+  [[nodiscard]] bool Full() const;
+  [[nodiscard]] std::span<const ActorAssetCompletion> Entries() const {
+    return entries_;
+  }
+
+ private:
+  std::array<ActorAssetCompletion, kCapacity> entries_{};
+  std::uint32_t serial_ = 0;
+};
+
 // The disc file tables (legacy_files in ActorAssetsLive.hpp): per-model
 // disc offsets and sector counts. The material-model sequence tables are
 // indexed material * 4 + model, as the original's flattened arrays.
@@ -378,14 +440,25 @@ class ActorAssetHost {
 
   // The request queue, in place: a request being processed can queue more.
   virtual std::uint8_t RequestKind(int slot) const = 0;
-  virtual void StoreRequest(int slot, const ActorAssetRequest& request) = 0;
+  // Stores `request` and its owner's identity (unowned for the original's
+  // requests).
+  virtual void StoreRequest(int slot, const ActorAssetRequest& request,
+                            const ActorAssetIdentity& identity) = 0;
+  // The identity of a queued request whose ticket is still pending, else
+  // unowned.
+  [[nodiscard]] virtual ActorAssetIdentity RequestIdentity(int slot) const = 0;
+  virtual ActorAssetCompletions& Completions() = 0;
   // A request QueueActorAssetRequest accepted, before it is stored.
   virtual void OnRequestQueued(const ActorAssetRequest& request) = 0;
+  // Moves the request and its identity; clearing a kind clears both.
   virtual void MoveRequest(int from, int to) = 0;
   virtual void ClearRequestKind(int slot) = 0;
   // Runs the head request's loader; returns its result.
   virtual int ProcessHeadRequest(ActorAssetKind kind) = 0;
   virtual void OnHeadRequestDone(int result) = 0;
+  // Abandons the head request's loader between frames
+  // (AbandonActorAssetLoad); false, changing nothing, when it cannot.
+  virtual bool AbandonHeadRequest(ActorAssetKind kind) = 0;
 
   // The game heap. Allocations return kNone when refused.
   virtual AssetAddress AllocateHigh(std::size_t bytes) = 0;
@@ -493,6 +566,39 @@ int QueueActorAssetRequest(ActorAssetHost& host,
                            const ActorAssetRequest& request);
 int UpdateActorAssetQueue(ActorAssetHost& host);
 void QueueAshleyWeaponSequence(ActorAssetHost& host, int sequence_id);
+
+// Native (#48): owned requests. An owner may submit only the kinds whose
+// loader AbandonActorAssetLoad can abandon mid-flight: actor model loads and
+// parses, weapon model parses and battle/common sequence parses (sub kind
+// 0).
+[[nodiscard]] bool IsOwnableActorAssetRequest(const ActorAssetRequest& request);
+// Queues `request` for `owner`; its ticket, or none when the request is not
+// ownable, the owner is kUnowned, or the queue or ticket table is full.
+[[nodiscard]] std::optional<ActorAssetTicket> SubmitActorAssetRequest(
+    ActorAssetHost& host, const ActorAssetRequest& request,
+    ActorAssetOwner owner);
+// Removes every queued request of `owner` and marks its ticket cancelled,
+// abandoning the head first when it is the owner's; the other requests keep
+// their order and slot 15 stays in place. False, changing nothing, when the
+// head cannot be abandoned.
+bool CancelActorAssetRequests(ActorAssetHost& host, ActorAssetOwner owner);
+// Clears all 16 requests without abandoning the head, as the battle
+// start-up does (INITBTL func_800FA7B0), and cancels every pending ticket.
+void ClearActorAssetQueue(ActorAssetHost& host);
+// The outcome of `ticket`. A pending ticket whose request left the queue
+// without completing (a raw reset of the request records) is cancelled
+// first, so no owner waits on a request that will never run.
+[[nodiscard]] ActorAssetCompletion FindActorAssetCompletion(
+    ActorAssetHost& host, ActorAssetTicket ticket);
+// Resets the loader state an ownable head request holds and discards the
+// record it bound but had not finished; the host has already cancelled the
+// request's disc read and file. Changes nothing for an unownable request.
+void AbandonActorAssetLoad(ActorAssetHost& host, ActorAssetLoadState& state,
+                           const ActorAssetRequest& request);
+// Native (#48): forgets the parse cursors of parses no longer in progress.
+// The original left them pointing into a file or caller buffer that was then
+// freed; nothing read them before the next parse set them again.
+void ReleaseIdleActorAssetCursors(ActorAssetLoadState& state);
 
 // Adds the texture offsets to `count` polygons' UVs (func_80099E7C).
 // Refuses (false) when the polygons run past `polygons`.

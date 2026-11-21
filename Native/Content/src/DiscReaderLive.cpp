@@ -16,7 +16,6 @@
 #include "Core/Diagnostics.hpp"
 #include "Core/Log.hpp"
 #include "Legacy/Psx.hpp"
-#include "Platform/LogicalTicks.hpp"
 
 namespace VS::Content {
 namespace {
@@ -187,9 +186,6 @@ class LiveDiscDriveHost final : public DiscDriveHost {
   void UseDirectBuffer() override {
     discDriveState.buffer_mode = DiscBufferMode::kDirect;
     legacyDiscReadBuffer = nullptr;
-  }
-  void WaitFrames(std::uint32_t frames) override {
-    VS::Platform::WaitTicks(static_cast<int>(frames));
   }
 
  private:

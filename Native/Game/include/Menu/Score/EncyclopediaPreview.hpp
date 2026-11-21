@@ -15,7 +15,8 @@
 // weapon and shield WEPs and its sequences) is read into a high-end heap
 // block; once read, its parts are queued to the battle asset queue into a
 // model buffer of the preview layout, and the file block is released after
-// the queue has consumed it. The functions reach the load step, the ZUD file
+// every part has loaded. A failed read or part abandons the whole load (#48).
+// The functions reach the load step, the ZUD file
 // table, the disc queue, the game heap, the asset queue and the actor
 // systems through an EnemyPreviewHost (EncyclopediaPreviewLive.hpp binds it).
 namespace VS::Menu::Score {  // NOLINT(readability-identifier-naming)
@@ -42,6 +43,12 @@ inline constexpr std::uint8_t kAshleyPreviewAnimation = 33;
 inline constexpr int kAshleyPreviewDisplayFlags = 3;
 // The ZUD header's bytes (_zudData_t, 592C.c:25).
 inline constexpr std::size_t kZudHeaderBytes = 0x30;
+// The most parts one ZUD file queues: the enemy, its weapon and shield (or
+// companion) and its two sequences.
+inline constexpr std::size_t kEnemyPreviewParts = 5;
+// Native (#48): LoadEnemyPreview's result when the load failed. The preview
+// has cancelled its requests, released its records and freed its blocks.
+inline constexpr int kEnemyPreviewFailed = -1;
 
 // The load steps LoadEnemyPreview advances (vs_battle_loadObjectDataState):
 // queue the read, queue the parts until consumed, pose the preview.
@@ -49,6 +56,13 @@ enum class EnemyPreviewStep : std::uint8_t {
   kQueueRead = 0,
   kLoadParts = 1,
   kPose = 2,
+};
+
+// The state of the ZUD file's disc read.
+enum class EnemyPreviewRead : std::uint8_t {
+  kPending,
+  kLoaded,
+  kFailed,
 };
 
 // One entry of the ZUD file table.
@@ -128,6 +142,9 @@ struct EnemyPreviewState {
   std::uint8_t palette_flag = 0;
   // Native queue identity; an address can be reused after a read is released.
   std::uint64_t read_generation = 0;
+  // Native (#48): the tickets of the queued parts in submission order, kNone
+  // past the last, until every part has loaded or the load is abandoned.
+  std::array<Content::ActorAssetTicket, kEnemyPreviewParts> tickets{};
 
   friend bool operator==(const EnemyPreviewState&,
                          const EnemyPreviewState&) = default;
@@ -151,13 +168,14 @@ class EnemyPreviewHost {
 
   // The disc queue: a read request for `file` (kNone when the queue is
   // full), its priority enqueue into `destination`, the read of a refused
-  // request, its completion and its release.
+  // request (kNone when it cannot be recorded), its state and its release.
   [[nodiscard]] virtual AssetAddress AllocateRead(
       const EnemyPreviewFile& file) = 0;
   virtual void EnqueueRead(AssetAddress read, AssetAddress destination) = 0;
   [[nodiscard]] virtual AssetAddress ReadRefused(const EnemyPreviewFile& file,
                                                  AssetAddress destination) = 0;
-  [[nodiscard]] virtual bool ReadLoaded(AssetAddress read) const = 0;
+  [[nodiscard]] virtual EnemyPreviewRead ReadStatus(
+      AssetAddress read) const = 0;
   virtual void ReleaseRead(AssetAddress read) = 0;
 
   // The game heap: the file block from the high end, the model buffer from
@@ -175,12 +193,23 @@ class EnemyPreviewHost {
   [[nodiscard]] virtual std::span<const std::byte> FileBytes(
       AssetAddress file, std::uint32_t bytes) const = 0;
 
-  // The battle asset queue: a request, one queue step and the first free
-  // request index (0 when the queue is empty).
-  virtual void QueueAsset(const Content::ActorAssetRequest& request) = 0;
+  // The battle asset queue (#48): a part submitted under the preview's owner
+  // (none when the queue or its ticket table is full or the request is
+  // refused), one queue step, a part's outcome, forgetting a settled ticket,
+  // and the cancellation of every preview request (false, changing nothing,
+  // when the queue's head cannot be abandoned).
+  [[nodiscard]] virtual std::optional<Content::ActorAssetTicket> SubmitAsset(
+      const Content::ActorAssetRequest& request) = 0;
   virtual void UpdateAssetQueue() = 0;
-  [[nodiscard]] virtual int FirstFreeAssetRequest() const = 0;
-  virtual void ReleaseModel(int slot) = 0;
+  [[nodiscard]] virtual Content::ActorAssetOutcome AssetOutcome(
+      Content::ActorAssetTicket ticket) = 0;
+  virtual void ForgetAsset(Content::ActorAssetTicket ticket) = 0;
+  [[nodiscard]] virtual bool CancelAssets() = 0;
+  // Releases the record bound at `part` of `buffer`, if one is bound there.
+  // False when the record stays bound or releasing it would release a
+  // record outside the buffer; the buffer must then be kept.
+  [[nodiscard]] virtual bool ReleasePart(AssetAddress buffer,
+                                         EnemyPreviewPart part) = 0;
 
   // The actor systems (ActorPreviewLive.hpp, AnimationControlLive.hpp,
   // AnimationPoseLive.hpp, ActorStateLive.hpp) and the record writes.
@@ -196,20 +225,26 @@ class EnemyPreviewHost {
 };
 
 // decomp: MENU9.PRG vs_menu9_loadZud (F02836, src/MENU/MENU9.PRG/57BC.c:10)
-// One load step: 1 while loading, 0 once the preview is posed.
+// One load step: 1 while loading, 0 once the preview is posed, and
+// kEnemyPreviewFailed (resetting the step) when the load failed.
 int LoadEnemyPreview(EnemyPreviewHost& host, EnemyPreviewState& state,
                      int zud_id);
 // decomp: MENU9.PRG vs_menu9_freeZud (F02837, src/MENU/MENU9.PRG/57BC.c:42)
+// Cancels any queued part and releases the records bound in the model
+// buffer before freeing it; a record that cannot be released keeps it.
 void FreeEnemyPreview(EnemyPreviewHost& host, EnemyPreviewState& state);
 // decomp: MENU9.PRG func_801080C8 (F02838, src/MENU/MENU9.PRG/57BC.c:49)
 void InitializeAshleyPreviewPose(EnemyPreviewHost& host);
 // decomp: MENU9.PRG vs_menu9_loadZudFile (F02839,
-// src/MENU/MENU9.PRG/592C.c:171)
-void QueueEnemyModelRead(EnemyPreviewHost& host, EnemyPreviewState& state,
-                         int zud_id);
+// src/MENU/MENU9.PRG/592C.c:171): false, holding nothing new, when no read
+// was queued.
+[[nodiscard]] bool QueueEnemyModelRead(EnemyPreviewHost& host,
+                                       EnemyPreviewState& state, int zud_id);
 // decomp: MENU9.PRG vs_menu9_parseZudFile (F02840,
 // src/MENU/MENU9.PRG/592C.c:203): 1 while the read or the queue is pending
-// or after the parts are queued, 0 once no file block is held.
+// or after the parts are queued, 0 once no file block is held, and
+// kEnemyPreviewFailed once a failed read, part or submission has abandoned
+// the load.
 int LoadEnemyModelParts(EnemyPreviewHost& host, EnemyPreviewState& state);
 // decomp: MENU9.PRG vs_menu9_freeZudFile (F02841,
 // src/MENU/MENU9.PRG/592C.c:295)

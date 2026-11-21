@@ -4,6 +4,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <optional>
 #include <span>
 
 #include "Content/ActorAssets.hpp"
@@ -66,11 +67,19 @@ int QueueLiveActorAssetRequest(const LegacyActorAssetRequest* request);
 // The typed request's entry for promoted callers; the same result.
 int QueueLiveActorAsset(const ActorAssetRequest& request);
 int UpdateLiveActorAssetQueue();
-// Between queue updates, abandon model/weapon/battle-sequence parsing and
-// actor-model reads borrowing either allocation. Drain a matching head first;
-// other request kinds refuse, and unrelated requests/loader state survive.
-[[nodiscard]] bool CancelLiveActorAssetBorrows(
-    std::span<std::byte> source, std::span<std::byte> destination);
+// Owned requests (#48; ActorAssets.hpp SubmitActorAssetRequest). Forgetting
+// a pending ticket disowns its request, which then completes unobserved;
+// owners cancel first.
+[[nodiscard]] std::optional<ActorAssetTicket> SubmitLiveActorAsset(
+    const ActorAssetRequest& request, ActorAssetOwner owner);
+[[nodiscard]] ActorAssetCompletion LiveActorAssetCompletion(
+    ActorAssetTicket ticket);
+void ForgetLiveActorAsset(ActorAssetTicket ticket);
+// Between queue updates, removes the owner's requests and abandons its head;
+// false, changing nothing, when the head cannot be abandoned.
+[[nodiscard]] bool CancelLiveActorAssetRequests(ActorAssetOwner owner);
+// The battle start-up's queue reset (INITBTL func_800FA7B0).
+void ClearLiveActorAssetQueue();
 // Adds the texture offsets to the UVs of `count` polygons in a game heap
 // block; polygons running past the block are refused.
 void OffsetLiveModelTextureCoordinates(void* polygons, int count, int colored,

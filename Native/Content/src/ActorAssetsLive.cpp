@@ -743,6 +743,11 @@ struct ModelReadOwner {
 
 ModelReadOwner modelReadOwner;
 
+// Native (#48): the owner of each queued request and the tickets' outcomes.
+// The original's request records have no room for them.
+std::array<ActorAssetIdentity, kActorAssetRequestCount> requestIdentities{};
+ActorAssetCompletions requestCompletions;
+
 LiveFileStream Stream(AssetFileStream stream) {
   switch (stream) {
     case AssetFileStream::kWeapon:
@@ -798,13 +803,22 @@ class LiveActorAssetHost final : public ActorAssetHost {
                ? legacyActorAssetRequests[slot].asset_kind
                : 0;
   }
-  void StoreRequest(int slot, const ActorAssetRequest& request) override {
+  void StoreRequest(int slot, const ActorAssetRequest& request,
+                    const ActorAssetIdentity& identity) override {
     if (!InRange(slot, kActorAssetRequestCount)) {
       CountRefusal("asset request slot", slot);
       return;
     }
     StoreRequestFields(request, legacyActorAssetRequests[slot]);
+    requestIdentities[slot] = identity;
   }
+  [[nodiscard]] ActorAssetIdentity RequestIdentity(int slot) const override {
+    if (RequestKind(slot) == 0) return {};
+    const ActorAssetIdentity identity = requestIdentities[slot];
+    return requestCompletions.Pending(identity) ? identity
+                                                : ActorAssetIdentity{};
+  }
+  ActorAssetCompletions& Completions() override { return requestCompletions; }
   void OnRequestQueued(const ActorAssetRequest& request) override {
     const std::uint8_t phase = active_state_ != nullptr
                                    ? active_state_->model_phase
@@ -821,9 +835,11 @@ class LiveActorAssetHost final : public ActorAssetHost {
   }
   void MoveRequest(int from, int to) override {
     legacyActorAssetRequests[to] = legacyActorAssetRequests[from];
+    requestIdentities[to] = requestIdentities[from];
   }
   void ClearRequestKind(int slot) override {
     legacyActorAssetRequests[slot].asset_kind = 0;
+    requestIdentities[slot] = {};
   }
   int ProcessHeadRequest(ActorAssetKind kind) override {
     LegacyActorAssetRequest& head = legacyActorAssetRequests[0];
@@ -837,6 +853,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
     active_state_ = &state;
     const int result = RunLoader(*this, state, request, kind);
     active_state_ = nullptr;
+    ReleaseIdleActorAssetCursors(state);
     StoreState(state);
     StoreRequestFields(request, head);
     return result;
@@ -851,6 +868,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
                      static_cast<unsigned>(head.target_slot),
                      static_cast<int>(head.model_id), result, record);
   }
+  bool AbandonHeadRequest(ActorAssetKind kind) override;
 
   // The game heap.
   AssetAddress AllocateHigh(std::size_t bytes) override {
@@ -1301,58 +1319,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
   const ActorAssetLoadState* active_state_ = nullptr;
 };
 
-bool ContainsAddress(std::span<const std::byte> bytes, AssetAddress address) {
-  const auto begin = reinterpret_cast<std::uintptr_t>(bytes.data());
-  const auto value = static_cast<std::uintptr_t>(address);
-  return !bytes.empty() && value >= begin && value - begin < bytes.size();
-}
-
-bool ValidBorrowAllocation(std::span<const std::byte> bytes) {
-  if (bytes.empty()) return true;
-  const auto capacity = Core::Memory::LivePayloadCapacity(bytes.data());
-  if (capacity.has_value() && *capacity >= bytes.size()) return true;
-  CountRefusal("asset borrow outside its heap allocation",
-               static_cast<std::int64_t>(bytes.size()));
-  return false;
-}
-
-bool CanCancelBorrow(const ActorAssetRequest& request) {
-  switch (static_cast<ActorAssetKind>(request.kind)) {
-    case ActorAssetKind::kActorModelLoad:
-    case ActorAssetKind::kActorModelParse:
-    case ActorAssetKind::kWeaponModelParse:
-      return true;
-    case ActorAssetKind::kSequenceParse:
-      if (request.sub_kind == 0) return true;
-      break;
-    default:
-      break;
-  }
-  CountRefusal("unsupported asset borrow cancellation", request.kind);
-  return false;
-}
-
-bool ClearBorrowCursors(ActorAssetLoadState& state,
-                        std::span<const std::byte> bytes, bool owns_head) {
-  if (bytes.empty()) return true;
-  const auto contains = [bytes](AssetAddress cursor) {
-    return ContainsAddress(bytes, cursor) ||
-           cursor == Address(bytes.data() + bytes.size());
-  };
-  const bool model = contains(state.model_cursor);
-  const bool weapon = contains(state.weapon_cursor);
-  const bool sequence = contains(state.sequence_cursor);
-  if (!owns_head && (((model || weapon) && state.parse_phase != 0) ||
-                     (sequence && state.sequence_parse_phase != 0))) {
-    CountRefusal("active foreign parser borrows the cancelled allocation", 0);
-    return false;
-  }
-  if (model) state.model_cursor = AssetAddress::kNone;
-  if (weapon) state.weapon_cursor = AssetAddress::kNone;
-  if (sequence) state.sequence_cursor = AssetAddress::kNone;
-  return true;
-}
-
+// Cancels the actor model file's disc read and frees the file.
 bool CancelModelFile(ActorAssetLoadState& state) {
   if (!state.model_file_allocated) return true;
   auto* file = Pointer<std::byte>(state.model_file);
@@ -1362,7 +1329,6 @@ bool CancelModelFile(ActorAssetLoadState& state) {
                  static_cast<std::int64_t>(state.model_file));
     return false;
   }
-  if (!ClearBorrowCursors(state, {file, *capacity}, true)) return false;
   if (!CancelLiveDiscWrites({file, *capacity})) return false;
   if (modelReadOwner.generation != 0 &&
       LiveDiscRequestGeneration(modelReadOwner.request) ==
@@ -1375,53 +1341,20 @@ bool CancelModelFile(ActorAssetLoadState& state) {
   return true;
 }
 
-bool CancelBorrowHead(ActorAssetKind kind, ActorAssetLoadState& state) {
-  switch (kind) {
-    case ActorAssetKind::kActorModelLoad:
-      if (!CancelModelFile(state)) return false;
-      [[fallthrough]];
-    case ActorAssetKind::kActorModelParse:
-      state.model_phase = 0;
-      state.parse_phase = 0;
-      state.model_file = AssetAddress::kNone;
-      state.model_cursor = AssetAddress::kNone;
-      state.model_palette_words = 0;
-      state.model_header_word = 0;
-      state.model_texture_width = 0;
-      state.model_texture_height = 0;
-      break;
-    case ActorAssetKind::kWeaponModelParse:
-      state.parse_phase = 0;
-      state.weapon_cursor = AssetAddress::kNone;
-      break;
-    case ActorAssetKind::kSequenceParse:
-      state.sequence_parse_phase = 0;
-      state.sequence_cursor = AssetAddress::kNone;
-      break;
-    default:
-      CountRefusal("unsupported asset head cancellation",
-                   static_cast<std::int64_t>(kind));
-      return false;
+bool LiveActorAssetHost::AbandonHeadRequest(ActorAssetKind kind) {
+  const ActorAssetRequest request = LoadRequest(legacyActorAssetRequests[0]);
+  if (request.kind != static_cast<std::uint8_t>(kind) ||
+      !IsOwnableActorAssetRequest(request)) {
+    CountRefusal("unsupported asset head cancellation", request.kind);
+    return false;
   }
+  ActorAssetLoadState state = LoadState();
+  if (kind == ActorAssetKind::kActorModelLoad && !CancelModelFile(state)) {
+    return false;
+  }
+  AbandonActorAssetLoad(*this, state, request);
+  StoreState(state);
   return true;
-}
-
-void RemoveBorrowRequests(
-    const std::array<bool, kActorAssetRequestCount>& cancelled) {
-  // Match the normal queue's immobile last slot rather than promoting it
-  // into the first fifteen slots while cancelling unrelated requests.
-  constexpr std::size_t kImmobile = kActorAssetRequestCount - 1;
-  std::size_t destination = 0;
-  for (std::size_t source = 0; source < kImmobile; ++source) {
-    if (!cancelled[source]) {
-      legacyActorAssetRequests[destination++] =
-          legacyActorAssetRequests[source];
-    }
-  }
-  while (destination < kImmobile) {
-    legacyActorAssetRequests[destination++] = {};
-  }
-  if (cancelled[kImmobile]) legacyActorAssetRequests[kImmobile] = {};
 }
 }  // namespace
 
@@ -1449,38 +1382,29 @@ int UpdateLiveActorAssetQueue() {
   return UpdateActorAssetQueue(host);
 }
 
-bool CancelLiveActorAssetBorrows(std::span<std::byte> source,
-                                 std::span<std::byte> destination) {
-  if (!ValidBorrowAllocation(source) || !ValidBorrowAllocation(destination)) {
-    return false;
-  }
-  std::array<bool, kActorAssetRequestCount> cancelled{};
-  bool any = false;
-  for (std::size_t index = 0; index < cancelled.size(); ++index) {
-    const auto request = LoadRequest(legacyActorAssetRequests[index]);
-    if (request.kind == 0 ||
-        (!ContainsAddress(source, request.data) &&
-         !ContainsAddress(destination, request.destination))) {
-      continue;
-    }
-    if (!CanCancelBorrow(request)) return false;
-    cancelled[index] = true;
-    any = true;
-  }
-  auto state = LoadState();
-  if (!ClearBorrowCursors(state, source, cancelled.front()) ||
-      !ClearBorrowCursors(state, destination, cancelled.front())) {
-    return false;
-  }
-  if (cancelled.front() &&
-      !CancelBorrowHead(
-          static_cast<ActorAssetKind>(legacyActorAssetRequests[0].asset_kind),
-          state)) {
-    return false;
-  }
-  StoreState(state);
-  if (any) RemoveBorrowRequests(cancelled);
-  return true;
+std::optional<ActorAssetTicket> SubmitLiveActorAsset(
+    const ActorAssetRequest& request, ActorAssetOwner owner) {
+  LiveActorAssetHost host;
+  return SubmitActorAssetRequest(host, request, owner);
+}
+
+ActorAssetCompletion LiveActorAssetCompletion(ActorAssetTicket ticket) {
+  LiveActorAssetHost host;
+  return FindActorAssetCompletion(host, ticket);
+}
+
+void ForgetLiveActorAsset(ActorAssetTicket ticket) {
+  requestCompletions.Forget(ticket);
+}
+
+bool CancelLiveActorAssetRequests(ActorAssetOwner owner) {
+  LiveActorAssetHost host;
+  return CancelActorAssetRequests(host, owner);
+}
+
+void ClearLiveActorAssetQueue() {
+  LiveActorAssetHost host;
+  ClearActorAssetQueue(host);
 }
 
 void OffsetLiveModelTextureCoordinates(void* polygons, int count, int colored,

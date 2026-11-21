@@ -230,9 +230,10 @@ class PreviewFixture : public TerminalFixture {
       }
     }
     DrainAssets();
-    if (!content::CancelLiveActorAssetBorrows({source_file_, entry->size},
-                                              {})) {
-      throw std::runtime_error("terminal source parser borrows did not drain");
+    // A drained queue leaves no parse in progress over the source file.
+    if (VS::Content::modelParseResetFlag != 0 ||
+        VS::Content::legacySequenceParsePhase != 0) {
+      throw std::runtime_error("terminal source parser did not finish");
     }
     memory::FreeLiveFromHighEnd(source_file_);
     source_file_ = nullptr;
@@ -240,7 +241,11 @@ class PreviewFixture : public TerminalFixture {
 
   void LoadEnemy(int model) {
     for (std::size_t tick = 0; tick < kFrameBudget; ++tick) {
-      if (TickEnemyPreview(model) == 0) return;
+      const int result = TickEnemyPreview(model);
+      if (result == 0) return;
+      if (result == score::kEnemyPreviewFailed) {
+        throw std::runtime_error("terminal real enemy preview failed");
+      }
     }
     throw std::runtime_error("terminal real enemy preview did not load");
   }

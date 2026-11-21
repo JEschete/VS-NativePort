@@ -22,9 +22,6 @@ enum class DiscDrivePhase : std::uint8_t {
 };
 
 inline constexpr std::uint32_t kDiscDataSectorBytes = 2048;
-// The drive's mode change took three frames; the reset keeps that wait so
-// start-up timing matches.
-inline constexpr std::uint32_t kDiscModeChangeFrames = 3;
 
 struct DiscReadPlan {
   std::int32_t start_sector = 0;
@@ -76,7 +73,6 @@ class DiscDriveHost {
   virtual void ClearXaMarkers() = 0;
 
   virtual void UseDirectBuffer() = 0;
-  virtual void WaitFrames(std::uint32_t frames) = 0;
 };
 
 [[nodiscard]] bool BeginDiscRead(DiscDriveHost& host, std::int32_t sector,

@@ -292,11 +292,17 @@ std::optional<std::int32_t> EnemyMenu(GazetteState& state,
     if (enemy == nullptr) return std::nullopt;
     if (enemy->unlocked != 0) {
       host.PlaySound(kConfirmSound);
-      if (!host.LoadEnemyPreview(enemy->model_id).has_value()) {
+      const auto started = host.LoadEnemyPreview(enemy->model_id);
+      if (!started.has_value()) {
         return Refuse(host, "enemy preview request refused");
       }
-      Advance(state);
-      state.next_result = kOpenViewer;
+      // Native (#48): a preview that cannot start keeps the list open.
+      if (*started == kGazettePreviewFailed) {
+        host.Refuse("enemy preview could not start");
+      } else {
+        Advance(state);
+        state.next_result = kOpenViewer;
+      }
     } else {
       host.PlaySound(kLockedSound);
     }
@@ -345,6 +351,25 @@ bool SetPreviewCamera(GazetteState& state, GazetteHost& host) {
   return true;
 }
 
+// Native (#48): the original had no failed preview. One that fails returns to
+// the enemy list the way LeaveViewer does, with the list re-entering.
+std::optional<std::int32_t> ReturnToList(GazetteState& state,
+                                         const GazetteCursorMemory& cursor,
+                                         GazetteHost& host,
+                                         std::string_view reason) {
+  host.Refuse(reason);
+  const int selected = ListSelection(cursor);
+  if (Enemy(host, selected) == nullptr) return std::nullopt;
+  state.selected_enemy = static_cast<std::int16_t>(selected);
+  if (!host.ShowListDescription(selected)) {
+    return Refuse(host, "return-to-list description is missing");
+  }
+  state.next_result = kReturnToOverview;
+  state.animation_step = 0;
+  state.phase = GazettePhase::kEnemies;
+  return 0;
+}
+
 std::optional<std::int32_t> WaitForPreview(GazetteState& state,
                                            const GazetteCursorMemory& cursor,
                                            GazetteHost& host) {
@@ -352,6 +377,9 @@ std::optional<std::int32_t> WaitForPreview(GazetteState& state,
   if (enemy == nullptr) return std::nullopt;
   const auto pending = host.LoadEnemyPreview(enemy->model_id);
   if (!pending.has_value()) return Refuse(host, "enemy preview poll refused");
+  if (*pending == kGazettePreviewFailed) {
+    return ReturnToList(state, cursor, host, "enemy preview failed to load");
+  }
   if (*pending != 0) return 0;
   if (!SetPreviewCamera(state, host)) return std::nullopt;
   state.camera.yaw = kInitialViewerYaw;
@@ -552,6 +580,18 @@ std::optional<std::int32_t> LeaveViewer(GazetteState& state,
   return 0;
 }
 
+// Native (#48): a replacement preview that fails leaves the viewer for the
+// list, restoring the menu and moving the rank box back as LeaveViewer's
+// eight steps do.
+std::optional<std::int32_t> AbandonSwitch(GazetteState& state,
+                                          const GazetteCursorMemory& cursor,
+                                          GazetteHost& host,
+                                          std::string_view reason) {
+  if (state.hide_ui != 0) host.SetMenuVisible(true);
+  host.MoveRankBox(kRankHorizontalStep * kSettled, 0, false);
+  return ReturnToList(state, cursor, host, reason);
+}
+
 std::optional<std::int32_t> SwitchPreview(GazetteState& state,
                                           const GazetteCursorMemory& cursor,
                                           GazetteHost& host) {
@@ -566,8 +606,13 @@ std::optional<std::int32_t> SwitchPreview(GazetteState& state,
     host.FreeEnemyPreview();
     const auto* enemy = Enemy(host, state.selected_enemy);
     if (enemy == nullptr) return std::nullopt;
-    if (!host.LoadEnemyPreview(enemy->model_id).has_value()) {
+    const auto started = host.LoadEnemyPreview(enemy->model_id);
+    if (!started.has_value()) {
       return Refuse(host, "replacement preview request refused");
+    }
+    if (*started == kGazettePreviewFailed) {
+      return AbandonSwitch(state, cursor, host,
+                           "replacement preview could not start");
     }
     Advance(state);
   } else if (state.phase == GazettePhase::kSwitchLoad) {
@@ -577,6 +622,10 @@ std::optional<std::int32_t> SwitchPreview(GazetteState& state,
     if (enemy == nullptr) return std::nullopt;
     const auto pending = host.LoadEnemyPreview(enemy->model_id);
     if (!pending.has_value()) return Refuse(host, "replacement poll refused");
+    if (*pending == kGazettePreviewFailed) {
+      return AbandonSwitch(state, cursor, host,
+                           "replacement preview failed to load");
+    }
     if (*pending == 0) {
       if (!SetPreviewCamera(state, host)) return std::nullopt;
       Advance(state);

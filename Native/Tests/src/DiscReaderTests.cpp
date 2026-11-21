@@ -46,9 +46,6 @@ class FakeDiscDrive final : public VS::Content::DiscDriveHost {
   void ClearXaMarkers() override { events.emplace_back("xa markers clear"); }
 
   void UseDirectBuffer() override { events.emplace_back("direct buffer"); }
-  void WaitFrames(std::uint32_t frames) override {
-    events.push_back("wait " + std::to_string(frames));
-  }
 
   DiscDrivePhase phase = DiscDrivePhase::kIdle;
   DiscReadPlan plan;
@@ -196,12 +193,12 @@ TEST_CASE("Disc command update ignores phases it does not serve",
   CHECK(other.phase == DiscDrivePhase::kCommandFailed);
 }
 
-TEST_CASE("Disc drive reset stops XA and idles before the mode-change wait",
+TEST_CASE("Disc drive reset stops XA and idles without a mode-change wait",
           "[content][disc][core]") {
   FakeDiscDrive drive;
   drive.phase = DiscDrivePhase::kStreamXa;
   VS::Content::ResetDiscDrive(drive);
   CHECK(drive.phase == DiscDrivePhase::kIdle);
   CHECK(drive.events == std::vector<std::string>{"stop xa", "xa markers clear",
-                                                 "direct buffer", "wait 3"});
+                                                 "direct buffer"});
 }

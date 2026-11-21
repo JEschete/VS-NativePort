@@ -15,16 +15,20 @@
 namespace VS::Menu::Score {  // NOLINT(readability-identifier-naming)
 struct EnemyPreviewState;
 
-// MENU9.PRG (57BC.c, 592C.c).
+// MENU9.PRG (57BC.c, 592C.c). The preview's parts are queued under
+// Content::ActorAssetOwner::kEnemyPreview (#48); a load that fails returns
+// kEnemyPreviewFailed.
 int LoadLiveEnemyPreview(int zud_id);
 void FreeLiveEnemyPreview();
 void InitializeLiveAshleyPreviewPose();
-void QueueLiveEnemyModelRead(int zud_id);
+[[nodiscard]] bool QueueLiveEnemyModelRead(int zud_id);
 int LoadLiveEnemyModelParts();
 void FreeLiveEnemyModelBuffer();
 
-// Abandon a stopped preview at any loading phase. Refuses invalid ownership
-// before freeing its backing buffers; foreign requests/records survive.
+// Abandon a stopped preview at any loading phase: cancels its own queued
+// parts and read, then releases the records bound in its buffer. Refuses
+// invalid ownership before freeing its backing buffers; foreign
+// requests/records survive.
 [[nodiscard]] bool CleanupLiveEnemyPreviewOwnedState();
 
 // State reset only (592C.c's bss). At MENU9 reload, checked cleanup must

@@ -70,6 +70,10 @@ struct GazetteState {
 };
 
 inline constexpr std::int32_t kGazetteStickCenter = 128;
+// GazetteHost::LoadEnemyPreview's results: 1 while the preview loads, 0 once
+// it is posed and (#48) kGazettePreviewFailed once a failed load has released
+// what it held. A failed preview returns to the enemy list.
+inline constexpr int kGazettePreviewFailed = -1;
 
 struct GazetteInput {
   std::uint32_t pressed = 0;
