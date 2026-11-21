@@ -15,7 +15,7 @@ namespace VS::Effects {
 struct LiveEffectInstance;
 struct LiveTimelineTrack;
 
-// func_800D55A4 (5BF94.c:7885): replaces the instance's timeline with the
+// func_800D55A4 (5BF94.c:6879): replaces the instance's timeline with the
 // package's timeline `timeline_index` and starts its tracks. The old timeline
 // stays when the package lacks the section (refused); `unused` is ignored, as
 // in the original.
@@ -23,27 +23,27 @@ void LiveLoadEffectTimeline(LiveEffectInstance* instance, int timeline_index,
                             int unused);
 // The track ticks return 1 while the track runs and 0 once it has no more
 // keys, or (refused) without an instance, timeline, track or current key.
-// func_800D57FC (5BF94.c:7950).
+// func_800D57FC (5BF94.c:6944).
 int LiveTickParticleEmissionTrack(LiveEffectInstance* instance,
                                   LiveTimelineTrack* track);
-// func_800D5904 (5BF94.c:7974).
+// func_800D5904 (5BF94.c:6968).
 int LiveTickEffectSoundTrack(LiveEffectInstance* instance,
                              LiveTimelineTrack* track);
-// func_800D5A98 (5BF94.c:8005): the track's key parameter holds its delay
+// func_800D5A98 (5BF94.c:6999): the track's key parameter holds its delay
 // (low half) and next action target (high half); children run the program
 // at `child_script_offset`. Refused without the package's action request.
 int LiveTickChildEffectTrack(LiveEffectInstance* instance,
                              LiveTimelineTrack* track, int child_script_offset);
-// func_800D5D74 (5BF94.c:8069).
+// func_800D5D74 (5BF94.c:7063).
 int LiveTickEffectRendererTrack(LiveEffectInstance* instance,
                                 LiveTimelineTrack* track);
-// func_800D5E00 (5BF94.c:8081): refused without the package's action request.
+// func_800D5E00 (5BF94.c:7075): refused without the package's action request.
 int LiveTickControllerVibrationTrack(LiveEffectInstance* instance,
                                      LiveTimelineTrack* track);
-// func_800D6A18 (5BF94.c:8422).
+// func_800D6A18 (5BF94.c:7416).
 int LiveTickCameraShakeTrack(LiveEffectInstance* instance,
                              LiveTimelineTrack* track);
-// func_800D6AEC (5BF94.c:8442): ticks the instance's active tracks and
+// func_800D6AEC (5BF94.c:7436): ticks the instance's active tracks and
 // advances its timeline frame; refused without an instance or timeline.
 void LiveTickEffectTimeline(LiveEffectInstance* instance,
                             int child_script_offset);

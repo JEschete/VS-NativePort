@@ -72,9 +72,6 @@
     <ClCompile Include="src\PFile.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\PFileLive.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\SystemResources.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -145,9 +142,6 @@
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\PFile.hpp">
-      <Filter>include\Content</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Content\PFileLive.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\StringTables.hpp">

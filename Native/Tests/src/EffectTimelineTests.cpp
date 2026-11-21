@@ -6,7 +6,7 @@
 #include "Effects/Timeline.hpp"
 #include "Effects/TimelinePlaybackLive.hpp"
 
-// 5BF94.c:8442 used PS1 header-sized pointer arithmetic instead of indexing
+// 5BF94.c:7436 used PS1 header-sized pointer arithmetic instead of indexing
 // native tracks.
 int Tests_EffectTimelineTrackStride(void) {
   constexpr std::size_t kTracks = 2;

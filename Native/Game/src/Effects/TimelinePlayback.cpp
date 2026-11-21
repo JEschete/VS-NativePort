@@ -120,6 +120,14 @@ std::optional<TimelineTrackKind> TimelineTrackKindOf(std::uint8_t kind) {
   return static_cast<TimelineTrackKind>(kind);
 }
 
+std::size_t TimelineTrackKeyBytes(std::uint16_t header) {
+  const auto kind = TimelineTrackKindOf(static_cast<std::uint8_t>(header));
+  if (!kind) return 0;
+  if (*kind == TimelineTrackKind::kChildEffects) return sizeof(ChildTrackKey);
+  return TimelineKeyStride(*kind) *
+         static_cast<std::size_t>(header >> kBitsPerByte);
+}
+
 ParticleEmission ParticleEmissionOf(std::uint32_t key) {
   return {.event = static_cast<std::uint8_t>((key >> kParticleEventShift) &
                                              kParticleEventMask),
@@ -173,7 +181,7 @@ std::optional<std::size_t> VibrationPatternOffset(
   return static_cast<std::size_t>(offset);
 }
 
-// decomp: func_800D57FC (src/BATTLE/BATTLE.PRG/5BF94.c:7950)
+// decomp: func_800D57FC (src/BATTLE/BATTLE.PRG/5BF94.c:6944)
 TrackStep TickParticleEmissionTrack(std::uint32_t key,
                                     std::int16_t timeline_frame,
                                     TrackTimers& timers,
@@ -190,7 +198,7 @@ TrackStep TickParticleEmissionTrack(std::uint32_t key,
   return TrackStep::kNextKey;
 }
 
-// decomp: func_800D5904 (src/BATTLE/BATTLE.PRG/5BF94.c:7974)
+// decomp: func_800D5904 (src/BATTLE/BATTLE.PRG/5BF94.c:6968)
 TrackStep TickSoundTrack(std::uint32_t key, std::int16_t timeline_frame,
                          std::int32_t stream_handle,
                          TimelinePlaybackHost& host) {
@@ -222,7 +230,7 @@ TrackStep TickSoundTrack(std::uint32_t key, std::int16_t timeline_frame,
   return TrackStep::kNextKey;
 }
 
-// decomp: func_800D5A98 (src/BATTLE/BATTLE.PRG/5BF94.c:8005)
+// decomp: func_800D5A98 (src/BATTLE/BATTLE.PRG/5BF94.c:6999)
 TrackStep TickChildEffectTrack(const ChildTrackKey& key,
                                std::int16_t timeline_frame,
                                std::span<const ChildTarget> targets,
@@ -254,7 +262,7 @@ TrackStep TickChildEffectTrack(const ChildTrackKey& key,
   return TrackStep::kContinue;
 }
 
-// decomp: func_800D5D74 (src/BATTLE/BATTLE.PRG/5BF94.c:8069)
+// decomp: func_800D5D74 (src/BATTLE/BATTLE.PRG/5BF94.c:7063)
 TrackStep TickRendererTrack(const RendererKey& key, std::int16_t timeline_frame,
                             TimelinePlaybackHost& host) {
   const std::uint32_t timing = key.timing;
@@ -273,7 +281,7 @@ TrackStep TickRendererTrack(const RendererKey& key, std::int16_t timeline_frame,
   return TrackStep::kNextKey;
 }
 
-// decomp: func_800D5E00 (src/BATTLE/BATTLE.PRG/5BF94.c:8081)
+// decomp: func_800D5E00 (src/BATTLE/BATTLE.PRG/5BF94.c:7075)
 TrackStep TickVibrationTrack(std::uint16_t key, std::int16_t timeline_frame,
                              const VibrationEndpoints& endpoints,
                              TimelinePlaybackHost& host) {
@@ -289,7 +297,7 @@ TrackStep TickVibrationTrack(std::uint16_t key, std::int16_t timeline_frame,
   return TrackStep::kNextKey;
 }
 
-// decomp: func_800D6A18 (src/BATTLE/BATTLE.PRG/5BF94.c:8422)
+// decomp: func_800D6A18 (src/BATTLE/BATTLE.PRG/5BF94.c:7416)
 TrackStep TickCameraShakeTrack(std::uint16_t key_timing,
                                std::uint32_t first_key_channels,
                                std::int16_t timeline_frame,
@@ -304,7 +312,7 @@ TrackStep TickCameraShakeTrack(std::uint16_t key_timing,
   return key_timer != 0 ? TrackStep::kContinue : TrackStep::kNextKey;
 }
 
-// decomp: func_800D6AEC (src/BATTLE/BATTLE.PRG/5BF94.c:8442)
+// decomp: func_800D6AEC (src/BATTLE/BATTLE.PRG/5BF94.c:7436)
 void TickEffectTimeline(TimelineProgress& progress, TimelineRunner& runner) {
   for (std::size_t track = 0; track < progress.track_count; ++track) {
     const std::uint32_t bit = 1U << (track & kActivityBitMask);
@@ -326,22 +334,18 @@ void TickEffectTimeline(TimelineProgress& progress, TimelineRunner& runner) {
   }
 }
 
-// decomp: func_800D55A4 (src/BATTLE/BATTLE.PRG/5BF94.c:7885)
+// decomp: func_800D55A4 (src/BATTLE/BATTLE.PRG/5BF94.c:6879)
 LoadedTimeline LoadEffectTimeline(std::uint8_t track_count,
                                   TimelineLoadHost& host) {
   LoadedTimeline loaded{.track_count = track_count};
   bool child_tracks = false;
   for (std::size_t track = 0; track < track_count; ++track) {
-    const auto header = host.TrackHeader(track);
-    if (!header) {
-      loaded.track_count = static_cast<std::uint8_t>(track);
-      break;
-    }
-    if (static_cast<std::uint8_t>(*header) ==
+    const std::uint16_t header = host.TrackHeader(track);
+    if (static_cast<std::uint8_t>(header) ==
         static_cast<std::uint8_t>(TimelineTrackKind::kChildEffects)) {
       child_tracks = true;
     }
-    host.StartTrack(track, {.header = *header});
+    host.StartTrack(track, {.header = header});
     loaded.active_tracks |= 1U << (track & kActivityBitMask);
   }
   loaded.flags = child_tracks ? kTimelineHasChildTracks : 0;

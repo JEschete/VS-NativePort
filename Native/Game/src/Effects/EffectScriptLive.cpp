@@ -14,6 +14,7 @@
 #include <type_traits>
 #include <vector>
 
+#include "Content/PFile.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/ActionEffectCallbacksLive.hpp"
@@ -316,11 +317,9 @@ PresetTables() {
                       "timelines load unmapped ({} times)",
                       unmappedTimelines);
   }
-  const std::span timelines =
-      LiveBoundPackageBlock(PackageBlockType::kTimelines);
-  if (timelines.size() >= sizeof(LiveTimelineTable::count)) {
-    remap.timeline_count =
-        reinterpret_cast<const LiveTimelineTable*>(timelines.data())->count;
+  if (const auto count = Content::PFileTimelineCount(
+          LiveBoundPackageBlock(PackageBlockType::kTimelines))) {
+    remap.timeline_count = *count;
   }
   return remap;
 }

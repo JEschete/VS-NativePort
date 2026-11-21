@@ -28,8 +28,8 @@ B0026,Native/Content/src/CdDriveLive.cpp,Content,Native/Game/include/State/GameC
 B0027,Native/Content/src/CdDriveLive.cpp,Content,Native/Game/src/State/PlayTime.hpp,Game,remaining,
 B0028,Native/Content/src/DiscReaderLive.cpp,Content,Native/Engine/Legacy/Psx.hpp,Engine.Legacy,remaining,
 B0029,Native/Content/src/DiscReaderLive.cpp,Content,Native/Engine/include/Audio/XaPlayback.hpp,Engine.Audio,remaining,
-B0030,Native/Content/src/PFileLive.cpp,Content,Native/Game/src/Effects/Package.hpp,Game,remaining,
-B0031,Native/Content/src/PFileLive.cpp,Content,Native/Game/src/Effects/Runtime.hpp,Game,remaining,
+B0030,Native/Content/src/PFileLive.cpp,Content,Native/Game/src/Effects/Package.hpp,Game,resolved,#49: PFileLive.cpp deleted; LiveLoadEffectTimeline and PackageTimelineRemap read the Game-bound LiveBoundPackageBlock(kTimelines) view through Content::ReadPFileTimeline/PFileTimelineCount
+B0031,Native/Content/src/PFileLive.cpp,Content,Native/Game/src/Effects/Runtime.hpp,Game,resolved,#49: PFileLive.cpp deleted; LiveLoadEffectTimeline and PackageTimelineRemap read the Game-bound LiveBoundPackageBlock(kTimelines) view through Content::ReadPFileTimeline/PFileTimelineCount
 B0032,Native/Content/src/SystemResourcesLive.cpp,Content,Native/Engine/Legacy/Psx.hpp,Engine.Legacy,remaining,
 B0033,Native/Content/src/SystemResourcesLive.cpp,Content,Native/Engine/include/Render/PaletteAnimationLive.hpp,Engine.Render,remaining,
 B0034,Native/Content/src/SystemResourcesLive.cpp,Content,Native/Game/include/Menu/Framework/FrameworkLive.hpp,Game,remaining,

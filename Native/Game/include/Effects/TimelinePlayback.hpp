@@ -9,7 +9,7 @@
 
 #include "Effects/TimelineCommands.hpp"
 
-// Typed effect timeline playback (BATTLE.PRG 5BF94.c:7885-8460). An effect's
+// Typed effect timeline playback (BATTLE.PRG 5BF94.c:6879-7493). An effect's
 // timeline holds up to 32 active tracks; each frame the dispatcher ticks every
 // active track by kind and retires those that finish, then moves the timeline
 // to its next frame unless the frame is held. The particle, sound, renderer,
@@ -123,6 +123,40 @@ struct ChildTrackKey {
   std::uint8_t delay{};
 };
 
+// The bytes one key of a `kind` track occupies, as its tick and the key
+// advance read it: particle, sound and action-control keys are a word,
+// renderer, colour and camera shake keys two words, vibration keys a halfword
+// and child keys a ChildTrackKey.
+[[nodiscard]] constexpr std::size_t TimelineKeyStride(TimelineTrackKind kind) {
+  constexpr std::size_t kWord = sizeof(std::uint32_t);
+  constexpr std::size_t kTwoWords = 2 * kWord;
+  switch (kind) {
+    case TimelineTrackKind::kParticleEmission:
+    case TimelineTrackKind::kSound:
+    case TimelineTrackKind::kActionControl:
+      return kWord;
+    case TimelineTrackKind::kChildEffects:
+      return sizeof(ChildTrackKey);
+    case TimelineTrackKind::kVibration:
+      return sizeof(std::uint16_t);
+    case TimelineTrackKind::kRenderer:
+    case TimelineTrackKind::kSourceActorColour:
+    case TimelineTrackKind::kTargetActorColour:
+    case TimelineTrackKind::kOtherActorColour:
+    case TimelineTrackKind::kSceneColour:
+    case TimelineTrackKind::kBackgroundColour:
+    case TimelineTrackKind::kCameraShake:
+      return kTwoWords;
+  }
+  return 0;
+}
+
+// The key bytes a track with `header` (kind in the low byte, key count in the
+// high byte) reads: its key count's keys, none for a kind without a tick, and
+// one ChildTrackKey for a child track, which reads its first key whatever
+// its key count, even with none.
+[[nodiscard]] std::size_t TimelineTrackKeyBytes(std::uint16_t header);
+
 // The key byte an action target's event actor slot names: the six actors,
 // then the final actor, frame and delay; nullopt past the key (refused: the
 // original reads the bytes after it).
@@ -202,7 +236,7 @@ class TimelinePlaybackHost {
   TimelinePlaybackHost& operator=(TimelinePlaybackHost&&) = default;
 };
 
-// decomp: func_800D57FC (src/BATTLE/BATTLE.PRG/5BF94.c:7950): from its due
+// decomp: func_800D57FC (src/BATTLE/BATTLE.PRG/5BF94.c:6944): from its due
 // frame (bits 0-7) on, samples the curves and emits the key's particles each
 // frame, counting down the key's frames unless the timeline frame is held.
 [[nodiscard]] TrackStep TickParticleEmissionTrack(std::uint32_t key,
@@ -210,7 +244,7 @@ class TimelinePlaybackHost {
                                                   TrackTimers& timers,
                                                   TimelinePlaybackHost& host);
 
-// decomp: func_800D5904 (src/BATTLE/BATTLE.PRG/5BF94.c:7974): on its due frame
+// decomp: func_800D5904 (src/BATTLE/BATTLE.PRG/5BF94.c:6968): on its due frame
 // (bits 0-8) plays the effect (9-17) from the shared (bits 18-19 zero) or room
 // sound banks, centred (20-21 zero) or at a transform (22-27); source 2 plays
 // the package's stream instead.
@@ -219,7 +253,7 @@ class TimelinePlaybackHost {
                                        std::int32_t stream_handle,
                                        TimelinePlaybackHost& host);
 
-// decomp: func_800D5A98 (src/BATTLE/BATTLE.PRG/5BF94.c:8005): from the key's
+// decomp: func_800D5A98 (src/BATTLE/BATTLE.PRG/5BF94.c:6999): from the key's
 // frame on, spawns a child at each action target, `delay` frames apart, then
 // a final child at the first target once the parent has no children running.
 // A negative index (never set by the original) ends the track.
@@ -228,13 +262,13 @@ class TimelinePlaybackHost {
     std::span<const ChildTarget> targets, ChildTrackState& state,
     TimelinePlaybackHost& host);
 
-// decomp: func_800D5D74 (src/BATTLE/BATTLE.PRG/5BF94.c:8069): attaches the
+// decomp: func_800D5D74 (src/BATTLE/BATTLE.PRG/5BF94.c:7063): attaches the
 // key's renderer on its due frame.
 [[nodiscard]] TrackStep TickRendererTrack(const RendererKey& key,
                                           std::int16_t timeline_frame,
                                           TimelinePlaybackHost& host);
 
-// decomp: func_800D5E00 (src/BATTLE/BATTLE.PRG/5BF94.c:8081): on its due frame
+// decomp: func_800D5E00 (src/BATTLE/BATTLE.PRG/5BF94.c:7075): on its due frame
 // (bits 0-8) starts the vibration pattern (9-13) for everyone (bits 14-15
 // zero) or only when the source (1), the target (2) or an action target (3)
 // is the player.
@@ -243,7 +277,7 @@ class TimelinePlaybackHost {
                                            const VibrationEndpoints& endpoints,
                                            TimelinePlaybackHost& host);
 
-// decomp: func_800D6A18 (src/BATTLE/BATTLE.PRG/5BF94.c:8422): from its due
+// decomp: func_800D6A18 (src/BATTLE/BATTLE.PRG/5BF94.c:7416): from its due
 // frame (bits 0-8 of the key's first halfword) on, counts down the key's
 // frames; on the due frame it starts the shake channels of the track's first
 // key, whichever key is current, as the original does.
@@ -287,7 +321,7 @@ class TimelineRunner {
   TimelineRunner& operator=(TimelineRunner&&) = default;
 };
 
-// decomp: func_800D6AEC (src/BATTLE/BATTLE.PRG/5BF94.c:8442): ticks each
+// decomp: func_800D6AEC (src/BATTLE/BATTLE.PRG/5BF94.c:7436): ticks each
 // active track and retires those that finish; tracks from the 33rd share the
 // activity bits of the first 32, as in the original.
 void TickEffectTimeline(TimelineProgress& progress, TimelineRunner& runner);
@@ -310,14 +344,13 @@ struct LoadedTimeline {
                          const LoadedTimeline&) = default;
 };
 
-// The timeline section's tracks as the load reads them.
+// The timeline section's tracks as the load reads them, each checked inside
+// the timeline block (Content::ReadPFileTimeline) before the load starts.
 class TimelineLoadHost {
  public:
   virtual ~TimelineLoadHost() = default;
-  // Track `track`'s header (kind in the low byte, key count in the high);
-  // nullopt (refused) when its key data is missing.
-  [[nodiscard]] virtual std::optional<std::uint16_t> TrackHeader(
-      std::size_t track) = 0;
+  // Track `track`'s header (kind in the low byte, key count in the high).
+  [[nodiscard]] virtual std::uint16_t TrackHeader(std::size_t track) = 0;
   // Starts track `track` and advances it to its first key.
   virtual void StartTrack(std::size_t track,
                           const TimelineTrackStart& start) = 0;
@@ -330,9 +363,8 @@ class TimelineLoadHost {
   TimelineLoadHost& operator=(TimelineLoadHost&&) = default;
 };
 
-// decomp: func_800D55A4 (src/BATTLE/BATTLE.PRG/5BF94.c:7885): starts the
-// section's tracks, each active; a track whose data is missing ends the
-// timeline there.
+// decomp: func_800D55A4 (src/BATTLE/BATTLE.PRG/5BF94.c:6879): starts the
+// section's tracks, each active, and flags a timeline with child tracks.
 [[nodiscard]] LoadedTimeline LoadEffectTimeline(std::uint8_t track_count,
                                                 TimelineLoadHost& host);
 }  // namespace VS::Effects

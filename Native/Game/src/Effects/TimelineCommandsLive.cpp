@@ -26,6 +26,7 @@
 #include "Effects/SpawnRequest.hpp"
 #include "Effects/Timeline.hpp"
 #include "Effects/TimelineCommands.hpp"
+#include "Effects/TimelinePlayback.hpp"
 #include "Effects/TimelineTracksLive.hpp"
 #include "Effects/TransformsLiveState.hpp"
 #include "Field/ChestInteractionsLive.hpp"
@@ -40,6 +41,9 @@ namespace {
 // An action-control key is one word, stored as ActionControlKey lays it out.
 static_assert(sizeof(ActionControlKey) == sizeof(std::uint32_t));
 static_assert(std::is_trivially_copyable_v<ActionControlKey>);
+// The timeline load bounds each track's keys by this reader's stride.
+static_assert(TimelineKeyStride(TimelineTrackKind::kActionControl) ==
+              sizeof(std::uint32_t));
 
 std::uint64_t refusedInstances = 0;
 std::uint64_t refusedRecords = 0;

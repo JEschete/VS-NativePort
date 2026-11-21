@@ -2,11 +2,14 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
-#include <cstring>
+#include <expected>
 #include <limits>
+#include <optional>
 #include <span>
+#include <string>
 #include <vector>
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include "Content/ActorAssetsLive.hpp"
@@ -15,15 +18,10 @@
 #include "Content/OverlayWorkspace.hpp"
 #include "Content/OverlayWorkspaceLive.hpp"
 #include "Content/PFile.hpp"
-#include "Content/PFileLive.hpp"
 #include "Content/SystemResources.hpp"
-#include "Core/Memory/Heap.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Effects/Package.hpp"
 
 namespace {
 namespace Content = VS::Content;
-namespace Memory = VS::Core::Memory;
 
 class FakeOverlayWorkspace final : public Content::OverlayWorkspaceHost {
  public:
@@ -62,7 +60,9 @@ void PutU32(std::span<std::byte> bytes, std::size_t at, std::uint32_t value) {
 }
 
 // Two sections of two tracks: section 0's table at 0x0C, section 1's at
-// 0x18; section 1 track 1 names data far past the block.
+// 0x18. Section 0's particle and sound tracks each hold a one-word key;
+// section 1's renderer track names two words from 0x2C, past the block, and
+// its track 1 names data far past the block.
 constexpr std::size_t kTimelineBytes = 0x30;
 
 std::array<std::byte, kTimelineBytes> TimelineBlock() {
@@ -71,13 +71,45 @@ std::array<std::byte, kTimelineBytes> TimelineBlock() {
   PutU16(block, 4, 0x0C);
   PutU16(block, 6, 0x18);
   PutU32(block, 0x0C, 2);
+  PutU16(block, 0x10, 0x0101);
   PutU16(block, 0x12, 0x24);
+  PutU16(block, 0x14, 0x0102);
   PutU16(block, 0x16, 0x28);
   PutU32(block, 0x18, 2);
+  PutU16(block, 0x1C, 0x0204);
   PutU16(block, 0x1E, 0x2C);
+  PutU16(block, 0x20, 0x0101);
   PutU16(block, 0x22, 0xFFF0);
   return block;
 }
+
+// Every key one word.
+std::size_t WordKeys(std::uint16_t header) {
+  return std::size_t{4} * static_cast<std::size_t>(header >> 8U);
+}
+
+using TimelineFault = Content::PFileTimelineFault;
+using TimelineError = Content::PFileTimelineError;
+using TimelineTrack = Content::PFileTimelineTrack;
+
+// A refusal before any track is read.
+TimelineError SectionError(TimelineFault fault, std::size_t section,
+                           std::size_t offset, std::size_t bytes,
+                           std::size_t block_bytes) {
+  return {.fault = fault,
+          .section = section,
+          .track = std::nullopt,
+          .offset = offset,
+          .bytes = bytes,
+          .block_bytes = block_bytes};
+}
+
+// A section lookup in the first `bytes` of the block and its result.
+struct SectionLookup {
+  std::size_t bytes = 0;
+  std::size_t section = 0;
+  std::expected<std::size_t, TimelineError> expected;
+};
 
 struct UploadedImage {
   Content::VramRect rect;
@@ -288,60 +320,136 @@ TEST_CASE("PFile timeline sections resolve block-relative table offsets",
           "[content-slice][content][timeline]") {
   const auto block = TimelineBlock();
   const std::span<const std::byte> bytes(block);
-  CHECK(Content::PFileTimelineSection(bytes, 0) == std::size_t{0x0C});
-  CHECK(Content::PFileTimelineSection(bytes, 1) == std::size_t{0x18});
-  // The original does not check the section count.
-  CHECK(Content::PFileTimelineSection(bytes, 2) == std::size_t{0});
-  CHECK_FALSE(Content::PFileTimelineSection(bytes, 22).has_value());
-  CHECK_FALSE(Content::PFileTimelineSection(
-                  bytes, std::numeric_limits<std::size_t>::max())
-                  .has_value());
-  CHECK_FALSE(Content::PFileTimelineSection(bytes.first(3), 0).has_value());
-  CHECK_FALSE(Content::PFileTimelineSection(bytes.first(0x0C), 0).has_value());
-  CHECK(Content::PFileTimelineSection(bytes.first(0x0D), 0) ==
-        std::size_t{0x0C});
+  CHECK(Content::PFileTimelineCount(bytes) == 2);
+  CHECK(Content::PFileTimelineCount(bytes.first(3)) ==
+        std::unexpected(SectionError(TimelineFault::kHeader, 0, 0, 4, 3)));
+  constexpr auto kLargest = std::numeric_limits<std::size_t>::max();
+  const std::array<SectionLookup, 8> lookups{{
+      {.bytes = kTimelineBytes, .section = 0, .expected = std::size_t{0x0C}},
+      {.bytes = kTimelineBytes, .section = 1, .expected = std::size_t{0x18}},
+      // The original does not check the section count.
+      {.bytes = kTimelineBytes, .section = 2, .expected = std::size_t{0}},
+      {.bytes = kTimelineBytes,
+       .section = 22,
+       .expected = std::unexpected(SectionError(TimelineFault::kSectionIndex,
+                                                22, 0x30, 2, kTimelineBytes))},
+      {.bytes = kTimelineBytes,
+       .section = kLargest,
+       .expected =
+           std::unexpected(SectionError(TimelineFault::kSectionIndex, kLargest,
+                                        kLargest, 2, kTimelineBytes))},
+      {.bytes = 3,
+       .section = 0,
+       .expected = std::unexpected(
+           SectionError(TimelineFault::kSectionIndex, 0, 4, 2, 3))},
+      // The section's count word must lie inside the block too.
+      {.bytes = 0x0F,
+       .section = 0,
+       .expected = std::unexpected(
+           SectionError(TimelineFault::kSectionOffset, 0, 0x0C, 4, 0x0F))},
+      {.bytes = 0x10, .section = 0, .expected = std::size_t{0x0C}},
+  }};
+  for (const SectionLookup& lookup : lookups) {
+    CAPTURE(lookup.bytes, lookup.section);
+    CHECK(Content::PFileTimelineSection(bytes.first(lookup.bytes),
+                                        lookup.section) == lookup.expected);
+  }
 }
 
 TEST_CASE("PFile timeline tracks resolve data offsets inside the block only",
           "[content-slice][content][timeline]") {
   const auto block = TimelineBlock();
   const std::span<const std::byte> bytes(block);
-  CHECK(Content::PFileTimelineTrackData(bytes, 0, 0) == std::size_t{0x24});
-  CHECK(Content::PFileTimelineTrackData(bytes, 0, 1) == std::size_t{0x28});
-  CHECK(Content::PFileTimelineTrackData(bytes, 1, 0) == std::size_t{0x2C});
-  CHECK_FALSE(Content::PFileTimelineTrackData(bytes, 1, 1).has_value());
-  // The original does not check the track count either.
-  CHECK(Content::PFileTimelineTrackData(bytes, 0, 2) == std::size_t{0});
-  CHECK_FALSE(Content::PFileTimelineTrackData(bytes, 1, 5).has_value());
-  CHECK_FALSE(Content::PFileTimelineTrackData(
+  CHECK(Content::PFileTimelineTrackEntry(bytes, 0, 0) ==
+        TimelineTrack{.header = 0x0101, .data_offset = 0x24});
+  CHECK(Content::PFileTimelineTrackEntry(bytes, 0, 1) ==
+        TimelineTrack{.header = 0x0102, .data_offset = 0x28});
+  CHECK(Content::PFileTimelineTrackEntry(bytes, 1, 0) ==
+        TimelineTrack{.header = 0x0204, .data_offset = 0x2C});
+  CHECK(Content::PFileTimelineTrackEntry(bytes, 1, 1) ==
+        std::unexpected(TimelineError{.fault = TimelineFault::kTrackData,
+                                      .section = 1,
+                                      .track = 1,
+                                      .offset = 0xFFF0,
+                                      .bytes = 1,
+                                      .block_bytes = kTimelineBytes}));
+  // The original does not check the track count either: track 2 of section
+  // 0 is section 1's count word.
+  CHECK(Content::PFileTimelineTrackEntry(bytes, 0, 2) ==
+        TimelineTrack{.header = 2, .data_offset = 0});
+  CHECK(Content::PFileTimelineTrackEntry(bytes, 1, 5) ==
+        std::unexpected(TimelineError{.fault = TimelineFault::kTrackEntry,
+                                      .section = 1,
+                                      .track = 5,
+                                      .offset = 0x30,
+                                      .bytes = 4,
+                                      .block_bytes = kTimelineBytes}));
+  CHECK_FALSE(Content::PFileTimelineTrackEntry(
                   bytes, 0, std::numeric_limits<std::size_t>::max())
                   .has_value());
-  CHECK_FALSE(Content::PFileTimelineTrackData(bytes, 22, 0).has_value());
+  CHECK(Content::PFileTimelineTrackEntry(bytes, 22, 0)
+            .error_or(TimelineError{})
+            .fault == TimelineFault::kSectionIndex);
 }
 
-TEST_CASE("Live timeline lookups bound the block by its game heap payload",
+TEST_CASE("PFile timeline sections load only when every track fits the block",
           "[content-slice][content][timeline]") {
-  alignas(Memory::kHeapUnitBytes)
-      std::array<std::byte, Memory::kHeapUnitBytes * 64>
-          arena{};
-  Memory::ScopedLiveGameHeap heap{arena};
-  void* const payload = Memory::AllocateLiveFromHighEnd(kTimelineBytes);
-  REQUIRE(payload != nullptr);
-  const auto block = TimelineBlock();
-  std::memcpy(payload, block.data(), block.size());
-  auto* const timeline = static_cast<VS::Effects::LiveTimelineTable*>(payload);
-  auto* const base = static_cast<std::byte*>(payload);
-  CHECK(Content::PFileLiveTimelineSection(timeline, 1) == base + 0x18);
-  CHECK(Content::PFileLiveTimelineTrackData(timeline, 0, 1) == base + 0x28);
-  CHECK(Content::PFileLiveTimelineTrackData(timeline, 1, 1) == nullptr);
-  CHECK(Content::PFileLiveTimelineSection(timeline, -1) == nullptr);
-  CHECK(Content::PFileLiveTimelineTrackData(timeline, 0, -1) == nullptr);
-  CHECK(Content::PFileLiveTimelineSection(nullptr, 0) == nullptr);
-  auto local = TimelineBlock();
-  CHECK(Content::PFileLiveTimelineSection(
-            reinterpret_cast<VS::Effects::LiveTimelineTable*>(local.data()),
-            0) == nullptr);
-  Memory::FreeLiveFromHighEnd(payload);
+  auto block = TimelineBlock();
+  const std::span<const std::byte> bytes(block);
+  const auto section = Content::ReadPFileTimeline(bytes, 0, &WordKeys);
+  REQUIRE(section.has_value());
+  if (!section) return;
+  CHECK(section->section == 0);
+  const std::vector<TimelineTrack> tracks = {
+      {.header = 0x0101, .data_offset = 0x24},
+      {.header = 0x0102, .data_offset = 0x28}};
+  CHECK(section->tracks == tracks);
+
+  // Section 1's renderer keys end four bytes past the block.
+  const auto keys = Content::ReadPFileTimeline(bytes, 1, &WordKeys);
+  CHECK(keys ==
+        std::unexpected(TimelineError{.fault = TimelineFault::kTrackKeys,
+                                      .section = 1,
+                                      .track = 0,
+                                      .offset = 0x2C,
+                                      .bytes = 8,
+                                      .block_bytes = kTimelineBytes}));
+  CHECK(Content::Describe(keys.error_or(TimelineError{})) ==
+        "section 1 track 0: keys at 0x2c (8 bytes) outside the 48-byte "
+        "timeline block");
+  // Without key extents only the data offsets are checked.
+  CHECK(Content::ReadPFileTimeline(bytes, 1, nullptr)
+            .error_or(TimelineError{})
+            .track == std::optional<std::size_t>{1});
+}
+
+TEST_CASE("PFile timeline loads keep the count's low byte and aligned keys",
+          "[content-slice][content][timeline]") {
+  auto block = TimelineBlock();
+  const std::span<const std::byte> bytes(block);
+  // The load keeps the count word's low byte.
+  PutU32(block, 0x0C, 0x0102);
+  CHECK(Content::ReadPFileTimeline(bytes, 0, &WordKeys)
+            .transform([](const Content::PFileTimeline& read) {
+              return read.tracks.size();
+            }) == std::size_t{2});
+
+  // Keys start on a word boundary.
+  PutU16(block, 0x12, 0x26);
+  const auto misaligned = Content::ReadPFileTimeline(bytes, 0, &WordKeys);
+  CHECK(misaligned ==
+        std::unexpected(TimelineError{.fault = TimelineFault::kTrackAlignment,
+                                      .section = 0,
+                                      .track = 0,
+                                      .offset = 0x26,
+                                      .bytes = 4,
+                                      .block_bytes = kTimelineBytes}));
+  CHECK(Content::Describe(misaligned.error_or(TimelineError{})) ==
+        "section 0 track 0: keys at 0x26 off a 4-byte boundary");
+  CHECK(Content::Describe(Content::PFileTimelineCount(bytes.first(3))
+                              .error_or(TimelineError{})) ==
+        "timeline: count word at 0x0 (4 bytes) outside the 3-byte timeline "
+        "block");
 }
 
 TEST_CASE("System resources read SYSTEM.DAT into a whole file buffer",

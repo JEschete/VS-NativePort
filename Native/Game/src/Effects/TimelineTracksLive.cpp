@@ -19,6 +19,7 @@
 #include "Effects/Timeline.hpp"
 #include "Effects/TimelineCommands.hpp"
 #include "Effects/TimelineCommandsLive.hpp"
+#include "Effects/TimelinePlayback.hpp"
 #include "Effects/TimelineTrackKeys.hpp"
 #include "Effects/TimelineTracks.hpp"
 #include "Render/PaletteAnimationLive.hpp"
@@ -33,6 +34,21 @@ using Request = LiveActionEffectRequest;
 // A colour key is two words, stored as ColourKey lays them out.
 static_assert(sizeof(ColourKey) == 2 * sizeof(std::uint32_t));
 static_assert(std::is_trivially_copyable_v<ColourKey>);
+// The timeline load bounds each track's keys by these readers' strides.
+static_assert(TimelineKeyStride(TimelineTrackKind::kSourceActorColour) ==
+              sizeof(ColourKey));
+static_assert(TimelineKeyStride(TimelineTrackKind::kTargetActorColour) ==
+              sizeof(ColourKey));
+static_assert(TimelineKeyStride(TimelineTrackKind::kOtherActorColour) ==
+              sizeof(ColourKey));
+static_assert(TimelineKeyStride(TimelineTrackKind::kSceneColour) ==
+              sizeof(ColourKey));
+static_assert(TimelineKeyStride(TimelineTrackKind::kBackgroundColour) ==
+              sizeof(ColourKey));
+static_assert(TimelineKeyStride(TimelineTrackKind::kParticleEmission) ==
+              kParticleKeyWords * sizeof(std::uint32_t));
+static_assert(TimelineKeyStride(TimelineTrackKind::kCameraShake) ==
+              kShakeKeyWords * sizeof(std::uint32_t));
 constexpr auto kActionTargets = std::tuple_size_v<decltype(Request::targets)>;
 constexpr auto kActionOthers = std::tuple_size_v<decltype(Request::others)>;
 

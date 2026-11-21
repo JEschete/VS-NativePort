@@ -195,7 +195,6 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\ActorAssetsLive.cpp",
                 r"src\CdDriveLive.cpp",
                 r"src\OverlayWorkspaceLive.cpp",
-                r"src\PFileLive.cpp",
                 r"src\SystemResourcesLive.cpp",
             )
             or project == "VS.Tests"

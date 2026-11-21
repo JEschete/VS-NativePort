@@ -1365,12 +1365,16 @@ TEST_CASE("Timeline section and track indices retain block-relative offsets",
     }
   }
   const auto block = std::as_bytes(std::span(&fixture, 1));
+  const auto data_offset = [](const Content::PFileTimelineTrack& entry) {
+    return entry.data_offset;
+  };
   for (std::size_t section = 0; section < fixture.sections.size(); ++section) {
     CHECK(Content::PFileTimelineSection(block, section) ==
           offsetof(TimelineBlockFixture, sections) +
               section * sizeof(TimelineSectionFixture));
     for (std::size_t track = 0; track < 2; ++track) {
-      CHECK(Content::PFileTimelineTrackData(block, section, track) ==
+      CHECK(Content::PFileTimelineTrackEntry(block, section, track)
+                .transform(data_offset) ==
             offsetof(TimelineBlockFixture, keys) + section * 8 + track * 4);
     }
   }

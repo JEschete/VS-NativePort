@@ -253,10 +253,10 @@ class ScriptEffectHost {
   ScriptEffectHost& operator=(ScriptEffectHost&&) = delete;
   virtual ~ScriptEffectHost() = default;
 
-  // func_800D55A4 (5BF94.c:7885): replaces the instance's timeline with the
+  // func_800D55A4 (5BF94.c:6879): replaces the instance's timeline with the
   // package's timeline `index`.
   virtual void LoadTimeline(std::uint8_t index) = 0;
-  // func_800D6AEC (5BF94.c:8442): runs a frame of the instance's timeline;
+  // func_800D6AEC (5BF94.c:7436): runs a frame of the instance's timeline;
   // the child effects its tracks start run from `child_offset`.
   virtual void TickTimeline(std::uint16_t child_offset) = 0;
   // Frees the instance's timeline (func_80043C60) and clears it.

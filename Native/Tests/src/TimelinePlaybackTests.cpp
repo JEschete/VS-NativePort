@@ -1,17 +1,24 @@
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <filesystem>
 #include <optional>
 #include <span>
 #include <tuple>
 #include <utility>
 #include <vector>
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include "Audio/SoundBanks.hpp"
+#include "Content/DataStore.hpp"
+#include "Content/PFile.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Effects/EffectResources.hpp"
+#include "Effects/EffectResourcesLive.hpp"
 #include "Effects/Runtime.hpp"
 #include "Effects/Timeline.hpp"
 #include "Effects/TimelineCommands.hpp"
@@ -118,13 +125,13 @@ class RecordingRunner final : public fx::TimelineRunner {
   std::uint8_t flags_;
 };
 
-// A timeline section whose track headers are `headers` (nullopt: missing).
+// A timeline section whose track headers are `headers`.
 class RecordingLoadHost final : public fx::TimelineLoadHost {
  public:
-  explicit RecordingLoadHost(std::vector<std::optional<std::uint16_t>> headers)
+  explicit RecordingLoadHost(std::vector<std::uint16_t> headers)
       : headers_(std::move(headers)) {}
 
-  std::optional<std::uint16_t> TrackHeader(std::size_t track) override {
+  std::uint16_t TrackHeader(std::size_t track) override {
     return headers_.at(track);
   }
   void StartTrack(std::size_t track,
@@ -137,7 +144,7 @@ class RecordingLoadHost final : public fx::TimelineLoadHost {
   std::vector<fx::TimelineTrackStart> starts;
 
  private:
-  std::vector<std::optional<std::uint16_t>> headers_;
+  std::vector<std::uint16_t> headers_;
 };
 
 constexpr fx::ChildTrackKey ChildKey(std::uint8_t delay) {
@@ -168,27 +175,66 @@ void PutU16(std::span<std::byte> bytes, std::size_t at, std::uint16_t value) {
   bytes[at + 1] = static_cast<std::byte>(value >> 8U);
 }
 
-// One timeline section at 0x08 of three tracks: a child track (kind 3, one
-// key, data 0x20), a sound track (kind 2, two keys, data 0x30) and a
-// particle track whose data lies far past the block.
-constexpr std::size_t kTimelineBlockBytes = 0x40;
+void PutWord(std::vector<std::byte>& bytes, std::uint32_t value) {
+  for (int shift = 0; shift < 32; shift += 8) {
+    bytes.push_back(static_cast<std::byte>((value >> shift) & 0xFFU));
+  }
+}
+
+// Two timeline sections. Section 0 (at 0x0C) holds a child track (kind 3,
+// one key, data 0x28) and a sound track (kind 2, two keys, data 0x38).
+// Section 1 (at 0x18) holds a particle track (data 0x40) and one whose data
+// lies far past the block.
+constexpr std::size_t kTimelineBlockBytes = 0x48;
+constexpr std::size_t kChildKeys = 0x28;
+constexpr std::size_t kSoundKeys = 0x38;
 std::array<std::byte, kTimelineBlockBytes> TimelineBlock() {
   std::array<std::byte, kTimelineBlockBytes> block{};
-  PutU16(block, 0, 1);
-  PutU16(block, 4, 0x08);
-  PutU16(block, 0x08, 3);
-  PutU16(block, 0x0C, 0x0103);
-  PutU16(block, 0x0E, 0x20);
-  PutU16(block, 0x10, 0x0202);
-  PutU16(block, 0x12, 0x30);
-  PutU16(block, 0x14, 0x0101);
-  PutU16(block, 0x16, 0xFFF0);
+  PutU16(block, 0, 2);
+  // Section offsets are halfwords after the count word.
+  PutU16(block, 0x04, 0x0C);
+  PutU16(block, 0x06, 0x18);
+  PutU16(block, 0x0C, 2);
+  PutU16(block, 0x10, 0x0103);
+  PutU16(block, 0x12, kChildKeys);
+  PutU16(block, 0x14, 0x0202);
+  PutU16(block, 0x16, kSoundKeys);
+  PutU16(block, 0x18, 2);
+  PutU16(block, 0x1C, 0x0101);
+  PutU16(block, 0x1E, 0x40);
+  PutU16(block, 0x20, 0x0101);
+  PutU16(block, 0x22, 0xFFF0);
   // The child key starts on frame 0xFF.
-  block[0x20 + 7] = std::byte{0xFF};
+  block[kChildKeys + 7] = std::byte{0xFF};
   // The sound keys are due on frames 5 and 6.
-  PutU16(block, 0x30, 5);
-  PutU16(block, 0x34, 6);
+  PutU16(block, kSoundKeys, 5);
+  PutU16(block, kSoundKeys + 4, 6);
   return block;
+}
+
+// An effect package of a `skipped`-byte block of an unbound type, a timeline
+// block of `block` and the terminator, held in words as the package buffer is.
+std::vector<std::uint32_t> TimelinePackage(std::span<const std::byte> block,
+                                           std::size_t skipped = 0) {
+  constexpr std::uint32_t kUnboundType = 0x7;
+  constexpr auto kTimelineType =
+      static_cast<std::uint32_t>(fx::PackageBlockType::kTimelines);
+  constexpr std::uint32_t kTypeShift = 16;
+  constexpr std::size_t kHeaderBytes = sizeof(std::uint32_t);
+  std::vector<std::byte> bytes;
+  if (skipped != 0) {
+    PutWord(bytes, static_cast<std::uint32_t>(skipped + kHeaderBytes) |
+                       (kUnboundType << kTypeShift));
+    bytes.resize(bytes.size() + skipped);
+  }
+  PutWord(bytes, static_cast<std::uint32_t>(block.size() + kHeaderBytes) |
+                     (kTimelineType << kTypeShift));
+  bytes.insert(bytes.end(), block.begin(), block.end());
+  PutWord(bytes, 0);
+  std::vector<std::uint32_t> words((bytes.size() + kHeaderBytes - 1) /
+                                   kHeaderBytes);
+  std::memcpy(words.data(), bytes.data(), bytes.size());
+  return words;
 }
 
 // A track over `keys` on its first key.
@@ -202,22 +248,27 @@ fx::LiveTimelineTrack TrackOver(std::uint8_t kind,
   return track;
 }
 
-// A live heap whose current package's block 3 is TimelineBlock().
+// A live heap and the action package, current, bound to `package`; the
+// package pointers are restored afterwards.
 class LiveTimelinePackage {
  public:
-  LiveTimelinePackage()
-      : payload_(Memory::AllocateLiveFromHighEnd(kTimelineBlockBytes)) {
-    REQUIRE(payload_ != nullptr);
-    const auto block = TimelineBlock();
-    std::memcpy(payload_, block.data(), block.size());
-    package_.timelines = static_cast<fx::LiveTimelineTable*>(payload_);
-    package_.request = &request_;
+  explicit LiveTimelinePackage(
+      std::vector<std::uint32_t> package = TimelinePackage(TimelineBlock()))
+      : package_(std::move(package)) {
+    fx::actionPackage = {};
+    fx::package = &fx::actionPackage;
+    REQUIRE(fx::BindLiveEffectPackage(
+        std::as_writable_bytes(std::span<std::uint32_t>(package_))));
+    fx::actionPackage.request = &request_;
   }
   ~LiveTimelinePackage() {
     if (instance.context.timeline != nullptr) {
       Memory::FreeLiveFromHighEnd(instance.context.timeline);
     }
-    Memory::FreeLiveFromHighEnd(payload_);
+    fx::package = &fx::actionPackage;
+    fx::ForgetLivePackageExtents();
+    fx::actionPackage = saved_action_;
+    fx::package = saved_package_;
   }
   LiveTimelinePackage(const LiveTimelinePackage&) = delete;
   LiveTimelinePackage& operator=(const LiveTimelinePackage&) = delete;
@@ -230,21 +281,140 @@ class LiveTimelinePackage {
     REQUIRE(instance.context.timeline != nullptr);
     return *instance.context.timeline;
   }
-  [[nodiscard]] std::byte* Block() const {
-    return static_cast<std::byte*>(payload_);
+  // The bound timeline block.
+  [[nodiscard]] static std::byte* Block() {
+    const std::span<std::byte> block =
+        fx::LiveBoundPackageBlock(fx::PackageBlockType::kTimelines);
+    REQUIRE(block.size() == kTimelineBlockBytes);
+    return block.data();
   }
 
   fx::LiveEffectInstance instance{};
 
  private:
   alignas(Memory::kHeapUnitBytes)
-      std::array<std::byte, Memory::kHeapUnitBytes * 128> arena_{};
+      std::array<std::byte, Memory::kHeapUnitBytes * 512> arena_{};
   Memory::ScopedLiveGameHeap heap_{arena_};
+  fx::LiveEffectPackage saved_action_ = fx::actionPackage;
+  fx::LiveEffectPackage* saved_package_ = fx::package;
   VS::Effects::LiveActionEffectRequest request_{};
-  fx::LiveEffectPackage package_{};
-  PackageScope scope_{&package_};
-  void* payload_;
+  std::vector<std::uint32_t> package_;
 };
+
+// Binds texture and sound blocks nowhere.
+class IgnoredPackageHost final : public fx::EffectPackageHost {
+ public:
+  void BindTextureTables(std::span<std::byte> /*block*/) override {}
+  void BindSoundBank(std::span<std::byte> /*block*/) override {}
+  std::int32_t BindAuxiliarySound(std::span<std::byte> /*block*/) override {
+    return 0;
+  }
+};
+
+// The timeline blocks of the extracted effect packages: those read whole by
+// Content::ReadPFileTimeline and those the live loader loaded.
+struct PackageTimelines {
+  std::size_t packages{};
+  std::size_t misaligned_blocks{};
+  std::size_t sections{};
+  std::size_t refused_sections{};
+  std::size_t tracks{};
+  std::size_t tightest_slack{SIZE_MAX};
+  std::array<std::size_t, 16> kinds{};
+  std::size_t loaded_sections{};
+  std::size_t loaded_tracks{};
+};
+
+// The extracted effect packages (EFFECT/*.P); skips the test without them.
+std::vector<std::vector<std::byte>> ExtractedEffectPackages() {
+  const std::filesystem::path root = "Native\\data";
+  if (!std::filesystem::exists(root / VS::Content::DataStore::ManifestName)) {
+    SKIP("Extracted Native data is unavailable");
+  }
+  REQUIRE(VS::Content::DataStore::Open(root));
+  const VS::Content::DataStore* store = VS::Content::DataStore::Get();
+  REQUIRE(store != nullptr);
+  std::vector<std::vector<std::byte>> packages;
+  for (const VS::Content::DataStore::Entry& entry : store->Entries()) {
+    if (!entry.path.starts_with("EFFECT/") || !entry.path.ends_with(".P")) {
+      continue;
+    }
+    const auto bytes = store->ReadAll(entry);
+    REQUIRE(bytes.has_value());
+    if (!bytes) continue;
+    const auto view = std::as_bytes(std::span(*bytes));
+    packages.emplace_back(view.begin(), view.end());
+  }
+  return packages;
+}
+
+// Reads every section of `block` as the load does.
+void ReadTimelineSections(std::span<const std::byte> block,
+                          PackageTimelines& found) {
+  const auto count = VS::Content::PFileTimelineCount(block);
+  REQUIRE(count.has_value());
+  for (std::int32_t section = 0; section < count.value_or(0); ++section) {
+    const auto timeline = VS::Content::ReadPFileTimeline(
+        block, static_cast<std::size_t>(section), &fx::TimelineTrackKeyBytes);
+    if (!timeline) {
+      ++found.refused_sections;
+      UNSCOPED_INFO(VS::Content::Describe(timeline.error()));
+      continue;
+    }
+    ++found.sections;
+    for (const VS::Content::PFileTimelineTrack& track : timeline->tracks) {
+      ++found.tracks;
+      const std::size_t end =
+          track.data_offset + fx::TimelineTrackKeyBytes(track.header);
+      found.tightest_slack = std::min(found.tightest_slack, block.size() - end);
+      const auto kind = static_cast<std::uint8_t>(track.header);
+      if (kind < found.kinds.size()) ++found.kinds.at(kind);
+    }
+  }
+}
+
+// Loads every section of `block` through the live loader, bound alone in a
+// package of its own so no texture or sound block binds.
+void LoadTimelineSections(std::span<const std::byte> block,
+                          PackageTimelines& found) {
+  LiveTimelinePackage live(TimelinePackage(block));
+  const auto count = VS::Content::PFileTimelineCount(
+      fx::LiveBoundPackageBlock(fx::PackageBlockType::kTimelines));
+  REQUIRE(count.has_value());
+  for (int section = 0; section < count.value_or(0); ++section) {
+    if (live.instance.context.timeline != nullptr) {
+      Memory::FreeLiveFromHighEnd(live.instance.context.timeline);
+      live.instance.context.timeline = nullptr;
+    }
+    fx::LiveLoadEffectTimeline(&live.instance, section, 0);
+    const fx::LiveEffectTimeline* timeline = live.instance.context.timeline;
+    if (timeline == nullptr) continue;
+    ++found.loaded_sections;
+    found.loaded_tracks += timeline->track_count;
+  }
+}
+
+// Reads and loads the timeline block of each extracted package.
+PackageTimelines ExtractedPackageTimelines() {
+  PackageTimelines found;
+  for (std::vector<std::byte>& package : ExtractedEffectPackages()) {
+    fx::EffectPackageBlocks blocks;
+    IgnoredPackageHost host;
+    const fx::PackageWalk walk =
+        fx::BindEffectPackageBlocks(package, blocks, host);
+    CHECK(walk.status == fx::PackageWalkStatus::kEnded);
+    if (blocks.timelines.empty()) continue;
+    ++found.packages;
+    // Track keys are read as words from the block's place in the package.
+    const auto offset = blocks.timelines.data() - package.data();
+    if (offset % static_cast<std::ptrdiff_t>(sizeof(std::uint32_t)) != 0) {
+      ++found.misaligned_blocks;
+    }
+    ReadTimelineSections(blocks.timelines, found);
+    LoadTimelineSections(blocks.timelines, found);
+  }
+  return found;
+}
 
 // Due on frame 5 for two frames: event 0x15, transparency 0x2A, variant 3.
 constexpr std::uint32_t kParticleLook = (0x15U << 20) | (0x2AU << 26);
@@ -564,14 +734,15 @@ TEST_CASE("Tracks from the 33rd share the first tracks' activity bits",
   CHECK(progress.active_tracks == 0);
 }
 
-TEST_CASE("Timeline loads start each track until one is missing",
+TEST_CASE("Timeline loads start every track of the section",
           "[timeline-playback]") {
-  RecordingLoadHost host({0x0101, 0x0203, std::nullopt, 0x0102});
-  CHECK(
-      fx::LoadEffectTimeline(4, host) ==
-      fx::LoadedTimeline{.track_count = 2, .flags = 2, .active_tracks = 0b11});
-  CHECK(host.started == std::vector<std::pair<std::size_t, std::uint16_t>>{
-                            {0, 0x0101}, {1, 0x0203}});
+  RecordingLoadHost host({0x0101, 0x0203, 0x0001, 0x0102});
+  CHECK(fx::LoadEffectTimeline(4, host) ==
+        fx::LoadedTimeline{
+            .track_count = 4, .flags = 2, .active_tracks = 0b1111});
+  const std::vector<std::pair<std::size_t, std::uint16_t>> started{
+      {0, 0x0101}, {1, 0x0203}, {2, 0x0001}, {3, 0x0102}};
+  CHECK(host.started == started);
   for (const fx::TimelineTrackStart& start : host.starts) {
     CHECK(start.key_index == -1);
     CHECK(start.timers == fx::TrackTimers{});
@@ -596,9 +767,9 @@ TEST_CASE("Live timelines load the package's timeline section",
   CHECK(timeline.frame == 0);
   const auto tracks = timeline.Tracks();
   CHECK(reinterpret_cast<const std::byte*>(tracks[0].keys) ==
-        live.Block() + 0x20);
+        LiveTimelinePackage::Block() + kChildKeys);
   CHECK(reinterpret_cast<const std::byte*>(tracks[1].keys) ==
-        live.Block() + 0x30);
+        LiveTimelinePackage::Block() + kSoundKeys);
 }
 
 TEST_CASE("Live timelines start their tracks and keep them on a bad section",
@@ -614,6 +785,64 @@ TEST_CASE("Live timelines start their tracks and keep them on a bad section",
   CHECK(live.instance.context.timeline == &timeline);
 }
 
+TEST_CASE("Live timelines refuse a section with a track outside the block",
+          "[timeline-playback]") {
+  LiveTimelinePackage live;
+  const fx::LiveEffectTimeline& timeline = live.Load();
+  // Section 1's first track fits; its second lies past the block, so the
+  // whole section is refused before the current timeline is freed.
+  fx::LiveLoadEffectTimeline(&live.instance, 1, 0);
+  CHECK(live.instance.context.timeline == &timeline);
+  CHECK(timeline.track_count == 2);
+  CHECK(timeline.Tracks()[1].header.kind == 2);
+  fx::LiveLoadEffectTimeline(&live.instance, -1, 0);
+  CHECK(live.instance.context.timeline == &timeline);
+}
+
+TEST_CASE("Live timelines load only from a bound word-aligned block",
+          "[timeline-playback]") {
+  {
+    // A two-byte block before it puts the timeline block off a word.
+    LiveTimelinePackage misaligned(TimelinePackage(TimelineBlock(), 2));
+    CHECK(fx::LiveBoundPackageBlock(fx::PackageBlockType::kTimelines).size() ==
+          kTimelineBlockBytes);
+    fx::LiveLoadEffectTimeline(&misaligned.instance, 0, 0);
+    CHECK(misaligned.instance.context.timeline == nullptr);
+  }
+  LiveTimelinePackage live;
+  // A package whose timeline pointer no longer matches the walk's view.
+  fx::actionPackage.timelines = nullptr;
+  fx::LiveLoadEffectTimeline(&live.instance, 0, 0);
+  CHECK(live.instance.context.timeline == nullptr);
+}
+
+TEST_CASE("Timeline track keys span their kind's stride per key",
+          "[timeline-playback]") {
+  struct KeyBytes {
+    std::uint16_t header = 0;
+    std::size_t bytes = 0;
+  };
+  constexpr std::array<KeyBytes, 11> kKeyBytes{{
+      {.header = 0x0201, .bytes = 8},
+      {.header = 0x0302, .bytes = 12},
+      {.header = 0x020C, .bytes = 8},
+      {.header = 0x0305, .bytes = 6},
+      {.header = 0x0204, .bytes = 16},
+      {.header = 0x0106, .bytes = 8},
+      {.header = 0x020D, .bytes = 16},
+      // A child track reads one key whatever its count; kinds without a tick
+      // read none.
+      {.header = 0x0303, .bytes = sizeof(fx::ChildTrackKey)},
+      {.header = 0x0003, .bytes = sizeof(fx::ChildTrackKey)},
+      {.header = 0x050B, .bytes = 0},
+      {.header = 0x0500, .bytes = 0},
+  }};
+  for (const KeyBytes& track : kKeyBytes) {
+    CAPTURE(track.header);
+    CHECK(fx::TimelineTrackKeyBytes(track.header) == track.bytes);
+  }
+}
+
 TEST_CASE("Live timelines tick their tracks", "[timeline-playback]") {
   LiveTimelinePackage live;
   fx::LiveEffectTimeline& timeline = live.Load();
@@ -624,9 +853,10 @@ TEST_CASE("Live timelines tick their tracks", "[timeline-playback]") {
   CHECK(timeline.frame == 5);
   // The sound track's due key plays the (absent) stream and moves on.
   std::uint32_t sound_key = 0;
-  std::memcpy(&sound_key, live.Block() + 0x30, sizeof sound_key);
+  std::byte* const sound_keys = LiveTimelinePackage::Block() + kSoundKeys;
+  std::memcpy(&sound_key, sound_keys, sizeof sound_key);
   sound_key |= 2U << 18;
-  std::memcpy(live.Block() + 0x30, &sound_key, sizeof sound_key);
+  std::memcpy(sound_keys, &sound_key, sizeof sound_key);
   fx::LiveTickEffectTimeline(&live.instance, 0);
   CHECK(tracks[1].key_index == 1);
   CHECK(timeline.active_tracks == 0b11);
@@ -682,4 +912,22 @@ TEST_CASE("Live shake tracks count down even while the frame is held",
   CHECK(track.key_timer == 2);
   timeline.flags = 0;
   instance.context.timeline = nullptr;
+}
+
+TEST_CASE("Extracted effect timelines load whole through the live loader",
+          "[timeline-playback]") {
+  const PackageTimelines found = ExtractedPackageTimelines();
+  // E000.P to E289.P; two have no timeline block.
+  CHECK(found.packages == 288);
+  CHECK(found.misaligned_blocks == 0);
+  CHECK(found.refused_sections == 0);
+  CHECK(found.sections == 513);
+  CHECK(found.tracks == 5418);
+  // E000.P section 48's last track ends at its block's end.
+  CHECK(found.tightest_slack == 0);
+  const std::array<std::size_t, 16> kinds{
+      0, 2130, 459, 54, 792, 360, 204, 334, 183, 328, 29, 6, 362, 177, 0, 0};
+  CHECK(found.kinds == kinds);
+  CHECK(found.loaded_sections == found.sections);
+  CHECK(found.loaded_tracks == found.tracks);
 }
