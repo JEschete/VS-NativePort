@@ -1895,20 +1895,25 @@ int LoadWeaponWithBones(FakeAssetHost& host, std::uint8_t bones) {
 }
 }  // namespace
 
-TEST_CASE("Weapon files load four bones and refuse a fifth",
+TEST_CASE("Weapon files load four bones",
           "[content-slice][content][actor-assets]") {
   const auto four_owner = std::make_unique<FakeAssetHost>();
   FakeAssetHost& four = *four_owner;
   CHECK(LoadWeaponWithBones(four, 4) == kAssetDone);
   CHECK(four.refusals.empty());
   CHECK(four.weapon_bones[4].size() == 32);
+}
+
+TEST_CASE("Weapon files refuse a fifth bone and discard the bound record",
+          "[content-slice][content][actor-assets]") {
   const auto five_owner = std::make_unique<FakeAssetHost>();
   FakeAssetHost& five = *five_owner;
   CHECK(LoadWeaponWithBones(five, 5) == kAssetRefused);
   CHECK(five.refusals == std::vector<std::string>{"weapon bone count"});
   CHECK(five.low_blocks.empty());
   CHECK(five.weapon_bones[4].empty());
-  CHECK(Required(five.weapons[4]).bone_count == 0);
+  CHECK_FALSE(five.weapons[4].has_value());
+  CHECK(five.cleared_weapons == std::vector{4});
   CHECK(five.high_frees == five.high_blocks);
 }
 
@@ -1934,6 +1939,82 @@ TEST_CASE("Weapon files refuse geometry larger than a fixed slot buffer",
   REQUIRE(host.geometry_records.size() == 1);
   CHECK(host.geometry_records[0].destination == host.weapon_buffers[0]);
   CHECK(host.geometry_records[0].bytes == Content::kWeaponGeometryBytes);
+}
+
+TEST_CASE("Refused weapon parses discard the record, geometry and texture",
+          "[content-slice][content][actor-assets]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  std::vector<std::byte> file = WeaponFile();
+  // The polygon section runs past the geometry: the second frame refuses
+  // after the first allocated the geometry and reserved a texture slot.
+  Put32(std::span<std::byte>(file).subspan(kWepGeometryAt), 0x3C, 0xFFFF);
+  AddWeaponFile(host);
+  host.AddDiscFile(kWepSector, std::move(file));
+  ActorAssetLoadState state;
+  ActorAssetRequest request = WeaponRequest(host);
+  int result = kAssetPending;
+  for (int step = 0; step < 4 && result == kAssetPending; ++step) {
+    result = Content::UpdateWeaponModelLoad(host, state, request);
+  }
+  CHECK(result == kAssetRefused);
+  CHECK(host.refusals == std::vector<std::string>{"weapon primitives"});
+  REQUIRE(host.low_blocks.size() == 1);
+  CHECK(host.low_frees == host.low_blocks);
+  CHECK(host.forgotten_geometry == host.low_blocks);
+  CHECK(host.high_frees == host.high_blocks);
+  CHECK_FALSE(host.weapons[4].has_value());
+  CHECK(std::ranges::all_of(host.weapon_textures, [](const auto& slot) {
+    return slot.references == 0;
+  }));
+}
+
+TEST_CASE("Refused shared weapon copies drop the references they took",
+          "[content-slice][content][actor-assets]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  AddWeaponFile(host);
+  WeaponAssetRecord source;
+  source.bone_count = 2;
+  source.actor_id = 1;
+  source.model_id = kWepModel;
+  source.texture_slot = 6;
+  source.geometry = host.AddBlock(0x100);
+  host.weapons[5] = source;
+  host.weapon_textures[6].references = 1;
+  host.refuse_allocations = true;
+  ActorAssetLoadState state;
+  ActorAssetRequest request = WeaponRequest(host);
+  request.target_slot = 2;
+  CHECK(Content::UpdateWeaponModelLoad(host, state, request) == kAssetRefused);
+  CHECK_FALSE(host.weapons[2].has_value());
+  CHECK(host.weapon_textures[6].references == 1);
+  CHECK(host.low_frees.empty());
+  CHECK(Required(host.weapons[5]).geometry == source.geometry);
+}
+
+TEST_CASE("A busy weapon slot keeps its record when a parse is refused",
+          "[content-slice][content][actor-assets]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  AddWeaponFile(host);
+  WeaponAssetRecord loaded;
+  loaded.bone_count = 3;
+  loaded.actor_id = 1;
+  loaded.model_id = 9;
+  loaded.texture_slot = 4;
+  loaded.geometry = host.AddBlock(0x100);
+  host.weapons[4] = loaded;
+  host.weapon_textures[4].references = 1;
+  ActorAssetLoadState state;
+  ActorAssetRequest request = WeaponRequest(host);
+  request.kind = static_cast<std::uint8_t>(ActorAssetKind::kWeaponModelParse);
+  request.data = host.AddBlock(kSectorBytes);
+  CHECK(Content::ParseWeaponModel(host, state, request) == kAssetBusy);
+  CHECK(Required(host.weapons[4]).geometry == loaded.geometry);
+  CHECK(host.weapon_textures[4].references == 1);
+  CHECK(host.cleared_weapons.empty());
+  CHECK(host.low_frees.empty());
 }
 
 TEST_CASE("Shared weapon copies into a fixed slot read only the source model",

@@ -650,7 +650,7 @@ int ParseWeaponFile(ActorAssetHost& host, ActorAssetLoadState& state,
   const std::int32_t size = cursor.I32();
   // Native bound: the original copied boneCount * 8 bytes into the record's
   // four bones and posed that many. Shipped WEP files have three bones (#270).
-  // The record is left unclaimed, so the slot is neither busy nor releasable.
+  // ParseWeaponModel discards the bound record (#491).
   if (cursor.Ok() && model.bone_count > kWeaponModelBones) {
     host.Refuse("weapon bone count", model.bone_count);
     return kAssetRefused;
@@ -712,6 +712,47 @@ int FinishWeaponPrimitives(ActorAssetHost& host, ActorAssetLoadState& state,
   host.WriteWeaponBones(target, bones.first(bone_bytes));
   return FinishWeaponModel(host, state, request);
 }
+
+// Whether a weapon record other than `slot` uses `geometry` (a copy of a
+// shared model in slots 4 and up keeps its source's geometry).
+bool WeaponGeometryShared(const ActorAssetHost& host, int slot,
+                          AssetAddress geometry) {
+  for (int other = 0; other < kWeaponModelSlots; ++other) {
+    if (other != slot && host.WeaponSummary(other).present &&
+        host.LoadWeapon(other).geometry == geometry) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// Native (#491): the original's parse could not fail. A refused parse
+// discards the record it bound with what it allocated: no release reaches
+// a record whose bone count is 0, or frees geometry before FinishWeaponModel
+// sets the record's actor.
+int DiscardRefusedWeapon(ActorAssetHost& host, int slot, int result) {
+  if (result != kAssetRefused || !host.WeaponSummary(slot).present) {
+    return result;
+  }
+  const WeaponAssetRecord model = host.LoadWeapon(slot);
+  const bool fixed = slot < kFixedGeometrySlots &&
+                     model.geometry == host.WeaponGeometryBuffer(slot);
+  if (model.geometry != AssetAddress::kNone && !fixed &&
+      !WeaponGeometryShared(host, slot, model.geometry)) {
+    host.ForgetModelGeometry(model.geometry);
+    host.FreeLow(model.geometry);
+  }
+  if (model.texture_slot != kNoAssetTextureSlot) {
+    AddTextureReference(host, AssetTextureTable::kWeapon, model.texture_slot,
+                        -1);
+    if (model.wide_texture) {
+      AddTextureReference(host, AssetTextureTable::kWeapon,
+                          model.texture_slot + 1, -1);
+    }
+  }
+  host.ClearWeaponSlot(slot);
+  return result;
+}
 }  // namespace
 
 // decomp: BATTLE.PRG _loadWep (src/BATTLE/BATTLE.PRG/30DB0.c:523)
@@ -763,7 +804,8 @@ int ParseWeaponModel(ActorAssetHost& host, ActorAssetLoadState& state,
       host.Refuse("weapon record", target);
       return kAssetRefused;
     }
-    return FinishWeaponPrimitives(host, state, request);
+    return DiscardRefusedWeapon(host, target,
+                                FinishWeaponPrimitives(host, state, request));
   }
   if (state.parse_phase != 0) {
     host.Refuse("weapon parse phase", state.parse_phase);
@@ -782,10 +824,12 @@ int ParseWeaponModel(ActorAssetHost& host, ActorAssetLoadState& state,
     source = SharedAssetSlot(request.data, kWeaponModelSlots);
   }
   if (source) {
-    return CopySharedWeapon(host, state, request, *source);
+    return DiscardRefusedWeapon(
+        host, target, CopySharedWeapon(host, state, request, *source));
   }
   model.model_id = static_cast<std::uint8_t>(request.model_id);
-  return ParseWeaponFile(host, state, request, model);
+  return DiscardRefusedWeapon(host, target,
+                              ParseWeaponFile(host, state, request, model));
 }
 
 // decomp: BATTLE.PRG _loadMaterialPalette (src/BATTLE/BATTLE.PRG/30DB0.c:855)
