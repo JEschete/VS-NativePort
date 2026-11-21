@@ -948,6 +948,9 @@
     <ClCompile Include="src\NativeFilePresentationTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\NativeImageTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\NativeMenuTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

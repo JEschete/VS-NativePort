@@ -60,8 +60,10 @@
     <ClCompile Include="src\DiscReaderLive.cpp">
       <AdditionalIncludeDirectories>$(VSLegacyIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\ImageFiles.cpp" />
     <ClCompile Include="src\ModuleLoader.cpp" />
     <ClCompile Include="src\MovieEncoder.cpp" />
+    <ClCompile Include="src\NativeImage.cpp" />
     <ClCompile Include="src\OverlayFiles.cpp" />
     <ClCompile Include="src\OverlayWorkspace.cpp" />
     <ClCompile Include="src\OverlayWorkspaceLive.cpp">
@@ -72,6 +74,7 @@
     <ClCompile Include="src\SystemResourcesLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\TimFile.cpp" />
     <ClCompile Include="Legacy\LibDs.cpp">
       <AdditionalIncludeDirectories>$(VSLegacyIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -93,8 +96,10 @@
     <ClInclude Include="include\Content\DiscQueue.hpp" />
     <ClInclude Include="include\Content\DiscReader.hpp" />
     <ClInclude Include="include\Content\DiscReaderLive.hpp" />
+    <ClInclude Include="include\Content\ImageFiles.hpp" />
     <ClInclude Include="include\Content\ModuleData.hpp" />
     <ClInclude Include="include\Content\MovieEncoder.hpp" />
+    <ClInclude Include="include\Content\NativeImage.hpp" />
     <ClInclude Include="include\Content\OverlayFiles.hpp" />
     <ClInclude Include="include\Content\OverlayWorkspace.hpp" />
     <ClInclude Include="include\Content\OverlayWorkspaceLive.hpp" />
@@ -102,6 +107,7 @@
     <ClInclude Include="include\Content\StringTables.hpp" />
     <ClInclude Include="include\Content\SystemResources.hpp" />
     <ClInclude Include="include\Content\SystemResourcesLive.hpp" />
+    <ClInclude Include="include\Content\TimFile.hpp" />
     <ClInclude Include="Legacy\LibDs.hpp" />
   </ItemGroup>
   <ItemGroup>

@@ -2,9 +2,12 @@
 #include <array>
 #include <bit>
 #include <chrono>
+#include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <span>
 #include <string>
+#include <string_view>
 #include <thread>
 #include <type_traits>
 #include <utility>
@@ -26,6 +29,7 @@
 #include "Core/RandomLive.hpp"
 #include "Core/Runtime.hpp"
 #include "Core/RuntimeLive.hpp"
+#include "Core/Sha256.hpp"
 #include "Core/String/GameText.hpp"
 #include "Core/String/GameTextLive.hpp"
 #include "Legacy/Psx.hpp"
@@ -922,5 +926,36 @@ TEST_CASE("Lagrange interpolation preserves original fixed-point coefficients",
     int scalar = 0;
     Core::Math::InterpolateLiveLagrangeScalar(8, 16, 32, 64, phase, &scalar);
     CHECK(scalar == x);
+  }
+}
+
+TEST_CASE("SHA-256 digests match the FIPS 180-4 examples", "[core][sha256]") {
+  const auto bytes_of = [](std::string_view text) {
+    return std::as_bytes(std::span(text.data(), text.size()));
+  };
+  CHECK(VS::Core::Sha256Hex(bytes_of("")) ==
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+  CHECK(VS::Core::Sha256Hex(bytes_of("abc")) ==
+        "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
+  const std::string_view two_blocks =
+      "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq";
+  CHECK(VS::Core::Sha256Hex(bytes_of(two_blocks)) ==
+        "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1");
+  const std::string million(1'000'000, 'a');
+  CHECK(VS::Core::Sha256Hex(bytes_of(million)) ==
+        "cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0");
+
+  // Pieces that straddle block boundaries give the one-shot digest.
+  const auto whole = VS::Core::Sha256Of(bytes_of(million));
+  for (const std::size_t piece :
+       {std::size_t{1}, std::size_t{55}, std::size_t{63}, std::size_t{64},
+        std::size_t{65}, std::size_t{1000}}) {
+    CAPTURE(piece);
+    VS::Core::Sha256 hasher;
+    const auto all = bytes_of(million);
+    for (std::size_t at = 0; at < all.size(); at += piece) {
+      hasher.Update(all.subspan(at, std::min(piece, all.size() - at)));
+    }
+    CHECK(hasher.Finish() == whole);
   }
 }
