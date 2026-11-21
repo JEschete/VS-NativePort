@@ -12,10 +12,11 @@
 #include <fstream>
 #include <limits>
 #include <memory>
-#include <new>
 #include <numbers>
 #include <optional>
 #include <string>
+#include <system_error>
+#include <thread>
 #include <utility>
 #include <vector>
 
@@ -39,6 +40,7 @@
 #include "Content/DataStore.hpp"
 #include "Core/Log.hpp"
 #include "Legacy/Psx.hpp"
+#include "Platform/Paths.hpp"
 #include "nlohmann/json.hpp"
 
 int TestsZoneMusicCanonicalState(void);
@@ -327,17 +329,27 @@ struct AudioFixture {
     bank.samples.push_back(std::move(sample));
   }
 
-  ~AudioFixture() try {
+  // Scanners and indexers briefly open files just written to the temporary
+  // directory (#490), so a removal that meets one is retried before the
+  // leftover directory fails the test.
+  ~AudioFixture() noexcept(false) {
     std::error_code error;
-    std::filesystem::remove_all(root, error);
-    if (error) {
-      std::fprintf(stderr, "audio fixture cleanup failed: %d\n", error.value());
-      std::abort();
+    for (int attempt = 0; attempt < kCleanupAttempts; ++attempt) {
+      std::filesystem::remove_all(root, error);
+      if (!error) return;
+      std::this_thread::sleep_for(kCleanupRetryDelay);
     }
-  } catch (const std::bad_alloc&) {
-    std::fputs("audio fixture cleanup could not allocate memory\n", stderr);
-    std::abort();
+    FAIL_CHECK("audio fixture could not remove "
+               << VS::Platform::PathText(root) << ": " << error.message()
+               << " (" << error.value() << ")");
   }
+  AudioFixture(const AudioFixture&) = delete;
+  AudioFixture& operator=(const AudioFixture&) = delete;
+  AudioFixture(AudioFixture&&) = delete;
+  AudioFixture& operator=(AudioFixture&&) = delete;
+
+  static constexpr int kCleanupAttempts = 40;
+  static constexpr std::chrono::milliseconds kCleanupRetryDelay{50};
 
   Audio::VoiceControls Controls() const {
     Audio::VoiceControls controls;
@@ -985,6 +997,29 @@ TEST_CASE("Native final dry and wet mix preserves signed PCM output bounds",
     CHECK(positive_limit);
     CHECK(negative_limit);
   }
+}
+
+TEST_CASE("Audio fixtures remove a directory whose file is briefly held open",
+          "[audio][fixture]") {
+  std::filesystem::path root;
+  std::jthread holder;
+  {
+    const AudioFixture fixture;
+    root = fixture.root;
+    std::filesystem::create_directories(root);
+    // The stream denies deletion while open, as a scanner's handle does.
+    auto file = std::make_unique<std::ofstream>(root / "held.wav");
+    REQUIRE(file->good());
+    std::error_code held;
+    CHECK_FALSE(std::filesystem::remove(root / "held.wav", held));
+    CHECK(held);
+    holder = std::jthread([file = std::move(file)]() mutable {
+      std::this_thread::sleep_for(std::chrono::milliseconds(200));
+      file.reset();
+    });
+  }
+  holder.join();
+  CHECK_FALSE(std::filesystem::exists(root));
 }
 
 TEST_CASE(
