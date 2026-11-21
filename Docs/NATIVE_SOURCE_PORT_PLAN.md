@@ -48,13 +48,14 @@ renumbers function IDs and rewrites the catalogs, so do not run it to refresh st
 | D15 | Third-party | SDL3 (zlib), vendored. CC0/MIT code may be lifted with attribution (rood-boi device logic, PsyCross GTE math). GPL / non-commercial / unlicensed code is reference only. | Proposed |
 | D16 | Upstream contributions | Renames are **not** sent back to rood-reverse | Owner |
 | D17 | Enemy data | Species / EnemyDef (`extends` variants) / Loot / Spawn catalogs, with behaviors in code. See [ENEMY_DATA_SCHEME.md (archived)](https://github.com/JEschete/VS-NativePort/blob/0e3ae7d8df169bc684c8155fa44b90e731bb4e69/Docs/ENEMY_DATA_SCHEME.md) | Owner asked to modernize; design v1 |
-| D18 | Asset pipeline | `VS.Extract` converts **every** disc file **up front** into `Native\data\` (git-ignored). The game never reads the disc. Formats: executable tables → JSON (generated typed decoders); text → UTF-8 string catalog; models → glTF 2.0 matching `resources\Sydney Losstarot (Dying)\`; rooms → glTF + room JSON; images → PNG; samples → WAV; music/SFX stay **sequenced** (JSON event lists played by our ported sequencer); XA → FLAC; movies → **AV1** in Matroska (ffmpeg at extract time only, dav1d at runtime). See [ASSET_PIPELINE.md](ASSET_PIPELINE.md) | Owner (2026-10-15) |
+| D18 | Asset pipeline | `VS.Extract` converts **every** disc file **up front** into `Native\data\` (git-ignored). The game never reads the disc. Formats: executable tables → JSON (generated typed decoders); text → UTF-8 string catalog; models → glTF 2.0 matching `resources\Sydney Losstarot (Dying)\`; rooms → glTF + room JSON; images → PNG; samples → WAV; music/SFX stay **sequenced** (JSON event lists played by our ported sequencer); XA → FLAC; movies → **AV1** in Matroska (ffmpeg at extract time only, dav1d at runtime). See [ASSET_PIPELINE.md](ASSET_PIPELINE.md). *(2026-11-21: table, image and glTF packaging refined by D25.)* | Owner (2026-10-15) |
 | D19 | Build instructions | [BUILDING.md](BUILDING.md) is the single source of truth for clone → build → extract → play. Every change to prerequisites, scripts, dependencies, output layout or extraction updates it **in the same commit**. Planned steps are marked ⏭ until they land. | Owner (2026-10-15) |
 | D20 | 1b data path | **Extract now.** The game reads only VS.Extract output (`Native\data`); files not converted yet are copied as they are and listed `raw` in `files.tsv`, so each converter replaces one form at a time. Module data (initialised data and images kept in the module images) is filled from the extracted module files at start-up. | Owner (2026-10-17) |
 | D21 | Texture/VRAM model for 1b | **Page image:** one 1024×512 16-bit image the game's uploads, copies and drawing act on with the original semantics (`Render::PageSpace`). As built, drawing is rasterized on the CPU for parity and the GPU only presents; the GPU renderer of §6.2 replaces the rasterizer in 2a. | Owner (2026-10-17) |
 | D22 | Movies | **AV1** in Matroska with FLAC, converted by FFmpeg at extract time; dav1d + libwebm + dr_flac at run time. | Owner (2026-10-17) |
 | D23 | Instruments | **sfizz** (SFZ + WAV) driven by the ported AKAO sequencer, as proposed in §6.3. | Owner (2026-10-17) |
 | D24 | C++ headers | Every header becomes a real C++ header (`.hpp`, `#pragma once`, namespaces, C++ linkage, no C idioms); a rename or language override is not enough. The copier is retired: its decomp input was removed in `6b20016f0`, generated files are edited directly, and a generated header leaves `copy_manifest.json` when it is migrated. Tracked in [CPP_HEADERS.md](CPP_HEADERS.md). | Owner (2026-11-18) |
+| D25 | Native asset formats | Chosen for **ease of modding**, without losing exactness. Stable IDs everywhere; LBAs and offsets are provenance only. Flat gameplay tables are **CSV** (one table per file, references by ID), merged with the patch and mod layers and compiled into **SQLite** for queries. Images are **PNG** at their true depth with a `.image.json` sidecar: the PNG is authoritative for colour and transparency, and the sidecar holds only what PNG cannot (STP, provenance, material). Models are `.gltf` + `.bin` + shared PNG files. Events, effect programs and layouts are schema-validated JSON. Unknown bytes are kept. Valid unused content is converted and marked `unreferenced`. Output layout is [ASSET_PIPELINE.md](ASSET_PIPELINE.md) §3; details are in its §1.1. | Owner (2026-11-21) |
 
 ### 0.1 Target meaning of "not an emulator"
 
@@ -860,37 +861,33 @@ struct BladeInstance {            // mutable, lives in GameState / save
 | `title` | title-screen layout, timings (1000/100 tick timeouts), menu items |
 
 ### 9.4 Schema rules (from DW4 `schemas\README.md`)
-- Every file has `"schema_version"`. Loaders accept known versions only, and migrate forward (never downgrade).
-- Validation at load: types, ranges, references (every `ItemId` resolves), uniqueness. Errors name the file, the JSON pointer and the rule.
+- Every file has a schema version: a `"schema_version"` member in JSON, and the version in the table's `<table>.schema.json` for CSV tables. Loaders accept known versions only, and migrate forward (never downgrade).
+- Validation at load: types, ranges, references (every `ItemId` resolves), uniqueness. Errors name the file, the location (JSON pointer, or CSV row and column) and the rule.
 - After validation, data becomes **immutable** typed records (frozen registries).
 - Converted payloads (`Native\data\`) are git-ignored. Only the schemas, the extractor and the patches are committed. See [ASSET_PIPELINE.md](ASSET_PIPELINE.md).
 
 ### 9.5 Example catalog entry
 
-```json
-{
-  "schema_version": 1,
-  "blades": [
-    {
-      "id": "blade.scramasax",
-      "legacyId": 2,
-      "name": "text.item.blade.scramasax.name",
-      "category": "dagger",
-      "damageType": "piercing",
-      "stats": { "str": 3, "int": 0, "agl": 0 },
-      "range": 5, "risk": 1,
-      "maxDp": 50, "maxPp": 50,
-      "compatibleGrips": ["grip.short_hilt"],
-      "model": "wep.0x02"
-    }
-  ]
-}
+Flat tables are CSV (D25), so they open in any spreadsheet. A list becomes its own join table instead of a nested
+array. `catalogs\items\blades.csv`:
+
+```csv
+id,legacy_id,name,category,damage_type,str,int,agl,range,risk,max_dp,max_pp,model
+blade.scramasax,2,text.item.blade.scramasax.name,dagger,piercing,3,0,0,5,1,50,50,model.wep.02
 ```
+
+`catalogs\items\blade_grips.csv`:
+
+```csv
+blade,grip
+blade.scramasax,grip.short_hilt
+```
+
 (Values illustrative. Real values come from VS.Extract.)
 
 ### 9.6 Patch layers (mods)
-Load order: `Native\data\` (converted from the disc) → `Native\Content\patches\` (our fixes/enhancements) → `mods\<name>\` (user). Mods may also replace converted assets (glTF, PNG, WAV, sequences, movies) by path.
-Patch operations: `add`, `replace`, `merge` (field-level), `remove`, by ID. A conflict report lists every ID that more than one layer touched.
+Load order: `Native\data\` (converted from the disc) → `Native\Content\patches\` (our fixes/enhancements) → `mods\<name>\` (user). Each layer mirrors the `Native\data\` layout. Mods may also replace converted assets (glTF, PNG, WAV, sequences, movies) by path.
+Patch operations: `add`, `replace`, `merge` (field-level), `remove`, by ID. In a CSV layer, a row whose `id` already exists merges the columns that the layer's header lists, and a new `id` adds a row. An optional `_op` column selects `replace` or `remove` explicitly. A conflict report lists every ID that more than one layer touched. The merged layers are compiled into one SQLite database for queries; the CSV files remain the source.
 
 ### 9.7 Behaviors stay in code
 Catalogs hold **parameters**. **Behaviors** (AI routines, effect kinds, event commands, break-art scripts) are C++ registered by name in a `BehaviorRegistry`. Data refers to behaviors by name (`"ai": "ai.minotaur"`). New behaviors are added in code in Phase 3a, or in the script layer in 3b.

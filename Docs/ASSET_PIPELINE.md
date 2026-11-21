@@ -1,12 +1,13 @@
 # Asset Pipeline: disc → `Native\data\`
 
 Status: **design v1, accepted by the owner**. The owner's decisions are:
-- JSON for tables.
+- Flat gameplay tables as CSV, compiled into SQLite; structured data as JSON (D25, refining the original "JSON for tables").
 - Convert **everything up front**, not phase by phase.
 - Converted output is git-ignored.
-- Models match the `resources\Sydney Losstarot (Dying)\` glTF.
+- Models match the `resources\Sydney Losstarot (Dying)\` glTF, packaged as `.gltf` + `.bin` + shared PNG files (D25).
 - Video is **AV1**.
 - Music is **sequenced**.
+- Formats are chosen for ease of modding, without losing exactness (D25, §1.1).
 
 This document is the contract between the extractor (`VS.Extract`) and the game's loaders (`VS.Content` and each system). Whenever a format below changes, bump that converter's version (§8).
 
@@ -20,11 +21,28 @@ This document is the contract between the extractor (`VS.Extract`) and the game'
 |---|---|
 | P1 | **The game never reads the disc.** At runtime, `VS.Desktop` loads only `Native\data\` (plus the patch and mod layers). Only `VS.Extract` reads `.bin/.cue`. |
 | P2 | **Convert everything up front.** One command (`extract-native-assets.cmd`) converts every file on the disc. Nothing is converted lazily or per phase. If a format's converter is not written yet, the run reports it as `unconverted` in the manifest, and the gate in §9 fails. |
-| P3 | **Modern, open formats only:** JSON, glTF 2.0, PNG, WAV, FLAC and Matroska (AV1 + FLAC). There are no PS1 formats (TIM, VAB, AKAO, STR, XA, MPD, …) under `Native\data\`. |
+| P3 | **Modern, open formats only:** CSV, JSON, glTF 2.0, PNG, WAV, FLAC and Matroska (AV1 + FLAC); SQLite only as the compiled query form of the CSV tables. There are no PS1 formats (TIM, VAB, AKAO, STR, XA, MPD, …) under `Native\data\`. |
 | P4 | **Lossless with respect to the game.** Every value the original code reads must survive conversion. Fields with no standard home go in documented `extras`, an optional project extension (§6.2.1), or JSON members (§4.1). A round-trip test proves data preservation for every converter; preview and playback fidelity have separate checks (§7). |
 | P5 | **Not committed.** `Native\data\` is git-ignored. Only the extractor, its schemas and the hand-written patches are committed. Users supply their own disc. |
 | P6 | **Readable by humans and tools.** The output opens in Blender, any image viewer, VLC and a text editor. This is what makes Phase 2/3 modding possible. |
 | P7 | **Deterministic.** The same disc plus the same extractor version gives byte-identical output (sorted keys, fixed float formatting, fixed encoder settings), so diffs between extractor versions are meaningful. |
+
+### 1.1 Format decisions (owner, 2026-11-21, plan D25)
+
+The rule for choosing: **what is easiest for a modder to edit**, provided conversion stays exact.
+
+| # | Topic | Decision |
+|---|---|---|
+| 1 | Gameplay tables | **CSV**, one table per file with a stable `id` column and references by ID; lists become join tables. Each table has a `<table>.schema.json` (columns, types, ranges, references). The loader merges the base, patch and mod layers and compiles them into **SQLite** for queries. The CSV files stay the source; the database is derived. |
+| 2 | Images | **PNG** at the true depth (indexed 4-bit or 8-bit, RGBA for 16bpp) plus a `<name>.image.json` sidecar (§6.4). |
+| 3 | Models | glTF 2.0 as **`.gltf` + `.bin` + shared PNG** files, so textures can be edited in any image editor and models open directly in Blender. A self-contained `.gltf`/`.glb` is an export option only. |
+| 4 | Events, effect programs, layouts | **JSON** with a JSON Schema, so editors can complete and check them. A script language can be added later on top of the same data. |
+| 5 | Unknown data | **Kept** as named opaque fields (§4.1), so re-encoding is exact. |
+| 6 | Colour and STP | The **PNG is authoritative** for colour and transparency: what an editor changes is what the game uses. The sidecar holds only what PNG cannot: the STP bit, provenance and the material default (§6.4). The round trip proves the original 16-bit words are reproduced exactly (§7). |
+| 7 | Unused content | Valid content with no reference (e.g. `DBGFNT.TIM`, `BG\007OP01A`) is **converted** and marked `unreferenced` in the manifest, so modders can use it. Empty files are `skipped` with a reason; exact duplicates are recorded as aliases of one output. |
+| 8 | Short palette files | Palette rows past the end of a file (FBC) are recorded as **`undefined`**, and validation proves that no sprite samples them. Stale bytes are not reproduced. |
+| 9 | Layout | §3. Patch and mod layers mirror it and override by path (assets) or by ID (tables), plan §9.6. |
+| 10 | Coverage gaps | Formats with no migration issue get one (images in menus, ending, `SYSTEM.DAT` and PRG data; the gameplay catalog; the string table; AKAO sequences; PLG/PRG data blobs). |
 
 ---
 
@@ -58,27 +76,29 @@ Game systems
 ```
 Native\data\
   manifest.json
-  catalogs\          Tier 1: executable / PRG tables as typed JSON (§4)
-    items\  blades.json grips.json gems.json armor.json shields.json accessories.json consumables.json misc.json
-    battle\ break-arts.json abilities.json spells.json status-effects.json
-    enemies\ species.json enemies.json modelsets.json loot.json bestiary.json      (ENEMY_DATA_SCHEME.md)
-    world\  zones.json rooms\<zone>\<room>.json doors.json keys.json chests.json save-points.json
-    menu\   workshops.json combine-blades.json combine-armor.json ...
-    title\  title.json             (layout, timings, menu items)
+  catalogs\          Tier 1: executable / PRG tables (§4); flat tables as <table>.csv + <table>.schema.json
+    items\  blades.csv grips.csv gems.csv armor.csv shields.csv accessories.csv consumables.csv misc.csv ...
+    battle\ break-arts.csv abilities.csv spells.csv status-effects.csv
+    enemies\ species.csv enemies.csv modelsets.csv loot.csv bestiary.csv      (ENEMY_DATA_SCHEME.md)
+    world\  zones.csv rooms.csv doors.csv keys.csv chests.csv save-points.csv puzzle-challenges.csv
+    menu\   workshops.csv combination-*.csv ...      (SYD workshop recipes)
+    title\  title.json             (layout, timings, menu items: structured, so JSON)
     effects\ effects.json          (template instantiations → parameters)
     music.json sfx.json            (index: id → sequence/bank files)
-    engine\ <table>.json           (other exe tables; one file per DATA_LEDGER `catalog` row group)
+    engine\ <table>.csv            (other exe tables; one file per DATA_LEDGER `catalog` row group)
   text\              Tier 2
     strings.en.json                (every game string: id → UTF-8 text with markup)
     fonts\ main.png main.font.json (glyph atlas + metrics)
-  models\            Tier 3: glTF 2.0 (one file each, embedded buffers/PNG like the Sydney reference)
+  models\            Tier 3: glTF 2.0 as .gltf + .bin, textures as shared image files (§6.4)
     characters\<SHP>.gltf          (skinned mesh + applicable SEQ/ESQ clips, texture frames and VS metadata)
     weapons\<WEP>.gltf             (material variants = blade materials)
     armor\ shields\ ...            (as discovered per CONTENT_LEDGER)
     zud\<ZUD>.json                 (enemy model set: references SHP/WEP/SEQ glTFs; no duplicate meshes)
   rooms\<zone>\<MAPxxx>.gltf       (room geometry + textures)  + <MAPxxx>.room.json (collision, tiles, doors, scripts)
-  textures\<dir>\<name>.png        (TIM/GIM/FBT/standalone images; indexed PNG + .palettes.json where palettes matter)
-    actors\<ETM>\<binding>.png     (inspection export + .palettes.json; actor-bound atlas regions, §6.2.2)
+  rooms\automap\<ARM>.json         (minimap scenes per area: display geometry, doors, room names by string id)
+  textures\<dir>\<name>.png        (TIM/GIM/FBT/standalone images, §6.4) + <name>.image.json
+                                   (+ <name>.palettes.png when an image has several palettes)
+    actors\<ETM>\<binding>.png     (actor-bound atlas images + .image.json, §6.2.2)
   ui\                              (menu art, title art, illustrations as PNG + layout JSON)
   events\<id>.json                 (EVT event scripts as decoded command lists; text by string id)
   effects\<id>.json + textures     (EFFECT .P/.FBT/.FBC data)
@@ -101,16 +121,18 @@ The exact file list is generated: `CONTENT_LEDGER.csv` (§9) gives every disc fi
 
 ---
 
-## 4. Tier 1: executable and overlay tables → JSON catalogs
+## 4. Tier 1: executable and overlay tables → CSV tables and JSON catalogs
 
 **Source:** initialized data in `SLUS_010.40` and the `*.PRG` overlays. `build\port\data.json` (`tools\port\data_inventory.py`) lists them, and `DATA_LEDGER.csv` gives each one a disposition. Only `catalog` rows go through this tier. `constexpr` rows are computed in code, `state` rows become zeroed module state and `drop` rows disappear.
+
+Flat, row-shaped tables (items, actions, spells, status, recipes, enemies, loot, spawns, challenges) are written as CSV (§1.1). Data with nested structure (title layout, effect template parameters) is written as JSON.
 
 **Decoders are generated, not hand-written:**
 
 1. `tools\port\gen_table_decoders.py` reads the decomp struct definitions (libclang, PS1 layout: 32-bit pointers, 4-byte alignment, GCC bitfield order). For each catalog table it emits:
    - a C++ reader (`VS.Extract`, `src\tables\Generated*.cpp`) that pulls fields from the file image at the symbol's offset;
-   - a JSON writer;
-   - a JSON Schema (`Native\Content\schemas\<catalog>.schema.json`, committed);
+   - a CSV writer (flat tables) or JSON writer (structured catalogs);
+   - a schema (`Native\Content\schemas\<catalog>.schema.json`, committed); for a CSV table it lists the columns, types, ranges and references;
    - the runtime C++ record type plus its loader (`VS.Content`, committed). The runtime type uses **modern widths** (D3: no layout matching).
 2. Field names come from `TYPE_LEDGER.csv` (the final names), never `unk_0x10`. A field that is still unnamed fails generation.
 3. **Pointers become references:**
@@ -120,12 +142,12 @@ The exact file list is generated: `CONTENT_LEDGER.csv` (§9) gives every disc fi
    | function pointer | the function's **final name** (`"Battle::Abilities::ApplyHeal"`), resolved through `BehaviorRegistry` at load |
    | pointer to a string | a string ID in `strings.en.json` |
    | pointer to another table row | that row's catalog ID (`"blade.scramasax"`) |
-   | pointer to an asset | an asset path relative to `Native\data\` |
+   | pointer to an asset | an asset ID (`assets.json`, #47), never a disc location |
 
-4. Every record keeps its `legacyId` (the original index) so copied logic and `.mcd` save import keep working (plan §9.2).
+4. Every record keeps its `legacyId` (CSV column `legacy_id`; the original index) so copied logic and `.mcd` save import keep working (plan §9.2).
 
 ### 4.1 Lossless "extras"
-If a value has no clean meaning yet, it is **kept**, not dropped. It goes under `"_raw": { "<field>": value }` and is listed in `TYPE_LEDGER` as unnamed. Unnamed fields block the 1a gate, so `_raw` must be empty at the end of Phase 1.
+If a value has no clean meaning yet, it is **kept**, not dropped. In a CSV table it is a `raw.<field>` column; in JSON it goes under `"_raw": { "<field>": value }`. Either way it is listed in `TYPE_LEDGER` as unnamed. Unnamed fields block the 1a gate, so no raw field may remain at the end of Phase 1.
 
 ---
 
@@ -150,28 +172,29 @@ The disc has 27 kinds of files. The "Source" column below names the files on the
 | `OBJ\*.SHP` (202) + `OBJ\*.SEQ` (700) | `models\characters\<SHP>.gltf` | §6.2 | vstools `SHP.js`/`SEQ.js`, VagrantStoryImporter, decomp actor loaders |
 | `OBJ\*.WEP` (127) | `models\weapons\<WEP>.gltf` | static mesh, one texture per blade material via `KHR_materials_variants` | vstools `WEP.js`, VagrantStoryImporter |
 | `MAP\*.ZUD` (455) | `models\zud\<ZUD>.json` + any meshes not already emitted | a ZUD bundles SHP + WEP(s) + SEQ for an enemy. It is emitted as **references** to the shared glTFs (dedup by content hash), not copied | vstools `ZUD.js` |
-| `SMALL\*.ARM` (32), `SMALL\*.DIS` (22) | `catalogs\` JSON + `textures\` | `.ARM` = minimap/area data, `.DIS` = to confirm in CONTENT_LEDGER | GodHands, DataCrystal |
+| `SMALL\*.ARM` (32) | `rooms\automap\<ARM>.json` | minimap scenes: a room count, 12-byte room records (visited, payload length, zone, map), display geometry (vertices, triangles, quads, lines, doors) and 36-byte names with previous/next links; (zone, map) becomes the stable room ID and names become string IDs. 47 map IDs exceed their zone's room table: explain them before converting | native `Field\MinimapScene.hpp` |
+| `SMALL\*.DIS` (22) | `textures\dis\*.png` + `.image.json`, `catalogs\world\puzzle-challenges.csv` | concatenated 4bpp TIMs; `IQ.DIS` also holds the 64-record cube-puzzle challenge table (keyed by room ID); `ENDSCR00–15` are 16bpp result screens | native `CubePuzzleLifecycle.hpp`, `ClearResultsCore.cpp` |
 | `MAP\*.MPD` (512) | `rooms\<zone>\<MAP>.gltf` + `.room.json` | §6.3 | vstools `MPD.js`, VSViewer, decomp field loaders |
-| `MAP\*.ZND` (256) | `catalogs\enemies\*`, `catalogs\world\zones.json`, zone textures → PNG | enemy records → the ENEMY_DATA_SCHEME catalogs; zone TIMs → PNG | ENEMY_DATA_SCHEME.md §3 |
+| `MAP\*.ZND` (256) | `catalogs\enemies\*`, `catalogs\world\zones.csv`, zone textures → PNG | enemy records → the ENEMY_DATA_SCHEME catalogs; zone TIMs → PNG | ENEMY_DATA_SCHEME.md §3 |
 | `EVENT\*.EVT` (512) | `events\<id>.json` | command list `{op, args}` with op names from the decomp's event interpreter; text → string IDs | decomp `Event\` module |
-| `BG\*.TIM` (4), `BG\*.FAR` (4), root `*.TIM` | `textures\bg\*.png` + `.json` | TIM → PNG (§6.4); `.FAR` = to confirm | |
-| `GIM\*.GIM` (49) | `textures\gim\*.png` | VS screen-effect images | |
-| `MENU\*.BIN` (11), `ENDING\ILLUST*.BIN` (11) | `ui\*.png` + layout JSON | menu art, game-over, ending illustrations | decomp `Menu\`, `Ending\` |
-| `MENU\*.SYD` (3) | `catalogs\items\*.json` | item definition tables | GodHands |
-| `SMALL\MON.BIN` | `catalogs\enemies\bestiary.json` | | ENEMY_DATA_SCHEME |
-| `SMALL\HELP*.HF0/HF1` (28) | `text\strings.en.json` | help pages | |
-| `EFFECT\*.P` (290), `*.FBT` (755), `*.FBC` (277), `EFFECT\*.BIN` (311) | `effects\<id>.json` + `textures\effect\*.png` | `.FBT` texture pages + `.FBC` CLUTs → PNG; `.P`/`.BIN` parameters → JSON; plugin code is already in `Native\` (the decomp). Effect behaviors stay in code (plan §9.7) | decomp `Effects\` |
-| `OBJ\*.ESQ` (97), `OBJ\*.ETM` (80) | applicable character glTFs + actor-bound PNG/palette inspection exports | event animation banks and texture overlays, including facial frames; resolve actor/bank/palette bindings from loaders, not matching filenames (§6.2.2) | decomp `BATTLE.PRG/30DB0.c`, `40564.c`; native `Actors/TextureAnimation.c` |
+| `BG\*.TIM` (4), `BG\*.FAR` (4), root `*.TIM` | `textures\bg\*.png` + `.image.json`; `.FAR` → background layout JSON | TIM → PNG (§6.4). The BG TIM headers are not authoritative: they declare mode `0xA` (16bpp + CLUT) with a 256-colour CLUT and three share id `0x110`; the loader overwrites the id, ignores the mode and takes the depth from each draw's texture page (`Background.cpp`). `.FAR` = 12-byte header `{w, h, reserved}` then w×h 24-byte tiles (source rectangle + 4 corner colours), reached only through MPD room section 15 | native `Field\Background.cpp`, `BackgroundLive.cpp` |
+| `GIM\*.GIM` (49) | `textures\gim\*.png` + composition JSON | VS screen-effect images: per-layer cell maps over shared strips, 4 × 16-colour CLUTs and a shared or owned 256-colour palette | native `Render\GimImages.cpp` |
+| `MENU\*.BIN` (11), `ENDING\ILLUST*.BIN` (11) | `ui\*.png` + `.image.json` + layout JSON | menu art, game-over, ending illustrations. `MENUBG` is word-RLE and `ILLUST*` are LZ/RLE-compressed TIMs, decoded at conversion; `ITEMNAME`, `ITEMHELP`, `MENU12` and `MCMAN` are text and tables, not images | native `Menu\`, `StaffRollCore.cpp` |
+| `MENU\*.SYD` (3) | `catalogs\menu\combination-*.csv` | workshop **combination recipes** (result and material tables), not item definitions; there is no global item-stat file | native `Menu\Setup\Combination.hpp` |
+| `SMALL\MON.BIN` | `catalogs\enemies\bestiary.csv` | 150 records of `0x2C` bytes | ENEMY_DATA_SCHEME |
+| `SMALL\HELP*.HF0/HF1` (28) | `text\strings.en.json` + `ui\help\<page>.json` + `ui\help\*.png` | `.HF0` = page text, sprite placements and line table; `.HF1` = 8×16 8bpp illustration blocks and 16-colour palettes | native `ManualTopics.hpp`, `ManualIllustration.hpp`, `Manual.cpp` |
+| `EFFECT\*.P` (290), `*.FBT` (755), `*.FBC` (277), `EFFECT\*.BIN` (311) | `effects\<id>.json` + `textures\effect\*.png` | `.FBT` texture pages + `.FBC` palettes → PNG (§6.4). `.P` files are block streams (u32 header: size in the low 16 bits, type in the high 16 bits; type 0 ends) → effect JSON. `.BIN` files are **PLG code overlays** and EFFPURGE dispatch tables, already ported to C++ (`Effects\Plugins\PlgNNN.cpp`, `PurgeTables.cpp`); only their data blobs remain, as typed tables. Effect behaviors stay in code (plan §9.7) | decomp `Effects\` |
+| `OBJ\*.ESQ` (97), `OBJ\*.ETM` (80) | applicable character glTFs + the actor-bound images they reference | event animation banks and texture overlays, including facial frames; resolve actor/bank/palette bindings from loaders, not matching filenames (§6.2.2) | decomp `BATTLE.PRG/30DB0.c`, `40564.c`; native `Actors/TextureAnimation.c` |
 | `SOUND\WAVE*.DAT` (101) | `audio\samples\` + `audio\banks\` | §6.5 | decomp `Audio\` |
 | `MUSIC\MUSIC*.DAT` (192) | `audio\music\*.seq.json` | §6.5 | decomp `Audio\Seq` |
 | `SE\EFFECT*.DAT` (102) | `audio\sfx\*.seq.json` (+ bank if embedded) | §6.5 | |
 | `ENDING\ENDING.XA` (1, 77 MB) | `audio\streams\ending\<ch>.flac` | §6.6 | jpsxdec |
 | `MOV\TITLE.STR` (1, 26 MB) | `movies\*.mkv` | §6.7 | ffmpeg `psxstr`, jpsxdec |
-| `BATTLE\SYSTEM.DAT` | split by content (textures → PNG, tables → JSON) | to confirm | decomp `Battle\` |
+| `BATTLE\SYSTEM.DAT` | `textures\system\*.png` + `.image.json`, `text\fonts\` metrics | 8 sections: images (0, 1, 3, 4, 5), a palette (2), a fixed image (6) and interface images (7). It supplies the font and UI glyphs | native `SystemResources.hpp`, `Canvas.cpp` |
 | `SLUS_010.40`, `*.PRG`, `GIM\SCREFF2.PRG` | Tier 1 tables only (code is already in `Native\`) | §4 | |
-| `license_data.dat`, `SYSTEM.CNF`, `DBGFNT.TIM`, `ENDING\NULL.DAT`, 192 zero-byte placeholders | nothing (`drop`) | recorded in the manifest as `skipped: reason` | |
+| `license_data.dat`, `SYSTEM.CNF`, `ENDING\NULL.DAT`, 192 zero-byte placeholders | nothing (`drop`) | recorded in the manifest as `skipped: reason`. `DBGFNT.TIM` (a debug font no code reads) is converted and marked `unreferenced` (§1.1) | |
 
-"To confirm" rows are settled while building `CONTENT_LEDGER.csv`. Settling a row means: read the decomp loader that consumes the file, then write the converter. **No converter is written from community docs alone.** The decomp's loader is the ground truth for what each byte means. vstools, VagrantStoryImporter, GodHands and DataCrystal speed up understanding, but they are reference only (licenses: `TOOLS_INVENTORY.md`).
+Every row is now identified (D25 inventory, 2026-11-21); the open questions are listed per IMP issue. Settling a row's converter means reading the loader that consumes the file (the native port's loader, with the decomp as a cross-reference for original behaviour), then writing the converter. **No converter is written from community docs alone.** vstools, VagrantStoryImporter, GodHands and DataCrystal speed up understanding, but they are reference only (licenses: `TOOLS_INVENTORY.md`).
 
 ### 6.2 Character models (SHP + SEQ/ESQ + ETM → glTF), matching the Sydney reference
 
@@ -179,12 +202,12 @@ The disc has 27 kinds of files. The "Source" column below names the files on the
 
 | Element | Rule (from the reference) |
 |---|---|
-| asset | glTF 2.0, one scene, embedded buffer and PNG as base64 data URIs (one self-contained file) |
+| asset | glTF 2.0, one scene, written as `.gltf` + `.bin` with textures as shared image files (§6.4) referenced by relative URI (D25). Blender and standard viewers open it directly, and textures can be edited without touching the model. A self-contained base64 `.gltf` or `.glb`, like the reference, is an export option only |
 | mesh | one skinned mesh; attributes `POSITION`, `NORMAL`, `TEXCOORD_0`, `COLOR_0`, `JOINTS_0`, `WEIGHTS_0` + indices |
 | skeleton | one node per SHP bone named `bone<N>` (N = SHP bone index), with rotation + translation; one `skin` with `inverseBindMatrices` |
 | animations | **every** applicable SEQ/ESQ skeletal clip, one clip per animation, named `<SHP>_<bank>_<n>` (e.g. `6F_BT2_0`); texture/event tracks follow §6.2.2 |
 | material | baseline: `KHR_materials_unlit`, `alphaMode: BLEND`, `metallicFactor: 0`, `roughnessFactor: 0.9`; split primitives/materials where source blend or lighting state differs |
-| texture | PNG with the palette applied; sampler `magFilter/minFilter = 9728` (NEAREST), wrap `10497` (REPEAT) |
+| texture | the shared image files of §6.4 (PNG + `.image.json`), referenced by the material; sampler `magFilter/minFilter = 9728` (NEAREST), wrap `10497` (REPEAT) |
 
 Additions the reference does not have, required by P4 (lossless). The initial contract uses `extras`; standard tools can display the baseline without interpreting VS behavior:
 - `asset.extras.vs.schemaVersion`: version of the VS payload across the file's `extras.vs` objects (§6.2.1).
@@ -195,7 +218,7 @@ Additions the reference does not have, required by P4 (lossless). The initial co
 - **Which SEQ/ESQ clips and ETM regions belong to which SHP** comes from the decomp's loaders, event commands and ZUD bundles, not file-name guessing. A matching prefix/stem is a candidate association, not proof.
 - **Fixed-point scale:** positions are SHP units divided by a constant `VS_UNIT_SCALE`, recorded in `asset.extras.vs.unitScale` so the loader can return exact integer values. The Sydney reference's scale is measured and matched.
 
-**Runtime loader:** `VS.Content::ModelLoader` reads glTF (nlohmann-json; base64 buffers) into the engine's `ModelDef` / `AnimationDef`. In Phase 1 the copied actor code expects SHP-shaped data. The loader provides it from the glTF (bone table, vertex groups, the `extras`). This is why the round-trip in §7 is mandatory: `decode(SHP) == ModelLoader(glTF)` field for field.
+**Runtime loader:** `VS.Content::ModelLoader` reads glTF (nlohmann-json; the `.bin` buffer and image files beside it) into the engine's `ModelDef` / `AnimationDef`. In Phase 1 the copied actor code expects SHP-shaped data. The loader provides it from the glTF (bone table, vertex groups, the `extras`). This is why the round-trip in §7 is mandatory: `decode(SHP) == ModelLoader(glTF)` field for field.
 
 **Also emitted** (optional, `--posed`): `<SHP>_posed.obj/.mtl/_0.png`, like the reference folder. This is for quick previews only; the game never reads it.
 
@@ -221,7 +244,7 @@ The [original ETM loader](../resources/rood-reverse/src/BATTLE/BATTLE.PRG/30DB0.
 | Tracks and clock | Integer frame durations, declared tick rate, clip/event associations, start/stop commands, looping and synchronization with skeletal clips. Derive boundary/order semantics from the original scheduler rather than inferring them from filenames or a viewer's frame rate. |
 | Lifecycle | Base-texture restoration, bank/clip switching, actor-local mutable texture state and cleanup on cancellation, scene exit and repeat entry. Shared immutable images must not make one actor's expressions change another actor. |
 
-Embed the bound image data and actor-local contract in the character glTF so it remains self-contained. Preserve palette indices, all consumed palette entries and transparency/STP information, not only a baked RGBA appearance. The inspector also emits `textures\actors\<ETM>\<binding>.png` plus `.palettes.json` from the same decoded data; these are inspection derivatives, not a second runtime authority. A chosen-palette RGBA PNG or individual expression-frame PNG is a convenient additional export, not a lossless replacement for the indexed data.
+The character glTF references the bound images and carries the actor-local contract. The images are written once as `textures\actors\<ETM>\<binding>.png` plus `.image.json` (§6.4) and shared by the runtime, Workshop and editors; there is no second copy. Preserve palette indices, all consumed palette entries and transparency/STP information, not only a baked RGBA appearance. A chosen-palette RGBA PNG or individual expression-frame PNG is a convenient additional export, not a lossless replacement for the indexed data.
 
 Resolve colors from the verified character palette binding; never guess a palette or interpret index bytes as RGB. Missing/ambiguous bindings remain explicit errors or `unconverted` entries with diagnostics, not plausible-looking successful exports. Inventory unresolved regions and aliases until their consumption is understood. Multiple characters may reference the same source bank without duplicating meshes; §8 tracks every dependency that contributes to each output.
 
@@ -253,11 +276,16 @@ AP3 and AP4 can proceed independently after AP2. The two-actor slice establishes
   - enemy spawn references → `catalogs\enemies` (ENEMY_DATA_SCHEME).
 - Room IDs are `room.<zone>.<n>` with the original `legacyId` (zone/room index).
 
-### 6.4 Textures and images (TIM/GIM/FBT/FBC/BIN art → PNG)
-- **Alpha:** PS1 colour `0x0000` becomes alpha **0** (transparent). A colour with the STP bit set becomes alpha **128**; the blend mode comes from the material or primitive, not the texel. Every other colour is alpha **255**. This 3-state mapping is lossless and reversible.
-- **One palette in use:** the output is RGBA PNG.
-- **Several palettes (CLUTs) in use:** the output is an **indexed PNG** (4/8-bit) plus `<name>.palettes.json` (every CLUT as RGBA). Examples are WEP materials, palette animation and effect colour swaps. The renderer applies a palette as a lookup in the shader; Phase 2 can bake it if needed.
-- **Colour:** 5-bit channels are expanded by bit replication (`c<<3 | c>>2`). The raw 15-bit value is recoverable, so this is lossless.
+### 6.4 Textures and images (TIM/GIM/FBT/FBC/BIN art → PNG + `.image.json`)
+
+Modding first (D25): the PNG is what an image editor changes, so the PNG is authoritative for colour and transparency. The `<name>.image.json` sidecar holds only what PNG cannot carry. Conversion stays exact: PNG + sidecar reproduce the original 16-bit words, and the round trip (§7) proves it.
+
+- **Pixels:** 4bpp and 8bpp images are **indexed PNGs at their true bit depth**. Indices are never re-quantized or remapped. 16bpp images are RGBA PNGs (24bpp, if any, RGB).
+- **Colour:** 5-bit channels are expanded by bit replication (`c<<3 | c>>2`). Import takes the nearest 5-bit value (`(c*31 + 127) / 255`), which inverts replication exactly and rounds edited colours sensibly.
+- **Transparency:** alpha **0** means the word `0x0000`, the colour the hardware never draws. Every other word is alpha **255**. Import maps alpha 0 to `0x0000` whatever its colour, and rejects partial alpha with the file and pixel or palette index. Opaque pure black is always `0x8000`, because `0x0000` would be transparent. (An image shown directly, such as a full-screen picture, displays `0x0000` as black; the material says which applies.)
+- **STP (semi-transparency bit):** stored in the sidecar per palette entry, or per texel for 16bpp: `"none"`, `"all"`, a list of palette indices, or a 1-bit mask image `<name>.stp.png`. STP colours display opaque in editors; whether STP blends, and how, is the material's rule, not the texel's.
+- **Palettes:** the indexed PNG's own palette is the image's default palette. An image with several palettes (CLUT variants, palette animation, effect colour swaps, blade materials) also has `<name>.palettes.png`: one palette per row, row 0 = the default, with the same colour and transparency rules and STP per row in the sidecar. The converter checks that the PNG's palette equals row 0 and reports a mismatch instead of picking one. An image whose palette lives elsewhere (ETM, zone textures) gets a preview palette from its default binding; the sidecar names the palette's source, and import ignores the preview.
+- **Sidecar** (`image.schema.json`): schema version, stable image ID, source depth, STP, palette count and source, material default (blend mode, when the consumer is known), `unreferenced` flag and provenance (source path and hash, legacy IDs, original VRAM rectangles). Unused palette entries keep their words.
 - **Placement:** images that the original placed in a shared VRAM page are written as **separate** files. Their placement in VRAM is runtime layout, not content (plan §0.1). Any UV remapping is done by the converter and checked in the round-trip.
 
 ### 6.5 Sequenced audio (owner choice: **sequenced**)
@@ -462,12 +490,12 @@ Every converter ships with a test in `VS.Tests` (tagged `[extract]`; it runs onl
 
 | Converter | Test |
 |---|---|
-| Tier 1 tables | disc bytes → decoder → JSON → runtime loader → re-encode with the PS1 layout == the original bytes |
+| Tier 1 tables | disc bytes → decoder → CSV/JSON → runtime loader → re-encode with the PS1 layout == the original bytes |
 | text | string bytes → markup → encode == the original bytes, for every string |
 | SHP/SEQ/WEP | `decode(raw)` == `ModelLoader(glTF)` field by field (bones, vertices, UVs, colours, flags, every `extras` value, every keyframe) |
 | ESQ/ETM actor bindings | decoded source == converted/reloaded skeletal and texture tracks, indexed pixels, palettes, patch rectangles, associations, timing and lifecycle commands; malformed or unresolved inputs fail explicitly |
 | MPD | the same, via `RoomLoader` |
-| textures | PNG + palettes → 15-bit texels/CLUTs == the original (exact) |
+| textures | PNG + `.image.json` (+ `.palettes.png`, `.stp.png`) → indices and 16-bit texel/palette words == the original (exact), including `0x0000` vs `0x8000` and every STP bit |
 | samples | WAV PCM == the ADPCM decode (exact); loop points equal |
 | sequences | JSON → encode == the original AKAO bytes |
 | XA | FLAC PCM == the ADPCM decode (exact) |
@@ -501,11 +529,14 @@ Record source revision/dirty state, disc identity, tool/converter/schema version
   "outputs": [
     { "source": "OBJ/6F.SHP", "source_sha256": "…", "converter": "shp-gltf", "files": ["models/characters/6F.gltf"] },
     { "source": "license_data.dat", "skipped": "not game content" },
+    { "source": "DBGFNT.TIM", "source_sha256": "…", "converter": "tim-png", "files": ["textures/root/DBGFNT.png", "textures/root/DBGFNT.image.json"], "unreferenced": true },
+    { "source": "EFFECT/E001.FBT", "alias_of": "EFFECT/E000.FBT" },
     { "source": "MAP/MAP123.MPD", "unconverted": "converter not yet implemented" }
   ]
 }
 ```
 
+- **Unused and duplicate content (D25):** valid content that nothing references is converted and marked `"unreferenced": true`. An exact duplicate of another source file is recorded with `"alias_of"` and shares that file's outputs.
 - **Versions:** each converter has an integer version in code (`VS.Extract`). The runtime embeds the minimum version it requires for each converter, so an old `Native\data\` is rejected with instructions (§2).
 - **Composite dependencies:** an output entry retains its primary `source` and adds a sorted `dependencies` array of `{ "source", "source_sha256" }` records for every other consumed input. Character outputs include the resolved SEQ/ESQ/ETM files and palette sources, not just SHP. A changed/deleted dependency or contributing converter/schema version invalidates the output; a missing dependency is an error, never a reason to reuse a stale model.
 - **Character contract changes:** version ESQ/ETM conversion alongside the model converter and `asset.extras.vs.schemaVersion` (or its explicitly migrated extension equivalent). Runtime requirements must include the VS payload version; successful generic glTF loading is not an acceptable fallback for incompatible gameplay data.
