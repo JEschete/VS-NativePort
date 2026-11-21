@@ -58,6 +58,7 @@ Ticks are logical game ticks (1/60 s). Unknown options and invalid values are er
 | `--scripted` | Ignore keyboard and gamepad game input so nobody can disturb the run. Host F-keys still work. |
 | `--capture <file.bmp>` | Write the last presented frame to a BMP file on exit. |
 | `--save-dir <dir>` | Use this folder for native saves instead of the local `combat-lab\saves`. |
+| `--input-config <file>` | Read key and gamepad bindings from this file instead of the `config\input.json` the game also uses. F1-F8, F10 and F11 stay reserved for the Lab. See [BUILDING.md](BUILDING.md#controls). |
 | `--sequence <manifest.json>` | Run several presets in one window. See [Script sequences](#script-sequences). |
 | `--catalog-only` | Load data, write `catalog.json` to the run folder and exit without opening a window. |
 | `--scene-catalog` | With `--catalog-only`, also write `scene-inventory.json`. |

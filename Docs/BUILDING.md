@@ -355,6 +355,7 @@ build\Release\VS.Desktop.exe
 | `--disc <path>` | Use this disc (`.cue`, `.chd` or extracted folder). By default the exe looks for the `VS_DISC` environment variable, then for `disks\SLUS-01040.cue` (or `SLUS-01040\`) in its own folder or any parent folder, which finds the repo copy in a dev build. |
 | `--data <dir>` | The extracted data (§5). By default `Native\data` in the exe's folder or any parent folder. |
 | `--save-dir <dir>` | Override the native save directory. Use a dedicated ignored directory for tests; the default is `saves` beside the executable. |
+| `--input-config <file>` | Read key and gamepad bindings from this file instead of `config\input.json` beside the executable. See [Controls](#controls). |
 | `--frames <n>` | Stop after `n` logical ticks (NTSC fields: 60000/1001, approximately 59.94 per second). |
 | `--capture <dir> --at <t1,first:last,...>` | Write `frame_<t>.bmp` at individual ticks or every tick in positive inclusive ranges, e.g. `--at 100,200:500`. Ranges are stored without expanding the command line or allocating one entry per tick. A selected tick with no display image records the host's black presentation instead of silently omitting the frame. For continuous comparisons use `--speed 1`; large selections produce one BMP per selected tick, so bound the run and preserve verified lossless video before removing redundant frames. |
 | `--press <t:Buttons,...>` | Scripted presses, each held 3 ticks, e.g. `3400:Down,3500:Circle` (names: Up Down Left Right Cross Circle Square Triangle L1 R1 L2 R2 L3 R3 Start Select, joined with `+`). |
@@ -371,6 +372,34 @@ including `vs-native.log` and `game-logs`. Logging options are validated but
 cannot enable Release logging; observation/verification logging requires a
 Debug build. Extractor/launcher setup output is separate and remains available
 for actionable first-run failures. Debug diagnostic behavior is unchanged.
+
+### Controls
+
+Key and gamepad bindings live in `config\input.json` beside the executable (`--input-config <file>` picks another
+file). The game and the Combat Lab share the default file. A missing file is created with the original layout:
+
+```json
+{
+  "version": 1,
+  "keyboard": { "Up": ["Up"], "Cross": ["X"], "Start": ["Return"], "...": [] },
+  "gamepad": { "Cross": ["South"], "L2": ["LeftTrigger"], "...": [] },
+  "trigger_threshold": 16384
+}
+```
+
+Each action (`Up Down Left Right Cross Circle Square Triangle L1 R1 L2 R2 L3 R3 Start Select`) lists any number of
+keys or gamepad controls; `[]` unbinds it, and an action left out keeps its default. Keys use the names in
+`Native\Engine\src\Input\Bindings.cpp` (letters, digits, `F1`-`F12`, arrows, `Keypad8`, `LeftShift`, ...). Gamepad
+controls are positional: `South East West North DpadUp DpadDown DpadLeft DpadRight LeftShoulder RightShoulder LeftStick
+RightStick Start Back LeftTrigger RightTrigger`. A trigger counts as pressed above `trigger_threshold` (1-32767).
+The analog sticks are not bindable; the left stick still drives the d-pad in analog mode.
+
+The file is checked as a whole. Invalid JSON, a repeated JSON key, an unknown name, one key or control bound to two
+actions, or (in the Combat Lab only) one of its reserved keys F1-F8, F10 or F11 rejects it: the defaults apply, the
+file is left unchanged, and each problem is logged with the `input` channel and recorded as an `input.bindings`
+trace event.
+Release builds show the problems in a warning box. `--scripted` runs never read the file. The launcher does not
+forward `--input-config` yet.
 
 Native file-menu integration remains under verification in #18. Native slots
 are `slot00.vssave` through `slot99.vssave`, with recoverable `.bak` files;

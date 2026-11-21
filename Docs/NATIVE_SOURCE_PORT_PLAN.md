@@ -629,13 +629,13 @@ These are target designs, not an implemented-feature inventory. See §0.2 and §
 ### 6.5 Input (`Engine\Input`)
 - **Responsibility:** devices → actions.
 - **Model:**
-  - `Action` enum (Confirm, Cancel, Menu, Camera…).
+  - `Action` enum (the sixteen PS1 controls, `Input/Actions.hpp`) and `ActionSet`/`ActionState`, kept separate from physical keys and gamepad controls.
   - A `PadState` with the original PS button bitmask for Phase 1 parity (the game logic reads it).
-  - SDL3 gamepad and keyboard bindings.
+  - SDL3 gamepad and keyboard bindings (`Input/Bindings.hpp`, #52): a versioned JSON file, `config\input.json` beside the executable by default (`--input-config` overrides it), shared by `VS.Desktop` and the Combat Lab. A missing file is created with the original default layout. Any problem (invalid JSON, a duplicate JSON key, an unknown action, key or control, a key or control bound to two actions, a host-reserved key, or a bad version or trigger threshold) rejects the whole file. The defaults then apply, the file is never overwritten, and every problem is logged and recorded as an `input.bindings` trace event; Release Desktop also shows them in a warning box. Bindings load only while the devices are enabled, so `--scripted` runs never read the file. Limits: the analog sticks are not bindable, and the launcher does not forward `--input-config`.
   - Rumble (the title's Vibration option) maps to SDL rumble.
 - **Absorbs:** libpad (25 symbols, 544 uses), rewritten at copy time (R); `Input` (17 rows).
 - **Phase 2:** remapping UI, per-device prompts.
-- **Tests:** binding resolution; pad edge detection (pressed/held/repeat) matching the original repeat timings.
+- **Tests:** binding resolution and file validation (`[input-bindings]`); pad edge detection (pressed/held/repeat) matching the original repeat timings.
 
 ### 6.6 Content (`VS.Content`)
 - **Responsibility:** the disc (for VS.Extract only), every format on it, and loading the converted content in `Native\data\` (D18).

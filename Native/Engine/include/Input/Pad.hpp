@@ -4,9 +4,11 @@
 #include <limits>
 #include <string>
 #include <string_view>
+#include <utility>
 
 #include "Core/Types.hpp"
 #include "Input/Actions.hpp"
+#include "Input/Bindings.hpp"
 
 union SDL_Event;
 struct SDL_Gamepad;
@@ -72,6 +74,10 @@ class InputSystem {
   // The motor levels the next Update drives the gamepad at; ignored while the
   // devices are disabled.
   void RequestRumble(Rumble rumble) { m_rumble_request_ = rumble; }
+  // The keys and gamepad controls the devices are read through from the next
+  // Update on (DefaultBindings until a host sets others).
+  void SetBindings(Bindings bindings) { m_bindings_ = std::move(bindings); }
+  const Bindings& CurrentBindings() const { return m_bindings_; }
 
  private:
   bool OpenGamepad(u32 instance_id);
@@ -81,6 +87,7 @@ class InputSystem {
   u32 SampleGamepad(Sticks& sticks) const;
 
   SDL_Gamepad* m_pad_ = nullptr;
+  Bindings m_bindings_ = DefaultBindings();
   PadState m_state_;
   std::array<u32, std::numeric_limits<u32>::digits> m_held_ticks_{};
   u32 m_injected_ = 0;

@@ -483,6 +483,9 @@
     <ClCompile Include="src\Input\Actions.cpp">
       <Filter>src\Input</Filter>
     </ClCompile>
+    <ClCompile Include="src\Input\Bindings.cpp">
+      <Filter>src\Input</Filter>
+    </ClCompile>
     <ClInclude Include="src\Input\Buttons.hpp">
       <Filter>src\Input</Filter>
     </ClInclude>
@@ -1006,6 +1009,9 @@
       <Filter>include\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\Input\Actions.hpp">
+      <Filter>include\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Input\Bindings.hpp">
       <Filter>include\Input</Filter>
     </ClInclude>
     <ClInclude Include="include\Input\Controller.hpp">

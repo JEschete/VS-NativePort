@@ -126,6 +126,7 @@
     <ClCompile Include="src\BattleAbilityFoundationTests.cpp" />
     <ClCompile Include="src\BattleAbilityTerminalTests.cpp" />
     <ClCompile Include="src\BattleTargetingTests.cpp" />
+    <ClCompile Include="src\BindingsTests.cpp" />
     <ClCompile Include="src\BoneTrailTests.cpp" />
     <ClCompile Include="src\BreakArtsTests.cpp" />
     <ClCompile Include="src\CameraConstraintTests.cpp" />

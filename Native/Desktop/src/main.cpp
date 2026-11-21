@@ -23,6 +23,7 @@
 #include "Core/FrameClock.hpp"
 #include "Core/Log.hpp"
 #include "Diagnostics/GameplayTrace.hpp"
+#include "Input/Bindings.hpp"
 #include "Input/Pad.hpp"
 #include "Movie/MoviePlayer.hpp"
 #include "Platform/App.hpp"
@@ -343,6 +344,8 @@ struct RunSettings {
   Capture capture;
   InputScript script;
   std::optional<fs::path> save_directory;
+  // The key and gamepad bindings, read only when the devices are.
+  fs::path input_config;
   std::optional<Render::EffectPathTraceRange> effect_paths;
   std::vector<std::string> arguments;
 };
@@ -351,6 +354,7 @@ RunSettings ParseRunSettings(int argc, char** argv) {
   RunSettings settings;
   settings.arguments.assign(argv, argv + argc);
   settings.gpu_validation = Render::ChooseGpuValidation(argc, argv);
+  settings.input_config = Platform::ExecutableDir() / "config" / "input.json";
   if (auto s = Option(argc, argv, "--speed")) {
     std::from_chars(s->data(), s->data() + s->size(), settings.speed);
     settings.speed = std::max(settings.speed, 1u);
@@ -362,7 +366,8 @@ RunSettings ParseRunSettings(int argc, char** argv) {
   settings.capture = ParseCapture(argc, argv);
   settings.script = ParseInputScript(argc, argv);
   for (int i = 1; i < argc; ++i) {
-    if (std::string_view(argv[i]) == "--trace-effect-paths") {
+    const std::string_view option = argv[i];
+    if (option == "--trace-effect-paths") {
       if (i + 1 == argc) {
         throw std::runtime_error("--trace-effect-paths requires first:last");
       }
@@ -371,13 +376,20 @@ RunSettings ParseRunSettings(int argc, char** argv) {
       settings.effect_paths = *range;
       continue;
     }
-    if (std::string_view(argv[i]) != "--save-dir") continue;
+    if (option != "--save-dir" && option != "--input-config") continue;
     if (i + 1 == argc || std::string_view(argv[i + 1]).empty() ||
         std::string_view(argv[i + 1]).starts_with("--")) {
-      throw std::runtime_error("--save-dir requires a directory");
+      throw std::runtime_error(
+          std::format("{} requires a {}", option,
+                      option == "--save-dir" ? "directory" : "file path"));
     }
-    const std::string_view path = argv[++i];
-    settings.save_directory = fs::path(std::u8string(path.begin(), path.end()));
+    const std::string_view text = argv[++i];
+    const fs::path path(std::u8string(text.begin(), text.end()));
+    if (option == "--save-dir") {
+      settings.save_directory = path;
+    } else {
+      settings.input_config = path;
+    }
   }
   settings.devices =
       std::none_of(argv + 1, argv + argc, [](const char* argument) {
@@ -427,6 +439,34 @@ struct PresentedFrame {
   i32 width = 0;
   i32 height = 0;
 };
+
+// Reads the player's key and gamepad bindings. A rejected file leaves the
+// defaults in force; the player hears why from the log, or from a warning in a
+// build without one.
+void LoadInputBindings(Input::InputSystem& input, const fs::path& path,
+                       Game::GameplayTrace* trace, SDL_Window* window) {
+  auto loaded = Input::LoadBindingsFile(path);
+  if (trace != nullptr) {
+    trace->Event(
+        "input.bindings",
+        {{"path", Platform::PathText(path)},
+         {"source", std::string(Input::BindingsSourceName(loaded.source))},
+         {"diagnostics", loaded.diagnostics}});
+  }
+  if constexpr (!kEnableDetailedGameLogging) {
+    if (!loaded.diagnostics.empty()) {
+      std::string message =
+          std::format("{} could not be used, so the default controls apply:",
+                      Platform::PathText(path));
+      for (const auto& diagnostic : loaded.diagnostics) {
+        message += "\n- " + diagnostic;
+      }
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING, "Control bindings",
+                               message.c_str(), window);
+    }
+  }
+  input.SetBindings(std::move(loaded.bindings));
+}
 
 // Advances one logical tick; returns whether it produced an image.
 bool RunLogicalTick(Game::GameApp& game, Input::InputSystem& input,
@@ -495,7 +535,9 @@ int RunGame(const RunSettings& settings, Game::GameplayTrace* trace) {
   } movie_scope;
 
   Input::InputSystem input;
-  if (!settings.devices) {
+  if (settings.devices) {
+    LoadInputBindings(input, settings.input_config, trace, app.Window());
+  } else {
     input.SetDevicesEnabled(false);
     VS::Core::LogInfo("input", "--scripted: keyboard and gamepad ignored");
   }

@@ -2,12 +2,15 @@
 
 #include <SDL3/SDL.h>
 
+#include <array>
 #include <limits>
 #include <memory>
+#include <span>
 #include <string>
 
 #include "Core/Log.hpp"
 #include "Input/Actions.hpp"
+#include "Input/Bindings.hpp"
 
 namespace VS::Input {
 
@@ -22,6 +25,17 @@ constexpr u8 kDpadHighThreshold = 241;
 constexpr u32 kRumbleDurationMs = 250;
 constexpr u64 kRumbleRefreshMs = 100;
 constexpr Rumble kStillMotors{};
+
+// SDL's button for each digital GamepadControl, kSouth..kBack.
+constexpr std::array<SDL_GamepadButton, kGamepadButtonCount> kGamepadButtons{
+    SDL_GAMEPAD_BUTTON_SOUTH,         SDL_GAMEPAD_BUTTON_EAST,
+    SDL_GAMEPAD_BUTTON_WEST,          SDL_GAMEPAD_BUTTON_NORTH,
+    SDL_GAMEPAD_BUTTON_DPAD_UP,       SDL_GAMEPAD_BUTTON_DPAD_DOWN,
+    SDL_GAMEPAD_BUTTON_DPAD_LEFT,     SDL_GAMEPAD_BUTTON_DPAD_RIGHT,
+    SDL_GAMEPAD_BUTTON_LEFT_SHOULDER, SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER,
+    SDL_GAMEPAD_BUTTON_LEFT_STICK,    SDL_GAMEPAD_BUTTON_RIGHT_STICK,
+    SDL_GAMEPAD_BUTTON_START,         SDL_GAMEPAD_BUTTON_BACK,
+};
 
 u8 AxisToByte(Sint16 value) {
   return static_cast<u8>((static_cast<i32>(value) + kAxisCenter) >>
@@ -133,76 +147,34 @@ std::string InputSystem::GamepadName() const {
 }
 
 u32 InputSystem::SampleKeyboard() const {
-  // Default layout; rebinding arrives with the options/config work (plan §6.4).
-  struct Bind {
-    SDL_Scancode key;
-    u32 bit;
-  };
-  static constexpr Bind kBinds[] = {
-      {SDL_SCANCODE_UP, Up},        {SDL_SCANCODE_DOWN, Down},
-      {SDL_SCANCODE_LEFT, Left},    {SDL_SCANCODE_RIGHT, Right},
-      {SDL_SCANCODE_X, Cross},      {SDL_SCANCODE_C, Circle},
-      {SDL_SCANCODE_Z, Square},     {SDL_SCANCODE_S, Triangle},
-      {SDL_SCANCODE_Q, L1},         {SDL_SCANCODE_E, R1},
-      {SDL_SCANCODE_1, L2},         {SDL_SCANCODE_3, R2},
-      {SDL_SCANCODE_RETURN, Start}, {SDL_SCANCODE_BACKSPACE, Select},
-  };
-  const bool* keys = SDL_GetKeyboardState(nullptr);
-  u32 mask = 0;
-  for (const auto& binding : kBinds) {
-    if (keys[binding.key]) {
-      mask |= binding.bit;
-    }
+  int count = 0;
+  const bool* keys = SDL_GetKeyboardState(&count);
+  if (!keys || count <= 0) {
+    return 0;
   }
-  return mask;
+  return ResolveKeyboard(m_bindings_,
+                         std::span<const bool>(keys, static_cast<usize>(count)))
+      .PadWord();
 }
 
 u32 InputSystem::SampleGamepad(Sticks& sticks) const {
   if (!m_pad_) {
     return 0;
   }
-  struct Bind {
-    SDL_GamepadButton button;
-    u32 bit;
-  };
-  // SDL face buttons are positional: South=Cross, East=Circle, West=Square,
-  // North=Triangle.
-  static constexpr Bind kBinds[] = {
-      {SDL_GAMEPAD_BUTTON_DPAD_UP, Up},
-      {SDL_GAMEPAD_BUTTON_DPAD_DOWN, Down},
-      {SDL_GAMEPAD_BUTTON_DPAD_LEFT, Left},
-      {SDL_GAMEPAD_BUTTON_DPAD_RIGHT, Right},
-      {SDL_GAMEPAD_BUTTON_SOUTH, Cross},
-      {SDL_GAMEPAD_BUTTON_EAST, Circle},
-      {SDL_GAMEPAD_BUTTON_WEST, Square},
-      {SDL_GAMEPAD_BUTTON_NORTH, Triangle},
-      {SDL_GAMEPAD_BUTTON_LEFT_SHOULDER, L1},
-      {SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER, R1},
-      {SDL_GAMEPAD_BUTTON_LEFT_STICK, L3},
-      {SDL_GAMEPAD_BUTTON_RIGHT_STICK, R3},
-      {SDL_GAMEPAD_BUTTON_START, Start},
-      {SDL_GAMEPAD_BUTTON_BACK, Select},
-  };
-  u32 mask = 0;
-  for (const auto& binding : kBinds) {
-    if (SDL_GetGamepadButton(m_pad_, binding.button)) {
-      mask |= binding.bit;
-    }
+  GamepadSnapshot snapshot;
+  for (usize index = 0; index < kGamepadButtons.size(); ++index) {
+    snapshot.buttons.at(index) =
+        SDL_GetGamepadButton(m_pad_, kGamepadButtons.at(index));
   }
-  constexpr Sint16 kTriggerThreshold = 16384;
-  if (SDL_GetGamepadAxis(m_pad_, SDL_GAMEPAD_AXIS_LEFT_TRIGGER) >
-      kTriggerThreshold) {
-    mask |= L2;
-  }
-  if (SDL_GetGamepadAxis(m_pad_, SDL_GAMEPAD_AXIS_RIGHT_TRIGGER) >
-      kTriggerThreshold) {
-    mask |= R2;
-  }
+  snapshot.left_trigger =
+      SDL_GetGamepadAxis(m_pad_, SDL_GAMEPAD_AXIS_LEFT_TRIGGER);
+  snapshot.right_trigger =
+      SDL_GetGamepadAxis(m_pad_, SDL_GAMEPAD_AXIS_RIGHT_TRIGGER);
   sticks.lx = AxisToByte(SDL_GetGamepadAxis(m_pad_, SDL_GAMEPAD_AXIS_LEFTX));
   sticks.ly = AxisToByte(SDL_GetGamepadAxis(m_pad_, SDL_GAMEPAD_AXIS_LEFTY));
   sticks.rx = AxisToByte(SDL_GetGamepadAxis(m_pad_, SDL_GAMEPAD_AXIS_RIGHTX));
   sticks.ry = AxisToByte(SDL_GetGamepadAxis(m_pad_, SDL_GAMEPAD_AXIS_RIGHTY));
-  return mask;
+  return ResolveGamepad(m_bindings_, snapshot).PadWord();
 }
 
 const PadState& InputSystem::Update(u32 tick_speed) {

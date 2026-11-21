@@ -26,6 +26,7 @@
 #include "Core/FrameTiming.hpp"
 #include "Core/Log.hpp"
 #include "Ending/Credits/StaffRoll.hpp"
+#include "Input/Bindings.hpp"
 #include "Input/Controller.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Input/Pad.hpp"
@@ -34,6 +35,7 @@
 #include "Platform/App.hpp"
 #include "Platform/CrashHandler.hpp"
 #include "Platform/GameFiber.hpp"
+#include "Platform/Paths.hpp"
 #include "Render/Device.hpp"
 #include "Render/PageSpace.hpp"
 #include "Save/NativeMenu.hpp"
@@ -60,6 +62,9 @@ struct Options {
   fs::path sequence;
   fs::path capture;
   fs::path save_directory;
+  // The key and gamepad bindings, shared with the game; read only when the
+  // devices are.
+  fs::path input_config;
   std::uint64_t frames = 0;
   int speed = 1;
   bool start = false;
@@ -143,12 +148,18 @@ void ParseValue(Options& options, std::string_view argument,
     options.door_resume = value;
   } else if (argument == "--capture") {
     options.capture = value;
-  } else if (argument == "--save-dir") {
+  } else if (argument == "--save-dir" || argument == "--input-config") {
     if (value.empty() || value.starts_with("--")) {
-      throw std::runtime_error("--save-dir requires a directory");
+      throw std::runtime_error(
+          std::format("{} requires a {}", argument,
+                      argument == "--save-dir" ? "directory" : "file path"));
     }
-    options.save_directory =
-        fs::path(std::u8string(value.begin(), value.end()));
+    auto path = fs::path(std::u8string(value.begin(), value.end()));
+    if (argument == "--save-dir") {
+      options.save_directory = std::move(path);
+    } else {
+      options.input_config = std::move(path);
+    }
   } else if (argument == "--frames") {
     options.frames = ParseTick(value);
   } else if (argument == "--door-limit") {
@@ -250,6 +261,9 @@ Options Parse(int argc, char** argv) {
   options.gpu_validation = Render::ChooseGpuValidation(argc, argv);
   ValidateOptions(options);
   if (options.data.empty()) options.data = FindData();
+  if (options.input_config.empty()) {
+    options.input_config = Platform::ExecutableDir() / "config" / "input.json";
+  }
   return options;
 }
 
@@ -1193,6 +1207,28 @@ void ConfigureSession(const Options& options) {
   }
 }
 
+// Reads the player's bindings, refusing the keys LiveSession::Handle keeps for
+// the lab's own controls.
+void LoadInputBindings(Input::InputSystem& input, const fs::path& path,
+                       Trace& trace) {
+  constexpr std::array kLabKeys{
+      SDL_SCANCODE_F1,  SDL_SCANCODE_F2,  SDL_SCANCODE_F3, SDL_SCANCODE_F4,
+      SDL_SCANCODE_F5,  SDL_SCANCODE_F6,  SDL_SCANCODE_F7, SDL_SCANCODE_F8,
+      SDL_SCANCODE_F10, SDL_SCANCODE_F11,
+  };
+  std::array<Input::Key, kLabKeys.size()> reserved{};
+  std::ranges::transform(kLabKeys, reserved.begin(), [](SDL_Scancode key) {
+    return static_cast<Input::Key>(key);
+  });
+  auto loaded = Input::LoadBindingsFile(path, reserved);
+  trace.Event(
+      "input.bindings",
+      {{"path", Platform::PathText(path)},
+       {"source", std::string(Input::BindingsSourceName(loaded.source))},
+       {"diagnostics", loaded.diagnostics}});
+  input.SetBindings(std::move(loaded.bindings));
+}
+
 int Run(int argc, char** argv) {
   const bool player_observations =
       std::any_of(argv + 1, argv + argc, [](const char* argument) {
@@ -1232,6 +1268,9 @@ int Run(int argc, char** argv) {
     ConfigureSession(options);
     Input::InputSystem input;
     input.SetDevicesEnabled(options.devices);
+    if (options.devices) {
+      LoadInputBindings(input, options.input_config, trace);
+    }
     Canvas canvas;
     if (!ShowLoading(app, gpu, canvas, input, trace,
                      "READING ENCOUNTER CATALOG", true)) {

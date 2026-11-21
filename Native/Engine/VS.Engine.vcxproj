@@ -227,6 +227,7 @@
     <ClCompile Include="src\Core\String\GameTextLive.cpp" />
     <ClCompile Include="src\Core\Unported.cpp" />
     <ClCompile Include="src\Input\Actions.cpp" />
+    <ClCompile Include="src\Input\Bindings.cpp" />
     <ClCompile Include="src\Input\Controller.cpp" />
     <ClCompile Include="src\Input\ControllerLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -493,6 +494,7 @@
     <ClInclude Include="include\Core\Types.hpp" />
     <ClInclude Include="include\Core\Unported.hpp" />
     <ClInclude Include="include\Input\Actions.hpp" />
+    <ClInclude Include="include\Input\Bindings.hpp" />
     <ClInclude Include="include\Input\Controller.hpp" />
     <ClInclude Include="include\Input\ControllerLive.hpp" />
     <ClInclude Include="include\Input\ControllerLiveState.hpp" />
