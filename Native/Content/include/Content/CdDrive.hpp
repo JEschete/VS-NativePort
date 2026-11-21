@@ -7,6 +7,8 @@
 #include <optional>
 #include <span>
 
+#include "Content/AssetHandle.hpp"
+
 // The disc request queue and the drive's interrupt handlers (SLUS_010.40
 // main.c:9021-9500). Loaders allocate a request for a file extent, enqueue it
 // with a destination and poll it until the queue reports it loaded; the
@@ -62,10 +64,14 @@ enum class DiscInterrupt : std::uint8_t {
   kNoResult = 6,
 };
 
-// vs_main_CdFile: a file's first sector and byte count.
+// vs_main_CdFile: a file's first sector and byte count. A file named by the
+// asset catalog (#47) carries its handle instead of a sector: `sector` stays
+// 0 and `bytes` is the load size. Not the executable's 8-byte record; tables
+// relocated from the module image keep their own layout type.
 struct DiscFileExtent {
   std::int32_t sector = 0;
   std::int32_t bytes = 0;
+  AssetHandle asset{};
 };
 
 // The buffer a request reads into, as an opaque handle: the queue stores it

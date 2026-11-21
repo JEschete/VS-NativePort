@@ -27,7 +27,6 @@ namespace {
 namespace fs = std::filesystem;
 using Platform::PathText;
 using Platform::Utf8Path;
-constexpr int kPipelineVersion = 2;
 constexpr auto kReadyFile = "launcher-assets.json";
 constexpr std::string_view kUtf8ByteOrderMark = "\xEF\xBB\xBF";
 constexpr std::size_t kLongestPathCharacters = 32768;
@@ -89,6 +88,9 @@ Result SealAssets(const fs::path& data, const VerifiedDisc& source_disc,
     return result;
   }
   const auto* store = Content::DataStore::Get();
+  if (auto result = store->RequireCatalog(); !result) {
+    return result;
+  }
   for (const auto& source : disc.Files()) {
     if (source.directory) continue;
     const auto* entry = store->Find(source.path);
@@ -131,7 +133,7 @@ Result SealAssets(const fs::path& data, const VerifiedDisc& source_disc,
   }
   return WriteJson(
       data / kReadyFile,
-      {{"version", kPipelineVersion},
+      {{"version", kAssetPipelineVersion},
        {"source", SourceIdentity(source_disc.image, source_disc.sha256)},
        {"files", files}});
 }
@@ -560,7 +562,8 @@ Result CheckAssets(const fs::path& data, const fs::path& image) {
   if (!ready) return std::unexpected(ready.error());
   if (!ready->is_object() || !ready->contains("version") ||
       !ready->at("version").is_number_integer() ||
-      ready->at("version") != kPipelineVersion || !ready->contains("source") ||
+      ready->at("version") != kAssetPipelineVersion ||
+      !ready->contains("source") ||
       ready->at("source") != SourceIdentity(image, kSupportedDiscSha256) ||
       !ready->contains("files") || !ready->at("files").is_array() ||
       ready->at("files").empty()) {

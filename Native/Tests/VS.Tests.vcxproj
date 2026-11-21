@@ -114,7 +114,9 @@
     <ClCompile Include="src\AnimationPoseTests.cpp" />
     <ClCompile Include="src\AppearanceTests.cpp" />
     <ClCompile Include="src\AppearanceTransitionTests.cpp" />
+    <ClCompile Include="src\AssetCatalogTests.cpp" />
     <ClCompile Include="src\AudioControlSfxTests.cpp" />
+    <ClCompile Include="src\AudioDispatchTests.cpp" />
     <ClCompile Include="src\AudioMixerDriverTests.cpp" />
     <ClCompile Include="src\AudioMusicStreamTests.cpp" />
     <ClCompile Include="src\AudioPlaybackBanksTests.cpp" />

@@ -237,7 +237,13 @@
     <ClCompile Include="src\AppearanceTransitionTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\AssetCatalogTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\AudioControlSfxTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AudioDispatchTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\AudioMixerDriverTests.cpp">

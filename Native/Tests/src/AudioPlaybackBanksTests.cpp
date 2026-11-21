@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <array>
 #include <bit>
 #include <cstddef>
@@ -847,6 +848,7 @@ class FakeSoundBanks final : public Audio::SoundBankHost {
   std::optional<Audio::SoundSlots> slots;
   std::optional<Audio::EffectTagCursors> cursors;
   std::int32_t file_entries = 4;
+  std::optional<Audio::MenuSoundFile> missing_menu_file;
   std::optional<DiscRequestRef> next_request = RequestRef(0x100);
   BankBuffer next_buffer = Buffer(0x2000);
   std::map<DiscRequestRef, DiscRequestState> states;
@@ -892,9 +894,12 @@ class FakeSoundBanks final : public Audio::SoundBankHost {
     if (id < 0 || id >= 3) return std::nullopt;
     return id + 1;
   }
-  Content::DiscFileExtent MenuFile(Audio::MenuSoundFile file) override {
+  std::optional<Content::DiscFileExtent> MenuFile(
+      Audio::MenuSoundFile file) override {
+    if (file == missing_menu_file) return std::nullopt;
     const int index = std::to_underlying(file);
-    return {.sector = 10 + index, .bytes = 0x100 + index};
+    return Content::DiscFileExtent{.sector = 10 + index,
+                                   .bytes = 0x100 + index};
   }
   BankBuffer MenuSoundEffects() override { return Buffer(0xF000); }
 
@@ -1256,6 +1261,42 @@ TEST_CASE("Menu sound banks load in the original's order",
   };
   CHECK(host.log == expected);
   CHECK(host.cursors == Audio::EffectTagCursors{});
+  CHECK(host.refusals.empty());
+}
+
+TEST_CASE("Menu sound banks refuse a file the catalog does not name",
+          "[audio-playback-banks][audio]") {
+  FakeSoundBanks host;
+  SECTION("a sample bank is neither read nor uploaded") {
+    host.missing_menu_file = Audio::MenuSoundFile::kWave0005;
+    Audio::InitializeMenuSoundBanks(host);
+    const std::vector<std::string> expected{
+        "init-playback",
+        "mix 127",
+        "alloc 256",
+        "read 10 8192",
+        "load-bank 8192 true",
+        "free 8192",
+        "alloc 258",
+        "read 12 12288",
+        "sfx-bank 12288 0 true",
+        "free 12288",
+        "read 13 61440",
+        "bind 61440",
+        "cursors",
+    };
+    CHECK(host.log == expected);
+  }
+  SECTION("the effect programs are neither read nor bound") {
+    host.missing_menu_file = Audio::MenuSoundFile::kEffect00;
+    Audio::InitializeMenuSoundBanks(host);
+    CHECK(std::ranges::none_of(host.log, [](const std::string& entry) {
+      return entry.starts_with("bind") || entry == "read 13 61440";
+    }));
+    CHECK(host.log.back() == "cursors");
+  }
+  CHECK(host.refusals ==
+        std::vector{Audio::SoundBankRefusal::kMenuFileUnavailable});
 }
 
 TEST_CASE("Sound slot resets release no buffer or request",

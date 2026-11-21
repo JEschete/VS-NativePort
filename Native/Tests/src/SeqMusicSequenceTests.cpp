@@ -1,6 +1,8 @@
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <iterator>
 #include <limits>
 #include <optional>
 #include <span>
@@ -10,6 +12,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Audio/Mixer/MixControl.hpp"
+#include "Audio/Mixer/VoiceMixer.hpp"
 #include "Audio/Seq/Channel.hpp"
 #include "Audio/SeqMusicSequence.hpp"
 #include "Audio/SeqMusicSequenceLive.hpp"
@@ -627,23 +630,28 @@ TEST_CASE("Music commands keep their live bindings and helpers keep none",
           "[audio-seq-control][audio]") {
   using CommandHandler = void (*)(VS::Audio::CommandParams*);
   const auto symbols = VS::Content::ModuleSymbols();
-  const std::array<std::pair<std::uint32_t, CommandHandler>, 11> kept{{
-      {0x80016DF8U, &Seq::LiveStartOrResumeMusic},
-      {0x80016E74U, &Seq::LiveSaveCurrentMusic},
-      {0x80016F0CU, &Seq::LiveStartMusicLayer},
-      {0x80016FF4U, &Seq::LiveCrossfadeMusicLayers},
-      {0x800171C8U, &Seq::LiveStartMusicWithLoopCounter},
-      {0x80017498U, &Seq::LiveSetMusicVolume},
-      {0x8001754CU, &Seq::LiveFadeMusicVolume},
-      {0x8001766CU, &Seq::LiveFadeMusicVolumeFrom},
-      {0x80017764U, &Seq::LiveSetDiscVolume},
-      {0x80017798U, &Seq::LiveFadeDiscVolume},
-      {0x80017800U, &Seq::LiveFadeDiscVolumeFrom},
-  }};
-  for (const auto& [address, handler] : kept) {
-    CAPTURE(address);
-    CHECK(VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40", address) ==
-          reinterpret_cast<void*>(handler));
+  // The command table registers these directly (AudioDispatchTests checks it
+  // against the original table), so no module symbol binds them.
+  const std::array<CommandHandler, 11> kept{
+      &Seq::LiveStartOrResumeMusic,
+      &Seq::LiveSaveCurrentMusic,
+      &Seq::LiveStartMusicLayer,
+      &Seq::LiveCrossfadeMusicLayers,
+      &Seq::LiveStartMusicWithLoopCounter,
+      &Seq::LiveSetMusicVolume,
+      &Seq::LiveFadeMusicVolume,
+      &Seq::LiveFadeMusicVolumeFrom,
+      &Seq::LiveSetDiscVolume,
+      &Seq::LiveFadeDiscVolume,
+      &Seq::LiveFadeDiscVolumeFrom,
+  };
+  const auto& table = VS::Audio::Mixer::kCommandHandlers;
+  for (std::size_t index = 0; index < kept.size(); ++index) {
+    CAPTURE(index);
+    CHECK(std::ranges::find(table, kept[index]) != std::end(table));
+    CHECK(std::ranges::find(symbols, reinterpret_cast<void*>(kept[index]),
+                            &VS::Content::ModuleSymbol::target) ==
+          symbols.end());
   }
   for (const std::uint32_t address :
        {0x80015C9CU, 0x80015D38U, 0x80015D84U, 0x800160F0U, 0x80016A00U}) {

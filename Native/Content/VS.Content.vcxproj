@@ -43,6 +43,8 @@
     <ClCompile Include="src\ActorAssetsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\AssetCatalog.cpp" />
+    <ClCompile Include="src\AssetCatalogImport.cpp" />
     <ClCompile Include="src\AudioBank.cpp" />
     <ClCompile Include="src\AudioStream.cpp" />
     <ClCompile Include="src\CdDrive.cpp" />
@@ -80,6 +82,9 @@
   <ItemGroup>
     <ClInclude Include="include\Content\ActorAssets.hpp" />
     <ClInclude Include="include\Content\ActorAssetsLive.hpp" />
+    <ClInclude Include="include\Content\AssetCatalog.hpp" />
+    <ClInclude Include="include\Content\AssetCatalogImport.hpp" />
+    <ClInclude Include="include\Content\AssetHandle.hpp" />
     <ClInclude Include="include\Content\AudioBank.hpp" />
     <ClInclude Include="include\Content\AudioStream.hpp" />
     <ClInclude Include="include\Content\CdDrive.hpp" />

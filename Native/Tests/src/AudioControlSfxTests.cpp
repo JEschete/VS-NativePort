@@ -1,8 +1,10 @@
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <initializer_list>
+#include <iterator>
 #include <limits>
 #include <map>
 #include <optional>
@@ -14,6 +16,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Audio/MixControl.hpp"
+#include "Audio/Mixer/VoiceMixer.hpp"
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/Sfx.hpp"
 #include "Audio/SfxLive.hpp"
@@ -1638,24 +1641,29 @@ TEST_CASE(
     "[audio-control-sfx][audio][redirect-binding]") {
   using Handler = void (*)(VS::Audio::CommandParams*);
   const auto symbols = VS::Content::ModuleSymbols();
-  const std::array<std::pair<std::uint32_t, Handler>, 13> kept{{
-      {0x80017208U, &SoundEffects::LivePlayInterfaceProgramPair},
-      {0x80017254U, &SoundEffects::LivePlayInterfaceProgram},
-      {0x800172D4U, &SoundEffects::LivePlaySharedProgram},
-      {0x8001733CU, &SoundEffects::LivePlayBlobPrograms},
-      {0x8001746CU, &SoundEffects::LiveStopPrograms},
-      {0x80017870U, &SoundEffects::LiveSetProgramVolume},
-      {0x80017958U, &SoundEffects::LiveFadeProgramVolume},
-      {0x80017AD8U, &SoundEffects::LiveSetSceneVolume},
-      {0x80017B54U, &SoundEffects::LiveFadeSceneVolume},
-      {0x80017C1CU, &SoundEffects::LiveSetProgramPan},
-      {0x80017CFCU, &SoundEffects::LiveFadeProgramPan},
-      {0x80017E74U, &SoundEffects::LiveSetScenePan},
-      {0x80017EECU, &SoundEffects::LiveFadeScenePan},
-  }};
-  for (const auto& [address, handler] : kept) {
-    CAPTURE(address);
-    CHECK(VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40", address) ==
-          reinterpret_cast<void*>(handler));
+  // The command table registers these directly (AudioDispatchTests checks it
+  // against the original table), so no module symbol binds them.
+  const std::array<Handler, 13> kept{
+      &SoundEffects::LivePlayInterfaceProgramPair,
+      &SoundEffects::LivePlayInterfaceProgram,
+      &SoundEffects::LivePlaySharedProgram,
+      &SoundEffects::LivePlayBlobPrograms,
+      &SoundEffects::LiveStopPrograms,
+      &SoundEffects::LiveSetProgramVolume,
+      &SoundEffects::LiveFadeProgramVolume,
+      &SoundEffects::LiveSetSceneVolume,
+      &SoundEffects::LiveFadeSceneVolume,
+      &SoundEffects::LiveSetProgramPan,
+      &SoundEffects::LiveFadeProgramPan,
+      &SoundEffects::LiveSetScenePan,
+      &SoundEffects::LiveFadeScenePan,
+  };
+  const auto& table = VS::Audio::Mixer::kCommandHandlers;
+  for (std::size_t index = 0; index < kept.size(); ++index) {
+    CAPTURE(index);
+    CHECK(std::ranges::find(table, kept[index]) != std::end(table));
+    CHECK(std::ranges::find(symbols, reinterpret_cast<void*>(kept[index]),
+                            &VS::Content::ModuleSymbol::target) ==
+          symbols.end());
   }
 }

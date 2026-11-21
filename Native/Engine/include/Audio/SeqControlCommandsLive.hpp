@@ -7,7 +7,8 @@ struct SeqChannel;
 
 // Bindings from the sequencer's opcode handler tables
 // (VS::Audio::Seq::kOpcodeHandlers and VS::Audio::Seq::kExtendedOpcodeHandlers,
-// stored in the module image) to the typed flow-control commands (Control.cpp
+// typed registrations in Sequencer.cpp) to the typed flow-control commands
+// (Control.cpp
 // in src\Audio\Seq). Each handler keeps the table's signature. It runs the
 // command over the channel's program, bounded by the memory the program lies
 // in (LiveChannelProgram), and its music layer. A command whose operands or

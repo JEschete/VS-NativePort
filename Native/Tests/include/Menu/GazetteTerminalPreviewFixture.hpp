@@ -8,7 +8,6 @@
 #include <span>
 #include <stdexcept>
 #include <string>
-#include <string_view>
 #include <utility>
 
 #include "Actors/ActorRecord.hpp"
@@ -129,21 +128,6 @@ class PreviewFixture : public TerminalFixture {
       throw std::runtime_error("terminal preview fixture requires idle actors");
     }
     for (const auto owner : PreviewOwners()) saved_.Keep(owner);
-    const auto pointers = VS::Content::ModulePointerTables();
-    const auto commands = std::ranges::find_if(pointers, [](const auto& entry) {
-      return static_cast<void*>(entry.target) ==
-             static_cast<void*>(VS::Audio::Mixer::kCommandHandlers);
-    });
-    const auto executable =
-        shared::ReadImage(R"(Native\data\disc\SLUS_010.40)");
-    if (commands == pointers.end() ||
-        commands->capacity != std::size(VS::Audio::Mixer::kCommandHandlers) ||
-        commands->module == nullptr ||
-        std::string_view(commands->module) != "SLUS_010.40" ||
-        !content::RelocateModulePointerTable(*commands, executable,
-                                             VS::Content::ModuleSymbols())) {
-      throw std::runtime_error("terminal native sound command import failed");
-    }
     ImportTable(VS::Actors::textureSlotOrigins);
     ImportTable(VS::Actors::textureSlotRowOffsets);
     ImportTable(VS::Actors::sheathedWeaponAnimationBases);

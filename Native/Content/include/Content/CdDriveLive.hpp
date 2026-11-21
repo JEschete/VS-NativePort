@@ -19,12 +19,19 @@
 // array, is refused with a warning. Callers read a refused file with
 // ReadLiveRefusedDiscFile, or with CompleteLiveRefusedDiscRequest, which
 // returns a completed record that their polls and releases accept.
+//
+// #47: each call taking a DiscFile (the original's sector record) has a
+// DiscFileExtent overload, which may name a catalog asset instead of a
+// sector; the queue keeps the asset beside the legacy slot, whose record
+// then holds sector 0 and the load size. An extent naming both is refused
+// when its read starts.
 namespace VS::Content {
 
 struct DiscFile;
 struct DiscQueueSlot;
 
 DiscQueueSlot* AllocateLiveDiscRequest(const DiscFile* file);
+DiscQueueSlot* AllocateLiveDiscRequest(const DiscFileExtent& file);
 // Allocation identity, independent of the slot's address and destination.
 // Zero means unallocated/released/reset. Reusing a queue or fallback record
 // issues a fresh nonzero generation; clients can reject stale raw handles.
@@ -42,15 +49,19 @@ void InitializeLiveDiscQueue();
 void UpdateLiveDiscQueue();
 // Returns 1 only when the read completed; refusal/failure returns 0 and warns.
 int ReadLiveDiscFileBlocking(int sector, int bytes, void* destination);
+int ReadLiveDiscFileBlocking(const DiscFileExtent& file, void* destination);
 // Reads `file` into `destination` without a request (#282), once the drive
 // is free. Returns 1 when it was read; 0 (with a warning) when the drive
 // stayed busy for a minute of frames, refused the read, or failed to read.
 int ReadLiveRefusedDiscFile(const DiscFile* file, void* destination);
+int ReadLiveRefusedDiscFile(const DiscFileExtent& file, void* destination);
 // #282: reads `file` as ReadLiveRefusedDiscFile does and returns a record
 // outside the request array: Loaded when it was read, Error when not (a
 // queued request that cannot be read never loads either). Releasing the
 // record frees it for reuse; its address stays valid. Null for a null file.
 DiscQueueSlot* CompleteLiveRefusedDiscRequest(const DiscFile* file,
+                                              void* destination);
+DiscQueueSlot* CompleteLiveRefusedDiscRequest(const DiscFileExtent& file,
                                               void* destination);
 // Requests refused because the queue was full since start-up.
 [[nodiscard]] std::uint64_t LiveDiscRequestRefusals() noexcept;

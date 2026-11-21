@@ -3389,8 +3389,9 @@ int func_800F9800(void) {
         self.assertIn("VS::Core::Errorf", live[start:live.index("\n  }\n", start)])
 
     def test_sound_effect_commands_bind_their_handler_table_addresses(self):
-        # #276 audio-control-sfx: Audio_Mixer_kCommandHandlers (SLUS_010.40 0x800301E0) stores these 13 handler
-        # addresses; every other owned control/SFX address left the module symbols.
+        # Audio_Mixer_kCommandHandlers (SLUS_010.40 0x800301E0) stores these 13 handler addresses. #47 replaced
+        # the module-symbol relocation with a constinit registration in VoiceMixer.cpp, one entry per line with
+        # the original address; AudioDispatchTests.cpp checks each index against the disc words.
         handlers = {
             0x80017208: "LivePlayInterfaceProgramPair", 0x80017254: "LivePlayInterfaceProgram",
             0x800172D4: "LivePlaySharedProgram", 0x8001733C: "LivePlayBlobPrograms",
@@ -3402,13 +3403,17 @@ int func_800F9800(void) {
         }
         root = Path(__file__).resolve().parents[2]
         pointers = module_pointers_text(root)
+        mixer = (root / r"Native\Engine\src\Audio\Mixer\VoiceMixer.cpp").read_text(encoding="utf-8")
+        self.assertIn("constinit CommandHandler kCommandHandlers[kCommandHandlerCount] = {", mixer)
+        registrations = {
+            int(match.group(2), 16): match.group(1)
+            for match in re.finditer(r"&SoundEffects::(\w+),\s*// 0x[0-9A-F]{2}: (0x[0-9A-F]{8})", mixer)
+        }
         for address, name in handlers.items():
             with self.subTest(name=name):
-                binding = f"VS::Audio::SoundEffects::{name}"
-                self.assertIn(("SLUS_010.40", address, binding), copy_fixups.MODULE_BINDING_ENTRIES)
-                self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS[binding],
-                                 r"Native\Engine\include\Audio\SoundEffectProgramsLive.hpp")
-                self.assertIn(f"0x{address:08X}u, 0u, reinterpret_cast<void*>(&{binding}),", pointers)
+                self.assertEqual(registrations.get(address), name)
+                self.assertNotIn(f"0x{address:08X}u, 0u,", pointers)
+                self.assertNotIn(f"&VS::Audio::SoundEffects::{name})", pointers)
         for retired in ("Audio_PlaySfx,", "Audio_ResolveSfxProgram,", "Audio_Control_SetMusicVolume,",
                         "Audio_SoundEffects_PlayProgramPair,"):
             self.assertNotIn(f"&{retired.rstrip(',')}", pointers)
@@ -3755,7 +3760,7 @@ int func_800F9800(void) {
         background_live = (root / r"Native\Game\src\Field\BackgroundLive.cpp").read_text(encoding="utf-8")
         self.assertIn("Content::CompleteLiveRefusedDiscRequest(", background_live)
         room_loading_live = (root / r"Native\Game\src\Field\RoomLoadingLive.cpp").read_text(encoding="utf-8")
-        self.assertIn("request = Content::CompleteLiveRefusedDiscRequest(&disc_file, data);", room_loading_live)
+        self.assertIn("request = Content::CompleteLiveRefusedDiscRequest(extent, data);", room_loading_live)
         map_loading_live = "".join(
             (root / r"Native\Game\src\Menu\MapLoadingLive.cpp").read_text(encoding="utf-8").split()
         )

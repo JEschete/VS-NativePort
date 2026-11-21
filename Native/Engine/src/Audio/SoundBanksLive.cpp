@@ -1,6 +1,8 @@
 // Hand-maintained (tools/port/owned.csv).
 // Live binding for SoundBanks.hpp: the slot record (vs_main_soundData), the
-// sound-effect and wave bank file tables, _soundFileMap, the menu sound
+// asset catalog's sound-effect and wave bank file tables and menu sound files
+// (the original's _seLBAs, _soundLBAs and the files _loadMenuSound names,
+// #47), _soundFileMap, the menu sound
 // effects (_sfxData), the channel groups' next tags (D_8005FE70-D_8005FE84),
 // the disc request queue, the high end of the game heap and the playback and
 // sample bank bindings.
@@ -12,7 +14,6 @@
 #include <iterator>
 #include <optional>
 
-#include "Audio/LegacyFiles.hpp"
 #include "Audio/SampleBanksLive.hpp"
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/SfxChannelGroups.hpp"
@@ -24,7 +25,6 @@
 #include "Audio/StreamPlayback.hpp"
 #include "Audio/XaMixLive.hpp"
 #include "Content/CdDriveLive.hpp"
-#include "Content/DiscLayout.h"
 #include "Content/DiscQueue.hpp"
 #include "Core/Runtime.hpp"
 #include "Input/Settings.hpp"
@@ -42,11 +42,7 @@ static_assert(std::size(VS::Audio::soundState.music_handles) ==
 static_assert(std::size(VS::Audio::soundState.sfx_stream_data) ==
               kEffectStreamSlotCount);
 
-// The file tables' entries (ModulePointers.cpp: 400-byte word tables at
-// 0x8004A9E0, 0x8004B020, 0x8004A530 and 0x8004AB70, and the 200-byte map at
-// 0x8004B1B0); the generated declarations leave them unsized.
-constexpr std::int32_t kSfxBankFileCount = 100;
-constexpr std::int32_t kWaveBankFileCount = 100;
+// _soundFileMap's entries (the 200-byte map at 0x8004B1B0).
 constexpr std::int32_t kWaveBankMapEntries = 200;
 
 const char* RefusalReason(SoundBankRefusal refusal) {
@@ -57,6 +53,8 @@ const char* RefusalReason(SoundBankRefusal refusal) {
       return "the wave bank file is past the file table";
     case SoundBankRefusal::kWaveBankMapOutOfRange:
       return "the wave bank id is past _soundFileMap";
+    case SoundBankRefusal::kMenuFileUnavailable:
+      return "no loaded asset catalog names the menu sound file";
   }
   return "refused";
 }
@@ -146,16 +144,12 @@ class LiveSoundBanks final : public SoundBankHost {
   }
 
   std::optional<Content::DiscFileExtent> SfxBankFile(std::int32_t id) override {
-    return LiveTableFile(VS::Audio::legacySfxBankDiscOffsets,
-                         VS::Audio::legacySfxBankFileSizes, kSfxBankFileCount,
-                         id);
+    return LiveAudioFile(AudioFileTable::kSfxBanks, id);
   }
 
   std::optional<Content::DiscFileExtent> WaveBankFile(
       std::int32_t file) override {
-    return LiveTableFile(VS::Audio::legacyWaveBankDiscOffsets,
-                         VS::Audio::legacyWaveBankFileSizes, kWaveBankFileCount,
-                         file);
+    return LiveAudioFile(AudioFileTable::kWaveBanks, file);
   }
 
   std::optional<std::int32_t> MappedWaveBankFile(std::int32_t id) override {
@@ -163,18 +157,8 @@ class LiveSoundBanks final : public SoundBankHost {
     return VS::Audio::kWaveBankFileMap[static_cast<std::size_t>(id)];
   }
 
-  Content::DiscFileExtent MenuFile(MenuSoundFile file) override {
-    switch (file) {
-      case MenuSoundFile::kWave0000:
-        return {.sector = VS_WAVE0000_DAT_LBA, .bytes = VS_WAVE0000_DAT_SIZE};
-      case MenuSoundFile::kWave0005:
-        return {.sector = VS_WAVE0005_DAT_LBA, .bytes = VS_WAVE0005_DAT_SIZE};
-      case MenuSoundFile::kWave0200:
-        return {.sector = VS_WAVE0200_DAT_LBA, .bytes = VS_WAVE0200_DAT_SIZE};
-      case MenuSoundFile::kEffect00:
-        return {.sector = VS_EFFECT00_DAT_LBA, .bytes = VS_EFFECT00_DAT_SIZE};
-    }
-    return {};
+  std::optional<Content::DiscFileExtent> MenuFile(MenuSoundFile file) override {
+    return LiveMenuSoundFile(file);
   }
 
   BankBuffer MenuSoundEffects() override {
@@ -212,8 +196,7 @@ class LiveSoundBanks final : public SoundBankHost {
 
   void ReadFileBlocking(const Content::DiscFileExtent& file,
                         BankBuffer destination) override {
-    Content::ReadLiveDiscFileBlocking(file.sector, file.bytes,
-                                      LiveBufferPointer(destination));
+    Content::ReadLiveDiscFileBlocking(file, LiveBufferPointer(destination));
   }
 
   void WaitFrame() override { State::UpdateLivePlayTimeAndLoading(); }

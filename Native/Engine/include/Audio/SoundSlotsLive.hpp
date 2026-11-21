@@ -21,12 +21,14 @@ BankBuffer LiveBankBuffer(const void* data);
 void* LiveBufferPointer(BankBuffer buffer);
 BankRequest LiveBankRequest(VS::Content::DiscQueueSlot* slot);
 VS::Content::DiscQueueSlot* LiveRequestSlot(const BankRequest& request);
-// Entry `index` of a file table of `entries` sectors and sizes; nullopt past
-// it.
-std::optional<Content::DiscFileExtent> LiveTableFile(const int* sectors,
-                                                     const int* sizes,
-                                                     std::int32_t entries,
+// The asset catalog's audio file tables (#47), indexed by the original ids.
+enum class AudioFileTable : std::uint8_t { kMusic, kSfxBanks, kWaveBanks };
+// Entry `index` of a table, or a menu sound file, as the asset and the
+// whole-sector size the original's tables gave. Nullopt past the table, or,
+// with a warning, when no loaded asset catalog names the file.
+std::optional<Content::DiscFileExtent> LiveAudioFile(AudioFileTable table,
                                                      std::int32_t index);
+std::optional<Content::DiscFileExtent> LiveMenuSoundFile(MenuSoundFile file);
 
 std::optional<DiscRequestRef> AllocateLiveSlotRequest(
     const Content::DiscFileExtent& file);

@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <initializer_list>
+#include <iterator>
 #include <limits>
 #include <map>
 #include <memory>
@@ -2892,35 +2893,39 @@ TEST_CASE(
     "Mixer commands keep their live bindings and retired helpers keep none",
     "[audio-mixer-driver][audio]") {
   const auto symbols = VS::Content::ModuleSymbols();
-  const std::array<std::pair<std::uint32_t, VS::Audio::CommandHandler>, 22>
-      kept{{
-          {0x80017FB0U, &Mixer::LiveSetSoundEffectPitchScale},
-          {0x80018090U, &Mixer::LiveSlideSoundEffectPitchScale},
-          {0x80018218U, &Mixer::LiveSetWorldSoundEffectPitchScale},
-          {0x80018270U, &Mixer::LiveSlideWorldSoundEffectPitchScale},
-          {0x8001833CU, &Mixer::LiveSetTempoScale},
-          {0x80018358U, &Mixer::LiveSlideTempoScale},
-          {0x800183C0U, &Mixer::LiveSetTempoScaleRamp},
-          {0x80018434U, &Mixer::LiveSetMusicPitchScale},
-          {0x80018450U, &Mixer::LiveSlideMusicPitchScale},
-          {0x800184B8U, &Mixer::LiveSetMusicPitchScaleRamp},
-          {0x8001852CU, &Mixer::LiveStopMusicAndCancelReplacement},
-          {0x800185A0U, &Mixer::LiveStopMatchingMusic},
-          {0x80018608U, &Mixer::LiveStopWorldSoundEffects},
-          {0x800186E4U, &Mixer::LiveEnableStereoOutput},
-          {0x80018744U, &Mixer::LiveEnableMonoOutput},
-          {0x800187A4U, &Mixer::LiveSetMusicMuteMask},
-          {0x800187E4U, &Mixer::LiveSetMusicJumpThreshold},
-          {0x800187F8U, &Mixer::LivePauseMusic},
-          {0x800188E8U, &Mixer::LiveResumeMusic},
-          {0x80018984U, &Mixer::LivePauseWorldSoundEffects},
-          {0x80018AA0U, &Mixer::LiveResumeWorldSoundEffects},
-          {0x80018BD8U, &Mixer::LiveIgnoreCommand},
-      }};
-  for (const auto& [address, handler] : kept) {
-    CAPTURE(address);
-    CHECK(VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40", address) ==
-          reinterpret_cast<void*>(handler));
+  // The command table registers these directly (AudioDispatchTests checks it
+  // against the original table), so no module symbol binds them.
+  const std::array<VS::Audio::CommandHandler, 22> kept{
+      &Mixer::LiveSetSoundEffectPitchScale,
+      &Mixer::LiveSlideSoundEffectPitchScale,
+      &Mixer::LiveSetWorldSoundEffectPitchScale,
+      &Mixer::LiveSlideWorldSoundEffectPitchScale,
+      &Mixer::LiveSetTempoScale,
+      &Mixer::LiveSlideTempoScale,
+      &Mixer::LiveSetTempoScaleRamp,
+      &Mixer::LiveSetMusicPitchScale,
+      &Mixer::LiveSlideMusicPitchScale,
+      &Mixer::LiveSetMusicPitchScaleRamp,
+      &Mixer::LiveStopMusicAndCancelReplacement,
+      &Mixer::LiveStopMatchingMusic,
+      &Mixer::LiveStopWorldSoundEffects,
+      &Mixer::LiveEnableStereoOutput,
+      &Mixer::LiveEnableMonoOutput,
+      &Mixer::LiveSetMusicMuteMask,
+      &Mixer::LiveSetMusicJumpThreshold,
+      &Mixer::LivePauseMusic,
+      &Mixer::LiveResumeMusic,
+      &Mixer::LivePauseWorldSoundEffects,
+      &Mixer::LiveResumeWorldSoundEffects,
+      &Mixer::LiveIgnoreCommand,
+  };
+  for (std::size_t index = 0; index < kept.size(); ++index) {
+    CAPTURE(index);
+    CHECK(std::ranges::find(Mixer::kCommandHandlers, kept[index]) !=
+          std::end(Mixer::kCommandHandlers));
+    CHECK(std::ranges::find(symbols, reinterpret_cast<void*>(kept[index]),
+                            &VS::Content::ModuleSymbol::target) ==
+          symbols.end());
   }
   // The sound driver, the voice mixer, Sound_SetReverbMode and the
   // dispatcher are reached only through direct calls.

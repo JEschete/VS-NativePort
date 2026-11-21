@@ -2,6 +2,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <iterator>
 #include <optional>
 #include <span>
 #include <utility>
@@ -15,6 +16,7 @@
 #include "Audio/PlaybackReset.hpp"
 #include "Audio/Samples/SampleBanks.hpp"
 #include "Audio/Seq/Channel.hpp"
+#include "Audio/Seq/Sequencer.hpp"
 #include "Audio/SeqChannelCommands.hpp"
 #include "Audio/SeqEnvelopeCommands.hpp"
 #include "Audio/SeqModulationCommands.hpp"
@@ -1229,7 +1231,12 @@ TEST_CASE(
                                           0x8001B734U) == nullptr);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40",
                                           0x8001B778U) == nullptr);
-  CHECK(
-      VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40", 0x8001B4ECU) ==
-      reinterpret_cast<void*>(&Seq::LiveSetVolumeBalance));
+  // Opcode 0xA3's handler is registered directly (AudioDispatchTests checks
+  // it against the original table), so no module symbol binds it.
+  const auto& opcodes = VS::Audio::Seq::kOpcodeHandlers;
+  CHECK(std::ranges::find(opcodes, &Seq::LiveSetVolumeBalance) !=
+        std::end(opcodes));
+  CHECK(std::ranges::find(symbols,
+                          reinterpret_cast<void*>(&Seq::LiveSetVolumeBalance),
+                          &VS::Content::ModuleSymbol::target) == symbols.end());
 }

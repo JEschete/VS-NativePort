@@ -18,6 +18,7 @@
 #include <type_traits>
 #include <vector>
 
+#include "Content/AssetHandle.hpp"
 #include "Content/CdDrive.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Content/DiscReaderLive.hpp"
@@ -68,6 +69,12 @@ constexpr std::uint32_t kRefusedReadWaitFrames = 60 * 60;
 std::uint64_t refusedRequests = 0;
 std::uint64_t requestSerial = 0;
 std::array<std::uint64_t, kDiscRequestCapacity> requestGenerations{};
+// The catalog asset each request reads (#47), beside the legacy slots, which
+// keep the original's 8-byte file record. An asset request's slot holds
+// sector 0, which no file starts at; a slot that also names a sector (an
+// ambiguous extent, or a record rewritten in place) is refused when it
+// starts rather than read as either.
+std::array<AssetHandle, kDiscRequestCapacity> requestAssets{};
 
 struct RefusedRecord {
   DiscQueueSlot slot{};
@@ -116,6 +123,24 @@ DiscFileExtent Extent(const DiscFile& file) {
   return {.sector = file.lba, .bytes = file.size};
 }
 
+DiscFile RecordOf(const DiscFileExtent& file) {
+  return {.lba = file.sector, .size = file.bytes};
+}
+
+DiscFileExtent SlotFile(std::size_t index) {
+  const DiscQueueSlot& slot = discRequestSlots[index];
+  DiscFileExtent file = Extent(slot.file);
+  if (slot.state != DiscRequestState::kFree) {
+    file.asset = requestAssets[index];
+  }
+  return file;
+}
+
+// An extent names a sector or an asset, never both.
+bool Ambiguous(const DiscFileExtent& file) {
+  return file.asset.Valid() && file.sector != 0;
+}
+
 DiscRequestQueue LoadQueue() {
   DiscRequestQueue queue;
   for (std::size_t i = 0; i < kDiscRequestCapacity; ++i) {
@@ -123,7 +148,7 @@ DiscRequestQueue LoadQueue() {
     queue.requests[i] = {
         .state = slot.state,
         .priority = static_cast<std::uint16_t>(slot.priority),
-        .file = Extent(slot.file),
+        .file = SlotFile(i),
         .reserved = slot.reserved,
         .destination = Destination(slot.destination),
     };
@@ -143,6 +168,9 @@ void CommitQueue(const DiscRequestQueue& queue) {
     slot.file.size = request.file.bytes;
     slot.reserved = request.reserved;
     slot.destination = Pointer(request.destination);
+    requestAssets[i] = request.state == DiscRequestState::kFree
+                           ? AssetHandle{}
+                           : request.file.asset;
   }
   discRequestCounts.reading = static_cast<std::int16_t>(queue.reading);
   discRequestCounts.waiting = static_cast<std::int16_t>(queue.waiting);
@@ -169,13 +197,23 @@ class LiveDiscQueueHost final : public DiscQueueHost {
   }
   bool BeginRead(const DiscFileExtent& file,
                  DiscDestination destination) override {
-    const bool accepted =
-        BeginLiveDiscRead(file.sector, static_cast<std::uint32_t>(file.bytes),
-                          Pointer(destination));
-    if (!accepted) {
+    if (Ambiguous(file)) {
       VS::Core::Warnf("content",
-                      "Disc read refused: sector %d, %d bytes, state %d",
-                      file.sector, file.bytes, static_cast<int>(DriveState()));
+                      "Disc read refused: sector %d and asset %u both named",
+                      file.sector, file.asset.index);
+      return false;
+    }
+    const auto bytes = static_cast<std::uint32_t>(file.bytes);
+    const bool accepted =
+        file.asset.Valid()
+            ? BeginLiveAssetRead(file.asset, bytes, Pointer(destination))
+            : BeginLiveDiscRead(file.sector, bytes, Pointer(destination));
+    if (!accepted) {
+      VS::Core::Warnf(
+          "content",
+          "Disc read refused: sector %d, asset %u, %d bytes, state %d",
+          file.sector, file.asset.index, file.bytes,
+          static_cast<int>(DriveState()));
     } else {
       queued_request_.reset();
       read_generation_ = LiveDiscReadGeneration();
@@ -296,16 +334,20 @@ DiscQueueSlot* AllocateLiveDiscRequest(const DiscFile* file) {
     VS::Core::Warnf("content", "AllocateDiscRequest refused: null file");
     return nullptr;
   }
+  return AllocateLiveDiscRequest(Extent(*file));
+}
+
+DiscQueueSlot* AllocateLiveDiscRequest(const DiscFileExtent& file) {
   DiscRequestQueue queue = LoadQueue();
-  const std::optional<std::size_t> index =
-      AllocateDiscRequest(queue, Extent(*file));
+  const std::optional<std::size_t> index = AllocateDiscRequest(queue, file);
   if (!index) {
     if (std::has_single_bit(++refusedRequests)) {
       VS::Core::Warnf(
           "content",
           "AllocateDiscRequest refused: all %zu disc requests are in "
-          "use (sector %d, %d bytes); %" PRIu64 " refused",
-          kDiscRequestCapacity, file->lba, file->size, refusedRequests);
+          "use (sector %d, asset %u, %d bytes); %" PRIu64 " refused",
+          kDiscRequestCapacity, file.sector, file.asset.index, file.bytes,
+          refusedRequests);
     }
     return nullptr;
   }
@@ -371,6 +413,11 @@ DiscQueueSlot* CompleteLiveRefusedDiscRequest(const DiscFile* file,
     VS::Core::Warnf("content", "CompleteRefusedDiscRequest refused: null file");
     return nullptr;
   }
+  return CompleteLiveRefusedDiscRequest(Extent(*file), destination);
+}
+
+DiscQueueSlot* CompleteLiveRefusedDiscRequest(const DiscFileExtent& file,
+                                              void* destination) {
   const auto generation = NextRequestGeneration();
   if (generation == 0) {
     return nullptr;
@@ -381,7 +428,7 @@ DiscQueueSlot* CompleteLiveRefusedDiscRequest(const DiscFile* file,
   owner.generation = generation;
   record = DiscQueueSlot{};
   record.state = read ? DiscRequestState::kLoaded : DiscRequestState::kError;
-  record.file = *file;
+  record.file = RecordOf(file);
   record.destination = destination;
   return &record;
 }
@@ -440,13 +487,20 @@ void UpdateLiveDiscQueue() {
 }
 
 int ReadLiveDiscFileBlocking(int sector, int bytes, void* destination) {
+  return ReadLiveDiscFileBlocking({.sector = sector, .bytes = bytes},
+                                  destination);
+}
+
+int ReadLiveDiscFileBlocking(const DiscFileExtent& file, void* destination) {
   LiveDiscQueueHost host;
-  const auto result = ReadDiscFileBlocking(
-      host, {.sector = sector, .bytes = bytes}, Destination(destination));
+  const auto result =
+      ReadDiscFileBlocking(host, file, Destination(destination));
   if (result == DiscReadResult::kFailed) {
-    VS::Core::Warnf("content",
-                    "Accepted disc read failed: sector %d, %d bytes, state %d",
-                    sector, bytes, static_cast<int>(host.DriveState()));
+    VS::Core::Warnf(
+        "content",
+        "Accepted disc read failed: sector %d, asset %u, %d bytes, state %d",
+        file.sector, file.asset.index, file.bytes,
+        static_cast<int>(host.DriveState()));
   }
   return result == DiscReadResult::kComplete ? 1 : 0;
 }
@@ -456,14 +510,19 @@ int ReadLiveRefusedDiscFile(const DiscFile* file, void* destination) {
     VS::Core::Warnf("content", "ReadRefusedDiscFile refused: null file");
     return 0;
   }
+  return ReadLiveRefusedDiscFile(Extent(*file), destination);
+}
+
+int ReadLiveRefusedDiscFile(const DiscFileExtent& file, void* destination) {
   LiveDiscQueueHost host;
-  if (!ReadRefusedDiscFile(host, Extent(*file), Destination(destination),
+  if (!ReadRefusedDiscFile(host, file, Destination(destination),
                            kRefusedReadWaitFrames)) {
     VS::Core::Warnf(
         "content",
-        "ReadRefusedDiscFile: sector %d (%d bytes) was not read; the "
-        "drive stayed in state %d",
-        file->lba, file->size, static_cast<int>(host.DriveState()));
+        "ReadRefusedDiscFile: sector %d, asset %u (%d bytes) was not read; "
+        "the drive stayed in state %d",
+        file.sector, file.asset.index, file.bytes,
+        static_cast<int>(host.DriveState()));
     return 0;
   }
   return 1;

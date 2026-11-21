@@ -268,9 +268,8 @@ std::array<ReadRecord, 2> readRecords{};
 // 15254-15269). A block that cannot be taken leaves no request, which the
 // wait refuses; the original read into a null block.
 void BeginLiveRead(LoadedFile file, Content::DiscFileExtent extent) {
-  const VS::Content::DiscFile disc_file = ToDiscFile(extent);
   VS::Content::DiscQueueSlot* request =
-      Content::AllocateLiveDiscRequest(&disc_file);
+      Content::AllocateLiveDiscRequest(extent);
   const auto bytes = static_cast<std::size_t>(std::max(extent.bytes, 0));
   void* data = Core::Memory::AllocateLiveFromHighEnd(bytes);
   RecordOf(file) = {};
@@ -286,7 +285,7 @@ void BeginLiveRead(LoadedFile file, Content::DiscFileExtent extent) {
   if (request != nullptr) {
     Content::EnqueueLivePriorityDiscRequest(request, data);
   } else {
-    request = Content::CompleteLiveRefusedDiscRequest(&disc_file, data);
+    request = Content::CompleteLiveRefusedDiscRequest(extent, data);
   }
   RequestOf(file) = request;
 }
@@ -862,7 +861,9 @@ class LiveZoneLoadHost final
   }
 
   [[nodiscard]] Content::DiscFileExtent ZoneFile(int zone_id) const override {
-    return legacyZoneDiscFiles.at(static_cast<std::size_t>(zone_id));
+    const ZoneDiscFile& file =
+        legacyZoneDiscFiles.at(static_cast<std::size_t>(zone_id));
+    return {.sector = file.sector, .bytes = file.bytes};
   }
 
   [[nodiscard]] int ZoneMusicId(int zone_id) const override {

@@ -53,7 +53,7 @@ H0051,header,Native/Engine/src/Audio/Control/SoundControl.hpp,generated,no,pragm
 H0052,header,Native/Engine/src/Audio/Cutscene/Stream.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0053,header,Native/Engine/src/Audio/Driver/SoundDriver.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0054,header,Native/Engine/src/Audio/Legacy.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0055,header,Native/Engine/src/Audio/LegacyFiles.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
+H0055,header,Native/Engine/src/Audio/LegacyFiles.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,retired,"the audio file tables became the asset catalog's audio.json, imported by VS.Extract and read through VS::Content::AssetCatalog::Audio (#47)"
 H0056,header,Native/Engine/src/Audio/Mixer/MixControl.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0057,header,Native/Engine/src/Audio/Mixer/VoiceMixer.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0058,header,Native/Engine/src/Audio/Playback/SoundPlayback.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
@@ -463,7 +463,7 @@ S0026,source,Native/Engine/src/Audio/Driver/SoundDriver.cpp,generated,yes,,0,,,,
 S0027,source,Native/Engine/src/Audio/Driver/SoundDriverLive.cpp,owned,no,,0,,,,,,,,,done,
 S0028,source,Native/Engine/src/Audio/Driver/VoiceOutputLive.cpp,owned,no,,0,,,,,,,,,done,
 S0029,source,Native/Engine/src/Audio/Legacy.cpp,generated,yes,,0,,,,,,,,,done,
-S0030,source,Native/Engine/src/Audio/LegacyFiles.cpp,generated,yes,,0,,,,,,,,,done,
+S0030,source,Native/Engine/src/Audio/LegacyFiles.cpp,generated,yes,,0,,,,,,,,,retired,"the audio file tables became the asset catalog's audio.json, imported by VS.Extract and read through VS::Content::AssetCatalog::Audio (#47)"
 S0031,source,Native/Engine/src/Audio/Mixer/MixControlLive.cpp,owned,no,,0,,,,,,,,,done,
 S0032,source,Native/Engine/src/Audio/Mixer/VoiceMixer.cpp,generated,yes,,0,,,,,,,,,done,
 S0033,source,Native/Engine/src/Audio/Mixer/VoiceMixerLive.cpp,owned,no,,0,,,,,,,,,done,

@@ -9,7 +9,8 @@ struct SeqChannel;
 
 // Bindings from the sequencer's opcode handler tables
 // (VS::Audio::Seq::kOpcodeHandlers and VS::Audio::Seq::kExtendedOpcodeHandlers,
-// stored in the module image) to the typed voice commands (ChannelCommands.cpp,
+// typed registrations in Sequencer.cpp) to the typed voice commands
+// (ChannelCommands.cpp,
 // Envelope.cpp and Modulation.cpp in src\Audio\Seq). Each handler keeps the
 // table's signature: it reads the operands at the channel's program counter,
 // bounded by the active music layer's heap block when the counter lies in it,

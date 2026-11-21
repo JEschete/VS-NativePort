@@ -16,8 +16,8 @@ struct SeqChannel;
 // and the sequence memory.
 //
 // The command handlers keep C-callable entries:
-// VS::Audio::Mixer::kCommandHandlers (a module image) stores their addresses
-// (copy_fixups.py MODULE_BINDING_ENTRIES). Generated and owned callers of the
+// VS::Audio::Mixer::kCommandHandlers (a typed registration in VoiceMixer.cpp,
+// #47) names them. Generated and owned callers of the
 // other entries keep the original call shapes (OWNED_CALL_BINDINGS).
 namespace VS::Audio::SoundEffects {
 void LiveReleaseMatchingVoices(std::intptr_t selector, int flags);

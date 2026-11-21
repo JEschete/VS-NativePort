@@ -192,19 +192,6 @@ struct AudioRestore {
   ArrayRestore<VS::Audio::SeqChannel,
                std::size(VS::Audio::SoundEffects::channels)>
       effects{VS::Audio::SoundEffects::channels};
-
-  AudioRestore() {
-    const auto image = ReadOriginal(R"(Native\data\disc\SLUS_010.40)");
-    const auto tables = VS::Content::ModulePointerTables();
-    const auto table = std::ranges::find(
-        tables, reinterpret_cast<void**>(VS::Audio::Mixer::kCommandHandlers),
-        &VS::Content::ModulePointerTable::target);
-    if (table == tables.end() ||
-        !VS::Content::RelocateModulePointerTable(
-            *table, image, VS::Content::ModuleSymbols())) {
-      throw std::runtime_error("could not relocate production audio callbacks");
-    }
-  }
 };
 
 struct PreviewOwner {

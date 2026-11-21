@@ -1,6 +1,8 @@
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <iterator>
 #include <optional>
 #include <span>
 #include <utility>
@@ -10,6 +12,7 @@
 #include "Audio/Driver/SoundDriver.hpp"
 #include "Audio/Mixer/VoiceMixer.hpp"
 #include "Audio/Seq/Channel.hpp"
+#include "Audio/Seq/Sequencer.hpp"
 #include "Audio/SeqControlCommands.hpp"
 #include "Audio/SeqControlCommandsLive.hpp"
 #include "Audio/SeqRecordsLive.hpp"
@@ -559,39 +562,46 @@ TEST_CASE("Flow-control handlers keep module bindings only in opcode tables",
           "[audio-seq-control][audio]") {
   using Handler = void (*)(VS::Audio::SeqChannel*, int);
   const auto symbols = VS::Content::ModuleSymbols();
-  const std::array<std::pair<std::uint32_t, Handler>, 27> kept{{
-      {0x8001B138U, &Seq::LiveFinishChannel},
-      {0x8001B20CU, &Seq::LiveFinishChannelOnReplacement},
-      {0x8001B248U, &Seq::LiveSetTempo},
-      {0x8001B294U, &Seq::LiveSlideTempo},
-      {0x8001B334U, &Seq::LiveSetReverbDepth},
-      {0x8001B37CU, &Seq::LiveSlideReverbDepth},
-      {0x8001B424U, &Seq::LiveJumpRelative},
-      {0x8001B450U, &Seq::LiveJumpAtThreshold},
-      {0x8001B4A8U, &Seq::LiveCallRelative},
-      {0x8001B4E0U, &Seq::LiveReturnFromCall},
-      {0x8001B70CU, &Seq::LiveSetSequenceControlValue},
-      {0x8001C378U, &Seq::LiveIgnoreInstruction},
-      {0x8001C39CU, &Seq::LiveIgnoreInstruction},
-      {0x8001C66CU, &Seq::LiveSetVoiceAllocationStart},
-      {0x8001C68CU, &Seq::LiveResetVoiceAllocationStart},
-      {0x8001C69CU, &Seq::LivePushLoop},
-      {0x8001C6ECU, &Seq::LiveRepeatLoop},
-      {0x8001C780U, &Seq::LiveJumpOnLoopPass},
-      {0x8001C7ECU, &Seq::LiveExitLoopOnPass},
-      {0x8001C868U, &Seq::LiveRepeatLoopForever},
-      {0x8001C97CU, &Seq::LiveSetTimerDivisors},
-      {0x8001C9B4U, &Seq::LiveSetTimerCount},
-      {0x8001CBCCU, &Seq::LivePlayEmbeddedSoundEffect},
-      {0x8001CC98U, &Seq::LiveSelectNoteRemapTable},
-      {0x8001CCC8U, &Seq::LiveMarkChannelKeyed},
-      {0x8001CCE8U, &Seq::LiveClearChannelKeyed},
-      {0x8001CD2CU, &Seq::LiveStopOnInvalidInstruction},
-  }};
-  for (const auto& [address, handler] : kept) {
-    CAPTURE(address);
-    CHECK(VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40", address) ==
-          reinterpret_cast<void*>(handler));
+  // The opcode tables register these directly (AudioDispatchTests checks them
+  // against the original tables), so no module symbol binds them.
+  // LiveIgnoreInstruction stands for both of SoundVM_nop's entry points.
+  const std::array<Handler, 26> kept{
+      &Seq::LiveFinishChannel,
+      &Seq::LiveFinishChannelOnReplacement,
+      &Seq::LiveSetTempo,
+      &Seq::LiveSlideTempo,
+      &Seq::LiveSetReverbDepth,
+      &Seq::LiveSlideReverbDepth,
+      &Seq::LiveJumpRelative,
+      &Seq::LiveJumpAtThreshold,
+      &Seq::LiveCallRelative,
+      &Seq::LiveReturnFromCall,
+      &Seq::LiveSetSequenceControlValue,
+      &Seq::LiveIgnoreInstruction,
+      &Seq::LiveSetVoiceAllocationStart,
+      &Seq::LiveResetVoiceAllocationStart,
+      &Seq::LivePushLoop,
+      &Seq::LiveRepeatLoop,
+      &Seq::LiveJumpOnLoopPass,
+      &Seq::LiveExitLoopOnPass,
+      &Seq::LiveRepeatLoopForever,
+      &Seq::LiveSetTimerDivisors,
+      &Seq::LiveSetTimerCount,
+      &Seq::LivePlayEmbeddedSoundEffect,
+      &Seq::LiveSelectNoteRemapTable,
+      &Seq::LiveMarkChannelKeyed,
+      &Seq::LiveClearChannelKeyed,
+      &Seq::LiveStopOnInvalidInstruction,
+  };
+  const auto& opcodes = VS::Audio::Seq::kOpcodeHandlers;
+  const auto& extended = VS::Audio::Seq::kExtendedOpcodeHandlers;
+  for (std::size_t index = 0; index < kept.size(); ++index) {
+    CAPTURE(index);
+    CHECK((std::ranges::find(opcodes, kept[index]) != std::end(opcodes) ||
+           std::ranges::find(extended, kept[index]) != std::end(extended)));
+    CHECK(std::ranges::find(symbols, reinterpret_cast<void*>(kept[index]),
+                            &VS::Content::ModuleSymbol::target) ==
+          symbols.end());
   }
   // SoundVM_nop is stored in no table; its callers call the typed command.
   CHECK(VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40",

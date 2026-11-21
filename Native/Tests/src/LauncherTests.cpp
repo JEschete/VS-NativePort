@@ -48,11 +48,11 @@ struct LauncherFixture {
     }
   }
   void Cue(const std::string& text) const { std::ofstream(cue) << text; }
-  void Ready() const {
+  void Ready(int version = Launcher::kAssetPipelineVersion) const {
     fs::create_directories(root / "assets");
     std::ofstream(root / "assets" / "data.bin", std::ios::binary) << "data";
     Json(root / "assets" / "launcher-assets.json",
-         {{"version", 2},
+         {{"version", version},
           {"source",
            {{"image",
              VS::Platform::PathText(fs::absolute(image).lexically_normal())},
@@ -887,6 +887,7 @@ TEST_CASE("Launcher checks every inventoried asset before reusing extraction",
   SECTION("Changed source disc") {
     std::ofstream(fixture.image, std::ios::app) << "changed";
   }
+  SECTION("Prepared before the asset catalogs") { fixture.Ready(2); }
   CHECK_FALSE(Launcher::CheckAssets(fixture.root / "assets", fixture.image)
                   .has_value());
 }

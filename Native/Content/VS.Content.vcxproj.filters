@@ -21,6 +21,12 @@
     <ClCompile Include="src\ActorAssetsLive.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\AssetCatalog.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AssetCatalogImport.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\AudioBank.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -79,6 +85,15 @@
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\ActorAssetsLive.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\AssetCatalog.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\AssetCatalogImport.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\AssetHandle.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\AudioBank.hpp">

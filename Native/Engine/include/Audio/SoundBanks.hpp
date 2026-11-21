@@ -157,6 +157,8 @@ enum class SoundBankRefusal : std::uint8_t {
   kSfxBankFileOutOfRange,
   kWaveBankFileOutOfRange,
   kWaveBankMapOutOfRange,
+  // No loaded asset catalog names the menu file; it is not read.
+  kMenuFileUnavailable,
 };
 
 class SoundBankHost {
@@ -179,14 +181,16 @@ class SoundBankHost {
   virtual void StoreSoundSlots(const SoundSlots& slots) = 0;
   virtual void StoreEffectTagCursors(const EffectTagCursors& cursors) = 0;
 
-  // The file tables; nullopt for an index past them.
+  // The file tables; nullopt for an index past them or a file the asset
+  // catalog does not name.
   virtual std::optional<Content::DiscFileExtent> SfxBankFile(
       std::int32_t id) = 0;
   virtual std::optional<Content::DiscFileExtent> WaveBankFile(
       std::int32_t file) = 0;
   // _soundFileMap: the wave bank file a zone or script names.
   virtual std::optional<std::int32_t> MappedWaveBankFile(std::int32_t id) = 0;
-  virtual Content::DiscFileExtent MenuFile(MenuSoundFile file) = 0;
+  virtual std::optional<Content::DiscFileExtent> MenuFile(
+      MenuSoundFile file) = 0;
   // The static buffer _loadMenuSound reads EFFECT00 into (_sfxData).
   virtual BankBuffer MenuSoundEffects() = 0;
 

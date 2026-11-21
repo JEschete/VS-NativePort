@@ -3,12 +3,18 @@
 
 #include <cstdint>
 #include <limits>
+#include <span>
+#include <string_view>
 
 #include "Audio/XaPlayback.hpp"
+#include "Content/AssetCatalog.hpp"
+#include "Content/AssetHandle.hpp"
 #include "Content/DataAccess.hpp"
+#include "Content/DataStore.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Content/DiscReader.hpp"
 #include "Core/Diagnostics.hpp"
+#include "Core/Log.hpp"
 #include "Legacy/Psx.hpp"
 #include "Platform/LogicalTicks.hpp"
 
@@ -19,6 +25,32 @@ namespace {
 constexpr std::uint8_t kInactiveXaMarker = 128;
 std::uint64_t readGeneration = 0;
 bool readCompleted = false;
+// The asset the armed read names; none for a sector read. The drive record
+// keeps the original's fields, so the handle lives beside it.
+AssetHandle armedAsset{};
+
+// Reads the armed asset's first `bytes` into `destination`.
+bool ReadArmedAsset(std::uint32_t bytes, void* destination) {
+  const DataStore* store = DataStore::Get();
+  if (store == nullptr) {
+    VS::Core::LogError("content", "asset read refused: no data is open");
+    return false;
+  }
+  const auto read = store->ReadAsset(
+      armedAsset, std::span(static_cast<std::uint8_t*>(destination), bytes));
+  if (!read) {
+    VS::Core::LogError("content", "{}", read.error());
+    return false;
+  }
+  const AssetRecord* record = store->Catalog() != nullptr
+                                  ? store->Catalog()->Record(armedAsset)
+                                  : nullptr;
+  VS::Core::LogDebug(
+      "content", "asset read: {} ({} bytes)",
+      record != nullptr ? std::string_view(record->id) : std::string_view("?"),
+      bytes);
+  return true;
+}
 
 DiscDrivePhase PhaseOf(DiscDriveState state) {
   switch (state) {
@@ -73,8 +105,9 @@ DiscDriveState StateOf(DiscDrivePhase phase) {
 
 class LiveDiscDriveHost final : public DiscDriveHost {
  public:
-  explicit LiveDiscDriveHost(void* destination = nullptr)
-      : destination_(destination) {}
+  explicit LiveDiscDriveHost(void* destination = nullptr,
+                             AssetHandle asset = {})
+      : destination_(destination), asset_(asset) {}
 
   [[nodiscard]] DiscDrivePhase Phase() const override {
     return PhaseOf(discDriveState.state);
@@ -96,6 +129,7 @@ class LiveDiscDriveHost final : public DiscDriveHost {
     drive.failure_count = 0;
     drive.ring_sectors_written = 0;
     drive.sector_count = plan.sector_count;
+    armedAsset = asset_;
   }
   [[nodiscard]] DiscReadPlan PendingRead() const override {
     const DiscDrive& drive = discDriveState;
@@ -108,6 +142,10 @@ class LiveDiscDriveHost final : public DiscDriveHost {
   [[nodiscard]] bool ReadPendingData() override {
     readCompleted = false;
     const DiscDrive& drive = discDriveState;
+    if (armedAsset.Valid()) {
+      return ReadArmedAsset(static_cast<std::uint32_t>(drive.byte_count),
+                            drive.destination);
+    }
     return ReadDiscBytes(static_cast<unsigned>(drive.start_sector),
                          static_cast<unsigned>(drive.byte_count),
                          drive.destination) != 0;
@@ -156,12 +194,11 @@ class LiveDiscDriveHost final : public DiscDriveHost {
 
  private:
   void* destination_;
+  AssetHandle asset_;
 };
 
-}  // namespace
-
-bool BeginLiveDiscRead(std::int32_t sector, std::uint32_t bytes,
-                       void* destination) {
+bool BeginRead(std::int32_t sector, std::uint32_t bytes, void* destination,
+               AssetHandle asset) {
   if ((bytes != 0 && destination == nullptr) ||
       readGeneration == std::numeric_limits<std::uint64_t>::max()) {
     VS::Core::Warnf(
@@ -169,11 +206,27 @@ bool BeginLiveDiscRead(std::int32_t sector, std::uint32_t bytes,
         "Disc read refused: missing destination or exhausted generation");
     return false;
   }
-  LiveDiscDriveHost host(destination);
+  LiveDiscDriveHost host(destination, asset);
   if (!BeginDiscRead(host, sector, bytes)) return false;
   ++readGeneration;
   readCompleted = false;
   return true;
+}
+
+}  // namespace
+
+bool BeginLiveDiscRead(std::int32_t sector, std::uint32_t bytes,
+                       void* destination) {
+  return BeginRead(sector, bytes, destination, {});
+}
+
+bool BeginLiveAssetRead(AssetHandle asset, std::uint32_t bytes,
+                        void* destination) {
+  if (!asset.Valid()) {
+    VS::Core::Warnf("content", "Asset read refused: no asset");
+    return false;
+  }
+  return BeginRead(0, bytes, destination, asset);
 }
 
 std::uint64_t LiveDiscReadGeneration() noexcept { return readGeneration; }
@@ -189,6 +242,7 @@ void CancelLiveDiscRead(const void* destination) {
   }
   if (discDriveState.destination != destination) return;
   readCompleted = false;
+  armedAsset = {};
   discDriveState.destination = nullptr;
   const auto phase = PhaseOf(discDriveState.state);
   if (phase == DiscDrivePhase::kReadXaInit ||
@@ -208,6 +262,7 @@ void UpdateLiveDiscCommands() {
 
 void ResetLiveDiscDrive() {
   readCompleted = false;
+  armedAsset = {};
   discDriveState.destination = nullptr;
   LiveDiscDriveHost host;
   ResetDiscDrive(host);

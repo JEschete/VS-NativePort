@@ -284,12 +284,24 @@ rem Diagnostic: list the disc's files.
 build\Debug\VS.Extract.exe list    disks\SLUS-01040.cue
 build\Debug\VS.Extract.exe audio   Native\data\disc Native\data
 build\Debug\VS.Extract.exe streams disks\SLUS-01040.cue Native\data
+rem Rewrite catalogs\ for an existing data directory without re-extracting.
+build\Debug\VS.Extract.exe catalogs Native\data
 ```
 
 - Writes `Native\data\disc\<disc path>` for every file and `Native\data\files.tsv` (sector, size, form, path).
   Files not converted yet are copied as they are (form `raw`); the intro movie becomes `MOV\TITLE.STR.mkv` (AV1 +
   FLAC, form `mkv`). Effect and ending audio are imported separately under `audio\streams`;
   the ending's legacy sector-data row remains `stream`, not a raw readable disc file.
+- `extract` finishes by writing `Native\data\catalogs\assets.json` and `audio.json` (#47). `assets.json`
+  names every `raw` file with a stable asset id (`asset.` + the lowercase disc path, `/` → `.`,
+  e.g. `asset.music.music000.dat`), its size and its original path/sector as provenance. `audio.json`
+  maps the executable's music, sound-effect and wave-bank tables and the menu sound files to those ids.
+  The importer reads the tables from `SLUS_010.40` and refuses an entry whose sector, directory or
+  whole-sector size does not match an extracted file. A failed import leaves the previous catalogs.
+  `catalogs` rewrites them for an existing data directory; the output is identical on a second run.
+- The game, Combat Lab and launcher refuse to start without valid catalogs and say which command to run.
+  An invalid catalog names the file, JSON pointer and rule it broke. The launcher's pipeline version
+  is 3, so a data directory prepared before catalogs existed is prepared again.
 - Takes about a minute. Run it again after an extractor change; the converters replace one `raw` form at a time.
 - With FFmpeg available, it stops with an error if FFmpeg has no AV1 encoder or the movie conversion fails.
   Without FFmpeg, it lists the movie unconverted and warns.

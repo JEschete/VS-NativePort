@@ -292,6 +292,10 @@ void LoadData(const Options& options) {
   if (const auto opened = Content::DataStore::Open(options.data); !opened) {
     throw std::runtime_error(opened.error());
   }
+  if (const auto catalog = Content::DataStore::Get()->RequireCatalog();
+      !catalog) {
+    throw std::runtime_error(catalog.error());
+  }
   if (VS::Content::LoadModuleData() != 0) {
     throw std::runtime_error("required production module data failed to load");
   }

@@ -619,11 +619,15 @@ int RunDesktop(int argc, char** argv, Game::GameplayTrace* trace) {
     }
     return 1;
   }
-  if (auto result = Content::DataStore::Open(*data_root); !result) {
-    VS::Core::LogError("boot", "{}", result.error());
+  // The asset catalog (#47) names every file the game reads by id; data
+  // prepared before it existed has none.
+  auto opened = Content::DataStore::Open(*data_root);
+  if (opened) opened = Content::DataStore::Get()->RequireCatalog();
+  if (!opened) {
+    VS::Core::LogError("boot", "{}", opened.error());
     if constexpr (!kEnableDetailedGameLogging) {
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Game data unavailable",
-                               result.error().c_str(), nullptr);
+                               opened.error().c_str(), nullptr);
     }
     return 1;
   }

@@ -2,14 +2,19 @@
 
 #include <algorithm>
 #include <charconv>
+#include <cstddef>
 #include <cstring>
+#include <format>
 #include <fstream>
+#include <limits>
 #include <memory>
 #include <string>
+#include <system_error>
 #include <unordered_set>
 #include <utility>
 #include <vector>
 
+#include "Content/AssetCatalog.hpp"
 #include "Content/DataAccess.hpp"
 #include "Core/Log.hpp"
 #include "Platform/CrashHandler.hpp"
@@ -25,6 +30,10 @@ std::unique_ptr<DataStore>& Instance() {
   static std::unique_ptr<DataStore> store;
   return store;
 }
+
+// The last catalog generation issued; handles from earlier catalogs no longer
+// resolve.
+u32 catalogGeneration = 0;
 
 bool ParseU32(std::string_view s, u32& out) {
   const auto r = std::from_chars(s.data(), s.data() + s.size(), out);
@@ -56,7 +65,8 @@ bool DataStore::Entry::ContainsSector(u32 sector) const {
          static_cast<u64>(sector) < static_cast<u64>(lba) + SectorCount();
 }
 
-std::expected<void, std::string> DataStore::Open(const fs::path& root) {
+std::expected<std::vector<DataStore::Entry>, std::string>
+DataStore::LoadManifest(const fs::path& root) {
   enum : usize {
     kLbaColumn,
     kSizeColumn,
@@ -70,8 +80,7 @@ std::expected<void, std::string> DataStore::Open(const fs::path& root) {
                            Platform::PathText(root / ManifestName) +
                            " (run VS.Extract extract <disc> <dir>)");
   }
-  auto store = std::make_unique<DataStore>();
-  store->m_root_ = root;
+  std::vector<Entry> entries;
   std::string line;
   std::getline(in, line);  // header
   while (std::getline(in, line)) {
@@ -99,12 +108,78 @@ std::expected<void, std::string> DataStore::Open(const fs::path& root) {
     }
     e.form = cols[kFormColumn];
     e.path = cols[kPathColumn];
-    store->m_entries_.push_back(std::move(e));
+    entries.push_back(std::move(e));
   }
-  std::ranges::sort(store->m_entries_, {}, &Entry::lba);
-  VS::Core::LogInfo("content", "extracted data: {} files from {}",
-                    store->m_entries_.size(), Platform::PathText(root));
+  std::ranges::sort(entries, {}, &Entry::lba);
+  return entries;
+}
+
+std::expected<void, std::string> DataStore::Open(const fs::path& root) {
+  auto entries = LoadManifest(root);
+  if (!entries) return std::unexpected(entries.error());
+  auto store = std::make_unique<DataStore>();
+  store->m_root_ = root;
+  store->m_entries_ = std::move(*entries);
+  std::error_code error;
+  const fs::path catalogs = root / Platform::Utf8Path(kCatalogDirectory);
+  if (fs::exists(catalogs, error)) {
+    if (catalogGeneration == std::numeric_limits<u32>::max()) {
+      return std::unexpected("asset catalog generations exhausted");
+    }
+    auto catalog = AssetCatalog::Load(root, ++catalogGeneration);
+    if (!catalog) {
+      return std::unexpected(catalog.error() + " (re-run VS.Extract catalogs " +
+                             Platform::PathText(root) + ")");
+    }
+    store->m_catalog_ = std::move(*catalog);
+  } else if (error) {
+    return std::unexpected("cannot inspect " + Platform::PathText(catalogs) +
+                           ": " + error.message());
+  }
+  VS::Core::LogInfo("content", "extracted data: {} files, {} assets from {}",
+                    store->m_entries_.size(),
+                    store->m_catalog_ ? store->m_catalog_->Size() : 0,
+                    Platform::PathText(root));
   Instance() = std::move(store);
+  return {};
+}
+
+std::expected<void, std::string> DataStore::RequireCatalog() const {
+  if (m_catalog_) return {};
+  return std::unexpected(
+      "no asset catalog in " +
+      Platform::PathText(m_root_ / Platform::Utf8Path(kCatalogDirectory)) +
+      " (run VS.Extract catalogs " + Platform::PathText(m_root_) +
+      ", or prepare the disc again with VS.Launcher)");
+}
+
+std::expected<void, std::string> DataStore::ReadAsset(AssetHandle asset,
+                                                      std::span<u8> out) const {
+  if (!m_catalog_) {
+    return std::unexpected("asset read refused: no asset catalog is loaded");
+  }
+  const AssetRecord* record = m_catalog_->Record(asset);
+  if (record == nullptr) {
+    return std::unexpected(std::format(
+        "asset read refused: handle {}/{} was not issued by the open catalog "
+        "(generation {})",
+        asset.index, asset.generation, m_catalog_->Generation()));
+  }
+  if (out.size() > record->LoadBytes()) {
+    return std::unexpected(
+        std::format("asset read refused: {} bytes exceed {}'s {}-byte load",
+                    out.size(), record->id, record->LoadBytes()));
+  }
+  const usize bytes = std::min<usize>(out.size(), record->bytes);
+  const fs::path path = m_catalog_->FileOf(*record);
+  std::ifstream file(path, std::ios::binary);
+  file.read(reinterpret_cast<char*>(out.data()),
+            static_cast<std::streamsize>(bytes));
+  if (!file || static_cast<usize>(file.gcount()) != bytes) {
+    return std::unexpected(std::format("cannot read {} bytes of {} ({})", bytes,
+                                       Platform::PathText(path), record->id));
+  }
+  std::fill(out.begin() + static_cast<std::ptrdiff_t>(bytes), out.end(), u8{0});
   return {};
 }
 

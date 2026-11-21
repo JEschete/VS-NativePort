@@ -14,8 +14,8 @@ struct CommandParams;
 // and the voice output.
 //
 // The command handlers keep C-callable entries:
-// VS::Audio::Mixer::kCommandHandlers (a module image) stores their addresses
-// (copy_fixups.py MODULE_BINDING_ENTRIES). Each reads its words from `params`;
+// VS::Audio::Mixer::kCommandHandlers (a typed registration in VoiceMixer.cpp,
+// #47) names them. Each reads its words from `params`;
 // func_8001833C and func_80018434 read the low byte of `params->param1`.
 namespace VS::Audio::Mixer {
 void LiveSetSoundEffectPitchScale(VS::Audio::CommandParams* params);

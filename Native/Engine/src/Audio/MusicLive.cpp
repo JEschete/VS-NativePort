@@ -1,6 +1,7 @@
 // Hand-maintained (tools/port/owned.csv).
-// Live binding for Music.hpp: the slot record (vs_main_soundData), the music
-// file table (_musicLBAs, _musicFileSizes), the disc request queue, the high
+// Live binding for Music.hpp: the slot record (vs_main_soundData), the asset
+// catalog's music table (the original's _musicLBAs and _musicFileSizes, #47),
+// the disc request queue, the high
 // end of the game heap, the playback front end, the sound control requests
 // and the zone context's music switch (D_800F18B0).
 #include "Audio/MusicLive.hpp"
@@ -11,7 +12,6 @@
 #include <iterator>
 #include <optional>
 
-#include "Audio/LegacyFiles.hpp"
 #include "Audio/Music.hpp"
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/SoundBanks.hpp"
@@ -93,8 +93,7 @@ class LiveMusic final : public MusicHost {
   }
 
   std::optional<Content::DiscFileExtent> MusicFile(std::int32_t id) override {
-    return LiveTableFile(VS::Audio::legacyMusicDiscOffsets,
-                         VS::Audio::legacyMusicFileSizes, kMusicFileCount, id);
+    return LiveAudioFile(AudioFileTable::kMusic, id);
   }
 
   std::uint32_t StartMusic(BankBuffer music) override {

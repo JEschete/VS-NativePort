@@ -13,6 +13,7 @@
 #include <utility>
 #include <vector>
 
+#include "Content/AssetCatalogImport.hpp"
 #include "Content/AudioBank.hpp"
 #include "Content/AudioStream.hpp"
 #include "Content/DataStore.hpp"
@@ -36,6 +37,7 @@ namespace {
 constexpr int kMinimumArguments = 3;
 constexpr int kExtractArguments = 4;
 constexpr int kOutputArgument = 3;
+constexpr int kCatalogArguments = 3;
 
 int Usage() {
   std::puts(
@@ -47,10 +49,14 @@ int Usage() {
       "<ffmpeg.exe>]\n"
       "  VS.Extract extract <disc.cue|disc.chd|folder> <outdir> [--ffmpeg "
       "<ffmpeg.exe>]\n"
+      "  VS.Extract catalogs <datadir>\n"
       "      Form 1 files are copied as they are; movies (*.STR) are converted "
       "to Matroska (AV1 + FLAC)\n"
       "      with FFmpeg (found on PATH, or --ffmpeg). Effect audio and XA "
-      "are imported under audio/streams as lossless PCM assets.");
+      "are imported under audio/streams as lossless PCM assets.\n"
+      "      extract also writes catalogs/ (asset ids and the audio tables); "
+      "catalogs rewrites\n"
+      "      them from an extracted folder.");
   return 2;
 }
 
@@ -332,6 +338,18 @@ int ListDisc(const Content::Disc& disc) {
   return 0;
 }
 
+// catalogs/ from the manifest and executable already under root.
+int WriteCatalogs(const fs::path& root) {
+  const auto written = Content::WriteAssetCatalogs(root);
+  if (!written) {
+    VS::Core::LogError("extract", "{}", written.error());
+    return 1;
+  }
+  VS::Core::LogInfo("extract", "wrote {} with {} assets",
+                    Platform::PathText(root / "catalogs"), *written);
+  return 0;
+}
+
 int ExtractDisc(const Content::Disc& disc, int argc, char** argv) {
   // <outdir>\disc\<path> for each file, and the manifest Content::DataStore
   // reads (sector, size, form, path). Interleaved files (movies, XA audio)
@@ -411,6 +429,7 @@ int ExtractDisc(const Content::Disc& disc, int argc, char** argv) {
   VS::Core::LogInfo(
       "extract", "wrote {} files to {} ({} interleaved listed, not converted)",
       written, Platform::PathText(out), skipped);
+  if (WriteCatalogs(out) != 0) return 1;
   return ConvertStreams(disc, out, ffmpeg);
 }
 
@@ -427,6 +446,11 @@ int Run(int argc, char** argv) {
     return Usage();
   }
   const std::string cmd = argv[1];
+  if (cmd == "catalogs") {
+    return argc == kCatalogArguments
+               ? WriteCatalogs(Platform::Utf8Path(argv[2]))
+               : Usage();
+  }
   auto disc = Content::Disc::Open(Platform::Utf8Path(argv[2]));
   if (!disc) {
     VS::Core::LogError("extract", "{}", disc.error());

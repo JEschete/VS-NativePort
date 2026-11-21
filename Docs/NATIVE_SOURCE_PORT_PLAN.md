@@ -645,6 +645,13 @@ These are target designs, not an implemented-feature inventory. See §0.2 and §
 - **Model:**
   - `Disc` opens `.bin/.cue` (mode 2 raw sectors) and parses ISO9660 itself. **Only VS.Extract uses it**; the game never reads the disc.
   - `AssetId` registry: every file the game references by LBA or index becomes a named ID (`asset.movie.title`), mapped to its converted file(s) in `Native\data\`.
+    **Status (#47):** `Content::AssetCatalog` (`catalogs\assets.json`, schema `vs.assets` v1) names every `raw` extracted file
+    `asset.<lowercase disc path, '/' → '.'>` with its size and original path/sector as provenance only. `catalogs\audio.json`
+    (`vs.audio` v1) maps the music, SFX-bank and wave-bank tables and the menu sound files to IDs. `AssetHandle` is
+    `{record, generation}`; reopening the data issues a new generation, so an old handle is refused rather than reread.
+    `DataStore::ReadAsset` and the disc queue's asset requests read an asset by handle at its whole-sector load size.
+    VS.Extract (`AssetCatalogImport`) is the only code that turns sectors and executable tables into IDs. Converted forms
+    (`mkv`, `stream`) and the remaining sector-addressed consumers are not migrated yet (EC-04).
   - `AsyncLoader` does background loads with completion handles, replacing `DsRead` callbacks.
   - **Decoders** (used by VS.Extract and the round-trip tests) produce typed objects: TIM, MPD, ZND, SHP, SEQ, WEP, ARM, ZUD, SYD, FBT/FBC, EVT, AKAO, XA, MCDATA, ITEMNAME/ITEMHELP text, HF0/HF1 help, EFFECT data.
   - **Loaders** (used by the game) read glTF, PNG, WAV, FLAC and JSON from `Native\data\` and build the same typed objects. The round-trip rule in ASSET_PIPELINE §7 proves `decode(raw) == load(converted)`.
@@ -1464,6 +1471,18 @@ registrations rather than serialized function addresses. Separate disk layout fr
 **Retirement gate:** required tables resolve with validated bounds before their consumers run; malformed inputs produce
 precise errors. Ultimately the shipping game runs from versioned converted assets with the original disc unavailable and
 has no module-image copying, sector arithmetic or original-address relocation dependency.
+
+**#47 status (first migrated slice):** `VS.Extract catalogs` imports `catalogs/assets.json` (a stable `asset.*` ID per raw
+extracted file, with LBA/path kept only as provenance) and `catalogs/audio.json` (the music, SFX-bank, wave-bank and
+menu-sound tables, read from the user's `SLUS_010.40`). `DataStore` validates both with precise `file: pointer: rule`
+errors, and Desktop, CombatLab and the Launcher (pipeline 3) refuse to start without them. The audio slice
+(`SoundSlotsLive`, `MusicLive`, `SoundBanks*`) requests catalog handles through `DiscFileExtent::asset`; the queue
+rejects an extent naming both a sector and an asset, and a handle from an earlier catalog generation. `LegacyFiles`
+(the copied LBA/size tables) is deleted. The sound command table (`D_800301E0`) and the AKAO opcode tables
+(`D_800305E0`, `D_80030760`) are constinit typed registrations whose disc parity `AudioDispatchTests.cpp` checks, and
+their 149 handler addresses and 3 pointer tables left `ModulePointers.cpp`. Remaining: actor/model, room/zone, menu,
+effect and movie consumers still request sectors; `MOV/TITLE.STR` and `ENDING.XA` have no asset IDs; the other
+module-image copies and relocated tables remain.
 
 #### EC-05: Scratchpad and overlay-offset preservation
 

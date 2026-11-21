@@ -3,11 +3,14 @@
 #include <expected>
 #include <filesystem>
 #include <memory>
+#include <optional>
 #include <span>
 #include <string>
 #include <string_view>
 #include <vector>
 
+#include "Content/AssetCatalog.hpp"
+#include "Content/AssetHandle.hpp"
 #include "Core/Types.hpp"
 
 namespace VS::Content {
@@ -17,7 +20,9 @@ namespace VS::Content {
 // disc\; files.tsv lists each one's first sector, size and form ("raw" = the
 // disc file as is; otherwise the converted file's extension, e.g. "mkv" for
 // MOV/TITLE.STR.mkv; "stream" = an interleaved file not converted), so code
-// that still addresses the disc by sector finds it.
+// that still addresses the disc by sector finds it. catalogs\ holds the asset
+// catalog (AssetCatalog.hpp), the runtime contract migrated consumers read
+// assets through instead of sectors.
 class DataStore {
  public:
   // Exclusive, stack-nested override of the process-wide service. Keeps the
@@ -53,7 +58,12 @@ class DataStore {
 
   static constexpr const char* ManifestName = "files.tsv";
 
-  // Opens the process-wide store (used by the C API in Content/DataAccess.h).
+  // Reads root's files.tsv alone (the asset importer's input), sorted by lba.
+  static std::expected<std::vector<Entry>, std::string> LoadManifest(
+      const std::filesystem::path& root);
+  // Opens the process-wide store (used by the C API in Content/DataAccess.h):
+  // the manifest and, when root\catalogs\ exists, the asset catalog, which
+  // must then load. Each open catalog gets a fresh handle generation.
   static std::expected<void, std::string> Open(
       const std::filesystem::path& root);
   static const DataStore* Get();
@@ -68,9 +78,23 @@ class DataStore {
   bool Read(const Entry& e, u64 offset, std::span<u8> out) const;
   std::expected<std::vector<u8>, std::string> ReadAll(const Entry& e) const;
 
+  // Null when the store has no catalogs\ (synthetic test stores).
+  [[nodiscard]] const AssetCatalog* Catalog() const {
+    return m_catalog_ ? &*m_catalog_ : nullptr;
+  }
+  // The game and tools that play from this store need its catalog; the error
+  // says how to make one.
+  [[nodiscard]] std::expected<void, std::string> RequireCatalog() const;
+  // Reads `asset` into `out` as the original's whole-sector load did: its
+  // bytes, then zeros. Refuses an asset this store's catalog did not issue
+  // and a destination past the asset's load size.
+  [[nodiscard]] std::expected<void, std::string> ReadAsset(
+      AssetHandle asset, std::span<u8> out) const;
+
  private:
   std::filesystem::path m_root_;
   std::vector<Entry> m_entries_;  // sorted by lba
+  std::optional<AssetCatalog> m_catalog_;
 };
 
 }  // namespace VS::Content

@@ -207,12 +207,6 @@
     <ClInclude Include="src\Audio\Legacy.hpp">
       <Filter>src\Audio</Filter>
     </ClInclude>
-    <ClCompile Include="src\Audio\LegacyFiles.cpp">
-      <Filter>src\Audio</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Audio\LegacyFiles.hpp">
-      <Filter>src\Audio</Filter>
-    </ClInclude>
     <ClCompile Include="src\Audio\Mixer\MixControl.cpp">
       <Filter>src\Audio\Mixer</Filter>
     </ClCompile>

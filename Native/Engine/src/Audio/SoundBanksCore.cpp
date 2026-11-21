@@ -60,11 +60,21 @@ void StopBankSoundEffects(SoundBankHost& host, std::int32_t effect_tags) {
   host.StopSoundEffects(Playback::EffectSelector::kNone, effect_tags);
 }
 
-// Reads a menu file into a buffer from the high end.
-BankBuffer ReadMenuFile(SoundBankHost& host, MenuSoundFile file) {
-  const Content::DiscFileExtent extent = host.MenuFile(file);
-  const BankBuffer buffer = host.AllocateBuffer(extent.bytes);
-  host.ReadFileBlocking(extent, buffer);
+std::optional<Content::DiscFileExtent> MenuFile(SoundBankHost& host,
+                                                MenuSoundFile file) {
+  std::optional<Content::DiscFileExtent> extent = host.MenuFile(file);
+  if (!extent) host.Refuse(SoundBankRefusal::kMenuFileUnavailable);
+  return extent;
+}
+
+// Reads a menu file into a buffer from the high end; nullopt, read nothing,
+// for a file the host cannot name.
+std::optional<BankBuffer> ReadMenuFile(SoundBankHost& host,
+                                       MenuSoundFile file) {
+  const std::optional<Content::DiscFileExtent> extent = MenuFile(host, file);
+  if (!extent) return std::nullopt;
+  const BankBuffer buffer = host.AllocateBuffer(extent->bytes);
+  host.ReadFileBlocking(*extent, buffer);
   return buffer;
 }
 }  // namespace
@@ -256,18 +266,26 @@ void SetMonoOutput(SoundBankHost& host, std::int32_t mono_enabled) {
 void InitializeMenuSoundBanks(SoundBankHost& host) {
   host.InitializePlayback();
   host.SetDiscMixVolume(kMenuDiscMixVolume);
+  // A file the host cannot name is skipped: nothing is uploaded or bound
+  // from a buffer that was not read.
   for (const MenuSoundFile file :
        {MenuSoundFile::kWave0000, MenuSoundFile::kWave0005}) {
-    const BankBuffer bank = ReadMenuFile(host, file);
-    host.LoadBank(bank, true);
-    host.FreeBuffer(bank);
+    if (const std::optional<BankBuffer> bank = ReadMenuFile(host, file)) {
+      host.LoadBank(*bank, true);
+      host.FreeBuffer(*bank);
+    }
   }
-  const BankBuffer effect_bank = ReadMenuFile(host, MenuSoundFile::kWave0200);
-  host.LoadSoundEffectBank(effect_bank, kMenuSfxBankUploadSlot, true);
-  host.FreeBuffer(effect_bank);
-  const BankBuffer effects = host.MenuSoundEffects();
-  host.ReadFileBlocking(host.MenuFile(MenuSoundFile::kEffect00), effects);
-  host.BindSoundEffectPrograms(effects);
+  if (const std::optional<BankBuffer> effect_bank =
+          ReadMenuFile(host, MenuSoundFile::kWave0200)) {
+    host.LoadSoundEffectBank(*effect_bank, kMenuSfxBankUploadSlot, true);
+    host.FreeBuffer(*effect_bank);
+  }
+  if (const std::optional<Content::DiscFileExtent> programs =
+          MenuFile(host, MenuSoundFile::kEffect00)) {
+    const BankBuffer effects = host.MenuSoundEffects();
+    host.ReadFileBlocking(*programs, effects);
+    host.BindSoundEffectPrograms(effects);
+  }
   host.StoreEffectTagCursors(EffectTagCursors{});
 }
 

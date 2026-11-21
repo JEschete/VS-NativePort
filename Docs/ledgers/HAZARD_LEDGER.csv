@@ -89,6 +89,7 @@ f5a19ff76c15,DIV-ZERO,medium,pattern,,InspectAudioStream,Native/Content/src/Audi
 0c0fde31cfff,DIV-ZERO,medium,pattern,,InspectAudioStream,Native/Content/src/AudioStream.cpp,117,PsxAdpcmDecoder,48,7,open,
 1cd5c7d3e6d3,DIV-ZERO,medium,pattern,,SelectXaAudioSectors,Native/Content/src/AudioStream.cpp,291,sample_rate,48,7,open,
 981ecc802501,DIV-ZERO,medium,pattern,,SelectXaAudioSectors,Native/Content/src/AudioStream.cpp,291,channels,48,7,open,
+3c37761904cc,DIV-ZERO,medium,pattern,,RequireCatalog,Native/Content/src/DataStore.cpp,124,Platform,47,6,false-positive,"root / Platform::Utf8Path(kCatalogDirectory) is std::filesystem::path concatenation, not arithmetic division"
 bca3b9ef41b4,DIV-ZERO,medium,pattern,F03395,SlideStreamVolume,Native/Engine/src/Audio/Cutscene/StreamControl.cpp,156,static_cast,253,30A,guarded,"divisor is std::max(1, ticks); StreamControlTests.cpp ""Stream fades take at least one tick and clamp loud sources"" covers the zero-tick fade"
 c5292d7cba16,DIV-ZERO,medium,pattern,,AdvanceLogicalTick,Native/Engine/src/Audio/Driver/TickTimer.cpp,82,Core,253,30A,open,
 2fdbeda37c56,DIV-ZERO,medium,pattern,,AdvanceLogicalTick,Native/Engine/src/Audio/Driver/TickTimer.cpp,83,Core,253,30A,open,
@@ -100,7 +101,7 @@ ff924b350363,DIV-ZERO,medium,pattern,,Divide,Native/Engine/src/Audio/Seq/MusicSe
 ba6e06a3f7b1,DIV-ZERO,medium,pattern,F03274,CalculateNotePitch,Native/Engine/src/Audio/Seq/SequencerCore.cpp,321,static_cast,253,30A,open,
 0cb29ee9d49b,DIV-ZERO,medium,pattern,,StartPitchBend,Native/Engine/src/Audio/Seq/SequencerCore.cpp,967,std,253,30A,open,
 d1211083e39c,DIV-ZERO,medium,pattern,,RoundDown,Native/Engine/src/Core/Memory/WordCopy.cpp,16,unit,45,3,open,
-0b1dec916125,DIV-ZERO,medium,pattern,,AdvanceEnvelope,Native/Engine/src/Input/Controller.cpp,202,static_cast,52,5,guarded,"divisor is the step's frame count inside the remaining != 0 branch; a zero-frame step ends the stream before the division (main.c:8723-8735); ControllerTests ""Vibration envelopes step the small motor and ramp the large one"" covers the ramp"
+0b1dec916125,DIV-ZERO,medium,pattern,,AdvanceEnvelope,Native/Engine/src/Input/Controller.cpp,198,static_cast,52,5,guarded,"divisor is the step's frame count inside the remaining != 0 branch; a zero-frame step ends the stream before the division (main.c:8723-8735); ControllerTests ""Vibration envelopes step the small motor and ramp the large one"" covers the ramp"
 7484d9685a7c,DIV-ZERO,low,pattern,,TextureLodDepthForFarClip,Native/Engine/src/Render/CameraView.cpp,164,(1 << kFarClipToLodShift),50,10,open,
 19e3bd768ad4,DIV-ZERO,medium,pattern,,FogNearDepthCue,Native/Engine/src/Render/DepthCue.cpp,35,divisor,50,10,open,
 ab940c410a2c,DIV-ZERO,medium,pattern,,NextDivisor,Native/Engine/src/Render/EncodedText.cpp,38,static_cast,50,10,open,
@@ -144,7 +145,7 @@ ff7c2bc2c19e,DIV-ZERO,medium,pattern,F00396,DistributeHitLimbDamage,Native/Game/
 dccc46474def,DIV-ZERO,medium,pattern,,GaugeFill,Native/Game/src/Battle/HudRendering.cpp,57,gauge.maximum,56,24,open,
 630402b960c0,DIV-ZERO,medium,pattern,F01294,IsPointInTargetPrism,Native/Game/src/Battle/SphereContainment.cpp,188,corners.size(),56,24,open,
 58adfaccd6e6,DIV-ZERO,medium,pattern,,Slope,Native/Game/src/Battle/SphereTerrain.cpp,74,height,56,24,open,
-7b99a6c8629a,DIV-ZERO,medium,pattern,,AdvanceTargetPage,Native/Game/src/Battle/TargetPagesLive.cpp,135,book.pages.size(),56,24,open,
+7b99a6c8629a,DIV-ZERO,medium,pattern,,AdvanceTargetPage,Native/Game/src/Battle/TargetPagesLive.cpp,133,book.pages.size(),56,24,open,
 e5934119e4ad,DIV-ZERO,medium,pattern,,MoveSphereCursorAcross,Native/Game/src/Battle/Targeting.cpp,1092,length,56,24,open,
 f1001b5e0eea,DIV-ZERO,medium,pattern,,MoveSphereCursorAcross,Native/Game/src/Battle/Targeting.cpp,1092,length,56,24,open,
 0dbef81e71ab,DIV-ZERO,medium,pattern,,InspectNavigation,Native/Game/src/Diagnostics/PlayerObservation.cpp,636,result.spacing,none,,open,

@@ -23,6 +23,9 @@ inline constexpr auto kSupportedDiscSha256 = std::string_view(
     "25221D7F8FDB2C4490AF12D9E82F0E58BDD6ACB43387F9082B3C5E79DFE090C0");
 constexpr auto kSupportedDiscSha1 = "38C63DB6C49A06B91D87CD5A4E31B1EC68FE212C";
 inline constexpr int kPercentComplete = 100;
+// The asset pipeline a prepared extraction was made by; CheckAssets refuses
+// any other. 3: VS.Extract writes the asset catalogs (#47) the game requires.
+inline constexpr int kAssetPipelineVersion = 3;
 using HashProgress = std::function<void(int)>;
 
 struct CloseDiscHandle {

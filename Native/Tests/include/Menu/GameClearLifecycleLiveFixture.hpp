@@ -34,6 +34,7 @@
 #include "Battle/Actor.hpp"
 #include "Battle/StatusEffects.hpp"
 #include "Content/CdDriveLive.hpp"
+#include "Content/DataStore.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Content/DiscReaderLive.hpp"
 #include "Content/ModuleData.hpp"
@@ -151,10 +152,11 @@ class Fixture {
       VS::Audio::Seq::pendingMusicData, VS::Audio::Seq::musicLoopsRemaining,
       VS::Audio::Seq::masterFade, VS::Audio::Driver::commandArguments,
       VS::Audio::Driver::controlLatches, VS::Audio::Driver::legacySpuEvent,
-      VS::Audio::Mixer::commandParams, VS::Audio::Mixer::voiceScheduler,
-      VS::Audio::Mixer::voiceOwners, VS::Audio::SoundEffects::channels,
-      VS::Audio::Cutscene::streamState, VS::Audio::Samples::musicSampleBankIds,
-      VS::State::scoreData, VS::State::stateFlags, VS::State::roomVisitProgress,
+      VS::Audio::Mixer::commandParams, VS::Audio::Mixer::kCommandHandlers,
+      VS::Audio::Mixer::voiceScheduler, VS::Audio::Mixer::voiceOwners,
+      VS::Audio::SoundEffects::channels, VS::Audio::Cutscene::streamState,
+      VS::Audio::Samples::musicSampleBankIds, VS::State::scoreData,
+      VS::State::stateFlags, VS::State::roomVisitProgress,
       VS::Battle::characterState, VS::Battle::submenuState,
       VS::Input::buttonsPressed, VS::Content::discRequestSlots,
       VS::Content::discRequestCounts, VS::Content::discDriveState,
@@ -166,6 +168,8 @@ class Fixture {
       results::incrementingMapCompletion>
       saved_;
   SavedRuntime saved_runtime_;
+  // The music loader names its file through the extracted data's catalog.
+  content::DataStore::ScopedOverride store_;
 
  public:
   static constexpr std::size_t kArenaBytes = std::size_t{256} * 1024;
@@ -185,6 +189,8 @@ class Fixture {
     REQUIRE_FALSE(results::InspectLiveGameClear().owns_pages);
     REQUIRE(results::InspectLiveGameClear().state_timer == 0);
     REQUIRE(content::LiveRefusedDiscRecordsInUse() == 0);
+    REQUIRE(content::DataStore::Open(R"(Native\data)").has_value());
+    REQUIRE(content::DataStore::Get()->RequireCatalog().has_value());
     REQUIRE(std::ranges::all_of(
         VS::Content::discRequestSlots, [](const auto& slot) {
           return slot.state == VS::Content::DiscRequestState::kFree &&
@@ -311,13 +317,6 @@ class Fixture {
     REQUIRE(stream.good());
     const std::vector<unsigned char> image{
         std::istreambuf_iterator<char>(stream), {}};
-    const auto tables = VS::Content::ModulePointerTables();
-    const auto handlers = std::ranges::find(
-        tables, reinterpret_cast<void**>(VS::Audio::Mixer::kCommandHandlers),
-        &VS::Content::ModulePointerTable::target);
-    REQUIRE(handlers != tables.end());
-    REQUIRE(content::RelocateModulePointerTable(*handlers, image,
-                                                VS::Content::ModuleSymbols()));
     const auto entries = VS::Content::ModuleDataEntries();
     const auto idle = std::ranges::find(
         entries, static_cast<void*>(&VS::Audio::Seq::kIdleProgram),

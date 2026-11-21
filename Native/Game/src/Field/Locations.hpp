@@ -30,8 +30,14 @@ extern std::array<LocationDestination, kLocationCount> locationDestinations;
 // D_8004FCCC@SLUS_010.40)
 extern std::array<std::uint8_t, kZoneTableEntries> zoneMusicIds;
 // Each zone file's original sector and byte count, until zones load by asset
-// id (#47).
-using ZoneDiscFiles = std::array<Content::DiscFileExtent, kZoneTableEntries>;
+// id (#47). The executable's vs_main_CdFile records: 8 bytes each, the stride
+// the module symbol map (ModulePointers.cpp, 0x8004F4CC) relocates.
+struct ZoneDiscFile {
+  std::int32_t sector = 0;
+  std::int32_t bytes = 0;
+};
+static_assert(sizeof(ZoneDiscFile) == 2 * sizeof(std::int32_t));
+using ZoneDiscFiles = std::array<ZoneDiscFile, kZoneTableEntries>;
 // decomp: vs_main_zndFiles (src/SLUS_010.40/main.c:670,
 // vs_main_zndFiles@SLUS_010.40)
 extern ZoneDiscFiles legacyZoneDiscFiles;
