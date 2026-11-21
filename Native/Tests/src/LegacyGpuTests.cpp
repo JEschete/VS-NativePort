@@ -570,9 +570,11 @@ TEST_CASE("Sky background emits visible colored triangles behind room geometry",
   ClearOTagR(ordering.data(), 2048);
   VS::Core::Gte::Reset();
   static_assert(sizeof sky == VS::Render::kSkyDomeBytes);
-  CHECK(VS::Render::DrawLiveSkyDome(&sky, sizeof sky) ==
+  VS::Core::Gte::MATRIX view{};
+  view.m[0][0] = view.m[1][1] = view.m[2][2] = 4096;
+  CHECK(VS::Render::DrawLiveSkyDome(&sky, sizeof sky, view) ==
         VS::Render::RoomDrawStatus::kDrawn);
-  CHECK(VS::Render::DrawLiveSkyDome(&sky, sizeof sky - 1) ==
+  CHECK(VS::Render::DrawLiveSkyDome(&sky, sizeof sky - 1, view) ==
         VS::Render::RoomDrawStatus::kInvalidGeometry);
   auto* triangle = reinterpret_cast<POLY_G3*>(buffer.data());
   CHECK(frame->primitive_cursor == buffer.data() + sizeof(POLY_G3));

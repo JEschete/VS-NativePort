@@ -21,6 +21,8 @@
 #include "Content/ModuleData.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Gte.hpp"
+#include "Core/Math/MatrixLive.hpp"
+#include "Core/Math/Projection.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/ActorCollisionLive.hpp"
 #include "Field/Gimmicks.hpp"
@@ -33,13 +35,7 @@
 
 using VS::Core::Gte::CVECTOR;
 using VS::Core::Gte::MATRIX;
-using VS::Core::Gte::RotTrans;
-using VS::Core::Gte::RotTransPers;
-using VS::Core::Gte::SetRotMatrix;
-using VS::Core::Gte::SetTransMatrix;
-using VS::Core::Gte::StoreLvnl;
 using VS::Core::Gte::SVECTOR;
-using VS::Core::Gte::VECTOR;
 
 using VS::Legacy::AddPrim;
 using VS::Legacy::setlen;
@@ -94,51 +90,36 @@ template <typename Instance>
           static_cast<std::int32_t>(matrix.t[2])};
 }
 
-[[nodiscard]] MATRIX MatrixFrom(const ModelTransform& transform) {
-  MATRIX matrix{};
-  Math::StoreMatrix(matrix, transform.rotation);
-  matrix.t[0] = transform.translation.x;
-  matrix.t[1] = transform.translation.y;
-  matrix.t[2] = transform.translation.z;
-  return matrix;
-}
-
+// The bone or shadow transform and the frame's projection, held by the draw
+// rather than loaded into the shared GTE state (EC-03).
 class LiveModelTransformer final : public ModelTransformer {
  public:
   explicit LiveModelTransformer(std::span<const MATRIX> matrices = {})
-      : matrices_(matrices) {}
+      : matrices_(matrices), projection_(VS::Core::Gte::SharedProjection()) {}
 
   void LoadBone(std::size_t bone) override {
-    const MATRIX& matrix = matrices_[bone];
-    SetRotMatrix(&matrix);
-    SetTransMatrix(&matrix);
+    transform_ = Math::TransformOf(matrices_[bone]);
   }
   void LoadTransform(const ModelTransform& transform) override {
-    const MATRIX matrix = MatrixFrom(transform);
-    SetRotMatrix(&matrix);
-    SetTransMatrix(&matrix);
+    transform_ = {transform.rotation, transform.translation};
   }
+  // SDK RotTrans: MAC1-3.
   Math::Vec3 Transform(const ModelVertex& vertex) override {
-    SVECTOR input = {vertex.x, vertex.y, vertex.z, 0};
-    VECTOR output{};
-    VS::Core::Gte::Word flags = 0;
-    RotTrans(&input, &output, &flags);
-    return Math::VectorOf(output);
+    return Math::RotateTranslateVertex(transform_,
+                                       {vertex.x, vertex.y, vertex.z})
+        .mac;
   }
+  // SDK RotTransPers' SXY2 and the MAC3 the original then stored (gte_stlvnl).
   ProjectedPoint Project(const ModelVertex& vertex) override {
-    SVECTOR input = {vertex.x, vertex.y, vertex.z, 0};
-    VS::Core::Gte::Word screen = 0;
-    VS::Core::Gte::Word fog = 0;
-    VS::Core::Gte::Word flags = 0;
-    VECTOR transformed{};
-    RotTransPers(&input, &screen, &fog, &flags);
-    StoreLvnl(&transformed);
-    return {static_cast<std::int32_t>(screen),
-            static_cast<std::int32_t>(transformed.vz)};
+    const Math::PerspectiveVertex projected = Math::ProjectVertex(
+        transform_, projection_, {vertex.x, vertex.y, vertex.z});
+    return {projected.PackedScreen(), projected.mac.z};
   }
 
  private:
   std::span<const MATRIX> matrices_;
+  Math::Transform3 transform_{Math::IdentityRotation(), {}};
+  Math::PerspectiveProjection projection_;
 };
 
 // The end of the current frame's primitive buffer, or nothing when the

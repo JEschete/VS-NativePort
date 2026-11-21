@@ -38,8 +38,9 @@ void BuildLiveRoomGeometryViewMatrix(const VS::Core::Gte::VECTOR& position,
 void BuildLiveScaleCompensatedRoomView(const VS::Core::Gte::VECTOR& position,
                                        const VS::Core::Gte::VECTOR& angles,
                                        VS::Core::Gte::MATRIX& output);
-// Draws the sky through the loaded GTE view at the farthest ordering entry.
-RoomDrawStatus DrawLiveSkyDome(const void* sky, std::size_t bytes);
+// Draws the sky rotated by `view` at the farthest ordering entry.
+RoomDrawStatus DrawLiveSkyDome(const void* sky, std::size_t bytes,
+                               const VS::Core::Gte::MATRIX& view);
 // Tints the room packets written between `start` and `end`, which must lie
 // in the current frame buffer; false (and logged) when the range is refused
 // or truncated.

@@ -1432,6 +1432,17 @@ operations, MAC/IR values, screen/depth FIFOs and flags).
 
 Arithmetic executes natively, but callers still rely on a persistent coprocessor-shaped state machine.
 
+Status (#51, explicit transform slice): `Core/Math/Projection.hpp` gives RTV0TR and RTPS as functions
+(`RotateTranslateVertex`, `ProjectVertex`) of a `Transform3`, a `PerspectiveProjection` and a vertex. They return
+MAC, IR, the screen point, depth, depth cue and FLAG, with the 44-bit wrap and saturation flags; the bridge's `Rtps` and
+`Rtv0Tr` run the same functions over its state. The room, sky, screen-offset, model, ground-shadow, screen-transition,
+framebuffer-effect and bone-endpoint Live transformers project through them with their own view and a per-draw
+projection snapshot and load no register. The sky dome takes its view explicitly. The shared projection (screen offset,
+distance, depth cue) is the one remaining owned context, which producers still set through `SetGeomOffset`,
+`SetGeomScreen` and `SetDepthCue`. Not yet retired: 92 register-bridge call sites in 35 Game and Engine source files,
+tracked by #495. Evidence: `Render-explicit-transform-slice` in `Docs/ledgers/GATE_SLICES.csv` and
+`VR-CORE-MATH-SLICE` and `VR-RENDER-ROOM-DRAW-SLICE` in `Docs/ledgers/VERIFY_LEDGER.csv`.
+
 **Issue:** renaming GTE operations does not remove hidden ordering/state dependencies. This also makes isolated tests
 and independent transform contexts harder to express.
 

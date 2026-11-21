@@ -417,6 +417,9 @@
     <ClCompile Include="src\Core\Math\Matrix.cpp">
       <Filter>src\Core\Math</Filter>
     </ClCompile>
+    <ClCompile Include="src\Core\Math\Projection.cpp">
+      <Filter>src\Core\Math</Filter>
+    </ClCompile>
     <ClCompile Include="src\Core\Math\ScalarMath.cpp">
       <Filter>src\Core\Math</Filter>
     </ClCompile>
@@ -943,6 +946,9 @@
       <Filter>include\Core\Math</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\Math\MatrixLive.hpp">
+      <Filter>include\Core\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\Math\Projection.hpp">
       <Filter>include\Core\Math</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\Math\ScalarMath.hpp">

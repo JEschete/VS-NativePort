@@ -37,8 +37,6 @@
 
 using VS::Core::Gte::CVECTOR;
 using VS::Core::Gte::MATRIX;
-using VS::Core::Gte::SetRotMatrix;
-using VS::Core::Gte::SetTransMatrix;
 using VS::Core::Gte::VECTOR;
 
 using VS::Legacy::AddPrim;
@@ -403,9 +401,6 @@ void LiveBackgroundHost::AddFill(const FillRect& fill) {
 void LiveBackgroundHost::DrawSkyDome(const CameraVector& position,
                                      const CameraVector& angles,
                                      bool scale_compensated) {
-  const VS::Render::FrameScratch& scratch = Scratch();
-  SetRotMatrix(&scratch.view_matrix);
-  SetTransMatrix(&scratch.view_matrix);
   VECTOR dome_position{};
   VECTOR dome_angles{};
   Math::StoreVector(dome_position, position);
@@ -416,10 +411,10 @@ void LiveBackgroundHost::DrawSkyDome(const CameraVector& position,
   } else {
     Render::BuildLiveRoomGeometryViewMatrix(dome_position, dome_angles, view);
   }
-  SetRotMatrix(&view);
-  SetTransMatrix(&view);
+  // The original loaded this view into the GTE for func_8009820C; no later
+  // draw reads it back (#51 audit), so it travels as an argument instead.
   Render::DrawLiveSkyDome(VS::Content::battleSkyDome,
-                          sizeof VS::Content::battleSkyDome);
+                          sizeof VS::Content::battleSkyDome, view);
 }
 
 CameraVector LiveBackgroundHost::ReferenceRotation() {

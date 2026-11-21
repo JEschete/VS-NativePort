@@ -25,16 +25,10 @@
 #include "Render/RoomDrawLive.hpp"
 #include "Render/UiPrimitives.hpp"
 
-using VS::Core::Gte::GetGeomOffset;
 using VS::Core::Gte::MATRIX;
-using VS::Core::Gte::RotTrans;
-using VS::Core::Gte::RotTransPers;
 using VS::Core::Gte::SetGeomOffset;
 using VS::Core::Gte::SetGeomScreen;
-using VS::Core::Gte::SetRotMatrix;
-using VS::Core::Gte::SetTransMatrix;
 using VS::Core::Gte::SVECTOR;
-using VS::Core::Gte::VECTOR;
 
 using VS::Legacy::ClearOTagR;
 using VS::Legacy::nextPrim;
@@ -98,59 +92,17 @@ Render::RoomCamera RolledCamera() {
   return camera;
 }
 
-// The GTE with a 256 projection distance centred on (160, 120), starting
-// from an identity view 1024 units in front of the camera.
-class GteTransformer final : public Render::RoomTransformer {
- public:
-  GteTransformer() {
-    VS::Core::Gte::Reset();
-    SetGeomScreen(256);
-    SetGeomOffset(160, 120);
-    LoadView(IdentityView(1024));
-  }
-  ~GteTransformer() override { VS::Core::Gte::Reset(); }
-  GteTransformer(const GteTransformer&) = delete;
-  GteTransformer& operator=(const GteTransformer&) = delete;
-  GteTransformer(GteTransformer&&) = delete;
-  GteTransformer& operator=(GteTransformer&&) = delete;
-
-  void LoadView(const Render::RoomView& view) override {
-    MATRIX matrix{};
-    Math::StoreMatrix(matrix, view.rotation);
-    matrix.t[0] = view.translation.x;
-    matrix.t[1] = view.translation.y;
-    matrix.t[2] = view.translation.z;
-    SetRotMatrix(&matrix);
-    SetTransMatrix(&matrix);
-  }
-  Render::RoomProjectedPoint Project(
-      const Render::RoomPosition& position) override {
-    SVECTOR input{position.x, position.y, position.z, 0};
-    VS::Core::Gte::Word screen = 0;
-    VS::Core::Gte::Word fog = 0;
-    VS::Core::Gte::Word flags = 0;
-    const VS::Core::Gte::Word depth =
-        RotTransPers(&input, &screen, &fog, &flags);
-    return {static_cast<std::int32_t>(screen),
-            static_cast<std::int32_t>(depth)};
-  }
-  Math::Vec3 Transform(const Render::RoomPosition& position) override {
-    SVECTOR input{position.x, position.y, position.z, 0};
-    VECTOR output{};
-    VS::Core::Gte::Word flags = 0;
-    RotTrans(&input, &output, &flags);
-    return Math::VectorOf(output);
-  }
-  [[nodiscard]] Render::RoomScreenOffset ScreenOffset() const override {
-    VS::Core::Gte::Word x = 0;
-    VS::Core::Gte::Word y = 0;
-    GetGeomOffset(&x, &y);
-    return {static_cast<std::int32_t>(x), static_cast<std::int32_t>(y)};
-  }
-  void SetScreenOffset(const Render::RoomScreenOffset& offset) override {
-    SetGeomOffset(offset.x, offset.y);
-  }
-};
+// The GTE arithmetic with a 256 projection distance centred on (160, 120),
+// starting from an identity view 1024 units in front of the camera.
+Render::PerspectiveRoomTransformer TestTransformer() {
+  Math::PerspectiveProjection projection;
+  projection.distance = 256;
+  projection.offset_x = Math::ScreenOffsetFixed(160);
+  projection.offset_y = Math::ScreenOffsetFixed(120);
+  Render::PerspectiveRoomTransformer transformer(projection);
+  transformer.LoadView(IdentityView(1024));
+  return transformer;
+}
 
 struct RecordedPacket {
   std::vector<std::uint32_t> words;
@@ -288,7 +240,7 @@ void CheckLevel(bool quad, int levels) {
   const auto level = static_cast<std::size_t>(levels);
   const int triangles = quad ? kEdgeTriangles[level] : kTriangles[level];
   const int quads = quad ? kQuadLeaves[level] : 0;
-  GteTransformer transformer;
+  auto transformer = TestTransformer();
   RecordingQueue queue;
   const auto result =
       Subdivide(quad, levels, kMaterial, {}, transformer, queue);
@@ -761,7 +713,7 @@ TEST_CASE("Room coordinate shift ignores high bits of the original register",
 
 TEST_CASE("Room projection decodes positions, screens, depths and winding",
           "[render][room-projection]") {
-  GteTransformer transformer;
+  auto transformer = TestTransformer();
   PackedCoordinates data{};
   constexpr std::array<std::int16_t, 3> kBase{-128, -128, 0};
   std::memcpy(data.data(), kBase.data(), sizeof kBase);
@@ -894,7 +846,7 @@ TEST_CASE("Room subdivision refuses levels outside the original recursion",
           "[render][room-subdivision]") {
   for (const bool quad : {false, true}) {
     for (const int levels : {-1, 4, INT32_MAX}) {
-      GteTransformer transformer;
+      auto transformer = TestTransformer();
       RecordingQueue queue;
       const auto result =
           Subdivide(quad, levels, kMaterial, {}, transformer, queue);
@@ -910,7 +862,7 @@ TEST_CASE("Room subdivision emits no partial packet at a capacity boundary",
   for (const bool quad : {false, true}) {
     const std::size_t full =
         quad ? 4 * kQuadBytes + 4 * kTriangleBytes : 7 * kTriangleBytes;
-    GteTransformer transformer;
+    auto transformer = TestTransformer();
     RecordingQueue queue(full - 1);
     const auto result = Subdivide(quad, 1, kMaterial, {}, transformer, queue);
     CHECK(result.status == Render::RoomDrawStatus::kBufferFull);
@@ -924,7 +876,7 @@ TEST_CASE("Room subdivision emits no partial packet at a capacity boundary",
 
 TEST_CASE("Room subdivision retains source midpoint position color and UV",
           "[render][room-subdivision]") {
-  GteTransformer transformer;
+  auto transformer = TestTransformer();
   RecordingQueue queue;
   REQUIRE(Subdivide(false, 1, kMaterial, {}, transformer, queue).emitted == 7);
   const auto& first = queue.packets.front().words;
@@ -944,7 +896,7 @@ TEST_CASE("Room subdivision retains source midpoint position color and UV",
 TEST_CASE("Room subdivision preserves far rejection and signed depth bias",
           "[render][room-subdivision]") {
   for (const bool quad : {false, true}) {
-    GteTransformer transformer;
+    auto transformer = TestTransformer();
     Render::RoomClipState clip;
     Render::SetRoomPolygonFarClip(clip, 256);
     RecordingQueue rejected;
@@ -964,7 +916,7 @@ TEST_CASE("Room subdivision preserves far rejection and signed depth bias",
 
 TEST_CASE("Room subdivision rejects off-screen leaves without emitting",
           "[render][room-subdivision]") {
-  GteTransformer transformer;
+  auto transformer = TestTransformer();
   Render::SetProjectionScreenOffset(transformer, {1000, 1000});
   RecordingQueue queue;
   CHECK(Subdivide(false, 3, kMaterial, {}, transformer, queue).emitted == 0);
@@ -974,7 +926,7 @@ TEST_CASE("Room subdivision rejects off-screen leaves without emitting",
 
 TEST_CASE("Room batches emit typed packets with native materials",
           "[render][room-batch]") {
-  GteTransformer transformer;
+  auto transformer = TestTransformer();
   RecordingQueue queue;
   const auto batch = Batch();
   const auto result =
@@ -992,7 +944,7 @@ TEST_CASE("Room batches preserve capacity and exact final-record boundaries",
   const auto batch = Batch();
   for (const std::size_t capacity : {0u, 39u, 40u, 91u, 92u}) {
     CAPTURE(capacity);
-    GteTransformer transformer;
+    auto transformer = TestTransformer();
     RecordingQueue queue(capacity);
     const auto result =
         Render::DrawRoomGeometryPolygons(batch, 0, 0, {}, transformer, queue);
@@ -1001,7 +953,7 @@ TEST_CASE("Room batches preserve capacity and exact final-record boundaries",
                                 : Render::RoomDrawStatus::kBufferFull));
     CHECK(queue.Used() == (capacity < 40 ? 0u : capacity < 92 ? 40u : 92u));
   }
-  GteTransformer transformer;
+  auto transformer = TestTransformer();
   RecordingQueue queue(0);
   const std::array<std::uint32_t, 2> empty{};
   const auto result = Render::DrawRoomGeometryPolygons(
@@ -1012,7 +964,7 @@ TEST_CASE("Room batches preserve capacity and exact final-record boundaries",
 
 TEST_CASE("Room batches refuse truncated or oversized polygon records",
           "[render][room-batch]") {
-  GteTransformer transformer;
+  auto transformer = TestTransformer();
   RecordingQueue queue;
   const auto batch = Batch();
   const std::span bytes(batch);
@@ -1033,7 +985,7 @@ TEST_CASE("Room batches refuse truncated or oversized polygon records",
 
 TEST_CASE("Room batches retain subdivision clipping and texture LOD",
           "[render][room-batch]") {
-  GteTransformer transformer;
+  auto transformer = TestTransformer();
   const auto batch = Batch();
   RecordingQueue subdivided;
   CHECK(Render::DrawRoomGeometryPolygons(batch, 3u << 13, 1, {}, transformer,
@@ -1074,7 +1026,7 @@ TEST_CASE("Room geometry skips hidden, alternate-pass and unfaced groups",
   };
   for (const auto& entry : kCases) {
     CAPTURE(entry.flags, entry.pass.mode, entry.pass.view_facing);
-    GteTransformer transformer;
+    auto transformer = TestTransformer();
     transformer.LoadView(IdentityView(9999));
     RecordingQueue queue;
     const auto geometry = Geometry(entry.flags);
@@ -1082,7 +1034,7 @@ TEST_CASE("Room geometry skips hidden, alternate-pass and unfaced groups",
                                    queue) == Render::RoomDrawStatus::kDrawn);
     CHECK(queue.packets.size() == entry.packets);
   }
-  GteTransformer transformer;
+  auto transformer = TestTransformer();
   RecordingQueue queue;
   const auto geometry = Geometry(0);
   CHECK(Render::DrawRoomGeometry(std::span(geometry).first(geometry.size() - 1),
@@ -1215,12 +1167,11 @@ TEST_CASE("Room tint stops at foreign packets and refuses truncated ranges",
 
 TEST_CASE("Sky dome emits rotated Gouraud faces at the farthest slot",
           "[render][room]") {
-  GteTransformer transformer;
-  transformer.LoadView(IdentityView(0));
+  auto transformer = TestTransformer();
   const auto sky = OneFaceSky();
   const auto bytes = std::as_bytes(std::span(&sky, 1));
   RecordingQueue queue;
-  CHECK(Render::DrawSkyDome(bytes, transformer, queue) ==
+  CHECK(Render::DrawSkyDome(bytes, IdentityView(0), transformer, queue) ==
         Render::RoomDrawStatus::kDrawn);
   REQUIRE(queue.packets.size() == 1);
   const auto& packet = queue.packets.front();
@@ -1231,30 +1182,94 @@ TEST_CASE("Sky dome emits rotated Gouraud faces at the farthest slot",
   CHECK((packet.words[1] & 0xFF) == 255);
 }
 
+TEST_CASE("Sky dome rotates by the view it is given, not the loaded one",
+          "[render][room]") {
+  auto transformer = TestTransformer();
+  const auto sky = OneFaceSky();
+  Render::RoomView view = IdentityView(0);
+  view.translation.x = 5;
+  view.translation.y = 7;
+  RecordingQueue queue;
+  CHECK(Render::DrawSkyDome(std::as_bytes(std::span(&sky, 1)), view,
+                            transformer,
+                            queue) == Render::RoomDrawStatus::kDrawn);
+  REQUIRE(queue.packets.size() == 1);
+  CHECK(ScreenX(queue.packets.front().words[2]) == 145);
+  CHECK(ScreenY(queue.packets.front().words[2]) == 107);
+}
+
+namespace {
+// A projected room point as {screen x, screen y, depth}.
+std::array<std::int32_t, 3> ScreenAndDepth(
+    const Render::RoomProjectedPoint& point) {
+  const auto screen = static_cast<std::uint32_t>(point.screen);
+  return {ScreenX(screen), ScreenY(screen),
+          static_cast<std::int32_t>(point.depth)};
+}
+}  // namespace
+
+TEST_CASE("Room transformers keep their views and projections to themselves",
+          "[render][room]") {
+  auto near = TestTransformer();
+  Math::PerspectiveProjection wide;
+  wide.distance = 512;
+  Render::PerspectiveRoomTransformer far(wide);
+  far.LoadView(IdentityView(4096));
+  const Render::RoomPosition point{64, 0, 0};
+  const Render::RoomProjectedPoint alone = near.Project(point);
+  CHECK(ScreenAndDepth(alone) == std::array<std::int32_t, 3>{176, 120, 256});
+  far.SetScreenOffset({7, 9});
+  CHECK(ScreenAndDepth(far.Project(point)) ==
+        std::array<std::int32_t, 3>{15, 9, 1024});
+  CHECK(near.Transform(point) == Math::Vec3{64, 0, 1024});
+  CHECK(near.Project(point).screen == alone.screen);
+  CHECK(near.ScreenOffset() == Render::RoomScreenOffset{160, 120});
+}
+
+TEST_CASE("Room transformers neither record into nor read the GTE registers",
+          "[render][room]") {
+  VS::Core::Gte::Reset();
+  SetGeomOffset(1, 2);
+  SetGeomScreen(77);
+  const Math::PerspectiveProjection shared = VS::Core::Gte::SharedProjection();
+  auto transformer = TestTransformer();
+  const Render::RoomPosition point{64, 0, 0};
+  const Render::RoomProjectedPoint before = transformer.Project(point);
+  transformer.SetScreenOffset({7, 9});
+  CHECK(VS::Core::Gte::SharedProjection() == shared);
+  transformer.SetScreenOffset({160, 120});
+  SetGeomOffset(30, 40);
+  SetGeomScreen(1000);
+  const Render::RoomProjectedPoint after = transformer.Project(point);
+  CHECK(after.screen == before.screen);
+  CHECK(after.depth == before.depth);
+  VS::Core::Gte::Reset();
+}
+
 TEST_CASE("Sky dome refuses truncated, out-of-range and unqueued faces",
           "[render][room]") {
-  GteTransformer transformer;
-  transformer.LoadView(IdentityView(0));
+  auto transformer = TestTransformer();
   const auto sky = OneFaceSky();
   const auto bytes = std::as_bytes(std::span(&sky, 1));
+  const Render::RoomView view = IdentityView(0);
   RecordingQueue refused;
-  CHECK(Render::DrawSkyDome(bytes.first(bytes.size() - 1), transformer,
+  CHECK(Render::DrawSkyDome(bytes.first(bytes.size() - 1), view, transformer,
                             refused) ==
         Render::RoomDrawStatus::kInvalidGeometry);
   auto invalid = sky;
   invalid.faces[63][1] = Render::kSkyDomeVertexCount;
-  CHECK(Render::DrawSkyDome(std::as_bytes(std::span(&invalid, 1)), transformer,
-                            refused) ==
+  CHECK(Render::DrawSkyDome(std::as_bytes(std::span(&invalid, 1)), view,
+                            transformer, refused) ==
         Render::RoomDrawStatus::kInvalidGeometry);
   CHECK(refused.packets.empty());
   RecordingQueue full(0);
-  CHECK(Render::DrawSkyDome(bytes, transformer, full) ==
+  CHECK(Render::DrawSkyDome(bytes, view, transformer, full) ==
         Render::RoomDrawStatus::kBufferFull);
 }
 
 TEST_CASE("Projection screen offsets round-trip as unsigned halfwords",
           "[render][room]") {
-  GteTransformer transformer;
+  auto transformer = TestTransformer();
   Render::SetProjectionScreenOffset(transformer, {264, 196});
   CHECK(Render::GetProjectionScreenOffset(transformer) ==
         Render::RoomScreenOffset{264, 196});

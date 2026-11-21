@@ -15,14 +15,7 @@
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
 
-using VS::Core::Gte::GetGeomOffset;
 using VS::Core::Gte::MATRIX;
-using VS::Core::Gte::RotTrans;
-using VS::Core::Gte::RotTransPers;
-using VS::Core::Gte::SetGeomOffset;
-using VS::Core::Gte::SetRotMatrix;
-using VS::Core::Gte::SetTransMatrix;
-using VS::Core::Gte::SVECTOR;
 using VS::Core::Gte::VECTOR;
 
 using VS::Legacy::AddPrim;
@@ -49,45 +42,18 @@ static_assert(sizeof(VS::Core::Gte::Word) == sizeof(std::int32_t));
   return matrix;
 }
 
-[[nodiscard]] SVECTOR VectorFrom(const RoomPosition& position) {
-  return {position.x, position.y, position.z, 0};
+// A transformer over the projection the frame's producers left in the
+// shared GTE state; its view and results stay private to the draw.
+[[nodiscard]] PerspectiveRoomTransformer FrameTransformer() {
+  return PerspectiveRoomTransformer(VS::Core::Gte::SharedProjection());
 }
 
-class LiveRoomTransformer final : public RoomTransformer {
- public:
-  void LoadView(const RoomView& view) override {
-    const MATRIX matrix = MatrixFrom(view);
-    SetRotMatrix(&matrix);
-    SetTransMatrix(&matrix);
-  }
-  RoomProjectedPoint Project(const RoomPosition& position) override {
-    SVECTOR input = VectorFrom(position);
-    VS::Core::Gte::Word screen = 0;
-    VS::Core::Gte::Word fog = 0;
-    VS::Core::Gte::Word flags = 0;
-    // Native projection returns the quarter depth (SZ3 >> 2) directly.
-    const VS::Core::Gte::Word depth =
-        RotTransPers(&input, &screen, &fog, &flags);
-    return {static_cast<std::int32_t>(screen),
-            static_cast<std::int32_t>(depth)};
-  }
-  Math::Vec3 Transform(const RoomPosition& position) override {
-    SVECTOR input = VectorFrom(position);
-    VECTOR output{};
-    VS::Core::Gte::Word flags = 0;
-    RotTrans(&input, &output, &flags);
-    return Math::VectorOf(output);
-  }
-  [[nodiscard]] RoomScreenOffset ScreenOffset() const override {
-    VS::Core::Gte::Word x = 0;
-    VS::Core::Gte::Word y = 0;
-    GetGeomOffset(&x, &y);
-    return {static_cast<std::int32_t>(x), static_cast<std::int32_t>(y)};
-  }
-  void SetScreenOffset(const RoomScreenOffset& offset) override {
-    SetGeomOffset(offset.x, offset.y);
-  }
-};
+[[nodiscard]] RoomView ViewFrom(const MATRIX& matrix) {
+  return {Math::MatrixOf(matrix),
+          {static_cast<std::int32_t>(matrix.t[0]),
+           static_cast<std::int32_t>(matrix.t[1]),
+           static_cast<std::int32_t>(matrix.t[2])}};
+}
 
 [[nodiscard]] std::uintptr_t FrameBufferBase() {
   return reinterpret_cast<std::uintptr_t>(legacyPrimitiveBuffers[frameBuf & 1]);
@@ -201,7 +167,7 @@ RoomDrawStatus DrawLiveRoomGeometry(const void* geometry, std::size_t bytes,
     VS::Core::Debugf(kChannel, "Room geometry overlaps the primitive buffer");
     return RoomDrawStatus::kInvalidGeometry;
   }
-  LiveRoomTransformer transformer;
+  PerspectiveRoomTransformer transformer = FrameTransformer();
   const RoomDrawPass pass{mode, FrameScratchpad().first_person_view_facing};
   const RoomDrawStatus status = DrawRoomGeometry(
       BytesOf(geometry, bytes), pass, LiveRoomClipState(), transformer, queue);
@@ -223,14 +189,15 @@ void BuildLiveScaleCompensatedRoomView(const VECTOR& position,
       LiveRoomCamera(), PositionFrom(position), AnglesFrom(angles)));
 }
 
-RoomDrawStatus DrawLiveSkyDome(const void* sky, std::size_t bytes) {
+RoomDrawStatus DrawLiveSkyDome(const void* sky, std::size_t bytes,
+                               const MATRIX& view) {
   LiveRoomPacketQueue queue(kPrimitiveBufferBytes);
   if (sky == nullptr || !queue.Ready()) {
     return RoomDrawStatus::kDrawn;
   }
-  LiveRoomTransformer transformer;
+  PerspectiveRoomTransformer transformer = FrameTransformer();
   const RoomDrawStatus status =
-      DrawSkyDome(BytesOf(sky, bytes), transformer, queue);
+      DrawSkyDome(BytesOf(sky, bytes), ViewFrom(view), transformer, queue);
   if (status == RoomDrawStatus::kInvalidGeometry) {
     VS::Core::Debugf(kChannel, "Sky dome refused (%zu bytes)", bytes);
   }
@@ -266,13 +233,15 @@ bool TintLiveRoomGeometryPrimitives(void* start, void* end,
 }
 
 VS::Render::ScreenOffset GetLiveProjectionScreenOffset() {
-  const LiveRoomTransformer transformer;
+  const PerspectiveRoomTransformer transformer = FrameTransformer();
   const RoomScreenOffset offset = GetProjectionScreenOffset(transformer);
   return {offset.x, offset.y};
 }
 
+// The shared offset stays the producer every other projection reads.
 void SetLiveProjectionScreenOffset(const VS::Render::ScreenOffset& offset) {
-  LiveRoomTransformer transformer;
+  PerspectiveRoomTransformer transformer = FrameTransformer();
   SetProjectionScreenOffset(transformer, {offset.x, offset.y});
+  VS::Core::Gte::SetSharedProjection(transformer.Projection());
 }
 }  // namespace VS::Render

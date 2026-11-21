@@ -92,7 +92,7 @@
   }
  },
  "tests": {
-  "assertions": 12985635,
+  "assertions": 12985717,
   "cases": [
    "A CHD holding the approved disc passes identity verification",
    "A CHD of the right size with the wrong bytes fails the checksum",
@@ -2530,6 +2530,9 @@
    "Exhausted detours forget the action target",
    "Existing detour initialization does not consume random draws",
    "Exiting a loop on its pass leaves the loop",
+   "Explicit projection and the shared registers do not interfere",
+   "Explicit projection matches the SDK vectors without shared state",
+   "Explicit rotate-translate reports the RTV0TR saturation flags",
    "Exported legacy instrument provenance survives metadata loading",
    "Exported native bank assets round-trip and regenerate identically",
    "Extended pages map absolute indices and reverse without losing targets",
@@ -7751,6 +7754,8 @@
    "Room tint stops at foreign packets and refuses truncated ranges",
    "Room tint switches on any colour and off on black at zero strength",
    "Room tint transforms GT3 and GT4 payloads without changing tags",
+   "Room transformers keep their views and projections to themselves",
+   "Room transformers neither record into nor read the GTE registers",
    "Room transforms follow the camera and face camera-facing groups",
    "Room transforms keep stored views and refuse truncated groups",
    "Room transforms use native camera layout and camera-facing groups",
@@ -8253,6 +8258,7 @@
    "Sky dome emits rotated Gouraud faces at the farthest slot",
    "Sky dome follows the camera at the zoomed far clip",
    "Sky dome refuses truncated, out-of-range and unqueued faces",
+   "Sky dome rotates by the view it is given, not the loaded one",
    "Small target lists preserve the original single visible page",
    "Snapping moves only free-standing room actors to their support",
    "Snow draws a flake pair and settles odd flakes",

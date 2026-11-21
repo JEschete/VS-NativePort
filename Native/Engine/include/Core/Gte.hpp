@@ -1,17 +1,20 @@
 #pragma once
 
 // Fixed-point vector/matrix math that replaces the PS1 geometry coprocessor
-// (GTE) and its library (libgte), plan ?6.1. The copy tool rewrote every
+// (GTE) and its library (libgte), plan §6.1. The copy tool rewrote every
 // libgte call and inline GTE macro to these functions (strategy R). The GTE
 // kept a small register state between calls (rotation, translation, projection,
 // the last vertex), and the copied code relies on it, so that state lives here
-// as math state, not as a device (EC-03).
+// as math state, not as a device (EC-03). The rotate-translate and projection
+// arithmetic is Core/Math/Projection.hpp's; migrated callers use it directly.
 //
-// The vector/matrix types keep their libgte names and layouts; plan ?6.1
+// The vector/matrix types keep their libgte names and layouts; plan §6.1
 // replaces them with Core::Vec3s / Mat3x3s.
 
 #include <cstddef>
 #include <cstdint>
+
+#include "Core/Math/Projection.hpp"
 
 namespace VS::Core::Gte {
 
@@ -92,5 +95,16 @@ Word RotTransPers4(SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3,
 Word RotAverage4(SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3, Word* sxy0,
                  Word* sxy1, Word* sxy2, Word* sxy3, Word* p, Word* flag);
 Word NormalClip(Word sxy0, Word sxy1, Word sxy2);
+
+// ---- shared projection (MA-11, EC-03)
+// Migrated callers run Math::ProjectVertex and Math::RotateTranslateVertex
+// (Core/Math/Projection.hpp) with their own transform and leave the shared
+// registers alone. Until every projection producer is migrated, they take the
+// projection SetGeomOffset, SetGeomScreen and SetDepthCue left here once per
+// draw.
+[[nodiscard]] Math::PerspectiveProjection SharedProjection() noexcept;
+// Replaces the shared projection (the producer side of SharedProjection).
+void SetSharedProjection(
+    const Math::PerspectiveProjection& projection) noexcept;
 
 }  // namespace VS::Core::Gte

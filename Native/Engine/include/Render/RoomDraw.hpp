@@ -7,6 +7,8 @@
 #include <optional>
 #include <span>
 
+#include "Core/Math/Matrix.hpp"
+#include "Core/Math/Projection.hpp"
 #include "Core/Math/ScalarMath.hpp"
 
 // MPD room geometry: group views, polygon decoding and projection,
@@ -132,6 +134,33 @@ class RoomTransformer {
       const RoomPosition& position) = 0;
   [[nodiscard]] virtual RoomScreenOffset ScreenOffset() const = 0;
   virtual void SetScreenOffset(const RoomScreenOffset& offset) = 0;
+};
+
+// The GTE's fixed-point rotate-translate-perspective (Core/Math/Projection)
+// over a view and projection this transformer owns, so drawing with it reads
+// and writes no shared GTE state and independent draws cannot interfere.
+class PerspectiveRoomTransformer final : public RoomTransformer {
+ public:
+  explicit PerspectiveRoomTransformer(
+      const Core::Math::PerspectiveProjection& projection) noexcept
+      : projection_(projection) {}
+
+  void LoadView(const RoomView& view) override;
+  [[nodiscard]] RoomProjectedPoint Project(
+      const RoomPosition& position) override;
+  [[nodiscard]] Core::Math::Vec3 Transform(
+      const RoomPosition& position) override;
+  [[nodiscard]] RoomScreenOffset ScreenOffset() const override;
+  void SetScreenOffset(const RoomScreenOffset& offset) override;
+
+  [[nodiscard]] const Core::Math::PerspectiveProjection& Projection()
+      const noexcept {
+    return projection_;
+  }
+
+ private:
+  Core::Math::Transform3 view_{Core::Math::IdentityRotation(), {}};
+  Core::Math::PerspectiveProjection projection_;
 };
 
 class RoomPacketQueue {
@@ -299,8 +328,10 @@ void SetRoomPolygonScreenBounds(RoomClipState& clip,
                                 const RoomScreenBounds& bounds);
 
 // BATTLE.PRG func_8009820C: the 34-vertex, 64-face Gouraud sky behind the
-// room, rotated without perspective and centred on the 320x240 frame.
-RoomDrawStatus DrawSkyDome(std::span<const std::byte> sky,
+// room, rotated by `view` without perspective and centred on the 320x240
+// frame. The original rotated by whatever view the caller had loaded into the
+// GTE; the view is now an argument.
+RoomDrawStatus DrawSkyDome(std::span<const std::byte> sky, const RoomView& view,
                            RoomTransformer& transformer,
                            RoomPacketQueue& queue);
 

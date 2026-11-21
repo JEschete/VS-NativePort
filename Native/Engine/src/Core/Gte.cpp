@@ -1,29 +1,30 @@
 #include "Core/Gte.hpp"
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 
-#include "Core/Math/ScalarMath.hpp"
+#include "Core/Math/Matrix.hpp"
+#include "Core/Math/Projection.hpp"
 
-// Fixed-point math replacing the GTE (plan §6.1). Arithmetic follows the
-// documented GTE behaviour: 4.12 matrices, 64-bit accumulation, >>12 scaling,
-// saturation of the 16-bit results and the projection divide. Rounding and flag
-// details that gameplay may depend on are checked by the GTE parity tests (plan
-// §6.1).
+// The libgte bridge (plan §6.1, EC-03): the register state copied callers
+// load, execute and store through. RTV0TR and RTPS run Core/Math/Projection's
+// explicit arithmetic on that state and leave every result in the registers,
+// as the coprocessor did. The remaining operations follow the documented GTE
+// behaviour: 4.12 matrices, 64-bit accumulation, >>12 scaling and saturation
+// of the 16-bit results.
 
 namespace VS::Core::Gte {
 namespace {
+namespace Math = VS::Core::Math;
 
 struct GteState {
-  int16_t rot[3][3] = {{4096, 0, 0}, {0, 4096, 0}, {0, 0, 4096}};
-  int32_t trans[3] = {};
-  int32_t ofx = 0, ofy = 0;  // 16.16
-  uint16_t h = 1000;
-  int16_t dqa = 0;
-  int32_t dqb = 0;
+  Math::Transform3 transform{
+      Math::Mat3{{{{4096, 0, 0}, {0, 4096, 0}, {0, 0, 4096}}}}, {}};
+  Math::PerspectiveProjection projection;
   int16_t zsf4 = 0x400;
   int32_t farColor[3] = {};
-  int16_t v0[3] = {};
+  Math::Position3 v0{};
   int16_t sx[3] = {}, sy[3] = {};
   uint16_t sz[4] = {};
   int32_t mac0 = 0, mac[3] = {};
@@ -34,47 +35,12 @@ struct GteState {
 
 GteState g;
 
-// FLAG bits: MAC1-3 positive/negative overflow (30-28/27-25), IR1-3 (24-22),
-// SZ3 (18), divide overflow (17), MAC0 (16/15), SX2/SY2 (14/13) and IR0
-// (12). Bit 31 summarizes bits 30-23 and 18-13.
-constexpr uint32_t kFlagErrorBits = 0x7F87E000u;
-constexpr uint32_t kFlagError = 0x80000000u;
-constexpr int64_t kMacLimit = int64_t{1} << 43;
-
-void FinishFlag() {
-  if ((g.flag & kFlagErrorBits) != 0) {
-    g.flag |= kFlagError;
-  }
-}
-
-// The GTE keeps MAC1-3 intermediates in signed 44 bits.
-int64_t WrapSigned44(int64_t value) {
-  constexpr uint64_t kMask = (uint64_t{1} << 44) - 1;
-  return static_cast<int64_t>(
-             (static_cast<uint64_t>(value) + static_cast<uint64_t>(kMacLimit)) &
-             kMask) -
-         kMacLimit;
-}
-
-int64_t Limit(int64_t v, int64_t lo, int64_t hi, unsigned flag_bit) {
-  if (v < lo || v > hi) {
+// IR1-3 saturation, flagged in FLAG bits 24-22.
+int16_t SaturateIr(int64_t v, unsigned flag_bit) {
+  if (v < INT16_MIN || v > INT16_MAX) {
     g.flag |= 1u << flag_bit;
   }
-  return std::clamp(v, lo, hi);
-}
-
-int16_t SaturateIr(int64_t v, unsigned flag_bit) {
-  return static_cast<int16_t>(Limit(v, -0x8000, 0x7FFF, flag_bit));
-}
-
-// MAC0 keeps the low word of a wider sum; flag the sum when it leaves the
-// signed word range.
-void CheckMac0(int64_t v) {
-  if (v > INT32_MAX) {
-    g.flag |= 1u << 16;
-  } else if (v < INT32_MIN) {
-    g.flag |= 1u << 15;
-  }
+  return static_cast<int16_t>(std::clamp<int64_t>(v, INT16_MIN, INT16_MAX));
 }
 
 void PushScreenXY(int16_t x, int16_t y) {
@@ -87,45 +53,22 @@ void PushZ(uint16_t z) {
   g.sz[0] = g.sz[1], g.sz[1] = g.sz[2], g.sz[2] = g.sz[3], g.sz[3] = z;
 }
 
-// Rotate and translate a vector by the current state: MAC = (T << 12 + R * v)
-// >> 12, each partial sum flagged and wrapped to signed 44 bits.
-void RotateTranslate(const int16_t v[3]) {
-  for (unsigned i = 0; i < 3; ++i) {
-    int64_t acc = static_cast<int64_t>(g.trans[i]) * 4096;
-    for (int j = 0; j < 3; ++j) {
-      acc += static_cast<int64_t>(g.rot[i][j]) * v[j];
-      if (acc >= kMacLimit) {
-        g.flag |= 1u << (30 - i);
-      } else if (acc < -kMacLimit) {
-        g.flag |= 1u << (27 - i);
-      }
-      acc = WrapSigned44(acc);
-    }
-    g.mac[i] = static_cast<int32_t>(acc >> 12);
-    g.ir[i] = SaturateIr(g.mac[i], 24 - i);
-  }
+// RTV0TR leaves MAC1-3, IR1-3 and FLAG.
+void Commit(const Math::RotatedVertex& result) {
+  g.mac[0] = result.mac.x, g.mac[1] = result.mac.y, g.mac[2] = result.mac.z;
+  std::copy(result.ir.begin(), result.ir.end(), g.ir);
+  g.flag = result.flag;
 }
 
-// RTPS projection (SDK RotTransPers, libgte/SMP_02.s at 0x80041814): the
-// reciprocal divide, screen and depth-cue sums are wider than a word. SX2/SY2
-// and IR0 saturate from the wide sums while MAC0 keeps the low word.
-void Project() {
-  const auto z = static_cast<uint16_t>(Limit(g.mac[2], 0, 0xFFFF, 18));
-  PushZ(z);
-  if (VS::Core::Math::PerspectiveDivideOverflows(g.h, z)) {
-    g.flag |= 1u << 17;
-  }
-  const int64_t n = VS::Core::Math::DividePerspective(g.h, z);
-  const int64_t x = n * g.ir[0] + g.ofx;
-  CheckMac0(x);
-  const int64_t y = n * g.ir[1] + g.ofy;
-  CheckMac0(y);
-  PushScreenXY(static_cast<int16_t>(Limit(x >> 16, -0x400, 0x3FF, 14)),
-               static_cast<int16_t>(Limit(y >> 16, -0x400, 0x3FF, 13)));
-  const int64_t cue = n * g.dqa + g.dqb;
-  CheckMac0(cue);
-  g.mac0 = static_cast<int32_t>(static_cast<uint32_t>(cue));
-  g.ir0 = static_cast<int16_t>(Limit(cue >> 12, 0, 0x1000, 12));
+// RTPS also pushes SZ3 and SXY2 through their FIFOs and leaves MAC0 and IR0.
+void Commit(const Math::PerspectiveVertex& result) {
+  g.mac[0] = result.mac.x, g.mac[1] = result.mac.y, g.mac[2] = result.mac.z;
+  std::copy(result.ir.begin(), result.ir.end(), g.ir);
+  PushZ(result.depth);
+  PushScreenXY(result.screen_x, result.screen_y);
+  g.mac0 = result.mac0;
+  g.ir0 = result.ir0;
+  g.flag = result.flag;
 }
 
 Word PackXY(int i) {
@@ -139,9 +82,7 @@ void UnpackXY(Word sxy, int16_t& x, int16_t& y) {
   y = static_cast<int16_t>((static_cast<uint32_t>(sxy) >> 16) & 0xFFFF);
 }
 
-void LoadVector(const SVECTOR* v) {
-  g.v0[0] = v->vx, g.v0[1] = v->vy, g.v0[2] = v->vz;
-}
+void LoadVector(const SVECTOR* v) { g.v0 = {v->vx, v->vy, v->vz}; }
 
 void Multiply(const short a[3][3], const short b[3][3], short out[3][3]) {
   short r[3][3];
@@ -159,37 +100,48 @@ void Multiply(const short a[3][3], const short b[3][3], short out[3][3]) {
 
 }  // namespace
 
+Math::PerspectiveProjection SharedProjection() noexcept { return g.projection; }
+
+void SetSharedProjection(
+    const Math::PerspectiveProjection& projection) noexcept {
+  g.projection = projection;
+}
+
 void Reset() { g = GteState{}; }
 
 void SetRotMatrix(const MATRIX* m) {
-  std::copy(&m->m[0][0], &m->m[0][0] + 9, &g.rot[0][0]);
-}
-
-void SetTransMatrix(const MATRIX* m) {
-  for (int i = 0; i < 3; ++i) {
-    g.trans[i] = static_cast<int32_t>(m->t[i]);
+  for (std::size_t row = 0; row < 3; ++row) {
+    for (std::size_t column = 0; column < 3; ++column) {
+      g.transform.rotation.m[row][column] = m->m[row][column];
+    }
   }
 }
 
-void SetTransVector(const VECTOR* v) {
-  g.trans[0] = static_cast<int32_t>(v->vx);
-  g.trans[1] = static_cast<int32_t>(v->vy);
-  g.trans[2] = static_cast<int32_t>(v->vz);
+void SetTransMatrix(const MATRIX* m) {
+  g.transform.translation = {static_cast<int32_t>(m->t[0]),
+                             static_cast<int32_t>(m->t[1]),
+                             static_cast<int32_t>(m->t[2])};
 }
 
-void ClearTranslation() { g.trans[0] = g.trans[1] = g.trans[2] = 0; }
+void SetTransVector(const VECTOR* v) {
+  g.transform.translation = {static_cast<int32_t>(v->vx),
+                             static_cast<int32_t>(v->vy),
+                             static_cast<int32_t>(v->vz)};
+}
+
+void ClearTranslation() { g.transform.translation = {}; }
 
 void SetGeomOffset(Word ofx, Word ofy) {
-  g.ofx = static_cast<int32_t>(static_cast<uint32_t>(ofx) << 16);
-  g.ofy = static_cast<int32_t>(static_cast<uint32_t>(ofy) << 16);
+  g.projection.offset_x = Math::ScreenOffsetFixed(static_cast<int32_t>(ofx));
+  g.projection.offset_y = Math::ScreenOffsetFixed(static_cast<int32_t>(ofy));
 }
 
 void GetGeomOffset(Word* ofx, Word* ofy) {
-  *ofx = g.ofx >> 16;
-  *ofy = g.ofy >> 16;
+  *ofx = Math::ScreenOffsetPixels(g.projection.offset_x);
+  *ofy = Math::ScreenOffsetPixels(g.projection.offset_y);
 }
 
-void SetGeomScreen(Word h) { g.h = static_cast<uint16_t>(h); }
+void SetGeomScreen(Word h) { g.projection.distance = static_cast<uint16_t>(h); }
 
 // SDK-compatible entry point; copied callers retain this parameter order.
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
@@ -209,8 +161,8 @@ void GetFarColor(Word* r, Word* gg, Word* b) {
 
 // The DQA register holds a halfword, as ctc2 stores it.
 void SetDepthCue(Word coefficient, Word offset) {
-  g.dqa = static_cast<int16_t>(coefficient);
-  g.dqb = static_cast<int32_t>(offset);
+  g.projection.depth_cue_coefficient = static_cast<int16_t>(coefficient);
+  g.projection.depth_cue_offset = static_cast<int32_t>(offset);
 }
 
 void LoadV0(const SVECTOR* v) { LoadVector(v); }
@@ -221,18 +173,9 @@ void LoadSxy3(Word sxy0, Word sxy1, Word sxy2) {
   UnpackXY(sxy2, g.sx[2], g.sy[2]);
 }
 
-void Rtps() {
-  g.flag = 0;
-  RotateTranslate(g.v0);
-  Project();
-  FinishFlag();
-}
+void Rtps() { Commit(Math::ProjectVertex(g.transform, g.projection, g.v0)); }
 
-void Rtv0Tr() {
-  g.flag = 0;
-  RotateTranslate(g.v0);
-  FinishFlag();
-}
+void Rtv0Tr() { Commit(Math::RotateTranslateVertex(g.transform, g.v0)); }
 
 void Nclip() {
   const int64_t r = static_cast<int64_t>(g.sx[0]) * g.sy[1] +
@@ -286,7 +229,11 @@ VECTOR* ApplyMatrix(MATRIX* m, SVECTOR* v0, VECTOR* v1) {
 
 VECTOR* ApplyRotMatrix(SVECTOR* v0, VECTOR* v1) {
   MATRIX m{};
-  std::copy(&g.rot[0][0], &g.rot[0][0] + 9, &m.m[0][0]);
+  for (std::size_t row = 0; row < 3; ++row) {
+    for (std::size_t column = 0; column < 3; ++column) {
+      m.m[row][column] = g.transform.rotation.m[row][column];
+    }
+  }
   SVECTOR result{};
   ApplyMatrixSV(&m, v0, &result);
   v1->vx = result.vx, v1->vy = result.vy, v1->vz = result.vz;

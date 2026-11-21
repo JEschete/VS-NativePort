@@ -26,6 +26,9 @@
 #include "Actors/WeaponModel.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Diagnostics.hpp"
+#include "Core/Gte.hpp"
+#include "Core/Math/MatrixLive.hpp"
+#include "Core/Math/Projection.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/GimmickLookup.hpp"
@@ -45,10 +48,6 @@
 
 using VS::Core::Gte::CVECTOR;
 using VS::Core::Gte::MATRIX;
-using VS::Core::Gte::RotTransPers;
-using VS::Core::Gte::SetRotMatrix;
-using VS::Core::Gte::SetTransMatrix;
-using VS::Core::Gte::StoreLvnl;
 using VS::Core::Gte::SVECTOR;
 using VS::Core::Gte::VECTOR;
 
@@ -502,17 +501,15 @@ class LiveBoneProjection final : public BoneProjectionHost {
     matrix_ = &object->matrices[bone];
     return {BoneLookup::kFound, object->model->bones[bone].length};
   }
+  // SDK RotTransPers' SXY2 and the MAC3 the original then stored (gte_stlvnl),
+  // from the bone's transform and the frame's projection rather than the
+  // shared GTE registers (EC-03).
   ProjectedBonePoint Project(std::int16_t offset_x) override {
-    SVECTOR position = {offset_x, 0, 0, 0};
-    SetRotMatrix(matrix_);
-    SetTransMatrix(matrix_);
-    VS::Core::Gte::Word screen = 0;
-    VS::Core::Gte::Word fog = 0;
-    VS::Core::Gte::Word flags = 0;
-    VECTOR transformed{};
-    RotTransPers(&position, &screen, &fog, &flags);
-    StoreLvnl(&transformed);
-    return {static_cast<std::int32_t>(screen), transformed.vz};
+    const VS::Core::Math::PerspectiveVertex projected =
+        VS::Core::Math::ProjectVertex(VS::Core::Math::TransformOf(*matrix_),
+                                      VS::Core::Gte::SharedProjection(),
+                                      {offset_x, 0, 0});
+    return {projected.PackedScreen(), projected.mac.z};
   }
 
  private:

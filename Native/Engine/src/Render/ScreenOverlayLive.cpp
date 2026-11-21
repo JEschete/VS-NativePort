@@ -12,6 +12,7 @@
 
 #include "Core/Diagnostics.hpp"
 #include "Core/Gte.hpp"
+#include "Core/Math/Projection.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/TransitionsLiveState.hpp"
@@ -23,12 +24,6 @@
 #include "Render/UiPrimitives.hpp"
 
 using VS::Core::Gte::CVECTOR;
-using VS::Core::Gte::MATRIX;
-using VS::Core::Gte::RotTrans;
-using VS::Core::Gte::SetRotMatrix;
-using VS::Core::Gte::SetTransMatrix;
-using VS::Core::Gte::SVECTOR;
-using VS::Core::Gte::VECTOR;
 
 using VS::Legacy::AddPrim;
 using VS::Legacy::DR_MODE;
@@ -95,24 +90,20 @@ void ReportRefusal(const char* what) {
          (entry * kOrderingEntryBytes);
 }
 
+// The strip transform held by the draw rather than loaded into the shared GTE
+// state (EC-03).
 class LiveScreenTransformer final : public ScreenTransformer {
  public:
   void LoadTransform(const Math::Transform3& transform) override {
-    MATRIX matrix{};
-    Math::StoreMatrix(matrix, transform.rotation);
-    matrix.t[0] = transform.translation.x;
-    matrix.t[1] = transform.translation.y;
-    matrix.t[2] = transform.translation.z;
-    SetRotMatrix(&matrix);
-    SetTransMatrix(&matrix);
+    transform_ = transform;
   }
+  // SDK RotTrans: MAC1-3.
   Math::Vec3 Transform(std::int16_t x, std::int16_t y) override {
-    SVECTOR input = {x, y, 0, 0};
-    VECTOR output{};
-    VS::Core::Gte::Word flags = 0;
-    RotTrans(&input, &output, &flags);
-    return Math::VectorOf(output);
+    return Math::RotateTranslateVertex(transform_, {x, y, 0}).mac;
   }
+
+ private:
+  Math::Transform3 transform_{Math::IdentityRotation(), {}};
 };
 
 // decomp: BATTLE.PRG func_8007D41C (src/BATTLE/BATTLE.PRG/146C.c:9285): every

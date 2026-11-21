@@ -9,6 +9,9 @@
 #include <cstring>
 #include <optional>
 
+#include "Core/Math/Matrix.hpp"
+#include "Core/Math/Projection.hpp"
+
 namespace VS::Render {
 namespace {
 namespace Math = VS::Core::Math;
@@ -998,7 +1001,7 @@ void SetRoomPolygonScreenBounds(RoomClipState& clip,
 }
 
 // decomp: BATTLE.PRG func_8009820C.
-RoomDrawStatus DrawSkyDome(std::span<const std::byte> sky,
+RoomDrawStatus DrawSkyDome(std::span<const std::byte> sky, const RoomView& view,
                            RoomTransformer& transformer,
                            RoomPacketQueue& queue) {
   if (sky.size() < kSkyDomeBytes) {
@@ -1009,6 +1012,7 @@ RoomDrawStatus DrawSkyDome(std::span<const std::byte> sky,
   if (!SkyFacesValid(faces)) {
     return RoomDrawStatus::kInvalidGeometry;
   }
+  transformer.LoadView(view);
   std::array<Math::Vec3, kSkyDomeVertexCount> positions{};
   std::array<std::uint32_t, kSkyDomeVertexCount> colors{};
   for (std::size_t vertex = 0; vertex < kSkyDomeVertexCount; ++vertex) {
@@ -1116,5 +1120,35 @@ RoomScreenOffset GetProjectionScreenOffset(const RoomTransformer& transformer) {
 void SetProjectionScreenOffset(RoomTransformer& transformer,
                                const RoomScreenOffset& offset) {
   transformer.SetScreenOffset(offset);
+}
+
+void PerspectiveRoomTransformer::LoadView(const RoomView& view) {
+  view_ = {view.rotation, view.translation};
+}
+
+// SDK RotTransPers: the packed SXY2 and SZ3 / 4.
+RoomProjectedPoint PerspectiveRoomTransformer::Project(
+    const RoomPosition& position) {
+  const Math::PerspectiveVertex vertex = Math::ProjectVertex(
+      view_, projection_, {position.x, position.y, position.z});
+  return {vertex.PackedScreen(), vertex.QuarterDepth()};
+}
+
+// SDK RotTrans: MAC1-3.
+Math::Vec3 PerspectiveRoomTransformer::Transform(const RoomPosition& position) {
+  return Math::RotateTranslateVertex(view_,
+                                     {position.x, position.y, position.z})
+      .mac;
+}
+
+RoomScreenOffset PerspectiveRoomTransformer::ScreenOffset() const {
+  return {Math::ScreenOffsetPixels(projection_.offset_x),
+          Math::ScreenOffsetPixels(projection_.offset_y)};
+}
+
+void PerspectiveRoomTransformer::SetScreenOffset(
+    const RoomScreenOffset& offset) {
+  projection_.offset_x = Math::ScreenOffsetFixed(offset.x);
+  projection_.offset_y = Math::ScreenOffsetFixed(offset.y);
 }
 }  // namespace VS::Render
