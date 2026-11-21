@@ -17,7 +17,6 @@
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Ai/PlanningWorkspace.hpp"
 #include "Battle/Damage.hpp"
-#include "Boot/SessionLive.hpp"
 
 using VS::Battle::ActionRequestRecord;
 
@@ -34,6 +33,8 @@ static_assert(offsetof(ActionRequestRecord, targets) ==
 // actor->command.fields.unk8 bit 5 (74088.c:1590, lbu 0x8).
 constexpr unsigned kSuppressAwarenessIndicator = 0x20;
 
+// Binds the planning globals to one call's workspace; unbinds them on every
+// exit, including a session transfer unwinding through the call.
 class BoundPlanningWorkspace {
  public:
   explicit BoundPlanningWorkspace(PlanningWorkspace& workspace) {
@@ -53,11 +54,6 @@ class BoundPlanningWorkspace {
     VS::Battle::Ai::candidateExclusions = nullptr;
     VS::Battle::Ai::fallbackCandidates = nullptr;
   }
-
- private:
-  // A session transition would skip this destructor and leave the globals
-  // pointing at the caller's workspace (#266).
-  VS::Boot::LiveSessionTransitionBarrier barrier_;
 };
 
 VS::Battle::Ai::ActorAiState& AiStateOf(int slot) {

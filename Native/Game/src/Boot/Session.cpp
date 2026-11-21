@@ -5,76 +5,126 @@ namespace VS::Boot {
 namespace {
 constexpr int kSoftResetWaitTicks = 10;
 
-// Checked before any state changes, so a refused request leaves the session
-// exactly as it was.
-void CheckTransition(const SessionState& state, SessionHost& host) {
-  if (!state.active) host.Refuse(SessionRefusal::kNoSession);
-  if (state.barrier_depth > 0) host.Refuse(SessionRefusal::kInsideBarrier);
+// The session's extent: ends it on every exit from RunSession, including an
+// exception or a fiber cancellation unwinding through it.
+class SessionScope {
+ public:
+  SessionScope(SessionState& state, SessionHost& host)
+      : state_(state), host_(host) {
+    host_.InvalidateSceneUi();
+    state_.active = true;
+    host_.ResetGameplayInspection();
+  }
+  ~SessionScope() {
+    host_.InvalidateSceneUi();
+    host_.ResetNativeSession();
+    state_.active = false;
+    host_.ResetGameplayInspection();
+  }
+  SessionScope(const SessionScope&) = delete;
+  SessionScope& operator=(const SessionScope&) = delete;
+  SessionScope(SessionScope&&) = delete;
+  SessionScope& operator=(SessionScope&&) = delete;
+
+ private:
+  SessionState& state_;
+  SessionHost& host_;
+};
+
+// The native state a transition resets: the title starts a new save session,
+// and the title and the game loop each replace the scene heap the UI borrows.
+// Runs after the frames the transition left have unwound, so none of their
+// destructors can undo it.
+void PrepareDestination(SessionHost& host, Mode destination) {
+  switch (destination) {
+    case Mode::kTitle:
+      host.ResetNativeSession();
+      host.InvalidateSceneUi();
+      host.ResetGameplayInspection();
+      break;
+    case Mode::kGameplay:
+      host.InvalidateSceneUi();
+      host.ResetGameplayInspection();
+      break;
+    case Mode::kBoot:
+    case Mode::kEnding:
+      break;
+  }
 }
 
-[[noreturn]] void RequestSession(SessionHost& host,
-                                 SessionDestination destination) {
-  host.InvalidateSceneUi();
-  host.ResetGameplayInspection();
-  host.Transfer(destination);
+// Checked before anything changes, so a refused request leaves the session
+// exactly as it was.
+[[noreturn]] void Transfer(const SessionState& state, SessionHost& host,
+                           Mode destination) {
+  if (!state.active) host.Refuse(SessionRefusal::kNoSession);
+  throw SessionTransfer{destination};
 }
 }  // namespace
 
-bool BeginSession(SessionState& state, SessionHost& host,
-                  bool entries_present) {
-  if (state.active || !entries_present) return false;
-  host.InvalidateSceneUi();
-  state.active = true;
-  host.ResetGameplayInspection();
+const char* ModeName(Mode mode) noexcept {
+  switch (mode) {
+    case Mode::kBoot:
+      return "boot";
+    case Mode::kTitle:
+      return "title";
+    case Mode::kGameplay:
+      return "gameplay";
+    case Mode::kEnding:
+      return "ending";
+  }
+  return "?";
+}
+
+bool RunSession(SessionState& state, SessionHost& host, ModeModules& modules,
+                Mode first) {
+  if (state.active) return false;
+  const SessionScope session(state, host);
+  std::optional<Mode> next = first;
+  while (next) {
+    const Mode mode = *next;
+    state.mode = mode;
+    host.EnterMode(mode);
+    std::optional<Mode> transfer;
+    try {
+      next = modules.For(mode).Run();
+    } catch (const SessionTransfer& request) {
+      transfer = request.destination;
+    }
+    // Outside the handler: the destination runs with no exception in flight.
+    if (transfer) {
+      host.AbandonInterruptedWork();
+      PrepareDestination(host, *transfer);
+      next = transfer;
+    }
+  }
   return true;
 }
 
-SessionDestination EntryFor(int boundary_value) {
-  return boundary_value == static_cast<int>(SessionDestination::kGameLoop)
-             ? SessionDestination::kGameLoop
-             : SessionDestination::kTitle;
+void JumpToTitle(const SessionState& state, SessionHost& host) {
+  Transfer(state, host, Mode::kTitle);
 }
 
-void EndSession(SessionState& state, SessionHost& host) {
-  host.InvalidateSceneUi();
-  host.ResetNativeSession();
-  state.active = false;
-  host.ResetGameplayInspection();
+void JumpToGameLoop(const SessionState& state, SessionHost& host) {
+  Transfer(state, host, Mode::kGameplay);
 }
 
-SessionTransitionBarrier::SessionTransitionBarrier(SessionState& state)
-    : state_(state) {
-  ++state_.barrier_depth;
+void JumpToEnding(const SessionState& state, SessionHost& host) {
+  Transfer(state, host, Mode::kEnding);
 }
 
-SessionTransitionBarrier::~SessionTransitionBarrier() {
-  --state_.barrier_depth;
+Mode RunBootMode(BootHost& host) {
+  host.InitializePlatformServices();
+  return Mode::kTitle;
 }
 
-void JumpToTitle(SessionState& state, SessionHost& host) {
-  CheckTransition(state, host);
-  host.ResetNativeSession();
-  RequestSession(host, SessionDestination::kTitle);
-}
-
-void JumpToGameLoop(SessionState& state, SessionHost& host) {
-  CheckTransition(state, host);
-  RequestSession(host, SessionDestination::kGameLoop);
-}
-
-int RunTitleAndBattle(TitleSessionHost& host) {
+Mode RunTitleMode(TitleSessionHost& host) {
   host.InitializeTitleSession();
   host.LoadTitleOverlay();
   host.SetGameEntryMode(host.RunTitle());
   host.ClearPendingClearSave();
   host.ShowLoadingScreen();
   host.LoadBattleOverlays();
-  return host.RunLoadedGame();
-}
-
-void RunGame(GameHost& host) {
-  host.InitializePlatformServices();
-  host.RunSessions();
+  return Mode::kGameplay;
 }
 
 void DelayAfterOverlayLoad() {}
@@ -128,8 +178,7 @@ void EnterBattle(TransitionHost& host, OverlayLoadHost& overlays) {
   host.JumpToGameLoop();
 }
 
-void RunEndingAndReturnToTitle(TransitionHost& host,
-                               OverlayLoadHost& overlays) {
+void RunEndingAndReturnToTitle(TransitionHost& host) {
   host.SetGameplayActive(false);
   host.HideDisplay();
   host.StopControllerMotors();
@@ -137,6 +186,10 @@ void RunEndingAndReturnToTitle(TransitionHost& host,
   host.StopAllMusic();
   host.StopSceneSoundEffects();
   host.CaptureAshleySnapshot();
+  host.JumpToEnding();
+}
+
+void RunEndingMode(TransitionHost& host, OverlayLoadHost& overlays) {
   LoadEndingOverlay(overlays);
   host.RunStaffRoll();
   host.HideDisplay();

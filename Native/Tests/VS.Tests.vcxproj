@@ -251,6 +251,7 @@
     <ClCompile Include="src\GameClearLifecycleLiveTests.cpp" />
     <ClCompile Include="src\GameClearLifecycleTests.cpp" />
     <ClCompile Include="src\GameClearScoreTests.cpp" />
+    <ClCompile Include="src\GameFiberTests.cpp" />
     <ClCompile Include="src\GameFontTests.cpp" />
     <ClCompile Include="src\GameplayLoopTests.cpp" />
     <ClCompile Include="src\GazetteCameraTests.cpp" />

@@ -1031,6 +1031,18 @@ class LiveSession {
     }
   }
 
+  // The encounter's game code threw: its fiber already unwound, so the
+  // encounter ends here and the lab stays up to configure the next one.
+  void FailEncounter(const char* message) {
+    VS::Core::LogError("combat-lab", "encounter failed: {}", message);
+    fiber_.reset();
+    help_ = paused_ = false;
+    trace_.Event("encounter.failed",
+                 {{"number", encounter_number_}, {"message", message}}, ticks_);
+    editor_.Message("ENCOUNTER FAILED - SEE THE LOG");
+    if (!scripts_.empty()) FinishScript();
+  }
+
   void Tick() {
     if (Finished()) return;
     step_ = false;
@@ -1063,7 +1075,14 @@ class LiveSession {
     if (fiber_) {
       Legacy::FeedPad(0, pad, true);
       const auto simulation_start = SDL_GetTicksNS();
-      const bool running = fiber_->Resume();
+      bool running = false;
+      try {
+        running = fiber_->Resume();
+      } catch (const std::exception& error) {
+        simulation_timing_.Record(simulation_start);
+        FailEncounter(error.what());
+        return;
+      }
       simulation_timing_.Record(simulation_start);
       const auto inspection_start = SDL_GetTicksNS();
       const auto state = Game::InspectEncounter();

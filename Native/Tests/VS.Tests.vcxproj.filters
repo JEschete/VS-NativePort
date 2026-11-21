@@ -648,6 +648,9 @@
     <ClCompile Include="src\GameClearScoreTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\GameFiberTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\GameFontTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

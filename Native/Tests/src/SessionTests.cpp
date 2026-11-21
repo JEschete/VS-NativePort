@@ -1,35 +1,39 @@
+#include <array>
+#include <cstddef>
+#include <exception>
+#include <functional>
+#include <initializer_list>
+#include <optional>
+#include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
 
 #include "Boot/Session.hpp"
+#include "Platform/GameFiber.hpp"
 
 namespace {
-using VS::Boot::SessionDestination;
+using VS::Boot::Mode;
 using VS::Boot::SessionRefusal;
 using VS::Boot::SessionState;
-using VS::Boot::SessionTransitionBarrier;
+using Calls = std::vector<std::string>;
 
-struct Transferred {
-  SessionDestination destination;
-};
 struct Refused {
   SessionRefusal refusal;
 };
 
-// The core has no extern "C" frames, so the test host can leave Transfer and
-// Refuse with exceptions instead of the live boundary jump.
 class RecordingHost final : public VS::Boot::SessionHost {
  public:
-  std::vector<std::string> calls;
+  Calls calls;
 
   void InvalidateSceneUi() override { calls.emplace_back("ui"); }
   void ResetGameplayInspection() override { calls.emplace_back("inspect"); }
   void ResetNativeSession() override { calls.emplace_back("save"); }
-  [[noreturn]] void Transfer(SessionDestination destination) override {
-    calls.emplace_back("transfer");
-    throw Transferred{destination};
+  void AbandonInterruptedWork() override { calls.emplace_back("abandon"); }
+  void EnterMode(Mode mode) override {
+    calls.emplace_back(std::string("enter-") + VS::Boot::ModeName(mode));
   }
   [[noreturn]] void Refuse(SessionRefusal refusal) override {
     calls.emplace_back("refuse");
@@ -37,16 +41,55 @@ class RecordingHost final : public VS::Boot::SessionHost {
   }
 };
 
-template <typename Jump>
-SessionDestination TransferredTo(Jump jump) {
-  try {
-    jump();
-  } catch (const Transferred& transferred) {
-    return transferred.destination;
+// Each mode's run: the mode and how many times it ran before.
+using Script = std::function<std::optional<Mode>(Mode, int)>;
+
+class ScriptedModules final : public VS::Boot::ModeModules {
+ public:
+  explicit ScriptedModules(Script script) : script_(std::move(script)) {}
+  VS::Boot::ModeModule& For(Mode mode) override {
+    return modules_.at(static_cast<std::size_t>(mode));
   }
-  FAIL("the jump returned");
-  return SessionDestination::kTitle;
-}
+
+ private:
+  class Module final : public VS::Boot::ModeModule {
+   public:
+    Module(const Script& script, Mode mode) : script_(script), mode_(mode) {}
+    std::optional<Mode> Run() override { return script_(mode_, runs_++); }
+
+   private:
+    const Script& script_;
+    Mode mode_;
+    int runs_ = 0;
+  };
+
+  Script script_;
+  std::array<Module, 4> modules_{
+      Module{script_, Mode::kBoot}, Module{script_, Mode::kTitle},
+      Module{script_, Mode::kGameplay}, Module{script_, Mode::kEnding}};
+};
+
+// A mode's local whose destructor reports the unwind.
+class Frame {
+ public:
+  Frame(Calls& calls, std::string name)
+      : calls_(calls), name_(std::move(name)) {}
+  ~Frame() {
+    try {
+      calls_.emplace_back("unwind-" + name_);
+    } catch (...) {
+      std::terminate();
+    }
+  }
+  Frame(const Frame&) = delete;
+  Frame& operator=(const Frame&) = delete;
+  Frame(Frame&&) = delete;
+  Frame& operator=(Frame&&) = delete;
+
+ private:
+  Calls& calls_;
+  std::string name_;
+};
 
 template <typename Jump>
 SessionRefusal RefusedWith(Jump jump) {
@@ -54,16 +97,33 @@ SessionRefusal RefusedWith(Jump jump) {
     jump();
   } catch (const Refused& refused) {
     return refused.refusal;
-  } catch (const Transferred&) {
+  } catch (const VS::Boot::SessionTransfer&) {
     FAIL("the jump transferred");
   }
   FAIL("the jump returned");
   return SessionRefusal::kNoSession;
 }
 
+Calls SessionBegin() { return {"ui", "inspect"}; }
+Calls SessionEnd() { return {"ui", "save", "inspect"}; }
+
+Calls Session(std::initializer_list<std::string> body) {
+  Calls calls = SessionBegin();
+  calls.insert(calls.end(), body);
+  const Calls end = SessionEnd();
+  calls.insert(calls.end(), end.begin(), end.end());
+  return calls;
+}
+
+class RecordingBootHost final : public VS::Boot::BootHost {
+ public:
+  Calls calls;
+  void InitializePlatformServices() override { calls.emplace_back("platform"); }
+};
+
 class RecordingTitleHost final : public VS::Boot::TitleSessionHost {
  public:
-  std::vector<std::string> calls;
+  Calls calls;
   int entry_mode = -1;
 
   void InitializeTitleSession() override { calls.emplace_back("init"); }
@@ -79,18 +139,26 @@ class RecordingTitleHost final : public VS::Boot::TitleSessionHost {
   void ClearPendingClearSave() override { calls.emplace_back("clear"); }
   void ShowLoadingScreen() override { calls.emplace_back("loading"); }
   void LoadBattleOverlays() override { calls.emplace_back("battle"); }
-  int RunLoadedGame() override {
-    calls.emplace_back("game");
-    return 9;
-  }
 };
 
-class RecordingGameHost final : public VS::Boot::GameHost {
- public:
-  std::vector<std::string> calls;
-  void InitializePlatformServices() override { calls.emplace_back("platform"); }
-  void RunSessions() override { calls.emplace_back("sessions"); }
+// The session a game fiber runs; the fiber entry has no parameters.
+struct FiberSession {
+  SessionState state;
+  RecordingHost host;
 };
+FiberSession* fiberSession = nullptr;
+
+void RunFiberSession() {
+  ScriptedModules modules([](Mode mode, int) -> std::optional<Mode> {
+    if (mode != Mode::kGameplay) return Mode::kGameplay;
+    const Frame frame(fiberSession->host.calls, "gameplay");
+    while (true) VS::Platform::GameFiber::YieldToHost();
+  });
+  if (!VS::Boot::RunSession(fiberSession->state, fiberSession->host, modules,
+                            Mode::kBoot)) {
+    fiberSession->host.calls.emplace_back("not-started");
+  }
+}
 
 const char* ProgramName(VS::Boot::OverlayProgram program) {
   switch (program) {
@@ -149,6 +217,7 @@ class RecordingLifecycleHost final : public VS::Boot::OverlayLoadHost,
   }
   void JumpToTitle() override { calls.emplace_back("jump-title"); }
   void JumpToGameLoop() override { calls.emplace_back("jump-game"); }
+  void JumpToEnding() override { calls.emplace_back("jump-ending"); }
   void InitializeMemoryCard() override { calls.emplace_back("init-card"); }
   void StartMemoryCard() override { calls.emplace_back("start-card"); }
   void InitializeControllers() override {
@@ -276,55 +345,117 @@ class RecordingGameplayOverlayHost final
 };
 }  // namespace
 
-TEST_CASE("session begins and ends in the original order", "[session]") {
+TEST_CASE("session runs its modes until one ends it", "[session]") {
   SessionState state;
   RecordingHost host;
-  REQUIRE(VS::Boot::BeginSession(state, host, true));
-  CHECK(state.active);
-  CHECK(host.calls == std::vector<std::string>{"ui", "inspect"});
-
-  host.calls.clear();
-  VS::Boot::EndSession(state, host);
+  ScriptedModules modules([&](Mode mode, int) -> std::optional<Mode> {
+    CHECK(state.active);
+    CHECK(state.mode == mode);
+    if (mode == Mode::kBoot) return Mode::kTitle;
+    if (mode == Mode::kTitle) return Mode::kGameplay;
+    return std::nullopt;
+  });
+  REQUIRE(VS::Boot::RunSession(state, host, modules, Mode::kBoot));
   CHECK_FALSE(state.active);
-  CHECK(host.calls == std::vector<std::string>{"ui", "save", "inspect"});
+  CHECK(host.calls == Session({"enter-boot", "enter-title", "enter-gameplay"}));
 }
 
-TEST_CASE("session refuses to begin twice or without entries", "[session]") {
+TEST_CASE("session refuses to start inside a running session", "[session]") {
   SessionState state;
   RecordingHost host;
-  CHECK_FALSE(VS::Boot::BeginSession(state, host, false));
-  CHECK_FALSE(state.active);
-  REQUIRE(VS::Boot::BeginSession(state, host, true));
-  host.calls.clear();
-  CHECK_FALSE(VS::Boot::BeginSession(state, host, true));
-  CHECK(host.calls.empty());
+  ScriptedModules inner([](Mode, int) -> std::optional<Mode> {
+    FAIL("the nested session ran a mode");
+    return std::nullopt;
+  });
+  ScriptedModules outer([&](Mode, int) -> std::optional<Mode> {
+    CHECK_FALSE(VS::Boot::RunSession(state, host, inner, Mode::kTitle));
+    CHECK(state.active);
+    return std::nullopt;
+  });
+  REQUIRE(VS::Boot::RunSession(state, host, outer, Mode::kGameplay));
+  CHECK(host.calls == Session({"enter-gameplay"}));
 }
 
-TEST_CASE("session boundary values select the entry", "[session]") {
-  CHECK(VS::Boot::EntryFor(0) == SessionDestination::kTitle);
-  CHECK(VS::Boot::EntryFor(1) == SessionDestination::kTitle);
-  CHECK(VS::Boot::EntryFor(2) == SessionDestination::kGameLoop);
-}
-
-TEST_CASE("title transition resets the save session first", "[session]") {
+TEST_CASE("title transfer unwinds the mode before resetting the save session",
+          "[session]") {
   SessionState state;
   RecordingHost host;
-  REQUIRE(VS::Boot::BeginSession(state, host, true));
-  host.calls.clear();
-  CHECK(TransferredTo([&] { VS::Boot::JumpToTitle(state, host); }) ==
-        SessionDestination::kTitle);
+  ScriptedModules modules([&](Mode mode, int runs) -> std::optional<Mode> {
+    if (mode == Mode::kTitle) {
+      return runs == 0 ? std::optional<Mode>(Mode::kGameplay) : std::nullopt;
+    }
+    const Frame frame(host.calls, "gameplay");
+    VS::Boot::JumpToTitle(state, host);
+  });
+  REQUIRE(VS::Boot::RunSession(state, host, modules, Mode::kTitle));
   CHECK(host.calls ==
-        std::vector<std::string>{"save", "ui", "inspect", "transfer"});
+        Session({"enter-title", "enter-gameplay", "unwind-gameplay", "abandon",
+                 "save", "ui", "inspect", "enter-title"}));
 }
 
-TEST_CASE("game-loop transition keeps the save session", "[session]") {
+TEST_CASE("game-loop transfer keeps the save session", "[session]") {
   SessionState state;
   RecordingHost host;
-  REQUIRE(VS::Boot::BeginSession(state, host, true));
+  ScriptedModules modules([&](Mode, int runs) -> std::optional<Mode> {
+    if (runs == 0) VS::Boot::JumpToGameLoop(state, host);
+    return std::nullopt;
+  });
+  REQUIRE(VS::Boot::RunSession(state, host, modules, Mode::kGameplay));
+  CHECK(host.calls == Session({"enter-gameplay", "abandon", "ui", "inspect",
+                               "enter-gameplay"}));
+}
+
+TEST_CASE("ending transfer prepares nothing and returns by the title",
+          "[session]") {
+  SessionState state;
+  RecordingHost host;
+  ScriptedModules modules([&](Mode mode, int runs) -> std::optional<Mode> {
+    if (mode == Mode::kGameplay) VS::Boot::JumpToEnding(state, host);
+    if (mode == Mode::kEnding) VS::Boot::JumpToTitle(state, host);
+    return runs == 0 ? std::optional<Mode>(Mode::kGameplay) : std::nullopt;
+  });
+  REQUIRE(VS::Boot::RunSession(state, host, modules, Mode::kTitle));
+  CHECK(host.calls ==
+        Session({"enter-title", "enter-gameplay", "abandon", "enter-ending",
+                 "abandon", "save", "ui", "inspect", "enter-title"}));
+}
+
+TEST_CASE("repeated transfers stay in one session", "[session]") {
+  SessionState state;
+  RecordingHost host;
+  int titles = 0;
+  ScriptedModules modules([&](Mode mode, int runs) -> std::optional<Mode> {
+    if (mode == Mode::kTitle) {
+      ++titles;
+      return Mode::kGameplay;
+    }
+    if (runs < 3) VS::Boot::JumpToTitle(state, host);
+    return std::nullopt;
+  });
+  REQUIRE(VS::Boot::RunSession(state, host, modules, Mode::kTitle));
+  CHECK(titles == 4);
+  CHECK_FALSE(state.active);
+  CHECK(Calls(host.calls.begin(), host.calls.begin() + 2) == SessionBegin());
+  CHECK(Calls(host.calls.end() - 3, host.calls.end()) == SessionEnd());
+}
+
+TEST_CASE("an exception unwinds the mode and ends the session", "[session]") {
+  SessionState state;
+  RecordingHost host;
+  ScriptedModules failing([&](Mode, int) -> std::optional<Mode> {
+    const Frame frame(host.calls, "gameplay");
+    throw std::runtime_error("mode failed");
+  });
+  CHECK_THROWS_AS(VS::Boot::RunSession(state, host, failing, Mode::kGameplay),
+                  std::runtime_error);
+  CHECK_FALSE(state.active);
+  CHECK(host.calls == Session({"enter-gameplay", "unwind-gameplay"}));
+
   host.calls.clear();
-  CHECK(TransferredTo([&] { VS::Boot::JumpToGameLoop(state, host); }) ==
-        SessionDestination::kGameLoop);
-  CHECK(host.calls == std::vector<std::string>{"ui", "inspect", "transfer"});
+  ScriptedModules next(
+      [](Mode, int) -> std::optional<Mode> { return std::nullopt; });
+  CHECK(VS::Boot::RunSession(state, host, next, Mode::kTitle));
+  CHECK(host.calls == Session({"enter-title"}));
 }
 
 TEST_CASE("transitions without a session are refused untouched", "[session]") {
@@ -334,55 +465,42 @@ TEST_CASE("transitions without a session are refused untouched", "[session]") {
         SessionRefusal::kNoSession);
   CHECK(RefusedWith([&] { VS::Boot::JumpToGameLoop(state, host); }) ==
         SessionRefusal::kNoSession);
-  CHECK(host.calls == std::vector<std::string>{"refuse", "refuse"});
+  CHECK(RefusedWith([&] { VS::Boot::JumpToEnding(state, host); }) ==
+        SessionRefusal::kNoSession);
+  CHECK(host.calls == Calls{"refuse", "refuse", "refuse"});
 }
 
-TEST_CASE("transitions inside a barrier are refused untouched", "[session]") {
-  SessionState state;
-  RecordingHost host;
-  REQUIRE(VS::Boot::BeginSession(state, host, true));
-  host.calls.clear();
+TEST_CASE("cancelling the game fiber unwinds the mode and ends the session",
+          "[session][fiber]") {
+  FiberSession session;
+  fiberSession = &session;
   {
-    const SessionTransitionBarrier barrier{state};
-    CHECK(RefusedWith([&] { VS::Boot::JumpToTitle(state, host); }) ==
-          SessionRefusal::kInsideBarrier);
-    CHECK(RefusedWith([&] { VS::Boot::JumpToGameLoop(state, host); }) ==
-          SessionRefusal::kInsideBarrier);
+    VS::Platform::GameFiber fiber(&RunFiberSession);
+    REQUIRE(fiber.Resume());
+    CHECK(session.state.active);
+    CHECK(session.state.mode == Mode::kGameplay);
+    CHECK(session.host.calls ==
+          Calls{"ui", "inspect", "enter-boot", "enter-gameplay"});
+    session.host.calls.clear();
   }
-  CHECK(host.calls == std::vector<std::string>{"refuse", "refuse"});
-  CHECK(state.active);
-  CHECK(state.barrier_depth == 0);
-  CHECK(TransferredTo([&] { VS::Boot::JumpToGameLoop(state, host); }) ==
-        SessionDestination::kGameLoop);
+  fiberSession = nullptr;
+  CHECK_FALSE(session.state.active);
+  CHECK(session.host.calls ==
+        Calls{"unwind-gameplay", "ui", "save", "inspect"});
 }
 
-TEST_CASE("session barriers nest", "[session]") {
-  SessionState state;
-  {
-    const SessionTransitionBarrier outer{state};
-    CHECK(state.barrier_depth == 1);
-    {
-      const SessionTransitionBarrier inner{state};
-      CHECK(state.barrier_depth == 2);
-    }
-    CHECK(state.barrier_depth == 1);
-  }
-  CHECK(state.barrier_depth == 0);
+TEST_CASE("boot initializes the platform before the title", "[session]") {
+  RecordingBootHost host;
+  CHECK(VS::Boot::RunBootMode(host) == Mode::kTitle);
+  CHECK(host.calls == Calls{"platform"});
 }
 
-TEST_CASE("title session runs in the original order", "[session]") {
+TEST_CASE("title mode runs in the original order", "[session]") {
   RecordingTitleHost host;
-  CHECK(VS::Boot::RunTitleAndBattle(host) == 9);
+  CHECK(VS::Boot::RunTitleMode(host) == Mode::kGameplay);
   CHECK(host.entry_mode == 3);
-  CHECK(host.calls == std::vector<std::string>{"init", "overlay", "title",
-                                               "mode", "clear", "loading",
-                                               "battle", "game"});
-}
-
-TEST_CASE("game initializes the platform before sessions", "[session]") {
-  RecordingGameHost host;
-  VS::Boot::RunGame(host);
-  CHECK(host.calls == std::vector<std::string>{"platform", "sessions"});
+  CHECK(host.calls == Calls{"init", "overlay", "title", "mode", "clear",
+                            "loading", "battle"});
 }
 
 TEST_CASE("overlay loading uses typed programs and original slots",
@@ -421,15 +539,19 @@ TEST_CASE("battle entry loads overlays before requesting the game loop",
                           "load-battle-init-1", "entry-1", "jump-game"});
 }
 
-TEST_CASE("ending cleanup returns to title after staff roll", "[session]") {
+TEST_CASE("ending leaves the game loop and returns to title after staff roll",
+          "[session]") {
   RecordingLifecycleHost host;
-  VS::Boot::RunEndingAndReturnToTitle(host, host);
-  CHECK(host.calls == std::vector<std::string>{
-                          "gameplay-off", "hide", "stop-motors",
-                          "refresh-input", "stop-music", "stop-scene-sfx",
-                          "capture-ashley", "load-ending-0", "staff-roll",
-                          "hide", "stop-motors", "refresh-input",
-                          "shutdown-audio", "clear-save-on", "jump-title"});
+  VS::Boot::RunEndingAndReturnToTitle(host);
+  CHECK(host.calls == Calls{"gameplay-off", "hide", "stop-motors",
+                            "refresh-input", "stop-music", "stop-scene-sfx",
+                            "capture-ashley", "jump-ending"});
+
+  host.calls.clear();
+  VS::Boot::RunEndingMode(host, host);
+  CHECK(host.calls == Calls{"load-ending-0", "staff-roll", "hide",
+                            "stop-motors", "refresh-input", "shutdown-audio",
+                            "clear-save-on", "jump-title"});
 }
 
 TEST_CASE("platform initialization enables reset after services start",

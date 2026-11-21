@@ -81,7 +81,7 @@ snapshot, not a fresh build/test result. Refresh it when closing a package; do n
 
 | Area | Implemented foundation | Still not established by that foundation |
 |---|---|---|
-| Execution/platform | Native `VS::Boot::RunLiveGame` on a Windows fiber; SDL event loop and crash diagnostics | Explicit module lifecycle, full title/gameplay parity |
+| Execution/platform | Native `VS::Boot::RunLiveGame`: `Boot::RunSession` runs the boot, title, gameplay and ending modes on a cancellable Windows fiber that carries exceptions to the host; SDL event loop and crash diagnostics | Full title/gameplay parity; typed handles (#47) |
 | Graphics | GP0/ordering-table compatibility renderer and SDL GPU image presentation | Typed native draw queue, native geometry/material path |
 | Input/verification | Native pad state, legacy receive-buffer adapter, `--press`/`--scripted`, bounded captures | Complete recording/replay, canonical state comparison, input-adapter retirement |
 | Content | Extracted regular files, LBA manifest, module data/pointer initialization | Fully validated relocations, typed/versioned assets, disc-independent startup |
@@ -539,8 +539,8 @@ Confirm that the ledger percentages match §1, that the CI lint is clean and tha
 
 ### Phase 1b status (as built, 2026-10-17)
 
-The boot code (`VS::Boot::RunLiveGame` over `VS::Boot::RunGame` = `vs_main_exec`) runs on a game fiber (`Platform::GameFiber`):
-`VSync` hands control to the host loop, which feeds the pad, resumes the game once per tick and presents the page
+The boot code (`VS::Boot::RunLiveGame`, the session from `vs_main_exec`) runs on a game fiber (`Platform::GameFiber`):
+the game's wait for the next frame hands control to the host loop, which feeds the pad, resumes the game once per tick and presents the page
 space. Reached and compared with a DuckStation reference capture of each screen: NOW LOADING, the publisher and
 developer logos, the intro movie with its soundtrack (the opening music runs on under the title screen to tick
 4401, as on the PS1), the title art and the menu ring New Game / Continue / Vibration / Sound. Gamepad, keyboard
@@ -687,7 +687,7 @@ These are target designs, not an implemented-feature inventory. See §0.2 and §
 
 | Module | Origin | Notes |
 |---|---|---|
-| `Boot` | SLUS `main` boot path | Builds systems and runs the top-level state machine **Boot → Title → Game ⇄ Battle/Menu → Ending**, replacing `jumpToTitle`/`jumpToBattle`/overlay swaps. |
+| `Boot` | SLUS `main` boot path | `Boot::RunSession` runs the modes **Boot → Title → Gameplay → Ending → Title**; field, battle and the menus share the gameplay mode's loop. `JumpToTitle`/`JumpToGameLoop`/`JumpToEnding` throw a `SessionTransfer` to the runner, so the frames they leave unwind before the destination is prepared (#44). |
 | `Title` | TITLE.PRG (98 functions, all named) | Dev credits, intro movie, title menu, attract loop. **1b target.** |
 | `Field` | SLUS + BATTLE field parts | Room/zone loading, camera, collision, doors. |
 | `Battle` | BATTLE.PRG (1,850 functions) | Combat, risk, chains, AI. Largest naming job. |
@@ -699,7 +699,10 @@ These are target designs, not an implemented-feature inventory. See §0.2 and §
 | `Ending` | ENDING.PRG | Credits/ending sequences. |
 | `State` | globals | `GameState` (party, flags, inventory, location, timers) as one owned, serializable object. |
 
-Overlays become modules with explicit `Init()`, `Shutdown()`, `Update(dt)` and `Reset()`. Statics that the original re-initialized by reloading the overlay are reset in `Reset()`.
+Each mode is a `Boot::ModeModule` (#44) whose `Run()` runs on the game fiber until it returns the next mode or a jump
+transfers out; the fiber's per-tick wait is its update, and its ordered initialization (`InitializeTitleSession`,
+`InitializeGameplayOverlay`) and scoped teardown are its lifecycle. Statics that the original re-initialized by
+reloading an overlay must be reset by the mode's initialization.
 
 ### 6.8.1 Actors and their assets: one shared path (owner, 2026-10-17)
 
@@ -726,7 +729,7 @@ lists the owners as built; `GameState` as one owned object (§6.8 `State`) is st
 | Lifetime | Lasts | Owners | Reset or load point |
 |---|---|---|---|
 | Persistent | across saves | `State::stateFlags` (typed `StateFlags`), read and written by id through `State::ScriptFlags` (`LiveScriptFlag`, `SetLiveScriptFlag`); `State::scoreData`, `artsStatus`, `roomVisitProgress`, `learnedActionFlags`, `playTime`, `recentRoomEnemyStates`; `Items::inventory` and `inventoryIndices` (the original's misnamed `Audio_Seq_unused*` storage); `Input::settings` | New Game (`Title::InitializeNewGameData`); `Game::Save::Capture` and its restore in `Save/RuntimeSnapshot.cpp` |
-| Session | from one title entry to the next | `Boot::SessionState`, `SoftResetState`, the save resume, and the workspaces that replaced the PS1 scratchpad: `Event::LiveEventCameraScratch()` (shake envelope and offsets), `Effects::EmitterWorkspace()` (emitter flags carried between emissions) and `Battle::LiveSphereWorkspace()` (sphere bases, sine samples, staged volumes) | `Boot::ResetLiveSessionState()`, called by every `ResetNativeSession` (`InitializeTitleSession`, `ResetToTitle`, `JumpToTitle`, `EndSession`); the jump into the game loop keeps them |
+| Session | from one title entry to the next | `Boot::SessionState`, `SoftResetState`, the save resume, and the workspaces that replaced the PS1 scratchpad: `Event::LiveEventCameraScratch()` (shake envelope and offsets), `Effects::EmitterWorkspace()` (emitter flags carried between emissions) and `Battle::LiveSphereWorkspace()` (sphere bases, sine samples, staged volumes) | `Boot::ResetLiveSessionState()`, called by every `ResetNativeSession` (`InitializeTitleSession`, `ResetToTitle`, the title transfer's preparation in `Boot::RunSession`, and the session's end); the jump into the game loop keeps them |
 | Scene | one room or battle | `Field::RoomVisitState`, `Event::cameraWorkspace`, `Battle::targetSphere`, the AI room state and its borrowed bindings | room load; the AI session invalidation (`Battle/Ai/RoomState.cpp`) |
 | Temporary | one frame or one call | `Render::FrameScratchpad()` (the frame setup rewrites it every frame), the AI `PlanningWorkspace` (one per call), `Render` model workspaces, event frame locals | none |
 
@@ -1344,7 +1347,7 @@ and a dependency boundary. No such new approval is implied by this audit.
 | EC-03 | Stateful GTE-style math interface | Native arithmetic with coprocessor-style compatibility | Engine/Core, Render, Game/Actors | M4, M7, M10 |
 | EC-04 | Sector requests and module-address relocation | Storage adapter plus original data-layout coupling | Content, Game/Boot | M1, M4-M9, M10 |
 | EC-05 | Scratchpad and overlapping overlay storage | Memory-layout compatibility | Engine/Core, Game/Boot and resource owners | M1, M3, M7, M9, M10 |
-| EC-06 | VSync, callbacks and root-counter behavior | Logical-tick waits and sound timer connected; fiber cancellation, error transport and explicit modes remain | Engine/Core, Platform, Game/Boot | M2, M3, M5, M10 |
+| EC-06 | VSync, callbacks and root-counter behavior | Retired (#44): logical-tick waits, sound timer, fiber cancellation, error transport and explicit session modes; per-tick replay state identical at speeds 1 and 4 | Engine/Core, Platform, Game/Boot | M2, M3, M5, M10 |
 | EC-07 | Original controller receive buffers | Protocol compatibility adapter | Engine/Input, Game/Title | M3, M9, M10 |
 | EC-08 | Movie backend and MDEC-shaped presentation | Native AV1/FLAC decoding connected; page-space presentation and lifecycle retirement remain | Engine/Movie, Content | M6, M10 |
 | EC-09 | Memory-card API and native persistence | Initial schema3 save/load milestone delivered; imports, clear saves, campaign and final adapter retirement remain | Engine/Save, Game/State | M9, M10 |
@@ -1498,9 +1501,21 @@ are removed with provenance comments. `SetVideoMode(MODE_NTSC)` and the empty ve
 `tick_timer::ReadClock` keeps the sequencer's tick-cost diagnostic on a steady clock, outside game time.
 
 **Issue:** no gameplay caller reads a root counter or scanline any more, and wall-clock readings stay in diagnostics.
-The remaining debt is lifecycle: a wait blocked on the fiber cannot be cancelled when the host exits, an exception
-thrown on the fiber does not reach the host, and session transfers still jump across frames with `setjmp`/`longjmp`
-instead of explicit mode transitions (#44).
+The lifecycle is explicit (#44): destroying or cancelling the fiber throws `Platform::FiberCancelled` from the wait it
+is blocked in, so every frame unwinds with its destructors; an exception that ends the game is logged where it was
+thrown and rethrown to the host by `GameFiber::Resume`; and session transfers are `Boot::SessionTransfer` exceptions
+caught by `Boot::RunSession`, replacing `setjmp`/`longjmp`.
+
+Presentation cadence is outside game time. `Core::FrameClock` runs at most four catch-up ticks per present and drops
+the remaining backlog after a stall, so a stall pauses game time instead of compressing it; a host pauses by not
+resuming the fiber, and a step resumes it for exactly one tick (CombatLab F6/F7).
+
+**Status: retired (#44).** Per-tick state events (frame snapshots, flag writes, session begin/end) of the documented
+menu replay were identical at `--speed 1` and `--speed 4` through tick 7000, and the tick-4500 capture was
+byte-identical. Soft resets in gameplay, in the main menu and in a second session, exits in title and gameplay modes,
+a CombatLab pause/step/stop/rerun and a window close mid-encounter all reached the host without a stranded wait; the
+error path is covered by the `[fiber]` and `[session]` tests. Evidence: `VR-BOOT-SESSION-SLICE` in
+`Docs/ledgers/VERIFY_LEDGER.csv`.
 
 **Retain:** original logical tick rates, event ordering and gameplay delays. A fiber can remain an implementation detail
 if its lifecycle and yield contract are explicit; removing fibers is not itself a modernization requirement.

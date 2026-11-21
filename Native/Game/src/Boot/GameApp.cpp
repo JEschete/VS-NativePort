@@ -14,26 +14,7 @@
 
 namespace VS::Game {
 
-const char* ModeName(Mode mode) {
-  switch (mode) {
-    case Mode::Boot:
-      return "Boot";
-    case Mode::Title:
-      return "Title";
-    case Mode::Field:
-      return "Field";
-    case Mode::Battle:
-      return "Battle";
-    case Mode::Menu:
-      return "Menu";
-    case Mode::Ending:
-      return "Ending";
-  }
-  return "?";
-}
-
-// The copied boot entry (vs_main_exec): the original's endless loop, run on the
-// game fiber.
+// The session from boot (vs_main_exec), run on the game fiber.
 struct GameApp::Runner {
   Platform::GameFiber fiber{&VS::Boot::RunLiveGame};
 };
@@ -54,11 +35,17 @@ GameApp::GameApp(Services services) : m_services_(services) {
 }
 
 GameApp::~GameApp() {
+  // Unwind the game first: its frames' destructors still use the session.
+  m_runner_.reset();
   Save::ShutdownFileMenus();
   VS::Boot::ResetGameplayInspection();
 }
 
 bool GameApp::Finished() const { return m_runner_->fiber.Finished(); }
+
+std::optional<Boot::Mode> GameApp::CurrentMode() const {
+  return VS::Boot::LiveSessionMode();
+}
 
 void GameApp::Tick(const Input::PadState& pad, bool pad_connected) {
   Legacy::FeedPad(0, pad, pad_connected);

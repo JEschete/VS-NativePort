@@ -3,29 +3,39 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <optional>
 
 #include "Core/Math/ScalarMath.hpp"
 
-// Native title and gameplay sessions. The original resets the stack pointer to
-// a saved checkpoint to abandon the current call stack (overlay.c:20-21). The
-// native session loop keeps that as a nonlocal transition to the session
-// boundary, which on this toolchain runs no destructors in the abandoned
-// frames (#266). The policy below decides whether a transition may happen;
-// the host performs it, so the core reaches no global state.
+// Native runtime modes and sessions. The original left the current call stack
+// by restoring a stack pointer saved at boot and jumping to the title or the
+// game loop (vs_overlay_jumpToTitle/jumpToBattle, SLUS_010.40 overlay.s:34-35).
+// Natively a transition throws SessionTransfer to the session runner, so every
+// frame it leaves unwinds and runs its destructors before the runner prepares
+// and runs the destination mode. The policy below decides what may happen; the
+// host performs it, so the core reaches no global state.
 namespace VS::Boot {
-enum class SessionDestination : std::uint8_t { kTitle = 1, kGameLoop = 2 };
+// The runtime modes of a session (plan §6.8). Field, battle and the menus share
+// one game loop, so they are one gameplay mode.
+enum class Mode : std::uint8_t { kBoot, kTitle, kGameplay, kEnding };
+
+[[nodiscard]] const char* ModeName(Mode mode) noexcept;
 
 enum class SessionRefusal : std::uint8_t {
-  // A transition requested with no session loop running.
+  // A transition requested with no session running.
   kNoSession,
-  // A transition requested while a scope that binds globals to stack storage
-  // is live; jumping would leave those globals pointing at a dead frame.
-  kInsideBarrier,
 };
 
 struct SessionState {
   bool active = false;
-  int barrier_depth = 0;
+  // The running mode; meaningful only while active.
+  Mode mode = Mode::kBoot;
+};
+
+// What a transition throws to the session runner. Deliberately not a
+// std::exception, so only the runner handles it.
+struct SessionTransfer {
+  Mode destination;
 };
 
 class SessionHost {
@@ -35,38 +45,65 @@ class SessionHost {
   virtual void InvalidateSceneUi() = 0;
   virtual void ResetGameplayInspection() = 0;
   virtual void ResetNativeSession() = 0;
-  // Returns to the session boundary with `destination`; never returns.
-  [[noreturn]] virtual void Transfer(SessionDestination destination) = 0;
+  // Clears bookkeeping of the work a transfer interrupted that no destructor
+  // owns; runs after the frames unwound.
+  virtual void AbandonInterruptedWork() = 0;
+  // Reports the mode about to run.
+  virtual void EnterMode(Mode mode) = 0;
   // Reports the refused transition and stops; never returns.
   [[noreturn]] virtual void Refuse(SessionRefusal refusal) = 0;
 };
 
-// Starts a session; false if one is running or an entry is missing.
-[[nodiscard]] bool BeginSession(SessionState& state, SessionHost& host,
-                                bool entries_present);
-// The entry for the value the session boundary resumed with (0 on entry).
-[[nodiscard]] SessionDestination EntryFor(int boundary_value);
-void EndSession(SessionState& state, SessionHost& host);
-
-// RAII barrier: a transition requested while one is held is refused.
-class SessionTransitionBarrier {
+// One runtime mode (formerly an overlay's entry). Run() returns the next mode,
+// or nullopt to end the session; it can also be left by a transition.
+class ModeModule {
  public:
-  explicit SessionTransitionBarrier(SessionState& state);
-  ~SessionTransitionBarrier();
-  SessionTransitionBarrier(const SessionTransitionBarrier&) = delete;
-  SessionTransitionBarrier& operator=(const SessionTransitionBarrier&) = delete;
-  SessionTransitionBarrier(SessionTransitionBarrier&&) = delete;
-  SessionTransitionBarrier& operator=(SessionTransitionBarrier&&) = delete;
-
- private:
-  SessionState& state_;
+  ModeModule() = default;
+  virtual ~ModeModule() = default;
+  ModeModule(const ModeModule&) = delete;
+  ModeModule& operator=(const ModeModule&) = delete;
+  ModeModule(ModeModule&&) = delete;
+  ModeModule& operator=(ModeModule&&) = delete;
+  [[nodiscard]] virtual std::optional<Mode> Run() = 0;
 };
 
-// SLUS_010.40 vs_overlay_jumpToTitle (overlay.c:20): resets the native save
-// session, then returns to the title entry.
-[[noreturn]] void JumpToTitle(SessionState& state, SessionHost& host);
-// SLUS_010.40 vs_overlay_jumpToBattle (overlay.c:21).
-[[noreturn]] void JumpToGameLoop(SessionState& state, SessionHost& host);
+class ModeModules {
+ public:
+  ModeModules() = default;
+  virtual ~ModeModules() = default;
+  ModeModules(const ModeModules&) = delete;
+  ModeModules& operator=(const ModeModules&) = delete;
+  ModeModules(ModeModules&&) = delete;
+  ModeModules& operator=(ModeModules&&) = delete;
+  [[nodiscard]] virtual ModeModule& For(Mode mode) = 0;
+};
+
+// Runs a session from `first` until a mode ends it. False, with nothing run,
+// if a session is already running. The session ends on every exit, including
+// an exception or a fiber cancellation passing through.
+[[nodiscard]] bool RunSession(SessionState& state, SessionHost& host,
+                              ModeModules& modules, Mode first);
+
+// SLUS_010.40 vs_overlay_jumpToTitle (overlay.s:34): leaves the running mode
+// for the title, which resets the native save session.
+[[noreturn]] void JumpToTitle(const SessionState& state, SessionHost& host);
+// SLUS_010.40 vs_overlay_jumpToBattle (overlay.s:35): leaves the running mode
+// for the game loop.
+[[noreturn]] void JumpToGameLoop(const SessionState& state, SessionHost& host);
+// Leaves the game loop for the ending. The original called the ending on top
+// of the game loop's frames (vs_main_showEndingAndReturnToTitle, main.c:1005)
+// and abandoned them only when it jumped to the title.
+[[noreturn]] void JumpToEnding(const SessionState& state, SessionHost& host);
+
+class BootHost {
+ public:
+  virtual ~BootHost() = default;
+  virtual void InitializePlatformServices() = 0;
+};
+
+// SLUS_010.40 vs_main_exec (main.c:1220): initializes the platform once, then
+// the session continues with the title.
+[[nodiscard]] Mode RunBootMode(BootHost& host);
 
 class TitleSessionHost {
  public:
@@ -79,21 +116,11 @@ class TitleSessionHost {
   virtual void ClearPendingClearSave() = 0;
   virtual void ShowLoadingScreen() = 0;
   virtual void LoadBattleOverlays() = 0;
-  virtual int RunLoadedGame() = 0;
 };
 
-// SLUS_010.40 vs_main_execTitle (main.c:8344).
-int RunTitleAndBattle(TitleSessionHost& host);
-
-class GameHost {
- public:
-  virtual ~GameHost() = default;
-  virtual void InitializePlatformServices() = 0;
-  virtual void RunSessions() = 0;
-};
-
-// SLUS_010.40 vs_main_exec (main.c:8361).
-void RunGame(GameHost& host);
+// SLUS_010.40 vs_main_execTitle (main.c:1198), up to its call of the game
+// loop: the title, then the battle overlays the game loop runs from.
+[[nodiscard]] Mode RunTitleMode(TitleSessionHost& host);
 
 // SLUS_010.40 vs_overlay_wait (overlay.c:23): the original spins 4096 NOPs
 // for the instruction cache after an overlay load; native code needs none.
@@ -155,14 +182,18 @@ class TransitionHost {
   virtual void SetClearSavePending(bool pending) = 0;
   virtual void JumpToTitle() = 0;
   virtual void JumpToGameLoop() = 0;
+  virtual void JumpToEnding() = 0;
 };
 
-// SLUS_010.40 vs_main_resetGame (main.c:8119),
-// vs_main_jumpToBattle (main.c:8138), and
-// vs_main_showEndingAndReturnToTitle (main.c:8158).
+// SLUS_010.40 vs_main_resetGame (main.c:972) and vs_main_jumpToBattle
+// (main.c:988).
 void ResetToTitle(TransitionHost& host);
 void EnterBattle(TransitionHost& host, OverlayLoadHost& overlays);
-void RunEndingAndReturnToTitle(TransitionHost& host, OverlayLoadHost& overlays);
+// SLUS_010.40 vs_main_showEndingAndReturnToTitle (main.c:1005), split at its
+// call of the ending: this half leaves the game loop for the ending mode, and
+// RunEndingMode runs the ending and returns to the title.
+void RunEndingAndReturnToTitle(TransitionHost& host);
+void RunEndingMode(TransitionHost& host, OverlayLoadHost& overlays);
 
 class PlatformServicesHost {
  public:

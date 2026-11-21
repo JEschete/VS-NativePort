@@ -1,19 +1,25 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
+#include <optional>
+
 #include "Boot/Session.hpp"
 
-// The live session loop: the session boundary, scene UI, save session and
-// gameplay inspection state behind Boot/Session.hpp.
+// The live session: the production modes, scene UI, save session and gameplay
+// inspection state behind Boot/Session.hpp.
 namespace VS::Boot {
 using SessionEntry = int (*)();
 
-// Runs `title` (or `battle` after a game-loop transition) until it returns;
-// -1 if a session is already running or an entry is missing. Must run on the
-// game fiber.
-int RunLiveSessionLoop(SessionEntry title, SessionEntry battle);
-int RunLiveTitleAndBattle();
+// Runs a session of the production modes from boot until the game loop
+// returns. Must run on the game fiber.
 void RunLiveGame();
+// Runs a session whose title and gameplay modes are `title` and `battle`,
+// from the title, and returns the value of the entry that ended it; -1 if a
+// session is already running or an entry is missing. Transitions run as in
+// the game (the ending is the production one). Must run on the game fiber.
+int RunLiveSessionLoop(SessionEntry title, SessionEntry battle);
+// The running session's mode; nullopt with no session running.
+[[nodiscard]] std::optional<Mode> LiveSessionMode();
 [[noreturn]] void JumpToLiveTitle();
 [[noreturn]] void JumpToLiveGameLoop();
 void LoadBattleOverlaysLive();
@@ -37,15 +43,4 @@ void InitializeGameplayOverlayLive(int start_state);
 // is left only by a session transition.
 void RunGameplayLoopLive();
 void SetSoftResetEnabledLive(int enabled);
-
-// Held by scopes that bind globals to stack storage; a session transition
-// requested meanwhile is reported and stops the process instead of leaving
-// those globals pointing at an abandoned frame (#266).
-class LiveSessionTransitionBarrier {
- public:
-  LiveSessionTransitionBarrier();
-
- private:
-  SessionTransitionBarrier barrier_;
-};
 }  // namespace VS::Boot

@@ -37,6 +37,7 @@ using VS::u32;
 using VS::u64;
 using VS::usize;
 namespace Audio = VS::Audio;
+namespace Boot = VS::Boot;
 namespace Content = VS::Content;
 namespace Core = VS::Core;
 namespace Game = VS::Game;
@@ -461,8 +462,7 @@ bool RunLogicalTick(Game::GameApp& game, Input::InputSystem& input,
   return shown;
 }
 
-int RunGame(const Content::Disc* disc, const RunSettings& settings,
-            Game::GameplayTrace* trace) {
+int RunGame(const RunSettings& settings, Game::GameplayTrace* trace) {
   ConfigureEffectPathTrace(settings, trace);
   VS::Core::LogInfo("boot", "run: tick limit={}, speed={}, scripted presses={}",
                     settings.max_ticks, settings.speed,
@@ -498,7 +498,7 @@ int RunGame(const Content::Disc* disc, const RunSettings& settings,
     input.SetDevicesEnabled(false);
     VS::Core::LogInfo("input", "--scripted: keyboard and gamepad ignored");
   }
-  Game::GameApp game({disc, settings.save_directory});
+  Game::GameApp game({settings.save_directory});
   Platform::ProgressWatchdog watchdog(settings.max_ticks != 0);
   Core::FrameClock clock;
   double last = app.NowSeconds();
@@ -541,8 +541,11 @@ int RunGame(const Content::Disc* disc, const RunSettings& settings,
     }
   }
   if (trace != nullptr) {
+    const auto mode = game.CurrentMode();
     trace->Event("host.exit",
-                 {{"ticks", game.Ticks()}, {"game_finished", game.Finished()}},
+                 {{"ticks", game.Ticks()},
+                  {"game_finished", game.Finished()},
+                  {"mode", mode ? Boot::ModeName(*mode) : "none"}},
                  game.Ticks());
   }
   return 0;
@@ -585,7 +588,7 @@ int RunDesktop(int argc, char** argv, Game::GameplayTrace* trace) {
     trace->Event("content.data",
                  {{"data_root", fs::absolute(*data_root).string()}});
   }
-  return RunGame(disc.get(), ParseRunSettings(argc, argv), trace);
+  return RunGame(ParseRunSettings(argc, argv), trace);
 }
 
 }  // namespace

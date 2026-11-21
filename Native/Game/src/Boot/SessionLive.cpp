@@ -3,10 +3,10 @@
 #include "Boot/SessionLive.hpp"
 
 #include <algorithm>
-#include <csetjmp>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
+#include <optional>
 
 #include "Audio/MusicLive.hpp"
 #include "Audio/SampleBanksLive.hpp"
@@ -74,10 +74,6 @@ using VS::Legacy::StartCARD;
 
 namespace VS::Boot {
 namespace {
-// The boundary is the one place a transition lands; the frames it abandons
-// must hold no object whose destructor matters (#266), which the transition
-// barrier enforces for the scopes known to need it.
-std::jmp_buf sessionBoundary;
 SessionState liveState;
 
 // libpad port IDs (ControllerLive.hpp).
@@ -153,21 +149,18 @@ class LiveSessionHost final : public SessionHost {
   }
   void ResetNativeSession() override { ResetLiveSessionState(); }
 
-  [[noreturn]] void Transfer(SessionDestination destination) override {
-    VS::Core::Debugf(
-        "boot", "native session transition: %s",
-        destination == SessionDestination::kTitle ? "title" : "battle");
-    Event::AbandonLiveScriptUses();
-    // NOLINTNEXTLINE(cert-err52-cpp): the session boundary leaves the copied
-    // call graph by jump, not exception (#267); the barrier guards the frames.
-    std::longjmp(sessionBoundary, static_cast<int>(destination));
+  // The script VM's current invocation and source uses are bookkeeping, not
+  // scopes, so the frames a transfer unwound leave them behind.
+  void AbandonInterruptedWork() override { Event::AbandonLiveScriptUses(); }
+  void EnterMode(Mode mode) override {
+    VS::Core::Debugf("boot", "session mode: %s", ModeName(mode));
   }
 
   [[noreturn]] void Refuse(SessionRefusal refusal) override {
     VS::Core::Errorf("boot", "native session transition refused: %s",
                      refusal == SessionRefusal::kNoSession
                          ? "no session is running"
-                         : "a scope bound to stack storage is live");
+                         : "unknown refusal");
     std::abort();
   }
 };
@@ -263,6 +256,7 @@ class LiveLifecycleHost final : public OverlayLoadHost,
   }
   void JumpToTitle() override { JumpToLiveTitle(); }
   void JumpToGameLoop() override { JumpToLiveGameLoop(); }
+  void JumpToEnding() override { VS::Boot::JumpToEnding(liveState, liveHost); }
 
   void InitializeMemoryCard() override { InitCARD(0); }
   void StartMemoryCard() override { StartCARD(); }
@@ -320,15 +314,23 @@ class LiveLifecycleHost final : public OverlayLoadHost,
 
 LiveLifecycleHost liveLifecycleHost;
 
-int RunLoadedGame() {
+// The rest of vs_main_execTitle (main.c:1198): the game loop, then the
+// teardown once it returns.
+void RunLoadedGame() {
   VS::Boot::ResetGameplayInspection();
   VS::Boot::isGameplayActive = 1;
   RunGameplayLoopLive();
   VS::Boot::ResetGameplayInspection();
   SetDispMask(0);
   VS::Audio::LiveStopAndFreeCurrentMusic();
-  return 0;
 }
+
+class LiveBootHost final : public BootHost {
+ public:
+  void InitializePlatformServices() override {
+    InitializePlatformServicesLive();
+  }
+};
 
 class LiveTitleSessionHost final : public TitleSessionHost {
  public:
@@ -346,17 +348,99 @@ class LiveTitleSessionHost final : public TitleSessionHost {
   void ClearPendingClearSave() override { VS::Boot::isClearSavePending = 0; }
   void ShowLoadingScreen() override { Render::ShowLiveLoadingScreen(); }
   void LoadBattleOverlays() override { LoadBattleOverlaysLive(); }
-  int RunLoadedGame() override { return VS::Boot::RunLoadedGame(); }
 };
 
-class LiveGameHost final : public GameHost {
+class BootModule final : public ModeModule {
  public:
-  void InitializePlatformServices() override {
-    InitializePlatformServicesLive();
+  std::optional<Mode> Run() override {
+    LiveBootHost host;
+    return RunBootMode(host);
   }
-  void RunSessions() override {
-    RunLiveSessionLoop(RunLiveTitleAndBattle, RunLoadedGame);
+};
+
+class TitleModule final : public ModeModule {
+ public:
+  std::optional<Mode> Run() override {
+    LiveTitleSessionHost host;
+    return RunTitleMode(host);
   }
+};
+
+class GameplayModule final : public ModeModule {
+ public:
+  std::optional<Mode> Run() override {
+    RunLoadedGame();
+    return std::nullopt;
+  }
+};
+
+class EndingModule final : public ModeModule {
+ public:
+  std::optional<Mode> Run() override {
+    RunEndingMode(liveLifecycleHost, liveLifecycleHost);
+    // Not reached: the ending leaves by its jump to the title.
+    return std::nullopt;
+  }
+};
+
+class ProductionModules final : public ModeModules {
+ public:
+  ModeModule& For(Mode mode) override {
+    switch (mode) {
+      case Mode::kBoot:
+        return boot_;
+      case Mode::kTitle:
+        return title_;
+      case Mode::kGameplay:
+        return gameplay_;
+      case Mode::kEnding:
+        return ending_;
+    }
+    VS::Core::Errorf("boot", "unknown session mode: %d",
+                     static_cast<int>(mode));
+    std::abort();
+  }
+
+ private:
+  BootModule boot_;
+  TitleModule title_;
+  GameplayModule gameplay_;
+  EndingModule ending_;
+};
+
+// A mode that runs one entry function and ends the session with its value.
+class EntryModule final : public ModeModule {
+ public:
+  EntryModule(SessionEntry entry, int& result)
+      : entry_(entry), result_(result) {}
+  std::optional<Mode> Run() override {
+    result_ = entry_();
+    return std::nullopt;
+  }
+
+ private:
+  SessionEntry entry_;
+  int& result_;
+};
+
+// The production modes with the title and the game loop replaced by entry
+// functions.
+class EntryModules final : public ModeModules {
+ public:
+  EntryModules(SessionEntry title, SessionEntry battle)
+      : title_(title, result_), gameplay_(battle, result_) {}
+  ModeModule& For(Mode mode) override {
+    if (mode == Mode::kTitle) return title_;
+    if (mode == Mode::kGameplay) return gameplay_;
+    return production_.For(mode);
+  }
+  int Result() const { return result_; }
+
+ private:
+  int result_ = 0;
+  EntryModule title_;
+  EntryModule gameplay_;
+  ProductionModules production_;
 };
 }  // namespace
 
@@ -379,29 +463,23 @@ void ResetLiveSessionHeap() {
   Core::Memory::ResetLiveGameHeap();
 }
 
-int RunLiveSessionLoop(SessionEntry title, SessionEntry battle) {
-  if (!BeginSession(liveState, liveHost,
-                    title != nullptr && battle != nullptr)) {
-    return -1;
-  }
-  // NOLINTNEXTLINE(cert-err52-cpp): see Transfer.
-  const int boundary_value = setjmp(sessionBoundary);
-  const int result = EntryFor(boundary_value) == SessionDestination::kGameLoop
-                         ? battle()
-                         : title();
-  EndSession(liveState, liveHost);
-  return result;
-}
-
-int RunLiveTitleAndBattle() {
-  // Static: the frame below the boundary must not own it (#266).
-  static LiveTitleSessionHost host;
-  return RunTitleAndBattle(host);
-}
-
 void RunLiveGame() {
-  LiveGameHost host;
-  RunGame(host);
+  ProductionModules modules;
+  if (!RunSession(liveState, liveHost, modules, Mode::kBoot)) {
+    VS::Core::Errorf("boot", "a native session is already running");
+  }
+}
+
+int RunLiveSessionLoop(SessionEntry title, SessionEntry battle) {
+  if (title == nullptr || battle == nullptr) return -1;
+  EntryModules modules(title, battle);
+  if (!RunSession(liveState, liveHost, modules, Mode::kTitle)) return -1;
+  return modules.Result();
+}
+
+std::optional<Mode> LiveSessionMode() {
+  if (!liveState.active) return std::nullopt;
+  return liveState.mode;
 }
 
 void LoadBattleOverlaysLive() { LoadBattleOverlays(liveLifecycleHost); }
@@ -417,7 +495,7 @@ void ResetToTitleLive() { ResetToTitle(liveLifecycleHost); }
 void EnterBattleLive() { EnterBattle(liveLifecycleHost, liveLifecycleHost); }
 
 void RunEndingAndReturnToTitleLive() {
-  RunEndingAndReturnToTitle(liveLifecycleHost, liveLifecycleHost);
+  RunEndingAndReturnToTitle(liveLifecycleHost);
 }
 
 void InitializePlatformServicesLive() {
@@ -435,7 +513,4 @@ void SetSoftResetEnabledLive(int enabled) {
 void JumpToLiveTitle() { JumpToTitle(liveState, liveHost); }
 
 void JumpToLiveGameLoop() { JumpToGameLoop(liveState, liveHost); }
-
-LiveSessionTransitionBarrier::LiveSessionTransitionBarrier()
-    : barrier_(liveState) {}
 }  // namespace VS::Boot

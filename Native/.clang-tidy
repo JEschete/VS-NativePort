@@ -36,7 +36,7 @@ CheckOptions:
   readability-identifier-naming.MemberIgnoredRegexp: '^(nativeSize|sourceElementSize|nativeElementSize|polygonOffset|firstFrame|lastFrame|heightMap|tileFlags|terrainRegions|movementResult|roomBounds|roomData|randomState|lastBudgetTick)$'
   readability-identifier-naming.EnumConstantCase: CamelCase
   readability-identifier-naming.EnumConstantPrefix: k
-  readability-identifier-naming.EnumConstantIgnoredRegexp: '^(Trace|Debug|Info|Warn|Error|Off|L1|L2|L3|R1|R2|R3|Triangle|Circle|Cross|Square|Select|Start|Up|Right|Down|Left|Boot|Title|Field|Battle|Menu|Ending)$'
+  readability-identifier-naming.EnumConstantIgnoredRegexp: '^(Trace|Debug|Info|Warn|Error|Off|L1|L2|L3|R1|R2|R3|Triangle|Circle|Cross|Square|Select|Start|Up|Right|Down|Left)$'
   readability-identifier-naming.ConstexprVariableCase: CamelCase
   readability-identifier-naming.ConstexprVariablePrefix: k
   readability-identifier-naming.ConstexprVariableIgnoredRegexp: '^(ManifestName|SectorRaw|SectorData|SectorForm2|SampleRate|Channels|TicksPerSecond|TableSize)$'

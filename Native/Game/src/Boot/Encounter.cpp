@@ -748,22 +748,39 @@ void InitializeEncounterPlayerStats(const EncounterStatOverrides& overrides) {
       stats.strength, stats.intelligence, stats.agility);
 }
 
+namespace {
+// The encounter's lifetime: ends it on every exit, including the unwind of a
+// cancelled or failed encounter fiber, so the next one starts clean.
+class EncounterScope {
+ public:
+  EncounterScope() { active = true; }
+  ~EncounterScope() {
+    VS::Battle::ResetTargetPages();
+    active = false;
+    externalEventStarted = false;
+    roomLocalEventStarted = false;
+    pendingDoor = -1;
+    gameplayInspectionReady = false;
+    configured = false;
+    roomPrepared = false;
+  }
+  EncounterScope(const EncounterScope&) = delete;
+  EncounterScope& operator=(const EncounterScope&) = delete;
+  EncounterScope(EncounterScope&&) = delete;
+  EncounterScope& operator=(EncounterScope&&) = delete;
+};
+}  // namespace
+
 void RunEncounter() {
   if (!configured || active) {
     VS::Core::LogError("encounter", "invalid encounter lifecycle entry");
     return;
   }
-  active = true;
-  VS::Boot::InitializePlatformServicesLive();
-  VS::Boot::RunLiveSessionLoop(EnterOrFinishEncounter, ResumeEncounter);
-  VS::Battle::ResetTargetPages();
-  active = false;
-  externalEventStarted = false;
-  roomLocalEventStarted = false;
-  pendingDoor = -1;
-  gameplayInspectionReady = false;
-  configured = false;
-  roomPrepared = false;
+  {
+    const EncounterScope encounter;
+    VS::Boot::InitializePlatformServicesLive();
+    VS::Boot::RunLiveSessionLoop(EnterOrFinishEncounter, ResumeEncounter);
+  }
   VS::Core::LogInfo("encounter",
                     "session finished; no normal title entry invoked");
 }

@@ -51,7 +51,8 @@ The 2026-11-21 logical-tick migration (#44) deletes the libetc shim (`LibEtc.hpp
 240 Hz root counter 2 and its interrupt event are `Audio::TickTimer`, a logical-tick listener, in place of
 `SetRCnt`/`StartRCnt`/`StopRCnt`/`GetRCnt`, `OpenEvent`/`EnableEvent`/`DisableEvent`/`CloseEvent` and the
 `RCntCNT2`, `RCntMdINTR`, `EvSpINT` and `EvMdINTR` constants. `SetVideoMode(MODE_NTSC)` and the empty
-`VSyncCallback` are deleted. These rows are marked `[x]`; EC-06's fiber lifecycle gate remains.
+`VSyncCallback` are deleted. These rows are marked `[x]`. The fiber lifecycle and cadence gates then closed and
+EC-06 is retired (#44; plan §15 EC-06).
 
 ## libgpu â†’ Graphics (78 symbols, 1742 uses)
 
