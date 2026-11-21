@@ -3760,7 +3760,7 @@ int func_800F9800(void) {
         preview_live = (root / r"Native\Game\src\Menu\Score\EncyclopediaPreviewLive.cpp").read_text(encoding="utf-8")
         self.assertIn("Content::CompleteLiveRefusedDiscRequest(&disc, Pointer(destination))", preview_live)
         background = "".join((root / r"Native\Game\src\Field\Background.cpp").read_text(encoding="utf-8").split())
-        self.assertIn("state.texture_read=host.CompleteRefusedRead(section->texture,state.tim_buffer);", background)
+        self.assertNotIn("state.texture_read", background)
         self.assertIn("state.layout_read=host.CompleteRefusedRead(section->layout,state.layout);", background)
         background_live = (root / r"Native\Game\src\Field\BackgroundLive.cpp").read_text(encoding="utf-8")
         self.assertIn("Content::CompleteLiveRefusedDiscRequest(", background_live)
@@ -3820,7 +3820,8 @@ int func_800F9800(void) {
             gazette_live,
         )
         background_tests = (root / r"Native\Tests\src\FieldBackgroundTests.cpp").read_text(encoding="utf-8")
-        self.assertIn('"CompleteRefusedRead 100 1", "CompleteRefusedRead 200 2"', background_tests)
+        self.assertIn('"CompleteRefusedRead 200 1"', background_tests)
+        self.assertNotIn('"CompleteRefusedRead 100 1"', background_tests)
         effects = "".join((root / r"Native\Game\src\Effects\EffectResources.cpp").read_text(encoding="utf-8").split())
         self.assertIn("}else{state.read=host.CompleteRefusedRead(read,destination.id);}", effects)
         effects_live = (root / r"Native\Game\src\Effects\EffectResourcesLive.cpp").read_text(encoding="utf-8")
