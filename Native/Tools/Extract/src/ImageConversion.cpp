@@ -456,10 +456,12 @@ std::expected<ImageDepth, std::string> BackgroundLayoutDepth(
                          sizeof(std::int16_t)) == 0) {
       continue;
     }
-    // decomp: func_8009147C (2842C.c:509) draws with the texture page
+    // decomp: BATTLE.PRG func_8009147C (src/BATTLE/BATTLE.PRG/2842C.c:509)
+    // draws with the texture page
     // page | (colors[1].cd << 7). The page is the event script's byte operand
-    // (vs_battle_script_74, 4DEA8.c:2813), which can set depth bit 7 but not
-    // bit 8, so only code 1 (8-bit) fixes the depth without the script.
+    // (vs_battle_script_74, src/BATTLE/BATTLE.PRG/4DEA8.c:2813), which can set
+    // depth bit 7 but not bit 8, so only code 1 (8-bit) fixes the depth without
+    // the script.
     const auto code =
         std::to_integer<std::uint8_t>(layout[offset + kTileDepthCodeOffset]);
     if (code != kEightBitCode) {
