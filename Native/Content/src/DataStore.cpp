@@ -15,8 +15,10 @@
 #include <vector>
 
 #include "Content/AssetCatalog.hpp"
+#include "Content/ConversionManifest.hpp"
 #include "Content/DataAccess.hpp"
 #include "Core/Log.hpp"
+#include "Core/Sha256.hpp"
 #include "Platform/CrashHandler.hpp"
 #include "Platform/Paths.hpp"
 
@@ -120,6 +122,9 @@ std::expected<void, std::string> DataStore::Open(const fs::path& root) {
   auto store = std::make_unique<DataStore>();
   store->m_root_ = root;
   store->m_entries_ = std::move(*entries);
+  auto conversions = LoadConversionManifest(root);
+  if (!conversions) return std::unexpected(conversions.error());
+  store->m_conversion_manifest_ = std::move(*conversions);
   std::error_code error;
   const fs::path catalogs = root / Platform::Utf8Path(kCatalogDirectory);
   if (fs::exists(catalogs, error)) {
@@ -151,6 +156,93 @@ std::expected<void, std::string> DataStore::RequireCatalog() const {
       Platform::PathText(m_root_ / Platform::Utf8Path(kCatalogDirectory)) +
       " (run VS.Extract catalogs " + Platform::PathText(m_root_) +
       ", or prepare the disc again with VS.Launcher)");
+}
+
+std::expected<void, std::string> DataStore::RequireConversions() const {
+  if (!m_conversion_manifest_) {
+    return std::unexpected(
+        "no conversion manifest in " +
+        Platform::PathText(m_root_ /
+                           Platform::Utf8Path(kConversionManifestName)) +
+        " (run VS.Extract extract <disc> <dir>)");
+  }
+  if (auto required =
+          CheckRequiredConverters(*m_conversion_manifest_, kRequiredConverters);
+      !required) {
+    return required;
+  }
+
+  constexpr std::string_view kTimConverter = "tim-png";
+  constexpr std::string_view kTimExtension = ".TIM";
+  for (const Entry& entry : m_entries_) {
+    if (entry.path.size() < kTimExtension.size() ||
+        entry.path.substr(entry.path.size() - kTimExtension.size()) !=
+            kTimExtension) {
+      continue;
+    }
+    if (entry.form != "raw") {
+      return std::unexpected("TIM source is not raw: " + entry.path);
+    }
+    const ConversionOutput* conversion = nullptr;
+    for (const ConversionOutput& output : m_conversion_manifest_->outputs) {
+      if (output.converter == kTimConverter && output.source == entry.path) {
+        if (conversion != nullptr) {
+          return std::unexpected("multiple tim-png outputs name " + entry.path);
+        }
+        conversion = &output;
+      }
+    }
+    if (conversion == nullptr) {
+      return std::unexpected("no tim-png output for " + entry.path +
+                             " (run VS.Extract extract <disc> <dir>)");
+    }
+    const auto source = ReadAll(entry);
+    if (!source) return std::unexpected(source.error());
+    if (Core::Sha256Hex(std::as_bytes(std::span(*source))) !=
+        conversion->source_sha256) {
+      return std::unexpected("stale tim-png source hash for " + entry.path +
+                             " (run VS.Extract extract <disc> <dir>)");
+    }
+    for (const SourceDependency& dependency : conversion->dependencies) {
+      const Entry* dependency_entry = Find(dependency.source);
+      if (dependency_entry == nullptr) {
+        return std::unexpected("missing tim-png dependency " +
+                               dependency.source + " for " + entry.path);
+      }
+      const auto bytes = ReadAll(*dependency_entry);
+      if (!bytes) return std::unexpected(bytes.error());
+      if (Core::Sha256Hex(std::as_bytes(std::span(*bytes))) !=
+          dependency.source_sha256) {
+        return std::unexpected("stale tim-png dependency " + dependency.source +
+                               " for " + entry.path +
+                               " (run VS.Extract extract <disc> <dir>)");
+      }
+    }
+    for (const std::string& file : conversion->files) {
+      const fs::path path = m_root_ / Platform::Utf8Path(file);
+      std::error_code error;
+      const bool regular = fs::is_regular_file(path, error);
+      if (error && error != std::errc::no_such_file_or_directory) {
+        return std::unexpected("cannot inspect " + Platform::PathText(path) +
+                               ": " + error.message());
+      }
+      if (!regular) {
+        return std::unexpected("missing tim-png output " +
+                               Platform::PathText(path) +
+                               " (run VS.Extract extract <disc> <dir>)");
+      }
+    }
+  }
+  for (const ConversionOutput& output : m_conversion_manifest_->outputs) {
+    if (output.converter != kTimConverter) continue;
+    const Entry* source = Find(output.source);
+    if (source == nullptr || source->form != "raw" ||
+        !output.source.ends_with(kTimExtension)) {
+      return std::unexpected(
+          "tim-png output names a missing or non-TIM source " + output.source);
+    }
+  }
+  return {};
 }
 
 std::expected<void, std::string> DataStore::ReadAsset(AssetHandle asset,

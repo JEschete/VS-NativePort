@@ -88,10 +88,6 @@ struct DecodedTim {
 // (a container's next payload, or an error for a standalone file).
 [[nodiscard]] std::expected<DecodedTim, TimDiagnostic> DecodeTim(
     std::span<const std::byte> data);
-// The TIM's bytes with exact block lengths. Fails when a block's words do not
-// fill its rectangle or a mode/CLUT flag disagrees with the blocks.
-[[nodiscard]] std::expected<std::vector<std::byte>, std::string> EncodeTim(
-    const TimFile& tim);
 [[nodiscard]] std::string_view TimErrorName(TimError error) noexcept;
 
 }  // namespace VS::Content

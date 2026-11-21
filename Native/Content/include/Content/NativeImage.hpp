@@ -117,17 +117,9 @@ struct NativeImage {
 // index within its palette, and a width that packs into whole halfwords.
 [[nodiscard]] std::expected<void, std::string> ValidateImage(
     const NativeImage& image);
-
-// The image a TIM holds when drawn at `depth`. A TIM declared 16-bit whose
-// halfwords pack indices (the field backgrounds) converts at the depth its
-// consumer draws; its CLUT words become the palettes.
-[[nodiscard]] std::expected<NativeImage, std::string> ImageFromTim(
-    const TimFile& tim, ImageDepth depth);
-
-// The image's halfwords as VRAM holds them (indices packed low pixel first);
-// the width in halfwords is width / PixelsPerHalfword.
+// Pixels packed into the halfwords consumed by the hardware upload APIs, and
+// all palette rows in file order.
 [[nodiscard]] std::vector<std::uint16_t> PackedWords(const NativeImage& image);
-// Every palette row, in order, as one run of words.
 [[nodiscard]] std::vector<std::uint16_t> PaletteWords(const NativeImage& image);
 
 // Where a TIM-sourced image came from: the words the image does not carry.
@@ -139,11 +131,5 @@ struct TimOrigin {
 
   bool operator==(const TimOrigin&) const = default;
 };
-
-[[nodiscard]] TimOrigin OriginOf(const TimFile& tim);
-// The TIM rebuilt from the image and its origin; equals the source TIM when
-// the image is unedited.
-[[nodiscard]] std::expected<TimFile, std::string> TimFromImage(
-    const NativeImage& image, const TimOrigin& origin);
 
 }  // namespace VS::Content

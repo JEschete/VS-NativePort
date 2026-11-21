@@ -74,7 +74,12 @@ PROJECTS = [
     Project("VS.Tests", "Tests", kind="exe", console=True, refs=["VS.Engine", "VS.Content", "VS.Game"],
             libs=["sdl3", "catch2", "movie", "audio", "crypto", "http", "disc", "image"],
             whole_archive=["VS.Engine", "VS.Content", "VS.Game"],
-            see=["VS.CombatLab", "VS.Launcher"], extra_sources=[
+            see=["VS.CombatLab", "VS.Launcher", "VS.Extract"], extra_sources=[
+                r"Tools\Extract\src\ConversionManifestWriter.cpp",
+                r"Tools\Extract\src\ImageFilesWriter.cpp",
+                r"Tools\Extract\src\ImageConversion.cpp",
+                r"Tools\Extract\src\TimImage.cpp",
+                r"Tools\Extract\src\TimWriter.cpp",
                 r"Tools\Launcher\src\Setup.cpp",
                 r"Tools\Launcher\src\DiscValidation.cpp",
                 r"Tools\Launcher\src\Updates.cpp",

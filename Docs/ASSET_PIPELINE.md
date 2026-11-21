@@ -67,7 +67,8 @@ Game systems
 
 - Run it with `extract-native-assets.cmd [--disc disks\SLUS-01040.cue] [--out Native\data] [--only <kind>] [--force]`.
 - The runs are **incremental**. An output is rebuilt only when its source file hash or its converter version changes. `--force` rebuilds everything.
-- **Startup check:** `VS.Desktop` reads `manifest.json`. If the file is missing, a converter version is older than the one the build expects, or any entry is `unconverted`, it stops with a clear message telling the user to run `extract-native-assets.cmd`. It never falls back to reading the disc.
+- Conversion is **offline**. `VS.Extract extract` converts the supported source files during extraction; `VS.Extract images <datadir>` reruns just the standalone image converter. The field-background runtime now reads the converted PNG/sidecar and uploads the native pixels and palette; it does not parse or convert the source TIM. The FAR layout remains a raw file read through the disc-file catalog and is a separate migration boundary.
+- **Startup check:** `VS.Desktop`, Combat Lab and Launcher validate `manifest.json` and the required converter versions. They reject missing/stale standalone TIM sources, dependencies or outputs with an instruction to rerun extraction. They never fall back to reading the source TIM.
 
 ---
 
@@ -177,7 +178,7 @@ The disc has 27 kinds of files. The "Source" column below names the files on the
 | `MAP\*.MPD` (512) | `rooms\<zone>\<MAP>.gltf` + `.room.json` | §6.3 | vstools `MPD.js`, VSViewer, decomp field loaders |
 | `MAP\*.ZND` (256) | `catalogs\enemies\*`, `catalogs\world\zones.csv`, zone textures → PNG | enemy records → the ENEMY_DATA_SCHEME catalogs; zone TIMs → PNG | ENEMY_DATA_SCHEME.md §3 |
 | `EVENT\*.EVT` (512) | `events\<id>.json` | command list `{op, args}` with op names from the decomp's event interpreter; text → string IDs | decomp `Event\` module |
-| `BG\*.TIM` (4), `BG\*.FAR` (4), root `*.TIM` | `textures\bg\*.png` + `.image.json`; `.FAR` → background layout JSON | TIM → PNG (§6.4). The BG TIM headers are not authoritative: they declare mode `0xA` (16bpp + CLUT) with a 256-colour CLUT and three share id `0x110`; the loader overwrites the id, ignores the mode and takes the depth from each draw's texture page (`Background.cpp`). `.FAR` = 12-byte header `{w, h, reserved}` then w×h 24-byte tiles (source rectangle + 4 corner colours), reached only through MPD room section 15 | native `Field\Background.cpp`, `BackgroundLive.cpp` |
+| `BG\*.TIM` (4), `BG\*.FAR` (4), root `*.TIM` | `textures\bg\*.png` + `.image.json`; `.FAR` → background layout JSON | TIM → PNG (§6.4). The BG TIM headers are not authoritative: they declare mode `0xA` (16bpp + CLUT) with a 256-colour CLUT and three share id `0x110`; the layout's draw depth selects 8-bit indices. The runtime uploads the converted PNG's packed indices and exact palette words. `.FAR` = 12-byte header `{w, h, reserved}` then w×h 24-byte tiles (source rectangle + 4 corner colours); it is still loaded raw through MPD room section 15 | native `Field\Background.cpp`, `BackgroundLive.cpp` |
 | `GIM\*.GIM` (49) | `textures\gim\*.png` + composition JSON | VS screen-effect images: per-layer cell maps over shared strips, 4 × 16-colour CLUTs and a shared or owned 256-colour palette | native `Render\GimImages.cpp` |
 | `MENU\*.BIN` (11), `ENDING\ILLUST*.BIN` (11) | `ui\*.png` + `.image.json` + layout JSON | menu art, game-over, ending illustrations. `MENUBG` is word-RLE and `ILLUST*` are LZ/RLE-compressed TIMs, decoded at conversion; `ITEMNAME`, `ITEMHELP`, `MENU12` and `MCMAN` are text and tables, not images | native `Menu\`, `StaffRollCore.cpp` |
 | `MENU\*.SYD` (3) | `catalogs\menu\combination-*.csv` | workshop **combination recipes** (result and material tables), not item definitions; there is no global item-stat file | native `Menu\Setup\Combination.hpp` |
@@ -279,6 +280,8 @@ AP3 and AP4 can proceed independently after AP2. The two-actor slice establishes
 ### 6.4 Textures and images (TIM/GIM/FBT/FBC/BIN art → PNG + `.image.json`)
 
 Modding first (D25): the PNG is what an image editor changes, so the PNG is authoritative for colour and transparency. The `<name>.image.json` sidecar holds only what PNG cannot carry. Conversion stays exact: PNG + sidecar reproduce the original 16-bit words, and the round trip (§7) proves it.
+
+The strict TIM and native-image readers/types are in `VS.Content`; the TIM-to-image conversion, PNG/sidecar writers and manifest writer are in `VS.Extract`. These writers are not part of the runtime Content library. The extractor writes the native files once. The field-background runtime resolves the converted PNG/sidecar from the manifest and uploads its pixels and palette; it does not parse the source TIM. Its FAR tile layout remains raw and is a separate migration boundary.
 
 - **Pixels:** 4bpp and 8bpp images are **indexed PNGs at their true bit depth**. Indices are never re-quantized or remapped. 16bpp images are RGBA PNGs (24bpp, if any, RGB).
 - **Colour:** 5-bit channels are expanded by bit replication (`c<<3 | c>>2`). Import takes the nearest 5-bit value (`(c*31 + 127) / 255`), which inverts replication exactly and rounds edited colours sensibly.
@@ -524,19 +527,27 @@ Record source revision/dirty state, disc identity, tool/converter/schema version
 {
   "schema_version": 1,
   "extractor_version": "0.1.0",
-  "disc": { "id": "SLUS-01040", "bin_sha256": "…", "cue_sha256": "…" },
-  "converters": { "shp-gltf": 1, "mpd-gltf": 1, "tim-png": 1, "akao-seq": 1, "xa-flac": 1, "str-av1": 1, "tables": 1, "text": 1 },
+  "converters": { "tim-png": 1 },
   "outputs": [
-    { "source": "OBJ/6F.SHP", "source_sha256": "…", "converter": "shp-gltf", "files": ["models/characters/6F.gltf"] },
-    { "source": "license_data.dat", "skipped": "not game content" },
-    { "source": "DBGFNT.TIM", "source_sha256": "…", "converter": "tim-png", "files": ["textures/root/DBGFNT.png", "textures/root/DBGFNT.image.json"], "unreferenced": true },
-    { "source": "EFFECT/E001.FBT", "alias_of": "EFFECT/E000.FBT" },
-    { "source": "MAP/MAP123.MPD", "unconverted": "converter not yet implemented" }
+    {
+      "id": "image.bg.001op01a",
+      "source": "BG/001OP01A.TIM",
+      "source_sha256": "…",
+      "converter": "tim-png",
+      "files": [
+        "textures/bg/001OP01A.png",
+        "textures/bg/001OP01A.image.json"
+      ],
+      "dependencies": [
+        { "source": "BG/001OP01A.FAR", "source_sha256": "…" }
+      ]
+    }
   ]
 }
 ```
 
-- **Unused and duplicate content (D25):** valid content that nothing references is converted and marked `"unreferenced": true`. An exact duplicate of another source file is recorded with `"alias_of"` and shares that file's outputs.
+- This is the current schema: every output has a stable `id`, primary source and hash, converter name, and output paths; dependencies include every other consumed input and its hash. Unknown members and paths outside the data root are errors. `files.tsv` remains the raw disc-file catalog.
+- **Unused content:** valid content known to be unused is still converted and marked `"unreferenced": true` (for example `DBGFNT.TIM`). Alias, skipped and unconverted output entries are not part of this schema.
 - **Versions:** each converter has an integer version in code (`VS.Extract`). The runtime embeds the minimum version it requires for each converter, so an old `Native\data\` is rejected with instructions (§2).
 - **Composite dependencies:** an output entry retains its primary `source` and adds a sorted `dependencies` array of `{ "source", "source_sha256" }` records for every other consumed input. Character outputs include the resolved SEQ/ESQ/ETM files and palette sources, not just SHP. A changed/deleted dependency or contributing converter/schema version invalidates the output; a missing dependency is an error, never a reason to reuse a stale model.
 - **Character contract changes:** version ESQ/ETM conversion alongside the model converter and `asset.extras.vs.schemaVersion` (or its explicitly migrated extension equivalent). Runtime requirements must include the VS payload version; successful generic glTF loading is not an acceptable fallback for incompatible gameplay data.

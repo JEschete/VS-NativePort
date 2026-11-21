@@ -11,6 +11,7 @@
 
 #include "Content/AssetCatalog.hpp"
 #include "Content/AssetHandle.hpp"
+#include "Content/ConversionManifest.hpp"
 #include "Core/Types.hpp"
 
 namespace VS::Content {
@@ -85,6 +86,12 @@ class DataStore {
   // The game and tools that play from this store need its catalog; the error
   // says how to make one.
   [[nodiscard]] std::expected<void, std::string> RequireCatalog() const;
+  // Requires the converters used by native runtime consumers and verifies
+  // their standalone TIM sources, dependencies and outputs are present/current.
+  [[nodiscard]] std::expected<void, std::string> RequireConversions() const;
+  [[nodiscard]] const ConversionManifest* Conversions() const {
+    return m_conversion_manifest_ ? &*m_conversion_manifest_ : nullptr;
+  }
   // Reads `asset` into `out` as the original's whole-sector load did: its
   // bytes, then zeros. Refuses an asset this store's catalog did not issue
   // and a destination past the asset's load size.
@@ -95,6 +102,7 @@ class DataStore {
   std::filesystem::path m_root_;
   std::vector<Entry> m_entries_;  // sorted by lba
   std::optional<AssetCatalog> m_catalog_;
+  std::optional<ConversionManifest> m_conversion_manifest_;
 };
 
 }  // namespace VS::Content

@@ -151,22 +151,21 @@ class FakeBackgroundHost final : public fx::BackgroundHost {
   void ReleaseRead(fx::BackgroundReadId read) override {
     calls.push_back(std::format("ReleaseRead {}", Raw(read)));
   }
-  void StampTimId(fx::BackgroundBufferId buffer, std::uint32_t id) override {
-    calls.push_back(std::format("StampTimId {} {}", Raw(buffer), id));
+  [[nodiscard]] std::expected<fx::BackgroundTextureUpload, std::string>
+  LoadBackgroundTexture(const fx::BackgroundFile& source) override {
+    calls.push_back(std::format("LoadBackgroundTexture {}", source.lba));
+    return texture;
   }
-  [[nodiscard]] fx::BackgroundTim ParseTim(
-      fx::BackgroundBufferId /*buffer*/) override {
-    return tim;
+  void UploadBackgroundPixels(std::span<const std::uint16_t>,
+                              const fx::TextureRect& rect) override {
+    calls.push_back(std::format("UploadBackgroundPixels {} {} {} {} {}", rect.x,
+                                rect.y, rect.width, rect.height,
+                                rect.width * rect.height));
   }
-  void UploadTimPixels(fx::BackgroundBufferId buffer,
-                       const fx::TextureRect& rect) override {
-    calls.push_back(std::format("UploadTimPixels {} {} {} {} {}", Raw(buffer),
-                                rect.x, rect.y, rect.width, rect.height));
-  }
-  void UploadTimClut(fx::BackgroundBufferId buffer, int row, int first_color,
-                     int count) override {
-    calls.push_back(std::format("UploadTimClut {} {} {} {}", Raw(buffer), row,
-                                first_color, count));
+  void UploadBackgroundPalette(std::span<const std::uint16_t> words,
+                               int row) override {
+    calls.push_back(
+        std::format("UploadBackgroundPalette {} {}", row, words.size()));
   }
 
   std::optional<fx::RoomEnvironment> environment = fx::RoomEnvironment{};
@@ -187,7 +186,12 @@ class FakeBackgroundHost final : public fx::BackgroundHost {
   bool refuse_buffer = false;
   bool refuse_reads = false;
   std::vector<fx::BackgroundReadId> loaded;
-  fx::BackgroundTim tim;
+  std::expected<fx::BackgroundTextureUpload, std::string> texture{
+      fx::BackgroundTextureUpload{
+          .source_rect = {.x = 0x47, .y = 0x1C3, .width = 16, .height = 32},
+          .pixel_words =
+              std::vector<std::uint16_t>(std::size_t{16} * std::size_t{32}),
+          .palette_words = std::vector<std::uint16_t>(256)}};
   std::uintptr_t next_buffer = 1;
   Calls calls;
 };
@@ -217,11 +221,8 @@ constexpr fx::FillRect kBackdropFill{
 // A room whose background and weather InitializeRoomBackground has reset.
 struct InitializedRoom {
   FakeBackgroundHost host;
-  fx::RoomBackgroundState state{.tiled_enabled = 1,
-                                .texture_read = ReadId(1),
-                                .layout_read = ReadId(2),
-                                .layout = BufferId(3),
-                                .tim_buffer = BufferId(4)};
+  fx::RoomBackgroundState state{
+      .tiled_enabled = 1, .layout_read = ReadId(2), .layout = BufferId(3)};
   fx::RoomWeatherState weather{.ambient_sound_id = 21,
                                .kind = fx::kRainWeather,
                                .variation_enabled = 0,
@@ -230,21 +231,13 @@ struct InitializedRoom {
   InitializedRoom() { fx::InitializeRoomBackground(host, state, weather); }
 };
 
-// A tiled background with both reads queued and its TIM buffer held.
+// A tiled background with its layout read queued.
 struct TiledLoad {
   FakeBackgroundHost host;
   fx::RoomBackgroundState state{.texture_page = 0x15,
-                                .texture_read = ReadId(100),
+                                .texture_file = {.lba = 100, .size = 0x801},
                                 .layout_read = ReadId(200),
-                                .layout = BufferId(2),
-                                .tim_buffer = BufferId(1)};
-
-  TiledLoad() {
-    host.tim = {
-        .pixels =
-            fx::TextureRect{.x = 0x47, .y = 0x1C3, .width = 16, .height = 32},
-        .has_clut = true};
-  }
+                                .layout = BufferId(2)};
 };
 }  // namespace
 
@@ -334,10 +327,10 @@ TEST_CASE("Room weather area turns into world units",
 TEST_CASE("Room background initialization clears the loads",
           "[field-camera][field-background]") {
   const InitializedRoom room;
-  CHECK(room.state.texture_read == fx::BackgroundReadId::kNone);
   CHECK(room.state.layout_read == fx::BackgroundReadId::kNone);
   CHECK(room.state.layout == fx::BackgroundBufferId::kNone);
-  CHECK(room.state.tim_buffer == fx::BackgroundBufferId::kNone);
+  CHECK(room.state.texture_file == fx::BackgroundFile{});
+  CHECK(room.state.texture_uploaded == 0);
   CHECK(room.state.tiled_enabled == 0);
   CHECK(room.host.stored_area.has_value());
   CHECK(room.host.calls.empty());
@@ -485,7 +478,7 @@ TEST_CASE("Background cells refuse a layout missing cells",
         "backdrop fill is drawn");
 }
 
-TEST_CASE("Tiled background queues its texture pages and reads",
+TEST_CASE("Tiled background queues its layout and records the image source",
           "[field-camera][field-background]") {
   FakeBackgroundHost host;
   host.section = Section();
@@ -493,105 +486,98 @@ TEST_CASE("Tiled background queues its texture pages and reads",
   CHECK(fx::QueueTiledBackgroundLoad(host, state, 0x15) == 1);
   CHECK(state.texture_page == 0x15);
   CHECK(state.texture_page_count == 3);
-  CHECK(Raw(state.tim_buffer) == 1);
-  CHECK(Raw(state.layout) == 2);
-  CHECK(Raw(state.texture_read) == 100);
+  CHECK(state.texture_file == Section().texture);
+  CHECK(state.texture_uploaded == 0);
+  CHECK(Raw(state.layout) == 1);
   CHECK(Raw(state.layout_read) == 200);
-  CHECK(host.calls ==
-        Calls{"ReserveTexturePages 21 3 5", "AllocateHighBuffer 4096",
-              "AllocateHighBuffer 4096", "AllocateRead 100", "AllocateRead 200",
-              "EnqueueRead 100 1", "EnqueueRead 200 2"});
+  CHECK(host.calls == Calls{"ReserveTexturePages 21 3 5",
+                            "AllocateHighBuffer 4096", "AllocateRead 200",
+                            "EnqueueRead 200 1"});
 }
 
-TEST_CASE("Tiled background completes refused reads at once",
+TEST_CASE("Tiled background completes a refused layout read at once",
           "[field-camera][field-background]") {
   FakeBackgroundHost refused;
   refused.section = Section();
   refused.refuse_reads = true;
   fx::RoomBackgroundState refused_state;
   CHECK(fx::QueueTiledBackgroundLoad(refused, refused_state, 0x15) == 1);
-  CHECK(Raw(refused_state.texture_read) == 1100);
+  CHECK(refused_state.texture_file == Section().texture);
   CHECK(Raw(refused_state.layout_read) == 1200);
-  CHECK(refused.calls ==
-        Calls{"ReserveTexturePages 21 3 5", "AllocateHighBuffer 4096",
-              "AllocateHighBuffer 4096", "AllocateRead 100", "AllocateRead 200",
-              "CompleteRefusedRead 100 1", "CompleteRefusedRead 200 2"});
+  CHECK(refused.calls == Calls{"ReserveTexturePages 21 3 5",
+                               "AllocateHighBuffer 4096", "AllocateRead 200",
+                               "CompleteRefusedRead 200 1"});
 }
 
 TEST_CASE("Tiled background load refusals leave no reads",
           "[field-camera][field-background]") {
   FakeBackgroundHost host;
-  fx::RoomBackgroundState state{.texture_read = ReadId(1),
-                                .layout_read = ReadId(2)};
+  fx::RoomBackgroundState state{.layout_read = ReadId(2)};
   CHECK(fx::QueueTiledBackgroundLoad(host, state, 0x15) == 0);
-  CHECK(state.texture_read == fx::BackgroundReadId::kNone);
   CHECK(state.layout_read == fx::BackgroundReadId::kNone);
+  CHECK(state.texture_file == fx::BackgroundFile{});
   CHECK(host.calls.empty());
 
   host.section = Section();
   host.reserve_ok = false;
-  state.texture_read = ReadId(1);
+  state.layout_read = ReadId(1);
   CHECK(fx::QueueTiledBackgroundLoad(host, state, 0x15) == 0);
-  CHECK(state.texture_read == fx::BackgroundReadId::kNone);
+  CHECK(state.texture_file == fx::BackgroundFile{});
   CHECK(host.calls == Calls{"ReserveTexturePages 21 3 5"});
 
   host.calls.clear();
   host.reserve_ok = true;
   host.refuse_buffer = true;
   CHECK(fx::QueueTiledBackgroundLoad(host, state, 0x15) == 0);
-  CHECK(host.calls == Calls{"ReserveTexturePages 21 3 5",
-                            "AllocateHighBuffer 4096",
-                            "AllocateHighBuffer 4096"});
+  CHECK(host.calls ==
+        Calls{"ReserveTexturePages 21 3 5", "AllocateHighBuffer 4096"});
 }
 
-TEST_CASE("Tiled background uploads the TIM once its read lands",
+TEST_CASE("Tiled background uploads its converted image once",
           "[field-camera][field-background]") {
   ChannelWarnings warnings{"field.background"};
   TiledLoad load;
   CHECK(fx::FinishTiledBackgroundLoad(load.host, load.state) == 0);
-  CHECK(load.host.calls.empty());
-
-  load.host.loaded = {ReadId(100)};
-  CHECK(fx::FinishTiledBackgroundLoad(load.host, load.state) == 0);
-  CHECK(load.host.calls ==
-        Calls{"StampTimId 1 16", "UploadTimPixels 1 327 451 16 32",
-              "UploadTimClut 1 14 0 256", "ReleaseRead 100"});
-  CHECK(load.state.texture_read == fx::BackgroundReadId::kNone);
+  CHECK(load.state.texture_uploaded == 1);
+  CHECK(load.host.calls == Calls{"LoadBackgroundTexture 100",
+                                 "UploadBackgroundPixels 327 451 "
+                                 "16 32 512",
+                                 "UploadBackgroundPalette 14 256"});
   CHECK(warnings.messages.empty());
-}
 
-TEST_CASE("Tiled background frees the TIM once the layout lands",
-          "[field-camera][field-background]") {
-  ChannelWarnings warnings{"field.background"};
-  TiledLoad load;
-  load.state.texture_read = fx::BackgroundReadId::kNone;
+  load.host.calls.clear();
   load.host.loaded = {ReadId(200)};
   CHECK(fx::FinishTiledBackgroundLoad(load.host, load.state) == 1);
-  CHECK(load.host.calls == Calls{"FreeHighBuffer 1", "ReleaseRead 200"});
-  CHECK(load.state.tim_buffer == fx::BackgroundBufferId::kNone);
+  CHECK(load.host.calls == Calls{"ReleaseRead 200"});
+}
+
+TEST_CASE("Tiled background keeps the loaded layout buffer",
+          "[field-camera][field-background]") {
+  TiledLoad load;
+  load.host.loaded = {ReadId(200)};
+  CHECK(fx::FinishTiledBackgroundLoad(load.host, load.state) == 0);
+  CHECK(load.host.calls.size() == 3);
+  load.host.calls.clear();
+  CHECK(fx::FinishTiledBackgroundLoad(load.host, load.state) == 1);
+  CHECK(load.host.calls == Calls{"ReleaseRead 200"});
   CHECK(load.state.layout_read == fx::BackgroundReadId::kNone);
   CHECK(Raw(load.state.layout) == 2);
 
   load.host.calls.clear();
   CHECK(fx::FinishTiledBackgroundLoad(load.host, load.state) == 0);
   CHECK(load.host.calls.empty());
-  CHECK(warnings.messages.empty());
 }
 
-TEST_CASE("Tiled background skips a TIM read without a buffer",
+TEST_CASE("Tiled background does not retry a missing native image every frame",
           "[field-camera][field-background]") {
-  ChannelWarnings warnings{"field.background"};
   FakeBackgroundHost host;
-  fx::RoomBackgroundState state{.texture_read = ReadId(100)};
-  host.loaded = {ReadId(100)};
-  host.tim = {.pixels = fx::TextureRect{}, .has_clut = true};
+  fx::RoomBackgroundState state{.texture_file = {.lba = 100, .size = 0x801}};
+  host.texture = std::unexpected("no converted image");
   CHECK(fx::FinishTiledBackgroundLoad(host, state) == 0);
-  CHECK(host.calls == Calls{"ReleaseRead 100"});
-  CHECK(state.texture_read == fx::BackgroundReadId::kNone);
-  REQUIRE(warnings.messages.size() == 1);
-  CHECK(warnings.messages[0] ==
-        "FinishTiledBackgroundLoad: the texture read finished without a TIM "
-        "buffer; nothing is uploaded");
+  CHECK(host.calls == Calls{"LoadBackgroundTexture 100"});
+  CHECK(state.texture_uploaded == 1);
+  CHECK(fx::FinishTiledBackgroundLoad(host, state) == 0);
+  CHECK(host.calls == Calls{"LoadBackgroundTexture 100"});
 }
 
 TEST_CASE("Tiled background release returns its pages once",
@@ -604,6 +590,8 @@ TEST_CASE("Tiled background release returns its pages once",
   CHECK(fx::ReleaseTiledBackground(host, state) == 1);
   CHECK(state.tiled_enabled == 0);
   CHECK(state.layout == fx::BackgroundBufferId::kNone);
+  CHECK(state.texture_file == fx::BackgroundFile{});
+  CHECK(state.texture_uploaded == 0);
   CHECK(host.calls == Calls{"RetireTexturePages 21 3 5", "FreeHighBuffer 2"});
   host.calls.clear();
   CHECK(fx::ReleaseTiledBackground(host, state) == 0);

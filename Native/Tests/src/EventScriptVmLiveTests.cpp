@@ -1967,9 +1967,14 @@ struct BackgroundOpcodeStateFixture {
   int first_person = VS::Field::isFirstPersonViewEnabled;
 
   BackgroundOpcodeStateFixture() {
-    VS::Field::backgroundTextureDiscRequest = nullptr;
     VS::Field::backgroundLayoutDiscRequest = nullptr;
     VS::Field::loadedBackgroundLayout = nullptr;
+    auto live = VS::Field::LoadLiveRoomBackgroundState();
+    live.texture_file = {};
+    live.texture_uploaded = 0;
+    live.layout_read = VS::Field::BackgroundReadId::kNone;
+    live.layout = VS::Field::BackgroundBufferId::kNone;
+    VS::Field::StoreLiveRoomBackgroundState(live);
   }
   ~BackgroundOpcodeStateFixture() {
     VS::Field::StoreLiveRoomBackgroundState(background);

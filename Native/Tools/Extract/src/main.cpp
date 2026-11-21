@@ -20,6 +20,7 @@
 #include "Content/Disc.hpp"
 #include "Content/MovieEncoder.hpp"
 #include "Core/Log.hpp"
+#include "Extract/ImageConversion.hpp"
 #include "Platform/App.hpp"
 #include "Platform/Paths.hpp"
 #include "nlohmann/json.hpp"
@@ -30,6 +31,7 @@ using VS::u64;
 using VS::u8;
 using VS::usize;
 namespace Content = VS::Content;
+namespace Extract = VS::Extract;
 namespace Platform = VS::Platform;
 
 namespace {
@@ -38,6 +40,8 @@ constexpr int kMinimumArguments = 3;
 constexpr int kExtractArguments = 4;
 constexpr int kOutputArgument = 3;
 constexpr int kCatalogArguments = 3;
+constexpr int kImageArguments = 3;
+constexpr int kForcedImageArguments = 4;
 
 int Usage() {
   std::puts(
@@ -50,13 +54,18 @@ int Usage() {
       "  VS.Extract extract <disc.cue|disc.chd|folder> <outdir> [--ffmpeg "
       "<ffmpeg.exe>]\n"
       "  VS.Extract catalogs <datadir>\n"
+      "  VS.Extract images   <datadir> [--force]\n"
       "      Form 1 files are copied as they are; movies (*.STR) are converted "
       "to Matroska (AV1 + FLAC)\n"
       "      with FFmpeg (found on PATH, or --ffmpeg). Effect audio and XA "
       "are imported under audio/streams as lossless PCM assets.\n"
       "      extract also writes catalogs/ (asset ids and the audio tables); "
       "catalogs rewrites\n"
-      "      them from an extracted folder.");
+      "      them from an extracted folder.\n"
+      "      extract also converts the standalone TIM images to PNG under "
+      "textures/ and records them\n"
+      "      in manifest.json; images converts again only what changed "
+      "(--force: everything).");
   return 2;
 }
 
@@ -350,6 +359,19 @@ int WriteCatalogs(const fs::path& root) {
   return 0;
 }
 
+// textures/ and manifest.json from the disc files already under root.
+int ConvertImages(const fs::path& root, bool force) {
+  const auto report = Extract::ConvertDiscImages(root, force);
+  if (!report) {
+    VS::Core::LogError("extract", "{}", report.error());
+    return 1;
+  }
+  VS::Core::LogInfo(
+      "extract", "images: {} converted, {} unchanged, {} stale files removed",
+      report->converted, report->unchanged, report->removed);
+  return 0;
+}
+
 int ExtractDisc(const Content::Disc& disc, int argc, char** argv) {
   // <outdir>\disc\<path> for each file, and the manifest Content::DataStore
   // reads (sector, size, form, path). Interleaved files (movies, XA audio)
@@ -430,6 +452,7 @@ int ExtractDisc(const Content::Disc& disc, int argc, char** argv) {
       "extract", "wrote {} files to {} ({} interleaved listed, not converted)",
       written, Platform::PathText(out), skipped);
   if (WriteCatalogs(out) != 0) return 1;
+  if (ConvertImages(out, false) != 0) return 1;
   return ConvertStreams(disc, out, ffmpeg);
 }
 
@@ -449,6 +472,13 @@ int Run(int argc, char** argv) {
   if (cmd == "catalogs") {
     return argc == kCatalogArguments
                ? WriteCatalogs(Platform::Utf8Path(argv[2]))
+               : Usage();
+  }
+  if (cmd == "images") {
+    const bool force = argc == kForcedImageArguments &&
+                       std::string_view(argv[kOutputArgument]) == "--force";
+    return argc == kImageArguments || force
+               ? ConvertImages(Platform::Utf8Path(argv[2]), force)
                : Usage();
   }
   auto disc = Content::Disc::Open(Platform::Utf8Path(argv[2]));

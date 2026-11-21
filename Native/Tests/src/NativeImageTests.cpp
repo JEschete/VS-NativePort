@@ -23,12 +23,16 @@
 #include "Content/NativeImage.hpp"
 #include "Content/TimFile.hpp"
 #include "Core/Sha256.hpp"
+#include "Extract/ImageFilesWriter.hpp"
+#include "Extract/TimImage.hpp"
+#include "Extract/TimWriter.hpp"
 #include "Render/DrawPolygon.hpp"
 #include "Render/PageSpace.hpp"
 #include "nlohmann/json.hpp"
 
 namespace {
 namespace Content = VS::Content;
+namespace Extract = VS::Extract;
 namespace fs = std::filesystem;
 using Content::ImageDepth;
 using Bytes = std::vector<std::byte>;
@@ -197,13 +201,13 @@ std::vector<Sample> Samples() {
 Content::ImageDocument DocumentOf(const Bytes& bytes, ImageDepth depth) {
   const Content::TimFile tim = TimOf(bytes);
   return {.id = "image.test.sample",
-          .image = Take(Content::ImageFromTim(tim, depth)),
+          .image = Take(Extract::ImageFromTim(tim, depth)),
           .material = Content::ImageMaterial{},
           .unreferenced = false,
           .provenance = {.source = "TEST/SAMPLE.TIM",
                          .source_sha256 = VS::Core::Sha256Hex(bytes),
                          .offset = 0,
-                         .tim = Content::OriginOf(tim),
+                         .tim = Extract::OriginOf(tim),
                          .dependencies = {},
                          .note = {}}};
 }
@@ -331,11 +335,11 @@ TEST_CASE("A TIM decodes every word", "[content-images][tim]") {
 
 TEST_CASE("A TIM re-encodes to the same bytes", "[content-images][tim]") {
   const Bytes bytes = FourBitTwoPalettes();
-  CHECK(Take(Content::EncodeTim(TimOf(bytes))) == bytes);
+  CHECK(Take(Extract::EncodeTim(TimOf(bytes))) == bytes);
   // The id's version byte is kept, not normalized.
   const Bytes background = PackedBackground();
   CHECK(TimOf(background).id == 0x110);
-  CHECK(Take(Content::EncodeTim(TimOf(background))) == background);
+  CHECK(Take(Extract::EncodeTim(TimOf(background))) == background);
 }
 
 TEST_CASE("Malformed TIMs are rejected with the field at fault",
@@ -423,7 +427,7 @@ TEST_CASE("Indexed TIM pixels unpack low pixel first",
           "[content-images][tim]") {
   const Content::TimFile four = TimOf(FourBitTwoPalettes());
   const Content::NativeImage image =
-      Take(Content::ImageFromTim(four, ImageDepth::kIndexed4));
+      Take(Extract::ImageFromTim(four, ImageDepth::kIndexed4));
   CHECK(image.width == 8);
   CHECK(image.height == 2);
   CHECK(image.indices == std::vector<std::uint8_t>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
@@ -436,44 +440,46 @@ TEST_CASE("A packed background converts at the depth its tiles draw",
           "[content-images][tim]") {
   const Content::TimFile background = TimOf(PackedBackground());
   const Content::NativeImage eight =
-      Take(Content::ImageFromTim(background, ImageDepth::kIndexed8));
+      Take(Extract::ImageFromTim(background, ImageDepth::kIndexed8));
   CHECK(eight.width == 4);
   CHECK(eight.indices ==
         std::vector<std::uint8_t>{1, 2, 3, 4, 0x00, 0xFF, 0x80, 0x7F});
   CHECK(eight.palettes.size() == 1);
   CHECK(eight.PaletteEntries() == 256);
   const Content::TimFile rebuilt =
-      Take(Content::TimFromImage(eight, Content::OriginOf(background)));
+      Take(Extract::TimFromImage(eight, Extract::OriginOf(background)));
   CHECK(rebuilt == background);
 }
 
 TEST_CASE("Image conversion rejects what it cannot keep",
           "[content-images][tim]") {
   const Content::TimFile direct = TimOf(DirectMixedStp());
-  CHECK_FALSE(Content::ImageFromTim(direct, ImageDepth::kIndexed8).has_value());
+  CHECK_FALSE(Extract::ImageFromTim(direct, ImageDepth::kIndexed8).has_value());
   const Content::TimFile four = TimOf(FourBitTwoPalettes());
-  CHECK_FALSE(Content::ImageFromTim(four, ImageDepth::kDirect16).has_value());
-  CHECK_FALSE(Content::ImageFromTim(four, ImageDepth::kIndexed8).has_value());
+  CHECK_FALSE(Extract::ImageFromTim(four, ImageDepth::kDirect16).has_value());
+  CHECK_FALSE(Extract::ImageFromTim(four, ImageDepth::kIndexed8).has_value());
 
   // An index past a short palette names the pixel.
   Content::TimFile short_palette = TimOf(EightBitShortPalette());
   short_palette.image.words[1] = 0x2001;
-  auto invalid = Content::ImageFromTim(short_palette, ImageDepth::kIndexed8);
+  auto invalid = Extract::ImageFromTim(short_palette, ImageDepth::kIndexed8);
   REQUIRE_FALSE(invalid.has_value());
   CHECK(invalid.error().find("pixel (3, 0)") != std::string::npos);
 
   // CLUT words that do not divide into whole palettes.
   Content::TimFile ragged = TimOf(EightBitAllStp());
   Present(ragged.clut).words.resize(300);
-  CHECK_FALSE(Content::ImageFromTim(ragged, ImageDepth::kIndexed8).has_value());
+  CHECK_FALSE(Extract::ImageFromTim(ragged, ImageDepth::kIndexed8).has_value());
 
   Content::TimFile wide = TimOf(DirectNoStp());
   wide.flags = 0x3;
-  CHECK_FALSE(Content::ImageFromTim(wide, ImageDepth::kDirect16).has_value());
+  CHECK_FALSE(Extract::ImageFromTim(wide, ImageDepth::kDirect16).has_value());
 }
 
 TEST_CASE("An image of an unknown depth is rejected, not divided by",
           "[content-images][tim]") {
+  // This deliberately checks rejection of an invalid on-disk enum value.
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   const auto unknown = static_cast<ImageDepth>(0);
   STATIC_CHECK(Content::PixelsPerHalfword(unknown) == 1);
   STATIC_CHECK_FALSE(Content::IsIndexed(unknown));
@@ -497,11 +503,11 @@ TEST_CASE("Image files reproduce the TIM exactly", "[content-images][files]") {
   const Content::ImageDocument document =
       DocumentOf(sample.bytes, sample.depth);
   const std::vector<Content::ImageFile> files =
-      Take(Content::EncodeImageFiles(document, sample.stem));
+      Take(Extract::EncodeImageFiles(document, sample.stem));
   std::vector<std::string> names;
   for (const Content::ImageFile& file : files) names.push_back(file.name);
   CHECK(names == sample.files);
-  CHECK(Take(Content::EncodeImageFiles(document, sample.stem)) == files);
+  CHECK(Take(Extract::EncodeImageFiles(document, sample.stem)) == files);
 
   const FileMap map = MapOf(files);
   const Content::ImageDocument loaded =
@@ -509,13 +515,13 @@ TEST_CASE("Image files reproduce the TIM exactly", "[content-images][files]") {
   CHECK(loaded == document);
   REQUIRE(loaded.provenance.tim.has_value());
   const Content::TimFile rebuilt =
-      Take(Content::TimFromImage(loaded.image, Present(loaded.provenance.tim)));
-  CHECK(Take(Content::EncodeTim(rebuilt)) == sample.bytes);
+      Take(Extract::TimFromImage(loaded.image, Present(loaded.provenance.tim)));
+  CHECK(Take(Extract::EncodeTim(rebuilt)) == sample.bytes);
 }
 
 namespace {
 FileMap FourFiles() {
-  return MapOf(Take(Content::EncodeImageFiles(
+  return MapOf(Take(Extract::EncodeImageFiles(
       DocumentOf(FourBitTwoPalettes(), ImageDepth::kIndexed4), "FOUR")));
 }
 }  // namespace
@@ -527,7 +533,7 @@ TEST_CASE("Indexed image files keep the true depth",
   CHECK(ShapeOf(four.at("FOUR.png")).bit_depth == 4);
   CHECK(ShapeOf(four.at("FOUR.palettes.png")).type == LCT_RGBA);
 
-  const FileMap eight = MapOf(Take(Content::EncodeImageFiles(
+  const FileMap eight = MapOf(Take(Extract::EncodeImageFiles(
       DocumentOf(EightBitAllStp(), ImageDepth::kIndexed8), "EIGHT")));
   CHECK(ShapeOf(eight.at("EIGHT.png")).bit_depth == 8);
   CHECK(SidecarOf(eight, "EIGHT.image.json")["palette"]["stp"][0] == "all");
@@ -555,7 +561,7 @@ TEST_CASE("A sidecar carries only what PNG cannot", "[content-images][files]") {
 
 TEST_CASE("A direct image has an STP mask only when its bits are mixed",
           "[content-images][files]") {
-  const FileMap mixed = MapOf(Take(Content::EncodeImageFiles(
+  const FileMap mixed = MapOf(Take(Extract::EncodeImageFiles(
       DocumentOf(DirectMixedStp(), ImageDepth::kDirect16), "MIXED")));
   CHECK(ShapeOf(mixed.at("MIXED.png")).type == LCT_RGBA);
   CHECK(ShapeOf(mixed.at("MIXED.stp.png")).type == LCT_GREY);
@@ -566,7 +572,7 @@ TEST_CASE("A direct image has an STP mask only when its bits are mixed",
 
 TEST_CASE("Edited image files change the words the game uses",
           "[content-images][files]") {
-  FileMap files = MapOf(Take(Content::EncodeImageFiles(
+  FileMap files = MapOf(Take(Extract::EncodeImageFiles(
       DocumentOf(EightBitShortPalette(), ImageDepth::kIndexed8), "SHORT")));
   files["SHORT.png"] = EditIndexedPng(
       files.at("SHORT.png"),
@@ -600,7 +606,7 @@ TEST_CASE("Edited image files change the words the game uses",
 
 TEST_CASE("Image files that disagree or cannot be drawn are rejected",
           "[content-images][files]") {
-  const FileMap four = MapOf(Take(Content::EncodeImageFiles(
+  const FileMap four = MapOf(Take(Extract::EncodeImageFiles(
       DocumentOf(FourBitTwoPalettes(), ImageDepth::kIndexed4), "FOUR")));
   const auto rejects = [](const FileMap& files, std::string_view stem,
                           std::string_view text) {
@@ -654,7 +660,7 @@ TEST_CASE("Image files that disagree or cannot be drawn are rejected",
   files["FOUR.image.json"] = SidecarBytes(sidecar);
   rejects(files, "FOUR", "the PNG palette has 16 entries; the sidecar says 15");
 
-  const FileMap mixed = MapOf(Take(Content::EncodeImageFiles(
+  const FileMap mixed = MapOf(Take(Extract::EncodeImageFiles(
       DocumentOf(DirectMixedStp(), ImageDepth::kDirect16), "MIXED")));
   files = mixed;
   files["MIXED.stp.png"] = EditRgbaPng(mixed.at("MIXED.stp.png"),
@@ -726,7 +732,7 @@ CompositePair CompositeBoth(bool semi) {
   const Bytes bytes = TimBytes(0x10, 0x9, BlockSpec{{0, 480, 256, 1}, clut},
                                BlockSpec{{512, 0, 2, 1}, {0x0100, 0x0302}});
   const Content::TimFile tim = TimOf(bytes);
-  const FileMap files = MapOf(Take(Content::EncodeImageFiles(
+  const FileMap files = MapOf(Take(Extract::EncodeImageFiles(
       DocumentOf(bytes, ImageDepth::kIndexed8), "COMPOSITE")));
   const Content::ImageDocument loaded =
       Take(Content::DecodeImageFiles("COMPOSITE", ReaderOf(files)));
@@ -766,8 +772,8 @@ TEST_CASE("Image files are staged on disk and load back",
   fs::remove_all(directory, ignored);
   const Content::ImageDocument document =
       DocumentOf(FourBitTwoPalettes(), ImageDepth::kIndexed4);
-  const auto files = Take(Content::EncodeImageFiles(document, "FOUR"));
-  REQUIRE(Content::WriteImageFiles(directory, files).has_value());
+  const auto files = Take(Extract::EncodeImageFiles(document, "FOUR"));
+  REQUIRE(Extract::WriteImageFiles(directory, files).has_value());
   std::size_t count = 0;
   for (const auto& entry : fs::directory_iterator(directory)) {
     CHECK(entry.path().extension() != ".tmp");

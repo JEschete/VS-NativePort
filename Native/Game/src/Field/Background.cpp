@@ -55,10 +55,9 @@ constexpr std::uint16_t kBackdropClut = 0x38B1;
 constexpr std::int32_t kSectorBytes = 0x800;
 constexpr std::int32_t kSectorMask = kSectorBytes - 1;
 
-// func_8008F0FC: the TIM's id word, and where its pixels go: the low 64
-// columns of the reserved page, in the page's row of the texture area, and
-// its CLUT in row 14 of the CLUT strip.
-constexpr std::uint32_t kTimId = 0x10;
+// func_8008F0FC: where the image pixels go: the low 64 columns of the
+// reserved page, in the page's row of the texture area, and its CLUT in row
+// 14 of the CLUT strip.
 constexpr std::int32_t kPageColumnMask = 0x3F;
 constexpr std::int32_t kPageXMask = 0xF;
 constexpr std::int32_t kPageWidthShift = 6;
@@ -102,6 +101,15 @@ constexpr int kBackgroundClutColors = 0x100;
 [[nodiscard]] std::int32_t DomeAxis(std::int32_t position,
                                     std::int32_t far_clip) {
   return Math::WrappingMultiply(position / kFixedOne, far_clip) / kFixedOne;
+}
+
+[[nodiscard]] bool IsValidBackgroundTexture(
+    const BackgroundTextureUpload& image) {
+  const TextureRect& rect = image.source_rect;
+  return rect.width > 0 && rect.height > 0 &&
+         image.pixel_words.size() == (static_cast<std::size_t>(rect.width) *
+                                      static_cast<std::size_t>(rect.height)) &&
+         image.palette_words.size() == kBackgroundClutColors;
 }
 
 void DrawSolidBackdrop(BackgroundHost& host) {
@@ -153,10 +161,10 @@ void DrawSkyDome(BackgroundHost& host,
 // decomp: BATTLE.PRG func_8008E88C (src/BATTLE/BATTLE.PRG/146C.c:17310)
 void InitializeRoomBackground(BackgroundHost& host, RoomBackgroundState& state,
                               RoomWeatherState& weather) {
-  state.texture_read = BackgroundReadId::kNone;
   state.layout_read = BackgroundReadId::kNone;
   state.layout = BackgroundBufferId::kNone;
-  state.tim_buffer = BackgroundBufferId::kNone;
+  state.texture_file = {};
+  state.texture_uploaded = 0;
   // The particle buffer is dropped without being freed, as in the original.
   weather.particles = WeatherParticlesId::kNone;
   state.tiled_enabled = 0;
@@ -290,30 +298,19 @@ std::int32_t QueueTiledBackgroundLoad(BackgroundHost& host,
                                       RoomBackgroundState& state,
                                       std::int32_t texture_page) {
   state.texture_page = static_cast<std::uint8_t>(texture_page);
+  state.texture_file = {};
+  state.texture_uploaded = 0;
   if (const std::optional<TiledBackgroundSection> section =
           host.TiledBackground()) {
     state.texture_page_count =
         static_cast<std::int16_t>(section->texture_page_count);
     if (host.ReserveTexturePages(state.texture_page, state.texture_page_count,
                                  kBackgroundPageOwner)) {
-      const std::int32_t texture_bytes = SectorAligned(section->texture.size);
       const std::int32_t layout_bytes = SectorAligned(section->layout.size);
-      state.tim_buffer = host.AllocateHighBuffer(texture_bytes);
       state.layout = host.AllocateHighBuffer(layout_bytes);
-      // A refused buffer leaves the other allocated and the pages lent, as
-      // in the original.
-      if (state.tim_buffer == BackgroundBufferId::kNone ||
-          state.layout == BackgroundBufferId::kNone) {
-        return 0;
-      }
-      state.texture_read = host.AllocateRead(section->texture);
+      if (state.layout == BackgroundBufferId::kNone) return 0;
+      state.texture_file = section->texture;
       state.layout_read = host.AllocateRead(section->layout);
-      if (state.texture_read != BackgroundReadId::kNone) {
-        host.EnqueueRead(state.texture_read, state.tim_buffer);
-      } else {
-        state.texture_read =
-            host.CompleteRefusedRead(section->texture, state.tim_buffer);
-      }
       if (state.layout_read != BackgroundReadId::kNone) {
         host.EnqueueRead(state.layout_read, state.layout);
       } else {
@@ -323,7 +320,6 @@ std::int32_t QueueTiledBackgroundLoad(BackgroundHost& host,
       return 1;
     }
   }
-  state.texture_read = BackgroundReadId::kNone;
   state.layout_read = BackgroundReadId::kNone;
   return 0;
 }
@@ -331,40 +327,33 @@ std::int32_t QueueTiledBackgroundLoad(BackgroundHost& host,
 // decomp: BATTLE.PRG func_8008F0FC (src/BATTLE/BATTLE.PRG/146C.c:17557)
 std::int32_t FinishTiledBackgroundLoad(BackgroundHost& host,
                                        RoomBackgroundState& state) {
-  if (state.texture_read != BackgroundReadId::kNone &&
-      host.ReadLoaded(state.texture_read)) {
-    if (state.tim_buffer == BackgroundBufferId::kNone) {
-      // The original stamps and parses the missing buffer at address 0.
-      VS::Core::LogWarn(kChannel,
-                        "FinishTiledBackgroundLoad: the texture read finished "
-                        "without a TIM buffer; nothing is uploaded");
+  if (state.texture_uploaded == 0) {
+    state.texture_uploaded = 1;
+    const auto image = host.LoadBackgroundTexture(state.texture_file);
+    if (!image) {
+      VS::Core::LogError(kChannel, "FinishTiledBackgroundLoad: {}",
+                         image.error());
+    } else if (!IsValidBackgroundTexture(*image)) {
+      VS::Core::LogError(
+          kChannel,
+          "FinishTiledBackgroundLoad: converted background image has "
+          "invalid pixel dimensions or palette size");
     } else {
-      host.StampTimId(state.tim_buffer, kTimId);
-      const BackgroundTim tim = host.ParseTim(state.tim_buffer);
-      if (tim.pixels) {
-        const std::int32_t page = state.texture_page;
-        TextureRect rect = *tim.pixels;
-        rect.x =
-            static_cast<std::int16_t>((rect.x & kPageColumnMask) +
-                                      ((page & kPageXMask) << kPageWidthShift));
-        rect.y =
-            static_cast<std::int16_t>(static_cast<std::uint8_t>(rect.y) +
-                                      ((page & kPageRowBit) << kPageRowShift));
-        host.UploadTimPixels(state.tim_buffer, rect);
-      }
-      if (tim.has_clut) {
-        host.UploadTimClut(state.tim_buffer, kBackgroundClutRow, 0,
-                           kBackgroundClutColors);
-      }
+      const std::int32_t page = state.texture_page;
+      TextureRect rect = image->source_rect;
+      rect.x =
+          static_cast<std::int16_t>((rect.x & kPageColumnMask) +
+                                    ((page & kPageXMask) << kPageWidthShift));
+      rect.y =
+          static_cast<std::int16_t>(static_cast<std::uint8_t>(rect.y) +
+                                    ((page & kPageRowBit) << kPageRowShift));
+      host.UploadBackgroundPixels(image->pixel_words, rect);
+      host.UploadBackgroundPalette(image->palette_words, kBackgroundClutRow);
     }
-    host.ReleaseRead(state.texture_read);
-    state.texture_read = BackgroundReadId::kNone;
     return 0;
   }
   if (state.layout_read != BackgroundReadId::kNone &&
       host.ReadLoaded(state.layout_read)) {
-    host.FreeHighBuffer(state.tim_buffer);
-    state.tim_buffer = BackgroundBufferId::kNone;
     host.ReleaseRead(state.layout_read);
     state.layout_read = BackgroundReadId::kNone;
     return 1;
@@ -381,6 +370,8 @@ std::int32_t ReleaseTiledBackground(BackgroundHost& host,
                           kBackgroundPageOwner);
   host.FreeHighBuffer(state.layout);
   state.layout = BackgroundBufferId::kNone;
+  state.texture_file = {};
+  state.texture_uploaded = 0;
   return 1;
 }
 }  // namespace VS::Field

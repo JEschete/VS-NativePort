@@ -6,15 +6,23 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <filesystem>
+#include <format>
 #include <optional>
 #include <span>
+#include <string>
 #include <string_view>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 #include "Content/CdDriveLive.hpp"
+#include "Content/ConversionManifest.hpp"
+#include "Content/DataStore.hpp"
 #include "Content/DiscQueue.hpp"
+#include "Content/ImageFiles.hpp"
 #include "Content/ModuleData.hpp"
+#include "Content/NativeImage.hpp"
 #include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -26,13 +34,13 @@
 #include "Field/Mpd.hpp"
 #include "Field/Room.hpp"
 #include "Field/RoomRenderingLive.hpp"
+#include "Platform/Paths.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/Render.hpp"
 #include "Render/RoomDraw.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/TexturePagesLive.hpp"
-#include "Render/TimImageLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 
 using VS::Core::Gte::CVECTOR;
@@ -40,7 +48,6 @@ using VS::Core::Gte::MATRIX;
 using VS::Core::Gte::VECTOR;
 
 using VS::Legacy::AddPrim;
-using VS::Legacy::LoadImage;
 using VS::Legacy::POLY_FT4;
 using VS::Legacy::POLY_GT4;
 using VS::Legacy::RECT;
@@ -56,15 +63,12 @@ using VS::Legacy::setWH;
 using VS::Legacy::setXY0;
 using VS::Legacy::setXY4;
 using VS::Legacy::TILE;
-using VS::Legacy::TIM_IMAGE;
 
 // decomp: D_800F1CE0 (D_800F1CE0@BATTLE/BATTLE.PRG)
 VECTOR VS::Field::backgroundReferenceVectors[2];
 // decomp: D_800F1D78 (D_800F1D78@BATTLE/BATTLE.PRG)
 int VS::Field::backgroundGradientColors
     [VS::Field::kBackgroundGradientColorCount];
-// decomp: D_800F1DAC (D_800F1DAC@BATTLE/BATTLE.PRG)
-VS::Content::DiscQueueSlot* VS::Field::backgroundTextureDiscRequest;
 // decomp: D_800F1DB0 (D_800F1DB0@BATTLE/BATTLE.PRG)
 VS::Content::DiscQueueSlot* VS::Field::backgroundLayoutDiscRequest;
 // decomp: D_800F1DB4 (D_800F1DB4@BATTLE/BATTLE.PRG)
@@ -85,9 +89,6 @@ char VS::Field::legacyBackgroundTexturePage;
 std::uint8_t VS::Field::isTiledBackgroundEnabled;
 // decomp: D_800F1DCC (D_800F1DCC@BATTLE/BATTLE.PRG)
 VS::Field::BackgroundLayoutRecord* VS::Field::loadedBackgroundLayout;
-// decomp: D_800F1DD0 (D_800F1DD0@BATTLE/BATTLE.PRG)
-std::uint32_t* VS::Field::legacyBackgroundTimBuffer;
-
 namespace {
 // D_80068C1C: 34 twelve-byte vertices, the third word of each its colour, and
 // 64 four-byte faces (146C.c:17537).
@@ -140,14 +141,18 @@ namespace VS::Field {
 namespace {
 namespace Math = Core::Math;
 namespace Memory = Core::Memory;
+namespace Content = VS::Content;
 
 constexpr std::string_view kChannel = "field.background";
 // The farthest scene ordering entry (orderingTable + 0x1FFC).
 constexpr int kFarthestOrderingSlot = 0x7FF;
+constexpr std::size_t kBackgroundPaletteEntries = 256;
 
 std::uint64_t refusedCalls = 0;
 std::uint64_t droppedPackets = 0;
 std::uint64_t refusedSections = 0;
+VS::Field::BackgroundFile queuedBackgroundTextureFile;
+std::uint8_t backgroundTextureUploaded;
 
 // True on the 1st, 2nd, 4th, 8th... occurrence, to keep repeated
 // diagnostics readable.
@@ -265,6 +270,129 @@ auto RunLive(Rule rule) {
     return result;
   }
 }
+
+struct ResolvedBackgroundSource {
+  const Content::DataStore::Entry* entry;
+  const Content::ConversionOutput* conversion;
+};
+
+struct NativeImageFiles {
+  std::filesystem::path directory;
+  std::string stem;
+};
+
+std::expected<ResolvedBackgroundSource, std::string> FindBackgroundSource(
+    const Content::DataStore& store, const BackgroundFile& source) {
+  if (source.lba <= 0 || source.size <= 0) {
+    return std::unexpected(
+        std::format("room background source has invalid LBA {} and size {}",
+                    source.lba, source.size));
+  }
+  const Content::DataStore::Entry* const entry =
+      store.FindBySector(static_cast<VS::u32>(source.lba));
+  const std::uint64_t sector_rounded_size =
+      entry == nullptr ? 0
+                       : static_cast<std::uint64_t>(entry->SectorCount()) *
+                             Content::DataStore::kDataSectorBytes;
+  if (entry == nullptr || entry->lba != static_cast<VS::u32>(source.lba) ||
+      !entry->path.ends_with(".TIM") ||
+      sector_rounded_size != static_cast<std::uint32_t>(source.size)) {
+    return std::unexpected(std::format(
+        "no extracted TIM matches room background LBA {} and sector-rounded "
+        "size {}",
+        source.lba, source.size));
+  }
+
+  const Content::ConversionManifest* const manifest = store.Conversions();
+  if (manifest == nullptr) {
+    return std::unexpected("no conversion manifest is loaded");
+  }
+  const Content::ConversionOutput* conversion = nullptr;
+  for (const Content::ConversionOutput& output : manifest->outputs) {
+    if (output.converter != "tim-png" || output.source != entry->path) {
+      continue;
+    }
+    if (conversion != nullptr) {
+      return std::unexpected(
+          std::format("multiple tim-png outputs name {}", entry->path));
+    }
+    conversion = &output;
+  }
+  if (conversion == nullptr) {
+    return std::unexpected(
+        std::format("no tim-png output is registered for {}", entry->path));
+  }
+  return ResolvedBackgroundSource{.entry = entry, .conversion = conversion};
+}
+
+std::expected<NativeImageFiles, std::string> ResolveBackgroundImageFiles(
+    const Content::DataStore& store, const ResolvedBackgroundSource& source) {
+  constexpr std::string_view kSidecarSuffix = ".image.json";
+  std::string sidecar;
+  for (const std::string& file : source.conversion->files) {
+    if (!file.ends_with(kSidecarSuffix)) continue;
+    if (!sidecar.empty()) {
+      return std::unexpected(
+          std::format("{} has multiple image sidecars", source.entry->path));
+    }
+    sidecar = file;
+  }
+  if (sidecar.empty()) {
+    return std::unexpected(
+        std::format("{} has no native image sidecar", source.entry->path));
+  }
+
+  std::string stem_path =
+      sidecar.substr(0, sidecar.size() - kSidecarSuffix.size());
+  if (std::ranges::find(source.conversion->files, stem_path + ".png") ==
+      source.conversion->files.end()) {
+    return std::unexpected(
+        std::format("{} has no native PNG image", source.entry->path));
+  }
+  const std::size_t separator = stem_path.rfind('/');
+  std::string stem =
+      stem_path.substr(separator == std::string::npos ? 0 : separator + 1);
+  std::filesystem::path directory = store.Root();
+  if (separator != std::string::npos) {
+    directory /= VS::Platform::Utf8Path(stem_path.substr(0, separator));
+  }
+  return NativeImageFiles{.directory = std::move(directory),
+                          .stem = std::move(stem)};
+}
+
+std::expected<Content::ImageDocument, std::string> LoadBackgroundImage(
+    const ResolvedBackgroundSource& source, const NativeImageFiles& files) {
+  auto document = Content::LoadImageFiles(files.directory, files.stem);
+  if (!document) {
+    return std::unexpected(
+        std::format("{}: {}", source.entry->path, document.error()));
+  }
+  if (document->id != source.conversion->id ||
+      document->provenance.source != source.entry->path ||
+      document->provenance.source_sha256 != source.conversion->source_sha256 ||
+      document->unreferenced || !document->provenance.tim) {
+    return std::unexpected(std::format(
+        "{} does not match its conversion manifest", source.entry->path));
+  }
+  const Content::TimOrigin& tim = *document->provenance.tim;
+  if (document->image.depth != Content::ImageDepth::kIndexed8 ||
+      document->image.width != (std::uint32_t{tim.image.width} * 2) ||
+      document->image.height != tim.image.height ||
+      document->image.palettes.size() != 1 ||
+      document->image.PaletteEntries() != kBackgroundPaletteEntries ||
+      document->material !=
+          Content::ImageMaterial{
+              .zero_word = Content::ZeroWord::kTransparent,
+              .semi_transparency = Content::SemiTransparency::kOff}) {
+    return std::unexpected(std::format(
+        "{} is not a supported 8-bit background image", source.entry->path));
+  }
+  if (auto valid = Content::ValidateImage(document->image); !valid) {
+    return std::unexpected(
+        std::format("{}: {}", source.entry->path, valid.error()));
+  }
+  return std::move(*document);
+}
 }  // namespace
 
 RoomBackgroundState LoadLiveRoomBackgroundState() {
@@ -277,10 +405,10 @@ RoomBackgroundState LoadLiveRoomBackgroundState() {
       .solid = static_cast<std::uint8_t>(isSolidBackground),
       .texture_page = static_cast<std::uint8_t>(legacyBackgroundTexturePage),
       .tiled_enabled = isTiledBackgroundEnabled,
-      .texture_read = IdOf<BackgroundReadId>(backgroundTextureDiscRequest),
+      .texture_file = queuedBackgroundTextureFile,
+      .texture_uploaded = backgroundTextureUploaded,
       .layout_read = IdOf<BackgroundReadId>(backgroundLayoutDiscRequest),
-      .layout = IdOf<BackgroundBufferId>(loadedBackgroundLayout),
-      .tim_buffer = IdOf<BackgroundBufferId>(legacyBackgroundTimBuffer)};
+      .layout = IdOf<BackgroundBufferId>(loadedBackgroundLayout)};
   std::ranges::copy(backgroundGradientColors, state.gradient_colors.begin());
   return state;
 }
@@ -295,12 +423,11 @@ void StoreLiveRoomBackgroundState(const RoomBackgroundState& state) {
   isSolidBackground = static_cast<char>(state.solid);
   legacyBackgroundTexturePage = static_cast<char>(state.texture_page);
   isTiledBackgroundEnabled = state.tiled_enabled;
-  backgroundTextureDiscRequest =
-      PointerOf<VS::Content::DiscQueueSlot>(state.texture_read);
+  queuedBackgroundTextureFile = state.texture_file;
+  backgroundTextureUploaded = state.texture_uploaded;
   backgroundLayoutDiscRequest =
       PointerOf<VS::Content::DiscQueueSlot>(state.layout_read);
   loadedBackgroundLayout = PointerOf<BackgroundLayoutRecord>(state.layout);
-  legacyBackgroundTimBuffer = PointerOf<std::uint32_t>(state.tim_buffer);
 }
 
 std::optional<RoomEnvironment> LiveRoomEnvironment() {
@@ -524,46 +651,48 @@ void LiveBackgroundHost::ReleaseRead(BackgroundReadId read) {
   Content::ReleaseLiveDiscRequest(PointerOf<VS::Content::DiscQueueSlot>(read));
 }
 
-void LiveBackgroundHost::StampTimId(BackgroundBufferId buffer,
-                                    std::uint32_t id) {
-  *PointerOf<std::uint32_t>(buffer) = id;
-}
-
-BackgroundTim LiveBackgroundHost::ParseTim(BackgroundBufferId buffer) {
-  TIM_IMAGE tim{};
-  Render::ParseLiveTim(PointerOf<void>(buffer), &tim);
-  BackgroundTim parsed{.pixels = std::nullopt,
-                       .has_clut = tim.caddr != nullptr};
-  if (tim.paddr != nullptr) {
-    const RECT& rect = *tim.prect;
-    parsed.pixels = TextureRect{
-        .x = rect.x, .y = rect.y, .width = rect.w, .height = rect.h};
+std::expected<BackgroundTextureUpload, std::string>
+LiveBackgroundHost::LoadBackgroundTexture(const BackgroundFile& source) {
+  const Content::DataStore* const store = Content::DataStore::Get();
+  if (store == nullptr) {
+    return std::unexpected(
+        "no extracted-data store is open for the room background");
   }
-  return parsed;
+  auto source_asset = FindBackgroundSource(*store, source);
+  if (!source_asset) {
+    return std::unexpected(source_asset.error());
+  }
+  auto files = ResolveBackgroundImageFiles(*store, *source_asset);
+  if (!files) return std::unexpected(files.error());
+  auto document = LoadBackgroundImage(*source_asset, *files);
+  if (!document) return std::unexpected(document.error());
+
+  const Content::TimOrigin& tim = *document->provenance.tim;
+  return BackgroundTextureUpload{
+      .source_rect = {.x = static_cast<std::int16_t>(tim.image.x),
+                      .y = static_cast<std::int16_t>(tim.image.y),
+                      .width = static_cast<std::int16_t>(tim.image.width),
+                      .height = static_cast<std::int16_t>(tim.image.height)},
+      .pixel_words = Content::PackedWords(document->image),
+      .palette_words = document->image.palettes.front()};
 }
 
-void LiveBackgroundHost::UploadTimPixels(BackgroundBufferId buffer,
-                                         const TextureRect& rect) {
-  TIM_IMAGE tim{};
-  Render::ParseLiveTim(PointerOf<void>(buffer), &tim);
-  if (tim.paddr == nullptr) return;
-  RECT& target = *tim.prect;
-  target.x = rect.x;
-  target.y = rect.y;
-  target.w = rect.width;
-  target.h = rect.height;
-  LoadImage(tim.prect, tim.paddr);
+void LiveBackgroundHost::UploadBackgroundPixels(
+    std::span<const std::uint16_t> words, const TextureRect& rect) {
+  std::vector<std::uint32_t> packed((words.size() + 1) / 2);
+  for (std::size_t i = 0; i < words.size(); i += 2) {
+    const std::uint32_t high =
+        i + 1 < words.size() ? std::uint32_t{words[i + 1]} << 16 : 0;
+    packed[i / 2] = std::uint32_t{words[i]} | high;
+  }
+  RECT target{.x = rect.x, .y = rect.y, .w = rect.width, .h = rect.height};
+  LoadImage(&target, packed.data());
 }
 
-void LiveBackgroundHost::UploadTimClut(BackgroundBufferId buffer, int row,
-                                       int first_color, int count) {
-  TIM_IMAGE tim{};
-  Render::ParseLiveTim(PointerOf<void>(buffer), &tim);
-  if (tim.caddr == nullptr) return;
-  Render::LoadLiveClutColors(reinterpret_cast<const std::uint16_t*>(tim.caddr),
-                             static_cast<std::uint32_t>(row),
-                             static_cast<std::uint32_t>(first_color),
-                             static_cast<std::uint32_t>(count));
+void LiveBackgroundHost::UploadBackgroundPalette(
+    std::span<const std::uint16_t> words, int row) {
+  Render::LoadLiveClutColors(words.data(), static_cast<std::uint32_t>(row), 0,
+                             static_cast<std::uint32_t>(words.size()));
 }
 
 // decomp: BATTLE.PRG func_8008E88C (src/BATTLE/BATTLE.PRG/146C.c:17310)

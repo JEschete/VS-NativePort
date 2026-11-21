@@ -39,6 +39,9 @@
     <ClCompile Include="src\CdDriveLive.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ConversionManifest.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\DataStore.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -55,6 +58,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\ImageFiles.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\JsonText.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\ModuleLoader.cpp">
@@ -114,6 +120,9 @@
     <ClInclude Include="include\Content\CdDriveLive.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
+    <ClInclude Include="include\Content\ConversionManifest.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
     <ClInclude Include="include\Content\DataAccess.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
@@ -136,6 +145,9 @@
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\ImageFiles.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\JsonText.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\ModuleData.hpp">

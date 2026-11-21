@@ -13,6 +13,12 @@
     <Filter Include="..\Tools\CombatLab\src">
       <UniqueIdentifier>{1E5165DB-8EC7-5511-A167-D460786D1005}</UniqueIdentifier>
     </Filter>
+    <Filter Include="..\Tools\Extract">
+      <UniqueIdentifier>{2FD266CC-7835-52A4-8C78-D9E7F8EE3ADD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="..\Tools\Extract\src">
+      <UniqueIdentifier>{2C7A048D-49EC-5DFE-8F8E-84511153821F}</UniqueIdentifier>
+    </Filter>
     <Filter Include="..\Tools\Launcher">
       <UniqueIdentifier>{CB4D3062-002C-5C94-99D0-9D1D55ED6A87}</UniqueIdentifier>
     </Filter>
@@ -757,6 +763,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\HudStateTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ImageConversionTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\InformationTests.cpp">
@@ -1539,6 +1548,21 @@
     <ClInclude Include="include\TestSupport\TimeAttackDrawRecorder.hpp">
       <Filter>include\TestSupport</Filter>
     </ClInclude>
+    <ClCompile Include="..\Tools\Extract\src\ConversionManifestWriter.cpp">
+      <Filter>..\Tools\Extract\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Tools\Extract\src\ImageFilesWriter.cpp">
+      <Filter>..\Tools\Extract\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Tools\Extract\src\ImageConversion.cpp">
+      <Filter>..\Tools\Extract\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Tools\Extract\src\TimImage.cpp">
+      <Filter>..\Tools\Extract\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Tools\Extract\src\TimWriter.cpp">
+      <Filter>..\Tools\Extract\src</Filter>
+    </ClCompile>
     <ClCompile Include="..\Tools\Launcher\src\Setup.cpp">
       <Filter>..\Tools\Launcher\src</Filter>
     </ClCompile>

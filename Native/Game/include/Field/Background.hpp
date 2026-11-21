@@ -4,8 +4,11 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <expected>
 #include <optional>
 #include <span>
+#include <string>
+#include <vector>
 
 #include "Field/Camera.hpp"
 
@@ -23,6 +26,15 @@ struct RoomWeatherState;  // Field/Environment.hpp
 // never dereferenced.
 enum class BackgroundReadId : std::uintptr_t { kNone = 0 };
 enum class BackgroundBufferId : std::uintptr_t { kNone = 0 };
+
+// A file on the disc, in sectors and bytes (vs_main_CdFile).
+struct BackgroundFile {
+  std::int32_t lba = 0;
+  std::int32_t size = 0;
+
+  friend bool operator==(const BackgroundFile&,
+                         const BackgroundFile&) = default;
+};
 
 // The room's sky gradient, zenith to horizon, as 0x00BBGGRR words.
 inline constexpr std::size_t kGradientColorCount = 5;
@@ -49,10 +61,10 @@ struct RoomBackgroundState {
   std::uint8_t solid = 0;               // D_800F1DC6
   std::uint8_t texture_page = 0;        // D_800F1DC8
   std::uint8_t tiled_enabled = 0;       // D_800F1DC9
-  BackgroundReadId texture_read{};      // D_800F1DAC
+  BackgroundFile texture_file{};        // native source for the loaded image
+  std::uint8_t texture_uploaded = 0;    // native load step, not a legacy global
   BackgroundReadId layout_read{};       // D_800F1DB0
   BackgroundBufferId layout{};          // D_800F1DCC
-  BackgroundBufferId tim_buffer{};      // D_800F1DD0
 
   friend bool operator==(const RoomBackgroundState&,
                          const RoomBackgroundState&) = default;
@@ -186,28 +198,19 @@ struct BackgroundLayout {
   std::span<const BackgroundTile> tiles;
 };
 
-// A file on the disc, in sectors and bytes (vs_main_CdFile).
-struct BackgroundFile {
-  std::int32_t lba = 0;
-  std::int32_t size = 0;
-
-  friend bool operator==(const BackgroundFile&,
-                         const BackgroundFile&) = default;
-};
-
 // The room's tiled background section: the texture pages its picture takes
-// and its TIM and layout files.
+// and its image source and layout files.
 struct TiledBackgroundSection {
   std::uint16_t texture_page_count = 0;
   BackgroundFile texture;
   BackgroundFile layout;
 };
 
-// A parsed TIM: its pixel block's VRAM rectangle, when it has one, and
-// whether it carries a CLUT.
-struct BackgroundTim {
-  std::optional<TextureRect> pixels;
-  bool has_clut = false;
+// Image data in PS1 VRAM upload order, retaining the source TIM's rectangle.
+struct BackgroundTextureUpload {
+  TextureRect source_rect;
+  std::vector<std::uint16_t> pixel_words;
+  std::vector<std::uint16_t> palette_words;
 };
 
 class BackgroundHost {
@@ -270,15 +273,13 @@ class BackgroundHost {
       const BackgroundFile& file, BackgroundBufferId destination) = 0;
   [[nodiscard]] virtual bool ReadLoaded(BackgroundReadId read) = 0;
   virtual void ReleaseRead(BackgroundReadId read) = 0;
-  // Writes the TIM id word over the buffer's first word.
-  virtual void StampTimId(BackgroundBufferId buffer, std::uint32_t id) = 0;
-  [[nodiscard]] virtual BackgroundTim ParseTim(BackgroundBufferId buffer) = 0;
-  // Stores `rect` as the TIM's pixel rectangle and loads its pixels there.
-  virtual void UploadTimPixels(BackgroundBufferId buffer,
-                               const TextureRect& rect) = 0;
-  // vs_main_loadClut over the TIM's CLUT.
-  virtual void UploadTimClut(BackgroundBufferId buffer, int row,
-                             int first_color, int count) = 0;
+  // Loads an already-converted native image; it does not read or decode TIM.
+  [[nodiscard]] virtual std::expected<BackgroundTextureUpload, std::string>
+  LoadBackgroundTexture(const BackgroundFile& source) = 0;
+  virtual void UploadBackgroundPixels(std::span<const std::uint16_t> words,
+                                      const TextureRect& rect) = 0;
+  virtual void UploadBackgroundPalette(std::span<const std::uint16_t> words,
+                                       int row) = 0;
 };
 
 // func_8008E88C: clears the background and weather loads, then reads the
@@ -306,13 +307,13 @@ void SetRoomBackgroundColors(BackgroundHost& host, RoomBackgroundState& state,
 // func_8008EC48: the tiled picture, the solid backdrop or the sky dome.
 void DrawRoomBackground(BackgroundHost& host, const RoomBackgroundState& state,
                         const std::optional<CameraVector>& rotation_override);
-// func_8008EFCC: lends the picture's texture pages and queues its TIM and
-// layout; 1 once both reads are queued.
+// func_8008EFCC: lends the picture's texture pages and queues its layout;
+// 1 once the layout read is queued.
 [[nodiscard]] std::int32_t QueueTiledBackgroundLoad(BackgroundHost& host,
                                                     RoomBackgroundState& state,
                                                     std::int32_t texture_page);
-// func_8008F0FC: uploads the TIM once read, then frees its buffer once the
-// layout is read; 1 at that last step.
+// func_8008F0FC: uploads the converted image once, then frees the layout
+// buffer once its read finishes; 1 at that last step.
 [[nodiscard]] std::int32_t FinishTiledBackgroundLoad(
     BackgroundHost& host, RoomBackgroundState& state);
 // func_8008F234: disables the picture and returns its pages and layout; 1

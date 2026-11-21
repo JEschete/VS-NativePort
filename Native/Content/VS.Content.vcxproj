@@ -51,6 +51,7 @@
     <ClCompile Include="src\CdDriveLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\ConversionManifest.cpp" />
     <ClCompile Include="src\DataStore.cpp" />
     <ClCompile Include="src\Disc.cpp" />
     <ClCompile Include="src\DiscQueue.cpp">
@@ -61,6 +62,7 @@
       <AdditionalIncludeDirectories>$(VSLegacyIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\ImageFiles.cpp" />
+    <ClCompile Include="src\JsonText.cpp" />
     <ClCompile Include="src\ModuleLoader.cpp" />
     <ClCompile Include="src\MovieEncoder.cpp" />
     <ClCompile Include="src\NativeImage.cpp" />
@@ -89,6 +91,7 @@
     <ClInclude Include="include\Content\AudioStream.hpp" />
     <ClInclude Include="include\Content\CdDrive.hpp" />
     <ClInclude Include="include\Content\CdDriveLive.hpp" />
+    <ClInclude Include="include\Content\ConversionManifest.hpp" />
     <ClInclude Include="include\Content\DataAccess.hpp" />
     <ClInclude Include="include\Content\DataStore.hpp" />
     <ClInclude Include="include\Content\Disc.hpp" />
@@ -97,6 +100,7 @@
     <ClInclude Include="include\Content\DiscReader.hpp" />
     <ClInclude Include="include\Content\DiscReaderLive.hpp" />
     <ClInclude Include="include\Content\ImageFiles.hpp" />
+    <ClInclude Include="include\Content\JsonText.hpp" />
     <ClInclude Include="include\Content\ModuleData.hpp" />
     <ClInclude Include="include\Content\MovieEncoder.hpp" />
     <ClInclude Include="include\Content\NativeImage.hpp" />

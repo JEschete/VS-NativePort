@@ -91,6 +91,9 @@ Result SealAssets(const fs::path& data, const VerifiedDisc& source_disc,
   if (auto result = store->RequireCatalog(); !result) {
     return result;
   }
+  if (auto result = store->RequireConversions(); !result) {
+    return result;
+  }
   for (const auto& source : disc.Files()) {
     if (source.directory) continue;
     const auto* entry = store->Find(source.path);

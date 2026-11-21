@@ -89,11 +89,6 @@ struct ImageFile {
   bool operator==(const ImageFile&) const = default;
 };
 
-// The files of `document`, named from `stem`, in a fixed order (PNG, sidecar,
-// then the optional files). The same document gives the same bytes.
-[[nodiscard]] std::expected<std::vector<ImageFile>, std::string>
-EncodeImageFiles(const ImageDocument& document, std::string_view stem);
-
 // The bytes of one file; nothing when it does not exist.
 using ImageFileBytes = std::optional<std::vector<std::byte>>;
 // Reads one file by name.
@@ -107,12 +102,6 @@ using ImageFileReader = std::function<ImageFileBytes(const std::string&)>;
 // DecodeImageFiles over the files in `directory`.
 [[nodiscard]] std::expected<ImageDocument, std::string> LoadImageFiles(
     const std::filesystem::path& directory, std::string_view stem);
-// Writes every file to `directory` as <name>.tmp before renaming any, so a
-// failed write replaces nothing.
-[[nodiscard]] std::expected<void, std::string> WriteImageFiles(
-    const std::filesystem::path& directory,
-    const std::vector<ImageFile>& files);
-
 [[nodiscard]] std::string_view ZeroWordName(ZeroWord value) noexcept;
 [[nodiscard]] std::string_view SemiTransparencyName(
     SemiTransparency value) noexcept;

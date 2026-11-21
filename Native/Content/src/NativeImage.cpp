@@ -113,88 +113,18 @@ std::expected<void, std::string> ValidateImage(const NativeImage& image) {
   return {};
 }
 
-std::expected<NativeImage, std::string> ImageFromTim(const TimFile& tim,
-                                                     ImageDepth depth) {
-  const TimPixelMode mode = tim.Mode();
-  if (mode == TimPixelMode::kDirect24) {
-    return std::unexpected(
-        "24-bit TIMs have no native image form yet; none is in the "
-        "inventoried corpus");
-  }
-  NativeImage image{.depth = depth,
-                    .width = tim.image.rect.width,
-                    .height = tim.image.rect.height,
-                    .indices = {},
-                    .texels = {},
-                    .palettes = {}};
-  if (!IsIndexed(depth)) {
-    if (mode != TimPixelMode::kDirect15 || tim.clut) {
-      return std::unexpected(
-          std::format("a TIM in mode {}{} is not a 16-bit image",
-                      static_cast<int>(mode), tim.clut ? " with a CLUT" : ""));
-    }
-    image.texels = tim.image.words;
-    if (auto valid = ValidateImage(image); !valid) {
-      return std::unexpected(valid.error());
-    }
-    return image;
-  }
-  const TimPixelMode matching = depth == ImageDepth::kIndexed4
-                                    ? TimPixelMode::kIndexed4
-                                    : TimPixelMode::kIndexed8;
-  if (mode != matching && mode != TimPixelMode::kDirect15) {
-    return std::unexpected(
-        std::format("a TIM in mode {} cannot be drawn as a {}-bit image",
-                    static_cast<int>(mode), static_cast<int>(depth)));
-  }
-  if (!tim.clut) {
-    return std::unexpected(std::format(
-        "the {}-bit image has no CLUT block; an image whose palette lives "
-        "elsewhere needs that palette's source",
-        static_cast<int>(depth)));
-  }
-  const std::vector<std::uint16_t>& clut = tim.clut->words;
-  const std::size_t capacity = PaletteCapacity(depth);
-  const std::size_t entries = std::min(capacity, clut.size());
-  if (entries == 0 || clut.size() % entries != 0) {
-    return std::unexpected(
-        std::format("the CLUT's {} words do not divide into {}-entry palettes",
-                    clut.size(), capacity));
-  }
-  for (std::size_t first = 0; first < clut.size(); first += entries) {
-    image.palettes.emplace_back(
-        clut.begin() + static_cast<std::ptrdiff_t>(first),
-        clut.begin() + static_cast<std::ptrdiff_t>(first + entries));
-  }
-  const std::uint32_t per_halfword = PixelsPerHalfword(depth);
-  const unsigned bits = BitsPerPixel(depth);
-  const unsigned index_mask = (1U << bits) - 1;
-  image.width = tim.image.rect.width * per_halfword;
-  image.indices.reserve(PixelCount(image));
-  for (const std::uint16_t word : tim.image.words) {
-    for (std::uint32_t pixel = 0; pixel < per_halfword; ++pixel) {
-      image.indices.push_back(
-          static_cast<std::uint8_t>((word >> (pixel * bits)) & index_mask));
-    }
-  }
-  if (auto valid = ValidateImage(image); !valid) {
-    return std::unexpected(valid.error());
-  }
-  return image;
-}
-
 std::vector<std::uint16_t> PackedWords(const NativeImage& image) {
   if (!IsIndexed(image.depth)) return image.texels;
   const std::uint32_t per_halfword = PixelsPerHalfword(image.depth);
   const unsigned bits = BitsPerPixel(image.depth);
   std::vector<std::uint16_t> words(image.indices.size() / per_halfword);
-  for (std::size_t i = 0; i < words.size(); ++i) {
+  for (std::size_t index = 0; index < words.size(); ++index) {
     unsigned word = 0;
     for (std::uint32_t pixel = 0; pixel < per_halfword; ++pixel) {
-      word |= unsigned{image.indices[(i * per_halfword) + pixel]}
+      word |= unsigned{image.indices[(index * per_halfword) + pixel]}
               << (pixel * bits);
     }
-    words[i] = static_cast<std::uint16_t>(word);
+    words[index] = static_cast<std::uint16_t>(word);
   }
   return words;
 }
@@ -206,46 +136,6 @@ std::vector<std::uint16_t> PaletteWords(const NativeImage& image) {
     words.insert(words.end(), row.begin(), row.end());
   }
   return words;
-}
-
-TimOrigin OriginOf(const TimFile& tim) {
-  return {.id = tim.id,
-          .flags = tim.flags,
-          .image = tim.image.rect,
-          .clut = tim.clut ? std::optional(tim.clut->rect) : std::nullopt};
-}
-
-std::expected<TimFile, std::string> TimFromImage(const NativeImage& image,
-                                                 const TimOrigin& origin) {
-  if (auto valid = ValidateImage(image); !valid) {
-    return std::unexpected(valid.error());
-  }
-  TimFile tim{.id = origin.id, .flags = origin.flags, .clut = {}, .image = {}};
-  tim.image.rect = origin.image;
-  tim.image.rect.width =
-      static_cast<std::uint16_t>(image.width / PixelsPerHalfword(image.depth));
-  tim.image.rect.height = static_cast<std::uint16_t>(image.height);
-  tim.image.words = PackedWords(image);
-  if (IsIndexed(image.depth)) {
-    std::vector<std::uint16_t> words = PaletteWords(image);
-    if (!origin.clut ||
-        std::size_t{origin.clut->width} * origin.clut->height != words.size()) {
-      return std::unexpected(std::format(
-          "the image's {} palette words do not fill its source CLUT "
-          "rectangle",
-          words.size()));
-    }
-    tim.clut = TimBlock{.rect = *origin.clut, .words = std::move(words)};
-  } else if (origin.clut) {
-    return std::unexpected(
-        "a 16-bit image has no palettes for its source CLUT block");
-  }
-  if (tim.HasClut() != tim.clut.has_value()) {
-    return std::unexpected(std::format(
-        "the source flag word 0x{:08X} disagrees with the image's palettes",
-        tim.flags));
-  }
-  return tim;
 }
 
 }  // namespace VS::Content
