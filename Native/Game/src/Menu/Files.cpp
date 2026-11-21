@@ -2992,7 +2992,7 @@ int UpdateGameOver(Context& context, std::uint8_t& step) {
         host.SetDifficulty(
             static_cast<std::uint8_t>(state.game_over_difficulty));
         host.FreeMusicSlot(kGameOverMusicSlot);
-        host.SetMonoOutput(host.MonoSound());
+        host.SetSoundOutput(host.CurrentSoundOutput());
         host.SetGameOver(false);
         host.EnterBattle();
       }

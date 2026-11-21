@@ -7,6 +7,7 @@
 #include <span>
 #include <string_view>
 
+#include "Input/Settings.hpp"
 #include "Menu/Framework/Framework.hpp"
 
 // MENU8.PRG's options screen (88.c): the nine-row settings list and the
@@ -54,7 +55,8 @@ enum class Step : std::uint8_t {
 };
 
 // The vs_main_settings_t fields the screen reads and writes. The four flags
-// are bits 3, 5, 6 and 7 of the record's first byte.
+// are bits 3, 5, 6 and 7 of the record's first byte; `device` holds the
+// sound output and vibration settings, which take effect at once.
 struct Settings {
   bool puzzle_mode_off = false;
   bool ability_timing = false;
@@ -63,8 +65,7 @@ struct Settings {
   std::uint8_t cursor_memory = 0;
   std::uint8_t information = 0;
   std::uint8_t simple_map = 0;
-  std::uint8_t mono_sound = 0;
-  std::uint8_t vibration_on = 0;
+  VS::Input::DeviceSettings device;
 };
 
 // One choice's local statics (_simpleMapOptionMenu and its siblings).
@@ -108,7 +109,7 @@ class Host {
   virtual void StoreSettings(const Settings& settings) = 0;
   [[nodiscard]] virtual bool PuzzleModeDisabled() = 0;
   virtual void SetPuzzleMode(bool enabled) = 0;
-  virtual void SetMonoOutput(int mono) = 0;
+  virtual void SetSoundOutput(VS::Input::SoundOutput output) = 0;
   virtual void PlayVibrationPreset(int preset) = 0;
   // vs_battle_menuState.currentMenu = 8: leave the menus for the battle.
   virtual void ReturnToBattle() = 0;

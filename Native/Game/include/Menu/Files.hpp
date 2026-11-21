@@ -9,6 +9,7 @@
 #include <string_view>
 #include <type_traits>
 
+#include "Input/Settings.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Sounds.hpp"
@@ -399,7 +400,7 @@ class Host : public Render::ImmediatePacketTarget, public CardHost {
   virtual void SetDifficulty(std::uint8_t difficulty) = 0;
   [[nodiscard]] virtual std::uint8_t CursorMemory() = 0;
   virtual void SetCursorMemory(std::uint8_t memory) = 0;
-  [[nodiscard]] virtual std::uint8_t MonoSound() = 0;
+  [[nodiscard]] virtual VS::Input::SoundOutput CurrentSoundOutput() = 0;
 
   virtual int UpdateDataSaveMenu(int init) = 0;
   virtual int UpdateDataLoadMenu(int init) = 0;
@@ -410,7 +411,7 @@ class Host : public Render::ImmediatePacketTarget, public CardHost {
   virtual void SetFieldRendering(bool enabled) = 0;
   virtual void FreeMusicSlot(int slot) = 0;
   virtual void FadeMusicSlotVolume(int slot, int volume, int frames) = 0;
-  virtual void SetMonoOutput(int mono) = 0;
+  virtual void SetSoundOutput(VS::Input::SoundOutput output) = 0;
   virtual int LoadIntroSnapshotStep(int action) = 0;
   virtual void SetCurrentMenu(int menu) = 0;
 

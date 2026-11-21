@@ -21,6 +21,7 @@
 #include "Core/Diagnostics.hpp"
 #include "Input/Controller.hpp"
 #include "Input/ControllerLiveState.hpp"
+#include "Input/Settings.hpp"
 #include "Input/Vibration.hpp"
 #include "State/Timers.hpp"
 
@@ -124,6 +125,31 @@ void Refused(const char* operation, const char* reason, std::int64_t value) {
         "input", "%s: %s (%" PRId64 "); nothing changed (refusal %" PRIu64 ")",
         operation, reason, value, refusedRequests);
   }
+}
+
+// The sound and vibration bytes last reported as not 0 or 1, so a held
+// altered value is reported once rather than every tick.
+std::optional<std::array<std::uint8_t, 2>> reportedInexactDevice;
+
+void ReportInexactDeviceSettings(const DecodedDeviceSettings& decoded) {
+  if (decoded.exact) {
+    reportedInexactDevice.reset();
+    return;
+  }
+  const std::array<std::uint8_t, 2> bytes{VS::Input::settings.mono_sound,
+                                          VS::Input::settings.vibration_on};
+  if (reportedInexactDevice == bytes) {
+    return;
+  }
+  reportedInexactDevice = bytes;
+  const bool mono = decoded.settings.sound_output == SoundOutput::kMono;
+  const bool vibration = decoded.settings.vibration == Vibration::kOn;
+  VS::Core::Warnf("input",
+                  "settings sound byte %u and vibration byte %u are not 0 or "
+                  "1; the devices apply %s output and vibration %s",
+                  static_cast<unsigned>(bytes[0]),
+                  static_cast<unsigned>(bytes[1]), mono ? "mono" : "stereo",
+                  vibration ? "on" : "off");
 }
 
 int PortId(ControllerPort port) noexcept {
@@ -296,27 +322,37 @@ void StoreControllerState(const ControllerState& state) noexcept {
 ControllerFrame PollLiveControllers() {
   ControllerState state{
       .ports = LoadPorts(), .buttons = LoadButtons(), .sticks = {}};
-  ControllerSettings settings{
-      .mono_sound = VS::Input::settings.mono_sound != 0,
-      .vibration_on = VS::Input::settings.vibration_on != 0,
-  };
+  DeviceSettings device = LiveDeviceSettings();
   const ControllerFrameOptions options{
       .tick_speed = static_cast<std::uint32_t>(VS::State::tickSpeed),
       .soft_reset_enabled = VS::Boot::isSoftResetEnabled != 0,
   };
   LivePadHost host;
-  const ControllerFrame frame =
-      UpdateControllers(state, settings, host, options);
+  const ControllerFrame frame = UpdateControllers(state, device, host, options);
   StoreControllerState(state);
   if (frame == ControllerFrame::kSoftReset) {
-    VS::Input::settings.mono_sound =
-        static_cast<char>(settings.mono_sound ? 1 : 0);
-    VS::Input::settings.vibration_on =
-        static_cast<char>(settings.vibration_on ? 1 : 0);
+    SetLiveDeviceSettings(device);
   }
   return frame;
 }
 }  // namespace
+
+ActionState LiveActions() noexcept {
+  return {
+      .held = ActionSet::FromPadWord(static_cast<std::uint32_t>(buttonsState)),
+      .pressed = ActionSet::FromPadWord(buttonsPressed)};
+}
+
+DeviceSettings LiveDeviceSettings() {
+  const DecodedDeviceSettings decoded =
+      DecodeDeviceSettings(VS::Input::settings);
+  ReportInexactDeviceSettings(decoded);
+  return decoded.settings;
+}
+
+void SetLiveDeviceSettings(DeviceSettings device) {
+  EncodeDeviceSettings(device, VS::Input::settings);
+}
 
 void SubmitLivePad(ControllerPort port, const PadState& pad, bool connected) {
   LinkFor(port).sample = {
@@ -337,7 +373,7 @@ Rumble LiveRumble(ControllerPort port) {
   const PadLink& link = LinkFor(port);
   if (!link.sample.connected || !link.sample.analog ||
       !link.motors_registered || !link.motors_aligned ||
-      VS::Input::settings.vibration_on == 0) {
+      LiveDeviceSettings().vibration == Vibration::kOff) {
     return {};
   }
   constexpr unsigned kByteToLevel = 257;
@@ -483,7 +519,7 @@ void ResetLiveVibrationPatterns() {
 void UpdateLiveVibrationPatterns() {
   ControllerPortState first = LoadPort(ControllerPort::kFirst);
   const std::uint32_t outside = UpdateVibrationPatterns(
-      liveVibration, first, VS::Input::settings.vibration_on != 0);
+      liveVibration, first, LiveDeviceSettings().vibration);
   StorePort(ControllerPort::kFirst, first);
   if (outside != 0) {
     Refused("UpdateLiveVibrationPatterns", "pattern reads outside the pattern",

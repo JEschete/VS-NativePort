@@ -10,6 +10,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Content/ModuleData.hpp"
+#include "Input/Settings.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Options.hpp"
 #include "Menu/OptionsLive.hpp"
@@ -57,7 +58,7 @@ class FakeHost final : public options::Host {
   std::vector<int> text_box_states;
   std::vector<options::Settings> stored;
   std::vector<bool> puzzle_modes;
-  std::vector<int> mono_outputs;
+  std::vector<VS::Input::SoundOutput> sound_outputs;
   std::vector<int> vibrations;
   int battle_returns = 0;
 
@@ -104,7 +105,9 @@ class FakeHost final : public options::Host {
   }
   bool PuzzleModeDisabled() override { return puzzle_disabled; }
   void SetPuzzleMode(bool enabled) override { puzzle_modes.push_back(enabled); }
-  void SetMonoOutput(int mono) override { mono_outputs.push_back(mono); }
+  void SetSoundOutput(VS::Input::SoundOutput output) override {
+    sound_outputs.push_back(output);
+  }
   void PlayVibrationPreset(int preset) override {
     vibrations.push_back(preset);
   }
@@ -138,6 +141,17 @@ struct OptionsFixture {
     return result;
   }
 };
+
+// The row marks of each two-row choice the screen has opened, in order.
+std::vector<std::vector<std::int32_t>> TwoRowMarks(const FakeHost& host) {
+  std::vector<std::vector<std::int32_t>> marks;
+  for (const CreatedRows& rows : host.created) {
+    if (rows.count == 2) {
+      marks.push_back(rows.row_types);
+    }
+  }
+  return marks;
+}
 }  // namespace
 
 TEST_CASE("Options opens nine settings rows",
@@ -261,12 +275,23 @@ TEST_CASE("Options simple map choice stores the value its row selects",
   CHECK(fixture.host.settings.simple_map == 3);
 }
 
-TEST_CASE("Options sound and puzzle choices drive their outputs",
+TEST_CASE("Options sound choices drive the audio output",
           "[menu-files][menu][menu-options]") {
+  using VS::Input::SoundOutput;
   OptionsFixture fixture;
   CHECK(fixture.Choose(Step::kSound, 1) == 0);
-  CHECK(fixture.host.mono_outputs == std::vector<int>{1});
-  CHECK(fixture.host.settings.mono_sound == 1);
+  CHECK(fixture.host.settings.device.sound_output == SoundOutput::kMono);
+  CHECK(fixture.Choose(Step::kSound, 0) == 0);
+  CHECK(fixture.host.sound_outputs ==
+        std::vector{SoundOutput::kMono, SoundOutput::kStereo});
+  CHECK(fixture.host.settings.device.sound_output == SoundOutput::kStereo);
+  using Marks = std::vector<std::vector<std::int32_t>>;
+  CHECK(TwoRowMarks(fixture.host) == Marks{{4, 0}, {0, 4}});
+}
+
+TEST_CASE("Options puzzle choice drives the puzzle mode",
+          "[menu-files][menu][menu-options]") {
+  OptionsFixture fixture;
   CHECK(fixture.Choose(Step::kPuzzleMode, 1) == 0);
   CHECK(fixture.host.settings.puzzle_mode_off);
   CHECK(fixture.host.puzzle_modes == std::vector<bool>{false});
@@ -274,10 +299,16 @@ TEST_CASE("Options sound and puzzle choices drive their outputs",
 
 TEST_CASE("Options vibration and information choices drive their outputs",
           "[menu-files][menu][menu-options]") {
+  using VS::Input::Vibration;
   OptionsFixture fixture;
+  fixture.host.settings.device.vibration = Vibration::kOff;
   CHECK(fixture.Choose(Step::kVibration, 0) == 0);
   CHECK(fixture.host.vibrations == std::vector<int>{0});
-  CHECK(fixture.host.settings.vibration_on == 1);
+  CHECK(fixture.host.settings.device.vibration == Vibration::kOn);
+  CHECK(fixture.Choose(Step::kVibration, 1) == 0);
+  CHECK(fixture.host.settings.device.vibration == Vibration::kOff);
+  using Marks = std::vector<std::vector<std::int32_t>>;
+  CHECK(TwoRowMarks(fixture.host) == Marks{{0, 4}, {4, 0}});
   fixture.host.settings.information = 1;
   CHECK(fixture.Choose(Step::kInformation, 1) == 0);
   CHECK(fixture.host.settings.information == 0);

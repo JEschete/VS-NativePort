@@ -196,19 +196,6 @@ constexpr MenuSpritePacket kMenuStripRight{
     Word(Pack(160, 64)),
 };
 
-// The pad bits the title reads (PADLup ... PADselect).
-constexpr std::uint32_t kPadCircle = 1U << 5;
-constexpr std::uint32_t kPadCross = 1U << 6;
-constexpr std::uint32_t kPadSelect = 1U << 8;
-constexpr std::uint32_t kPadStart = 1U << 11;
-constexpr std::uint32_t kPadUp = 1U << 12;
-constexpr std::uint32_t kPadRight = 1U << 13;
-constexpr std::uint32_t kPadDown = 1U << 14;
-constexpr std::uint32_t kPadLeft = 1U << 15;
-constexpr std::uint32_t kAnyButton = 0xFFFF;
-constexpr std::uint32_t kConfirmButtons = kPadStart | kPadCircle;
-constexpr std::uint32_t kToggleButtons = kPadUp | kPadDown | kPadSelect;
-
 // The file screens' VRAM (_gameLoadScreen, 22C.c:3135-3149).
 struct ImageUpload {
   Image image;
@@ -355,9 +342,6 @@ constexpr int kOutlineFadeInSteps = 4;
 constexpr int kOutlineFadeInStep = 64;
 constexpr int kChoiceFadeStep = 24;
 constexpr int kChoicePairSum = 11;
-constexpr int kVibrationChoiceBase = 5;
-constexpr int kStereoChoice = 7;
-constexpr int kMonoChoiceStep = 3;
 constexpr std::uint32_t kDiscMixVolume = 0x7F;
 constexpr std::array<int, 3> kClosingOutlines{64, 128, 192};
 constexpr int kClosingPosition = 128;
@@ -567,7 +551,7 @@ void ShowPublisher(Host& host) {
 void ShowDeveloper(Host& host) {
   for (int frame = 0; frame < kLogoFrames; ++frame) {
     if (frame >= kLogoFadeFrames && frame <= kLogoFadeOutStart &&
-        (host.Input().held & kAnyButton) != 0) {
+        MenuCommandsFor(host.Actions()).any) {
       frame = kLogoFadeOutStart;
     }
     DrawLogo(host, kDeveloperSprite, frame);
@@ -590,20 +574,23 @@ struct SettingsMenu {
 };
 
 void ConfirmVibration(Host& host, int choice) {
-  PlayerSettings settings = host.Settings();
-  settings.vibration_on = Byte(choice - kVibrationChoiceBase);
+  Input::DeviceSettings settings = host.Settings();
+  settings.vibration = choice == static_cast<int>(MenuItemId::kVibrationOn)
+                           ? Input::Vibration::kOn
+                           : Input::Vibration::kOff;
   host.SetSettings(settings);
-  if (choice == static_cast<int>(MenuItemId::kVibrationOn)) {
+  if (settings.vibration == Input::Vibration::kOn) {
     host.PlayVibrationPreset(0);
   }
 }
 
 void ConfirmSound(Host& host, int choice) {
-  const int mono = (choice + 1) & 1;
-  PlayerSettings settings = host.Settings();
-  settings.mono_sound = Byte(mono);
+  Input::DeviceSettings settings = host.Settings();
+  settings.sound_output = choice == static_cast<int>(MenuItemId::kMono)
+                              ? Input::SoundOutput::kMono
+                              : Input::SoundOutput::kStereo;
   host.SetSettings(settings);
-  host.SetMonoOutput(mono);
+  host.SetSoundOutput(settings.sound_output);
   host.SetDiscMixVolume(kDiscMixVolume);
 }
 
@@ -623,11 +610,6 @@ constexpr SettingsMenu kSoundMenu{
     .lower_choice = MenuItemId::kMono,
     .confirm = ConfirmSound,
 };
-
-// The choice and its pair (11 - choice) both name items.
-[[nodiscard]] bool ValidChoice(int choice) noexcept {
-  return ValidItem(choice) && ValidItem(kChoicePairSum - choice);
-}
 
 [[nodiscard]] std::uint8_t FadingOutline(int step, std::uint8_t current) {
   return step < kOutlineFadeInSteps ? Byte(step * kOutlineFadeInStep)
@@ -705,17 +687,17 @@ void RunSettingsChoice(Context& context, const SettingsMenu& menu, int choice) {
   Host& host = context.host;
   while (true) {
     DrawMenuAndPollInput(context);
-    const Buttons buttons = host.Input();
-    if ((buttons.held & kConfirmButtons) != 0) {
+    const MenuCommands commands = MenuCommandsFor(host.Actions());
+    if (commands.confirm) {
       PlayMenuSelectSound(host);
       menu.confirm(host, choice);
       return;
     }
-    if ((buttons.held & kPadCross) != 0) {
+    if (commands.back) {
       PlayMenuLeaveSound(host);
       return;
     }
-    if ((buttons.pressed & kToggleButtons) != 0) {
+    if (commands.toggle) {
       choice = ToggleSettingsChoice(context, choice);
     }
   }
@@ -766,10 +748,6 @@ void CloseSettingsMenu(Context& context, const SettingsMenu& menu) {
 }
 
 void ShowSettingsMenu(Context& context, const SettingsMenu& menu, int choice) {
-  if (!ValidChoice(choice)) {
-    context.host.Refuse("title setting outside the submenu's items");
-    return;
-  }
   OpenSettingsMenu(context, menu, choice);
   RunSettingsChoice(context, menu, choice);
   CloseSettingsMenu(context, menu);
@@ -917,17 +895,6 @@ void MoveMenu(Context& context, int& menu_item, int direction) {
   }
 }
 
-[[nodiscard]] int NavigationDirection(std::uint32_t held) noexcept {
-  int direction = 0;
-  if ((held & (kPadUp | kPadLeft)) != 0) {
-    --direction;
-  }
-  if ((held & (kPadSelect | kPadRight | kPadDown)) != 0) {
-    ++direction;
-  }
-  return direction;
-}
-
 // vs_title_exec's menu loop: the chosen item, or kTimeout after 1000 idle
 // frames once the intro movie has been stopped for 100.
 int WaitForSelection(Context& context, int& menu_item) {
@@ -941,21 +908,22 @@ int WaitForSelection(Context& context, int& menu_item) {
     if (host.IntroMoviePlaying()) {
       last_movie_frame = host.ElapsedTicks();
     }
-    if ((host.Input().held & kAnyButton) != 0) {
+    if (MenuCommandsFor(host.Actions()).any) {
       last_button_frame = host.ElapsedTicks();
     }
     if (host.ElapsedTicks() - last_button_frame > kIdleFrames &&
         host.ElapsedTicks() - last_movie_frame > kMovieIdleFrames) {
       return static_cast<int>(MenuItemId::kTimeout);
     }
-    if ((host.Input().held & kConfirmButtons) != 0) {
+    if (MenuCommandsFor(host.Actions()).confirm) {
       const std::optional<int> choice = ChooseMenuItem(context, menu_item);
       if (choice.has_value()) {
         return *choice;
       }
       last_button_frame = host.ElapsedTicks();
     }
-    const int direction = NavigationDirection(host.Input().held);
+    // A settings submenu polls input, so the step is read after it closes.
+    const int direction = MenuCommandsFor(host.Actions()).step;
     if (direction != 0) {
       MoveMenu(context, menu_item, direction);
     }
@@ -1311,34 +1279,38 @@ void DrawMenuAndPollInput(Context& context) {
 
 // decomp: TITLE.PRG _menuVibrationSettings (src/TITLE/TITLE.PRG/22C.c:4246)
 void ShowVibrationSettings(Context& context) {
-  const int choice =
-      context.host.Settings().vibration_on + kVibrationChoiceBase;
-  ShowSettingsMenu(context, kVibrationMenu, choice);
+  const MenuItemId choice =
+      context.host.Settings().vibration == Input::Vibration::kOn
+          ? MenuItemId::kVibrationOn
+          : MenuItemId::kVibrationOff;
+  ShowSettingsMenu(context, kVibrationMenu, static_cast<int>(choice));
 }
 
 // decomp: TITLE.PRG _menuSoundSettings (src/TITLE/TITLE.PRG/22C.c:4353)
 void ShowSoundSettings(Context& context) {
-  const int choice =
-      kStereoChoice - context.host.Settings().mono_sound * kMonoChoiceStep;
-  ShowSettingsMenu(context, kSoundMenu, choice);
+  const MenuItemId choice =
+      context.host.Settings().sound_output == Input::SoundOutput::kMono
+          ? MenuItemId::kMono
+          : MenuItemId::kStereo;
+  ShowSettingsMenu(context, kSoundMenu, static_cast<int>(choice));
 }
 
 // decomp: TITLE.PRG _nop (src/TITLE/TITLE.PRG/22C.c:4461)
 int NewGameChoice() noexcept { return static_cast<int>(MenuItemId::kNewGame); }
 
-// decomp: TITLE.PRG _initEnvironment (src/TITLE/TITLE.PRG/22C.c:4463)
+// decomp: TITLE.PRG _initEnvironment (src/TITLE/TITLE.PRG/22C.c:4463). The
+// host's settings are already 0 or 1 (Settings.hpp), which the original's
+// `!= 0` normalization produced.
 void InitializeSettings(Context& context) {
   Host& host = context.host;
-  PlayerSettings settings = host.Settings();
+  Input::DeviceSettings settings = host.Settings();
   host.ResetPlayerSettings();
   if (host.VisitCount() == 0) {
     ShowPublisherAndDeveloper(host);
-    settings = {.mono_sound = 0, .vibration_on = 1};
+    settings = {};
   }
-  settings = {.mono_sound = Byte(settings.mono_sound != 0 ? 1 : 0),
-              .vibration_on = Byte(settings.vibration_on != 0 ? 1 : 0)};
   host.SetSettings(settings);
-  host.SetMonoOutput(settings.mono_sound);
+  host.SetSoundOutput(settings.sound_output);
   host.SetDiscMixVolume(kDiscMixVolume);
   host.ClearInventoryIndices();
   host.SetGameModes({.difficulty = 1, .puzzle_mode = 1});
@@ -1403,6 +1375,34 @@ void InitializeNewGameData(Host& host) {
 
 // decomp: TITLE.PRG _setTitleExitFlags (src/TITLE/TITLE.PRG/22C.c:4741)
 void PrepareExit(Host& host, int cause) { host.ApplyExit(PlanExit(cause)); }
+
+// vs_title_exec and _menuVibrationSettings/_menuSoundSettings
+// (src/TITLE/TITLE.PRG/22C.c:4246, 4353, 4491) test these pad bits of
+// vs_main_buttonsState (held) and vs_main_buttonsPressed (newly pressed).
+MenuCommands MenuCommandsFor(const Input::ActionState& actions) noexcept {
+  using Input::Action;
+  using Input::ActionSet;
+  constexpr ActionSet kConfirmActions{Action::kStart, Action::kCircle};
+  constexpr ActionSet kBackActions{Action::kCross};
+  constexpr ActionSet kToggleActions{Action::kUp, Action::kDown,
+                                     Action::kSelect};
+  constexpr ActionSet kPreviousActions{Action::kUp, Action::kLeft};
+  constexpr ActionSet kNextActions{Action::kSelect, Action::kRight,
+                                   Action::kDown};
+  MenuCommands commands{
+      .any = !actions.held.Empty(),
+      .confirm = actions.held.ContainsAny(kConfirmActions),
+      .back = actions.held.ContainsAny(kBackActions),
+      .toggle = actions.pressed.ContainsAny(kToggleActions),
+  };
+  if (actions.held.ContainsAny(kPreviousActions)) {
+    --commands.step;
+  }
+  if (actions.held.ContainsAny(kNextActions)) {
+    ++commands.step;
+  }
+  return commands;
+}
 
 ExitPlan PlanExit(int cause) noexcept {
   constexpr int kTimeoutFirstCutscene = 3;

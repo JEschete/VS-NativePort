@@ -5,8 +5,10 @@
 #include <cstdint>
 #include <span>
 
+#include "Input/Actions.hpp"
 #include "Input/Controller.hpp"
 #include "Input/Pad.hpp"
+#include "Input/Settings.hpp"
 
 // Live binding for Controller.hpp. The ports, buttons, sticks and settings
 // stay in the legacy globals the copied code reads (ControllerLiveState.hpp);
@@ -27,6 +29,15 @@ void ResetLivePadLinks();
 // connected analog pad whose motors the game registered and aligned, and
 // vibration is on in the settings.
 [[nodiscard]] Rumble LiveRumble(ControllerPort port);
+
+// Player 1's actions from the last controller update (UpdateLiveControllers).
+[[nodiscard]] ActionState LiveActions() noexcept;
+
+// The sound output and vibration in the settings record. A byte other than 0
+// or 1 is read as the devices applied it (Settings.hpp) and reported once.
+[[nodiscard]] DeviceSettings LiveDeviceSettings();
+// Writes both bytes as 0 or 1; the caller applies the sound output.
+void SetLiveDeviceSettings(DeviceSettings device);
 
 [[nodiscard]] VibrationState& LiveVibrationState() noexcept;
 // Requests refused since start-up.

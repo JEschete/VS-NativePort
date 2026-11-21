@@ -9,6 +9,8 @@
 #include <span>
 #include <string_view>
 
+#include "Input/Settings.hpp"
+
 // The memory-card save files of MENU7.PRG (260.c) and TITLE.PRG (22C.c): file
 // names, the save-image cipher and block checksums, the directory scan, the
 // card-readiness and transfer state machines, and packaging and applying a
@@ -331,7 +333,8 @@ class SaveStateHost {
   virtual void SetPlayTime(std::uint32_t play_time) = 0;
   // VS::Save::CaptureAshleySnapshot over the live game state.
   virtual void CaptureSnapshot() = 0;
-  virtual void SetMonoOutput(std::int32_t mono) = 0;
+  // The loaded settings' sound output, applied to the audio at once.
+  virtual void SetSoundOutput(VS::Input::SoundOutput output) = 0;
   virtual std::uint8_t SaveLocation() = 0;
   // vs_battle_getMapCompletion, stored as the statistics' one byte.
   virtual std::uint8_t MapCompletion() = 0;

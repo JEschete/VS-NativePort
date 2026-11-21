@@ -14,6 +14,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Content/ModuleData.hpp"
+#include "Input/Settings.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Menu/Files.hpp"
 #include "Menu/FilesLive.hpp"
@@ -188,7 +189,9 @@ class FakeHost final : public FakeCard<files::Host> {
   void SetDifficulty(std::uint8_t) override {}
   std::uint8_t CursorMemory() override { return 0; }
   void SetCursorMemory(std::uint8_t) override {}
-  std::uint8_t MonoSound() override { return 0; }
+  VS::Input::SoundOutput CurrentSoundOutput() override {
+    return VS::Input::SoundOutput::kStereo;
+  }
   int UpdateDataSaveMenu(int) override { return 0; }
   int UpdateDataLoadMenu(int) override { return 0; }
   int StepMenuResources(int) override { return 0; }
@@ -198,7 +201,7 @@ class FakeHost final : public FakeCard<files::Host> {
   void SetFieldRendering(bool) override {}
   void FreeMusicSlot(int) override {}
   void FadeMusicSlotVolume(int, int, int) override {}
-  void SetMonoOutput(int) override {}
+  void SetSoundOutput(VS::Input::SoundOutput) override {}
   int LoadIntroSnapshotStep(int) override { return 0; }
   void SetCurrentMenu(int) override {}
   void BeginGameOverLoad() override {}

@@ -17,6 +17,7 @@
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/SfxChannelGroups.hpp"
 #include "Audio/SoundBanks.hpp"
+#include "Audio/SoundPlayback.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Audio/SoundSlotsLive.hpp"
 #include "Audio/SoundState.hpp"
@@ -26,6 +27,7 @@
 #include "Content/DiscLayout.h"
 #include "Content/DiscQueue.hpp"
 #include "Core/Runtime.hpp"
+#include "Input/Settings.hpp"
 #include "Legacy/Psx.hpp"
 #include "State/GameClockLive.hpp"
 
@@ -366,6 +368,11 @@ void LiveLoadWaveBankBlocking(int id) {
 void LiveSetMonoOutput(int mono_enabled) {
   LiveSoundBanks host("SetMonoOutput");
   SetMonoOutput(host, mono_enabled);
+}
+
+void LiveSetSoundOutput(Input::SoundOutput output) {
+  LiveSetMonoOutput(
+      output == Input::SoundOutput::kMono ? Playback::kMonoRequested : 0);
 }
 
 // decomp: SLUS_010.40 _loadMenuSound (src/SLUS_010.40/main.c:10452)

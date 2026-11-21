@@ -1276,11 +1276,11 @@ TEST_CASE(
   RuntimeFixture fixture;
   auto state = fixture.Capture();
   const bool mono = GENERATE(false, true);
-  VS::Input::settings.mono_sound = static_cast<char>(!mono);
+  VS::Input::settings.mono_sound = static_cast<std::uint8_t>(!mono);
   VS::Audio::LiveSetMonoOutput(mono ? 0 : 1);
   VS::Audio::Driver::controlLatches.mix_behavior |= 0x10;
   const auto before = LiveFingerprint(fixture);
-  state.settings.mono_sound = static_cast<char>(mono);
+  state.settings.mono_sound = static_cast<std::uint8_t>(mono);
   state.settings.slot_state = 0xFEDCBA98u;
   state.settings.key = 0xF00DCAFEu;
   REQUIRE(Save::PrepareResume({1, 0, state}).has_value());

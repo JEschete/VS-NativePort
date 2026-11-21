@@ -1107,7 +1107,7 @@ std::expected<void, SaveImageError> ValidateAndApplyLoadedSave(
       state.Section(SaveSection::kAshleySnapshot)
           .first<VS::Save::kAshleySnapshotBytes>());
   const std::span<std::byte> settings = state.Section(SaveSection::kSettings);
-  state.SetMonoOutput(static_cast<std::int8_t>(
+  state.SetSoundOutput(VS::Input::DecodeSoundOutput(
       std::to_integer<std::uint8_t>(settings[kSettingsMonoSoundOffset])));
   return {};
 }

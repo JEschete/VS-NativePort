@@ -522,7 +522,7 @@ std::int32_t RoundMotorIntensityTowardZero(std::int32_t intensity) noexcept {
 // decomp: SLUS_010.40 vs_main_setVibrateParams (src/SLUS_010.40/main.c:8698)
 std::uint32_t UpdateVibrationPatterns(VibrationState& vibration,
                                       ControllerPortState& first_port,
-                                      bool vibration_on) noexcept {
+                                      Vibration setting) noexcept {
   vibration.motor_levels = {};
   std::uint32_t outside = 0;
   for (VibrationSlot& slot : vibration.slots) {
@@ -545,7 +545,7 @@ std::uint32_t UpdateVibrationPatterns(VibrationState& vibration,
       slot.pattern = {};
     }
   }
-  if (vibration_on) {
+  if (setting == Vibration::kOn) {
     SetMotorCommand(first_port, Motor::kSmall,
                     CommandForLevel(vibration.motor_levels[0]));
     SetMotorCommand(first_port, Motor::kLarge,
@@ -587,7 +587,7 @@ std::expected<std::uint32_t, VibrationPresetError> PlayVibrationPreset(
 
 // decomp: SLUS_010.40 vs_main_processPadState (src/SLUS_010.40/main.c:8789)
 ControllerFrame UpdateControllers(ControllerState& state,
-                                  ControllerSettings& settings,
+                                  DeviceSettings& settings,
                                   ControllerHost& host,
                                   const ControllerFrameOptions& options) {
   auto& [first, second] = state.ports;
@@ -607,8 +607,7 @@ ControllerFrame UpdateControllers(ControllerState& state,
   if (options.soft_reset_enabled &&
       (state.buttons.previous & kSoftResetButtons) == kSoftResetButtons &&
       (state.buttons.pressed & kSoftResetButtons) != 0) {
-    settings.mono_sound = false;
-    settings.vibration_on = true;
+    settings = {};
     return ControllerFrame::kSoftReset;
   }
   return ControllerFrame::kContinue;

@@ -91,9 +91,9 @@ int CurrentRow(Choice choice, const Settings& settings) {
     case Choice::kPuzzleMode:
       return settings.puzzle_mode_off ? 1 : 0;
     case Choice::kSound:
-      return settings.mono_sound;
+      return settings.device.sound_output == Input::SoundOutput::kMono ? 1 : 0;
     case Choice::kVibration:
-      return 1 - settings.vibration_on;
+      return settings.device.vibration == Input::Vibration::kOn ? 0 : 1;
     case Choice::kSimpleMap:
       break;
   }
@@ -279,12 +279,14 @@ void ApplySetting(Context& ctx, Choice choice, int result) {
       ctx.host.SetPuzzleMode(!settings.puzzle_mode_off);
       return;
     case Choice::kSound:
-      settings.mono_sound = static_cast<std::uint8_t>(result - 1);
+      settings.device.sound_output =
+          result == 2 ? Input::SoundOutput::kMono : Input::SoundOutput::kStereo;
       ctx.host.StoreSettings(settings);
-      ctx.host.SetMonoOutput(settings.mono_sound);
+      ctx.host.SetSoundOutput(settings.device.sound_output);
       return;
     case Choice::kVibration:
-      settings.vibration_on = OnForFirstRow(result);
+      settings.device.vibration =
+          result == 1 ? Input::Vibration::kOn : Input::Vibration::kOff;
       break;
   }
   ctx.host.StoreSettings(settings);

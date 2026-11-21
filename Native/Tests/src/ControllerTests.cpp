@@ -6,6 +6,7 @@
 #include <memory>
 #include <span>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
@@ -14,22 +15,56 @@
 
 #include "Boot/GameLoop.hpp"
 #include "Content/ModuleData.hpp"
+#include "Core/Log.hpp"
+#include "Input/Actions.hpp"
 #include "Input/Controller.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Input/Controllers.hpp"
 #include "Input/Pad.hpp"
+#include "Input/Settings.hpp"
 #include "State/Timers.hpp"
 
 namespace {
 namespace Input = VS::Input;
 using Input::ControllerKind;
 using Input::ControllerPort;
+using Input::DeviceSettings;
 using Input::Motor;
 using Input::PadConnection;
 using Input::PadInfoQuery;
+using Input::SoundOutput;
+using Input::Vibration;
 using Calls = std::vector<std::string>;
 using MotorCommands = std::array<std::uint8_t, Input::kMotorCount>;
+
+// Routes log records to `observer` for the scope's life.
+struct LogScope {
+  VS::Core::LogObserver previous;
+  explicit LogScope(VS::Core::LogObserver observer)
+      : previous(VS::Core::SetLogObserver(std::move(observer))) {}
+  ~LogScope() { VS::Core::SetLogObserver(std::move(previous)); }
+  LogScope(const LogScope&) = delete;
+  LogScope& operator=(const LogScope&) = delete;
+  LogScope(LogScope&&) = delete;
+  LogScope& operator=(LogScope&&) = delete;
+};
+
+// Records the input channel's warnings into `warnings` while it lives.
+LogScope RecordInputWarnings(std::vector<std::string>& warnings) {
+  return LogScope([&warnings](const VS::Core::LogRecord& record) {
+    if (record.level == VS::Core::LogLevel::Warn && record.channel == "input") {
+      warnings.emplace_back(record.message);
+    }
+  });
+}
+
+// Reads the live settings after storing bytes the devices never write.
+DeviceSettings ReadInexactDeviceSettings() {
+  VS::Input::settings.mono_sound = 2;
+  VS::Input::settings.vibration_on = 7;
+  return Input::LiveDeviceSettings();
+}
 
 std::size_t Index(ControllerPort port) {
   return static_cast<std::size_t>(port);
@@ -151,7 +186,8 @@ constexpr std::array<std::uint8_t, 5> kStepPattern{3, 0, 0, 0, 0};
 struct Frames {
   FakeHost host;
   Input::ControllerState state;
-  Input::ControllerSettings settings{.mono_sound = true, .vibration_on = false};
+  DeviceSettings settings{.sound_output = SoundOutput::kMono,
+                          .vibration = Vibration::kOff};
   Input::ControllerFrameOptions options;
 
   Frames() {
@@ -572,7 +608,7 @@ TEST_CASE("Owned vibration releases storage on reset or natural completion",
   if (reset) {
     Input::ResetVibrationPatterns(state, ports);
   } else {
-    CHECK(Input::UpdateVibrationPatterns(state, ports[0], true) == 0);
+    CHECK(Input::UpdateVibrationPatterns(state, ports[0], Vibration::kOn) == 0);
   }
   CHECK_FALSE(state.slots[0].active);
   CHECK(state.slots[0].pattern.Bytes().empty());
@@ -593,8 +629,10 @@ TEST_CASE("Owned and borrowed vibration produce the same motor frames",
   Input::ControllerPortState owned_port;
   for (int frame = 0; frame < 16; ++frame) {
     CAPTURE(frame);
-    CHECK(Input::UpdateVibrationPatterns(borrowed, borrowed_port, true) == 0);
-    CHECK(Input::UpdateVibrationPatterns(owned, owned_port, true) == 0);
+    CHECK(Input::UpdateVibrationPatterns(borrowed, borrowed_port,
+                                         Vibration::kOn) == 0);
+    CHECK(Input::UpdateVibrationPatterns(owned, owned_port, Vibration::kOn) ==
+          0);
     CHECK(owned.motor_levels == borrowed.motor_levels);
     CHECK(owned_port.motor_commands == borrowed_port.motor_commands);
     CHECK(owned.slots[0].active == borrowed.slots[0].active);
@@ -628,7 +666,7 @@ TEST_CASE("Starting a view of owned vibration retains its storage",
   CHECK(started.Bytes().data() == view.data());
   CHECK(started.Bytes().size() == view.size());
   Input::ControllerPortState port;
-  CHECK(Input::UpdateVibrationPatterns(state, port, true) == 0);
+  CHECK(Input::UpdateVibrationPatterns(state, port, Vibration::kOn) == 0);
   CHECK(lifetime.expired());
 }
 
@@ -679,7 +717,7 @@ TEST_CASE("Vibration envelopes step the small motor and ramp the large one",
                                          true, true, false};
   for (std::size_t tick = 0; tick < kLevels.size(); ++tick) {
     CAPTURE(tick);
-    CHECK(Input::UpdateVibrationPatterns(vibration, port, true) == 0);
+    CHECK(Input::UpdateVibrationPatterns(vibration, port, Vibration::kOn) == 0);
     CHECK(vibration.motor_levels == kLevels.at(tick));
     CHECK(port.motor_commands == kCommands.at(tick));
     CHECK(vibration.slots[0].active == kPlaying.at(tick));
@@ -696,10 +734,10 @@ TEST_CASE("The vibration mix clamps and leaves motors alone when disabled",
   Input::ControllerPortState port;
   port.extended_id = 7;
   port.motor_commands = {5, 6};
-  CHECK(Input::UpdateVibrationPatterns(vibration, port, false) == 0);
+  CHECK(Input::UpdateVibrationPatterns(vibration, port, Vibration::kOff) == 0);
   CHECK(vibration.motor_levels == std::array<std::int32_t, 2>{0, 0xFF00});
   CHECK(port.motor_commands == MotorCommands{5, 6});
-  CHECK(Input::UpdateVibrationPatterns(vibration, port, true) == 0);
+  CHECK(Input::UpdateVibrationPatterns(vibration, port, Vibration::kOn) == 0);
   CHECK(port.motor_commands == MotorCommands{0, 0xFF});
 }
 
@@ -710,14 +748,14 @@ TEST_CASE("Pattern reads outside the pattern count and read as zero",
   Input::VibrationState vibration;
   Input::StartVibrationPattern(vibration, Bytes(kPattern), 1, 0);
   Input::ControllerPortState port;
-  CHECK(Input::UpdateVibrationPatterns(vibration, port, true) == 4);
+  CHECK(Input::UpdateVibrationPatterns(vibration, port, Vibration::kOn) == 4);
   const Input::VibrationSlot& slot = vibration.slots[0];
   CHECK(slot.envelopes[0].active);
   CHECK(slot.envelopes[0].remaining == 3);
   CHECK_FALSE(slot.envelopes[1].active);
   CHECK(vibration.motor_levels == std::array<std::int32_t, 2>{0, 0});
   // The ended stream reads its terminating step again on every tick.
-  CHECK(Input::UpdateVibrationPatterns(vibration, port, true) == 2);
+  CHECK(Input::UpdateVibrationPatterns(vibration, port, Vibration::kOn) == 2);
 }
 
 TEST_CASE("Paused and patternless slots do not drive the motors",
@@ -728,7 +766,7 @@ TEST_CASE("Paused and patternless slots do not drive the motors",
   Input::PauseVibrationSlot(vibration, 1);
   vibration.slots[1].active = true;
   Input::ControllerPortState port;
-  Input::UpdateVibrationPatterns(vibration, port, true);
+  Input::UpdateVibrationPatterns(vibration, port, Vibration::kOn);
   CHECK(vibration.motor_levels == std::array<std::int32_t, 2>{0, 0});
   CHECK_FALSE(vibration.slots[1].active);
   CHECK(vibration.slots[0].envelopes[1].remaining == 0);
@@ -857,14 +895,82 @@ TEST_CASE("A soft reset needs the whole combination completed this frame",
   CHECK(frames.Run(kSoftReset) == Input::ControllerFrame::kContinue);
   CHECK(frames.Run(kSoftReset & ~kButtonStart) ==
         Input::ControllerFrame::kContinue);
-  CHECK(frames.settings.mono_sound);
+  CHECK(frames.settings.sound_output == SoundOutput::kMono);
   CHECK(frames.Run(kSoftReset) == Input::ControllerFrame::kSoftReset);
-  CHECK_FALSE(frames.settings.mono_sound);
-  CHECK(frames.settings.vibration_on);
+  // The reset restores the device defaults: stereo with vibration on.
+  CHECK(frames.settings == DeviceSettings{});
   CHECK(frames.state.buttons.held == kSoftReset);
-  frames.settings = {.mono_sound = true, .vibration_on = false};
+  frames.settings = {.sound_output = SoundOutput::kMono,
+                     .vibration = Vibration::kOff};
   CHECK(frames.Run(kSoftReset | kButtonCross) ==
         Input::ControllerFrame::kContinue);
+}
+
+TEST_CASE("Device settings decode the record's bytes as the devices apply them",
+          "[input-controller][input]") {
+  // Sound_SetSpeakerMode (src/SLUS_010.40/25AC.c:451) plays mono for 1 only;
+  // vs_main_setVibrateParams (src/SLUS_010.40/main.c:1653) drives the motors
+  // for any nonzero byte. Other bytes decode but are not exact.
+  const auto [mono, vibration, expected, exact] =
+      GENERATE(table<int, int, DeviceSettings, bool>({
+          {0, 1, {SoundOutput::kStereo, Vibration::kOn}, true},
+          {1, 0, {SoundOutput::kMono, Vibration::kOff}, true},
+          {2, 0, {SoundOutput::kStereo, Vibration::kOff}, false},
+          {0, 2, {SoundOutput::kStereo, Vibration::kOn}, false},
+          {0xFF, 0xFF, {SoundOutput::kStereo, Vibration::kOn}, false},
+      }));
+  VS::Input::Settings record{};
+  record.mono_sound = static_cast<std::uint8_t>(mono);
+  record.vibration_on = static_cast<std::uint8_t>(vibration);
+  const Input::DecodedDeviceSettings decoded =
+      Input::DecodeDeviceSettings(record);
+  CHECK(decoded.settings == expected);
+  CHECK(decoded.exact == exact);
+  // Encoding writes the bytes that decode exactly to the same settings.
+  Input::EncodeDeviceSettings(decoded.settings, record);
+  CHECK(record.mono_sound <= 1);
+  CHECK(record.vibration_on <= 1);
+  const Input::DecodedDeviceSettings again =
+      Input::DecodeDeviceSettings(record);
+  CHECK(again.settings == expected);
+  CHECK(again.exact);
+}
+
+TEST_CASE("Live device settings write exact bytes",
+          "[input-controller][input]") {
+  const LiveControllerGlobals saved;
+  Input::SetLiveDeviceSettings({});
+  CHECK(VS::Input::settings.mono_sound == 0);
+  CHECK(VS::Input::settings.vibration_on == 1);
+  CHECK(Input::LiveDeviceSettings() == DeviceSettings{});
+  Input::SetLiveDeviceSettings(
+      {.sound_output = SoundOutput::kMono, .vibration = Vibration::kOff});
+  CHECK(VS::Input::settings.mono_sound == 1);
+  CHECK(VS::Input::settings.vibration_on == 0);
+  CHECK(Input::LiveDeviceSettings() ==
+        DeviceSettings{SoundOutput::kMono, Vibration::kOff});
+}
+
+TEST_CASE("Live device settings report inexact bytes once",
+          "[input-controller][input]") {
+  const LiveControllerGlobals saved;
+  std::vector<std::string> warnings;
+  const LogScope log = RecordInputWarnings(warnings);
+  Input::SetLiveDeviceSettings({});
+  CHECK(Input::LiveDeviceSettings() == DeviceSettings{});
+  const DeviceSettings altered{.sound_output = SoundOutput::kStereo,
+                               .vibration = Vibration::kOn};
+  CHECK(ReadInexactDeviceSettings() == altered);
+  CHECK(ReadInexactDeviceSettings() == altered);
+  REQUIRE(warnings.size() == 1);
+  CHECK(warnings[0].find("sound byte 2 and vibration byte 7") !=
+        std::string::npos);
+
+  // An exact read clears the report, so the same bytes are reported again.
+  Input::SetLiveDeviceSettings({});
+  CHECK(Input::LiveDeviceSettings() == DeviceSettings{});
+  CHECK(ReadInexactDeviceSettings() == altered);
+  CHECK(warnings.size() == 2);
 }
 
 TEST_CASE("Retired controller entries leave no module address bindings",
@@ -986,6 +1092,25 @@ TEST_CASE("Live controller updates publish the legacy button state",
   CHECK(Input::UpdateLiveControllers() == 1);
   CHECK(VS::Input::releasedButtons == static_cast<int>(kButtonCross));
   CHECK(VS::Input::buttonHeldFrames[6] == 0U);
+}
+
+TEST_CASE("Live actions report the last update's held and new buttons",
+          "[input-controller][input]") {
+  const LiveControllerGlobals saved;
+  PrepareLiveControllers();
+  const VS::Input::ActionSet cross{VS::Input::Action::kCross};
+  FeedLivePad(kButtonCross);
+  CHECK(Input::UpdateLiveControllers() == 1);
+  CHECK(Input::LiveActions() ==
+        VS::Input::ActionState{.held = cross, .pressed = cross});
+
+  CHECK(Input::UpdateLiveControllers() == 1);
+  CHECK(Input::LiveActions() ==
+        VS::Input::ActionState{.held = cross, .pressed = {}});
+
+  FeedLivePad(0);
+  CHECK(Input::UpdateLiveControllers() == 1);
+  CHECK(Input::LiveActions() == VS::Input::ActionState{});
 }
 
 TEST_CASE("Live controller updates publish the legacy stick and port state",

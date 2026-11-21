@@ -26,6 +26,7 @@
 #include "Field/ChestInteractionsLive.hpp"
 #include "Field/Gimmicks.hpp"
 #include "Field/RoomRenderingLive.hpp"
+#include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Input/Settings.hpp"
 #include "Items/ItemRecords.hpp"
@@ -602,8 +603,8 @@ class LiveHost : public LiveCardHost {
   void SetCursorMemory(std::uint8_t memory) override {
     VS::Input::settings.cursor_memory = static_cast<char>(memory);
   }
-  std::uint8_t MonoSound() override {
-    return static_cast<std::uint8_t>(VS::Input::settings.mono_sound);
+  Input::SoundOutput CurrentSoundOutput() override {
+    return Input::LiveDeviceSettings().sound_output;
   }
 
   int UpdateDataSaveMenu(int init) override {
@@ -627,7 +628,9 @@ class LiveHost : public LiveCardHost {
   void FadeMusicSlotVolume(int slot, int volume, int frames) override {
     Audio::LiveFadeMusicSlotVolume(slot, volume, frames);
   }
-  void SetMonoOutput(int mono) override { Audio::LiveSetMonoOutput(mono); }
+  void SetSoundOutput(Input::SoundOutput output) override {
+    Audio::LiveSetSoundOutput(output);
+  }
   int LoadIntroSnapshotStep(int action) override {
     return VS::Save::MemoryCard::LoadLiveIntroSnapshotStep(action);
   }

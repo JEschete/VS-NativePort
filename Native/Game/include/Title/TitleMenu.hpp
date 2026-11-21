@@ -8,6 +8,8 @@
 #include <span>
 #include <string_view>
 
+#include "Input/Actions.hpp"
+#include "Input/Settings.hpp"
 #include "Render/DisplayControl.hpp"
 #include "Render/UiPackets.hpp"
 
@@ -115,17 +117,20 @@ struct GameDisplayLayout {
                          const GameDisplayLayout&) = default;
 };
 
-struct Buttons {
-  std::uint32_t held = 0;
-  std::uint32_t pressed = 0;
-};
+// The title's commands for a tick (plan §6.5), from the logical actions the
+// host reports. `any`: any action held, which skips the developer logo and
+// holds off the menu's timeout. `confirm`: Start or Circle held. `back`:
+// Cross held. `toggle`: Up, Down or Select newly pressed, which switches a
+// settings choice. `step`: -1 while Up or Left is held, +1 while Select,
+// Right or Down is, 0 when neither or both are.
+struct MenuCommands {
+  bool any = false;
+  bool confirm = false;
+  bool back = false;
+  bool toggle = false;
+  int step = 0;
 
-struct PlayerSettings {
-  std::uint8_t mono_sound = 0;
-  std::uint8_t vibration_on = 0;
-
-  friend bool operator==(const PlayerSettings&,
-                         const PlayerSettings&) = default;
+  friend bool operator==(const MenuCommands&, const MenuCommands&) = default;
 };
 
 // One boss time-trial record (VS::State::TrialScore).
@@ -183,16 +188,17 @@ class Host : public Render::ImmediatePacketTarget {
   virtual void Refuse(std::string_view what) = 0;
   // Sound effect `effect` of the menu group, centred.
   virtual void PlaySoundEffect(int effect) = 0;
-  [[nodiscard]] virtual PlayerSettings Settings() = 0;
-  // Writes only the mono and vibration settings.
-  virtual void SetSettings(PlayerSettings settings) = 0;
+  [[nodiscard]] virtual VS::Input::DeviceSettings Settings() = 0;
+  // Writes only the sound output and vibration settings.
+  virtual void SetSettings(VS::Input::DeviceSettings settings) = 0;
   // VS::Boot::InitializePlayerSettings.
   virtual void ResetPlayerSettings() = 0;
-  virtual void SetMonoOutput(int mono) = 0;
+  virtual void SetSoundOutput(VS::Input::SoundOutput output) = 0;
   virtual void SetDiscMixVolume(std::uint32_t volume) = 0;
 
   virtual void UpdateControllers() = 0;
-  [[nodiscard]] virtual Buttons Input() = 0;
+  // Player 1's actions as of the last UpdateControllers.
+  [[nodiscard]] virtual VS::Input::ActionState Actions() = 0;
   virtual void InvalidateControllerConnections() = 0;
   virtual void UpdateVibrationPatterns() = 0;
   virtual void PlayVibrationPreset(int preset) = 0;
@@ -356,6 +362,8 @@ void InitializeNewGameData(Host& host);
 void PrepareExit(Host& host, int cause);
 
 // The policies the functions above apply, for the tests.
+[[nodiscard]] MenuCommands MenuCommandsFor(
+    const VS::Input::ActionState& actions) noexcept;
 [[nodiscard]] ExitPlan PlanExit(int cause) noexcept;
 [[nodiscard]] GameDisplayLayout PlanGameDisplay(
     const GameDisplayRequest& request) noexcept;

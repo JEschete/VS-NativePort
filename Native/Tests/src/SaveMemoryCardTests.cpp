@@ -19,10 +19,12 @@
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "Content/ModuleData.hpp"
 #include "Field/Mpd.hpp"
 #include "Input/ControllerLiveState.hpp"
+#include "Input/Settings.hpp"
 #include "Legacy/Psx.hpp"
 #include "Save/MemoryCard/CardResources.hpp"
 #include "Save/MemoryCard/GameFiles.hpp"
@@ -444,7 +446,7 @@ class FakeSaveState final : public Files::SaveStateHost {
   std::vector<std::uint32_t> play_time_sets;
   std::deque<std::uint32_t> scripted;
   Files::CipherState cipher;
-  std::optional<std::int32_t> mono;
+  std::optional<VS::Input::SoundOutput> sound_output;
   std::uint32_t play_time = 0;
   int captures = 0;
   std::uint8_t location = 0;
@@ -473,7 +475,9 @@ class FakeSaveState final : public Files::SaveStateHost {
     play_time_sets.push_back(value);
   }
   void CaptureSnapshot() override { ++captures; }
-  void SetMonoOutput(std::int32_t value) override { mono = value; }
+  void SetSoundOutput(VS::Input::SoundOutput output) override {
+    sound_output = output;
+  }
   std::uint8_t SaveLocation() override { return location; }
   std::uint8_t MapCompletion() override { return map_completion; }
   bool KeepsContainerData() override { return keeps_container; }
@@ -509,8 +513,9 @@ class FakeSaveState final : public Files::SaveStateHost {
       bitmaps_{};
 };
 
-// Patterned sections with an in-use slot, 41 saves (7 this game), mono sound,
-// a valid snapshot and room indices, and 12:34:07 of play.
+// Patterned sections with an in-use slot, 41 saves (7 this game), a sound
+// byte of 0xFF (which plays as stereo), a valid snapshot and room indices, and
+// 12:34:07 of play.
 void FillGameState(FakeSaveState& state) {
   for (std::size_t index = 0; index < state.sections.size(); ++index) {
     Bytes& bytes = state.sections.at(index);
@@ -1274,7 +1279,28 @@ TEST_CASE("A packaged save decodes, checks and applies back into the game",
             .has_value());
   CHECK(std::ranges::equal(loaded.sections, package.state.sections));
   CHECK(loaded.play_time_sets == std::vector{package.state.play_time});
-  CHECK(loaded.mono == std::optional<std::int32_t>{-1});
+  CHECK(loaded.sound_output == std::optional{VS::Input::SoundOutput::kStereo});
+}
+
+TEST_CASE("A loaded save's sound byte selects mono only when it is 1",
+          "[save][save-memory-card]") {
+  // Sound_SetSpeakerMode (src/SLUS_010.40/25AC.c:451) plays mono for 1 only.
+  using VS::Input::SoundOutput;
+  const auto [byte, output] = GENERATE(table<int, SoundOutput>({
+      {0, SoundOutput::kStereo},
+      {1, SoundOutput::kMono},
+      {2, SoundOutput::kStereo},
+      {0xFF, SoundOutput::kStereo},
+  }));
+  Package package;
+  package.state.Of(SectionId::kSettings).at(Files::kSettingsMonoSoundOffset) =
+      static_cast<std::byte>(byte);
+  REQUIRE(package.Game().has_value());
+  Bytes image = package.Outgoing();
+  FakeSaveState loaded;
+  CHECK(Files::ValidateAndApplyLoadedSave(loaded, ImageOf(image), true)
+            .has_value());
+  CHECK(loaded.sound_output == std::optional{output});
 }
 
 TEST_CASE("A packaged save carries the magic, the card title and the icon",
@@ -1505,7 +1531,7 @@ TEST_CASE("A loaded save with bad checks or indices applies nothing",
     CHECK(Files::ValidateAndApplyLoadedSave(loaded, ImageOf(image), true) ==
           Applied{std::unexpected(row.error)});
     CHECK(loaded.play_time_sets.empty());
-    CHECK_FALSE(loaded.mono.has_value());
+    CHECK_FALSE(loaded.sound_output.has_value());
     CHECK(AllEqual(loaded.Of(SectionId::kSettings), std::byte{0}));
   }
 }

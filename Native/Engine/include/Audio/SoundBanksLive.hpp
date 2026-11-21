@@ -3,6 +3,8 @@
 
 #include <cstdint>
 
+#include "Input/Settings.hpp"
+
 // Live bindings for SoundBanks.hpp over the slot record (vs_main_soundData),
 // the sound-effect and wave bank file tables, _soundFileMap, the disc request
 // queue (CdDriveLive.hpp), the high end of the game heap and the playback and
@@ -25,6 +27,8 @@ void LiveLoadMappedWaveBank(int id);
 int LiveUpdateWaveBankLoad();
 void LiveLoadWaveBankBlocking(int id);
 void LiveSetMonoOutput(int mono_enabled);
+// The typed form the settings consumers use (Input/Settings.hpp).
+void LiveSetSoundOutput(Input::SoundOutput output);
 void LiveInitializeMenuSoundBanks();
 void LiveResetSoundSlots();
 }  // namespace VS::Audio

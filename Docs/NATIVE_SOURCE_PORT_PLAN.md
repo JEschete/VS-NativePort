@@ -633,6 +633,9 @@ These are target designs, not an implemented-feature inventory. See §0.2 and §
   - A `PadState` with the original PS button bitmask for Phase 1 parity (the game logic reads it).
   - SDL3 gamepad and keyboard bindings (`Input/Bindings.hpp`, #52): a versioned JSON file, `config\input.json` beside the executable by default (`--input-config` overrides it), shared by `VS.Desktop` and the Combat Lab. A missing file is created with the original default layout. Any problem (invalid JSON, a duplicate JSON key, an unknown action, key or control, a key or control bound to two actions, a host-reserved key, or a bad version or trigger threshold) rejects the whole file. The defaults then apply, the file is never overwritten, and every problem is logged and recorded as an `input.bindings` trace event; Release Desktop also shows them in a warning box. Bindings load only while the devices are enabled, so `--scripted` runs never read the file. Limits: the analog sticks are not bindable, and the launcher does not forward `--input-config`.
   - Rumble (the title's Vibration option) maps to SDL rumble.
+  - Typed device settings (`Input/Settings.hpp`, #52): `DeviceSettings` holds a `SoundOutput` and a `Vibration`, decoded from the packed record's bytes the way the devices applied them. `Sound_SetSpeakerMode` selects mono only for 1 (25AC.c:451), and the motors run for any nonzero vibration byte (main.c:1653). `LiveDeviceSettings` reports a byte other than 0 or 1 once per distinct pair, and writes store 0 or 1. A soft reset restores `DeviceSettings{}`, which is stereo with vibration on (main.c:1764-1765). Divergence: a corrupt mono byte of 2 stays stereo, which is what `Sound_SetSpeakerMode` applied. The original title's `initEnvironment` normalized it to mono (22C.c:1487), and the Options menu opened on an out-of-range row (88.c:454).
+  - Consumers are split. **Immediate device consumers** apply a change at once: the audio output (`Audio::LiveSetSoundOutput`, from the title Sound menu, the Options menu and a loaded save) and the pad motors (`LiveRumble`, gated by vibration and applied through `InputSystem::RequestRumble`). **Session/gameplay consumers** read the Options flags (`Menu::Options::Settings`: puzzle mode, ability timing, weapon and armour status, cursor memory, information, simple map) when they act; these persist with the save. Gameplay still reads those flags through the packed record (#489).
+  - The title menu reads `LiveActions()` (player 1's held and newly pressed `ActionState`) and turns it into `Title::MenuCommands` through `MenuCommandsFor`, so it reads no legacy controller globals. The other copied consumers move off `ControllerLiveState.hpp` under #489.
 - **Absorbs:** libpad (25 symbols, 544 uses), rewritten at copy time (R); `Input` (17 rows).
 - **Phase 2:** remapping UI, per-device prompts.
 - **Tests:** binding resolution and file validation (`[input-bindings]`); pad edge detection (pressed/held/repeat) matching the original repeat timings.
@@ -1348,7 +1351,7 @@ and a dependency boundary. No such new approval is implied by this audit.
 | EC-04 | Sector requests and module-address relocation | Storage adapter plus original data-layout coupling | Content, Game/Boot | M1, M4-M9, M10 |
 | EC-05 | Scratchpad and overlapping overlay storage | Memory-layout compatibility | Engine/Core, Game/Boot and resource owners | M1, M3, M7, M9, M10 |
 | EC-06 | VSync, callbacks and root-counter behavior | Retired (#44): logical-tick waits, sound timer, fiber cancellation, error transport and explicit session modes; per-tick replay state identical at speeds 1 and 4 | Engine/Core, Platform, Game/Boot | M2, M3, M5, M10 |
-| EC-07 | Original controller receive buffers | Protocol compatibility adapter | Engine/Input, Game/Title | M3, M9, M10 |
+| EC-07 | Original controller receive buffers | Protocol adapter retired (#52); copied gameplay and menus still read the legacy pad-word view (#489) | Engine/Input, Game/Title | M3, M9, M10 |
 | EC-08 | Movie backend and MDEC-shaped presentation | Native AV1/FLAC decoding connected; page-space presentation and lifecycle retirement remain | Engine/Movie, Content | M6, M10 |
 | EC-09 | Memory-card API and native persistence | Initial schema3 save/load milestone delivered; imports, clear saves, campaign and final adapter retirement remain | Engine/Save, Game/State | M9, M10 |
 
@@ -1530,10 +1533,14 @@ not strand execution in a blocking wait. No gameplay caller requires root-counte
 **Evidence:** `Native/Engine/src/Input/Pad.cpp`, `Native/Engine/src/Input/ControllerLive.cpp` (`SubmitLivePad`,
 `LiveRumble`), and `Native/Game/src/Boot/GameApp.cpp`.
 
-Status (#52, in progress): the libpad shim and both 34-byte receive buffers are deleted. The host submits each tick's
+Status (#52, protocol adapter retired): the libpad shim and both 34-byte receive buffers are deleted. The host submits each tick's
 pad as a typed `PadSample` to a native pad link, which answers the game's controller requests (`ControllerHost`), and
 registered motor commands become a `Rumble` request the host applies through `InputSystem::RequestRumble`. Hosts reset
-the link when their game ends. Consumers still read the pad-word bit layout through the legacy controller globals.
+the link when their game ends. Physical keys and gamepad controls resolve to logical actions through validated
+`Input::Bindings` (§6.5). The title menu reads `LiveActions()` and typed `DeviceSettings`, so the title slice reads no
+legacy controller globals. Not yet retired: 60 copied gameplay, menu, event and ending files still read the legacy view
+(`ControllerLiveState.hpp`). They make 106 reads of pad-word button masks, sticks and ports, and 93 reads of the packed
+settings record. #489 tracks their migration and the deletion of the view.
 
 **Issue:** game input still depends on the pad-word bit layout, port IDs and legacy connection/mode conventions.
 **Retain:** button edges/repeat timings, analog behavior, disconnect semantics and game-specific input rules.

@@ -367,8 +367,8 @@ class LiveSaveState final : public SaveStateHost {
     VS::State::playTime = VS::State::UnpackPlayTime(play_time);
   }
   void CaptureSnapshot() override { VS::Save::CaptureLiveAshleySnapshot(); }
-  void SetMonoOutput(std::int32_t mono) override {
-    VS::Audio::LiveSetMonoOutput(mono);
+  void SetSoundOutput(VS::Input::SoundOutput output) override {
+    VS::Audio::LiveSetSoundOutput(output);
   }
   std::uint8_t SaveLocation() override {
     return static_cast<std::uint8_t>(VS::Menu::saveLocationId);

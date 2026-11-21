@@ -12,6 +12,8 @@
 #include <utility>
 #include <vector>
 
+#include "Input/Settings.hpp"
+
 // The SLUS_010.40 controller service (main.c:8454-8870) and the battle
 // stick dead zone (BATTLE 5BE50.c:82): pad packets, connection and analog
 // mode, button edges and repeat, and the two-slot vibration pattern player.
@@ -115,11 +117,6 @@ struct ControllerState {
   ControllerPorts ports{};
   ButtonState buttons;
   StickPositions sticks;
-};
-
-struct ControllerSettings {
-  bool mono_sound = false;
-  bool vibration_on = true;
 };
 
 struct ControllerFrameOptions {
@@ -273,7 +270,7 @@ void ResetVibrationPatterns(VibrationState& vibration,
 // outside the pattern; each read as 0, which ends the stream.
 std::uint32_t UpdateVibrationPatterns(VibrationState& vibration,
                                       ControllerPortState& first_port,
-                                      bool vibration_on) noexcept;
+                                      Vibration setting) noexcept;
 // `presets`: a count byte and three spare bytes, then one little-endian
 // pattern offset per preset. Starts the preset in a free slot.
 std::expected<std::uint32_t, VibrationPresetError> PlayVibrationPreset(
@@ -281,10 +278,10 @@ std::expected<std::uint32_t, VibrationPresetError> PlayVibrationPreset(
     std::int32_t index) noexcept;
 
 // Polls both ports and derives the button edges, repeat and stick positions.
-// A soft reset (Start+Select+L1+L2+R1+R2) restores the sound and vibration
-// defaults in `settings` and is returned for the caller to perform.
+// A soft reset (Start+Select+L1+L2+R1+R2) restores the device defaults in
+// `settings` and is returned for the caller to perform.
 ControllerFrame UpdateControllers(ControllerState& state,
-                                  ControllerSettings& settings,
+                                  DeviceSettings& settings,
                                   ControllerHost& host,
                                   const ControllerFrameOptions& options);
 }  // namespace VS::Input

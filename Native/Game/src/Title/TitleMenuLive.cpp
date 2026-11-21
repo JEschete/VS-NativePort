@@ -26,7 +26,6 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Field/Mpd.hpp"
 #include "Input/ControllerLive.hpp"
-#include "Input/ControllerLiveState.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Legacy/Psx.hpp"
 #include "Menu/FilesLive.hpp"
@@ -185,18 +184,16 @@ class LiveHost final : public Host {
   void PlaySoundEffect(int effect) override {
     Audio::LivePlaySfxCentered(Menu::kMenuSoundChannelGroup, effect);
   }
-  PlayerSettings Settings() override {
-    return {
-        .mono_sound = static_cast<std::uint8_t>(VS::Input::settings.mono_sound),
-        .vibration_on =
-            static_cast<std::uint8_t>(VS::Input::settings.vibration_on)};
+  Input::DeviceSettings Settings() override {
+    return Input::LiveDeviceSettings();
   }
-  void SetSettings(PlayerSettings settings) override {
-    VS::Input::settings.mono_sound = static_cast<char>(settings.mono_sound);
-    VS::Input::settings.vibration_on = static_cast<char>(settings.vibration_on);
+  void SetSettings(Input::DeviceSettings settings) override {
+    Input::SetLiveDeviceSettings(settings);
   }
   void ResetPlayerSettings() override { VS::Boot::InitializePlayerSettings(); }
-  void SetMonoOutput(int mono) override { Audio::LiveSetMonoOutput(mono); }
+  void SetSoundOutput(Input::SoundOutput output) override {
+    Audio::LiveSetSoundOutput(output);
+  }
   void SetDiscMixVolume(std::uint32_t volume) override {
     if (!Audio::Control::SetLiveDiscMixVolume(volume)) {
       VS::Core::LogWarn(kChannel, "Title disc mix volume {} was refused",
@@ -205,10 +202,7 @@ class LiveHost final : public Host {
   }
 
   void UpdateControllers() override { ::VS::Input::UpdateLiveControllers(); }
-  Buttons Input() override {
-    return {.held = static_cast<std::uint32_t>(VS::Input::buttonsState),
-            .pressed = VS::Input::buttonsPressed};
-  }
+  Input::ActionState Actions() override { return ::VS::Input::LiveActions(); }
   void InvalidateControllerConnections() override {
     ::VS::Input::InvalidateLiveControllerConnections();
   }

@@ -14,10 +14,13 @@
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "Content/ModuleData.hpp"
 #include "Field/Mpd.hpp"
+#include "Input/Actions.hpp"
 #include "Input/ControllerLiveState.hpp"
+#include "Input/Settings.hpp"
 #include "Menu/FilesLive.hpp"
 #include "Render/Display.hpp"
 #include "Save/MemoryCard/GameFilesLive.hpp"
@@ -34,13 +37,11 @@ using VS::Legacy::DRAWENV;
 namespace {
 namespace title = VS::Title;
 using title::MenuItemMotion;
+using VS::Input::Action;
+using VS::Input::DeviceSettings;
+using VS::Input::SoundOutput;
+using VS::Input::Vibration;
 using VS::Render::ScreenRect;
-
-constexpr std::uint32_t kCircle = 1U << 5;
-constexpr std::uint32_t kCross = 1U << 6;
-constexpr std::uint32_t kStart = 1U << 11;
-constexpr std::uint32_t kUp = 1U << 12;
-constexpr std::uint32_t kDown = 1U << 14;
 
 // The menu capture: two 160x64 strips of the background, then the copyright
 // area's background and the copyright itself, each 180x24.
@@ -91,10 +92,12 @@ int Next(std::deque<int>& results, int fallback) {
   return result;
 }
 
-title::Buttons Held(std::uint32_t bits) { return {.held = bits}; }
+VS::Input::ActionState Held(Action action) {
+  return {.held = {action}, .pressed = {}};
+}
 
-title::Buttons Pressed(std::uint32_t bits) {
-  return {.held = bits, .pressed = bits};
+VS::Input::ActionState Pressed(Action action) {
+  return {.held = {action}, .pressed = {action}};
 }
 
 // A scripted title host: it records what the title asked for and answers
@@ -113,14 +116,14 @@ class FakeHost final : public title::Host {
 
   std::vector<std::string> refusals;
   std::vector<int> sounds;
-  title::PlayerSettings settings{};
-  int mono = -1;
+  DeviceSettings settings{};
+  std::optional<SoundOutput> sound_output;
   std::uint32_t disc_volume = 0;
   std::vector<int> presets;
 
-  std::deque<title::Buttons> script;
-  title::Buttons idle{};
-  title::Buttons buttons{};
+  std::deque<VS::Input::ActionState> script;
+  VS::Input::ActionState idle{};
+  VS::Input::ActionState actions{};
   bool script_running = true;
   int polls = 0;
   int vibration_updates = 0;
@@ -209,18 +212,18 @@ class FakeHost final : public title::Host {
     refusals.emplace_back(what);
   }
   void PlaySoundEffect(int effect) override { sounds.push_back(effect); }
-  title::PlayerSettings Settings() override {
+  DeviceSettings Settings() override {
     Log("Settings");
     return settings;
   }
-  void SetSettings(title::PlayerSettings value) override {
+  void SetSettings(DeviceSettings value) override {
     Log("SetSettings");
     settings = value;
   }
   void ResetPlayerSettings() override { Log("ResetPlayerSettings"); }
-  void SetMonoOutput(int value) override {
-    Log("SetMonoOutput");
-    mono = value;
+  void SetSoundOutput(SoundOutput output) override {
+    Log("SetSoundOutput");
+    sound_output = output;
   }
   void SetDiscMixVolume(std::uint32_t volume) override {
     Log("SetDiscMixVolume");
@@ -233,15 +236,15 @@ class FakeHost final : public title::Host {
       throw std::runtime_error("the title never stopped polling");
     }
     if (!script_running) {
-      buttons = {};
+      actions = {};
     } else if (script.empty()) {
-      buttons = idle;
+      actions = idle;
     } else {
-      buttons = script.front();
+      actions = script.front();
       script.pop_front();
     }
   }
-  title::Buttons Input() override { return buttons; }
+  VS::Input::ActionState Actions() override { return actions; }
   void InvalidateControllerConnections() override {
     Log("InvalidateControllerConnections");
     script_running = true;
@@ -474,10 +477,10 @@ void PrepareRun(FakeHost& host) {
   host.record_pixels = false;
 }
 
-void Repeat(std::deque<title::Buttons>& script, int count,
-            title::Buttons buttons = {}) {
+void Repeat(std::deque<VS::Input::ActionState>& script, int count,
+            VS::Input::ActionState actions = {}) {
   for (int frame = 0; frame < count; ++frame) {
-    script.push_back(buttons);
+    script.push_back(actions);
   }
 }
 
@@ -555,18 +558,19 @@ void DrawFirstItem(Fixture& fixture) {
   title::DrawMenu(fixture.context);
 }
 
-// The vibration submenu over main item 2: Up once the items settle, then
-// Start.
+// The vibration submenu over main item 2 with vibration off: Up once the
+// items settle, then Start.
 void ToggleVibration(Fixture& fixture) {
   FakeHost& host = fixture.host;
   host.log_frames = false;
   host.record_packets = false;
+  host.settings.vibration = Vibration::kOff;
   PlaceMainItems(fixture.state, 2);
   Repeat(host.script, 24);
-  host.script.push_back(Pressed(kUp));
+  host.script.push_back(Pressed(Action::kUp));
   Repeat(host.script, 6);
-  host.script.push_back(Held(kStart));
-  host.idle = Held(kCross);
+  host.script.push_back(Held(Action::kStart));
+  host.idle = Held(Action::kCross);
   title::ShowVibrationSettings(fixture.context);
 }
 
@@ -578,9 +582,9 @@ void SwitchToMono(Fixture& fixture) {
   host.record_packets = false;
   PlaceMainItems(fixture.state, 3);
   Repeat(host.script, 24);
-  host.script.push_back(Pressed(kDown));
+  host.script.push_back(Pressed(Action::kDown));
   Repeat(host.script, 6);
-  host.script.push_back(Held(kCircle));
+  host.script.push_back(Held(Action::kCircle));
   title::ShowSoundSettings(fixture.context);
 }
 
@@ -590,7 +594,7 @@ int RunNewGame(Fixture& fixture) {
   PrepareRun(host);
   host.movie_plays = true;
   host.initial_selection = 9;
-  host.script = {Held(kStart)};
+  host.script = {Held(Action::kStart)};
   return title::Run(fixture.context);
 }
 
@@ -825,37 +829,42 @@ TEST_CASE("Title settings start from the logos on the first visit",
   Fixture fixture;
   FakeHost& host = fixture.host;
   host.visit_count = 0;
-  host.settings = {.mono_sound = 1, .vibration_on = 0};
+  host.settings = {.sound_output = SoundOutput::kMono,
+                   .vibration = Vibration::kOff};
   host.record_packets = false;
   title::InitializeSettings(fixture.context);
-  CHECK(host.settings ==
-        title::PlayerSettings{.mono_sound = 0, .vibration_on = 1});
-  CHECK(host.mono == 0);
+  // A first visit restores the device defaults: stereo with vibration on.
+  CHECK(host.settings == DeviceSettings{});
+  CHECK(host.sound_output == std::optional{SoundOutput::kStereo});
   CHECK(host.disc_volume == 0x7F);
   CHECK(host.modes == title::GameModes{.difficulty = 1, .puzzle_mode = 1});
   CHECK(host.packet_count == 728);
   CHECK(host.Count("ClearImage") == 1);
   REQUIRE(host.events.size() >= 5);
   CHECK(std::vector<std::string>(host.events.end() - 5, host.events.end()) ==
-        std::vector<std::string>{"SetSettings", "SetMonoOutput",
+        std::vector<std::string>{"SetSettings", "SetSoundOutput",
                                  "SetDiscMixVolume", "ClearInventoryIndices",
                                  "SetGameModes"});
 }
 
 TEST_CASE("Title settings keep the player's choices on later visits",
           "[title][title-menu]") {
+  const DeviceSettings chosen{.sound_output = SoundOutput::kMono,
+                              .vibration = Vibration::kOff};
   Fixture fixture;
   FakeHost& host = fixture.host;
-  host.visit_count = 3;
-  host.settings = {.mono_sound = 5, .vibration_on = 0};
-  title::InitializeSettings(fixture.context);
-  CHECK(host.settings ==
-        title::PlayerSettings{.mono_sound = 1, .vibration_on = 0});
-  CHECK(host.mono == 1);
-  CHECK(host.events == std::vector<std::string>{
-                           "Settings", "ResetPlayerSettings", "SetSettings",
-                           "SetMonoOutput", "SetDiscMixVolume",
-                           "ClearInventoryIndices", "SetGameModes"});
+  host.settings = chosen;
+  for (const int visit : {3, 4}) {
+    host.visit_count = visit;
+    host.events.clear();
+    title::InitializeSettings(fixture.context);
+    CHECK(host.settings == chosen);
+    CHECK(host.sound_output == std::optional{SoundOutput::kMono});
+    CHECK(host.events == std::vector<std::string>{
+                             "Settings", "ResetPlayerSettings", "SetSettings",
+                             "SetSoundOutput", "SetDiscMixVolume",
+                             "ClearInventoryIndices", "SetGameModes"});
+  }
 }
 
 TEST_CASE("Title logos clear and upload their images", "[title][title-menu]") {
@@ -909,7 +918,7 @@ TEST_CASE("Title logos alternate the display buffers", "[title][title-menu]") {
 TEST_CASE("Title developer logo skips to its fade on a button",
           "[title][title-menu]") {
   FakeHost host;
-  host.idle = Held(kCross);
+  host.idle = Held(Action::kCross);
   host.record_packets = false;
   title::ShowPublisherAndDeveloper(host);
   CHECK(host.packet_count == 429);
@@ -1367,7 +1376,7 @@ TEST_CASE("Title vibration submenu toggles and confirms",
   const FakeHost& host = fixture.host;
   ToggleVibration(fixture);
   CHECK(host.sounds == std::vector<int>{kChangeSound, kSelectSound});
-  CHECK(host.settings.vibration_on == 1);
+  CHECK(host.settings.vibration == Vibration::kOn);
   CHECK(host.presets == std::vector<int>{0});
   CHECK(host.polls == 42);
   CHECK(host.script.empty());
@@ -1401,10 +1410,10 @@ TEST_CASE("Title vibration submenu leaves on Cross", "[title][title-menu]") {
   FakeHost& host = fixture.host;
   host.log_frames = false;
   host.record_packets = false;
-  host.settings.vibration_on = 1;
+  host.settings.vibration = Vibration::kOn;
   PlaceMainItems(fixture.state, 2);
   Repeat(host.script, 24);
-  host.idle = Held(kCross);
+  host.idle = Held(Action::kCross);
   title::ShowVibrationSettings(fixture.context);
   CHECK(host.sounds == std::vector<int>{kLeaveSound});
   CHECK(host.Count("SetSettings") == 0);
@@ -1417,8 +1426,8 @@ TEST_CASE("Title sound submenu switches to mono", "[title][title-menu]") {
   const FakeHost& host = fixture.host;
   SwitchToMono(fixture);
   CHECK(host.sounds == std::vector<int>{kChangeSound, kSelectSound});
-  CHECK(host.settings.mono_sound == 1);
-  CHECK(host.mono == 1);
+  CHECK(host.settings.sound_output == SoundOutput::kMono);
+  CHECK(host.sound_output == std::optional{SoundOutput::kMono});
   CHECK(host.disc_volume == 0x7F);
 }
 
@@ -1434,18 +1443,67 @@ TEST_CASE("Title sound submenu closes and returns its items",
   CHECK(items[0].text_position == 96);
 }
 
-TEST_CASE("Title submenus refuse settings outside their items",
-          "[title][title-menu]") {
-  Fixture fixture;
-  FakeHost& host = fixture.host;
-  host.settings = {.mono_sound = 3, .vibration_on = 9};
-  title::ShowVibrationSettings(fixture.context);
-  title::ShowSoundSettings(fixture.context);
-  CHECK(host.refusals ==
-        std::vector<std::string>{"title setting outside the submenu's items",
-                                 "title setting outside the submenu's items"});
-  CHECK(host.polls == 0);
-  CHECK(host.loads.empty());
+// Each submenu opens at the current setting, so confirming it at once keeps
+// that setting.
+TEST_CASE("Title submenus open at the current setting", "[title][title-menu]") {
+  const DeviceSettings current =
+      GENERATE(DeviceSettings{.sound_output = SoundOutput::kStereo,
+                              .vibration = Vibration::kOn},
+               DeviceSettings{.sound_output = SoundOutput::kMono,
+                              .vibration = Vibration::kOff});
+  for (const bool sound : {false, true}) {
+    Fixture fixture;
+    FakeHost& host = fixture.host;
+    host.log_frames = false;
+    host.record_packets = false;
+    host.settings = current;
+    PlaceMainItems(fixture.state, sound ? 3 : 2);
+    Repeat(host.script, 24);
+    host.script.push_back(Held(Action::kCircle));
+    if (sound) {
+      title::ShowSoundSettings(fixture.context);
+      CHECK(host.sound_output == std::optional{current.sound_output});
+    } else {
+      title::ShowVibrationSettings(fixture.context);
+      CHECK(host.presets.size() ==
+            (current.vibration == Vibration::kOn ? 1U : 0U));
+    }
+    CHECK(host.settings == current);
+    CHECK(host.sounds == std::vector<int>{kSelectSound});
+  }
+}
+
+TEST_CASE("Title menu commands confirm and leave on held actions",
+          "[title][title-menu][input]") {
+  CHECK(title::MenuCommandsFor({}) == title::MenuCommands{});
+  CHECK(title::MenuCommandsFor(Held(Action::kSquare)) ==
+        title::MenuCommands{.any = true});
+  for (const Action confirm : {Action::kStart, Action::kCircle}) {
+    CHECK(title::MenuCommandsFor(Held(confirm)) ==
+          title::MenuCommands{.any = true, .confirm = true});
+  }
+  CHECK(title::MenuCommandsFor(Held(Action::kCross)) ==
+        title::MenuCommands{.any = true, .back = true});
+}
+
+TEST_CASE("Title menu commands toggle on presses and step while held",
+          "[title][title-menu][input]") {
+  using VS::Input::ActionSet;
+  using VS::Input::ActionState;
+  // Toggling needs a new press; a held direction only steps.
+  CHECK(title::MenuCommandsFor(Held(Action::kUp)) ==
+        title::MenuCommands{.any = true, .step = -1});
+  CHECK(title::MenuCommandsFor(Pressed(Action::kUp)) ==
+        title::MenuCommands{.any = true, .toggle = true, .step = -1});
+  CHECK(title::MenuCommandsFor(Pressed(Action::kSelect)) ==
+        title::MenuCommands{.any = true, .toggle = true, .step = 1});
+  CHECK(title::MenuCommandsFor(Held(Action::kRight)).step == 1);
+  CHECK(title::MenuCommandsFor(Held(Action::kLeft)).step == -1);
+  CHECK_FALSE(title::MenuCommandsFor(Pressed(Action::kLeft)).toggle);
+  // Previous and next together cancel out.
+  const ActionState both{.held = ActionSet{Action::kLeft, Action::kDown},
+                         .pressed = {}};
+  CHECK(title::MenuCommandsFor(both).step == 0);
 }
 
 TEST_CASE("Title run starts a new game", "[title][title-menu]") {
@@ -1526,9 +1584,9 @@ TEST_CASE("Title run continues from a loaded game", "[title][title-menu]") {
   Fixture fixture;
   FakeHost& host = fixture.host;
   PrepareRun(host);
-  host.script = {Held(kDown)};
+  host.script = {Held(Action::kDown)};
   Repeat(host.script, 10);
-  host.script.push_back(Held(kStart));
+  host.script.push_back(Held(Action::kStart));
   host.card_steps = {0, 1};
   host.load_results = {0, 0, 1};
   CHECK(title::Run(fixture.context) == 1);
@@ -1549,9 +1607,9 @@ TEST_CASE("Title run shows the menu again after leaving Continue",
   FakeHost& host = fixture.host;
   PrepareRun(host);
   host.initial_selection = 1;
-  host.script = {Held(kStart)};
+  host.script = {Held(Action::kStart)};
   Repeat(host.script, 64);
-  host.script.push_back(Held(kStart));
+  host.script.push_back(Held(Action::kStart));
   host.load_results = {-1, 1};
   CHECK(title::Run(fixture.context) == 1);
   CHECK(host.Count("StartIntroMovie") == 2);
@@ -1675,11 +1733,12 @@ TEST_CASE("Title live host binds settings and visits", "[title][title-menu]") {
   const LiveHostGuard guard;
   title::Host& host = title::LiveTitleHost();
   CHECK(&title::LiveTitleHost() == &host);
-  host.SetSettings({.mono_sound = 1, .vibration_on = 0});
+  host.SetSettings(
+      {.sound_output = SoundOutput::kMono, .vibration = Vibration::kOff});
   CHECK(VS::Input::settings.mono_sound == 1);
   CHECK(VS::Input::settings.vibration_on == 0);
-  CHECK(host.Settings() ==
-        title::PlayerSettings{.mono_sound = 1, .vibration_on = 0});
+  CHECK(host.Settings() == DeviceSettings{.sound_output = SoundOutput::kMono,
+                                          .vibration = Vibration::kOff});
   host.SetVisitCount(5);
   CHECK(VS::Title::titleScreenVisitCount == 5);
   CHECK(host.VisitCount() == 5);

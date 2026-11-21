@@ -107,8 +107,7 @@ class LiveHost final : public Host {
             .cursor_memory = VS::Input::settings.cursor_memory,
             .information = VS::Input::settings.information,
             .simple_map = VS::Input::settings.simple_map,
-            .mono_sound = VS::Input::settings.mono_sound,
-            .vibration_on = VS::Input::settings.vibration_on};
+            .device = Input::LiveDeviceSettings()};
   }
   void StoreSettings(const Settings& settings) override {
     std::uint8_t flags = FlagByte();
@@ -120,8 +119,7 @@ class LiveHost final : public Host {
     VS::Input::settings.cursor_memory = settings.cursor_memory;
     VS::Input::settings.information = settings.information;
     VS::Input::settings.simple_map = settings.simple_map;
-    VS::Input::settings.mono_sound = settings.mono_sound;
-    VS::Input::settings.vibration_on = settings.vibration_on;
+    Input::SetLiveDeviceSettings(settings.device);
   }
   bool PuzzleModeDisabled() override {
     return VS::State::stateFlags.puzzle_mode_disabled != 0;
@@ -129,7 +127,9 @@ class LiveHost final : public Host {
   void SetPuzzleMode(bool enabled) override {
     VS::State::stateFlags.puzzle_mode = enabled ? 1 : 0;
   }
-  void SetMonoOutput(int mono) override { Audio::LiveSetMonoOutput(mono); }
+  void SetSoundOutput(Input::SoundOutput output) override {
+    Audio::LiveSetSoundOutput(output);
+  }
   void PlayVibrationPreset(int preset) override {
     Input::PlayLiveVibrationPreset(preset);
   }

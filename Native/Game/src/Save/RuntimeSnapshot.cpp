@@ -48,6 +48,7 @@
 #include "Field/RoomLoading.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Input/ControllerLiveState.hpp"
+#include "Input/Settings.hpp"
 #include "Items/Categories.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Items/InventoryLive.hpp"
@@ -160,15 +161,21 @@ Result ValidateAudioConsumer() {
   return {};
 }
 
-void SyncMonoOutput(bool mono) {
+void SyncSoundOutput(VS::Input::SoundOutput output) {
   const auto before = VS::Audio::Driver::controlLatches.mix_behavior;
+  const bool mono = output == VS::Input::SoundOutput::kMono;
   if (((before & kMonoOutput) != 0) == mono) return;
   // Original loaded-save apply ends with vs_main_setMonoSound. The production
   // 0x80/0x81 handlers invalidate voice volumes and update the very same latch
   // consumed by native sequencer/XA/stream output. Preserve unrelated live
   // music-stack bits; only the output mode belongs to saved settings.
-  VS::Audio::LiveSetMonoOutput(mono ? 1 : 0);
+  VS::Audio::LiveSetSoundOutput(output);
   VS::Audio::Driver::controlLatches.mix_behavior |= before & ~kOutputModeMask;
+}
+
+// The sound output a restored settings record selects (Input/Settings.hpp).
+VS::Input::SoundOutput SavedSoundOutput(const VS::Input::Settings& settings) {
+  return VS::Input::DecodeSoundOutput(settings.mono_sound);
 }
 
 template <typename T>
@@ -1567,7 +1574,7 @@ std::expected<void, std::string> PrepareResume(const Document& document) {
   if (document.new_game_entry) {
     VS::State::savedEntryDoor = *document.new_game_entry;
     ApplyClock(0);
-    SyncMonoOutput(pending->state.settings.mono_sound == 1);
+    SyncSoundOutput(SavedSoundOutput(pending->state.settings));
     return {};
   }
   VS::State::savedEntryDoor = {};
@@ -1584,7 +1591,7 @@ std::expected<void, std::string> PrepareResume(const Document& document) {
       static_cast<unsigned>(pending->state.location.position[2] / kTileUnits);
   VS::State::savedEntryDoor.entry_facing =
       static_cast<unsigned>(pending->state.location.facing / kQuarterTurn);
-  SyncMonoOutput(pending->state.settings.mono_sound == 1);
+  SyncSoundOutput(SavedSoundOutput(pending->state.settings));
   return {};
 }
 
@@ -1602,7 +1609,9 @@ void CancelResume() {
     VS::Battle::actionDefinitions[index].unlocked = previous.unlocked[index];
   }
   if (AudioConsumerReady()) {
-    SyncMonoOutput((previous.mix_behavior & kMonoOutput) != 0);
+    SyncSoundOutput((previous.mix_behavior & kMonoOutput) != 0
+                        ? VS::Input::SoundOutput::kMono
+                        : VS::Input::SoundOutput::kStereo);
   } else {
     VS::Core::LogWarn(
         "save",
@@ -1674,7 +1683,7 @@ std::expected<void, std::string> FinishResume() {
   ApplyClock(state.play_ticks);
   VS::State::sceneTimer = state.scene_timer;
   ApplyCaches(state);
-  SyncMonoOutput(state.settings.mono_sound == 1);
+  SyncSoundOutput(SavedSoundOutput(state.settings));
   VS::Core::SeedBiosRand(state.random.bios_state);
   VS::Core::interfaceRandomState = state.random.interface_state;
   std::copy(state.random.shuffle.begin(), state.random.shuffle.end(),
