@@ -323,7 +323,11 @@ class FakeAssetHost final : public Content::ActorAssetHost {
     if (destination == AssetAddress::kNone) {
       return false;
     }
-    actors.at(Index(slot)) = ActorAssetRecord{};
+    ActorAssetRecord record;
+    // The live bind marks the record without a texture or parent.
+    record.texture_slot = Content::kNoAssetTextureSlot;
+    record.attach_parent = Content::kNoAssetTextureSlot;
+    actors.at(Index(slot)) = record;
     return true;
   }
   ActorAssetRecord LoadActor(int slot) const override {
@@ -1581,6 +1585,214 @@ TEST_CASE("Actor model loads refuse a model missing from the SHP table",
   ActorAssetRequest missing = Request(ActorAssetKind::kActorModelLoad, 3, 30);
   CHECK(Content::UpdateActorModelLoad(host, state, missing) == kAssetRefused);
   CHECK(host.refusals == std::vector<std::string>{"actor model file table"});
+}
+
+namespace {
+// Model 9's SHP file, 2 sectors at offset 7 (30DB0.c:1100-1235): `quads`
+// quads its 0x40-byte model's empty polygon section cannot hold, an 8-byte
+// embedded sequence and a 16x64 texture with 16 palette words, one slot.
+constexpr int kShpModel = 9;
+constexpr std::int32_t kShpSector = 7 + 95000;
+constexpr std::size_t kShpModelAt = 0xF8;
+constexpr std::uint32_t kShpModelBytes = 0x40;
+
+std::vector<std::byte> ShpFile(std::uint32_t quads) {
+  std::vector<std::byte> file(2 * kSectorBytes);
+  const std::span<std::byte> bytes(file);
+  Put32(bytes, 8, quads);
+  Put32(bytes, kShpModelAt - 4, kShpModelBytes);
+  Put32(bytes, kShpModelAt + 0x3C, kShpModelBytes);
+  std::size_t at = kShpModelAt + kShpModelBytes;
+  Put32(bytes, at + 4, 8);
+  at += 16;
+  Put32(bytes, at, 0x500);
+  bytes[at + 5] = std::byte{8};
+  bytes[at + 6] = std::byte{32};
+  bytes[at + 7] = std::byte{16};
+  return file;
+}
+
+// The SHP tables name model 9's file; `quads` adds it to the disc, without
+// which its read delivers zeros.
+void AddShpFile(FakeAssetHost& host, std::optional<std::uint32_t> quads) {
+  host.SetTable(AssetFileTable::kShpSectors, Index(kShpModel), 2);
+  host.SetTable(AssetFileTable::kShpOffsets, Index(kShpModel), 7);
+  if (quads) {
+    host.AddDiscFile(kShpSector, ShpFile(*quads));
+  }
+  host.origins.assign(4 * Index(Content::kActorTextureSlots), 0);
+  host.rows.assign(Content::kActorTextureSlots, 0);
+}
+
+ActorAssetRequest ShpRequest(FakeAssetHost& host, int slot) {
+  ActorAssetRequest request =
+      Request(ActorAssetKind::kActorModelLoad, slot, kShpModel);
+  request.destination = host.AddBlock(8);
+  request.sub_kind = 0xFF;
+  return request;
+}
+
+// Runs `steps` load steps, or until the load stops pending.
+int LoadActorModel(FakeAssetHost& host, ActorAssetLoadState& state,
+                   ActorAssetRequest& request, int steps = 4) {
+  int result = kAssetPending;
+  for (int step = 0; step < steps && result == kAssetPending; ++step) {
+    result = Content::UpdateActorModelLoad(host, state, request);
+  }
+  return result;
+}
+
+int LoadActorModel(FakeAssetHost& host, int slot) {
+  ActorAssetLoadState state;
+  ActorAssetRequest request = ShpRequest(host, slot);
+  return LoadActorModel(host, state, request);
+}
+
+bool HoldsNoActorTextures(const FakeAssetHost& host) {
+  return std::ranges::all_of(host.actor_textures, [](const auto& slot) {
+    return slot.references == 0;
+  });
+}
+
+// `slot` is empty and its texture references and low blocks are returned.
+bool DiscardedActor(const FakeAssetHost& host, int slot) {
+  return !host.actors.at(Index(slot)).has_value() &&
+         HoldsNoActorTextures(host) && host.low_frees == host.low_blocks;
+}
+}  // namespace
+
+TEST_CASE("Actor model files load and fix their primitives to place the actor",
+          "[content-slice][content][actor-assets]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  AddShpFile(host, 0);
+  CHECK(LoadActorModel(host, 3) == kAssetDone);
+  CHECK(host.refusals.empty());
+  const ActorAssetRecord& actor = Required(host.actors[3]);
+  CHECK(actor.model_id == kShpModel);
+  CHECK(actor.holds_texture_slots);
+  CHECK(actor.texture_slot == 0);
+  CHECK(host.actor_textures[0].references == 1);
+  const std::vector<AssetAddress> owned = {actor.model, actor.owned_sequence};
+  CHECK(owned == host.low_blocks);
+  CHECK(host.placements.size() == 1);
+}
+
+TEST_CASE("A refused actor model parse discards the record it bound",
+          "[content-slice][content][actor-assets]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  AddShpFile(host, std::nullopt);
+  CHECK(LoadActorModel(host, 3) == kAssetRefused);
+  CHECK(host.refusals == std::vector<std::string>{"actor model size"});
+  CHECK_FALSE(host.actors[3].has_value());
+  // A later load of the model reads its file rather than sharing the
+  // discarded record.
+  CHECK(LoadActorModel(host, 4) == kAssetRefused);
+  CHECK(host.reads.size() == 2);
+  CHECK_FALSE(host.actors[4].has_value());
+  CHECK(host.high_frees == host.high_blocks);
+}
+
+TEST_CASE("A refused actor texture releases its slots and blocks",
+          "[content-slice][content][actor-assets]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  AddShpFile(host, 0);
+  host.origins.clear();
+  CHECK(LoadActorModel(host, 3) == kAssetRefused);
+  CHECK(host.refusals == std::vector<std::string>{"actor texture"});
+  CHECK_FALSE(host.actors[3].has_value());
+  CHECK(HoldsNoActorTextures(host));
+  CHECK(host.low_blocks.size() == 2);
+  CHECK(host.low_frees == host.low_blocks);
+  CHECK(host.retired_pages.empty());
+}
+
+TEST_CASE("A refused actor texture in the fallback slot retires its page",
+          "[content-slice][content][actor-assets]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  AddShpFile(host, 0);
+  host.origins.clear();
+  for (int slot = 0; slot < 12; ++slot) {
+    host.actor_textures.at(Index(slot)).references = 1;
+  }
+  CHECK(LoadActorModel(host, 3) == kAssetRefused);
+  REQUIRE(host.reserved_pages.size() == 1);
+  CHECK(host.actor_textures[20].references == 0);
+  REQUIRE(host.retired_pages.size() == 1);
+  CHECK(host.retired_pages[0].first == 31);
+  CHECK(host.retired_pages[0].count == 1);
+  CHECK_FALSE(host.actors[3].has_value());
+}
+
+TEST_CASE("A refused primitives pass discards the actor on its second frame",
+          "[content-slice][content][actor-assets]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  AddShpFile(host, 1);
+  ActorAssetLoadState state;
+  ActorAssetRequest request = ShpRequest(host, 3);
+  CHECK(LoadActorModel(host, state, request, 2) == kAssetPending);
+  REQUIRE(state.parse_phase == 1);
+  CHECK(Content::UpdateActorModelLoad(host, state, request) == kAssetRefused);
+  CHECK(host.refusals == std::vector<std::string>{"actor primitives"});
+  CHECK(DiscardedActor(host, 3));
+}
+
+TEST_CASE("A refused companion link discards the copied record",
+          "[content-slice][content][actor-assets]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  ActorAssetLoadState state;
+  ActorAssetRequest request = SharedModelRequest(host);
+  request.sub_kind = 9;
+  request.texture_slot = 0xFC;
+  CHECK(Content::UpdateActorModelLoad(host, state, request) == kAssetRefused);
+  CHECK(host.refusals == std::vector<std::string>{"companion parent"});
+  CHECK_FALSE(host.actors[3].has_value());
+  CHECK(host.actors[2].has_value());
+  CHECK(HoldsNoActorTextures(host));
+  CHECK(host.low_frees.empty());
+}
+
+TEST_CASE("Abandoning an actor parse waiting on its primitives discards it",
+          "[content-slice][content][actor-assets][asset-ownership]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  AddShpFile(host, 0);
+  ActorAssetLoadState state;
+  ActorAssetRequest request = ShpRequest(host, 3);
+  CHECK(LoadActorModel(host, state, request, 2) == kAssetPending);
+  REQUIRE(state.parse_phase == 1);
+  Content::AbandonActorAssetLoad(host, state, request);
+  CHECK(state.model_phase == 0);
+  CHECK(state.parse_phase == 0);
+  CHECK(DiscardedActor(host, 3));
+  CHECK(host.high_frees == host.high_blocks);
+  // The slot loads again from the start.
+  CHECK(LoadActorModel(host, 3) == kAssetDone);
+  CHECK(host.reads.size() == 2);
+}
+
+TEST_CASE("A second frame whose actor was released ends the parse",
+          "[content-slice][content][actor-assets]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  AddShpFile(host, 0);
+  ActorAssetLoadState state;
+  ActorAssetRequest request = ShpRequest(host, 3);
+  CHECK(LoadActorModel(host, state, request, 2) == kAssetPending);
+  REQUIRE(state.parse_phase == 1);
+  CHECK(Content::ReleaseActorModel(host, 3) == 0);
+  CHECK(Content::UpdateActorModelLoad(host, state, request) == kAssetRefused);
+  CHECK(host.refusals == std::vector<std::string>{"actor record"});
+  CHECK(state.parse_phase == 0);
+  // The next parse starts from its file instead of a stale second frame.
+  ActorAssetRequest next = ShpRequest(host, 4);
+  CHECK(LoadActorModel(host, state, next) == kAssetDone);
+  CHECK(Required(host.actors[4]).model_id == kShpModel);
 }
 
 TEST_CASE("Modelless actors are placed in the room without a model file",

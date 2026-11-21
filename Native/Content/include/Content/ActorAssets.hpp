@@ -423,6 +423,9 @@ struct ActorAssetLoadState {
   std::int32_t model_header_word = 0;
   std::int32_t model_texture_width = 0;
   std::int32_t model_texture_height = 0;
+  // Native (#492): whether the model parse in progress bound its record, so
+  // a refusal discards only a record the parse created.
+  bool model_record_bound = false;
 
   friend bool operator==(const ActorAssetLoadState&,
                          const ActorAssetLoadState&) = default;

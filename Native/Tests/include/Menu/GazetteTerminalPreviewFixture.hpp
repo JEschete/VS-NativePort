@@ -102,6 +102,7 @@ inline auto PreviewOwners() {
                     BytesOf(VS::Content::legacyEtmFileLocation),
                     BytesOf(VS::Content::legacyEtmDiscRequest),
                     BytesOf(VS::Content::modelParseResetFlag),
+                    BytesOf(VS::Content::modelParseBoundRecord),
                     BytesOf(VS::Content::assetQueuePeakUsage),
                     BytesOf(VS::Content::lastLoadPhaseSnapshot),
                     BytesOf(VS::Content::assetQueueFrameTicks),
@@ -232,6 +233,7 @@ class PreviewFixture : public TerminalFixture {
     DrainAssets();
     // A drained queue leaves no parse in progress over the source file.
     if (VS::Content::modelParseResetFlag != 0 ||
+        VS::Content::modelParseBoundRecord ||
         VS::Content::legacySequenceParsePhase != 0) {
       throw std::runtime_error("terminal source parser did not finish");
     }

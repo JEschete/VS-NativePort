@@ -1608,6 +1608,7 @@ int ParseActorTexture(ActorAssetHost& host, ActorAssetLoadState& state,
     host.StoreActor(target, actor);
     return RefuseActor(host, "actor texture slot count", count);
   }
+  actor.holds_texture_slots = true;
   std::optional<int> slot = FindFreeActorTextureSlots(host, count, first, end);
   if (!slot) {
     if (host.ReserveTexturePages(kFallbackTexturePage, 1) == 0) {
@@ -1673,6 +1674,11 @@ int ParseActorModelFile(ActorAssetHost& host, ActorAssetLoadState& state,
   cursor.Skip(kFileHeaderBytes);
   actor.placement = request.placement;
   actor.is_skipped = true;
+  // Native (#492): set once the texture's references are taken
+  // (ParseActorTexture); the original sets it here, before the texture
+  // branch (30DB0.c:1149), so a refused partial record claimed references
+  // it never took.
+  actor.holds_texture_slots = false;
   const std::uint32_t counts = cursor.U32();
   const std::uint32_t polygons = cursor.U32();
   actor.bone_count = static_cast<std::uint8_t>(counts);
@@ -1714,7 +1720,6 @@ int ParseActorModelFile(ActorAssetHost& host, ActorAssetLoadState& state,
   const std::int32_t skip = cursor.I32();
   cursor.Skip(skip);
   const std::int32_t texture_size = cursor.I32();
-  actor.holds_texture_slots = true;
   if (texture_size == kBorrowedTextureMarker) {
     return BorrowActorTexture(host, state, request, cursor, actor);
   }
@@ -1774,29 +1779,54 @@ int UpdateActorModelLoad(ActorAssetHost& host, ActorAssetLoadState& state,
   return result;
 }
 
-// decomp: BATTLE.PRG _parseShp (src/BATTLE/BATTLE.PRG/30DB0.c:1026)
-int ParseActorModel(ActorAssetHost& host, ActorAssetLoadState& state,
-                    ActorAssetRequest& request) {
-  const int target = TargetSlot(request);
-  if (!ValidActorSlot(host, target)) {
-    return kAssetRefused;
-  }
-  if (state.parse_phase == kParseFixPrimitives) {
-    if (!host.ActorSummary(target).present) {
-      return RefuseActor(host, "actor record", target);
+namespace {
+// Native (#492): discards an actor record a refused parse bound, with what
+// the parse acquired: its model and embedded sequence (unless a peer shares
+// the model), its texture references and the fallback page. No frame has run
+// the model, so it plays no sounds, and the parse sets no battle or common
+// sequence (ResetActorRecordFields clears them).
+void DiscardActorRecord(ActorAssetHost& host, int slot) {
+  if (!host.ActorSummary(slot).present) return;
+  const ActorAssetRecord actor = host.LoadActor(slot);
+  ActorAssetRequest probe;
+  probe.target_slot = static_cast<std::int8_t>(slot);
+  probe.model_id = static_cast<std::int16_t>(actor.model_id);
+  if (FindSharedActorModel(host, probe) == 0) {
+    if (actor.model != AssetAddress::kNone) host.FreeLow(actor.model);
+    if (actor.owned_sequence != AssetAddress::kNone) {
+      host.FreeLow(actor.owned_sequence);
     }
-    return ResumeActorModel(host, state, request);
   }
-  if (state.parse_phase != 0) {
-    return RefuseActor(host, "actor parse phase", state.parse_phase);
+  if (actor.holds_texture_slots && actor.texture_slot != kNoAssetTextureSlot) {
+    for (int i = 0; i <= actor.texture_slot_count_minus_one &&
+                    actor.texture_slot + i < kActorTextureSlots;
+         ++i) {
+      AddTextureReference(host, AssetTextureTable::kActor,
+                          actor.texture_slot + i, -1);
+    }
+    if (actor.texture_slot == kFallbackTextureSlot) {
+      static_cast<void>(host.RetireTexturePages(kFallbackTexturePage, 1));
+    }
   }
-  if (target == 0 && request.model_id == kAshleyModelId) {
-    return ReloadAshleyTexture(host, state, request);
+  host.ClearActorSlot(slot);
+}
+
+// Native (#492): the original's parse could not fail. A parse that ends,
+// refused or not, leaves no second frame pending, and a refused one discards
+// the record it bound; a record present before the parse stays.
+int FinishActorParse(ActorAssetHost& host, ActorAssetLoadState& state,
+                     int target, int result) {
+  if (result == kAssetPending) return result;
+  state.parse_phase = 0;
+  if (result == kAssetRefused && state.model_record_bound) {
+    DiscardActorRecord(host, target);
   }
-  if (!host.ActorSummary(target).present &&
-      !host.BindActorRecord(target, request.destination)) {
-    return kAssetRefused;
-  }
+  state.model_record_bound = false;
+  return result;
+}
+
+int ParseBoundActorModel(ActorAssetHost& host, ActorAssetLoadState& state,
+                         ActorAssetRequest& request) {
   if (request.model_id == kModellessActorId) {
     return PlaceModellessActor(host, state, request);
   }
@@ -1808,6 +1838,37 @@ int ParseActorModel(ActorAssetHost& host, ActorAssetLoadState& state,
     return CopySharedActorModel(host, state, request, *source);
   }
   return ParseActorModelFile(host, state, request);
+}
+}  // namespace
+
+// decomp: BATTLE.PRG _parseShp (src/BATTLE/BATTLE.PRG/30DB0.c:1026)
+int ParseActorModel(ActorAssetHost& host, ActorAssetLoadState& state,
+                    ActorAssetRequest& request) {
+  const int target = TargetSlot(request);
+  if (!ValidActorSlot(host, target)) {
+    return kAssetRefused;
+  }
+  if (state.parse_phase == kParseFixPrimitives) {
+    const int result = host.ActorSummary(target).present
+                           ? ResumeActorModel(host, state, request)
+                           : RefuseActor(host, "actor record", target);
+    return FinishActorParse(host, state, target, result);
+  }
+  if (state.parse_phase != 0) {
+    return RefuseActor(host, "actor parse phase", state.parse_phase);
+  }
+  if (target == 0 && request.model_id == kAshleyModelId) {
+    return ReloadAshleyTexture(host, state, request);
+  }
+  // The original reuses a present record and binds only an empty slot.
+  state.model_record_bound = !host.ActorSummary(target).present;
+  if (state.model_record_bound &&
+      !host.BindActorRecord(target, request.destination)) {
+    state.model_record_bound = false;
+    return kAssetRefused;
+  }
+  return FinishActorParse(host, state, target,
+                          ParseBoundActorModel(host, state, request));
 }
 
 // decomp: BATTLE.PRG func_8009CFB0 (src/BATTLE/BATTLE.PRG/30DB0.c:1920)
@@ -1864,11 +1925,10 @@ int ReleaseActorModel(ActorAssetHost& host, int slot) {
   return 0;
 }
 
-// Native (#48): the original never abandoned a request. An owner's
+// Native (#48, #492): the original never abandoned a request. An owner's
 // cancellation abandons its head between frames: a parse waiting to fix its
-// primitives has bound a record, placed its texture and allocated its
-// model, so the record is released (actors) or discarded (weapons) with
-// them.
+// primitives has placed its texture and allocated its model, so the record
+// it bound is discarded with them.
 void AbandonActorAssetLoad(ActorAssetHost& host, ActorAssetLoadState& state,
                            const ActorAssetRequest& request) {
   if (!IsOwnableActorAssetRequest(request)) return;
@@ -1877,10 +1937,11 @@ void AbandonActorAssetLoad(ActorAssetHost& host, ActorAssetLoadState& state,
   switch (static_cast<ActorAssetKind>(request.kind)) {
     case ActorAssetKind::kActorModelLoad:
     case ActorAssetKind::kActorModelParse:
-      if (mid_parse && target >= 0 && target < kActorRecordSlots &&
-          host.ActorSummary(target).present) {
-        static_cast<void>(ReleaseActorModel(host, target));
+      if (mid_parse && state.model_record_bound && target >= 0 &&
+          target < kActorRecordSlots) {
+        DiscardActorRecord(host, target);
       }
+      state.model_record_bound = false;
       // The host has cancelled the file's read; it frees the file unless the
       // host has.
       if (state.model_file_allocated) {

@@ -61,6 +61,8 @@ using VS::Legacy::RECT;
 std::uint8_t VS::Content::objectDataLoadStep;
 // decomp: D_800E8F29 (D_800E8F29@BATTLE/BATTLE.PRG)
 unsigned char VS::Content::modelParseResetFlag;
+// Native (#492): ActorAssetsLive.hpp.
+bool VS::Content::modelParseBoundRecord;
 // decomp: D_800E8FC4 (D_800E8FC4@BATTLE/BATTLE.PRG)
 int VS::Content::assetQueuePeakUsage;
 // decomp: D_800F457C (D_800F457C@BATTLE/BATTLE.PRG)
@@ -392,6 +394,7 @@ ActorAssetLoadState LoadState() {
   state.model_header_word = legacyShpHeaderWord;
   state.model_texture_width = legacyShpTextureWidth;
   state.model_texture_height = legacyShpTextureHeight;
+  state.model_record_bound = modelParseBoundRecord;
   return state;
 }
 
@@ -414,6 +417,7 @@ void StoreState(const ActorAssetLoadState& state) {
   legacyShpHeaderWord = state.model_header_word;
   legacyShpTextureWidth = state.model_texture_width;
   legacyShpTextureHeight = state.model_texture_height;
+  modelParseBoundRecord = state.model_record_bound;
 }
 
 // --- Weapon records ----------------------------------------------------------

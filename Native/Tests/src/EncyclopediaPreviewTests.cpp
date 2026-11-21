@@ -949,12 +949,12 @@ struct PreviewLifecycleFixture : LivePreviewFixture {
   game_clear_live_tests::SavedGlobals<
       VS::Actors::actorRecords, VS::Actors::weaponModels,
       VS::Content::legacyModelLoadPhase, VS::Content::modelParseResetFlag,
-      VS::Content::legacySequenceParsePhase, VS::Content::legacyShpFileBuffer,
-      VS::Content::legacyShpAllocated, VS::Content::legacyShpFileLocation,
-      VS::Content::legacyShpDiscRequest, VS::Content::legacyShpParseCursor,
-      VS::Content::legacyShpCopiedWordCount, VS::Content::legacyShpHeaderWord,
-      VS::Content::legacyShpTextureWidth, VS::Content::legacyShpTextureHeight,
-      VS::Content::legacyWeaponParseCursor,
+      VS::Content::modelParseBoundRecord, VS::Content::legacySequenceParsePhase,
+      VS::Content::legacyShpFileBuffer, VS::Content::legacyShpAllocated,
+      VS::Content::legacyShpFileLocation, VS::Content::legacyShpDiscRequest,
+      VS::Content::legacyShpParseCursor, VS::Content::legacyShpCopiedWordCount,
+      VS::Content::legacyShpHeaderWord, VS::Content::legacyShpTextureWidth,
+      VS::Content::legacyShpTextureHeight, VS::Content::legacyWeaponParseCursor,
       VS::Content::legacySequenceParseData, VS::Content::legacyShpDiscOffsets,
       VS::Content::legacyShpSectorCounts>
       saved_loader;
@@ -965,6 +965,7 @@ struct PreviewLifecycleFixture : LivePreviewFixture {
     std::ranges::fill(VS::Actors::weaponModels, nullptr);
     VS::Content::legacyModelLoadPhase = 0;
     VS::Content::modelParseResetFlag = 0;
+    VS::Content::modelParseBoundRecord = false;
     VS::Content::legacySequenceParsePhase = 0;
     VS::Content::legacyShpAllocated = 0;
     VS::Content::legacyShpFileBuffer = nullptr;

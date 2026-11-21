@@ -133,6 +133,7 @@ struct AssetStateRestore {
       requests{VS::Content::legacyActorAssetRequests.data()};
   ValueRestore<std::uint8_t> model_phase{VS::Content::legacyModelLoadPhase};
   ValueRestore<unsigned char> parse_phase{VS::Content::modelParseResetFlag};
+  ValueRestore<bool> parse_bound{VS::Content::modelParseBoundRecord};
   ValueRestore<std::uint8_t> sequence_phase{
       VS::Content::legacySequenceParsePhase};
   ValueRestore<std::uint8_t> effect_phase{VS::Content::legacyEtmLoadPhase};
@@ -396,6 +397,7 @@ struct Fixture {
             [](const auto& request) { return request.asset_kind != 0; }) ||
         VS::Content::legacyModelLoadPhase != 0 ||
         VS::Content::modelParseResetFlag != 0 ||
+        VS::Content::modelParseBoundRecord ||
         VS::Content::legacySequenceParsePhase != 0) {
       throw std::runtime_error("terminal fixture requires an idle asset queue");
     }

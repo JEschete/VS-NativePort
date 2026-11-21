@@ -107,6 +107,10 @@ extern std::uint8_t objectDataLoadStep;
 // decomp: D_800E8F29 (BATTLE/BATTLE.PRG 30DB0.c): the parse phase of the
 // model being parsed; 1 while its primitives wait for the second frame.
 extern unsigned char modelParseResetFlag;
+// Native (#492), not a module symbol: whether the model being parsed bound
+// its record (ActorAssetLoadState::model_record_bound); cleared with the
+// parse phase.
+extern bool modelParseBoundRecord;
 // The original's request profile (BATTLE/BATTLE.PRG 30DB0.c:176): the slowest
 // request in VSync(1) scanlines while a model file parsed (D_800E8FC4), its
 // load phase (D_800F457C), the last request's scanlines (D_800F4580) and the
