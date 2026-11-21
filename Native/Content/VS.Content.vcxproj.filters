@@ -54,10 +54,16 @@
     <ClCompile Include="src\DiscReaderLive.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ImageFiles.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ModuleLoader.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\MovieEncoder.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\NativeImage.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\OverlayFiles.cpp">
@@ -76,6 +82,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\SystemResourcesLive.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TimFile.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClInclude Include="include\Content\ActorAssets.hpp">
@@ -126,10 +135,16 @@
     <ClInclude Include="include\Content\DiscReaderLive.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
+    <ClInclude Include="include\Content\ImageFiles.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
     <ClInclude Include="include\Content\ModuleData.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\MovieEncoder.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\NativeImage.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\OverlayFiles.hpp">
@@ -151,6 +166,9 @@
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\SystemResourcesLive.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\TimFile.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClCompile Include="Legacy\LibDs.cpp">
