@@ -298,7 +298,7 @@
     </ClCompile>
     <ClCompile Include="src\Render\RoomDraw.cpp" />
     <ClCompile Include="src\Render\RoomDrawLive.cpp">
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VSLegacyIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Render\RoomLighting.cpp" />
     <ClCompile Include="src\Render\ScaledFont.cpp" />

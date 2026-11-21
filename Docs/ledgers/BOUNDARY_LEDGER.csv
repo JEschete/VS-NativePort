@@ -76,5 +76,5 @@ B0074,Native/Engine/src/Render/ModelGeometryLive.cpp,Engine.Render,Native/Game/s
 B0075,Native/Engine/src/Render/PaletteAnimationLive.cpp,Engine.Render,Native/Game/include/Actors/AppearanceLive.hpp,Game,remaining,
 B0076,Native/Engine/src/Render/PaletteAnimationLive.cpp,Engine.Render,Native/Game/include/Field/BackgroundLive.hpp,Game,remaining,
 B0077,Native/Engine/src/Render/PaletteAnimationLive.cpp,Engine.Render,Native/Game/include/Field/RoomRenderingLive.hpp,Game,remaining,
-B0078,Native/Engine/src/Render/RoomDrawLive.cpp,Engine.Render,Native/Game/src/Field/Room.hpp,Game,remaining,
+B0078,Native/Engine/src/Render/RoomDrawLive.cpp,Engine.Render,Native/Game/src/Field/Room.hpp,Game,resolved,
 B0079,Native/Engine/src/Render/ScreenOverlayLive.cpp,Engine.Render,Native/Game/src/Field/TransitionsLiveState.hpp,Game,remaining,
