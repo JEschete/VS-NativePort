@@ -18,6 +18,7 @@
 #include "Battle/TargetingState.hpp"
 #include "Core/Log.hpp"
 #include "Field/Interactions.hpp"
+#include "Input/Actions.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.hpp"
 #include "Menu/Sounds.hpp"
@@ -26,9 +27,6 @@
 
 using VS::Battle::ActionRequestRecord;
 using VS::Battle::ActionState;
-
-using VS::Legacy::kPadL1;
-using VS::Legacy::kPadR1;
 
 namespace {
 constexpr auto kSlots = std::tuple_size_v<decltype(ActionState::previews)>;
@@ -147,10 +145,11 @@ int VS::Battle::AdvanceTargetPage(int direction) {
 }
 
 int VS::Battle::HandleTargetPageButtons(void) {
-  const auto pressed = VS::Input::buttonsPressed & (kPadL1 | kPadR1);
+  const auto pressed =
+      VS::Input::buttonsPressed & (VS::Input::L1 | VS::Input::R1);
   int changed = 0;
-  if (pressed == kPadL1) changed = VS::Battle::AdvanceTargetPage(-1);
-  if (pressed == kPadR1) changed = VS::Battle::AdvanceTargetPage(1);
+  if (pressed == VS::Input::L1) changed = VS::Battle::AdvanceTargetPage(-1);
+  if (pressed == VS::Input::R1) changed = VS::Battle::AdvanceTargetPage(1);
   if (changed) VS::Menu::PlayChangeSound();
   return changed;
 }

@@ -17,13 +17,9 @@ namespace {
 constexpr std::int32_t kDeadZoneLow = 64;
 constexpr std::int32_t kDeadZoneHigh = 192;
 
-constexpr std::size_t kPacketStatus = 0;
-constexpr std::size_t kPacketButtonsHigh = 2;
-constexpr std::size_t kPacketButtonsLow = 3;
-constexpr std::size_t kPacketRightX = 4;
-constexpr std::size_t kPacketRightY = 5;
-constexpr std::size_t kPacketLeftX = 6;
-constexpr std::size_t kPacketLeftY = 7;
+// main.c:8510: the original inverted the active-low 16-bit pad word into a
+// 32-bit int, which set the upper half.
+constexpr std::uint32_t kActiveLowUpperHalf = 0xFFFF0000U;
 constexpr unsigned kByteBits = std::numeric_limits<std::uint8_t>::digits;
 
 // main.c:8464 and 8476: analog mode, switchable by the player.
@@ -358,9 +354,9 @@ void ConfigureControllerActuators(ControllerPortState& state,
 
 // decomp: SLUS_010.40 vs_main_updatePadState (src/SLUS_010.40/main.c:8486)
 std::uint32_t ReadControllerPort(ControllerPortState& state,
-                                 ControllerPort port, const PadPacket& packet,
+                                 ControllerPort port, const PadSample& sample,
                                  ControllerHost& host) {
-  if (packet[kPacketStatus] != 0) {
+  if (!sample.connected) {
     state.left_stick = {};
     state.right_stick = {};
     return 0;
@@ -368,15 +364,12 @@ std::uint32_t ReadControllerPort(ControllerPortState& state,
   state.kind = QueryKind(port, host);
   std::uint32_t buttons = 0;
   if (ReportsButtons(state.kind)) {
-    buttons = ~(
-        (static_cast<std::uint32_t>(packet[kPacketButtonsHigh]) << kByteBits) |
-        packet[kPacketButtonsLow]);
+    buttons = kActiveLowUpperHalf | sample.buttons;
   }
   state.kind = QueryKind(port, host);
   if (ReportsSticks(state.kind)) {
-    state.left_stick = {.x = packet[kPacketLeftX], .y = packet[kPacketLeftY]};
-    state.right_stick = {.x = packet[kPacketRightX],
-                         .y = packet[kPacketRightY]};
+    state.left_stick = sample.left_stick;
+    state.right_stick = sample.right_stick;
   } else {
     state.left_stick = {};
     state.right_stick = {};
@@ -600,11 +593,11 @@ ControllerFrame UpdateControllers(ControllerState& state,
   auto& [first, second] = state.ports;
   const std::uint32_t first_buttons =
       ReadControllerPort(first, ControllerPort::kFirst,
-                         host.ReceivedPacket(ControllerPort::kFirst), host) &
+                         host.Sample(ControllerPort::kFirst), host) &
       kPortButtonMask;
   const std::uint32_t second_buttons =
       ReadControllerPort(second, ControllerPort::kSecond,
-                         host.ReceivedPacket(ControllerPort::kSecond), host)
+                         host.Sample(ControllerPort::kSecond), host)
       << kSecondPortShift;
   UpdateControllerConnection(first, ControllerPort::kFirst, host);
   UpdateControllerConnection(second, ControllerPort::kSecond, host);

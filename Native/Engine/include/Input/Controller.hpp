@@ -57,10 +57,13 @@ inline constexpr std::uint8_t kStickCenter = 128;
 struct AnalogStick {
   std::uint8_t x = kStickCenter;
   std::uint8_t y = kStickCenter;
+
+  friend bool operator==(const AnalogStick&, const AnalogStick&) = default;
 };
 
 // One controller port (main.h:19 portInfo_t). `left_stick` is the physical
-// left stick (packet bytes 6-7), `right_stick` the right one (bytes 4-5).
+// left stick (receive-buffer bytes 6-7), `right_stick` the right one (bytes
+// 4-5).
 struct ControllerPortState {
   ControllerKind kind = ControllerKind::kNone;
   std::uint8_t extended_id = 0;
@@ -74,10 +77,19 @@ struct ControllerPortState {
 
 using ControllerPorts = std::array<ControllerPortState, kControllerPortCount>;
 
-// A libpad receive buffer: [0] 0 = data valid, [2..3] active-low buttons,
-// [4..7] right X, right Y, left X, left Y.
-inline constexpr std::size_t kPadPacketBytes = 34;
-using PadPacket = std::array<std::uint8_t, kPadPacketBytes>;
+// What one port's controller reports for a tick: the content of the receive
+// buffer libpad filled each vertical blank, without its wire encoding.
+// `buttons` uses the pad word's bit layout (Actions.hpp), set while held.
+// `analog` is a DualShock in analog mode, which reports its sticks.
+struct PadSample {
+  bool connected = false;
+  bool analog = false;
+  std::uint16_t buttons = 0;
+  AnalogStick left_stick;
+  AnalogStick right_stick;
+
+  friend bool operator==(const PadSample&, const PadSample&) = default;
+};
 
 // One held-tick counter per bit of the button word.
 inline constexpr std::size_t kButtonCount = 32;
@@ -117,7 +129,8 @@ struct ControllerFrameOptions {
 
 enum class ControllerFrame : std::uint8_t { kContinue, kSoftReset };
 
-// The pad hardware: libpad on the PS1, LibPad.cpp in the live game.
+// The pad hardware: libpad on the PS1, the submitted device samples in the
+// live game (ControllerLive.hpp).
 class ControllerHost {
  public:
   ControllerHost() = default;
@@ -135,7 +148,8 @@ class ControllerHost {
   virtual void RegisterMotorCommands(ControllerPort port) = 0;
   // Whether the pad accepted the actuator alignment.
   virtual bool AlignMotors(ControllerPort port) = 0;
-  virtual PadPacket ReceivedPacket(ControllerPort port) = 0;
+  // The port's report for the current tick.
+  virtual PadSample Sample(ControllerPort port) = 0;
 };
 
 // One vibration bytecode stream: (frames, level) pairs ending at frames 0.
@@ -213,8 +227,10 @@ void InvalidateControllerConnections(ControllerPorts& ports) noexcept;
 void UnlockAnalogModeSwitch(ControllerPorts& ports, ControllerHost& host);
 void ConfigureControllerActuators(ControllerPortState& state,
                                   ControllerPort port, ControllerHost& host);
+// The port's buttons with bits 16-31 set, as the original's active-low decode
+// returned them; 0 for an empty port or a kind that reports no buttons.
 std::uint32_t ReadControllerPort(ControllerPortState& state,
-                                 ControllerPort port, const PadPacket& packet,
+                                 ControllerPort port, const PadSample& sample,
                                  ControllerHost& host);
 void UpdateControllerConnection(ControllerPortState& state, ControllerPort port,
                                 ControllerHost& host);

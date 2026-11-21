@@ -1101,7 +1101,7 @@ their observable fields/tolerances. A deliberately perturbed input/state produce
 
 ### M3 — Interactive title, input and explicit lifecycle
 
-**Scope/files:** `Game/src/Boot`, `Game/src/Title`, `Engine/src/Input`, `Legacy/Input/LibPad.cpp`, `GameFiber`/`LogicalTicks`;
+**Scope/files:** `Game/src/Boot`, `Game/src/Title`, `Engine/src/Input`, `GameFiber`/`LogicalTicks`;
 EC-05/06/07. This is not the complete music/movie gate.
 
 1. Create separate checkpoints for logos, title art, menu selection, settings, idle/attract transition and New Game.
@@ -1527,13 +1527,15 @@ not strand execution in a blocking wait. No gameplay caller requires root-counte
 
 #### EC-07: Controller protocol translation
 
-**Evidence:** `Native/Engine/src/Input/Pad.cpp`, `Native/Engine/Legacy/Input/LibPad.cpp` (`FeedPad`), and
-`Native/Game/src/Boot/GameApp.cpp`.
+**Evidence:** `Native/Engine/src/Input/Pad.cpp`, `Native/Engine/src/Input/ControllerLive.cpp` (`SubmitLivePad`,
+`LiveRumble`), and `Native/Game/src/Boot/GameApp.cpp`.
 
-SDL input is encoded back into original active-low controller receive buffers so copied controller code can decode it.
-This is a protocol adapter, not a full controller hardware emulator. Actuator calls are currently placeholders.
+Status (#52, in progress): the libpad shim and both 34-byte receive buffers are deleted. The host submits each tick's
+pad as a typed `PadSample` to a native pad link, which answers the game's controller requests (`ControllerHost`), and
+registered motor commands become a `Rumble` request the host applies through `InputSystem::RequestRumble`. Hosts reset
+the link when their game ends. Consumers still read the pad-word bit layout through the legacy controller globals.
 
-**Issue:** game input still depends on buffer layouts, port IDs and legacy connection/mode conventions.
+**Issue:** game input still depends on the pad-word bit layout, port IDs and legacy connection/mode conventions.
 **Retain:** button edges/repeat timings, analog behavior, disconnect semantics and game-specific input rules.
 **Replace:** consumers with native pad/action state; map rumble to the platform implementation with explicit lifetime.
 

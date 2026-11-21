@@ -18,6 +18,7 @@
 #include "Content/StringTables.hpp"
 #include "Core/Log.hpp"
 #include "Field/ChestInteractionsLive.hpp"
+#include "Input/Actions.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -32,12 +33,6 @@
 #include "Render/Text/CompactFont.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "State/StateFlags.hpp"
-
-using VS::Legacy::kPadLleft;
-using VS::Legacy::kPadLright;
-using VS::Legacy::kPadRdown;
-using VS::Legacy::kPadRright;
-using VS::Legacy::kPadRup;
 
 namespace battle_menu_strings = VS::Content::text::battle_prg::menu_strings;
 
@@ -201,11 +196,11 @@ class LiveHost final : public MenuHost {
   RankInput ReadRankInput() override {
     const auto pressed = static_cast<std::uint32_t>(VS::Input::buttonsPressed);
     const auto repeat = static_cast<std::uint32_t>(VS::Input::buttonRepeat);
-    return {.quit = (pressed & kPadRup) != 0,
-            .back = (pressed & kPadRdown) != 0,
-            .confirm = (pressed & kPadRright) != 0,
-            .right = (repeat & kPadLright) != 0,
-            .left = (repeat & kPadLleft) != 0};
+    return {.quit = (pressed & VS::Input::Triangle) != 0,
+            .back = (pressed & VS::Input::Cross) != 0,
+            .confirm = (pressed & VS::Input::Circle) != 0,
+            .right = (repeat & VS::Input::Right) != 0,
+            .left = (repeat & VS::Input::Left) != 0};
   }
   void PlaySound(MenuSound sound) override {
     switch (sound) {

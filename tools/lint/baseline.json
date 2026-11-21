@@ -366,13 +366,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "4146628cf44dc287a468093557dc1b3cfe8768c0f2f5b13d4d23327d4ea5fb75",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/Legacy/Input/LibPad.cpp",
-      "rule": "bugprone-easily-swappable-parameters"
-    },
-    {
       "key": "4398e2fdc02ddbdb917db6c0e638e9a8533852b5f7ddae84e46a8674c652d485",
       "count": 1,
       "tool": "tidy",
@@ -917,13 +910,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "95d24f9eaada86c3a524dafe1175a97c74904817bf482cc0f2907d938cf56f31",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/Legacy/Input/LibPad.cpp",
-      "rule": "bugprone-easily-swappable-parameters"
     },
     {
       "key": "97087c8506f4ccf1a1a3fd5a817594d8e8cf9c2881546297ea388c30598de3a9",

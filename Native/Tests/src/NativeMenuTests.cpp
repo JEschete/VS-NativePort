@@ -29,6 +29,7 @@
 #include "Field/MinimapScene.hpp"
 #include "Field/Mpd.hpp"
 #include "Field/RoomLoading.hpp"
+#include "Input/Actions.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/Categories.hpp"
 #include "Items/InventoryLive.hpp"
@@ -45,13 +46,6 @@
 #include "State/RoomMemory.hpp"
 #include "State/StateFlags.hpp"
 #include "Title/SaveFiles.hpp"
-
-using VS::Legacy::kPadLdown;
-using VS::Legacy::kPadLleft;
-using VS::Legacy::kPadLright;
-using VS::Legacy::kPadLup;
-using VS::Legacy::kPadRdown;
-using VS::Legacy::kPadRright;
 
 namespace {
 namespace fs = std::filesystem;
@@ -315,11 +309,11 @@ void Buttons(int pressed, int repeat = 0) {
 }
 
 void ConfirmSave() {
-  Buttons(kPadRright);
+  Buttons(VS::Input::Circle);
   CHECK(VS::Menu::UpdateLiveDataSaveMenu(0) == 0);
-  Buttons(0, kPadLup);
+  Buttons(0, VS::Input::Up);
   CHECK(VS::Menu::UpdateLiveDataSaveMenu(0) == 0);
-  Buttons(kPadRright);
+  Buttons(VS::Input::Circle);
   CHECK(VS::Menu::UpdateLiveDataSaveMenu(0) == 0);
   Buttons(0);
   CHECK(VS::Menu::UpdateLiveDataSaveMenu(0) == 0);
@@ -347,13 +341,13 @@ void Move(int direction, int (*update)(int)) {
 }
 
 void ChooseYes(int (*update)(int)) {
-  Buttons(kPadRright);
+  Buttons(VS::Input::Circle);
   REQUIRE(update(0) == 0);
   REQUIRE(Screen().confirmation);
   CHECK_FALSE(Screen().affirmative);
-  Move(kPadLup, update);
+  Move(VS::Input::Up, update);
   REQUIRE(Screen().affirmative);
-  Buttons(kPadRright);
+  Buttons(VS::Input::Circle);
   REQUIRE(update(0) == 0);
 }
 
@@ -386,13 +380,13 @@ void CheckStagedBank(const VS::Items::ContainerData* bank) {
 void CheckSelectedSlot(int slot) { CHECK(SelectedSlot() == slot); }
 
 void CheckTitlePickerWrapAndCancel() {
-  Move(kPadLdown, VS::Menu::UpdateLiveLoadMenu);
+  Move(VS::Input::Down, VS::Menu::UpdateLiveLoadMenu);
   CHECK(SelectedSlot() == 0);
-  Move(kPadLup, VS::Menu::UpdateLiveLoadMenu);
+  Move(VS::Input::Up, VS::Menu::UpdateLiveLoadMenu);
   CHECK(SelectedSlot() == 99);
   CHECK(Screen().files.front().slot == 97);
   CHECK(Screen().files.back().slot == 99);
-  Buttons(kPadRdown);
+  Buttons(VS::Input::Cross);
   CHECK(VS::Menu::UpdateLiveLoadMenu(0) == -1);
   CHECK_FALSE(Save::FileMenuPresentation());
 }
@@ -404,13 +398,13 @@ void CheckContainerTail(const VS::Items::ContainerData* bank) {
 }
 
 void CheckVerticalConsent() {
-  Move(kPadLleft, VS::Game::Save::SelectContainer);
+  Move(VS::Input::Left, VS::Game::Save::SelectContainer);
   CHECK_FALSE(Screen().affirmative);
-  Move(kPadLright, VS::Game::Save::SelectContainer);
+  Move(VS::Input::Right, VS::Game::Save::SelectContainer);
   CHECK_FALSE(Screen().affirmative);
-  Move(kPadLup, VS::Game::Save::SelectContainer);
+  Move(VS::Input::Up, VS::Game::Save::SelectContainer);
   CHECK(Screen().affirmative);
-  Move(kPadLdown, VS::Game::Save::SelectContainer);
+  Move(VS::Input::Down, VS::Game::Save::SelectContainer);
   CHECK_FALSE(Screen().affirmative);
 }
 
@@ -449,7 +443,7 @@ TEST_CASE("Native Continue scrolls all one hundred files vertically",
   CHECK(Text(VS::Title::memoryCardMessage) == "Select a file");
   REQUIRE(VS::Title::memoryCardMessage != nullptr);
   for (int slot = 1; slot < 100; ++slot) {
-    Move(kPadLdown, VS::Menu::UpdateLiveLoadMenu);
+    Move(VS::Input::Down, VS::Menu::UpdateLiveLoadMenu);
     CHECK(SelectedSlot() == slot);
     CHECK(Screen().files.front().slot == std::max(0, slot - 2));
   }
@@ -471,9 +465,9 @@ TEST_CASE("Native file screens have three cards without generic row panels",
     CHECK(file.status == Save::FileStatus::kEmpty);
     CHECK_FALSE(file.document);
   }
-  Move(kPadLleft, VS::Menu::UpdateLiveLoadMenu);
+  Move(VS::Input::Left, VS::Menu::UpdateLiveLoadMenu);
   CheckSelectedSlot(0);
-  Move(kPadLright, VS::Menu::UpdateLiveLoadMenu);
+  Move(VS::Input::Right, VS::Menu::UpdateLiveLoadMenu);
   CheckSelectedSlot(0);
 }
 
@@ -509,7 +503,7 @@ TEST_CASE("Native picker never replaces an invalid existing file",
   CHECK(Screen().files.front().status == Save::FileStatus::kInvalid);
   CHECK(Text(VS::Menu::Files::memoryCardMessage) ==
         "Invalid data - not overwritten");
-  Buttons(kPadRright);
+  Buttons(VS::Input::Circle);
   CHECK(VS::Menu::UpdateLiveDataSaveMenu(0) == 0);
   CHECK(Text(VS::Menu::Files::memoryCardMessage) == "No usable native save");
   std::ifstream input(path, std::ios::binary);
@@ -521,12 +515,12 @@ TEST_CASE("Container selection owns typed storage beyond picker reentry",
           "[save-menu]") {
   MenuFixture fixture;
   BeginPicker(VS::Game::Save::SelectContainer, 1);
-  Press(kPadRright, VS::Game::Save::SelectContainer);
+  Press(VS::Input::Circle, VS::Game::Save::SelectContainer);
   REQUIRE(Screen().confirmation);
   CHECK_FALSE(Screen().affirmative);
-  Buttons(0, kPadLup);
+  Buttons(0, VS::Input::Up);
   Tick(VS::Game::Save::SelectContainer);
-  Press(kPadRright, VS::Game::Save::SelectContainer);
+  Press(VS::Input::Circle, VS::Game::Save::SelectContainer);
   Buttons(0);
   REQUIRE(VS::Game::Save::SelectContainer(0) == 1);
   auto* bank = VS::Game::Save::ContainerData();
@@ -543,17 +537,17 @@ TEST_CASE("Native confirmation is vertical explicit consent and cancelable",
           "[save-menu]") {
   MenuFixture fixture;
   BeginPicker(VS::Game::Save::SelectContainer, 1);
-  Press(kPadRright, VS::Game::Save::SelectContainer);
+  Press(VS::Input::Circle, VS::Game::Save::SelectContainer);
   REQUIRE(Screen().confirmation);
   CHECK_FALSE(Screen().affirmative);
   CheckVerticalConsent();
-  Press(kPadRright, VS::Game::Save::SelectContainer);
+  Press(VS::Input::Circle, VS::Game::Save::SelectContainer);
   CheckCanceledConsent(fixture.root);
-  Press(kPadRright, VS::Game::Save::SelectContainer);
+  Press(VS::Input::Circle, VS::Game::Save::SelectContainer);
   CHECK_FALSE(Screen().affirmative);
-  Move(kPadLup, VS::Game::Save::SelectContainer);
+  Move(VS::Input::Up, VS::Game::Save::SelectContainer);
   CHECK(Screen().affirmative);
-  Press(kPadRdown, VS::Game::Save::SelectContainer);
+  Press(VS::Input::Cross, VS::Game::Save::SelectContainer);
   CheckCanceledConsent(fixture.root);
 }
 
@@ -561,11 +555,11 @@ TEST_CASE("Native reentry retains the last file at the end of the scroll",
           "[save-menu]") {
   MenuFixture fixture;
   BeginPicker(VS::Game::Save::SelectContainer, 1);
-  Move(kPadLup, VS::Game::Save::SelectContainer);
+  Move(VS::Input::Up, VS::Game::Save::SelectContainer);
   CheckSelectedSlot(99);
-  Press(kPadRright, VS::Game::Save::SelectContainer);
-  Move(kPadLup, VS::Game::Save::SelectContainer);
-  Press(kPadRright, VS::Game::Save::SelectContainer);
+  Press(VS::Input::Circle, VS::Game::Save::SelectContainer);
+  Move(VS::Input::Up, VS::Game::Save::SelectContainer);
+  Press(VS::Input::Circle, VS::Game::Save::SelectContainer);
   Buttons(0);
   REQUIRE(VS::Game::Save::SelectContainer(0) == 1);
   BeginPicker(VS::Menu::UpdateLiveDataSaveMenu, 2);
@@ -596,7 +590,7 @@ TEST_CASE("Native clear saves require staged original ending inputs",
   MenuFixture fixture;
   REQUIRE(VS::Menu::UpdateLiveSaveMenu(1) == 0);
   CHECK(Text(VS::Title::memoryCardMessage) == "No ending clear save available");
-  Buttons(kPadRright);
+  Buttons(VS::Input::Circle);
   CHECK(VS::Menu::UpdateLiveSaveMenu(0) == -1);
   CHECK(fs::is_empty(fixture.root));
 }
@@ -726,7 +720,7 @@ TEST_CASE("Original ending component writes a distinct native clear save",
   CheckClearSaveProgress(loaded->document);
   CheckClearSaveCarryover(loaded->document);
   CheckClearSaveSession();
-  Buttons(kPadRright);
+  Buttons(VS::Input::Circle);
   CHECK(VS::Menu::UpdateLiveSaveMenu(0) == 1);
   Save::ShutdownFileMenus();
   Save::ConfigureDirectory(fixture.root);
@@ -825,10 +819,10 @@ TEST_CASE("Clear saves retain explicit recovered-file replacement consent",
   ClearInputsFixture ending;
   BeginPicker(VS::Menu::UpdateLiveSaveMenu, 1);
   REQUIRE(Screen().files[0].status == Save::FileStatus::kRecovered);
-  Press(kPadRright, VS::Menu::UpdateLiveSaveMenu);
+  Press(VS::Input::Circle, VS::Menu::UpdateLiveSaveMenu);
   CHECK(Text(VS::Title::memoryCardMessage) == "Replace invalid original");
   CHECK_FALSE(Screen().affirmative);
-  Press(kPadRright, VS::Menu::UpdateLiveSaveMenu);  // Default No.
+  Press(VS::Input::Circle, VS::Menu::UpdateLiveSaveMenu);  // Default No.
   CHECK_FALSE(Screen().confirmation);
   CHECK(FileBytes(path) == original);
   CHECK(FileBytes(path.string() + ".bak") == backup);
@@ -855,7 +849,7 @@ TEST_CASE("Clear-save failure leaves counters and original bytes unchanged",
   Press(0, VS::Menu::UpdateLiveSaveMenu);
   CheckFailedClearSaveChangedNothing(path, original);
   REQUIRE(fs::remove(path.string() + ".lock"));
-  Press(kPadRright, VS::Menu::UpdateLiveSaveMenu);
+  Press(VS::Input::Circle, VS::Menu::UpdateLiveSaveMenu);
   Press(0, VS::Menu::UpdateLiveSaveMenu);
   ChooseYes(VS::Menu::UpdateLiveSaveMenu);
   Press(0, VS::Menu::UpdateLiveSaveMenu);
@@ -872,18 +866,18 @@ TEST_CASE(
   BeginPicker(VS::Menu::UpdateLiveLoadMenu, 2);
   REQUIRE(Screen().files.front().status == Save::FileStatus::kValid);
   CheckSounds(fixture, {});
-  Move(kPadLleft, VS::Menu::UpdateLiveLoadMenu);
-  Move(kPadLright, VS::Menu::UpdateLiveLoadMenu);
+  Move(VS::Input::Left, VS::Menu::UpdateLiveLoadMenu);
+  Move(VS::Input::Right, VS::Menu::UpdateLiveLoadMenu);
   CheckSounds(fixture, {});
-  Press(kPadRright, VS::Menu::UpdateLiveLoadMenu);
+  Press(VS::Input::Circle, VS::Menu::UpdateLiveLoadMenu);
   CheckSounds(fixture, {0, 1, 0, 0, 0});
   CHECK_FALSE(Screen().affirmative);
-  Move(kPadLleft, VS::Menu::UpdateLiveLoadMenu);
-  Move(kPadLright, VS::Menu::UpdateLiveLoadMenu);
+  Move(VS::Input::Left, VS::Menu::UpdateLiveLoadMenu);
+  Move(VS::Input::Right, VS::Menu::UpdateLiveLoadMenu);
   CheckSounds(fixture, {0, 1, 0, 0, 0});
-  Move(kPadLup, VS::Menu::UpdateLiveLoadMenu);
+  Move(VS::Input::Up, VS::Menu::UpdateLiveLoadMenu);
   CheckSounds(fixture, {1, 1, 0, 0, 0});
-  Press(kPadRright, VS::Menu::UpdateLiveLoadMenu);
+  Press(VS::Input::Circle, VS::Menu::UpdateLiveLoadMenu);
   // Both dispatches precede Execute and the C-only gameplay transition.
   CheckSounds(fixture, {1, 2, 0, 0, 0});
   CHECK_FALSE(Save::ResumePending());
@@ -894,22 +888,22 @@ TEST_CASE(
     "[save-menu]") {
   MenuFixture fixture;
   BeginPicker(VS::Game::Save::SelectContainer, 1);
-  Press(kPadRright, VS::Game::Save::SelectContainer);
+  Press(VS::Input::Circle, VS::Game::Save::SelectContainer);
   CheckSounds(fixture, {0, 1, 0, 0, 0});
-  Press(kPadRright, VS::Game::Save::SelectContainer);
+  Press(VS::Input::Circle, VS::Game::Save::SelectContainer);
   CHECK_FALSE(Screen().confirmation);
   CheckSounds(fixture, {0, 1, 1, 0, 0});
-  Press(kPadRright, VS::Game::Save::SelectContainer);
-  Move(kPadLup, VS::Game::Save::SelectContainer);
-  Press(kPadRdown, VS::Game::Save::SelectContainer);
+  Press(VS::Input::Circle, VS::Game::Save::SelectContainer);
+  Move(VS::Input::Up, VS::Game::Save::SelectContainer);
+  Press(VS::Input::Cross, VS::Game::Save::SelectContainer);
   CHECK_FALSE(Screen().confirmation);
   CheckSounds(fixture, {1, 2, 2, 0, 0});
-  Buttons(kPadRdown);
+  Buttons(VS::Input::Cross);
   REQUIRE(VS::Game::Save::SelectContainer(0) == -1);
   CheckSounds(fixture, {1, 2, 3, 0, 0});
 
   BeginPicker(VS::Menu::UpdateLiveDataLoadMenu, 1);
-  Press(kPadRright, VS::Menu::UpdateLiveDataLoadMenu);
+  Press(VS::Input::Circle, VS::Menu::UpdateLiveDataLoadMenu);
   CHECK(Text(VS::Menu::Files::memoryCardMessage) == "No usable native save");
   CheckSounds(fixture, {1, 2, 3, 1, 0});
 }
@@ -923,16 +917,16 @@ TEST_CASE(
   BeginPicker(VS::Menu::UpdateLiveLoadMenu, 2);
   REQUIRE(Screen().files.front().status == Save::FileStatus::kValid);
   REQUIRE(fs::remove(fixture.root / "slot00.vssave"));
-  Move(kPadLup, VS::Menu::UpdateLiveLoadMenu);
+  Move(VS::Input::Up, VS::Menu::UpdateLiveLoadMenu);
   REQUIRE(SelectedSlot() == 99);
-  Buttons(0, kPadLdown);
+  Buttons(0, VS::Input::Down);
   Tick(VS::Menu::UpdateLiveLoadMenu);
   // A reread would show Empty. Cached wrap must also avoid a blank read frame.
   REQUIRE(Screen().files.size() == 3);
   CheckSelectedSlot(0);
   CHECK(Screen().files.front().status == Save::FileStatus::kValid);
   CHECK(Text(VS::Title::memoryCardMessage) == "Select a file");
-  Buttons(kPadRdown);
+  Buttons(VS::Input::Cross);
   REQUIRE(VS::Menu::UpdateLiveLoadMenu(0) == -1);
   BeginPicker(VS::Menu::UpdateLiveLoadMenu, 2);
   CHECK(Screen().files.front().status == Save::FileStatus::kEmpty);
@@ -952,11 +946,11 @@ TEST_CASE("Native revisits keep invalid and missing previews until fresh entry",
     std::ofstream appeared(fixture.root / "slot01.vssave");
     appeared << "new damaged file";
   }
-  Move(kPadLup, VS::Menu::UpdateLiveLoadMenu);
-  Buttons(0, kPadLdown);
+  Move(VS::Input::Up, VS::Menu::UpdateLiveLoadMenu);
+  Buttons(0, VS::Input::Down);
   Tick(VS::Menu::UpdateLiveLoadMenu);
   CheckFirstTwoFiles({Save::FileStatus::kInvalid, Save::FileStatus::kEmpty});
-  Buttons(kPadRdown);
+  Buttons(VS::Input::Cross);
   REQUIRE(VS::Menu::UpdateLiveLoadMenu(0) == -1);
   BeginPicker(VS::Menu::UpdateLiveLoadMenu, 2);
   CheckFirstTwoFiles({Save::FileStatus::kEmpty, Save::FileStatus::kInvalid});
@@ -967,11 +961,11 @@ TEST_CASE("Native browsing surfaces filesystem errors on uncached slots",
   MenuFixture fixture;
   BeginPicker(VS::Menu::UpdateLiveLoadMenu, 2);
   REQUIRE(fs::create_directory(fixture.root / "slot03.vssave"));
-  Move(kPadLdown, VS::Menu::UpdateLiveLoadMenu);
-  Move(kPadLdown, VS::Menu::UpdateLiveLoadMenu);
-  Move(kPadLdown, VS::Menu::UpdateLiveLoadMenu);
+  Move(VS::Input::Down, VS::Menu::UpdateLiveLoadMenu);
+  Move(VS::Input::Down, VS::Menu::UpdateLiveLoadMenu);
+  Move(VS::Input::Down, VS::Menu::UpdateLiveLoadMenu);
   CHECK(Text(VS::Title::memoryCardMessage) == "Cannot read native saves");
-  Buttons(kPadRdown);
+  Buttons(VS::Input::Cross);
   REQUIRE(VS::Menu::UpdateLiveLoadMenu(0) == -1);
 }
 
@@ -1001,7 +995,7 @@ TEST_CASE(
   CHECK(Text(VS::Title::memoryCardMessage) == "File changed - select again");
   CHECK_FALSE(Save::ResumePending());
   CheckSounds(fixture, {1, 2, 0, 0, 0});
-  Press(kPadRdown, VS::Menu::UpdateLiveLoadMenu);
+  Press(VS::Input::Cross, VS::Menu::UpdateLiveLoadMenu);
   Press(0, VS::Menu::UpdateLiveLoadMenu);
   const auto refreshed = Screen().files[0].document;
   REQUIRE(refreshed);
@@ -1042,13 +1036,13 @@ TEST_CASE("Native save retry refreshes previews without losing staged storage",
     std::ofstream appeared(fixture.root / "slot00.vssave");
     appeared << "changed after failed write";
   }
-  Press(kPadRright, VS::Menu::UpdateLiveDataSaveMenu);
+  Press(VS::Input::Circle, VS::Menu::UpdateLiveDataSaveMenu);
   Press(0, VS::Menu::UpdateLiveDataSaveMenu);
   CHECK(Screen().files[0].status == Save::FileStatus::kInvalid);
   REQUIRE(fs::remove(fixture.root / "slot00.vssave"));
-  Press(kPadRright, VS::Menu::UpdateLiveDataSaveMenu);
+  Press(VS::Input::Circle, VS::Menu::UpdateLiveDataSaveMenu);
   REQUIRE(Text(VS::Menu::Files::memoryCardMessage) == "No usable native save");
-  Press(kPadRright, VS::Menu::UpdateLiveDataSaveMenu);
+  Press(VS::Input::Circle, VS::Menu::UpdateLiveDataSaveMenu);
   Press(0, VS::Menu::UpdateLiveDataSaveMenu);
   REQUIRE(Screen().files[0].status == Save::FileStatus::kEmpty);
   ConfirmSave();
@@ -1069,7 +1063,7 @@ TEST_CASE("Native cached previews cannot conceal missing load content",
   Press(0, VS::Menu::UpdateLiveLoadMenu);
   CHECK(Text(VS::Title::memoryCardMessage) == "File changed - select again");
   CHECK_FALSE(Save::ResumePending());
-  Press(kPadRdown, VS::Menu::UpdateLiveLoadMenu);
+  Press(VS::Input::Cross, VS::Menu::UpdateLiveLoadMenu);
   Press(0, VS::Menu::UpdateLiveLoadMenu);
   CHECK(Screen().files[0].status == Save::FileStatus::kInvalid);
   CHECK_FALSE(Screen().files[0].message.empty());

@@ -230,7 +230,6 @@
 #include "Field/TrapsLive.hpp"
 #include "Field/TriggerMarkers.hpp"
 #include "Field/Zone.hpp"
-#include "Input/Controllers.hpp"
 #include "Input/Vibration.hpp"
 #include "Items/Categories.hpp"
 #include "Items/ContainerGemCountsLive.hpp"
@@ -1593,8 +1592,6 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"SLUS_010.40", 0x8004A504u, 24u,
      const_cast<void*>(static_cast<const void*>(&VS::Input::kVibrationPresets)),
      0u, 0u, 0u},
-    {"SLUS_010.40", 0x8004A51Cu, 12u, &VS::Input::legacyActuatorAlignment, 0u,
-     0u, 0u},
     {"SLUS_010.40", 0x8004A528u, 4u, &VS::Title::titleScreenVisitCount,
      sizeof VS::Title::titleScreenVisitCount, 0u, 0u},
     {"SLUS_010.40", 0x8004A52Cu, 4u, &VS::Render::isFrameStepPaused,
@@ -1670,8 +1667,6 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
      sizeof VS::Content::discControlResponseBytes, 1u, 1u},
     {"SLUS_010.40", 0x8005DFD0u, 4u, &VS::Boot::battleReturnStackPointer,
      sizeof VS::Boot::battleReturnStackPointer, 1u, 1u},
-    {"SLUS_010.40", 0x8005DFF0u, 68u, &VS::Input::legacyPadResponseBytes,
-     sizeof VS::Input::legacyPadResponseBytes, 1u, 1u},
     {"SLUS_010.40", 0x8005E038u, 136u, &VS::Audio::soundState,
      sizeof VS::Audio::soundState, 0u, 0u},
     {"SLUS_010.40", 0x8005E0C0u, 8u, &VS::Render::legacyPrimitiveBuffers,

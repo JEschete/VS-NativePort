@@ -1,6 +1,7 @@
 // Hand-maintained (tools/port/owned.csv).
 // Live binding for the controller service (Controller.cpp): the legacy port,
-// button, stick and settings globals, libpad, and the typed vibration slots.
+// button, stick and settings globals, the submitted pad samples and motor
+// links that replace libpad, and the typed vibration slots.
 #include "Input/ControllerLive.hpp"
 
 #include <algorithm>
@@ -21,14 +22,7 @@
 #include "Input/Controller.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Input/Vibration.hpp"
-#include "Legacy/Input/LibPad.hpp"
 #include "State/Timers.hpp"
-
-using VS::Legacy::PadGetState;
-using VS::Legacy::PadInfoMode;
-using VS::Legacy::PadSetAct;
-using VS::Legacy::PadSetActAlign;
-using VS::Legacy::PadSetMainMode;
 
 // decomp: SLUS_010.40 _portInfo, vs_main_buttonsReleased,
 // _buttonHeldFrameCount, vs_main_stickPosBuf, vs_main_buttonRepeat,
@@ -76,8 +70,6 @@ static_assert(
     kMotorCount);
 static_assert(std::size(controllerPorts) == kControllerPortCount);
 static_assert(std::size(buttonHeldFrames) == kButtonCount);
-static_assert(sizeof(legacyPadResponseBytes) ==
-              kControllerPortCount * kPadPacketBytes);
 
 constexpr std::size_t kLegacyStickBytes = 0x10;
 constexpr std::size_t kLegacyStickRightX = 8;
@@ -101,6 +93,24 @@ constexpr std::size_t kMaxPatternBytes = 4096;
 
 std::uint64_t refusedRequests = 0;
 VibrationState liveVibration;
+
+// A port's link to its pad: the submitted report, and whether the game
+// registered its motor commands (PadSetAct) and the pad accepted their
+// alignment (PadSetActAlign).
+struct PadLink {
+  PadSample sample;
+  bool motors_registered = false;
+  bool motors_aligned = false;
+};
+std::array<PadLink, kControllerPortCount> padLinks;
+
+// libpad PadInfoMode answers for a DualShock (psx-spx "Controllers"): its
+// current ID is 7 in analog mode and 4 in digital mode, and its extended ID 7
+// says it can switch modes and has motors.
+constexpr std::int32_t kAnalogPadId = 7;
+constexpr std::int32_t kDigitalPadId = 4;
+constexpr std::int32_t kDualShockExtendedId = 7;
+constexpr std::int32_t kAnalogModeOffset = 1;
 
 // Reports the first occurrence and then every power of two.
 bool Reportable(std::uint64_t count) noexcept {
@@ -172,42 +182,53 @@ void StorePorts(const ControllerPorts& ports) noexcept {
   StorePort(ControllerPort::kSecond, ports[1]);
 }
 
-PadPacket ToPacket(LegacyPadPacket bytes) noexcept {
-  PadPacket packet{};
-  std::ranges::copy(bytes, packet.begin());
-  return packet;
+PadLink& LinkFor(ControllerPort port) noexcept {
+  return std::span(padLinks)[PortIndex(port)];
 }
 
-// libpad over the legacy port records: the registered motor commands are
-// the record's actuator bytes, which the shim reads every frame.
-class LibPadHost final : public ControllerHost {
+// The submitted pads and the motor links in place of libpad. The registered
+// motor commands are the port record's actuator bytes, read when the host
+// loop asks for the rumble (LiveRumble).
+class LivePadHost final : public ControllerHost {
  public:
   std::int32_t QueryMode(ControllerPort port, PadInfoQuery query) override {
-    return PadInfoMode(PortId(port), static_cast<int>(query), 0);
+    const PadSample& sample = LinkFor(port).sample;
+    if (!sample.connected) {
+      return 0;
+    }
+    switch (query) {
+      case PadInfoQuery::kCurrentId:
+        return sample.analog ? kAnalogPadId : kDigitalPadId;
+      case PadInfoQuery::kCurrentExtendedId:
+        return kDualShockExtendedId;
+      case PadInfoQuery::kCurrentModeOffset:
+        return sample.analog ? kAnalogModeOffset : 0;
+    }
+    return 0;
   }
 
-  void SetMainMode(ControllerPort port, std::int32_t mode_offset,
-                   std::uint8_t lock) override {
-    static_cast<void>(PadSetMainMode(PortId(port), mode_offset, lock));
-  }
+  // The submitted pad keeps the mode its device reports.
+  void SetMainMode(ControllerPort /*port*/, std::int32_t /*mode_offset*/,
+                   std::uint8_t /*lock*/) override {}
 
   PadConnection ConnectionState(ControllerPort port) override {
-    return static_cast<PadConnection>(PadGetState(PortId(port)));
+    return LinkFor(port).sample.connected ? PadConnection::kStable
+                                          : PadConnection::kDisconnected;
   }
 
   void RegisterMotorCommands(ControllerPort port) override {
-    PadSetAct(
-        PortId(port),
-        std::span(controllerPorts)[PortIndex(port)].actuator_levels.data(),
-        static_cast<int>(kMotorCount));
+    LinkFor(port).motors_registered = true;
   }
 
+  // _actParams (main.c) assigns command byte 0 to the small motor and byte 1
+  // to the large one, the alignment a DualShock accepts.
   bool AlignMotors(ControllerPort port) override {
-    return PadSetActAlign(PortId(port), legacyActuatorAlignment.data()) != 0;
+    LinkFor(port).motors_aligned = true;
+    return true;
   }
 
-  PadPacket ReceivedPacket(ControllerPort port) override {
-    return std::span(legacyPadResponseBytes)[PortIndex(port)];
+  PadSample Sample(ControllerPort port) override {
+    return LinkFor(port).sample;
   }
 };
 
@@ -283,7 +304,7 @@ ControllerFrame PollLiveControllers() {
       .tick_speed = static_cast<std::uint32_t>(VS::State::tickSpeed),
       .soft_reset_enabled = VS::Boot::isSoftResetEnabled != 0,
   };
-  LibPadHost host;
+  LivePadHost host;
   const ControllerFrame frame =
       UpdateControllers(state, settings, host, options);
   StoreControllerState(state);
@@ -296,6 +317,42 @@ ControllerFrame PollLiveControllers() {
   return frame;
 }
 }  // namespace
+
+void SubmitLivePad(ControllerPort port, const PadState& pad, bool connected) {
+  LinkFor(port).sample = {
+      .connected = connected,
+      .analog = connected && pad.analog,
+      .buttons = static_cast<std::uint16_t>(connected ? pad.held : 0U),
+      .left_stick = {.x = pad.sticks.lx, .y = pad.sticks.ly},
+      .right_stick = {.x = pad.sticks.rx, .y = pad.sticks.ry},
+  };
+}
+
+void ResetLivePadLinks() { padLinks = {}; }
+
+// The levels the libpad shim derived from the registered command bytes: the
+// large motor's byte scaled to the full range, the small motor on or off
+// (main.c:8698 vs_main_setVibrateParams writes them).
+Rumble LiveRumble(ControllerPort port) {
+  const PadLink& link = LinkFor(port);
+  if (!link.sample.connected || !link.sample.analog ||
+      !link.motors_registered || !link.motors_aligned ||
+      VS::Input::settings.vibration_on == 0) {
+    return {};
+  }
+  constexpr unsigned kByteToLevel = 257;
+  constexpr std::uint8_t kSmallMotorOn = 1;
+  const auto& commands =
+      std::span(controllerPorts)[PortIndex(port)].actuator_levels;
+  const std::uint8_t large = commands[static_cast<std::size_t>(Motor::kLarge)];
+  const std::uint8_t small = commands[static_cast<std::size_t>(Motor::kSmall)];
+  return {
+      .low_frequency = static_cast<std::uint16_t>(large * kByteToLevel),
+      .high_frequency = (small & kSmallMotorOn) != 0
+                            ? std::numeric_limits<std::uint16_t>::max()
+                            : std::uint16_t{0},
+  };
+}
 
 VibrationState& LiveVibrationState() noexcept { return liveVibration; }
 
@@ -311,45 +368,45 @@ void InvalidateLiveControllerConnections() {
 
 void UnlockLiveAnalogModeSwitch() {
   ControllerPorts ports = LoadPorts();
-  LibPadHost host;
+  LivePadHost host;
   UnlockAnalogModeSwitch(ports, host);
   StorePorts(ports);
 }
 
-void ConfigureLiveControllerActuators(int port_id, LegacyPadPacket /*packet*/) {
+void ConfigureLiveControllerActuators(int port_id) {
   const std::optional<ControllerPort> port = PortFromId(port_id);
   if (!port) {
     Refused("ConfigureLiveControllerActuators", "unknown port ID", port_id);
     return;
   }
   ControllerPortState state = LoadPort(*port);
-  LibPadHost host;
+  LivePadHost host;
   ConfigureControllerActuators(state, *port, host);
   StorePort(*port, state);
 }
 
-int ReadLiveControllerPort(int port_id, LegacyPadPacket packet) {
+int ReadLiveControllerPort(int port_id) {
   const std::optional<ControllerPort> port = PortFromId(port_id);
   if (!port) {
     Refused("ReadLiveControllerPort", "unknown port ID", port_id);
     return 0;
   }
   ControllerPortState state = LoadPort(*port);
-  LibPadHost host;
+  LivePadHost host;
   const std::uint32_t buttons =
-      ReadControllerPort(state, *port, ToPacket(packet), host);
+      ReadControllerPort(state, *port, host.Sample(*port), host);
   StorePort(*port, state);
   return static_cast<int>(buttons);
 }
 
-void UpdateLiveControllerConnection(int port_id, LegacyPadPacket /*packet*/) {
+void UpdateLiveControllerConnection(int port_id) {
   const std::optional<ControllerPort> port = PortFromId(port_id);
   if (!port) {
     Refused("UpdateLiveControllerConnection", "unknown port ID", port_id);
     return;
   }
   ControllerPortState state = LoadPort(*port);
-  LibPadHost host;
+  LivePadHost host;
   UpdateControllerConnection(state, *port, host);
   StorePort(*port, state);
 }

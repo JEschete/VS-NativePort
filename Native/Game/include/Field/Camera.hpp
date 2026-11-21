@@ -7,6 +7,7 @@
 #include "Actors/ActorPlacement.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/CollisionMap.hpp"
+#include "Input/Actions.hpp"
 
 // The field camera (BATTLE.PRG 146C.c:776-9106): the orbit camera that
 // follows Ashley and the battle action's targets, its zone clamp, tracking
@@ -16,17 +17,17 @@
 namespace VS::Field {
 using CameraVector = Core::Math::Vec3;
 
-// Controller word bits (Legacy/Input/LibPad.hpp).
-inline constexpr std::uint32_t kPadL1 = 1U << 2;
-inline constexpr std::uint32_t kPadR1 = 1U << 3;
-inline constexpr std::uint32_t kPadCross = 1U << 6;
-inline constexpr std::uint32_t kPadSelect = 1U << 8;
-inline constexpr std::uint32_t kPadRightStickButton = 1U << 10;
-inline constexpr std::uint32_t kPadStart = 1U << 11;
-inline constexpr std::uint32_t kPadUp = 1U << 12;
-inline constexpr std::uint32_t kPadRight = 1U << 13;
-inline constexpr std::uint32_t kPadDown = 1U << 14;
-inline constexpr std::uint32_t kPadLeft = 1U << 15;
+// Controller word bits (Input/Actions.hpp).
+inline constexpr std::uint32_t kPadL1 = Input::L1;
+inline constexpr std::uint32_t kPadR1 = Input::R1;
+inline constexpr std::uint32_t kPadCross = Input::Cross;
+inline constexpr std::uint32_t kPadSelect = Input::Select;
+inline constexpr std::uint32_t kPadRightStickButton = Input::R3;
+inline constexpr std::uint32_t kPadStart = Input::Start;
+inline constexpr std::uint32_t kPadUp = Input::Up;
+inline constexpr std::uint32_t kPadRight = Input::Right;
+inline constexpr std::uint32_t kPadDown = Input::Down;
+inline constexpr std::uint32_t kPadLeft = Input::Left;
 
 // controlMode values the camera tests.
 inline constexpr std::uint32_t kControlModeAction = 2;

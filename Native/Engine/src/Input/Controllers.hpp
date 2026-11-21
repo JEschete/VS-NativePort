@@ -1,7 +1,7 @@
 #pragma once
-// The legacy port records and libpad buffers shared by the copied code and
-// libpad (ControllerLiveState.hpp, ControllerLive.cpp). The original built
-// with unsigned char, so every byte is std::uint8_t.
+// The legacy port records shared by the copied code and the controller service
+// (ControllerLiveState.hpp, ControllerLive.cpp). The original built with
+// unsigned char, so every byte is std::uint8_t.
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -24,14 +24,4 @@ struct LegacyControllerPort {
   std::array<std::uint8_t, kMotorCount> actuator_levels;
   std::uint8_t connected;
 };
-
-// decomp: _actParams: the motor alignment table libpad reads.
-inline constexpr std::size_t kActuatorAlignmentBytes = 12;
-using ActuatorAlignment = std::array<std::uint8_t, kActuatorAlignmentBytes>;
-// libpad: an alignment byte of 0xFF leaves that command byte unassigned.
-inline constexpr std::uint8_t kUnassignedActuator = 0xFF;
-
-// decomp: vs_main_padBuffer: libpad's receive buffer for each port.
-extern std::array<PadPacket, kControllerPortCount> legacyPadResponseBytes;
-extern ActuatorAlignment legacyActuatorAlignment;
 }  // namespace VS::Input

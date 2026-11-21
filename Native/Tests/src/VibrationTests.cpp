@@ -15,14 +15,10 @@
 #include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Input/Controllers.hpp"
-#include "Input/LegacyPad.hpp"
 #include "Input/Pad.hpp"
 #include "Input/Vibration.hpp"
-#include "Legacy/Psx.hpp"
 
-using VS::Legacy::PadInitDirect;
-using VS::Legacy::PadSetAct;
-using VS::Legacy::PadSetActAlign;
+using VS::Input::ControllerPort;
 
 namespace {
 struct Command {
@@ -92,27 +88,48 @@ struct VirtualGamepad {
   }
 };
 
+void SubmitAnalogPad() {
+  VS::Input::PadState state;
+  state.analog = true;
+  VS::Input::SubmitLivePad(ControllerPort::kFirst, state, true);
+}
+
+// An analog first pad whose motors the game registered, as after boot's
+// InitializeControllers; Set writes the game's motor command bytes.
 struct ActuatorLease {
   std::uint8_t saved_setting = VS::Input::settings.vibration_on;
-  std::array<unsigned char, 34> response{};
-  std::array<unsigned char, 2> levels{};
-  std::array<unsigned char, 6> alignment{0, 1, 255, 255, 255, 255};
+  std::array<VS::Input::LegacyControllerPort, 2> saved_ports =
+      std::to_array(VS::Input::controllerPorts);
 
   ActuatorLease() {
     VS::Input::settings.vibration_on = 1;
-    PadInitDirect(response.data(), nullptr);
-    VS::Input::PadState state;
-    state.analog = true;
-    VS::Legacy::FeedPad(0, state, true);
-    PadSetAct(0, levels.data(), static_cast<int>(levels.size()));
-    PadSetActAlign(0, alignment.data());
+    VS::Input::ResetLivePadLinks();
+    SubmitAnalogPad();
+    VS::Input::ConfigureLiveControllerActuators(0);
   }
 
+  ActuatorLease(const ActuatorLease&) = delete;
+  ActuatorLease& operator=(const ActuatorLease&) = delete;
+  ActuatorLease(ActuatorLease&&) = delete;
+  ActuatorLease& operator=(ActuatorLease&&) = delete;
+
   ~ActuatorLease() {
-    PadInitDirect(nullptr, nullptr);
+    VS::Input::ResetLivePadLinks();
+    std::ranges::copy(saved_ports, std::begin(VS::Input::controllerPorts));
     VS::Input::settings.vibration_on = saved_setting;
   }
+
+  static void Set(std::uint8_t small, std::uint8_t large) {
+    VS::Input::controllerPorts[0].actuator_levels = {small, large};
+  }
 };
+
+// One host frame: the game's motor commands become the rumble request that
+// InputSystem applies at the start of its update (main.cpp RunLogicalTick).
+const VS::Input::PadState& Tick(VS::Input::InputSystem& input) {
+  input.RequestRumble(VS::Input::LiveRumble(ControllerPort::kFirst));
+  return input.Update();
+}
 
 void Connect(VS::Input::InputSystem& input, SDL_JoystickID id) {
   SDL_Event event{};
@@ -129,7 +146,7 @@ void PumpInputEvents(VS::Input::InputSystem& input) {
 
 void CheckDisconnectedInput(VS::Input::InputSystem& input) {
   CHECK_FALSE(input.HasGamepad());
-  const auto& state = input.Update();
+  const auto& state = Tick(input);
   CHECK_FALSE(state.analog);
   CHECK(state.held == 0);
   CHECK(state.sticks.lx == VS::Input::Sticks::kCenter);
@@ -144,7 +161,7 @@ void HoldCrossAndRight(SDL_Joystick* joystick) {
 
 void CheckAdoptedInput(VS::Input::InputSystem& input) {
   REQUIRE(input.HasGamepad());
-  const auto& state = input.Update();
+  const auto& state = Tick(input);
   CHECK(state.analog);
   CHECK(state.held == (VS::Input::Cross | VS::Input::Right));
   CHECK(state.pressed == (VS::Input::Cross | VS::Input::Right));
@@ -171,9 +188,9 @@ struct RumbleFixture {
     commands.clear();
   }
 
-  void Apply(unsigned char small, unsigned char large) {
-    lease.levels = {small, large};
-    input.Update();
+  void Apply(std::uint8_t small, std::uint8_t large) {
+    ActuatorLease::Set(small, large);
+    Tick(input);
   }
 };
 
@@ -185,8 +202,7 @@ struct PatternState {
 
   PatternState() {
     VS::Input::LiveVibrationState() = {};
-    VS::Input::ConfigureLiveControllerActuators(
-        0, VS::Input::legacyPadResponseBytes[0]);
+    VS::Input::ConfigureLiveControllerActuators(0);
   }
 
   ~PatternState() {
@@ -263,13 +279,13 @@ TEST_CASE("Vibration Off and scripted input stop an active SDL effect",
   fixture.Apply(1, 255);
   CheckLast(fixture.commands, 65535, 65535);
   VS::Input::settings.vibration_on = 0;
-  fixture.input.Update();
+  Tick(fixture.input);
   CheckLast(fixture.commands, 0, 0);
   VS::Input::settings.vibration_on = 1;
-  fixture.input.Update();
+  Tick(fixture.input);
   CheckLast(fixture.commands, 65535, 65535);
   fixture.input.SetDevicesEnabled(false);
-  fixture.input.Update();
+  Tick(fixture.input);
   CheckLast(fixture.commands, 0, 0);
 }
 
@@ -278,17 +294,21 @@ TEST_CASE("Disconnect and pad reset invalidate active actuator output",
   RumbleFixture fixture;
   fixture.Apply(1, 255);
   CheckLast(fixture.commands, 65535, 65535);
-  VS::Legacy::FeedPad(0, {}, false);
-  fixture.input.Update();
+  VS::Input::SubmitLivePad(ControllerPort::kFirst, {}, false);
+  Tick(fixture.input);
   CheckLast(fixture.commands, 0, 0);
-  VS::Input::PadState state;
-  state.analog = true;
-  VS::Legacy::FeedPad(0, state, true);
-  fixture.input.Update();
+  SubmitAnalogPad();
+  Tick(fixture.input);
   CheckLast(fixture.commands, 65535, 65535);
-  PadInitDirect(nullptr, nullptr);
-  fixture.input.Update();
+  VS::Input::ResetLivePadLinks();
+  Tick(fixture.input);
   CheckLast(fixture.commands, 0, 0);
+  // The game's next boot registers its motors again.
+  SubmitAnalogPad();
+  VS::Input::ConfigureLiveControllerActuators(0);
+  ActuatorLease::Set(1, 255);
+  Tick(fixture.input);
+  CheckLast(fixture.commands, 65535, 65535);
 }
 
 TEST_CASE("Closing and removing a gamepad stop its active rumble",
@@ -298,18 +318,18 @@ TEST_CASE("Closing and removing a gamepad stop its active rumble",
   std::vector<Command> commands;
   VirtualGamepad device(commands);
   REQUIRE(device.id != 0);
-  ActuatorLease lease;
-  lease.levels = {1, 255};
+  const ActuatorLease lease;
+  ActuatorLease::Set(1, 255);
   {
     VS::Input::InputSystem input;
     Connect(input, device.id);
-    input.Update();
+    Tick(input);
     CheckLast(commands, 65535, 65535);
   }
   CheckLast(commands, 0, 0);
   VS::Input::InputSystem input;
   Connect(input, device.id);
-  input.Update();
+  Tick(input);
   CheckLast(commands, 65535, 65535);
   // Real detachment removes the SDL rumble callback before the removal event.
   device.Detach();
@@ -321,7 +341,7 @@ TEST_CASE("Closing and removing a gamepad stop its active rumble",
   REQUIRE(reconnected.id != 0);
   PumpInputEvents(input);
   REQUIRE(input.HasGamepad());
-  input.Update();
+  Tick(input);
   CheckLast(commands, 65535, 65535);
 }
 
@@ -335,7 +355,7 @@ TEST_CASE("Gamepad removal adopts an already connected pad without another add",
       SDL_OpenJoystick(replacement.id), SDL_CloseJoystick);
   HoldCrossAndRight(joystick.get());
   PumpInputEvents(fixture.input);
-  const auto& original = fixture.input.Update();
+  const auto& original = Tick(fixture.input);
   CHECK(original.held == 0);
   CHECK(original.sticks.lx == VS::Input::Sticks::kCenter);
 
@@ -359,7 +379,7 @@ TEST_CASE("Removing an inactive gamepad leaves the active pad alone",
   replacement.Detach();
   PumpInputEvents(fixture.input);
   REQUIRE(fixture.input.HasGamepad());
-  CHECK(fixture.input.Update().held == 0);
+  CHECK(Tick(fixture.input).held == 0);
   fixture.Apply(1, 128);
   CheckLast(fixture.commands, 32896, 65535);
   CHECK(replacement_commands.empty());
@@ -378,7 +398,7 @@ TEST_CASE("Gamepad handover reapplies unchanged rumble to the replacement",
   fixture.device.Detach();
   PumpInputEvents(fixture.input);
   REQUIRE(fixture.input.HasGamepad());
-  fixture.input.Update();
+  Tick(fixture.input);
   CheckLast(replacement_commands, 32896, 65535);
   fixture.Apply(0, 0);
   CheckLast(replacement_commands, 0, 0);
@@ -392,25 +412,47 @@ TEST_CASE("Active vibration survives the SDL refresh interval",
   for (int repeat = 0; repeat < 6; ++repeat) {
     SDL_Delay(80);
     SDL_PumpEvents();
-    fixture.input.Update();
+    Tick(fixture.input);
     CheckLast(fixture.commands, 65535, 65535);
   }
   fixture.Apply(0, 0);
   CheckLast(fixture.commands, 0, 0);
 }
 
-TEST_CASE("Unbound and unsupported actuator commands remain silent",
+TEST_CASE("Unregistered digital and absent pads report no rumble",
           "[input][vibration]") {
-  ActuatorLease lease;
-  lease.levels = {1, 255};
-  PadSetAct(0, nullptr, 0);
-  CHECK(VS::Legacy::ReadActuators(0).low_frequency == 0);
-  CHECK(VS::Legacy::ReadActuators(0).high_frequency == 0);
-  PadSetAct(0, lease.levels.data(), 2);
-  lease.alignment[0] = 1;
-  CHECK(PadSetActAlign(0, lease.alignment.data()) == 0);
-  CHECK(VS::Legacy::ReadActuators(0).low_frequency == 0);
-  CHECK(VS::Legacy::ReadActuators(0).high_frequency == 0);
+  const ActuatorLease lease;
+  ActuatorLease::Set(1, 255);
+  constexpr VS::Input::Rumble kFull{.low_frequency = 65535,
+                                    .high_frequency = 65535};
+  CHECK(VS::Input::LiveRumble(ControllerPort::kFirst) == kFull);
+  CHECK(VS::Input::LiveRumble(ControllerPort::kSecond) == VS::Input::Rumble{});
+
+  // Motor commands the game never registered drive nothing.
+  VS::Input::ResetLivePadLinks();
+  SubmitAnalogPad();
+  CHECK(VS::Input::LiveRumble(ControllerPort::kFirst) == VS::Input::Rumble{});
+
+  // A digital pad has no motors to register (main.c:8471).
+  VS::Input::SubmitLivePad(ControllerPort::kFirst, {}, true);
+  VS::Input::ConfigureLiveControllerActuators(0);
+  ActuatorLease::Set(1, 255);
+  CHECK(VS::Input::LiveRumble(ControllerPort::kFirst) == VS::Input::Rumble{});
+  SubmitAnalogPad();
+  CHECK(VS::Input::LiveRumble(ControllerPort::kFirst) == kFull);
+  VS::Input::settings.vibration_on = 0;
+  CHECK(VS::Input::LiveRumble(ControllerPort::kFirst) == VS::Input::Rumble{});
+}
+
+TEST_CASE("A pad sample before the game configures its ports is absent",
+          "[input][vibration][input-controller]") {
+  const ActuatorLease lease;
+  VS::Input::ResetLivePadLinks();
+  CHECK(VS::Input::ReadLiveControllerPort(0) == 0);
+  VS::Input::ConfigureLiveControllerActuators(0);
+  // Configuring an absent pad keeps the digital small-motor command.
+  CHECK(VS::Input::controllerPorts[0].actuator_levels[0] == 0x40);
+  CHECK(VS::Input::LiveRumble(ControllerPort::kFirst) == VS::Input::Rumble{});
 }
 
 TEST_CASE("No selected gamepad safely ignores registered vibration",
@@ -418,10 +460,10 @@ TEST_CASE("No selected gamepad safely ignores registered vibration",
   GamepadSubsystem subsystem;
   REQUIRE(subsystem.ready);
   VS::Input::InputSystem input;
-  ActuatorLease lease;
-  lease.levels = {1, 255};
+  const ActuatorLease lease;
+  ActuatorLease::Set(1, 255);
   CHECK_FALSE(input.HasGamepad());
-  CHECK_FALSE(input.Update().analog);
+  CHECK_FALSE(Tick(input).analog);
 }
 
 TEST_CASE("Original vibration bytecode retains unsigned motor intensities",
@@ -430,7 +472,7 @@ TEST_CASE("Original vibration bytecode retains unsigned motor intensities",
   PatternState pattern;
   REQUIRE(pattern.Start(1) == 1);
   VS::Input::UpdateLiveVibrationPatterns();
-  fixture.input.Update();
+  Tick(fixture.input);
   CheckLast(fixture.commands, 32896, 65535);
 }
 
@@ -443,7 +485,7 @@ TEST_CASE("Both original vibration slots have independent complete envelopes",
   REQUIRE(pattern.Start(1) == 1);
   REQUIRE(pattern.Start(2) == 2);
   VS::Input::UpdateLiveVibrationPatterns();
-  fixture.input.Update();
+  Tick(fixture.input);
   CheckLast(fixture.commands, 65535, 0);
 }
 
@@ -540,17 +582,17 @@ void CheckRumbleCapability(SDL_JoystickID id) {
                                  SDL_PROP_GAMEPAD_CAP_RUMBLE_BOOLEAN, false));
 }
 
-void RunLowHardwarePulse(VS::Input::InputSystem& input, ActuatorLease& lease) {
-  lease.levels = {0, 64};
+void RunLowHardwarePulse(VS::Input::InputSystem& input) {
+  ActuatorLease::Set(0, 64);
   SDL_ClearError();
   for (int tick = 0; tick < 20; ++tick) {
     SDL_PumpEvents();
-    input.Update();
+    Tick(input);
     REQUIRE(std::string(SDL_GetError()).empty());
     SDL_Delay(16);
   }
-  lease.levels = {};
-  input.Update();
+  ActuatorLease::Set(0, 0);
+  Tick(input);
   REQUIRE(std::string(SDL_GetError()).empty());
 }
 
@@ -566,8 +608,8 @@ void RunApprovedHardwareCheck() {
   VS::Input::InputSystem input;
   Connect(input, id);
   CheckRumbleCapability(id);
-  ActuatorLease lease;
-  RunLowHardwarePulse(input, lease);
+  const ActuatorLease lease;
+  RunLowHardwarePulse(input);
 }
 }  // namespace
 

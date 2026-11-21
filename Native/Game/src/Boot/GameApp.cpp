@@ -7,7 +7,8 @@
 #include "Boot/SessionLive.hpp"
 #include "Content/DataAccess.hpp"
 #include "Core/Log.hpp"
-#include "Input/LegacyPad.hpp"
+#include "Input/Controller.hpp"
+#include "Input/ControllerLive.hpp"
 #include "Input/Pad.hpp"
 #include "Platform/GameFiber.hpp"
 #include "Save/NativeMenu.hpp"
@@ -39,6 +40,7 @@ GameApp::~GameApp() {
   m_runner_.reset();
   Save::ShutdownFileMenus();
   VS::Boot::ResetGameplayInspection();
+  Input::ResetLivePadLinks();
 }
 
 bool GameApp::Finished() const { return m_runner_->fiber.Finished(); }
@@ -47,8 +49,13 @@ std::optional<Boot::Mode> GameApp::CurrentMode() const {
   return VS::Boot::LiveSessionMode();
 }
 
+Input::Rumble GameApp::Rumble() const {
+  return Finished() ? Input::Rumble{}
+                    : Input::LiveRumble(Input::ControllerPort::kFirst);
+}
+
 void GameApp::Tick(const Input::PadState& pad, bool pad_connected) {
-  Legacy::FeedPad(0, pad, pad_connected);
+  Input::SubmitLivePad(Input::ControllerPort::kFirst, pad, pad_connected);
   if (!m_runner_->fiber.Resume()) {
     static bool logged = false;
     if (!logged) {

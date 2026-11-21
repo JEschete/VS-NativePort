@@ -22,6 +22,7 @@
 #include "Field/Gimmicks.hpp"
 #include "Field/MinimapScene.hpp"
 #include "Field/Room.hpp"
+#include "Input/Actions.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.hpp"
 #include "Menu/Results/CubePuzzle.hpp"
@@ -283,7 +284,7 @@ void StoreRating(CubePuzzleRating rating) {
 }
 
 [[nodiscard]] bool LiveConfirmPressed() {
-  return (VS::Input::buttonsPressed & VS::Legacy::kPadRright) != 0;
+  return (VS::Input::buttonsPressed & VS::Input::Circle) != 0;
 }
 
 [[nodiscard]] int Finished(CubePuzzleLoad load) {

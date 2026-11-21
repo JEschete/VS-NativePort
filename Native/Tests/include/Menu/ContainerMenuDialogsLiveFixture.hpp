@@ -14,12 +14,11 @@
 #include "Battle/Actor.hpp"
 #include "Boot/OverlayReset.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Input/Controller.hpp"
 #include "Input/ControllerLive.hpp"
-#include "Input/LegacyPad.hpp"
 #include "Items/ContainerTransfersLive.hpp"
 #include "Items/ContainerTransfersLiveFixture.hpp"
 #include "Items/InventoryLive.hpp"
-#include "Legacy/Input/LibPad.hpp"
 #include "Menu/Container/ContainerListTransferLive.hpp"
 #include "Menu/Container/ContainerMenuDialogsLive.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
@@ -94,14 +93,13 @@ struct DialogLiveFixture : equipment::LiveFixture {
     VS::Menu::activeTextBoxOrderingTable = VS::Menu::textBoxOrderingTables;
     VS::Legacy::ClearOTag(VS::Menu::activeTextBoxOrderingTable,
                           kTextOrderingTags);
-    VS::Legacy::PadInitDirect(VS::Input::legacyPadResponseBytes[0].data(),
-                              VS::Input::legacyPadResponseBytes[1].data());
+    VS::Input::ResetLivePadLinks();
     Buttons(0);
   }
   ~DialogLiveFixture() {
     framework::ResetLiveMainMenuStatics();
     dialogs::ResetLiveContainerDialogSession();
-    VS::Legacy::PadInitDirect(nullptr, nullptr);
+    VS::Input::ResetLivePadLinks();
   }
   static std::vector<unsigned char> ReadData(const char* path) {
     std::ifstream stream(path, std::ios::binary);
@@ -129,9 +127,10 @@ struct DialogLiveFixture : equipment::LiveFixture {
         [](unsigned char byte) { return std::byte{byte}; });
   }
   static void Buttons(std::uint32_t buttons) {
-    VS::Legacy::FeedPad(0, VS::Input::PadState{.held = buttons, .sticks = {}},
-                        true);
-    VS::Legacy::FeedPad(1, {}, false);
+    VS::Input::SubmitLivePad(VS::Input::ControllerPort::kFirst,
+                             VS::Input::PadState{.held = buttons, .sticks = {}},
+                             true);
+    VS::Input::SubmitLivePad(VS::Input::ControllerPort::kSecond, {}, false);
     VS::Input::UpdateLiveControllers();
   }
   int Frame(TickFunction update, std::uint32_t buttons = 0) {

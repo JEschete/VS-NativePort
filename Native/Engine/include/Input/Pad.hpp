@@ -6,34 +6,12 @@
 #include <string_view>
 
 #include "Core/Types.hpp"
+#include "Input/Actions.hpp"
 
 union SDL_Event;
 struct SDL_Gamepad;
 
 namespace VS::Input {
-
-// Button bits as the game logic sees them. Values match the original pad word
-// (libetc PADxxx) so ported logic keeps its masks; the hardware behind them is
-// SDL. Player 1 uses bits 0-15, player 2 bits 16-31 (as in
-// vs_main_processPadState).
-enum Button : u32 {
-  L2 = 1u << 0,
-  R2 = 1u << 1,
-  L1 = 1u << 2,
-  R1 = 1u << 3,
-  Triangle = 1u << 4,
-  Circle = 1u << 5,
-  Cross = 1u << 6,
-  Square = 1u << 7,
-  Select = 1u << 8,
-  L3 = 1u << 9,
-  R3 = 1u << 10,  // also set by the game when the left stick is deflected
-  Start = 1u << 11,
-  Up = 1u << 12,
-  Right = 1u << 13,
-  Down = 1u << 14,
-  Left = 1u << 15,
-};
 
 struct Sticks {
   static constexpr u8 kCenter = 128;
@@ -49,6 +27,15 @@ struct PadState {
                      // ticks every 4
   Sticks sticks;
   bool analog = false;
+};
+
+// Gamepad motor levels: the large (low-frequency) and small (high-frequency)
+// motors, 0 = off.
+struct Rumble {
+  u16 low_frequency = 0;
+  u16 high_frequency = 0;
+
+  friend bool operator==(const Rumble&, const Rumble&) = default;
 };
 
 std::string DescribeButtons(u32 mask);
@@ -82,6 +69,9 @@ class InputSystem {
   // Ignore keyboard and gamepad (scripted runs that must not be disturbed by a
   // person at the machine).
   void SetDevicesEnabled(bool enabled) { m_devices_ = enabled; }
+  // The motor levels the next Update drives the gamepad at; ignored while the
+  // devices are disabled.
+  void RequestRumble(Rumble rumble) { m_rumble_request_ = rumble; }
 
  private:
   bool OpenGamepad(u32 instance_id);
@@ -95,8 +85,8 @@ class InputSystem {
   std::array<u32, std::numeric_limits<u32>::digits> m_held_ticks_{};
   u32 m_injected_ = 0;
   bool m_devices_ = true;
-  u16 m_rumble_low_ = 0;
-  u16 m_rumble_high_ = 0;
+  Rumble m_rumble_request_;
+  Rumble m_rumble_;
   u64 m_rumble_updated_ = 0;
   bool m_rumble_error_ = false;
 };

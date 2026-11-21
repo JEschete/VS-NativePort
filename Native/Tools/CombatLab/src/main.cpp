@@ -26,7 +26,8 @@
 #include "Core/FrameTiming.hpp"
 #include "Core/Log.hpp"
 #include "Ending/Credits/StaffRoll.hpp"
-#include "Input/LegacyPad.hpp"
+#include "Input/Controller.hpp"
+#include "Input/ControllerLive.hpp"
 #include "Input/Pad.hpp"
 #include "Legacy/Psx.hpp"
 #include "Movie/MoviePlayer.hpp"
@@ -608,7 +609,7 @@ class LiveSession {
         "host.exit",
         {{"ticks", ticks_}, {"encounter_interrupted", fiber_ != nullptr}},
         ticks_);
-    fiber_.reset();
+    ReleaseEncounter();
     VS::Movie::PlayerClose();
     return rejected_ || sequence_failed_ || sequence_cancelled_ ? 2 : 0;
   }
@@ -1031,11 +1032,18 @@ class LiveSession {
     }
   }
 
+  // Ends the encounter's game code and drops its links to the pad, so its
+  // last motor commands do not drive the gamepad afterwards.
+  void ReleaseEncounter() {
+    fiber_.reset();
+    Input::ResetLivePadLinks();
+  }
+
   // The encounter's game code threw: its fiber already unwound, so the
   // encounter ends here and the lab stays up to configure the next one.
   void FailEncounter(const char* message) {
     VS::Core::LogError("combat-lab", "encounter failed: {}", message);
-    fiber_.reset();
+    ReleaseEncounter();
     help_ = paused_ = false;
     trace_.Event("encounter.failed",
                  {{"number", encounter_number_}, {"message", message}}, ticks_);
@@ -1068,12 +1076,15 @@ class LiveSession {
       }
     }
     input_.Inject(injected);
+    input_.RequestRumble(fiber_
+                             ? Input::LiveRumble(Input::ControllerPort::kFirst)
+                             : Input::Rumble{});
     const auto& pad = input_.Update();
     if (!fiber_) {
       UpdateEditor(pad);
     }
     if (fiber_) {
-      Legacy::FeedPad(0, pad, true);
+      Input::SubmitLivePad(Input::ControllerPort::kFirst, pad, true);
       const auto simulation_start = SDL_GetTicksNS();
       bool running = false;
       try {
@@ -1093,7 +1104,7 @@ class LiveSession {
       trace_timing_.Record(trace_start);
       UpdateScript(state, scene);
       if (!running) {
-        fiber_.reset();
+        ReleaseEncounter();
         help_ = paused_ = false;
         trace_.Event("encounter.end", {{"number", encounter_number_}}, ticks_);
         editor_.Message("ENCOUNTER ENDED - READY TO CONFIGURE OR RESTART");

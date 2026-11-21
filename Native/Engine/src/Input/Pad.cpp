@@ -7,7 +7,7 @@
 #include <string>
 
 #include "Core/Log.hpp"
-#include "Input/LegacyPad.hpp"
+#include "Input/Actions.hpp"
 
 namespace VS::Input {
 
@@ -21,21 +21,7 @@ constexpr u8 kDpadLowThreshold = 16;
 constexpr u8 kDpadHighThreshold = 241;
 constexpr u32 kRumbleDurationMs = 250;
 constexpr u64 kRumbleRefreshMs = 100;
-
-struct NamedBit {
-  u32 bit;
-  const char* name;
-};
-constexpr NamedBit kNames[] = {
-    {Up, "Up"},         {Down, "Down"},
-    {Left, "Left"},     {Right, "Right"},
-    {Cross, "Cross"},   {Circle, "Circle"},
-    {Square, "Square"}, {Triangle, "Triangle"},
-    {L1, "L1"},         {R1, "R1"},
-    {L2, "L2"},         {R2, "R2"},
-    {L3, "L3"},         {R3, "R3"},
-    {Start, "Start"},   {Select, "Select"},
-};
+constexpr Rumble kStillMotors{};
 
 u8 AxisToByte(Sint16 value) {
   return static_cast<u8>((static_cast<i32>(value) + kAxisCenter) >>
@@ -46,12 +32,12 @@ u8 AxisToByte(Sint16 value) {
 
 std::string DescribeButtons(u32 mask) {
   std::string out;
-  for (const auto& named : kNames) {
-    if (mask & named.bit) {
+  for (const Action action : kActions) {
+    if ((mask & ActionBit(action)) != 0) {
       if (!out.empty()) {
         out += '+';
       }
-      out += named.name;
+      out += ActionName(action);
     }
   }
   return out.empty() ? "-" : out;
@@ -61,11 +47,8 @@ u32 ParseButtons(std::string_view names) {
   u32 mask = 0;
   while (!names.empty()) {
     const usize plus = names.find('+');
-    const std::string_view name = names.substr(0, plus);
-    for (const auto& named : kNames) {
-      if (name == named.name) {
-        mask |= named.bit;
-      }
+    if (const auto action = ParseAction(names.substr(0, plus))) {
+      mask |= ActionBit(*action);
     }
     names = plus == std::string_view::npos ? std::string_view{}
                                            : names.substr(plus + 1);
@@ -88,15 +71,14 @@ bool InputSystem::OpenGamepad(u32 instance_id) {
 
 void InputSystem::CloseGamepad() {
   if (m_pad_) {
-    if ((m_rumble_low_ != 0 || m_rumble_high_ != 0) &&
-        !SDL_RumbleGamepad(m_pad_, 0, 0, 0)) {
+    if (m_rumble_ != kStillMotors && !SDL_RumbleGamepad(m_pad_, 0, 0, 0)) {
       SDL_LogWarn(SDL_LOG_CATEGORY_INPUT, "stopping gamepad rumble: %s",
                   SDL_GetError());
     }
     SDL_CloseGamepad(m_pad_);
     m_pad_ = nullptr;
   }
-  m_rumble_low_ = m_rumble_high_ = 0;
+  m_rumble_ = {};
   m_rumble_updated_ = 0;
   m_rumble_error_ = false;
 }
@@ -123,11 +105,9 @@ void InputSystem::HandleEvent(const SDL_Event& ev) {
 
 void InputSystem::UpdateActuators() {
   if (!m_pad_) return;
-  const auto levels =
-      m_devices_ ? Legacy::ReadActuators(0) : Legacy::ActuatorState{};
-  const bool changed = levels.low_frequency != m_rumble_low_ ||
-                       levels.high_frequency != m_rumble_high_;
-  const bool active = levels.low_frequency != 0 || levels.high_frequency != 0;
+  const Rumble levels = m_devices_ ? m_rumble_request_ : kStillMotors;
+  const bool changed = levels != m_rumble_;
+  const bool active = levels != kStillMotors;
   const u64 now = SDL_GetTicks();
   if ((!changed && (!active || now - m_rumble_updated_ < kRumbleRefreshMs)) ||
       (m_rumble_error_ && now - m_rumble_updated_ < kRumbleRefreshMs)) {
@@ -143,8 +123,7 @@ void InputSystem::UpdateActuators() {
     m_rumble_error_ = true;
     return;
   }
-  m_rumble_low_ = levels.low_frequency;
-  m_rumble_high_ = levels.high_frequency;
+  m_rumble_ = levels;
   m_rumble_error_ = false;
 }
 

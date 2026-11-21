@@ -19,7 +19,5 @@ EC-05,Native/Engine/include/Core/Arena.hpp,header
 EC-05,Native/Engine/src/Core/Arena.cpp,source
 EC-05,Native/Engine/src/Core/Overlays.cpp,source
 EC-05,Native/Game/src/Boot/OverlayReset.cpp,source
-EC-07,Native/Engine/Legacy/Input/LibPad.hpp,header
-EC-07,Native/Engine/Legacy/Input/LibPad.cpp,source
 EC-09,Native/Engine/Legacy/Save/LibCard.hpp,header
 EC-09,Native/Engine/Legacy/Save/LibCard.cpp,source

@@ -18,9 +18,7 @@
 #include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Input/Controllers.hpp"
-#include "Input/LegacyPad.hpp"
 #include "Input/Pad.hpp"
-#include "Legacy/Psx.hpp"
 #include "State/Timers.hpp"
 
 namespace {
@@ -37,7 +35,7 @@ std::size_t Index(ControllerPort port) {
   return static_cast<std::size_t>(port);
 }
 
-// Records every libpad request; each port answers from its fields.
+// Records every pad request; each port answers from its fields.
 class FakeHost final : public Input::ControllerHost {
  public:
   struct Port {
@@ -46,7 +44,11 @@ class FakeHost final : public Input::ControllerHost {
     std::int32_t mode_offset = 0;
     PadConnection connection = PadConnection::kStable;
     bool aligns = true;
-    Input::PadPacket packet{};
+    Input::PadSample sample{.connected = true,
+                            .analog = false,
+                            .buttons = 0,
+                            .left_stick = {},
+                            .right_stick = {}};
   };
 
   std::array<Port, Input::kControllerPortCount> ports{};
@@ -86,9 +88,9 @@ class FakeHost final : public Input::ControllerHost {
     return ports.at(Index(port)).aligns;
   }
 
-  Input::PadPacket ReceivedPacket(ControllerPort port) override {
-    Record("packet", port);
-    return ports.at(Index(port)).packet;
+  Input::PadSample Sample(ControllerPort port) override {
+    Record("sample", port);
+    return ports.at(Index(port)).sample;
   }
 
  private:
@@ -102,19 +104,14 @@ class FakeHost final : public Input::ControllerHost {
   }
 };
 
-// A valid libpad packet: active-low buttons, then the right stick (bytes
-// 4-5) and the left stick (bytes 6-7).
-Input::PadPacket Packet(std::uint32_t held, Input::AnalogStick left = {},
+// A connected pad's report: held buttons and both sticks.
+Input::PadSample Sample(std::uint32_t held, Input::AnalogStick left = {},
                         Input::AnalogStick right = {}) {
-  const std::uint32_t inverted = ~held;
-  Input::PadPacket packet{};
-  packet[2] = static_cast<std::uint8_t>(inverted >> 8U);
-  packet[3] = static_cast<std::uint8_t>(inverted);
-  packet[4] = right.x;
-  packet[5] = right.y;
-  packet[6] = left.x;
-  packet[7] = left.y;
-  return packet;
+  return {.connected = true,
+          .analog = true,
+          .buttons = static_cast<std::uint16_t>(held),
+          .left_stick = left,
+          .right_stick = right};
 }
 
 bool ReportsButtons(ControllerKind kind) {
@@ -158,7 +155,7 @@ struct Frames {
   Input::ControllerFrameOptions options;
 
   Frames() {
-    host.ports[1].packet[0] = 0xFF;
+    host.ports[1].sample.connected = false;
     for (Input::ControllerPortState& port : state.ports) {
       port.connected = true;
     }
@@ -166,7 +163,7 @@ struct Frames {
 
   Input::ControllerFrame Run(std::uint32_t held, Input::AnalogStick left = {},
                              Input::AnalogStick right = {}) {
-    host.ports[0].packet = Packet(held, left, right);
+    host.ports[0].sample = Sample(held, left, right);
     return Input::UpdateControllers(state, settings, host, options);
   }
 };
@@ -185,8 +182,6 @@ void StartBothSlots(Input::VibrationState& vibration) {
 struct LiveControllerGlobals {
   std::array<VS::Input::LegacyControllerPort, 2> ports =
       std::to_array(VS::Input::controllerPorts);
-  std::array<VS::Input::PadPacket, Input::kControllerPortCount> packets =
-      VS::Input::legacyPadResponseBytes;
   std::array<std::uint32_t, Input::kButtonCount> held_frames =
       std::to_array(VS::Input::buttonHeldFrames);
   Input::VibrationState vibration = Input::LiveVibrationState();
@@ -207,9 +202,8 @@ struct LiveControllerGlobals {
   LiveControllerGlobals() = default;
 
   ~LiveControllerGlobals() {
-    VS::Legacy::PadInitDirect(nullptr, nullptr);
+    Input::ResetLivePadLinks();
     std::ranges::copy(ports, std::begin(VS::Input::controllerPorts));
-    VS::Input::legacyPadResponseBytes = packets;
     std::ranges::copy(held_frames, std::begin(VS::Input::buttonHeldFrames));
     Input::LiveVibrationState() = vibration;
     VS::Input::releasedButtons = released;
@@ -230,8 +224,7 @@ void PrepareLiveControllers() {
   VS::Boot::isSoftResetEnabled = 0;
   VS::Input::previousButtons = 0;
   std::ranges::fill(VS::Input::buttonHeldFrames, 0U);
-  VS::Legacy::PadInitDirect(VS::Input::legacyPadResponseBytes[0].data(),
-                            VS::Input::legacyPadResponseBytes[1].data());
+  Input::ResetLivePadLinks();
 }
 
 // Feeds an analog first pad with its left stick at (200, 100) and no second.
@@ -243,8 +236,8 @@ void FeedLivePad(std::uint32_t held) {
   pad.sticks.ly = 100;
   pad.sticks.rx = 128;
   pad.sticks.ry = 128;
-  VS::Legacy::FeedPad(0, pad, true);
-  VS::Legacy::FeedPad(1, {}, false);
+  Input::SubmitLivePad(ControllerPort::kFirst, pad, true);
+  Input::SubmitLivePad(ControllerPort::kSecond, {}, false);
 }
 }  // namespace
 
@@ -320,7 +313,7 @@ TEST_CASE("Configuring actuators keeps the digital small motor byte",
   CHECK(host.calls == Calls{"query 0 2", "register 0", "align 0"});
 }
 
-TEST_CASE("An invalid packet centres the sticks and reports no buttons",
+TEST_CASE("An empty port centres the sticks and reports no buttons",
           "[input-controller][input]") {
   FakeHost host;
   Input::ControllerPortState state;
@@ -328,9 +321,9 @@ TEST_CASE("An invalid packet centres the sticks and reports no buttons",
   state.button_bits = 0x12;
   state.left_stick = {.x = 1, .y = 2};
   state.right_stick = {.x = 3, .y = 4};
-  Input::PadPacket packet = Packet(kButtonCross);
-  packet[0] = 0xFF;
-  CHECK(Input::ReadControllerPort(state, ControllerPort::kSecond, packet,
+  Input::PadSample sample = Sample(kButtonCross);
+  sample.connected = false;
+  CHECK(Input::ReadControllerPort(state, ControllerPort::kSecond, sample,
                                   host) == 0);
   CheckCentred(state.left_stick);
   CheckCentred(state.right_stick);
@@ -339,7 +332,7 @@ TEST_CASE("An invalid packet centres the sticks and reports no buttons",
   CHECK(host.calls.empty());
 }
 
-TEST_CASE("Reading a port reports active-low buttons for pad kinds",
+TEST_CASE("Reading a port reports buttons for pad kinds",
           "[input-controller][input]") {
   const auto kind = static_cast<ControllerKind>(GENERATE(range(0, 8)));
   CAPTURE(static_cast<int>(kind));
@@ -347,7 +340,7 @@ TEST_CASE("Reading a port reports active-low buttons for pad kinds",
   host.ports[1].kind = kind;
   Input::ControllerPortState state;
   const std::uint32_t buttons = Input::ReadControllerPort(
-      state, ControllerPort::kSecond, Packet(kButtonLeft | 0x41), host);
+      state, ControllerPort::kSecond, Sample(kButtonLeft | 0x41), host);
   // main.c:8510: the inverted word keeps its upper sixteen bits set.
   const std::uint32_t expected = ReportsButtons(kind) ? 0xFFFF8041U : 0U;
   CHECK(buttons == expected);
@@ -356,7 +349,7 @@ TEST_CASE("Reading a port reports active-low buttons for pad kinds",
   CHECK(host.calls == Calls{"query 1 1", "query 1 1"});
 }
 
-TEST_CASE("Analog kinds report both sticks from their packet bytes",
+TEST_CASE("Analog kinds report both sticks from their sample",
           "[input-controller][input]") {
   const auto kind = static_cast<ControllerKind>(GENERATE(4, 5, 7));
   CAPTURE(static_cast<int>(kind));
@@ -366,7 +359,7 @@ TEST_CASE("Analog kinds report both sticks from their packet bytes",
   state.left_stick = {.x = 1, .y = 1};
   state.right_stick = {.x = 1, .y = 1};
   Input::ReadControllerPort(state, ControllerPort::kFirst,
-                            Packet(0, {.x = 10, .y = 20}, {.x = 30, .y = 40}),
+                            Sample(0, {.x = 10, .y = 20}, {.x = 30, .y = 40}),
                             host);
   if (kind == ControllerKind::kDigital) {
     CheckCentred(state.left_stick);
@@ -785,7 +778,7 @@ TEST_CASE("Preset directories outside their data are refused",
 TEST_CASE("Controller updates combine both ports into held and pressed buttons",
           "[input-controller][input]") {
   Frames frames;
-  frames.host.ports[1].packet = Packet(1U);
+  frames.host.ports[1].sample = Sample(1U);
   CHECK(frames.Run(kButtonCross) == Input::ControllerFrame::kContinue);
   const Input::ButtonState& buttons = frames.state.buttons;
   CHECK(buttons.held == (kButtonCross | 1U << 16U));
@@ -796,15 +789,15 @@ TEST_CASE("Controller updates combine both ports into held and pressed buttons",
   CHECK(buttons.pressed == 0);
   CHECK(buttons.held_ticks[6] == 2);
   CHECK(buttons.held_ticks[16] == 2);
-  CHECK(frames.host.calls.front() == "packet 0");
+  CHECK(frames.host.calls.front() == "sample 0");
 }
 
 TEST_CASE("Controller updates report buttons released since the last frame",
           "[input-controller][input]") {
   Frames frames;
-  frames.host.ports[1].packet = Packet(1U);
+  frames.host.ports[1].sample = Sample(1U);
   frames.Run(kButtonCross);
-  frames.host.ports[1].packet[0] = 0xFF;
+  frames.host.ports[1].sample.connected = false;
   frames.Run(0);
   const Input::ButtonState& buttons = frames.state.buttons;
   CHECK(buttons.released == (kButtonCross | 1U << 16U));
@@ -884,7 +877,9 @@ TEST_CASE("Retired controller entries leave no module address bindings",
                0x8004357CU, 0x800435DCU, 0x80043608U, 0x80043668U, 0x800436B4U,
                0x800438C8U, 0x80043940U, 0x80050118U, 0x80050190U, 0x80055C78U,
                0x80055C90U, 0x8005DFC0U, 0x8005DFDCU, 0x8005E1C0U, 0x8005E1D0U,
-               0x8005E238U, 0x80060020U);
+               0x8005E238U, 0x80060020U,
+               // _actParams and vs_main_padBuffer, libpad's tables.
+               0x8004A51CU, 0x8005DFF0U);
   CAPTURE(address);
   const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40", address) ==
@@ -900,8 +895,7 @@ TEST_CASE("Live controller requests refuse unknown ports motors and patterns",
   Input::SetLiveMotorCommand(2, 0, 0x11);
   Input::SetLiveMotorCommand(0, 2, 0x11);
   Input::SetLiveMotorCommand(-1, 0, 0x11);
-  CHECK(Input::ReadLiveControllerPort(
-            0x20, VS::Input::legacyPadResponseBytes[0]) == 0);
+  CHECK(Input::ReadLiveControllerPort(0x20) == 0);
   CHECK(Input::StartLiveVibrationPattern(nullptr, 1, 0) == 0);
   // A stream with no zero-frame step within the bound is not followed.
   const std::vector<char> unterminated(4096, 1);

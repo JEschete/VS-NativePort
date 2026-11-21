@@ -6,10 +6,7 @@
 
 #include "Boot/Session.hpp"
 #include "Core/Types.hpp"
-
-namespace VS::Input {
-struct PadState;
-}
+#include "Input/Pad.hpp"
 
 namespace VS::Game {
 
@@ -32,6 +29,9 @@ class GameApp {
   // One logical tick: hands the pad to the game and runs it until it waits for
   // the next frame. Rethrows an exception that ended the game.
   void Tick(const Input::PadState& pad, bool pad_connected);
+  // The motor levels the game's vibration gives the first pad, for the host
+  // to apply before the next tick's input; none once the game ended.
+  [[nodiscard]] Input::Rumble Rumble() const;
   // The running session's mode; nullopt before boot and once the game ended.
   std::optional<Boot::Mode> CurrentMode() const;
   u64 Ticks() const { return m_ticks_; }

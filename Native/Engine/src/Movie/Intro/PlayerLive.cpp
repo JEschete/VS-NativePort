@@ -1,6 +1,7 @@
 // Hand-maintained live binding for Movie/Intro/Player.cpp.
 #include <cstdint>
 
+#include "Input/Actions.hpp"
 #include "Input/Buttons.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -13,8 +14,6 @@
 
 using VS::Legacy::ClearImage;
 using VS::Legacy::DISPENV;
-using VS::Legacy::kPadRright;
-using VS::Legacy::kPadStart;
 using VS::Legacy::PutDispEnv;
 using VS::Legacy::RECT;
 using VS::Legacy::SetDefDispEnv;
@@ -44,7 +43,8 @@ class LiveHost final : public Host {
   void WaitTick() override { VS::Platform::WaitTicks(); }
   void UpdateControllers() override { VS::Input::UpdateLiveControllers(); }
   [[nodiscard]] bool SkipRequested() const override {
-    return (VS::Input::buttonsPressed & (kPadRright | kPadStart)) != 0;
+    return (VS::Input::buttonsPressed &
+            (VS::Input::Circle | VS::Input::Start)) != 0;
   }
 
   void ClearPicturePages() override {

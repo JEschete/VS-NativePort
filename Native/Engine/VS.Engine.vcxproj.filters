@@ -10,9 +10,6 @@
     <Filter Include="Legacy\Core">
       <UniqueIdentifier>{8FCFF963-1336-5A31-8A18-21B56C09FCFD}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Legacy\Input">
-      <UniqueIdentifier>{F9500361-2920-5536-AE5B-96CFACBC1EE4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Legacy\Render">
       <UniqueIdentifier>{CEC37E17-3F8E-5DE0-85DC-AD936EF98D2C}</UniqueIdentifier>
     </Filter>
@@ -483,6 +480,9 @@
     <ClCompile Include="src\Core\Unported.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
+    <ClCompile Include="src\Input\Actions.cpp">
+      <Filter>src\Input</Filter>
+    </ClCompile>
     <ClInclude Include="src\Input\Buttons.hpp">
       <Filter>src\Input</Filter>
     </ClInclude>
@@ -490,9 +490,6 @@
       <Filter>src\Input</Filter>
     </ClCompile>
     <ClCompile Include="src\Input\ControllerLive.cpp">
-      <Filter>src\Input</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Input\Controllers.cpp">
       <Filter>src\Input</Filter>
     </ClCompile>
     <ClInclude Include="src\Input\Controllers.hpp">
@@ -1008,6 +1005,9 @@
     <ClInclude Include="include\Core\Unported.hpp">
       <Filter>include\Core</Filter>
     </ClInclude>
+    <ClInclude Include="include\Input\Actions.hpp">
+      <Filter>include\Input</Filter>
+    </ClInclude>
     <ClInclude Include="include\Input\Controller.hpp">
       <Filter>include\Input</Filter>
     </ClInclude>
@@ -1015,9 +1015,6 @@
       <Filter>include\Input</Filter>
     </ClInclude>
     <ClInclude Include="include\Input\ControllerLiveState.hpp">
-      <Filter>include\Input</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Input\LegacyPad.hpp">
       <Filter>include\Input</Filter>
     </ClInclude>
     <ClInclude Include="include\Input\Pad.hpp">
@@ -1190,12 +1187,6 @@
     </ClInclude>
     <ClInclude Include="Legacy\Core\PsxTypes.hpp">
       <Filter>Legacy\Core</Filter>
-    </ClInclude>
-    <ClCompile Include="Legacy\Input\LibPad.cpp">
-      <Filter>Legacy\Input</Filter>
-    </ClCompile>
-    <ClInclude Include="Legacy\Input\LibPad.hpp">
-      <Filter>Legacy\Input</Filter>
     </ClInclude>
     <ClInclude Include="Legacy\Psx.hpp">
       <Filter>Legacy</Filter>

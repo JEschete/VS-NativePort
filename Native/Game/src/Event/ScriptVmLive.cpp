@@ -63,6 +63,7 @@
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/RoomStateLive.hpp"
 #include "Field/TransitionsLive.hpp"
+#include "Input/Actions.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/InventoryLive.hpp"
@@ -456,7 +457,7 @@ class LiveVmHost final : public ScriptVmHost {
   }
   void ClearHeldButtons() override { VS::Input::buttonsPressed = 0; }
   bool StartPressed() const override {
-    return (VS::Input::buttonsPressed & VS::Legacy::kPadStart) != 0;
+    return (VS::Input::buttonsPressed & VS::Input::Start) != 0;
   }
   std::uint8_t PressedButtonsLowByte() const override {
     return VS::Input::LowButtonByte(VS::Input::buttonsPressed);

@@ -226,12 +226,10 @@
     <ClCompile Include="src\Core\String\GameText.cpp" />
     <ClCompile Include="src\Core\String\GameTextLive.cpp" />
     <ClCompile Include="src\Core\Unported.cpp" />
+    <ClCompile Include="src\Input\Actions.cpp" />
     <ClCompile Include="src\Input\Controller.cpp" />
     <ClCompile Include="src\Input\ControllerLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
-    <ClCompile Include="src\Input\Controllers.cpp">
-      <AdditionalIncludeDirectories>$(VSLegacyIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Input\Pad.cpp" />
     <ClCompile Include="src\Input\Vibration.cpp">
@@ -352,9 +350,6 @@
     <ClCompile Include="src\Save\SaveStore.cpp" />
     <ClCompile Include="src\Save\Snapshot.cpp" />
     <ClCompile Include="Legacy\Audio\LibSpu.cpp">
-      <AdditionalIncludeDirectories>$(VSLegacyIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
-    <ClCompile Include="Legacy\Input\LibPad.cpp">
       <AdditionalIncludeDirectories>$(VSLegacyIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="Legacy\Render\LibGpu.cpp">
@@ -497,10 +492,10 @@
     <ClInclude Include="include\Core\Text\TextCode.hpp" />
     <ClInclude Include="include\Core\Types.hpp" />
     <ClInclude Include="include\Core\Unported.hpp" />
+    <ClInclude Include="include\Input\Actions.hpp" />
     <ClInclude Include="include\Input\Controller.hpp" />
     <ClInclude Include="include\Input\ControllerLive.hpp" />
     <ClInclude Include="include\Input\ControllerLiveState.hpp" />
-    <ClInclude Include="include\Input\LegacyPad.hpp" />
     <ClInclude Include="include\Input\Pad.hpp" />
     <ClInclude Include="include\Input\Settings.hpp" />
     <ClInclude Include="include\Movie\IntroPlayer.hpp" />
@@ -557,7 +552,6 @@
     <ClInclude Include="include\Save\Snapshot.hpp" />
     <ClInclude Include="Legacy\Audio\LibSpu.hpp" />
     <ClInclude Include="Legacy\Core\PsxTypes.hpp" />
-    <ClInclude Include="Legacy\Input\LibPad.hpp" />
     <ClInclude Include="Legacy\Psx.hpp" />
     <ClInclude Include="Legacy\Render\LibGpu.hpp" />
     <ClInclude Include="Legacy\Save\LibCard.hpp" />

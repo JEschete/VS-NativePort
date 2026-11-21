@@ -54,6 +54,13 @@ The 2026-11-21 logical-tick migration (#44) deletes the libetc shim (`LibEtc.hpp
 `VSyncCallback` are deleted. These rows are marked `[x]`. The fiber lifecycle and cadence gates then closed and
 EC-06 is retired (#44; plan §15 EC-06).
 
+The 2026-11-21 controller migration (#52) deletes the libpad shim (`LibPad.hpp/.cpp`). The game's controller
+requests reach a native pad link (`Engine/src/Input/ControllerLive.cpp`) that answers from typed `PadSample`
+state; registered motor commands become a `Rumble` request the host passes to `InputSystem::RequestRumble`.
+`PadInitDirect`, `PadStartCom`, `PadGetState`, `PadInfoMode`, `PadSetMainMode`, `PadSetAct`, `PadSetActAlign` and
+the `InfoMode*`/`PadStateStable` constants are marked `[x]`. The `PAD*` button constants stay open until their
+consumers use native actions.
+
 ## libgpu â†’ Graphics (78 symbols, 1742 uses)
 
 Target: VS.Render: PrimitiveList adapter -> RenderQueue (sprites/meshes/quads), Texture/VRAM-page cache, framebuffer readback API
@@ -205,19 +212,19 @@ Target: VS.Input: ActionState snapshot per frame, rumble
 | [ ] | R | `PADRleft` | constant | 21 | 10 | BATTLE.PRG (9), MENU (3), MENU4.PRG (2), MENUE.PRG (2), MAINMENU.PRG (1), MENU2.PRG (1), MENU3.PRG (1), MENU8.PRG (1), MENUB.PRG (1) |
 | [x] | R | `PADL2` | constant | 5 | 5 | BATTLE.PRG (1), MENU4.PRG (1), MENU5.PRG (1), MENU9.PRG (1), SLUS_010.40 (1) |
 | [ ] | R | `PADR2` | constant | 5 | 5 | BATTLE.PRG (2), MENU5.PRG (1), MENU9.PRG (1), SLUS_010.40 (1) |
-| [ ] | R | `PadInfoMode` | function | 5 | 1 | SLUS_010.40 (5) |
-| [ ] | R | `InfoModeCurExID` | constant | 2 | 1 | SLUS_010.40 (2) |
-| [ ] | R | `InfoModeCurID` | constant | 2 | 1 | SLUS_010.40 (2) |
-| [ ] | R | `PadSetAct` | function | 2 | 1 | SLUS_010.40 (2) |
-| [ ] | R | `PadSetActAlign` | function | 2 | 1 | SLUS_010.40 (2) |
-| [ ] | R | `PadSetMainMode` | function | 2 | 1 | SLUS_010.40 (2) |
-| [ ] | R | `InfoModeCurExOffs` | constant | 1 | 1 | SLUS_010.40 (1) |
-| [ ] | R | `PadGetState` | function | 1 | 1 | SLUS_010.40 (1) |
-| [ ] | R | `PadInitDirect` | function | 1 | 1 | SLUS_010.40 (1) |
-| [ ] | R | `PadStartCom` | function | 1 | 1 | SLUS_010.40 (1) |
+| [x] | R | `PadInfoMode` | function | 5 | 1 | SLUS_010.40 (5) |
+| [x] | R | `InfoModeCurExID` | constant | 2 | 1 | SLUS_010.40 (2) |
+| [x] | R | `InfoModeCurID` | constant | 2 | 1 | SLUS_010.40 (2) |
+| [x] | R | `PadSetAct` | function | 2 | 1 | SLUS_010.40 (2) |
+| [x] | R | `PadSetActAlign` | function | 2 | 1 | SLUS_010.40 (2) |
+| [x] | R | `PadSetMainMode` | function | 2 | 1 | SLUS_010.40 (2) |
+| [x] | R | `InfoModeCurExOffs` | constant | 1 | 1 | SLUS_010.40 (1) |
+| [x] | R | `PadGetState` | function | 1 | 1 | SLUS_010.40 (1) |
+| [x] | R | `PadInitDirect` | function | 1 | 1 | SLUS_010.40 (1) |
+| [x] | R | `PadStartCom` | function | 1 | 1 | SLUS_010.40 (1) |
 | [x] | R | `PadStateFindCTP1` | constant | 1 | 1 | SLUS_010.40 (1) |
 | [x] | R | `PadStateFindPad` | constant | 1 | 1 | SLUS_010.40 (1) |
-| [ ] | R | `PadStateStable` | constant | 1 | 1 | SLUS_010.40 (1) |
+| [x] | R | `PadStateStable` | constant | 1 | 1 | SLUS_010.40 (1) |
 
 ## crt â†’ Core (7 symbols, 264 uses)
 

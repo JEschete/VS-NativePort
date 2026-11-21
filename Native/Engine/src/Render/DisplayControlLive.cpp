@@ -142,18 +142,14 @@ class LiveFieldFrame final : public FieldFrameHost {
   // The original polled both pads inline (146C.c:5998-6008).
   std::uint32_t PollSecondControllerPressed() override {
     const auto first =
-        static_cast<std::uint16_t>(VS::Input::ReadLiveControllerPort(
-            0, VS::Input::legacyPadResponseBytes[0]));
+        static_cast<std::uint16_t>(VS::Input::ReadLiveControllerPort(0));
     VS::Input::buttonsState = first;
-    const auto second =
-        static_cast<std::uint32_t>(VS::Input::ReadLiveControllerPort(
-            kSecondPortShift, VS::Input::legacyPadResponseBytes[1]));
+    const auto second = static_cast<std::uint32_t>(
+        VS::Input::ReadLiveControllerPort(kSecondPortShift));
     const std::uint32_t state = first | (second << kSecondPortShift);
     VS::Input::buttonsState = static_cast<int>(state);
-    VS::Input::UpdateLiveControllerConnection(
-        0, VS::Input::legacyPadResponseBytes[0]);
-    VS::Input::UpdateLiveControllerConnection(
-        kSecondPortShift, VS::Input::legacyPadResponseBytes[1]);
+    VS::Input::UpdateLiveControllerConnection(0);
+    VS::Input::UpdateLiveControllerConnection(kSecondPortShift);
     const auto previous =
         static_cast<std::uint32_t>(VS::Input::previousButtons);
     const std::uint32_t pressed = ~previous & state;

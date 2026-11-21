@@ -13,6 +13,7 @@
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Core/Text/TextCode.hpp"
+#include "Input/Actions.hpp"
 #include "Input/Buttons.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.hpp"
@@ -41,10 +42,6 @@ using VS::Legacy::getClut;
 using VS::Legacy::getTPage;
 using VS::Legacy::GpuHandle;
 using VS::Legacy::isendprim;
-using VS::Legacy::kPadLdown;
-using VS::Legacy::kPadRdown;
-using VS::Legacy::kPadRright;
-using VS::Legacy::kPadStart;
 using VS::Legacy::LINE_G2;
 using VS::Legacy::nextPrim;
 using VS::Legacy::P_TAG;
@@ -102,11 +99,11 @@ struct EmptySlotsFixture {
   void CheckEmptySlotInput() const {
     files::Context context = LiveFiles();
     for (size_t index = 0; index < summaries.size(); ++index) {
-      VS::Input::buttonsPressed = kPadRright;
+      VS::Input::buttonsPressed = VS::Input::Circle;
       CHECK(files::UpdateLoadFiles(context, 0) == 0);
       CHECK(VS::Menu::Files::selectCursorXy != 0);
       VS::Input::buttonsPressed = 0;
-      VS::Input::buttonRepeat = kPadLdown;
+      VS::Input::buttonRepeat = VS::Input::Down;
       CHECK(files::UpdateLoadFiles(context, 0) == 0);
       VS::Input::buttonRepeat = 0;
     }
@@ -232,7 +229,7 @@ TEST_CASE("Game Over fade links packets through native handles",
     CHECK(files::UpdateGameOverChoices(context, false) == 0);
   }
 
-  VS::Input::buttonsPressed = kPadStart;
+  VS::Input::buttonsPressed = VS::Input::Start;
   CHECK(files::UpdateGameOverChoices(context, false) == 0);
   VS::Input::buttonsPressed = 0;
   const auto* fade_packet = VS::Render::FrameScratchpad().primitive_cursor;
@@ -254,7 +251,7 @@ TEST_CASE("Empty Load summaries remain unavailable and can be cancelled",
     CHECK(files::LiveFilesState().elements[index + 5].slot_unavailable != 0);
   }
   fixture.CheckEmptySlotInput();
-  VS::Input::buttonsPressed = kPadRdown;
+  VS::Input::buttonsPressed = VS::Input::Cross;
   CHECK(files::UpdateLoadFiles(context, 0) == -1);
   CHECK(VS::Menu::Files::selectCursorXy == 0);
 }

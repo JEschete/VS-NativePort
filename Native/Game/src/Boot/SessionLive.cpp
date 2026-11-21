@@ -66,8 +66,6 @@
 
 using VS::Legacy::ClearImage;
 using VS::Legacy::InitCARD;
-using VS::Legacy::PadInitDirect;
-using VS::Legacy::PadStartCom;
 using VS::Legacy::RECT;
 using VS::Legacy::SetDispMask;
 using VS::Legacy::StartCARD;
@@ -225,10 +223,8 @@ class LiveLifecycleHost final : public OverlayLoadHost,
     VS::Input::SetLiveMotorCommand(0, 1, 0);
   }
   void RefreshControllers() override {
-    VS::Input::UpdateLiveControllerConnection(
-        kFirstPadPortId, VS::Input::legacyPadResponseBytes[0]);
-    VS::Input::UpdateLiveControllerConnection(
-        kSecondPadPortId, VS::Input::legacyPadResponseBytes[1]);
+    VS::Input::UpdateLiveControllerConnection(kFirstPadPortId);
+    VS::Input::UpdateLiveControllerConnection(kSecondPadPortId);
   }
   void ShutdownAudio() override { VS::Audio::Playback::LiveShutdown(); }
   void WaitTicks(int count) override { VS::Platform::WaitTicks(count); }
@@ -261,14 +257,13 @@ class LiveLifecycleHost final : public OverlayLoadHost,
   void InitializeMemoryCard() override { InitCARD(0); }
   void StartMemoryCard() override { StartCARD(); }
   void InitializeControllers() override {
-    PadInitDirect(VS::Input::legacyPadResponseBytes[0].data(),
-                  VS::Input::legacyPadResponseBytes[1].data());
-    VS::Input::ConfigureLiveControllerActuators(
-        kFirstPadPortId, VS::Input::legacyPadResponseBytes[0]);
-    VS::Input::ConfigureLiveControllerActuators(
-        kSecondPadPortId, VS::Input::legacyPadResponseBytes[1]);
+    VS::Input::ResetLivePadLinks();
+    VS::Input::ConfigureLiveControllerActuators(kFirstPadPortId);
+    VS::Input::ConfigureLiveControllerActuators(kSecondPadPortId);
   }
-  void StartControllerCommunication() override { PadStartCom(); }
+  // libpad began polling the ports here; the host loop submits them each
+  // logical tick instead (VS::Input::SubmitLivePad).
+  void StartControllerCommunication() override {}
   void UnlockAnalogModeSwitch() override {
     VS::Input::UnlockLiveAnalogModeSwitch();
   }

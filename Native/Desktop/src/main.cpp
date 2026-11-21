@@ -436,6 +436,7 @@ bool RunLogicalTick(Game::GameApp& game, Input::InputSystem& input,
   watchdog.Pulse(game.Ticks() + 1);
   BeginLogicalTick(game.Ticks() + 1);
   input.Inject(settings.script.MaskAt(game.Ticks() + 1));
+  input.RequestRumble(game.Rumble());
   const auto& pad = input.Update();
   if (pad.pressed) {
     VS::Core::LogInfo("input", "pressed {}",

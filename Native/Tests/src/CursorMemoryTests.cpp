@@ -25,6 +25,7 @@
 #include "Field/Gimmicks.hpp"
 #include "Field/Mpd.hpp"
 #include "Field/Room.hpp"
+#include "Input/Actions.hpp"
 #include "Input/Buttons.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/EquipmentLive.hpp"
@@ -666,7 +667,7 @@ TEST_CASE("Workshop repair restores DP with original rounded PP cost",
   CAPTURE(missing, pp);
   WorkshopRepairFixture fixture(missing, pp);
   const auto original = VS::Items::inventory;
-  fixture.Prompt(VS::Legacy::kPadRdown);
+  fixture.Prompt(VS::Input::Cross);
   CHECK(std::memcmp(&original, &VS::Items::inventory, sizeof(original)) == 0);
   REQUIRE(fixture.Tick() == -1);
   auto expected = original;
@@ -679,7 +680,7 @@ TEST_CASE("Workshop repair restores DP with original rounded PP cost",
   repaired(expected.shields[0].base);
   repaired(expected.armor[0]);
   for (int repeat = 0; repeat < 2; ++repeat) {
-    fixture.Prompt(VS::Legacy::kPadRright);
+    fixture.Prompt(VS::Input::Circle);
     REQUIRE(fixture.Tick() == 0);
     CHECK(std::memcmp(&expected, &VS::Items::inventory, sizeof(expected)) == 0);
     REQUIRE(fixture.Tick() == 0);
@@ -730,7 +731,7 @@ TEST_CASE("Workshop repair refreshes equipped runtime DP and PP",
   REQUIRE(fixture.stats.weapon.current_dp == 10000 - missing);
   REQUIRE(fixture.stats.shield.current_dp == 10000 - missing);
   REQUIRE(fixture.stats.limbs[0].armor.current_dp == 10000 - missing);
-  fixture.Prompt(VS::Legacy::kPadRright);
+  fixture.Prompt(VS::Input::Circle);
   REQUIRE(fixture.Tick() == 0);
   const std::array<int, 5> actual{
       fixture.stats.weapon.current_dp, fixture.stats.shield.current_dp,

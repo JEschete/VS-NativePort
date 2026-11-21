@@ -11,6 +11,7 @@
 
 #include "Core/Memory/Heap.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Input/Actions.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.hpp"
 #include "Menu/Manual.hpp"
@@ -585,7 +586,7 @@ TEST_CASE(
     "Live scroll fades link the arrow rows tiles and page into the fade slot",
     "[manual-page-live]") {
   PageFrame frame;
-  VS::Input::previousButtons = VS::Legacy::kPadRleft;
+  VS::Input::previousButtons = VS::Input::Square;
   manual::pageArrowAnimState = 4;
   manual::LiveDrawUpperScrollFade();
   CheckLiveUpperFade(frame);

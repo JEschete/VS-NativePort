@@ -10,10 +10,9 @@
 
 #include "Boot/OverlayReset.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Input/Controller.hpp"
 #include "Input/ControllerLive.hpp"
-#include "Input/LegacyPad.hpp"
 #include "Items/ContainerTransfersLiveFixture.hpp"
-#include "Legacy/Input/LibPad.hpp"
 #include "Menu/Container/ContainerPendingRowsLive.hpp"
 #include "Menu/ContainerPendingRowsWorld.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
@@ -80,13 +79,12 @@ struct PendingRowsLiveFixture : equipment::LiveFixture {
     VS::Menu::activeTextBoxOrderingTable = VS::Menu::textBoxOrderingTables;
     VS::Legacy::ClearOTag(VS::Menu::activeTextBoxOrderingTable,
                           kTextOrderingEntries);
-    VS::Legacy::PadInitDirect(VS::Input::legacyPadResponseBytes[0].data(),
-                              VS::Input::legacyPadResponseBytes[1].data());
+    VS::Input::ResetLivePadLinks();
     Buttons(0);
   }
   ~PendingRowsLiveFixture() {
     framework::ResetLiveMainMenuStatics();
-    VS::Legacy::PadInitDirect(nullptr, nullptr);
+    VS::Input::ResetLivePadLinks();
   }
   static void CopyText(const char* path, std::span<std::byte> target,
                        std::size_t expected_bytes) {
@@ -99,9 +97,10 @@ struct PendingRowsLiveFixture : equipment::LiveFixture {
                            [](std::uint8_t value) { return std::byte{value}; });
   }
   static void Buttons(std::uint32_t buttons) {
-    VS::Legacy::FeedPad(0, VS::Input::PadState{.held = buttons, .sticks = {}},
-                        true);
-    VS::Legacy::FeedPad(1, {}, false);
+    VS::Input::SubmitLivePad(VS::Input::ControllerPort::kFirst,
+                             VS::Input::PadState{.held = buttons, .sticks = {}},
+                             true);
+    VS::Input::SubmitLivePad(VS::Input::ControllerPort::kSecond, {}, false);
     VS::Input::UpdateLiveControllers();
   }
   int Build(int category) {

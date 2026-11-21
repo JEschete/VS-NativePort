@@ -6,15 +6,27 @@
 #include <span>
 
 #include "Input/Controller.hpp"
+#include "Input/Pad.hpp"
 
 // Live binding for Controller.hpp. The ports, buttons, sticks and settings
 // stay in the legacy globals the copied code reads (ControllerLiveState.hpp);
 // each adapter loads them into the typed state, runs the core and stores them
-// back. libpad (LibPad.hpp) is the host. Port IDs are libpad's: 0x00 and 0x10.
-// The vibration slots are typed state owned here. Invalid ports, motors and
-// patterns are refused, reported and leave the state unchanged.
+// back. The host is the pad state the desktop loop submits each logical tick
+// (SubmitLivePad) and the motor links the game configures; it replaces libpad.
+// Port IDs are libpad's: 0x00 and 0x10. The vibration slots are typed state
+// owned here. Invalid ports, motors and patterns are refused, reported and
+// leave the state unchanged.
 namespace VS::Input {
-using LegacyPadPacket = std::span<const std::uint8_t, kPadPacketBytes>;
+// The desktop loop's report for a port, before the game's tick reads it.
+// `connected` false reports an empty port.
+void SubmitLivePad(ControllerPort port, const PadState& pad, bool connected);
+// What PadInitDirect did: forgets the motor links and reports both ports empty
+// until the next submission, so the configuration that follows sees no pad.
+void ResetLivePadLinks();
+// The motor levels the game's commands give a port's pad: none unless it is a
+// connected analog pad whose motors the game registered and aligned, and
+// vibration is on in the settings.
+[[nodiscard]] Rumble LiveRumble(ControllerPort port);
 
 [[nodiscard]] VibrationState& LiveVibrationState() noexcept;
 // Requests refused since start-up.
@@ -22,9 +34,9 @@ using LegacyPadPacket = std::span<const std::uint8_t, kPadPacketBytes>;
 
 void InvalidateLiveControllerConnections();
 void UnlockLiveAnalogModeSwitch();
-void ConfigureLiveControllerActuators(int port_id, LegacyPadPacket packet);
-int ReadLiveControllerPort(int port_id, LegacyPadPacket packet);
-void UpdateLiveControllerConnection(int port_id, LegacyPadPacket packet);
+void ConfigureLiveControllerActuators(int port_id);
+int ReadLiveControllerPort(int port_id);
+void UpdateLiveControllerConnection(int port_id);
 void SetLiveMotorCommand(int port_index, int motor, std::uint8_t command);
 // The caller retains these bytes until the slot is cleared or replaced,
 // including while a pattern is paused. Both streams must end inside the span.
