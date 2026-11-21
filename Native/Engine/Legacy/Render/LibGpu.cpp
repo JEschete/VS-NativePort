@@ -1,5 +1,8 @@
 #include "Legacy/Render/LibGpu.hpp"
 
+#include <array>
+#include <functional>
+#include <optional>
 #include <span>
 #include <stdexcept>
 #include <unordered_map>
@@ -28,11 +31,12 @@ namespace VS::Legacy {
 
 namespace {
 
-// Ordering-table link handles. A packet keeps one handle for its address for
-// the whole run: packet pools and heap blocks are reused frame after frame, so
-// the table stays the size of the memory that ever held packets, far below the
-// 2^24 a link can address. Handle 0 is never issued (a zeroed tag is not a
-// link); 0xFFFFFF is the end marker.
+// Ordering-table link handles. Outside the bound frame regions a packet keeps
+// one handle for its address for the whole run: static packets and heap
+// blocks are reused frame after frame, so the table stays the size of the
+// memory that ever held them, far below the 2^23 handles below the frame-link
+// flag. Handle 0 is never issued (a zeroed tag is not a link); 0xFFFFFF is
+// the end marker.
 struct LinkTable {
   std::unordered_map<const void*, std::uint32_t> handles;
   std::vector<const void*> pointers{nullptr};
@@ -41,6 +45,88 @@ struct LinkTable {
 LinkTable& Links() {
   static LinkTable t;
   return t;
+}
+
+// A tag word's link is its low 24 bits; the top byte is the packet length.
+constexpr std::uint32_t kLinkMask = 0xFFFFFF;
+static_assert(kGpuLinkEnd == kLinkMask);
+
+// Frame-relative links (LibGpu.hpp): bit 23, a 6-bit generation, a 2-bit
+// region and a 15-bit word offset.
+constexpr std::uint32_t kFrameLinkFlag = 0x800000;
+constexpr unsigned kFrameLinkGenerationShift = 17;
+constexpr std::uint32_t kFrameLinkGenerationMask = 0x3F;
+constexpr unsigned kFrameLinkRegionShift = 15;
+constexpr std::uint32_t kFrameLinkRegionMask = 0x3;
+constexpr std::uint32_t kFrameLinkWordMask = 0x7FFF;
+// Generation 63 would turn the last word of region 3 into kGpuLinkEnd.
+constexpr std::uint8_t kFrameLinkGenerations = 63;
+constexpr std::size_t kLinkWordBytes = sizeof(std::uint32_t);
+// Each frame buffer owns a primitive region and an ordering-table region.
+constexpr std::size_t kFrameLinkBuffers = kGpuLinkRegionCount / 2;
+static_assert(kGpuLinkRegionMaxBytes / kLinkWordBytes ==
+              kFrameLinkWordMask + 1);
+
+struct FrameLinkRegion {
+  std::byte* base = nullptr;
+  std::size_t bytes = 0;
+  std::uint8_t generation = 0;
+};
+
+std::array<FrameLinkRegion, kGpuLinkRegionCount>& FrameRegions() {
+  static std::array<FrameLinkRegion, kGpuLinkRegionCount> regions;
+  return regions;
+}
+
+void AdvanceGeneration(FrameLinkRegion& region) {
+  region.generation = static_cast<std::uint8_t>((region.generation + 1) %
+                                                kFrameLinkGenerations);
+}
+
+bool Contains(const FrameLinkRegion& region, const std::byte* p) {
+  return region.base != nullptr && !std::less<>{}(p, region.base) &&
+         std::less<>{}(p, region.base + region.bytes);
+}
+
+// The frame link for `p`, when it lies in a bound region. A packet that is
+// not word-aligned cannot be a link target on the GPU; it is reported and
+// keeps a run-lifetime handle.
+std::optional<std::uint32_t> FrameLink(const void* p) {
+  const auto* byte = static_cast<const std::byte*>(p);
+  const auto& regions = FrameRegions();
+  for (std::size_t index = 0; index < regions.size(); ++index) {
+    const FrameLinkRegion& region = regions[index];
+    if (!Contains(region, byte)) {
+      continue;
+    }
+    const auto offset = static_cast<std::size_t>(byte - region.base);
+    if (offset % kLinkWordBytes != 0) {
+      VS::Core::LogError("render",
+                         "link to {} is not word-aligned in frame link region "
+                         "{}; it keeps a run-lifetime handle",
+                         p, index);
+      return std::nullopt;
+    }
+    return kFrameLinkFlag |
+           (std::uint32_t{region.generation} << kFrameLinkGenerationShift) |
+           (static_cast<std::uint32_t>(index) << kFrameLinkRegionShift) |
+           static_cast<std::uint32_t>(offset / kLinkWordBytes);
+  }
+  return std::nullopt;
+}
+
+// The memory a frame link names, or nullptr when it is stale.
+void* FramePointer(std::uint32_t link) {
+  const FrameLinkRegion& region =
+      FrameRegions()[(link >> kFrameLinkRegionShift) & kFrameLinkRegionMask];
+  const std::size_t offset = (link & kFrameLinkWordMask) * kLinkWordBytes;
+  if (region.base == nullptr ||
+      ((link >> kFrameLinkGenerationShift) & kFrameLinkGenerationMask) !=
+          region.generation ||
+      offset >= region.bytes) {
+    return nullptr;
+  }
+  return std::span(region.base, region.bytes).subspan(offset).data();
 }
 
 // A packet is its tag word followed by `len` command words, possibly several
@@ -84,13 +170,16 @@ u32 TextureWindow(const RECT* tw) {
 }  // namespace
 
 std::uint32_t GpuHandle(const void* p) {
+  if (const auto frame_link = FrameLink(p)) {
+    return *frame_link;
+  }
   LinkTable& t = Links();
   auto [it, added] =
       t.handles.try_emplace(p, static_cast<std::uint32_t>(t.pointers.size()));
   if (added) {
-    if (t.pointers.size() >= kGpuLinkEnd) {
+    if (t.pointers.size() >= kFrameLinkFlag) {
       VS::Core::RecordUnported(
-          "libgpu: more than 2^24 packet addresses linked");
+          "libgpu: more than 2^23 packet addresses linked");
       t.handles.erase(it);
       return kGpuLinkEnd;
     }
@@ -100,12 +189,80 @@ std::uint32_t GpuHandle(const void* p) {
 }
 
 void* GpuPointer(std::uint32_t link) {
-  link &= 0xFFFFFF;
+  link &= kLinkMask;
+  if (link == kGpuLinkEnd) {
+    return nullptr;
+  }
+  if ((link & kFrameLinkFlag) != 0) {
+    return FramePointer(link);
+  }
   const LinkTable& t = Links();
-  if (link == kGpuLinkEnd || link == 0 || link >= t.pointers.size()) {
+  if (link == 0 || link >= t.pointers.size()) {
     return nullptr;
   }
   return const_cast<void*>(t.pointers[link]);
+}
+
+GpuLinkState GpuLinkStatus(std::uint32_t link) {
+  link &= kLinkMask;
+  if (link == kGpuLinkEnd) {
+    return GpuLinkState::kEnd;
+  }
+  if (GpuPointer(link) != nullptr) {
+    return GpuLinkState::kLive;
+  }
+  return (link & kFrameLinkFlag) != 0 ? GpuLinkState::kStale
+                                      : GpuLinkState::kUnknown;
+}
+
+bool BindGpuLinkRegion(GpuLinkRegion region, std::span<std::byte> memory) {
+  auto& regions = FrameRegions();
+  const auto index = static_cast<std::size_t>(region);
+  if (index >= regions.size()) {
+    VS::Core::LogError("render", "frame link region {} does not exist", index);
+    return false;
+  }
+  FrameLinkRegion& bound = regions.at(index);
+  AdvanceGeneration(bound);
+  bound.base = nullptr;
+  bound.bytes = 0;
+  if (memory.empty()) {
+    return true;
+  }
+  if (memory.size() > kGpuLinkRegionMaxBytes) {
+    VS::Core::LogError("render",
+                       "frame link region {} of {} bytes exceeds the {} a link "
+                       "addresses; it stays released",
+                       index, memory.size(), kGpuLinkRegionMaxBytes);
+    return false;
+  }
+  for (std::size_t other = 0; other < regions.size(); ++other) {
+    const FrameLinkRegion& held = regions.at(other);
+    if (held.base != nullptr &&
+        std::less<>{}(memory.data(), held.base + held.bytes) &&
+        std::less<>{}(held.base, memory.data() + memory.size())) {
+      VS::Core::LogError("render",
+                         "frame link region {} at {} overlaps bound region "
+                         "{}; it stays released",
+                         index, static_cast<const void*>(memory.data()), other);
+      return false;
+    }
+  }
+  bound.base = memory.data();
+  bound.bytes = memory.size();
+  return true;
+}
+
+void BeginGpuLinkFrame(std::size_t buffer) {
+  if (buffer >= kFrameLinkBuffers) {
+    VS::Core::LogError("render", "frame buffer {} has no link regions", buffer);
+    return;
+  }
+  auto& regions = FrameRegions();
+  AdvanceGeneration(regions.at(
+      static_cast<std::size_t>(GpuLinkRegion::kPrimitives0) + buffer));
+  AdvanceGeneration(regions.at(
+      static_cast<std::size_t>(GpuLinkRegion::kOrderingTable0) + buffer));
 }
 
 // Typed draw items (Render/DrawList.hpp) are drawn as the walk follows the
@@ -142,7 +299,18 @@ int GpuWalkList(const void* p) {
     previous = tag;
     const std::uint32_t link = tag->addr;
     items.DrawBefore(link, visited);
-    p = link == kGpuLinkEnd ? nullptr : GpuPointer(link);
+    if (link == kGpuLinkEnd) {
+      break;
+    }
+    p = GpuPointer(link);
+    if (p == nullptr && GpuLinkStatus(link) == GpuLinkState::kStale) {
+      VS::Core::LogError("render",
+                         "stale frame link 0x{:06X} in packet {} after {} "
+                         "entries: its frame buffer began a later frame",
+                         link, static_cast<const void*>(tag), count);
+      VS::Platform::LogAddress(tag);
+      return -1;
+    }
   }
   return count;
 }

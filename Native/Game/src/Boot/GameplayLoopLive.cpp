@@ -213,6 +213,8 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
         ordering_table_ + kOverlayOrderingTableOffset;
     VS::Render::FrameScratchpad().ordering_table =
         ordering_table_ + kFieldOrderingTableOffset;
+    VS::Render::BeginLegacyFrame(
+        static_cast<std::size_t>(VS::Render::frameBuf));
     ClearOTagR(ordering_table_, kOrderingTableLength);
     // Typed scene items draw into the whole page space; feedback packets
     // still narrow them through the draw area, as they narrow packets.

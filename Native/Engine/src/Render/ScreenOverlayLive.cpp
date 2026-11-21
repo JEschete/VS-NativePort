@@ -2,7 +2,6 @@
 // Live binding for the screen overlays (ScreenOverlay.cpp).
 #include "Render/ScreenOverlayLive.hpp"
 
-#include <algorithm>
 #include <array>
 #include <bit>
 #include <cinttypes>
@@ -300,8 +299,7 @@ bool AbandonLiveFrameBeforeHeapReset() {
     }
   }
   static_cast<void>(GameFrameDrawList().Abandon());
-  std::ranges::fill(legacyOrderingTables, nullptr);
-  std::ranges::fill(legacyPrimitiveBuffers, nullptr);
+  ClearLegacyFrameMemory();
   legacyCurrentOrderingTable = nullptr;
   FrameScratchpad().ordering_table = nullptr;
   FrameScratchpad().overlay_ordering_table = nullptr;

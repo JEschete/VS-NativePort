@@ -860,3 +860,165 @@ TEST_CASE("addPrim inserts after the table entry and catPrim appends",
   gpu::termPrim(&third);
   CHECK(gpu::GpuWalkList(ot) == 4);
 }
+
+namespace {
+using VS::Legacy::GpuLinkState;
+using VS::Legacy::GpuLinkStatus;
+using VS::Legacy::GpuPointer;
+using VS::Render::FrameMemory;
+
+constexpr std::uint32_t kFrameLinkFlag = 0x800000;
+constexpr unsigned kFrameLinkRegionShift = 15;
+constexpr std::uint32_t kFrameLinkRegionMask = 0x3;
+constexpr std::size_t kFrameLinkGenerations = 63;
+
+bool IsFrameLink(std::uint32_t link) { return (link & kFrameLinkFlag) != 0; }
+
+// Starts and ends a test with no frame memory bound, restoring the frame
+// buffer pointers it found.
+class FrameMemoryScope {
+ public:
+  FrameMemoryScope() {
+    std::ranges::copy(VS::Render::legacyPrimitiveBuffers,
+                      saved_primitives_.begin());
+    std::ranges::copy(VS::Render::legacyOrderingTables,
+                      saved_ordering_.begin());
+    VS::Render::ClearLegacyFrameMemory();
+  }
+  ~FrameMemoryScope() {
+    VS::Render::ClearLegacyFrameMemory();
+    std::ranges::copy(saved_primitives_, VS::Render::legacyPrimitiveBuffers);
+    std::ranges::copy(saved_ordering_, VS::Render::legacyOrderingTables);
+  }
+  FrameMemoryScope(const FrameMemoryScope&) = delete;
+  FrameMemoryScope& operator=(const FrameMemoryScope&) = delete;
+  FrameMemoryScope(FrameMemoryScope&&) = delete;
+  FrameMemoryScope& operator=(FrameMemoryScope&&) = delete;
+
+ private:
+  std::array<void*, VS::Render::kFrameBufferCount> saved_primitives_{};
+  std::array<void*, VS::Render::kFrameBufferCount> saved_ordering_{};
+};
+
+template <typename T, std::size_t N>
+void BindFrameMemory(FrameMemory memory, std::size_t buffer,
+                     std::array<T, N>& storage) {
+  VS::Render::SetLegacyFrameMemory(memory, buffer, storage.data(),
+                                   sizeof(storage));
+}
+}  // namespace
+
+TEST_CASE("Frame links stay valid only for the frame that issued them",
+          "[legacy][gpu][frame-links]") {
+  const FrameMemoryScope scope;
+  std::array<Packet, 4> primitives{};
+  BindFrameMemory(FrameMemory::kPrimitives, 0, primitives);
+  CHECK(VS::Render::legacyPrimitiveBuffers[0] == primitives.data());
+
+  Packet* const packet = &primitives[2];
+  const std::uint32_t link = GpuHandle(packet);
+  CHECK(IsFrameLink(link));
+  CHECK(GpuPointer(link) == packet);
+  CHECK(GpuLinkStatus(link) == GpuLinkState::kLive);
+
+  VS::Render::BeginLegacyFrame(1);
+  CHECK(GpuPointer(link) == packet);
+
+  VS::Render::BeginLegacyFrame(0);
+  CHECK(GpuPointer(link) == nullptr);
+  CHECK(GpuLinkStatus(link) == GpuLinkState::kStale);
+  const std::uint32_t renewed = GpuHandle(packet);
+  CHECK(renewed != link);
+  CHECK(GpuPointer(renewed) == packet);
+}
+
+TEST_CASE("Released frame memory leaves its links stale",
+          "[legacy][gpu][frame-links]") {
+  const FrameMemoryScope scope;
+  std::array<Packet, 4> primitives{};
+  BindFrameMemory(FrameMemory::kPrimitives, 0, primitives);
+  Packet* const packet = &primitives[2];
+  const std::uint32_t link = GpuHandle(packet);
+
+  VS::Render::SetLegacyFrameMemory(FrameMemory::kPrimitives, 0, nullptr, 0);
+  CHECK(VS::Render::legacyPrimitiveBuffers[0] == nullptr);
+  CHECK(GpuPointer(link) == nullptr);
+  CHECK(GpuLinkStatus(link) == GpuLinkState::kStale);
+  const std::uint32_t unbound = GpuHandle(packet);
+  CHECK_FALSE(IsFrameLink(unbound));
+  CHECK(GpuPointer(unbound) == packet);
+  CHECK(GpuLinkStatus(0) == GpuLinkState::kUnknown);
+  CHECK(GpuLinkStatus(VS::Legacy::kGpuLinkEnd) == GpuLinkState::kEnd);
+}
+
+TEST_CASE("A walk refuses a frame link an earlier frame left behind",
+          "[legacy][gpu][frame-links]") {
+  const FrameMemoryScope scope;
+  std::array<std::uint32_t, 4> table{};
+  std::array<Packet, 2> primitives{};
+  BindFrameMemory(FrameMemory::kOrderingTable, 1, table);
+  BindFrameMemory(FrameMemory::kPrimitives, 1, primitives);
+
+  ClearOTagR(table.data(), static_cast<int>(table.size()));
+  addPrim(&table[2], primitives.data());
+  CHECK(IsFrameLink(getaddr(&table[2])));
+  CHECK(GpuWalkList(&table[3]) == 5);
+  CHECK(GpuWalkList(&table[3]) == 5);
+
+  VS::Render::BeginLegacyFrame(1);
+  CHECK(GpuWalkList(&table[3]) == -1);
+
+  ClearOTagR(table.data(), static_cast<int>(table.size()));
+  CHECK(GpuWalkList(&table[3]) == 4);
+}
+
+TEST_CASE("Frame link generations never form the end marker",
+          "[legacy][gpu][frame-links]") {
+  const FrameMemoryScope scope;
+  std::vector<std::uint32_t> table(VS::Legacy::kGpuLinkRegionMaxBytes /
+                                   sizeof(std::uint32_t));
+  VS::Render::SetLegacyFrameMemory(FrameMemory::kOrderingTable, 1, table.data(),
+                                   table.size() * sizeof(std::uint32_t));
+  std::vector<std::uint32_t> links;
+  for (std::size_t frame = 0; frame < 2 * kFrameLinkGenerations; ++frame) {
+    const std::uint32_t link = GpuHandle(&table.back());
+    CHECK(link != VS::Legacy::kGpuLinkEnd);
+    CHECK(GpuPointer(link) == &table.back());
+    links.push_back(link);
+    VS::Render::BeginLegacyFrame(1);
+  }
+  // The generation repeats after 63 frames, and not before.
+  CHECK(links[kFrameLinkGenerations] == links.front());
+  std::ranges::sort(links);
+  CHECK(std::ranges::unique(links).begin() - links.begin() ==
+        static_cast<std::ptrdiff_t>(kFrameLinkGenerations));
+}
+
+TEST_CASE("Frame memory a link cannot address keeps run-lifetime handles",
+          "[legacy][gpu][frame-links]") {
+  const FrameMemoryScope scope;
+  std::vector<std::uint32_t> oversized(
+      VS::Legacy::kGpuLinkRegionMaxBytes / sizeof(std::uint32_t) + 1);
+  VS::Render::SetLegacyFrameMemory(FrameMemory::kPrimitives, 0,
+                                   oversized.data(),
+                                   oversized.size() * sizeof(std::uint32_t));
+  CHECK(VS::Render::legacyPrimitiveBuffers[0] == oversized.data());
+  CHECK_FALSE(IsFrameLink(GpuHandle(oversized.data())));
+
+  std::array<std::uint32_t, 8> table{};
+  BindFrameMemory(FrameMemory::kOrderingTable, 0, table);
+  // Memory another region holds stays with it.
+  VS::Render::SetLegacyFrameMemory(FrameMemory::kOrderingTable, 1, &table[4],
+                                   4 * sizeof(std::uint32_t));
+  const std::uint32_t held = GpuHandle(&table[6]);
+  CHECK(IsFrameLink(held));
+  CHECK(((held >> kFrameLinkRegionShift) & kFrameLinkRegionMask) ==
+        static_cast<std::uint32_t>(VS::Legacy::GpuLinkRegion::kOrderingTable0));
+
+  // A packet that is not word-aligned cannot be a GPU link target.
+  auto* const misaligned =
+      std::as_writable_bytes(std::span(table)).subspan(2).data();
+  const std::uint32_t link = GpuHandle(misaligned);
+  CHECK_FALSE(IsFrameLink(link));
+  CHECK(GpuPointer(link) == misaligned);
+}

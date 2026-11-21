@@ -449,6 +449,7 @@ class LiveDisplay : public Host {
 
   void BeginOrderingTables(const OrderingTableLayout& layout) override {
     const std::size_t buffer = BufferIndex(layout.buffer);
+    VS::Render::BeginLegacyFrame(buffer);
     auto* base =
         static_cast<std::uint32_t*>(VS::Render::legacyOrderingTables[buffer]);
     VS::Render::FrameScratchpad().primitive_cursor =
@@ -479,11 +480,11 @@ class LiveDisplay : public Host {
                         buffer, bytes);
     }
     const std::size_t index = BufferIndex(buffer);
-    if (kind == FrameBufferKind::kPrimitives) {
-      VS::Render::legacyPrimitiveBuffers[index] = allocation;
-    } else {
-      VS::Render::legacyOrderingTables[index] = allocation;
-    }
+    VS::Render::SetLegacyFrameMemory(
+        kind == FrameBufferKind::kPrimitives
+            ? VS::Render::FrameMemory::kPrimitives
+            : VS::Render::FrameMemory::kOrderingTable,
+        index, allocation, bytes);
   }
 
   void WaitTick() override {

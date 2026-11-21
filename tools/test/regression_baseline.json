@@ -92,7 +92,7 @@
   }
  },
  "tests": {
-  "assertions": 12996999,
+  "assertions": 12997280,
   "cases": [
    "A CHD holding the approved disc passes identity verification",
    "A CHD of the right size with the wrong bytes fails the checksum",
@@ -434,6 +434,7 @@
    "A visit past the records is refused, not stored",
    "A visited connecting area label shows its own name",
    "A waiting ground offset steps until x and z are spent",
+   "A walk refuses a frame link an earlier frame left behind",
    "A walk that skips an item's slot entry does not draw it",
    "A wall at the edge refuses the ledge offset",
    "A weapon bone chain refuses too many bones or a late parent",
@@ -4809,6 +4810,9 @@
    "Four-point projection matches the SDK issue vectors",
    "Frame abandonment refuses an unavailable heap without losing owners",
    "Frame budgets and missing handoffs never constitute scene completion",
+   "Frame link generations never form the end marker",
+   "Frame links stay valid only for the frame that issued them",
+   "Frame memory a link cannot address keeps run-lifetime handles",
    "Frame part faces may share transformed extra storage slots",
    "Frame update caches the room working-state window",
    "Frame update locates the terrain region bitmap",
@@ -7430,6 +7434,7 @@
    "Relationship search returns the first other listed actor",
    "Relative fine tune adds the signed operand to the stored tune",
    "Relative jumps and calls refuse targets outside the sequence",
+   "Released frame memory leaves its links stale",
    "Releasing a music layer idles its channels at the default lengths",
    "Releasing a music layer ignores layers playing another track",
    "Releasing a music layer stops only the track it names",

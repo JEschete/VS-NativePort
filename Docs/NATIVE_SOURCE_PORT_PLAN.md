@@ -1374,6 +1374,13 @@ renderer, not just a texture lookup table and not a complete cycle-accurate GPU 
 **Issue:** native geometry submission is still packet-shaped; x64-safe ordering-table handles fix pointer truncation
 but do not replace ordering tables. Host GPU presentation alone does not satisfy the target rendering architecture.
 
+**Progress (#50):** room geometry and the sky background submit typed `Render::DrawPolygon` items through
+`Render::FrameDrawList` and `PageSpace::Draw`, with no GP0 packets or ordering-table links. Links into the two frame
+buffers' primitive and ordering-table memory (`Render::SetLegacyFrameMemory`, `BindGpuLinkRegion`) are frame-relative:
+they carry the buffer's generation, expire when that buffer begins a later frame (`BeginGpuLinkFrame`), and
+`GpuWalkList` refuses a stale link instead of following it. Static and heap packets outside those regions keep
+run-lifetime handles until their callers migrate.
+
 **Retain:** draw order, palette animation, blending, clipping, required readbacks and selectable original visual rules.
 **Replace:** packet construction/traversal with typed draw items and explicit sort keys; use texture/material handles
 and a defined render-target capture API. Preserve an isolated comparison path until replacement outputs are verified.

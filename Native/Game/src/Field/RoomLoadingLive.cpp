@@ -972,10 +972,12 @@ class LiveRoomLoadHost final
 
   // decomp: BATTLE.PRG func_80089DC0 (src/BATTLE/BATTLE.PRG/146C.c:15296-15299)
   void AllocatePrimitiveBuffers() override {
-    VS::Render::legacyPrimitiveBuffers[0] =
-        Core::Memory::AllocateLiveFromLowEnd(kPrimitiveBufferBytes);
-    VS::Render::legacyPrimitiveBuffers[1] =
-        Core::Memory::AllocateLiveFromLowEnd(kPrimitiveBufferBytes);
+    for (std::size_t buffer = 0; buffer < Render::kFrameBufferCount; ++buffer) {
+      Render::SetLegacyFrameMemory(
+          Render::FrameMemory::kPrimitives, buffer,
+          Core::Memory::AllocateLiveFromLowEnd(kPrimitiveBufferBytes),
+          kPrimitiveBufferBytes);
+    }
     Render::InitializeLiveClutAnimation();
   }
 
@@ -1277,10 +1279,15 @@ class LiveRoomUnloadHost final
     Items::ClearLiveRoomLootList();
   }
 
-  // The original freed both and left them set.
+  // The original freed both and left them set; natively both are cleared and
+  // every link into them ends.
   void FreePrimitiveBuffers() override {
     FreeLowEnd(VS::Render::legacyPrimitiveBuffers[1]);
     FreeLowEnd(VS::Render::legacyPrimitiveBuffers[0]);
+    Render::SetLegacyFrameMemory(Render::FrameMemory::kPrimitives, 1, nullptr,
+                                 0);
+    Render::SetLegacyFrameMemory(Render::FrameMemory::kPrimitives, 0, nullptr,
+                                 0);
   }
 };
 }  // namespace

@@ -84,6 +84,11 @@ every pointer-to-4-byte-integer cast and where its value goes):
   copied link word), `nextPrim`, `ClearOTag(R)`, `AddPrim(s)`, `DrawOTag`/`DrawPrim` (which walk the list and hand
   each packet to the renderer) use them; 37 `(u_long)p & 0xFFFFFF` sites become `GpuHandle(p)`, and
   `_insertTPage` and `Render::SplicePrimitiveList` were fixed by review. Unit-tested with packets 16 MiB apart.
+  Since #50, a link into bound frame memory (`Render::SetLegacyFrameMemory`: both primitive buffers and ordering
+  tables) is frame-relative: bit 23, a 6-bit generation, the region and a word offset. It stops resolving once that
+  buffer begins a later frame, and `GpuWalkList` refuses it rather than follow it. Game code allocates and frees
+  frame memory only through `SetLegacyFrameMemory`; test fixtures that assign the pointers directly, and all other
+  packets, keep run-lifetime handles.
 - **Pointer storage:** casts whose value lands in something made pointer-sized become `(uintptr_t)`: three runtime
   members (`Content::ActorAssetRequest.dataAddress`, `Audio::CommandParams.param1`, `Audio::MusicConfig.sequenceBase`),
   one global (`Event::subroutineReturnCursor`), 16 locals, plus round trips and comparisons.

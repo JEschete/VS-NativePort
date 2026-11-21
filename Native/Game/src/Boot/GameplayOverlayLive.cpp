@@ -58,18 +58,20 @@ class LiveGameplayOverlayHost final : public GameplayOverlayHost {
   void ResetGameHeap() override { ResetLiveSessionHeap(); }
   void InitializeOrderingTables(
       const GameplayOverlayDefaults& defaults) override {
-    VS::Render::legacyPrimitiveBuffers[1] = nullptr;
-    VS::Render::legacyPrimitiveBuffers[0] = nullptr;
+    using VS::Render::FrameMemory;
+    VS::Render::SetLegacyFrameMemory(FrameMemory::kPrimitives, 1, nullptr, 0);
+    VS::Render::SetLegacyFrameMemory(FrameMemory::kPrimitives, 0, nullptr, 0);
     for (std::size_t i = 0; i < 2; ++i) {
-      VS::Render::legacyOrderingTables[i] =
-          VS::Core::Memory::AllocateLiveFromLowEnd(
-              defaults.ordering_table_bytes);
-      if (VS::Render::legacyOrderingTables[i] == nullptr) {
+      void* const table = VS::Core::Memory::AllocateLiveFromLowEnd(
+          defaults.ordering_table_bytes);
+      if (table == nullptr) {
         VS::Core::Errorf("boot",
                          "failed to allocate gameplay ordering table %u",
                          static_cast<unsigned>(i));
         std::abort();
       }
+      VS::Render::SetLegacyFrameMemory(FrameMemory::kOrderingTable, i, table,
+                                       defaults.ordering_table_bytes);
     }
     SetDrawStp(&VS::Render::legacyMaskBitOffPackets[0], 0);
     SetDrawStp(&VS::Render::legacyMaskBitOffPackets[1], 0);

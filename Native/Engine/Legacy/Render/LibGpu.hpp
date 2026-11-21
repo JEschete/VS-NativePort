@@ -12,7 +12,9 @@
 // macro, so a source that includes both names these qualified
 // (VS::Legacy::RECT) rather than through using-declarations.
 
+#include <cstddef>
 #include <cstdint>
+#include <span>
 #include <type_traits>
 
 #include "Legacy/Core/PsxTypes.hpp"
@@ -444,6 +446,40 @@ inline constexpr std::uint32_t kGpuLinkEnd = 0xFFFFFFu;
 std::uint32_t GpuHandle(const void* p);
 void* GpuPointer(std::uint32_t link);
 
+// ---- frame-relative links (#50)
+// A link into a bound frame region (a frame buffer's primitive buffer or
+// ordering table) is valid only until that frame buffer's next frame begins:
+// bit 23 marks it, bits 17-22 hold the region's generation (0-62, so no link
+// equals kGpuLinkEnd), bits 15-16 the region and bits 0-14 the word offset.
+// Binding, releasing or beginning a frame advances the generation, so a link
+// an earlier frame left behind resolves to nothing. Memory outside every
+// bound region (static and heap packets, test fixtures) keeps a handle for
+// the whole run.
+enum class GpuLinkRegion : std::uint8_t {
+  kPrimitives0,
+  kPrimitives1,
+  kOrderingTable0,
+  kOrderingTable1,
+};
+inline constexpr std::size_t kGpuLinkRegionCount = 4;
+inline constexpr std::size_t kGpuLinkRegionMaxBytes = 0x20000;
+
+// Binds `memory` to `region`; empty memory releases it. Refuses (and leaves
+// the region released) memory over kGpuLinkRegionMaxBytes or overlapping
+// another bound region.
+bool BindGpuLinkRegion(GpuLinkRegion region, std::span<std::byte> memory);
+// Begins frame buffer `buffer`'s next frame: the links into its primitive
+// buffer and ordering table issued before now become stale.
+void BeginGpuLinkFrame(std::size_t buffer);
+
+enum class GpuLinkState : std::uint8_t {
+  kEnd,      // kGpuLinkEnd
+  kLive,     // resolves to memory
+  kStale,    // a frame link from an earlier frame or a released region
+  kUnknown,  // never issued
+};
+[[nodiscard]] GpuLinkState GpuLinkStatus(std::uint32_t link);
+
 // A link from a packet pointer, or from a link word copied from a packet.
 template <class T>
 inline std::uint32_t GpuLinkOf(T x) {
@@ -626,7 +662,8 @@ void setLineG4(P* p) {
 }
 
 // Walks one ordering table / packet list from `p` to the end marker and hands
-// each drawing packet to the renderer. Returns the number of packets visited.
+// each drawing packet to the renderer. Returns the number of packets visited,
+// or -1 on a cyclic list or a stale frame link.
 int GpuWalkList(const void* p);
 
 // ---- display, drawing environment and video memory
