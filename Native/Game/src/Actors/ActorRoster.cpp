@@ -17,8 +17,6 @@ constexpr int kMarkedAuxiliary = 1;
 constexpr int kUncancelledAuxiliaryA = 2;
 constexpr int kUncancelledAuxiliaryB = 4;
 constexpr unsigned kAuxiliaryIdMask = 0xFF;
-// An actor with an allocation of kind 2 also owns the model at slot + 4.
-constexpr std::size_t kSecondModelOffset = 4;
 
 std::optional<std::size_t> FirstLinkingSlot(const RosterView& view) {
   const auto link = std::ranges::find_if(view, [](const RosterSlotView& slot) {
@@ -61,21 +59,22 @@ RemovalResult RemoveActorAtSlot(ActorRemovalHost& host, std::uint32_t index,
     return RemovalResult::kOutOfRange;
   }
   const std::size_t slot = index;
-  const std::optional<RosterOccupant> occupant = host.Occupant(slot);
-  if (!occupant.has_value()) {
+  const std::optional<ActorResources> owned = host.Claim(slot);
+  if (!owned.has_value()) {
     return RemovalResult::kEmpty;
   }
   host.Remember(slot, hidden);
   if (!host.CancelAssets(slot)) {
     host.FinishAssets(slot);
   }
-  if (occupant->gimmick) {
+  if (owned->gimmick) {
     host.ReleaseGimmick(slot);
-  } else {
+  }
+  if (owned->model) {
     host.ReleaseModel(slot);
-    if (occupant->second_model) {
-      host.ReleaseModel(slot + kSecondModelOffset);
-    }
+  }
+  if (owned->second_model) {
+    host.ReleaseModel(slot + kSecondBodySlotOffset);
   }
   host.FreeAiState(slot);
   if (const std::optional<std::size_t> link =

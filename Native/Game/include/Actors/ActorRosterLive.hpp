@@ -14,7 +14,7 @@ int LinkLiveActorAfterAshley(VS::Battle::Actor* actor);
 // _removeActor (146C.c:909): 1 when `actor` left the list; its next link is
 // cleared. Refused (0) for a null actor.
 int UnlinkLiveActorFromRoomList(VS::Battle::Actor* actor);
-// _removeActorAtIndex (146C.c:926): 0 for an index past the roster, else 1.
+// removeActorById (146C.c:582): 0 for an index past the roster, else 1.
 int RemoveLiveActorAtSlot(unsigned index, int hidden);
 // func_8006C250 (146C.c:1842).
 void FreezeLiveActorAnimations();

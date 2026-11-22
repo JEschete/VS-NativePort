@@ -1778,6 +1778,7 @@
     <ClInclude Include="include\Actors\ActorCommands.hpp" />
     <ClInclude Include="include\Actors\ActorCommandsLive.hpp" />
     <ClInclude Include="include\Actors\ActorFlags.hpp" />
+    <ClInclude Include="include\Actors\ActorInstances.hpp" />
     <ClInclude Include="include\Actors\ActorLifecycle.hpp" />
     <ClInclude Include="include\Actors\ActorMotion.hpp" />
     <ClInclude Include="include\Actors\ActorMotionLive.hpp" />

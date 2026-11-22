@@ -8,6 +8,7 @@
 #include <optional>
 #include <span>
 
+#include "Actors/ActorInstances.hpp"
 #include "Actors/ActorRoster.hpp"
 #include "Actors/BattleActorState.hpp"
 #include "Content/ActorAssets.hpp"
@@ -23,168 +24,6 @@
 // address. ActorSpawningLive binds VS::Battle::actors, the actor allocations,
 // the zone context, the room enemy memory, Ashley's snapshot and the inventory.
 namespace VS::Actors {
-// The slots room actors, scripted actors and gimmicks use.
-inline constexpr std::size_t kSpawnActorSlots = 16;
-
-// An actor allocation the host owns, before and after it joins its slot.
-// The low byte stores slot + 1; the upper bits store a nonzero generation.
-// This token never contains the actor's address.
-enum class SpawnedActor : std::uint64_t { kNone = 0 };
-
-// Resolves stable actor handles at the legacy actor-table boundary. The
-// address is retained only in this table and is never part of a handle.
-class ActorHandleTable {
- public:
-  [[nodiscard]] SpawnedActor Begin(std::size_t slot, std::uintptr_t address) {
-    if (slot >= entries_.size() || address == 0) {
-      return SpawnedActor::kNone;
-    }
-    Entry& entry = entries_[slot];
-    if (entry.address != 0) {
-      return SpawnedActor::kNone;
-    }
-    Advance(entry);
-    entry.address = address;
-    entry.installed = false;
-    return Encode(slot, entry.generation);
-  }
-
-  // Reconciles an externally changed actor-table slot. A null slot invalidates
-  // an installed actor but leaves a pending, unpublished allocation intact.
-  [[nodiscard]] SpawnedActor Observe(std::size_t slot, std::uintptr_t address) {
-    if (slot >= entries_.size()) {
-      return SpawnedActor::kNone;
-    }
-    Entry& entry = entries_[slot];
-    if (address == 0) {
-      if (entry.installed) {
-        entry.address = 0;
-        entry.installed = false;
-        Advance(entry);
-      }
-      return SpawnedActor::kNone;
-    }
-    if (entry.address != address) {
-      Advance(entry);
-      entry.address = address;
-      entry.installed = true;
-    } else {
-      entry.installed = true;
-    }
-    return Encode(slot, entry.generation);
-  }
-
-  [[nodiscard]] bool Publish(std::size_t slot, SpawnedActor actor) {
-    std::size_t actor_slot = 0;
-    std::uint64_t generation = 0;
-    if (!Decode(actor, actor_slot, generation) || actor_slot != slot ||
-        slot >= entries_.size()) {
-      return false;
-    }
-    Entry& entry = entries_[slot];
-    if (entry.address == 0 || entry.generation != generation ||
-        entry.installed) {
-      return false;
-    }
-    entry.installed = true;
-    return true;
-  }
-
-  [[nodiscard]] std::uintptr_t Resolve(SpawnedActor actor) const {
-    std::size_t slot = 0;
-    std::uint64_t generation = 0;
-    if (!Decode(actor, slot, generation)) {
-      return 0;
-    }
-    const Entry& entry = entries_[slot];
-    return entry.generation == generation ? entry.address : 0;
-  }
-
-  [[nodiscard]] bool Discard(SpawnedActor actor) {
-    std::size_t slot = 0;
-    std::uint64_t generation = 0;
-    if (!Decode(actor, slot, generation)) {
-      return false;
-    }
-    Entry& entry = entries_[slot];
-    if (entry.generation != generation || entry.address == 0 ||
-        entry.installed) {
-      return false;
-    }
-    entry.address = 0;
-    Advance(entry);
-    return true;
-  }
-
-  [[nodiscard]] bool Remove(std::size_t slot, SpawnedActor actor) {
-    std::size_t actor_slot = 0;
-    std::uint64_t generation = 0;
-    if (!Decode(actor, actor_slot, generation) || actor_slot != slot ||
-        slot >= entries_.size()) {
-      return false;
-    }
-    Entry& entry = entries_[slot];
-    if (entry.generation != generation || entry.address == 0 ||
-        !entry.installed) {
-      return false;
-    }
-    entry.address = 0;
-    entry.installed = false;
-    Advance(entry);
-    return true;
-  }
-
-  void Reset() {
-    for (Entry& entry : entries_) {
-      entry.address = 0;
-      entry.installed = false;
-      Advance(entry);
-    }
-  }
-
- private:
-  static constexpr unsigned kSlotBits = 8;
-  static constexpr std::uint64_t kSlotMask =
-      (std::uint64_t{1} << kSlotBits) - 1;
-  static constexpr std::uint64_t kGenerationMask =
-      std::numeric_limits<std::uint64_t>::max() >> kSlotBits;
-
-  struct Entry {
-    std::uintptr_t address = 0;
-    std::uint64_t generation = 0;
-    bool installed = false;
-  };
-
-  [[nodiscard]] static constexpr SpawnedActor Encode(std::size_t slot,
-                                                     std::uint64_t generation) {
-    // The enum's nonzero values encode slot-generation pairs.
-    // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
-    return static_cast<SpawnedActor>((generation << kSlotBits) |
-                                     (static_cast<std::uint64_t>(slot) + 1));
-  }
-
-  [[nodiscard]] static constexpr bool Decode(SpawnedActor actor,
-                                             std::size_t& slot,
-                                             std::uint64_t& generation) {
-    const std::uint64_t value = static_cast<std::uint64_t>(actor);
-    const std::uint64_t encoded_slot = value & kSlotMask;
-    generation = value >> kSlotBits;
-    if (encoded_slot == 0 || encoded_slot > kSpawnActorSlots ||
-        generation == 0) {
-      return false;
-    }
-    slot = static_cast<std::size_t>(encoded_slot - 1);
-    return true;
-  }
-
-  static void Advance(Entry& entry) {
-    entry.generation =
-        entry.generation == kGenerationMask ? 1 : entry.generation + 1;
-  }
-
-  std::array<Entry, kSpawnActorSlots> entries_{};
-};
-
 // The host's handle to a template's equipment parts, which the Items
 // builders read (VS::Actors::CharacterInit.weapon, shield, accessory and
 // armor).
@@ -240,8 +79,6 @@ inline constexpr std::uint8_t kSecondBodyTextureSlot = 0xFC;
 inline constexpr std::uint8_t kModelLoadMaterial = 2;
 // The sub-kind of a model load without a texture override.
 inline constexpr std::uint8_t kDefaultSubKind = 0xFF;
-// The second body model takes actor record slot actor + 4.
-inline constexpr std::size_t kSecondBodySlotOffset = 4;
 
 // Ashley's inventory extents (vs_main_inventory_t).
 inline constexpr std::size_t kInventoryWeapons = 8;
@@ -305,15 +142,6 @@ inline constexpr unsigned kPlacementFacingShift = 24;
           .tile_z = static_cast<std::uint8_t>(word >> kPlacementTileZShift),
           .facing = static_cast<std::uint8_t>(word >> kPlacementFacingShift)};
 }
-
-enum class ActorShape : std::uint8_t {
-  // A gimmick actor: the actor, its stats and its model (allocation kind 0).
-  kAuxiliary,
-  // An actor with weapon and shield model slots (allocation kind 1).
-  kEquipped,
-  // An enemy whose second body takes the weapon model slot (kind 2).
-  kSecondaryBody,
-};
 
 enum class EquipmentHand : std::uint8_t { kWeapon = 0, kShield = 1 };
 

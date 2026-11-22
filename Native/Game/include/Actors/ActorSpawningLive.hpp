@@ -1,6 +1,10 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
+#include <cstddef>
+#include <optional>
+
+#include "Actors/ActorInstances.hpp"
 #include "Actors/ActorSpawning.hpp"
 
 namespace VS::Battle {
@@ -24,6 +28,12 @@ struct RoomActorRecord;
 // freed, or before a gameplay session clears the actor table.
 void InvalidateLiveActorHandle(std::size_t slot, VS::Battle::Actor* actor);
 void ResetLiveActorHandles();
+// Native (#55): starts removing the installed `actor` in `slot` and returns
+// the slot resources its definition owns, once; nothing when `actor` is not
+// the slot's actor or is already being removed. An actor the spawn host did
+// not allocate owns none and is reported on the "actors" channel.
+[[nodiscard]] std::optional<ActorResources> ClaimLiveActorRemoval(
+    std::size_t slot, const VS::Battle::Actor* actor);
 // Native (#48): cancels the queued asset requests the installed actor owns;
 // false, changing nothing, when the queue cannot abandon its head.
 [[nodiscard]] bool CancelLiveActorAssets(std::size_t slot,

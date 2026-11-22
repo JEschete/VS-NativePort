@@ -7,6 +7,8 @@
 #include <optional>
 #include <span>
 
+#include "Actors/ActorInstances.hpp"
+
 // The room actor roster (BATTLE.PRG 146C.c:884-946, 1842-1864, 6028 and
 // 74088.c:1001): the list of room actors chained after Ashley (slot 0),
 // removing an actor from its slot, freezing every actor's animation and the
@@ -59,13 +61,6 @@ struct RosterDecision {
 [[nodiscard]] RosterDecision UnlinkActorFromRoomList(const RosterView& view,
                                                      RosterCandidate candidate);
 
-struct RosterOccupant {
-  // A gimmick (kind 0x10) rather than a modelled actor.
-  bool gimmick = false;
-  // The actor owns a second model in slot + 4 (allocation kind 2).
-  bool second_model = false;
-};
-
 // The live actor table RemoveActorAtSlot edits.
 class ActorRemovalHost {
  public:
@@ -76,9 +71,11 @@ class ActorRemovalHost {
   ActorRemovalHost& operator=(ActorRemovalHost&&) = delete;
   virtual ~ActorRemovalHost() = default;
 
-  // The actor in `slot`, or nothing for an empty slot.
-  [[nodiscard]] virtual std::optional<RosterOccupant> Occupant(
-      std::size_t slot) const = 0;
+  // Native (#55): starts removing the actor in `slot` and returns the slot
+  // resources its definition owns (ActorInstanceTable::ClaimRemoval), once;
+  // nothing for an empty slot or an actor already being removed.
+  [[nodiscard]] virtual std::optional<ActorResources> Claim(
+      std::size_t slot) = 0;
   // Records the room enemy in `slot` (func_80069FC4).
   virtual void Remember(std::size_t slot, int hidden) = 0;
   // Native (#48): cancels the queued asset requests `slot`'s actor owns;
@@ -99,10 +96,12 @@ class ActorRemovalHost {
 
 enum class RemovalResult : std::uint8_t { kOutOfRange, kEmpty, kRemoved };
 
-// _removeActorAtIndex (146C.c:926): remembers the actor, releases its
-// gimmick or models and AI state, unchains it and frees it. Native (#48): the
-// actor's queued asset requests are cancelled first, or run to completion
-// when the queue cannot abandon its head, so none outlives the actor.
+// removeActorById (146C.c:582): remembers the actor, releases its gimmick or
+// models and AI state, unchains it and frees it. Native (#48): the actor's
+// queued asset requests are cancelled first, or run to completion when the
+// queue cannot abandon its head, so none outlives the actor. Native (#55):
+// the released resources are those the actor's definition owns, claimed once,
+// rather than those its rewritable kind suggests.
 RemovalResult RemoveActorAtSlot(ActorRemovalHost& host, std::uint32_t index,
                                 int hidden);
 

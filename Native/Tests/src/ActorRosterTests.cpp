@@ -13,6 +13,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Actors/ActorInstances.hpp"
 #include "Actors/ActorRecord.hpp"
 #include "Actors/ActorRoster.hpp"
 #include "Actors/ActorRosterLive.hpp"
@@ -282,15 +283,16 @@ TEST_CASE("Unlinking an actor bypasses its first predecessor",
 namespace {
 class RecordingRemovalHost final : public actors::ActorRemovalHost {
  public:
-  std::array<std::optional<actors::RosterOccupant>, actors::kRosterSlots>
-      occupants{};
+  // Each slot's unclaimed resources; a claim hands them over once.
+  std::array<std::optional<actors::ActorResources>, actors::kRosterSlots>
+      owned{};
   actors::RosterView links{};
   std::vector<std::string> calls;
   bool cancel_assets = true;
 
-  [[nodiscard]] std::optional<actors::RosterOccupant> Occupant(
-      std::size_t slot) const override {
-    return occupants.at(slot);
+  [[nodiscard]] std::optional<actors::ActorResources> Claim(
+      std::size_t slot) override {
+    return std::exchange(owned.at(slot), std::nullopt);
   }
   void Remember(std::size_t slot, int hidden) override {
     calls.push_back("remember " + std::to_string(slot) + " " +
@@ -330,9 +332,9 @@ class RecordingRemovalHost final : public actors::ActorRemovalHost {
 TEST_CASE("Removing an actor releases it in the original order",
           "[actors-room-memory]") {
   RecordingRemovalHost host;
-  host.occupants[3] = actors::RosterOccupant{.second_model = true};
-  host.occupants[7] = actors::RosterOccupant{.gimmick = true};
-  host.occupants[9] = actors::RosterOccupant{};
+  host.owned[3] = actors::ActorResources{.model = true, .second_model = true};
+  host.owned[7] = actors::ActorResources{.gimmick = true};
+  host.owned[9] = actors::ActorResources{.model = true};
   host.links[0] = {.occupied = true, .links_to_actor = true};
 
   CHECK(actors::RemoveActorAtSlot(host, 3, 1) ==
@@ -360,11 +362,35 @@ TEST_CASE("Removing an actor releases it in the original order",
   CHECK(host.calls.empty());
 }
 
+TEST_CASE("Removing an actor releases only what its definition owns, once",
+          "[actors-room-memory]") {
+  // #55: what removal releases comes from the actor's definition, not from
+  // its kind, which scripts rewrite; a second removal releases nothing.
+  RecordingRemovalHost host;
+  host.owned[2] = actors::ActorResources{.gimmick = true};
+  host.owned[6] = actors::ActorResources{};
+
+  CHECK(actors::RemoveActorAtSlot(host, 2, 0) ==
+        actors::RemovalResult::kRemoved);
+  CHECK(host.TakeCalls() == std::vector<std::string>{"remember 2 0", "cancel 2",
+                                                     "gimmick 2", "ai 2",
+                                                     "free 2"});
+  CHECK(actors::RemoveActorAtSlot(host, 2, 0) == actors::RemovalResult::kEmpty);
+  CHECK(host.calls.empty());
+
+  // An actor without a definition still leaves its slot, but owns no gimmick
+  // or model to release.
+  CHECK(actors::RemoveActorAtSlot(host, 6, 0) ==
+        actors::RemovalResult::kRemoved);
+  CHECK(host.TakeCalls() ==
+        std::vector<std::string>{"remember 6 0", "cancel 6", "ai 6", "free 6"});
+}
+
 TEST_CASE("Removing an actor finishes the asset requests it cannot cancel",
           "[actors-room-memory]") {
   // #48: no request the actor owns outlives it to write into its storage.
   RecordingRemovalHost host;
-  host.occupants[5] = actors::RosterOccupant{};
+  host.owned[5] = actors::ActorResources{.model = true};
   host.cancel_assets = false;
 
   CHECK(actors::RemoveActorAtSlot(host, 5, 0) ==

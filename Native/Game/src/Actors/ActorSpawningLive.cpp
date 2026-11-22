@@ -133,8 +133,8 @@ template <typename T, typename Id>
                                               : nullptr;
 }
 
-ActorHandleTable& LiveActorHandles() {
-  static ActorHandleTable handles;
+ActorInstanceTable& LiveActorHandles() {
+  static ActorInstanceTable handles;
   return handles;
 }
 
@@ -159,11 +159,12 @@ template <typename T>
 }
 
 [[nodiscard]] SpawnedActor BeginActorAllocation(std::size_t slot,
-                                                VS::Battle::Actor* actor) {
+                                                VS::Battle::Actor* actor,
+                                                ActorShape shape) {
   static_cast<void>(
       LiveActorHandles().Observe(slot, ActorAddress(SlotActor(slot))));
-  const SpawnedActor handle =
-      LiveActorHandles().Begin(slot, ActorAddress(actor));
+  const SpawnedActor handle = LiveActorHandles().Begin(
+      slot, ActorAddress(actor), ActorDefinition{.shape = shape});
   if (handle == SpawnedActor::kNone) {
     VS::Core::Memory::FreeLiveFromLowEnd(actor);
     WarnActorRefused("AllocateLiveActor",
@@ -268,7 +269,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
         actor.stats = &core->actor.stats;
         actor.model = &core->model;
         actor.allocation_kind = kAuxiliaryAllocation;
-        return BeginActorAllocation(slot, &actor);
+        return BeginActorAllocation(slot, &actor, shape);
       }
       case ActorShape::kEquipped: {
         auto* allocation = static_cast<VS::Actors::ActorAllocation*>(
@@ -282,7 +283,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
         actor.equipment_models[0] = &allocation->model_slots[0];
         actor.equipment_models[1] = &allocation->model_slots[1];
         actor.allocation_kind = kEquippedAllocation;
-        return BeginActorAllocation(slot, &actor);
+        return BeginActorAllocation(slot, &actor, shape);
       }
       case ActorShape::kSecondaryBody: {
         auto* allocation = static_cast<VS::Actors::ActorAllocation*>(
@@ -295,7 +296,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
         actor.model = &allocation->core.model;
         actor.equipment_models[0] = &allocation->model_slots[0];
         actor.allocation_kind = kSecondaryBodyAllocation;
-        return BeginActorAllocation(slot, &actor);
+        return BeginActorAllocation(slot, &actor, shape);
       }
     }
     return SpawnedActor::kNone;
@@ -1154,6 +1155,23 @@ void InvalidateLiveActorHandle(std::size_t slot, VS::Battle::Actor* actor) {
     WarnActorRefused("InvalidateLiveActorHandle",
                      "actor handle could not be retired");
   }
+}
+
+std::optional<ActorResources> ClaimLiveActorRemoval(
+    std::size_t slot, const VS::Battle::Actor* actor) {
+  if (actor == nullptr || SlotActor(slot) != actor) {
+    return std::nullopt;
+  }
+  const SpawnedActor handle =
+      LiveActorHandles().Observe(slot, ActorAddress(actor));
+  const std::optional<ActorResources> owned =
+      LiveActorHandles().ClaimRemoval(slot, handle);
+  if (owned.has_value() && !LiveActorHandles().Definition(handle).has_value()) {
+    WarnActorRefused("RemoveActorAtSlot",
+                     "the actor has no spawn definition; no gimmick or model "
+                     "is released");
+  }
+  return owned;
 }
 
 bool CancelLiveActorAssets(std::size_t slot, const VS::Battle::Actor* actor) {

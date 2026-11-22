@@ -11,6 +11,7 @@
 #include <optional>
 #include <span>
 
+#include "Actors/ActorInstances.hpp"
 #include "Actors/ActorRoster.hpp"
 #include "Actors/ActorSpawningLive.hpp"
 #include "Actors/ActorStateLive.hpp"
@@ -33,8 +34,6 @@
 namespace VS::Actors {
 namespace {
 constexpr std::uint16_t kLinkableKindMask = 0x7;
-constexpr std::uint16_t kGimmickKind = 0x10;
-constexpr int kSecondModelAllocation = 2;
 
 static_assert(std::size(VS::Battle::actors) >= kRosterSlots);
 static_assert(std::size(VS::Battle::actors) == kBattleActorSlots);
@@ -57,19 +56,17 @@ RosterCandidate CandidateOf(const VS::Battle::Actor& actor) {
 }
 
 // The actor table as RemoveActorAtSlot edits it. The actor is read once, as
-// the original did, before anything is released.
+// the original did, before anything is released; what it owns comes from its
+// instance record, not from its rewritable kind.
 class LiveRemovalHost final : public ActorRemovalHost {
  public:
   explicit LiveRemovalHost(VS::Battle::Actor* actor) : actor_(actor) {}
 
-  [[nodiscard]] std::optional<RosterOccupant> Occupant(
-      std::size_t /*slot*/) const override {
+  [[nodiscard]] std::optional<ActorResources> Claim(std::size_t slot) override {
     if (actor_ == nullptr) {
       return std::nullopt;
     }
-    return RosterOccupant{
-        .gimmick = actor_->kind == kGimmickKind,
-        .second_model = actor_->allocation_kind == kSecondModelAllocation};
+    return ClaimLiveActorRemoval(slot, actor_);
   }
   void Remember(std::size_t slot, int hidden) override {
     StoreLiveRoomActorState(static_cast<int>(slot), hidden);

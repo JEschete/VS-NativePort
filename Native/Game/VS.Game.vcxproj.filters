@@ -3114,6 +3114,9 @@
     <ClInclude Include="include\Actors\ActorFlags.hpp">
       <Filter>include\Actors</Filter>
     </ClInclude>
+    <ClInclude Include="include\Actors\ActorInstances.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
     <ClInclude Include="include\Actors\ActorLifecycle.hpp">
       <Filter>include\Actors</Filter>
     </ClInclude>

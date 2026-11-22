@@ -11,6 +11,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Actors/ActorInstances.hpp"
 #include "Actors/ActorSpawning.hpp"
 #include "Actors/ActorSpawningLive.hpp"
 #include "Actors/CharacterInit.hpp"
@@ -28,6 +29,8 @@
 namespace {
 namespace actors = VS::Actors;
 namespace content = VS::Content;
+using actors::ActorDefinition;
+using actors::ActorResources;
 using actors::ActorShape;
 using actors::EquipmentHand;
 using actors::SpawnedActor;
@@ -89,10 +92,14 @@ const T& Required(const std::optional<T>& value) {
   return *value;
 }
 
+constexpr ActorDefinition kEquippedActor{.shape = ActorShape::kEquipped};
+constexpr ActorDefinition kGimmickActor{.shape = ActorShape::kAuxiliary};
+constexpr ActorDefinition kTwoBodyActor{.shape = ActorShape::kSecondaryBody};
+
 TEST_CASE("Actor handles validate and retire published identities",
           "[actors][actors-spawning]") {
-  actors::ActorHandleTable handles;
-  const SpawnedActor actor = handles.Begin(3, 0x1000);
+  actors::ActorInstanceTable handles;
+  const SpawnedActor actor = handles.Begin(3, 0x1000, kEquippedActor);
 
   CHECK(actor != SpawnedActor::kNone);
   CHECK(handles.Resolve(actor) == 0x1000);
@@ -104,12 +111,12 @@ TEST_CASE("Actor handles validate and retire published identities",
 
 TEST_CASE("Reused actor slots issue a new generation for the same address",
           "[actors][actors-spawning]") {
-  actors::ActorHandleTable handles;
-  const SpawnedActor first = handles.Begin(3, 0x1000);
+  actors::ActorInstanceTable handles;
+  const SpawnedActor first = handles.Begin(3, 0x1000, kEquippedActor);
   REQUIRE(handles.Publish(3, first));
   REQUIRE(handles.Remove(3, first));
 
-  const SpawnedActor replacement = handles.Begin(3, 0x1000);
+  const SpawnedActor replacement = handles.Begin(3, 0x1000, kEquippedActor);
   CHECK(replacement != SpawnedActor::kNone);
   CHECK(replacement != first);
   CHECK(handles.Resolve(first) == 0);
@@ -120,21 +127,22 @@ TEST_CASE("Reused actor slots issue a new generation for the same address",
 
 TEST_CASE("Discarding an unpublished actor invalidates its handle",
           "[actors][actors-spawning]") {
-  actors::ActorHandleTable handles;
-  const SpawnedActor actor = handles.Begin(7, 0x2000);
+  actors::ActorInstanceTable handles;
+  const SpawnedActor actor = handles.Begin(7, 0x2000, kEquippedActor);
 
   CHECK(actor != SpawnedActor::kNone);
   CHECK_FALSE(handles.Publish(6, actor));
   CHECK_FALSE(handles.Remove(7, actor));
   CHECK(handles.Discard(actor));
   CHECK(handles.Resolve(actor) == 0);
+  CHECK_FALSE(handles.Definition(actor).has_value());
   CHECK_FALSE(handles.Discard(actor));
 }
 
 TEST_CASE("Resetting the actor table invalidates published handles",
           "[actors][actors-spawning]") {
-  actors::ActorHandleTable handles;
-  const SpawnedActor actor = handles.Begin(4, 0x3000);
+  actors::ActorInstanceTable handles;
+  const SpawnedActor actor = handles.Begin(4, 0x3000, kEquippedActor);
   REQUIRE(handles.Publish(4, actor));
 
   handles.Reset();
@@ -144,6 +152,72 @@ TEST_CASE("Resetting the actor table invalidates published handles",
   CHECK(replacement != SpawnedActor::kNone);
   CHECK(replacement != actor);
   CHECK(handles.Resolve(replacement) == 0x3000);
+  // Reset also forgets the definition: an address seen again afterwards is an
+  // instance the table did not allocate.
+  CHECK_FALSE(handles.Definition(replacement).has_value());
+}
+
+TEST_CASE("Actor definitions fix the slot resources an actor owns",
+          "[actors][actors-spawning]") {
+  CHECK(kGimmickActor.Resources() == ActorResources{.gimmick = true});
+  CHECK(kEquippedActor.Resources() == ActorResources{.model = true});
+  CHECK(kTwoBodyActor.Resources() ==
+        ActorResources{.model = true, .second_model = true});
+}
+
+TEST_CASE("An actor keeps its definition until another address takes its slot",
+          "[actors][actors-spawning]") {
+  actors::ActorInstanceTable handles;
+  const SpawnedActor gimmick = handles.Begin(5, 0x4000, kGimmickActor);
+  CHECK(handles.Definition(gimmick) == kGimmickActor);
+  REQUIRE(handles.Publish(5, gimmick));
+  CHECK(handles.Observe(5, 0x4000) == gimmick);
+  CHECK(handles.Definition(gimmick) == kGimmickActor);
+  // An address the table did not allocate has no definition.
+  const SpawnedActor stranger = handles.Observe(5, 0x5000);
+  CHECK(stranger != gimmick);
+  CHECK_FALSE(handles.Definition(stranger).has_value());
+  CHECK_FALSE(handles.Definition(gimmick).has_value());
+}
+
+TEST_CASE("Removal claims an actor's resources exactly once",
+          "[actors][actors-spawning]") {
+  actors::ActorInstanceTable handles;
+  const SpawnedActor actor = handles.Begin(6, 0x6000, kTwoBodyActor);
+
+  // An unpublished allocation (a failed creation) has nothing to remove.
+  CHECK_FALSE(handles.ClaimRemoval(6, actor).has_value());
+  REQUIRE(handles.Publish(6, actor));
+  CHECK_FALSE(handles.ClaimRemoval(5, actor).has_value());
+  CHECK(handles.ClaimRemoval(6, actor) ==
+        ActorResources{.model = true, .second_model = true});
+  // A second removal of the same instance, even before it is retired, claims
+  // nothing, so nothing is released twice.
+  CHECK_FALSE(handles.ClaimRemoval(6, actor).has_value());
+  CHECK(handles.Remove(6, actor));
+  CHECK_FALSE(handles.ClaimRemoval(6, actor).has_value());
+}
+
+TEST_CASE("A slot's replacement actor claims only its own resources",
+          "[actors][actors-spawning]") {
+  actors::ActorInstanceTable handles;
+  const SpawnedActor first = handles.Begin(6, 0x6000, kTwoBodyActor);
+  REQUIRE(handles.Publish(6, first));
+  REQUIRE(handles.Remove(6, first));
+
+  const SpawnedActor replacement = handles.Begin(6, 0x6000, kGimmickActor);
+  REQUIRE(handles.Publish(6, replacement));
+  CHECK_FALSE(handles.ClaimRemoval(6, first).has_value());
+  CHECK(handles.ClaimRemoval(6, replacement) ==
+        ActorResources{.gimmick = true});
+}
+
+TEST_CASE("An actor without a definition claims no resources, once",
+          "[actors][actors-spawning]") {
+  actors::ActorInstanceTable handles;
+  const SpawnedActor stranger = handles.Observe(6, 0x7000);
+  CHECK(handles.ClaimRemoval(6, stranger) == ActorResources{});
+  CHECK_FALSE(handles.ClaimRemoval(6, stranger).has_value());
 }
 
 // A recording host: the actor table, the asset queue, the zone's ZUD cache
@@ -2000,6 +2074,32 @@ TEST_CASE("Removing a live actor cancels only its own queued load",
   CHECK(actors::CancelLiveActorAssets(kSlot, &installed));
   CHECK(content::FindLiveFreeActorAssetRequest() == 1);
   content::ClearLiveActorAssetQueue();
+  actors::ResetLiveActorHandles();
+  VS::Battle::actors[kSlot] = saved_actor;
+}
+
+TEST_CASE("A live removal claims an undefined actor once and releases nothing",
+          "[actors][actors-spawning]") {
+  // #55: an actor the spawn host did not allocate has no definition, so its
+  // removal names no gimmick or model, whatever its kind says.
+  constexpr std::size_t kSlot = 11;
+  VS::Battle::Actor* const saved_actor = VS::Battle::actors[kSlot];
+  actors::ResetLiveActorHandles();
+  VS::Battle::Actor foreign{};
+  VS::Battle::Actor other{};
+  VS::Battle::actors[kSlot] = &foreign;
+  {
+    ChannelWarnings warnings("actors");
+    CHECK_FALSE(actors::ClaimLiveActorRemoval(kSlot, nullptr).has_value());
+    CHECK_FALSE(actors::ClaimLiveActorRemoval(kSlot, &other).has_value());
+    CHECK(actors::ClaimLiveActorRemoval(kSlot, &foreign) == ActorResources{});
+    CHECK_FALSE(actors::ClaimLiveActorRemoval(kSlot, &foreign).has_value());
+    CHECK(warnings.messages ==
+          std::vector<std::string>{
+              Refused("RemoveActorAtSlot",
+                      "the actor has no spawn definition; no gimmick or "
+                      "model is released")});
+  }
   actors::ResetLiveActorHandles();
   VS::Battle::actors[kSlot] = saved_actor;
 }
