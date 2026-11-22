@@ -4,9 +4,12 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
+#include <expected>
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <functional>
+#include <initializer_list>
 #include <iterator>
 #include <map>
 #include <optional>
@@ -28,6 +31,7 @@
 #include "Core/Sha256.hpp"
 #include "Effects/EffectResources.hpp"
 #include "Effects/EffectResourcesLive.hpp"
+#include "Extract/EffectTextureConversion.hpp"
 #include "Extract/ImageConversion.hpp"
 #include "Extract/ImageFilesWriter.hpp"
 #include "Field/BackgroundLive.hpp"
@@ -471,7 +475,8 @@ Extract::ImageConversionReport RequiredConversion(const fs::path& root,
   return *report;
 }
 
-std::vector<std::uint16_t> FbcWords(const Bytes& source) {
+// The little-endian halfwords of an FBC or FBT file.
+std::vector<std::uint16_t> WordsOf(const Bytes& source) {
   std::vector<std::uint16_t> words;
   for (std::size_t offset = 0; offset + 1 < source.size();
        offset += sizeof(std::uint16_t)) {
@@ -486,7 +491,7 @@ void CheckFbcImage(const Content::ImageDocument& decoded, const Bytes& source) {
   CHECK(decoded.image.depth == Content::ImageDepth::kDirect16);
   CHECK(decoded.image.width == kFbcPaletteEntries);
   CHECK(decoded.image.height == source.size() / kFbcRowBytes);
-  CHECK(Content::PackedWords(decoded.image) == FbcWords(source));
+  CHECK(Content::PackedWords(decoded.image) == WordsOf(source));
 }
 
 DataFiles FbcCorpusInputs(
@@ -639,7 +644,8 @@ TEST_CASE("conversion manifests are strict and deterministic",
                               .files = {"textures/test/IMAGE.png"},
                               .dependencies = {},
                               .unreferenced = false,
-                              .note = {}});
+                              .note = {},
+                              .alias_of = {}});
   const auto encoded = Extract::FormatConversionManifest(manifest);
   REQUIRE(encoded.has_value());
   const auto parsed = Content::ParseConversionManifest(
@@ -662,15 +668,40 @@ TEST_CASE("conversion manifests are strict and deterministic",
                   std::as_bytes(std::span(traversal.data(), traversal.size())),
                   "manifest.json")
                   .has_value());
-  std::string future = *encoded;
-  future.replace(future.find("\"schema_version\": 1"),
-                 std::string("\"schema_version\": 1").size(),
-                 "\"schema_version\": 2");
+  const auto with_schema = [&encoded](std::string_view version) {
+    std::string text = *encoded;
+    const std::string current = "\"schema_version\": 2";
+    text.replace(text.find(current), current.size(),
+                 std::format("\"schema_version\": {}", version));
+    return text;
+  };
+  // Schema 1 manifests have no aliases and still load; later ones do not.
+  const std::string older = with_schema("1");
+  CHECK(
+      Content::ParseConversionManifest(
+          std::as_bytes(std::span(older.data(), older.size())), "manifest.json")
+          .has_value());
+  const std::string future = with_schema("3");
   CHECK_FALSE(Content::ParseConversionManifest(
                   std::as_bytes(std::span(future.data(), future.size())),
                   "manifest.json")
                   .has_value());
+}
 
+TEST_CASE("conversion manifests reject invalid dependencies and hashes",
+          "[content-images][conversion]") {
+  const std::string hash(64, 'a');
+  Content::ConversionManifest manifest;
+  manifest.converters["tim-png"] = 1;
+  manifest.outputs.push_back({.id = "image.test",
+                              .source = "TEST/IMAGE.TIM",
+                              .source_sha256 = hash,
+                              .converter = "tim-png",
+                              .files = {"textures/test/IMAGE.png"},
+                              .dependencies = {},
+                              .unreferenced = false,
+                              .note = {},
+                              .alias_of = {}});
   manifest.outputs[0].dependencies = {
       {.source = "Z/FAR", .source_sha256 = hash},
       {.source = "A/FAR", .source_sha256 = hash}};
@@ -700,7 +731,8 @@ TEST_CASE("required converter versions gate the loaded manifest",
                                      .files = {"textures/test/IMAGE.png"},
                                      .dependencies = {},
                                      .unreferenced = false,
-                                     .note = {}}});
+                                     .note = {},
+                                     .alias_of = {}}});
   CHECK(manifest.converters["tim-png"] == 2);
   CHECK(manifest.converters.contains("other"));
   CHECK(manifest.outputs.size() == 1);
@@ -760,7 +792,7 @@ TEST_CASE("FBC conversion round-trips every 16-bit colour word",
     const auto decoded =
         Content::DecodeImageFiles("E001_1", ReaderFor(converted->files));
     REQUIRE(decoded.has_value());
-    REQUIRE(Content::PackedWords(decoded->image) == FbcWords(source));
+    REQUIRE(Content::PackedWords(decoded->image) == WordsOf(source));
   }
 }
 
@@ -969,7 +1001,7 @@ TEST_CASE("Live effect palettes load the converted rows by sector",
   const auto loaded = VS::Effects::LoadLiveEffectPalette(kConvertedFbcRead);
   INFO((loaded ? std::string{} : loaded.error()));
   REQUIRE(loaded.has_value());
-  CHECK(*loaded == FbcWords(store.fbc));
+  CHECK(*loaded == WordsOf(store.fbc));
 
   const auto exact_size = VS::Effects::LoadLiveEffectPalette(
       {.lba = 100, .size = static_cast<std::int32_t>(store.fbc.size())});
@@ -1017,6 +1049,638 @@ TEST_CASE("Live effect palettes refuse an edit that is not 256 entries wide",
   REQUIRE_FALSE(refused.has_value());
   CHECK(refused.error().find("is not a 256-entry effect palette") !=
         std::string::npos);
+}
+
+// A synthetic effect disc for the fbt-texture-png converter: EFFPURGE.BIN's
+// tables at their file offsets (EffectTextureConversion.cpp), and per effect
+// a package, a two-row FBC in palette slot 0 and texture pages.
+constexpr std::size_t kEffPurgeBytes = 17264;
+constexpr std::size_t kPurgeClutRows = 0x164C;
+constexpr std::size_t kPurgePaletteFiles = 0x196C;
+constexpr std::size_t kPurgeTextureCounts = 0x1FAC;
+constexpr std::size_t kPurgeTextureSlots = 0x213C;
+constexpr std::size_t kPurgeTextureFiles = 0x2430;
+constexpr std::size_t kPurgePackageFiles = 0x2FFC;
+constexpr std::size_t kPurgeExtentBytes = 4;
+constexpr std::string_view kPurgePath = "EFFECT/EFFPURGE.BIN";
+constexpr std::size_t kFbtBytes = std::size_t{64} * 256 * sizeof(std::uint16_t);
+constexpr std::uint32_t kFirstTestLba = 100;  // TemporaryData::WriteManifest
+// The v byte of a package's first descriptor, which no converter reads.
+constexpr std::size_t kFirstDescriptorV = 13;
+
+std::uint32_t SectorsOf(std::size_t bytes) {
+  return static_cast<std::uint32_t>((bytes + 2047) / 2048);
+}
+
+// The files.tsv entries TemporaryData::WriteManifest lists for `files`.
+std::vector<Content::DataStore::Entry> EntriesOf(const DataFiles& files) {
+  std::vector<Content::DataStore::Entry> entries;
+  std::uint32_t lba = kFirstTestLba;
+  for (const auto& [path, bytes] : files) {
+    entries.push_back({.path = path,
+                       .lba = lba,
+                       .size = static_cast<std::uint32_t>(bytes.size()),
+                       .form = "raw"});
+    lba += SectorsOf(bytes.size());
+  }
+  return entries;
+}
+
+std::uint32_t LbaOf(const DataFiles& files, std::string_view path) {
+  const auto entries = EntriesOf(files);
+  const auto found =
+      std::ranges::find(entries, path, &Content::DataStore::Entry::path);
+  REQUIRE(found != entries.end());
+  return found->lba;
+}
+
+VS::Effects::DiscRead FbtRead(const DataFiles& files, std::string_view path) {
+  return {.lba = static_cast<std::int32_t>(LbaOf(files, path)),
+          .size = static_cast<std::int32_t>(kFbtBytes)};
+}
+
+void Poke16(Bytes& bytes, std::size_t offset, std::uint32_t value) {
+  bytes[offset] = static_cast<std::byte>(value & 0xFFU);
+  bytes[offset + 1] = static_cast<std::byte>((value >> 8U) & 0xFFU);
+}
+
+// A texture descriptor reading `width` texels from `u` of VRAM page 24 at
+// `depth_code` (0 4-bit, 1 8-bit, 2 direct colour), with its CLUT at `entry`
+// of the effect FBC's `row`.
+struct FbtSample {
+  std::uint32_t depth_code = 0;
+  std::uint32_t row = 0;
+  std::uint32_t entry = 0;
+  std::uint32_t u = 0;
+  std::uint32_t width = 0;
+};
+
+FbtSample Sample(std::uint32_t depth_code, std::uint32_t row = 0,
+                 std::uint32_t entry = 0) {
+  return {.depth_code = depth_code,
+          .row = row,
+          .entry = entry,
+          .u = 0,
+          .width = 16};
+}
+
+// A package whose texture block holds `samples`' descriptors, then its end
+// block.
+Bytes PackageBytes(std::span<const FbtSample> samples) {
+  constexpr std::size_t kDescriptorBytes = 0x18;
+  constexpr std::uint32_t kPage24 = 0x18;  // column 8 of the second row
+  Bytes block;
+  Put16(block, 1);  // table count
+  Put16(block, 4);  // where the descriptors start
+  for (const FbtSample& sample : samples) {
+    const std::size_t start = block.size();
+    Put16(block, static_cast<std::uint16_t>(((240 + sample.row) << 6U) |
+                                            ((768 + sample.entry) / 16)));
+    Put16(block,
+          static_cast<std::uint16_t>(kPage24 | (sample.depth_code << 7U)));
+    block.push_back(static_cast<std::byte>(sample.u));
+    block.push_back(std::byte{0});  // v
+    block.push_back(static_cast<std::byte>(sample.width));
+    block.resize(start + kDescriptorBytes);
+  }
+  Bytes package;
+  Put32(package, static_cast<std::uint32_t>(block.size() + 4) | (1U << 16U));
+  package.insert(package.end(), block.begin(), block.end());
+  Put32(package, 0);  // the end block
+  return package;
+}
+
+Bytes PackageBytes(std::initializer_list<FbtSample> samples) {
+  return PackageBytes(std::span(samples.begin(), samples.size()));
+}
+
+// A 64 x 256-halfword effect texture page whose bytes start at `seed`.
+Bytes FbtBytes(std::uint8_t seed = 0) {
+  Bytes bytes(kFbtBytes);
+  for (std::size_t index = 0; index < bytes.size(); ++index) {
+    bytes[index] = static_cast<std::byte>(((index * 7U) + seed) & 0xFFU);
+  }
+  return bytes;
+}
+
+struct FbtPage {
+  std::uint32_t slot = 0;
+  Bytes bytes;
+};
+
+struct FbtEffect {
+  std::uint32_t effect = 0;
+  std::vector<FbtSample> samples;
+  std::vector<FbtPage> pages;
+};
+
+// `effect` loading one page into slot 0, which `samples` read.
+FbtEffect Effect(std::uint32_t effect, std::vector<FbtSample> samples,
+                 Bytes page = FbtBytes()) {
+  return {.effect = effect,
+          .samples = std::move(samples),
+          .pages = {{.slot = 0, .bytes = std::move(page)}}};
+}
+
+std::string EffectPath(std::uint32_t effect, std::string_view suffix) {
+  return std::format("EFFECT/E{:03}{}", effect, suffix);
+}
+
+std::string PagePath(std::uint32_t effect, const FbtPage& page) {
+  return EffectPath(effect, std::format("_{}.FBT", page.slot));
+}
+
+// EFFPURGE.BIN binding `effects` (in ascending order) to their files, by
+// sectors from E000.P's.
+Bytes PurgeBytes(const DataFiles& files, std::span<const FbtEffect> effects) {
+  const std::uint32_t base = LbaOf(files, "EFFECT/E000.P");
+  Bytes purge(kEffPurgeBytes);
+  const auto put_extent = [&](std::size_t offset, const std::string& path) {
+    Poke16(purge, offset, LbaOf(files, path) - base);
+    Poke16(purge, offset + 2, SectorsOf(files.at(path).size()) * 2048);
+  };
+  std::size_t texture = 0;
+  for (const FbtEffect& effect : effects) {
+    const std::size_t index = effect.effect;
+    purge[kPurgeClutRows + index] = std::byte{2};
+    put_extent(kPurgePaletteFiles + (index * kPurgeExtentBytes),
+               EffectPath(effect.effect, "_0.FBC"));
+    put_extent(kPurgePackageFiles + (index * kPurgeExtentBytes),
+               EffectPath(effect.effect, ".P"));
+    purge[kPurgeTextureCounts + index] =
+        static_cast<std::byte>(effect.pages.size());
+    for (const FbtPage& page : effect.pages) {
+      purge[kPurgeTextureSlots + texture] = static_cast<std::byte>(page.slot);
+      put_extent(kPurgeTextureFiles + (texture * kPurgeExtentBytes),
+                 PagePath(effect.effect, page));
+      ++texture;
+    }
+  }
+  return purge;
+}
+
+// A disc of `effects`' files and the EFFPURGE.BIN binding them.
+DataFiles FbtDiscFiles(const std::vector<FbtEffect>& effects) {
+  DataFiles files;
+  for (const FbtEffect& effect : effects) {
+    files.emplace(EffectPath(effect.effect, ".P"),
+                  PackageBytes(effect.samples));
+    files.emplace(EffectPath(effect.effect, "_0.FBC"), FbcBytes(2));
+    for (const FbtPage& page : effect.pages) {
+      files.emplace(PagePath(effect.effect, page), page.bytes);
+    }
+  }
+  files.emplace(std::string(kPurgePath), PurgeBytes(files, effects));
+  return files;
+}
+
+Extract::SourceReader ReaderOf(const DataFiles& files) {
+  return [&files](std::string_view path)
+             -> std::expected<Extract::SourceFile, std::string> {
+    const auto found = files.find(path);
+    if (found == files.end()) {
+      return std::unexpected(std::format("{} is not on the disc", path));
+    }
+    return Extract::SourceFile{.path = found->first, .bytes = found->second};
+  };
+}
+
+std::expected<Extract::FbtConversionPlan, std::string> PlanFbt(
+    const DataFiles& files) {
+  return Extract::PlanFbtConversions(EntriesOf(files), ReaderOf(files));
+}
+
+std::string FbtPlanError(const DataFiles& files) {
+  const auto plan = PlanFbt(files);
+  return plan ? std::string{} : plan.error();
+}
+
+Extract::FbtConversion RequiredFbtConversion(const DataFiles& files) {
+  auto plan = PlanFbt(files);
+  INFO((plan ? std::string{} : plan.error()));
+  REQUIRE(plan.has_value());
+  REQUIRE(plan->conversions.size() == 1);
+  return std::move(plan->conversions.front());
+}
+
+// `count` colours of FbcBytes(2) from `entry` of `row`.
+std::vector<std::uint16_t> PreviewWords(std::uint32_t row, std::uint32_t entry,
+                                        std::size_t count) {
+  const std::vector<std::uint16_t> words = WordsOf(FbcBytes(2));
+  const auto first = words.begin() + static_cast<std::ptrdiff_t>(
+                                         (row * kFbcPaletteEntries) + entry);
+  return {first, first + static_cast<std::ptrdiff_t>(count)};
+}
+
+struct FbtDepthCase {
+  std::uint32_t code = 0;
+  Content::ImageDepth depth = Content::ImageDepth::kIndexed4;
+  std::uint32_t entry = 0;
+  std::uint32_t width = 0;
+  std::size_t colours = 0;
+};
+
+void CheckFbtDepthBinding(const FbtDepthCase& depth,
+                          const Extract::FbtConversion& conversion) {
+  CHECK(conversion.texture.path == "EFFECT/E000_0.FBT");
+  CHECK(conversion.depth == depth.depth);
+  CHECK(conversion.palette.path == "EFFECT/E000_0.FBC");
+  CHECK(conversion.palette_row == 1);
+  CHECK(conversion.palette_entry == depth.entry);
+}
+
+void CheckFbtDepthProvenance(const Content::ImageDocument& decoded,
+                             const FbtDepthCase& depth) {
+  const Content::ImageProvenance& provenance = decoded.provenance;
+  const Content::TexturePagePlacement placement{
+      .effect = 0, .slot = 0, .page = 24, .vram = Content::TexturePageRect(24)};
+  CHECK(provenance.texture_page == placement);
+  const Content::PreviewPalette preview{
+      .image = "image.effect.e000_0.palette", .row = 1, .entry = depth.entry};
+  CHECK(provenance.preview_palette == preview);
+  CHECK(provenance.note.empty());
+  std::vector<std::string> dependencies;
+  for (const Content::ImageDependency& dependency : provenance.dependencies) {
+    dependencies.push_back(dependency.source + " " + dependency.role);
+  }
+  CHECK(dependencies ==
+        std::vector<std::string>{"EFFECT/E000.P sampler",
+                                 "EFFECT/E000_0.FBC preview palette",
+                                 "EFFECT/EFFPURGE.BIN binding"});
+}
+
+void CheckFbtDepthPixels(const FbtDepthCase& depth, const DataFiles& files,
+                         const Content::ImageDocument& decoded) {
+  CHECK(decoded.image.depth == depth.depth);
+  CHECK(decoded.image.width == depth.width);
+  CHECK(decoded.image.height == 256);
+  CHECK(Content::PackedWords(decoded.image) ==
+        WordsOf(files.at("EFFECT/E000_0.FBT")));
+  REQUIRE(decoded.image.palettes.size() == 1);
+  CHECK(decoded.image.palettes.front() ==
+        PreviewWords(1, depth.entry, depth.colours));
+}
+
+void CheckFbtDepthImage(const FbtDepthCase& depth, const DataFiles& files,
+                        const Extract::FbtConversion& conversion) {
+  const auto converted = Extract::ConvertFbtTexture(conversion);
+  REQUIRE(converted.has_value());
+  CHECK(converted->output.id == "image.effect.e000_0");
+  CHECK(converted->output.converter == Extract::kFbtTextureConverterName);
+  CHECK(converted->location.directory == "textures/effect");
+  const auto decoded =
+      Content::DecodeImageFiles("E000_0", ReaderFor(converted->files));
+  REQUIRE(decoded.has_value());
+  CheckFbtDepthPixels(depth, files, *decoded);
+  CheckFbtDepthProvenance(*decoded, depth);
+}
+
+void CheckFbtDepthCase(const FbtDepthCase& depth) {
+  INFO("depth code " << depth.code);
+  const DataFiles files = FbtDiscFiles(
+      {Effect(0, {Sample(depth.code), Sample(depth.code, 1, depth.entry),
+                  Sample(depth.code, 1, depth.entry)})});
+  const Extract::FbtConversion conversion = RequiredFbtConversion(files);
+  CheckFbtDepthBinding(depth, conversion);
+  CheckFbtDepthImage(depth, files, conversion);
+}
+
+TEST_CASE("FBT pages convert at the depth their effect samples",
+          "[content-images]") {
+  CheckFbtDepthCase({.code = 0,
+                     .depth = Content::ImageDepth::kIndexed4,
+                     .entry = 16,
+                     .width = 256,
+                     .colours = 16});
+  CheckFbtDepthCase({.code = 1,
+                     .depth = Content::ImageDepth::kIndexed8,
+                     .entry = 0,
+                     .width = 128,
+                     .colours = 256});
+}
+
+TEST_CASE("An FBT page no descriptor samples converts at 8 bits with a note",
+          "[content-images]") {
+  const DataFiles files = FbtDiscFiles({Effect(0, {})});
+  const Extract::FbtConversion conversion = RequiredFbtConversion(files);
+  CHECK_FALSE(conversion.depth.has_value());
+  const auto converted = Extract::ConvertFbtTexture(conversion);
+  REQUIRE(converted.has_value());
+  CHECK(converted->output.note.find("converts at 8 bits") != std::string::npos);
+  const auto decoded =
+      Content::DecodeImageFiles("E000_0", ReaderFor(converted->files));
+  REQUIRE(decoded.has_value());
+  CHECK(decoded->image.depth == Content::ImageDepth::kIndexed8);
+  CHECK(decoded->provenance.note == converted->output.note);
+  CHECK(Content::PackedWords(decoded->image) ==
+        WordsOf(files.at("EFFECT/E000_0.FBT")));
+}
+
+void CheckFbtAlias(const Content::ConversionOutput& alias) {
+  CHECK(alias.id == "image.effect.e001_0");
+  CHECK(alias.source == "EFFECT/E001_0.FBT");
+  CHECK(alias.converter == Extract::kFbtTextureConverterName);
+  CHECK(alias.alias_of == "image.effect.e000_0");
+  CHECK(alias.files.empty());
+  REQUIRE_FALSE(alias.dependencies.empty());
+  CHECK(alias.dependencies.front().source == "EFFECT/E001.P");
+}
+
+TEST_CASE("Identical FBT pages at one depth alias the later page",
+          "[content-images]") {
+  const auto plan =
+      PlanFbt(FbtDiscFiles({Effect(0, {Sample(0)}), Effect(1, {Sample(0)})}));
+  REQUIRE(plan.has_value());
+  REQUIRE(plan->conversions.size() == 1);
+  CHECK(plan->conversions.front().texture.path == "EFFECT/E000_0.FBT");
+  REQUIRE(plan->aliases.size() == 1);
+  CheckFbtAlias(plan->aliases.front());
+}
+
+TEST_CASE("Identical FBT pages at different depths do not alias",
+          "[content-images]") {
+  const auto plan =
+      PlanFbt(FbtDiscFiles({Effect(0, {Sample(0)}), Effect(1, {Sample(1)})}));
+  REQUIRE(plan.has_value());
+  CHECK(plan->conversions.size() == 2);
+  CHECK(plan->aliases.empty());
+}
+
+TEST_CASE("FBT planning rejects pages it cannot place or sample",
+          "[content-images]") {
+  DataFiles files = FbtDiscFiles({Effect(0, {Sample(0)})});
+  Bytes& purge = files.at(std::string(kPurgePath));
+  Bytes& package = files.at("EFFECT/E000.P");
+  std::string reason;
+  SECTION("purge tables of another size") {
+    purge.pop_back();
+    reason = "the purge tables take 17264 bytes; it has 17263";
+  }
+  SECTION("no FBC palette") {
+    purge[kPurgeClutRows] = std::byte{0};
+    reason = "effect 0 lists texture pages but loads no FBC palette";
+  }
+  SECTION("an extent that names no file") {
+    Poke16(purge, kPurgePaletteFiles + 2, 4096);
+    reason = "names no listed .FBC file";
+  }
+  SECTION("a slot past the effect pages") {
+    purge[kPurgeTextureSlots] = std::byte{8};
+    reason = "slots are 0-7";
+  }
+  SECTION("a page no effect loads") {
+    files.emplace("EFFECT/E000_7.FBT", FbtBytes());
+    reason =
+        "EFFECT/E000_7.FBT: no effect in EFFECT/EFFPURGE.BIN loads this "
+        "texture page";
+  }
+  SECTION("a package without its end block") {
+    package.resize(package.size() - 4);
+    reason = "without its end block";
+  }
+  SECTION("texels past the page") {
+    FbtSample past = Sample(0);
+    past.u = 250;
+    package = PackageBytes({past});
+    reason = "reads texels 250-265, past its page's 256";
+  }
+  SECTION("two depths for one page") {
+    package = PackageBytes({Sample(0), Sample(1)});
+    reason = "an earlier one reads it at";
+  }
+  SECTION("direct colour") {
+    package = PackageBytes({Sample(2)});
+    reason = "as direct colour; effect pages hold palette indices";
+  }
+  SECTION("a CLUT row the FBC lacks") {
+    package = PackageBytes({Sample(0, 2)});
+    reason = "which EFFECT/E000_0.FBC's 2 rows at row 240 do not hold";
+  }
+  const std::string error = FbtPlanError(files);
+  INFO(error);
+  CHECK(error.find(reason) != std::string::npos);
+}
+
+TEST_CASE("FBT planning rejects a page two effects or none can load",
+          "[content-images]") {
+  DataFiles files =
+      FbtDiscFiles({Effect(0, {Sample(0)}), Effect(1, {Sample(0)})});
+  Bytes& purge = files.at(std::string(kPurgePath));
+  std::string reason;
+  SECTION("a page two effects load") {
+    const auto at = static_cast<std::ptrdiff_t>(kPurgeTextureFiles);
+    const auto extent = static_cast<std::ptrdiff_t>(kPurgeExtentBytes);
+    std::copy_n(purge.begin() + at, extent, purge.begin() + at + extent);
+    reason = "EFFECT/E000_0.FBT is loaded by effects 0 and 1";
+  }
+  SECTION("an effect without its package") {
+    Poke16(purge, kPurgePackageFiles + kPurgeExtentBytes, 0);
+    reason = "effect 1 lists texture pages but has no package";
+  }
+  const std::string error = FbtPlanError(files);
+  INFO(error);
+  CHECK(error.find(reason) != std::string::npos);
+}
+
+TEST_CASE("FBT conversion rejects a page it cannot rebuild",
+          "[content-images]") {
+  Extract::FbtConversion conversion =
+      RequiredFbtConversion(FbtDiscFiles({Effect(0, {Sample(0)})}));
+  std::string reason;
+  SECTION("a short page") {
+    conversion.texture.bytes.pop_back();
+    reason = "is a 32768-byte .FBT file; it has 32767 bytes";
+  }
+  SECTION("a slot past the effect pages") {
+    conversion.slot = 8;
+    reason = "slot 8 is not one of 0-7";
+  }
+  SECTION("a preview row the FBC lacks") {
+    conversion.palette_row = 2;
+    reason = "has no 16-entry palette at row 2, entry 0";
+  }
+  SECTION("an 8-bit preview past the row's end") {
+    conversion.depth = Content::ImageDepth::kIndexed8;
+    conversion.palette_entry = 16;
+    reason = "has no 256-entry palette at row 0, entry 16";
+  }
+  const auto converted = Extract::ConvertFbtTexture(conversion);
+  REQUIRE_FALSE(converted.has_value());
+  INFO(converted.error());
+  CHECK(converted.error().find(reason) != std::string::npos);
+}
+
+TEST_CASE("FBT conversion keeps unchanged pages and edits until forced",
+          "[content-images]") {
+  TemporaryData data;
+  data.WriteManifest(FbtDiscFiles({Effect(0, {Sample(0)})}));
+  CHECK(RequiredConversion(data.Root(), false).converted == 2);
+  const fs::path page = data.Root() / "textures" / "effect" / "E000_0.png";
+  const Bytes generated = ReadBytes(page);
+  REQUIRE_FALSE(generated.empty());
+  const auto second = RequiredConversion(data.Root(), false);
+  CHECK(second.converted == 0);
+  CHECK(second.unchanged == 2);
+
+  const Bytes edited{std::byte{0x01}, std::byte{0x02}};
+  OverwriteFile(page, edited);
+  CHECK(RequiredConversion(data.Root(), false).unchanged == 2);
+  CHECK(ReadBytes(page) == edited);
+  CHECK(RequiredConversion(data.Root(), true).converted == 2);
+  CHECK(ReadBytes(page) == generated);
+}
+
+TEST_CASE("A changed package, palette or binding reconverts its FBT pages",
+          "[content-images]") {
+  TemporaryData data;
+  DataFiles files = FbtDiscFiles({Effect(0, {Sample(0)})});
+  data.WriteManifest(files);
+  REQUIRE(RequiredConversion(data.Root(), false).converted == 2);
+  std::string stale;
+  std::size_t reconverted = 1;
+  SECTION("the package") {
+    files.at("EFFECT/E000.P")[kFirstDescriptorV] ^= std::byte{1};
+    stale =
+        "stale fbt-texture-png dependency EFFECT/E000.P for "
+        "EFFECT/E000_0.FBT";
+  }
+  SECTION("the palette") {
+    files.at("EFFECT/E000_0.FBC").front() ^= std::byte{1};
+    stale = "stale fbc-palette-png source hash for EFFECT/E000_0.FBC";
+    reconverted = 2;  // the palette and the page that previews it
+  }
+  SECTION("the binding") {
+    files.at(std::string(kPurgePath)).back() ^= std::byte{1};
+    stale =
+        "stale fbt-texture-png dependency EFFECT/EFFPURGE.BIN for "
+        "EFFECT/E000_0.FBT";
+  }
+  data.WriteManifest(files);
+  const std::string error = ConversionError(data);
+  INFO(error);
+  CHECK(error.find(stale) != std::string::npos);
+  CHECK(RequiredConversion(data.Root(), false).converted == reconverted);
+  CHECK(ConversionError(data).empty());
+}
+
+// `data` with effect 0's page and its converted image, opened.
+struct ConvertedFbtStore {
+  TemporaryData data;
+  DataFiles files = FbtDiscFiles({Effect(0, {Sample(0)})});
+  VS::Effects::DiscRead read = FbtRead(files, "EFFECT/E000_0.FBT");
+  Content::DataStore::ScopedOverride restore;
+
+  ConvertedFbtStore() {
+    data.WriteManifest(files);
+    REQUIRE(Extract::ConvertDiscImages(data.Root(), false).has_value());
+    REQUIRE(Content::DataStore::Open(data.Root()).has_value());
+  }
+
+  fs::path Directory() const { return data.Root() / "textures" / "effect"; }
+};
+
+TEST_CASE("Live effect textures load the converted page by sector",
+          "[content-images]") {
+  {
+    Content::DataStore::ScopedOverride none;
+    const auto unopened =
+        VS::Effects::LoadLiveEffectTexture({.lba = 102, .size = 32768});
+    REQUIRE_FALSE(unopened.has_value());
+    CHECK(unopened.error().find("no extracted-data store") !=
+          std::string::npos);
+  }
+  const ConvertedFbtStore store;
+  const auto loaded = VS::Effects::LoadLiveEffectTexture(store.read);
+  INFO((loaded ? std::string{} : loaded.error()));
+  REQUIRE(loaded.has_value());
+  CHECK(*loaded == WordsOf(store.files.at("EFFECT/E000_0.FBT")));
+  CHECK_FALSE(VS::Effects::LoadLiveEffectTexture(
+                  {.lba = store.read.lba + 1, .size = store.read.size})
+                  .has_value());
+  CHECK_FALSE(
+      VS::Effects::LoadLiveEffectTexture({.lba = store.read.lba, .size = 2048})
+          .has_value());
+}
+
+TEST_CASE("Live effect textures load edits to the converted page",
+          "[content-images]") {
+  const ConvertedFbtStore store;
+  auto authored = Content::LoadImageFiles(store.Directory(), "E000_0");
+  REQUIRE(authored.has_value());
+  REQUIRE_FALSE(authored->image.indices.empty());
+  authored->image.indices.front() ^= 0x0FU;
+  auto files = Extract::EncodeImageFiles(*authored, "E000_0");
+  REQUIRE(files.has_value());
+  REQUIRE(Extract::WriteImageFiles(store.Directory(), *files).has_value());
+  const Bytes& source = store.files.at("EFFECT/E000_0.FBT");
+  const auto edited = VS::Effects::LoadLiveEffectTexture(store.read);
+  REQUIRE(edited.has_value());
+  CHECK(*edited == Content::PackedWords(authored->image));
+  CHECK(*edited != WordsOf(source));
+  CHECK(ReadBytes(store.data.Root() / "disc" / "EFFECT" / "E000_0.FBT") ==
+        source);
+}
+
+TEST_CASE("Live effect textures refuse an edit that is not one page",
+          "[content-images]") {
+  const ConvertedFbtStore store;
+  auto authored = Content::LoadImageFiles(store.Directory(), "E000_0");
+  REQUIRE(authored.has_value());
+  // The same indices, as a 512 x 128 image.
+  authored->image.width *= 2;
+  authored->image.height /= 2;
+  auto files = Extract::EncodeImageFiles(*authored, "E000_0");
+  REQUIRE(files.has_value());
+  REQUIRE(Extract::WriteImageFiles(store.Directory(), *files).has_value());
+  const auto refused = VS::Effects::LoadLiveEffectTexture(store.read);
+  REQUIRE_FALSE(refused.has_value());
+  CHECK(refused.error().find(
+            "is not an indexed 64x256-word effect texture page") !=
+        std::string::npos);
+}
+
+TEST_CASE("Live effect textures load an aliased page from its target",
+          "[content-images]") {
+  TemporaryData data;
+  DataFiles files =
+      FbtDiscFiles({Effect(0, {Sample(0)}), Effect(1, {Sample(0)})});
+  data.WriteManifest(files);
+  const auto report = RequiredConversion(data.Root(), false);
+  CHECK(report.converted == 3);  // two palettes and one page
+  CHECK(report.aliased == 1);
+  const fs::path copy = data.Root() / "textures" / "effect" / "E001_0.png";
+  CHECK_FALSE(fs::exists(copy));
+  CHECK(ConversionError(data).empty());
+  {
+    Content::DataStore::ScopedOverride restore;
+    REQUIRE(Content::DataStore::Open(data.Root()).has_value());
+    const auto loaded =
+        VS::Effects::LoadLiveEffectTexture(FbtRead(files, "EFFECT/E001_0.FBT"));
+    INFO((loaded ? std::string{} : loaded.error()));
+    REQUIRE(loaded.has_value());
+    CHECK(*loaded == WordsOf(files.at("EFFECT/E001_0.FBT")));
+  }
+}
+
+TEST_CASE("A changed FBT alias refuses stale output until converted",
+          "[content-images]") {
+  TemporaryData data;
+  const fs::path copy = data.Root() / "textures" / "effect" / "E001_0.png";
+  DataFiles files =
+      FbtDiscFiles({Effect(0, {Sample(0)}), Effect(1, {Sample(0)})});
+  data.WriteManifest(files);
+  const auto initial = RequiredConversion(data.Root(), false);
+  CHECK(initial.aliased == 1);
+  files.at("EFFECT/E001_0.FBT") = FbtBytes(1);
+  data.WriteManifest(files);
+  CHECK(ConversionError(data).find(
+            "stale fbt-texture-png source hash for EFFECT/E001_0.FBT") !=
+        std::string::npos);
+  const auto split = RequiredConversion(data.Root(), false);
+  CHECK(split.converted == 1);
+  CHECK(split.aliased == 0);
+  CHECK(fs::exists(copy));
+  CHECK(ConversionError(data).empty());
 }
 
 TEST_CASE("TIM conversion preserves edits until a forced rebuild",
@@ -1138,6 +1802,55 @@ TEST_CASE("extracted FBC palette corpus converts and reloads exact words",
   for (const auto& [path, source] : input_files) {
     VerifyFbcCorpusOutput(converted_data.Root(), manifest, path, source);
   }
+}
+
+Extract::FbtConversionPlan ExtractedFbtPlan() {
+  const fs::path source_root = "Native/data";
+  auto entries = Content::DataStore::LoadManifest(source_root);
+  if (!entries) SKIP("Extracted Native/data is unavailable");
+  const auto listed = std::ranges::count_if(
+      *entries, [](const Content::DataStore::Entry& entry) {
+        return entry.form == "raw" && entry.path.ends_with(".FBT");
+      });
+  if (listed == 0) SKIP("Extracted Native/data has no FBT files");
+  const Extract::SourceReader read = [&source_root](std::string_view path)
+      -> std::expected<Extract::SourceFile, std::string> {
+    Bytes bytes = ReadBytes(source_root / "disc" / fs::path(path));
+    if (bytes.empty()) {
+      return std::unexpected(std::format("cannot read {}", path));
+    }
+    return Extract::SourceFile{.path = std::string(path),
+                               .bytes = std::move(bytes)};
+  };
+  const auto plan = Extract::PlanFbtConversions(*entries, read);
+  INFO((plan ? std::string{} : plan.error()));
+  REQUIRE(plan.has_value());
+  CHECK(plan->conversions.size() + plan->aliases.size() ==
+        static_cast<std::size_t>(listed));
+  return std::move(*plan);
+}
+
+void CheckExtractedFbtPlan(const Extract::FbtConversionPlan& plan) {
+  std::map<std::string, std::string, std::less<>> hashes;  // id -> source
+  for (const Extract::FbtConversion& conversion : plan.conversions) {
+    const auto converted = Extract::ConvertFbtTexture(conversion);
+    INFO((converted ? std::string{} : converted.error()));
+    REQUIRE(converted.has_value());
+    hashes.emplace(converted->output.id, converted->output.source_sha256);
+  }
+  for (const Content::ConversionOutput& alias : plan.aliases) {
+    INFO(alias.source);
+    const auto target = hashes.find(alias.alias_of);
+    REQUIRE(target != hashes.end());
+    CHECK(target->second == alias.source_sha256);
+    CHECK(alias.files.empty());
+  }
+}
+
+TEST_CASE("extracted FBT corpus binds every page and converts it exactly",
+          "[content-images][extract]") {
+  const auto plan = ExtractedFbtPlan();
+  CheckExtractedFbtPlan(plan);
 }
 
 }  // namespace

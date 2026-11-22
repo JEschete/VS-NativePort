@@ -65,7 +65,12 @@ std::expected<void, std::string> CheckOutput(const ConversionManifest& manifest,
         std::format("{}: converter '{}' is not listed in converters", output.id,
                     output.converter));
   }
-  if (output.files.empty()) {
+  if (!output.alias_of.empty()) {
+    if (!output.files.empty()) {
+      return std::unexpected(std::format("{}: an alias of {} lists no files",
+                                         output.id, output.alias_of));
+    }
+  } else if (output.files.empty()) {
     return std::unexpected(std::format("{}: lists no files", output.id));
   }
   for (const std::string& file : output.files) {
@@ -78,7 +83,27 @@ std::expected<void, std::string> CheckOutput(const ConversionManifest& manifest,
   return CheckDependencies(output);
 }
 
-std::expected<std::vector<std::string>, std::string> FilesOf(
+// An alias names another output of its converter that has files and the same
+// source bytes.
+std::expected<void, std::string> CheckAlias(const ConversionManifest& manifest,
+                                            const ConversionOutput& output) {
+  if (output.alias_of.empty()) return {};
+  const ConversionOutput* const target = manifest.Find(output.alias_of);
+  if (target == nullptr || !target->alias_of.empty() ||
+      target->converter != output.converter) {
+    return std::unexpected(
+        std::format("{}: alias_of '{}' must name a {} output with files",
+                    output.id, output.alias_of, output.converter));
+  }
+  if (target->source_sha256 != output.source_sha256) {
+    return std::unexpected(
+        std::format("{}: its source hash differs from its alias target {}",
+                    output.id, output.alias_of));
+  }
+  return {};
+}
+
+std::expected<std::vector<std::string>, std::string> FileListOf(
     const JsonMembers& members) {
   auto value = members.Get("files");
   if (!value) return std::unexpected(value.error());
@@ -124,7 +149,7 @@ std::expected<ConversionOutput, std::string> OutputOf(const Json& value,
   const JsonMembers members(value, std::move(where));
   if (auto only =
           members.Only({"id", "source", "source_sha256", "converter", "files",
-                        "dependencies", "unreferenced", "note"});
+                        "dependencies", "unreferenced", "note", "alias_of"});
       !only) {
     return std::unexpected(only.error());
   }
@@ -137,7 +162,7 @@ std::expected<ConversionOutput, std::string> OutputOf(const Json& value,
     if (!text) return std::unexpected(text.error());
     *field = std::move(*text);
   }
-  auto files = FilesOf(members);
+  auto files = FileListOf(members);
   if (!files) return std::unexpected(files.error());
   output.files = std::move(*files);
   auto dependencies = DependenciesOf(members);
@@ -152,6 +177,11 @@ std::expected<ConversionOutput, std::string> OutputOf(const Json& value,
     auto note = members.String("note");
     if (!note) return std::unexpected(note.error());
     output.note = std::move(*note);
+  }
+  if (members.Find("alias_of") != nullptr) {
+    auto alias = members.String("alias_of");
+    if (!alias) return std::unexpected(alias.error());
+    output.alias_of = std::move(*alias);
   }
   return output;
 }
@@ -218,6 +248,11 @@ const ConversionOutput* ConversionManifest::Find(std::string_view id) const {
   return found == outputs.end() ? nullptr : &*found;
 }
 
+const ConversionOutput* ConversionManifest::FilesOf(
+    const ConversionOutput& output) const {
+  return output.alias_of.empty() ? &output : Find(output.alias_of);
+}
+
 std::expected<void, std::string> ValidateConversionManifest(
     const ConversionManifest& manifest) {
   if (manifest.extractor_version.empty()) {
@@ -239,6 +274,11 @@ std::expected<void, std::string> ValidateConversionManifest(
           std::format("output id '{}' is listed twice", output.id));
     }
   }
+  for (const ConversionOutput& output : manifest.outputs) {
+    if (auto alias = CheckAlias(manifest, output); !alias) {
+      return alias;
+    }
+  }
   return {};
 }
 
@@ -255,10 +295,12 @@ std::expected<ConversionManifest, std::string> ParseConversionManifest(
   auto version = members.Unsigned("schema_version",
                                   std::numeric_limits<std::uint32_t>::max());
   if (!version) return std::unexpected(version.error());
-  if (*version != kConversionManifestSchemaVersion) {
-    return std::unexpected(
-        std::format("{} is schema version {}; this build reads version {}",
-                    name, *version, kConversionManifestSchemaVersion));
+  if (*version < kOldestConversionManifestSchemaVersion ||
+      *version > kConversionManifestSchemaVersion) {
+    return std::unexpected(std::format(
+        "{} is schema version {}; this build reads versions {} to {}", name,
+        *version, kOldestConversionManifestSchemaVersion,
+        kConversionManifestSchemaVersion));
   }
   ConversionManifest manifest;
   auto extractor = members.String("extractor_version");

@@ -289,12 +289,16 @@ Effect palette variants and palette animation are not palette data. Each texture
 
 Binding a package's texture tables checks each indexed descriptor against the palette rows its effect loaded (`CheckEffectPaletteReferences`). A 4-bit (16-entry) or 8-bit (256-entry) descriptor must sample columns 768-1023 of one of rows 240-244. The row must be filled by its effect's CLUT, which covers its slot through row 244, or be row 240. Row 240 holds the battle's system palette, SYSTEM.DAT's fixed image, which INITBTL.PRG uploads to (768, 240) at `18.c:311`. Direct-colour descriptors sample no palette and are skipped. A descriptor that fails stops the bind before anything is published. `BindLiveEffectTextureTables` logs the descriptor index, its CLUT word, the reason, the loaded rows and the action effect, then aborts, as it already does for a malformed texture block. On the disc, every package the runtime loads (290, 278 with texture tables) passes using only its own CLUT's rows. The only descriptors on row 240 are E000.P's 95, filled by its own slot-0 CLUT. E000.P is also BATTLE.PRG's resident empty package, which binds against the system palette alone and passes too. E252-E399 name E000.P's package offset and load no CLUT. The runtime plays them without loading a package (`FinishPurgeOverlay`), so their descriptors are never bound over another effect's palette.
 
+Effect FBT texture pages (#214): an FBT is one whole VRAM texture page, 64 × 256 words (32,768 bytes). `VS.Extract images` (`Extract/EffectTextureConversion.hpp`) binds each page to the one effect that loads it through EFFPURGE.BIN's tables (each effect's FBT count, slots and file extents; extents count sectors from `E000.P`). The page goes to texture page 24 + its slot (slots 0-7). Its depth comes from the descriptors in that effect's `.P` texture block that sample its page. A 4-bit page becomes a 256 × 256 indexed PNG, an 8-bit page a 128 × 256 one, and the indices are the page's bytes unchanged. A page that no descriptor samples (only `E040_3.FBT`) converts at 8 bits with a `note`. A page bound to no effect or to two, sampled at two depths or as direct colour, sampled past its page's edge, or sampled through a CLUT row its effect's FBC does not hold is a conversion error. The PNG's palette is a preview only: the effect FBC's most sampled row and first entry, the lowest on a tie. The sidecar names it in `provenance.preview_palette` (palette image id, row and entry), and the runtime draws with the converted FBC, so colours are edited in the palette image. `provenance.texture_page` records the effect, slot, page and VRAM rectangle. The dependencies are the package (role `sampler`), the FBC (`preview palette`) and EFFPURGE.BIN (`binding`); a change to any of them reconverts the page. Pages with the same bytes at the same depth are converted once. The first by path holds the files and the others are manifest aliases (§8), so an edit to the shared PNG changes every effect that loads it. On the disc, the 755 FBTs give 516 converted pages (15 at 4 bits, 501 at 8 bits) and 239 aliases, each of a page in another effect.
+
+At runtime the effect loader finds a page's converted image by its sector through the manifest (`LoadLiveEffectTexture`), following an alias to its target, and uploads its packed words. It never reads the FBT and has no disc fallback. A page whose image is missing, stale or invalid (`ResourceRefusal::kTextureMissing`), or is not an indexed 64 × 256-word page (`kTextureSize`), is refused and reported, and its texture page is not reserved. `DataStore::RequireConversions` refuses to start when an FBT lacks its conversion or the page or a dependency has changed. The loader still allocates the 32 KB buffer the original read each page into, so the high heap sees the same allocations. A page now loads in one poll, as a palette does; the disc queue used to take several polls per page, and neither matches the original's CD read time.
+
 - **Pixels:** 4bpp and 8bpp images are **indexed PNGs at their true bit depth**. Indices are never re-quantized or remapped. 16bpp images are RGBA PNGs (24bpp, if any, RGB).
 - **Colour:** 5-bit channels are expanded by bit replication (`c<<3 | c>>2`). Import takes the nearest 5-bit value (`(c*31 + 127) / 255`), which inverts replication exactly and rounds edited colours sensibly.
 - **Transparency:** alpha **0** means the word `0x0000`, the colour the hardware never draws. Every other word is alpha **255**. Import maps alpha 0 to `0x0000` whatever its colour, and rejects partial alpha with the file and pixel or palette index. Opaque pure black is always `0x8000`, because `0x0000` would be transparent. (An image shown directly, such as a full-screen picture, displays `0x0000` as black; the material says which applies.)
 - **STP (semi-transparency bit):** stored in the sidecar per palette entry, or per texel for 16bpp: `"none"`, `"all"`, a list of palette indices, or a 1-bit mask image `<name>.stp.png`. STP colours display opaque in editors; whether STP blends, and how, is the material's rule, not the texel's.
 - **Palettes:** the indexed PNG's own palette is the image's default palette. An image with several palettes (CLUT variants, palette animation, effect colour swaps, blade materials) also has `<name>.palettes.png`: one palette per row, row 0 = the default, with the same colour and transparency rules and STP per row in the sidecar. The converter checks that the PNG's palette equals row 0 and reports a mismatch instead of picking one. An image whose palette lives elsewhere (ETM, zone textures) gets a preview palette from its default binding; the sidecar names the palette's source, and import ignores the preview.
-- **Sidecar** (schema `vs.image`, version 1; `Content/ImageFiles.hpp`): `schema`, `schema_version`, the stable image `id`, `depth` (4, 8 or 16), `width` and `height`; for indexed images `palette` = `{entries, count, stp}` with one STP value per palette row; for 16bpp images `stp` = `"none"`, `"all"` or `"mask"` (then `<name>.stp.png`); `material` = `{zero_word, semi_transparency}` only when the consumer is known; `unreferenced` only when true; and `provenance` = source path, SHA-256 and byte offset, the TIM's id, flags and VRAM rectangles, any `dependencies` (source, hash and role, such as the layout that fixes a background's depth) and a `note`. Unknown members are errors, so a misspelt field is reported rather than ignored. Unused palette entries keep their words.
+- **Sidecar** (schema `vs.image`, version 1; `Content/ImageFiles.hpp`): `schema`, `schema_version`, the stable image `id`, `depth` (4, 8 or 16), `width` and `height`; for indexed images `palette` = `{entries, count, stp}` with one STP value per palette row; for 16bpp images `stp` = `"none"`, `"all"` or `"mask"` (then `<name>.stp.png`); `material` = `{zero_word, semi_transparency}` only when the consumer is known; `unreferenced` only when true; and `provenance` = source path, SHA-256 and byte offset, the TIM's id, flags and VRAM rectangles, an effect page's `texture_page` (`effect`, `slot`, `page`, `vram`) and `preview_palette` (`image`, `row`, `entry`), any `dependencies` (source, hash and role, such as the layout that fixes a background's depth) and a `note`. Unknown members are errors, so a misspelt field is reported rather than ignored. Unused palette entries keep their words.
 - **Placement:** images that the original placed in a shared VRAM page are written as **separate** files. Their placement in VRAM is runtime layout, not content (plan §0.1). Any UV remapping is done by the converter and checked in the round-trip.
 
 ### 6.5 Sequenced audio (owner choice: **sequenced**)
@@ -531,9 +535,9 @@ Record source revision/dirty state, disc identity, tool/converter/schema version
 
 ```json
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "extractor_version": "0.1.0",
-  "converters": { "tim-png": 1 },
+  "converters": { "fbc-palette-png": 1, "fbt-texture-png": 1, "tim-png": 1 },
   "outputs": [
     {
       "id": "image.bg.001op01a",
@@ -547,13 +551,23 @@ Record source revision/dirty state, disc identity, tool/converter/schema version
       "dependencies": [
         { "source": "BG/001OP01A.FAR", "source_sha256": "…" }
       ]
+    },
+    {
+      "id": "image.effect.e017_1",
+      "source": "EFFECT/E017_1.FBT",
+      "source_sha256": "…",
+      "converter": "fbt-texture-png",
+      "files": [],
+      "dependencies": [ … ],
+      "alias_of": "image.effect.e013_1"
     }
   ]
 }
 ```
 
 - This is the current schema: every output has a stable `id`, primary source and hash, converter name, and output paths; dependencies include every other consumed input and its hash. Unknown members and paths outside the data root are errors. `files.tsv` remains the raw disc-file catalog.
-- **Unused content:** valid content known to be unused is still converted and marked `"unreferenced": true` (for example `DBGFNT.TIM`). Alias, skipped and unconverted output entries are not part of this schema.
+- **Aliases** (schema version 2): an exact duplicate lists no files and names in `alias_of` an output of the same converter that has files and the same source hash. Readers load the target's files (`ConversionManifest::FilesOf`), and an edit to them applies to every alias. Effect FBT pages are the first aliased outputs (§6.4). Version 1 manifests, which have no aliases, still read.
+- **Unused content:** valid content known to be unused is still converted and marked `"unreferenced": true` (for example `DBGFNT.TIM`). Skipped and unconverted output entries are not part of this schema.
 - **Versions:** each converter has an integer version in code (`VS.Extract`). The runtime embeds the minimum version it requires for each converter, so an old `Native\data\` is rejected with instructions (§2).
 - **Composite dependencies:** an output entry retains its primary `source` and adds a sorted `dependencies` array of `{ "source", "source_sha256" }` records for every other consumed input. Character outputs include the resolved SEQ/ESQ/ETM files and palette sources, not just SHP. A changed/deleted dependency or contributing converter/schema version invalidates the output; a missing dependency is an error, never a reason to reuse a stale model.
 - **Character contract changes:** version ESQ/ETM conversion alongside the model converter and `asset.extras.vs.schemaVersion` (or its explicitly migrated extension equivalent). Runtime requirements must include the VS payload version; successful generic glTF loading is not an acceptable fallback for incompatible gameplay data.
@@ -570,7 +584,7 @@ Record source revision/dirty state, disc identity, tool/converter/schema version
 
 <!-- content:begin (generated by tools/ledger/content.py --sync) -->
 
-**282 of 5,162 disc files converted**, 282 of them with a passing round trip; 194 skipped with a reason; 4,686 unconverted.
+**1,037 of 5,162 disc files converted**, 1,037 of them with a passing round trip; 194 skipped with a reason; 3,931 unconverted.
 
 | Kind | Files | Converted | Round trip pass | Skipped | Unconverted | Converts under |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
@@ -585,7 +599,7 @@ Record source revision/dirty state, disc identity, tool/converter/schema version
 | effect package | 290 | 0 | 0 | 0 | 290 | #216 |
 | effect palette | 277 | 277 | 277 | 0 | 0 | #215 |
 | effect plugin overlay data | 120 | 0 | 0 | 0 | 120 | #502 |
-| effect texture page | 755 | 0 | 0 | 0 | 755 | #214 |
+| effect texture page | 755 | 755 | 755 | 0 | 0 | #214 |
 | ending illustration | 11 | 0 | 0 | 0 | 11 | #498 |
 | equipment model | 127 | 0 | 0 | 0 | 127 | #204 |
 | event script | 512 | 0 | 0 | 0 | 512 | #202 |

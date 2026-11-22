@@ -482,6 +482,7 @@
     <ClCompile Include="src\WeatherRenderTests.cpp" />
     <ClCompile Include="src\XaMixTests.cpp" />
     <ClCompile Include="..\Tools\Extract\src\ConversionManifestWriter.cpp" />
+    <ClCompile Include="..\Tools\Extract\src\EffectTextureConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\ImageFilesWriter.cpp" />
     <ClCompile Include="..\Tools\Extract\src\ImageConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\TimImage.cpp" />

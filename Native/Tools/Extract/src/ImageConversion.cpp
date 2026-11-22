@@ -1,4 +1,5 @@
-// The tim-png and fbc-palette-png converters (ImageConversion.hpp).
+// The tim-png and fbc-palette-png converters, and the batch that runs them with
+// fbt-texture-png (ImageConversion.hpp).
 #include "Extract/ImageConversion.hpp"
 
 #include <algorithm>
@@ -19,6 +20,7 @@
 #include "Content/DataStore.hpp"
 #include "Content/TimFile.hpp"
 #include "Core/Sha256.hpp"
+#include "Extract/EffectTextureConversion.hpp"
 #include "Platform/Paths.hpp"
 
 namespace VS::Extract {
@@ -199,18 +201,6 @@ std::string HashOf(const SourceFile& source) {
   return Core::Sha256Hex(source.bytes);
 }
 
-std::expected<std::string, std::string> FbcPaletteIdForDiscPath(
-    std::string_view path) {
-  auto id = ImageIdForDiscPath(path);
-  if (!id) return std::unexpected(id.error());
-  id->append(".palette");
-  if (!IsContentId(*id)) {
-    return std::unexpected(
-        std::format("'{}' gives no valid FBC palette id", path));
-  }
-  return id;
-}
-
 std::expected<ImageLocation, std::string> FbcPaletteLocationForDiscPath(
     std::string_view path) {
   auto location = ImageLocationForDiscPath(path);
@@ -256,6 +246,8 @@ ImageProvenance ProvenanceOf(const TimConversion& conversion,
                              .source_sha256 = HashOf(conversion.tim),
                              .offset = 0,
                              .tim = OriginOf(tim),
+                             .texture_page = std::nullopt,
+                             .preview_palette = std::nullopt,
                              .dependencies = {},
                              .note = conversion.note};
   for (const SourceDependency& dependency : DependenciesOf(conversion)) {
@@ -267,33 +259,11 @@ ImageProvenance ProvenanceOf(const TimConversion& conversion,
   return provenance;
 }
 
-// Decodes the converted files, which must give `document` back.
-std::expected<ImageDocument, std::string> DecodeConverted(
-    const ImageDocument& document, std::string_view stem,
-    const std::vector<ImageFile>& files, const SourceFile& source) {
-  const ImageFileReader read = [&files](const std::string& name) {
-    const auto found = std::ranges::find(files, name, &ImageFile::name);
-    return found == files.end() ? ImageFileBytes{}
-                                : ImageFileBytes{found->bytes};
-  };
-  auto decoded = DecodeImageFiles(stem, read);
-  if (!decoded) {
-    return std::unexpected(
-        std::format("{}: the converted files do not decode: {}", source.path,
-                    decoded.error()));
-  }
-  if (*decoded != document) {
-    return std::unexpected(std::format(
-        "{}: the converted files decode to a different image", source.path));
-  }
-  return decoded;
-}
-
 // The files must decode to the same document and rebuild the source bytes.
 std::expected<void, std::string> VerifyRoundTrip(
     const ImageDocument& document, std::string_view stem,
     const std::vector<ImageFile>& files, const SourceFile& source) {
-  auto decoded = DecodeConverted(document, stem, files, source);
+  auto decoded = DecodeConvertedFiles(document, stem, files, source);
   if (!decoded) return std::unexpected(decoded.error());
   if (!decoded->provenance.tim) {
     return std::unexpected(std::format(
@@ -320,7 +290,7 @@ std::expected<void, std::string> VerifyRoundTrip(
 std::expected<void, std::string> VerifyFbcRoundTrip(
     const ImageDocument& document, std::string_view stem,
     const std::vector<ImageFile>& files, const SourceFile& source) {
-  auto decoded = DecodeConverted(document, stem, files, source);
+  auto decoded = DecodeConvertedFiles(document, stem, files, source);
   if (!decoded) return std::unexpected(decoded.error());
   const std::vector<std::uint16_t> words = Content::PackedWords(decoded->image);
   if (words.size() * kFbcWordBytes != source.bytes.size()) {
@@ -555,6 +525,47 @@ std::expected<ConverterBatch, std::string> ConvertTims(
   return batch;
 }
 
+// The manifest's output for `conversion` when every input and flag is the one
+// recorded and its files exist.
+const ConversionOutput* UnchangedFbtOutput(const ConversionManifest& manifest,
+                                           const fs::path& root,
+                                           const FbtConversion& conversion) {
+  auto expected = FbtOutputOf(conversion);
+  if (!expected) return nullptr;
+  const ConversionOutput* output = manifest.Find(expected->id);
+  if (output == nullptr || output->files.empty()) return nullptr;
+  ConversionOutput recorded = *output;
+  recorded.files.clear();
+  return recorded == *expected ? PresentOutput(root, output) : nullptr;
+}
+
+std::expected<ConverterBatch, std::string> ConvertFbtTextures(
+    const fs::path& root, const ConversionManifest& previous,
+    const std::vector<DataStore::Entry>& entries, bool force,
+    ConversionRun& run) {
+  auto plan = PlanFbtConversions(entries, [&root](std::string_view path) {
+    return ReadSource(root, path);
+  });
+  if (!plan) return std::unexpected(plan.error());
+  ConverterBatch batch = StartBatch(previous, kFbtTextureConverterName,
+                                    kFbtTextureConverterVersion, force);
+  for (const FbtConversion& conversion : plan->conversions) {
+    const ConversionOutput* kept =
+        batch.reuse ? UnchangedFbtOutput(previous, root, conversion) : nullptr;
+    if (auto recorded =
+            Record(run, batch, kept,
+                   [&conversion] { return ConvertFbtTexture(conversion); });
+        !recorded) {
+      return std::unexpected(recorded.error());
+    }
+  }
+  for (ConversionOutput& alias : plan->aliases) {
+    batch.outputs.push_back(std::move(alias));
+    ++run.report.aliased;
+  }
+  return batch;
+}
+
 std::expected<ConverterBatch, std::string> ConvertFbcPalettes(
     const fs::path& root, const ConversionManifest& previous,
     const std::vector<DataStore::Entry>& entries, bool force,
@@ -607,6 +618,38 @@ std::expected<std::size_t, std::string> Publish(
 
 }  // namespace
 
+std::expected<ImageDocument, std::string> DecodeConvertedFiles(
+    const ImageDocument& document, std::string_view stem,
+    const std::vector<ImageFile>& files, const SourceFile& source) {
+  const ImageFileReader read = [&files](const std::string& name) {
+    const auto found = std::ranges::find(files, name, &ImageFile::name);
+    return found == files.end() ? ImageFileBytes{}
+                                : ImageFileBytes{found->bytes};
+  };
+  auto decoded = DecodeImageFiles(stem, read);
+  if (!decoded) {
+    return std::unexpected(
+        std::format("{}: the converted files do not decode: {}", source.path,
+                    decoded.error()));
+  }
+  if (*decoded != document) {
+    return std::unexpected(std::format(
+        "{}: the converted files decode to a different image", source.path));
+  }
+  return decoded;
+}
+
+ConvertedImage ListConvertedImage(ConversionOutput output,
+                                  ImageLocation location,
+                                  std::vector<ImageFile> files) {
+  for (const ImageFile& file : files) {
+    output.files.push_back(std::format("{}/{}", location.directory, file.name));
+  }
+  return ConvertedImage{.output = std::move(output),
+                        .location = std::move(location),
+                        .files = std::move(files)};
+}
+
 std::expected<std::string, std::string> ImageIdForDiscPath(
     std::string_view disc_path) {
   auto parts = SplitDiscPath(disc_path);
@@ -634,6 +677,18 @@ std::expected<ImageLocation, std::string> ImageLocationForDiscPath(
         "'{}' gives no valid image location under the data root", disc_path));
   }
   return location;
+}
+
+std::expected<std::string, std::string> FbcPaletteIdForDiscPath(
+    std::string_view disc_path) {
+  auto id = ImageIdForDiscPath(disc_path);
+  if (!id) return std::unexpected(id.error());
+  id->append(".palette");
+  if (!IsContentId(*id)) {
+    return std::unexpected(
+        std::format("'{}' gives no valid FBC palette id", disc_path));
+  }
+  return id;
 }
 
 std::expected<ImageDepth, std::string> BackgroundLayoutDepth(
@@ -729,21 +784,16 @@ std::expected<ConvertedImage, std::string> ConvertTim(
       !verified) {
     return std::unexpected(verified.error());
   }
-  ConversionOutput output{.id = *id,
-                          .source = source.path,
-                          .source_sha256 = document.provenance.source_sha256,
-                          .converter = std::string(kTimConverterName),
-                          .files = {},
-                          .dependencies = DependenciesOf(conversion),
-                          .unreferenced = conversion.unreferenced,
-                          .note = conversion.note};
-  for (const ImageFile& file : *files) {
-    output.files.push_back(
-        std::format("{}/{}", location->directory, file.name));
-  }
-  return ConvertedImage{.output = std::move(output),
-                        .location = std::move(*location),
-                        .files = std::move(*files)};
+  return ListConvertedImage({.id = *id,
+                             .source = source.path,
+                             .source_sha256 = document.provenance.source_sha256,
+                             .converter = std::string(kTimConverterName),
+                             .files = {},
+                             .dependencies = DependenciesOf(conversion),
+                             .unreferenced = conversion.unreferenced,
+                             .note = conversion.note,
+                             .alias_of = {}},
+                            std::move(*location), std::move(*files));
 }
 
 std::expected<ConvertedImage, std::string> ConvertFbcPalette(
@@ -795,6 +845,8 @@ std::expected<ConvertedImage, std::string> ConvertFbcPalette(
                      .source_sha256 = HashOf(source),
                      .offset = 0,
                      .tim = std::nullopt,
+                     .texture_page = std::nullopt,
+                     .preview_palette = std::nullopt,
                      .dependencies = {},
                      .note = "FBC CLUT rows retain source order."}};
   auto files = EncodeImageFiles(document, location->stem);
@@ -806,21 +858,16 @@ std::expected<ConvertedImage, std::string> ConvertFbcPalette(
       !verified) {
     return std::unexpected(verified.error());
   }
-  ConversionOutput output{.id = *id,
-                          .source = source.path,
-                          .source_sha256 = document.provenance.source_sha256,
-                          .converter = std::string(kFbcPaletteConverterName),
-                          .files = {},
-                          .dependencies = {},
-                          .unreferenced = false,
-                          .note = {}};
-  for (const ImageFile& file : *files) {
-    output.files.push_back(
-        std::format("{}/{}", location->directory, file.name));
-  }
-  return ConvertedImage{.output = std::move(output),
-                        .location = std::move(*location),
-                        .files = std::move(*files)};
+  return ListConvertedImage({.id = *id,
+                             .source = source.path,
+                             .source_sha256 = document.provenance.source_sha256,
+                             .converter = std::string(kFbcPaletteConverterName),
+                             .files = {},
+                             .dependencies = {},
+                             .unreferenced = false,
+                             .note = {},
+                             .alias_of = {}},
+                            std::move(*location), std::move(*files));
 }
 
 std::expected<ImageConversionReport, std::string> ConvertDiscImages(
@@ -836,7 +883,10 @@ std::expected<ImageConversionReport, std::string> ConvertDiscImages(
   if (!tims) return std::unexpected(tims.error());
   auto palettes = ConvertFbcPalettes(root, previous, *entries, force, run);
   if (!palettes) return std::unexpected(palettes.error());
-  const std::array batches{std::move(*tims), std::move(*palettes)};
+  auto textures = ConvertFbtTextures(root, previous, *entries, force, run);
+  if (!textures) return std::unexpected(textures.error());
+  const std::array batches{std::move(*tims), std::move(*palettes),
+                           std::move(*textures)};
   auto removed = Publish(root, previous, run, batches);
   if (!removed) return std::unexpected(removed.error());
   run.report.converted = run.converted.size();

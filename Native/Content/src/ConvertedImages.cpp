@@ -8,6 +8,7 @@
 #include <format>
 #include <string>
 #include <string_view>
+#include <vector>
 
 #include "Content/ConversionManifest.hpp"
 #include "Content/DataStore.hpp"
@@ -26,8 +27,9 @@ struct ImageFileLocation {
 // The directory and stem of the sidecar and PNG an output lists.
 std::expected<ImageFileLocation, std::string> ImageFilesOf(
     const DataStore& store, const ConvertedSource& source) {
+  const std::vector<std::string>& files = source.files->files;
   std::string sidecar;
-  for (const std::string& file : source.conversion->files) {
+  for (const std::string& file : files) {
     if (!file.ends_with(kImageSidecarSuffix)) continue;
     if (!sidecar.empty()) {
       return std::unexpected(
@@ -41,9 +43,8 @@ std::expected<ImageFileLocation, std::string> ImageFilesOf(
   }
   const std::string stem_path =
       sidecar.substr(0, sidecar.size() - kImageSidecarSuffix.size());
-  if (std::ranges::find(source.conversion->files,
-                        stem_path + std::string(kImagePngSuffix)) ==
-      source.conversion->files.end()) {
+  if (std::ranges::find(files, stem_path + std::string(kImagePngSuffix)) ==
+      files.end()) {
     return std::unexpected(
         std::format("{} has no native PNG image", source.entry->path));
   }
@@ -93,7 +94,13 @@ std::expected<ConvertedSource, std::string> FindConvertedSource(
     return std::unexpected(std::format("no {} output is registered for {}",
                                        read.converter, entry->path));
   }
-  return ConvertedSource{.entry = entry, .conversion = conversion};
+  const ConversionOutput* const files = manifest->FilesOf(*conversion);
+  if (files == nullptr) {
+    return std::unexpected(std::format("{}: alias target {} is not registered",
+                                       entry->path, conversion->alias_of));
+  }
+  return ConvertedSource{
+      .entry = entry, .conversion = conversion, .files = files};
 }
 
 std::expected<ImageDocument, std::string> LoadConvertedImage(
@@ -105,8 +112,8 @@ std::expected<ImageDocument, std::string> LoadConvertedImage(
     return std::unexpected(
         std::format("{}: {}", source.entry->path, document.error()));
   }
-  if (document->id != source.conversion->id ||
-      document->provenance.source != source.entry->path ||
+  if (document->id != source.files->id ||
+      document->provenance.source != source.files->source ||
       document->provenance.source_sha256 != source.conversion->source_sha256 ||
       document->unreferenced) {
     return std::unexpected(std::format(

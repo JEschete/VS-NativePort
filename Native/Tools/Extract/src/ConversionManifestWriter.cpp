@@ -39,6 +39,7 @@ Json OutputJson(const ConversionOutput& output) {
   }
   if (output.unreferenced) json["unreferenced"] = true;
   if (!output.note.empty()) json["note"] = output.note;
+  if (!output.alias_of.empty()) json["alias_of"] = output.alias_of;
   return json;
 }
 }  // namespace

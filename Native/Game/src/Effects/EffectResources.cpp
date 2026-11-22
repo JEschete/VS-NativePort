@@ -104,16 +104,23 @@ template <typename T>
                   .h = kTexturePageHeight};
 }
 
-// Uploads a loaded texture page, reserving and recording it.
+// Uploads a texture page from its converted image, reserving and recording
+// it.
 ResourceRefusal UploadTexture(EffectResourceState& state,
                               EffectResourceHost& host,
-                              const TextureAsset& asset) {
+                              const TextureAsset& asset, DiscRead source) {
   const auto area = TextureArea(asset);
   if (!area) return ResourceRefusal::kTextureSlot;
+  const auto words = host.LoadTexturePage(source);
+  if (!words) return ResourceRefusal::kTextureMissing;
+  if (words->size() !=
+      static_cast<std::size_t>(area->w) * static_cast<std::size_t>(area->h)) {
+    return ResourceRefusal::kTextureSize;
+  }
   const std::uint32_t page = kEffectTexturePageBase + asset.slot;
   host.ReserveTexturePage(page);
   state.loaded_texture_pages |= 1U << page;
-  host.UploadImage(*area, state.texture_buffer.id);
+  host.UploadImage(*area, *words);
   return ResourceRefusal::kNone;
 }
 
@@ -140,9 +147,9 @@ ResourceRefusal UploadPalette(EffectResourceHost& host,
   return ResourceRefusal::kNone;
 }
 
-// func_800D7CFC's state 1: uploads the current asset once it is ready and
-// moves to the next. Texture pages are read from the disc; a CLUT is its
-// converted palette, ready at once.
+// func_800D7CFC's state 1: uploads the current asset and moves to the next.
+// Each asset is its converted image, ready at once, where the original read a
+// texture page from the disc over several polls.
 ResourcePoll LoadNextTexture(EffectResourceState& state,
                              EffectResourceHost& host) {
   const auto index = state.texture_index;
@@ -152,25 +159,17 @@ ResourcePoll LoadNextTexture(EffectResourceState& state,
     return {.pending = true, .refusal = ResourceRefusal::kAssetIndex};
   }
   const auto layout = host.DiscLayout();
-  // Allocated at the first asset, CLUT or not, as the original did, so the
-  // high heap sees the same allocations.
+  // Allocated at the first asset, as the original did for its texture reads,
+  // so the high heap sees the same allocations.
   if (state.texture_buffer.id == EffectBufferId::kNone) {
     state.texture_buffer = host.AllocateBuffer(layout.texture_staging_bytes);
   }
   const auto& asset = state.textures.assets[static_cast<std::size_t>(index)];
   const DiscRead read{.lba = asset.file.lba + layout.package_base_lba,
                       .size = asset.file.size};
-  ResourceRefusal refusal = ResourceRefusal::kNone;
-  if (asset.is_clut) {
-    refusal = UploadPalette(host, asset, read);
-  } else {
-    const auto poll =
-        PollEffectResourceRead(state, host, read, state.texture_buffer);
-    if (poll.pending) return poll;
-    refusal = poll.refusal == ResourceRefusal::kNone
-                  ? UploadTexture(state, host, asset)
-                  : poll.refusal;
-  }
+  const ResourceRefusal refusal = asset.is_clut
+                                      ? UploadPalette(host, asset, read)
+                                      : UploadTexture(state, host, asset, read);
   ++state.texture_index;
   if (state.textures.asset_count == state.texture_index) {
     SetEffectTextureLoadState(state, TextureLoadState::kLoaded);
