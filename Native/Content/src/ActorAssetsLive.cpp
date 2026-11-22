@@ -749,6 +749,7 @@ struct FileReadOwner {
 
 FileReadOwner modelReadOwner;
 FileReadOwner weaponReadOwner;
+FileReadOwner sequenceReadOwner;
 
 FileReadOwner* ReadOwner(AssetFileStream stream) {
   switch (stream) {
@@ -756,6 +757,8 @@ FileReadOwner* ReadOwner(AssetFileStream stream) {
       return &modelReadOwner;
     case AssetFileStream::kWeapon:
       return &weaponReadOwner;
+    case AssetFileStream::kSequence:
+      return &sequenceReadOwner;
     default:
       return nullptr;
   }
@@ -1373,6 +1376,16 @@ bool CancelWeaponFile(ActorAssetLoadState& state) {
   return true;
 }
 
+bool CancelSequenceFile(ActorAssetLoadState& state) {
+  if (!HoldsSequenceFile(state)) return true;
+  if (!CancelFileRead(state.sequence_file, sequenceReadOwner,
+                      "cancelled sequence file outside its heap allocation")) {
+    return false;
+  }
+  state.sequence_file_owned = false;
+  return true;
+}
+
 bool LiveActorAssetHost::AbandonHeadRequest(ActorAssetKind kind) {
   const ActorAssetRequest request = LoadRequest(legacyActorAssetRequests[0]);
   if (request.kind != static_cast<std::uint8_t>(kind) ||
@@ -1387,6 +1400,9 @@ bool LiveActorAssetHost::AbandonHeadRequest(ActorAssetKind kind) {
   if (kind == ActorAssetKind::kWeaponModelLoad && !CancelWeaponFile(state)) {
     return false;
   }
+  if (kind == ActorAssetKind::kSequenceLoad && !CancelSequenceFile(state)) {
+    return false;
+  }
   AbandonActorAssetLoad(*this, state, request);
   StoreState(state);
   return true;
@@ -1396,15 +1412,6 @@ bool LiveActorAssetHost::AbandonHeadRequest(ActorAssetKind kind) {
 int FindLiveFreeActorAssetRequest() {
   LiveActorAssetHost host;
   return FindFreeActorAssetRequest(host);
-}
-
-int QueueLiveActorAssetRequest(const LegacyActorAssetRequest* request) {
-  if (request == nullptr) {
-    CountRefusal("null asset request", 0);
-    return -1;
-  }
-  LiveActorAssetHost host;
-  return QueueActorAssetRequest(host, LoadRequest(*request));
 }
 
 int QueueLiveActorAsset(const ActorAssetRequest& request) {

@@ -1178,6 +1178,19 @@ void FinishLiveActorAssets(std::size_t slot, const VS::Battle::Actor* actor) {
   }
 }
 
+int QueueLiveSlotActorAsset(std::size_t slot,
+                            const Content::ActorAssetRequest& request) {
+  const VS::Battle::Actor* actor = SlotActor(slot);
+  const SpawnedActor handle =
+      actor == nullptr ? SpawnedActor::kNone
+                       : LiveActorHandles().Observe(slot, ActorAddress(actor));
+  if (handle == SpawnedActor::kNone ||
+      !Content::IsOwnableActorAssetRequest(request)) {
+    return Content::QueueLiveActorAsset(request);
+  }
+  return Content::QueueLiveOwnedActorAsset(request, AssetOwnerOf(handle));
+}
+
 void ResetLiveActorHandles() { LiveActorHandles().Reset(); }
 
 // decomp: BATTLE.PRG func_800765B0 (src/BATTLE/BATTLE.PRG/146C.c:5877)

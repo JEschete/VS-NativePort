@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "Actors/ActorRosterLive.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/Location.hpp"
@@ -35,7 +36,7 @@
 #include "Battle/Sphere.hpp"
 #include "Battle/SphereLifecycleLive.hpp"
 #include "Battle/TargetingLive.hpp"
-#include "Content/ActorAssetsLive.hpp"
+#include "Content/ActorAssets.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Effects/ActionRequest.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
@@ -305,14 +306,16 @@ class LiveWorld final : public ActionPresentationWorld {
   }
   std::uint8_t SourceModel(int actor) override;
   void QueueAsset(PresentationAsset asset) override {
-    VS::Content::LegacyActorAssetRequest live{};
-    constexpr int kEffectAsset = 7;
-    live.asset_kind = kEffectAsset;
-    live.target_slot = std::bit_cast<decltype(live.target_slot)>(asset.slot);
-    live.sub_kind = asset.kind;
-    live.model_id = asset.model;
-    live.material = std::bit_cast<decltype(live.material)>(asset.material);
-    Content::QueueLiveActorAssetRequest(&live);
+    Content::ActorAssetRequest request;
+    request.kind =
+        static_cast<std::uint8_t>(Content::ActorAssetKind::kSequenceLoad);
+    request.target_slot = std::bit_cast<std::int8_t>(asset.slot);
+    request.sub_kind = asset.kind;
+    request.model_id = asset.model;
+    request.material = asset.material;
+    // Native (#48): owned by the acting actor, so removing it cancels the
+    // sequence before it binds into the slot's next actor.
+    static_cast<void>(Actors::QueueLiveSlotActorAsset(asset.slot, request));
   }
   void HideHud() override { VS::Battle::SetLiveHudHidden(1); }
   bool InformationEnabled() override {

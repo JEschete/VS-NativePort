@@ -30,6 +30,11 @@ void ResetLiveActorHandles();
                                          const VS::Battle::Actor* actor);
 // Runs the asset queue until the installed actor owns no queued request.
 void FinishLiveActorAssets(std::size_t slot, const VS::Battle::Actor* actor);
+// Native (#48): queues `request` for the actor installed in `slot`, so
+// removing that actor cancels it. Unowned, as the original queued it, when the
+// slot is empty or the request kind is not ownable. The queue index, or -1.
+int QueueLiveSlotActorAsset(std::size_t slot,
+                            const Content::ActorAssetRequest& request);
 
 // The typed records of the legacy layouts.
 [[nodiscard]] CharacterTemplate DecodeCharacterTemplate(

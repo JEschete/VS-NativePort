@@ -413,6 +413,14 @@ bool ActorAssetCompletions::Full() const {
 }
 
 namespace {
+// The sequence sub kinds the loaders switch on (func_8009BE5C, loadSeq).
+constexpr std::uint8_t kBattleSequence = 0;
+constexpr std::uint8_t kCommonBankSequence = 1;
+constexpr std::uint8_t kEffectBankSequence = 2;
+constexpr std::uint8_t kMaterialSequence = 3;
+constexpr std::uint8_t kMaterialModelSequence = 4;
+constexpr std::uint8_t kSpecialSequence = 5;
+
 // The owner of the request in `slot`, when it is owned and queued.
 std::optional<ActorAssetIdentity> OwnedRequest(const ActorAssetHost& host,
                                                int slot) {
@@ -455,7 +463,13 @@ bool IsOwnableActorAssetRequest(const ActorAssetRequest& request) {
     case ActorAssetKind::kWeaponModelParse:
       return true;
     case ActorAssetKind::kSequenceParse:
-      return request.sub_kind == 0;
+      return request.sub_kind == kBattleSequence;
+    // Native (#48): the sequences bound into their target actor. Banks bind
+    // into every actor and a material sequence into the shared work buffer.
+    case ActorAssetKind::kSequenceLoad:
+      return request.sub_kind == kBattleSequence ||
+             request.sub_kind == kMaterialModelSequence ||
+             request.sub_kind == kSpecialSequence;
     default:
       return false;
   }
@@ -1972,6 +1986,10 @@ bool HoldsWeaponFile(const ActorAssetLoadState& state) {
   return state.weapon_file_loaded && state.model_phase != kPhaseStart;
 }
 
+bool HoldsSequenceFile(const ActorAssetLoadState& state) {
+  return state.sequence_file_owned && state.model_phase != kPhaseStart;
+}
+
 // Native (#48, #492): the original never abandoned a request. An owner's
 // cancellation abandons its head between frames: a parse waiting to fix its
 // primitives has placed its texture and allocated its model, so the record
@@ -1983,6 +2001,7 @@ void AbandonActorAssetLoad(ActorAssetHost& host, ActorAssetLoadState& state,
   const bool mid_parse = state.parse_phase == kParseFixPrimitives;
   const bool holds_model_file = HoldsActorModelFile(state);
   const bool holds_weapon_file = HoldsWeaponFile(state);
+  const bool holds_sequence_file = HoldsSequenceFile(state);
   const int target = TargetSlot(request);
   const auto kind = static_cast<ActorAssetKind>(request.kind);
   switch (kind) {
@@ -2022,6 +2041,16 @@ void AbandonActorAssetLoad(ActorAssetHost& host, ActorAssetLoadState& state,
         state.model_phase = kPhaseStart;
       }
       break;
+    case ActorAssetKind::kSequenceLoad:
+      // An ownable sequence parses whole in the step after its read, so it
+      // binds nothing while it waits; only its file is held.
+      if (holds_sequence_file) host.FreeHigh(state.sequence_file);
+      state.sequence_file_owned = false;
+      state.sequence_file = AssetAddress::kNone;
+      state.model_phase = kPhaseStart;
+      state.sequence_parse_phase = kPhaseStart;
+      state.sequence_cursor = AssetAddress::kNone;
+      break;
     default:
       state.sequence_parse_phase = kPhaseStart;
       state.sequence_cursor = AssetAddress::kNone;
@@ -2041,12 +2070,6 @@ void ReleaseIdleActorAssetCursors(ActorAssetLoadState& state) {
 }
 
 namespace {
-constexpr std::uint8_t kBattleSequence = 0;
-constexpr std::uint8_t kCommonBankSequence = 1;
-constexpr std::uint8_t kEffectBankSequence = 2;
-constexpr std::uint8_t kMaterialSequence = 3;
-constexpr std::uint8_t kMaterialModelSequence = 4;
-constexpr std::uint8_t kSpecialSequence = 5;
 constexpr std::size_t kMaterialModelColumns = 4;
 constexpr std::uint8_t kFallbackSequenceMaterial = 2;
 constexpr std::uint16_t kMaterialModelActorId = 2;

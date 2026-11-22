@@ -967,8 +967,9 @@ TEST_CASE(
   FakeAssetHost& host = *owner;
   CHECK_FALSE(Content::SubmitActorAssetRequest(
       host, PartRequest(1), Content::kUnownedActorAssetOwner));
-  CHECK_FALSE(Content::SubmitActorAssetRequest(
-      host, Request(ActorAssetKind::kSequenceLoad, 0, 1), kPreviewOwner));
+  ActorAssetRequest bank_load = Request(ActorAssetKind::kSequenceLoad, 1, 1);
+  bank_load.sub_kind = 1;
+  CHECK_FALSE(Content::SubmitActorAssetRequest(host, bank_load, kPreviewOwner));
   ActorAssetRequest common = Request(ActorAssetKind::kSequenceParse, 0, 1);
   common.sub_kind = 1;
   CHECK_FALSE(Content::SubmitActorAssetRequest(host, common, kPreviewOwner));
@@ -983,15 +984,18 @@ TEST_CASE(
   CHECK(IssuedTickets(host) == 0);
 }
 
-TEST_CASE("Asset submissions own a common sequence parse",
+TEST_CASE("Asset submissions own common parses and special sequence loads",
           "[content-slice][content][actor-assets][asset-ownership]") {
   const auto owner = std::make_unique<FakeAssetHost>();
   FakeAssetHost& host = *owner;
   ActorAssetRequest common = Request(ActorAssetKind::kSequenceParse, 0, 1);
   common.sub_kind = 0;
+  ActorAssetRequest special = Request(ActorAssetKind::kSequenceLoad, 3, 1);
+  special.sub_kind = 5;
   CHECK(Content::SubmitActorAssetRequest(host, common, kPreviewOwner));
-  CHECK(host.queued == std::vector{common});
-  CHECK(IssuedTickets(host) == 1);
+  CHECK(Content::SubmitActorAssetRequest(host, special, kPreviewOwner));
+  CHECK(host.queued == std::vector{common, special});
+  CHECK(IssuedTickets(host) == 2);
   CHECK(host.refusals.empty());
 }
 
@@ -1075,8 +1079,10 @@ TEST_CASE("Untracked owned requests need an owner and an ownable kind",
   const Content::ActorAssetOwner unowned = Content::kUnownedActorAssetOwner;
   CHECK(Content::QueueOwnedActorAssetRequest(host, PartRequest(1), unowned) ==
         -1);
-  CHECK(Content::QueueOwnedActorAssetRequest(
-            host, Request(ActorAssetKind::kSequenceLoad, 0, 1), actor) == -1);
+  // A material sequence binds into the shared work buffer, not an actor.
+  ActorAssetRequest material = Request(ActorAssetKind::kSequenceLoad, 0, 1);
+  material.sub_kind = 3;
+  CHECK(Content::QueueOwnedActorAssetRequest(host, material, actor) == -1);
   CHECK(host.refusals ==
         std::vector<std::string>(2, "unownable asset request"));
   CHECK(QueuedModels(host).empty());
@@ -1272,6 +1278,72 @@ TEST_CASE("Abandoning an unstarted weapon model load frees nothing",
   CHECK_FALSE(state.weapon_file_loaded);
 }
 
+namespace {
+// Queues actor 3's battle sequence for kUntrackedActor and starts its read.
+void StartOwnedBattleSequence(FakeAssetHost& host) {
+  AddBattleSequenceActor(host);
+  REQUIRE(Content::QueueOwnedActorAssetRequest(
+              host, Request(ActorAssetKind::kSequenceLoad, 3, 2),
+              kUntrackedActor) == 0);
+  REQUIRE(Content::UpdateActorSequenceLoad(host, host.load_state,
+                                           host.requests[0]) == kAssetPending);
+  REQUIRE(host.high_blocks.size() == 1);
+}
+}  // namespace
+
+TEST_CASE("Cancelling an owner's sequence load mid-read frees its file",
+          "[content-slice][content][actor-assets][asset-ownership]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  StartOwnedBattleSequence(host);
+  CHECK(Content::CancelActorAssetRequests(host, kUntrackedActor));
+  CHECK(host.abandoned == std::vector{ActorAssetKind::kSequenceLoad});
+  CHECK(host.high_frees == host.high_blocks);
+  CHECK_FALSE(host.load_state.sequence_file_owned);
+  CHECK(host.load_state.sequence_file == AssetAddress::kNone);
+  CHECK_FALSE(Content::HasActorAssetRequests(host, kUntrackedActor));
+}
+
+TEST_CASE("A sequence load cancelled before its parse leaves nothing to parse",
+          "[content-slice][content][actor-assets][asset-ownership]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  StartOwnedBattleSequence(host);
+  host.read_finished = true;
+  REQUIRE(Content::UpdateActorSequenceLoad(host, host.load_state,
+                                           host.requests[0]) == kAssetPending);
+  CHECK(Content::CancelActorAssetRequests(host, kUntrackedActor));
+  CHECK(host.high_frees == host.high_blocks);
+  // The next sequence load reads its own file, not the freed one.
+  host.read_finished = false;
+  ActorAssetRequest next = Request(ActorAssetKind::kSequenceLoad, 3, 2);
+  CHECK(Content::UpdateActorSequenceLoad(host, host.load_state, next) ==
+        kAssetPending);
+  CHECK(host.reads.size() == 2);
+  CHECK(host.high_blocks.size() == 2);
+}
+
+TEST_CASE("Abandoning an unstarted sequence load frees no earlier file",
+          "[content-slice][content][actor-assets][asset-ownership]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  AddBattleSequenceActor(host);
+  ActorAssetLoadState state;
+  // An earlier load's file, freed when that load finished.
+  const AssetAddress earlier = host.AllocateHigh(2048);
+  host.FreeHigh(earlier);
+  state.sequence_file = earlier;
+  // A battle sequence without a file ends at its start with its flag set.
+  ActorAssetRequest empty = Request(ActorAssetKind::kSequenceLoad, 3, 3);
+  REQUIRE(Content::UpdateActorSequenceLoad(host, state, empty) == kAssetDone);
+  REQUIRE(state.sequence_file_owned);
+  Content::AbandonActorAssetLoad(host, state,
+                                 Request(ActorAssetKind::kSequenceLoad, 3, 2));
+  CHECK(host.high_frees == std::vector{earlier});
+  CHECK_FALSE(state.sequence_file_owned);
+  CHECK(state.sequence_file == AssetAddress::kNone);
+}
+
 TEST_CASE("Abandoning an actor model load frees its file block",
           "[content-slice][content][actor-assets][asset-ownership]") {
   const auto owner = std::make_unique<FakeAssetHost>();
@@ -1287,11 +1359,13 @@ TEST_CASE("Abandoning an actor model load frees its file block",
   CHECK(state.model_phase == 0);
   CHECK(state.model_file == AssetAddress::kNone);
   CHECK_FALSE(host.actors[3].has_value());
-  // Unownable requests leave the loader alone.
+  // Unownable requests leave the loader alone: an effect bank still waits on
+  // its texture.
   ActorAssetLoadState sequence_state;
   sequence_state.sequence_parse_phase = 1;
-  Content::AbandonActorAssetLoad(host, sequence_state,
-                                 Request(ActorAssetKind::kSequenceLoad, 0, 1));
+  ActorAssetRequest effect_bank = Request(ActorAssetKind::kSequenceLoad, 1, 1);
+  effect_bank.sub_kind = 2;
+  Content::AbandonActorAssetLoad(host, sequence_state, effect_bank);
   CHECK(sequence_state.sequence_parse_phase == 1);
 }
 
@@ -2590,13 +2664,12 @@ TEST_CASE("Sequence parser refuses a material bank larger than its work buffer",
       [](std::byte value) { return value == std::byte{0x6B}; }));
 }
 
-TEST_CASE("Live battle asset entry points refuse a null request and bad slots",
+TEST_CASE("Live battle asset entry points refuse bad slots",
           "[content-slice][content][actor-assets]") {
   const std::uint64_t before = Content::LiveActorAssetRefusals();
-  CHECK(Content::QueueLiveActorAssetRequest(nullptr) == -1);
   CHECK(Content::ReleaseLiveWeaponModel(25) == -1);
   CHECK(Content::ReleaseLiveSequenceEffectTexture(0) == -1);
-  CHECK(Content::LiveActorAssetRefusals() == before + 2);
+  CHECK(Content::LiveActorAssetRefusals() == before + 1);
 }
 
 namespace {

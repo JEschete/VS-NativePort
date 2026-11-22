@@ -61,10 +61,8 @@ static_assert(sizeof(SequenceBuffer) == kSequenceBufferBytes,
               "SequenceBuffer must keep its PS1 layout");
 
 int FindLiveFreeActorAssetRequest();
-// Copies `request` into the first free queue slot; -1 when the queue is
-// full or `request` is null.
-int QueueLiveActorAssetRequest(const LegacyActorAssetRequest* request);
-// The typed request's entry for promoted callers; the same result.
+// Copies the typed `request` into the first free queue slot; -1 when the
+// queue is full.
 int QueueLiveActorAsset(const ActorAssetRequest& request);
 int UpdateLiveActorAssetQueue();
 // Owned requests (#48; ActorAssets.hpp SubmitActorAssetRequest). Forgetting
