@@ -62,8 +62,8 @@ int Usage() {
       "      extract also writes catalogs/ (asset ids and the audio tables); "
       "catalogs rewrites\n"
       "      them from an extracted folder.\n"
-      "      extract also converts the standalone TIM images to PNG under "
-      "textures/ and records them\n"
+      "      extract also converts standalone TIM images and effect FBC "
+      "palettes to PNG under textures/ and records them\n"
       "      in manifest.json; images converts again only what changed "
       "(--force: everything).");
   return 2;

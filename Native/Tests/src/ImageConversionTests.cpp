@@ -36,6 +36,8 @@ namespace Extract = VS::Extract;
 namespace fs = std::filesystem;
 using Bytes = std::vector<std::byte>;
 using DataFiles = std::map<std::string, Bytes, std::less<>>;
+constexpr std::size_t kFbcPaletteEntries = 256;
+constexpr std::size_t kFbcRowBytes = kFbcPaletteEntries * sizeof(std::uint16_t);
 
 void Put16(Bytes& bytes, std::uint16_t value) {
   bytes.push_back(static_cast<std::byte>(value & 0xFFU));
@@ -45,6 +47,12 @@ void Put16(Bytes& bytes, std::uint16_t value) {
 void Put32(Bytes& bytes, std::uint32_t value) {
   Put16(bytes, static_cast<std::uint16_t>(value & 0xFFFFU));
   Put16(bytes, static_cast<std::uint16_t>(value >> 16U));
+}
+
+std::uint16_t Read16(std::span<const std::byte> bytes, std::size_t offset) {
+  return static_cast<std::uint16_t>(
+      std::to_integer<std::uint32_t>(bytes[offset]) |
+      (std::to_integer<std::uint32_t>(bytes[offset + 1]) << 8U));
 }
 
 std::uint32_t Read32(std::span<const std::byte> bytes, std::size_t offset) {
@@ -70,6 +78,19 @@ Bytes TimBytes() {
   Put16(bytes, 4);
   Put16(bytes, 1);
   for (std::uint16_t word = 0; word < 4; ++word) Put16(bytes, word);
+  return bytes;
+}
+
+Bytes FbcBytes(std::size_t rows) {
+  Bytes bytes;
+  for (std::size_t index = 0; index < rows * kFbcPaletteEntries; ++index) {
+    std::uint16_t word = static_cast<std::uint16_t>(index * 37U);
+    if (index == 0) word = 0x0000;
+    if (index == 1) word = 0x8000;
+    if (index == 2) word = 0x8001;
+    if (index == 3) word = 0x7FFF;
+    Put16(bytes, word);
+  }
   return bytes;
 }
 
@@ -421,6 +442,79 @@ void VerifyDependencyInvalidation(TemporaryData& converted_data,
   VerifyMissingConvertedOutput(converted_data, manifest);
 }
 
+Content::ImageFileReader ReaderFor(
+    const std::vector<Content::ImageFile>& files) {
+  return [&files](const std::string& name) {
+    const auto found =
+        std::ranges::find(files, name, &Content::ImageFile::name);
+    return found == files.end() ? Content::ImageFileBytes{}
+                                : Content::ImageFileBytes{found->bytes};
+  };
+}
+
+void OverwriteFile(const fs::path& path, const Bytes& bytes) {
+  std::ofstream output(path, std::ios::binary | std::ios::trunc);
+  output.write(reinterpret_cast<const char*>(bytes.data()),
+               static_cast<std::streamsize>(bytes.size()));
+  REQUIRE(output.good());
+}
+
+Extract::ImageConversionReport RequiredConversion(const fs::path& root,
+                                                  bool force) {
+  auto report = Extract::ConvertDiscImages(root, force);
+  REQUIRE(report.has_value());
+  return *report;
+}
+
+std::vector<std::uint16_t> FbcWords(const Bytes& source) {
+  std::vector<std::uint16_t> words;
+  for (std::size_t offset = 0; offset + 1 < source.size();
+       offset += sizeof(std::uint16_t)) {
+    words.push_back(Read16(source, offset));
+  }
+  return words;
+}
+
+// A converted FBC palette is one 256-entry direct-colour row per source row,
+// holding exactly the source's colour words.
+void CheckFbcImage(const Content::ImageDocument& decoded, const Bytes& source) {
+  CHECK(decoded.image.depth == Content::ImageDepth::kDirect16);
+  CHECK(decoded.image.width == kFbcPaletteEntries);
+  CHECK(decoded.image.height == source.size() / kFbcRowBytes);
+  CHECK(Content::PackedWords(decoded.image) == FbcWords(source));
+}
+
+DataFiles FbcCorpusInputs(
+    const fs::path& source_root,
+    const std::vector<Content::DataStore::Entry>& entries) {
+  DataFiles inputs;
+  for (const Content::DataStore::Entry& entry : entries) {
+    if (entry.form != "raw" || !entry.path.ends_with(".FBC")) continue;
+    const Bytes bytes = ReadBytes(source_root / "disc" / fs::path(entry.path));
+    REQUIRE(bytes.size() == entry.size);
+    inputs.emplace(entry.path, bytes);
+  }
+  return inputs;
+}
+
+void VerifyFbcCorpusOutput(const fs::path& converted_root,
+                           const Content::ConversionManifest& manifest,
+                           const std::string& path, const Bytes& source) {
+  INFO(path);
+  const auto id = Extract::ImageIdForDiscPath(path);
+  REQUIRE(id.has_value());
+  const auto* output = manifest.Find(*id + ".palette");
+  REQUIRE(output != nullptr);
+  CHECK(output->converter == Extract::kFbcPaletteConverterName);
+  const auto location = Extract::ImageLocationForDiscPath(path);
+  REQUIRE(location.has_value());
+  const auto decoded = Content::LoadImageFiles(
+      converted_root / "textures" / "effect" / "palettes", location->stem);
+  REQUIRE(decoded.has_value());
+  CHECK(decoded->provenance.source == path);
+  CheckFbcImage(*decoded, source);
+}
+
 TEST_CASE("TIM image identifiers and paths are stable", "[content-images]") {
   CHECK(Extract::ImageIdForDiscPath("BG/001OP01A.TIM") == "image.bg.001op01a");
   CHECK(Extract::ImageIdForDiscPath("DBGFNT.TIM") == "image.root.dbgfnt");
@@ -626,6 +720,103 @@ TEST_CASE("TIM conversion reuses unchanged outputs", "[content-images]") {
   CHECK(second->unchanged == 1);
 }
 
+TEST_CASE("FBC palettes round-trip as editable native images",
+          "[content-images]") {
+  const Bytes source = FbcBytes(2);
+  const auto converted = Extract::ConvertFbcPalette(
+      {.path = "EFFECT/E001_1.FBC", .bytes = source});
+  REQUIRE(converted.has_value());
+  CHECK(converted->output.id == "image.effect.e001_1.palette");
+  CHECK(converted->output.converter == Extract::kFbcPaletteConverterName);
+  CHECK(converted->location.directory == "textures/effect/palettes");
+  CHECK(converted->location.stem == "E001_1");
+  CHECK(std::ranges::find(converted->files, "E001_1.stp.png",
+                          &Content::ImageFile::name) != converted->files.end());
+
+  const auto decoded =
+      Content::DecodeImageFiles("E001_1", ReaderFor(converted->files));
+  REQUIRE(decoded.has_value());
+  CHECK(decoded->provenance.source == "EFFECT/E001_1.FBC");
+  CheckFbcImage(*decoded, source);
+}
+
+TEST_CASE("FBC conversion round-trips every 16-bit colour word",
+          "[content-images]") {
+  constexpr std::size_t kWordsPerFile = 5 * kFbcPaletteEntries;
+  for (std::size_t first = 0; first <= 0xFFFFU; first += kWordsPerFile) {
+    INFO("first word " << first);
+    Bytes source;
+    for (std::size_t index = 0; index < kWordsPerFile; ++index) {
+      Put16(source, static_cast<std::uint16_t>((first + index) & 0xFFFFU));
+    }
+    const auto converted = Extract::ConvertFbcPalette(
+        {.path = "EFFECT/E001_1.FBC", .bytes = source});
+    REQUIRE(converted.has_value());
+    const auto decoded =
+        Content::DecodeImageFiles("E001_1", ReaderFor(converted->files));
+    REQUIRE(decoded.has_value());
+    REQUIRE(Content::PackedWords(decoded->image) == FbcWords(source));
+  }
+}
+
+TEST_CASE("FBC palette conversion rejects incomplete or oversized rows",
+          "[content-images]") {
+  SECTION("partial row") {
+    const Bytes source(kFbcRowBytes - 1, std::byte{0});
+    const auto converted = Extract::ConvertFbcPalette(
+        {.path = "EFFECT/E001_1.FBC", .bytes = source});
+    REQUIRE_FALSE(converted.has_value());
+    CHECK(converted.error().find("whole 512-byte rows") != std::string::npos);
+  }
+  SECTION("too many rows") {
+    const Bytes source = FbcBytes(6);
+    const auto converted = Extract::ConvertFbcPalette(
+        {.path = "EFFECT/E001_1.FBC", .bytes = source});
+    REQUIRE_FALSE(converted.has_value());
+    CHECK(converted.error().find("at most 5") != std::string::npos);
+  }
+}
+
+TEST_CASE("FBC conversion keeps unchanged palettes and edits until forced",
+          "[content-images]") {
+  TemporaryData data;
+  data.WriteManifest({{"EFFECT/E001_1.FBC", FbcBytes(2)}});
+  CHECK(RequiredConversion(data.Root(), false).converted == 1);
+  const fs::path palette =
+      data.Root() / "textures" / "effect" / "palettes" / "E001_1.png";
+  const Bytes generated = ReadBytes(palette);
+  REQUIRE_FALSE(generated.empty());
+  const auto second = RequiredConversion(data.Root(), false);
+  CHECK(second.converted == 0);
+  CHECK(second.unchanged == 1);
+
+  const Bytes edited{std::byte{0x01}, std::byte{0x02}};
+  OverwriteFile(palette, edited);
+  CHECK(RequiredConversion(data.Root(), false).unchanged == 1);
+  CHECK(ReadBytes(palette) == edited);
+  CHECK(RequiredConversion(data.Root(), true).converted == 1);
+  CHECK(ReadBytes(palette) == generated);
+}
+
+TEST_CASE("FBC conversion removes the files of deleted sources",
+          "[content-images]") {
+  TemporaryData data;
+  data.WriteManifest({{"EFFECT/E001_1.FBC", FbcBytes(2)}});
+  REQUIRE(Extract::ConvertDiscImages(data.Root(), false).has_value());
+  const auto manifest = RequiredManifest(data.Root());
+  const auto* output = manifest.Find("image.effect.e001_1.palette");
+  REQUIRE(output != nullptr);
+  const fs::path palette =
+      data.Root() / "textures" / "effect" / "palettes" / "E001_1.png";
+  REQUIRE(fs::exists(palette));
+
+  data.WriteManifest({});
+  const auto removed = Extract::ConvertDiscImages(data.Root(), false);
+  REQUIRE(removed.has_value());
+  CHECK(removed->removed == output->files.size());
+  CHECK_FALSE(fs::exists(palette));
+}
+
 TEST_CASE("TIM conversion preserves edits until a forced rebuild",
           "[content-images]") {
   TemporaryData data;
@@ -723,6 +914,28 @@ TEST_CASE("extracted TIM corpus converts without changing its source bytes",
 
   VerifyBackgroundTextureEdit(source_root, converted_data, input_files);
   VerifyDependencyInvalidation(converted_data, input_files, manifest);
+}
+
+TEST_CASE("extracted FBC palette corpus converts and reloads exact words",
+          "[content-images][extract]") {
+  const fs::path source_root = "Native/data";
+  auto entries = Content::DataStore::LoadManifest(source_root);
+  if (!entries) SKIP("Extracted Native/data is unavailable");
+  const DataFiles input_files = FbcCorpusInputs(source_root, *entries);
+  if (input_files.empty()) SKIP("Extracted Native/data has no FBC files");
+
+  TemporaryData converted_data;
+  converted_data.WriteManifest(input_files);
+  const auto report = Extract::ConvertDiscImages(converted_data.Root(), false);
+  REQUIRE(report.has_value());
+  CHECK(report->converted == input_files.size());
+  CHECK(report->unchanged == 0);
+  const auto manifest = RequiredManifest(converted_data.Root());
+  CHECK(manifest.converters.contains(
+      std::string(Extract::kFbcPaletteConverterName)));
+  for (const auto& [path, source] : input_files) {
+    VerifyFbcCorpusOutput(converted_data.Root(), manifest, path, source);
+  }
 }
 
 }  // namespace

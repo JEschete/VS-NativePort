@@ -18,17 +18,20 @@
 #include "Extract/TimImage.hpp"
 #include "Extract/TimWriter.hpp"
 
-// The tim-png converter (ASSET_PIPELINE.md §6.4, #208): each standalone TIM on
-// the disc becomes a native image under textures\, recorded in manifest.json.
-// A background TIM's header is not authoritative (it declares 16 bits with a
-// CLUT); its layout (BG\<name>.FAR) fixes the depth its tiles draw it at, and
-// is recorded as a dependency. TIMs inside other files (zones, DIS, programs)
-// belong to their containers' converters, which share DecodeTim.
+// The tim-png and fbc-palette-png converters (ASSET_PIPELINE.md §6.4, #208,
+// #215): standalone TIMs and effect FBC CLUTs become native images under
+// textures\, recorded in manifest.json. A background TIM's header is not
+// authoritative (it declares 16 bits with a CLUT); its layout
+// (BG\<name>.FAR) fixes the depth its tiles draw it at, and is recorded as a
+// dependency. TIMs inside other files (zones, DIS, programs) belong to their
+// containers' converters, which share DecodeTim.
 namespace VS::Extract {
 namespace Content = VS::Content;
 
 inline constexpr std::string_view kTimConverterName = "tim-png";
 inline constexpr std::uint32_t kTimConverterVersion = 1;
+inline constexpr std::string_view kFbcPaletteConverterName = "fbc-palette-png";
+inline constexpr std::uint32_t kFbcPaletteConverterVersion = 1;
 
 // Where an image lives under the data root: textures/<directory>, lowercase,
 // and the source file's stem.
@@ -77,18 +80,22 @@ struct ConvertedImage {
 [[nodiscard]] std::expected<ConvertedImage, std::string> ConvertTim(
     const TimConversion& conversion);
 
+// Converts one raw FBC file: 256 little-endian 16-bit colour words per row.
+[[nodiscard]] std::expected<ConvertedImage, std::string> ConvertFbcPalette(
+    const SourceFile& source);
+
 struct ImageConversionReport {
   std::size_t converted = 0;
   std::size_t unchanged = 0;  // sources, dependencies and versions match
   std::size_t removed = 0;    // files no current output lists
 };
 
-// Converts every standalone TIM files.tsv lists under `root`, then records
-// them in root\manifest.json. An output whose source, dependencies and
-// converter version are unchanged and whose files exist is kept as it is (so
-// edits to it survive) unless `force`. Every image converts before anything
-// is written; the manifest is written after the images, and files no output
-// lists any more are removed last.
+// Converts every standalone TIM and effect FBC files.tsv lists under `root`,
+// then records them in root\manifest.json. An output whose source,
+// dependencies and converter version are unchanged and whose files exist is
+// kept as it is (so edits to it survive) unless `force`. Every image converts
+// before anything is written; the manifest is written after the images, and
+// files no output lists any more are removed last.
 [[nodiscard]] std::expected<ImageConversionReport, std::string>
 ConvertDiscImages(const std::filesystem::path& root, bool force);
 
