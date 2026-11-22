@@ -30,6 +30,7 @@
     <None Include="..\..\ledger\boundaries.py" />
     <None Include="..\..\ledger\build_ledgers.py" />
     <None Include="..\..\ledger\build_symbol_ledgers.py" />
+    <None Include="..\..\ledger\content.py" />
     <None Include="..\..\ledger\gates.py" />
     <None Include="..\..\ledger\hazards.py" />
     <None Include="..\..\ledger\headers.py" />
@@ -38,6 +39,7 @@
     <None Include="..\..\ledger\reconcile_locations.py" />
     <None Include="..\..\ledger\test_boundaries.py" />
     <None Include="..\..\ledger\test_build_symbol_ledgers.py" />
+    <None Include="..\..\ledger\test_content.py" />
     <None Include="..\..\ledger\test_gates.py" />
     <None Include="..\..\ledger\test_hazards.py" />
     <None Include="..\..\ledger\test_headers.py" />

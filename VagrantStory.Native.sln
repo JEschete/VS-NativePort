@@ -70,6 +70,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ledgers", "ledgers", "{B9B1CF7E-C648-5E57-9EEB-347208BDD4B1}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\ledgers\BOUNDARY_LEDGER.csv = Docs\ledgers\BOUNDARY_LEDGER.csv
+		Docs\ledgers\CONTENT_LEDGER.csv = Docs\ledgers\CONTENT_LEDGER.csv
 		Docs\ledgers\CPP_PROMOTION.csv = Docs\ledgers\CPP_PROMOTION.csv
 		Docs\ledgers\DATA_LEDGER.csv = Docs\ledgers\DATA_LEDGER.csv
 		Docs\ledgers\EC_BRIDGES.csv = Docs\ledgers\EC_BRIDGES.csv

@@ -19,6 +19,7 @@ import re
 import sys
 import xml.etree.ElementTree as ET
 from collections import Counter, defaultdict, deque
+from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
@@ -176,6 +177,22 @@ def stale_tracker(tool: str, path: Path, begin: str, end: str, block: str) -> li
     if replace_tracker_block(current, begin, end, block) == current:
         return []
     return [Issue(tool, "tracker-stale", str(path), "tracker block differs from the ledger; run --sync")]
+
+
+def ledger_tool_main(description: str, sync: Callable[[Path], None], check: Callable[[Path], list[Issue]],
+                     report: Callable[[Path, list[Issue]], str]) -> int:
+    """The `--sync`/`--check` command line shared by the single-ledger tools; `report` writes the closing count."""
+    parser = argparse.ArgumentParser(description=description, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--sync", action="store_true")
+    parser.add_argument("--check", action="store_true")
+    arguments = parser.parse_args()
+    if arguments.sync:
+        sync(ROOT)
+    issues = check(ROOT)
+    for found in issues[:50]:
+        print(f"{found.rule}: {found.subject}: {found.message}")
+    print(report(ROOT, issues))
+    return 1 if issues and arguments.check else 0
 
 
 def slash(path: str) -> str:

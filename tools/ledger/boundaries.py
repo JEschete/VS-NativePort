@@ -15,7 +15,6 @@ Tracked in issue #43.
 """
 from __future__ import annotations
 
-import argparse
 import posixpath
 import re
 import sys
@@ -227,22 +226,10 @@ def check(root: Path) -> list[Issue]:
     return found + gates.stale_tracker("boundaries", tracker_path(root), SUMMARY_BEGIN, SUMMARY_END, summary(rows))
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--sync", action="store_true")
-    parser.add_argument("--check", action="store_true")
-    arguments = parser.parse_args()
-    root = gates.ROOT
-    if arguments.sync:
-        sync(root)
-    issues = check(root)
-    for found in issues[:50]:
-        print(f"{found.rule}: {found.subject}: {found.message}")
-    rows = read_csv(ledger_path(root))
-    status = Counter(row["status"] for row in rows)
-    print(f"{len(rows):,} crossing includes: {dict(sorted(status.items()))}; {len(issues)} violations")
-    return 1 if issues and arguments.check else 0
+def report(root: Path, issues: list[Issue]) -> str:
+    status = Counter(row["status"] for row in read_csv(ledger_path(root)))
+    return f"{sum(status.values()):,} crossing includes: {dict(sorted(status.items()))}; {len(issues)} violations"
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(gates.ledger_tool_main(__doc__, sync, check, report))
