@@ -1156,6 +1156,30 @@ TEST_CASE("A room enemy cancels queued owned parts when submission fails",
   CHECK(std::ranges::find(host.log, "Install 3") == host.log.end());
 }
 
+TEST_CASE("A room enemy drains its requests if cancellation is refused",
+          "[actors][actors-spawning]") {
+  FakeSpawnHost host;
+  PrepareRoom(host);
+  host.refuse_owned_submit_at = 2;
+  host.allow_owned_cancel = false;
+  const SpawnedActor actor = Handle(kFirstHandle);
+
+  CHECK((actors::SpawnRoomEnemy(host, 3, EnemySpawn(), EnemyTemplate(), 1) ==
+             SpawnedActor::kNone &&
+         host.table.at(3) == SpawnedActor::kNone));
+  CHECK((host.checked_assets.size() == 2 && host.forgotten_assets.size() == 2));
+  CHECK(host.discarded == std::vector{actor});
+  const std::vector<int> actor_models = {3};
+  const std::vector<int> weapon_models = {6, 7};
+  CHECK((host.released_actor_models == actor_models &&
+         host.released_weapon_models == weapon_models));
+  const auto installed = std::ranges::find(host.log, "Install 3");
+  const auto updated = std::ranges::find(host.log, "UpdateQueue");
+  const auto released = std::ranges::find(host.log, "ReleaseActorModel 3");
+  CHECK(installed == host.log.end());
+  CHECK(updated < released);
+}
+
 TEST_CASE("A room enemy is discarded if its handle cannot be published",
           "[actors][actors-spawning]") {
   FakeSpawnHost host;

@@ -772,6 +772,9 @@ class OwnedSpawnAssets {
   }
 
   [[nodiscard]] bool Finish() {
+    if (count_ == 0) {
+      return true;
+    }
     DrainAssetQueue(host_);
     bool loaded = true;
     for (std::size_t i = 0; i < count_; ++i) {
@@ -1030,7 +1033,7 @@ SpawnedActor SpawnRoomEnemy(ActorSpawnHost& host, int actor_id,
                             character, parts, body_model, category))) {
     host.Refuse(SpawnRefusal::kAssetQueue);
     if (!assets.Cancel()) {
-      return SpawnedActor::kNone;
+      static_cast<void>(assets.Finish());
     }
     DiscardRoomEnemy(host, actor, slot, parts);
     return SpawnedActor::kNone;
