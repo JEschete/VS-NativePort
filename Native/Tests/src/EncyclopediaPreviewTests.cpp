@@ -1036,6 +1036,11 @@ score::EnemyPreviewState QueueOriginalPreview() {
   return before;
 }
 
+// The model loader's phase once its file has loaded and its parse is pending.
+constexpr std::uint8_t kModelParsePending = 2;
+
+// The companion's converted model loads at once (#203), so the update that
+// starts its read leaves the file held, the parse pending and no disc request.
 score::EnemyPreviewState StartCompanionRead() {
   const auto before = QueuePreviewParts(true, true);
   const auto model = static_cast<std::uint16_t>(
@@ -1049,8 +1054,9 @@ score::EnemyPreviewState StartCompanionRead() {
   REQUIRE(VS::Content::UpdateLiveActorAssetQueue() == 1);
   REQUIRE(VS::Content::legacyActorAssetRequests[0].target_slot == 16);
   REQUIRE(VS::Content::UpdateLiveActorAssetQueue() == 1);
-  REQUIRE(VS::Content::legacyModelLoadPhase == 1);
+  REQUIRE(VS::Content::legacyModelLoadPhase == kModelParsePending);
   REQUIRE(VS::Content::legacyShpAllocated == 1);
+  REQUIRE(VS::Content::legacyShpDiscRequest == nullptr);
   return before;
 }
 
@@ -1063,7 +1069,7 @@ void CheckEmptyPreviewQueue() {
   CHECK(VS::Content::legacySequenceParseData == nullptr);
 }
 
-std::span<std::byte> StartForeignModelRead() {
+std::span<std::byte> StartForeignModelLoad() {
   auto* foreign =
       static_cast<std::byte*>(VS::Core::Memory::AllocateLiveFromLowEnd(
           sizeof(VS::Actors::ActorRecord)));
@@ -1080,12 +1086,9 @@ std::span<std::byte> StartForeignModelRead() {
   return {foreign, sizeof(VS::Actors::ActorRecord)};
 }
 
-void CheckForeignModelRead(const void* file,
-                           const VS::Content::DiscQueueSlot* read,
-                           std::uint64_t generation) {
-  CHECK(VS::Content::legacyModelLoadPhase == 1);
+void CheckForeignModelLoad(const void* file) {
+  CHECK(VS::Content::legacyModelLoadPhase == kModelParsePending);
   CHECK(VS::Content::legacyShpFileBuffer == file);
-  CHECK(VS::Content::LiveDiscRequestGeneration(read) == generation);
   CHECK(VS::Content::FindLiveFreeActorAssetRequest() == 1);
   CHECK(VS::Core::Memory::LivePayloadCapacity(file).has_value());
 }
@@ -1308,36 +1311,29 @@ TEST_CASE("Actual heap replacement cancels queued preview parts",
   CHECK(VS::Core::Memory::RefusedLiveHeapRequestCount() == refusals);
 }
 
-TEST_CASE("Preview cleanup preserves a foreign active model read",
+TEST_CASE("Preview cleanup preserves a foreign pending model load",
           "[encyclopedia-preview][gazette-preview-lifecycle]") {
   PreviewLifecycleFixture fixture;
-  const auto foreign = StartForeignModelRead();
+  const auto foreign = StartForeignModelLoad();
   const auto* file = VS::Content::legacyShpFileBuffer;
-  auto* read = VS::Content::legacyShpDiscRequest;
-  const auto generation = VS::Content::LiveDiscRequestGeneration(read);
   const auto before = QueuePreviewParts(false);
   REQUIRE(score::CleanupLiveEnemyPreviewOwnedState());
   CheckColdPreviewRelease(before);
-  CheckForeignModelRead(file, read, generation);
+  CheckForeignModelLoad(file);
   // The foreign request is unowned, so nothing cancels it but a reset; the
-  // fixture restores the read and loader state it leaves.
+  // fixture restores the loader state it leaves.
   VS::Content::ClearLiveActorAssetQueue();
   VS::Core::Memory::FreeLiveFromLowEnd(foreign.data());
 }
 
-TEST_CASE("Preview cleanup cancels the companion model-file owner",
+TEST_CASE("Preview cleanup frees the companion's pending model file",
           "[encyclopedia-preview][gazette-preview-lifecycle]") {
-  const bool loaded = GENERATE(false, true);
   PreviewLifecycleFixture fixture;
   const auto before = StartCompanionRead();
-  auto* request = VS::Content::legacyShpDiscRequest;
   const auto* file = VS::Content::legacyShpFileBuffer;
-  REQUIRE(VS::Content::LiveDiscRequestGeneration(request) != 0);
-  if (loaded) request->state = VS::Content::DiscRequestState::kLoaded;
   REQUIRE(score::CleanupLiveEnemyPreviewOwnedState());
   CheckColdPreviewRelease(before);
   CheckEmptyPreviewQueue();
-  CHECK(VS::Content::LiveDiscRequestGeneration(request) == 0);
   CHECK_FALSE(VS::Core::Memory::LivePayloadCapacity(file).has_value());
   CHECK(VS::Content::legacyModelLoadPhase == 0);
   CHECK(VS::Content::legacyShpAllocated == 0);
@@ -1423,16 +1419,14 @@ TEST_CASE("Preview cleanup preserves foreign actors queue order and tail",
   VS::Core::Memory::FreeLiveFromLowEnd(foreign.data());
 }
 
-TEST_CASE("Preview cleanup preserves a reused companion read generation",
+TEST_CASE("Preview cleanup of the companion's model leaves foreign reads",
           "[encyclopedia-preview][gazette-preview-lifecycle]") {
   PreviewLifecycleFixture fixture;
   const auto before = StartCompanionRead();
-  auto* original = VS::Content::legacyShpDiscRequest;
   const auto* file = VS::Content::legacyShpFileBuffer;
-  VS::Content::ReleaseLiveDiscRequest(original);
   const VS::Content::DiscFile location{1, 16};
   auto* foreign = VS::Content::AllocateLiveDiscRequest(&location);
-  REQUIRE(foreign == original);
+  REQUIRE(foreign != nullptr);
   const auto generation = VS::Content::LiveDiscRequestGeneration(foreign);
   REQUIRE(score::CleanupLiveEnemyPreviewOwnedState());
   CheckColdPreviewRelease(

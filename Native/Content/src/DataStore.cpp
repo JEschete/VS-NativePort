@@ -60,6 +60,7 @@ constexpr std::array kConvertedTypes{
     ConvertedType{.extension = ".FBC", .converter = "fbc-palette-png"},
     ConvertedType{.extension = ".FBT", .converter = "fbt-texture-png"},
     ConvertedType{.extension = ".SYD", .converter = kSydRecipeConverterName},
+    ConvertedType{.extension = ".SHP", .converter = "shp-gltf"},
 };
 
 // The fix each stale or missing output error names.

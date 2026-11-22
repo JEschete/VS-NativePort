@@ -223,6 +223,22 @@ Additions the reference does not have, required by P4 (lossless). The initial co
 
 **Also emitted** (optional, `--posed`): `<SHP>_posed.obj/.mtl/_0.png`, like the reference folder. This is for quick previews only; the game never reads it.
 
+**Current state (SHP slice, #203).** `VS.Extract models <datadir>` (and `extract`) converts all 202 `OBJ\*.SHP` files with converter `shp-gltf` version 1 (`Extract/ShpModelConversion.hpp`, `Content/ShpModelFiles.hpp`, `Content/ShpFile.hpp`):
+
+- Each model writes `models\characters\<NN>.gltf` + `<NN>.bin`. A model with its own texture also writes `<NN>.png`, `.image.json` and `.palettes.png` (§6.4). Its id is `model.obj.<nn>` and its image id is `image.obj.<nn>`. The 10 models that borrow another model's texture write only the glTF and the buffer. Their glTF shows the lender's PNG, and their manifest entry lists the lender's SHP as a dependency.
+- The glTF has one skinned mesh, a `root` node turned 180° about X and one `bone<N>` node per SHP bone. Positions are the SHP's integer units (scale 1) with each bone's rest origin added.
+  - Primitives are grouped by polygon flags 0x71: double-sided, semi-transparent and blend mode.
+  - Each corner carries the custom `_VS_VERTEX` attribute, which holds its SHP vertex number.
+  - Each primitive's `extras.vs.polygons` lists its polygons in triangle order.
+- `asset.extras.vs` holds the payload (schema `vs.shp-model` version 1): the source and its hash, the bones, the polygon counts, the limb ranges and the 0xE8-byte layout block as named fields. For example, `collision_radius` can be edited as a number. Buffer views hold the sound bytes and the embedded SEQ bytes.
+- The payload and the geometry are authoritative. The materials, textures and images only preview the polygon flags. The reader rebuilds the SHP from those two sources and checks it against every value the payload records. The Khronos glTF validator reports 0 errors and 0 warnings for all 202 models.
+- A rerun leaves the files of an unchanged SHP alone, so edits survive. `--force` rewrites every model.
+- At runtime, `Content::LoadConvertedModel` (`Content/ConvertedModels.hpp`) handles the actor model read (`ActorAssetsLive` `BeginFileRead`, `kActorModel`) and never reads the SHP from the disc. It matches the read's LBA and sector-rounded size to the extracted SHP and rebuilds the bytes from that model's files. An edit is validated and loaded, or refused with the file and member named. `RequireConversions` refuses to start without the `shp-gltf` batch.
+  - The load completes in the same update that requests it, where the original waited for the CD.
+  - An edited model must still fit the original sector-rounded allocation; a larger one is refused.
+
+Not yet done: SEQ/ESQ animation clips (#205, #206), ETM texture overlays (#207), WEP and ZUD (#204, #200), a model larger than its original allocation, and a re-export from Blender through the validator.
+
 #### 6.2.1 Container, schema and optional extension
 
 - **First delivery:** keep the existing `extras.vs` design and define its versioned contract in `Native\Content\schemas\actor-animation.schema.json` (planned). VS.Content and Workshop must agree on IDs, units, track semantics and fixtures; do not build incompatible per-tool interpretations.
@@ -529,7 +545,7 @@ Every converter ships with a test in `VS.Tests` (tagged `[extract]`; it runs onl
 | Tier 1 tables | disc bytes → decoder → CSV/JSON → runtime loader → re-encode with the PS1 layout == the original bytes |
 | workshop recipes | each SYD → decode → CSV tables → parse == the decoded recipes → re-encode == the original bytes (§6.8) |
 | text | string bytes → markup → encode == the original bytes, for every string |
-| SHP/SEQ/WEP | `decode(raw)` == `ModelLoader(glTF)` field by field (bones, vertices, UVs, colours, flags, every `extras` value, every keyframe) |
+| SHP/SEQ/WEP | `decode(raw)` == `ModelLoader(glTF)` field by field (bones, vertices, UVs, colours, flags, every `extras` value, every keyframe). SHP today: each extracted SHP decodes and re-encodes to its exact bytes, and each converted model loads back to its exact SHP bytes (§6.2) |
 | ESQ/ETM actor bindings | decoded source == converted/reloaded skeletal and texture tracks, indexed pixels, palettes, patch rectangles, associations, timing and lifecycle commands; malformed or unresolved inputs fail explicitly |
 | MPD | the same, via `RoomLoader` |
 | textures | PNG + `.image.json` (+ `.palettes.png`, `.stp.png`) → indices and 16-bit texel/palette words == the original (exact), including `0x0000` vs `0x8000` and every STP bit |
@@ -561,7 +577,7 @@ Record source revision/dirty state, disc identity, tool/converter/schema version
 {
   "schema_version": 2,
   "extractor_version": "0.1.0",
-  "converters": { "fbc-palette-png": 1, "fbt-texture-png": 1, "syd-recipe-csv": 1, "tim-png": 1 },
+  "converters": { "fbc-palette-png": 1, "fbt-texture-png": 1, "shp-gltf": 1, "syd-recipe-csv": 1, "tim-png": 1 },
   "outputs": [
     {
       "id": "image.bg.001op01a",
@@ -608,12 +624,12 @@ Record source revision/dirty state, disc identity, tool/converter/schema version
 
 <!-- content:begin (generated by tools/ledger/content.py --sync) -->
 
-**1,040 of 5,162 disc files converted**, 1,040 of them with a passing round trip; 194 skipped with a reason; 3,928 unconverted.
+**1,242 of 5,162 disc files converted**, 1,242 of them with a passing round trip; 194 skipped with a reason; 3,726 unconverted.
 
 | Kind | Files | Converted | Round trip pass | Skipped | Unconverted | Converts under |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
 | actor archetype | 455 | 0 | 0 | 0 | 455 | #200 |
-| actor shape | 202 | 0 | 0 | 0 | 202 | #203 |
+| actor shape | 202 | 202 | 202 | 0 | 0 | #203 |
 | actor texture overlay | 80 | 0 | 0 | 0 | 80 | #207 |
 | area map | 32 | 0 | 0 | 0 | 32 | #201 |
 | background layout | 4 | 0 | 0 | 0 | 4 | #210 |

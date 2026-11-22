@@ -21,6 +21,7 @@
 #include "Content/MovieEncoder.hpp"
 #include "Core/Log.hpp"
 #include "Extract/ImageConversion.hpp"
+#include "Extract/ShpModelConversion.hpp"
 #include "Extract/WorkshopRecipeConversion.hpp"
 #include "Platform/App.hpp"
 #include "Platform/Paths.hpp"
@@ -57,6 +58,7 @@ int Usage() {
       "  VS.Extract catalogs <datadir>\n"
       "  VS.Extract images   <datadir> [--force]\n"
       "  VS.Extract tables   <datadir> [--force]\n"
+      "  VS.Extract models   <datadir> [--force]\n"
       "      Form 1 files are copied as they are; movies (*.STR) are converted "
       "to Matroska (AV1 + FLAC)\n"
       "      with FFmpeg (found on PATH, or --ffmpeg). Effect audio and XA "
@@ -71,7 +73,11 @@ int Usage() {
       "      extract also converts the workshop recipe files (MENU/*.SYD) to "
       "CSV tables under catalogs/menu/;\n"
       "      tables converts again only what changed (--force: everything, "
-      "replacing edited tables).");
+      "replacing edited tables).\n"
+      "      extract also converts the character models (OBJ/*.SHP) to glTF "
+      "under models/characters/;\n"
+      "      models converts again only what changed (--force: everything, "
+      "replacing edited models).");
   return 2;
 }
 
@@ -395,6 +401,21 @@ int ConvertTables(const fs::path& root, bool force) {
   return 0;
 }
 
+// models/characters/ glTF models and their manifest.json outputs from the
+// disc files already under root.
+int ConvertModels(const fs::path& root, bool force) {
+  const auto report = Extract::ConvertDiscModels(root, force);
+  if (!report) {
+    VS::Core::LogError("extract", "{}", report.error());
+    return 1;
+  }
+  VS::Core::LogInfo("extract",
+                    "models: {} converted, {} unchanged, {} stale files "
+                    "removed",
+                    report->converted, report->unchanged, report->removed);
+  return 0;
+}
+
 int ExtractDisc(const Content::Disc& disc, int argc, char** argv) {
   // <outdir>\disc\<path> for each file, and the manifest Content::DataStore
   // reads (sector, size, form, path). Interleaved files (movies, XA audio)
@@ -477,6 +498,7 @@ int ExtractDisc(const Content::Disc& disc, int argc, char** argv) {
   if (WriteCatalogs(out) != 0) return 1;
   if (ConvertImages(out, false) != 0) return 1;
   if (ConvertTables(out, false) != 0) return 1;
+  if (ConvertModels(out, false) != 0) return 1;
   return ConvertStreams(disc, out, ffmpeg);
 }
 
@@ -509,10 +531,11 @@ int Run(int argc, char** argv) {
                ? WriteCatalogs(Platform::Utf8Path(argv[2]))
                : Usage();
   }
-  if (cmd == "images" || cmd == "tables") {
+  if (cmd == "images" || cmd == "tables" || cmd == "models") {
     const auto force = ForceArgument(argc, argv);
     if (!force) return Usage();
     const fs::path root = Platform::Utf8Path(argv[2]);
+    if (cmd == "models") return ConvertModels(root, *force);
     return cmd == "images" ? ConvertImages(root, *force)
                            : ConvertTables(root, *force);
   }

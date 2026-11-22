@@ -80,6 +80,7 @@ PROJECTS = [
                 r"Tools\Extract\src\EffectTextureConversion.cpp",
                 r"Tools\Extract\src\ImageFilesWriter.cpp",
                 r"Tools\Extract\src\ImageConversion.cpp",
+                r"Tools\Extract\src\ShpModelConversion.cpp",
                 r"Tools\Extract\src\TimImage.cpp",
                 r"Tools\Extract\src\TimWriter.cpp",
                 r"Tools\Extract\src\WorkshopRecipeConversion.cpp",

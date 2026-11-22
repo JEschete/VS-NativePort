@@ -54,6 +54,7 @@
     </ClCompile>
     <ClCompile Include="src\ConversionManifest.cpp" />
     <ClCompile Include="src\ConvertedImages.cpp" />
+    <ClCompile Include="src\ConvertedModels.cpp" />
     <ClCompile Include="src\DataStore.cpp" />
     <ClCompile Include="src\Disc.cpp" />
     <ClCompile Include="src\DiscQueue.cpp">
@@ -74,6 +75,8 @@
       <AdditionalIncludeDirectories>$(VSLegacyIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\PFile.cpp" />
+    <ClCompile Include="src\ShpFile.cpp" />
+    <ClCompile Include="src\ShpModelFiles.cpp" />
     <ClCompile Include="src\SystemResources.cpp" />
     <ClCompile Include="src\SystemResourcesLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -97,6 +100,7 @@
     <ClInclude Include="include\Content\CdDriveLive.hpp" />
     <ClInclude Include="include\Content\ConversionManifest.hpp" />
     <ClInclude Include="include\Content\ConvertedImages.hpp" />
+    <ClInclude Include="include\Content\ConvertedModels.hpp" />
     <ClInclude Include="include\Content\DataAccess.hpp" />
     <ClInclude Include="include\Content\DataStore.hpp" />
     <ClInclude Include="include\Content\Disc.hpp" />
@@ -113,6 +117,8 @@
     <ClInclude Include="include\Content\OverlayWorkspace.hpp" />
     <ClInclude Include="include\Content\OverlayWorkspaceLive.hpp" />
     <ClInclude Include="include\Content\PFile.hpp" />
+    <ClInclude Include="include\Content\ShpFile.hpp" />
+    <ClInclude Include="include\Content\ShpModelFiles.hpp" />
     <ClInclude Include="include\Content\StringTables.hpp" />
     <ClInclude Include="include\Content\SystemResources.hpp" />
     <ClInclude Include="include\Content\SystemResourcesLive.hpp" />

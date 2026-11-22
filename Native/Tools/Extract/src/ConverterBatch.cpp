@@ -118,6 +118,15 @@ ConverterBatch StartBatch(const ConversionManifest& previous,
           .outputs = {}};
 }
 
+std::expected<RunStart, std::string> StartRun(const fs::path& root) {
+  auto entries = Content::DataStore::LoadManifest(root);
+  if (!entries) return std::unexpected(entries.error());
+  auto loaded = Content::LoadConversionManifest(root);
+  if (!loaded) return std::unexpected(loaded.error());
+  return RunStart{.entries = std::move(*entries),
+                  .previous = loaded->value_or(ConversionManifest{})};
+}
+
 std::expected<std::size_t, std::string> PublishBatches(
     const fs::path& root, const ConversionManifest& previous,
     std::span<const ConverterBatch> batches) {
@@ -136,6 +145,16 @@ std::expected<std::size_t, std::string> PublishBatches(
     removed += *stale;
   }
   return removed;
+}
+
+std::expected<std::size_t, std::string> PublishBatch(
+    const fs::path& root, const ConversionManifest& previous,
+    const ConverterBatch& batch,
+    const std::function<std::expected<void, std::string>()>& write) {
+  if (auto written = write(); !written) {
+    return std::unexpected(written.error());
+  }
+  return PublishBatches(root, previous, std::span(&batch, 1));
 }
 
 std::expected<void, std::string> WriteOutputFiles(

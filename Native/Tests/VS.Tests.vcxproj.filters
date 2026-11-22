@@ -1155,6 +1155,9 @@
     <ClCompile Include="src\SfxBankSelectionTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ShpFileTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\SkeletonTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -1567,6 +1570,9 @@
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>
     <ClCompile Include="..\Tools\Extract\src\ImageConversion.cpp">
+      <Filter>..\Tools\Extract\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Tools\Extract\src\ShpModelConversion.cpp">
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>
     <ClCompile Include="..\Tools\Extract\src\TimImage.cpp">

@@ -35,7 +35,6 @@ using Content::ImageProvenance;
 using Content::IsContentId;
 using Content::IsDataRelativePath;
 using Content::kImagePngSuffix;
-using Content::LoadConversionManifest;
 using Content::SemiTransparency;
 using Content::SourceDependency;
 using Content::TimFile;
@@ -752,18 +751,17 @@ std::expected<ConvertedImage, std::string> ConvertFbcPalette(
 
 std::expected<ImageConversionReport, std::string> ConvertDiscImages(
     const fs::path& root, bool force) {
-  auto entries = DataStore::LoadManifest(root);
-  if (!entries) return std::unexpected(entries.error());
-  auto loaded = LoadConversionManifest(root);
-  if (!loaded) return std::unexpected(loaded.error());
-  const ConversionManifest previous = loaded->value_or(ConversionManifest{});
+  auto start = StartRun(root);
+  if (!start) return std::unexpected(start.error());
+  const ConversionManifest& previous = start->previous;
+  const std::vector<DataStore::Entry>& entries = start->entries;
   // Every image converts before anything is written.
   ConversionRun run;
-  auto tims = ConvertTims(root, previous, *entries, force, run);
+  auto tims = ConvertTims(root, previous, entries, force, run);
   if (!tims) return std::unexpected(tims.error());
-  auto palettes = ConvertFbcPalettes(root, previous, *entries, force, run);
+  auto palettes = ConvertFbcPalettes(root, previous, entries, force, run);
   if (!palettes) return std::unexpected(palettes.error());
-  auto textures = ConvertFbtTextures(root, previous, *entries, force, run);
+  auto textures = ConvertFbtTextures(root, previous, entries, force, run);
   if (!textures) return std::unexpected(textures.error());
   const std::array batches{std::move(*tims), std::move(*palettes),
                            std::move(*textures)};

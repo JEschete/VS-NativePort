@@ -13,11 +13,15 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <expected>
+#include <format>
 #include <iterator>
 #include <optional>
 #include <span>
+#include <string>
 #include <tuple>
 #include <type_traits>
+#include <vector>
 
 #include "Actors/ActorRecord.hpp"
 #include "Actors/ActorSpawning.hpp"
@@ -38,8 +42,11 @@
 #include "Content/ActorAssets.hpp"
 #include "Content/CdDrive.hpp"
 #include "Content/CdDriveLive.hpp"
+#include "Content/ConvertedModels.hpp"
+#include "Content/DataStore.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Core/Diagnostics.hpp"
+#include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/GimmickResourcesLive.hpp"
 #include "Field/Gimmicks.hpp"
@@ -296,6 +303,43 @@ void CountRefusal(const char* what, std::int64_t value) {
         "content", "actor assets refused %s (%" PRId64 "); %" PRIu64 " refused",
         what, value, refusals);
   }
+}
+
+// Native (#203): the SHP bytes of the converted model (ASSET_PIPELINE.md
+// §6.2) a read of `file` names, found by its sector until assets have stable
+// ids (#47).
+std::expected<std::vector<std::byte>, std::string> ConvertedModelBytes(
+    DiscFileExtent file) {
+  const DataStore* const store = DataStore::Get();
+  if (store == nullptr) {
+    return std::unexpected("no extracted-data store is open");
+  }
+  if (file.sector <= 0 || file.bytes <= 0) {
+    return std::unexpected(
+        std::format("invalid LBA {} and size {}", file.sector, file.bytes));
+  }
+  return LoadConvertedModel(
+      *store, {.lba = static_cast<std::uint32_t>(file.sector),
+               .rounded_size = static_cast<std::uint64_t>(file.bytes)});
+}
+
+// Native (#203): fills `destination` with the converted model in place of
+// the disc read. A model that does not load or fit leaves zeros, which the
+// parser refuses as an empty model.
+void ReadConvertedModel(DiscFileExtent file, std::span<std::byte> destination) {
+  std::ranges::fill(destination, std::byte{0});
+  auto bytes = ConvertedModelBytes(file);
+  if (bytes && bytes->size() > destination.size()) {
+    bytes = std::unexpected(
+        std::format("its {} bytes exceed the {}-byte model read", bytes->size(),
+                    destination.size()));
+  }
+  if (!bytes) {
+    VS::Core::LogError("content", "actor model at LBA {}: {}", file.sector,
+                       bytes.error());
+    return;
+  }
+  std::ranges::copy(*bytes, destination.begin());
 }
 
 AssetAddress Address(const void* pointer) {
@@ -927,6 +971,15 @@ class LiveActorAssetHost final : public ActorAssetHost {
     const LiveFileStream live = Stream(stream);
     live.file->lba = file.sector;
     live.file->size = file.bytes;
+    if (stream == AssetFileStream::kActorModel) {
+      // Native (#203): the converted model loads at once, with no disc read.
+      const auto wanted = static_cast<std::size_t>(std::max(file.bytes, 0));
+      const std::span<std::byte> bytes = Bytes(destination, wanted);
+      ReadConvertedModel(file, bytes.first(std::min(bytes.size(), wanted)));
+      *live.request = nullptr;
+      modelReadOwner = {};
+      return true;
+    }
     *live.request = AllocateLiveDiscRequest(live.file);
     if (FileReadOwner* owner = ReadOwner(stream)) {
       *owner = {*live.request, LiveDiscRequestGeneration(*live.request)};

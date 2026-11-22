@@ -48,6 +48,9 @@
     <ClCompile Include="src\ConvertedImages.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ConvertedModels.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\DataStore.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -88,6 +91,12 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\PFile.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ShpFile.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ShpModelFiles.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\SystemResources.cpp">
@@ -138,6 +147,9 @@
     <ClInclude Include="include\Content\ConvertedImages.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
+    <ClInclude Include="include\Content\ConvertedModels.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
     <ClInclude Include="include\Content\DataAccess.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
@@ -184,6 +196,12 @@
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\PFile.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\ShpFile.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\ShpModelFiles.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\StringTables.hpp">

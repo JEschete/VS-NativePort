@@ -502,16 +502,14 @@ std::expected<ConvertedTables, std::string> ConvertSydRecipes(
 
 std::expected<TableConversionReport, std::string> ConvertDiscTables(
     const fs::path& root, bool force) {
-  auto entries = DataStore::LoadManifest(root);
-  if (!entries) return std::unexpected(entries.error());
-  auto loaded = Content::LoadConversionManifest(root);
-  if (!loaded) return std::unexpected(loaded.error());
-  const ConversionManifest previous = loaded->value_or(ConversionManifest{});
+  auto start = StartRun(root);
+  if (!start) return std::unexpected(start.error());
+  const ConversionManifest& previous = start->previous;
   ConverterBatch batch = StartBatch(previous, kSydRecipeConverterName,
                                     kSydRecipeConverterVersion, force);
   TableConversionReport report;
   std::vector<ConvertedTables> converted;
-  for (const DataStore::Entry& entry : *entries) {
+  for (const DataStore::Entry& entry : start->entries) {
     if (entry.form != kRawForm || !entry.path.ends_with(kSydExtension)) {
       continue;
     }
@@ -531,10 +529,8 @@ std::expected<TableConversionReport, std::string> ConvertDiscTables(
     batch.outputs.push_back(tables->output);
     converted.push_back(std::move(*tables));
   }
-  if (auto written = WriteTables(root, converted); !written) {
-    return std::unexpected(written.error());
-  }
-  auto removed = PublishBatches(root, previous, std::span(&batch, 1));
+  auto removed = PublishBatch(root, previous, batch,
+                              [&] { return WriteTables(root, converted); });
   if (!removed) return std::unexpected(removed.error());
   report.converted = converted.size();
   report.removed = *removed;

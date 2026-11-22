@@ -417,6 +417,7 @@
     <ClCompile Include="src\SeqVoiceCommandsTests.cpp" />
     <ClCompile Include="src\SessionTests.cpp" />
     <ClCompile Include="src\SfxBankSelectionTests.cpp" />
+    <ClCompile Include="src\ShpFileTests.cpp" />
     <ClCompile Include="src\SkeletonTests.cpp" />
     <ClCompile Include="src\SoundTransitionTests.cpp" />
     <ClCompile Include="src\SourceNormalizationTests.cpp" />
@@ -487,6 +488,7 @@
     <ClCompile Include="..\Tools\Extract\src\EffectTextureConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\ImageFilesWriter.cpp" />
     <ClCompile Include="..\Tools\Extract\src\ImageConversion.cpp" />
+    <ClCompile Include="..\Tools\Extract\src\ShpModelConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\TimImage.cpp" />
     <ClCompile Include="..\Tools\Extract\src\TimWriter.cpp" />
     <ClCompile Include="..\Tools\Extract\src\WorkshopRecipeConversion.cpp" />

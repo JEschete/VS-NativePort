@@ -4,12 +4,14 @@
 #include <cstdint>
 #include <expected>
 #include <filesystem>
+#include <functional>
 #include <span>
 #include <string>
 #include <string_view>
 #include <vector>
 
 #include "Content/ConversionManifest.hpp"
+#include "Content/DataStore.hpp"
 
 // What every converter VS.Extract runs shares: reading an extracted disc file,
 // keeping outputs whose inputs are unchanged, writing output files in place
@@ -46,6 +48,17 @@ struct ConverterBatch {
     const Content::ConversionManifest& previous, std::string_view name,
     std::uint32_t version, bool force);
 
+// What a conversion run starts from: the extracted files files.tsv lists and
+// the previous manifest.json (empty before the first run).
+// NOLINTNEXTLINE(bugprone-exception-escape): std::map's noexcept move.
+struct RunStart {
+  std::vector<Content::DataStore::Entry> entries;
+  Content::ConversionManifest previous;
+};
+
+[[nodiscard]] std::expected<RunStart, std::string> StartRun(
+    const std::filesystem::path& root);
+
 // Records `batches` in place of their converters' previous outputs, writes
 // manifest.json, then removes the files the previous outputs listed that no
 // current one does, and returns how many it removed. Removal comes last, so a
@@ -54,6 +67,14 @@ struct ConverterBatch {
     const std::filesystem::path& root,
     const Content::ConversionManifest& previous,
     std::span<const ConverterBatch> batches);
+
+// A single converter's run: writes its converted files with `write`, then
+// records `batch` (PublishBatches), and returns how many stale files it
+// removed. Nothing is recorded when a write fails.
+[[nodiscard]] std::expected<std::size_t, std::string> PublishBatch(
+    const std::filesystem::path& root,
+    const Content::ConversionManifest& previous, const ConverterBatch& batch,
+    const std::function<std::expected<void, std::string>()>& write);
 
 // A file to write: its name and its bytes.
 struct OutputBytes {

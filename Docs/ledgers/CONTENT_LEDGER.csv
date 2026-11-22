@@ -3666,7 +3666,7 @@ MUSIC/MUSIC196.DAT,1,music sequence,,,,pending,unconverted,converts under #501
 MUSIC/MUSIC197.DAT,1,music sequence,,,,pending,unconverted,converts under #501
 MUSIC/MUSIC198.DAT,1,music sequence,,,,pending,unconverted,converts under #501
 MUSIC/MUSIC199.DAT,1,music sequence,,,,pending,unconverted,converts under #501
-OBJ/00.SHP,31084,actor shape,,,,pending,unconverted,converts under #203
+OBJ/00.SHP,31084,actor shape,Content::DecodeShp,shp-gltf,models/characters/00.gltf;models/characters/00.bin;models/characters/00.png;models/characters/00.image.json;models/characters/00.palettes.png,pass,converted,model.obj.00
 OBJ/00BT1B00.SEQ,2920,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/00BT1B01.SEQ,3095,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/00BT1B02.SEQ,5064,skeletal animation,,,,pending,unconverted,converts under #205
@@ -3728,7 +3728,7 @@ OBJ/00_BT8.SEQ,29097,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/00_BT9.SEQ,30130,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/00_BTA.SEQ,28496,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/00_COM.SEQ,35961,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/01.SHP,31024,actor shape,,,,pending,unconverted,converts under #203
+OBJ/01.SHP,31024,actor shape,Content::DecodeShp,shp-gltf,models/characters/01.gltf;models/characters/01.bin;models/characters/01.png;models/characters/01.image.json;models/characters/01.palettes.png,pass,converted,model.obj.01
 OBJ/01.WEP,3504,equipment model,,,,pending,unconverted,converts under #204
 OBJ/01SP00.SEQ,6435,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/01SP01.SEQ,6494,skeletal animation,,,,pending,unconverted,converts under #205
@@ -3739,7 +3739,7 @@ OBJ/01_BT4.SEQ,23011,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/01_BT6.SEQ,23011,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/01_BTA.SEQ,21316,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/01_COM.SEQ,525,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/02.SHP,31712,actor shape,,,,pending,unconverted,converts under #203
+OBJ/02.SHP,31712,actor shape,Content::DecodeShp,shp-gltf,models/characters/02.gltf;models/characters/02.bin;models/characters/02.png;models/characters/02.image.json;models/characters/02.palettes.png,pass,converted,model.obj.02
 OBJ/02.WEP,3472,equipment model,,,,pending,unconverted,converts under #204
 OBJ/02_BT1.SEQ,24998,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/02_BT2.SEQ,24998,skeletal animation,,,,pending,unconverted,converts under #205
@@ -3751,7 +3751,7 @@ OBJ/02_BT7.SEQ,27572,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/02_BT8.SEQ,25992,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/02_BT9.SEQ,30130,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/02_BTA.SEQ,25094,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/03.SHP,31848,actor shape,,,,pending,unconverted,converts under #203
+OBJ/03.SHP,31848,actor shape,Content::DecodeShp,shp-gltf,models/characters/03.gltf;models/characters/03.bin;models/characters/03.png;models/characters/03.image.json;models/characters/03.palettes.png,pass,converted,model.obj.03
 OBJ/03.WEP,3428,equipment model,,,,pending,unconverted,converts under #204
 OBJ/03SP00.SEQ,7617,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/03SP01.SEQ,5750,skeletal animation,,,,pending,unconverted,converts under #205
@@ -3763,14 +3763,14 @@ OBJ/03_BT4.SEQ,38352,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/03_BT9.SEQ,31530,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/03_BTA.SEQ,31202,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/03_COM.SEQ,16116,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/04.SHP,30928,actor shape,,,,pending,unconverted,converts under #203
+OBJ/04.SHP,30928,actor shape,Content::DecodeShp,shp-gltf,models/characters/04.gltf;models/characters/04.bin;models/characters/04.png;models/characters/04.image.json;models/characters/04.palettes.png,pass,converted,model.obj.04
 OBJ/04.WEP,3432,equipment model,,,,pending,unconverted,converts under #204
 OBJ/04_BT1.SEQ,27177,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/04_BT2.SEQ,33006,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/04_BT4.SEQ,33006,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/04_BTA.SEQ,27389,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/04_COM.SEQ,12011,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/05.SHP,51704,actor shape,,,,pending,unconverted,converts under #203
+OBJ/05.SHP,51704,actor shape,Content::DecodeShp,shp-gltf,models/characters/05.gltf;models/characters/05.bin;models/characters/05.png;models/characters/05.image.json;models/characters/05.palettes.png,pass,converted,model.obj.05; dependency of model.obj.c6
 OBJ/05.WEP,3420,equipment model,,,,pending,unconverted,converts under #204
 OBJ/05SP00.SEQ,7676,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/05SP01.SEQ,5836,skeletal animation,,,,pending,unconverted,converts under #205
@@ -3782,11 +3782,11 @@ OBJ/05_BT4.SEQ,39124,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/05_BT9.SEQ,32247,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/05_BTA.SEQ,31914,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/05_COM.SEQ,16585,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/06.SHP,31084,actor shape,,,,pending,unconverted,converts under #203
+OBJ/06.SHP,31084,actor shape,Content::DecodeShp,shp-gltf,models/characters/06.gltf;models/characters/06.bin;models/characters/06.png;models/characters/06.image.json;models/characters/06.palettes.png,pass,converted,model.obj.06
 OBJ/06.WEP,3532,equipment model,,,,pending,unconverted,converts under #204
-OBJ/07.SHP,30088,actor shape,,,,pending,unconverted,converts under #203
+OBJ/07.SHP,30088,actor shape,Content::DecodeShp,shp-gltf,models/characters/07.gltf;models/characters/07.bin;models/characters/07.png;models/characters/07.image.json;models/characters/07.palettes.png,pass,converted,model.obj.07
 OBJ/07.WEP,3428,equipment model,,,,pending,unconverted,converts under #204
-OBJ/08.SHP,30224,actor shape,,,,pending,unconverted,converts under #203
+OBJ/08.SHP,30224,actor shape,Content::DecodeShp,shp-gltf,models/characters/08.gltf;models/characters/08.bin;models/characters/08.png;models/characters/08.image.json;models/characters/08.palettes.png,pass,converted,model.obj.08
 OBJ/08.WEP,3588,equipment model,,,,pending,unconverted,converts under #204
 OBJ/08SP00.SEQ,7617,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/08SP01.SEQ,5750,skeletal animation,,,,pending,unconverted,converts under #205
@@ -3798,14 +3798,14 @@ OBJ/08_BT4.SEQ,38352,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/08_BT9.SEQ,31530,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/08_BTA.SEQ,31202,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/08_COM.SEQ,16116,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/09.SHP,31388,actor shape,,,,pending,unconverted,converts under #203
+OBJ/09.SHP,31388,actor shape,Content::DecodeShp,shp-gltf,models/characters/09.gltf;models/characters/09.bin;models/characters/09.png;models/characters/09.image.json;models/characters/09.palettes.png,pass,converted,model.obj.09
 OBJ/09.WEP,3608,equipment model,,,,pending,unconverted,converts under #204
 OBJ/09SP00.SEQ,5732,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/09SP01.SEQ,5771,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/09SP02.SEQ,7563,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/09SP03.SEQ,5791,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/09_BT5.SEQ,21048,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/0A.SHP,31148,actor shape,,,,pending,unconverted,converts under #203
+OBJ/0A.SHP,31148,actor shape,Content::DecodeShp,shp-gltf,models/characters/0A.gltf;models/characters/0A.bin;models/characters/0A.png;models/characters/0A.image.json;models/characters/0A.palettes.png,pass,converted,model.obj.0a
 OBJ/0A.WEP,3428,equipment model,,,,pending,unconverted,converts under #204
 OBJ/0ASP00.SEQ,2775,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/0ASP01.SEQ,4168,skeletal animation,,,,pending,unconverted,converts under #205
@@ -3815,7 +3815,7 @@ OBJ/0A_BT1.SEQ,31820,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/0A_BT2.SEQ,38352,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/0A_BT7.SEQ,30874,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/0A_BTA.SEQ,31202,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/0B.SHP,31184,actor shape,,,,pending,unconverted,converts under #203
+OBJ/0B.SHP,31184,actor shape,Content::DecodeShp,shp-gltf,models/characters/0B.gltf;models/characters/0B.bin;models/characters/0B.png;models/characters/0B.image.json;models/characters/0B.palettes.png,pass,converted,model.obj.0b
 OBJ/0B.WEP,3376,equipment model,,,,pending,unconverted,converts under #204
 OBJ/0BSP00.SEQ,3468,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/0BSP01.SEQ,3790,skeletal animation,,,,pending,unconverted,converts under #205
@@ -3825,43 +3825,43 @@ OBJ/0B_BT1.SEQ,31820,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/0B_BT2.SEQ,38352,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/0B_BT9.SEQ,28277,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/0B_BTA.SEQ,31202,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/0C.SHP,28788,actor shape,,,,pending,unconverted,converts under #203
+OBJ/0C.SHP,28788,actor shape,Content::DecodeShp,shp-gltf,models/characters/0C.gltf;models/characters/0C.bin;models/characters/0C.png;models/characters/0C.image.json;models/characters/0C.palettes.png,pass,converted,model.obj.0c
 OBJ/0C.WEP,3416,equipment model,,,,pending,unconverted,converts under #204
 OBJ/0C_BT1.SEQ,13399,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/0C_BT2.SEQ,13399,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/0C_BT4.SEQ,13399,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/0C_BTA.SEQ,13399,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/0D.SHP,30400,actor shape,,,,pending,unconverted,converts under #203
+OBJ/0D.SHP,30400,actor shape,Content::DecodeShp,shp-gltf,models/characters/0D.gltf;models/characters/0D.bin;models/characters/0D.png;models/characters/0D.image.json;models/characters/0D.palettes.png,pass,converted,model.obj.0d
 OBJ/0D.WEP,3620,equipment model,,,,pending,unconverted,converts under #204
 OBJ/0D_BT1.SEQ,13399,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/0D_BT2.SEQ,13399,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/0D_BT4.SEQ,13399,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/0D_BTA.SEQ,13399,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/0E.SHP,30116,actor shape,,,,pending,unconverted,converts under #203
+OBJ/0E.SHP,30116,actor shape,Content::DecodeShp,shp-gltf,models/characters/0E.gltf;models/characters/0E.bin;models/characters/0E.png;models/characters/0E.image.json;models/characters/0E.palettes.png,pass,converted,model.obj.0e
 OBJ/0E.WEP,3556,equipment model,,,,pending,unconverted,converts under #204
 OBJ/0E_BT1.SEQ,13399,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/0E_BT2.SEQ,13399,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/0E_BT4.SEQ,13399,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/0E_BTA.SEQ,13399,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/0F.SHP,28520,actor shape,,,,pending,unconverted,converts under #203
+OBJ/0F.SHP,28520,actor shape,Content::DecodeShp,shp-gltf,models/characters/0F.gltf;models/characters/0F.bin;models/characters/0F.png;models/characters/0F.image.json;models/characters/0F.palettes.png,pass,converted,model.obj.0f
 OBJ/0F.WEP,3516,equipment model,,,,pending,unconverted,converts under #204
 OBJ/0F_BT1.SEQ,13399,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/0F_BT2.SEQ,13399,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/0F_BT4.SEQ,15539,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/0F_BTA.SEQ,15539,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/10.SHP,28884,actor shape,,,,pending,unconverted,converts under #203
+OBJ/10.SHP,28884,actor shape,Content::DecodeShp,shp-gltf,models/characters/10.gltf;models/characters/10.bin;models/characters/10.png;models/characters/10.image.json;models/characters/10.palettes.png,pass,converted,model.obj.10
 OBJ/10.WEP,3588,equipment model,,,,pending,unconverted,converts under #204
 OBJ/10_BT1.SEQ,13399,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/10_BT2.SEQ,13399,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/10_BT4.SEQ,15539,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/10_BTA.SEQ,15539,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/11.SHP,29116,actor shape,,,,pending,unconverted,converts under #203
+OBJ/11.SHP,29116,actor shape,Content::DecodeShp,shp-gltf,models/characters/11.gltf;models/characters/11.bin;models/characters/11.png;models/characters/11.image.json;models/characters/11.palettes.png,pass,converted,model.obj.11
 OBJ/11.WEP,3588,equipment model,,,,pending,unconverted,converts under #204
 OBJ/11_BT1.SEQ,13399,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/11_BT2.SEQ,13399,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/11_BT4.SEQ,15539,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/11_BTA.SEQ,15539,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/12.SHP,31336,actor shape,,,,pending,unconverted,converts under #203
+OBJ/12.SHP,31336,actor shape,Content::DecodeShp,shp-gltf,models/characters/12.gltf;models/characters/12.bin;models/characters/12.png;models/characters/12.image.json;models/characters/12.palettes.png,pass,converted,model.obj.12
 OBJ/12.WEP,3588,equipment model,,,,pending,unconverted,converts under #204
 OBJ/12_BT1.SEQ,15031,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/12_BT2.SEQ,15417,skeletal animation,,,,pending,unconverted,converts under #205
@@ -3871,7 +3871,7 @@ OBJ/12_BT5.SEQ,21664,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/12_BT7.SEQ,21664,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/12_BT9.SEQ,14298,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/12_BTA.SEQ,16984,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/13.SHP,40308,actor shape,,,,pending,unconverted,converts under #203
+OBJ/13.SHP,40308,actor shape,Content::DecodeShp,shp-gltf,models/characters/13.gltf;models/characters/13.bin;models/characters/13.png;models/characters/13.image.json;models/characters/13.palettes.png,pass,converted,model.obj.13
 OBJ/13.WEP,3492,equipment model,,,,pending,unconverted,converts under #204
 OBJ/13_BT1.SEQ,15031,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/13_BT2.SEQ,15417,skeletal animation,,,,pending,unconverted,converts under #205
@@ -3881,7 +3881,7 @@ OBJ/13_BT5.SEQ,21664,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/13_BT7.SEQ,21664,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/13_BT9.SEQ,14298,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/13_BTA.SEQ,16984,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/14.SHP,31196,actor shape,,,,pending,unconverted,converts under #203
+OBJ/14.SHP,31196,actor shape,Content::DecodeShp,shp-gltf,models/characters/14.gltf;models/characters/14.bin;models/characters/14.png;models/characters/14.image.json;models/characters/14.palettes.png,pass,converted,model.obj.14
 OBJ/14.WEP,3412,equipment model,,,,pending,unconverted,converts under #204
 OBJ/14_BT1.SEQ,15031,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/14_BT2.SEQ,15417,skeletal animation,,,,pending,unconverted,converts under #205
@@ -3891,12 +3891,12 @@ OBJ/14_BT5.SEQ,21664,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/14_BT7.SEQ,21664,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/14_BT9.SEQ,14298,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/14_BTA.SEQ,16984,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/15.SHP,29964,actor shape,,,,pending,unconverted,converts under #203
+OBJ/15.SHP,29964,actor shape,Content::DecodeShp,shp-gltf,models/characters/15.gltf;models/characters/15.bin;models/characters/15.png;models/characters/15.image.json;models/characters/15.palettes.png,pass,converted,model.obj.15
 OBJ/15.WEP,3632,equipment model,,,,pending,unconverted,converts under #204
 OBJ/15_BT1.SEQ,16271,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/15_BT6.SEQ,15404,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/15_BTA.SEQ,16271,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/16.SHP,30396,actor shape,,,,pending,unconverted,converts under #203
+OBJ/16.SHP,30396,actor shape,Content::DecodeShp,shp-gltf,models/characters/16.gltf;models/characters/16.bin;models/characters/16.png;models/characters/16.image.json;models/characters/16.palettes.png,pass,converted,model.obj.16
 OBJ/16.WEP,3524,equipment model,,,,pending,unconverted,converts under #204
 OBJ/16_BT1.SEQ,18803,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/16_BT2.SEQ,18803,skeletal animation,,,,pending,unconverted,converts under #205
@@ -3907,7 +3907,7 @@ OBJ/16_BT7.SEQ,19813,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/16_BT8.SEQ,16650,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/16_BT9.SEQ,14296,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/16_BTA.SEQ,14816,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/17.SHP,30804,actor shape,,,,pending,unconverted,converts under #203
+OBJ/17.SHP,30804,actor shape,Content::DecodeShp,shp-gltf,models/characters/17.gltf;models/characters/17.bin;models/characters/17.png;models/characters/17.image.json;models/characters/17.palettes.png,pass,converted,model.obj.17
 OBJ/17.WEP,3512,equipment model,,,,pending,unconverted,converts under #204
 OBJ/17_BT1.SEQ,18803,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/17_BT2.SEQ,18803,skeletal animation,,,,pending,unconverted,converts under #205
@@ -3918,7 +3918,7 @@ OBJ/17_BT7.SEQ,19813,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/17_BT8.SEQ,16650,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/17_BT9.SEQ,14296,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/17_BTA.SEQ,14816,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/18.SHP,31348,actor shape,,,,pending,unconverted,converts under #203
+OBJ/18.SHP,31348,actor shape,Content::DecodeShp,shp-gltf,models/characters/18.gltf;models/characters/18.bin;models/characters/18.png;models/characters/18.image.json;models/characters/18.palettes.png,pass,converted,model.obj.18
 OBJ/18.WEP,3528,equipment model,,,,pending,unconverted,converts under #204
 OBJ/18_BT1.SEQ,18803,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/18_BT2.SEQ,18803,skeletal animation,,,,pending,unconverted,converts under #205
@@ -3929,7 +3929,7 @@ OBJ/18_BT7.SEQ,19813,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/18_BT8.SEQ,16650,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/18_BT9.SEQ,14296,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/18_BTA.SEQ,14816,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/19.SHP,32332,actor shape,,,,pending,unconverted,converts under #203
+OBJ/19.SHP,32332,actor shape,Content::DecodeShp,shp-gltf,models/characters/19.gltf;models/characters/19.bin;models/characters/19.png;models/characters/19.image.json;models/characters/19.palettes.png,pass,converted,model.obj.19
 OBJ/19.WEP,6028,equipment model,,,,pending,unconverted,converts under #204
 OBJ/19_BT1.SEQ,18803,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/19_BT2.SEQ,18803,skeletal animation,,,,pending,unconverted,converts under #205
@@ -3940,46 +3940,46 @@ OBJ/19_BT7.SEQ,19813,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/19_BT8.SEQ,16650,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/19_BT9.SEQ,14296,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/19_BTA.SEQ,14816,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/1A.SHP,22024,actor shape,,,,pending,unconverted,converts under #203
+OBJ/1A.SHP,22024,actor shape,Content::DecodeShp,shp-gltf,models/characters/1A.gltf;models/characters/1A.bin;models/characters/1A.png;models/characters/1A.image.json;models/characters/1A.palettes.png,pass,converted,model.obj.1a
 OBJ/1A.WEP,5988,equipment model,,,,pending,unconverted,converts under #204
 OBJ/1ASP00.SEQ,4625,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/1ASP01.SEQ,1552,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/1ASP02.SEQ,1615,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/1A_BTA.SEQ,8283,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/1B.SHP,13824,actor shape,,,,pending,unconverted,converts under #203
+OBJ/1B.SHP,13824,actor shape,Content::DecodeShp,shp-gltf,models/characters/1B.gltf;models/characters/1B.bin;models/characters/1B.png;models/characters/1B.image.json;models/characters/1B.palettes.png,pass,converted,model.obj.1b
 OBJ/1B.WEP,5904,equipment model,,,,pending,unconverted,converts under #204
 OBJ/1BSP00.SEQ,4625,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/1BSP01.SEQ,1552,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/1BSP02.SEQ,1615,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/1B_BTA.SEQ,8283,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/1C.SHP,30380,actor shape,,,,pending,unconverted,converts under #203
+OBJ/1C.SHP,30380,actor shape,Content::DecodeShp,shp-gltf,models/characters/1C.gltf;models/characters/1C.bin;models/characters/1C.png;models/characters/1C.image.json;models/characters/1C.palettes.png,pass,converted,model.obj.1c
 OBJ/1C.WEP,6084,equipment model,,,,pending,unconverted,converts under #204
 OBJ/1C_BT1.SEQ,13645,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/1C_BT2.SEQ,13645,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/1C_BT4.SEQ,13645,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/1C_BT9.SEQ,12665,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/1C_BTA.SEQ,12003,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/1D.SHP,31112,actor shape,,,,pending,unconverted,converts under #203
+OBJ/1D.SHP,31112,actor shape,Content::DecodeShp,shp-gltf,models/characters/1D.gltf;models/characters/1D.bin;models/characters/1D.png;models/characters/1D.image.json;models/characters/1D.palettes.png,pass,converted,model.obj.1d
 OBJ/1D.WEP,6132,equipment model,,,,pending,unconverted,converts under #204
 OBJ/1D_BT1.SEQ,13645,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/1D_BT2.SEQ,13645,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/1D_BT4.SEQ,13645,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/1D_BT9.SEQ,12665,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/1D_BTA.SEQ,12003,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/1E.SHP,31244,actor shape,,,,pending,unconverted,converts under #203
+OBJ/1E.SHP,31244,actor shape,Content::DecodeShp,shp-gltf,models/characters/1E.gltf;models/characters/1E.bin;models/characters/1E.png;models/characters/1E.image.json;models/characters/1E.palettes.png,pass,converted,model.obj.1e
 OBJ/1E.WEP,6084,equipment model,,,,pending,unconverted,converts under #204
 OBJ/1E_BT3.SEQ,16673,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/1E_BT5.SEQ,16713,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/1E_BT7.SEQ,16713,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/1E_BTA.SEQ,14072,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/1F.SHP,32372,actor shape,,,,pending,unconverted,converts under #203
+OBJ/1F.SHP,32372,actor shape,Content::DecodeShp,shp-gltf,models/characters/1F.gltf;models/characters/1F.bin;models/characters/1F.png;models/characters/1F.image.json;models/characters/1F.palettes.png,pass,converted,model.obj.1f
 OBJ/1F.WEP,6156,equipment model,,,,pending,unconverted,converts under #204
 OBJ/1F_BT3.SEQ,16673,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/1F_BT5.SEQ,16713,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/1F_BT6.SEQ,14717,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/1F_BT7.SEQ,16713,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/1F_BTA.SEQ,14072,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/20.SHP,33312,actor shape,,,,pending,unconverted,converts under #203
+OBJ/20.SHP,33312,actor shape,Content::DecodeShp,shp-gltf,models/characters/20.gltf;models/characters/20.bin;models/characters/20.png;models/characters/20.image.json;models/characters/20.palettes.png,pass,converted,model.obj.20
 OBJ/20.WEP,5696,equipment model,,,,pending,unconverted,converts under #204
 OBJ/20_BT2.SEQ,17306,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/20_BT3.SEQ,17769,skeletal animation,,,,pending,unconverted,converts under #205
@@ -3988,83 +3988,83 @@ OBJ/20_BT5.SEQ,17354,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/20_BT7.SEQ,17354,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/20_BT8.SEQ,17195,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/20_BTA.SEQ,16602,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/21.SHP,33416,actor shape,,,,pending,unconverted,converts under #203
+OBJ/21.SHP,33416,actor shape,Content::DecodeShp,shp-gltf,models/characters/21.gltf;models/characters/21.bin;models/characters/21.png;models/characters/21.image.json;models/characters/21.palettes.png,pass,converted,model.obj.21
 OBJ/21.WEP,5904,equipment model,,,,pending,unconverted,converts under #204
 OBJ/21_BT6.SEQ,26545,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/22.SHP,30000,actor shape,,,,pending,unconverted,converts under #203
+OBJ/22.SHP,30000,actor shape,Content::DecodeShp,shp-gltf,models/characters/22.gltf;models/characters/22.bin;models/characters/22.png;models/characters/22.image.json;models/characters/22.palettes.png,pass,converted,model.obj.22
 OBJ/22.WEP,6824,equipment model,,,,pending,unconverted,converts under #204
 OBJ/22SP00.SEQ,1550,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/22_BTA.SEQ,20917,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/23.SHP,30000,actor shape,,,,pending,unconverted,converts under #203
+OBJ/23.SHP,30000,actor shape,Content::DecodeShp,shp-gltf,models/characters/23.gltf;models/characters/23.bin;models/characters/23.png;models/characters/23.image.json;models/characters/23.palettes.png,pass,converted,model.obj.23
 OBJ/23.WEP,3492,equipment model,,,,pending,unconverted,converts under #204
 OBJ/23SP00.SEQ,1550,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/23_BTA.SEQ,20893,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/24.SHP,31072,actor shape,,,,pending,unconverted,converts under #203
+OBJ/24.SHP,31072,actor shape,Content::DecodeShp,shp-gltf,models/characters/24.gltf;models/characters/24.bin;models/characters/24.png;models/characters/24.image.json;models/characters/24.palettes.png,pass,converted,model.obj.24
 OBJ/24.WEP,3408,equipment model,,,,pending,unconverted,converts under #204
 OBJ/24_BT1.SEQ,21338,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/24_BT2.SEQ,21338,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/24_BT4.SEQ,21338,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/24_BT9.SEQ,21800,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/24_BTA.SEQ,21464,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/25.SHP,52256,actor shape,,,,pending,unconverted,converts under #203
+OBJ/25.SHP,52256,actor shape,Content::DecodeShp,shp-gltf,models/characters/25.gltf;models/characters/25.bin;models/characters/25.png;models/characters/25.image.json;models/characters/25.palettes.png,pass,converted,model.obj.25
 OBJ/25.WEP,3488,equipment model,,,,pending,unconverted,converts under #204
 OBJ/25SP00.SEQ,7454,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/25_BT5.SEQ,22102,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/25_BT7.SEQ,22102,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/25_BTA.SEQ,22102,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/26.SHP,38152,actor shape,,,,pending,unconverted,converts under #203
+OBJ/26.SHP,38152,actor shape,Content::DecodeShp,shp-gltf,models/characters/26.gltf;models/characters/26.bin;models/characters/26.png;models/characters/26.image.json;models/characters/26.palettes.png,pass,converted,model.obj.26
 OBJ/26.WEP,3500,equipment model,,,,pending,unconverted,converts under #204
 OBJ/26SP00.SEQ,1352,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/26_BTA.SEQ,15617,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/27.SHP,39344,actor shape,,,,pending,unconverted,converts under #203
+OBJ/27.SHP,39344,actor shape,Content::DecodeShp,shp-gltf,models/characters/27.gltf;models/characters/27.bin;models/characters/27.png;models/characters/27.image.json;models/characters/27.palettes.png,pass,converted,model.obj.27
 OBJ/27.WEP,3480,equipment model,,,,pending,unconverted,converts under #204
 OBJ/27SP00.SEQ,4252,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/27_BTA.SEQ,16544,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/28.SHP,30496,actor shape,,,,pending,unconverted,converts under #203
+OBJ/28.SHP,30496,actor shape,Content::DecodeShp,shp-gltf,models/characters/28.gltf;models/characters/28.bin;models/characters/28.png;models/characters/28.image.json;models/characters/28.palettes.png,pass,converted,model.obj.28
 OBJ/28.WEP,3520,equipment model,,,,pending,unconverted,converts under #204
 OBJ/28SP00.SEQ,3867,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/28_BTA.SEQ,25254,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/29.SHP,16576,actor shape,,,,pending,unconverted,converts under #203
+OBJ/29.SHP,16576,actor shape,Content::DecodeShp,shp-gltf,models/characters/29.gltf;models/characters/29.bin;models/characters/29.png;models/characters/29.image.json;models/characters/29.palettes.png,pass,converted,model.obj.29
 OBJ/29.WEP,3464,equipment model,,,,pending,unconverted,converts under #204
 OBJ/29SP00.SEQ,1281,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/29_BTA.SEQ,4693,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/2A.SHP,16576,actor shape,,,,pending,unconverted,converts under #203
+OBJ/2A.SHP,16576,actor shape,Content::DecodeShp,shp-gltf,models/characters/2A.gltf;models/characters/2A.bin;models/characters/2A.png;models/characters/2A.image.json;models/characters/2A.palettes.png,pass,converted,model.obj.2a
 OBJ/2A.WEP,3524,equipment model,,,,pending,unconverted,converts under #204
 OBJ/2ASP00.SEQ,1281,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/2A_BTA.SEQ,4693,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/2B.SHP,24960,actor shape,,,,pending,unconverted,converts under #203
+OBJ/2B.SHP,24960,actor shape,Content::DecodeShp,shp-gltf,models/characters/2B.gltf;models/characters/2B.bin;models/characters/2B.png;models/characters/2B.image.json;models/characters/2B.palettes.png,pass,converted,model.obj.2b
 OBJ/2B.WEP,3504,equipment model,,,,pending,unconverted,converts under #204
 OBJ/2BSP00.SEQ,1327,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/2BSP01.SEQ,1184,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/2B_BTA.SEQ,6025,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/2C.SHP,23196,actor shape,,,,pending,unconverted,converts under #203
+OBJ/2C.SHP,23196,actor shape,Content::DecodeShp,shp-gltf,models/characters/2C.gltf;models/characters/2C.bin;models/characters/2C.png;models/characters/2C.image.json;models/characters/2C.palettes.png,pass,converted,model.obj.2c
 OBJ/2C.WEP,3524,equipment model,,,,pending,unconverted,converts under #204
 OBJ/2CSP00.SEQ,352,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/2C_BTA.SEQ,2198,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/2D.SHP,17768,actor shape,,,,pending,unconverted,converts under #203
+OBJ/2D.SHP,17768,actor shape,Content::DecodeShp,shp-gltf,models/characters/2D.gltf;models/characters/2D.bin;models/characters/2D.png;models/characters/2D.image.json;models/characters/2D.palettes.png,pass,converted,model.obj.2d
 OBJ/2D.WEP,3528,equipment model,,,,pending,unconverted,converts under #204
 OBJ/2DSP00.SEQ,2895,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/2D_BTA.SEQ,11128,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/2E.SHP,15308,actor shape,,,,pending,unconverted,converts under #203
+OBJ/2E.SHP,15308,actor shape,Content::DecodeShp,shp-gltf,models/characters/2E.gltf;models/characters/2E.bin;models/characters/2E.png;models/characters/2E.image.json;models/characters/2E.palettes.png,pass,converted,model.obj.2e
 OBJ/2E.WEP,3380,equipment model,,,,pending,unconverted,converts under #204
 OBJ/2ESP00.SEQ,2207,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/2E_BTA.SEQ,6877,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/2F.SHP,28264,actor shape,,,,pending,unconverted,converts under #203
+OBJ/2F.SHP,28264,actor shape,Content::DecodeShp,shp-gltf,models/characters/2F.gltf;models/characters/2F.bin;models/characters/2F.png;models/characters/2F.image.json;models/characters/2F.palettes.png,pass,converted,model.obj.2f
 OBJ/2F.WEP,3472,equipment model,,,,pending,unconverted,converts under #204
 OBJ/2F_BTA.SEQ,14889,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/30.SHP,30048,actor shape,,,,pending,unconverted,converts under #203
+OBJ/30.SHP,30048,actor shape,Content::DecodeShp,shp-gltf,models/characters/30.gltf;models/characters/30.bin;models/characters/30.png;models/characters/30.image.json;models/characters/30.palettes.png,pass,converted,model.obj.30
 OBJ/30.WEP,3280,equipment model,,,,pending,unconverted,converts under #204
 OBJ/30_BTA.SEQ,16427,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/31.SHP,28808,actor shape,,,,pending,unconverted,converts under #203
+OBJ/31.SHP,28808,actor shape,Content::DecodeShp,shp-gltf,models/characters/31.gltf;models/characters/31.bin;models/characters/31.png;models/characters/31.image.json;models/characters/31.palettes.png,pass,converted,model.obj.31
 OBJ/31.WEP,3380,equipment model,,,,pending,unconverted,converts under #204
 OBJ/31_BTA.SEQ,11977,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/32.SHP,28104,actor shape,,,,pending,unconverted,converts under #203
+OBJ/32.SHP,28104,actor shape,Content::DecodeShp,shp-gltf,models/characters/32.gltf;models/characters/32.bin;models/characters/32.png;models/characters/32.image.json;models/characters/32.palettes.png,pass,converted,model.obj.32
 OBJ/32.WEP,3460,equipment model,,,,pending,unconverted,converts under #204
 OBJ/32_BTA.SEQ,14891,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/33.SHP,29324,actor shape,,,,pending,unconverted,converts under #203
+OBJ/33.SHP,29324,actor shape,Content::DecodeShp,shp-gltf,models/characters/33.gltf;models/characters/33.bin;models/characters/33.png;models/characters/33.image.json;models/characters/33.palettes.png,pass,converted,model.obj.33
 OBJ/33.WEP,5852,equipment model,,,,pending,unconverted,converts under #204
 OBJ/33_BTA.SEQ,14648,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/34.SHP,32868,actor shape,,,,pending,unconverted,converts under #203
+OBJ/34.SHP,32868,actor shape,Content::DecodeShp,shp-gltf,models/characters/34.gltf;models/characters/34.bin;models/characters/34.png;models/characters/34.image.json;models/characters/34.palettes.png,pass,converted,model.obj.34
 OBJ/34.WEP,5956,equipment model,,,,pending,unconverted,converts under #204
 OBJ/34_BT2.SEQ,23405,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/34_BT3.SEQ,23405,skeletal animation,,,,pending,unconverted,converts under #205
@@ -4072,114 +4072,114 @@ OBJ/34_BT4.SEQ,23075,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/34_BT5.SEQ,23405,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/34_BT7.SEQ,23405,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/34_BTA.SEQ,24595,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/35.SHP,52328,actor shape,,,,pending,unconverted,converts under #203
+OBJ/35.SHP,52328,actor shape,Content::DecodeShp,shp-gltf,models/characters/35.gltf;models/characters/35.bin;models/characters/35.png;models/characters/35.image.json;models/characters/35.palettes.png,pass,converted,model.obj.35
 OBJ/35.WEP,5996,equipment model,,,,pending,unconverted,converts under #204
 OBJ/35SP00.SEQ,7454,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/35_BT5.SEQ,22102,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/35_BT7.SEQ,22102,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/35_BTA.SEQ,22102,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/36.SHP,50564,actor shape,,,,pending,unconverted,converts under #203
+OBJ/36.SHP,50564,actor shape,Content::DecodeShp,shp-gltf,models/characters/36.gltf;models/characters/36.bin;models/characters/36.png;models/characters/36.image.json;models/characters/36.palettes.png,pass,converted,model.obj.36
 OBJ/36.WEP,5936,equipment model,,,,pending,unconverted,converts under #204
 OBJ/36_BT3.SEQ,23451,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/36_BT4.SEQ,23451,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/36_BT5.SEQ,23451,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/36_BT7.SEQ,23451,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/36_BTA.SEQ,22217,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/37.SHP,56832,actor shape,,,,pending,unconverted,converts under #203
+OBJ/37.SHP,56832,actor shape,Content::DecodeShp,shp-gltf,models/characters/37.gltf;models/characters/37.bin;models/characters/37.png;models/characters/37.image.json;models/characters/37.palettes.png,pass,converted,model.obj.37
 OBJ/37.WEP,6004,equipment model,,,,pending,unconverted,converts under #204
 OBJ/37SP00.SEQ,1609,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/37_BTA.SEQ,24074,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/38.SHP,48524,actor shape,,,,pending,unconverted,converts under #203
+OBJ/38.SHP,48524,actor shape,Content::DecodeShp,shp-gltf,models/characters/38.gltf;models/characters/38.bin;models/characters/38.png;models/characters/38.image.json;models/characters/38.palettes.png,pass,converted,model.obj.38
 OBJ/38.WEP,6404,equipment model,,,,pending,unconverted,converts under #204
 OBJ/38SP00.SEQ,4076,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/38SP01.SEQ,3400,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/38SP02.SEQ,4043,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/38SP03.SEQ,3372,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/38_BTA.SEQ,32152,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/39.SHP,95424,actor shape,,,,pending,unconverted,converts under #203
+OBJ/39.SHP,95424,actor shape,Content::DecodeShp,shp-gltf,models/characters/39.gltf;models/characters/39.bin;models/characters/39.png;models/characters/39.image.json;models/characters/39.palettes.png,pass,converted,model.obj.39
 OBJ/39.WEP,3616,equipment model,,,,pending,unconverted,converts under #204
 OBJ/39SP00.SEQ,4603,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/39SP01.SEQ,2529,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/39_BTA.SEQ,21242,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/3A.SHP,42552,actor shape,,,,pending,unconverted,converts under #203
+OBJ/3A.SHP,42552,actor shape,Content::DecodeShp,shp-gltf,models/characters/3A.gltf;models/characters/3A.bin;models/characters/3A.png;models/characters/3A.image.json;models/characters/3A.palettes.png,pass,converted,model.obj.3a
 OBJ/3A.WEP,3576,equipment model,,,,pending,unconverted,converts under #204
 OBJ/3ASP00.SEQ,9533,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/3A_BTA.SEQ,35304,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/3B.SHP,41016,actor shape,,,,pending,unconverted,converts under #203
+OBJ/3B.SHP,41016,actor shape,Content::DecodeShp,shp-gltf,models/characters/3B.gltf;models/characters/3B.bin;models/characters/3B.png;models/characters/3B.image.json;models/characters/3B.palettes.png,pass,converted,model.obj.3b
 OBJ/3B.WEP,3612,equipment model,,,,pending,unconverted,converts under #204
 OBJ/3BSP00.SEQ,9533,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/3B_BTA.SEQ,35304,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/3C.SHP,31480,actor shape,,,,pending,unconverted,converts under #203
+OBJ/3C.SHP,31480,actor shape,Content::DecodeShp,shp-gltf,models/characters/3C.gltf;models/characters/3C.bin;models/characters/3C.png;models/characters/3C.image.json;models/characters/3C.palettes.png,pass,converted,model.obj.3c
 OBJ/3C.WEP,3552,equipment model,,,,pending,unconverted,converts under #204
 OBJ/3CSP00.SEQ,1929,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/3CSP01.SEQ,1057,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/3C_BTA.SEQ,20108,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/3D.SHP,60300,actor shape,,,,pending,unconverted,converts under #203
+OBJ/3D.SHP,60300,actor shape,Content::DecodeShp,shp-gltf,models/characters/3D.gltf;models/characters/3D.bin;models/characters/3D.png;models/characters/3D.image.json;models/characters/3D.palettes.png,pass,converted,model.obj.3d
 OBJ/3D.WEP,3584,equipment model,,,,pending,unconverted,converts under #204
 OBJ/3DSP00.SEQ,5657,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/3DSP01.SEQ,9136,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/3D_BTA.SEQ,27672,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/3E.SHP,58456,actor shape,,,,pending,unconverted,converts under #203
+OBJ/3E.SHP,58456,actor shape,Content::DecodeShp,shp-gltf,models/characters/3E.gltf;models/characters/3E.bin;models/characters/3E.png;models/characters/3E.image.json;models/characters/3E.palettes.png,pass,converted,model.obj.3e
 OBJ/3E.WEP,3556,equipment model,,,,pending,unconverted,converts under #204
 OBJ/3ESP00.SEQ,5657,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/3ESP01.SEQ,9136,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/3E_BTA.SEQ,27672,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/3F.SHP,59504,actor shape,,,,pending,unconverted,converts under #203
+OBJ/3F.SHP,59504,actor shape,Content::DecodeShp,shp-gltf,models/characters/3F.gltf;models/characters/3F.bin;models/characters/3F.png;models/characters/3F.image.json;models/characters/3F.palettes.png,pass,converted,model.obj.3f
 OBJ/3F.WEP,6652,equipment model,,,,pending,unconverted,converts under #204
 OBJ/3FSP00.SEQ,5657,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/3FSP01.SEQ,9136,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/3F_BTA.SEQ,27672,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/40.SHP,58268,actor shape,,,,pending,unconverted,converts under #203
+OBJ/40.SHP,58268,actor shape,Content::DecodeShp,shp-gltf,models/characters/40.gltf;models/characters/40.bin;models/characters/40.png;models/characters/40.image.json;models/characters/40.palettes.png,pass,converted,model.obj.40
 OBJ/40.WEP,6664,equipment model,,,,pending,unconverted,converts under #204
 OBJ/40SP00.SEQ,5657,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/40SP01.SEQ,9136,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/40_BTA.SEQ,25792,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/41.SHP,60656,actor shape,,,,pending,unconverted,converts under #203
+OBJ/41.SHP,60656,actor shape,Content::DecodeShp,shp-gltf,models/characters/41.gltf;models/characters/41.bin;models/characters/41.png;models/characters/41.image.json;models/characters/41.palettes.png,pass,converted,model.obj.41
 OBJ/41.WEP,6336,equipment model,,,,pending,unconverted,converts under #204
 OBJ/41SP00.SEQ,5657,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/41SP01.SEQ,9136,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/41_BTA.SEQ,27672,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/42.SHP,60688,actor shape,,,,pending,unconverted,converts under #203
+OBJ/42.SHP,60688,actor shape,Content::DecodeShp,shp-gltf,models/characters/42.gltf;models/characters/42.bin;models/characters/42.png;models/characters/42.image.json;models/characters/42.palettes.png,pass,converted,model.obj.42
 OBJ/42.WEP,6664,equipment model,,,,pending,unconverted,converts under #204
 OBJ/42SP00.SEQ,5657,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/42SP01.SEQ,4727,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/42_BTA.SEQ,34007,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/43.SHP,60720,actor shape,,,,pending,unconverted,converts under #203
+OBJ/43.SHP,60720,actor shape,Content::DecodeShp,shp-gltf,models/characters/43.gltf;models/characters/43.bin;models/characters/43.png;models/characters/43.image.json;models/characters/43.palettes.png,pass,converted,model.obj.43
 OBJ/43.WEP,6740,equipment model,,,,pending,unconverted,converts under #204
 OBJ/43SP00.SEQ,5657,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/43SP01.SEQ,5814,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/43_BTA.SEQ,34186,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/44.SHP,59284,actor shape,,,,pending,unconverted,converts under #203
+OBJ/44.SHP,59284,actor shape,Content::DecodeShp,shp-gltf,models/characters/44.gltf;models/characters/44.bin;models/characters/44.png;models/characters/44.image.json;models/characters/44.palettes.png,pass,converted,model.obj.44
 OBJ/44.WEP,6796,equipment model,,,,pending,unconverted,converts under #204
 OBJ/44SP00.SEQ,3931,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/44SP01.SEQ,5271,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/44_BTA.SEQ,26886,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/45.SHP,51348,actor shape,,,,pending,unconverted,converts under #203
+OBJ/45.SHP,51348,actor shape,Content::DecodeShp,shp-gltf,models/characters/45.gltf;models/characters/45.bin;models/characters/45.png;models/characters/45.image.json;models/characters/45.palettes.png,pass,converted,model.obj.45
 OBJ/45.WEP,6652,equipment model,,,,pending,unconverted,converts under #204
 OBJ/46.WEP,6932,equipment model,,,,pending,unconverted,converts under #204
-OBJ/47.SHP,24160,actor shape,,,,pending,unconverted,converts under #203
+OBJ/47.SHP,24160,actor shape,Content::DecodeShp,shp-gltf,models/characters/47.gltf;models/characters/47.bin;models/characters/47.png;models/characters/47.image.json;models/characters/47.palettes.png,pass,converted,model.obj.47
 OBJ/47.WEP,5516,equipment model,,,,pending,unconverted,converts under #204
 OBJ/47SP00.SEQ,4637,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/47SP01.SEQ,1552,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/47SP02.SEQ,1618,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/47_BTA.SEQ,8285,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/48.SHP,16052,actor shape,,,,pending,unconverted,converts under #203
+OBJ/48.SHP,16052,actor shape,Content::DecodeShp,shp-gltf,models/characters/48.gltf;models/characters/48.bin;models/characters/48.png;models/characters/48.image.json;models/characters/48.palettes.png,pass,converted,model.obj.48
 OBJ/48.WEP,6116,equipment model,,,,pending,unconverted,converts under #204
 OBJ/48SP00.SEQ,4637,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/48SP01.SEQ,1552,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/48SP02.SEQ,1618,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/48_BTA.SEQ,8285,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/49.SHP,31480,actor shape,,,,pending,unconverted,converts under #203
+OBJ/49.SHP,31480,actor shape,Content::DecodeShp,shp-gltf,models/characters/49.gltf;models/characters/49.bin;models/characters/49.png;models/characters/49.image.json;models/characters/49.palettes.png,pass,converted,model.obj.49
 OBJ/49.WEP,6016,equipment model,,,,pending,unconverted,converts under #204
 OBJ/49SP00.SEQ,1929,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/49SP01.SEQ,1057,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/49_BTA.SEQ,20108,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/4A.SHP,31480,actor shape,,,,pending,unconverted,converts under #203
+OBJ/4A.SHP,31480,actor shape,Content::DecodeShp,shp-gltf,models/characters/4A.gltf;models/characters/4A.bin;models/characters/4A.png;models/characters/4A.image.json;models/characters/4A.palettes.png,pass,converted,model.obj.4a
 OBJ/4A.WEP,6456,equipment model,,,,pending,unconverted,converts under #204
 OBJ/4ASP00.SEQ,1929,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/4ASP01.SEQ,1057,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/4A_BTA.SEQ,20108,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/4B.SHP,31568,actor shape,,,,pending,unconverted,converts under #203
+OBJ/4B.SHP,31568,actor shape,Content::DecodeShp,shp-gltf,models/characters/4B.gltf;models/characters/4B.bin;models/characters/4B.png;models/characters/4B.image.json;models/characters/4B.palettes.png,pass,converted,model.obj.4b
 OBJ/4B.WEP,6456,equipment model,,,,pending,unconverted,converts under #204
 OBJ/4B_BT1.SEQ,15031,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/4B_BT2.SEQ,15417,skeletal animation,,,,pending,unconverted,converts under #205
@@ -4189,7 +4189,7 @@ OBJ/4B_BT5.SEQ,21664,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/4B_BT7.SEQ,21664,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/4B_BT9.SEQ,14298,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/4B_BTA.SEQ,16984,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/4C.SHP,50152,actor shape,,,,pending,unconverted,converts under #203
+OBJ/4C.SHP,50152,actor shape,Content::DecodeShp,shp-gltf,models/characters/4C.gltf;models/characters/4C.bin;models/characters/4C.png;models/characters/4C.image.json;models/characters/4C.palettes.png,pass,converted,model.obj.4c
 OBJ/4C.WEP,6392,equipment model,,,,pending,unconverted,converts under #204
 OBJ/4CSP00.SEQ,6435,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/4CSP01.SEQ,6494,skeletal animation,,,,pending,unconverted,converts under #205
@@ -4201,27 +4201,27 @@ OBJ/4C_BT6.SEQ,23011,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/4C_BTA.SEQ,21316,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/4C_COM.SEQ,525,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/4D.WEP,6392,equipment model,,,,pending,unconverted,converts under #204
-OBJ/4E.SHP,49008,actor shape,,,,pending,unconverted,converts under #203
+OBJ/4E.SHP,49008,actor shape,Content::DecodeShp,shp-gltf,models/characters/4E.gltf;models/characters/4E.bin;models/characters/4E.png;models/characters/4E.image.json;models/characters/4E.palettes.png,pass,converted,model.obj.4e
 OBJ/4E.WEP,6392,equipment model,,,,pending,unconverted,converts under #204
 OBJ/4ESP00.SEQ,3235,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/4E_BT2.SEQ,22628,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/4E_BT3.SEQ,22628,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/4F.SHP,90620,actor shape,,,,pending,unconverted,converts under #203
+OBJ/4F.SHP,90620,actor shape,Content::DecodeShp,shp-gltf,models/characters/4F.gltf;models/characters/4F.bin;models/characters/4F.png;models/characters/4F.image.json;models/characters/4F.palettes.png,pass,converted,"model.obj.4f; dependency of model.obj.50, model.obj.af, model.obj.b0"
 OBJ/4F.WEP,6016,equipment model,,,,pending,unconverted,converts under #204
 OBJ/4FSP00.SEQ,18084,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/4F_BTA.SEQ,16395,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/50.SHP,8356,actor shape,,,,pending,unconverted,converts under #203
+OBJ/50.SHP,8356,actor shape,Content::DecodeShp,shp-gltf,models/characters/50.gltf;models/characters/50.bin,pass,converted,model.obj.50
 OBJ/50.WEP,6348,equipment model,,,,pending,unconverted,converts under #204
 OBJ/50SP00.SEQ,18084,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/50_BTA.SEQ,16395,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/51.SHP,31444,actor shape,,,,pending,unconverted,converts under #203
+OBJ/51.SHP,31444,actor shape,Content::DecodeShp,shp-gltf,models/characters/51.gltf;models/characters/51.bin;models/characters/51.png;models/characters/51.image.json;models/characters/51.palettes.png,pass,converted,model.obj.51
 OBJ/51.WEP,6448,equipment model,,,,pending,unconverted,converts under #204
 OBJ/51_BT6.SEQ,18616,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/52.SHP,31556,actor shape,,,,pending,unconverted,converts under #203
+OBJ/52.SHP,31556,actor shape,Content::DecodeShp,shp-gltf,models/characters/52.gltf;models/characters/52.bin;models/characters/52.png;models/characters/52.image.json;models/characters/52.palettes.png,pass,converted,model.obj.52
 OBJ/52.WEP,6048,equipment model,,,,pending,unconverted,converts under #204
 OBJ/52_BT6.SEQ,20260,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/53.WEP,4104,equipment model,,,,pending,unconverted,converts under #204
-OBJ/54.SHP,31876,actor shape,,,,pending,unconverted,converts under #203
+OBJ/54.SHP,31876,actor shape,Content::DecodeShp,shp-gltf,models/characters/54.gltf;models/characters/54.bin;models/characters/54.png;models/characters/54.image.json;models/characters/54.palettes.png,pass,converted,model.obj.54
 OBJ/54.WEP,3540,equipment model,,,,pending,unconverted,converts under #204
 OBJ/54_BT1.SEQ,17351,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/54_BT2.SEQ,17351,skeletal animation,,,,pending,unconverted,converts under #205
@@ -4236,28 +4236,28 @@ OBJ/54_BTA.SEQ,16939,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/55.WEP,3516,equipment model,,,,pending,unconverted,converts under #204
 OBJ/56.WEP,3596,equipment model,,,,pending,unconverted,converts under #204
 OBJ/57.WEP,6432,equipment model,,,,pending,unconverted,converts under #204
-OBJ/58.SHP,42224,actor shape,,,,pending,unconverted,converts under #203
+OBJ/58.SHP,42224,actor shape,Content::DecodeShp,shp-gltf,models/characters/58.gltf;models/characters/58.bin;models/characters/58.png;models/characters/58.image.json;models/characters/58.palettes.png,pass,converted,model.obj.58
 OBJ/58.WEP,6128,equipment model,,,,pending,unconverted,converts under #204
 OBJ/58_BT6.SEQ,26545,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/59.SHP,50652,actor shape,,,,pending,unconverted,converts under #203
+OBJ/59.SHP,50652,actor shape,Content::DecodeShp,shp-gltf,models/characters/59.gltf;models/characters/59.bin;models/characters/59.png;models/characters/59.image.json;models/characters/59.palettes.png,pass,converted,model.obj.59
 OBJ/59.WEP,6028,equipment model,,,,pending,unconverted,converts under #204
 OBJ/59_BT6.SEQ,26545,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/5A.SHP,45892,actor shape,,,,pending,unconverted,converts under #203
+OBJ/5A.SHP,45892,actor shape,Content::DecodeShp,shp-gltf,models/characters/5A.gltf;models/characters/5A.bin;models/characters/5A.png;models/characters/5A.image.json;models/characters/5A.palettes.png,pass,converted,model.obj.5a
 OBJ/5A.WEP,5988,equipment model,,,,pending,unconverted,converts under #204
 OBJ/5A_BTA.SEQ,12288,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/5B.SHP,47592,actor shape,,,,pending,unconverted,converts under #203
+OBJ/5B.SHP,47592,actor shape,Content::DecodeShp,shp-gltf,models/characters/5B.gltf;models/characters/5B.bin;models/characters/5B.png;models/characters/5B.image.json;models/characters/5B.palettes.png,pass,converted,model.obj.5b
 OBJ/5B.WEP,5988,equipment model,,,,pending,unconverted,converts under #204
 OBJ/5B_BTA.SEQ,16625,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/5C.SHP,44180,actor shape,,,,pending,unconverted,converts under #203
+OBJ/5C.SHP,44180,actor shape,Content::DecodeShp,shp-gltf,models/characters/5C.gltf;models/characters/5C.bin;models/characters/5C.png;models/characters/5C.image.json;models/characters/5C.palettes.png,pass,converted,model.obj.5c
 OBJ/5C.WEP,5988,equipment model,,,,pending,unconverted,converts under #204
 OBJ/5C_BTA.SEQ,11981,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/5D.SHP,44624,actor shape,,,,pending,unconverted,converts under #203
+OBJ/5D.SHP,44624,actor shape,Content::DecodeShp,shp-gltf,models/characters/5D.gltf;models/characters/5D.bin;models/characters/5D.png;models/characters/5D.image.json;models/characters/5D.palettes.png,pass,converted,model.obj.5d
 OBJ/5D.WEP,5988,equipment model,,,,pending,unconverted,converts under #204
 OBJ/5D_BTA.SEQ,14355,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/5E.SHP,46360,actor shape,,,,pending,unconverted,converts under #203
+OBJ/5E.SHP,46360,actor shape,Content::DecodeShp,shp-gltf,models/characters/5E.gltf;models/characters/5E.bin;models/characters/5E.png;models/characters/5E.image.json;models/characters/5E.palettes.png,pass,converted,model.obj.5e
 OBJ/5E.WEP,5988,equipment model,,,,pending,unconverted,converts under #204
 OBJ/5E_BTA.SEQ,14826,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/5F.SHP,49244,actor shape,,,,pending,unconverted,converts under #203
+OBJ/5F.SHP,49244,actor shape,Content::DecodeShp,shp-gltf,models/characters/5F.gltf;models/characters/5F.bin;models/characters/5F.png;models/characters/5F.image.json;models/characters/5F.palettes.png,pass,converted,model.obj.5f
 OBJ/5F.WEP,5988,equipment model,,,,pending,unconverted,converts under #204
 OBJ/5F_BT2.SEQ,22689,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/5F_BT3.SEQ,22689,skeletal animation,,,,pending,unconverted,converts under #205
@@ -4265,7 +4265,7 @@ OBJ/5F_BT4.SEQ,22689,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/5F_BT5.SEQ,22689,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/5F_BT7.SEQ,22689,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/5F_BTA.SEQ,22689,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/60.SHP,55668,actor shape,,,,pending,unconverted,converts under #203
+OBJ/60.SHP,55668,actor shape,Content::DecodeShp,shp-gltf,models/characters/60.gltf;models/characters/60.bin;models/characters/60.png;models/characters/60.image.json;models/characters/60.palettes.png,pass,converted,model.obj.60
 OBJ/60.WEP,3336,equipment model,,,,pending,unconverted,converts under #204
 OBJ/60_BT2.SEQ,23927,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/60_BT3.SEQ,23927,skeletal animation,,,,pending,unconverted,converts under #205
@@ -4273,103 +4273,103 @@ OBJ/60_BT4.SEQ,23927,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/60_BT5.SEQ,23927,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/60_BT7.SEQ,23927,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/60_BTA.SEQ,22515,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/61.SHP,55164,actor shape,,,,pending,unconverted,converts under #203
+OBJ/61.SHP,55164,actor shape,Content::DecodeShp,shp-gltf,models/characters/61.gltf;models/characters/61.bin;models/characters/61.png;models/characters/61.image.json;models/characters/61.palettes.png,pass,converted,model.obj.61
 OBJ/61.WEP,3336,equipment model,,,,pending,unconverted,converts under #204
 OBJ/61SP00.SEQ,5393,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/61_BT5.SEQ,19689,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/61_BT7.SEQ,19689,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/61_BTA.SEQ,17173,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/62.SHP,51880,actor shape,,,,pending,unconverted,converts under #203
+OBJ/62.SHP,51880,actor shape,Content::DecodeShp,shp-gltf,models/characters/62.gltf;models/characters/62.bin;models/characters/62.png;models/characters/62.image.json;models/characters/62.palettes.png,pass,converted,model.obj.62
 OBJ/62.WEP,3336,equipment model,,,,pending,unconverted,converts under #204
 OBJ/62_BT3.SEQ,23452,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/62_BT4.SEQ,23452,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/62_BT5.SEQ,23452,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/62_BT7.SEQ,23452,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/62_BTA.SEQ,22218,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/63.SHP,52240,actor shape,,,,pending,unconverted,converts under #203
+OBJ/63.SHP,52240,actor shape,Content::DecodeShp,shp-gltf,models/characters/63.gltf;models/characters/63.bin;models/characters/63.png;models/characters/63.image.json;models/characters/63.palettes.png,pass,converted,model.obj.63
 OBJ/63.WEP,3360,equipment model,,,,pending,unconverted,converts under #204
 OBJ/63_BT3.SEQ,20981,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/63_BT4.SEQ,20981,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/63_BT5.SEQ,20981,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/63_BT7.SEQ,20981,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/63_BTA.SEQ,19611,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/64.SHP,56812,actor shape,,,,pending,unconverted,converts under #203
+OBJ/64.SHP,56812,actor shape,Content::DecodeShp,shp-gltf,models/characters/64.gltf;models/characters/64.bin;models/characters/64.png;models/characters/64.image.json;models/characters/64.palettes.png,pass,converted,model.obj.64
 OBJ/64.WEP,3372,equipment model,,,,pending,unconverted,converts under #204
 OBJ/64SP00.SEQ,1609,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/64_BTA.SEQ,24074,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/65.SHP,62984,actor shape,,,,pending,unconverted,converts under #203
+OBJ/65.SHP,62984,actor shape,Content::DecodeShp,shp-gltf,models/characters/65.gltf;models/characters/65.bin;models/characters/65.png;models/characters/65.image.json;models/characters/65.palettes.png,pass,converted,model.obj.65
 OBJ/65.WEP,3460,equipment model,,,,pending,unconverted,converts under #204
 OBJ/65SP00.SEQ,1609,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/65_BTA.SEQ,24074,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/66.SHP,60760,actor shape,,,,pending,unconverted,converts under #203
+OBJ/66.SHP,60760,actor shape,Content::DecodeShp,shp-gltf,models/characters/66.gltf;models/characters/66.bin;models/characters/66.png;models/characters/66.image.json;models/characters/66.palettes.png,pass,converted,model.obj.66
 OBJ/66.WEP,3372,equipment model,,,,pending,unconverted,converts under #204
 OBJ/66SP00.SEQ,4076,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/66SP01.SEQ,3400,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/66SP02.SEQ,4043,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/66SP03.SEQ,3372,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/66_BTA.SEQ,32112,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/67.SHP,59964,actor shape,,,,pending,unconverted,converts under #203
+OBJ/67.SHP,59964,actor shape,Content::DecodeShp,shp-gltf,models/characters/67.gltf;models/characters/67.bin;models/characters/67.png;models/characters/67.image.json;models/characters/67.palettes.png,pass,converted,model.obj.67
 OBJ/67.WEP,3372,equipment model,,,,pending,unconverted,converts under #204
 OBJ/67SP00.SEQ,4076,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/67SP01.SEQ,3400,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/67SP02.SEQ,4043,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/67SP03.SEQ,3372,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/67_BTA.SEQ,24617,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/68.SHP,95424,actor shape,,,,pending,unconverted,converts under #203
+OBJ/68.SHP,95424,actor shape,Content::DecodeShp,shp-gltf,models/characters/68.gltf;models/characters/68.bin;models/characters/68.png;models/characters/68.image.json;models/characters/68.palettes.png,pass,converted,model.obj.68
 OBJ/68.WEP,3288,equipment model,,,,pending,unconverted,converts under #204
 OBJ/68SP00.SEQ,4603,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/68SP01.SEQ,2529,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/68_BTA.SEQ,21242,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/69.SHP,95424,actor shape,,,,pending,unconverted,converts under #203
+OBJ/69.SHP,95424,actor shape,Content::DecodeShp,shp-gltf,models/characters/69.gltf;models/characters/69.bin;models/characters/69.png;models/characters/69.image.json;models/characters/69.palettes.png,pass,converted,model.obj.69
 OBJ/69.WEP,3292,equipment model,,,,pending,unconverted,converts under #204
 OBJ/69SP00.SEQ,4603,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/69SP01.SEQ,2529,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/69_BTA.SEQ,21242,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/6A.SHP,41000,actor shape,,,,pending,unconverted,converts under #203
+OBJ/6A.SHP,41000,actor shape,Content::DecodeShp,shp-gltf,models/characters/6A.gltf;models/characters/6A.bin;models/characters/6A.png;models/characters/6A.image.json;models/characters/6A.palettes.png,pass,converted,model.obj.6a
 OBJ/6A.WEP,3496,equipment model,,,,pending,unconverted,converts under #204
 OBJ/6ASP00.SEQ,9533,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/6A_BTA.SEQ,35304,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/6B.SHP,41000,actor shape,,,,pending,unconverted,converts under #203
+OBJ/6B.SHP,41000,actor shape,Content::DecodeShp,shp-gltf,models/characters/6B.gltf;models/characters/6B.bin;models/characters/6B.png;models/characters/6B.image.json;models/characters/6B.palettes.png,pass,converted,model.obj.6b
 OBJ/6B.WEP,3468,equipment model,,,,pending,unconverted,converts under #204
 OBJ/6BSP00.SEQ,9533,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/6B_BTA.SEQ,35304,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/6C.SHP,31128,actor shape,,,,pending,unconverted,converts under #203
+OBJ/6C.SHP,31128,actor shape,Content::DecodeShp,shp-gltf,models/characters/6C.gltf;models/characters/6C.bin;models/characters/6C.png;models/characters/6C.image.json;models/characters/6C.palettes.png,pass,converted,model.obj.6c
 OBJ/6C.WEP,3292,equipment model,,,,pending,unconverted,converts under #204
 OBJ/6C_BT1.SEQ,21443,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/6C_BT2.SEQ,21659,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/6C_BT4.SEQ,21659,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/6C_BTA.SEQ,20971,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/6D.SHP,14060,actor shape,,,,pending,unconverted,converts under #203
+OBJ/6D.SHP,14060,actor shape,Content::DecodeShp,shp-gltf,models/characters/6D.gltf;models/characters/6D.bin,pass,converted,model.obj.6d
 OBJ/6D.WEP,3404,equipment model,,,,pending,unconverted,converts under #204
 OBJ/6D_BT2.SEQ,22248,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/6D_BTA.SEQ,23707,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/6E.SHP,20148,actor shape,,,,pending,unconverted,converts under #203
+OBJ/6E.SHP,20148,actor shape,Content::DecodeShp,shp-gltf,models/characters/6E.gltf;models/characters/6E.bin;models/characters/6E.png;models/characters/6E.image.json;models/characters/6E.palettes.png,pass,converted,model.obj.6e
 OBJ/6E.WEP,3288,equipment model,,,,pending,unconverted,converts under #204
-OBJ/6F.SHP,32412,actor shape,,,,pending,unconverted,converts under #203
+OBJ/6F.SHP,32412,actor shape,Content::DecodeShp,shp-gltf,models/characters/6F.gltf;models/characters/6F.bin;models/characters/6F.png;models/characters/6F.image.json;models/characters/6F.palettes.png,pass,converted,model.obj.6f
 OBJ/6F.WEP,3288,equipment model,,,,pending,unconverted,converts under #204
 OBJ/6F_BT2.SEQ,22248,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/6F_BTA.SEQ,23707,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/70.SHP,29616,actor shape,,,,pending,unconverted,converts under #203
+OBJ/70.SHP,29616,actor shape,Content::DecodeShp,shp-gltf,models/characters/70.gltf;models/characters/70.bin;models/characters/70.png;models/characters/70.image.json;models/characters/70.palettes.png,pass,converted,model.obj.70
 OBJ/70.WEP,3624,equipment model,,,,pending,unconverted,converts under #204
-OBJ/71.SHP,30020,actor shape,,,,pending,unconverted,converts under #203
+OBJ/71.SHP,30020,actor shape,Content::DecodeShp,shp-gltf,models/characters/71.gltf;models/characters/71.bin;models/characters/71.png;models/characters/71.image.json;models/characters/71.palettes.png,pass,converted,model.obj.71
 OBJ/71.WEP,3624,equipment model,,,,pending,unconverted,converts under #204
-OBJ/72.SHP,30140,actor shape,,,,pending,unconverted,converts under #203
+OBJ/72.SHP,30140,actor shape,Content::DecodeShp,shp-gltf,models/characters/72.gltf;models/characters/72.bin;models/characters/72.png;models/characters/72.image.json;models/characters/72.palettes.png,pass,converted,model.obj.72
 OBJ/72.WEP,3624,equipment model,,,,pending,unconverted,converts under #204
-OBJ/73.SHP,30164,actor shape,,,,pending,unconverted,converts under #203
+OBJ/73.SHP,30164,actor shape,Content::DecodeShp,shp-gltf,models/characters/73.gltf;models/characters/73.bin;models/characters/73.png;models/characters/73.image.json;models/characters/73.palettes.png,pass,converted,model.obj.73
 OBJ/73.WEP,3624,equipment model,,,,pending,unconverted,converts under #204
-OBJ/74.SHP,30024,actor shape,,,,pending,unconverted,converts under #203
+OBJ/74.SHP,30024,actor shape,Content::DecodeShp,shp-gltf,models/characters/74.gltf;models/characters/74.bin;models/characters/74.png;models/characters/74.image.json;models/characters/74.palettes.png,pass,converted,model.obj.74
 OBJ/74.WEP,3624,equipment model,,,,pending,unconverted,converts under #204
-OBJ/75.SHP,30692,actor shape,,,,pending,unconverted,converts under #203
+OBJ/75.SHP,30692,actor shape,Content::DecodeShp,shp-gltf,models/characters/75.gltf;models/characters/75.bin;models/characters/75.png;models/characters/75.image.json;models/characters/75.palettes.png,pass,converted,model.obj.75
 OBJ/75.WEP,3624,equipment model,,,,pending,unconverted,converts under #204
-OBJ/76.SHP,31748,actor shape,,,,pending,unconverted,converts under #203
+OBJ/76.SHP,31748,actor shape,Content::DecodeShp,shp-gltf,models/characters/76.gltf;models/characters/76.bin;models/characters/76.png;models/characters/76.image.json;models/characters/76.palettes.png,pass,converted,model.obj.76
 OBJ/76.WEP,3624,equipment model,,,,pending,unconverted,converts under #204
-OBJ/77.SHP,30888,actor shape,,,,pending,unconverted,converts under #203
+OBJ/77.SHP,30888,actor shape,Content::DecodeShp,shp-gltf,models/characters/77.gltf;models/characters/77.bin;models/characters/77.png;models/characters/77.image.json;models/characters/77.palettes.png,pass,converted,model.obj.77
 OBJ/77.WEP,3624,equipment model,,,,pending,unconverted,converts under #204
 OBJ/77_BT1.SEQ,21443,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/77_BT2.SEQ,21659,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/77_BT4.SEQ,21659,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/77_BTA.SEQ,20971,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/78.SHP,32728,actor shape,,,,pending,unconverted,converts under #203
+OBJ/78.SHP,32728,actor shape,Content::DecodeShp,shp-gltf,models/characters/78.gltf;models/characters/78.bin;models/characters/78.png;models/characters/78.image.json;models/characters/78.palettes.png,pass,converted,model.obj.78
 OBJ/78.WEP,3624,equipment model,,,,pending,unconverted,converts under #204
 OBJ/78_BT1.SEQ,29080,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/78_BT2.SEQ,29113,skeletal animation,,,,pending,unconverted,converts under #205
@@ -4382,22 +4382,22 @@ OBJ/78_BT8.SEQ,29097,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/78_BT9.SEQ,30130,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/78_BTA.SEQ,28496,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/78_COM.SEQ,35954,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/79.SHP,29240,actor shape,,,,pending,unconverted,converts under #203
+OBJ/79.SHP,29240,actor shape,Content::DecodeShp,shp-gltf,models/characters/79.gltf;models/characters/79.bin;models/characters/79.png;models/characters/79.image.json;models/characters/79.palettes.png,pass,converted,model.obj.79
 OBJ/79.WEP,3624,equipment model,,,,pending,unconverted,converts under #204
-OBJ/7A.SHP,48124,actor shape,,,,pending,unconverted,converts under #203
+OBJ/7A.SHP,48124,actor shape,Content::DecodeShp,shp-gltf,models/characters/7A.gltf;models/characters/7A.bin;models/characters/7A.png;models/characters/7A.image.json;models/characters/7A.palettes.png,pass,converted,model.obj.7a
 OBJ/7A.WEP,3624,equipment model,,,,pending,unconverted,converts under #204
-OBJ/7B.SHP,49184,actor shape,,,,pending,unconverted,converts under #203
+OBJ/7B.SHP,49184,actor shape,Content::DecodeShp,shp-gltf,models/characters/7B.gltf;models/characters/7B.bin;models/characters/7B.png;models/characters/7B.image.json;models/characters/7B.palettes.png,pass,converted,model.obj.7b
 OBJ/7B.WEP,3624,equipment model,,,,pending,unconverted,converts under #204
-OBJ/7C.SHP,40196,actor shape,,,,pending,unconverted,converts under #203
+OBJ/7C.SHP,40196,actor shape,Content::DecodeShp,shp-gltf,models/characters/7C.gltf;models/characters/7C.bin;models/characters/7C.png;models/characters/7C.image.json;models/characters/7C.palettes.png,pass,converted,model.obj.7c; dependency of model.obj.7d
 OBJ/7C.WEP,3624,equipment model,,,,pending,unconverted,converts under #204
-OBJ/7D.SHP,15740,actor shape,,,,pending,unconverted,converts under #203
+OBJ/7D.SHP,15740,actor shape,Content::DecodeShp,shp-gltf,models/characters/7D.gltf;models/characters/7D.bin,pass,converted,model.obj.7d
 OBJ/7D.WEP,3624,equipment model,,,,pending,unconverted,converts under #204
-OBJ/7E.SHP,30108,actor shape,,,,pending,unconverted,converts under #203
+OBJ/7E.SHP,30108,actor shape,Content::DecodeShp,shp-gltf,models/characters/7E.gltf;models/characters/7E.bin;models/characters/7E.png;models/characters/7E.image.json;models/characters/7E.palettes.png,pass,converted,model.obj.7e
 OBJ/7E.WEP,3624,equipment model,,,,pending,unconverted,converts under #204
 OBJ/7ESP00.SEQ,3867,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/7E_BTA.SEQ,25252,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/7F.WEP,3624,equipment model,,,,pending,unconverted,converts under #204
-OBJ/80.SHP,31876,actor shape,,,,pending,unconverted,converts under #203
+OBJ/80.SHP,31876,actor shape,Content::DecodeShp,shp-gltf,models/characters/80.gltf;models/characters/80.bin;models/characters/80.png;models/characters/80.image.json;models/characters/80.palettes.png,pass,converted,model.obj.80
 OBJ/80_BT1.SEQ,17351,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/80_BT2.SEQ,17351,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/80_BT3.SEQ,18372,skeletal animation,,,,pending,unconverted,converts under #205
@@ -4408,11 +4408,11 @@ OBJ/80_BT7.SEQ,18372,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/80_BT8.SEQ,18236,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/80_BT9.SEQ,17036,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/80_BTA.SEQ,16939,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/81.SHP,30632,actor shape,,,,pending,unconverted,converts under #203
+OBJ/81.SHP,30632,actor shape,Content::DecodeShp,shp-gltf,models/characters/81.gltf;models/characters/81.bin;models/characters/81.png;models/characters/81.image.json;models/characters/81.palettes.png,pass,converted,model.obj.81
 OBJ/81_BT2.SEQ,20816,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/81_BT4.SEQ,20816,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/81_BTA.SEQ,20816,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/82.SHP,30936,actor shape,,,,pending,unconverted,converts under #203
+OBJ/82.SHP,30936,actor shape,Content::DecodeShp,shp-gltf,models/characters/82.gltf;models/characters/82.bin;models/characters/82.png;models/characters/82.image.json;models/characters/82.palettes.png,pass,converted,model.obj.82
 OBJ/82SP00.SEQ,4254,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/82SP01.SEQ,5910,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/82SP02.SEQ,4343,skeletal animation,,,,pending,unconverted,converts under #205
@@ -4422,10 +4422,10 @@ OBJ/82_BT7.SEQ,16582,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/82_BT9.SEQ,16359,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/82_BTA.SEQ,17953,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/82_COM.SEQ,552,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/83.SHP,32448,actor shape,,,,pending,unconverted,converts under #203
+OBJ/83.SHP,32448,actor shape,Content::DecodeShp,shp-gltf,models/characters/83.gltf;models/characters/83.bin;models/characters/83.png;models/characters/83.image.json;models/characters/83.palettes.png,pass,converted,model.obj.83; dependency of model.obj.6d
 OBJ/83_BT2.SEQ,22248,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/83_BTA.SEQ,23707,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/84.SHP,12392,actor shape,,,,pending,unconverted,converts under #203
+OBJ/84.SHP,12392,actor shape,Content::DecodeShp,shp-gltf,models/characters/84.gltf;models/characters/84.bin;models/characters/84.png;models/characters/84.image.json;models/characters/84.palettes.png,pass,converted,model.obj.84
 OBJ/84_BT1.SEQ,6924,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/84_BT2.SEQ,6993,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/84_BT3.SEQ,5807,skeletal animation,,,,pending,unconverted,converts under #205
@@ -4437,44 +4437,44 @@ OBJ/84_BT8.SEQ,6394,skeletal animation,,,,pending,unconverted,converts under #20
 OBJ/84_BT9.SEQ,6684,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/84_BTA.SEQ,6634,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/84_COM.SEQ,8665,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/85.SHP,30464,actor shape,,,,pending,unconverted,converts under #203
+OBJ/85.SHP,30464,actor shape,Content::DecodeShp,shp-gltf,models/characters/85.gltf;models/characters/85.bin;models/characters/85.png;models/characters/85.image.json;models/characters/85.palettes.png,pass,converted,model.obj.85
 OBJ/85_BT2.SEQ,20816,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/85_BT4.SEQ,20816,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/85_BTA.SEQ,20816,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/86.SHP,30632,actor shape,,,,pending,unconverted,converts under #203
+OBJ/86.SHP,30632,actor shape,Content::DecodeShp,shp-gltf,models/characters/86.gltf;models/characters/86.bin;models/characters/86.png;models/characters/86.image.json;models/characters/86.palettes.png,pass,converted,model.obj.86
 OBJ/86_BT2.SEQ,20816,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/86_BT4.SEQ,20816,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/86_BTA.SEQ,20816,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/87.SHP,30696,actor shape,,,,pending,unconverted,converts under #203
+OBJ/87.SHP,30696,actor shape,Content::DecodeShp,shp-gltf,models/characters/87.gltf;models/characters/87.bin;models/characters/87.png;models/characters/87.image.json;models/characters/87.palettes.png,pass,converted,model.obj.87
 OBJ/87_BT2.SEQ,20816,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/87_BT4.SEQ,20816,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/87_BTA.SEQ,20816,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/88.SHP,30464,actor shape,,,,pending,unconverted,converts under #203
+OBJ/88.SHP,30464,actor shape,Content::DecodeShp,shp-gltf,models/characters/88.gltf;models/characters/88.bin;models/characters/88.png;models/characters/88.image.json;models/characters/88.palettes.png,pass,converted,model.obj.88
 OBJ/88_BT2.SEQ,20816,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/88_BT4.SEQ,20816,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/88_BTA.SEQ,20816,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/89.SHP,30464,actor shape,,,,pending,unconverted,converts under #203
+OBJ/89.SHP,30464,actor shape,Content::DecodeShp,shp-gltf,models/characters/89.gltf;models/characters/89.bin;models/characters/89.png;models/characters/89.image.json;models/characters/89.palettes.png,pass,converted,model.obj.89
 OBJ/89_BT2.SEQ,20816,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/89_BT4.SEQ,20816,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/89_BTA.SEQ,20816,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/8A.SHP,30632,actor shape,,,,pending,unconverted,converts under #203
+OBJ/8A.SHP,30632,actor shape,Content::DecodeShp,shp-gltf,models/characters/8A.gltf;models/characters/8A.bin;models/characters/8A.png;models/characters/8A.image.json;models/characters/8A.palettes.png,pass,converted,model.obj.8a
 OBJ/8A_BT2.SEQ,20816,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/8A_BT4.SEQ,20816,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/8A_BTA.SEQ,20816,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/8B.SHP,11456,actor shape,,,,pending,unconverted,converts under #203
-OBJ/8C.SHP,10956,actor shape,,,,pending,unconverted,converts under #203
-OBJ/8D.SHP,7216,actor shape,,,,pending,unconverted,converts under #203
-OBJ/8E.SHP,11556,actor shape,,,,pending,unconverted,converts under #203
-OBJ/8F.SHP,11564,actor shape,,,,pending,unconverted,converts under #203
-OBJ/90.SHP,31408,actor shape,,,,pending,unconverted,converts under #203
+OBJ/8B.SHP,11456,actor shape,Content::DecodeShp,shp-gltf,models/characters/8B.gltf;models/characters/8B.bin;models/characters/8B.png;models/characters/8B.image.json;models/characters/8B.palettes.png,pass,converted,model.obj.8b
+OBJ/8C.SHP,10956,actor shape,Content::DecodeShp,shp-gltf,models/characters/8C.gltf;models/characters/8C.bin;models/characters/8C.png;models/characters/8C.image.json;models/characters/8C.palettes.png,pass,converted,model.obj.8c
+OBJ/8D.SHP,7216,actor shape,Content::DecodeShp,shp-gltf,models/characters/8D.gltf;models/characters/8D.bin;models/characters/8D.png;models/characters/8D.image.json;models/characters/8D.palettes.png,pass,converted,model.obj.8d
+OBJ/8E.SHP,11556,actor shape,Content::DecodeShp,shp-gltf,models/characters/8E.gltf;models/characters/8E.bin;models/characters/8E.png;models/characters/8E.image.json;models/characters/8E.palettes.png,pass,converted,model.obj.8e
+OBJ/8F.SHP,11564,actor shape,Content::DecodeShp,shp-gltf,models/characters/8F.gltf;models/characters/8F.bin;models/characters/8F.png;models/characters/8F.image.json;models/characters/8F.palettes.png,pass,converted,model.obj.8f
+OBJ/90.SHP,31408,actor shape,Content::DecodeShp,shp-gltf,models/characters/90.gltf;models/characters/90.bin;models/characters/90.png;models/characters/90.image.json;models/characters/90.palettes.png,pass,converted,"model.obj.90; dependency of model.obj.91, model.obj.ab"
 OBJ/90_BT2.SEQ,20816,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/90_BT4.SEQ,20816,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/90_BTA.SEQ,20816,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/91.SHP,14480,actor shape,,,,pending,unconverted,converts under #203
+OBJ/91.SHP,14480,actor shape,Content::DecodeShp,shp-gltf,models/characters/91.gltf;models/characters/91.bin,pass,converted,model.obj.91
 OBJ/91_BT2.SEQ,20816,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/91_BT4.SEQ,20816,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/91_BTA.SEQ,20816,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/92.SHP,31648,actor shape,,,,pending,unconverted,converts under #203
+OBJ/92.SHP,31648,actor shape,Content::DecodeShp,shp-gltf,models/characters/92.gltf;models/characters/92.bin;models/characters/92.png;models/characters/92.image.json;models/characters/92.palettes.png,pass,converted,model.obj.92
 OBJ/92_BT1.SEQ,17351,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/92_BT2.SEQ,17351,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/92_BT3.SEQ,18372,skeletal animation,,,,pending,unconverted,converts under #205
@@ -4485,7 +4485,7 @@ OBJ/92_BT7.SEQ,18372,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/92_BT8.SEQ,18236,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/92_BT9.SEQ,17036,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/92_BTA.SEQ,16939,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/93.SHP,31096,actor shape,,,,pending,unconverted,converts under #203
+OBJ/93.SHP,31096,actor shape,Content::DecodeShp,shp-gltf,models/characters/93.gltf;models/characters/93.bin;models/characters/93.png;models/characters/93.image.json;models/characters/93.palettes.png,pass,converted,model.obj.93
 OBJ/93_BT1.SEQ,17351,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/93_BT2.SEQ,17351,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/93_BT3.SEQ,18372,skeletal animation,,,,pending,unconverted,converts under #205
@@ -4496,7 +4496,7 @@ OBJ/93_BT7.SEQ,18372,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/93_BT8.SEQ,18236,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/93_BT9.SEQ,17036,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/93_BTA.SEQ,16939,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/94.SHP,31292,actor shape,,,,pending,unconverted,converts under #203
+OBJ/94.SHP,31292,actor shape,Content::DecodeShp,shp-gltf,models/characters/94.gltf;models/characters/94.bin;models/characters/94.png;models/characters/94.image.json;models/characters/94.palettes.png,pass,converted,model.obj.94
 OBJ/94_BT1.SEQ,17351,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/94_BT2.SEQ,17351,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/94_BT3.SEQ,18372,skeletal animation,,,,pending,unconverted,converts under #205
@@ -4507,7 +4507,7 @@ OBJ/94_BT7.SEQ,18372,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/94_BT8.SEQ,18236,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/94_BT9.SEQ,17036,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/94_BTA.SEQ,16939,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/95.SHP,31876,actor shape,,,,pending,unconverted,converts under #203
+OBJ/95.SHP,31876,actor shape,Content::DecodeShp,shp-gltf,models/characters/95.gltf;models/characters/95.bin;models/characters/95.png;models/characters/95.image.json;models/characters/95.palettes.png,pass,converted,model.obj.95
 OBJ/95_BT1.SEQ,17351,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/95_BT2.SEQ,17351,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/95_BT3.SEQ,18372,skeletal animation,,,,pending,unconverted,converts under #205
@@ -4518,14 +4518,14 @@ OBJ/95_BT7.SEQ,18372,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/95_BT8.SEQ,18236,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/95_BT9.SEQ,17036,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/95_BTA.SEQ,16939,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/96.SHP,31556,actor shape,,,,pending,unconverted,converts under #203
+OBJ/96.SHP,31556,actor shape,Content::DecodeShp,shp-gltf,models/characters/96.gltf;models/characters/96.bin;models/characters/96.png;models/characters/96.image.json;models/characters/96.palettes.png,pass,converted,model.obj.96
 OBJ/96_BT6.SEQ,20260,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/97.SHP,26212,actor shape,,,,pending,unconverted,converts under #203
-OBJ/98.SHP,50656,actor shape,,,,pending,unconverted,converts under #203
-OBJ/99.SHP,51684,actor shape,,,,pending,unconverted,converts under #203
-OBJ/9A.SHP,33484,actor shape,,,,pending,unconverted,converts under #203
-OBJ/9B.SHP,51616,actor shape,,,,pending,unconverted,converts under #203
-OBJ/9C.SHP,32356,actor shape,,,,pending,unconverted,converts under #203
+OBJ/97.SHP,26212,actor shape,Content::DecodeShp,shp-gltf,models/characters/97.gltf;models/characters/97.bin;models/characters/97.png;models/characters/97.image.json;models/characters/97.palettes.png,pass,converted,model.obj.97
+OBJ/98.SHP,50656,actor shape,Content::DecodeShp,shp-gltf,models/characters/98.gltf;models/characters/98.bin;models/characters/98.png;models/characters/98.image.json;models/characters/98.palettes.png,pass,converted,model.obj.98
+OBJ/99.SHP,51684,actor shape,Content::DecodeShp,shp-gltf,models/characters/99.gltf;models/characters/99.bin;models/characters/99.png;models/characters/99.image.json;models/characters/99.palettes.png,pass,converted,model.obj.99
+OBJ/9A.SHP,33484,actor shape,Content::DecodeShp,shp-gltf,models/characters/9A.gltf;models/characters/9A.bin;models/characters/9A.png;models/characters/9A.image.json;models/characters/9A.palettes.png,pass,converted,model.obj.9a
+OBJ/9B.SHP,51616,actor shape,Content::DecodeShp,shp-gltf,models/characters/9B.gltf;models/characters/9B.bin;models/characters/9B.png;models/characters/9B.image.json;models/characters/9B.palettes.png,pass,converted,model.obj.9b
+OBJ/9C.SHP,32356,actor shape,Content::DecodeShp,shp-gltf,models/characters/9C.gltf;models/characters/9C.bin;models/characters/9C.png;models/characters/9C.image.json;models/characters/9C.palettes.png,pass,converted,model.obj.9c
 OBJ/9CSP00.SEQ,7617,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/9CSP01.SEQ,5750,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/9CSP02.SEQ,13859,skeletal animation,,,,pending,unconverted,converts under #205
@@ -4536,9 +4536,9 @@ OBJ/9C_BT4.SEQ,38352,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/9C_BT9.SEQ,31530,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/9C_BTA.SEQ,31202,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/9C_COM.SEQ,16116,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/9D.SHP,32192,actor shape,,,,pending,unconverted,converts under #203
-OBJ/9E.SHP,34420,actor shape,,,,pending,unconverted,converts under #203
-OBJ/9F.SHP,30912,actor shape,,,,pending,unconverted,converts under #203
+OBJ/9D.SHP,32192,actor shape,Content::DecodeShp,shp-gltf,models/characters/9D.gltf;models/characters/9D.bin;models/characters/9D.png;models/characters/9D.image.json;models/characters/9D.palettes.png,pass,converted,model.obj.9d
+OBJ/9E.SHP,34420,actor shape,Content::DecodeShp,shp-gltf,models/characters/9E.gltf;models/characters/9E.bin;models/characters/9E.png;models/characters/9E.image.json;models/characters/9E.palettes.png,pass,converted,model.obj.9e
+OBJ/9F.SHP,30912,actor shape,Content::DecodeShp,shp-gltf,models/characters/9F.gltf;models/characters/9F.bin;models/characters/9F.png;models/characters/9F.image.json;models/characters/9F.palettes.png,pass,converted,model.obj.9f
 OBJ/9FSP00.SEQ,4254,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/9FSP01.SEQ,5910,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/9FSP02.SEQ,4343,skeletal animation,,,,pending,unconverted,converts under #205
@@ -4548,9 +4548,9 @@ OBJ/9F_BT7.SEQ,16582,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/9F_BT9.SEQ,16359,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/9F_BTA.SEQ,17953,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/9F_COM.SEQ,552,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/A0.SHP,32388,actor shape,,,,pending,unconverted,converts under #203
+OBJ/A0.SHP,32388,actor shape,Content::DecodeShp,shp-gltf,models/characters/A0.gltf;models/characters/A0.bin;models/characters/A0.png;models/characters/A0.image.json;models/characters/A0.palettes.png,pass,converted,model.obj.a0
 OBJ/A0_BT6.SEQ,18616,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/A1.SHP,31876,actor shape,,,,pending,unconverted,converts under #203
+OBJ/A1.SHP,31876,actor shape,Content::DecodeShp,shp-gltf,models/characters/A1.gltf;models/characters/A1.bin;models/characters/A1.png;models/characters/A1.image.json;models/characters/A1.palettes.png,pass,converted,model.obj.a1
 OBJ/A1_BT1.SEQ,17351,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/A1_BT2.SEQ,17351,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/A1_BT3.SEQ,18372,skeletal animation,,,,pending,unconverted,converts under #205
@@ -4561,7 +4561,7 @@ OBJ/A1_BT7.SEQ,18372,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/A1_BT8.SEQ,18236,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/A1_BT9.SEQ,17036,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/A1_BTA.SEQ,16939,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/A2.SHP,31232,actor shape,,,,pending,unconverted,converts under #203
+OBJ/A2.SHP,31232,actor shape,Content::DecodeShp,shp-gltf,models/characters/A2.gltf;models/characters/A2.bin;models/characters/A2.png;models/characters/A2.image.json;models/characters/A2.palettes.png,pass,converted,model.obj.a2
 OBJ/A2_BT1.SEQ,17351,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/A2_BT2.SEQ,17351,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/A2_BT3.SEQ,18372,skeletal animation,,,,pending,unconverted,converts under #205
@@ -4572,7 +4572,7 @@ OBJ/A2_BT7.SEQ,18372,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/A2_BT8.SEQ,18236,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/A2_BT9.SEQ,17036,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/A2_BTA.SEQ,16939,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/A3.SHP,47608,actor shape,,,,pending,unconverted,converts under #203
+OBJ/A3.SHP,47608,actor shape,Content::DecodeShp,shp-gltf,models/characters/A3.gltf;models/characters/A3.bin;models/characters/A3.png;models/characters/A3.image.json;models/characters/A3.palettes.png,pass,converted,"model.obj.a3; dependency of model.obj.a4, model.obj.a5"
 OBJ/A3_BT1.SEQ,6390,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/A3_BT2.SEQ,6390,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/A3_BT3.SEQ,6581,skeletal animation,,,,pending,unconverted,converts under #205
@@ -4583,7 +4583,7 @@ OBJ/A3_BT7.SEQ,6581,skeletal animation,,,,pending,unconverted,converts under #20
 OBJ/A3_BT8.SEQ,6555,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/A3_BT9.SEQ,5816,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/A3_BTA.SEQ,6040,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/A4.SHP,15628,actor shape,,,,pending,unconverted,converts under #203
+OBJ/A4.SHP,15628,actor shape,Content::DecodeShp,shp-gltf,models/characters/A4.gltf;models/characters/A4.bin,pass,converted,model.obj.a4
 OBJ/A4_BT1.SEQ,4171,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/A4_BT2.SEQ,4171,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/A4_BT3.SEQ,4235,skeletal animation,,,,pending,unconverted,converts under #205
@@ -4594,7 +4594,7 @@ OBJ/A4_BT7.SEQ,4235,skeletal animation,,,,pending,unconverted,converts under #20
 OBJ/A4_BT8.SEQ,4126,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/A4_BT9.SEQ,3701,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/A4_BTA.SEQ,3949,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/A5.SHP,13556,actor shape,,,,pending,unconverted,converts under #203
+OBJ/A5.SHP,13556,actor shape,Content::DecodeShp,shp-gltf,models/characters/A5.gltf;models/characters/A5.bin,pass,converted,model.obj.a5
 OBJ/A5_BT1.SEQ,4588,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/A5_BT2.SEQ,4588,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/A5_BT3.SEQ,4549,skeletal animation,,,,pending,unconverted,converts under #205
@@ -4605,7 +4605,7 @@ OBJ/A5_BT7.SEQ,4549,skeletal animation,,,,pending,unconverted,converts under #20
 OBJ/A5_BT8.SEQ,4494,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/A5_BT9.SEQ,3959,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/A5_BTA.SEQ,4282,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/A6.SHP,48304,actor shape,,,,pending,unconverted,converts under #203
+OBJ/A6.SHP,48304,actor shape,Content::DecodeShp,shp-gltf,models/characters/A6.gltf;models/characters/A6.bin;models/characters/A6.png;models/characters/A6.image.json;models/characters/A6.palettes.png,pass,converted,model.obj.a6
 OBJ/A6_BT1.SEQ,18537,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/A6_BT2.SEQ,18537,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/A6_BT3.SEQ,19577,skeletal animation,,,,pending,unconverted,converts under #205
@@ -4616,13 +4616,13 @@ OBJ/A6_BT7.SEQ,19577,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/A6_BT8.SEQ,19424,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/A6_BT9.SEQ,18250,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/A6_BTA.SEQ,18153,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/A7.SHP,32468,actor shape,,,,pending,unconverted,converts under #203
+OBJ/A7.SHP,32468,actor shape,Content::DecodeShp,shp-gltf,models/characters/A7.gltf;models/characters/A7.bin;models/characters/A7.png;models/characters/A7.image.json;models/characters/A7.palettes.png,pass,converted,model.obj.a7
 OBJ/A7_BT6.SEQ,20260,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/A8.SHP,32176,actor shape,,,,pending,unconverted,converts under #203
+OBJ/A8.SHP,32176,actor shape,Content::DecodeShp,shp-gltf,models/characters/A8.gltf;models/characters/A8.bin;models/characters/A8.png;models/characters/A8.image.json;models/characters/A8.palettes.png,pass,converted,model.obj.a8
 OBJ/A8_BT2.SEQ,20816,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/A8_BT4.SEQ,20816,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/A8_BTA.SEQ,20816,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/A9.SHP,34224,actor shape,,,,pending,unconverted,converts under #203
+OBJ/A9.SHP,34224,actor shape,Content::DecodeShp,shp-gltf,models/characters/A9.gltf;models/characters/A9.bin;models/characters/A9.png;models/characters/A9.image.json;models/characters/A9.palettes.png,pass,converted,model.obj.a9
 OBJ/A9SP00.SEQ,3503,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/A9SP01.SEQ,3825,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/A9SP02.SEQ,5631,skeletal animation,,,,pending,unconverted,converts under #205
@@ -4631,7 +4631,7 @@ OBJ/A9_BT1.SEQ,32297,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/A9_BT2.SEQ,38868,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/A9_BT9.SEQ,28744,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/A9_BTA.SEQ,31690,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/AA.SHP,31804,actor shape,,,,pending,unconverted,converts under #203
+OBJ/AA.SHP,31804,actor shape,Content::DecodeShp,shp-gltf,models/characters/AA.gltf;models/characters/AA.bin;models/characters/AA.png;models/characters/AA.image.json;models/characters/AA.palettes.png,pass,converted,model.obj.aa
 OBJ/AASP00.SEQ,6435,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/AASP01.SEQ,6494,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/AASP02.SEQ,9331,skeletal animation,,,,pending,unconverted,converts under #205
@@ -4641,59 +4641,59 @@ OBJ/AA_BT4.SEQ,23011,skeletal animation,,,,pending,unconverted,converts under #2
 OBJ/AA_BT6.SEQ,23011,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/AA_BTA.SEQ,21316,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/AA_COM.SEQ,525,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/AB.SHP,6144,actor shape,,,,pending,unconverted,converts under #203
+OBJ/AB.SHP,6144,actor shape,Content::DecodeShp,shp-gltf,models/characters/AB.gltf;models/characters/AB.bin,pass,converted,model.obj.ab
 OBJ/AB_BT2.SEQ,2496,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/AB_BT4.SEQ,2496,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/AB_BT6.SEQ,2496,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/AB_BTA.SEQ,2460,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/AC.SHP,11452,actor shape,,,,pending,unconverted,converts under #203
+OBJ/AC.SHP,11452,actor shape,Content::DecodeShp,shp-gltf,models/characters/AC.gltf;models/characters/AC.bin;models/characters/AC.png;models/characters/AC.image.json;models/characters/AC.palettes.png,pass,converted,model.obj.ac
 OBJ/AC_BT2.SEQ,3531,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/AD.SHP,38388,actor shape,,,,pending,unconverted,converts under #203
-OBJ/AE.SHP,11420,actor shape,,,,pending,unconverted,converts under #203
-OBJ/AF.SHP,24640,actor shape,,,,pending,unconverted,converts under #203
+OBJ/AD.SHP,38388,actor shape,Content::DecodeShp,shp-gltf,models/characters/AD.gltf;models/characters/AD.bin;models/characters/AD.png;models/characters/AD.image.json;models/characters/AD.palettes.png,pass,converted,model.obj.ad
+OBJ/AE.SHP,11420,actor shape,Content::DecodeShp,shp-gltf,models/characters/AE.gltf;models/characters/AE.bin;models/characters/AE.png;models/characters/AE.image.json;models/characters/AE.palettes.png,pass,converted,model.obj.ae
+OBJ/AF.SHP,24640,actor shape,Content::DecodeShp,shp-gltf,models/characters/AF.gltf;models/characters/AF.bin,pass,converted,model.obj.af
 OBJ/AFSP00.SEQ,18207,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/AF_BTA.SEQ,17114,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/B0.SHP,8592,actor shape,,,,pending,unconverted,converts under #203
+OBJ/B0.SHP,8592,actor shape,Content::DecodeShp,shp-gltf,models/characters/B0.gltf;models/characters/B0.bin,pass,converted,model.obj.b0
 OBJ/B0SP00.SEQ,18207,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/B0_BTA.SEQ,17114,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/B1.SHP,42928,actor shape,,,,pending,unconverted,converts under #203
-OBJ/B2.SHP,15108,actor shape,,,,pending,unconverted,converts under #203
-OBJ/B3.SHP,12276,actor shape,,,,pending,unconverted,converts under #203
-OBJ/B4.SHP,14468,actor shape,,,,pending,unconverted,converts under #203
-OBJ/B5.SHP,8368,actor shape,,,,pending,unconverted,converts under #203
-OBJ/B6.SHP,8408,actor shape,,,,pending,unconverted,converts under #203
-OBJ/B7.SHP,15468,actor shape,,,,pending,unconverted,converts under #203
-OBJ/B8.SHP,14908,actor shape,,,,pending,unconverted,converts under #203
-OBJ/B9.SHP,14612,actor shape,,,,pending,unconverted,converts under #203
-OBJ/BA.SHP,14588,actor shape,,,,pending,unconverted,converts under #203
-OBJ/BB.SHP,16028,actor shape,,,,pending,unconverted,converts under #203
-OBJ/BC.SHP,10284,actor shape,,,,pending,unconverted,converts under #203
-OBJ/BD.SHP,8572,actor shape,,,,pending,unconverted,converts under #203
-OBJ/BE.SHP,9068,actor shape,,,,pending,unconverted,converts under #203
-OBJ/BF.SHP,13164,actor shape,,,,pending,unconverted,converts under #203
-OBJ/C0.SHP,15108,actor shape,,,,pending,unconverted,converts under #203
-OBJ/C1.SHP,10356,actor shape,,,,pending,unconverted,converts under #203
-OBJ/C2.SHP,12420,actor shape,,,,pending,unconverted,converts under #203
-OBJ/C3.SHP,15932,actor shape,,,,pending,unconverted,converts under #203
-OBJ/C4.SHP,32136,actor shape,,,,pending,unconverted,converts under #203
+OBJ/B1.SHP,42928,actor shape,Content::DecodeShp,shp-gltf,models/characters/B1.gltf;models/characters/B1.bin;models/characters/B1.png;models/characters/B1.image.json;models/characters/B1.palettes.png,pass,converted,model.obj.b1
+OBJ/B2.SHP,15108,actor shape,Content::DecodeShp,shp-gltf,models/characters/B2.gltf;models/characters/B2.bin;models/characters/B2.png;models/characters/B2.image.json;models/characters/B2.palettes.png,pass,converted,model.obj.b2
+OBJ/B3.SHP,12276,actor shape,Content::DecodeShp,shp-gltf,models/characters/B3.gltf;models/characters/B3.bin;models/characters/B3.png;models/characters/B3.image.json;models/characters/B3.palettes.png,pass,converted,model.obj.b3
+OBJ/B4.SHP,14468,actor shape,Content::DecodeShp,shp-gltf,models/characters/B4.gltf;models/characters/B4.bin;models/characters/B4.png;models/characters/B4.image.json;models/characters/B4.palettes.png,pass,converted,model.obj.b4
+OBJ/B5.SHP,8368,actor shape,Content::DecodeShp,shp-gltf,models/characters/B5.gltf;models/characters/B5.bin;models/characters/B5.png;models/characters/B5.image.json;models/characters/B5.palettes.png,pass,converted,model.obj.b5
+OBJ/B6.SHP,8408,actor shape,Content::DecodeShp,shp-gltf,models/characters/B6.gltf;models/characters/B6.bin;models/characters/B6.png;models/characters/B6.image.json;models/characters/B6.palettes.png,pass,converted,model.obj.b6
+OBJ/B7.SHP,15468,actor shape,Content::DecodeShp,shp-gltf,models/characters/B7.gltf;models/characters/B7.bin;models/characters/B7.png;models/characters/B7.image.json;models/characters/B7.palettes.png,pass,converted,model.obj.b7
+OBJ/B8.SHP,14908,actor shape,Content::DecodeShp,shp-gltf,models/characters/B8.gltf;models/characters/B8.bin;models/characters/B8.png;models/characters/B8.image.json;models/characters/B8.palettes.png,pass,converted,model.obj.b8
+OBJ/B9.SHP,14612,actor shape,Content::DecodeShp,shp-gltf,models/characters/B9.gltf;models/characters/B9.bin;models/characters/B9.png;models/characters/B9.image.json;models/characters/B9.palettes.png,pass,converted,model.obj.b9
+OBJ/BA.SHP,14588,actor shape,Content::DecodeShp,shp-gltf,models/characters/BA.gltf;models/characters/BA.bin;models/characters/BA.png;models/characters/BA.image.json;models/characters/BA.palettes.png,pass,converted,model.obj.ba
+OBJ/BB.SHP,16028,actor shape,Content::DecodeShp,shp-gltf,models/characters/BB.gltf;models/characters/BB.bin;models/characters/BB.png;models/characters/BB.image.json;models/characters/BB.palettes.png,pass,converted,model.obj.bb
+OBJ/BC.SHP,10284,actor shape,Content::DecodeShp,shp-gltf,models/characters/BC.gltf;models/characters/BC.bin;models/characters/BC.png;models/characters/BC.image.json;models/characters/BC.palettes.png,pass,converted,model.obj.bc
+OBJ/BD.SHP,8572,actor shape,Content::DecodeShp,shp-gltf,models/characters/BD.gltf;models/characters/BD.bin;models/characters/BD.png;models/characters/BD.image.json;models/characters/BD.palettes.png,pass,converted,model.obj.bd
+OBJ/BE.SHP,9068,actor shape,Content::DecodeShp,shp-gltf,models/characters/BE.gltf;models/characters/BE.bin;models/characters/BE.png;models/characters/BE.image.json;models/characters/BE.palettes.png,pass,converted,model.obj.be
+OBJ/BF.SHP,13164,actor shape,Content::DecodeShp,shp-gltf,models/characters/BF.gltf;models/characters/BF.bin;models/characters/BF.png;models/characters/BF.image.json;models/characters/BF.palettes.png,pass,converted,model.obj.bf
+OBJ/C0.SHP,15108,actor shape,Content::DecodeShp,shp-gltf,models/characters/C0.gltf;models/characters/C0.bin;models/characters/C0.png;models/characters/C0.image.json;models/characters/C0.palettes.png,pass,converted,model.obj.c0
+OBJ/C1.SHP,10356,actor shape,Content::DecodeShp,shp-gltf,models/characters/C1.gltf;models/characters/C1.bin;models/characters/C1.png;models/characters/C1.image.json;models/characters/C1.palettes.png,pass,converted,model.obj.c1
+OBJ/C2.SHP,12420,actor shape,Content::DecodeShp,shp-gltf,models/characters/C2.gltf;models/characters/C2.bin;models/characters/C2.png;models/characters/C2.image.json;models/characters/C2.palettes.png,pass,converted,model.obj.c2
+OBJ/C3.SHP,15932,actor shape,Content::DecodeShp,shp-gltf,models/characters/C3.gltf;models/characters/C3.bin;models/characters/C3.png;models/characters/C3.image.json;models/characters/C3.palettes.png,pass,converted,model.obj.c3
+OBJ/C4.SHP,32136,actor shape,Content::DecodeShp,shp-gltf,models/characters/C4.gltf;models/characters/C4.bin;models/characters/C4.png;models/characters/C4.image.json;models/characters/C4.palettes.png,pass,converted,model.obj.c4
 OBJ/C4_BT6.SEQ,20260,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/C5.SHP,15272,actor shape,,,,pending,unconverted,converts under #203
-OBJ/C6.SHP,18644,actor shape,,,,pending,unconverted,converts under #203
-OBJ/C7.SHP,15948,actor shape,,,,pending,unconverted,converts under #203
-OBJ/C8.SHP,14532,actor shape,,,,pending,unconverted,converts under #203
-OBJ/C9.SHP,32740,actor shape,,,,pending,unconverted,converts under #203
-OBJ/CA.SHP,32764,actor shape,,,,pending,unconverted,converts under #203
-OBJ/CB.SHP,30248,actor shape,,,,pending,unconverted,converts under #203
+OBJ/C5.SHP,15272,actor shape,Content::DecodeShp,shp-gltf,models/characters/C5.gltf;models/characters/C5.bin;models/characters/C5.png;models/characters/C5.image.json;models/characters/C5.palettes.png,pass,converted,model.obj.c5
+OBJ/C6.SHP,18644,actor shape,Content::DecodeShp,shp-gltf,models/characters/C6.gltf;models/characters/C6.bin,pass,converted,model.obj.c6
+OBJ/C7.SHP,15948,actor shape,Content::DecodeShp,shp-gltf,models/characters/C7.gltf;models/characters/C7.bin;models/characters/C7.png;models/characters/C7.image.json;models/characters/C7.palettes.png,pass,converted,model.obj.c7
+OBJ/C8.SHP,14532,actor shape,Content::DecodeShp,shp-gltf,models/characters/C8.gltf;models/characters/C8.bin;models/characters/C8.png;models/characters/C8.image.json;models/characters/C8.palettes.png,pass,converted,model.obj.c8
+OBJ/C9.SHP,32740,actor shape,Content::DecodeShp,shp-gltf,models/characters/C9.gltf;models/characters/C9.bin;models/characters/C9.png;models/characters/C9.image.json;models/characters/C9.palettes.png,pass,converted,model.obj.c9
+OBJ/CA.SHP,32764,actor shape,Content::DecodeShp,shp-gltf,models/characters/CA.gltf;models/characters/CA.bin;models/characters/CA.png;models/characters/CA.image.json;models/characters/CA.palettes.png,pass,converted,model.obj.ca
+OBJ/CB.SHP,30248,actor shape,Content::DecodeShp,shp-gltf,models/characters/CB.gltf;models/characters/CB.bin;models/characters/CB.png;models/characters/CB.image.json;models/characters/CB.palettes.png,pass,converted,model.obj.cb
 OBJ/CB_BTA.SEQ,4290,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/CC.SHP,50432,actor shape,,,,pending,unconverted,converts under #203
+OBJ/CC.SHP,50432,actor shape,Content::DecodeShp,shp-gltf,models/characters/CC.gltf;models/characters/CC.bin;models/characters/CC.png;models/characters/CC.image.json;models/characters/CC.palettes.png,pass,converted,model.obj.cc
 OBJ/CC_BTA.SEQ,2703,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/CD.SHP,30884,actor shape,,,,pending,unconverted,converts under #203
+OBJ/CD.SHP,30884,actor shape,Content::DecodeShp,shp-gltf,models/characters/CD.gltf;models/characters/CD.bin;models/characters/CD.png;models/characters/CD.image.json;models/characters/CD.palettes.png,pass,converted,model.obj.cd
 OBJ/CD_BTA.SEQ,4266,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/CE.SHP,25216,actor shape,,,,pending,unconverted,converts under #203
+OBJ/CE.SHP,25216,actor shape,Content::DecodeShp,shp-gltf,models/characters/CE.gltf;models/characters/CE.bin;models/characters/CE.png;models/characters/CE.image.json;models/characters/CE.palettes.png,pass,converted,model.obj.ce
 OBJ/CE_BTA.SEQ,1645,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/CF.SHP,32096,actor shape,,,,pending,unconverted,converts under #203
+OBJ/CF.SHP,32096,actor shape,Content::DecodeShp,shp-gltf,models/characters/CF.gltf;models/characters/CF.bin;models/characters/CF.png;models/characters/CF.image.json;models/characters/CF.palettes.png,pass,converted,model.obj.cf
 OBJ/CF_BTA.SEQ,4099,skeletal animation,,,,pending,unconverted,converts under #205
-OBJ/D0.SHP,30008,actor shape,,,,pending,unconverted,converts under #203
+OBJ/D0.SHP,30008,actor shape,Content::DecodeShp,shp-gltf,models/characters/D0.gltf;models/characters/D0.bin;models/characters/D0.png;models/characters/D0.image.json;models/characters/D0.palettes.png,pass,converted,model.obj.d0
 OBJ/D0_BTA.SEQ,2792,skeletal animation,,,,pending,unconverted,converts under #205
 OBJ/E001.ESQ,16300,shared animation set,,,,pending,unconverted,converts under #206
 OBJ/E001.ETM,8196,actor texture overlay,,,,pending,unconverted,converts under #207
