@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "table": "combination-blade-materials",
+  "description": "Workshop combinations: the material two ingredients' materials give. Pairs not listed give no material.",
+  "key": ["first_material", "first_category", "second_material", "second_category"],
+  "columns": [
+    {
+      "name": "first_material",
+      "type": "integer",
+      "minimum": 3,
+      "maximum": 7,
+      "description": "The first ingredient's material (1 wood, 2 leather, 3 bronze, 4 iron, 5 hagane, 6 silver, 7 damascus)."
+    },
+    {
+      "name": "first_category",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9,
+      "description": "The first ingredient's category."
+    },
+    {
+      "name": "second_material",
+      "type": "integer",
+      "minimum": 3,
+      "maximum": 7,
+      "description": "The second ingredient's material."
+    },
+    {
+      "name": "second_category",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9,
+      "description": "The second ingredient's category."
+    },
+    {
+      "name": "material",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 7,
+      "description": "The combined item's material."
+    }
+  ]
+}

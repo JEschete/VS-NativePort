@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "table": "combination-blade-pairs",
+  "description": "Workshop combinations: the result two ingredients make. Pairs not listed do not combine.",
+  "key": ["first", "second"],
+  "columns": [
+    {
+      "name": "first",
+      "type": "reference",
+      "references": "combination-blade-results",
+      "description": "The first ingredient's result id."
+    },
+    {
+      "name": "second",
+      "type": "reference",
+      "references": "combination-blade-results",
+      "description": "The second ingredient's result id."
+    },
+    {
+      "name": "result",
+      "type": "reference",
+      "references": "combination-blade-results",
+      "description": "The result the two make."
+    }
+  ]
+}

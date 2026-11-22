@@ -10,6 +10,7 @@
 #include <fstream>
 #include <limits>
 #include <memory>
+#include <optional>
 #include <span>
 #include <string>
 #include <string_view>
@@ -22,6 +23,7 @@
 #include "Content/AssetCatalog.hpp"
 #include "Content/ConversionManifest.hpp"
 #include "Content/DataAccess.hpp"
+#include "Content/WorkshopRecipes.hpp"
 #include "Core/Log.hpp"
 #include "Core/Sha256.hpp"
 #include "Platform/CrashHandler.hpp"
@@ -57,6 +59,7 @@ constexpr std::array kConvertedTypes{
     ConvertedType{.extension = ".TIM", .converter = "tim-png"},
     ConvertedType{.extension = ".FBC", .converter = "fbc-palette-png"},
     ConvertedType{.extension = ".FBT", .converter = "fbt-texture-png"},
+    ConvertedType{.extension = ".SYD", .converter = kSydRecipeConverterName},
 };
 
 // The fix each stale or missing output error names.
@@ -193,6 +196,24 @@ std::expected<void, std::string> RequireConvertedType(
   return {};
 }
 
+// The workshop recipe tables, when `manifest` lists their outputs.
+std::expected<std::optional<WorkshopRecipeCatalog>, std::string>
+LoadListedRecipes(const fs::path& root,
+                  const std::optional<ConversionManifest>& manifest) {
+  if (!manifest || std::ranges::none_of(
+                       manifest->outputs, [](const ConversionOutput& output) {
+                         return output.converter == kSydRecipeConverterName;
+                       })) {
+    return std::nullopt;
+  }
+  auto recipes = LoadWorkshopRecipes(root);
+  if (!recipes) {
+    return std::unexpected(recipes.error() + " (re-run VS.Extract tables " +
+                           Platform::PathText(root) + ")");
+  }
+  return std::move(*recipes);
+}
+
 }  // namespace
 
 DataStore::ScopedOverride::ScopedOverride() {
@@ -276,9 +297,18 @@ std::expected<void, std::string> DataStore::Open(const fs::path& root) {
   auto conversions = LoadConversionManifest(root);
   if (!conversions) return std::unexpected(conversions.error());
   store->m_conversion_manifest_ = std::move(*conversions);
+  auto recipes = LoadListedRecipes(root, store->m_conversion_manifest_);
+  if (!recipes) return std::unexpected(recipes.error());
+  store->m_workshop_recipes_ = std::move(*recipes);
+  // catalogs\ also holds the tier-1 tables (catalogs\menu\); either asset
+  // catalog file means the asset catalog was written and must load.
   std::error_code error;
   const fs::path catalogs = root / Platform::Utf8Path(kCatalogDirectory);
-  if (fs::exists(catalogs, error)) {
+  const bool cataloged =
+      fs::exists(catalogs / Platform::Utf8Path(kAssetCatalogFile), error) ||
+      (!error &&
+       fs::exists(catalogs / Platform::Utf8Path(kAudioCatalogFile), error));
+  if (cataloged) {
     if (catalogGeneration == std::numeric_limits<u32>::max()) {
       return std::unexpected("asset catalog generations exhausted");
     }

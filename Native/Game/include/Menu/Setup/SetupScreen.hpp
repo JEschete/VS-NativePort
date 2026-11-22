@@ -151,10 +151,12 @@ struct MaterialBonus {
 inline constexpr std::size_t kMaterialCount = 8;
 using MaterialBonuses = std::array<MaterialBonus, kMaterialCount>;
 
-// BLADE.SYD, SHIELD.SYD and ARMOR.SYD: _loadSyd's id - 1.
+// BLADE, SHIELD and ARMOR (the workshop recipe tables, once BLADE.SYD,
+// SHIELD.SYD and ARMOR.SYD): _loadSyd's id - 1, in Content::WorkshopKind's
+// order.
 enum class RecipeKind : std::uint8_t { kBlade, kShield, kArmor };
 inline constexpr std::size_t kRecipeKindCount = 3;
-// A decoded recipe file (Combination.hpp).
+// A kind's recipe book (Combination.hpp).
 struct RecipeBook;
 
 // The item list (_populateItemsList, _navigateItemsList).
@@ -405,14 +407,13 @@ class Host {
   // VS::Field::IsCurrentRoomWorkshop: 0 outside a workshop.
   [[nodiscard]] virtual int CurrentWorkshop() = 0;
 
-  // _loadSyd's disc read into a high-end block.
+  // _loadSyd's request: the kind's recipe book from the loaded tables.
   virtual void StartRecipeLoad(RecipeKind kind) = 0;
-  // True once read; nothing when no read is pending.
+  // True once built; nothing when no load is pending.
   [[nodiscard]] virtual std::optional<bool> RecipeLoaded() = 0;
-  // Releases the finished read; the file decodes into the recipe tables.
+  // Releases the finished load; its book becomes the recipe tables.
   virtual void ReleaseRecipeRequest() = 0;
-  // The decoded recipe tables; null before a file decoded or after it was
-  // freed.
+  // The loaded recipe book; null before one loaded or after it was freed.
   [[nodiscard]] virtual const RecipeBook* Recipes() = 0;
   virtual void FreeRecipes() = 0;
 

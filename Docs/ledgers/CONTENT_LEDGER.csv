@@ -3443,8 +3443,8 @@ MAP/ZONE252.ZND,68,zone,,,,pending,unconverted,converts under #199
 MAP/ZONE253.ZND,68,zone,,,,pending,unconverted,converts under #199
 MAP/ZONE254.ZND,68,zone,,,,pending,unconverted,converts under #199
 MAP/ZONE255.ZND,68,zone,,,,pending,unconverted,converts under #199
-MENU/ARMOR.SYD,5912,combination recipes,,,,pending,unconverted,converts under #499
-MENU/BLADE.SYD,13264,combination recipes,,,,pending,unconverted,converts under #499
+MENU/ARMOR.SYD,5912,combination recipes,Extract::DecodeSydRecipes,syd-recipe-csv,catalogs/menu/combination-armor-results.csv;catalogs/menu/combination-armor-results.schema.json;catalogs/menu/combination-armor-pairs.csv;catalogs/menu/combination-armor-pairs.schema.json;catalogs/menu/combination-armor-materials.csv;catalogs/menu/combination-armor-materials.schema.json,pass,converted,catalog.menu.combination-armor
+MENU/BLADE.SYD,13264,combination recipes,Extract::DecodeSydRecipes,syd-recipe-csv,catalogs/menu/combination-blade-results.csv;catalogs/menu/combination-blade-results.schema.json;catalogs/menu/combination-blade-pairs.csv;catalogs/menu/combination-blade-pairs.schema.json;catalogs/menu/combination-blade-materials.csv;catalogs/menu/combination-blade-materials.schema.json,pass,converted,catalog.menu.combination-blade
 MENU/GAMEOVER.BIN,6144,"menu image, text or table",,,,pending,unconverted,"converts under #498, #499, #500"
 MENU/ITEMHELP.BIN,27580,"menu image, text or table",,,,pending,unconverted,"converts under #498, #499, #500"
 MENU/ITEMNAME.BIN,12288,"menu image, text or table",,,,pending,unconverted,"converts under #498, #499, #500"
@@ -3471,7 +3471,7 @@ MENU/MENUE.PRG,10844,program overlay data,,,,pending,unconverted,"converts under
 MENU/MENUF.PRG,29176,program overlay data,,,,pending,unconverted,"converts under #500, #502"
 MENU/OPMCIMG1.BIN,8192,"menu image, text or table",,,,pending,unconverted,"converts under #498, #499, #500"
 MENU/OPMCIMG2.BIN,8192,"menu image, text or table",,,,pending,unconverted,"converts under #498, #499, #500"
-MENU/SHIELD.SYD,504,combination recipes,,,,pending,unconverted,converts under #499
+MENU/SHIELD.SYD,504,combination recipes,Extract::DecodeSydRecipes,syd-recipe-csv,catalogs/menu/combination-shield-results.csv;catalogs/menu/combination-shield-results.schema.json;catalogs/menu/combination-shield-pairs.csv;catalogs/menu/combination-shield-pairs.schema.json;catalogs/menu/combination-shield-materials.csv;catalogs/menu/combination-shield-materials.schema.json,pass,converted,catalog.menu.combination-shield
 MENU/SPMCIMG.BIN,114688,"menu image, text or table",,,,pending,unconverted,"converts under #498, #499, #500"
 MOV/TITLE.STR,22970368,movie,,,,pending,unconverted,"extracted in mkv form; the runtime reads disc\MOV\TITLE.STR.mkv, written outside manifest.json; converts under #504"
 MUSIC/MUSIC000.DAT,3624,music sequence,,,,pending,unconverted,converts under #501

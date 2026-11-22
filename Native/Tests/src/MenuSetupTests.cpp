@@ -1,11 +1,9 @@
 // Hand-maintained tests for the typed workshop menu (MENUC.PRG, #276 row
-// 49): its cores through a recording host, and the live recipe read.
+// 49): its cores through a recording host, and the live recipe books.
 #include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
-#include <iterator>
-#include <memory>
 #include <optional>
 #include <span>
 #include <string>
@@ -15,10 +13,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Content/DiscLayout.h"
-#include "Content/DiscQueue.hpp"
+#include "Content/DataStore.hpp"
 #include "Content/ModuleData.hpp"
-#include "Core/Memory/HeapLive.hpp"
+#include "Content/WorkshopRecipes.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/ItemRows.hpp"
@@ -29,6 +26,7 @@
 #include "Menu/Sounds.hpp"
 #include "Render/EncodedText.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
+#include "TestSupport/WorkshopRecipeRoot.hpp"
 
 namespace {
 namespace fw = VS::Menu::Framework;
@@ -222,53 +220,47 @@ struct Workshop {
   setup::Context context{.state = state, .host = host};
 };
 
-// A SHIELD.SYD of four result entries (at 12), eight material entries (at
-// 16) and two records (at 24): materials 0 and 1 combine into material 3,
-// materials 0 and 2 into material 9 (which has no bonus); sub ids 0 and 1
-// into record 1, sub ids 0 and 2 into record 5 (past the two).
-constexpr std::size_t kResultsAt = 12;
-constexpr std::size_t kMaterialsAt = 16;
-constexpr std::size_t kRecordsAt = 24;
-constexpr std::size_t kShieldFileBytes = 40;
+// SHIELD.SYD's pieces as tables: sub ids 0 and 1 make record 1 (model 7,
+// category 2, one gem slot), and materials 0 and 1 combine into material 3.
 constexpr std::uint8_t kCombinedMaterial = 3;
 constexpr std::uint8_t kBonuslessMaterial = 9;
-constexpr std::uint8_t kMissingRecord = 5;
 constexpr std::uint8_t kRecordModel = 7;
 constexpr std::uint8_t kRecordCategory = 2;
 constexpr std::uint8_t kRecordGemSlots = 1;
 constexpr std::uint8_t kArmorIdOffset = 126;
+constexpr std::size_t kShieldPairSide = 17;
+constexpr std::uint16_t kShieldMaterialEntries = 64;
 
-constexpr std::size_t kWordBytes = 4;
-constexpr std::size_t kByteBits = 8;
-constexpr std::size_t kMaterialsWord = kWordBytes;
-constexpr std::size_t kRecordsWord = 2 * kWordBytes;
-
-void PutWord(std::span<std::uint8_t> file, std::size_t at, std::size_t value) {
-  for (std::size_t byte = 0; byte < kWordBytes; ++byte) {
-    file[at + byte] = static_cast<std::uint8_t>(value >> (byte * kByteBits));
-  }
+VS::Content::WorkshopRecipeTable ShieldTable() {
+  constexpr auto kShield = VS::Content::WorkshopKind::kShield;
+  auto table = VS::test_support::FullWorkshopTable(kShield);
+  VS::Content::PieceResult& record = table.pieces.at(1);
+  record.model = kRecordModel;
+  record.category = kRecordCategory;
+  record.gem_slots = kRecordGemSlots;
+  table.pairs.push_back(
+      {.first = VS::test_support::WorkshopResultId(kShield, 0),
+       .second = VS::test_support::WorkshopResultId(kShield, 1),
+       .result = VS::test_support::WorkshopResultId(kShield, 1)});
+  table.materials.push_back({.first_material = 0,
+                             .first_category = 0,
+                             .second_material = 1,
+                             .second_category = 0,
+                             .material = kCombinedMaterial});
+  return table;
 }
 
-std::vector<std::uint8_t> ShieldFile() {
-  std::vector<std::uint8_t> file(kShieldFileBytes);
-  PutWord(file, 0, kResultsAt);
-  PutWord(file, kMaterialsWord, kMaterialsAt);
-  PutWord(file, kRecordsWord, kRecordsAt);
-  file[kResultsAt + 1] = 1;
-  file[kResultsAt + 2] = kMissingRecord;
-  file[kMaterialsAt + 1] = kCombinedMaterial;
-  file[kMaterialsAt + 2] = kBonuslessMaterial;
-  const std::size_t record = kRecordsAt + setup::kArmorRecipeBytes;
-  file[record + 1] = kRecordModel;
-  file[record + 2] = kRecordCategory;
-  file[record + 3] = kRecordGemSlots;
-  return file;
-}
-
-setup::RecipeBook Decode(setup::RecipeKind kind) {
-  auto book = setup::DecodeRecipeFile(kind, ShieldFile());
+setup::RecipeBook ShieldBook() {
+  auto book = setup::BuildRecipeBook(ShieldTable());
+  INFO(book.error_or(""));
   REQUIRE(book.has_value());
   return std::move(*book);
+}
+
+// Why BuildRecipeBook refuses `table`, or empty.
+std::string BookRefusal(const VS::Content::WorkshopRecipeTable& table) {
+  const auto book = setup::BuildRecipeBook(table);
+  return book ? std::string{} : book.error();
 }
 
 // Shields of materials 0 and `material`, sub ids 0 and `sub_id`; the error
@@ -283,45 +275,67 @@ std::string ShieldRefusal(const setup::RecipeBook& book, std::uint16_t material,
   return built ? std::string{} : built.error();
 }
 
-TEST_CASE("Workshop recipe files refuse headers outside the file",
+TEST_CASE("Workshop recipe books hold the recipe tables' matrices",
           "[menu][menu-setup]") {
-  std::vector<std::uint8_t> file = ShieldFile();
-  const auto shield = setup::DecodeRecipeFile(setup::RecipeKind::kShield, file);
-  REQUIRE(shield.has_value());
-  CHECK(shield->results.size() == kMaterialsAt - kResultsAt);
-  CHECK(shield->materials.size() == kRecordsAt - kMaterialsAt);
-  CHECK(shield->armor.size() == 2);
-  CHECK(shield->blades.empty());
-
-  const auto short_file = setup::DecodeRecipeFile(
-      setup::RecipeKind::kShield,
-      std::span(file).first(setup::kRecipeHeaderBytes - 1));
-  REQUIRE_FALSE(short_file.has_value());
-  CHECK(short_file.error() == "recipe file of 11 bytes has no header");
-
-  PutWord(file, kMaterialsWord, kShieldFileBytes + 1);
-  const auto past = setup::DecodeRecipeFile(setup::RecipeKind::kShield, file);
-  REQUIRE_FALSE(past.has_value());
-  CHECK(past.error() == "recipe table 1 at 41 outside the 40-byte file");
+  const setup::RecipeBook shield = ShieldBook();
+  CHECK(shield.kind == setup::RecipeKind::kShield);
+  CHECK(shield.results.size() == kShieldPairSide * kShieldPairSide);
+  CHECK(shield.results[1] == 1);
+  CHECK(shield.materials.size() == kShieldMaterialEntries);
+  CHECK(shield.materials[1] == kCombinedMaterial);
+  CHECK(shield.armor.size() == kShieldPairSide);
+  CHECK(shield.blades.empty());
 }
 
-TEST_CASE("Workshop recipe lookups refuse entries outside the decoded file",
+TEST_CASE("Workshop recipe books refuse tables that break their layout",
           "[menu][menu-setup]") {
-  const setup::RecipeBook shield = Decode(setup::RecipeKind::kShield);
-  CHECK(ShieldRefusal(shield, 8, 1) ==
-        "combined material entry 8 outside the recipe file");
-  CHECK(ShieldRefusal(shield, 1, 4) ==
-        "combination entry 4 outside the recipe file");
-  CHECK(ShieldRefusal(shield, 2, 1) == "combined material 9 has no stat bonus");
-  CHECK(ShieldRefusal(shield, 1, 2) ==
-        "recipe record 5 outside the recipe file");
-  CHECK(ShieldRefusal(Decode(setup::RecipeKind::kArmor), 1, 1) ==
-        "recipe file 3 decoded where file 2 belongs");
+  VS::Content::WorkshopRecipeTable mixed = ShieldTable();
+  mixed.blades.emplace_back().id = "blade-000";
+  CHECK(BookRefusal(mixed) == "shield tables hold another kind's results");
+  VS::Content::WorkshopRecipeTable gap = ShieldTable();
+  gap.pieces.erase(gap.pieces.begin());
+  CHECK(BookRefusal(gap) ==
+        "result shield-001 has legacy_id 1 at index 0; results run from 0 in "
+        "order");
+  VS::Content::WorkshopRecipeTable unnamed = ShieldTable();
+  unnamed.pairs[0].result = "shield-999";
+  CHECK(BookRefusal(unnamed) == "pair names no result 'shield-999'");
+  VS::Content::WorkshopRecipeTable empty_result = ShieldTable();
+  empty_result.pairs[0].result = "shield-000";
+  CHECK(BookRefusal(empty_result) ==
+        "pair (shield-000, shield-001) repeats or makes legacy id 0");
+  VS::Content::WorkshopRecipeTable past_material = ShieldTable();
+  past_material.materials[0].material = kBonuslessMaterial;
+  CHECK(BookRefusal(past_material) ==
+        "material rule (0, 0, 1, 0) is out of range or repeats");
+}
+
+TEST_CASE("Workshop recipe lookups refuse entries outside the recipe tables",
+          "[menu][menu-setup]") {
+  const setup::RecipeBook shield = ShieldBook();
+  CHECK(ShieldRefusal(shield, kShieldMaterialEntries, 1) ==
+        "combined material entry 64 outside the recipe tables");
+  setup::RecipeBook short_results = shield;
+  short_results.results.resize(2);
+  CHECK(ShieldRefusal(short_results, 1, 2) ==
+        "combination entry 2 outside the recipe tables");
+  setup::RecipeBook bonusless = shield;
+  bonusless.materials[1] = kBonuslessMaterial;
+  CHECK(ShieldRefusal(bonusless, 1, 1) ==
+        "combined material 9 has no stat bonus");
+  setup::RecipeBook short_records = shield;
+  short_records.armor.resize(1);
+  CHECK(ShieldRefusal(short_records, 1, 1) ==
+        "recipe record 1 outside the recipe tables");
+  setup::RecipeBook armor = shield;
+  armor.kind = setup::RecipeKind::kArmor;
+  CHECK(ShieldRefusal(armor, 1, 1) ==
+        "recipe book 3 loaded where book 2 belongs");
 }
 
 TEST_CASE("Workshop shield combination builds the looked-up recipe record",
           "[menu][menu-setup]") {
-  const setup::RecipeBook shield = Decode(setup::RecipeKind::kShield);
+  const setup::RecipeBook shield = ShieldBook();
   items::InventoryArmor first{};
   items::InventoryArmor second{};
   second.material = 1;
@@ -331,6 +345,7 @@ TEST_CASE("Workshop shield combination builds the looked-up recipe record",
   CHECK(built->id == 1 + kArmorIdOffset);
   CHECK(built->material == kCombinedMaterial);
   CHECK(built->weapon_model_id == kRecordModel);
+  CHECK(built->category == kRecordCategory);
   CHECK(built->gem_slots == kRecordGemSlots);
 }
 
@@ -514,8 +529,8 @@ TEST_CASE("Workshop recipe loading polls the host's read",
   shop.host.loaded.reset();
   CHECK(setup::LoadCombinationRecipes(shop.context, kPoll) == 1);
   CHECK(shop.host.refusals ==
-        Strings{"recipe file 4 outside 1-3",
-                "recipe file loading without a pending read"});
+        Strings{"recipe book 4 outside 1-3",
+                "recipe book loading without a pending load"});
 }
 
 TEST_CASE("Workshop weapon reloads refuse a missing Ashley actor",
@@ -560,8 +575,8 @@ TEST_CASE("Workshop ingredient counts leave accessories out",
   CHECK(shop.host.refusals == Strings{"combination category 3 outside 0-2"});
 }
 
-// The live workshop over a scratch game heap and disc queue; the recipe
-// read it starts is finished and its block freed before the heap goes.
+// The live workshop over its own data store (none until Open); its recipe
+// books and state are reset when it goes.
 class LiveRecipes {
  public:
   LiveRecipes() = default;
@@ -570,14 +585,8 @@ class LiveRecipes {
   LiveRecipes(LiveRecipes&&) = delete;
   LiveRecipes& operator=(LiveRecipes&&) = delete;
   ~LiveRecipes() {
-    if (read_ != nullptr) {
-      read_->state = VS::Content::DiscRequestState::kLoaded;
-      Load(0);
-    }
     setup::ResetLiveSetupStatics();
     setup::LiveSetupState() = saved_state_;
-    std::ranges::copy(saved_slots_, std::begin(VS::Content::discRequestSlots));
-    VS::Content::discRequestCounts = saved_counts_;
   }
 
   static int Load(int id) {
@@ -586,82 +595,82 @@ class LiveRecipes {
     });
   }
 
-  // The queued SHIELD.SYD read, its block filled with ShieldFile().
-  VS::Content::DiscQueueSlot& QueuedShieldRead() {
-    const auto slot = std::ranges::find_if(
-        VS::Content::discRequestSlots,
-        [](const VS::Content::DiscQueueSlot& request) {
-          return request.state == VS::Content::DiscRequestState::kEnqueued &&
-                 request.file.lba == VS_SHIELD_SYD_LBA;
-        });
-    REQUIRE(slot != std::end(VS::Content::discRequestSlots));
-    REQUIRE(slot->file.size == VS_SHIELD_SYD_SIZE);
-    std::ranges::copy(ShieldFile(),
-                      static_cast<std::uint8_t*>(slot->destination));
-    read_ = &*slot;
-    return *slot;
-  }
-
-  void Finish() {
-    REQUIRE(read_ != nullptr);
-    read_->state = VS::Content::DiscRequestState::kLoaded;
-    read_ = nullptr;
-  }
-
  private:
-  struct alignas(VS::Core::Memory::kHeapUnitBytes) Arena {
-    std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 4096> bytes{};
-  };
-  std::unique_ptr<Arena> arena_ = std::make_unique<Arena>();
-  VS::Core::Memory::ScopedLiveGameHeap heap_{arena_->bytes};
-  decltype(VS::Content::discRequestSlots) saved_slots_ =
-      VS::Content::discRequestSlots;
-  VS::Content::DiscRequestCounts saved_counts_ = VS::Content::discRequestCounts;
+  VS::Content::DataStore::ScopedOverride store_;
   setup::State saved_state_ = setup::LiveSetupState();
-  VS::Content::DiscQueueSlot* read_ = nullptr;
 };
 
 constexpr int kRecipePoll = 0;
-constexpr int kShieldRecipeFile = 2;
+constexpr int kShieldRecipeBook = 2;
 
-TEST_CASE("Live workshop recipe reads keep their block while in flight",
+TEST_CASE("Live workshop recipe loads refuse without recipe tables",
           "[menu][menu-setup]") {
   LiveRecipes live;
   VS::test_support::ChannelWarnings warnings{"menu.setup"};
-  CHECK(LiveRecipes::Load(kShieldRecipeFile) == 0);
-  live.QueuedShieldRead();
-  // A second read and a reload while the first is in flight keep it.
-  CHECK(LiveRecipes::Load(kShieldRecipeFile) == 0);
-  setup::ResetLiveSetupStatics();
-  CHECK(LiveRecipes::Load(kRecipePoll) == 0);
+  CHECK(LiveRecipes::Load(kShieldRecipeBook) == 0);
+  CHECK(LiveRecipes::Load(kRecipePoll) == 1);
   CHECK(setup::LiveSetupRecipes() == nullptr);
   CHECK(warnings.messages ==
-        Strings{"recipe file read while the previous read was in flight",
-                "workshop reset while its recipe read was in flight; the "
-                "block stays until the read finishes"});
-
-  // The kept read still finishes and decodes.
-  live.Finish();
-  CHECK(LiveRecipes::Load(kRecipePoll) == 1);
-  CHECK(setup::LiveSetupRecipes() != nullptr);
+        Strings{"no workshop recipe tables are loaded (run VS.Extract tables "
+                "<datadir>)",
+                "recipe book loading without a pending load"});
 }
 
-TEST_CASE("Live workshop recipe reads decode the finished file",
-          "[menu][menu-setup]") {
-  LiveRecipes live;
-  VS::test_support::ChannelWarnings warnings{"menu.setup"};
-  CHECK(LiveRecipes::Load(kShieldRecipeFile) == 0);
-  live.QueuedShieldRead();
-  CHECK(LiveRecipes::Load(kRecipePoll) == 0);
-  live.Finish();
-  CHECK(LiveRecipes::Load(kRecipePoll) == 1);
+// Checks the live recipe book is ShieldTable's.
+void CheckLiveShieldBook() {
   const setup::RecipeBook* const book = setup::LiveSetupRecipes();
   REQUIRE(book != nullptr);
   CHECK(book->kind == setup::RecipeKind::kShield);
-  CHECK(book->materials.size() == kRecordsAt - kMaterialsAt);
+  CHECK(book->materials.size() == kShieldMaterialEntries);
+  CHECK(book->materials[1] == kCombinedMaterial);
+  REQUIRE(book->armor.size() == kShieldPairSide);
+  CHECK(book->armor[1].model == kRecordModel);
+}
+
+// Converts ShieldTable's recipe files under `root` and opens a data store
+// over it.
+void OpenShieldRecipes(VS::test_support::WorkshopRecipeRoot& root) {
+  root.Table(VS::Content::WorkshopKind::kShield) = ShieldTable();
+  root.WriteSources();
+  CHECK(root.Convert(false).converted == VS::Content::kWorkshopKindCount);
+  const auto opened = VS::Content::DataStore::Open(root.Root());
+  INFO(opened.error_or(""));
+  REQUIRE(opened.has_value());
+}
+
+TEST_CASE("Live workshop recipe loads build the book from the data store",
+          "[menu][menu-setup]") {
+  VS::test_support::WorkshopRecipeRoot root;
+  LiveRecipes live;
+  OpenShieldRecipes(root);
+  VS::test_support::ChannelWarnings warnings{"menu.setup"};
+  CHECK(LiveRecipes::Load(kShieldRecipeBook) == 0);
+  // A second load while the first is pending keeps the first.
+  CHECK(LiveRecipes::Load(kShieldRecipeBook) == 0);
+  CHECK(LiveRecipes::Load(kRecipePoll) == 1);
+  CheckLiveShieldBook();
+  CHECK(warnings.messages ==
+        Strings{"recipe book load while the previous load was pending"});
+}
+
+TEST_CASE("Live workshop recipe loads over a held book free it first",
+          "[menu][menu-setup]") {
+  VS::test_support::WorkshopRecipeRoot root;
+  LiveRecipes live;
+  OpenShieldRecipes(root);
+  CHECK(LiveRecipes::Load(kShieldRecipeBook) == 0);
+  CHECK(LiveRecipes::Load(kRecipePoll) == 1);
+  REQUIRE(setup::LiveSetupRecipes() != nullptr);
+  VS::test_support::ChannelWarnings warnings{"menu.setup"};
+  CHECK(LiveRecipes::Load(kShieldRecipeBook) == 0);
+  CHECK(setup::LiveSetupRecipes() == nullptr);
+  CHECK(LiveRecipes::Load(kRecipePoll) == 1);
+  CHECK(setup::LiveSetupRecipes() != nullptr);
   setup::ResetLiveSetupStatics();
   CHECK(setup::LiveSetupRecipes() == nullptr);
-  CHECK(warnings.messages.empty());
+  CHECK(warnings.messages ==
+        Strings{"recipe book load while the previous book was held; freed "
+                "it"});
 }
 
 TEST_CASE("MENUC.PRG keeps no module symbol entries", "[menu][menu-setup]") {

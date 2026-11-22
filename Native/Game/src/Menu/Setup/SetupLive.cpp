@@ -19,11 +19,11 @@
 #include "Battle/TargetingState.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/CdDriveLive.hpp"
+#include "Content/DataStore.hpp"
 #include "Content/DiscLayout.h"
-#include "Content/DiscQueue.hpp"
 #include "Content/StringTables.hpp"
+#include "Content/WorkshopRecipes.hpp"
 #include "Core/Log.hpp"
-#include "Core/Memory/HeapLive.hpp"
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -157,16 +157,6 @@ static_assert(menu12::kCombineBladesIndex ==
 static_assert(menu12::kNewBladeIndex == menu12_text::index::kNewBlade);
 static_assert(Framework::kMenu12Bytes == VS_MENU12_BIN_SIZE);
 
-// _loadSyd's files (168.c:2658): BLADE.SYD, SHIELD.SYD and ARMOR.SYD.
-struct RecipeFile {
-  int lba;
-  int size;
-};
-constexpr std::array<RecipeFile, kRecipeKindCount> kRecipeFiles{{
-    {.lba = VS_BLADE_SYD_LBA, .size = VS_BLADE_SYD_SIZE},
-    {.lba = VS_SHIELD_SYD_LBA, .size = VS_SHIELD_SYD_SIZE},
-    {.lba = VS_ARMOR_SYD_LBA, .size = VS_ARMOR_SYD_SIZE},
-}};
 // VS::Items::materialModifiers' strength, intelligence and agility
 // bytes of a material's record.
 constexpr std::size_t kStrengthModifier = 24;
@@ -183,22 +173,18 @@ constexpr int kWorkshopRestriction = 0x200;
 
 State setupState{};
 
-// _sydData's block, its read and the file it decoded into.
+// _sydData: the recipe book _loadSyd's load built (pending until the menu
+// polls it) and the book the combination screens read. The books come from
+// the workshop recipe tables the data store loaded (#499), not the SYD files.
 struct RecipeLoad {
-  void* data = nullptr;
-  std::size_t size = 0;
   RecipeKind kind = RecipeKind::kBlade;
-  VS::Content::DiscQueueSlot* request = nullptr;
+  std::optional<RecipeBook> pending;
   std::optional<RecipeBook> book;
 };
 RecipeLoad recipeLoad{};
 
 void FreeRecipeBlock() {
-  if (recipeLoad.data != nullptr) {
-    Core::Memory::FreeLiveFromHighEnd(recipeLoad.data);
-  }
-  recipeLoad.data = nullptr;
-  recipeLoad.size = 0;
+  recipeLoad.pending.reset();
   recipeLoad.book.reset();
 }
 
@@ -502,10 +488,10 @@ class LiveHost final : public Host {
 
   void StartRecipeLoad(RecipeKind kind) override;
   std::optional<bool> RecipeLoaded() override {
-    if (recipeLoad.request == nullptr) {
+    if (!recipeLoad.pending) {
       return std::nullopt;
     }
-    return recipeLoad.request->state == VS::Content::DiscRequestState::kLoaded;
+    return true;
   }
   void ReleaseRecipeRequest() override;
   const RecipeBook* Recipes() override {
@@ -553,62 +539,48 @@ class LiveHost final : public Host {
 };
 
 // decomp: MENUC.PRG loadSyd (src/MENU/MENUC.PRG/168.c:2666; was _loadSyd), its
-// request.
+// request: the kind's book from the loaded workshop recipe tables.
 void LiveHost::StartRecipeLoad(RecipeKind kind) {
   const auto index = static_cast<std::size_t>(kind);
-  if (index >= kRecipeFiles.size()) {
-    Refuse("recipe file outside BLADE, SHIELD and ARMOR.SYD");
+  if (index >= kRecipeKindCount) {
+    Refuse("recipe book outside blade, shield and armor");
     return;
   }
-  if (recipeLoad.request != nullptr) {
-    // The original lost the read in flight and its block; the block stays
-    // until that read finishes.
-    Refuse("recipe file read while the previous read was in flight");
+  if (recipeLoad.pending) {
+    Refuse("recipe book load while the previous load was pending");
     return;
   }
-  if (recipeLoad.data != nullptr) {
+  if (recipeLoad.book) {
     // The original replaced _sydData and lost the earlier block.
-    Refuse("recipe file read while the previous block was held; freed it");
+    Refuse("recipe book load while the previous book was held; freed it");
     FreeRecipeBlock();
   }
-  const RecipeFile& file = kRecipeFiles[index];
-  const auto size = static_cast<std::size_t>(file.size);
-  void* const data = Core::Memory::AllocateLiveFromHighEnd(size);
-  if (data == nullptr) {
-    Refuse("recipe file does not fit the game heap");
+  const Content::DataStore* const store = Content::DataStore::Get();
+  const Content::WorkshopRecipeCatalog* const catalog =
+      store != nullptr ? store->WorkshopRecipes() : nullptr;
+  if (catalog == nullptr) {
+    Refuse(
+        "no workshop recipe tables are loaded (run VS.Extract tables "
+        "<datadir>)");
     return;
   }
-  recipeLoad.data = data;
-  recipeLoad.size = size;
-  recipeLoad.kind = kind;
-  VS::Content::DiscFile request{};
-  request.lba = file.lba;
-  request.size = file.size;
-  recipeLoad.request = Content::AllocateLiveDiscRequest(&request);
-  if (recipeLoad.request != nullptr) {
-    Content::EnqueueLiveDiscRequest(recipeLoad.request, data);
-  } else {
-    recipeLoad.request =
-        Content::CompleteLiveRefusedDiscRequest(&request, data);
+  auto built = BuildRecipeBook(catalog->Of(
+      static_cast<Content::WorkshopKind>(std::to_underlying(kind))));
+  if (!built) {
+    Refuse(built.error());
+    return;
   }
+  recipeLoad.kind = kind;
+  recipeLoad.pending = std::move(*built);
 }
 
 void LiveHost::ReleaseRecipeRequest() {
-  Content::ReleaseLiveDiscRequest(recipeLoad.request);
-  recipeLoad.request = nullptr;
-  if (recipeLoad.data == nullptr) {
-    Refuse("recipe file read without its block");
+  if (!recipeLoad.pending) {
+    Refuse("recipe book released without a pending load");
     return;
   }
-  const std::span<const std::uint8_t> bytes(
-      static_cast<const std::uint8_t*>(recipeLoad.data), recipeLoad.size);
-  auto decoded = DecodeRecipeFile(recipeLoad.kind, bytes);
-  if (!decoded) {
-    Refuse(decoded.error());
-    recipeLoad.book.reset();
-    return;
-  }
-  recipeLoad.book = std::move(*decoded);
+  recipeLoad.book = std::move(recipeLoad.pending);
+  recipeLoad.pending.reset();
 }
 
 template <typename Call>
@@ -638,14 +610,8 @@ const RecipeBook* LiveSetupRecipes() {
 
 void ResetLiveSetupStatics() {
   ResetModuleStatics(setupState);
-  if (recipeLoad.request != nullptr) {
-    VS::Core::LogWarn("menu.setup",
-                      "workshop reset while its recipe read was in flight; the "
-                      "block stays until the read finishes");
-    return;
-  }
   // The reload dropped _sydData without freeing its block; the native port
-  // frees it so repeated reloads do not exhaust the high end.
+  // frees the books so a reload starts without one.
   FreeRecipeBlock();
 }
 }  // namespace VS::Menu::Setup

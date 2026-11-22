@@ -9,13 +9,14 @@
 #include <string>
 #include <vector>
 
+#include "Content/WorkshopRecipes.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/ItemRows.hpp"
 #include "Menu/Setup/SetupScreen.hpp"
 
 // MENUC.PRG's blade, shield and armor combination (168.c:2658-5100): the
-// recipe files (BLADE.SYD, SHIELD.SYD, ARMOR.SYD), the combined records'
+// recipe books (from the workshop recipe tables), the combined records'
 // formulas, the ingredient lists and the three combination screens.
 namespace VS::Menu::Setup {
 // _workshopMaterials: per workshop, the materials (one bit each) it works.
@@ -39,18 +40,11 @@ inline constexpr std::array<std::int16_t, 2> kSameMaterialTypeFactors{6, 8};
 // The combined values stay within +-100.
 inline constexpr int kCombinedValueLimit = 100;
 
-// A recipe file starts with three little-endian byte offsets: the result
-// table, the material table and the result records (16 bytes a blade's, 8 a
-// shield's or armor piece's).
-inline constexpr std::size_t kRecipeHeaderBytes = 12;
-inline constexpr std::size_t kBladeRecipeBytes = 16;
-inline constexpr std::size_t kArmorRecipeBytes = 8;
-
-// A BLADE.SYD result record (_combineBlades' info): the combined blade's
-// model, category, damage and cost types, cost, recovery delay (byte 6, the
-// decomp's unk6, copied to the blade's unk12 at MENUC.PRG
-// src/MENU/MENUC.PRG/168.c:4973), base strength, intelligence and agility and
-// its ranges and shape.
+// A combined blade's recipe record (Content::BladeResult, BLADE.SYD's
+// _combineBlades info): the combined blade's model, category, damage and cost
+// types, cost, recovery delay (the decomp's unk6, copied to the blade's unk12
+// at MENUC.PRG src/MENU/MENUC.PRG/168.c:4973), base strength, intelligence
+// and agility and its ranges and shape.
 struct BladeRecipe {
   std::uint8_t model = 0;
   std::uint8_t category = 0;
@@ -63,8 +57,9 @@ struct BladeRecipe {
   std::uint8_t agility = 0;
   Items::WeaponRange range;
 };
-// A SHIELD.SYD or ARMOR.SYD result record (_armorInfo): the model, the
-// category, the gem slots and the base strength, intelligence and agility.
+// A combined shield's or armor piece's recipe record (Content::PieceResult,
+// SHIELD.SYD's and ARMOR.SYD's _armorInfo): the model, the category, the gem
+// slots and the base strength, intelligence and agility.
 struct ArmorRecipe {
   std::uint8_t model = 0;
   std::uint8_t category = 0;
@@ -73,17 +68,12 @@ struct ArmorRecipe {
   std::uint8_t intelligence = 0;
   std::uint8_t agility = 0;
 };
-[[nodiscard]] BladeRecipe DecodeBladeRecipe(
-    std::span<const std::uint8_t, kBladeRecipeBytes> record);
-[[nodiscard]] ArmorRecipe DecodeArmorRecipe(
-    std::span<const std::uint8_t, kArmorRecipeBytes> record);
 
-// A decoded recipe file: the result record of each ingredient pair (by
-// their ids), the combined material of each material pair (by both
-// materials, and the categories for blades and armor) and the result records
-// (blades for BLADE.SYD, shield or armor pieces for the others). Each table
-// runs from its header offset to the next table's (the last to the end of
-// the loaded block).
+// One kind's recipes as the combination screens look them up: the result
+// record of each ingredient pair (by their ids), the combined material of
+// each material pair (by both materials, and the categories for blades and
+// armor) and the result records (blades for kBlade, shield or armor pieces
+// for the others), by legacy id.
 struct RecipeBook {
   RecipeKind kind = RecipeKind::kBlade;
   std::vector<std::uint8_t> results;
@@ -91,10 +81,10 @@ struct RecipeBook {
   std::vector<BladeRecipe> blades;
   std::vector<ArmorRecipe> armor;
 };
-// Decodes a loaded recipe file of `kind`, or says why its header does not
-// hold three tables inside it.
-[[nodiscard]] std::expected<RecipeBook, std::string> DecodeRecipeFile(
-    RecipeKind kind, std::span<const std::uint8_t> file);
+// The book of a kind's workshop recipe tables (catalogs\menu\, #499), or why
+// they do not make one.
+[[nodiscard]] std::expected<RecipeBook, std::string> BuildRecipeBook(
+    const Content::WorkshopRecipeTable& table);
 
 // Combines six classes (or seven affinities): a value either ingredient
 // shares with the pair's greatest or least stays; the others take the sum
@@ -108,7 +98,7 @@ void CombinePhysicalTypeValues(const Items::PartTypes& first,
                                const Items::PartTypes& second,
                                Items::PartTypes& result,
                                bool materials_different);
-// The combined record from the decoded recipe file `recipes` (the first
+// The combined record from the recipe book `recipes` (the first
 // ingredient with the recipe's id, material, base stats and the combined
 // values), or why the recipe lookup failed.
 [[nodiscard]] std::expected<Items::InventoryBlade, std::string>
@@ -124,7 +114,7 @@ BuildCombinedArmor(const Items::InventoryArmor& first,
                    const Items::InventoryArmor& second,
                    const RecipeBook& recipes, const MaterialBonuses& bonuses);
 
-// Starts loading recipe file `id` (1-3), or (0) polls it: 1 once loaded or
+// Starts loading recipe book `id` (1-3), or (0) polls it: 1 once loaded or
 // when nothing loads.
 int LoadCombinationRecipes(Context& context, int id);
 // The result row (row 0): the item's name, or "new blade/shield/armor".

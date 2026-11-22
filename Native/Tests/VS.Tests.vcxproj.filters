@@ -1344,6 +1344,9 @@
     <ClCompile Include="src\WeatherRenderTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\WorkshopRecipeTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\XaMixTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -1548,7 +1551,13 @@
     <ClInclude Include="include\TestSupport\TimeAttackDrawRecorder.hpp">
       <Filter>include\TestSupport</Filter>
     </ClInclude>
+    <ClInclude Include="include\TestSupport\WorkshopRecipeRoot.hpp">
+      <Filter>include\TestSupport</Filter>
+    </ClInclude>
     <ClCompile Include="..\Tools\Extract\src\ConversionManifestWriter.cpp">
+      <Filter>..\Tools\Extract\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Tools\Extract\src\ConverterBatch.cpp">
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>
     <ClCompile Include="..\Tools\Extract\src\EffectTextureConversion.cpp">
@@ -1564,6 +1573,9 @@
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>
     <ClCompile Include="..\Tools\Extract\src\TimWriter.cpp">
+      <Filter>..\Tools\Extract\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Tools\Extract\src\WorkshopRecipeConversion.cpp">
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>
     <ClCompile Include="..\Tools\Launcher\src\Setup.cpp">

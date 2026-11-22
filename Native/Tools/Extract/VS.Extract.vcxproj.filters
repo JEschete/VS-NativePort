@@ -15,6 +15,9 @@
     <ClCompile Include="src\ConversionManifestWriter.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ConverterBatch.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\EffectTextureConversion.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -33,7 +36,13 @@
     <ClCompile Include="src\TimWriter.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\WorkshopRecipeConversion.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClInclude Include="include\Extract\ConversionManifestWriter.hpp">
+      <Filter>include\Extract</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Extract\ConverterBatch.hpp">
       <Filter>include\Extract</Filter>
     </ClInclude>
     <ClInclude Include="include\Extract\EffectTextureConversion.hpp">
@@ -49,6 +58,9 @@
       <Filter>include\Extract</Filter>
     </ClInclude>
     <ClInclude Include="include\Extract\TimWriter.hpp">
+      <Filter>include\Extract</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Extract\WorkshopRecipeConversion.hpp">
       <Filter>include\Extract</Filter>
     </ClInclude>
   </ItemGroup>

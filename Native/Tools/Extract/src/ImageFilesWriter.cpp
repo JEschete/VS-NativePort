@@ -7,18 +7,16 @@
 #include <cstddef>
 #include <cstdint>
 #include <format>
-#include <fstream>
 #include <initializer_list>
 #include <span>
 #include <string>
-#include <system_error>
 #include <utility>
 #include <vector>
 
 #include "Content/ConversionManifest.hpp"
 #include "Content/JsonText.hpp"
+#include "Extract/ConverterBatch.hpp"
 #include "Extract/TimImage.hpp"
-#include "Platform/Paths.hpp"
 
 namespace VS::Extract {
 namespace {
@@ -49,14 +47,6 @@ Bytes ToBytes(std::span<const unsigned char> data) {
   Bytes bytes(data.size());
   std::ranges::transform(data, bytes.begin(), [](unsigned char value) {
     return static_cast<std::byte>(value);
-  });
-  return bytes;
-}
-
-PngBytes ToPngBytes(std::span<const std::byte> data) {
-  PngBytes bytes(data.size());
-  std::ranges::transform(data, bytes.begin(), [](std::byte value) {
-    return std::to_integer<unsigned char>(value);
   });
   return bytes;
 }
@@ -363,47 +353,15 @@ std::expected<std::vector<ImageFile>, std::string> EncodeImageFiles(
 
 std::expected<void, std::string> WriteImageFiles(
     const fs::path& directory, const std::vector<ImageFile>& files) {
-  std::error_code error;
-  fs::create_directories(directory, error);
-  if (error) {
-    return std::unexpected(std::format("cannot create {}: {}",
-                                       Platform::PathText(directory),
-                                       error.message()));
-  }
-  std::vector<fs::path> staged;
-  const auto discard = [&staged] {
-    std::error_code ignored;
-    for (const fs::path& path : staged) fs::remove(path, ignored);
-  };
+  std::vector<OutputBytes> outputs;
+  outputs.reserve(files.size());
   for (const ImageFile& file : files) {
     if (auto valid = CheckStem(file.name); !valid) {
-      discard();
       return std::unexpected(valid.error());
     }
-    fs::path temporary = directory / Platform::Utf8Path(file.name + ".tmp");
-    std::ofstream output(temporary, std::ios::binary | std::ios::trunc);
-    staged.push_back(temporary);
-    const PngBytes data = ToPngBytes(file.bytes);
-    output.write(reinterpret_cast<const char*>(data.data()),
-                 static_cast<std::streamsize>(data.size()));
-    output.close();
-    if (!output) {
-      discard();
-      return std::unexpected(
-          std::format("cannot write {}", Platform::PathText(temporary)));
-    }
+    outputs.push_back({.name = file.name, .bytes = file.bytes});
   }
-  for (std::size_t index = 0; index < files.size(); ++index) {
-    fs::rename(staged[index], directory / Platform::Utf8Path(files[index].name),
-               error);
-    if (error) {
-      return std::unexpected(std::format(
-          "cannot replace {}: {}",
-          Platform::PathText(directory / Platform::Utf8Path(files[index].name)),
-          error.message()));
-    }
-  }
-  return {};
+  return WriteOutputFiles(directory, outputs);
 }
 
 }  // namespace VS::Extract

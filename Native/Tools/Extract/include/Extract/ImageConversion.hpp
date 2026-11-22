@@ -14,6 +14,7 @@
 #include "Content/ImageFiles.hpp"
 #include "Content/NativeImage.hpp"
 #include "Extract/ConversionManifestWriter.hpp"
+#include "Extract/ConverterBatch.hpp"
 #include "Extract/ImageFilesWriter.hpp"
 #include "Extract/TimImage.hpp"
 #include "Extract/TimWriter.hpp"
@@ -59,11 +60,6 @@ ImageLocationForDiscPath(std::string_view disc_path);
 // tile must give the same depth; the error names the tile.
 [[nodiscard]] std::expected<Content::ImageDepth, std::string>
 BackgroundLayoutDepth(std::span<const std::byte> layout);
-
-struct SourceFile {
-  std::string path;  // disc path, '/'-separated
-  std::vector<std::byte> bytes;
-};
 
 struct TimConversion {
   SourceFile tim;

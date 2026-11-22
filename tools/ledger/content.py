@@ -102,6 +102,7 @@ DECODERS = {
     "tim-png": "Content::DecodeTim",
     "fbc-palette-png": "Extract::ConvertFbcPalette",
     "fbt-texture-png": "Extract::ConvertFbtTexture",
+    "syd-recipe-csv": "Extract::DecodeSydRecipes",
 }
 # The disc-corpus tests that prove each converter preserves its sources (ASSET_PIPELINE section 7).
 EVIDENCE = {
@@ -110,6 +111,9 @@ EVIDENCE = {
                         "Effect CLUTs load every extracted palette through the loader"),
     "fbt-texture-png": ("extracted FBT corpus binds every page and converts it exactly",
                         "Effect textures load every extracted page through the loader"),
+    "syd-recipe-csv": ("Extracted workshop recipe files convert to tables exactly",
+                       "Original blade recipe produces the inspected ordered result",
+                       "Original shield and armor recipes use their distinct material tables"),
 }
 
 

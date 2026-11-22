@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "table": "combination-armor-results",
+  "description": "Workshop combination results: the item each combination makes.",
+  "key": ["id"],
+  "columns": [
+    {
+      "name": "id",
+      "type": "id",
+      "description": "The result's id; pairs name it."
+    },
+    {
+      "name": "legacy_id",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "The original record index: the combined item's sub id (and, for blades, its id; shields and armor add 126). Runs from 0 without gaps."
+    },
+    {
+      "name": "model",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "The combined item's model."
+    },
+    {
+      "name": "category",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 7,
+      "description": "The item category: shields 0-1, armor 2-5 (the armor material table is by category 2-5)."
+    },
+    {
+      "name": "gem_slots",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 3,
+      "description": "How many gems the shield holds."
+    },
+    {
+      "name": "strength",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": "Base strength, before the material's bonus."
+    },
+    {
+      "name": "intelligence",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": "Base intelligence, before the material's bonus."
+    },
+    {
+      "name": "agility",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": "Base agility, before the material's bonus."
+    },
+    {
+      "name": "raw.byte7",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "Record byte 7, not yet named; kept so the record rebuilds exactly."
+    }
+  ]
+}

@@ -21,6 +21,7 @@
 #include "Content/MovieEncoder.hpp"
 #include "Core/Log.hpp"
 #include "Extract/ImageConversion.hpp"
+#include "Extract/WorkshopRecipeConversion.hpp"
 #include "Platform/App.hpp"
 #include "Platform/Paths.hpp"
 #include "nlohmann/json.hpp"
@@ -55,6 +56,7 @@ int Usage() {
       "<ffmpeg.exe>]\n"
       "  VS.Extract catalogs <datadir>\n"
       "  VS.Extract images   <datadir> [--force]\n"
+      "  VS.Extract tables   <datadir> [--force]\n"
       "      Form 1 files are copied as they are; movies (*.STR) are converted "
       "to Matroska (AV1 + FLAC)\n"
       "      with FFmpeg (found on PATH, or --ffmpeg). Effect audio and XA "
@@ -65,7 +67,11 @@ int Usage() {
       "      extract also converts standalone TIM images and effect FBC "
       "palettes to PNG under textures/ and records them\n"
       "      in manifest.json; images converts again only what changed "
-      "(--force: everything).");
+      "(--force: everything).\n"
+      "      extract also converts the workshop recipe files (MENU/*.SYD) to "
+      "CSV tables under catalogs/menu/;\n"
+      "      tables converts again only what changed (--force: everything, "
+      "replacing edited tables).");
   return 2;
 }
 
@@ -374,6 +380,21 @@ int ConvertImages(const fs::path& root, bool force) {
   return 0;
 }
 
+// catalogs/menu/ tables and their manifest.json outputs from the disc files
+// already under root.
+int ConvertTables(const fs::path& root, bool force) {
+  const auto report = Extract::ConvertDiscTables(root, force);
+  if (!report) {
+    VS::Core::LogError("extract", "{}", report.error());
+    return 1;
+  }
+  VS::Core::LogInfo("extract",
+                    "tables: {} converted, {} unchanged, {} stale files "
+                    "removed",
+                    report->converted, report->unchanged, report->removed);
+  return 0;
+}
+
 int ExtractDisc(const Content::Disc& disc, int argc, char** argv) {
   // <outdir>\disc\<path> for each file, and the manifest Content::DataStore
   // reads (sector, size, form, path). Interleaved files (movies, XA audio)
@@ -455,6 +476,7 @@ int ExtractDisc(const Content::Disc& disc, int argc, char** argv) {
       written, Platform::PathText(out), skipped);
   if (WriteCatalogs(out) != 0) return 1;
   if (ConvertImages(out, false) != 0) return 1;
+  if (ConvertTables(out, false) != 0) return 1;
   return ConvertStreams(disc, out, ffmpeg);
 }
 
@@ -462,6 +484,17 @@ bool ValidStreamArguments(int argc, char** argv) {
   return argc == kExtractArguments ||
          (argc == kExtractArguments + 2 &&
           std::string_view(argv[kExtractArguments]) == "--ffmpeg");
+}
+
+// <command> <datadir> [--force]: whether the arguments are valid, and
+// whether --force is given.
+std::optional<bool> ForceArgument(int argc, char** argv) {
+  if (argc == kImageArguments) return false;
+  if (argc == kForcedImageArguments &&
+      std::string_view(argv[kOutputArgument]) == "--force") {
+    return true;
+  }
+  return std::nullopt;
 }
 
 }  // namespace
@@ -476,12 +509,12 @@ int Run(int argc, char** argv) {
                ? WriteCatalogs(Platform::Utf8Path(argv[2]))
                : Usage();
   }
-  if (cmd == "images") {
-    const bool force = argc == kForcedImageArguments &&
-                       std::string_view(argv[kOutputArgument]) == "--force";
-    return argc == kImageArguments || force
-               ? ConvertImages(Platform::Utf8Path(argv[2]), force)
-               : Usage();
+  if (cmd == "images" || cmd == "tables") {
+    const auto force = ForceArgument(argc, argv);
+    if (!force) return Usage();
+    const fs::path root = Platform::Utf8Path(argv[2]);
+    return cmd == "images" ? ConvertImages(root, *force)
+                           : ConvertTables(root, *force);
   }
   auto disc = Content::Disc::Open(Platform::Utf8Path(argv[2]));
   if (!disc) {

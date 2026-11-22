@@ -33,6 +33,9 @@
     <ClCompile Include="src\AudioStream.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\CatalogTable.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\CdDrive.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -96,6 +99,9 @@
     <ClCompile Include="src\TimFile.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\WorkshopRecipes.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClInclude Include="include\Content\ActorAssets.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
@@ -115,6 +121,9 @@
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\AudioStream.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\CatalogTable.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\CdDrive.hpp">
@@ -187,6 +196,9 @@
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\TimFile.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\WorkshopRecipes.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClCompile Include="Legacy\LibDs.cpp">

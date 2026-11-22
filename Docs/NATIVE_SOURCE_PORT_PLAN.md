@@ -846,13 +846,13 @@ struct BladeInstance {            // mutable, lives in GameState / save
 
 | Catalog | Source on disc (to verify per CONTENT_LEDGER) |
 |---|---|
-| `blades`, `grips`, `gems`, `armor`, `shields`, `accessories` | `MENU\BLADE.SYD`, `ARMOR.SYD`, `SHIELD.SYD`, `SMALL\*.DIS/*.ARM`, SLUS tables |
+| `blades`, `grips`, `gems`, `armor`, `shields`, `accessories` | `SMALL\*.DIS/*.ARM`, SLUS tables (the `MENU\*.SYD` files are workshop recipes, not item definitions) |
 | `consumables`, `materials`, `misc-items` | SLUS/BATTLE tables |
 | `item-text` | `MENU\ITEMNAME.BIN`, `ITEMHELP.BIN`, `SMALL\HELP*.HF0/HF1` |
 | `species`, `enemies` (base + `extends` variants), `modelsets`, `bestiary` | ZND enemy sections (455 records in 49 zones), ZUD archives, `MON.BIN`. See [ENEMY_DATA_SCHEME.md (archived)](https://github.com/JEschete/VS-NativePort/blob/0e3ae7d8df169bc684c8155fa44b90e731bb4e69/Docs/ENEMY_DATA_SCHEME.md) |
 | `loot` (shared drop tables) | Per-slot drop rates lifted out of the ZND records |
 | `break-arts`, `battle-abilities` (chain/defense), `spells`, `status-effects` | BATTLE tables |
-| `workshops`, `combine-tables` | MENU tables (blade/armor combination matrices) |
+| `workshops`, `combination-<kind>-results`/`-pairs`/`-materials` | the blade, shield and armor combination recipes in `MENU\*.SYD`, converted (#499, ASSET_PIPELINE.md §6.8); the workshop tables are still to identify |
 | `rooms` (incl. `spawns[]` with conditions), `zones`, `doors`, `keys`, `chests`, `save-points` | MPD/ZND + SLUS tables |
 | `text` (dialog, UI) | event data, MCDATA, menu text |
 | `music`, `sfx` | sound bank/sequence index tables |

@@ -15,7 +15,6 @@
 #include <utility>
 #include <vector>
 
-#include "Core/Sha256.hpp"
 #include "Extract/ImageFilesWriter.hpp"
 
 namespace VS::Extract {
@@ -120,10 +119,6 @@ std::uint32_t ReadLittleEndian(Bytes data, std::size_t offset,
 std::uint16_t HalfwordAt(Bytes data, std::size_t offset) {
   return static_cast<std::uint16_t>(
       ReadLittleEndian(data, offset, kHalfwordBytes));
-}
-
-std::string HashOf(const SourceFile& source) {
-  return Core::Sha256Hex(source.bytes);
 }
 
 struct FileExtent {

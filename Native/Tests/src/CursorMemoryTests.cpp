@@ -4,9 +4,8 @@
 #include <cstdint>
 #include <cstring>
 #include <filesystem>
-#include <fstream>
 #include <span>
-#include <string_view>
+#include <string>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -21,6 +20,7 @@
 #include "Battle/Damage.hpp"
 #include "Battle/TargetingState.hpp"
 #include "Content/StringTables.hpp"
+#include "Content/WorkshopRecipes.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/Gimmicks.hpp"
 #include "Field/Mpd.hpp"
@@ -50,10 +50,12 @@
 #include "Menu/TextBox.hpp"
 #include "State/Progress.hpp"
 #include "State/StateFlags.hpp"
+#include "TestSupport/WorkshopRecipeRoot.hpp"
 
 using VS::Battle::ActionDefinition;
 using VS::Battle::kActionIdDaggerArtOne;
 using VS::Battle::kActionTypeBreakArt;
+using VS::Content::WorkshopKind;
 
 namespace menu1_strings = VS::Content::text::menu1_prg::strings;
 
@@ -538,46 +540,76 @@ struct WorkshopRepairFixture {
   }
 };
 
+// Workshop recipe books from tables holding every record of the kind's SYD
+// file, with the pairs and material rules each test adds.
 struct WorkshopRecipeFixture {
-  std::array<std::uint8_t, 14000> bytes{};
   setup::MaterialBonuses bonuses{};
-  static constexpr std::uint32_t kCombinations = 12;
-  static constexpr std::uint32_t kMaterials = 10000;
-  static constexpr std::uint32_t kRecords = 12000;
 
   WorkshopRecipeFixture() {
-    const std::array<std::uint32_t, 3> header{kCombinations, kMaterials,
-                                              kRecords};
-    for (std::size_t table = 0; table < header.size(); ++table) {
-      for (std::size_t byte = 0; byte < sizeof(std::uint32_t); ++byte) {
-        bytes[(table * sizeof(std::uint32_t)) + byte] =
-            static_cast<std::uint8_t>(header[table] >> (byte * 8));
-      }
-    }
     bonuses[5] = {.strength = 3, .intelligence = -2, .agility = -4};
   }
 
-  [[nodiscard]] static setup::RecipeBook Decode(
-      setup::RecipeKind kind, std::span<const std::uint8_t> file) {
-    auto book = setup::DecodeRecipeFile(kind, file);
+  [[nodiscard]] static setup::RecipeBook Build(
+      const VS::Content::WorkshopRecipeTable& table) {
+    auto book = setup::BuildRecipeBook(table);
+    INFO(book.error_or(""));
     REQUIRE(book.has_value());
     return *std::move(book);
   }
 
-  [[nodiscard]] setup::RecipeBook Book(setup::RecipeKind kind) const {
-    return Decode(kind, bytes);
+  // Shields 6 and 7 (armor 65 and 66) make record 12; material 3 (category
+  // 5) with `second_material` (category 4) gives material 5.
+  [[nodiscard]] static setup::RecipeBook ArmorBook(bool shield,
+                                                   int second_material) {
+    const WorkshopKind kind =
+        shield ? WorkshopKind::kShield : WorkshopKind::kArmor;
+    auto table = VS::test_support::FullWorkshopTable(kind);
+    table.pairs.push_back(
+        {.first = VS::test_support::WorkshopResultId(kind, shield ? 6 : 65),
+         .second = VS::test_support::WorkshopResultId(kind, shield ? 7 : 66),
+         .result = VS::test_support::WorkshopResultId(kind, 12)});
+    table.materials.push_back(
+        {.first_material = 3,
+         .first_category = static_cast<std::uint8_t>(shield ? 0 : 5),
+         .second_material = static_cast<std::uint8_t>(second_material),
+         .second_category = static_cast<std::uint8_t>(shield ? 0 : 4),
+         .material = 5});
+    VS::Content::PieceResult& record = table.pieces.at(12);
+    record.model = 9;
+    record.category = 4;
+    record.gem_slots = 3;
+    record.stats = {.strength = 10, .intelligence = -5, .agility = 2};
+    return Build(table);
   }
 
-  void ArmorRecipe(bool shield, int second_material) {
-    const int combination = shield ? 6 * 17 + 7 : (65 - 16) * 65 + 66 - 16;
-    const int material = shield ? 3 * 8 + second_material
-                                : 3 * 128 + 3 * 32 + second_material * 4 + 2;
-    bytes[kCombinations + combination] = 12;
-    bytes[kMaterials + material] = 5;
-    const std::array<std::uint8_t, setup::kArmorRecipeBytes> record{
-        0, 9, 4, 3, 10, static_cast<std::uint8_t>(-5), 2, 0};
-    std::copy(record.begin(), record.end(),
-              bytes.begin() + kRecords + (12 * record.size()));
+  // Blades 14 and 26 make record 31; material 3 (category 3) with
+  // `second_material` (category 4) gives material 5.
+  [[nodiscard]] static setup::RecipeBook BladeBook(int second_material) {
+    constexpr WorkshopKind kBlade = WorkshopKind::kBlade;
+    auto table = VS::test_support::FullWorkshopTable(kBlade);
+    table.pairs.push_back(
+        {.first = VS::test_support::WorkshopResultId(kBlade, 14),
+         .second = VS::test_support::WorkshopResultId(kBlade, 26),
+         .result = VS::test_support::WorkshopResultId(kBlade, 31)});
+    table.materials.push_back(
+        {.first_material = 3,
+         .first_category = 3,
+         .second_material = static_cast<std::uint8_t>(second_material),
+         .second_category = 4,
+         .material = 5});
+    VS::Content::BladeResult& record = table.blades.at(31);
+    record.model = 35;
+    record.category = 4;
+    record.damage_type = 2;
+    record.cost_type = 5;
+    record.cost = 7;
+    record.recovery_delay = 9;
+    record.stats = {.strength = 10, .intelligence = 6, .agility = 2};
+    record.range = 1;
+    record.range_y = 2;
+    record.range_z = 3;
+    record.attack_shape = 4;
+    return Build(table);
   }
 
   void CheckArmor(const VS::Items::InventoryArmor& result, bool shield) const {
@@ -619,8 +651,7 @@ struct WorkshopRecipeFixture {
     }
   }
 
-  void CheckBlade(const VS::Items::InventoryBlade& result,
-                  const std::array<unsigned char, 16>& record) const {
+  void CheckBlade(const VS::Items::InventoryBlade& result) const {
     const std::array<int, 18> actual{
         result.id,           result.sub_id,     result.weapon_model_id,
         result.category,     result.material,   result.strength,
@@ -634,29 +665,26 @@ struct WorkshopRecipeFixture {
       CAPTURE(index);
       CHECK(actual[index] == expected[index]);
     }
-    const VS::Items::WeaponRange range{.range = record[12],
-                                       .range_y = record[13],
-                                       .range_z = record[14],
-                                       .shape_bits = record[15]};
+    const VS::Items::WeaponRange range{
+        .range = 1, .range_y = 2, .range_z = 3, .shape_bits = 4};
     CHECK(result.range == range);
   }
 };
 
-std::vector<unsigned char> ReadWorkshopRecipe(std::string_view file) {
+// The workshop recipe tables VS.Extract converted from the extracted disc.
+VS::Content::WorkshopRecipeCatalog ConvertedWorkshopRecipes() {
   for (auto directory = std::filesystem::current_path();
        directory != directory.parent_path();
        directory = directory.parent_path()) {
-    const auto path = directory / "Native" / "data" / "disc" / "MENU" / file;
-    if (!std::filesystem::exists(path)) continue;
-    std::ifstream input(path, std::ios::binary);
-    REQUIRE(input);
-    std::vector<unsigned char> bytes(std::filesystem::file_size(path));
-    input.read(reinterpret_cast<char*>(bytes.data()),
-               static_cast<std::streamsize>(bytes.size()));
-    REQUIRE(input.good());
-    return bytes;
+    const auto root = directory / "Native" / "data";
+    if (!std::filesystem::exists(root / "catalogs" / "menu")) continue;
+    auto catalog = VS::Content::LoadWorkshopRecipes(root);
+    INFO((catalog ? std::string{} : catalog.error()));
+    REQUIRE(catalog.has_value());
+    return *std::move(catalog);
   }
-  SKIP("Extracted original workshop recipe is unavailable");
+  SKIP("Converted workshop recipe tables are unavailable");
+  return {};
 }
 }  // namespace
 
@@ -694,7 +722,6 @@ TEST_CASE("Workshop armor recipes retain original ownership and result rules",
   const int second_material = GENERATE(3, 4);
   CAPTURE(shield, second_material);
   WorkshopRecipeFixture fixture;
-  fixture.ArmorRecipe(shield, second_material);
   VS::Items::InventoryArmor first{}, second{};
   first.id = 191;
   first.sub_id = static_cast<std::uint8_t>(shield ? 6 : 65);
@@ -715,8 +742,7 @@ TEST_CASE("Workshop armor recipes retain original ownership and result rules",
   second.current_pp = 82;
   const auto build =
       shield ? setup::BuildCombinedShield : setup::BuildCombinedArmor;
-  const auto book = fixture.Book(shield ? setup::RecipeKind::kShield
-                                        : setup::RecipeKind::kArmor);
+  const auto book = WorkshopRecipeFixture::ArmorBook(shield, second_material);
   const auto result = build(first, second, book, fixture.bonuses);
   REQUIRE(result.has_value());
   fixture.CheckArmor(*result, shield);
@@ -750,13 +776,6 @@ TEST_CASE("Workshop blade recipes use ordered IDs materials and native stats",
           "[menu][equipment][workshop][recipes][menu-setup]") {
   const int second_material = GENERATE(3, 4);
   WorkshopRecipeFixture fixture;
-  fixture.bytes[fixture.kCombinations + 14 * 96 + 26] = 31;
-  fixture.bytes[fixture.kMaterials + 3 * 50 + (second_material - 3) * 10 + 4] =
-      5;
-  const std::array<unsigned char, 16> record{31, 35, 4, 2, 5, 7, 9, 0,
-                                             10, 6,  2, 0, 1, 2, 3, 4};
-  std::copy(record.begin(), record.end(),
-            fixture.bytes.data() + fixture.kRecords + 31 * record.size());
   VS::Items::InventoryBlade first{}, second{};
   first.id = 14;
   first.category = 3;
@@ -774,9 +793,10 @@ TEST_CASE("Workshop blade recipes use ordered IDs materials and native stats",
   second.max_pp = 202;
   second.current_pp = 82;
   const auto result = setup::BuildCombinedBlade(
-      first, second, fixture.Book(setup::RecipeKind::kBlade), fixture.bonuses);
+      first, second, WorkshopRecipeFixture::BladeBook(second_material),
+      fixture.bonuses);
   REQUIRE(result.has_value());
-  fixture.CheckBlade(*result, record);
+  fixture.CheckBlade(*result);
 }
 
 TEST_CASE("Workshop stat fusion preserves extrema truncation and bounds",
@@ -800,8 +820,7 @@ TEST_CASE("Workshop stat fusion preserves extrema truncation and bounds",
 TEST_CASE("Original blade recipe produces the inspected ordered result",
           "[menu][equipment][workshop][recipes][disc][menu-setup]") {
   WorkshopRecipeFixture fixture;
-  auto bytes = ReadWorkshopRecipe("BLADE.SYD");
-  REQUIRE(bytes.size() == 13264);
+  const auto recipes = ConvertedWorkshopRecipes();
   VS::Items::InventoryBlade first{}, second{};
   first.id = 14;
   first.category = 2;
@@ -812,7 +831,7 @@ TEST_CASE("Original blade recipe produces the inspected ordered result",
   second.material = 4;
   second.max_dp = 2002;
   const auto book =
-      WorkshopRecipeFixture::Decode(setup::RecipeKind::kBlade, bytes);
+      WorkshopRecipeFixture::Build(recipes.Of(WorkshopKind::kBlade));
   const auto result =
       setup::BuildCombinedBlade(first, second, book, fixture.bonuses);
   REQUIRE(result.has_value());
@@ -830,8 +849,7 @@ TEST_CASE(
     "[menu][equipment][workshop][recipes][disc][menu-setup]") {
   const bool shield = GENERATE(false, true);
   WorkshopRecipeFixture fixture;
-  auto bytes = ReadWorkshopRecipe(shield ? "SHIELD.SYD" : "ARMOR.SYD");
-  REQUIRE(bytes.size() == (shield ? 504 : 5912));
+  const auto recipes = ConvertedWorkshopRecipes();
   VS::Items::InventoryArmor first{}, second{};
   first.sub_id = static_cast<std::uint8_t>(shield ? 6 : 65);
   second.sub_id = static_cast<std::uint8_t>(shield ? 7 : 66);
@@ -842,8 +860,8 @@ TEST_CASE(
   second.max_dp = 2002;
   const auto build =
       shield ? setup::BuildCombinedShield : setup::BuildCombinedArmor;
-  const auto book = WorkshopRecipeFixture::Decode(
-      shield ? setup::RecipeKind::kShield : setup::RecipeKind::kArmor, bytes);
+  const auto book = WorkshopRecipeFixture::Build(
+      recipes.Of(shield ? WorkshopKind::kShield : WorkshopKind::kArmor));
   const auto result = build(first, second, book, fixture.bonuses);
   REQUIRE(result.has_value());
   const std::array<int, 9> actual{

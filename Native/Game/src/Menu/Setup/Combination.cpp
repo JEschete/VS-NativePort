@@ -12,6 +12,7 @@
 #include <span>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include "Items/Inventory.hpp"
@@ -52,9 +53,7 @@ constexpr int kFactorDivisor = 10;
 constexpr std::size_t kFirstPhysicalType = 1;
 constexpr std::size_t kPhysicalTypeCount = 3;
 
-// The recipe file header's three little-endian words.
-constexpr std::size_t kRecipeTableCount = 3;
-constexpr std::size_t kWordBytes = 4;
+// A material is one bit of a workshop's mask byte.
 constexpr std::size_t kByteBits = 8;
 // BLADE.SYD's material table by both blades' material (from bronze, 3) and
 // category, and its result table by both blade ids.
@@ -76,27 +75,8 @@ constexpr int kArmorSubIdBase = 16;
 constexpr int kArmorSubIdStride = 65;
 // A combined shield's or armor piece's id follows its sub id.
 constexpr int kArmorIdOffset = 126;
-// A blade recipe record's bytes (_combineBlades' info).
-constexpr std::size_t kBladeModelByte = 1;
-constexpr std::size_t kBladeCategoryByte = 2;
-constexpr std::size_t kBladeDamageTypeByte = 3;
-constexpr std::size_t kBladeCostTypeByte = 4;
-constexpr std::size_t kBladeCostByte = 5;
-constexpr std::size_t kBladeRecoveryDelayByte = 6;
-constexpr std::size_t kBladeStrengthByte = 8;
-constexpr std::size_t kBladeIntelligenceByte = 9;
-constexpr std::size_t kBladeAgilityByte = 10;
-constexpr std::size_t kBladeRangeByte = 12;
-constexpr std::size_t kBladeSecondRangeByte = 13;
-constexpr std::size_t kBladeThirdRangeByte = 14;
-constexpr std::size_t kBladeShapeByte = 15;
-// A shield or armor recipe record's bytes (_armorInfo).
-constexpr std::size_t kArmorModelByte = 1;
-constexpr std::size_t kArmorCategoryByte = 2;
-constexpr std::size_t kArmorGemSlotsByte = 3;
-constexpr std::size_t kArmorStrengthByte = 4;
-constexpr std::size_t kArmorIntelligenceByte = 5;
-constexpr std::size_t kArmorAgilityByte = 6;
+// The blade shape byte: the shape in bits 0-2, the angle in bits 3-7.
+constexpr unsigned kAttackAngleShift = 3;
 
 // The screens' rows: the result (row 0) slides in to (155, 18); ingredient
 // slot s (1-2) is row 10 + s at y 18 + 16s, sliding in to x 169.
@@ -212,7 +192,7 @@ std::expected<std::uint8_t, std::string> RecipeEntry(
     std::span<const std::uint8_t> table, int index, std::string_view what) {
   if (index < 0 || static_cast<std::size_t>(index) >= table.size()) {
     return std::unexpected(
-        std::format("{} entry {} outside the recipe file", what, index));
+        std::format("{} entry {} outside the recipe tables", what, index));
   }
   return table[static_cast<std::size_t>(index)];
 }
@@ -222,7 +202,7 @@ std::expected<Record, std::string> RecipeRecord(
     const std::vector<Record>& records, std::size_t index) {
   if (index >= records.size()) {
     return std::unexpected(
-        std::format("recipe record {} outside the recipe file", index));
+        std::format("recipe record {} outside the recipe tables", index));
   }
   return records[index];
 }
@@ -250,7 +230,7 @@ std::expected<RecipeResult, std::string> LookUpRecipe(
     int material_index, int result_index) {
   if (recipes.kind != kind) {
     return std::unexpected(std::format(
-        "recipe file {} decoded where file {} belongs",
+        "recipe book {} loaded where book {} belongs",
         static_cast<int>(recipes.kind) + 1, static_cast<int>(kind) + 1));
   }
   const auto material =
@@ -645,7 +625,7 @@ int BuildPreview(Context& context) {
     if (first == nullptr || second == nullptr) {
       combination.refused = true;
     } else if (recipes == nullptr) {
-      context.host.Refuse("combination without a loaded recipe file");
+      context.host.Refuse("combination without a loaded recipe book");
       combination.refused = true;
     } else if (auto built = Kind::Build(*first, *second, *recipes,
                                         context.host.Materials())) {
@@ -1174,33 +1154,6 @@ int RunCombination(Context& context, CategoryState& menu) {
 }
 }  // namespace
 
-BladeRecipe DecodeBladeRecipe(
-    std::span<const std::uint8_t, kBladeRecipeBytes> record) {
-  return {.model = record[kBladeModelByte],
-          .category = record[kBladeCategoryByte],
-          .damage_type = record[kBladeDamageTypeByte],
-          .cost_type = record[kBladeCostTypeByte],
-          .cost = record[kBladeCostByte],
-          .recovery_delay = record[kBladeRecoveryDelayByte],
-          .strength = record[kBladeStrengthByte],
-          .intelligence = record[kBladeIntelligenceByte],
-          .agility = record[kBladeAgilityByte],
-          .range = {.range = record[kBladeRangeByte],
-                    .range_y = record[kBladeSecondRangeByte],
-                    .range_z = record[kBladeThirdRangeByte],
-                    .shape_bits = record[kBladeShapeByte]}};
-}
-
-ArmorRecipe DecodeArmorRecipe(
-    std::span<const std::uint8_t, kArmorRecipeBytes> record) {
-  return {.model = record[kArmorModelByte],
-          .category = record[kArmorCategoryByte],
-          .gem_slots = record[kArmorGemSlotsByte],
-          .strength = record[kArmorStrengthByte],
-          .intelligence = record[kArmorIntelligenceByte],
-          .agility = record[kArmorAgilityByte]};
-}
-
 // decomp: MENUC.PRG setClassAffinities (src/MENU/MENUC.PRG/168.c:4763; was
 // _setClassAffinities)
 void CombineClassOrAffinityValues(const Items::PartClasses& first,
@@ -1345,54 +1298,48 @@ std::expected<Items::InventoryArmor, std::string> BuildCombinedArmor(
   return BuildCombinedArmorPiece(first, second, recipes, *recipe);
 }
 
-std::expected<RecipeBook, std::string> DecodeRecipeFile(
-    RecipeKind kind, std::span<const std::uint8_t> file) {
-  if (file.size() < kRecipeHeaderBytes) {
-    return std::unexpected(
-        std::format("recipe file of {} bytes has no header", file.size()));
+std::expected<RecipeBook, std::string> BuildRecipeBook(
+    const Content::WorkshopRecipeTable& table) {
+  static_assert(std::to_underlying(RecipeKind::kBlade) ==
+                    std::to_underlying(Content::WorkshopKind::kBlade) &&
+                std::to_underlying(RecipeKind::kShield) ==
+                    std::to_underlying(Content::WorkshopKind::kShield) &&
+                std::to_underlying(RecipeKind::kArmor) ==
+                    std::to_underlying(Content::WorkshopKind::kArmor));
+  auto matrices = Content::DenseWorkshopTables(table);
+  if (!matrices) {
+    return std::unexpected(matrices.error());
   }
-  std::array<std::size_t, kRecipeTableCount> offsets{};
-  for (std::size_t table = 0; table < kRecipeTableCount; ++table) {
-    for (std::size_t byte = 0; byte < kWordBytes; ++byte) {
-      offsets[table] |=
-          static_cast<std::size_t>(file[(table * kWordBytes) + byte])
-          << (byte * kByteBits);
-    }
-    if (offsets[table] > file.size()) {
-      return std::unexpected(
-          std::format("recipe table {} at {} outside the {}-byte file", table,
-                      offsets[table], file.size()));
-    }
-  }
-  // A table ends where the next table after it starts, or with the file.
-  const auto table_bytes = [&](std::size_t table) {
-    std::size_t end = file.size();
-    for (const std::size_t offset : offsets) {
-      if (offset > offsets[table]) {
-        end = std::min(end, offset);
-      }
-    }
-    return file.subspan(offsets[table], end - offsets[table]);
-  };
-  const std::span<const std::uint8_t> results = table_bytes(0);
-  const std::span<const std::uint8_t> materials = table_bytes(1);
-  const std::span<const std::uint8_t> records = table_bytes(2);
   RecipeBook book{};
-  book.kind = kind;
-  book.results.assign(results.begin(), results.end());
-  book.materials.assign(materials.begin(), materials.end());
-  if (kind == RecipeKind::kBlade) {
-    for (std::size_t at = 0; at + kBladeRecipeBytes <= records.size();
-         at += kBladeRecipeBytes) {
-      book.blades.push_back(
-          DecodeBladeRecipe(records.subspan(at).first<kBladeRecipeBytes>()));
-    }
-  } else {
-    for (std::size_t at = 0; at + kArmorRecipeBytes <= records.size();
-         at += kArmorRecipeBytes) {
-      book.armor.push_back(
-          DecodeArmorRecipe(records.subspan(at).first<kArmorRecipeBytes>()));
-    }
+  book.kind = static_cast<RecipeKind>(std::to_underlying(table.kind));
+  book.results = std::move(matrices->results);
+  book.materials = std::move(matrices->materials);
+  for (const Content::BladeResult& blade : table.blades) {
+    book.blades.push_back(
+        {.model = blade.model,
+         .category = blade.category,
+         .damage_type = blade.damage_type,
+         .cost_type = blade.cost_type,
+         .cost = blade.cost,
+         .recovery_delay = blade.recovery_delay,
+         .strength = static_cast<std::uint8_t>(blade.stats.strength),
+         .intelligence = static_cast<std::uint8_t>(blade.stats.intelligence),
+         .agility = static_cast<std::uint8_t>(blade.stats.agility),
+         .range = {.range = blade.range,
+                   .range_y = blade.range_y,
+                   .range_z = blade.range_z,
+                   .shape_bits = static_cast<std::uint8_t>(
+                       blade.attack_shape |
+                       (blade.attack_angle << kAttackAngleShift))}});
+  }
+  for (const Content::PieceResult& piece : table.pieces) {
+    book.armor.push_back(
+        {.model = piece.model,
+         .category = piece.category,
+         .gem_slots = piece.gem_slots,
+         .strength = static_cast<std::uint8_t>(piece.stats.strength),
+         .intelligence = static_cast<std::uint8_t>(piece.stats.intelligence),
+         .agility = static_cast<std::uint8_t>(piece.stats.agility)});
   }
   return book;
 }
@@ -1402,7 +1349,7 @@ int LoadCombinationRecipes(Context& context, int id) {
   CombinationState& combination = context.state.combination;
   if (id != 0) {
     if (id < 1 || id > static_cast<int>(kRecipeKindCount)) {
-      context.host.Refuse(std::format("recipe file {} outside 1-3", id));
+      context.host.Refuse(std::format("recipe book {} outside 1-3", id));
       return 0;
     }
     context.host.StartRecipeLoad(static_cast<RecipeKind>(id - 1));
@@ -1414,7 +1361,7 @@ int LoadCombinationRecipes(Context& context, int id) {
   }
   const std::optional<bool> loaded = context.host.RecipeLoaded();
   if (!loaded) {
-    context.host.Refuse("recipe file loading without a pending read");
+    context.host.Refuse("recipe book loading without a pending load");
     combination.recipes_loading = false;
     return 1;
   }

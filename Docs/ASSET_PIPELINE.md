@@ -67,8 +67,8 @@ Game systems
 
 - Run it with `extract-native-assets.cmd [--disc disks\SLUS-01040.cue] [--out Native\data] [--only <kind>] [--force]`.
 - The runs are **incremental**. An output is rebuilt only when its source file hash or its converter version changes. `--force` rebuilds everything.
-- Conversion is **offline**. `VS.Extract extract` converts the supported source files during extraction; `VS.Extract images <datadir>` reruns just the standalone image converter. The field-background runtime now reads the converted PNG/sidecar and uploads the native pixels and palette; it does not parse or convert the source TIM. The FAR layout remains a raw file read through the disc-file catalog and is a separate migration boundary.
-- **Startup check:** `VS.Desktop`, Combat Lab and Launcher validate `manifest.json` and the required converter versions. They reject missing/stale standalone TIM sources, dependencies or outputs with an instruction to rerun extraction. They never fall back to reading the source TIM.
+- Conversion is **offline**. `VS.Extract extract` converts the supported source files during extraction; `VS.Extract images <datadir>` reruns just the image converters and `VS.Extract tables <datadir>` just the table converters (the workshop recipes, §6.8). The field-background runtime now reads the converted PNG/sidecar and uploads the native pixels and palette; it does not parse or convert the source TIM. The FAR layout remains a raw file read through the disc-file catalog and is a separate migration boundary.
+- **Startup check:** `VS.Desktop`, Combat Lab and Launcher validate `manifest.json` and the required converter versions. They reject missing/stale converted sources (TIM, FBC, FBT and SYD), dependencies or outputs, and workshop tables that fail their checks, with an instruction to rerun extraction. They never fall back to reading the source file.
 
 ---
 
@@ -82,7 +82,7 @@ Native\data\
     battle\ break-arts.csv abilities.csv spells.csv status-effects.csv
     enemies\ species.csv enemies.csv modelsets.csv loot.csv bestiary.csv      (ENEMY_DATA_SCHEME.md)
     world\  zones.csv rooms.csv doors.csv keys.csv chests.csv save-points.csv puzzle-challenges.csv
-    menu\   workshops.csv combination-*.csv ...      (SYD workshop recipes)
+    menu\   combination-<kind>-results.csv -pairs.csv -materials.csv   (SYD workshop recipes, §6.8)
     title\  title.json             (layout, timings, menu items: structured, so JSON)
     effects\ effects.json          (template instantiations → parameters)
     music.json sfx.json            (index: id → sequence/bank files)
@@ -133,7 +133,7 @@ Flat, row-shaped tables (items, actions, spells, status, recipes, enemies, loot,
 1. `tools\port\gen_table_decoders.py` reads the decomp struct definitions (libclang, PS1 layout: 32-bit pointers, 4-byte alignment, GCC bitfield order). For each catalog table it emits:
    - a C++ reader (`VS.Extract`, `src\tables\Generated*.cpp`) that pulls fields from the file image at the symbol's offset;
    - a CSV writer (flat tables) or JSON writer (structured catalogs);
-   - a schema (`Native\Content\schemas\<catalog>.schema.json`, committed); for a CSV table it lists the columns, types, ranges and references;
+   - a schema (committed under `Native\Content\schemas\` at the table's path under `Native\data\`, e.g. `catalogs\menu\combination-blade-results.schema.json`); for a CSV table it lists the columns, types, ranges and references;
    - the runtime C++ record type plus its loader (`VS.Content`, committed). The runtime type uses **modern widths** (D3: no layout matching).
 2. Field names come from `TYPE_LEDGER.csv` (the final names), never `unk_0x10`. A field that is still unnamed fails generation.
 3. **Pointers become references:**
@@ -181,7 +181,7 @@ The disc has 27 kinds of files. The "Source" column below names the files on the
 | `BG\*.TIM` (4), `BG\*.FAR` (4), root `*.TIM` | `textures\bg\*.png` + `.image.json`; `.FAR` → background layout JSON | TIM → PNG (§6.4). The BG TIM headers are not authoritative: they declare mode `0xA` (16bpp + CLUT) with a 256-colour CLUT and three share id `0x110`; the layout's draw depth selects 8-bit indices. The runtime uploads the converted PNG's packed indices and exact palette words. `.FAR` = 12-byte header `{w, h, reserved}` then w×h 24-byte tiles (source rectangle + 4 corner colours); it is still loaded raw through MPD room section 15 | native `Field\Background.cpp`, `BackgroundLive.cpp` |
 | `GIM\*.GIM` (49) | `textures\gim\*.png` + composition JSON | VS screen-effect images: per-layer cell maps over shared strips, 4 × 16-colour CLUTs and a shared or owned 256-colour palette | native `Render\GimImages.cpp` |
 | `MENU\*.BIN` (11), `ENDING\ILLUST*.BIN` (11) | `ui\*.png` + `.image.json` + layout JSON | menu art, game-over, ending illustrations. `MENUBG` is word-RLE and `ILLUST*` are LZ/RLE-compressed TIMs, decoded at conversion; `ITEMNAME`, `ITEMHELP`, `MENU12` and `MCMAN` are text and tables, not images | native `Menu\`, `StaffRollCore.cpp` |
-| `MENU\*.SYD` (3) | `catalogs\menu\combination-*.csv` | workshop **combination recipes** (result and material tables), not item definitions; there is no global item-stat file | native `Menu\Setup\Combination.hpp` |
+| `MENU\*.SYD` (3) | `catalogs\menu\combination-<kind>-{results,pairs,materials}.csv` + `.schema.json` | workshop **combination recipes** (result records, ingredient pairs and material rules), not item definitions; there is no global item-stat file. Converted (§6.8) | native `Content\WorkshopRecipes.hpp`, `Menu\Setup\Combination.hpp` |
 | `SMALL\MON.BIN` | `catalogs\enemies\bestiary.csv` | 150 records of `0x2C` bytes | ENEMY_DATA_SCHEME |
 | `SMALL\HELP*.HF0/HF1` (28) | `text\strings.en.json` + `ui\help\<page>.json` + `ui\help\*.png` | `.HF0` = page text, sprite placements and line table; `.HF1` = 8×16 8bpp illustration blocks and 16-colour palettes | native `ManualTopics.hpp`, `ManualIllustration.hpp`, `Manual.cpp` |
 | `EFFECT\*.P` (290), `*.FBT` (755), `*.FBC` (277), `EFFECT\*.BIN` (311) | `effects\<id>.json` + `textures\effect\*.png` | `.FBT` texture pages + `.FBC` palettes → PNG (§6.4). `.P` files are block streams (u32 header: size in the low 16 bits, type in the high 16 bits; type 0 ends) → effect JSON. `.BIN` files are **PLG code overlays** and EFFPURGE dispatch tables, already ported to C++ (`Effects\Plugins\PlgNNN.cpp`, `PurgeTables.cpp`); only their data blobs remain, as typed tables. Effect behaviors stay in code (plan §9.7) | decomp `Effects\` |
@@ -504,6 +504,20 @@ navigation/listening, every effect/track in context, bit-exact DSP parity and
   - The YUV planes are uploaded to an SDL3 GPU texture and converted in a shader. Presentation is clocked to the audio, and skipping is the game's original behavior.
 - **Validation:** frame N of the decoded MKV against a jpsxdec decode of the same frame, with a PSNR threshold of ≥ 45 dB (near-lossless), for the first 60 frames and every 300th frame after that.
 
+### 6.8 Workshop recipes (SYD → CSV tables, #499)
+
+`MENU\BLADE.SYD`, `SHIELD.SYD` and `ARMOR.SYD` are the workshop's combination recipes. Each one starts with a 12-byte header of three offsets: the pair matrix (the result record by both ingredients' record indices), the material matrix (the material two ingredients' materials give; blades and armor also index it by category) and the result records (16 bytes for a blade, 8 for a shield or armor piece). `VS.Extract tables <datadir>` (and `extract`) converts each file to three CSV tables under `catalogs\menu\` (`Extract/WorkshopRecipeConversion.hpp`, `Content/WorkshopRecipes.hpp`):
+
+- `combination-<kind>-results.csv`: one row per result record, with a stable `id` (`blade-001`), its `legacy_id` (the record index the item records and the original's matrices use) and the named fields (model, category, gem slots or the blade's damage, cost and range fields, and the strength, intelligence and agility modifiers). The unnamed bytes are kept as `raw.byte7` and `raw.byte11` (§4.1).
+- `combination-<kind>-pairs.csv`: `first,second,result`, all result ids, one row per ingredient pair that makes something.
+- `combination-<kind>-materials.csv`: `first_material,[first_category,]second_material,[second_category,]material`, one row per combination that gives a material (1 wood to 7 damascus).
+
+Empty matrix entries have no row. Each table's schema is committed in `Native\Content\schemas\catalogs\menu\` and written beside it, and a test checks that the two match. The manifest lists each kind as one output (`catalog.menu.combination-<kind>`, converter `syd-recipe-csv`) holding its six files and the source hash.
+
+Conversion keeps edits. A rerun leaves the tables of an unchanged SYD alone, reconverts those whose SYD changed and with `--force` rewrites them all. The converter only writes tables that parse back to the decoded recipes and rebuild the original file byte for byte, so a disc that does not convert exactly is an error rather than a lossy output. At startup the data store reads and checks every table (types and ranges, every reference names a result, ingredients fit the pair matrix, `legacy_id`s run from 0 without gaps) and refuses to open on the first error, naming the file, line and column and telling the user to rerun `VS.Extract tables`. `RequireConversions` refuses to start when a SYD has no tables or its source hash is stale. The workshop builds its recipe book from the loaded tables (`Menu::Setup::BuildRecipeBook`, which rebuilds the original's dense matrices) and never reads the SYD. On the disc, the three files give 96 blade, 17 shield and 81 armor result records (record 0 of each is the empty one), with 8,100, 256 and 4,096 pairs and 2,025, 49 and 784 material rules.
+
+Not yet done: compiling the tables into SQLite, the patch and mod layers, replacing the result fields with references to the item catalog when there is one, and an in-game combination replay (#58, #499).
+
 ---
 
 ## 7. Round-trip and validation (per converter)
@@ -513,6 +527,7 @@ Every converter ships with a test in `VS.Tests` (tagged `[extract]`; it runs onl
 | Converter | Test |
 |---|---|
 | Tier 1 tables | disc bytes → decoder → CSV/JSON → runtime loader → re-encode with the PS1 layout == the original bytes |
+| workshop recipes | each SYD → decode → CSV tables → parse == the decoded recipes → re-encode == the original bytes (§6.8) |
 | text | string bytes → markup → encode == the original bytes, for every string |
 | SHP/SEQ/WEP | `decode(raw)` == `ModelLoader(glTF)` field by field (bones, vertices, UVs, colours, flags, every `extras` value, every keyframe) |
 | ESQ/ETM actor bindings | decoded source == converted/reloaded skeletal and texture tracks, indexed pixels, palettes, patch rectangles, associations, timing and lifecycle commands; malformed or unresolved inputs fail explicitly |
@@ -546,7 +561,7 @@ Record source revision/dirty state, disc identity, tool/converter/schema version
 {
   "schema_version": 2,
   "extractor_version": "0.1.0",
-  "converters": { "fbc-palette-png": 1, "fbt-texture-png": 1, "tim-png": 1 },
+  "converters": { "fbc-palette-png": 1, "fbt-texture-png": 1, "syd-recipe-csv": 1, "tim-png": 1 },
   "outputs": [
     {
       "id": "image.bg.001op01a",
@@ -593,7 +608,7 @@ Record source revision/dirty state, disc identity, tool/converter/schema version
 
 <!-- content:begin (generated by tools/ledger/content.py --sync) -->
 
-**1,037 of 5,162 disc files converted**, 1,037 of them with a passing round trip; 194 skipped with a reason; 3,931 unconverted.
+**1,040 of 5,162 disc files converted**, 1,040 of them with a passing round trip; 194 skipped with a reason; 3,928 unconverted.
 
 | Kind | Files | Converted | Round trip pass | Skipped | Unconverted | Converts under |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
@@ -604,7 +619,7 @@ Record source revision/dirty state, disc identity, tool/converter/schema version
 | background layout | 4 | 0 | 0 | 0 | 4 | #210 |
 | bestiary | 1 | 0 | 0 | 0 | 1 | #499 |
 | boot configuration | 1 | 0 | 0 | 1 | 0 | - |
-| combination recipes | 3 | 0 | 0 | 0 | 3 | #499 |
+| combination recipes | 3 | 3 | 3 | 0 | 0 | #499 |
 | effect package | 290 | 0 | 0 | 0 | 290 | #216 |
 | effect palette | 277 | 277 | 277 | 0 | 0 | #215 |
 | effect plugin overlay data | 120 | 0 | 0 | 0 | 120 | #502 |

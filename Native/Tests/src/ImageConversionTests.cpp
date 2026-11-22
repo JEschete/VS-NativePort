@@ -34,6 +34,7 @@
 #include "Extract/EffectTextureConversion.hpp"
 #include "Extract/ImageConversion.hpp"
 #include "Extract/ImageFilesWriter.hpp"
+#include "Extract/WorkshopRecipeConversion.hpp"
 #include "Field/BackgroundLive.hpp"
 
 namespace {
@@ -468,10 +469,15 @@ void OverwriteFile(const fs::path& path, const Bytes& bytes) {
   REQUIRE(output.good());
 }
 
+// Converts root's images and records its workshop recipe tables (none in
+// these stores), so the store's conversion check covers the images alone.
 Extract::ImageConversionReport RequiredConversion(const fs::path& root,
                                                   bool force) {
   auto report = Extract::ConvertDiscImages(root, force);
   REQUIRE(report.has_value());
+  const auto tables = Extract::ConvertDiscTables(root, force);
+  INFO((tables ? std::string{} : tables.error()));
+  REQUIRE(tables.has_value());
   return *report;
 }
 
@@ -873,7 +879,7 @@ TEST_CASE("Data stores require each FBC's current converted palette",
   TemporaryData data;
   const Bytes fbc = FbcBytes(2);
   data.WriteManifest({{"EFFECT/E001_1.FBC", fbc}});
-  REQUIRE(Extract::ConvertDiscImages(data.Root(), false).has_value());
+  REQUIRE(RequiredConversion(data.Root(), false).converted == 1);
   CHECK(ConversionError(data).empty());
 
   SECTION("a missing palette image") {
@@ -1734,7 +1740,7 @@ TEST_CASE("A converted background refuses its deleted layout",
           "[content-images]") {
   TemporaryData data;
   data.WriteManifest(BackgroundTimFiles());
-  REQUIRE(Extract::ConvertDiscImages(data.Root(), false).has_value());
+  REQUIRE(RequiredConversion(data.Root(), false).converted == 1);
   CHECK(ConversionError(data).empty());
   data.WriteManifest({{"BG/001OP01A.TIM", TimBytes()}});
   CHECK(ConversionError(data).find(
@@ -1771,9 +1777,8 @@ TEST_CASE("extracted TIM corpus converts without changing its source bytes",
 
   TemporaryData converted_data;
   converted_data.WriteManifest(input_files);
-  const auto report = Extract::ConvertDiscImages(converted_data.Root(), false);
-  REQUIRE(report.has_value());
-  CHECK(report->converted ==
+  const auto report = RequiredConversion(converted_data.Root(), false);
+  CHECK(report.converted ==
         std::ranges::count_if(input_files, [](const auto& item) {
           return item.first.ends_with(".TIM");
         }));

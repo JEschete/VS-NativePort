@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "table": "combination-blade-results",
+  "description": "Workshop combination results: the item each combination makes.",
+  "key": ["id"],
+  "columns": [
+    {
+      "name": "id",
+      "type": "id",
+      "description": "The result's id; pairs name it."
+    },
+    {
+      "name": "legacy_id",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "The original record index: the combined item's sub id (and, for blades, its id; shields and armor add 126). Runs from 0 without gaps."
+    },
+    {
+      "name": "model",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "The combined item's model."
+    },
+    {
+      "name": "category",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9,
+      "description": "The blade category (0-9); the material table is by category."
+    },
+    {
+      "name": "damage_type",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 3,
+      "description": "The damage type (0-3)."
+    },
+    {
+      "name": "cost_type",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 7,
+      "description": "What the blade's attacks cost (0-7)."
+    },
+    {
+      "name": "cost",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "How much each attack costs."
+    },
+    {
+      "name": "recovery_delay",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "The recovery delay after an attack (record byte 6)."
+    },
+    {
+      "name": "strength",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": "Base strength, before the material's bonus."
+    },
+    {
+      "name": "intelligence",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": "Base intelligence, before the material's bonus."
+    },
+    {
+      "name": "agility",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": "Base agility, before the material's bonus."
+    },
+    {
+      "name": "range",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "The attack's reach."
+    },
+    {
+      "name": "range_y",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "The attack area's second extent."
+    },
+    {
+      "name": "range_z",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "The attack area's third extent."
+    },
+    {
+      "name": "attack_shape",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 7,
+      "description": "The attack area's shape (the shape byte's low three bits)."
+    },
+    {
+      "name": "attack_angle",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 31,
+      "description": "The attack area's angle (the shape byte's high five bits)."
+    },
+    {
+      "name": "raw.byte7",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "Record byte 7, not yet named; kept so the record rebuilds exactly."
+    },
+    {
+      "name": "raw.byte11",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "Record byte 11, not yet named; kept so the record rebuilds exactly."
+    }
+  ]
+}

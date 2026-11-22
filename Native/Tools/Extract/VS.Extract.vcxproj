@@ -48,20 +48,24 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\ConversionManifestWriter.cpp" />
+    <ClCompile Include="src\ConverterBatch.cpp" />
     <ClCompile Include="src\EffectTextureConversion.cpp" />
     <ClCompile Include="src\ImageConversion.cpp" />
     <ClCompile Include="src\ImageFilesWriter.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\TimImage.cpp" />
     <ClCompile Include="src\TimWriter.cpp" />
+    <ClCompile Include="src\WorkshopRecipeConversion.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Extract\ConversionManifestWriter.hpp" />
+    <ClInclude Include="include\Extract\ConverterBatch.hpp" />
     <ClInclude Include="include\Extract\EffectTextureConversion.hpp" />
     <ClInclude Include="include\Extract\ImageConversion.hpp" />
     <ClInclude Include="include\Extract\ImageFilesWriter.hpp" />
     <ClInclude Include="include\Extract\TimImage.hpp" />
     <ClInclude Include="include\Extract\TimWriter.hpp" />
+    <ClInclude Include="include\Extract\WorkshopRecipeConversion.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Engine\VS.Engine.vcxproj">
