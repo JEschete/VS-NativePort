@@ -34,6 +34,7 @@
 #include "Effects/EffectScriptLive.hpp"
 #include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
+#include "Effects/ParticleRender.hpp"
 #include "Effects/ParticleTextureAnimation.hpp"
 #include "Effects/Particles.hpp"
 #include "Effects/Runtime.hpp"
@@ -1592,6 +1593,8 @@ constexpr std::uint16_t kEffectClutColumn = 768 / 16;
 constexpr std::uint16_t kIndexedPage = 10;
 constexpr std::uint16_t kLowerPages = 0x10;
 constexpr std::int16_t kStripY = 300;
+constexpr std::int16_t kUnitCosine = 4096;
+constexpr std::uint32_t kNeutralColor = 0x808080;
 
 // Row 0 is the composite words, then non-zero greys alternating STP; row 1
 // is row 0 moved one entry left, so no entry repeats row 0's and its last is
@@ -1671,19 +1674,20 @@ constexpr std::uint16_t DescriptorClut(std::int16_t row, bool semi) {
                                     (semi ? kSemiTransparentClut : 0U));
 }
 
-Render::DrawCorner StripCorner(std::int16_t x, std::int16_t y, std::uint8_t u,
-                               std::uint8_t v) {
+// The descriptor quad's corner `index` as the renderer receives it.
+Render::DrawCorner QuadCorner(const Effects::ParticleQuad& quad,
+                              std::size_t index) {
   Render::DrawCorner corner;
-  corner.x = x;
-  corner.y = y;
-  corner.u = u;
-  corner.v = v;
+  corner.x = quad.vertices.at(index).x;
+  corner.y = quad.vertices.at(index).y;
+  corner.u = static_cast<std::uint8_t>(quad.uv.at(index) & 0xFFU);
+  corner.v = static_cast<std::uint8_t>((quad.uv.at(index) >> 8U) & 0xFFU);
   return corner;
 }
 
-// Every index of the 8-bit (256) or 4-bit (16) texture drawn raw through
-// `clut` over the background, in the tpage's semi-transparency `mode`, with
-// `slot` in the effect CLUT rows.
+// Every index of the 8-bit (256) or 4-bit (16) texture drawn over the
+// background from a descriptor with CLUT word `clut` and the tpage's
+// semi-transparency `mode`, with `slot` in the effect CLUT rows.
 std::vector<std::uint16_t> CompositeIndices(std::span<const std::uint16_t> slot,
                                             bool eight_bit, std::uint16_t clut,
                                             std::uint16_t mode) {
@@ -1712,21 +1716,32 @@ std::vector<std::uint16_t> CompositeIndices(std::span<const std::uint16_t> slot,
                 .h = rows},
                texture.data());
   pages.Fill({.x = 0, .y = kStripY, .w = width, .h = rows}, 128, 64, 32);
+  // One unrotated descriptor over the whole texture; BuildParticleQuad
+  // takes the draw's semi-transparency from the CLUT word's bit 15.
+  Effects::ParticleTexture descriptor{};
+  descriptor.corners = {{{0, 0}, {width, 0}, {0, rows}, {width, rows}}};
+  descriptor.w = width;
+  descriptor.h = rows;
+  descriptor.clut = clut;
+  descriptor.tpage = static_cast<std::uint16_t>(
+      kIndexedPage | (eight_bit ? (1U << 7U) : kLowerPages) |
+      (static_cast<unsigned>(mode) << 5U));
+  const Effects::ParticleQuad quad = Effects::BuildParticleQuad(
+      descriptor, {.x = 0, .y = kStripY}, kUnitCosine, 0, kNeutralColor);
   Render::DrawPolygon strip;
+  // Drawn raw so the texels are the palette words; production sprites also
+  // modulate by the particle colour and dither.
   strip.material = {.gouraud = false,
                     .textured = true,
-                    .semi_transparent = (clut & kSemiTransparentClut) != 0,
+                    .semi_transparent = quad.semi_transparent,
                     .raw_texture = true,
-                    .page = {static_cast<std::uint16_t>(
-                        kIndexedPage | (eight_bit ? (1U << 7U) : kLowerPages) |
-                        (static_cast<unsigned>(mode) << 5U))},
-                    .palette = {clut}};
+                    .page = {quad.tpage},
+                    .palette = {quad.clut}};
   strip.corner_count = Render::kDrawQuadCorners;
-  const auto bottom = static_cast<std::int16_t>(kStripY + rows);
-  strip.corners = {
-      StripCorner(0, kStripY, 0, 0), StripCorner(width, kStripY, width, 0),
-      StripCorner(0, bottom, 0, rows), StripCorner(width, bottom, width, rows)};
+  strip.corners = {QuadCorner(quad, 0), QuadCorner(quad, 1),
+                   QuadCorner(quad, 2), QuadCorner(quad, 3)};
   REQUIRE(pages.Draw(strip));
+  const auto bottom = static_cast<std::int16_t>(kStripY + rows);
   std::vector<std::uint16_t> drawn;
   for (std::int16_t y = kStripY; y < bottom; ++y) {
     for (std::int16_t x = 0; x < width; ++x) drawn.push_back(pages.At(x, y));
