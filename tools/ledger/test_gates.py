@@ -926,6 +926,16 @@ def slice_record(**values: str) -> dict[str, str]:
     }
 
 
+class ReadCsvTests(unittest.TestCase):
+    def test_a_row_with_more_or_fewer_fields_than_the_header_is_rejected(self) -> None:
+        for row in ("A1,one,two,three\n", "A1,one\n"):
+            with self.subTest(row=row), tempfile.TemporaryDirectory() as directory:
+                path = Path(directory) / "LEDGER.csv"
+                path.write_text("id,name,notes\nA0,zero,\"kept, quoted\"\n" + row, encoding="utf-8")
+                with self.assertRaisesRegex(SystemExit, r"LEDGER\.csv: row A1 \(record 3\)"):
+                    gates.read_csv(path)
+
+
 class DefinitionParserTests(unittest.TestCase):
     @staticmethod
     def names(text: str) -> list[str]:

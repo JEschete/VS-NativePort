@@ -151,7 +151,14 @@ def read_csv(path: Path) -> list[dict[str, str]]:
     if not path.is_file():
         return []
     with path.open(encoding="utf-8-sig", newline="") as stream:
-        return list(csv.DictReader(stream))
+        rows = list(csv.DictReader(stream))
+    # DictReader files surplus fields under None and fills missing ones with
+    # None; either means an unquoted comma or a lost field (#508).
+    for line, row in enumerate(rows, 2):
+        if None in row or None in row.values():
+            identifier = next(iter(row.values()), "")
+            raise SystemExit(f"{path.name}: row {identifier} (record {line}) has a field count that differs from the header")
+    return rows
 
 
 def read_tracker(path: Path) -> str:

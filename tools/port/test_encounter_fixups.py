@@ -3683,8 +3683,9 @@ int func_800F9800(void) {
         # left it for the owned ItemRows.cpp LoadItemText (#276 row 46), whose ItemRowsLive.cpp StartItemTextLoad
         # keeps the guard below. F00645 (two reads) left it for the owned Background.cpp QueueTiledBackgroundLoad
         # (#276 row 24), which completes a refused read through the host's CompleteRefusedRead (BackgroundLive.cpp).
-        # F02899 left it for the owned Combination.cpp LoadCombinationRecipes (#276 row 49), whose SetupLive.cpp
-        # StartRecipeLoad keeps the guard below. F00532 and F00542 left it for the owned RoomLoading.cpp
+        # F02899 left it for the owned Combination.cpp LoadCombinationRecipes (#276 row 49); since #499
+        # SetupLive.cpp StartRecipeLoad reads the converted workshop tables, so no recipe disc read remains.
+        # F00532 and F00542 left it for the owned RoomLoading.cpp
         # QueueZoneLoad and QueueRoomLoad (#276 row 25c), whose RoomLoadingLive.cpp BeginRead keeps the guard
         # below. F01425 left it for the owned EffectRuntime.cpp UpdatePrimaryEffects (#276 row 37), which keeps
         # a refused menu reload request from the queue. F01388 left it for the owned ScreenOverlayLifetime.cpp
@@ -3867,7 +3868,8 @@ int func_800F9800(void) {
         # ActorSpawningLive.cpp BeginZudRead, and row 46 moved ItemRows.cpp's item text load into
         # ItemRowsLive.cpp StartItemTextLoad. Row 24 moved Background.cpp's tiled TIM and layout reads into the
         # owned QueueTiledBackgroundLoad, whose BackgroundLive.cpp EnqueueRead runs only for an allocated read.
-        # Row 49 moved Combination.cpp's recipe read into SetupLive.cpp StartRecipeLoad. Row 25c moved
+        # Row 49 moved Combination.cpp's recipe read into SetupLive.cpp StartRecipeLoad, which since #499 builds
+        # the recipe book from the converted workshop tables instead. Row 25c moved
         # RoomLoading.cpp's ZND and MPD reads into RoomLoadingLive.cpp BeginRead. Row 37 moved Runtime.cpp's menu
         # reload request into the owned EffectRuntime.cpp UpdatePrimaryEffects. Row 39 moved ScreenEffects.cpp's
         # overlay load into the owned ScreenOverlayLifetime.cpp LoadScreenOverlay, whose ScreenOverlaysLive.cpp
@@ -3909,8 +3911,9 @@ int func_800F9800(void) {
         self.assertIn("if(itemTextRequest!=nullptr){Content::EnqueueLiveDiscRequest(itemTextRequest,", items)
         self.assertIn("}else{itemTextRequest=Content::CompleteLiveRefusedDiscRequest(&file,block);}", items)
         setup = "".join((root / r"Native\Game\src\Menu\Setup\SetupLive.cpp").read_text(encoding="utf-8").split())
-        self.assertIn("if(recipeLoad.request!=nullptr){Content::EnqueueLiveDiscRequest(recipeLoad.request,data);}", setup)
-        self.assertIn("}else{recipeLoad.request=Content::CompleteLiveRefusedDiscRequest(&request,data);}", setup)
+        # #499: the recipes come from the converted workshop tables, so no recipe disc request remains to guard.
+        self.assertNotIn("DiscRequest", setup)
+        self.assertIn("store->WorkshopRecipes()", setup)
 
     def test_heap_callers_use_the_live_binding_and_disc_ring_is_bytes(self):
         names = ("AllocateFromLowEnd", "AllocateFromHighEnd", "FreeFromLowEnd", "FreeFromHighEnd")
