@@ -721,8 +721,8 @@ ActorAssetRequest SharedModelRequest(FakeAssetHost& host) {
 void AddBattleSequenceActor(FakeAssetHost& host) {
   ActorAssetRecord actor = ActorWithModel(9);
   actor.battle_sequence_lbas[2] = 5000;
-  actor.chain_attack_animation_ids[2] = 0x1800;
-  actor.chain_attack_animation_ids[3] = 0x7FF;
+  actor.battle_sequence_sizes[2] = 0x1800;
+  actor.battle_sequence_sizes[3] = 0x7FF;
   host.actors[3] = actor;
   host.read_finished = false;
 }
@@ -2148,7 +2148,7 @@ TEST_CASE("Player battle sequence loads also queue the material sequence",
   FakeAssetHost& host = *owner;
   ActorAssetRecord actor = ActorWithModel(0);
   actor.battle_sequence_lbas[4] = 6000;
-  actor.chain_attack_animation_ids[4] = 0x0800;
+  actor.battle_sequence_sizes[4] = 0x0800;
   host.actors[0] = actor;
   host.read_finished = false;
   ActorAssetLoadState state;

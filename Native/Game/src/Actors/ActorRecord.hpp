@@ -139,7 +139,9 @@ struct ActorRecord {
   std::int32_t reserved65c;
   std::int32_t reserved660;
   std::uint32_t battle_sequence_lbas[kBattleSequences];
-  std::uint16_t chain_attack_animation_ids[kBattleSequences];
+  // Byte sizes of the battle sequences: entity.h calls them
+  // chainAttackAnimationIds, ShpHeader btSeqSizes (#509).
+  std::uint16_t battle_sequence_sizes[kBattleSequences];
   std::uint32_t special_sequence_lbas[kSpecialSequences];
   std::int32_t reserved6bc[kReserved6bcWords];
   std::uint16_t special_sequence_sizes[kSpecialSequences];

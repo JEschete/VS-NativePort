@@ -2123,8 +2123,7 @@ SequenceFileExtent BattleSequenceFile(ActorAssetHost& host,
   }
   const auto index = static_cast<std::size_t>(model);
   const std::uint32_t sectors =
-      std::uint32_t{actor->chain_attack_animation_ids[index]} >>
-      kSequenceSizeShift;
+      std::uint32_t{actor->battle_sequence_sizes[index]} >> kSequenceSizeShift;
   if (sectors == 0) {
     return SequenceResult(kAssetDone);
   }

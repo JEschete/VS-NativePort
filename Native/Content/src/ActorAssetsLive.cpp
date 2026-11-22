@@ -231,9 +231,8 @@ static_assert(
     std::extent_v<decltype(VS::Actors::ActorRecord::battle_sequence_lbas)> ==
     std::tuple_size_v<decltype(ActorAssetRecord::battle_sequence_lbas)>);
 static_assert(
-    std::extent_v<
-        decltype(VS::Actors::ActorRecord::chain_attack_animation_ids)> ==
-    std::tuple_size_v<decltype(ActorAssetRecord::chain_attack_animation_ids)>);
+    std::extent_v<decltype(VS::Actors::ActorRecord::battle_sequence_sizes)> ==
+    std::tuple_size_v<decltype(ActorAssetRecord::battle_sequence_sizes)>);
 static_assert(
     std::extent_v<decltype(VS::Actors::ActorRecord::special_sequence_lbas)> ==
     std::tuple_size_v<decltype(ActorAssetRecord::special_sequence_lbas)>);
@@ -668,8 +667,8 @@ void LoadActorTables(const VS::Actors::ActorRecord& in, ActorAssetRecord& out) {
                              .timer = scroll.timer};
   }
   std::ranges::copy(in.battle_sequence_lbas, out.battle_sequence_lbas.begin());
-  std::ranges::copy(in.chain_attack_animation_ids,
-                    out.chain_attack_animation_ids.begin());
+  std::ranges::copy(in.battle_sequence_sizes,
+                    out.battle_sequence_sizes.begin());
   std::ranges::copy(in.special_sequence_lbas,
                     out.special_sequence_lbas.begin());
   std::ranges::copy(in.special_sequence_sizes,
@@ -702,8 +701,8 @@ void StoreActorTables(const ActorAssetRecord& in,
   }
   std::ranges::copy(in.battle_sequence_lbas,
                     std::begin(out.battle_sequence_lbas));
-  std::ranges::copy(in.chain_attack_animation_ids,
-                    std::begin(out.chain_attack_animation_ids));
+  std::ranges::copy(in.battle_sequence_sizes,
+                    std::begin(out.battle_sequence_sizes));
   std::ranges::copy(in.special_sequence_lbas,
                     std::begin(out.special_sequence_lbas));
   std::ranges::copy(in.special_sequence_sizes,

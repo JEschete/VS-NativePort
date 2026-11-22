@@ -374,7 +374,7 @@ struct ActorAssetRecord {
   std::uint16_t occupancy_height = 0;
   std::uint16_t reserved648 = 0;  // the low 16 bits of the 0x648 word
   std::array<std::uint32_t, kActorBattleSequences> battle_sequence_lbas{};
-  std::array<std::uint16_t, kActorBattleSequences> chain_attack_animation_ids{};
+  std::array<std::uint16_t, kActorBattleSequences> battle_sequence_sizes{};
   std::array<std::uint32_t, kActorSpecialSequences> special_sequence_lbas{};
   std::array<std::uint16_t, kActorSpecialSequences> special_sequence_sizes{};
   std::int32_t opaque6dc = 0;
