@@ -8,20 +8,25 @@ any, is in [HANDOFF.md](../Docs/HANDOFF.md).
 
 - Commit and push at verified milestones without asking. Never add AI or assistant attribution: no
   `Co-authored-by` trailers, tool names or model names in commits, issues, PRs, comments or files.
+- `main` changes only through pull requests the owner reviews and merges. Work on a feature branch (currently
+  `imp/asset-migration`) with one open PR into `main`; never push to `main` directly.
 - Never force-push or rewrite history. Preserve unrelated edits in the worktree.
 - Never delete Ghidra, `tools\Base` or `tools\PSX`. Keep the repository small: delete scratch files in `build\` when
   done, and keep disc-derived data, captures, dumps and BIOS files out of commits.
 - Work in the order set by tracker [#4](https://github.com/JEschete/VS-NativePort/issues/4). Log a newly found defect
   as an issue, with evidence, before fixing it.
-- A passing build or baseline is not proof of behavior. Close an issue only with the fixing commit, the exact-revision
-  CI run and concrete test or replay evidence.
+- A passing build or baseline is not proof of behavior. An issue closes only with the fixing commit, the exact-revision
+  CI run and concrete test or replay evidence; with the PR workflow it closes when the owner merges the PR that lists
+  `Closes #N`.
 
 ## Session start
 
 1. Read [HANDOFF.md](../Docs/HANDOFF.md) and the next open item in tracker #4.
 2. Check CI on the last pushed commit: `gh run list --repo JEschete/VS-NativePort --limit 4`. Track and repair a
    failure instead of refreshing a baseline to hide it.
-3. Check `git status`; finish or commit any verified work left from the previous session before starting new work.
+3. Check `git status` and the open PR (`gh pr list --repo JEschete/VS-NativePort`). If the owner merged it, bring the
+   feature branch up to date with `main` (`git fetch` then `git merge origin/main`) and open a new PR for the next
+   work. Finish or commit any verified work left from the previous session before starting new work.
 
 ## Making a change
 
@@ -76,9 +81,10 @@ history. Verify each change with the smallest builds, Catch2 tags, replays and q
 - Keep function, data and type status in the canonical [ledgers](../Docs/ledgers/). Record only what was
   demonstrated.
 - Commit only the change's files. Write the message to a UTF-8 file without BOM and use `git commit -F <file>`;
-  no attribution. Push, then `gh run watch <id> --exit-status`.
-- After CI passes, post a concise issue checkpoint with the commit, CI run and evidence location. Close an issue only
-  when all its acceptance criteria are verified, then continue the next ordered item.
+  no attribution. Push the feature branch, then `gh run watch <id> --exit-status`.
+- After CI passes, post a concise issue checkpoint with the commit, CI run and evidence location. When all of an
+  issue's acceptance criteria are verified, add `Closes #N` to the open PR's description; the issue closes when the
+  owner merges. Then continue the next ordered item.
 - Update [HANDOFF.md](../Docs/HANDOFF.md) at a package boundary, an owner pause or a genuine blocker. Include the exact
   current revision, next action and any unresolved limits.
 - Retain referenced verification evidence; clean only disposable scratch intermediates.

@@ -35,12 +35,12 @@
   <Import Project="$(VCInstallDir)vcpkg\scripts\buildsystems\msbuild\vcpkg.props" Condition="Exists('$(VCInstallDir)vcpkg\scripts\buildsystems\msbuild\vcpkg.props')" />
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)include;$(MSBuildThisFileDirectory)src;$(MSBuildThisFileDirectory)..\Engine\include;$(MSBuildThisFileDirectory)..\Content\include;$(MSBuildThisFileDirectory)..\Game\include;$(MSBuildThisFileDirectory)..\Tools\CombatLab\include;$(MSBuildThisFileDirectory)..\Tools\Launcher\include;$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)include;$(MSBuildThisFileDirectory)src;$(MSBuildThisFileDirectory)..\Engine\include;$(MSBuildThisFileDirectory)..\Content\include;$(MSBuildThisFileDirectory)..\Game\include;$(MSBuildThisFileDirectory)..\Tools\CombatLab\include;$(MSBuildThisFileDirectory)..\Tools\Launcher\include;$(MSBuildThisFileDirectory)..\Tools\Extract\include;$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies Condition="'$(Configuration)'=='Debug'">SDL3.lib;Catch2d.lib;dav1d.lib;webm.lib;sfizz.lib;bcrypt.lib;winhttp.lib;chdr.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalDependencies Condition="'$(Configuration)'=='Release'">SDL3.lib;Catch2.lib;dav1d.lib;webm.lib;sfizz.lib;bcrypt.lib;winhttp.lib;chdr.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies Condition="'$(Configuration)'=='Debug'">SDL3.lib;Catch2d.lib;dav1d.lib;webm.lib;sfizz.lib;bcrypt.lib;winhttp.lib;chdr.lib;lodepng.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies Condition="'$(Configuration)'=='Release'">SDL3.lib;Catch2.lib;dav1d.lib;webm.lib;sfizz.lib;bcrypt.lib;winhttp.lib;chdr.lib;lodepng.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/WHOLEARCHIVE:$(OutDir)VS.Engine.lib /WHOLEARCHIVE:$(OutDir)VS.Content.lib /WHOLEARCHIVE:$(OutDir)VS.Game.lib %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
@@ -287,6 +287,7 @@
     <ClCompile Include="src\HudStateLiveTests.cpp" />
     <ClCompile Include="src\HudStateModuleTests.cpp" />
     <ClCompile Include="src\HudStateTests.cpp" />
+    <ClCompile Include="src\ImageConversionTests.cpp" />
     <ClCompile Include="src\InformationTests.cpp" />
     <ClCompile Include="src\InputTests.cpp" />
     <ClCompile Include="src\IntroPlayerTests.cpp" />
@@ -350,6 +351,7 @@
     <ClCompile Include="src\MusicVoiceConflictsTests.cpp" />
     <ClCompile Include="src\NativeContainerTests.cpp" />
     <ClCompile Include="src\NativeFilePresentationTests.cpp" />
+    <ClCompile Include="src\NativeImageTests.cpp" />
     <ClCompile Include="src\NativeMenuTests.cpp" />
     <ClCompile Include="src\NativeSnapshotTests.cpp" />
     <ClCompile Include="src\NavigationOverrideTests.cpp" />
@@ -479,6 +481,11 @@
     <ClCompile Include="src\WeatherPoolTests.cpp" />
     <ClCompile Include="src\WeatherRenderTests.cpp" />
     <ClCompile Include="src\XaMixTests.cpp" />
+    <ClCompile Include="..\Tools\Extract\src\ConversionManifestWriter.cpp" />
+    <ClCompile Include="..\Tools\Extract\src\ImageFilesWriter.cpp" />
+    <ClCompile Include="..\Tools\Extract\src\ImageConversion.cpp" />
+    <ClCompile Include="..\Tools\Extract\src\TimImage.cpp" />
+    <ClCompile Include="..\Tools\Extract\src\TimWriter.cpp" />
     <ClCompile Include="..\Tools\Launcher\src\Setup.cpp" />
     <ClCompile Include="..\Tools\Launcher\src\DiscValidation.cpp" />
     <ClCompile Include="..\Tools\Launcher\src\Updates.cpp" />

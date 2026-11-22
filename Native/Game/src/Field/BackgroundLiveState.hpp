@@ -41,9 +41,6 @@ extern VS::Core::Gte::VECTOR backgroundReferenceVectors[2];
 // five gradient colours last spread over the sky dome.
 inline constexpr int kBackgroundGradientColorCount = 5;
 extern int backgroundGradientColors[kBackgroundGradientColorCount];
-// decomp: D_800F1DAC (BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/146C.c:372): the
-// tiled background's TIM read, or null.
-extern VS::Content::DiscQueueSlot* backgroundTextureDiscRequest;
 // decomp: D_800F1DB0 (BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/146C.c:373): its
 // layout read, or null.
 extern VS::Content::DiscQueueSlot* backgroundLayoutDiscRequest;
@@ -72,7 +69,4 @@ extern std::uint8_t isTiledBackgroundEnabled;
 // decomp: D_800F1DCC (BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/146C.c:380): the
 // tiled background's layout (high heap), or null.
 extern BackgroundLayoutRecord* loadedBackgroundLayout;
-// decomp: D_800F1DD0 (BATTLE/BATTLE.PRG src/BATTLE/BATTLE.PRG/146C.c:381): its
-// TIM until the upload (high heap), or null.
-extern std::uint32_t* legacyBackgroundTimBuffer;
 }  // namespace VS::Field

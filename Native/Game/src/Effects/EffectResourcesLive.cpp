@@ -6,16 +6,24 @@
 #include <bit>
 #include <cstddef>
 #include <cstdint>
+#include <expected>
+#include <format>
 #include <iterator>
 #include <optional>
 #include <span>
+#include <string>
 #include <type_traits>
+#include <utility>
+#include <vector>
 
 #include "Audio/SoundBanksLive.hpp"
 #include "Audio/StreamControlLive.hpp"
 #include "Content/CdDriveLive.hpp"
+#include "Content/ConvertedImages.hpp"
+#include "Content/DataStore.hpp"
 #include "Content/DiscLayout.h"
 #include "Content/DiscQueue.hpp"
+#include "Content/NativeImage.hpp"
 #include "Content/OverlayWorkspaceLive.hpp"
 #include "Core/Arena.hpp"
 #include "Core/Log.hpp"
@@ -33,6 +41,7 @@
 #include "Effects/Runtime.hpp"
 #include "Effects/TextureBindings.hpp"
 #include "Legacy/Psx.hpp"
+#include "Render/PageSpace.hpp"
 #include "Render/TexturePagesLive.hpp"
 
 using VS::Core::Gte::VECTOR;
@@ -88,6 +97,7 @@ constexpr unsigned int kPluginUpdateMessage = 2;
 
 std::uint64_t refusedCalls = 0;
 std::uint64_t walkReports = 0;
+std::uint64_t paletteErrors = 0;
 
 // True on the 1st, 2nd, 4th, 8th... occurrence, to keep repeated
 // diagnostics readable.
@@ -282,11 +292,15 @@ void ReportWalk(const PackageWalk& walk) {
   }
 }
 
-// The texture tables and sound blocks the walk hands over.
+// The texture tables and sound blocks the walk hands over. Texture
+// descriptors must sample `palette_rows`.
 class LivePackageHost final : public EffectPackageHost {
  public:
+  explicit LivePackageHost(EffectPaletteRows palette_rows)
+      : palette_rows_(palette_rows) {}
+
   void BindTextureTables(std::span<std::byte> block) override {
-    BindLiveEffectTextureTables(block);
+    BindLiveEffectTextureTables(block, palette_rows_);
   }
 
   void BindSoundBank(std::span<std::byte> block) override {
@@ -297,6 +311,9 @@ class LivePackageHost final : public EffectPackageHost {
   std::int32_t BindAuxiliarySound(std::span<std::byte> block) override {
     return Audio::BindLiveRoomCutsceneStream(block.data(), block.size());
   }
+
+ private:
+  EffectPaletteRows palette_rows_;
 };
 
 // The package buffer within its file size and heap payload, or the empty
@@ -356,7 +373,38 @@ void StoreTextures(LiveTextureLoadList& list, const TextureLoadList& textures) {
   file.size = read.size;
   return file;
 }
+}  // namespace
 
+// The converted palette (ASSET_PIPELINE.md §6.4) of the FBC `source` reads,
+// found by its sector until assets have stable ids (#47).
+std::expected<std::vector<std::uint16_t>, std::string> LoadLiveEffectPalette(
+    DiscRead source) {
+  const Content::DataStore* const store = Content::DataStore::Get();
+  if (store == nullptr) {
+    return std::unexpected("no extracted-data store is open");
+  }
+  if (source.lba <= 0 || source.size <= 0) {
+    return std::unexpected(
+        std::format("invalid LBA {} and size {}", source.lba, source.size));
+  }
+  auto converted = Content::FindConvertedSource(
+      *store, {.lba = static_cast<std::uint32_t>(source.lba),
+               .rounded_size = static_cast<std::uint64_t>(source.size),
+               .extension = ".FBC",
+               .converter = "fbc-palette-png"});
+  if (!converted) return std::unexpected(converted.error());
+  auto document = Content::LoadConvertedImage(*store, *converted);
+  if (!document) return std::unexpected(document.error());
+  if (document->image.depth != Content::ImageDepth::kDirect16 ||
+      document->image.width != static_cast<std::uint32_t>(kEffectClutWidth)) {
+    return std::unexpected(std::format("{} is not a {}-entry effect palette",
+                                       converted->entry->path,
+                                       kEffectClutWidth));
+  }
+  return std::move(document->image.texels);
+}
+
+namespace {
 // The disc queue, the high heap, the overlay arena, VRAM and the texture
 // pages.
 class LiveResourceHost final : public EffectResourceHost {
@@ -436,6 +484,23 @@ class LiveResourceHost final : public EffectResourceHost {
     rectangle.w = area.w;
     rectangle.h = area.h;
     static_cast<void>(LoadImage(&rectangle, PointerOf<std::uint32_t>(pixels)));
+  }
+
+  std::optional<std::vector<std::uint16_t>> LoadPalette(
+      DiscRead source) override {
+    auto palette = LoadLiveEffectPalette(source);
+    if (palette) return std::move(*palette);
+    if (ShouldReport(paletteErrors)) {
+      VS::Core::LogError("effects", "effect palette at LBA {}: {} ({} errors)",
+                         source.lba, palette.error(), paletteErrors);
+    }
+    return std::nullopt;
+  }
+
+  void UploadPalette(const VramRect& area,
+                     std::span<const std::uint16_t> words) override {
+    Render::GamePages().Upload(
+        {.x = area.x, .y = area.y, .w = area.w, .h = area.h}, words.data());
   }
 };
 
@@ -531,6 +596,12 @@ void PublishRenderers(const EffectRendererTable& renderers) {
       return "no destination buffer";
     case ResourceRefusal::kReadTooLarge:
       return "a read longer than its buffer";
+    case ResourceRefusal::kPaletteMissing:
+      return "a CLUT without a loadable converted palette";
+    case ResourceRefusal::kPaletteRows:
+      return "a CLUT palette that is empty or ends in a partial 256-entry row";
+    case ResourceRefusal::kPaletteSlot:
+      return "a CLUT palette with more rows than its slot reaches by row 244";
     case ResourceRefusal::kNone:
       break;
   }
@@ -596,7 +667,13 @@ std::optional<PackageWalk> BindLiveEffectPackage(std::span<std::byte> package) {
   }
   ForgetLivePackageExtents();
   PackageRecord& record = PackageRecordFor(VS::Effects::package);
-  LivePackageHost host;
+  // The resident empty package (E000.P) samples only the system palette; a
+  // loaded package samples the rows its effect's configured CLUT fills.
+  const bool resident =
+      package.data() == reinterpret_cast<std::byte*>(emptyPackage);
+  LivePackageHost host{resident ? kSystemPaletteRows
+                                : BoundEffectPaletteRows(
+                                      LoadLiveEffectResourceState().textures)};
   const PackageWalk walk =
       BindEffectPackageBlocks(package, record.blocks, host);
   PublishBlocks(*VS::Effects::package, record.blocks, walk);

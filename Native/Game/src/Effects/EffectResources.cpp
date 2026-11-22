@@ -1,11 +1,13 @@
 // Hand-maintained (tools/port/owned.csv).
 #include "Effects/EffectResources.hpp"  // NOLINT(build/include): typed API
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
 #include <optional>
 #include <span>
+#include <vector>
 
 #include "Core/Math/Interpolation.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -102,23 +104,45 @@ template <typename T>
                   .h = kTexturePageHeight};
 }
 
-// Uploads a loaded texture asset, reserving and recording its page.
+// Uploads a loaded texture page, reserving and recording it.
 ResourceRefusal UploadTexture(EffectResourceState& state,
                               EffectResourceHost& host,
                               const TextureAsset& asset) {
   const auto area = TextureArea(asset);
   if (!area) return ResourceRefusal::kTextureSlot;
-  if (!asset.is_clut) {
-    const std::uint32_t page = kEffectTexturePageBase + asset.slot;
-    host.ReserveTexturePage(page);
-    state.loaded_texture_pages |= 1U << page;
-  }
+  const std::uint32_t page = kEffectTexturePageBase + asset.slot;
+  host.ReserveTexturePage(page);
+  state.loaded_texture_pages |= 1U << page;
   host.UploadImage(*area, state.texture_buffer.id);
   return ResourceRefusal::kNone;
 }
 
-// func_800D7CFC's state 1: reads the current asset and, once it has loaded,
-// uploads it and moves to the next.
+// Uploads a CLUT from its converted palette: the file's rows, then 0x0000
+// (never drawn) through the rest of the slot. The original uploaded the slot
+// from its one-sector FBC read, whose bytes past the file are the sector's
+// zero padding; only slot 0's last row lay past that read, in stale staging
+// bytes, and is zero here too.
+ResourceRefusal UploadPalette(EffectResourceHost& host,
+                              const TextureAsset& asset, DiscRead source) {
+  const auto area = TextureArea(asset);
+  if (!area) return ResourceRefusal::kTextureSlot;
+  const auto palette = host.LoadPalette(source);
+  if (!palette) return ResourceRefusal::kPaletteMissing;
+  constexpr auto kRowWords = static_cast<std::size_t>(kEffectClutWidth);
+  const std::size_t slot_words = kRowWords * static_cast<std::size_t>(area->h);
+  if (palette->empty() || palette->size() % kRowWords != 0) {
+    return ResourceRefusal::kPaletteRows;
+  }
+  if (palette->size() > slot_words) return ResourceRefusal::kPaletteSlot;
+  std::vector<std::uint16_t> words(slot_words, std::uint16_t{0});
+  std::ranges::copy(*palette, words.begin());
+  host.UploadPalette(*area, words);
+  return ResourceRefusal::kNone;
+}
+
+// func_800D7CFC's state 1: uploads the current asset once it is ready and
+// moves to the next. Texture pages are read from the disc; a CLUT is its
+// converted palette, ready at once.
 ResourcePoll LoadNextTexture(EffectResourceState& state,
                              EffectResourceHost& host) {
   const auto index = state.texture_index;
@@ -128,19 +152,25 @@ ResourcePoll LoadNextTexture(EffectResourceState& state,
     return {.pending = true, .refusal = ResourceRefusal::kAssetIndex};
   }
   const auto layout = host.DiscLayout();
+  // Allocated at the first asset, CLUT or not, as the original did, so the
+  // high heap sees the same allocations.
   if (state.texture_buffer.id == EffectBufferId::kNone) {
     state.texture_buffer = host.AllocateBuffer(layout.texture_staging_bytes);
   }
   const auto& asset = state.textures.assets[static_cast<std::size_t>(index)];
-  const auto poll =
-      PollEffectResourceRead(state, host,
-                             {.lba = asset.file.lba + layout.package_base_lba,
-                              .size = asset.file.size},
-                             state.texture_buffer);
-  if (poll.pending) return poll;
-  const auto refusal = poll.refusal == ResourceRefusal::kNone
-                           ? UploadTexture(state, host, asset)
-                           : poll.refusal;
+  const DiscRead read{.lba = asset.file.lba + layout.package_base_lba,
+                      .size = asset.file.size};
+  ResourceRefusal refusal = ResourceRefusal::kNone;
+  if (asset.is_clut) {
+    refusal = UploadPalette(host, asset, read);
+  } else {
+    const auto poll =
+        PollEffectResourceRead(state, host, read, state.texture_buffer);
+    if (poll.pending) return poll;
+    refusal = poll.refusal == ResourceRefusal::kNone
+                  ? UploadTexture(state, host, asset)
+                  : poll.refusal;
+  }
   ++state.texture_index;
   if (state.textures.asset_count == state.texture_index) {
     SetEffectTextureLoadState(state, TextureLoadState::kLoaded);
@@ -675,6 +705,18 @@ PurgeTableRefusal ConfigureTextureLoads(EffectResourceState& state,
                                 static_cast<std::int32_t>(i + 1));
   }
   return PurgeTableRefusal::kNone;
+}
+
+EffectPaletteRows BoundEffectPaletteRows(
+    const TextureLoadList& textures) noexcept {
+  const TextureAsset& clut = textures.assets[0];
+  if (textures.asset_count <= 0 || !clut.is_clut ||
+      clut.slot >= static_cast<std::uint16_t>(kEffectClutRows)) {
+    return kSystemPaletteRows;
+  }
+  const unsigned below_slot = (1U << clut.slot) - 1U;
+  return static_cast<EffectPaletteRows>(kSystemPaletteRows |
+                                        (kAllEffectPaletteRows & ~below_slot));
 }
 
 // decomp: EFFPURGE.BIN configurePlg (src/EFFECT/EFFPURGE.BIN/0.c:972)

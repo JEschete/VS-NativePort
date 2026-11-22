@@ -443,7 +443,9 @@ the disc only to report its label. The title screen appears about 55 s after sta
 intro movie**, so test runs press it: `--press 1000:Start` puts the menu up by tick ~1100.
 `tools\test\run_native.ps1` wraps copy, build and a captured run (`-SkipIntro`), and
 `tools\test\duckstation_capture.ps1` makes the matching DuckStation reference (see `.github\copilot-instructions.md`
-for the emulator and BIOS locations).
+for the emulator and BIOS locations). Its `-DumpUploads` switch also saves every texture and palette upload the
+original made, in order, so they can be compared word for word with a `--capture-pages` VRAM dump without
+aligning frames (the dumps keep the 15-bit colour but not the semi-transparency bit).
 
 The game reads only `Native\data\` (⏭ plus `Native\Content\patches\` and `mods\`). The disc is optional at run
 time; if it is found, its label is logged. If `Native\data\` is missing, the game stops with a message that says to

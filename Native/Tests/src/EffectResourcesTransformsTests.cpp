@@ -9,12 +9,16 @@
 #include <optional>
 #include <span>
 #include <stdexcept>
+#include <string>
 #include <utility>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "Actors/Location.hpp"
+#include "Content/DataStore.hpp"
+#include "Content/ImageFiles.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Math/Matrix.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -30,11 +34,17 @@
 #include "Effects/EffectScriptLive.hpp"
 #include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
+#include "Effects/ParticleRender.hpp"
+#include "Effects/ParticleTextureAnimation.hpp"
 #include "Effects/Particles.hpp"
 #include "Effects/Runtime.hpp"
 #include "Effects/SecondaryEffectRequestsLive.hpp"
+#include "Effects/TextureBindings.hpp"
 #include "Effects/Transforms.hpp"
 #include "Effects/TransformsLive.hpp"
+#include "Extract/ImageConversion.hpp"
+#include "Render/DrawPolygon.hpp"
+#include "Render/PageSpace.hpp"
 #include "TestSupport/EffectProgramScope.hpp"
 
 namespace {
@@ -234,6 +244,20 @@ class FakeResourceHost final : public Effects::EffectResourceHost {
   std::vector<std::uint32_t> reserved;
   std::vector<std::uint32_t> retired;
   std::vector<std::pair<Effects::VramRect, Effects::EffectBufferId>> uploads;
+  // One palette row whose words count up from 0x8001.
+  std::optional<std::vector<std::uint16_t>> palette = [] {
+    std::vector<std::uint16_t> row(256);
+    for (std::size_t i = 0; i < row.size(); ++i) {
+      row[i] = static_cast<std::uint16_t>(0x8001 + i);
+    }
+    return row;
+  }();
+  std::vector<Effects::DiscRead> palette_requests;
+  std::vector<std::pair<Effects::VramRect, std::vector<std::uint16_t>>>
+      palette_uploads;
+  // When set, palette uploads also land here, as the live host's land in
+  // the game's pages.
+  VS::Render::PageSpace* pages = nullptr;
   std::uintptr_t next_id = 0x100;
 
   Effects::EffectDiscLayout DiscLayout() override { return layout; }
@@ -274,6 +298,20 @@ class FakeResourceHost final : public Effects::EffectResourceHost {
   void UploadImage(const Effects::VramRect& area,
                    Effects::EffectBufferId pixels) override {
     uploads.emplace_back(area, pixels);
+  }
+  std::optional<std::vector<std::uint16_t>> LoadPalette(
+      Effects::DiscRead source) override {
+    palette_requests.push_back(source);
+    return palette;
+  }
+  void UploadPalette(const Effects::VramRect& area,
+                     std::span<const std::uint16_t> words) override {
+    palette_uploads.emplace_back(
+        area, std::vector<std::uint16_t>(words.begin(), words.end()));
+    if (pages != nullptr) {
+      pages->Upload({.x = area.x, .y = area.y, .w = area.w, .h = area.h},
+                    words.data());
+    }
   }
 };
 
@@ -1434,11 +1472,12 @@ void ConfigureClutAndPage(Effects::EffectResourceState& state) {
       1));
 }
 
-// The four polls that load both assets.
+// The three polls that load both assets: the CLUT at once, then the page's
+// read and upload.
 void LoadClutAndPage(Effects::EffectResourceState& state,
                      FakeResourceHost& host) {
   ConfigureClutAndPage(state);
-  for (int poll = 0; poll < 4; ++poll) {
+  for (int poll = 0; poll < 3; ++poll) {
     static_cast<void>(Effects::UpdateEffectTextureLoading(state, host));
   }
 }
@@ -1451,33 +1490,555 @@ TEST_CASE("Effect textures load the CLUT, then each texture page",
   host.loaded = true;
   ConfigureClutAndPage(state);
   CHECK_FALSE(Effects::ConfigureEffectTextureAsset(state, {}, 8));
-  for (int poll = 0; poll < 4; ++poll) {
+  for (int poll = 0; poll < 3; ++poll) {
     const auto result = Effects::UpdateEffectTextureLoading(state, host);
     CHECK(result.pending);
     CHECK(result.refusal == Effects::ResourceRefusal::kNone);
   }
   CHECK(Effects::EffectTextureLoadState(state) ==
         Effects::TextureLoadState::kLoaded);
-  CHECK(host.uploads.size() == 2);
+  CHECK(host.palette_uploads.size() == 1);
+  CHECK(host.uploads.size() == 1);
 }
 
-TEST_CASE("Effect textures upload the CLUT row and reserve the page",
+TEST_CASE("Effect textures zero-fill the CLUT slot past the palette's rows",
           "[effects][effects-resources-transforms]") {
   Effects::EffectResourceState state{};
   FakeResourceHost host;
   host.loaded = true;
   LoadClutAndPage(state, host);
-  REQUIRE(host.uploads.size() == 2);
+  REQUIRE(host.palette_uploads.size() == 1);
+  const auto& [clut_area, clut_words] = host.palette_uploads[0];
+  CHECK(clut_area == Effects::VramRect{.x = 768, .y = 242, .w = 256, .h = 3});
+  REQUIRE(clut_words.size() == std::size_t{256} * 3);
+  const auto& palette = Required(host.palette);
+  CHECK(std::equal(palette.begin(), palette.end(), clut_words.begin()));
+  // The rows past the file's are zero, as the sector padding after it was.
+  CHECK(std::all_of(clut_words.begin() + 256, clut_words.end(),
+                    [](std::uint16_t word) { return word == 0; }));
+}
+
+TEST_CASE("Effect textures upload and reserve each texture page",
+          "[effects][effects-resources-transforms]") {
+  Effects::EffectResourceState state{};
+  FakeResourceHost host;
+  host.loaded = true;
+  LoadClutAndPage(state, host);
+  REQUIRE(host.uploads.size() == 1);
   CHECK(host.uploads[0].first ==
-        Effects::VramRect{.x = 768, .y = 242, .w = 256, .h = 3});
-  CHECK(host.uploads[1].first ==
         Effects::VramRect{.x = 704, .y = 256, .w = 64, .h = 256});
   CHECK(host.reserved == std::vector<std::uint32_t>{27});
   CHECK(state.loaded_texture_pages == (1U << 27));
+}
+
+TEST_CASE("Effect textures read the CLUT from its palette, not the disc",
+          "[effects][effects-resources-transforms]") {
+  Effects::EffectResourceState state{};
+  FakeResourceHost host;
+  host.loaded = true;
+  LoadClutAndPage(state, host);
+  CHECK(host.palette_requests ==
+        std::vector{Effects::DiscRead{.lba = 1001, .size = 0x200}});
   CHECK(host.requested ==
-        std::vector{Effects::DiscRead{.lba = 1001, .size = 0x200},
-                    Effects::DiscRead{.lba = 1004, .size = 0x8000}});
+        std::vector{Effects::DiscRead{.lba = 1004, .size = 0x8000}});
+  // The staging buffer is still allocated at the first asset, the CLUT.
   CHECK(host.allocations == std::vector<std::size_t>{0x8000});
+}
+
+TEST_CASE("Effect textures allocate the staging buffer at a leading CLUT",
+          "[effects][effects-resources-transforms]") {
+  Effects::EffectResourceState state{};
+  FakeResourceHost host;
+  ConfigureClutAndPage(state);
+  CHECK(Effects::UpdateEffectTextureLoading(state, host).pending);
+  CHECK(host.allocations == std::vector<std::size_t>{0x8000});
+  CHECK(host.palette_uploads.size() == 1);
+  CHECK(host.requested.empty());
+}
+
+TEST_CASE("Effect textures refuse a missing, empty or oversized palette",
+          "[effects][effects-resources-transforms]") {
+  // The poll's refusal and how many palettes it uploaded.
+  const auto load = [](std::optional<std::vector<std::uint16_t>> words) {
+    Effects::EffectResourceState state{};
+    FakeResourceHost host;
+    host.loaded = true;
+    host.palette = std::move(words);
+    ConfigureClutAndPage(state);
+    const auto result = Effects::UpdateEffectTextureLoading(state, host);
+    CHECK(result.pending);
+    // The page after the CLUT loads either way.
+    CHECK(state.texture_index == 1);
+    return std::pair{result.refusal, host.palette_uploads.size()};
+  };
+  using Effects::ResourceRefusal;
+  const auto refused = [](ResourceRefusal refusal) {
+    return std::pair{refusal, std::size_t{0}};
+  };
+  CHECK(load(std::nullopt) == refused(ResourceRefusal::kPaletteMissing));
+  CHECK(load(std::vector<std::uint16_t>{}) ==
+        refused(ResourceRefusal::kPaletteRows));
+  // Not whole 256-word rows.
+  CHECK(load(std::vector<std::uint16_t>(300)) ==
+        refused(ResourceRefusal::kPaletteRows));
+  // Four rows, past slot 2's three.
+  CHECK(load(std::vector<std::uint16_t>(std::size_t{256} * 4)) ==
+        refused(ResourceRefusal::kPaletteSlot));
+  CHECK(load(std::vector<std::uint16_t>(std::size_t{256} * 3)) ==
+        std::pair{ResourceRefusal::kNone, std::size_t{1}});
+}
+
+namespace {
+namespace Render = VS::Render;
+
+constexpr std::size_t kSlotRowWords = 256;
+// Slot 1 (rows 241-244) holding a two-row FBC; rows 243-244 are past it.
+constexpr std::uint16_t kCompositeSlot = 1;
+constexpr std::size_t kCompositeFbcRows = 2;
+constexpr std::size_t kCompositeSlotRows = 4;
+constexpr std::int16_t kCompositeFirstRow = 241;
+constexpr std::uint16_t kBackground = 0x1110;  // r 16, g 8, b 4
+constexpr std::uint16_t kSemiTransparentClut = 0x8000;
+constexpr std::uint16_t kEffectClutColumn = 768 / 16;
+// The indexed textures at page 10: 8-bit indices 0-255 as two rows of 128
+// texels at y 0, and 4-bit indices 0-15 as one row at y 256.
+constexpr std::uint16_t kIndexedPage = 10;
+constexpr std::uint16_t kLowerPages = 0x10;
+constexpr std::int16_t kStripY = 300;
+constexpr std::int16_t kUnitCosine = 4096;
+constexpr std::uint32_t kNeutralColor = 0x808080;
+
+// Row 0 is the composite words, then non-zero greys alternating STP; row 1
+// is row 0 moved one entry left, so no entry repeats row 0's and its last is
+// 0x0000.
+std::vector<std::uint16_t> CompositePaletteWords() {
+  // The words each draw treats differently: 0x0000 is never drawn, bit 15
+  // (STP) selects the texels a semi-transparent draw blends, and the blacks
+  // and near-blacks are drawn like any other colour.
+  constexpr std::array<std::uint16_t, 12> kCompositeWords = {
+      0x0000, 0x8000, 0x0001, 0x8001, 0x001F, 0x801F,
+      0x7FFF, 0xFFFF, 0x03E0, 0x83E0, 0x7C00, 0xFC00};
+  std::vector<std::uint16_t> row(kSlotRowWords);
+  std::ranges::copy(kCompositeWords, row.begin());
+  for (std::size_t index = kCompositeWords.size(); index < row.size();
+       ++index) {
+    const auto grey = static_cast<std::uint16_t>(0x0421U * (1U + index % 31U));
+    row[index] = static_cast<std::uint16_t>(grey | ((index & 1U) << 15U));
+  }
+  std::vector<std::uint16_t> words;
+  for (std::size_t source = 0; source < kCompositeFbcRows; ++source) {
+    for (std::size_t index = 0; index < row.size(); ++index) {
+      words.push_back(row[(index + source) % row.size()]);
+    }
+  }
+  return words;
+}
+
+std::vector<std::byte> LittleEndianBytes(std::span<const std::uint16_t> words) {
+  std::vector<std::byte> bytes;
+  for (const std::uint16_t word : words) {
+    bytes.push_back(static_cast<std::byte>(word & 0xFFU));
+    bytes.push_back(static_cast<std::byte>(word >> 8U));
+  }
+  return bytes;
+}
+
+// The slot the effect loader uploads from `fbc`'s converted palette files.
+std::vector<std::uint16_t> ConvertedSlot(const std::vector<std::byte>& fbc) {
+  const auto converted = VS::Extract::ConvertFbcPalette(
+      {.path = "EFFECT/E001_1.FBC", .bytes = fbc});
+  REQUIRE(converted.has_value());
+  const std::vector<VS::Content::ImageFile>& files = converted->files;
+  const auto document = VS::Content::DecodeImageFiles(
+      converted->location.stem, [&files](const std::string& name) {
+        const auto found =
+            std::ranges::find(files, name, &VS::Content::ImageFile::name);
+        return found == files.end() ? VS::Content::ImageFileBytes{}
+                                    : VS::Content::ImageFileBytes{found->bytes};
+      });
+  REQUIRE(document.has_value());
+  Effects::EffectResourceState state{};
+  FakeResourceHost host;
+  host.palette = document->image.texels;
+  Effects::SetEffectTextureAssetCount(state, 1);
+  REQUIRE(
+      Effects::ConfigureEffectTextureAsset(state,
+                                           {.file = {.lba = 1, .size = 0x800},
+                                            .slot = kCompositeSlot,
+                                            .is_clut = true},
+                                           0));
+  CHECK(Effects::UpdateEffectTextureLoading(state, host).refusal ==
+        Effects::ResourceRefusal::kNone);
+  REQUIRE(host.palette_uploads.size() == 1);
+  CHECK(host.palette_uploads[0].first ==
+        Effects::VramRect{.x = 768,
+                          .y = kCompositeFirstRow,
+                          .w = 256,
+                          .h = static_cast<std::int16_t>(kCompositeSlotRows)});
+  return host.palette_uploads[0].second;
+}
+
+// A descriptor CLUT word for `row`: bit 15 makes the draw semi-transparent,
+// as ParticleRender reads it.
+constexpr std::uint16_t DescriptorClut(std::int16_t row, bool semi) {
+  return static_cast<std::uint16_t>((static_cast<unsigned>(row) << 6U) |
+                                    kEffectClutColumn |
+                                    (semi ? kSemiTransparentClut : 0U));
+}
+
+// The descriptor quad's corner `index` as the renderer receives it.
+Render::DrawCorner QuadCorner(const Effects::ParticleQuad& quad,
+                              std::size_t index) {
+  Render::DrawCorner corner;
+  corner.x = quad.vertices.at(index).x;
+  corner.y = quad.vertices.at(index).y;
+  corner.u = static_cast<std::uint8_t>(quad.uv.at(index) & 0xFFU);
+  corner.v = static_cast<std::uint8_t>((quad.uv.at(index) >> 8U) & 0xFFU);
+  return corner;
+}
+
+// Pages that hold `slot` in the effect CLUT rows and the indexed textures.
+void PrepareIndexedPages(Render::PageSpace& pages,
+                         std::span<const std::uint16_t> slot) {
+  pages.SetDrawArea(0, 0, Render::PageSpace::Width - 1,
+                    Render::PageSpace::Height - 1);
+  pages.SetDrawOffset(0, 0);
+  pages.Upload({.x = 768,
+                .y = kCompositeFirstRow,
+                .w = 256,
+                .h = static_cast<std::int32_t>(kCompositeSlotRows)},
+               slot.data());
+  for (const bool eight_bit : {false, true}) {
+    const unsigned width = eight_bit ? 128U : 16U;
+    const unsigned rows = eight_bit ? 2U : 1U;
+    std::vector<std::uint16_t> texture;
+    for (unsigned index = 0; index < width * rows;
+         index += eight_bit ? 2U : 4U) {
+      texture.push_back(static_cast<std::uint16_t>(
+          eight_bit ? index | ((index + 1) << 8U)
+                    : index | ((index + 1) << 4U) | ((index + 2) << 8U) |
+                          ((index + 3) << 12U)));
+    }
+    pages.Upload({.x = kIndexedPage * 64,
+                  .y = eight_bit ? 0 : 256,
+                  .w = static_cast<std::int32_t>(texture.size() / rows),
+                  .h = static_cast<std::int32_t>(rows)},
+                 texture.data());
+  }
+}
+
+std::uint8_t IndexedWidth(bool eight_bit) { return eight_bit ? 128 : 16; }
+std::uint8_t IndexedRows(bool eight_bit) { return eight_bit ? 2 : 1; }
+
+// Draws every index of the 8-bit (256) or 4-bit (16) texture over the
+// background at row `y` from a descriptor with CLUT word `clut` and the
+// tpage's semi-transparency `mode`.
+void DrawIndices(Render::PageSpace& pages, bool eight_bit, std::uint16_t clut,
+                 std::uint16_t mode, std::int16_t y) {
+  const std::uint8_t width = IndexedWidth(eight_bit);
+  const std::uint8_t rows = IndexedRows(eight_bit);
+  pages.Fill({.x = 0, .y = y, .w = width, .h = rows}, 128, 64, 32);
+  // One unrotated descriptor over the whole texture; BuildParticleQuad
+  // takes the draw's semi-transparency from the CLUT word's bit 15.
+  Effects::ParticleTexture descriptor{};
+  descriptor.corners = {{{0, 0}, {width, 0}, {0, rows}, {width, rows}}};
+  descriptor.w = width;
+  descriptor.h = rows;
+  descriptor.clut = clut;
+  descriptor.tpage = static_cast<std::uint16_t>(
+      kIndexedPage | (eight_bit ? (1U << 7U) : kLowerPages) |
+      (static_cast<unsigned>(mode) << 5U));
+  const Effects::ParticleQuad quad = Effects::BuildParticleQuad(
+      descriptor, {.x = 0, .y = y}, kUnitCosine, 0, kNeutralColor);
+  Render::DrawPolygon strip;
+  // Drawn raw so the texels are the palette words; production sprites also
+  // modulate by the particle colour and dither.
+  strip.material = {.gouraud = false,
+                    .textured = true,
+                    .semi_transparent = quad.semi_transparent,
+                    .raw_texture = true,
+                    .page = {quad.tpage},
+                    .palette = {quad.clut}};
+  strip.corner_count = Render::kDrawQuadCorners;
+  strip.corners = {QuadCorner(quad, 0), QuadCorner(quad, 1),
+                   QuadCorner(quad, 2), QuadCorner(quad, 3)};
+  REQUIRE(pages.Draw(strip));
+}
+
+// The pixels DrawIndices drew at row `y`, one per index.
+std::vector<std::uint16_t> DrawnIndices(const Render::PageSpace& pages,
+                                        bool eight_bit, std::int16_t y) {
+  const auto bottom = static_cast<std::int16_t>(y + IndexedRows(eight_bit));
+  std::vector<std::uint16_t> drawn;
+  for (std::int16_t row = y; row < bottom; ++row) {
+    for (std::int16_t x = 0; x < IndexedWidth(eight_bit); ++x) {
+      drawn.push_back(pages.At(x, row));
+    }
+  }
+  return drawn;
+}
+
+// Every index drawn alone with `slot` in the effect CLUT rows.
+std::vector<std::uint16_t> CompositeIndices(std::span<const std::uint16_t> slot,
+                                            bool eight_bit, std::uint16_t clut,
+                                            std::uint16_t mode) {
+  Render::PageSpace pages;
+  PrepareIndexedPages(pages, slot);
+  DrawIndices(pages, eight_bit, clut, mode, kStripY);
+  return DrawnIndices(pages, eight_bit, kStripY);
+}
+
+// Each drawn index against its word in the slot row: 0x0000 leaves the
+// background, an opaque draw or a word without STP is copied exactly, and a
+// semi-transparent draw blends STP words while keeping the bit.
+void CheckCompositedWords(std::span<const std::uint16_t> slot,
+                          std::size_t slot_row, bool semi,
+                          std::span<const std::uint16_t> drawn) {
+  for (std::size_t index = 0; index < drawn.size(); ++index) {
+    CAPTURE(index);
+    // Indices read entries 0-15 or 0-255 of the descriptor's row only.
+    const std::uint16_t word = slot[(slot_row * kSlotRowWords) + index];
+    if (word == 0) {
+      CHECK(drawn[index] == kBackground);
+    } else if (!semi || (word & 0x8000U) == 0) {
+      CHECK(drawn[index] == word);
+    } else {
+      CHECK((drawn[index] & 0x8000U) != 0);
+    }
+  }
+}
+}  // namespace
+
+TEST_CASE("Converted effect palettes fill the CLUT slot as the FBC read did",
+          "[effects][effects-resources-transforms][render]") {
+  const std::vector<std::uint16_t> words = CompositePaletteWords();
+  // The original uploaded the slot from its one-sector read: the file's rows,
+  // then the sector's zero padding.
+  std::vector<std::uint16_t> original(kCompositeSlotRows * kSlotRowWords, 0);
+  std::ranges::copy(words, original.begin());
+  CHECK(ConvertedSlot(LittleEndianBytes(words)) == original);
+}
+
+TEST_CASE("Converted effect palettes composite indexed textures by word",
+          "[effects][effects-resources-transforms][render]") {
+  const std::vector<std::uint16_t> slot =
+      ConvertedSlot(LittleEndianBytes(CompositePaletteWords()));
+  const bool eight_bit = GENERATE(false, true);
+  const auto slot_row = static_cast<std::size_t>(GENERATE(0, 1, 2, 3));
+  const bool semi = GENERATE(false, true);
+  const auto mode = static_cast<std::uint16_t>(GENERATE(0, 1, 2, 3));
+  CAPTURE(eight_bit, slot_row, semi, mode);
+  const auto row = static_cast<std::int16_t>(kCompositeFirstRow + slot_row);
+  const std::vector<std::uint16_t> drawn =
+      CompositeIndices(slot, eight_bit, DescriptorClut(row, semi), mode);
+  REQUIRE(drawn.size() == (eight_bit ? std::size_t{256} : std::size_t{16}));
+  CheckCompositedWords(slot, slot_row, semi, drawn);
+  if (slot_row >= kCompositeFbcRows) {
+    // Rows past the file hold the read's zero padding, so nothing is drawn.
+    CHECK(std::ranges::all_of(
+        drawn, [](std::uint16_t pixel) { return pixel == kBackground; }));
+  }
+}
+
+TEST_CASE("Converted effect palettes blend STP words by the page's rule",
+          "[effects][effects-resources-transforms][render]") {
+  const std::vector<std::uint16_t> slot =
+      ConvertedSlot(LittleEndianBytes(CompositePaletteWords()));
+  const bool eight_bit = GENERATE(false, true);
+  const auto mode = static_cast<std::uint16_t>(GENERATE(0, 1, 2, 3));
+  CAPTURE(eight_bit, mode);
+  const std::vector<std::uint16_t> drawn = CompositeIndices(
+      slot, eight_bit, DescriptorClut(kCompositeFirstRow, true), mode);
+  // Black, red and white with STP (indices 1, 5 and 7) over r 16, g 8, b 4:
+  // (b + f) / 2, b + f, b - f and b + f / 4 per channel, clamped to 0-31.
+  constexpr std::array<std::array<std::uint16_t, 3>, 4> kBlended = {{
+      {0x8888, 0x8897, 0xC677},
+      {0x9110, 0x911F, 0xFFFF},
+      {0x9110, 0x9100, 0x8000},
+      {0x9110, 0x9117, 0xADF7},
+  }};
+  REQUIRE(drawn.size() > 7);
+  CHECK(drawn[1] == kBlended.at(mode)[0]);
+  CHECK(drawn[5] == kBlended.at(mode)[1]);
+  CHECK(drawn[7] == kBlended.at(mode)[2]);
+}
+
+TEST_CASE("Effect texture animations switch palette rows on their frames",
+          "[effects][effects-resources-transforms][render]") {
+  const std::vector<std::uint16_t> slot =
+      ConvertedSlot(LittleEndianBytes(CompositePaletteWords()));
+  // Frame 0 (row 241) holds 4 ticks, frame 1 (row 242) 2, then the program
+  // restarts; real tables (E046, E077-E080, E157...) swap rows like this over
+  // one texture region. The words are 0x00040000, 0x00020001 and 0x20000000.
+  const std::vector<std::byte> program =
+      LittleEndianBytes(std::array<std::uint16_t, 6>{0x0000, 0x0004, 0x0001,
+                                                     0x0002, 0x0000, 0x2000});
+  const std::array<std::uint16_t, 2> frame_cluts = {
+      DescriptorClut(kCompositeFirstRow, false),
+      DescriptorClut(static_cast<std::int16_t>(kCompositeFirstRow + 1), false)};
+  Effects::TextureAnimationState state{};
+  Effects::RestartTextureAnimation(state, 0);
+  std::uint16_t frame = 0;
+  std::vector<std::uint16_t> shown;
+  for (int step = 0; step < 6; ++step) {
+    const auto advance = Effects::AdvanceTextureAnimation(state, program);
+    REQUIRE(advance.step != Effects::TextureAnimationStep::kRefused);
+    if (advance.step == Effects::TextureAnimationStep::kFrame) {
+      frame = advance.frame;
+    }
+    shown.push_back(
+        CompositeIndices(slot, false, frame_cluts.at(frame), 0).at(4));
+  }
+  // Index 4 is 0x001F in row 241 and row 241's entry 5, 0x801F, in row 242.
+  CHECK(shown == std::vector<std::uint16_t>{0x001F, 0x001F, 0x801F, 0x001F,
+                                            0x001F, 0x801F});
+}
+
+namespace {
+constexpr std::int16_t kSystemPaletteRow = 240;
+
+// Row 240's words: non-zero, alternating STP and unlike any word in
+// CompositePaletteWords' rows.
+std::vector<std::uint16_t> SystemPaletteWords() {
+  std::vector<std::uint16_t> row(kSlotRowWords);
+  for (std::size_t index = 0; index < row.size(); ++index) {
+    row[index] =
+        static_cast<std::uint16_t>(0x0200U | index | ((index & 1U) << 15U));
+  }
+  return row;
+}
+
+// Loads `palette` as the CLUT of an effect in `slot` through the texture
+// loader, whose host uploads it into `pages`.
+void LoadEffectClut(Render::PageSpace& pages,
+                    std::vector<std::uint16_t> palette, std::uint16_t slot) {
+  Effects::EffectResourceState state{};
+  FakeResourceHost host;
+  host.pages = &pages;
+  host.palette = std::move(palette);
+  Effects::SetEffectTextureAssetCount(state, 1);
+  REQUIRE(Effects::ConfigureEffectTextureAsset(
+      state, {.file = {.lba = 1, .size = 0x800}, .slot = slot, .is_clut = true},
+      0));
+  REQUIRE(Effects::UpdateEffectTextureLoading(state, host).refusal ==
+          Effects::ResourceRefusal::kNone);
+}
+
+// Writes `words`, whole rows, into `vram`'s effect CLUT columns from `row`.
+void PutClutRows(std::vector<std::uint16_t>& vram, std::int32_t row,
+                 std::span<const std::uint16_t> words) {
+  for (std::size_t offset = 0; offset < words.size(); offset += kSlotRowWords) {
+    const auto line = static_cast<std::size_t>(row) + (offset / kSlotRowWords);
+    std::ranges::copy(
+        words.subspan(offset, kSlotRowWords),
+        vram.begin() + static_cast<std::ptrdiff_t>(
+                           (line * Render::PageSpace::Width) + 768));
+  }
+}
+
+// The first word where `pages` differs from `expected`, or the word count.
+std::size_t FirstDifference(const Render::PageSpace& pages,
+                            std::span<const std::uint16_t> expected) {
+  const std::span<const std::uint16_t> pixels = pages.Pixels();
+  return static_cast<std::size_t>(std::ranges::mismatch(pixels, expected).in1 -
+                                  pixels.begin());
+}
+}  // namespace
+
+TEST_CASE("Later effect CLUTs replace their slot's rows and nothing else",
+          "[effects][effects-resources-transforms][render][effect-palette]") {
+  Render::PageSpace pages;
+  // Non-zero sentinels everywhere, the system palette row 240 included.
+  std::vector<std::uint16_t> expected(
+      static_cast<std::size_t>(Render::PageSpace::Width) *
+      Render::PageSpace::Height);
+  for (std::size_t index = 0; index < expected.size(); ++index) {
+    expected[index] = static_cast<std::uint16_t>(1U + (index % 0xFFFFU));
+  }
+  pages.Upload({.x = 0,
+                .y = 0,
+                .w = Render::PageSpace::Width,
+                .h = Render::PageSpace::Height},
+               expected.data());
+  // As E206 then E207 load: a two-row CLUT in slot 1, then a one-row CLUT in
+  // the same slot, whose zero fill leaves none of the first's rows behind.
+  const std::vector<std::uint16_t> first = CompositePaletteWords();
+  const std::vector<std::uint16_t> second(
+      first.rbegin(),
+      first.rbegin() + static_cast<std::ptrdiff_t>(kSlotRowWords));
+  std::vector<std::uint16_t> slot(kCompositeSlotRows * kSlotRowWords, 0);
+  LoadEffectClut(pages, first, kCompositeSlot);
+  std::ranges::copy(first, slot.begin());
+  PutClutRows(expected, kCompositeFirstRow, slot);
+  CHECK(FirstDifference(pages, expected) == expected.size());
+  LoadEffectClut(pages, second, kCompositeSlot);
+  std::ranges::fill(slot, std::uint16_t{0});
+  std::ranges::copy(second, slot.begin());
+  PutClutRows(expected, kCompositeFirstRow, slot);
+  CHECK(FirstDifference(pages, expected) == expected.size());
+  // A slot-3 CLUT writes rows 243-244 only; rows 241-242 keep the earlier
+  // words, which its descriptors may not name (BoundEffectPaletteRows).
+  LoadEffectClut(pages, first, 3);
+  PutClutRows(expected, kCompositeFirstRow + 2, first);
+  CHECK(FirstDifference(pages, expected) == expected.size());
+}
+
+TEST_CASE("Effect descriptors sharing a texture draw their own rows together",
+          "[effects][effects-resources-transforms][render][effect-palette]") {
+  const std::vector<std::uint16_t> slot =
+      ConvertedSlot(LittleEndianBytes(CompositePaletteWords()));
+  const std::vector<std::uint16_t> system = SystemPaletteWords();
+  const bool eight_bit = GENERATE(false, true);
+  CAPTURE(eight_bit);
+  Render::PageSpace pages;
+  PrepareIndexedPages(pages, slot);
+  pages.Upload({.x = 768, .y = kSystemPaletteRow, .w = 256, .h = 1},
+               system.data());
+  // The resident package's row 240 and both of the effect's rows, the last
+  // blended, each drawn from the one texture before any is read back.
+  struct Strip {
+    std::span<const std::uint16_t> palette;
+    std::int16_t row = 0;
+    bool semi = false;
+    std::int16_t y = 0;
+  };
+  const std::span<const std::uint16_t> rows = slot;
+  const auto below = [](std::int16_t value, int step) {
+    return static_cast<std::int16_t>(value + step);
+  };
+  const std::array<Strip, 3> strips = {{
+      {.palette = system,
+       .row = kSystemPaletteRow,
+       .semi = false,
+       .y = kStripY},
+      {.palette = rows.first(kSlotRowWords),
+       .row = kCompositeFirstRow,
+       .semi = false,
+       .y = below(kStripY, 4)},
+      {.palette = rows.subspan(kSlotRowWords, kSlotRowWords),
+       .row = below(kCompositeFirstRow, 1),
+       .semi = true,
+       .y = below(kStripY, 8)},
+  }};
+  for (const Strip& strip : strips) {
+    DrawIndices(pages, eight_bit, DescriptorClut(strip.row, strip.semi), 1,
+                strip.y);
+  }
+  for (const Strip& strip : strips) {
+    CAPTURE(strip.row);
+    CheckCompositedWords(strip.palette, 0, strip.semi,
+                         DrawnIndices(pages, eight_bit, strip.y));
+  }
+  // Drawing left every palette row as it was uploaded.
+  std::vector<std::uint16_t> cluts(kSlotRowWords * (1 + kCompositeSlotRows));
+  pages.Download({.x = 768,
+                  .y = kSystemPaletteRow,
+                  .w = 256,
+                  .h = static_cast<std::int32_t>(1 + kCompositeSlotRows)},
+                 cluts.data());
+  CHECK(std::equal(system.begin(), system.end(), cluts.begin()));
+  CHECK(std::equal(slot.begin(), slot.end(),
+                   cluts.begin() + static_cast<std::ptrdiff_t>(kSlotRowWords)));
 }
 
 TEST_CASE("Effect textures free the staging buffer after the last page",
@@ -1652,6 +2213,83 @@ TEST_CASE("Effect purge tables list the CLUT, then the effect's FBTs",
         Effects::TextureAsset{.file = fixture.textures[1], .slot = 1});
 }
 
+namespace {
+// Polls the texture loader until nothing is pending, requiring each poll to
+// succeed.
+void FinishTextureLoad(Effects::EffectResourceState& state,
+                       FakeResourceHost& host) {
+  for (int poll = 0; poll < 16; ++poll) {
+    const auto result = Effects::UpdateEffectTextureLoading(state, host);
+    REQUIRE(result.refusal == Effects::ResourceRefusal::kNone);
+    if (!result.pending) return;
+  }
+  FAIL("the texture load never finished");
+}
+
+// Effect 0's palette, then effect 2's (`second`) in its own slot.
+void CheckBothEffectPalettes(const FakeResourceHost& host,
+                             const std::vector<std::uint16_t>& second) {
+  CHECK(host.palette_requests ==
+        std::vector{Effects::DiscRead{.lba = 1010, .size = 0x200},
+                    Effects::DiscRead{.lba = 1012, .size = 0x200}});
+  REQUIRE(host.palette_uploads.size() == 2);
+  CHECK(host.palette_uploads[0].first ==
+        Effects::VramRect{.x = 768, .y = 240, .w = 256, .h = 5});
+  const auto& [area, words] = host.palette_uploads[1];
+  CHECK(area == Effects::VramRect{.x = 768, .y = 242, .w = 256, .h = 3});
+  REQUIRE(words.size() == std::size_t{256} * 3);
+  CHECK(std::equal(second.begin(), second.end(), words.begin()));
+  CHECK(std::all_of(words.begin() + 256, words.end(),
+                    [](std::uint16_t word) { return word == 0; }));
+}
+
+// Every staging buffer is freed and no read is left once loading finishes.
+void CheckTextureLoadReleased(const PurgeTableFixture& fixture,
+                              const FakeResourceHost& host) {
+  CHECK(host.freed.size() == host.allocations.size());
+  CHECK(fixture.state.texture_buffer == Effects::EffectBuffer{});
+  CHECK(fixture.state.read == Effects::DiscReadId::kNone);
+}
+}  // namespace
+
+TEST_CASE("An effect configured after a finished load uploads its palette",
+          "[effects][effects-resources-transforms][effect-palette]") {
+  PurgeTableFixture fixture;
+  FakeResourceHost host;
+  host.loaded = true;
+  const std::vector<std::uint16_t> second(256, 0x7C00);
+  static_cast<void>(fixture.Configure(0));
+  FinishTextureLoad(fixture.state, host);
+  CHECK(host.uploads.size() == 2);
+  host.palette = second;
+  static_cast<void>(fixture.Configure(2));
+  FinishTextureLoad(fixture.state, host);
+  // Effect 2 has no FBTs.
+  CHECK(host.uploads.size() == 2);
+  CheckBothEffectPalettes(host, second);
+  CheckTextureLoadReleased(fixture, host);
+}
+
+TEST_CASE("An effect reconfigured before its pages load drops them",
+          "[effects][effects-resources-transforms][effect-palette]") {
+  PurgeTableFixture fixture;
+  FakeResourceHost host;
+  host.loaded = true;
+  const std::vector<std::uint16_t> second(256, 0x7C00);
+  static_cast<void>(fixture.Configure(0));
+  REQUIRE(Effects::UpdateEffectTextureLoading(fixture.state, host).pending);
+  REQUIRE(host.palette_uploads.size() == 1);
+  host.palette = second;
+  static_cast<void>(fixture.Configure(2));
+  FinishTextureLoad(fixture.state, host);
+  // Effect 0's pages never load; its staging buffer serves effect 2.
+  CHECK(host.uploads.empty());
+  CHECK(host.reserved.empty());
+  CHECK(host.allocations.size() == 1);
+  CheckBothEffectPalettes(host, second);
+  CheckTextureLoadReleased(fixture, host);
+}
+
 TEST_CASE("Effect purge tables load the plugin file and its entries",
           "[effects][effects-resources-transforms]") {
   PurgeTableFixture fixture;
@@ -1741,6 +2379,269 @@ TEST_CASE("Effect renderer and plugin tables refuse entries past their ends",
       static_cast<Effects::PluginEntry>(0xFFFF), 0));
   CHECK_FALSE(
       Effects::LiveSetEffectRenderer(static_cast<Effects::PluginEntry>(0), 8));
+}
+
+namespace {
+// The texture block (1) the production block walk binds.
+class TextureBlockCapture final : public Effects::EffectPackageHost {
+ public:
+  std::span<std::byte> texture_tables;
+
+  void BindTextureTables(std::span<std::byte> block) override {
+    texture_tables = block;
+  }
+  void BindSoundBank(std::span<std::byte> /*block*/) override {}
+  std::int32_t BindAuxiliarySound(std::span<std::byte> /*block*/) override {
+    return 0;
+  }
+};
+
+// An effect's CLUT, as the purge tables list it, and its converted palette.
+struct ExtractedClut {
+  int effect{};
+  Effects::TextureAsset asset;
+  Effects::DiscRead read;
+  std::vector<std::uint16_t> palette;
+};
+
+// The extracted data, with its conversions current, opened as the game does.
+class ExtractedEffectData {
+ public:
+  ExtractedEffectData() {
+    if (!VS::Content::DataStore::Open("Native/data")) {
+      SKIP("Extracted Native/data is unavailable");
+    }
+    store_ = VS::Content::DataStore::Get();
+    REQUIRE(store_ != nullptr);
+    const auto required = store_->RequireConversions();
+    INFO((required ? std::string{} : required.error()));
+    REQUIRE(required.has_value());
+    const auto* package_base = store_->Find("EFFECT/E000.P");
+    REQUIRE(package_base != nullptr);
+    base_lba_ = static_cast<std::int32_t>(package_base->lba);
+  }
+
+  [[nodiscard]] const VS::Content::DataStore& Store() const { return *store_; }
+  [[nodiscard]] std::int32_t BaseLba() const { return base_lba_; }
+
+  // Every effect that loads a CLUT, with the palette the live host loads.
+  [[nodiscard]] std::vector<ExtractedClut> Cluts() const {
+    const auto tables = Effects::LiveEffectPurgeTables();
+    std::vector<ExtractedClut> cluts;
+    for (std::size_t effect = 0; effect < tables.clut_rows.size(); ++effect) {
+      INFO("effect " << effect);
+      Effects::EffectResourceState state{};
+      CHECK(Effects::ConfigureTextureLoads(state, tables,
+                                           static_cast<std::int32_t>(effect)) ==
+            Effects::PurgeTableRefusal::kNone);
+      const auto& first = state.textures.assets[0];
+      if (state.textures.asset_count == 0 || !first.is_clut) continue;
+      const Effects::DiscRead read{.lba = first.file.lba + base_lba_,
+                                   .size = first.file.size};
+      auto palette = Effects::LoadLiveEffectPalette(read);
+      INFO((palette ? std::string{} : palette.error()));
+      REQUIRE(palette.has_value());
+      CHECK(palette->size() ==
+            static_cast<std::size_t>(tables.clut_rows[effect]) *
+                static_cast<std::size_t>(Effects::kEffectClutWidth));
+      cluts.push_back({.effect = static_cast<int>(effect),
+                       .asset = first,
+                       .read = read,
+                       .palette = std::move(*palette)});
+    }
+    return cluts;
+  }
+
+ private:
+  VS::Content::DataStore::ScopedOverride restore_;
+  const VS::Content::DataStore* store_ = nullptr;
+  std::int32_t base_lba_ = 0;
+};
+
+// An effect package read from the extracted data, and the texture block the
+// production block walk binds in it (empty without one). The block views
+// `package`, whose buffer moves with it.
+struct ExtractedTextureBlock {
+  std::vector<std::uint8_t> package;
+  std::span<const std::byte> block;
+};
+
+ExtractedTextureBlock ReadTextureBlock(const ExtractedEffectData& data,
+                                       const Extent& package) {
+  const auto lba = static_cast<std::uint32_t>(package.lba + data.BaseLba());
+  const auto* entry = data.Store().FindBySector(lba);
+  REQUIRE(entry != nullptr);
+  CHECK(entry->lba == lba);
+  auto bytes = data.Store().ReadAll(*entry);
+  REQUIRE(bytes.has_value());
+  ExtractedTextureBlock read{.package = std::move(*bytes), .block = {}};
+  Effects::EffectPackageBlocks blocks;
+  TextureBlockCapture capture;
+  static_cast<void>(Effects::BindEffectPackageBlocks(
+      std::as_writable_bytes(std::span(read.package)), blocks, capture));
+  read.block = capture.texture_tables;
+  return read;
+}
+
+// The descriptors of `clut`'s effect package whose CLUT row lies in its slot
+// but past its palette's rows.
+std::vector<std::pair<int, std::size_t>> DescriptorsPastPalette(
+    const ExtractedEffectData& data, const ExtractedClut& clut) {
+  const auto tables = Effects::LiveEffectPurgeTables();
+  const auto read = ReadTextureBlock(
+      data, tables.package_files[static_cast<std::size_t>(clut.effect)]);
+  std::vector<std::pair<int, std::size_t>> past;
+  if (read.block.empty()) return past;
+  const std::span<const std::byte> block = read.block;
+  const auto layout = Effects::BindEffectTextureTables(block, {});
+  const std::size_t rows =
+      clut.palette.size() / static_cast<std::size_t>(Effects::kEffectClutWidth);
+  const std::size_t first_past =
+      static_cast<std::size_t>(Effects::kEffectClutFirstRow) + clut.asset.slot +
+      rows;
+  const std::size_t end =
+      static_cast<std::size_t>(Effects::kEffectClutFirstRow) +
+      static_cast<std::size_t>(Effects::kEffectClutRows);
+  for (std::size_t offset = layout.descriptor_offset, index = 0;
+       offset + Effects::kTextureDescriptorBytes <= block.size();
+       offset += Effects::kTextureDescriptorBytes, ++index) {
+    const auto word = static_cast<std::uint16_t>(
+        std::to_integer<std::uint32_t>(block[offset]) |
+        (std::to_integer<std::uint32_t>(block[offset + 1]) << 8U));
+    // A CLUT id is (y << 6) | (x >> 4); bit 15 is the native STP flag.
+    const std::size_t row = (word >> 6U) & 0x1FFU;
+    if (row >= first_past && row < end) past.emplace_back(clut.effect, index);
+  }
+  return past;
+}
+}  // namespace
+
+TEST_CASE("Effect CLUTs load every extracted palette through the loader",
+          "[effects][effects-resources-transforms][extract]") {
+  const ExtractedEffectData data;
+  const auto cluts = data.Cluts();
+  CHECK_FALSE(cluts.empty());
+  for (const ExtractedClut& clut : cluts) {
+    INFO("effect " << clut.effect);
+    Effects::EffectResourceState state{};
+    CHECK(Effects::ConfigureTextureLoads(
+              state, Effects::LiveEffectPurgeTables(), clut.effect) ==
+          Effects::PurgeTableRefusal::kNone);
+    FakeResourceHost host;
+    host.layout.package_base_lba = data.BaseLba();
+    host.palette = clut.palette;
+    const auto poll = Effects::UpdateEffectTextureLoading(state, host);
+    CHECK(poll.refusal == Effects::ResourceRefusal::kNone);
+    CHECK(host.palette_requests == std::vector{clut.read});
+    CHECK(host.requested.empty());
+    REQUIRE(host.palette_uploads.size() == 1);
+    CHECK(host.palette_uploads[0].first.y ==
+          Effects::kEffectClutFirstRow + clut.asset.slot);
+  }
+}
+
+namespace {
+// How the loaded effect packages' descriptors sample palette rows.
+struct PaletteReferenceSurvey {
+  std::size_t loaded = 0;
+  std::size_t textured = 0;
+  std::size_t refused = 0;
+  std::size_t on_foreign_rows = 0;
+};
+
+// Mirrors FinishPurgeOverlay (EffectRuntime.cpp): an action effect whose
+// package names E000.P's offset (E252-E399's placeholders) plays without
+// loading a package.
+bool LoadsOwnPackage(std::size_t effect, const Extent& package) {
+  return package.size != 0 && (effect == 0 || package.lba != 0);
+}
+
+PaletteReferenceSurvey SurveyPaletteReferences(
+    const ExtractedEffectData& data) {
+  const auto tables = Effects::LiveEffectPurgeTables();
+  PaletteReferenceSurvey survey;
+  for (std::size_t effect = 0; effect < tables.package_files.size(); ++effect) {
+    INFO("effect " << effect);
+    if (!LoadsOwnPackage(effect, tables.package_files[effect])) continue;
+    ++survey.loaded;
+    Effects::EffectResourceState state{};
+    REQUIRE(Effects::ConfigureTextureLoads(state, tables,
+                                           static_cast<std::int32_t>(effect)) ==
+            Effects::PurgeTableRefusal::kNone);
+    const auto read = ReadTextureBlock(data, tables.package_files[effect]);
+    if (read.block.empty()) continue;
+    ++survey.textured;
+    const auto layout = Effects::BindEffectTextureTables(read.block, {});
+    const auto rows = Effects::BoundEffectPaletteRows(state.textures);
+    const auto check =
+        Effects::CheckEffectPaletteReferences(read.block, layout, rows);
+    INFO("descriptor " << check.descriptor << " CLUT " << check.clut);
+    CHECK(check.fault == Effects::PaletteReferenceFault::kNone);
+    if (check.fault != Effects::PaletteReferenceFault::kNone) ++survey.refused;
+    // Only E000's slot-0 CLUT fills row 240; no other effect samples it.
+    const auto own = effect == 0 ? rows
+                                 : static_cast<Effects::EffectPaletteRows>(
+                                       rows & ~Effects::kSystemPaletteRows);
+    if (Effects::CheckEffectPaletteReferences(read.block, layout, own).fault !=
+        Effects::PaletteReferenceFault::kNone) {
+      ++survey.on_foreign_rows;
+    }
+  }
+  return survey;
+}
+}  // namespace
+
+TEST_CASE("Loaded effect descriptors sample only their own palette rows",
+          "[effects][effects-resources-transforms][extract][effect-palette]") {
+  const ExtractedEffectData data;
+  const auto survey = SurveyPaletteReferences(data);
+  CHECK(survey.loaded == 290);
+  CHECK(survey.textured == 278);
+  CHECK(survey.refused == 0);
+  CHECK(survey.on_foreign_rows == 0);
+  // The resident empty package is E000.P, bound with the system palette only.
+  const auto tables = Effects::LiveEffectPurgeTables();
+  const auto resident = ReadTextureBlock(data, tables.package_files[0]);
+  REQUIRE_FALSE(resident.block.empty());
+  CHECK(Effects::CheckEffectPaletteReferences(
+            resident.block,
+            Effects::BindEffectTextureTables(resident.block, {}),
+            Effects::kSystemPaletteRows) == Effects::PaletteReferenceCheck{});
+}
+
+TEST_CASE("Effect palette rows follow the configured CLUT's slot",
+          "[effects][effects-resources-transforms][effect-palette]") {
+  const auto rows = [](std::int32_t count, std::uint16_t slot, bool is_clut) {
+    Effects::TextureLoadList textures{.asset_count = count};
+    textures.assets[0] = {.file = {}, .slot = slot, .is_clut = is_clut};
+    return Effects::BoundEffectPaletteRows(textures);
+  };
+  // Slot 2 fills rows 242-244; the system palette holds row 240.
+  CHECK(rows(1, 2, true) == 0b11101);
+  CHECK(rows(1, 0, true) == Effects::kAllEffectPaletteRows);
+  CHECK(rows(1, 4, true) == 0b10001);
+  CHECK(rows(0, 2, true) == Effects::kSystemPaletteRows);
+  CHECK(rows(1, 2, false) == Effects::kSystemPaletteRows);
+  CHECK(rows(1, 5, true) == Effects::kSystemPaletteRows);
+}
+
+TEST_CASE("Effect descriptors sample past their palette only in E210",
+          "[effects][effects-resources-transforms][extract]") {
+  const ExtractedEffectData data;
+  std::vector<std::pair<int, std::size_t>> past;
+  for (const ExtractedClut& clut : data.Cluts()) {
+    INFO("effect " << clut.effect);
+    const auto found = DescriptorsPastPalette(data, clut);
+    past.insert(past.end(), found.begin(), found.end());
+  }
+  // E210.P's descriptors 520-544 name CLUT row 242, past E210_1.FBC's one
+  // row in slot 1. The original's read left that row as the sector's zero
+  // padding, so they draw transparent, as the zero-filled slot does natively.
+  std::vector<std::pair<int, std::size_t>> expected;
+  for (std::size_t index = 520; index <= 544; ++index) {
+    expected.emplace_back(210, index);
+  }
+  CHECK(past == expected);
 }
 
 namespace {

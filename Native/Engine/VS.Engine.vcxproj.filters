@@ -468,6 +468,9 @@
     <ClCompile Include="src\Core\RuntimeLive.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
+    <ClCompile Include="src\Core\Sha256.cpp">
+      <Filter>src\Core</Filter>
+    </ClCompile>
     <ClCompile Include="src\Core\String\GameText.cpp">
       <Filter>src\Core\String</Filter>
     </ClCompile>
@@ -994,6 +997,9 @@
       <Filter>include\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\RuntimeLive.hpp">
+      <Filter>include\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\Sha256.hpp">
       <Filter>include\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\String\GameText.hpp">

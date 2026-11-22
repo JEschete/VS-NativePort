@@ -39,15 +39,27 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies Condition="'$(Configuration)'=='Debug'">SDL3.lib;chdr.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalDependencies Condition="'$(Configuration)'=='Release'">SDL3.lib;chdr.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies Condition="'$(Configuration)'=='Debug'">SDL3.lib;chdr.lib;lodepng.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies Condition="'$(Configuration)'=='Release'">SDL3.lib;chdr.lib;lodepng.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>$(VSNative)Windows.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\ConversionManifestWriter.cpp" />
+    <ClCompile Include="src\ImageConversion.cpp" />
+    <ClCompile Include="src\ImageFilesWriter.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\TimImage.cpp" />
+    <ClCompile Include="src\TimWriter.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\Extract\ConversionManifestWriter.hpp" />
+    <ClInclude Include="include\Extract\ImageConversion.hpp" />
+    <ClInclude Include="include\Extract\ImageFilesWriter.hpp" />
+    <ClInclude Include="include\Extract\TimImage.hpp" />
+    <ClInclude Include="include\Extract\TimWriter.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Engine\VS.Engine.vcxproj">

@@ -185,6 +185,27 @@ count. Include-graph consumers are a static measure over every preprocessor
 branch, so they can overcount a conditional include. Stored records are
 references, not fresh runs; rerun what a closure claim depends on.
 
+### Content ledger
+
+`tools\ledger\content.py --check` (CI) checks `Docs\ledgers\CONTENT_LEDGER.csv`,
+one row per disc file ([ASSET_PIPELINE.md](ASSET_PIPELINE.md) §9). It needs no
+disc. It rejects:
+- a kind its directory and extension don't give;
+- a `skipped` row that isn't a zero-byte placeholder or a §6.1 drop with its reason;
+- a `converted` row whose converter the runtime doesn't read or whose decoder or
+  outputs are missing;
+- `round_trip=pass` without its disc-corpus tests cited by a passing
+  `VERIFY_LEDGER` record;
+- a stale ASSET_PIPELINE summary.
+
+With an extracted disc it also compares every row with `Native\data\files.tsv`
+and `manifest.json`. After an extraction or a converter change, rebuild it:
+
+```powershell
+.\.venv-3\Scripts\python.exe tools\ledger\content.py --sync
+.\.venv-3\Scripts\python.exe -m unittest discover -s tools\ledger -p test_content.py -v
+```
+
 ### Decomp provenance citations
 
 `tools\ledger\provenance.py --check` (CI, after fetching only the pinned

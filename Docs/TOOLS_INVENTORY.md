@@ -114,7 +114,7 @@ Mirrors in `tools\PSX\Asset-Tools\jpsxdec`, `tools\PSX\Emulators\{DuckStation,PC
 | `port\` | Retired copy pipeline (plan D24): `copy_to_native.py`, `copy_fixups.py`, `own.py`; plus `understood.py` and indexes (BUILDING.md §8). |
 | `scaffold\gen_solution.py` | Generates the solution, including the `Tools` folder's item projects for `tools\` and `C:\Tools` (`scaffold\projects\`, entry files only for untracked trees). |
 | `test\run_native.ps1` | Copy, build and run the port with captures and scripted input (`-SkipIntro` presses Start during the movie). |
-| `test\duckstation_setup.ps1`, `test\duckstation_capture.ps1` | Portable DuckStation for reference captures, with key input. |
+| `test\duckstation_setup.ps1`, `test\duckstation_capture.ps1` | Portable DuckStation for reference captures, with key input; `-DumpUploads` also saves every CPU-to-VRAM upload in order. |
 
 ---
 

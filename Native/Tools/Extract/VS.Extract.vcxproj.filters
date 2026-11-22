@@ -1,13 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="include">
+      <UniqueIdentifier>{5871F96D-15A5-5C9E-BCB7-30DBCE6CD591}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\Extract">
+      <UniqueIdentifier>{61E643E0-7AAB-5E2D-9E3F-374A44036791}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src">
       <UniqueIdentifier>{87160A6E-FCB9-55FF-B4E3-B7C9EE314E12}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\ConversionManifestWriter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ImageConversion.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ImageFilesWriter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\main.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\TimImage.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TimWriter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClInclude Include="include\Extract\ConversionManifestWriter.hpp">
+      <Filter>include\Extract</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Extract\ImageConversion.hpp">
+      <Filter>include\Extract</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Extract\ImageFilesWriter.hpp">
+      <Filter>include\Extract</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Extract\TimImage.hpp">
+      <Filter>include\Extract</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Extract\TimWriter.hpp">
+      <Filter>include\Extract</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

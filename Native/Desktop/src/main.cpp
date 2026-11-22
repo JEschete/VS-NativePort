@@ -623,6 +623,7 @@ int RunDesktop(int argc, char** argv, Game::GameplayTrace* trace) {
   // prepared before it existed has none.
   auto opened = Content::DataStore::Open(*data_root);
   if (opened) opened = Content::DataStore::Get()->RequireCatalog();
+  if (opened) opened = Content::DataStore::Get()->RequireConversions();
   if (!opened) {
     VS::Core::LogError("boot", "{}", opened.error());
     if constexpr (!kEnableDetailedGameLogging) {

@@ -894,6 +894,9 @@
     <None Include="..\..\ledger\build_symbol_ledgers.py">
       <Filter>tools\ledger</Filter>
     </None>
+    <None Include="..\..\ledger\content.py">
+      <Filter>tools\ledger</Filter>
+    </None>
     <None Include="..\..\ledger\gates.py">
       <Filter>tools\ledger</Filter>
     </None>
@@ -916,6 +919,9 @@
       <Filter>tools\ledger</Filter>
     </None>
     <None Include="..\..\ledger\test_build_symbol_ledgers.py">
+      <Filter>tools\ledger</Filter>
+    </None>
+    <None Include="..\..\ledger\test_content.py">
       <Filter>tools\ledger</Filter>
     </None>
     <None Include="..\..\ledger\test_gates.py">

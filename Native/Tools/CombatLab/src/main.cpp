@@ -296,6 +296,10 @@ void LoadData(const Options& options) {
       !catalog) {
     throw std::runtime_error(catalog.error());
   }
+  if (const auto conversions = Content::DataStore::Get()->RequireConversions();
+      !conversions) {
+    throw std::runtime_error(conversions.error());
+  }
   if (VS::Content::LoadModuleData() != 0) {
     throw std::runtime_error("required production module data failed to load");
   }

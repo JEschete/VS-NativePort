@@ -2,6 +2,7 @@
 // Hand-maintained (tools/port/owned.csv).
 
 #include <optional>
+#include <string>
 #include <vector>
 
 #include "Field/Background.hpp"
@@ -58,12 +59,12 @@ class LiveBackgroundHost final : public BackgroundHost {
       const BackgroundFile& file, BackgroundBufferId destination) override;
   [[nodiscard]] bool ReadLoaded(BackgroundReadId read) override;
   void ReleaseRead(BackgroundReadId read) override;
-  void StampTimId(BackgroundBufferId buffer, std::uint32_t id) override;
-  [[nodiscard]] BackgroundTim ParseTim(BackgroundBufferId buffer) override;
-  void UploadTimPixels(BackgroundBufferId buffer,
-                       const TextureRect& rect) override;
-  void UploadTimClut(BackgroundBufferId buffer, int row, int first_color,
-                     int count) override;
+  [[nodiscard]] std::expected<BackgroundTextureUpload, std::string>
+  LoadBackgroundTexture(const BackgroundFile& source) override;
+  void UploadBackgroundPixels(std::span<const std::uint16_t> words,
+                              const TextureRect& rect) override;
+  void UploadBackgroundPalette(std::span<const std::uint16_t> words,
+                               int row) override;
 
  private:
   // The cells Layout read out of the heap buffer, which the layout it
