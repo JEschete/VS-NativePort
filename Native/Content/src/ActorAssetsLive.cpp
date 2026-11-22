@@ -740,12 +740,26 @@ struct LiveFileStream {
   DiscQueueSlot** request;
 };
 
-struct ModelReadOwner {
+// Native (#48): the disc request each cancellable file read started, so a
+// cancellation releases that request and not a later one reusing its slot.
+struct FileReadOwner {
   DiscQueueSlot* request = nullptr;
   std::uint64_t generation = 0;
 };
 
-ModelReadOwner modelReadOwner;
+FileReadOwner modelReadOwner;
+FileReadOwner weaponReadOwner;
+
+FileReadOwner* ReadOwner(AssetFileStream stream) {
+  switch (stream) {
+    case AssetFileStream::kActorModel:
+      return &modelReadOwner;
+    case AssetFileStream::kWeapon:
+      return &weaponReadOwner;
+    default:
+      return nullptr;
+  }
+}
 
 // Native (#48): the owner of each queued request and the tickets' outcomes.
 // The original's request records have no room for them.
@@ -901,9 +915,8 @@ class LiveActorAssetHost final : public ActorAssetHost {
     live.file->lba = file.sector;
     live.file->size = file.bytes;
     *live.request = AllocateLiveDiscRequest(live.file);
-    if (stream == AssetFileStream::kActorModel) {
-      modelReadOwner = {*live.request,
-                        LiveDiscRequestGeneration(*live.request)};
+    if (FileReadOwner* owner = ReadOwner(stream)) {
+      *owner = {*live.request, LiveDiscRequestGeneration(*live.request)};
     }
     if (*live.request == nullptr) {
       return false;
@@ -925,7 +938,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
   }
   void ReleaseFileRead(AssetFileStream stream) override {
     ReleaseLiveDiscRequest(*Stream(stream).request);
-    if (stream == AssetFileStream::kActorModel) modelReadOwner = {};
+    if (FileReadOwner* owner = ReadOwner(stream)) *owner = {};
   }
 
   // VRAM.
@@ -1321,25 +1334,42 @@ class LiveActorAssetHost final : public ActorAssetHost {
   const ActorAssetLoadState* active_state_ = nullptr;
 };
 
-// Cancels the actor model file's disc read and frees the file.
-bool CancelModelFile(ActorAssetLoadState& state) {
-  if (!state.model_file_allocated) return true;
-  auto* file = Pointer<std::byte>(state.model_file);
+// Cancels the disc read into a loader's file and frees the file.
+bool CancelFileRead(AssetAddress address, FileReadOwner& owner,
+                    const char* refusal) {
+  auto* file = Pointer<std::byte>(address);
   const auto capacity = Core::Memory::LivePayloadCapacity(file);
   if (!capacity.has_value()) {
-    CountRefusal("cancelled actor file outside its heap allocation",
-                 static_cast<std::int64_t>(state.model_file));
+    CountRefusal(refusal, static_cast<std::int64_t>(address));
     return false;
   }
   if (!CancelLiveDiscWrites({file, *capacity})) return false;
-  if (modelReadOwner.generation != 0 &&
-      LiveDiscRequestGeneration(modelReadOwner.request) ==
-          modelReadOwner.generation) {
-    ReleaseLiveDiscRequest(modelReadOwner.request);
+  if (owner.generation != 0 &&
+      LiveDiscRequestGeneration(owner.request) == owner.generation) {
+    ReleaseLiveDiscRequest(owner.request);
   }
-  modelReadOwner = {};
+  owner = {};
   Core::Memory::FreeLiveFromHighEnd(file);
+  return true;
+}
+
+bool CancelModelFile(ActorAssetLoadState& state) {
+  if (!HoldsActorModelFile(state)) return true;
+  if (!CancelFileRead(state.model_file, modelReadOwner,
+                      "cancelled actor file outside its heap allocation")) {
+    return false;
+  }
   state.model_file_allocated = false;
+  return true;
+}
+
+bool CancelWeaponFile(ActorAssetLoadState& state) {
+  if (!HoldsWeaponFile(state)) return true;
+  if (!CancelFileRead(state.weapon_file, weaponReadOwner,
+                      "cancelled weapon file outside its heap allocation")) {
+    return false;
+  }
+  state.weapon_file_loaded = false;
   return true;
 }
 
@@ -1352,6 +1382,9 @@ bool LiveActorAssetHost::AbandonHeadRequest(ActorAssetKind kind) {
   }
   ActorAssetLoadState state = LoadState();
   if (kind == ActorAssetKind::kActorModelLoad && !CancelModelFile(state)) {
+    return false;
+  }
+  if (kind == ActorAssetKind::kWeaponModelLoad && !CancelWeaponFile(state)) {
     return false;
   }
   AbandonActorAssetLoad(*this, state, request);

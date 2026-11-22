@@ -351,6 +351,8 @@ std::optional<ActorAssetTicket> ActorAssetCompletions::Issue(
   while (ticket == ActorAssetTicket::kNone ||
          Find(ticket).outcome != ActorAssetOutcome::kUnknown) {
     ++serial_;
+    // A ticket names any serial, not only kNone.
+    // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
     ticket = static_cast<ActorAssetTicket>(serial_);
   }
   *free = {.identity = {.owner = owner, .ticket = ticket},
@@ -449,6 +451,7 @@ bool IsOwnableActorAssetRequest(const ActorAssetRequest& request) {
   switch (static_cast<ActorAssetKind>(request.kind)) {
     case ActorAssetKind::kActorModelLoad:
     case ActorAssetKind::kActorModelParse:
+    case ActorAssetKind::kWeaponModelLoad:
     case ActorAssetKind::kWeaponModelParse:
       return true;
     case ActorAssetKind::kSequenceParse:
@@ -1961,16 +1964,28 @@ int ReleaseActorModel(ActorAssetHost& host, int slot) {
   return 0;
 }
 
+bool HoldsActorModelFile(const ActorAssetLoadState& state) {
+  return state.model_file_allocated && state.model_phase != kPhaseStart;
+}
+
+bool HoldsWeaponFile(const ActorAssetLoadState& state) {
+  return state.weapon_file_loaded && state.model_phase != kPhaseStart;
+}
+
 // Native (#48, #492): the original never abandoned a request. An owner's
 // cancellation abandons its head between frames: a parse waiting to fix its
 // primitives has placed its texture and allocated its model, so the record
-// it bound is discarded with them.
+// it bound is discarded with them. A file is freed only when the load holds
+// it (#506).
 void AbandonActorAssetLoad(ActorAssetHost& host, ActorAssetLoadState& state,
                            const ActorAssetRequest& request) {
   if (!IsOwnableActorAssetRequest(request)) return;
   const bool mid_parse = state.parse_phase == kParseFixPrimitives;
+  const bool holds_model_file = HoldsActorModelFile(state);
+  const bool holds_weapon_file = HoldsWeaponFile(state);
   const int target = TargetSlot(request);
-  switch (static_cast<ActorAssetKind>(request.kind)) {
+  const auto kind = static_cast<ActorAssetKind>(request.kind);
+  switch (kind) {
     case ActorAssetKind::kActorModelLoad:
     case ActorAssetKind::kActorModelParse:
       if (mid_parse && state.model_record_bound && target >= 0 &&
@@ -1980,10 +1995,8 @@ void AbandonActorAssetLoad(ActorAssetHost& host, ActorAssetLoadState& state,
       state.model_record_bound = false;
       // The host has cancelled the file's read; it frees the file unless the
       // host has.
-      if (state.model_file_allocated) {
-        state.model_file_allocated = false;
-        host.FreeHigh(state.model_file);
-      }
+      if (holds_model_file) host.FreeHigh(state.model_file);
+      state.model_file_allocated = false;
       state.model_phase = kPhaseStart;
       state.parse_phase = 0;
       state.model_file = AssetAddress::kNone;
@@ -1993,12 +2006,21 @@ void AbandonActorAssetLoad(ActorAssetHost& host, ActorAssetLoadState& state,
       state.model_texture_width = 0;
       state.model_texture_height = 0;
       break;
+    case ActorAssetKind::kWeaponModelLoad:
     case ActorAssetKind::kWeaponModelParse:
       if (mid_parse && target >= 0 && target < kWeaponModelSlots) {
         DiscardWeaponRecord(host, target);
       }
       state.parse_phase = 0;
       state.weapon_cursor = AssetAddress::kNone;
+      // A parse reads its caller's file; a load frees its own, as the actor
+      // model's, once the host has cancelled the read.
+      if (kind == ActorAssetKind::kWeaponModelLoad) {
+        if (holds_weapon_file) host.FreeHigh(state.weapon_file);
+        state.weapon_file_loaded = false;
+        state.weapon_file = AssetAddress::kNone;
+        state.model_phase = kPhaseStart;
+      }
       break;
     default:
       state.sequence_parse_phase = kPhaseStart;

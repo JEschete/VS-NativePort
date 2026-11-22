@@ -1137,6 +1137,24 @@ TEST_CASE("Cancelling an owned head abandons its loader or changes nothing",
   CHECK(Outcome(host, head) == ActorAssetOutcome::kCancelled);
 }
 
+TEST_CASE("Cancelling an owner's weapon load mid-read frees its file",
+          "[content-slice][content][actor-assets][asset-ownership]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  AddWeaponFile(host);
+  host.read_finished = false;
+  REQUIRE(Content::QueueOwnedActorAssetRequest(host, WeaponRequest(host),
+                                               kUntrackedActor) == 0);
+  REQUIRE(Content::UpdateWeaponModelLoad(host, host.load_state,
+                                         host.requests[0]) == kAssetPending);
+  REQUIRE(host.high_blocks.size() == 1);
+  CHECK(Content::CancelActorAssetRequests(host, kUntrackedActor));
+  CHECK(host.abandoned == std::vector{ActorAssetKind::kWeaponModelLoad});
+  CHECK(host.high_frees == host.high_blocks);
+  CHECK_FALSE(host.load_state.weapon_file_loaded);
+  CHECK_FALSE(Content::HasActorAssetRequests(host, kUntrackedActor));
+}
+
 TEST_CASE("Clearing the asset queue cancels every owned request",
           "[content-slice][content][actor-assets][asset-ownership]") {
   const auto owner = std::make_unique<FakeAssetHost>();
@@ -1198,6 +1216,60 @@ TEST_CASE("Abandoning a weapon parse waiting on its primitives discards it",
   // The slot parses again from the start.
   CHECK(LoadWeaponAfresh(host) == kAssetDone);
   CHECK(Required(host.weapons[4]).bone_count == 2);
+}
+
+TEST_CASE("Abandoning a weapon model load mid-read frees its file block",
+          "[content-slice][content][actor-assets][asset-ownership]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  AddWeaponFile(host);
+  host.read_finished = false;
+  ActorAssetLoadState state;
+  ActorAssetRequest request = WeaponRequest(host);
+  REQUIRE(Content::UpdateWeaponModelLoad(host, state, request) ==
+          kAssetPending);
+  REQUIRE(host.high_blocks.size() == 1);
+  Content::AbandonActorAssetLoad(host, state, request);
+  CHECK(host.high_frees == host.high_blocks);
+  CHECK(state.model_phase == 0);
+  CHECK_FALSE(state.weapon_file_loaded);
+  CHECK(state.weapon_file == AssetAddress::kNone);
+  CHECK_FALSE(host.weapons[4].has_value());
+  host.read_finished = true;
+  CHECK(LoadWeaponAfresh(host) == kAssetDone);
+}
+
+TEST_CASE("Abandoning a weapon model load mid-parse discards its record",
+          "[content-slice][content][actor-assets][asset-ownership]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  ActorAssetLoadState state;
+  ActorAssetRequest request = WeaponParseAwaitingPrimitives(host, state);
+  request.kind = static_cast<std::uint8_t>(ActorAssetKind::kWeaponModelLoad);
+  Content::AbandonActorAssetLoad(host, state, request);
+  CHECK_FALSE(host.weapons[4].has_value());
+  CHECK(host.low_frees == host.low_blocks);
+  CHECK(host.high_frees == host.high_blocks);
+  CHECK(state.parse_phase == 0);
+  CHECK(state.model_phase == 0);
+  CHECK(state.weapon_cursor == AssetAddress::kNone);
+}
+
+TEST_CASE("Abandoning an unstarted weapon model load frees nothing",
+          "[content-slice][content][actor-assets][asset-ownership]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  AddWeaponFile(host);
+  host.refuse_allocations = true;
+  ActorAssetLoadState state;
+  ActorAssetRequest request = WeaponRequest(host);
+  // The refused read leaves the loader at its start with its file unread.
+  REQUIRE(Content::UpdateWeaponModelLoad(host, state, request) ==
+          kAssetRefused);
+  REQUIRE(state.weapon_file_loaded);
+  Content::AbandonActorAssetLoad(host, state, request);
+  CHECK(host.high_frees.empty());
+  CHECK_FALSE(state.weapon_file_loaded);
 }
 
 TEST_CASE("Abandoning an actor model load frees its file block",
@@ -1859,6 +1931,26 @@ TEST_CASE("Abandoning an actor parse waiting on its primitives discards it",
   // The slot loads again from the start.
   CHECK(LoadActorModel(host, 3) == kAssetDone);
   CHECK(host.reads.size() == 2);
+}
+
+TEST_CASE("Abandoning an unstarted model load frees no earlier file",
+          "[content-slice][content][actor-assets][asset-ownership]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  AddShpFile(host, 0);
+  ActorAssetLoadState state;
+  ActorAssetRequest loaded = ShpRequest(host, 3);
+  REQUIRE(LoadActorModel(host, state, loaded) == kAssetDone);
+  REQUIRE(host.high_frees == host.high_blocks);
+  // A refused file read leaves the loader at its start, still naming the
+  // file the finished load freed.
+  ActorAssetRequest refused = Request(ActorAssetKind::kActorModelLoad, 2, 30);
+  refused.destination = host.AddBlock(8);
+  REQUIRE(Content::UpdateActorModelLoad(host, state, refused) == kAssetRefused);
+  Content::AbandonActorAssetLoad(host, state, ShpRequest(host, 4));
+  CHECK(host.high_frees == host.high_blocks);
+  CHECK_FALSE(state.model_file_allocated);
+  CHECK(state.model_file == AssetAddress::kNone);
 }
 
 TEST_CASE("A second frame whose actor was released ends the parse",

@@ -580,9 +580,8 @@ int UpdateActorAssetQueue(ActorAssetHost& host);
 void QueueAshleyWeaponSequence(ActorAssetHost& host, int sequence_id);
 
 // Native (#48): owned requests. An owner may submit only the kinds whose
-// loader AbandonActorAssetLoad can abandon mid-flight: actor model loads and
-// parses, weapon model parses and battle/common sequence parses (sub kind
-// 0).
+// loader AbandonActorAssetLoad can abandon mid-flight: actor and weapon model
+// loads and parses, and battle/common sequence parses (sub kind 0).
 [[nodiscard]] bool IsOwnableActorAssetRequest(const ActorAssetRequest& request);
 // Queues `request` for `owner`; its ticket, or none when the request is not
 // ownable, the owner is kUnowned, or the queue or ticket table is full.
@@ -612,9 +611,15 @@ void ClearActorAssetQueue(ActorAssetHost& host);
 // first, so no owner waits on a request that will never run.
 [[nodiscard]] ActorAssetCompletion FindActorAssetCompletion(
     ActorAssetHost& host, ActorAssetTicket ticket);
+// Native (#506): whether the loader holds its actor model or weapon file. A
+// load holds it only once it has left its start: a refused read leaves the
+// flag set at the start, naming no file or one already freed.
+[[nodiscard]] bool HoldsActorModelFile(const ActorAssetLoadState& state);
+[[nodiscard]] bool HoldsWeaponFile(const ActorAssetLoadState& state);
 // Resets the loader state an ownable head request holds and discards the
 // record it bound but had not finished; the host has already cancelled the
-// request's disc read and file. Changes nothing for an unownable request.
+// request's disc read. Frees the request's model or weapon file unless the
+// host has (clearing its flag). Changes nothing for an unownable request.
 void AbandonActorAssetLoad(ActorAssetHost& host, ActorAssetLoadState& state,
                            const ActorAssetRequest& request);
 // Native (#48): forgets the parse cursors of parses no longer in progress.

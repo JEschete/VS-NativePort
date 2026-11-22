@@ -1039,7 +1039,8 @@ int QueueAshleyModelLoad(ActorSpawnHost& host, int model_id);
 // the actor owns its model request, so removing the actor cancels it.
 int QueueScriptedActorSpawn(ActorSpawnHost& host, std::uint32_t actor_id,
                             int model_id, SpawnPlacement placement);
-// func_8007CA20 (146C.c:8962).
+// func_8007CA20 (146C.c:8962). Native (#48): the actor owns its equipment
+// requests, as every equipment load, so removing the actor cancels them.
 void LoadActorEquipmentModels(ActorSpawnHost& host, int actor_id,
                               int blade_model, int shield_model);
 // func_8007CAA4 (146C.c:8971). An actor without a shield releases its

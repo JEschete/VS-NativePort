@@ -288,7 +288,9 @@ void QueueEquipment(ActorSpawnHost& host, SpawnedActor actor, int actor_id,
   request.texture_slot =
       hand == EquipmentHand::kWeapon ? kWeaponTextureSlot : kShieldTextureSlot;
   request.material = static_cast<std::uint8_t>(material);
-  static_cast<void>(host.QueueAsset(request));
+  // Native (#48): scripts load equipment for published actors, so the actor
+  // owns the load and removal cancels it before the equipment memory goes.
+  static_cast<void>(host.QueueOwnedAsset(request, actor));
 }
 
 [[nodiscard]] SpawnedActor AllocateEquipped(

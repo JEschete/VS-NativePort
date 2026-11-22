@@ -869,14 +869,23 @@ TEST_CASE("A gimmick actor is refused in an occupied slot or outside the table",
   CHECK(outside.log.empty());
 }
 
+namespace {
+constexpr actors::SpawnPlacement EquippedPlacement() {
+  return {.tile_x = 4, .surface = 1, .tile_z = 5, .facing = 6};
+}
+
+// Actor 3 with model 0x22, blade 15 (material 2) and shield 6 (material 1).
+SpawnedActor CreateEquippedActor(FakeSpawnHost& host) {
+  host.table.at(actors::kAshleySlot) = Handle(0x10);
+  return actors::CreateActorWithEquipment(host, 3, 0x22, 15, 2, 6, 1,
+                                          EquippedPlacement(), 1);
+}
+}  // namespace
+
 TEST_CASE("An equipped actor queues its models and joins the list after Ashley",
           "[actors][actors-spawning]") {
   FakeSpawnHost host;
-  host.table.at(actors::kAshleySlot) = Handle(0x10);
-  const actors::SpawnPlacement placement{
-      .tile_x = 4, .surface = 1, .tile_z = 5, .facing = 6};
-  const SpawnedActor actor = actors::CreateActorWithEquipment(
-      host, 3, 0x22, 15, 2, 6, 1, placement, 1);
+  const SpawnedActor actor = CreateEquippedActor(host);
   REQUIRE(actor == Handle(kFirstHandle));
   CHECK(host.table.at(3) == actor);
   CHECK(host.log == std::vector<std::string>{"Allocate 1",
@@ -884,9 +893,9 @@ TEST_CASE("An equipped actor queues its models and joins the list after Ashley",
                                              "QueueAsset",
                                              "BaseSequence 3",
                                              "Release 6",
-                                             "QueueAsset",
+                                             "QueueOwnedAsset",
                                              "Release 7",
-                                             "QueueAsset",
+                                             "QueueOwnedAsset",
                                              "WeaponSequence 3 2 1",
                                              "UpdateQueue",
                                              "Pump",
@@ -901,12 +910,26 @@ TEST_CASE("An equipped actor queues its models and joins the list after Ashley",
                                              "Display 3 0x1846",
                                              "TemplateWord 3 0",
                                              "AiState 3 -1"});
+  CHECK(host.defaults ==
+        actors::ActorDefaults{.id = 3,
+                              .model_id = 0x22,
+                              .blade_id = 15,
+                              .shield_id = 6,
+                              .disposition = {.kind = 4, .weapon_drawn = true},
+                              .interaction_flags = 0,
+                              .gait = {.movement_class = 2, .gait_class = 4}});
+}
+
+TEST_CASE("An equipped actor's requests load its slots and it owns its parts",
+          "[actors][actors-spawning]") {
+  FakeSpawnHost host;
+  const SpawnedActor actor = CreateEquippedActor(host);
   REQUIRE(host.requests.size() == 3);
   ActorAssetRequest model{};
   model.kind = Kind(ActorAssetKind::kActorModelLoad);
   model.target_slot = 3;
   model.model_id = 0x22;
-  model.placement = actors::PackPlacement(placement);
+  model.placement = actors::PackPlacement(EquippedPlacement());
   model.destination = At(kFirstHandle + kModelOffset);
   model.sub_kind = actors::kDefaultSubKind;
   model.material = actors::kModelLoadMaterial;
@@ -920,14 +943,8 @@ TEST_CASE("An equipped actor queues its models and joins the list after Ashley",
   shield.texture_slot = actors::kShieldTextureSlot;
   shield.material = 1;
   CHECK(host.requests.at(2) == shield);
-  CHECK(host.defaults ==
-        actors::ActorDefaults{.id = 3,
-                              .model_id = 0x22,
-                              .blade_id = 15,
-                              .shield_id = 6,
-                              .disposition = {.kind = 4, .weapon_drawn = true},
-                              .interaction_flags = 0,
-                              .gait = {.movement_class = 2, .gait_class = 4}});
+  // Native (#48): removing the actor cancels its blade and shield loads.
+  CHECK(host.queued_owners == std::vector{actor, actor});
 }
 
 TEST_CASE("Ashley's slot ends the list and a bare model queues no parts",
@@ -1621,8 +1638,9 @@ TEST_CASE("Equipment refreshes keep the original's blade form without a shield",
                                          .shield_model = 12,
                                          .shield_material = 3};
   actors::RefreshActorEquipmentModels(host, 3);
-  CHECK(host.log == std::vector<std::string>{"Release 6", "QueueAsset",
-                                             "Release 7", "QueueAsset"});
+  CHECK(host.log == std::vector<std::string>{"Release 6", "QueueOwnedAsset",
+                                             "Release 7", "QueueOwnedAsset"});
+  CHECK(host.queued_owners == std::vector{Handle(0x30), Handle(0x30)});
   CHECK(host.requests.at(0).material == 2);
   CHECK(host.requests.at(1).model_id == 12);
 
