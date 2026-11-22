@@ -203,7 +203,8 @@ class LiveActorLoadHost final : public ActorLoadHost {
     return -1;
   }
   const std::optional<Content::ActorAssetTicket> ticket =
-      Content::SubmitLiveActorAsset(request, AssetOwnerOf(actor));
+      Content::SubmitLiveActorAsset(request, AssetOwnerOf(actor),
+                                    &LiveActorRecordMemory);
   if (!ticket) {
     return -1;
   }
@@ -403,16 +404,6 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     const VS::Battle::Actor* live =
         ActorPointer<const VS::Battle::Actor>(actor, "ActorModelAddress");
     return live != nullptr ? Address(live->model) : AssetAddress::kNone;
-  }
-
-  [[nodiscard]] AssetAddress EquipmentAddress(
-      SpawnedActor actor, EquipmentHand hand) const override {
-    const VS::Battle::Actor* live =
-        ActorPointer<const VS::Battle::Actor>(actor, "ActorEquipmentAddress");
-    if (live == nullptr) {
-      return AssetAddress::kNone;
-    }
-    return Address(live->equipment_models[static_cast<std::size_t>(hand)]);
   }
 
   void SetEquippedWeaponCategory(SpawnedActor actor,
@@ -748,7 +739,8 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
         nullptr) {
       return std::nullopt;
     }
-    return Content::SubmitLiveActorAsset(request, AssetOwnerOf(actor));
+    return Content::SubmitLiveActorAsset(request, AssetOwnerOf(actor),
+                                         &LiveActorRecordMemory);
   }
   [[nodiscard]] int QueueOwnedAsset(const Content::ActorAssetRequest& request,
                                     SpawnedActor actor) override {
@@ -1306,6 +1298,32 @@ int QueueLiveActorOwnedAsset(const VS::Battle::Actor* actor,
     }
   }
   return Content::QueueLiveActorAsset(request);
+}
+
+AssetAddress LiveActorRecordMemory(Content::ActorAssetOwner owner,
+                                   Content::ActorRecordTable table,
+                                   int record) {
+  // An owner's value is its actor's handle (AssetOwnerOf).
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
+  const auto actor = static_cast<SpawnedActor>(owner.value);
+  const ActorInstanceTable& handles = LiveActorHandles();
+  const std::optional<ActorRecordPart> part =
+      OwnedActorRecordPart(handles, actor, table, record);
+  const auto* live =
+      reinterpret_cast<const VS::Battle::Actor*>(handles.Resolve(actor));
+  if (!part || live == nullptr) {
+    return AssetAddress::kNone;
+  }
+  switch (*part) {
+    case ActorRecordPart::kBody:
+      return Address(live->model);
+    case ActorRecordPart::kSecondBody:
+    case ActorRecordPart::kWeapon:
+      return Address(live->equipment_models[0]);
+    case ActorRecordPart::kShield:
+      return Address(live->equipment_models[1]);
+  }
+  return AssetAddress::kNone;
 }
 
 void ResetLiveActorHandles() { LiveActorHandles().Reset(); }

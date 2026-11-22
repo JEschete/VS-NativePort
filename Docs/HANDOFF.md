@@ -40,6 +40,21 @@ tickets. The untracked owned-request API is retired. Release door run
 blocked baseline with 20/20 teardowns, 0 engine errors and 45 settled loads
 with no failed, lost or prematurely released tickets.
 
+Record-memory slice: an owned request names no memory.
+`SubmitActorAssetRequest` refuses an owned request with a destination; the
+owner passes an `ActorRecordMemory` resolver with each live submission, which
+the queue keeps per request and calls at bind time with the stored owner. A
+spawned actor binds only its own body, second body, weapon and shield records
+(`OwnedActorRecordPart`, generation-checked); the enemy preview resolves its
+model buffer parts (`EnemyPreviewRecordMemory`); the equipment menu's reloads
+bind through Ashley's handle. A kNone memory is a counted bind refusal, so the
+load fails visibly. The Release door run again matched 15 passed / 5 blocked,
+20/20 teardowns, 0 engine errors and 85 settled loads. Still open for #48
+criterion 2: the head-owned `ActorAssetLoadState` parser state is global, the
+shared record index rides in `request.data`, immutable sharing waits on
+#203/#205, and the unowned menu `ActorPreview` and gimmick model requests
+still name destinations.
+
 Both #48 and #55 remain open. Original global waits (`ScriptWaitForObjectLoad`,
 the equipment menu's queue-busy check) stay as original timing; banks and
 material sequences stay unowned; the remaining `allocation_kind` readers

@@ -3,6 +3,8 @@
 
 #include <cstdint>
 
+#include "Content/ActorAssets.hpp"
+
 // Binds the encyclopedia preview (EncyclopediaPreview.hpp) to the shared
 // model load step (VS::Content::objectDataLoadStep), the ZUD file
 // table (zudLbas, zudSizes, paletteFlags),
@@ -24,6 +26,12 @@ void InitializeLiveAshleyPreviewPose();
 [[nodiscard]] bool QueueLiveEnemyModelRead(int zud_id);
 int LoadLiveEnemyModelParts();
 void FreeLiveEnemyModelBuffer();
+// Native (#48): where the live preview's owned request binds `slot` of
+// `table` (EnemyPreviewRecordMemory), the record memory its parts submit with
+// (Content::ActorRecordMemory); kNone for another owner or when the preview
+// holds no such part.
+[[nodiscard]] Content::AssetAddress LiveEnemyPreviewRecordMemory(
+    Content::ActorAssetOwner owner, Content::ActorRecordTable table, int slot);
 
 // Abandon a stopped preview at any loading phase: cancels its own queued
 // parts and read, then releases the records bound in its buffer. Refuses

@@ -54,6 +54,14 @@ int QueueLiveSlotActorAsset(std::size_t slot,
 // and the pending allocations do not hold it.
 int QueueLiveActorOwnedAsset(const VS::Battle::Actor* actor,
                              const Content::ActorAssetRequest& request);
+// Native (#48): the memory the actor named by `owner` keeps for its `record`
+// of `table`, where an owned request binds it: the model memory of its body,
+// the weapon model memory of its second body or weapon, the shield model
+// memory of its shield. kNone for a stale or foreign owner, an actor without
+// a spawn definition, or a record that is not one of the actor's parts.
+[[nodiscard]] Content::AssetAddress LiveActorRecordMemory(
+    Content::ActorAssetOwner owner, Content::ActorRecordTable table,
+    int record);
 
 // The typed records of the legacy layouts.
 [[nodiscard]] CharacterTemplate DecodeCharacterTemplate(

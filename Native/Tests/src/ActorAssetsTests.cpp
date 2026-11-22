@@ -149,6 +149,12 @@ class FakeAssetHost final : public Content::ActorAssetHost {
     if (RequestKind(slot) == 0) return {};
     return completions.Current(identities.at(Index(slot)));
   }
+  // The live host binds an owned head request's record into its owner's
+  // memory and an unowned request's into its destination.
+  bool HasRecordMemory(const ActorAssetRequest& request) const {
+    return RequestIdentity(0).owner != Content::kUnownedActorAssetOwner ||
+           request.destination != AssetAddress::kNone;
+  }
   Content::ActorAssetCompletions& Completions() override { return completions; }
   void OnRequestQueued(const ActorAssetRequest& request) override {
     queued.push_back(request);
@@ -271,8 +277,8 @@ class FakeAssetHost final : public Content::ActorAssetHost {
             .model_id = model->model_id,
             .bone_count = model->bone_count};
   }
-  bool BindWeaponRecord(int slot, AssetAddress destination) override {
-    if (destination == AssetAddress::kNone) {
+  bool BindWeaponRecord(int slot, const ActorAssetRequest& request) override {
+    if (!HasRecordMemory(request)) {
       return false;
     }
     WeaponAssetRecord model;
@@ -317,8 +323,8 @@ class FakeAssetHost final : public Content::ActorAssetHost {
             .sequence_model_id = actor->sequence_model_id,
             .common_sequence = actor->common_sequence};
   }
-  bool BindActorRecord(int slot, AssetAddress destination) override {
-    if (destination == AssetAddress::kNone) {
+  bool BindActorRecord(int slot, const ActorAssetRequest& request) override {
+    if (!HasRecordMemory(request)) {
       return false;
     }
     ActorAssetRecord record;
@@ -974,6 +980,20 @@ TEST_CASE(
   CHECK(IssuedTickets(host) == 0);
 }
 
+TEST_CASE("Asset submissions refuse an owned request that names a destination",
+          "[content-slice][content][actor-assets][asset-ownership]") {
+  // #48: an owned request's owner provides its record memory.
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  ActorAssetRequest addressed = PartRequest(1);
+  addressed.destination = host.AddBlock(8);
+  CHECK_FALSE(Content::SubmitActorAssetRequest(host, addressed, kPreviewOwner));
+  CHECK(host.refusals ==
+        std::vector<std::string>{"owned asset request names a destination"});
+  CHECK(host.queued.empty());
+  CHECK(IssuedTickets(host) == 0);
+}
+
 TEST_CASE("Asset submissions own common parses and special sequence loads",
           "[content-slice][content][actor-assets][asset-ownership]") {
   const auto owner = std::make_unique<FakeAssetHost>();
@@ -1087,8 +1107,9 @@ TEST_CASE("Cancelling an owner's weapon load mid-read frees its file",
   FakeAssetHost& host = *owner;
   AddWeaponFile(host);
   host.read_finished = false;
-  REQUIRE(
-      Content::SubmitActorAssetRequest(host, WeaponRequest(host), kActorOwner));
+  ActorAssetRequest request = WeaponRequest(host);
+  request.destination = AssetAddress::kNone;
+  REQUIRE(Content::SubmitActorAssetRequest(host, request, kActorOwner));
   REQUIRE(Content::UpdateWeaponModelLoad(host, host.load_state,
                                          host.requests[0]) == kAssetPending);
   REQUIRE(host.high_blocks.size() == 1);

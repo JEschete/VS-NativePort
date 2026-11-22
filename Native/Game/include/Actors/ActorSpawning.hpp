@@ -145,6 +145,61 @@ inline constexpr unsigned kPlacementFacingShift = 24;
 
 enum class EquipmentHand : std::uint8_t { kWeapon = 0, kShield = 1 };
 
+// Native (#48): the records an actor's requests load, as parts of the actor.
+// A part's record slot derives from the actor's slot, and the actor provides
+// the record's memory when it binds, so a request names no memory and cannot
+// aim at another actor's records.
+enum class ActorRecordPart : std::uint8_t {
+  // The body's actor record, in the actor's model memory.
+  kBody,
+  // A secondary-body actor's second body: the actor record
+  // kSecondBodySlotOffset slots on, in the weapon model memory.
+  kSecondBody,
+  // The weapon and shield records (actor * 2 + hand), in the equipment model
+  // memory of the hand.
+  kWeapon,
+  kShield,
+};
+
+// The record table `part` binds.
+[[nodiscard]] constexpr Content::ActorRecordTable ActorPartTable(
+    ActorRecordPart part) {
+  return part == ActorRecordPart::kWeapon || part == ActorRecordPart::kShield
+             ? Content::ActorRecordTable::kWeapon
+             : Content::ActorRecordTable::kActor;
+}
+
+// The record slot of `part` for the actor in `slot`.
+[[nodiscard]] constexpr std::size_t ActorPartRecordSlot(std::size_t slot,
+                                                        ActorRecordPart part) {
+  switch (part) {
+    case ActorRecordPart::kSecondBody:
+      return slot + kSecondBodySlotOffset;
+    case ActorRecordPart::kWeapon:
+      return slot * 2;
+    case ActorRecordPart::kShield:
+      return (slot * 2) + 1;
+    case ActorRecordPart::kBody:
+      break;
+  }
+  return slot;
+}
+
+// The part of the `shape` actor in `slot` whose record is `record` of
+// `table`; none when that record is not one of the actor's. Only a
+// secondary body owns a second body, only an equipped actor its weapon and
+// shield, and a gimmick actor loads no owned records.
+[[nodiscard]] std::optional<ActorRecordPart> ActorRecordPartAt(
+    ActorShape shape, std::size_t slot, Content::ActorRecordTable table,
+    std::size_t record);
+
+// The part of `actor`, published or pending in `handles`, whose record is
+// `record` of `table`; none for a stale handle, an actor without a spawn
+// definition, a negative record or a record that is not one of its parts.
+[[nodiscard]] std::optional<ActorRecordPart> OwnedActorRecordPart(
+    const ActorInstanceTable& handles, SpawnedActor actor,
+    Content::ActorRecordTable table, int record);
+
 enum class SpawnRefusal : std::uint8_t {
   // An actor id outside VS::Battle::actors.
   kActorSlot,
@@ -674,10 +729,9 @@ class ActorSpawnHost {
   // dependent resources.
   virtual void DiscardUninstalled(SpawnedActor actor) = 0;
   virtual void Install(std::size_t slot, SpawnedActor actor) = 0;
+  // The actor's model memory, which an unowned gimmick request names.
   [[nodiscard]] virtual Content::AssetAddress ModelAddress(
       SpawnedActor actor) const = 0;
-  [[nodiscard]] virtual Content::AssetAddress EquipmentAddress(
-      SpawnedActor actor, EquipmentHand hand) const = 0;
   virtual void SetEquippedWeaponCategory(SpawnedActor actor,
                                          std::uint8_t category) = 0;
   // Sets the identity of a new gimmick actor, unlinked and not retained.

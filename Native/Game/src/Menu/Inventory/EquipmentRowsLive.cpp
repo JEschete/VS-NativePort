@@ -45,7 +45,6 @@
 namespace VS::Menu::Inventory {
 namespace {
 using Content::ActorAssetRequest;
-using Content::AssetAddress;
 using Framework::ItemText;
 using Framework::MenuRow;
 using Framework::RowPlacement;
@@ -236,10 +235,6 @@ class LiveAccessoryHost final : public AccessoryPreviewHost {
   std::span<const VS::Items::InventoryArmor> armor_ = BoundArmor();
 };
 
-[[nodiscard]] AssetAddress Address(const void* pointer) {
-  return static_cast<AssetAddress>(reinterpret_cast<std::uintptr_t>(pointer));
-}
-
 [[nodiscard]] VS::Actors::WeaponModel* WeaponModel(int slot) {
   if (slot < 0 || slot >= VS::Actors::kWeaponModelCount) {
     return nullptr;
@@ -259,14 +254,10 @@ class LiveModelHost final : public EquipmentModelHost {
   bool HasWeaponModel(int slot) override {
     return WeaponModel(slot) != nullptr;
   }
-  std::optional<AssetAddress> EquipmentModelSlot(int index) override {
-    if (VS::Battle::characterState == nullptr || index < 0 ||
-        static_cast<std::size_t>(index) >=
-            std::size(VS::Battle::characterState->equipment_models)) {
-      return std::nullopt;
-    }
-    return Address(VS::Battle::characterState
-                       ->equipment_models[static_cast<std::size_t>(index)]);
+  bool HasEquipmentModelSlot(int index) override {
+    return VS::Battle::characterState != nullptr && index >= 0 &&
+           static_cast<std::size_t>(index) <
+               std::size(VS::Battle::characterState->equipment_models);
   }
   void ReleaseWeaponModel(int slot) override {
     static_cast<void>(Content::ReleaseLiveWeaponModel(slot));

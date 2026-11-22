@@ -431,7 +431,7 @@ ModelReload ReloadEquipmentModels(std::uint8_t& step, EquipmentModelHost& host,
   switch (step) {
     case kReloadQueue:
       if (choice.model_id != 0 &&
-          !host.EquipmentModelSlot(ModelIndex(choice.model_id))) {
+          !host.HasEquipmentModelSlot(ModelIndex(choice.model_id))) {
         return ModelReload::kRefused;
       }
       if (choice.category == 0) {
@@ -504,6 +504,8 @@ bool IsTwoHandedWeapon(std::int32_t category) {
 
 // decomp: MENU3.PRG populateDataSlot (src/MENU/MENU3.PRG/68C4.c:103; was
 // _populateDataSlot)
+// Native (#48): the character owns the request (QueueAsset) and provides
+// the record's memory when it binds, so the request names no destination.
 bool QueueEquipmentModel(EquipmentModelHost& host, std::int32_t model_id,
                          std::int32_t material) {
   if (model_id == 0) {
@@ -511,15 +513,13 @@ bool QueueEquipmentModel(EquipmentModelHost& host, std::int32_t model_id,
   }
   const int index = ModelIndex(model_id);
   const bool shield = index != 0;
-  const auto destination = host.EquipmentModelSlot(index);
-  if (!destination) {
+  if (!host.HasEquipmentModelSlot(index)) {
     return false;
   }
   ActorAssetRequest request{};
   request.kind = kEquipmentModelKind;
   request.target_slot = static_cast<std::int8_t>(index);
   request.model_id = static_cast<std::int16_t>(model_id);
-  request.destination = *destination;
   request.sub_kind = 0;
   request.texture_slot = shield ? kShieldTextureSlot : kWeaponTextureSlot;
   request.material = static_cast<std::uint8_t>(material);

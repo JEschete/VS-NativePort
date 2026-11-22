@@ -47,8 +47,6 @@ using VS::test_support::Refused;
 constexpr std::uintptr_t kFirstHandle = 0x1000;
 constexpr std::uintptr_t kHandleStride = 0x100;
 constexpr std::uintptr_t kModelOffset = 0x10;
-constexpr std::uintptr_t kWeaponOffset = 0x20;
-constexpr std::uintptr_t kShieldOffset = 0x30;
 constexpr std::uintptr_t kZudBase = 0x80000;
 
 SpawnedActor Handle(std::uintptr_t value) {
@@ -233,6 +231,64 @@ TEST_CASE("A pending allocation is found by its address until published",
   CHECK(handles.Pending(0x1000) == SpawnedActor::kNone);
   // The lookup did not install or re-key anything.
   CHECK(handles.Observe(3, 0x1000) == actor);
+}
+
+using actors::ActorRecordPart;
+using content::ActorRecordTable;
+
+TEST_CASE("An equipped actor's owned records bind only into its own parts",
+          "[actors][actors-spawning][asset-ownership]") {
+  // #48: an owned request names no memory; the actor its owner names
+  // provides it, so a record of another slot binds nowhere.
+  actors::ActorInstanceTable handles;
+  const SpawnedActor actor = handles.Begin(3, 0x1000, kEquippedActor);
+  CHECK(actors::OwnedActorRecordPart(handles, actor, ActorRecordTable::kActor,
+                                     3) == ActorRecordPart::kBody);
+  CHECK(actors::OwnedActorRecordPart(handles, actor, ActorRecordTable::kWeapon,
+                                     6) == ActorRecordPart::kWeapon);
+  CHECK(actors::OwnedActorRecordPart(handles, actor, ActorRecordTable::kWeapon,
+                                     7) == ActorRecordPart::kShield);
+  // Slot 7 is a second body's record, which an equipped actor lacks.
+  CHECK_FALSE(
+      actors::OwnedActorRecordPart(handles, actor, ActorRecordTable::kActor, 7)
+          .has_value());
+  CHECK_FALSE(
+      actors::OwnedActorRecordPart(handles, actor, ActorRecordTable::kWeapon, 8)
+          .has_value());
+  CHECK_FALSE(
+      actors::OwnedActorRecordPart(handles, actor, ActorRecordTable::kActor, -1)
+          .has_value());
+  REQUIRE(handles.Publish(3, actor));
+  REQUIRE(handles.Remove(3, actor));
+  CHECK_FALSE(
+      actors::OwnedActorRecordPart(handles, actor, ActorRecordTable::kActor, 3)
+          .has_value());
+}
+
+TEST_CASE("Second bodies bind their records and gimmicks or strangers none",
+          "[actors][actors-spawning][asset-ownership]") {
+  actors::ActorInstanceTable handles;
+  const SpawnedActor two_body = handles.Begin(2, 0x2000, kTwoBodyActor);
+  CHECK(actors::OwnedActorRecordPart(handles, two_body,
+                                     ActorRecordTable::kActor,
+                                     2) == ActorRecordPart::kBody);
+  CHECK(actors::OwnedActorRecordPart(handles, two_body,
+                                     ActorRecordTable::kActor,
+                                     6) == ActorRecordPart::kSecondBody);
+  CHECK_FALSE(actors::OwnedActorRecordPart(handles, two_body,
+                                           ActorRecordTable::kWeapon, 4)
+                  .has_value());
+  const SpawnedActor gimmick = handles.Begin(5, 0x3000, kGimmickActor);
+  CHECK_FALSE(actors::OwnedActorRecordPart(handles, gimmick,
+                                           ActorRecordTable::kActor, 5)
+                  .has_value());
+  const SpawnedActor stranger = handles.Observe(6, 0x4000);
+  CHECK_FALSE(actors::OwnedActorRecordPart(handles, stranger,
+                                           ActorRecordTable::kActor, 6)
+                  .has_value());
+  CHECK_FALSE(actors::OwnedActorRecordPart(handles, SpawnedActor::kNone,
+                                           ActorRecordTable::kActor, 0)
+                  .has_value());
 }
 
 using content::ActorAssetOutcome;
@@ -438,11 +494,6 @@ struct FakeSpawnHost final : actors::ActorSpawnHost {
   }
   AssetAddress ModelAddress(SpawnedActor actor) const override {
     return At(Raw(actor) + kModelOffset);
-  }
-  AssetAddress EquipmentAddress(SpawnedActor actor,
-                                EquipmentHand hand) const override {
-    return At(Raw(actor) +
-              (hand == EquipmentHand::kWeapon ? kWeaponOffset : kShieldOffset));
   }
   void SetEquippedWeaponCategory(SpawnedActor /*actor*/,
                                  std::uint8_t category) override {
@@ -1127,7 +1178,6 @@ TEST_CASE("An equipped actor's requests load its slots and it owns its parts",
   model.target_slot = 3;
   model.model_id = 0x22;
   model.placement = actors::PackPlacement(EquippedPlacement());
-  model.destination = At(kFirstHandle + kModelOffset);
   model.sub_kind = actors::kDefaultSubKind;
   model.material = actors::kModelLoadMaterial;
   CHECK(host.requests.at(0) == model);
@@ -1135,7 +1185,6 @@ TEST_CASE("An equipped actor's requests load its slots and it owns its parts",
   shield.kind = Kind(ActorAssetKind::kWeaponModelLoad);
   shield.target_slot = 7;
   shield.model_id = 6;
-  shield.destination = At(kFirstHandle + kShieldOffset);
   shield.sub_kind = 3;
   shield.texture_slot = actors::kShieldTextureSlot;
   shield.material = 1;
@@ -1240,7 +1289,6 @@ TEST_CASE("Equipment model loads stay inside the weapon model slots",
   expected.kind = Kind(ActorAssetKind::kWeaponModelLoad);
   expected.target_slot = 19;
   expected.model_id = 12;
-  expected.destination = At(0x2000 + kShieldOffset);
   expected.sub_kind = 9;
   expected.texture_slot = actors::kShieldTextureSlot;
   expected.material = 3;
@@ -1291,7 +1339,6 @@ std::vector<ActorAssetRequest> ExpectedRoomEnemyRequests() {
   body.model_id = 0x21;
   body.placement = actors::PackPlacement(
       {.tile_x = 5, .surface = 1, .tile_z = 6, .facing = 0x80});
-  body.destination = At(kFirstHandle + kModelOffset);
   body.sub_kind = actors::kDefaultSubKind;
   body.variant = 1;
   body.material = 3;
@@ -1300,7 +1347,6 @@ std::vector<ActorAssetRequest> ExpectedRoomEnemyRequests() {
   weapon.target_slot = 6;
   weapon.data = At(kZudBase + 0x40);
   weapon.model_id = 5;
-  weapon.destination = At(kFirstHandle + kWeaponOffset);
   weapon.sub_kind = 3;
   weapon.texture_slot = actors::kWeaponTextureSlot;
   weapon.material = 2;
@@ -1308,7 +1354,6 @@ std::vector<ActorAssetRequest> ExpectedRoomEnemyRequests() {
   shield.target_slot = 7;
   shield.data = At(kZudBase + 0x50);
   shield.model_id = 6;
-  shield.destination = At(kFirstHandle + kShieldOffset);
   shield.texture_slot = actors::kShieldTextureSlot;
   shield.material = 1;
   ActorAssetRequest battle = shield;
@@ -1496,7 +1541,6 @@ TEST_CASE("A room enemy with a second body loads it in the weapon slot",
   second.kind = Kind(ActorAssetKind::kActorModelLoad);
   second.target_slot = 7;
   second.model_id = 0x22;
-  second.destination = At(kFirstHandle + kWeaponOffset);
   second.sub_kind = 3;
   second.texture_slot = actors::kSecondBodyTextureSlot;
   second.variant = 0;

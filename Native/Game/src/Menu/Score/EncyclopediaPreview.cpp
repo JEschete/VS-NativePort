@@ -106,10 +106,11 @@ bool Submit(PartQueue& queue) {
 
 // decomp: MENU9.PRG vs_menu9_parseZudFile (F02840,
 // src/MENU/MENU9.PRG/592C.c:236-258)
-// A weapon or shield model of the equipped layout.
+// A weapon or shield model of the equipped layout. Native (#48): its record
+// binds into the model buffer (EnemyPreviewRecordMemory).
 bool QueueEquipment(PartQueue& queue, const ZudSection& section,
-                    std::uint8_t model, int slot, EnemyPreviewPart part,
-                    std::uint8_t texture_slot, std::uint8_t material) {
+                    std::uint8_t model, int slot, std::uint8_t texture_slot,
+                    std::uint8_t material) {
   const std::optional<AssetAddress> data =
       SectionAddress(queue.state, queue.file_bytes, section);
   if (!data) {
@@ -121,7 +122,6 @@ bool QueueEquipment(PartQueue& queue, const ZudSection& section,
   request.target_slot = static_cast<std::int8_t>(slot);
   request.data = *data;
   request.model_id = model;
-  request.destination = queue.host.ModelPart(queue.state.model_buffer, part);
   request.sub_kind = kAttachmentSubKind;
   request.texture_slot = texture_slot;
   request.material = material;
@@ -139,8 +139,6 @@ bool QueueCompanion(PartQueue& queue) {
   request.kind = Kind(ActorAssetKind::kActorModelLoad);
   request.target_slot = kEnemyPreviewCompanionSlot;
   request.model_id = kCompanionModels[queue.state.variant];
-  request.destination = queue.host.ModelPart(queue.state.model_buffer,
-                                             EnemyPreviewPart::kCompanion);
   request.sub_kind = kAttachmentSubKind;
   request.texture_slot = kCompanionTextureSlot;
   request.variant = 0;
@@ -197,8 +195,6 @@ bool QueueEnemyParts(EnemyPreviewHost& host, EnemyPreviewState& state) {
   request.target_slot = kEnemyPreviewActorSlot;
   request.data = *shape;
   request.model_id = header->character_id;
-  request.destination =
-      host.ModelPart(state.model_buffer, EnemyPreviewPart::kEnemy);
   request.sub_kind = kEnemySubKind;
   request.variant = state.palette_flag & 1U;
   request.material = header->default_material;
@@ -209,14 +205,14 @@ bool QueueEnemyParts(EnemyPreviewHost& host, EnemyPreviewState& state) {
   } else {
     if (header->weapon != 0 &&
         !QueueEquipment(queue, header->weapon_model, header->weapon,
-                        kEnemyPreviewWeaponSlot, EnemyPreviewPart::kWeapon,
-                        kWeaponTextureSlot, header->weapon_material)) {
+                        kEnemyPreviewWeaponSlot, kWeaponTextureSlot,
+                        header->weapon_material)) {
       return false;
     }
     if (header->shield != 0 &&
         !QueueEquipment(queue, header->shield_model, header->shield,
-                        kEnemyPreviewShieldSlot, EnemyPreviewPart::kShield,
-                        kShieldTextureSlot, header->shield_material)) {
+                        kEnemyPreviewShieldSlot, kShieldTextureSlot,
+                        header->shield_material)) {
       return false;
     }
   }
@@ -507,5 +503,32 @@ void FreeEnemyModelBuffer(EnemyPreviewHost& host, EnemyPreviewState& state) {
     host.FreeModelBuffer(state.model_buffer);
   }
   state.model_buffer = AssetAddress::kNone;
+}
+
+std::optional<EnemyPreviewPart> EnemyPreviewPartAt(
+    Content::ActorRecordTable table, int slot, std::uint8_t variant) {
+  if (table == Content::ActorRecordTable::kActor) {
+    if (slot == kEnemyPreviewActorSlot) return EnemyPreviewPart::kEnemy;
+    if (variant != 0 && slot == kEnemyPreviewCompanionSlot) {
+      return EnemyPreviewPart::kCompanion;
+    }
+    return std::nullopt;
+  }
+  if (variant != 0) return std::nullopt;
+  if (slot == kEnemyPreviewWeaponSlot) return EnemyPreviewPart::kWeapon;
+  if (slot == kEnemyPreviewShieldSlot) return EnemyPreviewPart::kShield;
+  return std::nullopt;
+}
+
+AssetAddress EnemyPreviewRecordMemory(const EnemyPreviewHost& host,
+                                      const EnemyPreviewState& state,
+                                      Content::ActorRecordTable table,
+                                      int slot) {
+  const std::optional<EnemyPreviewPart> part =
+      EnemyPreviewPartAt(table, slot, state.variant);
+  if (!part || state.model_buffer == AssetAddress::kNone) {
+    return AssetAddress::kNone;
+  }
+  return host.ModelPart(state.model_buffer, *part);
 }
 }  // namespace VS::Menu::Score

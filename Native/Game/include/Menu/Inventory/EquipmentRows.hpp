@@ -164,9 +164,9 @@ class EquipmentModelHost {
   [[nodiscard]] virtual std::uint8_t PreviewSequenceModel() = 0;
   [[nodiscard]] virtual std::uint8_t PreviewAnimation() = 0;
   [[nodiscard]] virtual bool HasWeaponModel(int slot) = 0;
-  // VS::Battle::characterState->equipmentModels[index]; nullopt without one.
-  [[nodiscard]] virtual std::optional<Content::AssetAddress> EquipmentModelSlot(
-      int index) = 0;
+  // Whether VS::Battle::characterState has equipment model slot `index`.
+  // Its record memory is the character's: the reload's requests are hers.
+  [[nodiscard]] virtual bool HasEquipmentModelSlot(int index) = 0;
   virtual void ReleaseWeaponModel(int slot) = 0;
   virtual void QueueWeaponAnimations(std::int32_t sequence_model) = 0;
   virtual void QueueAsset(const Content::ActorAssetRequest& request) = 0;

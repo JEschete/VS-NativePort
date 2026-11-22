@@ -113,6 +113,8 @@ struct ActorAssetRequest {
   std::uint8_t kind = 0;
   std::int8_t target_slot = 0;
   std::int16_t model_id = 0;
+  // The memory an unowned request's record binds to. An owned request names
+  // none: its owner provides the memory when the record binds (#48).
   AssetAddress destination = AssetAddress::kNone;
   AssetAddress data = AssetAddress::kNone;
   // The four placement bytes (tile X, surface, tile Z, facing).
@@ -124,6 +126,13 @@ struct ActorAssetRequest {
 
   friend bool operator==(const ActorAssetRequest&,
                          const ActorAssetRequest&) = default;
+};
+
+// The record tables the loaders bind: the actor records (D_800F4538) and the
+// weapon records (D_800F4540).
+enum class ActorRecordTable : std::uint8_t {
+  kActor,
+  kWeapon,
 };
 
 // Native (#48): request ownership. The owner is an opaque identity: an owner
@@ -514,9 +523,11 @@ class ActorAssetHost {
 
   // Weapon records (D_800F4540).
   virtual WeaponAssetSummary WeaponSummary(int slot) const = 0;
-  // Points an empty slot at `destination`, cleared, with no texture slot;
-  // false when `destination` is kNone.
-  virtual bool BindWeaponRecord(int slot, AssetAddress destination) = 0;
+  // Points an empty slot, cleared and with no texture slot, at the memory of
+  // the record `request` binds: the memory its owner keeps for the slot when
+  // the running request is owned (#48), else the request's destination.
+  // False, binding nothing, when there is no such memory.
+  virtual bool BindWeaponRecord(int slot, const ActorAssetRequest& request) = 0;
   virtual WeaponAssetRecord LoadWeapon(int slot) const = 0;
   virtual void StoreWeapon(int slot, const WeaponAssetRecord& record) = 0;
   virtual void CopyWeaponRecord(int target, int source) = 0;
@@ -530,7 +541,8 @@ class ActorAssetHost {
 
   // Actor records (D_800F4538).
   virtual ActorAssetSummary ActorSummary(int slot) const = 0;
-  virtual bool BindActorRecord(int slot, AssetAddress destination) = 0;
+  // As BindWeaponRecord, for an actor record.
+  virtual bool BindActorRecord(int slot, const ActorAssetRequest& request) = 0;
   virtual ActorAssetRecord LoadActor(int slot) const = 0;
   virtual void StoreActor(int slot, const ActorAssetRecord& record) = 0;
   virtual void CopyActorRecord(int target, int source) = 0;
@@ -585,7 +597,8 @@ void QueueAshleyWeaponSequence(ActorAssetHost& host, int sequence_id);
 // special: sub kinds 0, 4 and 5).
 [[nodiscard]] bool IsOwnableActorAssetRequest(const ActorAssetRequest& request);
 // Queues `request` for `owner`; its ticket, or none when the request is not
-// ownable, the owner is kUnowned, or the queue or ticket table is full.
+// ownable or names a destination, the owner is kUnowned, or the queue or
+// ticket table is full. The owner provides its records' memory instead.
 [[nodiscard]] std::optional<ActorAssetTicket> SubmitActorAssetRequest(
     ActorAssetHost& host, const ActorAssetRequest& request,
     ActorAssetOwner owner);

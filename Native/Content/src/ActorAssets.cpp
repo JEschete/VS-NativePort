@@ -480,6 +480,10 @@ std::optional<ActorAssetTicket> SubmitActorAssetRequest(
     host.Refuse("unownable asset request", request.kind);
     return std::nullopt;
   }
+  if (request.destination != AssetAddress::kNone) {
+    host.Refuse("owned asset request names a destination", request.kind);
+    return std::nullopt;
+  }
   const int slot = FindFreeActorAssetRequest(host);
   if (slot == -1) return std::nullopt;
   ActorAssetCompletions& completions = host.Completions();
@@ -1034,7 +1038,7 @@ int ParseWeaponModel(ActorAssetHost& host, ActorAssetLoadState& state,
     return kAssetRefused;
   }
   if (!host.WeaponSummary(target).present &&
-      !host.BindWeaponRecord(target, request.destination)) {
+      !host.BindWeaponRecord(target, request)) {
     return kAssetRefused;
   }
   WeaponAssetRecord model = host.LoadWeapon(target);
@@ -1897,8 +1901,7 @@ int ParseActorModel(ActorAssetHost& host, ActorAssetLoadState& state,
   }
   // The original reuses a present record and binds only an empty slot.
   state.model_record_bound = !host.ActorSummary(target).present;
-  if (state.model_record_bound &&
-      !host.BindActorRecord(target, request.destination)) {
+  if (state.model_record_bound && !host.BindActorRecord(target, request)) {
     state.model_record_bound = false;
     return kAssetRefused;
   }

@@ -397,32 +397,27 @@ TEST_CASE("Equipped enemy parts carry fields over in the original order",
   score::EnemyPreviewState state = LoadedState(host, 7);
   REQUIRE(score::LoadEnemyModelParts(host, state) == 1);
   REQUIRE(host.queued.size() == 5);
+  // Native (#48): the parts name no memory; their records bind into the
+  // model buffer (EnemyPreviewRecordMemory).
   const ActorAssetRequest& body = host.queued[0];
   CHECK(body == ActorAssetRequest{.kind = 2,
                                   .target_slot = 1,
                                   .model_id = 13,
-                                  .destination = kEquippedBuffer,
                                   .data = At(0x10030),
                                   .sub_kind = 0xFF,
                                   .material = 6,
                                   .variant = 1});
-  CHECK(host.queued[1] ==
-        ActorAssetRequest{.kind = 4,
-                          .target_slot = 2,
-                          .model_id = 17,
-                          .destination = Part(kEquippedBuffer,
-                                              score::EnemyPreviewPart::kWeapon),
-                          .data = At(0x10070),
-                          .sub_kind = 1,
-                          .texture_slot = 0xF0,
-                          .material = 4,
-                          .variant = 1});
-  const AssetAddress shield =
-      Part(kEquippedBuffer, score::EnemyPreviewPart::kShield);
+  CHECK(host.queued[1] == ActorAssetRequest{.kind = 4,
+                                            .target_slot = 2,
+                                            .model_id = 17,
+                                            .data = At(0x10070),
+                                            .sub_kind = 1,
+                                            .texture_slot = 0xF0,
+                                            .material = 4,
+                                            .variant = 1});
   CHECK(host.queued[2] == ActorAssetRequest{.kind = 4,
                                             .target_slot = 3,
                                             .model_id = 27,
-                                            .destination = shield,
                                             .data = At(0x10090),
                                             .sub_kind = 1,
                                             .texture_slot = 0xF1,
@@ -431,7 +426,6 @@ TEST_CASE("Equipped enemy parts carry fields over in the original order",
   CHECK(host.queued[3] == ActorAssetRequest{.kind = 8,
                                             .target_slot = 1,
                                             .model_id = 9,
-                                            .destination = shield,
                                             .data = At(0x100C0),
                                             .sub_kind = 0,
                                             .texture_slot = 0xF1,
@@ -450,20 +444,43 @@ TEST_CASE("Companion enemies queue the companion record instead of weapons",
   CHECK(state.model_buffer == kCompanionBuffer);
   REQUIRE(score::LoadEnemyModelParts(host, state) == 1);
   REQUIRE(host.queued.size() == 4);
-  const AssetAddress companion =
-      Part(kCompanionBuffer, score::EnemyPreviewPart::kCompanion);
   CHECK(host.queued[1] == ActorAssetRequest{.kind = 1,
                                             .target_slot = 16,
                                             .model_id = 27,
-                                            .destination = companion,
                                             .data = At(0x10030),
                                             .sub_kind = 1,
                                             .texture_slot = 0xFC,
                                             .material = 6,
                                             .variant = 0});
-  CHECK(host.queued[2].destination == companion);
+  CHECK(host.queued[2].destination == AssetAddress::kNone);
   CHECK(host.queued[2].variant == 0);
   CHECK(host.queued[3].texture_slot == 0xFC);
+}
+
+TEST_CASE("Preview records bind into the model buffer by part",
+          "[encyclopedia-preview]") {
+  using Table = VS::Content::ActorRecordTable;
+  using PreviewPart = score::EnemyPreviewPart;
+  FakeHost host;
+  const score::EnemyPreviewState equipped = LoadedState(host, 7);
+  CHECK(score::EnemyPreviewRecordMemory(host, equipped, Table::kActor, 1) ==
+        Part(kEquippedBuffer, PreviewPart::kEnemy));
+  CHECK(score::EnemyPreviewRecordMemory(host, equipped, Table::kWeapon, 2) ==
+        Part(kEquippedBuffer, PreviewPart::kWeapon));
+  CHECK(score::EnemyPreviewRecordMemory(host, equipped, Table::kWeapon, 3) ==
+        Part(kEquippedBuffer, PreviewPart::kShield));
+  // Records that are not the layout's parts bind nothing.
+  CHECK(score::EnemyPreviewRecordMemory(host, equipped, Table::kActor, 16) ==
+        AssetAddress::kNone);
+  CHECK(score::EnemyPreviewRecordMemory(host, equipped, Table::kWeapon, 4) ==
+        AssetAddress::kNone);
+  const score::EnemyPreviewState companion = LoadedState(host, 31);
+  CHECK(score::EnemyPreviewRecordMemory(host, companion, Table::kActor, 16) ==
+        Part(kCompanionBuffer, PreviewPart::kCompanion));
+  CHECK(score::EnemyPreviewRecordMemory(host, companion, Table::kWeapon, 2) ==
+        AssetAddress::kNone);
+  CHECK(score::EnemyPreviewRecordMemory(host, {}, Table::kActor, 1) ==
+        AssetAddress::kNone);
 }
 
 TEST_CASE("Companion variants follow the table and its first entry quirk",
@@ -867,20 +884,33 @@ T* Pointer(AssetAddress address) {
   return reinterpret_cast<T*>(static_cast<std::uintptr_t>(address));
 }
 
+// Where the live preview's owned request binds `slot` of `table`.
+const std::uint8_t* RecordMemory(VS::Content::ActorRecordTable table,
+                                 int slot) {
+  return Pointer<std::uint8_t>(score::LiveEnemyPreviewRecordMemory(
+      VS::Content::kEnemyPreviewActorAssetOwner, table, slot));
+}
+
 // The companion record, or the enemy's weapon and shield, follow the body at
-// the native record strides.
+// the native record strides. The parts name no memory (#48).
 void CheckAttachmentStrides(bool companion, const std::uint8_t* buffer) {
+  using Table = VS::Content::ActorRecordTable;
   const VS::Content::LegacyActorAssetRequest& attachment =
       VS::Content::legacyActorAssetRequests[1];
-  CHECK(attachment.destination == buffer + sizeof(VS::Actors::ActorRecord));
+  CHECK(attachment.destination == nullptr);
   CHECK(attachment.asset_kind == (companion ? 1 : 4));
   CHECK(attachment.target_slot == (companion ? 16 : 2));
+  CHECK(RecordMemory(companion ? Table::kActor : Table::kWeapon,
+                     attachment.target_slot) ==
+        buffer + sizeof(VS::Actors::ActorRecord));
   if (!companion) {
     const VS::Content::LegacyActorAssetRequest& shield =
         VS::Content::legacyActorAssetRequests[2];
-    CHECK(shield.destination == buffer + sizeof(VS::Actors::ActorRecord) +
-                                    sizeof(VS::Actors::WeaponModel));
+    CHECK(shield.destination == nullptr);
     CHECK(shield.target_slot == 3);
+    CHECK(RecordMemory(Table::kWeapon, 3) ==
+          buffer + sizeof(VS::Actors::ActorRecord) +
+              sizeof(VS::Actors::WeaponModel));
   }
 }
 
@@ -1146,7 +1176,12 @@ TEST_CASE("Live enemy preview places parts at native record strides",
   REQUIRE(score::LoadLiveEnemyModelParts() == 1);
   const VS::Content::LegacyActorAssetRequest& body =
       VS::Content::legacyActorAssetRequests[0];
-  CHECK(body.destination == buffer);
+  CHECK(body.destination == nullptr);
+  CHECK(RecordMemory(VS::Content::ActorRecordTable::kActor, 1) == buffer);
+  // Another owner's records do not bind into the preview's buffer.
+  CHECK(score::LiveEnemyPreviewRecordMemory(
+            {.value = 0x101}, VS::Content::ActorRecordTable::kActor, 1) ==
+        AssetAddress::kNone);
   CHECK(body.data_address == reinterpret_cast<std::uintptr_t>(file + 0x30));
   CHECK(body.placement == 0);
   CheckAttachmentStrides(companion, buffer);

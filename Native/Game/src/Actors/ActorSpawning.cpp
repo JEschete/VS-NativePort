@@ -231,9 +231,9 @@ void ApplyTemplate(ActorSpawnHost& host, std::size_t slot,
   ApplyInitialStats(host, slot, character, randomize);
 }
 
-[[nodiscard]] ActorAssetRequest ModelLoadRequest(ActorSpawnHost& host,
-                                                 SpawnedActor actor, int index,
-                                                 int model_id,
+// Native (#48): the request names no memory; the owning actor provides its
+// model memory when the record binds.
+[[nodiscard]] ActorAssetRequest ModelLoadRequest(int index, int model_id,
                                                  SpawnPlacement placement,
                                                  int flags) {
   ActorAssetRequest request{};
@@ -241,7 +241,6 @@ void ApplyTemplate(ActorSpawnHost& host, std::size_t slot,
   request.target_slot = static_cast<std::int8_t>(index);
   request.model_id = static_cast<std::int16_t>(model_id);
   request.placement = PackPlacement(placement);
-  request.destination = host.ModelAddress(actor);
   if ((flags & kTextureOverrideFlag) != 0) {
     request.sub_kind = static_cast<std::uint8_t>(
         (static_cast<unsigned>(flags) >> kOverrideSubKindShift) &
@@ -262,7 +261,7 @@ void ApplyTemplate(ActorSpawnHost& host, std::size_t slot,
                                  int index, int model_id,
                                  SpawnPlacement placement, int flags) {
   return host.QueueOwnedAsset(
-      ModelLoadRequest(host, actor, index, model_id, placement, flags), actor);
+      ModelLoadRequest(index, model_id, placement, flags), actor);
 }
 
 void QueueEquipment(ActorSpawnHost& host, SpawnedActor actor, int actor_id,
@@ -284,13 +283,13 @@ void QueueEquipment(ActorSpawnHost& host, SpawnedActor actor, int actor_id,
   request.kind = static_cast<std::uint8_t>(ActorAssetKind::kWeaponModelLoad);
   request.target_slot = static_cast<std::int8_t>(slot);
   request.model_id = static_cast<std::int16_t>(model_id);
-  request.destination = host.EquipmentAddress(actor, hand);
   request.sub_kind = static_cast<std::uint8_t>(actor_id);
   request.texture_slot =
       hand == EquipmentHand::kWeapon ? kWeaponTextureSlot : kShieldTextureSlot;
   request.material = static_cast<std::uint8_t>(material);
   // Native (#48): scripts load equipment for published actors, so the actor
   // owns the load and removal cancels it before the equipment memory goes.
+  // The actor provides that memory when the record binds.
   static_cast<void>(host.QueueOwnedAsset(request, actor));
 }
 
@@ -660,6 +659,46 @@ void InitializeActorDefaults(ActorSpawnHost& host, std::size_t slot,
   }
 }
 
+std::optional<ActorRecordPart> ActorRecordPartAt(
+    ActorShape shape, std::size_t slot, Content::ActorRecordTable table,
+    std::size_t record) {
+  static constexpr std::array kEquippedParts{ActorRecordPart::kBody,
+                                             ActorRecordPart::kWeapon,
+                                             ActorRecordPart::kShield};
+  static constexpr std::array kSecondaryBodyParts{ActorRecordPart::kBody,
+                                                  ActorRecordPart::kSecondBody};
+  std::span<const ActorRecordPart> parts;
+  switch (shape) {
+    case ActorShape::kEquipped:
+      parts = kEquippedParts;
+      break;
+    case ActorShape::kSecondaryBody:
+      parts = kSecondaryBodyParts;
+      break;
+    case ActorShape::kAuxiliary:
+      return std::nullopt;
+  }
+  for (const ActorRecordPart part : parts) {
+    if (ActorPartTable(part) == table &&
+        ActorPartRecordSlot(slot, part) == record) {
+      return part;
+    }
+  }
+  return std::nullopt;
+}
+
+std::optional<ActorRecordPart> OwnedActorRecordPart(
+    const ActorInstanceTable& handles, SpawnedActor actor,
+    Content::ActorRecordTable table, int record) {
+  const std::optional<std::size_t> slot = handles.Slot(actor);
+  const std::optional<ActorDefinition> definition = handles.Definition(actor);
+  if (!slot || !definition || record < 0) {
+    return std::nullopt;
+  }
+  return ActorRecordPartAt(definition->shape, *slot, table,
+                           static_cast<std::size_t>(record));
+}
+
 // decomp: BATTLE.PRG func_80076F24 (src/BATTLE/BATTLE.PRG/146C.c:6179)
 void InitializeActorFromTemplate(ActorSpawnHost& host, std::size_t slot,
                                  const CharacterTemplate& character,
@@ -765,31 +804,10 @@ struct RoomEnemyParts {
   bool common_animation = false;
 };
 
-// Native (#48): the records a room enemy's requests load, as parts of the
-// owning actor. Each part's record slot and destination derive from the
-// actor and its slot, for its request and for its release, so neither can
-// aim at another actor's records.
-enum class SpawnPart : std::uint8_t {
-  kBody,
-  kSecondBody,
-  kWeapon,
-  kShield,
-  kAnimation,
-};
-
-[[nodiscard]] std::size_t PartRecordSlot(std::size_t slot, SpawnPart part) {
-  switch (part) {
-    case SpawnPart::kSecondBody:
-      return slot + kSecondBodySlotOffset;
-    case SpawnPart::kWeapon:
-      return slot * 2;
-    case SpawnPart::kShield:
-      return (slot * 2) + 1;
-    default:
-      return slot;
-  }
-}
-
+// Native (#48): the records a room enemy's requests load are parts of the
+// owning actor. Each part's record slot derives from the actor's slot, for
+// its request and for its release, and the actor provides its memory when
+// it binds, so neither can aim at another actor's records.
 class OwnedSpawnAssets {
  public:
   OwnedSpawnAssets(ActorSpawnHost& host, SpawnedActor actor, std::size_t slot)
@@ -798,27 +816,15 @@ class OwnedSpawnAssets {
   // Aims `request` at the owning actor's `part` and submits it. The request
   // keeps its other fields, carried from one part to the next as the
   // original's stack record was.
-  [[nodiscard]] bool Submit(SpawnPart part, ActorAssetRequest& request) {
-    request.target_slot = static_cast<std::int8_t>(PartRecordSlot(slot_, part));
-    switch (part) {
-      case SpawnPart::kBody:
-        request.destination = host_.ModelAddress(actor_);
-        break;
-      case SpawnPart::kSecondBody:
-      case SpawnPart::kWeapon:
-        request.destination =
-            host_.EquipmentAddress(actor_, EquipmentHand::kWeapon);
-        break;
-      case SpawnPart::kShield:
-        request.destination =
-            host_.EquipmentAddress(actor_, EquipmentHand::kShield);
-        break;
-      case SpawnPart::kAnimation:
-        // A sequence parse reads no destination; the record carries the
-        // previous part's, as the original's did.
-        break;
-    }
+  [[nodiscard]] bool Submit(ActorRecordPart part, ActorAssetRequest& request) {
+    request.target_slot =
+        static_cast<std::int8_t>(ActorPartRecordSlot(slot_, part));
     return Submit(request);
+  }
+
+  // Submits a sequence parse for the owning actor's body.
+  [[nodiscard]] bool SubmitSequence(ActorAssetRequest& request) {
+    return Submit(ActorRecordPart::kBody, request);
   }
 
   [[nodiscard]] bool Finish() {
@@ -899,7 +905,7 @@ class OwnedSpawnAssets {
     request.sub_kind = slot_byte;
     request.texture_slot = kSecondBodyTextureSlot;
     request.variant = 0;
-    if (!assets.Submit(SpawnPart::kSecondBody, request)) return false;
+    if (!assets.Submit(ActorRecordPart::kSecondBody, request)) return false;
   } else {
     if (parts.weapon) {
       request.kind =
@@ -909,7 +915,7 @@ class OwnedSpawnAssets {
       request.sub_kind = slot_byte;
       request.texture_slot = kWeaponTextureSlot;
       request.material = character.weapon_material;
-      if (!assets.Submit(SpawnPart::kWeapon, request)) return false;
+      if (!assets.Submit(ActorRecordPart::kWeapon, request)) return false;
     }
     if (parts.shield) {
       request.kind =
@@ -919,7 +925,7 @@ class OwnedSpawnAssets {
       request.sub_kind = slot_byte;
       request.texture_slot = kShieldTextureSlot;
       request.material = character.shield_material;
-      if (!assets.Submit(SpawnPart::kShield, request)) return false;
+      if (!assets.Submit(ActorRecordPart::kShield, request)) return false;
     }
   }
   if (parts.battle_animation) {
@@ -927,39 +933,39 @@ class OwnedSpawnAssets {
     request.data = SectionAddress(block, layout.battle_animation);
     request.sub_kind = 0;
     request.model_id = category;
-    if (!assets.Submit(SpawnPart::kAnimation, request)) return false;
+    if (!assets.SubmitSequence(request)) return false;
   }
   if (parts.common_animation) {
     request.kind = static_cast<std::uint8_t>(ActorAssetKind::kSequenceParse);
     request.data = SectionAddress(block, layout.common_animation);
     request.sub_kind = 0;
     request.model_id = 0;
-    if (!assets.Submit(SpawnPart::kAnimation, request)) return false;
+    if (!assets.SubmitSequence(request)) return false;
   }
   return true;
 }
 
 void ReleaseRoomEnemyAssets(ActorSpawnHost& host, std::size_t slot,
                             const RoomEnemyParts& parts) {
-  const auto release_record = [&](SpawnPart part) {
-    const std::size_t record = PartRecordSlot(slot, part);
+  const auto release_record = [&](ActorRecordPart part) {
+    const std::size_t record = ActorPartRecordSlot(slot, part);
     if (record < Content::kActorRecordSlots) {
       host.ReleaseActorModel(static_cast<int>(record));
     }
   };
-  const auto release_equipment = [&](SpawnPart part) {
-    const std::size_t record = PartRecordSlot(slot, part);
+  const auto release_equipment = [&](ActorRecordPart part) {
+    const std::size_t record = ActorPartRecordSlot(slot, part);
     if (record < Content::kWeaponModelSlots) {
       host.ReleaseWeaponModel(static_cast<int>(record));
     }
   };
-  release_record(SpawnPart::kBody);
+  release_record(ActorRecordPart::kBody);
   if (parts.second_body) {
-    release_record(SpawnPart::kSecondBody);
+    release_record(ActorRecordPart::kSecondBody);
     return;
   }
-  if (parts.weapon) release_equipment(SpawnPart::kWeapon);
-  if (parts.shield) release_equipment(SpawnPart::kShield);
+  if (parts.weapon) release_equipment(ActorRecordPart::kWeapon);
+  if (parts.shield) release_equipment(ActorRecordPart::kShield);
 }
 
 void DiscardRoomEnemy(ActorSpawnHost& host, SpawnedActor actor,
@@ -1081,7 +1087,7 @@ SpawnedActor SpawnRoomEnemy(ActorSpawnHost& host, int actor_id,
   request.variant = static_cast<std::uint8_t>(spawn.variant & 1U);
   request.material = character.material;
   OwnedSpawnAssets assets(host, actor, slot);
-  if (!assets.Submit(SpawnPart::kBody, request) ||
+  if (!assets.Submit(ActorRecordPart::kBody, request) ||
       (!parts.bare &&
        !QueueRoomEnemyParts(assets, request, slot, *block, *layout, character,
                             parts, body_model, category))) {
@@ -1139,10 +1145,8 @@ int QueueScriptedActorSpawn(ActorSpawnHost& host, std::uint32_t actor_id,
   // Native (#48): the actor is published while its model loads, so a queued
   // request could outlive it and bind its record into the freed actor. The
   // actor owns the request, and removal cancels it (RemoveActorAtSlot).
-  const int request =
-      host.QueueOwnedAsset(ModelLoadRequest(host, actor, static_cast<int>(slot),
-                                            model_id, placement, 0),
-                           actor);
+  const int request = host.QueueOwnedAsset(
+      ModelLoadRequest(static_cast<int>(slot), model_id, placement, 0), actor);
   if (request < 0) {
     host.DiscardUninstalled(actor);
     host.Refuse(SpawnRefusal::kAssetQueue);

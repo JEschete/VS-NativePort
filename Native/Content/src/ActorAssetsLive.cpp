@@ -767,6 +767,8 @@ FileReadOwner* ReadOwner(AssetFileStream stream) {
 // Native (#48): the owner of each queued request and the tickets' outcomes.
 // The original's request records have no room for them.
 std::array<ActorAssetIdentity, kActorAssetRequestCount> requestIdentities{};
+// Native (#48): where each queued owned request's owner keeps its records.
+std::array<ActorRecordMemory, kActorAssetRequestCount> requestRecordMemory{};
 ActorAssetCompletions requestCompletions;
 
 LiveFileStream Stream(AssetFileStream stream) {
@@ -818,6 +820,11 @@ int RunLoader(ActorAssetHost& host, ActorAssetLoadState& state,
 
 class LiveActorAssetHost final : public ActorAssetHost {
  public:
+  LiveActorAssetHost() = default;
+  // A host storing the owned requests it queues with `memory`.
+  explicit LiveActorAssetHost(ActorRecordMemory memory)
+      : submitted_memory_(memory) {}
+
   // The request queue.
   [[nodiscard]] std::uint8_t RequestKind(int slot) const override {
     return InRange(slot, kActorAssetRequestCount)
@@ -832,6 +839,8 @@ class LiveActorAssetHost final : public ActorAssetHost {
     }
     StoreRequestFields(request, legacyActorAssetRequests[slot]);
     requestIdentities[slot] = identity;
+    requestRecordMemory[slot] =
+        identity.owner != kUnownedActorAssetOwner ? submitted_memory_ : nullptr;
   }
   [[nodiscard]] ActorAssetIdentity RequestIdentity(int slot) const override {
     if (RequestKind(slot) == 0) return {};
@@ -855,10 +864,12 @@ class LiveActorAssetHost final : public ActorAssetHost {
   void MoveRequest(int from, int to) override {
     legacyActorAssetRequests[to] = legacyActorAssetRequests[from];
     requestIdentities[to] = requestIdentities[from];
+    requestRecordMemory[to] = requestRecordMemory[from];
   }
   void ClearRequestKind(int slot) override {
     legacyActorAssetRequests[slot].asset_kind = 0;
     requestIdentities[slot] = {};
+    requestRecordMemory[slot] = nullptr;
   }
   int ProcessHeadRequest(ActorAssetKind kind) override {
     LegacyActorAssetRequest& head = legacyActorAssetRequests[0];
@@ -1010,9 +1021,11 @@ class LiveActorAssetHost final : public ActorAssetHost {
             .model_id = model->model_id,
             .bone_count = model->bone_count};
   }
-  bool BindWeaponRecord(int slot, AssetAddress destination) override {
+  bool BindWeaponRecord(int slot, const ActorAssetRequest& request) override {
     auto* model = BindRecord<VS::Actors::WeaponModel>(
-        slot, kWeaponModelSlots, destination, "weapon record destination");
+        slot, kWeaponModelSlots,
+        RecordMemory(ActorRecordTable::kWeapon, slot, request),
+        "weapon record destination");
     if (model == nullptr) {
       return false;
     }
@@ -1087,9 +1100,11 @@ class LiveActorAssetHost final : public ActorAssetHost {
             .sequence_model_id = actor->sequence_model_id,
             .common_sequence = Address(actor->common_sequence)};
   }
-  bool BindActorRecord(int slot, AssetAddress destination) override {
+  bool BindActorRecord(int slot, const ActorAssetRequest& request) override {
     auto* actor = BindRecord<VS::Actors::ActorRecord>(
-        slot, kActorRecordSlots, destination, "actor record destination");
+        slot, kActorRecordSlots,
+        RecordMemory(ActorRecordTable::kActor, slot, request),
+        "actor record destination");
     if (actor == nullptr) {
       return false;
     }
@@ -1315,6 +1330,20 @@ class LiveActorAssetHost final : public ActorAssetHost {
     }
   }
 
+  // Native (#48): the memory the head request's record of `table` at `slot`
+  // binds: its owner's, asked through the memory it was queued with, which
+  // also answers after its ticket is forgotten; an unowned request's
+  // destination.
+  [[nodiscard]] static AssetAddress RecordMemory(
+      ActorRecordTable table, int slot, const ActorAssetRequest& request) {
+    const ActorAssetOwner owner = legacyActorAssetRequests[0].asset_kind != 0
+                                      ? requestIdentities[0].owner
+                                      : kUnownedActorAssetOwner;
+    if (owner == kUnownedActorAssetOwner) return request.destination;
+    const ActorRecordMemory memory = requestRecordMemory[0];
+    return memory != nullptr ? memory(owner, table, slot) : AssetAddress::kNone;
+  }
+
   // A cleared record at `destination` for an empty slot. The loaders bind
   // only empty slots, so a refused destination leaves the slot empty, as the
   // original's null destination did.
@@ -1335,6 +1364,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
   }
 
   const ActorAssetLoadState* active_state_ = nullptr;
+  ActorRecordMemory submitted_memory_ = nullptr;
 };
 
 // Cancels the disc read into a loader's file and frees the file.
@@ -1425,8 +1455,13 @@ int UpdateLiveActorAssetQueue() {
 }
 
 std::optional<ActorAssetTicket> SubmitLiveActorAsset(
-    const ActorAssetRequest& request, ActorAssetOwner owner) {
-  LiveActorAssetHost host;
+    const ActorAssetRequest& request, ActorAssetOwner owner,
+    ActorRecordMemory memory) {
+  if (memory == nullptr) {
+    CountRefusal("owned asset request without record memory", request.kind);
+    return std::nullopt;
+  }
+  LiveActorAssetHost host{memory};
   return SubmitActorAssetRequest(host, request, owner);
 }
 

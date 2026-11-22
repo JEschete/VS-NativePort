@@ -67,9 +67,15 @@ int QueueLiveActorAsset(const ActorAssetRequest& request);
 int UpdateLiveActorAssetQueue();
 // Owned requests (#48; ActorAssets.hpp SubmitActorAssetRequest). Forgetting
 // a pending ticket disowns its request, which then completes unobserved;
-// owners cancel first.
+// owners cancel first. An owned request names no memory: `memory` is where
+// the owner keeps the record of `table` at `slot` that the request binds, or
+// kNone to refuse it, asked when the record binds. A submission without one
+// is refused.
+using ActorRecordMemory = AssetAddress (*)(ActorAssetOwner owner,
+                                           ActorRecordTable table, int slot);
 [[nodiscard]] std::optional<ActorAssetTicket> SubmitLiveActorAsset(
-    const ActorAssetRequest& request, ActorAssetOwner owner);
+    const ActorAssetRequest& request, ActorAssetOwner owner,
+    ActorRecordMemory memory);
 [[nodiscard]] bool LiveActorAssetsQueued(ActorAssetOwner owner);
 [[nodiscard]] ActorAssetCompletion LiveActorAssetCompletion(
     ActorAssetTicket ticket);

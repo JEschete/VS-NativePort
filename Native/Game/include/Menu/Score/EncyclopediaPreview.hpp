@@ -185,7 +185,8 @@ class EnemyPreviewHost {
   [[nodiscard]] virtual AssetAddress AllocateModelBuffer(
       EnemyPreviewLayout layout) = 0;
   virtual void FreeModelBuffer(AssetAddress buffer) = 0;
-  // The address of `part` in a model buffer.
+  // The address of `part` in a model buffer, or kNone when the buffer cannot
+  // hold it.
   [[nodiscard]] virtual AssetAddress ModelPart(AssetAddress buffer,
                                                EnemyPreviewPart part) const = 0;
   // The bytes of the file block, `bytes` long, or empty when the block
@@ -249,4 +250,16 @@ int LoadEnemyModelParts(EnemyPreviewHost& host, EnemyPreviewState& state);
 // decomp: MENU9.PRG vs_menu9_freeZudFile (F02841,
 // src/MENU/MENU9.PRG/592C.c:300)
 void FreeEnemyModelBuffer(EnemyPreviewHost& host, EnemyPreviewState& state);
+// Native (#48): the part of a preview of `variant` whose record is `slot` of
+// `table`: the enemy's actor record, then the companion's actor record (a
+// companion layout) or the weapon and shield records (the equipped layout).
+// None for any other record.
+[[nodiscard]] std::optional<EnemyPreviewPart> EnemyPreviewPartAt(
+    Content::ActorRecordTable table, int slot, std::uint8_t variant);
+// Native (#48): the memory in the model buffer where the preview's owned
+// request binds `slot` of `table`. The parts name no memory; kNone without a
+// model buffer or for a record that is not one of the preview's parts.
+[[nodiscard]] AssetAddress EnemyPreviewRecordMemory(
+    const EnemyPreviewHost& host, const EnemyPreviewState& state,
+    Content::ActorRecordTable table, int slot);
 }  // namespace VS::Menu::Score

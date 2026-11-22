@@ -258,7 +258,8 @@ class LiveEnemyPreviewHost final : public EnemyPreviewHost {
   [[nodiscard]] std::optional<Content::ActorAssetTicket> SubmitAsset(
       const Content::ActorAssetRequest& request) override {
     return Content::SubmitLiveActorAsset(request,
-                                         Content::kEnemyPreviewActorAssetOwner);
+                                         Content::kEnemyPreviewActorAssetOwner,
+                                         &LiveEnemyPreviewRecordMemory);
   }
 
   void UpdateAssetQueue() override { Content::UpdateLiveActorAssetQueue(); }
@@ -435,6 +436,15 @@ int LoadLiveEnemyModelParts() { return LoadEnemyModelParts(Host(), liveState); }
 // decomp: MENU9.PRG vs_menu9_freeZudFile (F02841,
 // src/MENU/MENU9.PRG/592C.c:300)
 void FreeLiveEnemyModelBuffer() { FreeEnemyModelBuffer(Host(), liveState); }
+
+AssetAddress LiveEnemyPreviewRecordMemory(Content::ActorAssetOwner owner,
+                                          Content::ActorRecordTable table,
+                                          int slot) {
+  if (owner != Content::kEnemyPreviewActorAssetOwner) {
+    return AssetAddress::kNone;
+  }
+  return EnemyPreviewRecordMemory(Host(), liveState, table, slot);
+}
 
 bool CleanupLiveEnemyPreviewOwnedState() {
   const bool owned = liveState.read != AssetAddress::kNone ||

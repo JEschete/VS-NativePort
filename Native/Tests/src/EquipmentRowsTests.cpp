@@ -627,8 +627,7 @@ class RecordingModelHost final : public inv::EquipmentModelHost {
   std::uint8_t sequence_model = 0;
   std::uint8_t animation = 0;
   std::array<bool, 4> weapon_models{};
-  std::array<std::optional<AssetAddress>, 2> slots{AssetAddress{0x1000},
-                                                   AssetAddress{0x2000}};
+  std::array<bool, 2> slots{true, true};
   bool busy = false;
   std::vector<ActorAssetRequest> requests;
   std::vector<std::string> log;
@@ -639,7 +638,7 @@ class RecordingModelHost final : public inv::EquipmentModelHost {
   bool HasWeaponModel(int slot) override {
     return weapon_models.at(static_cast<std::size_t>(slot));
   }
-  std::optional<AssetAddress> EquipmentModelSlot(int index) override {
+  bool HasEquipmentModelSlot(int index) override {
     return slots.at(static_cast<std::size_t>(index));
   }
   void ReleaseWeaponModel(int slot) override {
@@ -775,7 +774,7 @@ TEST_CASE("ReloadEquipmentModels refuses without a preview actor or model slot",
         inv::ModelReload::kRefused);
   CHECK(step == 2);
   RecordingModelHost missing;
-  missing.slots[0] = std::nullopt;
+  missing.slots[0] = false;
   step = 0;
   CHECK(inv::ReloadEquipmentModels(step, missing, {1, 5, 0}) ==
         inv::ModelReload::kRefused);
@@ -807,16 +806,12 @@ TEST_CASE("QueueEquipmentModel requests the weapon or shield model",
   weapon.kind = 3;
   weapon.target_slot = 0;
   weapon.model_id = 95;
-  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
-  weapon.destination = AssetAddress{0x1000};
   weapon.texture_slot = 240;
   weapon.material = 5;
   CHECK(host.requests[0] == weapon);
   ActorAssetRequest shield = weapon;
   shield.target_slot = 1;
   shield.model_id = 96;
-  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
-  shield.destination = AssetAddress{0x2000};
   shield.texture_slot = 241;
   shield.material = 3;
   CHECK(host.requests[1] == shield);
@@ -825,7 +820,7 @@ TEST_CASE("QueueEquipmentModel requests the weapon or shield model",
 TEST_CASE("QueueEquipmentModel skips model zero and refuses a missing slot",
           "[equipment-rows]") {
   RecordingModelHost host;
-  host.slots = {std::nullopt, std::nullopt};
+  host.slots = {false, false};
   CHECK(inv::QueueEquipmentModel(host, 0, 1));
   CHECK_FALSE(inv::QueueEquipmentModel(host, 5, 1));
   CHECK_FALSE(inv::QueueEquipmentModel(host, -4, 1));

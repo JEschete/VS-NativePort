@@ -155,6 +155,16 @@ class ActorInstanceTable {
     return entry != nullptr ? entry->definition : std::nullopt;
   }
 
+  // The slot `actor` names; nothing for a stale or invalid handle.
+  [[nodiscard]] std::optional<std::size_t> Slot(SpawnedActor actor) const {
+    std::size_t slot = 0;
+    std::uint64_t generation = 0;
+    if (Find(actor) == nullptr || !Decode(actor, slot, generation)) {
+      return std::nullopt;
+    }
+    return slot;
+  }
+
   // Starts removing the installed `actor` in `slot` and hands over the
   // resources it owns, once. A stale handle, an unpublished allocation or an
   // actor already being removed claims nothing; an observed instance without
