@@ -128,10 +128,9 @@ struct ActorAssetRequest {
 
 // Native (#48): request ownership. The owner is an opaque identity: an owner
 // submits requests through SubmitActorAssetRequest and holds their tickets;
-// each ticket records its outcome until forgotten. An owner that needs no
-// outcome queues through QueueOwnedActorAssetRequest instead: the request
-// carries no ticket but stays cancellable. Requests queued through
-// QueueActorAssetRequest stay unowned, as all of the original's were.
+// each ticket records its outcome until forgotten, and the owner can cancel
+// its queued requests. Requests queued through QueueActorAssetRequest stay
+// unowned, as all of the original's were.
 struct ActorAssetOwner {
   std::uint64_t value = 0;
 
@@ -184,8 +183,8 @@ class ActorAssetCompletions {
   [[nodiscard]] ActorAssetCompletion Find(ActorAssetTicket ticket) const;
   void Forget(ActorAssetTicket ticket);
   [[nodiscard]] bool Pending(const ActorAssetIdentity& identity) const;
-  // The identity a queued request stored with still holds: an untracked
-  // owner's (no ticket) or a pending ticket's; else unowned.
+  // The identity a queued request stored with still holds: a pending
+  // ticket's; else unowned.
   [[nodiscard]] ActorAssetIdentity Current(
       const ActorAssetIdentity& stored) const;
   [[nodiscard]] bool Full() const;
@@ -590,13 +589,6 @@ void QueueAshleyWeaponSequence(ActorAssetHost& host, int sequence_id);
 [[nodiscard]] std::optional<ActorAssetTicket> SubmitActorAssetRequest(
     ActorAssetHost& host, const ActorAssetRequest& request,
     ActorAssetOwner owner);
-// Queues `request` for `owner` without a ticket: the owner can cancel it, but
-// its outcome is not recorded. The queue slot, as QueueActorAssetRequest, or
-// -1 when the request is not ownable, the owner is kUnowned or the queue is
-// full.
-int QueueOwnedActorAssetRequest(ActorAssetHost& host,
-                                const ActorAssetRequest& request,
-                                ActorAssetOwner owner);
 // Whether any queued request belongs to `owner`.
 [[nodiscard]] bool HasActorAssetRequests(const ActorAssetHost& host,
                                          ActorAssetOwner owner);

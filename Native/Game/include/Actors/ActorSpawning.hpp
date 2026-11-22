@@ -747,8 +747,9 @@ class ActorSpawnHost {
   [[nodiscard]] virtual std::optional<Content::ActorAssetTicket>
   SubmitOwnedAsset(const Content::ActorAssetRequest& request,
                    SpawnedActor actor) = 0;
-  // An owned request without a ticket (Content::QueueOwnedActorAssetRequest):
-  // the queue index, or a negative value when it is refused or full.
+  // Native (#48): an owned request with a ticket the live load table holds
+  // and settles once the load ends: the queue index, or a negative value when
+  // it is refused or full.
   [[nodiscard]] virtual int QueueOwnedAsset(
       const Content::ActorAssetRequest& request, SpawnedActor actor) = 0;
   [[nodiscard]] virtual Content::ActorAssetCompletion AssetCompletion(

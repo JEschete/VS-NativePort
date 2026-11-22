@@ -7,6 +7,7 @@
 #include "Actors/ActorCommandsLive.hpp"
 #include "Actors/ActorMovementLive.hpp"
 #include "Actors/ActorRecord.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/Animation.hpp"
 #include "Actors/AnimationControlLive.hpp"
@@ -518,6 +519,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     VS::Actors::UpdateAndDrawLiveRoomActors(
         &VS::Render::FrameScratchpad().view_matrix);
     static_cast<void>(VS::Content::UpdateLiveActorAssetQueue());
+    VS::Actors::SettleLiveActorLoads();
     SetRotMatrix(&VS::Render::FrameScratchpad().view_matrix);
     SetTransMatrix(&VS::Render::FrameScratchpad().view_matrix);
     Battle::LiveUpdateAndDrawFloatingLabels();

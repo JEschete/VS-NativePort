@@ -30,10 +30,22 @@ two diagnostics in unchanged `AnimationControl.cpp` functions about swappable
 integer parameters; no new tidy findings were in the edited files. The ordinary
 changed-source quality check passed.
 
-Both #48 and #55 remain open. Other actor/model producers still queue unowned
-requests; concurrent replacement, cancellation of longer-lived loads, stale
-completion handling, broader actor/resource migration, and live gameplay
-verification remain. No gameplay or hardware verification is claimed.
+Later slices: `ac397a138` owns scripted model requests; `4e1de0464` removes
+actors by their instance definitions and releases each claim once. The
+ticketed-load slice (`Actors/ActorLoads.hpp`) tracks every actor-owned load
+until it ends: `SettleLiveActorLoads` runs each frame after the queue update
+and logs each outcome, and removal or the spawn drain releases the actor's
+tickets. The untracked owned-request API is retired. Release door run
+(`--door-from z009-r000-d000 --door-limit 20`) matched the 15 passed / 5
+blocked baseline with 20/20 teardowns, 0 engine errors and 45 settled loads
+with no failed, lost or prematurely released tickets.
+
+Both #48 and #55 remain open. Original global waits (`ScriptWaitForObjectLoad`,
+the equipment menu's queue-busy check) stay as original timing; banks and
+material sequences stay unowned; the remaining `allocation_kind` readers
+(`ActionPresentationLive.cpp`, `ActorCreation.cpp`, `ActorCreationLive.cpp`)
+and broader actor/resource migration remain. No hardware verification is
+claimed.
 
 ## Connected-controller handover (#438), 2026-11-18
 

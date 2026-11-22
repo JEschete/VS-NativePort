@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cinttypes>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -13,6 +14,7 @@
 #include <span>
 
 #include "Actors/ActorAllocation.hpp"
+#include "Actors/ActorLoads.hpp"
 #include "Actors/ActorModelSlot.hpp"
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorRecord.hpp"
@@ -144,6 +146,73 @@ ActorInstanceTable& LiveActorHandles() {
 
 [[nodiscard]] Content::ActorAssetOwner AssetOwnerOf(SpawnedActor actor) {
   return {.value = static_cast<std::uint64_t>(actor)};
+}
+
+ActorLoadTable& LiveActorLoads() {
+  static ActorLoadTable loads;
+  return loads;
+}
+
+// Reports on the "actors" channel how each of an actor's loads ended.
+class LiveActorLoadHost final : public ActorLoadHost {
+ public:
+  [[nodiscard]] Content::ActorAssetCompletion Completion(
+      Content::ActorAssetTicket ticket) override {
+    return Content::LiveActorAssetCompletion(ticket);
+  }
+  void Forget(Content::ActorAssetTicket ticket) override {
+    Content::ForgetLiveActorAsset(ticket);
+  }
+  void Settled(SpawnedActor actor,
+               const Content::ActorAssetCompletion& completion) override {
+    const auto handle = static_cast<std::uint64_t>(actor);
+    switch (completion.outcome) {
+      case Content::ActorAssetOutcome::kLoaded:
+        VS::Core::Debugf("actors", "actor %#" PRIx64 " load done (result %d)",
+                         handle, completion.result);
+        return;
+      case Content::ActorAssetOutcome::kCancelled:
+        VS::Core::Debugf("actors", "actor %#" PRIx64 " load cancelled", handle);
+        return;
+      case Content::ActorAssetOutcome::kFailed:
+        VS::Core::Warnf("actors",
+                        "actor %#" PRIx64 " asset load failed (result %d)",
+                        handle, completion.result);
+        return;
+      case Content::ActorAssetOutcome::kPending:
+        VS::Core::Warnf("actors",
+                        "actor %#" PRIx64 " load released before it ended",
+                        handle);
+        return;
+      case Content::ActorAssetOutcome::kUnknown:
+        VS::Core::Warnf("actors", "actor %#" PRIx64 " load ticket was lost",
+                        handle);
+        return;
+    }
+  }
+};
+
+// Native (#48): queues `request` for `actor` with a ticket its load table
+// settles. The queue index, or -1 when the queue or ticket table is full.
+[[nodiscard]] int QueueActorLoad(SpawnedActor actor,
+                                 const Content::ActorAssetRequest& request) {
+  LiveActorLoadHost host;
+  LiveActorLoads().Settle(host);
+  const int slot = Content::FindLiveFreeActorAssetRequest();
+  if (slot < 0) {
+    return -1;
+  }
+  const std::optional<Content::ActorAssetTicket> ticket =
+      Content::SubmitLiveActorAsset(request, AssetOwnerOf(actor));
+  if (!ticket) {
+    return -1;
+  }
+  if (!LiveActorLoads().Track(actor, *ticket)) {
+    // Each tracked load holds one queued request, so the settled table has
+    // room while the queue does.
+    WarnActorRefused("QueueActorLoad", "the actor load table is full");
+  }
+  return slot;
 }
 
 template <typename T>
@@ -687,7 +756,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
         nullptr) {
       return -1;
     }
-    return Content::QueueLiveOwnedActorAsset(request, AssetOwnerOf(actor));
+    return QueueActorLoad(actor, request);
   }
   [[nodiscard]] Content::ActorAssetCompletion AssetCompletion(
       Content::ActorAssetTicket ticket) override {
@@ -1180,7 +1249,12 @@ bool CancelLiveActorAssets(std::size_t slot, const VS::Battle::Actor* actor) {
   if (handle == SpawnedActor::kNone) {
     return true;
   }
-  return Content::CancelLiveActorAssetRequests(AssetOwnerOf(handle));
+  if (!Content::CancelLiveActorAssetRequests(AssetOwnerOf(handle))) {
+    return false;
+  }
+  LiveActorLoadHost host;
+  LiveActorLoads().Release(host, handle);
+  return true;
 }
 
 void FinishLiveActorAssets(std::size_t slot, const VS::Battle::Actor* actor) {
@@ -1194,6 +1268,13 @@ void FinishLiveActorAssets(std::size_t slot, const VS::Battle::Actor* actor) {
     static_cast<void>(Content::UpdateLiveActorAssetQueue());
     State::UpdateLivePlayTimeAndLoading();
   }
+  LiveActorLoadHost host;
+  LiveActorLoads().Release(host, handle);
+}
+
+void SettleLiveActorLoads() {
+  LiveActorLoadHost host;
+  LiveActorLoads().Settle(host);
 }
 
 int QueueLiveSlotActorAsset(std::size_t slot,
@@ -1206,7 +1287,7 @@ int QueueLiveSlotActorAsset(std::size_t slot,
       !Content::IsOwnableActorAssetRequest(request)) {
     return Content::QueueLiveActorAsset(request);
   }
-  return Content::QueueLiveOwnedActorAsset(request, AssetOwnerOf(handle));
+  return QueueActorLoad(handle, request);
 }
 
 int QueueLiveActorOwnedAsset(const VS::Battle::Actor* actor,

@@ -903,21 +903,7 @@ std::ptrdiff_t IssuedTickets(const FakeAssetHost& host) {
       });
 }
 
-constexpr Content::ActorAssetOwner kUntrackedActor{.value = 0x201};
-constexpr Content::ActorAssetOwner kOtherUntrackedActor{.value = 0x202};
-
-// Queues models 1 and 3 for kUntrackedActor, unowned model 2 between them and
-// model 4 for kOtherUntrackedActor, none of them with a ticket.
-void QueueUntrackedRequests(FakeAssetHost& host) {
-  static_cast<void>(Content::QueueOwnedActorAssetRequest(host, PartRequest(1),
-                                                         kUntrackedActor));
-  static_cast<void>(Content::QueueActorAssetRequest(
-      host, Request(ActorAssetKind::kSequenceLoad, 0, 2)));
-  static_cast<void>(Content::QueueOwnedActorAssetRequest(host, PartRequest(3),
-                                                         kUntrackedActor));
-  static_cast<void>(Content::QueueOwnedActorAssetRequest(host, PartRequest(4),
-                                                         kOtherUntrackedActor));
-}
+constexpr Content::ActorAssetOwner kActorOwner{.value = 0x201};
 }  // namespace
 
 TEST_CASE("Owned asset requests carry their tickets through the queue",
@@ -973,8 +959,12 @@ TEST_CASE(
   ActorAssetRequest common = Request(ActorAssetKind::kSequenceParse, 0, 1);
   common.sub_kind = 1;
   CHECK_FALSE(Content::SubmitActorAssetRequest(host, common, kPreviewOwner));
+  // A material sequence binds into the shared work buffer, not an actor.
+  ActorAssetRequest material = Request(ActorAssetKind::kSequenceLoad, 0, 1);
+  material.sub_kind = 3;
+  CHECK_FALSE(Content::SubmitActorAssetRequest(host, material, kPreviewOwner));
   CHECK(host.refusals ==
-        std::vector<std::string>(3, "unownable asset request"));
+        std::vector<std::string>(4, "unownable asset request"));
   for (ActorAssetRequest& slot : host.requests) {
     slot.kind = 1;
   }
@@ -1071,58 +1061,6 @@ TEST_CASE("Asset request cancellation is scoped to one owner identity",
         Content::ActorAssetIdentity{.owner = second_owner, .ticket = *second});
 }
 
-TEST_CASE("Untracked owned requests need an owner and an ownable kind",
-          "[content-slice][content][actor-assets][asset-ownership]") {
-  const auto owner = std::make_unique<FakeAssetHost>();
-  FakeAssetHost& host = *owner;
-  const Content::ActorAssetOwner actor{.value = 0x201};
-  const Content::ActorAssetOwner unowned = Content::kUnownedActorAssetOwner;
-  CHECK(Content::QueueOwnedActorAssetRequest(host, PartRequest(1), unowned) ==
-        -1);
-  // A material sequence binds into the shared work buffer, not an actor.
-  ActorAssetRequest material = Request(ActorAssetKind::kSequenceLoad, 0, 1);
-  material.sub_kind = 3;
-  CHECK(Content::QueueOwnedActorAssetRequest(host, material, actor) == -1);
-  CHECK(host.refusals ==
-        std::vector<std::string>(2, "unownable asset request"));
-  CHECK(QueuedModels(host).empty());
-  CHECK_FALSE(Content::HasActorAssetRequests(host, actor));
-}
-
-TEST_CASE("Untracked owned requests queue without a ticket",
-          "[content-slice][content][actor-assets][asset-ownership]") {
-  const auto owner = std::make_unique<FakeAssetHost>();
-  FakeAssetHost& host = *owner;
-  QueueUntrackedRequests(host);
-  CHECK(QueuedModels(host) == std::vector{1, 2, 3, 4});
-  CHECK(IssuedTickets(host) == 0);
-  CHECK(host.RequestIdentity(2) ==
-        Content::ActorAssetIdentity{.owner = kUntrackedActor});
-  CHECK(host.RequestIdentity(1) == Content::ActorAssetIdentity{});
-  CHECK(Content::HasActorAssetRequests(host, kUntrackedActor));
-  CHECK_FALSE(
-      Content::HasActorAssetRequests(host, Content::kUnownedActorAssetOwner));
-}
-
-TEST_CASE("Untracked owned requests stay cancellable without a ticket",
-          "[content-slice][content][actor-assets][asset-ownership]") {
-  const auto owner = std::make_unique<FakeAssetHost>();
-  FakeAssetHost& host = *owner;
-  QueueUntrackedRequests(host);
-
-  // Completing the head records nothing; the owner keeps its other request.
-  host.process_result = kAssetDone;
-  CHECK(Content::UpdateActorAssetQueue(host) == 1);
-  CHECK(IssuedTickets(host) == 0);
-  CHECK(host.RequestIdentity(1) ==
-        Content::ActorAssetIdentity{.owner = kUntrackedActor});
-
-  CHECK(Content::CancelActorAssetRequests(host, kUntrackedActor));
-  CHECK(QueuedModels(host) == std::vector{2, 4});
-  CHECK_FALSE(Content::HasActorAssetRequests(host, kUntrackedActor));
-  CHECK(Content::HasActorAssetRequests(host, kOtherUntrackedActor));
-}
-
 TEST_CASE("Cancelling an owned head abandons its loader or changes nothing",
           "[content-slice][content][actor-assets][asset-ownership]") {
   using Content::ActorAssetOutcome;
@@ -1149,16 +1087,16 @@ TEST_CASE("Cancelling an owner's weapon load mid-read frees its file",
   FakeAssetHost& host = *owner;
   AddWeaponFile(host);
   host.read_finished = false;
-  REQUIRE(Content::QueueOwnedActorAssetRequest(host, WeaponRequest(host),
-                                               kUntrackedActor) == 0);
+  REQUIRE(
+      Content::SubmitActorAssetRequest(host, WeaponRequest(host), kActorOwner));
   REQUIRE(Content::UpdateWeaponModelLoad(host, host.load_state,
                                          host.requests[0]) == kAssetPending);
   REQUIRE(host.high_blocks.size() == 1);
-  CHECK(Content::CancelActorAssetRequests(host, kUntrackedActor));
+  CHECK(Content::CancelActorAssetRequests(host, kActorOwner));
   CHECK(host.abandoned == std::vector{ActorAssetKind::kWeaponModelLoad});
   CHECK(host.high_frees == host.high_blocks);
   CHECK_FALSE(host.load_state.weapon_file_loaded);
-  CHECK_FALSE(Content::HasActorAssetRequests(host, kUntrackedActor));
+  CHECK_FALSE(Content::HasActorAssetRequests(host, kActorOwner));
 }
 
 TEST_CASE("Clearing the asset queue cancels every owned request",
@@ -1279,12 +1217,11 @@ TEST_CASE("Abandoning an unstarted weapon model load frees nothing",
 }
 
 namespace {
-// Queues actor 3's battle sequence for kUntrackedActor and starts its read.
+// Queues actor 3's battle sequence for kActorOwner and starts its read.
 void StartOwnedBattleSequence(FakeAssetHost& host) {
   AddBattleSequenceActor(host);
-  REQUIRE(Content::QueueOwnedActorAssetRequest(
-              host, Request(ActorAssetKind::kSequenceLoad, 3, 2),
-              kUntrackedActor) == 0);
+  REQUIRE(Content::SubmitActorAssetRequest(
+      host, Request(ActorAssetKind::kSequenceLoad, 3, 2), kActorOwner));
   REQUIRE(Content::UpdateActorSequenceLoad(host, host.load_state,
                                            host.requests[0]) == kAssetPending);
   REQUIRE(host.high_blocks.size() == 1);
@@ -1296,12 +1233,12 @@ TEST_CASE("Cancelling an owner's sequence load mid-read frees its file",
   const auto owner = std::make_unique<FakeAssetHost>();
   FakeAssetHost& host = *owner;
   StartOwnedBattleSequence(host);
-  CHECK(Content::CancelActorAssetRequests(host, kUntrackedActor));
+  CHECK(Content::CancelActorAssetRequests(host, kActorOwner));
   CHECK(host.abandoned == std::vector{ActorAssetKind::kSequenceLoad});
   CHECK(host.high_frees == host.high_blocks);
   CHECK_FALSE(host.load_state.sequence_file_owned);
   CHECK(host.load_state.sequence_file == AssetAddress::kNone);
-  CHECK_FALSE(Content::HasActorAssetRequests(host, kUntrackedActor));
+  CHECK_FALSE(Content::HasActorAssetRequests(host, kActorOwner));
 }
 
 TEST_CASE("A sequence load cancelled before its parse leaves nothing to parse",
@@ -1312,7 +1249,7 @@ TEST_CASE("A sequence load cancelled before its parse leaves nothing to parse",
   host.read_finished = true;
   REQUIRE(Content::UpdateActorSequenceLoad(host, host.load_state,
                                            host.requests[0]) == kAssetPending);
-  CHECK(Content::CancelActorAssetRequests(host, kUntrackedActor));
+  CHECK(Content::CancelActorAssetRequests(host, kActorOwner));
   CHECK(host.high_frees == host.high_blocks);
   // The next sequence load reads its own file, not the freed one.
   host.read_finished = false;

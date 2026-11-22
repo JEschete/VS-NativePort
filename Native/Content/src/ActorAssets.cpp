@@ -400,10 +400,7 @@ bool ActorAssetCompletions::Pending(const ActorAssetIdentity& identity) const {
 
 ActorAssetIdentity ActorAssetCompletions::Current(
     const ActorAssetIdentity& stored) const {
-  if (stored.ticket == ActorAssetTicket::kNone || Pending(stored)) {
-    return stored;
-  }
-  return {};
+  return Pending(stored) ? stored : ActorAssetIdentity{};
 }
 
 bool ActorAssetCompletions::Full() const {
@@ -496,21 +493,6 @@ std::optional<ActorAssetTicket> SubmitActorAssetRequest(
   host.OnRequestQueued(request);
   host.StoreRequest(slot, request, {.owner = owner, .ticket = *ticket});
   return ticket;
-}
-
-int QueueOwnedActorAssetRequest(ActorAssetHost& host,
-                                const ActorAssetRequest& request,
-                                ActorAssetOwner owner) {
-  if (owner == kUnownedActorAssetOwner ||
-      !IsOwnableActorAssetRequest(request)) {
-    host.Refuse("unownable asset request", request.kind);
-    return -1;
-  }
-  const int slot = FindFreeActorAssetRequest(host);
-  if (slot == -1) return -1;
-  host.OnRequestQueued(request);
-  host.StoreRequest(slot, request, {.owner = owner});
-  return slot;
 }
 
 bool HasActorAssetRequests(const ActorAssetHost& host, ActorAssetOwner owner) {

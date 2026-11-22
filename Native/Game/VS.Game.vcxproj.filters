@@ -3120,6 +3120,9 @@
     <ClInclude Include="include\Actors\ActorLifecycle.hpp">
       <Filter>include\Actors</Filter>
     </ClInclude>
+    <ClInclude Include="include\Actors\ActorLoads.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
     <ClInclude Include="include\Actors\ActorMotion.hpp">
       <Filter>include\Actors</Filter>
     </ClInclude>

@@ -12,6 +12,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Actors/ActorInstances.hpp"
+#include "Actors/ActorLoads.hpp"
 #include "Actors/ActorSpawning.hpp"
 #include "Actors/ActorSpawningLive.hpp"
 #include "Actors/CharacterInit.hpp"
@@ -218,6 +219,113 @@ TEST_CASE("An actor without a definition claims no resources, once",
   const SpawnedActor stranger = handles.Observe(6, 0x7000);
   CHECK(handles.ClaimRemoval(6, stranger) == ActorResources{});
   CHECK_FALSE(handles.ClaimRemoval(6, stranger).has_value());
+}
+
+using content::ActorAssetOutcome;
+using content::ActorAssetTicket;
+using SettledLoad = std::pair<SpawnedActor, ActorAssetOutcome>;
+
+// An actor load host over a real ticket table, recording each settled load.
+struct FakeLoadHost final : actors::ActorLoadHost {
+  content::ActorAssetCompletions tickets;
+  std::vector<SettledLoad> settled;
+
+  content::ActorAssetCompletion Completion(ActorAssetTicket ticket) override {
+    return tickets.Find(ticket);
+  }
+  void Forget(ActorAssetTicket ticket) override { tickets.Forget(ticket); }
+  void Settled(SpawnedActor actor,
+               const content::ActorAssetCompletion& completion) override {
+    settled.emplace_back(actor, completion.outcome);
+  }
+  ActorAssetTicket Issue(SpawnedActor actor) {
+    const std::optional<ActorAssetTicket> ticket =
+        tickets.Issue({.value = Raw(actor)});
+    return Required(ticket);
+  }
+};
+
+// Tracks a load of `actor` that has ended with `outcome`, or is pending.
+ActorAssetTicket TrackLoad(FakeLoadHost& host, actors::ActorLoadTable& loads,
+                           SpawnedActor actor, ActorAssetOutcome outcome) {
+  const ActorAssetTicket ticket = host.Issue(actor);
+  REQUIRE(loads.Track(actor, ticket));
+  if (outcome != ActorAssetOutcome::kPending) {
+    REQUIRE(host.tickets.Complete(ticket, outcome, 0));
+  }
+  return ticket;
+}
+
+TEST_CASE("An actor load table reports each ended load once",
+          "[actors][actors-spawning][asset-ownership]") {
+  FakeLoadHost host;
+  actors::ActorLoadTable loads;
+  const SpawnedActor actor = Handle(kFirstHandle);
+  TrackLoad(host, loads, actor, ActorAssetOutcome::kLoaded);
+  TrackLoad(host, loads, actor, ActorAssetOutcome::kFailed);
+  TrackLoad(host, loads, actor, ActorAssetOutcome::kPending);
+
+  loads.Settle(host);
+  CHECK(host.settled ==
+        std::vector<SettledLoad>{{actor, ActorAssetOutcome::kLoaded},
+                                 {actor, ActorAssetOutcome::kFailed}});
+  CHECK(loads.Tracked(actor) == 1);
+  loads.Settle(host);
+  CHECK(host.settled.size() == 2);
+}
+
+TEST_CASE("Settled actor loads forget their tickets, pending ones do not",
+          "[actors][actors-spawning][asset-ownership]") {
+  FakeLoadHost host;
+  actors::ActorLoadTable loads;
+  const SpawnedActor actor = Handle(kFirstHandle);
+  const ActorAssetTicket ended =
+      TrackLoad(host, loads, actor, ActorAssetOutcome::kFailed);
+  const ActorAssetTicket pending =
+      TrackLoad(host, loads, actor, ActorAssetOutcome::kPending);
+  loads.Settle(host);
+  CHECK(host.tickets.Find(ended).outcome == ActorAssetOutcome::kUnknown);
+  CHECK(host.tickets.Find(pending).outcome == ActorAssetOutcome::kPending);
+}
+
+TEST_CASE("Releasing an actor's loads settles only that actor's tickets",
+          "[actors][actors-spawning][asset-ownership]") {
+  FakeLoadHost host;
+  actors::ActorLoadTable loads;
+  const SpawnedActor first = Handle(kFirstHandle);
+  const SpawnedActor second = Handle(kFirstHandle + kHandleStride);
+  const ActorAssetTicket cancelled = host.Issue(first);
+  const ActorAssetTicket other = host.Issue(second);
+  REQUIRE(loads.Track(first, cancelled));
+  REQUIRE(loads.Track(second, other));
+  REQUIRE(host.tickets.Complete(cancelled, ActorAssetOutcome::kCancelled, -2));
+
+  loads.Release(host, first);
+  CHECK(host.settled ==
+        std::vector<SettledLoad>{{first, ActorAssetOutcome::kCancelled}});
+  CHECK(loads.Tracked(first) == 0);
+  CHECK(host.tickets.Find(other).outcome == ActorAssetOutcome::kPending);
+  // A load released before it ends is reported pending and forgotten.
+  loads.Release(host, second);
+  CHECK(host.settled.back() ==
+        SettledLoad{second, ActorAssetOutcome::kPending});
+  CHECK(host.tickets.Find(other).outcome == ActorAssetOutcome::kUnknown);
+  CHECK(loads.Tracked(second) == 0);
+}
+
+TEST_CASE("An actor load table refuses no actor, no ticket and overflow",
+          "[actors][actors-spawning][asset-ownership]") {
+  FakeLoadHost host;
+  actors::ActorLoadTable loads;
+  const SpawnedActor actor = Handle(kFirstHandle);
+  const ActorAssetTicket ticket = host.Issue(actor);
+  CHECK_FALSE(loads.Track(SpawnedActor::kNone, ticket));
+  CHECK_FALSE(loads.Track(actor, ActorAssetTicket::kNone));
+  for (std::size_t i = 0; i < actors::ActorLoadTable::kCapacity; ++i) {
+    REQUIRE(loads.Track(actor, host.Issue(actor)));
+  }
+  CHECK_FALSE(loads.Track(actor, ticket));
+  CHECK(loads.Tracked(actor) == actors::ActorLoadTable::kCapacity);
 }
 
 // A recording host: the actor table, the asset queue, the zone's ZUD cache
@@ -2073,6 +2181,42 @@ TEST_CASE("Removing a live actor cancels only its own queued load",
   CHECK(content::FindLiveFreeActorAssetRequest() == 2);
   CHECK(actors::CancelLiveActorAssets(kSlot, &installed));
   CHECK(content::FindLiveFreeActorAssetRequest() == 1);
+  content::ClearLiveActorAssetQueue();
+  actors::ResetLiveActorHandles();
+  VS::Battle::actors[kSlot] = saved_actor;
+}
+
+TEST_CASE("Live actor loads report how they end and forget their tickets",
+          "[actors][actors-spawning][asset-ownership]") {
+  // #48: each load an actor queues is ticketed and settled; more loads than
+  // the ticket table holds still queue because each settled ticket is gone.
+  constexpr std::size_t kSlot = 10;
+  constexpr std::size_t kLoads = 2 * content::ActorAssetCompletions::kCapacity;
+  VS::Battle::Actor* const saved_actor = VS::Battle::actors[kSlot];
+  content::ClearLiveActorAssetQueue();
+  actors::ResetLiveActorHandles();
+  actors::SettleLiveActorLoads();
+  VS::Battle::Actor installed{};
+  VS::Battle::actors[kSlot] = &installed;
+  ActorAssetRequest request{};
+  // The weapon parser refuses a target below the weapon slots at once.
+  request.kind = Kind(ActorAssetKind::kWeaponModelParse);
+  request.target_slot = -1;
+  bool queued = true;
+  {
+    ChannelWarnings warnings("actors");
+    for (std::size_t load = 0; load < kLoads; ++load) {
+      queued = queued &&
+               actors::QueueLiveActorOwnedAsset(&installed, request) == 0 &&
+               content::UpdateLiveActorAssetQueue() == -1;
+      actors::SettleLiveActorLoads();
+    }
+    CHECK(queued);
+    CHECK(warnings.messages.size() == kLoads);
+    CHECK(std::ranges::all_of(warnings.messages, [](const std::string& line) {
+      return line.ends_with("asset load failed (result -2)");
+    }));
+  }
   content::ClearLiveActorAssetQueue();
   actors::ResetLiveActorHandles();
   VS::Battle::actors[kSlot] = saved_actor;

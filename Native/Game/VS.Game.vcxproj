@@ -1780,6 +1780,7 @@
     <ClInclude Include="include\Actors\ActorFlags.hpp" />
     <ClInclude Include="include\Actors\ActorInstances.hpp" />
     <ClInclude Include="include\Actors\ActorLifecycle.hpp" />
+    <ClInclude Include="include\Actors\ActorLoads.hpp" />
     <ClInclude Include="include\Actors\ActorMotion.hpp" />
     <ClInclude Include="include\Actors\ActorMotionLive.hpp" />
     <ClInclude Include="include\Actors\ActorMovement.hpp" />

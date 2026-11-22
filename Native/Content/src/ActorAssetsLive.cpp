@@ -1430,12 +1430,6 @@ std::optional<ActorAssetTicket> SubmitLiveActorAsset(
   return SubmitActorAssetRequest(host, request, owner);
 }
 
-int QueueLiveOwnedActorAsset(const ActorAssetRequest& request,
-                             ActorAssetOwner owner) {
-  LiveActorAssetHost host;
-  return QueueOwnedActorAssetRequest(host, request, owner);
-}
-
 bool LiveActorAssetsQueued(ActorAssetOwner owner) {
   LiveActorAssetHost host;
   return HasActorAssetRequests(host, owner);
