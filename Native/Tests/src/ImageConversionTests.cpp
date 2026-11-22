@@ -1730,6 +1730,18 @@ TEST_CASE(
   CHECK_FALSE(fs::exists(data.Root() / "textures" / "bg" / "obsolete.png"));
 }
 
+TEST_CASE("A converted background refuses its deleted layout",
+          "[content-images]") {
+  TemporaryData data;
+  data.WriteManifest(BackgroundTimFiles());
+  REQUIRE(Extract::ConvertDiscImages(data.Root(), false).has_value());
+  CHECK(ConversionError(data).empty());
+  data.WriteManifest({{"BG/001OP01A.TIM", TimBytes()}});
+  CHECK(ConversionError(data).find(
+            "missing tim-png dependency BG/001OP01A.FAR") != std::string::npos);
+  CHECK_FALSE(Extract::ConvertDiscImages(data.Root(), false).has_value());
+}
+
 TEST_CASE("unsupported TIM inputs fail before publishing converted outputs",
           "[content-images]") {
   SECTION("unknown standalone image") {
@@ -1780,6 +1792,106 @@ TEST_CASE("extracted TIM corpus converts without changing its source bytes",
 
   VerifyBackgroundTextureEdit(source_root, converted_data, input_files);
   VerifyDependencyInvalidation(converted_data, input_files, manifest);
+}
+
+// The containers whose TIMs other converters will own (#203 zones, #211 DIS,
+// #498 the ending program), keyed by the tally name.
+std::optional<std::string_view> EmbeddedTimContainer(std::string_view path) {
+  if (path.starts_with("MAP/") && path.ends_with(".ZND")) return "MAP";
+  if (path.starts_with("SMALL/") && path.ends_with(".DIS")) return "SMALL";
+  if (path == "ENDING/ENDING.PRG") return "ENDING";
+  return std::nullopt;
+}
+
+// Each strict TIM starting at a 4-byte-aligned word of `bytes`, by offset; a
+// scan resumes after each TIM it finds.
+std::vector<std::pair<std::size_t, Content::DecodedTim>> EmbeddedTims(
+    std::span<const std::byte> bytes) {
+  constexpr std::size_t kWord = 4;
+  std::vector<std::pair<std::size_t, Content::DecodedTim>> tims;
+  std::size_t at = 0;
+  while (at + kWord <= bytes.size()) {
+    if (Read32(bytes, at) == Content::kTimMagic) {
+      auto decoded = Content::DecodeTim(bytes.subspan(at));
+      if (decoded) {
+        const std::size_t length = decoded->bytes;
+        tims.emplace_back(at, std::move(*decoded));
+        at += length;
+        continue;
+      }
+    }
+    at += kWord;
+  }
+  return tims;
+}
+
+// The TIM count the zone's first texture table declares (RoomLoading.cpp
+// UploadZoneTextures), so the scan cannot miss or invent zone TIMs.
+std::size_t ZoneTextureCount(std::span<const std::byte> zone) {
+  constexpr std::size_t kTexturesOffsetAt = 0x10;
+  constexpr std::size_t kTablesAt = 16;
+  if (zone.size() < kTexturesOffsetAt + 4) return 0;
+  const std::size_t section = Read32(zone, kTexturesOffsetAt);
+  if (section > zone.size() || zone.size() - section < kTablesAt + 4) return 0;
+  if (static_cast<std::int32_t>(Read32(zone, section)) <= 0) return 0;
+  return Read32(zone, section + kTablesAt);
+}
+
+std::string EmbeddedTimTally(std::string_view container,
+                             const Content::TimFile& tim) {
+  const auto mode = tim.Mode();
+  if (mode == Content::TimPixelMode::kDirect15) {
+    return std::format("{} 16-bit", container);
+  }
+  const auto depth = mode == Content::TimPixelMode::kIndexed4
+                         ? Content::ImageDepth::kIndexed4
+                         : Content::ImageDepth::kIndexed8;
+  const std::size_t entries = tim.clut ? tim.clut->words.size() : 0;
+  return std::format("{} {}-bit x{} palettes", container,
+                     Content::BitsPerPixel(depth),
+                     entries / Content::PaletteCapacity(depth));
+}
+
+TEST_CASE("embedded TIM payloads convert and rebuild their exact bytes",
+          "[content-images][extract]") {
+  const fs::path source_root = "Native/data";
+  auto entries = Content::DataStore::LoadManifest(source_root);
+  if (!entries) SKIP("Extracted Native/data is unavailable");
+  std::map<std::string, std::size_t, std::less<>> tallies;
+  for (const Content::DataStore::Entry& entry : *entries) {
+    const auto container = EmbeddedTimContainer(entry.path);
+    if (entry.form != "raw" || !container) continue;
+    CAPTURE(entry.path);
+    const Bytes bytes = ReadBytes(source_root / "disc" / fs::path(entry.path));
+    REQUIRE_FALSE(bytes.empty());
+    const auto tims = EmbeddedTims(bytes);
+    if (*container == "MAP") CHECK(tims.size() == ZoneTextureCount(bytes));
+    const std::string_view stem =
+        std::string_view(entry.path).substr(0, entry.path.rfind('.'));
+    for (const auto& [offset, decoded] : tims) {
+      const auto slice = std::span(bytes).subspan(offset, decoded.bytes);
+      Extract::TimConversion conversion{
+          .tim = {.path = std::format("{}_{:06X}.TIM", stem, offset),
+                  .bytes = Bytes(slice.begin(), slice.end())},
+          .layout = std::nullopt,
+          .material = std::nullopt,
+          .unreferenced = false,
+          .note = {}};
+      const auto converted = Extract::ConvertTim(conversion);
+      INFO((converted ? std::string{} : converted.error()));
+      CHECK(converted.has_value());
+      ++tallies[EmbeddedTimTally(*container, decoded.tim)];
+    }
+  }
+  if (tallies.empty()) SKIP("Extracted Native/data has no TIM containers");
+  const std::map<std::string, std::size_t, std::less<>> expected{
+      {"ENDING 4-bit x1 palettes", 6},
+      {"ENDING 4-bit x2 palettes", 1},
+      {"ENDING 8-bit x1 palettes", 5},
+      {"MAP 16-bit", 782},
+      {"SMALL 16-bit", 16},
+      {"SMALL 4-bit x16 palettes", 12}};
+  CHECK(tallies == expected);
 }
 
 TEST_CASE("extracted FBC palette corpus converts and reloads exact words",

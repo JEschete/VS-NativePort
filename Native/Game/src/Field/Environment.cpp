@@ -63,7 +63,10 @@ constexpr std::int32_t kVisibleTop = -kScreenMargin * kFixedOne;
 constexpr std::int32_t kVisibleRight = kMarginRight * kFixedOne;
 constexpr std::int32_t kVisibleBottom = kMarginBottom * kFixedOne;
 constexpr std::uint16_t kTileClut = 0x3BB0;
-constexpr std::int32_t kSemiTransparencyShift = 7;
+// A tile's second corner code sets texture-page bit 7, the low depth bit
+// (8-bit indices). The tile quad is opaque, so the page's semi-transparency
+// bits (5-6) do not apply.
+constexpr std::int32_t kTextureDepthShift = 7;
 
 [[nodiscard]] std::int16_t Half(std::int32_t value) {
   return Math::WrapSigned16(static_cast<std::uint32_t>(value));
@@ -179,7 +182,7 @@ void MaybeTurnBack(WeatherHost& host, std::int16_t& step) {
                   {.u = Texel(far_u), .v = Texel(far_v)}}},
       .colors = ColorsOf(corners),
       .texture_page = static_cast<std::uint16_t>(
-          base_texture_page | (corners[1].code << kSemiTransparencyShift)),
+          base_texture_page | (corners[1].code << kTextureDepthShift)),
       .clut = kTileClut};
 }
 }  // namespace
