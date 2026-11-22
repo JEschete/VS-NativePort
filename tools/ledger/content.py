@@ -101,12 +101,15 @@ DROPPED = {
 DECODERS = {
     "tim-png": "Content::DecodeTim",
     "fbc-palette-png": "Extract::ConvertFbcPalette",
+    "fbt-texture-png": "Extract::ConvertFbtTexture",
 }
 # The disc-corpus tests that prove each converter preserves its sources (ASSET_PIPELINE section 7).
 EVIDENCE = {
     "tim-png": ("extracted TIM corpus converts without changing its source bytes",),
     "fbc-palette-png": ("extracted FBC palette corpus converts and reloads exact words",
                         "Effect CLUTs load every extracted palette through the loader"),
+    "fbt-texture-png": ("extracted FBT corpus binds every page and converts it exactly",
+                        "Effect textures load every extracted page through the loader"),
 }
 
 
@@ -180,6 +183,7 @@ def expected_rows(root: Path, evidence: Evidence) -> list[dict[str, str]]:
     """The ledger the extracted data under Native\\data gives."""
     data = data_root(root)
     manifest = json.loads((data / "manifest.json").read_text(encoding="utf-8"))
+    by_id = {output["id"]: output for output in manifest["outputs"]}
     outputs: dict[str, list[dict]] = {}
     dependents: dict[str, list[str]] = {}
     for output in manifest["outputs"]:
@@ -210,10 +214,13 @@ def expected_rows(root: Path, evidence: Evidence) -> list[dict[str, str]]:
             converter = converters[0]
             for output in outputs[path]:
                 notes.insert(0, output["id"] + (" (unreferenced)" if output.get("unreferenced") else "")
+                             + (f" (alias of {output['alias_of']})" if output.get("alias_of") else "")
                              + (f": {output['note']}" if output.get("note") else ""))
+            # An alias's files are its target's (ASSET_PIPELINE section 8).
+            files = [file for output in outputs[path]
+                     for file in (by_id[output["alias_of"]] if output.get("alias_of") else output)["files"]]
             row.update(decoder=DECODERS[converter], converter=converter, round_trip=evidence.round_trip(converter),
-                       status="converted",
-                       output=";".join(file for output in outputs[path] for file in output["files"]))
+                       status="converted", output=";".join(files))
         elif size == 0 or path in DROPPED:
             row.update(kind=PLACEHOLDER if size == 0 else kind.name, decoder=NOT_APPLICABLE,
                        converter=NOT_APPLICABLE, output=NOT_APPLICABLE, round_trip=NOT_APPLICABLE, status="skipped")

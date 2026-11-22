@@ -243,7 +243,16 @@ class FakeResourceHost final : public Effects::EffectResourceHost {
   Effects::EffectBuffer overlay{.id = BufferId(0x500), .capacity = 0x10000};
   std::vector<std::uint32_t> reserved;
   std::vector<std::uint32_t> retired;
-  std::vector<std::pair<Effects::VramRect, Effects::EffectBufferId>> uploads;
+  std::vector<std::pair<Effects::VramRect, std::vector<std::uint16_t>>> uploads;
+  // One texture page whose words count up.
+  std::optional<std::vector<std::uint16_t>> texture = [] {
+    std::vector<std::uint16_t> page(std::size_t{64} * 256);
+    for (std::size_t i = 0; i < page.size(); ++i) {
+      page[i] = static_cast<std::uint16_t>(i);
+    }
+    return page;
+  }();
+  std::vector<Effects::DiscRead> texture_requests;
   // One palette row whose words count up from 0x8001.
   std::optional<std::vector<std::uint16_t>> palette = [] {
     std::vector<std::uint16_t> row(256);
@@ -295,9 +304,15 @@ class FakeResourceHost final : public Effects::EffectResourceHost {
   void RetireTexturePage(std::uint32_t page) override {
     retired.push_back(page);
   }
+  std::optional<std::vector<std::uint16_t>> LoadTexturePage(
+      Effects::DiscRead source) override {
+    texture_requests.push_back(source);
+    return texture;
+  }
   void UploadImage(const Effects::VramRect& area,
-                   Effects::EffectBufferId pixels) override {
-    uploads.emplace_back(area, pixels);
+                   std::span<const std::uint16_t> words) override {
+    uploads.emplace_back(
+        area, std::vector<std::uint16_t>(words.begin(), words.end()));
   }
   std::optional<std::vector<std::uint16_t>> LoadPalette(
       Effects::DiscRead source) override {
@@ -1472,12 +1487,11 @@ void ConfigureClutAndPage(Effects::EffectResourceState& state) {
       1));
 }
 
-// The three polls that load both assets: the CLUT at once, then the page's
-// read and upload.
+// The two polls that load both assets, each ready at once.
 void LoadClutAndPage(Effects::EffectResourceState& state,
                      FakeResourceHost& host) {
   ConfigureClutAndPage(state);
-  for (int poll = 0; poll < 3; ++poll) {
+  for (int poll = 0; poll < 2; ++poll) {
     static_cast<void>(Effects::UpdateEffectTextureLoading(state, host));
   }
 }
@@ -1487,10 +1501,9 @@ TEST_CASE("Effect textures load the CLUT, then each texture page",
           "[effects][effects-resources-transforms]") {
   Effects::EffectResourceState state{};
   FakeResourceHost host;
-  host.loaded = true;
   ConfigureClutAndPage(state);
   CHECK_FALSE(Effects::ConfigureEffectTextureAsset(state, {}, 8));
-  for (int poll = 0; poll < 3; ++poll) {
+  for (int poll = 0; poll < 2; ++poll) {
     const auto result = Effects::UpdateEffectTextureLoading(state, host);
     CHECK(result.pending);
     CHECK(result.refusal == Effects::ResourceRefusal::kNone);
@@ -1522,25 +1535,25 @@ TEST_CASE("Effect textures upload and reserve each texture page",
           "[effects][effects-resources-transforms]") {
   Effects::EffectResourceState state{};
   FakeResourceHost host;
-  host.loaded = true;
   LoadClutAndPage(state, host);
   REQUIRE(host.uploads.size() == 1);
   CHECK(host.uploads[0].first ==
         Effects::VramRect{.x = 704, .y = 256, .w = 64, .h = 256});
+  CHECK(host.uploads[0].second == Required(host.texture));
   CHECK(host.reserved == std::vector<std::uint32_t>{27});
   CHECK(state.loaded_texture_pages == (1U << 27));
 }
 
-TEST_CASE("Effect textures read the CLUT from its palette, not the disc",
+TEST_CASE("Effect textures read converted images, not the disc",
           "[effects][effects-resources-transforms]") {
   Effects::EffectResourceState state{};
   FakeResourceHost host;
-  host.loaded = true;
   LoadClutAndPage(state, host);
   CHECK(host.palette_requests ==
         std::vector{Effects::DiscRead{.lba = 1001, .size = 0x200}});
-  CHECK(host.requested ==
+  CHECK(host.texture_requests ==
         std::vector{Effects::DiscRead{.lba = 1004, .size = 0x8000}});
+  CHECK(host.requested.empty());
   // The staging buffer is still allocated at the first asset, the CLUT.
   CHECK(host.allocations == std::vector<std::size_t>{0x8000});
 }
@@ -1586,6 +1599,58 @@ TEST_CASE("Effect textures refuse a missing, empty or oversized palette",
         refused(ResourceRefusal::kPaletteSlot));
   CHECK(load(std::vector<std::uint16_t>(std::size_t{256} * 3)) ==
         std::pair{ResourceRefusal::kNone, std::size_t{1}});
+}
+
+namespace {
+struct PageLoadResult {
+  Effects::ResourceRefusal refusal = Effects::ResourceRefusal::kNone;
+  bool loaded = false;
+  bool uploaded = false;
+  bool reservations_match = false;
+};
+
+PageLoadResult LoadPage(std::optional<std::vector<std::uint16_t>> words) {
+  Effects::EffectResourceState state{};
+  FakeResourceHost host;
+  host.texture = std::move(words);
+  ConfigureClutAndPage(state);
+  static_cast<void>(Effects::UpdateEffectTextureLoading(state, host));
+  const auto result = Effects::UpdateEffectTextureLoading(state, host);
+  const bool uploaded = !host.uploads.empty();
+  return {.refusal = result.refusal,
+          .loaded = Effects::EffectTextureLoadState(state) ==
+                    Effects::TextureLoadState::kLoaded,
+          .uploaded = uploaded,
+          .reservations_match = uploaded == !host.reserved.empty() &&
+                                uploaded == (state.loaded_texture_pages != 0)};
+}
+
+void CheckRefusedPageSize(std::vector<std::uint16_t> words) {
+  const auto page = LoadPage(std::move(words));
+  CHECK(page.refusal == Effects::ResourceRefusal::kTextureSize);
+  CHECK_FALSE(page.uploaded);
+  CHECK(page.reservations_match);
+}
+}  // namespace
+
+TEST_CASE("Effect textures refuse a missing page",
+          "[effects][effects-resources-transforms]") {
+  using Effects::ResourceRefusal;
+  const auto missing = LoadPage(std::nullopt);
+  CHECK(missing.refusal == ResourceRefusal::kTextureMissing);
+  CHECK(missing.loaded);
+  CHECK_FALSE(missing.uploaded);
+  CHECK(missing.reservations_match);
+}
+
+TEST_CASE("Effect textures refuse an invalid page size",
+          "[effects][effects-resources-transforms]") {
+  CheckRefusedPageSize({});
+  CheckRefusedPageSize(std::vector<std::uint16_t>(std::size_t{64} * 255));
+  CheckRefusedPageSize(std::vector<std::uint16_t>(std::size_t{128} * 256));
+  const auto complete =
+      LoadPage(std::vector<std::uint16_t>(std::size_t{64} * 256));
+  CHECK(complete.refusal == Effects::ResourceRefusal::kNone);
 }
 
 namespace {
@@ -2045,7 +2110,6 @@ TEST_CASE("Effect textures free the staging buffer after the last page",
           "[effects][effects-resources-transforms]") {
   Effects::EffectResourceState state{};
   FakeResourceHost host;
-  host.loaded = true;
   LoadClutAndPage(state, host);
   const auto staging = state.texture_buffer.id;
   CHECK_FALSE(Effects::UpdateEffectTextureLoading(state, host).pending);
@@ -2057,15 +2121,15 @@ TEST_CASE("Effect textures refuse and skip a slot past pages 24-31",
           "[effects][effects-resources-transforms]") {
   Effects::EffectResourceState state{};
   FakeResourceHost host;
-  host.loaded = true;
   Effects::SetEffectTextureAssetCount(state, 1);
   REQUIRE(
       Effects::ConfigureEffectTextureAsset(state, {.file = {}, .slot = 8}, 0));
-  CHECK(Effects::UpdateEffectTextureLoading(state, host).pending);
   const auto refused = Effects::UpdateEffectTextureLoading(state, host);
+  CHECK(refused.pending);
   CHECK(refused.refusal == Effects::ResourceRefusal::kTextureSlot);
   CHECK(Effects::EffectTextureLoadState(state) ==
         Effects::TextureLoadState::kLoaded);
+  CHECK(host.texture_requests.empty());
   CHECK(host.uploads.empty());
 }
 
@@ -2538,6 +2602,75 @@ TEST_CASE("Effect CLUTs load every extracted palette through the loader",
     CHECK(host.palette_uploads[0].first.y ==
           Effects::kEffectClutFirstRow + clut.asset.slot);
   }
+}
+
+namespace {
+// The FBT `read` names, as the extracted file's little-endian words.
+std::vector<std::uint16_t> ExtractedPageWords(const ExtractedEffectData& data,
+                                              const Effects::DiscRead& read) {
+  const auto* entry =
+      data.Store().FindBySector(static_cast<std::uint32_t>(read.lba));
+  REQUIRE(entry != nullptr);
+  auto bytes = data.Store().ReadAll(*entry);
+  REQUIRE(bytes.has_value());
+  REQUIRE(bytes->size() == static_cast<std::size_t>(read.size));
+  std::vector<std::uint16_t> words(bytes->size() / 2);
+  for (std::size_t i = 0; i < words.size(); ++i) {
+    words[i] = static_cast<std::uint16_t>((*bytes)[2 * i] |
+                                          ((*bytes)[(2 * i) + 1] << 8U));
+  }
+  return words;
+}
+
+// Loads effect `effect`'s textures through the loader, its host loading
+// each page from the converted images; the pages it uploaded.
+std::size_t LoadExtractedPages(const ExtractedEffectData& data,
+                               std::int32_t effect) {
+  Effects::EffectResourceState state{};
+  REQUIRE(Effects::ConfigureTextureLoads(
+              state, Effects::LiveEffectPurgeTables(), effect) ==
+          Effects::PurgeTableRefusal::kNone);
+  FakeResourceHost host;
+  host.layout.package_base_lba = data.BaseLba();
+  for (std::int32_t asset = 0; asset < state.textures.asset_count; ++asset) {
+    const auto& texture =
+        state.textures.assets[static_cast<std::size_t>(asset)];
+    if (texture.is_clut) {
+      host.palette = std::vector<std::uint16_t>(
+          static_cast<std::size_t>(Effects::kEffectClutWidth));
+    } else {
+      const Effects::DiscRead read{.lba = texture.file.lba + data.BaseLba(),
+                                   .size = texture.file.size};
+      auto page = Effects::LoadLiveEffectTexture(read);
+      INFO((page ? std::string{} : page.error()));
+      REQUIRE(page.has_value());
+      // The converted image packs back to the FBT's bytes.
+      CHECK(*page == ExtractedPageWords(data, read));
+      host.texture = std::move(*page);
+    }
+    REQUIRE(Effects::UpdateEffectTextureLoading(state, host).refusal ==
+            Effects::ResourceRefusal::kNone);
+  }
+  CHECK(std::ranges::all_of(host.uploads, [](const auto& upload) {
+    return upload.second.size() == std::size_t{64} * 256;
+  }));
+  return host.uploads.size();
+}
+}  // namespace
+
+TEST_CASE("Effect textures load every extracted page through the loader",
+          "[effects][effects-resources-transforms][extract]") {
+  const ExtractedEffectData data;
+  const auto tables = Effects::LiveEffectPurgeTables();
+  std::size_t pages = 0;
+  for (std::size_t effect = 0; effect < tables.texture_counts.size();
+       ++effect) {
+    if (tables.texture_counts[effect] == 0) continue;
+    INFO("effect " << effect);
+    pages += LoadExtractedPages(data, static_cast<std::int32_t>(effect));
+  }
+  // Every FBT on the disc.
+  CHECK(pages == 755);
 }
 
 namespace {

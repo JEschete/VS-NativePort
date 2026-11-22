@@ -19,6 +19,9 @@ namespace VS::Content {
 struct ConvertedSource {
   const DataStore::Entry* entry = nullptr;
   const ConversionOutput* conversion = nullptr;
+  // The output whose files hold the image: `conversion`, or the output it is
+  // an alias of when another disc file has the same bytes.
+  const ConversionOutput* files = nullptr;
 };
 
 // What a read of the extracted file names: its first sector and its size
@@ -36,7 +39,8 @@ struct ConvertedRead {
     const DataStore& store, const ConvertedRead& read);
 
 // The native image `source`'s output wrote, checked against the manifest: its
-// id, source path and hash, a referenced image and a valid one.
+// id, source path and hash, a referenced image and a valid one. An alias
+// loads its target's image, which names the target's id and source.
 [[nodiscard]] std::expected<ImageDocument, std::string> LoadConvertedImage(
     const DataStore& store, const ConvertedSource& source);
 

@@ -150,7 +150,9 @@ struct EffectDiscLayout {
   // E000.P, the base of every EffectFileExtent.
   std::int32_t package_base_lba{};
   DiscRead purge_overlay;
-  // Every FBT has this size; the texture buffer holds one.
+  // Every FBT has this size. The loader still allocates a texture buffer this
+  // big, as the original's reads needed, so the high heap sees the same
+  // allocations; converted images fill no buffer.
   std::size_t texture_staging_bytes{};
 };
 
@@ -183,6 +185,10 @@ enum class ResourceRefusal : std::uint8_t {
   kPaletteRows,
   // A CLUT whose converted palette has more rows than its slot reaches.
   kPaletteSlot,
+  // A texture page without a converted image the host could load.
+  kTextureMissing,
+  // A texture page whose converted image does not fill one page.
+  kTextureSize,
 };
 
 // A load step's result: pending is the original's return value.
@@ -211,7 +217,14 @@ class EffectResourceHost {
   [[nodiscard]] virtual EffectBuffer PurgeOverlayBuffer() = 0;
   virtual void ReserveTexturePage(std::uint32_t page) = 0;
   virtual void RetireTexturePage(std::uint32_t page) = 0;
-  virtual void UploadImage(const VramRect& area, EffectBufferId pixels) = 0;
+  // The converted texture page (ASSET_PIPELINE.md §6.4) of the FBT `source`
+  // reads: its packed VRAM words, row-major, as the FBT held them. Nothing
+  // when it is missing or invalid; the host reports why.
+  [[nodiscard]] virtual std::optional<std::vector<std::uint16_t>>
+  LoadTexturePage(DiscRead source) = 0;
+  // Uploads `area`'s words, row-major.
+  virtual void UploadImage(const VramRect& area,
+                           std::span<const std::uint16_t> words) = 0;
   // The converted palette (ASSET_PIPELINE.md §6.4) of the FBC that `source`
   // reads: its rows of kEffectClutWidth colour words, in file order.
   // Nothing when it is missing or invalid; the host reports why.

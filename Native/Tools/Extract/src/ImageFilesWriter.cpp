@@ -87,25 +87,6 @@ std::expected<void, std::string> CheckId(std::string_view id) {
   return {};
 }
 
-std::expected<void, std::string> CheckProvenance(
-    const ImageProvenance& provenance) {
-  if (provenance.source.empty() ||
-      !Content::IsLowercaseSha256(provenance.source_sha256)) {
-    return std::unexpected(
-        "provenance needs a source path and its lowercase SHA-256");
-  }
-  for (const ImageDependency& dependency : provenance.dependencies) {
-    if (dependency.source.empty() || dependency.role.empty() ||
-        !Content::IsLowercaseSha256(dependency.source_sha256)) {
-      return std::unexpected(std::format(
-          "dependency '{}' needs a source path, a role and its lowercase "
-          "SHA-256",
-          dependency.source));
-    }
-  }
-  return {};
-}
-
 enum class StpCoverage : std::uint8_t { kNone, kAll, kSome };
 
 StpCoverage CoverageOf(std::span<const std::uint16_t> words) {
@@ -167,6 +148,21 @@ Json ProvenanceJson(const ImageProvenance& provenance) {
     tim["image"] = RectJson(provenance.tim->image);
     if (provenance.tim->clut) tim["clut"] = RectJson(*provenance.tim->clut);
     json["tim"] = std::move(tim);
+  }
+  if (const auto& placement = provenance.texture_page) {
+    Json page;
+    page["effect"] = placement->effect;
+    page["slot"] = placement->slot;
+    page["page"] = placement->page;
+    page["vram"] = RectJson(placement->vram);
+    json["texture_page"] = std::move(page);
+  }
+  if (const auto& preview = provenance.preview_palette) {
+    Json palette;
+    palette["image"] = preview->image;
+    palette["row"] = preview->row;
+    palette["entry"] = preview->entry;
+    json["preview_palette"] = std::move(palette);
   }
   if (!provenance.dependencies.empty()) {
     Json dependencies = Json::array();
@@ -328,7 +324,8 @@ std::expected<std::vector<ImageFile>, std::string> EncodeImageFiles(
   if (auto valid = CheckId(document.id); !valid) {
     return std::unexpected(valid.error());
   }
-  if (auto valid = CheckProvenance(document.provenance); !valid) {
+  if (auto valid = Content::ValidateImageProvenance(document.provenance);
+      !valid) {
     return std::unexpected(std::format("{}: {}", document.id, valid.error()));
   }
   const Content::NativeImage& image = document.image;

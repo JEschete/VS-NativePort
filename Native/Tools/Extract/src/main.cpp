@@ -366,9 +366,11 @@ int ConvertImages(const fs::path& root, bool force) {
     VS::Core::LogError("extract", "{}", report.error());
     return 1;
   }
-  VS::Core::LogInfo(
-      "extract", "images: {} converted, {} unchanged, {} stale files removed",
-      report->converted, report->unchanged, report->removed);
+  VS::Core::LogInfo("extract",
+                    "images: {} converted, {} unchanged, {} aliased, {} stale "
+                    "files removed",
+                    report->converted, report->unchanged, report->aliased,
+                    report->removed);
   return 0;
 }
 

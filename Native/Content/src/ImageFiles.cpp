@@ -62,21 +62,13 @@ std::expected<void, std::string> CheckId(std::string_view id) {
   return {};
 }
 
-std::expected<void, std::string> CheckProvenance(
-    const ImageProvenance& provenance) {
-  if (provenance.source.empty() ||
-      !IsLowercaseSha256(provenance.source_sha256)) {
-    return std::unexpected(
-        "provenance needs a source path and its lowercase SHA-256");
-  }
-  for (const ImageDependency& dependency : provenance.dependencies) {
-    if (dependency.source.empty() || dependency.role.empty() ||
-        !IsLowercaseSha256(dependency.source_sha256)) {
-      return std::unexpected(std::format(
-          "dependency '{}' needs a source path, a role and its lowercase "
-          "SHA-256",
-          dependency.source));
-    }
+std::expected<void, std::string> CheckTexturePage(
+    const TexturePagePlacement& placement) {
+  if (placement.page >= kTexturePageCount ||
+      placement.vram != TexturePageRect(placement.page)) {
+    return std::unexpected(std::format(
+        "texture page {} must be below {} and fill its own VRAM rectangle",
+        placement.page, kTexturePageCount));
   }
   return {};
 }
@@ -338,11 +330,51 @@ std::expected<ImageDependency, std::string> DependencyOf(
                          .role = std::move(*role)};
 }
 
+std::expected<TexturePagePlacement, std::string> TexturePageOf(
+    const Json& value, const std::string& where) {
+  const JsonMembers json(value, where);
+  if (auto only = json.Only({"effect", "slot", "page", "vram"}); !only) {
+    return std::unexpected(only.error());
+  }
+  auto effect = json.Unsigned("effect", UINT32_MAX);
+  if (!effect) return std::unexpected(effect.error());
+  auto slot = json.Unsigned("slot", UINT32_MAX);
+  if (!slot) return std::unexpected(slot.error());
+  auto page = json.Unsigned("page", UINT32_MAX);
+  if (!page) return std::unexpected(page.error());
+  auto vram_value = json.Get("vram");
+  if (!vram_value) return std::unexpected(vram_value.error());
+  auto vram = RectOf(**vram_value, json.Where("vram"));
+  if (!vram) return std::unexpected(vram.error());
+  return TexturePagePlacement{.effect = static_cast<std::uint32_t>(*effect),
+                              .slot = static_cast<std::uint32_t>(*slot),
+                              .page = static_cast<std::uint32_t>(*page),
+                              .vram = *vram};
+}
+
+std::expected<PreviewPalette, std::string> PreviewPaletteOf(
+    const Json& value, const std::string& where) {
+  const JsonMembers json(value, where);
+  if (auto only = json.Only({"image", "row", "entry"}); !only) {
+    return std::unexpected(only.error());
+  }
+  auto image = json.String("image");
+  if (!image) return std::unexpected(image.error());
+  auto row = json.Unsigned("row", UINT32_MAX);
+  if (!row) return std::unexpected(row.error());
+  auto entry = json.Unsigned("entry", UINT32_MAX);
+  if (!entry) return std::unexpected(entry.error());
+  return PreviewPalette{.image = std::move(*image),
+                        .row = static_cast<std::uint32_t>(*row),
+                        .entry = static_cast<std::uint32_t>(*entry)};
+}
+
 std::expected<ImageProvenance, std::string> ProvenanceOf(
     const Json& value, const std::string& where) {
   const JsonMembers json(value, where);
-  if (auto only = json.Only(
-          {"source", "source_sha256", "offset", "tim", "dependencies", "note"});
+  if (auto only =
+          json.Only({"source", "source_sha256", "offset", "tim", "texture_page",
+                     "preview_palette", "dependencies", "note"});
       !only) {
     return std::unexpected(only.error());
   }
@@ -360,6 +392,16 @@ std::expected<ImageProvenance, std::string> ProvenanceOf(
     auto origin = TimOriginOf(*tim, json.Where("tim"));
     if (!origin) return std::unexpected(origin.error());
     provenance.tim = *origin;
+  }
+  if (const Json* page = json.Find("texture_page")) {
+    auto placement = TexturePageOf(*page, json.Where("texture_page"));
+    if (!placement) return std::unexpected(placement.error());
+    provenance.texture_page = *placement;
+  }
+  if (const Json* preview = json.Find("preview_palette")) {
+    auto palette = PreviewPaletteOf(*preview, json.Where("preview_palette"));
+    if (!palette) return std::unexpected(palette.error());
+    provenance.preview_palette = std::move(*palette);
   }
   if (const Json* dependencies = json.Find("dependencies")) {
     if (!dependencies->is_array()) {
@@ -379,7 +421,7 @@ std::expected<ImageProvenance, std::string> ProvenanceOf(
     if (!note) return std::unexpected(note.error());
     provenance.note = std::move(*note);
   }
-  if (auto valid = CheckProvenance(provenance); !valid) {
+  if (auto valid = ValidateImageProvenance(provenance); !valid) {
     return std::unexpected(std::format("{}: {}", where, valid.error()));
   }
   return provenance;
@@ -738,6 +780,36 @@ std::string_view SemiTransparencyName(SemiTransparency value) noexcept {
   const auto index = static_cast<std::size_t>(value);
   return index < kSemiTransparencyNames.size() ? kSemiTransparencyNames[index]
                                                : "unknown";
+}
+
+std::expected<void, std::string> ValidateImageProvenance(
+    const ImageProvenance& provenance) {
+  if (provenance.source.empty() ||
+      !IsLowercaseSha256(provenance.source_sha256)) {
+    return std::unexpected(
+        "provenance needs a source path and its lowercase SHA-256");
+  }
+  for (const ImageDependency& dependency : provenance.dependencies) {
+    if (dependency.source.empty() || dependency.role.empty() ||
+        !IsLowercaseSha256(dependency.source_sha256)) {
+      return std::unexpected(std::format(
+          "dependency '{}' needs a source path, a role and its lowercase "
+          "SHA-256",
+          dependency.source));
+    }
+  }
+  if (provenance.texture_page) {
+    if (auto valid = CheckTexturePage(*provenance.texture_page); !valid) {
+      return valid;
+    }
+  }
+  if (provenance.preview_palette &&
+      !IsContentId(provenance.preview_palette->image)) {
+    return std::unexpected(
+        std::format("preview palette image '{}' is not an image id",
+                    provenance.preview_palette->image));
+  }
+  return {};
 }
 
 std::expected<ImageDocument, std::string> DecodeImageFiles(

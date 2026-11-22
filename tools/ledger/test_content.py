@@ -151,6 +151,17 @@ class ContentLedgerTests(unittest.TestCase):
                            'ConverterVersion{.name = "gim-png", .version = 1},\n')
         self.assertEqual(self.fixture.rules(), ["converter-untracked"])
 
+    def test_an_alias_lists_its_targets_files(self) -> None:
+        alias = {"id": "image.bg.002op01a", "source": "BG/002OP01A.TIM", "source_sha256": "0" * 64,
+                 "converter": "tim-png", "files": [], "dependencies": [], "alias_of": OUTPUT["id"]}
+        self.fixture.data([*FILES, ("BG/002OP01A.TIM", 33312, "raw")], [OUTPUT, alias])
+        content.sync(self.fixture.root)
+        row = self.fixture.rows()["BG/002OP01A.TIM"]
+        self.assertEqual((row["status"], row["output"], row["notes"]),
+                         ("converted", "textures/bg/001OP01A.png;textures/bg/001OP01A.image.json",
+                          "image.bg.002op01a (alias of image.bg.001op01a)"))
+        self.assertEqual(self.fixture.rules(), [])
+
     def test_sync_refuses_a_file_no_rule_covers(self) -> None:
         self.fixture.data([*FILES, ("NEW/THING.XYZ", 4, "raw")], [OUTPUT])
         with self.assertRaises(SystemExit):

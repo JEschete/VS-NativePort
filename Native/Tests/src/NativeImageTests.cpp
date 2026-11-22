@@ -208,6 +208,8 @@ Content::ImageDocument DocumentOf(const Bytes& bytes, ImageDepth depth) {
                          .source_sha256 = VS::Core::Sha256Hex(bytes),
                          .offset = 0,
                          .tim = Extract::OriginOf(tim),
+                         .texture_page = std::nullopt,
+                         .preview_palette = std::nullopt,
                          .dependencies = {},
                          .note = {}}};
 }

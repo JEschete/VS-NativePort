@@ -52,6 +52,11 @@ void StoreLiveEffectResourceContext(const EffectResourceContext& context);
 // it is missing or invalid.
 [[nodiscard]] std::expected<std::vector<std::uint16_t>, std::string>
 LoadLiveEffectPalette(DiscRead source);
+// The converted texture page of the FBT `source` reads (the live host's
+// LoadTexturePage): its 64x256 packed words from the open extracted-data
+// store, or why it is missing or invalid.
+[[nodiscard]] std::expected<std::vector<std::uint16_t>, std::string>
+LoadLiveEffectTexture(DiscRead source);
 
 // func_800D7814 (6F014.c:446).
 void LiveInitializeEffectResources();

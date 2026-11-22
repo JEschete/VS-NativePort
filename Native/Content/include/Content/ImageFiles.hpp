@@ -61,11 +61,53 @@ struct ImageDependency {
   bool operator==(const ImageDependency&) const = default;
 };
 
+// VRAM holds 32 texture pages of 64 x 256 halfwords, 16 across each half of
+// the 1024 x 512 frame buffer.
+inline constexpr std::uint32_t kTexturePageCount = 32;
+inline constexpr std::uint32_t kTexturePagesPerRow = 16;
+inline constexpr std::uint16_t kTexturePageWidth = 64;  // halfwords
+inline constexpr std::uint16_t kTexturePageHeight = 256;
+
+// The VRAM rectangle of texture page `page` (below kTexturePageCount).
+[[nodiscard]] constexpr TimRect TexturePageRect(std::uint32_t page) noexcept {
+  return TimRect{.x = static_cast<std::int16_t>((page % kTexturePagesPerRow) *
+                                                kTexturePageWidth),
+                 .y = static_cast<std::int16_t>((page / kTexturePagesPerRow) *
+                                                kTexturePageHeight),
+                 .width = kTexturePageWidth,
+                 .height = kTexturePageHeight};
+}
+
+// Where an effect loads a whole-page texture (EFFECT\*.FBT, #214): the
+// effect, the page's slot among its pages, the VRAM texture page and that
+// page's rectangle (TexturePageRect).
+struct TexturePagePlacement {
+  std::uint32_t effect = 0;
+  std::uint32_t slot = 0;
+  std::uint32_t page = 0;
+  TimRect vram;
+
+  bool operator==(const TexturePagePlacement&) const = default;
+};
+
+// The palette row an image's PNG shows only for previewing: the image that
+// owns the row, the row and its first entry. The runtime draws with the
+// palette image, so editing it, not this copy, changes the game.
+struct PreviewPalette {
+  std::string image;  // content id
+  std::uint32_t row = 0;
+  std::uint32_t entry = 0;
+
+  bool operator==(const PreviewPalette&) const = default;
+};
+
 struct ImageProvenance {
   std::string source;  // the disc path, '/'-separated
   std::string source_sha256;
   std::uint64_t offset = 0;  // where the image's source bytes start
   std::optional<TimOrigin> tim;
+  std::optional<TexturePagePlacement> texture_page;
+  std::optional<PreviewPalette> preview_palette;
   std::vector<ImageDependency> dependencies;
   std::string note;
 
@@ -102,6 +144,11 @@ using ImageFileReader = std::function<ImageFileBytes(const std::string&)>;
 // DecodeImageFiles over the files in `directory`.
 [[nodiscard]] std::expected<ImageDocument, std::string> LoadImageFiles(
     const std::filesystem::path& directory, std::string_view stem);
+// Whether provenance names its source and hash, each dependency's source,
+// role and hash, a texture page within VRAM at its own rectangle, and a
+// preview palette by a valid image id.
+[[nodiscard]] std::expected<void, std::string> ValidateImageProvenance(
+    const ImageProvenance& provenance);
 [[nodiscard]] std::string_view ZeroWordName(ZeroWord value) noexcept;
 [[nodiscard]] std::string_view SemiTransparencyName(
     SemiTransparency value) noexcept;

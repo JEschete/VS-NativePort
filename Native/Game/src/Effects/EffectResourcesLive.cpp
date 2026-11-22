@@ -12,6 +12,7 @@
 #include <optional>
 #include <span>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -40,14 +41,10 @@
 #include "Effects/PurgeTables.hpp"
 #include "Effects/Runtime.hpp"
 #include "Effects/TextureBindings.hpp"
-#include "Legacy/Psx.hpp"
 #include "Render/PageSpace.hpp"
 #include "Render/TexturePagesLive.hpp"
 
 using VS::Core::Gte::VECTOR;
-
-using VS::Legacy::LoadImage;
-using VS::Legacy::RECT;
 
 // decomp: D_800F5630 (D_800F5630@BATTLE/BATTLE.PRG)
 int VS::Effects::textureLoadIndex;
@@ -98,6 +95,7 @@ constexpr unsigned int kPluginUpdateMessage = 2;
 std::uint64_t refusedCalls = 0;
 std::uint64_t walkReports = 0;
 std::uint64_t paletteErrors = 0;
+std::uint64_t textureErrors = 0;
 
 // True on the 1st, 2nd, 4th, 8th... occurrence, to keep repeated
 // diagnostics readable.
@@ -373,12 +371,16 @@ void StoreTextures(LiveTextureLoadList& list, const TextureLoadList& textures) {
   file.size = read.size;
   return file;
 }
-}  // namespace
 
-// The converted palette (ASSET_PIPELINE.md §6.4) of the FBC `source` reads,
-// found by its sector until assets have stable ids (#47).
-std::expected<std::vector<std::uint16_t>, std::string> LoadLiveEffectPalette(
-    DiscRead source) {
+struct LiveConvertedImage {
+  std::string path;  // the extracted file the read names
+  Content::ImageDocument document;
+};
+
+// The converted image (ASSET_PIPELINE.md §6.4) of the `extension` file
+// `source` reads, found by its sector until assets have stable ids (#47).
+std::expected<LiveConvertedImage, std::string> LoadLiveConvertedImage(
+    DiscRead source, std::string_view extension, std::string_view converter) {
   const Content::DataStore* const store = Content::DataStore::Get();
   if (store == nullptr) {
     return std::unexpected("no extracted-data store is open");
@@ -390,18 +392,45 @@ std::expected<std::vector<std::uint16_t>, std::string> LoadLiveEffectPalette(
   auto converted = Content::FindConvertedSource(
       *store, {.lba = static_cast<std::uint32_t>(source.lba),
                .rounded_size = static_cast<std::uint64_t>(source.size),
-               .extension = ".FBC",
-               .converter = "fbc-palette-png"});
+               .extension = extension,
+               .converter = converter});
   if (!converted) return std::unexpected(converted.error());
   auto document = Content::LoadConvertedImage(*store, *converted);
   if (!document) return std::unexpected(document.error());
-  if (document->image.depth != Content::ImageDepth::kDirect16 ||
-      document->image.width != static_cast<std::uint32_t>(kEffectClutWidth)) {
+  return LiveConvertedImage{.path = converted->entry->path,
+                            .document = std::move(*document)};
+}
+}  // namespace
+
+// The converted palette of the FBC `source` reads.
+std::expected<std::vector<std::uint16_t>, std::string> LoadLiveEffectPalette(
+    DiscRead source) {
+  auto loaded = LoadLiveConvertedImage(source, ".FBC", "fbc-palette-png");
+  if (!loaded) return std::unexpected(loaded.error());
+  Content::NativeImage& image = loaded->document.image;
+  if (image.depth != Content::ImageDepth::kDirect16 ||
+      image.width != static_cast<std::uint32_t>(kEffectClutWidth)) {
     return std::unexpected(std::format("{} is not a {}-entry effect palette",
-                                       converted->entry->path,
-                                       kEffectClutWidth));
+                                       loaded->path, kEffectClutWidth));
   }
-  return std::move(document->image.texels);
+  return std::move(image.texels);
+}
+
+// The converted texture page of the FBT `source` reads.
+std::expected<std::vector<std::uint16_t>, std::string> LoadLiveEffectTexture(
+    DiscRead source) {
+  auto loaded = LoadLiveConvertedImage(source, ".FBT", "fbt-texture-png");
+  if (!loaded) return std::unexpected(loaded.error());
+  const Content::NativeImage& image = loaded->document.image;
+  if (!Content::IsIndexed(image.depth) ||
+      image.width != static_cast<std::uint32_t>(kTexturePageWidth) *
+                         Content::PixelsPerHalfword(image.depth) ||
+      image.height != static_cast<std::uint32_t>(kTexturePageHeight)) {
+    return std::unexpected(
+        std::format("{} is not an indexed {}x{}-word effect texture page",
+                    loaded->path, kTexturePageWidth, kTexturePageHeight));
+  }
+  return Content::PackedWords(image);
 }
 
 namespace {
@@ -477,13 +506,21 @@ class LiveResourceHost final : public EffectResourceHost {
         Render::RetireLiveTexturePageRange(page, 1, kEffectOwnerTag));
   }
 
-  void UploadImage(const VramRect& area, EffectBufferId pixels) override {
-    RECT rectangle{};
-    rectangle.x = area.x;
-    rectangle.y = area.y;
-    rectangle.w = area.w;
-    rectangle.h = area.h;
-    static_cast<void>(LoadImage(&rectangle, PointerOf<std::uint32_t>(pixels)));
+  std::optional<std::vector<std::uint16_t>> LoadTexturePage(
+      DiscRead source) override {
+    auto page = LoadLiveEffectTexture(source);
+    if (page) return std::move(*page);
+    if (ShouldReport(textureErrors)) {
+      VS::Core::LogError("effects", "effect texture at LBA {}: {} ({} errors)",
+                         source.lba, page.error(), textureErrors);
+    }
+    return std::nullopt;
+  }
+
+  void UploadImage(const VramRect& area,
+                   std::span<const std::uint16_t> words) override {
+    Render::GamePages().Upload(
+        {.x = area.x, .y = area.y, .w = area.w, .h = area.h}, words.data());
   }
 
   std::optional<std::vector<std::uint16_t>> LoadPalette(
@@ -602,6 +639,10 @@ void PublishRenderers(const EffectRendererTable& renderers) {
       return "a CLUT palette that is empty or ends in a partial 256-entry row";
     case ResourceRefusal::kPaletteSlot:
       return "a CLUT palette with more rows than its slot reaches by row 244";
+    case ResourceRefusal::kTextureMissing:
+      return "a texture page without a loadable converted image";
+    case ResourceRefusal::kTextureSize:
+      return "a texture page image that does not fill one 64x256-word page";
     case ResourceRefusal::kNone:
       break;
   }

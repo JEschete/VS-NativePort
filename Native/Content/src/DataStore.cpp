@@ -14,6 +14,7 @@
 #include <string>
 #include <string_view>
 #include <system_error>
+#include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -55,18 +56,31 @@ struct ConvertedType {
 constexpr std::array kConvertedTypes{
     ConvertedType{.extension = ".TIM", .converter = "tim-png"},
     ConvertedType{.extension = ".FBC", .converter = "fbc-palette-png"},
+    ConvertedType{.extension = ".FBT", .converter = "fbt-texture-png"},
 };
 
 // The fix each stale or missing output error names.
 constexpr std::string_view kRerun = " (run VS.Extract extract <disc> <dir>)";
 
+// The SHA-256 of each extracted file one check has read: many outputs share
+// a dependency such as EFFECT/EFFPURGE.BIN.
+using SourceHashes = std::unordered_map<std::string, std::string>;
+
 // Whether `entry`'s bytes still hash to `sha256`.
 std::expected<bool, std::string> HashMatches(const DataStore& store,
+                                             SourceHashes& hashes,
                                              const DataStore::Entry& entry,
                                              std::string_view sha256) {
-  const auto bytes = store.ReadAll(entry);
-  if (!bytes) return std::unexpected(bytes.error());
-  return Core::Sha256Hex(std::as_bytes(std::span(*bytes))) == sha256;
+  auto found = hashes.find(entry.path);
+  if (found == hashes.end()) {
+    const auto bytes = store.ReadAll(entry);
+    if (!bytes) return std::unexpected(bytes.error());
+    found = hashes
+                .emplace(entry.path,
+                         Core::Sha256Hex(std::as_bytes(std::span(*bytes))))
+                .first;
+  }
+  return found->second == sha256;
 }
 
 // Whether every file `conversion` lists exists under the data root.
@@ -89,67 +103,52 @@ std::expected<void, std::string> RequireOutputFiles(
   return {};
 }
 
-// Whether the one output `type`'s converter made from `entry` is current with
-// its source and dependencies and has every file it lists.
+// Whether the output `type`'s converter made from `entry` is current with its
+// source and dependencies, and the output holding its files has every file.
 std::expected<void, std::string> RequireConvertedSource(
     const DataStore& store, const ConversionManifest& manifest,
-    const DataStore::Entry& entry, const ConvertedType& type) {
-  if (entry.form != "raw") {
-    return std::unexpected(
-        std::format("{} source is not raw: {}", type.converter, entry.path));
-  }
-  const ConversionOutput* conversion = nullptr;
-  for (const ConversionOutput& output : manifest.outputs) {
-    if (output.converter != type.converter || output.source != entry.path) {
-      continue;
-    }
-    if (conversion != nullptr) {
-      return std::unexpected(std::format("multiple {} outputs name {}",
-                                         type.converter, entry.path));
-    }
-    conversion = &output;
-  }
-  if (conversion == nullptr) {
-    return std::unexpected(std::format("no {} output for {}{}", type.converter,
-                                       entry.path, kRerun));
-  }
-  const auto current = HashMatches(store, entry, conversion->source_sha256);
+    SourceHashes& hashes, const DataStore::Entry& entry,
+    const ConversionOutput& conversion) {
+  const auto current =
+      HashMatches(store, hashes, entry, conversion.source_sha256);
   if (!current) return std::unexpected(current.error());
   if (!*current) {
     return std::unexpected(std::format("stale {} source hash for {}{}",
-                                       type.converter, entry.path, kRerun));
+                                       conversion.converter, entry.path,
+                                       kRerun));
   }
-  for (const SourceDependency& dependency : conversion->dependencies) {
+  for (const SourceDependency& dependency : conversion.dependencies) {
     const DataStore::Entry* dependency_entry = store.Find(dependency.source);
     if (dependency_entry == nullptr) {
       return std::unexpected(std::format("missing {} dependency {} for {}",
-                                         type.converter, dependency.source,
-                                         entry.path));
+                                         conversion.converter,
+                                         dependency.source, entry.path));
     }
     const auto matches =
-        HashMatches(store, *dependency_entry, dependency.source_sha256);
+        HashMatches(store, hashes, *dependency_entry, dependency.source_sha256);
     if (!matches) return std::unexpected(matches.error());
     if (!*matches) {
-      return std::unexpected(std::format("stale {} dependency {} for {}{}",
-                                         type.converter, dependency.source,
-                                         entry.path, kRerun));
+      return std::unexpected(
+          std::format("stale {} dependency {} for {}{}", conversion.converter,
+                      dependency.source, entry.path, kRerun));
     }
   }
-  return RequireOutputFiles(store, *conversion);
+  const ConversionOutput* const files = manifest.FilesOf(conversion);
+  if (files == nullptr) {
+    return std::unexpected(std::format("{}: alias target {} is not registered",
+                                       entry.path, conversion.alias_of));
+  }
+  return RequireOutputFiles(store, *files);
 }
 
-// Whether every raw file of `type` has its converted output, and every output
-// of its converter names such a file.
-std::expected<void, std::string> RequireConvertedType(
+using OutputMap = std::unordered_map<std::string_view, const ConversionOutput*>;
+
+// Each output of `type`'s converter by source path, checking that it names a
+// raw file of `type` and that no source has two outputs.
+std::expected<OutputMap, std::string> OutputsBySource(
     const DataStore& store, const ConversionManifest& manifest,
     const ConvertedType& type) {
-  for (const DataStore::Entry& entry : store.Entries()) {
-    if (!entry.path.ends_with(type.extension)) continue;
-    if (auto required = RequireConvertedSource(store, manifest, entry, type);
-        !required) {
-      return required;
-    }
-  }
+  OutputMap outputs;
   for (const ConversionOutput& output : manifest.outputs) {
     if (output.converter != type.converter) continue;
     const DataStore::Entry* source = store.Find(output.source);
@@ -158,6 +157,37 @@ std::expected<void, std::string> RequireConvertedType(
       return std::unexpected(
           std::format("{} output names a missing or non-{} source {}",
                       type.converter, type.extension, output.source));
+    }
+    if (!outputs.emplace(output.source, &output).second) {
+      return std::unexpected(std::format("multiple {} outputs name {}",
+                                         type.converter, output.source));
+    }
+  }
+  return outputs;
+}
+
+// Whether every raw file of `type` has its current converted output, and
+// every output of its converter names such a file.
+std::expected<void, std::string> RequireConvertedType(
+    const DataStore& store, const ConversionManifest& manifest,
+    SourceHashes& hashes, const ConvertedType& type) {
+  const auto outputs = OutputsBySource(store, manifest, type);
+  if (!outputs) return std::unexpected(outputs.error());
+  for (const DataStore::Entry& entry : store.Entries()) {
+    if (!entry.path.ends_with(type.extension)) continue;
+    if (entry.form != "raw") {
+      return std::unexpected(
+          std::format("{} source is not raw: {}", type.converter, entry.path));
+    }
+    const auto found = outputs->find(entry.path);
+    if (found == outputs->end()) {
+      return std::unexpected(std::format("no {} output for {}{}",
+                                         type.converter, entry.path, kRerun));
+    }
+    if (auto required = RequireConvertedSource(store, manifest, hashes, entry,
+                                               *found->second);
+        !required) {
+      return required;
     }
   }
   return {};
@@ -292,9 +322,10 @@ std::expected<void, std::string> DataStore::RequireConversions() const {
       !required) {
     return required;
   }
+  SourceHashes hashes;
   for (const ConvertedType& type : kConvertedTypes) {
     if (auto required =
-            RequireConvertedType(*this, *m_conversion_manifest_, type);
+            RequireConvertedType(*this, *m_conversion_manifest_, hashes, type);
         !required) {
       return required;
     }

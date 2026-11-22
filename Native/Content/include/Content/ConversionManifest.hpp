@@ -17,13 +17,17 @@
 // made from which disc file. Every output records its stable id, its source
 // path and SHA-256, the converter that made it, the files it wrote under the
 // data root and every other input it consumed (dependencies, with hashes), so
-// a changed source or dependency, or an older converter, rebuilds it. The
-// runtime refuses a manifest without the converter versions it reads. Not
-// files.tsv (DataStore::ManifestName), which lists the raw disc files.
+// a changed source or dependency, or an older converter, rebuilds it. An
+// alias output (schema version 2) names a source whose bytes another output
+// of its converter already holds: it lists no files and reads its target's.
+// The runtime refuses a manifest without the converter versions it reads.
+// Not files.tsv (DataStore::ManifestName), which lists the raw disc files.
 namespace VS::Content {
 
 inline constexpr std::string_view kConversionManifestName = "manifest.json";
-inline constexpr std::uint32_t kConversionManifestSchemaVersion = 1;
+inline constexpr std::uint32_t kConversionManifestSchemaVersion = 2;
+// Version 1 manifests have no aliases and still read.
+inline constexpr std::uint32_t kOldestConversionManifestSchemaVersion = 1;
 // Changes when the extractor's output contract does. Fixed text (no date or
 // revision), so a second extraction writes the same bytes.
 inline constexpr std::string_view kExtractorVersion = "0.1.0";
@@ -38,6 +42,7 @@ struct ConverterVersion {
 inline constexpr std::array kRequiredConverters{
     ConverterVersion{.name = "tim-png", .version = 1},
     ConverterVersion{.name = "fbc-palette-png", .version = 1},
+    ConverterVersion{.name = "fbt-texture-png", .version = 1},
 };
 
 struct SourceDependency {
@@ -56,6 +61,8 @@ struct ConversionOutput {
   std::vector<SourceDependency> dependencies;  // sorted by source
   bool unreferenced = false;  // valid content nothing on the disc uses
   std::string note;
+  // The output whose files hold this source's bytes; then `files` is empty.
+  std::string alias_of;
 
   bool operator==(const ConversionOutput&) const = default;
 };
@@ -67,6 +74,10 @@ struct ConversionManifest {
   std::vector<ConversionOutput> outputs;  // sorted by id
 
   [[nodiscard]] const ConversionOutput* Find(std::string_view id) const;
+  // The output whose files hold `output`'s content: its alias target, or
+  // itself.
+  [[nodiscard]] const ConversionOutput* FilesOf(
+      const ConversionOutput& output) const;
   bool operator==(const ConversionManifest&) const = default;
 };
 
@@ -78,8 +89,9 @@ struct ConversionManifest {
 [[nodiscard]] bool IsDataRelativePath(std::string_view path) noexcept;
 
 // Whether the manifest is complete and consistent: known converters, unique
-// valid ids, lowercase SHA-256s, sorted unique dependencies and file paths
-// that stay under the data root.
+// valid ids, lowercase SHA-256s, sorted unique dependencies, file paths that
+// stay under the data root, and aliases that list no files and name an
+// output of their converter with files and the same source hash.
 [[nodiscard]] std::expected<void, std::string> ValidateConversionManifest(
     const ConversionManifest& manifest);
 // Parses and validates a manifest; unknown members are errors.
