@@ -82,6 +82,8 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\TimFile.cpp" />
+    <ClCompile Include="src\WepFile.cpp" />
+    <ClCompile Include="src\WepModelFiles.cpp" />
     <ClCompile Include="src\WorkshopRecipes.cpp" />
     <ClCompile Include="Legacy\LibDs.cpp">
       <AdditionalIncludeDirectories>$(VSLegacyIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -123,6 +125,8 @@
     <ClInclude Include="include\Content\SystemResources.hpp" />
     <ClInclude Include="include\Content\SystemResourcesLive.hpp" />
     <ClInclude Include="include\Content\TimFile.hpp" />
+    <ClInclude Include="include\Content\WepFile.hpp" />
+    <ClInclude Include="include\Content\WepModelFiles.hpp" />
     <ClInclude Include="include\Content\WorkshopRecipes.hpp" />
     <ClInclude Include="Legacy\LibDs.hpp" />
   </ItemGroup>

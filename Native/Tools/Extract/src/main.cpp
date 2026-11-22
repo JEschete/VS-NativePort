@@ -22,6 +22,7 @@
 #include "Core/Log.hpp"
 #include "Extract/ImageConversion.hpp"
 #include "Extract/ShpModelConversion.hpp"
+#include "Extract/WepModelConversion.hpp"
 #include "Extract/WorkshopRecipeConversion.hpp"
 #include "Platform/App.hpp"
 #include "Platform/Paths.hpp"
@@ -75,7 +76,8 @@ int Usage() {
       "      tables converts again only what changed (--force: everything, "
       "replacing edited tables).\n"
       "      extract also converts the character models (OBJ/*.SHP) to glTF "
-      "under models/characters/;\n"
+      "under models/characters/ and the\n"
+      "      weapon models (OBJ/*.WEP) to glTF under models/weapons/;\n"
       "      models converts again only what changed (--force: everything, "
       "replacing edited models).");
   return 2;
@@ -401,18 +403,28 @@ int ConvertTables(const fs::path& root, bool force) {
   return 0;
 }
 
-// models/characters/ glTF models and their manifest.json outputs from the
-// disc files already under root.
+// models/characters/ and models/weapons/ glTF models and their manifest.json
+// outputs from the disc files already under root.
 int ConvertModels(const fs::path& root, bool force) {
-  const auto report = Extract::ConvertDiscModels(root, force);
-  if (!report) {
-    VS::Core::LogError("extract", "{}", report.error());
+  const auto characters = Extract::ConvertDiscModels(root, force);
+  if (!characters) {
+    VS::Core::LogError("extract", "{}", characters.error());
     return 1;
   }
   VS::Core::LogInfo("extract",
                     "models: {} converted, {} unchanged, {} stale files "
                     "removed",
-                    report->converted, report->unchanged, report->removed);
+                    characters->converted, characters->unchanged,
+                    characters->removed);
+  const auto weapons = Extract::ConvertDiscWeapons(root, force);
+  if (!weapons) {
+    VS::Core::LogError("extract", "{}", weapons.error());
+    return 1;
+  }
+  VS::Core::LogInfo("extract",
+                    "weapons: {} converted, {} unchanged, {} stale files "
+                    "removed",
+                    weapons->converted, weapons->unchanged, weapons->removed);
   return 0;
 }
 

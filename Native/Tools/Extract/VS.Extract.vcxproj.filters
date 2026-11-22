@@ -39,6 +39,9 @@
     <ClCompile Include="src\TimWriter.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\WepModelConversion.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\WorkshopRecipeConversion.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -64,6 +67,9 @@
       <Filter>include\Extract</Filter>
     </ClInclude>
     <ClInclude Include="include\Extract\TimWriter.hpp">
+      <Filter>include\Extract</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Extract\WepModelConversion.hpp">
       <Filter>include\Extract</Filter>
     </ClInclude>
     <ClInclude Include="include\Extract\WorkshopRecipeConversion.hpp">

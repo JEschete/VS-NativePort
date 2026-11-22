@@ -1,35 +1,26 @@
-#include <algorithm>
-#include <chrono>
 #include <cstddef>
 #include <cstdint>
-#include <cstdio>
 #include <cstring>
-#include <expected>
 #include <filesystem>
 #include <format>
-#include <fstream>
 #include <functional>
 #include <map>
 #include <optional>
 #include <span>
 #include <string>
 #include <string_view>
-#include <system_error>
 #include <utility>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
 
 #include "Content/ConvertedModels.hpp"
-#include "Content/DataStore.hpp"
 #include "Content/ImageFiles.hpp"
 #include "Content/JsonText.hpp"
 #include "Content/ShpFile.hpp"
 #include "Content/ShpModelFiles.hpp"
-#include "Extract/ConverterBatch.hpp"
-#include "Extract/ImageConversion.hpp"
 #include "Extract/ShpModelConversion.hpp"
-#include "Extract/WorkshopRecipeConversion.hpp"
+#include "TestSupport/ModelFixtures.hpp"
 
 namespace {
 
@@ -37,6 +28,13 @@ namespace fs = std::filesystem;
 namespace content = VS::Content;
 namespace extract = VS::Extract;
 using Bytes = std::vector<std::byte>;
+using VS::test_support::ErrorOf;
+using VS::test_support::ExtractedModels;
+using VS::test_support::LoadModel;
+using VS::test_support::ModelRoot;
+using VS::test_support::ParseGltf;
+using VS::test_support::Polygon;
+using VS::test_support::ReadModel;
 
 constexpr std::uint8_t kRootParent = 0x2F;
 constexpr std::int32_t kSampleLender = 0x4F;
@@ -57,26 +55,6 @@ std::uint32_t Read32(std::span<const std::byte> bytes, std::size_t at) {
 // A file offset from a model section offset word.
 std::size_t SectionAt(std::span<const std::byte> bytes, std::size_t word_at) {
   return content::kShpModelOffset + Read32(bytes, word_at);
-}
-
-struct PolygonSpec {
-  std::uint8_t corners = 3;
-  std::uint8_t flags = 0;
-  std::uint8_t extra = 0;
-  std::uint16_t first = 0;  // the first corner's vertex
-};
-
-content::ShpPolygon Polygon(const PolygonSpec& spec) {
-  content::ShpPolygon polygon;
-  polygon.corners = spec.corners;
-  polygon.flags = spec.flags;
-  polygon.extra = spec.extra;
-  for (std::uint16_t corner = 0; corner < spec.corners; ++corner) {
-    polygon.vertices.at(corner) =
-        static_cast<std::uint16_t>(spec.first + corner);
-    polygon.uvs.at(corner) = static_cast<std::uint16_t>(0x0101U * (corner + 1));
-  }
-  return polygon;
 }
 
 // A model of every part with fields set to values the encoder must keep.
@@ -307,22 +285,6 @@ TEST_CASE("SHP encoding refuses what the file cannot hold",
   }
 }
 
-std::optional<fs::path> ExtractedModels() {
-  for (auto directory = fs::current_path();
-       directory.has_parent_path() && directory != directory.parent_path();
-       directory = directory.parent_path()) {
-    const fs::path models = directory / "Native" / "data" / "disc" / "OBJ";
-    if (fs::exists(models)) return models;
-  }
-  return std::nullopt;
-}
-
-Bytes ReadModel(const fs::path& path) {
-  auto bytes = VS::Extract::ReadFileBytes(path);
-  REQUIRE(bytes.has_value());
-  return *std::move(bytes);
-}
-
 using Tallies = std::map<std::string, std::size_t, std::less<>>;
 
 // The layout a borrowed texture's lender sets, tallying the texture's kind.
@@ -374,36 +336,14 @@ TEST_CASE("Extracted SHP files decode and rebuild their exact bytes",
 }
 
 constexpr std::size_t kExtractedModelCount = 202;
-constexpr std::uint32_t kFirstTestLba = 100;  // ModelRoot's first file
-constexpr std::uint64_t kSectorBytes = content::DataStore::kDataSectorBytes;
 constexpr std::uint64_t kEditedRadius = 333;
 constexpr std::uint64_t kPastHalfword = 0x10000;
-
-std::string ErrorOf(const auto& result) {
-  return result ? std::string{} : result.error();
-}
 
 extract::ConvertedModel Converted(const extract::ShpConversion& conversion) {
   auto converted = extract::ConvertShpModel(conversion);
   INFO(ErrorOf(converted));
   REQUIRE(converted.has_value());
   return *std::move(converted);
-}
-
-content::ImageFileReader ReaderOf(
-    const std::vector<content::ImageFile>& files) {
-  return [&files](const std::string& name) -> content::ImageFileBytes {
-    const auto file = std::ranges::find(files, name, &content::ImageFile::name);
-    if (file == files.end()) return std::nullopt;
-    return file->bytes;
-  };
-}
-
-content::JsonDocument ParseGltf(std::span<const std::byte> bytes) {
-  auto gltf = content::ParseJsonText(bytes, "model.gltf");
-  INFO(ErrorOf(gltf));
-  REQUIRE(gltf.has_value());
-  return *std::move(gltf);
 }
 
 // The manifest entry of OBJ\4F.SHP converted with its own texture.
@@ -423,7 +363,7 @@ void CheckOwnTextureOutput(const content::ConversionOutput& output) {
 void CheckOwnTextureFiles(const extract::ConvertedModel& model,
                           const content::ShpFile& shp, const Bytes& bytes) {
   const auto document =
-      content::DecodeShpModelFiles("4F", ReaderOf(model.files));
+      content::DecodeShpModelFiles("4F", content::FileListReader(model.files));
   INFO(ErrorOf(document));
   REQUIRE(document.has_value());
   CHECK(document->shp == shp);
@@ -468,7 +408,7 @@ void CheckBorrowerOutput(const extract::ConvertedModel& model,
 void CheckBorrowerDocument(const extract::ConvertedModel& model,
                            const content::ShpFile& lender) {
   const auto document =
-      content::DecodeShpModelFiles("50", ReaderOf(model.files));
+      content::DecodeShpModelFiles("50", content::FileListReader(model.files));
   INFO(ErrorOf(document));
   REQUIRE(document.has_value());
   CHECK(document->shp == BorrowingShp());
@@ -497,102 +437,8 @@ TEST_CASE("A converted model that borrows a texture depends on its lender",
         std::string::npos);
 }
 
-// A temporary data root whose files.tsv lists `sources` as raw files from
-// sector kFirstTestLba on.
-class ModelRoot {
- public:
-  explicit ModelRoot(const std::vector<extract::SourceFile>& sources)
-      : root_(fs::temp_directory_path() /
-              std::format(
-                  "vs-shp-models-{}-{}",
-                  std::chrono::steady_clock::now().time_since_epoch().count(),
-                  sequence++)) {
-    fs::create_directories(root_ / "disc");
-    std::ofstream manifest(root_ / content::DataStore::ManifestName);
-    manifest << "lba\tsize\tform\tpath\n";
-    std::uint32_t lba = kFirstTestLba;
-    for (const extract::SourceFile& source : sources) {
-      const fs::path file = root_ / "disc" / fs::path(source.path);
-      fs::create_directories(file.parent_path());
-      std::ofstream output(file, std::ios::binary | std::ios::trunc);
-      output.write(reinterpret_cast<const char*>(source.bytes.data()),
-                   static_cast<std::streamsize>(source.bytes.size()));
-      REQUIRE(output.good());
-      manifest << lba << '\t' << source.bytes.size() << "\traw\t" << source.path
-               << '\n';
-      const std::uint64_t sectors =
-          (source.bytes.size() + kSectorBytes - 1) / kSectorBytes;
-      reads_.push_back({.lba = lba, .rounded_size = sectors * kSectorBytes});
-      lba += static_cast<std::uint32_t>(sectors);
-    }
-    REQUIRE(manifest.good());
-  }
-  // NOLINTNEXTLINE(bugprone-exception-escape): errors use the error_code API.
-  ~ModelRoot() {
-    std::error_code error;
-    fs::remove_all(root_, error);
-    if (error) {
-      std::fprintf(stderr, "SHP model fixture left files: %s\n",
-                   error.message().c_str());
-    }
-  }
-  ModelRoot(const ModelRoot&) = delete;
-  ModelRoot& operator=(const ModelRoot&) = delete;
-  ModelRoot(ModelRoot&&) = delete;
-  ModelRoot& operator=(ModelRoot&&) = delete;
-
-  [[nodiscard]] const fs::path& Root() const { return root_; }
-  // The read of the `index`th source.
-  [[nodiscard]] const content::ConvertedModelRead& Read(
-      std::size_t index) const {
-    return reads_.at(index);
-  }
-
-  // Runs every required converter; the models' report.
-  [[nodiscard]] extract::ModelConversionReport Convert() const {
-    const auto images = extract::ConvertDiscImages(root_, false);
-    INFO(ErrorOf(images));
-    REQUIRE(images.has_value());
-    const auto tables = extract::ConvertDiscTables(root_, false);
-    INFO(ErrorOf(tables));
-    REQUIRE(tables.has_value());
-    auto models = extract::ConvertDiscModels(root_, false);
-    INFO(ErrorOf(models));
-    REQUIRE(models.has_value());
-    return *std::move(models);
-  }
-
-  // Applies `edit` to `stem`'s converted glTF file.
-  void EditGltf(std::string_view stem,
-                const std::function<void(content::JsonDocument&)>& edit) const {
-    const fs::path path = root_ / "models" / "characters" /
-                          std::format("{}{}", stem, content::kGltfSuffix);
-    content::JsonDocument gltf = ParseGltf(ReadModel(path));
-    edit(gltf);
-    std::ofstream output(path, std::ios::binary | std::ios::trunc);
-    output << content::FormatJsonText(gltf) << '\n';
-    REQUIRE(output.good());
-  }
-
- private:
-  static inline unsigned sequence = 0;
-  fs::path root_;
-  std::vector<content::ConvertedModelRead> reads_;
-};
-
-// The model `read` names, loaded from a store opened over `root`.
-std::expected<Bytes, std::string> LoadModel(
-    const fs::path& root, const content::ConvertedModelRead& read) {
-  content::DataStore::ScopedOverride restore;
-  if (auto opened = content::DataStore::Open(root); !opened) {
-    return std::unexpected(opened.error());
-  }
-  const content::DataStore* store = content::DataStore::Get();
-  if (store == nullptr) return std::unexpected("no store is open");
-  if (auto required = store->RequireConversions(); !required) {
-    return std::unexpected(required.error());
-  }
-  return content::LoadConvertedModel(*store, read);
+auto LoadShp(const fs::path& root, const content::ConvertedModelRead& read) {
+  return LoadModel(root, read, content::LoadConvertedModel);
 }
 
 void SetCollisionRadius(content::JsonDocument& gltf, std::uint64_t radius) {
@@ -601,11 +447,12 @@ void SetCollisionRadius(content::JsonDocument& gltf, std::uint64_t radius) {
 
 // An edit to the model's glTF survives a rerun and changes the bytes loaded.
 void CheckEditedModelLoads(const ModelRoot& root, const Bytes& original) {
-  root.EditGltf("4F", [](content::JsonDocument& gltf) {
-    SetCollisionRadius(gltf, kEditedRadius);
-  });
-  CHECK(root.Convert().unchanged == 2);
-  const auto edited = LoadModel(root.Root(), root.Read(0));
+  root.EditGltf(content::kShpModelDirectory, "4F",
+                [](content::JsonDocument& gltf) {
+                  SetCollisionRadius(gltf, kEditedRadius);
+                });
+  CHECK(root.Convert().characters.unchanged == 2);
+  const auto edited = LoadShp(root.Root(), root.Read(0));
   INFO(ErrorOf(edited));
   REQUIRE(edited.has_value());
   CHECK(*edited != original);
@@ -618,13 +465,14 @@ void CheckEditedModelLoads(const ModelRoot& root, const Bytes& original) {
 
 // A value the file cannot hold, and a read no file matches, are refused.
 void CheckRefusedLoads(const ModelRoot& root) {
-  root.EditGltf("4F", [](content::JsonDocument& gltf) {
-    SetCollisionRadius(gltf, kPastHalfword);
-  });
-  const auto refused = LoadModel(root.Root(), root.Read(0));
+  root.EditGltf(content::kShpModelDirectory, "4F",
+                [](content::JsonDocument& gltf) {
+                  SetCollisionRadius(gltf, kPastHalfword);
+                });
+  const auto refused = LoadShp(root.Root(), root.Read(0));
   REQUIRE_FALSE(refused.has_value());
   CHECK(refused.error().find("collision_radius") != std::string::npos);
-  const auto unknown = LoadModel(root.Root(), {.lba = 1, .rounded_size = 0});
+  const auto unknown = LoadShp(root.Root(), {.lba = 1, .rounded_size = 0});
   REQUIRE_FALSE(unknown.has_value());
   CHECK(unknown.error().find("no extracted .SHP file matches LBA 1") !=
         std::string::npos);
@@ -636,9 +484,9 @@ TEST_CASE("Converted models load in place of their SHP files, edits included",
   const Bytes borrower = Encoded(BorrowingShp());
   const ModelRoot root({{.path = "OBJ/4F.SHP", .bytes = lender},
                         {.path = "OBJ/50.SHP", .bytes = borrower}});
-  CHECK(root.Convert().converted == 2);
-  CHECK(LoadModel(root.Root(), root.Read(0)) == lender);
-  CHECK(LoadModel(root.Root(), root.Read(1)) == borrower);
+  CHECK(root.Convert().characters.converted == 2);
+  CHECK(LoadShp(root.Root(), root.Read(0)) == lender);
+  CHECK(LoadShp(root.Root(), root.Read(1)) == borrower);
   CheckEditedModelLoads(root, lender);
   CheckRefusedLoads(root);
 }
@@ -647,29 +495,9 @@ TEST_CASE("Extracted SHP models load from their conversions as exact bytes",
           "[content-models][shp][extract]") {
   const auto models = ExtractedModels();
   if (!models) SKIP("Extracted Native/data is unavailable");
-  content::DataStore::ScopedOverride restore;
-  const auto opened =
-      content::DataStore::Open(models->parent_path().parent_path());
-  INFO(ErrorOf(opened));
-  REQUIRE(opened.has_value());
-  const content::DataStore* store = content::DataStore::Get();
-  REQUIRE(store != nullptr);
-  if (store == nullptr) return;
-  std::size_t loaded = 0;
-  for (const content::DataStore::Entry& entry : store->Entries()) {
-    if (entry.form != "raw" || !entry.path.ends_with(content::kShpExtension)) {
-      continue;
-    }
-    CAPTURE(entry.path);
-    const auto bytes = content::LoadConvertedModel(
-        *store,
-        {.lba = entry.lba, .rounded_size = entry.SectorCount() * kSectorBytes});
-    INFO(ErrorOf(bytes));
-    REQUIRE(bytes.has_value());
-    CHECK(*bytes == ReadModel(store->FileOf(entry)));
-    ++loaded;
-  }
-  CHECK(loaded == kExtractedModelCount);
+  CHECK(VS::test_support::CheckExtractedModelsLoad(
+            *models, content::kShpExtension, content::LoadConvertedModel) ==
+        kExtractedModelCount);
 }
 
 }  // namespace

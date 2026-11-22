@@ -144,6 +144,12 @@ using ImageFileReader = std::function<ImageFileBytes(const std::string&)>;
 // DecodeImageFiles over the files in `directory`.
 [[nodiscard]] std::expected<ImageDocument, std::string> LoadImageFiles(
     const std::filesystem::path& directory, std::string_view stem);
+// Reads files by name from `directory`.
+[[nodiscard]] ImageFileReader DirectoryFileReader(
+    std::filesystem::path directory);
+// Reads files by name from `files`, which must outlive the reader.
+[[nodiscard]] ImageFileReader FileListReader(
+    const std::vector<ImageFile>& files);
 // Whether provenance names its source and hash, each dependency's source,
 // role and hash, a texture page within VRAM at its own rectangle, and a
 // preview palette by a valid image id.

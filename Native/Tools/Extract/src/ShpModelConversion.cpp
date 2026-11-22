@@ -36,6 +36,7 @@ using Content::kShpIndexCorners;
 using Content::kShpMaxCorners;
 using Content::kShpTriangleCorners;
 using Content::ShpFile;
+using Content::ShpModel;
 using Content::ShpModelDocument;
 using Content::ShpPolygon;
 using Content::ShpTexture;
@@ -54,6 +55,7 @@ constexpr std::string_view kShpDirectory = "OBJ";
 constexpr std::string_view kModelIdPrefix = "model";
 constexpr std::string_view kGenerator = "VS.Extract shp-gltf 1";
 constexpr std::string_view kUnlitExtension = "KHR_materials_unlit";
+constexpr std::string_view kVariantsExtension = "KHR_materials_variants";
 // glTF buffer view targets, sampler filters and wrapping.
 constexpr std::uint32_t kArrayBufferTarget = 34962;
 constexpr std::uint32_t kElementArrayBufferTarget = 34963;
@@ -84,14 +86,12 @@ void PutFloat(Bytes& out, float value) {
 
 // The disc file's stem: OBJ/4F.SHP -> 4F.
 Result<std::string> StemOf(std::string_view disc_path) {
-  const std::size_t slash = disc_path.rfind('/');
-  const std::string_view name =
-      slash == std::string_view::npos ? disc_path : disc_path.substr(slash + 1);
-  if (!name.ends_with(kShpExtension) || name.size() == kShpExtension.size()) {
+  auto stem = DiscStemOf(disc_path, kShpExtension);
+  if (!stem) {
     return std::unexpected(
         std::format("'{}' is not an SHP character model", disc_path));
   }
-  return std::string(name.substr(0, name.size() - kShpExtension.size()));
+  return std::move(*stem);
 }
 
 // --- The buffer.
@@ -192,7 +192,7 @@ std::uint32_t NumberOf(const Corner& corner, Primitive& primitive,
 
 // What every primitive's corners read from the model.
 struct MeshSource {
-  const ShpFile* shp = nullptr;
+  const ShpModel* model = nullptr;
   const std::vector<std::int64_t>* origins = nullptr;
   std::vector<std::uint16_t> bones;  // by SHP vertex
   ShpTextureSize uv_scale;
@@ -200,7 +200,7 @@ struct MeshSource {
 
 // Each vertex's bone. The reader rebuilds the groups as runs of vertices on
 // one bone, so every group must hold vertices and differ from the one before.
-Result<std::vector<std::uint16_t>> VertexBones(const ShpFile& shp) {
+Result<std::vector<std::uint16_t>> VertexBones(const ShpModel& shp) {
   std::vector<std::uint16_t> bones;
   bones.reserve(shp.vertices.size());
   for (std::size_t group = 0; group < shp.groups.size(); ++group) {
@@ -224,7 +224,7 @@ Result<std::vector<std::uint16_t>> VertexBones(const ShpFile& shp) {
   return bones;
 }
 
-Check AddPolygon(const ShpFile& shp, const ShpPolygon& polygon,
+Check AddPolygon(const ShpModel& shp, const ShpPolygon& polygon,
                  std::size_t ordinal, Primitive& primitive,
                  CornerNumbers& numbered, std::vector<bool>& used) {
   if (polygon.corners != kShpTriangleCorners &&
@@ -258,7 +258,7 @@ Check AddPolygon(const ShpFile& shp, const ShpPolygon& polygon,
 }
 
 // The primitives in ascending flags, every polygon in ordinal order.
-Result<std::vector<Primitive>> PlanPrimitives(const ShpFile& shp) {
+Result<std::vector<Primitive>> PlanPrimitives(const ShpModel& shp) {
   std::map<std::uint8_t, Primitive> by_flags;
   std::map<std::uint8_t, CornerNumbers> numbers;
   std::vector<bool> used(shp.vertices.size());
@@ -309,7 +309,7 @@ struct AttributeBytes {
 
 void PutCorner(const MeshSource& source, const Corner& corner,
                AttributeBytes& out, bool first) {
-  const Content::ShpVertex& vertex = source.shp->vertices[corner.vertex];
+  const Content::ShpVertex& vertex = source.model->vertices[corner.vertex];
   const std::uint16_t bone = source.bones[corner.vertex];
   const std::array<std::int64_t, kAxes> position{
       vertex.x + (*source.origins)[bone], vertex.y, vertex.z};
@@ -377,7 +377,7 @@ Json AddPrimitive(const MeshSource& source, const Primitive& primitive,
       attribute(SpecOf("SCALAR", Content::kGltfFloat, false), bytes.vertices);
   attributes["TEXCOORD_0"] =
       attribute(SpecOf("VEC2", Content::kGltfFloat, false), bytes.uvs);
-  if (source.shp->colored) {
+  if (source.model->colored) {
     attributes["COLOR_0"] = attribute(
         SpecOf("VEC4", Content::kGltfUnsignedByte, true), bytes.colors);
   }
@@ -400,13 +400,17 @@ Json AddPrimitive(const MeshSource& source, const Primitive& primitive,
   return json;
 }
 
-// A preview of the polygon flags: the texture unlit, blended when the
+// A preview of the polygon flags: texture `texture` unlit, blended when the
 // polygons are semi-transparent and drawn from both sides without culling.
-Json MaterialOf(std::uint8_t flags) {
+// A variant's copy adds its name to the material's.
+Json MaterialOf(std::uint8_t flags, std::size_t texture = 0,
+                std::string_view variant = {}) {
   Json material = Json::object();
-  material["name"] = std::format("flags_{:02x}", flags);
+  material["name"] = variant.empty()
+                         ? std::format("flags_{:02x}", flags)
+                         : std::format("flags_{:02x}_{}", flags, variant);
   material["pbrMetallicRoughness"] =
-      Json{{"baseColorTexture", Json{{"index", 0}}},
+      Json{{"baseColorTexture", Json{{"index", texture}}},
            {"metallicFactor", 0.0},
            {"roughnessFactor", 1.0}};
   material["extensions"] = Json{{std::string(kUnlitExtension), Json::object()}};
@@ -427,72 +431,77 @@ Bytes MatrixBytes(const std::vector<std::int64_t>& origins) {
   return bytes;
 }
 
-std::optional<std::size_t> AddBytesView(GltfBuffer& buffer,
-                                        const Bytes& bytes) {
-  if (bytes.empty()) return std::nullopt;
-  return buffer.AddView(bytes, std::nullopt);
-}
-
 struct GltfParts {
   Json meshes;
   Json materials;
-  std::optional<std::size_t> sound;
-  std::optional<std::size_t> sequence;
 };
 
-Result<GltfParts> BuildMesh(const ShpModelDocument& document,
-                            std::string_view stem, GltfBuffer& buffer) {
-  const ShpFile& shp = document.shp;
-  auto origins = Content::ShpBoneOrigins(shp);
+// Variant v after the first shows texture v through a copy of each
+// primitive's material, which the primitive maps v to; variant 0 maps to the
+// primitive's own material.
+void AddVariantMaterials(std::span<const ModelMaterialVariant> variants,
+                         std::span<const Primitive> planned, Json& primitives,
+                         Json& materials) {
+  if (variants.empty()) return;
+  for (std::size_t index = 0; index < planned.size(); ++index) {
+    Json& primitive = primitives[index];
+    Json mappings = Json::array({Json{{"material", primitive["material"]},
+                                      {"variants", Json::array({0})}}});
+    for (std::size_t variant = 1; variant < variants.size(); ++variant) {
+      mappings.push_back(Json{{"material", materials.size()},
+                              {"variants", Json::array({variant})}});
+      materials.push_back(
+          MaterialOf(planned[index].flags, variant, variants[variant].name));
+    }
+    primitive["extensions"] =
+        Json{{std::string(kVariantsExtension), Json{{"mappings", mappings}}}};
+  }
+}
+
+Result<GltfParts> BuildMesh(const ShpModel& model, const ModelGltfSpec& spec,
+                            GltfBuffer& buffer) {
+  auto origins = Content::ShpBoneOrigins(model);
   if (!origins) return std::unexpected(origins.error());
-  auto bones = VertexBones(shp);
+  auto bones = VertexBones(model);
   if (!bones) return std::unexpected(bones.error());
-  const std::optional<ShpTextureSize> scale = Content::ShpUvScale(document);
-  if (!scale || scale->width == 0 || scale->height == 0) {
+  if (spec.uv_scale.width == 0 || spec.uv_scale.height == 0) {
     return std::unexpected(
         std::string("the model's texture size, which scales its UVs, is not "
                     "known"));
   }
-  auto planned = PlanPrimitives(shp);
+  auto planned = PlanPrimitives(model);
   if (!planned) return std::unexpected(planned.error());
-  const MeshSource source{.shp = &shp,
+  const MeshSource source{.model = &model,
                           .origins = &*origins,
                           .bones = std::move(*bones),
-                          .uv_scale = *scale};
+                          .uv_scale = spec.uv_scale};
+  // The inverse bind matrices are accessor 0, where the skeleton names them.
   AccessorSpec matrices = SpecOf("MAT4", Content::kGltfFloat, false);
-  matrices.count = shp.bones.size();
+  matrices.count = model.bones.size();
   buffer.AddAccessor(matrices, MatrixBytes(*origins));
-  GltfParts parts{.meshes = Json::array(),
-                  .materials = Json::array(),
-                  .sound = std::nullopt,
-                  .sequence = std::nullopt};
+  GltfParts parts{.meshes = Json::array(), .materials = Json::array()};
   Json primitives = Json::array();
   for (const Primitive& primitive : *planned) {
     primitives.push_back(
         AddPrimitive(source, primitive, parts.materials.size(), buffer));
     parts.materials.push_back(MaterialOf(primitive.flags));
   }
-  parts.meshes.push_back(
-      Json{{"name", std::string(stem)}, {"primitives", std::move(primitives)}});
-  parts.sound = AddBytesView(buffer, shp.sound);
-  parts.sequence = AddBytesView(buffer, shp.sequence);
+  AddVariantMaterials(spec.variants, *planned, primitives, parts.materials);
+  parts.meshes.push_back(Json{{"name", std::string(spec.stem)},
+                              {"primitives", std::move(primitives)}});
   return parts;
 }
 
-Json GltfOf(const ShpModelDocument& document, std::string_view stem,
-            std::string_view image_uri, GltfParts parts,
+Json GltfOf(const ModelGltfSpec& spec, Json payload, GltfParts parts,
             const GltfBuffer& buffer) {
   Json gltf = Json::object();
   gltf["asset"] =
       Json{{"version", "2.0"},
-           {"generator", std::string(kGenerator)},
-           {"extras", Json{{std::string(Content::kShpExtrasKey),
-                            Content::ShpModelPayload(document, parts.sound,
-                                                     parts.sequence)}}}};
+           {"generator", std::string(spec.generator)},
+           {"extras",
+            Json{{std::string(Content::kShpExtrasKey), std::move(payload)}}}};
   gltf["extensionsUsed"] = Json::array({std::string(kUnlitExtension)});
-  // The inverse bind matrices are accessor 0 (BuildMesh adds them first).
-  const Json skeleton = Content::ShpSkeletonGltf(document.shp, 0);
-  for (const auto& member : skeleton.items()) {
+  for (const auto& member : spec.skeleton.items()) {
     gltf[member.key()] = member.value();
   }
   gltf["meshes"] = std::move(parts.meshes);
@@ -502,11 +511,24 @@ Json GltfOf(const ShpModelDocument& document, std::string_view stem,
                                        {"minFilter", kNearestFilter},
                                        {"wrapS", kRepeatWrap},
                                        {"wrapT", kRepeatWrap}}});
-  gltf["images"] = Json::array({Json{{"uri", std::string(image_uri)}}});
+  gltf["images"] = Json::array({Json{{"uri", std::string(spec.image_uri)}}});
+  if (!spec.variants.empty()) {
+    gltf["extensionsUsed"].push_back(std::string(kVariantsExtension));
+    Json names = Json::array();
+    for (std::size_t index = 0; index < spec.variants.size(); ++index) {
+      names.push_back(Json{{"name", std::string(spec.variants[index].name)}});
+      if (index == 0) continue;
+      gltf["textures"].push_back(Json{{"sampler", 0}, {"source", index}});
+      gltf["images"].push_back(
+          Json{{"uri", std::string(spec.variants[index].image_uri)}});
+    }
+    gltf["extensions"] =
+        Json{{std::string(kVariantsExtension), Json{{"variants", names}}}};
+  }
   gltf["accessors"] = buffer.Accessors();
   gltf["bufferViews"] = buffer.Views();
   gltf["buffers"] = Json::array({Json{
-      {"uri", std::string(stem) + std::string(Content::kGltfBufferSuffix)},
+      {"uri", std::string(spec.stem) + std::string(Content::kGltfBufferSuffix)},
       {"byteLength", buffer.Data().size()}}});
   return gltf;
 }
@@ -541,13 +563,8 @@ Result<std::vector<ImageFile>> TextureFiles(const ShpModelDocument& document,
 Check VerifyModel(const ShpModelDocument& document, std::string_view stem,
                   const std::vector<ImageFile>& files,
                   const SourceFile& source) {
-  const Content::ImageFileReader read =
-      [&files](const std::string& name) -> Content::ImageFileBytes {
-    const auto file = std::ranges::find(files, name, &ImageFile::name);
-    if (file == files.end()) return std::nullopt;
-    return file->bytes;
-  };
-  auto decoded = Content::DecodeShpModelFiles(stem, read);
+  auto decoded =
+      Content::DecodeShpModelFiles(stem, Content::FileListReader(files));
   if (!decoded) {
     return std::unexpected(
         std::format("{}: the converted model does not read back: {}",
@@ -660,18 +677,6 @@ Result<ShpModelDocument> DocumentOf(const SourceFile& model,
 
 // The manifest's output for `conversion` when its sources and lender are the
 // ones recorded and its files exist.
-const ConversionOutput* UnchangedOutput(const ConversionManifest& manifest,
-                                        const fs::path& root,
-                                        const ShpConversion& conversion) {
-  auto expected = ModelOutputOf(conversion);
-  if (!expected) return nullptr;
-  const ConversionOutput* output = manifest.Find(expected->id);
-  if (output == nullptr || output->files.empty()) return nullptr;
-  ConversionOutput recorded = *output;
-  recorded.files.clear();
-  return recorded == *expected ? PresentOutput(root, output) : nullptr;
-}
-
 using SourceMap = std::map<std::string, SourceFile, std::less<>>;
 
 // Every SHP files.tsv lists, by disc path.
@@ -709,7 +714,7 @@ Result<ShpConversion> PlanConversion(const SourceFile& model,
   return conversion;
 }
 
-Check WriteModels(const fs::path& root,
+Check WriteModels(const fs::path& directory,
                   const std::vector<ConvertedModel>& converted) {
   std::vector<OutputBytes> files;
   for (const ConvertedModel& model : converted) {
@@ -718,8 +723,7 @@ Check WriteModels(const fs::path& root,
     }
   }
   if (files.empty()) return {};
-  return WriteOutputFiles(
-      root / Platform::Utf8Path(Content::kShpModelDirectory), files);
+  return WriteOutputFiles(directory, files);
 }
 
 }  // namespace
@@ -746,33 +750,72 @@ std::string ShpLenderPath(std::int32_t lender) {
   return std::format("{}/{:02X}{}", kShpDirectory, lender, kShpExtension);
 }
 
-std::expected<std::vector<ImageFile>, std::string> EncodeShpModelFiles(
-    const ShpModelDocument& document, std::string_view stem,
-    std::string_view image_uri) {
-  GltfBuffer buffer;
-  auto parts = BuildMesh(document, stem, buffer);
-  if (!parts) {
-    return std::unexpected(
-        std::format("{}: {}", document.source, parts.error()));
+std::optional<std::string> DiscStemOf(std::string_view disc_path,
+                                      std::string_view extension) {
+  const std::size_t slash = disc_path.rfind('/');
+  const std::string_view name =
+      slash == std::string_view::npos ? disc_path : disc_path.substr(slash + 1);
+  if (!name.ends_with(extension) || name.size() == extension.size()) {
+    return std::nullopt;
   }
+  return std::string(name.substr(0, name.size() - extension.size()));
+}
+
+std::expected<std::vector<ImageFile>, std::string> EncodeModelGltf(
+    const Content::ShpModel& model, const ModelGltfSpec& spec) {
+  GltfBuffer buffer;
+  auto parts = BuildMesh(model, spec, buffer);
+  if (!parts) return std::unexpected(parts.error());
+  const ModelViewAdder add_view =
+      [&buffer](
+          std::span<const std::byte> bytes) -> std::optional<std::size_t> {
+    if (bytes.empty()) return std::nullopt;
+    return buffer.AddView(bytes, std::nullopt);
+  };
+  Json payload = spec.payload(add_view);
   const std::string text =
       Content::FormatJsonText(
-          GltfOf(document, stem, image_uri, std::move(*parts), buffer)) +
+          GltfOf(spec, std::move(payload), std::move(*parts), buffer)) +
       "\n";
   const auto text_bytes = std::as_bytes(std::span(text));
   std::vector<ImageFile> files;
   files.push_back(
-      {.name = std::string(stem) + std::string(Content::kGltfSuffix),
+      {.name = std::string(spec.stem) + std::string(Content::kGltfSuffix),
        .bytes = Bytes(text_bytes.begin(), text_bytes.end())});
   files.push_back(
-      {.name = std::string(stem) + std::string(Content::kGltfBufferSuffix),
+      {.name = std::string(spec.stem) + std::string(Content::kGltfBufferSuffix),
        .bytes = buffer.Data()});
+  return files;
+}
+
+std::expected<std::vector<ImageFile>, std::string> EncodeShpModelFiles(
+    const ShpModelDocument& document, std::string_view stem,
+    std::string_view image_uri) {
+  const ShpFile& shp = document.shp;
+  const ModelGltfSpec spec{
+      .stem = stem,
+      .image_uri = image_uri,
+      .generator = kGenerator,
+      .uv_scale = Content::ShpUvScale(document).value_or(ShpTextureSize{}),
+      .skeleton = Content::ShpSkeletonGltf(shp, 0),
+      .payload =
+          [&](const ModelViewAdder& add_view) {
+            const std::optional<std::size_t> sound = add_view(shp.sound);
+            const std::optional<std::size_t> sequence = add_view(shp.sequence);
+            return Content::ShpModelPayload(document, sound, sequence);
+          },
+      .variants = {}};
+  auto files = EncodeModelGltf(shp, spec);
+  if (!files) {
+    return std::unexpected(
+        std::format("{}: {}", document.source, files.error()));
+  }
   auto texture = TextureFiles(document, stem);
   if (!texture) {
     return std::unexpected(
         std::format("{}: {}", document.source, texture.error()));
   }
-  std::ranges::move(*texture, std::back_inserter(files));
+  std::ranges::move(*texture, std::back_inserter(*files));
   return files;
 }
 
@@ -798,46 +841,72 @@ std::expected<ConvertedModel, std::string> ConvertShpModel(
   }
   auto output = ModelOutputOf(conversion);
   if (!output) return std::unexpected(output.error());
-  for (const ImageFile& file : *files) {
-    output->files.push_back(
-        std::format("{}/{}", Content::kShpModelDirectory, file.name));
+  return ConvertedModelOf(std::move(*output), std::move(*files),
+                          Content::kShpModelDirectory);
+}
+
+ConvertedModel ConvertedModelOf(ConversionOutput output,
+                                std::vector<ImageFile> files,
+                                std::string_view directory) {
+  for (const ImageFile& file : files) {
+    output.files.push_back(std::format("{}/{}", directory, file.name));
   }
-  return ConvertedModel{.output = std::move(*output),
-                        .files = std::move(*files)};
+  return ConvertedModel{.output = std::move(output), .files = std::move(files)};
+}
+
+std::expected<ModelConversionReport, std::string> RunModelConverter(
+    const fs::path& root, const RunStart& start, const ModelConverterSpec& spec,
+    std::span<const ModelJob> jobs) {
+  const ConversionManifest& previous = start.previous;
+  ConverterBatch batch =
+      StartBatch(previous, spec.name, spec.version, spec.force);
+  ModelConversionReport report;
+  std::vector<ConvertedModel> converted;
+  for (const ModelJob& job : jobs) {
+    const ConversionOutput* kept =
+        batch.reuse ? MatchingOutput(previous, root, job.expected) : nullptr;
+    if (kept != nullptr) {
+      batch.outputs.push_back(*kept);
+      ++report.unchanged;
+      continue;
+    }
+    auto model = job.convert();
+    if (!model) return std::unexpected(model.error());
+    batch.outputs.push_back(model->output);
+    converted.push_back(std::move(*model));
+  }
+  const fs::path directory = root / Platform::Utf8Path(spec.directory);
+  auto removed = PublishBatch(
+      root, previous, batch, [&] { return WriteModels(directory, converted); });
+  if (!removed) return std::unexpected(removed.error());
+  report.converted = converted.size();
+  report.removed = *removed;
+  return report;
 }
 
 std::expected<ModelConversionReport, std::string> ConvertDiscModels(
     const fs::path& root, bool force) {
   auto start = StartRun(root);
   if (!start) return std::unexpected(start.error());
-  const ConversionManifest& previous = start->previous;
   auto sources = ReadModelSources(root, start->entries);
   if (!sources) return std::unexpected(sources.error());
-  ConverterBatch batch = StartBatch(previous, Content::kShpModelConverterName,
-                                    Content::kShpModelConverterVersion, force);
-  ModelConversionReport report;
-  std::vector<ConvertedModel> converted;
+  std::vector<ModelJob> jobs;
   for (const auto& [path, source] : *sources) {
     auto conversion = PlanConversion(source, *sources);
     if (!conversion) return std::unexpected(conversion.error());
-    const ConversionOutput* kept =
-        batch.reuse ? UnchangedOutput(previous, root, *conversion) : nullptr;
-    if (kept != nullptr) {
-      batch.outputs.push_back(*kept);
-      ++report.unchanged;
-      continue;
-    }
-    auto model = ConvertShpModel(*conversion);
-    if (!model) return std::unexpected(model.error());
-    batch.outputs.push_back(model->output);
-    converted.push_back(std::move(*model));
+    auto expected = ModelOutputOf(*conversion);
+    if (!expected) return std::unexpected(expected.error());
+    jobs.push_back({.expected = std::move(*expected),
+                    .convert = [conversion = std::move(*conversion)] {
+                      return ConvertShpModel(conversion);
+                    }});
   }
-  auto removed = PublishBatch(root, previous, batch,
-                              [&] { return WriteModels(root, converted); });
-  if (!removed) return std::unexpected(removed.error());
-  report.converted = converted.size();
-  report.removed = *removed;
-  return report;
+  return RunModelConverter(root, *start,
+                           {.name = Content::kShpModelConverterName,
+                            .version = Content::kShpModelConverterVersion,
+                            .directory = Content::kShpModelDirectory,
+                            .force = force},
+                           jobs);
 }
 
 }  // namespace VS::Extract

@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <expected>
 #include <filesystem>
+#include <functional>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -115,12 +116,12 @@ inline constexpr std::size_t kShpFirstBoneNode = 2;
 // parent's origin moved by -length[parent]. Every bone after the first must
 // have a lower-numbered parent (bone 0's parent byte is not used).
 [[nodiscard]] std::expected<std::vector<std::int64_t>, std::string>
-ShpBoneOrigins(const ShpFile& shp);
+ShpBoneOrigins(const ShpModel& model);
 
 // The glTF members that hold the skeleton, "scene", "scenes", "nodes" and
 // "skins", with the inverse bind matrices in accessor
 // `inverse_bind_matrices`. The bones must have valid origins (ShpBoneOrigins).
-[[nodiscard]] JsonDocument ShpSkeletonGltf(const ShpFile& shp,
+[[nodiscard]] JsonDocument ShpSkeletonGltf(const ShpModel& model,
                                            std::size_t inverse_bind_matrices);
 // The inverse bind matrix of a bone at `origin`: a move by -origin along X.
 // The root's turn applies on top, so it is not inverted here.
@@ -150,6 +151,80 @@ using ShpLayoutBlock = std::array<std::byte, kShpLayoutBlockBytes>;
 [[nodiscard]] JsonDocument ShpModelPayload(
     const ShpModelDocument& document, std::optional<std::size_t> sound_view,
     std::optional<std::size_t> sequence_view);
+
+// --- Shared by every model format whose glTF holds an ShpModel (SHP, WEP).
+
+// A buffer view of a model's glTF buffer.
+struct ModelGltfView {
+  std::size_t offset = 0;
+  std::size_t length = 0;
+  std::size_t stride = 0;  // 0: tightly packed
+};
+
+// A model's <stem>.gltf and the <stem>.bin buffer it names.
+struct ModelGltfFile {
+  std::string name;  // <stem>.gltf
+  JsonDocument json;
+  std::vector<std::byte> buffer;
+  std::vector<ModelGltfView> views;
+};
+
+// `stem`'s glTF and buffer: glTF 2.0 with only the members a model writes
+// and exactly one buffer, <stem>.bin.
+[[nodiscard]] std::expected<ModelGltfFile, std::string> ReadModelGltf(
+    std::string_view stem, const ImageFileReader& read);
+// The payload, asset.extras.vs, which must be asset.extras' only member.
+[[nodiscard]] std::expected<JsonMembers, std::string> ModelGltfPayload(
+    const ModelGltfFile& file);
+
+// The members every model payload starts with.
+struct ModelIdentity {
+  std::string id;      // e.g. model.obj.4f
+  std::string source;  // the disc path
+  std::string source_sha256;
+
+  bool operator==(const ModelIdentity&) const = default;
+};
+
+// The payload's schema, schema_version, id, source and source_sha256; the
+// schema must be `schema` at `version`. `kind` names the model in the error
+// ("a character model").
+[[nodiscard]] std::expected<ModelIdentity, std::string> ReadModelIdentity(
+    const JsonMembers& payload, std::string_view schema, std::uint32_t version,
+    std::string_view kind);
+
+// The polygons of each part (triangles, quads, mixed).
+using ShpPolygonCounts = std::array<std::uint16_t, kShpPartCount>;
+
+// The payload members polygon_counts, limb_ranges and bones, which every
+// model payload has, and back.
+[[nodiscard]] JsonDocument ShpPolygonCountsJson(const ShpModel& model);
+[[nodiscard]] JsonDocument ShpBonesJson(const ShpModel& model);
+// Reads limb_ranges and bones into `model` and returns polygon_counts.
+[[nodiscard]] std::expected<ShpPolygonCounts, std::string> ReadShpModelHeader(
+    const JsonMembers& payload, ShpModel& model);
+
+// What a model's mesh is read against.
+struct ModelMeshSpec {
+  ShpPolygonCounts counts{};
+  ShpTextureSize uv_scale;  // what the texture coordinates are divided by
+  // The skeleton members the payload gives (ShpSkeletonGltf), with the
+  // inverse bind matrices in the accessor it is passed.
+  std::function<JsonDocument(std::size_t)> skeleton;
+};
+
+// Reads the glTF's mesh into `model`'s groups, vertices and parts; its bones
+// and polygon layout must already be read. The skeleton members must be the
+// ones `spec` gives, numbers within a float's precision, and the inverse bind
+// matrices exactly ShpInverseBindMatrix's.
+[[nodiscard]] std::expected<void, std::string> ReadModelMesh(
+    const ModelGltfFile& file, const ModelMeshSpec& spec, ShpModel& model);
+
+// `stem`'s image files, which must be image `image_id` converted from
+// `model`'s source.
+[[nodiscard]] std::expected<ImageDocument, std::string> ReadModelImage(
+    std::string_view stem, const ImageFileReader& read,
+    const ModelIdentity& model, std::string_view image_id);
 
 // The document `stem`'s files hold, checked against everything the payload
 // records. Errors name the file and the member or vertex at fault.

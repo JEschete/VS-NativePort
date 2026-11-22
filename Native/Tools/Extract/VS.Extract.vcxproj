@@ -56,6 +56,7 @@
     <ClCompile Include="src\ShpModelConversion.cpp" />
     <ClCompile Include="src\TimImage.cpp" />
     <ClCompile Include="src\TimWriter.cpp" />
+    <ClCompile Include="src\WepModelConversion.cpp" />
     <ClCompile Include="src\WorkshopRecipeConversion.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -67,6 +68,7 @@
     <ClInclude Include="include\Extract\ShpModelConversion.hpp" />
     <ClInclude Include="include\Extract\TimImage.hpp" />
     <ClInclude Include="include\Extract\TimWriter.hpp" />
+    <ClInclude Include="include\Extract\WepModelConversion.hpp" />
     <ClInclude Include="include\Extract\WorkshopRecipeConversion.hpp" />
   </ItemGroup>
   <ItemGroup>

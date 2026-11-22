@@ -836,16 +836,27 @@ std::expected<ImageDocument, std::string> DecodeImageFiles(
 
 std::expected<ImageDocument, std::string> LoadImageFiles(
     const fs::path& directory, std::string_view stem) {
-  return DecodeImageFiles(
-      stem, [&directory](const std::string& name) -> std::optional<Bytes> {
-        std::ifstream input(directory / Platform::Utf8Path(name),
-                            std::ios::binary);
-        if (!input) return std::nullopt;
-        const std::vector<char> data{std::istreambuf_iterator<char>(input),
-                                     std::istreambuf_iterator<char>()};
-        if (input.bad()) return std::nullopt;
-        return TextBytes(std::string_view(data.data(), data.size()));
-      });
+  return DecodeImageFiles(stem, DirectoryFileReader(directory));
+}
+
+ImageFileReader DirectoryFileReader(fs::path directory) {
+  return [directory = std::move(directory)](
+             const std::string& name) -> std::optional<Bytes> {
+    std::ifstream input(directory / Platform::Utf8Path(name), std::ios::binary);
+    if (!input) return std::nullopt;
+    const std::vector<char> data{std::istreambuf_iterator<char>(input),
+                                 std::istreambuf_iterator<char>()};
+    if (input.bad()) return std::nullopt;
+    return TextBytes(std::string_view(data.data(), data.size()));
+  };
+}
+
+ImageFileReader FileListReader(const std::vector<ImageFile>& files) {
+  return [&files](const std::string& name) -> ImageFileBytes {
+    const auto found = std::ranges::find(files, name, &ImageFile::name);
+    if (found == files.end()) return std::nullopt;
+    return found->bytes;
+  };
 }
 
 }  // namespace VS::Content

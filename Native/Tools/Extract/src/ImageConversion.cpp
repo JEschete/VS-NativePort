@@ -28,8 +28,6 @@ using Content::DecodeTim;
 using Content::ImageDepth;
 using Content::ImageDocument;
 using Content::ImageFile;
-using Content::ImageFileBytes;
-using Content::ImageFileReader;
 using Content::ImageMaterial;
 using Content::ImageProvenance;
 using Content::IsContentId;
@@ -426,11 +424,7 @@ const ConversionOutput* UnchangedFbtOutput(const ConversionManifest& manifest,
                                            const FbtConversion& conversion) {
   auto expected = FbtOutputOf(conversion);
   if (!expected) return nullptr;
-  const ConversionOutput* output = manifest.Find(expected->id);
-  if (output == nullptr || output->files.empty()) return nullptr;
-  ConversionOutput recorded = *output;
-  recorded.files.clear();
-  return recorded == *expected ? PresentOutput(root, output) : nullptr;
+  return MatchingOutput(manifest, root, *expected);
 }
 
 std::expected<ConverterBatch, std::string> ConvertFbtTextures(
@@ -500,12 +494,7 @@ std::expected<std::size_t, std::string> Publish(
 std::expected<ImageDocument, std::string> DecodeConvertedFiles(
     const ImageDocument& document, std::string_view stem,
     const std::vector<ImageFile>& files, const SourceFile& source) {
-  const ImageFileReader read = [&files](const std::string& name) {
-    const auto found = std::ranges::find(files, name, &ImageFile::name);
-    return found == files.end() ? ImageFileBytes{}
-                                : ImageFileBytes{found->bytes};
-  };
-  auto decoded = DecodeImageFiles(stem, read);
+  auto decoded = DecodeImageFiles(stem, Content::FileListReader(files));
   if (!decoded) {
     return std::unexpected(
         std::format("{}: the converted files do not decode: {}", source.path,

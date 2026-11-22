@@ -19,6 +19,7 @@
 #include "Extract/ConverterBatch.hpp"
 #include "Extract/ImageConversion.hpp"
 #include "Extract/ShpModelConversion.hpp"
+#include "Extract/WepModelConversion.hpp"
 #include "Extract/WorkshopRecipeConversion.hpp"
 #include "TestSupport/WorkshopRecipeRoot.hpp"
 
@@ -244,14 +245,16 @@ struct EditedResults {
   std::string edited;
 };
 
-// Converts SampleTable's recipe files (and the images, so every required
-// converter has run) under `root`, then edits the shield results table.
+// Converts SampleTable's recipe files (and the images and models, so every
+// required converter has run) under `root`, then edits the shield results
+// table.
 EditedResults ConvertAndEditShieldResults(WorkshopRecipeRoot& root) {
   root.Table(WorkshopKind::kShield) = SampleTable(WorkshopKind::kShield);
   root.WriteSources();
   CHECK(root.Convert(false).converted == 3);
   REQUIRE(extract::ConvertDiscImages(root.Root(), false).has_value());
   REQUIRE(extract::ConvertDiscModels(root.Root(), false).has_value());
+  REQUIRE(extract::ConvertDiscWeapons(root.Root(), false).has_value());
   EditedResults results{.path = root.TableFile(WorkshopKind::kShield,
                                                WorkshopTablePart::kResults),
                         .generated = {},

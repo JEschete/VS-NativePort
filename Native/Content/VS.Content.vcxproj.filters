@@ -108,6 +108,12 @@
     <ClCompile Include="src\TimFile.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\WepFile.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\WepModelFiles.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\WorkshopRecipes.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -214,6 +220,12 @@
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\TimFile.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\WepFile.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\WepModelFiles.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\WorkshopRecipes.hpp">

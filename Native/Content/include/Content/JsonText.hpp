@@ -43,6 +43,9 @@ class JsonMembers {
       std::string_view key) const;
   [[nodiscard]] std::expected<std::uint64_t, std::string> Unsigned(
       std::string_view key, std::uint64_t max) const;
+  // A whole number from `min` to `max`.
+  [[nodiscard]] std::expected<std::int64_t, std::string> Integer(
+      std::string_view key, std::int64_t min, std::int64_t max) const;
   [[nodiscard]] std::expected<std::string, std::string> String(
       std::string_view key) const;
   [[nodiscard]] std::expected<bool, std::string> Boolean(

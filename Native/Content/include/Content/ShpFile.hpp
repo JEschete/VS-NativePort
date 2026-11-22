@@ -117,22 +117,47 @@ struct ShpTexture {
   bool operator==(const ShpTexture&) const = default;
 };
 
-struct ShpFile {
-  std::array<std::byte, kShpLayoutBlockBytes> layout{};
+// The model section SHP and WEP files share, with the counts the file header
+// gives for it.
+struct ShpModel {
   std::array<std::uint16_t, kShpLimbRangeCount> limb_ranges{};
   std::vector<ShpBone> bones;
   std::vector<ShpGroup> groups;
   std::vector<ShpVertex> vertices;
   std::array<std::vector<ShpPolygon>, kShpPartCount> parts;
   std::vector<std::byte> sound;
+  bool colored = false;  // the polygon record layout
+
+  bool operator==(const ShpModel&) const = default;
+};
+
+struct ShpFile : ShpModel {
+  std::array<std::byte, kShpLayoutBlockBytes> layout{};
   std::uint32_t sequence_word = 1;  // the word before the embedded SEQ
   std::vector<std::byte> sequence;
-  bool colored = false;  // the polygon record layout
   // Exactly one: the model's own texture, or the model whose texture it uses.
   std::optional<ShpTexture> texture;
   std::optional<std::int32_t> lender;
 
   bool operator==(const ShpFile&) const = default;
+};
+
+// The magic and the counts that start an SHP or WEP file: bones and groups as
+// bytes, then the polygons of each part as halfwords.
+inline constexpr std::size_t kShpCountsBytes = 0x0C;
+
+struct ShpModelCounts {
+  std::size_t bones = 0;
+  std::size_t groups = 0;
+  std::array<std::size_t, kShpPartCount> parts{};
+
+  bool operator==(const ShpModelCounts&) const = default;
+};
+
+// A model section and the file header that counts it.
+struct ShpModelBytes {
+  std::array<std::byte, kShpCountsBytes> counts{};
+  std::vector<std::byte> model;
 };
 
 // Where a file's texture comes from, read without decoding the model.
@@ -152,5 +177,18 @@ struct ShpTextureSource {
 // file cannot hold.
 [[nodiscard]] std::expected<std::vector<std::byte>, std::string> EncodeShp(
     const ShpFile& shp);
+
+// The magic and counts at the start of `data`.
+[[nodiscard]] std::expected<ShpModelCounts, std::string> DecodeShpCounts(
+    std::span<const std::byte> data);
+// The model section `model` (exactly its bytes) that `counts` describe, in the
+// polygon layout `colored`. Error offsets count from the section's start.
+[[nodiscard]] std::expected<ShpModel, std::string> DecodeShpModel(
+    std::span<const std::byte> model, const ShpModelCounts& counts,
+    bool colored);
+// The model section `model` is and the header that counts it, which
+// DecodeShpCounts and DecodeShpModel read back to `model`.
+[[nodiscard]] std::expected<ShpModelBytes, std::string> EncodeShpModel(
+    const ShpModel& model);
 
 }  // namespace VS::Content

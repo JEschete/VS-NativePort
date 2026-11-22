@@ -3,7 +3,9 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <cstdint>
 #include <format>
+#include <limits>
 #include <string>
 #include <utility>
 
@@ -121,6 +123,24 @@ std::expected<std::uint64_t, std::string> JsonMembers::Unsigned(
         std::format("{} must be a whole number from 0 to {}", Where(key), max));
   }
   return (*value)->get<std::uint64_t>();
+}
+
+std::expected<std::int64_t, std::string> JsonMembers::Integer(
+    std::string_view key, std::int64_t min, std::int64_t max) const {
+  auto value = Get(key);
+  if (!value) return std::unexpected(value.error());
+  const JsonDocument& number = **value;
+  const bool fits = number.is_number_integer() &&
+                    (!number.is_number_unsigned() ||
+                     number.get<std::uint64_t>() <=
+                         static_cast<std::uint64_t>(
+                             std::numeric_limits<std::int64_t>::max()));
+  if (!fits || number.get<std::int64_t>() < min ||
+      number.get<std::int64_t>() > max) {
+    return std::unexpected(std::format(
+        "{} must be a whole number from {} to {}", Where(key), min, max));
+  }
+  return number.get<std::int64_t>();
 }
 
 std::expected<std::string, std::string> JsonMembers::String(

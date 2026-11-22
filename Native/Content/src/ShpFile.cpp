@@ -111,12 +111,6 @@ std::unexpected<std::string> Fail(std::size_t offset,
   return std::unexpected(std::format("byte 0x{:X}: {}", offset, message));
 }
 
-struct Counts {
-  std::size_t bones = 0;
-  std::size_t groups = 0;
-  std::array<std::size_t, kShpPartCount> parts{};
-};
-
 struct PolygonLayout {
   std::size_t corners = 0;
   std::size_t bytes = 0;
@@ -250,7 +244,7 @@ struct Sections {
 };
 
 std::expected<Sections, std::string> SectionsOf(Bytes model,
-                                                const Counts& counts) {
+                                                const ShpModelCounts& counts) {
   const Sections sections{
       .sound = ReadLe<std::uint32_t>(model, kSoundAt),
       .groups = ReadLe<std::uint32_t>(model, kGroupsAt),
@@ -273,8 +267,8 @@ std::expected<Sections, std::string> SectionsOf(Bytes model,
 
 std::expected<void, std::string> DecodeGroups(Bytes model,
                                               const Sections& sections,
-                                              const Counts& counts,
-                                              ShpFile& shp) {
+                                              const ShpModelCounts& counts,
+                                              ShpModel& shp) {
   std::size_t previous = 0;
   for (std::size_t group = 0; group < counts.groups; ++group) {
     const std::size_t at = sections.groups + (group * kGroupBytes);
@@ -300,7 +294,7 @@ std::expected<void, std::string> DecodeGroups(Bytes model,
   return {};
 }
 
-void DecodeBones(Bytes model, std::size_t count, ShpFile& shp) {
+void DecodeBones(Bytes model, std::size_t count, ShpModel& shp) {
   for (std::size_t bone = 0; bone < count; ++bone) {
     const Bytes record =
         model.subspan(kModelHeaderBytes + (bone * kBoneBytes), kBoneBytes);
@@ -322,7 +316,7 @@ void DecodeBones(Bytes model, std::size_t count, ShpFile& shp) {
 
 std::expected<void, std::string> DecodeVertices(Bytes model,
                                                 const Sections& sections,
-                                                ShpFile& shp) {
+                                                ShpModel& shp) {
   const std::size_t count = shp.groups.empty() ? 0 : shp.groups.back().end;
   const std::size_t end = sections.vertices + (count * kVertexBytes);
   if (sections.polygons != end || end > model.size()) {
@@ -344,10 +338,8 @@ std::expected<void, std::string> DecodeVertices(Bytes model,
 }
 
 // The polygons from `at`; returns where they end.
-std::expected<std::size_t, std::string> DecodePolygons(Bytes model,
-                                                       std::size_t at,
-                                                       const Counts& counts,
-                                                       ShpFile& shp) {
+std::expected<std::size_t, std::string> DecodePolygons(
+    Bytes model, std::size_t at, const ShpModelCounts& counts, ShpModel& shp) {
   for (std::size_t part = 0; part < kShpPartCount; ++part) {
     for (std::size_t index = 0; index < counts.parts.at(part); ++index) {
       auto decoded = DecodePolygon(model, at, static_cast<ShpPart>(part),
@@ -360,8 +352,12 @@ std::expected<std::size_t, std::string> DecodePolygons(Bytes model,
   return at;
 }
 
-std::expected<void, std::string> DecodeModel(Bytes model, const Counts& counts,
-                                             ShpFile& shp) {
+std::expected<void, std::string> DecodeModel(Bytes model,
+                                             const ShpModelCounts& counts,
+                                             ShpModel& shp) {
+  if (model.size() < kModelHeaderBytes + (counts.bones * kBoneBytes)) {
+    return Fail(0, "the model is too small for its bones");
+  }
   for (std::size_t range = 0; range < kShpLimbRangeCount; ++range) {
     shp.limb_ranges.at(range) = ReadLe<std::uint16_t>(model, range * 2);
   }
@@ -574,7 +570,7 @@ void PutPolygon(std::span<std::byte> record, const ShpPolygon& polygon,
   }
 }
 
-std::expected<void, std::string> CheckGroups(const ShpFile& shp) {
+std::expected<void, std::string> CheckGroups(const ShpModel& shp) {
   std::size_t previous = 0;
   for (const ShpGroup& group : shp.groups) {
     if (group.bone >= shp.bones.size() || group.end <= previous) {
@@ -618,7 +614,7 @@ std::expected<void, std::string> CheckTexture(const ShpFile& shp) {
   return {};
 }
 
-std::expected<void, std::string> CheckCounts(const ShpFile& shp) {
+std::expected<void, std::string> CheckModel(const ShpModel& shp) {
   constexpr std::size_t kByteMax = std::numeric_limits<std::uint8_t>::max();
   constexpr std::size_t kHalfMax = std::numeric_limits<std::uint16_t>::max();
   if (shp.bones.size() > kByteMax || shp.groups.size() > kByteMax ||
@@ -628,9 +624,6 @@ std::expected<void, std::string> CheckCounts(const ShpFile& shp) {
   }
   if (auto groups = CheckGroups(shp); !groups) {
     return groups;
-  }
-  if (auto texture = CheckTexture(shp); !texture) {
-    return texture;
   }
   for (std::size_t part = 0; part < kShpPartCount; ++part) {
     for (const ShpPolygon& polygon : shp.parts.at(part)) {
@@ -644,7 +637,7 @@ std::expected<void, std::string> CheckCounts(const ShpFile& shp) {
   return {};
 }
 
-void PutBones(Writer& out, const ShpFile& shp) {
+void PutBones(Writer& out, const ShpModel& shp) {
   for (const ShpBone& bone : shp.bones) {
     out.Put(bone.length);
     out.PutByte(bone.parent);
@@ -659,7 +652,7 @@ void PutBones(Writer& out, const ShpFile& shp) {
   }
 }
 
-std::vector<std::byte> EncodeModel(const ShpFile& shp) {
+std::vector<std::byte> EncodeModel(const ShpModel& shp) {
   std::size_t polygon_bytes = 0;
   for (const auto& part : shp.parts) {
     for (const ShpPolygon& polygon : part) {
@@ -757,19 +750,12 @@ std::expected<ShpFile, std::string> DecodeShp(
         "layout",
         *shp.lender));
   }
-  const Counts counts{.bones = ByteAt(data, kBoneCountAt),
-                      .groups = ByteAt(data, kGroupCountAt),
-                      .parts = {ReadLe<std::uint16_t>(data, kTriangleCountAt),
-                                ReadLe<std::uint16_t>(data, kQuadCountAt),
-                                ReadLe<std::uint16_t>(data, kMixedCountAt)}};
+  const auto counts = DecodeShpCounts(data);
+  if (!counts) return std::unexpected(counts.error());
   std::ranges::copy(data.subspan(kLayoutAt, kShpLayoutBlockBytes),
                     shp.layout.begin());
   const Bytes model = data.subspan(kShpModelOffset, *model_bytes);
-  if (std::cmp_less(model.size(),
-                    kModelHeaderBytes + (counts.bones * kBoneBytes))) {
-    return Fail(kShpModelOffset, "the model is too small for its bones");
-  }
-  if (auto decoded = DecodeModel(model, counts, shp); !decoded) {
+  if (auto decoded = DecodeModel(model, *counts, shp); !decoded) {
     return std::unexpected(std::format("model {}", decoded.error()));
   }
   return shp;
@@ -777,26 +763,65 @@ std::expected<ShpFile, std::string> DecodeShp(
 
 std::expected<std::vector<std::byte>, std::string> EncodeShp(
     const ShpFile& shp) {
-  if (auto checked = CheckCounts(shp); !checked) {
+  if (auto checked = CheckTexture(shp); !checked) {
     return std::unexpected(checked.error());
   }
-  const std::vector<std::byte> model = EncodeModel(shp);
-  if (model.size() >
+  auto model = EncodeShpModel(shp);
+  if (!model) return std::unexpected(model.error());
+  Writer out;
+  out.Append(model->counts);
+  out.Append(shp.layout);
+  out.Put(static_cast<std::int32_t>(model->model.size()));
+  out.Append(model->model);
+  PutTail(out, shp);
+  return out.Take();
+}
+
+std::expected<ShpModelCounts, std::string> DecodeShpCounts(Bytes data) {
+  if (data.size() < kShpCountsBytes) {
+    return Fail(0, std::format("the counts need {} bytes; {} remain",
+                               kShpCountsBytes, data.size()));
+  }
+  if (ReadLe<std::uint32_t>(data, 0) != kMagic) {
+    return Fail(0, "the file does not start with the magic \"H01\"");
+  }
+  return ShpModelCounts{.bones = ByteAt(data, kBoneCountAt),
+                        .groups = ByteAt(data, kGroupCountAt),
+                        .parts = {ReadLe<std::uint16_t>(data, kTriangleCountAt),
+                                  ReadLe<std::uint16_t>(data, kQuadCountAt),
+                                  ReadLe<std::uint16_t>(data, kMixedCountAt)}};
+}
+
+std::expected<ShpModel, std::string> DecodeShpModel(
+    Bytes model, const ShpModelCounts& counts, bool colored) {
+  ShpModel decoded;
+  decoded.colored = colored;
+  if (auto read = DecodeModel(model, counts, decoded); !read) {
+    return std::unexpected(read.error());
+  }
+  return decoded;
+}
+
+std::expected<ShpModelBytes, std::string> EncodeShpModel(
+    const ShpModel& model) {
+  if (auto checked = CheckModel(model); !checked) {
+    return std::unexpected(checked.error());
+  }
+  ShpModelBytes encoded{.counts = {}, .model = EncodeModel(model)};
+  if (encoded.model.size() >
       static_cast<std::size_t>(std::numeric_limits<std::int32_t>::max())) {
     return Refuse("the model is too large");
   }
   Writer out;
   out.Put(kMagic);
-  out.PutByte(static_cast<std::uint8_t>(shp.bones.size()));
-  out.PutByte(static_cast<std::uint8_t>(shp.groups.size()));
-  for (const auto& part : shp.parts) {
+  out.PutByte(static_cast<std::uint8_t>(model.bones.size()));
+  out.PutByte(static_cast<std::uint8_t>(model.groups.size()));
+  for (const auto& part : model.parts) {
     out.Put(static_cast<std::uint16_t>(part.size()));
   }
-  out.Append(shp.layout);
-  out.Put(static_cast<std::int32_t>(model.size()));
-  out.Append(model);
-  PutTail(out, shp);
-  return out.Take();
+  const std::vector<std::byte> counts = out.Take();
+  std::ranges::copy(counts, encoded.counts.begin());
+  return encoded;
 }
 
 }  // namespace VS::Content

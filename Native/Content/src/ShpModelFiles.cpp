@@ -8,9 +8,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <format>
-#include <fstream>
 #include <initializer_list>
-#include <iterator>
 #include <limits>
 #include <optional>
 #include <span>
@@ -20,7 +18,6 @@
 #include <vector>
 
 #include "Content/ConversionManifest.hpp"
-#include "Platform/Paths.hpp"
 #include "nlohmann/json.hpp"
 
 namespace VS::Content {
@@ -591,46 +588,19 @@ Json TexturePayload(const ShpModelDocument& document) {
 // palette words and the buffer views of the sound and the embedded SEQ.
 struct Payload {
   ShpModelDocument document;
-  std::array<std::uint16_t, kShpPartCount> counts{};
+  ShpPolygonCounts counts{};
   std::uint8_t palette_words = 0;
   std::optional<std::size_t> sound_view;
   std::optional<std::size_t> sequence_view;
 };
 
 Check ReadIdentity(const JsonMembers& members, ShpModelDocument& document) {
-  auto schema = members.String("schema");
-  if (!schema) return std::unexpected(schema.error());
-  if (*schema != kShpModelSchema) {
-    return std::unexpected(
-        std::format("{} is \"{}\"; a character model is \"{}\"",
-                    members.Where("schema"), *schema, kShpModelSchema));
-  }
-  auto version = members.Unsigned("schema_version", kU32Max);
-  if (!version) return std::unexpected(version.error());
-  if (*version != kShpModelSchemaVersion) {
-    return std::unexpected(std::format("{} is {}; this reader takes {}",
-                                       members.Where("schema_version"),
-                                       *version, kShpModelSchemaVersion));
-  }
-  auto id = members.String("id");
-  auto source = members.String("source");
-  auto sha256 = members.String("source_sha256");
-  if (!id || !IsContentId(*id)) {
-    return std::unexpected(
-        std::format("{} must be lowercase letters, digits, '.', '_' or '-'",
-                    members.Where("id")));
-  }
-  if (!source || source->empty()) {
-    return std::unexpected(
-        std::format("{} must name the disc file", members.Where("source")));
-  }
-  if (!sha256 || !IsLowercaseSha256(*sha256)) {
-    return std::unexpected(std::format("{} must be a lowercase SHA-256",
-                                       members.Where("source_sha256")));
-  }
-  document.id = std::move(*id);
-  document.source = std::move(*source);
-  document.source_sha256 = std::move(*sha256);
+  auto identity = ReadModelIdentity(
+      members, kShpModelSchema, kShpModelSchemaVersion, "a character model");
+  if (!identity) return std::unexpected(identity.error());
+  document.id = std::move(identity->id);
+  document.source = std::move(identity->source);
+  document.source_sha256 = std::move(identity->source_sha256);
   return {};
 }
 
@@ -645,14 +615,13 @@ Check ReadGeometryHeader(const JsonMembers& members, Payload& payload) {
   if (!sequence) return std::unexpected(sequence.error());
   payload.sound_view = *sound;
   payload.sequence_view = *sequence;
-  return FirstError({
-      ReadUnsignedArray(members, "polygon_counts", payload.counts),
-      ReadUnsignedArray(members, "limb_ranges", shp.limb_ranges),
-      ReadUnsigned(members, "sequence_word", shp.sequence_word),
-  });
+  auto counts = ReadShpModelHeader(members, shp);
+  if (!counts) return std::unexpected(counts.error());
+  payload.counts = *counts;
+  return ReadUnsigned(members, "sequence_word", shp.sequence_word);
 }
 
-Check ReadBones(const JsonMembers& members, ShpFile& shp) {
+Check ReadBones(const JsonMembers& members, ShpModel& model) {
   auto bones = members.Get("bones");
   if (!bones) return std::unexpected(bones.error());
   const Json& list = **bones;
@@ -664,7 +633,7 @@ Check ReadBones(const JsonMembers& members, ShpFile& shp) {
     auto bone = BoneOf(list[index],
                        std::format("{}[{}]", members.Where("bones"), index));
     if (!bone) return std::unexpected(bone.error());
-    shp.bones.push_back(*bone);
+    model.bones.push_back(*bone);
   }
   return {};
 }
@@ -725,25 +694,15 @@ Check ReadTexturePayload(const JsonMembers& members, Payload& payload) {
 
 // --- The glTF file.
 
-struct BufferView {
-  std::size_t offset = 0;
-  std::size_t length = 0;
-  std::size_t stride = 0;  // 0: tightly packed
-};
-
-struct GltfFile {
-  std::string name;
-  Json json;
-  Bytes buffer;
-  std::vector<BufferView> views;
-};
+using BufferView = ModelGltfView;
+using GltfFile = ModelGltfFile;
 
 Check CheckAsset(const GltfFile& file) {
   const JsonMembers top(file.json, file.name);
-  if (auto only =
-          top.Only({"asset", "extensionsUsed", "scene", "scenes", "nodes",
-                    "skins", "meshes", "materials", "textures", "samplers",
-                    "images", "accessors", "bufferViews", "buffers"});
+  if (auto only = top.Only({"asset", "extensionsUsed", "extensions", "scene",
+                            "scenes", "nodes", "skins", "meshes", "materials",
+                            "textures", "samplers", "images", "accessors",
+                            "bufferViews", "buffers"});
       !only) {
     return only;
   }
@@ -866,17 +825,9 @@ Result<GltfFile> ReadGltf(std::string_view stem, const ImageFileReader& read) {
 }
 
 Result<Payload> ReadPayload(const GltfFile& file) {
-  const JsonMembers top(file.json, file.name);
-  const JsonMembers asset(file.json.at("asset"), top.Where("asset"));
-  auto extras = asset.Get("extras");
-  if (!extras) return std::unexpected(extras.error());
-  const JsonMembers extra(**extras, asset.Where("extras"));
-  if (auto only = extra.Only({kShpExtrasKey}); !only) {
-    return std::unexpected(only.error());
-  }
-  auto value = extra.Get(kShpExtrasKey);
-  if (!value) return std::unexpected(value.error());
-  const JsonMembers members(**value, extra.Where(kShpExtrasKey));
+  auto payload_members = ModelGltfPayload(file);
+  if (!payload_members) return std::unexpected(payload_members.error());
+  const JsonMembers& members = *payload_members;
   if (auto only = members.Only({"schema", "schema_version", "id", "source",
                                 "source_sha256", "colored", "polygon_counts",
                                 "limb_ranges", "layout", "bones", "sound",
@@ -888,7 +839,6 @@ Result<Payload> ReadPayload(const GltfFile& file) {
   if (auto read = FirstError({
           ReadIdentity(members, payload.document),
           ReadGeometryHeader(members, payload),
-          ReadBones(members, payload.document.shp),
           ReadLayout(members, payload.document.shp),
           ReadTexturePayload(members, payload),
       });
@@ -1152,11 +1102,32 @@ Result<std::size_t> SkinMatrices(const JsonMembers& top) {
   return static_cast<std::size_t>(*matrices);
 }
 
-// Whether two values are the same JSON, whatever their member order and
-// whether their numbers are written as integers or floats.
-bool SameJson(const Json& left, const Json& right) {
-  return nlohmann::json::parse(left.dump()) ==
-         nlohmann::json::parse(right.dump());
+// A skeleton number this close to the expected one matches it: a float's
+// rounding of a glTF re-export, far below one angle unit's 0.0015 radians.
+constexpr double kSkeletonTolerance = 1e-6;
+
+// Whether two values are the same JSON, whatever their member order, with
+// numbers equal within kSkeletonTolerance.
+bool NearJson(const Json& left, const Json& right) {
+  if (left.is_number() && right.is_number()) {
+    return std::abs(left.get<double>() - right.get<double>()) <=
+           kSkeletonTolerance;
+  }
+  if (left.is_object() && right.is_object()) {
+    if (left.size() != right.size()) return false;
+    for (const auto& member : left.items()) {
+      const auto other = right.find(member.key());
+      if (other == right.end() || !NearJson(member.value(), *other)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  if (left.is_array() && right.is_array()) {
+    return left.size() == right.size() &&
+           std::equal(left.begin(), left.end(), right.begin(), NearJson);
+  }
+  return left == right;
 }
 
 Check CheckInverseBindMatrices(const GltfFile& file, std::size_t accessor,
@@ -1182,17 +1153,17 @@ Check CheckInverseBindMatrices(const GltfFile& file, std::size_t accessor,
   return {};
 }
 
-Check CheckSkeleton(const GltfFile& file, const ShpFile& shp,
+Check CheckSkeleton(const GltfFile& file, const ModelMeshSpec& spec,
                     const std::vector<std::int64_t>& origins) {
   const JsonMembers top(file.json, file.name);
   auto matrices = SkinMatrices(top);
   if (!matrices) return std::unexpected(matrices.error());
-  const Json skeleton = ShpSkeletonGltf(shp, *matrices);
+  const Json skeleton = spec.skeleton(*matrices);
   for (const auto& member : skeleton.items()) {
     const Json* actual = top.Find(member.key());
-    if (actual == nullptr || !SameJson(*actual, member.value())) {
+    if (actual == nullptr || !NearJson(*actual, member.value())) {
       return std::unexpected(std::format(
-          "{} is not the skeleton asset.extras.vs.bones gives; edit the bones "
+          "{} is not the skeleton asset.extras.vs gives; edit the bones "
           "there",
           top.Where(member.key())));
     }
@@ -1595,8 +1566,10 @@ Check WalkPolygons(const PolygonList& polygons,
 Check ReadPrimitive(const GltfFile& file, const Json& json,
                     const std::string& where, MeshState& mesh) {
   const JsonMembers members(json, where);
-  if (auto only =
-          members.Only({"attributes", "indices", "material", "mode", "extras"});
+  // A primitive's extensions (material variants) only choose its preview
+  // material, which the reader does not read.
+  if (auto only = members.Only({"attributes", "indices", "material", "mode",
+                                "extras", "extensions"});
       !only) {
     return only;
   }
@@ -1621,14 +1594,15 @@ Check ReadPrimitive(const GltfFile& file, const Json& json,
   return WalkPolygons(*polygons, *indices, *corners, mesh);
 }
 
-Result<MeshState> ReadMesh(const GltfFile& file, const Payload& payload,
+Result<MeshState> ReadMesh(const GltfFile& file, const ModelMeshSpec& spec,
+                           bool colored,
                            const std::vector<std::int64_t>& origins) {
   MeshState mesh;
   mesh.origins = &origins;
-  mesh.uv_scale = ShpUvScale(payload.document).value_or(ShpTextureSize{});
-  mesh.colored = payload.document.shp.colored;
+  mesh.uv_scale = spec.uv_scale;
+  mesh.colored = colored;
   std::size_t total = 0;
-  for (const std::uint16_t count : payload.counts) total += count;
+  for (const std::uint16_t count : spec.counts) total += count;
   mesh.polygons.resize(total);
   const JsonMembers top(file.json, file.name);
   auto meshes = top.Get("meshes");
@@ -1658,9 +1632,9 @@ Result<MeshState> ReadMesh(const GltfFile& file, const Payload& payload,
   return mesh;
 }
 
-// --- The SHP from the parts.
+// --- The model from the parts.
 
-Check AssembleVertices(const MeshState& mesh, ShpFile& shp) {
+Check AssembleVertices(const MeshState& mesh, ShpModel& model) {
   for (std::size_t vertex = 0; vertex < mesh.vertices.size(); ++vertex) {
     const VertexRecord& record = mesh.vertices[vertex];
     if (!record.seen) {
@@ -1669,20 +1643,19 @@ Check AssembleVertices(const MeshState& mesh, ShpFile& shp) {
           "no gaps",
           vertex, kShpVertexAttribute, mesh.vertices.size() - 1));
     }
-    shp.vertices.push_back(record.position);
+    model.vertices.push_back(record.position);
     const auto end = static_cast<std::uint16_t>(vertex + 1);
-    if (shp.groups.empty() || shp.groups.back().bone != record.bone) {
-      shp.groups.push_back(ShpGroup{.bone = record.bone, .end = end});
+    if (model.groups.empty() || model.groups.back().bone != record.bone) {
+      model.groups.push_back(ShpGroup{.bone = record.bone, .end = end});
     } else {
-      shp.groups.back().end = end;
+      model.groups.back().end = end;
     }
   }
   return {};
 }
 
-Check AssembleParts(MeshState& mesh,
-                    const std::array<std::uint16_t, kShpPartCount>& counts,
-                    ShpFile& shp) {
+Check AssembleParts(MeshState& mesh, const ShpPolygonCounts& counts,
+                    ShpModel& model) {
   std::size_t ordinal = 0;
   for (std::size_t part = 0; part < kShpPartCount; ++part) {
     for (std::size_t index = 0; index < counts[part]; ++index, ++ordinal) {
@@ -1692,7 +1665,7 @@ Check AssembleParts(MeshState& mesh,
             "polygon {} is in no primitive; polygon_counts adds up to {}",
             ordinal, mesh.polygons.size()));
       }
-      shp.parts[part].push_back(std::move(*polygon));
+      model.parts[part].push_back(std::move(*polygon));
     }
   }
   return {};
@@ -1715,20 +1688,13 @@ Check ReadOwnTexture(std::string_view stem, const ImageFileReader& read,
                      Payload& payload) {
   ShpModelDocument& document = payload.document;
   if (document.image_id.empty()) return {};
-  auto image = DecodeImageFiles(stem, read);
+  auto image =
+      ReadModelImage(stem, read,
+                     ModelIdentity{.id = document.id,
+                                   .source = document.source,
+                                   .source_sha256 = document.source_sha256},
+                     document.image_id);
   if (!image) return std::unexpected(image.error());
-  const std::string sidecar = NameOf(stem, kImageSidecarSuffix);
-  if (image->id != document.image_id) {
-    return std::unexpected(
-        std::format("{} has id '{}'; asset.extras.vs.texture.image says '{}'",
-                    sidecar, image->id, document.image_id));
-  }
-  if (image->provenance.source != document.source ||
-      image->provenance.source_sha256 != document.source_sha256) {
-    return std::unexpected(std::format("{} comes from {}; the model from {}",
-                                       sidecar, image->provenance.source,
-                                       document.source));
-  }
   auto texture = ShpTextureOf(image->image, payload.palette_words);
   if (!texture) {
     return std::unexpected(
@@ -1740,25 +1706,19 @@ Check ReadOwnTexture(std::string_view stem, const ImageFileReader& read,
 
 Result<ShpModelDocument> AssembleModel(const GltfFile& file, Payload& payload) {
   ShpFile& shp = payload.document.shp;
-  auto origins = ShpBoneOrigins(shp);
-  if (!origins) {
-    return std::unexpected(std::format("{}: asset.extras.vs.bones: {}",
-                                       file.name, origins.error()));
+  const ModelMeshSpec spec{
+      .counts = payload.counts,
+      .uv_scale = ShpUvScale(payload.document).value_or(ShpTextureSize{}),
+      .skeleton = [&shp](std::size_t matrices) {
+        return ShpSkeletonGltf(shp, matrices);
+      }};
+  if (auto mesh = ReadModelMesh(file, spec, shp); !mesh) {
+    return std::unexpected(mesh.error());
   }
-  if (auto skeleton = CheckSkeleton(file, shp, *origins); !skeleton) {
-    return std::unexpected(skeleton.error());
-  }
-  auto mesh = ReadMesh(file, payload, *origins);
-  if (!mesh) return std::unexpected(mesh.error());
   auto sound = ViewBytes(file, payload.sound_view, "sound");
   if (!sound) return std::unexpected(sound.error());
   auto sequence = ViewBytes(file, payload.sequence_view, "sequence");
   if (!sequence) return std::unexpected(sequence.error());
-  if (auto assembled = FirstError({AssembleVertices(*mesh, shp),
-                                   AssembleParts(*mesh, payload.counts, shp)});
-      !assembled) {
-    return std::unexpected(std::format("{}: {}", file.name, assembled.error()));
-  }
   shp.sound = std::move(*sound);
   shp.sequence = std::move(*sequence);
   if (auto encoded = EncodeShp(shp); !encoded) {
@@ -1779,7 +1739,7 @@ std::optional<ShpTextureSize> ShpUvScale(const ShpModelDocument& document) {
 }
 
 std::expected<std::vector<std::int64_t>, std::string> ShpBoneOrigins(
-    const ShpFile& shp) {
+    const ShpModel& shp) {
   if (shp.bones.empty()) {
     return std::unexpected(std::string("the model has no bones"));
   }
@@ -1800,7 +1760,7 @@ std::expected<std::vector<std::int64_t>, std::string> ShpBoneOrigins(
   return origins;
 }
 
-JsonDocument ShpSkeletonGltf(const ShpFile& shp,
+JsonDocument ShpSkeletonGltf(const ShpModel& shp,
                              std::size_t inverse_bind_matrices) {
   std::vector<Json> children(shp.bones.size(), Json::array());
   for (std::size_t bone = 1; bone < shp.bones.size(); ++bone) {
@@ -1962,12 +1922,6 @@ JsonDocument ShpModelPayload(const ShpModelDocument& document,
                              std::optional<std::size_t> sound_view,
                              std::optional<std::size_t> sequence_view) {
   const ShpFile& shp = document.shp;
-  Json counts = Json::array();
-  for (const std::vector<ShpPolygon>& part : shp.parts) {
-    counts.push_back(part.size());
-  }
-  Json bones = Json::array();
-  for (const ShpBone& bone : shp.bones) bones.push_back(BoneJson(bone));
   Json payload = Json::object();
   payload["schema"] = std::string(kShpModelSchema);
   payload["schema_version"] = kShpModelSchemaVersion;
@@ -1975,10 +1929,10 @@ JsonDocument ShpModelPayload(const ShpModelDocument& document,
   payload["source"] = document.source;
   payload["source_sha256"] = document.source_sha256;
   payload["colored"] = shp.colored;
-  payload["polygon_counts"] = std::move(counts);
+  payload["polygon_counts"] = ShpPolygonCountsJson(shp);
   payload["limb_ranges"] = shp.limb_ranges;
   payload["layout"] = ShpLayoutJson(shp.layout);
-  payload["bones"] = std::move(bones);
+  payload["bones"] = ShpBonesJson(shp);
   payload["sound"] = IndexJson(sound_view);
   payload["sequence_word"] = shp.sequence_word;
   payload["sequence"] = IndexJson(sequence_view);
@@ -1986,12 +1940,145 @@ JsonDocument ShpModelPayload(const ShpModelDocument& document,
   return payload;
 }
 
-std::expected<ShpModelDocument, std::string> DecodeShpModelFiles(
+std::expected<ModelGltfFile, std::string> ReadModelGltf(
     std::string_view stem, const ImageFileReader& read) {
   if (auto valid = CheckStem(stem); !valid) {
     return std::unexpected(valid.error());
   }
-  auto file = ReadGltf(stem, read);
+  return ReadGltf(stem, read);
+}
+
+std::expected<JsonMembers, std::string> ModelGltfPayload(
+    const ModelGltfFile& file) {
+  const JsonMembers top(file.json, file.name);
+  auto asset_value = top.Get("asset");
+  if (!asset_value) return std::unexpected(asset_value.error());
+  const JsonMembers asset(**asset_value, top.Where("asset"));
+  auto extras = asset.Get("extras");
+  if (!extras) return std::unexpected(extras.error());
+  const JsonMembers extra(**extras, asset.Where("extras"));
+  if (auto only = extra.Only({kShpExtrasKey}); !only) {
+    return std::unexpected(only.error());
+  }
+  auto value = extra.Get(kShpExtrasKey);
+  if (!value) return std::unexpected(value.error());
+  return JsonMembers(**value, extra.Where(kShpExtrasKey));
+}
+
+std::expected<ModelIdentity, std::string> ReadModelIdentity(
+    const JsonMembers& payload, std::string_view schema, std::uint32_t version,
+    std::string_view kind) {
+  auto name = payload.String("schema");
+  if (!name) return std::unexpected(name.error());
+  if (*name != schema) {
+    return std::unexpected(std::format("{} is \"{}\"; {} is \"{}\"",
+                                       payload.Where("schema"), *name, kind,
+                                       schema));
+  }
+  auto read_version = payload.Unsigned("schema_version", kU32Max);
+  if (!read_version) return std::unexpected(read_version.error());
+  if (*read_version != version) {
+    return std::unexpected(std::format("{} is {}; this reader takes {}",
+                                       payload.Where("schema_version"),
+                                       *read_version, version));
+  }
+  auto id = payload.String("id");
+  auto source = payload.String("source");
+  auto sha256 = payload.String("source_sha256");
+  if (!id || !IsContentId(*id)) {
+    return std::unexpected(
+        std::format("{} must be lowercase letters, digits, '.', '_' or '-'",
+                    payload.Where("id")));
+  }
+  if (!source || source->empty()) {
+    return std::unexpected(
+        std::format("{} must name the disc file", payload.Where("source")));
+  }
+  if (!sha256 || !IsLowercaseSha256(*sha256)) {
+    return std::unexpected(std::format("{} must be a lowercase SHA-256",
+                                       payload.Where("source_sha256")));
+  }
+  return ModelIdentity{.id = std::move(*id),
+                       .source = std::move(*source),
+                       .source_sha256 = std::move(*sha256)};
+}
+
+JsonDocument ShpPolygonCountsJson(const ShpModel& model) {
+  Json counts = Json::array();
+  for (const std::vector<ShpPolygon>& part : model.parts) {
+    counts.push_back(part.size());
+  }
+  return counts;
+}
+
+JsonDocument ShpBonesJson(const ShpModel& model) {
+  Json bones = Json::array();
+  for (const ShpBone& bone : model.bones) bones.push_back(BoneJson(bone));
+  return bones;
+}
+
+std::expected<ShpPolygonCounts, std::string> ReadShpModelHeader(
+    const JsonMembers& payload, ShpModel& model) {
+  ShpPolygonCounts counts{};
+  model.bones.clear();
+  if (auto read = FirstError({
+          ReadUnsignedArray(payload, "polygon_counts", counts),
+          ReadUnsignedArray(payload, "limb_ranges", model.limb_ranges),
+          ReadBones(payload, model),
+      });
+      !read) {
+    return std::unexpected(read.error());
+  }
+  return counts;
+}
+
+std::expected<void, std::string> ReadModelMesh(const ModelGltfFile& file,
+                                               const ModelMeshSpec& spec,
+                                               ShpModel& model) {
+  auto origins = ShpBoneOrigins(model);
+  if (!origins) {
+    return std::unexpected(std::format("{}: asset.extras.vs.bones: {}",
+                                       file.name, origins.error()));
+  }
+  if (auto skeleton = CheckSkeleton(file, spec, *origins); !skeleton) {
+    return std::unexpected(skeleton.error());
+  }
+  auto mesh = ReadMesh(file, spec, model.colored, *origins);
+  if (!mesh) return std::unexpected(mesh.error());
+  model.groups.clear();
+  model.vertices.clear();
+  for (std::vector<ShpPolygon>& part : model.parts) part.clear();
+  if (auto assembled = FirstError({AssembleVertices(*mesh, model),
+                                   AssembleParts(*mesh, spec.counts, model)});
+      !assembled) {
+    return std::unexpected(std::format("{}: {}", file.name, assembled.error()));
+  }
+  return {};
+}
+
+std::expected<ImageDocument, std::string> ReadModelImage(
+    std::string_view stem, const ImageFileReader& read,
+    const ModelIdentity& model, std::string_view image_id) {
+  auto image = DecodeImageFiles(stem, read);
+  if (!image) return std::unexpected(image.error());
+  const std::string sidecar = NameOf(stem, kImageSidecarSuffix);
+  if (image->id != image_id) {
+    return std::unexpected(
+        std::format("{} has id '{}'; asset.extras.vs.texture.image says '{}'",
+                    sidecar, image->id, image_id));
+  }
+  if (image->provenance.source != model.source ||
+      image->provenance.source_sha256 != model.source_sha256) {
+    return std::unexpected(std::format("{} comes from {}; the model from {}",
+                                       sidecar, image->provenance.source,
+                                       model.source));
+  }
+  return std::move(*image);
+}
+
+std::expected<ShpModelDocument, std::string> DecodeShpModelFiles(
+    std::string_view stem, const ImageFileReader& read) {
+  auto file = ReadModelGltf(stem, read);
   if (!file) return std::unexpected(file.error());
   auto payload = ReadPayload(*file);
   if (!payload) return std::unexpected(payload.error());
@@ -2003,20 +2090,7 @@ std::expected<ShpModelDocument, std::string> DecodeShpModelFiles(
 
 std::expected<ShpModelDocument, std::string> LoadShpModelFiles(
     const fs::path& directory, std::string_view stem) {
-  return DecodeShpModelFiles(
-      stem, [&directory](const std::string& name) -> std::optional<Bytes> {
-        std::ifstream input(directory / Platform::Utf8Path(name),
-                            std::ios::binary);
-        if (!input) return std::nullopt;
-        const std::vector<char> data{std::istreambuf_iterator<char>(input),
-                                     std::istreambuf_iterator<char>()};
-        if (input.bad()) return std::nullopt;
-        Bytes bytes(data.size());
-        std::ranges::transform(data, bytes.begin(), [](char value) {
-          return static_cast<std::byte>(value);
-        });
-        return bytes;
-      });
+  return DecodeShpModelFiles(stem, DirectoryFileReader(directory));
 }
 
 }  // namespace VS::Content

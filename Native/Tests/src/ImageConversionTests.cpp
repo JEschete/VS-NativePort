@@ -35,6 +35,7 @@
 #include "Extract/ImageConversion.hpp"
 #include "Extract/ImageFilesWriter.hpp"
 #include "Extract/ShpModelConversion.hpp"
+#include "Extract/WepModelConversion.hpp"
 #include "Extract/WorkshopRecipeConversion.hpp"
 #include "Field/BackgroundLive.hpp"
 
@@ -470,9 +471,9 @@ void OverwriteFile(const fs::path& path, const Bytes& bytes) {
   REQUIRE(output.good());
 }
 
-// Converts root's images and records its workshop recipe tables and character
-// models (none in these stores), so the store's conversion check covers the
-// images alone.
+// Converts root's images and records its workshop recipe tables, character
+// models and weapons (none in these stores), so the store's conversion check
+// covers the images alone.
 Extract::ImageConversionReport RequiredConversion(const fs::path& root,
                                                   bool force) {
   auto report = Extract::ConvertDiscImages(root, force);
@@ -483,6 +484,9 @@ Extract::ImageConversionReport RequiredConversion(const fs::path& root,
   const auto models = Extract::ConvertDiscModels(root, force);
   INFO((models ? std::string{} : models.error()));
   REQUIRE(models.has_value());
+  const auto weapons = Extract::ConvertDiscWeapons(root, force);
+  INFO((weapons ? std::string{} : weapons.error()));
+  REQUIRE(weapons.has_value());
   return *report;
 }
 

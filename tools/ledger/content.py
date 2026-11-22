@@ -104,6 +104,7 @@ DECODERS = {
     "fbt-texture-png": "Extract::ConvertFbtTexture",
     "shp-gltf": "Content::DecodeShp",
     "syd-recipe-csv": "Extract::DecodeSydRecipes",
+    "wep-gltf": "Content::DecodeWep",
 }
 # The disc-corpus tests that prove each converter preserves its sources (ASSET_PIPELINE section 7).
 EVIDENCE = {
@@ -117,6 +118,8 @@ EVIDENCE = {
     "syd-recipe-csv": ("Extracted workshop recipe files convert to tables exactly",
                        "Original blade recipe produces the inspected ordered result",
                        "Original shield and armor recipes use their distinct material tables"),
+    "wep-gltf": ("Extracted WEP files decode and rebuild their exact bytes",
+                 "Extracted WEP models load from their conversions as exact bytes"),
 }
 
 

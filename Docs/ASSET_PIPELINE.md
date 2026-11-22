@@ -92,7 +92,7 @@ Native\data\
     fonts\ main.png main.font.json (glyph atlas + metrics)
   models\            Tier 3: glTF 2.0 as .gltf + .bin, textures as shared image files (§6.4)
     characters\<SHP>.gltf          (skinned mesh + applicable SEQ/ESQ clips, texture frames and VS metadata)
-    weapons\<WEP>.gltf             (material variants = blade materials)
+    weapons\<WEP>.gltf             (+ .bin, texture image files; material variants = blade materials, §6.2.4)
     armor\ shields\ ...            (as discovered per CONTENT_LEDGER)
     zud\<ZUD>.json                 (enemy model set: references SHP/WEP/SEQ glTFs; no duplicate meshes)
   rooms\<zone>\<MAPxxx>.gltf       (room geometry + textures)  + <MAPxxx>.room.json (collision, tiles, doors, scripts)
@@ -171,7 +171,7 @@ The disc has 27 kinds of files. The "Source" column below names the files on the
 | Source (count) | Output | Converter notes | References |
 |---|---|---|---|
 | `OBJ\*.SHP` (202) + `OBJ\*.SEQ` (700) | `models\characters\<SHP>.gltf` | §6.2 | vstools `SHP.js`/`SEQ.js`, VagrantStoryImporter, decomp actor loaders |
-| `OBJ\*.WEP` (127) | `models\weapons\<WEP>.gltf` | static mesh, one texture per blade material via `KHR_materials_variants` | vstools `WEP.js`, VagrantStoryImporter |
+| `OBJ\*.WEP` (127) | `models\weapons\<WEP>.gltf` | skinned mesh; one palette row per blade material, shown through `KHR_materials_variants` (§6.2.4) | vstools `WEP.js`, VagrantStoryImporter |
 | `MAP\*.ZUD` (455) | `models\zud\<ZUD>.json` + any meshes not already emitted | a ZUD bundles SHP + WEP(s) + SEQ for an enemy. It is emitted as **references** to the shared glTFs (dedup by content hash), not copied | vstools `ZUD.js` |
 | `SMALL\*.ARM` (32) | `rooms\automap\<ARM>.json` | minimap scenes: a room count, 12-byte room records (visited, payload length, zone, map), display geometry (vertices, triangles, quads, lines, doors) and 36-byte names with previous/next links; (zone, map) becomes the stable room ID and names become string IDs. 47 map IDs exceed their zone's room table: explain them before converting | native `Field\MinimapScene.hpp` |
 | `SMALL\*.DIS` (22) | `textures\dis\*.png` + `.image.json`, `catalogs\world\puzzle-challenges.csv` | concatenated 4bpp TIMs; `IQ.DIS` also holds the 64-record cube-puzzle challenge table (keyed by room ID); `ENDSCR00–15` are 16bpp result screens | native `CubePuzzleLifecycle.hpp`, `ClearResultsCore.cpp` |
@@ -237,7 +237,7 @@ Additions the reference does not have, required by P4 (lossless). The initial co
   - The load completes in the same update that requests it, where the original waited for the CD.
   - An edited model must still fit the original sector-rounded allocation; a larger one is refused.
 
-Not yet done: SEQ/ESQ animation clips (#205, #206), ETM texture overlays (#207), WEP and ZUD (#204, #200), a model larger than its original allocation, and a re-export from Blender through the validator.
+Not yet done: SEQ/ESQ animation clips (#205, #206), ETM texture overlays (#207), ZUD (#200), a model larger than its original allocation, and a re-export from Blender through the validator. Weapons are §6.2.4.
 
 #### 6.2.1 Container, schema and optional extension
 
@@ -280,6 +280,20 @@ All packages below are **planned**, not completed by this document. Their prereq
 AP3 and AP4 can proceed independently after AP2. The two-actor slice establishes the contract, not full coverage: before the content gate passes, inventory every ESQ/ETM and settle each consumed binding or record a justified skip. Do not claim universal viewer support or facial fidelity from a single successful clip.
 
 **Rendering boundary:** the unlit glTF baseline and baked preview colors are not the final lighting implementation. Preserve vertex colors, per-primitive lighting/blend flags, palette changes and scene lighting inputs for the native renderer. Standard `alphaMode: BLEND` does not express every PS1 blend operation. For a reported cutscene rim/backlight effect, trace the specific shot's texture, lighting, vertex-color and event inputs before choosing its native representation; do not assume it is an animated texture.
+
+#### 6.2.4 Weapon models (WEP → glTF, #204)
+
+A WEP is the SHP magic and counts, a model section laid out as an SHP's (flat polygons, no sound), a texture with one palette per blade material, and one rest rotation per bone (`Content/WepFile.hpp`). `VS.Extract models <datadir>` (and `extract`) converts all 127 `OBJ\*.WEP` files with converter `wep-gltf` version 1 (`Extract/WepModelConversion.hpp`, `Content/WepModelFiles.hpp`), sharing the character model writer and reader:
+
+- Each weapon writes `models\weapons\<NN>.gltf` + `<NN>.bin`, its texture `<NN>.png` + `.image.json` + `.palettes.png` (§6.4), and six previews `<NN>.<material>.preview.png`. Its ids are `model.obj.<nn>.wep` and `image.obj.<nn>.wep`, so they do not collide with the character model of the same number.
+- The texture is 8-bit and 32 rows tall. `.palettes.png` has seven rows in the order iron, bronze, hagane, silver, damascus, wood, leather; BATTLE.PRG's `weaponMaterialPaletteMap` gives each item material its row. Each row is the handle's colours then the material's. The PNG's own palette is row 0 (iron), and edits to any row are validated as §6.4 requires.
+- The glTF has the character model layout, with each bone after the first turned by its rest rotation, so it shows the weapon as the game draws it. `asset.extras.vs` holds the payload (schema `vs.wep-model` version 1), including the stored rotations.
+- **Material variants:** the glTF declares `KHR_materials_variants` with one variant per material row. Each primitive maps `iron` to its own material, and each other variant to a copy that shows that material's preview. A preview is the texture with that row's palette. Blender and other variant-aware viewers can switch blade materials.
+- The previews are derived and only for viewers: the game and the reader never read them. After editing `.palettes.png`, convert again with `--force` to refresh them.
+- At runtime, `Content::LoadConvertedWeapon` serves the weapon read (`ActorAssetsLive` `BeginFileRead`, `kWeapon`) as §6.2 describes for characters. The game picks the material row when it loads the weapon (`LoadWeaponMaterialPalette`), as the original did. `RequireConversions` refuses to start without the `wep-gltf` batch.
+- The Khronos glTF validator reports 0 errors and 0 warnings for all 127 weapons, and two forced conversions write identical files.
+
+Not yet done: shields, which are SHP files, and the enemy weapons ZUD bundles load (#200); a weapon larger than its original allocation; and a re-export from Blender through the validator.
 
 ### 6.3 Rooms (MPD → glTF + room JSON)
 - **Geometry:** one glTF per room. Each texture page/CLUT group is one primitive with an unlit, nearest-sampled PNG. Vertex colors are kept, and the same `VS_UNIT_SCALE` applies.
@@ -545,7 +559,7 @@ Every converter ships with a test in `VS.Tests` (tagged `[extract]`; it runs onl
 | Tier 1 tables | disc bytes → decoder → CSV/JSON → runtime loader → re-encode with the PS1 layout == the original bytes |
 | workshop recipes | each SYD → decode → CSV tables → parse == the decoded recipes → re-encode == the original bytes (§6.8) |
 | text | string bytes → markup → encode == the original bytes, for every string |
-| SHP/SEQ/WEP | `decode(raw)` == `ModelLoader(glTF)` field by field (bones, vertices, UVs, colours, flags, every `extras` value, every keyframe). SHP today: each extracted SHP decodes and re-encodes to its exact bytes, and each converted model loads back to its exact SHP bytes (§6.2) |
+| SHP/SEQ/WEP | `decode(raw)` == `ModelLoader(glTF)` field by field (bones, vertices, UVs, colours, flags, every `extras` value, every keyframe). SHP and WEP today: each extracted file decodes and re-encodes to its exact bytes, and each converted model loads back to its exact bytes (§6.2, §6.2.4) |
 | ESQ/ETM actor bindings | decoded source == converted/reloaded skeletal and texture tracks, indexed pixels, palettes, patch rectangles, associations, timing and lifecycle commands; malformed or unresolved inputs fail explicitly |
 | MPD | the same, via `RoomLoader` |
 | textures | PNG + `.image.json` (+ `.palettes.png`, `.stp.png`) → indices and 16-bit texel/palette words == the original (exact), including `0x0000` vs `0x8000` and every STP bit |
@@ -577,7 +591,7 @@ Record source revision/dirty state, disc identity, tool/converter/schema version
 {
   "schema_version": 2,
   "extractor_version": "0.1.0",
-  "converters": { "fbc-palette-png": 1, "fbt-texture-png": 1, "shp-gltf": 1, "syd-recipe-csv": 1, "tim-png": 1 },
+  "converters": { "fbc-palette-png": 1, "fbt-texture-png": 1, "shp-gltf": 1, "syd-recipe-csv": 1, "tim-png": 1, "wep-gltf": 1 },
   "outputs": [
     {
       "id": "image.bg.001op01a",
@@ -624,7 +638,7 @@ Record source revision/dirty state, disc identity, tool/converter/schema version
 
 <!-- content:begin (generated by tools/ledger/content.py --sync) -->
 
-**1,242 of 5,162 disc files converted**, 1,242 of them with a passing round trip; 194 skipped with a reason; 3,726 unconverted.
+**1,369 of 5,162 disc files converted**, 1,369 of them with a passing round trip; 194 skipped with a reason; 3,599 unconverted.
 
 | Kind | Files | Converted | Round trip pass | Skipped | Unconverted | Converts under |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
@@ -641,7 +655,7 @@ Record source revision/dirty state, disc identity, tool/converter/schema version
 | effect plugin overlay data | 120 | 0 | 0 | 0 | 120 | #502 |
 | effect texture page | 755 | 755 | 755 | 0 | 0 | #214 |
 | ending illustration | 11 | 0 | 0 | 0 | 11 | #498 |
-| equipment model | 127 | 0 | 0 | 0 | 127 | #204 |
+| equipment model | 127 | 127 | 127 | 0 | 0 | #204 |
 | event script | 512 | 0 | 0 | 0 | 512 | #202 |
 | filler | 1 | 0 | 0 | 1 | 0 | - |
 | help graphics | 14 | 0 | 0 | 0 | 14 | #213 |

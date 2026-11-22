@@ -107,6 +107,16 @@ const ConversionOutput* PresentOutput(const fs::path& root,
   return present ? output : nullptr;
 }
 
+const ConversionOutput* MatchingOutput(const ConversionManifest& manifest,
+                                       const fs::path& root,
+                                       const ConversionOutput& expected) {
+  const ConversionOutput* output = manifest.Find(expected.id);
+  if (output == nullptr || output->files.empty()) return nullptr;
+  ConversionOutput recorded = *output;
+  recorded.files.clear();
+  return recorded == expected ? PresentOutput(root, output) : nullptr;
+}
+
 ConverterBatch StartBatch(const ConversionManifest& previous,
                           std::string_view name, std::uint32_t version,
                           bool force) {

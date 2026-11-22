@@ -305,11 +305,14 @@ void CountRefusal(const char* what, std::int64_t value) {
   }
 }
 
-// Native (#203): the SHP bytes of the converted model (ASSET_PIPELINE.md
-// §6.2) a read of `file` names, found by its sector until assets have stable
-// ids (#47).
+using ConvertedLoader = std::expected<std::vector<std::byte>, std::string> (*)(
+    const DataStore&, const ConvertedModelRead&);
+
+// Native (#203, #204): the SHP or WEP bytes of the converted model
+// (ASSET_PIPELINE.md §6.2-6.3) a read of `file` names, found by its sector
+// until assets have stable ids (#47).
 std::expected<std::vector<std::byte>, std::string> ConvertedModelBytes(
-    DiscFileExtent file) {
+    DiscFileExtent file, ConvertedLoader load) {
   const DataStore* const store = DataStore::Get();
   if (store == nullptr) {
     return std::unexpected("no extracted-data store is open");
@@ -318,25 +321,28 @@ std::expected<std::vector<std::byte>, std::string> ConvertedModelBytes(
     return std::unexpected(
         std::format("invalid LBA {} and size {}", file.sector, file.bytes));
   }
-  return LoadConvertedModel(
-      *store, {.lba = static_cast<std::uint32_t>(file.sector),
-               .rounded_size = static_cast<std::uint64_t>(file.bytes)});
+  return load(*store, {.lba = static_cast<std::uint32_t>(file.sector),
+                       .rounded_size = static_cast<std::uint64_t>(file.bytes)});
 }
 
-// Native (#203): fills `destination` with the converted model in place of
-// the disc read. A model that does not load or fit leaves zeros, which the
-// parser refuses as an empty model.
-void ReadConvertedModel(DiscFileExtent file, std::span<std::byte> destination) {
+// Native (#203, #204): fills `destination` with the converted actor or weapon
+// model in place of the disc read. A model that does not load or fit leaves
+// zeros: the parser refuses them as an empty actor model, and they parse as
+// a weapon with no geometry.
+void ReadConvertedModel(AssetFileStream stream, DiscFileExtent file,
+                        std::span<std::byte> destination) {
   std::ranges::fill(destination, std::byte{0});
-  auto bytes = ConvertedModelBytes(file);
+  const bool weapon = stream == AssetFileStream::kWeapon;
+  auto bytes = ConvertedModelBytes(
+      file, weapon ? LoadConvertedWeapon : LoadConvertedModel);
   if (bytes && bytes->size() > destination.size()) {
     bytes = std::unexpected(
         std::format("its {} bytes exceed the {}-byte model read", bytes->size(),
                     destination.size()));
   }
   if (!bytes) {
-    VS::Core::LogError("content", "actor model at LBA {}: {}", file.sector,
-                       bytes.error());
+    VS::Core::LogError("content", "{} model at LBA {}: {}",
+                       weapon ? "weapon" : "actor", file.sector, bytes.error());
     return;
   }
   std::ranges::copy(*bytes, destination.begin());
@@ -971,13 +977,16 @@ class LiveActorAssetHost final : public ActorAssetHost {
     const LiveFileStream live = Stream(stream);
     live.file->lba = file.sector;
     live.file->size = file.bytes;
-    if (stream == AssetFileStream::kActorModel) {
-      // Native (#203): the converted model loads at once, with no disc read.
+    if (stream == AssetFileStream::kActorModel ||
+        stream == AssetFileStream::kWeapon) {
+      // Native (#203, #204): the converted model loads at once, with no disc
+      // read.
       const auto wanted = static_cast<std::size_t>(std::max(file.bytes, 0));
       const std::span<std::byte> bytes = Bytes(destination, wanted);
-      ReadConvertedModel(file, bytes.first(std::min(bytes.size(), wanted)));
+      ReadConvertedModel(stream, file,
+                         bytes.first(std::min(bytes.size(), wanted)));
       *live.request = nullptr;
-      modelReadOwner = {};
+      if (FileReadOwner* owner = ReadOwner(stream)) *owner = {};
       return true;
     }
     *live.request = AllocateLiveDiscRequest(live.file);

@@ -36,6 +36,14 @@ struct SourceFile {
 [[nodiscard]] const Content::ConversionOutput* PresentOutput(
     const std::filesystem::path& root, const Content::ConversionOutput* output);
 
+// The manifest's output with `expected`'s id when it records everything
+// `expected` does but the files (`expected` lists none), and its files exist
+// under `root`; else nullptr.
+[[nodiscard]] const Content::ConversionOutput* MatchingOutput(
+    const Content::ConversionManifest& manifest,
+    const std::filesystem::path& root,
+    const Content::ConversionOutput& expected);
+
 // One converter's outputs in a run, kept unchanged or newly converted.
 struct ConverterBatch {
   std::string_view name;
