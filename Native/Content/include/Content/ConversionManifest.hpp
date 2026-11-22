@@ -37,6 +37,7 @@ struct ConverterVersion {
 // accepts; a manifest without them is refused with instructions.
 inline constexpr std::array kRequiredConverters{
     ConverterVersion{.name = "tim-png", .version = 1},
+    ConverterVersion{.name = "fbc-palette-png", .version = 1},
 };
 
 struct SourceDependency {

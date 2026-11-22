@@ -6,7 +6,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <filesystem>
 #include <format>
 #include <optional>
 #include <span>
@@ -17,7 +16,7 @@
 #include <vector>
 
 #include "Content/CdDriveLive.hpp"
-#include "Content/ConversionManifest.hpp"
+#include "Content/ConvertedImages.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Content/ImageFiles.hpp"
@@ -34,7 +33,6 @@
 #include "Field/Mpd.hpp"
 #include "Field/Room.hpp"
 #include "Field/RoomRenderingLive.hpp"
-#include "Platform/Paths.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/Render.hpp"
 #include "Render/RoomDraw.hpp"
@@ -271,108 +269,26 @@ auto RunLive(Rule rule) {
   }
 }
 
-struct ResolvedBackgroundSource {
-  const Content::DataStore::Entry* entry;
-  const Content::ConversionOutput* conversion;
-};
-
-struct NativeImageFiles {
-  std::filesystem::path directory;
-  std::string stem;
-};
-
-std::expected<ResolvedBackgroundSource, std::string> FindBackgroundSource(
-    const Content::DataStore& store, const BackgroundFile& source) {
-  if (source.lba <= 0 || source.size <= 0) {
+std::expected<Content::ImageDocument, std::string> LoadBackgroundImage(
+    const Content::DataStore& store, const BackgroundFile& file) {
+  if (file.lba <= 0 || file.size <= 0) {
     return std::unexpected(
         std::format("room background source has invalid LBA {} and size {}",
-                    source.lba, source.size));
+                    file.lba, file.size));
   }
-  const Content::DataStore::Entry* const entry =
-      store.FindBySector(static_cast<VS::u32>(source.lba));
-  const std::uint64_t sector_rounded_size =
-      entry == nullptr ? 0
-                       : static_cast<std::uint64_t>(entry->SectorCount()) *
-                             Content::DataStore::kDataSectorBytes;
-  if (entry == nullptr || entry->lba != static_cast<VS::u32>(source.lba) ||
-      !entry->path.ends_with(".TIM") ||
-      sector_rounded_size != static_cast<std::uint32_t>(source.size)) {
-    return std::unexpected(std::format(
-        "no extracted TIM matches room background LBA {} and sector-rounded "
-        "size {}",
-        source.lba, source.size));
+  auto source = Content::FindConvertedSource(
+      store, {.lba = static_cast<std::uint32_t>(file.lba),
+              .rounded_size = static_cast<std::uint64_t>(file.size),
+              .extension = ".TIM",
+              .converter = "tim-png"});
+  if (!source) {
+    return std::unexpected("room background: " + source.error());
   }
-
-  const Content::ConversionManifest* const manifest = store.Conversions();
-  if (manifest == nullptr) {
-    return std::unexpected("no conversion manifest is loaded");
-  }
-  const Content::ConversionOutput* conversion = nullptr;
-  for (const Content::ConversionOutput& output : manifest->outputs) {
-    if (output.converter != "tim-png" || output.source != entry->path) {
-      continue;
-    }
-    if (conversion != nullptr) {
-      return std::unexpected(
-          std::format("multiple tim-png outputs name {}", entry->path));
-    }
-    conversion = &output;
-  }
-  if (conversion == nullptr) {
+  auto document = Content::LoadConvertedImage(store, *source);
+  if (!document) return std::unexpected(document.error());
+  if (!document->provenance.tim) {
     return std::unexpected(
-        std::format("no tim-png output is registered for {}", entry->path));
-  }
-  return ResolvedBackgroundSource{.entry = entry, .conversion = conversion};
-}
-
-std::expected<NativeImageFiles, std::string> ResolveBackgroundImageFiles(
-    const Content::DataStore& store, const ResolvedBackgroundSource& source) {
-  constexpr std::string_view kSidecarSuffix = ".image.json";
-  std::string sidecar;
-  for (const std::string& file : source.conversion->files) {
-    if (!file.ends_with(kSidecarSuffix)) continue;
-    if (!sidecar.empty()) {
-      return std::unexpected(
-          std::format("{} has multiple image sidecars", source.entry->path));
-    }
-    sidecar = file;
-  }
-  if (sidecar.empty()) {
-    return std::unexpected(
-        std::format("{} has no native image sidecar", source.entry->path));
-  }
-
-  std::string stem_path =
-      sidecar.substr(0, sidecar.size() - kSidecarSuffix.size());
-  if (std::ranges::find(source.conversion->files, stem_path + ".png") ==
-      source.conversion->files.end()) {
-    return std::unexpected(
-        std::format("{} has no native PNG image", source.entry->path));
-  }
-  const std::size_t separator = stem_path.rfind('/');
-  std::string stem =
-      stem_path.substr(separator == std::string::npos ? 0 : separator + 1);
-  std::filesystem::path directory = store.Root();
-  if (separator != std::string::npos) {
-    directory /= VS::Platform::Utf8Path(stem_path.substr(0, separator));
-  }
-  return NativeImageFiles{.directory = std::move(directory),
-                          .stem = std::move(stem)};
-}
-
-std::expected<Content::ImageDocument, std::string> LoadBackgroundImage(
-    const ResolvedBackgroundSource& source, const NativeImageFiles& files) {
-  auto document = Content::LoadImageFiles(files.directory, files.stem);
-  if (!document) {
-    return std::unexpected(
-        std::format("{}: {}", source.entry->path, document.error()));
-  }
-  if (document->id != source.conversion->id ||
-      document->provenance.source != source.entry->path ||
-      document->provenance.source_sha256 != source.conversion->source_sha256 ||
-      document->unreferenced || !document->provenance.tim) {
-    return std::unexpected(std::format(
-        "{} does not match its conversion manifest", source.entry->path));
+        std::format("{} has no TIM provenance", source->entry->path));
   }
   const Content::TimOrigin& tim = *document->provenance.tim;
   if (document->image.depth != Content::ImageDepth::kIndexed8 ||
@@ -385,13 +301,9 @@ std::expected<Content::ImageDocument, std::string> LoadBackgroundImage(
               .zero_word = Content::ZeroWord::kTransparent,
               .semi_transparency = Content::SemiTransparency::kOff}) {
     return std::unexpected(std::format(
-        "{} is not a supported 8-bit background image", source.entry->path));
+        "{} is not a supported 8-bit background image", source->entry->path));
   }
-  if (auto valid = Content::ValidateImage(document->image); !valid) {
-    return std::unexpected(
-        std::format("{}: {}", source.entry->path, valid.error()));
-  }
-  return std::move(*document);
+  return document;
 }
 }  // namespace
 
@@ -658,13 +570,7 @@ LiveBackgroundHost::LoadBackgroundTexture(const BackgroundFile& source) {
     return std::unexpected(
         "no extracted-data store is open for the room background");
   }
-  auto source_asset = FindBackgroundSource(*store, source);
-  if (!source_asset) {
-    return std::unexpected(source_asset.error());
-  }
-  auto files = ResolveBackgroundImageFiles(*store, *source_asset);
-  if (!files) return std::unexpected(files.error());
-  auto document = LoadBackgroundImage(*source_asset, *files);
+  auto document = LoadBackgroundImage(*store, source);
   if (!document) return std::unexpected(document.error());
 
   const Content::TimOrigin& tim = *document->provenance.tim;

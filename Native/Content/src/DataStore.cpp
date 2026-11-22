@@ -1,14 +1,18 @@
 #include "Content/DataStore.hpp"
 
 #include <algorithm>
+#include <array>
 #include <charconv>
 #include <cstddef>
 #include <cstring>
+#include <expected>
 #include <format>
 #include <fstream>
 #include <limits>
 #include <memory>
+#include <span>
 #include <string>
+#include <string_view>
 #include <system_error>
 #include <unordered_set>
 #include <utility>
@@ -40,6 +44,123 @@ u32 catalogGeneration = 0;
 bool ParseU32(std::string_view s, u32& out) {
   const auto r = std::from_chars(s.data(), s.data() + s.size(), out);
   return r.ec == std::errc() && r.ptr == s.data() + s.size();
+}
+
+// A disc file type the runtime reads only through a converter's outputs.
+struct ConvertedType {
+  std::string_view extension;
+  std::string_view converter;
+};
+
+constexpr std::array kConvertedTypes{
+    ConvertedType{.extension = ".TIM", .converter = "tim-png"},
+    ConvertedType{.extension = ".FBC", .converter = "fbc-palette-png"},
+};
+
+// The fix each stale or missing output error names.
+constexpr std::string_view kRerun = " (run VS.Extract extract <disc> <dir>)";
+
+// Whether `entry`'s bytes still hash to `sha256`.
+std::expected<bool, std::string> HashMatches(const DataStore& store,
+                                             const DataStore::Entry& entry,
+                                             std::string_view sha256) {
+  const auto bytes = store.ReadAll(entry);
+  if (!bytes) return std::unexpected(bytes.error());
+  return Core::Sha256Hex(std::as_bytes(std::span(*bytes))) == sha256;
+}
+
+// Whether every file `conversion` lists exists under the data root.
+std::expected<void, std::string> RequireOutputFiles(
+    const DataStore& store, const ConversionOutput& conversion) {
+  for (const std::string& file : conversion.files) {
+    const fs::path path = store.Root() / Platform::Utf8Path(file);
+    std::error_code error;
+    const bool regular = fs::is_regular_file(path, error);
+    if (error && error != std::errc::no_such_file_or_directory) {
+      return std::unexpected("cannot inspect " + Platform::PathText(path) +
+                             ": " + error.message());
+    }
+    if (!regular) {
+      return std::unexpected(std::format("missing {} output {}{}",
+                                         conversion.converter,
+                                         Platform::PathText(path), kRerun));
+    }
+  }
+  return {};
+}
+
+// Whether the one output `type`'s converter made from `entry` is current with
+// its source and dependencies and has every file it lists.
+std::expected<void, std::string> RequireConvertedSource(
+    const DataStore& store, const ConversionManifest& manifest,
+    const DataStore::Entry& entry, const ConvertedType& type) {
+  if (entry.form != "raw") {
+    return std::unexpected(
+        std::format("{} source is not raw: {}", type.converter, entry.path));
+  }
+  const ConversionOutput* conversion = nullptr;
+  for (const ConversionOutput& output : manifest.outputs) {
+    if (output.converter != type.converter || output.source != entry.path) {
+      continue;
+    }
+    if (conversion != nullptr) {
+      return std::unexpected(std::format("multiple {} outputs name {}",
+                                         type.converter, entry.path));
+    }
+    conversion = &output;
+  }
+  if (conversion == nullptr) {
+    return std::unexpected(std::format("no {} output for {}{}", type.converter,
+                                       entry.path, kRerun));
+  }
+  const auto current = HashMatches(store, entry, conversion->source_sha256);
+  if (!current) return std::unexpected(current.error());
+  if (!*current) {
+    return std::unexpected(std::format("stale {} source hash for {}{}",
+                                       type.converter, entry.path, kRerun));
+  }
+  for (const SourceDependency& dependency : conversion->dependencies) {
+    const DataStore::Entry* dependency_entry = store.Find(dependency.source);
+    if (dependency_entry == nullptr) {
+      return std::unexpected(std::format("missing {} dependency {} for {}",
+                                         type.converter, dependency.source,
+                                         entry.path));
+    }
+    const auto matches =
+        HashMatches(store, *dependency_entry, dependency.source_sha256);
+    if (!matches) return std::unexpected(matches.error());
+    if (!*matches) {
+      return std::unexpected(std::format("stale {} dependency {} for {}{}",
+                                         type.converter, dependency.source,
+                                         entry.path, kRerun));
+    }
+  }
+  return RequireOutputFiles(store, *conversion);
+}
+
+// Whether every raw file of `type` has its converted output, and every output
+// of its converter names such a file.
+std::expected<void, std::string> RequireConvertedType(
+    const DataStore& store, const ConversionManifest& manifest,
+    const ConvertedType& type) {
+  for (const DataStore::Entry& entry : store.Entries()) {
+    if (!entry.path.ends_with(type.extension)) continue;
+    if (auto required = RequireConvertedSource(store, manifest, entry, type);
+        !required) {
+      return required;
+    }
+  }
+  for (const ConversionOutput& output : manifest.outputs) {
+    if (output.converter != type.converter) continue;
+    const DataStore::Entry* source = store.Find(output.source);
+    if (source == nullptr || source->form != "raw" ||
+        !output.source.ends_with(type.extension)) {
+      return std::unexpected(
+          std::format("{} output names a missing or non-{} source {}",
+                      type.converter, type.extension, output.source));
+    }
+  }
+  return {};
 }
 
 }  // namespace
@@ -171,75 +292,11 @@ std::expected<void, std::string> DataStore::RequireConversions() const {
       !required) {
     return required;
   }
-
-  constexpr std::string_view kTimConverter = "tim-png";
-  constexpr std::string_view kTimExtension = ".TIM";
-  for (const Entry& entry : m_entries_) {
-    if (entry.path.size() < kTimExtension.size() ||
-        entry.path.substr(entry.path.size() - kTimExtension.size()) !=
-            kTimExtension) {
-      continue;
-    }
-    if (entry.form != "raw") {
-      return std::unexpected("TIM source is not raw: " + entry.path);
-    }
-    const ConversionOutput* conversion = nullptr;
-    for (const ConversionOutput& output : m_conversion_manifest_->outputs) {
-      if (output.converter == kTimConverter && output.source == entry.path) {
-        if (conversion != nullptr) {
-          return std::unexpected("multiple tim-png outputs name " + entry.path);
-        }
-        conversion = &output;
-      }
-    }
-    if (conversion == nullptr) {
-      return std::unexpected("no tim-png output for " + entry.path +
-                             " (run VS.Extract extract <disc> <dir>)");
-    }
-    const auto source = ReadAll(entry);
-    if (!source) return std::unexpected(source.error());
-    if (Core::Sha256Hex(std::as_bytes(std::span(*source))) !=
-        conversion->source_sha256) {
-      return std::unexpected("stale tim-png source hash for " + entry.path +
-                             " (run VS.Extract extract <disc> <dir>)");
-    }
-    for (const SourceDependency& dependency : conversion->dependencies) {
-      const Entry* dependency_entry = Find(dependency.source);
-      if (dependency_entry == nullptr) {
-        return std::unexpected("missing tim-png dependency " +
-                               dependency.source + " for " + entry.path);
-      }
-      const auto bytes = ReadAll(*dependency_entry);
-      if (!bytes) return std::unexpected(bytes.error());
-      if (Core::Sha256Hex(std::as_bytes(std::span(*bytes))) !=
-          dependency.source_sha256) {
-        return std::unexpected("stale tim-png dependency " + dependency.source +
-                               " for " + entry.path +
-                               " (run VS.Extract extract <disc> <dir>)");
-      }
-    }
-    for (const std::string& file : conversion->files) {
-      const fs::path path = m_root_ / Platform::Utf8Path(file);
-      std::error_code error;
-      const bool regular = fs::is_regular_file(path, error);
-      if (error && error != std::errc::no_such_file_or_directory) {
-        return std::unexpected("cannot inspect " + Platform::PathText(path) +
-                               ": " + error.message());
-      }
-      if (!regular) {
-        return std::unexpected("missing tim-png output " +
-                               Platform::PathText(path) +
-                               " (run VS.Extract extract <disc> <dir>)");
-      }
-    }
-  }
-  for (const ConversionOutput& output : m_conversion_manifest_->outputs) {
-    if (output.converter != kTimConverter) continue;
-    const Entry* source = Find(output.source);
-    if (source == nullptr || source->form != "raw" ||
-        !output.source.ends_with(kTimExtension)) {
-      return std::unexpected(
-          "tim-png output names a missing or non-TIM source " + output.source);
+  for (const ConvertedType& type : kConvertedTypes) {
+    if (auto required =
+            RequireConvertedType(*this, *m_conversion_manifest_, type);
+        !required) {
+      return required;
     }
   }
   return {};

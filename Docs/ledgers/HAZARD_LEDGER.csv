@@ -89,7 +89,8 @@ f5a19ff76c15,DIV-ZERO,medium,pattern,,InspectAudioStream,Native/Content/src/Audi
 0c0fde31cfff,DIV-ZERO,medium,pattern,,InspectAudioStream,Native/Content/src/AudioStream.cpp,117,PsxAdpcmDecoder,48,7,open,
 1cd5c7d3e6d3,DIV-ZERO,medium,pattern,,SelectXaAudioSectors,Native/Content/src/AudioStream.cpp,291,sample_rate,48,7,open,
 981ecc802501,DIV-ZERO,medium,pattern,,SelectXaAudioSectors,Native/Content/src/AudioStream.cpp,291,channels,48,7,open,
-3c37761904cc,DIV-ZERO,medium,pattern,,RequireCatalog,Native/Content/src/DataStore.cpp,129,Platform,47,6,false-positive,"root / Platform::Utf8Path(kCatalogDirectory) is std::filesystem::path concatenation, not arithmetic division"
+3c37761904cc,DIV-ZERO,medium,pattern,,RequireCatalog,Native/Content/src/DataStore.cpp,76,Platform,47,6,false-positive,"root / Platform::Utf8Path(kCatalogDirectory) is std::filesystem::path concatenation, not arithmetic division"
+7ebd1fbcb521,DIV-ZERO,medium,pattern,,RequireConversions,Native/Content/src/DataStore.cpp,286,Platform,47,6,false-positive,"m_root_ / Platform::Utf8Path(kConversionManifestName) is std::filesystem::path concatenation, not arithmetic division"
 8ace270f856e,DIV-ZERO,medium,pattern,,StpMask,Native/Content/src/ImageFiles.cpp,684,shape.width,47,6,guarded,"divisor is the sidecar width, at least 1: the sidecar reader runs ValidateImageSize before any pixels are read, and the loop covers only the width x height colours DecodeRgbaPng checked; NativeImageTests ""Image files that disagree or cannot be drawn are rejected"" covers the mask error"
 c037e6b11261,DIV-ZERO,medium,pattern,,StpMask,Native/Content/src/ImageFiles.cpp,684,shape.width,47,6,guarded,"divisor is the sidecar width, at least 1: the sidecar reader runs ValidateImageSize before any pixels are read, and the loop covers only the width x height colours DecodeRgbaPng checked; NativeImageTests ""Image files that disagree or cannot be drawn are rejected"" covers the mask error"
 25f019391fdf,DIV-ZERO,medium,pattern,,DirectPixels,Native/Content/src/ImageFiles.cpp,716,shape.width,47,6,guarded,"divisor is the sidecar width, at least 1: the sidecar reader runs ValidateImageSize before any pixels are read, and the loop covers only the width x height colours DecodeRgbaPng checked; NativeImageTests ""Image files reproduce the TIM exactly"" covers the 16-bit samples"
@@ -158,7 +159,7 @@ f1001b5e0eea,DIV-ZERO,medium,pattern,,MoveSphereCursorAcross,Native/Game/src/Bat
 0dbef81e71ab,DIV-ZERO,medium,pattern,,InspectNavigation,Native/Game/src/Diagnostics/PlayerObservation.cpp,636,result.spacing,none,,open,
 f5ccef9ecb90,DIV-ZERO,medium,pattern,,InspectNavigation,Native/Game/src/Diagnostics/PlayerObservation.cpp,636,result.spacing,none,,open,
 d2f84bfba13e,DIV-ZERO,medium,pattern,F01473,SampleEffectCurve,Native/Game/src/Effects/Curves.cpp,106,static_cast,61,31,open,
-3b16545a1f1a,DIV-ZERO,medium,pattern,,PackageRecordFor,Native/Game/src/Effects/EffectResourcesLive.cpp,127,packageRecords.size(),61,31,open,
+3b16545a1f1a,DIV-ZERO,medium,pattern,,PackageRecordFor,Native/Game/src/Effects/EffectResourcesLive.cpp,137,packageRecords.size(),61,31,open,
 a8e81ea7325a,DIV-ZERO,medium,pattern,,FindOrAdd,Native/Game/src/Effects/PackageExtentsLive.cpp,116,records.size(),61,31,open,
 12bc3e7f9768,DIV-ZERO,medium,pattern,,PrepareShape,Native/Game/src/Effects/ParticleEmitter.cpp,323,scratch_.ring_segments,61,31,open,
 0748f6b9e8d1,DIV-ZERO,medium,pattern,F01594,DrawAnimatedSpriteParticles,Native/Game/src/Effects/ParticleRender.cpp,171,projection->depth,61,31,open,

@@ -26,6 +26,8 @@
 #include "Content/ImageFiles.hpp"
 #include "Content/TimFile.hpp"
 #include "Core/Sha256.hpp"
+#include "Effects/EffectResources.hpp"
+#include "Effects/EffectResourcesLive.hpp"
 #include "Extract/ImageConversion.hpp"
 #include "Extract/ImageFilesWriter.hpp"
 #include "Field/BackgroundLive.hpp"
@@ -815,6 +817,103 @@ TEST_CASE("FBC conversion removes the files of deleted sources",
   REQUIRE(removed.has_value());
   CHECK(removed->removed == output->files.size());
   CHECK_FALSE(fs::exists(palette));
+}
+
+// The startup conversion check on `data`'s store: empty, or its error.
+std::string ConversionError(const TemporaryData& data) {
+  Content::DataStore::ScopedOverride restore;
+  REQUIRE(Content::DataStore::Open(data.Root()).has_value());
+  const auto required = Content::DataStore::Get()->RequireConversions();
+  return required ? std::string{} : required.error();
+}
+
+TEST_CASE("Data stores require each FBC's current converted palette",
+          "[content-images]") {
+  TemporaryData data;
+  const Bytes fbc = FbcBytes(2);
+  data.WriteManifest({{"EFFECT/E001_1.FBC", fbc}});
+  REQUIRE(Extract::ConvertDiscImages(data.Root(), false).has_value());
+  CHECK(ConversionError(data).empty());
+
+  SECTION("a missing palette image") {
+    fs::remove(data.Root() / "textures" / "effect" / "palettes" / "E001_1.png");
+    CHECK(ConversionError(data).find("missing fbc-palette-png output") !=
+          std::string::npos);
+  }
+  SECTION("a changed source") {
+    Bytes changed = fbc;
+    changed.front() ^= std::byte{1};
+    data.Write("EFFECT/E001_1.FBC", changed);
+    CHECK(ConversionError(data).find(
+              "stale fbc-palette-png source hash for EFFECT/E001_1.FBC") !=
+          std::string::npos);
+  }
+  SECTION("a source without a palette") {
+    data.WriteManifest(
+        {{"EFFECT/E001_1.FBC", fbc}, {"EFFECT/E002_1.FBC", fbc}});
+    CHECK(ConversionError(data).find(
+              "no fbc-palette-png output for EFFECT/E002_1.FBC") !=
+          std::string::npos);
+  }
+}
+
+// `data` with E001_1.FBC at sector 100 and its converted palette, opened.
+struct ConvertedFbcStore {
+  TemporaryData data;
+  Bytes fbc = FbcBytes(2);
+  Content::DataStore::ScopedOverride restore;
+
+  ConvertedFbcStore() {
+    data.WriteManifest({{"EFFECT/E001_1.FBC", fbc}});
+    REQUIRE(Extract::ConvertDiscImages(data.Root(), false).has_value());
+    REQUIRE(Content::DataStore::Open(data.Root()).has_value());
+  }
+};
+
+constexpr VS::Effects::DiscRead kConvertedFbcRead{.lba = 100, .size = 2048};
+
+TEST_CASE("Live effect palettes load the converted rows by sector",
+          "[content-images]") {
+  {
+    Content::DataStore::ScopedOverride none;
+    const auto unopened = VS::Effects::LoadLiveEffectPalette(kConvertedFbcRead);
+    REQUIRE_FALSE(unopened.has_value());
+    CHECK(unopened.error().find("no extracted-data store") !=
+          std::string::npos);
+  }
+  ConvertedFbcStore store;
+  const auto loaded = VS::Effects::LoadLiveEffectPalette(kConvertedFbcRead);
+  INFO((loaded ? std::string{} : loaded.error()));
+  REQUIRE(loaded.has_value());
+  CHECK(*loaded == FbcWords(store.fbc));
+
+  const auto exact_size = VS::Effects::LoadLiveEffectPalette(
+      {.lba = 100, .size = static_cast<std::int32_t>(store.fbc.size())});
+  REQUIRE_FALSE(exact_size.has_value());
+  CHECK(exact_size.error().find("sector-rounded size") != std::string::npos);
+  CHECK_FALSE(VS::Effects::LoadLiveEffectPalette({.lba = 101, .size = 2048})
+                  .has_value());
+  CHECK_FALSE(
+      VS::Effects::LoadLiveEffectPalette({.lba = 0, .size = 2048}).has_value());
+}
+
+TEST_CASE("Live effect palettes load edits to the converted image",
+          "[content-images]") {
+  ConvertedFbcStore store;
+  const fs::path directory =
+      store.data.Root() / "textures" / "effect" / "palettes";
+  auto authored = Content::LoadImageFiles(directory, "E001_1");
+  REQUIRE(authored.has_value());
+  REQUIRE_FALSE(authored->image.texels.empty());
+  authored->image.texels.front() = 0x7C1F;
+  auto files = Extract::EncodeImageFiles(*authored, "E001_1");
+  REQUIRE(files.has_value());
+  REQUIRE(Extract::WriteImageFiles(directory, *files).has_value());
+  const auto edited = VS::Effects::LoadLiveEffectPalette(kConvertedFbcRead);
+  REQUIRE(edited.has_value());
+  CHECK(edited->front() == 0x7C1F);
+  CHECK(ReadBytes(store.data.Root() / "disc" / "EFFECT" / "E001_1.FBC") ==
+        store.fbc);
 }
 
 TEST_CASE("TIM conversion preserves edits until a forced rebuild",

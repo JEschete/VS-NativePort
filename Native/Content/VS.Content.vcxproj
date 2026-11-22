@@ -52,6 +52,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\ConversionManifest.cpp" />
+    <ClCompile Include="src\ConvertedImages.cpp" />
     <ClCompile Include="src\DataStore.cpp" />
     <ClCompile Include="src\Disc.cpp" />
     <ClCompile Include="src\DiscQueue.cpp">
@@ -92,6 +93,7 @@
     <ClInclude Include="include\Content\CdDrive.hpp" />
     <ClInclude Include="include\Content\CdDriveLive.hpp" />
     <ClInclude Include="include\Content\ConversionManifest.hpp" />
+    <ClInclude Include="include\Content\ConvertedImages.hpp" />
     <ClInclude Include="include\Content\DataAccess.hpp" />
     <ClInclude Include="include\Content\DataStore.hpp" />
     <ClInclude Include="include\Content\Disc.hpp" />

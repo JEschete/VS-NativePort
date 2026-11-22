@@ -6,18 +6,19 @@
 #include <cstdint>
 #include <optional>
 #include <span>
+#include <vector>
 
 #include "Core/Math/ScalarMath.hpp"
 #include "Effects/PackageExtents.hpp"
 
 // Effect resources (BATTLE.PRG 6F014.c:446-800 and EFFPURGE.BIN 0.c:590-975):
 // the package context, the package block walk and binders, the disc reads of
-// the purge overlay, the package, the textures and the plugin, and the purge
-// tables that configure them. The cores work on typed records and reach the
-// disc, the heap, VRAM, the sound banks and the particle pool through hosts;
-// EffectResourcesLive.hpp binds them to the battle's globals. Disc requests,
-// buffers and packages are opaque ids that are compared and never
-// dereferenced here.
+// the purge overlay, the package, the texture pages and the plugin, the
+// converted CLUT palettes, and the purge tables that configure them. The cores
+// work on typed records and reach the disc, the converted data, the heap, VRAM,
+// the sound banks and the particle pool through hosts; EffectResourcesLive.hpp
+// binds them to the battle's globals. Disc requests, buffers and packages are
+// opaque ids that are compared and never dereferenced here.
 namespace VS::Effects {
 // A disc request a host issued; kNone is no request.
 enum class DiscReadId : std::uintptr_t { kNone = 0 };
@@ -168,6 +169,9 @@ enum class ResourceRefusal : std::uint8_t {
   kNoBuffer,
   // A read longer than its destination.
   kReadTooLarge,
+  // A CLUT whose converted palette is missing or invalid, or has more rows
+  // than its slot.
+  kPalette,
 };
 
 // A load step's result: pending is the original's return value.
@@ -197,6 +201,14 @@ class EffectResourceHost {
   virtual void ReserveTexturePage(std::uint32_t page) = 0;
   virtual void RetireTexturePage(std::uint32_t page) = 0;
   virtual void UploadImage(const VramRect& area, EffectBufferId pixels) = 0;
+  // The converted palette (ASSET_PIPELINE.md §6.4) of the FBC that `source`
+  // reads: its rows of kEffectClutWidth colour words, in file order.
+  // Nothing when it is missing or invalid; the host reports why.
+  [[nodiscard]] virtual std::optional<std::vector<std::uint16_t>> LoadPalette(
+      DiscRead source) = 0;
+  // Uploads `area`'s colour words, row-major.
+  virtual void UploadPalette(const VramRect& area,
+                             std::span<const std::uint16_t> words) = 0;
 };
 
 // The package bookkeeping outside the loader state.

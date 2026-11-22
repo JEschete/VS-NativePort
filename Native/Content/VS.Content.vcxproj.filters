@@ -42,6 +42,9 @@
     <ClCompile Include="src\ConversionManifest.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ConvertedImages.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\DataStore.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -121,6 +124,9 @@
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\ConversionManifest.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\ConvertedImages.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\DataAccess.hpp">

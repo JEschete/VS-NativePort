@@ -2,8 +2,12 @@
 // Hand-maintained (tools/port/owned.csv).
 
 #include <cstddef>
+#include <cstdint>
+#include <expected>
 #include <optional>
 #include <span>
+#include <string>
+#include <vector>
 
 #include "Effects/EffectResources.hpp"
 
@@ -43,6 +47,11 @@ void StoreLiveEffectResourceState(const EffectResourceState& state);
 void StoreLiveEffectResourceContext(const EffectResourceContext& context);
 // The EFFPURGE.BIN tables (D_800FAE4C-D_800FB34C).
 [[nodiscard]] EffectPurgeTables LiveEffectPurgeTables();
+// The converted palette of the FBC `source` reads (the live host's
+// LoadPalette): its 256-word rows from the open extracted-data store, or why
+// it is missing or invalid.
+[[nodiscard]] std::expected<std::vector<std::uint16_t>, std::string>
+LoadLiveEffectPalette(DiscRead source);
 
 // func_800D7814 (6F014.c:446).
 void LiveInitializeEffectResources();
