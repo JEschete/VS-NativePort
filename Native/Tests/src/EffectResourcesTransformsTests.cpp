@@ -2213,6 +2213,83 @@ TEST_CASE("Effect purge tables list the CLUT, then the effect's FBTs",
         Effects::TextureAsset{.file = fixture.textures[1], .slot = 1});
 }
 
+namespace {
+// Polls the texture loader until nothing is pending, requiring each poll to
+// succeed.
+void FinishTextureLoad(Effects::EffectResourceState& state,
+                       FakeResourceHost& host) {
+  for (int poll = 0; poll < 16; ++poll) {
+    const auto result = Effects::UpdateEffectTextureLoading(state, host);
+    REQUIRE(result.refusal == Effects::ResourceRefusal::kNone);
+    if (!result.pending) return;
+  }
+  FAIL("the texture load never finished");
+}
+
+// Effect 0's palette, then effect 2's (`second`) in its own slot.
+void CheckBothEffectPalettes(const FakeResourceHost& host,
+                             const std::vector<std::uint16_t>& second) {
+  CHECK(host.palette_requests ==
+        std::vector{Effects::DiscRead{.lba = 1010, .size = 0x200},
+                    Effects::DiscRead{.lba = 1012, .size = 0x200}});
+  REQUIRE(host.palette_uploads.size() == 2);
+  CHECK(host.palette_uploads[0].first ==
+        Effects::VramRect{.x = 768, .y = 240, .w = 256, .h = 5});
+  const auto& [area, words] = host.palette_uploads[1];
+  CHECK(area == Effects::VramRect{.x = 768, .y = 242, .w = 256, .h = 3});
+  REQUIRE(words.size() == std::size_t{256} * 3);
+  CHECK(std::equal(second.begin(), second.end(), words.begin()));
+  CHECK(std::all_of(words.begin() + 256, words.end(),
+                    [](std::uint16_t word) { return word == 0; }));
+}
+
+// Every staging buffer is freed and no read is left once loading finishes.
+void CheckTextureLoadReleased(const PurgeTableFixture& fixture,
+                              const FakeResourceHost& host) {
+  CHECK(host.freed.size() == host.allocations.size());
+  CHECK(fixture.state.texture_buffer == Effects::EffectBuffer{});
+  CHECK(fixture.state.read == Effects::DiscReadId::kNone);
+}
+}  // namespace
+
+TEST_CASE("An effect configured after a finished load uploads its palette",
+          "[effects][effects-resources-transforms][effect-palette]") {
+  PurgeTableFixture fixture;
+  FakeResourceHost host;
+  host.loaded = true;
+  const std::vector<std::uint16_t> second(256, 0x7C00);
+  static_cast<void>(fixture.Configure(0));
+  FinishTextureLoad(fixture.state, host);
+  CHECK(host.uploads.size() == 2);
+  host.palette = second;
+  static_cast<void>(fixture.Configure(2));
+  FinishTextureLoad(fixture.state, host);
+  // Effect 2 has no FBTs.
+  CHECK(host.uploads.size() == 2);
+  CheckBothEffectPalettes(host, second);
+  CheckTextureLoadReleased(fixture, host);
+}
+
+TEST_CASE("An effect reconfigured before its pages load drops them",
+          "[effects][effects-resources-transforms][effect-palette]") {
+  PurgeTableFixture fixture;
+  FakeResourceHost host;
+  host.loaded = true;
+  const std::vector<std::uint16_t> second(256, 0x7C00);
+  static_cast<void>(fixture.Configure(0));
+  REQUIRE(Effects::UpdateEffectTextureLoading(fixture.state, host).pending);
+  REQUIRE(host.palette_uploads.size() == 1);
+  host.palette = second;
+  static_cast<void>(fixture.Configure(2));
+  FinishTextureLoad(fixture.state, host);
+  // Effect 0's pages never load; its staging buffer serves effect 2.
+  CHECK(host.uploads.empty());
+  CHECK(host.reserved.empty());
+  CHECK(host.allocations.size() == 1);
+  CheckBothEffectPalettes(host, second);
+  CheckTextureLoadReleased(fixture, host);
+}
+
 TEST_CASE("Effect purge tables load the plugin file and its entries",
           "[effects][effects-resources-transforms]") {
   PurgeTableFixture fixture;

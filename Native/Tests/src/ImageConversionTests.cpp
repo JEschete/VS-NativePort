@@ -151,10 +151,13 @@ Bytes Direct24TimBytes() {
 class TemporaryData {
  public:
   TemporaryData() {
+    // The sequence keeps roots made within one clock tick apart.
+    static unsigned sequence = 0;
     root_ = fs::temp_directory_path() /
             ("vs-image-conversion-" +
              std::to_string(
-                 std::chrono::steady_clock::now().time_since_epoch().count()));
+                 std::chrono::steady_clock::now().time_since_epoch().count()) +
+             "-" + std::to_string(sequence++));
     fs::create_directories(root_ / "disc");
   }
 
@@ -861,6 +864,81 @@ TEST_CASE("Data stores require each FBC's current converted palette",
               "no fbc-palette-png output for EFFECT/E002_1.FBC") !=
           std::string::npos);
   }
+}
+
+// The same two FBC files, converted into two separate data roots.
+struct TwinFbcRoots {
+  DataFiles files{{"EFFECT/E001_1.FBC", FbcBytes(2)},
+                  {"EFFECT/E002_1.FBC", FbcBytes(1)}};
+  TemporaryData first;
+  TemporaryData second;
+
+  TwinFbcRoots() {
+    first.WriteManifest(files);
+    second.WriteManifest(files);
+    REQUIRE(RequiredConversion(first.Root(), false).converted == 2);
+    REQUIRE(RequiredConversion(second.Root(), false).converted == 2);
+  }
+};
+
+TEST_CASE("FBC conversion writes identical bytes in every data root",
+          "[content-images]") {
+  const TwinFbcRoots roots;
+  CHECK(ReadBytes(roots.first.Root() / "manifest.json") ==
+        ReadBytes(roots.second.Root() / "manifest.json"));
+  for (const auto& output : RequiredManifest(roots.first.Root()).outputs) {
+    for (const std::string& file : output.files) {
+      INFO(file);
+      const Bytes bytes = ReadBytes(roots.first.Root() / fs::path(file));
+      REQUIRE_FALSE(bytes.empty());
+      CHECK(bytes == ReadBytes(roots.second.Root() / fs::path(file)));
+    }
+  }
+}
+
+TEST_CASE("A changed FBC reconverts its own palette and no other",
+          "[content-images]") {
+  TwinFbcRoots roots;
+  DataFiles changed = roots.files;
+  changed["EFFECT/E001_1.FBC"].front() ^= std::byte{1};
+  roots.first.WriteManifest(changed);
+  const auto report = RequiredConversion(roots.first.Root(), false);
+  CHECK(report.converted == 1);
+  CHECK(report.unchanged == 1);
+  const fs::path palettes = fs::path("textures") / "effect" / "palettes";
+  CHECK(ReadBytes(roots.first.Root() / palettes / "E001_1.png") !=
+        ReadBytes(roots.second.Root() / palettes / "E001_1.png"));
+  CHECK(ReadBytes(roots.first.Root() / palettes / "E002_1.png") ==
+        ReadBytes(roots.second.Root() / palettes / "E002_1.png"));
+}
+
+TEST_CASE("A malformed FBC fails the run before any palette publishes",
+          "[content-images]") {
+  TemporaryData data;
+  data.WriteManifest({{"EFFECT/E001_1.FBC", FbcBytes(2)}});
+  REQUIRE(RequiredConversion(data.Root(), false).converted == 1);
+  const fs::path manifest = data.Root() / "manifest.json";
+  const fs::path palettes = data.Root() / "textures" / "effect" / "palettes";
+  const Bytes published = ReadBytes(manifest);
+  const Bytes palette = ReadBytes(palettes / "E001_1.png");
+  REQUIRE_FALSE(published.empty());
+
+  Bytes changed = FbcBytes(2);
+  changed.front() ^= std::byte{1};
+  data.WriteManifest(
+      {{"EFFECT/E001_1.FBC", changed},
+       {"EFFECT/E002_1.FBC", Bytes(kFbcRowBytes - 1, std::byte{0})}});
+  const auto failed = Extract::ConvertDiscImages(data.Root(), false);
+  REQUIRE_FALSE(failed.has_value());
+  CHECK(failed.error().find("EFFECT/E002_1.FBC") != std::string::npos);
+  // The changed palette converted in memory only: nothing was written.
+  CHECK(ReadBytes(manifest) == published);
+  CHECK(ReadBytes(palettes / "E001_1.png") == palette);
+  CHECK_FALSE(fs::exists(palettes / "E002_1.png"));
+  // The store then refuses the stale palette instead of loading it.
+  CHECK(ConversionError(data).find(
+            "stale fbc-palette-png source hash for EFFECT/E001_1.FBC") !=
+        std::string::npos);
 }
 
 // `data` with E001_1.FBC at sector 100 and its converted palette, opened.
