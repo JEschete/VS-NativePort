@@ -169,6 +169,8 @@ enum class SpawnRefusal : std::uint8_t {
   kEquipmentSlot,
   // The heap refused the actor.
   kAllocation,
+  // The actor model could not be queued.
+  kAssetQueue,
   // A template's ZUD index outside the zone's enemy files.
   kZudIndex,
   // The heap refused the ZUD file.
@@ -682,6 +684,9 @@ class ActorSpawnHost {
   // A zeroed allocation of `shape` with its stats, model and equipment
   // model links and allocation kind set; kNone when the heap refuses.
   [[nodiscard]] virtual SpawnedActor Allocate(ActorShape shape) = 0;
+  // Frees a newly allocated actor before it has been installed or given
+  // dependent resources.
+  virtual void DiscardUninstalled(SpawnedActor actor) = 0;
   virtual void Install(std::size_t slot, SpawnedActor actor) = 0;
   [[nodiscard]] virtual Content::AssetAddress ModelAddress(
       SpawnedActor actor) const = 0;

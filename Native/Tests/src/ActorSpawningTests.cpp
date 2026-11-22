@@ -96,6 +96,7 @@ struct FakeSpawnHost final : actors::ActorSpawnHost {
   std::array<SpawnedActor, actors::kBattleActorSlots> table{};
   std::array<actors::SpawnedState, actors::kBattleActorSlots> states{};
   std::vector<ActorAssetRequest> requests;
+  std::vector<SpawnedActor> discarded;
   bool refuse_allocation = false;
   std::uintptr_t next_handle = kFirstHandle;
   int queue_index = 4;
@@ -152,6 +153,10 @@ struct FakeSpawnHost final : actors::ActorSpawnHost {
     const SpawnedActor actor = Handle(next_handle);
     next_handle += kHandleStride;
     return actor;
+  }
+  void DiscardUninstalled(SpawnedActor actor) override {
+    discarded.push_back(actor);
+    Log("DiscardUninstalled");
   }
   void Install(std::size_t slot, SpawnedActor actor) override {
     Log(std::format("Install {}", slot));
@@ -1320,14 +1325,28 @@ TEST_CASE("A scripted actor spawns into a free slot below 16",
   CHECK(actors::QueueScriptedActorSpawn(host, 9, 0x33, placement) ==
         host.queue_index + 1);
   CHECK(host.table.at(9) == Handle(kFirstHandle));
-  CHECK(host.log == std::vector<std::string>{"Allocate 1", "Install 9",
-                                             "Defaults 9", "QueueAsset",
+  CHECK(host.log == std::vector<std::string>{"Allocate 1", "QueueAsset",
+                                             "Install 9", "Defaults 9",
                                              "AiState 9 -1"});
   const actors::ActorDefaults& defaults = Required(host.defaults);
   CHECK(defaults.disposition == actors::SpawnDisposition{.kind = 8});
   CHECK(defaults.interaction_flags == 4);
   CHECK(host.requests.at(0).placement == actors::PackPlacement(placement));
   CHECK(host.requests.at(0).target_slot == 9);
+}
+
+TEST_CASE("A scripted actor is discarded when its model request cannot queue",
+          "[actors][actors-spawning]") {
+  FakeSpawnHost host;
+  host.queue_index = -1;
+
+  CHECK(actors::QueueScriptedActorSpawn(host, 9, 0x33, {}) == 0);
+  CHECK(host.table.at(9) == SpawnedActor::kNone);
+  CHECK(host.discarded == std::vector{Handle(kFirstHandle)});
+  CHECK(host.refusals == std::vector{SpawnRefusal::kAssetQueue});
+  CHECK(host.defaults == std::nullopt);
+  CHECK(host.log == std::vector<std::string>{"Allocate 1", "QueueAsset",
+                                             "DiscardUninstalled"});
 }
 
 TEST_CASE(

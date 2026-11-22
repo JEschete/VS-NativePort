@@ -261,6 +261,10 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     return SpawnedActor::kNone;
   }
 
+  void DiscardUninstalled(SpawnedActor actor) override {
+    VS::Core::Memory::FreeLiveFromLowEnd(PointerOf<VS::Battle::Actor>(actor));
+  }
+
   void Install(std::size_t slot, SpawnedActor actor) override {
     if (slot < std::size(VS::Battle::actors)) {
       VS::Battle::actors[slot] = PointerOf<VS::Battle::Actor>(actor);

@@ -380,6 +380,8 @@ const char* SpawnRefusalText(SpawnRefusal refusal) {
       return "equipment model slot outside the weapon model table";
     case SpawnRefusal::kAllocation:
       return "actor allocation refused";
+    case SpawnRefusal::kAssetQueue:
+      return "actor model request queue is full";
     case SpawnRefusal::kZudIndex:
       return "ZUD index outside the zone's enemy files";
     case SpawnRefusal::kZudAllocation:
@@ -972,10 +974,15 @@ int QueueScriptedActorSpawn(ActorSpawnHost& host, std::uint32_t actor_id,
     host.Refuse(SpawnRefusal::kAllocation);
     return 0;
   }
-  host.Install(slot, actor);
-  ApplyDefaults(host, slot, model_id, 0, 0, kScriptedSpawnFlags);
   const int request = QueueModelLoad(host, actor, static_cast<int>(slot),
                                      model_id, placement, 0);
+  if (request < 0) {
+    host.DiscardUninstalled(actor);
+    host.Refuse(SpawnRefusal::kAssetQueue);
+    return 0;
+  }
+  host.Install(slot, actor);
+  ApplyDefaults(host, slot, model_id, 0, 0, kScriptedSpawnFlags);
   static_cast<void>(host.CreateAiState(slot, kFreshAiFlags));
   return request + 1;
 }
