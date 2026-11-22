@@ -16,6 +16,13 @@
     <VSNative>$(VSRepositoryRoot)Native\</VSNative>
     <VSLegacyIncludes>$(VSNative)Engine;$(VSNative)Content;$(VSNative)Engine\include;$(VSNative)Engine\src;$(VSNative)Content\include;$(VSNative)Content\src</VSLegacyIncludes>
     <VSCopiedCIncludes>$(VSLegacyIncludes);$(VSNative)Game\include;$(VSNative)Game\src</VSCopiedCIncludes>
+    <!-- One limit on parallel clang-cl processes across every project and MSBuild node. Without it each project
+         compiles with one process per logical processor, and /m builds several projects at once, which exhausts
+         memory on many-core machines. Override with the VS_JOBS environment variable or /p:VS_JOBS=N; the quality
+         tools (tools\lint\quality.py) use the same variable. -->
+    <VS_JOBS Condition="'$(VS_JOBS)' == ''">8</VS_JOBS>
+    <MultiProcMaxCount>$(VS_JOBS)</MultiProcMaxCount>
+    <EnforceProcessCountAcrossBuilds>true</EnforceProcessCountAcrossBuilds>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>

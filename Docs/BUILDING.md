@@ -178,6 +178,11 @@ build-native.cmd Release
 `build-native.cmd` finds MSBuild with `vswhere`, restores the vcpkg packages (into `vcpkg_installed\`), and builds
 `VagrantStory.Native.sln` for x64. The default configuration is Debug. Up to four
 additional arguments after the configuration are passed to MSBuild.
+
+Compilation runs at most `VS_JOBS` clang-cl processes at once across all projects (default 8, set in
+`Directory.Build.props`); without that limit each project would start one per logical processor and `/m` would build
+several projects at once, which exhausts memory on many-core machines. Raise or lower it with the environment variable
+(`set VS_JOBS=4`) or `/p:VS_JOBS=4`. The quality tools use the same variable.
 In PowerShell, prefix repository scripts with `.\`: use `.\build-native.cmd`
 and `.\test-native.cmd`.
 

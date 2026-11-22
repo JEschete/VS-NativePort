@@ -50,13 +50,15 @@ quality-native.cmd --tidy
 ```
 
 The default command runs formatting, cpplint, Ruff, and clone detection. Formatting
-and cpplint batches run on a worker pool (one fewer than the logical processors)
+and cpplint batches run on a worker pool (the `VS_JOBS` limit, at most one fewer
+than the logical processors)
 while clone detection runs in the background; the report keeps the serial check
 and file order. `--tidy` adds compilation-based analysis. A header change analyzes the owned translation
 units that include it directly or transitively (resolved over all native sources,
 including copied ones); ambiguous include names over-select rather than skip.
 Translation units run in parallel; `--jobs N` limits the worker count (default:
-logical processors). Clone detection uses the same selected files as the other
+the `VS_JOBS` environment variable, else 8, because one clang-tidy process can hold
+more than a gigabyte). Clone detection uses the same selected files as the other
 checks. A partial scan therefore does not detect copies from an unchanged file;
 run the default command for a cross-repository clone audit. Its subprocess has a
 600-second budget, like each tidy invocation; a timeout remains an infrastructure

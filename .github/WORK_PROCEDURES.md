@@ -13,6 +13,10 @@ any, is in [HANDOFF.md](../Docs/HANDOFF.md).
 - Never force-push or rewrite history. Preserve unrelated edits in the worktree.
 - Never delete Ghidra, `tools\Base` or `tools\PSX`. Keep the repository small: delete scratch files in `build\` when
   done, and keep disc-derived data, captures, dumps and BIOS files out of commits.
+- Bound machine load. Run one heavy job at a time (a build, `--tidy` scan, regression check or replay batch), including
+  across background agents and worktrees; never start parallel agents that each build. Builds and quality tools cap
+  their parallel processes at `VS_JOBS` (default 8, [BUILDING.md](../Docs/BUILDING.md) section 4.1); do not raise it
+  or pass `--jobs` above it.
 - Work in the order set by tracker [#4](https://github.com/JEschete/VS-NativePort/issues/4). Log a newly found defect
   as an issue, with evidence, before fixing it.
 - A passing build or baseline is not proof of behavior. An issue closes only with the fixing commit, the exact-revision

@@ -36,9 +36,32 @@ INCLUDE_DIRECTIVE = re.compile(r'^[ \t]*#[ \t]*include[ \t]*[<"]([^">]+)[">]', r
 TIDY_TIMEOUT = 600
 CLONE_TIMEOUT = 600
 CPPLINT_BATCH = 30
+DEFAULT_JOBS = 8
+
+
+def parallel_jobs() -> int:
+    """Concurrent tool processes: the VS_JOBS environment variable, else eight.
+
+    One clang-tidy process can hold more than a gigabyte, so one per logical
+    processor exhausts memory on many-core machines. MSBuild applies the same
+    variable to clang-cl (Directory.Build.props).
+    """
+    configured = os.environ.get("VS_JOBS", "").strip()
+    if not configured:
+        return min(DEFAULT_JOBS, os.cpu_count() or 1)
+    try:
+        jobs = int(configured)
+    except ValueError:
+        jobs = 0
+    if jobs < 1:
+        raise SystemExit(f"VS_JOBS must be a positive integer, not {configured!r}")
+    return jobs
+
+
+JOBS = parallel_jobs()
 # The clone scan is one single-threaded process; leave it a processor while
 # per-file formatter and cpplint processes share the rest.
-WORKERS = max(1, (os.cpu_count() or 1) - 1)
+WORKERS = max(1, min(JOBS, (os.cpu_count() or 1) - 1))
 BACKGROUND_CHECKS = ("clones",)
 # Inputs that decide the result of every file: a change to one checks them all.
 FULL_SCAN_FILES = {
@@ -557,7 +580,7 @@ def check_tidy(
     executable = llvm_tool("clang-tidy")
     database = compile_commands(files)
     sources = [path for path in files if Path(path).suffix in SOURCE_SUFFIXES]
-    with ThreadPoolExecutor(max_workers=jobs or os.cpu_count() or 1) as pool:
+    with ThreadPoolExecutor(max_workers=jobs or JOBS) as pool:
         reports = list(
             pool.map(lambda path: tidy_report(executable, database, path), sources)
         )
@@ -822,8 +845,8 @@ def main() -> int:
     parser.add_argument(
         "--jobs",
         type=int,
-        default=os.cpu_count() or 1,
-        help="parallel clang-tidy translation units (default: logical processors)",
+        default=JOBS,
+        help="parallel clang-tidy translation units (default: VS_JOBS, else 8)",
     )
     parser.add_argument(
         "--update-baseline",
