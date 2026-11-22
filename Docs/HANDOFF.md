@@ -1,5 +1,34 @@
 # Current Handoff
 
+## Actor request ownership and identity (#48/#55), 2026-11-22
+
+Starting revision: `ff4b3713d`, clean worktree. Commit
+`fd50525fad2609929a326acc3818c663982b4712` extends the generation-checked
+actor identity into room-enemy asset loading. Each ownable request is ticketed
+to that actor; the spawn waits for all results before publishing it, cancels
+queued requests when a later submission fails, and releases partial model
+resources on load or publication failure. The actor owner is an opaque ID, not
+a fixed enum. This is a bounded producer-to-publication slice, not completion
+of either issue.
+
+Debug and Release passed `[actors-spawning]` (48 cases / 431 assertions),
+`[asset-ownership]` (13 / 132), and `[encyclopedia-preview]` (43 / 684).
+`quality.py --since origin/main` reported 0 new findings before the push.
+Ledger gates, modernization, hazards, headers and static regression checks
+reported 0 violations. Exact-revision Actions run
+[45014081945](https://github.com/JEschete/VS-NativePort/actions/runs/45014081945)
+passed both Source Quality and Tool and ledger controls.
+
+The additional serial `quality.py --files ... --tidy --jobs 1` pass found two
+new tidy diagnostics in unchanged `AnimationControl.cpp` functions about
+swappable integer parameters; no new tidy findings were in the edited files.
+The ordinary changed-source quality check passed.
+
+Both #48 and #55 remain open. Other actor/model producers still queue unowned
+requests; concurrent replacement, cancellation of longer-lived loads, stale
+completion handling, broader actor/resource migration, and live gameplay
+verification remain. No gameplay or hardware verification is claimed.
+
 ## Connected-controller handover (#438), 2026-11-18
 
 Starting revision: `aa41806e6`, clean worktree. The active-controller removal
