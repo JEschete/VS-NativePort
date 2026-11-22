@@ -10,6 +10,10 @@
     Return = Start, Backspace = Select. Each key briefly brings DuckStation to the front (Qt reads only focused input)
     and gives focus back.
 
+    -DumpUploads turns on DuckStation's [Debug] DumpCPUToVRAMCopies for this run only and moves every CPU-to-VRAM
+    upload it wrote (cpu_to_vram_copy_<n>.png, numbered in upload order; RGBA8 from the 15-bit words, no position)
+    to <Out>\uploads. Use it to compare uploaded textures and palettes with the port's without aligning frames.
+
 .EXAMPLE
     tools\test\duckstation_capture.ps1 -SkipIntro -Keys '40:Down,42:X' -Seconds 38,46,50 -Out build\ds_cont
 #>
@@ -17,7 +21,8 @@ param(
     [double[]]$Seconds = @(5, 9, 16, 22, 30, 38, 46, 56, 62),
     [string]$Out = 'build\ds_cap',
     [string]$Keys = '',
-    [switch]$SkipIntro
+    [switch]$SkipIntro,
+    [switch]$DumpUploads
 )
 $repo = Resolve-Path (Join-Path $PSScriptRoot '..\..')
 Set-Location $repo
@@ -55,6 +60,14 @@ if (-not (Test-Path 'build\duckstation\portable.txt')) { & (Join-Path $PSScriptR
 if (Test-Path $Out) { Remove-Item $Out -Recurse -Force }
 [DsWin]::SetProcessDPIAware() | Out-Null
 New-Item -ItemType Directory $Out | Out-Null
+$settings = (Resolve-Path 'build\duckstation\settings.ini').Path
+$dumpKey = "`r`n[Debug]`r`nDumpCPUToVRAMCopies = true`r`n"
+$savedSettings = [IO.File]::ReadAllText($settings).Replace($dumpKey, '')   # drops a key an interrupted run left
+[IO.File]::WriteAllText($settings, $savedSettings)
+if ($DumpUploads) {
+    Get-ChildItem 'build\duckstation' -File -Filter 'cpu_to_vram_copy_*.png' | Remove-Item -Force
+    [IO.File]::WriteAllText($settings, $savedSettings + $dumpKey)
+}
 $exe = (Resolve-Path 'build\duckstation\duckstation-qt-x64-ReleaseLTCG.exe').Path
 $p = Start-Process -FilePath $exe -ArgumentList '-batch', '--', (Resolve-Path 'disks\SLUS-01040.cue').Path -PassThru
 $start = Get-Date
@@ -96,3 +109,11 @@ foreach ($s in $Seconds) {
     "t=$s captured ${w}x${hh}"
 }
 Stop-Process -Id $p.Id
+if ($DumpUploads) {
+    $p.WaitForExit(10000) | Out-Null
+    [IO.File]::WriteAllText($settings, $savedSettings)
+    $dumps = Get-ChildItem 'build\duckstation' -File -Filter 'cpu_to_vram_copy_*.png'
+    New-Item -ItemType Directory (Join-Path $Out 'uploads') | Out-Null
+    $dumps | Move-Item -Destination (Join-Path $Out 'uploads')
+    "uploads: $(@($dumps).Count) in $(Join-Path $Out 'uploads')"
+}
