@@ -761,22 +761,28 @@ TEST_CASE("FBC conversion round-trips every 16-bit colour word",
   }
 }
 
+// Whether converting `source` as an FBC fails with an error naming `reason`.
+bool FbcRejected(const Bytes& source, std::string_view reason) {
+  const auto converted = Extract::ConvertFbcPalette(
+      {.path = "EFFECT/E001_1.FBC", .bytes = source});
+  return !converted.has_value() &&
+         converted.error().find(reason) != std::string::npos;
+}
+
 TEST_CASE("FBC palette conversion rejects incomplete or oversized rows",
           "[content-images]") {
   SECTION("partial row") {
-    const Bytes source(kFbcRowBytes - 1, std::byte{0});
-    const auto converted = Extract::ConvertFbcPalette(
-        {.path = "EFFECT/E001_1.FBC", .bytes = source});
-    REQUIRE_FALSE(converted.has_value());
-    CHECK(converted.error().find("whole 512-byte rows") != std::string::npos);
+    CHECK(FbcRejected(Bytes(kFbcRowBytes - 1, std::byte{0}),
+                      "whole 512-byte rows"));
   }
-  SECTION("too many rows") {
-    const Bytes source = FbcBytes(6);
-    const auto converted = Extract::ConvertFbcPalette(
-        {.path = "EFFECT/E001_1.FBC", .bytes = source});
-    REQUIRE_FALSE(converted.has_value());
-    CHECK(converted.error().find("at most 5") != std::string::npos);
+  SECTION("empty") {
+    CHECK(FbcRejected({}, "whole 512-byte rows; it has 0 bytes"));
   }
+  SECTION("truncated second row") {
+    CHECK(FbcRejected(Bytes(kFbcRowBytes + kFbcRowBytes / 2, std::byte{0}),
+                      "it has 768 bytes"));
+  }
+  SECTION("too many rows") { CHECK(FbcRejected(FbcBytes(6), "at most 5")); }
 }
 
 TEST_CASE("FBC conversion keeps unchanged palettes and edits until forced",
@@ -914,6 +920,25 @@ TEST_CASE("Live effect palettes load edits to the converted image",
   CHECK(edited->front() == 0x7C1F);
   CHECK(ReadBytes(store.data.Root() / "disc" / "EFFECT" / "E001_1.FBC") ==
         store.fbc);
+}
+
+TEST_CASE("Live effect palettes refuse an edit that is not 256 entries wide",
+          "[content-images]") {
+  ConvertedFbcStore store;
+  const fs::path directory =
+      store.data.Root() / "textures" / "effect" / "palettes";
+  auto authored = Content::LoadImageFiles(directory, "E001_1");
+  REQUIRE(authored.has_value());
+  // The same 512 colours, as four 128-entry rows.
+  authored->image.width /= 2;
+  authored->image.height *= 2;
+  auto files = Extract::EncodeImageFiles(*authored, "E001_1");
+  REQUIRE(files.has_value());
+  REQUIRE(Extract::WriteImageFiles(directory, *files).has_value());
+  const auto refused = VS::Effects::LoadLiveEffectPalette(kConvertedFbcRead);
+  REQUIRE_FALSE(refused.has_value());
+  CHECK(refused.error().find("is not a 256-entry effect palette") !=
+        std::string::npos);
 }
 
 TEST_CASE("TIM conversion preserves edits until a forced rebuild",

@@ -42,6 +42,14 @@ inline constexpr std::int16_t kEffectClutX = 768;
 inline constexpr std::int16_t kEffectClutFirstRow = 240;
 inline constexpr std::int16_t kEffectClutWidth = 256;
 inline constexpr std::int16_t kEffectClutRows = 5;
+// A set of effect CLUT rows: bit n is row 240 + n.
+using EffectPaletteRows = std::uint8_t;
+inline constexpr EffectPaletteRows kAllEffectPaletteRows = 0x1F;
+static_assert(kAllEffectPaletteRows == (1U << kEffectClutRows) - 1U);
+// The battle's system palette holds row 240 (SYSTEM.DAT's fixed image, which
+// INITBTL.PRG uploads to (768, 240) at 18.c:311) unless an effect's CLUT
+// fills it.
+inline constexpr EffectPaletteRows kSystemPaletteRows = 1;
 // vs_effpurge_exec reserves the full particle pool.
 inline constexpr std::int32_t kEffectParticlePoolSize = 255;
 // A package block's {u16 size, u16 type} header word.
@@ -169,9 +177,12 @@ enum class ResourceRefusal : std::uint8_t {
   kNoBuffer,
   // A read longer than its destination.
   kReadTooLarge,
-  // A CLUT whose converted palette is missing or invalid, or has more rows
-  // than its slot.
-  kPalette,
+  // A CLUT without a converted palette the host could load.
+  kPaletteMissing,
+  // A CLUT whose converted palette is empty or ends in a partial row.
+  kPaletteRows,
+  // A CLUT whose converted palette has more rows than its slot reaches.
+  kPaletteSlot,
 };
 
 // A load step's result: pending is the original's return value.
@@ -528,6 +539,11 @@ EffectPurgeConfiguration ConfigureEffectResources(
 PurgeTableRefusal ConfigureTextureLoads(EffectResourceState& state,
                                         const EffectPurgeTables& tables,
                                         std::int32_t effect_id) noexcept;
+// The effect CLUT rows a configured load list fills: its CLUT's slot through
+// row 244 when the list loads one, and the system palette's row 240. A
+// refused CLUT still counts; its refusal is reported when it loads.
+[[nodiscard]] EffectPaletteRows BoundEffectPaletteRows(
+    const TextureLoadList& textures) noexcept;
 // _configurePlg (EFFPURGE 0.c:953): the plugin file and its renderers.
 PurgeTableRefusal ConfigurePluginLoad(EffectResourceState& state,
                                       EffectRendererTable& renderers,

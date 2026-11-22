@@ -292,11 +292,15 @@ void ReportWalk(const PackageWalk& walk) {
   }
 }
 
-// The texture tables and sound blocks the walk hands over.
+// The texture tables and sound blocks the walk hands over. Texture
+// descriptors must sample `palette_rows`.
 class LivePackageHost final : public EffectPackageHost {
  public:
+  explicit LivePackageHost(EffectPaletteRows palette_rows)
+      : palette_rows_(palette_rows) {}
+
   void BindTextureTables(std::span<std::byte> block) override {
-    BindLiveEffectTextureTables(block);
+    BindLiveEffectTextureTables(block, palette_rows_);
   }
 
   void BindSoundBank(std::span<std::byte> block) override {
@@ -307,6 +311,9 @@ class LivePackageHost final : public EffectPackageHost {
   std::int32_t BindAuxiliarySound(std::span<std::byte> block) override {
     return Audio::BindLiveRoomCutsceneStream(block.data(), block.size());
   }
+
+ private:
+  EffectPaletteRows palette_rows_;
 };
 
 // The package buffer within its file size and heap payload, or the empty
@@ -589,8 +596,12 @@ void PublishRenderers(const EffectRendererTable& renderers) {
       return "no destination buffer";
     case ResourceRefusal::kReadTooLarge:
       return "a read longer than its buffer";
-    case ResourceRefusal::kPalette:
-      return "a CLUT without a valid converted palette that fits its slot";
+    case ResourceRefusal::kPaletteMissing:
+      return "a CLUT without a loadable converted palette";
+    case ResourceRefusal::kPaletteRows:
+      return "a CLUT palette that is empty or ends in a partial 256-entry row";
+    case ResourceRefusal::kPaletteSlot:
+      return "a CLUT palette with more rows than its slot reaches by row 244";
     case ResourceRefusal::kNone:
       break;
   }
@@ -656,7 +667,13 @@ std::optional<PackageWalk> BindLiveEffectPackage(std::span<std::byte> package) {
   }
   ForgetLivePackageExtents();
   PackageRecord& record = PackageRecordFor(VS::Effects::package);
-  LivePackageHost host;
+  // The resident empty package (E000.P) samples only the system palette; a
+  // loaded package samples the rows its effect's configured CLUT fills.
+  const bool resident =
+      package.data() == reinterpret_cast<std::byte*>(emptyPackage);
+  LivePackageHost host{resident ? kSystemPaletteRows
+                                : BoundEffectPaletteRows(
+                                      LoadLiveEffectResourceState().textures)};
   const PackageWalk walk =
       BindEffectPackageBlocks(package, record.blocks, host);
   PublishBlocks(*VS::Effects::package, record.blocks, walk);

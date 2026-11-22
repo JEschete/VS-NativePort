@@ -13,6 +13,7 @@
 
 #include "Content/ModuleData.hpp"
 #include "Effects/ActionRequest.hpp"
+#include "Effects/EffectResources.hpp"
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
@@ -64,7 +65,8 @@ struct TextureBindingFixture {
 
   void Bind() {
     VS::Effects::BindLiveEffectTextureTables(
-        std::as_writable_bytes(std::span(bytes)));
+        std::as_writable_bytes(std::span(bytes)),
+        VS::Effects::kAllEffectPaletteRows);
   }
 
   static void CheckFirstFrame(
@@ -117,8 +119,10 @@ void CheckSourceTextureBlocks(const std::filesystem::path& path) {
     if (header[1] == 1) {
       VS::Effects::actionRequest.effect_id =
           path.filename() == "E084.P" ? 84 : 53;
-      VS::Effects::BindLiveEffectTextureTables(std::as_writable_bytes(
-          std::span(bytes).subspan(offset + 4, header[0] - 4)));
+      VS::Effects::BindLiveEffectTextureTables(
+          std::as_writable_bytes(
+              std::span(bytes).subspan(offset + 4, header[0] - 4)),
+          VS::Effects::kAllEffectPaletteRows);
       if (path.filename() == "E084.P") {
         CheckGravityBinding();
       }
@@ -200,8 +204,11 @@ TEST_CASE("Material channels preserve distinct authored multi-table bindings",
   bytes[3] = 24;
   bytes[4] = bytes[6] = 1;
   bytes[5] = 0x00010001;
+  // Two 4-bit descriptors sampling x 768 on row 241.
+  bytes[7] = bytes[13] = 0x3C70;
   VS::Effects::BindLiveEffectTextureTables(
-      std::as_writable_bytes(std::span(bytes)));
+      std::as_writable_bytes(std::span(bytes)),
+      VS::Effects::kAllEffectPaletteRows);
   CHECK(VS::Effects::actionPackage.texture_table_count == 3);
   CHECK(VS::Effects::actionPackage.texture_tables[0] !=
         VS::Effects::actionPackage.texture_tables[1]);
@@ -265,7 +272,8 @@ TEST_CASE("Truncated effect texture blocks are diagnosed before publication",
   TextureBindingFixture fixture;
   VS::Effects::BindLiveEffectTextureTables(
       std::as_writable_bytes(std::span(fixture.bytes))
-          .first(sizeof fixture.bytes - 1));
+          .first(sizeof fixture.bytes - 1),
+      VS::Effects::kAllEffectPaletteRows);
   FAIL("Truncated texture descriptor was accepted");
 }
 
@@ -286,6 +294,19 @@ TEST_CASE(
   fixture.bytes[2] = 0xFFFF0001;
   fixture.Bind();
   FAIL("An unavailable texture descriptor was replaced or accepted");
+}
+
+TEST_CASE("Effect descriptors on a CLUT row nothing loaded are diagnosed",
+          "[.texture-block-palette]") {
+  VS::Platform::InstallCrashHandler();
+  TextureBindingFixture fixture;
+  // Descriptor 1: 4-bit, sampling x 768 on row 241, which only the system
+  // palette's row 240 does not reach.
+  fixture.bytes[10] = 0x00003C70;
+  VS::Effects::BindLiveEffectTextureTables(
+      std::as_writable_bytes(std::span(fixture.bytes)),
+      VS::Effects::kSystemPaletteRows);
+  FAIL("A descriptor on an unloaded CLUT row was accepted");
 }
 
 TEST_CASE("Effect origin is the canonical primary request focus position",

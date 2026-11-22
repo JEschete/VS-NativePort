@@ -127,12 +127,13 @@ ResourceRefusal UploadPalette(EffectResourceHost& host,
   const auto area = TextureArea(asset);
   if (!area) return ResourceRefusal::kTextureSlot;
   const auto palette = host.LoadPalette(source);
+  if (!palette) return ResourceRefusal::kPaletteMissing;
   constexpr auto kRowWords = static_cast<std::size_t>(kEffectClutWidth);
   const std::size_t slot_words = kRowWords * static_cast<std::size_t>(area->h);
-  if (!palette || palette->empty() || palette->size() % kRowWords != 0 ||
-      palette->size() > slot_words) {
-    return ResourceRefusal::kPalette;
+  if (palette->empty() || palette->size() % kRowWords != 0) {
+    return ResourceRefusal::kPaletteRows;
   }
+  if (palette->size() > slot_words) return ResourceRefusal::kPaletteSlot;
   std::vector<std::uint16_t> words(slot_words, std::uint16_t{0});
   std::ranges::copy(*palette, words.begin());
   host.UploadPalette(*area, words);
@@ -704,6 +705,18 @@ PurgeTableRefusal ConfigureTextureLoads(EffectResourceState& state,
                                 static_cast<std::int32_t>(i + 1));
   }
   return PurgeTableRefusal::kNone;
+}
+
+EffectPaletteRows BoundEffectPaletteRows(
+    const TextureLoadList& textures) noexcept {
+  const TextureAsset& clut = textures.assets[0];
+  if (textures.asset_count <= 0 || !clut.is_clut ||
+      clut.slot >= static_cast<std::uint16_t>(kEffectClutRows)) {
+    return kSystemPaletteRows;
+  }
+  const unsigned below_slot = (1U << clut.slot) - 1U;
+  return static_cast<EffectPaletteRows>(kSystemPaletteRows |
+                                        (kAllEffectPaletteRows & ~below_slot));
 }
 
 // decomp: EFFPURGE.BIN configurePlg (src/EFFECT/EFFPURGE.BIN/0.c:972)

@@ -1565,13 +1565,18 @@ TEST_CASE("Effect textures refuse a missing, empty or oversized palette",
     return std::pair{result.refusal, host.palette_uploads.size()};
   };
   using Effects::ResourceRefusal;
-  const auto refused = std::pair{ResourceRefusal::kPalette, std::size_t{0}};
-  CHECK(load(std::nullopt) == refused);
-  CHECK(load(std::vector<std::uint16_t>{}) == refused);
+  const auto refused = [](ResourceRefusal refusal) {
+    return std::pair{refusal, std::size_t{0}};
+  };
+  CHECK(load(std::nullopt) == refused(ResourceRefusal::kPaletteMissing));
+  CHECK(load(std::vector<std::uint16_t>{}) ==
+        refused(ResourceRefusal::kPaletteRows));
   // Not whole 256-word rows.
-  CHECK(load(std::vector<std::uint16_t>(300)) == refused);
+  CHECK(load(std::vector<std::uint16_t>(300)) ==
+        refused(ResourceRefusal::kPaletteRows));
   // Four rows, past slot 2's three.
-  CHECK(load(std::vector<std::uint16_t>(std::size_t{256} * 4)) == refused);
+  CHECK(load(std::vector<std::uint16_t>(std::size_t{256} * 4)) ==
+        refused(ResourceRefusal::kPaletteSlot));
   CHECK(load(std::vector<std::uint16_t>(std::size_t{256} * 3)) ==
         std::pair{ResourceRefusal::kNone, std::size_t{1}});
 }
@@ -2195,26 +2200,41 @@ class ExtractedEffectData {
   std::int32_t base_lba_ = 0;
 };
 
-// The descriptors of `clut`'s effect package whose CLUT row lies in its slot
-// but past its palette's rows.
-std::vector<std::pair<int, std::size_t>> DescriptorsPastPalette(
-    const ExtractedEffectData& data, const ExtractedClut& clut) {
-  const auto tables = Effects::LiveEffectPurgeTables();
-  const auto& package =
-      tables.package_files[static_cast<std::size_t>(clut.effect)];
+// An effect package read from the extracted data, and the texture block the
+// production block walk binds in it (empty without one). The block views
+// `package`, whose buffer moves with it.
+struct ExtractedTextureBlock {
+  std::vector<std::uint8_t> package;
+  std::span<const std::byte> block;
+};
+
+ExtractedTextureBlock ReadTextureBlock(const ExtractedEffectData& data,
+                                       const Extent& package) {
   const auto lba = static_cast<std::uint32_t>(package.lba + data.BaseLba());
   const auto* entry = data.Store().FindBySector(lba);
   REQUIRE(entry != nullptr);
   CHECK(entry->lba == lba);
   auto bytes = data.Store().ReadAll(*entry);
   REQUIRE(bytes.has_value());
+  ExtractedTextureBlock read{.package = std::move(*bytes), .block = {}};
   Effects::EffectPackageBlocks blocks;
   TextureBlockCapture capture;
   static_cast<void>(Effects::BindEffectPackageBlocks(
-      std::as_writable_bytes(std::span(*bytes)), blocks, capture));
+      std::as_writable_bytes(std::span(read.package)), blocks, capture));
+  read.block = capture.texture_tables;
+  return read;
+}
+
+// The descriptors of `clut`'s effect package whose CLUT row lies in its slot
+// but past its palette's rows.
+std::vector<std::pair<int, std::size_t>> DescriptorsPastPalette(
+    const ExtractedEffectData& data, const ExtractedClut& clut) {
+  const auto tables = Effects::LiveEffectPurgeTables();
+  const auto read = ReadTextureBlock(
+      data, tables.package_files[static_cast<std::size_t>(clut.effect)]);
   std::vector<std::pair<int, std::size_t>> past;
-  if (capture.texture_tables.empty()) return past;
-  const std::span<const std::byte> block = capture.texture_tables;
+  if (read.block.empty()) return past;
+  const std::span<const std::byte> block = read.block;
   const auto layout = Effects::BindEffectTextureTables(block, {});
   const std::size_t rows =
       clut.palette.size() / static_cast<std::size_t>(Effects::kEffectClutWidth);
@@ -2260,6 +2280,91 @@ TEST_CASE("Effect CLUTs load every extracted palette through the loader",
     CHECK(host.palette_uploads[0].first.y ==
           Effects::kEffectClutFirstRow + clut.asset.slot);
   }
+}
+
+namespace {
+// How the loaded effect packages' descriptors sample palette rows.
+struct PaletteReferenceSurvey {
+  std::size_t loaded = 0;
+  std::size_t textured = 0;
+  std::size_t refused = 0;
+  std::size_t on_foreign_rows = 0;
+};
+
+// Mirrors FinishPurgeOverlay (EffectRuntime.cpp): an action effect whose
+// package names E000.P's offset (E252-E399's placeholders) plays without
+// loading a package.
+bool LoadsOwnPackage(std::size_t effect, const Extent& package) {
+  return package.size != 0 && (effect == 0 || package.lba != 0);
+}
+
+PaletteReferenceSurvey SurveyPaletteReferences(
+    const ExtractedEffectData& data) {
+  const auto tables = Effects::LiveEffectPurgeTables();
+  PaletteReferenceSurvey survey;
+  for (std::size_t effect = 0; effect < tables.package_files.size(); ++effect) {
+    INFO("effect " << effect);
+    if (!LoadsOwnPackage(effect, tables.package_files[effect])) continue;
+    ++survey.loaded;
+    Effects::EffectResourceState state{};
+    REQUIRE(Effects::ConfigureTextureLoads(state, tables,
+                                           static_cast<std::int32_t>(effect)) ==
+            Effects::PurgeTableRefusal::kNone);
+    const auto read = ReadTextureBlock(data, tables.package_files[effect]);
+    if (read.block.empty()) continue;
+    ++survey.textured;
+    const auto layout = Effects::BindEffectTextureTables(read.block, {});
+    const auto rows = Effects::BoundEffectPaletteRows(state.textures);
+    const auto check =
+        Effects::CheckEffectPaletteReferences(read.block, layout, rows);
+    INFO("descriptor " << check.descriptor << " CLUT " << check.clut);
+    CHECK(check.fault == Effects::PaletteReferenceFault::kNone);
+    if (check.fault != Effects::PaletteReferenceFault::kNone) ++survey.refused;
+    // Only E000's slot-0 CLUT fills row 240; no other effect samples it.
+    const auto own = effect == 0 ? rows
+                                 : static_cast<Effects::EffectPaletteRows>(
+                                       rows & ~Effects::kSystemPaletteRows);
+    if (Effects::CheckEffectPaletteReferences(read.block, layout, own).fault !=
+        Effects::PaletteReferenceFault::kNone) {
+      ++survey.on_foreign_rows;
+    }
+  }
+  return survey;
+}
+}  // namespace
+
+TEST_CASE("Loaded effect descriptors sample only their own palette rows",
+          "[effects][effects-resources-transforms][extract][effect-palette]") {
+  const ExtractedEffectData data;
+  const auto survey = SurveyPaletteReferences(data);
+  CHECK(survey.loaded == 290);
+  CHECK(survey.textured == 278);
+  CHECK(survey.refused == 0);
+  CHECK(survey.on_foreign_rows == 0);
+  // The resident empty package is E000.P, bound with the system palette only.
+  const auto tables = Effects::LiveEffectPurgeTables();
+  const auto resident = ReadTextureBlock(data, tables.package_files[0]);
+  REQUIRE_FALSE(resident.block.empty());
+  CHECK(Effects::CheckEffectPaletteReferences(
+            resident.block,
+            Effects::BindEffectTextureTables(resident.block, {}),
+            Effects::kSystemPaletteRows) == Effects::PaletteReferenceCheck{});
+}
+
+TEST_CASE("Effect palette rows follow the configured CLUT's slot",
+          "[effects][effects-resources-transforms][effect-palette]") {
+  const auto rows = [](std::int32_t count, std::uint16_t slot, bool is_clut) {
+    Effects::TextureLoadList textures{.asset_count = count};
+    textures.assets[0] = {.file = {}, .slot = slot, .is_clut = is_clut};
+    return Effects::BoundEffectPaletteRows(textures);
+  };
+  // Slot 2 fills rows 242-244; the system palette holds row 240.
+  CHECK(rows(1, 2, true) == 0b11101);
+  CHECK(rows(1, 0, true) == Effects::kAllEffectPaletteRows);
+  CHECK(rows(1, 4, true) == 0b10001);
+  CHECK(rows(0, 2, true) == Effects::kSystemPaletteRows);
+  CHECK(rows(1, 2, false) == Effects::kSystemPaletteRows);
+  CHECK(rows(1, 5, true) == Effects::kSystemPaletteRows);
 }
 
 TEST_CASE("Effect descriptors sample past their palette only in E210",

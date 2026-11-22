@@ -6,13 +6,26 @@
 #include <cstdlib>
 #include <cstring>
 #include <span>
+#include <string_view>
 
 #include "Core/Log.hpp"
+#include "Effects/EffectResources.hpp"
 
 namespace VS::Effects {
 namespace {
 constexpr std::size_t kHeaderBytes = 4;
 constexpr std::size_t kTableOffsetBytes = sizeof(std::uint32_t);
+// A descriptor's CLUT word, then its texture page word.
+constexpr std::size_t kDescriptorPageOffset = sizeof(std::uint16_t);
+constexpr std::uint32_t kClutColumnMask = 0x3F;
+constexpr std::uint32_t kClutColumnEntries = 16;
+constexpr std::uint32_t kClutRowShift = 6;
+constexpr std::uint32_t kClutRowMask = 0x1FF;
+constexpr std::uint32_t kPageDepthShift = 7;
+constexpr std::uint32_t kPageDepthMask = 3;
+constexpr std::uint32_t kIndexed8Depth = 1;
+constexpr std::uint32_t kIndexed4Entries = 16;
+constexpr std::uint32_t kIndexed8Entries = 256;
 using Bytes = std::span<const std::byte>;
 
 void Require(bool condition, const char* message) {
@@ -47,6 +60,31 @@ void ValidateFrames(Bytes bytes, std::size_t begin, std::size_t end,
     Require(first <= descriptor_count && frames <= descriptor_count - first,
             "frame references unavailable texture descriptors");
   }
+}
+
+PaletteReferenceFault PaletteFault(std::uint16_t clut, std::uint16_t page,
+                                   std::uint8_t bound_rows) {
+  const std::uint32_t depth = (page >> kPageDepthShift) & kPageDepthMask;
+  if (depth > kIndexed8Depth) return PaletteReferenceFault::kNone;
+  const std::uint32_t entries =
+      depth == kIndexed8Depth ? kIndexed8Entries : kIndexed4Entries;
+  const std::uint32_t first = (clut & kClutColumnMask) * kClutColumnEntries;
+  const auto area_x = static_cast<std::uint32_t>(kEffectClutX);
+  const auto area_end = area_x + static_cast<std::uint32_t>(kEffectClutWidth);
+  if (first < area_x || first + entries > area_end) {
+    return PaletteReferenceFault::kColumn;
+  }
+  const std::uint32_t row = (clut >> kClutRowShift) & kClutRowMask;
+  const auto first_row = static_cast<std::uint32_t>(kEffectClutFirstRow);
+  if (row < first_row ||
+      row - first_row >= static_cast<std::uint32_t>(kEffectClutRows)) {
+    return PaletteReferenceFault::kRow;
+  }
+  if (((static_cast<std::uint32_t>(bound_rows) >> (row - first_row)) & 1U) ==
+      0) {
+    return PaletteReferenceFault::kUnbound;
+  }
+  return PaletteReferenceFault::kNone;
 }
 }  // namespace
 
@@ -93,5 +131,37 @@ TextureBlockLayout BindEffectTextureTables(Bytes block,
         "E084 material channel 1 shares authored source table 0");
   }
   return layout;
+}
+
+PaletteReferenceCheck CheckEffectPaletteReferences(
+    Bytes block, const TextureBlockLayout& layout, std::uint8_t bound_rows) {
+  for (std::size_t offset = layout.descriptor_offset, index = 0;
+       offset <= block.size() &&
+       kTextureDescriptorBytes <= block.size() - offset;
+       offset += kTextureDescriptorBytes, ++index) {
+    const auto clut = Read<std::uint16_t>(block, offset);
+    const auto page =
+        Read<std::uint16_t>(block, offset + kDescriptorPageOffset);
+    const PaletteReferenceFault fault = PaletteFault(clut, page, bound_rows);
+    if (fault != PaletteReferenceFault::kNone) {
+      return {.fault = fault, .descriptor = index, .clut = clut};
+    }
+  }
+  return {};
+}
+
+std::string_view DescribePaletteFault(PaletteReferenceFault fault) noexcept {
+  switch (fault) {
+    case PaletteReferenceFault::kColumn:
+      return "samples palette entries outside the effect CLUT's x 768-1023";
+    case PaletteReferenceFault::kRow:
+      return "names a CLUT row outside the effect rows 240-244";
+    case PaletteReferenceFault::kUnbound:
+      return "names an effect CLUT row that neither its effect's palette nor "
+             "the system palette fills";
+    case PaletteReferenceFault::kNone:
+      break;
+  }
+  return "samples a loaded effect palette";
 }
 }  // namespace VS::Effects
