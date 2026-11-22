@@ -24,6 +24,7 @@ param(
     [int]$Speed = 1,   # logical ticks per real tick (attract/long runs: 8)
     [switch]$GpuValidation,    # SDL GPU debug mode; Release runs without it unless asked (#348)
     [switch]$NoGpuValidation,  # turn it off in Debug, for a like-for-like comparison
+    [string]$SaveDir = '',     # saves folder; an empty one makes the title menu start at New Game
     [ValidateSet('trace', 'debug', 'info', 'warn', 'error', 'off')]
     [string]$LogLevel = 'info',
     [string]$LogChannels = '*'
@@ -57,6 +58,10 @@ if (-not $Devices) { $argv += '--scripted' }
 if ($Speed -gt 1) { $argv += @('--speed', "$Speed") }
 if ($GpuValidation) { $argv += '--gpu-validation' }
 if ($NoGpuValidation) { $argv += '--no-gpu-validation' }
+if ($SaveDir) {
+    New-Item -ItemType Directory -Force $SaveDir | Out-Null
+    $argv += @('--save-dir', "`"$((Resolve-Path $SaveDir).Path)`"")
+}
 $logPath = Join-Path $repo "build\$Config\vs-native.log"
 if (Test-Path $logPath) { Remove-Item $logPath -Force }
 # Own the handle from launch; Start-Process can lose the exit code when startup fails immediately.
