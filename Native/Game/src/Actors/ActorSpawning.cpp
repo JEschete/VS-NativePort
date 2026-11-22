@@ -764,22 +764,60 @@ struct RoomEnemyParts {
   bool common_animation = false;
 };
 
+// Native (#48): the records a room enemy's requests load, as parts of the
+// owning actor. Each part's record slot and destination derive from the
+// actor and its slot, for its request and for its release, so neither can
+// aim at another actor's records.
+enum class SpawnPart : std::uint8_t {
+  kBody,
+  kSecondBody,
+  kWeapon,
+  kShield,
+  kAnimation,
+};
+
+[[nodiscard]] std::size_t PartRecordSlot(std::size_t slot, SpawnPart part) {
+  switch (part) {
+    case SpawnPart::kSecondBody:
+      return slot + kSecondBodySlotOffset;
+    case SpawnPart::kWeapon:
+      return slot * 2;
+    case SpawnPart::kShield:
+      return (slot * 2) + 1;
+    default:
+      return slot;
+  }
+}
+
 class OwnedSpawnAssets {
  public:
-  OwnedSpawnAssets(ActorSpawnHost& host, SpawnedActor actor)
-      : host_(host), actor_(actor) {}
+  OwnedSpawnAssets(ActorSpawnHost& host, SpawnedActor actor, std::size_t slot)
+      : host_(host), actor_(actor), slot_(slot) {}
 
-  [[nodiscard]] bool Submit(const ActorAssetRequest& request) {
-    if (tickets_.size() == count_) {
-      return false;
+  // Aims `request` at the owning actor's `part` and submits it. The request
+  // keeps its other fields, carried from one part to the next as the
+  // original's stack record was.
+  [[nodiscard]] bool Submit(SpawnPart part, ActorAssetRequest& request) {
+    request.target_slot = static_cast<std::int8_t>(PartRecordSlot(slot_, part));
+    switch (part) {
+      case SpawnPart::kBody:
+        request.destination = host_.ModelAddress(actor_);
+        break;
+      case SpawnPart::kSecondBody:
+      case SpawnPart::kWeapon:
+        request.destination =
+            host_.EquipmentAddress(actor_, EquipmentHand::kWeapon);
+        break;
+      case SpawnPart::kShield:
+        request.destination =
+            host_.EquipmentAddress(actor_, EquipmentHand::kShield);
+        break;
+      case SpawnPart::kAnimation:
+        // A sequence parse reads no destination; the record carries the
+        // previous part's, as the original's did.
+        break;
     }
-    const std::optional<Content::ActorAssetTicket> ticket =
-        host_.SubmitOwnedAsset(request, actor_);
-    if (!ticket) {
-      return false;
-    }
-    tickets_.at(count_++) = *ticket;
-    return true;
+    return Submit(request);
   }
 
   [[nodiscard]] bool Finish() {
@@ -806,6 +844,19 @@ class OwnedSpawnAssets {
   }
 
  private:
+  [[nodiscard]] bool Submit(const ActorAssetRequest& request) {
+    if (tickets_.size() == count_) {
+      return false;
+    }
+    const std::optional<Content::ActorAssetTicket> ticket =
+        host_.SubmitOwnedAsset(request, actor_);
+    if (!ticket) {
+      return false;
+    }
+    tickets_.at(count_++) = *ticket;
+    return true;
+  }
+
   void Forget() {
     for (std::size_t i = 0; i < count_; ++i) {
       host_.ForgetAsset(tickets_.at(i));
@@ -816,6 +867,7 @@ class OwnedSpawnAssets {
   static constexpr std::size_t kCapacity = 5;
   ActorSpawnHost& host_;
   SpawnedActor actor_;
+  std::size_t slot_;
   std::array<Content::ActorAssetTicket, kCapacity> tickets_{};
   std::size_t count_ = 0;
 };
@@ -835,86 +887,78 @@ class OwnedSpawnAssets {
 // The second body, equipment and animation requests after the body's, each
 // carrying the previous request's fields as the original's stack record did.
 [[nodiscard]] bool QueueRoomEnemyParts(
-    ActorSpawnHost& host, OwnedSpawnAssets& assets, ActorAssetRequest& request,
-    SpawnedActor actor, std::size_t slot, const ZudBlock& block,
-    const ZudLayout& layout, const CharacterTemplate& character,
-    const RoomEnemyParts& parts, std::uint8_t body_model,
-    std::uint8_t category) {
+    OwnedSpawnAssets& assets, ActorAssetRequest& request, std::size_t slot,
+    const ZudBlock& block, const ZudLayout& layout,
+    const CharacterTemplate& character, const RoomEnemyParts& parts,
+    std::uint8_t body_model, std::uint8_t category) {
   const auto slot_byte = static_cast<std::uint8_t>(slot);
   if (parts.second_body) {
     request.kind = static_cast<std::uint8_t>(ActorAssetKind::kActorModelLoad);
-    request.target_slot =
-        static_cast<std::int8_t>(slot + kSecondBodySlotOffset);
     request.model_id = static_cast<std::int16_t>(body_model + 1);
-    request.destination = host.EquipmentAddress(actor, EquipmentHand::kWeapon);
     request.sub_kind = slot_byte;
     request.texture_slot = kSecondBodyTextureSlot;
     request.variant = 0;
-    if (!assets.Submit(request)) return false;
+    if (!assets.Submit(SpawnPart::kSecondBody, request)) return false;
   } else {
     if (parts.weapon) {
       request.kind =
           static_cast<std::uint8_t>(ActorAssetKind::kWeaponModelParse);
-      request.target_slot = static_cast<std::int8_t>(slot * 2);
       request.data = SectionAddress(block, layout.weapon);
       request.model_id = character.blade_model;
-      request.destination =
-          host.EquipmentAddress(actor, EquipmentHand::kWeapon);
       request.sub_kind = slot_byte;
       request.texture_slot = kWeaponTextureSlot;
       request.material = character.weapon_material;
-      if (!assets.Submit(request)) return false;
+      if (!assets.Submit(SpawnPart::kWeapon, request)) return false;
     }
     if (parts.shield) {
       request.kind =
           static_cast<std::uint8_t>(ActorAssetKind::kWeaponModelParse);
-      request.target_slot = static_cast<std::int8_t>((slot * 2) + 1);
       request.data = SectionAddress(block, layout.shield);
       request.model_id = character.shield_model;
-      request.destination =
-          host.EquipmentAddress(actor, EquipmentHand::kShield);
       request.sub_kind = slot_byte;
       request.texture_slot = kShieldTextureSlot;
       request.material = character.shield_material;
-      if (!assets.Submit(request)) return false;
+      if (!assets.Submit(SpawnPart::kShield, request)) return false;
     }
   }
   if (parts.battle_animation) {
     request.kind = static_cast<std::uint8_t>(ActorAssetKind::kSequenceParse);
-    request.target_slot = static_cast<std::int8_t>(slot);
     request.data = SectionAddress(block, layout.battle_animation);
     request.sub_kind = 0;
     request.model_id = category;
-    if (!assets.Submit(request)) return false;
+    if (!assets.Submit(SpawnPart::kAnimation, request)) return false;
   }
   if (parts.common_animation) {
     request.kind = static_cast<std::uint8_t>(ActorAssetKind::kSequenceParse);
-    request.target_slot = static_cast<std::int8_t>(slot);
     request.data = SectionAddress(block, layout.common_animation);
     request.sub_kind = 0;
     request.model_id = 0;
-    if (!assets.Submit(request)) return false;
+    if (!assets.Submit(SpawnPart::kAnimation, request)) return false;
   }
   return true;
 }
 
 void ReleaseRoomEnemyAssets(ActorSpawnHost& host, std::size_t slot,
                             const RoomEnemyParts& parts) {
-  if (slot < Content::kActorRecordSlots) {
-    host.ReleaseActorModel(static_cast<int>(slot));
-  }
-  if (parts.second_body &&
-      slot + kSecondBodySlotOffset < Content::kActorRecordSlots) {
-    host.ReleaseActorModel(static_cast<int>(slot + kSecondBodySlotOffset));
-  } else {
-    const std::size_t weapon_slot = slot * 2;
-    if (parts.weapon && weapon_slot < Content::kWeaponModelSlots) {
-      host.ReleaseWeaponModel(static_cast<int>(weapon_slot));
+  const auto release_record = [&](SpawnPart part) {
+    const std::size_t record = PartRecordSlot(slot, part);
+    if (record < Content::kActorRecordSlots) {
+      host.ReleaseActorModel(static_cast<int>(record));
     }
-    if (parts.shield && weapon_slot + 1 < Content::kWeaponModelSlots) {
-      host.ReleaseWeaponModel(static_cast<int>(weapon_slot + 1));
+  };
+  const auto release_equipment = [&](SpawnPart part) {
+    const std::size_t record = PartRecordSlot(slot, part);
+    if (record < Content::kWeaponModelSlots) {
+      host.ReleaseWeaponModel(static_cast<int>(record));
     }
+  };
+  release_record(SpawnPart::kBody);
+  if (parts.second_body) {
+    release_record(SpawnPart::kSecondBody);
+    return;
   }
+  if (parts.weapon) release_equipment(SpawnPart::kWeapon);
+  if (parts.shield) release_equipment(SpawnPart::kShield);
 }
 
 void DiscardRoomEnemy(ActorSpawnHost& host, SpawnedActor actor,
@@ -1029,19 +1073,17 @@ SpawnedActor SpawnRoomEnemy(ActorSpawnHost& host, int actor_id,
   // the original's stack record was.
   ActorAssetRequest request{};
   request.kind = static_cast<std::uint8_t>(ActorAssetKind::kActorModelParse);
-  request.target_slot = static_cast<std::int8_t>(slot);
   request.data = SectionAddress(*block, layout->shape);
   request.model_id = body_model;
   request.placement = PackPlacement(RoomEnemyPlacement(spawn, remembered));
-  request.destination = host.ModelAddress(actor);
   request.sub_kind = kDefaultSubKind;
   request.variant = static_cast<std::uint8_t>(spawn.variant & 1U);
   request.material = character.material;
-  OwnedSpawnAssets assets(host, actor);
-  if (!assets.Submit(request) ||
+  OwnedSpawnAssets assets(host, actor, slot);
+  if (!assets.Submit(SpawnPart::kBody, request) ||
       (!parts.bare &&
-       !QueueRoomEnemyParts(host, assets, request, actor, slot, *block, *layout,
-                            character, parts, body_model, category))) {
+       !QueueRoomEnemyParts(assets, request, slot, *block, *layout, character,
+                            parts, body_model, category))) {
     host.Refuse(SpawnRefusal::kAssetQueue);
     if (!assets.Cancel()) {
       static_cast<void>(assets.Finish());
