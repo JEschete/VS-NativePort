@@ -49,8 +49,9 @@ void SettleLiveActorLoads();
 // kind is not ownable. The queue index, or -1.
 int QueueLiveSlotActorAsset(std::size_t slot,
                             const Content::ActorAssetRequest& request);
-// As QueueLiveSlotActorAsset, for `actor` wherever it is installed; unowned
-// when it is not in the actor table.
+// As QueueLiveSlotActorAsset, for `actor` wherever it is installed or while
+// the spawn host's allocation of it is pending; unowned when the actor table
+// and the pending allocations do not hold it.
 int QueueLiveActorOwnedAsset(const VS::Battle::Actor* actor,
                              const Content::ActorAssetRequest& request);
 

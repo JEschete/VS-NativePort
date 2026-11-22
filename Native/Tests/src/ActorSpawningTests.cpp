@@ -15,6 +15,7 @@
 #include "Actors/ActorLoads.hpp"
 #include "Actors/ActorSpawning.hpp"
 #include "Actors/ActorSpawningLive.hpp"
+#include "Actors/AnimationControlLive.hpp"
 #include "Actors/CharacterInit.hpp"
 #include "Actors/RoomActorCache.hpp"
 #include "Battle/AbilityState.hpp"
@@ -219,6 +220,19 @@ TEST_CASE("An actor without a definition claims no resources, once",
   const SpawnedActor stranger = handles.Observe(6, 0x7000);
   CHECK(handles.ClaimRemoval(6, stranger) == ActorResources{});
   CHECK_FALSE(handles.ClaimRemoval(6, stranger).has_value());
+}
+
+TEST_CASE("A pending allocation is found by its address until published",
+          "[actors][actors-spawning]") {
+  actors::ActorInstanceTable handles;
+  CHECK(handles.Pending(0x1000) == SpawnedActor::kNone);
+  const SpawnedActor actor = handles.Begin(3, 0x1000, kEquippedActor);
+  CHECK(handles.Pending(0) == SpawnedActor::kNone);
+  CHECK(handles.Pending(0x1000) == actor);
+  REQUIRE(handles.Publish(3, actor));
+  CHECK(handles.Pending(0x1000) == SpawnedActor::kNone);
+  // The lookup did not install or re-key anything.
+  CHECK(handles.Observe(3, 0x1000) == actor);
 }
 
 using content::ActorAssetOutcome;
@@ -2179,6 +2193,29 @@ TEST_CASE("Removing a live actor cancels only its own queued load",
   CHECK(actors::QueueLiveActorOwnedAsset(&stranger, request) == 0);
   CHECK(actors::QueueLiveActorOwnedAsset(&installed, request) == 1);
   CHECK(content::FindLiveFreeActorAssetRequest() == 2);
+  CHECK(actors::CancelLiveActorAssets(kSlot, &installed));
+  CHECK(content::FindLiveFreeActorAssetRequest() == 1);
+  content::ClearLiveActorAssetQueue();
+  actors::ResetLiveActorHandles();
+  VS::Battle::actors[kSlot] = saved_actor;
+}
+
+TEST_CASE("A live actor owns the sequence loads its equipped spawn queues",
+          "[actors][actors-spawning][asset-ownership]") {
+  // #48: removing the actor cancels its own sequences; a shared sequence,
+  // which no actor owns, stays queued.
+  constexpr int kSlot = 1;
+  VS::Battle::Actor* const saved_actor = VS::Battle::actors[kSlot];
+  content::ClearLiveActorAssetQueue();
+  actors::ResetLiveActorHandles();
+  VS::Battle::Actor installed{};
+  installed.equipped_weapon_category = 2;
+  VS::Battle::actors[kSlot] = &installed;
+  actors::QueueLiveSharedSequenceLoad(0, 1);
+  actors::QueueLiveActorBaseSequenceLoad(&installed, kSlot);
+  actors::QueueLiveActorWeaponSequenceLoad(reinterpret_cast<char*>(&installed),
+                                           kSlot, 1, 0);
+  CHECK(content::FindLiveFreeActorAssetRequest() == 3);
   CHECK(actors::CancelLiveActorAssets(kSlot, &installed));
   CHECK(content::FindLiveFreeActorAssetRequest() == 1);
   content::ClearLiveActorAssetQueue();

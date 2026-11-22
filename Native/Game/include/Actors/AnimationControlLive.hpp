@@ -20,10 +20,12 @@ struct Actor;
 // refused with a warning on the "actors" channel.
 namespace VS::Actors {
 struct SoundEffectSlot;
-// `actor` is unused, as in the original.
+// Native (#48): `actor`, unused by the original, owns the queued sequence load
+// (ActorSpawningLive.hpp QueueLiveActorOwnedAsset), so removing it cancels the
+// load.
 void QueueLiveActorBaseSequenceLoad(VS::Battle::Actor* actor, int actor_id);
 // `actor_bytes` is the VS::Battle::Actor whose equipped weapon category is read
-// when the weapon sequence is queued.
+// when the weapon sequence is queued; it owns that load, as above.
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
 void QueueLiveActorWeaponSequenceLoad(char* actor_bytes, int actor_id,
                                       int weapon_category, int spawn_flags);

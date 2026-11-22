@@ -13,6 +13,7 @@
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorMovementLive.hpp"
 #include "Actors/ActorRecord.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/Animation.hpp"
 #include "Actors/AnimationControl.hpp"
@@ -277,6 +278,10 @@ int TableByte(const std::array<std::uint8_t, Size>& table, int index,
 
 class LiveAnimationHost final : public AnimationControlHost {
  public:
+  LiveAnimationHost() = default;
+  // Native (#48): `owner` owns the sequence loads this host queues.
+  explicit LiveAnimationHost(const VS::Battle::Actor* owner) : owner_(owner) {}
+
   AnimationActor& Attach(VS::Actors::ActorRecord& record) {
     return registry_.Attach(record);
   }
@@ -348,7 +353,7 @@ class LiveAnimationHost final : public AnimationControlHost {
     VS::Actors::forcedModelOverrides = static_cast<char>(control);
   }
   void QueueSequenceAsset(const Content::ActorAssetRequest& request) override {
-    static_cast<void>(Content::QueueLiveActorAsset(request));
+    static_cast<void>(QueueLiveActorOwnedAsset(owner_, request));
   }
   int ReleaseSharedSequence(int bank) override {
     const Synced synced(registry_);
@@ -490,6 +495,7 @@ class LiveAnimationHost final : public AnimationControlHost {
 
  private:
   AnimationRegistry registry_;
+  const VS::Battle::Actor* owner_ = nullptr;
 };
 
 SoundEffectSlot SlotOf(const VS::Actors::ModelEffectSlot& live) {
@@ -498,21 +504,20 @@ SoundEffectSlot SlotOf(const VS::Actors::ModelEffectSlot& live) {
 }  // namespace
 
 // decomp: BATTLE.PRG func_800770FC (src/BATTLE/BATTLE.PRG/146C.c:6254)
-void QueueLiveActorBaseSequenceLoad(VS::Battle::Actor* /*actor*/,
-                                    int actor_id) {
-  LiveAnimationHost host;
+void QueueLiveActorBaseSequenceLoad(VS::Battle::Actor* actor, int actor_id) {
+  LiveAnimationHost host(actor);
   QueueActorBaseSequenceLoad(host, actor_id);
 }
 
 // decomp: BATTLE.PRG func_800771E0 (src/BATTLE/BATTLE.PRG/146C.c:6294)
 void QueueLiveActorWeaponSequenceLoad(char* actor_bytes, int actor_id,
                                       int weapon_category, int spawn_flags) {
+  const auto* actor = reinterpret_cast<const VS::Battle::Actor*>(actor_bytes);
   std::optional<int> equipped;
-  if (actor_bytes != nullptr) {
-    equipped = reinterpret_cast<const VS::Battle::Actor*>(actor_bytes)
-                   ->equipped_weapon_category;
+  if (actor != nullptr) {
+    equipped = actor->equipped_weapon_category;
   }
-  LiveAnimationHost host;
+  LiveAnimationHost host(actor);
   QueueActorWeaponSequenceLoad(host, equipped, actor_id, weapon_category,
                                spawn_flags);
 }

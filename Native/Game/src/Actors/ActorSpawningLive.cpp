@@ -1298,6 +1298,12 @@ int QueueLiveActorOwnedAsset(const VS::Battle::Actor* actor,
         return QueueLiveSlotActorAsset(slot, request);
       }
     }
+    const SpawnedActor pending =
+        LiveActorHandles().Pending(ActorAddress(actor));
+    if (pending != SpawnedActor::kNone &&
+        Content::IsOwnableActorAssetRequest(request)) {
+      return QueueActorLoad(pending, request);
+    }
   }
   return Content::QueueLiveActorAsset(request);
 }

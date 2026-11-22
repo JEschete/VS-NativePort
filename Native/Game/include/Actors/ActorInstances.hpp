@@ -132,6 +132,21 @@ class ActorInstanceTable {
     return entry != nullptr ? entry->address : 0;
   }
 
+  // The unpublished allocation at `address`; kNone when no pending instance
+  // has it. Unlike Observe, this changes nothing.
+  [[nodiscard]] SpawnedActor Pending(std::uintptr_t address) const {
+    if (address == 0) {
+      return SpawnedActor::kNone;
+    }
+    for (std::size_t slot = 0; slot < entries_.size(); ++slot) {
+      const Entry& entry = entries_[slot];
+      if (entry.address == address && !entry.installed) {
+        return Encode(slot, entry.generation);
+      }
+    }
+    return SpawnedActor::kNone;
+  }
+
   // The definition `actor` was allocated with; nothing for a stale handle or
   // an instance the table only observed.
   [[nodiscard]] std::optional<ActorDefinition> Definition(
