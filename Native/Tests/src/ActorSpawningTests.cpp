@@ -19,6 +19,7 @@
 #include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Content/ActorAssets.hpp"
+#include "Content/ActorAssetsLive.hpp"
 #include "Content/CdDrive.hpp"
 #include "Field/Mpd.hpp"
 #include "Legacy/Psx.hpp"
@@ -890,7 +891,7 @@ TEST_CASE("An equipped actor queues its models and joins the list after Ashley",
   CHECK(host.table.at(3) == actor);
   CHECK(host.log == std::vector<std::string>{"Allocate 1",
                                              "Category 2",
-                                             "QueueAsset",
+                                             "QueueOwnedAsset",
                                              "BaseSequence 3",
                                              "Release 6",
                                              "QueueOwnedAsset",
@@ -943,8 +944,8 @@ TEST_CASE("An equipped actor's requests load its slots and it owns its parts",
   shield.texture_slot = actors::kShieldTextureSlot;
   shield.material = 1;
   CHECK(host.requests.at(2) == shield);
-  // Native (#48): removing the actor cancels its blade and shield loads.
-  CHECK(host.queued_owners == std::vector{actor, actor});
+  // Native (#48): removing the actor cancels its body, blade and shield loads.
+  CHECK(host.queued_owners == std::vector{actor, actor, actor});
 }
 
 TEST_CASE("Ashley's slot ends the list and a bare model queues no parts",
@@ -953,13 +954,15 @@ TEST_CASE("Ashley's slot ends the list and a bare model queues no parts",
   const SpawnedActor actor = actors::CreateActorWithEquipment(
       host, 0, actors::kBareModel, 15, 2, 6, 1, {}, 0);
   REQUIRE(actor != SpawnedActor::kNone);
-  CHECK(host.log == std::vector<std::string>{
-                        "Allocate 1", "Category 2", "QueueAsset", "UpdateQueue",
-                        "Pump", "Animation 0 0", "Display 0 0x1847",
-                        "Install 0", "Defaults 0", "Speeds 0 0x9000 0x12000",
-                        "CombatPose 0 0", "ClearNext 0", "Display 0 0x46",
-                        "TemplateWord 0 0", "AiState 0 -1"});
+  CHECK(host.log ==
+        std::vector<std::string>{"Allocate 1", "Category 2", "QueueOwnedAsset",
+                                 "UpdateQueue", "Pump", "Animation 0 0",
+                                 "Display 0 0x1847", "Install 0", "Defaults 0",
+                                 "Speeds 0 0x9000 0x12000", "CombatPose 0 0",
+                                 "ClearNext 0", "Display 0 0x46",
+                                 "TemplateWord 0 0", "AiState 0 -1"});
   CHECK(host.requests.size() == 1);
+  CHECK(host.queued_owners == std::vector{actor});
 }
 
 TEST_CASE("An equipped actor is refused before anything is allocated",
@@ -1558,6 +1561,22 @@ TEST_CASE("Ashley's model request is value-initialized",
   expected.target_slot = 0;
   expected.model_id = 0x12;
   CHECK(host.requests == std::vector<ActorAssetRequest>{expected});
+  // Without Ashley the load stays unowned, as the original queued it.
+  CHECK(host.queued_owners.empty());
+}
+
+TEST_CASE("An installed Ashley owns her model load",
+          "[actors][actors-spawning]") {
+  // #48: removing Ashley cancels the load into her record.
+  FakeSpawnHost host;
+  host.table.at(actors::kAshleySlot) = Handle(0x10);
+  host.queue_index = 2;
+  CHECK(actors::QueueAshleyModelLoad(host, 0x12) == 3);
+  CHECK(host.queued_owners == std::vector{Handle(0x10)});
+  CHECK(host.log == std::vector<std::string>{"QueueOwnedAsset"});
+  REQUIRE(host.requests.size() == 1);
+  CHECK(host.requests.at(0).target_slot == 0);
+  CHECK(host.requests.at(0).model_id == 0x12);
 }
 
 TEST_CASE("A scripted actor spawns into a free slot below 16",
@@ -1959,4 +1978,28 @@ TEST_CASE("Live spawn adapters report their refusals on the actors channel",
   }
   VS::Battle::actors[10] = saved_actor;
   VS::Battle::characterState = saved_character;
+}
+
+TEST_CASE("Removing a live actor cancels only its own queued load",
+          "[actors][actors-spawning]") {
+  // #48: the equipment menu queues Ashley's reloads through this binding.
+  constexpr std::size_t kSlot = 10;
+  VS::Battle::Actor* const saved_actor = VS::Battle::actors[kSlot];
+  content::ClearLiveActorAssetQueue();
+  actors::ResetLiveActorHandles();
+  VS::Battle::Actor installed{};
+  VS::Battle::Actor stranger{};
+  VS::Battle::actors[kSlot] = &installed;
+  ActorAssetRequest request{};
+  request.kind = Kind(ActorAssetKind::kWeaponModelLoad);
+  request.target_slot = 0;
+  request.model_id = 3;
+  CHECK(actors::QueueLiveActorOwnedAsset(&stranger, request) == 0);
+  CHECK(actors::QueueLiveActorOwnedAsset(&installed, request) == 1);
+  CHECK(content::FindLiveFreeActorAssetRequest() == 2);
+  CHECK(actors::CancelLiveActorAssets(kSlot, &installed));
+  CHECK(content::FindLiveFreeActorAssetRequest() == 1);
+  content::ClearLiveActorAssetQueue();
+  actors::ResetLiveActorHandles();
+  VS::Battle::actors[kSlot] = saved_actor;
 }

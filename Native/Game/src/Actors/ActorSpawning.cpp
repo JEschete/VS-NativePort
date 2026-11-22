@@ -257,11 +257,12 @@ void ApplyTemplate(ActorSpawnHost& host, std::size_t slot,
   return request;
 }
 
+// Native (#48): the actor owns its body load, as it owns its equipment loads.
 [[nodiscard]] int QueueModelLoad(ActorSpawnHost& host, SpawnedActor actor,
                                  int index, int model_id,
                                  SpawnPlacement placement, int flags) {
-  return host.QueueAsset(
-      ModelLoadRequest(host, actor, index, model_id, placement, flags));
+  return host.QueueOwnedAsset(
+      ModelLoadRequest(host, actor, index, model_id, placement, flags), actor);
 }
 
 void QueueEquipment(ActorSpawnHost& host, SpawnedActor actor, int actor_id,
@@ -1105,12 +1106,18 @@ SpawnedActor SpawnRoomEnemy(ActorSpawnHost& host, int actor_id,
 }
 
 // decomp: BATTLE.PRG func_8007C8F8 (src/BATTLE/BATTLE.PRG/146C.c:8881)
+// Native (#48): an installed Ashley owns the load into her record; without
+// her it stays unowned, as the original queued it.
 int QueueAshleyModelLoad(ActorSpawnHost& host, int model_id) {
   ActorAssetRequest request{};
   request.model_id = static_cast<std::int16_t>(model_id);
   request.kind = static_cast<std::uint8_t>(ActorAssetKind::kActorModelLoad);
   request.target_slot = static_cast<std::int8_t>(kAshleySlot);
-  return host.QueueAsset(request) + 1;
+  const SpawnedActor ashley = host.ActorAt(kAshleySlot);
+  if (ashley == SpawnedActor::kNone) {
+    return host.QueueAsset(request) + 1;
+  }
+  return host.QueueOwnedAsset(request, ashley) + 1;
 }
 
 // decomp: BATTLE.PRG spawnModelActor (src/BATTLE/BATTLE.PRG/146C.c:8891; was

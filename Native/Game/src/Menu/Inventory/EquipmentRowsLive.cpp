@@ -13,6 +13,7 @@
 #include <string_view>
 
 #include "Actors/ActorRecord.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
@@ -273,8 +274,10 @@ class LiveModelHost final : public EquipmentModelHost {
   void QueueWeaponAnimations(std::int32_t sequence_model) override {
     Framework::QueueLiveAshleyWeaponAnimations(sequence_model);
   }
+  // Native (#48): the reload writes Ashley's equipment memory, so she owns it.
   void QueueAsset(const ActorAssetRequest& request) override {
-    static_cast<void>(Content::QueueLiveActorAsset(request));
+    static_cast<void>(
+        Actors::QueueLiveActorOwnedAsset(VS::Battle::characterState, request));
   }
   void SetWeaponDrawn(bool drawn) override {
     Actors::SetLiveActorWeaponDrawn(kPreviewActor, drawn ? 1 : 0,

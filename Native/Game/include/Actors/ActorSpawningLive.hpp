@@ -35,6 +35,10 @@ void FinishLiveActorAssets(std::size_t slot, const VS::Battle::Actor* actor);
 // slot is empty or the request kind is not ownable. The queue index, or -1.
 int QueueLiveSlotActorAsset(std::size_t slot,
                             const Content::ActorAssetRequest& request);
+// As QueueLiveSlotActorAsset, for `actor` wherever it is installed; unowned
+// when it is not in the actor table.
+int QueueLiveActorOwnedAsset(const VS::Battle::Actor* actor,
+                             const Content::ActorAssetRequest& request);
 
 // The typed records of the legacy layouts.
 [[nodiscard]] CharacterTemplate DecodeCharacterTemplate(
