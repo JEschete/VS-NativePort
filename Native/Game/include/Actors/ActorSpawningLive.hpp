@@ -20,6 +20,11 @@ namespace VS::Actors {
 struct CharacterInit;
 struct RoomActorRecord;
 
+// Invalidates the native identity before the matching legacy allocation is
+// freed, or before a gameplay session clears the actor table.
+void InvalidateLiveActorHandle(std::size_t slot, VS::Battle::Actor* actor);
+void ResetLiveActorHandles();
+
 // The typed records of the legacy layouts.
 [[nodiscard]] CharacterTemplate DecodeCharacterTemplate(
     const CharacterInit& init);

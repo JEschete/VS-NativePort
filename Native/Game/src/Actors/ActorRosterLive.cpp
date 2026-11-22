@@ -12,6 +12,7 @@
 #include <span>
 
 #include "Actors/ActorRoster.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/ActorTableLive.hpp"
 #include "Actors/BattleActorState.hpp"
@@ -92,6 +93,7 @@ class LiveRemovalHost final : public ActorRemovalHost {
     VS::Battle::actors[predecessor]->next = actor_->next;
   }
   void Free(std::size_t slot) override {
+    InvalidateLiveActorHandle(slot, actor_);
     VS::Core::Memory::FreeLiveFromLowEnd(actor_);
     VS::Battle::actors[slot] = nullptr;
   }

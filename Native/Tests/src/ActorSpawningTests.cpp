@@ -88,6 +88,63 @@ const T& Required(const std::optional<T>& value) {
   return *value;
 }
 
+TEST_CASE("Actor handles validate and retire published identities",
+          "[actors][actors-spawning]") {
+  actors::ActorHandleTable handles;
+  const SpawnedActor actor = handles.Begin(3, 0x1000);
+
+  CHECK(actor != SpawnedActor::kNone);
+  CHECK(handles.Resolve(actor) == 0x1000);
+  CHECK(handles.Publish(3, actor));
+  CHECK(handles.Observe(3, 0x1000) == actor);
+  CHECK(handles.Remove(3, actor));
+  CHECK(handles.Resolve(actor) == 0);
+}
+
+TEST_CASE("Reused actor slots issue a new generation for the same address",
+          "[actors][actors-spawning]") {
+  actors::ActorHandleTable handles;
+  const SpawnedActor first = handles.Begin(3, 0x1000);
+  REQUIRE(handles.Publish(3, first));
+  REQUIRE(handles.Remove(3, first));
+
+  const SpawnedActor replacement = handles.Begin(3, 0x1000);
+  CHECK(replacement != SpawnedActor::kNone);
+  CHECK(replacement != first);
+  CHECK(handles.Resolve(first) == 0);
+  CHECK(handles.Resolve(replacement) == 0x1000);
+  CHECK(handles.Publish(3, replacement));
+  CHECK_FALSE(handles.Remove(3, first));
+}
+
+TEST_CASE("Discarding an unpublished actor invalidates its handle",
+          "[actors][actors-spawning]") {
+  actors::ActorHandleTable handles;
+  const SpawnedActor actor = handles.Begin(7, 0x2000);
+
+  CHECK(actor != SpawnedActor::kNone);
+  CHECK_FALSE(handles.Publish(6, actor));
+  CHECK_FALSE(handles.Remove(7, actor));
+  CHECK(handles.Discard(actor));
+  CHECK(handles.Resolve(actor) == 0);
+  CHECK_FALSE(handles.Discard(actor));
+}
+
+TEST_CASE("Resetting the actor table invalidates published handles",
+          "[actors][actors-spawning]") {
+  actors::ActorHandleTable handles;
+  const SpawnedActor actor = handles.Begin(4, 0x3000);
+  REQUIRE(handles.Publish(4, actor));
+
+  handles.Reset();
+
+  CHECK(handles.Resolve(actor) == 0);
+  const SpawnedActor replacement = handles.Observe(4, 0x3000);
+  CHECK(replacement != SpawnedActor::kNone);
+  CHECK(replacement != actor);
+  CHECK(handles.Resolve(replacement) == 0x3000);
+}
+
 // A recording host: the actor table, the asset queue, the zone's ZUD cache
 // and Ashley's state, with every edit logged in call order.
 struct FakeSpawnHost final : actors::ActorSpawnHost {
@@ -145,7 +202,7 @@ struct FakeSpawnHost final : actors::ActorSpawnHost {
   SpawnedActor ActorAt(std::size_t slot) const override {
     return slot < table.size() ? table.at(slot) : SpawnedActor::kNone;
   }
-  SpawnedActor Allocate(ActorShape shape) override {
+  SpawnedActor Allocate(ActorShape shape, std::size_t /*slot*/) override {
     Log(std::format("Allocate {}", static_cast<int>(shape)));
     if (refuse_allocation) {
       return SpawnedActor::kNone;

@@ -133,6 +133,41 @@ template <typename T, typename Id>
                                               : nullptr;
 }
 
+ActorHandleTable& LiveActorHandles() {
+  static ActorHandleTable handles;
+  return handles;
+}
+
+[[nodiscard]] std::uintptr_t ActorAddress(const VS::Battle::Actor* actor) {
+  return reinterpret_cast<std::uintptr_t>(actor);
+}
+
+template <typename T>
+[[nodiscard]] T* ActorPointer(SpawnedActor actor, const char* operation) {
+  const std::uintptr_t address = LiveActorHandles().Resolve(actor);
+  if (address == 0) {
+    if (actor != SpawnedActor::kNone) {
+      WarnActorRefused(operation, "stale or invalid actor handle");
+    }
+    return nullptr;
+  }
+  return reinterpret_cast<T*>(address);
+}
+
+[[nodiscard]] SpawnedActor BeginActorAllocation(std::size_t slot,
+                                                VS::Battle::Actor* actor) {
+  static_cast<void>(
+      LiveActorHandles().Observe(slot, ActorAddress(SlotActor(slot))));
+  const SpawnedActor handle =
+      LiveActorHandles().Begin(slot, ActorAddress(actor));
+  if (handle == SpawnedActor::kNone) {
+    VS::Core::Memory::FreeLiveFromLowEnd(actor);
+    WarnActorRefused("AllocateLiveActor",
+                     "actor slot already has a live or pending identity");
+  }
+  return handle;
+}
+
 [[nodiscard]] VS::Battle::ActorStats* SlotStats(std::size_t slot) {
   VS::Battle::Actor* actor = SlotActor(slot);
   return actor != nullptr ? actor->stats : nullptr;
@@ -213,10 +248,11 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
 
   // --- The actor table and allocations
   [[nodiscard]] SpawnedActor ActorAt(std::size_t slot) const override {
-    return IdOf<SpawnedActor>(SlotActor(slot));
+    return LiveActorHandles().Observe(slot, ActorAddress(SlotActor(slot)));
   }
 
-  [[nodiscard]] SpawnedActor Allocate(ActorShape shape) override {
+  [[nodiscard]] SpawnedActor Allocate(ActorShape shape,
+                                      std::size_t slot) override {
     switch (shape) {
       case ActorShape::kAuxiliary: {
         auto* core = static_cast<VS::Actors::ActorCore*>(
@@ -228,7 +264,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
         actor.stats = &core->actor.stats;
         actor.model = &core->model;
         actor.allocation_kind = kAuxiliaryAllocation;
-        return IdOf<SpawnedActor>(&actor);
+        return BeginActorAllocation(slot, &actor);
       }
       case ActorShape::kEquipped: {
         auto* allocation = static_cast<VS::Actors::ActorAllocation*>(
@@ -242,7 +278,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
         actor.equipment_models[0] = &allocation->model_slots[0];
         actor.equipment_models[1] = &allocation->model_slots[1];
         actor.allocation_kind = kEquippedAllocation;
-        return IdOf<SpawnedActor>(&actor);
+        return BeginActorAllocation(slot, &actor);
       }
       case ActorShape::kSecondaryBody: {
         auto* allocation = static_cast<VS::Actors::ActorAllocation*>(
@@ -255,30 +291,50 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
         actor.model = &allocation->core.model;
         actor.equipment_models[0] = &allocation->model_slots[0];
         actor.allocation_kind = kSecondaryBodyAllocation;
-        return IdOf<SpawnedActor>(&actor);
+        return BeginActorAllocation(slot, &actor);
       }
     }
     return SpawnedActor::kNone;
   }
 
   void DiscardUninstalled(SpawnedActor actor) override {
-    VS::Core::Memory::FreeLiveFromLowEnd(PointerOf<VS::Battle::Actor>(actor));
+    VS::Battle::Actor* live =
+        ActorPointer<VS::Battle::Actor>(actor, "DiscardUninstalledActor");
+    if (live == nullptr) {
+      return;
+    }
+    if (!LiveActorHandles().Discard(actor)) {
+      WarnActorRefused("DiscardUninstalledActor",
+                       "actor handle is already installed or stale");
+      return;
+    }
+    VS::Core::Memory::FreeLiveFromLowEnd(live);
   }
 
   void Install(std::size_t slot, SpawnedActor actor) override {
-    if (slot < std::size(VS::Battle::actors)) {
-      VS::Battle::actors[slot] = PointerOf<VS::Battle::Actor>(actor);
+    VS::Battle::Actor* live =
+        ActorPointer<VS::Battle::Actor>(actor, "InstallSpawnedActor");
+    if (live == nullptr || slot >= std::size(VS::Battle::actors)) {
+      return;
     }
+    if (!LiveActorHandles().Publish(slot, actor)) {
+      WarnActorRefused("InstallSpawnedActor",
+                       "actor handle does not match the target slot");
+      return;
+    }
+    VS::Battle::actors[slot] = live;
   }
 
   [[nodiscard]] AssetAddress ModelAddress(SpawnedActor actor) const override {
-    const VS::Battle::Actor* live = PointerOf<VS::Battle::Actor>(actor);
+    const VS::Battle::Actor* live =
+        ActorPointer<const VS::Battle::Actor>(actor, "ActorModelAddress");
     return live != nullptr ? Address(live->model) : AssetAddress::kNone;
   }
 
   [[nodiscard]] AssetAddress EquipmentAddress(
       SpawnedActor actor, EquipmentHand hand) const override {
-    const VS::Battle::Actor* live = PointerOf<VS::Battle::Actor>(actor);
+    const VS::Battle::Actor* live =
+        ActorPointer<const VS::Battle::Actor>(actor, "ActorEquipmentAddress");
     if (live == nullptr) {
       return AssetAddress::kNone;
     }
@@ -287,7 +343,8 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
 
   void SetEquippedWeaponCategory(SpawnedActor actor,
                                  std::uint8_t category) override {
-    if (VS::Battle::Actor* live = PointerOf<VS::Battle::Actor>(actor);
+    if (VS::Battle::Actor* live =
+            ActorPointer<VS::Battle::Actor>(actor, "SetWeaponCategory");
         live != nullptr) {
       live->equipped_weapon_category = category;
     }
@@ -295,7 +352,8 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
 
   void WriteAuxiliaryIdentity(SpawnedActor actor,
                               const AuxiliaryIdentity& identity) override {
-    VS::Battle::Actor* live = PointerOf<VS::Battle::Actor>(actor);
+    VS::Battle::Actor* live =
+        ActorPointer<VS::Battle::Actor>(actor, "WriteAuxiliaryIdentity");
     if (live == nullptr) {
       return;
     }
@@ -590,13 +648,19 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     InitializeLivePlaceholderActor(static_cast<int>(slot), actor_id);
   }
   void QueueBaseSequence(SpawnedActor actor, std::size_t slot) override {
-    QueueLiveActorBaseSequenceLoad(PointerOf<VS::Battle::Actor>(actor),
-                                   static_cast<int>(slot));
+    VS::Battle::Actor* live =
+        ActorPointer<VS::Battle::Actor>(actor, "QueueBaseSequence");
+    if (live != nullptr) {
+      QueueLiveActorBaseSequenceLoad(live, static_cast<int>(slot));
+    }
   }
   void QueueWeaponSequence(SpawnedActor actor, std::size_t slot,
                            std::uint8_t category, int flags) override {
-    QueueLiveActorWeaponSequenceLoad(PointerOf<char>(actor),
-                                     static_cast<int>(slot), category, flags);
+    char* live = ActorPointer<char>(actor, "QueueWeaponSequence");
+    if (live != nullptr) {
+      QueueLiveActorWeaponSequenceLoad(live, static_cast<int>(slot), category,
+                                       flags);
+    }
   }
 
   // --- The asset queue
@@ -783,13 +847,35 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   }
 
   [[nodiscard]] SpawnedActor Character() const override {
-    return CharacterStats() != nullptr
-               ? IdOf<SpawnedActor>(VS::Battle::characterState)
-               : SpawnedActor::kNone;
+    if (VS::Battle::characterState == nullptr) {
+      return SpawnedActor::kNone;
+    }
+    for (std::size_t slot = 0; slot < kSpawnActorSlots; ++slot) {
+      if (SlotActor(slot) == VS::Battle::characterState) {
+        const SpawnedActor actor = LiveActorHandles().Observe(
+            slot, ActorAddress(VS::Battle::characterState));
+        return ActorPointer<const VS::Battle::Actor>(actor, "CurrentActor") !=
+                           nullptr &&
+                       VS::Battle::characterState->stats != nullptr
+                   ? actor
+                   : SpawnedActor::kNone;
+      }
+    }
+    WarnActorRefused("CurrentSpawnedActor",
+                     "character state is not in the live actor table");
+    return SpawnedActor::kNone;
   }
 
   void SetCharacter(SpawnedActor actor) override {
-    VS::Battle::characterState = PointerOf<VS::Battle::Actor>(actor);
+    if (actor == SpawnedActor::kNone) {
+      VS::Battle::characterState = nullptr;
+      return;
+    }
+    VS::Battle::Actor* live =
+        ActorPointer<VS::Battle::Actor>(actor, "SetCharacter");
+    if (live != nullptr) {
+      VS::Battle::characterState = live;
+    }
   }
 
   void RestoreAshleyVitals(const AshleySnapshot& snapshot) override {
@@ -1023,6 +1109,18 @@ RememberedSpawn DecodeRemembered(const VS::Actors::RoomActorRecord& record) {
   return decoded;
 }
 
+void InvalidateLiveActorHandle(std::size_t slot, VS::Battle::Actor* actor) {
+  const SpawnedActor handle =
+      LiveActorHandles().Observe(slot, ActorAddress(actor));
+  if (handle != SpawnedActor::kNone &&
+      !LiveActorHandles().Remove(slot, handle)) {
+    WarnActorRefused("InvalidateLiveActorHandle",
+                     "actor handle could not be retired");
+  }
+}
+
+void ResetLiveActorHandles() { LiveActorHandles().Reset(); }
+
 // decomp: BATTLE.PRG func_800765B0 (src/BATTLE/BATTLE.PRG/146C.c:5877)
 VS::Battle::Actor* CreateLiveAuxiliaryActor(int index, int actor_id,
                                             const SpawnPlacement* placement,
@@ -1033,8 +1131,9 @@ VS::Battle::Actor* CreateLiveAuxiliaryActor(int index, int actor_id,
     return nullptr;
   }
   LiveActorSpawnHost host(kOperation);
-  return PointerOf<VS::Battle::Actor>(
-      CreateAuxiliaryActor(host, index, actor_id, *placement, material));
+  return ActorPointer<VS::Battle::Actor>(
+      CreateAuxiliaryActor(host, index, actor_id, *placement, material),
+      kOperation);
 }
 
 // decomp: BATTLE.PRG func_800774FC (src/BATTLE/BATTLE.PRG/146C.c:6377)
@@ -1048,9 +1147,11 @@ VS::Battle::Actor* CreateLiveActorWithEquipment(
     return nullptr;
   }
   LiveActorSpawnHost host(kOperation);
-  return PointerOf<VS::Battle::Actor>(CreateActorWithEquipment(
-      host, actor_id, model_id, blade_model, blade_material, shield_model,
-      shield_material, *placement, flags));
+  return ActorPointer<VS::Battle::Actor>(
+      CreateActorWithEquipment(host, actor_id, model_id, blade_model,
+                               blade_material, shield_model, shield_material,
+                               *placement, flags),
+      kOperation);
 }
 
 // decomp: BATTLE.PRG func_800775C0 (src/BATTLE/BATTLE.PRG/146C.c:6578)
@@ -1064,9 +1165,10 @@ VS::Battle::Actor* SpawnLiveRoomEnemy(int actor_id,
     return nullptr;
   }
   LiveActorSpawnHost host(kOperation);
-  return PointerOf<VS::Battle::Actor>(
+  return ActorPointer<VS::Battle::Actor>(
       SpawnRoomEnemy(host, actor_id, DecodeRoomSpawn(*spawn),
-                     DecodeCharacterTemplate(*init), flags));
+                     DecodeCharacterTemplate(*init), flags),
+      kOperation);
 }
 
 // decomp: BATTLE.PRG func_8007C8F8 (src/BATTLE/BATTLE.PRG/146C.c:8881)

@@ -178,6 +178,7 @@ class LiveGameplayOverlayHost final : public GameplayOverlayHost {
                        static_cast<unsigned>(kActorCapacity));
       std::abort();
     }
+    VS::Actors::ResetLiveActorHandles();
     for (std::size_t i = 0; i < slot_count; ++i) {
       VS::Battle::actors[i] = nullptr;
     }

@@ -286,7 +286,7 @@ void QueueEquipment(ActorSpawnHost& host, SpawnedActor actor, int actor_id,
     ActorSpawnHost& host, std::size_t slot, int model_id, int blade_model,
     int blade_material, int shield_model, int shield_material,
     SpawnPlacement placement, int flags) {
-  const SpawnedActor actor = host.Allocate(ActorShape::kEquipped);
+  const SpawnedActor actor = host.Allocate(ActorShape::kEquipped, slot);
   if (actor == SpawnedActor::kNone) {
     host.Refuse(SpawnRefusal::kAllocation);
     return SpawnedActor::kNone;
@@ -601,7 +601,7 @@ SpawnedActor CreateAuxiliaryActor(ActorSpawnHost& host, int index, int actor_id,
   if (!slot || host.ActorAt(*slot) != SpawnedActor::kNone) {
     return SpawnedActor::kNone;
   }
-  const SpawnedActor actor = host.Allocate(ActorShape::kAuxiliary);
+  const SpawnedActor actor = host.Allocate(ActorShape::kAuxiliary, *slot);
   if (actor == SpawnedActor::kNone) {
     host.Refuse(SpawnRefusal::kAllocation);
     return SpawnedActor::kNone;
@@ -914,7 +914,8 @@ SpawnedActor SpawnRoomEnemy(ActorSpawnHost& host, int actor_id,
   }
 
   const SpawnedActor actor = host.Allocate(
-      parts.second_body ? ActorShape::kSecondaryBody : ActorShape::kEquipped);
+      parts.second_body ? ActorShape::kSecondaryBody : ActorShape::kEquipped,
+      slot);
   if (actor == SpawnedActor::kNone) {
     host.Refuse(SpawnRefusal::kAllocation);
     return SpawnedActor::kNone;
@@ -969,7 +970,7 @@ int QueueScriptedActorSpawn(ActorSpawnHost& host, std::uint32_t actor_id,
   if (host.ActorAt(slot) != SpawnedActor::kNone) {
     return 0;
   }
-  const SpawnedActor actor = host.Allocate(ActorShape::kEquipped);
+  const SpawnedActor actor = host.Allocate(ActorShape::kEquipped, slot);
   if (actor == SpawnedActor::kNone) {
     host.Refuse(SpawnRefusal::kAllocation);
     return 0;
