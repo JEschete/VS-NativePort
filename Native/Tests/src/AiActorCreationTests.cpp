@@ -19,7 +19,9 @@
 #include <catch2/generators/catch_generators_range.hpp>
 
 #include "Actors/ActorAllocation.hpp"
+#include "Actors/ActorInstances.hpp"
 #include "Actors/ActorRecord.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Actors/ModelInstance.hpp"
 #include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLiveState.hpp"
@@ -179,7 +181,7 @@ CreationActor AiActor(int id = 3) {
                        .id = id,
                        .kind = 0x05,
                        .settings = 0x12345678u,
-                       .allocation_kind = 1};
+                       .shape = VS::Actors::ActorShape::kEquipped};
 }
 
 bool Allocated(const FakeCreationHost& host) {
@@ -229,7 +231,7 @@ TEST_CASE("AI creation gives an auxiliary actor of object 2 or 4 a free slot",
   host.special_actors =
       RoomSpecialActors{kOther, kNoBattleActor, kOther, kNoBattleActor};
   CreationActor actor = AiActor();
-  actor.allocation_kind = VS::Battle::Ai::kAuxiliaryAllocationKind;
+  actor.shape = VS::Actors::ActorShape::kAuxiliary;
   host.model.reset();  // an auxiliary core holds no actor record
   actor.kind = 0x10;
   CHECK(CreateActorAiState(host, actor, -1) == false);
@@ -249,7 +251,7 @@ TEST_CASE("AI creation leaves full special slots and non-auxiliary actors",
   SECTION("every slot is taken") {
     Required(host.special_actors).fill(kOther);
     CreationActor actor = AiActor();
-    actor.allocation_kind = VS::Battle::Ai::kAuxiliaryAllocationKind;
+    actor.shape = VS::Actors::ActorShape::kAuxiliary;
     CHECK(CreateActorAiState(host, actor, -1).has_value());
     CHECK(std::ranges::count(Required(host.special_actors), kOther) == 4);
   }
@@ -258,6 +260,12 @@ TEST_CASE("AI creation leaves full special slots and non-auxiliary actors",
     host.special_actors.reset();
     CHECK(CreateActorAiState(host, AiActor(), -1).has_value());
   }
+  SECTION("an actor without a spawn definition is never special") {
+    // #55: storage the spawn host did not allocate has no known core layout.
+    CreationActor actor = AiActor();
+    actor.shape.reset();
+    CHECK(CreateActorAiState(host, actor, -1).has_value());
+  }
   CHECK(std::ranges::count(host.steps, std::string{"store-special 0"}) == 0);
 }
 
@@ -265,7 +273,7 @@ TEST_CASE("AI creation refuses a special actor without its model or room",
           "[ai][actor-creation][special-actors]") {
   FakeCreationHost host;
   CreationActor actor = AiActor();
-  actor.allocation_kind = VS::Battle::Ai::kAuxiliaryAllocationKind;
+  actor.shape = VS::Actors::ActorShape::kAuxiliary;
   SECTION("no model") { host.object_word.reset(); }
   SECTION("no room AI state for object 4") {
     host.object_word = 4;
@@ -281,7 +289,7 @@ TEST_CASE("AI creation needs no room AI state for other auxiliary objects",
   host.object_word = 3;
   host.special_actors.reset();
   CreationActor actor = AiActor();
-  actor.allocation_kind = VS::Battle::Ai::kAuxiliaryAllocationKind;
+  actor.shape = VS::Actors::ActorShape::kAuxiliary;
   CHECK(CreateActorAiState(host, actor, -1).has_value());
 }
 
@@ -614,6 +622,7 @@ struct LiveCreationFixture {
 
   LiveCreationFixture() {
     std::fill_n(VS::Battle::actors.begin(), saved_actors.size(), nullptr);
+    VS::Actors::ResetLiveActorHandles();
     std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved_states.size(),
                 nullptr);
     std::fill(std::begin(VS::Actors::actorRecords),
@@ -631,6 +640,7 @@ struct LiveCreationFixture {
   LiveCreationFixture& operator=(LiveCreationFixture&&) = delete;
   ~LiveCreationFixture() {
     VS::Render::ForgetLiveModelExtent(&model);
+    VS::Actors::ResetLiveActorHandles();
     std::ranges::copy(saved_actors, std::begin(VS::Battle::actors));
     std::ranges::copy(saved_states, std::begin(VS::Battle::Ai::actorAiStates));
     std::ranges::copy(saved_records, std::begin(VS::Actors::actorRecords));
@@ -642,10 +652,11 @@ struct LiveCreationFixture {
   }
 
   // Ashley: an AI kind with a body allocation, her actor record and stats.
+  // #55: her allocation kind word stays 0, an auxiliary core's; her spawn
+  // definition gives her body allocation and actor record.
   void PrepareAshley() {
     actor.id = 0;
     actor.kind = 0x04;
-    actor.allocation_kind = 1;
     actor.combat_pose = 1;
     actor.command_opcode = 7;
     actor.command_flags = 0xAB;
@@ -669,7 +680,9 @@ struct LiveCreationFixture {
     record.collision_radius = 20;
     record.collision_height = 0x90;
     VS::Actors::actorRecords[0] = &record;
-    VS::Battle::actors[0] = &actor;
+    CHECK(VS::Actors::InstallLiveActorInstance(
+              0, &actor, VS::Actors::ActorShape::kEquipped) !=
+          VS::Actors::SpawnedActor::kNone);
   }
 };
 
@@ -752,8 +765,13 @@ TEST_CASE("Live AI creation registers an auxiliary special actor",
   fixture.room.special_actors[0] = &holder;
   fixture.actor.id = 6;
   fixture.actor.kind = 0x10;
-  fixture.actor.allocation_kind = VS::Battle::Ai::kAuxiliaryAllocationKind;
+  // #55: the allocation kind word says a body allocation (1), but the spawn
+  // definition, which creation reads, makes the actor an auxiliary core.
+  fixture.actor.allocation_kind = 1;
   fixture.actor.model = &core.model;
+  CHECK(VS::Actors::InstallLiveActorInstance(
+            6, &fixture.actor, VS::Actors::ActorShape::kAuxiliary) !=
+        VS::Actors::SpawnedActor::kNone);
 
   CHECK(VS::Battle::Ai::CreateLiveActorAiState(&fixture.actor, -1) == 0);
   CHECK(fixture.room.special_actors[0] == &holder);

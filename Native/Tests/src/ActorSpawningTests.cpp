@@ -2328,3 +2328,47 @@ TEST_CASE("A live removal claims an undefined actor once and releases nothing",
   actors::ResetLiveActorHandles();
   VS::Battle::actors[kSlot] = saved_actor;
 }
+
+TEST_CASE("Live actor shapes come from the spawn definitions",
+          "[actors][actors-spawning][actor-shape]") {
+  // #55: native code reads an actor's shape from the definition recorded
+  // with its allocation, not from its allocation kind word (0x40).
+  constexpr std::size_t kSlot = 12;
+  VS::Battle::Actor* const saved_actor = VS::Battle::actors[kSlot];
+  actors::ResetLiveActorHandles();
+  VS::Battle::actors[kSlot] = nullptr;
+  VS::Battle::Actor body{};
+  VS::Battle::Actor other{};
+  CHECK_FALSE(actors::LiveActorShape(nullptr).has_value());
+  CHECK(actors::InstallLiveActorInstance(
+            kSlot, &body, ActorShape::kSecondaryBody) != SpawnedActor::kNone);
+  CHECK(VS::Battle::actors[kSlot] == &body);
+  CHECK(actors::LiveActorShape(&body) == ActorShape::kSecondaryBody);
+  CHECK_FALSE(actors::LiveActorShape(&other).has_value());
+  // A removed actor's storage left in its slot is observed without one.
+  actors::InvalidateLiveActorHandle(kSlot, &body);
+  CHECK_FALSE(actors::LiveActorShape(&body).has_value());
+  actors::ResetLiveActorHandles();
+  VS::Battle::actors[kSlot] = saved_actor;
+}
+
+TEST_CASE("A live actor instance installs only into a free spawn slot",
+          "[actors][actors-spawning][actor-shape]") {
+  constexpr std::size_t kSlot = 12;
+  VS::Battle::Actor* const saved_actor = VS::Battle::actors[kSlot];
+  actors::ResetLiveActorHandles();
+  VS::Battle::actors[kSlot] = nullptr;
+  VS::Battle::Actor body{};
+  VS::Battle::Actor other{};
+  CHECK(actors::InstallLiveActorInstance(kSlot, &body, ActorShape::kEquipped) !=
+        SpawnedActor::kNone);
+  CHECK(actors::InstallLiveActorInstance(
+            kSlot, &other, ActorShape::kEquipped) == SpawnedActor::kNone);
+  CHECK(actors::InstallLiveActorInstance(actors::kSpawnActorSlots, &other,
+                                         ActorShape::kEquipped) ==
+        SpawnedActor::kNone);
+  CHECK(VS::Battle::actors[kSlot] == &body);
+  CHECK_FALSE(actors::LiveActorShape(&other).has_value());
+  actors::ResetLiveActorHandles();
+  VS::Battle::actors[kSlot] = saved_actor;
+}

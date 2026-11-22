@@ -62,6 +62,20 @@ int QueueLiveActorOwnedAsset(const VS::Battle::Actor* actor,
 [[nodiscard]] Content::AssetAddress LiveActorRecordMemory(
     Content::ActorAssetOwner owner, Content::ActorRecordTable table,
     int record);
+// Native (#55): the shape the spawn host allocated `actor` with, while it is
+// installed in a spawn slot or its allocation is pending; nothing for storage
+// the host did not allocate. Native code reads this instead of the actor's
+// allocation kind word (0x40).
+[[nodiscard]] std::optional<ActorShape> LiveActorShape(
+    const VS::Battle::Actor* actor);
+// Native (#55): records `actor`, storage its caller owns and frees, as an
+// installed instance of `shape` in `slot`, as the spawn host's Allocate and
+// Install record a spawned actor; kNone, changing nothing, when the slot keeps
+// another live or pending instance. Spawns allocate through the spawn host;
+// this defines an actor whose storage the host does not own.
+[[nodiscard]] SpawnedActor InstallLiveActorInstance(std::size_t slot,
+                                                    VS::Battle::Actor* actor,
+                                                    ActorShape shape);
 
 // The typed records of the legacy layouts.
 [[nodiscard]] CharacterTemplate DecodeCharacterTemplate(

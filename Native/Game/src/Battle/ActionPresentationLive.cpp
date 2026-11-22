@@ -6,8 +6,10 @@
 #include <cstdlib>
 #include <iterator>
 #include <memory>
+#include <optional>
 #include <vector>
 
+#include "Actors/ActorInstances.hpp"
 #include "Actors/ActorRosterLive.hpp"
 #include "Actors/ActorSpawningLive.hpp"
 #include "Actors/ActorStateLive.hpp"
@@ -291,10 +293,13 @@ class LiveWorld final : public ActionPresentationWorld {
   std::uint8_t DefaultLimb(int actor) const override {
     return Stats(actor).default_target_limb;
   }
+  // Native (#55): an actor with a body allocation, equipped or with a second
+  // body, by its spawn definition; the original read word 0x40 (1 or 2).
   bool EligibleBystander(int actor) const override {
-    const auto* value = VS::Battle::actors[actor];
-    return value != nullptr &&
-           (value->allocation_kind == 1 || value->allocation_kind == 2);
+    const std::optional<Actors::ActorShape> shape =
+        Actors::LiveActorShape(VS::Battle::actors[actor]);
+    return shape == Actors::ActorShape::kEquipped ||
+           shape == Actors::ActorShape::kSecondaryBody;
   }
   void Dispatch(const ActionPresentationRequest& request, int mode,
                 std::uint8_t variant) override {

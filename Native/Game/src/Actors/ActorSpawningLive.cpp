@@ -68,6 +68,8 @@ namespace VS::Actors {
 namespace {
 using Content::AssetAddress;
 
+// The actor's allocation kind word (0x40), kept in the PS1 layout. Native code
+// reads the allocation's definition instead (LiveActorShape).
 constexpr int kAuxiliaryAllocation = 0;
 constexpr int kEquippedAllocation = 1;
 constexpr int kSecondaryBodyAllocation = 2;
@@ -1324,6 +1326,42 @@ AssetAddress LiveActorRecordMemory(Content::ActorAssetOwner owner,
       return Address(live->equipment_models[1]);
   }
   return AssetAddress::kNone;
+}
+
+std::optional<ActorShape> LiveActorShape(const VS::Battle::Actor* actor) {
+  if (actor == nullptr) {
+    return std::nullopt;
+  }
+  ActorInstanceTable& handles = LiveActorHandles();
+  SpawnedActor handle = handles.Pending(ActorAddress(actor));
+  for (std::size_t slot = 0;
+       handle == SpawnedActor::kNone && slot < kSpawnActorSlots; ++slot) {
+    if (SlotActor(slot) == actor) {
+      handle = handles.Observe(slot, ActorAddress(actor));
+    }
+  }
+  const std::optional<ActorDefinition> definition = handles.Definition(handle);
+  if (!definition) {
+    return std::nullopt;
+  }
+  return definition->shape;
+}
+
+SpawnedActor InstallLiveActorInstance(std::size_t slot,
+                                      VS::Battle::Actor* actor,
+                                      ActorShape shape) {
+  if (actor == nullptr || slot >= kSpawnActorSlots) {
+    return SpawnedActor::kNone;
+  }
+  ActorInstanceTable& handles = LiveActorHandles();
+  static_cast<void>(handles.Observe(slot, ActorAddress(SlotActor(slot))));
+  const SpawnedActor handle =
+      handles.Begin(slot, ActorAddress(actor), ActorDefinition{.shape = shape});
+  if (handle == SpawnedActor::kNone || !handles.Publish(slot, handle)) {
+    return SpawnedActor::kNone;
+  }
+  VS::Battle::actors[slot] = actor;
+  return handle;
 }
 
 void ResetLiveActorHandles() { LiveActorHandles().Reset(); }

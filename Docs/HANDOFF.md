@@ -55,11 +55,18 @@ shared record index rides in `request.data`, immutable sharing waits on
 #203/#205, and the unowned menu `ActorPreview` and gimmick model requests
 still name destinations.
 
+Shape slice (#55): native readers of the actor's allocation kind word (0x40)
+now read the spawn definition (`LiveActorShape`, installed or pending): the
+action presentation's bystanders, AI special-actor registration and the AI
+creation's actor record lookup. The spawn host still writes the word for the
+PS1 layout; no native code reads it. An actor the spawn host did not allocate
+has no shape, so it is no bystander, takes no special slot and has no record.
+`InstallLiveActorInstance` defines actors whose storage the host does not own.
+
 Both #48 and #55 remain open. Original global waits (`ScriptWaitForObjectLoad`,
 the equipment menu's queue-busy check) stay as original timing; banks and
-material sequences stay unowned; the remaining `allocation_kind` readers
-(`ActionPresentationLive.cpp`, `ActorCreation.cpp`, `ActorCreationLive.cpp`)
-and broader actor/resource migration remain. No hardware verification is
+material sequences stay unowned; broader actor/resource migration (slot
+addressing, the combined `ActorRecord`) remains. No hardware verification is
 claimed.
 
 ## Connected-controller handover (#438), 2026-11-18

@@ -8,7 +8,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Actors/ActorInstances.hpp"
 #include "Actors/ActorRecord.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Actors/ShpModel.hpp"
 #include "Battle/Action.hpp"
 #include "Battle/ActionPresentationLive.hpp"
@@ -44,19 +46,22 @@ struct LivePresentation {
   } output;
   LivePresentation() {
     std::ranges::fill(VS::Battle::actors, nullptr);
+    VS::Actors::ResetLiveActorHandles();
     std::ranges::fill(VS::Actors::actorRecords, nullptr);
     for (std::size_t i = 0; i < model.bones.size(); ++i) {
       model.bones.at(i).limb_ids = static_cast<unsigned char>(i + 1);
     }
     VS::Render::RecordLiveModelExtent(&model, sizeof(model));
     for (std::size_t i = 0; i < battle.size(); ++i) {
-      battle.at(i).allocation_kind = i == 2 ? 2 : 1;
       battle.at(i).stats = &stats.at(i);
       stats.at(i).default_target_limb = 4;
       actors.at(i).instance.model = &model.header;
       actors.at(i).instance.bone_count = 6;
       actors.at(i).model_data_size = sizeof(model);
-      VS::Battle::actors[i] = &battle.at(i);
+      static_cast<void>(VS::Actors::InstallLiveActorInstance(
+          i, &battle.at(i),
+          i == 2 ? VS::Actors::ActorShape::kSecondaryBody
+                 : VS::Actors::ActorShape::kEquipped));
       VS::Actors::actorRecords[i] = &actors.at(i);
     }
     action.action_id = 60;
@@ -67,6 +72,7 @@ struct LivePresentation {
   LivePresentation& operator=(const LivePresentation&) = delete;
   ~LivePresentation() {
     VS::Render::ForgetLiveModelExtent(&model);
+    VS::Actors::ResetLiveActorHandles();
     std::ranges::copy(saved_battle, std::begin(VS::Battle::actors));
     std::ranges::copy(saved_actors, std::begin(VS::Actors::actorRecords));
     VS::Battle::actionDefinitions[60] = saved_definition;
@@ -102,6 +108,28 @@ TEST_CASE("F00109 production builder excludes real targets from bystanders",
   CHECK(request.source.Actor().event_actor_slot == 0);
   CHECK(request.targets[0].Actor().event_actor_slot == 0);
   CHECK(request.position.pad == 0);
+}
+TEST_CASE("F00109 production bystanders follow their spawn definitions",
+          "[action-presentation][F00109][redirect-binding][actor-shape]") {
+  // #55: actor 2's allocation kind word says a second body (2), but only its
+  // spawn definition decides; an auxiliary core or an actor the spawn host
+  // did not allocate is no bystander.
+  auto fixture = std::make_unique<LivePresentation>();
+  fixture->action.target_count = 1;
+  fixture->ActorHit(0, 1, 2);
+  VS::Battle::Actor& bystander = fixture->battle.at(2);
+  bystander.allocation_kind = 2;
+  VS::Actors::InvalidateLiveActorHandle(2, &bystander);
+  VS::Battle::actors[2] = nullptr;
+  SECTION("an auxiliary core") {
+    CHECK(VS::Actors::InstallLiveActorInstance(
+              2, &bystander, VS::Actors::ActorShape::kAuxiliary) !=
+          VS::Actors::SpawnedActor::kNone);
+  }
+  SECTION("no spawn definition") { VS::Battle::actors[2] = &bystander; }
+  fixture->Build();
+  CHECK(fixture->output.request.count == 1);
+  CHECK(fixture->output.request.other_count == 0);
 }
 TEST_CASE("F00109 production duplicate does not change a later default limb",
           "[action-presentation][F00109][redirect-binding]") {

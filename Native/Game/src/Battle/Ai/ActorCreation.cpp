@@ -64,7 +64,7 @@ void MarkAttributeActor(ActorCreationHost& host, const CreationActor& actor) {
 // An auxiliary actor whose model object ID is 2 or 4 takes the room's first
 // free special actor slot; with every slot taken it takes none.
 bool RegisterSpecialActor(ActorCreationHost& host, const CreationActor& actor) {
-  if (actor.allocation_kind != kAuxiliaryAllocationKind) return true;
+  if (actor.shape != VS::Actors::ActorShape::kAuxiliary) return true;
   const std::optional<std::uint32_t> object_word =
       host.ModelObjectWord(actor.handle);
   if (!object_word.has_value()) {

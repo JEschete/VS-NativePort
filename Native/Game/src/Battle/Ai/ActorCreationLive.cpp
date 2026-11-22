@@ -13,7 +13,9 @@
 #include <type_traits>
 
 #include "Actors/ActorAllocation.hpp"
+#include "Actors/ActorInstances.hpp"
 #include "Actors/ActorRecord.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Actors/ModelInstance.hpp"
 #include "Actors/Skeleton.hpp"
 #include "Actors/SkeletonLive.hpp"
@@ -188,10 +190,13 @@ VS::Battle::Actor& ActorOf(BattleActorHandle actor) {
 
 // Only actors with an equipped or secondary body allocation carry the actor
 // record fields past the model instance; an auxiliary core ends after its
-// matrices.
+// matrices. Native (#55): the allocation is the actor's spawn definition, not
+// its allocation kind word (0x40), and an actor without one has no record.
 const VS::Actors::ActorRecord* RecordOf(const VS::Battle::Actor& actor) {
-  if (actor.model == nullptr ||
-      actor.allocation_kind == kAuxiliaryAllocationKind) {
+  const std::optional<VS::Actors::ActorShape> shape =
+      VS::Actors::LiveActorShape(&actor);
+  if (actor.model == nullptr || !shape.has_value() ||
+      *shape == VS::Actors::ActorShape::kAuxiliary) {
     return nullptr;
   }
   return reinterpret_cast<const VS::Actors::ActorRecord*>(actor.model);
@@ -464,7 +469,7 @@ int CreateLiveActorAiState(VS::Battle::Actor* actor, int options) {
       .saved_settings_flags = static_cast<std::uint16_t>(
           std::bit_cast<std::uint32_t>(actor->spawn_ai_settings)),
       .settings = std::bit_cast<std::uint32_t>(actor->ai_settings),
-      .allocation_kind = actor->allocation_kind};
+      .shape = VS::Actors::LiveActorShape(actor)};
   LiveCreationHost host;
   const std::optional<bool> remembered_idle =
       CreateActorAiState(host, creation, static_cast<std::int16_t>(options));

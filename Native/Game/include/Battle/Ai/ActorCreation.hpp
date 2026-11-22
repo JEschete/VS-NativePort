@@ -7,6 +7,7 @@
 #include <optional>
 #include <span>
 
+#include "Actors/ActorInstances.hpp"
 #include "Battle/Ai/ActorCleanup.hpp"
 #include "Battle/Ai/ActorCommands.hpp"
 
@@ -18,9 +19,6 @@
 // actor records; this policy reaches them only through ActorCreationHost, so
 // it touches no AI state record, PS1 address or heap.
 namespace VS::Battle::Ai {
-// Actor word 0x40 of an actor allocated as an auxiliary core; only those
-// actors can take a room special actor slot.
-inline constexpr std::int32_t kAuxiliaryAllocationKind = 0;
 // Actor kinds that take an AI state.
 inline constexpr std::uint16_t kAiStateActorKinds = 0x05;
 
@@ -34,8 +32,12 @@ struct CreationActor {
   // The low halfword of actor word 0x34: bit 0 enables the saved settings
   // flags in bits 1-11.
   std::uint16_t saved_settings_flags = 0;
-  std::uint32_t settings = 0;        // actor 0x38, the template settings
-  std::int32_t allocation_kind = 0;  // actor 0x40
+  std::uint32_t settings = 0;  // actor 0x38, the template settings
+  // Native (#55): the shape of the actor's spawn definition; nothing for an
+  // actor the spawn host did not allocate. Only an auxiliary core can take a
+  // room special actor slot. The original read the allocation kind word
+  // (0x40), 0 for an auxiliary core.
+  std::optional<VS::Actors::ActorShape> shape;
 };
 
 // The actor record fields creation reads through the actor's model (0x44).
@@ -119,7 +121,7 @@ class ActorCreationHost {
   [[nodiscard]] virtual std::optional<std::uint32_t> ModelObjectWord(
       BattleActorHandle actor) const = 0;
   // Nothing without the model's actor record (an auxiliary actor's core
-  // holds none).
+  // holds none, and an actor without a spawn definition has no known one).
   [[nodiscard]] virtual std::optional<CreationModel> Model(
       BattleActorHandle actor) const = 0;
   // Nothing without stats.
