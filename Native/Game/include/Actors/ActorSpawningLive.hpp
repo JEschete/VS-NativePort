@@ -24,6 +24,12 @@ struct RoomActorRecord;
 // freed, or before a gameplay session clears the actor table.
 void InvalidateLiveActorHandle(std::size_t slot, VS::Battle::Actor* actor);
 void ResetLiveActorHandles();
+// Native (#48): cancels the queued asset requests the installed actor owns;
+// false, changing nothing, when the queue cannot abandon its head.
+[[nodiscard]] bool CancelLiveActorAssets(std::size_t slot,
+                                         const VS::Battle::Actor* actor);
+// Runs the asset queue until the installed actor owns no queued request.
+void FinishLiveActorAssets(std::size_t slot, const VS::Battle::Actor* actor);
 
 // The typed records of the legacy layouts.
 [[nodiscard]] CharacterTemplate DecodeCharacterTemplate(

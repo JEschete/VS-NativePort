@@ -286,6 +286,7 @@ class RecordingRemovalHost final : public actors::ActorRemovalHost {
       occupants{};
   actors::RosterView links{};
   std::vector<std::string> calls;
+  bool cancel_assets = true;
 
   [[nodiscard]] std::optional<actors::RosterOccupant> Occupant(
       std::size_t slot) const override {
@@ -294,6 +295,13 @@ class RecordingRemovalHost final : public actors::ActorRemovalHost {
   void Remember(std::size_t slot, int hidden) override {
     calls.push_back("remember " + std::to_string(slot) + " " +
                     std::to_string(hidden));
+  }
+  [[nodiscard]] bool CancelAssets(std::size_t slot) override {
+    calls.push_back("cancel " + std::to_string(slot));
+    return cancel_assets;
+  }
+  void FinishAssets(std::size_t slot) override {
+    calls.push_back("finish " + std::to_string(slot));
   }
   void ReleaseGimmick(std::size_t slot) override {
     calls.push_back("gimmick " + std::to_string(slot));
@@ -329,26 +337,41 @@ TEST_CASE("Removing an actor releases it in the original order",
 
   CHECK(actors::RemoveActorAtSlot(host, 3, 1) ==
         actors::RemovalResult::kRemoved);
-  CHECK(host.TakeCalls() == std::vector<std::string>{"remember 3 1", "model 3",
-                                                     "model 7", "ai 3",
-                                                     "bypass 0 3", "free 3"});
+  CHECK(host.TakeCalls() ==
+        std::vector<std::string>{"remember 3 1", "cancel 3", "model 3",
+                                 "model 7", "ai 3", "bypass 0 3", "free 3"});
 
   CHECK(actors::RemoveActorAtSlot(host, 7, 0) ==
         actors::RemovalResult::kRemoved);
-  CHECK(host.TakeCalls() == std::vector<std::string>{"remember 7 0",
+  CHECK(host.TakeCalls() == std::vector<std::string>{"remember 7 0", "cancel 7",
                                                      "gimmick 7", "ai 7",
                                                      "bypass 0 7", "free 7"});
 
   host.links = {};
   CHECK(actors::RemoveActorAtSlot(host, 9, 0) ==
         actors::RemovalResult::kRemoved);
-  CHECK(host.TakeCalls() ==
-        std::vector<std::string>{"remember 9 0", "model 9", "ai 9", "free 9"});
+  CHECK(host.TakeCalls() == std::vector<std::string>{"remember 9 0", "cancel 9",
+                                                     "model 9", "ai 9",
+                                                     "free 9"});
 
   CHECK(actors::RemoveActorAtSlot(host, 4, 0) == actors::RemovalResult::kEmpty);
   CHECK(actors::RemoveActorAtSlot(host, 16, 0) ==
         actors::RemovalResult::kOutOfRange);
   CHECK(host.calls.empty());
+}
+
+TEST_CASE("Removing an actor finishes the asset requests it cannot cancel",
+          "[actors-room-memory]") {
+  // #48: no request the actor owns outlives it to write into its storage.
+  RecordingRemovalHost host;
+  host.occupants[5] = actors::RosterOccupant{};
+  host.cancel_assets = false;
+
+  CHECK(actors::RemoveActorAtSlot(host, 5, 0) ==
+        actors::RemovalResult::kRemoved);
+  CHECK(host.TakeCalls() == std::vector<std::string>{"remember 5 0", "cancel 5",
+                                                     "finish 5", "model 5",
+                                                     "ai 5", "free 5"});
 }
 
 namespace {

@@ -147,9 +147,7 @@ class FakeAssetHost final : public Content::ActorAssetHost {
   }
   Content::ActorAssetIdentity RequestIdentity(int slot) const override {
     if (RequestKind(slot) == 0) return {};
-    const Content::ActorAssetIdentity identity = identities.at(Index(slot));
-    return completions.Pending(identity) ? identity
-                                         : Content::ActorAssetIdentity{};
+    return completions.Current(identities.at(Index(slot)));
   }
   Content::ActorAssetCompletions& Completions() override { return completions; }
   void OnRequestQueued(const ActorAssetRequest& request) override {
@@ -904,6 +902,22 @@ std::ptrdiff_t IssuedTickets(const FakeAssetHost& host) {
         return e.identity.ticket != Content::ActorAssetTicket::kNone;
       });
 }
+
+constexpr Content::ActorAssetOwner kUntrackedActor{.value = 0x201};
+constexpr Content::ActorAssetOwner kOtherUntrackedActor{.value = 0x202};
+
+// Queues models 1 and 3 for kUntrackedActor, unowned model 2 between them and
+// model 4 for kOtherUntrackedActor, none of them with a ticket.
+void QueueUntrackedRequests(FakeAssetHost& host) {
+  static_cast<void>(Content::QueueOwnedActorAssetRequest(host, PartRequest(1),
+                                                         kUntrackedActor));
+  static_cast<void>(Content::QueueActorAssetRequest(
+      host, Request(ActorAssetKind::kSequenceLoad, 0, 2)));
+  static_cast<void>(Content::QueueOwnedActorAssetRequest(host, PartRequest(3),
+                                                         kUntrackedActor));
+  static_cast<void>(Content::QueueOwnedActorAssetRequest(host, PartRequest(4),
+                                                         kOtherUntrackedActor));
+}
 }  // namespace
 
 TEST_CASE("Owned asset requests carry their tickets through the queue",
@@ -1051,6 +1065,56 @@ TEST_CASE("Asset request cancellation is scoped to one owner identity",
   CHECK(Outcome(host, *second) == ActorAssetOutcome::kPending);
   CHECK(host.RequestIdentity(0) ==
         Content::ActorAssetIdentity{.owner = second_owner, .ticket = *second});
+}
+
+TEST_CASE("Untracked owned requests need an owner and an ownable kind",
+          "[content-slice][content][actor-assets][asset-ownership]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  const Content::ActorAssetOwner actor{.value = 0x201};
+  const Content::ActorAssetOwner unowned = Content::kUnownedActorAssetOwner;
+  CHECK(Content::QueueOwnedActorAssetRequest(host, PartRequest(1), unowned) ==
+        -1);
+  CHECK(Content::QueueOwnedActorAssetRequest(
+            host, Request(ActorAssetKind::kSequenceLoad, 0, 1), actor) == -1);
+  CHECK(host.refusals ==
+        std::vector<std::string>(2, "unownable asset request"));
+  CHECK(QueuedModels(host).empty());
+  CHECK_FALSE(Content::HasActorAssetRequests(host, actor));
+}
+
+TEST_CASE("Untracked owned requests queue without a ticket",
+          "[content-slice][content][actor-assets][asset-ownership]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  QueueUntrackedRequests(host);
+  CHECK(QueuedModels(host) == std::vector{1, 2, 3, 4});
+  CHECK(IssuedTickets(host) == 0);
+  CHECK(host.RequestIdentity(2) ==
+        Content::ActorAssetIdentity{.owner = kUntrackedActor});
+  CHECK(host.RequestIdentity(1) == Content::ActorAssetIdentity{});
+  CHECK(Content::HasActorAssetRequests(host, kUntrackedActor));
+  CHECK_FALSE(
+      Content::HasActorAssetRequests(host, Content::kUnownedActorAssetOwner));
+}
+
+TEST_CASE("Untracked owned requests stay cancellable without a ticket",
+          "[content-slice][content][actor-assets][asset-ownership]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  QueueUntrackedRequests(host);
+
+  // Completing the head records nothing; the owner keeps its other request.
+  host.process_result = kAssetDone;
+  CHECK(Content::UpdateActorAssetQueue(host) == 1);
+  CHECK(IssuedTickets(host) == 0);
+  CHECK(host.RequestIdentity(1) ==
+        Content::ActorAssetIdentity{.owner = kUntrackedActor});
+
+  CHECK(Content::CancelActorAssetRequests(host, kUntrackedActor));
+  CHECK(QueuedModels(host) == std::vector{2, 4});
+  CHECK_FALSE(Content::HasActorAssetRequests(host, kUntrackedActor));
+  CHECK(Content::HasActorAssetRequests(host, kOtherUntrackedActor));
 }
 
 TEST_CASE("Cancelling an owned head abandons its loader or changes nothing",

@@ -680,6 +680,14 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     }
     return Content::SubmitLiveActorAsset(request, AssetOwnerOf(actor));
   }
+  [[nodiscard]] int QueueOwnedAsset(const Content::ActorAssetRequest& request,
+                                    SpawnedActor actor) override {
+    if (ActorPointer<const VS::Battle::Actor>(actor, "QueueOwnedAsset") ==
+        nullptr) {
+      return -1;
+    }
+    return Content::QueueLiveOwnedActorAsset(request, AssetOwnerOf(actor));
+  }
   [[nodiscard]] Content::ActorAssetCompletion AssetCompletion(
       Content::ActorAssetTicket ticket) override {
     return Content::LiveActorAssetCompletion(ticket);
@@ -1145,6 +1153,28 @@ void InvalidateLiveActorHandle(std::size_t slot, VS::Battle::Actor* actor) {
       !LiveActorHandles().Remove(slot, handle)) {
     WarnActorRefused("InvalidateLiveActorHandle",
                      "actor handle could not be retired");
+  }
+}
+
+bool CancelLiveActorAssets(std::size_t slot, const VS::Battle::Actor* actor) {
+  const SpawnedActor handle =
+      LiveActorHandles().Observe(slot, ActorAddress(actor));
+  if (handle == SpawnedActor::kNone) {
+    return true;
+  }
+  return Content::CancelLiveActorAssetRequests(AssetOwnerOf(handle));
+}
+
+void FinishLiveActorAssets(std::size_t slot, const VS::Battle::Actor* actor) {
+  const SpawnedActor handle =
+      LiveActorHandles().Observe(slot, ActorAddress(actor));
+  if (handle == SpawnedActor::kNone) {
+    return;
+  }
+  // Pumped like the spawn paths' drain loop (ActorSpawning.cpp).
+  while (Content::LiveActorAssetsQueued(AssetOwnerOf(handle))) {
+    static_cast<void>(Content::UpdateLiveActorAssetQueue());
+    State::UpdateLivePlayTimeAndLoading();
   }
 }
 

@@ -81,6 +81,11 @@ class ActorRemovalHost {
       std::size_t slot) const = 0;
   // Records the room enemy in `slot` (func_80069FC4).
   virtual void Remember(std::size_t slot, int hidden) = 0;
+  // Native (#48): cancels the queued asset requests `slot`'s actor owns;
+  // false, changing nothing, when the queue cannot abandon its head.
+  [[nodiscard]] virtual bool CancelAssets(std::size_t slot) = 0;
+  // Runs the asset queue until `slot`'s actor owns no queued request.
+  virtual void FinishAssets(std::size_t slot) = 0;
   virtual void ReleaseGimmick(std::size_t slot) = 0;
   virtual void ReleaseModel(std::size_t model_slot) = 0;
   virtual void FreeAiState(std::size_t slot) = 0;
@@ -95,7 +100,9 @@ class ActorRemovalHost {
 enum class RemovalResult : std::uint8_t { kOutOfRange, kEmpty, kRemoved };
 
 // _removeActorAtIndex (146C.c:926): remembers the actor, releases its
-// gimmick or models and AI state, unchains it and frees it.
+// gimmick or models and AI state, unchains it and frees it. Native (#48): the
+// actor's queued asset requests are cancelled first, or run to completion
+// when the queue cannot abandon its head, so none outlives the actor.
 RemovalResult RemoveActorAtSlot(ActorRemovalHost& host, std::uint32_t index,
                                 int hidden);
 

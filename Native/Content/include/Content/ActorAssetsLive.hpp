@@ -72,6 +72,11 @@ int UpdateLiveActorAssetQueue();
 // owners cancel first.
 [[nodiscard]] std::optional<ActorAssetTicket> SubmitLiveActorAsset(
     const ActorAssetRequest& request, ActorAssetOwner owner);
+// An owned request without a ticket (QueueOwnedActorAssetRequest); its queue
+// slot, or -1.
+[[nodiscard]] int QueueLiveOwnedActorAsset(const ActorAssetRequest& request,
+                                           ActorAssetOwner owner);
+[[nodiscard]] bool LiveActorAssetsQueued(ActorAssetOwner owner);
 [[nodiscard]] ActorAssetCompletion LiveActorAssetCompletion(
     ActorAssetTicket ticket);
 void ForgetLiveActorAsset(ActorAssetTicket ticket);

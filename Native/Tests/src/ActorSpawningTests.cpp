@@ -159,6 +159,7 @@ struct FakeSpawnHost final : actors::ActorSpawnHost {
   std::array<actors::SpawnedState, actors::kBattleActorSlots> states{};
   std::vector<ActorAssetRequest> requests;
   std::vector<OwnedRequest> owned_requests;
+  std::vector<SpawnedActor> queued_owners;
   std::vector<content::ActorAssetTicket> forgotten_assets;
   std::vector<content::ActorAssetTicket> checked_assets;
   std::vector<SpawnedActor> discarded;
@@ -385,6 +386,14 @@ struct FakeSpawnHost final : actors::ActorSpawnHost {
     }
     owned_requests.push_back({.actor = actor, .ticket = *ticket});
     return ticket;
+  }
+  int QueueOwnedAsset(const ActorAssetRequest& request,
+                      SpawnedActor actor) override {
+    requests.push_back(request);
+    queued_owners.push_back(actor);
+    busy = true;
+    Log("QueueOwnedAsset");
+    return queue_index;
   }
   content::ActorAssetCompletion AssetCompletion(
       content::ActorAssetTicket ticket) override {
@@ -1542,9 +1551,12 @@ TEST_CASE("A scripted actor spawns into a free slot below 16",
   CHECK(actors::QueueScriptedActorSpawn(host, 9, 0x33, placement) ==
         host.queue_index + 1);
   CHECK(host.table.at(9) == Handle(kFirstHandle));
-  CHECK(host.log == std::vector<std::string>{"Allocate 1", "QueueAsset",
+  CHECK(host.log == std::vector<std::string>{"Allocate 1", "QueueOwnedAsset",
                                              "Install 9", "Defaults 9",
                                              "AiState 9 -1"});
+  // #48: the actor owns its model request, so its removal can cancel it.
+  CHECK(host.queued_owners == std::vector{Handle(kFirstHandle)});
+  CHECK(host.owned_requests.empty());
   const actors::ActorDefaults& defaults = Required(host.defaults);
   CHECK(defaults.disposition == actors::SpawnDisposition{.kind = 8});
   CHECK(defaults.interaction_flags == 4);
@@ -1562,7 +1574,7 @@ TEST_CASE("A scripted actor is discarded when its model request cannot queue",
   CHECK(host.discarded == std::vector{Handle(kFirstHandle)});
   CHECK(host.refusals == std::vector{SpawnRefusal::kAssetQueue});
   CHECK(host.defaults == std::nullopt);
-  CHECK(host.log == std::vector<std::string>{"Allocate 1", "QueueAsset",
+  CHECK(host.log == std::vector<std::string>{"Allocate 1", "QueueOwnedAsset",
                                              "DiscardUninstalled"});
 }
 

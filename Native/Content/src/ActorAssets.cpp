@@ -396,6 +396,14 @@ bool ActorAssetCompletions::Pending(const ActorAssetIdentity& identity) const {
          entry.outcome == ActorAssetOutcome::kPending;
 }
 
+ActorAssetIdentity ActorAssetCompletions::Current(
+    const ActorAssetIdentity& stored) const {
+  if (stored.ticket == ActorAssetTicket::kNone || Pending(stored)) {
+    return stored;
+  }
+  return {};
+}
+
 bool ActorAssetCompletions::Full() const {
   return std::ranges::none_of(entries_, [](const ActorAssetCompletion& entry) {
     return entry.identity.ticket == ActorAssetTicket::kNone;
@@ -408,7 +416,7 @@ std::optional<ActorAssetIdentity> OwnedRequest(const ActorAssetHost& host,
                                                int slot) {
   if (host.RequestKind(slot) == 0) return std::nullopt;
   const ActorAssetIdentity identity = host.RequestIdentity(slot);
-  if (identity.ticket == ActorAssetTicket::kNone) return std::nullopt;
+  if (identity.owner == kUnownedActorAssetOwner) return std::nullopt;
   return identity;
 }
 
@@ -471,6 +479,30 @@ std::optional<ActorAssetTicket> SubmitActorAssetRequest(
   host.OnRequestQueued(request);
   host.StoreRequest(slot, request, {.owner = owner, .ticket = *ticket});
   return ticket;
+}
+
+int QueueOwnedActorAssetRequest(ActorAssetHost& host,
+                                const ActorAssetRequest& request,
+                                ActorAssetOwner owner) {
+  if (owner == kUnownedActorAssetOwner ||
+      !IsOwnableActorAssetRequest(request)) {
+    host.Refuse("unownable asset request", request.kind);
+    return -1;
+  }
+  const int slot = FindFreeActorAssetRequest(host);
+  if (slot == -1) return -1;
+  host.OnRequestQueued(request);
+  host.StoreRequest(slot, request, {.owner = owner});
+  return slot;
+}
+
+bool HasActorAssetRequests(const ActorAssetHost& host, ActorAssetOwner owner) {
+  if (owner == kUnownedActorAssetOwner) return false;
+  for (int slot = 0; slot < kActorAssetRequestCount; ++slot) {
+    const std::optional<ActorAssetIdentity> identity = OwnedRequest(host, slot);
+    if (identity && identity->owner == owner) return true;
+  }
+  return false;
 }
 
 bool CancelActorAssetRequests(ActorAssetHost& host, ActorAssetOwner owner) {

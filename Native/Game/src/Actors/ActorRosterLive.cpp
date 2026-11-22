@@ -74,6 +74,12 @@ class LiveRemovalHost final : public ActorRemovalHost {
   void Remember(std::size_t slot, int hidden) override {
     StoreLiveRoomActorState(static_cast<int>(slot), hidden);
   }
+  [[nodiscard]] bool CancelAssets(std::size_t slot) override {
+    return CancelLiveActorAssets(slot, actor_);
+  }
+  void FinishAssets(std::size_t slot) override {
+    FinishLiveActorAssets(slot, actor_);
+  }
   void ReleaseGimmick(std::size_t slot) override {
     static_cast<void>(VS::Field::DropLiveUnsupportedGimmickStack(
         static_cast<std::int32_t>(slot)));

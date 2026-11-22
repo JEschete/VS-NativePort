@@ -919,6 +919,10 @@ class ActorSpawnHost {
   [[nodiscard]] virtual std::optional<Content::ActorAssetTicket>
   SubmitOwnedAsset(const Content::ActorAssetRequest& request,
                    SpawnedActor actor) = 0;
+  // An owned request without a ticket (Content::QueueOwnedActorAssetRequest):
+  // the queue index, or a negative value when it is refused or full.
+  [[nodiscard]] virtual int QueueOwnedAsset(
+      const Content::ActorAssetRequest& request, SpawnedActor actor) = 0;
   [[nodiscard]] virtual Content::ActorAssetCompletion AssetCompletion(
       Content::ActorAssetTicket ticket) = 0;
   virtual void ForgetAsset(Content::ActorAssetTicket ticket) = 0;
@@ -1031,7 +1035,8 @@ SpawnedActor SpawnRoomEnemy(ActorSpawnHost& host, int actor_id,
                             const CharacterTemplate& character, int flags);
 // func_8007C8F8 (146C.c:8926): the queue index plus one.
 int QueueAshleyModelLoad(ActorSpawnHost& host, int model_id);
-// func_8007C928 (146C.c:8936): the queue index plus one, or 0.
+// func_8007C928 (146C.c:8936): the queue index plus one, or 0. Native (#48):
+// the actor owns its model request, so removing the actor cancels it.
 int QueueScriptedActorSpawn(ActorSpawnHost& host, std::uint32_t actor_id,
                             int model_id, SpawnPlacement placement);
 // func_8007CA20 (146C.c:8962).

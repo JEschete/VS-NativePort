@@ -818,9 +818,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
   }
   [[nodiscard]] ActorAssetIdentity RequestIdentity(int slot) const override {
     if (RequestKind(slot) == 0) return {};
-    const ActorAssetIdentity identity = requestIdentities[slot];
-    return requestCompletions.Pending(identity) ? identity
-                                                : ActorAssetIdentity{};
+    return requestCompletions.Current(requestIdentities[slot]);
   }
   ActorAssetCompletions& Completions() override { return requestCompletions; }
   void OnRequestQueued(const ActorAssetRequest& request) override {
@@ -1390,6 +1388,17 @@ std::optional<ActorAssetTicket> SubmitLiveActorAsset(
     const ActorAssetRequest& request, ActorAssetOwner owner) {
   LiveActorAssetHost host;
   return SubmitActorAssetRequest(host, request, owner);
+}
+
+int QueueLiveOwnedActorAsset(const ActorAssetRequest& request,
+                             ActorAssetOwner owner) {
+  LiveActorAssetHost host;
+  return QueueOwnedActorAssetRequest(host, request, owner);
+}
+
+bool LiveActorAssetsQueued(ActorAssetOwner owner) {
+  LiveActorAssetHost host;
+  return HasActorAssetRequests(host, owner);
 }
 
 ActorAssetCompletion LiveActorAssetCompletion(ActorAssetTicket ticket) {

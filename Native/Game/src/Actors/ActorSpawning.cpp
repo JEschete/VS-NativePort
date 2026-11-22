@@ -231,9 +231,11 @@ void ApplyTemplate(ActorSpawnHost& host, std::size_t slot,
   ApplyInitialStats(host, slot, character, randomize);
 }
 
-[[nodiscard]] int QueueModelLoad(ActorSpawnHost& host, SpawnedActor actor,
-                                 int index, int model_id,
-                                 SpawnPlacement placement, int flags) {
+[[nodiscard]] ActorAssetRequest ModelLoadRequest(ActorSpawnHost& host,
+                                                 SpawnedActor actor, int index,
+                                                 int model_id,
+                                                 SpawnPlacement placement,
+                                                 int flags) {
   ActorAssetRequest request{};
   request.kind = static_cast<std::uint8_t>(ActorAssetKind::kActorModelLoad);
   request.target_slot = static_cast<std::int8_t>(index);
@@ -252,7 +254,14 @@ void ApplyTemplate(ActorSpawnHost& host, std::size_t slot,
   }
   request.variant = 0;
   request.material = kModelLoadMaterial;
-  return host.QueueAsset(request);
+  return request;
+}
+
+[[nodiscard]] int QueueModelLoad(ActorSpawnHost& host, SpawnedActor actor,
+                                 int index, int model_id,
+                                 SpawnPlacement placement, int flags) {
+  return host.QueueAsset(
+      ModelLoadRequest(host, actor, index, model_id, placement, flags));
 }
 
 void QueueEquipment(ActorSpawnHost& host, SpawnedActor actor, int actor_id,
@@ -1076,8 +1085,13 @@ int QueueScriptedActorSpawn(ActorSpawnHost& host, std::uint32_t actor_id,
     host.Refuse(SpawnRefusal::kAllocation);
     return 0;
   }
-  const int request = QueueModelLoad(host, actor, static_cast<int>(slot),
-                                     model_id, placement, 0);
+  // Native (#48): the actor is published while its model loads, so a queued
+  // request could outlive it and bind its record into the freed actor. The
+  // actor owns the request, and removal cancels it (RemoveActorAtSlot).
+  const int request =
+      host.QueueOwnedAsset(ModelLoadRequest(host, actor, static_cast<int>(slot),
+                                            model_id, placement, 0),
+                           actor);
   if (request < 0) {
     host.DiscardUninstalled(actor);
     host.Refuse(SpawnRefusal::kAssetQueue);

@@ -66,6 +66,9 @@ RemovalResult RemoveActorAtSlot(ActorRemovalHost& host, std::uint32_t index,
     return RemovalResult::kEmpty;
   }
   host.Remember(slot, hidden);
+  if (!host.CancelAssets(slot)) {
+    host.FinishAssets(slot);
+  }
   if (occupant->gimmick) {
     host.ReleaseGimmick(slot);
   } else {
