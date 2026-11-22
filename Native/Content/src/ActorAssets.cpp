@@ -341,7 +341,7 @@ void QueueAshleyWeaponSequence(ActorAssetHost& host, int sequence_id) {
 
 std::optional<ActorAssetTicket> ActorAssetCompletions::Issue(
     ActorAssetOwner owner) {
-  if (owner == ActorAssetOwner::kUnowned) return std::nullopt;
+  if (owner == kUnownedActorAssetOwner) return std::nullopt;
   const auto free = std::ranges::find(
       entries_, ActorAssetTicket::kNone,
       [](const ActorAssetCompletion& entry) { return entry.identity.ticket; });
@@ -453,7 +453,7 @@ bool IsOwnableActorAssetRequest(const ActorAssetRequest& request) {
 std::optional<ActorAssetTicket> SubmitActorAssetRequest(
     ActorAssetHost& host, const ActorAssetRequest& request,
     ActorAssetOwner owner) {
-  if (owner == ActorAssetOwner::kUnowned ||
+  if (owner == kUnownedActorAssetOwner ||
       !IsOwnableActorAssetRequest(request)) {
     host.Refuse("unownable asset request", request.kind);
     return std::nullopt;
@@ -464,7 +464,8 @@ std::optional<ActorAssetTicket> SubmitActorAssetRequest(
   if (completions.Full()) CancelOrphanedTickets(host);
   const std::optional<ActorAssetTicket> ticket = completions.Issue(owner);
   if (!ticket) {
-    host.Refuse("asset ticket table full", static_cast<std::int64_t>(owner));
+    host.Refuse("asset ticket table full",
+                static_cast<std::int64_t>(owner.value));
     return std::nullopt;
   }
   host.OnRequestQueued(request);
@@ -473,7 +474,7 @@ std::optional<ActorAssetTicket> SubmitActorAssetRequest(
 }
 
 bool CancelActorAssetRequests(ActorAssetHost& host, ActorAssetOwner owner) {
-  if (owner == ActorAssetOwner::kUnowned) return false;
+  if (owner == kUnownedActorAssetOwner) return false;
   const auto owns = [&](int slot) {
     const std::optional<ActorAssetIdentity> identity = OwnedRequest(host, slot);
     return identity && identity->owner == owner;

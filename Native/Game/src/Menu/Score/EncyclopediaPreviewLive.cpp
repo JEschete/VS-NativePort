@@ -257,8 +257,8 @@ class LiveEnemyPreviewHost final : public EnemyPreviewHost {
 
   [[nodiscard]] std::optional<Content::ActorAssetTicket> SubmitAsset(
       const Content::ActorAssetRequest& request) override {
-    return Content::SubmitLiveActorAsset(
-        request, Content::ActorAssetOwner::kEnemyPreview);
+    return Content::SubmitLiveActorAsset(request,
+                                         Content::kEnemyPreviewActorAssetOwner);
   }
 
   void UpdateAssetQueue() override { Content::UpdateLiveActorAssetQueue(); }
@@ -274,7 +274,7 @@ class LiveEnemyPreviewHost final : public EnemyPreviewHost {
 
   [[nodiscard]] bool CancelAssets() override {
     return Content::CancelLiveActorAssetRequests(
-        Content::ActorAssetOwner::kEnemyPreview);
+        Content::kEnemyPreviewActorAssetOwner);
   }
 
   // Releases the record bound at `part` of `buffer`, if any: actor 1 with
@@ -445,7 +445,7 @@ bool CleanupLiveEnemyPreviewOwnedState() {
   if (!file || !model || !ValidatePreviewRecords(*model)) return false;
   if (!file->empty() && !Content::CancelLiveDiscWrites(*file)) return false;
   if (!Content::CancelLiveActorAssetRequests(
-          Content::ActorAssetOwner::kEnemyPreview)) {
+          Content::kEnemyPreviewActorAssetOwner)) {
     Report("cleanup could not cancel the preview's parts");
     return false;
   }

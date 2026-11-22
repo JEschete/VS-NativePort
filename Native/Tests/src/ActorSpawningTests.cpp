@@ -148,15 +148,32 @@ TEST_CASE("Resetting the actor table invalidates published handles",
 // A recording host: the actor table, the asset queue, the zone's ZUD cache
 // and Ashley's state, with every edit logged in call order.
 struct FakeSpawnHost final : actors::ActorSpawnHost {
+  struct OwnedRequest {
+    SpawnedActor actor = SpawnedActor::kNone;
+    content::ActorAssetTicket ticket = content::ActorAssetTicket::kNone;
+  };
+
   std::vector<std::string> log;
   std::vector<SpawnRefusal> refusals;
   std::array<SpawnedActor, actors::kBattleActorSlots> table{};
   std::array<actors::SpawnedState, actors::kBattleActorSlots> states{};
   std::vector<ActorAssetRequest> requests;
+  std::vector<OwnedRequest> owned_requests;
+  std::vector<content::ActorAssetTicket> forgotten_assets;
+  std::vector<content::ActorAssetTicket> checked_assets;
   std::vector<SpawnedActor> discarded;
+  std::vector<SpawnedActor> cancelled_owners;
+  std::vector<int> released_actor_models;
+  std::vector<int> released_weapon_models;
   bool refuse_allocation = false;
+  bool refuse_install = false;
+  bool allow_owned_cancel = true;
   std::uintptr_t next_handle = kFirstHandle;
   int queue_index = 4;
+  int owned_submit_attempts = 0;
+  int refuse_owned_submit_at = -1;
+  int fail_owned_completion_at = -1;
+  content::ActorAssetCompletions owned_completions;
   int ai_result = 0;
   int roll = 10;
   int rolls = 0;
@@ -217,7 +234,9 @@ struct FakeSpawnHost final : actors::ActorSpawnHost {
   }
   void Install(std::size_t slot, SpawnedActor actor) override {
     Log(std::format("Install {}", slot));
-    table.at(slot) = actor;
+    if (!refuse_install) {
+      table.at(slot) = actor;
+    }
   }
   AssetAddress ModelAddress(SpawnedActor actor) const override {
     return At(Raw(actor) + kModelOffset);
@@ -347,13 +366,73 @@ struct FakeSpawnHost final : actors::ActorSpawnHost {
     Log("QueueAsset");
     return queue_index;
   }
+  std::optional<content::ActorAssetTicket> SubmitOwnedAsset(
+      const ActorAssetRequest& request, SpawnedActor actor) override {
+    const int attempt = owned_submit_attempts++;
+    if (attempt == refuse_owned_submit_at) {
+      return std::nullopt;
+    }
+    const content::ActorAssetOwner owner{.value =
+                                             static_cast<std::uint64_t>(actor)};
+    const std::optional<content::ActorAssetTicket> ticket =
+        owned_completions.Issue(owner);
+    if (!ticket) {
+      return std::nullopt;
+    }
+    if (QueueAsset(request) < 0) {
+      owned_completions.Forget(*ticket);
+      return std::nullopt;
+    }
+    owned_requests.push_back({.actor = actor, .ticket = *ticket});
+    return ticket;
+  }
+  content::ActorAssetCompletion AssetCompletion(
+      content::ActorAssetTicket ticket) override {
+    checked_assets.push_back(ticket);
+    return owned_completions.Find(ticket);
+  }
+  void ForgetAsset(content::ActorAssetTicket ticket) override {
+    forgotten_assets.push_back(ticket);
+    owned_completions.Forget(ticket);
+  }
+  bool CancelOwnedAssets(SpawnedActor actor) override {
+    if (!allow_owned_cancel) {
+      return false;
+    }
+    cancelled_owners.push_back(actor);
+    for (const OwnedRequest& request : owned_requests) {
+      if (request.actor == actor) {
+        static_cast<void>(owned_completions.Complete(
+            request.ticket, content::ActorAssetOutcome::kCancelled,
+            content::kAssetRefused));
+      }
+    }
+    busy = false;
+    return true;
+  }
   bool AssetQueueIdle() const override { return !busy; }
   void UpdateAssetQueue() override {
     busy = false;
+    for (std::size_t i = 0; i < owned_requests.size(); ++i) {
+      const content::ActorAssetOutcome outcome =
+          static_cast<int>(i) == fail_owned_completion_at
+              ? content::ActorAssetOutcome::kFailed
+              : content::ActorAssetOutcome::kLoaded;
+      static_cast<void>(owned_completions.Complete(
+          owned_requests.at(i).ticket, outcome,
+          outcome == content::ActorAssetOutcome::kLoaded
+              ? content::kAssetDone
+              : content::kAssetRefused));
+    }
     Log("UpdateQueue");
   }
   void PumpLoading() override { Log("Pump"); }
+  void ReleaseActorModel(int slot) override {
+    released_actor_models.push_back(slot);
+    Log(std::format("ReleaseActorModel {}", slot));
+  }
   void ReleaseWeaponModel(int slot) override {
+    released_weapon_models.push_back(slot);
     Log(std::format("Release {}", slot));
   }
 
@@ -1036,6 +1115,63 @@ TEST_CASE("A room enemy queues its ZUD parts in the original's order",
     CAPTURE(i);
     CHECK(host.requests.at(i) == expected.at(i));
   }
+  CHECK(host.checked_assets.size() == expected.size());
+  CHECK(host.forgotten_assets.size() == expected.size());
+}
+
+TEST_CASE("A room enemy is discarded when an owned model part fails",
+          "[actors][actors-spawning]") {
+  FakeSpawnHost host;
+  PrepareRoom(host);
+  host.fail_owned_completion_at = 1;
+
+  CHECK(actors::SpawnRoomEnemy(host, 3, EnemySpawn(), EnemyTemplate(), 1) ==
+        SpawnedActor::kNone);
+  CHECK(host.table.at(3) == SpawnedActor::kNone);
+  CHECK(host.discarded == std::vector{Handle(kFirstHandle)});
+  CHECK(host.released_actor_models == std::vector{3});
+  CHECK(host.released_weapon_models == std::vector{6, 7});
+  CHECK(host.forgotten_assets.size() == 5);
+  CHECK(host.refusals == std::vector{SpawnRefusal::kAssetQueue});
+  CHECK(std::ranges::find(host.log, "Install 3") == host.log.end());
+  CHECK(std::ranges::none_of(host.log, [](const std::string& entry) {
+    return entry.starts_with("AiState ");
+  }));
+}
+
+TEST_CASE("A room enemy cancels queued owned parts when submission fails",
+          "[actors][actors-spawning]") {
+  FakeSpawnHost host;
+  PrepareRoom(host);
+  host.refuse_owned_submit_at = 2;
+  const SpawnedActor actor = Handle(kFirstHandle);
+
+  CHECK(actors::SpawnRoomEnemy(host, 3, EnemySpawn(), EnemyTemplate(), 1) ==
+        SpawnedActor::kNone);
+  CHECK(host.cancelled_owners == std::vector{actor});
+  CHECK(host.forgotten_assets.size() == 2);
+  CHECK(host.discarded == std::vector{actor});
+  CHECK(host.table.at(3) == SpawnedActor::kNone);
+  CHECK(host.refusals == std::vector{SpawnRefusal::kAssetQueue});
+  CHECK(std::ranges::find(host.log, "Install 3") == host.log.end());
+}
+
+TEST_CASE("A room enemy is discarded if its handle cannot be published",
+          "[actors][actors-spawning]") {
+  FakeSpawnHost host;
+  PrepareRoom(host);
+  host.refuse_install = true;
+
+  CHECK(actors::SpawnRoomEnemy(host, 3, EnemySpawn(), EnemyTemplate(), 1) ==
+        SpawnedActor::kNone);
+  CHECK(host.table.at(3) == SpawnedActor::kNone);
+  CHECK(host.discarded == std::vector{Handle(kFirstHandle)});
+  CHECK(host.released_actor_models == std::vector{3});
+  CHECK(host.released_weapon_models == std::vector{6, 7});
+  CHECK(host.forgotten_assets.size() == 5);
+  CHECK(std::ranges::none_of(host.log, [](const std::string& entry) {
+    return entry.starts_with("TemplateIdentity ");
+  }));
 }
 
 TEST_CASE("A room enemy settles from its template and spawn record",

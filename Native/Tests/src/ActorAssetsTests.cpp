@@ -850,7 +850,7 @@ TEST_CASE("Battle asset queue reports a head request the loader refuses",
 }
 
 namespace {
-constexpr auto kPreviewOwner = Content::ActorAssetOwner::kEnemyPreview;
+constexpr auto kPreviewOwner = Content::kEnemyPreviewActorAssetOwner;
 
 ActorAssetRequest PartRequest(int model) {
   return Request(ActorAssetKind::kWeaponModelParse, 2, model);
@@ -952,7 +952,7 @@ TEST_CASE(
   const auto owner = std::make_unique<FakeAssetHost>();
   FakeAssetHost& host = *owner;
   CHECK_FALSE(Content::SubmitActorAssetRequest(
-      host, PartRequest(1), Content::ActorAssetOwner::kUnowned));
+      host, PartRequest(1), Content::kUnownedActorAssetOwner));
   CHECK_FALSE(Content::SubmitActorAssetRequest(
       host, Request(ActorAssetKind::kSequenceLoad, 0, 1), kPreviewOwner));
   ActorAssetRequest common = Request(ActorAssetKind::kSequenceParse, 0, 1);
@@ -1023,13 +1023,34 @@ TEST_CASE("Cancelling an owner's requests compacts the rest of the queue",
   host.StoreRequest(15, PartRequest(15),
                     {.owner = kPreviewOwner, .ticket = last_ticket});
   CHECK_FALSE(Content::CancelActorAssetRequests(
-      host, Content::ActorAssetOwner::kUnowned));
+      host, Content::kUnownedActorAssetOwner));
   CHECK(Content::CancelActorAssetRequests(host, kPreviewOwner));
   CHECK(host.abandoned.empty());
   CHECK(QueuedModels(host) == std::vector{10, 12});
   CHECK(Completed(host, owned) ==
         std::pair{ActorAssetOutcome::kCancelled, kAssetRefused});
   CHECK(Outcome(host, last_ticket) == ActorAssetOutcome::kCancelled);
+}
+
+TEST_CASE("Asset request cancellation is scoped to one owner identity",
+          "[content-slice][content][actor-assets][asset-ownership]") {
+  using Content::ActorAssetOutcome;
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  const Content::ActorAssetOwner first_owner{.value = 0x101};
+  const Content::ActorAssetOwner second_owner{.value = 0x102};
+  const auto first =
+      Content::SubmitActorAssetRequest(host, PartRequest(1), first_owner);
+  const auto second =
+      Content::SubmitActorAssetRequest(host, PartRequest(2), second_owner);
+  REQUIRE(first.has_value());
+  REQUIRE(second.has_value());
+
+  CHECK(Content::CancelActorAssetRequests(host, first_owner));
+  CHECK(Outcome(host, *first) == ActorAssetOutcome::kCancelled);
+  CHECK(Outcome(host, *second) == ActorAssetOutcome::kPending);
+  CHECK(host.RequestIdentity(0) ==
+        Content::ActorAssetIdentity{.owner = second_owner, .ticket = *second});
 }
 
 TEST_CASE("Cancelling an owned head abandons its loader or changes nothing",

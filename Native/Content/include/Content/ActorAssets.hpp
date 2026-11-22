@@ -126,15 +126,19 @@ struct ActorAssetRequest {
                          const ActorAssetRequest&) = default;
 };
 
-// Native (#48): request ownership. An owner submits a request through
-// SubmitActorAssetRequest and holds the ticket it returns; the queue records
-// the request's outcome against the ticket (loaded, failed or cancelled)
-// until the owner forgets it. Requests queued through QueueActorAssetRequest
-// stay unowned, as all of the original's were.
-enum class ActorAssetOwner : std::uint8_t {
-  kUnowned = 0,
-  kEnemyPreview = 1,
+// Native (#48): request ownership. The owner is an opaque identity: an owner
+// submits requests through SubmitActorAssetRequest and holds their tickets;
+// each ticket records its outcome until forgotten. Requests queued through
+// QueueActorAssetRequest stay unowned, as all of the original's were.
+struct ActorAssetOwner {
+  std::uint64_t value = 0;
+
+  friend bool operator==(const ActorAssetOwner&,
+                         const ActorAssetOwner&) = default;
 };
+
+inline constexpr ActorAssetOwner kUnownedActorAssetOwner{};
+inline constexpr ActorAssetOwner kEnemyPreviewActorAssetOwner{1};
 
 enum class ActorAssetTicket : std::uint32_t { kNone = 0 };
 
@@ -148,7 +152,7 @@ enum class ActorAssetOutcome : std::uint8_t {
 };
 
 struct ActorAssetIdentity {
-  ActorAssetOwner owner = ActorAssetOwner::kUnowned;
+  ActorAssetOwner owner = kUnownedActorAssetOwner;
   ActorAssetTicket ticket = ActorAssetTicket::kNone;
 
   friend bool operator==(const ActorAssetIdentity&,

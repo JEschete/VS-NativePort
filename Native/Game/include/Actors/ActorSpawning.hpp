@@ -916,11 +916,19 @@ class ActorSpawnHost {
   // The queue index of the request, or a negative value when it is full.
   [[nodiscard]] virtual int QueueAsset(
       const Content::ActorAssetRequest& request) = 0;
+  [[nodiscard]] virtual std::optional<Content::ActorAssetTicket>
+  SubmitOwnedAsset(const Content::ActorAssetRequest& request,
+                   SpawnedActor actor) = 0;
+  [[nodiscard]] virtual Content::ActorAssetCompletion AssetCompletion(
+      Content::ActorAssetTicket ticket) = 0;
+  virtual void ForgetAsset(Content::ActorAssetTicket ticket) = 0;
+  [[nodiscard]] virtual bool CancelOwnedAssets(SpawnedActor actor) = 0;
   // vs_battle_getEmptyObjectDataSlot() == 0: every request is done.
   [[nodiscard]] virtual bool AssetQueueIdle() const = 0;
   virtual void UpdateAssetQueue() = 0;
   // vs_main_updatePlayTimeAndLoading(0): the frame-paced loading pump.
   virtual void PumpLoading() = 0;
+  virtual void ReleaseActorModel(int slot) = 0;
   virtual void ReleaseWeaponModel(int slot) = 0;
 
   // --- The zone

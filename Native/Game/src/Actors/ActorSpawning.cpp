@@ -753,6 +753,59 @@ struct RoomEnemyParts {
   bool common_animation = false;
 };
 
+class OwnedSpawnAssets {
+ public:
+  OwnedSpawnAssets(ActorSpawnHost& host, SpawnedActor actor)
+      : host_(host), actor_(actor) {}
+
+  [[nodiscard]] bool Submit(const ActorAssetRequest& request) {
+    if (tickets_.size() == count_) {
+      return false;
+    }
+    const std::optional<Content::ActorAssetTicket> ticket =
+        host_.SubmitOwnedAsset(request, actor_);
+    if (!ticket) {
+      return false;
+    }
+    tickets_.at(count_++) = *ticket;
+    return true;
+  }
+
+  [[nodiscard]] bool Finish() {
+    DrainAssetQueue(host_);
+    bool loaded = true;
+    for (std::size_t i = 0; i < count_; ++i) {
+      loaded = host_.AssetCompletion(tickets_.at(i)).outcome ==
+                   Content::ActorAssetOutcome::kLoaded &&
+               loaded;
+    }
+    Forget();
+    return loaded;
+  }
+
+  [[nodiscard]] bool Cancel() {
+    if (!host_.CancelOwnedAssets(actor_)) {
+      return false;
+    }
+    Forget();
+    return true;
+  }
+
+ private:
+  void Forget() {
+    for (std::size_t i = 0; i < count_; ++i) {
+      host_.ForgetAsset(tickets_.at(i));
+    }
+    count_ = 0;
+  }
+
+  static constexpr std::size_t kCapacity = 5;
+  ActorSpawnHost& host_;
+  SpawnedActor actor_;
+  std::array<Content::ActorAssetTicket, kCapacity> tickets_{};
+  std::size_t count_ = 0;
+};
+
 [[nodiscard]] bool RoomEnemySectionsFit(const ZudLayout& layout,
                                         const RoomEnemyParts& parts,
                                         std::size_t file_bytes) {
@@ -767,12 +820,12 @@ struct RoomEnemyParts {
 
 // The second body, equipment and animation requests after the body's, each
 // carrying the previous request's fields as the original's stack record did.
-void QueueRoomEnemyParts(ActorSpawnHost& host, ActorAssetRequest& request,
-                         SpawnedActor actor, std::size_t slot,
-                         const ZudBlock& block, const ZudLayout& layout,
-                         const CharacterTemplate& character,
-                         const RoomEnemyParts& parts, std::uint8_t body_model,
-                         std::uint8_t category) {
+[[nodiscard]] bool QueueRoomEnemyParts(
+    ActorSpawnHost& host, OwnedSpawnAssets& assets, ActorAssetRequest& request,
+    SpawnedActor actor, std::size_t slot, const ZudBlock& block,
+    const ZudLayout& layout, const CharacterTemplate& character,
+    const RoomEnemyParts& parts, std::uint8_t body_model,
+    std::uint8_t category) {
   const auto slot_byte = static_cast<std::uint8_t>(slot);
   if (parts.second_body) {
     request.kind = static_cast<std::uint8_t>(ActorAssetKind::kActorModelLoad);
@@ -783,7 +836,7 @@ void QueueRoomEnemyParts(ActorSpawnHost& host, ActorAssetRequest& request,
     request.sub_kind = slot_byte;
     request.texture_slot = kSecondBodyTextureSlot;
     request.variant = 0;
-    static_cast<void>(host.QueueAsset(request));
+    if (!assets.Submit(request)) return false;
   } else {
     if (parts.weapon) {
       request.kind =
@@ -796,7 +849,7 @@ void QueueRoomEnemyParts(ActorSpawnHost& host, ActorAssetRequest& request,
       request.sub_kind = slot_byte;
       request.texture_slot = kWeaponTextureSlot;
       request.material = character.weapon_material;
-      static_cast<void>(host.QueueAsset(request));
+      if (!assets.Submit(request)) return false;
     }
     if (parts.shield) {
       request.kind =
@@ -809,7 +862,7 @@ void QueueRoomEnemyParts(ActorSpawnHost& host, ActorAssetRequest& request,
       request.sub_kind = slot_byte;
       request.texture_slot = kShieldTextureSlot;
       request.material = character.shield_material;
-      static_cast<void>(host.QueueAsset(request));
+      if (!assets.Submit(request)) return false;
     }
   }
   if (parts.battle_animation) {
@@ -818,7 +871,7 @@ void QueueRoomEnemyParts(ActorSpawnHost& host, ActorAssetRequest& request,
     request.data = SectionAddress(block, layout.battle_animation);
     request.sub_kind = 0;
     request.model_id = category;
-    static_cast<void>(host.QueueAsset(request));
+    if (!assets.Submit(request)) return false;
   }
   if (parts.common_animation) {
     request.kind = static_cast<std::uint8_t>(ActorAssetKind::kSequenceParse);
@@ -826,17 +879,46 @@ void QueueRoomEnemyParts(ActorSpawnHost& host, ActorAssetRequest& request,
     request.data = SectionAddress(block, layout.common_animation);
     request.sub_kind = 0;
     request.model_id = 0;
-    static_cast<void>(host.QueueAsset(request));
+    if (!assets.Submit(request)) return false;
   }
+  return true;
+}
+
+void ReleaseRoomEnemyAssets(ActorSpawnHost& host, std::size_t slot,
+                            const RoomEnemyParts& parts) {
+  if (slot < Content::kActorRecordSlots) {
+    host.ReleaseActorModel(static_cast<int>(slot));
+  }
+  if (parts.second_body &&
+      slot + kSecondBodySlotOffset < Content::kActorRecordSlots) {
+    host.ReleaseActorModel(static_cast<int>(slot + kSecondBodySlotOffset));
+  } else {
+    const std::size_t weapon_slot = slot * 2;
+    if (parts.weapon && weapon_slot < Content::kWeaponModelSlots) {
+      host.ReleaseWeaponModel(static_cast<int>(weapon_slot));
+    }
+    if (parts.shield && weapon_slot + 1 < Content::kWeaponModelSlots) {
+      host.ReleaseWeaponModel(static_cast<int>(weapon_slot + 1));
+    }
+  }
+}
+
+void DiscardRoomEnemy(ActorSpawnHost& host, SpawnedActor actor,
+                      std::size_t slot, const RoomEnemyParts& parts) {
+  ReleaseRoomEnemyAssets(host, slot, parts);
+  host.DiscardUninstalled(actor);
 }
 
 // Installs the loaded enemy, applies its template and restores what its room
 // remembered of it.
-void SettleRoomEnemy(ActorSpawnHost& host, std::size_t slot, SpawnedActor actor,
-                     const RoomSpawn& spawn, const CharacterTemplate& character,
-                     const std::optional<RememberedSpawn>& remembered,
-                     int flags) {
+[[nodiscard]] bool SettleRoomEnemy(
+    ActorSpawnHost& host, std::size_t slot, SpawnedActor actor,
+    const RoomSpawn& spawn, const CharacterTemplate& character,
+    const std::optional<RememberedSpawn>& remembered, int flags) {
   host.Install(slot, actor);
+  if (host.ActorAt(slot) != actor) {
+    return false;
+  }
   ApplyTemplate(host, slot, character, character.blade_model,
                 character.shield_model, flags, true);
   const SpawnedState state = host.State(slot);
@@ -866,6 +948,7 @@ void SettleRoomEnemy(ActorSpawnHost& host, std::size_t slot, SpawnedActor actor,
   }
   host.SetCombatPose(slot,
                      ai_state == 0 ? spawn.combat_pose : kNeutralCombatPose);
+  return true;
 }
 }  // namespace
 
@@ -940,13 +1023,28 @@ SpawnedActor SpawnRoomEnemy(ActorSpawnHost& host, int actor_id,
   request.sub_kind = kDefaultSubKind;
   request.variant = static_cast<std::uint8_t>(spawn.variant & 1U);
   request.material = character.material;
-  static_cast<void>(host.QueueAsset(request));
-  if (!parts.bare) {
-    QueueRoomEnemyParts(host, request, actor, slot, *block, *layout, character,
-                        parts, body_model, category);
+  OwnedSpawnAssets assets(host, actor);
+  if (!assets.Submit(request) ||
+      (!parts.bare &&
+       !QueueRoomEnemyParts(host, assets, request, actor, slot, *block, *layout,
+                            character, parts, body_model, category))) {
+    host.Refuse(SpawnRefusal::kAssetQueue);
+    if (!assets.Cancel()) {
+      return SpawnedActor::kNone;
+    }
+    DiscardRoomEnemy(host, actor, slot, parts);
+    return SpawnedActor::kNone;
   }
-  DrainAssetQueue(host);
-  SettleRoomEnemy(host, slot, actor, spawn, character, remembered, flags);
+  if (!assets.Finish()) {
+    host.Refuse(SpawnRefusal::kAssetQueue);
+    DiscardRoomEnemy(host, actor, slot, parts);
+    return SpawnedActor::kNone;
+  }
+  if (!SettleRoomEnemy(host, slot, actor, spawn, character, remembered,
+                       flags)) {
+    DiscardRoomEnemy(host, actor, slot, parts);
+    return SpawnedActor::kNone;
+  }
   return actor;
 }
 

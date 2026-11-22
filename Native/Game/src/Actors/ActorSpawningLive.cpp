@@ -142,6 +142,10 @@ ActorHandleTable& LiveActorHandles() {
   return reinterpret_cast<std::uintptr_t>(actor);
 }
 
+[[nodiscard]] Content::ActorAssetOwner AssetOwnerOf(SpawnedActor actor) {
+  return {.value = static_cast<std::uint64_t>(actor)};
+}
+
 template <typename T>
 [[nodiscard]] T* ActorPointer(SpawnedActor actor, const char* operation) {
   const std::uintptr_t address = LiveActorHandles().Resolve(actor);
@@ -668,6 +672,28 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
       const Content::ActorAssetRequest& request) override {
     return Content::QueueLiveActorAsset(request);
   }
+  [[nodiscard]] std::optional<Content::ActorAssetTicket> SubmitOwnedAsset(
+      const Content::ActorAssetRequest& request, SpawnedActor actor) override {
+    if (ActorPointer<const VS::Battle::Actor>(actor, "SubmitOwnedAsset") ==
+        nullptr) {
+      return std::nullopt;
+    }
+    return Content::SubmitLiveActorAsset(request, AssetOwnerOf(actor));
+  }
+  [[nodiscard]] Content::ActorAssetCompletion AssetCompletion(
+      Content::ActorAssetTicket ticket) override {
+    return Content::LiveActorAssetCompletion(ticket);
+  }
+  void ForgetAsset(Content::ActorAssetTicket ticket) override {
+    Content::ForgetLiveActorAsset(ticket);
+  }
+  [[nodiscard]] bool CancelOwnedAssets(SpawnedActor actor) override {
+    if (ActorPointer<const VS::Battle::Actor>(actor, "CancelOwnedAssets") ==
+        nullptr) {
+      return false;
+    }
+    return Content::CancelLiveActorAssetRequests(AssetOwnerOf(actor));
+  }
   [[nodiscard]] bool AssetQueueIdle() const override {
     return Content::FindLiveFreeActorAssetRequest() == 0;
   }
@@ -675,6 +701,9 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     static_cast<void>(Content::UpdateLiveActorAssetQueue());
   }
   void PumpLoading() override { State::UpdateLivePlayTimeAndLoading(); }
+  void ReleaseActorModel(int slot) override {
+    static_cast<void>(Content::ReleaseLiveActorModel(slot));
+  }
   void ReleaseWeaponModel(int slot) override {
     static_cast<void>(Content::ReleaseLiveWeaponModel(slot));
   }

@@ -16,7 +16,7 @@ namespace VS::Menu::Score {  // NOLINT(readability-identifier-naming)
 struct EnemyPreviewState;
 
 // MENU9.PRG (57BC.c, 592C.c). The preview's parts are queued under
-// Content::ActorAssetOwner::kEnemyPreview (#48); a load that fails returns
+// Content::kEnemyPreviewActorAssetOwner (#48); a load that fails returns
 // kEnemyPreviewFailed.
 int LoadLiveEnemyPreview(int zud_id);
 void FreeLiveEnemyPreview();
