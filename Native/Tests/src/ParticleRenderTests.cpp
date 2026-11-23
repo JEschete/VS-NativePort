@@ -110,6 +110,7 @@ struct EffectTraceScope {
     CHECK(record.at("vertices").at(0).at("raster") ==
           nlohmann::json::array({13, 24}));
     CHECK(record.at("draw_offset") == nlohmann::json::array({3, 4}));
+    CHECK(record.at("dither").is_boolean());
   }
 };
 

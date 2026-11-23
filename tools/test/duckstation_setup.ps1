@@ -7,6 +7,10 @@
     memory cards (the port has none yet) and binds the pad to the keyboard (duckstation_capture.ps1 presses these).
     The installed DuckStation and its own settings are never touched.
 
+    The GPU renders like the hardware: the software renderer, unscaled dithering, a 5-bit frame. DuckStation's
+    default is a hardware renderer in True Color mode, which blends at 8 bits and changes stacked semi-transparent
+    effects; the E207 window glow in MAP001 looked much brighter and greener than the port that way (#507).
+
     Locations on the development machine (see .github\copilot-instructions.md):
       DuckStation  C:\Tools\Systems\PSX\Emulators\DuckStation\duckstation-qt-x64-ReleaseLTCG.exe
       BIOS         F:\Emulators\PlayStation\bios\SCPH1001.BIN (NTSC-U; scph5501.bin also there)
@@ -37,6 +41,8 @@ SearchDirectory = $BiosDir
 PathNTSCU = $Bios
 PatchFastBoot = true
 [GPU]
+Renderer = Software
+DitheringMode = Unscaled
 ResolutionScale = 1
 [Display]
 Scaling = Nearest

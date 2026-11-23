@@ -114,6 +114,65 @@ TEST_CASE("Adjacent scaled atlas tiles never sample neighboring atlas storage",
   }
 }
 
+// #507: the MAP001 window glow (E207) stacks dozens of dim additive layers,
+// drawn with dithering off. The GPU modulates each texel and truncates it to
+// the 5-bit frame before adding, so a dark texel adds nothing however often it
+// is drawn. A true-colour emulator mode adds at 8 bits and shows a brighter,
+// greener glow than the hardware.
+TEST_CASE("Additive textured layers truncate to the 5-bit frame each draw",
+          "[render][gpu][raster][blend]") {
+  PageSpace pages;
+  // Two STP words from E207_1.FBC: channels 5,5,4 and 2,2,1.
+  const std::array<u16, 3> palette{0, 0x90A5, 0x8442};
+  pages.Upload({768, 0, 3, 1}, palette.data());
+  // 4-bit texels: index 1 for u 0..7, index 2 for u 8..15.
+  std::array<u16, std::size_t{4} * 8> texels{};
+  for (std::size_t row = 0; row < 8; ++row) {
+    std::fill_n(texels.begin() + static_cast<std::ptrdiff_t>(row * 4), 2,
+                u16{0x1111});
+    std::fill_n(texels.begin() + static_cast<std::ptrdiff_t>(row * 4 + 2), 2,
+                u16{0x2222});
+  }
+  pages.Upload({640, 256, 4, 8}, texels.data());
+  // Modulated, semi-transparent quad at E207's vertex colour 63; the page
+  // selects additive blending.
+  const auto layer = [&pages](int x, int u) {
+    const std::array<u32, 9> quad{
+        0x2E3F3F3Fu,
+        Position(x, 10),
+        Texture(u, 0) | (getClut(768, 0) << 16),
+        Position(x + 8, 10),
+        Texture(u + 8, 0) | (getTPage(0, 1, 640, 256) << 16),
+        Position(x, 18),
+        Texture(u, 8),
+        Position(x + 8, 18),
+        Texture(u + 8, 8)};
+    CHECK(pages.Execute(quad) == quad.size());
+  };
+  for (int draw = 0; draw < 8; ++draw) {
+    layer(10, 0);
+    layer(30, 8);
+  }
+  // Each bright layer adds 40*63/128 = 19 -> 2 (red, green) and
+  // 32*63/128 = 15 -> 1 (blue); 8-bit accumulation would reach 19,19,15.
+  constexpr u16 kBright = 0x8000 | 16 | (16 << 5) | (8 << 10);
+  // Each dark layer adds 7 -> 0 and 3 -> 0: only the STP bit is written.
+  constexpr u16 kDark = 0x8000;
+  for (int y = 9; y <= 18; ++y) {
+    for (int x = 9; x <= 38; ++x) {
+      const bool rows = y >= 10 && y < 18;
+      u16 expected = 0;
+      if (rows && x >= 10 && x < 18) {
+        expected = kBright;
+      } else if (rows && x >= 30 && x < 38) {
+        expected = kDark;
+      }
+      CAPTURE(x, y);
+      CHECK(pages.At(x, y) == expected);
+    }
+  }
+}
+
 TEST_CASE("Quad diagonals shade shared pixels exactly once",
           "[render][gpu][raster][blend]") {
   const bool reverse = GENERATE(false, true);

@@ -453,7 +453,11 @@ intro movie**, so test runs press it: `--press 1000:Start` puts the menu up by t
 `tools\test\duckstation_capture.ps1` makes the matching DuckStation reference (see `.github\copilot-instructions.md`
 for the emulator and BIOS locations). Its `-DumpUploads` switch also saves every texture and palette upload the
 original made, in order, so they can be compared word for word with a `--capture-pages` VRAM dump without
-aligning frames (the dumps keep the 15-bit colour but not the semi-transparency bit).
+aligning frames (the dumps keep the 15-bit colour but not the semi-transparency bit). The reference copy uses
+DuckStation's software renderer with unscaled dithering, so it blends in a 5-bit frame like the PS1 GPU and the
+port. DuckStation's default True Color mode blends at 8 bits; stacked semi-transparent effects then look brighter
+than on hardware, so do not compare the port with captures made that way (#507). The capture script rewrites
+an older portable copy's settings to the hardware mode.
 
 The game reads only `Native\data\` (⏭ plus `Native\Content\patches\` and `mods\`). The disc is optional at run
 time; if it is found, its label is logged. If `Native\data\` is missing, the game stops with a message that says to

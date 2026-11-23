@@ -89,13 +89,14 @@ void PageSpace::TracePrimitive(std::uintptr_t command_address, u32 opcode,
       "effect-path",
       "{{\"kind\":\"primitive\",\"command_address\":{},\"opcode\":{},"
       "\"textured\":{},\"raw\":{},\"clut\":{},\"texture_page\":[{},{}],"
-      "\"texture_depth\":{},\"blend\":{},\"draw_offset\":[{},{}],"
+      "\"texture_depth\":{},\"blend\":{},\"dither\":{},"
+      "\"draw_offset\":[{},{}],"
       "\"draw_area\":[{},{},{},{}],\"display\":[{},{},{},{}],"
       "\"display_lines\":[{},{}],"
       "\"vertices\":[{}]}}",
       command_address, opcode, primitive.textured, primitive.raw,
-      primitive.clut, m_pageX, m_pageY, m_depth, m_semiMode, m_offX, m_offY,
-      m_areaX1, m_areaY1, m_areaX2, m_areaY2, m_display.area.x,
+      primitive.clut, m_pageX, m_pageY, m_depth, m_semiMode, m_dither, m_offX,
+      m_offY, m_areaX1, m_areaY1, m_areaX2, m_areaY2, m_display.area.x,
       m_display.area.y, m_display.area.w, m_display.area.h, m_display.screenY,
       m_display.screenH, points);
 }

@@ -56,7 +56,12 @@ public static class DsWin {
     }
 }
 '@
-if (-not (Test-Path 'build\duckstation\portable.txt')) { & (Join-Path $PSScriptRoot 'duckstation_setup.ps1') | Out-Null }
+# A copy set up before the hardware-accurate GPU settings (#507) renders in True Color; rewrite its settings.
+$dsSettings = 'build\duckstation\settings.ini'
+if (-not (Test-Path 'build\duckstation\portable.txt') -or -not (Test-Path $dsSettings) -or
+    -not (Select-String -Quiet -SimpleMatch 'Renderer = Software' $dsSettings)) {
+    & (Join-Path $PSScriptRoot 'duckstation_setup.ps1') | Out-Null
+}
 if (Test-Path $Out) { Remove-Item $Out -Recurse -Force }
 [DsWin]::SetProcessDPIAware() | Out-Null
 New-Item -ItemType Directory $Out | Out-Null
