@@ -25,6 +25,7 @@ namespace content = VS::Content;
 using Bytes = std::vector<std::byte>;
 using VS::test_support::ErrorOf;
 using VS::test_support::ExtractedModels;
+using VS::test_support::LittleWord;
 using VS::test_support::ReadModel;
 
 constexpr std::size_t kExtractedZudCount = 455;
@@ -47,17 +48,7 @@ content::ZudFile SampleZud() {
 }
 
 Bytes Encoded(const content::ZudFile& zud) {
-  auto bytes = content::EncodeZudFile(zud);
-  INFO(ErrorOf(bytes));
-  REQUIRE(bytes.has_value());
-  return *std::move(bytes);
-}
-
-std::uint32_t Word(std::span<const std::byte> bytes, std::size_t at) {
-  return std::to_integer<std::uint32_t>(bytes[at]) |
-         (std::to_integer<std::uint32_t>(bytes[at + 1]) << 8U) |
-         (std::to_integer<std::uint32_t>(bytes[at + 2]) << 16U) |
-         (std::to_integer<std::uint32_t>(bytes[at + 3]) << 24U);
+  return VS::test_support::Required(content::EncodeZudFile(zud));
 }
 
 TEST_CASE("ZUD files round-trip their identity and packed sections",
@@ -72,7 +63,7 @@ TEST_CASE("ZUD files round-trip their identity and packed sections",
                                          0,    0x33, 4,    0x37, 5};
   for (std::size_t word = 0; word < words.size(); ++word) {
     CAPTURE(word);
-    CHECK(Word(bytes, content::kZudIdentityBytes + (4 * word)) ==
+    CHECK(LittleWord(bytes, content::kZudIdentityBytes + (4 * word)) ==
           words.at(word));
   }
   CHECK(content::DecodeZudFile(bytes) == zud);

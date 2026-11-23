@@ -19,6 +19,7 @@ namespace content = VS::Content;
 using Bytes = std::vector<std::byte>;
 using VS::test_support::ErrorOf;
 using VS::test_support::ExtractedModels;
+using VS::test_support::LittleWord;
 using VS::test_support::ReadModel;
 
 // Measured on the configured disc (ASSET_PIPELINE.md §6.9).
@@ -52,17 +53,7 @@ content::ZndFile SampleZone() {
 }
 
 Bytes Encoded(const content::ZndFile& zone) {
-  auto bytes = content::EncodeZndFile(zone);
-  INFO(ErrorOf(bytes));
-  REQUIRE(bytes.has_value());
-  return *std::move(bytes);
-}
-
-std::uint32_t Word(std::span<const std::byte> bytes, std::size_t at) {
-  return std::to_integer<std::uint32_t>(bytes[at]) |
-         (std::to_integer<std::uint32_t>(bytes[at + 1]) << 8U) |
-         (std::to_integer<std::uint32_t>(bytes[at + 2]) << 16U) |
-         (std::to_integer<std::uint32_t>(bytes[at + 3]) << 24U);
+  return VS::test_support::Required(content::EncodeZndFile(zone));
 }
 
 void PutWord(Bytes& bytes, std::size_t at, std::uint32_t word) {
@@ -112,11 +103,11 @@ TEST_CASE("ZND files round-trip their rooms, enemies and texture table",
                                           0};
   for (std::size_t word = 0; word < header.size(); ++word) {
     CAPTURE(word);
-    CHECK(Word(bytes, 4 * word) == header.at(word));
+    CHECK(LittleWord(bytes, 4 * word) == header.at(word));
   }
   const std::size_t textures_at = 0x20 + kRooms + kEnemies;
-  CHECK(Word(bytes, textures_at) == kTextures - 16);
-  CHECK(Word(bytes, textures_at + 16) == 2);
+  CHECK(LittleWord(bytes, textures_at) == kTextures - 16);
+  CHECK(LittleWord(bytes, textures_at + 16) == 2);
   CHECK(content::DecodeZndFile(bytes) == zone);
 
   // A zone with nothing is its header, a zero count and the empty texture
@@ -138,18 +129,18 @@ TEST_CASE("ZND decoding names the bytes it rejects", "[content-tables][znd]") {
     std::string_view error;
   };
   const Bytes bytes = Encoded(SampleZone());
-  const std::size_t textures_at = Word(bytes, 0x10);
+  const std::size_t textures_at = LittleWord(bytes, 0x10);
   Bytes short_header(bytes.begin(), bytes.begin() + 31);
   Bytes reserved = bytes;
   reserved.at(kReservedAt) = std::byte{1};
   Bytes trailing = bytes;
   trailing.push_back(std::byte{0});
   Bytes gap = bytes;
-  PutWord(gap, kEnemiesOffsetAt, Word(bytes, kEnemiesOffsetAt) + 4);
+  PutWord(gap, kEnemiesOffsetAt, LittleWord(bytes, kEnemiesOffsetAt) + 4);
   Bytes second_table = bytes;
   PutWord(second_table, textures_at + 4, 1);
   Bytes table_size = bytes;
-  PutWord(table_size, textures_at, Word(bytes, textures_at) - 1);
+  PutWord(table_size, textures_at, LittleWord(bytes, textures_at) - 1);
   Bytes overrun = bytes;
   PutWord(overrun, textures_at + 16 + 4 + 12, 5);
   Bytes untextured = Packed({}, kNoEnemies, kNoTextures);

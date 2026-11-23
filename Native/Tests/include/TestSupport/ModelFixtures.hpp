@@ -67,6 +67,23 @@ struct PolygonSpec {
   return result ? std::string{} : result.error();
 }
 
+// The value of a result that must succeed; the error fails the test.
+[[nodiscard]] auto Required(auto result) {
+  INFO(ErrorOf(result));
+  REQUIRE(result.has_value());
+  return *std::move(result);
+}
+
+// The little-endian 32-bit word at `at`.
+[[nodiscard]] inline std::uint32_t LittleWord(std::span<const std::byte> bytes,
+                                              std::size_t at) {
+  std::uint32_t word = 0;
+  for (std::size_t index = 0; index < 4; ++index) {
+    word |= std::to_integer<std::uint32_t>(bytes[at + index]) << (8U * index);
+  }
+  return word;
+}
+
 // Native/data/disc/OBJ, found from the working directory up.
 [[nodiscard]] inline std::optional<std::filesystem::path> ExtractedModels() {
   for (auto directory = std::filesystem::current_path();
