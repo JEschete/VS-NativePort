@@ -7,7 +7,8 @@
 Docs\\ASSET_PIPELINE.md section 9 and plan section 4.5 define the ledger: one row per disc file with its kind, decoder,
 converter, outputs, round-trip result and status. --sync reads Native\\data\\files.tsv (every disc file) and
 Native\\data\\manifest.json (the registered conversions), so it needs an extracted disc. A file that is the source of a
-manifest output is `converted`; a zero-byte placeholder, or a file section 6.1 drops, is `skipped` with its reason;
+manifest output is `converted`; a placeholder (no bytes, or one zero byte), or a file section 6.1 drops, is `skipped`
+with its reason;
 every other file is `unconverted`, noting the issue that converts it. A converted row has `round_trip=pass` only when
 every disc-corpus test named for its converter in EVIDENCE is a Catch2 TEST_CASE cited by a passing VERIFY_LEDGER
 record. --check needs no disc: it checks every row against these rules, the evidence and the runtime's converter list,
@@ -34,7 +35,8 @@ FIELDS = ["path", "size", "kind", "decoder", "converter", "output", "round_trip"
 STATUS_VALUES = ("converted", "skipped", "unconverted")
 NOT_APPLICABLE = "n/a"
 PLACEHOLDER = "placeholder"
-PLACEHOLDER_REASON = "zero-byte placeholder"
+# An unused slot: a file of no bytes, or of one zero byte (the runtime's DataStore.cpp IsPlaceholder), by size.
+PLACEHOLDER_REASONS = {0: "zero-byte placeholder", 1: "one-byte zero placeholder"}
 RUNTIME_CONVERTER = re.compile(r'ConverterVersion\{\s*\.name\s*=\s*"(?P<name>[^"]+)"')
 
 
@@ -47,7 +49,7 @@ class Kind:
 
 TIM = Kind("TIM image", "#208")
 PROGRAM = Kind("program overlay data", "#500, #502")
-SAMPLE_BANK = Kind("sample bank", "#504", "the runtime reads audio\\banks\\, written outside manifest.json")
+SAMPLE_BANK = Kind("sample bank", "#504")
 # (directory, extension) -> kind, from the section 6.1 format map. A disc file no rule covers fails --sync.
 RULES: dict[tuple[str, str], Kind] = {
     ("", "40"): Kind("main executable data", "#499, #500, #502"),
@@ -64,8 +66,7 @@ RULES: dict[tuple[str, str], Kind] = {
     ("ENDING", "BIN"): Kind("ending illustration", "#498"),
     ("ENDING", "DAT"): Kind("filler"),
     ("ENDING", "PRG"): PROGRAM,
-    ("ENDING", "XA"): Kind("XA audio stream", "#504", "the runtime reads audio\\streams\\xa\\, written outside "
-                                                      "manifest.json"),
+    ("ENDING", "XA"): Kind("XA audio stream", "#504"),
     ("EVENT", "EVT"): Kind("event script", "#202"),
     ("GIM", "GIM"): Kind("layered artwork", "#209"),
     ("GIM", "PRG"): PROGRAM,
@@ -75,8 +76,7 @@ RULES: dict[tuple[str, str], Kind] = {
     ("MENU", "BIN"): Kind("menu image, text or table", "#498, #499, #500"),
     ("MENU", "PRG"): PROGRAM,
     ("MENU", "SYD"): Kind("combination recipes", "#499"),
-    ("MOV", "STR"): Kind("movie", "#504", "the runtime reads disc\\MOV\\TITLE.STR.mkv, written outside "
-                                          "manifest.json"),
+    ("MOV", "STR"): Kind("movie", "#504"),
     ("MUSIC", "DAT"): Kind("music sequence", "#501"),
     ("OBJ", "ESQ"): Kind("shared animation set", "#206"),
     ("OBJ", "ETM"): Kind("actor texture overlay", "#207"),
@@ -106,6 +106,9 @@ DECODERS = {
     "seq-gltf": "Content::DecodeSeqFile",
     "syd-recipe-csv": "Extract::DecodeSydRecipes",
     "wep-gltf": "Content::DecodeWep",
+    "wave-bank": "Content::DecodeAudioBank",
+    "xa-flac": "Content::SelectXaAudioSectors + FFmpeg adpcm_xa",
+    "str-mkv": "FFmpeg psxstr + mdec",
 }
 # The disc-corpus tests that prove each converter preserves its sources (ASSET_PIPELINE section 7).
 EVIDENCE = {
@@ -123,6 +126,9 @@ EVIDENCE = {
                        "Original shield and armor recipes use their distinct material tables"),
     "wep-gltf": ("Extracted WEP files decode and rebuild their exact bytes",
                  "Extracted WEP models load from their conversions as exact bytes"),
+    "wave-bank": ("Extracted sound banks hold their WAVE files' exact ADPCM decode",),
+    "xa-flac": ("The extracted ending XA FLAC is its selected sectors' exact decode",),
+    "str-mkv": ("The extracted title movie keeps every STR frame at 15 frames a second",),
 }
 
 
@@ -192,6 +198,20 @@ def read_disc_files(data: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(stream, delimiter="\t"))
 
 
+def placeholder_reason(data: Path, entry: dict[str, str]) -> str | None:
+    """Why the extracted disc file `entry` is an unused slot, or None when it holds content."""
+    size = int(entry["size"])
+    if size == 1:
+        extracted = data / "disc" / entry["path"]
+        if entry["form"] != "raw":
+            return None
+        if not extracted.is_file():
+            raise SystemExit(f"{extracted} is missing; extract the disc again")
+        if extracted.read_bytes() != b"\0":
+            return None
+    return PLACEHOLDER_REASONS.get(size)
+
+
 def expected_rows(root: Path, evidence: Evidence) -> list[dict[str, str]]:
     """The ledger the extracted data under Native\\data gives."""
     data = data_root(root)
@@ -234,10 +254,10 @@ def expected_rows(root: Path, evidence: Evidence) -> list[dict[str, str]]:
                      for file in (by_id[output["alias_of"]] if output.get("alias_of") else output)["files"]]
             row.update(decoder=DECODERS[converter], converter=converter, round_trip=evidence.round_trip(converter),
                        status="converted", output=";".join(files))
-        elif size == 0 or path in DROPPED:
-            row.update(kind=PLACEHOLDER if size == 0 else kind.name, decoder=NOT_APPLICABLE,
+        elif (reason := DROPPED.get(path) or placeholder_reason(data, entry)) is not None:
+            row.update(kind=kind.name if path in DROPPED else PLACEHOLDER, decoder=NOT_APPLICABLE,
                        converter=NOT_APPLICABLE, output=NOT_APPLICABLE, round_trip=NOT_APPLICABLE, status="skipped")
-            notes.insert(0, PLACEHOLDER_REASON if size == 0 else DROPPED[path])
+            notes.insert(0, reason)
         else:
             notes += [note for note in (kind.note, f"converts under {kind.issues}" if kind.issues else "") if note]
         rows.append({**row, "notes": "; ".join(notes)})
@@ -287,7 +307,8 @@ def check_row(row: dict[str, str], runtime: set[str], evidence: Evidence) -> lis
         return [("size-invalid", f"size {row['size']!r} is not a byte count")]
     size = int(row["size"])
     kind = kind_of(path)
-    expected_kind = PLACEHOLDER if size == 0 and status == "skipped" else kind.name if kind else None
+    placeholder = status == "skipped" and path not in DROPPED and size in PLACEHOLDER_REASONS
+    expected_kind = PLACEHOLDER if placeholder else kind.name if kind else None
     if expected_kind is None:
         found.append(("kind-unknown", "no RULES entry for its directory and extension"))
     elif row["kind"] != expected_kind:
@@ -311,9 +332,11 @@ def check_row(row: dict[str, str], runtime: set[str], evidence: Evidence) -> lis
         elif row["round_trip"] not in {"pass", "pending"}:
             found.append(("round-trip-invalid", f"round_trip {row['round_trip']!r} for a converted file"))
     elif status == "skipped":
-        reason = PLACEHOLDER_REASON if size == 0 else DROPPED.get(path)
+        # Without the extracted data a one-byte file's byte is unknown; --check against the data compares it.
+        reason = DROPPED.get(path) or PLACEHOLDER_REASONS.get(size)
         if reason is None:
-            found.append(("skip-unexplained", "only zero-byte placeholders and DROPPED files are skipped"))
+            found.append(("skip-unexplained", "only placeholders (no bytes or one zero byte) and DROPPED files are "
+                          "skipped"))
         elif not row["notes"].startswith(reason):
             found.append(("skip-reason-missing", f"notes must start with the reason {reason!r}"))
         if (*resolved, row["round_trip"]) != (NOT_APPLICABLE,) * 4:

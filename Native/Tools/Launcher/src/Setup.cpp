@@ -657,16 +657,11 @@ std::expected<fs::path, std::string> Prepare(const Settings& settings,
     return {};
   };
   progress({SetupStage::kExtract,
-            "Preparing disc files, intro and streamed audio..."});
+            "Preparing disc files, models, sound banks, intro and streamed "
+            "audio..."});
   if (auto result = run({PathText(installation / "VS.Extract.exe"), "extract",
                          PathText(verified->image), PathText(staging),
                          "--ffmpeg", PathText(settings.ffmpeg)});
-      !result) {
-    return std::unexpected(result.error());
-  }
-  progress({SetupStage::kAudio, "Importing music and sound banks..."});
-  if (auto result = run({PathText(installation / "VS.Extract.exe"), "audio",
-                         PathText(staging / "disc"), PathText(staging)});
       !result) {
     return std::unexpected(result.error());
   }

@@ -12,6 +12,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\AudioBankConversion.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ConversionManifestWriter.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -45,6 +48,9 @@
     <ClCompile Include="src\WorkshopRecipeConversion.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClInclude Include="include\Extract\AudioBankConversion.hpp">
+      <Filter>include\Extract</Filter>
+    </ClInclude>
     <ClInclude Include="include\Extract\ConversionManifestWriter.hpp">
       <Filter>include\Extract</Filter>
     </ClInclude>

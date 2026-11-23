@@ -193,7 +193,7 @@ references, not fresh runs; rerun what a closure claim depends on.
 one row per disc file ([ASSET_PIPELINE.md](ASSET_PIPELINE.md) §9). It needs no
 disc. It rejects:
 - a kind its directory and extension don't give;
-- a `skipped` row that isn't a zero-byte placeholder or a §6.1 drop with its reason;
+- a `skipped` row that isn't a placeholder (no bytes, or one zero byte) or a §6.1 drop with its reason;
 - a `converted` row whose converter the runtime doesn't read or whose decoder or
   outputs are missing;
 - `round_trip=pass` without its disc-corpus tests cited by a passing

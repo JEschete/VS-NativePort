@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <cstdint>
 #include <expected>
 #include <filesystem>
 #include <span>
@@ -14,6 +15,14 @@ namespace VS::Content {
 
 inline constexpr u32 kXaSectorsPerSecond = 75;
 inline constexpr usize kAudioStreamHeaderBytes = 64;
+
+// The xa-flac converter (ASSET_PIPELINE.md §6.6, #504): an XA file's selected
+// sectors become audio\streams\xa\<path>.flac, decoded losslessly. XA files
+// are interleaved: files.tsv lists them as "stream" with nothing under disc\,
+// and the manifest hashes their raw 2352-byte sectors.
+inline constexpr std::string_view kXaFlacConverterName = "xa-flac";
+inline constexpr std::uint32_t kXaFlacConverterVersion = 1;
+inline constexpr std::string_view kXaExtension = ".XA";
 
 struct EmbeddedAudioStream {
   usize offset = 0;
@@ -54,6 +63,8 @@ std::filesystem::path AudioStreamInstrumentPath(
     usize channel);
 std::filesystem::path XaAudioPath(const std::filesystem::path& data_root,
                                   std::string_view source_path);
+// XaAudioPath's file, '/'-separated under the data root.
+std::string XaAudioFile(std::string_view source_path);
 std::expected<std::vector<u8>, std::string> SelectXaAudioSectors(
     std::span<const u8> raw_sectors);
 

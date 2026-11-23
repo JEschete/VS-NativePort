@@ -21,8 +21,11 @@
 #include <vector>
 
 #include "Content/AssetCatalog.hpp"
+#include "Content/AudioBank.hpp"
+#include "Content/AudioStream.hpp"
 #include "Content/ConversionManifest.hpp"
 #include "Content/DataAccess.hpp"
+#include "Content/MovieEncoder.hpp"
 #include "Content/WorkshopRecipes.hpp"
 #include "Core/Log.hpp"
 #include "Core/Sha256.hpp"
@@ -50,23 +53,53 @@ bool ParseU32(std::string_view s, u32& out) {
 }
 
 // A disc file type the runtime reads only through a converter's outputs.
+// `prefix` is the path start ("" for any directory). `form` is the files.tsv
+// form of its sources: raw sources are under disc\ and are rehashed, while
+// interleaved ones (movies, XA) have no disc\ copy to hash, so only their
+// outputs' files are required.
 struct ConvertedType {
+  std::string_view prefix;
   std::string_view extension;
   std::string_view converter;
+  std::string_view form;
+
+  [[nodiscard]] bool Matches(std::string_view path) const {
+    return path.starts_with(prefix) && path.ends_with(extension);
+  }
 };
 
+constexpr std::string_view kRawForm = "raw";
+
 constexpr std::array kConvertedTypes{
-    ConvertedType{.extension = ".TIM", .converter = "tim-png"},
-    ConvertedType{.extension = ".FBC", .converter = "fbc-palette-png"},
-    ConvertedType{.extension = ".FBT", .converter = "fbt-texture-png"},
-    ConvertedType{.extension = ".SYD", .converter = kSydRecipeConverterName},
-    ConvertedType{.extension = ".SHP", .converter = "shp-gltf"},
-    ConvertedType{.extension = ".SEQ", .converter = "seq-gltf"},
-    ConvertedType{.extension = ".WEP", .converter = "wep-gltf"},
+    ConvertedType{"", ".TIM", "tim-png", kRawForm},
+    ConvertedType{"", ".FBC", "fbc-palette-png", kRawForm},
+    ConvertedType{"", ".FBT", "fbt-texture-png", kRawForm},
+    ConvertedType{"", ".SYD", kSydRecipeConverterName, kRawForm},
+    ConvertedType{"", ".SHP", "shp-gltf", kRawForm},
+    ConvertedType{"", ".SEQ", "seq-gltf", kRawForm},
+    ConvertedType{"", ".WEP", "wep-gltf", kRawForm},
+    ConvertedType{kWaveBankPrefix, kWaveBankExtension, kWaveBankConverterName,
+                  kRawForm},
+    ConvertedType{"", kXaExtension, kXaFlacConverterName, "stream"},
+    ConvertedType{"", kMovieExtension, kStrMkvConverterName, kMovieForm},
 };
 
 // The fix each stale or missing output error names.
 constexpr std::string_view kRerun = " (run VS.Extract extract <disc> <dir>)";
+
+// Whether `entry` is an empty placeholder: no bytes, or one zero byte (the
+// unused SOUND, MUSIC and SE slots), which no converter reads.
+std::expected<bool, std::string> IsPlaceholder(const DataStore& store,
+                                               const DataStore::Entry& entry) {
+  if (entry.form != kRawForm || entry.size > 1) return false;
+  if (entry.size == 0) return true;
+  std::array<u8, 1> byte{};
+  if (!store.Read(entry, 0, byte)) {
+    return std::unexpected("cannot read " +
+                           Platform::PathText(store.FileOf(entry)));
+  }
+  return byte[0] == 0;
+}
 
 // The SHA-256 of each extracted file one check has read: many outputs share
 // a dependency such as EFFECT/EFFPURGE.BIN.
@@ -111,17 +144,21 @@ std::expected<void, std::string> RequireOutputFiles(
 
 // Whether the output `type`'s converter made from `entry` is current with its
 // source and dependencies, and the output holding its files has every file.
+// An interleaved source has no extracted bytes to rehash; its output's files
+// are still required.
 std::expected<void, std::string> RequireConvertedSource(
     const DataStore& store, const ConversionManifest& manifest,
     SourceHashes& hashes, const DataStore::Entry& entry,
     const ConversionOutput& conversion) {
-  const auto current =
-      HashMatches(store, hashes, entry, conversion.source_sha256);
-  if (!current) return std::unexpected(current.error());
-  if (!*current) {
-    return std::unexpected(std::format("stale {} source hash for {}{}",
-                                       conversion.converter, entry.path,
-                                       kRerun));
+  if (entry.form == kRawForm) {
+    const auto current =
+        HashMatches(store, hashes, entry, conversion.source_sha256);
+    if (!current) return std::unexpected(current.error());
+    if (!*current) {
+      return std::unexpected(std::format("stale {} source hash for {}{}",
+                                         conversion.converter, entry.path,
+                                         kRerun));
+    }
   }
   for (const SourceDependency& dependency : conversion.dependencies) {
     const DataStore::Entry* dependency_entry = store.Find(dependency.source);
@@ -150,7 +187,7 @@ std::expected<void, std::string> RequireConvertedSource(
 using OutputMap = std::unordered_map<std::string_view, const ConversionOutput*>;
 
 // Each output of `type`'s converter by source path, checking that it names a
-// raw file of `type` and that no source has two outputs.
+// file of `type` in its form and that no source has two outputs.
 std::expected<OutputMap, std::string> OutputsBySource(
     const DataStore& store, const ConversionManifest& manifest,
     const ConvertedType& type) {
@@ -158,11 +195,11 @@ std::expected<OutputMap, std::string> OutputsBySource(
   for (const ConversionOutput& output : manifest.outputs) {
     if (output.converter != type.converter) continue;
     const DataStore::Entry* source = store.Find(output.source);
-    if (source == nullptr || source->form != "raw" ||
-        !output.source.ends_with(type.extension)) {
-      return std::unexpected(
-          std::format("{} output names a missing or non-{} source {}",
-                      type.converter, type.extension, output.source));
+    if (source == nullptr || source->form != type.form ||
+        !type.Matches(output.source)) {
+      return std::unexpected(std::format(
+          "{} output names a missing or non-{} {}*{} source {}", type.converter,
+          type.form, type.prefix, type.extension, output.source));
     }
     if (!outputs.emplace(output.source, &output).second) {
       return std::unexpected(std::format("multiple {} outputs name {}",
@@ -172,21 +209,25 @@ std::expected<OutputMap, std::string> OutputsBySource(
   return outputs;
 }
 
-// Whether every raw file of `type` has its current converted output, and
-// every output of its converter names such a file.
+// Whether every file of `type`, other than a placeholder, has its current
+// converted output, and every output of its converter names such a file.
 std::expected<void, std::string> RequireConvertedType(
     const DataStore& store, const ConversionManifest& manifest,
     SourceHashes& hashes, const ConvertedType& type) {
   const auto outputs = OutputsBySource(store, manifest, type);
   if (!outputs) return std::unexpected(outputs.error());
   for (const DataStore::Entry& entry : store.Entries()) {
-    if (!entry.path.ends_with(type.extension)) continue;
-    if (entry.form != "raw") {
-      return std::unexpected(
-          std::format("{} source is not raw: {}", type.converter, entry.path));
-    }
+    if (!type.Matches(entry.path)) continue;
     const auto found = outputs->find(entry.path);
     if (found == outputs->end()) {
+      const auto placeholder = IsPlaceholder(store, entry);
+      if (!placeholder) return std::unexpected(placeholder.error());
+      if (*placeholder) continue;
+      // An interleaved file is listed as "stream" until it is converted.
+      if (entry.form != type.form && type.form == kRawForm) {
+        return std::unexpected(std::format("{} source is not raw: {}",
+                                           type.converter, entry.path));
+      }
       return std::unexpected(std::format("no {} output for {}{}",
                                          type.converter, entry.path, kRerun));
     }
@@ -353,7 +394,7 @@ std::expected<void, std::string> DataStore::RequireConversions() const {
   if (auto required =
           CheckRequiredConverters(*m_conversion_manifest_, kRequiredConverters);
       !required) {
-    return required;
+    return std::unexpected(required.error() + std::string(kRerun));
   }
   SourceHashes hashes;
   for (const ConvertedType& type : kConvertedTypes) {

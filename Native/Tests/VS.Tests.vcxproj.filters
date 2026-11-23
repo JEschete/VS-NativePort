@@ -252,6 +252,9 @@
     <ClCompile Include="src\AudioControlSfxTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\AudioConversionTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\AudioDispatchTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -1527,6 +1530,9 @@
     <ClInclude Include="include\TestSupport\ActorRecordTableScope.hpp">
       <Filter>include\TestSupport</Filter>
     </ClInclude>
+    <ClInclude Include="include\TestSupport\AudioConversionFixture.hpp">
+      <Filter>include\TestSupport</Filter>
+    </ClInclude>
     <ClInclude Include="include\TestSupport\ChannelWarnings.hpp">
       <Filter>include\TestSupport</Filter>
     </ClInclude>
@@ -1566,6 +1572,9 @@
     <ClInclude Include="include\TestSupport\WorkshopRecipeRoot.hpp">
       <Filter>include\TestSupport</Filter>
     </ClInclude>
+    <ClCompile Include="..\Tools\Extract\src\AudioBankConversion.cpp">
+      <Filter>..\Tools\Extract\src</Filter>
+    </ClCompile>
     <ClCompile Include="..\Tools\Extract\src\ConversionManifestWriter.cpp">
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>

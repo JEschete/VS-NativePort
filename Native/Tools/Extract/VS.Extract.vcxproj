@@ -47,6 +47,7 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\AudioBankConversion.cpp" />
     <ClCompile Include="src\ConversionManifestWriter.cpp" />
     <ClCompile Include="src\ConverterBatch.cpp" />
     <ClCompile Include="src\EffectTextureConversion.cpp" />
@@ -60,6 +61,7 @@
     <ClCompile Include="src\WorkshopRecipeConversion.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Extract\AudioBankConversion.hpp" />
     <ClInclude Include="include\Extract\ConversionManifestWriter.hpp" />
     <ClInclude Include="include\Extract\ConverterBatch.hpp" />
     <ClInclude Include="include\Extract\EffectTextureConversion.hpp" />

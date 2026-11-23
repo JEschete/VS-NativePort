@@ -47,6 +47,9 @@ inline constexpr std::array kRequiredConverters{
     ConverterVersion{.name = "shp-gltf", .version = 2},
     ConverterVersion{.name = "seq-gltf", .version = 1},
     ConverterVersion{.name = "wep-gltf", .version = 1},
+    ConverterVersion{.name = "wave-bank", .version = 1},
+    ConverterVersion{.name = "xa-flac", .version = 1},
+    ConverterVersion{.name = "str-mkv", .version = 1},
 };
 
 struct SourceDependency {

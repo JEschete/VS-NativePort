@@ -112,7 +112,7 @@ Native\data\
     streams\akao\<id>\stream.json  (bounded effect-stream metadata and source header)
     streams\akao\<id>\<n>.wav + <n>.sfz
     streams\xa\<disc path>.flac    (lossless decoded XA, e.g. ENDING\ENDING.XA.flac)
-  movies\<name>.mkv                (AV1 video + FLAC audio)
+  movies\<name>.mkv                (planned; today disc\MOV\TITLE.STR.mkv: AV1 video + FLAC audio, §6.7)
 ```
 
 The exact file list is generated: `CONTENT_LEDGER.csv` (§9) gives every disc file its output path(s).
@@ -186,14 +186,14 @@ The disc has 27 kinds of files. The "Source" column below names the files on the
 | `SMALL\HELP*.HF0/HF1` (28) | `text\strings.en.json` + `ui\help\<page>.json` + `ui\help\*.png` | `.HF0` = page text, sprite placements and line table; `.HF1` = 8×16 8bpp illustration blocks and 16-colour palettes | native `ManualTopics.hpp`, `ManualIllustration.hpp`, `Manual.cpp` |
 | `EFFECT\*.P` (290), `*.FBT` (755), `*.FBC` (277), `EFFECT\*.BIN` (311) | `effects\<id>.json` + `textures\effect\*.png` | `.FBT` texture pages + `.FBC` palettes → PNG (§6.4). `.P` files are block streams (u32 header: size in the low 16 bits, type in the high 16 bits; type 0 ends) → effect JSON. `.BIN` files are **PLG code overlays** and EFFPURGE dispatch tables, already ported to C++ (`Effects\Plugins\PlgNNN.cpp`, `PurgeTables.cpp`); only their data blobs remain, as typed tables. Effect behaviors stay in code (plan §9.7) | decomp `Effects\` |
 | `OBJ\*.ESQ` (97), `OBJ\*.ETM` (80) | applicable character glTFs + the actor-bound images they reference | event animation banks and texture overlays, including facial frames; resolve actor/bank/palette bindings from loaders, not matching filenames (§6.2.2) | decomp `BATTLE.PRG/30DB0.c`, `40564.c`; native `Actors/TextureAnimation.c` |
-| `SOUND\WAVE*.DAT` (101) | `audio\samples\` + `audio\banks\` | §6.5 | decomp `Audio\` |
+| `SOUND\WAVE*.DAT` (101) | `audio\banks\<bank>\` (`bank.json`, `<n>.wav` + `<n>.sfz`) | 83 banks; 18 one-byte zero placeholders. Converter `wave-bank` (§6.5) | decomp `Audio\` |
 | `MUSIC\MUSIC*.DAT` (192) | `audio\music\*.seq.json` | §6.5 | decomp `Audio\Seq` |
 | `SE\EFFECT*.DAT` (102) | `audio\sfx\*.seq.json` (+ bank if embedded) | §6.5 | |
-| `ENDING\ENDING.XA` (1, 77 MB) | `audio\streams\ending\<ch>.flac` | §6.6 | jpsxdec |
-| `MOV\TITLE.STR` (1, 26 MB) | `movies\*.mkv` | §6.7 | ffmpeg `psxstr`, jpsxdec |
+| `ENDING\ENDING.XA` (1, 77 MB) | `audio\streams\xa\ENDING\ENDING.XA.flac` | converter `xa-flac` (§6.6) | jpsxdec |
+| `MOV\TITLE.STR` (1, 26 MB) | `disc\MOV\TITLE.STR.mkv` | converter `str-mkv` (§6.7) | ffmpeg `psxstr`, jpsxdec |
 | `BATTLE\SYSTEM.DAT` | `textures\system\*.png` + `.image.json`, `text\fonts\` metrics | 8 sections: images (0, 1, 3, 4, 5), a palette (2), a fixed image (6) and interface images (7). It supplies the font and UI glyphs | native `SystemResources.hpp`, `Canvas.cpp` |
 | `SLUS_010.40`, `*.PRG`, `GIM\SCREFF2.PRG` | Tier 1 tables only (code is already in `Native\`) | §4 | |
-| `license_data.dat`, `SYSTEM.CNF`, `ENDING\NULL.DAT`, 192 zero-byte placeholders | nothing (`drop`) | recorded in the manifest as `skipped: reason`. `DBGFNT.TIM` (a debug font no code reads) is converted and marked `unreferenced` (§1.1) | |
+| `license_data.dat`, `SYSTEM.CNF`, `ENDING\NULL.DAT`, 192 zero-byte and 65 one-byte zero placeholders | nothing (`drop`) | recorded in the manifest as `skipped: reason`. `DBGFNT.TIM` (a debug font no code reads) is converted and marked `unreferenced` (§1.1) | |
 
 Every row is now identified (D25 inventory, 2026-11-21); the open questions are listed per IMP issue. Settling a row's converter means reading the loader that consumes the file (the native port's loader, with the decomp as a cross-reference for original behaviour), then writing the converter. **No converter is written from community docs alone.** vstools, VagrantStoryImporter, GodHands and DataCrystal speed up understanding, but they are reference only (licenses: `TOOLS_INVENTORY.md`).
 
@@ -368,8 +368,11 @@ The game plays music and sound effects by sequencing sampled instruments at runt
 | Index (planned) | `catalogs\music.json`, `catalogs\sfx.json` | Semantic IDs with original track/SE provenance. |
 
 - The semantic event schema/round-trip encoder remains planned, not implemented by the sample importer.
-- **Current import:** `VS.Extract audio Native\data\disc Native\data` converts all **83 nonempty banks**
-  on the supported disc; 18 one-byte files are placeholders. Optional numeric wave-file IDs select a subset.
+- **Current import:** `VS.Extract banks Native\data` (also called by `extract`) converts all **83 banks**
+  on the supported disc through the `wave-bank` converter; the 18 one-byte zero files are placeholders
+  (unused bank slots) that it and the runtime skip. Each bank is a manifest output
+  (`audio.bank.<wave file>`) listing its `bank.json`, `.wav` and `.sfz` files with the source hash, so a
+  rerun keeps unchanged banks, `--force` rewrites them, and two banks writing one bank id are refused.
   Exact-end records and equal start/loop offsets in erased, final DMA padding are explicitly unavailable,
   not fabricated silence. Active ADPCM remains strictly validated. WAVE0032's older 64-byte articulation
   is recognized by its payload layout, pitch table and envelope fields. Q20 base pitch is converted to
@@ -377,6 +380,10 @@ The game plays music and sound effects by sequencing sampled instruments at runt
   Its all-zero pitch tables are unavailable records. Original data/provenance remain import sources,
   not a new authoring-format requirement. Two complete imports produced identical hashes for 5,993 files.
   Reimport after upgrading: existing SFZ files need the unsmoothed, extended pitch-bend range for FM.
+- **Effect-package sample streams are not sample banks:** the `audio\streams\akao\<id>\` outputs below come
+  from block 13 of the `EFFECT\*.P` packages. They are ADPCM samples, not AKAO sequences, and they stay
+  outside the manifest until the effect-package conversion (#216) registers each package as one output.
+  A separate converter for block 13 alone would mark the packages converted while their other blocks are not.
 - **Mixer/voices:** behavioral, at the envelope level, at 48 kHz (plan §6.3), never SPU registers.
   Final dry+wet output (after any Mono fold-down) saturates to the original signed-PCM range,
   [-1, 32767/32768], before delivery to SDL. Quiet mixes remain additive; source voice gains are
@@ -461,6 +468,8 @@ The game plays music and sound effects by sequencing sampled instruments at runt
   LBA/extent, selected file/channel and rate. The legacy `files.tsv` row remains `stream`: it describes
   sector-addressed data access, not availability of the separate native audio asset. Decoder PCM hashes
   match the uncompressed import exactly. All 250 effect/XA outputs are stable on repeated imports.
+  The manifest records the FLAC as output `audio.xa.<name>` of converter `xa-flac`, with the hash of the
+  file's raw 2352-byte sectors (§8); an unchanged source keeps its FLAC on the next extraction.
 - **Runtime:** the owned `XaPlayback` service uses the existing dr_flac dependency to decode on the
   control thread, then supplies an independent SDL source on demand. This shipped track occupies about
   67 MB of PCM while playing; there is no callback file I/O, decoder work or gameplay-thread refill.
@@ -540,7 +549,7 @@ navigation/listening, every effect/track in context, bit-exact DSP parity and
      - audio as **FLAC**.
 
      The settings are `-c:v libsvtav1 -preset 6 -svtav1-params lp=2 -crf 18` or `-c:v libaom-av1 -cpu-used 6 -row-mt 1 -threads 2 -crf 18 -b:v 0`, each with `-pix_fmt yuv420p -color_range pc -colorspace bt470bg -c:a flac` (`Content/MovieEncoder`). The encoder writes a random container ID, so two conversions differ as files while decoding to identical frames.
-  3. The result is muxed into Matroska: `movies\<name>.mkv`. WebM cannot carry FLAC, so the container is MKV.
+  3. The result is muxed into Matroska: `disc\MOV\TITLE.STR.mkv` (`files.tsv` lists the movie with form `mkv`). WebM cannot carry FLAC, so the container is MKV. The manifest records it as output `movie.<name>` of converter `str-mkv`, with the hash of the movie's raw sectors (§8); an unchanged source keeps its MKV, so a second extraction does not re-encode it.
 - **Encoder dependency:** ffmpeg is an **extract-time tool only**. It is never linked or shipped. `VS.Extract` finds it on `PATH` or through `--ffmpeg <path>`. The launcher and `VS.Extract` both stop with an error naming the FFmpeg if it has neither encoder, and `VS.Extract` stops if a conversion fails. Verified on the dev machine: ffmpeg 8.1.1 (winget Gyan.FFmpeg) has `libsvtav1`, `libaom-av1` and `flac`. Gyan's "essentials" 9.0.2 build has `libaom-av1` but no `libsvtav1` (#254).
 - **Encoder comparison** (ffmpeg 8.1.1, whole intro, against a lossless decode of the same source): `libsvtav1` 44.5 dB, 10.2 MB, about 1 s; `libaom-av1` 44.0 dB, 9.3 MB, about 9 s. Both have 593 frames and identical audio, and both play through the game's dav1d path.
 - **Runtime (`Engine\Movie`):**
@@ -548,7 +557,7 @@ navigation/listening, every effect/track in context, bit-exact DSP parity and
   - AV1 decode: **dav1d**, BSD.
   - FLAC decode: dr_flac or libFLAC.
   - The YUV planes are uploaded to an SDL3 GPU texture and converted in a shader. Presentation is clocked to the audio, and skipping is the game's original behavior.
-- **Validation:** frame N of the decoded MKV against a jpsxdec decode of the same frame, with a PSNR threshold of ≥ 45 dB (near-lossless), for the first 60 frames and every 300th frame after that.
+- **Validation:** frame N of the decoded MKV against a jpsxdec decode of the same frame, with a PSNR threshold of ≥ 45 dB (near-lossless), for the first 60 frames and every 300th frame after that. Today's disc-corpus test checks that the MKV keeps every frame FFmpeg's `psxstr` demuxer completes from the STR (593) at 15 frames a second; the PSNR comparison is not yet a test.
 
 ### 6.8 Workshop recipes (SYD → CSV tables, #499)
 
@@ -579,10 +588,10 @@ Every converter ships with a test in `VS.Tests` (tagged `[extract]`; it runs onl
 | ESQ/ETM actor bindings | decoded source == converted/reloaded skeletal and texture tracks, indexed pixels, palettes, patch rectangles, associations, timing and lifecycle commands; malformed or unresolved inputs fail explicitly |
 | MPD | the same, via `RoomLoader` |
 | textures | PNG + `.image.json` (+ `.palettes.png`, `.stp.png`) → indices and 16-bit texel/palette words == the original (exact), including `0x0000` vs `0x8000` and every STP bit |
-| samples | WAV PCM == the ADPCM decode (exact); loop points equal |
+| samples | WAV PCM == the ADPCM decode (exact); loop points equal. Every extracted bank (`[content-audio][extract]`) |
 | sequences | JSON → encode == the original AKAO bytes |
-| XA | FLAC PCM == the ADPCM decode (exact) |
-| movies | PSNR test (§6.7); frame count and duration equal |
+| XA | FLAC PCM == the ADPCM decode (exact), checked against an independent decoder of the selected sectors |
+| movies | PSNR test (§6.7; not yet a test); frame count and duration equal (`[content-movie][extract]`) |
 | ENEMY catalogs | ENEMY_DATA_SCHEME §3 (expanded `extends` == the original record) |
 
 Schema validation runs at load in every build. Round-trip tests run in CI where a disc is available, and locally through `test-native.cmd --extract`.
@@ -607,7 +616,7 @@ Record source revision/dirty state, disc identity, tool/converter/schema version
 {
   "schema_version": 2,
   "extractor_version": "0.1.0",
-  "converters": { "fbc-palette-png": 1, "fbt-texture-png": 1, "seq-gltf": 1, "shp-gltf": 2, "syd-recipe-csv": 1, "tim-png": 1, "wep-gltf": 1 },
+  "converters": { "fbc-palette-png": 1, "fbt-texture-png": 1, "seq-gltf": 1, "shp-gltf": 2, "str-mkv": 1, "syd-recipe-csv": 1, "tim-png": 1, "wave-bank": 1, "wep-gltf": 1, "xa-flac": 1 },
   "outputs": [
     {
       "id": "image.bg.001op01a",
@@ -639,6 +648,7 @@ Record source revision/dirty state, disc identity, tool/converter/schema version
 - **Aliases** (schema version 2): an exact duplicate lists no files and names in `alias_of` an output of the same converter that has files and the same source hash. Readers load the target's files (`ConversionManifest::FilesOf`), and an edit to them applies to every alias. Effect FBT pages are the first aliased outputs (§6.4). Version 1 manifests, which have no aliases, still read.
 - **Unused content:** valid content known to be unused is still converted and marked `"unreferenced": true` (for example `DBGFNT.TIM`). Skipped and unconverted output entries are not part of this schema.
 - **Versions:** each converter has an integer version in code (`VS.Extract`). The runtime embeds the minimum version it requires for each converter, so an old `Native\data\` is rejected with instructions (§2).
+- **Interleaved sources:** an XA or STR file (`files.tsv` form `stream` or `mkv`) has no extracted copy under `disc\`; its `source_sha256` is the hash of its raw 2352-byte sectors, read from the disc image by `VS.Extract`. The runtime cannot rehash these, so it checks only that each one has its output and that the output's files exist. One-byte zero files, like empty ones, are placeholders and need no output.
 - **Composite dependencies:** an output entry retains its primary `source` and adds a sorted `dependencies` array of `{ "source", "source_sha256" }` records for every other consumed input. Character outputs include the resolved SEQ/ESQ/ETM files and palette sources, not just SHP. A changed/deleted dependency or contributing converter/schema version invalidates the output; a missing dependency is an error, never a reason to reuse a stale model.
 - **Character contract changes:** version ESQ/ETM conversion alongside the model converter and `asset.extras.vs.schemaVersion` (or its explicitly migrated extension equivalent). Runtime requirements must include the VS payload version; successful generic glTF loading is not an acceptable fallback for incompatible gameplay data.
 - **Wrong disc:** the disc hash is checked against the known SLUS-01040 hashes; another release or a modified disc gives a warning, not a failure.
@@ -649,12 +659,12 @@ Record source revision/dirty state, disc identity, tool/converter/schema version
 
 - **`CONTENT_LEDGER.csv`** (plan §4.5, #503) has one row per disc file. Its columns: `path, size, kind, decoder, converter, output, round_trip, status, notes`. `python tools\ledger\content.py --sync` rebuilds it from an extracted disc (`Native\data\files.tsv` and `manifest.json`); `--check` runs in CI without a disc and compares the ledger with the extracted data when there is one.
   - `converted`: the file is the source of a manifest output. Its converter must be one the runtime reads (`kRequiredConverters`). `round_trip=pass` needs every disc-corpus test `content.py` names for the converter to be a Catch2 test cited by a passing `VERIFY_LEDGER` record; otherwise `pending`.
-  - `skipped`: a zero-byte placeholder, or a file §6.1 drops (`SYSTEM.CNF`, `ENDING\NULL.DAT`), with the reason first in `notes`; the other columns are `n/a`.
-  - `unconverted`: everything else, noting the issue that converts it. A file that only feeds another conversion (a `BG\*.FAR` fixing its TIM's depth) stays `unconverted` until its own converter, and outputs written outside the manifest (sample banks, `ENDING.XA`, `TITLE.STR`; #504) do not count as converted.
+  - `skipped`: a placeholder (no bytes, or one zero byte), or a file §6.1 drops (`SYSTEM.CNF`, `ENDING\NULL.DAT`), with the reason first in `notes`; the other columns are `n/a`.
+  - `unconverted`: everything else, noting the issue that converts it. A file that only feeds another conversion (a `BG\*.FAR` fixing its TIM's depth) stays `unconverted` until its own converter, and outputs written outside the manifest (effect-package sample streams; #216) do not count as converted.
 
 <!-- content:begin (generated by tools/ledger/content.py --sync) -->
 
-**2,069 of 5,162 disc files converted**, 2,069 of them with a passing round trip; 194 skipped with a reason; 2,899 unconverted.
+**2,154 of 5,162 disc files converted**, 2,154 of them with a passing round trip; 259 skipped with a reason; 2,749 unconverted.
 
 | Kind | Files | Converted | Round trip pass | Skipped | Unconverted | Converts under |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
@@ -679,19 +689,19 @@ Record source revision/dirty state, disc identity, tool/converter/schema version
 | layered artwork | 49 | 0 | 0 | 0 | 49 | #209 |
 | main executable data | 1 | 0 | 0 | 0 | 1 | #499, #500, #502 |
 | menu image, text or table | 11 | 0 | 0 | 0 | 11 | #498, #499, #500 |
-| movie | 1 | 0 | 0 | 0 | 1 | #504 |
-| music sequence | 192 | 0 | 0 | 0 | 192 | #501 |
-| placeholder | 192 | 0 | 0 | 192 | 0 | - |
+| movie | 1 | 1 | 1 | 0 | 0 | #504 |
+| music sequence | 169 | 0 | 0 | 0 | 169 | #501 |
+| placeholder | 257 | 0 | 0 | 257 | 0 | - |
 | presentation images | 22 | 0 | 0 | 0 | 22 | #211 |
 | program overlay data | 20 | 0 | 0 | 0 | 20 | #500, #502 |
 | room | 512 | 0 | 0 | 0 | 512 | #198 |
-| sample bank | 101 | 0 | 0 | 0 | 101 | #504 |
+| sample bank | 83 | 83 | 83 | 0 | 0 | #504 |
 | shared animation set | 97 | 0 | 0 | 0 | 97 | #206 |
 | skeletal animation | 700 | 700 | 700 | 0 | 0 | #205 |
-| sound-effect sequences | 102 | 0 | 0 | 0 | 102 | #501 |
+| sound-effect sequences | 78 | 0 | 0 | 0 | 78 | #501 |
 | system images and font | 1 | 0 | 0 | 0 | 1 | #498 |
 | TIM image | 5 | 5 | 5 | 0 | 0 | #208 |
-| XA audio stream | 1 | 0 | 0 | 0 | 1 | #504 |
+| XA audio stream | 1 | 1 | 1 | 0 | 0 | #504 |
 | zone | 256 | 0 | 0 | 0 | 256 | #199 |
 
 <!-- content:end -->

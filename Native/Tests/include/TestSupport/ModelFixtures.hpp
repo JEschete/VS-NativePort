@@ -31,6 +31,7 @@
 #include "Extract/ShpModelConversion.hpp"
 #include "Extract/WepModelConversion.hpp"
 #include "Extract/WorkshopRecipeConversion.hpp"
+#include "TestSupport/AudioConversionFixture.hpp"
 
 // Shared fixtures for the converted character, weapon and animation tests
 // (ShpFileTests.cpp, WepFileTests.cpp, SeqFileTests.cpp).
@@ -199,6 +200,7 @@ class ModelRoot {
     auto weapons = Extract::ConvertDiscWeapons(root_, false);
     INFO(ErrorOf(weapons));
     REQUIRE(weapons.has_value());
+    RecordAudioConversions(root_);
     return {.characters = *std::move(characters),
             .weapons = *std::move(weapons)};
   }

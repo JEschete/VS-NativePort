@@ -1,13 +1,14 @@
 #include <array>
-#include <charconv>
+#include <cctype>
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
+#include <expected>
 #include <filesystem>
 #include <format>
 #include <fstream>
 #include <optional>
-#include <set>
+#include <span>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -16,10 +17,14 @@
 #include "Content/AssetCatalogImport.hpp"
 #include "Content/AudioBank.hpp"
 #include "Content/AudioStream.hpp"
+#include "Content/ConversionManifest.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/Disc.hpp"
 #include "Content/MovieEncoder.hpp"
 #include "Core/Log.hpp"
+#include "Core/Sha256.hpp"
+#include "Extract/AudioBankConversion.hpp"
+#include "Extract/ConverterBatch.hpp"
 #include "Extract/ImageConversion.hpp"
 #include "Extract/ShpModelConversion.hpp"
 #include "Extract/WepModelConversion.hpp"
@@ -50,8 +55,6 @@ int Usage() {
   std::puts(
       "usage:\n"
       "  VS.Extract list    <disc.cue|disc.chd|folder>\n"
-      "  VS.Extract audio   <disc.cue|disc.chd|folder> <outdir> "
-      "[wave-file-id ...]\n"
       "  VS.Extract streams <disc.cue|disc.chd|folder> <outdir> [--ffmpeg "
       "<ffmpeg.exe>]\n"
       "  VS.Extract extract <disc.cue|disc.chd|folder> <outdir> [--ffmpeg "
@@ -60,10 +63,13 @@ int Usage() {
       "  VS.Extract images   <datadir> [--force]\n"
       "  VS.Extract tables   <datadir> [--force]\n"
       "  VS.Extract models   <datadir> [--force]\n"
+      "  VS.Extract banks    <datadir> [--force]\n"
       "      Form 1 files are copied as they are; movies (*.STR) are converted "
       "to Matroska (AV1 + FLAC)\n"
       "      with FFmpeg (found on PATH, or --ffmpeg). Effect audio and XA "
       "are imported under audio/streams as lossless PCM assets.\n"
+      "      Movies and XA tracks are recorded in manifest.json and kept when "
+      "their sectors are unchanged.\n"
       "      extract also writes catalogs/ (asset ids and the audio tables); "
       "catalogs rewrites\n"
       "      them from an extracted folder.\n"
@@ -79,7 +85,10 @@ int Usage() {
       "under models/characters/ and the\n"
       "      weapon models (OBJ/*.WEP) to glTF under models/weapons/;\n"
       "      models converts again only what changed (--force: everything, "
-      "replacing edited models).");
+      "replacing edited models).\n"
+      "      extract also converts the sound banks (SOUND/WAVE*.DAT) to WAV "
+      "and SFZ under audio/banks/;\n"
+      "      banks converts again only what changed (--force: everything).");
   return 2;
 }
 
@@ -106,8 +115,9 @@ std::optional<fs::path> FindFfmpeg(int argc, char** argv) {
   return std::nullopt;
 }
 
-bool WriteRawStream(const Content::Disc& disc, const Content::DiscEntry& file,
-                    const fs::path& tmp, bool xa_audio = false) {
+// An interleaved file's raw 2352-byte sectors: what its manifest hash covers.
+std::optional<std::vector<u8>> ReadRawFile(const Content::Disc& disc,
+                                           const Content::DiscEntry& file) {
   const u64 sectors =
       (static_cast<u64>(file.size) + Content::Disc::SectorData - 1) /
       Content::Disc::SectorData;
@@ -116,20 +126,16 @@ bool WriteRawStream(const Content::Disc& disc, const Content::DiscEntry& file,
           disc.ReadRawSectors(file.lba, static_cast<u32>(sectors), raw);
       !result) {
     VS::Core::LogError("extract", "{}: {}", file.path, result.error());
-    return false;
+    return std::nullopt;
   }
-  if (xa_audio) {
-    auto selected = Content::SelectXaAudioSectors(raw);
-    if (!selected) {
-      VS::Core::LogError("extract", "{}: {}", file.path, selected.error());
-      return false;
-    }
-    raw = std::move(*selected);
-  }
+  return raw;
+}
+
+bool WriteBytes(std::span<const u8> bytes, const fs::path& tmp) {
   fs::create_directories(tmp.parent_path());
   std::ofstream stream(tmp, std::ios::binary);
-  stream.write(reinterpret_cast<const char*>(raw.data()),
-               static_cast<std::streamsize>(raw.size()));
+  stream.write(reinterpret_cast<const char*>(bytes.data()),
+               static_cast<std::streamsize>(bytes.size()));
   stream.close();
   if (!stream) {
     VS::Core::LogError("extract", "cannot write {}", Platform::PathText(tmp));
@@ -138,13 +144,42 @@ bool WriteRawStream(const Content::Disc& disc, const Content::DiscEntry& file,
   return true;
 }
 
+// TITLE.STR -> title
+std::string LowerStem(std::string_view path) {
+  std::string_view stem = path.substr(path.rfind('/') + 1);
+  stem = stem.substr(0, stem.find('.'));
+  std::string lower;
+  for (const char letter : stem) {
+    lower.push_back(
+        static_cast<char>(std::tolower(static_cast<unsigned char>(letter))));
+  }
+  return lower;
+}
+
+// The manifest entry for an interleaved file, without its files: the source
+// hash covers its raw sectors, as no copy of it is under disc\.
+Content::ConversionOutput InterleavedOutput(std::string id,
+                                            std::string_view converter,
+                                            const Content::DiscEntry& file,
+                                            std::span<const u8> raw) {
+  return {.id = std::move(id),
+          .source = file.path,
+          .source_sha256 = VS::Core::Sha256Hex(std::as_bytes(raw)),
+          .converter = std::string(converter),
+          .files = {},
+          .dependencies = {},
+          .unreferenced = false,
+          .note = {},
+          .alias_of = {}};
+}
+
 // Preserve the movie's decoded audio losslessly; video uses AV1 CRF 18.
-bool ConvertMovie(const Content::Disc& disc, const fs::path& ffmpeg,
-                  const Content::Av1Encoder& encoder,
-                  const Content::DiscEntry& file, const fs::path& mkv) {
+bool ConvertMovie(const fs::path& ffmpeg, const Content::Av1Encoder& encoder,
+                  const Content::DiscEntry& file, std::span<const u8> raw,
+                  const fs::path& mkv) {
   fs::path tmp = mkv;
   tmp += L".raw";
-  if (!WriteRawStream(disc, file, tmp)) return false;
+  if (!WriteBytes(raw, tmp)) return false;
   std::vector<std::string> arguments{Platform::PathText(ffmpeg),
                                      "-hide_banner",
                                      "-loglevel",
@@ -180,11 +215,47 @@ bool ConvertMovie(const Content::Disc& disc, const fs::path& ffmpeg,
   return true;
 }
 
-bool ConvertXa(const Content::Disc& disc, const fs::path& ffmpeg,
-               const Content::DiscEntry& file, const fs::path& flac) {
+// Converts or keeps one movie, adding its output to `batch`. Whether it has
+// an output: without an encoder an unchanged earlier conversion is still
+// kept, otherwise the movie is only listed. nullopt on a logged failure.
+std::optional<bool> ConvertOrKeepMovie(
+    const Content::Disc& disc, const fs::path& out,
+    const std::optional<fs::path>& ffmpeg,
+    const std::optional<Content::Av1Encoder>& encoder,
+    const Content::ConversionManifest& previous, const Content::DiscEntry& file,
+    Extract::ConverterBatch& batch) {
+  const auto raw = ReadRawFile(disc, file);
+  if (!raw) return std::nullopt;
+  auto output = InterleavedOutput("movie." + LowerStem(file.path),
+                                  Content::kStrMkvConverterName, file, *raw);
+  const Content::ConversionOutput* kept =
+      batch.reuse ? Extract::MatchingOutput(previous, out, output) : nullptr;
+  if (kept != nullptr) {
+    VS::Core::LogInfo("extract", "{}: unchanged", file.path);
+    batch.outputs.push_back(*kept);
+    return true;
+  }
+  if (!ffmpeg || !encoder) return false;
+  std::string mkv = std::format("disc/{}.{}", file.path, Content::kMovieForm);
+  if (!ConvertMovie(*ffmpeg, *encoder, file, *raw,
+                    out / Platform::Utf8Path(mkv))) {
+    return std::nullopt;
+  }
+  output.files = {std::move(mkv)};
+  batch.outputs.push_back(std::move(output));
+  return true;
+}
+
+bool ConvertXa(const fs::path& ffmpeg, const Content::DiscEntry& file,
+               std::span<const u8> raw, const fs::path& flac) {
   fs::path tmp = flac;
   tmp += L".raw";
-  if (!WriteRawStream(disc, file, tmp, true)) return false;
+  const auto selected = Content::SelectXaAudioSectors(raw);
+  if (!selected) {
+    VS::Core::LogError("extract", "{}: {}", file.path, selected.error());
+    return false;
+  }
+  if (!WriteBytes(*selected, tmp)) return false;
   const auto arguments = std::to_array<std::string>(
       {Platform::PathText(ffmpeg), "-hide_banner", "-loglevel", "error", "-y",
        "-f", "psxstr", "-i", Platform::PathText(tmp), "-map", "0:a:0", "-c:a",
@@ -202,99 +273,78 @@ bool ConvertXa(const Content::Disc& disc, const fs::path& ffmpeg,
   return true;
 }
 
-int ConvertAudio(const Content::Disc& disc, int argc, char** argv) {
-  constexpr u32 kMaximumWaveFile = 9999;
-  std::set<std::string> selected;
-  for (int index = kExtractArguments; index < argc; ++index) {
-    u32 id = 0;
-    const std::string_view argument = argv[index];
-    const auto result =
-        std::from_chars(argument.data(), argument.data() + argument.size(), id);
-    if (result.ec != std::errc() ||
-        result.ptr != argument.data() + argument.size() ||
-        id > kMaximumWaveFile) {
-      VS::Core::LogError("extract", "invalid wave-file ID: {}", argument);
-      return 1;
-    }
-    selected.insert(std::format("SOUND/WAVE{:04}.DAT", id));
-  }
-  const bool filtered = !selected.empty();
-  int count = 0;
-  for (const auto& file : disc.Files()) {
-    if (file.directory || !file.path.starts_with("SOUND/WAVE") ||
-        !file.path.ends_with(".DAT") ||
-        (filtered && !selected.contains(file.path))) {
-      continue;
-    }
-    auto bytes = disc.ReadFile(file);
-    if (!bytes) {
-      VS::Core::LogError("extract", "{}", bytes.error());
-      return 1;
-    }
-    if (bytes->size() == 1 && (*bytes)[0] == 0) {
-      VS::Core::LogInfo("extract", "{}: empty wave-bank placeholder",
-                        file.path);
-      selected.erase(file.path);
-      continue;
-    }
-    auto bank = Content::DecodeAudioBank(*bytes);
-    if (!bank) {
-      VS::Core::LogError("extract", "{}: {}", file.path, bank.error());
-      return 1;
-    }
-    if (auto result = Content::ExportAudioBank(
-            *bank, Platform::Utf8Path(argv[kOutputArgument]));
-        !result) {
-      VS::Core::LogError("extract", "{}: {}", file.path, result.error());
-      return 1;
-    }
-
-    VS::Core::LogInfo("extract", "{}: bank {}, {} instruments", file.path,
-                      bank->id, bank->instruments.size());
-    for (usize index = 0; index < bank->instruments.size(); ++index) {
-      if (!bank->instruments[index].available) {
-        VS::Core::LogWarn("extract",
-                          "{}: instrument {} has no playable sample/pitch; "
-                          "recorded as unavailable, no sample fabricated",
-                          file.path, index);
-      }
-    }
-    ++count;
-    selected.erase(file.path);
-  }
-  if (!selected.empty()) {
-    VS::Core::LogError("extract", "requested wave file was not found: {}",
-                       *selected.begin());
+// audio/banks/ and their manifest.json outputs from the disc files already
+// under root.
+int ConvertBanks(const fs::path& root, bool force) {
+  const auto report = Extract::ConvertDiscBanks(root, force);
+  if (!report) {
+    VS::Core::LogError("extract", "{}", report.error());
     return 1;
   }
-  if (count == 0) {
-    VS::Core::LogError("extract", "no SOUND/WAVE banks in the selected source");
-    return 1;
-  }
-  VS::Core::LogInfo("extract", "converted {} audio banks", count);
+  VS::Core::LogInfo("extract",
+                    "banks: {} converted, {} unchanged, {} placeholders "
+                    "skipped, {} stale files removed",
+                    report->converted, report->unchanged, report->skipped,
+                    report->removed);
   return 0;
+}
+
+// Converts or keeps one XA track, adding its output to `batch`.
+bool ConvertOrKeepXa(const Content::Disc& disc, const fs::path& out,
+                     const std::optional<fs::path>& ffmpeg,
+                     const Content::ConversionManifest& previous,
+                     const Content::DiscEntry& file,
+                     Extract::ConverterBatch& batch) {
+  const auto raw = ReadRawFile(disc, file);
+  if (!raw) return false;
+  auto output = InterleavedOutput("audio.xa." + LowerStem(file.path),
+                                  Content::kXaFlacConverterName, file, *raw);
+  const Content::ConversionOutput* kept =
+      batch.reuse ? Extract::MatchingOutput(previous, out, output) : nullptr;
+  if (kept != nullptr) {
+    VS::Core::LogInfo("extract", "{}: unchanged", file.path);
+    batch.outputs.push_back(*kept);
+    return true;
+  }
+  if (!ffmpeg) {
+    VS::Core::LogError("extract", "{}: FFmpeg is required for XA conversion",
+                       file.path);
+    return false;
+  }
+  if (!ConvertXa(*ffmpeg, file, *raw, Content::XaAudioPath(out, file.path))) {
+    return false;
+  }
+  output.files = {Content::XaAudioFile(file.path)};
+  batch.outputs.push_back(std::move(output));
+  return true;
 }
 
 int ConvertStreams(const Content::Disc& disc, const fs::path& out,
                    const std::optional<fs::path>& ffmpeg) {
+  const auto loaded = Content::LoadConversionManifest(out);
+  if (!loaded) {
+    VS::Core::LogError("extract", "{}", loaded.error());
+    return 1;
+  }
+  const Content::ConversionManifest previous =
+      loaded->value_or(Content::ConversionManifest{});
+  Extract::ConverterBatch tracks =
+      Extract::StartBatch(previous, Content::kXaFlacConverterName,
+                          Content::kXaFlacConverterVersion, false);
   nlohmann::json entries = nlohmann::json::array();
   nlohmann::json xa = nlohmann::json::array();
   for (const auto& file : disc.Files()) {
-    if (!file.directory && file.path.ends_with(".XA")) {
-      if (!ffmpeg) {
-        VS::Core::LogError(
-            "extract", "{}: FFmpeg is required for XA conversion", file.path);
+    if (!file.directory && file.path.ends_with(Content::kXaExtension)) {
+      if (!ConvertOrKeepXa(disc, out, ffmpeg, previous, file, tracks)) {
         return 1;
       }
-      const auto asset = Content::XaAudioPath(out, file.path);
-      if (!ConvertXa(disc, *ffmpeg, file, asset)) return 1;
       xa.push_back({{"source", file.path},
                     {"lba", file.lba},
                     {"source_bytes", file.size},
                     {"file", 1},
                     {"channel", 0},
                     {"sectors_per_second", Content::kXaSectorsPerSecond},
-                    {"asset", fs::relative(asset, out).generic_string()}});
+                    {"asset", Content::XaAudioFile(file.path)}});
       continue;
     }
     if (file.directory || !file.path.starts_with("EFFECT/") ||
@@ -343,6 +393,12 @@ int ConvertStreams(const Content::Disc& disc, const fs::path& out,
   index.close();
   if (!index) {
     VS::Core::LogError("extract", "writing stream provenance index");
+    return 1;
+  }
+  const auto removed =
+      Extract::PublishBatches(out, previous, std::span(&tracks, 1));
+  if (!removed) {
+    VS::Core::LogError("extract", "{}", removed.error());
     return 1;
   }
   VS::Core::LogInfo("extract", "converted {} effect streams and {} XA tracks",
@@ -428,6 +484,48 @@ int ConvertModels(const fs::path& root, bool force) {
   return 0;
 }
 
+// The AV1 encoder movies use; none without FFmpeg or a disc image to read
+// the movie's raw sectors from.
+std::expected<std::optional<Content::Av1Encoder>, std::string> MovieEncoder(
+    const Content::Disc& disc, const fs::path& out,
+    const std::optional<fs::path>& ffmpeg) {
+  if (!ffmpeg) {
+    VS::Core::LogWarn(
+        "extract",
+        "FFmpeg not found (PATH or --ffmpeg): movies are listed, not "
+        "converted");
+    return std::nullopt;
+  }
+  if (!disc.IsImage()) return std::nullopt;
+  auto found = Content::FindAv1Encoder(*ffmpeg, out / "ffmpeg-encoders.txt");
+  if (!found) return std::unexpected(std::move(found.error()));
+  VS::Core::LogInfo("extract", "movies use the FFmpeg encoder {}", found->name);
+  return std::optional<Content::Av1Encoder>(std::move(*found));
+}
+
+// <out>\disc\<path>: a file's bytes as they are on the disc.
+bool CopyDiscFile(const Content::Disc& disc, const fs::path& out,
+                  const Content::DiscEntry& file) {
+  const auto data = disc.ReadFile(file);
+  if (!data) {
+    VS::Core::LogError("extract", "{}", data.error());
+    return false;
+  }
+  return WriteBytes(*data, out / "disc" / fs::path(file.path));
+}
+
+// The conversions that read the extracted files rather than the disc, then
+// the interleaved streams.
+int ConvertExtracted(const Content::Disc& disc, const fs::path& out,
+                     const std::optional<fs::path>& ffmpeg) {
+  if (WriteCatalogs(out) != 0) return 1;
+  if (ConvertImages(out, false) != 0) return 1;
+  if (ConvertTables(out, false) != 0) return 1;
+  if (ConvertModels(out, false) != 0) return 1;
+  if (ConvertBanks(out, false) != 0) return 1;
+  return ConvertStreams(disc, out, ffmpeg);
+}
+
 int ExtractDisc(const Content::Disc& disc, int argc, char** argv) {
   // <outdir>\disc\<path> for each file, and the manifest Content::DataStore
   // reads (sector, size, form, path). Interleaved files (movies, XA audio)
@@ -443,23 +541,21 @@ int ExtractDisc(const Content::Disc& disc, int argc, char** argv) {
   }
   manifest << "lba\tsize\tform\tpath\n";
   const auto ffmpeg = FindFfmpeg(argc, argv);
-  if (!ffmpeg) {
-    VS::Core::LogWarn(
-        "extract",
-        "FFmpeg not found (PATH or --ffmpeg): movies are listed, not "
-        "converted");
+  const auto encoder = MovieEncoder(disc, out, ffmpeg);
+  if (!encoder) {
+    VS::Core::LogError("extract", "{}", encoder.error());
+    return 1;
   }
-  std::optional<Content::Av1Encoder> encoder;
-  if (ffmpeg && disc.IsImage()) {
-    auto found = Content::FindAv1Encoder(*ffmpeg, out / "ffmpeg-encoders.txt");
-    if (!found) {
-      VS::Core::LogError("extract", "{}", found.error());
-      return 1;
-    }
-    encoder = std::move(*found);
-    VS::Core::LogInfo("extract", "movies use the FFmpeg encoder {}",
-                      encoder->name);
+  const auto loaded = Content::LoadConversionManifest(out);
+  if (!loaded) {
+    VS::Core::LogError("extract", "{}", loaded.error());
+    return 1;
   }
+  const Content::ConversionManifest previous =
+      loaded->value_or(Content::ConversionManifest{});
+  Extract::ConverterBatch movies =
+      Extract::StartBatch(previous, Content::kStrMkvConverterName,
+                          Content::kStrMkvConverterVersion, false);
   int written = 0;
   int skipped = 0;
   for (const auto& f : disc.Files()) {
@@ -467,34 +563,20 @@ int ExtractDisc(const Content::Disc& disc, int argc, char** argv) {
       continue;
     }
     if (f.interleaved) {
-      const bool movie = f.path.ends_with(".STR");
-      fs::path mkv = out / "disc" / fs::path(f.path);
-      mkv += L".mkv";
-      if (movie && encoder) {
-        if (!ConvertMovie(disc, *ffmpeg, *encoder, f, mkv)) return 1;
-        manifest << f.lba << '\t' << f.size << "\tmkv\t" << f.path << '\n';
-        ++written;
-      } else {
-        manifest << f.lba << '\t' << f.size << "\tstream\t" << f.path << '\n';
-        ++skipped;
+      bool converted = false;
+      if (f.path.ends_with(Content::kMovieExtension) && disc.IsImage()) {
+        const auto movie = ConvertOrKeepMovie(disc, out, ffmpeg, *encoder,
+                                              previous, f, movies);
+        if (!movie) return 1;
+        converted = *movie;
       }
+      manifest << f.lba << '\t' << f.size << '\t'
+               << (converted ? Content::kMovieForm : "stream") << '\t' << f.path
+               << '\n';
+      ++(converted ? written : skipped);
       continue;
     }
-    auto data = disc.ReadFile(f);
-    if (!data) {
-      VS::Core::LogError("extract", "{}", data.error());
-      return 1;
-    }
-    const fs::path dst = out / "disc" / fs::path(f.path);
-    fs::create_directories(dst.parent_path());
-    std::ofstream output(dst, std::ios::binary);
-    output.write(reinterpret_cast<const char*>(data->data()),
-                 static_cast<std::streamsize>(data->size()));
-    output.close();
-    if (!output) {
-      VS::Core::LogError("extract", "cannot write {}", Platform::PathText(dst));
-      return 1;
-    }
+    if (!CopyDiscFile(disc, out, f)) return 1;
     manifest << f.lba << '\t' << f.size << "\traw\t" << f.path << '\n';
     ++written;
   }
@@ -504,14 +586,16 @@ int ExtractDisc(const Content::Disc& disc, int argc, char** argv) {
                        Platform::PathText(out));
     return 1;
   }
+  if (const auto removed =
+          Extract::PublishBatches(out, previous, std::span(&movies, 1));
+      !removed) {
+    VS::Core::LogError("extract", "{}", removed.error());
+    return 1;
+  }
   VS::Core::LogInfo(
       "extract", "wrote {} files to {} ({} interleaved listed, not converted)",
       written, Platform::PathText(out), skipped);
-  if (WriteCatalogs(out) != 0) return 1;
-  if (ConvertImages(out, false) != 0) return 1;
-  if (ConvertTables(out, false) != 0) return 1;
-  if (ConvertModels(out, false) != 0) return 1;
-  return ConvertStreams(disc, out, ffmpeg);
+  return ConvertExtracted(disc, out, ffmpeg);
 }
 
 bool ValidStreamArguments(int argc, char** argv) {
@@ -543,11 +627,12 @@ int Run(int argc, char** argv) {
                ? WriteCatalogs(Platform::Utf8Path(argv[2]))
                : Usage();
   }
-  if (cmd == "images" || cmd == "tables" || cmd == "models") {
+  if (cmd == "images" || cmd == "tables" || cmd == "models" || cmd == "banks") {
     const auto force = ForceArgument(argc, argv);
     if (!force) return Usage();
     const fs::path root = Platform::Utf8Path(argv[2]);
     if (cmd == "models") return ConvertModels(root, *force);
+    if (cmd == "banks") return ConvertBanks(root, *force);
     return cmd == "images" ? ConvertImages(root, *force)
                            : ConvertTables(root, *force);
   }
@@ -558,9 +643,6 @@ int Run(int argc, char** argv) {
   }
   if (cmd == "list") {
     return ListDisc(**disc);
-  }
-  if (cmd == "audio" && argc >= kExtractArguments) {
-    return ConvertAudio(**disc, argc, argv);
   }
   if (cmd == "streams" && ValidStreamArguments(argc, argv)) {
     return ConvertStreams(**disc, Platform::Utf8Path(argv[kOutputArgument]),

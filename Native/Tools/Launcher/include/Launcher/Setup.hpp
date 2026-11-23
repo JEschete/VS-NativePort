@@ -25,7 +25,9 @@ constexpr auto kSupportedDiscSha1 = "38C63DB6C49A06B91D87CD5A4E31B1EC68FE212C";
 inline constexpr int kPercentComplete = 100;
 // The asset pipeline a prepared extraction was made by; CheckAssets refuses
 // any other. 3: VS.Extract writes the asset catalogs (#47) the game requires.
-inline constexpr int kAssetPipelineVersion = 4;
+// 5: extract converts and records the sound banks, XA tracks and movies
+// (#504), replacing the separate audio step.
+inline constexpr int kAssetPipelineVersion = 5;
 using HashProgress = std::function<void(int)>;
 
 struct CloseDiscHandle {
@@ -39,7 +41,7 @@ struct VerifiedDisc {
   std::unique_ptr<void, CloseDiscHandle> read_lock;
 };
 
-enum class SetupStage { kDisc, kCache, kExtract, kAudio, kOutputs, kReady };
+enum class SetupStage { kDisc, kCache, kExtract, kOutputs, kReady };
 struct ProgressUpdate {
   SetupStage stage;
   std::string message;

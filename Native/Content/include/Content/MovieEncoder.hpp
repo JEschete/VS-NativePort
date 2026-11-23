@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <expected>
 #include <filesystem>
 #include <optional>
@@ -8,6 +9,15 @@
 #include <vector>
 
 namespace VS::Content {
+
+// The str-mkv converter (ASSET_PIPELINE.md §6.7, #504): each movie becomes
+// disc\<path>.mkv (AV1 video, FLAC audio), and files.tsv lists it in form
+// "mkv". Movies are interleaved, so the manifest hashes their raw 2352-byte
+// sectors.
+inline constexpr std::string_view kStrMkvConverterName = "str-mkv";
+inline constexpr std::uint32_t kStrMkvConverterVersion = 1;
+inline constexpr std::string_view kMovieExtension = ".STR";
+inline constexpr std::string_view kMovieForm = "mkv";
 
 // The FFmpeg AV1 encoder that converts a movie, with its quality settings.
 struct Av1Encoder {

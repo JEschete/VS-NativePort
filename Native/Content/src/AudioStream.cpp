@@ -8,6 +8,7 @@
 #include <utility>
 #include <vector>
 
+#include "Platform/Paths.hpp"
 #include "nlohmann/json.hpp"
 
 namespace VS::Content {
@@ -229,8 +230,11 @@ std::expected<void, std::string> ValidateAudioStreamAssets(
 
 std::filesystem::path XaAudioPath(const std::filesystem::path& data_root,
                                   std::string_view source_path) {
-  return data_root / "audio" / "streams" / "xa" /
-         (std::string(source_path) + ".flac");
+  return data_root / Platform::Utf8Path(XaAudioFile(source_path));
+}
+
+std::string XaAudioFile(std::string_view source_path) {
+  return "audio/streams/xa/" + std::string(source_path) + ".flac";
 }
 
 // Original XA filter is file 1/channel 0 at single speed (main.c:9188-9194).

@@ -287,7 +287,7 @@ build\Debug\VS.Extract.exe extract disks\SLUS-01040.cue Native\data
 build\Debug\VS.Extract.exe extract disks\SLUS-01040.cue Native\data --ffmpeg C:\path\to\ffmpeg.exe
 rem Diagnostic: list the disc's files.
 build\Debug\VS.Extract.exe list    disks\SLUS-01040.cue
-build\Debug\VS.Extract.exe audio   Native\data\disc Native\data
+build\Debug\VS.Extract.exe banks   Native\data
 build\Debug\VS.Extract.exe streams disks\SLUS-01040.cue Native\data
 rem Rewrite catalogs\ for an existing data directory without re-extracting.
 build\Debug\VS.Extract.exe catalogs Native\data
@@ -305,17 +305,20 @@ build\Debug\VS.Extract.exe catalogs Native\data
   whole-sector size does not match an extracted file. A failed import leaves the previous catalogs.
   `catalogs` rewrites them for an existing data directory; the output is identical on a second run.
 - The game, Combat Lab and launcher refuse to start without valid catalogs and say which command to run.
-  An invalid catalog names the file, JSON pointer and rule it broke. The launcher's pipeline version
-  is 3, so a data directory prepared before catalogs existed is prepared again.
+  An invalid catalog names the file, JSON pointer and rule it broke. They also refuse a data directory
+  whose `manifest.json` lacks a current output for any converted type, including each sound bank
+  (`wave-bank`), the ending XA (`xa-flac`) and the movie (`str-mkv`), and say to run `extract` again.
+  The launcher's pipeline version is 5, so a data directory prepared before these outputs existed is
+  prepared again.
 - Takes about a minute. Run it again after an extractor change; the converters replace one `raw` form at a time.
 - With FFmpeg available, it stops with an error if FFmpeg has no AV1 encoder or the movie conversion fails.
   Without FFmpeg, it lists the movie unconverted and warns.
-- The separate `audio` command imports all 83 nonempty wave banks into versioned JSON, mono PCM16 WAV
-  and SFZ under `Native\data\audio\banks`. Use it after the ordinary extraction, including for an existing
-  data directory. WAVE0069 supplies MUSIC016, WAVE0091 supplies MUSIC110, and WAVE0011 supplies MUSIC054
-  on entry to the dungeon; menu banks alone do not supply these music tracks.
-  Missing banks are reported, not replaced with fabricated audio.
-  Optional numbers are **wave-file IDs**, not instrument IDs. The older WAVE0032 articulation layout,
+- `extract` converts all 83 wave banks into versioned JSON, mono PCM16 WAV and SFZ under
+  `Native\data\audio\banks` and records each in `manifest.json` (converter `wave-bank`); the 18 one-byte
+  zero bank files are placeholders. The `banks` command reconverts them for an existing data directory:
+  only changed banks, or all of them with `--force`. WAVE0069 supplies MUSIC016, WAVE0091 supplies
+  MUSIC110, and WAVE0011 supplies MUSIC054 on entry to the dungeon; menu banks alone do not supply
+  these music tracks. Missing banks are reported, not replaced with fabricated audio. The older WAVE0032 articulation layout,
   exact-end records and erased final DMA padding are supported; unavailable slots are logged explicitly.
   Reimport after the fidelity update so SFZ pitch-bend range/smoothing matches native FM rendering.
   Successful import is not evidence that every music track has been listened to.
@@ -333,20 +336,20 @@ build\Debug\VS.Extract.exe catalogs Native\data
 
 ### 5.1 Native audio assets
 
-Run the separate bank import after ordinary extraction. For an existing data directory,
-the stream command updates effect/XA assets without reconverting the movie:
+`extract` converts the banks and streams. For an existing data directory, the bank and
+stream commands update them without reconverting the movie:
 
 ```cmd
-build\Debug\VS.Extract.exe audio   Native\data\disc Native\data
+build\Debug\VS.Extract.exe banks   Native\data
 build\Debug\VS.Extract.exe streams disks\SLUS-01040.cue Native\data
 ```
 
-- `audio` imports all 83 nonempty wave banks into versioned JSON, mono PCM16 WAV
-  and SFZ under `Native\data\audio\banks`. WAVE0069 supplies MUSIC016, WAVE0091
-  supplies MUSIC110, and WAVE0011 supplies MUSIC054 on dungeon entry; menu banks
-  alone do not supply these tracks. Missing banks are reported, not fabricated.
-  Optional numbers are wave-file IDs, not instrument IDs. Reimport after audio
-  converter changes. Successful import is not full-content listening evidence.
+- `banks` converts all 83 wave banks into versioned JSON, mono PCM16 WAV
+  and SFZ under `Native\data\audio\banks` and records them in `manifest.json`.
+  WAVE0069 supplies MUSIC016, WAVE0091 supplies MUSIC110, and WAVE0011 supplies
+  MUSIC054 on dungeon entry; menu banks alone do not supply these tracks. Missing
+  banks are reported, not fabricated. It keeps unchanged banks; `--force` reconverts
+  all of them. Successful import is not full-content listening evidence.
 - `streams` imports 113 effect streams as WAV/SFZ plus metadata and the ending XA
   as FLAC. Full `extract` also runs this stream step. XA requires the original
   raw-sector disc and FFmpeg on PATH (or `--ffmpeg <path>`); an extracted folder

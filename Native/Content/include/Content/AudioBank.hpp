@@ -1,10 +1,12 @@
 #pragma once
 
 #include <array>
+#include <cstdint>
 #include <expected>
 #include <filesystem>
 #include <span>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "Core/Types.hpp"
@@ -12,6 +14,14 @@
 namespace VS::Content {
 
 inline constexpr u32 kAudioBankSampleRate = 44100;
+
+// The wave-bank converter (ASSET_PIPELINE.md §6.5, #504): each nonempty
+// SOUND\WAVEnnnn.DAT becomes audio\banks\<bank id>\ (bank.json, and a WAV and
+// an SFZ per playable instrument).
+inline constexpr std::string_view kWaveBankConverterName = "wave-bank";
+inline constexpr std::uint32_t kWaveBankConverterVersion = 1;
+inline constexpr std::string_view kWaveBankPrefix = "SOUND/WAVE";
+inline constexpr std::string_view kWaveBankExtension = ".DAT";
 
 // Import-only block decoder; callers own end flags and channel interleave.
 class PsxAdpcmDecoder {
@@ -65,5 +75,8 @@ std::expected<AudioBank, std::string> LoadAudioBank(
     const std::filesystem::path& data_root, u32 id);
 std::filesystem::path AudioInstrumentPath(
     const std::filesystem::path& data_root, u32 bank_id, usize instrument);
+// The files ExportAudioBank writes for `bank`, '/'-separated under the data
+// root and sorted.
+std::vector<std::string> AudioBankFiles(const AudioBank& bank);
 
 }  // namespace VS::Content

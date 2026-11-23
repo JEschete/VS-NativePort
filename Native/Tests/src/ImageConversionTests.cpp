@@ -38,6 +38,7 @@
 #include "Extract/WepModelConversion.hpp"
 #include "Extract/WorkshopRecipeConversion.hpp"
 #include "Field/BackgroundLive.hpp"
+#include "TestSupport/AudioConversionFixture.hpp"
 
 namespace {
 namespace Content = VS::Content;
@@ -472,8 +473,8 @@ void OverwriteFile(const fs::path& path, const Bytes& bytes) {
 }
 
 // Converts root's images and records its workshop recipe tables, character
-// models and weapons (none in these stores), so the store's conversion check
-// covers the images alone.
+// models, weapons, sound banks, XA tracks and movies (none in these stores),
+// so the store's conversion check covers the images alone.
 Extract::ImageConversionReport RequiredConversion(const fs::path& root,
                                                   bool force) {
   auto report = Extract::ConvertDiscImages(root, force);
@@ -487,6 +488,7 @@ Extract::ImageConversionReport RequiredConversion(const fs::path& root,
   const auto weapons = Extract::ConvertDiscWeapons(root, force);
   INFO((weapons ? std::string{} : weapons.error()));
   REQUIRE(weapons.has_value());
+  VS::test_support::RecordAudioConversions(root);
   return *report;
 }
 

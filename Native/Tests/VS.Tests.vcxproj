@@ -116,6 +116,7 @@
     <ClCompile Include="src\AppearanceTransitionTests.cpp" />
     <ClCompile Include="src\AssetCatalogTests.cpp" />
     <ClCompile Include="src\AudioControlSfxTests.cpp" />
+    <ClCompile Include="src\AudioConversionTests.cpp" />
     <ClCompile Include="src\AudioDispatchTests.cpp" />
     <ClCompile Include="src\AudioMixerDriverTests.cpp" />
     <ClCompile Include="src\AudioMusicStreamTests.cpp" />
@@ -485,6 +486,7 @@
     <ClCompile Include="src\WepFileTests.cpp" />
     <ClCompile Include="src\WorkshopRecipeTests.cpp" />
     <ClCompile Include="src\XaMixTests.cpp" />
+    <ClCompile Include="..\Tools\Extract\src\AudioBankConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\ConversionManifestWriter.cpp" />
     <ClCompile Include="..\Tools\Extract\src\ConverterBatch.cpp" />
     <ClCompile Include="..\Tools\Extract\src\EffectTextureConversion.cpp" />
@@ -561,6 +563,7 @@
     <ClInclude Include="include\TestSupport\ActionPresentationFixture.hpp" />
     <ClInclude Include="include\TestSupport\ActionSequenceFixture.hpp" />
     <ClInclude Include="include\TestSupport\ActorRecordTableScope.hpp" />
+    <ClInclude Include="include\TestSupport\AudioConversionFixture.hpp" />
     <ClInclude Include="include\TestSupport\ChannelWarnings.hpp" />
     <ClInclude Include="include\TestSupport\EffectProgramScope.hpp" />
     <ClInclude Include="include\TestSupport\EndingDisplayRecorder.hpp" />

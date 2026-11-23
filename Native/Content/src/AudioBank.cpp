@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <array>
 #include <bit>
+#include <format>
 #include <fstream>
 #include <limits>
 #include <string>
@@ -376,6 +377,18 @@ std::filesystem::path AudioInstrumentPath(
          (std::to_string(instrument) + ".sfz");
 }
 
+std::vector<std::string> AudioBankFiles(const AudioBank& bank) {
+  const std::string directory = std::format("audio/banks/{}/", bank.id);
+  std::vector<std::string> files{directory + "bank.json"};
+  for (usize index = 0; index < bank.instruments.size(); ++index) {
+    if (!bank.instruments[index].available) continue;
+    files.push_back(std::format("{}{}.sfz", directory, index));
+    files.push_back(std::format("{}{}.wav", directory, index));
+  }
+  std::ranges::sort(files);
+  return files;
+}
+
 std::expected<void, std::string> ExportAudioBank(
     const AudioBank& bank, const std::filesystem::path& data_root) {
   if (bank.instruments.empty() ||
@@ -429,7 +442,7 @@ std::expected<AudioBank, std::string> LoadAudioBank(
   std::ifstream in(BankDirectory(data_root, id) / "bank.json");
   if (!in) {
     return std::unexpected("audio bank " + std::to_string(id) +
-                           " is missing; run VS.Extract audio");
+                           " is missing; run VS.Extract banks <datadir>");
   }
   try {
     nlohmann::json metadata;

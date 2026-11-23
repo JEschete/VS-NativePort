@@ -167,6 +167,24 @@ class ContentLedgerTests(unittest.TestCase):
         with self.assertRaises(SystemExit):
             content.sync(self.fixture.root)
 
+    def test_only_one_zero_byte_is_a_one_byte_placeholder(self) -> None:
+        single = {"SE/EFFECT00.DAT": b"\0", "SE/EFFECT01.DAT": b"\1", "ENDING/NULL.DAT": b"\0"}
+        self.fixture.data([*FILES, *((path, 1, "raw") for path in single)], [OUTPUT])
+        for path, byte in single.items():
+            target = self.fixture.root / "Native" / "data" / "disc" / path
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(byte)
+        content.sync(self.fixture.root)
+        rows = self.fixture.rows()
+        self.assertEqual([(rows[path]["status"], rows[path]["kind"], rows[path]["notes"]) for path in single], [
+            ("skipped", "placeholder", "one-byte zero placeholder"),
+            ("unconverted", "sound-effect sequences", "converts under #501"),
+            ("skipped", "filler", content.DROPPED["ENDING/NULL.DAT"]),
+        ])
+        self.assertEqual(self.fixture.rules(), [])
+        shutil.rmtree(self.fixture.root / "Native" / "data")
+        self.assertEqual(self.fixture.rules(), [])
+
 
 if __name__ == "__main__":
     unittest.main()
