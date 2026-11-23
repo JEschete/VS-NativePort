@@ -8,7 +8,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Content/ModuleData.hpp"
 #include "Content/OverlayWorkspaceLive.hpp"
@@ -17,6 +17,8 @@
 #include "Effects/ScreenEffectState.hpp"
 #include "Field/DoorMatchList.hpp"
 #include "Legacy/Psx.hpp"
+
+using VS::Content::disc::Locate;
 
 namespace {
 struct ScreenStateFixture {
@@ -62,8 +64,8 @@ void CheckQueuedRequest(const VS::Content::DiscQueueSlot* request,
   CHECK(VS::Effects::screenEffectDefaults.loading == 1);
   CHECK(VS::Content::overlayWorkspaceOwner == 6);
   CHECK(request->state == VS::Content::DiscRequestState::kEnqueued);
-  CHECK(request->file.lba == VS_SCREFF2_PRG_LBA);
-  CHECK(request->file.size == VS_SCREFF2_PRG_SIZE);
+  CHECK(request->file.lba == Locate("GIM/SCREFF2.PRG").lba);
+  CHECK(request->file.size == Locate("GIM/SCREFF2.PRG").size);
   CHECK(request->destination == VS::Core::kOverlaySlots[1]);
   CHECK(VS::Content::discRequestCounts.waiting == waiting);
 }

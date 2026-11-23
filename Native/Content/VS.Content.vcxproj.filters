@@ -174,7 +174,7 @@
     <ClInclude Include="include\Content\Disc.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
-    <ClInclude Include="include\Content\DiscLayout.h">
+    <ClInclude Include="include\Content\DiscLayout.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\DiscQueue.hpp">

@@ -5,7 +5,7 @@
 
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -17,6 +17,8 @@
 #include "Save/MemoryCard/SaveImage.hpp"
 #include "Title/SaveCard.hpp"
 #include "Title/SaveFiles.hpp"
+
+using VS::Content::disc::Locate;
 
 // decomp: _mcData (_mcData@src/TITLE/TITLE.PRG/22C.c)
 VS::Save::CardUiResources* VS::Save::MemoryCard::uiResources;
@@ -31,7 +33,7 @@ constexpr int kImageX = 800;
 constexpr int kImageY = 256;
 constexpr int kImageWidth = 224;
 constexpr int kImageHeight = 256;
-constexpr unsigned kImageBytes = VS_SPMCIMG_BIN_SIZE;
+constexpr unsigned kImageBytes = Locate("MENU/SPMCIMG.BIN").size;
 static_assert(kImageWidth * kImageHeight * 2 == kImageBytes);
 
 // GPU rectangles pack x/width in the low halfword and y/height in the high.
@@ -40,7 +42,9 @@ constexpr int kHalfwordMask = 0xFFFF;
 constexpr int PackedPair(int low, int high) {
   return (high << kHalfwordBits) | (low & kHalfwordMask);
 }
-constexpr unsigned kTextBytes = VS_MCDATA_BIN_SIZE + VS_MCMAN_BIN_SIZE;
+constexpr unsigned kCardDataBytes = Locate("MENU/MCDATA.BIN").size;
+constexpr unsigned kCardManualBytes = Locate("MENU/MCMAN.BIN").size;
+constexpr unsigned kTextBytes = kCardDataBytes + kCardManualBytes;
 constexpr auto kResourceOffset = sizeof(GameSaveImage) * kSaveImageCount;
 
 // The save images and the text resources share the image buffer once the
@@ -124,10 +128,12 @@ class LiveMenuAssets final : public MenuAssetHost {
     VS::Title::cardDirectoryEntryBuffer = nullptr;
   }
   void RequestImage() override {
-    Request(VS_SPMCIMG_BIN_LBA, kImageBytes, VS::Title::memoryCardUiResource);
+    Request(Locate("MENU/SPMCIMG.BIN").lba, kImageBytes,
+            VS::Title::memoryCardUiResource);
   }
   void RequestText() override {
-    Request(VS_MCDATA_BIN_LBA, kTextBytes, VS::Save::MemoryCard::uiResources);
+    Request(Locate("MENU/MCDATA.BIN").lba, kTextBytes,
+            VS::Save::MemoryCard::uiResources);
   }
   bool RequestLoaded() const override {
     return liveRequest != nullptr &&

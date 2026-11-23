@@ -12,7 +12,7 @@
 #include "Battle/StringContextLive.hpp"
 #include "Battle/TargetingState.hpp"
 #include "Boot/OverlayReset.hpp"
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Content/StringTables.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -43,6 +43,8 @@
 #include "Render/Text/VariableFont.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Content::disc::Locate;
 
 using VS::Legacy::AddPrim;
 using VS::Legacy::ClearOTag;
@@ -485,7 +487,8 @@ int CheckMenuReloadClosingDelay(void) {
 
   for (int visit = 0; visit < kVisits; ++visit) {
     request->state = VS::Content::DiscRequestState::kLoaded;
-    request->file = {VS_MAINMENU_PRG_LBA, VS_MAINMENU_PRG_SIZE};
+    request->file = {Locate("MENU/MAINMENU.PRG").lba,
+                     Locate("MENU/MAINMENU.PRG").size};
     VS::Menu::Framework::menuState.control.loading = 1;
     passed &= VS::Menu::Framework::LoadLiveMenuOverlay(0) == 1 &&
               request->state == VS::Content::DiscRequestState::kFree &&

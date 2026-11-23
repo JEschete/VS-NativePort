@@ -10,12 +10,14 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Boot/SessionLive.hpp"
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Event/ScriptVmLiveState.hpp"
 #include "Menu/GameClearLifecycleLiveFixture.hpp"
 #include "Menu/GazetteStatisticsLiveFixture.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
 #include "State/Progress.hpp"
+
+using VS::Content::disc::Locate;
 
 namespace {
 namespace live = gazette_statistics_live_tests;
@@ -136,12 +138,14 @@ TEST_CASE("Completed MENU9 restores both statistics cursors without row loss",
   const auto sequence = fixture.PrimeCursor(page);
   const ResidentState before(fixture);
   {
-    menu_overlay_tests::Load other(3, {VS_MENU2_PRG_LBA, VS_MENU2_PRG_SIZE});
+    menu_overlay_tests::Load other(
+        3, {Locate("MENU/MENU2.PRG").lba, Locate("MENU/MENU2.PRG").size});
     REQUIRE(other.Complete() == 1);
     CHECK(fixture.DrawCursor(page) == sequence[2]);
   }
   {
-    menu_overlay_tests::Load loaded(10, {VS_MENU9_PRG_LBA, VS_MENU9_PRG_SIZE});
+    menu_overlay_tests::Load loaded(
+        10, {Locate("MENU/MENU9.PRG").lba, Locate("MENU/MENU9.PRG").size});
     REQUIRE(loaded.Poll() == 0);
     CHECK(fixture.DrawCursor(page) == sequence[3]);
     REQUIRE(loaded.Complete() == 1);

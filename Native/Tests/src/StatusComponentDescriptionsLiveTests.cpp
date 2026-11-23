@@ -11,11 +11,13 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
 #include "Menu/Status/ComponentDescriptionsLive.hpp"
 #include "Menu/StatusComponentsWorld.hpp"
+
+using VS::Content::disc::Locate;
 
 namespace {
 namespace status = VS::Menu::Status;
@@ -184,7 +186,8 @@ TEST_CASE("MENU4 completion preserves borrowed component text and row owners",
   REQUIRE(status::SelectLiveWeaponComponent(1, &weapon) ==
           fixture.description.data());
   const auto buffer = fixture.description;
-  menu_overlay_tests::Load load(5, {VS_MENU4_PRG_LBA, VS_MENU4_PRG_SIZE});
+  menu_overlay_tests::Load load(
+      5, {Locate("MENU/MENU4.PRG").lba, Locate("MENU/MENU4.PRG").size});
   CHECK(load.Complete() == 1);
   CHECK(VS::Menu::Framework::itemHelp == fixture.help.data());
   CHECK(VS::Menu::Framework::stringBuf == fixture.description.data());

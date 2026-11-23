@@ -24,7 +24,7 @@
 #include "Battle/RewardFlowLive.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -75,6 +75,8 @@
 #include "Render/UiPacketsLive.hpp"
 #include "State/SceneTimerLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
+
+using VS::Content::disc::Locate;
 
 namespace VS::Event {
 namespace {
@@ -832,8 +834,9 @@ bool LiveVmHost::PreparePendingFile(int id, EventBuffer destination) {
     return false;
   }
   pending_destination_ = destination;
-  pending_file_ = {.lba = VS_0000_EVT_LBA + id * kSectorsPerEventFile,
-                   .size = VS_0000_EVT_SIZE};
+  pending_file_ = {
+      .lba = Locate("EVENT/0000.EVT").lba + id * kSectorsPerEventFile,
+      .size = Locate("EVENT/0000.EVT").size};
   return true;
 }
 

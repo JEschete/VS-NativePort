@@ -18,7 +18,7 @@
 #include "Audio/SoundBanksLive.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -60,6 +60,8 @@
 #include "Title/SaveCard.hpp"
 #include "Title/SaveFiles.hpp"
 
+using VS::Content::disc::Locate;
+
 using VS::Legacy::ClearImage;
 using VS::Legacy::DISPENV;
 using VS::Legacy::DRAWENV;
@@ -92,7 +94,7 @@ namespace {
 static_assert(sizeof(VS::Input::Settings) == kSettingsBytes);
 static_assert(sizeof(containerStrings) ==
               kContainerStringHalfwords * sizeof(std::uint16_t));
-static_assert(VS_GAMEOVER_BIN_SIZE >=
+static_assert(Locate("MENU/GAMEOVER.BIN").size >=
               kGameOverImageHalfwords * sizeof(std::uint16_t));
 
 // MCMAN.BIN's table (VS::Save::CardUiResources::text_table) in halfwords and
@@ -112,7 +114,8 @@ constexpr std::size_t kWrittenSummaryOffset = kFileInfoRecordBytes * 3;
 // is kept in the third.
 constexpr std::size_t kSaveImageBytes = sizeof(VS::Save::GameSaveImage);
 constexpr std::size_t kWorkspaceImages = 3;
-static_assert(kSaveImageBytes * kWorkspaceImages <= VS_SPMCIMG_BIN_SIZE);
+static_assert(kSaveImageBytes * kWorkspaceImages <=
+              Locate("MENU/SPMCIMG.BIN").size);
 static_assert(kWrittenSummaryOffset + sizeof(VS::Save::CardFileInfoRecord) <=
               kSaveImageBytes);
 static_assert(offsetof(VS::Save::CardFileInfoRecord, summary) ==
@@ -640,10 +643,11 @@ class LiveHost : public LiveCardHost {
   }
 
   void BeginGameOverLoad() override {
-    VS::Content::DiscFile file{.lba = VS_GAMEOVER_BIN_LBA,
-                               .size = VS_GAMEOVER_BIN_SIZE};
+    VS::Content::DiscFile file{.lba = Locate("MENU/GAMEOVER.BIN").lba,
+                               .size = Locate("MENU/GAMEOVER.BIN").size};
     gameOverRequest = Content::AllocateLiveDiscRequest(&file);
-    gameOverImage = Core::Memory::AllocateLiveFromHighEnd(VS_GAMEOVER_BIN_SIZE);
+    gameOverImage =
+        Core::Memory::AllocateLiveFromHighEnd(Locate("MENU/GAMEOVER.BIN").size);
     if (gameOverRequest != nullptr) {
       Content::EnqueueLiveDiscRequest(gameOverRequest, gameOverImage);
     } else {

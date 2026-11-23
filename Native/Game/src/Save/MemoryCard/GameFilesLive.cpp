@@ -17,7 +17,7 @@
 
 #include "Audio/SoundBanksLive.hpp"
 #include "Content/CdDriveLive.hpp"
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -43,6 +43,8 @@
 #include "State/StateFlags.hpp"
 #include "Title/SaveCard.hpp"
 #include "Title/SaveFiles.hpp"
+
+using VS::Content::disc::Locate;
 
 using VS::Legacy::DIRENTRY;
 
@@ -117,9 +119,10 @@ static_assert(std::extent_v<decltype(VS::Title::cardDirectoryEntries)> ==
 static_assert(std::extent_v<decltype(VS::Title::cardEventDescriptors)> ==
               kEventDescriptorCount);
 // The workspace is the first two images of the save-screen image buffer.
-static_assert(kWorkspaceBytes <= VS_SPMCIMG_BIN_SIZE);
-static_assert(VS_OPMCIMG1_BIN_SIZE == VS_OPMCIMG2_BIN_SIZE);
-static_assert(VS_OPMCIMG1_BIN_SIZE <= kSaveImageBytes);
+static_assert(kWorkspaceBytes <= Locate("MENU/SPMCIMG.BIN").size);
+static_assert(Locate("MENU/OPMCIMG1.BIN").size ==
+              Locate("MENU/OPMCIMG2.BIN").size);
+static_assert(Locate("MENU/OPMCIMG1.BIN").size <= kSaveImageBytes);
 
 constexpr bool LaysOut(SaveSection section, std::size_t offset,
                        std::size_t size) {
@@ -427,9 +430,10 @@ class LiveIntroHost final : public IntroSnapshotHost {
       return;
     }
     VS::Content::DiscFile file{};
-    file.lba = snapshot == IntroSnapshot::kCourtyard ? VS_OPMCIMG1_BIN_LBA
-                                                     : VS_OPMCIMG2_BIN_LBA;
-    file.size = VS_OPMCIMG1_BIN_SIZE;
+    file.lba = snapshot == IntroSnapshot::kCourtyard
+                   ? Locate("MENU/OPMCIMG1.BIN").lba
+                   : Locate("MENU/OPMCIMG2.BIN").lba;
+    file.size = Locate("MENU/OPMCIMG1.BIN").size;
     request_ = VS::Content::AllocateLiveDiscRequest(&file);
     if (request_ == nullptr) {
       VS::Core::Errorf(kDiagnosticChannel,

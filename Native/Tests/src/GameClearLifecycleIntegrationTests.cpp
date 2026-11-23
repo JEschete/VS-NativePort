@@ -9,12 +9,14 @@
 #include "Audio/MusicLive.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDrive.hpp"
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Content/ModuleData.hpp"
 #include "Menu/GameClearLifecycleLiveFixture.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "State/Progress.hpp"
+
+using VS::Content::disc::Locate;
 
 namespace {
 namespace results = VS::Menu::Results;
@@ -73,12 +75,14 @@ struct ReloadFixture : game_clear_live_tests::Fixture {
 
   static void CheckOtherAndPending() {
     {
-      menu_overlay_tests::Load other(3, {VS_MENU2_PRG_LBA, VS_MENU2_PRG_SIZE});
+      menu_overlay_tests::Load other(
+          3, {Locate("MENU/MENU2.PRG").lba, Locate("MENU/MENU2.PRG").size});
       REQUIRE(other.Complete() == 1);
     }
     CHECK(results::InspectLiveGameClear().state_timer == 1);
     CHECK(results::InspectLiveGameClear().request_bound);
-    menu_overlay_tests::Load pending(16, {VS_MENUF_PRG_LBA, VS_MENUF_PRG_SIZE});
+    menu_overlay_tests::Load pending(
+        16, {Locate("MENU/MENUF.PRG").lba, Locate("MENU/MENUF.PRG").size});
     REQUIRE(pending.Poll() == 0);
     CHECK(results::InspectLiveGameClear().state_timer == 1);
     CHECK(results::InspectLiveGameClear().request_bound);
@@ -222,7 +226,8 @@ TEST_CASE("Production MENUF completion resets views but retains results owners",
   const auto generation = content::LiveDiscRequestGeneration(request);
   ReloadFixture::CheckOtherAndPending();
   {
-    menu_overlay_tests::Load loaded(16, {VS_MENUF_PRG_LBA, VS_MENUF_PRG_SIZE});
+    menu_overlay_tests::Load loaded(
+        16, {Locate("MENU/MENUF.PRG").lba, Locate("MENU/MENUF.PRG").size});
     REQUIRE(loaded.Complete() == 1);
   }
   ReloadFixture::CheckControllerReset();

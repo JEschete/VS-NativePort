@@ -19,7 +19,7 @@
 #include "Battle/Actor.hpp"
 #include "Boot/OverlayReset.hpp"
 #include "Boot/SessionLive.hpp"
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -31,6 +31,8 @@
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
 #include "State/Progress.hpp"
+
+using VS::Content::disc::Locate;
 
 using VS::Battle::ActionDefinition;
 
@@ -197,7 +199,8 @@ TEST_CASE(
 TEST_CASE("MENU2 reload restores the file-backed Break Art timeout",
           "[battle-abilities-live][F02614][reload][menu-overlay-reload]") {
   LiveFoundationFixture fixture;
-  menu_overlay_tests::Load load(3, {VS_MENU2_PRG_LBA, VS_MENU2_PRG_SIZE});
+  menu_overlay_tests::Load load(
+      3, {Locate("MENU/MENU2.PRG").lba, Locate("MENU/MENU2.PRG").size});
   REQUIRE(abilities::LiveUpdateBreakArtUnlock(1) == 0);
   CHECK(VS::Battle::actionDefinitions[kArtAction].unlocked == 1);
   VS::Menu::textBoxes[7].flags.done = 1;
@@ -209,7 +212,8 @@ TEST_CASE("MENU2 reload restores the file-backed Break Art timeout",
 TEST_CASE("MENU2 reload restores unlock counts and phase without progression",
           "[battle-abilities-live][F02616][reload][menu-overlay-reload]") {
   LiveFoundationFixture fixture;
-  menu_overlay_tests::Load load(3, {VS_MENU2_PRG_LBA, VS_MENU2_PRG_SIZE});
+  menu_overlay_tests::Load load(
+      3, {Locate("MENU/MENU2.PRG").lba, Locate("MENU/MENU2.PRG").size});
   REQUIRE(abilities::LiveUpdateAbilityUnlock(1) == 0);
   CHECK(VS::State::artsStatus.kills.battle_abilities_unlocked == 1);
   CHECK(load.Complete() == 1);
@@ -312,7 +316,8 @@ TEST_CASE("Ability terminal cold reset preserves foundation row ownership",
 TEST_CASE("Loaded MENU2 requests dispatch the image reset before menu reentry",
           "[battle-ability-terminal-live][menu-overlay-reload]") {
   LiveTerminalFixture fixture;
-  menu_overlay_tests::Load load(3, {VS_MENU2_PRG_LBA, VS_MENU2_PRG_SIZE});
+  menu_overlay_tests::Load load(
+      3, {Locate("MENU/MENU2.PRG").lba, Locate("MENU/MENU2.PRG").size});
   const bool defense = GENERATE(false, true);
   auto& learned = defense ? abilities::unlockedDefenseAbilities
                           : abilities::unlockedChainAbilities;

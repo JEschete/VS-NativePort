@@ -20,7 +20,7 @@
 #include "Battle/TargetingState.hpp"
 #include "Boot/GameLoop.hpp"
 #include "Content/CdDriveLive.hpp"
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Content/DiscReaderLive.hpp"
 #include "Core/Diagnostics.hpp"
@@ -63,6 +63,8 @@
 #include "State/GameClockLive.hpp"
 #include "State/PlayTime.hpp"
 #include "Title/TitleMenuLive.hpp"
+
+using VS::Content::disc::Locate;
 
 using VS::Legacy::ClearImage;
 using VS::Legacy::InitCARD;
@@ -175,20 +177,20 @@ class LiveLifecycleHost final : public OverlayLoadHost,
     VS::Content::DiscFile file{};
     switch (request.program) {
       case OverlayProgram::kBattle:
-        file.lba = VS_BATTLE_PRG_LBA;
-        file.size = VS_BATTLE_PRG_SIZE;
+        file.lba = Locate("BATTLE/BATTLE.PRG").lba;
+        file.size = Locate("BATTLE/BATTLE.PRG").size;
         break;
       case OverlayProgram::kBattleInitialization:
-        file.lba = VS_INITBTL_PRG_LBA;
-        file.size = VS_INITBTL_PRG_SIZE;
+        file.lba = Locate("BATTLE/INITBTL.PRG").lba;
+        file.size = Locate("BATTLE/INITBTL.PRG").size;
         break;
       case OverlayProgram::kTitle:
-        file.lba = VS_TITLE_PRG_LBA;
-        file.size = VS_TITLE_PRG_SIZE;
+        file.lba = Locate("TITLE/TITLE.PRG").lba;
+        file.size = Locate("TITLE/TITLE.PRG").size;
         break;
       case OverlayProgram::kEnding:
-        file.lba = VS_ENDING_PRG_LBA;
-        file.size = VS_ENDING_PRG_SIZE;
+        file.lba = Locate("ENDING/ENDING.PRG").lba;
+        file.size = Locate("ENDING/ENDING.PRG").size;
         break;
       default:
         VS::Core::Errorf("boot", "unsupported overlay program: %d",

@@ -43,7 +43,7 @@
 #include "Boot/PlayerSettings.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/DataStore.hpp"
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Log.hpp"
 #include "Core/RandomLive.hpp"
@@ -90,6 +90,8 @@
 #include "State/ScriptFlagsLive.hpp"
 #include "State/StateFlags.hpp"
 #include "Title/TitleMenuLive.hpp"
+
+using VS::Content::disc::Locate;
 
 using VS::Battle::ActionState;
 using VS::Battle::kActionIdDaggerArtOne;
@@ -663,12 +665,12 @@ std::expected<void, std::string> ConfigureEncounter(const EncounterSetup& setup,
     const auto path = std::format("EVENT/{:04}.EVT", *setup.external_event);
     const auto* entry = store ? store->Find(path) : nullptr;
     constexpr unsigned kSectorsPerEvent =
-        VS_0000_EVT_SIZE / Content::DataStore::kDataSectorBytes;
+        Locate("EVENT/0000.EVT").size / Content::DataStore::kDataSectorBytes;
     if (entry == nullptr || entry->form != "raw" ||
-        entry->size != VS_0000_EVT_SIZE ||
-        entry->lba !=
-            VS_0000_EVT_LBA + static_cast<unsigned>(*setup.external_event) *
-                                  kSectorsPerEvent) {
+        entry->size != Locate("EVENT/0000.EVT").size ||
+        entry->lba != Locate("EVENT/0000.EVT").lba +
+                          static_cast<unsigned>(*setup.external_event) *
+                              kSectorsPerEvent) {
       return std::unexpected(
           "External event is unavailable or has an invalid "
           "original disc layout: " +

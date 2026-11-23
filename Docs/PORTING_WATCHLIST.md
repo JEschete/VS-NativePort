@@ -301,8 +301,11 @@ What the mechanical copy kept as it was, so that each item gets a deliberate fix
 - **Casts for per-file declarations.** 98 uses go through a cast to the view a decomp file declared and 30 calls go
   through an unprototyped pointer (copy report `view-cast`, `implicit-call-cast`). Each marks a place where two
   files disagreed about a type or an argument list; modernization picks the real type.
-- **Disc positions.** `Content/DiscLayout.h` keeps real LBAs/sizes because the code does sector arithmetic; Content
-  must map a sector to its converted file. `MENUBGSZ` is the ledger size of the title background asset.
+- **Disc positions.** `Content/DiscLayout.hpp` keeps real LBAs/sizes because the code does sector arithmetic; Content
+  must map a sector to its converted file. Code names a file by its disc path, `VS::Content::disc::Locate("DIR/FILE")`,
+  evaluated at compile time, so a path missing from the table does not compile. The table lists only the files the code
+  reads (the full listing is `Docs/ledgers/CONTENT_LEDGER.csv`); add a row, keeping path order, before citing a new one.
+  `MENUBGSZ` is the ledger size of the title background asset.
 - **String ids.** `Content/StringTables.hpp` holds the decomp's per-overlay string-table ids as
   `VS::Content::text::<file>::<table>::{offset,index}` constants. The retired `gen_decomp_headers.py` read the
   offsets from the user's extracted tables (`--data`), as the decomp's build reads them from the disc; the header is

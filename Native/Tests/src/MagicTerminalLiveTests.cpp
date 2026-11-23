@@ -15,7 +15,7 @@
 #include "Battle/ActionTable.hpp"
 #include "Battle/Actor.hpp"
 #include "Boot/SessionLive.hpp"
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
@@ -27,6 +27,8 @@
 #include "Menu/MagicTerminalLive.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
 #include "State/StateFlags.hpp"
+
+using VS::Content::disc::Locate;
 
 using VS::Battle::ActionDefinition;
 using VS::Legacy::isendprim;
@@ -209,7 +211,8 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
       const auto entry = +[] { return 0; };
       REQUIRE(VS::Boot::RunLiveSessionLoop(entry, entry) == 0);
     } else {
-      menu_overlay_tests::Load load(1, {VS_MENU0_PRG_LBA, VS_MENU0_PRG_SIZE});
+      menu_overlay_tests::Load load(
+          1, {Locate("MENU/MENU0.PRG").lba, Locate("MENU/MENU0.PRG").size});
       REQUIRE(load.Complete() == 1);
     }
   }
@@ -294,7 +297,8 @@ TEST_CASE("MENU0 completion and cold sessions restart every school owner",
   const bool cold = GENERATE(false, true);
   fixture.LeaveSchool(school);
   {
-    menu_overlay_tests::Load other(3, {VS_MENU2_PRG_LBA, VS_MENU2_PRG_SIZE});
+    menu_overlay_tests::Load other(
+        3, {Locate("MENU/MENU2.PRG").lba, Locate("MENU/MENU2.PRG").size});
     REQUIRE(other.Complete() == 1);
   }
   CHECK(kSchoolEntries[school](0) == kActions[school]);

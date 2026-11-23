@@ -1241,6 +1241,7 @@
     <None Include="..\..\test\scenarios\first_lever_room.json" />
     <None Include="..\..\test\scenarios\silver_wolves.json" />
     <None Include="..\..\test\slice-ai-ranking-wolves.json" />
+    <None Include="..\..\test\test_content_schemas.py" />
     <None Include="..\..\test\test_regression.py" />
     <None Include="..\..\test\verify_first_lever.py" />
     <None Include="..\..\vcpkg\ports\libchdr\bundled-notices.txt" />

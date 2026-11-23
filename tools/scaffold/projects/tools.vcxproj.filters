@@ -4527,6 +4527,9 @@
     <None Include="..\..\test\slice-ai-ranking-wolves.json">
       <Filter>tools\test</Filter>
     </None>
+    <None Include="..\..\test\test_content_schemas.py">
+      <Filter>tools\test</Filter>
+    </None>
     <None Include="..\..\test\test_regression.py">
       <Filter>tools\test</Filter>
     </None>

@@ -14,11 +14,13 @@
 #include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Boot/SessionLive.hpp"
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
 #include "Menu/Status/ActorStatus.hpp"
 #include "Menu/Status/LimbControllersLive.hpp"
+
+using VS::Content::disc::Locate;
 
 using VS::Legacy::nextPrim;
 
@@ -129,7 +131,8 @@ struct LiveLimbFixture {
   }
   static void ResetThroughBoundary(bool cold) {
     {
-      menu_overlay_tests::Load other(3, {VS_MENU2_PRG_LBA, VS_MENU2_PRG_SIZE});
+      menu_overlay_tests::Load other(
+          3, {Locate("MENU/MENU2.PRG").lba, Locate("MENU/MENU2.PRG").size});
       REQUIRE(other.Complete() == 1);
     }
     CHECK(status::LiveStatusEffectNavigationControllerState().count == 2);
@@ -138,7 +141,8 @@ struct LiveLimbFixture {
       const auto entry = +[] { return 0; };
       REQUIRE(VS::Boot::RunLiveSessionLoop(entry, entry) == 0);
     } else {
-      menu_overlay_tests::Load load(5, {VS_MENU4_PRG_LBA, VS_MENU4_PRG_SIZE});
+      menu_overlay_tests::Load load(
+          5, {Locate("MENU/MENU4.PRG").lba, Locate("MENU/MENU4.PRG").size});
       REQUIRE(load.Poll() == 0);
       CHECK(status::LiveStatusEffectNavigationControllerState().count == 2);
       REQUIRE(load.Complete() == 1);

@@ -21,7 +21,7 @@
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/CdDriveLive.hpp"
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Event/ScriptVmLiveState.hpp"
@@ -33,6 +33,8 @@
 #include "Menu/Score/EncyclopediaPreview.hpp"
 #include "Menu/Score/EncyclopediaPreviewLive.hpp"
 #include "Menu/TextBox.hpp"
+
+using VS::Content::disc::Locate;
 
 namespace {
 namespace score = VS::Menu::Score;
@@ -1286,12 +1288,14 @@ TEST_CASE("Only completed MENU9 abandons a pending or loaded preview read",
         VS::Content::DiscRequestState::kLoaded;
   }
   {
-    menu_overlay_tests::Load other(3, {VS_MENU2_PRG_LBA, VS_MENU2_PRG_SIZE});
+    menu_overlay_tests::Load other(
+        3, {Locate("MENU/MENU2.PRG").lba, Locate("MENU/MENU2.PRG").size});
     REQUIRE(other.Complete() == 1);
     CHECK(score::LiveEnemyPreviewState() == before);
   }
   {
-    menu_overlay_tests::Load menu(10, {VS_MENU9_PRG_LBA, VS_MENU9_PRG_SIZE});
+    menu_overlay_tests::Load menu(
+        10, {Locate("MENU/MENU9.PRG").lba, Locate("MENU/MENU9.PRG").size});
     REQUIRE(menu.Poll() == 0);
     CHECK(score::LiveEnemyPreviewState() == before);
     REQUIRE(menu.Complete() == 1);

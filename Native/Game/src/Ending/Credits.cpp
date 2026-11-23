@@ -2,7 +2,9 @@
 // decomp line.
 #include "Ending/Credits.hpp"
 
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
+
+using VS::Content::disc::Locate;
 
 // decomp: D_8006E3FC (D_8006E3FC@ENDING/ENDING.PRG)
 // contents: module image (ModuleData.cpp)
@@ -23,38 +25,40 @@ void* VS::Ending::Credits::illustrationResources
 
 // decomp: _illustLbas (_illustLbas@ENDING/ENDING.PRG)
 std::int32_t VS::Ending::Credits::illustrationDiscLocations
-    [VS::Ending::Credits::kIllustrationCount] = {VS_ILLUST06_BIN_LBA,
-                                                 VS_ILLUST07_BIN_LBA,
-                                                 VS_ILLUST08_BIN_LBA,
-                                                 VS_ILLUST09_BIN_LBA,
-                                                 VS_ILLUST10_BIN_LBA,
-                                                 VS_ILLUST11_BIN_LBA,
-                                                 VS_ILLUST12_BIN_LBA,
-                                                 VS_ILLUST13_BIN_LBA,
-                                                 VS_ILLUST14_BIN_LBA,
-                                                 VS_ILLUST15_BIN_LBA,
-                                                 VS_ILLUST16_BIN_LBA,
-                                                 0,
-                                                 0,
-                                                 0,
-                                                 0,
-                                                 0};
+    [VS::Ending::Credits::kIllustrationCount] = {
+        Locate("ENDING/ILLUST06.BIN").lba,
+        Locate("ENDING/ILLUST07.BIN").lba,
+        Locate("ENDING/ILLUST08.BIN").lba,
+        Locate("ENDING/ILLUST09.BIN").lba,
+        Locate("ENDING/ILLUST10.BIN").lba,
+        Locate("ENDING/ILLUST11.BIN").lba,
+        Locate("ENDING/ILLUST12.BIN").lba,
+        Locate("ENDING/ILLUST13.BIN").lba,
+        Locate("ENDING/ILLUST14.BIN").lba,
+        Locate("ENDING/ILLUST15.BIN").lba,
+        Locate("ENDING/ILLUST16.BIN").lba,
+        0,
+        0,
+        0,
+        0,
+        0};
 
 // decomp: _illustSizes (_illustSizes@ENDING/ENDING.PRG)
 std::int32_t VS::Ending::Credits::illustrationDiscSizes
-    [VS::Ending::Credits::kIllustrationCount] = {VS_ILLUST06_BIN_SIZE,
-                                                 VS_ILLUST07_BIN_SIZE,
-                                                 VS_ILLUST08_BIN_SIZE,
-                                                 VS_ILLUST09_BIN_SIZE,
-                                                 VS_ILLUST10_BIN_SIZE,
-                                                 VS_ILLUST11_BIN_SIZE,
-                                                 VS_ILLUST12_BIN_SIZE,
-                                                 VS_ILLUST13_BIN_SIZE,
-                                                 VS_ILLUST14_BIN_SIZE,
-                                                 VS_ILLUST15_BIN_SIZE,
-                                                 VS_ILLUST16_BIN_SIZE,
-                                                 0,
-                                                 0,
-                                                 0,
-                                                 0,
-                                                 0};
+    [VS::Ending::Credits::kIllustrationCount] = {
+        Locate("ENDING/ILLUST06.BIN").size,
+        Locate("ENDING/ILLUST07.BIN").size,
+        Locate("ENDING/ILLUST08.BIN").size,
+        Locate("ENDING/ILLUST09.BIN").size,
+        Locate("ENDING/ILLUST10.BIN").size,
+        Locate("ENDING/ILLUST11.BIN").size,
+        Locate("ENDING/ILLUST12.BIN").size,
+        Locate("ENDING/ILLUST13.BIN").size,
+        Locate("ENDING/ILLUST14.BIN").size,
+        Locate("ENDING/ILLUST15.BIN").size,
+        Locate("ENDING/ILLUST16.BIN").size,
+        0,
+        0,
+        0,
+        0,
+        0};

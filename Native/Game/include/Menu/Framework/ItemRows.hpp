@@ -21,8 +21,8 @@ namespace VS::Menu::Framework {
 struct MenuRow;
 struct RowPlacement;
 
-// ITEMNAME.BIN, ITEMHELP.BIN and MENU12.BIN (DiscLayout.h), loaded as one
-// block in that order.
+// ITEMNAME.BIN, ITEMHELP.BIN and MENU12.BIN (Content/DiscLayout.hpp), loaded
+// as one block in that order.
 inline constexpr std::size_t kItemNamesBytes = 12288;
 inline constexpr std::size_t kItemHelpBytes = 28672;
 inline constexpr std::size_t kMenu12Bytes = 4096;

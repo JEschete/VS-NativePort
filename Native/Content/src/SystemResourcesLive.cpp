@@ -7,13 +7,15 @@
 #include <span>
 
 #include "Content/CdDriveLive.hpp"
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Content/SystemResources.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Legacy/Psx.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
+
+using VS::Content::disc::Locate;
 
 using VS::Legacy::LoadImage;
 using VS::Legacy::RECT;
@@ -24,8 +26,8 @@ constexpr std::size_t SectionOffsetAt(SystemDatSection section) {
   return static_cast<std::size_t>(section) * sizeof(std::uint32_t);
 }
 
-static_assert(kSystemDatSector == VS_SYSTEM_DAT_LBA);
-static_assert(kSystemDatBytes == VS_SYSTEM_DAT_SIZE);
+static_assert(kSystemDatSector == Locate("BATTLE/SYSTEM.DAT").lba);
+static_assert(kSystemDatBytes == Locate("BATTLE/SYSTEM.DAT").size);
 static_assert(sizeof(SystemDatHeader) ==
               kSystemDatSections * sizeof(std::uint32_t));
 static_assert(offsetof(SystemDatHeader, image0_offset) ==

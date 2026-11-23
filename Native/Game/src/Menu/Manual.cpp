@@ -3,9 +3,11 @@
 
 #include <cstdint>
 
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Legacy/Psx.hpp"
+
+using VS::Content::disc::LocateAs;
 
 namespace VS::Menu::manual {
 // decomp: menuTextTable (src/MENU/MENUE.PRG/494.c:142); contents: the module
@@ -37,33 +39,33 @@ std::uint32_t* helpAssets;
 // decomp: helpFileCdFiles (src/MENU/MENUE.PRG/494.c:241): mkHfoPair(HELPnn)
 // for topics 1 to 14.
 const VS::Content::DiscFile kHelpFileCdFiles[kHelpFileCount] = {
-    {VS_HELP01_HF1_LBA, VS_HELP01_HF1_SIZE},
-    {VS_HELP01_HF0_LBA, VS_HELP01_HF0_SIZE},
-    {VS_HELP02_HF1_LBA, VS_HELP02_HF1_SIZE},
-    {VS_HELP02_HF0_LBA, VS_HELP02_HF0_SIZE},
-    {VS_HELP03_HF1_LBA, VS_HELP03_HF1_SIZE},
-    {VS_HELP03_HF0_LBA, VS_HELP03_HF0_SIZE},
-    {VS_HELP04_HF1_LBA, VS_HELP04_HF1_SIZE},
-    {VS_HELP04_HF0_LBA, VS_HELP04_HF0_SIZE},
-    {VS_HELP05_HF1_LBA, VS_HELP05_HF1_SIZE},
-    {VS_HELP05_HF0_LBA, VS_HELP05_HF0_SIZE},
-    {VS_HELP06_HF1_LBA, VS_HELP06_HF1_SIZE},
-    {VS_HELP06_HF0_LBA, VS_HELP06_HF0_SIZE},
-    {VS_HELP07_HF1_LBA, VS_HELP07_HF1_SIZE},
-    {VS_HELP07_HF0_LBA, VS_HELP07_HF0_SIZE},
-    {VS_HELP08_HF1_LBA, VS_HELP08_HF1_SIZE},
-    {VS_HELP08_HF0_LBA, VS_HELP08_HF0_SIZE},
-    {VS_HELP09_HF1_LBA, VS_HELP09_HF1_SIZE},
-    {VS_HELP09_HF0_LBA, VS_HELP09_HF0_SIZE},
-    {VS_HELP10_HF1_LBA, VS_HELP10_HF1_SIZE},
-    {VS_HELP10_HF0_LBA, VS_HELP10_HF0_SIZE},
-    {VS_HELP11_HF1_LBA, VS_HELP11_HF1_SIZE},
-    {VS_HELP11_HF0_LBA, VS_HELP11_HF0_SIZE},
-    {VS_HELP12_HF1_LBA, VS_HELP12_HF1_SIZE},
-    {VS_HELP12_HF0_LBA, VS_HELP12_HF0_SIZE},
-    {VS_HELP13_HF1_LBA, VS_HELP13_HF1_SIZE},
-    {VS_HELP13_HF0_LBA, VS_HELP13_HF0_SIZE},
-    {VS_HELP14_HF1_LBA, VS_HELP14_HF1_SIZE},
-    {VS_HELP14_HF0_LBA, VS_HELP14_HF0_SIZE},
+    LocateAs<VS::Content::DiscFile>("SMALL/HELP01.HF1"),
+    LocateAs<VS::Content::DiscFile>("SMALL/HELP01.HF0"),
+    LocateAs<VS::Content::DiscFile>("SMALL/HELP02.HF1"),
+    LocateAs<VS::Content::DiscFile>("SMALL/HELP02.HF0"),
+    LocateAs<VS::Content::DiscFile>("SMALL/HELP03.HF1"),
+    LocateAs<VS::Content::DiscFile>("SMALL/HELP03.HF0"),
+    LocateAs<VS::Content::DiscFile>("SMALL/HELP04.HF1"),
+    LocateAs<VS::Content::DiscFile>("SMALL/HELP04.HF0"),
+    LocateAs<VS::Content::DiscFile>("SMALL/HELP05.HF1"),
+    LocateAs<VS::Content::DiscFile>("SMALL/HELP05.HF0"),
+    LocateAs<VS::Content::DiscFile>("SMALL/HELP06.HF1"),
+    LocateAs<VS::Content::DiscFile>("SMALL/HELP06.HF0"),
+    LocateAs<VS::Content::DiscFile>("SMALL/HELP07.HF1"),
+    LocateAs<VS::Content::DiscFile>("SMALL/HELP07.HF0"),
+    LocateAs<VS::Content::DiscFile>("SMALL/HELP08.HF1"),
+    LocateAs<VS::Content::DiscFile>("SMALL/HELP08.HF0"),
+    LocateAs<VS::Content::DiscFile>("SMALL/HELP09.HF1"),
+    LocateAs<VS::Content::DiscFile>("SMALL/HELP09.HF0"),
+    LocateAs<VS::Content::DiscFile>("SMALL/HELP10.HF1"),
+    LocateAs<VS::Content::DiscFile>("SMALL/HELP10.HF0"),
+    LocateAs<VS::Content::DiscFile>("SMALL/HELP11.HF1"),
+    LocateAs<VS::Content::DiscFile>("SMALL/HELP11.HF0"),
+    LocateAs<VS::Content::DiscFile>("SMALL/HELP12.HF1"),
+    LocateAs<VS::Content::DiscFile>("SMALL/HELP12.HF0"),
+    LocateAs<VS::Content::DiscFile>("SMALL/HELP13.HF1"),
+    LocateAs<VS::Content::DiscFile>("SMALL/HELP13.HF0"),
+    LocateAs<VS::Content::DiscFile>("SMALL/HELP14.HF1"),
+    LocateAs<VS::Content::DiscFile>("SMALL/HELP14.HF0"),
 };
 }  // namespace VS::Menu::manual

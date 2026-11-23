@@ -109,7 +109,7 @@
     <ClInclude Include="include\Content\DataAccess.hpp" />
     <ClInclude Include="include\Content\DataStore.hpp" />
     <ClInclude Include="include\Content\Disc.hpp" />
-    <ClInclude Include="include\Content\DiscLayout.h" />
+    <ClInclude Include="include\Content\DiscLayout.hpp" />
     <ClInclude Include="include\Content\DiscQueue.hpp" />
     <ClInclude Include="include\Content\DiscReader.hpp" />
     <ClInclude Include="include\Content\DiscReaderLive.hpp" />

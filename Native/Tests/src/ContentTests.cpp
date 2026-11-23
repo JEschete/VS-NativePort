@@ -28,7 +28,7 @@
 #include "Content/DataAccess.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/Disc.hpp"
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Content/ModuleData.hpp"
 #include "Content/OverlayWorkspaceLive.hpp"
 #include "Content/PFile.hpp"
@@ -91,6 +91,8 @@
 #include "Legacy/Psx.hpp"
 #include "Movie/MoviePlayer.hpp"
 #include "Render/PageSpace.hpp"
+
+using VS::Content::disc::Locate;
 
 using VS::Core::Gte::SVECTOR;
 
@@ -550,8 +552,8 @@ void CheckTrapPackageSourcePoints(const Content::DataStore& store,
   const auto* entry = store.Find(path);
   REQUIRE(entry != nullptr);
   REQUIRE(entry->size <= 65535);
-  CHECK(entry->lba ==
-        VS_E000_P_LBA + VS::Effects::kPackageFiles[effect_id].lba);
+  CHECK(entry->lba == Locate("EFFECT/E000.P").lba +
+                          VS::Effects::kPackageFiles[effect_id].lba);
   CHECK(entry->SectorCount() * Content::DataStore::kDataSectorBytes ==
         VS::Effects::kPackageFiles[effect_id].size);
   auto bytes = store.ReadAll(*entry);
@@ -612,7 +614,7 @@ TEST_CASE("Original room trap kinds have bounded source-package mappings",
     REQUIRE(kind < kNonTrapFloorTriggerKind);
     const auto effect = static_cast<std::uint16_t>(kind + 6);
     const auto* file = store->FindBySector(
-        VS_E000_P_LBA + VS::Effects::kPackageFiles[effect].lba);
+        Locate("EFFECT/E000.P").lba + VS::Effects::kPackageFiles[effect].lba);
     REQUIRE(file != nullptr);
     CheckTrapPackageSourcePoints(*store, effect, file->path);
   }

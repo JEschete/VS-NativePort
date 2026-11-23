@@ -7,9 +7,11 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Boot/SessionLive.hpp"
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
 #include "Menu/StatusTerminalLiveFixture.hpp"
+
+using VS::Content::disc::Locate;
 
 namespace {
 namespace st = VS::Menu::Status;
@@ -89,13 +91,14 @@ struct ReloadFixture : Fixture {
     const auto list = st::LiveEquipmentListControllerState();
     const auto screen = st::LiveStatusTerminalControllerState();
     {
-      menu_overlay_tests::Load other(3, {VS_MENU2_PRG_LBA, VS_MENU2_PRG_SIZE});
+      menu_overlay_tests::Load other(
+          3, {Locate("MENU/MENU2.PRG").lba, Locate("MENU/MENU2.PRG").size});
       REQUIRE(other.Complete() == 1);
     }
     CheckUnchanged(detail, list, screen);
     {
-      menu_overlay_tests::Load pending(5,
-                                       {VS_MENU4_PRG_LBA, VS_MENU4_PRG_SIZE});
+      menu_overlay_tests::Load pending(
+          5, {Locate("MENU/MENU4.PRG").lba, Locate("MENU/MENU4.PRG").size});
       REQUIRE(pending.Poll() == 0);
       CheckUnchanged(detail, list, screen);
     }
@@ -106,7 +109,8 @@ struct ReloadFixture : Fixture {
       const auto entry = +[] { return 0; };
       REQUIRE(VS::Boot::RunLiveSessionLoop(entry, entry) == 0);
     } else {
-      menu_overlay_tests::Load load(5, {VS_MENU4_PRG_LBA, VS_MENU4_PRG_SIZE});
+      menu_overlay_tests::Load load(
+          5, {Locate("MENU/MENU4.PRG").lba, Locate("MENU/MENU4.PRG").size});
       REQUIRE(load.Complete() == 1);
     }
   }

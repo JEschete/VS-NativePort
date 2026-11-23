@@ -20,7 +20,7 @@
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DataStore.hpp"
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Content/StringTables.hpp"
 #include "Content/WorkshopRecipes.hpp"
 #include "Core/Log.hpp"
@@ -51,6 +51,8 @@
 #include "Render/EncodedTextLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/UiPacketsLive.hpp"
+
+using VS::Content::disc::Locate;
 
 namespace menu12_text = VS::Content::text::menu12_bin;
 
@@ -155,7 +157,7 @@ static_assert(menu12::kBladeIndex == menu12_text::index::kBlade);
 static_assert(menu12::kCombineBladesIndex ==
               menu12_text::index::kCombineBlades);
 static_assert(menu12::kNewBladeIndex == menu12_text::index::kNewBlade);
-static_assert(Framework::kMenu12Bytes == VS_MENU12_BIN_SIZE);
+static_assert(Framework::kMenu12Bytes == Locate("MENU/MENU12.BIN").size);
 
 // VS::Items::materialModifiers' strength, intelligence and agility
 // bytes of a material's record.

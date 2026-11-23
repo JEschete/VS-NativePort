@@ -14,7 +14,7 @@
 #include "Battle/StringContextLive.hpp"
 #include "Battle/TargetingState.hpp"
 #include "Content/CdDriveLive.hpp"
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Content/StringTables.hpp"
 #include "Core/Log.hpp"
@@ -37,15 +37,17 @@
 #include "Render/EncodedText.hpp"
 #include "Render/EncodedTextLive.hpp"
 
+using VS::Content::disc::Locate;
+
 namespace itemhelp_text = VS::Content::text::itemhelp_bin;
 namespace itemname_text = VS::Content::text::itemname_bin;
 
 namespace VS::Menu::Framework {
 namespace {
 // The typed constants name the disc's tables.
-static_assert(kItemNamesBytes == VS_ITEMNAME_BIN_SIZE);
-static_assert(kItemHelpBytes == VS_ITEMHELP_BIN_SIZE);
-static_assert(kMenu12Bytes == VS_MENU12_BIN_SIZE);
+static_assert(kItemNamesBytes == Locate("MENU/ITEMNAME.BIN").size);
+static_assert(kItemHelpBytes == Locate("MENU/ITEMHELP.BIN").size);
+static_assert(kMenu12Bytes == Locate("MENU/MENU12.BIN").size);
 static_assert(kRowDescriptionBufferBytes == kStringBufferBytes);
 static_assert(item_text::kBattleKnifeDesc ==
               itemhelp_text::index::kBattleKnifeDesc);
@@ -246,7 +248,7 @@ class LiveItemTextLoadHost final : public ItemTextLoadHost {
     menu12Text = reinterpret_cast<std::uint16_t*>(
         Bytes(block) + kItemNamesBytes + kItemHelpBytes);
     // The three files are contiguous on the disc.
-    const VS::Content::DiscFile file{.lba = VS_ITEMNAME_BIN_LBA,
+    const VS::Content::DiscFile file{.lba = Locate("MENU/ITEMNAME.BIN").lba,
                                      .size = static_cast<int>(kItemTextBytes)};
     itemTextRequest = Content::AllocateLiveDiscRequest(&file);
     if (itemTextRequest != nullptr) {

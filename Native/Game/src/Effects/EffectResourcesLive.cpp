@@ -22,7 +22,7 @@
 #include "Content/CdDriveLive.hpp"
 #include "Content/ConvertedImages.hpp"
 #include "Content/DataStore.hpp"
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Content/NativeImage.hpp"
 #include "Content/OverlayWorkspaceLive.hpp"
@@ -43,6 +43,8 @@
 #include "Effects/TextureBindings.hpp"
 #include "Render/PageSpace.hpp"
 #include "Render/TexturePagesLive.hpp"
+
+using VS::Content::disc::Locate;
 
 using VS::Core::Gte::VECTOR;
 
@@ -439,10 +441,10 @@ namespace {
 class LiveResourceHost final : public EffectResourceHost {
  public:
   EffectDiscLayout DiscLayout() override {
-    return {.package_base_lba = VS_E000_P_LBA,
-            .purge_overlay = {.lba = VS_EFFPURGE_BIN_LBA,
-                              .size = VS_EFFPURGE_BIN_SIZE},
-            .texture_staging_bytes = VS_E000_0_FBT_SIZE};
+    return {.package_base_lba = Locate("EFFECT/E000.P").lba,
+            .purge_overlay = {.lba = Locate("EFFECT/EFFPURGE.BIN").lba,
+                              .size = Locate("EFFECT/EFFPURGE.BIN").size},
+            .texture_staging_bytes = Locate("EFFECT/E000_0.FBT").size};
   }
 
   DiscReadId AllocateRead(DiscRead read) override {

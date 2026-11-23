@@ -15,7 +15,7 @@
 #include "Audio/SfxLive.hpp"
 #include "Battle/StringContextLive.hpp"
 #include "Battle/TargetingState.hpp"
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Core/Log.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Items/InventoryLive.hpp"
@@ -34,6 +34,8 @@
 #include "Render/EncodedTextLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/UiPacketsLive.hpp"
+
+using VS::Content::disc::Locate;
 
 // decomp: renderRenameMenuStrings (src/MENU/MENU8.PRG/21A0.c:129; was
 // _renderRenameMenuStrings)
@@ -59,7 +61,8 @@ using Blades = decltype(VS::Items::InventoryContents::blades);
 constexpr int kWeaponSlots = static_cast<int>(std::extent_v<Weapons>);
 constexpr int kBladeSlots = static_cast<int>(std::extent_v<Blades>);
 // ITEMNAME.BIN: one 24-byte name an item.
-constexpr std::size_t kItemNames = VS_ITEMNAME_BIN_SIZE / kNameBytes;
+constexpr std::size_t kItemNameFileBytes = Locate("MENU/ITEMNAME.BIN").size;
+constexpr std::size_t kItemNames = kItemNameFileBytes / kNameBytes;
 constexpr int kItemNameCount = static_cast<int>(kItemNames);
 // The information text box and vs_battle_menuState.currentMenu's weapon
 // menu.

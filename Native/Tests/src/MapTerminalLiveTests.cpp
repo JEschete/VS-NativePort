@@ -22,7 +22,7 @@
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DataStore.hpp"
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Content/DiscReaderLive.hpp"
 #include "Core/Gte.hpp"
@@ -59,6 +59,9 @@
 #include "Save/MenuAssetsLive.hpp"
 #include "State/Progress.hpp"
 #include "State/StateFlags.hpp"
+
+using VS::Content::disc::Locate;
+using VS::Content::disc::LocateAs;
 
 using VS::Core::Gte::LoadV0;
 using VS::Core::Gte::Rtv0Tr;
@@ -992,8 +995,8 @@ TEST_CASE("Production framework dispatch uses the real map state byte",
   CHECK(VS::Content::discRequestCounts.waiting != 0);
   CHECK(
       std::ranges::any_of(VS::Content::discRequestSlots, [](const auto& slot) {
-        return slot.file.lba == VS_MAPBG_BIN_LBA &&
-               slot.file.size == VS_MAPBG_BIN_SIZE &&
+        return slot.file.lba == Locate("MENU/MAPBG.BIN").lba &&
+               slot.file.size == Locate("MENU/MAPBG.BIN").size &&
                slot.destination != nullptr &&
                memory::LivePayloadCapacity(slot.destination).has_value();
       }));
@@ -1013,8 +1016,9 @@ TEST_CASE("Only completed MENU5 drains map reads and restores its module state",
   VS::State::stateFlags.map_paling[5] = 19;
   const auto camera = VS::Render::FrameScratchpad().camera;
   const VS::Content::DiscFile file =
-      map_reload ? VS::Content::DiscFile{VS_MENU5_PRG_LBA, VS_MENU5_PRG_SIZE}
-                 : VS::Content::DiscFile{VS_MENU4_PRG_LBA, VS_MENU4_PRG_SIZE};
+      map_reload ? VS::Content::DiscFile{Locate("MENU/MENU5.PRG").lba,
+                                         Locate("MENU/MENU5.PRG").size}
+                 : LocateAs<VS::Content::DiscFile>("MENU/MENU4.PRG");
   menu_overlay_tests::Load overlay(kMapScreen, file);
   CHECK(overlay.Poll() == 0);
   CHECK(memory::LivePayloadCapacity(owner.buffer).has_value());

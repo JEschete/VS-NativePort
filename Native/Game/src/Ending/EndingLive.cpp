@@ -22,7 +22,7 @@
 #include "Battle/ActionTable.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/MatrixLive.hpp"
@@ -51,6 +51,9 @@
 #include "State/PlayTime.hpp"
 #include "State/Progress.hpp"
 #include "State/StateFlags.hpp"
+
+using VS::Content::disc::Locate;
+using VS::Content::disc::LocateAs;
 
 using VS::Core::Gte::MATRIX;
 using VS::Core::Gte::RotTransPers4;
@@ -108,7 +111,7 @@ constexpr int kRegionQuadSlot = -7;
 // The writable TIM each embedded art slot holds (EmbeddedArt.cpp's
 // kTimCapacity, the original module's span for the illustration workspace).
 constexpr std::size_t kEmbeddedTimBytes = 72224;
-constexpr int kEndingMusicSector = VS_ENDING_XA_LBA;
+constexpr int kEndingMusicSector = Locate("ENDING/ENDING.XA").lba;
 constexpr int kSoundGroup = 0x7E;
 // RotTransPers4 packs a screen point as x in the low halfword, y in the high.
 constexpr std::uint32_t kHalfwordMask = 0xFFFF;
@@ -118,23 +121,23 @@ constexpr unsigned kHalfwordShift = 16;
 constexpr std::size_t kRetainedFlagBytes = 0x10;
 
 constexpr std::array<VS::Content::DiscFile, kResultsFileCount> kResultsFiles{{
-    {VS_END_DIS_LBA, VS_END_DIS_SIZE},
-    {VS_ENDSCR00_DIS_LBA, VS_ENDSCR00_DIS_SIZE},
-    {VS_ENDSCR01_DIS_LBA, VS_ENDSCR01_DIS_SIZE},
-    {VS_ENDSCR02_DIS_LBA, VS_ENDSCR02_DIS_SIZE},
-    {VS_ENDSCR03_DIS_LBA, VS_ENDSCR03_DIS_SIZE},
-    {VS_ENDSCR04_DIS_LBA, VS_ENDSCR04_DIS_SIZE},
-    {VS_ENDSCR05_DIS_LBA, VS_ENDSCR05_DIS_SIZE},
-    {VS_ENDSCR06_DIS_LBA, VS_ENDSCR06_DIS_SIZE},
-    {VS_ENDSCR07_DIS_LBA, VS_ENDSCR07_DIS_SIZE},
-    {VS_ENDSCR08_DIS_LBA, VS_ENDSCR08_DIS_SIZE},
-    {VS_ENDSCR09_DIS_LBA, VS_ENDSCR09_DIS_SIZE},
-    {VS_ENDSCR10_DIS_LBA, VS_ENDSCR10_DIS_SIZE},
-    {VS_ENDSCR11_DIS_LBA, VS_ENDSCR11_DIS_SIZE},
-    {VS_ENDSCR12_DIS_LBA, VS_ENDSCR12_DIS_SIZE},
-    {VS_ENDSCR13_DIS_LBA, VS_ENDSCR13_DIS_SIZE},
-    {VS_ENDSCR14_DIS_LBA, VS_ENDSCR14_DIS_SIZE},
-    {VS_ENDSCR15_DIS_LBA, VS_ENDSCR15_DIS_SIZE},
+    LocateAs<VS::Content::DiscFile>("SMALL/END.DIS"),
+    LocateAs<VS::Content::DiscFile>("SMALL/ENDSCR00.DIS"),
+    LocateAs<VS::Content::DiscFile>("SMALL/ENDSCR01.DIS"),
+    LocateAs<VS::Content::DiscFile>("SMALL/ENDSCR02.DIS"),
+    LocateAs<VS::Content::DiscFile>("SMALL/ENDSCR03.DIS"),
+    LocateAs<VS::Content::DiscFile>("SMALL/ENDSCR04.DIS"),
+    LocateAs<VS::Content::DiscFile>("SMALL/ENDSCR05.DIS"),
+    LocateAs<VS::Content::DiscFile>("SMALL/ENDSCR06.DIS"),
+    LocateAs<VS::Content::DiscFile>("SMALL/ENDSCR07.DIS"),
+    LocateAs<VS::Content::DiscFile>("SMALL/ENDSCR08.DIS"),
+    LocateAs<VS::Content::DiscFile>("SMALL/ENDSCR09.DIS"),
+    LocateAs<VS::Content::DiscFile>("SMALL/ENDSCR10.DIS"),
+    LocateAs<VS::Content::DiscFile>("SMALL/ENDSCR11.DIS"),
+    LocateAs<VS::Content::DiscFile>("SMALL/ENDSCR12.DIS"),
+    LocateAs<VS::Content::DiscFile>("SMALL/ENDSCR13.DIS"),
+    LocateAs<VS::Content::DiscFile>("SMALL/ENDSCR14.DIS"),
+    LocateAs<VS::Content::DiscFile>("SMALL/ENDSCR15.DIS"),
 }};
 
 std::size_t BufferIndex(int buffer) {

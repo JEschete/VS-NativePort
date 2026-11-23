@@ -5,7 +5,7 @@
 
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Content/OverlayWorkspaceLive.hpp"
 #include "Core/Log.hpp"
@@ -19,6 +19,8 @@
 #include "Render/TexturePagesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Content::disc::Locate;
 
 namespace VS::Effects::ScreenDistortion {
 namespace {
@@ -170,7 +172,8 @@ class LiveScreenOverlayLoader final : public ScreenOverlayLoader {
 
  private:
   static VS::Content::DiscFile OverlayFile() {
-    return {.lba = VS_SCREFF2_PRG_LBA, .size = VS_SCREFF2_PRG_SIZE};
+    return {.lba = Locate("GIM/SCREFF2.PRG").lba,
+            .size = Locate("GIM/SCREFF2.PRG").size};
   }
 };
 

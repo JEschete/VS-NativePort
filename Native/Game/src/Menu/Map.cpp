@@ -3,13 +3,15 @@
 
 #include <cstdint>
 
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Field/MinimapScene.hpp"
 #include "Legacy/Psx.hpp"
 #include "Menu/MapDrawing.hpp"
 #include "Menu/MapLoading.hpp"
 #include "Menu/MapMarkers.hpp"
+
+using VS::Content::disc::LocateAs;
 
 using VS::Core::Gte::SVECTOR;
 
@@ -19,38 +21,38 @@ std::int32_t currentMapRow = -1;
 
 // decomp: sceneArmFiles (src/MENU/MENU5.PRG/4D8.c:380)
 const VS::Content::DiscFile kSceneArmFiles[kSceneCount] = {
-    {VS_DUMMY_ARM_LBA, VS_DUMMY_ARM_SIZE},
-    {VS_SCEN001_ARM_LBA, VS_SCEN001_ARM_SIZE},
-    {VS_SCEN002_ARM_LBA, VS_SCEN002_ARM_SIZE},
-    {VS_SCEN003_ARM_LBA, VS_SCEN003_ARM_SIZE},
-    {VS_SCEN004_ARM_LBA, VS_SCEN004_ARM_SIZE},
-    {VS_SCEN005_ARM_LBA, VS_SCEN005_ARM_SIZE},
-    {VS_SCEN006_ARM_LBA, VS_SCEN006_ARM_SIZE},
-    {VS_SCEN007_ARM_LBA, VS_SCEN007_ARM_SIZE},
-    {VS_SCEN008_ARM_LBA, VS_SCEN008_ARM_SIZE},
-    {VS_SCEN009_ARM_LBA, VS_SCEN009_ARM_SIZE},
-    {VS_SCEN010_ARM_LBA, VS_SCEN010_ARM_SIZE},
-    {VS_SCEN011_ARM_LBA, VS_SCEN011_ARM_SIZE},
-    {VS_SCEN012_ARM_LBA, VS_SCEN012_ARM_SIZE},
-    {VS_SCEN013_ARM_LBA, VS_SCEN013_ARM_SIZE},
-    {VS_SCEN014_ARM_LBA, VS_SCEN014_ARM_SIZE},
-    {VS_SCEN015_ARM_LBA, VS_SCEN015_ARM_SIZE},
-    {VS_SCEN016_ARM_LBA, VS_SCEN016_ARM_SIZE},
-    {VS_SCEN017_ARM_LBA, VS_SCEN017_ARM_SIZE},
-    {VS_SCEN018_ARM_LBA, VS_SCEN018_ARM_SIZE},
-    {VS_SCEN019_ARM_LBA, VS_SCEN019_ARM_SIZE},
-    {VS_SCEN020_ARM_LBA, VS_SCEN020_ARM_SIZE},
-    {VS_SCEN021_ARM_LBA, VS_SCEN021_ARM_SIZE},
-    {VS_SCEN022_ARM_LBA, VS_SCEN022_ARM_SIZE},
-    {VS_SCEN023_ARM_LBA, VS_SCEN023_ARM_SIZE},
-    {VS_SCEN024_ARM_LBA, VS_SCEN024_ARM_SIZE},
-    {VS_SCEN025_ARM_LBA, VS_SCEN025_ARM_SIZE},
-    {VS_SCEN026_ARM_LBA, VS_SCEN026_ARM_SIZE},
-    {VS_SCEN027_ARM_LBA, VS_SCEN027_ARM_SIZE},
-    {VS_SCEN028_ARM_LBA, VS_SCEN028_ARM_SIZE},
-    {VS_SCEN029_ARM_LBA, VS_SCEN029_ARM_SIZE},
-    {VS_SCEN030_ARM_LBA, VS_SCEN030_ARM_SIZE},
-    {VS_SCEN031_ARM_LBA, VS_SCEN031_ARM_SIZE},
+    LocateAs<VS::Content::DiscFile>("SMALL/DUMMY.ARM"),
+    LocateAs<VS::Content::DiscFile>("SMALL/SCEN001.ARM"),
+    LocateAs<VS::Content::DiscFile>("SMALL/SCEN002.ARM"),
+    LocateAs<VS::Content::DiscFile>("SMALL/SCEN003.ARM"),
+    LocateAs<VS::Content::DiscFile>("SMALL/SCEN004.ARM"),
+    LocateAs<VS::Content::DiscFile>("SMALL/SCEN005.ARM"),
+    LocateAs<VS::Content::DiscFile>("SMALL/SCEN006.ARM"),
+    LocateAs<VS::Content::DiscFile>("SMALL/SCEN007.ARM"),
+    LocateAs<VS::Content::DiscFile>("SMALL/SCEN008.ARM"),
+    LocateAs<VS::Content::DiscFile>("SMALL/SCEN009.ARM"),
+    LocateAs<VS::Content::DiscFile>("SMALL/SCEN010.ARM"),
+    LocateAs<VS::Content::DiscFile>("SMALL/SCEN011.ARM"),
+    LocateAs<VS::Content::DiscFile>("SMALL/SCEN012.ARM"),
+    LocateAs<VS::Content::DiscFile>("SMALL/SCEN013.ARM"),
+    LocateAs<VS::Content::DiscFile>("SMALL/SCEN014.ARM"),
+    LocateAs<VS::Content::DiscFile>("SMALL/SCEN015.ARM"),
+    LocateAs<VS::Content::DiscFile>("SMALL/SCEN016.ARM"),
+    LocateAs<VS::Content::DiscFile>("SMALL/SCEN017.ARM"),
+    LocateAs<VS::Content::DiscFile>("SMALL/SCEN018.ARM"),
+    LocateAs<VS::Content::DiscFile>("SMALL/SCEN019.ARM"),
+    LocateAs<VS::Content::DiscFile>("SMALL/SCEN020.ARM"),
+    LocateAs<VS::Content::DiscFile>("SMALL/SCEN021.ARM"),
+    LocateAs<VS::Content::DiscFile>("SMALL/SCEN022.ARM"),
+    LocateAs<VS::Content::DiscFile>("SMALL/SCEN023.ARM"),
+    LocateAs<VS::Content::DiscFile>("SMALL/SCEN024.ARM"),
+    LocateAs<VS::Content::DiscFile>("SMALL/SCEN025.ARM"),
+    LocateAs<VS::Content::DiscFile>("SMALL/SCEN026.ARM"),
+    LocateAs<VS::Content::DiscFile>("SMALL/SCEN027.ARM"),
+    LocateAs<VS::Content::DiscFile>("SMALL/SCEN028.ARM"),
+    LocateAs<VS::Content::DiscFile>("SMALL/SCEN029.ARM"),
+    LocateAs<VS::Content::DiscFile>("SMALL/SCEN030.ARM"),
+    LocateAs<VS::Content::DiscFile>("SMALL/SCEN031.ARM"),
 };
 
 // decomp: mapNames (src/MENU/MENU5.PRG/4D8.c:421); contents: the module image

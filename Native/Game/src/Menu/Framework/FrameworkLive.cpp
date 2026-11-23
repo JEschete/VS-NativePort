@@ -36,7 +36,7 @@
 #include "Boot/SessionLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/CdDriveLive.hpp"
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Content/ModuleData.hpp"
 #include "Content/OverlayWorkspaceLive.hpp"
@@ -99,6 +99,8 @@
 #include "Render/UiPrimitives.hpp"
 #include "Save/NativeContainerLive.hpp"
 #include "State/StateFlags.hpp"
+
+using VS::Content::disc::Locate;
 
 using VS::Core::Gte::MATRIX;
 
@@ -279,31 +281,36 @@ constexpr Layer kCallerLayer{.base = LayerBase::kCaller, .slot = 0};
                                                 std::uint32_t size) {
   return lba << kLbaShift | size >> kSectorShift;
 }
+[[nodiscard]] constexpr std::uint32_t SquashLba(
+    VS::Content::disc::FileExtent file) {
+  return SquashLba(static_cast<std::uint32_t>(file.lba),
+                   static_cast<std::uint32_t>(file.size));
+}
 
 // The item shortcut loads MAINMENU.PRG alone.
 [[nodiscard]] constexpr std::uint32_t MainMenuProgram() {
-  return SquashLba(VS_MAINMENU_PRG_LBA, VS_MAINMENU_PRG_SIZE);
+  return SquashLba(Locate("MENU/MAINMENU.PRG"));
 }
 
 // decomp: _menuLbas (BATTLE/BATTLE.PRG 5BF94.c): MAINMENU.PRG with the
 // background, then the submenus' programs.
 constexpr std::array<std::uint32_t, kSubmenuStateCount> kMenuFiles = {
-    MainMenuProgram() + (VS_MENUBG_BIN_SIZE >> kSectorShift),
-    SquashLba(VS_MENU0_PRG_LBA, VS_MENU0_PRG_SIZE),
-    SquashLba(VS_MENU1_PRG_LBA, VS_MENU1_PRG_SIZE),
-    SquashLba(VS_MENU2_PRG_LBA, VS_MENU2_PRG_SIZE),
-    SquashLba(VS_MENU3_PRG_LBA, VS_MENU3_PRG_SIZE),
-    SquashLba(VS_MENU4_PRG_LBA, VS_MENU4_PRG_SIZE),
-    SquashLba(VS_MENU5_PRG_LBA, VS_MENU5_PRG_SIZE),
-    SquashLba(VS_MENU7_PRG_LBA, VS_MENU7_PRG_SIZE),
-    SquashLba(VS_MENU8_PRG_LBA, VS_MENU8_PRG_SIZE),
-    SquashLba(VS_MENU9_PRG_LBA, VS_MENU9_PRG_SIZE),
-    SquashLba(VS_MENUE_PRG_LBA, VS_MENUE_PRG_SIZE),
-    SquashLba(VS_MENUA_PRG_LBA, 0),
-    SquashLba(VS_MENUB_PRG_LBA, VS_MENUB_PRG_SIZE),
-    SquashLba(VS_MENUC_PRG_LBA, VS_MENUC_PRG_SIZE),
-    SquashLba(VS_MENUD_PRG_LBA, VS_MENUD_PRG_SIZE),
-    SquashLba(VS_MENUF_PRG_LBA, VS_MENUF_PRG_SIZE),
+    MainMenuProgram() + (Locate("MENU/MENUBG.BIN").size >> kSectorShift),
+    SquashLba(Locate("MENU/MENU0.PRG")),
+    SquashLba(Locate("MENU/MENU1.PRG")),
+    SquashLba(Locate("MENU/MENU2.PRG")),
+    SquashLba(Locate("MENU/MENU3.PRG")),
+    SquashLba(Locate("MENU/MENU4.PRG")),
+    SquashLba(Locate("MENU/MENU5.PRG")),
+    SquashLba(Locate("MENU/MENU7.PRG")),
+    SquashLba(Locate("MENU/MENU8.PRG")),
+    SquashLba(Locate("MENU/MENU9.PRG")),
+    SquashLba(Locate("MENU/MENUE.PRG")),
+    SquashLba(Locate("MENU/MENUA.PRG").lba, 0),
+    SquashLba(Locate("MENU/MENUB.PRG")),
+    SquashLba(Locate("MENU/MENUC.PRG")),
+    SquashLba(Locate("MENU/MENUD.PRG")),
+    SquashLba(Locate("MENU/MENUF.PRG")),
 };
 
 State frameworkState;
@@ -440,26 +447,26 @@ class CallOutScope {
 // statics with the program bytes. Native owners live outside that image.
 void ResetLoadedSubmenu(int lba) {
   switch (lba) {
-    case VS_MENU0_PRG_LBA:
+    case Locate("MENU/MENU0.PRG").lba:
       Magic::ResetMagicMenusLiveState();
       Magic::ResetTeleportMenuLiveState();
       break;
-    case VS_MENU1_PRG_LBA:
+    case Locate("MENU/MENU1.PRG").lba:
       break_arts::ResetLiveStatics();
       break;
-    case VS_MENU2_PRG_LBA:
+    case Locate("MENU/MENU2.PRG").lba:
       VS::Boot::ResetMenu2Statics();
       break;
-    case VS_MENU3_PRG_LBA:
+    case Locate("MENU/MENU3.PRG").lba:
       VS::Boot::ResetMenu3Statics();
       break;
-    case VS_MENU4_PRG_LBA:
+    case Locate("MENU/MENU4.PRG").lba:
       VS::Boot::ResetMenu4Statics();
       break;
-    case VS_MENU5_PRG_LBA:
+    case Locate("MENU/MENU5.PRG").lba:
       VS::Boot::ResetMenu5Statics();
       break;
-    case VS_MENU9_PRG_LBA:
+    case Locate("MENU/MENU9.PRG").lba:
       if (!Score::CleanupLiveEnemyPreviewOwnedState()) {
         VS::Core::LogError("menu.framework",
                            "enemy-preview cleanup refused before MENU9 reload");
@@ -467,22 +474,22 @@ void ResetLoadedSubmenu(int lba) {
       }
       VS::Boot::ResetMenu9Statics();
       break;
-    case VS_MENUB_PRG_LBA:
+    case Locate("MENU/MENUB.PRG").lba:
       VS::Boot::ResetMenubStatics();
       break;
-    case VS_MENUD_PRG_LBA:
+    case Locate("MENU/MENUD.PRG").lba:
       VS::Boot::ResetMenudStatics();
       break;
-    case VS_MENUE_PRG_LBA:
+    case Locate("MENU/MENUE.PRG").lba:
       VS::Boot::ResetMenueStatics();
       break;
-    case VS_MENUF_PRG_LBA:
+    case Locate("MENU/MENUF.PRG").lba:
       VS::Boot::ResetMenufStatics();
       break;
-    case VS_MENU7_PRG_LBA:
-    case VS_MENU8_PRG_LBA:
-    case VS_MENUA_PRG_LBA:
-    case VS_MENUC_PRG_LBA:
+    case Locate("MENU/MENU7.PRG").lba:
+    case Locate("MENU/MENU8.PRG").lba:
+    case Locate("MENU/MENUA.PRG").lba:
+    case Locate("MENU/MENUC.PRG").lba:
       break;
     default:
       VS::Core::LogWarn("menu.framework",
@@ -912,7 +919,7 @@ class LiveHost final : public Host {
     if (!loaded_lba) {
       return;
     }
-    if (*loaded_lba == VS_MAINMENU_PRG_LBA) {
+    if (*loaded_lba == Locate("MENU/MAINMENU.PRG").lba) {
       // The core handles ordinary MAINMENU loads; the item shortcut can
       // load that same program for a nonzero logical submenu.
       if (frameworkState.loaded_sub_menu != 0) {

@@ -16,7 +16,7 @@
 #include <type_traits>
 
 #include "Content/CdDriveLive.hpp"
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -25,6 +25,8 @@
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
+
+using VS::Content::disc::Locate;
 
 namespace VS::Render {
 namespace {
@@ -46,49 +48,48 @@ struct GimFile {
   std::uint32_t lba = 0;
   std::uint32_t sectors = 0;
 };
-constexpr GimFile File(std::uint32_t lba, std::uint32_t size) {
-  return {.lba = lba, .sectors = size >> kSectorShift};
+constexpr GimFile File(VS::Content::disc::FileExtent file) {
+  return {.lba = static_cast<std::uint32_t>(file.lba),
+          .sectors = static_cast<std::uint32_t>(file.size) >> kSectorShift};
 }
-constexpr GimFile kStaff13 = File(VS_STAFF013_GIM_LBA, VS_STAFF013_GIM_SIZE);
+constexpr GimFile kStaff13 = File(Locate("GIM/STAFF013.GIM"));
 constexpr std::array<GimFile, kGimImageCount> kGimFiles = {
-    File(VS_STAFF011_GIM_LBA, VS_STAFF011_GIM_SIZE),
-    File(VS_STAFF001_GIM_LBA, VS_STAFF001_GIM_SIZE),
-    File(VS_STAFF002_GIM_LBA, VS_STAFF002_GIM_SIZE),
-    File(VS_STAFF003_GIM_LBA, VS_STAFF003_GIM_SIZE),
-    File(VS_STAFF004_GIM_LBA, VS_STAFF004_GIM_SIZE),
-    File(VS_STAFF005_GIM_LBA, VS_STAFF005_GIM_SIZE),
-    File(VS_STAFF006_GIM_LBA, VS_STAFF006_GIM_SIZE),
-    File(VS_STAFF007_GIM_LBA, VS_STAFF007_GIM_SIZE),
-    File(VS_STAFF008_GIM_LBA, VS_STAFF008_GIM_SIZE),
-    File(VS_GAMEOVER_GIM_LBA, VS_GAMEOVER_GIM_SIZE),
-    File(VS_STAFF009_GIM_LBA, VS_STAFF009_GIM_SIZE),
-    File(VS_STAFF010_GIM_LBA, VS_STAFF010_GIM_SIZE),
-    File(VS_STAFF012_GIM_LBA, VS_STAFF012_GIM_SIZE),
-    File(VS_ENKEI_GIM_LBA, VS_ENKEI_GIM_SIZE),
-    File(VS_LOGO_G22_GIM_LBA, VS_LOGO_G22_GIM_SIZE),
+    File(Locate("GIM/STAFF011.GIM")),
+    File(Locate("GIM/STAFF001.GIM")),
+    File(Locate("GIM/STAFF002.GIM")),
+    File(Locate("GIM/STAFF003.GIM")),
+    File(Locate("GIM/STAFF004.GIM")),
+    File(Locate("GIM/STAFF005.GIM")),
+    File(Locate("GIM/STAFF006.GIM")),
+    File(Locate("GIM/STAFF007.GIM")),
+    File(Locate("GIM/STAFF008.GIM")),
+    File(Locate("GIM/GAMEOVER.GIM")),
+    File(Locate("GIM/STAFF009.GIM")),
+    File(Locate("GIM/STAFF010.GIM")),
+    File(Locate("GIM/STAFF012.GIM")),
+    File(Locate("GIM/ENKEI.GIM")),
+    File(Locate("GIM/LOGO_G22.GIM")),
     kStaff13,
-    File(VS_1142_GIM_LBA, VS_1142_GIM_SIZE),
-    File(VS_N_LEA_GIM_LBA, VS_N_LEA_GIM_SIZE),
-    File(VS_LOGO_28_GIM_LBA, VS_LOGO_28_GIM_SIZE),
-    File(VS_LOGO_29_GIM_LBA, VS_LOGO_29_GIM_SIZE),
-    File(VS_LOGO_30_GIM_LBA, VS_LOGO_30_GIM_SIZE),
-    File(VS_LOGO_31_GIM_LBA, VS_LOGO_31_GIM_SIZE),
-    File(VS_VKP_2_GIM_LBA, VS_VKP_2_GIM_SIZE),
-    File(VS_VKP_1_GIM_LBA, VS_VKP_1_GIM_SIZE),
-    File(VS_VKP_0_GIM_LBA, VS_VKP_0_GIM_SIZE),
-    File(VS_JYO_GIM_LBA, VS_JYO_GIM_SIZE),
-    File(VS_HEADQUAT_GIM_LBA, VS_HEADQUAT_GIM_SIZE),
-    File(VS_DEMOENK_GIM_LBA, VS_DEMOENK_GIM_SIZE),
-    File(VS_DADDY_GIM_LBA, VS_DADDY_GIM_SIZE),
-    File(VS_BLACK_GIM_LBA, VS_BLACK_GIM_SIZE),
-    File(VS_ENKEI2_GIM_LBA, VS_ENKEI2_GIM_SIZE),
-    File(VS_JO_GIM_LBA, VS_JO_GIM_SIZE),
-    File(VS_SUNRISE_GIM_LBA, VS_SUNRISE_GIM_SIZE),
-    File(VS_MAIN03_GIM_LBA, VS_MAIN03_GIM_SIZE),
-    File(VS_EPI_INF_GIM_LBA, VS_EPI_INF_GIM_SIZE),
-    File(VS_EPILOGUE_GIM_LBA, VS_EPILOGUE_GIM_SIZE),
-    kStaff13,
-    kStaff13,
+    File(Locate("GIM/1142.GIM")),
+    File(Locate("GIM/N_LEA.GIM")),
+    File(Locate("GIM/LOGO_28.GIM")),
+    File(Locate("GIM/LOGO_29.GIM")),
+    File(Locate("GIM/LOGO_30.GIM")),
+    File(Locate("GIM/LOGO_31.GIM")),
+    File(Locate("GIM/VKP_2.GIM")),
+    File(Locate("GIM/VKP_1.GIM")),
+    File(Locate("GIM/VKP_0.GIM")),
+    File(Locate("GIM/JYO.GIM")),
+    File(Locate("GIM/HEADQUAT.GIM")),
+    File(Locate("GIM/DEMOENK.GIM")),
+    File(Locate("GIM/DADDY.GIM")),
+    File(Locate("GIM/BLACK.GIM")),
+    File(Locate("GIM/ENKEI2.GIM")),
+    File(Locate("GIM/JO.GIM")),
+    File(Locate("GIM/SUNRISE.GIM")),
+    File(Locate("GIM/MAIN03.GIM")),
+    File(Locate("GIM/EPI_INF.GIM")),
+    File(Locate("GIM/EPILOGUE.GIM")),
     kStaff13,
     kStaff13,
     kStaff13,
@@ -102,19 +103,21 @@ constexpr std::array<GimFile, kGimImageCount> kGimFiles = {
     kStaff13,
     kStaff13,
     kStaff13,
-    File(VS_EPI_E01B_GIM_LBA, VS_EPI_E01B_GIM_SIZE),
-    File(VS_EV_MASK_GIM_LBA, VS_EV_MASK_GIM_SIZE),
-    File(VS_019XXX01_GIM_LBA, VS_019XXX01_GIM_SIZE),
-    File(VS_DEMO_001_GIM_LBA, VS_DEMO_001_GIM_SIZE),
-    File(VS_DEMO_002_GIM_LBA, VS_DEMO_002_GIM_SIZE),
-    File(VS_DEMO_003_GIM_LBA, VS_DEMO_003_GIM_SIZE),
-    File(VS_DEMO_004_GIM_LBA, VS_DEMO_004_GIM_SIZE),
-    File(VS_DEMO_005_GIM_LBA, VS_DEMO_005_GIM_SIZE),
-    File(VS_DEMO_006_GIM_LBA, VS_DEMO_006_GIM_SIZE),
-    File(VS_DEMO_007_GIM_LBA, VS_DEMO_007_GIM_SIZE),
-    File(VS_DEMO_008_GIM_LBA, VS_DEMO_008_GIM_SIZE),
-    File(VS_SQUARE_GIM_LBA, VS_SQUARE_GIM_SIZE),
-    File(VS_DEMOFIN_GIM_LBA, VS_DEMOFIN_GIM_SIZE),
+    kStaff13,
+    kStaff13,
+    File(Locate("GIM/EPI_E01B.GIM")),
+    File(Locate("GIM/EV_MASK.GIM")),
+    File(Locate("GIM/019XXX01.GIM")),
+    File(Locate("GIM/DEMO_001.GIM")),
+    File(Locate("GIM/DEMO_002.GIM")),
+    File(Locate("GIM/DEMO_003.GIM")),
+    File(Locate("GIM/DEMO_004.GIM")),
+    File(Locate("GIM/DEMO_005.GIM")),
+    File(Locate("GIM/DEMO_006.GIM")),
+    File(Locate("GIM/DEMO_007.GIM")),
+    File(Locate("GIM/DEMO_008.GIM")),
+    File(Locate("GIM/SQUARE.GIM")),
+    File(Locate("GIM/DEMOFIN.GIM")),
 };
 static_assert(std::ranges::all_of(kGimFiles, [](const GimFile& file) {
   return file.sectors != 0 && file.sectors <= kMaxSectors;

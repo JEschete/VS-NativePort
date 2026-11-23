@@ -9,7 +9,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Boot/SessionLive.hpp"
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Event/ScriptVmLiveState.hpp"
 #include "Menu/GameClearLifecycleLiveFixture.hpp"
 #include "Menu/GazetteTimesLiveFixture.hpp"
@@ -17,6 +17,8 @@
 #include "Menu/Score/GazetteStatisticsLive.hpp"
 #include "Menu/Score/ScoreScreen.hpp"
 #include "State/Progress.hpp"
+
+using VS::Content::disc::Locate;
 
 namespace {
 namespace live = gazette_times_live_tests;
@@ -161,12 +163,14 @@ TEST_CASE("Completed MENU9 resets only the time cursor before fresh rendering",
   score::clearCount = 3;
   const auto before = fixture.Observe();
   {
-    menu_overlay_tests::Load other(3, {VS_MENU2_PRG_LBA, VS_MENU2_PRG_SIZE});
+    menu_overlay_tests::Load other(
+        3, {Locate("MENU/MENU2.PRG").lba, Locate("MENU/MENU2.PRG").size});
     REQUIRE(other.Complete() == 1);
     CHECK(fixture.DrawCursor() == sequence[2]);
   }
   {
-    menu_overlay_tests::Load loaded(10, {VS_MENU9_PRG_LBA, VS_MENU9_PRG_SIZE});
+    menu_overlay_tests::Load loaded(
+        10, {Locate("MENU/MENU9.PRG").lba, Locate("MENU/MENU9.PRG").size});
     REQUIRE(loaded.Poll() == 0);
     CHECK(fixture.DrawCursor() == sequence[3]);
     REQUIRE(loaded.Complete() == 1);

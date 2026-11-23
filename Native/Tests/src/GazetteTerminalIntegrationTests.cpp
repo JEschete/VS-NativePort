@@ -10,13 +10,15 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Boot/SessionLive.hpp"
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Event/ScriptVmLiveState.hpp"
 #include "Menu/GameClearLifecycleLiveFixture.hpp"
 #include "Menu/GazetteTerminalLiveFixture.hpp"
 #include "Menu/GazetteTerminalPreviewFixture.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
 #include "State/Progress.hpp"
+
+using VS::Content::disc::Locate;
 
 namespace {
 namespace live = gazette_terminal_live_tests;
@@ -210,13 +212,15 @@ TEST_CASE("Only completed MENU9 drains the real pending or consumed MON owner",
   const auto owner = BeginMon(fixture, loaded);
   const ForeignOwner foreign;
   {
-    menu_overlay_tests::Load other(3, {VS_MENU2_PRG_LBA, VS_MENU2_PRG_SIZE});
+    menu_overlay_tests::Load other(
+        3, {Locate("MENU/MENU2.PRG").lba, Locate("MENU/MENU2.PRG").size});
     REQUIRE(other.Complete() == 1);
     CHECK(score::monBinData == owner.buffer);
   }
   {
-    menu_overlay_tests::Load menu(kGazetteScreen,
-                                  {VS_MENU9_PRG_LBA, VS_MENU9_PRG_SIZE});
+    menu_overlay_tests::Load menu(
+        kGazetteScreen,
+        {Locate("MENU/MENU9.PRG").lba, Locate("MENU/MENU9.PRG").size});
     REQUIRE(menu.Poll() == 0);
     CHECK(score::monBinData == owner.buffer);
     REQUIRE(menu.Complete() == 1);
@@ -270,8 +274,9 @@ void ResetAtBoundary(bool cold) {
     const auto entry = +[] { return 0; };
     REQUIRE(VS::Boot::RunLiveSessionLoop(entry, entry) == 0);
   } else {
-    menu_overlay_tests::Load menu(kGazetteScreen,
-                                  {VS_MENU9_PRG_LBA, VS_MENU9_PRG_SIZE});
+    menu_overlay_tests::Load menu(
+        kGazetteScreen,
+        {Locate("MENU/MENU9.PRG").lba, Locate("MENU/MENU9.PRG").size});
     REQUIRE(menu.Complete() == 1);
   }
 }

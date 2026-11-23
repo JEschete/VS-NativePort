@@ -13,7 +13,7 @@
 
 #include "Battle/StatusEffects.hpp"
 #include "Content/CdDriveLive.hpp"
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Core/Gte.hpp"
 #include "Core/Log.hpp"

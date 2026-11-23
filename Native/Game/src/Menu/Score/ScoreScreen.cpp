@@ -4,8 +4,10 @@
 
 #include <cstdint>
 
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Content/DiscQueue.hpp"
+
+using VS::Content::disc::LocateAs;
 
 using VS::Core::Gte::SVECTOR;
 using VS::Core::Gte::VECTOR;
@@ -61,8 +63,8 @@ VS::Content::DiscQueueSlot* VS::Menu::Score::monBinCdQueueSlot;
 VS::Menu::Score::EnemyEntry* VS::Menu::Score::monBinData;
 
 // decomp: _monBinFile (_monBinFile@src/MENU/MENU9.PRG/238.c)
-const VS::Content::DiscFile VS::Menu::Score::kMonBinFile = {VS_MON_BIN_LBA,
-                                                            VS_MON_BIN_SIZE};
+const VS::Content::DiscFile VS::Menu::Score::kMonBinFile =
+    LocateAs<VS::Content::DiscFile>("SMALL/MON.BIN");
 
 // decomp: _nextState (_nextState@src/MENU/MENU9.PRG/238.c)
 std::int32_t VS::Menu::Score::nextState;

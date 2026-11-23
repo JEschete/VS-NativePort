@@ -22,7 +22,7 @@
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DataStore.hpp"
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Content/DiscReaderLive.hpp"
 #include "Content/ModuleData.hpp"
@@ -42,6 +42,9 @@
 #include "Menu/Loot/LootTerminalLive.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
 #include "State/StateFlags.hpp"
+
+using VS::Content::disc::Locate;
+using VS::Content::disc::LocateAs;
 
 namespace {
 namespace inventory = VS::Menu::Inventory;
@@ -394,9 +397,9 @@ TEST_CASE(
   const auto other_module = loot ? kItemModule : kLootModule;
   const auto other_address = loot ? kItemNavigation : kLootNavigation;
   menu_overlay_tests::Load load(
-      loot ? 12 : 4,
-      loot ? VS::Content::DiscFile{VS_MENUB_PRG_LBA, VS_MENUB_PRG_SIZE}
-           : VS::Content::DiscFile{VS_MENU3_PRG_LBA, VS_MENU3_PRG_SIZE});
+      loot ? 12 : 4, loot ? VS::Content::DiscFile{Locate("MENU/MENUB.PRG").lba,
+                                                  Locate("MENU/MENUB.PRG").size}
+                          : LocateAs<VS::Content::DiscFile>("MENU/MENU3.PRG"));
   VS::Menu::Framework::menuMemory.inventory_cursors.category = 1;
   EnterEmptyNavigation(other_module, other_address);
   EnterEmptyNavigation(module, address);
@@ -448,13 +451,15 @@ TEST_CASE("F02553 MAINMENU reload restarts the live shortcut title phase",
   framework::ClearLiveMenuExcept(framework::kNoRow);
   REQUIRE(fixture.SettleRows());
   {
-    menu_overlay_tests::Load load(4, {VS_MENU3_PRG_LBA, VS_MENU3_PRG_SIZE});
+    menu_overlay_tests::Load load(
+        4, {Locate("MENU/MENU3.PRG").lba, Locate("MENU/MENU3.PRG").size});
     CHECK(load.Complete() == 1);
   }
   inventory::UpdateLiveMiscItemShortcut(0);
   CHECK(VS::Menu::Framework::itemNames == nullptr);
-  menu_overlay_tests::Load load(logical_submenu,
-                                {VS_MAINMENU_PRG_LBA, VS_MAINMENU_PRG_SIZE});
+  menu_overlay_tests::Load load(
+      logical_submenu,
+      {Locate("MENU/MAINMENU.PRG").lba, Locate("MENU/MAINMENU.PRG").size});
   VS::Menu::Framework::shortcutInvoked = kItemShortcut;
   CHECK(load.Complete() == 0);
   inventory::UpdateLiveMiscItemShortcut(0);
@@ -495,7 +500,8 @@ TEST_CASE(
   auto* const owned = loot::stagedInventory;
   fixture.BeginInventoryTransition();
   {
-    menu_overlay_tests::Load load(4, {VS_MENU3_PRG_LBA, VS_MENU3_PRG_SIZE});
+    menu_overlay_tests::Load load(
+        4, {Locate("MENU/MENU3.PRG").lba, Locate("MENU/MENU3.PRG").size});
     CHECK(load.Complete() == 1);
   }
   VS::Menu::Inventory::selectedItemCategoryIconOnTop = 1;
@@ -503,7 +509,8 @@ TEST_CASE(
   CHECK(VS::Menu::Inventory::selectedItemCategoryIconOnTop == 0);
   framework::ClearLiveMenuExcept(framework::kNoRow);
   REQUIRE(fixture.SettleRows());
-  menu_overlay_tests::Load load(12, {VS_MENUB_PRG_LBA, VS_MENUB_PRG_SIZE});
+  menu_overlay_tests::Load load(
+      12, {Locate("MENU/MENUB.PRG").lba, Locate("MENU/MENUB.PRG").size});
   CHECK(load.Complete() == 1);
   CHECK(loot::stagedInventory == owned);
   REQUIRE(loot::UpdateLiveInventoryTransition(0) == 0);

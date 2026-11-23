@@ -3,17 +3,19 @@
 
 #include <cstdint>
 
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Content/DiscQueue.hpp"
+
+using VS::Content::disc::LocateAs;
 
 namespace VS::Menu::Results {
 // decomp: _disFiles (_disFiles@src/MENU/MENUF.PRG/3B8.c)
 const VS::Content::DiscFile kDisFiles[kDisFileCount] = {
-    {VS_RANK_DIS_LBA, VS_RANK_DIS_SIZE},
-    {VS_TIME_DIS_LBA, VS_TIME_DIS_SIZE},
-    {VS_ATTACK_DIS_LBA, VS_ATTACK_DIS_SIZE},
-    {VS_IQ_DIS_LBA, VS_IQ_DIS_SIZE},
-    {VS_ESC_DIS_LBA, VS_ESC_DIS_SIZE},
+    LocateAs<VS::Content::DiscFile>("SMALL/RANK.DIS"),
+    LocateAs<VS::Content::DiscFile>("SMALL/TIME.DIS"),
+    LocateAs<VS::Content::DiscFile>("SMALL/ATTACK.DIS"),
+    LocateAs<VS::Content::DiscFile>("SMALL/IQ.DIS"),
+    LocateAs<VS::Content::DiscFile>("SMALL/ESC.DIS"),
 };
 
 // decomp: _newTimeSlot (_newTimeSlot@src/MENU/MENUF.PRG/3B8.c)

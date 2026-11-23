@@ -9,7 +9,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Boot/SessionLive.hpp"
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Content/ModuleData.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
@@ -18,6 +18,8 @@
 #include "Render/Frame.hpp"
 #include "State/Progress.hpp"
 #include "State/StateFlags.hpp"
+
+using VS::Content::disc::Locate;
 
 namespace {
 namespace results = VS::Menu::Results;
@@ -83,11 +85,13 @@ struct ReloadFixture : tests::Fixture {
 
   static void Reload(Asset asset) {
     {
-      menu_overlay_tests::Load other(3, {VS_MENU2_PRG_LBA, VS_MENU2_PRG_SIZE});
+      menu_overlay_tests::Load other(
+          3, {Locate("MENU/MENU2.PRG").lba, Locate("MENU/MENU2.PRG").size});
       REQUIRE(other.Complete() == 1);
       CheckUnchanged(asset);
     }
-    menu_overlay_tests::Load loaded(16, {VS_MENUF_PRG_LBA, VS_MENUF_PRG_SIZE});
+    menu_overlay_tests::Load loaded(
+        16, {Locate("MENU/MENUF.PRG").lba, Locate("MENU/MENUF.PRG").size});
     REQUIRE(loaded.Poll() == 0);
     CheckUnchanged(asset);
     REQUIRE(loaded.Complete() == 1);

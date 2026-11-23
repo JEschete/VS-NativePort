@@ -12,7 +12,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Content/DiscLayout.h"
+#include "Content/DiscLayout.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -26,6 +26,8 @@
 #include "Render/TexturePagesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.hpp"
+
+using VS::Content::disc::Locate;
 
 using VS::Core::Math::kQ12Unit;
 using VS::Legacy::ClearOTagR;
@@ -1031,7 +1033,7 @@ VS::Content::DiscQueueSlot& QueueStaffImage() {
       VS::Content::discRequestSlots,
       [](const VS::Content::DiscQueueSlot& request) {
         return request.state == VS::Content::DiscRequestState::kEnqueued &&
-               request.file.lba == VS_STAFF011_GIM_LBA;
+               request.file.lba == Locate("GIM/STAFF011.GIM").lba;
       });
   REQUIRE(slot != std::end(VS::Content::discRequestSlots));
   const GimFile file = BuildFile(kOneRow, 1);

@@ -1,7 +1,7 @@
 id,kind,path,origin,generated,guard,c_linkage,static_asserts,typedefs,void_params,gnu_attributes,macros,global_decls,c_wrapped,baseline,status,notes
 H0001,header,Native/Content/Legacy/LibDs.hpp,legacy,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0002,header,Native/Content/include/Content/DataAccess.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0003,header,Native/Content/include/Content/DiscLayout.h,generated,yes,pragma-once,0,0,0,0,0,10324,0,0,0,remaining,
+H0003,header,Native/Content/include/Content/DiscLayout.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0004,header,Native/Content/include/Content/ModuleData.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0005,header,Native/Content/include/Content/StringTables.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0006,header,Native/Content/src/ActorAssets.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,retired,merged into Native/Content/include/Content/ActorAssetsLive.hpp as VS::Content::LegacyActorAssetRequest and VS::Content::SequenceBuffer (#441)
