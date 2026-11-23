@@ -276,6 +276,7 @@ std::expected<ModelConversionReport, std::string> ConvertDiscWeapons(
     auto expected = WeaponOutputOf(*source);
     if (!expected) return std::unexpected(expected.error());
     jobs.push_back({.expected = std::move(*expected),
+                    .companions = {},
                     .convert = [source = std::move(*source)] {
                       return ConvertWepModel(source);
                     }});
@@ -284,7 +285,8 @@ std::expected<ModelConversionReport, std::string> ConvertDiscWeapons(
                            {.name = Content::kWepModelConverterName,
                             .version = Content::kWepModelConverterVersion,
                             .directory = Content::kWepModelDirectory,
-                            .force = force},
+                            .force = force,
+                            .companion = std::nullopt},
                            jobs);
 }
 

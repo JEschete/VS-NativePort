@@ -17,7 +17,9 @@
 #include <utility>
 #include <vector>
 
+#include "Content/ActorAnimation.hpp"
 #include "Content/ConversionManifest.hpp"
+#include "Content/SeqFile.hpp"
 #include "nlohmann/json.hpp"
 
 namespace VS::Content {
@@ -585,13 +587,12 @@ Json TexturePayload(const ShpModelDocument& document) {
 }
 
 // What the payload holds beyond the document: the parts' sizes, the texture's
-// palette words and the buffer views of the sound and the embedded SEQ.
+// palette words and the buffer view of the sound.
 struct Payload {
   ShpModelDocument document;
   ShpPolygonCounts counts{};
   std::uint8_t palette_words = 0;
   std::optional<std::size_t> sound_view;
-  std::optional<std::size_t> sequence_view;
 };
 
 Check ReadIdentity(const JsonMembers& members, ShpModelDocument& document) {
@@ -611,14 +612,65 @@ Check ReadGeometryHeader(const JsonMembers& members, Payload& payload) {
   shp.colored = *colored;
   auto sound = OptionalIndex(members, "sound");
   if (!sound) return std::unexpected(sound.error());
-  auto sequence = OptionalIndex(members, "sequence");
-  if (!sequence) return std::unexpected(sequence.error());
   payload.sound_view = *sound;
-  payload.sequence_view = *sequence;
   auto counts = ReadShpModelHeader(members, shp);
   if (!counts) return std::unexpected(counts.error());
   payload.counts = *counts;
   return ReadUnsigned(members, "sequence_word", shp.sequence_word);
+}
+
+// The embedded bank, after the bones (ReadGeometryHeader).
+Check ReadSequence(const JsonMembers& members,
+                   std::span<const std::uint8_t> event_lengths, ShpFile& shp) {
+  auto value = members.Get("sequence");
+  if (!value) return std::unexpected(value.error());
+  shp.sequence.clear();
+  if ((*value)->is_null()) return {};
+  auto bank = SeqBankOf(**value, members.Where("sequence"));
+  if (!bank) return std::unexpected(bank.error());
+  auto bytes = EncodeSeqBank(*bank, shp.bones.size(), event_lengths);
+  if (!bytes) {
+    return std::unexpected(
+        std::format("{}: {}", members.Where("sequence"), bytes.error()));
+  }
+  shp.sequence = std::move(*bytes);
+  return {};
+}
+
+// The owned banks, after the bones (ReadGeometryHeader).
+Check ReadSequences(const JsonMembers& members,
+                    std::span<const std::uint8_t> event_lengths,
+                    ShpModelDocument& document) {
+  auto value = members.Get("sequences");
+  if (!value) return std::unexpected(value.error());
+  const Json& list = **value;
+  const std::string where = members.Where("sequences");
+  if (!list.is_array()) {
+    return std::unexpected(std::format(
+        "{} must be an array of vs.actor-animation documents", where));
+  }
+  document.sequences.clear();
+  for (std::size_t index = 0; index < list.size(); ++index) {
+    const std::string item = std::format("{}[{}]", where, index);
+    auto sequence = ActorAnimationOf(list[index], item);
+    if (!sequence) return std::unexpected(sequence.error());
+    if (sequence->file.bones != document.shp.bones.size()) {
+      return std::unexpected(
+          std::format("{}.bones is {}; the model has {} bones", item,
+                      sequence->file.bones, document.shp.bones.size()));
+    }
+    if (!document.sequences.empty() &&
+        sequence->source <= document.sequences.back().source) {
+      return std::unexpected(std::format("{}.source must sort after \"{}\"",
+                                         item,
+                                         document.sequences.back().source));
+    }
+    if (auto bytes = EncodeSeqFile(sequence->file, event_lengths); !bytes) {
+      return std::unexpected(std::format("{}: {}", item, bytes.error()));
+    }
+    document.sequences.push_back(*std::move(sequence));
+  }
+  return {};
 }
 
 Check ReadBones(const JsonMembers& members, ShpModel& model) {
@@ -824,14 +876,15 @@ Result<GltfFile> ReadGltf(std::string_view stem, const ImageFileReader& read) {
   return file;
 }
 
-Result<Payload> ReadPayload(const GltfFile& file) {
+Result<Payload> ReadPayload(const GltfFile& file,
+                            std::span<const std::uint8_t> event_lengths) {
   auto payload_members = ModelGltfPayload(file);
   if (!payload_members) return std::unexpected(payload_members.error());
   const JsonMembers& members = *payload_members;
-  if (auto only = members.Only({"schema", "schema_version", "id", "source",
-                                "source_sha256", "colored", "polygon_counts",
-                                "limb_ranges", "layout", "bones", "sound",
-                                "sequence_word", "sequence", "texture"});
+  if (auto only = members.Only(
+          {"schema", "schema_version", "id", "source", "source_sha256",
+           "colored", "polygon_counts", "limb_ranges", "layout", "bones",
+           "sound", "sequence_word", "sequence", "texture", "sequences"});
       !only) {
     return std::unexpected(only.error());
   }
@@ -841,6 +894,13 @@ Result<Payload> ReadPayload(const GltfFile& file) {
           ReadGeometryHeader(members, payload),
           ReadLayout(members, payload.document.shp),
           ReadTexturePayload(members, payload),
+      });
+      !read) {
+    return std::unexpected(read.error());
+  }
+  if (auto read = FirstError({
+          ReadSequence(members, event_lengths, payload.document.shp),
+          ReadSequences(members, event_lengths, payload.document),
       });
       !read) {
     return std::unexpected(read.error());
@@ -1717,10 +1777,7 @@ Result<ShpModelDocument> AssembleModel(const GltfFile& file, Payload& payload) {
   }
   auto sound = ViewBytes(file, payload.sound_view, "sound");
   if (!sound) return std::unexpected(sound.error());
-  auto sequence = ViewBytes(file, payload.sequence_view, "sequence");
-  if (!sequence) return std::unexpected(sequence.error());
   shp.sound = std::move(*sound);
-  shp.sequence = std::move(*sequence);
   if (auto encoded = EncodeShp(shp); !encoded) {
     return std::unexpected(std::format("{}: the model is not a valid SHP: {}",
                                        file.name, encoded.error()));
@@ -1918,9 +1975,20 @@ std::expected<Layout, std::string> ShpLayoutOf(const JsonDocument& layout) {
   return LayoutOf(layout, "layout");
 }
 
+std::expected<JsonDocument, std::string> ShpSequenceJson(
+    const ShpFile& shp, std::span<const std::uint8_t> event_lengths) {
+  if (shp.sequence.empty()) return Json(nullptr);
+  auto bank = DecodeSeqBank(shp.sequence, shp.bones.size(), event_lengths);
+  if (!bank) {
+    return std::unexpected(
+        std::format("the embedded SEQ bank: {}", bank.error()));
+  }
+  return SeqBankJson(*bank);
+}
+
 JsonDocument ShpModelPayload(const ShpModelDocument& document,
                              std::optional<std::size_t> sound_view,
-                             std::optional<std::size_t> sequence_view) {
+                             JsonDocument sequence) {
   const ShpFile& shp = document.shp;
   Json payload = Json::object();
   payload["schema"] = std::string(kShpModelSchema);
@@ -1935,8 +2003,13 @@ JsonDocument ShpModelPayload(const ShpModelDocument& document,
   payload["bones"] = ShpBonesJson(shp);
   payload["sound"] = IndexJson(sound_view);
   payload["sequence_word"] = shp.sequence_word;
-  payload["sequence"] = IndexJson(sequence_view);
+  payload["sequence"] = std::move(sequence);
   payload["texture"] = TexturePayload(document);
+  Json sequences = Json::array();
+  for (const ActorAnimationDocument& owned : document.sequences) {
+    sequences.push_back(ActorAnimationJson(owned));
+  }
+  payload["sequences"] = std::move(sequences);
   return payload;
 }
 
@@ -2077,10 +2150,11 @@ std::expected<ImageDocument, std::string> ReadModelImage(
 }
 
 std::expected<ShpModelDocument, std::string> DecodeShpModelFiles(
-    std::string_view stem, const ImageFileReader& read) {
+    std::string_view stem, const ImageFileReader& read,
+    std::span<const std::uint8_t> event_lengths) {
   auto file = ReadModelGltf(stem, read);
   if (!file) return std::unexpected(file.error());
-  auto payload = ReadPayload(*file);
+  auto payload = ReadPayload(*file, event_lengths);
   if (!payload) return std::unexpected(payload.error());
   if (auto texture = ReadOwnTexture(stem, read, *payload); !texture) {
     return std::unexpected(texture.error());
@@ -2089,8 +2163,10 @@ std::expected<ShpModelDocument, std::string> DecodeShpModelFiles(
 }
 
 std::expected<ShpModelDocument, std::string> LoadShpModelFiles(
-    const fs::path& directory, std::string_view stem) {
-  return DecodeShpModelFiles(stem, DirectoryFileReader(directory));
+    const fs::path& directory, std::string_view stem,
+    std::span<const std::uint8_t> event_lengths) {
+  return DecodeShpModelFiles(stem, DirectoryFileReader(directory),
+                             event_lengths);
 }
 
 }  // namespace VS::Content

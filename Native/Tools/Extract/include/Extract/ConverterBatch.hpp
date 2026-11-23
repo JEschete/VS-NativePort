@@ -68,9 +68,10 @@ struct RunStart {
     const std::filesystem::path& root);
 
 // Records `batches` in place of their converters' previous outputs, writes
-// manifest.json, then removes the files the previous outputs listed that no
-// current one does, and returns how many it removed. Removal comes last, so a
-// failed removal leaves only unlisted files.
+// manifest.json, then removes the files those converters' previous outputs
+// listed that no output in the new manifest does, and returns how many it
+// removed. A file that several outputs share stays while any of them lists it.
+// Removal comes last, so a failed removal leaves only unlisted files.
 [[nodiscard]] std::expected<std::size_t, std::string> PublishBatches(
     const std::filesystem::path& root,
     const Content::ConversionManifest& previous,

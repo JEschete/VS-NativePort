@@ -3,13 +3,15 @@
 #include <cstddef>
 #include <cstdint>
 #include <expected>
+#include <span>
 #include <string>
 #include <vector>
 
 #include "Content/DataStore.hpp"
 
 // Converted character and weapon models the runtime loads in place of
-// OBJ\<NN>.SHP and OBJ\<NN>.WEP (ASSET_PIPELINE.md §6.2-6.3, #203, #204).
+// OBJ\<NN>.SHP and OBJ\<NN>.WEP (ASSET_PIPELINE.md §6.2-6.3, #203, #204), and
+// the OBJ\*.SEQ animation banks their glTF files hold (§6.2.1, #205).
 // Loading never converts; a missing or mismatched output is an error naming
 // the file.
 namespace VS::Content {
@@ -19,6 +21,9 @@ namespace VS::Content {
 struct ConvertedModelRead {
   std::uint32_t lba = 0;
   std::uint64_t rounded_size = 0;
+  // The game's event stride table (SeqFile.hpp kSeqEventLengthsAt), which
+  // reads character models' banks; weapons have none.
+  std::span<const std::uint8_t> event_lengths;
 };
 
 // The SHP bytes rebuilt from the shp-gltf output of the file `read` names,
@@ -30,5 +35,11 @@ LoadConvertedModel(const DataStore& store, const ConvertedModelRead& read);
 // checked against the manifest as LoadConvertedModel checks a model.
 [[nodiscard]] std::expected<std::vector<std::byte>, std::string>
 LoadConvertedWeapon(const DataStore& store, const ConvertedModelRead& read);
+
+// The SEQ bytes rebuilt from the glTF of the model that owns the bank `read`
+// names: its seq-gltf output names the owner's shp-gltf output, which must be
+// current with the hash the bank output records.
+[[nodiscard]] std::expected<std::vector<std::byte>, std::string>
+LoadConvertedSequence(const DataStore& store, const ConvertedModelRead& read);
 
 }  // namespace VS::Content

@@ -18,9 +18,11 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Content/ActorAnimation.hpp"
+#include "Content/ConvertedModels.hpp"
 #include "Content/JsonText.hpp"
 #include "Content/SeqFile.hpp"
 #include "Content/ShpFile.hpp"
+#include "Content/ShpModelFiles.hpp"
 #include "TestSupport/ModelFixtures.hpp"
 
 namespace {
@@ -499,19 +501,6 @@ TEST_CASE("The actor-animation reader names the member at fault",
   }
 }
 
-// The game's event stride table, from BATTLE.PRG beside the models.
-Lengths GameLengths(const fs::path& models) {
-  const Bytes prg = ReadModel(models.parent_path() / "BATTLE" / "BATTLE.PRG");
-  REQUIRE(prg.size() >=
-          content::kSeqEventLengthsAt + content::kSeqEventLengthCount);
-  Lengths lengths{};
-  for (std::size_t op = 0; op < lengths.size(); ++op) {
-    lengths.at(op) =
-        std::to_integer<std::uint8_t>(prg.at(content::kSeqEventLengthsAt + op));
-  }
-  return lengths;
-}
-
 void CountRef(const content::SeqRef& ref, Tallies& tallies) {
   if (std::holds_alternative<content::SeqEmpty>(ref)) {
     ++tallies["empty refs"];
@@ -580,7 +569,7 @@ TEST_CASE("Extracted SEQ files decode and rebuild their exact bytes",
           "[content-models][seq][extract]") {
   const auto models = ExtractedModels();
   if (!models) SKIP("Extracted Native/data is unavailable");
-  const Lengths lengths = GameLengths(*models);
+  const Lengths lengths = VS::test_support::ExtractedEventLengths(*models);
   Tallies tallies;
   for (const auto& entry : fs::directory_iterator(*models)) {
     if (entry.path().extension() != ".SEQ") continue;
@@ -618,7 +607,7 @@ TEST_CASE("Banks embedded in extracted SHP files rebuild their exact bytes",
           "[content-models][seq][extract]") {
   const auto models = ExtractedModels();
   if (!models) SKIP("Extracted Native/data is unavailable");
-  const Lengths lengths = GameLengths(*models);
+  const Lengths lengths = VS::test_support::ExtractedEventLengths(*models);
   Tallies tallies;
   for (const auto& entry : fs::directory_iterator(*models)) {
     if (entry.path().extension() != ".SHP") continue;
@@ -640,8 +629,18 @@ TEST_CASE("Banks embedded in extracted SHP files rebuild their exact bytes",
   // The embedded banks hold only each bone's initial key.
   const Tallies expected{{"commands", 0},  {"files", 202},   {"own clips", 202},
                          {"scripts", 140}, {"tracks", 4791}, {"unread", 115}};
-  INFO(Describe(tallies));
   CHECK(tallies == expected);
+}
+
+TEST_CASE("Extracted SEQ banks load from their owners' glTF as exact bytes",
+          "[content-models][seq][extract]") {
+  const auto models = ExtractedModels();
+  if (!models) SKIP("Extracted Native/data is unavailable");
+  constexpr std::size_t kExtractedBanks = 700;
+  const Lengths lengths = VS::test_support::ExtractedEventLengths(*models);
+  CHECK(VS::test_support::CheckExtractedModelsLoad(
+            *models, content::kSeqExtension, content::LoadConvertedSequence,
+            lengths) == kExtractedBanks);
 }
 
 }  // namespace

@@ -103,6 +103,7 @@ DECODERS = {
     "fbc-palette-png": "Extract::ConvertFbcPalette",
     "fbt-texture-png": "Extract::ConvertFbtTexture",
     "shp-gltf": "Content::DecodeShp",
+    "seq-gltf": "Content::DecodeSeqFile",
     "syd-recipe-csv": "Extract::DecodeSydRecipes",
     "wep-gltf": "Content::DecodeWep",
 }
@@ -115,6 +116,8 @@ EVIDENCE = {
                         "Effect textures load every extracted page through the loader"),
     "shp-gltf": ("Extracted SHP files decode and rebuild their exact bytes",
                  "Extracted SHP models load from their conversions as exact bytes"),
+    "seq-gltf": ("Extracted SEQ files decode and rebuild their exact bytes",
+                 "Extracted SEQ banks load from their owners' glTF as exact bytes"),
     "syd-recipe-csv": ("Extracted workshop recipe files convert to tables exactly",
                        "Original blade recipe produces the inspected ordered result",
                        "Original shield and armor recipes use their distinct material tables"),

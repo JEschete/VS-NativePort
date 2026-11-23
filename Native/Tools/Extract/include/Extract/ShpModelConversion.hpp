@@ -23,6 +23,14 @@
 // (ShpModelFiles.hpp), recorded in manifest.json. A model that borrows its
 // texture records the lender's SHP as a dependency, because the lender's
 // texture flag picks the polygon layout and its size scales the UVs.
+//
+// Each OBJ\*.SEQ animation bank (§6.2.1, #205) goes into the glTF of the one
+// model that loads it: the SHP's battle and special sequence fields name its
+// own, OBJ\00.SHP owns the material banks and OBJ\02.SHP the material-model
+// banks (BATTLE.PRG's tables). The model records BATTLE.PRG (the event stride
+// table and those tables) and its banks as dependencies, and each bank gets a
+// seq-gltf output of its own that lists the owner's glTF and buffer, so the
+// runtime finds it by its disc path.
 namespace VS::Extract {
 
 using Content::kShpExtension;
@@ -72,6 +80,8 @@ EncodeModelGltf(const Content::ShpModel& model, const ModelGltfSpec& spec);
 struct ConvertedModel {
   Content::ConversionOutput output;
   std::vector<Content::ImageFile> files;  // under the converter's directory
+  // Outputs of the companion converter that list some of `files`.
+  std::vector<Content::ConversionOutput> companions;
 };
 
 // `output` with `files`, listing each as <directory>/<name>.
@@ -89,7 +99,15 @@ struct ModelConversionReport {
 // and how to convert it when the previous output cannot be kept.
 struct ModelJob {
   Content::ConversionOutput expected;
+  // The companion outputs it makes, without files.
+  std::vector<Content::ConversionOutput> companions;
   std::function<std::expected<ConvertedModel, std::string>()> convert;
+};
+
+// A converter whose outputs live in another converter's files.
+struct ModelCompanionConverter {
+  std::string_view name;
+  std::uint32_t version = 0;
 };
 
 struct ModelConverterSpec {
@@ -97,13 +115,15 @@ struct ModelConverterSpec {
   std::uint32_t version = 0;
   std::string_view directory;  // under the root, e.g. models/characters
   bool force = false;          // convert even unchanged models
+  // Records the jobs' companion outputs; required when any job has them.
+  std::optional<ModelCompanionConverter> companion;
 };
 
 // Runs one model converter over `jobs`: keeps each previous output that
-// matches its job and whose files exist (MatchingOutput) unless `force`,
-// converts the rest, writes their files under the root's directory, and
-// records the run in manifest.json. Every model converts before anything is
-// written.
+// matches its job and whose files exist (MatchingOutput), with its
+// companions, unless `force`; converts the rest, writes their files under the
+// root's directory, and records the run in manifest.json. Every model
+// converts before anything is written.
 [[nodiscard]] std::expected<ModelConversionReport, std::string>
 RunModelConverter(const std::filesystem::path& root, const RunStart& start,
                   const ModelConverterSpec& spec,
@@ -116,29 +136,53 @@ RunModelConverter(const std::filesystem::path& root, const RunStart& start,
 // The disc path of the model whose texture model `lender` is
 // (79 -> OBJ/4F.SHP).
 [[nodiscard]] std::string ShpLenderPath(std::int32_t lender);
+// animation.<directories>.<stem>, lowercase
+// (OBJ/00_BT1.SEQ -> animation.obj.00_bt1).
+[[nodiscard]] std::expected<std::string, std::string> SeqAnimationIdForDiscPath(
+    std::string_view disc_path);
+
+using Content::kSeqAnimationConverterName;
+using Content::kSeqAnimationConverterVersion;
+using Content::kSeqExtension;
+// The file holding the event stride table and the material bank tables.
+inline constexpr std::string_view kBattleProgramPath = "BATTLE/BATTLE.PRG";
 
 // The files `document` writes as `stem`: <stem>.gltf and <stem>.bin, then its
 // own texture's image files. The materials show the texture `image_uri`
-// names: <stem>.png, or the lender's PNG for a borrowed texture.
+// names: <stem>.png, or the lender's PNG for a borrowed texture. The banks
+// are written with `event_lengths`, the game's event stride table.
 [[nodiscard]] std::expected<std::vector<Content::ImageFile>, std::string>
 EncodeShpModelFiles(const Content::ShpModelDocument& document,
-                    std::string_view stem, std::string_view image_uri);
+                    std::string_view stem, std::string_view image_uri,
+                    std::span<const std::uint8_t> event_lengths);
+
+// The game's event stride table, read from the file `source`; no lengths when
+// files.tsv lists no BATTLE.PRG, so only banks without events convert.
+struct SeqEventTable {
+  std::string source;
+  std::string source_sha256;
+  std::vector<std::uint8_t> lengths;
+};
 
 struct ShpConversion {
   SourceFile model;
-  std::optional<SourceFile> lender;  // needed when the model borrows
+  std::optional<SourceFile> lender;   // needed when the model borrows
+  std::vector<SourceFile> sequences;  // the banks it owns, sorted by path
+  SeqEventTable events;
 };
 
-// One model's files and manifest entry. The SHP must decode strictly, and
-// the files must read back to the same document and rebuild the exact
-// source bytes.
+// One model's files and manifest entry, with a seq-gltf companion for each
+// bank it owns. The SHP and banks must decode strictly, and the files must
+// read back to the same document and rebuild the exact source bytes.
 [[nodiscard]] std::expected<ConvertedModel, std::string> ConvertShpModel(
     const ShpConversion& conversion);
 
-// Converts every SHP files.tsv lists under `root`, then records them in
-// root\manifest.json. An output whose source, lender and converter version
-// are unchanged and whose files exist is kept as it is (so edits to it
-// survive) unless `force`. Every model converts before anything is written.
+// Converts every SHP files.tsv lists under `root`, with the SEQ banks each
+// owns, then records them in root\manifest.json. Every SEQ must have exactly
+// one owner whose field names its first sector and sector count. An output
+// whose source, dependencies and converter versions are unchanged and whose
+// files exist is kept as it is (so edits to it survive) unless `force`. Every
+// model converts before anything is written.
 [[nodiscard]] std::expected<ModelConversionReport, std::string>
 ConvertDiscModels(const std::filesystem::path& root, bool force);
 

@@ -26,20 +26,29 @@ namespace fs = std::filesystem;
 constexpr std::string_view kDiscDirectory = "disc";
 constexpr std::string_view kTemporarySuffix = ".tmp";
 
-// Removes the files the previous `converter` outputs listed that no current
-// one does.
+// Removes the files that previous outputs of the `published` converters listed
+// and no output of `manifest` does. Converters can share files (each SEQ bank's
+// output lists its owner's glTF), so a file stays while any output lists it.
 std::expected<std::size_t, std::string> RemoveStaleFiles(
     const fs::path& root, const ConversionManifest& previous,
-    const std::vector<ConversionOutput>& outputs, std::string_view converter) {
+    const ConversionManifest& manifest,
+    std::span<const ConverterBatch> published) {
   std::set<std::string_view> current;
-  for (const ConversionOutput& output : outputs) {
+  for (const ConversionOutput& output : manifest.outputs) {
     current.insert(output.files.begin(), output.files.end());
   }
+  std::set<std::string_view> removed_files;
   std::size_t removed = 0;
   for (const ConversionOutput& output : previous.outputs) {
-    if (output.converter != converter) continue;
+    if (std::ranges::none_of(published, [&](const ConverterBatch& batch) {
+          return output.converter == batch.name;
+        })) {
+      continue;
+    }
     for (const std::string& file : output.files) {
-      if (current.contains(file)) continue;
+      if (current.contains(file) || !removed_files.insert(file).second) {
+        continue;
+      }
       std::error_code error;
       if (fs::remove(root / Platform::Utf8Path(file), error)) ++removed;
       if (error) {
@@ -148,13 +157,7 @@ std::expected<std::size_t, std::string> PublishBatches(
   if (auto written = WriteConversionManifest(root, manifest); !written) {
     return std::unexpected(written.error());
   }
-  std::size_t removed = 0;
-  for (const ConverterBatch& batch : batches) {
-    auto stale = RemoveStaleFiles(root, previous, batch.outputs, batch.name);
-    if (!stale) return std::unexpected(stale.error());
-    removed += *stale;
-  }
-  return removed;
+  return RemoveStaleFiles(root, previous, manifest, batches);
 }
 
 std::expected<std::size_t, std::string> PublishBatch(

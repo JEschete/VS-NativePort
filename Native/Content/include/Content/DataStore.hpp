@@ -90,8 +90,9 @@ class DataStore {
   // says how to make one.
   [[nodiscard]] std::expected<void, std::string> RequireCatalog() const;
   // Requires the converters used by native runtime consumers and verifies
-  // that each standalone TIM, effect FBC and FBT and workshop SYD has a
-  // current output (source and dependency hashes) whose files are present.
+  // that each standalone TIM, effect FBC and FBT, workshop SYD and actor SHP,
+  // SEQ and WEP has a current output (source and dependency hashes) whose
+  // files are present.
   [[nodiscard]] std::expected<void, std::string> RequireConversions() const;
   [[nodiscard]] const ConversionManifest* Conversions() const {
     return m_conversion_manifest_ ? &*m_conversion_manifest_ : nullptr;

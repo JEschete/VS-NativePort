@@ -44,7 +44,8 @@ inline constexpr std::array kRequiredConverters{
     ConverterVersion{.name = "fbc-palette-png", .version = 1},
     ConverterVersion{.name = "fbt-texture-png", .version = 1},
     ConverterVersion{.name = "syd-recipe-csv", .version = 1},
-    ConverterVersion{.name = "shp-gltf", .version = 1},
+    ConverterVersion{.name = "shp-gltf", .version = 2},
+    ConverterVersion{.name = "seq-gltf", .version = 1},
     ConverterVersion{.name = "wep-gltf", .version = 1},
 };
 

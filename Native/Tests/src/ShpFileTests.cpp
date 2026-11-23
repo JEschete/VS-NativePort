@@ -3,7 +3,9 @@
 #include <cstring>
 #include <filesystem>
 #include <format>
+#include <fstream>
 #include <functional>
+#include <ios>
 #include <map>
 #include <optional>
 #include <span>
@@ -14,9 +16,12 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Content/ConversionManifest.hpp"
 #include "Content/ConvertedModels.hpp"
+#include "Content/DataStore.hpp"
 #include "Content/ImageFiles.hpp"
 #include "Content/JsonText.hpp"
+#include "Content/SeqFile.hpp"
 #include "Content/ShpFile.hpp"
 #include "Content/ShpModelFiles.hpp"
 #include "Extract/ShpModelConversion.hpp"
@@ -38,6 +43,7 @@ using VS::test_support::ReadModel;
 
 constexpr std::uint8_t kRootParent = 0x2F;
 constexpr std::int32_t kSampleLender = 0x4F;
+constexpr std::uint16_t kSampleBones = 2;
 constexpr std::size_t kGroupsWordAt = content::kShpModelOffset + 0x34;
 constexpr std::size_t kVerticesWordAt = content::kShpModelOffset + 0x38;
 constexpr std::size_t kPolygonsWordAt = content::kShpModelOffset + 0x3C;
@@ -57,12 +63,73 @@ std::size_t SectionAt(std::span<const std::byte> bytes, std::size_t word_at) {
   return content::kShpModelOffset + Read32(bytes, word_at);
 }
 
-// A model of every part with fields set to values the encoder must keep.
+// An eventless bank for the sample model's two bones: one clip whose root and
+// rotations read tracks of their own.
+content::SeqBank SampleBank() {
+  const auto track = [](std::int16_t key) {
+    return content::SeqTrack{
+        .start = content::SeqStart::kVector,
+        .initial = {key, 0, 0},
+        .commands = {{.frames = 2, .axes = {key, std::nullopt, std::nullopt}}},
+        .terminated = true};
+  };
+  return {.clips = {{.length = 2,
+                     .base = std::nullopt,
+                     .flags = 0,
+                     .events = std::nullopt,
+                     .root = content::SeqOwn{.element = 0},
+                     .travel = std::nullopt,
+                     .rotations = {content::SeqOwn{.element = 1},
+                                   content::SeqOwn{.element = 2}},
+                     .scales = std::nullopt}},
+          .map = {0},
+          .motion = {track(0), track(2), track(4)}};
+}
+
+Bytes SampleBankBytes() {
+  auto bytes = content::EncodeSeqBank(SampleBank(), kSampleBones, {});
+  INFO(ErrorOf(bytes));
+  REQUIRE(bytes.has_value());
+  return *std::move(bytes);
+}
+
+// A SEQ file of the sample bank, whose clip lasts `length` frames.
+Bytes SampleSeq(std::uint16_t length = 2) {
+  content::SeqFile file{.bones = kSampleBones, .bank = SampleBank()};
+  file.bank.clips.front().length = length;
+  auto bytes = content::EncodeSeqFile(file, {});
+  INFO(ErrorOf(bytes));
+  REQUIRE(bytes.has_value());
+  return *std::move(bytes);
+}
+
+// Points the model's first battle sequence at `sectors` sectors from `lba`
+// and its other sequence fields at none.
+void NameBattleSequence(content::ShpFile& shp, std::uint32_t lba,
+                        std::uint32_t sectors) {
+  constexpr std::size_t kFirst = 0;
+  content::JsonDocument layout = content::ShpLayoutJson(shp.layout);
+  for (const std::string_view sizes :
+       {"battle_sequence_sizes", "special_sequence_sizes"}) {
+    for (content::JsonDocument& size : layout.at(std::string(sizes))) size = 0;
+  }
+  layout.at("battle_sequence_lbas").at(kFirst) = lba;
+  layout.at("battle_sequence_sizes").at(kFirst) =
+      sectors * ModelRoot::kSectorBytes;
+  auto edited = content::ShpLayoutOf(layout);
+  INFO(ErrorOf(edited));
+  REQUIRE(edited.has_value());
+  shp.layout = *edited;
+}
+
+// A model of every part with fields set to values the encoder must keep. No
+// sequence field names a bank.
 content::ShpFile SampleShp(bool colored) {
   content::ShpFile shp;
   for (std::size_t i = 0; i < shp.layout.size(); ++i) {
     shp.layout.at(i) = static_cast<std::byte>(i);
   }
+  NameBattleSequence(shp, 0, 0);
   shp.limb_ranges.front() = 0x0102;
   shp.limb_ranges.back() = 0xFFFF;
   shp.bones = {{.length = 0,
@@ -109,8 +176,7 @@ content::ShpFile SampleShp(bool colored) {
     }
   }
   shp.sound = {std::byte{1}, std::byte{2}, std::byte{3}};
-  shp.sequence = {std::byte{0xAA}, std::byte{0xBB}, std::byte{0xCC},
-                  std::byte{0xDD}};
+  shp.sequence = SampleBankBytes();
   shp.colored = colored;
   content::ShpTexture texture{
       .flags = colored ? content::kShp4BitTexture : content::kShp8BitTexture,
@@ -357,8 +423,8 @@ void CheckOwnTextureOutput(const content::ConversionOutput& output) {
 // `model`'s files read back to `shp` and rebuild `bytes`.
 void CheckOwnTextureFiles(const extract::ConvertedModel& model,
                           const content::ShpFile& shp, const Bytes& bytes) {
-  const auto document =
-      content::DecodeShpModelFiles("4F", content::FileListReader(model.files));
+  const auto document = content::DecodeShpModelFiles(
+      "4F", content::FileListReader(model.files), {});
   INFO(ErrorOf(document));
   REQUIRE(document.has_value());
   CHECK(document->shp == shp);
@@ -375,8 +441,11 @@ TEST_CASE("An SHP model converts to glTF files that rebuild its bytes",
     CAPTURE(colored);
     const content::ShpFile shp = SampleShp(colored);
     const Bytes bytes = Encoded(shp);
-    const auto model = Converted(
-        {.model = {.path = "OBJ/4F.SHP", .bytes = bytes}, .lender = {}});
+    const auto model =
+        Converted({.model = {.path = "OBJ/4F.SHP", .bytes = bytes},
+                   .lender = {},
+                   .sequences = {},
+                   .events = {}});
     CheckOwnTextureOutput(model.output);
     CheckOwnTextureFiles(model, shp, bytes);
   }
@@ -391,8 +460,10 @@ void CheckBorrowerOutput(const extract::ConvertedModel& model,
   CHECK(model.output.files == files);
   REQUIRE(model.output.dependencies.size() == 1);
   CHECK(model.output.dependencies.front().source == lender.path);
-  CHECK(model.output.dependencies.front().source_sha256 ==
-        Converted({.model = lender, .lender = {}}).output.source_sha256);
+  CHECK(
+      model.output.dependencies.front().source_sha256 ==
+      Converted({.model = lender, .lender = {}, .sequences = {}, .events = {}})
+          .output.source_sha256);
   REQUIRE_FALSE(model.files.empty());
   const auto gltf = ParseGltf(model.files.front().bytes);
   CHECK(gltf["images"] ==
@@ -402,8 +473,8 @@ void CheckBorrowerOutput(const extract::ConvertedModel& model,
 // The borrower reads back with the lender's texture size and no image.
 void CheckBorrowerDocument(const extract::ConvertedModel& model,
                            const content::ShpFile& lender) {
-  const auto document =
-      content::DecodeShpModelFiles("50", content::FileListReader(model.files));
+  const auto document = content::DecodeShpModelFiles(
+      "50", content::FileListReader(model.files), {});
   INFO(ErrorOf(document));
   REQUIRE(document.has_value());
   CHECK(document->shp == BorrowingShp());
@@ -422,11 +493,12 @@ TEST_CASE("A converted model that borrows a texture depends on its lender",
                                    .bytes = Encoded(lender_shp)};
   const extract::SourceFile borrower{.path = "OBJ/50.SHP",
                                      .bytes = Encoded(BorrowingShp())};
-  const auto model = Converted({.model = borrower, .lender = lender});
+  const auto model = Converted(
+      {.model = borrower, .lender = lender, .sequences = {}, .events = {}});
   CheckBorrowerOutput(model, lender);
   CheckBorrowerDocument(model, lender_shp);
-  const auto missing =
-      extract::ConvertShpModel({.model = borrower, .lender = {}});
+  const auto missing = extract::ConvertShpModel(
+      {.model = borrower, .lender = {}, .sequences = {}, .events = {}});
   REQUIRE_FALSE(missing.has_value());
   CHECK(missing.error().find("OBJ/4F.SHP, which was not given") !=
         std::string::npos);
@@ -467,7 +539,8 @@ void CheckRefusedLoads(const ModelRoot& root) {
   const auto refused = LoadShp(root.Root(), root.Read(0));
   REQUIRE_FALSE(refused.has_value());
   CHECK(refused.error().find("collision_radius") != std::string::npos);
-  const auto unknown = LoadShp(root.Root(), {.lba = 1, .rounded_size = 0});
+  const auto unknown =
+      LoadShp(root.Root(), {.lba = 1, .rounded_size = 0, .event_lengths = {}});
   REQUIRE_FALSE(unknown.has_value());
   CHECK(unknown.error().find("no extracted .SHP file matches LBA 1") !=
         std::string::npos);
@@ -486,12 +559,154 @@ TEST_CASE("Converted models load in place of their SHP files, edits included",
   CheckRefusedLoads(root);
 }
 
+constexpr std::string_view kBankPath = "OBJ/4F_BT1.SEQ";
+
+// The sample model, whose first battle sequence names the one-sector bank at
+// `lba`.
+Bytes OwningShp(std::uint32_t lba) {
+  content::ShpFile shp = SampleShp(false);
+  NameBattleSequence(shp, lba, 1);
+  return Encoded(shp);
+}
+
+// The output that registers `model`'s one SEQ bank, kBankPath: its owner's
+// glTF and buffer, at the hash the model output records.
+void CheckBankOutput(const extract::ConvertedModel& model) {
+  REQUIRE(model.companions.size() == 1);
+  const content::ConversionOutput& companion = model.companions.front();
+  CHECK(companion.id == "animation.obj.4f_bt1");
+  CHECK(companion.source == kBankPath);
+  CHECK(companion.converter == content::kSeqAnimationConverterName);
+  const std::vector<std::string> files{"models/characters/4F.gltf",
+                                       "models/characters/4F.bin"};
+  CHECK(companion.files == files);
+  const std::vector<content::SourceDependency> owner{
+      {.source = "OBJ/4F.SHP", .source_sha256 = model.output.source_sha256}};
+  CHECK(companion.dependencies == owner);
+}
+
+TEST_CASE("A model's glTF holds the SEQ banks it owns",
+          "[content-models][shp][seq]") {
+  const extract::SourceFile bank{.path = std::string(kBankPath),
+                                 .bytes = SampleSeq()};
+  const auto model = Converted(
+      {.model = {.path = "OBJ/4F.SHP", .bytes = Encoded(SampleShp(false))},
+       .lender = {},
+       .sequences = {bank},
+       .events = {}});
+  REQUIRE(model.output.dependencies.size() == 1);
+  CHECK(model.output.dependencies.front().source == kBankPath);
+  CheckBankOutput(model);
+  const auto document = content::DecodeShpModelFiles(
+      "4F", content::FileListReader(model.files), {});
+  INFO(ErrorOf(document));
+  REQUIRE(document.has_value());
+  REQUIRE(document->sequences.size() == 1);
+  CHECK(document->sequences.front().source == kBankPath);
+  const content::SeqFile sample{.bones = kSampleBones, .bank = SampleBank()};
+  CHECK(document->sequences.front().file == sample);
+}
+
+auto LoadSeq(const fs::path& root, const content::ConvertedModelRead& read) {
+  return LoadModel(root, read, content::LoadConvertedSequence);
+}
+
+// An edit to the bank in its owner's glTF survives a rerun and changes the
+// bytes it loads as.
+void CheckEditedBankLoads(const ModelRoot& root) {
+  static constexpr std::size_t kFirst = 0;
+  static constexpr std::uint16_t kEditedLength = 1000;
+  root.EditGltf(content::kShpModelDirectory, "4F",
+                [](content::JsonDocument& gltf) {
+                  gltf.at("asset")
+                      .at("extras")
+                      .at("vs")
+                      .at("sequences")
+                      .at(kFirst)
+                      .at("bank")
+                      .at("clips")
+                      .at(kFirst)
+                      .at("length") = kEditedLength;
+                });
+  CHECK(root.Convert().characters.unchanged == 1);
+  CHECK(LoadSeq(root.Root(), root.Read(0)) == SampleSeq(kEditedLength));
+}
+
+void WriteFile(const fs::path& path, std::span<const std::byte> bytes) {
+  std::ofstream output(path, std::ios::binary | std::ios::trunc);
+  output.write(reinterpret_cast<const char*>(bytes.data()),
+               static_cast<std::streamsize>(bytes.size()));
+  REQUIRE(output.good());
+}
+
+// Takes the bank off the disc: files.tsv stops listing it and its owner's
+// field stops naming it.
+void DropBank(const ModelRoot& root) {
+  const fs::path manifest = root.Root() / content::DataStore::ManifestName;
+  std::string kept;
+  std::ifstream input(manifest);
+  for (std::string line; std::getline(input, line);) {
+    if (!line.contains(kBankPath)) kept += line + '\n';
+  }
+  input.close();
+  WriteFile(manifest, std::as_bytes(std::span(kept)));
+  REQUIRE(fs::remove(root.Root() / "disc" / fs::path(kBankPath)));
+  WriteFile(root.Root() / "disc" / "OBJ" / "4F.SHP", Encoded(SampleShp(false)));
+}
+
+TEST_CASE("SEQ banks load from their owner's converted glTF",
+          "[content-models][shp][seq]") {
+  const Bytes bank = SampleSeq();
+  // The bank is the first source, so it starts at kFirstLba.
+  const Bytes owner = OwningShp(ModelRoot::kFirstLba);
+  const ModelRoot root({{.path = std::string(kBankPath), .bytes = bank},
+                        {.path = "OBJ/4F.SHP", .bytes = owner}});
+  CHECK(root.Convert().characters.converted == 1);
+  CHECK(LoadSeq(root.Root(), root.Read(0)) == bank);
+  CHECK(LoadShp(root.Root(), root.Read(1)) == owner);
+  const extract::ModelConversionReport rerun = root.Convert().characters;
+  CHECK(rerun.unchanged == 1);
+  CHECK(rerun.removed == 0);
+  CHECK(LoadSeq(root.Root(), root.Read(0)) == bank);
+  CheckEditedBankLoads(root);
+  // The model's files outlive the bank output that also listed them.
+  DropBank(root);
+  const extract::ModelConversionReport dropped = root.Convert().characters;
+  CHECK(dropped.converted == 1);
+  CHECK(dropped.removed == 0);
+  CHECK(LoadShp(root.Root(), root.Read(1)) == Encoded(SampleShp(false)));
+}
+
+TEST_CASE("Every SEQ bank needs the one model that loads it",
+          "[content-models][shp][seq]") {
+  const auto refusal = [](const std::vector<extract::SourceFile>& sources) {
+    const ModelRoot root(sources);
+    const auto converted = extract::ConvertDiscModels(root.Root(), false);
+    REQUIRE_FALSE(converted.has_value());
+    return converted.error();
+  };
+  const extract::SourceFile bank{.path = std::string(kBankPath),
+                                 .bytes = SampleSeq()};
+  const Bytes owner = OwningShp(ModelRoot::kFirstLba);
+  CHECK(refusal({bank,
+                 {.path = "OBJ/4F.SHP", .bytes = Encoded(SampleShp(false))}}) ==
+        "OBJ/4F_BT1.SEQ is loaded by no model");
+  CHECK(refusal({bank,
+                 {.path = "OBJ/4F.SHP", .bytes = owner},
+                 {.path = "OBJ/50.SHP", .bytes = owner}}) ==
+        "OBJ/4F_BT1.SEQ is loaded by both OBJ/4F.SHP and OBJ/50.SHP");
+  CHECK(refusal({{.path = "OBJ/4F.SHP", .bytes = owner}}) ==
+        "OBJ/4F.SHP: battle_sequence_lbas[0] names 1 sectors at LBA 100, "
+        "which is no SEQ files.tsv lists");
+}
+
 TEST_CASE("Extracted SHP models load from their conversions as exact bytes",
           "[content-models][shp][extract]") {
   const auto models = ExtractedModels();
   if (!models) SKIP("Extracted Native/data is unavailable");
   CHECK(VS::test_support::CheckExtractedModelsLoad(
-            *models, content::kShpExtension, content::LoadConvertedModel) ==
+            *models, content::kShpExtension, content::LoadConvertedModel,
+            VS::test_support::ExtractedEventLengths(*models)) ==
         kExtractedModelCount);
 }
 

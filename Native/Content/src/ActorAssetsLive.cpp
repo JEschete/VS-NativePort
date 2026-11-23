@@ -19,6 +19,7 @@
 #include <optional>
 #include <span>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <type_traits>
 #include <vector>
@@ -45,6 +46,7 @@
 #include "Content/ConvertedModels.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/DiscQueue.hpp"
+#include "Content/ShpModelFiles.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -308,7 +310,7 @@ void CountRefusal(const char* what, std::int64_t value) {
 using ConvertedLoader = std::expected<std::vector<std::byte>, std::string> (*)(
     const DataStore&, const ConvertedModelRead&);
 
-// Native (#203, #204): the SHP or WEP bytes of the converted model
+// Native (#203, #204, #205): the SHP, WEP or SEQ bytes of the converted file
 // (ASSET_PIPELINE.md §6.2-6.3) a read of `file` names, found by its sector
 // until assets have stable ids (#47).
 std::expected<std::vector<std::byte>, std::string> ConvertedModelBytes(
@@ -322,27 +324,47 @@ std::expected<std::vector<std::byte>, std::string> ConvertedModelBytes(
         std::format("invalid LBA {} and size {}", file.sector, file.bytes));
   }
   return load(*store, {.lba = static_cast<std::uint32_t>(file.sector),
-                       .rounded_size = static_cast<std::uint64_t>(file.bytes)});
+                       .rounded_size = static_cast<std::uint64_t>(file.bytes),
+                       .event_lengths = std::span<const std::uint8_t>(
+                           VS::Actors::animationEventLengths)});
 }
 
-// Native (#203, #204): fills `destination` with the converted actor or weapon
-// model in place of the disc read. A model that does not load or fit leaves
-// zeros: the parser refuses them as an empty actor model, and they parse as
-// a weapon with no geometry.
+// Native (#205): whether a sequence read names an extracted OBJ\*.SEQ bank,
+// which loads from its owner's converted model. The other banks the sequence
+// stream reads (the ESQ banks, #206) still read the disc.
+bool IsConvertedSequence(DiscFileExtent file) {
+  const DataStore* const store = DataStore::Get();
+  if (store == nullptr || file.sector <= 0) return false;
+  const auto sector = static_cast<std::uint32_t>(file.sector);
+  const DataStore::Entry* const entry = store->FindBySector(sector);
+  return entry != nullptr && entry->lba == sector &&
+         entry->path.ends_with(kSeqExtension);
+}
+
+// Native (#203, #204, #205): fills `destination` with the converted actor
+// model, weapon model or animation bank in place of the disc read. A file
+// that does not load or fit leaves zeros: the parser refuses them as an empty
+// actor model, they parse as a weapon with no geometry, and as an empty bank.
 void ReadConvertedModel(AssetFileStream stream, DiscFileExtent file,
                         std::span<std::byte> destination) {
   std::ranges::fill(destination, std::byte{0});
-  const bool weapon = stream == AssetFileStream::kWeapon;
-  auto bytes = ConvertedModelBytes(
-      file, weapon ? LoadConvertedWeapon : LoadConvertedModel);
+  ConvertedLoader load = LoadConvertedModel;
+  std::string_view what = "actor model";
+  if (stream == AssetFileStream::kWeapon) {
+    load = LoadConvertedWeapon;
+    what = "weapon model";
+  } else if (stream == AssetFileStream::kSequence) {
+    load = LoadConvertedSequence;
+    what = "animation bank";
+  }
+  auto bytes = ConvertedModelBytes(file, load);
   if (bytes && bytes->size() > destination.size()) {
-    bytes = std::unexpected(
-        std::format("its {} bytes exceed the {}-byte model read", bytes->size(),
-                    destination.size()));
+    bytes = std::unexpected(std::format("its {} bytes exceed the {}-byte read",
+                                        bytes->size(), destination.size()));
   }
   if (!bytes) {
-    VS::Core::LogError("content", "{} model at LBA {}: {}",
-                       weapon ? "weapon" : "actor", file.sector, bytes.error());
+    VS::Core::LogError("content", "{} at LBA {}: {}", what, file.sector,
+                       bytes.error());
     return;
   }
   std::ranges::copy(*bytes, destination.begin());
@@ -978,9 +1000,10 @@ class LiveActorAssetHost final : public ActorAssetHost {
     live.file->lba = file.sector;
     live.file->size = file.bytes;
     if (stream == AssetFileStream::kActorModel ||
-        stream == AssetFileStream::kWeapon) {
-      // Native (#203, #204): the converted model loads at once, with no disc
-      // read.
+        stream == AssetFileStream::kWeapon ||
+        (stream == AssetFileStream::kSequence && IsConvertedSequence(file))) {
+      // Native (#203, #204, #205): the converted file loads at once, with no
+      // disc read.
       const auto wanted = static_cast<std::size_t>(std::max(file.bytes, 0));
       const std::span<std::byte> bytes = Bytes(destination, wanted);
       ReadConvertedModel(stream, file,

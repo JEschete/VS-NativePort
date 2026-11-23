@@ -19,14 +19,17 @@
 #include <utility>
 #include <vector>
 
+#include "Content/ActorAnimation.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/JsonText.hpp"
+#include "Content/SeqFile.hpp"
 #include "Content/ShpFile.hpp"
 #include "Extract/ImageConversion.hpp"
 #include "Extract/ImageFilesWriter.hpp"
 #include "Platform/Paths.hpp"
 
 namespace VS::Extract {
+using Content::ActorAnimationDocument;
 using Content::ConversionManifest;
 using Content::ConversionOutput;
 using Content::DataStore;
@@ -41,6 +44,7 @@ using Content::ShpModelDocument;
 using Content::ShpPolygon;
 using Content::ShpTexture;
 using Content::ShpTextureSize;
+using Content::SourceDependency;
 
 namespace {
 namespace fs = std::filesystem;
@@ -53,7 +57,8 @@ using Result = std::expected<T, std::string>;
 constexpr std::string_view kRawForm = "raw";
 constexpr std::string_view kShpDirectory = "OBJ";
 constexpr std::string_view kModelIdPrefix = "model";
-constexpr std::string_view kGenerator = "VS.Extract shp-gltf 1";
+constexpr std::string_view kAnimationIdPrefix = "animation";
+constexpr std::string_view kGenerator = "VS.Extract shp-gltf 2";
 constexpr std::string_view kUnlitExtension = "KHR_materials_unlit";
 constexpr std::string_view kVariantsExtension = "KHR_materials_variants";
 // glTF buffer view targets, sampler filters and wrapping.
@@ -559,12 +564,15 @@ Result<std::vector<ImageFile>> TextureFiles(const ShpModelDocument& document,
   return EncodeImageFiles(image, stem);
 }
 
-// The files must read back to `document` and rebuild the source bytes.
+// The files must read back to `document` and rebuild the source bytes: the
+// SHP and each bank it owns.
 Check VerifyModel(const ShpModelDocument& document, std::string_view stem,
                   const std::vector<ImageFile>& files,
-                  const SourceFile& source) {
-  auto decoded =
-      Content::DecodeShpModelFiles(stem, Content::FileListReader(files));
+                  const ShpConversion& conversion) {
+  const SourceFile& source = conversion.model;
+  const std::span<const std::uint8_t> lengths = conversion.events.lengths;
+  auto decoded = Content::DecodeShpModelFiles(
+      stem, Content::FileListReader(files), lengths);
   if (!decoded) {
     return std::unexpected(
         std::format("{}: the converted model does not read back: {}",
@@ -584,10 +592,41 @@ Check VerifyModel(const ShpModelDocument& document, std::string_view stem,
         std::format("{}: the converted model does not rebuild the source bytes",
                     source.path));
   }
+  if (decoded->sequences.size() != conversion.sequences.size()) {
+    return std::unexpected(std::format(
+        "{}: the converted model holds {} banks; it owns {}", source.path,
+        decoded->sequences.size(), conversion.sequences.size()));
+  }
+  for (std::size_t index = 0; index < conversion.sequences.size(); ++index) {
+    const SourceFile& bank = conversion.sequences[index];
+    auto rebuilt =
+        Content::EncodeSeqFile(decoded->sequences[index].file, lengths);
+    if (!rebuilt || *rebuilt != bank.bytes) {
+      return std::unexpected(
+          std::format("{}: the converted model does not rebuild {}",
+                      source.path, bank.path));
+    }
+  }
   return {};
 }
 
-// The manifest entry `conversion` makes, without its files.
+SourceDependency DependencyOf(const SourceFile& source) {
+  return {.source = source.path, .source_sha256 = HashOf(source)};
+}
+
+// The table's file, when there is one.
+std::optional<SourceDependency> EventsDependency(const SeqEventTable& events) {
+  if (events.source.empty()) return std::nullopt;
+  return SourceDependency{.source = events.source,
+                          .source_sha256 = events.source_sha256};
+}
+
+void SortDependencies(std::vector<SourceDependency>& dependencies) {
+  std::ranges::sort(dependencies, {}, &SourceDependency::source);
+}
+
+// The manifest entry `conversion` makes, without its files: its lender, the
+// event table's file and its banks are its dependencies.
 Result<ConversionOutput> ModelOutputOf(const ShpConversion& conversion) {
   auto id = ShpModelIdForDiscPath(conversion.model.path);
   if (!id) return std::unexpected(id.error());
@@ -602,11 +641,42 @@ Result<ConversionOutput> ModelOutputOf(const ShpConversion& conversion) {
       .note = {},
       .alias_of = {}};
   if (conversion.lender) {
-    output.dependencies.push_back(
-        {.source = conversion.lender->path,
-         .source_sha256 = HashOf(*conversion.lender)});
+    output.dependencies.push_back(DependencyOf(*conversion.lender));
   }
+  if (auto events = EventsDependency(conversion.events)) {
+    output.dependencies.push_back(std::move(*events));
+  }
+  for (const SourceFile& bank : conversion.sequences) {
+    output.dependencies.push_back(DependencyOf(bank));
+  }
+  SortDependencies(output.dependencies);
   return output;
+}
+
+// The seq-gltf output of each bank `conversion` owns, without files: each
+// depends on the model and the event table's file.
+Result<std::vector<ConversionOutput>> CompanionsOf(
+    const ShpConversion& conversion) {
+  std::vector<SourceDependency> dependencies{DependencyOf(conversion.model)};
+  if (auto events = EventsDependency(conversion.events)) {
+    dependencies.push_back(std::move(*events));
+  }
+  SortDependencies(dependencies);
+  std::vector<ConversionOutput> outputs;
+  for (const SourceFile& bank : conversion.sequences) {
+    auto id = SeqAnimationIdForDiscPath(bank.path);
+    if (!id) return std::unexpected(id.error());
+    outputs.push_back({.id = std::move(*id),
+                       .source = bank.path,
+                       .source_sha256 = HashOf(bank),
+                       .converter = std::string(kSeqAnimationConverterName),
+                       .files = {},
+                       .dependencies = dependencies,
+                       .unreferenced = false,
+                       .note = {},
+                       .alias_of = {}});
+  }
+  return outputs;
 }
 
 struct Lending {
@@ -653,8 +723,9 @@ Result<Lending> LendingOf(const ShpConversion& conversion,
       .image_stem = std::move(*stem)};
 }
 
-Result<ShpModelDocument> DocumentOf(const SourceFile& model,
+Result<ShpModelDocument> DocumentOf(const ShpConversion& conversion,
                                     const Lending& lending) {
+  const SourceFile& model = conversion.model;
   auto shp = Content::DecodeShp(model.bytes, lending.colored);
   if (!shp) {
     return std::unexpected(std::format("{}: {}", model.path, shp.error()));
@@ -666,50 +737,287 @@ Result<ShpModelDocument> DocumentOf(const SourceFile& model,
                             .source_sha256 = HashOf(model),
                             .image_id = {},
                             .lender_texture = lending.texture,
-                            .shp = std::move(*shp)};
+                            .shp = std::move(*shp),
+                            .sequences = {}};
   if (document.shp.texture) {
     auto image = ImageIdForDiscPath(model.path);
     if (!image) return std::unexpected(image.error());
     document.image_id = std::move(*image);
   }
+  for (const SourceFile& bank : conversion.sequences) {
+    auto file = Content::DecodeSeqFile(bank.bytes, conversion.events.lengths);
+    if (!file) {
+      return std::unexpected(std::format("{}: {}", bank.path, file.error()));
+    }
+    if (file->bones != document.shp.bones.size()) {
+      return std::unexpected(
+          std::format("{} animates {} bones; its model {} has {}", bank.path,
+                      file->bones, model.path, document.shp.bones.size()));
+    }
+    document.sequences.push_back({.source = bank.path,
+                                  .source_sha256 = HashOf(bank),
+                                  .file = std::move(*file)});
+  }
   return document;
 }
 
-// The manifest's output for `conversion` when its sources and lender are the
-// ones recorded and its files exist.
 using SourceMap = std::map<std::string, SourceFile, std::less<>>;
 
-// Every SHP files.tsv lists, by disc path.
-Result<SourceMap> ReadModelSources(
+// What the models convert from: every SHP and SEQ files.tsv lists, by disc
+// path, and BATTLE.PRG when it lists it.
+// NOLINTNEXTLINE(bugprone-exception-escape): std::map's noexcept move.
+struct ModelSources {
+  SourceMap models;
+  SourceMap banks;
+  std::map<std::uint32_t, const DataStore::Entry*> bank_sectors;  // by LBA
+  std::optional<SourceFile> program;
+};
+
+Result<ModelSources> ReadModelSources(
     const fs::path& root, const std::vector<DataStore::Entry>& entries) {
-  SourceMap sources;
+  ModelSources sources;
   for (const DataStore::Entry& entry : entries) {
-    if (entry.form != kRawForm || !entry.path.ends_with(kShpExtension)) {
-      continue;
-    }
+    if (entry.form != kRawForm) continue;
+    const bool model = entry.path.ends_with(kShpExtension);
+    const bool bank = entry.path.ends_with(kSeqExtension);
+    const bool program = entry.path == kBattleProgramPath;
+    if (!model && !bank && !program) continue;
     auto source = ReadSource(root, entry.path);
     if (!source) return std::unexpected(source.error());
-    sources.emplace(source->path, std::move(*source));
+    if (program) {
+      sources.program = std::move(*source);
+      continue;
+    }
+    if (bank) sources.bank_sectors.emplace(entry.lba, &entry);
+    (model ? sources.models : sources.banks)
+        .emplace(source->path, std::move(*source));
   }
   return sources;
 }
 
+// --- Which model owns each SEQ bank.
+
+// The model fields' bank sizes are bytes; the game reads whole sectors.
+constexpr std::uint32_t kSectorShift = 11;
+// BATTLE.PRG's material bank tables (ActorAssets.cpp SequenceFile): the
+// sector offsets (halfwords) and sector counts (bytes) of the banks the
+// player's battle sequences load for each weapon material, then of the ones
+// model 2's special sequences load, four per material. The game indexes them
+// from material 1; row 0 holds no bank.
+// decomp: D_800E8E8E (D_800E8E8E@BATTLE/BATTLE.PRG)
+constexpr std::size_t kMaterialBankOffsetsAt = 0x8068E;
+// decomp: D_800E8EA3 (D_800E8EA3@BATTLE/BATTLE.PRG)
+constexpr std::size_t kMaterialBankSectorsAt = 0x806A3;
+// decomp: D_800E8EA8 (D_800E8EA8@BATTLE/BATTLE.PRG)
+constexpr std::size_t kMaterialModelBankOffsetsAt = 0x806A8;
+// decomp: D_800E8EFC (D_800E8EFC@BATTLE/BATTLE.PRG)
+constexpr std::size_t kMaterialModelBankSectorsAt = 0x806FC;
+constexpr std::uint32_t kMaterialBankFirstSector = 0x18043;
+constexpr std::uint32_t kMaterialModelBankFirstSector = 0x1943E;
+constexpr std::size_t kFirstMaterial = 1;
+constexpr std::size_t kLastMaterial = 10;
+constexpr std::size_t kModelsPerMaterial = 4;
+// The models that load them: the player and model 2.
+constexpr std::int32_t kMaterialBankModel = 0;
+constexpr std::int32_t kMaterialModelBankModel = 2;
+static_assert(kMaterialModelBankSectorsAt +
+                  ((kLastMaterial + 1) * kModelsPerMaterial) <=
+              Content::kSeqEventLengthsAt);
+
+class BankOwners {
+ public:
+  explicit BankOwners(const ModelSources& sources) : sources_(sources) {}
+
+  // `owner`'s field `field` names `sectors` sectors at `lba`: that bank, or
+  // nothing when it names no sectors.
+  Check Claim(std::string_view owner, std::uint32_t lba, std::uint32_t sectors,
+              std::string_view field) {
+    if (sectors == 0) return {};
+    const auto found = sources_.bank_sectors.find(lba);
+    if (found == sources_.bank_sectors.end() ||
+        found->second->SectorCount() != sectors) {
+      return std::unexpected(
+          std::format("{}: {} names {} sectors at LBA {}, which is no SEQ "
+                      "files.tsv lists",
+                      owner, field, sectors, lba));
+    }
+    const std::string& bank = found->second->path;
+    const auto [claimed, added] = owner_of_.try_emplace(bank, owner);
+    if (!added && claimed->second != owner) {
+      return std::unexpected(std::format("{} is loaded by both {} and {}", bank,
+                                         claimed->second, owner));
+    }
+    return {};
+  }
+
+  // The banks each model owns, sorted by path; every bank needs an owner
+  // files.tsv lists.
+  Result<std::map<std::string, std::vector<std::string>, std::less<>>> ByModel()
+      const {
+    std::map<std::string, std::vector<std::string>, std::less<>> banks;
+    for (const auto& [bank, source] : sources_.banks) {
+      const auto owner = owner_of_.find(bank);
+      if (owner == owner_of_.end()) {
+        return std::unexpected(std::format("{} is loaded by no model", bank));
+      }
+      if (!sources_.models.contains(owner->second)) {
+        return std::unexpected(
+            std::format("{} is loaded by {}, which files.tsv does not list",
+                        bank, owner->second));
+      }
+      banks[owner->second].push_back(bank);
+    }
+    return banks;
+  }
+
+ private:
+  const ModelSources& sources_;
+  std::map<std::string, std::string, std::less<>> owner_of_;
+};
+
+// The banks the model's battle and special sequence fields name.
+Check ClaimModelBanks(BankOwners& owners, const SourceFile& model) {
+  constexpr std::size_t kBlockEnd =
+      Content::kShpCountsBytes + Content::kShpLayoutBlockBytes;
+  if (model.bytes.size() < kBlockEnd) {
+    return std::unexpected(std::format(
+        "{} is too short for its texture layout block", model.path));
+  }
+  Content::ShpLayoutBlock block{};
+  std::ranges::copy(
+      std::span(model.bytes).subspan(Content::kShpCountsBytes, block.size()),
+      block.begin());
+  const Json layout = Content::ShpLayoutJson(block);
+  constexpr std::array<std::pair<std::string_view, std::string_view>, 2>
+      kFields{{{"battle_sequence_lbas", "battle_sequence_sizes"},
+               {"special_sequence_lbas", "special_sequence_sizes"}}};
+  for (const auto& [lbas_name, sizes_name] : kFields) {
+    const Json& lbas = layout.at(std::string(lbas_name));
+    const Json& sizes = layout.at(std::string(sizes_name));
+    for (std::size_t index = 0; index < lbas.size(); ++index) {
+      if (auto claimed =
+              owners.Claim(model.path, lbas.at(index).get<std::uint32_t>(),
+                           sizes.at(index).get<std::uint32_t>() >> kSectorShift,
+                           std::format("{}[{}]", lbas_name, index));
+          !claimed) {
+        return claimed;
+      }
+    }
+  }
+  return {};
+}
+
+std::uint32_t ProgramByte(const SourceFile& program, std::size_t at) {
+  return std::to_integer<std::uint32_t>(program.bytes[at]);
+}
+
+std::uint32_t ProgramHalfword(const SourceFile& program, std::size_t at) {
+  return ProgramByte(program, at) | (ProgramByte(program, at + 1) << kByteBits);
+}
+
+// The banks BATTLE.PRG's material tables name.
+Check ClaimMaterialBanks(BankOwners& owners, const SourceFile& program) {
+  const std::string player = ShpLenderPath(kMaterialBankModel);
+  const std::string model = ShpLenderPath(kMaterialModelBankModel);
+  for (std::size_t material = kFirstMaterial; material <= kLastMaterial;
+       ++material) {
+    if (auto claimed = owners.Claim(
+            player,
+            kMaterialBankFirstSector +
+                ProgramHalfword(program,
+                                kMaterialBankOffsetsAt +
+                                    (material * sizeof(std::uint16_t))),
+            ProgramByte(program, kMaterialBankSectorsAt + material),
+            std::format("material bank {}", material));
+        !claimed) {
+      return claimed;
+    }
+    for (std::size_t column = 0; column < kModelsPerMaterial; ++column) {
+      const std::size_t row = (material * kModelsPerMaterial) + column;
+      if (auto claimed = owners.Claim(
+              model,
+              kMaterialModelBankFirstSector +
+                  ProgramHalfword(program, kMaterialModelBankOffsetsAt +
+                                               (row * sizeof(std::uint16_t))),
+              ProgramByte(program, kMaterialModelBankSectorsAt + row),
+              std::format("material {} model bank {}", material, column));
+          !claimed) {
+        return claimed;
+      }
+    }
+  }
+  return {};
+}
+
+// The event stride table, and the banks each model owns.
+// NOLINTNEXTLINE(bugprone-exception-escape): std::map's noexcept move.
+struct BankPlan {
+  SeqEventTable events;
+  std::map<std::string, std::vector<std::string>, std::less<>> banks;
+};
+
+Result<BankPlan> PlanBanks(const ModelSources& sources) {
+  BankPlan plan;
+  BankOwners owners(sources);
+  if (sources.program) {
+    const SourceFile& program = *sources.program;
+    constexpr std::size_t kTableEnd =
+        Content::kSeqEventLengthsAt + Content::kSeqEventLengthCount;
+    if (program.bytes.size() < kTableEnd) {
+      return std::unexpected(
+          std::format("{} is too short for the event stride table at {:#x}",
+                      program.path, Content::kSeqEventLengthsAt));
+    }
+    const auto table = std::span(program.bytes)
+                           .subspan(Content::kSeqEventLengthsAt,
+                                    Content::kSeqEventLengthCount);
+    plan.events = {.source = program.path,
+                   .source_sha256 = HashOf(program),
+                   .lengths = {}};
+    std::ranges::transform(
+        table, std::back_inserter(plan.events.lengths),
+        [](std::byte value) { return std::to_integer<std::uint8_t>(value); });
+    if (auto claimed = ClaimMaterialBanks(owners, program); !claimed) {
+      return std::unexpected(claimed.error());
+    }
+  }
+  for (const auto& [path, model] : sources.models) {
+    if (auto claimed = ClaimModelBanks(owners, model); !claimed) {
+      return std::unexpected(claimed.error());
+    }
+  }
+  auto banks = owners.ByModel();
+  if (!banks) return std::unexpected(banks.error());
+  plan.banks = std::move(*banks);
+  return plan;
+}
+
 Result<ShpConversion> PlanConversion(const SourceFile& model,
-                                     const SourceMap& sources) {
+                                     const ModelSources& sources,
+                                     const BankPlan& plan) {
   auto peeked = Content::PeekShpTexture(model.bytes);
   if (!peeked) {
     return std::unexpected(std::format("{}: {}", model.path, peeked.error()));
   }
-  ShpConversion conversion{.model = model, .lender = std::nullopt};
+  ShpConversion conversion{.model = model,
+                           .lender = std::nullopt,
+                           .sequences = {},
+                           .events = plan.events};
   if (peeked->lender) {
     const std::string path = ShpLenderPath(*peeked->lender);
-    const auto lender = sources.find(path);
-    if (lender == sources.end()) {
+    const auto lender = sources.models.find(path);
+    if (lender == sources.models.end()) {
       return std::unexpected(std::format(
           "{} borrows the texture of {}, which files.tsv does not list",
           model.path, path));
     }
     conversion.lender = lender->second;
+  }
+  if (const auto owned = plan.banks.find(model.path);
+      owned != plan.banks.end()) {
+    for (const std::string& bank : owned->second) {
+      conversion.sequences.push_back(sources.banks.find(bank)->second);
+    }
   }
   return conversion;
 }
@@ -748,6 +1056,25 @@ std::expected<std::string, std::string> ShpModelIdForDiscPath(
 
 std::string ShpLenderPath(std::int32_t lender) {
   return std::format("{}/{:02X}{}", kShpDirectory, lender, kShpExtension);
+}
+
+std::expected<std::string, std::string> SeqAnimationIdForDiscPath(
+    std::string_view disc_path) {
+  if (!DiscStemOf(disc_path, kSeqExtension)) {
+    return std::unexpected(
+        std::format("'{}' is not a SEQ animation bank", disc_path));
+  }
+  auto image = ImageIdForDiscPath(disc_path);
+  if (!image) return std::unexpected(image.error());
+  // image.<directories>.<stem> -> animation.<directories>.<stem>
+  std::string id =
+      std::format("{}{}", kAnimationIdPrefix,
+                  std::string_view(*image).substr(image->find('.')));
+  if (!Content::IsContentId(id)) {
+    return std::unexpected(std::format(
+        "'{}' gives the animation id '{}', which is not valid", disc_path, id));
+  }
+  return id;
 }
 
 std::optional<std::string> DiscStemOf(std::string_view disc_path,
@@ -790,8 +1117,13 @@ std::expected<std::vector<ImageFile>, std::string> EncodeModelGltf(
 
 std::expected<std::vector<ImageFile>, std::string> EncodeShpModelFiles(
     const ShpModelDocument& document, std::string_view stem,
-    std::string_view image_uri) {
+    std::string_view image_uri, std::span<const std::uint8_t> event_lengths) {
   const ShpFile& shp = document.shp;
+  auto sequence = Content::ShpSequenceJson(shp, event_lengths);
+  if (!sequence) {
+    return std::unexpected(
+        std::format("{}: {}", document.source, sequence.error()));
+  }
   const ModelGltfSpec spec{
       .stem = stem,
       .image_uri = image_uri,
@@ -801,8 +1133,7 @@ std::expected<std::vector<ImageFile>, std::string> EncodeShpModelFiles(
       .payload =
           [&](const ModelViewAdder& add_view) {
             const std::optional<std::size_t> sound = add_view(shp.sound);
-            const std::optional<std::size_t> sequence = add_view(shp.sequence);
-            return Content::ShpModelPayload(document, sound, sequence);
+            return Content::ShpModelPayload(document, sound, *sequence);
           },
       .variants = {}};
   auto files = EncodeModelGltf(shp, spec);
@@ -828,21 +1159,36 @@ std::expected<ConvertedModel, std::string> ConvertShpModel(
   }
   auto lending = LendingOf(conversion, peeked->lender);
   if (!lending) return std::unexpected(lending.error());
-  auto document = DocumentOf(model, *lending);
+  auto document = DocumentOf(conversion, *lending);
   if (!document) return std::unexpected(document.error());
   auto stem = StemOf(model.path);
   if (!stem) return std::unexpected(stem.error());
   auto files = EncodeShpModelFiles(
       *document, *stem,
-      lending->image_stem + std::string(Content::kImagePngSuffix));
+      lending->image_stem + std::string(Content::kImagePngSuffix),
+      conversion.events.lengths);
   if (!files) return std::unexpected(files.error());
-  if (auto verified = VerifyModel(*document, *stem, *files, model); !verified) {
+  if (auto verified = VerifyModel(*document, *stem, *files, conversion);
+      !verified) {
     return std::unexpected(verified.error());
   }
   auto output = ModelOutputOf(conversion);
   if (!output) return std::unexpected(output.error());
-  return ConvertedModelOf(std::move(*output), std::move(*files),
-                          Content::kShpModelDirectory);
+  auto companions = CompanionsOf(conversion);
+  if (!companions) return std::unexpected(companions.error());
+  ConvertedModel converted = ConvertedModelOf(
+      std::move(*output), std::move(*files), Content::kShpModelDirectory);
+  // Each bank's output lists the glTF and its buffer, which hold it.
+  for (ConversionOutput& companion : *companions) {
+    std::ranges::copy_if(converted.output.files,
+                         std::back_inserter(companion.files),
+                         [](const std::string& file) {
+                           return file.ends_with(Content::kGltfSuffix) ||
+                                  file.ends_with(Content::kGltfBufferSuffix);
+                         });
+  }
+  converted.companions = std::move(*companions);
+  return converted;
 }
 
 ConvertedModel ConvertedModelOf(ConversionOutput output,
@@ -851,33 +1197,69 @@ ConvertedModel ConvertedModelOf(ConversionOutput output,
   for (const ImageFile& file : files) {
     output.files.push_back(std::format("{}/{}", directory, file.name));
   }
-  return ConvertedModel{.output = std::move(output), .files = std::move(files)};
+  return ConvertedModel{
+      .output = std::move(output), .files = std::move(files), .companions = {}};
 }
 
 std::expected<ModelConversionReport, std::string> RunModelConverter(
     const fs::path& root, const RunStart& start, const ModelConverterSpec& spec,
     std::span<const ModelJob> jobs) {
   const ConversionManifest& previous = start.previous;
-  ConverterBatch batch =
-      StartBatch(previous, spec.name, spec.version, spec.force);
+  std::vector<ConverterBatch> batches{
+      StartBatch(previous, spec.name, spec.version, spec.force)};
+  if (spec.companion) {
+    batches.push_back(StartBatch(previous, spec.companion->name,
+                                 spec.companion->version, spec.force));
+  }
+  ConverterBatch& models = batches.front();
+  const auto unrecorded = [&spec](const std::string& id) {
+    return std::unexpected(
+        std::format("{} has companion outputs, which the {} converter does "
+                    "not record",
+                    id, spec.name));
+  };
   ModelConversionReport report;
   std::vector<ConvertedModel> converted;
   for (const ModelJob& job : jobs) {
+    if (!job.companions.empty() && !spec.companion) {
+      return unrecorded(job.expected.id);
+    }
     const ConversionOutput* kept =
-        batch.reuse ? MatchingOutput(previous, root, job.expected) : nullptr;
+        models.reuse ? MatchingOutput(previous, root, job.expected) : nullptr;
+    std::vector<const ConversionOutput*> kept_companions;
+    if (kept != nullptr && !job.companions.empty()) {
+      if (!batches.back().reuse) kept = nullptr;
+      for (const ConversionOutput& companion : job.companions) {
+        if (kept == nullptr) break;
+        const ConversionOutput* match =
+            MatchingOutput(previous, root, companion);
+        if (match == nullptr) kept = nullptr;
+        kept_companions.push_back(match);
+      }
+    }
     if (kept != nullptr) {
-      batch.outputs.push_back(*kept);
+      models.outputs.push_back(*kept);
+      for (const ConversionOutput* companion : kept_companions) {
+        batches.back().outputs.push_back(*companion);
+      }
       ++report.unchanged;
       continue;
     }
     auto model = job.convert();
     if (!model) return std::unexpected(model.error());
-    batch.outputs.push_back(model->output);
+    if (!model->companions.empty() && !spec.companion) {
+      return unrecorded(model->output.id);
+    }
+    models.outputs.push_back(model->output);
+    std::ranges::copy(model->companions,
+                      std::back_inserter(batches.back().outputs));
     converted.push_back(std::move(*model));
   }
   const fs::path directory = root / Platform::Utf8Path(spec.directory);
-  auto removed = PublishBatch(
-      root, previous, batch, [&] { return WriteModels(directory, converted); });
+  if (auto written = WriteModels(directory, converted); !written) {
+    return std::unexpected(written.error());
+  }
+  auto removed = PublishBatches(root, previous, batches);
   if (!removed) return std::unexpected(removed.error());
   report.converted = converted.size();
   report.removed = *removed;
@@ -890,23 +1272,32 @@ std::expected<ModelConversionReport, std::string> ConvertDiscModels(
   if (!start) return std::unexpected(start.error());
   auto sources = ReadModelSources(root, start->entries);
   if (!sources) return std::unexpected(sources.error());
+  auto plan = PlanBanks(*sources);
+  if (!plan) return std::unexpected(plan.error());
   std::vector<ModelJob> jobs;
-  for (const auto& [path, source] : *sources) {
-    auto conversion = PlanConversion(source, *sources);
+  for (const auto& [path, source] : sources->models) {
+    auto conversion = PlanConversion(source, *sources, *plan);
     if (!conversion) return std::unexpected(conversion.error());
     auto expected = ModelOutputOf(*conversion);
     if (!expected) return std::unexpected(expected.error());
+    auto companions = CompanionsOf(*conversion);
+    if (!companions) return std::unexpected(companions.error());
     jobs.push_back({.expected = std::move(*expected),
+                    .companions = std::move(*companions),
                     .convert = [conversion = std::move(*conversion)] {
                       return ConvertShpModel(conversion);
                     }});
   }
-  return RunModelConverter(root, *start,
-                           {.name = Content::kShpModelConverterName,
-                            .version = Content::kShpModelConverterVersion,
-                            .directory = Content::kShpModelDirectory,
-                            .force = force},
-                           jobs);
+  return RunModelConverter(
+      root, *start,
+      {.name = Content::kShpModelConverterName,
+       .version = Content::kShpModelConverterVersion,
+       .directory = Content::kShpModelDirectory,
+       .force = force,
+       .companion =
+           ModelCompanionConverter{.name = kSeqAnimationConverterName,
+                                   .version = kSeqAnimationConverterVersion}},
+      jobs);
 }
 
 }  // namespace VS::Extract

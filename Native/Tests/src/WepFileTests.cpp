@@ -545,7 +545,8 @@ TEST_CASE("Converted weapons load in place of their WEP files, edits included",
   CHECK(root.Convert().weapons.converted == 1);
   CHECK(LoadWep(root.Root(), root.Read(0)) == original);
   CheckReservedEdits(root);
-  const auto unknown = LoadWep(root.Root(), {.lba = 1, .rounded_size = 0});
+  const auto unknown =
+      LoadWep(root.Root(), {.lba = 1, .rounded_size = 0, .event_lengths = {}});
   REQUIRE_FALSE(unknown.has_value());
   CHECK(unknown.error().find("no extracted .WEP file matches LBA 1") !=
         std::string::npos);

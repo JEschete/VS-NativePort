@@ -7,10 +7,12 @@
 #include <filesystem>
 #include <functional>
 #include <optional>
+#include <span>
 #include <string>
 #include <string_view>
 #include <vector>
 
+#include "Content/ActorAnimation.hpp"
 #include "Content/ImageFiles.hpp"
 #include "Content/JsonText.hpp"
 #include "Content/NativeImage.hpp"
@@ -21,7 +23,7 @@
 //   <NN>.gltf   glTF 2.0: the skinned mesh, one node per bone and the VS
 //               payload in asset.extras.vs (schema vs.shp-model)
 //   <NN>.bin    the buffer: geometry, inverse bind matrices, and the sound
-//               and embedded SEQ bytes the payload names by buffer view
+//               bytes the payload names by buffer view
 //   <NN>.png    the model's own texture as a native image (§6.4), with its
 //               .image.json and .palettes.png; a model that borrows a texture
 //               shows its lender's <LL>.png instead
@@ -36,15 +38,25 @@
 // textures and images, which only preview the polygon flags. The payload
 // names the 0xE8-byte layout block's fields (the actor record's texture
 // overlays through reserved6d4, ActorRecord.hpp), so collision, shadow and
-// texture animation values edit as numbers.
+// texture animation values edit as numbers. The animation banks are JSON in
+// the payload (ActorAnimation.hpp, §6.2.1): "sequence" is the SHP's embedded
+// bank in the vs.actor-animation bank form (null when it has none), and
+// "sequences" holds each OBJ\*.SEQ file the model owns as a whole
+// vs.actor-animation document, sorted by source. Banks with event scripts need
+// the game's event stride table (SeqFile.hpp kSeqEventLengthsAt) to read and
+// rebuild.
 namespace VS::Content {
 
 inline constexpr std::string_view kShpModelConverterName = "shp-gltf";
-inline constexpr std::uint32_t kShpModelConverterVersion = 1;
+inline constexpr std::uint32_t kShpModelConverterVersion = 2;
 inline constexpr std::string_view kShpModelSchema = "vs.shp-model";
-inline constexpr std::uint32_t kShpModelSchemaVersion = 1;
+inline constexpr std::uint32_t kShpModelSchemaVersion = 2;
 inline constexpr std::string_view kShpModelDirectory = "models/characters";
 inline constexpr std::string_view kShpExtension = ".SHP";
+// Each OBJ\*.SEQ bank's own output, which lists its owner's glTF and buffer.
+inline constexpr std::string_view kSeqAnimationConverterName = "seq-gltf";
+inline constexpr std::uint32_t kSeqAnimationConverterVersion = 1;
+inline constexpr std::string_view kSeqExtension = ".SEQ";
 inline constexpr std::string_view kGltfSuffix = ".gltf";
 inline constexpr std::string_view kGltfBufferSuffix = ".bin";
 // The custom attribute holding each glTF vertex's SHP vertex number.
@@ -97,6 +109,9 @@ struct ShpModelDocument {
   // the texture itself).
   std::optional<ShpTextureSize> lender_texture;
   ShpFile shp;
+  // The OBJ\*.SEQ banks the model owns, sorted by source, each for the
+  // model's bones.
+  std::vector<ActorAnimationDocument> sequences;
 
   bool operator==(const ShpModelDocument&) const = default;
 };
@@ -145,12 +160,19 @@ using ShpLayoutBlock = std::array<std::byte, kShpLayoutBlockBytes>;
 [[nodiscard]] std::expected<ShpLayoutBlock, std::string> ShpLayoutOf(
     const JsonDocument& layout);
 
-// The payload asset.extras.vs holds for `document`, naming the buffer views
-// that hold its sound and embedded SEQ bytes (nothing when they are empty).
-// The writer and reader share it, so the schema has one definition.
+// The embedded SEQ bank in the vs.actor-animation bank form, or null when the
+// model has none. `event_lengths` is the game's event stride table; the error
+// names what the bank cannot hold.
+[[nodiscard]] std::expected<JsonDocument, std::string> ShpSequenceJson(
+    const ShpFile& shp, std::span<const std::uint8_t> event_lengths);
+
+// The payload asset.extras.vs holds for `document`, naming the buffer view
+// that holds its sound (nothing when it is empty) and holding `sequence`
+// (ShpSequenceJson) and the owned banks. The writer and reader share it, so
+// the schema has one definition.
 [[nodiscard]] JsonDocument ShpModelPayload(
     const ShpModelDocument& document, std::optional<std::size_t> sound_view,
-    std::optional<std::size_t> sequence_view);
+    JsonDocument sequence);
 
 // --- Shared by every model format whose glTF holds an ShpModel (SHP, WEP).
 
@@ -227,11 +249,14 @@ struct ModelMeshSpec {
     const ModelIdentity& model, std::string_view image_id);
 
 // The document `stem`'s files hold, checked against everything the payload
-// records. Errors name the file and the member or vertex at fault.
+// records; every bank must rebuild with `event_lengths` (the game's event
+// stride table). Errors name the file and the member or vertex at fault.
 [[nodiscard]] std::expected<ShpModelDocument, std::string> DecodeShpModelFiles(
-    std::string_view stem, const ImageFileReader& read);
+    std::string_view stem, const ImageFileReader& read,
+    std::span<const std::uint8_t> event_lengths);
 // DecodeShpModelFiles over the files in `directory`.
 [[nodiscard]] std::expected<ShpModelDocument, std::string> LoadShpModelFiles(
-    const std::filesystem::path& directory, std::string_view stem);
+    const std::filesystem::path& directory, std::string_view stem,
+    std::span<const std::uint8_t> event_lengths);
 
 }  // namespace VS::Content

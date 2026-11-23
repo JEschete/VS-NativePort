@@ -223,21 +223,21 @@ Additions the reference does not have, required by P4 (lossless). The initial co
 
 **Also emitted** (optional, `--posed`): `<SHP>_posed.obj/.mtl/_0.png`, like the reference folder. This is for quick previews only; the game never reads it.
 
-**Current state (SHP slice, #203).** `VS.Extract models <datadir>` (and `extract`) converts all 202 `OBJ\*.SHP` files with converter `shp-gltf` version 1 (`Extract/ShpModelConversion.hpp`, `Content/ShpModelFiles.hpp`, `Content/ShpFile.hpp`):
+**Current state (SHP and SEQ slices, #203, #205).** `VS.Extract models <datadir>` (and `extract`) converts all 202 `OBJ\*.SHP` files with converter `shp-gltf` version 2 (`Extract/ShpModelConversion.hpp`, `Content/ShpModelFiles.hpp`, `Content/ShpFile.hpp`), and carries all 700 `OBJ\*.SEQ` banks in their models' glTF files (§6.2.1):
 
 - Each model writes `models\characters\<NN>.gltf` + `<NN>.bin`. A model with its own texture also writes `<NN>.png`, `.image.json` and `.palettes.png` (§6.4). Its id is `model.obj.<nn>` and its image id is `image.obj.<nn>`. The 10 models that borrow another model's texture write only the glTF and the buffer. Their glTF shows the lender's PNG, and their manifest entry lists the lender's SHP as a dependency.
 - The glTF has one skinned mesh, a `root` node turned 180° about X and one `bone<N>` node per SHP bone. Positions are the SHP's integer units (scale 1) with each bone's rest origin added.
   - Primitives are grouped by polygon flags 0x71: double-sided, semi-transparent and blend mode.
   - Each corner carries the custom `_VS_VERTEX` attribute, which holds its SHP vertex number.
   - Each primitive's `extras.vs.polygons` lists its polygons in triangle order.
-- `asset.extras.vs` holds the payload (schema `vs.shp-model` version 1): the source and its hash, the bones, the polygon counts, the limb ranges and the 0xE8-byte layout block as named fields. For example, `collision_radius` can be edited as a number. Buffer views hold the sound bytes and the embedded SEQ bytes.
+- `asset.extras.vs` holds the payload (schema `vs.shp-model` version 2): the source and its hash, the bones, the polygon counts, the limb ranges and the 0xE8-byte layout block as named fields. For example, `collision_radius` can be edited as a number. A buffer view holds the sound bytes. `sequence` is the SHP's embedded bank and `sequences` lists the `OBJ\*.SEQ` banks the model owns, both as `vs.actor-animation` JSON (§6.2.1).
 - The payload and the geometry are authoritative. The materials, textures and images only preview the polygon flags. The reader rebuilds the SHP from those two sources and checks it against every value the payload records. The Khronos glTF validator reports 0 errors and 0 warnings for all 202 models.
 - A rerun leaves the files of an unchanged SHP alone, so edits survive. `--force` rewrites every model.
 - At runtime, `Content::LoadConvertedModel` (`Content/ConvertedModels.hpp`) handles the actor model read (`ActorAssetsLive` `BeginFileRead`, `kActorModel`) and never reads the SHP from the disc. It matches the read's LBA and sector-rounded size to the extracted SHP and rebuilds the bytes from that model's files. An edit is validated and loaded, or refused with the file and member named. `RequireConversions` refuses to start without the `shp-gltf` batch.
   - The load completes in the same update that requests it, where the original waited for the CD.
   - An edited model must still fit the original sector-rounded allocation; a larger one is refused.
 
-Not yet done: SEQ/ESQ animation clips (#205, #206), ETM texture overlays (#207), ZUD (#200), a model larger than its original allocation, and a re-export from Blender through the validator. Weapons are §6.2.4.
+Not yet done: glTF preview animations for the SEQ banks and ESQ clips (#205, #206), ETM texture overlays (#207), ZUD (#200), a model larger than its original allocation, and a re-export from Blender through the validator. Weapons are §6.2.4.
 
 #### 6.2.1 Container, schema and optional extension
 
@@ -249,7 +249,15 @@ Not yet done: SEQ/ESQ animation clips (#205, #206), ETM texture overlays (#207),
     - The JSON Schema checks types and ranges. The native reader also checks references, clip flags and event lengths (`EncodeSeqBank`).
     - All 700 `OBJ\*.SEQ` files and the 202 banks embedded in SHP files read back from this JSON equal to their decoded banks and rebuild their exact bytes (`SeqFileTests.cpp`).
     - `tools\test\test_content_schemas.py` checks the writer's fixture (`Native\Tests\data\animation\sample-bank.json`) against the schema in CI.
-    - Not yet done: carrying the banks in the model glTF, the preview animations and the runtime load.
+  - **SEQ banks in their models (#205, landed):** each bank is stored once, in `asset.extras.vs.sequences` of the one model that loads it.
+    - Ownership comes from what the game reads, not from file names. A model owns the banks its layout block names (`battle_sequence_lbas`/`_sizes` and `special_sequence_lbas`/`_sizes`, LBA and sector count). `OBJ\00.SHP` and `OBJ\02.SHP` also own the material and material-model banks that `BATTLE.PRG`'s tables name (`ShpModelConversion.cpp` `BankOwners`).
+    - The extractor refuses a bank that no model or two models load, and a layout entry that names no listed SEQ.
+    - Every bank gets a `seq-gltf` output (id `animation.obj.<bank>`) that lists its owner's `.gltf` and `.bin`. Its dependencies are `BATTLE\BATTLE.PRG` (the event lengths) and the owner SHP at the hash the model output records. A bank with a changed source or owner reconverts its owner.
+    - At runtime, `Content::LoadConvertedSequence` handles the animation bank read (`ActorAssetsLive` `BeginFileRead`, `kSequence`) of an `OBJ\*.SEQ` and never reads the bank from the disc. It finds the bank by LBA and sector-rounded size, reads its owner's glTF and rebuilds the bank's bytes. The last four models decoded are kept, keyed by their files' size and time, so one model's banks decode once. The ESQ banks the same stream reads still come from the disc (#206).
+    - An edited bank is validated and loaded, or refused with the file and member named. It must fit the original sector-rounded read; a larger one is refused and leaves an empty bank.
+    - `RequireConversions` refuses to start without the `seq-gltf` batch or with a bank that has no current output.
+    - All 700 banks load back from their owners' glTF files as their exact bytes (`SeqFileTests.cpp`), and the glTF files still pass the Khronos validator with 0 errors and 0 warnings. `00.gltf`, which holds the most banks, is about 4.1 MB.
+    - Not yet done: glTF animation clips that preview the banks, and playback and timing evidence for the converted banks.
 - **Extension adoption gate:** once the payload is exercised by both consumers, assess packaging it as one documented optional vendor extension. Choose a project/vendor namespace, publish its schema and fallback behavior, and test both readers before switching the writer. Do not invent a `KHR_` or `EXT_` standard. The extension must be in `extensionsUsed`, but not `extensionsRequired`, only while the asset has a valid standard preview without it. See the [glTF extension rules](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#specifying-extensions) and [extension registry guidance](https://github.com/KhronosGroup/glTF/tree/main/extensions).
 - There is **one authoritative VS payload** per asset. A packaging change requires a schema/converter-version change and an explicit migration; do not emit independently editable copies in both `extras` and an extension. A native loader rejects missing required VS data or unsupported versions with an actionable error, even when a generic viewer can still show the baseline.
 - Ordinary viewers need not execute facial tracks, event commands or VS rendering rules. Ignoring custom data is not a promise to preserve it on re-export. Before accepting an edited model, validate the VS payload and references; missing or altered metadata must be reported, not silently defaulted.
@@ -599,7 +607,7 @@ Record source revision/dirty state, disc identity, tool/converter/schema version
 {
   "schema_version": 2,
   "extractor_version": "0.1.0",
-  "converters": { "fbc-palette-png": 1, "fbt-texture-png": 1, "shp-gltf": 1, "syd-recipe-csv": 1, "tim-png": 1, "wep-gltf": 1 },
+  "converters": { "fbc-palette-png": 1, "fbt-texture-png": 1, "seq-gltf": 1, "shp-gltf": 2, "syd-recipe-csv": 1, "tim-png": 1, "wep-gltf": 1 },
   "outputs": [
     {
       "id": "image.bg.001op01a",
@@ -646,7 +654,7 @@ Record source revision/dirty state, disc identity, tool/converter/schema version
 
 <!-- content:begin (generated by tools/ledger/content.py --sync) -->
 
-**1,369 of 5,162 disc files converted**, 1,369 of them with a passing round trip; 194 skipped with a reason; 3,599 unconverted.
+**2,069 of 5,162 disc files converted**, 2,069 of them with a passing round trip; 194 skipped with a reason; 2,899 unconverted.
 
 | Kind | Files | Converted | Round trip pass | Skipped | Unconverted | Converts under |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
@@ -679,7 +687,7 @@ Record source revision/dirty state, disc identity, tool/converter/schema version
 | room | 512 | 0 | 0 | 0 | 512 | #198 |
 | sample bank | 101 | 0 | 0 | 0 | 101 | #504 |
 | shared animation set | 97 | 0 | 0 | 0 | 97 | #206 |
-| skeletal animation | 700 | 0 | 0 | 0 | 700 | #205 |
+| skeletal animation | 700 | 700 | 700 | 0 | 0 | #205 |
 | sound-effect sequences | 102 | 0 | 0 | 0 | 102 | #501 |
 | system images and font | 1 | 0 | 0 | 0 | 1 | #498 |
 | TIM image | 5 | 5 | 5 | 0 | 0 | #208 |

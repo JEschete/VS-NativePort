@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
@@ -22,6 +23,7 @@
 #include "Content/ConvertedModels.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/JsonText.hpp"
+#include "Content/SeqFile.hpp"
 #include "Content/ShpFile.hpp"
 #include "Content/ShpModelFiles.hpp"
 #include "Extract/ConverterBatch.hpp"
@@ -30,8 +32,8 @@
 #include "Extract/WepModelConversion.hpp"
 #include "Extract/WorkshopRecipeConversion.hpp"
 
-// Shared fixtures for the converted character and weapon model tests
-// (ShpFileTests.cpp, WepFileTests.cpp).
+// Shared fixtures for the converted character, weapon and animation tests
+// (ShpFileTests.cpp, WepFileTests.cpp, SeqFileTests.cpp).
 namespace VS::test_support {
 
 struct PolygonSpec {
@@ -77,6 +79,24 @@ struct PolygonSpec {
   INFO(ErrorOf(bytes));
   REQUIRE(bytes.has_value());
   return *std::move(bytes);
+}
+
+using EventLengths = std::array<std::uint8_t, Content::kSeqEventLengthCount>;
+
+// The game's event stride table, from the extracted BATTLE.PRG beside
+// `models`.
+[[nodiscard]] inline EventLengths ExtractedEventLengths(
+    const std::filesystem::path& models) {
+  const std::vector<std::byte> program =
+      ReadModel(models.parent_path() / "BATTLE" / "BATTLE.PRG");
+  REQUIRE(program.size() >=
+          Content::kSeqEventLengthsAt + Content::kSeqEventLengthCount);
+  EventLengths lengths{};
+  for (std::size_t op = 0; op < lengths.size(); ++op) {
+    lengths.at(op) = std::to_integer<std::uint8_t>(
+        program.at(Content::kSeqEventLengthsAt + op));
+  }
+  return lengths;
 }
 
 // Whether the extracted model `lender` in `models` is coloured, which a model
@@ -137,7 +157,9 @@ class ModelRoot {
                << '\n';
       const std::uint64_t sectors =
           (source.bytes.size() + kSectorBytes - 1) / kSectorBytes;
-      reads_.push_back({.lba = lba, .rounded_size = sectors * kSectorBytes});
+      reads_.push_back({.lba = lba,
+                        .rounded_size = sectors * kSectorBytes,
+                        .event_lengths = {}});
       lba += static_cast<std::uint32_t>(sectors);
     }
     REQUIRE(manifest.good());
@@ -221,10 +243,11 @@ LoadModel(const std::filesystem::path& root,
 }
 
 // Every raw file in the extracted data ending with `extension`, loaded from
-// its conversion with `load`, is the file's exact bytes; the count of them.
+// its conversion with `load` and the event stride table `event_lengths`, is
+// the file's exact bytes; the count of them.
 [[nodiscard]] inline std::size_t CheckExtractedModelsLoad(
     const std::filesystem::path& models, std::string_view extension,
-    ModelLoader load) {
+    ModelLoader load, std::span<const std::uint8_t> event_lengths = {}) {
   Content::DataStore::ScopedOverride restore;
   const auto opened =
       Content::DataStore::Open(models.parent_path().parent_path());
@@ -237,9 +260,10 @@ LoadModel(const std::filesystem::path& root,
   for (const Content::DataStore::Entry& entry : store->Entries()) {
     if (entry.form != "raw" || !entry.path.ends_with(extension)) continue;
     CAPTURE(entry.path);
-    const auto bytes = load(*store, {.lba = entry.lba,
-                                     .rounded_size = entry.SectorCount() *
-                                                     ModelRoot::kSectorBytes});
+    const auto bytes = load(
+        *store, {.lba = entry.lba,
+                 .rounded_size = entry.SectorCount() * ModelRoot::kSectorBytes,
+                 .event_lengths = event_lengths});
     INFO(ErrorOf(bytes));
     REQUIRE(bytes.has_value());
     CHECK(*bytes == ReadModel(store->FileOf(entry)));
