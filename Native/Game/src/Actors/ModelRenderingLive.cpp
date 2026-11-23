@@ -671,12 +671,7 @@ void InitializeLiveActorModelResources() {
               kClearedBankPages, std::uint8_t{0});
   std::fill_n(std::begin(VS::Actors::sharedSequenceData), kClearedSequenceBanks,
               nullptr);
-  VS::Content::legacySequenceParsePhase = 0;
-  VS::Content::legacyEtmLoadPhase = 0;
-  VS::Content::modelParseResetFlag = 0;
-  VS::Content::modelParseBoundRecord = false;
   VS::Content::objectDataLoadStep = 0;
-  VS::Content::legacyModelLoadPhase = 0;
   VS::Actors::sharedSequenceBankIndex = 0;
   VECTOR unit_room_scale{};
   unit_room_scale.vx = kUnitActorScale;

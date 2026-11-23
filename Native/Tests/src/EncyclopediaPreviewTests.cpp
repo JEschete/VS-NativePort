@@ -1360,6 +1360,45 @@ TEST_CASE("Preview cleanup releases partial and completed original model parts",
   CHECK(VS::Content::LiveActorAssetRefusals() == refused);
 }
 
+TEST_CASE(
+    "A queued model parser does not resume from module snapshots",
+    "[encyclopedia-preview][gazette-preview-lifecycle][asset-ownership]") {
+  const bool in_progress = GENERATE(false, true);
+  PreviewLifecycleFixture fixture;
+  const auto before = QueueOriginalPreview();
+  const auto refused = VS::Content::LiveActorAssetRefusals();
+  const void* geometry = in_progress ? BeginPreviewParser() : nullptr;
+  VS::Content::modelParseResetFlag = in_progress ? 0 : 1;
+  VS::Content::modelParseBoundRecord = !in_progress;
+  VS::Content::legacyShpParseCursor = nullptr;
+  FinishPreviewParts();
+  const auto* actor = VS::Actors::actorRecords[1];
+  REQUIRE(actor != nullptr);
+  if (in_progress) CHECK(actor->instance.model == geometry);
+  CHECK(VS::Content::LiveActorAssetRefusals() == refused);
+  REQUIRE(score::CleanupLiveEnemyPreviewOwnedState());
+  CheckColdPreviewRelease(before);
+  CheckEmptyPreviewQueue();
+}
+
+TEST_CASE(
+    "Cancelling a model parser ignores overwritten module snapshots",
+    "[encyclopedia-preview][gazette-preview-lifecycle][asset-ownership]") {
+  PreviewLifecycleFixture fixture;
+  const auto before = QueueOriginalPreview();
+  const void* geometry = BeginPreviewParser();
+  const auto refused = VS::Content::LiveActorAssetRefusals();
+  VS::Content::modelParseResetFlag = 0;
+  VS::Content::modelParseBoundRecord = false;
+  VS::Content::legacyShpParseCursor = nullptr;
+  REQUIRE(score::CleanupLiveEnemyPreviewOwnedState());
+  CheckColdPreviewRelease(before);
+  CheckEmptyPreviewQueue();
+  CHECK(VS::Actors::actorRecords[1] == nullptr);
+  CHECK_FALSE(VS::Core::Memory::LivePayloadCapacity(geometry).has_value());
+  CHECK(VS::Content::LiveActorAssetRefusals() == refused);
+}
+
 TEST_CASE("Preview cleanup preserves reused disc slots and empty foreign loads",
           "[encyclopedia-preview][gazette-preview-lifecycle]") {
   PreviewLifecycleFixture fixture;

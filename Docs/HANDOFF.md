@@ -1,5 +1,46 @@
 # Current Handoff
 
+## Per-request actor parser state (#48), 2026-11-23
+
+Starting revision: `23279779c`, clean worktree. `imp/asset-migration` was
+fast-forwarded from the merged branch to `origin/main`; work continues through
+an owner-reviewed PR, not a direct push to `main`.
+
+- Actor, weapon and sequence parser phases, buffers and cursors now live with
+  each queued request's identity and record-memory resolver. Queue movement,
+  cancellation and clearing carry or reset them together.
+- Module parser globals are output-only diagnostic snapshots for those loaders.
+  Tests overwrite the snapshots before and during a real preview parse and
+  before cancellation: the parse still finishes or frees its partial geometry.
+- The battle initializer relies on the queue reset rather than clearing
+  individual parser globals.
+- This is not #48 completion: the unowned ETM phase/buffer, serialized file
+  streams, in-band shared-record index, unowned producers and deliberate
+  immutable sharing remain. G00064's ledger note records a write-only snapshot,
+  not compatibility retirement.
+
+Validation on the seven-file dirty changeset based on `23279779c`:
+- `VS_JOBS=2`; MSBuild `VagrantStory.Native.sln /t:VS_Tests /m:2
+  /p:Configuration=Release /p:Platform=x64 /v:minimal /nologo`: passed.
+- `build\Release\VS.Tests.exe
+  "[actor-assets],[asset-ownership],[actors-spawning],[encyclopedia-preview],[actors][sequence],[actors][texture]"
+  --reporter compact`: **240 cases / 2,197 assertions passed**.
+- `quality.py --files` the changed `ActorAssetsLive.cpp/.hpp`,
+  `ModelRenderingLive.cpp` and `EncyclopediaPreviewTests.cpp`: **0 new findings**.
+- Evidence: `build\issue-48-release-build.log`,
+  `build\issue-48-release-tests.log`, `build\issue-48-quality.log`.
+
+The owner is playtesting the Debug build. Its binaries, logs and `Native\data`
+were not changed; Debug builds and gameplay replays are deferred, so no fresh
+Debug or gameplay parity claim is made. The latest starting CI
+`45208337293` passed both jobs; exact-revision branch CI belongs in the issue
+checkpoint after publication.
+
+Next: #518 records a source-confirmed error-propagation defect found while
+tracing these loaders: `BeginFileRead` ignores a converted read's failure and
+lets zero-filled content continue. Fix and test that boundary without changing
+the running game's data.
+
 ## E207 reference mode (#507) and ZND zone tables (#517), 2026-11-23
 
 Starting revision: `68c317d04`, clean worktree (the `resources/rood-reverse`

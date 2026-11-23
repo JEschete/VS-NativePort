@@ -476,31 +476,8 @@ void StoreRequestFields(const ActorAssetRequest& in,
   out.variant = in.variant;
 }
 
-ActorAssetLoadState LoadState() {
-  ActorAssetLoadState state;
-  state.model_phase = legacyModelLoadPhase;
-  state.parse_phase = modelParseResetFlag;
-  state.sequence_parse_phase = legacySequenceParsePhase;
-  state.effect_texture_phase = legacyEtmLoadPhase;
-  state.weapon_file_loaded = legacyWeaponFileLoaded != 0;
-  state.model_file_allocated = legacyShpAllocated != 0;
-  state.sequence_file_owned = legacySequenceBufferOwned != 0;
-  state.weapon_file = Address(legacyWeaponFileBuffer);
-  state.model_file = Address(legacyShpFileBuffer);
-  state.sequence_file = Address(legacySequenceFileBuffer);
-  state.effect_texture_file = Address(legacyEtmFileBuffer);
-  state.weapon_cursor = Address(legacyWeaponParseCursor);
-  state.model_cursor = Address(legacyShpParseCursor);
-  state.sequence_cursor = Address(legacySequenceParseData);
-  state.model_palette_words = legacyShpCopiedWordCount;
-  state.model_header_word = legacyShpHeaderWord;
-  state.model_texture_width = legacyShpTextureWidth;
-  state.model_texture_height = legacyShpTextureHeight;
-  state.model_record_bound = modelParseBoundRecord;
-  return state;
-}
-
-void StoreState(const ActorAssetLoadState& state) {
+// Module symbols remain diagnostic snapshots, not parser inputs.
+void PublishLoaderSnapshot(const ActorAssetLoadState& state) {
   legacyModelLoadPhase = state.model_phase;
   modelParseResetFlag = state.parse_phase;
   legacySequenceParsePhase = state.sequence_parse_phase;
@@ -866,11 +843,13 @@ FileReadOwner* ReadOwner(AssetFileStream stream) {
   }
 }
 
-// Native (#48): the owner of each queued request and the tickets' outcomes.
-// The original's request records have no room for them.
-std::array<ActorAssetIdentity, kActorAssetRequestCount> requestIdentities{};
-// Native (#48): where each queued owned request's owner keeps its records.
-std::array<ActorRecordMemory, kActorAssetRequestCount> requestRecordMemory{};
+struct QueuedAssetState {
+  ActorAssetIdentity identity;
+  ActorRecordMemory memory = nullptr;
+  ActorAssetLoadState loader;
+};
+
+std::array<QueuedAssetState, kActorAssetRequestCount> requestStates{};
 ActorAssetCompletions requestCompletions;
 
 LiveFileStream Stream(AssetFileStream stream) {
@@ -940,38 +919,36 @@ class LiveActorAssetHost final : public ActorAssetHost {
       return;
     }
     StoreRequestFields(request, legacyActorAssetRequests[slot]);
-    requestIdentities[slot] = identity;
-    requestRecordMemory[slot] =
-        identity.owner != kUnownedActorAssetOwner ? submitted_memory_ : nullptr;
+    requestStates[slot] = {.identity = identity,
+                           .memory = identity.owner != kUnownedActorAssetOwner
+                                         ? submitted_memory_
+                                         : nullptr,
+                           .loader = {}};
   }
   [[nodiscard]] ActorAssetIdentity RequestIdentity(int slot) const override {
     if (RequestKind(slot) == 0) return {};
-    return requestCompletions.Current(requestIdentities[slot]);
+    return requestCompletions.Current(requestStates[slot].identity);
   }
   ActorAssetCompletions& Completions() override { return requestCompletions; }
   void OnRequestQueued(const ActorAssetRequest& request) override {
-    const std::uint8_t phase = active_state_ != nullptr
-                                   ? active_state_->model_phase
-                                   : legacyModelLoadPhase;
-    const std::uint8_t parse = active_state_ != nullptr
-                                   ? active_state_->parse_phase
-                                   : modelParseResetFlag;
-    VS::Core::Debugf(
-        "actors", "queue kind=%u actor=%u model=%u phase=%u parse=%u",
-        static_cast<unsigned>(request.kind),
-        static_cast<unsigned>(request.target_slot),
-        static_cast<unsigned>(request.model_id), static_cast<unsigned>(phase),
-        static_cast<unsigned>(parse));
+    const ActorAssetLoadState& state = requestStates[0].loader;
+    VS::Core::Debugf("actors",
+                     "queue kind=%u actor=%u model=%u phase=%u parse=%u",
+                     static_cast<unsigned>(request.kind),
+                     static_cast<unsigned>(request.target_slot),
+                     static_cast<unsigned>(request.model_id),
+                     static_cast<unsigned>(state.model_phase),
+                     static_cast<unsigned>(state.parse_phase));
   }
   void MoveRequest(int from, int to) override {
     legacyActorAssetRequests[to] = legacyActorAssetRequests[from];
-    requestIdentities[to] = requestIdentities[from];
-    requestRecordMemory[to] = requestRecordMemory[from];
+    requestStates[to] = requestStates[from];
+    if (to == 0) PublishLoaderSnapshot(requestStates[0].loader);
   }
   void ClearRequestKind(int slot) override {
     legacyActorAssetRequests[slot].asset_kind = 0;
-    requestIdentities[slot] = {};
-    requestRecordMemory[slot] = nullptr;
+    requestStates[slot] = {};
+    if (slot == 0) PublishLoaderSnapshot({});
   }
   int ProcessHeadRequest(ActorAssetKind kind) override {
     LegacyActorAssetRequest& head = legacyActorAssetRequests[0];
@@ -981,12 +958,15 @@ class LiveActorAssetHost final : public ActorAssetHost {
       StoreRequestFields(request, head);
       return result;
     }
-    ActorAssetLoadState state = LoadState();
-    active_state_ = &state;
+    ActorAssetLoadState& state = requestStates[0].loader;
+    // The unowned ETM stream still uses its legacy phase and buffer (#207).
+    if (kind == ActorAssetKind::kEffectTextureLoad) {
+      state.effect_texture_phase = legacyEtmLoadPhase;
+      state.effect_texture_file = Address(legacyEtmFileBuffer);
+    }
     const int result = RunLoader(*this, state, request, kind);
-    active_state_ = nullptr;
     ReleaseIdleActorAssetCursors(state);
-    StoreState(state);
+    PublishLoaderSnapshot(state);
     StoreRequestFields(request, head);
     return result;
   }
@@ -1451,10 +1431,10 @@ class LiveActorAssetHost final : public ActorAssetHost {
   [[nodiscard]] static AssetAddress RecordMemory(
       ActorRecordTable table, int slot, const ActorAssetRequest& request) {
     const ActorAssetOwner owner = legacyActorAssetRequests[0].asset_kind != 0
-                                      ? requestIdentities[0].owner
+                                      ? requestStates[0].identity.owner
                                       : kUnownedActorAssetOwner;
     if (owner == kUnownedActorAssetOwner) return request.destination;
-    const ActorRecordMemory memory = requestRecordMemory[0];
+    const ActorRecordMemory memory = requestStates[0].memory;
     return memory != nullptr ? memory(owner, table, slot) : AssetAddress::kNone;
   }
 
@@ -1477,7 +1457,6 @@ class LiveActorAssetHost final : public ActorAssetHost {
     return reinterpret_cast<Record*>(bytes.data());
   }
 
-  const ActorAssetLoadState* active_state_ = nullptr;
   ActorRecordMemory submitted_memory_ = nullptr;
 };
 
@@ -1537,7 +1516,7 @@ bool LiveActorAssetHost::AbandonHeadRequest(ActorAssetKind kind) {
     CountRefusal("unsupported asset head cancellation", request.kind);
     return false;
   }
-  ActorAssetLoadState state = LoadState();
+  ActorAssetLoadState& state = requestStates[0].loader;
   if (kind == ActorAssetKind::kActorModelLoad && !CancelModelFile(state)) {
     return false;
   }
@@ -1548,7 +1527,7 @@ bool LiveActorAssetHost::AbandonHeadRequest(ActorAssetKind kind) {
     return false;
   }
   AbandonActorAssetLoad(*this, state, request);
-  StoreState(state);
+  PublishLoaderSnapshot(state);
   return true;
 }
 }  // namespace
