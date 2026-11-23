@@ -236,11 +236,19 @@ void SetTextureReferences(ActorAssetHost& host, AssetTextureTable table,
 
 // Starts a loader's read, or reads it at once when the disc queue refused
 // the request (#282).
-void StartFileRead(ActorAssetHost& host, AssetFileStream stream,
+bool StartFileRead(ActorAssetHost& host, AssetFileStream stream,
                    DiscFileExtent file, AssetAddress destination) {
-  if (!host.BeginFileRead(stream, file, destination)) {
-    host.ReadRefusedFile(file, destination);
+  switch (host.BeginFileRead(stream, file, destination)) {
+    case AssetFileReadStart::kStarted:
+      return true;
+    case AssetFileReadStart::kQueueFull:
+      if (host.ReadRefusedFile(file, destination)) return true;
+      break;
+    case AssetFileReadStart::kFailed:
+      break;
   }
+  host.Refuse("asset file read", file.sector);
+  return false;
 }
 
 bool IsDispatchedKind(std::uint8_t kind) {
@@ -718,9 +726,16 @@ int StartWeaponFileRead(ActorAssetHost& host, ActorAssetLoadState& state,
     return kAssetRefused;
   }
   state.model_phase = kPhaseReading;
-  StartFileRead(host, AssetFileStream::kWeapon,
-                {static_cast<std::int32_t>(*offset) + kWepFirstSector, bytes},
-                request.data);
+  if (!StartFileRead(
+          host, AssetFileStream::kWeapon,
+          {static_cast<std::int32_t>(*offset) + kWepFirstSector, bytes},
+          request.data)) {
+    host.FreeHigh(state.weapon_file);
+    state.weapon_file = request.data = AssetAddress::kNone;
+    state.weapon_file_loaded = false;
+    state.model_phase = kPhaseStart;
+    return kAssetRefused;
+  }
   return kAssetPending;
 }
 
@@ -1253,9 +1268,16 @@ int StartActorModelFileRead(ActorAssetHost& host, ActorAssetLoadState& state,
     return kAssetRefused;
   }
   state.model_phase = kPhaseReading;
-  StartFileRead(host, AssetFileStream::kActorModel,
-                {static_cast<std::int32_t>(*offset) + kShpFirstSector, bytes},
-                request.data);
+  if (!StartFileRead(
+          host, AssetFileStream::kActorModel,
+          {static_cast<std::int32_t>(*offset) + kShpFirstSector, bytes},
+          request.data)) {
+    host.FreeHigh(state.model_file);
+    state.model_file = request.data = AssetAddress::kNone;
+    state.model_file_allocated = false;
+    state.model_phase = kPhaseStart;
+    return kAssetRefused;
+  }
   return kAssetPending;
 }
 
@@ -2254,6 +2276,20 @@ int StartSequenceFileRead(ActorAssetHost& host, ActorAssetLoadState& state,
   if (state.sequence_file == AssetAddress::kNone) {
     return kAssetRefused;
   }
+  state.model_phase = kPhaseReading;
+  if (!StartFileRead(host, AssetFileStream::kSequence,
+                     {file.sector, static_cast<std::int32_t>(bytes)},
+                     request.data)) {
+    if (file.low_end) {
+      host.FreeLow(state.sequence_file);
+    } else {
+      host.FreeHigh(state.sequence_file);
+    }
+    state.sequence_file = request.data = AssetAddress::kNone;
+    state.sequence_file_owned = false;
+    state.model_phase = kPhaseStart;
+    return kAssetRefused;
+  }
   if (request.sub_kind == kBattleSequence && request.target_slot == 0 &&
       request.model_id != 0) {
     // The original leaves the other fields as stack bytes.
@@ -2263,9 +2299,6 @@ int StartSequenceFileRead(ActorAssetHost& host, ActorAssetLoadState& state,
     weapon.material = static_cast<std::uint8_t>(request.model_id);
     static_cast<void>(QueueActorAssetRequest(host, weapon));
   }
-  state.model_phase = kPhaseReading;
-  StartFileRead(host, AssetFileStream::kSequence,
-                {file.sector, static_cast<std::int32_t>(bytes)}, request.data);
   return kAssetPending;
 }
 
@@ -2818,10 +2851,15 @@ int StartEffectTextureRead(ActorAssetHost& host, ActorAssetLoadState& state,
     // The original leaves the phase at 1 with no read started.
     return kAssetRefused;
   }
-  StartFileRead(host, AssetFileStream::kEffectTexture,
-                {static_cast<std::int32_t>(*offset) + kEtmFirstSector,
-                 static_cast<std::int32_t>(bytes)},
-                state.effect_texture_file);
+  if (!StartFileRead(host, AssetFileStream::kEffectTexture,
+                     {static_cast<std::int32_t>(*offset) + kEtmFirstSector,
+                      static_cast<std::int32_t>(bytes)},
+                     state.effect_texture_file)) {
+    host.FreeHigh(state.effect_texture_file);
+    state.effect_texture_file = AssetAddress::kNone;
+    state.effect_texture_phase = kPhaseStart;
+    return kAssetRefused;
+  }
   return kAssetPending;
 }
 

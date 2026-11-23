@@ -658,6 +658,9 @@ These are target designs, not an implemented-feature inventory. See §0.2 and §
     reset. Legacy parser symbols remain output-only diagnostic snapshots, except the unowned ETM stream's phase
     and buffer (#207). The serialized file streams, shared-record index in `request.data`, unowned producers and
     immutable model/animation sharing remain migration work; no whole-issue or EC retirement is claimed.
+    File-read starts distinguish success, a full request queue and failure (#518). Only a full queue permits
+    the existing synchronous read fallback. A converted-file error or failed fallback frees the loader's
+    allocation from the same heap end and fails the request before parsing, binding or texture upload.
   - **Decoders** (used by VS.Extract and the round-trip tests) produce typed objects: TIM, MPD, ZND, SHP, SEQ, WEP, ARM, ZUD, SYD, FBT/FBC, EVT, AKAO, XA, MCDATA, ITEMNAME/ITEMHELP text, HF0/HF1 help, EFFECT data.
   - **Loaders** (used by the game) read glTF, PNG, WAV, FLAC and JSON from `Native\data\` and build the same typed objects. The round-trip rule in ASSET_PIPELINE §7 proves `decode(raw) == load(converted)`.
   - **Catalogs** are loaded from `Native\data\catalogs\` JSON, validated against `schemas\`, and frozen into immutable registries (§9).

@@ -378,9 +378,7 @@ std::optional<ConvertedRead> ConvertedReadOf(AssetFileStream stream,
 // Native (#203-#207): fills `destination` with the converted actor model,
 // weapon model, animation bank, animation set or effect texture sheet in
 // place of the disc read, and whether it loaded. A file that does not load or
-// fit leaves zeros: the parser refuses them as an empty actor model, they
-// parse as a weapon with no geometry, as an empty bank or set, and as a sheet
-// of no lines, which uploads nothing.
+// fit leaves zeros and fails the read; those bytes must not be parsed.
 bool ReadConvertedModel(const ConvertedRead& read, DiscFileExtent file,
                         std::span<std::byte> destination) {
   std::ranges::fill(destination, std::byte{0});
@@ -1005,8 +1003,8 @@ class LiveActorAssetHost final : public ActorAssetHost {
                                               std::size_t index) override {
     return LiveFileTableEntry(table, index);
   }
-  bool BeginFileRead(AssetFileStream stream, DiscFileExtent file,
-                     AssetAddress destination) override {
+  AssetFileReadStart BeginFileRead(AssetFileStream stream, DiscFileExtent file,
+                                   AssetAddress destination) override {
     const LiveFileStream live = Stream(stream);
     live.file->lba = file.sector;
     live.file->size = file.bytes;
@@ -1016,29 +1014,28 @@ class LiveActorAssetHost final : public ActorAssetHost {
       // read.
       const auto wanted = static_cast<std::size_t>(std::max(file.bytes, 0));
       const std::span<std::byte> bytes = Bytes(destination, wanted);
-      ReadConvertedModel(*converted, file,
-                         bytes.first(std::min(bytes.size(), wanted)));
+      const bool loaded = ReadConvertedModel(
+          *converted, file, bytes.first(std::min(bytes.size(), wanted)));
       *live.request = nullptr;
       if (FileReadOwner* owner = ReadOwner(stream)) *owner = {};
-      return true;
+      return loaded ? AssetFileReadStart::kStarted
+                    : AssetFileReadStart::kFailed;
     }
     *live.request = AllocateLiveDiscRequest(live.file);
     if (FileReadOwner* owner = ReadOwner(stream)) {
       *owner = {*live.request, LiveDiscRequestGeneration(*live.request)};
     }
     if (*live.request == nullptr) {
-      return false;
+      return AssetFileReadStart::kQueueFull;
     }
     EnqueueLiveDiscRequest(*live.request, Pointer(destination));
-    return true;
+    return AssetFileReadStart::kStarted;
   }
-  void ReadRefusedFile(DiscFileExtent file, AssetAddress destination) override {
+  bool ReadRefusedFile(DiscFileExtent file, AssetAddress destination) override {
     DiscFile location{};
     location.lba = file.sector;
     location.size = file.bytes;
-    if (ReadLiveRefusedDiscFile(&location, Pointer(destination)) == 0) {
-      CountRefusal("unread asset file sector", file.sector);
-    }
+    return ReadLiveRefusedDiscFile(&location, Pointer(destination)) != 0;
   }
   bool FileReadFinished(AssetFileStream stream) override {
     const DiscQueueSlot* request = *Stream(stream).request;

@@ -12,6 +12,7 @@
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
@@ -209,18 +210,23 @@ class FakeAssetHost final : public Content::ActorAssetHost {
     }
     return entry->second;
   }
-  bool BeginFileRead(AssetFileStream stream, Content::DiscFileExtent file,
-                     AssetAddress destination) override {
+  Content::AssetFileReadStart BeginFileRead(AssetFileStream stream,
+                                            Content::DiscFileExtent file,
+                                            AssetAddress destination) override {
     reads.push_back({stream, file, destination});
+    if (fail_reads) return Content::AssetFileReadStart::kFailed;
     if (accept_reads) {
       Deliver(file, destination);
     }
-    return accept_reads;
+    return accept_reads ? Content::AssetFileReadStart::kStarted
+                        : Content::AssetFileReadStart::kQueueFull;
   }
-  void ReadRefusedFile(Content::DiscFileExtent file,
+  bool ReadRefusedFile(Content::DiscFileExtent file,
                        AssetAddress destination) override {
     refused_reads.push_back({AssetFileStream::kWeapon, file, destination});
+    if (fail_fallback_reads) return false;
     Deliver(file, destination);
+    return true;
   }
   bool FileReadFinished(AssetFileStream /*stream*/) override {
     return read_finished;
@@ -443,6 +449,8 @@ class FakeAssetHost final : public Content::ActorAssetHost {
   std::vector<AssetAddress> low_frees;
 
   bool accept_reads = true;
+  bool fail_reads = false;
+  bool fail_fallback_reads = false;
   bool read_finished = true;
   std::vector<FileRead> reads;
   std::vector<FileRead> refused_reads;
@@ -1554,6 +1562,29 @@ TEST_CASE("Weapon loads parse a WEP file the disc queue refused",
   CHECK(host.refusals.empty());
 }
 
+TEST_CASE("Failed weapon reads free their file without parsing or fallback",
+          "[content][actor-assets][asset-read-failure]") {
+  const bool fallback = GENERATE(false, true);
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  AddWeaponFile(host);
+  host.fail_reads = !fallback;
+  host.accept_reads = !fallback;
+  host.fail_fallback_reads = fallback;
+  ActorAssetLoadState state;
+  ActorAssetRequest request = WeaponRequest(host);
+  CHECK(Content::UpdateWeaponModelLoad(host, state, request) == kAssetRefused);
+  CHECK(host.high_frees == host.high_blocks);
+  CHECK(host.low_blocks.empty());
+  CHECK_FALSE(host.weapons[4].has_value());
+  CHECK(request.data == AssetAddress::kNone);
+  CHECK(host.refused_reads.size() == (fallback ? 1 : 0));
+  CHECK(host.refusals == std::vector<std::string>{"asset file read"});
+  host.fail_reads = host.fail_fallback_reads = false;
+  host.accept_reads = true;
+  CHECK(LoadWeaponAfresh(host) == kAssetDone);
+}
+
 TEST_CASE("Weapon files parse the header, geometry and palettes",
           "[content-slice][content][actor-assets]") {
   const auto owner = std::make_unique<FakeAssetHost>();
@@ -2620,6 +2651,66 @@ TEST_CASE("Sequence parser refuses a material bank larger than its work buffer",
   CHECK(std::ranges::all_of(
       host.Block(host.work_sequence),
       [](std::byte value) { return value == std::byte{0x6B}; }));
+}
+
+TEST_CASE("Failed actor reads leave no file or partially bound record",
+          "[content][actor-assets][asset-read-failure]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  AddShpFile(host, 0);
+  host.fail_reads = true;
+  ActorAssetLoadState state;
+  ActorAssetRequest request = ShpRequest(host, 3);
+  CHECK(Content::UpdateActorModelLoad(host, state, request) == kAssetRefused);
+  CHECK(host.high_frees == host.high_blocks);
+  CHECK(host.low_blocks.empty());
+  CHECK_FALSE(host.actors[3].has_value());
+  CHECK(state == ActorAssetLoadState{});
+  CHECK(host.refused_reads.empty());
+  host.fail_reads = false;
+  CHECK(LoadActorModel(host, state, request) == kAssetDone);
+}
+
+TEST_CASE("Failed sequence reads release high and low files without binding",
+          "[content][actor-assets][asset-read-failure]") {
+  const bool bank = GENERATE(false, true);
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  AddBattleSequenceActor(host);
+  AddSequenceTables(host);
+  host.fail_reads = true;
+  ActorAssetLoadState state;
+  ActorAssetRequest request =
+      Request(ActorAssetKind::kSequenceLoad, bank ? 2 : 3, bank ? 5 : 2);
+  request.sub_kind = bank ? 1 : 0;
+  CHECK(Content::UpdateActorSequenceLoad(host, state, request) ==
+        kAssetRefused);
+  CHECK(host.high_frees == host.high_blocks);
+  CHECK(host.low_frees == host.low_blocks);
+  CHECK(state == ActorAssetLoadState{});
+  CHECK(host.sequence_banks.empty());
+  CHECK(host.queued.empty());
+  CHECK(host.refused_reads.empty());
+}
+
+TEST_CASE("Failed effect texture reads neither reserve nor upload a page",
+          "[content][actor-assets][asset-read-failure]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  AddEffectTextureFile(host);
+  host.fail_reads = true;
+  ActorAssetLoadState state;
+  const ActorAssetRequest request = EffectTextureRequest();
+  CHECK(Content::UpdateSequenceEffectTextureLoad(host, state, request) ==
+        kAssetRefused);
+  CHECK(host.high_frees == host.high_blocks);
+  CHECK(host.reserved_pages.empty());
+  CHECK(host.images.empty());
+  CHECK(state == ActorAssetLoadState{});
+  host.fail_reads = false;
+  StepEffectTextureLoad(host, state, request, 2);
+  CHECK(host.images.size() == 1);
+  CHECK(host.high_frees == host.high_blocks);
 }
 
 TEST_CASE("Live battle asset entry points refuse bad slots",
