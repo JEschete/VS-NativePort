@@ -351,7 +351,7 @@ std::expected<void, std::string> Disc::ParseIso9660() {
       !result) {
     return result;
   }
-  std::ranges::sort(m_files_, {}, &DiscFile::path);
+  std::ranges::sort(m_files_, {}, &DiscEntry::path);
   return {};
 }
 
@@ -393,7 +393,7 @@ std::expected<void, std::string> Disc::WalkDirectory(u32 lba, u32 size,
     const bool is_dir = (rec[kRecordFlagsOffset] & 0x02) != 0;
     if (!(name_len == 1 &&
           (rec[kRecordNameOffset] == 0 || rec[kRecordNameOffset] == 1))) {
-      DiscFile f;
+      DiscEntry f;
       f.path = prefix + NormalizeDiscPath(name);
       f.lba = ReadLe32(rec + kRecordLbaOffset);
       f.size = ReadLe32(rec + kRecordSizeOffset);
@@ -430,7 +430,7 @@ std::expected<void, std::string> Disc::ScanFolder(const fs::path& root) {
   std::error_code ec;
   for (auto it = fs::recursive_directory_iterator(root, ec);
        it != fs::recursive_directory_iterator(); ++it) {
-    DiscFile f;
+    DiscEntry f;
     f.path =
         NormalizeDiscPath(fs::relative(it->path(), root, ec).generic_string());
     f.directory = it->is_directory();
@@ -443,13 +443,13 @@ std::expected<void, std::string> Disc::ScanFolder(const fs::path& root) {
     return std::unexpected(
         std::format("cannot scan {}: {}", root.string(), ec.message()));
   }
-  std::ranges::sort(m_files_, {}, &DiscFile::path);
+  std::ranges::sort(m_files_, {}, &DiscEntry::path);
   return {};
 }
 
-std::optional<DiscFile> Disc::Find(std::string_view path) const {
+std::optional<DiscEntry> Disc::Find(std::string_view path) const {
   const std::string key = NormalizeDiscPath(path);
-  auto it = std::ranges::lower_bound(m_files_, key, {}, &DiscFile::path);
+  auto it = std::ranges::lower_bound(m_files_, key, {}, &DiscEntry::path);
   if (it != m_files_.end() && it->path == key) {
     return *it;
   }
@@ -457,7 +457,7 @@ std::optional<DiscFile> Disc::Find(std::string_view path) const {
 }
 
 std::expected<std::vector<u8>, std::string> Disc::ReadFile(
-    const DiscFile& file) const {
+    const DiscEntry& file) const {
   if (file.directory) {
     return std::unexpected(std::format("{} is a directory", file.path));
   }

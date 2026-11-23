@@ -14,7 +14,7 @@
 namespace VS::Content {
 
 // One file on the disc (from the ISO9660 directory) or in an extracted folder.
-struct DiscFile {
+struct DiscEntry {
   std::string
       path;      // upper-case, '/'-separated, no ";1" (e.g. "MAP/ZONE009.ZND")
   u32 lba = 0;   // first sector (disc image only)
@@ -46,15 +46,15 @@ class Disc {
   // Sectors on the disc image; 0 for an extracted folder.
   u64 SectorCount() const;
   std::string_view Label() const { return m_label_; }
-  const std::vector<DiscFile>& Files() const { return m_files_; }
+  const std::vector<DiscEntry>& Files() const { return m_files_; }
 
   // Case-insensitive; accepts '\' or '/', with or without leading slash and
   // ";1".
-  std::optional<DiscFile> Find(std::string_view path) const;
+  std::optional<DiscEntry> Find(std::string_view path) const;
 
   // Whole file as Form 1 user data (2048 bytes/sector).
   std::expected<std::vector<u8>, std::string> ReadFile(
-      const DiscFile& file) const;
+      const DiscEntry& file) const;
   std::expected<std::vector<u8>, std::string> ReadFile(
       std::string_view path) const;
 
@@ -83,7 +83,7 @@ class Disc {
   std::unique_ptr<Impl> m_impl_;
   bool m_is_image_ = false;
   std::string m_label_;
-  std::vector<DiscFile> m_files_;
+  std::vector<DiscEntry> m_files_;
 };
 
 std::string NormalizeDiscPath(std::string_view path);

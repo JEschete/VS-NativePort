@@ -106,7 +106,7 @@ std::optional<fs::path> FindFfmpeg(int argc, char** argv) {
   return std::nullopt;
 }
 
-bool WriteRawStream(const Content::Disc& disc, const Content::DiscFile& file,
+bool WriteRawStream(const Content::Disc& disc, const Content::DiscEntry& file,
                     const fs::path& tmp, bool xa_audio = false) {
   const u64 sectors =
       (static_cast<u64>(file.size) + Content::Disc::SectorData - 1) /
@@ -141,7 +141,7 @@ bool WriteRawStream(const Content::Disc& disc, const Content::DiscFile& file,
 // Preserve the movie's decoded audio losslessly; video uses AV1 CRF 18.
 bool ConvertMovie(const Content::Disc& disc, const fs::path& ffmpeg,
                   const Content::Av1Encoder& encoder,
-                  const Content::DiscFile& file, const fs::path& mkv) {
+                  const Content::DiscEntry& file, const fs::path& mkv) {
   fs::path tmp = mkv;
   tmp += L".raw";
   if (!WriteRawStream(disc, file, tmp)) return false;
@@ -181,7 +181,7 @@ bool ConvertMovie(const Content::Disc& disc, const fs::path& ffmpeg,
 }
 
 bool ConvertXa(const Content::Disc& disc, const fs::path& ffmpeg,
-               const Content::DiscFile& file, const fs::path& flac) {
+               const Content::DiscEntry& file, const fs::path& flac) {
   fs::path tmp = flac;
   tmp += L".raw";
   if (!WriteRawStream(disc, file, tmp, true)) return false;

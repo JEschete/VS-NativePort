@@ -252,8 +252,9 @@ TEST_CASE("A CHD reads back as the same files as its image",
   REQUIRE(disc.has_value());
   CHECK((*disc)->IsImage());
   CHECK((*disc)->SectorCount() == kImageSectors);
-  const auto file =
-      (*disc)->Find("TITLE.STR").value_or(Content::DiscFile{.path = "missing"});
+  const auto file = (*disc)
+                        ->Find("TITLE.STR")
+                        .value_or(Content::DiscEntry{.path = "missing"});
   REQUIRE(file.path == "TITLE.STR");
   CHECK(file.lba == kFileSector);
   CHECK(file.interleaved);
