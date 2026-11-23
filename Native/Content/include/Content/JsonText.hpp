@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <expected>
 #include <initializer_list>
+#include <optional>
 #include <span>
 #include <string>
 #include <string_view>
@@ -28,6 +29,11 @@ using JsonDocument = nlohmann::ordered_json;
 
 // Whether `text` is a SHA-256 digest in lowercase hexadecimal.
 [[nodiscard]] bool IsLowercaseSha256(std::string_view text) noexcept;
+
+// `value` when it is a whole number an int64 holds; nothing for fractions,
+// other types and larger numbers.
+[[nodiscard]] std::optional<std::int64_t> JsonWholeNumber(
+    const JsonDocument& value) noexcept;
 
 // One JSON object's members; errors name each member by its path.
 class JsonMembers {

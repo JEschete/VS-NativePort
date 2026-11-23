@@ -17,6 +17,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Content/ActorAnimation.hpp"
+#include "Content/JsonText.hpp"
 #include "Content/SeqFile.hpp"
 #include "Content/ShpFile.hpp"
 #include "TestSupport/ModelFixtures.hpp"
@@ -394,6 +396,109 @@ TEST_CASE("SEQ decoding names the bytes it rejects", "[content-models][seq]") {
   }
 }
 
+// The sample bank as an actor-animation document.
+content::ActorAnimationDocument SampleDocument() {
+  return {.source = "OBJ/SAMPLE.SEQ",
+          .source_sha256 =
+              "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934c"
+              "a495991b7852b855",
+          .file = {.bones = kSampleBones, .bank = SampleBank()}};
+}
+
+content::JsonDocument SampleFixture() {
+  constexpr std::string_view kFixture =
+      "Native/Tests/data/animation/"
+      "sample-bank.json";
+  auto directory = fs::current_path();
+  while (!fs::exists(directory / kFixture) &&
+         directory != directory.parent_path()) {
+    directory = directory.parent_path();
+  }
+  const auto json =
+      content::ParseJsonText(ReadModel(directory / kFixture), kFixture);
+  INFO(ErrorOf(json));
+  REQUIRE(json.has_value());
+  return *json;
+}
+
+content::JsonDocument Reparsed(const content::JsonDocument& json) {
+  const std::string text = content::FormatJsonText(json);
+  const auto parsed =
+      content::ParseJsonText(std::as_bytes(std::span(text)), "text");
+  INFO(ErrorOf(parsed));
+  REQUIRE(parsed.has_value());
+  return *parsed;
+}
+
+TEST_CASE("The actor-animation form writes and reads the sample bank",
+          "[content-models][seq]") {
+  const content::ActorAnimationDocument document = SampleDocument();
+  const content::JsonDocument json = content::ActorAnimationJson(document);
+  INFO(content::FormatJsonText(json));
+  CHECK(json == SampleFixture());
+  const auto read =
+      content::ActorAnimationOf(Reparsed(json), "sample-bank.json");
+  INFO(ErrorOf(read));
+  REQUIRE(read.has_value());
+  CHECK(*read == document);
+  CHECK(Encoded(read->file.bank) == Encoded(SampleBank()));
+}
+
+TEST_CASE("The actor-animation reader names the member at fault",
+          "[content-models][seq]") {
+  using content::JsonDocument;
+  struct Edit {
+    std::string_view pointer;
+    JsonDocument value;
+    std::string_view error;
+  };
+  const std::vector<Edit> edits{
+      {"/schema_version", 2, "s is vs.actor-animation version 2; this build"},
+      {"/source_sha256", "ABC", "s.source_sha256 must be a lowercase SHA-256"},
+      {"/bones", 42, "s.bones must be a whole number from 1 to 41"},
+      {"/bank/map/1", 255,
+       "s.bank.map[1] must be a whole number from 0 to "
+       "254 or null"},
+      {"/bank/clips/0/base", -1,
+       "s.bank.clips[0].base must be a whole number "
+       "from 0 to 254 or null"},
+      {"/bank/clips/0/extra", 1, "s.bank.clips[0] has an unknown member"},
+      {"/bank/clips/1/root", JsonDocument::parse(R"({"track": 7})"),
+       "s.bank.clips[1].root.command is missing"},
+      {"/bank/clips/2/scales", 1,
+       "s.bank.clips[2].scales must be an array "
+       "or null"},
+      {"/bank/motion/0/commands/4", 0,
+       "s.bank.motion[0].commands[4] must be "
+       "a whole number from 1 to 65535"},
+      {"/bank/motion/1/commands/1", 1.5,
+       "s.bank.motion[1].commands[1] must "
+       "be a whole number"},
+      {"/bank/motion/1/commands", JsonDocument::parse("[1, 300, null]"),
+       "s.bank.motion[1].commands must hold frames, x, y, z"},
+      {"/bank/motion/1/raw_scale", JsonDocument::parse("[1, 2, 3]"),
+       "s.bank.motion[1] has more than one initial key"},
+      {"/bank/motion/3/packed_scale/2", -16385,
+       "s.bank.motion[3].packed_scale[2] must be a whole number from -16384"},
+      {"/bank/motion/4/raw_scale/1", 256,
+       "s.bank.motion[4].raw_scale[1] must be a whole number from 0 to 255"},
+      {"/bank/motion/5/events/2", JsonDocument::parse("[5]"),
+       "s.bank.motion[5].events[2] must be an array of a frame, an op"},
+      {"/bank/motion/8/unread", "ABCD",
+       "s.bank.motion[8].unread must be bytes in lowercase hexadecimal"},
+      {"/bank/motion/8/unread", "abc",
+       "s.bank.motion[8].unread must be bytes in lowercase hexadecimal"},
+  };
+  for (const Edit& edit : edits) {
+    CAPTURE(edit.pointer);
+    JsonDocument json = content::ActorAnimationJson(SampleDocument());
+    json[JsonDocument::json_pointer(std::string(edit.pointer))] = edit.value;
+    const auto read = content::ActorAnimationOf(json, "s");
+    REQUIRE_FALSE(read.has_value());
+    CheckContains(read.error(), edit.error);
+  }
+}
+
 // The game's event stride table, from BATTLE.PRG beside the models.
 Lengths GameLengths(const fs::path& models) {
   const Bytes prg = ReadModel(models.parent_path() / "BATTLE" / "BATTLE.PRG");
@@ -431,7 +536,9 @@ void Count(const content::SeqBank& bank, Tallies& tallies) {
   for (const content::SeqElement& element : bank.motion) {
     ++tallies[std::string(kElements.at(element.index()))];
     const auto* track = std::get_if<content::SeqTrack>(&element);
-    if (track != nullptr && !track->terminated) ++tallies["unterminated"];
+    if (track == nullptr) continue;
+    tallies["commands"] += track->commands.size();
+    if (!track->terminated) ++tallies["unterminated"];
   }
 }
 
@@ -441,6 +548,15 @@ std::string Describe(const Tallies& tallies) {
     text += std::format("{}: {}\n", name, count);
   }
   return text;
+}
+
+// Checks `bank` reads back unchanged from its actor-animation JSON text.
+void CheckJsonRebuilds(const content::SeqBank& bank) {
+  const auto read =
+      content::SeqBankOf(Reparsed(content::SeqBankJson(bank)), "bank");
+  INFO(ErrorOf(read));
+  REQUIRE(read.has_value());
+  CHECK(*read == bank);
 }
 
 // Decodes `bytes` as a bank and checks it rebuilds them; false on failure.
@@ -455,6 +571,7 @@ bool CheckBankRebuilds(std::span<const std::byte> bytes, std::size_t bones,
   INFO(ErrorOf(rebuilt));
   REQUIRE(rebuilt.has_value());
   CHECK(std::ranges::equal(*rebuilt, bytes));
+  CheckJsonRebuilds(*decoded);
   Count(*decoded, tallies);
   return true;
 }
@@ -478,15 +595,21 @@ TEST_CASE("Extracted SEQ files decode and rebuild their exact bytes",
     INFO(ErrorOf(rebuilt));
     REQUIRE(rebuilt.has_value());
     CHECK(*rebuilt == bytes);
+    CheckJsonRebuilds(decoded->bank);
     Count(decoded->bank, tallies);
     ++tallies["files"];
   }
   // Tracks often run on into the next one; the game stops at the clip's
   // length, so most need no terminator.
-  const Tallies expected{{"empty refs", 6391},      {"files", 700},
-                         {"inherited clips", 1935}, {"mid-track refs", 26566},
-                         {"own clips", 12556},      {"scripts", 9297},
-                         {"tracks", 262258},        {"unterminated", 148454}};
+  const Tallies expected{{"commands", 2416326},
+                         {"empty refs", 6391},
+                         {"files", 700},
+                         {"inherited clips", 1935},
+                         {"mid-track refs", 26566},
+                         {"own clips", 12556},
+                         {"scripts", 9297},
+                         {"tracks", 262258},
+                         {"unterminated", 148454}};
   INFO(Describe(tallies));
   CHECK(tallies == expected);
 }
@@ -514,11 +637,9 @@ TEST_CASE("Banks embedded in extracted SHP files rebuild their exact bytes",
       ++tallies["files"];
     }
   }
-  const Tallies expected{{"files", 202},
-                         {"own clips", 202},
-                         {"scripts", 140},
-                         {"tracks", 4791},
-                         {"unread", 115}};
+  // The embedded banks hold only each bone's initial key.
+  const Tallies expected{{"commands", 0},  {"files", 202},   {"own clips", 202},
+                         {"scripts", 140}, {"tracks", 4791}, {"unread", 115}};
   INFO(Describe(tallies));
   CHECK(tallies == expected);
 }

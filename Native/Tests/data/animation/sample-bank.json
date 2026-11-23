@@ -1,0 +1,113 @@
+{
+  "schema": "vs.actor-animation",
+  "schema_version": 1,
+  "source": "OBJ/SAMPLE.SEQ",
+  "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "bones": 2,
+  "bank": {
+    "clips": [
+      {
+        "length": 50,
+        "base": null,
+        "flags": 3,
+        "events": 5,
+        "root": 0,
+        "travel": 6,
+        "rotations": [1, 2],
+        "scales": [3, 4]
+      },
+      {
+        "length": 4,
+        "base": 0,
+        "flags": 0,
+        "events": null,
+        "root": {
+          "track": 7,
+          "command": 0
+        },
+        "travel": null,
+        "rotations": [
+          {
+            "track": 0,
+            "command": 1
+          },
+          {
+            "empty": 0
+          }
+        ],
+        "scales": null
+      },
+      {
+        "length": 1,
+        "base": 0,
+        "flags": 2,
+        "events": null,
+        "root": {
+          "track": 2,
+          "command": 0
+        },
+        "travel": null,
+        "rotations": [
+          {
+            "track": 1,
+            "command": 0
+          },
+          {
+            "track": 1,
+            "command": 1
+          }
+        ],
+        "scales": [
+          {
+            "track": 3,
+            "command": 0
+          },
+          {
+            "track": 7,
+            "command": 2
+          }
+        ]
+      }
+    ],
+    "map": [0, null, 1, 2],
+    "motion": [
+      {
+        "vector": [0, -4, 8190],
+        "commands": [3, 1, null, -2, 40, null, 7, null]
+      },
+      {
+        "vector": [2, 0, 0],
+        "commands": [1, 300, null, null]
+      },
+      {
+        "vector": [-8192, 0, 16382],
+        "commands": []
+      },
+      {
+        "packed_scale": [64, 64, -16384],
+        "commands": [2, 1, 1, 1]
+      },
+      {
+        "raw_scale": [64, 0, 255],
+        "commands": []
+      },
+      {
+        "events": [
+          [0, 1, 9],
+          [300, 41, 1, 2, 3, 4, 5, 6, 7],
+          [5, 0]
+        ]
+      },
+      {
+        "vector": [10, 20, 30],
+        "commands": [2, null, null, null]
+      },
+      {
+        "commands": [2, -1, null, null, 1, null, 4000, null]
+      },
+      {
+        "unread": "abcd"
+      }
+    ]
+  }
+}

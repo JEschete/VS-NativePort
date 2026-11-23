@@ -241,7 +241,15 @@ Not yet done: SEQ/ESQ animation clips (#205, #206), ETM texture overlays (#207),
 
 #### 6.2.1 Container, schema and optional extension
 
-- **First delivery:** keep the existing `extras.vs` design and define its versioned contract in `Native\Content\schemas\actor-animation.schema.json` (planned). VS.Content and Workshop must agree on IDs, units, track semantics and fixtures; do not build incompatible per-tool interpretations.
+- **First delivery:** keep the existing `extras.vs` design and define its versioned contract in `Native\Content\schemas\actor-animation.schema.json`. VS.Content and Workshop must agree on IDs, units, track semantics and fixtures; do not build incompatible per-tool interpretations.
+  - **SEQ banks (#205, landed):** schema `vs.actor-animation` version 1 (`Content/ActorAnimation.hpp`) writes one bank as its source, the source's hash, the bone count and the bank.
+    - The bank lists its clips, the animation-to-clip map and the motion pool.
+    - Each pool element is a track (an optional initial key and its commands as one flat list of frames, x, y, z groups), an event script (`[frame, op, arguments...]` per event) or unread bytes (lowercase hex).
+    - Clips name pool elements by number, so a track can be lengthened without recomputing offsets.
+    - The JSON Schema checks types and ranges. The native reader also checks references, clip flags and event lengths (`EncodeSeqBank`).
+    - All 700 `OBJ\*.SEQ` files and the 202 banks embedded in SHP files read back from this JSON equal to their decoded banks and rebuild their exact bytes (`SeqFileTests.cpp`).
+    - `tools\test\test_content_schemas.py` checks the writer's fixture (`Native\Tests\data\animation\sample-bank.json`) against the schema in CI.
+    - Not yet done: carrying the banks in the model glTF, the preview animations and the runtime load.
 - **Extension adoption gate:** once the payload is exercised by both consumers, assess packaging it as one documented optional vendor extension. Choose a project/vendor namespace, publish its schema and fallback behavior, and test both readers before switching the writer. Do not invent a `KHR_` or `EXT_` standard. The extension must be in `extensionsUsed`, but not `extensionsRequired`, only while the asset has a valid standard preview without it. See the [glTF extension rules](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#specifying-extensions) and [extension registry guidance](https://github.com/KhronosGroup/glTF/tree/main/extensions).
 - There is **one authoritative VS payload** per asset. A packaging change requires a schema/converter-version change and an explicit migration; do not emit independently editable copies in both `extras` and an extension. A native loader rejects missing required VS data or unsupported versions with an actionable error, even when a generic viewer can still show the baseline.
 - Ordinary viewers need not execute facial tracks, event commands or VS rendering rules. Ignoring custom data is not a promise to preserve it on re-export. Before accepting an edited model, validate the VS payload and references; missing or altered metadata must be reported, not silently defaulted.

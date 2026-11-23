@@ -1,0 +1,187 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/JEschete/VS-NativePort/blob/main/Native/Content/schemas/actor-animation.schema.json",
+  "title": "vs.actor-animation",
+  "description": "One SEQ animation bank as editable numbers and lists (Docs/ASSET_PIPELINE.md §6.2.1, Content/ActorAnimation.hpp). The native reader also checks what a schema cannot: element references, clip flags against the tracks they read, and event lengths against the game's stride table.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "schema_version", "source", "source_sha256", "bones", "bank"],
+  "properties": {
+    "schema": { "const": "vs.actor-animation" },
+    "schema_version": { "const": 1 },
+    "source": {
+      "type": "string",
+      "description": "The disc file the bank came from, e.g. OBJ/6F_BT2.SEQ."
+    },
+    "source_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "The SHA-256 of the source file as extracted."
+    },
+    "bones": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 41,
+      "description": "The bones each clip animates; the game's pose holds 41 besides the root."
+    },
+    "bank": { "$ref": "#/$defs/bank" }
+  },
+  "$defs": {
+    "halfword": { "type": "integer", "minimum": 0, "maximum": 65535 },
+    "byte": { "type": "integer", "minimum": 0, "maximum": 255 },
+    "int16": { "type": "integer", "minimum": -32768, "maximum": 32767 },
+    "clipNumber": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 254,
+      "description": "A clip's place in bank.clips; 255 means none in the file, written as null."
+    },
+    "bank": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["clips", "map", "motion"],
+      "properties": {
+        "clips": { "type": "array", "items": { "$ref": "#/$defs/clip" } },
+        "map": {
+          "type": "array",
+          "description": "Animation index to clip number, or null where the index plays nothing.",
+          "items": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/clipNumber" }] }
+        },
+        "motion": {
+          "type": "array",
+          "description": "The element pool in file order; clips name elements by their place here.",
+          "items": { "$ref": "#/$defs/element" }
+        }
+      }
+    },
+    "clip": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["length", "base", "flags", "events", "root", "travel", "rotations", "scales"],
+      "properties": {
+        "length": { "$ref": "#/$defs/halfword", "description": "Frames the clip plays." },
+        "base": {
+          "description": "Null for a clip with its own initial keys, or the own clip whose keys it starts from.",
+          "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/clipNumber" }]
+        },
+        "flags": { "$ref": "#/$defs/byte", "description": "1: own clip with initial scales; 2: clip with scale tracks." },
+        "events": {
+          "description": "Null, or the motion element of the clip's event script.",
+          "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/halfword" }]
+        },
+        "root": { "$ref": "#/$defs/ref" },
+        "travel": {
+          "description": "Null, or the vector track that moves the actor (root motion).",
+          "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/halfword" }]
+        },
+        "rotations": {
+          "type": "array",
+          "description": "One track reference per bone.",
+          "items": { "$ref": "#/$defs/ref" }
+        },
+        "scales": {
+          "description": "Null, or one scale track reference per bone.",
+          "oneOf": [{ "type": "null" }, { "type": "array", "items": { "$ref": "#/$defs/ref" } }]
+        }
+      }
+    },
+    "ref": {
+      "description": "A track read from its start (its element number), from command `command` of track `track`, or an empty track (`empty` keeps the offset the file pointed at).",
+      "oneOf": [
+        { "$ref": "#/$defs/halfword" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["track", "command"],
+          "properties": {
+            "track": { "$ref": "#/$defs/halfword" },
+            "command": { "$ref": "#/$defs/halfword" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["empty"],
+          "properties": { "empty": { "$ref": "#/$defs/halfword" } }
+        }
+      ]
+    },
+    "element": {
+      "oneOf": [{ "$ref": "#/$defs/track" }, { "$ref": "#/$defs/events" }, { "$ref": "#/$defs/unread" }]
+    },
+    "track": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commands"],
+      "description": "An optional initial key, then keyframe commands.",
+      "properties": {
+        "vector": {
+          "description": "A rotation, root or travel key: x, y, z (even values).",
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "$ref": "#/$defs/int16" }
+        },
+        "raw_scale": {
+          "description": "Three scale bytes.",
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "$ref": "#/$defs/byte" }
+        },
+        "packed_scale": {
+          "description": "Three halved scale keys.",
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "type": "integer", "minimum": -16384, "maximum": 16383 }
+        },
+        "commands": {
+          "description": "Groups of four: frames (1 to 65535), then an x, y and z delta each frame adds, or null to keep that axis's previous delta.",
+          "type": "array",
+          "items": { "oneOf": [{ "type": "null" }, { "type": "integer", "minimum": -32768, "maximum": 65535 }] }
+        },
+        "terminated": {
+          "description": "Written only as false: no zero byte ends the commands, which run on into the next element.",
+          "type": "boolean"
+        }
+      },
+      "not": {
+        "anyOf": [
+          { "required": ["vector", "raw_scale"] },
+          { "required": ["vector", "packed_scale"] },
+          { "required": ["raw_scale", "packed_scale"] }
+        ]
+      }
+    },
+    "events": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["events"],
+      "properties": {
+        "events": {
+          "type": "array",
+          "description": "Each event as [frame, op, argument bytes...]; the last is the op that ends the script.",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "prefixItems": [{ "$ref": "#/$defs/halfword" }, { "$ref": "#/$defs/byte" }],
+            "items": { "$ref": "#/$defs/byte" }
+          }
+        }
+      }
+    },
+    "unread": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unread"],
+      "properties": {
+        "unread": {
+          "type": "string",
+          "pattern": "^([0-9a-f]{2})+$",
+          "description": "Bytes no clip reads, in lowercase hexadecimal."
+        }
+      }
+    }
+  }
+}

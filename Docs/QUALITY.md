@@ -286,6 +286,14 @@ attribution, stale plans, menu transactions and owned evidence retention. They
 do not replace live gameplay; see [the player guide](../Native/Player/README.md)
 for local model setup and the separate combat/physical-door acceptance gates.
 
+The JSON Schemas under `Native\Content\schemas` are checked in the same job. The
+test validates each schema, checks the committed writer fixtures against it, and
+checks that edits the schema must reject are rejected:
+
+```powershell
+.\.venv-3\Scripts\python.exe -m unittest discover -s tools\test -p test_content_schemas.py -v
+```
+
 ```cmd
 quality-native.cmd --list
 ```

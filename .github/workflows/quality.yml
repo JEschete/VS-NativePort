@@ -42,6 +42,8 @@ jobs:
         run: python -m unittest discover -s tools\naming -p test_*.py -v
       - name: Verify external player contracts
         run: python -m unittest discover -s Native\Player\tests -v
+      - name: Verify content JSON Schemas
+        run: python -m unittest discover -s tools\test -p test_content_schemas.py -v
       - name: Verify gate controls
         run: python -m unittest discover -s tools\ledger -p test_gates.py -v
       - name: Check ownership, promotion, quality, behavior and retirement gates
