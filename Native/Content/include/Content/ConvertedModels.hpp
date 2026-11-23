@@ -53,7 +53,8 @@ LoadConvertedAnimationSet(const DataStore& store,
 
 // The ETM bytes rebuilt from the etm-png output of the sheet `read` names
 // (its region images, EtmFile.hpp EtmSheetOfImages), checked against the
-// manifest: each image's source path and hash.
+// manifest: each image's source path and hash, and that each region keeps the
+// depth its model (loaded from its own conversion) draws its texture at.
 [[nodiscard]] std::expected<std::vector<std::byte>, std::string>
 LoadConvertedActorTexture(const DataStore& store,
                           const ConvertedModelRead& read);

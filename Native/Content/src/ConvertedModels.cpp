@@ -27,6 +27,7 @@
 #include "Content/EtmFile.hpp"
 #include "Content/ImageFiles.hpp"
 #include "Content/JsonText.hpp"
+#include "Content/NativeImage.hpp"
 #include "Content/SeqFile.hpp"
 #include "Content/ShpFile.hpp"
 #include "Content/ShpModelFiles.hpp"
@@ -258,6 +259,49 @@ std::expected<ConvertedSource, std::string> OwnerOf(
   return ConvertedSource{.entry = entry, .conversion = &*model, .files = files};
 }
 
+// The depth the model `region` names draws its texture at: a model that
+// borrows a texture draws it at 8 bits (ActorAssets.cpp BorrowActorTexture),
+// one with its own at that texture's depth. The model loads from its glTF, so
+// an edit to the model counts.
+std::expected<ImageDepth, std::string> RegionModelDepth(
+    const DataStore& store, const ConvertedModelRead& read,
+    const ImageDocument& region) {
+  const auto named = [](const ImageDependency& dependency) {
+    return dependency.role == kEtmRegionModelRole;
+  };
+  const auto& dependencies = region.provenance.dependencies;
+  const auto model = std::ranges::find_if(dependencies, named);
+  if (model == dependencies.end()) {
+    return std::unexpected(std::format("{} names no model", region.id));
+  }
+  if (std::ranges::count_if(dependencies, named) != 1) {
+    return std::unexpected(
+        std::format("{} names more than one model", region.id));
+  }
+  const DataStore::Entry* const entry = store.Find(model->source);
+  if (entry == nullptr) {
+    return std::unexpected(
+        std::format("{}: its model {} is not in the extracted data", region.id,
+                    model->source));
+  }
+  auto found = FindModel(
+      store,
+      {.lba = entry->lba,
+       .rounded_size =
+           std::uint64_t{entry->SectorCount()} * DataStore::kDataSectorBytes,
+       .event_lengths = read.event_lengths},
+      {.extension = kShpExtension, .converter = kShpModelConverterName});
+  if (!found) return std::unexpected(found.error());
+  auto document =
+      LoadShpModel(store, found->source, found->location, read.event_lengths);
+  if (!document) return std::unexpected(document.error());
+  const ShpFile& shp = (*document)->shp;
+  return shp.lender.has_value() ||
+                 (shp.texture.has_value() && shp.texture->Is8Bit())
+             ? ImageDepth::kIndexed8
+             : ImageDepth::kIndexed4;
+}
+
 }  // namespace
 
 std::expected<std::vector<std::byte>, std::string> LoadConvertedModel(
@@ -399,6 +443,13 @@ std::expected<std::vector<std::byte>, std::string> LoadConvertedActorTexture(
     if (region->provenance.source_sha256 != files.source_sha256) {
       return std::unexpected(std::format(
           "{} does not match its conversion manifest", sheet->entry->path));
+    }
+    auto depth = RegionModelDepth(store, read, *region);
+    if (!depth) return std::unexpected(depth.error());
+    if (region->image.depth != *depth) {
+      return std::unexpected(std::format(
+          "{} is {} bits deep, but its model draws its texture at {} bits",
+          region->id, BitsPerPixel(region->image.depth), BitsPerPixel(*depth)));
     }
     regions.push_back(std::move(*region));
   }

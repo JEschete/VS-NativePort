@@ -947,6 +947,8 @@ constexpr std::uint16_t kPastPaletteIndex = 9;
 constexpr unsigned kNibbleBits = 4;
 constexpr unsigned kByteBits = 8;
 constexpr std::size_t kExtractedSheetCount = 80;
+// Each of the sample's three regions is a PNG and its sidecar.
+constexpr std::size_t kSheetRegionFiles = 6;
 
 // Indices within SampleShp's palette, at each line's model's depth.
 content::EtmSheet SampleSheet() {
@@ -1143,9 +1145,20 @@ void CheckEditedSheetLoads(const ModelRoot& root) {
   CHECK(LoadSheet(root.Root(), root.Read(0)) == EncodedSheet(edited));
 }
 
-// Regions that no longer follow one another, one from another source and a
-// read no sheet matches are refused.
+// Regions that no longer follow one another, one from another source, one at
+// a depth its model does not draw and a read no sheet matches are refused.
 void CheckRefusedSheetLoads(const ModelRoot& root) {
+  const content::ImageDocument four_bit = LoadRegion(root, "51");
+  EditRegion(root, "51", [](content::ImageDocument& document) {
+    document.image.depth = content::ImageDepth::kIndexed8;
+    document.image.width /= 2;
+    document.image.indices.resize(document.image.width);
+  });
+  CHECK(ErrorOf(LoadSheet(root.Root(), root.Read(0))) ==
+        "image.obj.e001.51 is 8 bits deep, but its model draws its texture at "
+        "4 bits");
+  EditRegion(root, "51",
+             [&](content::ImageDocument& document) { document = four_bit; });
   EditRegion(root, "4F", [](content::ImageDocument& document) {
     document.image.height = 1;
     document.image.indices.resize(document.image.width);
@@ -1191,6 +1204,17 @@ TEST_CASE("ETM sheets decode and encode strictly", "[content-models][etm]") {
         "the sheet is 0 lines high; it must be 1 to 256");
 }
 
+// Every file under `directory`, by its path relative to it.
+std::map<std::string, Bytes> FilesUnder(const fs::path& directory) {
+  std::map<std::string, Bytes> files;
+  for (const auto& entry : fs::recursive_directory_iterator(directory)) {
+    if (!entry.is_regular_file()) continue;
+    files.emplace(fs::relative(entry.path(), directory).generic_string(),
+                  ReadModel(entry.path()));
+  }
+  return files;
+}
+
 TEST_CASE(
     "ETM sheets convert to region PNGs that load as their bytes, edits "
     "included",
@@ -1202,6 +1226,11 @@ TEST_CASE(
   CheckOwnedRegionImages(root);
   CheckBorrowedRegionImage(root);
   CHECK(LoadSheet(root.Root(), root.Read(0)) == sheet);
+  const ModelRoot again(SheetSources(sheet), kSheetFirstSector);
+  CHECK(again.Convert().actor_textures.converted == 1);
+  const std::map<std::string, Bytes> files = FilesUnder(SheetDirectory(root));
+  CHECK(files.size() == kSheetRegionFiles);
+  CHECK(FilesUnder(SheetDirectory(again)) == files);
   CHECK(root.Convert().actor_textures.unchanged == 1);
   CheckEditedSheetLoads(root);
   CheckRefusedSheetLoads(root);
@@ -1295,8 +1324,9 @@ TEST_CASE("Extracted ETM sheets load from their region images as exact bytes",
   const auto models = ExtractedModels();
   if (!models) SKIP("Extracted Native/data is unavailable");
   CHECK(VS::test_support::CheckExtractedModelsLoad(
-            *models, content::kEtmExtension,
-            content::LoadConvertedActorTexture) == kExtractedSheetCount);
+            *models, content::kEtmExtension, content::LoadConvertedActorTexture,
+            VS::test_support::ExtractedEventLengths(*models)) ==
+        kExtractedSheetCount);
 }
 
 }  // namespace

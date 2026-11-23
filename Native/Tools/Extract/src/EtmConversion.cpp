@@ -56,7 +56,6 @@ constexpr std::string_view kActorTextureIdPrefix = "actor-texture";
 // What each input gives a region.
 constexpr std::string_view kTableRole = "table";
 constexpr std::string_view kBindingRole = "binding";
-constexpr std::string_view kTextureRole = "texture";
 constexpr std::string_view kPreviewPaletteRole = "preview palette";
 constexpr std::uint32_t kByteBits = 8;
 constexpr std::size_t kHalfwordBytes = 2;
@@ -370,7 +369,8 @@ class SheetPlanner {
       return std::unexpected(std::format("{}: {}", path, peek.error()));
     }
     ModelTexture texture;
-    texture.dependencies.push_back(DependencyOf(**source, kTextureRole));
+    texture.dependencies.push_back(
+        DependencyOf(**source, Content::kEtmRegionModelRole));
     const SourceFile* owner = *source;
     if (peek->lender) {
       auto lender = cache_->Get(ShpLenderPath(*peek->lender), path);

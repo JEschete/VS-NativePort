@@ -25,6 +25,9 @@ inline constexpr std::string_view kEtmExtension = ".ETM";
 inline constexpr std::string_view kEtmTextureConverterName = "etm-png";
 inline constexpr std::uint32_t kEtmTextureConverterVersion = 1;
 inline constexpr std::string_view kActorTextureDirectory = "textures/actors";
+// The role of the dependency that names the model drawing a region (its
+// OBJ\*.SHP), whose texture depth the region must keep.
+inline constexpr std::string_view kEtmRegionModelRole = "texture";
 inline constexpr std::uint16_t kEtmMarker = 0x3045;
 inline constexpr std::size_t kEtmHeaderBytes = 4;
 inline constexpr std::size_t kEtmLineWords = 64;
