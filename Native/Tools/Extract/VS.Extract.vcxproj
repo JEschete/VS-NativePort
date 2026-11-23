@@ -61,6 +61,7 @@
     <ClCompile Include="src\TimWriter.cpp" />
     <ClCompile Include="src\WepModelConversion.cpp" />
     <ClCompile Include="src\WorkshopRecipeConversion.cpp" />
+    <ClCompile Include="src\ZudConversion.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Extract\AudioBankConversion.hpp" />
@@ -76,6 +77,7 @@
     <ClInclude Include="include\Extract\TimWriter.hpp" />
     <ClInclude Include="include\Extract\WepModelConversion.hpp" />
     <ClInclude Include="include\Extract\WorkshopRecipeConversion.hpp" />
+    <ClInclude Include="include\Extract\ZudConversion.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Engine\VS.Engine.vcxproj">

@@ -31,6 +31,7 @@
 #include "Extract/ShpModelConversion.hpp"
 #include "Extract/WepModelConversion.hpp"
 #include "Extract/WorkshopRecipeConversion.hpp"
+#include "Extract/ZudConversion.hpp"
 #include "Platform/App.hpp"
 #include "Platform/Paths.hpp"
 #include "nlohmann/json.hpp"
@@ -87,9 +88,11 @@ int Usage() {
       "under models/characters/ and the\n"
       "      weapon models (OBJ/*.WEP) to glTF under models/weapons/, the "
       "shared animation sets\n"
-      "      (OBJ/E*.ESQ) to JSON under models/animation-sets/ and the actor "
+      "      (OBJ/E*.ESQ) to JSON under models/animation-sets/, the actor "
       "effect texture sheets\n"
-      "      (OBJ/E*.ETM) to PNG under textures/actors/;\n"
+      "      (OBJ/E*.ETM) to PNG under textures/actors/ and the enemy "
+      "bundles (MAP/*.ZUD) to JSON\n"
+      "      archetypes under models/zud/;\n"
       "      models converts again only what changed (--force: everything, "
       "replacing edited models).\n"
       "      extract also converts the sound banks (SOUND/WAVE*.DAT) to WAV "
@@ -466,8 +469,9 @@ int ConvertTables(const fs::path& root, bool force) {
 }
 
 // models/characters/ and models/weapons/ glTF models, models/animation-sets/
-// JSON sets, textures/actors/ effect texture images and their manifest.json
-// outputs from the disc files already under root.
+// JSON sets, textures/actors/ effect texture images, models/zud/ enemy
+// archetypes and their manifest.json outputs from the disc files already under
+// root. The archetypes name the models, so they convert last.
 int ConvertModels(const fs::path& root, bool force) {
   const auto characters = Extract::ConvertDiscModels(root, force);
   if (!characters) {
@@ -507,6 +511,16 @@ int ConvertModels(const fs::path& root, bool force) {
                     "files removed",
                     textures->converted, textures->unchanged,
                     textures->removed);
+  const auto archetypes = Extract::ConvertDiscArchetypes(root, force);
+  if (!archetypes) {
+    VS::Core::LogError("extract", "{}", archetypes.error());
+    return 1;
+  }
+  VS::Core::LogInfo("extract",
+                    "archetypes: {} converted, {} unchanged, {} stale files "
+                    "removed",
+                    archetypes->converted, archetypes->unchanged,
+                    archetypes->removed);
   return 0;
 }
 

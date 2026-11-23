@@ -1362,6 +1362,9 @@
     <ClCompile Include="src\XaMixTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ZudFileTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClInclude Include="include\Battle\HudOrchestrationFixture.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
@@ -1609,6 +1612,9 @@
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>
     <ClCompile Include="..\Tools\Extract\src\WorkshopRecipeConversion.cpp">
+      <Filter>..\Tools\Extract\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Tools\Extract\src\ZudConversion.cpp">
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>
     <ClCompile Include="..\Tools\Launcher\src\Setup.cpp">

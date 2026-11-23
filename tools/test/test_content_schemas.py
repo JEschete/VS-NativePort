@@ -139,5 +139,40 @@ class AnimationSetSchemaTests(SchemaChecks, unittest.TestCase):
         }
 
 
+class ActorArchetypeSchemaTests(SchemaChecks, unittest.TestCase):
+    """vs.actor-archetype (Content/ActorArchetype.hpp)."""
+
+    schema_file = "actor-archetype.schema.json"
+    header = "ActorArchetype.hpp"
+    constant = "kActorArchetypeSchema"
+    fixture = "sample-archetype.json"
+    referenced = ("actor-animation.schema.json",)
+
+    def edits(self) -> dict:
+        return {
+            "a newer version": lambda d: d.update(schema_version=2),
+            "an uppercase hash": lambda d: d.update(
+                source_sha256=d["source_sha256"].upper()
+            ),
+            "header byte 256": lambda d: d["header"].update(shield=256),
+            "an unknown header member": lambda d: d["header"].update(extra=1),
+            "a missing header member": lambda d: d["header"].pop("weapon"),
+            "an uppercase id": lambda d: d.update(body={"model": "Model.OBJ.4F"}),
+            "a body file in another directory": lambda d: d.update(
+                body={"file": "../4F.gltf"}
+            ),
+            "a body both named and own": lambda d: d.update(
+                body={"file": "Z.gltf", "model": "model.obj.4f"}
+            ),
+            "a weapon bank": lambda d: d.update(weapon={"animation": "m"}),
+            "a shield number": lambda d: d.update(shield=1),
+            "too many bones": lambda d: d["battle_animation"].update(bones=42),
+            "clip 255 in a bank's map": lambda d: d["battle_animation"]["bank"][
+                "map"
+            ].__setitem__(1, 255),
+            "an unknown member": lambda d: d.update(extra=1),
+        }
+
+
 if __name__ == "__main__":
     unittest.main()

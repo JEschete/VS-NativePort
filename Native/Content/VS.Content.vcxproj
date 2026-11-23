@@ -40,6 +40,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\ActorAnimation.cpp" />
+    <ClCompile Include="src\ActorArchetype.cpp" />
     <ClCompile Include="src\ActorAssets.cpp" />
     <ClCompile Include="src\ActorAssetsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -90,12 +91,14 @@
     <ClCompile Include="src\WepFile.cpp" />
     <ClCompile Include="src\WepModelFiles.cpp" />
     <ClCompile Include="src\WorkshopRecipes.cpp" />
+    <ClCompile Include="src\ZudFile.cpp" />
     <ClCompile Include="Legacy\LibDs.cpp">
       <AdditionalIncludeDirectories>$(VSLegacyIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Content\ActorAnimation.hpp" />
+    <ClInclude Include="include\Content\ActorArchetype.hpp" />
     <ClInclude Include="include\Content\ActorAssets.hpp" />
     <ClInclude Include="include\Content\ActorAssetsLive.hpp" />
     <ClInclude Include="include\Content\AnimationSet.hpp" />
@@ -138,6 +141,7 @@
     <ClInclude Include="include\Content\WepFile.hpp" />
     <ClInclude Include="include\Content\WepModelFiles.hpp" />
     <ClInclude Include="include\Content\WorkshopRecipes.hpp" />
+    <ClInclude Include="include\Content\ZudFile.hpp" />
     <ClInclude Include="Legacy\LibDs.hpp" />
   </ItemGroup>
   <ItemGroup>

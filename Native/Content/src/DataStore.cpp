@@ -20,6 +20,7 @@
 #include <utility>
 #include <vector>
 
+#include "Content/ActorArchetype.hpp"
 #include "Content/AnimationSet.hpp"
 #include "Content/AssetCatalog.hpp"
 #include "Content/AudioBank.hpp"
@@ -30,6 +31,7 @@
 #include "Content/EtmFile.hpp"
 #include "Content/MovieEncoder.hpp"
 #include "Content/WorkshopRecipes.hpp"
+#include "Content/ZudFile.hpp"
 #include "Core/Log.hpp"
 #include "Core/Sha256.hpp"
 #include "Platform/CrashHandler.hpp"
@@ -83,6 +85,7 @@ constexpr std::array kConvertedTypes{
     ConvertedType{"", ".WEP", "wep-gltf", kRawForm},
     ConvertedType{"", kEsqExtension, kEsqAnimationSetConverterName, kRawForm},
     ConvertedType{"", kEtmExtension, kEtmTextureConverterName, kRawForm},
+    ConvertedType{"", kZudExtension, kZudArchetypeConverterName, kRawForm},
     ConvertedType{kWaveBankPrefix, kWaveBankExtension, kWaveBankConverterName,
                   kRawForm},
     ConvertedType{"", kXaExtension, kXaFlacConverterName, "stream"},

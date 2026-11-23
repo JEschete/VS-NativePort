@@ -538,9 +538,11 @@ Json GltfOf(const ModelGltfSpec& spec, Json payload, GltfParts parts,
   return gltf;
 }
 
-// The model's own texture as image files named `stem`, if it has one.
+// The model's own texture as image files named `stem`, if it has one. The
+// model starts `source_offset` bytes into its source file.
 Result<std::vector<ImageFile>> TextureFiles(const ShpModelDocument& document,
-                                            std::string_view stem) {
+                                            std::string_view stem,
+                                            std::size_t source_offset) {
   if (!document.shp.texture) return std::vector<ImageFile>{};
   const ShpTexture& texture = *document.shp.texture;
   auto encoded = Content::EncodeShp(document.shp);
@@ -555,7 +557,7 @@ Result<std::vector<ImageFile>> TextureFiles(const ShpModelDocument& document,
       .unreferenced = false,
       .provenance = {.source = document.source,
                      .source_sha256 = document.source_sha256,
-                     .offset = encoded->size() - texture_bytes,
+                     .offset = source_offset + encoded->size() - texture_bytes,
                      .tim = std::nullopt,
                      .texture_page = std::nullopt,
                      .preview_palette = std::nullopt,
@@ -1117,7 +1119,8 @@ std::expected<std::vector<ImageFile>, std::string> EncodeModelGltf(
 
 std::expected<std::vector<ImageFile>, std::string> EncodeShpModelFiles(
     const ShpModelDocument& document, std::string_view stem,
-    std::string_view image_uri, std::span<const std::uint8_t> event_lengths) {
+    std::string_view image_uri, std::span<const std::uint8_t> event_lengths,
+    std::size_t source_offset) {
   const ShpFile& shp = document.shp;
   auto sequence = Content::ShpSequenceJson(shp, event_lengths);
   if (!sequence) {
@@ -1141,7 +1144,7 @@ std::expected<std::vector<ImageFile>, std::string> EncodeShpModelFiles(
     return std::unexpected(
         std::format("{}: {}", document.source, files.error()));
   }
-  auto texture = TextureFiles(document, stem);
+  auto texture = TextureFiles(document, stem, source_offset);
   if (!texture) {
     return std::unexpected(
         std::format("{}: {}", document.source, texture.error()));

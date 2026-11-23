@@ -150,11 +150,14 @@ inline constexpr std::string_view kBattleProgramPath = "BATTLE/BATTLE.PRG";
 // The files `document` writes as `stem`: <stem>.gltf and <stem>.bin, then its
 // own texture's image files. The materials show the texture `image_uri`
 // names: <stem>.png, or the lender's PNG for a borrowed texture. The banks
-// are written with `event_lengths`, the game's event stride table.
+// are written with `event_lengths`, the game's event stride table. The model
+// starts `source_offset` bytes into its source file (a ZUD's body follows the
+// ZUD header), which the texture's provenance records.
 [[nodiscard]] std::expected<std::vector<Content::ImageFile>, std::string>
 EncodeShpModelFiles(const Content::ShpModelDocument& document,
                     std::string_view stem, std::string_view image_uri,
-                    std::span<const std::uint8_t> event_lengths);
+                    std::span<const std::uint8_t> event_lengths,
+                    std::size_t source_offset = 0);
 
 // The game's event stride table, read from the file `source`; no lengths when
 // files.tsv lists no BATTLE.PRG, so only banks without events convert.

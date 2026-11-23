@@ -95,7 +95,7 @@ Native\data\
     animation-sets\<ESQ>.json      (shared animation sets: the bank each model number or kind plays, §6.2.1)
     weapons\<WEP>.gltf             (+ .bin, texture image files; material variants = blade materials, §6.2.4)
     armor\ shields\ ...            (as discovered per CONTENT_LEDGER)
-    zud\<ZUD>.json                 (enemy model set: references SHP/WEP/SEQ glTFs; no duplicate meshes)
+    zud\<ZUD>.json                 (enemy archetype: names SHP/WEP/SEQ outputs; a part no OBJ file holds stays beside it, §6.2.5)
   rooms\<zone>\<MAPxxx>.gltf       (room geometry + textures)  + <MAPxxx>.room.json (collision, tiles, doors, scripts)
   rooms\automap\<ARM>.json         (minimap scenes per area: display geometry, doors, room names by string id)
   textures\<dir>\<name>.png        (TIM/GIM/FBT/standalone images, §6.4) + <name>.image.json
@@ -173,7 +173,7 @@ The disc has 27 kinds of files. The "Source" column below names the files on the
 |---|---|---|---|
 | `OBJ\*.SHP` (202) + `OBJ\*.SEQ` (700) | `models\characters\<SHP>.gltf` | §6.2 | vstools `SHP.js`/`SEQ.js`, VagrantStoryImporter, decomp actor loaders |
 | `OBJ\*.WEP` (127) | `models\weapons\<WEP>.gltf` | skinned mesh; one palette row per blade material, shown through `KHR_materials_variants` (§6.2.4) | vstools `WEP.js`, VagrantStoryImporter |
-| `MAP\*.ZUD` (455) | `models\zud\<ZUD>.json` + any meshes not already emitted | a ZUD bundles SHP + WEP(s) + SEQ for an enemy. It is emitted as **references** to the shared glTFs (dedup by content hash), not copied | vstools `ZUD.js` |
+| `MAP\*.ZUD` (455) | `models\zud\<ZUD>.json` + any body not already emitted | a ZUD bundles SHP + WEP(s) + SEQ for an enemy. It is emitted as **references** to the shared outputs (matched by content hash), not copied (§6.2.5) | vstools `ZUD.js` |
 | `SMALL\*.ARM` (32) | `rooms\automap\<ARM>.json` | minimap scenes: a room count, 12-byte room records (visited, payload length, zone, map), display geometry (vertices, triangles, quads, lines, doors) and 36-byte names with previous/next links; (zone, map) becomes the stable room ID and names become string IDs. 47 map IDs exceed their zone's room table: explain them before converting | native `Field\MinimapScene.hpp` |
 | `SMALL\*.DIS` (22) | `textures\dis\*.png` + `.image.json`, `catalogs\world\puzzle-challenges.csv` | concatenated 4bpp TIMs; `IQ.DIS` also holds the 64-record cube-puzzle challenge table (keyed by room ID); `ENDSCR00–15` are 16bpp result screens | native `CubePuzzleLifecycle.hpp`, `ClearResultsCore.cpp` |
 | `MAP\*.MPD` (512) | `rooms\<zone>\<MAP>.gltf` + `.room.json` | §6.3 | vstools `MPD.js`, VSViewer, decomp field loaders |
@@ -239,7 +239,7 @@ Additions the reference does not have, required by P4 (lossless). The initial co
   - The load completes in the same update that requests it, where the original waited for the CD.
   - An edited model must still fit the original sector-rounded allocation; a larger one is refused.
 
-Not yet done: glTF preview animations for the SEQ banks and ESQ clips (#205, #206), glTF references to the ETM texture regions and their texture tracks (#207), ZUD (#200), a model larger than its original allocation, and a re-export from Blender through the validator. Weapons are §6.2.4.
+Not yet done: glTF preview animations for the SEQ banks and ESQ clips (#205, #206), glTF references to the ETM texture regions and their texture tracks (#207), a model larger than its original allocation, and a re-export from Blender through the validator. Weapons are §6.2.4 and ZUD enemy archetypes §6.2.5.
 
 #### 6.2.1 Container, schema and optional extension
 
@@ -331,7 +331,22 @@ A WEP is the SHP magic and counts, a model section laid out as an SHP's (flat po
 - At runtime, `Content::LoadConvertedWeapon` serves the weapon read (`ActorAssetsLive` `BeginFileRead`, `kWeapon`) as §6.2 describes for characters. The game picks the material row when it loads the weapon (`LoadWeaponMaterialPalette`), as the original did. `RequireConversions` refuses to start without the `wep-gltf` batch.
 - The Khronos glTF validator reports 0 errors and 0 warnings for all 127 weapons, and two forced conversions write identical files.
 
-Not yet done: shields, which are SHP files, and the enemy weapons ZUD bundles load (#200); a weapon larger than its original allocation; and a re-export from Blender through the validator.
+Not yet done: a weapon larger than its original allocation, and a re-export from Blender through the validator. ZUD bundles name their weapons and shields (both WEP files) by these outputs (§6.2.5).
+
+#### 6.2.5 Enemy archetypes (ZUD → JSON, #200, #516)
+
+A ZUD is the enemy bundle a room spawn reads (`Content/ZudFile.hpp`). It has a 0x30-byte header and then five sections packed in order with no gaps: body (an SHP), weapon (a WEP), shield (a WEP), common animation and battle animation (SEQ banks). The header holds 8 identity bytes (character, weapon, battle-sequence model, weapon material, shield, shield material, default material, and a zero pad) and then one offset and size per section. `VS.Extract models <datadir>` (and `extract`) converts all 455 `MAP\*.ZUD` files with converter `zud-json` version 1 (`Extract/ZudConversion.hpp`):
+
+- Each bundle writes `models\zud\<ZUD>.json` (id `archetype.map.<zud>`) in schema `vs.actor-archetype` version 1 (`Content/ActorArchetype.hpp`, `Native\Content\schemas\actor-archetype.schema.json`). It holds the source, its hash, the identity bytes as named fields, and one entry per section (`null` when the section is empty).
+- **A section is named, not copied, when it already has an output.** The converter matches each section's SHA-256 against the `OBJ` files (the identity byte that numbers the part breaks a tie). A match names that file's output: `{"model": "model.obj.<nn>"}` for a body, `{"model": "model.obj.<nn>.wep"}` for a weapon or shield, `{"animation": "animation.obj.<bank>"}` for a bank. An edit to that model, weapon or bank reaches every archetype that names it.
+- **A section no `OBJ` file holds stays with the archetype.** A body becomes `models\zud\<ZUD>.gltf` + `.bin` in the §6.2 layout (model id `model.map.<zud>`; a texture of its own writes `<ZUD>.png`, `.image.json` and `.palettes.png` with image id `image.map.<zud>`, and a borrowed texture's image is `../characters/<NN>.png`), named as `{"file": "<ZUD>.gltf"}`. A bank is written inline as `{"bones": N, "bank": {...}}` in the `vs.actor-animation` bank form (§6.2.1). A weapon or shield must match a WEP.
+- Corpus: 451 bodies name an SHP and 4 are the archetype's own (`Z049U06`, `Z060U01`, `Z063U00`, `Z063U01`); 239 weapons and 52 shields name a WEP; 3 common animations and 85 battle animations name a SEQ bank, while 10 and 303 are inline.
+- The output depends on each `OBJ` file it names, at the hash that file's output records, and on `BATTLE\BATTLE.PRG` when it writes its own body or bank (the event lengths). A change to any of them reconverts the archetype. A rerun leaves unchanged archetypes and their edits alone; `--force` rewrites them.
+- The extractor refuses a bundle with no body, a non-zero pad byte, a section that does not start where the one before ends or runs past the file, bytes after the last section, a weapon or shield that matches no listed WEP, a named part that has no current output ("convert the models first"), and an own part when `files.tsv` does not list `BATTLE\BATTLE.PRG`.
+- At runtime, `Content::LoadConvertedArchetype` handles the room spawn's ZUD read (`ActorSpawningLive` `BeginZudRead` through `ReadLiveConvertedArchetype`) and never reads the bundle from the disc. It finds the bundle by LBA, loads each named part as its own read would (`LoadConvertedModel`, `LoadConvertedWeapon`, `LoadConvertedSequence`), loads an own body from its glTF beside the JSON (which must name the same source), and rebuilds the bundle's bytes. An id that names no output of the right converter, an edit that fails validation, or a file that does not match its manifest is refused with the file and member named. A rebuilt bundle larger than the read's allocation is refused and the spawn fails as a failed read did. `RequireConversions` refuses to start without the `zud-json` batch.
+- All 455 bundles decode and rebuild their exact bytes, and load from their archetype JSON through the runtime loader as their exact bytes (`ZudFileTests.cpp`). Synthetic bundles cover every kind of section, an edited part reaching the archetype, and each refusal (`ShpFileTests.cpp`). `tools\test\test_content_schemas.py` checks the writer's fixture (`Native\Tests\data\animation\sample-archetype.json`) against the schema in CI.
+
+Not yet done: the encyclopedia's enemy previews, which read ZUD files through their own path; editing the identity bytes against the character, weapon and material tables; and a bundle larger than its original allocation.
 
 ### 6.3 Rooms (MPD → glTF + room JSON)
 - **Geometry:** one glTF per room. Each texture page/CLUT group is one primitive with an unlit, nearest-sampled PNG. Vertex colors are kept, and the same `VS_UNIT_SCALE` applies.
@@ -686,11 +701,11 @@ Record source revision/dirty state, disc identity, tool/converter/schema version
 
 <!-- content:begin (generated by tools/ledger/content.py --sync) -->
 
-**2,331 of 5,162 disc files converted**, 2,331 of them with a passing round trip; 259 skipped with a reason; 2,572 unconverted.
+**2,786 of 5,162 disc files converted**, 2,786 of them with a passing round trip; 259 skipped with a reason; 2,117 unconverted.
 
 | Kind | Files | Converted | Round trip pass | Skipped | Unconverted | Converts under |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
-| actor archetype | 455 | 0 | 0 | 0 | 455 | #200 |
+| actor archetype | 455 | 455 | 455 | 0 | 0 | #200 |
 | actor shape | 202 | 202 | 202 | 0 | 0 | #203 |
 | actor texture overlay | 80 | 80 | 80 | 0 | 0 | #207 |
 | area map | 32 | 0 | 0 | 0 | 32 | #201 |

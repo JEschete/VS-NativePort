@@ -18,6 +18,9 @@
     <ClCompile Include="src\ActorAnimation.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ActorArchetype.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ActorAssets.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -132,7 +135,13 @@
     <ClCompile Include="src\WorkshopRecipes.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ZudFile.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClInclude Include="include\Content\ActorAnimation.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\ActorArchetype.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\ActorAssets.hpp">
@@ -259,6 +268,9 @@
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\WorkshopRecipes.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\ZudFile.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClCompile Include="Legacy\LibDs.cpp">

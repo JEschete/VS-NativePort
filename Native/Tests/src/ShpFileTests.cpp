@@ -17,7 +17,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Content/ActorArchetype.hpp"
+#include "Content/ActorAssetsLive.hpp"
 #include "Content/AnimationSet.hpp"
+#include "Content/CdDrive.hpp"
 #include "Content/ConversionManifest.hpp"
 #include "Content/ConvertedModels.hpp"
 #include "Content/DataStore.hpp"
@@ -29,10 +32,12 @@
 #include "Content/SeqFile.hpp"
 #include "Content/ShpFile.hpp"
 #include "Content/ShpModelFiles.hpp"
+#include "Content/ZudFile.hpp"
 #include "Extract/EsqConversion.hpp"
 #include "Extract/EtmConversion.hpp"
 #include "Extract/ImageFilesWriter.hpp"
 #include "Extract/ShpModelConversion.hpp"
+#include "Extract/ZudConversion.hpp"
 #include "TestSupport/ModelFixtures.hpp"
 
 namespace {
@@ -1327,6 +1332,392 @@ TEST_CASE("Extracted ETM sheets load from their region images as exact bytes",
             *models, content::kEtmExtension, content::LoadConvertedActorTexture,
             VS::test_support::ExtractedEventLengths(*models)) ==
         kExtractedSheetCount);
+}
+
+// --- ZUD enemy bundles.
+
+constexpr std::string_view kZudPath = "MAP/Z001U00.ZUD";
+constexpr std::string_view kBorrowingZudPath = "MAP/Z001U01.ZUD";
+constexpr std::string_view kTexturedZudPath = "MAP/Z001U02.ZUD";
+constexpr std::string_view kZudFile = "Z001U00.json";
+// The reads of ZudSources' sources: the bank, its owner, then the ZUDs.
+constexpr std::size_t kOwnerRead = 1;
+constexpr std::size_t kZudRead = 2;
+constexpr std::size_t kBorrowingZudRead = 3;
+constexpr std::size_t kTexturedZudRead = 4;
+constexpr std::size_t kZudCount = 3;
+constexpr std::uint16_t kOwnBankLength = 3;
+constexpr std::int16_t kMovedVertex = 99;
+constexpr std::size_t kShieldMaterialByte = 5;
+constexpr std::uint8_t kEditedMaterial = 9;
+
+constexpr std::size_t SectionIndex(content::ZudSection section) {
+  return static_cast<std::size_t>(section);
+}
+
+// A body no OBJ file holds: the sample model moved, borrowing 4F's texture or
+// with its own.
+Bytes ZudBody(bool borrowing) {
+  content::ShpFile shp = borrowing ? BorrowingShp() : SampleShp(false);
+  shp.vertices.front().x = kMovedVertex;
+  return Encoded(shp);
+}
+
+// A ZUD of 4F's numbers and `body` alone.
+content::ZudFile ZudOf(Bytes body) {
+  content::ZudFile zud;
+  zud.identity.front() = static_cast<std::uint8_t>(kSampleLender);
+  zud.sections.at(SectionIndex(content::ZudSection::kBody)) = std::move(body);
+  return zud;
+}
+
+// OBJ/4F.SHP as its body, a common bank no OBJ file holds and the bank
+// OBJ/4F_BT1.SEQ as its battle bank.
+content::ZudFile SampleZud() {
+  content::ZudFile zud = ZudOf(OwningShp(ModelRoot::kFirstLba));
+  zud.sections.at(SectionIndex(content::ZudSection::kCommonAnimation)) =
+      SampleSeq(kOwnBankLength);
+  zud.sections.at(SectionIndex(content::ZudSection::kBattleAnimation)) =
+      SampleSeq();
+  return zud;
+}
+
+Bytes EncodedZud(const content::ZudFile& zud) {
+  auto bytes = content::EncodeZudFile(zud);
+  INFO(ErrorOf(bytes));
+  REQUIRE(bytes.has_value());
+  return *std::move(bytes);
+}
+
+// The bank, first so that it starts at kFirstLba where its owner names it,
+// the owner, `zuds` and, if `program`, BATTLE.PRG.
+std::vector<extract::SourceFile> ZudSources(
+    const std::vector<extract::SourceFile>& zuds, bool program = true) {
+  std::vector<extract::SourceFile> sources{
+      {.path = std::string(kBankPath), .bytes = SampleSeq()},
+      {.path = "OBJ/4F.SHP", .bytes = OwningShp(ModelRoot::kFirstLba)}};
+  sources.insert(sources.end(), zuds.begin(), zuds.end());
+  if (program) {
+    sources.push_back({.path = std::string(extract::kBattleProgramPath),
+                       .bytes = Bytes(content::kSeqEventLengthsAt +
+                                      content::kSeqEventLengthCount)});
+  }
+  return sources;
+}
+
+auto LoadArchetype(const fs::path& root,
+                   const content::ConvertedModelRead& read) {
+  return LoadModel(root, read, content::LoadConvertedArchetype);
+}
+
+struct ArchetypeOutput {
+  std::string_view source;
+  std::string_view id;
+  std::vector<std::string> files;
+  std::vector<std::string> dependencies;
+};
+
+void CheckArchetypeOutput(const ModelRoot& root,
+                          const ArchetypeOutput& expected) {
+  CAPTURE(expected.source);
+  const auto manifest = content::LoadConversionManifest(root.Root());
+  INFO(ErrorOf(manifest));
+  if (!manifest || !*manifest) {
+    FAIL("no manifest.json");
+    return;
+  }
+  const std::vector<content::ConversionOutput>& outputs = (*manifest)->outputs;
+  const auto output = std::ranges::find(outputs, expected.source,
+                                        &content::ConversionOutput::source);
+  REQUIRE(output != outputs.end());
+  CHECK(output->id == expected.id);
+  CHECK(output->converter == content::kZudArchetypeConverterName);
+  CHECK(output->files == expected.files);
+  std::vector<std::string> dependencies;
+  for (const content::SourceDependency& dependency : output->dependencies) {
+    dependencies.push_back(dependency.source);
+  }
+  CHECK(dependencies == expected.dependencies);
+}
+
+// Each ZUD's JSON, beside the files of a body of its own; what each depends
+// on.
+void CheckArchetypeOutputs(const ModelRoot& root) {
+  CheckArchetypeOutput(
+      root,
+      {.source = kZudPath,
+       .id = "archetype.map.z001u00",
+       .files = {"models/zud/Z001U00.json"},
+       .dependencies = {"BATTLE/BATTLE.PRG", "OBJ/4F.SHP", "OBJ/4F_BT1.SEQ"}});
+  CheckArchetypeOutput(
+      root, {.source = kBorrowingZudPath,
+             .id = "archetype.map.z001u01",
+             .files = {"models/zud/Z001U01.json", "models/zud/Z001U01.gltf",
+                       "models/zud/Z001U01.bin"},
+             .dependencies = {"BATTLE/BATTLE.PRG", "OBJ/4F.SHP"}});
+  CheckArchetypeOutput(
+      root, {.source = kTexturedZudPath,
+             .id = "archetype.map.z001u02",
+             .files = {"models/zud/Z001U02.json", "models/zud/Z001U02.gltf",
+                       "models/zud/Z001U02.bin", "models/zud/Z001U02.png",
+                       "models/zud/Z001U02.image.json",
+                       "models/zud/Z001U02.palettes.png"},
+             .dependencies = {"BATTLE/BATTLE.PRG"}});
+}
+
+// The archetype's JSON names its body and battle bank and keeps its common
+// bank; the bodies of its own show the lender's image or their own.
+void CheckArchetypeFiles(const ModelRoot& root) {
+  const fs::path directory =
+      root.Root() / fs::path(content::kArchetypeDirectory);
+  const auto json =
+      content::ParseJsonText(ReadModel(directory / kZudFile), kZudFile);
+  INFO(ErrorOf(json));
+  REQUIRE(json.has_value());
+  CHECK(json->at("body") ==
+        content::JsonDocument::parse(R"({"model": "model.obj.4f"})"));
+  CHECK(
+      json->at("battle_animation") ==
+      content::JsonDocument::parse(R"({"animation": "animation.obj.4f_bt1"})"));
+  CHECK(json->at("common_animation").at("bones") == kSampleBones);
+  CHECK(ParseGltf(ReadModel(directory / "Z001U01.gltf"))["images"] ==
+        content::JsonDocument::parse(R"([{"uri": "../characters/4F.png"}])"));
+  CHECK(ParseGltf(ReadModel(directory / "Z001U02.gltf"))["images"] ==
+        content::JsonDocument::parse(R"([{"uri": "Z001U02.png"}])"));
+}
+
+// An edit to the model an archetype names survives a rerun and reaches the
+// archetype's bytes.
+void CheckEditedPartLoads(const ModelRoot& root, const Bytes& original) {
+  root.EditGltf(content::kShpModelDirectory, "4F",
+                [](content::JsonDocument& gltf) {
+                  SetCollisionRadius(gltf, kEditedRadius);
+                });
+  const auto rerun = root.Convert();
+  CHECK(rerun.characters.unchanged == 1);
+  CHECK(rerun.archetypes.unchanged == kZudCount);
+  const auto body = LoadShp(root.Root(), root.Read(kOwnerRead));
+  INFO(ErrorOf(body));
+  REQUIRE(body.has_value());
+  CHECK(*body != SampleZud().Section(content::ZudSection::kBody));
+  auto edited = content::DecodeZudFile(original);
+  REQUIRE(edited.has_value());
+  edited->sections.at(SectionIndex(content::ZudSection::kBody)) = *body;
+  CHECK(LoadArchetype(root.Root(), root.Read(kZudRead)) == EncodedZud(*edited));
+}
+
+// An edit to a body of the archetype's own survives a rerun and changes the
+// bytes it loads as.
+void CheckEditedOwnBodyLoads(const ModelRoot& root, const Bytes& original) {
+  root.EditGltf(content::kArchetypeDirectory, "Z001U01",
+                [](content::JsonDocument& gltf) {
+                  SetCollisionRadius(gltf, kEditedRadius);
+                });
+  CHECK(root.Convert().archetypes.unchanged == kZudCount);
+  const auto edited = LoadArchetype(root.Root(), root.Read(kBorrowingZudRead));
+  INFO(ErrorOf(edited));
+  REQUIRE(edited.has_value());
+  CHECK(*edited != original);
+  const auto zud = content::DecodeZudFile(*edited);
+  INFO(ErrorOf(zud));
+  REQUIRE(zud.has_value());
+  const auto shp =
+      content::DecodeShp(zud->Section(content::ZudSection::kBody), false);
+  INFO(ErrorOf(shp));
+  REQUIRE(shp.has_value());
+  CHECK(content::ShpLayoutJson(shp->layout)["collision_radius"] ==
+        kEditedRadius);
+}
+
+fs::path ArchetypePath(const ModelRoot& root) {
+  return root.Root() / fs::path(content::kArchetypeDirectory) / kZudFile;
+}
+
+// Applies `edit` to the sample ZUD's converted JSON file.
+void EditArchetype(const ModelRoot& root,
+                   const std::function<void(content::JsonDocument&)>& edit) {
+  auto json = content::ParseJsonText(ReadModel(ArchetypePath(root)), kZudFile);
+  INFO(ErrorOf(json));
+  REQUIRE(json.has_value());
+  edit(*json);
+  const std::string text = content::FormatJsonText(*json) + "\n";
+  WriteFile(ArchetypePath(root), std::as_bytes(std::span(text)));
+}
+
+// An edit to the archetype's header and its own bank survives a rerun and
+// changes the bytes it loads as.
+void CheckEditedArchetypeLoads(const ModelRoot& root) {
+  static constexpr std::uint16_t kEditedLength = 1000;
+  const auto loaded = LoadArchetype(root.Root(), root.Read(kZudRead));
+  INFO(ErrorOf(loaded));
+  REQUIRE(loaded.has_value());
+  auto edited = content::DecodeZudFile(*loaded);
+  REQUIRE(edited.has_value());
+  EditArchetype(root, [](content::JsonDocument& json) {
+    json.at("header").at("shield_material") = kEditedMaterial;
+    json.at("common_animation").at("bank").at("clips").front().at("length") =
+        kEditedLength;
+  });
+  CHECK(root.Convert().archetypes.unchanged == kZudCount);
+  edited->identity.at(kShieldMaterialByte) = kEditedMaterial;
+  edited->sections.at(SectionIndex(content::ZudSection::kCommonAnimation)) =
+      SampleSeq(kEditedLength);
+  CHECK(LoadArchetype(root.Root(), root.Read(kZudRead)) == EncodedZud(*edited));
+}
+
+// A part of the wrong kind or of another source, a stale archetype and a read
+// no ZUD matches are refused.
+void CheckRefusedArchetypeLoads(const ModelRoot& root) {
+  struct Refused {
+    std::string_view member;
+    content::JsonDocument value;
+    std::string_view error;
+  };
+  using content::JsonDocument;
+  const std::vector<Refused> refusals{
+      {"/body", JsonDocument::parse(R"({"model": "model.obj.99"})"),
+       "Z001U00.json's body names model.obj.99, which is not a"},
+      {"/body", JsonDocument::parse(R"({"model": "animation.obj.4f_bt1"})"),
+       "Z001U00.json's body names animation.obj.4f_bt1, which is not a"},
+      {"/battle_animation",
+       JsonDocument::parse(R"({"animation": "model.obj.4f"})"),
+       "Z001U00.json's battle animation names model.obj.4f, which is not a"},
+      {"/body", JsonDocument::parse(R"({"file": "Z001U01.gltf"})"),
+       "its body Z001U01.gltf is from MAP/Z001U01.ZUD, not MAP/Z001U00.ZUD"},
+      {"/source_sha256", std::string(64, 'a'),
+       "MAP/Z001U00.ZUD does not match its conversion manifest"},
+  };
+  const Bytes original = ReadModel(ArchetypePath(root));
+  for (const Refused& refused : refusals) {
+    CAPTURE(refused.member);
+    EditArchetype(root, [&refused](JsonDocument& json) {
+      json[JsonDocument::json_pointer(std::string(refused.member))] =
+          refused.value;
+    });
+    const std::string error =
+        ErrorOf(LoadArchetype(root.Root(), root.Read(kZudRead)));
+    INFO(error);
+    CHECK(error.contains(refused.error));
+    WriteFile(ArchetypePath(root), original);
+  }
+  CHECK(
+      ErrorOf(LoadArchetype(root.Root(),
+                            {.lba = 1, .rounded_size = 0, .event_lengths = {}}))
+          .contains("no extracted .ZUD file matches LBA 1"));
+}
+
+bool AllZero(std::span<const std::byte> bytes) {
+  return std::ranges::all_of(
+      bytes, [](std::byte byte) { return byte == std::byte{}; });
+}
+
+// The room spawn's ZUD read loads a bundle that fits its sector-rounded read,
+// and refuses one rebuilt larger, leaving zeros.
+void CheckLiveArchetypeReads(const ModelRoot& root) {
+  const content::ConvertedModelRead read = root.Read(kZudRead);
+  const auto expected = LoadArchetype(root.Root(), read);
+  INFO(ErrorOf(expected));
+  REQUIRE(expected.has_value());
+  const content::DiscFileExtent file{
+      .sector = static_cast<std::int32_t>(read.lba),
+      .bytes = static_cast<std::int32_t>(read.rounded_size)};
+  content::DataStore::ScopedOverride restore;
+  REQUIRE(content::DataStore::Open(root.Root()).has_value());
+  Bytes loaded(read.rounded_size, std::byte{0xFF});
+  REQUIRE(expected->size() <= loaded.size());
+  CHECK(content::ReadLiveConvertedArchetype(file, loaded) ==
+        std::optional<bool>{true});
+  CHECK(Bytes(loaded.begin(), loaded.begin() + std::ssize(*expected)) ==
+        *expected);
+  CHECK(AllZero(std::span(loaded).subspan(expected->size())));
+  const Bytes original = ReadModel(ArchetypePath(root));
+  EditArchetype(root, [&read](content::JsonDocument& json) {
+    content::JsonDocument unread = content::JsonDocument::object();
+    unread["unread"] = std::string(2 * read.rounded_size, 'a');
+    json.at("common_animation").at("bank").at("motion").push_back(unread);
+  });
+  std::ranges::fill(loaded, std::byte{0xFF});
+  CHECK(content::ReadLiveConvertedArchetype(file, loaded) ==
+        std::optional<bool>{false});
+  CHECK(AllZero(loaded));
+  WriteFile(ArchetypePath(root), original);
+}
+
+TEST_CASE("ZUD bundles convert to archetypes that load as their bytes",
+          "[content-models][zud]") {
+  const Bytes zud = EncodedZud(SampleZud());
+  const Bytes borrowing = EncodedZud(ZudOf(ZudBody(true)));
+  const Bytes textured = EncodedZud(ZudOf(ZudBody(false)));
+  const ModelRoot root(
+      ZudSources({{.path = std::string(kZudPath), .bytes = zud},
+                  {.path = std::string(kBorrowingZudPath), .bytes = borrowing},
+                  {.path = std::string(kTexturedZudPath), .bytes = textured}}));
+  CHECK(root.Convert().archetypes.converted == kZudCount);
+  CheckArchetypeOutputs(root);
+  CheckArchetypeFiles(root);
+  CHECK(LoadArchetype(root.Root(), root.Read(kZudRead)) == zud);
+  CHECK(LoadArchetype(root.Root(), root.Read(kBorrowingZudRead)) == borrowing);
+  CHECK(LoadArchetype(root.Root(), root.Read(kTexturedZudRead)) == textured);
+  const auto rerun = root.Convert().archetypes;
+  CHECK(rerun.unchanged == kZudCount);
+  CHECK(rerun.removed == 0);
+  CheckEditedPartLoads(root, zud);
+  CheckEditedOwnBodyLoads(root, borrowing);
+  CheckEditedArchetypeLoads(root);
+  CheckRefusedArchetypeLoads(root);
+  CheckLiveArchetypeReads(root);
+}
+
+// Why the archetype converter refuses `sources`, run after the models when
+// `models` is set.
+std::string ZudRefusal(const std::vector<extract::SourceFile>& sources,
+                       bool models) {
+  const ModelRoot root(sources);
+  if (models) {
+    const auto converted = extract::ConvertDiscModels(root.Root(), false);
+    INFO(ErrorOf(converted));
+    REQUIRE(converted.has_value());
+  }
+  return ErrorOf(extract::ConvertDiscArchetypes(root.Root(), false));
+}
+
+TEST_CASE("Every ZUD bundle needs whole sections and its models converted",
+          "[content-models][zud]") {
+  struct Refused {
+    std::vector<extract::SourceFile> sources;
+    std::string_view error;
+    bool models = true;
+  };
+  const auto sources = [](const content::ZudFile& zud, bool program = true) {
+    return ZudSources(
+        {{.path = std::string(kZudPath), .bytes = EncodedZud(zud)}}, program);
+  };
+  content::ZudFile padded = SampleZud();
+  padded.identity.back() = 1;
+  content::ZudFile armed = SampleZud();
+  armed.sections.at(SectionIndex(content::ZudSection::kWeapon)) = {
+      std::byte{1}};
+  content::ZudFile bodiless = SampleZud();
+  bodiless.sections.at(SectionIndex(content::ZudSection::kBody)).clear();
+  Bytes cut = EncodedZud(SampleZud());
+  cut.pop_back();
+  const std::vector<Refused> refusals{
+      {sources(SampleZud(), false),
+       "MAP/Z001U00.ZUD needs BATTLE/BATTLE.PRG, which files.tsv does not "
+       "list"},
+      {sources(SampleZud()),
+       "MAP/Z001U00.ZUD: its body is OBJ/4F.SHP, which has no current", false},
+      {sources(padded), "MAP/Z001U00.ZUD: identity byte 7 is 1, not 0"},
+      {sources(armed), "MAP/Z001U00.ZUD: its weapon is no WEP files.tsv lists"},
+      {sources(bodiless), "MAP/Z001U00.ZUD has no body"},
+      {ZudSources({{.path = std::string(kZudPath), .bytes = cut}}),
+       "MAP/Z001U00.ZUD: the battle animation section's"},
+  };
+  for (const Refused& refused : refusals) {
+    const std::string error = ZudRefusal(refused.sources, refused.models);
+    INFO(error);
+    CHECK(error.contains(refused.error));
+  }
 }
 
 }  // namespace

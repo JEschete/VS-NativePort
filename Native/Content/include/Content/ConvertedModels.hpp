@@ -12,8 +12,9 @@
 // Converted character and weapon models the runtime loads in place of
 // OBJ\<NN>.SHP and OBJ\<NN>.WEP (ASSET_PIPELINE.md §6.2-6.3, #203, #204), the
 // OBJ\*.SEQ animation banks their glTF files hold (§6.2.1, #205), the
-// OBJ\E*.ESQ shared animation sets (§6.2.2, #206) and the OBJ\E*.ETM effect
-// texture sheets (§6.2.3, #207).
+// OBJ\E*.ESQ shared animation sets (§6.2.1, #206), the OBJ\E*.ETM effect
+// texture sheets (§6.2.1, #207) and the MAP\*.ZUD enemy archetypes (§6.2.5,
+// #200).
 // Loading never converts; a missing or mismatched output is an error naming
 // the file.
 namespace VS::Content {
@@ -58,5 +59,16 @@ LoadConvertedAnimationSet(const DataStore& store,
 [[nodiscard]] std::expected<std::vector<std::byte>, std::string>
 LoadConvertedActorTexture(const DataStore& store,
                           const ConvertedModelRead& read);
+
+// The ZUD bytes rebuilt from the zud-json output of the enemy bundle `read`
+// names (its archetype JSON, ActorArchetype.hpp, §6.2.5, #200), checked
+// against the manifest: the archetype's source path and hash. Each part it
+// names loads from that output as its own read would (LoadConvertedModel,
+// LoadConvertedWeapon, LoadConvertedSequence), so an edit to a model reaches
+// every archetype naming it; the id must name an output of the right
+// converter. A body of the archetype's own loads from its glTF beside the
+// JSON, which must name the same source.
+[[nodiscard]] std::expected<std::vector<std::byte>, std::string>
+LoadConvertedArchetype(const DataStore& store, const ConvertedModelRead& read);
 
 }  // namespace VS::Content

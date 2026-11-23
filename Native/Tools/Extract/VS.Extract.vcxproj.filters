@@ -54,6 +54,9 @@
     <ClCompile Include="src\WorkshopRecipeConversion.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ZudConversion.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClInclude Include="include\Extract\AudioBankConversion.hpp">
       <Filter>include\Extract</Filter>
     </ClInclude>
@@ -91,6 +94,9 @@
       <Filter>include\Extract</Filter>
     </ClInclude>
     <ClInclude Include="include\Extract\WorkshopRecipeConversion.hpp">
+      <Filter>include\Extract</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Extract\ZudConversion.hpp">
       <Filter>include\Extract</Filter>
     </ClInclude>
   </ItemGroup>

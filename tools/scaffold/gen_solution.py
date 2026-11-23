@@ -88,6 +88,7 @@ PROJECTS = [
                 r"Tools\Extract\src\TimWriter.cpp",
                 r"Tools\Extract\src\WepModelConversion.cpp",
                 r"Tools\Extract\src\WorkshopRecipeConversion.cpp",
+                r"Tools\Extract\src\ZudConversion.cpp",
                 r"Tools\Launcher\src\Setup.cpp",
                 r"Tools\Launcher\src\DiscValidation.cpp",
                 r"Tools\Launcher\src\Updates.cpp",

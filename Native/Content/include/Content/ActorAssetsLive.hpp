@@ -8,6 +8,7 @@
 #include <span>
 
 #include "Content/ActorAssets.hpp"
+#include "Content/CdDrive.hpp"
 
 namespace VS::Actors {
 struct WeaponModelData;
@@ -99,6 +100,13 @@ int ReleaseLiveSequenceEffectTexture(int bank);
 
 // Inputs the loaders refused since start-up.
 [[nodiscard]] std::uint64_t LiveActorAssetRefusals() noexcept;
+
+// Native (#200): fills `destination` with the converted enemy archetype
+// (models/zud, ASSET_PIPELINE.md §6.2.5) a ZUD read of `file` names, and
+// whether it loaded; one that does not load or fit leaves zeros. Nothing when
+// `file` is not an extracted MAP\*.ZUD, which the caller reads from the disc.
+[[nodiscard]] std::optional<bool> ReadLiveConvertedArchetype(
+    DiscFileExtent file, std::span<std::byte> destination);
 
 // The battle asset queue's legacy globals. ActorAssetsLive.cpp defines them
 // and binds them to the typed loaders (ActorAssets.hpp); the battle start-up

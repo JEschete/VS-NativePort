@@ -48,6 +48,7 @@
 #include "Content/DiscQueue.hpp"
 #include "Content/EsqFile.hpp"
 #include "Content/ShpModelFiles.hpp"
+#include "Content/ZudFile.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -376,11 +377,11 @@ std::optional<ConvertedRead> ConvertedReadOf(AssetFileStream stream,
 
 // Native (#203-#207): fills `destination` with the converted actor model,
 // weapon model, animation bank, animation set or effect texture sheet in
-// place of the disc read. A file that does not load or fit leaves zeros: the
-// parser refuses them as an empty actor model, they parse as a weapon with no
-// geometry, as an empty bank or set, and as a sheet of no lines, which uploads
-// nothing.
-void ReadConvertedModel(const ConvertedRead& read, DiscFileExtent file,
+// place of the disc read, and whether it loaded. A file that does not load or
+// fit leaves zeros: the parser refuses them as an empty actor model, they
+// parse as a weapon with no geometry, as an empty bank or set, and as a sheet
+// of no lines, which uploads nothing.
+bool ReadConvertedModel(const ConvertedRead& read, DiscFileExtent file,
                         std::span<std::byte> destination) {
   std::ranges::fill(destination, std::byte{0});
   const std::string_view what = read.what;
@@ -392,11 +393,12 @@ void ReadConvertedModel(const ConvertedRead& read, DiscFileExtent file,
   if (!bytes) {
     VS::Core::LogError("content", "{} at LBA {}: {}", what, file.sector,
                        bytes.error());
-    return;
+    return false;
   }
   VS::Core::LogDebug("content", "{} at LBA {}: {} converted bytes", what,
                      file.sector, bytes->size());
   std::ranges::copy(*bytes, destination.begin());
+  return true;
 }
 
 AssetAddress Address(const void* pointer) {
@@ -1648,5 +1650,20 @@ int ReleaseLiveSequenceEffectTexture(int bank) {
 }
 
 std::uint64_t LiveActorAssetRefusals() noexcept { return refusals; }
+
+std::optional<bool> ReadLiveConvertedArchetype(
+    DiscFileExtent file, std::span<std::byte> destination) {
+  const DataStore* const store = DataStore::Get();
+  if (store == nullptr || file.sector <= 0) return std::nullopt;
+  const auto sector = static_cast<std::uint32_t>(file.sector);
+  const DataStore::Entry* const entry = store->FindBySector(sector);
+  if (entry == nullptr || entry->lba != sector ||
+      !entry->path.ends_with(kZudExtension)) {
+    return std::nullopt;
+  }
+  return ReadConvertedModel(
+      {.load = LoadConvertedArchetype, .what = "enemy archetype"}, file,
+      destination);
+}
 
 }  // namespace VS::Content

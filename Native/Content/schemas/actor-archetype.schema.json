@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/JEschete/VS-NativePort/blob/main/Native/Content/schemas/actor-archetype.schema.json",
+  "title": "vs.actor-archetype",
+  "description": "One MAP ZUD enemy bundle: its identity bytes and the parts a room spawn loads, named by conversion output id instead of copied (Docs/ASSET_PIPELINE.md §6.2.5, Content/ActorArchetype.hpp). The native loader also checks what a schema cannot: that each id names a current output of the right kind and that the rebuilt file fits the game's read.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "schema_version", "source", "source_sha256", "header", "body", "weapon", "shield", "common_animation", "battle_animation"],
+  "properties": {
+    "schema": { "const": "vs.actor-archetype" },
+    "schema_version": { "const": 1 },
+    "source": {
+      "type": "string",
+      "description": "The disc file the archetype came from, e.g. MAP/Z001U00.ZUD."
+    },
+    "source_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "The SHA-256 of the source file as extracted."
+    },
+    "header": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["character_id", "weapon", "battle_sequence_model", "weapon_material", "shield", "shield_material", "default_material"],
+      "description": "The identity bytes the encyclopedia preview reads (MENU9.PRG ZudData); the room spawn reads only the parts.",
+      "properties": {
+        "character_id": { "$ref": "#/$defs/byte" },
+        "weapon": { "$ref": "#/$defs/byte" },
+        "battle_sequence_model": { "$ref": "#/$defs/byte" },
+        "weapon_material": { "$ref": "#/$defs/byte" },
+        "shield": { "$ref": "#/$defs/byte" },
+        "shield_material": { "$ref": "#/$defs/byte" },
+        "default_material": { "$ref": "#/$defs/byte" }
+      }
+    },
+    "body": {
+      "description": "The character model: a converted model, or a glTF of the archetype's own beside this file.",
+      "oneOf": [{ "$ref": "#/$defs/model" }, { "$ref": "#/$defs/ownModel" }]
+    },
+    "weapon": {
+      "description": "A converted weapon model, or null for none.",
+      "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/model" }]
+    },
+    "shield": {
+      "description": "A converted shield model, or null for none.",
+      "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/model" }]
+    },
+    "common_animation": { "$ref": "#/$defs/animation" },
+    "battle_animation": { "$ref": "#/$defs/animation" }
+  },
+  "$defs": {
+    "byte": { "type": "integer", "minimum": 0, "maximum": 255 },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9._-]+$",
+      "description": "A conversion output id, e.g. model.obj.0a, model.obj.01.wep or animation.obj.00_bt1."
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["model"],
+      "properties": { "model": { "$ref": "#/$defs/id" } }
+    },
+    "ownModel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file"],
+      "properties": {
+        "file": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+\\.gltf$",
+          "description": "A glTF file name in this file's directory, e.g. Z049U06.gltf."
+        }
+      }
+    },
+    "animation": {
+      "description": "No bank, a converted bank, or a bank of the archetype's own as vs.actor-animation writes it.",
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["animation"],
+          "properties": { "animation": { "$ref": "#/$defs/id" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["bones", "bank"],
+          "properties": {
+            "bones": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 41,
+              "description": "The bones each clip animates; a bank for another bone count is kept but the game skips it."
+            },
+            "bank": { "$ref": "actor-animation.schema.json#/$defs/bank" }
+          }
+        }
+      ]
+    }
+  }
+}

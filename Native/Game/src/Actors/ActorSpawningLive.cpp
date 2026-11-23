@@ -871,6 +871,18 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   }
 
   void BeginZudRead(Content::DiscFileExtent file) override {
+    // Native (#200): an extracted ZUD loads from its converted archetype in
+    // place of the disc read.
+    if (const std::optional<bool> converted =
+            Content::ReadLiveConvertedArchetype(
+                file, std::span(static_cast<std::byte*>(
+                                    VS::Field::zoneContext.zud_data),
+                                static_cast<std::size_t>(file.bytes)))) {
+      converted_zud_ =
+          *converted ? ZudReadState::kLoaded : ZudReadState::kFailed;
+      VS::Field::zoneContext.zud_disc_request = nullptr;
+      return;
+    }
     VS::Content::DiscFile disc{};
     disc.lba = file.sector;
     disc.size = file.bytes;
@@ -887,6 +899,9 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   }
 
   [[nodiscard]] ZudReadState PollZudRead() const override {
+    if (converted_zud_) {
+      return *converted_zud_;
+    }
     const VS::Content::DiscQueueSlot* request =
         VS::Field::zoneContext.zud_disc_request;
     if (request == nullptr) {
@@ -905,6 +920,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   void FinishZudRead(int zud, bool loaded) override {
     Content::ReleaseLiveDiscRequest(VS::Field::zoneContext.zud_disc_request);
     VS::Field::zoneContext.zud_disc_request = nullptr;
+    converted_zud_.reset();
     if (loaded) {
       VS::Field::zoneContext.loaded_zud_index_plus_one = zud + 1;
     } else {
@@ -1117,6 +1133,8 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
 
  private:
   const char* operation_;
+  // A ZUD read that loaded from its conversion, until FinishZudRead.
+  std::optional<ZudReadState> converted_zud_;
 };
 
 LimbTemplate DecodeLimb(const VS::Actors::LimbInit& limb) {
