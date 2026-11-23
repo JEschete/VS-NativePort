@@ -92,6 +92,7 @@ Native\data\
     fonts\ main.png main.font.json (glyph atlas + metrics)
   models\            Tier 3: glTF 2.0 as .gltf + .bin, textures as shared image files (§6.4)
     characters\<SHP>.gltf          (skinned mesh + applicable SEQ/ESQ clips, texture frames and VS metadata)
+    animation-sets\<ESQ>.json      (shared animation sets: the bank each model number or kind plays, §6.2.1)
     weapons\<WEP>.gltf             (+ .bin, texture image files; material variants = blade materials, §6.2.4)
     armor\ shields\ ...            (as discovered per CONTENT_LEDGER)
     zud\<ZUD>.json                 (enemy model set: references SHP/WEP/SEQ glTFs; no duplicate meshes)
@@ -185,7 +186,8 @@ The disc has 27 kinds of files. The "Source" column below names the files on the
 | `SMALL\MON.BIN` | `catalogs\enemies\bestiary.csv` | 150 records of `0x2C` bytes | ENEMY_DATA_SCHEME |
 | `SMALL\HELP*.HF0/HF1` (28) | `text\strings.en.json` + `ui\help\<page>.json` + `ui\help\*.png` | `.HF0` = page text, sprite placements and line table; `.HF1` = 8×16 8bpp illustration blocks and 16-colour palettes | native `ManualTopics.hpp`, `ManualIllustration.hpp`, `Manual.cpp` |
 | `EFFECT\*.P` (290), `*.FBT` (755), `*.FBC` (277), `EFFECT\*.BIN` (311) | `effects\<id>.json` + `textures\effect\*.png` | `.FBT` texture pages + `.FBC` palettes → PNG (§6.4). `.P` files are block streams (u32 header: size in the low 16 bits, type in the high 16 bits; type 0 ends) → effect JSON. `.BIN` files are **PLG code overlays** and EFFPURGE dispatch tables, already ported to C++ (`Effects\Plugins\PlgNNN.cpp`, `PurgeTables.cpp`); only their data blobs remain, as typed tables. Effect behaviors stay in code (plan §9.7) | decomp `Effects\` |
-| `OBJ\*.ESQ` (97), `OBJ\*.ETM` (80) | applicable character glTFs + the actor-bound images they reference | event animation banks and texture overlays, including facial frames; resolve actor/bank/palette bindings from loaders, not matching filenames (§6.2.2) | decomp `BATTLE.PRG/30DB0.c`, `40564.c`; native `Actors/TextureAnimation.c` |
+| `OBJ\*.ESQ` (97) | `models\animation-sets\<ESQ>.json` | shared animation sets: up to 15 entries, each a selector (a model number or kind), an optional texture row and a SEQ bank; `BATTLE.PRG`'s tables bind them to models. Converter `esq-json` (§6.2.1) | decomp `BATTLE.PRG/30DB0.c`; native `Actors/ActorAssets.cpp` |
+| `OBJ\*.ETM` (80) | applicable character glTFs + the actor-bound images they reference | texture overlays, including facial frames; resolve actor/bank/palette bindings from loaders, not matching filenames (§6.2.2) | decomp `BATTLE.PRG/30DB0.c`, `40564.c`; native `Actors/TextureAnimation.c` |
 | `SOUND\WAVE*.DAT` (101) | `audio\banks\<bank>\` (`bank.json`, `<n>.wav` + `<n>.sfz`) | 83 banks; 18 one-byte zero placeholders. Converter `wave-bank` (§6.5) | decomp `Audio\` |
 | `MUSIC\MUSIC*.DAT` (192) | `audio\music\*.seq.json` | §6.5 | decomp `Audio\Seq` |
 | `SE\EFFECT*.DAT` (102) | `audio\sfx\*.seq.json` (+ bank if embedded) | §6.5 | |
@@ -253,11 +255,23 @@ Not yet done: glTF preview animations for the SEQ banks and ESQ clips (#205, #20
     - Ownership comes from what the game reads, not from file names. A model owns the banks its layout block names (`battle_sequence_lbas`/`_sizes` and `special_sequence_lbas`/`_sizes`, LBA and sector count). `OBJ\00.SHP` and `OBJ\02.SHP` also own the material and material-model banks that `BATTLE.PRG`'s tables name (`ShpModelConversion.cpp` `BankOwners`).
     - The extractor refuses a bank that no model or two models load, and a layout entry that names no listed SEQ.
     - Every bank gets a `seq-gltf` output (id `animation.obj.<bank>`) that lists its owner's `.gltf` and `.bin`. Its dependencies are `BATTLE\BATTLE.PRG` (the event lengths) and the owner SHP at the hash the model output records. A bank with a changed source or owner reconverts its owner.
-    - At runtime, `Content::LoadConvertedSequence` handles the animation bank read (`ActorAssetsLive` `BeginFileRead`, `kSequence`) of an `OBJ\*.SEQ` and never reads the bank from the disc. It finds the bank by LBA and sector-rounded size, reads its owner's glTF and rebuilds the bank's bytes. The last four models decoded are kept, keyed by their files' size and time, so one model's banks decode once. The ESQ banks the same stream reads still come from the disc (#206).
+    - At runtime, `Content::LoadConvertedSequence` handles the animation bank read (`ActorAssetsLive` `BeginFileRead`, `kSequence`) of an `OBJ\*.SEQ` and never reads the bank from the disc. It finds the bank by LBA and sector-rounded size, reads its owner's glTF and rebuilds the bank's bytes. The last four models decoded are kept, keyed by their files' size and time, so one model's banks decode once. The ESQ sets the same stream reads load from their own JSON (below).
     - An edited bank is validated and loaded, or refused with the file and member named. It must fit the original sector-rounded read; a larger one is refused and leaves an empty bank.
     - `RequireConversions` refuses to start without the `seq-gltf` batch or with a bank that has no current output.
     - All 700 banks load back from their owners' glTF files as their exact bytes (`SeqFileTests.cpp`), and the glTF files still pass the Khronos validator with 0 errors and 0 warnings. `00.gltf`, which holds the most banks, is about 4.1 MB.
     - Not yet done: glTF animation clips that preview the banks, and playback and timing evidence for the converted banks.
+  - **ESQ shared animation sets (#206, landed):** converter `esq-json` writes each `OBJ\E*.ESQ` as `models\animation-sets\<ESQ>.json` (id `animation-set.obj.<stem>`) in schema `vs.animation-set` version 1 (`Content/AnimationSet.hpp`, `Native\Content\schemas\animation-set.schema.json`).
+    - A set holds up to 15 entries in the order the game searches them. Each entry has a selector (a model number or a model kind), a texture row or `null`, the bone count and its bank in the `vs.actor-animation` form above.
+    - A set is its own file rather than part of a model's glTF because several models play it.
+    - Which models play an entry comes from `BATTLE.PRG`'s tables, not file names (`EsqConversion.cpp`). A model plays the first entry whose selector is its number or its kind (the kind table), and the set tables name each set's sectors.
+    - The extractor refuses an entry no listed model plays, a model whose bone count differs from its entry's, a texture row for a selector that is not a listed model number, a repeated selector, and a set the tables do not name or a table entry naming no listed set. The output depends on `BATTLE.PRG` and on every model the set binds, so a change to any of them reconverts the set.
+    - Each entry's bank includes the padding to a word that follows it on disc, as the game has it in memory.
+    - Two quirks of the original sets, absent from the standalone SEQ files, are kept rather than repaired:
+      - In 36 sets a track's last command is cut off by the end of its bank (once, by the next element). Every clip that plays such a track ends before the cut, so the game never reads it. The cut bytes stay as unread bytes, and the decoder and encoder refuse a clip that would play into them.
+      - Two entries map an animation to the clip one past the last (`E02F` entry 4, `E054` entry 2). Like the game, the reader accepts a clip number whose header still fits in the bank, and refuses one whose header would end past it.
+    - All 97 sets (355 entries) read back from their JSON equal to their decoded sets and rebuild their exact bytes, and load through the runtime loader as their exact bytes (`SeqFileTests.cpp`). `tools\test\test_content_schemas.py` checks the writer's fixture (`Native\Tests\data\animation\sample-set.json`) against the schema in CI.
+    - At runtime, `Content::LoadConvertedAnimationSet` handles an ESQ read of the animation bank stream (`ActorAssetsLive` `BeginFileRead`, `kSequence`) and never reads the set from the disc. An edited set is validated and loaded, or refused with the file and member named. It must fit the original sector-rounded read; a larger one is refused and leaves an empty set. `RequireConversions` refuses to start without the `esq-json` batch.
+    - Not yet done: a load-time check of an edited entry's bone count against the models that play it, glTF clips that preview the sets, and playback and timing evidence for the converted sets.
 - **Extension adoption gate:** once the payload is exercised by both consumers, assess packaging it as one documented optional vendor extension. Choose a project/vendor namespace, publish its schema and fallback behavior, and test both readers before switching the writer. Do not invent a `KHR_` or `EXT_` standard. The extension must be in `extensionsUsed`, but not `extensionsRequired`, only while the asset has a valid standard preview without it. See the [glTF extension rules](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#specifying-extensions) and [extension registry guidance](https://github.com/KhronosGroup/glTF/tree/main/extensions).
 - There is **one authoritative VS payload** per asset. A packaging change requires a schema/converter-version change and an explicit migration; do not emit independently editable copies in both `extras` and an extension. A native loader rejects missing required VS data or unsupported versions with an actionable error, even when a generic viewer can still show the baseline.
 - Ordinary viewers need not execute facial tracks, event commands or VS rendering rules. Ignoring custom data is not a promise to preserve it on re-export. Before accepting an edited model, validate the VS payload and references; missing or altered metadata must be reported, not silently defaulted.
@@ -664,7 +678,7 @@ Record source revision/dirty state, disc identity, tool/converter/schema version
 
 <!-- content:begin (generated by tools/ledger/content.py --sync) -->
 
-**2,154 of 5,162 disc files converted**, 2,154 of them with a passing round trip; 259 skipped with a reason; 2,749 unconverted.
+**2,251 of 5,162 disc files converted**, 2,251 of them with a passing round trip; 259 skipped with a reason; 2,652 unconverted.
 
 | Kind | Files | Converted | Round trip pass | Skipped | Unconverted | Converts under |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
@@ -696,7 +710,7 @@ Record source revision/dirty state, disc identity, tool/converter/schema version
 | program overlay data | 20 | 0 | 0 | 0 | 20 | #500, #502 |
 | room | 512 | 0 | 0 | 0 | 512 | #198 |
 | sample bank | 83 | 83 | 83 | 0 | 0 | #504 |
-| shared animation set | 97 | 0 | 0 | 0 | 97 | #206 |
+| shared animation set | 97 | 97 | 97 | 0 | 0 | #206 |
 | skeletal animation | 700 | 700 | 700 | 0 | 0 | #205 |
 | sound-effect sequences | 78 | 0 | 0 | 0 | 78 | #501 |
 | system images and font | 1 | 0 | 0 | 0 | 1 | #498 |

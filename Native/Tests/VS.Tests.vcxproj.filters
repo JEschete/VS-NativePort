@@ -1584,6 +1584,9 @@
     <ClCompile Include="..\Tools\Extract\src\EffectTextureConversion.cpp">
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>
+    <ClCompile Include="..\Tools\Extract\src\EsqConversion.cpp">
+      <Filter>..\Tools\Extract\src</Filter>
+    </ClCompile>
     <ClCompile Include="..\Tools\Extract\src\ImageFilesWriter.cpp">
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>

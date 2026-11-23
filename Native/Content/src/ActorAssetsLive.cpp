@@ -46,6 +46,7 @@
 #include "Content/ConvertedModels.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/DiscQueue.hpp"
+#include "Content/EsqFile.hpp"
 #include "Content/ShpModelFiles.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Log.hpp"
@@ -310,7 +311,7 @@ void CountRefusal(const char* what, std::int64_t value) {
 using ConvertedLoader = std::expected<std::vector<std::byte>, std::string> (*)(
     const DataStore&, const ConvertedModelRead&);
 
-// Native (#203, #204, #205): the SHP, WEP or SEQ bytes of the converted file
+// Native (#203-#206): the SHP, WEP, SEQ or ESQ bytes of the converted file
 // (ASSET_PIPELINE.md §6.2-6.3) a read of `file` names, found by its sector
 // until assets have stable ids (#47).
 std::expected<std::vector<std::byte>, std::string> ConvertedModelBytes(
@@ -329,35 +330,59 @@ std::expected<std::vector<std::byte>, std::string> ConvertedModelBytes(
                            VS::Actors::animationEventLengths)});
 }
 
-// Native (#205): whether a sequence read names an extracted OBJ\*.SEQ bank,
-// which loads from its owner's converted model. The other banks the sequence
-// stream reads (the ESQ banks, #206) still read the disc.
-bool IsConvertedSequence(DiscFileExtent file) {
+// A converted file a stream read loads in place of the disc read.
+struct ConvertedRead {
+  ConvertedLoader load = nullptr;
+  std::string_view what;
+};
+
+// Native (#205, #206): a sequence read naming an extracted OBJ\*.SEQ bank
+// loads from its owner's converted model, and one naming an OBJ\E*.ESQ shared
+// set from its animation-set JSON. Other sequence reads still read the disc.
+std::optional<ConvertedRead> ConvertedSequenceRead(DiscFileExtent file) {
   const DataStore* const store = DataStore::Get();
-  if (store == nullptr || file.sector <= 0) return false;
+  if (store == nullptr || file.sector <= 0) return std::nullopt;
   const auto sector = static_cast<std::uint32_t>(file.sector);
   const DataStore::Entry* const entry = store->FindBySector(sector);
-  return entry != nullptr && entry->lba == sector &&
-         entry->path.ends_with(kSeqExtension);
+  if (entry == nullptr || entry->lba != sector) return std::nullopt;
+  if (entry->path.ends_with(kSeqExtension)) {
+    return ConvertedRead{.load = LoadConvertedSequence,
+                         .what = "animation bank"};
+  }
+  if (entry->path.ends_with(kEsqExtension)) {
+    return ConvertedRead{.load = LoadConvertedAnimationSet,
+                         .what = "animation set"};
+  }
+  return std::nullopt;
 }
 
-// Native (#203, #204, #205): fills `destination` with the converted actor
-// model, weapon model or animation bank in place of the disc read. A file
-// that does not load or fit leaves zeros: the parser refuses them as an empty
-// actor model, they parse as a weapon with no geometry, and as an empty bank.
-void ReadConvertedModel(AssetFileStream stream, DiscFileExtent file,
+// Native (#203-#206): the converted file a read of `file` on `stream` loads,
+// if any.
+std::optional<ConvertedRead> ConvertedReadOf(AssetFileStream stream,
+                                             DiscFileExtent file) {
+  switch (stream) {
+    case AssetFileStream::kActorModel:
+      return ConvertedRead{.load = LoadConvertedModel, .what = "actor model"};
+    case AssetFileStream::kWeapon:
+      return ConvertedRead{.load = LoadConvertedWeapon, .what = "weapon model"};
+    case AssetFileStream::kSequence:
+      return ConvertedSequenceRead(file);
+    case AssetFileStream::kEffectTexture:
+      return std::nullopt;
+  }
+  return std::nullopt;
+}
+
+// Native (#203-#206): fills `destination` with the converted actor model,
+// weapon model, animation bank or animation set in place of the disc read. A
+// file that does not load or fit leaves zeros: the parser refuses them as an
+// empty actor model, they parse as a weapon with no geometry, and as an empty
+// bank or set.
+void ReadConvertedModel(const ConvertedRead& read, DiscFileExtent file,
                         std::span<std::byte> destination) {
   std::ranges::fill(destination, std::byte{0});
-  ConvertedLoader load = LoadConvertedModel;
-  std::string_view what = "actor model";
-  if (stream == AssetFileStream::kWeapon) {
-    load = LoadConvertedWeapon;
-    what = "weapon model";
-  } else if (stream == AssetFileStream::kSequence) {
-    load = LoadConvertedSequence;
-    what = "animation bank";
-  }
-  auto bytes = ConvertedModelBytes(file, load);
+  const std::string_view what = read.what;
+  auto bytes = ConvertedModelBytes(file, read.load);
   if (bytes && bytes->size() > destination.size()) {
     bytes = std::unexpected(std::format("its {} bytes exceed the {}-byte read",
                                         bytes->size(), destination.size()));
@@ -367,6 +392,8 @@ void ReadConvertedModel(AssetFileStream stream, DiscFileExtent file,
                        bytes.error());
     return;
   }
+  VS::Core::LogDebug("content", "{} at LBA {}: {} converted bytes", what,
+                     file.sector, bytes->size());
   std::ranges::copy(*bytes, destination.begin());
 }
 
@@ -999,14 +1026,13 @@ class LiveActorAssetHost final : public ActorAssetHost {
     const LiveFileStream live = Stream(stream);
     live.file->lba = file.sector;
     live.file->size = file.bytes;
-    if (stream == AssetFileStream::kActorModel ||
-        stream == AssetFileStream::kWeapon ||
-        (stream == AssetFileStream::kSequence && IsConvertedSequence(file))) {
-      // Native (#203, #204, #205): the converted file loads at once, with no
-      // disc read.
+    if (const std::optional<ConvertedRead> converted =
+            ConvertedReadOf(stream, file)) {
+      // Native (#203-#206): the converted file loads at once, with no disc
+      // read.
       const auto wanted = static_cast<std::size_t>(std::max(file.bytes, 0));
       const std::span<std::byte> bytes = Bytes(destination, wanted);
-      ReadConvertedModel(stream, file,
+      ReadConvertedModel(*converted, file,
                          bytes.first(std::min(bytes.size(), wanted)));
       *live.request = nullptr;
       if (FileReadOwner* owner = ReadOwner(stream)) *owner = {};

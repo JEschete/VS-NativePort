@@ -10,8 +10,9 @@
 #include "Content/DataStore.hpp"
 
 // Converted character and weapon models the runtime loads in place of
-// OBJ\<NN>.SHP and OBJ\<NN>.WEP (ASSET_PIPELINE.md §6.2-6.3, #203, #204), and
-// the OBJ\*.SEQ animation banks their glTF files hold (§6.2.1, #205).
+// OBJ\<NN>.SHP and OBJ\<NN>.WEP (ASSET_PIPELINE.md §6.2-6.3, #203, #204), the
+// OBJ\*.SEQ animation banks their glTF files hold (§6.2.1, #205), and the
+// OBJ\E*.ESQ shared animation sets (§6.2.2, #206).
 // Loading never converts; a missing or mismatched output is an error naming
 // the file.
 namespace VS::Content {
@@ -41,5 +42,12 @@ LoadConvertedWeapon(const DataStore& store, const ConvertedModelRead& read);
 // current with the hash the bank output records.
 [[nodiscard]] std::expected<std::vector<std::byte>, std::string>
 LoadConvertedSequence(const DataStore& store, const ConvertedModelRead& read);
+
+// The ESQ bytes rebuilt from the esq-json output of the set `read` names (its
+// one JSON file), checked against the manifest: the set's source path and
+// hash.
+[[nodiscard]] std::expected<std::vector<std::byte>, std::string>
+LoadConvertedAnimationSet(const DataStore& store,
+                          const ConvertedModelRead& read);
 
 }  // namespace VS::Content

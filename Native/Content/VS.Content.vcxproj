@@ -44,6 +44,7 @@
     <ClCompile Include="src\ActorAssetsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\AnimationSet.cpp" />
     <ClCompile Include="src\AssetCatalog.cpp" />
     <ClCompile Include="src\AssetCatalogImport.cpp" />
     <ClCompile Include="src\AudioBank.cpp" />
@@ -65,6 +66,7 @@
     <ClCompile Include="src\DiscReaderLive.cpp">
       <AdditionalIncludeDirectories>$(VSLegacyIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\EsqFile.cpp" />
     <ClCompile Include="src\ImageFiles.cpp" />
     <ClCompile Include="src\JsonText.cpp" />
     <ClCompile Include="src\ModuleLoader.cpp" />
@@ -95,6 +97,7 @@
     <ClInclude Include="include\Content\ActorAnimation.hpp" />
     <ClInclude Include="include\Content\ActorAssets.hpp" />
     <ClInclude Include="include\Content\ActorAssetsLive.hpp" />
+    <ClInclude Include="include\Content\AnimationSet.hpp" />
     <ClInclude Include="include\Content\AssetCatalog.hpp" />
     <ClInclude Include="include\Content\AssetCatalogImport.hpp" />
     <ClInclude Include="include\Content\AssetHandle.hpp" />
@@ -113,6 +116,7 @@
     <ClInclude Include="include\Content\DiscQueue.hpp" />
     <ClInclude Include="include\Content\DiscReader.hpp" />
     <ClInclude Include="include\Content\DiscReaderLive.hpp" />
+    <ClInclude Include="include\Content\EsqFile.hpp" />
     <ClInclude Include="include\Content\ImageFiles.hpp" />
     <ClInclude Include="include\Content\JsonText.hpp" />
     <ClInclude Include="include\Content\ModuleData.hpp" />

@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -16,14 +17,17 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Content/AnimationSet.hpp"
 #include "Content/ConversionManifest.hpp"
 #include "Content/ConvertedModels.hpp"
 #include "Content/DataStore.hpp"
+#include "Content/EsqFile.hpp"
 #include "Content/ImageFiles.hpp"
 #include "Content/JsonText.hpp"
 #include "Content/SeqFile.hpp"
 #include "Content/ShpFile.hpp"
 #include "Content/ShpModelFiles.hpp"
+#include "Extract/EsqConversion.hpp"
 #include "Extract/ShpModelConversion.hpp"
 #include "TestSupport/ModelFixtures.hpp"
 
@@ -698,6 +702,211 @@ TEST_CASE("Every SEQ bank needs the one model that loads it",
   CHECK(refusal({{.path = "OBJ/4F.SHP", .bytes = owner}}) ==
         "OBJ/4F.SHP: battle_sequence_lbas[0] names 1 sectors at LBA 100, "
         "which is no SEQ files.tsv lists");
+}
+
+// --- ESQ shared animation sets.
+
+constexpr std::string_view kSetPath = "OBJ/E001.ESQ";
+constexpr std::string_view kSetFile = "E001.json";
+// BATTLE.PRG's set tables (EsqConversion.cpp): the kind of each model number,
+// then each set's first sector (from kSetFirstSector) and sector count.
+constexpr std::size_t kKindTableAt = 0x80160;
+constexpr std::size_t kSetSectorsAt = 0x80340;
+constexpr std::uint32_t kSetFirstSector = 0x19797;
+constexpr std::size_t kSampleSet = 1;
+constexpr std::int32_t kSampleBorrower = 0x50;
+constexpr std::uint8_t kBorrowerKind = 0x30;
+constexpr std::uint8_t kLenderRow = 5;
+constexpr std::uint8_t kEditedRow = 6;
+
+content::SeqFile SetAnimation() {
+  return {.bones = kSampleBones, .bank = SampleBank()};
+}
+
+// The sample bank for the borrower's kind, then for the lender's model number
+// with a texture row.
+content::EsqFile SampleSet() {
+  return {.entries = {{.selector = kBorrowerKind,
+                       .texture_row = std::nullopt,
+                       .animation = SetAnimation()},
+                      {.selector = static_cast<std::uint16_t>(kSampleLender),
+                       .texture_row = kLenderRow,
+                       .animation = SetAnimation()}}};
+}
+
+Bytes EncodedSet(const content::EsqFile& set) {
+  auto bytes = content::EncodeEsqFile(set, {});
+  INFO(ErrorOf(bytes));
+  REQUIRE(bytes.has_value());
+  return *std::move(bytes);
+}
+
+// A BATTLE.PRG of the tables alone: set kSampleSet is `sectors` sectors from
+// the first set sector, and the borrower is of kBorrowerKind.
+Bytes SetProgram(std::uint8_t sectors = 1) {
+  Bytes program(content::kSeqEventLengthsAt + content::kSeqEventLengthCount);
+  program.at(kKindTableAt + kSampleBorrower) = std::byte{kBorrowerKind};
+  program.at(kSetSectorsAt + kSampleSet) = std::byte{sectors};
+  return program;
+}
+
+// The set, first so that it starts at the first set sector, the lender, the
+// borrower and `program`.
+std::vector<extract::SourceFile> SetSources(const Bytes& set,
+                                            Bytes program = SetProgram()) {
+  return {{.path = std::string(kSetPath), .bytes = set},
+          {.path = "OBJ/4F.SHP", .bytes = Encoded(SampleShp(false))},
+          {.path = "OBJ/50.SHP", .bytes = Encoded(BorrowingShp())},
+          {.path = std::string(extract::kBattleProgramPath),
+           .bytes = std::move(program)}};
+}
+
+auto LoadSet(const fs::path& root, const content::ConvertedModelRead& read) {
+  return LoadModel(root, read, content::LoadConvertedAnimationSet);
+}
+
+// The set's output: its JSON file, depending on BATTLE.PRG and both models.
+void CheckSetOutput(const ModelRoot& root) {
+  const auto manifest = content::LoadConversionManifest(root.Root());
+  INFO(ErrorOf(manifest));
+  if (!manifest || !*manifest) {
+    FAIL("no manifest.json");
+    return;
+  }
+  const std::vector<content::ConversionOutput>& outputs = (*manifest)->outputs;
+  const auto output =
+      std::ranges::find(outputs, kSetPath, &content::ConversionOutput::source);
+  REQUIRE(output != outputs.end());
+  CHECK(output->id == "animation-set.obj.e001");
+  CHECK(output->files ==
+        std::vector<std::string>{"models/animation-sets/E001.json"});
+  std::vector<std::string> dependencies;
+  for (const content::SourceDependency& dependency : output->dependencies) {
+    dependencies.push_back(dependency.source);
+  }
+  CHECK(dependencies == std::vector<std::string>{"BATTLE/BATTLE.PRG",
+                                                 "OBJ/4F.SHP", "OBJ/50.SHP"});
+}
+
+// Applies `edit` to the set's converted JSON file.
+void EditSet(const ModelRoot& root,
+             const std::function<void(content::JsonDocument&)>& edit) {
+  const fs::path path =
+      root.Root() / fs::path(content::kAnimationSetDirectory) / kSetFile;
+  auto json = content::ParseJsonText(ReadModel(path), kSetFile);
+  INFO(ErrorOf(json));
+  REQUIRE(json.has_value());
+  edit(*json);
+  const std::string text = content::FormatJsonText(*json) + "\n";
+  WriteFile(path, std::as_bytes(std::span(text)));
+}
+
+// An edit to the set's JSON survives a rerun and changes the bytes it loads
+// as.
+void CheckEditedSetLoads(const ModelRoot& root) {
+  EditSet(root, [](content::JsonDocument& json) {
+    json.at("entries").back().at("texture_row") = kEditedRow;
+  });
+  CHECK(root.Convert().animation_sets.unchanged == 1);
+  content::EsqFile edited = SampleSet();
+  edited.entries.back().texture_row = kEditedRow;
+  CHECK(LoadSet(root.Root(), root.Read(0)) == EncodedSet(edited));
+}
+
+// A set the game would misread, one from another source and a read no set
+// matches are refused.
+void CheckRefusedSetLoads(const ModelRoot& root) {
+  EditSet(root, [](content::JsonDocument& json) {
+    json.at("entries").front().at("selector") = kSampleLender;
+  });
+  CHECK(ErrorOf(LoadSet(root.Root(), root.Read(0))).contains("repeats"));
+  EditSet(root, [](content::JsonDocument& json) {
+    json.at("entries").front().at("selector") = kBorrowerKind;
+    json.at("source_sha256") = std::string(64, 'a');
+  });
+  CHECK(ErrorOf(LoadSet(root.Root(), root.Read(0))) ==
+        "OBJ/E001.ESQ does not match its conversion manifest");
+  CHECK(ErrorOf(LoadSet(root.Root(),
+                        {.lba = 1, .rounded_size = 0, .event_lengths = {}}))
+            .contains("no extracted .ESQ file matches LBA 1"));
+}
+
+TEST_CASE("ESQ sets convert to JSON that loads as their bytes, edits included",
+          "[content-models][esq]") {
+  const Bytes set = EncodedSet(SampleSet());
+  const ModelRoot root(SetSources(set), kSetFirstSector);
+  CHECK(root.Convert().animation_sets.converted == 1);
+  CheckSetOutput(root);
+  CHECK(LoadSet(root.Root(), root.Read(0)) == set);
+  CHECK(root.Convert().animation_sets.unchanged == 1);
+  CheckEditedSetLoads(root);
+  CheckRefusedSetLoads(root);
+}
+
+// Why the animation set converter refuses `sources`.
+std::string SetRefusal(const std::vector<extract::SourceFile>& sources) {
+  const ModelRoot root(sources, kSetFirstSector);
+  return ErrorOf(extract::ConvertDiscAnimationSets(root.Root(), false));
+}
+
+// The sources with the sample set changed by `change`.
+std::vector<extract::SourceFile> ChangedSet(
+    const std::function<void(content::EsqFile&)>& change) {
+  content::EsqFile set = SampleSet();
+  change(set);
+  return SetSources(EncodedSet(set));
+}
+
+TEST_CASE("Every ESQ set needs its table entry and the models it binds",
+          "[content-models][esq]") {
+  struct Refused {
+    std::vector<extract::SourceFile> sources;
+    std::string_view error;
+  };
+  const Bytes set = EncodedSet(SampleSet());
+  std::vector<extract::SourceFile> unlisted = SetSources(set);
+  unlisted.pop_back();
+  Bytes trailing = set;
+  trailing.resize(trailing.size() + sizeof(std::uint32_t));
+  const std::vector<Refused> refusals{
+      {unlisted,
+       "OBJ/E001.ESQ needs BATTLE/BATTLE.PRG, which files.tsv does not list"},
+      {SetSources(set, Bytes(kSetSectorsAt)),
+       "BATTLE/BATTLE.PRG is too short for the set tables"},
+      {SetSources(set, SetProgram(2)),
+       "BATTLE/BATTLE.PRG: set 1 names 2 sectors at LBA 104343, which is no "
+       "ESQ files.tsv lists"},
+      {SetSources(set, SetProgram(0)),
+       "OBJ/E001.ESQ is named by no entry of BATTLE/BATTLE.PRG's set tables"},
+      {SetSources(trailing), "OBJ/E001.ESQ: byte 0x"},
+      {ChangedSet([](content::EsqFile& changed) {
+         changed.entries.front().selector =
+             static_cast<std::uint16_t>(kSampleLender);
+       }),
+       "OBJ/E001.ESQ: entry 1 repeats entry 0's selector 79"},
+      {ChangedSet([](content::EsqFile& changed) {
+         changed.entries.front().selector = kBorrowerKind + 1;
+       }),
+       "OBJ/E001.ESQ: entry 0 (selector 49) binds no model files.tsv lists"},
+      {ChangedSet([](content::EsqFile& changed) {
+         content::SeqFile& animation = changed.entries.front().animation;
+         animation.bones = 1;
+         animation.bank.clips.front().rotations.pop_back();
+         animation.bank.motion.pop_back();
+       }),
+       "OBJ/E001.ESQ: entry 0 (selector 48) animates 1 bones, but OBJ/50.SHP "
+       "has 2"},
+      {ChangedSet([](content::EsqFile& changed) {
+         changed.entries.front().texture_row = kLenderRow;
+       }),
+       "OBJ/E001.ESQ: entry 0 gives texture row 5 to selector 48, which is no "
+       "model number files.tsv lists"},
+  };
+  for (const Refused& refused : refusals) {
+    const std::string error = SetRefusal(refused.sources);
+    INFO(error);
+    CHECK(error.contains(refused.error));
+  }
 }
 
 TEST_CASE("Extracted SHP models load from their conversions as exact bytes",

@@ -20,11 +20,13 @@
 #include <utility>
 #include <vector>
 
+#include "Content/AnimationSet.hpp"
 #include "Content/AssetCatalog.hpp"
 #include "Content/AudioBank.hpp"
 #include "Content/AudioStream.hpp"
 #include "Content/ConversionManifest.hpp"
 #include "Content/DataAccess.hpp"
+#include "Content/EsqFile.hpp"
 #include "Content/MovieEncoder.hpp"
 #include "Content/WorkshopRecipes.hpp"
 #include "Core/Log.hpp"
@@ -78,6 +80,7 @@ constexpr std::array kConvertedTypes{
     ConvertedType{"", ".SHP", "shp-gltf", kRawForm},
     ConvertedType{"", ".SEQ", "seq-gltf", kRawForm},
     ConvertedType{"", ".WEP", "wep-gltf", kRawForm},
+    ConvertedType{"", kEsqExtension, kEsqAnimationSetConverterName, kRawForm},
     ConvertedType{kWaveBankPrefix, kWaveBankExtension, kWaveBankConverterName,
                   kRawForm},
     ConvertedType{"", kXaExtension, kXaFlacConverterName, "stream"},

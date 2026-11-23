@@ -177,4 +177,32 @@ std::expected<bool, std::string> JsonMembers::Boolean(
   return (*value)->get<bool>();
 }
 
+std::expected<JsonSource, std::string> JsonSourceOf(const JsonMembers& members,
+                                                    std::string_view where,
+                                                    std::string_view schema,
+                                                    std::uint32_t version) {
+  auto named = members.String("schema");
+  if (!named) return std::unexpected(named.error());
+  auto number = members.Integer("schema_version", 0,
+                                std::numeric_limits<std::uint32_t>::max());
+  if (!number) return std::unexpected(number.error());
+  if (*named != schema || *number != version) {
+    return std::unexpected(
+        std::format("{} is {} version {}; this build reads {} version {}",
+                    where, *named, *number, schema, version));
+  }
+  JsonSource found;
+  auto source = members.String("source");
+  if (!source) return std::unexpected(source.error());
+  found.source = std::move(*source);
+  auto hash = members.String("source_sha256");
+  if (!hash) return std::unexpected(hash.error());
+  if (!IsLowercaseSha256(*hash)) {
+    return std::unexpected(std::format("{} must be a lowercase SHA-256 digest",
+                                       members.Where("source_sha256")));
+  }
+  found.source_sha256 = std::move(*hash);
+  return found;
+}
+
 }  // namespace VS::Content

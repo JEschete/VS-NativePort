@@ -19,8 +19,12 @@
 #include <utility>
 #include <vector>
 
+#include "Content/AnimationSet.hpp"
 #include "Content/ConvertedImages.hpp"
 #include "Content/DataStore.hpp"
+#include "Content/EsqFile.hpp"
+#include "Content/ImageFiles.hpp"
+#include "Content/JsonText.hpp"
 #include "Content/SeqFile.hpp"
 #include "Content/ShpFile.hpp"
 #include "Content/ShpModelFiles.hpp"
@@ -31,6 +35,8 @@
 namespace VS::Content {
 namespace {
 namespace fs = std::filesystem;
+
+constexpr std::string_view kJsonSuffix = ".json";
 
 struct ModelFileLocation {
   std::filesystem::path directory;
@@ -323,6 +329,47 @@ std::expected<std::vector<std::byte>, std::string> LoadConvertedSequence(
   auto bytes = EncodeSeqFile(found->file, read.event_lengths);
   if (!bytes) {
     return std::unexpected(std::format("{}: {}", path, bytes.error()));
+  }
+  return bytes;
+}
+
+std::expected<std::vector<std::byte>, std::string> LoadConvertedAnimationSet(
+    const DataStore& store, const ConvertedModelRead& read) {
+  auto set =
+      FindConvertedSource(store, {.lba = read.lba,
+                                  .rounded_size = read.rounded_size,
+                                  .extension = kEsqExtension,
+                                  .converter = kEsqAnimationSetConverterName});
+  if (!set) return std::unexpected(set.error());
+  const std::string& path = set->entry->path;
+  const std::string* json = nullptr;
+  for (const std::string& file : set->files->files) {
+    if (!file.ends_with(kJsonSuffix)) continue;
+    if (json != nullptr) {
+      return std::unexpected(
+          std::format("{} has more than one animation set file", path));
+    }
+    json = &file;
+  }
+  if (json == nullptr) {
+    return std::unexpected(std::format("{} has no animation set file", path));
+  }
+  const ImageFileBytes text = DirectoryFileReader(store.Root())(*json);
+  if (!text) {
+    return std::unexpected(std::format("{}: {} cannot be read", path, *json));
+  }
+  auto parsed = ParseJsonText(*text, *json);
+  if (!parsed) return std::unexpected(parsed.error());
+  auto document = AnimationSetOf(*parsed, *json);
+  if (!document) return std::unexpected(document.error());
+  if (document->source != set->conversion->source ||
+      document->source_sha256 != set->conversion->source_sha256) {
+    return std::unexpected(
+        std::format("{} does not match its conversion manifest", path));
+  }
+  auto bytes = EncodeEsqFile(document->file, read.event_lengths);
+  if (!bytes) {
+    return std::unexpected(std::format("{}: {}", *json, bytes.error()));
   }
   return bytes;
 }

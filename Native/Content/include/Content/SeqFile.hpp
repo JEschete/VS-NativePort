@@ -80,7 +80,8 @@ struct SeqTrack {
   std::array<std::int16_t, kSeqAxes> initial{};
   std::vector<SeqCommand> commands;
   // Whether a zero byte follows the commands. A track without one runs into
-  // the next element, which playback must never reach.
+  // the next element, which playback must never reach; in original ESQ
+  // entries that element can be the unread rest of a command cut off there.
   bool terminated = true;
 
   bool operator==(const SeqTrack&) const = default;
@@ -158,7 +159,9 @@ struct SeqClip {
 
 struct SeqBank {
   std::vector<SeqClip> clips;
-  // Animation index to clip.
+  // Animation index to clip. The game reads the header of any clip number
+  // whose header lies inside the bank, so a number past the last clip reads
+  // the bytes after the headers as one (two original ESQ entries).
   std::vector<std::optional<std::uint8_t>> map;
   std::vector<SeqElement> motion;
 

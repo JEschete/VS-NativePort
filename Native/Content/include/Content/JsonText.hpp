@@ -62,4 +62,17 @@ class JsonMembers {
   std::string where_;
 };
 
+// Where a converted document came from.
+struct JsonSource {
+  std::string source;  // the disc path
+  std::string source_sha256;
+};
+
+// The source of the document `members` holds, once its schema and
+// schema_version are `schema` and `version`; the error names `where` or the
+// member at fault.
+[[nodiscard]] std::expected<JsonSource, std::string> JsonSourceOf(
+    const JsonMembers& members, std::string_view where, std::string_view schema,
+    std::uint32_t version);
+
 }  // namespace VS::Content

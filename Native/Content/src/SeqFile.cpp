@@ -126,6 +126,14 @@ std::size_t RoundUp(std::size_t size) {
   return (size + kSizeAlignment - 1) / kSizeAlignment * kSizeAlignment;
 }
 
+// Whether clip `clip`'s header lies inside a `bank_bytes`-byte bank. The game
+// reads a header for any map entry without checking the clip count, so a
+// number past the last clip reads the bytes after the headers as one; two
+// original ESQ entries hold such a number.
+bool HeaderInBank(std::size_t clip, std::size_t bones, std::size_t bank_bytes) {
+  return kBankHeaderBytes + (clip + 1) * ClipHeaderBytes(bones) <= bank_bytes;
+}
+
 class Writer {
  public:
   void PutByte(std::uint8_t value) { bytes_.push_back(std::byte{value}); }
@@ -677,9 +685,10 @@ Status Decoder::ReadMap(std::size_t map_at, std::size_t clips) {
     const std::uint8_t clip = ByteAt(bank_, at);
     if (clip == kNoClip) {
       map_.emplace_back();
-    } else if (clip >= clips) {
-      return FailAt(at,
-                    std::format("the map names clip {} of {}", clip, clips));
+    } else if (!HeaderInBank(clip, bones_, bank_.size())) {
+      return FailAt(at, std::format("the map names clip {} of {}, whose header "
+                                    "would end past the {}-byte bank",
+                                    clip, clips, bank_.size()));
     } else {
       map_.emplace_back(clip);
     }
@@ -824,6 +833,14 @@ Result<Piece> Decoder::DecodeTrack(SeqTrack track, std::size_t at,
       break;
     }
     const auto read = ReadCommand(motion_, at, limit);
+    if (!read && !track.commands.empty()) {
+      // Original ESQ entries cut a track's last command off at the next
+      // element or the bank's end. The track ends unterminated before it, the
+      // cut bytes stay unread, and CheckPlayback proves no clip reads them.
+      piece.boundaries.pop_back();
+      track.terminated = false;
+      break;
+    }
     if (!read) {
       return FailMotion(at, "a command runs into the next element");
     }
@@ -1442,12 +1459,6 @@ Result<std::vector<std::byte>> Encoder::Run() {
       return std::unexpected(std::format("clip {}: {}", index, clip.error()));
     }
   }
-  for (const auto& clip : bank_.map) {
-    if (clip && *clip >= bank_.clips.size()) {
-      return std::unexpected(std::format("the map names clip {} of {}", *clip,
-                                         bank_.clips.size()));
-    }
-  }
   if (auto reach = CheckPlayback(bank_); !reach) {
     return std::unexpected(reach.error());
   }
@@ -1470,6 +1481,14 @@ Result<std::vector<std::byte>> Encoder::Run() {
     out.PutByte(clip.value_or(kNoClip));
   }
   out.Append(motion_.View());
+  for (const auto& clip : bank_.map) {
+    if (clip && !HeaderInBank(*clip, bones_, out.Size())) {
+      return std::unexpected(
+          std::format("the map names clip {} of {}, whose header would end "
+                      "past the {}-byte bank",
+                      *clip, bank_.clips.size(), out.Size()));
+    }
+  }
   return out.Take();
 }
 

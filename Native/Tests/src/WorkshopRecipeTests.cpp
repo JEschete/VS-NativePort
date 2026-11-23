@@ -17,6 +17,7 @@
 #include "Content/DataStore.hpp"
 #include "Content/WorkshopRecipes.hpp"
 #include "Extract/ConverterBatch.hpp"
+#include "Extract/EsqConversion.hpp"
 #include "Extract/ImageConversion.hpp"
 #include "Extract/ShpModelConversion.hpp"
 #include "Extract/WepModelConversion.hpp"
@@ -256,6 +257,7 @@ EditedResults ConvertAndEditShieldResults(WorkshopRecipeRoot& root) {
   REQUIRE(extract::ConvertDiscImages(root.Root(), false).has_value());
   REQUIRE(extract::ConvertDiscModels(root.Root(), false).has_value());
   REQUIRE(extract::ConvertDiscWeapons(root.Root(), false).has_value());
+  REQUIRE(extract::ConvertDiscAnimationSets(root.Root(), false).has_value());
   VS::test_support::RecordAudioConversions(root.Root());
   EditedResults results{.path = root.TableFile(WorkshopKind::kShield,
                                                WorkshopTablePart::kResults),

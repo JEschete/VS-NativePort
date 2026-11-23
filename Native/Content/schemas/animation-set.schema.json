@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/JEschete/VS-NativePort/blob/main/Native/Content/schemas/animation-set.schema.json",
+  "title": "vs.animation-set",
+  "description": "One ESQ shared animation set as editable numbers and lists (Docs/ASSET_PIPELINE.md §6.2.2, Content/AnimationSet.hpp). The game binds each actor to the first entry whose selector is its model's kind or its model number. Each bank is written as vs.actor-animation writes it; the native reader also checks what a schema cannot: element references, clip flags, event lengths and repeated selectors.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "schema_version", "source", "source_sha256", "entries"],
+  "properties": {
+    "schema": { "const": "vs.animation-set" },
+    "schema_version": { "const": 1 },
+    "source": {
+      "type": "string",
+      "description": "The disc file the set came from, e.g. OBJ/E001.ESQ."
+    },
+    "source_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "The SHA-256 of the source file as extracted."
+    },
+    "entries": {
+      "type": "array",
+      "maxItems": 15,
+      "description": "The entries in the order the game searches them; the game holds at most 15.",
+      "items": { "$ref": "#/$defs/entry" }
+    }
+  },
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["selector", "texture_row", "bones", "bank"],
+      "properties": {
+        "selector": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65534,
+          "description": "The model number or model kind the entry is for; 65535 would end the game's list."
+        },
+        "texture_row": {
+          "description": "The effect texture row a model selected by its number uses; null for none (255 in the file).",
+          "oneOf": [{ "type": "null" }, { "type": "integer", "minimum": 0, "maximum": 254 }]
+        },
+        "bones": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 41,
+          "description": "The bones each clip animates; it must match the models the entry binds."
+        },
+        "bank": { "$ref": "actor-animation.schema.json#/$defs/bank" }
+      }
+    }
+  }
+}

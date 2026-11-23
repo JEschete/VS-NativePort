@@ -25,6 +25,7 @@
 #include "Core/Sha256.hpp"
 #include "Extract/AudioBankConversion.hpp"
 #include "Extract/ConverterBatch.hpp"
+#include "Extract/EsqConversion.hpp"
 #include "Extract/ImageConversion.hpp"
 #include "Extract/ShpModelConversion.hpp"
 #include "Extract/WepModelConversion.hpp"
@@ -83,7 +84,9 @@ int Usage() {
       "replacing edited tables).\n"
       "      extract also converts the character models (OBJ/*.SHP) to glTF "
       "under models/characters/ and the\n"
-      "      weapon models (OBJ/*.WEP) to glTF under models/weapons/;\n"
+      "      weapon models (OBJ/*.WEP) to glTF under models/weapons/ and the "
+      "shared animation sets\n"
+      "      (OBJ/E*.ESQ) to JSON under models/animation-sets/;\n"
       "      models converts again only what changed (--force: everything, "
       "replacing edited models).\n"
       "      extract also converts the sound banks (SOUND/WAVE*.DAT) to WAV "
@@ -459,8 +462,9 @@ int ConvertTables(const fs::path& root, bool force) {
   return 0;
 }
 
-// models/characters/ and models/weapons/ glTF models and their manifest.json
-// outputs from the disc files already under root.
+// models/characters/ and models/weapons/ glTF models, models/animation-sets/
+// JSON sets and their manifest.json outputs from the disc files already under
+// root.
 int ConvertModels(const fs::path& root, bool force) {
   const auto characters = Extract::ConvertDiscModels(root, force);
   if (!characters) {
@@ -481,6 +485,15 @@ int ConvertModels(const fs::path& root, bool force) {
                     "weapons: {} converted, {} unchanged, {} stale files "
                     "removed",
                     weapons->converted, weapons->unchanged, weapons->removed);
+  const auto sets = Extract::ConvertDiscAnimationSets(root, force);
+  if (!sets) {
+    VS::Core::LogError("extract", "{}", sets.error());
+    return 1;
+  }
+  VS::Core::LogInfo("extract",
+                    "animation sets: {} converted, {} unchanged, {} stale "
+                    "files removed",
+                    sets->converted, sets->unchanged, sets->removed);
   return 0;
 }
 

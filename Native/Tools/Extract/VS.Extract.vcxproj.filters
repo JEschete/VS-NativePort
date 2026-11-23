@@ -24,6 +24,9 @@
     <ClCompile Include="src\EffectTextureConversion.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\EsqConversion.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ImageConversion.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -58,6 +61,9 @@
       <Filter>include\Extract</Filter>
     </ClInclude>
     <ClInclude Include="include\Extract\EffectTextureConversion.hpp">
+      <Filter>include\Extract</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Extract\EsqConversion.hpp">
       <Filter>include\Extract</Filter>
     </ClInclude>
     <ClInclude Include="include\Extract\ImageConversion.hpp">

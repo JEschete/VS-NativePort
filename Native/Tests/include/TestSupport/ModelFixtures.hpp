@@ -27,6 +27,7 @@
 #include "Content/ShpFile.hpp"
 #include "Content/ShpModelFiles.hpp"
 #include "Extract/ConverterBatch.hpp"
+#include "Extract/EsqConversion.hpp"
 #include "Extract/ImageConversion.hpp"
 #include "Extract/ShpModelConversion.hpp"
 #include "Extract/WepModelConversion.hpp"
@@ -125,10 +126,11 @@ using EventLengths = std::array<std::uint8_t, Content::kSeqEventLengthCount>;
 struct ModelReports {
   Extract::ModelConversionReport characters;
   Extract::ModelConversionReport weapons;
+  Extract::ModelConversionReport animation_sets;
 };
 
 // A temporary data root whose files.tsv lists `sources` as raw files from
-// sector kFirstLba on.
+// sector `first_lba` (kFirstLba unless given) on.
 class ModelRoot {
  public:
   static constexpr std::uint32_t kFirstLba = 100;
@@ -136,7 +138,8 @@ class ModelRoot {
   static constexpr std::uint64_t kSectorBytes =
       Content::DataStore::kDataSectorBytes;
 
-  explicit ModelRoot(const std::vector<Extract::SourceFile>& sources)
+  explicit ModelRoot(const std::vector<Extract::SourceFile>& sources,
+                     std::uint32_t first_lba = kFirstLba)
       : root_(std::filesystem::temp_directory_path() /
               std::format(
                   "vs-models-{}-{}",
@@ -145,7 +148,7 @@ class ModelRoot {
     std::filesystem::create_directories(root_ / "disc");
     std::ofstream manifest(root_ / Content::DataStore::ManifestName);
     manifest << "lba\tsize\tform\tpath\n";
-    std::uint32_t lba = kFirstLba;
+    std::uint32_t lba = first_lba;
     for (const Extract::SourceFile& source : sources) {
       const std::filesystem::path file =
           root_ / "disc" / std::filesystem::path(source.path);
@@ -200,9 +203,13 @@ class ModelRoot {
     auto weapons = Extract::ConvertDiscWeapons(root_, false);
     INFO(ErrorOf(weapons));
     REQUIRE(weapons.has_value());
+    auto sets = Extract::ConvertDiscAnimationSets(root_, false);
+    INFO(ErrorOf(sets));
+    REQUIRE(sets.has_value());
     RecordAudioConversions(root_);
     return {.characters = *std::move(characters),
-            .weapons = *std::move(weapons)};
+            .weapons = *std::move(weapons),
+            .animation_sets = *std::move(sets)};
   }
 
   // Applies `edit` to the converted glTF file `stem` in `directory`

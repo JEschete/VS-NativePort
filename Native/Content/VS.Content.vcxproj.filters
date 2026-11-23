@@ -24,6 +24,9 @@
     <ClCompile Include="src\ActorAssetsLive.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\AnimationSet.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\AssetCatalog.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -67,6 +70,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\DiscReaderLive.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EsqFile.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\ImageFiles.cpp">
@@ -132,6 +138,9 @@
     <ClInclude Include="include\Content\ActorAssetsLive.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
+    <ClInclude Include="include\Content\AnimationSet.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
     <ClInclude Include="include\Content\AssetCatalog.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
@@ -184,6 +193,9 @@
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\DiscReaderLive.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\EsqFile.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\ImageFiles.hpp">

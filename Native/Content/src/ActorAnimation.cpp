@@ -550,28 +550,12 @@ std::expected<ActorAnimationDocument, std::string> ActorAnimationOf(
       !only) {
     return std::unexpected(only.error());
   }
-  auto schema = members.String("schema");
-  if (!schema) return std::unexpected(schema.error());
-  auto version = members.Integer("schema_version", 0,
-                                 std::numeric_limits<std::uint32_t>::max());
-  if (!version) return std::unexpected(version.error());
-  if (*schema != kActorAnimationSchema ||
-      *version != kActorAnimationSchemaVersion) {
-    return std::unexpected(std::format(
-        "{} is {} version {}; this build reads {} version {}", where, *schema,
-        *version, kActorAnimationSchema, kActorAnimationSchemaVersion));
-  }
-  ActorAnimationDocument document;
-  auto source = members.String("source");
+  auto source = JsonSourceOf(members, where, kActorAnimationSchema,
+                             kActorAnimationSchemaVersion);
   if (!source) return std::unexpected(source.error());
-  document.source = std::move(*source);
-  auto hash = members.String("source_sha256");
-  if (!hash) return std::unexpected(hash.error());
-  if (!IsLowercaseSha256(*hash)) {
-    return std::unexpected(std::format("{} must be a lowercase SHA-256 digest",
-                                       members.Where("source_sha256")));
-  }
-  document.source_sha256 = std::move(*hash);
+  ActorAnimationDocument document;
+  document.source = std::move(source->source);
+  document.source_sha256 = std::move(source->source_sha256);
   auto bones =
       members.Integer("bones", 1, static_cast<std::int64_t>(kSeqMaxBones));
   if (!bones) return std::unexpected(bones.error());

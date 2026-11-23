@@ -18,7 +18,9 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Content/ActorAnimation.hpp"
+#include "Content/AnimationSet.hpp"
 #include "Content/ConvertedModels.hpp"
+#include "Content/EsqFile.hpp"
 #include "Content/JsonText.hpp"
 #include "Content/SeqFile.hpp"
 #include "Content/ShpFile.hpp"
@@ -217,6 +219,46 @@ TEST_CASE("SEQ banks round-trip every element and reference",
   CHECK(Encoded(*decoded) == bytes);
 }
 
+void CheckDecodesAs(const Bytes& bytes, const content::SeqBank& bank) {
+  const auto decoded =
+      content::DecodeSeqBank(bytes, kSampleBones, TestLengths());
+  INFO(ErrorOf(decoded));
+  REQUIRE(decoded.has_value());
+  CHECK(*decoded == bank);
+}
+
+// The sample bank with its commands-alone track unterminated, so that the
+// unread AB CD after it reads as a command the bank's end cuts off. No clip
+// plays that track far enough to read it.
+content::SeqBank CutCommandBank() {
+  content::SeqBank bank = SampleBank();
+  std::get<content::SeqTrack>(bank.motion.at(7)).terminated = false;
+  auto& scales = bank.clips.at(2).scales;
+  if (!scales) {
+    FAIL("the sample bank's clip 2 has no scale tracks");
+    return bank;
+  }
+  scales->at(1) = content::SeqEntry{.element = 7, .command = 1};
+  return bank;
+}
+
+TEST_CASE("SEQ banks keep the original ESQ quirks the game tolerates",
+          "[content-models][seq]") {
+  const content::SeqBank cut = CutCommandBank();
+  const Bytes cut_bytes = Encoded(cut);
+  CheckDecodesAs(cut_bytes, cut);
+  Bytes reached = cut_bytes;
+  reached.at(kClip1) = std::byte{5};
+  CheckContains(DecodeError(reached),
+                "has no terminator and its commands end at frame 3 of 4");
+  content::SeqBank past_headers = SampleBank();
+  past_headers.map.at(1) = 3;
+  CheckDecodesAs(Encoded(past_headers), past_headers);
+  past_headers.map.at(1) = 9;
+  CheckContains(EncodeError(past_headers),
+                "the map names clip 9 of 3, whose header would end past the");
+}
+
 TEST_CASE("Decoded SEQ tracks grow and shrink without breaking references",
           "[content-models][seq]") {
   content::SeqBank edited = SampleBank();
@@ -407,17 +449,17 @@ content::ActorAnimationDocument SampleDocument() {
           .file = {.bones = kSampleBones, .bank = SampleBank()}};
 }
 
-content::JsonDocument SampleFixture() {
-  constexpr std::string_view kFixture =
-      "Native/Tests/data/animation/"
-      "sample-bank.json";
+// The animation fixture `name` in Native/Tests/data/animation.
+content::JsonDocument Fixture(std::string_view name) {
+  const std::string fixture =
+      std::format("Native/Tests/data/animation/{}", name);
   auto directory = fs::current_path();
-  while (!fs::exists(directory / kFixture) &&
+  while (!fs::exists(directory / fixture) &&
          directory != directory.parent_path()) {
     directory = directory.parent_path();
   }
   const auto json =
-      content::ParseJsonText(ReadModel(directory / kFixture), kFixture);
+      content::ParseJsonText(ReadModel(directory / fixture), fixture);
   INFO(ErrorOf(json));
   REQUIRE(json.has_value());
   return *json;
@@ -437,7 +479,7 @@ TEST_CASE("The actor-animation form writes and reads the sample bank",
   const content::ActorAnimationDocument document = SampleDocument();
   const content::JsonDocument json = content::ActorAnimationJson(document);
   INFO(content::FormatJsonText(json));
-  CHECK(json == SampleFixture());
+  CHECK(json == Fixture("sample-bank.json"));
   const auto read =
       content::ActorAnimationOf(Reparsed(json), "sample-bank.json");
   INFO(ErrorOf(read));
@@ -641,6 +683,318 @@ TEST_CASE("Extracted SEQ banks load from their owners' glTF as exact bytes",
   CHECK(VS::test_support::CheckExtractedModelsLoad(
             *models, content::kSeqExtension, content::LoadConvertedSequence,
             lengths) == kExtractedBanks);
+}
+
+// --- ESQ shared animation sets.
+
+// The sample set: the sample bank for a model kind, then for a model number
+// with a texture row.
+constexpr std::uint16_t kSetKind = 129;
+constexpr std::uint16_t kSetModel = 58;
+constexpr std::uint8_t kSetRow = 64;
+// The count word, then three tables of a word per entry.
+constexpr std::size_t kSetHeaderWords = 7;
+constexpr std::size_t kWordBytes = 4;
+constexpr std::size_t kSetBodyAt = kSetHeaderWords * kWordBytes;
+constexpr std::uint32_t kGameNoRow = 0xFF;
+
+content::SeqFile SampleAnimation() {
+  return {.bones = kSampleBones, .bank = SampleBank()};
+}
+
+content::EsqFile SampleSet() {
+  return {.entries = {{.selector = kSetKind,
+                       .texture_row = std::nullopt,
+                       .animation = SampleAnimation()},
+                      {.selector = kSetModel,
+                       .texture_row = kSetRow,
+                       .animation = SampleAnimation()}}};
+}
+
+Bytes EncodedSet(const content::EsqFile& set) {
+  const auto bytes = content::EncodeEsqFile(set, TestLengths());
+  INFO(ErrorOf(bytes));
+  REQUIRE(bytes.has_value());
+  return *bytes;
+}
+
+std::uint32_t WordAt(std::span<const std::byte> bytes, std::size_t at) {
+  std::uint32_t word = 0;
+  for (std::size_t byte = kWordBytes; byte-- > 0;) {
+    word = (word << 8U) | std::to_integer<std::uint32_t>(bytes[at + byte]);
+  }
+  return word;
+}
+
+// `bytes` hold the sample set's tables, then `seq` twice, each padded with
+// zeros to a word.
+void CheckSetLayout(std::span<const std::byte> bytes,
+                    std::span<const std::byte> seq) {
+  const std::size_t padded =
+      (seq.size() + kWordBytes - 1) / kWordBytes * kWordBytes;
+  REQUIRE(padded > seq.size());
+  std::vector<std::uint32_t> header;
+  for (std::size_t word = 0; word < kSetHeaderWords; ++word) {
+    header.push_back(WordAt(bytes, word * kWordBytes));
+  }
+  const std::vector<std::uint32_t> expected{2,
+                                            kSetKind,
+                                            kSetModel,
+                                            kGameNoRow,
+                                            kSetRow,
+                                            0,
+                                            static_cast<std::uint32_t>(padded)};
+  CHECK(header == expected);
+  REQUIRE(bytes.size() == kSetBodyAt + (2 * padded));
+  CHECK(std::ranges::equal(bytes.subspan(kSetBodyAt, seq.size()), seq));
+  CHECK(std::ranges::all_of(
+      bytes.subspan(kSetBodyAt + seq.size(), padded - seq.size()),
+      [](std::byte pad) { return pad == std::byte{0}; }));
+}
+
+// The sample set as it decodes: each entry's padding joins the unread bytes
+// that end its bank.
+content::EsqFile DecodedSampleSet(std::size_t padding) {
+  content::EsqFile set = SampleSet();
+  for (content::EsqEntry& entry : set.entries) {
+    auto& unread =
+        std::get<content::SeqUnread>(entry.animation.bank.motion.back());
+    unread.bytes.resize(unread.bytes.size() + padding);
+  }
+  return set;
+}
+
+TEST_CASE("ESQ files hold their tables, then each entry padded to a word",
+          "[content-models][esq]") {
+  const auto seq = content::EncodeSeqFile(SampleAnimation(), TestLengths());
+  INFO(ErrorOf(seq));
+  REQUIRE(seq.has_value());
+  const Bytes bytes = EncodedSet(SampleSet());
+  CheckSetLayout(bytes, *seq);
+  const auto decoded = content::DecodeEsqFile(bytes, TestLengths());
+  INFO(ErrorOf(decoded));
+  REQUIRE(decoded.has_value());
+  const std::size_t padding =
+      (kWordBytes - seq->size() % kWordBytes) % kWordBytes;
+  CHECK(*decoded == DecodedSampleSet(padding));
+  CHECK(EncodedSet(*decoded) == bytes);
+  CHECK(EncodedSet({}) == Bytes(kWordBytes));
+}
+
+TEST_CASE("ESQ decoding names the bytes it rejects", "[content-models][esq]") {
+  struct Damage {
+    std::string_view name;
+    std::function<void(Bytes&)> apply;
+    std::string_view error;
+  };
+  constexpr std::size_t kSecondOffsetAt = 25;
+  constexpr std::size_t kFirstSizeAt = kSetBodyAt + 6;
+  const std::vector<Damage> damages{
+      {"short", [](Bytes& bytes) { bytes.resize(2); },
+       "byte 0x0: the file is shorter than its 4-byte count"},
+      {"count", [](Bytes& bytes) { bytes.at(0) = std::byte{16}; },
+       "byte 0x0: the count 16 is not 0 to 15"},
+      {"header", [](Bytes& bytes) { bytes.resize(20); },
+       "the 2-entry header needs 28 bytes, but the file has 20"},
+      {"selector pad", [](Bytes& bytes) { bytes.at(6) = std::byte{1}; },
+       "byte 0x6: the halfword after entry 0's selector is not zero"},
+      {"end selector",
+       [](Bytes& bytes) {
+         bytes.at(4) = std::byte{0xFF};
+         bytes.at(5) = std::byte{0xFF};
+       },
+       "byte 0x4: entry 0's selector is 0xFFFF, which ends the game's list"},
+      {"row pad", [](Bytes& bytes) { bytes.at(14) = std::byte{1}; },
+       "byte 0xE: the halfword after entry 0's texture row is not zero"},
+      {"wide row", [](Bytes& bytes) { bytes.at(17) = std::byte{1}; },
+       "byte 0x10: entry 1's texture row 320 is more than a byte"},
+      {"offset",
+       [](Bytes& bytes) { bytes.at(kSecondOffsetAt) ^= std::byte{1}; },
+       "byte 0x18: entry 1 starts at byte 0x"},
+      {"size", [](Bytes& bytes) { bytes.at(kFirstSizeAt) = std::byte{1}; },
+       "byte 0x20: entry 0's size field says"},
+      {"cut entry",
+       [](Bytes& bytes) { bytes.resize((bytes.size() + kSetBodyAt) / 2 + 4); },
+       "entry 1 is cut off in its 8-byte header"},
+      {"entry", [](Bytes& bytes) { bytes.at(kSetBodyAt + 1) = std::byte{1}; },
+       "entry 0 (selector 129) at byte 0x1C: byte 0x1: the byte after the "
+       "map length"},
+      {"trailing", [](Bytes& bytes) { bytes.resize(bytes.size() + 4); },
+       "4 bytes follow the last entry"},
+  };
+  const Bytes good = EncodedSet(SampleSet());
+  for (const Damage& damage : damages) {
+    CAPTURE(damage.name);
+    Bytes bytes = good;
+    damage.apply(bytes);
+    CheckContains(ErrorOf(content::DecodeEsqFile(bytes, TestLengths())),
+                  damage.error);
+  }
+}
+
+std::string SetEncodeError(const content::EsqFile& set) {
+  const auto bytes = content::EncodeEsqFile(set, TestLengths());
+  REQUIRE_FALSE(bytes.has_value());
+  return bytes.error();
+}
+
+TEST_CASE("ESQ encoding refuses what the game cannot read",
+          "[content-models][esq]") {
+  content::EsqFile set = SampleSet();
+  SECTION("entries") {
+    const content::EsqEntry first = set.entries.front();
+    set.entries.resize(content::kEsqMaxEntries + 1, first);
+    CheckContains(SetEncodeError(set), "16 entries are more than 15");
+  }
+  SECTION("selector") {
+    set.entries.front().selector =
+        static_cast<std::uint16_t>(content::kEsqMaxSelector + 1);
+    CheckContains(SetEncodeError(set),
+                  "entry 0's selector 0xFFFF ends the game's list");
+  }
+  SECTION("texture row") {
+    set.entries.back().texture_row =
+        static_cast<std::uint8_t>(content::kEsqMaxTextureRow + 1);
+    CheckContains(SetEncodeError(set),
+                  "entry 1's texture row 255 is the game's 'no row'");
+  }
+  SECTION("animation") {
+    set.entries.back().animation.bones =
+        static_cast<std::uint16_t>(content::kSeqMaxBones + 1);
+    CheckContains(SetEncodeError(set),
+                  "entry 1 (selector 58): 42 bones is more than the 41");
+  }
+}
+
+content::AnimationSetDocument SampleSetDocument() {
+  return {.source = "OBJ/SAMPLE.ESQ",
+          .source_sha256 = SampleDocument().source_sha256,
+          .file = SampleSet()};
+}
+
+TEST_CASE("The animation-set form writes and reads the sample set",
+          "[content-models][esq]") {
+  const content::AnimationSetDocument document = SampleSetDocument();
+  const content::JsonDocument json = content::AnimationSetJson(document);
+  INFO(content::FormatJsonText(json));
+  CHECK(json == Fixture("sample-set.json"));
+  const auto read = content::AnimationSetOf(Reparsed(json), "sample-set.json");
+  INFO(ErrorOf(read));
+  REQUIRE(read.has_value());
+  CHECK(*read == document);
+}
+
+TEST_CASE("The animation-set reader names the member at fault",
+          "[content-models][esq]") {
+  using content::JsonDocument;
+  struct Edit {
+    std::string_view pointer;
+    JsonDocument value;
+    std::string_view error;
+  };
+  const std::vector<Edit> edits{
+      {"/schema", "vs.actor-animation",
+       "s is vs.actor-animation version 1; this build reads "
+       "vs.animation-set version 1"},
+      {"/schema_version", 2, "s is vs.animation-set version 2; this build"},
+      {"/source_sha256", "ABC", "s.source_sha256 must be a lowercase SHA-256"},
+      {"/extra", 1, "s has an unknown member"},
+      {"/entries", "x", "s.entries must be an array of at most 15 entries"},
+      {"/entries/0/selector", 65535,
+       "s.entries[0].selector must be a whole number from 0 to 65534"},
+      {"/entries/0/texture_row", 255,
+       "s.entries[0].texture_row must be null or a whole number from 0 to "
+       "254"},
+      {"/entries/1/texture_row", "1",
+       "s.entries[1].texture_row must be null or a whole number"},
+      {"/entries/1/selector", kSetKind,
+       "s.entries[1].selector 129 repeats s.entries[0]'s"},
+      {"/entries/0/extra", 1, "s.entries[0] has an unknown member"},
+      {"/entries/1/bones", 0,
+       "s.entries[1].bones must be a whole number from 1 to 41"},
+      {"/entries/0/bank/map/1", 255,
+       "s.entries[0].bank.map[1] must be a whole number from 0 to 254 or "
+       "null"},
+  };
+  for (const Edit& edit : edits) {
+    CAPTURE(edit.pointer);
+    JsonDocument json = content::AnimationSetJson(SampleSetDocument());
+    json[JsonDocument::json_pointer(std::string(edit.pointer))] = edit.value;
+    CheckContains(ErrorOf(content::AnimationSetOf(json, "s")), edit.error);
+  }
+}
+
+// Counts what `entry` holds, with the map entries naming a clip past the
+// headers.
+void CountSetEntry(const content::EsqEntry& entry, Tallies& tallies) {
+  ++tallies["entries"];
+  if (entry.texture_row) ++tallies["texture rows"];
+  const content::SeqBank& bank = entry.animation.bank;
+  for (const auto& clip : bank.map) {
+    if (clip && *clip >= bank.clips.size()) ++tallies["clips past headers"];
+  }
+  Count(bank, tallies);
+}
+
+// Decodes `bytes` as a set, checks it rebuilds them and reads back from its
+// JSON text, and counts what it holds.
+void CheckSetRebuilds(const Bytes& bytes, const Lengths& lengths,
+                      Tallies& tallies) {
+  const auto decoded = content::DecodeEsqFile(bytes, lengths);
+  if (!decoded) {
+    FAIL_CHECK(decoded.error());
+    return;
+  }
+  CHECK(content::EncodeEsqFile(*decoded, lengths) == bytes);
+  const content::AnimationSetDocument document{
+      .source = "set",
+      .source_sha256 = SampleDocument().source_sha256,
+      .file = *decoded};
+  CHECK(content::AnimationSetOf(Reparsed(content::AnimationSetJson(document)),
+                                "set") == document);
+  ++tallies["files"];
+  for (const content::EsqEntry& entry : decoded->entries) {
+    CountSetEntry(entry, tallies);
+  }
+}
+
+TEST_CASE("Extracted ESQ files decode and rebuild their exact bytes",
+          "[content-models][esq][extract]") {
+  const auto models = ExtractedModels();
+  if (!models) SKIP("Extracted Native/data is unavailable");
+  const Lengths lengths = VS::test_support::ExtractedEventLengths(*models);
+  Tallies tallies;
+  for (const auto& entry : fs::directory_iterator(*models)) {
+    if (entry.path().extension() != content::kEsqExtension) continue;
+    CAPTURE(entry.path().filename().string());
+    CheckSetRebuilds(ReadModel(entry.path()), lengths, tallies);
+  }
+  const Tallies expected{{"clips past headers", 5},
+                         {"commands", 1694625},
+                         {"empty refs", 636},
+                         {"entries", 355},
+                         {"files", 97},
+                         {"inherited clips", 145},
+                         {"mid-track refs", 1697},
+                         {"own clips", 1732},
+                         {"scripts", 495},
+                         {"texture rows", 210},
+                         {"tracks", 41353},
+                         {"unread", 239},
+                         {"unterminated", 20790}};
+  INFO(Describe(tallies));
+  CHECK(tallies == expected);
+}
+
+TEST_CASE("Extracted ESQ sets load from their JSON as exact bytes",
+          "[content-models][esq][extract]") {
+  const auto models = ExtractedModels();
+  if (!models) SKIP("Extracted Native/data is unavailable");
+  constexpr std::size_t kExtractedSets = 97;
+  const Lengths lengths = VS::test_support::ExtractedEventLengths(*models);
+  CHECK(VS::test_support::CheckExtractedModelsLoad(
+            *models, content::kEsqExtension, content::LoadConvertedAnimationSet,
+            lengths) == kExtractedSets);
 }
 
 }  // namespace
