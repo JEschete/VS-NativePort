@@ -1,5 +1,91 @@
 # Current Handoff
 
+## Converted actor-asset read failures (#518), 2026-11-23
+
+Starting revision: `0530c5dc8` on `imp/asset-migration`, PR #519. The owner
+finished the Debug playtest before Debug rebuilding and regression began.
+
+The converted-read failure was logged in #518 before implementation.
+`BeginFileRead` now distinguishes a started read, a full queue and a failed
+read. Only a full queue can use the existing synchronous fallback, whose
+result is also checked. Failed SHP, WEP, SEQ/ESQ and ETM reads free the
+unpublished allocation from the correct heap end and return a failed request
+before parsing or texture upload. A failed player sequence does not queue its
+dependent weapon sequence.
+
+Tests cover all four loaders, high/low sequence allocations, failed synchronous
+fallback, recovery and live owned SHP/WEP ticket failure followed by a valid
+queued request. The preview cancellation fixtures now load actual converted
+models with the real event-stride table instead of relying on a missing store
+being accepted as a zero-filled model. The shared model fixture reuses its
+existing checked-result helper to satisfy tidy without weakening assertions.
+
+Validation on the nine-file dirty changeset based on `0530c5dc8`:
+- Debug and Release MSBuild `VagrantStory.Native.sln
+  /t:VS_Tests;VS_CombatLab;VS_Desktop /m:2 /p:Configuration=<configuration>
+  /p:Platform=x64 /v:minimal /nologo`, `VS_JOBS=4`: passed.
+- `python tools\test\regression.py check --config Debug`: **9,896 tests /
+  13,074,943 assertions; 2 replays; 0 regressions**. `silver_wolves` (2,400
+  frames) and `first_lever_room` (900 frames) match the unchanged baseline.
+- Final Release `VS.Tests.exe
+  "[actor-assets],[asset-ownership],[actors-spawning],[encyclopedia-preview],[actors][sequence],[actors][texture],[content-models]"
+  --reporter compact`: **302 cases / 19,405 assertions passed**.
+- Scoped quality/tidy on the changed loader and test translation units found
+  two test-size findings; both were corrected. The affected translation unit
+  was rechecked with tidy: **0 new findings**. No baseline was changed.
+- Evidence: `build\issue-518-debug-build.log`,
+  `build\issue-518-debug-regression.log`,
+  `build\issue-518-release-final-build.log`,
+  `build\issue-518-release-final-tests.log`,
+  `build\issue-518-release-final-console.log`, and
+  `build\issue-518-quality{,-retest}.log`.
+
+This also supplies fresh Debug regression evidence for the preceding #48
+request-state milestone. #48 still has the limits below; neither change
+completes asset modernization. Exact fixing-commit/branch-CI evidence belongs
+on #518 and PR #519 after publication. The PR closes #518 only on owner merge.
+
+## Per-request actor parser state (#48), 2026-11-23
+
+Starting revision: `23279779c`, clean worktree. `imp/asset-migration` was
+fast-forwarded from the merged branch to `origin/main`; work continues through
+an owner-reviewed PR, not a direct push to `main`.
+
+- Actor, weapon and sequence parser phases, buffers and cursors now live with
+  each queued request's identity and record-memory resolver. Queue movement,
+  cancellation and clearing carry or reset them together.
+- Module parser globals are output-only diagnostic snapshots for those loaders.
+  Tests overwrite the snapshots before and during a real preview parse and
+  before cancellation: the parse still finishes or frees its partial geometry.
+- The battle initializer relies on the queue reset rather than clearing
+  individual parser globals.
+- This is not #48 completion: the unowned ETM phase/buffer, serialized file
+  streams, in-band shared-record index, unowned producers and deliberate
+  immutable sharing remain. G00064's ledger note records a write-only snapshot,
+  not compatibility retirement.
+
+Validation on the seven-file dirty changeset based on `23279779c`:
+- `VS_JOBS=2`; MSBuild `VagrantStory.Native.sln /t:VS_Tests /m:2
+  /p:Configuration=Release /p:Platform=x64 /v:minimal /nologo`: passed.
+- `build\Release\VS.Tests.exe
+  "[actor-assets],[asset-ownership],[actors-spawning],[encyclopedia-preview],[actors][sequence],[actors][texture]"
+  --reporter compact`: **240 cases / 2,197 assertions passed**.
+- `quality.py --files` the changed `ActorAssetsLive.cpp/.hpp`,
+  `ModelRenderingLive.cpp` and `EncyclopediaPreviewTests.cpp`: **0 new findings**.
+- Evidence: `build\issue-48-release-build.log`,
+  `build\issue-48-release-tests.log`, `build\issue-48-quality.log`.
+
+At that checkpoint the owner was playtesting the Debug build. Its binaries,
+logs and `Native\data` were not changed; Debug builds and gameplay replays
+were deferred. Fresh integrated Debug evidence is now recorded above.
+The latest starting CI
+`45208337293` passed both jobs; exact-revision branch CI belongs in the issue
+checkpoint after publication.
+
+Follow-up: #518 records a source-confirmed error-propagation defect found while
+tracing these loaders: `BeginFileRead` ignores a converted read's failure and
+lets zero-filled content continue. Its fix and verification are recorded above.
+
 ## E207 reference mode (#507) and ZND zone tables (#517), 2026-11-23
 
 Starting revision: `68c317d04`, clean worktree (the `resources/rood-reverse`

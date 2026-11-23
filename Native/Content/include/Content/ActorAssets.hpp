@@ -232,6 +232,12 @@ enum class AssetFileStream : std::uint8_t {
   kEffectTexture,
 };
 
+enum class AssetFileReadStart : std::uint8_t {
+  kStarted,
+  kQueueFull,
+  kFailed,
+};
+
 enum class AssetTextureTable : std::uint8_t { kActor, kWeapon };
 
 // VS::Render::TextureSlot (D_800F46A8 and the weapon table).
@@ -493,12 +499,13 @@ class ActorAssetHost {
   // The disc file tables and the loaders' disc requests.
   virtual std::optional<std::uint32_t> FileTableEntry(AssetFileTable table,
                                                       std::size_t index) = 0;
-  // Starts an asynchronous read; false when the queue has no free request
-  // (#282), in which case nothing was started.
-  virtual bool BeginFileRead(AssetFileStream stream, DiscFileExtent file,
-                             AssetAddress destination) = 0;
+  // Only kQueueFull permits a synchronous read fallback (#282). A failed
+  // converted read must not fall back to the legacy file.
+  virtual AssetFileReadStart BeginFileRead(AssetFileStream stream,
+                                           DiscFileExtent file,
+                                           AssetAddress destination) = 0;
   // Reads the file before returning, for a read the queue refused.
-  virtual void ReadRefusedFile(DiscFileExtent file,
+  virtual bool ReadRefusedFile(DiscFileExtent file,
                                AssetAddress destination) = 0;
   // True once the stream's read has loaded (or no read is outstanding).
   virtual bool FileReadFinished(AssetFileStream stream) = 0;

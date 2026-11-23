@@ -204,6 +204,12 @@ Every row is now identified (D25 inventory, 2026-11-21); the open questions are 
 
 ### 6.2 Character models (SHP + SEQ/ESQ + ETM → glTF), matching the Sydney reference
 
+Runtime read errors (#518): missing, stale or invalid converted SHP, WEP,
+SEQ/ESQ and ETM data fails the actor-asset request. The loader frees its
+unpublished file allocation and does not parse cleared bytes or fall back to
+the extracted legacy file. Only a full legacy disc-request queue permits the
+existing synchronous fallback, and that fallback's failure is checked too.
+
 `resources\Sydney Losstarot (Dying)\6F.SHP.gltf` is the standard-tool preview baseline. Preserve that structure where compatible with the source; it does not override the lossless metadata or renderer requirements below:
 
 | Element | Rule (from the reference) |

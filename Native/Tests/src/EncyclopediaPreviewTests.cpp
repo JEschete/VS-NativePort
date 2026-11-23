@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <format>
 #include <map>
 #include <optional>
 #include <span>
@@ -15,12 +16,14 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Actors/ActorRecord.hpp"
+#include "Actors/Animation.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Battle/TargetingState.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/CdDriveLive.hpp"
+#include "Content/DataStore.hpp"
 #include "Content/DiscLayout.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -33,6 +36,7 @@
 #include "Menu/Score/EncyclopediaPreview.hpp"
 #include "Menu/Score/EncyclopediaPreviewLive.hpp"
 #include "Menu/TextBox.hpp"
+#include "TestSupport/ModelFixtures.hpp"
 
 using VS::Content::disc::Locate;
 
@@ -988,9 +992,11 @@ struct PreviewLifecycleFixture : LivePreviewFixture {
       VS::Content::legacyShpHeaderWord, VS::Content::legacyShpTextureWidth,
       VS::Content::legacyShpTextureHeight, VS::Content::legacyWeaponParseCursor,
       VS::Content::legacySequenceParseData, VS::Content::legacyShpDiscOffsets,
-      VS::Content::legacyShpSectorCounts>
+      VS::Content::legacyShpSectorCounts, VS::Content::legacyWepDiscOffsets,
+      VS::Content::legacyWepSectorCounts>
       saved_loader;
   equipment_detail_tests::ValueRestore<int> saved_zud_size{score::zudSizes[7]};
+  std::vector<ActorAssetTicket> extra_tickets;
 
   PreviewLifecycleFixture() {
     std::ranges::fill(VS::Actors::actorRecords, nullptr);
@@ -1007,6 +1013,18 @@ struct PreviewLifecycleFixture : LivePreviewFixture {
   }
   ~PreviewLifecycleFixture() {
     CHECK(score::CleanupLiveEnemyPreviewOwnedState());
+    for (const ActorAssetTicket ticket : extra_tickets) {
+      VS::Content::ForgetLiveActorAsset(ticket);
+    }
+  }
+  ActorAssetTicket Submit(const ActorAssetRequest& request) {
+    const auto ticket = VS::Content::SubmitLiveActorAsset(
+        request, VS::Content::kEnemyPreviewActorAssetOwner,
+        score::LiveEnemyPreviewRecordMemory);
+    REQUIRE(ticket.has_value());
+    if (!ticket) throw std::runtime_error("preview request was refused");
+    extra_tickets.push_back(*ticket);
+    return *ticket;
   }
 };
 
@@ -1041,6 +1059,47 @@ score::EnemyPreviewState QueueOriginalPreview() {
 // The model loader's phase once its file has loaded and its parse is pending.
 constexpr std::uint8_t kModelParsePending = 2;
 
+// Start a real converted read, without opening the store during the fixture's
+// separately injected ZUD read.
+int ReadQueuedConvertedModel(std::uint16_t model) {
+  constexpr std::uint32_t kFirstShpSector = 95000;
+  game_clear_live_tests::SavedGlobals<VS::Actors::animationEventLengths>
+      saved_lengths;
+  std::ranges::copy(
+      VS::test_support::ExtractedEventLengths(R"(Native\data\disc\OBJ)"),
+      VS::Actors::animationEventLengths.begin());
+  VS::Content::DataStore::ScopedOverride restore;
+  const auto opened = VS::Content::DataStore::Open(R"(Native\data)");
+  INFO(VS::test_support::ErrorOf(opened));
+  REQUIRE(opened.has_value());
+  const auto* store = VS::Content::DataStore::Get();
+  if (store == nullptr) throw std::runtime_error("no preview data store");
+  const auto* file = store->Find(std::format("OBJ/{:02X}.SHP", model));
+  if (file == nullptr) throw std::runtime_error("no preview model file");
+  REQUIRE(file->SectorCount() > 0);
+  REQUIRE(file->SectorCount() <= 255);
+  REQUIRE(file->lba >= kFirstShpSector);
+  REQUIRE(file->lba - kFirstShpSector <= 65535);
+  VS::Content::legacyShpSectorCounts[model] =
+      static_cast<std::uint8_t>(file->SectorCount());
+  VS::Content::legacyShpDiscOffsets[model] =
+      static_cast<std::uint16_t>(file->lba - kFirstShpSector);
+  return VS::Content::UpdateLiveActorAssetQueue();
+}
+
+void CheckFailedReadThenNext(ActorAssetTicket failed, ActorAssetTicket next) {
+  CHECK(VS::Content::UpdateLiveActorAssetQueue() == -1);
+  CHECK(VS::Content::LiveActorAssetCompletion(failed).outcome ==
+        ActorAssetOutcome::kFailed);
+  CHECK(VS::Actors::weaponModels[2] == nullptr);
+  CHECK(VS::Actors::actorRecords[1] == nullptr);
+  CHECK(VS::Content::LiveActorAssetCompletion(next).outcome ==
+        ActorAssetOutcome::kPending);
+  CHECK(VS::Content::UpdateLiveActorAssetQueue() == 1);
+  CHECK(VS::Content::LiveActorAssetCompletion(next).outcome ==
+        ActorAssetOutcome::kLoaded);
+}
+
 // The companion's converted model loads at once (#203), so the update that
 // starts its read leaves the file held, the parse pending and no disc request.
 score::EnemyPreviewState StartCompanionRead() {
@@ -1051,11 +1110,9 @@ score::EnemyPreviewState StartCompanionRead() {
   if (model >= std::size(VS::Content::legacyShpDiscOffsets)) {
     throw std::runtime_error("companion model is outside its file table");
   }
-  VS::Content::legacyShpSectorCounts[model] = 1;
-  VS::Content::legacyShpDiscOffsets[model] = 7;
   REQUIRE(VS::Content::UpdateLiveActorAssetQueue() == 1);
   REQUIRE(VS::Content::legacyActorAssetRequests[0].target_slot == 16);
-  REQUIRE(VS::Content::UpdateLiveActorAssetQueue() == 1);
+  REQUIRE(ReadQueuedConvertedModel(model) == 1);
   REQUIRE(VS::Content::legacyModelLoadPhase == kModelParsePending);
   REQUIRE(VS::Content::legacyShpAllocated == 1);
   REQUIRE(VS::Content::legacyShpDiscRequest == nullptr);
@@ -1076,15 +1133,13 @@ std::span<std::byte> StartForeignModelLoad() {
       static_cast<std::byte*>(VS::Core::Memory::AllocateLiveFromLowEnd(
           sizeof(VS::Actors::ActorRecord)));
   REQUIRE(foreign != nullptr);
-  VS::Content::legacyShpSectorCounts[20] = 1;
-  VS::Content::legacyShpDiscOffsets[20] = 7;
   ActorAssetRequest request;
   request.kind =
       static_cast<std::uint8_t>(VS::Content::ActorAssetKind::kActorModelLoad);
   request.model_id = 20;
   request.destination = At(reinterpret_cast<std::uintptr_t>(foreign));
   REQUIRE(VS::Content::QueueLiveActorAsset(request) == 0);
-  REQUIRE(VS::Content::UpdateLiveActorAssetQueue() == 1);
+  REQUIRE(ReadQueuedConvertedModel(20) == 1);
   return {foreign, sizeof(VS::Actors::ActorRecord)};
 }
 
@@ -1360,6 +1415,45 @@ TEST_CASE("Preview cleanup releases partial and completed original model parts",
   CHECK(VS::Content::LiveActorAssetRefusals() == refused);
 }
 
+TEST_CASE(
+    "A queued model parser does not resume from module snapshots",
+    "[encyclopedia-preview][gazette-preview-lifecycle][asset-ownership]") {
+  const bool in_progress = GENERATE(false, true);
+  PreviewLifecycleFixture fixture;
+  const auto before = QueueOriginalPreview();
+  const auto refused = VS::Content::LiveActorAssetRefusals();
+  const void* geometry = in_progress ? BeginPreviewParser() : nullptr;
+  VS::Content::modelParseResetFlag = in_progress ? 0 : 1;
+  VS::Content::modelParseBoundRecord = !in_progress;
+  VS::Content::legacyShpParseCursor = nullptr;
+  FinishPreviewParts();
+  const auto* actor = VS::Actors::actorRecords[1];
+  REQUIRE(actor != nullptr);
+  if (in_progress) CHECK(actor->instance.model == geometry);
+  CHECK(VS::Content::LiveActorAssetRefusals() == refused);
+  REQUIRE(score::CleanupLiveEnemyPreviewOwnedState());
+  CheckColdPreviewRelease(before);
+  CheckEmptyPreviewQueue();
+}
+
+TEST_CASE(
+    "Cancelling a model parser ignores overwritten module snapshots",
+    "[encyclopedia-preview][gazette-preview-lifecycle][asset-ownership]") {
+  PreviewLifecycleFixture fixture;
+  const auto before = QueueOriginalPreview();
+  const void* geometry = BeginPreviewParser();
+  const auto refused = VS::Content::LiveActorAssetRefusals();
+  VS::Content::modelParseResetFlag = 0;
+  VS::Content::modelParseBoundRecord = false;
+  VS::Content::legacyShpParseCursor = nullptr;
+  REQUIRE(score::CleanupLiveEnemyPreviewOwnedState());
+  CheckColdPreviewRelease(before);
+  CheckEmptyPreviewQueue();
+  CHECK(VS::Actors::actorRecords[1] == nullptr);
+  CHECK_FALSE(VS::Core::Memory::LivePayloadCapacity(geometry).has_value());
+  CHECK(VS::Content::LiveActorAssetRefusals() == refused);
+}
+
 TEST_CASE("Preview cleanup preserves reused disc slots and empty foreign loads",
           "[encyclopedia-preview][gazette-preview-lifecycle]") {
   PreviewLifecycleFixture fixture;
@@ -1380,6 +1474,39 @@ TEST_CASE("Preview cleanup preserves reused disc slots and empty foreign loads",
   REQUIRE(score::CleanupLiveEnemyPreviewOwnedState());
   CHECK(VS::Content::objectDataLoadStep == 7);
   VS::Content::ReleaseLiveDiscRequest(foreign);
+}
+
+TEST_CASE(
+    "Converted read failures fail owned tickets without blocking the next",
+    "[encyclopedia-preview][asset-read-failure]") {
+  using VS::Content::ActorAssetKind;
+  const bool weapon = GENERATE(false, true);
+  PreviewLifecycleFixture fixture;
+  const auto before = QueuePreviewParts(false, true);
+  VS::Content::ClearLiveActorAssetQueue();
+  VS::Content::legacyShpSectorCounts[1] = 1;
+  VS::Content::legacyShpDiscOffsets[1] = 0;
+  VS::Content::legacyWepSectorCounts[1] = 1;
+  VS::Content::legacyWepDiscOffsets[1] = 0;
+  VS::test_support::ModelRoot root(
+      {{.path = weapon ? "OBJ/01.WEP" : "OBJ/01.SHP",
+        .bytes = std::vector<std::byte>(2048)}},
+      weapon ? 104024 : 95000);
+  VS::Content::DataStore::ScopedOverride restore;
+  REQUIRE(VS::Content::DataStore::Open(root.Root()).has_value());
+  const auto failed =
+      fixture.Submit({.kind = static_cast<std::uint8_t>(
+                          weapon ? ActorAssetKind::kWeaponModelLoad
+                                 : ActorAssetKind::kActorModelLoad),
+                      .target_slot = static_cast<std::int8_t>(weapon ? 2 : 1),
+                      .model_id = 1});
+  const auto next = fixture.Submit(
+      {.kind = static_cast<std::uint8_t>(ActorAssetKind::kActorModelParse),
+       .target_slot = 1,
+       .model_id = VS::Content::kModellessActorId});
+  CheckFailedReadThenNext(failed, next);
+  REQUIRE(score::CleanupLiveEnemyPreviewOwnedState());
+  CheckColdPreviewRelease(before);
 }
 
 TEST_CASE("Preview cleanup refuses an invalid allocation before losing owners",

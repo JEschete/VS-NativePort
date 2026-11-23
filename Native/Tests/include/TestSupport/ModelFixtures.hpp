@@ -215,38 +215,22 @@ class ModelRoot {
 
   // Runs every required converter; the models' reports.
   [[nodiscard]] ModelReports Convert() const {
-    const auto images = Extract::ConvertDiscImages(root_, false);
-    INFO(ErrorOf(images));
-    REQUIRE(images.has_value());
-    const auto tables = Extract::ConvertDiscTables(root_, false);
-    INFO(ErrorOf(tables));
-    REQUIRE(tables.has_value());
-    auto characters = Extract::ConvertDiscModels(root_, false);
-    INFO(ErrorOf(characters));
-    REQUIRE(characters.has_value());
-    auto weapons = Extract::ConvertDiscWeapons(root_, false);
-    INFO(ErrorOf(weapons));
-    REQUIRE(weapons.has_value());
-    auto sets = Extract::ConvertDiscAnimationSets(root_, false);
-    INFO(ErrorOf(sets));
-    REQUIRE(sets.has_value());
-    auto textures = Extract::ConvertDiscActorTextures(root_, false);
-    INFO(ErrorOf(textures));
-    REQUIRE(textures.has_value());
-    auto archetypes = Extract::ConvertDiscArchetypes(root_, false);
-    INFO(ErrorOf(archetypes));
-    REQUIRE(archetypes.has_value());
+    static_cast<void>(Required(Extract::ConvertDiscImages(root_, false)));
+    static_cast<void>(Required(Extract::ConvertDiscTables(root_, false)));
+    auto characters = Required(Extract::ConvertDiscModels(root_, false));
+    auto weapons = Required(Extract::ConvertDiscWeapons(root_, false));
+    auto sets = Required(Extract::ConvertDiscAnimationSets(root_, false));
+    auto textures = Required(Extract::ConvertDiscActorTextures(root_, false));
+    auto archetypes = Required(Extract::ConvertDiscArchetypes(root_, false));
     // The zones name the archetypes, so they convert after them.
-    auto zones = Extract::ConvertDiscZones(root_, false);
-    INFO(ErrorOf(zones));
-    REQUIRE(zones.has_value());
+    auto zones = Required(Extract::ConvertDiscZones(root_, false));
     RecordAudioConversions(root_);
-    return {.characters = *std::move(characters),
-            .weapons = *std::move(weapons),
-            .animation_sets = *std::move(sets),
-            .actor_textures = *std::move(textures),
-            .archetypes = *std::move(archetypes),
-            .zones = *zones};
+    return {.characters = std::move(characters),
+            .weapons = std::move(weapons),
+            .animation_sets = std::move(sets),
+            .actor_textures = std::move(textures),
+            .archetypes = std::move(archetypes),
+            .zones = zones};
   }
 
   // Applies `edit` to the converted glTF file `stem` in `directory`

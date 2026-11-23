@@ -15,8 +15,8 @@ struct WeaponModelData;
 }
 
 // Live binding for the battle asset queue and loaders (ActorAssets.hpp) over
-// the legacy request queue (legacyActorAssetRequests), the loaders' globals
-// and disc file tables (below), the actor and weapon records
+// the legacy request queue (legacyActorAssetRequests), disc file tables
+// (below), the actor and weapon records
 // (VS::Actors::actorRecords, VS::Actors::weaponModels), the shared sequence
 // banks and the texture slot tables. Generated callers keep the original call
 // shapes.
@@ -24,6 +24,10 @@ struct WeaponModelData;
 // A record, buffer or file the typed loaders cannot bound, or a request they
 // refuse, is counted and warned about on the "content" channel. A loader
 // read the disc queue refuses (#282) is read before the loader returns.
+// Actor, weapon and sequence parser state belongs to each queue entry and
+// moves or clears with its identity and record-memory resolver. The legacy
+// parser globals below are output-only diagnostic snapshots; only the
+// unowned ETM loader still reads its legacy phase and buffer (#207).
 namespace VS::Content {
 
 struct DiscFile;
@@ -108,9 +112,8 @@ int ReleaseLiveSequenceEffectTexture(int bank);
 [[nodiscard]] std::optional<bool> ReadLiveConvertedArchetype(
     DiscFileExtent file, std::span<std::byte> destination);
 
-// The battle asset queue's legacy globals. ActorAssetsLive.cpp defines them
-// and binds them to the typed loaders (ActorAssets.hpp); the battle start-up
-// (ModelRenderingLive.cpp) still clears the load step and parse flag directly.
+// The battle asset queue's legacy globals. ActorAssetsLive.cpp defines them;
+// clearing the queue also clears its per-entry parser state and snapshots.
 
 // decomp: vs_battle_loadObjectDataState
 // (src/BATTLE/BATTLE.PRG/objectData.h:19): the step of the menus' object-data
@@ -135,10 +138,10 @@ extern int lastLoadPhaseSnapshot;
 extern int assetQueueFrameTicks;
 extern int lastAssetRequestType;
 
-// The loaders' legacy state (BATTLE.PRG 30DB0.c, declared upstream at
-// src/BATTLE/BATTLE.PRG/30DB0.c:73-105). ActorAssetsLive.cpp defines it; the
-// module image fills the three phases (ModuleData.cpp) and the module
-// symbol table names the rest (ModulePointers.cpp).
+// The loaders' legacy snapshots and file streams (BATTLE.PRG 30DB0.c,
+// declared upstream at src/BATTLE/BATTLE.PRG/30DB0.c:73-105). The module image
+// fills the three phases (ModuleData.cpp) and its symbol table names the
+// rest (ModulePointers.cpp). The serialized file streams remain shared.
 
 // decomp: _loadShpState, upstream loadShpState
 extern std::uint8_t legacyModelLoadPhase;
