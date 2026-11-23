@@ -135,6 +135,9 @@
     <ClCompile Include="src\WorkshopRecipes.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ZndFile.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ZudFile.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -268,6 +271,9 @@
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\WorkshopRecipes.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\ZndFile.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\ZudFile.hpp">

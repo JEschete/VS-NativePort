@@ -486,6 +486,7 @@
     <ClCompile Include="src\WepFileTests.cpp" />
     <ClCompile Include="src\WorkshopRecipeTests.cpp" />
     <ClCompile Include="src\XaMixTests.cpp" />
+    <ClCompile Include="src\ZndFileTests.cpp" />
     <ClCompile Include="src\ZudFileTests.cpp" />
     <ClCompile Include="..\Tools\Extract\src\AudioBankConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\ConversionManifestWriter.cpp" />

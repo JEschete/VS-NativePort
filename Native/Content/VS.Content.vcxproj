@@ -91,6 +91,7 @@
     <ClCompile Include="src\WepFile.cpp" />
     <ClCompile Include="src\WepModelFiles.cpp" />
     <ClCompile Include="src\WorkshopRecipes.cpp" />
+    <ClCompile Include="src\ZndFile.cpp" />
     <ClCompile Include="src\ZudFile.cpp" />
     <ClCompile Include="Legacy\LibDs.cpp">
       <AdditionalIncludeDirectories>$(VSLegacyIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -141,6 +142,7 @@
     <ClInclude Include="include\Content\WepFile.hpp" />
     <ClInclude Include="include\Content\WepModelFiles.hpp" />
     <ClInclude Include="include\Content\WorkshopRecipes.hpp" />
+    <ClInclude Include="include\Content\ZndFile.hpp" />
     <ClInclude Include="include\Content\ZudFile.hpp" />
     <ClInclude Include="Legacy\LibDs.hpp" />
   </ItemGroup>
