@@ -80,6 +80,7 @@ PROJECTS = [
                 r"Tools\Extract\src\ConverterBatch.cpp",
                 r"Tools\Extract\src\EffectTextureConversion.cpp",
                 r"Tools\Extract\src\EsqConversion.cpp",
+                r"Tools\Extract\src\EtmConversion.cpp",
                 r"Tools\Extract\src\ImageFilesWriter.cpp",
                 r"Tools\Extract\src\ImageConversion.cpp",
                 r"Tools\Extract\src\ShpModelConversion.cpp",

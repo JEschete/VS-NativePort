@@ -22,12 +22,16 @@
 #include "Content/ConvertedModels.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/EsqFile.hpp"
+#include "Content/EtmFile.hpp"
 #include "Content/ImageFiles.hpp"
 #include "Content/JsonText.hpp"
+#include "Content/NativeImage.hpp"
 #include "Content/SeqFile.hpp"
 #include "Content/ShpFile.hpp"
 #include "Content/ShpModelFiles.hpp"
 #include "Extract/EsqConversion.hpp"
+#include "Extract/EtmConversion.hpp"
+#include "Extract/ImageFilesWriter.hpp"
 #include "Extract/ShpModelConversion.hpp"
 #include "TestSupport/ModelFixtures.hpp"
 
@@ -872,7 +876,7 @@ TEST_CASE("Every ESQ set needs its table entry and the models it binds",
       {unlisted,
        "OBJ/E001.ESQ needs BATTLE/BATTLE.PRG, which files.tsv does not list"},
       {SetSources(set, Bytes(kSetSectorsAt)),
-       "BATTLE/BATTLE.PRG is too short for the set tables"},
+       "BATTLE/BATTLE.PRG is too short for its file tables"},
       {SetSources(set, SetProgram(2)),
        "BATTLE/BATTLE.PRG: set 1 names 2 sectors at LBA 104343, which is no "
        "ESQ files.tsv lists"},
@@ -917,6 +921,382 @@ TEST_CASE("Extracted SHP models load from their conversions as exact bytes",
             *models, content::kShpExtension, content::LoadConvertedModel,
             VS::test_support::ExtractedEventLengths(*models)) ==
         kExtractedModelCount);
+}
+
+// --- ETM actor effect texture sheets.
+
+constexpr std::string_view kSheetPath = "OBJ/E001.ETM";
+constexpr std::string_view kSheetDirectory = "E001";
+// BATTLE.PRG's sheet tables and the set offsets beside the set sector counts
+// (EtmConversion.cpp): each entry's first sector, from the first sector of
+// its kind, and its sector count.
+constexpr std::size_t kSheetOffsetsAt = 0x803B0;
+constexpr std::size_t kSheetSectorsAt = 0x80490;
+constexpr std::size_t kSetOffsetsAt = 0x80260;
+constexpr std::uint32_t kSheetFirstSector = 104351;
+// The sheet is one sector, so the set follows it.
+constexpr std::uint32_t kSetOffset = kSheetFirstSector + 1 - kSetFirstSector;
+constexpr std::int32_t kFourBitModel = 0x51;
+// The lender's two lines, then the 4-bit model's, then the borrower's.
+constexpr std::size_t kSheetLines = 4;
+constexpr std::uint8_t kFourBitRow = 2;
+constexpr std::uint8_t kBorrowerRow = 3;
+// SampleShp's palette rows hold 4 entries; the borrower's line uses index 9.
+constexpr std::size_t kSamplePaletteEntries = 4;
+constexpr std::uint16_t kPastPaletteIndex = 9;
+constexpr unsigned kNibbleBits = 4;
+constexpr unsigned kByteBits = 8;
+constexpr std::size_t kExtractedSheetCount = 80;
+
+// Indices within SampleShp's palette, at each line's model's depth.
+content::EtmSheet SampleSheet() {
+  content::EtmSheet sheet;
+  for (std::size_t line = 0; line < kSheetLines; ++line) {
+    const unsigned bits = line == kFourBitRow ? kNibbleBits : kByteBits;
+    for (std::size_t word = 0; word < content::kEtmLineWords; ++word) {
+      std::size_t value = 0;
+      for (unsigned pixel = 0; pixel * bits < content::kHalfwordBits; ++pixel) {
+        value |= ((word + line + pixel) % kSamplePaletteEntries)
+                 << (pixel * bits);
+      }
+      sheet.words.push_back(static_cast<std::uint16_t>(value));
+    }
+  }
+  sheet.words.at(kBorrowerRow * content::kEtmLineWords) =
+      static_cast<std::uint16_t>(kPastPaletteIndex << kByteBits);
+  return sheet;
+}
+
+Bytes EncodedSheet(const content::EtmSheet& sheet) {
+  auto bytes = content::EncodeEtmFile(sheet);
+  INFO(ErrorOf(bytes));
+  REQUIRE(bytes.has_value());
+  return *std::move(bytes);
+}
+
+// The borrower's, lender's and 4-bit model's texture rows, out of row order.
+content::EsqFile SheetSet() {
+  const auto entry = [](std::int32_t model, std::uint8_t row) {
+    return content::EsqEntry{.selector = static_cast<std::uint16_t>(model),
+                             .texture_row = row,
+                             .animation = SetAnimation()};
+  };
+  return {.entries = {entry(kSampleBorrower, kBorrowerRow),
+                      entry(kSampleLender, 0),
+                      entry(kFourBitModel, kFourBitRow)}};
+}
+
+struct SheetSectors {
+  std::uint8_t sheet = 1;
+  std::uint8_t set = 1;
+};
+
+// A BATTLE.PRG of the tables alone: entry kSampleSet names the sheet at the
+// first sheet sector and the set after it.
+Bytes SheetProgram(SheetSectors sectors = {}) {
+  Bytes program(content::kSeqEventLengthsAt + content::kSeqEventLengthCount);
+  program.at(kSheetSectorsAt + kSampleSet) = std::byte{sectors.sheet};
+  program.at(kSetSectorsAt + kSampleSet) = std::byte{sectors.set};
+  const std::size_t set_offset_at = kSetOffsetsAt + (kSampleSet * 2);
+  program.at(set_offset_at) = static_cast<std::byte>(kSetOffset);
+  program.at(set_offset_at + 1) =
+      static_cast<std::byte>(kSetOffset >> kByteBits);
+  CHECK(program.at(kSheetOffsetsAt + (kSampleSet * 2)) == std::byte{0});
+  return program;
+}
+
+// The sheet, first so that it starts at the first sheet sector, the set, the
+// three models and `program`.
+std::vector<extract::SourceFile> SheetSources(
+    const Bytes& sheet, const content::EsqFile& set = SheetSet(),
+    Bytes program = SheetProgram()) {
+  const Bytes set_bytes = EncodedSet(set);
+  REQUIRE(sheet.size() <= ModelRoot::kSectorBytes);
+  REQUIRE(set_bytes.size() <= ModelRoot::kSectorBytes);
+  return {{.path = std::string(kSheetPath), .bytes = sheet},
+          {.path = std::string(kSetPath), .bytes = set_bytes},
+          {.path = "OBJ/4F.SHP", .bytes = Encoded(SampleShp(false))},
+          {.path = "OBJ/50.SHP", .bytes = Encoded(BorrowingShp())},
+          {.path = "OBJ/51.SHP", .bytes = Encoded(SampleShp(true))},
+          {.path = std::string(extract::kBattleProgramPath),
+           .bytes = std::move(program)}};
+}
+
+auto LoadSheet(const fs::path& root, const content::ConvertedModelRead& read) {
+  return LoadModel(root, read, content::LoadConvertedActorTexture);
+}
+
+fs::path SheetDirectory(const ModelRoot& root) {
+  return root.Root() / fs::path(content::kActorTextureDirectory) /
+         kSheetDirectory;
+}
+
+content::ImageDocument LoadRegion(const ModelRoot& root,
+                                  std::string_view model) {
+  auto document = content::LoadImageFiles(SheetDirectory(root), model);
+  INFO(ErrorOf(document));
+  REQUIRE(document.has_value());
+  return *std::move(document);
+}
+
+// Applies `edit` to the region image of `model` and writes its files again.
+void EditRegion(const ModelRoot& root, std::string_view model,
+                const std::function<void(content::ImageDocument&)>& edit) {
+  content::ImageDocument document = LoadRegion(root, model);
+  edit(document);
+  const auto files = extract::EncodeImageFiles(document, model);
+  INFO(ErrorOf(files));
+  REQUIRE(files.has_value());
+  for (const content::ImageFile& file : *files) {
+    WriteFile(SheetDirectory(root) / file.name, file.bytes);
+  }
+}
+
+std::vector<std::string> RolesOf(const content::ImageDocument& document) {
+  std::vector<std::string> roles;
+  for (const content::ImageDependency& dependency :
+       document.provenance.dependencies) {
+    roles.push_back(std::format("{} {}", dependency.source, dependency.role));
+  }
+  return roles;
+}
+
+// The sheet's output: a folder of region images, depending on BATTLE.PRG, the
+// set and the models.
+void CheckSheetOutput(const ModelRoot& root) {
+  const auto manifest = content::LoadConversionManifest(root.Root());
+  INFO(ErrorOf(manifest));
+  if (!manifest || !*manifest) {
+    FAIL("no manifest.json");
+    return;
+  }
+  const std::vector<content::ConversionOutput>& outputs = (*manifest)->outputs;
+  const auto output = std::ranges::find(outputs, kSheetPath,
+                                        &content::ConversionOutput::source);
+  REQUIRE(output != outputs.end());
+  CHECK(output->id == "actor-texture.obj.e001");
+  std::vector<std::string> files = output->files;
+  std::ranges::sort(files);
+  CHECK(files == std::vector<std::string>{"textures/actors/E001/4F.image.json",
+                                          "textures/actors/E001/4F.png",
+                                          "textures/actors/E001/50.image.json",
+                                          "textures/actors/E001/50.png",
+                                          "textures/actors/E001/51.image.json",
+                                          "textures/actors/E001/51.png"});
+  std::vector<std::string> dependencies;
+  for (const content::SourceDependency& dependency : output->dependencies) {
+    dependencies.push_back(dependency.source);
+  }
+  CHECK(dependencies == std::vector<std::string>{"BATTLE/BATTLE.PRG",
+                                                 "OBJ/4F.SHP", "OBJ/50.SHP",
+                                                 "OBJ/51.SHP", "OBJ/E001.ESQ"});
+}
+
+// Each region is its model's lines at its depth, previewed with its model's
+// own palette.
+void CheckOwnedRegionImages(const ModelRoot& root) {
+  const content::ImageDocument lender = LoadRegion(root, "4F");
+  CHECK(lender.id == "image.obj.e001.4f");
+  CHECK(lender.image.depth == content::ImageDepth::kIndexed8);
+  CHECK(lender.image.height == kFourBitRow);
+  CHECK(lender.provenance.offset == content::kEtmHeaderBytes);
+  CHECK(lender.provenance.note.empty());
+  CHECK(RolesOf(lender) == std::vector<std::string>{"BATTLE/BATTLE.PRG table",
+                                                    "OBJ/4F.SHP texture",
+                                                    "OBJ/E001.ESQ binding"});
+  const content::ImageDocument four_bit = LoadRegion(root, "51");
+  CHECK(four_bit.image.depth == content::ImageDepth::kIndexed4);
+  CHECK(four_bit.image.width ==
+        content::kEtmLineWords *
+            content::PixelsPerHalfword(content::ImageDepth::kIndexed4));
+  CHECK(four_bit.provenance.preview_palette ==
+        content::PreviewPalette{.image = "image.obj.51", .row = 0, .entry = 0});
+}
+
+// A model borrowing another's texture is previewed with the lender's palette,
+// padded past its end with a note.
+void CheckBorrowedRegionImage(const ModelRoot& root) {
+  const content::ImageDocument borrower = LoadRegion(root, "50");
+  CHECK(borrower.image.depth == content::ImageDepth::kIndexed8);
+  CHECK(borrower.provenance.offset ==
+        content::kEtmHeaderBytes + (kBorrowerRow * content::kEtmLineBytes));
+  CHECK(borrower.provenance.preview_palette ==
+        content::PreviewPalette{.image = "image.obj.4f", .row = 0, .entry = 0});
+  CHECK(borrower.image.PaletteEntries() == kPastPaletteIndex + 1U);
+  CHECK(borrower.provenance.note.contains(
+      "past the 4 entries of OBJ/4F.SHP's palette"));
+  CHECK(RolesOf(borrower) ==
+        std::vector<std::string>{"BATTLE/BATTLE.PRG table",
+                                 "OBJ/4F.SHP preview palette",
+                                 "OBJ/50.SHP texture", "OBJ/E001.ESQ binding"});
+}
+
+// An edit to a region's PNG survives a rerun and changes the bytes the sheet
+// loads as.
+void CheckEditedSheetLoads(const ModelRoot& root) {
+  EditRegion(root, "4F", [](content::ImageDocument& document) {
+    document.image.indices.front() = 1;
+  });
+  CHECK(root.Convert().actor_textures.unchanged == 1);
+  content::EtmSheet edited = SampleSheet();
+  edited.words.front() = static_cast<std::uint16_t>(edited.words.front() | 1U);
+  CHECK(LoadSheet(root.Root(), root.Read(0)) == EncodedSheet(edited));
+}
+
+// Regions that no longer follow one another, one from another source and a
+// read no sheet matches are refused.
+void CheckRefusedSheetLoads(const ModelRoot& root) {
+  EditRegion(root, "4F", [](content::ImageDocument& document) {
+    document.image.height = 1;
+    document.image.indices.resize(document.image.width);
+  });
+  CHECK(ErrorOf(LoadSheet(root.Root(), root.Read(0))) ==
+        "image.obj.e001.51 starts at byte 0x104; the regions before it end at "
+        "0x84");
+  EditRegion(root, "51", [](content::ImageDocument& document) {
+    document.provenance.source_sha256 = std::string(64, 'a');
+  });
+  CHECK(ErrorOf(LoadSheet(root.Root(), root.Read(0))) ==
+        "OBJ/E001.ETM does not match its conversion manifest");
+  CHECK(ErrorOf(LoadSheet(root.Root(),
+                          {.lba = 1, .rounded_size = 0, .event_lengths = {}}))
+            .contains("no extracted .ETM file matches LBA 1"));
+}
+
+TEST_CASE("ETM sheets decode and encode strictly", "[content-models][etm]") {
+  const content::EtmSheet sheet = SampleSheet();
+  const Bytes bytes = EncodedSheet(sheet);
+  CHECK(bytes.size() ==
+        content::kEtmHeaderBytes + (kSheetLines * content::kEtmLineBytes));
+  CHECK(content::DecodeEtmFile(bytes) == sheet);
+  Bytes marker = bytes;
+  marker.front() = std::byte{0};
+  CHECK(ErrorOf(content::DecodeEtmFile(marker)) ==
+        "the marker is 0x3000, not 0x3045");
+  Bytes tall = bytes;
+  tall.at(2) = std::byte{1};
+  tall.at(3) = std::byte{1};
+  CHECK(ErrorOf(content::DecodeEtmFile(tall)) ==
+        "the sheet is 257 lines high; it must be 1 to 256");
+  CHECK(ErrorOf(content::DecodeEtmFile(std::span(bytes).first(3))) ==
+        "the file is 3 bytes; the header is 4");
+  CHECK(ErrorOf(
+            content::DecodeEtmFile(std::span(bytes).first(bytes.size() - 1))) ==
+        "the file is 515 bytes; a sheet 4 lines high is 516");
+  content::EtmSheet ragged = sheet;
+  ragged.words.pop_back();
+  CHECK(ErrorOf(content::EncodeEtmFile(ragged)) ==
+        "the sheet holds 255 halfwords, which is not whole lines of 64");
+  CHECK(ErrorOf(content::EncodeEtmFile({})) ==
+        "the sheet is 0 lines high; it must be 1 to 256");
+}
+
+TEST_CASE(
+    "ETM sheets convert to region PNGs that load as their bytes, edits "
+    "included",
+    "[content-models][etm]") {
+  const Bytes sheet = EncodedSheet(SampleSheet());
+  const ModelRoot root(SheetSources(sheet), kSheetFirstSector);
+  CHECK(root.Convert().actor_textures.converted == 1);
+  CheckSheetOutput(root);
+  CheckOwnedRegionImages(root);
+  CheckBorrowedRegionImage(root);
+  CHECK(LoadSheet(root.Root(), root.Read(0)) == sheet);
+  CHECK(root.Convert().actor_textures.unchanged == 1);
+  CheckEditedSheetLoads(root);
+  CheckRefusedSheetLoads(root);
+}
+
+// Why the actor texture converter refuses `sources`.
+std::string SheetRefusal(const std::vector<extract::SourceFile>& sources) {
+  const ModelRoot root(sources, kSheetFirstSector);
+  return ErrorOf(extract::ConvertDiscActorTextures(root.Root(), false));
+}
+
+// The sources with the sample set changed by `change`.
+std::vector<extract::SourceFile> ChangedSheetSet(
+    const std::function<void(content::EsqFile&)>& change) {
+  content::EsqFile set = SheetSet();
+  change(set);
+  return SheetSources(EncodedSheet(SampleSheet()), set);
+}
+
+TEST_CASE("Every ETM sheet needs its table entry, its set and its models",
+          "[content-models][etm]") {
+  struct Refused {
+    std::vector<extract::SourceFile> sources;
+    std::string_view error;
+  };
+  const Bytes sheet = EncodedSheet(SampleSheet());
+  std::vector<extract::SourceFile> unlisted = SheetSources(sheet);
+  unlisted.pop_back();
+  std::vector<extract::SourceFile> no_model = SheetSources(sheet);
+  std::erase_if(no_model, [](const extract::SourceFile& source) {
+    return source.path == "OBJ/51.SHP";
+  });
+  Bytes marker = sheet;
+  marker.front() = std::byte{0};
+  const std::vector<Refused> refusals{
+      {unlisted,
+       "OBJ/E001.ETM needs BATTLE/BATTLE.PRG, which files.tsv does not list"},
+      {SheetSources(sheet, SheetSet(), Bytes(kSheetSectorsAt)),
+       "BATTLE/BATTLE.PRG is too short for its file tables"},
+      {SheetSources(sheet, SheetSet(), SheetProgram({.sheet = 2, .set = 1})),
+       "BATTLE/BATTLE.PRG: entry 1 names 2 sectors at LBA 104351, which is no "
+       ".ETM files.tsv lists"},
+      {SheetSources(sheet, SheetSet(), SheetProgram({.sheet = 0, .set = 1})),
+       "OBJ/E001.ETM is named by no entry of BATTLE/BATTLE.PRG's sheet table"},
+      {SheetSources(sheet, SheetSet(), SheetProgram({.sheet = 1, .set = 0})),
+       "BATTLE/BATTLE.PRG: entry 1 names the sheet OBJ/E001.ETM but no set"},
+      {SheetSources(marker), "OBJ/E001.ETM: the marker is 0x3000, not 0x3045"},
+      {SheetSources(Bytes(sheet.begin(), sheet.end() - 1)),
+       "OBJ/E001.ETM: the file is 515 bytes; a sheet 4 lines high is 516"},
+      {no_model,
+       "OBJ/E001.ESQ needs OBJ/51.SHP, which files.tsv does not list"},
+      {ChangedSheetSet([](content::EsqFile& set) {
+         set.entries.front().texture_row = kSheetLines;
+       }),
+       "OBJ/E001.ETM: OBJ/E001.ESQ gives model 80 line 4, past the sheet's 4 "
+       "lines"},
+      {ChangedSheetSet(
+           [](content::EsqFile& set) { set.entries.at(1).texture_row = 1; }),
+       "OBJ/E001.ETM: OBJ/E001.ESQ gives no model line 0"},
+      {ChangedSheetSet(
+           [](content::EsqFile& set) { set.entries.back().texture_row = 0; }),
+       "the same line 0"},
+  };
+  for (const Refused& refused : refusals) {
+    const std::string error = SheetRefusal(refused.sources);
+    INFO(error);
+    CHECK(error.contains(refused.error));
+  }
+}
+
+TEST_CASE("Extracted ETM files decode and rebuild their exact bytes",
+          "[content-models][etm][extract]") {
+  const auto models = ExtractedModels();
+  if (!models) SKIP("Extracted Native/data is unavailable");
+  std::size_t sheets = 0;
+  for (const auto& entry : fs::directory_iterator(*models)) {
+    if (entry.path().extension() != fs::path(content::kEtmExtension)) continue;
+    CAPTURE(entry.path().filename().string());
+    const Bytes bytes = ReadModel(entry.path());
+    const auto sheet = content::DecodeEtmFile(bytes);
+    INFO(ErrorOf(sheet));
+    REQUIRE(sheet.has_value());
+    CHECK(content::EncodeEtmFile(*sheet) == bytes);
+    ++sheets;
+  }
+  CHECK(sheets == kExtractedSheetCount);
+}
+
+TEST_CASE("Extracted ETM sheets load from their region images as exact bytes",
+          "[content-models][etm][extract]") {
+  const auto models = ExtractedModels();
+  if (!models) SKIP("Extracted Native/data is unavailable");
+  CHECK(VS::test_support::CheckExtractedModelsLoad(
+            *models, content::kEtmExtension,
+            content::LoadConvertedActorTexture) == kExtractedSheetCount);
 }
 
 }  // namespace

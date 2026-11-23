@@ -20,9 +20,11 @@
 #include <vector>
 
 #include "Content/AnimationSet.hpp"
+#include "Content/ConversionManifest.hpp"
 #include "Content/ConvertedImages.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/EsqFile.hpp"
+#include "Content/EtmFile.hpp"
 #include "Content/ImageFiles.hpp"
 #include "Content/JsonText.hpp"
 #include "Content/SeqFile.hpp"
@@ -370,6 +372,42 @@ std::expected<std::vector<std::byte>, std::string> LoadConvertedAnimationSet(
   auto bytes = EncodeEsqFile(document->file, read.event_lengths);
   if (!bytes) {
     return std::unexpected(std::format("{}: {}", *json, bytes.error()));
+  }
+  return bytes;
+}
+
+std::expected<std::vector<std::byte>, std::string> LoadConvertedActorTexture(
+    const DataStore& store, const ConvertedModelRead& read) {
+  auto sheet =
+      FindConvertedSource(store, {.lba = read.lba,
+                                  .rounded_size = read.rounded_size,
+                                  .extension = kEtmExtension,
+                                  .converter = kEtmTextureConverterName});
+  if (!sheet) return std::unexpected(sheet.error());
+  const ConversionOutput& files = *sheet->files;
+  std::vector<ImageDocument> regions;
+  for (const std::string& file : files.files) {
+    if (!file.ends_with(kImageSidecarSuffix)) continue;
+    // Each region's files are <directory>/<sheet>/<model>.*; the image reader
+    // takes the leaf stem in its own directory.
+    const std::filesystem::path stem(std::string_view(file).substr(
+        0, file.size() - kImageSidecarSuffix.size()));
+    auto region = DecodeImageFiles(
+        stem.filename().string(),
+        DirectoryFileReader(store.Root() / stem.parent_path()));
+    if (!region) return std::unexpected(region.error());
+    if (region->provenance.source_sha256 != files.source_sha256) {
+      return std::unexpected(std::format(
+          "{} does not match its conversion manifest", sheet->entry->path));
+    }
+    regions.push_back(std::move(*region));
+  }
+  auto rebuilt = EtmSheetOfImages(regions, files.source);
+  if (!rebuilt) return std::unexpected(rebuilt.error());
+  auto bytes = EncodeEtmFile(*rebuilt);
+  if (!bytes) {
+    return std::unexpected(
+        std::format("{}: {}", sheet->entry->path, bytes.error()));
   }
   return bytes;
 }

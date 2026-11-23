@@ -29,6 +29,11 @@ namespace VS::Extract {
 [[nodiscard]] std::expected<std::string, std::string> AnimationSetIdForDiscPath(
     std::string_view disc_path);
 
+// The game's event stride table (kSeqEventLengthsAt), read from BATTLE.PRG
+// `program`, which must be long enough to hold it.
+[[nodiscard]] std::expected<SeqEventTable, std::string> ProgramEventTable(
+    const SourceFile& program);
+
 struct EsqConversion {
   SourceFile set;
   SeqEventTable events;

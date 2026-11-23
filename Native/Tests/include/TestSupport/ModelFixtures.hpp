@@ -28,14 +28,15 @@
 #include "Content/ShpModelFiles.hpp"
 #include "Extract/ConverterBatch.hpp"
 #include "Extract/EsqConversion.hpp"
+#include "Extract/EtmConversion.hpp"
 #include "Extract/ImageConversion.hpp"
 #include "Extract/ShpModelConversion.hpp"
 #include "Extract/WepModelConversion.hpp"
 #include "Extract/WorkshopRecipeConversion.hpp"
 #include "TestSupport/AudioConversionFixture.hpp"
 
-// Shared fixtures for the converted character, weapon and animation tests
-// (ShpFileTests.cpp, WepFileTests.cpp, SeqFileTests.cpp).
+// Shared fixtures for the converted character, weapon, animation and actor
+// texture tests (ShpFileTests.cpp, WepFileTests.cpp, SeqFileTests.cpp).
 namespace VS::test_support {
 
 struct PolygonSpec {
@@ -127,6 +128,7 @@ struct ModelReports {
   Extract::ModelConversionReport characters;
   Extract::ModelConversionReport weapons;
   Extract::ModelConversionReport animation_sets;
+  Extract::ModelConversionReport actor_textures;
 };
 
 // A temporary data root whose files.tsv lists `sources` as raw files from
@@ -206,10 +208,14 @@ class ModelRoot {
     auto sets = Extract::ConvertDiscAnimationSets(root_, false);
     INFO(ErrorOf(sets));
     REQUIRE(sets.has_value());
+    auto textures = Extract::ConvertDiscActorTextures(root_, false);
+    INFO(ErrorOf(textures));
+    REQUIRE(textures.has_value());
     RecordAudioConversions(root_);
     return {.characters = *std::move(characters),
             .weapons = *std::move(weapons),
-            .animation_sets = *std::move(sets)};
+            .animation_sets = *std::move(sets),
+            .actor_textures = *std::move(textures)};
   }
 
   // Applies `edit` to the converted glTF file `stem` in `directory`

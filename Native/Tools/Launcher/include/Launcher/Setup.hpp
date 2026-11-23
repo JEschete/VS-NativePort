@@ -27,8 +27,9 @@ inline constexpr int kPercentComplete = 100;
 // any other. 3: VS.Extract writes the asset catalogs (#47) the game requires.
 // 5: extract converts and records the sound banks, XA tracks and movies
 // (#504), replacing the separate audio step. 6: extract converts the shared
-// animation sets (OBJ\E*.ESQ, #206).
-inline constexpr int kAssetPipelineVersion = 6;
+// animation sets (OBJ\E*.ESQ, #206). 7: extract converts the actor effect
+// texture sheets (OBJ\E*.ETM, #207).
+inline constexpr int kAssetPipelineVersion = 7;
 using HashProgress = std::function<void(int)>;
 
 struct CloseDiscHandle {

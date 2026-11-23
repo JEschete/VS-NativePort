@@ -26,6 +26,7 @@
 #include "Extract/AudioBankConversion.hpp"
 #include "Extract/ConverterBatch.hpp"
 #include "Extract/EsqConversion.hpp"
+#include "Extract/EtmConversion.hpp"
 #include "Extract/ImageConversion.hpp"
 #include "Extract/ShpModelConversion.hpp"
 #include "Extract/WepModelConversion.hpp"
@@ -84,9 +85,11 @@ int Usage() {
       "replacing edited tables).\n"
       "      extract also converts the character models (OBJ/*.SHP) to glTF "
       "under models/characters/ and the\n"
-      "      weapon models (OBJ/*.WEP) to glTF under models/weapons/ and the "
+      "      weapon models (OBJ/*.WEP) to glTF under models/weapons/, the "
       "shared animation sets\n"
-      "      (OBJ/E*.ESQ) to JSON under models/animation-sets/;\n"
+      "      (OBJ/E*.ESQ) to JSON under models/animation-sets/ and the actor "
+      "effect texture sheets\n"
+      "      (OBJ/E*.ETM) to PNG under textures/actors/;\n"
       "      models converts again only what changed (--force: everything, "
       "replacing edited models).\n"
       "      extract also converts the sound banks (SOUND/WAVE*.DAT) to WAV "
@@ -463,8 +466,8 @@ int ConvertTables(const fs::path& root, bool force) {
 }
 
 // models/characters/ and models/weapons/ glTF models, models/animation-sets/
-// JSON sets and their manifest.json outputs from the disc files already under
-// root.
+// JSON sets, textures/actors/ effect texture images and their manifest.json
+// outputs from the disc files already under root.
 int ConvertModels(const fs::path& root, bool force) {
   const auto characters = Extract::ConvertDiscModels(root, force);
   if (!characters) {
@@ -494,6 +497,16 @@ int ConvertModels(const fs::path& root, bool force) {
                     "animation sets: {} converted, {} unchanged, {} stale "
                     "files removed",
                     sets->converted, sets->unchanged, sets->removed);
+  const auto textures = Extract::ConvertDiscActorTextures(root, force);
+  if (!textures) {
+    VS::Core::LogError("extract", "{}", textures.error());
+    return 1;
+  }
+  VS::Core::LogInfo("extract",
+                    "actor textures: {} converted, {} unchanged, {} stale "
+                    "files removed",
+                    textures->converted, textures->unchanged,
+                    textures->removed);
   return 0;
 }
 

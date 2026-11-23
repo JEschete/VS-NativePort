@@ -100,7 +100,7 @@ Native\data\
   rooms\automap\<ARM>.json         (minimap scenes per area: display geometry, doors, room names by string id)
   textures\<dir>\<name>.png        (TIM/GIM/FBT/standalone images, §6.4) + <name>.image.json
                                    (+ <name>.palettes.png when an image has several palettes)
-    actors\<ETM>\<binding>.png     (actor-bound atlas images + .image.json, §6.2.2)
+    actors\<ETM>\<MODEL>.png       (actor-bound texture regions + .image.json, §6.2.1, §6.2.2)
   ui\                              (menu art, title art, illustrations as PNG + layout JSON)
   events\<id>.json                 (EVT event scripts as decoded command lists; text by string id)
   effects\<id>.json + textures     (EFFECT .P/.FBT/.FBC data)
@@ -187,7 +187,7 @@ The disc has 27 kinds of files. The "Source" column below names the files on the
 | `SMALL\HELP*.HF0/HF1` (28) | `text\strings.en.json` + `ui\help\<page>.json` + `ui\help\*.png` | `.HF0` = page text, sprite placements and line table; `.HF1` = 8×16 8bpp illustration blocks and 16-colour palettes | native `ManualTopics.hpp`, `ManualIllustration.hpp`, `Manual.cpp` |
 | `EFFECT\*.P` (290), `*.FBT` (755), `*.FBC` (277), `EFFECT\*.BIN` (311) | `effects\<id>.json` + `textures\effect\*.png` | `.FBT` texture pages + `.FBC` palettes → PNG (§6.4). `.P` files are block streams (u32 header: size in the low 16 bits, type in the high 16 bits; type 0 ends) → effect JSON. `.BIN` files are **PLG code overlays** and EFFPURGE dispatch tables, already ported to C++ (`Effects\Plugins\PlgNNN.cpp`, `PurgeTables.cpp`); only their data blobs remain, as typed tables. Effect behaviors stay in code (plan §9.7) | decomp `Effects\` |
 | `OBJ\*.ESQ` (97) | `models\animation-sets\<ESQ>.json` | shared animation sets: up to 15 entries, each a selector (a model number or kind), an optional texture row and a SEQ bank; `BATTLE.PRG`'s tables bind them to models. Converter `esq-json` (§6.2.1) | decomp `BATTLE.PRG/30DB0.c`; native `Actors/ActorAssets.cpp` |
-| `OBJ\*.ETM` (80) | applicable character glTFs + the actor-bound images they reference | texture overlays, including facial frames; resolve actor/bank/palette bindings from loaders, not matching filenames (§6.2.2) | decomp `BATTLE.PRG/30DB0.c`, `40564.c`; native `Actors/TextureAnimation.c` |
+| `OBJ\*.ETM` (80) | `textures\actors\<ETM>\<MODEL>.png` + `.image.json` | texture sheets of event actors' lines (facial frames, for example); each set entry with a texture row names the lines its model uses. Converter `etm-png` (§6.2.1); glTF references and texture tracks follow §6.2.2 | decomp `BATTLE.PRG/30DB0.c`, `40564.c`; native `Actors/TextureAnimation.c` |
 | `SOUND\WAVE*.DAT` (101) | `audio\banks\<bank>\` (`bank.json`, `<n>.wav` + `<n>.sfz`) | 83 banks; 18 one-byte zero placeholders. Converter `wave-bank` (§6.5) | decomp `Audio\` |
 | `MUSIC\MUSIC*.DAT` (192) | `audio\music\*.seq.json` | §6.5 | decomp `Audio\Seq` |
 | `SE\EFFECT*.DAT` (102) | `audio\sfx\*.seq.json` (+ bank if embedded) | §6.5 | |
@@ -239,7 +239,7 @@ Additions the reference does not have, required by P4 (lossless). The initial co
   - The load completes in the same update that requests it, where the original waited for the CD.
   - An edited model must still fit the original sector-rounded allocation; a larger one is refused.
 
-Not yet done: glTF preview animations for the SEQ banks and ESQ clips (#205, #206), ETM texture overlays (#207), ZUD (#200), a model larger than its original allocation, and a re-export from Blender through the validator. Weapons are §6.2.4.
+Not yet done: glTF preview animations for the SEQ banks and ESQ clips (#205, #206), glTF references to the ETM texture regions and their texture tracks (#207), ZUD (#200), a model larger than its original allocation, and a re-export from Blender through the validator. Weapons are §6.2.4.
 
 #### 6.2.1 Container, schema and optional extension
 
@@ -272,6 +272,14 @@ Not yet done: glTF preview animations for the SEQ banks and ESQ clips (#205, #20
     - All 97 sets (355 entries) read back from their JSON equal to their decoded sets and rebuild their exact bytes, and load through the runtime loader as their exact bytes (`SeqFileTests.cpp`). `tools\test\test_content_schemas.py` checks the writer's fixture (`Native\Tests\data\animation\sample-set.json`) against the schema in CI.
     - At runtime, `Content::LoadConvertedAnimationSet` handles an ESQ read of the animation bank stream (`ActorAssetsLive` `BeginFileRead`, `kSequence`) and never reads the set from the disc. An edited set is validated and loaded, or refused with the file and member named. It must fit the original sector-rounded read; a larger one is refused and leaves an empty set. `RequireConversions` refuses to start without the `esq-json` batch.
     - Not yet done: a load-time check of an edited entry's bone count against the models that play it, glTF clips that preview the sets, and playback and timing evidence for the converted sets.
+  - **ETM actor texture sheets (#207 first slice, #515, landed):** converter `etm-png` writes each `OBJ\E*.ETM` as one indexed PNG plus `.image.json` (§6.4) per model it textures, `textures\actors\<ETM>\<MODEL>.png` (output id `actor-texture.obj.<stem>`, image id `image.obj.<stem>.<model>`; `Content/EtmFile.hpp`, `Extract/EtmConversion.hpp`).
+    - A sheet is a 4-byte header (marker and height) and lines of 64 halfwords that the game uploads below the actor textures. Which lines belong to which model comes from the ESQ set `BATTLE.PRG`'s tables pair with the sheet: each entry with a texture row starts a model's region, which runs to the next entry's row or the end of the sheet. The game binds a model to the first entry whose selector is its model number, so a texture row's selector is that number.
+    - A region's depth is its model's SHP texture depth, and its preview palette is the model's own palette; a model that borrows another's texture uses the lender's (2 regions). The sidecar names the palette's source, and the indices are authoritative. All 210 regions in the 80 sheets are 8-bit.
+    - 33 regions use indices past their model's palette. The game draws those from the rest of the model's CLUT row as filled at run time (a weapon's palette shares the row from column 160), so the preview shows them transparent and the sidecar's note says so.
+    - The extractor refuses a sheet entry that names no listed ETM or the wrong sector count, a sheet named by no entry or by two, an entry naming a sheet but no set, a set whose texture rows give no model line 0, repeat a model or a line or pass the sheet's end, and a region whose model is not a listed SHP. The output depends on `BATTLE.PRG`, the set and each region's model and lender, so a change to any of them reconverts the sheet.
+    - All 80 sheets rebuild their exact bytes from their regions and load through the runtime loader as their exact bytes (`ShpFileTests.cpp`). A rerun leaves unchanged sheets and their edits alone; `--force` rewrites them.
+    - At runtime, `Content::LoadConvertedActorTexture` handles the effect texture read (`ActorAssetsLive` `BeginFileRead`, `kEffectTexture`) and never reads the sheet from the disc. It rebuilds the sheet from the region images, which must be the sheet's indexed images, one line wide and in contiguous lines; an edit that breaks this is refused with the image named, and a rebuilt sheet larger than the original read is refused and uploads nothing. `RequireConversions` refuses to start without the `etm-png` batch. The prologue's opening cutscene loads `E001` this way.
+    - Not yet done: glTF references to the regions and the texture tracks that select frames from them (§6.2.2), and pixel evidence of an edited region in a scene.
 - **Extension adoption gate:** once the payload is exercised by both consumers, assess packaging it as one documented optional vendor extension. Choose a project/vendor namespace, publish its schema and fallback behavior, and test both readers before switching the writer. Do not invent a `KHR_` or `EXT_` standard. The extension must be in `extensionsUsed`, but not `extensionsRequired`, only while the asset has a valid standard preview without it. See the [glTF extension rules](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#specifying-extensions) and [extension registry guidance](https://github.com/KhronosGroup/glTF/tree/main/extensions).
 - There is **one authoritative VS payload** per asset. A packaging change requires a schema/converter-version change and an explicit migration; do not emit independently editable copies in both `extras` and an extension. A native loader rejects missing required VS data or unsupported versions with an actionable error, even when a generic viewer can still show the baseline.
 - Ordinary viewers need not execute facial tracks, event commands or VS rendering rules. Ignoring custom data is not a promise to preserve it on re-export. Before accepting an edited model, validate the VS payload and references; missing or altered metadata must be reported, not silently defaulted.
@@ -281,7 +289,7 @@ Not yet done: glTF preview animations for the SEQ banks and ESQ clips (#205, #20
 
 Treat skeletal pose, texture overlays and event synchronization as related but separate data. A correct ESQ bone pose alone does not prove facial playback, and texture-based expressions do not prove that every facial movement excludes bone animation.
 
-The [original ETM loader](../resources/rood-reverse/src/BATTLE/BATTLE.PRG/30DB0.c) skips a 16-bit word, reads a 16-bit height and uploads 128 bytes per row. [Native texture animation](../Native/Game/src/Actors/TextureAnimation.c) selects rectangular frames and handles packed texture addressing. These are reference mechanisms, not a complete converted-format specification: AP1 must establish actual actor, palette and event bindings before implementing a converter.
+The [original ETM loader](../resources/rood-reverse/src/BATTLE/BATTLE.PRG/30DB0.c) skips a 16-bit word, reads a 16-bit height and uploads 128 bytes per row. [Native texture animation](../Native/Game/src/Actors/TextureAnimation.c) selects rectangular frames and handles packed texture addressing. The sheet-to-model binding (which lines each model uses, at which depth and with which palette) is established and converted (§6.2.1, `etm-png`); the frame, palette-animation and event bindings below are not yet, and AP1 must establish them before the glTF carries texture tracks.
 
 | Contract component | Required content |
 |---|---|
@@ -678,13 +686,13 @@ Record source revision/dirty state, disc identity, tool/converter/schema version
 
 <!-- content:begin (generated by tools/ledger/content.py --sync) -->
 
-**2,251 of 5,162 disc files converted**, 2,251 of them with a passing round trip; 259 skipped with a reason; 2,652 unconverted.
+**2,331 of 5,162 disc files converted**, 2,331 of them with a passing round trip; 259 skipped with a reason; 2,572 unconverted.
 
 | Kind | Files | Converted | Round trip pass | Skipped | Unconverted | Converts under |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
 | actor archetype | 455 | 0 | 0 | 0 | 455 | #200 |
 | actor shape | 202 | 202 | 202 | 0 | 0 | #203 |
-| actor texture overlay | 80 | 0 | 0 | 0 | 80 | #207 |
+| actor texture overlay | 80 | 80 | 80 | 0 | 0 | #207 |
 | area map | 32 | 0 | 0 | 0 | 32 | #201 |
 | background layout | 4 | 0 | 0 | 0 | 4 | #210 |
 | bestiary | 1 | 0 | 0 | 0 | 1 | #499 |

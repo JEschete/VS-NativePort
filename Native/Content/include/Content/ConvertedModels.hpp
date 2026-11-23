@@ -11,8 +11,9 @@
 
 // Converted character and weapon models the runtime loads in place of
 // OBJ\<NN>.SHP and OBJ\<NN>.WEP (ASSET_PIPELINE.md §6.2-6.3, #203, #204), the
-// OBJ\*.SEQ animation banks their glTF files hold (§6.2.1, #205), and the
-// OBJ\E*.ESQ shared animation sets (§6.2.2, #206).
+// OBJ\*.SEQ animation banks their glTF files hold (§6.2.1, #205), the
+// OBJ\E*.ESQ shared animation sets (§6.2.2, #206) and the OBJ\E*.ETM effect
+// texture sheets (§6.2.3, #207).
 // Loading never converts; a missing or mismatched output is an error naming
 // the file.
 namespace VS::Content {
@@ -48,6 +49,13 @@ LoadConvertedSequence(const DataStore& store, const ConvertedModelRead& read);
 // hash.
 [[nodiscard]] std::expected<std::vector<std::byte>, std::string>
 LoadConvertedAnimationSet(const DataStore& store,
+                          const ConvertedModelRead& read);
+
+// The ETM bytes rebuilt from the etm-png output of the sheet `read` names
+// (its region images, EtmFile.hpp EtmSheetOfImages), checked against the
+// manifest: each image's source path and hash.
+[[nodiscard]] std::expected<std::vector<std::byte>, std::string>
+LoadConvertedActorTexture(const DataStore& store,
                           const ConvertedModelRead& read);
 
 }  // namespace VS::Content

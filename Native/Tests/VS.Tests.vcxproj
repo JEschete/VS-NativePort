@@ -491,6 +491,7 @@
     <ClCompile Include="..\Tools\Extract\src\ConverterBatch.cpp" />
     <ClCompile Include="..\Tools\Extract\src\EffectTextureConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\EsqConversion.cpp" />
+    <ClCompile Include="..\Tools\Extract\src\EtmConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\ImageFilesWriter.cpp" />
     <ClCompile Include="..\Tools\Extract\src\ImageConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\ShpModelConversion.cpp" />

@@ -52,6 +52,7 @@
     <ClCompile Include="src\ConverterBatch.cpp" />
     <ClCompile Include="src\EffectTextureConversion.cpp" />
     <ClCompile Include="src\EsqConversion.cpp" />
+    <ClCompile Include="src\EtmConversion.cpp" />
     <ClCompile Include="src\ImageConversion.cpp" />
     <ClCompile Include="src\ImageFilesWriter.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -67,6 +68,7 @@
     <ClInclude Include="include\Extract\ConverterBatch.hpp" />
     <ClInclude Include="include\Extract\EffectTextureConversion.hpp" />
     <ClInclude Include="include\Extract\EsqConversion.hpp" />
+    <ClInclude Include="include\Extract\EtmConversion.hpp" />
     <ClInclude Include="include\Extract\ImageConversion.hpp" />
     <ClInclude Include="include\Extract\ImageFilesWriter.hpp" />
     <ClInclude Include="include\Extract\ShpModelConversion.hpp" />

@@ -60,6 +60,17 @@ std::expected<std::size_t, std::string> RemoveStaleFiles(
   return removed;
 }
 
+std::expected<void, std::string> MakeDirectories(const fs::path& directory) {
+  std::error_code error;
+  fs::create_directories(directory, error);
+  if (error) {
+    return std::unexpected(std::format("cannot create {}: {}",
+                                       Platform::PathText(directory),
+                                       error.message()));
+  }
+  return {};
+}
+
 }  // namespace
 
 std::expected<std::vector<std::byte>, std::string> ReadFileBytes(
@@ -172,12 +183,8 @@ std::expected<std::size_t, std::string> PublishBatch(
 
 std::expected<void, std::string> WriteOutputFiles(
     const fs::path& directory, std::span<const OutputBytes> files) {
-  std::error_code error;
-  fs::create_directories(directory, error);
-  if (error) {
-    return std::unexpected(std::format("cannot create {}: {}",
-                                       Platform::PathText(directory),
-                                       error.message()));
+  if (auto created = MakeDirectories(directory); !created) {
+    return created;
   }
   std::vector<fs::path> staged;
   const auto discard = [&staged] {
@@ -187,6 +194,11 @@ std::expected<void, std::string> WriteOutputFiles(
   for (const OutputBytes& file : files) {
     fs::path temporary = directory / Platform::Utf8Path(std::format(
                                          "{}{}", file.name, kTemporarySuffix));
+    // A name may hold '/'-separated directories of its own.
+    if (auto created = MakeDirectories(temporary.parent_path()); !created) {
+      discard();
+      return created;
+    }
     std::ofstream output(temporary, std::ios::binary | std::ios::trunc);
     staged.push_back(temporary);
     output.write(reinterpret_cast<const char*>(file.bytes.data()),
@@ -200,6 +212,7 @@ std::expected<void, std::string> WriteOutputFiles(
   }
   for (std::size_t index = 0; index < files.size(); ++index) {
     const fs::path target = directory / Platform::Utf8Path(files[index].name);
+    std::error_code error;
     fs::rename(staged[index], target, error);
     if (error) {
       return std::unexpected(std::format("cannot replace {}: {}",

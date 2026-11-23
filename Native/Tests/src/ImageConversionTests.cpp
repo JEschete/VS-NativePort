@@ -33,6 +33,7 @@
 #include "Effects/EffectResourcesLive.hpp"
 #include "Extract/EffectTextureConversion.hpp"
 #include "Extract/EsqConversion.hpp"
+#include "Extract/EtmConversion.hpp"
 #include "Extract/ImageConversion.hpp"
 #include "Extract/ImageFilesWriter.hpp"
 #include "Extract/ShpModelConversion.hpp"
@@ -474,8 +475,9 @@ void OverwriteFile(const fs::path& path, const Bytes& bytes) {
 }
 
 // Converts root's images and records its workshop recipe tables, character
-// models, weapons, animation sets, sound banks, XA tracks and movies (none in
-// these stores), so the store's conversion check covers the images alone.
+// models, weapons, animation sets, actor textures, sound banks, XA tracks and
+// movies (none in these stores), so the store's conversion check covers the
+// images alone.
 Extract::ImageConversionReport RequiredConversion(const fs::path& root,
                                                   bool force) {
   auto report = Extract::ConvertDiscImages(root, force);
@@ -492,6 +494,9 @@ Extract::ImageConversionReport RequiredConversion(const fs::path& root,
   const auto sets = Extract::ConvertDiscAnimationSets(root, force);
   INFO((sets ? std::string{} : sets.error()));
   REQUIRE(sets.has_value());
+  const auto textures = Extract::ConvertDiscActorTextures(root, force);
+  INFO((textures ? std::string{} : textures.error()));
+  REQUIRE(textures.has_value());
   VS::test_support::RecordAudioConversions(root);
   return *report;
 }

@@ -37,6 +37,7 @@
 #include "Extract/AudioBankConversion.hpp"
 #include "Extract/ConverterBatch.hpp"
 #include "Extract/EsqConversion.hpp"
+#include "Extract/EtmConversion.hpp"
 #include "Extract/ImageConversion.hpp"
 #include "Extract/ShpModelConversion.hpp"
 #include "Extract/WepModelConversion.hpp"
@@ -180,14 +181,15 @@ class AudioRoot {
     REQUIRE(output.good());
   }
 
-  // Records the image, table, model, weapon and animation set converters,
-  // with nothing of theirs to convert here.
+  // Records the image, table, model, weapon, animation set and actor texture
+  // converters, with nothing of theirs to convert here.
   void ConvertOthers() const {
     REQUIRE(Extract::ConvertDiscImages(root_, false).has_value());
     REQUIRE(Extract::ConvertDiscTables(root_, false).has_value());
     REQUIRE(Extract::ConvertDiscModels(root_, false).has_value());
     REQUIRE(Extract::ConvertDiscWeapons(root_, false).has_value());
     REQUIRE(Extract::ConvertDiscAnimationSets(root_, false).has_value());
+    REQUIRE(Extract::ConvertDiscActorTextures(root_, false).has_value());
   }
 
   // Why a store over the root refuses its conversions; empty if it does not.

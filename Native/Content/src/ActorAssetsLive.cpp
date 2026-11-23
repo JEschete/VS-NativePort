@@ -356,7 +356,7 @@ std::optional<ConvertedRead> ConvertedSequenceRead(DiscFileExtent file) {
   return std::nullopt;
 }
 
-// Native (#203-#206): the converted file a read of `file` on `stream` loads,
+// Native (#203-#207): the converted file a read of `file` on `stream` loads,
 // if any.
 std::optional<ConvertedRead> ConvertedReadOf(AssetFileStream stream,
                                              DiscFileExtent file) {
@@ -368,16 +368,18 @@ std::optional<ConvertedRead> ConvertedReadOf(AssetFileStream stream,
     case AssetFileStream::kSequence:
       return ConvertedSequenceRead(file);
     case AssetFileStream::kEffectTexture:
-      return std::nullopt;
+      return ConvertedRead{.load = LoadConvertedActorTexture,
+                           .what = "actor texture"};
   }
   return std::nullopt;
 }
 
-// Native (#203-#206): fills `destination` with the converted actor model,
-// weapon model, animation bank or animation set in place of the disc read. A
-// file that does not load or fit leaves zeros: the parser refuses them as an
-// empty actor model, they parse as a weapon with no geometry, and as an empty
-// bank or set.
+// Native (#203-#207): fills `destination` with the converted actor model,
+// weapon model, animation bank, animation set or effect texture sheet in
+// place of the disc read. A file that does not load or fit leaves zeros: the
+// parser refuses them as an empty actor model, they parse as a weapon with no
+// geometry, as an empty bank or set, and as a sheet of no lines, which uploads
+// nothing.
 void ReadConvertedModel(const ConvertedRead& read, DiscFileExtent file,
                         std::span<std::byte> destination) {
   std::ranges::fill(destination, std::byte{0});
@@ -1028,7 +1030,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
     live.file->size = file.bytes;
     if (const std::optional<ConvertedRead> converted =
             ConvertedReadOf(stream, file)) {
-      // Native (#203-#206): the converted file loads at once, with no disc
+      // Native (#203-#207): the converted file loads at once, with no disc
       // read.
       const auto wanted = static_cast<std::size_t>(std::max(file.bytes, 0));
       const std::span<std::byte> bytes = Bytes(destination, wanted);

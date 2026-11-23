@@ -180,22 +180,6 @@ Check CheckSetTables(const SourceFile& program, const SetSources& sources) {
   return {};
 }
 
-Result<SeqEventTable> EventsOf(const SourceFile& program) {
-  if (program.bytes.size() < kProgramBytes) {
-    return std::unexpected(std::format(
-        "{} is too short for the set tables and the event stride table",
-        program.path));
-  }
-  SeqEventTable events{
-      .source = program.path, .source_sha256 = HashOf(program), .lengths = {}};
-  std::ranges::transform(
-      std::span(program.bytes)
-          .subspan(kSeqEventLengthsAt, kSeqEventLengthCount),
-      std::back_inserter(events.lengths),
-      [](std::byte value) { return std::to_integer<std::uint8_t>(value); });
-  return events;
-}
-
 // The game reads selectors as signed halfwords.
 std::int32_t SelectorOf(const EsqEntry& entry) {
   return static_cast<std::int16_t>(entry.selector);
@@ -352,6 +336,23 @@ Check VerifySet(const AnimationSetDocument& document, const ImageFile& file,
 
 }  // namespace
 
+std::expected<SeqEventTable, std::string> ProgramEventTable(
+    const SourceFile& program) {
+  if (program.bytes.size() < kProgramBytes) {
+    return std::unexpected(std::format(
+        "{} is too short for its file tables and the event stride table",
+        program.path));
+  }
+  SeqEventTable events{
+      .source = program.path, .source_sha256 = HashOf(program), .lengths = {}};
+  std::ranges::transform(
+      std::span(program.bytes)
+          .subspan(kSeqEventLengthsAt, kSeqEventLengthCount),
+      std::back_inserter(events.lengths),
+      [](std::byte value) { return std::to_integer<std::uint8_t>(value); });
+  return events;
+}
+
 std::expected<std::string, std::string> AnimationSetIdForDiscPath(
     std::string_view disc_path) {
   if (!DiscStemOf(disc_path, Content::kEsqExtension)) {
@@ -411,7 +412,7 @@ std::expected<ModelConversionReport, std::string> ConvertDiscAnimationSets(
                       sources->sets.front().path, kBattleProgramPath));
     }
     const SourceFile& program = *sources->program;
-    auto events = EventsOf(program);
+    auto events = ProgramEventTable(program);
     if (!events) return std::unexpected(events.error());
     if (auto named = CheckSetTables(program, *sources); !named) {
       return std::unexpected(named.error());
