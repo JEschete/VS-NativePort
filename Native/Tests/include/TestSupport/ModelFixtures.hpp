@@ -79,6 +79,19 @@ struct PolygonSpec {
   return *std::move(bytes);
 }
 
+// Whether the extracted model `lender` in `models` is coloured, which a model
+// that borrows its texture needs to decode.
+[[nodiscard]] inline bool LenderColored(const std::filesystem::path& models,
+                                        std::int32_t lender) {
+  const std::vector<std::byte> bytes =
+      ReadModel(models / std::format("{:02X}.SHP", lender));
+  const auto lent = Content::PeekShpTexture(bytes);
+  INFO(ErrorOf(lent));
+  REQUIRE(lent.has_value());
+  REQUIRE(lent->flags.has_value());
+  return lent->flags == Content::kShp4BitTexture;
+}
+
 [[nodiscard]] inline Content::JsonDocument ParseGltf(
     std::span<const std::byte> bytes) {
   auto gltf = Content::ParseJsonText(bytes, "model.gltf");

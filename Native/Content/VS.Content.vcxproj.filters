@@ -93,6 +93,9 @@
     <ClCompile Include="src\PFile.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\SeqFile.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ShpFile.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -202,6 +205,9 @@
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\PFile.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\SeqFile.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\ShpFile.hpp">

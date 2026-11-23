@@ -1131,6 +1131,9 @@
     <ClCompile Include="src\SeqControlCommandsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\SeqFileTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\SeqMusicSequenceTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

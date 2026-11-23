@@ -409,6 +409,7 @@
     <ClCompile Include="src\SecondaryEffectRequestsTests.cpp" />
     <ClCompile Include="src\SegmentCollisionTests.cpp" />
     <ClCompile Include="src\SeqControlCommandsTests.cpp" />
+    <ClCompile Include="src\SeqFileTests.cpp" />
     <ClCompile Include="src\SeqMusicSequenceTests.cpp" />
     <ClCompile Include="src\SeqSequencerTests.cpp" />
     <ClCompile Include="src\SequencePlaybackTests.cpp" />

@@ -295,13 +295,8 @@ std::optional<bool> LenderColored(const fs::path& models,
     ++tallies[std::format("flags {:02X}", source.flags.value_or(0))];
     return std::nullopt;
   }
-  const Bytes lender =
-      ReadModel(models / std::format("{:02X}.SHP", *source.lender));
-  const auto lent = content::PeekShpTexture(lender);
-  REQUIRE(lent.has_value());
-  REQUIRE(lent->flags.has_value());
   ++tallies["borrowed"];
-  return lent->flags == content::kShp4BitTexture;
+  return VS::test_support::LenderColored(models, *source.lender);
 }
 
 void CheckRebuilds(const fs::path& path, const fs::path& models,
