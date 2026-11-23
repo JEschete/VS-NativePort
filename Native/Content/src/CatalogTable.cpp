@@ -127,8 +127,17 @@ bool IsLowerHexDigit(char value) {
 std::expected<std::vector<std::size_t>, std::string> HeaderOrder(
     const TableSpec& spec, const CsvRecord& header, std::string_view file) {
   std::vector<std::size_t> position(spec.columns.size(), kNotFound);
+  bool has_label = false;
   for (std::size_t field = 0; field < header.fields.size(); ++field) {
     const std::string_view name = header.fields[field];
+    if (name == kDisplayName) {
+      if (has_label) {
+        return std::unexpected(std::format("{}:{}: column '{}' appears twice",
+                                           file, header.line, name));
+      }
+      has_label = true;
+      continue;
+    }
     const auto found = std::ranges::find(spec.columns, name, &ColumnSpec::name);
     if (found == spec.columns.end()) {
       return std::unexpected(
@@ -193,11 +202,11 @@ std::expected<std::int64_t, std::string> ReadCell(const ColumnSpec& column,
 
 std::expected<TableRow, std::string> ReadRow(
     const TableSpec& spec, const std::vector<std::size_t>& position,
-    const CsvRecord& record, std::string_view file) {
-  if (record.fields.size() != position.size()) {
+    const CsvRecord& record, std::size_t header_fields, std::string_view file) {
+  if (record.fields.size() != header_fields) {
     return std::unexpected(
         std::format("{}:{}: has {} fields; the header has {}", file,
-                    record.line, record.fields.size(), position.size()));
+                    record.line, record.fields.size(), header_fields));
   }
   TableRow row{.line = record.line, .cells = {}, .values = {}};
   for (std::size_t column = 0; column < spec.columns.size(); ++column) {
@@ -309,7 +318,8 @@ std::expected<std::vector<TableRow>, std::string> ReadTable(
   std::vector<TableRow> rows;
   std::unordered_map<std::string, std::size_t> keys;
   for (std::size_t index = 1; index < records->size(); ++index) {
-    auto row = ReadRow(spec, *position, (*records)[index], file);
+    auto row = ReadRow(spec, *position, (*records)[index],
+                       records->front().fields.size(), file);
     if (!row) return std::unexpected(row.error());
     RowKey key = KeyOf(spec, *key_columns, *row);
     const auto [found, added] = keys.emplace(std::move(key.cells), row->line);
@@ -354,6 +364,14 @@ std::string FormatTableSchema(const TableSpec& spec) {
     }
     entry["description"] = std::string(column.description);
     columns.push_back(std::move(entry));
+    if (columns.size() == 1) {
+      columns.push_back(
+          {{"name", kDisplayName},
+           {"type", "text"},
+           {"optional", true},
+           {"description",
+            "Informational plain-text label; not a key or gameplay value."}});
+    }
   }
   JsonDocument key = JsonDocument::array();
   for (const std::string_view name : spec.key) key.push_back(std::string(name));

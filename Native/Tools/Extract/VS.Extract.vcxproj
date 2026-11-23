@@ -47,6 +47,7 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\AssetLabels.cpp" />
     <ClCompile Include="src\AudioBankConversion.cpp" />
     <ClCompile Include="src\ConversionManifestWriter.cpp" />
     <ClCompile Include="src\ConverterBatch.cpp" />
@@ -64,6 +65,7 @@
     <ClCompile Include="src\ZudConversion.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Extract\AssetLabels.hpp" />
     <ClInclude Include="include\Extract\AudioBankConversion.hpp" />
     <ClInclude Include="include\Extract\ConversionManifestWriter.hpp" />
     <ClInclude Include="include\Extract\ConverterBatch.hpp" />

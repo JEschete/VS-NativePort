@@ -111,6 +111,12 @@ std::expected<void, std::string> JsonMembers::Only(
     return std::unexpected(std::format("{} must be an object", where_));
   }
   for (const auto& [key, value] : object_->items()) {
+    if (key == kDisplayName) {
+      if (!value.is_string()) {
+        return std::unexpected(std::format("{} must be a string", Where(key)));
+      }
+      continue;
+    }
     if (std::ranges::find(keys, std::string_view(key)) == keys.end()) {
       return std::unexpected(
           std::format("{} has an unknown member '{}'", where_, key));

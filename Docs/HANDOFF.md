@@ -1,5 +1,71 @@
 # Current Handoff
 
+## Readable-label preparation and semantic authoring decision (#520), 2026-11-23
+
+Base revision: `242ae3e2b` on `main`. The owner explicitly replaced the PR
+workflow with scoped commits/pushes on `main`; that documentation-only commit
+passed CI `45259252641`.
+
+**Destination: ASSET_PIPELINE.md section 4, not labels over opaque dumps.**
+The owner clarified this while the label pass was in progress. D26 now requires
+semantic IDs, schema-backed named values/flags, meaningful fields/arguments and
+explicit provenance for legacy identities/unused bytes. The new section 7.2
+readability gate was appended to all 21 open asset-format issues. #520 was
+expanded and remains open. The proposed table generator and charmap are now
+accurately marked unimplemented; no new implementation is claimed for them.
+
+**Preparatory code delivered**
+- `VS.Extract labels <datadir> [--force]` and successful conversion commands
+  add optional `display_name` metadata. CSV puts it second without shifting
+  runtime semantic columns; JSON uses an early member and glTF uses
+  `asset.extras.vs`. Other fields/IDs remain unchanged in this command.
+- Bounded English names decode accents/punctuation, stop before terminator
+  padding and retain unknown codes as visible markers. Item names label recipe
+  results and parts; verified archetype references propagate shared aliases.
+- Existing labels/author edits survive; `labels --force` refreshes only labels.
+  Unknown fields and old numeric identities still present are migration debt.
+
+**Measured local data evidence**
+- All **21,709 rows in 15 CSV tables** preserve every original cell; the new
+  label is column 2. Examples include Guildenstern, Muellenkamp Soldier (with
+  the source accent), Battle Knife and Scramasax.
+- **333 glTF and 2,751 JSON documents** are labeled. Across **13,525 non-disc
+  files**, canonical non-label JSON/CSV values and every binary hash are
+  unchanged. Schemas differ only by the optional annotation column.
+- The repeat command reports **0 updated / 3,114 unchanged files**.
+- No disc-derived data was committed. Native data was annotated only after
+  rebuilding consumers and confirming no native application was running.
+
+**Validation**
+- Full Debug and Release solution builds passed (`VS_JOBS=4`, `/m:2`,
+  `/p:Configuration=<Debug|Release> /p:Platform=x64`).
+- Release `[asset-labels]`: **12 cases / 183 assertions**.
+- The broader Release asset selection passed 132/133 cases; its only failure
+  compared catalog text before/after optional annotations. The test now compares
+  every non-label JSON field and verifies annotation types, not byte formatting.
+  That exact case then passed **5,568 assertions**.
+- Debug `[asset-labels],[asset-catalog]`: **38 cases / 7,350 assertions**.
+- Both existing Debug production replays, run through `regression.run_replay`
+  and `compare_replay`, match the unchanged baseline: `silver_wolves` 2,400
+  frames and `first_lever_room` 900 frames. The full suite was not repeated for
+  this annotation-only checkpoint.
+- Scoped tidy and the mixed changed-file quality pass report **0 new findings**.
+  The generated projects are stable on a second generation; all 15 CSV schemas
+  were produced by the native formatter and are stable on repeated annotation.
+- Evidence: `build\issue-520-*.log`, `build\issue-520-asset-before.json`.
+  Exact pushed-revision CI is recorded on the issue after publication.
+
+**Next:** implement the first actual section 4 authoring slice in workshop
+catalogs: semantic result IDs/references and verified named domains. Preserve
+directed combinations and original mappings, and classify unknown bytes from
+their real consumers rather than guessing. This checkpoint does not close #520,
+#499, #199 or any complete asset-format issue.
+
+**Owner playtest feedback:** positive FMV/demo/rain/facial/manor-fire observations
+are recorded on #149. New reports are #521 (VKP cigarette flicker), #522 (Debug
+logging choppiness), #523 (window drag pauses playback). They are owner evidence;
+tested revision and causes remain unverified. No speculative fixes were made.
+
 ## Converted actor-asset read failures (#518), 2026-11-23
 
 Starting revision: `0530c5dc8` on `imp/asset-migration`, PR #519. The owner

@@ -115,6 +115,7 @@
     <ClCompile Include="src\AppearanceTests.cpp" />
     <ClCompile Include="src\AppearanceTransitionTests.cpp" />
     <ClCompile Include="src\AssetCatalogTests.cpp" />
+    <ClCompile Include="src\AssetLabelsTests.cpp" />
     <ClCompile Include="src\AudioControlSfxTests.cpp" />
     <ClCompile Include="src\AudioConversionTests.cpp" />
     <ClCompile Include="src\AudioDispatchTests.cpp" />
@@ -490,6 +491,7 @@
     <ClCompile Include="src\ZoneConversionTests.cpp" />
     <ClCompile Include="src\ZoneTableTests.cpp" />
     <ClCompile Include="src\ZudFileTests.cpp" />
+    <ClCompile Include="..\Tools\Extract\src\AssetLabels.cpp" />
     <ClCompile Include="..\Tools\Extract\src\AudioBankConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\ConversionManifestWriter.cpp" />
     <ClCompile Include="..\Tools\Extract\src\ConverterBatch.cpp" />

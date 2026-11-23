@@ -23,6 +23,7 @@
 #include "Content/MovieEncoder.hpp"
 #include "Core/Log.hpp"
 #include "Core/Sha256.hpp"
+#include "Extract/AssetLabels.hpp"
 #include "Extract/AudioBankConversion.hpp"
 #include "Extract/ConverterBatch.hpp"
 #include "Extract/EsqConversion.hpp"
@@ -68,6 +69,7 @@ int Usage() {
       "  VS.Extract tables   <datadir> [--force]\n"
       "  VS.Extract models   <datadir> [--force]\n"
       "  VS.Extract banks    <datadir> [--force]\n"
+      "  VS.Extract labels   <datadir> [--force]\n"
       "      Form 1 files are copied as they are; movies (*.STR) are converted "
       "to Matroska (AV1 + FLAC)\n"
       "      with FFmpeg (found on PATH, or --ffmpeg). Effect audio and XA "
@@ -98,8 +100,28 @@ int Usage() {
       "replacing edited models).\n"
       "      extract also converts the sound banks (SOUND/WAVE*.DAT) to WAV "
       "and SFZ under audio/banks/;\n"
-      "      banks converts again only what changed (--force: everything).");
+      "      banks converts again only what changed (--force: everything).\n"
+      "      Successful conversion commands also add readable display_name "
+      "metadata. labels adds it without reconverting;\n"
+      "      labels --force refreshes only labels, preserving gameplay "
+      "fields and original encoded names.");
   return 2;
+}
+
+int LabelAssets(const fs::path& root, bool refresh = false) {
+  const auto result = Extract::LabelNativeAssets(root, refresh);
+  if (!result) {
+    VS::Core::LogError("extract", "labels: {}", result.error());
+    return 1;
+  }
+  VS::Core::LogInfo("extract",
+                    "labels: {} files updated, {} unchanged, {} CSV rows",
+                    result->written, result->unchanged, result->rows);
+  return 0;
+}
+
+int WithLabels(int result, const fs::path& root) {
+  return result == 0 ? LabelAssets(root) : result;
 }
 
 // --ffmpeg <path>, else ffmpeg.exe on PATH.
@@ -573,7 +595,7 @@ int ConvertExtracted(const Content::Disc& disc, const fs::path& out,
   if (ConvertModels(out, false) != 0) return 1;
   if (ConvertTables(out, false) != 0) return 1;
   if (ConvertBanks(out, false) != 0) return 1;
-  return ConvertStreams(disc, out, ffmpeg);
+  return WithLabels(ConvertStreams(disc, out, ffmpeg), out);
 }
 
 int ExtractDisc(const Content::Disc& disc, int argc, char** argv) {
@@ -674,17 +696,21 @@ int Run(int argc, char** argv) {
   const std::string cmd = argv[1];
   if (cmd == "catalogs") {
     return argc == kCatalogArguments
-               ? WriteCatalogs(Platform::Utf8Path(argv[2]))
+               ? WithLabels(WriteCatalogs(Platform::Utf8Path(argv[2])),
+                            Platform::Utf8Path(argv[2]))
                : Usage();
   }
-  if (cmd == "images" || cmd == "tables" || cmd == "models" || cmd == "banks") {
+  if (cmd == "images" || cmd == "tables" || cmd == "models" || cmd == "banks" ||
+      cmd == "labels") {
     const auto force = ForceArgument(argc, argv);
     if (!force) return Usage();
     const fs::path root = Platform::Utf8Path(argv[2]);
-    if (cmd == "models") return ConvertModels(root, *force);
-    if (cmd == "banks") return ConvertBanks(root, *force);
-    return cmd == "images" ? ConvertImages(root, *force)
-                           : ConvertTables(root, *force);
+    if (cmd == "labels") return LabelAssets(root, *force);
+    if (cmd == "models") return WithLabels(ConvertModels(root, *force), root);
+    if (cmd == "banks") return WithLabels(ConvertBanks(root, *force), root);
+    return WithLabels(cmd == "images" ? ConvertImages(root, *force)
+                                      : ConvertTables(root, *force),
+                      root);
   }
   auto disc = Content::Disc::Open(Platform::Utf8Path(argv[2]));
   if (!disc) {
@@ -695,8 +721,9 @@ int Run(int argc, char** argv) {
     return ListDisc(**disc);
   }
   if (cmd == "streams" && ValidStreamArguments(argc, argv)) {
-    return ConvertStreams(**disc, Platform::Utf8Path(argv[kOutputArgument]),
-                          FindFfmpeg(argc, argv));
+    const fs::path root = Platform::Utf8Path(argv[kOutputArgument]);
+    return WithLabels(ConvertStreams(**disc, root, FindFfmpeg(argc, argv)),
+                      root);
   }
   if (cmd == "extract" && argc >= kExtractArguments) {
     return ExtractDisc(**disc, argc, argv);

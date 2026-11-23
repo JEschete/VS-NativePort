@@ -44,6 +44,82 @@ The rule for choosing: **what is easiest for a modder to edit**, provided conver
 | 9 | Layout | §3. Patch and mod layers mirror it and override by path (assets) or by ID (tables), plan §9.6. |
 | 10 | Coverage gaps | Formats with no migration issue get one (images in menus, ending, `SYSTEM.DAT` and PRG data; the gameplay catalog; the string table; AKAO sequences; PLG/PRG data blobs). |
 
+### 1.2 Readable names (owner, 2026-11-23, plan D26, #520)
+
+**The owner chose §4's semantic authoring contract.** This annotation pass is
+preparatory compatibility work, not the destination or a format-completion
+gate. Positional/filename IDs and encoded fields in the current outputs still
+need the explicit schema/consumer migrations below. A readable label does not
+make a packed numeric field or unnamed command stream an authoring format.
+
+`display_name` is an optional **informational** plain-text label. It is not an
+ID, a reference, or a replacement for an encoded gameplay name:
+
+- CSV tables put it immediately after their first identity/key column.
+  Schemas describe it as optional text. `ReadTable` excludes it from semantic
+  cells, so existing numeric column positions and key/reference checks do not
+  change. Unlabeled tables remain supported.
+- Native JSON puts it early in the object. Strict readers accept this one
+  reserved annotation as a string; other unknown fields are still errors.
+  Native glTF puts it at the start of `asset.extras.vs`, not in an invalid
+  custom root property. Joint names, geometry and animation values do not change.
+- Image sidecars identify PNGs; bank/stream metadata identifies WAV/SFZ and
+  streamed audio. Binary payloads (`.bin`, PNG, WAV, SFZ, FLAC, MKV) are not
+  rewritten just to attach text. Conversion manifests and schemas remain
+  operational descriptions, not additional copies of author-facing names.
+
+The `labels` command deliberately does not rename existing keys or replace
+encoded values. The subsequent §4 migrations must introduce semantic IDs and
+named values, update their references/consumers together, and preserve legacy
+ID mappings and source bytes explicitly. IDs remain stable after that migration;
+editing a display name must not implicitly rename an identity.
+
+`VS.Extract labels <datadir>` annotates an existing native tree **without
+reconverting it**. Successful `extract`, `catalogs`, `images`, `models`, `tables`,
+`banks` and `streams` commands also run this pass. It uses the current native
+table values, the extracted item-name table when available, and the manifest's
+verified model/archetype references. It does not need or modify the disc image.
+
+The first pass adds labels; later passes preserve existing labels and gameplay
+edits. `labels <datadir> --force` recomputes **only labels**, never HP, equipment,
+placements, encoded names, geometry, palettes or other gameplay data. Each file
+is replaced through the existing staged writer; unchanged files are not
+rewritten. Errors identify the file and return failure. Completed files remain
+valid, and the same command can resume after a failure. Labeling is not a claim
+that an unconverted format has been converted or that all content is ready.
+Explicit reconversion commands retain their existing overwrite rules; the
+labeling pass does not protect an asset from a requested converter `--force`
+or a catalog rebuild.
+
+Current name sources:
+- Enemy and weapon display names decode the bounded English-edition ZND name
+  fields. E7 ends the name; trailing padding is ignored only for the label and
+  remains in the original hex field. Accents and punctuation are preserved.
+  Layout controls are omitted; unknown glyphs/controls remain visible markers.
+  This is not the lossless text/markup converter still required by #500.
+- Equipment parts and workshop results use `MENU/ITEMNAME.BIN` where a name is
+  available. Ingredient pairs and material rules describe their inputs/results.
+- ZUD references carry enemy names to their shared/owned model files. Shared
+  models keep the applicable names in sorted order rather than choosing an
+  arbitrary enemy and collapsing variants.
+- Assets without a known canonical name use an explicit source/role or ID
+  label. Such labels are descriptions, not invented names or verified room,
+  animation, sound or effect semantics.
+
+**Required for later converters and adoption work:**
+
+| Work | Name requirement still to apply/refine |
+|---|---|
+| #199 relational species, variants, loadouts and loot | Early names on definitions and useful join rows; keep distinct variants and encoded/string-ID authority. |
+| #198 MPD and #201 ARM | Resolve actual room/area names and introduce semantic room/area IDs with an explicit mapping from old keys; update exits, events, saves and other references together. |
+| #499 items, actions, status, bestiary and other tables | Early labels from source names/string IDs; recipes keep their ingredient/result descriptions. |
+| #500 text and #202 EVT | Readable string/event labels alongside stable IDs and lossless markup/provenance, not a competing authoritative text field. |
+| #209 GIM, #210 FAR, #211 DIS, #498 embedded/UI art | Label artwork, layers/layouts and challenge/result rows by source purpose and verified associations. |
+| #212 HF0 and #213 HF1 | Label pages, topics and diagrams with decoded titles and page associations. |
+| #216 effects and #502 module data | Label effect definitions/resources and tables by verified behavior/purpose; keep unknown meanings explicit. |
+| #501 music/SFX sequences | Label sequences and tracks through verified music/SFX associations; do not invent track titles. |
+| #203/#205/#206/#207 character inspection | Refine source-only model/clip/set/texture labels as verified character and animation associations become available. |
+
 ---
 
 ## 2. Flow
@@ -132,9 +208,14 @@ The exact file list is generated: `CONTENT_LEDGER.csv` (§9) gives every disc fi
 
 Flat, row-shaped tables (items, actions, spells, status, recipes, enemies, loot, spawns, challenges) are written as CSV (§1.1). Data with nested structure (title layout, effect template parameters) is written as JSON.
 
-**Decoders are generated, not hand-written:**
+**Target: schema-driven generated decoders, not hand-written authoring layouts.**
+`tools\port\gen_table_decoders.py` is a proposed tool, **not an implemented
+command**. The current SYD/ZND and model codecs are hand-written preservation/
+import implementations; their byte-exactness does not satisfy this authoring
+contract. #499 and the per-format issues must establish shared, enforceable
+schema/domain rules rather than copying the opaque dump layouts.
 
-1. `tools\port\gen_table_decoders.py` reads the decomp struct definitions (libclang, PS1 layout: 32-bit pointers, 4-byte alignment, GCC bitfield order). For each catalog table it emits:
+1. The planned generator reads the decomp struct definitions (libclang, PS1 layout: 32-bit pointers, 4-byte alignment, GCC bitfield order) and reviewed semantic schemas. For each catalog table it must emit:
    - a C++ reader (`VS.Extract`, `src\tables\Generated*.cpp`) that pulls fields from the file image at the symbol's offset;
    - a CSV writer (flat tables) or JSON writer (structured catalogs);
    - a schema (committed under `Native\Content\schemas\` at the table's path under `Native\data\`, e.g. `catalogs\menu\combination-blade-results.schema.json`); for a CSV table it lists the columns, types, ranges and references;
@@ -151,8 +232,33 @@ Flat, row-shaped tables (items, actions, spells, status, recipes, enemies, loot,
 
 4. Every record keeps its `legacyId` (CSV column `legacy_id`; the original index) so copied logic and `.mcd` save import keep working (plan §9.2).
 
+5. Primary definition IDs carry meaning (`blade.battle-knife`,
+   `blade.scramasax`), not just row positions. Shared definitions and distinct
+   variants must be modeled deliberately. Initial migration must update every
+   reference and retain an explicit old-ID mapping; changing a name later must
+   not silently change a persisted identity.
+6. Where meaning is known, schemas provide machine-readable domains and files
+   store names: `bronze`, `piercing`, named status flags, and named instruction
+   arguments. Numeric quantities and topology indices remain numbers with
+   documented units/roles. Packed words must be split according to proven
+   semantics; an AI settings word is not assumed to be only flags.
+7. Name column families by their actual mapped meaning, not ordinal position
+   (`affinity_fire`, `class_undead`, `type_edged`). Reserved/unused elements
+   require explicit classification; do not guess a name from an array index.
+8. Combination data uses semantic ingredient/result references or an editable
+   grid view of the same source. Keep directed pairs directed: do not assume
+   reversing ingredients gives the same result. Deduplicate or derive records
+   only after proving the source relationship and preserving instance state.
+
 ### 4.1 Lossless "extras"
 If a value has no clean meaning yet, it is **kept**, not dropped. In a CSV table it is a `raw.<field>` column; in JSON it goes under `"_raw": { "<field>": value }`. Either way it is listed in `TYPE_LEDGER` as unnamed. Unnamed fields block the 1a gate, so no raw field may remain at the end of Phase 1.
+
+Those are temporary preservation representations, not final author-facing
+columns. Quarantine imported unknown bytes/unused padding in one documented
+provenance representation rather than mixing `raw.byte7`, `raw_33` and
+`raw_5a` into editable definitions. Unknown **consumed** semantics block
+authoring-format completion; moving them to a sidecar or adding `unknown_`
+names does not satisfy the gate.
 
 ---
 
@@ -161,8 +267,8 @@ If a value has no clean meaning yet, it is **kept**, not dropped. In a CSV table
 - **Strings:** every string the game shows (exe, MENU `ITEMNAME/ITEMHELP`, `SMALL\HELP*.HF0/HF1`, `MCDATA`, event text in `EVT`, menu labels) is decoded from the VS character table to UTF-8 and stored once in `text\strings.en.json` as `{ "id": "text", ... }`.
 - **IDs** follow the owner prefix: `text.item.blade.scramasax.name`, `text.event.0012.004`, `text.menu.title.new_game`. Code and catalogs refer to IDs only.
 - **Inline control codes** (colour, wait, newline, name insertion, button glyphs) become a small markup language: `{color:red}`, `{wait:30}`, `{name:ashley}`, `{btn:circle}`, `\n`. The decoder and encoder are exact inverses, so the round-trip is byte-identical (§7).
-- **Fonts:** glyph bitmaps become a PNG atlas with JSON metrics (codepoint → rect, advance). The VS character code → Unicode map is in `Native\Content\schemas\charmap.json` (committed; it is a table of our own making, not game data). Reference: `tools\PSX\VagrantStory\VagrantStory-Font`.
-- **Localization:** Phase 2 adds `strings.<lang>.json` overlays. The structure is ready now.
+- **Fonts (target):** glyph bitmaps become a PNG atlas with JSON metrics (codepoint → rect, advance). #500 must supply the VS character code → Unicode contract and bidirectional codec. The proposed `Native\Content\schemas\charmap.json` is **not present yet**; the bounded label decoder in §1.2 is not a substitute for that text conversion. Reference: `tools\PSX\VagrantStory\VagrantStory-Font`.
+- **Localization (target):** Phase 2 adds `strings.<lang>.json` overlays. The complete string catalog/schema/codec must exist before claiming this structure is ready.
 
 ---
 
@@ -637,6 +743,10 @@ A `MAP\ZONE*.ZND` is what the room loader reads when the zone changes (`Content/
 - `catalogs\enemies\zone-enemy-limbs.csv`: one row per limb, except its armour part.
 - `catalogs\enemies\zone-enemy-parts.csv`: one row per equipment part: `weapon.blade`, `weapon.grip`, `weapon.gem1-3`, `shield.base`, `shield.gem1-3`, `accessory` and `limb0-5.armor`.
 
+All six tables receive early informational `display_name` columns through
+§1.2. In particular, `zone-enemies.csv` shows the decoded enemy name while its
+`name` and `weapon_name` hex fields continue to preserve every source byte.
+
 **Exactness.**
 - Every bit of a template is in exactly one column, and a test checks the coverage. Unnamed bytes are `raw_<offset>` columns (§4.1).
 - A limb or part whose bytes are all zero, and an empty room slot, has no row; a missing row reads as zeros.
@@ -703,6 +813,40 @@ Schema validation runs at load in every build. Round-trip tests run in CI where 
 | Native behavior and visual fidelity | Actual production scene/event playback at matched event states, including patch contents, unaffected pixels, restoration, actor isolation and repeat-entry behavior. Compare named shots for lighting/blending; record exact frame/tick/state and differences. | Untested characters, scenes, render modes or full-game fidelity. |
 
 Record source revision/dirty state, disc identity, tool/converter/schema versions, configuration, exact commands or UI actions, selected actor/bank/clip/palette, expected results, observed results and remaining limits. Keep disc-derived fixtures/captures local and out of commits or issue attachments. Converter round trips, viewer inspection and native/reference comparisons are independent acceptance records; none substitutes for another.
+
+---
+
+### 7.2 Authoring readability gate (D26, owner chose §4)
+
+This is an additional acceptance gate for every open asset-migration issue,
+including already converted preservation slices. It does **not** replace exact
+rebuild, deterministic output, native adoption, lifecycle or gameplay evidence.
+A label-only pass or one changed numeric value is not sufficient.
+
+- [ ] Definitions use semantic IDs and readable names. Positional/filename
+  identifiers remain only in explicit provenance/compatibility mappings.
+  References, joins and persisted identities are migrated and validated together;
+  distinct variants and mutable instances are not silently collapsed.
+- [ ] Known enums have machine-readable schema domains and are authored by name.
+  Known flags use named sets. Packed fields expose their proven component roles,
+  and numeric quantities/indices have units and documented meaning.
+- [ ] Column families, instruction arguments and animation/track records name
+  their meaning; no known value is hidden in an ordinal column or untyped integer
+  list. Source citations support the mappings; guesses do not pass.
+- [ ] Recipe/grid editing is understandable from semantic ingredient/result
+  references or a grid view over one authoritative source. Direction-dependent
+  entries, shared definitions and derived values have preservation tests.
+- [ ] Unknown consumed meanings are explicitly tracked and block completion.
+  Proven unused/reserved bytes remain lossless import provenance, not misleading
+  authoring controls. Placeholder/dummy records are identified explicitly.
+- [ ] A cold-read check selects five records per affected family with a recorded
+  seed and records their interpretation: what each record is, what its values
+  mean, what it references and how to make the intended edit, without opening
+  the decomp. Missing meanings fail the gate rather than becoming guessed labels.
+- [ ] The same records pass schema validation and native-consumer/round-trip
+  checks after an authoring edit; ordinary loading, reset and repeat entry still
+  work. Include exact revision/configuration, commands, source evidence, CI and
+  remaining limits before closure.
 
 ---
 

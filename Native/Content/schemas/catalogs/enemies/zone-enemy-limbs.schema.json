@@ -11,6 +11,12 @@
       "description": "the template"
     },
     {
+      "name": "display_name",
+      "type": "text",
+      "optional": true,
+      "description": "Informational plain-text label; not a key or gameplay value."
+    },
+    {
       "name": "limb",
       "type": "integer",
       "minimum": 0,

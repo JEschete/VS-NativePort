@@ -11,6 +11,12 @@
       "description": "the template"
     },
     {
+      "name": "display_name",
+      "type": "text",
+      "optional": true,
+      "description": "Informational plain-text label; not a key or gameplay value."
+    },
+    {
       "name": "part",
       "type": "id",
       "description": "weapon.blade, weapon.grip, weapon.gem1-3, shield.base, shield.gem1-3, accessory or limb0-5.armor"

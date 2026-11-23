@@ -19,6 +19,9 @@ namespace VS::Content {
 
 using JsonDocument = nlohmann::ordered_json;
 
+// Optional author-facing metadata, never a runtime identifier or value.
+inline constexpr std::string_view kDisplayName = "display_name";
+
 // Objects and arrays that hold objects or arrays get one member per line with
 // a two-space indent; arrays of scalars stay on one line. No trailing newline.
 [[nodiscard]] std::string FormatJsonText(const JsonDocument& value);
@@ -41,7 +44,7 @@ class JsonMembers {
   JsonMembers(const JsonDocument& object, std::string where);
 
   [[nodiscard]] std::string Where(std::string_view key) const;
-  // Fails when the value is not an object or has a member not in `keys`.
+  // Fails on unknown members, except optional string display_name metadata.
   [[nodiscard]] std::expected<void, std::string> Only(
       std::initializer_list<std::string_view> keys) const;
   [[nodiscard]] const JsonDocument* Find(std::string_view key) const;

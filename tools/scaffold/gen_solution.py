@@ -75,6 +75,7 @@ PROJECTS = [
             libs=["sdl3", "catch2", "movie", "audio", "crypto", "http", "disc", "image"],
             whole_archive=["VS.Engine", "VS.Content", "VS.Game"],
             see=["VS.CombatLab", "VS.Launcher", "VS.Extract"], extra_sources=[
+                r"Tools\Extract\src\AssetLabels.cpp",
                 r"Tools\Extract\src\AudioBankConversion.cpp",
                 r"Tools\Extract\src\ConversionManifestWriter.cpp",
                 r"Tools\Extract\src\ConverterBatch.cpp",

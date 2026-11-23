@@ -39,6 +39,24 @@ namespace Content = VS::Content;
 namespace fs = std::filesystem;
 using Json = nlohmann::json;
 
+void RemoveDisplayNames(Json& value) {
+  if (!value.is_structured()) return;
+  if (value.is_object()) {
+    const auto label = value.find("display_name");
+    if (label != value.end()) {
+      REQUIRE(label->is_string());
+      value.erase(label);
+    }
+  }
+  for (Json& child : value) RemoveDisplayNames(child);
+}
+
+Json CatalogValues(std::string_view text) {
+  Json value = Json::parse(text);
+  RemoveDisplayNames(value);
+  return value;
+}
+
 struct DiscFileSpec {
   std::string_view path;
   std::uint32_t lba;
@@ -971,8 +989,10 @@ TEST_CASE("Extracted catalogs match a fresh import of the user's disc",
   if (!data) SKIP(data.error());
   const auto texts = Content::ImportAssetCatalogs(data->entries, data->exe);
   REQUIRE(texts.has_value());
-  CHECK(texts->assets == ReadAll(data->root / "catalogs" / "assets.json"));
-  CHECK(texts->audio == ReadAll(data->root / "catalogs" / "audio.json"));
+  CHECK(CatalogValues(texts->assets) ==
+        CatalogValues(ReadAll(data->root / "catalogs" / "assets.json")));
+  CHECK(CatalogValues(texts->audio) ==
+        CatalogValues(ReadAll(data->root / "catalogs" / "audio.json")));
   const auto catalog = Content::AssetCatalog::Load(data->root, 1);
   REQUIRE(catalog.has_value());
   const auto raw = std::ranges::count(data->entries, std::string("raw"),

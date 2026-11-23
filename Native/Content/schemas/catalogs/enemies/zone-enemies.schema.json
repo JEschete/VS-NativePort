@@ -10,6 +10,12 @@
       "description": "the template (enemy.map.zone009.00)"
     },
     {
+      "name": "display_name",
+      "type": "text",
+      "optional": true,
+      "description": "Informational plain-text label; not a key or gameplay value."
+    },
+    {
       "name": "zone",
       "type": "reference",
       "references": "zones",

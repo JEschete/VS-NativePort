@@ -10,6 +10,12 @@
       "description": "The result's id; pairs name it."
     },
     {
+      "name": "display_name",
+      "type": "text",
+      "optional": true,
+      "description": "Informational plain-text label; not a key or gameplay value."
+    },
+    {
       "name": "legacy_id",
       "type": "integer",
       "minimum": 0,

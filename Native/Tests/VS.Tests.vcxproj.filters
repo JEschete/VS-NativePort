@@ -249,6 +249,9 @@
     <ClCompile Include="src\AssetCatalogTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\AssetLabelsTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\AudioControlSfxTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -1584,6 +1587,9 @@
     <ClInclude Include="include\TestSupport\WorkshopRecipeRoot.hpp">
       <Filter>include\TestSupport</Filter>
     </ClInclude>
+    <ClCompile Include="..\Tools\Extract\src\AssetLabels.cpp">
+      <Filter>..\Tools\Extract\src</Filter>
+    </ClCompile>
     <ClCompile Include="..\Tools\Extract\src\AudioBankConversion.cpp">
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>

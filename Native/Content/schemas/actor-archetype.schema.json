@@ -7,6 +7,10 @@
   "additionalProperties": false,
   "required": ["schema", "schema_version", "source", "source_sha256", "header", "body", "weapon", "shield", "common_animation", "battle_animation"],
   "properties": {
+    "display_name": {
+      "type": "string",
+      "description": "Optional informational name, not an identity or gameplay field."
+    },
     "schema": { "const": "vs.actor-archetype" },
     "schema_version": { "const": 1 },
     "source": {

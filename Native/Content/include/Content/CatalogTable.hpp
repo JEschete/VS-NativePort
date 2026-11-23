@@ -11,7 +11,8 @@
 // CSV gameplay tables (ASSET_PIPELINE.md §1.1, §4): one table per file, each
 // described by a <table>.schema.json that lists its columns' types, ranges and
 // references. Reading is strict: the header names every column exactly once
-// (in any order), each cell holds its column's type within its range, and the
+// (in any order), with an optional informational display_name column. Each
+// gameplay cell holds its column's type within its range, and the
 // key columns are unique together. Errors give the file, line and column, so
 // a typo is reported instead of being read as zero.
 namespace VS::Content {
@@ -59,7 +60,8 @@ struct CsvRecord {
     std::span<const std::vector<std::string>> records);
 
 // One data row in the spec's column order. Integer columns' values are in
-// `values`; other columns hold 0 there.
+// `values`; other columns hold 0 there. Optional display_name metadata is not
+// part of these cells, so it cannot change a consumer's column positions.
 struct TableRow {
   std::size_t line = 0;
   std::vector<std::string> cells;

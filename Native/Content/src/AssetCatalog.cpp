@@ -21,6 +21,7 @@
 #include <utility>
 #include <vector>
 
+#include "Content/JsonText.hpp"
 #include "Platform/Paths.hpp"
 #include "nlohmann/json.hpp"
 
@@ -76,6 +77,12 @@ std::expected<void, std::string> RequireKeys(
     std::span<const std::string_view> keys, const Errors& errors) {
   if (!object.is_object()) return errors.Fail(pointer, "must be an object");
   for (const auto& [key, value] : object.items()) {
+    if (key == kDisplayName) {
+      if (!value.is_string()) {
+        return errors.Fail(Pointer(pointer, key), "must be a string");
+      }
+      continue;
+    }
     if (std::ranges::find(keys, key) == keys.end()) {
       return errors.Fail(Pointer(pointer, key), "unknown key");
     }

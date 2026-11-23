@@ -12,6 +12,12 @@
       "description": "The first ingredient's material (1 wood, 2 leather, 3 bronze, 4 iron, 5 hagane, 6 silver, 7 damascus)."
     },
     {
+      "name": "display_name",
+      "type": "text",
+      "optional": true,
+      "description": "Informational plain-text label; not a key or gameplay value."
+    },
+    {
       "name": "first_category",
       "type": "integer",
       "minimum": 2,

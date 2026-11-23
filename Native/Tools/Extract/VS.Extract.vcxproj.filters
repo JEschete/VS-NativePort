@@ -12,6 +12,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\AssetLabels.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\AudioBankConversion.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -57,6 +60,9 @@
     <ClCompile Include="src\ZudConversion.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClInclude Include="include\Extract\AssetLabels.hpp">
+      <Filter>include\Extract</Filter>
+    </ClInclude>
     <ClInclude Include="include\Extract\AudioBankConversion.hpp">
       <Filter>include\Extract</Filter>
     </ClInclude>
