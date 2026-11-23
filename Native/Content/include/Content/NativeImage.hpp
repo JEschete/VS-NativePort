@@ -132,4 +132,10 @@ struct TimOrigin {
   bool operator==(const TimOrigin&) const = default;
 };
 
+[[nodiscard]] TimOrigin OriginOf(const TimFile& tim);
+// The TIM `image` was converted from, at its own depth: the importer's round
+// trip, and the runtime rebuilding a container from its converted images.
+[[nodiscard]] std::expected<TimFile, std::string> TimFromImage(
+    const NativeImage& image, const TimOrigin& origin);
+
 }  // namespace VS::Content

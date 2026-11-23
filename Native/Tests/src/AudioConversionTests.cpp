@@ -42,6 +42,7 @@
 #include "Extract/ShpModelConversion.hpp"
 #include "Extract/WepModelConversion.hpp"
 #include "Extract/WorkshopRecipeConversion.hpp"
+#include "Extract/ZndConversion.hpp"
 #include "Extract/ZudConversion.hpp"
 #include "TestSupport/AudioConversionFixture.hpp"
 
@@ -192,6 +193,7 @@ class AudioRoot {
     REQUIRE(Extract::ConvertDiscAnimationSets(root_, false).has_value());
     REQUIRE(Extract::ConvertDiscActorTextures(root_, false).has_value());
     REQUIRE(Extract::ConvertDiscArchetypes(root_, false).has_value());
+    REQUIRE(Extract::ConvertDiscZones(root_, false).has_value());
   }
 
   // Why a store over the root refuses its conversions; empty if it does not.

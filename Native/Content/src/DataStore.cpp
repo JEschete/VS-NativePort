@@ -31,6 +31,8 @@
 #include "Content/EtmFile.hpp"
 #include "Content/MovieEncoder.hpp"
 #include "Content/WorkshopRecipes.hpp"
+#include "Content/ZndFile.hpp"
+#include "Content/ZoneTables.hpp"
 #include "Content/ZudFile.hpp"
 #include "Core/Log.hpp"
 #include "Core/Sha256.hpp"
@@ -86,6 +88,7 @@ constexpr std::array kConvertedTypes{
     ConvertedType{"", kEsqExtension, kEsqAnimationSetConverterName, kRawForm},
     ConvertedType{"", kEtmExtension, kEtmTextureConverterName, kRawForm},
     ConvertedType{"", kZudExtension, kZudArchetypeConverterName, kRawForm},
+    ConvertedType{"", kZndExtension, kZndTableConverterName, kRawForm},
     ConvertedType{kWaveBankPrefix, kWaveBankExtension, kWaveBankConverterName,
                   kRawForm},
     ConvertedType{"", kXaExtension, kXaFlacConverterName, "stream"},

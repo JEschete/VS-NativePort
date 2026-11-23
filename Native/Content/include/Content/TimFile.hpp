@@ -90,4 +90,9 @@ struct DecodedTim {
     std::span<const std::byte> data);
 [[nodiscard]] std::string_view TimErrorName(TimError error) noexcept;
 
+// Rebuilds the exact TIM bytes: the importer's round trip, and the runtime
+// rebuilding a container from its converted images (ZND, #517).
+[[nodiscard]] std::expected<std::vector<std::byte>, std::string> EncodeTim(
+    const TimFile& tim);
+
 }  // namespace VS::Content

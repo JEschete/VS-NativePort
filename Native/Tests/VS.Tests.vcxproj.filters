@@ -1365,6 +1365,12 @@
     <ClCompile Include="src\ZndFileTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ZoneConversionTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ZoneTableTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ZudFileTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -1608,13 +1614,13 @@
     <ClCompile Include="..\Tools\Extract\src\TimImage.cpp">
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>
-    <ClCompile Include="..\Tools\Extract\src\TimWriter.cpp">
-      <Filter>..\Tools\Extract\src</Filter>
-    </ClCompile>
     <ClCompile Include="..\Tools\Extract\src\WepModelConversion.cpp">
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>
     <ClCompile Include="..\Tools\Extract\src\WorkshopRecipeConversion.cpp">
+      <Filter>..\Tools\Extract\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Tools\Extract\src\ZndConversion.cpp">
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>
     <ClCompile Include="..\Tools\Extract\src\ZudConversion.cpp">

@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "table": "zone-rooms",
+  "description": "The rooms in each zone's room table; unlisted slots are empty.",
+  "key": ["zone", "slot"],
+  "columns": [
+    {
+      "name": "zone",
+      "type": "reference",
+      "references": "zones",
+      "description": "the zone"
+    },
+    {
+      "name": "slot",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 65534,
+      "description": "the slot in the zone's room table"
+    },
+    {
+      "name": "room",
+      "type": "id",
+      "description": "the room file (room.map.map009)"
+    }
+  ]
+}

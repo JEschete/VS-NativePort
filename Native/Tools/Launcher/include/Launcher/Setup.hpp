@@ -29,8 +29,8 @@ inline constexpr int kPercentComplete = 100;
 // (#504), replacing the separate audio step. 6: extract converts the shared
 // animation sets (OBJ\E*.ESQ, #206). 7: extract converts the actor effect
 // texture sheets (OBJ\E*.ETM, #207). 8: extract converts the enemy archetypes
-// (MAP\*.ZUD, #200).
-inline constexpr int kAssetPipelineVersion = 8;
+// (MAP\*.ZUD, #200). 9: extract converts the zones (MAP\ZONE*.ZND, #517).
+inline constexpr int kAssetPipelineVersion = 9;
 using HashProgress = std::function<void(int)>;
 
 struct CloseDiscHandle {

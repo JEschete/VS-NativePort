@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "table": "zones",
+  "description": "Zones (MAP/ZONE*.ZND): music and room slots.",
+  "key": ["id"],
+  "columns": [
+    {
+      "name": "id",
+      "type": "id",
+      "description": "the zone, from its file (zone.map.zone009)"
+    },
+    {
+      "name": "music_id",
+      "type": "integer",
+      "minimum": -2147483648,
+      "maximum": 2147483647,
+      "description": "the music the zone plays"
+    },
+    {
+      "name": "room_slots",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 65535,
+      "description": "the room table's length, used slots or not"
+    }
+  ]
+}

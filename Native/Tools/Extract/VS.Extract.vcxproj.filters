@@ -45,13 +45,13 @@
     <ClCompile Include="src\TimImage.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\TimWriter.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\WepModelConversion.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\WorkshopRecipeConversion.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ZndConversion.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\ZudConversion.cpp">
@@ -87,13 +87,13 @@
     <ClInclude Include="include\Extract\TimImage.hpp">
       <Filter>include\Extract</Filter>
     </ClInclude>
-    <ClInclude Include="include\Extract\TimWriter.hpp">
-      <Filter>include\Extract</Filter>
-    </ClInclude>
     <ClInclude Include="include\Extract\WepModelConversion.hpp">
       <Filter>include\Extract</Filter>
     </ClInclude>
     <ClInclude Include="include\Extract\WorkshopRecipeConversion.hpp">
+      <Filter>include\Extract</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Extract\ZndConversion.hpp">
       <Filter>include\Extract</Filter>
     </ClInclude>
     <ClInclude Include="include\Extract\ZudConversion.hpp">

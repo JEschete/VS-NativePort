@@ -487,6 +487,8 @@
     <ClCompile Include="src\WorkshopRecipeTests.cpp" />
     <ClCompile Include="src\XaMixTests.cpp" />
     <ClCompile Include="src\ZndFileTests.cpp" />
+    <ClCompile Include="src\ZoneConversionTests.cpp" />
+    <ClCompile Include="src\ZoneTableTests.cpp" />
     <ClCompile Include="src\ZudFileTests.cpp" />
     <ClCompile Include="..\Tools\Extract\src\AudioBankConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\ConversionManifestWriter.cpp" />
@@ -498,9 +500,9 @@
     <ClCompile Include="..\Tools\Extract\src\ImageConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\ShpModelConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\TimImage.cpp" />
-    <ClCompile Include="..\Tools\Extract\src\TimWriter.cpp" />
     <ClCompile Include="..\Tools\Extract\src\WepModelConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\WorkshopRecipeConversion.cpp" />
+    <ClCompile Include="..\Tools\Extract\src\ZndConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\ZudConversion.cpp" />
     <ClCompile Include="..\Tools\Launcher\src\Setup.cpp" />
     <ClCompile Include="..\Tools\Launcher\src\DiscValidation.cpp" />

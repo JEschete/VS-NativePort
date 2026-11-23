@@ -3,7 +3,9 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <expected>
 #include <format>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -136,6 +138,46 @@ std::vector<std::uint16_t> PaletteWords(const NativeImage& image) {
     words.insert(words.end(), row.begin(), row.end());
   }
   return words;
+}
+
+TimOrigin OriginOf(const TimFile& tim) {
+  return {.id = tim.id,
+          .flags = tim.flags,
+          .image = tim.image.rect,
+          .clut = tim.clut ? std::optional(tim.clut->rect) : std::nullopt};
+}
+
+std::expected<TimFile, std::string> TimFromImage(const NativeImage& image,
+                                                 const TimOrigin& origin) {
+  if (auto valid = ValidateImage(image); !valid) {
+    return std::unexpected(valid.error());
+  }
+  TimFile tim{.id = origin.id, .flags = origin.flags, .clut = {}, .image = {}};
+  tim.image.rect = origin.image;
+  tim.image.rect.width =
+      static_cast<std::uint16_t>(image.width / PixelsPerHalfword(image.depth));
+  tim.image.rect.height = static_cast<std::uint16_t>(image.height);
+  tim.image.words = PackedWords(image);
+  if (IsIndexed(image.depth)) {
+    std::vector<std::uint16_t> words = PaletteWords(image);
+    if (!origin.clut ||
+        std::size_t{origin.clut->width} * origin.clut->height != words.size()) {
+      return std::unexpected(std::format(
+          "the image's {} palette words do not fill its source CLUT "
+          "rectangle",
+          words.size()));
+    }
+    tim.clut = TimBlock{.rect = *origin.clut, .words = std::move(words)};
+  } else if (origin.clut) {
+    return std::unexpected(
+        "a 16-bit image has no palettes for its source CLUT block");
+  }
+  if (tim.HasClut() != tim.clut.has_value()) {
+    return std::unexpected(std::format(
+        "the source flag word 0x{:08X} disagrees with the image's palettes",
+        tim.flags));
+  }
+  return tim;
 }
 
 }  // namespace VS::Content

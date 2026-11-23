@@ -1,0 +1,320 @@
+{
+  "schema_version": 1,
+  "table": "zone-enemy-parts",
+  "description": "Each template's equipment parts; a part with no row is all zeros.",
+  "key": ["enemy", "part"],
+  "columns": [
+    {
+      "name": "enemy",
+      "type": "reference",
+      "references": "zone-enemies",
+      "description": "the template"
+    },
+    {
+      "name": "part",
+      "type": "id",
+      "description": "weapon.blade, weapon.grip, weapon.gem1-3, shield.base, shield.gem1-3, accessory or limb0-5.armor"
+    },
+    {
+      "name": "item_id",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 65535,
+      "description": ""
+    },
+    {
+      "name": "sub_id",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": ""
+    },
+    {
+      "name": "weapon_model_id",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": ""
+    },
+    {
+      "name": "category",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "strength",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": ""
+    },
+    {
+      "name": "intelligence",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": ""
+    },
+    {
+      "name": "agility",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": ""
+    },
+    {
+      "name": "current_dp",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 65535,
+      "description": ""
+    },
+    {
+      "name": "max_dp",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 65535,
+      "description": ""
+    },
+    {
+      "name": "current_pp",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 65535,
+      "description": ""
+    },
+    {
+      "name": "max_pp",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 65535,
+      "description": ""
+    },
+    {
+      "name": "damage_type",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "cost_type",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "cost",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "material",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "recovery_delay",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "gem_slots",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "gem_effects",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "index",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "range",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "range_y",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "range_z",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "shape_bits",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "attack shape and angle"
+    },
+    {
+      "name": "type_1",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": ""
+    },
+    {
+      "name": "type_2",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": ""
+    },
+    {
+      "name": "type_3",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": ""
+    },
+    {
+      "name": "type_4",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": ""
+    },
+    {
+      "name": "class_1",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": ""
+    },
+    {
+      "name": "class_2",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": ""
+    },
+    {
+      "name": "class_3",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": ""
+    },
+    {
+      "name": "class_4",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": ""
+    },
+    {
+      "name": "class_5",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": ""
+    },
+    {
+      "name": "class_6",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": ""
+    },
+    {
+      "name": "class_7",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": ""
+    },
+    {
+      "name": "class_8",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": ""
+    },
+    {
+      "name": "affinity_1",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": ""
+    },
+    {
+      "name": "affinity_2",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": ""
+    },
+    {
+      "name": "affinity_3",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": ""
+    },
+    {
+      "name": "affinity_4",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": ""
+    },
+    {
+      "name": "affinity_5",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": ""
+    },
+    {
+      "name": "affinity_6",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": ""
+    },
+    {
+      "name": "affinity_7",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": ""
+    },
+    {
+      "name": "affinity_8",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": ""
+    }
+  ]
+}

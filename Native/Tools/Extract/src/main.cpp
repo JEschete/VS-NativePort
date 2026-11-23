@@ -31,6 +31,7 @@
 #include "Extract/ShpModelConversion.hpp"
 #include "Extract/WepModelConversion.hpp"
 #include "Extract/WorkshopRecipeConversion.hpp"
+#include "Extract/ZndConversion.hpp"
 #include "Extract/ZudConversion.hpp"
 #include "Platform/App.hpp"
 #include "Platform/Paths.hpp"
@@ -453,8 +454,9 @@ int ConvertImages(const fs::path& root, bool force) {
   return 0;
 }
 
-// catalogs/menu/ tables and their manifest.json outputs from the disc files
-// already under root.
+// catalogs/menu/, catalogs/world/ and catalogs/enemies/ tables, the zone
+// texture images and their manifest.json outputs from the disc files already
+// under root. The zones name the enemy archetypes, so this follows the models.
 int ConvertTables(const fs::path& root, bool force) {
   const auto report = Extract::ConvertDiscTables(root, force);
   if (!report) {
@@ -465,6 +467,14 @@ int ConvertTables(const fs::path& root, bool force) {
                     "tables: {} converted, {} unchanged, {} stale files "
                     "removed",
                     report->converted, report->unchanged, report->removed);
+  const auto zones = Extract::ConvertDiscZones(root, force);
+  if (!zones) {
+    VS::Core::LogError("extract", "{}", zones.error());
+    return 1;
+  }
+  VS::Core::LogInfo("extract",
+                    "zones: {} converted, {} unchanged, {} stale files removed",
+                    zones->converted, zones->unchanged, zones->removed);
   return 0;
 }
 
@@ -560,8 +570,8 @@ int ConvertExtracted(const Content::Disc& disc, const fs::path& out,
                      const std::optional<fs::path>& ffmpeg) {
   if (WriteCatalogs(out) != 0) return 1;
   if (ConvertImages(out, false) != 0) return 1;
-  if (ConvertTables(out, false) != 0) return 1;
   if (ConvertModels(out, false) != 0) return 1;
+  if (ConvertTables(out, false) != 0) return 1;
   if (ConvertBanks(out, false) != 0) return 1;
   return ConvertStreams(disc, out, ffmpeg);
 }

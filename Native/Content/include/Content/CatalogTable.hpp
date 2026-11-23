@@ -24,13 +24,14 @@ enum class ColumnType : std::uint8_t {
   kId,         // a content id (IsContentId)
   kInteger,    // a decimal integer within [minimum, maximum]
   kReference,  // the id of a row in the table `references` names
+  kBytes,      // `maximum` bytes as lowercase hexadecimal, two digits each
 };
 
 struct ColumnSpec {
   std::string_view name;
   ColumnType type = ColumnType::kInteger;
   std::int64_t minimum = 0;
-  std::int64_t maximum = 0;
+  std::int64_t maximum = 0;     // kBytes: the byte count
   std::string_view references;  // kReference only
   std::string_view description;
 };

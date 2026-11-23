@@ -14,8 +14,4 @@ namespace VS::Extract {
 [[nodiscard]] std::expected<Content::NativeImage, std::string> ImageFromTim(
     const Content::TimFile& tim, Content::ImageDepth depth);
 
-[[nodiscard]] Content::TimOrigin OriginOf(const Content::TimFile& tim);
-[[nodiscard]] std::expected<Content::TimFile, std::string> TimFromImage(
-    const Content::NativeImage& image, const Content::TimOrigin& origin);
-
 }  // namespace VS::Extract

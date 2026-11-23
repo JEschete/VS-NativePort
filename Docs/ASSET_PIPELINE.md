@@ -81,7 +81,9 @@ Native\data\
     items\  blades.csv grips.csv gems.csv armor.csv shields.csv accessories.csv consumables.csv misc.csv ...
     battle\ break-arts.csv abilities.csv spells.csv status-effects.csv
     enemies\ species.csv enemies.csv modelsets.csv loot.csv bestiary.csv      (ENEMY_DATA_SCHEME.md)
+             zone-enemies.csv zone-enemy-limbs.csv zone-enemy-parts.csv   (ZND templates, §6.9)
     world\  zones.csv rooms.csv doors.csv keys.csv chests.csv save-points.csv puzzle-challenges.csv
+             zone-rooms.csv zone-textures.csv                              (ZND, §6.9)
     menu\   combination-<kind>-results.csv -pairs.csv -materials.csv   (SYD workshop recipes, §6.8)
     title\  title.json             (layout, timings, menu items: structured, so JSON)
     effects\ effects.json          (template instantiations → parameters)
@@ -101,6 +103,7 @@ Native\data\
   textures\<dir>\<name>.png        (TIM/GIM/FBT/standalone images, §6.4) + <name>.image.json
                                    (+ <name>.palettes.png when an image has several palettes)
     actors\<ETM>\<MODEL>.png       (actor-bound texture regions + .image.json, §6.2.1, §6.2.2)
+    zone\<ZONE>\<nn>.png           (a zone's texture table TIMs + .image.json, §6.9)
   ui\                              (menu art, title art, illustrations as PNG + layout JSON)
   events\<id>.json                 (EVT event scripts as decoded command lists; text by string id)
   effects\<id>.json + textures     (EFFECT .P/.FBT/.FBC data)
@@ -177,7 +180,7 @@ The disc has 27 kinds of files. The "Source" column below names the files on the
 | `SMALL\*.ARM` (32) | `rooms\automap\<ARM>.json` | minimap scenes: a room count, 12-byte room records (visited, payload length, zone, map), display geometry (vertices, triangles, quads, lines, doors) and 36-byte names with previous/next links; (zone, map) becomes the stable room ID and names become string IDs. 47 map IDs exceed their zone's room table: explain them before converting | native `Field\MinimapScene.hpp` |
 | `SMALL\*.DIS` (22) | `textures\dis\*.png` + `.image.json`, `catalogs\world\puzzle-challenges.csv` | concatenated 4bpp TIMs; `IQ.DIS` also holds the 64-record cube-puzzle challenge table (keyed by room ID); `ENDSCR00–15` are 16bpp result screens | native `CubePuzzleLifecycle.hpp`, `ClearResultsCore.cpp` |
 | `MAP\*.MPD` (512) | `rooms\<zone>\<MAP>.gltf` + `.room.json` | §6.3 | vstools `MPD.js`, VSViewer, decomp field loaders |
-| `MAP\*.ZND` (256) | `catalogs\enemies\*`, `catalogs\world\zones.csv`, zone textures → PNG | enemy records → the ENEMY_DATA_SCHEME catalogs; zone TIMs → PNG | ENEMY_DATA_SCHEME.md §3 |
+| `MAP\*.ZND` (256) | `catalogs\world\zones.csv`, `zone-rooms.csv`, `zone-textures.csv`; `catalogs\enemies\zone-enemies.csv`, `zone-enemy-limbs.csv`, `zone-enemy-parts.csv`; `textures\zone\<ZONE>\*.png` | done (`znd-tables`, §6.9, #517): rows and images rebuild each zone exactly. The relational ENEMY_DATA_SCHEME catalogs remain #199 | ENEMY_DATA_SCHEME.md §3 |
 | `EVENT\*.EVT` (512) | `events\<id>.json` | command list `{op, args}` with op names from the decomp's event interpreter; text → string IDs | decomp `Event\` module |
 | `BG\*.TIM` (4), `BG\*.FAR` (4), root `*.TIM` | `textures\bg\*.png` + `.image.json`; `.FAR` → background layout JSON | TIM → PNG (§6.4). The BG TIM headers are not authoritative: they declare mode `0xA` (16bpp + CLUT) with a 256-colour CLUT and three share id `0x110`; the layout's draw depth selects 8-bit indices. The runtime uploads the converted PNG's packed indices and exact palette words. `.FAR` = 12-byte header `{w, h, reserved}` then w×h 24-byte tiles (source rectangle + 4 corner colours); it is still loaded raw through MPD room section 15 | native `Field\Background.cpp`, `BackgroundLive.cpp` |
 | `GIM\*.GIM` (49) | `textures\gim\*.png` + composition JSON | VS screen-effect images: per-layer cell maps over shared strips, 4 × 16-colour CLUTs and a shared or owned 256-colour palette | native `Render\GimImages.cpp` |
@@ -373,7 +376,7 @@ TIMs inside other files: the shared strict decoder finds 822 at 4-byte-aligned o
 - 28 are in `SMALL\*.DIS`: 12 at 4 bits with 16 palettes, and 16 direct-colour 320 × 224 end screens.
 - 12 are in `ENDING\ENDING.PRG`: 7 at 4 bits (one of them with two palettes) and 5 at 8 bits.
 
-A disc-backed `[extract]` test converts each one with `ConvertTim` and rebuilds its exact bytes. The containers' converters adopt them: zones in #203, DIS in #211 and the ending program in #498. `MENU\*.BIN`, `SYSTEM.DAT` and `TITLE.PRG` hold no raw TIMs, and `ENDING\ILLUST06-16.BIN` are compressed (#498).
+A disc-backed `[extract]` test converts each one with `ConvertTim` and rebuilds its exact bytes. The containers' converters adopt them: the zone converter writes the zones' TIMs (§6.9, #517); DIS in #211 and the ending program in #498. `MENU\*.BIN`, `SYSTEM.DAT` and `TITLE.PRG` hold no raw TIMs, and `ENDING\ILLUST06-16.BIN` are compressed (#498).
 
 Effect FBC palettes (first slice, #215): `VS.Extract images` reads each raw FBC as rows of 256 little-endian 16-bit colour words and writes an editable direct-colour PNG (one row per CLUT row, in source order) plus the standard `.image.json` (and `.stp.png` mask when STP is mixed) under `textures/effect/palettes/`. The manifest records the source path and hash. A file must hold whole rows and at most the 5 rows of the effect CLUT area (VRAM rows 240-244); anything else is a conversion error. Rows that an effect's CLUT count names past the end of a short file are not written. Conversion is offline. At runtime the effect loader resolves a CLUT's disc sector to its converted palette through the manifest (`LoadLiveEffectPalette`), uploads the PNG's rows and zero-fills the rest of the slot (decision 8). It never reads the FBC and has no disc fallback. The CLUT is refused and reported, while the effect's texture pages still load, when its palette is missing or does not match its manifest entry or is not a 256-entry direct-colour image (`ResourceRefusal::kPaletteMissing`), when it is empty or ends in a partial row (`kPaletteRows`), or when it has more rows than its slot reaches by row 244 (`kPaletteSlot`). `DataStore::RequireConversions` refuses to start when any FBC lacks a palette or its source hash is stale. An edit to the PNG is what the next load uploads.
 
@@ -610,6 +613,58 @@ Conversion keeps edits. A rerun leaves the tables of an unchanged SYD alone, rec
 
 Not yet done: compiling the tables into SQLite, the patch and mod layers, replacing the result fields with references to the item catalog when there is one, and an in-game combination replay (#58, #499).
 
+### 6.9 Zones (ZND → CSV tables, #199, #517)
+
+A `MAP\ZONE*.ZND` is what the room loader reads when the zone changes (`Content/ZndFile.hpp`; the game's `_loadZnd`). Its 0x1C-byte header holds the room table, enemy section and texture section (each as offset and size) and the zone's music id. A reserved word follows, zero in every file. The sections are packed back to back to the end of the file:
+- **Room table:** (sector, read size) per slot; an empty slot is (0, 0).
+- **Enemy section:** a count, that many ZUD (sector, read size) entries, then that many 0x464-byte templates (`vs_CharInitData`, `Actors/CharacterInit.hpp`).
+- **Texture section:** either 32 zero bytes, or four table sizes of which only the first is used, followed by that table: a count and that many TIMs, each after its byte size.
+
+`VS.Extract tables <datadir>` (and `extract`) converts all 256 zones with converter `znd-tables` version 1 (`Extract/ZndConversion.hpp`, `Content/ZoneTables.hpp`). `tables` runs after `models`, because the zones name the enemy archetypes (§6.2.5). It writes six CSV tables, each with a schema committed in `Native\Content\schemas\catalogs\` and written beside it (a test checks that the two match):
+- `catalogs\world\zones.csv`: `id` (`zone.map.zone009`), `music_id` and `room_slots` (the room table's length, used or not).
+- `catalogs\world\zone-rooms.csv`: one row per used slot, naming the room by id (`room.map.map009`).
+- `catalogs\world\zone-textures.csv`: the texture table's images by id, in upload order.
+- `catalogs\enemies\zone-enemies.csv`: one row per template.
+  - `id` (`enemy.map.zone009.00`), `zone`, `slot` and the `archetype` it loads (`archetype.map.z009u00`).
+  - The template's scalars, with the weapon, shield and accessory fields that sit around their parts.
+  - The two 24-byte names as hexadecimal in the game's encoding (column type `bytes`), until the string table (#500) gives them text ids.
+- `catalogs\enemies\zone-enemy-limbs.csv`: one row per limb, except its armour part.
+- `catalogs\enemies\zone-enemy-parts.csv`: one row per equipment part: `weapon.blade`, `weapon.grip`, `weapon.gem1-3`, `shield.base`, `shield.gem1-3`, `accessory` and `limb0-5.armor`.
+
+**Exactness.**
+- Every bit of a template is in exactly one column, and a test checks the coverage. Unnamed bytes are `raw_<offset>` columns (§4.1).
+- A limb or part whose bytes are all zero, and an empty room slot, has no row; a missing row reads as zeros.
+- Rows name files by id, never by sector. The rebuild takes each named file's sector and sector-rounded size from `files.tsv` as it is now.
+
+**Zone textures.** The texture table's TIMs become `textures\zone\<ZONE>\<nn>.png` with their sidecars (image id `image.map.zone009.00`), using the shared TIM rules (§6.4). Provenance names the zone, its hash and the TIM's byte offset. All 782 are 16-bit: room palette rows and texture pages, kept as the words the zone uploads. A page's packed 4- or 8-bit indices become an indexed image when the rooms (#198) bind each page's depth and palette.
+
+**Manifest and reruns.** The manifest has one output per zone (`zone.map.zone009`), listing the twelve table files it shares with every zone and its own images. The tables hold every zone, so a run that converts any zone writes them all. A run whose zones are all unchanged writes nothing, so edits survive; `--force` rewrites everything.
+
+**Refusals.** The converter writes nothing unless every zone's rows and images rebuild the source file byte for byte and the tables read back to the same rows. It refuses:
+- a room or ZUD entry whose sector starts no extracted MPD or ZUD, or whose size is not that file's read;
+- an empty texture table;
+- an archetype that the `zud-json` converter has not recorded ("convert the models first").
+
+**Runtime.** The room loader's zone read (`RoomLoadingLive`, `BeginConvertedZoneRead`) fills the block the disc read would have filled from `Content::LoadConvertedZone` and never reads the zone file. It completes in the requesting update.
+- The tables are read once and kept while their files are unchanged.
+- Each texture image must name its zone and that zone's manifest hash, and is rebuilt into its TIM (`Content::TimFromImage` and `EncodeTim`, shared with the importer).
+- A table error names the file, line and column. An unknown room, archetype or image, a stale image, or a zone rebuilt larger than the read's block is refused with the cause logged. The loader then refuses the zone as a failed read.
+- `RequireConversions` refuses to start without a current `znd-tables` output for every zone.
+
+**Corpus and tests.**
+- 256 zones: 455 templates, 512 rooms and 421 empty slots, and 782 TIMs in 76 tables.
+- The tables hold 455 template rows, 2,730 limb rows and 1,470 part rows.
+- All 256 zones decode and rebuild exactly (`ZndFileTests.cpp`) and load from their tables as their exact bytes (`ZoneConversionTests.cpp`).
+- A synthetic zone covers edits to a template field, a room slot and a texture, each refusal, the live read and two identical forced conversions (`ZoneConversionTests.cpp`, `ZoneTableTests.cpp`).
+
+Not yet done (#199):
+- the relational species, variant, loadout and loot tables of the enemy data scheme;
+- references from the parts to the item catalog;
+- the texture pages' depth and palette binding;
+- SQLite and the patch and mod layers;
+- production spawn, combat, drop and bestiary evidence for edited enemies;
+- a zone rebuilt larger than its original read.
+
 ---
 
 ## 7. Round-trip and validation (per converter)
@@ -701,7 +756,7 @@ Record source revision/dirty state, disc identity, tool/converter/schema version
 
 <!-- content:begin (generated by tools/ledger/content.py --sync) -->
 
-**2,786 of 5,162 disc files converted**, 2,786 of them with a passing round trip; 259 skipped with a reason; 2,117 unconverted.
+**3,042 of 5,162 disc files converted**, 3,042 of them with a passing round trip; 259 skipped with a reason; 1,861 unconverted.
 
 | Kind | Files | Converted | Round trip pass | Skipped | Unconverted | Converts under |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
@@ -739,7 +794,7 @@ Record source revision/dirty state, disc identity, tool/converter/schema version
 | system images and font | 1 | 0 | 0 | 0 | 1 | #498 |
 | TIM image | 5 | 5 | 5 | 0 | 0 | #208 |
 | XA audio stream | 1 | 1 | 1 | 0 | 0 | #504 |
-| zone | 256 | 0 | 0 | 0 | 256 | #199 |
+| zone | 256 | 256 | 256 | 0 | 0 | #199 |
 
 <!-- content:end -->
 - **`DATA_LEDGER.csv`:** each `catalog` row also names its output catalog file and decoder.

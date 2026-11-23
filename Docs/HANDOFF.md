@@ -1,5 +1,43 @@
 # Current Handoff
 
+## E207 reference mode (#507) and ZND zone tables (#517), 2026-11-23
+
+Starting revision: `68c317d04`, clean worktree (the `resources/rood-reverse`
+submodule checkout is at `f6bf8402`, not the recorded `c9a869b8`; it was left
+alone, so a local `provenance.py --check` reports stale citations that CI does
+not).
+
+**#507 (closed, `58c6d497c`)**
+- The MAP001 window glow is not drawn too faintly. The DuckStation reference
+  was captured in its default True Color mode, which blends at 8 bits. E207's
+  ~70 additive layers of a dark FBC palette (vertex colour 63, dither off)
+  truncate to almost nothing in a 5-bit frame, on hardware and in the port.
+- A replay of the traced primitives reproduces the native frame exactly in 5
+  bits and the reference's yellow-green glow at 8 bits.
+- The reference setup now uses DuckStation's software renderer with unscaled
+  dithering. A new hardware-mode capture of `build\ds_map001` was not made:
+  the capture script sends system-wide keys.
+
+**#517 (slice of #199)**
+- `bde93eb06` adds the lossless ZND codec. The follow-up adds the zone and
+  enemy CSV tables (`Content/ZoneTables.hpp`) and the `znd-tables` converter
+  (`VS.Extract tables`, now after `models`).
+- The zone texture images live under `textures\zone\`. The room loader's zone
+  read rebuilds each zone from the tables (`Content/ConvertedZones.hpp`).
+  `EncodeTim`, `OriginOf` and `TimFromImage` moved from VS.Extract to
+  VS.Content so the runtime rebuild and the importer share them.
+- The launcher pipeline version is 9. ASSET_PIPELINE.md §6.9 has the format
+  and limits.
+- **Evidence:**
+  - All 256 zones convert, rebuild and load back as their exact bytes.
+  - A native New Game loads ZONE001 from the tables at tick 1385.
+  - With the disc read forced, both replays match the old baseline.
+    Converted, every frame after frame 39-40 equals the disc run shifted by
+    2 frames. Baselines re-recorded: Debug and Release 9,889 tests /
+    13,074,767 assertions, 2 replays, 0 regressions.
+- The relational species, variant and loot tables, page depth and palette
+  binding, and production enemy-edit evidence remain open on #199.
+
 ## Actor request ownership and identity (#48/#55), 2026-11-22
 
 Starting revision: `ff4b3713d`, clean worktree. Commit

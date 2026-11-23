@@ -308,7 +308,7 @@ build\Debug\VS.Extract.exe catalogs Native\data
   An invalid catalog names the file, JSON pointer and rule it broke. They also refuse a data directory
   whose `manifest.json` lacks a current output for any converted type, including each sound bank
   (`wave-bank`), the ending XA (`xa-flac`) and the movie (`str-mkv`), and say to run `extract` again.
-  The launcher's pipeline version is 8, so a data directory prepared before these outputs existed is
+  The launcher's pipeline version is 9, so a data directory prepared before these outputs existed is
   prepared again.
 - Takes about a minute. Run it again after an extractor change; the converters replace one `raw` form at a time.
 - With FFmpeg available, it stops with an error if FFmpeg has no AV1 encoder or the movie conversion fails.

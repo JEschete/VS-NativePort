@@ -60,6 +60,9 @@
     <ClCompile Include="src\ConvertedModels.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ConvertedZones.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\DataStore.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -138,6 +141,9 @@
     <ClCompile Include="src\ZndFile.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ZoneTables.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ZudFile.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -187,6 +193,9 @@
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\ConvertedModels.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\ConvertedZones.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\DataAccess.hpp">
@@ -274,6 +283,9 @@
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\ZndFile.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\ZoneTables.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\ZudFile.hpp">

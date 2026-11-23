@@ -47,6 +47,7 @@
 #include "Boot/GameLoop.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
+#include "Content/ConvertedZones.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -264,11 +265,44 @@ std::array<ReadRecord, 2> readRecords{};
                                    : zoneContext.room_data;
 }
 
+// Native (#517): the outcome of a read that loaded from its conversion when
+// it began (a zone), which has no disc request.
+std::array<std::optional<DiscReadState>, 2> convertedReads{};
+
+[[nodiscard]] std::optional<DiscReadState>& ConvertedOf(LoadedFile file) {
+  return convertedReads.at(file == LoadedFile::kZone ? 0 : 1);
+}
+
+// Native (#517): an extracted zone loads from its converted tables in place
+// of the disc read, into the block the read would have filled.
+void BeginConvertedZoneRead(Content::DiscFileExtent extent) {
+  const auto bytes = static_cast<std::size_t>(std::max(extent.bytes, 0));
+  void* data = Core::Memory::AllocateLiveFromHighEnd(bytes);
+  RecordOf(LoadedFile::kZone) = {};
+  DataOf(LoadedFile::kZone) = data;
+  RequestOf(LoadedFile::kZone) = nullptr;
+  if (data == nullptr) {
+    return;
+  }
+  RecordOf(LoadedFile::kZone) = {.data = data, .bytes = bytes};
+  const bool loaded =
+      Content::ReadLiveConvertedZone(
+          extent, std::span(static_cast<std::byte*>(data), bytes))
+          .value_or(false);
+  ConvertedOf(LoadedFile::kZone) =
+      loaded ? DiscReadState::kLoaded : DiscReadState::kFailed;
+}
+
 // decomp: BATTLE.PRG _loadZnd and loadMpd
 // (src/BATTLE/BATTLE.PRG/146C.c:15124-15140; was _loadMpd and 15254-15269). A
 // block that cannot be taken leaves no request, which the wait refuses; the
 // original read into a null block.
 void BeginLiveRead(LoadedFile file, Content::DiscFileExtent extent) {
+  ConvertedOf(file).reset();
+  if (file == LoadedFile::kZone && Content::IsLiveConvertedZone(extent)) {
+    BeginConvertedZoneRead(extent);
+    return;
+  }
   VS::Content::DiscQueueSlot* request =
       Content::AllocateLiveDiscRequest(extent);
   const auto bytes = static_cast<std::size_t>(std::max(extent.bytes, 0));
@@ -461,6 +495,9 @@ class LiveFileReads : public Host {
   }
 
   [[nodiscard]] DiscReadState PollRead(LoadedFile file) const override {
+    if (const std::optional<DiscReadState> converted = ConvertedOf(file)) {
+      return *converted;
+    }
     const VS::Content::DiscQueueSlot* request = RequestOf(file);
     if (request == nullptr) {
       return DiscReadState::kFailed;
@@ -478,6 +515,7 @@ class LiveFileReads : public Host {
   void UpdateWhileLoading() override { State::UpdateLivePlayTimeAndLoading(); }
 
   void ReleaseRead(LoadedFile file) override {
+    ConvertedOf(file).reset();
     VS::Content::DiscQueueSlot*& request = RequestOf(file);
     if (request != nullptr) {
       Content::ReleaseLiveDiscRequest(request);

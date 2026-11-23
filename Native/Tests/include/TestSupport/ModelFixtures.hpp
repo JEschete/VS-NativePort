@@ -33,6 +33,7 @@
 #include "Extract/ShpModelConversion.hpp"
 #include "Extract/WepModelConversion.hpp"
 #include "Extract/WorkshopRecipeConversion.hpp"
+#include "Extract/ZndConversion.hpp"
 #include "Extract/ZudConversion.hpp"
 #include "TestSupport/AudioConversionFixture.hpp"
 
@@ -132,6 +133,7 @@ struct ModelReports {
   Extract::ModelConversionReport animation_sets;
   Extract::ModelConversionReport actor_textures;
   Extract::ModelConversionReport archetypes;
+  Extract::ZoneConversionReport zones;
 };
 
 // A temporary data root whose files.tsv lists `sources` as raw files from
@@ -217,12 +219,17 @@ class ModelRoot {
     auto archetypes = Extract::ConvertDiscArchetypes(root_, false);
     INFO(ErrorOf(archetypes));
     REQUIRE(archetypes.has_value());
+    // The zones name the archetypes, so they convert after them.
+    auto zones = Extract::ConvertDiscZones(root_, false);
+    INFO(ErrorOf(zones));
+    REQUIRE(zones.has_value());
     RecordAudioConversions(root_);
     return {.characters = *std::move(characters),
             .weapons = *std::move(weapons),
             .animation_sets = *std::move(sets),
             .actor_textures = *std::move(textures),
-            .archetypes = *std::move(archetypes)};
+            .archetypes = *std::move(archetypes),
+            .zones = *zones};
   }
 
   // Applies `edit` to the converted glTF file `stem` in `directory`

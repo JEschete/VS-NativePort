@@ -113,8 +113,14 @@ std::string_view TypeName(ColumnType type) {
       return "integer";
     case ColumnType::kReference:
       return "reference";
+    case ColumnType::kBytes:
+      return "bytes";
   }
   return "integer";
+}
+
+bool IsLowerHexDigit(char value) {
+  return (value >= '0' && value <= '9') || (value >= 'a' && value <= 'f');
 }
 
 // Each spec column's field position in the header.
@@ -149,6 +155,16 @@ std::expected<std::int64_t, std::string> ReadCell(const ColumnSpec& column,
                                                   std::string_view cell,
                                                   std::string_view file,
                                                   std::size_t line) {
+  if (column.type == ColumnType::kBytes) {
+    const auto digits = static_cast<std::size_t>(2 * column.maximum);
+    if (cell.size() == digits && std::ranges::all_of(cell, IsLowerHexDigit)) {
+      return 0;
+    }
+    return std::unexpected(
+        CellError(file, line, column.name,
+                  std::format("'{}' is not {} bytes as lowercase hexadecimal",
+                              cell, column.maximum)));
+  }
   if (column.type != ColumnType::kInteger) {
     if (IsContentId(cell)) return 0;
     return std::unexpected(CellError(
@@ -332,6 +348,9 @@ std::string FormatTableSchema(const TableSpec& spec) {
     }
     if (column.type == ColumnType::kReference) {
       entry["references"] = std::string(column.references);
+    }
+    if (column.type == ColumnType::kBytes) {
+      entry["bytes"] = column.maximum;
     }
     entry["description"] = std::string(column.description);
     columns.push_back(std::move(entry));

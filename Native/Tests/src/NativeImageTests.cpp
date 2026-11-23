@@ -25,7 +25,6 @@
 #include "Core/Sha256.hpp"
 #include "Extract/ImageFilesWriter.hpp"
 #include "Extract/TimImage.hpp"
-#include "Extract/TimWriter.hpp"
 #include "Render/DrawPolygon.hpp"
 #include "Render/PageSpace.hpp"
 #include "nlohmann/json.hpp"
@@ -207,7 +206,7 @@ Content::ImageDocument DocumentOf(const Bytes& bytes, ImageDepth depth) {
           .provenance = {.source = "TEST/SAMPLE.TIM",
                          .source_sha256 = VS::Core::Sha256Hex(bytes),
                          .offset = 0,
-                         .tim = Extract::OriginOf(tim),
+                         .tim = VS::Content::OriginOf(tim),
                          .texture_page = std::nullopt,
                          .preview_palette = std::nullopt,
                          .dependencies = {},
@@ -337,11 +336,11 @@ TEST_CASE("A TIM decodes every word", "[content-images][tim]") {
 
 TEST_CASE("A TIM re-encodes to the same bytes", "[content-images][tim]") {
   const Bytes bytes = FourBitTwoPalettes();
-  CHECK(Take(Extract::EncodeTim(TimOf(bytes))) == bytes);
+  CHECK(Take(VS::Content::EncodeTim(TimOf(bytes))) == bytes);
   // The id's version byte is kept, not normalized.
   const Bytes background = PackedBackground();
   CHECK(TimOf(background).id == 0x110);
-  CHECK(Take(Extract::EncodeTim(TimOf(background))) == background);
+  CHECK(Take(VS::Content::EncodeTim(TimOf(background))) == background);
 }
 
 TEST_CASE("Malformed TIMs are rejected with the field at fault",
@@ -449,7 +448,7 @@ TEST_CASE("A packed background converts at the depth its tiles draw",
   CHECK(eight.palettes.size() == 1);
   CHECK(eight.PaletteEntries() == 256);
   const Content::TimFile rebuilt =
-      Take(Extract::TimFromImage(eight, Extract::OriginOf(background)));
+      Take(VS::Content::TimFromImage(eight, VS::Content::OriginOf(background)));
   CHECK(rebuilt == background);
 }
 
@@ -516,9 +515,9 @@ TEST_CASE("Image files reproduce the TIM exactly", "[content-images][files]") {
       Take(Content::DecodeImageFiles(sample.stem, ReaderOf(map)));
   CHECK(loaded == document);
   REQUIRE(loaded.provenance.tim.has_value());
-  const Content::TimFile rebuilt =
-      Take(Extract::TimFromImage(loaded.image, Present(loaded.provenance.tim)));
-  CHECK(Take(Extract::EncodeTim(rebuilt)) == sample.bytes);
+  const Content::TimFile rebuilt = Take(
+      VS::Content::TimFromImage(loaded.image, Present(loaded.provenance.tim)));
+  CHECK(Take(VS::Content::EncodeTim(rebuilt)) == sample.bytes);
 }
 
 namespace {

@@ -192,7 +192,7 @@ ImageProvenance ProvenanceOf(const TimConversion& conversion,
   ImageProvenance provenance{.source = conversion.tim.path,
                              .source_sha256 = HashOf(conversion.tim),
                              .offset = 0,
-                             .tim = OriginOf(tim),
+                             .tim = Content::OriginOf(tim),
                              .texture_page = std::nullopt,
                              .preview_palette = std::nullopt,
                              .dependencies = {},
@@ -216,11 +216,11 @@ std::expected<void, std::string> VerifyRoundTrip(
     return std::unexpected(std::format(
         "{}: the converted files decode to a different image", source.path));
   }
-  auto tim = TimFromImage(decoded->image, *decoded->provenance.tim);
+  auto tim = Content::TimFromImage(decoded->image, *decoded->provenance.tim);
   if (!tim) {
     return std::unexpected(std::format("{}: {}", source.path, tim.error()));
   }
-  auto bytes = EncodeTim(*tim);
+  auto bytes = Content::EncodeTim(*tim);
   if (!bytes) {
     return std::unexpected(std::format("{}: {}", source.path, bytes.error()));
   }

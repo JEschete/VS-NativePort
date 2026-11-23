@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "table": "zone-textures",
+  "description": "The images in each zone's texture table, in upload order.",
+  "key": ["zone", "index"],
+  "columns": [
+    {
+      "name": "zone",
+      "type": "reference",
+      "references": "zones",
+      "description": "the zone"
+    },
+    {
+      "name": "index",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 65534,
+      "description": "the position in the table"
+    },
+    {
+      "name": "image",
+      "type": "id",
+      "description": "the converted image"
+    }
+  ]
+}

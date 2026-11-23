@@ -1,0 +1,260 @@
+{
+  "schema_version": 1,
+  "table": "zone-enemies",
+  "description": "Each zone's enemy templates (vs_CharInitData): the record's fields but its limbs and equipment parts.",
+  "key": ["id"],
+  "columns": [
+    {
+      "name": "id",
+      "type": "id",
+      "description": "the template (enemy.map.zone009.00)"
+    },
+    {
+      "name": "zone",
+      "type": "reference",
+      "references": "zones",
+      "description": "the zone"
+    },
+    {
+      "name": "slot",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 254,
+      "description": "the template's position"
+    },
+    {
+      "name": "archetype",
+      "type": "id",
+      "description": "the ZUD the template loads"
+    },
+    {
+      "name": "sub_type",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 65535,
+      "description": "the enemy kind (kill and bestiary)"
+    },
+    {
+      "name": "model_id",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "the body model id"
+    },
+    {
+      "name": "reach",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 31,
+      "description": "attack reach"
+    },
+    {
+      "name": "enemy_class",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 7,
+      "description": "the class (human .. evil)"
+    },
+    {
+      "name": "name",
+      "type": "bytes",
+      "bytes": 24,
+      "description": "the name, in the game's encoding"
+    },
+    {
+      "name": "hp",
+      "type": "integer",
+      "minimum": -32768,
+      "maximum": 32767,
+      "description": "hit points"
+    },
+    {
+      "name": "mp",
+      "type": "integer",
+      "minimum": -32768,
+      "maximum": 32767,
+      "description": "magic points"
+    },
+    {
+      "name": "strength",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "intelligence",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "agility",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "recovery_delay_bonus",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "material",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "walk_speed",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "gait_class",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "run_speed",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "status_immunities",
+      "type": "integer",
+      "minimum": -2147483648,
+      "maximum": 2147483647,
+      "description": "status immunity bits"
+    },
+    {
+      "name": "ai_settings",
+      "type": "integer",
+      "minimum": -2147483648,
+      "maximum": 2147483647,
+      "description": ""
+    },
+    {
+      "name": "mobility_limb_1",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "a limb whose loss slows the enemy"
+    },
+    {
+      "name": "mobility_limb_2",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "a limb whose loss slows the enemy"
+    },
+    {
+      "name": "default_target_limb",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "raw_33",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "unnamed"
+    },
+    {
+      "name": "weapon_material",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "weapon_drop_rate",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "out of 255"
+    },
+    {
+      "name": "weapon_index",
+      "type": "integer",
+      "minimum": -32768,
+      "maximum": 32767,
+      "description": ""
+    },
+    {
+      "name": "weapon_name",
+      "type": "bytes",
+      "bytes": 24,
+      "description": "the weapon's name, in the game's encoding"
+    },
+    {
+      "name": "shield_material",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "shield_drop_rate",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "out of 255"
+    },
+    {
+      "name": "shield_index",
+      "type": "integer",
+      "minimum": -32768,
+      "maximum": 32767,
+      "description": ""
+    },
+    {
+      "name": "accessory_drop_rate",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "out of 255"
+    },
+    {
+      "name": "accessory_index",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "raw_236",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "unnamed"
+    },
+    {
+      "name": "raw_237",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "unnamed"
+    },
+    {
+      "name": "zud_index",
+      "type": "integer",
+      "minimum": -2147483648,
+      "maximum": 2147483647,
+      "description": "the template's index in its zone (upstream mpdIdentifier)"
+    }
+  ]
+}

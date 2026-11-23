@@ -1,0 +1,294 @@
+{
+  "schema_version": 1,
+  "table": "zone-enemy-limbs",
+  "description": "Each template's limbs but their armour parts; a limb with no row is all zeros.",
+  "key": ["enemy", "limb"],
+  "columns": [
+    {
+      "name": "enemy",
+      "type": "reference",
+      "references": "zone-enemies",
+      "description": "the template"
+    },
+    {
+      "name": "limb",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 5,
+      "description": "the limb"
+    },
+    {
+      "name": "hp",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 65535,
+      "description": "the limb's hit points"
+    },
+    {
+      "name": "agility_defense_bonus",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "chain_evasion",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "type_1",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": "type resistance"
+    },
+    {
+      "name": "type_2",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": "type resistance"
+    },
+    {
+      "name": "type_3",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": "type resistance"
+    },
+    {
+      "name": "type_4",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": "type resistance"
+    },
+    {
+      "name": "affinity_1",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": "elemental affinity"
+    },
+    {
+      "name": "affinity_2",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": "elemental affinity"
+    },
+    {
+      "name": "affinity_3",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": "elemental affinity"
+    },
+    {
+      "name": "affinity_4",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": "elemental affinity"
+    },
+    {
+      "name": "affinity_5",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": "elemental affinity"
+    },
+    {
+      "name": "affinity_6",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": "elemental affinity"
+    },
+    {
+      "name": "affinity_7",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": "elemental affinity"
+    },
+    {
+      "name": "affinity_8",
+      "type": "integer",
+      "minimum": -128,
+      "maximum": 127,
+      "description": "elemental affinity"
+    },
+    {
+      "name": "action_1_id",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 65535,
+      "description": ""
+    },
+    {
+      "name": "action_1_effect_model",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "action_1_index",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "action_2_id",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 65535,
+      "description": ""
+    },
+    {
+      "name": "action_2_effect_model",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "action_2_index",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "action_3_id",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 65535,
+      "description": ""
+    },
+    {
+      "name": "action_3_effect_model",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "action_3_index",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "action_4_id",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 65535,
+      "description": ""
+    },
+    {
+      "name": "action_4_effect_model",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "action_4_index",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "armor_material",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "armor_drop_rate",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "out of 255"
+    },
+    {
+      "name": "raw_52",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "unnamed"
+    },
+    {
+      "name": "armor_index",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": ""
+    },
+    {
+      "name": "dp_splash_1",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "share of DP damage per limb (%)"
+    },
+    {
+      "name": "dp_splash_2",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "share of DP damage per limb (%)"
+    },
+    {
+      "name": "dp_splash_3",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "share of DP damage per limb (%)"
+    },
+    {
+      "name": "dp_splash_4",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "share of DP damage per limb (%)"
+    },
+    {
+      "name": "dp_splash_5",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "share of DP damage per limb (%)"
+    },
+    {
+      "name": "dp_splash_6",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "share of DP damage per limb (%)"
+    },
+    {
+      "name": "raw_5a",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "unnamed"
+    },
+    {
+      "name": "raw_5b",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "unnamed"
+    }
+  ]
+}

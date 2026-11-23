@@ -17,7 +17,6 @@
 #include "Extract/ConverterBatch.hpp"
 #include "Extract/ImageFilesWriter.hpp"
 #include "Extract/TimImage.hpp"
-#include "Extract/TimWriter.hpp"
 
 // The tim-png, fbc-palette-png and fbt-texture-png converters
 // (ASSET_PIPELINE.md §6.4, #208, #215, #214): standalone TIMs, effect FBC CLUTs

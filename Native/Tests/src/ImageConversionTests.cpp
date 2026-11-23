@@ -39,6 +39,7 @@
 #include "Extract/ShpModelConversion.hpp"
 #include "Extract/WepModelConversion.hpp"
 #include "Extract/WorkshopRecipeConversion.hpp"
+#include "Extract/ZndConversion.hpp"
 #include "Extract/ZudConversion.hpp"
 #include "Field/BackgroundLive.hpp"
 #include "TestSupport/AudioConversionFixture.hpp"
@@ -348,9 +349,9 @@ void VerifyCorpusTimRoundTrips(const fs::path& converted_root,
                                          location->stem);
     REQUIRE(image.has_value());
     REQUIRE(image->provenance.tim.has_value());
-    auto tim = Extract::TimFromImage(image->image, *image->provenance.tim);
+    auto tim = VS::Content::TimFromImage(image->image, *image->provenance.tim);
     REQUIRE(tim.has_value());
-    auto rebuilt = Extract::EncodeTim(*tim);
+    auto rebuilt = VS::Content::EncodeTim(*tim);
     REQUIRE(rebuilt.has_value());
     CHECK(*rebuilt == source);
     CHECK(manifest.Find(image->id) != nullptr);
@@ -501,6 +502,9 @@ Extract::ImageConversionReport RequiredConversion(const fs::path& root,
   const auto archetypes = Extract::ConvertDiscArchetypes(root, force);
   INFO((archetypes ? std::string{} : archetypes.error()));
   REQUIRE(archetypes.has_value());
+  const auto zones = Extract::ConvertDiscZones(root, force);
+  INFO((zones ? std::string{} : zones.error()));
+  REQUIRE(zones.has_value());
   VS::test_support::RecordAudioConversions(root);
   return *report;
 }
