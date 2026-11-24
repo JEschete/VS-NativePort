@@ -372,6 +372,15 @@ std::expected<std::size_t, std::string> EncodeGlyph(
 }
 }  // namespace
 
+std::optional<std::string> GameGlyphIdentity(unsigned glyph) {
+  if (glyph > UINT8_MAX) return std::nullopt;
+  if (auto literal = Literal(static_cast<std::uint8_t>(glyph))) return literal;
+  if (glyph >= kFirstSymbol && glyph < kFirstSymbol + kSymbols.size()) {
+    return std::format("{{{}}}", kSymbols[glyph - kFirstSymbol].markup);
+  }
+  return std::nullopt;
+}
+
 void AppendGameGlyphLabel(std::string& text, std::uint8_t glyph) {
   if (auto literal = Literal(glyph)) {
     text += *literal;

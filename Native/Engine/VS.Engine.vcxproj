@@ -293,6 +293,8 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Render\ModelWorkspace.cpp" />
+    <ClCompile Include="src\Render\NativeTextDraw.cpp" />
+    <ClCompile Include="src\Render\NativeTextLayout.cpp" />
     <ClCompile Include="src\Render\PageSpace.cpp" />
     <ClCompile Include="src\Render\PaletteAnimation.cpp" />
     <ClCompile Include="src\Render\PaletteAnimationLive.cpp">
@@ -531,6 +533,8 @@
     <ClInclude Include="include\Render\ModelGeometry.hpp" />
     <ClInclude Include="include\Render\ModelGeometryLive.hpp" />
     <ClInclude Include="include\Render\ModelWorkspace.hpp" />
+    <ClInclude Include="include\Render\NativeTextDraw.hpp" />
+    <ClInclude Include="include\Render\NativeTextLayout.hpp" />
     <ClInclude Include="include\Render\PageSpace.hpp" />
     <ClInclude Include="include\Render\Palette.hpp" />
     <ClInclude Include="include\Render\PaletteAnimation.hpp" />

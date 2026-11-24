@@ -1465,6 +1465,7 @@
     <ClCompile Include="src\Save\NativeFiles.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Save\NativeFileText.cpp" />
     <ClCompile Include="src\Save\NativeResume.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -2329,6 +2330,7 @@
     <ClInclude Include="include\Save\NativeContainerLive.hpp" />
     <ClInclude Include="include\Save\NativeFilePresentation.hpp" />
     <ClInclude Include="include\Save\NativeFiles.hpp" />
+    <ClInclude Include="include\Save\NativeFileText.hpp" />
     <ClInclude Include="include\Save\NativeMenu.hpp" />
     <ClInclude Include="include\Save\NativeResume.hpp" />
     <ClInclude Include="include\Save\NativeSnapshot.hpp" />

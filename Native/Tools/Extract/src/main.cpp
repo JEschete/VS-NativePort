@@ -32,6 +32,7 @@
 #include "Extract/FarConversion.hpp"
 #include "Extract/ImageConversion.hpp"
 #include "Extract/MaterialConversion.hpp"
+#include "Extract/SaveTextConversion.hpp"
 #include "Extract/ShpModelConversion.hpp"
 #include "Extract/WepModelConversion.hpp"
 #include "Extract/WorkshopAuthoring.hpp"
@@ -73,6 +74,7 @@ int Usage() {
       "  VS.Extract images   <datadir> [--force]\n"
       "  VS.Extract backgrounds <datadir> [--force]\n"
       "  VS.Extract tables   <datadir> [--force]\n"
+      "  VS.Extract text     <datadir> [--force]\n"
       "  VS.Extract models   <datadir> [--force]\n"
       "  VS.Extract banks    <datadir> [--force]\n"
       "  VS.Extract labels   <datadir> [--force]\n"
@@ -667,6 +669,10 @@ int ConvertExtracted(const Content::Disc& disc, const fs::path& out,
   if (ConvertModels(out, false) != 0) return 1;
   if (ConvertTables(out, false) != 0) return 1;
   if (ConvertBanks(out, false) != 0) return 1;
+  if (auto text = Extract::ConvertSaveText(out, false); !text) {
+    VS::Core::LogError("extract", "{}", text.error());
+    return 1;
+  }
   return WithLabels(ConvertStreams(disc, out, ffmpeg), out);
 }
 
@@ -766,6 +772,13 @@ int Run(int argc, char** argv) {
     return Usage();
   }
   const std::string cmd = argv[1];
+  if (cmd == "text") {
+    const auto force = ForceArgument(argc, argv);
+    if (!force) return Usage();
+    auto result = Extract::ConvertSaveText(Platform::Utf8Path(argv[2]), *force);
+    if (!result) VS::Core::LogError("extract", "{}", result.error());
+    return result ? 0 : 1;
+  }
   if (cmd == "authoring") {
     if (argc != kCatalogArguments) return Usage();
     const fs::path root = Platform::Utf8Path(argv[2]);

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "vs.font",
+  "title": "Native glyph atlas metrics",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "schema_version", "id", "image", "line_height", "glyphs"],
+  "properties": {
+    "schema": {"const": "vs.font"},
+    "schema_version": {"const": 1},
+    "id": {"type": "string", "pattern": "^font\\.[a-z0-9_.-]+$"},
+    "image": {"type": "string", "pattern": "^image\\.[a-z0-9_.-]+$"},
+    "line_height": {"type": "integer", "minimum": 1, "maximum": 4096},
+    "glyphs": {
+      "type": "object",
+      "description": "Keys are one Unicode scalar or a supported named symbol token, not original character codes. Coordinates and advances are nominal atlas pixels.",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["x", "y", "width", "height", "advance", "visible"],
+        "properties": {
+          "x": {"type": "integer", "minimum": 0},
+          "y": {"type": "integer", "minimum": 0},
+          "width": {"type": "integer", "minimum": 1},
+          "height": {"type": "integer", "minimum": 1},
+          "advance": {"type": "integer", "minimum": 1, "maximum": 4096},
+          "visible": {"type": "boolean"}
+        }
+      }
+    }
+  }
+}

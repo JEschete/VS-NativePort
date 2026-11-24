@@ -15,8 +15,8 @@
 // explicit Yes/No consent, save-point eligibility, refusal of invalid or
 // empty selections and of files that changed since their preview, and the
 // TITLE ending clear-save gate. The host owns the save files, their decoded
-// previews, the footer text, sounds and the game state a save captures or a
-// load resumes; this core reaches no menu global or PS1 address.
+// previews, localized status IDs, sounds and the game state a save captures or
+// a load resumes; this core reaches no menu global or PS1 address.
 namespace VS::Menu::Files {
 inline constexpr int kFileRows = 3;
 inline constexpr int kFileSlotCount = VS::Save::SaveStore::kSlotCount;
@@ -116,7 +116,7 @@ class FileMenuHost {
   // Resets the screen's elements and cursor, clears the not-saved flag and
   // forgets every preview and confirmed selection.
   virtual void BeginScreen(FileMenuScreen screen) = 0;
-  virtual void ShowStatus(FileMenuScreen screen, std::string_view text) = 0;
+  virtual void ShowStatus(FileMenuScreen screen, std::string_view text_id) = 0;
   virtual void PlaySound(FileMenuSound sound) = 0;
   virtual void ReportError(std::string_view text, std::string_view detail) = 0;
   // The failure of the previous resume attempt, which is then forgotten.

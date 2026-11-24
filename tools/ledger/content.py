@@ -43,6 +43,11 @@ RUNTIME_CONVERTER = re.compile(r'ConverterVersion\{\s*\.name\s*=\s*"(?P<name>[^"
 SECTION_CONVERTERS = {
     "material-csv": ("SLUS_010.40", "catalog.items.materials", "G01905 at 0x3F5DC, 240 bytes"),
 }
+TEXT_SECTIONS = {
+    "text.ui.save": ("MENU/MCMAN.BIN", "MCMAN entries 36/37 only; 25 native-owned status messages"),
+    "font.ui.save": ("TITLE/TITLE.PRG", "G02022 base English glyph metrics"),
+    "image.ui.save-font": ("TITLE/TITLE.PRG", "G02022 13824 pixel bytes at 0x46B68 and 32 palette bytes at 0x54A68"),
+}
 
 
 @dataclass(frozen=True)
@@ -240,7 +245,13 @@ def expected_rows(root: Path, evidence: Evidence) -> list[dict[str, str]]:
     sections: dict[str, list[str]] = {}
     dependents: dict[str, list[str]] = {}
     for output in manifest["outputs"]:
-        if section := SECTION_CONVERTERS.get(output["converter"]):
+        section = SECTION_CONVERTERS.get(output["converter"])
+        if output["converter"] == "save-text-json":
+            text_section = TEXT_SECTIONS.get(output["id"])
+            if text_section is None:
+                raise SystemExit(f"{output['id']}: invalid section-only conversion registration")
+            section = (text_section[0], output["id"], text_section[1])
+        if section:
             source, identity, extent = section
             if output["source"] != source or output["id"] != identity or output.get("alias_of"):
                 raise SystemExit(f"{output['id']}: invalid section-only conversion registration")

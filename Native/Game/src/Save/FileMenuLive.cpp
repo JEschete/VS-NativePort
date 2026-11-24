@@ -25,7 +25,6 @@
 #include "Audio/SfxLive.hpp"
 #include "Boot/GameLoop.hpp"
 #include "Core/Log.hpp"
-#include "Core/Text/TextCode.hpp"
 #include "Field/ChestInteractionsLive.hpp"
 #include "Field/Gimmicks.hpp"
 #include "Input/Actions.hpp"
@@ -36,6 +35,7 @@
 #include "Platform/App.hpp"
 #include "Save/FileMenu.hpp"
 #include "Save/NativeFilePresentation.hpp"
+#include "Save/NativeFileText.hpp"
 #include "Save/NativeFiles.hpp"
 #include "Save/NativeMenu.hpp"
 #include "Save/NativeResume.hpp"
@@ -52,13 +52,9 @@ using file_menu::FileMenuScreen;
 using file_menu::kFileRows;
 using file_menu::kFileSlotCount;
 
-constexpr int kUppercaseGlyph = 10;
-constexpr int kLowercaseGlyph = 36;
 constexpr int kMenuChannelGroup = 0x7E;
 // VS_SFX_FILEOPCOMPLETE (MENU7.PRG 260.c and TITLE.PRG 22C.c).
 constexpr int kFileOperationCompleteSound = 8;
-// The footer fits 288 pixels of six-pixel glyphs, not a 32-byte card label.
-constexpr std::size_t kFooterTextLimit = 48;
 
 struct FilePreview {
   FileInfo file;
@@ -79,7 +75,10 @@ std::optional<std::filesystem::path> directory;
 std::optional<Files> files;
 std::optional<VS::Items::ContainerData> stagedStorage;
 std::optional<Document> stagedClear;
-std::array<char, kFooterTextLimit + 1> footer{};
+std::string& StatusId() {
+  static std::string id;
+  return id;
+}
 
 std::string& ClearError() {
   static std::string error;
@@ -120,38 +119,13 @@ bool BankEmpty(const VS::Items::ContainerData& bank) {
          std::ranges::all_of(bank.misc, empty);
 }
 
-unsigned char Glyph(unsigned char c) {
-  if (c >= '0' && c <= '9') {
-    return c - '0';
-  } else if (c >= 'A' && c <= 'Z') {
-    return c - 'A' + kUppercaseGlyph;
-  } else if (c >= 'a' && c <= 'z') {
-    return c - 'a' + kLowercaseGlyph;
-  } else if (c == ' ') {
-    return VS::Core::TextCode::kSpace;
-  } else if (c == ':') {
-    return VS::Core::TextCode::kColon;
-  } else if (c == '/') {
-    return VS::Core::TextCode::kForwardSlash;
-  } else if (c == '-') {
-    return VS::Core::TextCode::kHyphen;
-  }
-  throw std::logic_error("Unsupported native save label character");
-}
-
 void Status(FileMenuScreen screen, std::string_view text) {
-  if (text.size() > kFooterTextLimit) {
-    throw std::logic_error("Native save prompt exceeds one game text line");
-  }
-  std::size_t n = 0;
-  for (const unsigned char c : text) {
-    footer[n++] = static_cast<char>(Glyph(c));
-  }
-  footer[n] = static_cast<char>(VS::Core::TextCode::kTerminator);
+  SelectNativeFileText(text);
+  StatusId() = text;
   if (screen == FileMenuScreen::kTitle) {
-    VS::Title::memoryCardMessage = footer.data();
+    VS::Title::memoryCardMessage = nullptr;
   } else {
-    VS::Menu::Files::memoryCardMessage = footer.data();
+    VS::Menu::Files::memoryCardMessage = nullptr;
   }
 }
 
@@ -337,6 +311,7 @@ class LiveFileMenuHost final : public file_menu::FileMenuHost {
  public:
   void BeginScreen(FileMenuScreen screen) override {
     ForgetPicker();
+    BeginNativeFileText();
     if (screen == FileMenuScreen::kTitle) {
       file_menu::ResetLiveTitleElements();
       VS::Title::selectionCursorPosition = 0;
@@ -550,7 +525,12 @@ int RunPicker(PickerEntry entry, int init) {
       .up = (VS::Input::buttonRepeat & VS::Input::Up) != 0,
       .down = (VS::Input::buttonRepeat & VS::Input::Down) != 0};
   LiveFileMenuHost host;
-  return static_cast<int>(entry(picker.session, host, init, input));
+  const auto result = entry(picker.session, host, init, input);
+  if (picker.session.menu.phase == file_menu::FileMenuPhase::kInactive) {
+    StatusId().clear();
+    ResetNativeFileText();
+  }
+  return static_cast<int>(result);
 }
 }  // namespace
 
@@ -586,12 +566,8 @@ void ResetFileMenuSession() {
   stagedStorage.reset();
   stagedClear.reset();
   ClearError().clear();
-  if (VS::Title::memoryCardMessage == footer.data()) {
-    VS::Title::memoryCardMessage = nullptr;
-  }
-  if (VS::Menu::Files::memoryCardMessage == footer.data()) {
-    VS::Menu::Files::memoryCardMessage = nullptr;
-  }
+  StatusId().clear();
+  ResetNativeFileText();
 }
 
 std::optional<NativeFileScreen> FileMenuPresentation() {
@@ -668,5 +644,5 @@ int UpdateLiveLoadMenu(int init_fadeout) {
 int UpdateLiveSaveMenu(int init_state) {
   return VS::Game::Save::RunPicker(Files::UpdateSaveMenu, init_state);
 }
-std::span<const char> LiveFileMenuFooter() { return VS::Game::Save::footer; }
+std::string_view LiveFileMenuStatusId() { return VS::Game::Save::StatusId(); }
 }  // namespace VS::Menu

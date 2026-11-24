@@ -220,17 +220,13 @@ void ClearBothBuffers() {
   return address - start;
 }
 
-// The text from `text` to the end of the MCMAN.BIN table (either screen's)
-// or of the native file menu's footer it lies in; empty for other text.
+// Only the still-unmigrated MCMAN table consumers use encoded text.
 [[nodiscard]] std::span<const std::uint8_t> TextTail(const char* text) {
-  const std::span<const char> footer = VS::Menu::LiveFileMenuFooter();
-  const std::array<std::span<const std::uint8_t>, 3> regions{
+  const std::array<std::span<const std::uint8_t>, 2> regions{
       std::span(reinterpret_cast<const std::uint8_t*>(textTable),
                 textTable != nullptr ? kTextTableBytes : 0),
       std::span(reinterpret_cast<const std::uint8_t*>(VS::Title::saveMenuText),
-                VS::Title::saveMenuText != nullptr ? kTextTableBytes : 0),
-      std::span(reinterpret_cast<const std::uint8_t*>(footer.data()),
-                footer.size())};
+                VS::Title::saveMenuText != nullptr ? kTextTableBytes : 0)};
   for (const std::span<const std::uint8_t> region : regions) {
     const std::optional<std::size_t> offset =
         OffsetIn(region.data(), region.size(), text);
@@ -382,7 +378,7 @@ class LiveCardHost : public LiveGpuHost {
     }
     const std::span<const std::uint8_t> text = TextTail(memoryCardMessage);
     if (text.empty()) {
-      Refuse("memory-card message outside the MCMAN.BIN table and footer");
+      Refuse("memory-card message outside the MCMAN.BIN table");
     }
     return text;
   }
@@ -957,7 +953,7 @@ void DrawLiveInteger(std::int32_t position, std::uint32_t value,
 void DrawLiveText(const char* text, int x, int y, int clut) {
   const std::span<const std::uint8_t> tail = TextTail(text);
   if (tail.empty()) {
-    Warn("file menu text outside the MCMAN.BIN table and footer");
+    Warn("file menu text outside the MCMAN.BIN table");
     return;
   }
   LiveImmediateTarget target;

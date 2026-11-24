@@ -80,6 +80,8 @@
     <ClCompile Include="src\ModuleLoader.cpp" />
     <ClCompile Include="src\MovieEncoder.cpp" />
     <ClCompile Include="src\NativeImage.cpp" />
+    <ClCompile Include="src\NativeText.cpp" />
+    <ClCompile Include="src\NativeTextAssets.cpp" />
     <ClCompile Include="src\OverlayFiles.cpp" />
     <ClCompile Include="src\OverlayWorkspace.cpp" />
     <ClCompile Include="src\OverlayWorkspaceLive.cpp">
@@ -143,6 +145,7 @@
     <ClInclude Include="include\Content\ModuleData.hpp" />
     <ClInclude Include="include\Content\MovieEncoder.hpp" />
     <ClInclude Include="include\Content\NativeImage.hpp" />
+    <ClInclude Include="include\Content\NativeText.hpp" />
     <ClInclude Include="include\Content\OverlayFiles.hpp" />
     <ClInclude Include="include\Content\OverlayWorkspace.hpp" />
     <ClInclude Include="include\Content\OverlayWorkspaceLive.hpp" />

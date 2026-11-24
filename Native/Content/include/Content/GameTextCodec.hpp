@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <expected>
+#include <optional>
 #include <span>
 #include <string>
 #include <string_view>
@@ -40,5 +41,9 @@ struct DecodedGameText {
 // Informational labels retain the existing visible markers for unmapped
 // glyphs; this is deliberately less strict than the authoring codec.
 void AppendGameGlyphLabel(std::string& text, std::uint8_t glyph);
+
+// Shared offline glyph facts for font import. A literal Unicode character or
+// a named symbol token; not a runtime Unicode-to-bytecode encoder.
+[[nodiscard]] std::optional<std::string> GameGlyphIdentity(unsigned glyph);
 
 }  // namespace VS::Content

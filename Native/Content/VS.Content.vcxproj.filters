@@ -114,6 +114,12 @@
     <ClCompile Include="src\NativeImage.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\NativeText.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\NativeTextAssets.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\OverlayFiles.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -274,6 +280,9 @@
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\NativeImage.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\NativeText.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\OverlayFiles.hpp">

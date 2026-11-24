@@ -14,6 +14,7 @@
 #include "Content/AssetHandle.hpp"
 #include "Content/ConversionManifest.hpp"
 #include "Content/MaterialCatalog.hpp"
+#include "Content/NativeText.hpp"
 #include "Content/WorkshopRecipes.hpp"
 #include "Core/Types.hpp"
 
@@ -119,6 +120,9 @@ class DataStore {
   [[nodiscard]] const MaterialCatalog* Materials() const {
     return m_materials_ ? &*m_materials_ : nullptr;
   }
+  [[nodiscard]] const NativeTextAssets* SaveText() const {
+    return m_save_text_ ? &*m_save_text_ : nullptr;
+  }
   [[nodiscard]] const CatalogDatabase* CatalogTables() const {
     return m_catalog_tables_ ? &*m_catalog_tables_ : nullptr;
   }
@@ -135,6 +139,7 @@ class DataStore {
   std::optional<ConversionManifest> m_conversion_manifest_;
   std::optional<WorkshopRecipeCatalog> m_workshop_recipes_;
   std::optional<MaterialCatalog> m_materials_;
+  std::optional<NativeTextAssets> m_save_text_;
   std::optional<CatalogDatabase> m_catalog_tables_;
 };
 

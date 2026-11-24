@@ -103,6 +103,7 @@ constexpr std::array kConvertedTypes{
 constexpr std::string_view kRerun = " (run VS.Extract extract <disc> <dir>)";
 
 std::string_view RerunFor(std::string_view converter) {
+  if (converter == kSaveTextConverter) return " (run VS.Extract text <dir>)";
   return converter == kMaterialConverterName ? " (run VS.Extract tables <dir>)"
                                              : kRerun;
 }
@@ -481,6 +482,12 @@ std::expected<void, std::string> DataStore::Open(const fs::path& root) {
     return std::unexpected("cannot inspect " + Platform::PathText(catalogs) +
                            ": " + error.message());
   }
+  if (store->m_conversion_manifest_ &&
+      store->m_conversion_manifest_->Find(kSaveTextId) != nullptr) {
+    auto text = LoadSaveTextAssets(*store);
+    if (!text) return std::unexpected(text.error());
+    store->m_save_text_ = std::move(*text);
+  }
   if (store->m_catalog_tables_) {
     if (auto cached = store->m_catalog_tables_->PublishCache(); !cached) {
       Core::LogWarn("content",
@@ -542,6 +549,24 @@ std::expected<void, std::string> DataStore::RequireConversions(
             RequireConvertedType(*this, *m_conversion_manifest_, hashes, type);
         !required) {
       return required;
+    }
+  }
+  // The text/font converter owns sections of two sources, not one container
+  // per output. Keep section ownership distinct from the generic file gate.
+  if (Find("MENU/MCMAN.BIN") != nullptr && Find("TITLE/TITLE.PRG") != nullptr) {
+    for (const auto id : {kSaveTextId, kSaveFontId, kSaveFontImageId}) {
+      const auto* output = m_conversion_manifest_->Find(id);
+      const auto* source = output == nullptr ? nullptr : Find(output->source);
+      if (source == nullptr || output->converter != kSaveTextConverter) {
+        return std::unexpected(
+            std::string(id) +
+            ": missing native save text; run VS.Extract text <dir>");
+      }
+      if (auto required = RequireConvertedSource(*this, *m_conversion_manifest_,
+                                                 hashes, *source, *output);
+          !required) {
+        return required;
+      }
     }
   }
   if (auto saved = cache.Publish(); !saved) {

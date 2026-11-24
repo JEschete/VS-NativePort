@@ -391,6 +391,69 @@ MCMAN location-label records (indices 77..104 except 89, and 117..136):
 new English control to invent. Their encoding/usage and placeholder status need
 explicit reconciliation; the English codec continues to reject them.
 
+### 5.1 Native file-picker prompt adoption (#54/#500)
+
+`VS.Extract text <datadir>` (also full extraction) publishes three manifest
+outputs: `text.ui.save`, `font.ui.save`, and `image.ui.save-font`. Unchanged
+sources keep authored files; `--force` explicitly replaces edits.
+
+- `text\strings.en.json` contains 25 native-owned status/notice/operation
+  messages and two imported MCMAN choices, `text.save.choice.yes/no`.
+  Only MCMAN entries **36 and 37**, halfword offsets **779 and 782**, are
+  imported. Their exact decoded markup/consumed extent remains in
+  `text\save-text.import.json`; leading spacing is a view-layout concern.
+  The other **135 entries**, including all **47 unsupported Japanese
+  location labels**, are not migrated. Other string tables remain unchanged.
+- `text\save.font.json` names `font.ui.save` and the shared
+  `image.ui.save-font` image. Its 159 glyph keys are Unicode scalars or named symbols,
+  with atlas-pixel rectangles, advances and line height. The offline importer
+  reuses `GameTextCodec`'s glyph facts, not a second runtime byte map.
+- `textures\ui\save-font.png` plus `.image.json` preserve the 4-bit first
+  English bank of TITLE's G02022 font: **13,824 bytes at 0x46B68**, plus
+  **32 palette bytes at 0x54A68**. The rest of G02022, other TITLE/module
+  images, SYSTEM.DAT and the wider #498 image corpus remain unconverted.
+
+Schemas are `Native\Content\schemas\strings.schema.json` and
+`font.schema.json`. Runtime `NativeText` parses Unicode and typed newline,
+named-button/symbol and `{value:role}` tokens; instant labels do **not**
+implement progressive dialogue controls. Unknown controls, duplicate JSON
+members/IDs, invalid Unicode, absent references/glyphs and overflow fail
+explicitly. Literal braces are `{{` and `}}`. Typed argument values are
+strings or signed 64-bit integers, not byte-sized import slots. String
+arguments are never parsed as markup; external CR/LF/tab become spaces.
+
+The existing `catalog-layers.json` ordered roots can supply partial
+`text\strings.en.json` overlays (same font, explicit scale and string map).
+The data store validates into owned typed content before publication. Each
+native file-picker entry owns its content/layout snapshot; cancel, completion,
+reset, reconfiguration and shutdown release it. The native file-picker
+policy emits semantic status IDs, never an encoded footer. Default No,
+backup/invalid-data cautions and the existing frame-delayed operations remain.
+The Yes/No choices and status share the native rendering path. Legacy room
+summaries, breadcrumb labels, button legend and artwork remain outside this
+bounded prompt/consent slice.
+
+Layout is independent of Game font globals: authored scale 0.5–4, measured
+Latin/symbol word wrapping and explicit newlines, scalar emergency wrapping,
+and explicit pixel-box overflow refusal (no truncation or silent shrink).
+The file view admits only content that fits its 304×30 status box and
+100×16 choice boxes. These are view constraints, not 24/48-byte string limits.
+The unchanged button legend moves to the top margin, leaving two full status
+lines inside the file screen's 224-pixel drawing area.
+The existing Caution bitmap is redrawn after the third card: that card formerly
+covered its top three rows. This preserves the required heading, not a new
+image-conversion claim (defect recorded on #54 before repair).
+This is not full Unicode shaping/UAX #14 conformance or a WCAG claim.
+Design references: [Unicode line breaking](https://www.unicode.org/reports/tr14/)
+and [text resizing without loss](https://www.w3.org/TR/WCAG22/#resize-text).
+
+The checked backend renders native glyph rectangles as scaled textured quads.
+It temporarily binds the owned PNG to the existing page/palette and restores
+both immediately after drawing. GPU packet/page-image rendering is explicit
+EC-01/EC-04 debt, **not** full font or compatibility retirement. No runtime
+UTF-8-to-legacy string/container reconstruction is used by migrated prompts.
+Verification evidence and limits are recorded in HANDOFF; #54/#500 remain open.
+
 ---
 
 ## 6. Tier 3: disc assets → modern formats

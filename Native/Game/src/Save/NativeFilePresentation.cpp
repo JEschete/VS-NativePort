@@ -26,6 +26,7 @@
 #include "Render/UiPackets.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Save/MemoryCard/CardResources.hpp"
+#include "Save/NativeFileText.hpp"
 #include "Title/SaveFiles.hpp"
 
 using VS::Legacy::getTPage;
@@ -51,7 +52,7 @@ constexpr int kCardWidth = 256;
 constexpr int kCardHeight = 32;
 constexpr int kGlyphExtent = 12;
 constexpr int kNameRight = 170;
-constexpr int kFooterTop = 209;
+constexpr int kControlsTop = 2;
 constexpr int kScreenWidth = 320;
 constexpr int kGenericElementId = 255;
 constexpr int kSelectedBlend = 8;
@@ -545,10 +546,10 @@ void Card(const Frontend& frontend, const NativeFileScreen& screen,
 }
 
 void Controls(const Frontend& frontend) {
-  constexpr Point kUp{16, kFooterTop}, kDown{28, kFooterTop};
-  constexpr Point kSelect{42, kFooterTop}, kConfirm{114, kFooterTop};
-  constexpr Point kCircle{100, kFooterTop}, kCross{188, kFooterTop};
-  constexpr Point kBack{202, kFooterTop};
+  constexpr Point kUp{16, kControlsTop}, kDown{28, kControlsTop};
+  constexpr Point kSelect{42, kControlsTop}, kConfirm{114, kControlsTop};
+  constexpr Point kCircle{100, kControlsTop}, kCross{188, kControlsTop};
+  constexpr Point kBack{202, kControlsTop};
   frontend.Glyph(kUpGlyph, kUp);
   frontend.Glyph(kDownGlyph, kDown);
   frontend.Ascii("Select", kSelect);
@@ -559,17 +560,14 @@ void Controls(const Frontend& frontend) {
 }
 
 void Confirmation(const Frontend& frontend, bool affirmative) {
-  constexpr int kTop = 18, kStride = 16, kTextX = 6, kCursorYOffset = -8;
-  constexpr Extent kChoiceSize{126, 12};
+  constexpr int kTop = 18, kStride = 20, kCursorYOffset = -8;
+  constexpr Extent kChoiceSize{126, 16};
   // F02759 _promptConfirm, MENU7/260.c:2092; F03629, TITLE/22C.c:2330.
   // Retain the original vertically stacked choices and large selection arrow.
   for (int row = 0; row < 2; ++row) {
     const bool selected = affirmative == (row == 0);
     const int y = kTop + row * kStride;
     frontend.Panel({0, y}, kChoiceSize, selected);
-    frontend.Encoded(OriginalText(row == 0 ? mcman_text::offset::kYesIndent
-                                           : mcman_text::offset::kNoIndent),
-                     {kTextX, y});
     if (selected) {
       frontend.Sprite({0, y + kCursorYOffset}, kCursorSprite);
     }
@@ -626,8 +624,15 @@ void DrawNativeFileScreen(const NativeFileScreen& screen) {
   const auto count =
       std::min(screen.files.size(), static_cast<std::size_t>(kVisibleRows));
   for (std::size_t row = 0; row < count; ++row) Card(frontend, screen, row);
+  // The third card covers y=181..183 of the frame's earlier caution bitmap.
+  constexpr SpriteAsset kCaution{VS::Render::PackUvClutWord(64, 145, 848, 223),
+                                 VS::Render::PackScreenWord(33, 7),
+                                 getTPage(0, 0, 768, 0)};
+  constexpr Point kCautionPosition{10, 181};
+  frontend.Sprite(kCautionPosition, kCaution);
   Controls(frontend);
   if (screen.confirmation) Confirmation(frontend, screen.affirmative);
+  DrawNativeFileText(screen.confirmation);
 }
 
 }  // namespace VS::Game::Save

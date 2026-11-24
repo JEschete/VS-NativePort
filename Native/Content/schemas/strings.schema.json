@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "vs.strings",
+  "title": "Native instant-information strings",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "schema_version", "font", "scale", "strings"],
+  "properties": {
+    "schema": {"const": "vs.strings"},
+    "schema_version": {"const": 1},
+    "font": {"type": "string", "pattern": "^font\\.[a-z0-9_.-]+$"},
+    "scale": {"type": "number", "minimum": 0.5, "maximum": 4},
+    "strings": {
+      "type": "object",
+      "propertyNames": {"pattern": "^text\\.[a-z0-9_.-]+$"},
+      "additionalProperties": {
+        "type": "string",
+        "description": "Unicode; literal braces {{ and }}; newline; named btn:triangle/square/circle/cross, arrow:left/right/up/down, music, level, star, block; {value:role}. Other controls are explicitly unsupported in this instant-information slice."
+      }
+    }
+  }
+}

@@ -2994,6 +2994,9 @@
     <ClCompile Include="src\Save\NativeFiles.cpp">
       <Filter>src\Save</Filter>
     </ClCompile>
+    <ClCompile Include="src\Save\NativeFileText.cpp">
+      <Filter>src\Save</Filter>
+    </ClCompile>
     <ClCompile Include="src\Save\NativeResume.cpp">
       <Filter>src\Save</Filter>
     </ClCompile>
@@ -4765,6 +4768,9 @@
       <Filter>include\Save</Filter>
     </ClInclude>
     <ClInclude Include="include\Save\NativeFiles.hpp">
+      <Filter>include\Save</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Save\NativeFileText.hpp">
       <Filter>include\Save</Filter>
     </ClInclude>
     <ClInclude Include="include\Save\NativeMenu.hpp">

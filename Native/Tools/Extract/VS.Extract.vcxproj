@@ -60,6 +60,7 @@
     <ClCompile Include="src\ImageFilesWriter.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MaterialConversion.cpp" />
+    <ClCompile Include="src\SaveTextConversion.cpp" />
     <ClCompile Include="src\ShpModelConversion.cpp" />
     <ClCompile Include="src\TimImage.cpp" />
     <ClCompile Include="src\WepModelConversion.cpp" />
@@ -82,6 +83,7 @@
     <ClInclude Include="include\Extract\ImageConversion.hpp" />
     <ClInclude Include="include\Extract\ImageFilesWriter.hpp" />
     <ClInclude Include="include\Extract\MaterialConversion.hpp" />
+    <ClInclude Include="include\Extract\SaveTextConversion.hpp" />
     <ClInclude Include="include\Extract\ShpModelConversion.hpp" />
     <ClInclude Include="include\Extract\TimImage.hpp" />
     <ClInclude Include="include\Extract\WepModelConversion.hpp" />

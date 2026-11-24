@@ -122,6 +122,20 @@ class ContentLedgerTests(unittest.TestCase):
         with self.assertRaisesRegex(SystemExit, "invalid section-only conversion registration"):
             content.sync(self.fixture.root)
 
+    def test_native_text_sections_do_not_claim_whole_font_or_text_sources(self) -> None:
+        outputs = [{"id": identity, "source": source, "converter": "save-text-json",
+                    "files": ["text/strings.en.json"]}
+                   for identity, (source, _) in content.TEXT_SECTIONS.items()]
+        self.fixture.data([*FILES, ("MENU/MCMAN.BIN", 3014, "raw"),
+                           ("TITLE/TITLE.PRG", 554568, "raw")], [OUTPUT, *outputs])
+        content.sync(self.fixture.root)
+        for source in ("MENU/MCMAN.BIN", "TITLE/TITLE.PRG"):
+            row = self.fixture.rows()[source]
+            self.assertEqual((row["status"], row["converter"], row["output"]),
+                             ("unconverted", "", ""))
+            self.assertIn("partial", row["notes"])
+        self.assertEqual(self.fixture.rules(), [])
+
     def test_round_trip_passes_only_with_a_passing_record_for_an_existing_test(self) -> None:
         self.fixture.verify("partial")
         content.sync(self.fixture.root)

@@ -161,7 +161,7 @@ TEST_CASE("File pickers open on the window around the last chosen slot",
   CHECK(picker.session.menu.phase == FileMenuPhase::kPick);
   CHECK(picker.host.windows == std::vector<int>{first});
   CHECK(picker.host.statuses ==
-        std::vector<std::string>{"Reading save files", "Select a file"});
+        std::vector<std::string>{"text.save.reading", "text.save.select"});
 }
 
 TEST_CASE("A failed resume is reported once and leaves the picker",
@@ -172,7 +172,7 @@ TEST_CASE("A failed resume is reported once and leaves the picker",
           FileMenuResult::kRunning);
   CHECK(picker.session.menu.phase == FileMenuPhase::kNotice);
   CHECK(picker.host.errors.at(0) ==
-        std::pair<std::string, std::string>{"Previous resume failed",
+        std::pair<std::string, std::string>{"text.save.resume-failed",
                                             "Missing room"});
   CHECK(picker.Frame(file_menu::UpdateLoadMenu) == FileMenuResult::kRunning);
   CHECK(picker.Frame(file_menu::UpdateLoadMenu, kCancel) ==
@@ -184,9 +184,9 @@ TEST_CASE("A failed resume is reported once and leaves the picker",
 TEST_CASE("Storage failures while reading the window leave the picker",
           "[save-menu][file-menu]") {
   const auto [fault, text] =
-      GENERATE(std::pair{FileMenuFault::kOpen, "Cannot open native saves"},
-               std::pair{FileMenuFault::kRead, "Cannot read native saves"},
-               std::pair{FileMenuFault::kSummary, "Save summary unavailable"});
+      GENERATE(std::pair{FileMenuFault::kOpen, "text.save.open-error"},
+               std::pair{FileMenuFault::kRead, "text.save.read-error"},
+               std::pair{FileMenuFault::kSummary, "text.save.summary-error"});
   Picker picker;
   picker.host.read_error = file_menu::FileMenuError{fault, "disk"};
   REQUIRE(file_menu::UpdateDataSaveMenu(picker.session, picker.host, 1,
@@ -209,7 +209,7 @@ void CheckWrapToLastWindow(Picker& picker) {
   CHECK(picker.session.menu.row == 2);
   CHECK_FALSE(picker.session.menu.ready);
   CHECK(picker.session.menu.phase == FileMenuPhase::kRead);
-  CHECK(picker.host.statuses.back() == "Reading save files");
+  CHECK(picker.host.statuses.back() == "text.save.reading");
   CHECK(picker.host.sounds.back() == FileMenuSound::kChange);
   CHECK(picker.Frame(file_menu::UpdateLoadMenu) == FileMenuResult::kRunning);
   CHECK(picker.host.windows == std::vector{0, 97});
@@ -253,12 +253,12 @@ namespace {
 // confirmation is cancelled.
 void DismissFirstRefusal(Picker& picker, Entry entry, bool save) {
   if (!save) {
-    CHECK(picker.host.statuses.back() == "No usable native save");
+    CHECK(picker.host.statuses.back() == "text.save.unusable");
     CHECK(picker.Frame(entry, kAccept) == FileMenuResult::kRunning);
     CHECK(picker.session.menu.phase == FileMenuPhase::kRead);
     CHECK(picker.Frame(entry) == FileMenuResult::kRunning);
   } else {
-    CHECK(picker.host.statuses.back() == "Save to selected file");
+    CHECK(picker.host.statuses.back() == "text.save.confirm.save");
     CHECK(picker.Frame(entry, kCancel) == FileMenuResult::kRunning);
   }
 }
@@ -280,22 +280,21 @@ TEST_CASE("Loads refuse empty and invalid slots and saves refuse invalid ones",
         (save ? FileMenuSound::kSelect : FileMenuSound::kInvalid));
   DismissFirstRefusal(picker, entry, save);
   CHECK(picker.Frame(entry, kDown) == FileMenuResult::kRunning);
-  CHECK(picker.host.statuses.back() == "Invalid data - not overwritten");
+  CHECK(picker.host.statuses.back() == "text.save.invalid");
   CHECK(picker.Frame(entry, kAccept) == FileMenuResult::kRunning);
   CHECK(picker.session.menu.phase == FileMenuPhase::kNotice);
-  CHECK(picker.host.errors.back() ==
-        std::pair<std::string, std::string>{"No usable native save",
-                                            "Bad checksum"});
+  CHECK(picker.host.errors.back() == std::pair<std::string, std::string>{
+                                         "text.save.unusable", "Bad checksum"});
   CHECK(picker.host.writes.empty());
 }
 
 namespace {
 // Consent opens on No; accepting No returns to the picker.
 void CheckConsentDefaultsToNo(Picker& picker) {
-  CHECK(picker.host.statuses.back() == "Backup available - select to use");
+  CHECK(picker.host.statuses.back() == "text.save.backup-available");
   CHECK(picker.Frame(file_menu::UpdateLoadMenu, kAccept) ==
         FileMenuResult::kRunning);
-  CHECK(picker.host.statuses.back() == "Recover from valid backup");
+  CHECK(picker.host.statuses.back() == "text.save.confirm.recover");
   CHECK_FALSE(picker.session.menu.affirmative);
   CHECK(picker.Frame(file_menu::UpdateLoadMenu, kAccept) ==
         FileMenuResult::kRunning);
@@ -329,7 +328,7 @@ TEST_CASE("Consent defaults to No, toggles and can be cancelled",
   CheckConsentTogglesAndCancels(picker);
 
   picker.ChooseYes(file_menu::UpdateLoadMenu);
-  CHECK(picker.host.statuses.back() == "Loading game");
+  CHECK(picker.host.statuses.back() == "text.save.loading");
   CHECK(picker.Frame(file_menu::UpdateLoadMenu) == FileMenuResult::kFinished);
   CHECK(picker.host.resumes == 1);
   CHECK(picker.session.menu.phase == FileMenuPhase::kInactive);
@@ -351,9 +350,9 @@ TEST_CASE("Saves need active gameplay and an enabled save point",
         FileMenuResult::kRunning);
   CHECK(picker.host.writes.empty());
   CHECK(picker.host.sounds.back() == FileMenuSound::kInvalid);
-  CHECK(picker.host.statuses.back() == "Save failed - see log");
+  CHECK(picker.host.statuses.back() == "text.save.save-failed");
   CHECK(picker.host.errors.back() ==
-        std::pair<std::string, std::string>{"Save failed - see log", detail});
+        std::pair<std::string, std::string>{"text.save.save-failed", detail});
   CHECK(picker.Frame(file_menu::UpdateDataSaveMenu, kAccept) ==
         FileMenuResult::kRunning);
   CHECK(picker.session.menu.phase == FileMenuPhase::kRead);
@@ -365,12 +364,12 @@ void ConfirmRecoveredReplacement(Picker& picker) {
   CHECK(picker.session.menu.container);
   CHECK(picker.Frame(file_menu::UpdateDataSaveMenu, kAccept) ==
         FileMenuResult::kRunning);
-  CHECK(picker.host.statuses.back() == "Replace invalid original");
+  CHECK(picker.host.statuses.back() == "text.save.confirm.replace-invalid");
   CHECK(picker.Frame(file_menu::UpdateDataSaveMenu, kUp) ==
         FileMenuResult::kRunning);
   CHECK(picker.Frame(file_menu::UpdateDataSaveMenu, kAccept) ==
         FileMenuResult::kRunning);
-  CHECK(picker.host.statuses.back() == "Saving game");
+  CHECK(picker.host.statuses.back() == "text.save.saving");
 }
 
 void CheckSavedRow(const Picker& picker, int slot) {
@@ -395,7 +394,7 @@ TEST_CASE(
         FileMenuResult::kRunning);
   CHECK(picker.host.writes == std::vector{WriteConsent::kReplaceRecovered});
   CHECK(picker.host.sounds.back() == FileMenuSound::kComplete);
-  CHECK(picker.host.statuses.back() == "Save complete");
+  CHECK(picker.host.statuses.back() == "text.save.complete");
   CHECK(picker.host.errors.empty());
   CheckSavedRow(picker, 42);
   CHECK(picker.Frame(file_menu::UpdateDataSaveMenu, kCancel) ==
@@ -425,20 +424,17 @@ TEST_CASE("Failed writes keep the file and offer a retry",
 TEST_CASE("Changed or unreadable selections return to the picker",
           "[save-menu][file-menu]") {
   const auto [fault, detail, text, shown, result] = GENERATE(
-      std::tuple{FileMenuFault::kChanged, "",
-                 "File changed - select "
-                 "again",
+      std::tuple{FileMenuFault::kChanged, "", "text.save.changed",
                  "Selected file content or status changed",
                  FileMenuResult::kRunning},
-      std::tuple{FileMenuFault::kChanged, "Backup used",
-                 "File changed - select again", "Backup used",
+      std::tuple{FileMenuFault::kChanged, "Backup used", "text.save.changed",
+                 "Backup used", FileMenuResult::kRunning},
+      std::tuple{FileMenuFault::kRead, "io", "text.save.read-error", "io",
                  FileMenuResult::kRunning},
-      std::tuple{FileMenuFault::kRead, "io", "Cannot read native saves", "io",
-                 FileMenuResult::kRunning},
-      std::tuple{FileMenuFault::kVerify, "diff", "Cannot verify selected save",
+      std::tuple{FileMenuFault::kVerify, "diff", "text.save.verify-error",
                  "diff", FileMenuResult::kRunning},
-      std::tuple{FileMenuFault::kOpen, "gone", "Cannot open native saves",
-                 "gone", FileMenuResult::kLeft});
+      std::tuple{FileMenuFault::kOpen, "gone", "text.save.open-error", "gone",
+                 FileMenuResult::kLeft});
   Picker picker;
   picker.Store(0, SlotStatus::kValid);
   picker.Open(file_menu::UpdateDataLoadMenu);
@@ -463,7 +459,7 @@ TEST_CASE("Loads without a document or with a failed resume change nothing",
   CHECK(picker.Frame(file_menu::UpdateDataLoadMenu) ==
         FileMenuResult::kRunning);
   CHECK(picker.host.errors.back() ==
-        std::pair<std::string, std::string>{"Load failed - game unchanged",
+        std::pair<std::string, std::string>{"text.save.load-failed",
                                             "Selected file has no document"});
   CHECK(picker.host.resumes == 0);
 
@@ -502,12 +498,13 @@ TEST_CASE("Container pickers open empty banks and confirmed containers",
   CHECK(picker.Frame(file_menu::UpdateContainerMenu, kAccept) ==
         FileMenuResult::kRunning);
   CHECK(picker.host.statuses.back() ==
-        (empty ? "Use empty container" : "Open selected container"));
+        (empty ? "text.save.confirm.empty-container"
+               : "text.save.confirm.container"));
   CHECK(picker.Frame(file_menu::UpdateContainerMenu, kUp) ==
         FileMenuResult::kRunning);
   CHECK(picker.Frame(file_menu::UpdateContainerMenu, kAccept) ==
         FileMenuResult::kRunning);
-  CHECK(picker.host.statuses.back() == "Opening container");
+  CHECK(picker.host.statuses.back() == "text.save.opening-container");
   CHECK(picker.Frame(file_menu::UpdateContainerMenu) ==
         FileMenuResult::kFinished);
   CheckContainerOpened(picker, empty);
@@ -524,7 +521,7 @@ TEST_CASE("The ending clear save is refused unless one is staged",
   CHECK(picker.session.menu.clear_game);
   CHECK(picker.session.menu.phase == FileMenuPhase::kNotice);
   CHECK(picker.host.errors.back() ==
-        std::pair<std::string, std::string>{"No ending clear save available",
+        std::pair<std::string, std::string>{"text.save.no-clear-save",
                                             "Ending not reached"});
   CHECK(picker.Frame(file_menu::UpdateSaveMenu, kAccept) ==
         FileMenuResult::kLeft);
@@ -534,7 +531,7 @@ TEST_CASE("The ending clear save is refused unless one is staged",
   picker.ChooseYes(file_menu::UpdateSaveMenu);
   CHECK(picker.Frame(file_menu::UpdateSaveMenu) == FileMenuResult::kRunning);
   CHECK(picker.host.writes == std::vector{WriteConsent::kNormal});
-  CHECK(picker.host.statuses.back() == "Save complete");
+  CHECK(picker.host.statuses.back() == "text.save.complete");
 }
 
 TEST_CASE("Save counters stop at 9999 and refuse an exhausted generation",

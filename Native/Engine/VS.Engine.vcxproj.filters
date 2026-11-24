@@ -630,6 +630,12 @@
     <ClCompile Include="src\Render\ModelWorkspace.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
+    <ClCompile Include="src\Render\NativeTextDraw.cpp">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\NativeTextLayout.cpp">
+      <Filter>src\Render</Filter>
+    </ClCompile>
     <ClCompile Include="src\Render\PageSpace.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
@@ -1126,6 +1132,12 @@
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Render\ModelWorkspace.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\NativeTextDraw.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\NativeTextLayout.hpp">
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Render\PageSpace.hpp">

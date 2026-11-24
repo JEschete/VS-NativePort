@@ -1,5 +1,161 @@
 # Current Handoff
 
+## Native file-picker text adoption (#54/#500), 2026-11-24
+
+Base `08f26705ba3b5142fd797df720bf59a7666ac5bb` on `main`; its metadata CI
+`45390826539` passed. **This text milestone is locally changed, not committed
+or pushed.** The parent owns publication and exact-revision CI. The material
+verification row and prior evidence below are preserved.
+
+### Complete adopted boundary
+
+The real TITLE Continue/native file-picker prompt and consent flow now uses
+semantic `text.save.*` IDs from editable `text\strings.en.json`, not the old
+encoded footer or MCMAN choice offsets. The same policy/host serves MENU7
+load/save/container/clear-save prompts; its existing consent, revalidation,
+eligibility, write and failure behavior is unchanged.
+
+`VS.Extract text <datadir>` publishes **27 strings**: 25 native-owned messages
+and exact imports of only MCMAN entries **36/37** (Yes/No). It also publishes
+`font.ui.save` with **159 Unicode/symbol metrics** and a true 4-bit PNG/sidecar
+for TITLE G02022's base English font: 13,824 pixel bytes at `0x46B68` and
+32 palette bytes at `0x54A68`. The existing manifest and source asset catalog
+own the references; `catalog-layers.json` supplies ordered text overlays.
+No runtime text encoder or legacy-container reconstruction is involved.
+
+Content owns validated Unicode/control tokens and font/image definitions.
+Layout owns geometry, includes glyph paint extents in word wrapping, and
+rejects overflow instead of truncating a caution or silently shrinking text.
+The Game session owns a copied content/layout snapshot; cancel, completion,
+reset, directory changes and shutdown release it. Literal string/int64 role
+arguments do not reparse markup; external CR/LF/tab become spaces, and bounded
+resource limits apply independently of legacy byte/slot limits.
+
+The isolated rendering backend emits checked scalable quads, temporarily
+uploads the native PNG/palette, and restores the prior page content before
+returning. **GPU page/packet rendering remains migration debt.** The existing
+button legend moves to the top margin to reserve two complete status lines.
+A pre-existing third-card overlap hid the top three rows of the Caution
+bitmap; it was logged on [#54 before repair](https://github.com/JEschete/VS-NativePort/issues/54#issuecomment-7131703920).
+The same bitmap is now redrawn after the cards, not claimed as newly converted.
+
+### Local validation
+
+- `VS_JOBS=4`; Debug and Release solution builds used
+  `MSBuild VagrantStory.Native.sln /m:2 /p:Configuration=<config> /p:Platform=x64`.
+  Both passed **80 cases / 14,031 assertions** with
+  `VS.Tests.exe "[native-text],[game-text-codec],[save-menu],[save-presentation],[source-verification]"`.
+  The 11 new cases cover Unicode/control parsing, literal arguments and
+  resource bounds, IDs/duplicates/references, invalid metrics, scaled/long
+  wrapping and paint extents, ownership, checked packet submission, converter
+  edit preservation, transactional layers and reset.
+- Existing save test names and required regression identities remain intact.
+  Status assertions now check the selected semantic ID, and reset also checks
+  that no encoded footer pointer is installed. No baseline was refreshed.
+- Scoped quality/tidy was run over the changed implementations and then only
+  subsequent fixes. Final named-coordinate cleanup retains exactly `(10,181)`
+  for Caution; both configurations were rebuilt and `[save-presentation]`
+  rerun afterward (**5 cases / 198 assertions each**). Scoped tidy/quality
+  finished with **zero new findings**. Logs: `build\native-text-*-build.log`,
+  `build\native-text-*-tests.log`, `build\native-text-quality-*.log`.
+- `python -m unittest discover -s tools\ledger -p test_content.py`:
+  **11 tests passed**. Section accounting explicitly prevents the two text
+  sources from being reported wholly converted. This initial validation used
+  only the isolated root; the default-data integration below followed it.
+- `gates.py --sync` refreshed only the generated verification summary;
+  `gates.py --check` reports **zero violations**. The parent's
+  `VR-MATERIAL-CATALOG` row is byte-identical to `HEAD`.
+- New files were staged before `gen_solution.py`; the second run leaves all
+  **10 changed project/filter files byte-identical**. No projects were edited
+  by hand. `VS.Extract text build\issue-54-native-text\data` repeated without
+  force preserves bytes **and timestamps of all six output/manifest files**.
+- Readability seed **54** samples load/empty-container confirmation,
+  resume/save/open failures and five explicitly keyed glyphs (`—`, `#`, `Û`,
+  `{star}`, `í`). Meaning, intended wording edits, atlas-pixel rectangles and
+  advances are readable without original byte offsets. Native changes tested
+  in the UI include 62/65-character messages, not just descriptive labels.
+
+### Actual controller/UI evidence
+
+All runs used an exact copy of the legitimate owner save
+`build\Debug\saves\slot00.vssave`, SHA-256
+`9f3429eb15da29c34823a5b320914641aedb280eceea50a916f579aa5e4ffa2f`.
+Only `build\issue-54-native-text\private-saves` was opened by the test game.
+The isolated data root owns its manifest, text/image outputs, layers and cache;
+other asset directories are read-only junction inputs. No original save,
+inventory, HP, room/event flag or base asset was edited. Standing after resume
+can naturally restore HP/MP; no stat editing was used as evidence.
+
+Accepted Debug run **`1795524177368893-0`** used a private text layer at
+scale **1.25**, with a 62-character selection message, 65-character load
+confirmation and longer `YES - Load` / `NO - Back` choices. Through ordinary
+`--press` input it:
+
+1. Opens Continue; shows default No; Circle takes No back to the picker.
+2. Selects empty slot 1; shows **No usable native save**; acknowledges it.
+3. Returns to slot 0; opens/cancels consent; leaves the picker.
+4. Re-enters (read at 4278, ready at 4280); opens consent at 4500, selects Yes
+   at 4800, confirms at 5100.
+5. Revalidates and prepares slot 0 at 5102; applies native resume before room
+   event dispatch at **5131**. The production world and original HUD are
+   visible afterward, with no prompt/choice overlay left behind.
+
+The Debug host records `exit_code=0`, `engine_errors=0` and
+`trace_failed=false`. Caution, both text lines and the button legend were
+visually inspected through the live window.
+
+The standard **Release** executable ran the identical controller sequence.
+Its **nine BMP captures (2000, 2450, 2650, 3050, 3300, 4350, 4650, 4900, 5600)
+are byte-identical to Debug**, including refusal, default/affirmative choices,
+re-entry and the resumed world. Its live longer selection text was also
+visually inspected. Standard Release disables detailed logging; its process
+had exited before an exit observer attached, so **no numeric Release UI exit
+code or Release engine-error count is claimed**. Release builds/tests passed.
+
+Two preceding diagnostic runs are not completion evidence:
+`1795523009056160-0` exposed the legend/Caution layout;
+`1795523979396780-0` verified final stock labels/Caution/refusal but did not load.
+Their early re-entry confirmation inputs arrived before the picker was ready.
+The accepted sequence uses the observed ready tick, not forced state.
+
+Exact arguments, source/dirty metadata, captures, conversion/project stability,
+readability and immutable-file checks are under **`build\issue-54-native-text`**;
+start with `result.json`, `mod-debug\capture.json` and
+`mod-release\capture.json`. Debug trace:
+`build\Debug\game-logs\1795524177368893-0`. All **eight watched original files**
+retain hashes/timestamps; the private save still matches its original hash.
+The isolated root currently enables `text-mod`; do not recursively clean its
+asset junctions.
+
+### Default-data integration before publication
+
+`build\Debug\VS.Extract.exe text Native\data` also completed successfully for
+the configured data root. Successful text conversion is intentionally silent;
+the repeat was additionally observed with `Start-Process`/`WaitForExit` and
+exit code 0. All three existing text JSON files retained hashes and timestamps.
+The five generated files (those JSON files and the font PNG/sidecar) are
+SHA-256-identical to the isolated base outputs already validated above, and
+all three `save-text-json` manifest registrations match. The default root has
+no layer configuration, so the private 1.25-scale test overrides do not leak
+into normal play.
+
+`content.py --sync` and `--check` reconcile the newly present partial outputs:
+5,162 files, 3,046 converted / 259 skipped / 1,857 unconverted, zero violations.
+The TITLE and MCMAN source files are not incorrectly marked wholly converted.
+The normal data tree now contains the required prompt/font assets; this is
+distinct from the earlier isolated-root tests. No new default-root controller
+run or authored-font-pixel visual comparison is claimed.
+
+**Remaining limits:** #54/#500/#498 remain open. The other 135 MCMAN strings
+(including 47 unsupported Japanese labels), other text tables/dialogue/help,
+font banks, SYSTEM.DAT/module images and full EC retirement are untouched.
+Room summaries, breadcrumb/legend/artwork rendering retain their explicit old
+boundaries. This slice is instant Latin/symbol information, not progressive
+dialogue, full Unicode shaping, localization completeness, accessibility
+certification or matched PS1/emulator parity. No new controller-driven
+save/overwrite/ending/container-completion claim is made. Publish the scoped
+milestone and confirm exact-revision CI before posting final acceptance evidence.
+
 ## Native material-catalog adoption (#499), 2026-11-24
 
 Base: clean `cbc6d8df78a3aac7886a6756559a9a0cd77468ce` on `main`.

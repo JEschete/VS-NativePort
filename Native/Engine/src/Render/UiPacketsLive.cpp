@@ -14,13 +14,17 @@
 #include <iterator>
 #include <optional>
 #include <span>
+#include <string>
+#include <vector>
 
 #include "Core/Diagnostics.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
+#include "Render/NativeTextDraw.hpp"
 #include "Render/Render.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPrimitives.hpp"
+#include "Render/UiTexturedQuads.hpp"
 
 using VS::Legacy::DrawPrim;
 using VS::Legacy::GpuHandle;
@@ -359,5 +363,37 @@ void DrawLiveImmediateSprite(int xy, int uv_clut, int wh, int tpage) {
 
 std::uint64_t DroppedLiveUiPacketCount() {
   return droppedPackets + refusedTexturePages + refusedSprites;
+}
+
+std::expected<void, std::string> DrawLiveNativeText(
+    std::span<const NativeTextDraw> draws, const Content::NativeImage& atlas) {
+  constexpr int kFontPaletteColors = 16;
+  class Collector final : public ImmediatePacketTarget {
+   public:
+    std::vector<UiTexturedQuadPacket> packets;
+    void Submit(std::span<const std::uint32_t> packet) override {
+      UiTexturedQuadPacket owned{};
+      std::ranges::copy(packet, owned.begin());
+      packets.push_back(owned);
+    }
+  } target;
+  auto checked = DrawNativeText(target, draws, atlas);
+  if (!checked) return checked;
+  const auto pixels = Content::PackedWords(atlas);
+  std::vector<std::uint16_t> previous(pixels.size());
+  std::array<std::uint16_t, kFontPaletteColors> palette{};
+  const int position = PackScreenWord(832, 0);
+  const int size = PackScreenWord(static_cast<int>(atlas.width / 4),
+                                  static_cast<int>(atlas.height));
+  const int clut = PackScreenWord(896, 222);
+  const int clut_size = PackScreenWord(kFontPaletteColors, 1);
+  ReadLiveImageRectangle(position, previous.data(), size);
+  ReadLiveImageRectangle(clut, palette.data(), clut_size);
+  UploadLiveImageRectangle(position, pixels.data(), size);
+  UploadLiveImageRectangle(clut, atlas.palettes.front().data(), clut_size);
+  for (auto& packet : target.packets) DrawPrim(packet.data());
+  UploadLiveImageRectangle(position, previous.data(), size);
+  UploadLiveImageRectangle(clut, palette.data(), clut_size);
+  return {};
 }
 }  // namespace VS::Render

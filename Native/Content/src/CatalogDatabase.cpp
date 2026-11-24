@@ -858,6 +858,11 @@ std::expected<std::optional<CachedCatalog>, std::string> ReadCachedCatalog(
 }
 }  // namespace
 
+std::expected<std::vector<fs::path>, std::string> LoadCatalogLayerRoots(
+    const fs::path& root) {
+  return LayerRoots(root);
+}
+
 struct CatalogDatabase::State {
   SqlConnection db{nullptr, sqlite3_close_v2};
   std::vector<CatalogConflict> conflicts;

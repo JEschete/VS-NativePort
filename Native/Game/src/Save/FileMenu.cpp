@@ -10,9 +10,9 @@
 
 namespace VS::Menu::Files {
 namespace {
-constexpr std::string_view kReading = "Reading save files";
-constexpr std::string_view kLoadFailed = "Load failed - game unchanged";
-constexpr std::string_view kSaveFailed = "Save failed - see log";
+constexpr std::string_view kReading = "text.save.reading";
+constexpr std::string_view kLoadFailed = "text.save.load-failed";
+constexpr std::string_view kSaveFailed = "text.save.save-failed";
 
 struct Request {
   FileMenuScreen screen = FileMenuScreen::kData;
@@ -34,17 +34,17 @@ FileSlot& Selected(FileMenu& menu) {
 std::string_view FaultText(FileMenuFault fault) {
   switch (fault) {
     case FileMenuFault::kRead:
-      return "Cannot read native saves";
+      return "text.save.read-error";
     case FileMenuFault::kSummary:
-      return "Save summary unavailable";
+      return "text.save.summary-error";
     case FileMenuFault::kVerify:
-      return "Cannot verify selected save";
+      return "text.save.verify-error";
     case FileMenuFault::kChanged:
-      return "File changed - select again";
+      return "text.save.changed";
     case FileMenuFault::kOpen:
       break;
   }
-  return "Cannot open native saves";
+  return "text.save.open-error";
 }
 
 // Notices leave the picker or offer a retry. Neither may reuse a preview
@@ -61,10 +61,10 @@ void Notice(FileMenu& menu, FileMenuHost& host, std::string_view text,
 void PickStatus(FileMenu& menu, FileMenuHost& host) {
   const auto status = Selected(menu).status;
   host.ShowStatus(menu.screen, status == SlotStatus::kRecovered
-                                   ? "Backup available - select to use"
+                                   ? "text.save.backup-available"
                                : status == SlotStatus::kInvalid
-                                   ? "Invalid data - not overwritten"
-                                   : "Select a file");
+                                   ? "text.save.invalid"
+                                   : "text.save.select");
 }
 
 void ReadFiles(FileMenu& menu, FileMenuHost& host) {
@@ -95,20 +95,23 @@ void Begin(FileMenuSession& session, FileMenuHost& host, const Request& request,
   host.BeginScreen(menu.screen);
   host.ShowStatus(menu.screen, kReading);
   if (const auto error = host.TakeResumeError()) {
-    Notice(menu, host, "Previous resume failed", *error, FileMenuResult::kLeft);
+    Notice(menu, host, "text.save.resume-failed", *error,
+           FileMenuResult::kLeft);
   }
 }
 
 std::string_view ConfirmPrompt(const FileMenu& menu, SlotStatus status) {
   if (menu.select_container) {
-    return status == SlotStatus::kRecovered ? "Use recovered container"
-           : status == SlotStatus::kEmpty   ? "Use empty container"
-                                            : "Open selected container";
+    return status == SlotStatus::kRecovered
+               ? "text.save.confirm.recovered-container"
+           : status == SlotStatus::kEmpty ? "text.save.confirm.empty-container"
+                                          : "text.save.confirm.container";
   }
   if (status == SlotStatus::kRecovered) {
-    return menu.save ? "Replace invalid original" : "Recover from valid backup";
+    return menu.save ? "text.save.confirm.replace-invalid"
+                     : "text.save.confirm.recover";
   }
-  return menu.save ? "Save to selected file" : "Load selected game";
+  return menu.save ? "text.save.confirm.save" : "text.save.confirm.load";
 }
 
 // F02759/F03629 _promptConfirm: affirmative Circle selects; No or Cross
@@ -121,9 +124,10 @@ void Confirm(FileMenu& menu, FileMenuHost& host, const FileMenuInput& input) {
   } else if (input.accept) {
     host.PlaySound(FileMenuSound::kSelect);
     menu.phase = FileMenuPhase::kExecute;
-    host.ShowStatus(menu.screen, menu.select_container ? "Opening container"
-                                 : menu.save           ? "Saving game"
-                                                       : "Loading game");
+    host.ShowStatus(menu.screen, menu.select_container
+                                     ? "text.save.opening-container"
+                                 : menu.save ? "text.save.saving"
+                                             : "text.save.loading");
   } else if (input.up || input.down) {
     menu.affirmative = !menu.affirmative;
     host.PlaySound(FileMenuSound::kChange);
@@ -158,7 +162,7 @@ void Accept(FileMenu& menu, FileMenuHost& host) {
       (!menu.save && !menu.select_container &&
        selected.status == SlotStatus::kEmpty)) {
     host.PlaySound(FileMenuSound::kInvalid);
-    Notice(menu, host, "No usable native save", selected.message,
+    Notice(menu, host, "text.save.unusable", selected.message,
            FileMenuResult::kRunning);
     return;
   }
@@ -234,7 +238,7 @@ void SaveSelection(FileMenuSession& session, FileMenuHost& host) {
                       .message = {}};
   session.last_slot = selected.slot;
   host.PlaySound(FileMenuSound::kComplete);
-  Notice(menu, host, "Save complete", {}, FileMenuResult::kFinished);
+  Notice(menu, host, "text.save.complete", {}, FileMenuResult::kFinished);
 }
 
 void Execute(FileMenuSession& session, FileMenuHost& host) {
@@ -347,7 +351,7 @@ FileMenuResult UpdateSaveMenu(FileMenuSession& session, FileMenuHost& host,
   Begin(session, host, kTitleSave, init_state);
   session.menu.clear_game = true;
   if (const auto staged = host.ClearSaveStaged(); !staged) {
-    Notice(session.menu, host, "No ending clear save available", staged.error(),
+    Notice(session.menu, host, "text.save.no-clear-save", staged.error(),
            FileMenuResult::kLeft);
   }
   return FileMenuResult::kRunning;

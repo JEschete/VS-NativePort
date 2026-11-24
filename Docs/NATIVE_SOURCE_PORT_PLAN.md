@@ -1505,6 +1505,16 @@ has no module-image copying, sector arithmetic or original-address relocation de
 
 ##### EC-04 asset T-shim ledger
 
+Native text checkpoint (#54/#500): the native file-picker status/notice and
+Yes/No consent slice now consumes semantic IDs, owned Unicode/control tokens,
+font metrics and layout. It no longer reconstructs an encoded footer or reads
+choice offsets at runtime. Only MCMAN entries 36/37 and the TITLE G02022 base
+English font image/metrics are imported; native statuses are authored text.
+Room summaries and other encoded menus remain unchanged. Scaled glyph quads
+still use an isolated page/palette/packet backend which restores its binding
+after each draw. This is partial typed adoption, not EC-01/EC-04, #54, #500,
+#498 or whole-module/font-source retirement. See ASSET_PIPELINE §5.1 and HANDOFF.
+
 These are **active migration debt**, not completed native adoption. This register
 uses the existing EC-04 owner and issue structure rather than a second status
 ledger. Evidence below is source inspection at `2764a890b`; preservation,

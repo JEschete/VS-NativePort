@@ -984,6 +984,9 @@
     <ClCompile Include="src\NativeSnapshotTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\NativeTextTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\NavigationOverrideTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -1648,6 +1651,9 @@
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>
     <ClCompile Include="..\Tools\Extract\src\MaterialConversion.cpp">
+      <Filter>..\Tools\Extract\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Tools\Extract\src\SaveTextConversion.cpp">
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>
     <ClCompile Include="..\Tools\Extract\src\WorkshopAuthoring.cpp">

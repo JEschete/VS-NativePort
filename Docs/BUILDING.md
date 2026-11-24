@@ -6,6 +6,11 @@ step must update this file in the same commit (plan D19).
 
 > **Recorded checkpoint, not a fresh build claim.** See [HANDOFF.md](HANDOFF.md)
 > for the source revision, uncommitted work, validation scope and current priority.
+> Native save/load prompts now require `VS.Extract.exe text <datadir>` once
+> for an existing extracted tree (full extraction includes it). This creates
+> editable `text\strings.en.json`, font metrics and a PNG atlas without
+> changing the original disc files. See ASSET_PIPELINE §5.1 for layered edits
+> and the deliberately partial font/string coverage.
 > Debug/Release results and exact replay procedures are retained in the
 > [archived handoff history](https://github.com/JEschete/VS-NativePort/blob/8db4f46e292aa19c382807757786d6f07f65c71c/Docs/HANDOFF_HISTORY.md).
 > Run the commands in sections 4 and 7 for your revision.

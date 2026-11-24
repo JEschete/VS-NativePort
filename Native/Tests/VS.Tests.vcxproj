@@ -360,6 +360,7 @@
     <ClCompile Include="src\NativeImageTests.cpp" />
     <ClCompile Include="src\NativeMenuTests.cpp" />
     <ClCompile Include="src\NativeSnapshotTests.cpp" />
+    <ClCompile Include="src\NativeTextTests.cpp" />
     <ClCompile Include="src\NavigationOverrideTests.cpp" />
     <ClCompile Include="src\OptionsTests.cpp" />
     <ClCompile Include="src\ParticleEmitterTests.cpp" />
@@ -512,6 +513,7 @@
     <ClCompile Include="..\Tools\Extract\src\WepModelConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\WorkshopRecipeConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\MaterialConversion.cpp" />
+    <ClCompile Include="..\Tools\Extract\src\SaveTextConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\WorkshopAuthoring.cpp" />
     <ClCompile Include="..\Tools\Extract\src\ZndConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\ZoneAuthoring.cpp" />

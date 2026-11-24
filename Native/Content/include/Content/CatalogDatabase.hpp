@@ -11,6 +11,9 @@
 
 namespace VS::Content {
 
+[[nodiscard]] std::expected<std::vector<std::filesystem::path>, std::string>
+LoadCatalogLayerRoots(const std::filesystem::path& root);
+
 struct CatalogTableSource {
   TableSpec spec;
   std::filesystem::path file;  // Relative to each data/layer root.
