@@ -1,5 +1,16 @@
 # Current Handoff
 
+## Verified cache/CI checkpoint
+
+`7a69555d2530270b630cccf78238a7f310b07dcf` passed exact-revision CI
+([45342671515](https://github.com/JEschete/VS-NativePort/actions/runs/45342671515)).
+Startup caching #524 and physical-source integrity #525 are closed with measured
+evidence. The earlier boundary, source-test identity, verification-reference and
+hazard-bookkeeping failures are resolved without lowering replay/assertion gates.
+FAR #210 remains open for semantic identities and scene-visible/reference edit
+evidence; the next observation uses the real-input MAP008/open-sky route described
+in its issue. Other asset migration issues remain open.
+
 ## Authored FAR image binding and placement (#210), 2026-11-24
 
 Verified worktree based on `0f7e0f00e991a3ef8be4bfd12cb7272754c3c1d2`, with
@@ -202,9 +213,9 @@ invalidate otherwise usable assets.
   classifies filesystem path `/` operators as non-arithmetic; no safety rule was
   disabled. Keep cache code and its generated hazard report together.
 
-This completes local implementation/verification of the two #524 cache slices,
-not exact-revision CI or issue closure. Cache optimization does not retire any
-remaining asset T-shim. Publish and confirm CI before closing #524/#525.
+The two #524 cache slices and #525 integrity fix are now published with successful
+exact-revision CI and closed issues (see the checkpoint above). Cache optimization
+does not retire any remaining asset T-shim.
 
 ## Source verification cache and physical-size integrity (#524/#525)
 
