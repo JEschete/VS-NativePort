@@ -150,6 +150,9 @@
     <ClCompile Include="src\SourceStampCache.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\StatusCatalog.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\SystemResources.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -319,6 +322,9 @@
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\SourceStampCache.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\StatusCatalog.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\StringTables.hpp">

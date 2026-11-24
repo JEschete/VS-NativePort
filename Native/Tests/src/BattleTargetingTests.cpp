@@ -41,6 +41,7 @@
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Legacy/Psx.hpp"
+#include "TestSupport/StatusRoot.hpp"
 
 using VS::Core::Gte::SVECTOR;
 
@@ -409,11 +410,9 @@ TEST_CASE("Attack prerequisite slots read the live target actor",
   live.stats->enemy_class = battle::kUndeadEnemyClass;
   const ScopedOverride<VS::Battle::Actor*> slot(VS::Battle::actors[5],
                                                 live.actor.get());
-  VS::Battle::StatusEffectParams params{};
-  params.status_flags = 0x40;
-  params.blocking_statuses = 0x8;
-  const ScopedOverride<VS::Battle::StatusEffectParams> strength(
-      VS::Battle::statusEffectParams[5], params);
+  VS::test_support::StatusRoot catalog;
+  catalog.definitions.rules[5] = {0x40, 0, 0x8};
+  catalog.Publish();
   std::array<std::uint8_t, 4> bytes{5, 0, 0, 0};
   CHECK(VS::Battle::IsAttackTargetUndeadSlot(nullptr, bytes.data()) == 1);
   CHECK(VS::Battle::IsAttackTargetLivingSlot(nullptr, bytes.data()) == 0);
@@ -427,6 +426,7 @@ TEST_CASE("Attack prerequisite slots read the live target actor",
 
 TEST_CASE("Attack prerequisite slots read the live target's equipment",
           "[battle][battle-targeting]") {
+  VS::test_support::StatusRoot catalog;
   LiveActor live;
   const ScopedOverride<VS::Battle::Actor*> slot(VS::Battle::actors[5],
                                                 live.actor.get());

@@ -30,7 +30,7 @@
 #include "Battle/Ai/AiState.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/EncounterHooks.hpp"
-#include "Battle/StatusEffects.hpp"
+#include "Battle/StatusCatalogLive.hpp"
 #include "Battle/TargetingLive.hpp"
 #include "Battle/TargetingState.hpp"
 #include "Core/Text/TextCode.hpp"
@@ -906,8 +906,8 @@ PlayerObservationState InspectPlayerObservation(const EncounterState& base) {
   if (!base.ready) return state;
   state.reaction_timing = InspectReactionTiming(base);
   for (std::size_t index = 0; index < state.status_masks.size(); ++index) {
-    state.status_masks[index] = static_cast<std::uint32_t>(
-        VS::Battle::statusEffectParams[index].status_flags);
+    state.status_masks[index] =
+        VS::Battle::RequireLiveStatusRule(static_cast<int>(index)).statuses;
   }
   InspectActionOptions(state);
   InspectItemOptions(state);

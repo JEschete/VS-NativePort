@@ -15,7 +15,7 @@
 #include "Battle/Actor.hpp"
 #include "Battle/AttackPrerequisiteTable.hpp"
 #include "Battle/Damage.hpp"
-#include "Battle/StatusEffects.hpp"
+#include "Battle/StatusCatalogLive.hpp"
 #include "Core/Log.hpp"
 #include "Items/ItemRecords.hpp"
 
@@ -61,14 +61,10 @@ class LivePrerequisiteTarget final : public battle::PrerequisiteTarget {
     return stats_ != nullptr;
   }
   [[nodiscard]] battle::StatusEffectRule EffectRule(int effect) const override {
-    if (effect < 0 || static_cast<std::size_t>(effect) >=
-                          std::size(VS::Battle::statusEffectParams)) {
-      return {};
-    }
-    const VS::Battle::StatusEffectParams& params =
-        VS::Battle::statusEffectParams[effect];
-    return {static_cast<std::uint32_t>(params.status_flags),
-            static_cast<std::uint32_t>(params.blocking_statuses)};
+    const auto* catalog = battle::LiveStatusCatalog();
+    const auto* rule = catalog != nullptr ? catalog->Rule(effect) : nullptr;
+    if (rule == nullptr) return {.available = false};
+    return {rule->statuses, rule->blocking};
   }
   [[nodiscard]] std::uint32_t StatusImmunities() const override {
     return stats_ != nullptr

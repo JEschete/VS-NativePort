@@ -16,7 +16,9 @@
 #include "Battle/StatusLifecycle.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Content/ModuleData.hpp"
+#include "Extract/StatusConversion.hpp"
 #include "Items/EquipmentAffinity.hpp"
+#include "TestSupport/StatusRoot.hpp"
 
 namespace {
 namespace battle = VS::Battle;
@@ -116,14 +118,7 @@ State Actor() {
 struct LiveFixture {
   VS::Battle::Actor* saved_player = VS::Battle::characterState;
   VS::Battle::Ai::ActorAiState* saved_ai = VS::Battle::Ai::actorAiStates[0];
-  VS::Battle::StatusEffectParams saved_attribute =
-      VS::Battle::statusEffectParams[5];
-  VS::Battle::StatusEffectParams saved_movement =
-      VS::Battle::statusEffectParams[11];
-  VS::Battle::StatusEffectParams saved_poison =
-      VS::Battle::statusEffectParams[14];
-  VS::Battle::StatusEffectParams saved_regeneration =
-      VS::Battle::statusEffectParams[17];
+  VS::test_support::StatusRoot catalog;
   VS::Battle::Actor player{};
   VS::Battle::ActorStats stats{};
   VS::Battle::Ai::ActorAiState ai{};
@@ -140,18 +135,22 @@ struct LiveFixture {
     stats.base_walk_speed = std::bit_cast<char>(std::uint8_t{205});
     stats.base_run_speed = std::bit_cast<char>(std::uint8_t{255});
     stats.total_strength = 65535;
-    VS::Battle::statusEffectParams[5].duration = 0x12FF;
-    VS::Battle::statusEffectParams[11].duration = 0x3401;
-    VS::Battle::statusEffectParams[14].tick_interval = 0x5602;
-    VS::Battle::statusEffectParams[17].tick_interval = 0x7805;
+    VS::Extract::StatusSourceRecords source{};
+    source[5].duration_word = 0x12FF;
+    source[11].duration_word = 0x3401;
+    source[13].duration_word = 15;
+    source[19].duration_word = 15;
+    source[14].interval_word = 2;
+    source[17].interval_word = 5;
+    const auto imported =
+        VS::Extract::DecodeStatus(VS::Extract::ReconstructStatusSource(source));
+    if (!imported) FAIL(imported.error());
+    catalog.definitions = imported->definitions;
+    catalog.Publish();
   }
   ~LiveFixture() {
     VS::Battle::characterState = saved_player;
     VS::Battle::Ai::actorAiStates[0] = saved_ai;
-    VS::Battle::statusEffectParams[5] = saved_attribute;
-    VS::Battle::statusEffectParams[11] = saved_movement;
-    VS::Battle::statusEffectParams[14] = saved_poison;
-    VS::Battle::statusEffectParams[17] = saved_regeneration;
   }
 };
 }  // namespace

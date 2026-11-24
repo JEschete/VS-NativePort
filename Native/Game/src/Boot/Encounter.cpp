@@ -34,7 +34,7 @@
 #include "Battle/EncounterHooks.hpp"
 #include "Battle/Feedback.hpp"
 #include "Battle/Sphere.hpp"
-#include "Battle/StatusEffects.hpp"
+#include "Battle/StatusCatalogLive.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
 #include "Battle/TargetPages.hpp"
@@ -440,7 +440,8 @@ std::expected<void, std::string> ApplyAdjustment(
   }
   const auto parameter =
       kAdjustments[static_cast<std::size_t>(adjustment)].status_parameter;
-  if (VS::Battle::statusEffectParams[parameter].status_flags == 0) {
+  const auto* catalog = VS::Battle::LiveStatusCatalog();
+  if (catalog == nullptr || catalog->Rule(parameter) == nullptr) {
     return std::unexpected("STATUS DEFINITIONS NOT LOADED");
   }
   VS::Battle::HitResult hit{};

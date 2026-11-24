@@ -64,6 +64,7 @@
     <ClCompile Include="src\MaterialConversion.cpp" />
     <ClCompile Include="src\SaveTextConversion.cpp" />
     <ClCompile Include="src\ShpModelConversion.cpp" />
+    <ClCompile Include="src\StatusConversion.cpp" />
     <ClCompile Include="src\TextContribution.cpp" />
     <ClCompile Include="src\TimImage.cpp" />
     <ClCompile Include="src\WepModelConversion.cpp" />
@@ -90,6 +91,7 @@
     <ClInclude Include="include\Extract\MaterialConversion.hpp" />
     <ClInclude Include="include\Extract\SaveTextConversion.hpp" />
     <ClInclude Include="include\Extract\ShpModelConversion.hpp" />
+    <ClInclude Include="include\Extract\StatusConversion.hpp" />
     <ClInclude Include="include\Extract\TextContribution.hpp" />
     <ClInclude Include="include\Extract\TimImage.hpp" />
     <ClInclude Include="include\Extract\WepModelConversion.hpp" />

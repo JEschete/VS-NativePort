@@ -56,6 +56,14 @@ struct ConverterBatch {
     const Content::ConversionManifest& previous, std::string_view name,
     std::uint32_t version, bool force);
 
+// Refuses to convert `output` over files that another converter lists, files
+// that exist but this converter did not write, and (unless `force`) authored
+// files whose recorded source hash differs from `output`'s.
+[[nodiscard]] std::expected<void, std::string> CheckAuthoringOwnership(
+    const Content::ConversionManifest& previous,
+    const std::filesystem::path& root, const Content::ConversionOutput& output,
+    bool force);
+
 // What a conversion run starts from: the extracted files files.tsv lists and
 // the previous manifest.json (empty before the first run).
 // NOLINTNEXTLINE(bugprone-exception-escape): std::map's noexcept move.

@@ -251,26 +251,9 @@ std::expected<TableConversionReport, std::string> ConvertDiscLearning(
                   std::string(Content::kAbilityLearningPath),
                   std::string(kArtSchema), std::string(kAbilitySchema),
                   std::string(kLearningImportPath)};
-  const auto* previous = start->previous.Find(output.id);
-  for (const auto& file : output.files) {
-    for (const auto& owner : start->previous.outputs) {
-      if (owner.id != output.id &&
-          std::ranges::find(owner.files, file) != owner.files.end()) {
-        return std::unexpected(file + ": output belongs to another converter");
-      }
-    }
-    if (!std::filesystem::exists(root / file)) continue;
-    if (previous == nullptr || previous->converter != output.converter ||
-        std::ranges::find(previous->files, file) == previous->files.end()) {
-      return std::unexpected(
-          file + ": refusing to overwrite a foreign authoring file");
-    }
-    if (!force && previous->source_sha256 != output.source_sha256) {
-      return std::unexpected(file +
-                             ": source changed; preserve authored edits or "
-                             "explicitly use --force");
-    }
-  }
+  const auto owned =
+      CheckAuthoringOwnership(start->previous, root, output, force);
+  if (!owned) return std::unexpected(owned.error());
   batch.outputs.push_back(output);
   auto published = PublishBatch(root, start->previous, batch, [&] {
     return WriteLearning(root, *imported, output.source_sha256, !force);

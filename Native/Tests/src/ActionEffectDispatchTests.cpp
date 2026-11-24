@@ -17,6 +17,7 @@
 #include "Battle/Damage.hpp"
 #include "Battle/Hit.hpp"
 #include "Battle/StatusEffects.hpp"
+#include "TestSupport/StatusRoot.hpp"
 
 namespace {
 namespace battle = VS::Battle;
@@ -264,8 +265,7 @@ TEST_CASE("F00507 tail gates never read character progress prematurely",
 
 struct LiveFixture {
   decltype(VS::Battle::actors) saved = VS::Battle::actors;
-  decltype(VS::Battle::statusEffectParams) rules =
-      VS::Battle::statusEffectParams;
+  VS::test_support::StatusRoot catalog;
   decltype(VS::Battle::limbInjuryStatusIds) ids =
       VS::Battle::limbInjuryStatusIds;
   VS::Battle::Actor actor{};
@@ -277,8 +277,6 @@ struct LiveFixture {
   }
   ~LiveFixture() {
     std::copy(saved.begin(), saved.end(), VS::Battle::actors.begin());
-    std::copy(rules.begin(), rules.end(),
-              VS::Battle::statusEffectParams.begin());
     std::copy(ids.begin(), ids.end(), VS::Battle::limbInjuryStatusIds.begin());
   }
 };
@@ -287,7 +285,8 @@ TEST_CASE("F00506 live injuries use low HP only and the actual status queue",
   LiveFixture fixture;
   fixture.stats.mobility_limb0 = 4;
   fixture.stats.mobility_limb1 = 5;
-  VS::Battle::statusEffectParams[4].status_flags = 0x10;
+  fixture.catalog.definitions.rules[4].statuses = 0x10;
+  fixture.catalog.Publish();
   fixture.hit.target.target_actor = 41;
   fixture.hit.hp_effect = 2;
   for (auto& limb : fixture.hit.limbs) limb.effects.armor_dp_change = -1;

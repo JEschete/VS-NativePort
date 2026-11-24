@@ -89,6 +89,7 @@ constexpr std::array kConvertedTypes{
     ConvertedType{"", ".SYD", kSydRecipeConverterName, kRawForm},
     ConvertedType{kMaterialSource, "", kMaterialConverterName, kRawForm, true},
     ConvertedType{kLearningSource, "", kLearningConverter.name, kRawForm, true},
+    ConvertedType{kStatusSource, "", kStatusConverter.name, kRawForm, true},
     ConvertedType{kBestiarySource, "", kBestiaryConverter, kRawForm, true},
     ConvertedType{"", ".SHP", "shp-gltf", kRawForm},
     ConvertedType{"", ".SEQ", "seq-gltf", kRawForm},
@@ -111,6 +112,8 @@ std::string_view RerunFor(std::string_view converter) {
     return " (run VS.Extract bestiary <dir>)";
   }
   if (converter == kSaveTextConverter) return " (run VS.Extract text <dir>)";
+  if (converter == kStatusConverter.name)
+    return " (run VS.Extract status <dir>)";
   return converter == kMaterialConverterName ? " (run VS.Extract tables <dir>)"
                                              : kRerun;
 }
@@ -307,6 +310,7 @@ struct CatalogRecords {
   std::optional<MaterialCatalog> materials;
   std::optional<BestiaryCatalog> bestiary;
   std::optional<LearningCatalog> learning;
+  std::optional<StatusCatalog> status;
 };
 
 struct LoadedCatalogs {
@@ -316,8 +320,13 @@ struct LoadedCatalogs {
 
 std::expected<CatalogRecords, std::string> ReadCatalogRecords(
     const CatalogDatabase& database, bool recipes, bool materials,
-    bool bestiary, bool learning) {
+    bool bestiary, bool learning, bool status) {
   CatalogRecords records;
+  if (status) {
+    auto loaded = LoadStatusCatalog(database);
+    if (!loaded) return std::unexpected(loaded.error());
+    records.status = std::move(*loaded);
+  }
   if (learning) {
     auto loaded = LoadLearning(database);
     if (!loaded) return std::unexpected(loaded.error());
@@ -350,7 +359,18 @@ std::expected<std::optional<LoadedCatalogs>, std::string> LoadListedCatalogs(
   bool materials = false;
   bool bestiary = false;
   bool learning = false;
+  bool status = false;
   for (const auto& output : manifest->outputs) {
+    if (output.converter == kStatusConverter.name) {
+      const auto version = manifest->converters.find(kStatusConverter.name);
+      if (status || output.id != kStatusOutputId ||
+          output.source != kStatusSource || !output.alias_of.empty() ||
+          version == manifest->converters.end() ||
+          version->second != kStatusConverter.version) {
+        return std::unexpected("invalid status conversion registration");
+      }
+      status = true;
+    }
     if (output.converter == kLearningConverter.name) {
       const auto version = manifest->converters.find(kLearningConverter.name);
       if (learning || output.id != kLearningOutputId ||
@@ -386,13 +406,20 @@ std::expected<std::optional<LoadedCatalogs>, std::string> LoadListedCatalogs(
     }
     materials = true;
   }
-  if (!recipes && !materials && !bestiary && !learning) return std::nullopt;
+  if (!recipes && !materials && !bestiary && !learning && !status) {
+    return std::nullopt;
+  }
   auto sources =
       recipes ? WorkshopCatalogSources() : std::vector<CatalogTableSource>{};
   if (materials) sources.push_back(MaterialCatalogSource());
   if (bestiary) sources.push_back(BestiaryCatalogSource());
   if (learning) {
     for (auto& source : LearningCatalogSources()) {
+      sources.push_back(std::move(source));
+    }
+  }
+  if (status) {
+    for (auto& source : StatusCatalogSources()) {
       sources.push_back(std::move(source));
     }
   }
@@ -404,15 +431,15 @@ std::expected<std::optional<LoadedCatalogs>, std::string> LoadListedCatalogs(
         "re-run VS.Extract tables " +
         Platform::PathText(root) + ")");
   }
-  auto records =
-      ReadCatalogRecords(*database, recipes, materials, bestiary, learning);
+  auto records = ReadCatalogRecords(*database, recipes, materials, bestiary,
+                                    learning, status);
   if (!records && database->CacheHit()) {
     Core::LogWarn("content", "compiled catalog rejected; recompiling CSVs: {}",
                   records.error());
     database = CatalogDatabase::Load(root, sources, false);
     if (!database) return std::unexpected(database.error());
-    records =
-        ReadCatalogRecords(*database, recipes, materials, bestiary, learning);
+    records = ReadCatalogRecords(*database, recipes, materials, bestiary,
+                                 learning, status);
   }
   if (!records) {
     return std::unexpected(records.error() +
@@ -511,6 +538,7 @@ std::expected<void, std::string> DataStore::Open(const fs::path& root) {
     store->m_workshop_recipes_ = std::move((**tables).records.recipes);
     store->m_materials_ = std::move((**tables).records.materials);
     store->m_learning_ = std::move((**tables).records.learning);
+    store->m_status_ = std::move((**tables).records.status);
     store->m_catalog_tables_ = std::move((**tables).database);
   }
   // catalogs\ also holds the tier-1 tables (catalogs\menu\); either asset

@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "table": "status-timings",
+  "description": "Shared durations/pulse intervals, separate from actor state.",
+  "key": ["id"],
+  "columns": [
+    {
+      "name": "id",
+      "type": "id",
+      "description": "Semantic identity."
+    },
+    {
+      "name": "display_name",
+      "type": "text",
+      "optional": true,
+      "description": "Informational plain-text label; not a key or gameplay value."
+    },
+    {
+      "name": "status_updates",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "Eligible status updates, once per vitals counter multiple of 60 while the actor is active and alive. Shared timer groups are engine contracts, not independent per-rule durations. Paralysis and numbness use separate actor timers with the same authored duration. Poison and regeneration reset the same HP pulse timer; AI uses these same intervals. Zero duration disables expiry; HP pulse intervals must be positive. Actor/save capacity 255."
+    }
+  ]
+}

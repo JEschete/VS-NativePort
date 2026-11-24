@@ -89,6 +89,7 @@
 #include "State/StateFlags.hpp"
 #include "State/Timers.hpp"
 #include "TestSupport/LearningRoot.hpp"
+#include "TestSupport/StatusRoot.hpp"
 
 using VS::Battle::ActionDefinition;
 using VS::Battle::ActionRequestRecord;
@@ -285,8 +286,7 @@ struct AbilityEffectFixture : AbilityFixture {
       VS::Battle::statCalculators;
   decltype(VS::Battle::limbArmorDpLoss) saved_limb_damage =
       VS::Battle::limbArmorDpLoss;
-  decltype(VS::Battle::statusEffectParams) saved_status_params =
-      VS::Battle::statusEffectParams;
+  VS::test_support::StatusRoot catalog;
   std::array<VS::Battle::Ai::ActorAiState*, 2> saved_ai{
       VS::Battle::Ai::actorAiStates[0], VS::Battle::Ai::actorAiStates[1]};
   std::uint32_t saved_last_value = VS::Battle::lastActionStatValue;
@@ -333,10 +333,11 @@ struct AbilityEffectFixture : AbilityFixture {
       }
     }
     BindCalculators();
-    VS::Battle::statusEffectParams[12] = {0x1000, 0, 0, 0x1000, 0};
-    VS::Battle::statusEffectParams[13] = {0x2000, 15, 0, 0x2000, 0};
-    VS::Battle::statusEffectParams[14] = {0x4000, 0, 2, 0x20000, 0};
-    VS::Battle::statusEffectParams[15] = {0x8000, 15, 0, 0x8800, 0x10};
+    catalog.definitions.rules[12] = {0x1000, 0x1000, 0};
+    catalog.definitions.rules[13] = {0x2000, 0x2000, 0};
+    catalog.definitions.rules[14] = {0x4000, 0x20000, 0};
+    catalog.definitions.rules[15] = {0x8000, 0x8800, 0x10};
+    catalog.Publish();
   }
 
   ~AbilityEffectFixture() {
@@ -344,8 +345,6 @@ struct AbilityEffectFixture : AbilityFixture {
               VS::Battle::statCalculators.begin());
     std::copy(saved_limb_damage.begin(), saved_limb_damage.end(),
               VS::Battle::limbArmorDpLoss.begin());
-    std::copy(saved_status_params.begin(), saved_status_params.end(),
-              VS::Battle::statusEffectParams.begin());
     VS::Battle::lastActionStatValue = saved_last_value;
     VS::Battle::criticalHitOccurred = saved_critical;
     for (int index = 0; index < 2; ++index) {

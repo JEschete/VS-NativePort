@@ -36,6 +36,7 @@
 #include "Extract/MaterialConversion.hpp"
 #include "Extract/SaveTextConversion.hpp"
 #include "Extract/ShpModelConversion.hpp"
+#include "Extract/StatusConversion.hpp"
 #include "Extract/WepModelConversion.hpp"
 #include "Extract/WorkshopAuthoring.hpp"
 #include "Extract/WorkshopRecipeConversion.hpp"
@@ -79,6 +80,7 @@ int Usage() {
       "  VS.Extract text     <datadir> [--force]\n"
       "  VS.Extract bestiary <datadir> [--force]\n"
       "  VS.Extract learning <datadir> [--force]\n"
+      "  VS.Extract status <datadir> [--force]\n"
       "  VS.Extract models   <datadir> [--force]\n"
       "  VS.Extract banks    <datadir> [--force]\n"
       "  VS.Extract labels   <datadir> [--force]\n"
@@ -144,6 +146,10 @@ int WithLabels(int result, const fs::path& root) {
 }
 
 int UpgradeAuthoring(const fs::path& root) {
+  if (auto status = Extract::ConvertDiscStatus(root, false); !status) {
+    VS::Core::LogError("extract", "status: {}", status.error());
+    return 1;
+  }
   if (auto bestiary = Extract::ConvertBestiary(root, false); !bestiary) {
     VS::Core::LogError("extract", "bestiary: {}", bestiary.error());
     return 1;
@@ -559,6 +565,10 @@ int ConvertImages(const fs::path& root, bool force) {
 // texture images and their manifest.json outputs from the disc files already
 // under root. The zones name the enemy archetypes, so this follows the models.
 int ConvertTables(const fs::path& root, bool force) {
+  if (auto status = Extract::ConvertDiscStatus(root, force); !status) {
+    VS::Core::LogError("extract", "status: {}", status.error());
+    return 1;
+  }
   if (auto learning = Extract::ConvertDiscLearning(root, force); !learning) {
     VS::Core::LogError("extract", "learning: {}", learning.error());
     return 1;
@@ -793,6 +803,14 @@ int Run(int argc, char** argv) {
     return Usage();
   }
   const std::string cmd = argv[1];
+  if (cmd == "status") {
+    const auto force = ForceArgument(argc, argv);
+    if (!force) return Usage();
+    const auto result =
+        Extract::ConvertDiscStatus(Platform::Utf8Path(argv[2]), *force);
+    if (!result) VS::Core::LogError("extract", "{}", result.error());
+    return result ? 0 : 1;
+  }
   if (cmd == "learning") {
     const auto force = ForceArgument(argc, argv);
     if (!force) return Usage();

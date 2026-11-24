@@ -6,6 +6,8 @@
 #include <optional>
 #include <span>
 
+#include "Content/StatusCatalog.hpp"
+
 namespace VS::Battle {
 inline constexpr std::size_t kStatusRuleCount = 32;
 
@@ -35,8 +37,8 @@ enum class StatusRuleId : std::uint8_t {
   kFireDefenseUp = 26,
   kEarthDefenseUp = 27,
   kWaterDefenseUp = 28,
-  kBanish = 29,
-  kInstantDeathRemoval = 30,
+  kAnalyze = 29,
+  kInstantDefeat = 30,
 };
 
 enum class StatusFeedback : std::uint8_t {
@@ -45,11 +47,7 @@ enum class StatusFeedback : std::uint8_t {
   kPositive = 2,
 };
 
-struct StatusRule {
-  std::uint32_t statuses = 0;
-  std::uint32_t cancelled = 0;
-  std::uint32_t blocking = 0;
-};
+using StatusRule = Content::StatusRule;
 
 struct StatusTarget {
   std::uint32_t active = 0;

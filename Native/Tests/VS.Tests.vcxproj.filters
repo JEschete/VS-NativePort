@@ -1245,6 +1245,9 @@
     <ClCompile Include="src\StatusBehaviorTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\StatusCatalogTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\StatusComponentDescriptionsLiveTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -1599,6 +1602,9 @@
     <ClInclude Include="include\TestSupport\ModelFixtures.hpp">
       <Filter>include\TestSupport</Filter>
     </ClInclude>
+    <ClInclude Include="include\TestSupport\ScratchDataRoot.hpp">
+      <Filter>include\TestSupport</Filter>
+    </ClInclude>
     <ClInclude Include="include\TestSupport\ScriptSources.hpp">
       <Filter>include\TestSupport</Filter>
     </ClInclude>
@@ -1606,6 +1612,9 @@
       <Filter>include\TestSupport</Filter>
     </ClInclude>
     <ClInclude Include="include\TestSupport\SphereContainmentLiveFixture.hpp">
+      <Filter>include\TestSupport</Filter>
+    </ClInclude>
+    <ClInclude Include="include\TestSupport\StatusRoot.hpp">
       <Filter>include\TestSupport</Filter>
     </ClInclude>
     <ClInclude Include="include\TestSupport\TimeAttackDrawRecorder.hpp">
@@ -1663,6 +1672,9 @@
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>
     <ClCompile Include="..\Tools\Extract\src\LearningConversion.cpp">
+      <Filter>..\Tools\Extract\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Tools\Extract\src\StatusConversion.cpp">
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>
     <ClCompile Include="..\Tools\Extract\src\SaveTextConversion.cpp">

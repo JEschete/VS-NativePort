@@ -27,6 +27,7 @@ enum class ColumnType : std::uint8_t {
   kReference,  // the id of a row in the table `references` names
   kBytes,      // `maximum` bytes as lowercase hexadecimal, two digits each
   kEnum,       // a named value; numeric aliases are accepted for legacy imports
+  kFlags,      // named set members separated by '|'; "none" is the empty set
 };
 
 struct EnumValue {
@@ -97,6 +98,9 @@ struct TableRow {
 
 // The <table>.schema.json text, ending in a newline.
 [[nodiscard]] std::string FormatTableSchema(const TableSpec& spec);
+
+[[nodiscard]] std::string FormatFlags(std::span<const EnumValue> domain,
+                                      std::uint32_t flags);
 
 struct NormalizedTable {
   std::string text;

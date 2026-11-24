@@ -18,6 +18,7 @@
 #include "Battle/StatusQueueLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Legacy/Psx.hpp"
+#include "TestSupport/StatusRoot.hpp"
 
 using VS::Battle::ActionState;
 using VS::Battle::kActionTypeBreakArt;
@@ -33,8 +34,7 @@ struct ConditionFixture {
       VS::Battle::floatingLabels;
   decltype(VS::Battle::floatingLabelCount) saved_label_count =
       VS::Battle::floatingLabelCount;
-  decltype(VS::Battle::statusEffectParams) saved_params =
-      VS::Battle::statusEffectParams;
+  VS::test_support::StatusRoot catalog;
   decltype(VS::Battle::actionDefinitions) saved_definitions =
       VS::Battle::actionDefinitions;
   decltype(std::to_array(VS::Core::randomShuffleTable)) saved_random =
@@ -69,8 +69,6 @@ struct ConditionFixture {
     VS::Battle::actionState = saved_action;
     VS::Battle::floatingLabels = saved_labels;
     VS::Battle::floatingLabelCount = saved_label_count;
-    std::copy(saved_params.begin(), saved_params.end(),
-              VS::Battle::statusEffectParams.begin());
     std::copy(saved_definitions.begin(), saved_definitions.end(),
               VS::Battle::actionDefinitions.data());
     std::copy(saved_random.begin(), saved_random.end(),
@@ -99,21 +97,20 @@ struct ConditionFixture {
   }
 
   void InitializePolicies() {
-    // Resident status parameters, G01906 (SLUS file offset 0x3F6CC).
-    std::fill_n(VS::Battle::statusEffectParams.begin(), saved_params.size(),
-                VS::Battle::StatusEffectParams{});
-    VS::Battle::statusEffectParams[4] = {0x10, 0, 0, 0x800, 0};
+    auto& rules = catalog.definitions.rules;
+    rules[4] = {0x10, 0x800, 0};
     for (int id = 5; id <= 10; ++id) {
-      VS::Battle::statusEffectParams[id] = {1 << id, 15, 0, 0x7E0, 0x10000};
+      rules[id] = {1U << id, 0x7E0, 0x10000};
     }
-    VS::Battle::statusEffectParams[11] = {0x800, 20, 0, 0x800, 0x8010};
-    VS::Battle::statusEffectParams[12] = {0x1000, 0, 0, 0x1000, 0};
-    VS::Battle::statusEffectParams[13] = {0x2000, 15, 0, 0x2000, 0};
-    VS::Battle::statusEffectParams[14] = {0x4000, 0, 2, 0x20000, 0};
-    VS::Battle::statusEffectParams[15] = {0x8000, 15, 0, 0x8800, 0x10};
-    VS::Battle::statusEffectParams[16] = {0x10000, 0, 0, 0x7E0, 0x10000};
-    VS::Battle::statusEffectParams[17] = {0x20000, 0, 5, 0, 0x4000};
-    VS::Battle::statusEffectParams[19] = {0x80000, 15, 0, 0x1FF80000, 0};
+    rules[11] = {0x800, 0x800, 0x8010};
+    rules[12] = {0x1000, 0x1000, 0};
+    rules[13] = {0x2000, 0x2000, 0};
+    rules[14] = {0x4000, 0x20000, 0};
+    rules[15] = {0x8000, 0x8800, 0x10};
+    rules[16] = {0x10000, 0x7E0, 0x10000};
+    rules[17] = {0x20000, 0, 0x4000};
+    rules[19] = {0x80000, 0x1FF80000, 0};
+    catalog.Publish();
   }
 
   bool Apply(int effect) {

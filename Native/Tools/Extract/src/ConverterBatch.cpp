@@ -148,6 +148,32 @@ ConverterBatch StartBatch(const ConversionManifest& previous,
           .outputs = {}};
 }
 
+std::expected<void, std::string> CheckAuthoringOwnership(
+    const ConversionManifest& previous, const fs::path& root,
+    const ConversionOutput& output, bool force) {
+  const auto* recorded = previous.Find(output.id);
+  for (const auto& file : output.files) {
+    for (const auto& owner : previous.outputs) {
+      if (owner.id != output.id &&
+          std::ranges::find(owner.files, file) != owner.files.end()) {
+        return std::unexpected(file + ": output belongs to another converter");
+      }
+    }
+    if (!fs::exists(root / Platform::Utf8Path(file))) continue;
+    if (recorded == nullptr || recorded->converter != output.converter ||
+        std::ranges::find(recorded->files, file) == recorded->files.end()) {
+      return std::unexpected(
+          file + ": refusing to overwrite a foreign authoring file");
+    }
+    if (!force && recorded->source_sha256 != output.source_sha256) {
+      return std::unexpected(file +
+                             ": source changed; preserve authored edits or "
+                             "explicitly use --force");
+    }
+  }
+  return {};
+}
+
 std::expected<RunStart, std::string> StartRun(const fs::path& root) {
   auto entries = Content::DataStore::LoadManifest(root);
   if (!entries) return std::unexpected(entries.error());

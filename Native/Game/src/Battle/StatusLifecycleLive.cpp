@@ -15,6 +15,7 @@
 #include "Battle/Feedback.hpp"
 #include "Battle/FloatingLabelPlacementLive.hpp"
 #include "Battle/FloatingLabelProducersLive.hpp"
+#include "Battle/StatusCatalogLive.hpp"
 #include "Battle/StatusEffects.hpp"
 #include "Battle/StatusHelpersLive.hpp"
 #include "Battle/StatusLifecycle.hpp"
@@ -97,26 +98,7 @@ void Store(const StatusLifecycleState& state, VS::Battle::ActorStats& stats) {
   }
 }
 
-StatusDurations Durations() {
-  constexpr std::size_t kAttributes = 5;
-  constexpr std::size_t kMovement = 11;
-  constexpr std::size_t kEquipment = 19;
-  constexpr std::size_t kParalysis = 13;
-  constexpr std::size_t kPoison = 14;
-  constexpr std::size_t kRegeneration = 17;
-  return {static_cast<std::uint8_t>(
-              VS::Battle::statusEffectParams[kAttributes].duration),
-          static_cast<std::uint8_t>(
-              VS::Battle::statusEffectParams[kMovement].duration),
-          static_cast<std::uint8_t>(
-              VS::Battle::statusEffectParams[kEquipment].duration),
-          static_cast<std::uint8_t>(
-              VS::Battle::statusEffectParams[kParalysis].duration),
-          static_cast<std::uint8_t>(
-              VS::Battle::statusEffectParams[kPoison].tick_interval),
-          static_cast<std::uint8_t>(
-              VS::Battle::statusEffectParams[kRegeneration].tick_interval)};
-}
+StatusDurations Durations() { return RequireLiveStatusCatalog().timings; }
 
 class LiveStatusWorld final : public StatusLifecycleWorld {
  public:

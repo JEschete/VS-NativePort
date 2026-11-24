@@ -32,6 +32,7 @@
 #include "Field/Gimmicks.hpp"
 #include "Legacy/Psx.hpp"
 #include "State/ScriptFlagsLive.hpp"
+#include "TestSupport/StatusRoot.hpp"
 
 using VS::Battle::ActionDefinition;
 using VS::Battle::ActionRequestRecord;
@@ -78,10 +79,7 @@ struct PlanningAdvanceFixture : PlanningFixture {
   VS::Battle::Ai::RoomAiState* saved_room = VS::Battle::Ai::roomAiState;
   decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
   std::array<std::uint32_t, 5> saved_masks{};
-  VS::Battle::StatusEffectParams saved_poison =
-      VS::Battle::statusEffectParams[14];
-  VS::Battle::StatusEffectParams saved_regeneration =
-      VS::Battle::statusEffectParams[17];
+  VS::test_support::StatusRoot catalog;
   VS::Battle::Ai::RoomAiState room{};
   VS::Battle::Actor battle_actor{};
 
@@ -90,8 +88,9 @@ struct PlanningAdvanceFixture : PlanningFixture {
                 saved_masks.begin());
     std::fill_n(VS::Battle::Ai::kTimedStatusFlags.begin(), saved_masks.size(),
                 0);
-    VS::Battle::statusEffectParams[14].tick_interval = 1;
-    VS::Battle::statusEffectParams[17].tick_interval = 1;
+    catalog.definitions.timings.poison_interval = 1;
+    catalog.definitions.timings.regeneration_interval = 1;
+    catalog.Publish();
     room.allows_non_spell_actions = 0;
     room.engaged_mask_bytes[0] = 0;
     room.engaged_mask_bytes[1] = 0;
@@ -112,8 +111,6 @@ struct PlanningAdvanceFixture : PlanningFixture {
               VS::Battle::actors.begin());
     std::copy(saved_masks.begin(), saved_masks.end(),
               VS::Battle::Ai::kTimedStatusFlags.begin());
-    VS::Battle::statusEffectParams[14] = saved_poison;
-    VS::Battle::statusEffectParams[17] = saved_regeneration;
   }
 };
 
@@ -265,6 +262,9 @@ struct ActorPlanFixture : EnumerationFixture {
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   VS::Battle::Ai::CandidateEntryView pass_candidates[3][16]{};
   VS::Battle::Ai::ArenaOrbitState orbit{};
+  // Plan simulation reads the poison and regeneration intervals from the live
+  // status catalog, which a fixture run alone does not otherwise publish.
+  VS::test_support::StatusRoot catalog;
 
   ActorPlanFixture() {
     VS::Battle::Ai::InvalidateLivePlanningStatsSnapshot();

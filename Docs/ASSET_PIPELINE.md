@@ -465,6 +465,77 @@ The generic label pass also leaves native text/font and import-only schemas to
 their semantic owners, including refresh runs (#526). It does not label a shared
 native text catalog with the name of one contributing executable.
 
+### 4.5 Native status rules and shared timing (#499)
+
+The adopted contract is verified in HANDOFF ("Native status catalog adoption").
+Both tables lead with a plain-text `display_name` after the semantic `id`, and
+the committed schemas under `Native\Content\schemas\catalogs\battle\` must
+equal the generated schema for each table spec (a Catch2 test compares them).
+
+`VS.Extract status <datadir>` (also `tables`, `authoring` and full extraction)
+imports **only G01906**, the 32 sixteen-byte records at SLUS offset `0x3F6CC`.
+The `status-csv` bundle is `catalog.battle.status`:
+
+- `catalogs\battle\status-rules.csv`: semantic rule IDs and named
+  `effect_channels`, `replaces`, `blocked_by` sets.
+- `catalogs\battle\status-timings.csv`: six named shared duration/pulse roles.
+- Matching schemas define named flag members with explicit original bit
+  mappings. Sets use `|`, or `none`; numeric masks, unnamed bits, duplicate
+  members and unknown names are not native authoring syntax.
+- `catalogs\battle\import\status.json` is offline provenance for **every word
+  of every original record**, including unused/duplicate durations. Original
+  reconstruction never consults edited CSVs and is not a runtime path.
+
+Timing is measured in **eligible status updates**, not wall-clock seconds:
+the live vitals loop calls the status updater at counter multiples of 60,
+only for an eligible living actor. AI estimates the same poison/regeneration
+intervals in its planning-time calculation.
+
+| Authored role | Actual state affected | Original source |
+|---|---|---|
+| `timing.attribute-modifiers` | Strength, Intelligence and Agility up/down share timer 0 | Row 5 duration low byte |
+| `timing.movement-modifiers` | Quicken and impaired legs share timer 1; recovered legs can clear earlier | Row 11 duration low byte |
+| `timing.equipment-and-elements` | Equipment up/down and all eight elemental enchantments share timer 2 | Row 19 duration low byte |
+| `timing.paralysis-and-numbness` | Separate timers 3/4, both initialized from this one definition | Row 13 duration low byte |
+| `timing.poison-pulse` | HP pulse timer 5; poison wins if both effects are present | Row 14 interval |
+| `timing.regeneration-pulse` | Same HP pulse timer 5, not a separate regeneration timer | Row 17 interval |
+
+The remaining row durations are **not independently effective**. In particular,
+equipment-up/element durations and numbness's own row duration are preserved
+offline, not advertised as working per-rule controls. The retained actor/save
+timers are bytes: definitions above 255 refuse; zero duration means no expiry
+countdown, while HP pulse intervals must be positive. Original AI reads the
+full interval halfword but lifecycle uses its low byte. Non-stock originals
+where these disagree remain exactly reconstructible offline but refuse native
+adoption; there is no silent narrowing or new actor sidecar.
+
+The last three bits were resolved by **consumers and producers**, not position:
+
+- 29 is **Analyze**. Original `func_80083D7C` queues it and independently marks
+  the target analyzed on execution, even if the rule has no effect.
+- 30 is the **instant-defeat channel** checked by the undead/living
+  prerequisites and removed by the effect that requests all current HP.
+  It is not a timed “Spirit Drain” ailment.
+- 31 is **spell immunity**, not an unidentified reserved flag. Enemy
+  initialization copies this resistance bit into active statuses;
+  `doesAttackHit` zeroes a spell's threshold and `func_80085390` suppresses
+  spell dispatch. No fixed original `applyStatus(31)` caller was found.
+  The retained rule record does not author enemy spawn resistance.
+
+The source is pinned decomp `c9a869b8919efc561894fb6a851b300791553bd3`:
+`main.c:524`, `BATTLE/BATTLE.PRG/146C.c:6085`, `:10072`, `:10429`,
+`:11129`, `:12287`, `:12432`, `:12858`, `:13697`, `:14243`, `:14565`,
+and `74088.c:591`. The original binary confirms the initialization, sign-bit
+spell tests, seven LBU-to-SB timer assignments and AI's LHU interval reads.
+Legacy callback names containing “Banish” remain call-boundary compatibility
+names; they do not define the catalog's meaning.
+
+Definitions use the existing layered SQLite/cache, independently of mutable
+actor statuses/timers and module resets. G01906's module copy/address/storage
+is removed; other globals beside it are unchanged. This is **not** action,
+enemy-resistance, actor/save-width or whole-executable adoption. Current local
+validation and remaining controller/reference limits belong in HANDOFF.
+
 ## 5. Tier 2: text and fonts
 
 - **Strings:** every string the game shows (exe, MENU `ITEMNAME/ITEMHELP`, `SMALL\HELP*.HF0/HF1`, `MCDATA`, event text in `EVT`, menu labels) is decoded from the VS character table to UTF-8 and stored once in `text\strings.en.json` as `{ "id": "text", ... }`.

@@ -41,8 +41,4 @@ std::array<Actors::WeaponModel*, 1> previewWeaponModelAliases;
 // decomp: D_800F4594 (D_800F4594@BATTLE/BATTLE.PRG)
 std::int32_t previewShieldModelAlias;
 
-// decomp: vs_main_statusEffectParams (vs_main_statusEffectParams@SLUS_010.40)
-// Contents: module image (ModuleData.cpp).
-std::array<StatusEffectParams, kStatusEffectCount> statusEffectParams;
-
 }  // namespace VS::Battle

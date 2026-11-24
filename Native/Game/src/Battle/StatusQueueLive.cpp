@@ -13,7 +13,7 @@
 #include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Hit.hpp"
-#include "Battle/StatusEffects.hpp"
+#include "Battle/StatusCatalogLive.hpp"
 #include "Battle/StatusQueue.hpp"
 #include "Core/Diagnostics.hpp"
 
@@ -22,7 +22,6 @@ using VS::Battle::ActionDefinition;
 namespace VS::Battle {
 namespace {
 constexpr unsigned kExemptActorId = 128;
-static_assert(std::size(VS::Battle::statusEffectParams) == kStatusRuleCount);
 using StatusHandler = std::optional<StatusFeedback> (*)(
     std::span<const StatusRule>, const StatusTarget&, QueuedStatuses&);
 
@@ -55,18 +54,7 @@ StatusTarget TargetOf(const VS::Battle::HitResult& hit) {
           .exempt = stats.actor_id == kExemptActorId};
 }
 
-StatusRule RuleOf(const VS::Battle::StatusEffectParams& params) {
-  return {.statuses = std::bit_cast<std::uint32_t>(params.status_flags),
-          .cancelled = std::bit_cast<std::uint32_t>(params.cancelled_statuses),
-          .blocking = std::bit_cast<std::uint32_t>(params.blocking_statuses)};
-}
-
-StatusRule RuleAt(int index) {
-  Require(index >= 0 && static_cast<std::size_t>(index) <
-                            std::size(VS::Battle::statusEffectParams),
-          "Status queue rule is outside its table");
-  return RuleOf(VS::Battle::statusEffectParams[index]);
-}
+StatusRule RuleAt(int index) { return RequireLiveStatusRule(index); }
 
 QueuedStatuses Load(const VS::Battle::HitResult& hit) {
   // The legacy member names are reversed: remove_statuses adds statuses.
@@ -86,10 +74,7 @@ auto ApplyHandler(VS::Battle::HitResult* target, Handler handler,
                   Args... args) {
   auto& hit = HitOf(target);
   const auto actor = TargetOf(hit);
-  std::array<StatusRule, kStatusRuleCount> rules{};
-  for (std::size_t index = 0; index < rules.size(); ++index) {
-    rules.at(index) = RuleOf(VS::Battle::statusEffectParams[index]);
-  }
+  const auto& rules = RequireLiveStatusCatalog().rules;
   auto queued = Load(hit);
   const auto result = handler(rules, actor, queued, args...);
   if (!result) {

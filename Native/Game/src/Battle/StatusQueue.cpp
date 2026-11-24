@@ -173,7 +173,7 @@ std::optional<BanishOutcome> QueueBanish(std::span<const StatusRule> rules,
                                          const StatusTarget& target,
                                          QueuedStatuses& queued,
                                          bool execute_action) {
-  const auto changed = QueueRule(rules, target, queued, StatusRuleId::kBanish);
+  const auto changed = QueueRule(rules, target, queued, StatusRuleId::kAnalyze);
   if (!changed) return std::nullopt;
   return BanishOutcome{.changed_mask = changed.value(),
                        .analyze_requested = execute_action};

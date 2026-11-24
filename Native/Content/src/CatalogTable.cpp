@@ -117,6 +117,8 @@ std::string_view TypeName(ColumnType type) {
       return "bytes";
     case ColumnType::kEnum:
       return "enum";
+    case ColumnType::kFlags:
+      return "flags";
   }
   return "integer";
 }
@@ -143,9 +145,36 @@ std::string EnumError(const ColumnSpec& column, std::string_view cell,
     if (!names.empty()) names += ", ";
     names += value.name;
   }
+
   return CellError(
       file, line, column.name,
       std::format("'{}' is not one of [{}] or its legacy code", cell, names));
+}
+
+std::expected<std::int64_t, std::string> ReadFlags(const ColumnSpec& column,
+                                                   std::string_view cell,
+                                                   std::string_view file,
+                                                   std::size_t line) {
+  if (cell == "none") return 0;
+  std::uint32_t result = 0;
+  while (!cell.empty()) {
+    const auto end = cell.find('|');
+    const auto name = cell.substr(0, end);
+    const auto found =
+        std::ranges::find(column.enumeration, name, &EnumValue::name);
+    if (found == column.enumeration.end() || found->code <= 0 ||
+        found->code > UINT32_MAX ||
+        (result & static_cast<std::uint32_t>(found->code)) != 0) {
+      return std::unexpected(
+          CellError(file, line, column.name,
+                    "unknown or repeated flag '" + std::string(name) + "'"));
+    }
+    result |= static_cast<std::uint32_t>(found->code);
+    if (end == std::string_view::npos) return result;
+    cell.remove_prefix(end + 1);
+  }
+  return std::unexpected(
+      CellError(file, line, column.name, "empty flag member; use 'none'"));
 }
 
 // Each spec column's field position in the header.
@@ -193,6 +222,9 @@ std::expected<std::int64_t, std::string> ReadCell(const ColumnSpec& column,
                                                   std::string_view cell,
                                                   std::string_view file,
                                                   std::size_t line) {
+  if (column.type == ColumnType::kFlags) {
+    return ReadFlags(column, cell, file, line);
+  }
   if (column.type == ColumnType::kEnum) {
     for (const auto& value : column.enumeration) {
       if (value.name == cell && !EnumName(column, value.code).empty()) {
@@ -358,6 +390,10 @@ std::expected<TableRow, std::string> ReadTableRow(
     row.cells.emplace_back(spec.columns[column].type == ColumnType::kEnum
                                ? EnumName(spec.columns[column], *value)
                                : std::string_view(cells[column]));
+    if (spec.columns[column].type == ColumnType::kFlags) {
+      row.cells.back() = FormatFlags(spec.columns[column].enumeration,
+                                     static_cast<std::uint32_t>(*value));
+    }
     row.values.push_back(*value);
   }
   return row;
@@ -458,7 +494,7 @@ std::string FormatTableSchema(const TableSpec& spec) {
     if (column.type == ColumnType::kBytes) {
       entry["bytes"] = column.maximum;
     }
-    if (column.type == ColumnType::kEnum) {
+    if (column.type == ColumnType::kEnum || column.type == ColumnType::kFlags) {
       JsonDocument values = JsonDocument::object();
       for (const auto& value : column.enumeration) {
         if (value.code >= column.minimum && value.code <= column.maximum) {
@@ -466,8 +502,13 @@ std::string FormatTableSchema(const TableSpec& spec) {
         }
       }
       entry["enum"] = std::move(values);
-      entry["legacy_numeric_aliases"] = true;
+      entry["legacy_numeric_aliases"] = column.type == ColumnType::kEnum;
+      if (column.type == ColumnType::kFlags) {
+        entry["separator"] = "|";
+        entry["empty_set"] = "none";
+      }
     }
+
     entry["description"] = std::string(column.description);
     columns.push_back(std::move(entry));
     if (columns.size() == 1) {
@@ -494,6 +535,21 @@ std::string FormatTableSchema(const TableSpec& spec) {
   }
   schema["columns"] = std::move(columns);
   return FormatJsonText(schema) + "\n";
+}
+
+std::string FormatFlags(std::span<const EnumValue> domain,
+                        std::uint32_t flags) {
+  if (flags == 0) return "none";
+  std::string result;
+  for (const auto& member : domain) {
+    const auto mask = static_cast<std::uint32_t>(member.code);
+    if ((flags & mask) == 0) continue;
+    if (!result.empty()) result += '|';
+    result += member.name;
+    flags &= ~mask;
+  }
+  if (flags != 0) return {};
+  return result;
 }
 
 }  // namespace VS::Content

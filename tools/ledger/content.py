@@ -41,6 +41,11 @@ PLACEHOLDER_REASONS = {0: "zero-byte placeholder", 1: "one-byte zero placeholder
 RUNTIME_CONVERTER = re.compile(r'ConverterVersion\{\s*\.name\s*=\s*"(?P<name>[^"]+)"')
 # A table output is not evidence that its entire containing executable migrated.
 SECTION_CONVERTERS = {
+    "status-csv": (
+        "SLUS_010.40", "catalog.battle.status",
+        "G01906 at 0x3F6CC, 512 source bytes; 32 rules and six shared timing roles; "
+        "all original timing words preserved offline only",
+    ),
     "material-csv": ("SLUS_010.40", "catalog.items.materials", "G01905 at 0x3F5DC, 240 bytes"),
     "learning-csv": (
         "SLUS_010.40", "catalog.battle.learning",
@@ -114,6 +119,7 @@ DROPPED = {
 }
 # The code that reads each converter's source format.
 DECODERS = {
+    "status-csv": "Extract::DecodeStatus",
     "bestiary-csv": "Extract::DecodeBestiary",
     "tim-png": "Content::DecodeTim",
     "far-layout-json": "Content::DecodeFar",
@@ -133,6 +139,7 @@ DECODERS = {
 }
 # The disc-corpus tests that prove each converter preserves its sources (ASSET_PIPELINE section 7).
 EVIDENCE = {
+    "status-csv": ("Status configured executable and persisted provenance reload all 32 records exactly",),
     "bestiary-csv": ("Bestiary configured disc corpus reloads all records and descriptions exactly",),
     "tim-png": ("extracted TIM corpus converts without changing its source bytes",),
     "far-layout-json": ("Configured FAR corpus rebuilds exactly and loads through the live reader",),

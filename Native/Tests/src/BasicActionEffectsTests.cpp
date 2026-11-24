@@ -30,6 +30,7 @@
 #include "Core/RandomLive.hpp"
 #include "State/ScriptFlags.hpp"
 #include "State/ScriptFlagsLive.hpp"
+#include "TestSupport/StatusRoot.hpp"
 
 using VS::Battle::ActionDefinition;
 using VS::Battle::ActionState;
@@ -59,8 +60,7 @@ VS::Battle::HitResult SeedHit() {
 
 struct LiveFixture {
   decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
-  decltype(VS::Battle::statusEffectParams) saved_rules =
-      VS::Battle::statusEffectParams;
+  VS::test_support::StatusRoot catalog;
   decltype(VS::Battle::actionEffectMediators) saved_mediators =
       VS::Battle::actionEffectMediators;
   VS::Battle::ActorStats stats{};
@@ -69,8 +69,6 @@ struct LiveFixture {
 
   LiveFixture() {
     std::ranges::fill(VS::Battle::actors, nullptr);
-    std::ranges::fill(VS::Battle::statusEffectParams,
-                      VS::Battle::StatusEffectParams{});
     actor.stats = &stats;
     VS::Battle::actors[41] = &actor;
     hit.target.target_actor = 41;
@@ -79,7 +77,6 @@ struct LiveFixture {
   }
   ~LiveFixture() {
     std::ranges::copy(saved_actors, VS::Battle::actors.begin());
-    std::ranges::copy(saved_rules, VS::Battle::statusEffectParams.begin());
     std::ranges::copy(saved_mediators,
                       VS::Battle::actionEffectMediators.begin());
   }
@@ -188,8 +185,10 @@ TEST_CASE("Live instant death preserves all other hit and stats fields",
           std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(hp));
       fixture.stats.statuses = 0x11;
       fixture.stats.status_immunities = -1;
-      VS::Battle::statusEffectParams[kInstantDeathRule].status_flags = 0x10;
-      VS::Battle::statusEffectParams[kInstantDeathRule].blocking_statuses = -1;
+      fixture.catalog.definitions.rules[kInstantDeathRule].statuses = 0x10;
+      fixture.catalog.definitions.rules[kInstantDeathRule].blocking =
+          UINT32_MAX;
+      fixture.catalog.Publish();
       const auto stats = Bytes(fixture.stats);
       auto expected = fixture.hit;
       expected.target.hp =

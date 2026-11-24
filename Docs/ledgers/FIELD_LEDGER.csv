@@ -6518,11 +6518,11 @@ T00708.000,T00708,vs_main_sfxContext,0,unk0,1,int,,,,reserved0,Not used by nativ
 T00708.001,T00708,vs_main_sfxContext,1,unk4,1,int,,,,reserved4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Audio\Playback\SoundPlayback.hpp:11;declaration-only;source:25AC.h:6
 T00708.002,T00708,vs_main_sfxContext,2,unk8,1,char,,,,reserved8,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Audio\Playback\SoundPlayback.hpp:12;declaration-only;source:25AC.h:7
 T00708.003,T00708,vs_main_sfxContext,3,unk9,1,char,,,metadataFlagByte,flags,Bit 7 requests playback tags,high,source:25AC.c:443
-T00709.000,T00709,vs_main_statusEffectParams_t,0,unk0,1,int,,,,status_flags,Status flags the effect sets,med,source:146C.c:11207
-T00709.001,T00709,vs_main_statusEffectParams_t,1,unk4,1,u_short,,,,duration,"Status timer duration; read only through byte aliases (G01907-G01909, G01912 = entries 5, 11, 13, 19)",med,declaration-only;source:main.h:111;address of G01907 is 0x8004EECC + 5 * 16 + 4
-T00709.002,T00709,vs_main_statusEffectParams_t,2,unk6,1,u_short,,,,tick_interval,Ticks per HP change of a damage-over-time status,med,source:74088.c:1223
-T00709.003,T00709,vs_main_statusEffectParams_t,3,unk8,1,int,,,,cancelled_statuses,Active statuses the effect cancels instead of stacking,med,source:146C.c:11209
-T00709.004,T00709,vs_main_statusEffectParams_t,4,unkC,1,int,,,,blocking_statuses,Active statuses that keep the effect from applying,med,source:146C.c:11206
+T00709.000,T00709,vs_main_statusEffectParams_t,0,unk0,1,int,,,,statuses,Status flags the effect sets,med,retired-by:Content::StatusRule::statuses (#499);source:146C.c:11207
+T00709.001,T00709,vs_main_statusEffectParams_t,1,unk4,1,u_short,,,,duration,"Status timer duration; read only through byte aliases (G01907-G01909, G01912 = entries 5, 11, 13, 19)",med,retired-by:Content::StatusTimings attributes/movement/paralysis/equipment roles (#499);declaration-only;source:main.h:111;address of G01907 is 0x8004EECC + 5 * 16 + 4
+T00709.002,T00709,vs_main_statusEffectParams_t,2,unk6,1,u_short,,,,tick_interval,Ticks per HP change of a damage-over-time status,med,retired-by:Content::StatusTimings poison_interval and regeneration_interval (#499);source:74088.c:1223
+T00709.003,T00709,vs_main_statusEffectParams_t,3,unk8,1,int,,,,cancelled,Active statuses the effect cancels instead of stacking,med,retired-by:Content::StatusRule::cancelled (#499);source:146C.c:11209
+T00709.004,T00709,vs_main_statusEffectParams_t,4,unkC,1,int,,,,blocking,Active statuses that keep the effect from applying,med,retired-by:Content::StatusRule::blocking (#499);source:146C.c:11206
 T00710.000,T00710,vs_main_stickPos,0,lStickX,0,int,,,,l_stick_x,Named in the fork; see cited use,med,source:4D8.c:611
 T00710.001,T00710,vs_main_stickPos,1,lStickY,0,int,,,,l_stick_y,Named in the fork; see cited use,med,source:4D8.c:612
 T00710.002,T00710,vs_main_stickPos,2,rStickX,0,int,,,,r_stick_x,Named in the fork; see cited use,med,source:5BF94.c:667

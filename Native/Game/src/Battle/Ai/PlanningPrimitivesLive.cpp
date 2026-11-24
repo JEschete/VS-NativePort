@@ -35,7 +35,7 @@
 #include "Battle/Ai/OrbitingBoss.hpp"
 #include "Battle/Ai/PlanningWorkspace.hpp"
 #include "Battle/Damage.hpp"
-#include "Battle/StatusEffects.hpp"
+#include "Battle/StatusCatalogLive.hpp"
 #include "Battle/TargetingLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -78,8 +78,6 @@ static_assert(std::tuple_size_v<
               kCandidateCapacity);
 constexpr int kRestoreOperation = 2;
 constexpr int kAimedSimulationMode = 3;
-constexpr std::size_t kPoisonStatusIndex = 14;
-constexpr std::size_t kRegenerationStatusIndex = 17;
 constexpr auto kTargetOffset = offsetof(ReactionRecord, targets);
 PlanningStatsSnapshot liveStatsSnapshot;
 static_assert(std::tuple_size_v<decltype(ActionRequestRecord::targets)> ==
@@ -1510,11 +1508,9 @@ void AdvanceLivePlanningSimulation(std::int32_t time_step) {
           "Planning simulation requires a valid room AI state");
   LivePlanningSimulation host(*VS::Battle::Ai::roomAiState);
   PlanningSimulationRules rules{
-      .poison_interval =
-          VS::Battle::statusEffectParams[kPoisonStatusIndex].tick_interval,
+      .poison_interval = RequireLiveStatusCatalog().timings.poison_interval,
       .regeneration_interval =
-          VS::Battle::statusEffectParams[kRegenerationStatusIndex]
-              .tick_interval};
+          RequireLiveStatusCatalog().timings.regeneration_interval};
   std::copy_n(std::begin(VS::Battle::Ai::kTimedStatusFlags),
               rules.timed_status_masks.size(),
               rules.timed_status_masks.begin());

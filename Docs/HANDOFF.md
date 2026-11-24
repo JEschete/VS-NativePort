@@ -1,5 +1,102 @@
 # Current Handoff
 
+## Native status catalog adoption (#499), 2026-11-24
+
+Based on `b5fbfc6c6634a7486092e83c85c1a828268e3640` (a documentation-only
+commit on top of the learning and bestiary milestones). The status
+implementation, tests, committed schemas, generated projects and bookkeeping
+were verified in the working tree and published together; the publishing
+commit and its exact-revision CI are recorded in the metadata line at the end
+of this section. This does not close #499 or #58.
+
+The implementation adds named rule sets and six shared timing roles, an offline
+32-record source/provenance codec, layered SQLite/DataStore family selection,
+extractor entry points and checked live readers. The raw G01906 storage, module
+copy and address entry are removed. Existing status test fixtures use isolated
+catalogs. ASSET_PIPELINE section 4.5 describes this contract.
+
+### Evidence obtained
+
+- All **32 records / 512 bytes** of the actual executable match the independent
+  initializer parse from pinned decomp
+  `c9a869b8919efc561894fb6a851b300791553bd3`.
+  `build\issue-499-status\pinned-source-comparison.json` records the source
+  hash, actual words, revision and dirty state.
+- `source-assembly.txt` confirms seven byte-to-byte timer assignments
+  (including paralysis/numbness sharing row 13) and AI's full-halfword
+  poison/regeneration interval reads. The proposed importer refuses intervals
+  above actor capacity rather than silently changing one consumer; exact
+  original words remain reconstructible offline.
+- **Bit 31 is resolved, not a remaining semantics blocker:** original enemy
+  initialization copies the sign bit of resistance into active statuses
+  (`80076CEC..80076D00`); spell hit calculation zeroes its threshold
+  (`8007F330`) and spell dispatch suppresses its mediator (`8008546C`).
+  Its meaning is spell immunity. No fixed original apply-rule-31 caller was
+  found. Bit 29 is Analyze; bit 30 is the instant-defeat prerequisite/removal
+  channel. Do not reclassify 31 as unused merely from its zero timing fields.
+- With `VS_JOBS=4`, MSBuild `/m:2`, **Debug and Release both build with exit 0**
+  from the final worktree. `StatusConversion.cpp` is in the generated tests
+  project (`tools\scaffold\gen_solution.py`), and the status table sources are
+  loaded independently of `if (learning)` in `DataStore.cpp` (a status-only root
+  previously never loaded its tables). Final selections, each run alone:
+  - Debug and Release `"[status-catalog],[learning-catalog]"`: **26 cases /
+    390 assertions**; `"[status-lifecycle],[status-queue]"`: **69 / 1,289**.
+  - Debug `"[asset-labels]"`: **13 / 311**, now generating `vs.status-import`
+    for the native-owned bypass; Debug `"[planning]"` (earlier build): 214 /
+    189,972.
+  - Release `[ai]` **1,068 / 3,189,727**, `[combat]` 185 / 720,140, `[battle]`
+    263 / 1,826, `[resource-dispatch]` 18 / 979, `[basic-action-effects]`
+    20 / 17,993, `[random-stat-effects]` 24 / 21,600, `[triggered-recovery]`
+    24 / 52,604, `[damage-recovery]` 13 / 6,839.
+  - A Release-only abort (`0xC0000409`) appeared when `[ai]` ran alone: three
+    `ActorPlanFixture` tests reached the live planner with no catalog
+    published and `RequireLiveStatusCatalog()` aborts by design. The fixture
+    now publishes a `StatusRoot`. Combined runs had hidden it, so each wide
+    selection was run alone.
+- `VS.Extract status Native\data` creates the five status CSV/schema/provenance
+  outputs plus its manifest registration; a second run is byte-identical.
+  The complete `VS.Extract authoring Native\data` pass reports **0 files updated
+  / 3,127 unchanged labels, 21,704 CSV rows** and left all **18,715** files under
+  `Native\data` unchanged in path, size and timestamp
+  (`data-before.csv` / `data-after.csv`, `authoring-default-root.log`).
+- `readability-seed-499.json` is the seeded cold read: all 32 rule IDs are
+  `status.<name>` with a plain-text `display_name` as the second column, and no
+  flag cell is numeric. The five sampled rules (intelligence down, quicken,
+  spell immunity, equipment down, regeneration) read without the decomp.
+- Bounded `run_native.ps1 -NoCopy -SkipIntro -Frames 1500` on the default root
+  with scratch capture/save directories exits **0** in Debug (**0 engine
+  errors**) and Release; only the existing `unported:` warnings appear.
+  Evidence: `build\issue-499-status\run-debug`, `run-release`.
+- Scoped quality: `python tools\lint\quality.py --since b5fbfc6c6` reports
+  **0 new**; `--files <changed sources> --tidy` reports 0. Four ledger gates and
+  regression static report 0 violations; provenance with
+  `--decomp build\issue-499-bestiary\pinned-decomp` reports **0 problems**.
+  The default `resources\rood-reverse` checkout is ahead of the pin and gives
+  thousands of false stale citations, so the pinned export is the reference.
+
+### Boundary and ledgers
+
+The test roots share one `ScratchDataRoot` base, and the two converters share
+`CheckAuthoringOwnership` (foreign files refuse even with `--force`; missing
+owned schemas can be repaired without replacing edited CSVs; a changed source
+refuses without `--force`). DATA_LEDGER G01906 is retired as
+`Content::StatusCatalog`; G01907..G01912 are replaced by the six timing roles;
+TYPE_LEDGER T00709 and its FIELD rows are retired with `VR-STATUS-CATALOG`
+(14 functions, 14 test references).
+
+### Remaining scope
+
+#499/#58 remain open. Action, limb and AI consumers still read the typed rules
+through explicit compatibility lookups, and authored status edits are not earned
+combat evidence or matched PS1 status-damage evidence: no controller or combat
+capture of a changed status rule was made, and only the default values are
+exercised by gameplay-facing runs. General action/item/text definitions and the
+remaining executable catalogs are separate slices.
+
+The 2026-11-24 `build\` cleanup (BUILDING.md section 4.6) archived uncited
+scratch under `build\evidence-archive\20261124-build-cleanup\`; nothing cited
+by docs or issues moved.
+
 ## Native learning requirements (#499), 2026-11-24
 
 Based on `7fef62342425275888c3bb7007a29f3e3d7e3d35`, with the learning

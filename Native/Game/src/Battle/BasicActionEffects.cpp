@@ -169,7 +169,7 @@ void MarkSourceActionSuccess(SourceActionOutcome& outcome) {
 
 // decomp: func_80084248 (src/BATTLE/BATTLE.PRG/146C.c:12432).
 void QueueInstantDeath(InstantDeathQueue& queue) {
-  queue.RemoveStatuses(StatusRuleId::kInstantDeathRemoval);
+  queue.RemoveStatuses(StatusRuleId::kInstantDefeat);
   const auto hp = queue.CurrentHp();
   queue.QueueHp({std::bit_cast<std::int16_t>(hp), 1});
 }

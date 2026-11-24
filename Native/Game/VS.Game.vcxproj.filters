@@ -936,6 +936,9 @@
     <ClCompile Include="src\Battle\StatFactorsLive.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
+    <ClCompile Include="src\Battle\StatusCatalogLive.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
     <ClCompile Include="src\Battle\StatusEffects.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
@@ -3646,6 +3649,9 @@
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\StatFactorsLive.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\StatusCatalogLive.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\StatusHelpers.hpp">

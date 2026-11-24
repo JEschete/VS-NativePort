@@ -23,6 +23,7 @@ inline constexpr int kUndeadEnemyClass = 2;
 struct StatusEffectRule {
   std::uint32_t status_flags = 0;
   std::uint32_t blocking_statuses = 0;
+  bool available = true;
 };
 
 // The target of a hit, as the rules read it.
@@ -31,7 +32,7 @@ class PrerequisiteTarget {
   virtual ~PrerequisiteTarget() = default;
   // False when the target is not an actor; a rule that reads it then fails.
   [[nodiscard]] virtual bool Valid() const = 0;
-  // The parameters of a status effect (VS::Battle::statusEffectParams).
+  // Typed catalog channels, or an explicitly unavailable definition.
   [[nodiscard]] virtual StatusEffectRule EffectRule(int effect) const = 0;
   [[nodiscard]] virtual std::uint32_t StatusImmunities() const = 0;
   [[nodiscard]] virtual std::uint32_t Statuses() const = 0;

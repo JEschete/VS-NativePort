@@ -63,6 +63,9 @@
     <ClCompile Include="src\ShpModelConversion.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\StatusConversion.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\TextContribution.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -133,6 +136,9 @@
       <Filter>include\Extract</Filter>
     </ClInclude>
     <ClInclude Include="include\Extract\ShpModelConversion.hpp">
+      <Filter>include\Extract</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Extract\StatusConversion.hpp">
       <Filter>include\Extract</Filter>
     </ClInclude>
     <ClInclude Include="include\Extract\TextContribution.hpp">

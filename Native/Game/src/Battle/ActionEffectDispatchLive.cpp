@@ -15,7 +15,7 @@
 #include "Battle/Damage.hpp"
 #include "Battle/Hit.hpp"
 #include "Battle/LearningLive.hpp"
-#include "Battle/StatusEffects.hpp"
+#include "Battle/StatusCatalogLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Log.hpp"
@@ -76,9 +76,7 @@ class LiveInjuryQueue final : public LimbInjuryQueue {
     return VS::Battle::limbInjuryStatusIds[limb];
   }
   std::uint32_t RuleMask(std::uint8_t rule) override {
-    Require(rule < std::size(VS::Battle::statusEffectParams));
-    return std::bit_cast<std::uint32_t>(
-        VS::Battle::statusEffectParams[rule].status_flags);
+    return RequireLiveStatusRule(rule).statuses;
   }
   void QueueStatus(std::uint8_t rule, bool remove) override {
     if (remove) {

@@ -6,6 +6,7 @@
 #include <cstdint>
 
 #include "Battle/StatusHelpers.hpp"
+#include "Content/StatusCatalog.hpp"
 #include "Items/ItemRecords.hpp"
 
 namespace VS::Battle {
@@ -49,16 +50,7 @@ struct StatusLifecycleState {
                          const StatusLifecycleState&) = default;
 };
 
-struct StatusDurations {
-  std::uint8_t attributes{};
-  std::uint8_t movement{};
-  std::uint8_t equipment{};
-  std::uint8_t paralysis{};
-  std::uint8_t poison_interval{};
-  std::uint8_t regeneration_interval{};
-  friend bool operator==(const StatusDurations&,
-                         const StatusDurations&) = default;
-};
+using StatusDurations = Content::StatusTimings;
 
 // Calls observe all preceding writes. A binding must reload the state after
 // an external callback, retaining mutations made by that callback.

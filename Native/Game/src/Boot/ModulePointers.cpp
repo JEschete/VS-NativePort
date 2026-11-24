@@ -1579,8 +1579,6 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
      0u, 0u, 0u},
     {"SLUS_010.40", 0x8004B9DCu, 13312u, VS::Battle::actionDefinitions.data(),
      sizeof VS::Battle::actionDefinitions, 1u, 1u},
-    {"SLUS_010.40", 0x8004EECCu, 512u, &VS::Battle::statusEffectParams,
-     sizeof VS::Battle::statusEffectParams, 1u, 1u},
     {"SLUS_010.40", 0x8004F0CCu, 1024u, &VS::Field::locationDestinations,
      sizeof VS::Field::locationDestinations, 1u, 1u},
     {"SLUS_010.40", 0x8004F4CCu, 2048u, &VS::Field::legacyZoneDiscFiles, 0u, 0u,

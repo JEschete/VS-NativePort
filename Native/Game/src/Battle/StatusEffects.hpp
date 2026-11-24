@@ -1,7 +1,6 @@
 #pragma once
-// The status effect definitions and the battle's status and vitals timers,
-// with the BATTLE.PRG menu globals declared beside them. StatusEffects.cpp
-// defines them; the module images fill the tables at start-up.
+// Mutable battle/status and menu state. Immutable status rules and timing
+// definitions are owned by Content::StatusCatalog, not module images.
 
 #include <array>
 #include <cstddef>
@@ -17,21 +16,6 @@ struct CursorMemory;
 
 namespace VS::Battle {
 
-inline constexpr std::size_t kStatusEffectParamsBytes = 0x10;
-
-// decomp: vs_main_statusEffectParams_t, upstream vs_StatusEffectParams
-// (src/SLUS_010.40/modifiers.h:11)
-struct StatusEffectParams {
-  std::int32_t status_flags;
-  std::uint16_t duration;
-  std::uint16_t tick_interval;
-  std::int32_t cancelled_statuses;
-  std::int32_t blocking_statuses;
-};
-static_assert(sizeof(StatusEffectParams) == kStatusEffectParamsBytes,
-              "StatusEffectParams must keep its PS1 layout");
-
-inline constexpr std::size_t kStatusEffectCount = 32;
 inline constexpr std::size_t kStatusLimbCount = 4;
 
 // decomp: D_800E8204 (src/BATTLE/BATTLE.PRG/146C.c:298)
@@ -55,7 +39,5 @@ extern std::array<Actors::WeaponModel*, 1> previewWeaponModelAliases;
 // decomp: D_800F4594 (src/BATTLE/BATTLE.PRG/battleUnk.h:35): the original's
 // alias of the preview shield model slot.
 extern std::int32_t previewShieldModelAlias;
-// decomp: vs_main_statusEffectParams (src/SLUS_010.40/main.c:524)
-extern std::array<StatusEffectParams, kStatusEffectCount> statusEffectParams;
 
 }  // namespace VS::Battle

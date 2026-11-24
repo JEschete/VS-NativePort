@@ -447,6 +447,7 @@
     <ClCompile Include="src\StatFactorsTests.cpp" />
     <ClCompile Include="src\StatusActorSwitchingTests.cpp" />
     <ClCompile Include="src\StatusBehaviorTests.cpp" />
+    <ClCompile Include="src\StatusCatalogTests.cpp" />
     <ClCompile Include="src\StatusComponentDescriptionsLiveTests.cpp" />
     <ClCompile Include="src\StatusComponentDescriptionsTests.cpp" />
     <ClCompile Include="src\StatusDetailTransitionsLiveTests.cpp" />
@@ -516,6 +517,7 @@
     <ClCompile Include="..\Tools\Extract\src\WorkshopRecipeConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\MaterialConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\LearningConversion.cpp" />
+    <ClCompile Include="..\Tools\Extract\src\StatusConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\SaveTextConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\TextContribution.cpp" />
     <ClCompile Include="..\Tools\Extract\src\BestiaryConversion.cpp" />
@@ -599,9 +601,11 @@
     <ClInclude Include="include\TestSupport\FloatingLabelRenderingLiveFixture.hpp" />
     <ClInclude Include="include\TestSupport\LearningRoot.hpp" />
     <ClInclude Include="include\TestSupport\ModelFixtures.hpp" />
+    <ClInclude Include="include\TestSupport\ScratchDataRoot.hpp" />
     <ClInclude Include="include\TestSupport\ScriptSources.hpp" />
     <ClInclude Include="include\TestSupport\ScriptSteps.hpp" />
     <ClInclude Include="include\TestSupport\SphereContainmentLiveFixture.hpp" />
+    <ClInclude Include="include\TestSupport\StatusRoot.hpp" />
     <ClInclude Include="include\TestSupport\TimeAttackDrawRecorder.hpp" />
     <ClInclude Include="include\TestSupport\WorkshopRecipeRoot.hpp" />
   </ItemGroup>

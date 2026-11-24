@@ -16,6 +16,7 @@
 #include "Content/LearningCatalog.hpp"
 #include "Content/MaterialCatalog.hpp"
 #include "Content/NativeText.hpp"
+#include "Content/StatusCatalog.hpp"
 #include "Content/WorkshopRecipes.hpp"
 #include "Core/Types.hpp"
 
@@ -124,6 +125,9 @@ class DataStore {
   [[nodiscard]] const LearningCatalog* Learning() const {
     return m_learning_ ? &*m_learning_ : nullptr;
   }
+  [[nodiscard]] const StatusCatalog* StatusRules() const {
+    return m_status_ ? &*m_status_ : nullptr;
+  }
   [[nodiscard]] const NativeTextAssets* SaveText() const {
     return m_save_text_ ? &*m_save_text_ : nullptr;
   }
@@ -144,6 +148,7 @@ class DataStore {
   std::optional<WorkshopRecipeCatalog> m_workshop_recipes_;
   std::optional<MaterialCatalog> m_materials_;
   std::optional<LearningCatalog> m_learning_;
+  std::optional<StatusCatalog> m_status_;
   std::optional<NativeTextAssets> m_save_text_;
   std::optional<CatalogDatabase> m_catalog_tables_;
 };

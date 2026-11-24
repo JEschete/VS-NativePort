@@ -7,7 +7,7 @@
 
 namespace VS::Battle {
 namespace {
-// VS::Battle::statusEffectParams indices of the effects the rules check.
+// Explicit legacy action-to-catalog rule mapping.
 enum class Effect : std::uint8_t {
   kHalfMovement = 4,
   kStrengthDown = 5,
@@ -34,8 +34,8 @@ enum class Effect : std::uint8_t {
   kFireDefenseUp = 26,
   kEarthDefenseUp = 27,
   kWaterDefenseUp = 28,
-  kBanish = 29,
-  kSpiritDrain = 30,
+  kAnalyze = 29,
+  kInstantDefeat = 30,
 };
 
 // A follow-up hit with this rule skips targets with this impact kind.
@@ -116,7 +116,8 @@ constexpr std::array<PrerequisiteRule, kPrerequisiteCount> kRules{
 // (src/BATTLE/BATTLE.PRG/146C.c:10118; was _hitPrerequisiteCanApplyEffect)
 bool IsStatusEffectBlocked(int effect, const PrerequisiteTarget& target) {
   const StatusEffectRule rule = target.EffectRule(effect);
-  return (rule.status_flags & target.StatusImmunities()) != 0 ||
+  return !rule.available ||
+         (rule.status_flags & target.StatusImmunities()) != 0 ||
          (rule.blocking_statuses & target.Statuses()) != 0;
 }
 
@@ -315,21 +316,21 @@ bool CanApplyWaterDefenseUp(const PrerequisiteTarget& target) {
 // decomp: BATTLE.PRG hitPrerequisiteCanApplyBanish
 // (src/BATTLE/BATTLE.PRG/146C.c:10429; was _hitPrerequisiteCanApplyBanish)
 bool CanApplyBanish(const PrerequisiteTarget& target) {
-  return CanApply(Effect::kBanish, target);
+  return CanApply(Effect::kAnalyze, target);
 }
 
 // decomp: BATTLE.PRG hitPrerequisiteCanApplyExorcise
 // (src/BATTLE/BATTLE.PRG/146C.c:10434; was _hitPrerequisiteCanApplyExorcise):
 // undead targets only.
 bool CanApplyExorcise(const PrerequisiteTarget& target) {
-  return CanApply(Effect::kSpiritDrain, target) && IsUndead(target);
+  return CanApply(Effect::kInstantDefeat, target) && IsUndead(target);
 }
 
 // decomp: BATTLE.PRG hitPrerequisiteCanApplyDrain
 // (src/BATTLE/BATTLE.PRG/146C.c:10443; was _hitPrerequisiteCanApplyDrain):
 // living targets only.
 bool CanApplyDrain(const PrerequisiteTarget& target) {
-  return CanApply(Effect::kSpiritDrain, target) && !IsUndead(target);
+  return CanApply(Effect::kInstantDefeat, target) && !IsUndead(target);
 }
 
 // decomp: BATTLE.PRG hitPrerequisiteUnused0..2

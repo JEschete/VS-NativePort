@@ -1471,10 +1471,6 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"SLUS_010.40", 0x3C1DC, sizeof VS::Battle::actionDefinitions,
      VS::Battle::actionDefinitions.data(),
      sizeof VS::Battle::actionDefinitions},  // G01904 vs_main_actions
-    {"SLUS_010.40", 0x3F6CC, sizeof VS::Battle::statusEffectParams,
-     &VS::Battle::statusEffectParams,
-     sizeof VS::Battle::statusEffectParams},  // G01906
-                                              // vs_main_statusEffectParams
     {"SLUS_010.40", 0x3F8CC, sizeof VS::Field::locationDestinations,
      &VS::Field::locationDestinations,
      sizeof VS::Field::locationDestinations},  // G01913
