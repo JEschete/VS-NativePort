@@ -3,9 +3,11 @@
 ## Native material-catalog adoption (#499), 2026-11-24
 
 Base: clean `cbc6d8df78a3aac7886a6756559a9a0cd77468ce` on `main`.
-Base CI `45367143397` passed; the material changes described here are local and
-unpublished. Publication and exact-revision CI remain the next step.
-No commit/push, baseline refresh or reference-tree edit was made in this slice.
+Base CI `45367143397` passed. The local/dirty validation recorded below predates
+publication as `1e6ae3d4b9dc8ec9c7d3688aa2f42a498e67c877` on `main`;
+[exact-revision CI 45375354826](https://github.com/JEschete/VS-NativePort/actions/runs/45375354826)
+passed and the implementation evidence was posted on #499. No baseline refresh
+or reference-tree edit was made in this slice.
 
 **Adopted:** `Content::MaterialCatalog` owns semantic `material.none/wood/
 leather/bronze/iron/hagane/silver/damascus` definitions, named class and
@@ -112,6 +114,75 @@ semantic recipe lookup (EC-04-T-SYD), wider inventory/persistence/appearance
 instances, and mod-defined material kinds remain separate work. No runtime
 material byte reconstruction remains, but this is not whole-file or whole-issue
 completion.
+
+### Controller follow-up on published `1e6ae3d4` (2026-11-24)
+
+Posted as [#499 controller evidence](https://github.com/JEschete/VS-NativePort/issues/499#issuecomment-7130743689).
+
+The repository-local Desktop save `build\Debug\saves\slot00.vssave` is an
+unchanged migrated owner save, not a Combat Lab preset. Its SHA-256
+`9f3429eb15da29c34823a5b320914641aedb280eceea50a916f579aa5e4ffa2f`
+matches `build\legacy-state-hashes.json`. It records zone 13 / room 12
+(The Withered Spring), position `[1609,0,975]`, HP 171/262 and ordinary
+equipment, including two leather Cuirasses. The archived #15 boosted
+all-spells/999-stat presets were inspected but **not used**.
+
+An exact copy was placed in `build\issue-499-workshop\private-saves`.
+Its isolated `data` root copies `files.tsv`/`manifest.json` and uses directory
+junctions to the existing asset directories, with its own SQLite cache and
+layer configuration. No owner save, inventory, HP, room/workshop flag, scene
+completion flag or base/source asset was edited.
+
+The production Desktop window was launched through the UI tool, using only
+ordinary `--press` controller input:
+- Start skips the title movie; Continue, slot selection and Yes load the copy.
+- Original MAP040 door 4, tile `(14,15)`, leads from 13/12 to 42/0
+  (MAP205, Work of Art). Its original required flag/value are both zero.
+  Up/Left movement and Cross perform the real traversal; zone 42/0 is reached
+  at tick 2789. The UI displays Work of Art and its wood/leather/bronze gate.
+- Items → Setup → Combine → Armor selects the two existing leather Cuirasses
+  (inventory slots 1 and 4, definition 162 / recipe 36), then OK and Yes.
+  The stock preview displays defense/STR **7**, defense/INT **13**, agility
+  **0**, DP **61/61**. Confirming returns to Setup with Combine highlighted.
+- A **private** layer, `material-mod\catalogs\items\materials.csv`, changes only
+  `material.leather,strength` from 0 to **20**. The existing compiler publishes
+  `(material.leather,20,5,0)` in the isolated SQLite material row. Repeating the
+  same earned-save route produces defense/STR **27**, with INT **13**, agility
+  **0** and DP **61/61** unchanged; the equipped-panel STR projection changes
+  110→130. OK and Yes again return to Setup.
+
+Accepted Debug runs:
+
+| Run | Preview / confirmations | Result |
+| --- | --- | --- |
+| `1795520095191474-0` | stock preview 10500; OK 10800; Yes 11200 | Setup/Combine highlighted by 11300 |
+| `1795520498342396-0` | edited preview 10500; held for UI observation; OK 15000; Yes 15400 | Setup/Combine highlighted by 15500 |
+
+Both report `host.result.exit_code=0`, no engine errors, no `menu.setup`
+refusals and `session.end.trace_failed=false`. This is controller/UI
+transaction evidence, **not** a byte-for-byte inventory or saved-result audit.
+No matched pre-adoption executable/emulator replay, action-damage acceptance or
+Release controller pass is claimed. #499 and #58 remain open.
+
+Evidence is under `build\issue-499-workshop`: `result.json` records transitions,
+actual input logs, compiled row and immutable-source checks;
+`base-combine-arguments.txt` / `mod-combine-arguments.txt` retain exact commands;
+`b\frame_10500.bmp` and `m\frame_10500.bmp` show the matching stock/edited
+previews; `b\frame_11500.bmp` / `m\frame_15700.bmp` show the completed return.
+Full logs are in the corresponding `build\Debug\game-logs\<run>` folders.
+All **23 protected files**, including all **14 FAR authoring files**, the
+material CSV/schema/import/executable source and five original save/backup
+files, retain their original SHA-256 and modification times.
+
+The isolated `data\catalog-layers.json` currently enables the private mod.
+The archived stock run preceded that file; omit this **isolated** configuration
+to repeat the stock case. Do not recursively clean through the asset junctions.
+Some background navigation/movement key probes did not reach the game's input
+stream, and one overlong shortcut was truncated to 1023 argument characters;
+neither is game
+defect evidence. Accepted shortcuts were read back and their full arguments
+verified (1005 characters). No code change, build, canonical regression replay,
+commit, push or issue closure was performed in this follow-up.
 
 ## FAR runtime follow-up: reset/re-entry, unmatched reference (#210), 2026-11-24
 
