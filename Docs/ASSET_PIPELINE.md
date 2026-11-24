@@ -270,6 +270,22 @@ names does not satisfy the gate.
 - **Fonts (target):** glyph bitmaps become a PNG atlas with JSON metrics (codepoint → rect, advance). #500 must supply the VS character code → Unicode contract and bidirectional codec. The proposed `Native\Content\schemas\charmap.json` is **not present yet**; the bounded label decoder in §1.2 is not a substitute for that text conversion. Reference: `tools\PSX\VagrantStory\VagrantStory-Font`.
 - **Localization (target):** Phase 2 adds `strings.<lang>.json` overlays. The complete string catalog/schema/codec must exist before claiming this structure is ready.
 
+**Implemented name-codec foundation (#500):** `Content/GameTextCodec.hpp`
+provides strict reversible English glyphs, escaped literal braces (`{{`, `}}`),
+named symbol/button glyphs, newline, `{page}`, `{confirm}` and `{spacing:N}`.
+Spacing uses the renderer's nominal units: -16..-1 encode F0..FF, while 0..239
+retain their positive values. E6 waits for controller confirmation; it is not
+a fixed-duration `{wait:30}`. Font/palette control FB is a packed instruction,
+not simply a colour number. Other controls and unmapped glyphs are rejected
+with the string identity and byte position until their semantics are implemented.
+
+The decoder reports the exact consumed prefix through E7. Callers retain the
+remaining bytes as import provenance, not text; an all-zero fixed slot is an
+empty import record rather than a fabricated terminated string. Informational
+labels reuse the same glyph map while retaining visible unknown-code markers.
+This codec covers current item/enemy name contents, **not** the complete string
+catalog, font/charmap asset, formatted UI controls or ID-based runtime adoption.
+
 ---
 
 ## 6. Tier 3: disc assets → modern formats

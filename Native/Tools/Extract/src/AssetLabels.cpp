@@ -23,6 +23,7 @@
 #include "Content/CatalogTable.hpp"
 #include "Content/ConversionManifest.hpp"
 #include "Content/DataStore.hpp"
+#include "Content/GameTextCodec.hpp"
 #include "Content/JsonText.hpp"
 #include "Content/WorkshopRecipes.hpp"
 #include "Content/ZoneTables.hpp"
@@ -43,63 +44,6 @@ constexpr std::string_view kEnemies = "zone-enemies";
 constexpr std::string_view kParts = "zone-enemy-parts";
 constexpr unsigned kHexAlphabetOffset = 10;
 constexpr unsigned kHexBits = 4;
-
-void AppendUtf8(std::string& text, std::uint32_t code) {
-  constexpr std::uint32_t kAsciiLimit = 0x80;
-  constexpr std::uint32_t kTwoByteLimit = 0x800;
-  constexpr std::uint32_t kTwoBytePrefix = 0xC0;
-  constexpr std::uint32_t kThreeBytePrefix = 0xE0;
-  constexpr std::uint32_t kContinuationPrefix = 0x80;
-  constexpr std::uint32_t kPayloadMask = 0x3F;
-  constexpr unsigned kPayloadBits = 6;
-  if (code < kAsciiLimit) {
-    text += static_cast<char>(code);
-  } else if (code < kTwoByteLimit) {
-    text += static_cast<char>(kTwoBytePrefix | (code >> kPayloadBits));
-    text += static_cast<char>(kContinuationPrefix | (code & kPayloadMask));
-  } else {
-    text += static_cast<char>(kThreeBytePrefix | (code >> (2 * kPayloadBits)));
-    text += static_cast<char>(kContinuationPrefix |
-                              ((code >> kPayloadBits) & kPayloadMask));
-    text += static_cast<char>(kContinuationPrefix | (code & kPayloadMask));
-  }
-}
-
-// English glyph indices: upstream tools/etc/vsString.py:6-40.
-void AppendGlyph(std::string& text, std::uint8_t glyph) {
-  constexpr std::uint8_t kFirstSign = 0x86;
-  constexpr std::uint8_t kFirstPunctuation = 0x8F;
-  constexpr std::uint8_t kFirstSymbol = 0xAD;
-  constexpr std::string_view kAlphabet =
-      "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-  constexpr std::array<std::uint32_t, 45> kAccents{
-      0x0152, 0x00C0, 0x00C1, 0x00C2, 0x00C4, 0x00C7, 0x00C8, 0x00C9, 0x00CA,
-      0x00CB, 0x00CC, 0x00CD, 0x00CE, 0x00CF, 0x00D2, 0x00D3, 0x00D4, 0x00D6,
-      0x00D9, 0x00DA, 0x00DB, 0x00DC, 0x00DF, 0x0153, 0x00E0, 0x00E1, 0x00E2,
-      0x00E4, 0x00E7, 0x00E8, 0x00E9, 0x00EA, 0x00EB, 0x00EC, 0x00ED, 0x00EE,
-      0x00EF, 0x00F2, 0x00F3, 0x00F4, 0x00F6, 0x00F9, 0x00FA, 0x00FB, 0x00FC};
-  constexpr std::array<std::uint32_t, 9> kSigns{
-      0x201E, 0x203C, 0x2260, 0x2266, 0x2267, 0x00F7, 0x00B7, 0x2014, 0x22EF};
-  constexpr std::string_view kPunctuation = " !\"#$%&'()=@[];:,./\\<>?_-+*`{}";
-  constexpr std::array<std::string_view, 13> kSymbols{
-      "[music]", "[triangle]", "[square]", "[circle]", "[cross]",
-      "[left]",  "[right]",    "[up]",     "[down]",   "Lv.",
-      "[star]",  "[block]",    "~"};
-  if (glyph < kAlphabet.size()) {
-    text += kAlphabet[glyph];
-  } else if (glyph < kAlphabet.size() + kAccents.size()) {
-    AppendUtf8(text, kAccents[glyph - kAlphabet.size()]);
-  } else if (glyph >= kFirstSign && glyph < kFirstSign + kSigns.size()) {
-    AppendUtf8(text, kSigns[glyph - kFirstSign]);
-  } else if (glyph >= kFirstPunctuation &&
-             glyph < kFirstPunctuation + kPunctuation.size()) {
-    text += kPunctuation[glyph - kFirstPunctuation];
-  } else if (glyph >= kFirstSymbol && glyph < kFirstSymbol + kSymbols.size()) {
-    text += kSymbols[glyph - kFirstSymbol];
-  } else {
-    text += std::format("[glyph {:02X}]", glyph);
-  }
-}
 
 std::string Join(const Names& names) {
   std::string joined;
@@ -659,7 +603,7 @@ std::expected<std::string, std::string> DecodeAssetName(
     const auto code = std::to_integer<std::uint8_t>(bytes[index]);
     if (code == Render::kTextTerminator) break;
     if (code < Render::kTextFirstControl) {
-      AppendGlyph(text, code);
+      Content::AppendGameGlyphLabel(text, code);
     } else if (code == Render::kTextNewline) {
       text += ' ';
     } else if (code >= Render::kTextFirstParameterized) {

@@ -87,6 +87,9 @@
     <ClCompile Include="src\EtmFile.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\GameTextCodec.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ImageFiles.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -232,6 +235,9 @@
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\GameplayDomains.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\GameTextCodec.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\ImageFiles.hpp">

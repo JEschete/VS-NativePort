@@ -1,5 +1,38 @@
 # Current Handoff
 
+## Reversible English name codec (#500/#520), 2026-11-23
+
+Verified worktree based on `6716fac3d` on `main`. The new Content game-text codec
+shares the existing English glyph mapping with asset labels. It round-trips
+Unicode, named symbol/button glyphs, escaped braces, page/confirm/newline and
+signed nominal spacing. Unsupported controls/glyphs, malformed markup/UTF-8
+and missing terminators fail with string identity and byte position.
+
+E6 means controller confirmation, not a timed wait. FA parameters F0..FF mean
+-16..-1; other parameters remain positive. The decoder's consumed count includes
+E7, allowing the importer to preserve post-terminator bytes without treating
+them as text. All-zero fixed slots remain classified empty import records.
+Font/palette/speaker/formatting controls and the complete string catalog,
+charmap/font asset and ID-based runtime adoption remain #500; no completion
+claim is made for those.
+
+- Full Debug/Release builds passed, `VS_JOBS=4`, `/m:2`, x64.
+- Both configurations: **33 cases / 3,750 assertions**, selection
+  `[game-text-codec],[asset-labels],[workshop-authoring]`.
+- Actual 1,422 name slots: **1,419 nonempty names** round-trip with every
+  suffix byte preserved; three all-zero slots are explicitly classified.
+  Their only embedded controls are 809 FA:6 spacing operations.
+- Tests cover every mapped English glyph, all 256 spacing parameters, Unicode,
+  braces, multi-character level glyph versus literal `Lv.`, malformed input and
+  a terminator-valued parameter. Existing label/authoring tests are unchanged.
+- New codec/test tidy and complete changed-file quality: zero new findings.
+  Project generation is stable on its second run. No native data changed.
+- Evidence: `build\issue-500-codec-*.log`.
+
+Continue with authoritative string definitions and their real consumers, then
+the remaining semantic identities/domains and per-format adoption. A codec
+foundation alone does not close #500 or #520.
+
 ## Named zone fields and domains (#199/#520), 2026-11-23
 
 Verified worktree based on `2276a0a6a` on `main`. `znd-tables` version 2

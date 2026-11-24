@@ -71,6 +71,7 @@
     </ClCompile>
     <ClCompile Include="src\EsqFile.cpp" />
     <ClCompile Include="src\EtmFile.cpp" />
+    <ClCompile Include="src\GameTextCodec.cpp" />
     <ClCompile Include="src\ImageFiles.cpp" />
     <ClCompile Include="src\JsonText.cpp" />
     <ClCompile Include="src\ModuleLoader.cpp" />
@@ -129,6 +130,7 @@
     <ClInclude Include="include\Content\EsqFile.hpp" />
     <ClInclude Include="include\Content\EtmFile.hpp" />
     <ClInclude Include="include\Content\GameplayDomains.hpp" />
+    <ClInclude Include="include\Content\GameTextCodec.hpp" />
     <ClInclude Include="include\Content\ImageFiles.hpp" />
     <ClInclude Include="include\Content\JsonText.hpp" />
     <ClInclude Include="include\Content\ModuleData.hpp" />

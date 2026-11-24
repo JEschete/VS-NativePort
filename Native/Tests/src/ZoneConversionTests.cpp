@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <expected>
@@ -20,6 +21,7 @@
 #include "Content/ConversionManifest.hpp"
 #include "Content/ConvertedZones.hpp"
 #include "Content/DataStore.hpp"
+#include "Content/GameTextCodec.hpp"
 #include "Content/ImageFiles.hpp"
 #include "Content/TimFile.hpp"
 #include "Content/ZndFile.hpp"
@@ -332,7 +334,58 @@ void CheckLiveReads(const ModelRoot& root, const Bytes& source) {
   CHECK_FALSE(content::ReadLiveConvertedZone(room, block).has_value());
 }
 
+bool CheckNameSlot(std::span<const std::byte> source, std::string_view id) {
+  // Empty fixed slots are import records, not unterminated strings to invent.
+  if (std::ranges::all_of(
+          source, [](std::byte value) { return value == std::byte{}; })) {
+    return false;
+  }
+  const auto decoded = content::DecodeGameText(source, id);
+  if (!decoded) FAIL(decoded.error());
+  auto encoded = content::EncodeGameText(decoded->markup, id);
+  if (!encoded) FAIL(encoded.error());
+  CHECK(encoded->size() == decoded->consumed);
+  const auto suffix = source.subspan(decoded->consumed);
+  encoded->insert(encoded->end(), suffix.begin(), suffix.end());
+  CHECK(*encoded == Bytes(source.begin(), source.end()));
+  return true;
+}
+
 }  // namespace
+
+TEST_CASE(
+    "Item and enemy names round-trip through readable text with provenance",
+    "[game-text-codec][extract]") {
+  const auto data = RepositoryPath(fs::path("Native") / "data");
+  if (!data) SKIP("Extracted Native/data is unavailable");
+  const auto items = ReadModel(*data / "disc" / "MENU" / "ITEMNAME.BIN");
+  constexpr std::size_t kNameBytes = 24;
+  REQUIRE(items.size() % kNameBytes == 0);
+  std::size_t names = 0;
+  std::size_t empty = 0;
+  for (std::size_t at = 0; at < items.size(); at += kNameBytes) {
+    const bool present =
+        CheckNameSlot(std::span(items).subspan(at, kNameBytes),
+                      std::format("ITEMNAME.BIN slot {}", at / kNameBytes));
+    ++(present ? names : empty);
+  }
+  const auto zones = content::ReadZoneTables(
+      [&](std::string_view path) -> std::expected<std::string, std::string> {
+        return ReadText(*data / fs::path(path));
+      });
+  if (!zones) FAIL(zones.error());
+  for (const auto& zone : *zones) {
+    for (const auto& enemy : zone.enemies) {
+      for (const std::size_t at : {std::size_t{0x04}, std::size_t{0x128}}) {
+        const bool present = CheckNameSlot(
+            std::span(enemy.data).subspan(at, kNameBytes), enemy.id);
+        ++(present ? names : empty);
+      }
+    }
+  }
+  CHECK(names == 1419);
+  CHECK(empty == 3);
+}
 
 TEST_CASE("Zone texture ids name their image files", "[content-tables][znd]") {
   CHECK(content::ZoneTextureId("zone.map.zone009", 3) ==
