@@ -342,7 +342,7 @@ bool CheckNameSlot(std::span<const std::byte> source, std::string_view id) {
   }
   const auto decoded = content::DecodeGameText(source, id);
   if (!decoded) FAIL(decoded.error());
-  auto encoded = content::EncodeGameText(decoded->markup, id);
+  auto encoded = content::EncodeGameText(*decoded, id);
   if (!encoded) FAIL(encoded.error());
   CHECK(encoded->size() == decoded->consumed);
   const auto suffix = source.subspan(decoded->consumed);
@@ -351,7 +351,40 @@ bool CheckNameSlot(std::span<const std::byte> source, std::string_view id) {
   return true;
 }
 
+std::size_t CheckTextTable(const fs::path& path) {
+  const auto source = ReadModel(path);
+  REQUIRE(source.size() >= 2);
+  const auto halfword = [&source](std::size_t index) {
+    return std::to_integer<unsigned>(source.at(index * 2)) |
+           (std::to_integer<unsigned>(source.at(index * 2 + 1)) << 8);
+  };
+  const std::size_t count = halfword(0);
+  REQUIRE(count * 2 <= source.size());
+  for (std::size_t index = 0; index < count; ++index) {
+    const std::size_t begin = halfword(index) * 2;
+    const std::size_t end =
+        index + 1 < count ? halfword(index + 1) * 2 : source.size();
+    REQUIRE(begin >= count * 2);
+    REQUIRE(end > begin);
+    REQUIRE(end <= source.size());
+    const auto id = std::format("{} entry {}", path.filename().string(), index);
+    CHECK(CheckNameSlot(std::span(source).subspan(begin, end - begin), id));
+  }
+  return count;
+}
+
 }  // namespace
+
+TEST_CASE("Item help and workshop text preserve controls and import provenance",
+          "[game-text-codec][extract]") {
+  const auto data = RepositoryPath(fs::path("Native") / "data");
+  if (!data) SKIP("Extracted Native/data is unavailable");
+  std::size_t strings = 0;
+  for (const auto* name : {"ITEMHELP.BIN", "MENU12.BIN"}) {
+    strings += CheckTextTable(*data / "disc" / "MENU" / name);
+  }
+  CHECK(strings == 766);
+}
 
 TEST_CASE(
     "Item and enemy names round-trip through readable text with provenance",

@@ -1,5 +1,45 @@
 # Current Handoff
 
+## Verified offline text controls (#500), 2026-11-24
+
+Base `ef82a0f066446257307913a8c8698155361aa489`, with the text codec/header,
+`GameTextCodecTests.cpp`, `ZoneConversionTests.cpp` and text documentation dirty
+during verification. Concurrent FAR identity files were untracked/unregistered,
+not part of these builds. Scoped publication and exact-revision CI are pending.
+
+- F8..FF now decode into named controls and operands: glyph reveal cost, text
+  sound selector, spacing, glyph bank, palette slot/bank, centering, vertical
+  offset, conditional speaker pause, numeric formatting and string arguments.
+  The original parameter semantics come from upstream
+  `src/BATTLE/BATTLE.PRG/5BF94.c`, not inferred timing or color names.
+- FB move-down's ignored low bits stay in separate import provenance. Offline
+  reconstruction preserves them; markup-only encoding canonicalizes them to
+  zero. Invalid/stale/duplicate provenance is refused explicitly.
+- Debug and Release test-project builds passed with `VS_JOBS=4`, `/m:2`:
+  `MSBuild.exe Native\Tests\VS.Tests.vcxproj /m:2 /p:Configuration=Debug
+  /p:Platform=x64` (repeat with Release). Each
+  `build\<configuration>\VS.Tests.exe "[game-text-codec]"` passed **17 cases /
+  11,591 assertions**. This includes all **766 ITEMHELP/MENU12 strings**,
+  **1,419 nonempty item/enemy names**, post-terminator bytes, all **1,802 valid
+  parameter combinations**, malformed inputs and the production formatter's
+  numeric/string substitution behavior.
+- Four-file source quality passed. Focused codec/new-test `quality.py --files
+  Native\Content\src\GameTextCodec.cpp Native\Tests\src\GameTextCodecTests.cpp
+  --tidy` passed with **0 findings / 0 new**; eight exact fixture literals are
+  informational. Hazard synchronization reports **274 sites / 0 violations**
+  with no ledger changes. No test identity, assertion threshold or replay
+  baseline was weakened or refreshed.
+- Evidence: `build\issue-500-controls-{Debug,Release}-{build,tests}.log`,
+  `build\issue-500-controls-quality.json`, and
+  `build\issue-500-controls-tidy.{log,json}`.
+
+This is an **offline import codec**, not a new runtime string-table repacker or
+completed #500/#54 adoption. MCMAN's extended Japanese glyph records remain
+unsupported: 47 location-label entries (77..104 except 89, and 117..136), with
+208 F6 prefixes; their usage/placeholder status is not established. The finding
+is recorded on #500. Full catalogs, semantic call-site argument bindings,
+font/charmap assets, remaining encodings and typed UI/layout consumers remain.
+
 ## Verified cache/CI checkpoint
 
 `7a69555d2530270b630cccf78238a7f310b07dcf` passed exact-revision CI
@@ -7,9 +47,11 @@
 Startup caching #524 and physical-source integrity #525 are closed with measured
 evidence. The earlier boundary, source-test identity, verification-reference and
 hazard-bookkeeping failures are resolved without lowering replay/assertion gates.
-FAR #210 remains open for semantic identities and scene-visible/reference edit
-evidence; the next observation uses the real-input MAP008/open-sky route described
-in its issue. Other asset migration issues remain open.
+FAR #210 remains open for semantic identities, reference parity and the remaining
+format gates. The open-sky route was MAP062, not a FAR scene. A subsequent
+non-skipped MAP001 run established a visible native PNG edit at matched event
+PC `+0x626`; #210 retains its exact commands and pixel comparisons.
+Other asset migration issues remain open.
 
 ## Authored FAR image binding and placement (#210), 2026-11-24
 

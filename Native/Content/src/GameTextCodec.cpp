@@ -24,6 +24,19 @@ constexpr std::uint8_t kOpenBraceGlyph = 0xAB;
 constexpr std::uint8_t kCloseBraceGlyph = 0xAC;
 constexpr int kSpacingBackLimit = 0xF0;
 constexpr int kByteRange = 256;
+constexpr unsigned kFontMoveShift = 3;
+constexpr unsigned kIgnoredFontMask = 7;
+constexpr unsigned kArgumentCount = 10;
+constexpr unsigned kPaletteSlotCount = 4;
+constexpr int kMaximumByte = kByteRange - 1;
+constexpr int kMaximumDigits = kMaximumByte / kArgumentCount;
+constexpr int kMaximumDown = kMaximumByte >> kFontMoveShift;
+constexpr std::string_view kArgumentPrefix = "arg=";
+constexpr unsigned kFontBase = 6;
+constexpr unsigned kFontAlternate = 5;
+constexpr unsigned kFontJustify = 4;
+constexpr unsigned kUpperPalette = 7;
+namespace encoding = Core::String;
 constexpr std::string_view kAlphabet{
     "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
 };
@@ -120,6 +133,121 @@ std::expected<void, std::string> AppendGlyph(std::string& text,
       Error(id, at, std::format("unmapped English glyph 0x{:02X}", code)));
 }
 
+std::expected<int, std::string> IntegerOperand(std::string_view value,
+                                               int minimum, int maximum,
+                                               std::string_view operand,
+                                               std::string_view id,
+                                               std::size_t at) {
+  int result = 0;
+  const auto parsed =
+      std::from_chars(value.data(), value.data() + value.size(), result);
+  if (parsed.ec != std::errc() || parsed.ptr != value.data() + value.size() ||
+      result < minimum || result > maximum) {
+    return std::unexpected(Error(id, at,
+                                 std::format("{} must be an integer in {}..{}",
+                                             operand, minimum, maximum)));
+  }
+  return result;
+}
+
+std::expected<unsigned, std::string> NumberOperand(std::string_view value,
+                                                   std::string_view id,
+                                                   std::size_t at) {
+  constexpr std::string_view kDigits = ",digits=";
+  const auto split = value.find(kDigits);
+  if (!value.starts_with(kArgumentPrefix) || split == std::string_view::npos) {
+    return std::unexpected(
+        Error(id, at, "number requires arg=N,digits=auto or arg=N,digits=N"));
+  }
+  auto argument = IntegerOperand(
+      value.substr(kArgumentPrefix.size(), split - kArgumentPrefix.size()), 0,
+      kArgumentCount - 1, "integer argument", id, at);
+  if (!argument) return std::unexpected(argument.error());
+  const auto digits_text = value.substr(split + kDigits.size());
+  auto digits =
+      digits_text == "auto"
+          ? std::expected<int, std::string>(0)
+          : IntegerOperand(digits_text, 1, kMaximumDigits, "digits", id, at);
+  if (!digits) return std::unexpected(digits.error());
+  const auto parameter = static_cast<unsigned>(*digits) * kArgumentCount +
+                         static_cast<unsigned>(*argument);
+  if (parameter >= kByteRange) {
+    return std::unexpected(
+        Error(id, at, "number operands do not fit the imported byte encoding"));
+  }
+  return parameter;
+}
+
+std::expected<unsigned, std::string> FontOperand(std::string_view name,
+                                                 std::string_view value,
+                                                 std::string_view id,
+                                                 std::size_t at) {
+  if (name == "font" && value == "base") return kFontBase;
+  if (name == "font" && value == "alternate") return kFontAlternate;
+  if (name == "justify" && value == "toggle") return kFontJustify;
+  if (name == "down") {
+    auto amount = IntegerOperand(value, 1, kMaximumDown, "down", id, at);
+    if (!amount) return std::unexpected(amount.error());
+    return static_cast<unsigned>(*amount) << kFontMoveShift;
+  }
+  if (name == "palette") {
+    if (value == "slot=3,bank=upper") return kUpperPalette;
+    constexpr std::string_view kSlot = "slot=";
+    constexpr std::string_view kBank = ",bank=current";
+    if (value.starts_with(kSlot) && value.ends_with(kBank)) {
+      auto slot = IntegerOperand(
+          value.substr(kSlot.size(),
+                       value.size() - kSlot.size() - kBank.size()),
+          0, kPaletteSlotCount - 1, "palette slot", id, at);
+      if (!slot) return std::unexpected(slot.error());
+      return static_cast<unsigned>(*slot);
+    }
+  }
+  return std::unexpected(Error(id, at, "unsupported font/palette operands"));
+}
+
+struct Parameter {
+  std::uint8_t code = 0;
+  unsigned value = 0;
+};
+
+std::expected<Parameter, std::string> EncodeParameter(std::string_view name,
+                                                      std::string_view value,
+                                                      std::string_view id,
+                                                      std::size_t at) {
+  if (name == "font" || name == "justify" || name == "down" ||
+      name == "palette") {
+    auto font = FontOperand(name, value, id, at);
+    if (!font) return std::unexpected(font.error());
+    return Parameter{encoding::kGameTextFontControl, *font};
+  }
+  if (name == "hex" || name == "decimal") {
+    auto number = NumberOperand(value, id, at);
+    if (!number) return std::unexpected(number.error());
+    return Parameter{name == "hex" ? encoding::kGameTextPrintHex
+                                   : encoding::kGameTextPrintDecimal,
+                     *number};
+  }
+  if (name == "string" && value.starts_with(kArgumentPrefix)) {
+    auto argument =
+        IntegerOperand(value.substr(kArgumentPrefix.size()), 0,
+                       kArgumentCount - 1, "string argument", id, at);
+    if (!argument) return std::unexpected(argument.error());
+    return Parameter{encoding::kGameTextPrintString,
+                     static_cast<unsigned>(*argument)};
+  }
+  std::uint8_t code = 0;
+  if (name == "glyph-cost") code = encoding::kGameTextChunkSize;
+  if (name == "sound-selector") code = encoding::kGameTextSoundEffect;
+  if (name == "speaker-pause") code = encoding::kGameTextSpeakerPause;
+  if (code != 0) {
+    auto operand = IntegerOperand(value, 0, kMaximumByte, name, id, at);
+    if (!operand) return std::unexpected(operand.error());
+    return Parameter{code, static_cast<unsigned>(*operand)};
+  }
+  return std::unexpected(Error(id, at, "unsupported control operands"));
+}
+
 std::expected<void, std::string> AppendControl(std::vector<std::byte>& bytes,
                                                std::string_view token,
                                                std::string_view id,
@@ -132,18 +260,12 @@ std::expected<void, std::string> AppendControl(std::vector<std::byte>& bytes,
   }
   if (token.starts_with("spacing:")) {
     const auto value = token.substr(std::string_view("spacing:").size());
-    int spacing = 0;
-    const auto parsed =
-        std::from_chars(value.data(), value.data() + value.size(), spacing);
-    if (parsed.ec != std::errc() || parsed.ptr != value.data() + value.size() ||
-        spacing < kSpacingBackLimit - kByteRange ||
-        spacing >= kSpacingBackLimit) {
-      return std::unexpected(
-          Error(id, at, "spacing must be an integer in -16..239"));
-    }
+    auto spacing = IntegerOperand(value, kSpacingBackLimit - kByteRange,
+                                  kSpacingBackLimit - 1, "spacing", id, at);
+    if (!spacing) return std::unexpected(spacing.error());
     bytes.push_back(static_cast<std::byte>(Core::String::kGameTextSpacing));
-    bytes.push_back(
-        static_cast<std::byte>(spacing < 0 ? spacing + kByteRange : spacing));
+    bytes.push_back(static_cast<std::byte>(*spacing < 0 ? *spacing + kByteRange
+                                                        : *spacing));
     return {};
   }
   for (std::size_t index = 0; index < kSymbols.size(); ++index) {
@@ -152,8 +274,86 @@ std::expected<void, std::string> AppendControl(std::vector<std::byte>& bytes,
       return {};
     }
   }
-  return std::unexpected(
-      Error(id, at, "unsupported markup {" + std::string(token) + "}"));
+  const auto colon = token.find(':');
+  if (colon == std::string_view::npos) {
+    return std::unexpected(
+        Error(id, at, "unsupported markup {" + std::string(token) + "}"));
+  }
+  auto parameter =
+      EncodeParameter(token.substr(0, colon), token.substr(colon + 1), id, at);
+  if (!parameter) return std::unexpected(parameter.error());
+  bytes.push_back(static_cast<std::byte>(parameter->code));
+  bytes.push_back(static_cast<std::byte>(parameter->value));
+  return {};
+}
+
+// decomp: BATTLE printVariableWidthFont (src/BATTLE/BATTLE.PRG/5BF94.c:1253)
+void DecodeFontControl(DecodedGameText& text, unsigned parameter) {
+  if ((parameter >> kFontMoveShift) != 0) {
+    if ((parameter & kIgnoredFontMask) != 0) {
+      text.ignored_font_bits.push_back(
+          {.markup_offset = text.markup.size(),
+           .bits = static_cast<std::uint8_t>(parameter & kIgnoredFontMask)});
+    }
+    text.markup += std::format("{{down:{}}}", parameter >> kFontMoveShift);
+  } else if (parameter == kFontBase || parameter == kFontAlternate) {
+    text.markup += parameter == kFontBase ? "{font:base}" : "{font:alternate}";
+  } else if (parameter == kFontJustify) {
+    text.markup += "{justify:toggle}";
+  } else if (parameter == kUpperPalette) {
+    text.markup += "{palette:slot=3,bank=upper}";
+  } else {
+    text.markup += std::format("{{palette:slot={},bank=current}}", parameter);
+  }
+}
+
+std::expected<void, std::string> DecodeParameter(DecodedGameText& text,
+                                                 std::uint8_t code,
+                                                 unsigned parameter,
+                                                 std::string_view id,
+                                                 std::size_t at) {
+  switch (code) {
+    case encoding::kGameTextChunkSize:
+      text.markup += std::format("{{glyph-cost:{}}}", parameter);
+      break;
+    case encoding::kGameTextSoundEffect:
+      text.markup += std::format("{{sound-selector:{}}}", parameter);
+      break;
+    case encoding::kGameTextSpacing: {
+      const int spacing = static_cast<int>(parameter);
+      text.markup += std::format("{{spacing:{}}}", spacing >= kSpacingBackLimit
+                                                       ? spacing - kByteRange
+                                                       : spacing);
+      break;
+    }
+    case encoding::kGameTextFontControl:
+      DecodeFontControl(text, parameter);
+      break;
+    case encoding::kGameTextSpeakerPause:
+      text.markup += std::format("{{speaker-pause:{}}}", parameter);
+      break;
+    case encoding::kGameTextPrintHex:
+    case encoding::kGameTextPrintDecimal:
+      text.markup +=
+          std::format("{{{}:arg={},digits={}}}",
+                      code == encoding::kGameTextPrintHex ? "hex" : "decimal",
+                      parameter % kArgumentCount,
+                      parameter < kArgumentCount
+                          ? "auto"
+                          : std::to_string(parameter / kArgumentCount));
+      break;
+    case encoding::kGameTextPrintString:
+      if (parameter >= kArgumentCount) {
+        return std::unexpected(
+            Error(id, at, "string argument is outside the ten import slots"));
+      }
+      text.markup += std::format("{{string:arg={}}}", parameter);
+      break;
+    default:
+      return std::unexpected(
+          Error(id, at, std::format("unsupported control 0x{:02X}", code)));
+  }
+  return {};
 }
 
 std::expected<std::size_t, std::string> EncodeGlyph(
@@ -201,15 +401,16 @@ std::expected<DecodedGameText, std::string> DecodeGameText(
                code == Core::String::kGameTextConfirm) {
       result.markup +=
           code == Core::String::kGameTextPageBreak ? "{page}" : "{confirm}";
-    } else if (code == Core::String::kGameTextSpacing) {
+    } else if (code >= Core::String::kGameTextChunkSize) {
       if (at + 1 == source.size()) {
-        return std::unexpected(
-            Error(id, at, "spacing control has no parameter"));
+        return std::unexpected(Error(id, at, "control has no parameter"));
       }
-      const int value = std::to_integer<std::uint8_t>(source[++at]);
-      result.markup +=
-          std::format("{{spacing:{}}}",
-                      value >= kSpacingBackLimit ? value - kByteRange : value);
+      const auto value = std::to_integer<std::uint8_t>(source[at + 1]);
+      if (auto control = DecodeParameter(result, code, value, id, at);
+          !control) {
+        return std::unexpected(control.error());
+      }
+      ++at;
     } else {
       return std::unexpected(
           Error(id, at, std::format("unsupported control 0x{:02X}", code)));
@@ -219,10 +420,24 @@ std::expected<DecodedGameText, std::string> DecodeGameText(
 }
 
 std::expected<std::vector<std::byte>, std::string> EncodeGameText(
-    std::string_view markup, std::string_view id) {
+    const DecodedGameText& decoded, std::string_view id) {
+  const std::string_view markup = decoded.markup;
   std::vector<std::byte> bytes;
+  std::size_t provenance = 0;
   for (std::size_t at = 0; at < markup.size();) {
+    const auto* ignored = provenance < decoded.ignored_font_bits.size()
+                              ? &decoded.ignored_font_bits[provenance]
+                              : nullptr;
+    if (ignored != nullptr && ignored->markup_offset < at) {
+      return std::unexpected(Error(id, ignored->markup_offset,
+                                   "stale or unordered font provenance"));
+    }
     const auto rest = markup.substr(at);
+    if (ignored != nullptr && ignored->markup_offset == at &&
+        !rest.starts_with("{down:")) {
+      return std::unexpected(
+          Error(id, at, "font provenance needs a down token"));
+    }
     if (rest.starts_with("{{") || rest.starts_with("}}")) {
       bytes.push_back(static_cast<std::byte>(
           rest.front() == '{' ? kOpenBraceGlyph : kCloseBraceGlyph));
@@ -237,6 +452,14 @@ std::expected<std::vector<std::byte>, std::string> EncodeGameText(
           !control) {
         return std::unexpected(control.error());
       }
+      if (ignored != nullptr && ignored->markup_offset == at) {
+        if (ignored->bits == 0 || ignored->bits > kIgnoredFontMask) {
+          return std::unexpected(
+              Error(id, at, "ignored font bits must be 1..7"));
+        }
+        bytes.back() |= static_cast<std::byte>(ignored->bits);
+        ++provenance;
+      }
       at = end + 1;
     } else if (rest.front() == '}') {
       return std::unexpected(
@@ -250,8 +473,16 @@ std::expected<std::vector<std::byte>, std::string> EncodeGameText(
       at += *count;
     }
   }
+  if (provenance != decoded.ignored_font_bits.size()) {
+    return std::unexpected(Error(id, markup.size(), "unused font provenance"));
+  }
   bytes.push_back(static_cast<std::byte>(Core::String::kGameTextTerminator));
   return bytes;
+}
+
+std::expected<std::vector<std::byte>, std::string> EncodeGameText(
+    std::string_view markup, std::string_view id) {
+  return EncodeGameText(DecodedGameText{.markup = std::string(markup)}, id);
 }
 
 }  // namespace VS::Content

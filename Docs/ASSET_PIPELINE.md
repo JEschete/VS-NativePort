@@ -292,21 +292,47 @@ names does not satisfy the gate.
 - **Fonts (target):** glyph bitmaps become a PNG atlas with JSON metrics (codepoint → rect, advance). #500 must supply the VS character code → Unicode contract and bidirectional codec. The proposed `Native\Content\schemas\charmap.json` is **not present yet**; the bounded label decoder in §1.2 is not a substitute for that text conversion. Reference: `tools\PSX\VagrantStory\VagrantStory-Font`.
 - **Localization (target):** Phase 2 adds `strings.<lang>.json` overlays. The complete string catalog/schema/codec must exist before claiming this structure is ready.
 
-**Implemented name-codec foundation (#500):** `Content/GameTextCodec.hpp`
+**Implemented offline text-codec foundation (#500):** `Content/GameTextCodec.hpp`
 provides strict reversible English glyphs, escaped literal braces (`{{`, `}}`),
 named symbol/button glyphs, newline, `{page}`, `{confirm}` and `{spacing:N}`.
 Spacing uses the renderer's nominal units: -16..-1 encode F0..FF, while 0..239
 retain their positive values. E6 waits for controller confirmation; it is not
-a fixed-duration `{wait:30}`. Font/palette control FB is a packed instruction,
-not simply a colour number. Other controls and unmapped glyphs are rejected
-with the string identity and byte position until their semantics are implemented.
+a fixed-duration `{wait:30}`. The parameterized import vocabulary is:
+
+| Markup | Original meaning |
+| --- | --- |
+| `{glyph-cost:N}` | F8: cost subtracted from the progressive reveal budget for each glyph (0 disables chunking), not a literal frame duration. |
+| `{sound-selector:N}` | F9: selector in the text sound bank, played when the rendered chunk count changes; 0 is silent. |
+| `{speaker-pause:N}` | FC: negate the speaker pause counter only when it was positive; the drawer subsequently advances it. This is not a whole-dialogue wait. |
+| `{font:base}`, `{font:alternate}` | FB 6/5: select glyph bank 0/1. These describe bank identity, not an invented typeface/style. Font-asset identities remain a #500/#54 dependency. |
+| `{justify:toggle}` | FB 4: toggle line centering. |
+| `{down:N}` | FB high five bits: move down by N nominal font units. Its ignored low three bits live in `DecodedGameText::ignored_font_bits`, not authoring text. |
+| `{palette:slot=N,bank=current}` | FB 0..3: select a slot while retaining the current palette bank. |
+| `{palette:slot=3,bank=upper}` | FB 7: select upper-bank slot 3. Other forced-bank combinations have no such legacy encoding. |
+| `{decimal:arg=N,digits=auto}`, `{hex:arg=N,digits=D}` | FE/FD: explicit integer argument slot and significant/fixed digit count. Both formats accept either digit mode. Original large-count arithmetic remains the import consumer's behavior, not a promise of arbitrary-width numeric formatting. |
+| `{string:arg=N}` | FF: insert one of the ten bound string arguments. Argument roles must be named by each future catalog's call-site bindings, not inferred here. |
+
+The mapping follows upstream `src/BATTLE/BATTLE.PRG/5BF94.c`:
+`vs_battle_printf` (991), `printVariableWidthFont` (1253), and
+`printFixedWidthFont` (1644). The byte-sized limits apply only to offline legacy
+reconstruction. This codec must not become a runtime string-table repacker or
+constrain native string/layout definitions. Unimplemented controls and unmapped
+glyphs fail with the string identity and byte position.
 
 The decoder reports the exact consumed prefix through E7. Callers retain the
 remaining bytes as import provenance, not text; an all-zero fixed slot is an
 empty import record rather than a fabricated terminated string. Informational
 labels reuse the same glyph map while retaining visible unknown-code markers.
-This codec covers current item/enemy name contents, **not** the complete string
-catalog, font/charmap asset, formatted UI controls or ID-based runtime adoption.
+`EncodeGameText(decoded, id)` preserves the ignored font bits; the markup-only
+overload emits their canonical zero bits. Invalid, duplicate, stale or unused
+provenance offsets fail explicitly instead of changing unrelated text.
+
+This codec is **not** the complete string catalog, font/charmap asset or ID-based
+runtime adoption. Inspection also found extended Japanese glyph pairs in 47
+MCMAN location-label records (indices 77..104 except 89, and 117..136):
+`F6 EF` maps to the Japanese table's block glyph in the upstream decoder, not a
+new English control to invent. Their encoding/usage and placeholder status need
+explicit reconciliation; the English codec continues to reject them.
 
 ---
 
