@@ -303,6 +303,8 @@ rem Add readable names without reconverting or replacing gameplay edits.
 build\Debug\VS.Extract.exe labels Native\data
 rem Upgrade recipe identities and zone field names without replacing values.
 build\Debug\VS.Extract.exe authoring Native\data
+rem Import only encyclopedia definitions and their shared native text.
+build\Debug\VS.Extract.exe bestiary Native\data
 ```
 
 - `backgrounds <datadir> [--force]` converts the four supported `BG\*.FAR`
@@ -344,6 +346,15 @@ build\Debug\VS.Extract.exe authoring Native\data
   explicit numeric quantities; its schema is beside it. Reserved import bytes
   stay in `catalogs\items\import\materials.json`, not editable stat columns.
   Normal reruns preserve edits; `tables --force` reimports.
+- `bestiary <datadir> [--force]` imports the native encyclopedia definitions
+  and text without reconverting neighboring tables. `tables`, `authoring`,
+  and full `extract` also include it. Existing trees need this import before
+  opening the encyclopedia; there is no raw MON.BIN fallback.
+  Edit `catalogs\enemies\bestiary.csv` and `text\strings.en.json`, or supply
+  ordered CSV/text layers. Keep `catalogs\enemies\import\bestiary.json` for
+  exact offline reconstruction. The shared text producer preserves the save
+  contributor; forcing bestiary does not replace save prompts. See
+  [ASSET_PIPELINE.md §4.3](ASSET_PIPELINE.md#43-native-encyclopedia-definitions-499500).
 - The same `authoring` command upgrades `znd-tables` version 1 to version 2:
   named enemy classes/materials, meaningful type/class/affinity columns and
   explicitly indexed DP splash percentages. Old headers remain readable through

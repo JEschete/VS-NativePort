@@ -40,7 +40,7 @@ constexpr std::uint16_t kDimmedDigitClut = 0x37F7;
 constexpr std::uint8_t kBright = 128;
 constexpr std::uint8_t kDim = 32;
 constexpr std::size_t kBitsPerWord = 32;
-constexpr std::uint8_t kNoEnemy = 255;
+constexpr std::uint32_t kNoEnemy = UINT32_MAX;
 constexpr int kNoPreview = 3;
 constexpr int kSlideFromRight = 2;
 constexpr int kProjectionStride = 32;
@@ -75,6 +75,7 @@ constexpr int kClassGradient = 1;
 constexpr auto kClasses = std::to_array<std::string_view>(
     {"HUMAN", "BEAST", "UNDEAD", "PHANTOM", "DRAGON", "EVIL"});
 constexpr std::size_t kIdentificationDigits = 6;
+constexpr std::size_t kTotalDigits = 10;
 constexpr std::size_t kIdentificationTextBytes = 14;
 constexpr int kNavigationMidpoint = 9;
 constexpr int kNavigationSize = 16;
@@ -97,8 +98,7 @@ bool Terminated(GazetteText text) {
 }
 
 bool HasEnemy(std::span<const GazetteEnemy> enemies, std::int32_t selected) {
-  return selected >= 0 && static_cast<std::size_t>(selected) <
-                              std::min(enemies.size(), kEncyclopediaEnemies);
+  return selected >= 0 && static_cast<std::size_t>(selected) < enemies.size();
 }
 
 GazetteText Description(const GazetteEnemy& enemy, GazetteText locked) {
@@ -108,29 +108,37 @@ GazetteText Description(const GazetteEnemy& enemy, GazetteText locked) {
 bool ValidList(std::span<const GazetteEnemy> enemies,
                GazetteRecordCursor cursor, GazetteText locked_name,
                GazetteText locked_description) {
-  if (enemies.size() < kEncyclopediaEnemies ||
-      cursor.first_row > kEncyclopediaEnemies - kGazetteVisibleRecords) {
+  if (enemies.size() < kGazetteVisibleRecords ||
+      cursor.first_row > enemies.size() - kGazetteVisibleRecords) {
     return false;
   }
   for (const auto& enemy :
        enemies.subspan(cursor.first_row, kGazetteVisibleRecords)) {
-    if (!Terminated(enemy.unlocked != 0 ? enemy.name : locked_name)) {
+    if (enemy.name_id.empty() &&
+        !Terminated(enemy.unlocked != 0 ? enemy.name : locked_name)) {
       return false;
     }
   }
   const std::size_t selected =
       static_cast<std::size_t>(cursor.first_row) + cursor.selected_row;
-  return selected >= kEncyclopediaEnemies || enemies[selected].selected != 0 ||
+  return selected >= enemies.size() || enemies[selected].selected != 0 ||
+         !enemies[selected].description_id.empty() ||
          Terminated(Description(enemies[selected], locked_description));
 }
 
 void SelectEnemyRows(std::span<GazetteEnemy> enemies, std::size_t selected,
                      GazetteText locked_description, EnemyListHost& host) {
-  for (std::size_t index = 0; index < kEncyclopediaEnemies; ++index) {
+  for (std::size_t index = 0; index < enemies.size(); ++index) {
     auto& enemy = enemies[index];
     if (index == selected) {
       if (enemy.selected == 0) {
-        host.SetInformation(Description(enemy, locked_description));
+        if (!enemy.description_id.empty()) {
+          host.SetNativeInformation(enemy.unlocked != 0
+                                        ? enemy.description_id
+                                        : "text.bestiary.locked.description");
+        } else {
+          host.SetInformation(Description(enemy, locked_description));
+        }
       }
       enemy.selected = 1;
       if (enemy.unlocked != 0) enemy.highlight_step = kSettled;
@@ -176,8 +184,8 @@ void DrawViewerControls(std::int32_t slide,
                   kControlsGradient);
 }
 
-void DrawIdentification(std::int32_t selected, std::int32_t slide,
-                        EnemyViewerHost& host) {
+void DrawIdentification(std::int32_t selected, std::size_t count,
+                        std::int32_t slide, EnemyViewerHost& host) {
   std::array<char, kIdentificationTextBytes> label{
       'N', 'O', '.', ' ', ' ', ' ', '0', '0', '0', '/', '0', '7', '8', '\0'};
   int number = selected + 1;
@@ -185,6 +193,11 @@ void DrawIdentification(std::int32_t selected, std::int32_t slide,
     label[kIdentificationDigits + digit - 1] =
         static_cast<char>('0' + number % kDecimalBase);
     number /= kDecimalBase;
+  }
+  for (std::size_t digit = kDigitCount; digit != 0; --digit) {
+    label[kTotalDigits + digit - 1] =
+        static_cast<char>('0' + count % kDecimalBase);
+    count /= kDecimalBase;
   }
   host.DrawText(label.data(),
                 Framework::PackXy(math::WrappingSubtract(slide, kButtonInset),
@@ -207,6 +220,13 @@ bool ShowEnemyDescription(std::span<const GazetteEnemy> enemies,
   }
   const auto description = Description(
       enemies[static_cast<std::size_t>(selected)], locked_description);
+  const auto& enemy = enemies[static_cast<std::size_t>(selected)];
+  if (!enemy.description_id.empty()) {
+    host.SetNativeInformation(enemy.unlocked != 0
+                                  ? enemy.description_id
+                                  : "text.bestiary.locked.description");
+    return true;
+  }
   if (!Terminated(description)) {
     host.Refuse("enemy description has no end");
     return false;
@@ -254,8 +274,7 @@ bool DrawEnemyNumber(const EnemyNumber& number, EnemyQuadTarget& target) {
 // 80105D8C.
 bool InitializeEnemyList(std::span<GazetteEnemy> enemies,
                          std::span<const std::uint32_t> flags) {
-  if (enemies.size() < kEncyclopediaEnemies) return false;
-  enemies = enemies.first(kEncyclopediaEnemies);
+  if (enemies.empty() || enemies.size() > kMaximumEnemyNumber) return false;
   for (const auto& enemy : enemies) {
     if (enemy.defeat_bit_count > 0 &&
         (enemy.first_defeat_bit < 0 ||
@@ -265,11 +284,11 @@ bool InitializeEnemyList(std::span<GazetteEnemy> enemies,
       return false;
     }
   }
-  std::uint8_t first = kNoEnemy;
-  std::uint8_t previous = kNoEnemy;
+  std::uint32_t first = kNoEnemy;
+  std::uint32_t previous = kNoEnemy;
   for (std::size_t index = 0; index < enemies.size(); ++index) {
     auto& enemy = enemies[index];
-    enemy.unlocked = 0;
+    enemy.unlocked = enemy.always_unlocked ? 1 : 0;
     const int end = enemy.first_defeat_bit + enemy.defeat_bit_count;
     for (int bit = enemy.first_defeat_bit; bit < end; ++bit) {
       const auto offset = static_cast<std::size_t>(bit);
@@ -280,12 +299,12 @@ bool InitializeEnemyList(std::span<GazetteEnemy> enemies,
       }
     }
     if (enemy.unlocked == 0) continue;
-    if (first == kNoEnemy) first = static_cast<std::uint8_t>(index);
+    if (first == kNoEnemy) first = static_cast<std::uint32_t>(index);
     enemy.previous = previous;
     if (previous != kNoEnemy) {
-      enemies[previous].next = static_cast<std::uint8_t>(index);
+      enemies[previous].next = static_cast<std::uint32_t>(index);
     }
-    previous = static_cast<std::uint8_t>(index);
+    previous = static_cast<std::uint32_t>(index);
   }
   if (first != kNoEnemy) {
     enemies[first].previous = previous;
@@ -319,13 +338,19 @@ bool RenderEnemyList(std::span<GazetteEnemy> enemies,
           host.DrawCursor(animation.cursor_step, kCursorX,
                           math::WrappingSubtract(y, kCursorRaise)));
     }
-    auto& row = host.CreateRow({0, kListX, y, kListWidth, 0},
-                               enemy.unlocked != 0 ? enemy.name : locked_name);
+    const Framework::RowPlacement placement{0, kListX, y, kListWidth, 0};
+    auto& row =
+        enemy.name_id.empty()
+            ? host.CreateRow(placement,
+                             enemy.unlocked != 0 ? enemy.name : locked_name)
+            : host.CreateNativeRow(
+                  placement, enemy.unlocked != 0 ? enemy.name_id
+                                                 : "text.bestiary.locked.name");
     if (enemy.unlocked == 0) row.font_color = kLockedColor;
     row.gradient_state = static_cast<std::uint8_t>(enemy.highlight_step);
     if (visible == 0 && cursor.first_row != 0) row.is_scrollable = kScrollUp;
     if (visible == kGazetteVisibleRecords - 1 &&
-        cursor.first_row != kEncyclopediaEnemies - kGazetteVisibleRecords) {
+        cursor.first_row != enemies.size() - kGazetteVisibleRecords) {
       row.is_scrollable = kScrollDown;
     }
     host.DrawNumber({kListX - kNumberInset, y, static_cast<int>(index + 1),
@@ -350,8 +375,9 @@ bool RenderEnemyViewer(std::span<const GazetteEnemy> enemies,
         enemies[static_cast<std::size_t>(presentation.selected_enemy)];
     if (enemy.class_id < 0 ||
         static_cast<std::size_t>(enemy.class_id) >= kClasses.size() ||
-        enemy.name.size() < kNamePrefixBytes ||
-        !Terminated(enemy.name.subspan(kNamePrefixBytes))) {
+        (enemy.name_id.empty() &&
+         (enemy.name.size() < kNamePrefixBytes ||
+          !Terminated(enemy.name.subspan(kNamePrefixBytes))))) {
       host.Refuse("viewer class/name outside its bounds");
       return false;
     }
@@ -364,13 +390,18 @@ bool RenderEnemyViewer(std::span<const GazetteEnemy> enemies,
   const auto control_slide = math::WrappingMultiply(step, kUiStride);
   const auto& enemy =
       enemies[static_cast<std::size_t>(presentation.selected_enemy)];
-  host.CreateRow(
-      {0, math::WrappingAdd(name_slide, kNameX), kNameY, kNameWidth, 0},
-      enemy.name.subspan(kNamePrefixBytes));
+  const Framework::RowPlacement placement{
+      0, math::WrappingAdd(name_slide, kNameX), kNameY, kNameWidth, 0};
+  if (enemy.name_id.empty()) {
+    host.CreateRow(placement, enemy.name.subspan(kNamePrefixBytes));
+  } else {
+    host.CreateNativeRow(placement, enemy.name_id);
+  }
   host.DrawRow();
   host.Row().state = Framework::RowState::kInactive;
   DrawViewerControls(control_slide, presentation, host);
-  DrawIdentification(presentation.selected_enemy, control_slide, host);
+  DrawIdentification(presentation.selected_enemy, enemies.size(), control_slide,
+                     host);
   host.DrawText(
       kClasses[static_cast<std::size_t>(enemy.class_id)],
       Framework::PackXy(math::WrappingAdd(name_slide, kClassX), kClassY),

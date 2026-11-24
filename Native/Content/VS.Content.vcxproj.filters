@@ -48,6 +48,9 @@
     <ClCompile Include="src\BackgroundLayout.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\BestiaryCatalog.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\CatalogDatabase.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -207,6 +210,9 @@
     <ClInclude Include="include\Content\BackgroundLayout.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
+    <ClInclude Include="include\Content\BestiaryCatalog.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
     <ClInclude Include="include\Content\CatalogDatabase.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
@@ -316,6 +322,9 @@
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\SystemResourcesLive.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\TextCatalogRegistration.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\TimFile.hpp">

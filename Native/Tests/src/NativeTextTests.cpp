@@ -9,6 +9,7 @@
 #include <fstream>
 #include <limits>
 #include <span>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -20,6 +21,7 @@
 #include "Content/JsonText.hpp"
 #include "Content/NativeText.hpp"
 #include "Extract/SaveTextConversion.hpp"
+#include "Extract/TextContribution.hpp"
 #include "Render/NativeTextDraw.hpp"
 #include "Render/NativeTextLayout.hpp"
 #include "Save/NativeFileText.hpp"
@@ -332,4 +334,103 @@ TEST_CASE("Save text layers load transactionally and views own reset snapshots",
   CHECK_NOTHROW(VS::Game::Save::SelectNativeFileText("text.save.confirm.load"));
   VS::Game::Save::ResetNativeFileText();
   CHECK_NOTHROW(VS::Game::Save::BeginNativeFileText());
+}
+
+namespace {
+void Contribute(const ImportedTextFixture& fixture,
+                const VS::Extract::TextContribution& contribution,
+                bool force = false) {
+  auto start = VS::Extract::StartRun(fixture.root);
+  REQUIRE(start);
+  if (!start) throw std::runtime_error(start.error());
+  auto prepared = VS::Extract::PrepareTextContribution(
+      fixture.root, start->previous, contribution, force);
+  REQUIRE(prepared);
+  if (!prepared) throw std::runtime_error(prepared.error());
+  std::vector<VS::Extract::OutputBytes> files;
+  for (const auto& file : prepared->files) {
+    files.push_back({file.name, file.bytes});
+  }
+  REQUIRE(VS::Extract::WriteOutputFiles(fixture.root, files));
+  REQUIRE(VS::Extract::PublishBatches(fixture.root, start->previous,
+                                      std::span(&prepared->batch, 1)));
+}
+}  // namespace
+
+TEST_CASE(
+    "Shared text contributions preserve foreign owners edits and stable repeat "
+    "timestamps",
+    "[native-text][bestiary]") {
+  ImportedTextFixture fixture;
+  auto strings = text::JsonDocument::parse(fixture.Read(text::kSaveTextPath));
+  strings["strings"]["text.save.select"] = "My authored save selection";
+  fixture.Write(text::kSaveTextPath, Bytes(text::FormatJsonText(strings)));
+  const VS::Extract::TextContribution contribution{
+      "bestiary",
+      "text.bestiary.",
+      {"SMALL/MON.BIN", std::string(64, 'a')},
+      {{"text.bestiary.notes.name", "Native field notes"}}};
+  Contribute(fixture, contribution);
+  CHECK(text::JsonDocument::parse(
+            fixture.Read(text::kSaveTextPath))["strings"]["text.save.select"] ==
+        "My authored save selection");
+  REQUIRE(VS::Extract::ConvertSaveText(fixture.root, true));
+  strings = text::JsonDocument::parse(fixture.Read(text::kSaveTextPath));
+  CHECK(strings["strings"]["text.bestiary.notes.name"] == "Native field notes");
+  const auto before = fixture.Read(text::kSaveTextPath);
+  const auto stamp =
+      std::filesystem::last_write_time(fixture.root / text::kSaveTextPath);
+  Contribute(fixture, contribution);
+  CHECK(fixture.Read(text::kSaveTextPath) == before);
+  CHECK(std::filesystem::last_write_time(fixture.root / text::kSaveTextPath) ==
+        stamp);
+}
+
+TEST_CASE(
+    "Shared text contributions reject ID collisions and invalid native "
+    "controls before publication",
+    "[native-text][bestiary]") {
+  ImportedTextFixture fixture;
+  auto start = VS::Extract::StartRun(fixture.root);
+  REQUIRE(start);
+  if (!start) throw std::runtime_error(start.error());
+  VS::Extract::TextContribution collision{
+      "bestiary",
+      "text.",
+      {"SMALL/MON.BIN", std::string(64, 'a')},
+      {{"text.save.select", "Wrong owner"}}};
+  CHECK_FALSE(VS::Extract::PrepareTextContribution(
+      fixture.root, start->previous, collision, false));
+  collision.strings = {{"text.bestiary.notes", "{spacing:40}Opaque"}};
+  CHECK_FALSE(VS::Extract::PrepareTextContribution(
+      fixture.root, start->previous, collision, false));
+  CHECK(text::JsonDocument::parse(fixture.Read(text::kSaveTextPath))["strings"]
+            .size() == 27);
+}
+
+TEST_CASE(
+    "Shared text refuses multiple physical catalog owners in import and "
+    "runtime",
+    "[native-text][bestiary]") {
+  ImportedTextFixture fixture;
+  REQUIRE(text::DataStore::Open(fixture.root));
+  const auto* original = text::DataStore::Get();
+  auto manifest = text::JsonDocument::parse(fixture.Read("manifest.json"));
+  auto other = manifest["outputs"].front();
+  other["id"] = "text.other-owner";
+  other["files"] = {std::string(text::kSaveTextPath)};
+  manifest["outputs"].push_back(other);
+  fixture.Write("manifest.json", Bytes(text::FormatJsonText(manifest)));
+  auto start = VS::Extract::StartRun(fixture.root);
+  REQUIRE(start);
+  if (!start) throw std::runtime_error(start.error());
+  const VS::Extract::TextContribution contribution{
+      "bestiary",
+      "text.bestiary.",
+      {"SMALL/MON.BIN", std::string(64, 'a')},
+      {{"text.bestiary.notes", "Notes"}}};
+  CHECK_FALSE(VS::Extract::PrepareTextContribution(
+      fixture.root, start->previous, contribution, false));
+  CHECK_FALSE(text::DataStore::Open(fixture.root));
+  CHECK(text::DataStore::Get() == original);
 }

@@ -341,6 +341,63 @@ open; typed-host tests are not a substitute.
 
 ---
 
+### 4.3 Native encyclopedia definitions (#499/#500)
+
+`VS.Extract bestiary <datadir>` (also `tables`, `authoring`, and `extract`)
+imports `SMALL\MON.BIN` into `catalogs\enemies\bestiary.csv` and its schema.
+`bestiary.*` IDs identify encyclopedia entries, **not spawned enemies**.
+Names and descriptions reference the shared native text catalog by ID.
+The layered SQLite compiler owns validation and immutable runtime records.
+
+The original file contains 150 44-byte records and a 150-entry description
+offset table. Only records **0..77** enter the original list, selection and
+previous/next navigation; the detail viewer can only select those entries.
+Consequently the other **72 records are out-of-list provenance**, not invented
+enemy definitions. Their zero fields, Japanese-name bytes and empty
+descriptions are preserved exactly without assigning them unproved meanings.
+`catalogs\enemies\import\bestiary.json` retains all 150 original records and
+description extents, including initial UI values, reserved/name-suffix bytes
+and padding. Reconstruction is an **offline original-preservation check**;
+runtime never reads this provenance or reconstructs MON.BIN.
+
+Editable columns:
+
+- `id`, `name`, `description`: stable definition and native text references;
+- `legacy_id`: original visible record 0..77, or **-1 for native-only entries**;
+- `display_order`: unique sort position; numbering is dense in the resulting
+  list. The three-digit view deliberately admits at most 999 entries;
+- `class`: `human`, `beast`, `undead`, `phantom`, `dragon`, or `evil`;
+- `preview_table_index`: an explicit 0..255 **MENU9 preview-table adapter**,
+  not an actor/species identity. It selects that existing table's model,
+  equipment and palette policy. #200/#55 still own its replacement;
+- `unlock`: `defeated-subtype-range` tests any saved defeat bit in the
+  half-open range `[first_defeated_subtype, first + count)`. Those indices are
+  **actor subtypes**, not MON record numbers or preview indices. The original
+  defeat producer writes subtypes below 256. `always` explicitly exposes a
+  native information entry with both range fields zero; neither policy
+  writes progress or implies a new enemy spawn.
+
+Proven semantics come from upstream MENU9 `238.c` (definitions 372, unlock
+1921, list 1977, detail 2074), preview `592C.c` (table 28), and BATTLE
+`146C.c:1437` (defeat-bit producer). Extending actor identities or their
+persistent defeat model remains #199/#200/#203, not an inferred field meaning.
+
+The Gazette owns its snapshot, selection/highlight/link state and native
+layouts separately from immutable definitions. Cancel, re-entry, MENU9
+replacement, cold-session and pre-heap boundaries release that ownership.
+Native cursor/link indices are not bytes; the old BATTLE byte cursor remains
+an explicitly limited compatibility bookmark. Native text has no 28-byte
+name limit. List text uses a 220-pixel content box and a wider background;
+the viewer gives the name its own lower-left position. These view bounds and
+the eight-row/999-entry policy are deliberate, not container limits.
+
+Normal imports preserve authored CSV/text and foreign text contributors.
+`bestiary --force` reimports only this family, not save prompts or neighboring
+tables. Missing definitions, bad references, invalid ranges or layouts refuse
+entry rather than falling back to a legacy read. Model preview, actor assets,
+progress storage and the GPU page/packet backend remain tracked dependencies.
+This is not completion of the wider #499/#500 or neighboring migration issues.
+
 ## 5. Tier 2: text and fonts
 
 - **Strings:** every string the game shows (exe, MENU `ITEMNAME/ITEMHELP`, `SMALL\HELP*.HF0/HF1`, `MCDATA`, event text in `EVT`, menu labels) is decoded from the VS character table to UTF-8 and stored once in `text\strings.en.json` as `{ "id": "text", ... }`.
@@ -393,11 +450,12 @@ explicit reconciliation; the English codec continues to reject them.
 
 ### 5.1 Native file-picker prompt adoption (#54/#500)
 
-`VS.Extract text <datadir>` (also full extraction) publishes three manifest
-outputs: `text.ui.save`, `font.ui.save`, and `image.ui.save-font`. Unchanged
-sources keep authored files; `--force` explicitly replaces edits.
+`VS.Extract text <datadir>` (also full extraction) publishes the save import,
+font and image outputs (`text.ui.save`, `font.ui.save`, `image.ui.save-font`)
+and contributes to the shared `text.catalog.en` output. Unchanged sources
+keep authored files; `--force` replaces only this contributor's strings.
 
-- `text\strings.en.json` contains 25 native-owned status/notice/operation
+- `text\strings.en.json` includes 25 native-owned status/notice/operation
   messages and two imported MCMAN choices, `text.save.choice.yes/no`.
   Only MCMAN entries **36 and 37**, halfword offsets **779 and 782**, are
   imported. Their exact decoded markup/consumed extent remains in
@@ -453,6 +511,34 @@ both immediately after drawing. GPU packet/page-image rendering is explicit
 EC-01/EC-04 debt, **not** full font or compatibility retirement. No runtime
 UTF-8-to-legacy string/container reconstruction is used by migrated prompts.
 Verification evidence and limits are recorded in HANDOFF; #54/#500 remain open.
+
+### 5.2 Shared catalog ownership and encyclopedia text
+
+`TextContribution` is the single offline producer of `text\strings.en.json`.
+Manifest output `text.catalog.en` (`text-catalog-json`) is its sole file owner;
+source-specific outputs do not also claim that file. The import-only
+`text\strings.import.json` records contributor source hashes and owned IDs.
+It is not a second primary string store. The save-only bootstrap upgrades
+the previous catalog without replacing authored values. Bestiary and save
+imports preserve one another, including when one family is force-reimported.
+Unchanged semantic content preserves the authored file's bytes and timestamp,
+including formatting; ID collisions and unsupported controls fail before
+publication.
+
+The encyclopedia contributes 78 names, 78 descriptions and two native-owned
+locked-entry labels. Its names' proven leading `{spacing:14}` is view
+indentation (the original detail view skips those two bytes). Only observed
+inter-word `{spacing:6}` becomes a space, whose default native advance is six
+units. Other spacing fails instead of being guessed. Exact original markup
+and suffix bytes remain in the bestiary import provenance. The actual
+descriptions use plain English glyphs and newline; no progressive control
+or runtime re-encoding is needed.
+
+The existing native font and ordered text layers are shared. Gazette glyph
+layouts are copied into a frame-owned overlay and submitted **after** the
+menu ordering table so queued backgrounds cannot cover them; reset drops
+that overlay. This reuses the explicit page/packet backend debt. It is not
+variable-font palette/pixel parity or full font retirement.
 
 ---
 
@@ -1369,7 +1455,7 @@ A label-only pass or one changed numeric value is not sufficient.
 
 <!-- content:begin (generated by tools/ledger/content.py --sync) -->
 
-**3,046 of 5,162 disc files converted**, 3,046 of them with a passing round trip; 259 skipped with a reason; 1,857 unconverted.
+**3,047 of 5,162 disc files converted**, 3,047 of them with a passing round trip; 259 skipped with a reason; 1,856 unconverted.
 
 | Kind | Files | Converted | Round trip pass | Skipped | Unconverted | Converts under |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
@@ -1378,7 +1464,7 @@ A label-only pass or one changed numeric value is not sufficient.
 | actor texture overlay | 80 | 80 | 80 | 0 | 0 | #207 |
 | area map | 32 | 0 | 0 | 0 | 32 | #201 |
 | background layout | 4 | 4 | 4 | 0 | 0 | #210 |
-| bestiary | 1 | 0 | 0 | 0 | 1 | #499 |
+| bestiary | 1 | 1 | 1 | 0 | 0 | #499 |
 | boot configuration | 1 | 0 | 0 | 1 | 0 | - |
 | combination recipes | 3 | 3 | 3 | 0 | 0 | #499 |
 | effect package | 290 | 0 | 0 | 0 | 290 | #216 |

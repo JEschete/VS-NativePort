@@ -15,6 +15,7 @@
 #include "Content/StringTables.hpp"
 #include "Extract/ConverterBatch.hpp"
 #include "Extract/ImageFilesWriter.hpp"
+#include "Extract/TextContribution.hpp"
 
 namespace VS::Extract {
 namespace {
@@ -194,6 +195,31 @@ std::expected<Content::ImageFile, std::string> ImportProvenance(
   return Content::ImageFile{"text/save-text.import.json",
                             Bytes(Content::FormatJsonText(provenance) + "\n")};
 }
+struct SaveOutputBatch {
+  const std::filesystem::path& root;
+  const Content::ConversionManifest& previous;
+  ConverterBatch& batch;
+
+  bool Add(std::string_view id, const SourceFile& source,
+           std::vector<std::string> paths, std::string note) const {
+    Content::ConversionOutput output{
+        .id = std::string(id),
+        .source = source.path,
+        .source_sha256 = HashOf(source),
+        .converter = std::string(text::kSaveTextConverter),
+        .files = std::move(paths),
+        .dependencies = {},
+        .unreferenced = false,
+        .note = std::move(note),
+        .alias_of = {}};
+    auto expected = output;
+    expected.files.clear();
+    const auto* old = MatchingOutput(previous, root, expected);
+    const bool reuse = batch.reuse && old && old->files == output.files;
+    batch.outputs.push_back(reuse ? *old : output);
+    return !reuse;
+  }
+};
 }  // namespace
 
 std::expected<void, std::string> ConvertSaveText(
@@ -216,37 +242,26 @@ std::expected<void, std::string> ConvertSaveText(
     return std::unexpected("save font: image round trip failed");
   }
   auto batch = StartBatch(start->previous, text::kSaveTextConverter, 1, force);
+  auto contribution = PrepareTextContribution(root, start->previous,
+                                              {"save",
+                                               "text.save.",
+                                               {mcman->path, HashOf(*mcman)},
+                                               (*strings)["strings"]},
+                                              force);
+  if (!contribution) return std::unexpected(contribution.error());
   std::vector<Content::ImageFile> files;
-  const auto add = [&](std::string_view id, const SourceFile& source,
-                       std::vector<std::string> paths, std::string note) {
-    Content::ConversionOutput output{
-        .id = std::string(id),
-        .source = source.path,
-        .source_sha256 = HashOf(source),
-        .converter = std::string(text::kSaveTextConverter),
-        .files = std::move(paths),
-        .dependencies = {},
-        .unreferenced = false,
-        .note = std::move(note),
-        .alias_of = {}};
-    auto expected = output;
-    expected.files.clear();
-    const auto* old = MatchingOutput(start->previous, root, expected);
-    batch.outputs.push_back(batch.reuse && old ? *old : output);
-    return !(batch.reuse && old);
-  };
-  if (add(text::kSaveTextId, *mcman,
-          {std::string(text::kSaveTextPath), "text/save-text.import.json"},
+  const SaveOutputBatch outputs{root, start->previous, batch};
+  if (outputs.Add(
+          text::kSaveTextId, *mcman, {"text/save-text.import.json"},
           "Only MCMAN entries 36/37 (Yes/No); 25 native-owned status messages. "
           "All other 135 MCMAN entries, including 47 unsupported Japanese "
           "labels, remain outside this slice.")) {
-    files.push_back({std::string(text::kSaveTextPath),
-                     Bytes(Content::FormatJsonText(*strings) + "\n")});
     auto provenance = ImportProvenance(*mcman);
     if (!provenance) return std::unexpected(provenance.error());
     files.push_back(std::move(*provenance));
   }
-  if (add(text::kSaveFontId, *title, {std::string(text::kSaveFontPath)},
+  if (outputs.Add(
+          text::kSaveFontId, *title, {std::string(text::kSaveFontPath)},
           "G02022 English base glyph metrics; upstream memcard.h:1426 and "
           "shared GameTextCodec glyph identities.")) {
     files.push_back({std::string(text::kSaveFontPath),
@@ -256,18 +271,22 @@ std::expected<void, std::string> ConvertSaveText(
   for (const auto& file : *images) {
     paths.push_back(std::string(kImageDirectory) + "/" + file.name);
   }
-  if (add(text::kSaveFontImageId, *title, paths, image->provenance.note)) {
+  if (outputs.Add(text::kSaveFontImageId, *title, paths,
+                  image->provenance.note)) {
     for (auto& file : *images) {
       file.name = std::string(kImageDirectory) + "/" + file.name;
       files.push_back(std::move(file));
     }
   }
+  for (auto& file : contribution->files) files.push_back(std::move(file));
   if (files.empty()) return {};
-  auto published = PublishBatch(root, start->previous, batch, [&]() {
-    std::vector<OutputBytes> output;
-    for (const auto& file : files) output.push_back({file.name, file.bytes});
-    return WriteOutputFiles(root, output);
-  });
+  std::vector<OutputBytes> output;
+  for (const auto& file : files) output.push_back({file.name, file.bytes});
+  if (auto written = WriteOutputFiles(root, output); !written) {
+    return written;
+  }
+  const std::array batches{batch, contribution->batch};
+  auto published = PublishBatches(root, start->previous, batches);
   if (!published) return std::unexpected(published.error());
   return {};
 }

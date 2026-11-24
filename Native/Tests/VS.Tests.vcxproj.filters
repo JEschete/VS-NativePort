@@ -294,6 +294,9 @@
     <ClCompile Include="src\BattleTargetingTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\BestiaryCatalogTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\BindingsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -1654,6 +1657,12 @@
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>
     <ClCompile Include="..\Tools\Extract\src\SaveTextConversion.cpp">
+      <Filter>..\Tools\Extract\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Tools\Extract\src\TextContribution.cpp">
+      <Filter>..\Tools\Extract\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Tools\Extract\src\BestiaryConversion.cpp">
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>
     <ClCompile Include="..\Tools\Extract\src\WorkshopAuthoring.cpp">

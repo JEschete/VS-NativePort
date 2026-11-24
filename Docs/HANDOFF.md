@@ -1,5 +1,211 @@
 # Current Handoff
 
+## Native bestiary adoption (#499/#500), 2026-11-24
+
+Local work on `main`, based on `0c92bed8e8155aae04ae35a88dcbf2774d0113a7`.
+The implementation, tests, schemas, generated projects and bookkeeping are
+dirty; no commit or push was made for this slice. Parent publication
+and exact-revision CI remain gates. Default-root integration is recorded below.
+
+### Adopted boundary
+
+`VS.Extract bestiary <dir>` imports `SMALL\MON.BIN` into semantic
+`catalogs\enemies\bestiary.csv` plus schema, shared native text IDs and
+import-only provenance. `tables`, `authoring` and full extraction include it.
+The configured file is **12,782 bytes**, comprising 150 44-byte records and
+150 description offsets/extents. The original list, navigation and preview
+selection admit only **78 entries**. The other 72 records are explicitly
+out-of-list provenance, not invented enemy definitions. All source bytes,
+initial UI fields, reserved/name-suffix bytes and unused descriptions survive
+offline reconstruction. `ParseBestiaryProvenance` reloads the original
+independently of authored CSV/text changes.
+
+CSV identities, named classes, explicit preview-table adapters and named
+unlock policies load through the existing layered SQLite compiler/cache.
+External `text.catalog.en` references are validated with their actual
+source file, row and column before publication. The Gazette uses owned
+native definitions/text/layouts and separately derived selection, highlight,
+unlock and circular-link state. Its MON disc request, raw parser, mutable
+import block, exported aliases and 44-byte runtime type are removed.
+No runtime MON reconstruction or Unicode-to-game-text encoding is used.
+The common startup source-hash/stamp verification remains unchanged; it is
+distinct from a gameplay MON reader and parser.
+
+There is one authoritative `text\strings.en.json` producer and one physical
+manifest owner, `text.catalog.en`. Per-contributor source hashes/owned IDs
+live in `text\strings.import.json`, not a duplicate primary store.
+Standalone save-text bootstrap and its 27 strings remain supported.
+Bestiary contributes 156 imported strings and two native-owned locked labels.
+Independent imports/force operations preserve foreign contributors;
+duplicate owners, IDs and unsupported controls refuse publication.
+
+The first live proof exposed an adoption regression: Select incorrectly
+hid the description with preview controls, and the new overlay needed to
+honor the information option/textbox lifecycle and detach stale encoded
+text. It was recorded on
+[#499 before repair](https://github.com/JEschete/VS-NativePort/issues/499#issuecomment-7137510822).
+The final binding clears the old textbox borrow and follows information
+textbox 7's own open/hidden/frozen policy, independently of preview chrome.
+Native glyph commands own their layouts/atlas and run after menu ordering
+tables; release/reset also drops pending commands.
+
+### Local checks and evidence
+
+- `VS_JOBS=4`, one heavy job, MSBuild `/m:2`, Debug and Release.
+  Both rebuilt and passed **25 cases / 22,768 assertions** using
+  `VS.Tests.exe "[bestiary],[gazette-terminal-live]"` after adding persisted
+  provenance reload and removing the remaining unused legacy information
+  lookups. The final information-lifecycle repair then rebuilt both and
+  passed **20 cases / 329 assertions** with
+  `"[gazette-terminal-live],[information]"`.
+- The earlier broader Release selection
+  `"[bestiary],[native-text],[catalog-layers],[gazette-terminal],[gazette-terminal-integration],[score]"`
+  passed **118 cases / 25,984 assertions**. It covers actual MENU9 dispatch,
+  preview teardown, foreign requests, cold-session and pre-heap boundaries.
+  Subsequent changed behavior was verified by the focused checks above;
+  the broad count is not presented as a later rerun.
+- Synthetic cases cover source bounds, IDs/collisions, named policies,
+  malformed/stale provenance, cross-owner text preservation, duplicate
+  manifest ownership, layer reference diagnostics and 300-entry native
+  circular links. The configured-corpus test reloads the persisted import
+  and compares every original byte.
+- `verify_import.ps1` in `build\issue-499-bestiary` changes the private base
+  preview to 6 and its name to 35 characters. Two non-forced imports preserve
+  bytes **and timestamps of all six watched catalog/text/provenance/manifest
+  files**. The private base is restored afterward. Default assets and the
+  owner/private save hashes remain unchanged. See `import-stability.json`
+  and `protected-inputs.json`.
+- Readability seed **499** is recorded in `cold-read-seed-499.json`; the
+  field roles are documented in ASSET_PIPELINE §4.3. Original MIPS at
+  `80105D8C..80105EFC` independently confirms signed range loads, stride
+  `0x2C`, loop bound `0x4E` and circular links
+  (`init-enemy-list-mips.txt`). The defeat producer reads `Actor::subType`;
+  it does not use MON positions or preview indices.
+- Nine necessarily retired MON-byte/request test identities were reconciled
+  one-to-one in the verification ledger and regression required-name list.
+  `test-identity-reconciliation.json` verifies that baseline numbers,
+  assertion thresholds and replay hashes are unchanged. Other names remain.
+- Section-accounting changes pass
+  `python -m unittest discover -s tools\ledger -p test_content.py`
+  (**11 tests**). Shared text never claims its whole containing source.
+- Final scoped quality/tidy covered **33 native and 3 Python files**. Its
+  two remaining style findings were repaired and rechecked with **0 new
+  findings** (`quality-publish.log`, `quality-last-fixes.log`). Both Debug and
+  Release were left rebuilt without diagnostic instrumentation; the final
+  registration refactor and information predicate passed **15 cases /
+  212 assertions each**. No renderer behavior change was made during the
+  diagnostic investigation.
+- New files were staged before project generation. Another generation leaves
+  all **eight changed project/filter files byte-identical**
+  (`project-stability.json`). `gates.py --check`, `headers.py --check`,
+  pinned-decomp provenance and `git diff --check` pass. Only the generated
+  verification summary was refreshed; no promotion tooling was revived.
+
+### Accepted controller proof
+
+`mod-final-debug` and `mod-final-release` under `build\issue-499-bestiary`
+contain the accepted runs and exact arguments. Both exited **0**.
+Debug run **`1795537793035089-0`** reports **0 engine errors** and
+`trace_failed=false`; standard Release does not claim detailed error counts.
+All **13 BMP checkpoints are byte-identical across configurations**
+(`frame-comparison.json`).
+
+Both runs load the legitimate copied owner save
+(`slot00.vssave`, SHA-256
+`9f3429eb15da29c34823a5b320914641aedb280eceea50a916f579aa5e4ffa2f`)
+through Continue/default-No/Up/confirm, then use actual menu inputs to open
+Score and Encyclopedia. At the observed Score checkpoint **4400**, the
+privately copied `disc\SMALL\MON.BIN` is renamed out of the expected path.
+It remains absent through **11300**, covering both encyclopedia entries and
+all preview operations, and is restored afterward with identical bytes and
+timestamp. Default/source assets are never renamed or written.
+
+The private CSV/text layer contains **151 visible definitions**: the original
+78 plus 73 explicitly native field-note entries, all with `legacy_id=-1`
+and the corresponding original defeat-subtype policies. No new actor,
+inventory item, room/event state or defeat flag is injected.
+
+- **5600/6100:** the first Zombie entry shows an authored 35-character name,
+  edited description and **Mummy preview** selected by adapter index 6.
+- **7150/7900:** Up wraps to native entry **151**; its 35-character name and
+  description render, and its explicit index-4 **Zombie preview** loads.
+  `text.mod.zombie.label` and `.notes` demonstrate role-based references
+  without imposing an import namespace or `.name/.description` suffix.
+- **8000/8150:** Select hides/restores preview controls; the separately
+  controlled information description remains readable.
+- **8450/9050:** R1 wraps to the first entry/model; Cross returns to the
+  remembered native-only list entry and its description.
+- **9600/10200/11000:** return to Score, re-enter the encyclopedia at entry
+  151, then return to normal gameplay with no lingering native text/model UI.
+
+The information crop and pixel checks confirm the returned description;
+temporary renderer diagnostics were removed without a renderer behavior
+change. Earlier `mod-debug`/`mod-release` runs exposed the Select regression
+and are not the final acceptance evidence. `controller-proof-final.json`
+records source absence and successful process exits. Owner/default assets
+and the private save remain unchanged; the private proof roots contain
+asset junctions and must **not** be recursively cleaned.
+
+### Reference checkout caution
+
+The read-only `resources\rood-reverse` checkout is at `f6bf8402...`, while the
+repository/CI pins **`c9a869b8919efc561894fb6a851b300791553bd3`**.
+Its `ignore = all` hides that difference from ordinary status.
+No reference files or gitlink were changed. A provenance sync against the
+working checkout produced an unrelated sweep; all unrelated comment-only
+changes were restored, retaining only this slice's citations/bookkeeping.
+The actual CI-pinned source was exported read-only to
+`build\issue-499-bestiary\pinned-decomp`.
+`provenance.py --check --decomp <that directory>` reports **0 problems**
+(7,988 native citations, 4,207 catalog rows, 470 unresolved records).
+Do not run another broad sync against the mismatched checkout.
+
+### Default-root integration and accounting repair
+
+The parent ran `build\Debug\VS.Extract.exe bestiary Native\data` without force.
+It produced **78 definitions** and expanded the single text catalog from
+**27 to 185 strings**, retaining every existing save string and its font/scale
+settings. All **21 protected inputs** (existing FAR, material and font files
+plus original source files) retained hashes and modification times.
+A repeated import left all **six catalog/text/provenance/manifest files**
+byte- and timestamp-identical. Evidence:
+`build\issue-499-bestiary\default-integration.json`, `default-stability.json`,
+`default-convert.log` and `default-repeat.log`.
+
+The real default-corpus sync exposed missing converter bookkeeping that the
+isolated corpus had not exercised. It was logged on #499 before repair:
+`bestiary-csv` lacked a `DECODERS` entry and a discoverable runtime converter
+declaration. The decoder is now registered as `Extract::DecodeBestiary`;
+the existing optional v1 contract is declared in `ConversionManifest.hpp`
+and shared by the catalog, runtime check and importer, without making it a
+new global startup requirement. A focused tool test checks whole-file
+accounting without inventing passing round-trip evidence.
+
+The **12 content-ledger tests**, Pylance syntax checks and scoped Python/C++
+quality pass. Both solution configurations were rebuilt after the declaration
+repair; `[bestiary],[native-text],[source-verification]` passed **31 cases /
+22,738 assertions each**. The subsequent header-only changes document the
+existing wrapped-alias cpplint exception; they do not change compiled behavior.
+Logs: `default-{Debug,Release}-{build,tests}.log` in the same evidence folder.
+`content.py --sync` and `--check` now report **5,162 files: 3,047 converted,
+259 skipped, 1,856 unconverted; zero violations**. MON is newly accounted
+for; shared text still does not claim whole MCMAN/TITLE conversion.
+
+### Remaining scope
+
+#499/#500 and #199/#200/#203/#55 remain open. This is encyclopedia authoring
+and consumption, not new actor spawning, combat, drops or progress storage.
+Preview-table indices, ZUD/SHP/SEQ/actor bridges, the BATTLE cursor bookmark
+and defeat flags retain their explicit compatibility limits. Native cursor
+and ring indices are wide; the deliberate view policy is 8–999 entries.
+Names have a 220-pixel view bound, not a 28-byte source slot.
+Class/control/number labels, surrounding Gazette UI and the page/packet
+backend are not claimed fully migrated. Native font layout is readable,
+but no variable-font palette/pixel parity or matched PS1 comparison is claimed.
+The default `Native\data` root is integrated and its content accounting is
+reconciled. The source milestone still needs scoped publication and
+exact-revision CI before its final issue evidence is posted.
+
 ## Native file-picker text adoption (#54/#500), 2026-11-24
 
 Base `08f26705ba3b5142fd797df720bf59a7666ac5bb` on `main`; its metadata CI

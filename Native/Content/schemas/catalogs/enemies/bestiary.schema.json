@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "table": "bestiary",
+  "description": "Encyclopedia definitions. Selection, highlights, unlocked state and navigation links belong to each UI session.",
+  "key": ["id"],
+  "columns": [
+    {
+      "name": "id",
+      "type": "id",
+      "description": "Stable encyclopedia definition identity, not a spawned enemy."
+    },
+    {
+      "name": "display_name",
+      "type": "text",
+      "optional": true,
+      "description": "Informational plain-text label; not a key or gameplay value."
+    },
+    {
+      "name": "legacy_id",
+      "type": "integer",
+      "minimum": -1,
+      "maximum": 77,
+      "description": "Original visible MON record index; -1 denotes a native-only entry. The 72 out-of-list records remain import provenance."
+    },
+    {
+      "name": "display_order",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 999,
+      "description": "Unique list position; 999 is the current three-digit view policy."
+    },
+    {
+      "name": "class",
+      "type": "enum",
+      "enum": {
+        "0": "human",
+        "1": "beast",
+        "2": "undead",
+        "3": "phantom",
+        "4": "dragon",
+        "5": "evil"
+      },
+      "legacy_numeric_aliases": true,
+      "description": "Displayed enemy class."
+    },
+    {
+      "name": "preview_table_index",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "MENU9 preview-table compatibility index (#200/#55); not a spawn identity. Uses that table's model, equipment and palette policy."
+    },
+    {
+      "name": "unlock",
+      "type": "enum",
+      "enum": {
+        "0": "defeated-subtype-range",
+        "1": "always"
+      },
+      "legacy_numeric_aliases": true,
+      "description": "Any defeated actor subtype in the range, or explicitly always visible (no progress write)."
+    },
+    {
+      "name": "first_defeated_subtype",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "First actor subtype tested in the saved defeat flags (#203)."
+    },
+    {
+      "name": "defeated_subtype_count",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 256,
+      "description": "Number of consecutive subtypes; range end is exclusive."
+    },
+    {
+      "name": "name",
+      "type": "reference",
+      "references": "text.catalog.en",
+      "description": "Native text ID for the readable name; no embedded list indent."
+    },
+    {
+      "name": "description",
+      "type": "reference",
+      "references": "text.catalog.en",
+      "description": "Native text ID for the description."
+    }
+  ]
+}

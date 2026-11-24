@@ -115,6 +115,21 @@ class ContentLedgerTests(unittest.TestCase):
         self.assertIn("converts under #499, #500, #502", row["notes"])
         self.assertEqual(self.fixture.rules(), [])
 
+    def test_bestiary_conversion_is_accounted_without_inventing_round_trip_evidence(self) -> None:
+        bestiary = {"id": "catalog.enemies.bestiary", "source": "SMALL/MON.BIN",
+                    "converter": "bestiary-csv", "files": ["catalogs/enemies/bestiary.csv",
+                                                        "catalogs/enemies/import/bestiary.json"]}
+        self.fixture.write("Native/Content/include/Content/ConversionManifest.hpp",
+                           'ConverterVersion{.name = "bestiary-csv", .version = 1},\n')
+        self.fixture.data([("SMALL/MON.BIN", 12782, "raw")], [bestiary])
+        content.sync(self.fixture.root)
+        row = self.fixture.rows()["SMALL/MON.BIN"]
+        self.assertEqual((row["status"], row["converter"], row["decoder"], row["round_trip"]),
+                         ("converted", "bestiary-csv", "Extract::DecodeBestiary", "pending"))
+        self.assertEqual(row["output"],
+                         "catalogs/enemies/bestiary.csv;catalogs/enemies/import/bestiary.json")
+        self.assertEqual(self.fixture.rules(), [])
+
     def test_section_converters_refuse_mismatched_sources(self) -> None:
         material = {"id": "catalog.items.materials", "source": "BG/001OP01A.TIM",
                     "converter": "material-csv", "files": ["catalogs/items/materials.csv"]}
@@ -126,6 +141,8 @@ class ContentLedgerTests(unittest.TestCase):
         outputs = [{"id": identity, "source": source, "converter": "save-text-json",
                     "files": ["text/strings.en.json"]}
                    for identity, (source, _) in content.TEXT_SECTIONS.items()]
+        outputs.append({"id": "text.catalog.en", "source": "MENU/MCMAN.BIN",
+                        "converter": "text-catalog-json", "files": ["text/strings.en.json"]})
         self.fixture.data([*FILES, ("MENU/MCMAN.BIN", 3014, "raw"),
                            ("TITLE/TITLE.PRG", 554568, "raw")], [OUTPUT, *outputs])
         content.sync(self.fixture.root)

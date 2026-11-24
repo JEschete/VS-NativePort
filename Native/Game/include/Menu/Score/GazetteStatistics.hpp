@@ -41,7 +41,7 @@ struct GazetteStatisticLabels {
 };
 
 struct GazetteRecordCursor {
-  std::uint8_t first_row = 0;
+  std::uint32_t first_row = 0;
   std::uint8_t selected_row = 0;
 };
 

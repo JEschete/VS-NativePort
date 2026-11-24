@@ -26,6 +26,7 @@
 #include "Extract/AssetLabels.hpp"
 #include "Extract/AudioBankConversion.hpp"
 #include "Extract/BackgroundAuthoring.hpp"
+#include "Extract/BestiaryConversion.hpp"
 #include "Extract/ConverterBatch.hpp"
 #include "Extract/EsqConversion.hpp"
 #include "Extract/EtmConversion.hpp"
@@ -75,6 +76,7 @@ int Usage() {
       "  VS.Extract backgrounds <datadir> [--force]\n"
       "  VS.Extract tables   <datadir> [--force]\n"
       "  VS.Extract text     <datadir> [--force]\n"
+      "  VS.Extract bestiary <datadir> [--force]\n"
       "  VS.Extract models   <datadir> [--force]\n"
       "  VS.Extract banks    <datadir> [--force]\n"
       "  VS.Extract labels   <datadir> [--force]\n"
@@ -139,6 +141,10 @@ int WithLabels(int result, const fs::path& root) {
 }
 
 int UpgradeAuthoring(const fs::path& root) {
+  if (auto bestiary = Extract::ConvertBestiary(root, false); !bestiary) {
+    VS::Core::LogError("extract", "bestiary: {}", bestiary.error());
+    return 1;
+  }
   const auto materials = Extract::ConvertDiscMaterials(root, false);
   if (!materials) {
     VS::Core::LogError("extract", "materials: {}", materials.error());
@@ -546,6 +552,10 @@ int ConvertImages(const fs::path& root, bool force) {
 // texture images and their manifest.json outputs from the disc files already
 // under root. The zones name the enemy archetypes, so this follows the models.
 int ConvertTables(const fs::path& root, bool force) {
+  if (auto bestiary = Extract::ConvertBestiary(root, force); !bestiary) {
+    VS::Core::LogError("extract", "bestiary: {}", bestiary.error());
+    return 1;
+  }
   const auto materials = Extract::ConvertDiscMaterials(root, force);
   if (!materials) {
     VS::Core::LogError("extract", "{}", materials.error());
@@ -772,10 +782,13 @@ int Run(int argc, char** argv) {
     return Usage();
   }
   const std::string cmd = argv[1];
-  if (cmd == "text") {
+  if (cmd == "text" || cmd == "bestiary") {
     const auto force = ForceArgument(argc, argv);
     if (!force) return Usage();
-    auto result = Extract::ConvertSaveText(Platform::Utf8Path(argv[2]), *force);
+    auto result =
+        cmd == "text"
+            ? Extract::ConvertSaveText(Platform::Utf8Path(argv[2]), *force)
+            : Extract::ConvertBestiary(Platform::Utf8Path(argv[2]), *force);
     if (!result) VS::Core::LogError("extract", "{}", result.error());
     return result ? 0 : 1;
   }

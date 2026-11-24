@@ -39,10 +39,14 @@ std::expected<std::vector<UiTexturedQuadPacket>, std::string> Packets(
       const double left = draw.x + glyph.x, top = draw.y + glyph.y;
       const double right = left + glyph.width, bottom = top + glyph.height;
       if (!std::isfinite(left) || !std::isfinite(top) ||
-          !std::isfinite(right) || !std::isfinite(bottom) || left < 0 ||
-          top < 0 || right > kScreenWidth || bottom > kScreenHeight ||
-          right <= left || bottom <= top || source.x < 0 || source.y < 0 ||
-          source.width <= 0 || source.height <= 0 ||
+          !std::isfinite(right) || !std::isfinite(bottom) ||
+          (!draw.clip_to_viewport &&
+           (left < 0 || top < 0 || right > kScreenWidth ||
+            bottom > kScreenHeight)) ||
+          left < INT16_MIN || top < INT16_MIN || right > INT16_MAX ||
+          bottom > INT16_MAX || right <= left || bottom <= top ||
+          source.x < 0 || source.y < 0 || source.width <= 0 ||
+          source.height <= 0 ||
           static_cast<std::int64_t>(source.x) + source.width > atlas.width ||
           static_cast<std::int64_t>(source.y) + source.height > atlas.height ||
           static_cast<std::int64_t>(source.x) + source.width > kLastTexel ||

@@ -19,6 +19,7 @@
 #include "Platform/LogicalTicks.hpp"
 #include "Render/Display.hpp"
 #include "Render/Loading.hpp"
+#include "Render/NativeTextDraw.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "State/GameClockLive.hpp"
 #include "State/PlayTime.hpp"
@@ -162,7 +163,10 @@ class LiveFieldFrame final : public FieldFrameHost {
     PresentEnvironments(static_cast<std::size_t>(index & 1));
   }
   void CommitPalettes() override { CommitLiveClutRows(); }
-  void DrawOrderingTable() override { DrawOTag(ordering_table_); }
+  void DrawOrderingTable() override {
+    DrawOTag(ordering_table_);
+    FlushLiveNativeText();
+  }
 
  private:
   std::uint32_t* ordering_table_;

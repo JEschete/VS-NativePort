@@ -3451,7 +3451,7 @@ MENU/ITEMNAME.BIN,12288,"menu image, text or table",,,,pending,unconverted,"conv
 MENU/MAINMENU.PRG,36217,program overlay data,,,,pending,unconverted,"converts under #500, #502"
 MENU/MAPBG.BIN,77312,"menu image, text or table",,,,pending,unconverted,"converts under #498, #499, #500"
 MENU/MCDATA.BIN,3040,"menu image, text or table",,,,pending,unconverted,"converts under #498, #499, #500"
-MENU/MCMAN.BIN,3014,"menu image, text or table",,,,pending,unconverted,"partial text.ui.save (save-text-json; MCMAN entries 36/37 only; 25 native-owned status messages); converts under #498, #499, #500"
+MENU/MCMAN.BIN,3014,"menu image, text or table",,,,pending,unconverted,"partial text.ui.save (save-text-json; MCMAN entries 36/37 only; 25 native-owned status messages); shared native text catalog; source importers account for byte coverage; converts under #498, #499, #500"
 MENU/MENU0.PRG,16913,program overlay data,,,,pending,unconverted,"converts under #500, #502"
 MENU/MENU1.PRG,7494,program overlay data,,,,pending,unconverted,"converts under #500, #502"
 MENU/MENU12.BIN,2448,"menu image, text or table",,,,pending,unconverted,"converts under #498, #499, #500"
@@ -5024,7 +5024,7 @@ SMALL/HELP13.HF1,15368,help graphics,,,,pending,unconverted,converts under #213
 SMALL/HELP14.HF0,7796,help page,,,,pending,unconverted,converts under #212
 SMALL/HELP14.HF1,1544,help graphics,,,,pending,unconverted,converts under #213
 SMALL/IQ.DIS,67136,presentation images,,,,pending,unconverted,converts under #211
-SMALL/MON.BIN,12782,bestiary,,,,pending,unconverted,converts under #499
+SMALL/MON.BIN,12782,bestiary,Extract::DecodeBestiary,bestiary-csv,catalogs/enemies/bestiary.csv;catalogs/enemies/bestiary.schema.json;catalogs/enemies/import/bestiary.json,pass,converted,"catalog.enemies.bestiary: 78 reachable definitions; all150records and150descriptions preserved offline, including72out-of-list records. No runtime MON bytes.; dependency of text.catalog.en"
 SMALL/RANK.DIS,99936,presentation images,,,,pending,unconverted,converts under #211
 SMALL/SCEN001.ARM,6596,area map,,,,pending,unconverted,converts under #201
 SMALL/SCEN002.ARM,5800,area map,,,,pending,unconverted,converts under #201

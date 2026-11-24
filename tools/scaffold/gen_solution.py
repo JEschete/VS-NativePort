@@ -92,6 +92,8 @@ PROJECTS = [
                 r"Tools\Extract\src\WorkshopRecipeConversion.cpp",
                 r"Tools\Extract\src\MaterialConversion.cpp",
                 r"Tools\Extract\src\SaveTextConversion.cpp",
+                r"Tools\Extract\src\TextContribution.cpp",
+                r"Tools\Extract\src\BestiaryConversion.cpp",
                 r"Tools\Extract\src\WorkshopAuthoring.cpp",
                 r"Tools\Extract\src\ZndConversion.cpp",
                 r"Tools\Extract\src\ZoneAuthoring.cpp",

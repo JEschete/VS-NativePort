@@ -11,9 +11,11 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Content/BestiaryCatalog.hpp"
 #include "Content/CatalogDatabase.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/JsonText.hpp"
+#include "Content/NativeText.hpp"
 #include "Content/WorkshopRecipes.hpp"
 #include "Menu/Setup/Combination.hpp"
 #include "Menu/Setup/SetupLive.hpp"
@@ -108,6 +110,43 @@ struct LiveRecipes {
   ~LiveRecipes() { setup::ResetLiveSetupStatics(); }
 };
 }  // namespace
+
+TEST_CASE(
+    "Bestiary text references resolve shared IDs and identify bad layer cells",
+    "[catalog-layers][bestiary]") {
+  WorkshopRecipeRoot root;
+  content::BestiaryCatalog catalog;
+  for (unsigned i = 0; i < 8; ++i) {
+    catalog.push_back({"bestiary.notes-" + std::to_string(i), -1, i + 1,
+                       content::BestiaryClass::kHuman, 0,
+                       content::BestiaryUnlock::kAlways, 0, 0,
+                       "text.catalog.note", "text.catalog.note"});
+  }
+  const auto csv = content::FormatBestiary(catalog);
+  const auto path = root.Root() / content::kBestiaryPath;
+  Write(path, csv);
+  Write(root.Root() / content::kBestiarySchemaPath,
+        content::FormatTableSchema(content::BestiaryTableSpec()));
+  const std::array sources{content::BestiaryCatalogSource()};
+  auto database = content::CatalogDatabase::Load(root.Root(), sources);
+  INFO((database ? "" : database.error()));
+  REQUIRE(database);
+  content::NativeTextCatalog text{"font.test", 1, {{"text.catalog.note", {}}}};
+  CHECK(content::ValidateBestiaryTextReferences(*database, text));
+  Write(root.Root() / "mod" / content::kBestiaryPath,
+        "id,name\nbestiary.notes-0,text.catalog.missing\n");
+  Write(
+      root.Root() / "catalog-layers.json",
+      R"({"schema":"vs.catalog-layers","schema_version":1,"layers":["mod"]})");
+  database = content::CatalogDatabase::Load(root.Root(), sources);
+  INFO((database ? "" : database.error()));
+  REQUIRE(database);
+  const auto checked = content::ValidateBestiaryTextReferences(*database, text);
+  REQUIRE_FALSE(checked);
+  CHECK(checked.error().find(":2: column 'name'") != std::string::npos);
+  CHECK(checked.error().find("mod") != std::string::npos);
+  CHECK(Read(path) == csv);
+}
 
 TEST_CASE("Layer headers resolve legacy column aliases without ambiguity",
           "[catalog-layers]") {

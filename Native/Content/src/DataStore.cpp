@@ -25,12 +25,14 @@
 #include "Content/AssetCatalog.hpp"
 #include "Content/AudioBank.hpp"
 #include "Content/AudioStream.hpp"
+#include "Content/BestiaryCatalog.hpp"
 #include "Content/ConversionManifest.hpp"
 #include "Content/DataAccess.hpp"
 #include "Content/EsqFile.hpp"
 #include "Content/EtmFile.hpp"
 #include "Content/MovieEncoder.hpp"
 #include "Content/SourceStampCache.hpp"
+#include "Content/TextCatalogRegistration.hpp"
 #include "Content/WorkshopRecipes.hpp"
 #include "Content/ZndFile.hpp"
 #include "Content/ZoneTables.hpp"
@@ -86,6 +88,7 @@ constexpr std::array kConvertedTypes{
     ConvertedType{"", ".FBT", "fbt-texture-png", kRawForm},
     ConvertedType{"", ".SYD", kSydRecipeConverterName, kRawForm},
     ConvertedType{kMaterialSource, "", kMaterialConverterName, kRawForm, true},
+    ConvertedType{kBestiarySource, "", kBestiaryConverter, kRawForm, true},
     ConvertedType{"", ".SHP", "shp-gltf", kRawForm},
     ConvertedType{"", ".SEQ", "seq-gltf", kRawForm},
     ConvertedType{"", ".WEP", "wep-gltf", kRawForm},
@@ -103,6 +106,9 @@ constexpr std::array kConvertedTypes{
 constexpr std::string_view kRerun = " (run VS.Extract extract <disc> <dir>)";
 
 std::string_view RerunFor(std::string_view converter) {
+  if (converter == kBestiaryConverter) {
+    return " (run VS.Extract bestiary <dir>)";
+  }
   if (converter == kSaveTextConverter) return " (run VS.Extract text <dir>)";
   return converter == kMaterialConverterName ? " (run VS.Extract tables <dir>)"
                                              : kRerun;
@@ -298,6 +304,7 @@ std::expected<void, std::string> RequireConvertedType(
 struct CatalogRecords {
   std::optional<WorkshopRecipeCatalog> recipes;
   std::optional<MaterialCatalog> materials;
+  std::optional<BestiaryCatalog> bestiary;
 };
 
 struct LoadedCatalogs {
@@ -306,7 +313,8 @@ struct LoadedCatalogs {
 };
 
 std::expected<CatalogRecords, std::string> ReadCatalogRecords(
-    const CatalogDatabase& database, bool recipes, bool materials) {
+    const CatalogDatabase& database, bool recipes, bool materials,
+    bool bestiary) {
   CatalogRecords records;
   if (recipes) {
     auto loaded = LoadWorkshopRecipes(database);
@@ -318,6 +326,11 @@ std::expected<CatalogRecords, std::string> ReadCatalogRecords(
     if (!loaded) return std::unexpected(loaded.error());
     records.materials = std::move(*loaded);
   }
+  if (bestiary) {
+    auto loaded = LoadBestiary(database);
+    if (!loaded) return std::unexpected(loaded.error());
+    records.bestiary = std::move(*loaded);
+  }
   return records;
 }
 
@@ -328,7 +341,18 @@ std::expected<std::optional<LoadedCatalogs>, std::string> LoadListedCatalogs(
   if (!manifest) return std::nullopt;
   bool recipes = false;
   bool materials = false;
+  bool bestiary = false;
   for (const auto& output : manifest->outputs) {
+    if (output.converter == kBestiaryConverter) {
+      const auto version = manifest->converters.find(kBestiaryConverter);
+      if (bestiary || output.id != kBestiaryId ||
+          output.source != kBestiarySource || !output.alias_of.empty() ||
+          version == manifest->converters.end() ||
+          version->second != kBestiaryConverterVersion) {
+        return std::unexpected("invalid bestiary conversion registration");
+      }
+      bestiary = true;
+    }
     recipes |= output.converter == kSydRecipeConverterName;
     if (output.converter != kMaterialConverterName) continue;
     const auto version = manifest->converters.find(kMaterialConverterName);
@@ -342,10 +366,11 @@ std::expected<std::optional<LoadedCatalogs>, std::string> LoadListedCatalogs(
     }
     materials = true;
   }
-  if (!recipes && !materials) return std::nullopt;
+  if (!recipes && !materials && !bestiary) return std::nullopt;
   auto sources =
       recipes ? WorkshopCatalogSources() : std::vector<CatalogTableSource>{};
   if (materials) sources.push_back(MaterialCatalogSource());
+  if (bestiary) sources.push_back(BestiaryCatalogSource());
   auto database = CatalogDatabase::Load(root, sources);
   if (!database) {
     return std::unexpected(
@@ -354,13 +379,13 @@ std::expected<std::optional<LoadedCatalogs>, std::string> LoadListedCatalogs(
         "re-run VS.Extract tables " +
         Platform::PathText(root) + ")");
   }
-  auto records = ReadCatalogRecords(*database, recipes, materials);
+  auto records = ReadCatalogRecords(*database, recipes, materials, bestiary);
   if (!records && database->CacheHit()) {
     Core::LogWarn("content", "compiled catalog rejected; recompiling CSVs: {}",
                   records.error());
     database = CatalogDatabase::Load(root, sources, false);
     if (!database) return std::unexpected(database.error());
-    records = ReadCatalogRecords(*database, recipes, materials);
+    records = ReadCatalogRecords(*database, recipes, materials, bestiary);
   }
   if (!records) {
     return std::unexpected(records.error() +
@@ -488,6 +513,16 @@ std::expected<void, std::string> DataStore::Open(const fs::path& root) {
     if (!text) return std::unexpected(text.error());
     store->m_save_text_ = std::move(*text);
   }
+  if (*tables && (**tables).records.bestiary) {
+    if (!store->m_save_text_) {
+      return std::unexpected("bestiary: missing native text catalog");
+    }
+    auto references = ValidateBestiaryTextReferences(
+        *store->m_catalog_tables_, store->m_save_text_->catalog);
+    if (!references) {
+      return std::unexpected(references.error());
+    }
+  }
   if (store->m_catalog_tables_) {
     if (auto cached = store->m_catalog_tables_->PublishCache(); !cached) {
       Core::LogWarn("content",
@@ -561,6 +596,19 @@ std::expected<void, std::string> DataStore::RequireConversions(
         return std::unexpected(
             std::string(id) +
             ": missing native save text; run VS.Extract text <dir>");
+      }
+      if (auto required = RequireConvertedSource(*this, *m_conversion_manifest_,
+                                                 hashes, *source, *output);
+          !required) {
+        return required;
+      }
+    }
+    if (const auto* output = m_conversion_manifest_->Find(kNativeTextCatalogId);
+        output != nullptr) {
+      const auto* source = Find(output->source);
+      if (source == nullptr ||
+          output->converter != kNativeTextCatalogConverter) {
+        return std::unexpected("native text: invalid contributor source");
       }
       if (auto required = RequireConvertedSource(*this, *m_conversion_manifest_,
                                                  hashes, *source, *output);

@@ -295,6 +295,7 @@
     <ClCompile Include="src\Render\ModelWorkspace.cpp" />
     <ClCompile Include="src\Render\NativeTextDraw.cpp" />
     <ClCompile Include="src\Render\NativeTextLayout.cpp" />
+    <ClCompile Include="src\Render\NativeTextQueue.cpp" />
     <ClCompile Include="src\Render\PageSpace.cpp" />
     <ClCompile Include="src\Render\PaletteAnimation.cpp" />
     <ClCompile Include="src\Render\PaletteAnimationLive.cpp">

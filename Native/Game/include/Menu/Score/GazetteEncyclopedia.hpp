@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <span>
+#include <string>
 #include <string_view>
 
 #include "Menu/Score/GazetteCamera.hpp"
@@ -10,8 +11,7 @@
 #include "Render/UiTexturedQuads.hpp"
 
 namespace VS::Menu::Score {  // NOLINT(readability-identifier-naming)
-inline constexpr std::size_t kEncyclopediaEnemies = 78;
-inline constexpr std::size_t kEncyclopediaNameBytes = 28;
+inline constexpr std::size_t kOriginalEncyclopediaEnemies = 78;
 inline constexpr std::size_t kEnemyDefeatFlagWords = 26;
 
 struct GazetteEnemy {
@@ -22,10 +22,13 @@ struct GazetteEnemy {
   std::int16_t selected = 0;
   std::int16_t highlight_step = 0;
   std::uint8_t unlocked = 0;
-  std::uint8_t previous = 0;
-  std::uint8_t next = 0;
+  std::uint32_t previous = 0;
+  std::uint32_t next = 0;
   GazetteText name;
   GazetteText description;
+  std::string name_id{};
+  std::string description_id{};
+  bool always_unlocked = false;
 };
 
 struct EnemyNumber {
@@ -45,8 +48,16 @@ class EnemyListHost {
  public:
   virtual ~EnemyListHost() = default;
   virtual void SetInformation(GazetteText text) = 0;
+  virtual void SetNativeInformation(std::string_view) {
+    Refuse("native information is not bound");
+  }
   virtual Framework::MenuRow& CreateRow(
       const Framework::RowPlacement& placement, GazetteText text) = 0;
+  virtual Framework::MenuRow& CreateNativeRow(
+      const Framework::RowPlacement& placement, std::string_view) {
+    Refuse("native row is not bound");
+    return CreateRow(placement, {});
+  }
   virtual Framework::MenuRow& Row() = 0;
   virtual std::int32_t DrawCursor(std::uint8_t step, int x, int y) = 0;
   virtual void DrawNumber(const EnemyNumber& number) = 0;
@@ -81,6 +92,11 @@ class EnemyViewerHost {
   virtual void DrawPreview(const Core::Math::Transform3& camera) = 0;
   virtual Framework::MenuRow& CreateRow(
       const Framework::RowPlacement& placement, GazetteText text) = 0;
+  virtual Framework::MenuRow& CreateNativeRow(
+      const Framework::RowPlacement& placement, std::string_view) {
+    Refuse("native row is not bound");
+    return CreateRow(placement, {});
+  }
   virtual void DrawRow() = 0;
   virtual Framework::MenuRow& Row() = 0;
   virtual void DrawButton(ViewerButton button, int x, int y) = 0;
@@ -109,14 +125,14 @@ class EnemyNavigationHost : public EnemyQuadTarget {
 [[nodiscard]] bool DrawEnemyNumber(const EnemyNumber& number,
                                    EnemyQuadTarget& target);
 
-// F02818. The first 78 entries form a circular list of unlocked enemies.
+// F02818. The supplied entries form a circular list of unlocked enemies.
 // Locked links, names, selection and signed highlights are preserved.
 // Positive defeat ranges must fit the supplied flags; nonpositive counts
 // do not read flags, just as in the original.
 [[nodiscard]] bool InitializeEnemyList(std::span<GazetteEnemy> enemies,
                                        std::span<const std::uint32_t> flags);
 
-// F02819. All 78 selections/highlights are updated, then eight rows are
+// F02819. All selections/highlights are updated, then eight rows are
 // rendered. A negative signed highlight is retained, not decremented.
 [[nodiscard]] bool RenderEnemyList(std::span<GazetteEnemy> enemies,
                                    GazetteRecordCursor cursor,

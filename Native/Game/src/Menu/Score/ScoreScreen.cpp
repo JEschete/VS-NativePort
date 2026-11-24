@@ -4,11 +4,6 @@
 
 #include <cstdint>
 
-#include "Content/DiscLayout.hpp"
-#include "Content/DiscQueue.hpp"
-
-using VS::Content::disc::LocateAs;
-
 using VS::Core::Gte::SVECTOR;
 using VS::Core::Gte::VECTOR;
 
@@ -34,9 +29,6 @@ VECTOR VS::Menu::Score::cameraPositionBackup;
 // decomp: _characterRank (_characterRank@src/MENU/MENU9.PRG/238.c)
 std::uint16_t VS::Menu::Score::characterRank;
 
-// decomp: _enemyDescriptions (_enemyDescriptions@src/MENU/MENU9.PRG/238.c)
-std::uint16_t* VS::Menu::Score::enemyDescriptions;
-
 // decomp: _enemySkipDelay (_enemySkipDelay@src/MENU/MENU9.PRG/238.c)
 std::int16_t VS::Menu::Score::enemySkipDelay;
 
@@ -55,16 +47,6 @@ std::int32_t VS::Menu::Score::menuState;
 // decomp: _menuText (_menuText@src/MENU/MENU9.PRG/238.c)
 // contents: disc string table (ModuleData.cpp)
 std::uint16_t VS::Menu::Score::menuText[VS::Menu::Score::kMenuTextWords];
-
-// decomp: _monBinCdQueueSlot (_monBinCdQueueSlot@src/MENU/MENU9.PRG/238.c)
-VS::Content::DiscQueueSlot* VS::Menu::Score::monBinCdQueueSlot;
-
-// decomp: _monBinData (_monBinData@src/MENU/MENU9.PRG/238.c)
-VS::Menu::Score::EnemyEntry* VS::Menu::Score::monBinData;
-
-// decomp: _monBinFile (_monBinFile@src/MENU/MENU9.PRG/238.c)
-const VS::Content::DiscFile VS::Menu::Score::kMonBinFile =
-    LocateAs<VS::Content::DiscFile>("SMALL/MON.BIN");
 
 // decomp: _nextState (_nextState@src/MENU/MENU9.PRG/238.c)
 std::int32_t VS::Menu::Score::nextState;

@@ -1,17 +1,12 @@
 #pragma once
 // MENU9.PRG's score screen (src/MENU/MENU9.PRG/238.c): the Gazette's list
-// rows, MON.BIN's enemy records, the remembered list cursors and the screen's
+// rows, remembered list cursors and the screen's
 // module state.
 #include <array>
 #include <cstddef>
 #include <cstdint>
 
 #include "Core/Gte.hpp"
-
-namespace VS::Content {
-struct DiscFile;
-struct DiscQueueSlot;
-}  // namespace VS::Content
 
 namespace VS::Menu::Score {  // NOLINT(readability-identifier-naming)
 // decomp: GazetteRow (src/MENU/MENU9.PRG/238.c:361-370; was _gazetteRow): one
@@ -31,32 +26,8 @@ struct ListRow {
 };
 
 namespace screen_layout {
-inline constexpr std::size_t kEnemyNameBytes = 28;
-inline constexpr std::size_t kEnemyUnlockedOffset = 0x0C;
-inline constexpr std::size_t kEnemyNameOffset = 0x10;
-inline constexpr std::size_t kEnemyEntryBytes = 0x2C;
 inline constexpr std::size_t kCursorMemoryBytes = 8;
 }  // namespace screen_layout
-
-// decomp: MonBinData (src/MENU/MENU9.PRG/238.c:372-384; was _monBinData_t): one
-// enemy's record in MON.BIN, read in place from the file's bytes.
-struct EnemyEntry {
-  std::int16_t zud_id = 0;
-  std::int16_t class_id = 0;
-  std::int16_t kill_flags_offset = 0;
-  std::int16_t kill_flags_count = 0;
-  std::int16_t selected = 0;
-  std::int16_t animation_state = 0;
-  std::uint8_t unlocked = 0;
-  std::uint8_t prev = 0;
-  std::uint8_t next = 0;
-  std::uint8_t reserved_f = 0;
-  std::array<std::uint8_t, screen_layout::kEnemyNameBytes> name{};
-};
-static_assert(sizeof(EnemyEntry) == screen_layout::kEnemyEntryBytes);
-static_assert(offsetof(EnemyEntry, unlocked) ==
-              screen_layout::kEnemyUnlockedOffset);
-static_assert(offsetof(EnemyEntry, name) == screen_layout::kEnemyNameOffset);
 
 // decomp: vs_battle_menu9CursorMemory_t (src/BATTLE/BATTLE.PRG/146C.h:791):
 // the Gazette lists' remembered pages and rows, which BATTLE.PRG keeps while
@@ -91,8 +62,6 @@ extern std::int16_t cameraHeightOffset;
 extern VS::Core::Gte::VECTOR cameraPositionBackup;
 // decomp: _characterRank (src/MENU/MENU9.PRG/238.c:584)
 extern std::uint16_t characterRank;
-// decomp: _enemyDescriptions (src/MENU/MENU9.PRG/238.c:946)
-extern std::uint16_t* enemyDescriptions;
 // decomp: _enemySkipDelay (src/MENU/MENU9.PRG/238.c:1248)
 extern std::int16_t enemySkipDelay;
 // decomp: _hideUi (src/MENU/MENU9.PRG/238.c:428)
@@ -105,12 +74,6 @@ extern std::uint16_t mapCompletion;
 extern std::int32_t menuState;
 // decomp: _menuText (src/MENU/MENU9.PRG/238.c:1446)
 extern std::uint16_t menuText[kMenuTextWords];
-// decomp: _monBinCdQueueSlot (src/MENU/MENU9.PRG/238.c:613)
-extern VS::Content::DiscQueueSlot* monBinCdQueueSlot;
-// decomp: _monBinData (src/MENU/MENU9.PRG/238.c:612)
-extern EnemyEntry* monBinData;
-// decomp: _monBinFile (src/MENU/MENU9.PRG/238.c:612)
-extern const VS::Content::DiscFile kMonBinFile;
 // decomp: _nextState (src/MENU/MENU9.PRG/238.c:608)
 extern std::int32_t nextState;
 // decomp: _openedChestCount (src/MENU/MENU9.PRG/238.c:446)

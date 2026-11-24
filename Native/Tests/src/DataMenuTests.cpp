@@ -342,15 +342,9 @@ struct ScoreViewerFixture : gazette_terminal_live_tests::TerminalFixture {
 
 TEST_CASE("Score encyclopedia viewer retains the complete original ID header",
           "[render][menu][score][viewer]") {
-  const int selected = GENERATE(0, 77);
+  const int selected = GENERATE(0, 77, 12, 24, 10, 16, 18);
   ScoreViewerFixture fixture;
   VS::Menu::Score::selectedEnemy = static_cast<int16_t>(selected);
-  const auto enemy =
-      fixture.MonBytes().subspan(static_cast<std::size_t>(selected) *
-                                     gazette_terminal_live_tests::kEnemyStride,
-                                 gazette_terminal_live_tests::kEnemyStride);
-  enemy[2] = static_cast<std::byte>(GENERATE(0, 1, 2, 3, 4, 5));
-  enemy[3] = std::byte{};
   VS::Menu::Score::RenderLiveEnemyViewer(8, 3);
   CHECK(fixture.clock.Clock(160) ==
         std::format("NO.   {:03}/078", selected + 1));

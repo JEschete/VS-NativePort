@@ -69,10 +69,13 @@ inline Call MenuBytes(const fw::MenuRow& row, std::int64_t kind) {
 }
 
 struct EnemyData {
-  std::array<score::GazetteEnemy, score::kEncyclopediaEnemies + 1> enemies{};
-  std::array<std::array<std::uint8_t, 4>, score::kEncyclopediaEnemies + 1>
+  std::array<score::GazetteEnemy, score::kOriginalEncyclopediaEnemies + 1>
+      enemies{};
+  std::array<std::array<std::uint8_t, 4>,
+             score::kOriginalEncyclopediaEnemies + 1>
       names{};
-  std::array<std::array<std::uint8_t, 3>, score::kEncyclopediaEnemies + 1>
+  std::array<std::array<std::uint8_t, 3>,
+             score::kOriginalEncyclopediaEnemies + 1>
       descriptions{};
   std::array<std::uint32_t, score::kEnemyDefeatFlagWords> flags{};
   std::array<std::uint8_t, 3> locked_name{0xA7, 0xA7, 0xE7};

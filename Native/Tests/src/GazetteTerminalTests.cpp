@@ -86,7 +86,7 @@ TEST_CASE("F02805 refuses only the description it would read",
                                           data.locked_description, host));
   CHECK_FALSE(score::ShowEnemyDescription(data.enemies, -1,
                                           data.locked_description, host));
-  CHECK_FALSE(score::ShowEnemyDescription(data.enemies, 78,
+  CHECK_FALSE(score::ShowEnemyDescription(data.enemies, 79,
                                           data.locked_description, host));
   CHECK(host.calls.empty());
 }
@@ -190,8 +190,8 @@ TEST_CASE("F02818 validates every positive defeat range before writing",
   CHECK(data.enemies[0].unlocked == 7);
   data.enemies[77].defeat_bit_count = 0;
   REQUIRE(score::InitializeEnemyList(data.enemies, data.flags));
-  CHECK_FALSE(score::InitializeEnemyList(std::span(data.enemies).first(77),
-                                         data.flags));
+  CHECK_FALSE(
+      score::InitializeEnemyList(std::span(data.enemies).first(0), data.flags));
 }
 
 TEST_CASE("F02818 nonpositive counts never require defeat flag storage",
@@ -207,7 +207,7 @@ TEST_CASE("F02818 nonpositive counts never require defeat flag storage",
   CHECK(data.enemies[0].unlocked == 0);
   CHECK(data.enemies[77].unlocked == 0);
   CHECK(data.enemies[77].previous == 31);
-  CHECK(data.enemies[78].unlocked == 1);
+  CHECK(data.enemies[78].unlocked == 0);
 }
 
 TEST_CASE("F02819 updates nonvisible rows and preserves negative highlights",
@@ -224,7 +224,7 @@ TEST_CASE("F02819 updates nonvisible rows and preserves negative highlights",
   CHECK(data.enemies[9].highlight_step == -1);
   CHECK(data.enemies[0].highlight_step == -32768);
   CHECK(data.enemies[77].highlight_step == 299);
-  CHECK(data.enemies[78].selected == 42);
+  CHECK(data.enemies[78].selected == 0);
   CHECK(animation.cursor_step == 1);
   CHECK(host.menu.state == fw::RowState::kInactive);
 }
@@ -268,7 +268,7 @@ TEST_CASE(
   fixture::EncyclopediaHost host;
   score::GazetteRecordAnimation animation;
   data.enemies[0].selected = 17;
-  CHECK_FALSE(List(data, host, {71, 0}, 8, animation));
+  CHECK_FALSE(List(data, host, {72, 0}, 8, animation));
   data.enemies[2].unlocked = 1;
   data.enemies[2].name = {};
   CHECK_FALSE(List(data, host, {0, 0}, 8, animation));
@@ -293,7 +293,7 @@ TEST_CASE(
   CHECK(host.calls[6] == Call{2, 0, 248, 166, 256, 0, 2, 7, 0xE7});
   CHECK(host.calls[15] == Call{14, fw::PackXy(-56, 160), 0x808080, 7, 14, 'N',
                                'O', '.', ' ', ' ', ' ', '0', '0', '8', '/', '0',
-                               '7', '8', 0});
+                               '7', '9', 0});
   CHECK(host.menu.state == fw::RowState::kInactive);
 }
 

@@ -1505,6 +1505,17 @@ has no module-image copying, sector arithmetic or original-address relocation de
 
 ##### EC-04 asset T-shim ledger
 
+Bestiary adoption (#499/#500) removes the Gazette's raw `SMALL/MON.BIN`
+request, 44-byte parser and in-file selection/highlight/link writes.
+Immutable SQLite definitions and the shared native text catalog produce an
+owned encyclopedia session; original reconstruction stays offline. The
+72 out-of-list records are provenance, not invented enemies. Native-only
+entries have explicit identity, preview and unlock policies. The retained
+preview-table index, BATTLE defeat/cursor storage and model/actor loading
+are separate #199/#200/#203/#55 dependencies; this does not retire the
+ZUD/SHP/SEQ bridges below. Native glyphs still use the isolated page/packet
+backend. See ASSET_PIPELINE §4.3/§5.2 and the current HANDOFF evidence.
+
 Native text checkpoint (#54/#500): the native file-picker status/notice and
 Yes/No consent slice now consumes semantic IDs, owned Unicode/control tokens,
 font metrics and layout. It no longer reconstructs an encoded footer or reads

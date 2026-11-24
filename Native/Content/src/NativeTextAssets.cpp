@@ -9,6 +9,7 @@
 #include "Content/ConvertedImages.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/NativeText.hpp"
+#include "Content/TextCatalogRegistration.hpp"
 #include "Platform/Paths.hpp"
 
 namespace VS::Content {
@@ -41,16 +42,46 @@ std::expected<void, std::string> Registered(const DataStore& store,
 }
 }  // namespace
 
+std::expected<void, std::string> CheckNativeTextCatalogOwnership(
+    const ConversionManifest& manifest, std::string_view owner) {
+  for (const auto& output : manifest.outputs) {
+    if (output.id != owner &&
+        std::ranges::find(output.files, kSaveTextPath) != output.files.end()) {
+      return std::unexpected(std::string(kSaveTextPath) + ": also claimed by " +
+                             output.id);
+    }
+  }
+  return {};
+}
+
+namespace {
+std::expected<void, std::string> RegisteredCatalog(const DataStore& store) {
+  const auto* manifest = store.Conversions();
+  const auto* shared =
+      manifest == nullptr ? nullptr : manifest->Find(kNativeTextCatalogId);
+  if (manifest != nullptr) {
+    auto ownership = CheckNativeTextCatalogOwnership(
+        *manifest, shared == nullptr ? kSaveTextId : kNativeTextCatalogId);
+    if (!ownership) return std::unexpected(ownership.error());
+  }
+  if (shared == nullptr) {
+    if (auto registered =
+            Registered(store, kSaveTextId, kSaveTextPath, "MENU/MCMAN.BIN");
+        !registered) {
+      return std::unexpected(registered.error());
+    }
+  } else if (shared->converter != kNativeTextCatalogConverter ||
+             std::ranges::find(shared->files, kSaveTextPath) ==
+                 shared->files.end()) {
+    return std::unexpected("native text: invalid shared catalog registration");
+  }
+  return Registered(store, kSaveFontId, kSaveFontPath, "TITLE/TITLE.PRG");
+}
+}  // namespace
+
 std::expected<NativeTextAssets, std::string> LoadSaveTextAssets(
     const DataStore& store) {
-  if (auto registered =
-          Registered(store, kSaveTextId, kSaveTextPath, "MENU/MCMAN.BIN");
-      !registered) {
-    return std::unexpected(registered.error());
-  }
-  if (auto registered =
-          Registered(store, kSaveFontId, kSaveFontPath, "TITLE/TITLE.PRG");
-      !registered) {
+  if (auto registered = RegisteredCatalog(store); !registered) {
     return std::unexpected(registered.error());
   }
   auto text = Read(store.Root(), kSaveTextPath);

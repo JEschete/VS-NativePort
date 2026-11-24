@@ -43,6 +43,11 @@ inline constexpr std::array kBackgroundLayoutConverters{
     ConverterVersion{.name = "far-layout-json", .version = 2},
 };
 
+// Optional catalog families validate their registration when present.
+inline constexpr std::array kBestiaryCatalogConverters{
+    ConverterVersion{.name = "bestiary-csv", .version = 1},
+};
+
 // The converters whose outputs this build reads, at the oldest version it
 // accepts; a manifest without them is refused with instructions.
 inline constexpr std::array kRequiredConverters{

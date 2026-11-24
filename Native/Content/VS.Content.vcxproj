@@ -52,6 +52,7 @@
     <ClCompile Include="src\AudioStream.cpp" />
     <ClCompile Include="src\BackgroundAssets.cpp" />
     <ClCompile Include="src\BackgroundLayout.cpp" />
+    <ClCompile Include="src\BestiaryCatalog.cpp" />
     <ClCompile Include="src\CatalogDatabase.cpp" />
     <ClCompile Include="src\CatalogTable.cpp" />
     <ClCompile Include="src\CdDrive.cpp" />
@@ -120,6 +121,7 @@
     <ClInclude Include="include\Content\AudioStream.hpp" />
     <ClInclude Include="include\Content\BackgroundAssets.hpp" />
     <ClInclude Include="include\Content\BackgroundLayout.hpp" />
+    <ClInclude Include="include\Content\BestiaryCatalog.hpp" />
     <ClInclude Include="include\Content\CatalogDatabase.hpp" />
     <ClInclude Include="include\Content\CatalogTable.hpp" />
     <ClInclude Include="include\Content\CdDrive.hpp" />
@@ -157,6 +159,7 @@
     <ClInclude Include="include\Content\StringTables.hpp" />
     <ClInclude Include="include\Content\SystemResources.hpp" />
     <ClInclude Include="include\Content\SystemResourcesLive.hpp" />
+    <ClInclude Include="include\Content\TextCatalogRegistration.hpp" />
     <ClInclude Include="include\Content\TimFile.hpp" />
     <ClInclude Include="include\Content\WepFile.hpp" />
     <ClInclude Include="include\Content\WepModelFiles.hpp" />

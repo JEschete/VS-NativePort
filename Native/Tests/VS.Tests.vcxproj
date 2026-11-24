@@ -130,6 +130,7 @@
     <ClCompile Include="src\BattleAbilityFoundationTests.cpp" />
     <ClCompile Include="src\BattleAbilityTerminalTests.cpp" />
     <ClCompile Include="src\BattleTargetingTests.cpp" />
+    <ClCompile Include="src\BestiaryCatalogTests.cpp" />
     <ClCompile Include="src\BindingsTests.cpp" />
     <ClCompile Include="src\BoneTrailTests.cpp" />
     <ClCompile Include="src\BreakArtsTests.cpp" />
@@ -514,6 +515,8 @@
     <ClCompile Include="..\Tools\Extract\src\WorkshopRecipeConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\MaterialConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\SaveTextConversion.cpp" />
+    <ClCompile Include="..\Tools\Extract\src\TextContribution.cpp" />
+    <ClCompile Include="..\Tools\Extract\src\BestiaryConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\WorkshopAuthoring.cpp" />
     <ClCompile Include="..\Tools\Extract\src\ZndConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\ZoneAuthoring.cpp" />

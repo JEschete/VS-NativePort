@@ -41,40 +41,30 @@ Entry ModuleEntry(unsigned address, Entry expected) {
 }
 
 struct MonOwner {
-  void* buffer;
-  VS::Content::DiscQueueSlot* request;
   std::uint64_t generation;
+  void* foreign_destination;
 
   void CheckReleased() const {
-    CHECK(score::monBinData == nullptr);
-    CHECK(score::monBinCdQueueSlot == nullptr);
-    CHECK(score::enemyDescriptions == nullptr);
+    CHECK(score::LiveBestiaryGeneration() == 0);
+    CHECK(score::LiveBestiaryEnemies().empty());
+    CHECK(score::LiveBestiaryDescription().empty());
     CHECK(score::menuState == 0);
-    CHECK_FALSE(memory::LivePayloadCapacity(buffer).has_value());
-    CHECK(content::LiveDiscRequestGeneration(request) != generation);
   }
 };
 
 MonOwner BeginMon(live::PreviewFixture& fixture, bool loaded) {
   fixture.LoadSourceActor();
+  auto* foreign_destination = VS::Content::discDriveState.destination;
   std::ranges::fill(VS::State::scoreData.enemy_kill_flags, -1);
   fixture.SelectPage(3, false);
   fixture.AdvanceTo(static_cast<int>(score::GazettePhase::kWaitForEnemies),
                     false);
-  const MonOwner owner{
-      score::monBinData, score::monBinCdQueueSlot,
-      content::LiveDiscRequestGeneration(score::monBinCdQueueSlot)};
-  REQUIRE(owner.buffer != nullptr);
-  REQUIRE(owner.request != nullptr);
+  const MonOwner owner{score::LiveBestiaryGeneration(), foreign_destination};
   REQUIRE(owner.generation != 0);
   if (loaded) {
     fixture.AdvanceTo(static_cast<int>(score::GazettePhase::kEnemies));
-  } else {
-    REQUIRE(content::BeginLiveDiscRead(
-        score::kMonBinFile.lba,
-        static_cast<std::uint32_t>(score::kMonBinFile.size), owner.buffer));
-    REQUIRE(VS::Content::discDriveState.destination == owner.buffer);
   }
+  CHECK(VS::Content::discDriveState.destination == owner.foreign_destination);
   return owner;
 }
 
@@ -88,7 +78,7 @@ struct ForeignOwner {
   ForeignOwner() {
     const auto bytes = live::BytesOf(VS::Battle::menu9CursorMemory);
     cursor.assign(bytes.begin(), bytes.end());
-    const VS::Content::DiscFile file{score::kMonBinFile.lba, 2048};
+    const VS::Content::DiscFile file{Locate("SMALL/MON.BIN").lba, 2048};
     request = content::AllocateLiveDiscRequest(&file);
     generation = content::LiveDiscRequestGeneration(request);
     if (allocation == nullptr || request == nullptr || generation == 0) {
@@ -127,7 +117,7 @@ TEST_CASE("Gazette enemy module entries use real links descriptions and digits",
   fw::InitializeLiveInformationBox();
   score::selectedEnemy = 0;
   ModuleEntry(0x80104B40, &score::ShowLiveEnemyDescription)();
-  CHECK(fixture.InformationText() == live::Fixture::Description(0));
+  CHECK(score::LiveBestiaryDescription() == "text.bestiary.zombie.description");
   fixture.ResetFrame();
   ModuleEntry(0x80105BCC, &score::DrawLiveEnemyNumber)(32, 48, 78, 0);
   CHECK(fixture.Packets().size() == 3);
@@ -144,7 +134,7 @@ TEST_CASE(
   fw::InitializeLiveInformationBox();
   const auto refusals = score::LiveGazetteTerminalRefusals();
   ModuleEntry(0x80105F00, &score::RenderLiveEnemyList)(8);
-  CHECK(fixture.InformationText() == live::Fixture::Description(0));
+  CHECK(score::LiveBestiaryDescription() == "text.bestiary.zombie.description");
   fixture.ResetFrame();
   ModuleEntry(0x801061F8, &score::RenderLiveEnemyViewer)(8, 3);
   CHECK_FALSE(fixture.Packets().empty());
@@ -204,9 +194,10 @@ TEST_CASE(
   CHECK(fixture.GuardsIntact());
 }
 
-TEST_CASE("Only completed MENU9 drains the real pending or consumed MON owner",
-          "[gazette-terminal-integration][gazette-terminal-reload]"
-          "[F02803][F04156]") {
+TEST_CASE(
+    "Only completed MENU9 releases the prepared or active native bestiary",
+    "[gazette-terminal-integration][gazette-terminal-reload]"
+    "[F02803][F04156]") {
   const bool loaded = GENERATE(false, true);
   live::PreviewFixture fixture;
   const auto owner = BeginMon(fixture, loaded);
@@ -215,23 +206,23 @@ TEST_CASE("Only completed MENU9 drains the real pending or consumed MON owner",
     menu_overlay_tests::Load other(
         3, {Locate("MENU/MENU2.PRG").lba, Locate("MENU/MENU2.PRG").size});
     REQUIRE(other.Complete() == 1);
-    CHECK(score::monBinData == owner.buffer);
+    CHECK(score::LiveBestiaryGeneration() == owner.generation);
   }
   {
     menu_overlay_tests::Load menu(
         kGazetteScreen,
         {Locate("MENU/MENU9.PRG").lba, Locate("MENU/MENU9.PRG").size});
     REQUIRE(menu.Poll() == 0);
-    CHECK(score::monBinData == owner.buffer);
+    CHECK(score::LiveBestiaryGeneration() == owner.generation);
     REQUIRE(menu.Complete() == 1);
   }
   owner.CheckReleased();
   foreign.Check();
-  CHECK(VS::Content::discDriveState.destination == nullptr);
+  CHECK(VS::Content::discDriveState.destination == owner.foreign_destination);
   CHECK(fixture.GuardsIntact());
 }
 
-TEST_CASE("Actual cold session drains the real pending or consumed MON owner",
+TEST_CASE("Actual cold session releases the prepared or active native bestiary",
           "[gazette-terminal-integration][gazette-terminal-reload]"
           "[F02803][F04156]") {
   const bool loaded = GENERATE(false, true);
@@ -248,13 +239,14 @@ TEST_CASE("Actual cold session drains the real pending or consumed MON owner",
   CHECK(VS::Boot::RunLiveSessionLoop(entry, entry) == 0);
   owner.CheckReleased();
   foreign.Check();
-  CHECK(VS::Content::discDriveState.destination == nullptr);
+  CHECK(VS::Content::discDriveState.destination == owner.foreign_destination);
   CHECK(fixture.GuardsIntact());
 }
 
-TEST_CASE("Actual pre-heap boundary drains MON before replacing heap identity",
-          "[gazette-terminal-integration][gazette-terminal-heap]"
-          "[F02803][F04156]") {
+TEST_CASE(
+    "Actual pre-heap boundary releases bestiary before replacing heap identity",
+    "[gazette-terminal-integration][gazette-terminal-heap]"
+    "[F02803][F04156]") {
   const bool loaded = GENERATE(false, true);
   live::PreviewFixture fixture;
   const auto owner = BeginMon(fixture, loaded);
@@ -262,7 +254,7 @@ TEST_CASE("Actual pre-heap boundary drains MON before replacing heap identity",
   const auto refusals = memory::RefusedLiveHeapRequestCount();
   VS::Boot::ResetLiveSessionHeap();
   owner.CheckReleased();
-  CHECK(VS::Content::discDriveState.destination == nullptr);
+  CHECK(VS::Content::discDriveState.destination == owner.foreign_destination);
   CHECK(VS::Content::discRequestCounts.reading == 0);
   CHECK(VS::Content::discRequestCounts.waiting == 0);
   CHECK(memory::GameHeap().Empty());
@@ -281,9 +273,10 @@ void ResetAtBoundary(bool cold) {
   }
 }
 
-TEST_CASE("Actual Gazette boundaries drain pending ZUD before its MON owner",
-          "[gazette-terminal-integration][gazette-terminal-reload]"
-          "[F02803][F04156]") {
+TEST_CASE(
+    "Actual Gazette boundaries drain pending ZUD before the native bestiary",
+    "[gazette-terminal-integration][gazette-terminal-reload]"
+    "[F02803][F04156]") {
   const bool cold = GENERATE(false, true);
   const game_clear_live_tests::SavedModuleData saved_module;
   const game_clear_live_tests::SavedGlobals<

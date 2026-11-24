@@ -50,6 +50,7 @@
     <ClCompile Include="src\AssetLabels.cpp" />
     <ClCompile Include="src\AudioBankConversion.cpp" />
     <ClCompile Include="src\BackgroundAuthoring.cpp" />
+    <ClCompile Include="src\BestiaryConversion.cpp" />
     <ClCompile Include="src\ConversionManifestWriter.cpp" />
     <ClCompile Include="src\ConverterBatch.cpp" />
     <ClCompile Include="src\EffectTextureConversion.cpp" />
@@ -62,6 +63,7 @@
     <ClCompile Include="src\MaterialConversion.cpp" />
     <ClCompile Include="src\SaveTextConversion.cpp" />
     <ClCompile Include="src\ShpModelConversion.cpp" />
+    <ClCompile Include="src\TextContribution.cpp" />
     <ClCompile Include="src\TimImage.cpp" />
     <ClCompile Include="src\WepModelConversion.cpp" />
     <ClCompile Include="src\WorkshopAuthoring.cpp" />
@@ -74,6 +76,7 @@
     <ClInclude Include="include\Extract\AssetLabels.hpp" />
     <ClInclude Include="include\Extract\AudioBankConversion.hpp" />
     <ClInclude Include="include\Extract\BackgroundAuthoring.hpp" />
+    <ClInclude Include="include\Extract\BestiaryConversion.hpp" />
     <ClInclude Include="include\Extract\ConversionManifestWriter.hpp" />
     <ClInclude Include="include\Extract\ConverterBatch.hpp" />
     <ClInclude Include="include\Extract\EffectTextureConversion.hpp" />
@@ -85,6 +88,7 @@
     <ClInclude Include="include\Extract\MaterialConversion.hpp" />
     <ClInclude Include="include\Extract\SaveTextConversion.hpp" />
     <ClInclude Include="include\Extract\ShpModelConversion.hpp" />
+    <ClInclude Include="include\Extract\TextContribution.hpp" />
     <ClInclude Include="include\Extract\TimImage.hpp" />
     <ClInclude Include="include\Extract\WepModelConversion.hpp" />
     <ClInclude Include="include\Extract\WorkshopAuthoring.hpp" />

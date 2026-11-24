@@ -38,9 +38,25 @@ native scene retains a higher-numbered textbox. Do not replace that lifetime
 repair with a font null-pointer fallback or assume original zero-initialized
 globals are reloaded.
 
+The encyclopedia (#499/#500) now owns native catalog/text snapshots, not a
+MON heap block. Reset must release its selection/highlight/link state **and
+already queued native glyph overlays**. The model-preview request and actor
+owners still have their separate cancellation/teardown order; removing MON's
+request is not permission to clear unrelated disc slots or heap allocations.
+
 ## 2. 64-bit and layout assumptions (handled during modernization)
 
 The copied code compiles for x64, but some of it assumes 32-bit pointers or fixed struct sizes:
+
+- **Definitions are not UI state.** MON's 150 physical records include only
+  78 reachable original encyclopedia entries. Keep all source bytes offline,
+  but do not reinterpret the remaining entries as enemies or retain a native
+  150-record/28-byte text limit. Preview-table indices, actor subtype defeat
+  ranges and display order are different roles. New encyclopedia definitions
+  do not create actors or grant progress. The compatibility BATTLE cursor
+  bookmark remains byte-sized; native in-session cursor and ring indices do
+  not. Native glyph overlays must be submitted after queued menu backgrounds
+  and must own their layouts/atlas rather than borrow frame or source bytes.
 
 - **Interior symbols are not independent ownership.** G00532 at800F5310
   aliases G00529's action-request position at+0xE0. Its inferred876-byte

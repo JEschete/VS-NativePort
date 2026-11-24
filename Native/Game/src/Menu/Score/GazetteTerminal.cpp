@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <optional>
 
+#include "Content/BestiaryCatalog.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/String/GameText.hpp"
 #include "Menu/Score/GazetteTimes.hpp"
@@ -99,8 +100,7 @@ std::optional<std::int32_t> Refuse(GazetteHost& host, std::string_view reason) {
 
 const GazetteEnemy* Enemy(GazetteHost& host, std::int32_t selected) {
   const auto enemies = host.Enemies();
-  if (selected < 0 || static_cast<std::size_t>(selected) >=
-                          std::min(enemies.size(), kEncyclopediaEnemies)) {
+  if (selected < 0 || static_cast<std::size_t>(selected) >= enemies.size()) {
     host.Refuse("enemy selection outside the loaded list");
     return nullptr;
   }
@@ -108,10 +108,12 @@ const GazetteEnemy* Enemy(GazetteHost& host, std::int32_t selected) {
 }
 
 int ListSelection(const GazetteCursorMemory& cursor) {
-  return cursor.enemies.first_row + cursor.enemies.selected_row;
+  if (cursor.enemies.first_row > Content::kBestiaryMaximumEntries) return -1;
+  return static_cast<int>(cursor.enemies.first_row) +
+         cursor.enemies.selected_row;
 }
 
-void NavigateRecords(GazetteRecordCursor& cursor, std::uint8_t last_page,
+void NavigateRecords(GazetteRecordCursor& cursor, std::uint32_t last_page,
                      const GazetteInput& input, GazetteHost& host) {
   if (cursor.selected_row == 0 && cursor.first_row == 0 &&
       (input.pressed & kUp) != 0) {
@@ -285,8 +287,15 @@ std::optional<std::int32_t> EnemyMenu(GazetteState& state,
                                       GazetteCursorMemory& cursor,
                                       const GazetteInput& input,
                                       GazetteHost& host) {
-  NavigateRecords(cursor.enemies, kEncyclopediaEnemies - kGazetteVisibleRecords,
-                  input, host);
+  const auto enemies = host.Enemies();
+  if (enemies.size() < kGazetteVisibleRecords ||
+      enemies.size() > Content::kBestiaryMaximumEntries) {
+    return Refuse(host, "enemy list outside the view's 8..999 record policy");
+  }
+  NavigateRecords(
+      cursor.enemies,
+      static_cast<std::uint32_t>(enemies.size() - kGazetteVisibleRecords),
+      input, host);
   if ((input.pressed & kCircle) != 0) {
     const auto* enemy = Enemy(host, ListSelection(cursor));
     if (enemy == nullptr) return std::nullopt;
@@ -475,10 +484,13 @@ bool SkipEnemy(GazetteState& state, bool right, GazetteHost& host) {
     const auto* enemy = Enemy(host, state.selected_enemy);
     if (enemy == nullptr) return false;
     const auto next = right ? enemy->next : enemy->previous;
-    if (next != state.selected_enemy) {
-      if (Enemy(host, next) == nullptr) return false;
+    if (next != static_cast<std::uint32_t>(state.selected_enemy)) {
+      if (next > Content::kBestiaryMaximumEntries ||
+          Enemy(host, static_cast<std::int32_t>(next)) == nullptr) {
+        return false;
+      }
       host.PlaySound(kEnemyChangeSound);
-      state.selected_enemy = next;
+      state.selected_enemy = static_cast<std::int16_t>(next);
       state.enemy_button_or_slide = static_cast<int>(right ? kR1 : kL1);
       host.ShowEnemyDescription(state.selected_enemy);
     }
@@ -522,7 +534,7 @@ std::optional<std::int32_t> Viewer(GazetteState& state,
                                    GazetteHost& host) {
   const auto* enemy = Enemy(host, state.selected_enemy);
   if (enemy == nullptr) return std::nullopt;
-  if (enemy->previous != state.selected_enemy) {
+  if (enemy->previous != static_cast<std::uint32_t>(state.selected_enemy)) {
     state.navigation_step = static_cast<std::int32_t>(
         (static_cast<std::uint32_t>(state.navigation_step) + 1U) &
         kNavigationMask);

@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "Content/JsonText.hpp"
+#include "Content/TextCatalogRegistration.hpp"
 #include "Core/Log.hpp"
 #include "Core/Sha256.hpp"
 #include "Platform/AtomicFile.hpp"
@@ -406,6 +407,9 @@ std::expected<void, std::string> NormalizeReferences(
       for (std::size_t c = 0; c < spec.columns.size(); ++c) {
         const auto& column = spec.columns[c];
         if (column.type != ColumnType::kReference) continue;
+        // JSON text has one separate producer, not a duplicate CSV/SQL table.
+        // DataStore validates this external reference before cache publication.
+        if (column.references == kNativeTextCatalogId) continue;
         const auto target = aliases.find(std::string(column.references));
         if (target == aliases.end() || !target->second.contains(row.cells[c])) {
           return std::unexpected(
@@ -646,7 +650,8 @@ std::string CreateTableSql(const TableSpec& spec) {
   }
   sql += ')';
   for (const auto& column : spec.columns) {
-    if (column.type == ColumnType::kReference) {
+    if (column.type == ColumnType::kReference &&
+        column.references != kNativeTextCatalogId) {
       sql += ",FOREIGN KEY(" + Quoted(column.name) + ") REFERENCES " +
              Quoted(column.references) +
              "(\"id\") DEFERRABLE INITIALLY DEFERRED";

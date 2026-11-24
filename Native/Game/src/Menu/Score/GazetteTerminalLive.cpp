@@ -5,24 +5,25 @@
 #include <bit>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <iterator>
+#include <map>
 #include <optional>
 #include <span>
 #include <string>
 #include <string_view>
+#include <utility>
+#include <vector>
 
 #include "Actors/ActorRecord.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Battle/Hud.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Battle/StatusEffects.hpp"
-#include "Content/CdDriveLive.hpp"
-#include "Content/DiscQueue.hpp"
-#include "Content/StringTables.hpp"
+#include "Content/BestiaryCatalog.hpp"
+#include "Content/DataStore.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/MatrixLive.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Core/String/GameText.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Menu/Framework/ActorPreviewLive.hpp"
@@ -43,6 +44,7 @@
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/Display.hpp"
 #include "Render/GameFontLive.hpp"
+#include "Render/NativeTextDraw.hpp"
 #include "Render/Render.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/SpritesLive.hpp"
@@ -51,25 +53,10 @@
 
 using VS::Core::Gte::MATRIX;
 
-namespace menu9_misc_info = VS::Content::text::menu9_prg::misc_info;
-
 namespace VS::Menu::Score {
 namespace {
-namespace memory = Core::Memory;
 static_assert(kGazettePreviewFailed == kEnemyPreviewFailed,
               "the terminal's failed-preview result is the preview's");
-constexpr std::size_t kEnemyStride = 44;
-constexpr std::size_t kDescriptionOffset = 150 * kEnemyStride;
-constexpr std::size_t kModelOffset = 0;
-constexpr std::size_t kClassOffset = 2;
-constexpr std::size_t kFirstFlagOffset = 4;
-constexpr std::size_t kFlagCountOffset = 6;
-constexpr std::size_t kSelectedOffset = 8;
-constexpr std::size_t kHighlightOffset = 10;
-constexpr std::size_t kUnlockedOffset = 12;
-constexpr std::size_t kPreviousOffset = 13;
-constexpr std::size_t kNextOffset = 14;
-constexpr std::size_t kNameOffset = 16;
 constexpr std::size_t kHalfwordBytes = 2;
 constexpr unsigned kByteBits = 8;
 constexpr int kControlsSlot = 6;
@@ -78,15 +65,32 @@ constexpr std::size_t kPreviewActor = 1;
 constexpr int kSoundGroup = 126;
 constexpr std::size_t kOverviewMemoryRow = 2;
 constexpr std::size_t kOverviewMemoryPage = 3;
+constexpr int kListNameIndent = 20;
+constexpr int kListBackgroundWidth = 240;
+constexpr int kViewerNameShift = 176;
+constexpr int kDescriptionX = 8;
+constexpr int kDescriptionY = 196;
+constexpr double kNameWidth = 220, kNameHeight = 16;
+constexpr double kDescriptionWidth = 304, kDescriptionHeight = 28;
 
-struct EnemyDataOwner {
-  std::byte* data = nullptr;
-  std::size_t bytes = 0;
-  VS::Content::DiscQueueSlot* request = nullptr;
-  std::uint64_t generation = 0;
+using EnemyRows = std::vector<GazetteEnemy>;
+// NOLINTNEXTLINE(bugprone-exception-escape): std::map's noexcept move.
+struct EnemySession {
+  Content::NativeTextAssets text;
+  EnemyRows rows;
+  std::map<std::string, Render::TextLayout, std::less<>> names;
+  std::map<std::string, Render::TextLayout, std::less<>> descriptions;
+  std::vector<Render::NativeTextDraw> draws;
+  std::string description;
+  bool ready = false;
 };
-
-EnemyDataOwner enemyData;
+std::optional<EnemySession>& EnemiesSession() {
+  static std::optional<EnemySession> session;
+  return session;
+}
+GazetteRecordCursor enemyCursor;
+bool enemyCursorInitialized = false;
+std::uint64_t bestiaryGeneration = 0;
 GazetteRecordAnimation enemyAnimation;
 GazetteScreenState screenState;
 std::int32_t menuAnimation = 0;
@@ -103,18 +107,6 @@ std::uint16_t Halfword(std::span<const std::byte> bytes, std::size_t offset) {
   return static_cast<std::uint16_t>(
       std::to_integer<unsigned>(bytes[offset]) |
       (std::to_integer<unsigned>(bytes[offset + 1]) << kByteBits));
-}
-
-std::int16_t SignedHalfword(std::span<const std::byte> bytes,
-                            std::size_t offset) {
-  return std::bit_cast<std::int16_t>(Halfword(bytes, offset));
-}
-
-void StoreHalfword(std::span<std::byte> bytes, std::size_t offset,
-                   std::int16_t value) {
-  const auto bits = static_cast<std::uint16_t>(value);
-  bytes[offset] = static_cast<std::byte>(bits);
-  bytes[offset + 1] = static_cast<std::byte>(bits >> kByteBits);
 }
 
 GazetteText Text(std::span<const std::byte> bytes) {
@@ -135,73 +127,90 @@ GazetteText Label(const std::uint16_t (&table)[Size], std::size_t index) {
   return Label(std::as_bytes(std::span(table)), index);
 }
 
-std::span<std::byte> EnemyBytes() {
-  const auto capacity = memory::LivePayloadCapacity(monBinData);
-  const auto file_size = kMonBinFile.size;
-  if (!capacity.has_value() || file_size <= 0 ||
-      *capacity < static_cast<std::size_t>(file_size) ||
-      static_cast<std::size_t>(file_size) <
-          kEncyclopediaEnemies * kEnemyStride) {
-    return {};
-  }
-  // Imported file bytes, never the native pointer-bearing row layout.
-  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-  return {reinterpret_cast<std::byte*>(monBinData),
-          static_cast<std::size_t>(file_size)};
-}
-
-std::span<const std::byte> Descriptions(std::span<const std::byte> bytes) {
-  if (bytes.size() <= kDescriptionOffset) return {};
-  const auto table = bytes.subspan(kDescriptionOffset);
-  if (static_cast<const void*>(enemyDescriptions) !=
-      static_cast<const void*>(table.data())) {
-    return {};
-  }
-  return table;
-}
-
-using EnemyRows = std::array<GazetteEnemy, kEncyclopediaEnemies>;
-
 bool ReadEnemies(EnemyRows& rows) {
-  const auto bytes = EnemyBytes();
-  if (bytes.empty()) return false;
-  const auto descriptions = Descriptions(bytes);
-  for (std::size_t index = 0; index < rows.size(); ++index) {
-    const auto entry = bytes.subspan(index * kEnemyStride, kEnemyStride);
-    rows[index] = {
-        .model_id = SignedHalfword(entry, kModelOffset),
-        .class_id = SignedHalfword(entry, kClassOffset),
-        .first_defeat_bit = SignedHalfword(entry, kFirstFlagOffset),
-        .defeat_bit_count = SignedHalfword(entry, kFlagCountOffset),
-        .selected = SignedHalfword(entry, kSelectedOffset),
-        .highlight_step = SignedHalfword(entry, kHighlightOffset),
-        .unlocked = std::to_integer<std::uint8_t>(entry[kUnlockedOffset]),
-        .previous = std::to_integer<std::uint8_t>(entry[kPreviousOffset]),
-        .next = std::to_integer<std::uint8_t>(entry[kNextOffset]),
-        .name = Text(entry.subspan(kNameOffset, kEncyclopediaNameBytes)),
-        .description = Label(descriptions, index)};
-  }
+  const auto& session = EnemiesSession();
+  if (!session || !session->ready) return false;
+  rows = session->rows;
   return true;
 }
 
-void StoreEnemies(const EnemyRows& rows, bool links) {
-  const auto bytes = EnemyBytes();
-  if (bytes.empty()) {
-    Refuse("enemy storage changed during an endpoint");
+void StoreEnemies(const EnemyRows& rows, bool) {
+  if (auto& session = EnemiesSession(); session) {
+    session->rows = rows;
+  }
+}
+
+void DetachLegacyInformationText() {
+  auto box = Menu::ReadLiveTextBox(Menu::kInformationTextBox);
+  box.text = nullptr;
+  box.speed = 0;
+  box.previous_chunks = 0;
+  box.flags.done = true;
+  Menu::WriteLiveTextBox(Menu::kInformationTextBox, box);
+}
+
+void SelectDescription(std::string_view id) {
+  auto& session = EnemiesSession();
+  if (!session || !session->descriptions.contains(id)) {
+    Refuse("native enemy description is not loaded");
     return;
   }
-  for (std::size_t index = 0; index < rows.size(); ++index) {
-    const auto entry = bytes.subspan(index * kEnemyStride, kEnemyStride);
-    const auto& enemy = rows[index];
-    if (links) {
-      entry[kUnlockedOffset] = static_cast<std::byte>(enemy.unlocked);
-      entry[kPreviousOffset] = static_cast<std::byte>(enemy.previous);
-      entry[kNextOffset] = static_cast<std::byte>(enemy.next);
-    } else {
-      StoreHalfword(entry, kSelectedOffset, enemy.selected);
-      StoreHalfword(entry, kHighlightOffset, enemy.highlight_step);
+  session->description = id;
+  DetachLegacyInformationText();
+}
+
+Framework::MenuRow& NativeRow(const Framework::RowPlacement& placement,
+                              std::string_view id, bool viewer) {
+  constexpr std::array<std::uint8_t, 1> kEmpty{0xE7};
+  auto background = placement;
+  if (!viewer) background.w = kListBackgroundWidth;
+  auto& row = Framework::SetLiveMenuItemText(background, kEmpty);
+  auto& session = EnemiesSession();
+  if (!session) return row;
+  const auto found = session->names.find(id);
+  if (found == session->names.end()) {
+    Refuse("native enemy name is not loaded");
+    return row;
+  }
+  session->draws.push_back(
+      {&found->second,
+       viewer ? placement.x - kViewerNameShift : placement.x + kListNameIndent,
+       placement.y, true});
+  return row;
+}
+
+void QueueEnemyText() {
+  auto& session = EnemiesSession();
+  if (!session) return;
+  if (LiveBestiaryInformationVisible()) {
+    const auto found = session->descriptions.find(session->description);
+    if (found != session->descriptions.end()) {
+      session->draws.push_back(
+          {&found->second, kDescriptionX, kDescriptionY, true});
     }
   }
+  Render::QueueLiveNativeText(session->draws, session->text.atlas.image);
+  session->draws.clear();
+}
+
+bool AddEnemyLayout(EnemySession& session, std::string_view id, bool name) {
+  auto& layouts = name ? session.names : session.descriptions;
+  if (layouts.contains(id)) return true;
+  auto text = session.text.catalog.Find(id);
+  if (!text) {
+    Refuse(text.error());
+    return false;
+  }
+  auto layout = Render::LayoutNativeText(
+      *text, session.text.font,
+      {name ? kNameWidth : kDescriptionWidth,
+       name ? kNameHeight : kDescriptionHeight, session.text.catalog.scale});
+  if (!layout) {
+    Refuse(std::string(id) + ": " + layout.error());
+    return false;
+  }
+  layouts.emplace(id, std::move(*layout));
+  return true;
 }
 
 bool EmitQuad(const Render::UiTexturedQuad& quad,
@@ -240,6 +249,13 @@ void DrawText(std::string_view text, std::uint32_t position,
 
 class LiveEnemyListHost final : public EnemyListHost {
  public:
+  void SetNativeInformation(std::string_view id) override {
+    SelectDescription(id);
+  }
+  Framework::MenuRow& CreateNativeRow(const Framework::RowPlacement& placement,
+                                      std::string_view id) override {
+    return NativeRow(placement, id, false);
+  }
   void SetInformation(GazetteText text) override {
     Framework::SetLiveInformationMessageText(text);
   }
@@ -287,6 +303,10 @@ class LiveEnemyNavigationHost final : public EnemyNavigationHost {
 
 class LiveEnemyViewerHost final : public EnemyViewerHost {
  public:
+  Framework::MenuRow& CreateNativeRow(const Framework::RowPlacement& placement,
+                                      std::string_view id) override {
+    return NativeRow(placement, id, true);
+  }
   void DrawEdgeFade() override { DrawLiveViewerEdgeFade(); }
   ProjectionOffset GetProjection() override {
     const auto offset = Render::GetLiveProjectionScreenOffset();
@@ -376,7 +396,10 @@ void WriteState(const GazetteState& state) {
 GazetteCursorMemory ReadCursor() {
   const auto& cursor = VS::Battle::menu9CursorMemory;
   return {{cursor.title_page, cursor.title_row},
-          {cursor.encyclopaedia_page, cursor.encyclopaedia_row},
+          enemyCursorInitialized
+              ? enemyCursor
+              : GazetteRecordCursor{cursor.encyclopaedia_page,
+                                    cursor.encyclopaedia_row},
           {cursor.record_time_page, cursor.record_time_row},
           cursor.gazette_page,
           cursor.gazette_row};
@@ -384,80 +407,83 @@ GazetteCursorMemory ReadCursor() {
 
 void WriteCursor(const GazetteCursorMemory& cursor) {
   auto& memory = VS::Battle::menu9CursorMemory;
-  memory.title_page = cursor.titles.first_row;
+  memory.title_page = static_cast<std::uint8_t>(cursor.titles.first_row);
   memory.title_row = cursor.titles.selected_row;
-  memory.encyclopaedia_page = cursor.enemies.first_row;
+  enemyCursor = cursor.enemies;
+  enemyCursorInitialized = true;
+  // The original BATTLE cursor is a compatibility bookmark only. The native
+  // in-session cursor never narrows to its byte-sized storage.
+  memory.encyclopaedia_page = static_cast<std::uint8_t>(
+      std::min<std::uint32_t>(cursor.enemies.first_row, UINT8_MAX));
   memory.encyclopaedia_row = cursor.enemies.selected_row;
-  memory.record_time_page = cursor.statistics.first_row;
+  memory.record_time_page =
+      static_cast<std::uint8_t>(cursor.statistics.first_row);
   memory.record_time_row = cursor.statistics.selected_row;
   memory.gazette_page = cursor.time_trial;
   memory.gazette_row = cursor.overview_row;
 }
 
 bool BeginRead() {
-  if (enemyData.data != nullptr || enemyData.request != nullptr ||
-      monBinData != nullptr || monBinCdQueueSlot != nullptr) {
+  if (EnemiesSession()) {
     Refuse("a prior enemy-list owner is still active");
     return false;
   }
-  if (kMonBinFile.size <= 0) return false;
-  const auto size = static_cast<std::size_t>(kMonBinFile.size);
-  auto* data = static_cast<std::byte*>(memory::AllocateLiveFromHighEnd(size));
-  if (data == nullptr) return false;
-  enemyData.data = data;
-  enemyData.bytes = size;
-  // This exported pointer remains a compatibility borrow, not the owner.
-  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-  monBinData = reinterpret_cast<EnemyEntry*>(data);
-  auto* request = Content::AllocateLiveDiscRequest(&kMonBinFile);
-  if (request != nullptr) {
-    monBinCdQueueSlot = request;
-    Content::EnqueueLiveDiscRequest(request, data);
-  } else {
-    request = Content::CompleteLiveRefusedDiscRequest(&kMonBinFile, data);
-    monBinCdQueueSlot = request;
-  }
-  enemyData.request = request;
-  enemyData.generation = Content::LiveDiscRequestGeneration(request);
-  if (request == nullptr || enemyData.generation == 0) {
-    if (!ReleaseLiveGazetteEnemyData()) {
-      Refuse("failed enemy read retained storage awaiting cancellation");
-    }
+  const auto* store = Content::DataStore::Get();
+  if (store == nullptr || store->CatalogTables() == nullptr ||
+      store->SaveText() == nullptr) {
+    Refuse("missing native bestiary; run VS.Extract tables <datadir>");
     return false;
   }
+  auto definitions = Content::LoadBestiary(*store->CatalogTables());
+  if (!definitions) {
+    Refuse(definitions.error());
+    return false;
+  }
+  if (definitions->size() < kGazetteVisibleRecords) {
+    Refuse("native encyclopedia view requires at least eight entries");
+    return false;
+  }
+  EnemySession session{*store->SaveText(), {}, {}, {}, {}, {}, false};
+  for (const auto& definition : *definitions) {
+    if (!AddEnemyLayout(session, definition.name, true) ||
+        !AddEnemyLayout(session, definition.description, false)) {
+      return false;
+    }
+    GazetteEnemy enemy;
+    enemy.model_id = static_cast<std::int16_t>(definition.preview_table_index);
+    enemy.class_id = static_cast<std::int16_t>(definition.enemy_class);
+    enemy.first_defeat_bit =
+        static_cast<std::int16_t>(definition.first_defeated_subtype);
+    enemy.defeat_bit_count =
+        static_cast<std::int16_t>(definition.defeated_subtype_count);
+    enemy.name_id = definition.name;
+    enemy.description_id = definition.description;
+    enemy.always_unlocked =
+        definition.unlock == Content::BestiaryUnlock::kAlways;
+    session.rows.push_back(std::move(enemy));
+  }
+  if (!AddEnemyLayout(session, "text.bestiary.locked.name", true) ||
+      !AddEnemyLayout(session, "text.bestiary.locked.description", false)) {
+    return false;
+  }
+  if (enemyCursor.first_row + kGazetteVisibleRecords > session.rows.size()) {
+    enemyCursor = {};
+    enemyCursorInitialized = false;
+  }
+  EnemiesSession() = std::move(session);
+  ++bestiaryGeneration;
   return true;
 }
 
 GazetteReadStatus ReadStatus() {
-  if (enemyData.request == nullptr || enemyData.generation == 0 ||
-      Content::LiveDiscRequestGeneration(enemyData.request) !=
-          enemyData.generation ||
-      enemyData.request != monBinCdQueueSlot ||
-      static_cast<void*>(enemyData.data) != static_cast<void*>(monBinData) ||
-      EnemyBytes().empty()) {
-    return GazetteReadStatus::kRefused;
-  }
-  if (enemyData.request->state == VS::Content::DiscRequestState::kError) {
-    return GazetteReadStatus::kRefused;
-  }
-  return enemyData.request->state == VS::Content::DiscRequestState::kLoaded
-             ? GazetteReadStatus::kLoaded
-             : GazetteReadStatus::kPending;
+  return EnemiesSession() ? GazetteReadStatus::kLoaded
+                          : GazetteReadStatus::kRefused;
 }
 
 bool FinishRead() {
-  if (ReadStatus() != GazetteReadStatus::kLoaded ||
-      enemyData.bytes <
-          kDescriptionOffset + kEncyclopediaEnemies * kHalfwordBytes) {
-    return false;
-  }
-  Content::ReleaseLiveDiscRequest(enemyData.request);
-  enemyData.request = nullptr;
-  enemyData.generation = 0;
-  monBinCdQueueSlot = nullptr;
-  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-  enemyDescriptions =
-      reinterpret_cast<std::uint16_t*>(enemyData.data + kDescriptionOffset);
+  auto& session = EnemiesSession();
+  if (!session || session->ready) return false;
+  session->ready = true;
   return true;
 }
 
@@ -549,6 +575,10 @@ class LiveGazetteHost final : public GazetteHost {
   }
   void DismissInformation() override {
     Publish();
+    if (auto& session = EnemiesSession(); session) {
+      session->description.clear();
+    }
+    Render::ResetQueuedNativeText();
     Framework::DismissLiveInformationBox();
   }
   void BuildPage(GazettePage page) override {
@@ -644,12 +674,8 @@ class LiveGazetteHost final : public GazetteHost {
         static_cast<std::size_t>(selected) >= enemies_.size()) {
       return false;
     }
-    const auto text = enemies_[static_cast<std::size_t>(selected)].description;
-    if (std::ranges::find(text, Core::String::kGameTextTerminator) ==
-        text.end()) {
-      return false;
-    }
-    Framework::SetLiveInformationMessageText(text);
+    SelectDescription(
+        enemies_[static_cast<std::size_t>(selected)].description_id);
     return true;
   }
   void SetMenuVisible(bool visible) override {
@@ -741,12 +767,10 @@ void ShowLiveEnemyDescription() {
   EnemyRows enemies;
   LiveEnemyListHost host;
   if (!ReadEnemies(enemies)) {
-    Refuse("enemy description without a bounded MON.BIN payload");
+    Refuse("enemy description without an active native bestiary");
     return;
   }
-  static_cast<void>(ShowEnemyDescription(
-      enemies, selectedEnemy,
-      Label(miscInfo, menu9_misc_info::index::kEnemyNotDefeated), host));
+  static_cast<void>(ShowEnemyDescription(enemies, selectedEnemy, {}, host));
 }
 
 // decomp: renderEnemyNo (src/MENU/MENU9.PRG/238.c:1883; was _renderEnemyNo).
@@ -772,6 +796,7 @@ void InitializeLiveEnemyList() {
     return;
   }
   StoreEnemies(enemies, true);
+  DetachLegacyInformationText();
 }
 
 // decomp: renderEnemyMenu (src/MENU/MENU9.PRG/238.c:1977; was
@@ -779,15 +804,14 @@ void InitializeLiveEnemyList() {
 void RenderLiveEnemyList(int step) {
   EnemyRows enemies;
   if (!ReadEnemies(enemies)) {
-    Refuse("enemy menu without a bounded MON.BIN payload");
+    Refuse("enemy menu without an active native bestiary");
     return;
   }
   LiveEnemyListHost host;
-  if (RenderEnemyList(
-          enemies, ReadCursor().enemies, step, enemyAnimation,
-          Label(miscInfo, menu9_misc_info::index::kEnemyNameNone),
-          Label(miscInfo, menu9_misc_info::index::kEnemyNotDefeated), host)) {
+  if (RenderEnemyList(enemies, ReadCursor().enemies, step, enemyAnimation, {},
+                      {}, host)) {
     StoreEnemies(enemies, false);
+    QueueEnemyText();
   }
 }
 
@@ -796,7 +820,7 @@ void RenderLiveEnemyList(int step) {
 void RenderLiveEnemyViewer(int step, int transition) {
   EnemyRows enemies;
   if (hideUi == 0 && !ReadEnemies(enemies)) {
-    Refuse("viewer UI without a bounded MON.BIN payload");
+    Refuse("viewer UI without an active native bestiary");
     return;
   }
   LiveEnemyViewerHost host;
@@ -806,6 +830,7 @@ void RenderLiveEnemyViewer(int step, int transition) {
                          static_cast<std::uint32_t>(rotationColor),
                          static_cast<std::uint32_t>(zoomColor)},
                         host));
+  QueueEnemyText();
 }
 
 // decomp: renderEnemyNavigation (src/MENU/MENU9.PRG/238.c:2785; was
@@ -852,32 +877,8 @@ int UpdateLiveGazetteScreen(std::uint8_t* phase) {
 }
 
 bool ReleaseLiveGazetteEnemyData() {
-  if (enemyData.data == nullptr &&
-      (enemyData.request != nullptr || monBinData != nullptr ||
-       monBinCdQueueSlot != nullptr)) {
-    Refuse("enemy-list aliases have no terminal storage owner");
-    return false;
-  }
-  if (enemyData.data != nullptr) {
-    const auto capacity = memory::LivePayloadCapacity(enemyData.data);
-    if (!capacity.has_value() || *capacity < enemyData.bytes ||
-        !Content::CancelLiveDiscWrites({enemyData.data, enemyData.bytes})) {
-      Refuse("enemy-list storage cannot be safely cancelled/released");
-      return false;
-    }
-  }
-  if (enemyData.request != nullptr &&
-      Content::LiveDiscRequestGeneration(enemyData.request) ==
-          enemyData.generation) {
-    Content::ReleaseLiveDiscRequest(enemyData.request);
-  }
-  if (enemyData.data != nullptr) {
-    memory::FreeLiveFromHighEnd(enemyData.data);
-  }
-  enemyData = {};
-  monBinData = nullptr;
-  monBinCdQueueSlot = nullptr;
-  enemyDescriptions = nullptr;
+  Render::ResetQueuedNativeText();
+  EnemiesSession().reset();
   return true;
 }
 
@@ -887,8 +888,36 @@ bool ResetLiveGazetteTerminalModuleState() {
   cameraAngles.pad = 0;
   screenState = {};
   enemyAnimation = {};
+  enemyCursor = {};
   return true;
 }
 
 std::uint64_t LiveGazetteTerminalRefusals() noexcept { return refusals; }
+bool BeginLiveBestiary() { return BeginRead(); }
+bool FinishLiveBestiary() { return FinishRead(); }
+std::uint64_t LiveBestiaryGeneration() noexcept {
+  return EnemiesSession() ? bestiaryGeneration : 0;
+}
+std::span<const GazetteEnemy> LiveBestiaryEnemies() noexcept {
+  const auto& session = EnemiesSession();
+  return session ? std::span<const GazetteEnemy>(session->rows)
+                 : std::span<const GazetteEnemy>{};
+}
+std::string_view LiveBestiaryDescription() noexcept {
+  const auto& session = EnemiesSession();
+  return session ? std::string_view(session->description) : std::string_view{};
+}
+bool LiveBestiaryInformationVisible() {
+  const auto& session = EnemiesSession();
+  if (!session || session->description.empty() ||
+      VS::Input::settings.information == 0) {
+    return false;
+  }
+  const auto box = Menu::ReadLiveTextBox(Menu::kInformationTextBox);
+  return box.flags.kind ==
+             static_cast<std::uint8_t>(Menu::TextBoxKind::kInformation) &&
+         !box.flags.frozen &&
+         box.state ==
+             static_cast<int>(static_cast<std::uint8_t>(box.open_duration)) + 1;
+}
 }  // namespace VS::Menu::Score

@@ -109,6 +109,7 @@ DROPPED = {
 }
 # The code that reads each converter's source format.
 DECODERS = {
+    "bestiary-csv": "Extract::DecodeBestiary",
     "tim-png": "Content::DecodeTim",
     "far-layout-json": "Content::DecodeFar",
     "fbc-palette-png": "Extract::ConvertFbcPalette",
@@ -127,6 +128,7 @@ DECODERS = {
 }
 # The disc-corpus tests that prove each converter preserves its sources (ASSET_PIPELINE section 7).
 EVIDENCE = {
+    "bestiary-csv": ("Bestiary configured disc corpus reloads all records and descriptions exactly",),
     "tim-png": ("extracted TIM corpus converts without changing its source bytes",),
     "far-layout-json": ("Configured FAR corpus rebuilds exactly and loads through the live reader",),
     "fbc-palette-png": ("extracted FBC palette corpus converts and reloads exact words",
@@ -245,6 +247,14 @@ def expected_rows(root: Path, evidence: Evidence) -> list[dict[str, str]]:
     sections: dict[str, list[str]] = {}
     dependents: dict[str, list[str]] = {}
     for output in manifest["outputs"]:
+        if output["converter"] == "text-catalog-json":
+            if output["id"] != "text.catalog.en" or output.get("alias_of"):
+                raise SystemExit(f"{output['id']}: invalid shared text registration")
+            sections.setdefault(output["source"], []).append(
+                "shared native text catalog; source importers account for byte coverage")
+            for dependency in output.get("dependencies", []):
+                dependents.setdefault(dependency["source"], []).append(output["id"])
+            continue
         section = SECTION_CONVERTERS.get(output["converter"])
         if output["converter"] == "save-text-json":
             text_section = TEXT_SECTIONS.get(output["id"])

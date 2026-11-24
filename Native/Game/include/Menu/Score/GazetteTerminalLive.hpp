@@ -1,11 +1,15 @@
 #pragma once
 
 #include <cstdint>
+#include <span>
+#include <string_view>
+
+#include "Menu/Score/GazetteEncyclopedia.hpp"
 
 namespace VS::Menu::Score {  // NOLINT(readability-identifier-naming)
-// MENU9's terminal entries. MON.BIN is decoded only inside a checked live
-// heap payload; text offsets, enemy links and actor/queue identities are
-// checked before use. The camera, rows, preview, times and statistics use
+// MENU9's terminal entries. The encyclopedia owns native catalog/text
+// snapshots and derived UI state; no MON.BIN bytes enter the runtime.
+// The camera, rows, preview, times and statistics use
 // their existing typed Live APIs.
 void ShowLiveEnemyDescription();
 void DrawLiveEnemyNumber(int x, int y, int number, int dimmed);
@@ -16,9 +20,8 @@ void DrawLiveEnemyNavigation(int direction);
 int UpdateLiveGazette();
 int UpdateLiveGazetteScreen(std::uint8_t* phase);
 
-// Cancels pending writes before releasing their request and owned MON.BIN
-// allocation. A stale request generation is never released as a new request.
-// Failure leaves ownership intact so the caller cannot reset the heap yet.
+// Releases the native snapshot and any frame-owned text. The separate model
+// preview owner must still be cancelled before its compatibility heap resets.
 [[nodiscard]] bool ReleaseLiveGazetteEnemyData();
 
 // MENU9's physical original image includes the terminal locals and state,
@@ -27,4 +30,10 @@ int UpdateLiveGazetteScreen(std::uint8_t* phase);
 // Call after preview teardown, and before replacing the game heap.
 [[nodiscard]] bool ResetLiveGazetteTerminalModuleState();
 [[nodiscard]] std::uint64_t LiveGazetteTerminalRefusals() noexcept;
+[[nodiscard]] bool BeginLiveBestiary();
+[[nodiscard]] bool FinishLiveBestiary();
+[[nodiscard]] std::uint64_t LiveBestiaryGeneration() noexcept;
+[[nodiscard]] std::span<const GazetteEnemy> LiveBestiaryEnemies() noexcept;
+[[nodiscard]] std::string_view LiveBestiaryDescription() noexcept;
+[[nodiscard]] bool LiveBestiaryInformationVisible();
 }  // namespace VS::Menu::Score

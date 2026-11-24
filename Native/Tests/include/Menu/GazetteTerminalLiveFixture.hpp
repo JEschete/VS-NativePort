@@ -102,9 +102,6 @@ inline auto ControlOwners() {
                     BytesOf(score::hideUi),
                     BytesOf(score::rotationColor),
                     BytesOf(score::zoomColor),
-                    BytesOf(score::monBinData),
-                    BytesOf(score::monBinCdQueueSlot),
-                    BytesOf(score::enemyDescriptions),
                     BytesOf(score::characterRank),
                     BytesOf(score::score),
                     BytesOf(score::cameraPositionBackup),
@@ -164,13 +161,12 @@ class TerminalFixture
       {.program_offsets = sound_offsets_,
        .bank_selectors = sound_banks_,
        .program_data = {}}};
-  std::byte* borrowed_mon_ = nullptr;
   VS::Render::ScreenOffset projection_ =
       VS::Render::GetLiveProjectionScreenOffset();
 
  public:
   TerminalFixture() {
-    if (score::monBinData != nullptr || score::monBinCdQueueSlot != nullptr ||
+    if (score::LiveBestiaryGeneration() != 0 ||
         content::LiveRefusedDiscRecordsInUse() != 0 ||
         !std::ranges::all_of(
             VS::Content::discRequestSlots, [](const auto& slot) {
@@ -182,7 +178,8 @@ class TerminalFixture
     ImportTable(score::menuText);
     ImportTable(score::rankText);
     ImportTable(VS::Menu::menuStrings);
-    if (!content::DataStore::Open(R"(Native\data)")) {
+    const auto* root = std::getenv("VS_BESTIARY_DATA_ROOT");
+    if (!content::DataStore::Open(root != nullptr ? root : R"(Native\data)")) {
       throw std::runtime_error("terminal fixture needs extracted data");
     }
     content::ResetLiveDiscDrive();
@@ -262,71 +259,20 @@ class TerminalFixture
   }
 
   void BorrowMon() {
-    if (borrowed_mon_ != nullptr || score::monBinData != nullptr) {
-      throw std::runtime_error("terminal test already has a MON owner");
+    if (!score::BeginLiveBestiary() || !score::FinishLiveBestiary()) {
+      throw std::runtime_error("native bestiary did not load");
     }
-    borrowed_mon_ = static_cast<std::byte*>(memory::AllocateLiveFromHighEnd(
-        static_cast<std::size_t>(score::kMonBinFile.size)));
-    if (borrowed_mon_ == nullptr ||
-        content::ReadLiveDiscFileBlocking(score::kMonBinFile.lba,
-                                          score::kMonBinFile.size,
-                                          borrowed_mon_) != 1) {
-      throw std::runtime_error("real MON read did not complete");
-    }
-    score::monBinData = reinterpret_cast<score::EnemyEntry*>(borrowed_mon_);
-    score::enemyDescriptions =
-        reinterpret_cast<std::uint16_t*>(borrowed_mon_ + kDescriptionOffset);
   }
 
   void ReleaseBorrowedMon() {
-    if (borrowed_mon_ == nullptr) return;
-    const auto capacity = memory::LivePayloadCapacity(borrowed_mon_);
-    const auto bytes = static_cast<std::size_t>(score::kMonBinFile.size);
-    if (!capacity || *capacity < bytes ||
-        !content::CancelLiveDiscWrites({borrowed_mon_, bytes})) {
-      VS::Core::Errorf("tests", "terminal borrowed MON cleanup refused");
-      std::abort();
-    }
-    score::monBinData = nullptr;
-    score::enemyDescriptions = nullptr;
-    memory::FreeLiveFromHighEnd(borrowed_mon_);
-    borrowed_mon_ = nullptr;
-  }
-
-  static std::span<std::byte> MonBytes() {
-    const auto capacity = memory::LivePayloadCapacity(score::monBinData);
-    const auto bytes = static_cast<std::size_t>(score::kMonBinFile.size);
-    if (!capacity || *capacity < bytes) {
-      throw std::runtime_error("terminal MON borrow left its real heap owner");
-    }
-    return {reinterpret_cast<std::byte*>(score::monBinData), bytes};
-  }
-
-  static shared::EncodedText Description(std::size_t index) {
-    const auto descriptions =
-        std::as_bytes(MonBytes()).subspan(kDescriptionOffset);
-    const auto offset =
-        static_cast<std::size_t>(Halfword(descriptions, index * 2)) * 2;
-    const auto bytes = descriptions.subspan(offset);
-    return shared::TerminatedText(
-        {reinterpret_cast<const std::uint8_t*>(bytes.data()), bytes.size()});
-  }
-
-  static shared::EncodedText EnemyName(std::size_t index,
-                                       bool skip_prefix = false) {
-    const auto bytes = MonBytes().subspan(index * kEnemyStride + 16, 28);
-    const auto text = std::span(
-        reinterpret_cast<const std::uint8_t*>(bytes.data()), bytes.size());
-    return shared::TerminatedText(text.subspan(skip_prefix ? 2 : 0));
+    if (!score::ReleaseLiveGazetteEnemyData()) std::abort();
   }
 
   static shared::EncodedText RankText() {
     const auto address =
         reinterpret_cast<std::uintptr_t>(VS::Menu::textBoxes[0].text);
-    const std::array<std::span<const std::byte>, 2> owners{
-        std::as_bytes(std::span(score::rankText)),
-        score::monBinData == nullptr ? std::span<const std::byte>{}
-                                     : MonBytes()};
+    const std::array<std::span<const std::byte>, 1> owners{
+        std::as_bytes(std::span(score::rankText))};
     for (const auto owner : owners) {
       const auto first = reinterpret_cast<std::uintptr_t>(owner.data());
       if (address < first || address - first >= owner.size()) continue;
