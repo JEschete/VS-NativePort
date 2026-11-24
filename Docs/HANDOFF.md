@@ -1,5 +1,63 @@
 # Current Handoff
 
+## Typed FAR layout slice (#210), 2026-11-23
+
+Locally verified; **not full #210 completion and not yet published**. Tests and
+captures identify `2764a890b1b1f9f8a42d0f0164c1016f21e0442a` with the FAR and
+parent boundary-repair edits dirty. The parent repair/policy documentation is
+now published separately as `5dc172f1f7a9b9b38026ca35f8c6cd7a880c02ea`; this FAR
+milestone still needs its own fixing revision and successful exact-revision CI.
+
+- `far-layout-json` v1 / background-layout schema v1 writes
+  `Native\data\backgrounds\001OP01A.background.json`,
+  `002OP01A.background.json`, `007OP01A.background.json`,
+  `008OP01A.background.json`, plus manifest registrations. Images and original
+  FAR/TIM sources were unchanged. All generated content/evidence remains ignored.
+- `background.import.bg.<stem>` references `image.bg.<stem>` (lowercase stems).
+  Verified bindings: 001 → MAP001/MAP215 (8×4); 002 → MAP002/MAP216 (16×4);
+  007 → MAP007 (8×12); 008 → MAP008 (8×12). All four are referenced; the old
+  007-unreferenced claim was disproved against the configured disc.
+- Full Debug/Release x64 builds passed with `VS_JOBS=4`, MSBuild `/m:2`.
+  `[far-layout],[field-background]` passed **32 cases / 2,012 assertions in
+  each configuration**, including all 288 cells through the production typed
+  reader, offline exact reconstruction, authored edits, refusal and lifecycle
+  cases. All four outputs validate against the committed JSON Schema.
+- `VS.Extract backgrounds Native\data` converted four; the repeated command
+  retained four with byte-identical JSON/manifest. Project generation was also
+  stable on its second run. Scoped codec/converter/test/runtime tidy passed.
+- Debug prologue: `VS.Desktop.exe --frames 6000 --scripted --press
+  1000:Start,1300:Circle --capture build\issue-210-native-debug --at
+  2200,3200,4200,5900 --no-gpu-validation --speed 8 --save-dir
+  build\issue-210-native-save`. Native JSON 001 loaded at tick 2705; normal
+  cancellation/exit at 6000, zero error log entries. Release produced the same
+  requested capture ticks under `build\issue-210-native`; detailed logs are
+  disabled in Release, so the Debug run supplies the load/exit evidence.
+
+Evidence: `build\issue-210-*-build.log`, `build\issue-210-*-far-tests.log`,
+`build\issue-210-convert-{first,repeat}.log`,
+`build\issue-210-{tidy,runtime-tidy}.log`,
+`build\issue-210-native-debug.log`, `build\issue-210-bindings.json`.
+The canonical verification record is `VR-FAR-TYPED-LAYOUTS`.
+
+**Remaining:** semantic artwork/room identities and readability; authored
+image-ID resolution through upload (currently checked against the MPD-selected
+image); native-only extensibility beyond the bounded renderer envelope;
+matched-reference placement/gradients/seams/parallax; an edited-layout room
+demonstration and production transitions/re-entry. The runtime uses typed owned
+cells without FAR reconstruction, but dormant module pointer declarations and
+image/page rendering compatibility remain. Do not retire the broader EC-04
+bridge or close #210 from this checkpoint.
+
+**Publication scope:** the FAR Content codec/header/schema, Extract converter
+and CLI, Field Background core/live APIs, session reset, FAR/background/event
+tests, converter registration, scaffold/content-ledger registrations, the
+generated Content/Extract/Tests projects, both related ledgers and the
+BUILDING/ASSET_PIPELINE/HANDOFF updates. Exclude the already-published parent
+text repair. Content-ledger sync also adds the previously omitted
+`catalogs/menu/import/combination-blade.json` listing for `MENU/BLADE.SYD`;
+the existing manifest already listed that file, dated 2026-11-23 20:10:57.
+No SYD implementation or data was changed.
+
 ## Owner correction and measured startup baseline, 2026-11-23
 
 The owner explicitly distinguishes **offline imported-byte preservation** from

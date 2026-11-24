@@ -10,7 +10,7 @@
 
 // Live binding for the room background (Background.hpp) over the copied
 // background globals (BackgroundLiveState.hpp), the room record, the frame
-// scratch camera, the high-end heap, the disc queue, VRAM and the frame's
+// scratch camera, typed native layouts, converted images and the frame's
 // primitive buffer. Each entry loads the globals into a RoomBackgroundState,
 // runs the typed core and stores them back. The entries keep the original
 // call shapes (BATTLE.PRG 146C.c:17431-17723) for the generated room,
@@ -41,35 +41,20 @@ class LiveBackgroundHost final : public BackgroundHost {
   void DrawSkyDome(const CameraVector& position, const CameraVector& angles,
                    bool scale_compensated) override;
   [[nodiscard]] CameraVector ReferenceRotation() override;
-  [[nodiscard]] std::optional<BackgroundLayout> Layout(
-      BackgroundBufferId layout) override;
+  [[nodiscard]] std::expected<std::shared_ptr<const OwnedBackgroundLayout>,
+                              std::string>
+  LoadBackgroundLayout(const TiledBackgroundSection& section) override;
   [[nodiscard]] std::optional<TiledBackgroundSection> TiledBackground()
       override;
   [[nodiscard]] bool ReserveTexturePages(int first_page, int page_count,
                                          int owner) override;
   void RetireTexturePages(int first_page, int page_count, int owner) override;
-  [[nodiscard]] BackgroundBufferId AllocateHighBuffer(
-      std::int32_t bytes) override;
-  void FreeHighBuffer(BackgroundBufferId buffer) override;
-  [[nodiscard]] BackgroundReadId AllocateRead(
-      const BackgroundFile& file) override;
-  void EnqueueRead(BackgroundReadId read,
-                   BackgroundBufferId destination) override;
-  [[nodiscard]] BackgroundReadId CompleteRefusedRead(
-      const BackgroundFile& file, BackgroundBufferId destination) override;
-  [[nodiscard]] bool ReadLoaded(BackgroundReadId read) override;
-  void ReleaseRead(BackgroundReadId read) override;
   [[nodiscard]] std::expected<BackgroundTextureUpload, std::string>
   LoadBackgroundTexture(const BackgroundFile& source) override;
   void UploadBackgroundPixels(std::span<const std::uint16_t> words,
                               const TextureRect& rect) override;
   void UploadBackgroundPalette(std::span<const std::uint16_t> words,
                                int row) override;
-
- private:
-  // The cells Layout read out of the heap buffer, which the layout it
-  // returns views.
-  std::vector<BackgroundTile> tiles_;
 };
 
 // func_8008E88C (146C.c:17431).

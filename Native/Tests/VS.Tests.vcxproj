@@ -230,6 +230,7 @@
     <ClCompile Include="src\EventScriptVmTests.cpp" />
     <ClCompile Include="src\EventSessionTests.cpp" />
     <ClCompile Include="src\EventWeaponModeTests.cpp" />
+    <ClCompile Include="src\FarLayoutTests.cpp" />
     <ClCompile Include="src\FieldActorCollisionTests.cpp" />
     <ClCompile Include="src\FieldBackgroundTests.cpp" />
     <ClCompile Include="src\FieldCameraCoreTests.cpp" />
@@ -500,6 +501,7 @@
     <ClCompile Include="..\Tools\Extract\src\EffectTextureConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\EsqConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\EtmConversion.cpp" />
+    <ClCompile Include="..\Tools\Extract\src\FarConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\ImageFilesWriter.cpp" />
     <ClCompile Include="..\Tools\Extract\src\ImageConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\ShpModelConversion.cpp" />

@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Camera-wrapped background grid",
+  "description": "32-screen-unit cells, row-major submission at the farthest ordering slot over black. Horizontal wrap is 1024 screen units. Room/event camera angles, Q12 parallax and offsets remain room state, not image depth. Semantic background identities remain unresolved under #210; background.import.* is explicitly compatibility-only.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "schema_version", "id", "image_id", "unreferenced", "image_depth", "presentation", "draw_order", "columns", "rows", "cells", "import_provenance"],
+  "properties": {
+    "schema": {"const": "background-layout.schema.json"},
+    "schema_version": {"const": 1},
+    "display_name": {"type": "string"},
+    "id": {"$ref": "#/$defs/id"},
+    "image_id": {"$ref": "#/$defs/id"},
+    "unreferenced": {"type": "boolean"},
+    "image_depth": {"const": "indexed8"},
+    "presentation": {"const": "camera-wrapped-grid"},
+    "draw_order": {"const": "row-major-farthest"},
+    "columns": {"type": "integer", "minimum": 1, "maximum": 31},
+    "rows": {"type": "integer", "minimum": 1, "maximum": 31},
+    "cells": {"type": "array", "minItems": 1, "maxItems": 961, "items": {"$ref": "#/$defs/cell"}, "description": "Exactly columns * rows cells; runtime validates this cross-field constraint."},
+    "import_provenance": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source", "source_sha256", "image_source", "image_source_sha256", "unused_header_word"],
+      "properties": {
+        "display_name": {"type": "string"},
+        "source": {"type": "string"},
+        "source_sha256": {"$ref": "#/$defs/hash"},
+        "image_source": {"type": "string"},
+        "image_source_sha256": {"$ref": "#/$defs/hash"},
+        "unused_header_word": {"type": "integer", "minimum": 0, "maximum": 4294967295, "description": "FAR +8, unconsumed by the background reader. Retained exactly, not an authoring quantity."}
+      }
+    }
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z0-9._-]+$"},
+    "hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "byte": {"type": "integer", "minimum": 0, "maximum": 255},
+    "color": {
+      "type": "object", "additionalProperties": false,
+      "description": "RGB texture modulation in 1/128 units: 128 neutral, 0 black.",
+      "required": ["red", "green", "blue"],
+      "properties": {"display_name": {"type": "string"}, "red": {"$ref": "#/$defs/byte"}, "green": {"$ref": "#/$defs/byte"}, "blue": {"$ref": "#/$defs/byte"}}
+    },
+    "cell": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source_texels", "corner_colors", "import_provenance"],
+      "properties": {
+        "display_name": {"type": "string"},
+        "source_texels": {
+          "description": "Inclusive sampled texel endpoints; right < left or bottom < top mirrors. Both pairs equal means disabled. Endpoints must be inside the bound image. Original signed delta is endpoint minus start, not pixel count.",
+          "type": "object", "additionalProperties": false, "required": ["left", "top", "right", "bottom"],
+          "properties": {"display_name": {"type": "string"}, "left": {"$ref": "#/$defs/byte"}, "top": {"$ref": "#/$defs/byte"}, "right": {"$ref": "#/$defs/byte"}, "bottom": {"$ref": "#/$defs/byte"}}
+        },
+        "corner_colors": {
+          "type": "object", "additionalProperties": false, "required": ["top_left", "top_right", "bottom_left", "bottom_right"],
+          "properties": {"display_name": {"type": "string"}, "top_left": {"$ref": "#/$defs/color"}, "top_right": {"$ref": "#/$defs/color"}, "bottom_left": {"$ref": "#/$defs/color"}, "bottom_right": {"$ref": "#/$defs/color"}}
+        },
+        "import_provenance": {
+          "type": "object", "additionalProperties": false, "required": ["unused_corner_bytes"],
+          "properties": {"display_name": {"type": "string"}, "unused_corner_bytes": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"$ref": "#/$defs/byte"}, "description": "Unconsumed CVECTOR code bytes for top-left, bottom-left, bottom-right. Top-right code is represented by image_depth."}}
+        }
+      }
+    }
+  }
+}

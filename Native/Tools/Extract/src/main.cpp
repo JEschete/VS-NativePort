@@ -28,6 +28,7 @@
 #include "Extract/ConverterBatch.hpp"
 #include "Extract/EsqConversion.hpp"
 #include "Extract/EtmConversion.hpp"
+#include "Extract/FarConversion.hpp"
 #include "Extract/ImageConversion.hpp"
 #include "Extract/ShpModelConversion.hpp"
 #include "Extract/WepModelConversion.hpp"
@@ -68,6 +69,7 @@ int Usage() {
       "<ffmpeg.exe>]\n"
       "  VS.Extract catalogs <datadir>\n"
       "  VS.Extract images   <datadir> [--force]\n"
+      "  VS.Extract backgrounds <datadir> [--force]\n"
       "  VS.Extract tables   <datadir> [--force]\n"
       "  VS.Extract models   <datadir> [--force]\n"
       "  VS.Extract banks    <datadir> [--force]\n"
@@ -491,6 +493,18 @@ int WriteCatalogs(const fs::path& root) {
 }
 
 // textures/ and manifest.json from the disc files already under root.
+int ConvertBackgrounds(const fs::path& root, bool force) {
+  const auto report = Extract::ConvertDiscBackgrounds(root, force);
+  if (!report) {
+    VS::Core::LogError("extract", "{}", report.error());
+    return 1;
+  }
+  VS::Core::LogInfo("extract",
+                    "backgrounds: {} converted, {} unchanged, {} removed",
+                    report->converted, report->unchanged, report->removed);
+  return 0;
+}
+
 int ConvertImages(const fs::path& root, bool force) {
   const auto report = Extract::ConvertDiscImages(root, force);
   if (!report) {
@@ -621,6 +635,7 @@ int ConvertExtracted(const Content::Disc& disc, const fs::path& out,
                      const std::optional<fs::path>& ffmpeg) {
   if (WriteCatalogs(out) != 0) return 1;
   if (ConvertImages(out, false) != 0) return 1;
+  if (ConvertBackgrounds(out, false) != 0) return 1;
   if (ConvertModels(out, false) != 0) return 1;
   if (ConvertTables(out, false) != 0) return 1;
   if (ConvertBanks(out, false) != 0) return 1;
@@ -735,11 +750,12 @@ int Run(int argc, char** argv) {
                : Usage();
   }
   if (cmd == "images" || cmd == "tables" || cmd == "models" || cmd == "banks" ||
-      cmd == "labels") {
+      cmd == "labels" || cmd == "backgrounds") {
     const auto force = ForceArgument(argc, argv);
     if (!force) return Usage();
     const fs::path root = Platform::Utf8Path(argv[2]);
     if (cmd == "labels") return LabelAssets(root, *force);
+    if (cmd == "backgrounds") return ConvertBackgrounds(root, *force);
     if (cmd == "models") return WithLabels(ConvertModels(root, *force), root);
     if (cmd == "banks") return WithLabels(ConvertBanks(root, *force), root);
     return WithLabels(cmd == "images" ? ConvertImages(root, *force)

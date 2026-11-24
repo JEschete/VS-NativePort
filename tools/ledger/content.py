@@ -100,6 +100,7 @@ DROPPED = {
 # The code that reads each converter's source format.
 DECODERS = {
     "tim-png": "Content::DecodeTim",
+    "far-layout-json": "Content::DecodeFar",
     "fbc-palette-png": "Extract::ConvertFbcPalette",
     "fbt-texture-png": "Extract::ConvertFbtTexture",
     "shp-gltf": "Content::DecodeShp",
@@ -117,6 +118,7 @@ DECODERS = {
 # The disc-corpus tests that prove each converter preserves its sources (ASSET_PIPELINE section 7).
 EVIDENCE = {
     "tim-png": ("extracted TIM corpus converts without changing its source bytes",),
+    "far-layout-json": ("Configured FAR corpus rebuilds exactly and loads through the live reader",),
     "fbc-palette-png": ("extracted FBC palette corpus converts and reloads exact words",
                         "Effect CLUTs load every extracted palette through the loader"),
     "fbt-texture-png": ("extracted FBT corpus binds every page and converts it exactly",

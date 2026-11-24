@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <cstring>
 #include <format>
+#include <memory>
 #include <optional>
 #include <span>
 #include <string>
@@ -15,7 +16,7 @@
 #include <utility>
 #include <vector>
 
-#include "Content/CdDriveLive.hpp"
+#include "Content/BackgroundLayout.hpp"
 #include "Content/ConvertedImages.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/DiscQueue.hpp"
@@ -25,7 +26,6 @@
 #include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Core/Memory/HeapLive.hpp"
 #include "Field/BackgroundLiveState.hpp"
 #include "Field/Environment.hpp"
 #include "Field/EnvironmentLive.hpp"
@@ -41,7 +41,6 @@
 #include "Render/TexturePagesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 
-using VS::Core::Gte::CVECTOR;
 using VS::Core::Gte::MATRIX;
 using VS::Core::Gte::VECTOR;
 
@@ -68,6 +67,8 @@ VECTOR VS::Field::backgroundReferenceVectors[2];
 int VS::Field::backgroundGradientColors
     [VS::Field::kBackgroundGradientColorCount];
 // decomp: D_800F1DB0 (D_800F1DB0@BATTLE/BATTLE.PRG)
+// Retained for module metadata only; native background loading has no disc
+// request.
 VS::Content::DiscQueueSlot* VS::Field::backgroundLayoutDiscRequest;
 // decomp: D_800F1DB4 (D_800F1DB4@BATTLE/BATTLE.PRG)
 int16_t VS::Field::backgroundOffsetX;
@@ -86,6 +87,8 @@ char VS::Field::legacyBackgroundTexturePage;
 // decomp: D_800F1DC9 (D_800F1DC9@BATTLE/BATTLE.PRG)
 std::uint8_t VS::Field::isTiledBackgroundEnabled;
 // decomp: D_800F1DCC (D_800F1DCC@BATTLE/BATTLE.PRG)
+// Retained for module metadata only; nativeBackgroundLayout owns the live
+// cells.
 VS::Field::BackgroundLayoutRecord* VS::Field::loadedBackgroundLayout;
 namespace {
 // D_80068C1C: 34 twelve-byte vertices, the third word of each its colour, and
@@ -138,7 +141,6 @@ static_assert(sizeof(TILE) % sizeof(std::uint32_t) == 0);
 namespace VS::Field {
 namespace {
 namespace Math = Core::Math;
-namespace Memory = Core::Memory;
 namespace Content = VS::Content;
 
 constexpr std::string_view kChannel = "field.background";
@@ -151,6 +153,7 @@ std::uint64_t droppedPackets = 0;
 std::uint64_t refusedSections = 0;
 VS::Field::BackgroundFile queuedBackgroundTextureFile;
 std::uint8_t backgroundTextureUploaded;
+std::shared_ptr<const OwnedBackgroundLayout> nativeBackgroundLayout;
 
 // True on the 1st, 2nd, 4th, 8th... occurrence, to keep repeated
 // diagnostics readable.
@@ -162,33 +165,11 @@ std::uint8_t backgroundTextureUploaded;
   return VS::Render::FrameScratchpad();
 }
 
-// The read and buffer ids name only kNone; each carries the address of a
-// disc request, the layout or the TIM buffer.
-template <typename Id, typename T>
-[[nodiscard]] Id IdOf(T* pointer) {
-  const auto address = reinterpret_cast<std::uintptr_t>(pointer);
-  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
-  return static_cast<Id>(address);
-}
-
-template <typename T, typename Id>
-[[nodiscard]] T* PointerOf(Id id) {
-  const auto address = static_cast<std::uintptr_t>(id);
-  return reinterpret_cast<T*>(address);
-}
-
 [[nodiscard]] ViewCamera ViewCameraOf(const VS::Render::Camera& camera) {
   return {.position = Math::VectorOf(camera.position),
           .look_at = Math::VectorOf(camera.look_at),
           .angles = Math::VectorOf(camera.angles),
           .far_clip = camera.far_clip};
-}
-
-[[nodiscard]] VS::Content::DiscFile DiscFileOf(const BackgroundFile& file) {
-  VS::Content::DiscFile disc{};
-  disc.lba = file.lba;
-  disc.size = file.size;
-  return disc;
 }
 
 [[nodiscard]] BackgroundFile BackgroundFileAt(std::span<const std::byte> bytes,
@@ -198,15 +179,19 @@ template <typename T, typename Id>
   return {.lba = disc.lba, .size = disc.size};
 }
 
-[[nodiscard]] BackgroundTile TileOf(const BackgroundTileRecord& tile) {
-  BackgroundTile result{.texture = {.x = tile.texture_rect.x,
-                                    .y = tile.texture_rect.y,
-                                    .width = tile.texture_rect.w,
-                                    .height = tile.texture_rect.h}};
+[[nodiscard]] BackgroundTile TileOf(const Content::BackgroundCell& tile) {
+  BackgroundTile result{
+      .texture = {.x = static_cast<std::int16_t>(tile.left),
+                  .y = static_cast<std::int16_t>(tile.top),
+                  .width = static_cast<std::int16_t>(tile.right - tile.left),
+                  .height = static_cast<std::int16_t>(tile.bottom - tile.top)}};
   for (std::size_t corner = 0; corner < result.corners.size(); ++corner) {
-    const CVECTOR& color = tile.corner_colors.at(corner);
+    const auto& color = tile.colors.at(corner);
     result.corners.at(corner) = {
-        .red = color.r, .green = color.g, .blue = color.b, .code = color.cd};
+        .red = static_cast<std::uint8_t>(color.red),
+        .green = static_cast<std::uint8_t>(color.green),
+        .blue = static_cast<std::uint8_t>(color.blue),
+        .code = static_cast<std::uint8_t>(corner == 1 ? 1 : 0)};
   }
   return result;
 }
@@ -319,8 +304,7 @@ RoomBackgroundState LoadLiveRoomBackgroundState() {
       .tiled_enabled = isTiledBackgroundEnabled,
       .texture_file = queuedBackgroundTextureFile,
       .texture_uploaded = backgroundTextureUploaded,
-      .layout_read = IdOf<BackgroundReadId>(backgroundLayoutDiscRequest),
-      .layout = IdOf<BackgroundBufferId>(loadedBackgroundLayout)};
+      .layout = nativeBackgroundLayout};
   std::ranges::copy(backgroundGradientColors, state.gradient_colors.begin());
   return state;
 }
@@ -337,9 +321,7 @@ void StoreLiveRoomBackgroundState(const RoomBackgroundState& state) {
   isTiledBackgroundEnabled = state.tiled_enabled;
   queuedBackgroundTextureFile = state.texture_file;
   backgroundTextureUploaded = state.texture_uploaded;
-  backgroundLayoutDiscRequest =
-      PointerOf<VS::Content::DiscQueueSlot>(state.layout_read);
-  loadedBackgroundLayout = PointerOf<BackgroundLayoutRecord>(state.layout);
+  nativeBackgroundLayout = state.layout;
 }
 
 std::optional<RoomEnvironment> LiveRoomEnvironment() {
@@ -460,36 +442,37 @@ CameraVector LiveBackgroundHost::ReferenceRotation() {
   return Math::VectorOf(backgroundReferenceVectors[0]);
 }
 
-std::optional<BackgroundLayout> LiveBackgroundHost::Layout(
-    BackgroundBufferId layout) {
-  const auto* const payload = PointerOf<const std::byte>(layout);
-  const std::size_t capacity = Memory::LivePayloadCapacity(payload).value_or(0);
-  if (capacity < sizeof(BackgroundLayoutRecord)) return std::nullopt;
-  // The tile records follow the header (2842C.c:481); each is copied out of
-  // the payload rather than read through the original's trailing array.
-  const std::span bytes(payload, capacity);
-  BackgroundLayoutRecord header{};
-  std::memcpy(&header, bytes.data(), sizeof(header));
-  const std::size_t readable =
-      (capacity - sizeof(header)) / sizeof(BackgroundTileRecord);
-  const auto side = [](std::int32_t value) {
-    return static_cast<std::size_t>(std::max(value, 0));
-  };
-  const std::size_t count =
-      std::min(readable, side(header.width) * side(header.height));
-  tiles_.clear();
-  tiles_.reserve(count);
-  for (std::size_t index = 0; index < count; ++index) {
-    BackgroundTileRecord tile{};
-    std::memcpy(
-        &tile,
-        bytes.subspan(sizeof(header) + (index * sizeof(tile)), sizeof(tile))
-            .data(),
-        sizeof(tile));
-    tiles_.push_back(TileOf(tile));
+std::expected<std::shared_ptr<const OwnedBackgroundLayout>, std::string>
+LiveBackgroundHost::LoadBackgroundLayout(
+    const TiledBackgroundSection& section) {
+  const auto* store = Content::DataStore::Get();
+  if (store == nullptr) {
+    return std::unexpected("no extracted-data store is open");
   }
-  return BackgroundLayout{
-      .width = header.width, .height = header.height, .tiles = tiles_};
+  if (section.layout.lba <= 0 || section.layout.size <= 0) {
+    return std::unexpected(
+        "room background layout has invalid source coordinates");
+  }
+  auto source = Content::FindConvertedSource(
+      *store, {.lba = static_cast<std::uint32_t>(section.layout.lba),
+               .rounded_size = static_cast<std::uint64_t>(section.layout.size),
+               .extension = ".FAR",
+               .converter = Content::kFarConverterName});
+  if (!source) return std::unexpected(source.error());
+  auto image = LoadBackgroundImage(*store, section.texture);
+  if (!image) return std::unexpected(image.error());
+  auto document = Content::LoadConvertedBackground(*store, *source, *image);
+  if (!document) return std::unexpected(document.error());
+  auto layout = std::make_shared<OwnedBackgroundLayout>();
+  layout->width = static_cast<std::int32_t>(document->columns);
+  layout->height = static_cast<std::int32_t>(document->rows);
+  for (const auto& cell : document->cells) {
+    layout->tiles.push_back(TileOf(cell));
+  }
+  Core::LogInfo(kChannel, "loaded native layout {} ({}x{}, image {})",
+                document->id, document->columns, document->rows,
+                document->image_id);
+  return layout;
 }
 
 std::optional<TiledBackgroundSection> LiveBackgroundHost::TiledBackground() {
@@ -525,42 +508,6 @@ void LiveBackgroundHost::RetireTexturePages(int first_page, int page_count,
   Render::RetireLiveTexturePageRange(static_cast<std::uint32_t>(first_page),
                                      static_cast<std::uint32_t>(page_count),
                                      owner);
-}
-
-BackgroundBufferId LiveBackgroundHost::AllocateHighBuffer(std::int32_t bytes) {
-  return IdOf<BackgroundBufferId>(Memory::AllocateLiveFromHighEnd(
-      static_cast<std::size_t>(static_cast<std::uint32_t>(bytes))));
-}
-
-void LiveBackgroundHost::FreeHighBuffer(BackgroundBufferId buffer) {
-  Memory::FreeLiveFromHighEnd(PointerOf<const void>(buffer));
-}
-
-BackgroundReadId LiveBackgroundHost::AllocateRead(const BackgroundFile& file) {
-  const VS::Content::DiscFile disc = DiscFileOf(file);
-  return IdOf<BackgroundReadId>(Content::AllocateLiveDiscRequest(&disc));
-}
-
-void LiveBackgroundHost::EnqueueRead(BackgroundReadId read,
-                                     BackgroundBufferId destination) {
-  Content::EnqueueLiveDiscRequest(PointerOf<VS::Content::DiscQueueSlot>(read),
-                                  PointerOf<void>(destination));
-}
-
-BackgroundReadId LiveBackgroundHost::CompleteRefusedRead(
-    const BackgroundFile& file, BackgroundBufferId destination) {
-  const VS::Content::DiscFile disc = DiscFileOf(file);
-  return IdOf<BackgroundReadId>(Content::CompleteLiveRefusedDiscRequest(
-      &disc, PointerOf<void>(destination)));
-}
-
-bool LiveBackgroundHost::ReadLoaded(BackgroundReadId read) {
-  return PointerOf<const VS::Content::DiscQueueSlot>(read)->state ==
-         VS::Content::DiscRequestState::kLoaded;
-}
-
-void LiveBackgroundHost::ReleaseRead(BackgroundReadId read) {
-  Content::ReleaseLiveDiscRequest(PointerOf<VS::Content::DiscQueueSlot>(read));
 }
 
 std::expected<BackgroundTextureUpload, std::string>

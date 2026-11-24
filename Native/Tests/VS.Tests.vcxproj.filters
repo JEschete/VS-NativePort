@@ -594,6 +594,9 @@
     <ClCompile Include="src\EventWeaponModeTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\FarLayoutTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\FieldActorCollisionTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -1612,6 +1615,9 @@
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>
     <ClCompile Include="..\Tools\Extract\src\EtmConversion.cpp">
+      <Filter>..\Tools\Extract\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Tools\Extract\src\FarConversion.cpp">
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>
     <ClCompile Include="..\Tools\Extract\src\ImageFilesWriter.cpp">

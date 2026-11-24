@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <optional>
 #include <string_view>
+#include <utility>
 
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -51,10 +52,6 @@ constexpr std::int32_t kMaxChannel = 255;
 constexpr std::uint16_t kBackdropTexturePage = 0x11;
 constexpr std::uint16_t kBackdropClut = 0x38B1;
 
-// func_8008EFCC: reads are whole 2048-byte sectors.
-constexpr std::int32_t kSectorBytes = 0x800;
-constexpr std::int32_t kSectorMask = kSectorBytes - 1;
-
 // func_8008F0FC: where the image pixels go: the low 64 columns of the
 // reserved page, in the page's row of the texture area, and its CLUT in row
 // 14 of the CLUT strip.
@@ -87,13 +84,6 @@ constexpr int kBackgroundClutColors = 0x100;
   const std::int32_t value = kNeutralTint + (tint * kTintScale);
   return static_cast<std::uint8_t>(
       Math::ClampSignedShort(static_cast<std::int16_t>(value), 0, kMaxChannel));
-}
-
-[[nodiscard]] std::int32_t SectorAligned(std::int32_t bytes) {
-  const std::int32_t partial = bytes & kSectorMask;
-  if (partial == 0) return bytes;
-  return Math::WrappingSubtract(Math::WrappingAdd(bytes, kSectorBytes),
-                                partial);
 }
 
 // The dome's position: the camera's whole units scaled by the zoomed far
@@ -161,8 +151,7 @@ void DrawSkyDome(BackgroundHost& host,
 // decomp: BATTLE.PRG func_8008E88C (src/BATTLE/BATTLE.PRG/146C.c:17310)
 void InitializeRoomBackground(BackgroundHost& host, RoomBackgroundState& state,
                               RoomWeatherState& weather) {
-  state.layout_read = BackgroundReadId::kNone;
-  state.layout = BackgroundBufferId::kNone;
+  ReleaseTiledBackground(host, state);
   state.texture_file = {};
   state.texture_uploaded = 0;
   // The particle buffer is dropped without being freed, as in the original.
@@ -259,15 +248,8 @@ void SetRoomBackgroundColors(BackgroundHost& host, RoomBackgroundState& state,
 // decomp: BATTLE.PRG func_8008EC48 (src/BATTLE/BATTLE.PRG/146C.c:17448)
 void DrawRoomBackground(BackgroundHost& host, const RoomBackgroundState& state,
                         const std::optional<CameraVector>& rotation_override) {
-  if (state.tiled_enabled != 0 && state.layout != BackgroundBufferId::kNone) {
-    const std::optional<BackgroundLayout> layout = host.Layout(state.layout);
-    if (!layout) {
-      VS::Core::LogWarn(
-          kChannel,
-          "DrawRoomBackground: the tiled layout cannot be read; no "
-          "background is drawn");
-      return;
-    }
+  if (state.tiled_enabled != 0 && state.layout) {
+    const auto& layout = state.layout;
     // Out-of-range sizes draw nothing at all, as in the original.
     if (static_cast<std::uint32_t>(Math::WrappingSubtract(layout->width, 1)) <
             kLayoutSideLimit &&
@@ -281,8 +263,11 @@ void DrawRoomBackground(BackgroundHost& host, const RoomBackgroundState& state,
           state.offset_y,
           Math::WrappingMultiply(camera.angles.x, state.parallax_y) /
               kFixedOne);
-      DrawRoomBackgroundTiles(host, *layout, horizontal, vertical,
-                              state.texture_page);
+      DrawRoomBackgroundTiles(host,
+                              {.width = layout->width,
+                               .height = layout->height,
+                               .tiles = layout->tiles},
+                              horizontal, vertical, state.texture_page);
     }
     return;
   }
@@ -297,47 +282,51 @@ void DrawRoomBackground(BackgroundHost& host, const RoomBackgroundState& state,
 std::int32_t QueueTiledBackgroundLoad(BackgroundHost& host,
                                       RoomBackgroundState& state,
                                       std::int32_t texture_page) {
+  const std::uint8_t was_enabled = state.tiled_enabled;
+  ReleaseTiledBackground(host, state);
   state.texture_page = static_cast<std::uint8_t>(texture_page);
   state.texture_file = {};
   state.texture_uploaded = 0;
   if (const std::optional<TiledBackgroundSection> section =
           host.TiledBackground()) {
+    auto layout = host.LoadBackgroundLayout(*section);
+    if (!layout || !*layout) {
+      VS::Core::LogError(kChannel, "QueueTiledBackgroundLoad: {}",
+                         layout ? "empty native background" : layout.error());
+      return 0;
+    }
     state.texture_page_count =
         static_cast<std::int16_t>(section->texture_page_count);
     if (host.ReserveTexturePages(state.texture_page, state.texture_page_count,
                                  kBackgroundPageOwner)) {
-      const std::int32_t layout_bytes = SectorAligned(section->layout.size);
-      state.layout = host.AllocateHighBuffer(layout_bytes);
-      if (state.layout == BackgroundBufferId::kNone) return 0;
+      state.layout = std::move(*layout);
       state.texture_file = section->texture;
-      state.layout_read = host.AllocateRead(section->layout);
-      if (state.layout_read != BackgroundReadId::kNone) {
-        host.EnqueueRead(state.layout_read, state.layout);
-      } else {
-        state.layout_read =
-            host.CompleteRefusedRead(section->layout, state.layout);
-      }
+      state.tiled_enabled = was_enabled;
       return 1;
     }
   }
-  state.layout_read = BackgroundReadId::kNone;
   return 0;
 }
 
 // decomp: BATTLE.PRG func_8008F0FC (src/BATTLE/BATTLE.PRG/146C.c:17557)
 std::int32_t FinishTiledBackgroundLoad(BackgroundHost& host,
                                        RoomBackgroundState& state) {
+  if (!state.layout) return 0;
   if (state.texture_uploaded == 0) {
     state.texture_uploaded = 1;
     const auto image = host.LoadBackgroundTexture(state.texture_file);
     if (!image) {
       VS::Core::LogError(kChannel, "FinishTiledBackgroundLoad: {}",
                          image.error());
+      ReleaseTiledBackground(host, state);
+      return 1;
     } else if (!IsValidBackgroundTexture(*image)) {
       VS::Core::LogError(
           kChannel,
           "FinishTiledBackgroundLoad: converted background image has "
           "invalid pixel dimensions or palette size");
+      ReleaseTiledBackground(host, state);
+      return 1;
     } else {
       const std::int32_t page = state.texture_page;
       TextureRect rect = image->source_rect;
@@ -352,10 +341,8 @@ std::int32_t FinishTiledBackgroundLoad(BackgroundHost& host,
     }
     return 0;
   }
-  if (state.layout_read != BackgroundReadId::kNone &&
-      host.ReadLoaded(state.layout_read)) {
-    host.ReleaseRead(state.layout_read);
-    state.layout_read = BackgroundReadId::kNone;
+  if (state.texture_uploaded == 1) {
+    state.texture_uploaded = 2;
     return 1;
   }
   return 0;
@@ -365,11 +352,10 @@ std::int32_t FinishTiledBackgroundLoad(BackgroundHost& host,
 std::int32_t ReleaseTiledBackground(BackgroundHost& host,
                                     RoomBackgroundState& state) {
   state.tiled_enabled = 0;
-  if (state.layout == BackgroundBufferId::kNone) return 0;
+  if (!state.layout) return 0;
   host.RetireTexturePages(state.texture_page, state.texture_page_count,
                           kBackgroundPageOwner);
-  host.FreeHighBuffer(state.layout);
-  state.layout = BackgroundBufferId::kNone;
+  state.layout.reset();
   state.texture_file = {};
   state.texture_uploaded = 0;
   return 1;

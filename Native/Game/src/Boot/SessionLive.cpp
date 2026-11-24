@@ -33,6 +33,7 @@
 #include "Event/ScriptDialogCommandsLive.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Event/ScriptVmLiveState.hpp"
+#include "Field/BackgroundLive.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Input/Controllers.hpp"
@@ -445,6 +446,7 @@ class EntryModules final : public ModeModules {
 // reset only because nothing cleared it; the title overlay overwrote it anyway,
 // so a new session matches the first boot instead of inheriting its values.
 void ResetLiveSessionState() {
+  Field::LiveReleaseTiledBackground();
   VS::Game::Save::ResetSession();
   Event::ResetLiveEventCameraScratch();
   Effects::ResetEmitterWorkspace();

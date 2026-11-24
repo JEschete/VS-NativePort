@@ -49,7 +49,7 @@ The rule for choosing: **what is easiest for a modder to edit**, provided conver
 | 4 | Events, effect programs, layouts | **JSON** with a JSON Schema, so editors can complete and check them. A script language can be added later on top of the same data. |
 | 5 | Unknown data | **Kept** as named opaque fields (§4.1), so re-encoding is exact. |
 | 6 | Colour and STP | The **PNG is authoritative** for colour and transparency: what an editor changes is what the game uses. The sidecar holds only what PNG cannot: the STP bit, provenance and the material default (§6.4). The round trip proves the original 16-bit words are reproduced exactly (§7). |
-| 7 | Unused content | Valid content with no reference (e.g. `DBGFNT.TIM`, `BG\007OP01A`) is **converted** and marked `unreferenced` in the manifest, so modders can use it. Empty files are `skipped` with a reason; exact duplicates are recorded as aliases of one output. |
+| 7 | Unused content | Valid content with no reference (e.g. `DBGFNT.TIM`) is **converted** and marked `unreferenced` in the manifest, so modders can use it. Empty files are `skipped` with a reason; exact duplicates are recorded as aliases of one output. All four FAR backgrounds have verified MPD references (§6.4.1); the earlier `007OP01A` example was incorrect. |
 | 8 | Short palette files | Palette rows past the end of a file (FBC) are **not stored**. The runtime fills them with zero (transparent), as the zero sector padding after each file gave the original. Stale bytes are not reproduced: the only stale row was slot 0's fifth, past the one sector read, and no sprite samples it. A disc test shows the only sprites that sample past their palette are E210's descriptors 520-544 (row 242, zero in both). |
 | 9 | Layout | §3. Patch and mod layers mirror it and override by path (assets) or by ID (tables), plan §9.6. |
 | 10 | Coverage gaps | Formats with no migration issue get one (images in menus, ending, `SYSTEM.DAT` and PRG data; the gameplay catalog; the string table; AKAO sequences; PLG/PRG data blobs). |
@@ -153,7 +153,7 @@ Game systems
 
 - Run it with `extract-native-assets.cmd [--disc disks\SLUS-01040.cue] [--out Native\data] [--only <kind>] [--force]`.
 - The runs are **incremental**. An output is rebuilt only when its source file hash or its converter version changes. `--force` rebuilds everything.
-- Conversion is **offline**. `VS.Extract extract` converts the supported source files during extraction; `VS.Extract images <datadir>` reruns just the image converters and `VS.Extract tables <datadir>` just the table converters (the workshop recipes, §6.8). The field-background runtime now reads the converted PNG/sidecar and uploads the native pixels and palette; it does not parse or convert the source TIM. The FAR layout remains a raw file read through the disc-file catalog and is a separate migration boundary.
+- Conversion is **offline**. `VS.Extract extract` converts the supported source files during extraction; `VS.Extract images <datadir>` reruns the image converters, `VS.Extract backgrounds <datadir>` the FAR layouts (§6.4.1), and `VS.Extract tables <datadir>` the table converters (the workshop recipes, §6.8). The field-background runtime reads the converted PNG/sidecar and typed layout JSON. It does not parse or reconstruct TIM/FAR payloads; the remaining room/image binding and renderer compatibility limits are separate gates.
 - **Startup check:** `VS.Desktop`, Combat Lab and Launcher validate `manifest.json` and the required converter versions. They reject missing/stale converted sources (TIM, FBC, FBT and SYD), dependencies or outputs, and workshop tables that fail their checks, with an instruction to rerun extraction. They never fall back to reading the source file.
 
 ---
@@ -314,7 +314,7 @@ The disc has 27 kinds of files. The "Source" column below names the files on the
 | `MAP\*.MPD` (512) | `rooms\<zone>\<MAP>.gltf` + `.room.json` | §6.3 | vstools `MPD.js`, VSViewer, decomp field loaders |
 | `MAP\*.ZND` (256) | `catalogs\world\zones.csv`, `zone-rooms.csv`, `zone-textures.csv`; `catalogs\enemies\zone-enemies.csv`, `zone-enemy-limbs.csv`, `zone-enemy-parts.csv`; `textures\zone\<ZONE>\*.png` | done (`znd-tables`, §6.9, #517): rows and images rebuild each zone exactly. The relational ENEMY_DATA_SCHEME catalogs remain #199 | ENEMY_DATA_SCHEME.md §3 |
 | `EVENT\*.EVT` (512) | `events\<id>.json` | command list `{op, args}` with op names from the decomp's event interpreter; text → string IDs | decomp `Event\` module |
-| `BG\*.TIM` (4), `BG\*.FAR` (4), root `*.TIM` | `textures\bg\*.png` + `.image.json`; `.FAR` → background layout JSON | TIM → PNG (§6.4). The BG TIM headers are not authoritative: they declare mode `0xA` (16bpp + CLUT) with a 256-colour CLUT and three share id `0x110`; the layout's draw depth selects 8-bit indices. The runtime uploads the converted PNG's packed indices and exact palette words. `.FAR` = 12-byte header `{w, h, reserved}` then w×h 24-byte tiles (source rectangle + 4 corner colours); it is still loaded raw through MPD room section 15 | native `Field\Background.cpp`, `BackgroundLive.cpp` |
+| `BG\*.TIM` (4), `BG\*.FAR` (4), root `*.TIM` | `textures\bg\*.png` + `.image.json`; `backgrounds\<stem>.background.json` | TIM → PNG (§6.4). The BG TIM headers are not authoritative: they declare mode `0xA` (16bpp + CLUT) with a 256-colour CLUT and three share id `0x110`; the layout's draw depth selects 8-bit indices. FAR has a 12-byte header and 24-byte cells; the reader consumes typed JSON cells directly (§6.4.1), while MPD section 15 still selects the paired image | native `Content\BackgroundLayout.hpp`, `Field\Background.cpp`, `BackgroundLive.cpp` |
 | `GIM\*.GIM` (49) | `textures\gim\*.png` + composition JSON | VS screen-effect images: per-layer cell maps over shared strips, 4 × 16-colour CLUTs and a shared or owned 256-colour palette | native `Render\GimImages.cpp` |
 | `MENU\*.BIN` (11), `ENDING\ILLUST*.BIN` (11) | `ui\*.png` + `.image.json` + layout JSON | menu art, game-over, ending illustrations. `MENUBG` is word-RLE and `ILLUST*` are LZ/RLE-compressed TIMs, decoded at conversion; `ITEMNAME`, `ITEMHELP`, `MENU12` and `MCMAN` are text and tables, not images | native `Menu\`, `StaffRollCore.cpp` |
 | `MENU\*.SYD` (3) | `catalogs\menu\combination-<kind>-{results,pairs,materials}.csv` + `.schema.json` | workshop **combination recipes** (result records, ingredient pairs and material rules), not item definitions; there is no global item-stat file. Converted (§6.8) | native `Content\WorkshopRecipes.hpp`, `Menu\Setup\Combination.hpp` |
@@ -510,7 +510,7 @@ Not yet done: the encyclopedia's enemy previews, which read ZUD files through th
 
 Modding first (D25): the PNG is what an image editor changes, so the PNG is authoritative for colour and transparency. The `<name>.image.json` sidecar holds only what PNG cannot carry. Conversion stays exact: PNG + sidecar reproduce the original 16-bit words, and the round trip (§7) proves it.
 
-The strict TIM and native-image readers/types are in `VS.Content`; the TIM-to-image conversion, PNG/sidecar writers and manifest writer are in `VS.Extract`. These writers are not part of the runtime Content library. The extractor writes the native files once. The field-background runtime resolves the converted PNG/sidecar from the manifest and uploads its pixels and palette; it does not parse the source TIM. Its FAR tile layout remains raw and is a separate migration boundary.
+The strict TIM and native-image readers/types are in `VS.Content`; the TIM-to-image conversion, PNG/sidecar writers and manifest writer are in `VS.Extract`. These writers are not part of the runtime Content library. The extractor writes the native files once. The field-background runtime resolves the converted PNG/sidecar from the manifest and uploads its pixels and palette; it does not parse the source TIM. Its FAR layout now uses the typed JSON reader in §6.4.1.
 
 Background material (#208): the original draws each FAR tile as an opaque Gouraud-shaded textured quad (`setPolyGT4`, `2842C.c:497`) with CLUT (768, 238), in the farthest ordering slot over a black full-screen fill. Its corner colours on the disc are neutral 128 (the texel unchanged) or black (an edge fade). There are no normals or lights, and the only change to the texture while it is shown is the event script's palette transform.
 
@@ -538,6 +538,80 @@ At runtime the effect loader finds a page's converted image by its sector throug
 - **Palettes:** the indexed PNG's own palette is the image's default palette. An image with several palettes (CLUT variants, palette animation, effect colour swaps, blade materials) also has `<name>.palettes.png`: one palette per row, row 0 = the default, with the same colour and transparency rules and STP per row in the sidecar. The converter checks that the PNG's palette equals row 0 and reports a mismatch instead of picking one. An image whose palette lives elsewhere (ETM, zone textures) gets a preview palette from its default binding; the sidecar names the palette's source, and import ignores the preview.
 - **Sidecar** (schema `vs.image`, version 1; `Content/ImageFiles.hpp`): `schema`, `schema_version`, the stable image `id`, `depth` (4, 8 or 16), `width` and `height`; for indexed images `palette` = `{entries, count, stp}` with one STP value per palette row; for 16bpp images `stp` = `"none"`, `"all"` or `"mask"` (then `<name>.stp.png`); `material` = `{zero_word, semi_transparency}` only when the consumer is known; `unreferenced` only when true; and `provenance` = source path, SHA-256 and byte offset, the TIM's id, flags and VRAM rectangles, an effect page's `texture_page` (`effect`, `slot`, `page`, `vram`) and `preview_palette` (`image`, `row`, `entry`), any `dependencies` (source, hash and role, such as the layout that fixes a background's depth) and a `note`. Unknown members are errors, so a misspelt field is reported rather than ignored. Unused palette entries keep their words.
 - **Placement:** images that the original placed in a shared VRAM page are written as **separate** files. Their placement in VRAM is runtime layout, not content (plan §0.1). Any UV remapping is done by the converter and checked in the round-trip.
+
+### 6.4.1 FAR background layouts
+
+**Implemented bounded slice (#210):** `VS.Extract backgrounds <datadir>
+[--force]` writes `backgrounds\<stem>.background.json`, using
+`far-layout-json` version 1 and the committed
+`Native\Content\schemas\background-layout.schema.json` version 1.
+Full extraction runs it after images. The configured SLUS-01040 corpus has
+four nonempty inputs and 288 cells:
+
+| Stem | Layout ID | Image ID | Grid | MPD references |
+| --- | --- | --- | --- | --- |
+| `001OP01A` | `background.import.bg.001op01a` | `image.bg.001op01a` | 8×4 | MAP001, MAP215 |
+| `002OP01A` | `background.import.bg.002op01a` | `image.bg.002op01a` | 16×4 | MAP002, MAP216 |
+| `007OP01A` | `background.import.bg.007op01a` | `image.bg.007op01a` | 8×12 | MAP007 |
+| `008OP01A` | `background.import.bg.008op01a` | `image.bg.008op01a` | 8×12 | MAP008 |
+
+All four bindings have consistent room section tables and sector-rounded
+file sizes. MAP007 was also compared byte-for-byte with the configured disc;
+the earlier claim that `007OP01A` was unreferenced was incorrect
+([investigation evidence](https://github.com/JEschete/VS-NativePort/issues/210#issuecomment-7121319720)).
+These are proven source/reuse relationships, **not verified semantic artwork
+or room names**. The `background.import.*` IDs explicitly retain that limit.
+
+The format follows the actual renderer, upstream
+`resources\rood-reverse\src\BATTLE\BATTLE.PRG\2842C.c:464`
+(`func_8009147C`), rather than treating every rectangle as a positive extent:
+
+- `columns`, `rows` and row-major `cells` describe the grid. The admitted
+  renderer envelope is 1–31 cells per side, with 32-screen-unit cells and
+  a 1024-screen-unit horizontal wrap.
+- `source_texels.{left,top,right,bottom}` are inclusive sampled endpoints.
+  Reversed endpoints mirror the texture; both endpoint pairs equal disable
+  the cell. The original signed deltas are endpoint minus start; negative
+  deltas occur in `007OP01A` and `008OP01A`.
+- Named `top_left`, `top_right`, `bottom_left`, `bottom_right` RGB colours
+  modulate the image in 1/128 units: 128 is neutral and zero is black.
+  `image_depth: indexed8` represents the consumed second corner's code byte,
+  shifted into texture-page depth bits. It is **not** semi-transparency.
+- `presentation: camera-wrapped-grid` and
+  `draw_order: row-major-farthest` retain the existing submission rules.
+  Camera roll, offsets and Q12 parallax remain room/event state; image bit
+  depth is not scene depth.
+- `import_provenance` retains source and paired-image paths/hashes, the
+  unconsumed header word at byte 8 and the other three unconsumed corner
+  code bytes. For imported originals, cell index `i` maps to source offset
+  `12 + 24*i`. No consumed layout field is hidden in an opaque payload.
+
+The converter validates every layout and paired PNG/sidecar before writing,
+uses the shared staged writer/manifest, and records the TIM as a dependency.
+Unchanged inputs retain validated authored JSON; changed/deleted dependencies
+invalidate it, and `--force` replaces authored cells from the import source.
+The native reader enforces schema/version, grid counts, byte-range endpoints
+inside the image, RGB ranges, image identity/material and source hashes in
+all builds. Unsupported depth modes and missing/stale/invalid resources
+produce errors rather than a raw-FAR fallback.
+
+Production loads `BackgroundLayoutDocument` into an owned
+`OwnedBackgroundLayout` and draws its cells directly. There is no FAR packing,
+heap payload or disc request in this path; `EncodeFar` is used only by offline
+extraction checks/tests. Repeat entry, initialization and session reset release
+native ownership and page reservations.
+
+**Remaining gates:** the current room still chooses its image through the MPD
+binding; JSON `image_id` validates that choice but cannot yet rebind it.
+The selected native image must next be resolved by authored ID and carried
+through upload, separating live references from import provenance. Semantic
+identities/readability, native-only extensibility beyond the admitted renderer
+envelope, matched-reference placement/gradients/seams/parallax, an edited-layout
+room demonstration and production transitions/re-entry remain open. Dormant
+legacy module pointer declarations and image/page rendering compatibility are
+not retired by this slice. The four-file offline round trip, direct reader
+tests and bounded prologue evidence do **not** establish full #210 or EC-04
+completion.
 
 ### 6.5 Sequenced audio (owner choice: **sequenced**)
 The game plays music and sound effects by sequencing sampled instruments at runtime. Tempo, volume, fades and battle transitions change live, so the content is converted into equivalent modern pieces and our ported sequencer (`Audio::Seq`, copied from the decomp `Audio\Seq`) plays it:
@@ -1046,9 +1120,9 @@ A label-only pass or one changed numeric value is not sufficient.
 ## 9. Tracking (ledgers and gates)
 
 - **`CONTENT_LEDGER.csv`** (plan §4.5, #503) has one row per disc file. Its columns: `path, size, kind, decoder, converter, output, round_trip, status, notes`. `python tools\ledger\content.py --sync` rebuilds it from an extracted disc (`Native\data\files.tsv` and `manifest.json`); `--check` runs in CI without a disc and compares the ledger with the extracted data when there is one.
-  - `converted`: the file is the source of a manifest output. Its converter must be one the runtime reads (`kRequiredConverters`). `round_trip=pass` needs every disc-corpus test `content.py` names for the converter to be a Catch2 test cited by a passing `VERIFY_LEDGER` record; otherwise `pending`.
+  - `converted`: the file is the source of a manifest output. Its converter must be one the runtime reads (startup `kRequiredConverters`, or the FAR reader's `kBackgroundLayoutConverters`). `round_trip=pass` needs every disc-corpus test `content.py` names for the converter to be a Catch2 test cited by a passing `VERIFY_LEDGER` record; otherwise `pending`.
   - `skipped`: a placeholder (no bytes, or one zero byte), or a file §6.1 drops (`SYSTEM.CNF`, `ENDING\NULL.DAT`), with the reason first in `notes`; the other columns are `n/a`.
-  - `unconverted`: everything else, noting the issue that converts it. A file that only feeds another conversion (a `BG\*.FAR` fixing its TIM's depth) stays `unconverted` until its own converter, and outputs written outside the manifest (effect-package sample streams; #216) do not count as converted.
+  - `unconverted`: everything else, noting the issue that converts it. Feeding another conversion alone does not count: FAR was unconverted while it only supplied TIM depth, and now has its own layout output. Outputs written outside the manifest (effect-package sample streams; #216) do not count as converted.
 
 <!-- content:begin (generated by tools/ledger/content.py --sync) -->
 

@@ -33,6 +33,9 @@
     <ClCompile Include="src\EtmConversion.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\FarConversion.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ImageConversion.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -85,6 +88,9 @@
       <Filter>include\Extract</Filter>
     </ClInclude>
     <ClInclude Include="include\Extract\EtmConversion.hpp">
+      <Filter>include\Extract</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Extract\FarConversion.hpp">
       <Filter>include\Extract</Filter>
     </ClInclude>
     <ClInclude Include="include\Extract\ImageConversion.hpp">

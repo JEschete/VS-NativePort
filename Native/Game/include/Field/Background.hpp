@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <expected>
+#include <memory>
 #include <optional>
 #include <span>
 #include <string>
@@ -22,10 +23,7 @@
 namespace VS::Field {
 struct RoomWeatherState;  // Field/Environment.hpp
 
-// Handles the host maps to its disc requests and heap buffers; compared and
-// never dereferenced.
-enum class BackgroundReadId : std::uintptr_t { kNone = 0 };
-enum class BackgroundBufferId : std::uintptr_t { kNone = 0 };
+struct OwnedBackgroundLayout;
 
 // A file on the disc, in sectors and bytes (vs_main_CdFile).
 struct BackgroundFile {
@@ -63,8 +61,7 @@ struct RoomBackgroundState {
   std::uint8_t tiled_enabled = 0;       // D_800F1DC9
   BackgroundFile texture_file{};        // native source for the loaded image
   std::uint8_t texture_uploaded = 0;    // native load step, not a legacy global
-  BackgroundReadId layout_read{};       // D_800F1DB0
-  BackgroundBufferId layout{};          // D_800F1DCC
+  std::shared_ptr<const OwnedBackgroundLayout> layout{};
 
   friend bool operator==(const RoomBackgroundState&,
                          const RoomBackgroundState&) = default;
@@ -176,7 +173,7 @@ struct TextureRect {
 };
 
 // A CVECTOR: a corner colour and, in the second corner, the tile's
-// semi-transparency mode.
+// texture-page depth code (not semi-transparency).
 struct TileCorner {
   std::uint8_t red = 0;
   std::uint8_t green = 0;
@@ -196,6 +193,12 @@ struct BackgroundLayout {
   std::int32_t width = 0;
   std::int32_t height = 0;
   std::span<const BackgroundTile> tiles;
+};
+
+struct OwnedBackgroundLayout {
+  std::int32_t width = 0;
+  std::int32_t height = 0;
+  std::vector<BackgroundTile> tiles;
 };
 
 // The room's tiled background section: the texture pages its picture takes
@@ -247,9 +250,9 @@ class BackgroundHost {
   // D_800F1CE0[0]: the dome's turn when neither the caller nor the room
   // gives one.
   [[nodiscard]] virtual CameraVector ReferenceRotation() = 0;
-  // The loaded layout, absent when the buffer cannot be read as one.
-  [[nodiscard]] virtual std::optional<BackgroundLayout> Layout(
-      BackgroundBufferId layout) = 0;
+  [[nodiscard]] virtual std::expected<
+      std::shared_ptr<const OwnedBackgroundLayout>, std::string>
+  LoadBackgroundLayout(const TiledBackgroundSection& section) = 0;
   // vs_battle_roomData.tiledBackground, absent when the room has none.
   [[nodiscard]] virtual std::optional<TiledBackgroundSection>
   TiledBackground() = 0;
@@ -259,20 +262,6 @@ class BackgroundHost {
                                                  int owner) = 0;
   virtual void RetireTexturePages(int first_page, int page_count,
                                   int owner) = 0;
-  // vs_main_allocHeapR and vs_main_freeHeapR; kNone when refused.
-  [[nodiscard]] virtual BackgroundBufferId AllocateHighBuffer(
-      std::int32_t bytes) = 0;
-  virtual void FreeHighBuffer(BackgroundBufferId buffer) = 0;
-  // The disc queue: kNone when every request is in use.
-  [[nodiscard]] virtual BackgroundReadId AllocateRead(
-      const BackgroundFile& file) = 0;
-  virtual void EnqueueRead(BackgroundReadId read,
-                           BackgroundBufferId destination) = 0;
-  // Reads a file the queue refused (#282) and returns a finished request.
-  [[nodiscard]] virtual BackgroundReadId CompleteRefusedRead(
-      const BackgroundFile& file, BackgroundBufferId destination) = 0;
-  [[nodiscard]] virtual bool ReadLoaded(BackgroundReadId read) = 0;
-  virtual void ReleaseRead(BackgroundReadId read) = 0;
   // Loads an already-converted native image; it does not read or decode TIM.
   [[nodiscard]] virtual std::expected<BackgroundTextureUpload, std::string>
   LoadBackgroundTexture(const BackgroundFile& source) = 0;
@@ -307,13 +296,11 @@ void SetRoomBackgroundColors(BackgroundHost& host, RoomBackgroundState& state,
 // func_8008EC48: the tiled picture, the solid backdrop or the sky dome.
 void DrawRoomBackground(BackgroundHost& host, const RoomBackgroundState& state,
                         const std::optional<CameraVector>& rotation_override);
-// func_8008EFCC: lends the picture's texture pages and queues its layout;
-// 1 once the layout read is queued.
+// func_8008EFCC: validates the native layout/image binding, then lends pages.
 [[nodiscard]] std::int32_t QueueTiledBackgroundLoad(BackgroundHost& host,
                                                     RoomBackgroundState& state,
                                                     std::int32_t texture_page);
-// func_8008F0FC: uploads the converted image once, then frees the layout
-// buffer once its read finishes; 1 at that last step.
+// func_8008F0FC: uploads the converted image once, then signals completion.
 [[nodiscard]] std::int32_t FinishTiledBackgroundLoad(
     BackgroundHost& host, RoomBackgroundState& state);
 // func_8008F234: disables the picture and returns its pages and layout; 1

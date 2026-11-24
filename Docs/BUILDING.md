@@ -291,13 +291,29 @@ build\Debug\VS.Extract.exe banks   Native\data
 build\Debug\VS.Extract.exe streams disks\SLUS-01040.cue Native\data
 rem Rewrite catalogs\ for an existing data directory without re-extracting.
 build\Debug\VS.Extract.exe catalogs Native\data
+rem Convert paired background images first, then their typed FAR layouts.
+build\Debug\VS.Extract.exe images Native\data
+build\Debug\VS.Extract.exe backgrounds Native\data
 rem Add readable names without reconverting or replacing gameplay edits.
 build\Debug\VS.Extract.exe labels Native\data
 rem Upgrade recipe identities and zone field names without replacing values.
 build\Debug\VS.Extract.exe authoring Native\data
 ```
 
-- Successful conversion commands also add optional, informational `display_name`
+- `backgrounds <datadir> [--force]` converts the four supported `BG\*.FAR`
+  layouts into `backgrounds\<stem>.background.json`, recorded as
+  `far-layout-json` version 1 in `manifest.json`. Full `extract` runs it after
+  image conversion. On an existing tree, run `images` first when the paired
+  TIM/FAR sources changed; the layout converter requires current PNG/sidecar
+  outputs. Unchanged inputs retain and validate authored JSON edits; `--force`
+  explicitly reimports and replaces them. Missing/stale images, invalid
+  rectangles, malformed grids and unsupported depth codes are errors.
+  The production background reader consumes typed cells directly, with no
+  raw-FAR fallback. Its version/schema checks run when a background is loaded,
+  so older data trees need this command even if they reach the title screen.
+  See [ASSET_PIPELINE.md §6.4.1](ASSET_PIPELINE.md#641-far-background-layouts)
+  for the format, proven room bindings and remaining authoring gates.
+- Other successful conversion commands also add optional, informational `display_name`
   labels to native CSV/JSON/glTF metadata. For an existing tree, use `labels`:
   it preserves the original fields and existing custom labels. Only
   `labels Native\data --force` refreshes those labels; unlike conversion
@@ -332,7 +348,7 @@ build\Debug\VS.Extract.exe authoring Native\data
   `catalogs` rewrites them for an existing data directory; the output is identical on a second run.
 - The game, Combat Lab and launcher refuse to start without valid catalogs and say which command to run.
   An invalid catalog names the file, JSON pointer and rule it broke. They also refuse a data directory
-  whose `manifest.json` lacks a current output for any converted type, including each sound bank
+  whose `manifest.json` lacks a current output for a required startup converter, including each sound bank
   (`wave-bank`), the ending XA (`xa-flac`) and the movie (`str-mkv`), and say to run `extract` again.
   The launcher's pipeline version is 9, so a data directory prepared before these outputs existed is
   prepared again.
