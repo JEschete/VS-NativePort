@@ -1,10 +1,83 @@
 # Current Handoff
 
+## FAR runtime follow-up: reset/re-entry, unmatched reference (#210), 2026-11-24
+
+Evidence-only pass on clean `11e1ac5de0bc98b9dfdcc5a591f1eaa3fbad52f5`;
+no production source or asset edits. Exact-revision
+[CI 45361848788](https://github.com/JEschete/VS-NativePort/actions/runs/45361848788)
+passed; semantic-slice publication evidence is
+[#210 comment 7127075347](https://github.com/JEschete/VS-NativePort/issues/210#issuecomment-7127075347).
+
+**Production soft reset and re-entry passed on the first attempt.** The Debug
+executable SHA-256 is
+`c9443a1c9f748e16247a60e5551e073aabcc03e5f60eb1e889d8879f795d6f1f`.
+Existing desktop replay arguments were launched through the consent-aware UI
+launcher using ignored `build\issue-210-lifecycle\attempt1.lnk`:
+
+```text
+--frames 8501 --scripted
+--press 1000:Start,1300:Circle,4200:Start+Select+L1+L2+R1+R2,4700:Start,5000:Circle
+--capture build\issue-210-lifecycle\attempt1
+--at 4000,4199,4300,4900,8000,8400 --no-gpu-validation --speed 8
+--save-dir build\issue-210-lifecycle\saves --verification-log
+```
+
+The actual controller reset at 4200 reaches title mode at 4211, completes
+title initialization at 4217 and returns to gameplay at 5072. The native
+castle-silhouette layout loads at 2705 and again at 6405. Captures 4000/4199
+and 8000/8400 show MAP001, zone 1/room 0, event 0/source 1, thread 0 PC
+`+0x626`, with no forced skip. The before/after camera, model snapshots and
+normalized event state are identical. Captures 4300/4900 and scene snapshots
+confirm the intervening title state. The process logs its normal 8501-tick
+stop and frame unwind with no errors; UI inventory confirms exit. The UI
+launcher does not expose the process exit code, so none is claimed.
+
+The observed production title/reset path calls
+`ResetLiveSessionState → LiveReleaseTiledBackground → ReleaseTiledBackground`;
+the latter retires pages and clears owned layout state. The two reloads and
+resumed visible scene are demonstrated. Successful per-page retirement has no
+existing log event, so allocator internals are not separately measured.
+This is a supported reset/title/new-game cycle, **not geographic room
+transitions/re-entry or complete compatibility retirement**.
+
+Evidence: `build\issue-210-lifecycle\result.json`, `attempt1.log`,
+`attempt1\capture.json`, six captures and `before-after.png`; trace
+`build\Debug\game-logs\1795512426264983-0`. All 14 published native authoring
+resources remain byte-identical.
+
+**Reference parity remains blocked by state alignment.** Only the approved
+portable `build\duckstation` copy was used. The existing setup rewrote its old
+settings to Software/Unscaled; the BIOS was referenced in its existing external
+directory, never copied. The configured CUE was selected from the portable game
+list. UI actions stayed inside the approved UI engine: its rejected
+foreground-restoration/keyboard deliveries were not bypassed with the
+system-wide keystroke capture script. Separate modal/menu windows were inspected
+explicitly. The first reference pass and one Restart Game pass did not establish
+the target MAP001 dialogue/camera; observed council/negotiation scenes were
+different. An attract-route or controller-delivery explanation is **unconfirmed**.
+
+The built-in Screenshot menu saved
+`build\issue-210-reference-current\unmatched-reference.png` (849×594;
+30/26/23 distinct channel levels, Software renderer observed). This is genuine
+hardware-mode output, **not a matched FAR comparison**. F10/F2 did not produce
+files with the existing minimal hotkey configuration; no save-state or reference
+room/event PC was obtained. DuckStation was closed through its UI.
+`result.json`, `settings-before.ini`, `setup.log` and input hashes in that
+directory retain the bounded attempt. No native rendering defect is established.
+
+Next required observation: an approved control path demonstrably selecting
+New Game and pausing at **“Have you found Sydney?”**, plus reference room/event/
+camera state. Do not substitute a timestamp or the unmatched PNG. Matched
+placement/gradients/seams/parallax, geographic transitions/re-entry and remaining
+retirement gates stay open. No completed authoring-edit probe was repeated.
+
 ## Semantic FAR authoring and visible native-only layout (#210), 2026-11-24
 
 Verified against `40604ac4f39bbe8b575e7230400a935414c82890` with the FAR
 Content/Game/Extract/tests, generated projects and documentation dirty.
-Publication and exact-revision CI remain pending; **#210 is not complete**.
+Published as `11e1ac5de0bc98b9dfdcc5a591f1eaa3fbad52f5`; exact-revision
+CI 45361848788 passed. Historical dirty-state evidence below is retained;
+**#210 is not complete**.
 
 - Four artwork identities now use `castle-silhouette`, `dark-clouds`,
   `sun-on-horizon` and `grey-clouds`: `background.<slug>`,
