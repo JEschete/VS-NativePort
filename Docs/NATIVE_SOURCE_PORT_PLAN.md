@@ -1337,6 +1337,14 @@ The `PageSpace` header records a page-image owner decision; its long-term shippi
 plan D1/D8 and §2.2. Retaining an optional compatibility renderer requires an explicit decision, separate verification
 and a dependency boundary. No such new approval is implied by this audit.
 
+**Asset adoption clarification (owner, 2026-11-23):** reconstructing a legacy
+asset in memory is still a T-shim. Native JSON/CSV/glTF input, native allocation,
+or a passing byte comparison does not retire the original-layout consumer.
+Byte equality is an **offline import-preservation test**, not a runtime
+architecture or a completion gate. Production consumes typed definitions and
+owned instances. New native content need not be exportable to the original
+format; deliberate gameplay limits must be distinguished from format limits.
+
 ### 15.2 What is already native
 
 - `Native/Desktop/src/main.cpp`: native initialization, event loop, presentation and capture orchestration.
@@ -1494,6 +1502,41 @@ registrations rather than serialized function addresses. Separate disk layout fr
 **Retirement gate:** required tables resolve with validated bounds before their consumers run; malformed inputs produce
 precise errors. Ultimately the shipping game runs from versioned converted assets with the original disc unavailable and
 has no module-image copying, sector arithmetic or original-address relocation dependency.
+
+##### EC-04 asset T-shim ledger
+
+These are **active migration debt**, not completed native adoption. This register
+uses the existing EC-04 owner and issue structure rather than a second status
+ledger. Evidence below is source inspection at `2764a890b`; preservation,
+production behavior and retirement remain separate claims.
+
+| T-shim ID | Existing runtime bridge / constraint | Retirement issue(s) | Required typed destination |
+|---|---|---|---|
+| EC-04-T-ZND | `ConvertedZones.cpp::LoadConvertedZone` calls `ZndFileOf` / `EncodeZndFile`; `ReadLiveConvertedZone` copies into a sector-sized block. Templates retain fixed name/limb layouts. | #199, #58 | Zone membership and environment definitions; relational species/enemy/loadout/loot definitions and native spawn instances. Room loading must not rebuild or parse a ZND. |
+| EC-04-T-ZUD | `ConvertedModels.cpp::LoadConvertedArchetype` rebuilds SHP/WEP/SEQ components and calls `EncodeZudFile`; `ActorAssetsLive` consumes the rebuilt container. | #200, #55, #48 | Archetype references resolve directly to owned/shared model, equipment and animation definitions. No synthetic ZUD container or section-offset dispatch. |
+| EC-04-T-SHP | `LoadConvertedModel` calls `EncodeShp` through `RebuiltBytes`, then the legacy-shaped actor loader parses it. Model validation also retains source-format constraints. | #203, #55, #48 | Typed mesh/skeleton/attachment definitions consumed directly. Any D21 renderer adapter is isolated; glTF authoring is not bounded by SHP exportability. |
+| EC-04-T-WEP | `LoadConvertedWeapon` calls `EncodeWep` through `RebuiltBytes`; equipment appearance follows the old model loader. | #204, #58 | Typed equipment appearances/material variants, independent of WEP records and narrow item indices. |
+| EC-04-T-SEQ | `LoadConvertedSequence` calls `EncodeSeqFile`; actor animation loading consumes the packed bank. | #205, #55 | Native clip/track definitions with explicit timing, interpolation and event semantics. No SEQ byte stream between the native loader and playback. |
+| EC-04-T-ESQ | `LoadConvertedAnimationSet` calls `EncodeEsqFile`; set selection still feeds the original-layout loader. | #206, #55, #48 | Typed shared animation sets and explicit skeleton/selector bindings, with owned playback state. |
+| EC-04-T-ETM | `LoadConvertedActorTexture` calls `EtmSheetOfImages` / `EncodeEtmFile` before actor texture loading. | #207, #55, #48 | Native texture-region/frame/palette definitions and instance bindings. PNG pixels are not repacked into ETM for playback. |
+| EC-04-T-SYD | Not a whole SYD-file rebuild: `BuildRecipeBook` calls `DenseWorkshopTables` and retains byte-valued results/material matrices and legacy-indexed equipment records. SQLite compilation does not retire this layout bridge. | #499, #58 | Semantic-ID recipe rules/lookups and item definitions/instances. Results are not limited to byte IDs; directed behavior remains exact without the SYD matrix layout. |
+
+For every row, retirement requires:
+1. Trace and migrate producers, consumers, callbacks, persistence and cleanup to
+   the typed destination; remove the runtime encoder/layout adapter and its
+   source-format validation requirement.
+2. Keep exact reconstruction of **imported originals** in offline converter
+   tests. Those tests remain mandatory and are not weakened by native adoption.
+3. Exercise a native authoring case beyond the old format's representational
+   limit through the actual consumer. Keep separately documented gameplay
+   policies, not accidental byte/count limits.
+4. Verify behavior/lifecycle with the format issue's real gameplay and
+   reference requirements; publish exact-revision CI and mark the row retired
+   only when the migrated path has no remaining bridge consumers.
+
+Caching these adapters, their validation or their derived tables is a launch
+optimization only. It cannot satisfy a retirement gate or make legacy source
+files a permanent requirement of the shipping native-data tree.
 
 **#47 status (first migrated slice):** `VS.Extract catalogs` imports `catalogs/assets.json` (a stable `asset.*` ID per raw
 extracted file, with LBA/path kept only as provenance) and `catalogs/audio.json` (the music, SFX-bank, wave-bank and

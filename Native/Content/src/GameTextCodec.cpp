@@ -12,7 +12,7 @@
 #include <utility>
 #include <vector>
 
-#include "Render/EncodedText.hpp"
+#include "Core/String/GameText.hpp"
 
 namespace VS::Content {
 namespace {
@@ -126,7 +126,8 @@ std::expected<void, std::string> AppendControl(std::vector<std::byte>& bytes,
                                                std::size_t at) {
   if (token == "page" || token == "confirm") {
     bytes.push_back(static_cast<std::byte>(
-        token == "page" ? Render::kTextPageBreak : Render::kTextConfirm));
+        token == "page" ? Core::String::kGameTextPageBreak
+                        : Core::String::kGameTextConfirm));
     return {};
   }
   if (token.starts_with("spacing:")) {
@@ -140,7 +141,7 @@ std::expected<void, std::string> AppendControl(std::vector<std::byte>& bytes,
       return std::unexpected(
           Error(id, at, "spacing must be an integer in -16..239"));
     }
-    bytes.push_back(static_cast<std::byte>(Render::kTextSpacing));
+    bytes.push_back(static_cast<std::byte>(Core::String::kGameTextSpacing));
     bytes.push_back(
         static_cast<std::byte>(spacing < 0 ? spacing + kByteRange : spacing));
     return {};
@@ -158,7 +159,8 @@ std::expected<void, std::string> AppendControl(std::vector<std::byte>& bytes,
 std::expected<std::size_t, std::string> EncodeGlyph(
     std::vector<std::byte>& bytes, std::string_view text, std::string_view id,
     std::size_t at) {
-  for (std::uint8_t code = 0; code < Render::kTextFirstControl; ++code) {
+  for (std::uint8_t code = 0; code < Core::String::kGameTextFirstControl;
+       ++code) {
     const auto literal = Literal(code);
     if (literal && text.starts_with(*literal)) {
       bytes.push_back(static_cast<std::byte>(code));
@@ -185,19 +187,21 @@ std::expected<DecodedGameText, std::string> DecodeGameText(
   DecodedGameText result;
   for (std::size_t at = 0; at < source.size(); ++at) {
     const auto code = std::to_integer<std::uint8_t>(source[at]);
-    if (code == Render::kTextTerminator) {
+    if (code == Core::String::kGameTextTerminator) {
       result.consumed = at + 1;
       return result;
     }
-    if (code < Render::kTextFirstControl) {
+    if (code < Core::String::kGameTextFirstControl) {
       if (auto glyph = AppendGlyph(result.markup, code, id, at); !glyph) {
         return std::unexpected(glyph.error());
       }
-    } else if (code == Render::kTextNewline) {
+    } else if (code == Core::String::kGameTextNewline) {
       result.markup += '\n';
-    } else if (code == Render::kTextPageBreak || code == Render::kTextConfirm) {
-      result.markup += code == Render::kTextPageBreak ? "{page}" : "{confirm}";
-    } else if (code == Render::kTextSpacing) {
+    } else if (code == Core::String::kGameTextPageBreak ||
+               code == Core::String::kGameTextConfirm) {
+      result.markup +=
+          code == Core::String::kGameTextPageBreak ? "{page}" : "{confirm}";
+    } else if (code == Core::String::kGameTextSpacing) {
       if (at + 1 == source.size()) {
         return std::unexpected(
             Error(id, at, "spacing control has no parameter"));
@@ -238,7 +242,7 @@ std::expected<std::vector<std::byte>, std::string> EncodeGameText(
       return std::unexpected(
           Error(id, at, "literal closing brace must be escaped as }}"));
     } else if (rest.front() == '\n') {
-      bytes.push_back(static_cast<std::byte>(Render::kTextNewline));
+      bytes.push_back(static_cast<std::byte>(Core::String::kGameTextNewline));
       ++at;
     } else {
       auto count = EncodeGlyph(bytes, rest, id, at);
@@ -246,7 +250,7 @@ std::expected<std::vector<std::byte>, std::string> EncodeGameText(
       at += *count;
     }
   }
-  bytes.push_back(static_cast<std::byte>(Render::kTextTerminator));
+  bytes.push_back(static_cast<std::byte>(Core::String::kGameTextTerminator));
   return bytes;
 }
 

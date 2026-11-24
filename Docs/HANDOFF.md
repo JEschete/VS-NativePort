@@ -1,5 +1,51 @@
 # Current Handoff
 
+## Owner correction and measured startup baseline, 2026-11-23
+
+The owner explicitly distinguishes **offline imported-byte preservation** from
+**production typed-definition adoption**. Runtime repacking is a temporary
+T-shim, even when the input is native CSV/JSON/glTF or a compiled SQLite table.
+The existing plan's EC-04 register now lists eight active asset/layout bridges
+with their retirement issues. All 21 open AM format issues and #520 have the
+stronger typed-adoption gate; prior reconstruction results are not completion.
+FAR work was instructed to consume typed cells directly, not rebuild FAR bytes.
+
+Measured **before implementing either cache**, using published `2764a890b`
+executables/libraries, Windows x64, native data with `znd-tables` v2:
+
+| Measurement | Observed Release median |
+|---|---:|
+| Complete one-tick scripted launch, three processes | 2,778.588 ms |
+| `CatalogDatabase::Load` | 74.565 ms |
+| Typed recipe construction from SQLite | 19.097 ms |
+| Entire `DataStore::Open` (includes catalog work) | 178.705 ms |
+| `RequireConversions` | 732.754 ms |
+| Source-file reads, isolated same source/dependency set | 122.967 ms |
+| SHA-256, isolated same set | 516.496 ms |
+
+The deduplicated set is **3,323 files / 103,428,746 bytes**; every isolated
+digest matched the manifest. One actual Debug trace reached its first logical
+frame at 18,855.842 ms, with approximately 14,679.606 ms between store-open
+completion and conversion-verification completion. These are observed/warm
+filesystem-cache runs, not a cold/clean-machine certification.
+
+Source verification is the first optimization target; SQLite caching is smaller
+today. #524 records atomic publication, invalidation, content-hashed CSV/schema
+inputs, ordered layer fingerprints, `--verify-all`, timestamp limitations and
+read-only asset-tree behavior. **No cache or performance gain is implemented
+or claimed yet.** Evidence: `build\startup-baseline-release.json`,
+`build\startup-components-release.log`,
+`build\Debug\game-logs\1795491820893310-0`.
+
+Current integration: `2764a890b` CI failed because Content's text codec included
+Engine.Render. The repair moves shared encoding constants into Core.String and
+keeps renderer aliases; the boundary check passes without ledger exceptions.
+Full Debug/Release builds and the `[game-text-codec],[render-font],[core][text]`
+selections passed (38 cases / 3,424 assertions). Parent-scoped source quality
+also passes. The typed FAR slice is separately verified locally and awaits
+its own scoped publication; do not certify either publication until its
+fixing revision's CI passes.
+
 ## Reversible English name codec (#500/#520), 2026-11-23
 
 Verified worktree based on `6716fac3d` on `main`. The new Content game-text codec

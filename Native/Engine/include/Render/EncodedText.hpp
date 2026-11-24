@@ -16,22 +16,24 @@
 // the policy reaches no battle string context (EncodedTextLive.hpp binds it).
 // The end of a span reads as its terminator.
 namespace VS::Render {
-inline constexpr std::uint8_t kTextFirstControl = 0xE5;
-inline constexpr std::uint8_t kTextPageBreak = 0xE5;
-inline constexpr std::uint8_t kTextConfirm = 0xE6;
+inline constexpr auto kTextFirstControl = Core::String::kGameTextFirstControl;
+inline constexpr auto kTextPageBreak = Core::String::kGameTextPageBreak;
+inline constexpr auto kTextConfirm = Core::String::kGameTextConfirm;
 inline constexpr auto kTextTerminator = Core::String::kGameTextTerminator;
-inline constexpr std::uint8_t kTextNewline = 0xE8;
-inline constexpr std::uint8_t kTextFirstParameterized = 0xEC;
-inline constexpr std::uint8_t kTextChunkSize = 0xF8;
-inline constexpr std::uint8_t kTextSoundEffect = 0xF9;
-inline constexpr std::uint8_t kTextSpacing = 0xFA;
-inline constexpr std::uint8_t kTextFontControl = 0xFB;
-inline constexpr std::uint8_t kTextSpeakerPause = 0xFC;
-inline constexpr std::uint8_t kTextPrintHex = 0xFD;
-inline constexpr std::uint8_t kTextPrintDecimal = 0xFE;
-inline constexpr std::uint8_t kTextPrintString = 0xFF;
-inline constexpr std::uint8_t kTextSpaceGlyph = 0x8F;
-inline constexpr std::uint8_t kTextMinusGlyph = 0xA7;
+inline constexpr auto kTextNewline = Core::String::kGameTextNewline;
+inline constexpr auto kTextFirstParameterized =
+    // NOLINTNEXTLINE(whitespace/indent_namespace): wrapped constant alias.
+    Core::String::kGameTextFirstParameterized;
+inline constexpr auto kTextChunkSize = Core::String::kGameTextChunkSize;
+inline constexpr auto kTextSoundEffect = Core::String::kGameTextSoundEffect;
+inline constexpr auto kTextSpacing = Core::String::kGameTextSpacing;
+inline constexpr auto kTextFontControl = Core::String::kGameTextFontControl;
+inline constexpr auto kTextSpeakerPause = Core::String::kGameTextSpeakerPause;
+inline constexpr auto kTextPrintHex = Core::String::kGameTextPrintHex;
+inline constexpr auto kTextPrintDecimal = Core::String::kGameTextPrintDecimal;
+inline constexpr auto kTextPrintString = Core::String::kGameTextPrintString;
+inline constexpr auto kTextSpaceGlyph = Core::String::kGameTextSpaceGlyph;
+inline constexpr auto kTextMinusGlyph = Core::String::kGameTextMinusGlyph;
 
 // The battle string context's ten integers and ten strings
 // (vs_battle_stringContext_t, 5BF94.h:165).
