@@ -10,7 +10,7 @@
     "schema_version": {"const": 1},
     "display_name": {"type": "string"},
     "id": {"$ref": "#/$defs/id"},
-    "image_id": {"$ref": "#/$defs/id"},
+    "image_id": {"$ref": "#/$defs/id", "description": "Authoritative native image reference, resolved through the conversion manifest (including aliases). The selected image must satisfy the background sampler/material contract; it need not be the original paired TIM."},
     "unreferenced": {"type": "boolean"},
     "image_depth": {"const": "indexed8"},
     "presentation": {"const": "camera-wrapped-grid"},
@@ -25,7 +25,7 @@
         "display_name": {"type": "string"},
         "source": {"type": "string"},
         "source_sha256": {"$ref": "#/$defs/hash"},
-        "image_source": {"type": "string"},
+        "image_source": {"type": "string", "description": "Original paired image import provenance, not the live image selector."},
         "image_source_sha256": {"$ref": "#/$defs/hash"},
         "unused_header_word": {"type": "integer", "minimum": 0, "maximum": 4294967295, "description": "FAR +8, unconsumed by the background reader. Retained exactly, not an authoring quantity."}
       }

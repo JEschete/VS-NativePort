@@ -16,6 +16,7 @@
 #include <ranges>
 #include <set>
 #include <span>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <system_error>
@@ -25,6 +26,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Content/ConversionManifest.hpp"
+#include "Content/ConvertedImages.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/ImageFiles.hpp"
 #include "Content/TimFile.hpp"
@@ -373,32 +375,59 @@ std::uint16_t EditAuthoredPalette(const fs::path& directory,
   return edited_word;
 }
 
+struct BackgroundRead {
+  const Content::DataStore& store;
+  Content::ConvertedRead request;
+  Content::ConvertedSource source;
+};
+
+BackgroundRead BackgroundReadOf(const Content::DataStore::Entry& entry) {
+  const auto* store = Content::DataStore::Get();
+  if (store == nullptr) {
+    throw std::logic_error("fixture data store is not open");
+  }
+  const auto file = BackgroundFileForEntry(entry);
+  const Content::ConvertedRead read{
+      .lba = entry.lba,
+      .rounded_size = static_cast<std::uint64_t>(file.size),
+      .extension = ".TIM",
+      .converter = "tim-png"};
+  auto source = Content::FindConvertedSource(*store, read);
+  if (!source) throw std::logic_error(source.error());
+  return {.store = *store, .request = read, .source = *source};
+}
+
+void RejectUnroundedBackgroundRead(const BackgroundRead& read,
+                                   std::uint32_t source_size) {
+  auto wrong_size = read.request;
+  wrong_size.rounded_size = source_size;
+  auto rejected = Content::FindConvertedSource(read.store, wrong_size);
+  REQUIRE_FALSE(rejected.has_value());
+  CHECK(rejected.error().find("sector-rounded size") != std::string::npos);
+}
+
 void VerifyBackgroundPaletteReload(const fs::path& source_root,
                                    const fs::path& converted_root,
                                    const DataFiles::value_type& background,
-                                   const Content::DataStore::Entry& entry,
-                                   VS::Field::LiveBackgroundHost& host) {
-  auto texture = host.LoadBackgroundTexture(BackgroundFileForEntry(entry));
+                                   const Content::DataStore::Entry& entry) {
+  const auto read = BackgroundReadOf(entry);
+  auto texture = Content::LoadConvertedImage(read.store, read.source);
   REQUIRE(texture.has_value());
-  CHECK(texture->pixel_words.size() ==
-        (static_cast<std::size_t>(texture->source_rect.width) *
-         static_cast<std::size_t>(texture->source_rect.height)));
-  CHECK(texture->palette_words.size() == 256);
+  CHECK(Content::PackedWords(texture->image).size() ==
+        static_cast<std::size_t>(texture->image.width) * texture->image.height /
+            2);
+  CHECK(texture->image.PaletteEntries() == 256);
   const auto location = Extract::ImageLocationForDiscPath(background.first);
   REQUIRE(location.has_value());
   const fs::path directory = converted_root / location->directory;
   const std::uint16_t edited_word =
       EditAuthoredPalette(directory, location->stem);
-  auto reloaded = host.LoadBackgroundTexture(BackgroundFileForEntry(entry));
+  auto reloaded = Content::LoadConvertedImage(read.store, read.source);
   REQUIRE(reloaded.has_value());
-  CHECK(reloaded->palette_words.front() == edited_word);
+  CHECK(reloaded->image.palettes.front().front() == edited_word);
   CHECK(ReadBytes(source_root / "disc" / fs::path(background.first)) ==
         background.second);
-  auto wrong_size = BackgroundFileForEntry(entry);
-  wrong_size.size = static_cast<std::int32_t>(entry.size);
-  auto rejected = host.LoadBackgroundTexture(wrong_size);
-  REQUIRE_FALSE(rejected.has_value());
-  CHECK(rejected.error().find("sector-rounded size") != std::string::npos);
+  RejectUnroundedBackgroundRead(read, entry.size);
 }
 
 void VerifyBackgroundTextureEdit(const fs::path& source_root,
@@ -413,9 +442,8 @@ void VerifyBackgroundTextureEdit(const fs::path& source_root,
   const Content::DataStore::Entry* const entry =
       Content::DataStore::Get()->Find(background->first);
   REQUIRE(entry != nullptr);
-  VS::Field::LiveBackgroundHost host;
   VerifyBackgroundPaletteReload(source_root, converted_data.Root(), *background,
-                                *entry, host);
+                                *entry);
 }
 
 void VerifyStaleDependency(TemporaryData& converted_data,

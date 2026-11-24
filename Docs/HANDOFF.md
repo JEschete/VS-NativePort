@@ -1,12 +1,75 @@
 # Current Handoff
 
+## Authored FAR image binding and placement (#210), 2026-11-24
+
+Verified worktree based on `0f7e0f00e991a3ef8be4bfd12cb7272754c3c1d2`, with
+FAR image-binding and parent source-cache changes dirty. The authored `image_id`
+selects the actual native image, including aliases/explicit unreferenced art;
+the loaded pixels/palette stay owned through upload. Original image bindings,
+TIM upload coordinates and page counts no longer veto a valid authored target.
+The renderer retains a free preferred page range or allocates another contiguous
+lendable range; it never overwrites occupied/resident pages. No FAR/TIM bytes
+are rebuilt at runtime.
+
+- Full Debug/Release x64 builds passed (`VS_JOBS=4`, `/m:2`).
+- Each configuration passed **136 cases / 18,215 assertions** with
+  `[far-layout],[field-background],[content-images],[native-image],[source-verification],[asset-catalog]`.
+  `[native-image]` was unmatched; `NativeImageTests.cpp` is covered by
+  `[content-images]`. Parent cache/catalog selections passed in these runs.
+- After the placement fix, each configuration passed **64 cases / 2,208
+  assertions** with `[far-layout],[field-background],[render-textures]`.
+  The refactored existing TIM fixture also passed alone in each configuration:
+  `extracted TIM corpus converts without changing its source bytes`,
+  **1 case / 1,683 assertions**. Unrelated suites were not repeated.
+- Two-image tests verify original-binding independence, preserved authored
+  references on repeat conversion, missing/invalid/non-image IDs, image material,
+  alias-owner dependencies, held reload snapshots and selected-image upload.
+  Allocation tests cover preferred/relocated ranges, occupied pages, exhaustion,
+  invalid owners/counts and ownership-preserving retirement.
+- Renderer probe: Release `--frames 3300 --scripted --press
+  1000:Start,1300:Circle --at 2704,2710,2750,2800,3000,3200
+  --no-gpu-validation --speed 8 --save-dir build\issue-210-rebind-save`,
+  changing only 001's image ID from `image.bg.001op01a` to `image.bg.002op01a`.
+  Original hint 27+2 was occupied (logged on #210); the fix used pages 29–30.
+  With `--capture-pages`, tick 3200 contains the selected image's exact pixel
+  words and palette. All six scene frames equal the original frames: the
+  background is occluded here. Both runs exited normally; the original authored
+  JSON was restored exactly. Do not claim a scene-visible artwork change.
+
+Evidence: `build\issue-210-rebinding-{Debug,Release}-{build,tests}.log`,
+`build\issue-210-rebinding-{Debug,Release}-placement-{build,tests}.log`,
+`build\issue-210-rebinding-placement-tidy.log`,
+`build\issue-210-rebind-before`, `build\issue-210-rebind-relocated`, and
+`build\issue-210-rebinding-relocated-comparison.json`. The earlier failed
+placement probe is retained separately; its camera divergence was not success.
+Rebinding code/new tests pass scoped tidy; expanded scanning of
+`ImageConversionTests.cpp` still reports the unchanged `RequiredConversion`
+fixture's size warning. No quality baseline was changed.
+
+This follow-up still requires scoped publication and exact-revision CI.
+The separate verification-reference repair (`VR-FIELD-CAMERA-BACKGROUND`,
+SUMMARY count 480→481) must publish independently; no new verification row was
+mixed into those pending ledger edits. Remaining #210 gates: verified semantic
+artwork/room IDs, broader native-only renderer capabilities, matched-reference
+visual/parallax evidence, a scene-visible authored edit, production room
+transitions/re-entry and remaining compatibility retirement. Cache benchmark/
+CLI validation belongs to the parent; no cache performance claim is made here.
+Publication scope: the existing Content BackgroundLayout/ConvertedImages files,
+Game Background core/live APIs, Engine TexturePages core/live APIs, FAR/field/
+image/texture-page/event tests, FarConversion, the background schema and these
+FAR documentation sections. No new files or project registration are required.
+Keep the parent source-cache files/project changes and its documentation hunks
+separate, as well as the independently publishable verification-reference repair.
+
 ## Typed FAR layout slice (#210), 2026-11-23
 
-Locally verified; **not full #210 completion and not yet published**. Tests and
+Base slice published as `75bae48f3cfbd0e6955f6982d1b562e6e0b28012`;
+**not full #210 completion**. Historical tests and
 captures identify `2764a890b1b1f9f8a42d0f0164c1016f21e0442a` with the FAR and
 parent boundary-repair edits dirty. The parent repair/policy documentation is
 now published separately as `5dc172f1f7a9b9b38026ca35f8c6cd7a880c02ea`; this FAR
-milestone still needs its own fixing revision and successful exact-revision CI.
+base milestone's CI follow-ups are tracked on #210. Successful exact-revision
+CI remains a publication gate; the historical measurements below are unchanged.
 
 - `far-layout-json` v1 / background-layout schema v1 writes
   `Native\data\backgrounds\001OP01A.background.json`,
@@ -39,9 +102,9 @@ Evidence: `build\issue-210-*-build.log`, `build\issue-210-*-far-tests.log`,
 `build\issue-210-native-debug.log`, `build\issue-210-bindings.json`.
 The canonical verification record is `VR-FAR-TYPED-LAYOUTS`.
 
-**Remaining:** semantic artwork/room identities and readability; authored
-image-ID resolution through upload (currently checked against the MPD-selected
-image); native-only extensibility beyond the bounded renderer envelope;
+**Remaining at this base checkpoint:** semantic artwork/room identities and
+readability; authored image-ID resolution through upload (addressed by the
+follow-up above); native-only extensibility beyond the bounded renderer envelope;
 matched-reference placement/gradients/seams/parallax; an edited-layout room
 demonstration and production transitions/re-entry. The runtime uses typed owned
 cells without FAR reconstruction, but dormant module pointer declarations and

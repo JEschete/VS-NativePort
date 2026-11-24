@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <expected>
+#include <filesystem>
 #include <span>
 #include <string>
 #include <string_view>
@@ -65,14 +66,22 @@ struct BackgroundLayoutDocument {
     const BackgroundLayoutDocument& layout);
 [[nodiscard]] std::expected<void, std::string> ValidateBackgroundLayout(
     const BackgroundLayoutDocument& layout);
+// Sampling/material checks; LoadBackgroundLayoutImage also validates identity
+// and source dependencies against the manifest.
 [[nodiscard]] std::expected<void, std::string> ValidateBackgroundImage(
     const BackgroundLayoutDocument& layout, const ImageDocument& image);
+// Resolves the authored image_id, then checks its manifest/source dependencies,
+// material, dimensions and sampled endpoints. Import image_source is not a
+// veto.
+[[nodiscard]] std::expected<ImageDocument, std::string>
+LoadBackgroundLayoutImage(const std::filesystem::path& root,
+                          const ConversionManifest& manifest,
+                          const BackgroundLayoutDocument& layout);
 [[nodiscard]] std::expected<std::string, std::string> WriteBackgroundLayout(
     const BackgroundLayoutDocument& layout);
 [[nodiscard]] std::expected<BackgroundLayoutDocument, std::string>
 ReadBackgroundLayout(std::span<const std::byte> bytes, std::string_view name);
 // Resolves the room's compatibility source once; all drawing uses native cells.
 [[nodiscard]] std::expected<BackgroundLayoutDocument, std::string>
-LoadConvertedBackground(const DataStore& store, const ConvertedSource& source,
-                        const ImageDocument& image);
+LoadConvertedBackground(const DataStore& store, const ConvertedSource& source);
 }  // namespace VS::Content

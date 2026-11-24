@@ -3,6 +3,7 @@
 
 #include <array>
 #include <cstdint>
+#include <expected>
 
 // The VRAM texture pages the engine lends to effects, menus and room
 // backgrounds (BATTLE.PRG 146C.c:9480-9549). The first 25 pages stay
@@ -63,6 +64,12 @@ void AdvanceTexturePageRetirements(TexturePageTable& pages) noexcept;
 // within bounds succeeds.
 TexturePageResult ReserveTexturePages(TexturePageTable& pages,
                                       TexturePageRange range, int owner);
+
+// Prefer the requested range, then find another contiguous free image range.
+// Unlike legacy empty reservations, an image must occupy at least one page.
+[[nodiscard]] std::expected<TexturePageRange, TexturePageResult>
+ReserveImageTexturePages(TexturePageTable& pages, TexturePageRange preferred,
+                         int owner);
 
 // BATTLE.PRG func_8007E0A8 (146C.c:9532): starts retiring the range when the
 // owner holds every page of it; nothing changes otherwise.

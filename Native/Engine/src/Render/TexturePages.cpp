@@ -58,6 +58,30 @@ TexturePageResult ReserveTexturePages(TexturePageTable& pages,
   return TexturePageResult::kDone;
 }
 
+std::expected<TexturePageRange, TexturePageResult> ReserveImageTexturePages(
+    TexturePageTable& pages, TexturePageRange preferred, int owner) {
+  if (!IsValidOwner(owner)) {
+    return std::unexpected(TexturePageResult::kInvalidOwner);
+  }
+  if (preferred.count == 0 ||
+      preferred.count > kTexturePageCount - kResidentTexturePageCount) {
+    return std::unexpected(TexturePageResult::kOutOfRange);
+  }
+  if (ReserveTexturePages(pages, preferred, owner) ==
+      TexturePageResult::kDone) {
+    return preferred;
+  }
+  for (std::uint32_t first = kResidentTexturePageCount;
+       first <= kTexturePageCount - preferred.count; ++first) {
+    const TexturePageRange candidate{.first = first, .count = preferred.count};
+    if (ReserveTexturePages(pages, candidate, owner) ==
+        TexturePageResult::kDone) {
+      return candidate;
+    }
+  }
+  return std::unexpected(TexturePageResult::kOccupied);
+}
+
 TexturePageResult RetireTexturePages(TexturePageTable& pages,
                                      TexturePageRange range, int owner) {
   if (!InLendableRange(range)) {

@@ -1970,7 +1970,6 @@ struct BackgroundOpcodeStateFixture {
     VS::Field::backgroundLayoutDiscRequest = nullptr;
     VS::Field::loadedBackgroundLayout = nullptr;
     auto live = VS::Field::LoadLiveRoomBackgroundState();
-    live.texture_file = {};
     live.texture_uploaded = 0;
     live.layout.reset();
     VS::Field::StoreLiveRoomBackgroundState(live);

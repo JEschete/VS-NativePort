@@ -19,6 +19,7 @@ constexpr std::size_t kHeaderBytes = 12;
 constexpr std::size_t kCellBytes = 24;
 constexpr std::uint32_t kByteBits = 8;
 constexpr std::uint32_t kByteMax = 255;
+constexpr std::uint32_t kImageSideLimit = kByteMax + 1;
 constexpr std::uint32_t kGridSideLimit = 31;
 constexpr std::size_t kPaletteEntries = 256;
 constexpr std::size_t kWordBytes = sizeof(std::uint32_t);
@@ -247,17 +248,17 @@ std::expected<void, std::string> ValidateBackgroundImage(
   if (auto valid = ValidateBackgroundLayout(layout); !valid) {
     return valid;
   }
-  if (image.id != layout.image_id ||
-      image.provenance.source != layout.image_source ||
-      image.provenance.source_sha256 != layout.image_source_sha256 ||
-      image.image.depth != ImageDepth::kIndexed8 ||
+  if (image.image.depth != ImageDepth::kIndexed8 || image.image.width == 0 ||
+      image.image.width > kImageSideLimit || image.image.width % 2 != 0 ||
+      image.image.height == 0 || image.image.height > kImageSideLimit ||
       image.image.palettes.size() != 1 ||
       image.image.PaletteEntries() != kPaletteEntries ||
       image.material !=
           ImageMaterial{.zero_word = ZeroWord::kTransparent,
                         .semi_transparency = SemiTransparency::kOff}) {
-    return std::unexpected(layout.id +
-                           ": missing, stale or incompatible image binding");
+    return std::unexpected(std::format(
+        "{}: image {} has incompatible depth, dimensions, palette or material",
+        layout.id, layout.image_id));
   }
   if (auto valid = ValidateImage(image.image); !valid) {
     return valid;
@@ -274,6 +275,40 @@ std::expected<void, std::string> ValidateBackgroundImage(
     }
   }
   return {};
+}
+
+std::expected<ImageDocument, std::string> LoadBackgroundLayoutImage(
+    const std::filesystem::path& root, const ConversionManifest& manifest,
+    const BackgroundLayoutDocument& layout) {
+  auto image = LoadConvertedImageById(root, manifest, layout.image_id);
+  if (!image) return std::unexpected(layout.id + ": " + image.error());
+  if (auto valid = ValidateBackgroundImage(layout, *image); !valid) {
+    return std::unexpected(valid.error());
+  }
+  const auto* output = manifest.Find(layout.image_id);
+  if (output == nullptr) {
+    return std::unexpected("background image output disappeared");
+  }
+  auto dependencies = output->dependencies;
+  dependencies.push_back({output->source, output->source_sha256});
+  const auto* owner = manifest.FilesOf(*output);
+  if (owner == nullptr) {
+    return std::unexpected("background image alias target disappeared");
+  }
+  if (owner != output) {
+    dependencies.insert(dependencies.end(), owner->dependencies.begin(),
+                        owner->dependencies.end());
+    dependencies.push_back({owner->source, owner->source_sha256});
+  }
+  const auto reader = DirectoryFileReader(root);
+  for (const auto& dependency : dependencies) {
+    auto original = reader("disc/" + dependency.source);
+    if (!original || Core::Sha256Hex(*original) != dependency.source_sha256) {
+      return std::unexpected(layout.image_id + ": missing/stale source " +
+                             dependency.source + "; rerun its image converter");
+    }
+  }
+  return image;
 }
 
 // decomp: BATTLE.PRG func_8009147C (src/BATTLE/BATTLE.PRG/2842C.c:464)
@@ -437,8 +472,7 @@ std::expected<BackgroundLayoutDocument, std::string> ReadBackgroundLayout(
 }
 
 std::expected<BackgroundLayoutDocument, std::string> LoadConvertedBackground(
-    const DataStore& store, const ConvertedSource& source,
-    const ImageDocument& image) {
+    const DataStore& store, const ConvertedSource& source) {
   const auto* manifest = store.Conversions();
   if (manifest == nullptr) {
     return std::unexpected("no background conversion manifest");
@@ -472,19 +506,10 @@ std::expected<BackgroundLayoutDocument, std::string> LoadConvertedBackground(
         ": stale layout identity/provenance; rerun VS.Extract backgrounds");
   }
   const auto reader = DirectoryFileReader(store.Root());
-  for (const auto& dependency :
-       std::array{SourceDependency{layout->source, layout->source_sha256},
-                  SourceDependency{layout->image_source,
-                                   layout->image_source_sha256}}) {
-    auto original = reader("disc/" + dependency.source);
-    if (!original || Core::Sha256Hex(*original) != dependency.source_sha256) {
-      return std::unexpected(file + ": missing/stale source " +
-                             dependency.source +
-                             "; rerun VS.Extract images and backgrounds");
-    }
-  }
-  if (auto valid = ValidateBackgroundImage(*layout, image); !valid) {
-    return std::unexpected(valid.error());
+  auto original = reader("disc/" + layout->source);
+  if (!original || Core::Sha256Hex(*original) != layout->source_sha256) {
+    return std::unexpected(file + ": missing/stale source " + layout->source +
+                           "; rerun VS.Extract images and backgrounds");
   }
   return layout;
 }

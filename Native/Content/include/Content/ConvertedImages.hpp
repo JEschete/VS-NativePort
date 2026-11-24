@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <expected>
+#include <filesystem>
 #include <string>
 #include <string_view>
 
@@ -43,5 +44,12 @@ struct ConvertedRead {
 // loads its target's image, which names the target's id and source.
 [[nodiscard]] std::expected<ImageDocument, std::string> LoadConvertedImage(
     const DataStore& store, const ConvertedSource& source);
+
+// An explicit authored reference can select an otherwise unreferenced image.
+// Aliases return their canonical image document; the manifest validates the
+// requested identity separately from that document's identity.
+[[nodiscard]] std::expected<ImageDocument, std::string> LoadConvertedImageById(
+    const std::filesystem::path& root, const ConversionManifest& manifest,
+    std::string_view image_id);
 
 }  // namespace VS::Content

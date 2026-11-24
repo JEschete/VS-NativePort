@@ -146,12 +146,10 @@ namespace Content = VS::Content;
 constexpr std::string_view kChannel = "field.background";
 // The farthest scene ordering entry (orderingTable + 0x1FFC).
 constexpr int kFarthestOrderingSlot = 0x7FF;
-constexpr std::size_t kBackgroundPaletteEntries = 256;
 
 std::uint64_t refusedCalls = 0;
 std::uint64_t droppedPackets = 0;
 std::uint64_t refusedSections = 0;
-VS::Field::BackgroundFile queuedBackgroundTextureFile;
 std::uint8_t backgroundTextureUploaded;
 std::shared_ptr<const OwnedBackgroundLayout> nativeBackgroundLayout;
 
@@ -254,42 +252,6 @@ auto RunLive(Rule rule) {
   }
 }
 
-std::expected<Content::ImageDocument, std::string> LoadBackgroundImage(
-    const Content::DataStore& store, const BackgroundFile& file) {
-  if (file.lba <= 0 || file.size <= 0) {
-    return std::unexpected(
-        std::format("room background source has invalid LBA {} and size {}",
-                    file.lba, file.size));
-  }
-  auto source = Content::FindConvertedSource(
-      store, {.lba = static_cast<std::uint32_t>(file.lba),
-              .rounded_size = static_cast<std::uint64_t>(file.size),
-              .extension = ".TIM",
-              .converter = "tim-png"});
-  if (!source) {
-    return std::unexpected("room background: " + source.error());
-  }
-  auto document = Content::LoadConvertedImage(store, *source);
-  if (!document) return std::unexpected(document.error());
-  if (!document->provenance.tim) {
-    return std::unexpected(
-        std::format("{} has no TIM provenance", source->entry->path));
-  }
-  const Content::TimOrigin& tim = *document->provenance.tim;
-  if (document->image.depth != Content::ImageDepth::kIndexed8 ||
-      document->image.width != (std::uint32_t{tim.image.width} * 2) ||
-      document->image.height != tim.image.height ||
-      document->image.palettes.size() != 1 ||
-      document->image.PaletteEntries() != kBackgroundPaletteEntries ||
-      document->material !=
-          Content::ImageMaterial{
-              .zero_word = Content::ZeroWord::kTransparent,
-              .semi_transparency = Content::SemiTransparency::kOff}) {
-    return std::unexpected(std::format(
-        "{} is not a supported 8-bit background image", source->entry->path));
-  }
-  return document;
-}
 }  // namespace
 
 RoomBackgroundState LoadLiveRoomBackgroundState() {
@@ -302,7 +264,6 @@ RoomBackgroundState LoadLiveRoomBackgroundState() {
       .solid = static_cast<std::uint8_t>(isSolidBackground),
       .texture_page = static_cast<std::uint8_t>(legacyBackgroundTexturePage),
       .tiled_enabled = isTiledBackgroundEnabled,
-      .texture_file = queuedBackgroundTextureFile,
       .texture_uploaded = backgroundTextureUploaded,
       .layout = nativeBackgroundLayout};
   std::ranges::copy(backgroundGradientColors, state.gradient_colors.begin());
@@ -319,7 +280,6 @@ void StoreLiveRoomBackgroundState(const RoomBackgroundState& state) {
   isSolidBackground = static_cast<char>(state.solid);
   legacyBackgroundTexturePage = static_cast<char>(state.texture_page);
   isTiledBackgroundEnabled = state.tiled_enabled;
-  queuedBackgroundTextureFile = state.texture_file;
   backgroundTextureUploaded = state.texture_uploaded;
   nativeBackgroundLayout = state.layout;
 }
@@ -459,13 +419,27 @@ LiveBackgroundHost::LoadBackgroundLayout(
                .extension = ".FAR",
                .converter = Content::kFarConverterName});
   if (!source) return std::unexpected(source.error());
-  auto image = LoadBackgroundImage(*store, section.texture);
-  if (!image) return std::unexpected(image.error());
-  auto document = Content::LoadConvertedBackground(*store, *source, *image);
+  auto document = Content::LoadConvertedBackground(*store, *source);
   if (!document) return std::unexpected(document.error());
+  const auto* manifest = store->Conversions();
+  if (manifest == nullptr) {
+    return std::unexpected("no background conversion manifest");
+  }
+  auto image =
+      Content::LoadBackgroundLayoutImage(store->Root(), *manifest, *document);
+  if (!image) return std::unexpected(image.error());
   auto layout = std::make_shared<OwnedBackgroundLayout>();
   layout->width = static_cast<std::int32_t>(document->columns);
   layout->height = static_cast<std::int32_t>(document->rows);
+  layout->image_id = document->image_id;
+  layout->image = {
+      .source_rect = {.x = 0,
+                      .y = 0,
+                      .width =
+                          static_cast<std::int16_t>(image->image.width / 2),
+                      .height = static_cast<std::int16_t>(image->image.height)},
+      .pixel_words = Content::PackedWords(image->image),
+      .palette_words = image->image.palettes.front()};
   for (const auto& cell : document->cells) {
     layout->tiles.push_back(TileOf(cell));
   }
@@ -496,11 +470,14 @@ std::optional<TiledBackgroundSection> LiveBackgroundHost::TiledBackground() {
       .layout = BackgroundFileAt(section, kTiledLayoutFileAt)};
 }
 
-bool LiveBackgroundHost::ReserveTexturePages(int first_page, int page_count,
-                                             int owner) {
-  return Render::ReserveLiveTexturePageRange(
-             static_cast<std::uint32_t>(first_page),
-             static_cast<std::uint32_t>(page_count), owner) != 0;
+bool LiveBackgroundHost::ReserveTexturePages(std::uint8_t& first_page,
+                                             int page_count, int owner) {
+  auto range = Render::ReserveLiveImageTexturePages(
+      {.first = first_page, .count = static_cast<std::uint32_t>(page_count)},
+      owner);
+  if (!range) return false;
+  first_page = static_cast<std::uint8_t>(range->first);
+  return true;
 }
 
 void LiveBackgroundHost::RetireTexturePages(int first_page, int page_count,
@@ -508,26 +485,6 @@ void LiveBackgroundHost::RetireTexturePages(int first_page, int page_count,
   Render::RetireLiveTexturePageRange(static_cast<std::uint32_t>(first_page),
                                      static_cast<std::uint32_t>(page_count),
                                      owner);
-}
-
-std::expected<BackgroundTextureUpload, std::string>
-LiveBackgroundHost::LoadBackgroundTexture(const BackgroundFile& source) {
-  const Content::DataStore* const store = Content::DataStore::Get();
-  if (store == nullptr) {
-    return std::unexpected(
-        "no extracted-data store is open for the room background");
-  }
-  auto document = LoadBackgroundImage(*store, source);
-  if (!document) return std::unexpected(document.error());
-
-  const Content::TimOrigin& tim = *document->provenance.tim;
-  return BackgroundTextureUpload{
-      .source_rect = {.x = static_cast<std::int16_t>(tim.image.x),
-                      .y = static_cast<std::int16_t>(tim.image.y),
-                      .width = static_cast<std::int16_t>(tim.image.width),
-                      .height = static_cast<std::int16_t>(tim.image.height)},
-      .pixel_words = Content::PackedWords(document->image),
-      .palette_words = document->image.palettes.front()};
 }
 
 void LiveBackgroundHost::UploadBackgroundPixels(

@@ -29,7 +29,14 @@ constexpr std::int32_t kOne = 4096;
 
 std::shared_ptr<fx::OwnedBackgroundLayout> Layout() {
   return std::make_shared<fx::OwnedBackgroundLayout>(fx::OwnedBackgroundLayout{
-      .width = 1, .height = 1, .tiles = std::vector<fx::BackgroundTile>(1)});
+      .width = 1,
+      .height = 1,
+      .tiles = std::vector<fx::BackgroundTile>(1),
+      .image_id = "image.test.background",
+      .image = {
+          .source_rect = {.x = 0x47, .y = 0x1C3, .width = 16, .height = 32},
+          .pixel_words = std::vector<std::uint16_t>(std::size_t{16} * 32, 17),
+          .palette_words = std::vector<std::uint16_t>(256, 31)}});
 }
 
 constexpr fx::WeatherParticlesId ParticlesId(std::uintptr_t id) {
@@ -102,29 +109,28 @@ class FakeBackgroundHost final : public fx::BackgroundHost {
       override {
     return section;
   }
-  [[nodiscard]] bool ReserveTexturePages(int first_page, int page_count,
-                                         int owner) override {
+  [[nodiscard]] bool ReserveTexturePages(std::uint8_t& first_page,
+                                         int page_count, int owner) override {
     calls.push_back(std::format("ReserveTexturePages {} {} {}", first_page,
                                 page_count, owner));
-    return reserve_ok;
+    if (!reserve_ok) return false;
+    if (relocated_page) first_page = *relocated_page;
+    return true;
   }
   void RetireTexturePages(int first_page, int page_count, int owner) override {
     calls.push_back(std::format("RetireTexturePages {} {} {}", first_page,
                                 page_count, owner));
   }
-  [[nodiscard]] std::expected<fx::BackgroundTextureUpload, std::string>
-  LoadBackgroundTexture(const fx::BackgroundFile& source) override {
-    calls.push_back(std::format("LoadBackgroundTexture {}", source.lba));
-    return texture;
-  }
-  void UploadBackgroundPixels(std::span<const std::uint16_t>,
+  void UploadBackgroundPixels(std::span<const std::uint16_t> words,
                               const fx::TextureRect& rect) override {
+    uploaded_pixels.assign(words.begin(), words.end());
     calls.push_back(std::format("UploadBackgroundPixels {} {} {} {} {}", rect.x,
                                 rect.y, rect.width, rect.height,
                                 rect.width * rect.height));
   }
   void UploadBackgroundPalette(std::span<const std::uint16_t> words,
                                int row) override {
+    uploaded_palette.assign(words.begin(), words.end());
     calls.push_back(
         std::format("UploadBackgroundPalette {} {}", row, words.size()));
   }
@@ -145,12 +151,9 @@ class FakeBackgroundHost final : public fx::BackgroundHost {
       layout{Layout()};
   std::optional<fx::TiledBackgroundSection> section;
   bool reserve_ok = true;
-  std::expected<fx::BackgroundTextureUpload, std::string> texture{
-      fx::BackgroundTextureUpload{
-          .source_rect = {.x = 0x47, .y = 0x1C3, .width = 16, .height = 32},
-          .pixel_words =
-              std::vector<std::uint16_t>(std::size_t{16} * std::size_t{32}),
-          .palette_words = std::vector<std::uint16_t>(256)}};
+  std::optional<std::uint8_t> relocated_page;
+  std::vector<std::uint16_t> uploaded_pixels;
+  std::vector<std::uint16_t> uploaded_palette;
   Calls calls;
 };
 
@@ -191,9 +194,7 @@ struct InitializedRoom {
 // A tiled background with its layout read queued.
 struct TiledLoad {
   FakeBackgroundHost host;
-  fx::RoomBackgroundState state{.texture_page = 0x15,
-                                .texture_file = {.lba = 100, .size = 0x801},
-                                .layout = Layout()};
+  fx::RoomBackgroundState state{.texture_page = 0x15, .layout = Layout()};
 };
 }  // namespace
 
@@ -284,7 +285,6 @@ TEST_CASE("Room background initialization clears the loads",
           "[field-camera][field-background]") {
   const InitializedRoom room;
   CHECK_FALSE(room.state.layout);
-  CHECK(room.state.texture_file == fx::BackgroundFile{});
   CHECK(room.state.texture_uploaded == 0);
   CHECK(room.state.tiled_enabled == 0);
   CHECK(room.host.stored_area.has_value());
@@ -430,13 +430,13 @@ TEST_CASE(
   fx::RoomBackgroundState state;
   CHECK(fx::QueueTiledBackgroundLoad(host, state, 0x15) == 1);
   CHECK(state.texture_page == 0x15);
-  CHECK(state.texture_page_count == 3);
-  CHECK(state.texture_file == Section().texture);
+  CHECK(state.texture_page_count == 1);
   CHECK(state.texture_uploaded == 0);
   REQUIRE(state.layout);
+  CHECK(state.layout->image_id == "image.test.background");
   CHECK(state.layout->width == 1);
   CHECK(host.calls ==
-        Calls{"LoadBackgroundLayout 200", "ReserveTexturePages 21 3 5"});
+        Calls{"LoadBackgroundLayout 200", "ReserveTexturePages 21 1 5"});
 }
 
 TEST_CASE("Tiled background rejects invalid native data before reserving pages",
@@ -447,7 +447,6 @@ TEST_CASE("Tiled background rejects invalid native data before reserving pages",
   fx::RoomBackgroundState refused_state;
   CHECK(fx::QueueTiledBackgroundLoad(refused, refused_state, 0x15) == 0);
   CHECK_FALSE(refused_state.layout);
-  CHECK(refused_state.texture_file == fx::BackgroundFile{});
   CHECK(refused.calls == Calls{"LoadBackgroundLayout 200"});
 }
 
@@ -457,15 +456,13 @@ TEST_CASE("Tiled background load refusals leave no native layout",
   fx::RoomBackgroundState state;
   CHECK(fx::QueueTiledBackgroundLoad(host, state, 0x15) == 0);
   CHECK_FALSE(state.layout);
-  CHECK(state.texture_file == fx::BackgroundFile{});
   CHECK(host.calls.empty());
 
   host.section = Section();
   host.reserve_ok = false;
   CHECK(fx::QueueTiledBackgroundLoad(host, state, 0x15) == 0);
-  CHECK(state.texture_file == fx::BackgroundFile{});
   CHECK(host.calls ==
-        Calls{"LoadBackgroundLayout 200", "ReserveTexturePages 21 3 5"});
+        Calls{"LoadBackgroundLayout 200", "ReserveTexturePages 21 1 5"});
 }
 
 TEST_CASE("Tiled background uploads its converted image once",
@@ -474,8 +471,7 @@ TEST_CASE("Tiled background uploads its converted image once",
   TiledLoad load;
   CHECK(fx::FinishTiledBackgroundLoad(load.host, load.state) == 0);
   CHECK(load.state.texture_uploaded == 1);
-  CHECK(load.host.calls == Calls{"LoadBackgroundTexture 100",
-                                 "UploadBackgroundPixels 327 451 "
+  CHECK(load.host.calls == Calls{"UploadBackgroundPixels 327 451 "
                                  "16 32 512",
                                  "UploadBackgroundPalette 14 256"});
   CHECK(warnings.messages.empty());
@@ -489,7 +485,7 @@ TEST_CASE("Tiled background keeps native cells after upload completion",
           "[field-camera][field-background]") {
   TiledLoad load;
   CHECK(fx::FinishTiledBackgroundLoad(load.host, load.state) == 0);
-  CHECK(load.host.calls.size() == 3);
+  CHECK(load.host.calls.size() == 2);
   load.host.calls.clear();
   CHECK(fx::FinishTiledBackgroundLoad(load.host, load.state) == 1);
   CHECK(load.host.calls.empty());
@@ -500,19 +496,17 @@ TEST_CASE("Tiled background keeps native cells after upload completion",
   CHECK(load.host.calls.empty());
 }
 
-TEST_CASE("Tiled background does not retry a missing native image every frame",
+TEST_CASE("Tiled background refuses a malformed staged image without rereading",
           "[field-camera][field-background]") {
   FakeBackgroundHost host;
-  fx::RoomBackgroundState state{.texture_file = {.lba = 100, .size = 0x801},
-                                .layout = Layout()};
-  host.texture = std::unexpected("no converted image");
+  auto layout = Layout();
+  layout->image.palette_words.clear();
+  fx::RoomBackgroundState state{.layout = layout};
   CHECK(fx::FinishTiledBackgroundLoad(host, state) == 1);
-  CHECK(host.calls ==
-        Calls{"LoadBackgroundTexture 100", "RetireTexturePages 0 0 5"});
+  CHECK(host.calls == Calls{"RetireTexturePages 0 0 5"});
   CHECK_FALSE(state.layout);
   CHECK(fx::FinishTiledBackgroundLoad(host, state) == 0);
-  CHECK(host.calls ==
-        Calls{"LoadBackgroundTexture 100", "RetireTexturePages 0 0 5"});
+  CHECK(host.calls == Calls{"RetireTexturePages 0 0 5"});
 }
 
 TEST_CASE("Tiled background release returns its pages once",
@@ -525,7 +519,6 @@ TEST_CASE("Tiled background release returns its pages once",
   CHECK(fx::ReleaseTiledBackground(host, state) == 1);
   CHECK(state.tiled_enabled == 0);
   CHECK_FALSE(state.layout);
-  CHECK(state.texture_file == fx::BackgroundFile{});
   CHECK(state.texture_uploaded == 0);
   CHECK(host.calls == Calls{"RetireTexturePages 21 3 5"});
   host.calls.clear();
@@ -544,13 +537,36 @@ TEST_CASE("Tiled background repeat entry retires the previous layout",
   host.calls.clear();
   REQUIRE(fx::QueueTiledBackgroundLoad(host, state, 0x16) == 1);
   CHECK(previous.expired());
-  CHECK(host.calls == Calls{"RetireTexturePages 21 3 5",
+  CHECK(host.calls == Calls{"RetireTexturePages 21 1 5",
                             "LoadBackgroundLayout 200",
-                            "ReserveTexturePages 22 3 5"});
+                            "ReserveTexturePages 22 1 5"});
   fx::RoomWeatherState weather;
   fx::InitializeRoomBackground(host, state, weather);
   CHECK_FALSE(state.layout);
-  CHECK(host.calls.back() == "RetireTexturePages 22 3 5");
+  CHECK(host.calls.back() == "RetireTexturePages 22 1 5");
+}
+
+TEST_CASE("Tiled background reserves and uploads the selected owned image",
+          "[field-background][far-rebinding]") {
+  FakeBackgroundHost host;
+  host.section = Section();
+  auto selected = Layout();
+  selected->image.source_rect.x = 0;
+  selected->image.source_rect.y = 0;
+  selected->image.source_rect.width = 128;
+  selected->image.pixel_words.resize(std::size_t{128} * 32, 17);
+  host.layout = selected;
+  host.relocated_page = 30;
+  fx::RoomBackgroundState state;
+  REQUIRE(fx::QueueTiledBackgroundLoad(host, state, 0x15) == 1);
+  CHECK(state.texture_page_count == 2);
+  CHECK(state.texture_page == 30);
+  host.layout = Layout();
+  REQUIRE(fx::FinishTiledBackgroundLoad(host, state) == 0);
+  CHECK(host.uploaded_pixels == selected->image.pixel_words);
+  CHECK(host.uploaded_palette == selected->image.palette_words);
+  CHECK(fx::ReleaseTiledBackground(host, state) == 1);
+  CHECK(host.calls.back() == "RetireTexturePages 30 2 5");
 }
 
 TEST_CASE("Background setters keep halfwords and bytes",

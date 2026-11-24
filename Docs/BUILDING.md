@@ -309,7 +309,12 @@ build\Debug\VS.Extract.exe authoring Native\data
   explicitly reimports and replaces them. Missing/stale images, invalid
   rectangles, malformed grids and unsupported depth codes are errors.
   The production background reader consumes typed cells directly, with no
-  raw-FAR fallback. Its version/schema checks run when a background is loaded,
+  raw-FAR fallback. Edit `image_id` to select another registered native image;
+  the original paired TIM remains import provenance. The selected pixels and
+  palette are retained through upload, with a free page range chosen for the
+  image's dimensions. Missing IDs, incompatible images and exhausted page
+  capacity are refused, not replaced with the original image.
+  Its version/schema checks run when a background is loaded,
   so older data trees need this command even if they reach the title screen.
   See [ASSET_PIPELINE.md §6.4.1](ASSET_PIPELINE.md#641-far-background-layouts)
   for the format, proven room bindings and remaining authoring gates.

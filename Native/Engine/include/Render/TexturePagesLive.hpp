@@ -22,6 +22,8 @@ void AdvanceLiveTexturePageRetirements();
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
 int ReserveLiveTexturePageRange(std::uint32_t first_page,
                                 std::uint32_t page_count, int owner_tag);
+[[nodiscard]] std::expected<TexturePageRange, TexturePageResult>
+ReserveLiveImageTexturePages(TexturePageRange preferred, int owner_tag);
 // func_8007E0A8 (146C.c:9532): 1 when the range started retiring, or 0.
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
 int RetireLiveTexturePageRange(std::uint32_t first_page,

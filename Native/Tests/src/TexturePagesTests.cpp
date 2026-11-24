@@ -110,6 +110,51 @@ TEST_CASE("Reservations outside pages 25-31 are refused, wrapping included",
   CHECK(pages == before);
 }
 
+TEST_CASE(
+    "Image reservations preserve a free hint or choose a contiguous range",
+    "[render-textures][far-rebinding]") {
+  for (const auto preferred : {27U, 31U}) {
+    auto pages = InitializedPages();
+    REQUIRE(Render::ReserveTexturePages(pages, {.first = 28, .count = 1}, 7) ==
+            TexturePageResult::kDone);
+    const auto image = Render::ReserveImageTexturePages(
+        pages, {.first = preferred, .count = 2}, 5);
+    REQUIRE(image.has_value());
+    if (!image) continue;
+    CHECK(image->first == 25);
+    CHECK(pages[28] == Owned(7));
+    CHECK(Render::RetireTexturePages(pages, *image, 5) ==
+          TexturePageResult::kDone);
+  }
+  auto pages = InitializedPages();
+  const auto image =
+      Render::ReserveImageTexturePages(pages, {.first = 27, .count = 1}, 5);
+  REQUIRE(image.has_value());
+  if (image) {
+    CHECK(image->first == 27);
+  }
+}
+
+TEST_CASE(
+    "Image reservations refuse exhaustion and invalid requests atomically",
+    "[render-textures][far-rebinding]") {
+  auto pages = InitializedPages();
+  REQUIRE(Render::ReserveTexturePages(pages, {.first = 25, .count = 7}, 7) ==
+          TexturePageResult::kDone);
+  const auto before = pages;
+  const auto exhausted =
+      Render::ReserveImageTexturePages(pages, {.first = 27, .count = 2}, 5);
+  REQUIRE_FALSE(exhausted.has_value());
+  CHECK(exhausted.error() == TexturePageResult::kOccupied);
+  CHECK_FALSE(
+      Render::ReserveImageTexturePages(pages, {.first = 27, .count = 2}, 0));
+  CHECK_FALSE(
+      Render::ReserveImageTexturePages(pages, {.first = 27, .count = 0}, 5));
+  CHECK_FALSE(
+      Render::ReserveImageTexturePages(pages, {.first = 27, .count = 8}, 5));
+  CHECK(pages == before);
+}
+
 TEST_CASE("Occupied pages and owners that read as states are refused",
           "[render-textures]") {
   Render::TexturePageTable pages = InitializedPages();

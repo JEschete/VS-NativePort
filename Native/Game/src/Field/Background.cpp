@@ -152,7 +152,6 @@ void DrawSkyDome(BackgroundHost& host,
 void InitializeRoomBackground(BackgroundHost& host, RoomBackgroundState& state,
                               RoomWeatherState& weather) {
   ReleaseTiledBackground(host, state);
-  state.texture_file = {};
   state.texture_uploaded = 0;
   // The particle buffer is dropped without being freed, as in the original.
   weather.particles = WeatherParticlesId::kNone;
@@ -285,7 +284,6 @@ std::int32_t QueueTiledBackgroundLoad(BackgroundHost& host,
   const std::uint8_t was_enabled = state.tiled_enabled;
   ReleaseTiledBackground(host, state);
   state.texture_page = static_cast<std::uint8_t>(texture_page);
-  state.texture_file = {};
   state.texture_uploaded = 0;
   if (const std::optional<TiledBackgroundSection> section =
           host.TiledBackground()) {
@@ -295,12 +293,18 @@ std::int32_t QueueTiledBackgroundLoad(BackgroundHost& host,
                          layout ? "empty native background" : layout.error());
       return 0;
     }
-    state.texture_page_count =
-        static_cast<std::int16_t>(section->texture_page_count);
+    if (!IsValidBackgroundTexture((*layout)->image)) {
+      VS::Core::LogError(
+          kChannel, "QueueTiledBackgroundLoad: invalid native image upload");
+      return 0;
+    }
+    const auto& image_rect = (*layout)->image.source_rect;
+    const auto word_width = image_rect.width + (image_rect.x & kPageColumnMask);
+    state.texture_page_count = static_cast<std::int16_t>(
+        (word_width + kPageColumnMask) / (kPageColumnMask + 1));
     if (host.ReserveTexturePages(state.texture_page, state.texture_page_count,
                                  kBackgroundPageOwner)) {
       state.layout = std::move(*layout);
-      state.texture_file = section->texture;
       state.tiled_enabled = was_enabled;
       return 1;
     }
@@ -314,13 +318,8 @@ std::int32_t FinishTiledBackgroundLoad(BackgroundHost& host,
   if (!state.layout) return 0;
   if (state.texture_uploaded == 0) {
     state.texture_uploaded = 1;
-    const auto image = host.LoadBackgroundTexture(state.texture_file);
-    if (!image) {
-      VS::Core::LogError(kChannel, "FinishTiledBackgroundLoad: {}",
-                         image.error());
-      ReleaseTiledBackground(host, state);
-      return 1;
-    } else if (!IsValidBackgroundTexture(*image)) {
+    const auto& image = state.layout->image;
+    if (!IsValidBackgroundTexture(image)) {
       VS::Core::LogError(
           kChannel,
           "FinishTiledBackgroundLoad: converted background image has "
@@ -329,15 +328,15 @@ std::int32_t FinishTiledBackgroundLoad(BackgroundHost& host,
       return 1;
     } else {
       const std::int32_t page = state.texture_page;
-      TextureRect rect = image->source_rect;
+      TextureRect rect = image.source_rect;
       rect.x =
           static_cast<std::int16_t>((rect.x & kPageColumnMask) +
                                     ((page & kPageXMask) << kPageWidthShift));
       rect.y =
           static_cast<std::int16_t>(static_cast<std::uint8_t>(rect.y) +
                                     ((page & kPageRowBit) << kPageRowShift));
-      host.UploadBackgroundPixels(image->pixel_words, rect);
-      host.UploadBackgroundPalette(image->palette_words, kBackgroundClutRow);
+      host.UploadBackgroundPixels(image.pixel_words, rect);
+      host.UploadBackgroundPalette(image.palette_words, kBackgroundClutRow);
     }
     return 0;
   }
@@ -356,7 +355,6 @@ std::int32_t ReleaseTiledBackground(BackgroundHost& host,
   host.RetireTexturePages(state.texture_page, state.texture_page_count,
                           kBackgroundPageOwner);
   state.layout.reset();
-  state.texture_file = {};
   state.texture_uploaded = 0;
   return 1;
 }

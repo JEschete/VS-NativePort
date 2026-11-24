@@ -46,11 +46,9 @@ class LiveBackgroundHost final : public BackgroundHost {
   LoadBackgroundLayout(const TiledBackgroundSection& section) override;
   [[nodiscard]] std::optional<TiledBackgroundSection> TiledBackground()
       override;
-  [[nodiscard]] bool ReserveTexturePages(int first_page, int page_count,
-                                         int owner) override;
+  [[nodiscard]] bool ReserveTexturePages(std::uint8_t& first_page,
+                                         int page_count, int owner) override;
   void RetireTexturePages(int first_page, int page_count, int owner) override;
-  [[nodiscard]] std::expected<BackgroundTextureUpload, std::string>
-  LoadBackgroundTexture(const BackgroundFile& source) override;
   void UploadBackgroundPixels(std::span<const std::uint16_t> words,
                               const TextureRect& rect) override;
   void UploadBackgroundPalette(std::span<const std::uint16_t> words,

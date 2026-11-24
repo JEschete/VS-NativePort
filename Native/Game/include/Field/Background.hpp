@@ -59,7 +59,6 @@ struct RoomBackgroundState {
   std::uint8_t solid = 0;               // D_800F1DC6
   std::uint8_t texture_page = 0;        // D_800F1DC8
   std::uint8_t tiled_enabled = 0;       // D_800F1DC9
-  BackgroundFile texture_file{};        // native source for the loaded image
   std::uint8_t texture_uploaded = 0;    // native load step, not a legacy global
   std::shared_ptr<const OwnedBackgroundLayout> layout{};
 
@@ -195,25 +194,27 @@ struct BackgroundLayout {
   std::span<const BackgroundTile> tiles;
 };
 
-struct OwnedBackgroundLayout {
-  std::int32_t width = 0;
-  std::int32_t height = 0;
-  std::vector<BackgroundTile> tiles;
-};
-
-// The room's tiled background section: the texture pages its picture takes
-// and its image source and layout files.
+// Room import provenance. The native layout selects its image; the original
+// image file and page count do not choose or constrain the runtime resource.
 struct TiledBackgroundSection {
   std::uint16_t texture_page_count = 0;
   BackgroundFile texture;
   BackgroundFile layout;
 };
 
-// Image data in PS1 VRAM upload order, retaining the source TIM's rectangle.
+// Native indexed pixels prepared for the current texture-page renderer.
 struct BackgroundTextureUpload {
   TextureRect source_rect;
   std::vector<std::uint16_t> pixel_words;
   std::vector<std::uint16_t> palette_words;
+};
+
+struct OwnedBackgroundLayout {
+  std::int32_t width = 0;
+  std::int32_t height = 0;
+  std::vector<BackgroundTile> tiles;
+  std::string image_id{};
+  BackgroundTextureUpload image{};
 };
 
 class BackgroundHost {
@@ -258,13 +259,11 @@ class BackgroundHost {
   TiledBackground() = 0;
   // func_8007DFF0 and func_8007E0A8: lends or retires texture pages; the
   // reservation is false when it was refused.
-  [[nodiscard]] virtual bool ReserveTexturePages(int first_page, int page_count,
-                                                 int owner) = 0;
+  // first_page is a placement hint, updated to the actual reserved range.
+  [[nodiscard]] virtual bool ReserveTexturePages(std::uint8_t& first_page,
+                                                 int page_count, int owner) = 0;
   virtual void RetireTexturePages(int first_page, int page_count,
                                   int owner) = 0;
-  // Loads an already-converted native image; it does not read or decode TIM.
-  [[nodiscard]] virtual std::expected<BackgroundTextureUpload, std::string>
-  LoadBackgroundTexture(const BackgroundFile& source) = 0;
   virtual void UploadBackgroundPixels(std::span<const std::uint16_t> words,
                                       const TextureRect& rect) = 0;
   virtual void UploadBackgroundPalette(std::span<const std::uint16_t> words,

@@ -326,7 +326,7 @@ The disc has 27 kinds of files. The "Source" column below names the files on the
 | `MAP\*.MPD` (512) | `rooms\<zone>\<MAP>.gltf` + `.room.json` | §6.3 | vstools `MPD.js`, VSViewer, decomp field loaders |
 | `MAP\*.ZND` (256) | `catalogs\world\zones.csv`, `zone-rooms.csv`, `zone-textures.csv`; `catalogs\enemies\zone-enemies.csv`, `zone-enemy-limbs.csv`, `zone-enemy-parts.csv`; `textures\zone\<ZONE>\*.png` | done (`znd-tables`, §6.9, #517): rows and images rebuild each zone exactly. The relational ENEMY_DATA_SCHEME catalogs remain #199 | ENEMY_DATA_SCHEME.md §3 |
 | `EVENT\*.EVT` (512) | `events\<id>.json` | command list `{op, args}` with op names from the decomp's event interpreter; text → string IDs | decomp `Event\` module |
-| `BG\*.TIM` (4), `BG\*.FAR` (4), root `*.TIM` | `textures\bg\*.png` + `.image.json`; `backgrounds\<stem>.background.json` | TIM → PNG (§6.4). The BG TIM headers are not authoritative: they declare mode `0xA` (16bpp + CLUT) with a 256-colour CLUT and three share id `0x110`; the layout's draw depth selects 8-bit indices. FAR has a 12-byte header and 24-byte cells; the reader consumes typed JSON cells directly (§6.4.1), while MPD section 15 still selects the paired image | native `Content\BackgroundLayout.hpp`, `Field\Background.cpp`, `BackgroundLive.cpp` |
+| `BG\*.TIM` (4), `BG\*.FAR` (4), root `*.TIM` | `textures\bg\*.png` + `.image.json`; `backgrounds\<stem>.background.json` | TIM → PNG (§6.4). The BG TIM headers are not authoritative: they declare mode `0xA` (16bpp + CLUT) with a 256-colour CLUT and three share id `0x110`; the layout's draw depth selects 8-bit indices. FAR has a 12-byte header and 24-byte cells; the reader consumes typed JSON cells directly and `image_id` selects the native image (§6.4.1). MPD section 15 remains the layout compatibility lookup and original-image provenance | native `Content\BackgroundLayout.hpp`, `Field\Background.cpp`, `BackgroundLive.cpp` |
 | `GIM\*.GIM` (49) | `textures\gim\*.png` + composition JSON | VS screen-effect images: per-layer cell maps over shared strips, 4 × 16-colour CLUTs and a shared or owned 256-colour palette | native `Render\GimImages.cpp` |
 | `MENU\*.BIN` (11), `ENDING\ILLUST*.BIN` (11) | `ui\*.png` + `.image.json` + layout JSON | menu art, game-over, ending illustrations. `MENUBG` is word-RLE and `ILLUST*` are LZ/RLE-compressed TIMs, decoded at conversion; `ITEMNAME`, `ITEMHELP`, `MENU12` and `MCMAN` are text and tables, not images | native `Menu\`, `StaffRollCore.cpp` |
 | `MENU\*.SYD` (3) | `catalogs\menu\combination-<kind>-{results,pairs,materials}.csv` + `.schema.json` | workshop **combination recipes** (result records, ingredient pairs and material rules), not item definitions; there is no global item-stat file. Converted (§6.8) | native `Content\WorkshopRecipes.hpp`, `Menu\Setup\Combination.hpp` |
@@ -608,16 +608,35 @@ all builds. Unsupported depth modes and missing/stale/invalid resources
 produce errors rather than a raw-FAR fallback.
 
 Production loads `BackgroundLayoutDocument` into an owned
-`OwnedBackgroundLayout` and draws its cells directly. There is no FAR packing,
-heap payload or disc request in this path; `EncodeFar` is used only by offline
-extraction checks/tests. Repeat entry, initialization and session reset release
-native ownership and page reservations.
+`OwnedBackgroundLayout` and draws its cells directly. The authored `image_id`
+now resolves through the shared native-image/manifest reader, including aliases
+and explicitly selected unreferenced artwork. The original MPD/TIM binding is
+import provenance/default only. The selected image's pixels and palette are
+owned with the cells and carried through upload; upload does not reopen the
+original TIM or re-resolve an ID after loading. Source/dependency hashes,
+canonical image metadata, sampled rectangles and material rules remain checked.
+The current sampler accepts even-width indexed-8 images up to 256×256 with one
+256-colour palette, transparent zero and semi-transparency off.
 
-**Remaining gates:** the current room still chooses its image through the MPD
-binding; JSON `image_id` validates that choice but cannot yet rebind it.
-The selected native image must next be resolved by authored ID and carried
-through upload, separating live references from import provenance. Semantic
-identities/readability, native-only extensibility beyond the admitted renderer
+Image dimensions determine the required page count. The event's original page
+number is a placement hint: the allocator keeps it when free, otherwise chooses
+another contiguous free range within lendable pages 25–31. Occupied/resident
+pages are never overwritten; invalid owners, empty/oversized requests and
+exhaustion fail without partial reservations. Drawing and retirement use the
+actual selected range. This is renderer allocation, not FAR/TIM reconstruction.
+`EncodeFar` remains offline-only, and repeat entry, initialization and session
+reset release native ownership and the actual page reservation.
+
+The bounded renderer probe changed only 001's `image_id` to `image.bg.002op01a`.
+Its old hint 27 could not fit two pages; relocation selected pages 29–30.
+At tick 3200, captured renderer storage contained the selected image's exact
+pixels and palette. Six captured scene frames matched the original camera
+frames: the background was occluded in that interval, so this demonstrates
+actual renderer upload, **not** a scene-visible artwork change. The authored
+layout was restored byte-for-byte; evidence is
+`build\issue-210-rebinding-relocated-comparison.json`.
+
+**Remaining gates:** semantic identities/readability, native-only extensibility beyond the admitted renderer
 envelope, matched-reference placement/gradients/seams/parallax, an edited-layout
 room demonstration and production transitions/re-entry remain open. Dormant
 legacy module pointer declarations and image/page rendering compatibility are

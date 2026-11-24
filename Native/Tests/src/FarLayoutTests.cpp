@@ -1,9 +1,11 @@
+#include <algorithm>
 #include <array>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
+#include <memory>
 #include <span>
 #include <stdexcept>
 #include <string>
@@ -17,9 +19,11 @@
 #include "Content/DataStore.hpp"
 #include "Content/JsonText.hpp"
 #include "Core/Sha256.hpp"
+#include "Extract/ConversionManifestWriter.hpp"
 #include "Extract/ConverterBatch.hpp"
 #include "Extract/FarConversion.hpp"
 #include "Extract/ImageConversion.hpp"
+#include "Extract/ImageFilesWriter.hpp"
 #include "Field/BackgroundLive.hpp"
 #include "Platform/Paths.hpp"
 
@@ -117,6 +121,32 @@ class FarData {
     return Required(
         Extract::ReadFileBytes(root / VS::Platform::Utf8Path(name)));
   }
+  void AddSecondImage() const {
+    auto image = TimBytes();
+    image[22] = std::byte{31};
+    image[544] = std::byte{1};
+    image[545] = std::byte{1};
+    Write("disc/BG/002OP01A.FAR", FarBytes());
+    Write("disc/BG/002OP01A.TIM", image);
+    const std::string manifest =
+        "lba\tsize\tform\tpath\n100\t36\traw\tBG/001OP01A.FAR\n"
+        "101\t608\traw\tBG/001OP01A.TIM\n102\t36\traw\tBG/002OP01A.FAR\n"
+        "103\t608\traw\tBG/002OP01A.TIM\n";
+    Write("files.tsv", BytesOf(manifest));
+    Required(Extract::ConvertDiscImages(root, false));
+  }
+  Content::ConversionManifest Manifest() const {
+    auto manifest = Required(Content::LoadConversionManifest(root));
+    if (!manifest) throw std::runtime_error("fixture manifest missing");
+    return std::move(*manifest);
+  }
+  void BindImage(const std::string& id) const {
+    auto json =
+        Required(Content::ParseJsonText(Read(kLayoutFile), kLayoutFile));
+    json["image_id"] = id;
+    const auto text = Content::FormatJsonText(json) + "\n";
+    Write(kLayoutFile, BytesOf(text));
+  }
   fs::path root;
   Content::DataStore::ScopedOverride store_scope;
 };
@@ -155,6 +185,24 @@ void CheckLoadedCells(const Content::BackgroundLayoutDocument& document,
     }
     CHECK(actual.corners[1].code == 1);
   }
+}
+
+using LayoutPtr = std::shared_ptr<const VS::Field::OwnedBackgroundLayout>;
+
+std::expected<LayoutPtr, std::string> LoadFixtureBackground(
+    const FarData& data) {
+  if (auto opened = Content::DataStore::Open(data.root); !opened) {
+    return std::unexpected(opened.error());
+  }
+  const auto* store = Content::DataStore::Get();
+  if (store == nullptr) return std::unexpected("fixture store missing");
+  const auto* far = store->Find("BG/001OP01A.FAR");
+  if (far == nullptr) return std::unexpected("fixture FAR missing");
+  VS::Field::LiveBackgroundHost host;
+  return host.LoadBackgroundLayout(
+      {.texture_page_count = 65535,
+       .texture = {},
+       .layout = {.lba = static_cast<std::int32_t>(far->lba), .size = 2048}});
 }
 }  // namespace
 
@@ -261,13 +309,104 @@ TEST_CASE(
   const auto image = Required(
       Content::LoadImageFiles(data.root / "textures" / "bg", "001OP01A"));
   layout.image_id = "image.missing";
-  CHECK_FALSE(Content::ValidateBackgroundImage(layout, image));
+  CHECK_FALSE(
+      Content::LoadBackgroundLayoutImage(data.root, data.Manifest(), layout));
   layout.image_id = image.id;
   layout.cells.front().right = 8;
   CHECK_FALSE(Content::ValidateBackgroundImage(layout, image));
   const auto text = Required(Content::WriteBackgroundLayout(layout));
   data.Write(kLayoutFile, BytesOf(text));
   CHECK_FALSE(Extract::ConvertDiscBackgrounds(data.root, false));
+}
+
+TEST_CASE("Authored FAR image IDs select a second image without an MPD veto",
+          "[far-layout][far-rebinding]") {
+  FarData data;
+  data.AddSecondImage();
+  Required(Extract::ConvertDiscBackgrounds(data.root, false));
+  data.BindImage("image.bg.002op01a");
+  const auto authored = data.Read(kLayoutFile);
+  CHECK(Required(Extract::ConvertDiscBackgrounds(data.root, false)).unchanged ==
+        2);
+  CHECK(data.Read(kLayoutFile) == authored);
+  fs::remove(data.root / "disc" / "BG" / "001OP01A.TIM");
+  const auto loaded = Required(LoadFixtureBackground(data));
+  REQUIRE(loaded);
+  CHECK(loaded->image_id == "image.bg.002op01a");
+  CHECK(loaded->image.pixel_words.front() == 257);
+  CHECK(loaded->image.palette_words[1] == 31);
+  const auto document =
+      Required(Content::ReadBackgroundLayout(authored, kLayoutFile));
+  CHECK(document.image_source == "BG/001OP01A.TIM");
+  CHECK(data.Read("disc/BG/001OP01A.FAR") == FarBytes());
+}
+
+TEST_CASE("FAR binding refuses missing, malformed and non-image identities",
+          "[far-layout][far-rebinding]") {
+  FarData data;
+  Required(Extract::ConvertDiscBackgrounds(data.root, false));
+  for (const auto& id :
+       {"image.missing", "../invalid", "background.import.bg.001op01a"}) {
+    CAPTURE(id);
+    data.BindImage(id);
+    CHECK_FALSE(LoadFixtureBackground(data));
+  }
+  data.BindImage("image.bg.001op01a");
+  fs::remove(data.root / "textures" / "bg" / "001OP01A.png");
+  CHECK_FALSE(LoadFixtureBackground(data));
+}
+
+TEST_CASE(
+    "FAR bindings validate image material and retain owned reload snapshots",
+    "[far-layout][far-rebinding]") {
+  FarData data;
+  data.AddSecondImage();
+  Required(Extract::ConvertDiscBackgrounds(data.root, false));
+  const auto first = Required(LoadFixtureBackground(data));
+  data.BindImage("image.bg.002op01a");
+  const auto second = Required(LoadFixtureBackground(data));
+  REQUIRE(first);
+  REQUIRE(second);
+  CHECK(first->image.pixel_words.front() == 0);
+  CHECK(second->image.pixel_words.front() == 257);
+  auto image = Required(
+      Content::LoadImageFiles(data.root / "textures" / "bg", "002OP01A"));
+  image.material.reset();
+  const auto files = Required(Extract::EncodeImageFiles(image, "002OP01A"));
+  REQUIRE(Extract::WriteImageFiles(data.root / "textures" / "bg", files));
+  CHECK_FALSE(LoadFixtureBackground(data));
+  CHECK(second->image.palette_words[1] == 31);
+}
+
+TEST_CASE("FAR explicit image aliases can select unreferenced native artwork",
+          "[far-layout][far-rebinding]") {
+  FarData data;
+  data.AddSecondImage();
+  Required(Extract::ConvertDiscBackgrounds(data.root, false));
+  auto image = Required(
+      Content::LoadImageFiles(data.root / "textures" / "bg", "002OP01A"));
+  image.unreferenced = true;
+  const auto files = Required(Extract::EncodeImageFiles(image, "002OP01A"));
+  REQUIRE(Extract::WriteImageFiles(data.root / "textures" / "bg", files));
+  auto manifest = data.Manifest();
+  auto output = std::ranges::find(manifest.outputs, image.id,
+                                  &Content::ConversionOutput::id);
+  REQUIRE(output != manifest.outputs.end());
+  output->unreferenced = true;
+  auto alias = *output;
+  alias.id = "image.test.explicit-alias";
+  alias.files.clear();
+  alias.dependencies.clear();
+  alias.alias_of = image.id;
+  manifest.outputs.push_back(alias);
+  REQUIRE(Extract::WriteConversionManifest(data.root, manifest));
+  data.BindImage(alias.id);
+  const auto loaded = Required(LoadFixtureBackground(data));
+  REQUIRE(loaded);
+  CHECK(loaded->image_id == alias.id);
+  CHECK(loaded->image.palette_words == image.image.palettes.front());
+  fs::remove(data.root / "disc" / "BG" / "002OP01A.FAR");
+  CHECK_FALSE(LoadFixtureBackground(data));
 }
 
 TEST_CASE("Live FAR reader adopts native edits without FAR repacking",
@@ -308,14 +447,8 @@ void VerifyCorpusEntry(const Content::DataStore& store,
               .rounded_size = std::uint64_t{entry.SectorCount()} * 2048,
               .extension = ".FAR",
               .converter = Content::kFarConverterName}));
-  const auto image_source = Required(Content::FindConvertedSource(
-      store, {.lba = tim->lba,
-              .rounded_size = std::uint64_t{tim->SectorCount()} * 2048,
-              .extension = ".TIM",
-              .converter = "tim-png"}));
-  const auto image = Required(Content::LoadConvertedImage(store, image_source));
   const auto document =
-      Required(Content::LoadConvertedBackground(store, source, image));
+      Required(Content::LoadConvertedBackground(store, source));
   CHECK(Required(Content::EncodeFar(document)) == bytes.bytes);
   VS::Field::LiveBackgroundHost host;
   const auto loaded = Required(host.LoadBackgroundLayout(Section(entry, *tim)));

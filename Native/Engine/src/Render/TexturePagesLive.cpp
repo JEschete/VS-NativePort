@@ -48,6 +48,15 @@ int ReserveLiveTexturePageRange(std::uint32_t first_page,
   return static_cast<int>(first_page);
 }
 
+std::expected<TexturePageRange, TexturePageResult> ReserveLiveImageTexturePages(
+    TexturePageRange preferred, int owner_tag) {
+  auto result = ReserveImageTexturePages(livePages, preferred, owner_tag);
+  if (!result) {
+    ReportRefusal("image allocation", preferred, owner_tag, result.error());
+  }
+  return result;
+}
+
 int RetireLiveTexturePageRange(std::uint32_t first_page,
                                std::uint32_t page_count, int owner_tag) {
   const TexturePageRange range{.first = first_page, .count = page_count};

@@ -13,7 +13,6 @@
 #include "Content/ImageFiles.hpp"
 #include "Extract/ConverterBatch.hpp"
 #include "Extract/ImageConversion.hpp"
-#include "Platform/Paths.hpp"
 
 namespace VS::Extract {
 namespace {
@@ -46,8 +45,7 @@ std::expected<Content::ImageDocument, std::string> PairedImage(
     return std::unexpected(image.path +
                            ": paired PNG/sidecar is not registered");
   }
-  auto document = Content::LoadImageFiles(
-      root / Platform::Utf8Path(location->directory), location->stem);
+  auto document = Content::LoadConvertedImageById(root, manifest, id);
   if (!document) return std::unexpected(document.error());
   return document;
 }
@@ -137,8 +135,9 @@ std::expected<PlannedLayout, std::string> PlanLayout(
       .text = std::move(*text)};
 }
 
-std::expected<void, std::string> ValidateKept(const std::filesystem::path& root,
-                                              const PlannedLayout& plan) {
+std::expected<void, std::string> ValidateKept(
+    const std::filesystem::path& root,
+    const Content::ConversionManifest& manifest, const PlannedLayout& plan) {
   auto reader = Content::DirectoryFileReader(root);
   auto bytes = reader(plan.file);
   if (!bytes) {
@@ -157,12 +156,9 @@ std::expected<void, std::string> ValidateKept(const std::filesystem::path& root,
     return std::unexpected(plan.file +
                            ": authored layout has stale import provenance");
   }
-  auto location = ImageLocationForDiscPath(layout->image_source);
-  if (!location) return std::unexpected(location.error());
-  auto image = Content::LoadImageFiles(
-      root / Platform::Utf8Path(location->directory), location->stem);
+  auto image = Content::LoadBackgroundLayoutImage(root, manifest, *layout);
   if (!image) return std::unexpected(image.error());
-  return Content::ValidateBackgroundImage(*layout, *image);
+  return {};
 }
 }  // namespace
 
@@ -186,7 +182,7 @@ std::expected<FarConversionReport, std::string> ConvertDiscBackgrounds(
         return std::unexpected(entry.path +
                                ": unexpected native layout output files");
       }
-      if (auto valid = ValidateKept(root, *plan); !valid) {
+      if (auto valid = ValidateKept(root, start->previous, *plan); !valid) {
         return std::unexpected(valid.error());
       }
       batch.outputs.push_back(*kept);
