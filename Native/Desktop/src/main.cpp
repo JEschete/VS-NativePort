@@ -623,7 +623,15 @@ int RunDesktop(int argc, char** argv, Game::GameplayTrace* trace) {
   // prepared before it existed has none.
   auto opened = Content::DataStore::Open(*data_root);
   if (opened) opened = Content::DataStore::Get()->RequireCatalog();
-  if (opened) opened = Content::DataStore::Get()->RequireConversions();
+  if (opened) {
+    const bool verify_all =
+        std::any_of(argv + 1, argv + argc, [](const char* argument) {
+          return std::string_view(argument) == "--verify-all";
+        });
+    opened = Content::DataStore::Get()->RequireConversions(
+        verify_all ? Content::SourceVerification::kFull
+                   : Content::SourceVerification::kCached);
+  }
   if (!opened) {
     VS::Core::LogError("boot", "{}", opened.error());
     if constexpr (!kEnableDetailedGameLogging) {

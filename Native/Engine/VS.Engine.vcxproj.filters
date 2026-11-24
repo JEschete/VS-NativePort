@@ -534,6 +534,9 @@
     <ClCompile Include="src\Platform\App.cpp">
       <Filter>src\Platform</Filter>
     </ClCompile>
+    <ClCompile Include="src\Platform\AtomicFile.cpp">
+      <Filter>src\Platform</Filter>
+    </ClCompile>
     <ClCompile Include="src\Platform\CrashHandler.cpp">
       <Filter>src\Platform</Filter>
     </ClCompile>
@@ -1051,6 +1054,9 @@
       <Filter>include\Movie</Filter>
     </ClInclude>
     <ClInclude Include="include\Platform\App.hpp">
+      <Filter>include\Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Platform\AtomicFile.hpp">
       <Filter>include\Platform</Filter>
     </ClInclude>
     <ClInclude Include="include\Platform\CrashHandler.hpp">

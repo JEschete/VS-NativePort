@@ -30,6 +30,7 @@
 #include "Content/EsqFile.hpp"
 #include "Content/EtmFile.hpp"
 #include "Content/MovieEncoder.hpp"
+#include "Content/SourceStampCache.hpp"
 #include "Content/WorkshopRecipes.hpp"
 #include "Content/ZndFile.hpp"
 #include "Content/ZoneTables.hpp"
@@ -114,23 +115,49 @@ std::expected<bool, std::string> IsPlaceholder(const DataStore& store,
 
 // The SHA-256 of each extracted file one check has read: many outputs share
 // a dependency such as EFFECT/EFFPURGE.BIN.
-using SourceHashes = std::unordered_map<std::string, std::string>;
+struct SourceHashes {
+  std::unordered_map<std::string, std::string> values;
+  SourceStampCache& cache;
+  SourceVerification verification;
+  SourceVerificationStats& statistics;
+};
 
 // Whether `entry`'s bytes still hash to `sha256`.
 std::expected<bool, std::string> HashMatches(const DataStore& store,
                                              SourceHashes& hashes,
                                              const DataStore::Entry& entry,
                                              std::string_view sha256) {
-  auto found = hashes.find(entry.path);
-  if (found == hashes.end()) {
-    const auto bytes = store.ReadAll(entry);
-    if (!bytes) return std::unexpected(bytes.error());
-    found = hashes
-                .emplace(entry.path,
-                         Core::Sha256Hex(std::as_bytes(std::span(*bytes))))
-                .first;
+  const auto found = hashes.values.find(entry.path);
+  if (found != hashes.values.end()) return found->second == sha256;
+  const auto path = store.FileOf(entry);
+  const auto before = ReadSourceFileStamp(path);
+  if (!before) return std::unexpected(before.error());
+  if (before->size != entry.size) {
+    return std::unexpected(
+        std::format("{}: source size is {}, expected {} from files.tsv",
+                    Platform::PathText(path), before->size, entry.size));
   }
-  return found->second == sha256;
+  if (hashes.verification == SourceVerification::kCached &&
+      hashes.cache.Use(entry.path, *before, sha256)) {
+    hashes.values.emplace(entry.path, sha256);
+    ++hashes.statistics.cache_hits;
+    return true;
+  }
+  const auto bytes = store.ReadAll(entry);
+  if (!bytes) return std::unexpected(bytes.error());
+  const auto actual = Core::Sha256Hex(std::as_bytes(std::span(*bytes)));
+  ++hashes.statistics.files_hashed;
+  hashes.statistics.bytes_hashed += bytes->size();
+  const auto after = ReadSourceFileStamp(path);
+  if (!after) return std::unexpected(after.error());
+  if (*before != *after) {
+    return std::unexpected(Platform::PathText(path) +
+                           ": source changed during verification; retry");
+  }
+  hashes.values.emplace(entry.path, actual);
+  if (actual != sha256) return false;
+  hashes.cache.Remember(entry.path, *after, actual);
+  return true;
 }
 
 // Whether every file `conversion` lists exists under the data root.
@@ -415,7 +442,12 @@ std::expected<void, std::string> DataStore::RequireCatalog() const {
       ", or prepare the disc again with VS.Launcher)");
 }
 
-std::expected<void, std::string> DataStore::RequireConversions() const {
+std::expected<void, std::string> DataStore::RequireConversions(
+    SourceVerification verification,
+    SourceVerificationStats* statistics) const {
+  SourceVerificationStats local;
+  auto& measured = statistics != nullptr ? *statistics : local;
+  measured = {};
   if (!m_conversion_manifest_) {
     return std::unexpected(
         "no conversion manifest in " +
@@ -428,7 +460,15 @@ std::expected<void, std::string> DataStore::RequireConversions() const {
       !required) {
     return std::unexpected(required.error() + std::string(kRerun));
   }
-  SourceHashes hashes;
+  SourceStampCache cache(m_root_);
+  if (auto loaded = cache.Load(); !loaded) {
+    Core::LogWarn("content", "source stamp cache ignored; checking sources: {}",
+                  loaded.error());
+  }
+  SourceHashes hashes{.values = {},
+                      .cache = cache,
+                      .verification = verification,
+                      .statistics = measured};
   for (const ConvertedType& type : kConvertedTypes) {
     if (auto required =
             RequireConvertedType(*this, *m_conversion_manifest_, hashes, type);
@@ -436,6 +476,13 @@ std::expected<void, std::string> DataStore::RequireConversions() const {
       return required;
     }
   }
+  if (auto saved = cache.Publish(); !saved) {
+    Core::LogWarn("content", "sources verified; cache could not be saved: {}",
+                  saved.error());
+  }
+  Core::LogDebug(
+      "content", "source verification: {} hashes ({} bytes), {} stamp hits",
+      measured.files_hashed, measured.bytes_hashed, measured.cache_hits);
   return {};
 }
 

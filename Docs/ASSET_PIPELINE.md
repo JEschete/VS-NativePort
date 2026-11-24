@@ -156,6 +156,18 @@ Game systems
 - Conversion is **offline**. `VS.Extract extract` converts the supported source files during extraction; `VS.Extract images <datadir>` reruns the image converters, `VS.Extract backgrounds <datadir>` the FAR layouts (§6.4.1), and `VS.Extract tables <datadir>` the table converters (the workshop recipes, §6.8). The field-background runtime reads the converted PNG/sidecar and typed layout JSON. It does not parse or reconstruct TIM/FAR payloads; the remaining room/image binding and renderer compatibility limits are separate gates.
 - **Startup check:** `VS.Desktop`, Combat Lab and Launcher validate `manifest.json` and the required converter versions. They reject missing/stale converted sources (TIM, FBC, FBT and SYD), dependencies or outputs, and workshop tables that fail their checks, with an instruction to rerun extraction. They never fall back to reading the source file.
 
+The current original-source validation is accelerated by a disposable
+`.cache/source-verification.json`: matching physical size, file-clock stamp and
+expected SHA-256 may reuse a previously validated digest. Native authoring
+files are not covered by this timestamp optimization. Full verification
+(`--verify-all` in Desktop/Combat Lab, always during launcher preparation)
+rehashes everything. A full read/hash checks the source stamp again before it
+can be cached; physical lengths must equal `files.tsv`, not merely contain a
+matching prefix. All required outputs are still checked on every run. Cache
+publication happens only after success and does not make a read-only data tree
+unusable. See [BUILDING.md](BUILDING.md#6-run) and #524/#525.
+Neither this cache nor the temporary source-tree dependency is native adoption.
+
 ---
 
 ## 3. Output layout (`Native\data\`, git-ignored)

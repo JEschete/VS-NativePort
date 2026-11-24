@@ -248,6 +248,7 @@
     <ClCompile Include="src\Movie\Movie.cpp" />
     <ClCompile Include="src\Movie\MoviePlayer.cpp" />
     <ClCompile Include="src\Platform\App.cpp" />
+    <ClCompile Include="src\Platform\AtomicFile.cpp" />
     <ClCompile Include="src\Platform\CrashHandler.cpp" />
     <ClCompile Include="src\Platform\GameFiber.cpp" />
     <ClCompile Include="src\Platform\LogicalTicks.cpp" />
@@ -506,6 +507,7 @@
     <ClInclude Include="include\Movie\Movie.hpp" />
     <ClInclude Include="include\Movie\MoviePlayer.hpp" />
     <ClInclude Include="include\Platform\App.hpp" />
+    <ClInclude Include="include\Platform\AtomicFile.hpp" />
     <ClInclude Include="include\Platform\CrashHandler.hpp" />
     <ClInclude Include="include\Platform\GameFiber.hpp" />
     <ClInclude Include="include\Platform\LogicalTicks.hpp" />

@@ -75,6 +75,7 @@ struct Options {
   bool door_transitions = false;
   bool scene_catalog = false;
   bool gpu_validation = false;
+  bool verify_all = false;
   std::string door_case;
   std::string door_from;
   fs::path door_resume;
@@ -248,6 +249,8 @@ Options Parse(int argc, char** argv) {
       options.door_transitions = true;
     } else if (argument == "--scene-catalog") {
       options.scene_catalog = true;
+    } else if (argument == "--verify-all") {
+      options.verify_all = true;
     } else if (argument == "--gpu-validation" ||
                argument == "--no-gpu-validation") {
       // Read by Render::ChooseGpuValidation below.
@@ -296,7 +299,9 @@ void LoadData(const Options& options) {
       !catalog) {
     throw std::runtime_error(catalog.error());
   }
-  if (const auto conversions = Content::DataStore::Get()->RequireConversions();
+  if (const auto conversions = Content::DataStore::Get()->RequireConversions(
+          options.verify_all ? Content::SourceVerification::kFull
+                             : Content::SourceVerification::kCached);
       !conversions) {
     throw std::runtime_error(conversions.error());
   }

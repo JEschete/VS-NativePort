@@ -104,6 +104,46 @@ also passes. The typed FAR slice is separately verified locally and awaits
 its own scoped publication; do not certify either publication until its
 fixing revision's CI passes.
 
+## Source verification cache and physical-size integrity (#524/#525)
+
+Worktree based on `1124d0e8b`, alongside the separately owned FAR image-binding
+slice. Required original sources now reuse validated size/time/SHA stamps from
+`.cache/source-verification.json`; Desktop and Combat Lab expose `--verify-all`,
+and launcher preparation always verifies fully. Native CSV/schema authoring
+never uses these timestamp stamps. A malformed or unwritable cache does not
+conceal invalid data or invalidate an otherwise usable read-only asset tree.
+Cache failures use explicit warnings and a full check.
+
+The #525 reproduction proved the old checker accepted a nine-byte physical
+source whose manifest declared four bytes: it hashed only the prefix. The new
+checker rejects physical length mismatches before cache reuse/hash, then checks
+the stamp again after a full read/hash. Cache publication happens only after
+all source/dependency/output checks succeed. The shared atomic text writer is
+also used by asset-catalog import, preserving old targets on failed replacement.
+
+Verification:
+- Debug/Release solution builds passed, `VS_JOBS=4`, `/m:2`.
+- Combined FAR/image/source-cache/catalog selections passed **136 cases /
+  18,215 assertions per configuration**; the first parent-only Debug selection
+  passed **35 cases / 7,265 assertions**.
+- Tests cover zero-hash hits, full checks, same-size/timestamp-preserving edits,
+  changed stamps/expected hashes, corrupt cache, missing sources/outputs,
+  truncated/overlong sources, write failure and atomic replacement cleanup.
+- The exact synthetic append reproduction now rejects `9` versus `4` bytes:
+  `build\issue-525-fixed-repro.log`.
+- Release direct verification median: **765.402 ms full -> 106.021 ms cached**,
+  with **3,323 hits, zero files/bytes hashed** on unchanged inputs.
+- Three actual one-tick Release launches per mode: median **2,778.943 ms full
+  -> 2,001.929 ms cached**. One Debug pair: first frame **17,177.892 ms full
+  -> 4,910.715 ms cached**; verification trace gap **13,073.644 -> 815.111 ms**.
+  These are observed/warm runs, not cold-machine certification.
+- Desktop full/cached flags and Combat Lab `--verify-all --catalog-only`
+  exited successfully. Evidence: `build\issue-524-*.log/json`.
+
+Persistent compiled SQLite is still #524; this source-cache slice cannot close
+that whole issue. Caching does not retire EC-04 adapters or the temporary
+original-source-tree requirement.
+
 ## Reversible English name codec (#500/#520), 2026-11-23
 
 Verified worktree based on `6716fac3d` on `main`. The new Content game-text codec

@@ -427,6 +427,7 @@
     <ClCompile Include="src\SkeletonTests.cpp" />
     <ClCompile Include="src\SoundTransitionTests.cpp" />
     <ClCompile Include="src\SourceNormalizationTests.cpp" />
+    <ClCompile Include="src\SourceVerificationTests.cpp" />
     <ClCompile Include="src\SpecialTerrainTests.cpp" />
     <ClCompile Include="src\SphereContainmentLiveTests.cpp" />
     <ClCompile Include="src\SphereContainmentModuleTests.cpp" />

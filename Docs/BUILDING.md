@@ -466,6 +466,7 @@ build\Release\VS.Desktop.exe
 |---|---|
 | `--disc <path>` | Use this disc (`.cue`, `.chd` or extracted folder). By default the exe looks for the `VS_DISC` environment variable, then for `disks\SLUS-01040.cue` (or `SLUS-01040\`) in its own folder or any parent folder, which finds the repo copy in a dev build. |
 | `--data <dir>` | The extracted data (§5). By default `Native\data` in the exe's folder or any parent folder. |
+| `--verify-all` | Desktop and Combat Lab: hash every required original source/dependency, ignoring cached size/time stamps. Use after tools that preserve file timestamps, or when checking source integrity. |
 | `--save-dir <dir>` | Override the native save directory. Use a dedicated ignored directory for tests; the default is `saves` beside the executable. |
 | `--input-config <file>` | Read key and gamepad bindings from this file instead of `config\input.json` beside the executable. See [Controls](#controls). |
 | `--frames <n>` | Stop after `n` logical ticks (NTSC fields: 60000/1001, approximately 59.94 per second). |
@@ -484,6 +485,20 @@ including `vs-native.log` and `game-logs`. Logging options are validated but
 cannot enable Release logging; observation/verification logging requires a
 Debug build. Extractor/launcher setup output is separate and remains available
 for actionable first-run failures. Debug diagnostic behavior is unchanged.
+
+Startup source checks keep a disposable `.cache\source-verification.json` under
+the selected data directory. Only original extracted sources use size/time/hash
+stamps; native CSV/schema authoring is not trusted by timestamp. A changed stamp
+or expected manifest hash triggers rehashing. Missing, truncated and overlong
+sources still fail; a missing native output cannot be concealed by a cache hit.
+
+The cache is replaced atomically only after the complete verification pass
+succeeds. Missing/corrupt caches cause full checks; cache-write failures use the
+normal warning logger and do not reject otherwise verified read-only assets.
+Launcher preparation always performs full verification. Size and modification
+time are an optimization, not tamper-proof identity: same-size edits that retain
+timestamps require `--verify-all`. Delete the cache to force rebuilding it.
+This does not retire the original-source validation or asset T-shims.
 
 ### Controls
 

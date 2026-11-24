@@ -129,6 +129,9 @@
     <ClCompile Include="src\ShpModelFiles.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\SourceStampCache.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\SystemResources.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -280,6 +283,9 @@
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\ShpModelFiles.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\SourceStampCache.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\StringTables.hpp">

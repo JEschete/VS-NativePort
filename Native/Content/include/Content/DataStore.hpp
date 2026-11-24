@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <expected>
 #include <filesystem>
 #include <memory>
@@ -16,6 +17,14 @@
 #include "Core/Types.hpp"
 
 namespace VS::Content {
+
+enum class SourceVerification { kCached, kFull };
+
+struct SourceVerificationStats {
+  std::size_t cache_hits = 0;
+  std::size_t files_hashed = 0;
+  u64 bytes_hashed = 0;
+};
 
 // The extracted game data: what VS.Extract wrote from the user's disc
 // (Native\data by default, never committed). Files keep their disc paths under
@@ -94,7 +103,11 @@ class DataStore {
   // SEQ and WEP, and sound bank has a current output (source and dependency
   // hashes) whose files are present, and that each XA track and movie has an
   // output whose files are present. Empty placeholder files need none.
-  [[nodiscard]] std::expected<void, std::string> RequireConversions() const;
+  // Original sources may reuse validated size/time/hash stamps. kFull ignores
+  // stamp hits; native authoring files never use timestamp-only validation.
+  [[nodiscard]] std::expected<void, std::string> RequireConversions(
+      SourceVerification verification = SourceVerification::kCached,
+      SourceVerificationStats* statistics = nullptr) const;
   [[nodiscard]] const ConversionManifest* Conversions() const {
     return m_conversion_manifest_ ? &*m_conversion_manifest_ : nullptr;
   }

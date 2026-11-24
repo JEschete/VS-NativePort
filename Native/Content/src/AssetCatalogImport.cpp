@@ -21,6 +21,7 @@
 
 #include "Content/AssetCatalog.hpp"
 #include "Content/DataStore.hpp"
+#include "Platform/AtomicFile.hpp"
 #include "Platform/Paths.hpp"
 #include "nlohmann/json.hpp"
 
@@ -250,26 +251,6 @@ std::string Lines(const Json& object) {
   return text + "\n}\n";
 }
 
-std::expected<void, std::string> ReplaceFile(const fs::path& path,
-                                             std::string_view text) {
-  fs::path temporary = path;
-  temporary += ".tmp";
-  {
-    std::ofstream output(temporary, std::ios::binary | std::ios::trunc);
-    output.write(text.data(), static_cast<std::streamsize>(text.size()));
-    output.close();
-    if (!output) {
-      return std::unexpected("cannot write " + Platform::PathText(temporary));
-    }
-  }
-  std::error_code error;
-  fs::rename(temporary, path, error);
-  if (error) {
-    return std::unexpected("cannot replace " + Platform::PathText(path) + ": " +
-                           error.message());
-  }
-  return {};
-}
 }  // namespace
 
 std::expected<AssetCatalogTexts, std::string> ImportAssetCatalogs(
@@ -345,12 +326,12 @@ std::expected<std::size_t, std::string> WriteAssetCatalogs(
     return std::unexpected("cannot create " + Platform::PathText(directory) +
                            ": " + error.message());
   }
-  if (auto written = ReplaceFile(
+  if (auto written = Platform::WriteFileAtomically(
           directory / Platform::Utf8Path(kAssetCatalogFile), texts->assets);
       !written) {
     return std::unexpected(written.error());
   }
-  if (auto written = ReplaceFile(
+  if (auto written = Platform::WriteFileAtomically(
           directory / Platform::Utf8Path(kAudioCatalogFile), texts->audio);
       !written) {
     return std::unexpected(written.error());
