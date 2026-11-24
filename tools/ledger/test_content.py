@@ -103,6 +103,25 @@ class ContentLedgerTests(unittest.TestCase):
                          ("unconverted", "pending"))
         self.assertEqual(self.fixture.rules(), [])
 
+    def test_material_section_does_not_claim_whole_executable_conversion(self) -> None:
+        material = {"id": "catalog.items.materials", "source": "SLUS_010.40",
+                    "converter": "material-csv", "files": ["catalogs/items/materials.csv"]}
+        self.fixture.data([*FILES, ("SLUS_010.40", 337920, "raw")], [OUTPUT, material])
+        content.sync(self.fixture.root)
+        row = self.fixture.rows()["SLUS_010.40"]
+        self.assertEqual((row["status"], row["round_trip"], row["converter"], row["output"]),
+                         ("unconverted", "pending", "", ""))
+        self.assertIn("partial catalog.items.materials (material-csv; G01905 at 0x3F5DC, 240 bytes)", row["notes"])
+        self.assertIn("converts under #499, #500, #502", row["notes"])
+        self.assertEqual(self.fixture.rules(), [])
+
+    def test_section_converters_refuse_mismatched_sources(self) -> None:
+        material = {"id": "catalog.items.materials", "source": "BG/001OP01A.TIM",
+                    "converter": "material-csv", "files": ["catalogs/items/materials.csv"]}
+        self.fixture.data(FILES, [OUTPUT, material])
+        with self.assertRaisesRegex(SystemExit, "invalid section-only conversion registration"):
+            content.sync(self.fixture.root)
+
     def test_round_trip_passes_only_with_a_passing_record_for_an_existing_test(self) -> None:
         self.fixture.verify("partial")
         content.sync(self.fixture.root)

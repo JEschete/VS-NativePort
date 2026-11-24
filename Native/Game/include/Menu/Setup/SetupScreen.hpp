@@ -4,8 +4,10 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <expected>
 #include <optional>
 #include <span>
+#include <string>
 #include <string_view>
 
 #include "Items/ItemRecords.hpp"
@@ -141,12 +143,11 @@ inline constexpr int kListChoice = 0x21;
 inline constexpr int kListFirstChoice = 0x22;
 }  // namespace sfx
 
-// VS::Items::materialModifiers' strength, intelligence and agility
-// bonuses of one material.
+// Primary-stat bonuses from one native material definition.
 struct MaterialBonus {
-  std::int8_t strength = 0;
-  std::int8_t intelligence = 0;
-  std::int8_t agility = 0;
+  std::int32_t strength = 0;
+  std::int32_t intelligence = 0;
+  std::int32_t agility = 0;
 };
 inline constexpr std::size_t kMaterialCount = 8;
 using MaterialBonuses = std::array<MaterialBonus, kMaterialCount>;
@@ -403,7 +404,8 @@ class Host {
   virtual void EquipShield(std::size_t slot) = 0;
   // A body part's armor: the 0-based slot, or nothing to take it off.
   virtual void EquipArmor(int body_part, std::optional<std::size_t> slot) = 0;
-  [[nodiscard]] virtual MaterialBonuses Materials() = 0;
+  [[nodiscard]] virtual std::expected<MaterialBonuses, std::string>
+  Materials() = 0;
   // VS::Field::IsCurrentRoomWorkshop: 0 outside a workshop.
   [[nodiscard]] virtual int CurrentWorkshop() = 0;
 

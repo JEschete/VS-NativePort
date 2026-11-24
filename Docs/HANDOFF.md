@@ -1,5 +1,118 @@
 # Current Handoff
 
+## Native material-catalog adoption (#499), 2026-11-24
+
+Base: clean `cbc6d8df78a3aac7886a6756559a9a0cd77468ce` on `main`.
+Base CI `45367143397` passed; the material changes described here are local and
+unpublished. Publication and exact-revision CI remain the next step.
+No commit/push, baseline refresh or reference-tree edit was made in this slice.
+
+**Adopted:** `Content::MaterialCatalog` owns semantic `material.none/wood/
+leather/bronze/iron/hagane/silver/damascus` definitions, named class and
+attack/defense affinity fields, explicit DP/stat quantities and early readable
+CSV labels. Definitions compile through the existing layered SQLite/cache
+mechanism, selected with the already published recipe family. The live workshop
+host reads typed primary-stat bonuses; G01905's raw array, module-data copy and
+module-address entry are removed. Save validation uses the deliberate eight-kind
+policy, not raw storage. The palette map is unchanged.
+
+`VS.Extract authoring Native\data` and `tables Native\data` produce the
+`material-csv` v1 output `catalog.items.materials`. Full extraction includes
+the tables workflow. The importer records only `SLUS_010.40` offset `0x3F5DC`,
+240 bytes, with both reserved bytes per record in import-only JSON. The
+file-level content ledger deliberately leaves the executable **unconverted**;
+the new section-output accounting records G01905's partial extent instead of
+counting the whole executable as migrated.
+
+**Arithmetic evidence:** upstream `src/SLUS_010.40/modifiers.h` and
+`main.c:350` define signed16 primary modifiers, not individual byte fields.
+The original MENUC source consumers are `168.c:4938/5017/5067`. Direct opcode
+inspection of the extracted MENUC image (SHA-1 matches its upstream splat
+configuration: `66eb6bfcdf6c8ec9ee1672da4824f6ebb7e9459a`) shows `lbu` at
+file offsets `0x8C54/0x8EA0/0x911C`, additions and byte stores: the compiler
+optimizes the ultimately byte-stored sums. Evidence:
+`build\issue-499-material-original-arithmetic.log`. Ghidra's local backend
+was unavailable, so no Ghidra result is claimed.
+
+Native modifiers are signed32 and sums signed64. A layer's **150** strength
+modifier plus recipe **-40** reaches the production typed host/core as **110**;
+blade, shield and armor builders all cover this widened case. Final results
+outside the still-byte inventory stat field refuse explicitly. This is a
+retained #58 storage constraint, not an invented balance clamp. The existing
+class/affinity fusion clamp (-100..100) and ingredient DP/PP rules are unchanged.
+
+**Local validation:**
+- Full Debug and Release x64 solution builds passed with `VS_JOBS=4` and
+  `MSBuild VagrantStory.Native.sln /m:2 /p:Configuration=<Debug|Release>
+  /p:Platform=x64 /nologo /v:minimal`.
+- Each configuration passed **129 cases / 13,575 assertions** with
+  `VS.Tests.exe "[material-catalog],[catalog-layers],[catalog-cache],
+  [content-tables],[menu-setup],[workshop],[runtime-snapshot]"` (one continuous
+  comma-separated argument, no embedded whitespace). Temporary test roots used
+  repository-local `build\test-data`.
+- Coverage includes all eight original records byte-exact offline, nonzero
+  synthetic reserved bytes, signed import fields, semantic CSV/schema reload,
+  32-bit definition values, malformed/duplicate/missing/unsupported identities,
+  layer precedence through the live workshop consumer, unchanged base/source
+  bytes, missing-catalog refusals and preview recovery, overflow refusals,
+  repeated opens, content-based cache invalidation, corrupt-cache typed retry,
+  and preservation of the prior store/cache on failed opens.
+- `python -m unittest discover -s tools\ledger -p test_content.py`: **10 pass**,
+  including section-only output accounting and invalid source registration.
+- Both configurations also passed `[source-verification]`: **9 cases / 98
+  assertions** each.
+- Complete changed-file quality (`18 native / 3 Python` files) and scoped tidy
+  on the catalog/importer/material tests/DataStore/workshop implementation and
+  updated cursor tests report **zero new findings**. No baselines were changed.
+- New files were staged before project generation. Two final
+  `python tools\scaffold\gen_solution.py` runs reproduced all **23** generated
+  solution/project files exactly, including the importer in the test link.
+- Two `VS.Extract authoring Native\data` reruns left the material CSV, schema,
+  import JSON, manifest and original executable identical in both SHA-256 and
+  modification time; each reported zero converted materials / one unchanged,
+  and zero label updates.
+- The two existing Debug regression replays match their unchanged fingerprints:
+  `silver_wolves` (2,400 frames), run `1795515369864154-0`;
+  `first_lever_room` (900 frames), run `1795515425669167-0`.
+  Used the existing `regression.run_replay` / `compare_replay` helpers only;
+  did not replay the complete CI/test workflow locally.
+- Content/hazard ledger reconciliation passed. Hazard triage is preserved;
+  only two DataStore source locations moved. Existing Catch2 names and replay
+  fingerprints are unchanged.
+- Logs are `build\issue-499-material-{debug,release}-{build,tests}.log`,
+  `build\issue-499-material-content-ledger-tests.log`,
+  `build\issue-499-material-content-ledger.log` and
+  `build\issue-499-material-hazards.log`. Authoring stability/replay and final
+  quality/generator evidence are `build\issue-499-material-authoring-stability.json`,
+  `build\issue-499-material-replays.json`,
+  `build\issue-499-material-generator-stability.json`,
+  `build\issue-499-material-quality.log`, `build\issue-499-material-tidy.log`
+  and `build\issue-499-material-cursor-tidy.log`.
+
+Exact publication scope is listed in `build\issue-499-material-files.txt`.
+It comprises the new Content material definition/schema and Extract importer;
+DataStore family selection; workshop host/core, old material storage,
+ModuleData/ModulePointers and snapshot material policy; three test files;
+the solution-generator test-source entry and section-aware content-ledger tool
+with tests; six generated project/filter files; and the pipeline/build/plan/
+handoff and existing data/content/hazard/verification ledgers. No disc-derived
+CSV, import JSON, capture, executable or log belongs in the commit.
+
+Cold-read seed **499** selects compatibility rows **1,7,3,2,5**: Wood
+strength 1 (edit to 2); Damascus physical attack affinity 20 (21); Bronze evil
+class modifier -5 (-4); Leather fire defense affinity 5 (6); Hagane base DP
+7000 = 70 displayed DP (7100 = 71). The CSV and schema identify these roles
+without consulting decomp. These are readability observations, not gameplay
+claims for currently unconsumed class/affinity/material-base-DP columns.
+
+**Remaining gates:** no controller-driven workshop/action parity was performed
+here. Host/core tests and unrelated regression replays do not satisfy that gate.
+#499 and #58 remain open; other executable catalogs, shared item definitions,
+semantic recipe lookup (EC-04-T-SYD), wider inventory/persistence/appearance
+instances, and mod-defined material kinds remain separate work. No runtime
+material byte reconstruction remains, but this is not whole-file or whole-issue
+completion.
+
 ## FAR runtime follow-up: reset/re-entry, unmatched reference (#210), 2026-11-24
 
 Evidence-only pass on clean `11e1ac5de0bc98b9dfdcc5a591f1eaa3fbad52f5`;

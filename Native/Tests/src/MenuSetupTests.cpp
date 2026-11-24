@@ -164,7 +164,10 @@ class FakeHost final : public setup::Host {
   void EquipShield(std::size_t /*slot*/) override {}
   void EquipArmor(int /*body_part*/,
                   std::optional<std::size_t> /*slot*/) override {}
-  setup::MaterialBonuses Materials() override { return {}; }
+  std::expected<setup::MaterialBonuses, std::string> Materials() override {
+    if (!material_error.empty()) return std::unexpected(material_error);
+    return setup::MaterialBonuses{};
+  }
   int CurrentWorkshop() override { return 0; }
 
   void StartRecipeLoad(setup::RecipeKind kind) override {
@@ -172,7 +175,7 @@ class FakeHost final : public setup::Host {
   }
   std::optional<bool> RecipeLoaded() override { return loaded; }
   void ReleaseRecipeRequest() override { ++released; }
-  const setup::RecipeBook* Recipes() override { return nullptr; }
+  const setup::RecipeBook* Recipes() override { return recipes; }
   void FreeRecipes() override {}
 
   std::optional<int> AshleySequenceModel() override { return ashley_model; }
@@ -199,6 +202,8 @@ class FakeHost final : public setup::Host {
   bool assets_pending = true;
   int pose_resets = 0;
   int load_step = 0;
+  std::string material_error;
+  const setup::RecipeBook* recipes = nullptr;
 
  private:
   static constexpr std::size_t kMenuRows = 64;
@@ -347,6 +352,27 @@ TEST_CASE("Workshop shield combination builds the looked-up recipe record",
   CHECK(built->weapon_model_id == kRecordModel);
   CHECK(built->category == kRecordCategory);
   CHECK(built->gem_slots == kRecordGemSlots);
+}
+
+TEST_CASE("Workshop previews propagate material catalog failures and recover",
+          "[menu][menu-setup][material-catalog]") {
+  Workshop shop;
+  const auto recipes = ShieldBook();
+  shop.host.recipes = &recipes;
+  shop.host.inventory.shields[0].base.id = 126;
+  shop.host.inventory.shields[1].base.id = 127;
+  shop.host.inventory.shields[1].base.sub_id = 1;
+  shop.host.inventory.shields[1].base.material = 1;
+  shop.state.combination.shield_ids = {1, 2};
+  shop.host.material_error = "invalid native material catalog";
+  setup::PreviewShieldCombination(shop.context, 0);
+  CHECK(shop.state.combination.refused);
+  CHECK(shop.state.combination.shield.base.id == 0);
+  CHECK(shop.host.refusals == Strings{shop.host.material_error});
+  shop.host.material_error.clear();
+  setup::PreviewShieldCombination(shop.context, 0);
+  CHECK_FALSE(shop.state.combination.refused);
+  CHECK(shop.state.combination.shield.base.id == 127);
 }
 
 TEST_CASE("Workshop slot history pops the latest selection first",

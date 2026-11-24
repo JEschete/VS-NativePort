@@ -13,6 +13,7 @@
 #include "Content/AssetCatalog.hpp"
 #include "Content/AssetHandle.hpp"
 #include "Content/ConversionManifest.hpp"
+#include "Content/MaterialCatalog.hpp"
 #include "Content/WorkshopRecipes.hpp"
 #include "Core/Types.hpp"
 
@@ -75,8 +76,7 @@ class DataStore {
   // Opens the process-wide store (used by the C API in Content/DataAccess.h):
   // the manifest and, when root\catalogs\ holds assets.json or audio.json,
   // the asset catalog, which must then load. Each open catalog gets a fresh
-  // handle generation. When manifest.json lists workshop recipe tables, they
-  // must load too.
+  // handle generation. Catalog tables listed in manifest.json must load too.
   static std::expected<void, std::string> Open(
       const std::filesystem::path& root);
   static const DataStore* Get();
@@ -116,6 +116,9 @@ class DataStore {
   [[nodiscard]] const WorkshopRecipeCatalog* WorkshopRecipes() const {
     return m_workshop_recipes_ ? &*m_workshop_recipes_ : nullptr;
   }
+  [[nodiscard]] const MaterialCatalog* Materials() const {
+    return m_materials_ ? &*m_materials_ : nullptr;
+  }
   [[nodiscard]] const CatalogDatabase* CatalogTables() const {
     return m_catalog_tables_ ? &*m_catalog_tables_ : nullptr;
   }
@@ -131,6 +134,7 @@ class DataStore {
   std::optional<AssetCatalog> m_catalog_;
   std::optional<ConversionManifest> m_conversion_manifest_;
   std::optional<WorkshopRecipeCatalog> m_workshop_recipes_;
+  std::optional<MaterialCatalog> m_materials_;
   std::optional<CatalogDatabase> m_catalog_tables_;
 };
 

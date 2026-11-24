@@ -336,6 +336,7 @@
     <ClCompile Include="src\MapRenderTests.cpp" />
     <ClCompile Include="src\MapTerminalLiveTests.cpp" />
     <ClCompile Include="src\MapTerminalTests.cpp" />
+    <ClCompile Include="src\MaterialCatalogTests.cpp" />
     <ClCompile Include="src\MemoryTests.cpp" />
     <ClCompile Include="src\MenuActorPreviewTests.cpp" />
     <ClCompile Include="src\MenuAssetsTests.cpp" />
@@ -510,6 +511,7 @@
     <ClCompile Include="..\Tools\Extract\src\TimImage.cpp" />
     <ClCompile Include="..\Tools\Extract\src\WepModelConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\WorkshopRecipeConversion.cpp" />
+    <ClCompile Include="..\Tools\Extract\src\MaterialConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\WorkshopAuthoring.cpp" />
     <ClCompile Include="..\Tools\Extract\src\ZndConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\ZoneAuthoring.cpp" />

@@ -7,7 +7,8 @@
 Docs\\ASSET_PIPELINE.md section 9 and plan section 4.5 define the ledger: one row per disc file with its kind, decoder,
 converter, outputs, round-trip result and status. --sync reads Native\\data\\files.tsv (every disc file) and
 Native\\data\\manifest.json (the registered conversions), so it needs an extracted disc. A file that is the source of a
-manifest output is `converted`; a placeholder (no bytes, or one zero byte), or a file section 6.1 drops, is `skipped`
+whole-file manifest output is `converted`; registered section-only imports remain `unconverted` with a precise
+partial note. A placeholder (no bytes, or one zero byte), or a file section 6.1 drops, is `skipped`
 with its reason;
 every other file is `unconverted`, noting the issue that converts it. A converted row has `round_trip=pass` only when
 every disc-corpus test named for its converter in EVIDENCE is a Catch2 TEST_CASE cited by a passing VERIFY_LEDGER
@@ -38,6 +39,10 @@ PLACEHOLDER = "placeholder"
 # An unused slot: a file of no bytes, or of one zero byte (the runtime's DataStore.cpp IsPlaceholder), by size.
 PLACEHOLDER_REASONS = {0: "zero-byte placeholder", 1: "one-byte zero placeholder"}
 RUNTIME_CONVERTER = re.compile(r'ConverterVersion\{\s*\.name\s*=\s*"(?P<name>[^"]+)"')
+# A table output is not evidence that its entire containing executable migrated.
+SECTION_CONVERTERS = {
+    "material-csv": ("SLUS_010.40", "catalog.items.materials", "G01905 at 0x3F5DC, 240 bytes"),
+}
 
 
 @dataclass(frozen=True)
@@ -232,14 +237,21 @@ def expected_rows(root: Path, evidence: Evidence) -> list[dict[str, str]]:
     manifest = json.loads((data / "manifest.json").read_text(encoding="utf-8"))
     by_id = {output["id"]: output for output in manifest["outputs"]}
     outputs: dict[str, list[dict]] = {}
+    sections: dict[str, list[str]] = {}
     dependents: dict[str, list[str]] = {}
     for output in manifest["outputs"]:
-        outputs.setdefault(output["source"], []).append(output)
+        if section := SECTION_CONVERTERS.get(output["converter"]):
+            source, identity, extent = section
+            if output["source"] != source or output["id"] != identity or output.get("alias_of"):
+                raise SystemExit(f"{output['id']}: invalid section-only conversion registration")
+            sections.setdefault(source, []).append(f"partial {identity} ({output['converter']}; {extent})")
+        else:
+            outputs.setdefault(output["source"], []).append(output)
         for dependency in output.get("dependencies", []):
             dependents.setdefault(dependency["source"], []).append(output["id"])
     files = read_disc_files(data)
     listed = {entry["path"] for entry in files}
-    for source in sorted(set(outputs) - listed):
+    for source in sorted((set(outputs) | set(sections)) - listed):
         raise SystemExit(f"manifest.json converts {source}, which files.tsv does not list")
     rows = []
     for entry in sorted(files, key=lambda item: item["path"]):
@@ -247,7 +259,7 @@ def expected_rows(root: Path, evidence: Evidence) -> list[dict[str, str]]:
         kind = kind_of(path)
         if kind is None:
             raise SystemExit(f"{path}: no RULES entry for its directory and extension; add its kind")
-        notes = []
+        notes = sorted(sections.get(path, []))
         if path in dependents:
             notes.append(f"dependency of {', '.join(sorted(dependents[path]))}")
         if form != "raw":

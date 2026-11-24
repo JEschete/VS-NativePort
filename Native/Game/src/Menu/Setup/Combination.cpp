@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <array>
+#include <bit>
 #include <cstddef>
 #include <cstdint>
 #include <expected>
@@ -182,10 +183,45 @@ std::int8_t ScaledSum(int first, int second, int factor) {
                  -kCombinedValueLimit, kCombinedValueLimit));
 }
 
-// A record's base value plus its material's bonus, kept to a byte.
-std::int8_t WithBonus(std::uint8_t base, std::int8_t bonus) {
-  return static_cast<std::int8_t>(
-      static_cast<std::uint8_t>(base + static_cast<std::uint8_t>(bonus)));
+// The source fields are signed recipe bytes and material halfwords; MIPS
+// optimizes their byte-stored sum to low-byte loads. Native definitions keep
+// the full modifier. Retained inventory/save bytes (#58) refuse overflow,
+// rather than wrap the result or invent a gameplay stat clamp.
+std::expected<std::int8_t, std::string> WithBonus(std::uint8_t base,
+                                                  std::int32_t bonus,
+                                                  std::string_view stat) {
+  const auto sum =
+      static_cast<std::int64_t>(std::bit_cast<std::int8_t>(base)) + bonus;
+  if (sum < std::numeric_limits<std::int8_t>::min() ||
+      sum > std::numeric_limits<std::int8_t>::max()) {
+    return std::unexpected(std::format(
+        "combined {} {} exceeds retained inventory stat storage (#58)", stat,
+        sum));
+  }
+  return static_cast<std::int8_t>(sum);
+}
+
+template <typename Record, typename Recipe>
+std::expected<void, std::string> ApplyBonuses(Record& record,
+                                              const Recipe& recipe,
+                                              const MaterialBonus& bonus) {
+  auto strength = WithBonus(recipe.strength, bonus.strength, "strength");
+  if (!strength) {
+    return std::unexpected(strength.error());
+  }
+  auto intelligence =
+      WithBonus(recipe.intelligence, bonus.intelligence, "intelligence");
+  if (!intelligence) {
+    return std::unexpected(intelligence.error());
+  }
+  auto agility = WithBonus(recipe.agility, bonus.agility, "agility");
+  if (!agility) {
+    return std::unexpected(agility.error());
+  }
+  record.strength = *strength;
+  record.intelligence = *intelligence;
+  record.agility = *agility;
+  return {};
 }
 
 std::expected<std::uint8_t, std::string> RecipeEntry(
@@ -264,10 +300,9 @@ std::expected<Items::InventoryArmor, std::string> BuildCombinedArmorPiece(
   result.sub_id = recipe.sub_id;
   result.id = static_cast<std::uint8_t>(recipe.sub_id + kArmorIdOffset);
   result.category = info->category;
-  result.strength = WithBonus(info->strength, recipe.bonus.strength);
-  result.intelligence =
-      WithBonus(info->intelligence, recipe.bonus.intelligence);
-  result.agility = WithBonus(info->agility, recipe.bonus.agility);
+  if (auto applied = ApplyBonuses(result, *info, recipe.bonus); !applied) {
+    return std::unexpected(applied.error());
+  }
   result.max_dp =
       static_cast<std::uint16_t>((first.max_dp + second.max_dp) / 2);
   result.current_dp = result.max_dp;
@@ -627,12 +662,18 @@ int BuildPreview(Context& context) {
     } else if (recipes == nullptr) {
       context.host.Refuse("combination without a loaded recipe book");
       combination.refused = true;
-    } else if (auto built = Kind::Build(*first, *second, *recipes,
-                                        context.host.Materials())) {
-      Kind::Store(buffer, *built);
     } else {
-      context.host.Refuse(built.error());
-      combination.refused = true;
+      const auto materials = context.host.Materials();
+      if (!materials) {
+        context.host.Refuse(materials.error());
+        combination.refused = true;
+      } else if (auto built =
+                     Kind::Build(*first, *second, *recipes, *materials)) {
+        Kind::Store(buffer, *built);
+      } else {
+        context.host.Refuse(built.error());
+        combination.refused = true;
+      }
     }
   } else if (mask != 0) {
     const auto* record =
@@ -1238,10 +1279,9 @@ std::expected<Items::InventoryBlade, std::string> BuildCombinedBlade(
   result.SetCostType(info->cost_type);
   result.recovery_delay = info->recovery_delay;
   result.range = info->range;
-  result.strength = WithBonus(info->strength, recipe->bonus.strength);
-  result.intelligence =
-      WithBonus(info->intelligence, recipe->bonus.intelligence);
-  result.agility = WithBonus(info->agility, recipe->bonus.agility);
+  if (auto applied = ApplyBonuses(result, *info, recipe->bonus); !applied) {
+    return std::unexpected(applied.error());
+  }
   result.max_dp = HalfSum(first.max_dp, second.max_dp);
   result.current_dp = result.max_dp;
   result.max_pp = HalfSum(first.max_pp, second.max_pp);

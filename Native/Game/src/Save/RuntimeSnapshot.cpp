@@ -34,6 +34,7 @@
 #include "Battle/Damage.hpp"
 #include "Boot/GameLoop.hpp"
 #include "Content/DataStore.hpp"
+#include "Content/MaterialCatalog.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -53,7 +54,6 @@
 #include "Items/EquipmentLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
-#include "Items/Materials.hpp"
 #include "Render/Camera.hpp"
 #include "Render/UiPrimitives.hpp"
 #include "State/Location.hpp"
@@ -490,7 +490,7 @@ Result ValidateItemIds(const Collection& items, const CategoryBounds& bounds,
     if (blade.id != 0 &&
         (!InCategory(blade.id, 1, bounds[kBladeEnd]) ||
          !valid_durability(blade) ||
-         blade.material >= std::size(VS::Items::materialModifiers) ||
+         blade.material >= Content::kMaterialIds.size() ||
          static_cast<unsigned char>(blade.category) >=
              std::size(VS::State::ArtsStatus{}.kills.weapon_category_kills))) {
       return ItemError(scope, "blades",
@@ -512,7 +512,7 @@ Result ValidateItemIds(const Collection& items, const CategoryBounds& bounds,
     return InCategory(armor.id, bounds[kGripEnd], bounds[kArmorAccessoryEnd]) &&
            valid_durability(armor) && armor.gem_slots >= 0 &&
            armor.gem_slots <= kEquipmentGems && armor.limb <= kAccessoryLimb &&
-           armor.material < std::size(VS::Items::materialModifiers) &&
+           armor.material < Content::kMaterialIds.size() &&
            static_cast<unsigned char>(armor.category) < kArmorCategoryCount;
   };
   for (const auto& armor : items.armor) {

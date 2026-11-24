@@ -102,6 +102,9 @@
     <ClCompile Include="src\JsonText.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\MaterialCatalog.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ModuleLoader.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -259,6 +262,9 @@
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\JsonText.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\MaterialCatalog.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\ModuleData.hpp">

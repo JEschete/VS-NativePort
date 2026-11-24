@@ -176,7 +176,8 @@ Neither this cache nor the temporary source-tree dependency is native adoption.
 Native\data\
   manifest.json
   catalogs\          Tier 1: executable / PRG tables (§4); flat tables as <table>.csv + <table>.schema.json
-    items\  blades.csv grips.csv gems.csv armor.csv shields.csv accessories.csv consumables.csv misc.csv ...
+    items\  materials.csv + .schema.json (G01905, §4.2)
+            blades.csv grips.csv gems.csv armor.csv shields.csv accessories.csv consumables.csv misc.csv ...
     battle\ break-arts.csv abilities.csv spells.csv status-effects.csv
     enemies\ species.csv enemies.csv modelsets.csv loot.csv bestiary.csv      (ENEMY_DATA_SCHEME.md)
              zone-enemies.csv zone-enemy-limbs.csv zone-enemy-parts.csv   (ZND templates, §6.9)
@@ -281,6 +282,62 @@ provenance representation rather than mixing `raw.byte7`, `raw_33` and
 `raw_5a` into editable definitions. Unknown **consumed** semantics block
 authoring-format completion; moving them to a sidecar or adding `unknown_`
 names does not satisfy the gate.
+
+### 4.2 Native material definitions (#499)
+
+`VS.Extract tables <datadir>`, `authoring <datadir>` and full `extract` import
+G01905 from **only** `SLUS_010.40` offset `0x3F5DC`, eight 30-byte records.
+Converter `material-csv` version 1 registers `catalog.items.materials`, writing
+`catalogs\items\materials.csv` and its schema. The containing executable remains
+unconverted in the file-level content ledger; the note records this partial
+extent. `resources\rood-reverse\src\SLUS_010.40\main.c:350` and `modifiers.h`
+define the original table and fields.
+
+The identities are `material.none`, `.wood`, `.leather`, `.bronze`, `.iron`,
+`.hagane`, `.silver` and `.damascus`, with readable `display_name` metadata.
+`legacy_id` is an explicit compatibility map for the eight existing inventory,
+save and palette kinds. Missing, duplicate or mismatched identities are errors;
+additional kinds require #58's instance/appearance/persistence expansion.
+
+The editable fields are:
+- `class_human/beast/undead/phantom/dragon/evil`: class modifier points;
+- `attack_affinity_` and `defense_affinity_` families for `physical`, `air`,
+  `fire`, `earth`, `water`, `light`, `dark`: affinity modifier points;
+- `max_dp`: internal durability units, 100 per displayed DP;
+- `strength`, `intelligence`, `agility`: additive primary-stat points.
+
+Modifiers use signed 32-bit native quantities and `max_dp` uses unsigned 32-bit,
+not the import's byte/halfword widths. The two reserved bytes per original
+record live exclusively in `catalogs\items\import\materials.json`, with source
+hash, byte offset, record size and material identity. Offline encoding checks
+its own legacy limits and preserves those bytes; runtime does not read this
+provenance or repack a material record.
+
+The existing layered SQLite compiler/cache loads this table alongside any
+listed workshop tables, validates typed records before cache publication, and
+recompiles a cache whose typed material records fail validation. Raw/synthetic
+stores and initial extractor bootstrap need no material outputs. Production
+conversion checks require them when the executable source is present; a missing
+live catalog refuses workshop combination, never supplies zero bonuses.
+Unchanged conversion preserves authored values and labels, including quantities
+that cannot be exported to the legacy format. `tables --force` explicitly
+reimports; normal layer loading never changes base/import files.
+
+The workshop now reads typed material primary-stat bonuses from the catalog.
+G01905's `ModuleData` copy, `ModulePointers` address entry and raw storage are
+removed. Palette data stays separate. Class, affinity and material-base DP
+fields are preserved definitions, not newly added workshop calculations:
+combination retains its existing ingredient affinity and averaged-DP rules.
+
+Original MENUC code sums byte recipe stats with material fields and stores a
+byte. Its MIPS compiler uses low-byte loads even though the material source
+fields are signed halfwords. The native sum uses signed 64-bit arithmetic.
+A modifier of **150** plus recipe **-40** reaches the live/core workshop path as
+**110**. Final results outside signed-byte inventory storage are explicitly
+refused, a remaining #58 storage constraint, **not a gameplay clamp**. The
+separate original class/affinity fusion clamp at -100..100 is unchanged.
+Controller-driven workshop/action parity and broader #499/#58 acceptance remain
+open; typed-host tests are not a substitute.
 
 ---
 
@@ -937,7 +994,9 @@ Empty matrix entries have no row. Each table's schema is committed in `Native\Co
 
 Conversion keeps edits. A rerun leaves the tables of an unchanged SYD alone, reconverts those whose SYD changed and with `--force` rewrites them all. The converter only writes tables that parse back to the decoded recipes and rebuild the original file byte for byte, so a disc that does not convert exactly is an error rather than a lossy output. At startup the data store reads and checks every table (types and ranges, every reference names a result, ingredients fit the pair matrix, `legacy_id`s run from 0 without gaps) and refuses to open on the first error, naming the file, line and column and telling the user to rerun `VS.Extract tables`. `RequireConversions` refuses to start when a SYD has no tables or its source hash is stale. The workshop builds its recipe book from the loaded tables (`Menu::Setup::BuildRecipeBook`, which rebuilds the original's dense matrices) and never reads the SYD. On the disc, the three files give 96 blade, 17 shield and 81 armor result records (record 0 of each is the empty one), with 8,100, 256 and 4,096 pairs and 2,025, 49 and 784 material rules.
 
-Not yet done: compiling the tables into SQLite, the patch and mod layers, replacing the result fields with references to the item catalog when there is one, and an in-game combination replay (#58, #499).
+SQLite compilation and patch/mod layers are implemented below. Still required:
+shared item-definition references, retirement of the recipe matrix bridge, and
+an in-game combination replay (#58, #499).
 
 #### Semantic recipe identities and import-only records
 
@@ -992,7 +1051,8 @@ definition with all import-only fields separated is still part of #499.
 
 #### Layered compiled workshop catalogs (#499)
 
-The data store loads the nine workshop CSV tables, applies the ordered roots in
+The data store loads the nine workshop CSV tables and the material definitions
+(§4.2) when their outputs are listed, applies the ordered roots in
 optional `catalog-layers.json`, validates their values/references and compiles
 them into a private SQLite database. Production recipe books are built from
 queries of that database, not a separate unpatched CSV path. The importer keeps
@@ -1024,7 +1084,7 @@ and import provenance are never changed by loading layers, and a SQLite cache
 does not retire EC-04-T-SYD's remaining recipe/item layout constraints.
 See [BUILDING.md section 5.1](BUILDING.md#51-recipe-patch-and-mod-layers) for the
 configuration and patch syntax. Other catalog families and asset-path overrides
-are not adopted by this slice; it does not complete #499 or #520.
+are not adopted; these bounded slices do not complete #499 or #520.
 
 ### 6.9 Zones (ZND → CSV tables, #199, #517)
 

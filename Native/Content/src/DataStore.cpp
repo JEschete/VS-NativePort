@@ -70,8 +70,10 @@ struct ConvertedType {
   std::string_view extension;
   std::string_view converter;
   std::string_view form;
+  bool exact = false;
 
   [[nodiscard]] bool Matches(std::string_view path) const {
+    if (exact) return path == prefix;
     return path.starts_with(prefix) && path.ends_with(extension);
   }
 };
@@ -83,6 +85,7 @@ constexpr std::array kConvertedTypes{
     ConvertedType{"", ".FBC", "fbc-palette-png", kRawForm},
     ConvertedType{"", ".FBT", "fbt-texture-png", kRawForm},
     ConvertedType{"", ".SYD", kSydRecipeConverterName, kRawForm},
+    ConvertedType{kMaterialSource, "", kMaterialConverterName, kRawForm, true},
     ConvertedType{"", ".SHP", "shp-gltf", kRawForm},
     ConvertedType{"", ".SEQ", "seq-gltf", kRawForm},
     ConvertedType{"", ".WEP", "wep-gltf", kRawForm},
@@ -98,6 +101,11 @@ constexpr std::array kConvertedTypes{
 
 // The fix each stale or missing output error names.
 constexpr std::string_view kRerun = " (run VS.Extract extract <disc> <dir>)";
+
+std::string_view RerunFor(std::string_view converter) {
+  return converter == kMaterialConverterName ? " (run VS.Extract tables <dir>)"
+                                             : kRerun;
+}
 
 // Whether `entry` is an empty placeholder: no bytes, or one zero byte (the
 // unused SOUND, MUSIC and SE slots), which no converter reads.
@@ -172,9 +180,9 @@ std::expected<void, std::string> RequireOutputFiles(
                              ": " + error.message());
     }
     if (!regular) {
-      return std::unexpected(std::format("missing {} output {}{}",
-                                         conversion.converter,
-                                         Platform::PathText(path), kRerun));
+      return std::unexpected(std::format(
+          "missing {} output {}{}", conversion.converter,
+          Platform::PathText(path), RerunFor(conversion.converter)));
     }
   }
   return {};
@@ -195,7 +203,7 @@ std::expected<void, std::string> RequireConvertedSource(
     if (!*current) {
       return std::unexpected(std::format("stale {} source hash for {}{}",
                                          conversion.converter, entry.path,
-                                         kRerun));
+                                         RerunFor(conversion.converter)));
     }
   }
   for (const SourceDependency& dependency : conversion.dependencies) {
@@ -272,7 +280,8 @@ std::expected<void, std::string> RequireConvertedType(
                                            type.converter, entry.path));
       }
       return std::unexpected(std::format("no {} output for {}{}",
-                                         type.converter, entry.path, kRerun));
+                                         type.converter, entry.path,
+                                         RerunFor(type.converter)));
     }
     for (const auto* output : found->second) {
       if (auto required =
@@ -285,21 +294,58 @@ std::expected<void, std::string> RequireConvertedType(
   return {};
 }
 
-// The workshop recipe tables, when `manifest` lists their outputs.
-struct LoadedRecipes {
-  CatalogDatabase database;
-  WorkshopRecipeCatalog recipes;
+struct CatalogRecords {
+  std::optional<WorkshopRecipeCatalog> recipes;
+  std::optional<MaterialCatalog> materials;
 };
 
-std::expected<std::optional<LoadedRecipes>, std::string> LoadListedRecipes(
-    const fs::path& root, const std::optional<ConversionManifest>& manifest) {
-  if (!manifest || std::ranges::none_of(
-                       manifest->outputs, [](const ConversionOutput& output) {
-                         return output.converter == kSydRecipeConverterName;
-                       })) {
-    return std::nullopt;
+struct LoadedCatalogs {
+  CatalogDatabase database;
+  CatalogRecords records;
+};
+
+std::expected<CatalogRecords, std::string> ReadCatalogRecords(
+    const CatalogDatabase& database, bool recipes, bool materials) {
+  CatalogRecords records;
+  if (recipes) {
+    auto loaded = LoadWorkshopRecipes(database);
+    if (!loaded) return std::unexpected(loaded.error());
+    records.recipes = std::move(*loaded);
   }
-  auto database = CatalogDatabase::Load(root, WorkshopCatalogSources());
+  if (materials) {
+    auto loaded = LoadMaterials(database);
+    if (!loaded) return std::unexpected(loaded.error());
+    records.materials = std::move(*loaded);
+  }
+  return records;
+}
+
+// Select only published families: the extractor can open raw/synthetic stores
+// before generating their tables. All selected consumers share one cache.
+std::expected<std::optional<LoadedCatalogs>, std::string> LoadListedCatalogs(
+    const fs::path& root, const std::optional<ConversionManifest>& manifest) {
+  if (!manifest) return std::nullopt;
+  bool recipes = false;
+  bool materials = false;
+  for (const auto& output : manifest->outputs) {
+    recipes |= output.converter == kSydRecipeConverterName;
+    if (output.converter != kMaterialConverterName) continue;
+    const auto version = manifest->converters.find(kMaterialConverterName);
+    if (materials || output.id != kMaterialOutputId ||
+        output.source != kMaterialSource || !output.alias_of.empty() ||
+        version == manifest->converters.end() ||
+        version->second != kMaterialConverterVersion) {
+      return std::unexpected(
+          "invalid material conversion registration (run VS.Extract tables "
+          "<dir>)");
+    }
+    materials = true;
+  }
+  if (!recipes && !materials) return std::nullopt;
+  auto sources =
+      recipes ? WorkshopCatalogSources() : std::vector<CatalogTableSource>{};
+  if (materials) sources.push_back(MaterialCatalogSource());
+  auto database = CatalogDatabase::Load(root, sources);
   if (!database) {
     return std::unexpected(
         database.error() +
@@ -307,18 +353,20 @@ std::expected<std::optional<LoadedRecipes>, std::string> LoadListedRecipes(
         "re-run VS.Extract tables " +
         Platform::PathText(root) + ")");
   }
-  auto recipes = LoadWorkshopRecipes(*database);
-  if (!recipes && database->CacheHit()) {
+  auto records = ReadCatalogRecords(*database, recipes, materials);
+  if (!records && database->CacheHit()) {
     Core::LogWarn("content", "compiled catalog rejected; recompiling CSVs: {}",
-                  recipes.error());
-    database = CatalogDatabase::Load(root, WorkshopCatalogSources(), false);
+                  records.error());
+    database = CatalogDatabase::Load(root, sources, false);
     if (!database) return std::unexpected(database.error());
-    recipes = LoadWorkshopRecipes(*database);
+    records = ReadCatalogRecords(*database, recipes, materials);
   }
-  if (!recipes) {
-    return std::unexpected(recipes.error());
+  if (!records) {
+    return std::unexpected(records.error() +
+                           " (check catalog-layers.json and layer CSVs; run "
+                           "VS.Extract tables <dir> for missing base tables)");
   }
-  return LoadedRecipes{std::move(*database), std::move(*recipes)};
+  return LoadedCatalogs{std::move(*database), std::move(*records)};
 }
 
 }  // namespace
@@ -404,11 +452,12 @@ std::expected<void, std::string> DataStore::Open(const fs::path& root) {
   auto conversions = LoadConversionManifest(root);
   if (!conversions) return std::unexpected(conversions.error());
   store->m_conversion_manifest_ = std::move(*conversions);
-  auto recipes = LoadListedRecipes(root, store->m_conversion_manifest_);
-  if (!recipes) return std::unexpected(recipes.error());
-  if (*recipes) {
-    store->m_workshop_recipes_ = std::move((**recipes).recipes);
-    store->m_catalog_tables_ = std::move((**recipes).database);
+  auto tables = LoadListedCatalogs(root, store->m_conversion_manifest_);
+  if (!tables) return std::unexpected(tables.error());
+  if (*tables) {
+    store->m_workshop_recipes_ = std::move((**tables).records.recipes);
+    store->m_materials_ = std::move((**tables).records.materials);
+    store->m_catalog_tables_ = std::move((**tables).database);
   }
   // catalogs\ also holds the tier-1 tables (catalogs\menu\); either asset
   // catalog file means the asset catalog was written and must load.

@@ -10,6 +10,7 @@
 #include <iterator>
 #include <optional>
 #include <span>
+#include <string>
 #include <string_view>
 #include <utility>
 #include <vector>
@@ -30,7 +31,6 @@
 #include "Items/EquipmentLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecordsLive.hpp"
-#include "Items/Materials.hpp"
 #include "Legacy/Psx.hpp"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
@@ -159,13 +159,7 @@ static_assert(menu12::kCombineBladesIndex ==
 static_assert(menu12::kNewBladeIndex == menu12_text::index::kNewBlade);
 static_assert(Framework::kMenu12Bytes == Locate("MENU/MENU12.BIN").size);
 
-// VS::Items::materialModifiers' strength, intelligence and agility
-// bytes of a material's record.
-constexpr std::size_t kStrengthModifier = 24;
-constexpr std::size_t kIntelligenceModifier = 26;
-constexpr std::size_t kAgilityModifier = 28;
-static_assert(std::size(VS::Items::materialModifiers) == kMaterialCount);
-static_assert(std::size(VS::Items::materialModifiers[0]) > kAgilityModifier);
+static_assert(Content::kMaterialIds.size() == kMaterialCount);
 // The information text box _repairMenu and the prompts close.
 constexpr std::size_t kInformationTextBox = 7;
 // _drawOk's "OK" goes 0xC bytes (three entries) before the scene table.
@@ -472,15 +466,19 @@ class LiveHost final : public Host {
         body_part, slot ? &VS::Items::inventory.armor[*slot] : nullptr);
     Reload();
   }
-  MaterialBonuses Materials() override {
+  std::expected<MaterialBonuses, std::string> Materials() override {
+    const auto* store = Content::DataStore::Get();
+    const auto* materials = store != nullptr ? store->Materials() : nullptr;
+    if (materials == nullptr) {
+      return std::unexpected(
+          "no native material catalog (run VS.Extract tables <dir>)");
+    }
     MaterialBonuses bonuses{};
     for (std::size_t material = 0; material < bonuses.size(); ++material) {
-      const auto& modifiers = VS::Items::materialModifiers[material];
-      bonuses[material] = {
-          .strength = static_cast<std::int8_t>(modifiers[kStrengthModifier]),
-          .intelligence =
-              static_cast<std::int8_t>(modifiers[kIntelligenceModifier]),
-          .agility = static_cast<std::int8_t>(modifiers[kAgilityModifier])};
+      const auto& modifiers = materials->at(material);
+      bonuses[material] = {.strength = modifiers.strength,
+                           .intelligence = modifiers.intelligence,
+                           .agility = modifiers.agility};
     }
     return bonuses;
   }

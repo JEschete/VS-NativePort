@@ -31,6 +31,7 @@
 #include "Extract/EtmConversion.hpp"
 #include "Extract/FarConversion.hpp"
 #include "Extract/ImageConversion.hpp"
+#include "Extract/MaterialConversion.hpp"
 #include "Extract/ShpModelConversion.hpp"
 #include "Extract/WepModelConversion.hpp"
 #include "Extract/WorkshopAuthoring.hpp"
@@ -90,7 +91,8 @@ int Usage() {
       "      in manifest.json; images converts again only what changed "
       "(--force: everything).\n"
       "      extract also converts the workshop recipe files (MENU/*.SYD) to "
-      "CSV tables under catalogs/menu/;\n"
+      "CSV tables under catalogs/menu/ and executable material definitions "
+      "under catalogs/items/;\n"
       "      tables converts again only what changed (--force: everything, "
       "replacing edited tables).\n"
       "      extract also converts the character models (OBJ/*.SHP) to glTF "
@@ -111,7 +113,8 @@ int Usage() {
       "metadata. labels adds it without reconverting;\n"
       "      labels --force refreshes only labels, preserving gameplay "
       "fields and original encoded names.\n"
-      "      authoring upgrades zone fields and generated recipe "
+      "      authoring imports material definitions and upgrades zone fields "
+      "and generated recipe "
       "IDs/references "
       "to semantic item names without changing recipe values.");
   return 2;
@@ -134,6 +137,13 @@ int WithLabels(int result, const fs::path& root) {
 }
 
 int UpgradeAuthoring(const fs::path& root) {
+  const auto materials = Extract::ConvertDiscMaterials(root, false);
+  if (!materials) {
+    VS::Core::LogError("extract", "materials: {}", materials.error());
+    return 1;
+  }
+  VS::Core::LogInfo("extract", "material authoring: {} converted, {} unchanged",
+                    materials->converted, materials->unchanged);
   const auto report = Extract::UpgradeWorkshopAuthoring(root);
   if (!report) {
     VS::Core::LogError("extract", "authoring: {}", report.error());
@@ -534,6 +544,13 @@ int ConvertImages(const fs::path& root, bool force) {
 // texture images and their manifest.json outputs from the disc files already
 // under root. The zones name the enemy archetypes, so this follows the models.
 int ConvertTables(const fs::path& root, bool force) {
+  const auto materials = Extract::ConvertDiscMaterials(root, force);
+  if (!materials) {
+    VS::Core::LogError("extract", "{}", materials.error());
+    return 1;
+  }
+  VS::Core::LogInfo("extract", "materials: {} converted, {} unchanged",
+                    materials->converted, materials->unchanged);
   const auto report = Extract::ConvertDiscTables(root, force);
   if (!report) {
     VS::Core::LogError("extract", "{}", report.error());

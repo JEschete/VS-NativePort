@@ -1471,9 +1471,6 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"SLUS_010.40", 0x3C1DC, sizeof VS::Battle::actionDefinitions,
      VS::Battle::actionDefinitions.data(),
      sizeof VS::Battle::actionDefinitions},  // G01904 vs_main_actions
-    {"SLUS_010.40", 0x3F5DC, sizeof VS::Items::materialModifiers,
-     &VS::Items::materialModifiers,
-     sizeof VS::Items::materialModifiers},  // G01905 vs_main_materialModifiers
     {"SLUS_010.40", 0x3F6CC, sizeof VS::Battle::statusEffectParams,
      &VS::Battle::statusEffectParams,
      sizeof VS::Battle::statusEffectParams},  // G01906

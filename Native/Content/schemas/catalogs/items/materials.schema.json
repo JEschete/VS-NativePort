@@ -1,0 +1,194 @@
+{
+  "schema_version": 1,
+  "table": "materials",
+  "description": "Native material definitions; reserved import bytes are not editable properties. Workshop consumes strength, intelligence and agility; other fields retain their proven source semantics.",
+  "key": ["id"],
+  "columns": [
+    {
+      "name": "id",
+      "type": "id",
+      "description": "Stable material definition identity."
+    },
+    {
+      "name": "display_name",
+      "type": "text",
+      "optional": true,
+      "description": "Informational plain-text label; not a key or gameplay value."
+    },
+    {
+      "name": "legacy_id",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 7,
+      "description": "Compatibility kind for existing inventory, saves and palettes; not a definition field-width limit."
+    },
+    {
+      "name": "class_human",
+      "type": "integer",
+      "minimum": -2147483648,
+      "maximum": 2147483647,
+      "description": "Human class modifier points."
+    },
+    {
+      "name": "class_beast",
+      "type": "integer",
+      "minimum": -2147483648,
+      "maximum": 2147483647,
+      "description": "Beast class modifier points."
+    },
+    {
+      "name": "class_undead",
+      "type": "integer",
+      "minimum": -2147483648,
+      "maximum": 2147483647,
+      "description": "Undead class modifier points."
+    },
+    {
+      "name": "class_phantom",
+      "type": "integer",
+      "minimum": -2147483648,
+      "maximum": 2147483647,
+      "description": "Phantom class modifier points."
+    },
+    {
+      "name": "class_dragon",
+      "type": "integer",
+      "minimum": -2147483648,
+      "maximum": 2147483647,
+      "description": "Dragon class modifier points."
+    },
+    {
+      "name": "class_evil",
+      "type": "integer",
+      "minimum": -2147483648,
+      "maximum": 2147483647,
+      "description": "Evil class modifier points."
+    },
+    {
+      "name": "attack_affinity_physical",
+      "type": "integer",
+      "minimum": -2147483648,
+      "maximum": 2147483647,
+      "description": "Physical attack affinity modifier points."
+    },
+    {
+      "name": "attack_affinity_air",
+      "type": "integer",
+      "minimum": -2147483648,
+      "maximum": 2147483647,
+      "description": "Air attack affinity modifier points (source wind)."
+    },
+    {
+      "name": "attack_affinity_fire",
+      "type": "integer",
+      "minimum": -2147483648,
+      "maximum": 2147483647,
+      "description": "Fire attack affinity modifier points."
+    },
+    {
+      "name": "attack_affinity_earth",
+      "type": "integer",
+      "minimum": -2147483648,
+      "maximum": 2147483647,
+      "description": "Earth attack affinity modifier points."
+    },
+    {
+      "name": "attack_affinity_water",
+      "type": "integer",
+      "minimum": -2147483648,
+      "maximum": 2147483647,
+      "description": "Water attack affinity modifier points."
+    },
+    {
+      "name": "attack_affinity_light",
+      "type": "integer",
+      "minimum": -2147483648,
+      "maximum": 2147483647,
+      "description": "Light attack affinity modifier points."
+    },
+    {
+      "name": "attack_affinity_dark",
+      "type": "integer",
+      "minimum": -2147483648,
+      "maximum": 2147483647,
+      "description": "Dark attack affinity modifier points."
+    },
+    {
+      "name": "defense_affinity_physical",
+      "type": "integer",
+      "minimum": -2147483648,
+      "maximum": 2147483647,
+      "description": "Physical defense affinity modifier points."
+    },
+    {
+      "name": "defense_affinity_air",
+      "type": "integer",
+      "minimum": -2147483648,
+      "maximum": 2147483647,
+      "description": "Air defense affinity modifier points (source wind)."
+    },
+    {
+      "name": "defense_affinity_fire",
+      "type": "integer",
+      "minimum": -2147483648,
+      "maximum": 2147483647,
+      "description": "Fire defense affinity modifier points."
+    },
+    {
+      "name": "defense_affinity_earth",
+      "type": "integer",
+      "minimum": -2147483648,
+      "maximum": 2147483647,
+      "description": "Earth defense affinity modifier points."
+    },
+    {
+      "name": "defense_affinity_water",
+      "type": "integer",
+      "minimum": -2147483648,
+      "maximum": 2147483647,
+      "description": "Water defense affinity modifier points."
+    },
+    {
+      "name": "defense_affinity_light",
+      "type": "integer",
+      "minimum": -2147483648,
+      "maximum": 2147483647,
+      "description": "Light defense affinity modifier points."
+    },
+    {
+      "name": "defense_affinity_dark",
+      "type": "integer",
+      "minimum": -2147483648,
+      "maximum": 2147483647,
+      "description": "Dark defense affinity modifier points."
+    },
+    {
+      "name": "max_dp",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295,
+      "description": "Material base durability in internal DP units (100 units per displayed DP); workshop combines ingredient DP instead."
+    },
+    {
+      "name": "strength",
+      "type": "integer",
+      "minimum": -2147483648,
+      "maximum": 2147483647,
+      "description": "Additive strength points for a workshop result."
+    },
+    {
+      "name": "intelligence",
+      "type": "integer",
+      "minimum": -2147483648,
+      "maximum": 2147483647,
+      "description": "Additive intelligence points for a workshop result."
+    },
+    {
+      "name": "agility",
+      "type": "integer",
+      "minimum": -2147483648,
+      "maximum": 2147483647,
+      "description": "Additive agility points for a workshop result."
+    }
+  ]
+}

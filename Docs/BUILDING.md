@@ -331,6 +331,14 @@ build\Debug\VS.Extract.exe authoring Native\data
   Do not delete a listed import file: it is needed for exact offline
   reconstruction. See [ASSET_PIPELINE.md](ASSET_PIPELINE.md) section 6.8 for the
   verified duplicate-name and shield/armor rules and the remaining §4 work.
+- `authoring`, `tables` and `extract` also import the native material catalog
+  from the executable's G01905 table. Existing trees need
+  `VS.Extract tables Native\data` (or `authoring Native\data`) before the
+  workshop can combine materials. `catalogs\items\materials.csv` uses semantic
+  `material.*` IDs, named class/attack-affinity/defense-affinity columns and
+  explicit numeric quantities; its schema is beside it. Reserved import bytes
+  stay in `catalogs\items\import\materials.json`, not editable stat columns.
+  Normal reruns preserve edits; `tables --force` reimports.
 - The same `authoring` command upgrades `znd-tables` version 1 to version 2:
   named enemy classes/materials, meaningful type/class/affinity columns and
   explicitly indexed DP splash percentages. Old headers remain readable through
@@ -428,8 +436,9 @@ blade.battle-knife,12
 Existing keys merge just the supplied columns. New rows require every semantic
 column. Optional `_op` selects `add` (must be absent), `replace` (must exist and
 supplies every column), `merge` (the default), or `remove` (must exist; only key
-values). Pairs use ordered `first,second` keys; materials use their schema's
-composite key. Named and legacy numeric enum keys are equivalent. Legacy result
+values). Pairs use ordered `first,second` keys; recipe material rules use their
+schema's composite key. Material definitions use their semantic `id`. Named and
+legacy numeric enum keys are equivalent. Legacy result
 aliases resolve to semantic IDs rather than renaming definitions.
 
 The last listed layer wins. Multiple layers touching one key are reported in the
@@ -438,7 +447,23 @@ columns, invalid values and unresolved references are errors, not defaults.
 Failed loads leave the previously published store intact. No base files are
 modified. Restart the game to load edits; this is not hot reload.
 
-**Current scope:** the nine workshop recipe tables only. The remaining gameplay
+For example, a layer's `catalogs\items\materials.csv` can contain:
+
+```csv
+id,strength
+material.bronze,12
+```
+
+The compiled catalog feeds the workshop's real primary-stat calculation.
+Definition modifiers accept signed 32-bit values, but the combined result must
+still fit the retained signed-byte inventory/save stat field; overflow is an
+explicit refusal, not a wrap or balance clamp. Adding a ninth material is also
+refused until #58 expands the inventory, palette and persistence contracts.
+The class/affinity/DP definitions do not replace the workshop's ingredient
+fusion/averaged-DP rules. See ASSET_PIPELINE section 4.2.
+
+**Current scope:** the nine workshop recipe tables and material definitions.
+The remaining gameplay
 and zone tables, asset-path overrides and stable mod-defined inventory identities
 are still tracked in #499, #199, #58 and #520. A CSV under a layer's `catalogs`
 directory that is not registered in this scope is rejected, not silently ignored.

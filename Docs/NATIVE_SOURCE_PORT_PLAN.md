@@ -1521,6 +1521,16 @@ production behavior and retirement remain separate claims.
 | EC-04-T-ETM | `LoadConvertedActorTexture` calls `EtmSheetOfImages` / `EncodeEtmFile` before actor texture loading. | #207, #55, #48 | Native texture-region/frame/palette definitions and instance bindings. PNG pixels are not repacked into ETM for playback. |
 | EC-04-T-SYD | Not a whole SYD-file rebuild: `BuildRecipeBook` calls `DenseWorkshopTables` and retains byte-valued results/material matrices and legacy-indexed equipment records. SQLite compilation does not retire this layout bridge. | #499, #58 | Semantic-ID recipe rules/lookups and item definitions/instances. Results are not limited to byte IDs; directed behavior remains exact without the SYD matrix layout. |
 
+G01905 material-table checkpoint (#499, 2026-11-24): its raw module-data storage
+and module-address mapping are removed. The workshop reads `MaterialCatalog`
+definitions from the same layered SQLite cache as recipes; no runtime material
+encoder remains. Native modifiers are signed 32-bit and sums use signed 64-bit.
+The eight-kind compatibility map and final inventory-stat byte storage remain
+explicit #58 constraints (unsupported kinds/results refuse, not truncate).
+Reserved bytes and exact reconstruction exist only in the offline importer.
+This does not retire EC-04-T-SYD or the remaining executable catalogs, nor prove
+controller-driven workshop/action parity. See ASSET_PIPELINE section 4.2.
+
 For every row, retirement requires:
 1. Trace and migrate producers, consumers, callbacks, persistence and cleanup to
    the typed destination; remove the runtime encoder/layout adapter and its

@@ -844,6 +844,44 @@ TEST_CASE("Original blade recipe produces the inspected ordered result",
   CHECK(actual == expected);
 }
 
+TEST_CASE("Every workshop result kind accepts widened material modifiers",
+          "[material-catalog][workshop][menu-setup]") {
+  const int kind = GENERATE(0, 1, 2);
+  WorkshopRecipeFixture fixture;
+  fixture.bonuses[5].strength = 150;
+  if (kind == 0) {
+    auto book = WorkshopRecipeFixture::BladeBook(4);
+    book.blades.at(31).strength = static_cast<std::uint8_t>(-40);
+    VS::Items::InventoryBlade first{}, second{};
+    first.id = 14;
+    first.material = 3;
+    first.category = 3;
+    second.id = 26;
+    second.material = 4;
+    second.category = 4;
+    const auto result =
+        setup::BuildCombinedBlade(first, second, book, fixture.bonuses);
+    if (!result) FAIL(result.error());
+    CHECK(result->strength == 110);
+  } else {
+    const bool shield = kind == 1;
+    auto book = WorkshopRecipeFixture::ArmorBook(shield, 4);
+    book.armor.at(12).strength = static_cast<std::uint8_t>(-40);
+    VS::Items::InventoryArmor first{}, second{};
+    first.sub_id = static_cast<std::uint8_t>(shield ? 6 : 65);
+    second.sub_id = static_cast<std::uint8_t>(shield ? 7 : 66);
+    first.material = 3;
+    second.material = 4;
+    first.category = 5;
+    second.category = 4;
+    const auto build =
+        shield ? setup::BuildCombinedShield : setup::BuildCombinedArmor;
+    const auto result = build(first, second, book, fixture.bonuses);
+    if (!result) FAIL(result.error());
+    CHECK(result->strength == 110);
+  }
+}
+
 TEST_CASE(
     "Original shield and armor recipes use their distinct material tables",
     "[menu][equipment][workshop][recipes][disc][menu-setup]") {
