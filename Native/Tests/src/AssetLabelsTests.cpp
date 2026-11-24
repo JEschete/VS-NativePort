@@ -424,6 +424,36 @@ TEST_CASE("Standalone audio metadata can be labeled without a disc inventory",
   CHECK(Required(extract::LabelNativeAssets(root.Root())).written == 0);
 }
 
+TEST_CASE(
+    "Native-owned text font and import records bypass generic asset labels",
+    "[asset-labels][learning-catalog]") {
+  const auto schema = GENERATE("vs.strings", "vs.font", "vs.text-contributions",
+                               "vs.save-text-import", "vs.bestiary-import",
+                               "vs.material-import", "vs.learning-import");
+  const bool refresh = GENERATE(false, true);
+  const ModelRoot root({});
+  const std::string text = std::string("{\"schema\":\"") + schema +
+                           "\", \"native_owner\":\"preserve my formatting\"}\n";
+  Write(root.Root(), "native-owned.json", text);
+  content::ConversionManifest manifest;
+  manifest.converters = {{"owner-json", 1}};
+  manifest.outputs = {{.id = "owner.test",
+                       .source = "SLUS_010.40",
+                       .source_sha256 = std::string(64, 'a'),
+                       .converter = "owner-json",
+                       .files = {"native-owned.json"},
+                       .dependencies = {},
+                       .note = {},
+                       .alias_of = {}}};
+  REQUIRE(extract::WriteConversionManifest(root.Root(), manifest));
+  const auto stamp = fs::last_write_time(root.Root() / "native-owned.json");
+  const auto result =
+      Required(extract::LabelNativeAssets(root.Root(), refresh));
+  CHECK(result.written == 0);
+  CHECK(Read(root.Root(), "native-owned.json") == text);
+  CHECK(fs::last_write_time(root.Root() / "native-owned.json") == stamp);
+}
+
 TEST_CASE("A malformed existing annotation is refused without replacing it",
           "[asset-labels]") {
   ModelRoot root({});

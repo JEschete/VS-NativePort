@@ -549,6 +549,14 @@ Check LabelJsonFile(const fs::path& root, std::string_view file,
                     bool refresh, AssetLabelReport& report) {
   auto document = ReadJson(root, file);
   if (!document) return std::unexpected(document.error());
+  const auto schema = StringMember(*document, "schema");
+  // These native definitions and preservation records have their own semantic
+  // owners; a containing executable is not their display identity (#526).
+  if (schema == "vs.strings" || schema == "vs.font" ||
+      schema == "vs.text-contributions" || schema.ends_with("-import")) {
+    ++report.unchanged;
+    return {};
+  }
   if (file.ends_with(".gltf")) {
     // Custom glTF metadata belongs in extras, never in a nonstandard root key.
     auto asset = document->find("asset");

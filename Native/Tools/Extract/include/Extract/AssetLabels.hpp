@@ -26,6 +26,8 @@ ReadItemDisplayNames(const std::filesystem::path& root);
 // Adds optional display_name metadata without reconverting assets or changing
 // gameplay fields. Existing labels survive unless refresh is requested.
 // Each changed file is replaced atomically; a failed run can be resumed.
+// Native text/font owners and import-only schemas are never generically
+// relabeled, including refresh runs (#526).
 [[nodiscard]] std::expected<AssetLabelReport, std::string> LabelNativeAssets(
     const std::filesystem::path& root, bool refresh = false);
 
