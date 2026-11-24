@@ -60,6 +60,7 @@
     <ClCompile Include="src\ShpModelConversion.cpp" />
     <ClCompile Include="src\TimImage.cpp" />
     <ClCompile Include="src\WepModelConversion.cpp" />
+    <ClCompile Include="src\WorkshopAuthoring.cpp" />
     <ClCompile Include="src\WorkshopRecipeConversion.cpp" />
     <ClCompile Include="src\ZndConversion.cpp" />
     <ClCompile Include="src\ZudConversion.cpp" />
@@ -77,6 +78,7 @@
     <ClInclude Include="include\Extract\ShpModelConversion.hpp" />
     <ClInclude Include="include\Extract\TimImage.hpp" />
     <ClInclude Include="include\Extract\WepModelConversion.hpp" />
+    <ClInclude Include="include\Extract\WorkshopAuthoring.hpp" />
     <ClInclude Include="include\Extract\WorkshopRecipeConversion.hpp" />
     <ClInclude Include="include\Extract\ZndConversion.hpp" />
     <ClInclude Include="include\Extract\ZudConversion.hpp" />

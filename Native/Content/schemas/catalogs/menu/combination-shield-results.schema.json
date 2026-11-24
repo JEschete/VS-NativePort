@@ -3,11 +3,16 @@
   "table": "combination-shield-results",
   "description": "Workshop combination results: the item each combination makes.",
   "key": ["id"],
+  "legacy_alias": {
+    "column": "legacy_id",
+    "pattern": "shield-{legacy_id:03}",
+    "role": "compatibility only; write current semantic ids"
+  },
   "columns": [
     {
       "name": "id",
       "type": "id",
-      "description": "The result's id; pairs name it."
+      "description": "Semantic result id; pairs name it."
     },
     {
       "name": "display_name",

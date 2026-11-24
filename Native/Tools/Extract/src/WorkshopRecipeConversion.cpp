@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "Content/DataStore.hpp"
+#include "Extract/WorkshopAuthoring.hpp"
 #include "Platform/Paths.hpp"
 
 namespace VS::Extract {
@@ -122,10 +123,6 @@ std::uint32_t WordAt(std::span<const std::byte> file, std::size_t offset) {
   return value;
 }
 
-std::string ResultId(const WorkshopLayout& layout, std::size_t legacy) {
-  return std::format("{}-{:03}", layout.name, legacy);
-}
-
 std::expected<void, std::string> CheckFrame(const WorkshopLayout& layout,
                                             const SydLayout& syd,
                                             std::span<const std::byte> file) {
@@ -154,7 +151,7 @@ std::expected<void, std::string> CheckFrame(const WorkshopLayout& layout,
 BladeResult BladeAt(const WorkshopLayout& layout,
                     std::span<const std::byte> record, std::size_t legacy) {
   const std::uint8_t shape = ByteAt(record, kBladeShapeByte);
-  return {.id = ResultId(layout, legacy),
+  return {.id = Content::LegacyWorkshopResultId(layout, legacy),
           .legacy_id = static_cast<std::uint32_t>(legacy),
           .model = ByteAt(record, kBladeModelByte),
           .category = ByteAt(record, kBladeCategoryByte),
@@ -176,7 +173,7 @@ BladeResult BladeAt(const WorkshopLayout& layout,
 
 PieceResult PieceAt(const WorkshopLayout& layout,
                     std::span<const std::byte> record, std::size_t legacy) {
-  return {.id = ResultId(layout, legacy),
+  return {.id = Content::LegacyWorkshopResultId(layout, legacy),
           .legacy_id = static_cast<std::uint32_t>(legacy),
           .model = ByteAt(record, kPieceModelByte),
           .category = ByteAt(record, kPieceCategoryByte),
@@ -224,9 +221,11 @@ std::expected<void, std::string> DecodePairs(const WorkshopLayout& layout,
                         second + layout.first_pair_id, result, syd.records));
       }
       table.pairs.push_back(
-          {.first = ResultId(layout, first + layout.first_pair_id),
-           .second = ResultId(layout, second + layout.first_pair_id),
-           .result = ResultId(layout, result)});
+          {.first = Content::LegacyWorkshopResultId(
+               layout, first + layout.first_pair_id),
+           .second = Content::LegacyWorkshopResultId(
+               layout, second + layout.first_pair_id),
+           .result = Content::LegacyWorkshopResultId(layout, result)});
     }
   }
   return {};
@@ -361,10 +360,13 @@ const ConversionOutput* UnchangedOutput(const ConversionManifest& manifest,
                                         const SourceFile& source,
                                         WorkshopKind kind) {
   const ConversionOutput* output = manifest.Find(OutputIdOf(kind));
+  std::vector<std::string> files =
+      output ? output->files : std::vector<std::string>{};
+  std::erase(files, WorkshopImportPath(kind));
   if (output == nullptr || output->converter != kSydRecipeConverterName ||
       output->source != source.path ||
       output->source_sha256 != HashOf(source) ||
-      !output->dependencies.empty() || output->files != OutputFilesOf(kind)) {
+      !output->dependencies.empty() || files != OutputFilesOf(kind)) {
     return nullptr;
   }
   return PresentOutput(root, output);
@@ -505,6 +507,11 @@ std::expected<TableConversionReport, std::string> ConvertDiscTables(
   auto start = StartRun(root);
   if (!start) return std::unexpected(start.error());
   const ConversionManifest& previous = start->previous;
+  if (!force) {
+    if (auto imports = CheckWorkshopImports(root, previous); !imports) {
+      return std::unexpected(imports.error());
+    }
+  }
   ConverterBatch batch = StartBatch(previous, kSydRecipeConverterName,
                                     kSydRecipeConverterVersion, force);
   TableConversionReport report;

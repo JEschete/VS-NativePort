@@ -31,6 +31,7 @@
 #include "Extract/ImageConversion.hpp"
 #include "Extract/ShpModelConversion.hpp"
 #include "Extract/WepModelConversion.hpp"
+#include "Extract/WorkshopAuthoring.hpp"
 #include "Extract/WorkshopRecipeConversion.hpp"
 #include "Extract/ZndConversion.hpp"
 #include "Extract/ZudConversion.hpp"
@@ -70,6 +71,7 @@ int Usage() {
       "  VS.Extract models   <datadir> [--force]\n"
       "  VS.Extract banks    <datadir> [--force]\n"
       "  VS.Extract labels   <datadir> [--force]\n"
+      "  VS.Extract authoring <datadir>\n"
       "      Form 1 files are copied as they are; movies (*.STR) are converted "
       "to Matroska (AV1 + FLAC)\n"
       "      with FFmpeg (found on PATH, or --ffmpeg). Effect audio and XA "
@@ -104,7 +106,9 @@ int Usage() {
       "      Successful conversion commands also add readable display_name "
       "metadata. labels adds it without reconverting;\n"
       "      labels --force refreshes only labels, preserving gameplay "
-      "fields and original encoded names.");
+      "fields and original encoded names.\n"
+      "      authoring upgrades generated recipe IDs and their references "
+      "to semantic item names without changing recipe values.");
   return 2;
 }
 
@@ -122,6 +126,20 @@ int LabelAssets(const fs::path& root, bool refresh = false) {
 
 int WithLabels(int result, const fs::path& root) {
   return result == 0 ? LabelAssets(root) : result;
+}
+
+int UpgradeAuthoring(const fs::path& root) {
+  const auto report = Extract::UpgradeWorkshopAuthoring(root);
+  if (!report) {
+    VS::Core::LogError("extract", "authoring: {}", report.error());
+    return 1;
+  }
+  VS::Core::LogInfo("extract",
+                    "authoring: {} recipe IDs, {} references, {} unused "
+                    "records archived, {} files updated",
+                    report->renamed, report->references, report->quarantined,
+                    report->written);
+  return 0;
 }
 
 // --ffmpeg <path>, else ffmpeg.exe on PATH.
@@ -497,7 +515,7 @@ int ConvertTables(const fs::path& root, bool force) {
   VS::Core::LogInfo("extract",
                     "zones: {} converted, {} unchanged, {} stale files removed",
                     zones->converted, zones->unchanged, zones->removed);
-  return 0;
+  return UpgradeAuthoring(root);
 }
 
 // models/characters/ and models/weapons/ glTF models, models/animation-sets/
@@ -694,6 +712,11 @@ int Run(int argc, char** argv) {
     return Usage();
   }
   const std::string cmd = argv[1];
+  if (cmd == "authoring") {
+    if (argc != kCatalogArguments) return Usage();
+    const fs::path root = Platform::Utf8Path(argv[2]);
+    return WithLabels(UpgradeAuthoring(root), root);
+  }
   if (cmd == "catalogs") {
     return argc == kCatalogArguments
                ? WithLabels(WriteCatalogs(Platform::Utf8Path(argv[2])),

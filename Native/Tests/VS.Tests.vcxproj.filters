@@ -1626,6 +1626,9 @@
     <ClCompile Include="..\Tools\Extract\src\WorkshopRecipeConversion.cpp">
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>
+    <ClCompile Include="..\Tools\Extract\src\WorkshopAuthoring.cpp">
+      <Filter>..\Tools\Extract\src</Filter>
+    </ClCompile>
     <ClCompile Include="..\Tools\Extract\src\ZndConversion.cpp">
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>

@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <span>
 #include <string>
+#include <vector>
 
 namespace VS::Extract {
 
@@ -18,6 +19,9 @@ struct AssetLabelReport {
 // keeps unknown glyphs/controls as visible markers. Not a text re-encoder.
 [[nodiscard]] std::expected<std::string, std::string> DecodeAssetName(
     std::span<const std::byte> bytes);
+
+[[nodiscard]] std::expected<std::vector<std::string>, std::string>
+ReadItemDisplayNames(const std::filesystem::path& root);
 
 // Adds optional display_name metadata without reconverting assets or changing
 // gameplay fields. Existing labels survive unless refresh is requested.

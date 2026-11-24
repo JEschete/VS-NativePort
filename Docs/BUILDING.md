@@ -293,6 +293,8 @@ rem Rewrite catalogs\ for an existing data directory without re-extracting.
 build\Debug\VS.Extract.exe catalogs Native\data
 rem Add readable names without reconverting or replacing gameplay edits.
 build\Debug\VS.Extract.exe labels Native\data
+rem Upgrade generated recipe IDs/references without replacing recipe values.
+build\Debug\VS.Extract.exe authoring Native\data
 ```
 
 - Successful conversion commands also add optional, informational `display_name`
@@ -302,6 +304,12 @@ build\Debug\VS.Extract.exe labels Native\data
   `--force`, it does not regenerate gameplay data. Rebuild consumers before
   annotating data used by an older build. See [ASSET_PIPELINE.md](ASSET_PIPELINE.md)
   section 1.2 for sources, binary companions and remaining name work.
+- `authoring` (also run by `tables` and `extract`) migrates generated recipe
+  keys to semantic item identities, retains explicit legacy aliases and
+  quarantines unreferenced stock placeholder tails in import-only provenance.
+  Do not delete a listed import file: it is needed for exact offline
+  reconstruction. See [ASSET_PIPELINE.md](ASSET_PIPELINE.md) section 6.8 for the
+  verified duplicate-name and shield/armor rules and the remaining §4 work.
 - Writes `Native\data\disc\<disc path>` for every file and `Native\data\files.tsv` (sector, size, form, path).
   Files not converted yet are copied as they are (form `raw`); the intro movie becomes `MOV\TITLE.STR.mkv` (AV1 +
   FLAC, form `mkv`). Effect and ending audio are imported separately under `audio\streams`;

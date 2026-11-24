@@ -715,7 +715,7 @@ navigation/listening, every effect/track in context, bit-exact DSP parity and
 
 `MENU\BLADE.SYD`, `SHIELD.SYD` and `ARMOR.SYD` are the workshop's combination recipes. Each one starts with a 12-byte header of three offsets: the pair matrix (the result record by both ingredients' record indices), the material matrix (the material two ingredients' materials give; blades and armor also index it by category) and the result records (16 bytes for a blade, 8 for a shield or armor piece). `VS.Extract tables <datadir>` (and `extract`) converts each file to three CSV tables under `catalogs\menu\` (`Extract/WorkshopRecipeConversion.hpp`, `Content/WorkshopRecipes.hpp`):
 
-- `combination-<kind>-results.csv`: one row per result record, with a stable `id` (`blade-001`), its `legacy_id` (the record index the item records and the original's matrices use) and the named fields (model, category, gem slots or the blade's damage, cost and range fields, and the strength, intelligence and agility modifiers). The unnamed bytes are kept as `raw.byte7` and `raw.byte11` (§4.1).
+- `combination-<kind>-results.csv`: one row per result definition, with a semantic `id` (`blade.battle-knife`), its compatibility `legacy_id` (the record index the original matrices use) and the current fields (model, category, gem slots or the blade's damage, cost and range fields, and the strength, intelligence and agility modifiers). Named enum domains and removal of remaining `raw.byte7`/`raw.byte11` authoring columns are still required by §4; semantic IDs alone do not complete that work.
 - `combination-<kind>-pairs.csv`: `first,second,result`, all result ids, one row per ingredient pair that makes something.
 - `combination-<kind>-materials.csv`: `first_material,[first_category,]second_material,[second_category,]material`, one row per combination that gives a material (1 wood to 7 damascus).
 
@@ -724,6 +724,42 @@ Empty matrix entries have no row. Each table's schema is committed in `Native\Co
 Conversion keeps edits. A rerun leaves the tables of an unchanged SYD alone, reconverts those whose SYD changed and with `--force` rewrites them all. The converter only writes tables that parse back to the decoded recipes and rebuild the original file byte for byte, so a disc that does not convert exactly is an error rather than a lossy output. At startup the data store reads and checks every table (types and ranges, every reference names a result, ingredients fit the pair matrix, `legacy_id`s run from 0 without gaps) and refuses to open on the first error, naming the file, line and column and telling the user to rerun `VS.Extract tables`. `RequireConversions` refuses to start when a SYD has no tables or its source hash is stale. The workshop builds its recipe book from the loaded tables (`Menu::Setup::BuildRecipeBook`, which rebuilds the original's dense matrices) and never reads the SYD. On the disc, the three files give 96 blade, 17 shield and 81 armor result records (record 0 of each is the empty one), with 8,100, 256 and 4,096 pairs and 2,025, 49 and 784 material rules.
 
 Not yet done: compiling the tables into SQLite, the patch and mod layers, replacing the result fields with references to the item catalog when there is one, and an in-game combination replay (#58, #499).
+
+#### Semantic recipe identities and import-only records
+
+`VS.Extract authoring <datadir>` upgrades generated `<kind>-NNN` result keys
+and every directed pair reference in place, without reconverting source data.
+`tables` and full `extract` also run this step. Existing custom identities,
+labels and value edits are preserved. The importer uses the source item names;
+ambiguous or unencodable names require an explicit identity, not a numeric
+suffix or an invented meaning.
+
+The two Footman's Maces use their verified categories:
+`blade.footmans-mace.axe-mace` and `blade.footmans-mace.heavy-mace`.
+The same rule disambiguates duplicate names only when a known category
+distinguishes them. Remaining collisions fail explicitly.
+
+The five stock `untitled` tail records have no recipe references. They move
+to `catalogs/menu/import/combination-blade.json` as original record bytes keyed
+by `legacy_id`, described by `workshop-import.schema.json`. This is **import
+provenance**, not another item catalog. The game does not read these records;
+the offline `EncodeWorkshopAuthoring` export restores them for exact legacy
+reconstruction. An edited/referenced record or custom caption is not discarded:
+it needs an explicit authoring identity. Explicitly authoring a former unused
+slot takes precedence over its archived original.
+
+Result schemas describe their old-ID alias pattern. Readers resolve aliases
+through `legacy_id`, normalize pairs to current IDs and reject ambiguous aliases
+or duplicate resolved directed pairs. Old numeric identifiers do not remain the
+primary authoring keys, and renaming a display label does not rename an ID.
+
+The shield/armor overlap is not byte-identical: 15 shield records have gem
+slots where the corresponding armor import byte is zero. Original and native
+`combineArmor` do not read the imported model or gem-slot bytes, whereas
+`combineShields` does. Those context-specific values remain exact. Shared IDs
+must agree on the category, stats and legacy identity both paths consume;
+divergent authored variants require distinct IDs. A single shared item
+definition with all import-only fields separated is still part of #499.
 
 ### 6.9 Zones (ZND → CSV tables, #199, #517)
 

@@ -42,6 +42,7 @@ struct TableSpec {
   std::string_view description;
   std::span<const ColumnSpec> columns;
   std::span<const std::string_view> key;  // unique together
+  std::string_view legacy_alias_prefix{};
 };
 
 // One CSV record: its first line in the file and its fields.

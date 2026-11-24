@@ -51,6 +51,9 @@
     <ClCompile Include="src\WepModelConversion.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\WorkshopAuthoring.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\WorkshopRecipeConversion.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -94,6 +97,9 @@
       <Filter>include\Extract</Filter>
     </ClInclude>
     <ClInclude Include="include\Extract\WepModelConversion.hpp">
+      <Filter>include\Extract</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Extract\WorkshopAuthoring.hpp">
       <Filter>include\Extract</Filter>
     </ClInclude>
     <ClInclude Include="include\Extract\WorkshopRecipeConversion.hpp">

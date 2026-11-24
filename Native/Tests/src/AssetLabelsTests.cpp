@@ -22,6 +22,8 @@
 #include "Extract/AssetLabels.hpp"
 #include "Extract/ConversionManifestWriter.hpp"
 #include "Extract/ConverterBatch.hpp"
+#include "Extract/WorkshopAuthoring.hpp"
+#include "Extract/WorkshopRecipeConversion.hpp"
 #include "TestSupport/ModelFixtures.hpp"
 #include "TestSupport/WorkshopRecipeRoot.hpp"
 
@@ -151,10 +153,9 @@ void WriteModels(const fs::path& root) {
   REQUIRE(written.has_value());
 }
 
-void EditCell(const fs::path& root, std::string_view column,
-              std::string value) {
-  auto records =
-      Required(content::ParseCsv(Read(root, kEnemyPath), kEnemyPath));
+void EditCell(const fs::path& root, std::string_view column, std::string value,
+              std::string_view path = kEnemyPath) {
+  auto records = Required(content::ParseCsv(Read(root, path), path));
   auto& header = records.front().fields;
   const auto found = std::ranges::find(header, column);
   REQUIRE(found != header.end());
@@ -162,7 +163,73 @@ void EditCell(const fs::path& root, std::string_view column,
   records.at(1).fields.at(index) = std::move(value);
   std::vector<std::vector<std::string>> rows;
   for (auto& record : records) rows.push_back(std::move(record.fields));
-  Write(root, kEnemyPath, content::FormatCsv(rows));
+  Write(root, path, content::FormatCsv(rows));
+}
+
+extract::SourceFile RecipeNames(bool collision = false) {
+  constexpr std::size_t kWidth = 24;
+  constexpr std::size_t kCount = 512;
+  constexpr std::size_t kShield = 127;
+  constexpr std::array<std::uint8_t, 6> kKnife{0x14, 0x31, 0x2C,
+                                               0x29, 0x28, 0xE7};
+  constexpr std::array<std::uint8_t, 5> kDirk{0x0D, 0x2C, 0x35, 0x2E, 0xE7};
+  constexpr std::array<std::uint8_t, 8> kBuckler{0x0B, 0x38, 0x26, 0x2E,
+                                                 0x2F, 0x28, 0x35, 0xE7};
+  constexpr std::array<std::uint8_t, 9> kUntitled{0x38, 0x31, 0x37, 0x2C, 0x37,
+                                                  0x2F, 0x28, 0x27, 0xE7};
+  std::vector<std::byte> bytes(kCount * kWidth);
+  auto out = std::span(bytes);
+  std::ranges::copy(std::as_bytes(std::span(kKnife)),
+                    out.subspan(kWidth).begin());
+  if (collision) {
+    std::ranges::copy(std::as_bytes(std::span(kKnife)),
+                      out.subspan(2 * kWidth).begin());
+  } else {
+    std::ranges::copy(std::as_bytes(std::span(kDirk)),
+                      out.subspan(2 * kWidth).begin());
+  }
+  std::ranges::copy(std::as_bytes(std::span(kBuckler)),
+                    out.subspan(kShield * kWidth).begin());
+  std::ranges::copy(std::as_bytes(std::span(kUntitled)),
+                    out.subspan(3 * kWidth).begin());
+  return {.path = "MENU/ITEMNAME.BIN", .bytes = std::move(bytes)};
+}
+
+content::WorkshopRecipeTable SmallRecipe(content::WorkshopKind kind) {
+  auto table = VS::test_support::FullWorkshopTable(kind);
+  if (kind == content::WorkshopKind::kBlade) {
+    table.blades.resize(3);
+    table.blades.at(1).stats.strength = 17;
+    table.pairs = {
+        {.first = "blade-001", .second = "blade-002", .result = "blade-001"},
+        {.first = "blade-002", .second = "blade-001", .result = "blade-002"}};
+  } else {
+    table.pieces.resize(2);
+    table.pieces.at(1).category = 1;
+  }
+  return table;
+}
+
+content::WorkshopRecipeTable ReadRecipe(const fs::path& root,
+                                        content::WorkshopKind kind) {
+  content::WorkshopTexts texts;
+  for (const auto part : content::kWorkshopTableParts) {
+    texts.at(static_cast<std::size_t>(part)) =
+        Read(root, content::WorkshopTablePath(kind, part));
+  }
+  return Required(content::ParseWorkshopTables(kind, texts));
+}
+
+content::WorkshopRecipeTable WithUntitledTail() {
+  auto table = SmallRecipe(content::WorkshopKind::kBlade);
+  content::BladeResult unused{};
+  unused.id = "blade-003";
+  unused.legacy_id = 3;
+  unused.damage_type = 1;
+  unused.cost_type = 2;
+  unused.attack_shape = 1;
+  table.blades.push_back(unused);
+  return table;
 }
 
 }  // namespace
@@ -370,4 +437,212 @@ TEST_CASE("A malformed existing annotation is refused without replacing it",
   CHECK(labeled.error().find("display_name must be a string") !=
         std::string::npos);
   CHECK(Read(root.Root(), kModelPath) == malformed);
+}
+
+TEST_CASE("Semantic recipe IDs preserve directed combinations and every byte",
+          "[workshop-authoring]") {
+  ModelRoot root({RecipeNames()});
+  const auto before = SmallRecipe(content::WorkshopKind::kBlade);
+  WriteWorkshop(root.Root(), before);
+  const auto report = Required(extract::UpgradeWorkshopAuthoring(root.Root()));
+  CHECK(report.renamed == 3);
+  CHECK(report.references == 6);
+  const auto after = ReadRecipe(root.Root(), before.kind);
+  CHECK(after.blades.at(1).id == "blade.knife");
+  CHECK(after.blades.at(2).id == "blade.dirk");
+  CHECK(after.pairs.at(0).result == "blade.knife");
+  CHECK(after.pairs.at(1).result == "blade.dirk");
+  CHECK(Required(extract::EncodeSydRecipes(after)) ==
+        Required(extract::EncodeSydRecipes(before)));
+  CHECK(Required(extract::UpgradeWorkshopAuthoring(root.Root())).written == 0);
+}
+
+TEST_CASE("Recipe migration preserves custom identities labels and stat edits",
+          "[workshop-authoring]") {
+  ModelRoot root({RecipeNames()});
+  auto before = SmallRecipe(content::WorkshopKind::kBlade);
+  before.blades.at(1).id = "blade.owner-choice";
+  before.pairs.clear();
+  WriteWorkshop(root.Root(), before);
+  REQUIRE(extract::LabelNativeAssets(root.Root()));
+  const std::string path = content::WorkshopTablePath(
+      before.kind, content::WorkshopTablePart::kResults);
+  EditCell(root.Root(), "display_name", "Owner's caption", path);
+  REQUIRE(extract::UpgradeWorkshopAuthoring(root.Root()));
+  const auto after = ReadRecipe(root.Root(), before.kind);
+  CHECK(after.blades.at(1).id == "blade.owner-choice");
+  CHECK(after.blades.at(1).stats == before.blades.at(1).stats);
+  CHECK(Read(root.Root(), path).find("Owner's caption") != std::string::npos);
+}
+
+TEST_CASE("Semantic ID collisions fail before any recipe file changes",
+          "[workshop-authoring]") {
+  ModelRoot root({RecipeNames(true)});
+  const auto table = SmallRecipe(content::WorkshopKind::kBlade);
+  WriteWorkshop(root.Root(), table);
+  const std::string path = content::WorkshopTablePath(
+      table.kind, content::WorkshopTablePart::kResults);
+  const auto before = Read(root.Root(), path);
+  const auto migrated = extract::UpgradeWorkshopAuthoring(root.Root());
+  REQUIRE_FALSE(migrated.has_value());
+  CHECK(migrated.error().find("collides") != std::string::npos);
+  CHECK(Read(root.Root(), path) == before);
+}
+
+TEST_CASE("Legacy recipe aliases normalize without duplicating directed pairs",
+          "[workshop-authoring]") {
+  auto table = SmallRecipe(content::WorkshopKind::kBlade);
+  table.blades.at(0).id = "blade.none";
+  table.blades.at(1).id = "blade.knife";
+  table.blades.at(2).id = "blade.dirk";
+  const auto parsed = Required(content::ParseWorkshopTables(
+      table.kind, content::FormatWorkshopTables(table)));
+  CHECK(parsed.pairs.at(0).first == "blade.knife");
+  CHECK(parsed.pairs.at(1).first == "blade.dirk");
+  table.pairs.push_back({.first = "blade.knife",
+                         .second = "blade.dirk",
+                         .result = "blade.knife"});
+  const auto duplicate = content::ParseWorkshopTables(
+      table.kind, content::FormatWorkshopTables(table));
+  REQUIRE_FALSE(duplicate.has_value());
+  CHECK(duplicate.error().find("duplicate ingredients") != std::string::npos);
+}
+
+TEST_CASE("Known categories disambiguate names without numeric ID suffixes",
+          "[workshop-authoring]") {
+  ModelRoot root({RecipeNames(true)});
+  auto table = SmallRecipe(content::WorkshopKind::kBlade);
+  table.blades.at(1).category = 4;
+  table.blades.at(2).category = 7;
+  WriteWorkshop(root.Root(), table);
+  REQUIRE(extract::UpgradeWorkshopAuthoring(root.Root()));
+  const auto named = ReadRecipe(root.Root(), table.kind);
+  CHECK(named.blades.at(1).id == "blade.knife.axe-mace");
+  CHECK(named.blades.at(2).id == "blade.knife.heavy-mace");
+  CHECK(Required(extract::EncodeSydRecipes(named)) ==
+        Required(extract::EncodeSydRecipes(table)));
+}
+
+TEST_CASE(
+    "Unreferenced stock untitled slots move to lossless import provenance",
+    "[workshop-authoring]") {
+  ModelRoot root({RecipeNames()});
+  const auto table = WithUntitledTail();
+  WriteWorkshop(root.Root(), table);
+  const auto report = Required(extract::UpgradeWorkshopAuthoring(root.Root()));
+  CHECK(report.quarantined == 1);
+  const auto named = ReadRecipe(root.Root(), table.kind);
+  CHECK(named.blades.size() == 3);
+  const auto imported =
+      ReadJson(root.Root(), extract::WorkshopImportPath(table.kind));
+  CHECK(imported.at("unused_results").at(0).at("legacy_id") == 3);
+  CHECK(Required(extract::EncodeWorkshopAuthoring(root.Root(), named)) ==
+        Required(extract::EncodeSydRecipes(table)));
+  CHECK(Required(extract::UpgradeWorkshopAuthoring(root.Root())).written == 0);
+}
+
+TEST_CASE("Edited or referenced untitled records require an explicit identity",
+          "[workshop-authoring]") {
+  const bool referenced = GENERATE(false, true);
+  ModelRoot root({RecipeNames()});
+  auto table = WithUntitledTail();
+  if (referenced) {
+    table.pairs.push_back(
+        {.first = "blade-001", .second = "blade-001", .result = "blade-003"});
+  } else {
+    table.blades.back().stats.strength = 1;
+  }
+  WriteWorkshop(root.Root(), table);
+  const auto refused = extract::UpgradeWorkshopAuthoring(root.Root());
+  REQUIRE_FALSE(refused.has_value());
+  CHECK(refused.error().find("needs an explicit semantic id") !=
+        std::string::npos);
+  CHECK_FALSE(
+      fs::exists(root.Root() / extract::WorkshopImportPath(table.kind)));
+  table.blades.back().id = "blade.experimental";
+  if (referenced) table.pairs.back().result = "blade.experimental";
+  WriteWorkshop(root.Root(), table);
+  CHECK(Required(extract::UpgradeWorkshopAuthoring(root.Root())).quarantined ==
+        0);
+}
+
+TEST_CASE("Shared shield identities cannot hide divergent armor-table copies",
+          "[workshop-authoring]") {
+  ModelRoot root({RecipeNames()});
+  const auto shield = SmallRecipe(content::WorkshopKind::kShield);
+  auto armor = SmallRecipe(content::WorkshopKind::kArmor);
+  armor.pieces.at(1).stats.strength = 1;
+  WriteWorkshop(root.Root(), shield);
+  WriteWorkshop(root.Root(), armor);
+  const auto refused = extract::UpgradeWorkshopAuthoring(root.Root());
+  REQUIRE_FALSE(refused.has_value());
+  CHECK(refused.error().find("differs between recipe tables") !=
+        std::string::npos);
+  armor.pieces.at(1).id = "shield.buckler.strong";
+  WriteWorkshop(root.Root(), armor);
+  REQUIRE(extract::UpgradeWorkshopAuthoring(root.Root()));
+  CHECK(ReadRecipe(root.Root(), shield.kind).pieces.at(1).id ==
+        "shield.buckler");
+  CHECK(ReadRecipe(root.Root(), armor.kind).pieces.at(1).id ==
+        "shield.buckler.strong");
+}
+
+TEST_CASE("Shield-only recipe fields stay exact when armor shares the identity",
+          "[workshop-authoring]") {
+  ModelRoot root({RecipeNames()});
+  auto shield = SmallRecipe(content::WorkshopKind::kShield);
+  const auto armor = SmallRecipe(content::WorkshopKind::kArmor);
+  shield.pieces.at(1).gem_slots = 3;
+  shield.pieces.at(1).model = 7;
+  WriteWorkshop(root.Root(), shield);
+  WriteWorkshop(root.Root(), armor);
+  REQUIRE(extract::UpgradeWorkshopAuthoring(root.Root()));
+  const auto named_shield = ReadRecipe(root.Root(), shield.kind);
+  const auto named_armor = ReadRecipe(root.Root(), armor.kind);
+  CHECK(named_shield.pieces.at(1).id == named_armor.pieces.at(1).id);
+  CHECK(Required(extract::EncodeSydRecipes(named_shield)) ==
+        Required(extract::EncodeSydRecipes(shield)));
+  CHECK(Required(extract::EncodeSydRecipes(named_armor)) ==
+        Required(extract::EncodeSydRecipes(armor)));
+}
+
+TEST_CASE("Incremental recipe conversion keeps authored IDs and import records",
+          "[workshop-authoring]") {
+  constexpr std::size_t kNameWidth = 24;
+  auto names = RecipeNames();
+  auto table =
+      VS::test_support::FullWorkshopTable(content::WorkshopKind::kBlade);
+  for (auto& blade : table.blades) {
+    blade.id = "blade.fixture-" + std::to_string(blade.legacy_id);
+  }
+  auto placeholder = WithUntitledTail().blades.back();
+  placeholder.legacy_id = static_cast<std::uint32_t>(table.blades.size() - 1);
+  placeholder.id = content::LegacyWorkshopResultId(
+      content::LayoutOf(table.kind), placeholder.legacy_id);
+  table.blades.back() = placeholder;
+  std::ranges::copy(std::span(names.bytes).subspan(3 * kNameWidth, kNameWidth),
+                    std::span(names.bytes)
+                        .subspan(placeholder.legacy_id * kNameWidth)
+                        .begin());
+  const extract::SourceFile source{
+      .path = "MENU/BLADE.SYD",
+      .bytes = Required(extract::EncodeSydRecipes(table))};
+  ModelRoot root({names, source});
+  WriteWorkshop(root.Root(), table);
+  const auto converted = Required(extract::ConvertSydRecipes(source));
+  content::ConversionManifest manifest;
+  manifest.converters[std::string(content::kSydRecipeConverterName)] =
+      content::kSydRecipeConverterVersion;
+  manifest.outputs.push_back(converted.output);
+  REQUIRE(extract::WriteConversionManifest(root.Root(), manifest));
+  CHECK(Required(extract::UpgradeWorkshopAuthoring(root.Root())).quarantined ==
+        1);
+  auto authored = ReadRecipe(root.Root(), table.kind);
+  authored.blades.at(1).stats.strength = 42;
+  WriteWorkshop(root.Root(), authored);
+  CHECK(Required(extract::ConvertDiscTables(root.Root(), false)).unchanged ==
+        1);
+  CHECK(ReadRecipe(root.Root(), table.kind).blades.at(1).stats.strength == 42);
+  REQUIRE(fs::remove(root.Root() / extract::WorkshopImportPath(table.kind)));
+  CHECK_FALSE(extract::ConvertDiscTables(root.Root(), false));
 }

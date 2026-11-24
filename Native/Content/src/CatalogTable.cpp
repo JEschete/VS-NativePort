@@ -380,6 +380,12 @@ std::string FormatTableSchema(const TableSpec& spec) {
   schema["table"] = std::string(spec.name);
   schema["description"] = std::string(spec.description);
   schema["key"] = std::move(key);
+  if (!spec.legacy_alias_prefix.empty()) {
+    schema["legacy_alias"] = {
+        {"column", "legacy_id"},
+        {"pattern", std::string(spec.legacy_alias_prefix) + "-{legacy_id:03}"},
+        {"role", "compatibility only; write current semantic ids"}};
+  }
   schema["columns"] = std::move(columns);
   return FormatJsonText(schema) + "\n";
 }

@@ -504,6 +504,7 @@
     <ClCompile Include="..\Tools\Extract\src\TimImage.cpp" />
     <ClCompile Include="..\Tools\Extract\src\WepModelConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\WorkshopRecipeConversion.cpp" />
+    <ClCompile Include="..\Tools\Extract\src\WorkshopAuthoring.cpp" />
     <ClCompile Include="..\Tools\Extract\src\ZndConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\ZudConversion.cpp" />
     <ClCompile Include="..\Tools\Launcher\src\Setup.cpp" />

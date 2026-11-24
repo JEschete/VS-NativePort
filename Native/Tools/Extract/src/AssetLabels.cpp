@@ -245,20 +245,9 @@ Check LoadItemNames(const fs::path& root, const RunStart& run,
       run.entries.end()) {
     return {};
   }
-  auto source = ReadSource(root, kItemNames);
-  if (!source) return std::unexpected(source.error());
-  if (source->bytes.size() % kNameBytes != 0) {
-    return std::unexpected("MENU/ITEMNAME.BIN: incomplete 24-byte name");
-  }
-  for (std::size_t at = 0; at < source->bytes.size(); at += kNameBytes) {
-    auto name =
-        DecodeAssetName(std::span(source->bytes).subspan(at, kNameBytes));
-    if (!name) {
-      return std::unexpected(std::format("{} item {}: {}", kItemNames,
-                                         at / kNameBytes, name.error()));
-    }
-    names.items.push_back(std::move(*name));
-  }
+  auto loaded = ReadItemDisplayNames(root);
+  if (!loaded) return std::unexpected(loaded.error());
+  names.items = std::move(*loaded);
   return {};
 }
 
@@ -647,6 +636,7 @@ std::map<std::string, std::string> StructuredFiles(
   std::map<std::string, std::string> files;
   for (const auto& output : manifest.outputs) {
     for (const std::string& file : output.files) {
+      if (file.starts_with("catalogs/menu/import/")) continue;
       if ((file.ends_with(".json") && !file.ends_with(".schema.json")) ||
           file.ends_with(".gltf")) {
         files.try_emplace(file, output.source);
@@ -688,6 +678,26 @@ std::expected<std::string, std::string> DecodeAssetName(
   const auto first = text.find_first_not_of(' ');
   if (first == std::string::npos) return std::string{};
   return text.substr(first, text.find_last_not_of(' ') - first + 1);
+}
+
+std::expected<std::vector<std::string>, std::string> ReadItemDisplayNames(
+    const fs::path& root) {
+  auto source = ReadSource(root, kItemNames);
+  if (!source) return std::unexpected(source.error());
+  if (source->bytes.size() % kNameBytes != 0) {
+    return std::unexpected("MENU/ITEMNAME.BIN: incomplete 24-byte name");
+  }
+  std::vector<std::string> names;
+  for (std::size_t at = 0; at < source->bytes.size(); at += kNameBytes) {
+    auto name =
+        DecodeAssetName(std::span(source->bytes).subspan(at, kNameBytes));
+    if (!name) {
+      return std::unexpected(std::format("{} item {}: {}", kItemNames,
+                                         at / kNameBytes, name.error()));
+    }
+    names.push_back(std::move(*name));
+  }
+  return names;
 }
 
 std::expected<AssetLabelReport, std::string> LabelNativeAssets(

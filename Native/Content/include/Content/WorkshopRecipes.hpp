@@ -67,6 +67,10 @@ struct WorkshopLayout {
 };
 [[nodiscard]] const WorkshopLayout& LayoutOf(WorkshopKind kind);
 
+// Compatibility alias for a result's original index, not its authoring id.
+[[nodiscard]] std::string LegacyWorkshopResultId(const WorkshopLayout& layout,
+                                                 std::size_t legacy_id);
+
 struct WorkshopStats {
   std::int8_t strength = 0;
   std::int8_t intelligence = 0;
@@ -162,6 +166,8 @@ using WorkshopTexts = std::array<std::string, kWorkshopTablePartCount>;
 // legacy ids must fit the pair matrix and results must not be legacy id 0
 // (which reads as no combination); legacy ids run from 0 without gaps. Errors
 // name the file, line and column.
+// Original <kind>-NNN aliases resolve through legacy_id and normalize to the
+// current result id. Ambiguous aliases and duplicate resolved pairs fail.
 [[nodiscard]] std::expected<WorkshopRecipeTable, std::string>
 ParseWorkshopTables(WorkshopKind kind, const WorkshopTexts& texts);
 
@@ -184,6 +190,11 @@ struct WorkshopRecipeCatalog {
     return tables.at(static_cast<std::size_t>(kind));
   }
 };
+// Shared ids must agree on the fields both recipe paths consume. Armor does
+// not consume its imported model/gem-slot bytes; those are preserved
+// separately.
+[[nodiscard]] std::expected<void, std::string> CheckSharedWorkshopResults(
+    const WorkshopRecipeCatalog& catalog);
 // Reads and checks every kind's tables under `root`.
 [[nodiscard]] std::expected<WorkshopRecipeCatalog, std::string>
 LoadWorkshopRecipes(const std::filesystem::path& root);

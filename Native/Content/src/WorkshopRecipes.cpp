@@ -9,6 +9,7 @@
 #include <fstream>
 #include <iterator>
 #include <optional>
+#include <set>
 #include <span>
 #include <string>
 #include <unordered_map>
@@ -116,7 +117,7 @@ constexpr std::string_view kBladeResults = "combination-blade-results";
 constexpr std::string_view kShieldResults = "combination-shield-results";
 constexpr std::string_view kArmorResults = "combination-armor-results";
 
-constexpr std::string_view kIdText = "The result's id; pairs name it.";
+constexpr std::string_view kIdText = "Semantic result id; pairs name it.";
 constexpr std::string_view kLegacyIdText{
     "The original record index: the combined item's sub id (and, for blades, "
     "its id; shields and armor add 126). Runs from 0 without gaps.",
@@ -212,7 +213,12 @@ constexpr std::array kPieceResultColumns{
 };
 static_assert(kPieceResultColumns.size() == kPieceRawByte7 + 1);
 
-enum PairColumn : std::uint8_t { kPairFirst, kPairSecond, kPairResult };
+enum PairColumn : std::uint8_t {
+  kPairFirst,
+  kPairSecond,
+  kPairResult,
+  kPairColumnCount
+};
 
 constexpr std::string_view kFirstText = "The first ingredient's result id.";
 constexpr std::string_view kSecondText = "The second ingredient's result id.";
@@ -308,7 +314,8 @@ constexpr std::array<KindSpecs, kWorkshopKindCount> kSpecs{{
         {.name = kBladeResults,
          .description = kResultsText,
          .columns = kBladeResultColumns,
-         .key = kResultKey},
+         .key = kResultKey,
+         .legacy_alias_prefix = kLayouts[0].name},
         {.name = "combination-blade-pairs",
          .description = kPairsText,
          .columns = kBladePairColumns,
@@ -322,7 +329,8 @@ constexpr std::array<KindSpecs, kWorkshopKindCount> kSpecs{{
         {.name = kShieldResults,
          .description = kResultsText,
          .columns = kPieceResultColumns,
-         .key = kResultKey},
+         .key = kResultKey,
+         .legacy_alias_prefix = kLayouts[1].name},
         {.name = "combination-shield-pairs",
          .description = kPairsText,
          .columns = kShieldPairColumns,
@@ -336,7 +344,8 @@ constexpr std::array<KindSpecs, kWorkshopKindCount> kSpecs{{
         {.name = kArmorResults,
          .description = kResultsText,
          .columns = kPieceResultColumns,
-         .key = kResultKey},
+         .key = kResultKey,
+         .legacy_alias_prefix = kLayouts[2].name},
         {.name = "combination-armor-pairs",
          .description = kPairsText,
          .columns = kArmorPairColumns,
@@ -465,8 +474,8 @@ using ResultIds = std::unordered_map<std::string, std::uint32_t>;
 // Records each result row's legacy id, which must be unique and, over the
 // table, run from 0 without gaps.
 std::expected<ResultIds, std::string> ResultIdsOf(
-    const std::vector<TableRow>& rows, std::size_t legacy_column,
-    std::string_view file) {
+    const WorkshopLayout& layout, const std::vector<TableRow>& rows,
+    std::size_t legacy_column, std::string_view file) {
   ResultIds ids;
   std::unordered_map<std::uint32_t, std::size_t> lines;
   for (const TableRow& row : rows) {
@@ -484,6 +493,15 @@ std::expected<ResultIds, std::string> ResultIdsOf(
       return std::unexpected(std::format(
           "{}: no row has legacy_id {}; legacy ids run from 0 without gaps",
           file, legacy));
+    }
+  }
+  for (std::uint32_t legacy = 0; legacy < rows.size(); ++legacy) {
+    const std::string alias = LegacyWorkshopResultId(layout, legacy);
+    const auto [found, added] = ids.emplace(alias, legacy);
+    if (!added && found->second != legacy) {
+      return std::unexpected(
+          std::format("{}: legacy alias '{}' conflicts with another result id",
+                      file, alias));
     }
   }
   return ids;
@@ -524,30 +542,39 @@ std::optional<std::string> IngredientProblem(const WorkshopLayout& layout,
 std::expected<std::vector<WorkshopPair>, std::string> PairsOf(
     const WorkshopLayout& layout, const TableSpec& spec,
     const std::vector<TableRow>& rows, const ResultIds& ids,
-    std::string_view file) {
+    const std::vector<TableRow>& results, std::string_view file) {
   std::vector<WorkshopPair> pairs;
   pairs.reserve(rows.size());
+  std::set<std::pair<std::uint32_t, std::uint32_t>> ingredients;
   for (const TableRow& row : rows) {
-    for (const std::size_t column : {kPairFirst, kPairSecond}) {
+    std::array<std::uint32_t, kPairColumnCount> resolved{};
+    for (const std::size_t column : {kPairFirst, kPairSecond, kPairResult}) {
       auto legacy = Resolve(ids, spec, row, column, file);
       if (!legacy) return std::unexpected(legacy.error());
-      if (auto problem =
-              IngredientProblem(layout, row.cells[column], *legacy)) {
-        return std::unexpected(
-            CellError(file, row.line, spec.columns[column].name, *problem));
+      resolved.at(column) = *legacy;
+      if (column != kPairResult) {
+        if (auto problem =
+                IngredientProblem(layout, row.cells[column], *legacy)) {
+          return std::unexpected(
+              CellError(file, row.line, spec.columns[column].name, *problem));
+        }
       }
     }
-    auto result = Resolve(ids, spec, row, kPairResult, file);
-    if (!result) return std::unexpected(result.error());
-    if (*result == 0) {
+    if (resolved[kPairResult] == 0) {
       return std::unexpected(CellError(
           file, row.line, "result",
           std::format("'{}' has legacy_id 0, which reads as no combination",
                       row.cells[kPairResult])));
     }
-    pairs.push_back({.first = row.cells[kPairFirst],
-                     .second = row.cells[kPairSecond],
-                     .result = row.cells[kPairResult]});
+    if (!ingredients.emplace(resolved[kPairFirst], resolved[kPairSecond])
+             .second) {
+      return std::unexpected(
+          CellError(file, row.line, "first",
+                    "duplicate ingredients after legacy alias resolution"));
+    }
+    pairs.push_back({.first = results.at(resolved[kPairFirst]).cells.at(0),
+                     .second = results.at(resolved[kPairSecond]).cells.at(0),
+                     .result = results.at(resolved[kPairResult]).cells.at(0)});
   }
   return pairs;
 }
@@ -682,6 +709,11 @@ const TableSpec& WorkshopTableSpec(WorkshopKind kind, WorkshopTablePart part) {
   return kSpecs.at(IndexOf(kind)).at(IndexOf(part));
 }
 
+std::string LegacyWorkshopResultId(const WorkshopLayout& layout,
+                                   std::size_t legacy_id) {
+  return std::format("{}-{:03}", layout.name, legacy_id);
+}
+
 std::string WorkshopTablePath(WorkshopKind kind, WorkshopTablePart part) {
   return std::format("{}/{}{}", kWorkshopTableDirectory,
                      WorkshopTableSpec(kind, part).name, kCsvSuffix);
@@ -734,7 +766,7 @@ std::expected<WorkshopRecipeTable, std::string> ParseWorkshopTables(
   std::ranges::sort(results, {}, [legacy_column](const TableRow& row) {
     return row.values[legacy_column];
   });
-  auto ids = ResultIdsOf(results, legacy_column,
+  auto ids = ResultIdsOf(layout, results, legacy_column,
                          WorkshopTablePath(kind, WorkshopTablePart::kResults));
   if (!ids) return std::unexpected(ids.error());
   WorkshopRecipeTable table{};
@@ -748,7 +780,7 @@ std::expected<WorkshopRecipeTable, std::string> ParseWorkshopTables(
   }
   auto pairs =
       PairsOf(layout, WorkshopTableSpec(kind, WorkshopTablePart::kPairs),
-              rows[IndexOf(WorkshopTablePart::kPairs)], *ids,
+              rows[IndexOf(WorkshopTablePart::kPairs)], *ids, results,
               WorkshopTablePath(kind, WorkshopTablePart::kPairs));
   if (!pairs) return std::unexpected(pairs.error());
   table.pairs = std::move(*pairs);
@@ -791,6 +823,25 @@ std::expected<WorkshopMatrices, std::string> DenseWorkshopTables(
                           .materials = std::move(*materials)};
 }
 
+std::expected<void, std::string> CheckSharedWorkshopResults(
+    const WorkshopRecipeCatalog& catalog) {
+  std::unordered_map<std::string, const PieceResult*> definitions;
+  for (const auto& table : catalog.tables) {
+    for (const auto& piece : table.pieces) {
+      const auto [found, added] = definitions.emplace(piece.id, &piece);
+      if (!added && (found->second->legacy_id != piece.legacy_id ||
+                     found->second->category != piece.category ||
+                     found->second->stats != piece.stats)) {
+        return std::unexpected(std::format(
+            "shared result '{}' differs between recipe tables; reconcile "
+            "the definition or assign an explicit variant id",
+            piece.id));
+      }
+    }
+  }
+  return {};
+}
+
 std::expected<WorkshopRecipeCatalog, std::string> LoadWorkshopRecipes(
     const fs::path& root) {
   WorkshopRecipeCatalog catalog;
@@ -805,6 +856,9 @@ std::expected<WorkshopRecipeCatalog, std::string> LoadWorkshopRecipes(
     auto table = ParseWorkshopTables(kind, texts);
     if (!table) return std::unexpected(table.error());
     catalog.tables.at(IndexOf(kind)) = std::move(*table);
+  }
+  if (auto shared = CheckSharedWorkshopResults(catalog); !shared) {
+    return std::unexpected(shared.error());
   }
   return catalog;
 }

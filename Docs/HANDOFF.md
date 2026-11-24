@@ -1,5 +1,62 @@
 # Current Handoff
 
+## Semantic recipe identity slice (#499/#520), 2026-11-23
+
+Base revision: `a144ae986`, on `main`. This is the first section 4 identity
+migration, not completion of the full authoring contract.
+
+- `VS.Extract authoring <datadir>` now migrates generated recipe IDs and all
+  directed references; `tables` and full `extract` also run it. Existing custom
+  identities, labels and value edits survive. Schemas document legacy aliases,
+  which readers normalize through `legacy_id`; ambiguous aliases and duplicate
+  resolved directed pairs are errors.
+- Real-data inspection found two Footman's Maces: categories 4 (Axe & Mace) and
+  7 (Heavy Mace). The owner approved category-qualified IDs. They are now
+  `blade.footmans-mace.axe-mace` and `blade.footmans-mace.heavy-mace`.
+- The owner also approved quarantining the five stock, unreferenced `untitled`
+  tail rows. They are no longer item definitions; their exact record bytes are
+  in `catalogs/menu/import/combination-blade.json`, tracked in the conversion
+  manifest. Only offline preservation export reads those bytes. Edited,
+  referenced or explicitly named records are not silently discarded.
+- The original shield/armor copies differ in gem slots for 15 records.
+  `combineArmor` does not read model/gem-slot bytes, while `combineShields` does
+  (upstream `src/MENU/MENUC.PRG/168.c:5017-5112`, native `Combination.cpp`).
+  Their context-specific bytes remain exact; shared category/stats/legacy
+  identity are checked, rather than forcing unequal records to be identical.
+- Normal incremental table conversion retains the import file and authored
+  edits. Missing tracked import provenance is refused unless the user explicitly
+  requests source reconversion with `--force`.
+
+**Evidence on the uncommitted slice based on `a144ae986`:**
+- Full Release and Debug solution builds passed, `VS_JOBS=4`, `/m:2`, x64.
+- Release final selection
+  `[workshop-authoring],[asset-labels],[content-tables][workshop],[asset-catalog]`:
+  **58 cases / 7,814 assertions passed**.
+- Debug identity/recipe selection: **20 cases / 464 assertions passed**.
+  An earlier Debug schema comparison used the old committed description; the
+  schemas were refreshed from the native formatter and that selection passed.
+- Both Debug production replays match their unchanged baselines after migration:
+  `silver_wolves` 2,400 frames and `first_lever_room` 900 frames.
+- Actual data: **189 semantic result IDs, 37,356 directed references**, and
+  **five archived records**. Every retained result value/label and material table
+  is unchanged; all directed pairs resolve to the same original result IDs.
+  Archived bytes equal their exact source records. A repeated `tables` run
+  converts **0** sources, keeps **3** recipe filesets and **256** zones, removes
+  **0** files, and changes **0** IDs/references/labels.
+- Scoped tidy and complete changed-file quality: **0 new findings**.
+  Generated projects are stable on their second generation.
+- Logs: `build\issue-520-authoring-*.log`, `build\issue-520-semantic-*.log`,
+  `build\issue-520-import-*.log`; before-state data stays local under
+  `build\issue-520-authoring-before`.
+
+**Still open:** machine-readable named enum/flag domains, meaningful numbered
+column families, authoritative readable text/markup, removal of remaining
+import-only fields from authoring rows, and one-copy shared item definitions.
+The field currently called `cost_type` needs its actual consumers traced; do
+not equate it with `ActionDefinition::type` just because another intermediate
+field is named `action_type`. Other asset families retain their section 7.2
+readability and original runtime/preservation gates. #499/#520 stay open.
+
 ## Readable-label preparation and semantic authoring decision (#520), 2026-11-23
 
 Base revision: `242ae3e2b` on `main`. The owner explicitly replaced the PR
