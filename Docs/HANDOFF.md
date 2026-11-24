@@ -2,10 +2,16 @@
 
 ## Native bestiary adoption (#499/#500), 2026-11-24
 
-Local work on `main`, based on `0c92bed8e8155aae04ae35a88dcbf2774d0113a7`.
-The implementation, tests, schemas, generated projects and bookkeeping are
-dirty; no commit or push was made for this slice. Parent publication
-and exact-revision CI remain gates. Default-root integration is recorded below.
+Local verification was based on `0c92bed8e8155aae04ae35a88dcbf2774d0113a7`
+with implementation, tests, schemas, generated projects and bookkeeping dirty.
+The integrated source/default-data milestone is published as
+`157c5aeafca9e3633a7fee0ece694e11f77c700a`. CI `45454036362` passed source
+quality but exposed one obsolete encounter-source assertion requiring the
+retired MON request/fallback. Its scoped replacement checks native catalog
+loading, explicit refusal and owned session publication while forbidding the
+old reader. The single affected Python test, syntax and quality checks pass;
+exact-revision CI for the repair remains pending. No runtime fallback or
+regression baseline was restored.
 
 ### Adopted boundary
 
@@ -203,8 +209,9 @@ Class/control/number labels, surrounding Gazette UI and the page/packet
 backend are not claimed fully migrated. Native font layout is readable,
 but no variable-font palette/pixel parity or matched PS1 comparison is claimed.
 The default `Native\data` root is integrated and its content accounting is
-reconciled. The source milestone still needs scoped publication and
-exact-revision CI before its final issue evidence is posted.
+reconciled. The published source milestone still needs successful
+exact-revision CI after the obsolete source-guard repair before final issue
+evidence is posted.
 
 ## Native file-picker text adoption (#54/#500), 2026-11-24
 

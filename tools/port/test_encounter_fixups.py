@@ -3828,13 +3828,13 @@ int func_800F9800(void) {
         gazette_live = "".join(
             (root / r"Native\Game\src\Menu\Score\GazetteTerminalLive.cpp").read_text(encoding="utf-8").split()
         )
-        self.assertIn(
-            "if(request!=nullptr){monBinCdQueueSlot=request;"
-            "Content::EnqueueLiveDiscRequest(request,data);}"
-            "else{request=Content::CompleteLiveRefusedDiscRequest(&kMonBinFile,data);"
-            "monBinCdQueueSlot=request;}",
-            gazette_live,
-        )
+        # Gazette owns a native catalog now; restoring its MON fallback would regress adoption.
+        self.assertIn("autodefinitions=Content::LoadBestiary(*store->CatalogTables());", gazette_live)
+        self.assertIn("if(!definitions){Refuse(definitions.error());returnfalse;}", gazette_live)
+        self.assertIn("EnemiesSession()=std::move(session);", gazette_live)
+        for retired in ("monBinCdQueueSlot", "kMonBinFile", "EnqueueLiveDiscRequest(",
+                        "CompleteLiveRefusedDiscRequest(", "DecodeBestiary(", "ReconstructBestiary("):
+            self.assertNotIn(retired, gazette_live)
         background_tests = (root / r"Native\Tests\src\FieldBackgroundTests.cpp").read_text(encoding="utf-8")
         self.assertIn("Tiled background rejects invalid native data before reserving pages", background_tests)
         self.assertIn(
