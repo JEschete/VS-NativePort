@@ -4,10 +4,11 @@
 
 Based on `7fef62342425275888c3bb7007a29f3e3d7e3d35`, with the learning
 implementation, tests, schemas, generated projects and bookkeeping dirty.
-That starting revision's metadata CI `45458128060` is green; the earlier
-bestiary fixing-revision CI remains `45455719702`. **These are not CI results
-for the uncommitted learning changes.** Publication and exact-revision CI are
-the parent task's responsibility. No commit or push was made by this task.
+That historical dirty-state evidence preceded publication as
+`0b4082ef42ae0d123fec0ac5d8f987895008d7ed`.
+[Exact-revision CI 45477093500](https://github.com/JEschete/VS-NativePort/actions/runs/45477093500)
+passed and final evidence is posted on #499. The independent #526 fix and its
+CI/closure are recorded below; neither milestone closes the wider catalog work.
 
 ### Adopted boundary
 
@@ -167,8 +168,9 @@ identities, mutable progress width and broader gameplay/fidelity acceptance
 are not completed here. #526's scoped repair is published, CI-verified and closed.
 No new combat acquisition or matched PS1 action-damage
 claim is made. Proof roots contain read-only asset junctions: do not recursively
-clean them. Parent next step: publish the coherent scoped changes, verify CI,
-post evidence and reconcile #526 while retaining the broader open issues.
+clean them. The learning milestone is published and CI-verified, and #526 is
+closed. The next active catalog slice is status-rule/shared-timer adoption,
+with unresolved meanings requiring source evidence rather than invented labels.
 
 ## Native bestiary adoption (#499/#500), 2026-11-24
 
