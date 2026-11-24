@@ -808,7 +808,7 @@ A `MAP\ZONE*.ZND` is what the room loader reads when the zone changes (`Content/
 - **Enemy section:** a count, that many ZUD (sector, read size) entries, then that many 0x464-byte templates (`vs_CharInitData`, `Actors/CharacterInit.hpp`).
 - **Texture section:** either 32 zero bytes, or four table sizes of which only the first is used, followed by that table: a count and that many TIMs, each after its byte size.
 
-`VS.Extract tables <datadir>` (and `extract`) converts all 256 zones with converter `znd-tables` version 1 (`Extract/ZndConversion.hpp`, `Content/ZoneTables.hpp`). `tables` runs after `models`, because the zones name the enemy archetypes (§6.2.5). It writes six CSV tables, each with a schema committed in `Native\Content\schemas\catalogs\` and written beside it (a test checks that the two match):
+`VS.Extract tables <datadir>` (and `extract`) converts all 256 zones with converter `znd-tables` version 2 (`Extract/ZndConversion.hpp`, `Content/ZoneTables.hpp`). `tables` runs after `models`, because the zones name the enemy archetypes (§6.2.5). It writes six CSV tables, each with a schema committed in `Native\Content\schemas\catalogs\` and written beside it (a test checks that the two match):
 - `catalogs\world\zones.csv`: `id` (`zone.map.zone009`), `music_id` and `room_slots` (the room table's length, used or not).
 - `catalogs\world\zone-rooms.csv`: one row per used slot, naming the room by id (`room.map.map009`).
 - `catalogs\world\zone-textures.csv`: the texture table's images by id, in upload order.
@@ -822,6 +822,36 @@ A `MAP\ZONE*.ZND` is what the room loader reads when the zone changes (`Content/
 All six tables receive early informational `display_name` columns through
 §1.2. In particular, `zone-enemies.csv` shows the decoded enemy name while its
 `name` and `weapon_name` hex fields continue to preserve every source byte.
+
+**Named fields and domains (version 2).**
+- `enemy_class` uses `human`, `beast`, `undead`, `phantom`, `dragon`, `evil`.
+  Weapon, shield and limb-armor material fields use the shared named material
+  domain (`none`, `wood` through `damascus`).
+- Physical-type columns name `none`, `blunt`, `edged`, `piercing`; class ratings
+  name the six classes; affinities name `physical`, `air`, `fire`, `earth`,
+  `water`, `light`, `dark`. The remaining array tail bytes are explicit
+  `storage_6`/`storage_7` fields, not invented classes/elements. They still need
+  separation into import provenance when native template consumers are adopted.
+- DP splash columns identify their zero-based destination limb and percent
+  units. A limb index is topology, not a universal head/arm/leg name; actual
+  body-part names depend on the model.
+- The old enemy `material` column becomes `movement_class`. It feeds both
+  gait/movement and body-load selection, **not** the equipment material enum.
+  Its packed semantics remain an explicit blocker rather than guessed names.
+- Mappings follow `StringTables.hpp`'s status indices, `Targeting.cpp`,
+  `EquipmentStats.cpp`, `EquipmentAffinity.cpp` and `ActorSpawning.cpp`, with
+  upstream structures/consumers in `BATTLE.PRG/charInit.h` and `146C.c`.
+
+Schemas expose each renamed column's `legacy_name`. Readers accept either name,
+but refuse both names for one column; enum numeric aliases remain supported.
+`VS.Extract authoring <datadir>` upgrades existing headers and enum spellings
+without replacing IDs, labels, record values or row order. It validates all six
+tables and compares every decoded native record before writing, then publishes
+the new converter version last. A normal `tables` run upgrades version-1 tables
+before considering source reconversion, preserving existing native edits.
+Unknown enum codes remain preservable by the raw ZND codec, but are refused as
+native authoring values. This does not resolve the remaining part categories,
+flags, strings, semantic identities or relational enemy definitions.
 
 **Exactness.**
 - Every bit of a template is in exactly one column, and a test checks the coverage. Unnamed bytes are `raw_<offset>` columns (§4.1).

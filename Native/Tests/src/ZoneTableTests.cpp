@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -44,6 +45,15 @@ content::ZndTemplate PatternTemplate(std::size_t seed, bool zeroed) {
   content::ZndTemplate data{};
   for (std::size_t at = 0; at < data.size(); ++at) {
     data.at(at) = static_cast<std::byte>((at * 7) + seed);
+  }
+  // Authoring enums use valid codes; other bytes retain the offset pattern.
+  data[3] = static_cast<std::byte>((std::to_integer<unsigned>(data[3]) & 31U) |
+                                   ((seed % 6) << 5));
+  data[0x124] = static_cast<std::byte>(3 + seed % 5);
+  data[0x200] = static_cast<std::byte>(seed % 8);
+  for (std::size_t limb = 0; limb < 6; ++limb) {
+    data[0x238 + limb * 0x5C + 0x50] =
+        static_cast<std::byte>((seed + limb) % 8);
   }
   if (zeroed) {
     for (std::size_t at = 0x140; at < 0x170; ++at) data.at(at) = std::byte{};
@@ -187,6 +197,7 @@ TEST_CASE("Zone tables name the row at fault", "[content-tables][znd]") {
     Edit(texts, refused.table, refused.from, refused.to);
     CHECK(ErrorOf(content::ReadZoneTables(ReaderOf(texts))) == refused.error);
   }
+
   // A name must be its 24 bytes in lowercase hexadecimal.
   Texts texts = SampleTexts();
   const auto zones = SampleZones();
@@ -201,4 +212,60 @@ TEST_CASE("Zone tables name the row at fault", "[content-tables][znd]") {
   CHECK(ErrorOf(content::ReadZoneTables(ReaderOf(texts)))
             .ends_with("column 'name': '" + upper +
                        "' is not 24 bytes as lowercase hexadecimal"));
+}
+
+TEST_CASE("Zone named field aliases preserve every template byte",
+          "[zone-authoring][content-tables][znd]") {
+  auto texts = SampleTexts();
+  Edit(texts, ZoneTable::kEnemies, "movement_class,", "material,");
+  Edit(texts, ZoneTable::kParts, "class_undead,", "class_3,");
+  Edit(texts, ZoneTable::kLimbs, "affinity_fire,", "affinity_3,");
+  CHECK(ReadBack(texts) == SampleZones());
+  const auto normalized = content::NormalizeTableText(
+      content::ZoneTableSpec(ZoneTable::kParts),
+      TextOf(texts, ZoneTable::kParts), "parts.csv");
+  if (!normalized) FAIL(normalized.error());
+  CHECK(normalized->renamed_columns == 1);
+  CHECK(normalized->text.contains("class_undead,"));
+  const auto again = content::NormalizeTableText(
+      content::ZoneTableSpec(ZoneTable::kParts), normalized->text, "parts.csv");
+  if (!again) FAIL(again.error());
+  CHECK(again->renamed_columns == 0);
+  CHECK(again->text == normalized->text);
+}
+
+TEST_CASE("Named affinity edits reach the correct equipment byte",
+          "[zone-authoring][content-tables][znd]") {
+  auto texts = SampleTexts();
+  auto rows = content::ParseCsv(TextOf(texts, ZoneTable::kParts), "parts.csv");
+  if (!rows) FAIL(rows.error());
+  auto& header = rows->front().fields;
+  const auto found = std::ranges::find(header, "affinity_fire");
+  REQUIRE(found != header.end());
+  rows->at(1).fields[static_cast<std::size_t>(found - header.begin())] = "-25";
+  std::vector<std::vector<std::string>> records;
+  for (const auto& row : *rows) records.push_back(row.fields);
+  TextOf(texts, ZoneTable::kParts) = content::FormatCsv(records);
+  auto expected = SampleZones();
+  expected[0].enemies[0].data[0x34 + 0x28 + 2] = std::byte{0xE7};
+  CHECK(ReadBack(texts) == expected);
+}
+
+TEST_CASE(
+    "Unsupported enemy classes remain raw-codec data, not authoring values",
+    "[zone-authoring][content-tables][znd]") {
+  auto zones = SampleZones();
+  zones[0].enemies[0].data[3] = std::byte{0xFF};
+  const auto texts = content::FormatZoneTables(zones);
+  const auto read = content::ReadZoneTables(ReaderOf(texts));
+  REQUIRE_FALSE(read.has_value());
+  CHECK(read.error().contains("column 'enemy_class'"));
+  content::ZndFile source;
+  source.enemies.push_back(
+      {.zud = {.sector = 1, .bytes = 2048}, .data = zones[0].enemies[0].data});
+  const auto encoded = content::EncodeZndFile(source);
+  if (!encoded) FAIL(encoded.error());
+  const auto decoded = content::DecodeZndFile(*encoded);
+  if (!decoded) FAIL(decoded.error());
+  CHECK(decoded->enemies[0].data == source.enemies[0].data);
 }

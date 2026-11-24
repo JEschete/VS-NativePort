@@ -128,6 +128,7 @@
     <ClInclude Include="include\Content\DiscReaderLive.hpp" />
     <ClInclude Include="include\Content\EsqFile.hpp" />
     <ClInclude Include="include\Content\EtmFile.hpp" />
+    <ClInclude Include="include\Content\GameplayDomains.hpp" />
     <ClInclude Include="include\Content\ImageFiles.hpp" />
     <ClInclude Include="include\Content\JsonText.hpp" />
     <ClInclude Include="include\Content\ModuleData.hpp" />

@@ -90,6 +90,7 @@ PROJECTS = [
                 r"Tools\Extract\src\WorkshopRecipeConversion.cpp",
                 r"Tools\Extract\src\WorkshopAuthoring.cpp",
                 r"Tools\Extract\src\ZndConversion.cpp",
+                r"Tools\Extract\src\ZoneAuthoring.cpp",
                 r"Tools\Extract\src\ZudConversion.cpp",
                 r"Tools\Launcher\src\Setup.cpp",
                 r"Tools\Launcher\src\DiscValidation.cpp",

@@ -45,88 +45,100 @@
       "description": ""
     },
     {
-      "name": "type_1",
+      "name": "type_none",
       "type": "integer",
+      "legacy_name": "type_1",
       "minimum": -128,
       "maximum": 127,
-      "description": "type resistance"
+      "description": "signed physical-type resistance"
     },
     {
-      "name": "type_2",
+      "name": "type_blunt",
       "type": "integer",
+      "legacy_name": "type_2",
       "minimum": -128,
       "maximum": 127,
-      "description": "type resistance"
+      "description": "signed physical-type resistance"
     },
     {
-      "name": "type_3",
+      "name": "type_edged",
       "type": "integer",
+      "legacy_name": "type_3",
       "minimum": -128,
       "maximum": 127,
-      "description": "type resistance"
+      "description": "signed physical-type resistance"
     },
     {
-      "name": "type_4",
+      "name": "type_piercing",
       "type": "integer",
+      "legacy_name": "type_4",
       "minimum": -128,
       "maximum": 127,
-      "description": "type resistance"
+      "description": "signed physical-type resistance"
     },
     {
-      "name": "affinity_1",
+      "name": "affinity_physical",
       "type": "integer",
+      "legacy_name": "affinity_1",
       "minimum": -128,
       "maximum": 127,
-      "description": "elemental affinity"
+      "description": "signed elemental affinity; storage_7 retains the original tail byte"
     },
     {
-      "name": "affinity_2",
+      "name": "affinity_air",
       "type": "integer",
+      "legacy_name": "affinity_2",
       "minimum": -128,
       "maximum": 127,
-      "description": "elemental affinity"
+      "description": "signed elemental affinity; storage_7 retains the original tail byte"
     },
     {
-      "name": "affinity_3",
+      "name": "affinity_fire",
       "type": "integer",
+      "legacy_name": "affinity_3",
       "minimum": -128,
       "maximum": 127,
-      "description": "elemental affinity"
+      "description": "signed elemental affinity; storage_7 retains the original tail byte"
     },
     {
-      "name": "affinity_4",
+      "name": "affinity_earth",
       "type": "integer",
+      "legacy_name": "affinity_4",
       "minimum": -128,
       "maximum": 127,
-      "description": "elemental affinity"
+      "description": "signed elemental affinity; storage_7 retains the original tail byte"
     },
     {
-      "name": "affinity_5",
+      "name": "affinity_water",
       "type": "integer",
+      "legacy_name": "affinity_5",
       "minimum": -128,
       "maximum": 127,
-      "description": "elemental affinity"
+      "description": "signed elemental affinity; storage_7 retains the original tail byte"
     },
     {
-      "name": "affinity_6",
+      "name": "affinity_light",
       "type": "integer",
+      "legacy_name": "affinity_6",
       "minimum": -128,
       "maximum": 127,
-      "description": "elemental affinity"
+      "description": "signed elemental affinity; storage_7 retains the original tail byte"
     },
     {
-      "name": "affinity_7",
+      "name": "affinity_dark",
       "type": "integer",
+      "legacy_name": "affinity_7",
       "minimum": -128,
       "maximum": 127,
-      "description": "elemental affinity"
+      "description": "signed elemental affinity; storage_7 retains the original tail byte"
     },
     {
-      "name": "affinity_8",
+      "name": "affinity_storage_7",
       "type": "integer",
+      "legacy_name": "affinity_8",
       "minimum": -128,
       "maximum": 127,
-      "description": "elemental affinity"
+      "description": "signed elemental affinity; storage_7 retains the original tail byte"
     },
     {
       "name": "action_1_id",
@@ -214,10 +226,19 @@
     },
     {
       "name": "armor_material",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 255,
-      "description": ""
+      "type": "enum",
+      "enum": {
+        "0": "none",
+        "1": "wood",
+        "2": "leather",
+        "3": "bronze",
+        "4": "iron",
+        "5": "hagane",
+        "6": "silver",
+        "7": "damascus"
+      },
+      "legacy_numeric_aliases": true,
+      "description": "limb armor material"
     },
     {
       "name": "armor_drop_rate",
@@ -241,46 +262,52 @@
       "description": ""
     },
     {
-      "name": "dp_splash_1",
+      "name": "dp_splash_limb_0_percent",
       "type": "integer",
+      "legacy_name": "dp_splash_1",
       "minimum": 0,
       "maximum": 255,
-      "description": "share of DP damage per limb (%)"
+      "description": "DP damage share (%) to the zero-based destination limb; body-part names depend on the model"
     },
     {
-      "name": "dp_splash_2",
+      "name": "dp_splash_limb_1_percent",
       "type": "integer",
+      "legacy_name": "dp_splash_2",
       "minimum": 0,
       "maximum": 255,
-      "description": "share of DP damage per limb (%)"
+      "description": "DP damage share (%) to the zero-based destination limb; body-part names depend on the model"
     },
     {
-      "name": "dp_splash_3",
+      "name": "dp_splash_limb_2_percent",
       "type": "integer",
+      "legacy_name": "dp_splash_3",
       "minimum": 0,
       "maximum": 255,
-      "description": "share of DP damage per limb (%)"
+      "description": "DP damage share (%) to the zero-based destination limb; body-part names depend on the model"
     },
     {
-      "name": "dp_splash_4",
+      "name": "dp_splash_limb_3_percent",
       "type": "integer",
+      "legacy_name": "dp_splash_4",
       "minimum": 0,
       "maximum": 255,
-      "description": "share of DP damage per limb (%)"
+      "description": "DP damage share (%) to the zero-based destination limb; body-part names depend on the model"
     },
     {
-      "name": "dp_splash_5",
+      "name": "dp_splash_limb_4_percent",
       "type": "integer",
+      "legacy_name": "dp_splash_5",
       "minimum": 0,
       "maximum": 255,
-      "description": "share of DP damage per limb (%)"
+      "description": "DP damage share (%) to the zero-based destination limb; body-part names depend on the model"
     },
     {
-      "name": "dp_splash_6",
+      "name": "dp_splash_limb_5_percent",
       "type": "integer",
+      "legacy_name": "dp_splash_6",
       "minimum": 0,
       "maximum": 255,
-      "description": "share of DP damage per limb (%)"
+      "description": "DP damage share (%) to the zero-based destination limb; body-part names depend on the model"
     },
     {
       "name": "raw_5a",

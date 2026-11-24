@@ -111,7 +111,11 @@ std::expected<std::vector<fs::path>, std::string> LayerRoots(
 }
 
 std::size_t ColumnIndex(const TableSpec& spec, std::string_view name) {
-  const auto found = std::ranges::find(spec.columns, name, &ColumnSpec::name);
+  const auto found =
+      std::ranges::find_if(spec.columns, [name](const auto& column) {
+        return column.name == name ||
+               (!column.legacy_name.empty() && column.legacy_name == name);
+      });
   return static_cast<std::size_t>(found - spec.columns.begin());
 }
 
@@ -211,12 +215,18 @@ std::expected<PatchHeader, std::string> ReadPatchHeader(const TableSpec& spec,
         return std::unexpected(
             CellError(file, header.line, name, "unknown column"));
       }
+      if (std::ranges::find(patch.columns, spec.columns[column].name,
+                            &ColumnSpec::name) != patch.columns.end()) {
+        return std::unexpected(
+            CellError(file, header.line, name, "duplicate aliased column"));
+      }
       patch.columns.push_back(spec.columns[column]);
       patch.fields.push_back(i);
     }
   }
   for (const auto key : spec.key) {
-    if (!seen.contains(std::string(key))) {
+    if (std::ranges::find(patch.columns, key, &ColumnSpec::name) ==
+        patch.columns.end()) {
       return std::unexpected(
           CellError(file, header.line, key, "missing key column"));
     }

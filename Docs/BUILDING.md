@@ -293,7 +293,7 @@ rem Rewrite catalogs\ for an existing data directory without re-extracting.
 build\Debug\VS.Extract.exe catalogs Native\data
 rem Add readable names without reconverting or replacing gameplay edits.
 build\Debug\VS.Extract.exe labels Native\data
-rem Upgrade generated recipe IDs/references without replacing recipe values.
+rem Upgrade recipe identities and zone field names without replacing values.
 build\Debug\VS.Extract.exe authoring Native\data
 ```
 
@@ -310,6 +310,15 @@ build\Debug\VS.Extract.exe authoring Native\data
   Do not delete a listed import file: it is needed for exact offline
   reconstruction. See [ASSET_PIPELINE.md](ASSET_PIPELINE.md) section 6.8 for the
   verified duplicate-name and shield/armor rules and the remaining §4 work.
+- The same `authoring` command upgrades `znd-tables` version 1 to version 2:
+  named enemy classes/materials, meaningful type/class/affinity columns and
+  explicitly indexed DP splash percentages. Old headers remain readable through
+  schema aliases. It checks every decoded record is unchanged before publishing
+  files and records the converter version last. Normal `tables` conversion
+  performs this upgrade first; do not use `--force` just to rename columns,
+  because that explicitly reconverts source data and replaces native edits.
+  The enemy's former `material` field is `movement_class`, not a wood/metal
+  material; its remaining semantics are documented in ASSET_PIPELINE section 6.9.
 - Writes `Native\data\disc\<disc path>` for every file and `Native\data\files.tsv` (sector, size, form, path).
   Files not converted yet are copied as they are (form `raw`); the intro movie becomes `MOV\TITLE.STR.mkv` (AV1 +
   FLAC, form `mkv`). Effect and ending audio are imported separately under `audio\streams`;

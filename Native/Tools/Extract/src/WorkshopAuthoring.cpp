@@ -478,29 +478,10 @@ std::expected<Content::WorkshopTexts, std::string> ReadTables(
 std::expected<Rewrite, std::string> NormalizeEnums(
     const Content::TableSpec& spec, const std::string& text,
     std::string_view file) {
-  auto checked = Content::ReadTable(spec, text, file);
-  if (!checked) return std::unexpected(checked.error());
-  auto records = Content::ParseCsv(text, file);
-  if (!records) return std::unexpected(records.error());
-  const auto& header = records->front().fields;
-  std::size_t changed = 0;
-  for (std::size_t column = 0; column < spec.columns.size(); ++column) {
-    if (spec.columns[column].type != Content::ColumnType::kEnum) continue;
-    const auto found = std::ranges::find(header, spec.columns[column].name);
-    const auto index = static_cast<std::size_t>(found - header.begin());
-    for (std::size_t row = 0; row < checked->size(); ++row) {
-      std::string& cell = records->at(row + 1).fields.at(index);
-      const std::string& canonical = checked->at(row).cells.at(column);
-      if (cell != canonical) {
-        cell = canonical;
-        ++changed;
-      }
-    }
-  }
-  if (changed == 0) return Rewrite{.text = text, .cells = 0};
-  std::vector<std::vector<std::string>> rows;
-  for (auto& record : *records) rows.push_back(std::move(record.fields));
-  return Rewrite{.text = Content::FormatCsv(rows), .cells = changed};
+  auto normalized = Content::NormalizeTableText(spec, text, file);
+  if (!normalized) return std::unexpected(normalized.error());
+  return Rewrite{.text = std::move(normalized->text),
+                 .cells = normalized->named_values};
 }
 
 using PendingFiles = std::vector<std::pair<std::string, std::string>>;

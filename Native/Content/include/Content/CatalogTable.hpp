@@ -42,6 +42,7 @@ struct ColumnSpec {
   std::string_view references;  // kReference only
   std::string_view description;
   std::span<const EnumValue> enumeration{};
+  std::string_view legacy_name{};
 };
 
 struct TableSpec {
@@ -96,5 +97,16 @@ struct TableRow {
 
 // The <table>.schema.json text, ending in a newline.
 [[nodiscard]] std::string FormatTableSchema(const TableSpec& spec);
+
+struct NormalizedTable {
+  std::string text;
+  std::size_t renamed_columns = 0;
+  std::size_t named_values = 0;
+};
+
+// Rewrites only legacy header aliases and enum spellings, retaining labels,
+// column/row order and all other cells. Already canonical text is unchanged.
+[[nodiscard]] std::expected<NormalizedTable, std::string> NormalizeTableText(
+    const TableSpec& spec, const std::string& text, std::string_view file);
 
 }  // namespace VS::Content

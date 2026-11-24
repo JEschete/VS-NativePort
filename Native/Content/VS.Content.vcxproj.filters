@@ -231,6 +231,9 @@
     <ClInclude Include="include\Content\EtmFile.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
+    <ClInclude Include="include\Content\GameplayDomains.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
     <ClInclude Include="include\Content\ImageFiles.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>

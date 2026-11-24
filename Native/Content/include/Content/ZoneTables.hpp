@@ -31,7 +31,7 @@
 namespace VS::Content {
 
 inline constexpr std::string_view kZndTableConverterName = "znd-tables";
-inline constexpr std::uint32_t kZndTableConverterVersion = 1;
+inline constexpr std::uint32_t kZndTableConverterVersion = 2;
 
 enum class ZoneTable : std::uint8_t {
   kZones,     // catalogs/world/zones: music and room slot count

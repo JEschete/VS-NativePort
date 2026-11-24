@@ -1,5 +1,55 @@
 # Current Handoff
 
+## Named zone fields and domains (#199/#520), 2026-11-23
+
+Verified worktree based on `2276a0a6a` on `main`. `znd-tables` version 2
+names physical types, classes, affinities and DP-splash destination limbs.
+Enemy class and weapon/shield/limb-armor materials use shared schema domains.
+The misleading enemy `material` header is now `movement_class`, with its
+unresolved packed/body-load semantics explicitly documented.
+
+Readers accept schema-declared `legacy_name` aliases and reject ambiguous
+headers. The shared normalizer retains every other cell, label and row order;
+workshop authoring reuses it. `authoring` upgrades existing zone tables and
+publishes the converter version last after comparing all decoded records.
+Non-force zone conversion migrates version-1 tables before deciding whether
+source reconversion is needed, so native edits are not lost to a version bump.
+Unknown enum codes remain raw-codec-preservable but fail native authoring.
+Synthetic authoring fixtures now use valid domain codes; a separate case checks
+unsupported codes still round-trip through the raw codec and are refused by
+the native table reader.
+
+Verification:
+- Full Debug/Release x64 builds passed (`VS_JOBS=4`, `/m:2`).
+- Both configurations: **91 cases / 10,326 assertions**, selection
+  `[catalog-layers],[content-tables],[workshop-authoring],[asset-labels],[asset-catalog]`.
+  This includes all 256 extracted zones loading as their exact source bytes.
+- Actual data: **39 renamed columns, 4,095 named values, 205,770 checked cells**,
+  with no unexplained differences across 6,205 rows. IDs, labels, topology,
+  encoded names, stats and storage tails are unchanged.
+- Repeat authoring: zero columns/values/files changed; labels also change zero
+  files. The actual native tree is now version 2 and both builds can consume it.
+- Seed-199 known-field cold reads cover five enemy, limb and part rows each.
+  This is not the full family readability gate: positional IDs, packed flags,
+  encoded text and remaining opaque fields still block it.
+- Both Debug production replays match unchanged baselines: 2,400 and 900 frames;
+  run directories end in `1795489399740241-0` and `1795489466978296-0`.
+- New shared/migration helper tidy and complete changed-file quality: zero new
+  findings. Expanding optional tidy to the old zone importer also reports its
+  existing layout literals, large reader/test and old fixture optional access.
+  The unchanged reader/byte helpers/fixture helpers were compared to `2276a0a6a`;
+  no quality baseline or test expectation was weakened to hide those findings.
+- Generated projects are stable on a second run. Evidence:
+  `build\issue-199-fields-*.log`, `build\issue-199-fields-broad-tidy.json`;
+  the 13 original table/schema/manifest files remain in
+  `build\issue-199-fields-before`.
+
+All broad asset migration issues remain open until their full adoption,
+authoring, lifecycle, reference and CI requirements pass. Next dependencies
+include authoritative strings/semantic variant identities, remaining part
+domains/flags, relational enemy definitions and adoption of layers outside
+recipes. Do not infer equipment materials from the movement/body selector.
+
 ## Layered SQLite workshop catalogs (#499/#520), 2026-11-23
 
 Verified worktree based on `f4312a2d2`, on `main`. The shared catalog compiler

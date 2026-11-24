@@ -56,9 +56,16 @@
     },
     {
       "name": "enemy_class",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 7,
+      "type": "enum",
+      "enum": {
+        "0": "human",
+        "1": "beast",
+        "2": "undead",
+        "3": "phantom",
+        "4": "dragon",
+        "5": "evil"
+      },
+      "legacy_numeric_aliases": true,
       "description": "the class (human .. evil)"
     },
     {
@@ -110,11 +117,12 @@
       "description": ""
     },
     {
-      "name": "material",
+      "name": "movement_class",
       "type": "integer",
+      "legacy_name": "material",
       "minimum": 0,
       "maximum": 255,
-      "description": ""
+      "description": "movement/body-load selector, not equipment material; packed semantics remain under investigation"
     },
     {
       "name": "walk_speed",
@@ -181,10 +189,19 @@
     },
     {
       "name": "weapon_material",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 255,
-      "description": ""
+      "type": "enum",
+      "enum": {
+        "0": "none",
+        "1": "wood",
+        "2": "leather",
+        "3": "bronze",
+        "4": "iron",
+        "5": "hagane",
+        "6": "silver",
+        "7": "damascus"
+      },
+      "legacy_numeric_aliases": true,
+      "description": "weapon material"
     },
     {
       "name": "weapon_drop_rate",
@@ -208,10 +225,19 @@
     },
     {
       "name": "shield_material",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 255,
-      "description": ""
+      "type": "enum",
+      "enum": {
+        "0": "none",
+        "1": "wood",
+        "2": "leather",
+        "3": "bronze",
+        "4": "iron",
+        "5": "hagane",
+        "6": "silver",
+        "7": "damascus"
+      },
+      "legacy_numeric_aliases": true,
+      "description": "shield material"
     },
     {
       "name": "shield_drop_rate",

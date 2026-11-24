@@ -16,6 +16,7 @@
 #include <utility>
 #include <vector>
 
+#include "Content/GameplayDomains.hpp"
 #include "Platform/Paths.hpp"
 
 namespace VS::Content {
@@ -112,38 +113,6 @@ constexpr ColumnSpec Reference(std::string_view name, std::string_view table,
           .references = table,
           .description = description};
 }
-
-constexpr std::array<EnumValue, 8> kMaterials{
-    {{0, "none"},
-     {1, "wood"},
-     {2, "leather"},
-     {3, "bronze"},
-     {4, "iron"},
-     {5, "hagane"},
-     {6, "silver"},
-     // NOLINTNEXTLINE(whitespace/indent_namespace)
-     {7, "damascus"}}};
-// ItemRows.cpp indexes ITEMHELP's Dagger and Blunt lists with value - 1.
-constexpr std::array<EnumValue, 10> kBladeCategories{
-    {{0, "none"},
-     {1, "dagger"},
-     {2, "sword"},
-     {3, "great-sword"},
-     {4, "axe-mace"},
-     {5, "great-axe"},
-     {6, "staff"},
-     {7, "heavy-mace"},
-     {8, "polearm"},
-     // NOLINTNEXTLINE(whitespace/indent_namespace)
-     {9, "crossbow"}}};
-constexpr std::array<EnumValue, 4> kDamageTypes{
-    // NOLINTNEXTLINE(whitespace/indent_namespace): array initializer.
-    {{0, "none"}, {1, "blunt"}, {2, "edged"}, {3, "piercing"}}};
-// ActionCostsLive.cpp feeds the weapon selector to ActionCosts.cpp's resource
-// mapping, not ActionDefinition::type.
-constexpr std::array<EnumValue, 5> kCostResources{
-    // NOLINTNEXTLINE(whitespace/indent_namespace): array initializer.
-    {{0, "none"}, {1, "mp"}, {2, "risk"}, {3, "hp"}, {4, "weapon-pp"}}};
 
 constexpr ColumnSpec Enumeration(std::string_view name, std::int64_t minimum,
                                  std::int64_t maximum,

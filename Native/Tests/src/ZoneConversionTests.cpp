@@ -28,6 +28,7 @@
 #include "Extract/ConverterBatch.hpp"
 #include "Extract/ImageFilesWriter.hpp"
 #include "Extract/ZndConversion.hpp"
+#include "Extract/ZoneAuthoring.hpp"
 #include "TestSupport/ModelFixtures.hpp"
 
 namespace {
@@ -85,6 +86,13 @@ content::ZndFile SampleZone() {
   enemy.zud = {.sector = kZudSector, .bytes = 3 * kSector};
   for (std::size_t at = 0; at < enemy.data.size(); ++at) {
     enemy.data.at(at) = static_cast<std::byte>((at * 13) + 5);
+  }
+  // Valid native authoring domains, without changing the other byte patterns.
+  enemy.data[3] = std::byte{0x65};
+  enemy.data[0x124] = std::byte{5};
+  enemy.data[0x200] = std::byte{3};
+  for (std::size_t limb = 0; limb < 6; ++limb) {
+    enemy.data[0x238 + limb * 0x5C + 0x50] = static_cast<std::byte>(limb + 1);
   }
   zone.enemies.push_back(enemy);
   // A room palette row with STP words and a texture page.
@@ -174,6 +182,37 @@ void EditTable(const ModelRoot& root, ZoneTable table, std::string_view from,
   REQUIRE(at != std::string::npos);
   text.replace(at, from.size(), to);
   WriteText(path, text);
+}
+
+void LegacyTableHeaders(const ModelRoot& root) {
+  for (const auto table : content::kZoneTables) {
+    const auto path = TableFile(root, table);
+    const auto text = ReadText(path);
+    const auto& spec = content::ZoneTableSpec(table);
+    auto checked = content::ReadTable(spec, text, path.string());
+    if (!checked) FAIL(checked.error());
+    auto records = content::ParseCsv(text, path.string());
+    if (!records) FAIL(records.error());
+    for (std::size_t column = 0; column < spec.columns.size(); ++column) {
+      if (!spec.columns[column].legacy_name.empty()) {
+        records->front().fields[column] = spec.columns[column].legacy_name;
+      }
+      if (spec.columns[column].type == content::ColumnType::kEnum) {
+        for (std::size_t row = 0; row < checked->size(); ++row) {
+          records->at(row + 1).fields[column] =
+              std::to_string(checked->at(row).values[column]);
+        }
+      }
+    }
+    std::vector<std::vector<std::string>> rows;
+    for (const auto& record : *records) rows.push_back(record.fields);
+    WriteText(path, content::FormatCsv(rows));
+  }
+  auto manifest = content::LoadConversionManifest(root.Root());
+  if (!manifest || !*manifest) FAIL("fixture conversion manifest missing");
+  (**manifest).converters[std::string(content::kZndTableConverterName)] = 1;
+  REQUIRE(
+      extract::WriteConversionManifest(root.Root(), **manifest).has_value());
 }
 
 // Every converted file's bytes, by path under the root.
@@ -370,6 +409,41 @@ TEST_CASE("The zone converter names the read it cannot resolve",
     CHECK(ErrorOf(extract::ConvertDiscZones(root.Root(), false)) ==
           refused.error);
   }
+}
+
+TEST_CASE("Old zone authoring upgrades without overwriting native edits",
+          "[zone-authoring][content-tables][znd]") {
+  const auto source = Encoded(SampleZone());
+  const ModelRoot root(ZoneSources(source));
+  RecordArchetype(root.Root());
+  REQUIRE(Convert(root).converted == 1);
+  CheckEditedTemplate(root, source);
+  const auto edited = Loaded(root);
+  LegacyTableHeaders(root);
+  CHECK(Convert(root).unchanged == 1);
+  CHECK(Loaded(root) == edited);
+  CHECK(ReadText(TableFile(root, ZoneTable::kEnemies))
+            .contains("movement_class,"));
+  const auto repeat = extract::UpgradeZoneAuthoring(root.Root());
+  if (!repeat) FAIL(repeat.error());
+  CHECK(repeat->written == 0);
+}
+
+TEST_CASE("Failed zone authoring upgrades preserve files and converter version",
+          "[zone-authoring][content-tables][znd]") {
+  const ModelRoot root(ZoneSources(Encoded(SampleZone())));
+  RecordArchetype(root.Root());
+  REQUIRE(Convert(root).converted == 1);
+  LegacyTableHeaders(root);
+  EditTable(root, ZoneTable::kParts, "affinity_3,",
+            "affinity_3,affinity_fire,");
+  const auto before = OutputFiles(root);
+  const auto manifest = ReadText(root.Root() / "manifest.json");
+  const auto upgraded = extract::UpgradeZoneAuthoring(root.Root());
+  REQUIRE_FALSE(upgraded.has_value());
+  CHECK(upgraded.error().contains("appears twice"));
+  CHECK(OutputFiles(root) == before);
+  CHECK(ReadText(root.Root() / "manifest.json") == manifest);
 }
 
 TEST_CASE("Committed zone table schemas match the converter's",

@@ -3,6 +3,7 @@
 #include <iterator>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
@@ -86,6 +87,35 @@ struct LiveRecipes {
   ~LiveRecipes() { setup::ResetLiveSetupStatics(); }
 };
 }  // namespace
+
+TEST_CASE("Layer headers resolve legacy column aliases without ambiguity",
+          "[catalog-layers]") {
+  const bool duplicate = GENERATE(false, true);
+  WorkshopRecipeRoot root;
+  Prepare(root);
+  Layers(root);
+  auto sources = content::WorkshopCatalogSources();
+  std::vector<content::ColumnSpec> columns(sources.front().spec.columns.begin(),
+                                           sources.front().spec.columns.end());
+  for (auto& column : columns) {
+    if (column.name == "strength") column.legacy_name = "str";
+  }
+  sources.front().spec.columns = columns;
+  Patch(root, "mod", WorkshopTablePart::kResults,
+        duplicate ? "id,str,strength\nblade.battle-knife,25,26\n"
+                  : "id,str\nblade.battle-knife,25\n");
+  auto database = content::CatalogDatabase::Load(root.Root(), sources);
+  if (duplicate) {
+    REQUIRE_FALSE(database.has_value());
+    CHECK(database.error().contains("duplicate aliased column"));
+  } else {
+    if (!database) FAIL(database.error());
+    CHECK(Recipes(*database)
+              .Of(WorkshopKind::kBlade)
+              .blades.at(1)
+              .stats.strength == 25);
+  }
+}
 
 TEST_CASE("SQLite catalogs preserve base records and directed recipes",
           "[catalog-layers][workshop]") {

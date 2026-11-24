@@ -34,6 +34,7 @@
 #include "Extract/WorkshopAuthoring.hpp"
 #include "Extract/WorkshopRecipeConversion.hpp"
 #include "Extract/ZndConversion.hpp"
+#include "Extract/ZoneAuthoring.hpp"
 #include "Extract/ZudConversion.hpp"
 #include "Platform/App.hpp"
 #include "Platform/Paths.hpp"
@@ -107,7 +108,8 @@ int Usage() {
       "metadata. labels adds it without reconverting;\n"
       "      labels --force refreshes only labels, preserving gameplay "
       "fields and original encoded names.\n"
-      "      authoring upgrades generated recipe IDs and their references "
+      "      authoring upgrades zone fields and generated recipe "
+      "IDs/references "
       "to semantic item names without changing recipe values.");
   return 2;
 }
@@ -139,6 +141,15 @@ int UpgradeAuthoring(const fs::path& root) {
                     "{} unused records archived, {} files updated",
                     report->renamed, report->references, report->named_values,
                     report->quarantined, report->written);
+  const auto zones = Extract::UpgradeZoneAuthoring(root);
+  if (!zones) {
+    VS::Core::LogError("extract", "zone authoring: {}", zones.error());
+    return 1;
+  }
+  VS::Core::LogInfo(
+      "extract",
+      "zone authoring: {} named columns, {} named values, {} files updated",
+      zones->renamed_columns, zones->named_values, zones->written);
   return 0;
 }
 

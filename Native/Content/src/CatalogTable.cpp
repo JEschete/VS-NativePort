@@ -163,7 +163,11 @@ std::expected<std::vector<std::size_t>, std::string> HeaderOrder(
       has_label = true;
       continue;
     }
-    const auto found = std::ranges::find(spec.columns, name, &ColumnSpec::name);
+    const auto found =
+        std::ranges::find_if(spec.columns, [name](const auto& column) {
+          return column.name == name ||
+                 (!column.legacy_name.empty() && column.legacy_name == name);
+        });
     if (found == spec.columns.end()) {
       return std::unexpected(
           std::format("{}:{}: unknown column '{}'", file, header.line, name));
@@ -401,12 +405,49 @@ std::string FormatTable(const TableSpec& spec,
   return FormatCsv(records);
 }
 
+std::expected<NormalizedTable, std::string> NormalizeTableText(
+    const TableSpec& spec, const std::string& text, std::string_view file) {
+  auto checked = ReadTable(spec, text, file);
+  if (!checked) return std::unexpected(checked.error());
+  auto records = ParseCsv(text, file);
+  if (!records) return std::unexpected(records.error());
+  auto positions = HeaderOrder(spec, records->front(), file);
+  if (!positions) return std::unexpected(positions.error());
+  NormalizedTable normalized{.text = text};
+  auto& header = records->front().fields;
+  for (std::size_t column = 0; column < spec.columns.size(); ++column) {
+    const auto index = positions->at(column);
+    if (header[index] != spec.columns[column].name) {
+      header[index] = spec.columns[column].name;
+      ++normalized.renamed_columns;
+    }
+    if (spec.columns[column].type != ColumnType::kEnum) continue;
+    for (std::size_t row = 0; row < checked->size(); ++row) {
+      auto& cell = records->at(row + 1).fields[index];
+      const auto& canonical = checked->at(row).cells[column];
+      if (cell != canonical) {
+        cell = canonical;
+        ++normalized.named_values;
+      }
+    }
+  }
+  if (normalized.renamed_columns != 0 || normalized.named_values != 0) {
+    std::vector<std::vector<std::string>> rows;
+    for (auto& record : *records) rows.push_back(std::move(record.fields));
+    normalized.text = FormatCsv(rows);
+  }
+  return normalized;
+}
+
 std::string FormatTableSchema(const TableSpec& spec) {
   JsonDocument columns = JsonDocument::array();
   for (const ColumnSpec& column : spec.columns) {
     JsonDocument entry = JsonDocument::object();
     entry["name"] = std::string(column.name);
     entry["type"] = std::string(TypeName(column.type));
+    if (!column.legacy_name.empty()) {
+      entry["legacy_name"] = std::string(column.legacy_name);
+    }
     if (column.type == ColumnType::kInteger) {
       entry["minimum"] = column.minimum;
       entry["maximum"] = column.maximum;

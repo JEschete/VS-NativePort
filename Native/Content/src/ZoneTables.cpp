@@ -21,6 +21,7 @@
 
 #include "Content/CatalogTable.hpp"
 #include "Content/ConversionManifest.hpp"
+#include "Content/GameplayDomains.hpp"
 
 namespace VS::Content {
 namespace {
@@ -36,6 +37,26 @@ constexpr std::int64_t kMaxTextures = 0xFFFF;
 constexpr std::int64_t kMaxEnemies = 0xFF;
 constexpr std::int64_t kLimbCount = 6;
 constexpr std::size_t kNameBytes = 24;
+constexpr std::array<std::string_view, 4> kTypeFields{
+    "none",
+    "blunt",
+    "edged",
+    "piercing",
+};
+// EquipmentStats.cpp uses classes[0..5] and affinities[0..6].
+// Tail slots remain explicit storage until the import/runtime split retires
+// them.
+constexpr std::array<std::string_view, 8> kClassFields{
+    "human",  "beast", "undead",    "phantom",
+    "dragon", "evil",  "storage_6", "storage_7",
+};
+constexpr std::array<std::string_view, 8> kAffinityFields{
+    "physical", "air", "fire", "earth", "water", "light", "dark", "storage_7",
+};
+constexpr std::array<std::string_view, 6> kSplashFields{
+    "limb_0_percent", "limb_1_percent", "limb_2_percent",
+    "limb_3_percent", "limb_4_percent", "limb_5_percent",
+};
 
 // decomp: vs_CharInitData (src/BATTLE/BATTLE.PRG/charInit.h:24-51) and the
 // records it holds; see Actors/CharacterInit.hpp and Items/ItemRecords.hpp.
@@ -68,7 +89,9 @@ struct TableLayout {
   void Lead(ColumnSpec column) { columns.push_back(column); }
 
   void Add(std::string_view name, std::size_t offset, std::size_t size,
-           bool is_signed, std::string_view description) {
+           bool is_signed, std::string_view description,
+           std::span<const EnumValue> domain = {},
+           std::string_view legacy_name = {}) {
     Field field{.column = name,
                 .offset = offset,
                 .size = size,
@@ -79,16 +102,20 @@ struct TableLayout {
     fields.push_back(field);
     const std::uint32_t width = static_cast<std::uint32_t>(size) * kByteBits;
     const std::int64_t span = std::int64_t{1} << width;
-    columns.push_back({.name = name,
-                       .type = ColumnType::kInteger,
-                       .minimum = is_signed ? -(span / 2) : 0,
-                       .maximum = is_signed ? (span / 2) - 1 : span - 1,
-                       .references = {},
-                       .description = description});
+    columns.push_back(
+        {.name = name,
+         .type = domain.empty() ? ColumnType::kInteger : ColumnType::kEnum,
+         .minimum = is_signed ? -(span / 2) : 0,
+         .maximum = is_signed ? (span / 2) - 1 : span - 1,
+         .references = {},
+         .description = description,
+         .enumeration = domain,
+         .legacy_name = legacy_name});
   }
 
   void Bits(std::string_view name, std::size_t offset, std::uint8_t bit,
-            std::uint8_t bits, std::string_view description) {
+            std::uint8_t bits, std::string_view description,
+            std::span<const EnumValue> domain = {}) {
     fields.push_back({.column = name,
                       .offset = offset,
                       .size = 1,
@@ -96,12 +123,14 @@ struct TableLayout {
                       .bytes = false,
                       .bit = bit,
                       .bits = bits});
-    columns.push_back({.name = name,
-                       .type = ColumnType::kInteger,
-                       .minimum = 0,
-                       .maximum = (std::int64_t{1} << bits) - 1,
-                       .references = {},
-                       .description = description});
+    columns.push_back(
+        {.name = name,
+         .type = domain.empty() ? ColumnType::kInteger : ColumnType::kEnum,
+         .minimum = 0,
+         .maximum = (std::int64_t{1} << bits) - 1,
+         .references = {},
+         .description = description,
+         .enumeration = domain});
   }
 
   void Bytes(std::string_view name, std::size_t offset, std::size_t size,
@@ -121,13 +150,16 @@ struct TableLayout {
                        .description = description});
   }
 
-  // `count` columns <stem>_1 .. <stem>_<count>, `size` bytes apart.
-  void Run(std::string_view stem, std::size_t offset, std::size_t count,
-           std::size_t size, bool is_signed, std::string_view description) {
-    for (std::size_t index = 0; index < count; ++index) {
+  void Run(std::string_view stem, std::size_t offset,
+           std::span<const std::string_view> meanings, std::size_t size,
+           bool is_signed, std::string_view description) {
+    for (std::size_t index = 0; index < meanings.size(); ++index) {
       const std::string& name =
+          names.emplace_back(std::format("{}_{}", stem, meanings[index]));
+      const std::string& legacy =
           names.emplace_back(std::format("{}_{}", stem, index + 1));
-      Add(name, offset + (index * size), size, is_signed, description);
+      Add(name, offset + (index * size), size, is_signed, description, {},
+          legacy);
     }
   }
 
@@ -173,7 +205,8 @@ void AddEnemyFields(TableLayout& table) {
   table.Add("sub_type", 0x00, 2, false, "the enemy kind (kill and bestiary)");
   table.Add("model_id", 0x02, 1, false, "the body model id");
   table.Bits("reach", 0x03, 0, 5, "attack reach");
-  table.Bits("enemy_class", 0x03, 5, 3, "the class (human .. evil)");
+  table.Bits("enemy_class", 0x03, 5, 3, "the class (human .. evil)",
+             kEnemyClasses);
   table.Bytes("name", 0x04, kNameBytes, "the name, in the game's encoding");
   table.Add("hp", 0x1C, 2, true, "hit points");
   table.Add("mp", 0x1E, 2, true, "magic points");
@@ -181,7 +214,10 @@ void AddEnemyFields(TableLayout& table) {
   table.Add("intelligence", 0x21, 1, false, "");
   table.Add("agility", 0x22, 1, false, "");
   table.Add("recovery_delay_bonus", 0x23, 1, false, "");
-  table.Add("material", 0x24, 1, false, "");
+  table.Add("movement_class", 0x24, 1, false,
+            "movement/body-load selector, not equipment material; packed "
+            "semantics remain under investigation",
+            {}, "material");
   table.Add("walk_speed", 0x25, 1, false, "");
   table.Add("gait_class", 0x26, 1, false, "");
   table.Add("run_speed", 0x27, 1, false, "");
@@ -193,12 +229,12 @@ void AddEnemyFields(TableLayout& table) {
             "a limb whose loss slows the enemy");
   table.Add("default_target_limb", 0x32, 1, false, "");
   table.Add("raw_33", 0x33, 1, false, "unnamed");
-  table.Add("weapon_material", 0x124, 1, false, "");
+  table.Add("weapon_material", 0x124, 1, false, "weapon material", kMaterials);
   table.Add("weapon_drop_rate", 0x125, 1, false, "out of 255");
   table.Add("weapon_index", 0x126, 2, true, "");
   table.Bytes("weapon_name", 0x128, kNameBytes,
               "the weapon's name, in the game's encoding");
-  table.Add("shield_material", 0x200, 1, false, "");
+  table.Add("shield_material", 0x200, 1, false, "shield material", kMaterials);
   table.Add("shield_drop_rate", 0x201, 1, false, "out of 255");
   table.Add("shield_index", 0x202, 2, true, "");
   table.Add("accessory_drop_rate", 0x234, 1, false, "out of 255");
@@ -214,8 +250,11 @@ void AddLimbFields(TableLayout& table) {
   table.Add("hp", 0x00, 2, false, "the limb's hit points");
   table.Add("agility_defense_bonus", 0x02, 1, false, "");
   table.Add("chain_evasion", 0x03, 1, false, "");
-  table.Run("type", 0x04, 4, 1, true, "type resistance");
-  table.Run("affinity", 0x08, 8, 1, true, "elemental affinity");
+  table.Run("type", 0x04, kTypeFields, 1, true,
+            "signed physical-type resistance");
+  table.Run(
+      "affinity", 0x08, kAffinityFields, 1, true,
+      "signed elemental affinity; storage_7 retains the original tail byte");
   for (std::size_t action = 0; action < 4; ++action) {
     const std::size_t at = 0x10 + (action * 4);
     table.Add(table.Name(std::format("action_{}_id", action + 1)), at, 2, false,
@@ -225,11 +264,14 @@ void AddLimbFields(TableLayout& table) {
     table.Add(table.Name(std::format("action_{}_index", action + 1)), at + 3, 1,
               false, "");
   }
-  table.Add("armor_material", 0x50, 1, false, "");
+  table.Add("armor_material", 0x50, 1, false, "limb armor material",
+            kMaterials);
   table.Add("armor_drop_rate", 0x51, 1, false, "out of 255");
   table.Add("raw_52", 0x52, 1, false, "unnamed");
   table.Add("armor_index", 0x53, 1, false, "");
-  table.Run("dp_splash", 0x54, 6, 1, false, "share of DP damage per limb (%)");
+  table.Run("dp_splash", 0x54, kSplashFields, 1, false,
+            "DP damage share (%) to the zero-based destination limb; body-part "
+            "names depend on the model");
   table.Add("raw_5a", 0x5A, 1, false, "unnamed");
   table.Add("raw_5b", 0x5B, 1, false, "unnamed");
 }
@@ -259,9 +301,12 @@ void AddPartFields(TableLayout& table) {
   table.Add("range_y", 0x19, 1, false, "");
   table.Add("range_z", 0x1A, 1, false, "");
   table.Add("shape_bits", 0x1B, 1, false, "attack shape and angle");
-  table.Run("type", 0x1C, 4, 1, true, "");
-  table.Run("class", 0x20, 8, 1, true, "");
-  table.Run("affinity", 0x28, 8, 1, true, "");
+  table.Run("type", 0x1C, kTypeFields, 1, true, "signed physical-type rating");
+  table.Run("class", 0x20, kClassFields, 1, true,
+            "signed class rating; storage_6/7 retain the original tail bytes");
+  table.Run(
+      "affinity", 0x28, kAffinityFields, 1, true,
+      "signed elemental affinity; storage_7 retains the original tail byte");
 }
 
 ColumnSpec IdColumn(std::string_view name, std::string_view description) {
@@ -435,9 +480,17 @@ unsigned HexDigit(char digit) {
 void AppendCells(std::vector<std::string>& cells, const TableLayout& layout,
                  std::span<const std::byte> record) {
   for (const Field& field : layout.fields) {
-    cells.push_back(field.bytes
-                        ? HexOf(record.subspan(field.offset, field.size))
-                        : std::format("{}", ReadField(record, field)));
+    if (field.bytes) {
+      cells.push_back(HexOf(record.subspan(field.offset, field.size)));
+      continue;
+    }
+    const auto value = ReadField(record, field);
+    const auto& column = layout.columns.at(cells.size());
+    const auto named =
+        std::ranges::find(column.enumeration, value, &EnumValue::code);
+    cells.push_back(named == column.enumeration.end()
+                        ? std::format("{}", value)
+                        : std::string(named->name));
   }
 }
 

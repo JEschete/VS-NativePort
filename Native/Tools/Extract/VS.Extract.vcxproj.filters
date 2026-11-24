@@ -60,6 +60,9 @@
     <ClCompile Include="src\ZndConversion.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ZoneAuthoring.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ZudConversion.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -106,6 +109,9 @@
       <Filter>include\Extract</Filter>
     </ClInclude>
     <ClInclude Include="include\Extract\ZndConversion.hpp">
+      <Filter>include\Extract</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Extract\ZoneAuthoring.hpp">
       <Filter>include\Extract</Filter>
     </ClInclude>
     <ClInclude Include="include\Extract\ZudConversion.hpp">

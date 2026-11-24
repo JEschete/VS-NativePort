@@ -30,6 +30,7 @@
 #include "Extract/ImageConversion.hpp"
 #include "Extract/ImageFilesWriter.hpp"
 #include "Extract/TimImage.hpp"
+#include "Extract/ZoneAuthoring.hpp"
 #include "Platform/Paths.hpp"
 
 namespace VS::Extract {
@@ -366,6 +367,15 @@ std::expected<ZoneConversionReport, std::string> ConvertDiscZones(
     const fs::path& root, bool force) {
   auto start = StartRun(root);
   if (!start) return std::unexpected(start.error());
+  const auto version =
+      start->previous.converters.find(Content::kZndTableConverterName);
+  if (!force && version != start->previous.converters.end() &&
+      version->second == 1) {
+    auto upgraded = UpgradeZoneAuthoring(root);
+    if (!upgraded) return std::unexpected(upgraded.error());
+    start = StartRun(root);
+    if (!start) return std::unexpected(start.error());
+  }
   const ConversionManifest& previous = start->previous;
   ConverterBatch batch = StartBatch(previous, Content::kZndTableConverterName,
                                     Content::kZndTableConverterVersion, force);

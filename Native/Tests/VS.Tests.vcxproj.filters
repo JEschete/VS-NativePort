@@ -1635,6 +1635,9 @@
     <ClCompile Include="..\Tools\Extract\src\ZndConversion.cpp">
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>
+    <ClCompile Include="..\Tools\Extract\src\ZoneAuthoring.cpp">
+      <Filter>..\Tools\Extract\src</Filter>
+    </ClCompile>
     <ClCompile Include="..\Tools\Extract\src\ZudConversion.cpp">
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>

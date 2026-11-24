@@ -63,6 +63,7 @@
     <ClCompile Include="src\WorkshopAuthoring.cpp" />
     <ClCompile Include="src\WorkshopRecipeConversion.cpp" />
     <ClCompile Include="src\ZndConversion.cpp" />
+    <ClCompile Include="src\ZoneAuthoring.cpp" />
     <ClCompile Include="src\ZudConversion.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -81,6 +82,7 @@
     <ClInclude Include="include\Extract\WorkshopAuthoring.hpp" />
     <ClInclude Include="include\Extract\WorkshopRecipeConversion.hpp" />
     <ClInclude Include="include\Extract\ZndConversion.hpp" />
+    <ClInclude Include="include\Extract\ZoneAuthoring.hpp" />
     <ClInclude Include="include\Extract\ZudConversion.hpp" />
   </ItemGroup>
   <ItemGroup>
