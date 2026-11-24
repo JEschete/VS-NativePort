@@ -10,8 +10,10 @@ quality but exposed one obsolete encounter-source assertion requiring the
 retired MON request/fallback. Its scoped replacement checks native catalog
 loading, explicit refusal and owned session publication while forbidding the
 old reader. The single affected Python test, syntax and quality checks pass;
-exact-revision CI for the repair remains pending. No runtime fallback or
-regression baseline was restored.
+the repair is published as `ac95b48d0cfb26879da927652a3f1f74857c0f79` and
+[exact-revision CI 45455719702](https://github.com/JEschete/VS-NativePort/actions/runs/45455719702)
+passed. Final evidence is posted on #499/#500. No runtime fallback or regression
+baseline was restored.
 
 ### Adopted boundary
 
@@ -209,9 +211,8 @@ Class/control/number labels, surrounding Gazette UI and the page/packet
 backend are not claimed fully migrated. Native font layout is readable,
 but no variable-font palette/pixel parity or matched PS1 comparison is claimed.
 The default `Native\data` root is integrated and its content accounting is
-reconciled. The published source milestone still needs successful
-exact-revision CI after the obsolete source-guard repair before final issue
-evidence is posted.
+reconciled. The source milestone and obsolete source-guard repair are published
+with successful exact-revision CI; the wider issue gates above remain open.
 
 ## Native file-picker text adoption (#54/#500), 2026-11-24
 
