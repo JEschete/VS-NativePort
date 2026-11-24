@@ -9,6 +9,7 @@
 #include <string_view>
 #include <vector>
 
+#include "Content/CatalogDatabase.hpp"
 #include "Content/CatalogTable.hpp"
 
 // The workshop combination recipes (MENU\BLADE.SYD, SHIELD.SYD and ARMOR.SYD;
@@ -198,5 +199,8 @@ struct WorkshopRecipeCatalog {
 // Reads and checks every kind's tables under `root`.
 [[nodiscard]] std::expected<WorkshopRecipeCatalog, std::string>
 LoadWorkshopRecipes(const std::filesystem::path& root);
+[[nodiscard]] std::vector<CatalogTableSource> WorkshopCatalogSources();
+[[nodiscard]] std::expected<WorkshopRecipeCatalog, std::string>
+LoadWorkshopRecipes(const CatalogDatabase& database);
 
 }  // namespace VS::Content

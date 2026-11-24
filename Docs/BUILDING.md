@@ -36,7 +36,7 @@ step must update this file in the same commit (plan D19).
 | VS workload | **Desktop development with C++** | |
 | VS components | **C++ Clang Compiler for Windows**, **MSBuild support for LLVM (clang-cl) toolset**, **vcpkg package manager** | All projects use the `ClangCL` toolset. vcpkg is the copy bundled with VS (`$(VCInstallDir)vcpkg`); you do not need a separate vcpkg install or `vcpkg integrate`. |
 | Git | any recent | |
-| Internet on the first build | | vcpkg downloads and builds the dependencies (SDL3, Catch2, nlohmann-json, dav1d, libwebm, dr_libs, sfizz, libchdr). This takes several minutes the first time and is cached after that. |
+| Internet on the first build | | vcpkg downloads and builds the dependencies (SDL3, Catch2, nlohmann-json, dav1d, libwebm, dr_libs, sfizz, libchdr, lodepng, SQLite). This takes several minutes the first time and is cached after that. |
 | **Your own copy of the game** | Vagrant Story (USA), **SLUS-01040** | See §3. No game data is in this repository. |
 | FFmpeg | 6.0+ with the `psxstr` demuxer and `libsvtav1` (preferred) or `libaom-av1` | Needed only by the extractor, to convert the intro movie (ASSET_PIPELINE §6.7); found on `PATH` or given with `--ffmpeg`. `winget install Gyan.FFmpeg` gives a suitable build. Gyan's "essentials" build has no `libsvtav1`, so it uses the slower `libaom-av1`. It is never linked or shipped. |
 
@@ -351,7 +351,57 @@ build\Debug\VS.Extract.exe authoring Native\data
   zstd stay out of the game's own symbols. After changing a port's files, touch `vcpkg.json`; MSBuild otherwise
   skips the vcpkg restore.
 
-### 5.1 Native audio assets
+### 5.1 Recipe patch and mod layers
+
+Workshop tables now compile into a private SQLite database when the data store
+opens. CSV remains authoritative; the database is rebuilt in memory, not written
+into the base data directory. The production workshop reads the compiled records.
+
+To enable layers, create `catalog-layers.json` beside the data root's
+`manifest.json`, using the schema in
+[`Native\Content\schemas\catalog-layers.schema.json`](../Native/Content/schemas/catalog-layers.schema.json).
+For the repository's normal `Native\data` layout:
+
+```json
+{
+  "schema": "vs.catalog-layers",
+  "schema_version": 1,
+  "layers": ["../Content/patches", "../../mods/my-mod"]
+}
+```
+
+Create the listed directories first. Paths resolve relative to this file, not
+the process's working directory. Absolute paths are also supported. An absent
+configuration means base-only loading; a missing, repeated or invalid configured
+root is an error. List patches first and mods in increasing precedence.
+
+Each layer mirrors the base catalog paths. For example,
+`mods\my-mod\catalogs\menu\combination-blade-results.csv` can contain:
+
+```csv
+id,strength
+blade.battle-knife,12
+```
+
+Existing keys merge just the supplied columns. New rows require every semantic
+column. Optional `_op` selects `add` (must be absent), `replace` (must exist and
+supplies every column), `merge` (the default), or `remove` (must exist; only key
+values). Pairs use ordered `first,second` keys; materials use their schema's
+composite key. Named and legacy numeric enum keys are equivalent. Legacy result
+aliases resolve to semantic IDs rather than renaming definitions.
+
+The last listed layer wins. Multiple layers touching one key are reported in the
+content log, with both source files. Duplicate keys within one layer, unknown
+columns, invalid values and unresolved references are errors, not defaults.
+Failed loads leave the previously published store intact. No base files are
+modified. Restart the game to load edits; this is not hot reload.
+
+**Current scope:** the nine workshop recipe tables only. The remaining gameplay
+and zone tables, asset-path overrides and stable mod-defined inventory identities
+are still tracked in #499, #199, #58 and #520. A CSV under a layer's `catalogs`
+directory that is not registered in this scope is rejected, not silently ignored.
+
+### 5.2 Native audio assets
 
 `extract` converts the banks and streams. For an existing data directory, the bank and
 stream commands update them without reconverting the movie:

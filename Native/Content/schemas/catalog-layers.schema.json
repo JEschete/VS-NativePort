@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Ordered native catalog layers",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "schema_version", "layers"],
+  "properties": {
+    "schema": {"const": "vs.catalog-layers"},
+    "schema_version": {"const": 1},
+    "display_name": {"type": "string"},
+    "layers": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1},
+      "description": "Patch and mod roots in increasing precedence. Relative paths resolve beside catalog-layers.json. Roots must exist and must not repeat or name the base root."
+    }
+  }
+}

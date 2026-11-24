@@ -39,8 +39,8 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies Condition="'$(Configuration)'=='Debug'">SDL3.lib;Catch2d.lib;dav1d.lib;webm.lib;sfizz.lib;bcrypt.lib;winhttp.lib;chdr.lib;lodepng.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalDependencies Condition="'$(Configuration)'=='Release'">SDL3.lib;Catch2.lib;dav1d.lib;webm.lib;sfizz.lib;bcrypt.lib;winhttp.lib;chdr.lib;lodepng.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies Condition="'$(Configuration)'=='Debug'">SDL3.lib;Catch2d.lib;dav1d.lib;webm.lib;sfizz.lib;bcrypt.lib;winhttp.lib;chdr.lib;lodepng.lib;sqlite3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies Condition="'$(Configuration)'=='Release'">SDL3.lib;Catch2.lib;dav1d.lib;webm.lib;sfizz.lib;bcrypt.lib;winhttp.lib;chdr.lib;lodepng.lib;sqlite3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/WHOLEARCHIVE:$(OutDir)VS.Engine.lib /WHOLEARCHIVE:$(OutDir)VS.Content.lib /WHOLEARCHIVE:$(OutDir)VS.Game.lib %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
@@ -134,6 +134,7 @@
     <ClCompile Include="src\BoneTrailTests.cpp" />
     <ClCompile Include="src\BreakArtsTests.cpp" />
     <ClCompile Include="src\CameraConstraintTests.cpp" />
+    <ClCompile Include="src\CatalogDatabaseTests.cpp" />
     <ClCompile Include="src\CdDriveTests.cpp" />
     <ClCompile Include="src\CollisionSamplingTests.cpp" />
     <ClCompile Include="src\CombatLabCanvasTests.cpp" />

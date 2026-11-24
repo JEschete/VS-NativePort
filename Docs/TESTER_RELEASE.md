@@ -38,6 +38,8 @@ setup.
 1. Extract the **entire ZIP** into a folder. Do not run programs inside the ZIP.
 2. Double-click **Start-Game.cmd**. It checks the bundled runtime files and opens
    the launcher. No Visual Studio, Python or Node.js installation is needed.
+   Keep the bundled `sqlite3.dll` beside the executables; it compiles native
+   gameplay catalogs and requires no separate database installation.
    On first launch saves default to the local `saves` folder; disc and FFmpeg
    fields are blank. No developer configuration or personal paths are included.
 3. Use **Choose disc...** beside the disc field to select your `.cue`, `.bin` or

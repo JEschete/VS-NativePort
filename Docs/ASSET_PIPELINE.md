@@ -776,6 +776,31 @@ must agree on the category, stats and legacy identity both paths consume;
 divergent authored variants require distinct IDs. A single shared item
 definition with all import-only fields separated is still part of #499.
 
+#### Layered compiled workshop catalogs (#499)
+
+The data store loads the nine workshop CSV tables, applies the ordered roots in
+optional `catalog-layers.json`, validates their values/references and compiles
+them into a private SQLite database. Production recipe books are built from
+queries of that database, not a separate unpatched CSV path. The importer keeps
+its base-only path so offline preservation/reconversion does not bake mods into
+the source catalog.
+
+Layers implement plan section 9.6: partial-field merge by schema key, complete
+add/replace, and explicit remove. Directed pair keys preserve order. Enum codes
+and legacy result aliases normalize before matching; ambiguous identities and
+duplicate resolved keys fail. Later roots win with a deterministic conflict
+report. Numeric values, readable enum names and row source locations survive
+SQLite compilation. Foreign keys are enabled; compilation is transactional and
+the published database is read-only.
+
+The database is currently in-memory and owned by the data store. Reopening
+recompiles from current CSV files without a stale persistent cache, requires no
+write access to base assets, and does not affect a previous store on failure.
+Base files and import provenance are never changed by loading layers.
+See [BUILDING.md section 5.1](BUILDING.md#51-recipe-patch-and-mod-layers) for the
+configuration and patch syntax. Other catalog families and asset-path overrides
+are not adopted by this slice; it does not complete #499 or #520.
+
 ### 6.9 Zones (ZND → CSV tables, #199, #517)
 
 A `MAP\ZONE*.ZND` is what the room loader reads when the zone changes (`Content/ZndFile.hpp`; the game's `_loadZnd`). Its 0x1C-byte header holds the room table, enemy section and texture section (each as offset and size) and the zone's music id. A reserved word follows, zero in every file. The sections are packed back to back to the end of the file:

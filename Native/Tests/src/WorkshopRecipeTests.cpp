@@ -533,3 +533,23 @@ TEST_CASE("Extracted workshop recipe files convert to tables exactly",
     CHECK(converted->files.size() == 2 * content::kWorkshopTablePartCount);
   }
 }
+
+TEST_CASE("Authored workshop corpus survives SQLite compilation exactly",
+          "[catalog-layers][workshop][extract]") {
+  const auto data = RepositoryPath(fs::path("Native") / "data");
+  if (!data) SKIP("Extracted Native/data is unavailable");
+  if (fs::exists(*data / "catalog-layers.json")) {
+    SKIP("Base-only corpus comparison requires no enabled catalog layers");
+  }
+  const auto base = content::LoadWorkshopRecipes(*data);
+  if (!base) FAIL(base.error());
+  const auto database =
+      content::CatalogDatabase::Load(*data, content::WorkshopCatalogSources());
+  if (!database) FAIL(database.error());
+  const auto compiled = content::LoadWorkshopRecipes(*database);
+  if (!compiled) FAIL(compiled.error());
+  for (const auto kind : content::kWorkshopKinds) {
+    CAPTURE(content::LayoutOf(kind).name);
+    CHECK(compiled->Of(kind) == base->Of(kind));
+  }
+}

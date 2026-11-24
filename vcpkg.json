@@ -15,6 +15,7 @@
     "libwebm",
     "drlibs",
     "libchdr",
-    "lodepng"
+    "lodepng",
+    "sqlite3"
   ]
 }

@@ -42,6 +42,9 @@
     <ClCompile Include="src\AudioStream.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\CatalogDatabase.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\CatalogTable.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -175,6 +178,9 @@
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\AudioStream.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\CatalogDatabase.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\CatalogTable.hpp">

@@ -570,6 +570,7 @@ std::expected<std::uint32_t, std::string> Resolve(const ResultIds& ids,
                                                   const TableRow& row,
                                                   std::size_t column,
                                                   std::string_view file) {
+  if (!row.source.empty()) file = row.source;
   const std::string& id = row.cells[column];
   const auto found = ids.find(id);
   if (found == ids.end()) {
@@ -805,17 +806,11 @@ WorkshopTexts FormatWorkshopTables(const WorkshopRecipeTable& table) {
                   materials)};
 }
 
-std::expected<WorkshopRecipeTable, std::string> ParseWorkshopTables(
-    WorkshopKind kind, const WorkshopTexts& texts) {
+namespace {
+std::expected<WorkshopRecipeTable, std::string> ParseWorkshopRows(
+    WorkshopKind kind,
+    std::array<std::vector<TableRow>, kWorkshopTablePartCount> rows) {
   const WorkshopLayout& layout = LayoutOf(kind);
-  std::array<std::vector<TableRow>, kWorkshopTablePartCount> rows;
-  for (const WorkshopTablePart part : kWorkshopTableParts) {
-    auto read =
-        ReadTable(WorkshopTableSpec(kind, part), texts.at(IndexOf(part)),
-                  WorkshopTablePath(kind, part));
-    if (!read) return std::unexpected(read.error());
-    rows.at(IndexOf(part)) = std::move(*read);
-  }
   std::vector<TableRow>& results = rows[IndexOf(WorkshopTablePart::kResults)];
   const std::size_t legacy_column = kind == WorkshopKind::kBlade
                                         ? std::size_t{kBladeLegacyId}
@@ -832,9 +827,8 @@ std::expected<WorkshopRecipeTable, std::string> ParseWorkshopTables(
     if (kind == WorkshopKind::kBlade) {
       auto blade = BladeOf(row);
       if (blade.cost_type == 0 && blade.cost != 0) {
-        return std::unexpected(
-            CellError(WorkshopTablePath(kind, WorkshopTablePart::kResults),
-                      row.line, "cost", "none cost_type requires zero cost"));
+        return std::unexpected(CellError(row.source, row.line, "cost",
+                                         "none cost_type requires zero cost"));
       }
       table.blades.push_back(std::move(blade));
     } else {
@@ -851,6 +845,20 @@ std::expected<WorkshopRecipeTable, std::string> ParseWorkshopTables(
     table.materials.push_back(RuleOf(row, layout.by_category));
   }
   return table;
+}
+}  // namespace
+
+std::expected<WorkshopRecipeTable, std::string> ParseWorkshopTables(
+    WorkshopKind kind, const WorkshopTexts& texts) {
+  std::array<std::vector<TableRow>, kWorkshopTablePartCount> rows;
+  for (const WorkshopTablePart part : kWorkshopTableParts) {
+    auto read =
+        ReadTable(WorkshopTableSpec(kind, part), texts.at(IndexOf(part)),
+                  WorkshopTablePath(kind, part));
+    if (!read) return std::unexpected(read.error());
+    rows.at(IndexOf(part)) = std::move(*read);
+  }
+  return ParseWorkshopRows(kind, std::move(rows));
 }
 
 std::size_t MaterialIndex(const WorkshopLayout& layout,
@@ -917,6 +925,37 @@ std::expected<WorkshopRecipeCatalog, std::string> LoadWorkshopRecipes(
       texts.at(IndexOf(part)) = std::move(*text);
     }
     auto table = ParseWorkshopTables(kind, texts);
+    if (!table) return std::unexpected(table.error());
+    catalog.tables.at(IndexOf(kind)) = std::move(*table);
+  }
+  if (auto shared = CheckSharedWorkshopResults(catalog); !shared) {
+    return std::unexpected(shared.error());
+  }
+  return catalog;
+}
+
+std::vector<CatalogTableSource> WorkshopCatalogSources() {
+  std::vector<CatalogTableSource> sources;
+  for (const auto kind : kWorkshopKinds) {
+    for (const auto part : kWorkshopTableParts) {
+      sources.push_back({WorkshopTableSpec(kind, part),
+                         Platform::Utf8Path(WorkshopTablePath(kind, part))});
+    }
+  }
+  return sources;
+}
+
+std::expected<WorkshopRecipeCatalog, std::string> LoadWorkshopRecipes(
+    const CatalogDatabase& database) {
+  WorkshopRecipeCatalog catalog;
+  for (const auto kind : kWorkshopKinds) {
+    std::array<std::vector<TableRow>, kWorkshopTablePartCount> rows;
+    for (const auto part : kWorkshopTableParts) {
+      auto read = database.Read(WorkshopTableSpec(kind, part));
+      if (!read) return std::unexpected(read.error());
+      rows.at(IndexOf(part)) = std::move(*read);
+    }
+    auto table = ParseWorkshopRows(kind, std::move(rows));
     if (!table) return std::unexpected(table.error());
     catalog.tables.at(IndexOf(kind)) = std::move(*table);
   }

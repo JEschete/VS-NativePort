@@ -246,17 +246,11 @@ std::expected<TableRow, std::string> ReadRow(
         std::format("{}:{}: has {} fields; the header has {}", file,
                     record.line, record.fields.size(), header_fields));
   }
-  TableRow row{.line = record.line, .cells = {}, .values = {}};
+  std::vector<std::string> cells;
   for (std::size_t column = 0; column < spec.columns.size(); ++column) {
-    const std::string& cell = record.fields[position[column]];
-    auto value = ReadCell(spec.columns[column], cell, file, record.line);
-    if (!value) return std::unexpected(value.error());
-    row.cells.emplace_back(spec.columns[column].type == ColumnType::kEnum
-                               ? EnumName(spec.columns[column], *value)
-                               : std::string_view(cell));
-    row.values.push_back(*value);
+    cells.push_back(record.fields[position[column]]);
   }
-  return row;
+  return ReadTableRow(spec, cells, file, record.line);
 }
 
 std::expected<std::vector<std::size_t>, std::string> KeyColumns(
@@ -342,6 +336,27 @@ std::string FormatCsv(std::span<const std::vector<std::string>> records) {
 std::string CellError(std::string_view file, std::size_t line,
                       std::string_view column, std::string_view problem) {
   return std::format("{}:{}: column '{}': {}", file, line, column, problem);
+}
+
+std::expected<TableRow, std::string> ReadTableRow(
+    const TableSpec& spec, std::span<const std::string> cells,
+    std::string_view file, std::size_t line) {
+  if (cells.size() != spec.columns.size()) {
+    return std::unexpected(std::format("{}:{}: expected {} cells, got {}", file,
+                                       line, spec.columns.size(),
+                                       cells.size()));
+  }
+  TableRow row{
+      .line = line, .cells = {}, .values = {}, .source = std::string(file)};
+  for (std::size_t column = 0; column < cells.size(); ++column) {
+    auto value = ReadCell(spec.columns[column], cells[column], file, line);
+    if (!value) return std::unexpected(value.error());
+    row.cells.emplace_back(spec.columns[column].type == ColumnType::kEnum
+                               ? EnumName(spec.columns[column], *value)
+                               : std::string_view(cells[column]));
+    row.values.push_back(*value);
+  }
+  return row;
 }
 
 std::expected<std::vector<TableRow>, std::string> ReadTable(

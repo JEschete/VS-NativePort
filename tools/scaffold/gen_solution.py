@@ -64,15 +64,15 @@ PROJECTS = [
     Project("VS.Content", "Content", refs=["VS.Engine"], legacy=True),
     Project("VS.Game", "Game", refs=["VS.Engine", "VS.Content"], folders=GAME_MODULES),
     Project("VS.Desktop", "Desktop", kind="exe", refs=["VS.Engine", "VS.Content", "VS.Game"],
-            libs=["sdl3", "movie", "audio", "disc", "image"]),
+            libs=["sdl3", "movie", "audio", "disc", "image", "catalog"]),
     Project("VS.CombatLab", "Tools\\CombatLab", kind="exe",
-            refs=["VS.Engine", "VS.Content", "VS.Game"], libs=["sdl3", "movie", "audio", "disc", "image"]),
+            refs=["VS.Engine", "VS.Content", "VS.Game"], libs=["sdl3", "movie", "audio", "disc", "image", "catalog"]),
     Project("VS.Extract", "Tools\\Extract", kind="exe", console=True, refs=["VS.Engine", "VS.Content"],
-            libs=["sdl3", "disc", "image"]),
+            libs=["sdl3", "disc", "image", "catalog"]),
     Project("VS.Launcher", "Tools\\Launcher", kind="exe",
-            refs=["VS.Engine", "VS.Content"], libs=["sdl3", "shell", "crypto", "http", "disc", "image"]),
+            refs=["VS.Engine", "VS.Content"], libs=["sdl3", "shell", "crypto", "http", "disc", "image", "catalog"]),
     Project("VS.Tests", "Tests", kind="exe", console=True, refs=["VS.Engine", "VS.Content", "VS.Game"],
-            libs=["sdl3", "catch2", "movie", "audio", "crypto", "http", "disc", "image"],
+            libs=["sdl3", "catch2", "movie", "audio", "crypto", "http", "disc", "image", "catalog"],
             whole_archive=["VS.Engine", "VS.Content", "VS.Game"],
             see=["VS.CombatLab", "VS.Launcher", "VS.Extract"], extra_sources=[
                 r"Tools\Extract\src\AssetLabels.cpp",
@@ -117,6 +117,8 @@ VCPKG_LIBS = {
     "disc": {"Debug": ["chdr.lib"], "Release": ["chdr.lib"]},
     # Content\\ImageFiles: native PNG images (ASSET_PIPELINE.md §6.4)
     "image": {"Debug": ["lodepng.lib"], "Release": ["lodepng.lib"]},
+    # Content\\CatalogDatabase: derived, layered gameplay catalogs.
+    "catalog": {"Debug": ["sqlite3.lib"], "Release": ["sqlite3.lib"]},
 }
 VCPKG_PROPS = r"$(VCInstallDir)vcpkg\scripts\buildsystems\msbuild\vcpkg.props"
 VCPKG_TARGETS = r"$(VCInstallDir)vcpkg\scripts\buildsystems\msbuild\vcpkg.targets"

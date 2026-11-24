@@ -103,6 +103,9 @@ class DataStore {
   [[nodiscard]] const WorkshopRecipeCatalog* WorkshopRecipes() const {
     return m_workshop_recipes_ ? &*m_workshop_recipes_ : nullptr;
   }
+  [[nodiscard]] const CatalogDatabase* CatalogTables() const {
+    return m_catalog_tables_ ? &*m_catalog_tables_ : nullptr;
+  }
   // Reads `asset` into `out` as the original's whole-sector load did: its
   // bytes, then zeros. Refuses an asset this store's catalog did not issue
   // and a destination past the asset's load size.
@@ -115,6 +118,7 @@ class DataStore {
   std::optional<AssetCatalog> m_catalog_;
   std::optional<ConversionManifest> m_conversion_manifest_;
   std::optional<WorkshopRecipeCatalog> m_workshop_recipes_;
+  std::optional<CatalogDatabase> m_catalog_tables_;
 };
 
 }  // namespace VS::Content

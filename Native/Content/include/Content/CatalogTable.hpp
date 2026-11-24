@@ -74,6 +74,7 @@ struct TableRow {
   std::size_t line = 0;
   std::vector<std::string> cells;
   std::vector<std::int64_t> values;
+  std::string source;
 };
 
 // "<file>:<line>: column '<column>': <problem>".
@@ -85,6 +86,10 @@ struct TableRow {
 // for their id syntax only; the caller resolves them.
 [[nodiscard]] std::expected<std::vector<TableRow>, std::string> ReadTable(
     const TableSpec& spec, std::string_view text, std::string_view file);
+// Validates cells already ordered by the spec, retaining their source location.
+[[nodiscard]] std::expected<TableRow, std::string> ReadTableRow(
+    const TableSpec& spec, std::span<const std::string> cells,
+    std::string_view file, std::size_t line);
 // `rows` (cells in the spec's column order) under the spec's header.
 [[nodiscard]] std::string FormatTable(
     const TableSpec& spec, std::span<const std::vector<std::string>> rows);

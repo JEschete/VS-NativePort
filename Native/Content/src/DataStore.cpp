@@ -252,21 +252,32 @@ std::expected<void, std::string> RequireConvertedType(
 }
 
 // The workshop recipe tables, when `manifest` lists their outputs.
-std::expected<std::optional<WorkshopRecipeCatalog>, std::string>
-LoadListedRecipes(const fs::path& root,
-                  const std::optional<ConversionManifest>& manifest) {
+struct LoadedRecipes {
+  CatalogDatabase database;
+  WorkshopRecipeCatalog recipes;
+};
+
+std::expected<std::optional<LoadedRecipes>, std::string> LoadListedRecipes(
+    const fs::path& root, const std::optional<ConversionManifest>& manifest) {
   if (!manifest || std::ranges::none_of(
                        manifest->outputs, [](const ConversionOutput& output) {
                          return output.converter == kSydRecipeConverterName;
                        })) {
     return std::nullopt;
   }
-  auto recipes = LoadWorkshopRecipes(root);
-  if (!recipes) {
-    return std::unexpected(recipes.error() + " (re-run VS.Extract tables " +
-                           Platform::PathText(root) + ")");
+  auto database = CatalogDatabase::Load(root, WorkshopCatalogSources());
+  if (!database) {
+    return std::unexpected(
+        database.error() +
+        " (check catalog-layers.json and layer CSVs; for missing base tables, "
+        "re-run VS.Extract tables " +
+        Platform::PathText(root) + ")");
   }
-  return std::move(*recipes);
+  auto recipes = LoadWorkshopRecipes(*database);
+  if (!recipes) {
+    return std::unexpected(recipes.error());
+  }
+  return LoadedRecipes{std::move(*database), std::move(*recipes)};
 }
 
 }  // namespace
@@ -354,7 +365,10 @@ std::expected<void, std::string> DataStore::Open(const fs::path& root) {
   store->m_conversion_manifest_ = std::move(*conversions);
   auto recipes = LoadListedRecipes(root, store->m_conversion_manifest_);
   if (!recipes) return std::unexpected(recipes.error());
-  store->m_workshop_recipes_ = std::move(*recipes);
+  if (*recipes) {
+    store->m_workshop_recipes_ = std::move((**recipes).recipes);
+    store->m_catalog_tables_ = std::move((**recipes).database);
+  }
   // catalogs\ also holds the tier-1 tables (catalogs\menu\); either asset
   // catalog file means the asset catalog was written and must load.
   std::error_code error;
@@ -376,6 +390,13 @@ std::expected<void, std::string> DataStore::Open(const fs::path& root) {
   } else if (error) {
     return std::unexpected("cannot inspect " + Platform::PathText(catalogs) +
                            ": " + error.message());
+  }
+  if (store->m_catalog_tables_) {
+    for (const auto& conflict : store->m_catalog_tables_->Conflicts()) {
+      VS::Core::LogInfo("content", "catalog conflict {} [{}]: {} overrides {}",
+                        conflict.table, conflict.key, conflict.winning_source,
+                        conflict.previous_source);
+    }
   }
   VS::Core::LogInfo("content", "extracted data: {} files, {} assets from {}",
                     store->m_entries_.size(),

@@ -1,5 +1,52 @@
 # Current Handoff
 
+## Layered SQLite workshop catalogs (#499/#520), 2026-11-23
+
+Verified worktree based on `f4312a2d2`, on `main`. The shared catalog compiler
+implements plan section 9.6 partial CSV merge, add, replace and remove by the
+schema's semantic/composite key. Optional `catalog-layers.json` lists patch/mod
+roots in increasing precedence. Base data is never written. See BUILDING.md
+section 5.1 for supported syntax and the nine-table scope.
+
+Production `DataStore::Open` compiles workshop tables into an owned in-memory
+SQLite database, then queries it to construct the recipe catalog used by the
+live workshop loader. Named/numeric domains and legacy result aliases normalize
+before matching. Duplicate resolved keys, bad operations/values, missing
+references, unsupported layer tables and missing/repeated roots fail explicitly.
+Conflicts report both source files; failed opens preserve the previous store.
+The importer retains its base-only preservation path. SQLite is a pinned vcpkg
+dependency, included in the generated executable links and tester packaging.
+
+Verification:
+- Full Debug and Release x64 builds passed (`VS_JOBS=4`, `/m:2`).
+- Both configurations passed **85 cases / 10,168 assertions**, selection
+  `[catalog-layers],[content-tables],[workshop-authoring],[asset-labels],[asset-catalog]`.
+- Tests cover partial edits, directed recipe additions through the production
+  live recipe loader, remove/replace, alias and enum keys, source diagnostics,
+  conflict precedence, Unicode/space paths, repeat compilation, base-file
+  preservation and failed-store publication.
+- The actual authored workshop corpus reloads identically through SQLite,
+  including every result, material rule and directed outcome.
+- Both Debug production replays match unchanged baselines: `silver_wolves`
+  2,400 frames, `first_lever_room` 900 frames. Run directories end in
+  `1795487514732269-0` and `1795487588404587-0` under
+  `build\Debug\combat-lab\runs`.
+- New compiler/test scoped tidy and complete changed-file quality: zero new
+  findings. Project generation is stable on a second run; generator syntax,
+  release script syntax and the configuration schema were checked.
+- Evidence: `build\issue-499-layers-*.log`. No disc-derived files changed.
+
+This is an adopted foundation, not closure of #499/#520. Remaining work includes
+the other table families, shared item definitions, full text/flags/field
+semantics and actual controller-driven edited-workshop/action acceptance.
+
+Next enemy-table trace: `CharacterInit.material` is **not** the equipment
+material enum. `ActorSpawning.cpp:150` forwards it as `gait.movement_class`,
+and the body asset request also consumes it; real values include 8, 16 and 64.
+Do not label those as equipment materials. Equipment classes start at index 0
+(six active entries), affinities at index 0 (seven active entries), and physical
+types use 1..3. The verified distinction is recorded on #199 before migration.
+
 ## Named recipe domains (#499/#520), 2026-11-23
 
 Base revision: `22b0be713` on `main`. The shared CSV schema/reader now supports
