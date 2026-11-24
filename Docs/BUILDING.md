@@ -269,6 +269,16 @@ run, check its citations in the
 archive referenced evidence first; unknown provenance means retain it.
 Do not commit or attach disc-derived captures, audio, dumps or BIOS files.
 
+The 2026-11-24 cleanup moved 80 uncited capture/reference directories and 268
+uncited loose logs, drafts and backups (about 673 MB) from the `build\` root into
+`build\evidence-archive\20261124-build-cleanup\` (`captures\`, `reference-pins\`,
+`loose-files\`). Its `MOVES.json` maps every entry to its old path, so moving an
+entry back restores it. Everything cited by this documentation or an issue
+(`issue-*` evidence, the logs named in the handoff) stayed at its original path,
+as did `build\player`, `build\duckstation`, the Combat Lab logs and the retained
+reference data. Keep `build\` root entries that docs or issues cite in place;
+put new disposable output under `build\scratch\<experiment>`.
+
 ---
 
 ## 5. Convert the game data (asset extraction)
