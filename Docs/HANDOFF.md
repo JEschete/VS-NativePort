@@ -3,9 +3,12 @@
 ## Native file-picker text adoption (#54/#500), 2026-11-24
 
 Base `08f26705ba3b5142fd797df720bf59a7666ac5bb` on `main`; its metadata CI
-`45390826539` passed. **This text milestone is locally changed, not committed
-or pushed.** The parent owns publication and exact-revision CI. The material
-verification row and prior evidence below are preserved.
+`45390826539` passed. The original local/dirty verification below preceded
+publication of the native-text milestone and default-root integration as
+`4a1f1514cdac4223dc64b9bbf88781499b22f2b6`.
+[Exact-revision CI 45400239745](https://github.com/JEschete/VS-NativePort/actions/runs/45400239745)
+passed and scoped acceptance evidence was posted on #54. The historical dirty
+records, material verification row and prior evidence below are preserved.
 
 ### Complete adopted boundary
 
@@ -144,7 +147,51 @@ into normal play.
 The TITLE and MCMAN source files are not incorrectly marked wholly converted.
 The normal data tree now contains the required prompt/font assets; this is
 distinct from the earlier isolated-root tests. No new default-root controller
-run or authored-font-pixel visual comparison is claimed.
+run was performed in that integration step.
+
+### Authored font-pixel adoption follow-up on published `4a1f1514`
+
+Two fresh Debug production Desktop runs on the **clean published revision**
+used the known Continue/confirmation inputs only:
+`--frames 2401 --scripted --at 2000,2300 --press 1000:Start,1300:Circle,1600:Circle`.
+Data, text layer, glyph metrics, save and other inputs were identical.
+The atlas at `build\issue-54-native-text\data\textures\ui\save-font.png` and
+all its parent directories were verified as privately owned, not junctions.
+
+Between baseline **`1795525896603936-0`** and authored
+**`1795526028012906-0`**, only **72 pixels** in the `L` glyph's first six
+columns (`x=0..5`, `y=12..23`) were set to its existing opaque white palette
+index **15**. The 4-bit PNG's palette, dimensions and every other atlas pixel
+were unchanged; no text/metric/layout/source-code edit was made.
+
+At both ticks **2000 and 2300**, exactly **210 frame pixels** differ:
+
+| Native glyph instance | Inclusive captured-frame rectangle | Changed pixels |
+| --- | --- | --- |
+| `L` in `YES - Load` | x=69..75, y=26..40 | 105 |
+| `L` starting the load prompt | x=8..14, y=198..212 | 105 |
+
+**Every other frame pixel is identical**, including the legacy `LOAD`
+breadcrumb, Caution, remaining text, artwork and background. Both frames
+within each run are also identical. Both runs report the same status/layout
+sequence (reading 1378, selection 1380, confirmation 1600), `exit_code=0`,
+`engine_errors=0` and `trace_failed=false`.
+
+This proves that authored atlas pixels reach the actual native glyph draws
+despite the temporary page upload/restore; it is not merely an
+original-equivalent font comparison. It does **not** retire the page/packet
+backend or convert any additional font bank.
+
+The private PNG was restored to its exact original bytes
+(`0c646b91196640f465e3b327d59837a2676b7135ddec2aaab188b9e7afb0483c`)
+and write/creation timestamps. All **16 protected inputs** retain their hashes
+and write timestamps, including the default font/text assets, default manifest,
+owner saves, private save/text/metrics/layer and sidecar.
+Evidence is in `build\issue-54-native-text\font-pixel-proof`
+(`runs.json`, `atlas-edit.json`, `frame-comparison.json`, `restoration.json`,
+both capture folders and exact argument files). No new build or whole test
+suite was run; the only maintained changes in this follow-up are these
+handoff/verification notes. No defect or source repair was needed.
 
 **Remaining limits:** #54/#500/#498 remain open. The other 135 MCMAN strings
 (including 47 unsupported Japanese labels), other text tables/dialogue/help,
@@ -153,8 +200,9 @@ Room summaries, breadcrumb/legend/artwork rendering retain their explicit old
 boundaries. This slice is instant Latin/symbol information, not progressive
 dialogue, full Unicode shaping, localization completeness, accessibility
 certification or matched PS1/emulator parity. No new controller-driven
-save/overwrite/ending/container-completion claim is made. Publish the scoped
-milestone and confirm exact-revision CI before posting final acceptance evidence.
+save/overwrite/ending/container-completion claim is made. The scoped native-text
+source milestone and default-root integration are published with passing CI;
+the wider issue and retirement gates above remain open.
 
 ## Native material-catalog adoption (#499), 2026-11-24
 
