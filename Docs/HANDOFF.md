@@ -1,11 +1,95 @@
 # Current Handoff
 
+## Semantic FAR authoring and visible native-only layout (#210), 2026-11-24
+
+Verified against `40604ac4f39bbe8b575e7230400a935414c82890` with the FAR
+Content/Game/Extract/tests, generated projects and documentation dirty.
+Publication and exact-revision CI remain pending; **#210 is not complete**.
+
+- Four artwork identities now use `castle-silhouette`, `dark-clouds`,
+  `sun-on-horizon` and `grey-clouds`: `background.<slug>`,
+  `image.bg.<slug>`, `backgrounds\<slug>.background.json` and
+  `textures\bg\<slug>.{png,image.json}`. These describe the artwork, not
+  invented room names or sunrise/sunset. Old IDs remain explicit aliases.
+- The edit-preserving migration updates eight manifest identities and eight
+  import-source catalog IDs/aliases. Catalog schema 2 preserves v1 reading.
+  Canonical/alias handles, per-alias dependency checks, custom IDs/filenames,
+  edited pixels/corners, collisions/refusals and repeat conversion are covered.
+  Direct custom raw-catalog file references to renamed native files still
+  require explicit migration and refuse before publication.
+- `far-layout-json`/`tim-png` are v2; layout schema 2 adds native
+  `cell_size_units` 16/32/64. Budgets are 64 cells per side, 1,024 stored cells
+  and 1 MiB JSON. Imported geometry stays 32 units; the offline FAR encoder
+  refuses a different cell size. Production owns and draws the typed geometry.
+- Full Debug/Release x64 solution builds passed with `VS_JOBS=4`, `/m:2`.
+  Selection: `[far-layout],[field-background],[content-images],[asset-catalog],
+  [asset-labels],[render-textures],[source-verification]`.
+  Debug initially passed 185 cases; the TIM corpus fixture alone failed because
+  it assumed the first manifest record owned files rather than resolving its
+  alias. After that test-helper correction, the exact corpus test passed
+  **1 case / 1,684 assertions**; unchanged passing cases were not rerun.
+  The final Release selection passed **186 cases / 18,684 assertions**.
+  No existing test name, assertion threshold or replay baseline changed.
+- Scoped whole-change quality passed with zero findings. Tidy checked eleven
+  migration/runtime/test translation units; the final fixture-size finding was
+  resolved by splitting the fixture helper, and its targeted rerun passed with
+  zero findings. Hazard synchronization records 276 sites, with the two new
+  cell-size divisors and coupled width modulo explicitly guarded.
+- All 288 cells and original FAR/TIM hashes are preserved; four PNGs remain
+  byte-identical. Four layouts and the source catalog pass JSON Schema.
+  Cold read: all four layouts plus seed 210's global cell 196, grey-clouds
+  cell 4, row 0/column 4, texels (127,0)..(159,30), four neutral RGB corners.
+  An editor can identify its corner-darkening edit from the schema alone.
+- The first `images` CLI annotation pass moved the four layout `display_name`
+  keys to the front; JSON values were identical. The repeated workflow then
+  kept all 14 watched native files byte-identical: four backgrounds unchanged;
+  images 798 unchanged/239 aliases; labels 0 changed/3,118 unchanged.
+  Project generation was byte-stable across 23 project/solution files.
+  Only eight BG content-ledger rows changed; source statuses are unchanged.
+- Final `gates.py --check`, `content.py --check`, `hazards.py --check`,
+  `regression.py static` and `git diff --check` passed. Verification records
+  are 482; existing 1,005 behavior markers and C++ promotion counts are unchanged.
+
+**Actual layout edit:** Debug `VS.Desktop.exe --frames 6001 --scripted --press
+1000:Start,1300:Circle --capture build\issue-210-layout-{original,authored}
+--at 4000,6000 --no-gpu-validation --speed 8 --save-dir
+build\issue-210-layout-save --verification-log`. No prologue skip or forced
+state. Changing only castle-silhouette's cell size 32→16 changed **4,401/4,391
+presented pixels**, bounds x24..294/y48..169. Both states are MAP001,
+zone 1/room 0, event 0/source 1, thread 0 PC `+0x626`; camera, models and
+normalized event state match exactly. The live loader logs 32/16-unit cells.
+Both runs exit 0 with no errors, and the layout, images, catalogs/manifest and
+executable restore/retain byte-exact hashes. The later label-only ordering pass
+is recorded separately above, not confused with the temporary gameplay edit.
+
+Evidence: `build\issue-210-semantic-{Debug,Release}-*-tests.log` and
+`build\issue-210-semantic-{Debug,Release}-tests.log`,
+`build\issue-210-semantic-{quality,tidy,tests-tidy}.{log,json}`,
+`build\issue-210-semantic-corpus.json`, `*-stable-hashes.csv`,
+`*-project-hashes.csv`; `build\issue-210-layout-comparison.json`,
+`build\issue-210-layout-comparison-{4000,6000}.png`, both `*-run.json` records
+and `*-hashes.csv`. Verification traces:
+`1795509870105143-0` / `1795510010698398-0`.
+Ignored `build\issue-210-semantic-before` preserves the pre-migration files;
+`Native\data` now contains the semantic filenames, aliases and catalog v2.
+Original import files were not changed or repacked.
+
+The prior skipped MAP008/open-sky observation was MAP062 with no FAR section.
+The separately verified MAP001 PNG edit remains in
+`build\issue-210-enabled-comparison.json` (7,815/7,800 changed pixels).
+Remaining gates: matched emulator/reference placement, gradients, seams and
+parallax; production transitions/re-entry; MPD/ARM semantic room bindings and
+applicable compatibility retirement. No complete EC-04 retirement is claimed.
+
 ## Verified offline text controls (#500), 2026-11-24
 
 Base `ef82a0f066446257307913a8c8698155361aa489`, with the text codec/header,
 `GameTextCodecTests.cpp`, `ZoneConversionTests.cpp` and text documentation dirty
 during verification. Concurrent FAR identity files were untracked/unregistered,
-not part of these builds. Scoped publication and exact-revision CI are pending.
+not part of these builds. Published as
+`40604ac4f39bbe8b575e7230400a935414c82890`; exact-revision
+[CI 45352616800](https://github.com/JEschete/VS-NativePort/actions/runs/45352616800)
+passed and evidence is posted on #500.
 
 - F8..FF now decode into named controls and operands: glyph reveal cost, text
   sound selector, spacing, glyph bank, palette slot/bank, centering, vertical

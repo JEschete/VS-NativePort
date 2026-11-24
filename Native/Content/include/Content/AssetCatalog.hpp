@@ -8,6 +8,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include "Content/AssetHandle.hpp"
@@ -17,11 +18,12 @@
 // user's disc. The game names files by id or by a typed catalog record; disc
 // sectors stay in the provenance the importer recorded.
 //
-// catalogs\assets.json (schema "vs.assets", version 1):
-//   {"schema": "vs.assets", "schema_version": 1, "assets": [
+// catalogs\assets.json (schema "vs.assets", version 2):
+//   {"schema": "vs.assets", "schema_version": 2, "assets": [
 //     {"id": "asset.music.music000.dat", "file": "disc/MUSIC/MUSIC000.DAT",
 //      "bytes": 12345,
-//      "provenance": {"disc_path": "MUSIC/MUSIC000.DAT", "lba": 46000}}, ...]}
+//      "provenance": {"disc_path": "MUSIC/MUSIC000.DAT", "lba": 46000}}, ...],
+//    "aliases": {"asset.compat.music": "asset.music.music000.dat"}}
 // catalogs\audio.json (schema "vs.audio", version 1): the original's music,
 // sound-effect bank and wave bank file tables and the files _loadMenuSound
 // reads, each entry naming an asset id:
@@ -31,7 +33,9 @@
 //    "menu": {"sample_banks": [id, id], "effect_sample_bank": id,
 //             "effect_programs": id}}
 //
-// Loading accepts these versions only and rejects unknown keys, invalid or
+// Asset version 1 remains readable without aliases. Version 2 aliases resolve
+// directly to canonical records and share their handles; chains are refused.
+// Loading rejects unsupported versions, unknown keys, invalid or
 // duplicate ids, unresolved references, paths outside the data root, missing
 // files and size mismatches. Errors name the file, the JSON pointer and the
 // rule. A loaded catalog is immutable.
@@ -42,7 +46,8 @@ inline constexpr std::string_view kAssetCatalogFile = "assets.json";
 inline constexpr std::string_view kAudioCatalogFile = "audio.json";
 inline constexpr std::string_view kAssetCatalogSchema = "vs.assets";
 inline constexpr std::string_view kAudioCatalogSchema = "vs.audio";
-inline constexpr int kAssetCatalogSchemaVersion = 1;
+inline constexpr int kAssetCatalogSchemaVersion = 2;
+inline constexpr int kOldestAssetCatalogSchemaVersion = 1;
 inline constexpr int kAudioCatalogSchemaVersion = 1;
 // The original read whole 2048-byte sectors.
 inline constexpr std::uint32_t kAssetSectorBytes = 2048;
@@ -53,9 +58,10 @@ inline constexpr std::size_t kWaveBankAssetCount = 100;
 
 // "asset." followed by '.'-separated segments of [a-z0-9_-].
 [[nodiscard]] bool IsValidAssetId(std::string_view id) noexcept;
-// The id the importer gives a disc file: "asset." and the lowercase disc
-// path with '/' as '.' ("MUSIC/MUSIC000.DAT" -> "asset.music.music000.dat").
-// Nullopt when the path cannot form a valid id.
+// The compatibility id derived from a disc file: "asset." and the lowercase
+// disc path with '/' as '.' ("MUSIC/MUSIC000.DAT" ->
+// "asset.music.music000.dat"). Known background imports now have semantic
+// source IDs plus these aliases. Nullopt when the path cannot form a valid id.
 [[nodiscard]] std::optional<std::string> AssetIdForDiscPath(
     std::string_view disc_path);
 
@@ -117,6 +123,8 @@ class AssetCatalog {
   std::vector<AssetRecord> records_;
   // Record indexes ordered by id.
   std::vector<std::uint32_t> by_id_;
+  // Compatibility keys resolve to the same record/handle as the canonical ID.
+  std::vector<std::pair<std::string, std::uint32_t>> aliases_;
   AudioCatalog audio_;
 };
 

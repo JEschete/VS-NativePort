@@ -431,6 +431,8 @@ LiveBackgroundHost::LoadBackgroundLayout(
   auto layout = std::make_shared<OwnedBackgroundLayout>();
   layout->width = static_cast<std::int32_t>(document->columns);
   layout->height = static_cast<std::int32_t>(document->rows);
+  layout->cell_size_units =
+      static_cast<std::int32_t>(document->cell_size_units);
   layout->image_id = document->image_id;
   layout->image = {
       .source_rect = {.x = 0,
@@ -443,9 +445,10 @@ LiveBackgroundHost::LoadBackgroundLayout(
   for (const auto& cell : document->cells) {
     layout->tiles.push_back(TileOf(cell));
   }
-  Core::LogInfo(kChannel, "loaded native layout {} ({}x{}, image {})",
+  Core::LogInfo(kChannel,
+                "loaded native layout {} ({}x{}, cell {} units, image {})",
                 document->id, document->columns, document->rows,
-                document->image_id);
+                document->cell_size_units, document->image_id);
   return layout;
 }
 

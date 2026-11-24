@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include "Content/BackgroundAssets.hpp"
 #include "Field/Camera.hpp"
 
 // The room background (BATTLE.PRG 146C.c:17431-17723 and 2842C.c:472-537):
@@ -192,6 +193,7 @@ struct BackgroundLayout {
   std::int32_t width = 0;
   std::int32_t height = 0;
   std::span<const BackgroundTile> tiles;
+  std::int32_t cell_size_units = Content::kBackgroundDefaultCellUnits;
 };
 
 // Room import provenance. The native layout selects its image; the original
@@ -215,6 +217,7 @@ struct OwnedBackgroundLayout {
   std::vector<BackgroundTile> tiles;
   std::string image_id{};
   BackgroundTextureUpload image{};
+  std::int32_t cell_size_units = Content::kBackgroundDefaultCellUnits;
 };
 
 class BackgroundHost {

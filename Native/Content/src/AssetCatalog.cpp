@@ -13,6 +13,7 @@
 #include <limits>
 #include <numeric>
 #include <optional>
+#include <set>
 #include <span>
 #include <sstream>
 #include <string>
@@ -66,8 +67,23 @@ std::string Pointer(std::string_view parent, std::size_t index) {
 
 std::expected<Json, std::string> ParseText(std::string_view text,
                                            const Errors& errors) {
-  Json value = Json::parse(text, nullptr, false);
+  std::vector<std::set<std::string>> keys;
+  bool duplicate = false;
+  const auto check_keys = [&keys, &duplicate](int, Json::parse_event_t event,
+                                              Json& item) {
+    if (event == Json::parse_event_t::object_start) keys.emplace_back();
+    if (event == Json::parse_event_t::key && !keys.empty()) {
+      duplicate =
+          !keys.back().insert(item.get<std::string>()).second || duplicate;
+    }
+    if (event == Json::parse_event_t::object_end && !keys.empty()) {
+      keys.pop_back();
+    }
+    return true;
+  };
+  Json value = Json::parse(text, check_keys, false);
   if (value.is_discarded()) return errors.Fail("", "not valid JSON");
+  if (duplicate) return errors.Fail("", "duplicate JSON object key");
   return value;
 }
 
@@ -98,7 +114,8 @@ std::expected<void, std::string> RequireKeys(
 std::expected<void, std::string> RequireSchema(const Json& root,
                                                std::string_view schema,
                                                int version,
-                                               const Errors& errors) {
+                                               const Errors& errors,
+                                               int minimum_version = 0) {
   const Json& name = root.at("schema");
   if (!name.is_string() || name.get<std::string>() != schema) {
     return errors.Fail("/schema", std::format("must be \"{}\"", schema));
@@ -107,7 +124,9 @@ std::expected<void, std::string> RequireSchema(const Json& root,
   if (!found.is_number_integer()) {
     return errors.Fail("/schema_version", "must be an integer");
   }
-  if (found.get<std::int64_t>() != version) {
+  if (minimum_version == 0) minimum_version = version;
+  if (found.get<std::int64_t>() < minimum_version ||
+      found.get<std::int64_t>() > version) {
     return errors.Fail(
         "/schema_version",
         std::format("unsupported version {} (this build reads {})",
@@ -232,17 +251,29 @@ std::expected<std::string, std::string> ReadText(const fs::path& path) {
   return std::move(text).str();
 }
 
-std::expected<std::vector<AssetRecord>, std::string> ParseAssetRecords(
+struct ParsedAssets {
+  std::vector<AssetRecord> records;
+  std::vector<std::pair<std::string, std::string>> aliases;
+};
+
+std::expected<ParsedAssets, std::string> ParseAssetRecords(
     std::string_view assets_json, const fs::path& root, const Errors& errors) {
   auto assets = ParseText(assets_json, errors);
   if (!assets) return std::unexpected(assets.error());
+  Json aliases = Json::object();
+  const bool has_aliases = assets->is_object() && assets->contains("aliases");
+  if (has_aliases) {
+    aliases = assets->at("aliases");
+    assets->erase("aliases");
+  }
   static constexpr std::array<std::string_view, 3> kAssetKeys = {
       "schema", "schema_version", "assets"};
   if (auto keys = RequireKeys(*assets, "", kAssetKeys, errors); !keys) {
     return std::unexpected(keys.error());
   }
   if (auto schema = RequireSchema(*assets, kAssetCatalogSchema,
-                                  kAssetCatalogSchemaVersion, errors);
+                                  kAssetCatalogSchemaVersion, errors,
+                                  kOldestAssetCatalogSchemaVersion);
       !schema) {
     return std::unexpected(schema.error());
   }
@@ -251,15 +282,29 @@ std::expected<std::vector<AssetRecord>, std::string> ParseAssetRecords(
   if (entries.size() > std::numeric_limits<std::uint32_t>::max()) {
     return errors.Fail("/assets", "too many assets");
   }
-  std::vector<AssetRecord> records;
-  records.reserve(entries.size());
+  ParsedAssets parsed;
+  parsed.records.reserve(entries.size());
   for (std::size_t index = 0; index < entries.size(); ++index) {
     auto record =
         ParseRecord(entries[index], Pointer("/assets", index), root, errors);
     if (!record) return std::unexpected(record.error());
-    records.push_back(std::move(*record));
+    parsed.records.push_back(std::move(*record));
   }
-  return records;
+  if (!aliases.is_object()) return errors.Fail("/aliases", "must be an object");
+  if (has_aliases &&
+      assets->at("schema_version") == kOldestAssetCatalogSchemaVersion) {
+    return errors.Fail("/aliases",
+                       "compatibility aliases require asset schema version 2");
+  }
+  for (const auto& [id, target] : aliases.items()) {
+    if (!IsValidAssetId(id) || !target.is_string() ||
+        !IsValidAssetId(target.get_ref<const std::string&>())) {
+      return errors.Fail(Pointer("/aliases", id),
+                         "must map a valid asset ID to a canonical asset ID");
+    }
+    parsed.aliases.emplace_back(id, target.get<std::string>());
+  }
+  return parsed;
 }
 
 // Record indexes ordered by id. A repeated id is reported at its later entry.
@@ -450,10 +495,25 @@ std::expected<AssetCatalog, std::string> AssetCatalog::Parse(
   const Errors asset_errors(kAssetCatalogFile);
   auto records = ParseAssetRecords(assets_json, root, asset_errors);
   if (!records) return std::unexpected(records.error());
-  catalog.records_ = std::move(*records);
+  catalog.records_ = std::move(records->records);
   auto by_id = SortById(catalog.records_, asset_errors);
   if (!by_id) return std::unexpected(by_id.error());
   catalog.by_id_ = std::move(*by_id);
+  std::vector<std::pair<std::string, std::uint32_t>> aliases;
+  for (const auto& [id, target] : records->aliases) {
+    if (catalog.Find(id)) {
+      return asset_errors.Fail(Pointer("/aliases", id),
+                               "alias shadows a canonical asset ID");
+    }
+    const auto handle = catalog.Find(target);
+    if (!handle) {
+      return asset_errors.Fail(Pointer("/aliases", id),
+                               "alias target must be a canonical asset ID");
+    }
+    aliases.emplace_back(id, handle->index);
+  }
+  std::ranges::sort(aliases);
+  catalog.aliases_ = std::move(aliases);
 
   auto audio = ParseAudioCatalog(audio_json, catalog);
   if (!audio) return std::unexpected(audio.error());
@@ -476,8 +536,14 @@ std::optional<AssetHandle> AssetCatalog::Find(std::string_view id) const {
       std::ranges::lower_bound(by_id_, id, {}, [this](std::uint32_t index) {
         return std::string_view(records_[index].id);
       });
-  if (found == by_id_.end() || records_[*found].id != id) return std::nullopt;
-  return AssetHandle{.index = *found, .generation = generation_};
+  if (found != by_id_.end() && records_[*found].id == id) {
+    return AssetHandle{.index = *found, .generation = generation_};
+  }
+  const auto alias = std::ranges::lower_bound(
+      aliases_, id, {},
+      [](const auto& entry) { return std::string_view(entry.first); });
+  if (alias == aliases_.end() || alias->first != id) return std::nullopt;
+  return AssetHandle{.index = alias->second, .generation = generation_};
 }
 
 const AssetRecord* AssetCatalog::Record(AssetHandle handle) const {

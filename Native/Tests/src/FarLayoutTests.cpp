@@ -14,11 +14,13 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Content/BackgroundAssets.hpp"
 #include "Content/BackgroundLayout.hpp"
 #include "Content/ConversionManifest.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/JsonText.hpp"
 #include "Core/Sha256.hpp"
+#include "Extract/BackgroundAuthoring.hpp"
 #include "Extract/ConversionManifestWriter.hpp"
 #include "Extract/ConverterBatch.hpp"
 #include "Extract/FarConversion.hpp"
@@ -32,7 +34,7 @@ namespace Content = VS::Content;
 namespace Extract = VS::Extract;
 namespace fs = std::filesystem;
 using Bytes = std::vector<std::byte>;
-constexpr std::string_view kLayoutFile = "backgrounds/001OP01A.background.json";
+constexpr auto kLayoutFile = "backgrounds/castle-silhouette.background.json";
 
 template <typename T>
 T Required(std::expected<T, std::string> value) {
@@ -84,6 +86,23 @@ Content::BackgroundLayoutDocument Identity() {
           .source_sha256 = VS::Core::Sha256Hex(FarBytes()),
           .image_source = "BG/001OP01A.TIM",
           .image_source_sha256 = VS::Core::Sha256Hex(TimBytes())};
+}
+
+Bytes LegacyJson(Bytes bytes, const std::string& name, const std::string& id,
+                 bool layout) {
+  auto json = Required(Content::ParseJsonText(bytes, name));
+  json["id"] = id;
+  if (layout) {
+    json["schema_version"] = 1;
+    json.erase("cell_size_units");
+    for (const auto& known : Content::BackgroundAssets()) {
+      if (json["image_id"] == Content::BackgroundImageId(known)) {
+        json["image_id"] = Content::LegacyBackgroundImageId(known);
+      }
+    }
+  }
+  const auto text = Content::FormatJsonText(json) + "\n";
+  return {BytesOf(text).begin(), BytesOf(text).end()};
 }
 
 class FarData {
@@ -146,6 +165,64 @@ class FarData {
     json["image_id"] = id;
     const auto text = Content::FormatJsonText(json) + "\n";
     Write(kLayoutFile, BytesOf(text));
+  }
+  void MoveLegacyFiles(Content::ConversionOutput& output,
+                       const Content::BackgroundAssetIdentity& asset,
+                       bool layout) const {
+    for (auto& file : output.files) {
+      const auto original = file;
+      const auto semantic = layout ? Content::BackgroundLayoutPath(asset)
+                                   : Content::BackgroundImageStemPath(asset);
+      const auto legacy =
+          layout ? "backgrounds/" + std::string(asset.source_stem) +
+                       ".background.json"
+                 : "textures/bg/" + std::string(asset.source_stem);
+      file = legacy + original.substr(semantic.size());
+      auto bytes = Read(original);
+      if (file.ends_with(".json")) {
+        bytes = LegacyJson(std::move(bytes), original, output.id, layout);
+      }
+      Write(file, bytes);
+      fs::remove(root / VS::Platform::Utf8Path(original));
+    }
+  }
+  void MakeLegacyFiles() const {
+    auto manifest = Manifest();
+    std::erase_if(manifest.outputs,
+                  [](const auto& output) { return !output.alias_of.empty(); });
+    for (auto& output : manifest.outputs) {
+      const auto* asset = Content::BackgroundAssetForSource(output.source);
+      if (asset == nullptr) continue;
+      const bool layout = output.converter == Content::kFarConverterName;
+      output.id = layout ? Content::LegacyBackgroundLayoutId(*asset)
+                         : Content::LegacyBackgroundImageId(*asset);
+      MoveLegacyFiles(output, *asset, layout);
+    }
+    manifest.converters["tim-png"] = 1;
+    manifest.converters["far-layout-json"] = 1;
+    const auto written = Extract::WriteConversionManifest(root, manifest);
+    if (!written) throw std::runtime_error(written.error());
+  }
+  void AddImageAlias(const std::string& id, const std::string& target) const {
+    auto manifest = Manifest();
+    const auto* output = manifest.Find(target);
+    if (output == nullptr) throw std::runtime_error("fixture image missing");
+    auto alias = *output;
+    alias.id = id;
+    alias.alias_of = target;
+    alias.files.clear();
+    manifest.outputs.push_back(alias);
+    const auto written = Extract::WriteConversionManifest(root, manifest);
+    if (!written) throw std::runtime_error(written.error());
+  }
+  void EditFirstPixel(const std::string& stem) const {
+    auto image =
+        Required(Content::LoadImageFiles(root / "textures" / "bg", stem));
+    image.image.indices.front() = 7;
+    const auto files = Required(Extract::EncodeImageFiles(image, stem));
+    const auto written =
+        Extract::WriteImageFiles(root / "textures" / "bg", files);
+    if (!written) throw std::runtime_error(written.error());
   }
   fs::path root;
   Content::DataStore::ScopedOverride store_scope;
@@ -306,8 +383,8 @@ TEST_CASE(
   Required(Extract::ConvertDiscBackgrounds(data.root, false));
   auto layout = Required(
       Content::ReadBackgroundLayout(data.Read(kLayoutFile), kLayoutFile));
-  const auto image = Required(
-      Content::LoadImageFiles(data.root / "textures" / "bg", "001OP01A"));
+  const auto image = Required(Content::LoadImageFiles(
+      data.root / "textures" / "bg", "castle-silhouette"));
   layout.image_id = "image.missing";
   CHECK_FALSE(
       Content::LoadBackgroundLayoutImage(data.root, data.Manifest(), layout));
@@ -352,7 +429,7 @@ TEST_CASE("FAR binding refuses missing, malformed and non-image identities",
     CHECK_FALSE(LoadFixtureBackground(data));
   }
   data.BindImage("image.bg.001op01a");
-  fs::remove(data.root / "textures" / "bg" / "001OP01A.png");
+  fs::remove(data.root / "textures" / "bg" / "castle-silhouette.png");
   CHECK_FALSE(LoadFixtureBackground(data));
 }
 
@@ -370,9 +447,9 @@ TEST_CASE(
   CHECK(first->image.pixel_words.front() == 0);
   CHECK(second->image.pixel_words.front() == 257);
   auto image = Required(
-      Content::LoadImageFiles(data.root / "textures" / "bg", "002OP01A"));
+      Content::LoadImageFiles(data.root / "textures" / "bg", "dark-clouds"));
   image.material.reset();
-  const auto files = Required(Extract::EncodeImageFiles(image, "002OP01A"));
+  const auto files = Required(Extract::EncodeImageFiles(image, "dark-clouds"));
   REQUIRE(Extract::WriteImageFiles(data.root / "textures" / "bg", files));
   CHECK_FALSE(LoadFixtureBackground(data));
   CHECK(second->image.palette_words[1] == 31);
@@ -384,9 +461,9 @@ TEST_CASE("FAR explicit image aliases can select unreferenced native artwork",
   data.AddSecondImage();
   Required(Extract::ConvertDiscBackgrounds(data.root, false));
   auto image = Required(
-      Content::LoadImageFiles(data.root / "textures" / "bg", "002OP01A"));
+      Content::LoadImageFiles(data.root / "textures" / "bg", "dark-clouds"));
   image.unreferenced = true;
-  const auto files = Required(Extract::EncodeImageFiles(image, "002OP01A"));
+  const auto files = Required(Extract::EncodeImageFiles(image, "dark-clouds"));
   REQUIRE(Extract::WriteImageFiles(data.root / "textures" / "bg", files));
   auto manifest = data.Manifest();
   auto output = std::ranges::find(manifest.outputs, image.id,
@@ -407,6 +484,153 @@ TEST_CASE("FAR explicit image aliases can select unreferenced native artwork",
   CHECK(loaded->image.palette_words == image.image.palettes.front());
   fs::remove(data.root / "disc" / "BG" / "002OP01A.FAR");
   CHECK_FALSE(LoadFixtureBackground(data));
+}
+
+TEST_CASE("Semantic FAR migration preserves edits and custom image references",
+          "[far-layout][far-authoring]") {
+  FarData data;
+  data.AddSecondImage();
+  Required(Extract::ConvertDiscBackgrounds(data.root, false));
+  data.MakeLegacyFiles();
+  data.EditFirstPixel("001OP01A");
+  constexpr auto kLegacy = "backgrounds/001OP01A.background.json";
+  auto json = Required(Content::ParseJsonText(data.Read(kLegacy), kLegacy));
+  json["display_name"] = "My edited silhouette";
+  json["cells"][0]["corner_colors"]["top_left"]["red"] = 42;
+  json["image_id"] = "image.custom.cloud";
+  const auto text = Content::FormatJsonText(json) + "\n";
+  data.Write(kLegacy, BytesOf(text));
+  data.AddImageAlias("image.custom.cloud", "image.bg.002op01a");
+  const auto original_png = data.Read("textures/bg/001OP01A.png");
+  CHECK(Required(Extract::UpgradeBackgroundAuthoring(data.root)).identities ==
+        4);
+  const auto migrated =
+      Required(Content::ParseJsonText(data.Read(kLayoutFile), kLayoutFile));
+  CHECK(migrated["display_name"] == "My edited silhouette");
+  CHECK(migrated["cells"][0]["corner_colors"]["top_left"]["red"] == 42);
+  CHECK(migrated["image_id"] == "image.custom.cloud");
+  CHECK(data.Read("textures/bg/castle-silhouette.png") == original_png);
+  CHECK(Required(Extract::ConvertDiscImages(data.root, false)).unchanged == 2);
+  CHECK(Required(Extract::ConvertDiscBackgrounds(data.root, false)).unchanged ==
+        2);
+  const auto loaded = Required(LoadFixtureBackground(data));
+  CHECK(loaded->image_id == "image.custom.cloud");
+}
+
+TEST_CASE("Semantic FAR aliases and repeated conversion keep one owned output",
+          "[far-layout][far-authoring]") {
+  FarData data;
+  Required(Extract::ConvertDiscBackgrounds(data.root, false));
+  data.MakeLegacyFiles();
+  Required(Extract::UpgradeBackgroundAuthoring(data.root));
+  const auto manifest = data.Manifest();
+  const auto* old = manifest.Find("background.import.bg.001op01a");
+  const auto* canonical = manifest.Find("background.castle-silhouette");
+  REQUIRE(old != nullptr);
+  REQUIRE(canonical != nullptr);
+  CHECK(manifest.FilesOf(*old) == canonical);
+  const auto before = data.Read("manifest.json");
+  const auto layout = data.Read(kLayoutFile);
+  CHECK(Required(Extract::ConvertDiscImages(data.root, false)).unchanged == 1);
+  CHECK(Required(Extract::ConvertDiscBackgrounds(data.root, false)).unchanged ==
+        1);
+  CHECK(data.Read("manifest.json") == before);
+  CHECK(data.Read(kLayoutFile) == layout);
+  CHECK(Required(Extract::UpgradeBackgroundAuthoring(data.root)).files == 0);
+}
+
+TEST_CASE("Semantic FAR migration refuses destination and identity collisions",
+          "[far-layout][far-authoring]") {
+  FarData data;
+  Required(Extract::ConvertDiscBackgrounds(data.root, false));
+  data.MakeLegacyFiles();
+  const auto before = data.Read("manifest.json");
+  SECTION("different authored destination") {
+    const Bytes conflict{std::byte{1}, std::byte{2}};
+    data.Write("textures/bg/castle-silhouette.png", conflict);
+    CHECK_FALSE(Extract::UpgradeBackgroundAuthoring(data.root));
+    CHECK(data.Read("textures/bg/castle-silhouette.png") == conflict);
+  }
+  SECTION("semantic ID belongs to another source") {
+    auto manifest = data.Manifest();
+    auto conflict = manifest.outputs.front();
+    conflict.id = "image.bg.castle-silhouette";
+    conflict.source = "OTHER.TIM";
+    manifest.outputs.push_back(conflict);
+    REQUIRE(Extract::WriteConversionManifest(data.root, manifest));
+    const auto collision = data.Read("manifest.json");
+    CHECK_FALSE(Extract::UpgradeBackgroundAuthoring(data.root));
+    CHECK(data.Read("manifest.json") == collision);
+    return;
+  }
+  CHECK(data.Read("manifest.json") == before);
+  CHECK(fs::exists(data.root / "textures" / "bg" / "001OP01A.png"));
+}
+
+TEST_CASE(
+    "A native FAR layout can use cell geometry the legacy format cannot encode",
+    "[far-layout][far-authoring]") {
+  FarData data;
+  Required(Extract::ConvertDiscBackgrounds(data.root, false));
+  auto layout = Required(
+      Content::ReadBackgroundLayout(data.Read(kLayoutFile), kLayoutFile));
+  layout.cell_size_units = 16;
+  const auto text = Required(Content::WriteBackgroundLayout(layout));
+  data.Write(kLayoutFile, BytesOf(text));
+  CHECK_FALSE(Content::EncodeFar(layout));
+  const auto loaded = Required(LoadFixtureBackground(data));
+  CHECK(loaded->cell_size_units == 16);
+  CHECK(Required(Extract::ConvertDiscBackgrounds(data.root, false)).unchanged ==
+        1);
+  CHECK(data.Read(kLayoutFile) ==
+        Bytes(BytesOf(text).begin(), BytesOf(text).end()));
+}
+
+TEST_CASE(
+    "Semantic FAR conversion preserves custom filenames and explicit old "
+    "aliases",
+    "[far-layout][far-authoring]") {
+  FarData data;
+  Required(Extract::ConvertDiscBackgrounds(data.root, false));
+  data.BindImage("image.bg.001op01a");
+  const auto authored = data.Read(kLayoutFile);
+  constexpr auto kCustom = "backgrounds/my-authored-layout.background.json";
+  data.Write(kCustom, authored);
+  fs::remove(data.root / VS::Platform::Utf8Path(kLayoutFile));
+  auto manifest = data.Manifest();
+  for (auto& output : manifest.outputs) {
+    if (output.id == "background.castle-silhouette") output.files = {kCustom};
+  }
+  REQUIRE(Extract::WriteConversionManifest(data.root, manifest));
+  CHECK(Required(Extract::ConvertDiscBackgrounds(data.root, false)).unchanged ==
+        1);
+  CHECK(data.Read(kCustom) == authored);
+  CHECK_FALSE(fs::exists(data.root / VS::Platform::Utf8Path(kLayoutFile)));
+  const auto loaded = Required(LoadFixtureBackground(data));
+  CHECK(loaded->image_id == "image.bg.001op01a");
+}
+
+TEST_CASE("Native background geometry enforces explicit renderer budgets",
+          "[far-layout][far-authoring]") {
+  auto layout = Required(Content::DecodeFar(FarBytes(), Identity()));
+  layout.columns = 64;
+  layout.rows = 16;
+  layout.cells.resize(1024, layout.cells.front());
+  const auto text = Required(Content::WriteBackgroundLayout(layout));
+  CHECK(Required(Content::ReadBackgroundLayout(BytesOf(text), "fixture")) ==
+        layout);
+  CHECK_FALSE(Content::EncodeFar(layout));
+  SECTION("total cell budget") {
+    layout.rows = 17;
+    layout.cells.resize(1088, layout.cells.front());
+  }
+  SECTION("side budget") {
+    layout.columns = 65;
+    layout.rows = 1;
+    layout.cells.resize(65);
+  }
+  SECTION("unsupported cell size") { layout.cell_size_units = 24; }
+  CHECK_FALSE(Content::WriteBackgroundLayout(layout));
 }
 
 TEST_CASE("Live FAR reader adopts native edits without FAR repacking",

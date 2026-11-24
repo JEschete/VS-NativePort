@@ -1602,6 +1602,9 @@
     <ClCompile Include="..\Tools\Extract\src\AssetLabels.cpp">
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>
+    <ClCompile Include="..\Tools\Extract\src\BackgroundAuthoring.cpp">
+      <Filter>..\Tools\Extract\src</Filter>
+    </ClCompile>
     <ClCompile Include="..\Tools\Extract\src\AudioBankConversion.cpp">
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>

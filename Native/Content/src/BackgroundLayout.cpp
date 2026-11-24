@@ -20,7 +20,7 @@ constexpr std::size_t kCellBytes = 24;
 constexpr std::uint32_t kByteBits = 8;
 constexpr std::uint32_t kByteMax = 255;
 constexpr std::uint32_t kImageSideLimit = kByteMax + 1;
-constexpr std::uint32_t kGridSideLimit = 31;
+constexpr std::uint32_t kLegacyGridSideLimit = 31;
 constexpr std::size_t kPaletteEntries = 256;
 constexpr std::size_t kWordBytes = sizeof(std::uint32_t);
 constexpr std::size_t kHeaderRowsAt = 4;
@@ -219,10 +219,14 @@ std::expected<void, std::string> ValidateBackgroundLayout(
       !IsLowercaseSha256(layout.image_source_sha256)) {
     return std::unexpected("background: invalid identity or import provenance");
   }
-  if (layout.columns < 1 || layout.columns > kGridSideLimit ||
-      layout.rows < 1 || layout.rows > kGridSideLimit ||
+  if (layout.columns < 1 || layout.columns > kBackgroundGridSideBudget ||
+      layout.rows < 1 || layout.rows > kBackgroundGridSideBudget ||
+      !IsBackgroundCellSize(layout.cell_size_units) ||
+      layout.cells.size() > kBackgroundCellBudget ||
       layout.cells.size() != std::size_t{layout.columns} * layout.rows) {
-    return std::unexpected(layout.id + ": expected a complete 1..31 cell grid");
+    return std::unexpected(layout.id +
+                           ": expected a complete 1..64 grid of at most 1024 "
+                           "cells, sized 16, 32 or 64 units");
   }
   for (std::size_t i = 0; i < layout.cells.size(); ++i) {
     const auto& cell = layout.cells[i];
@@ -320,8 +324,9 @@ std::expected<BackgroundLayoutDocument, std::string> DecodeFar(
   identity.columns = Word(bytes, 0, kWordBytes);
   identity.rows = Word(bytes, kHeaderRowsAt, kWordBytes);
   identity.unused_header_word = Word(bytes, kHeaderUnusedAt, kWordBytes);
-  if (identity.columns < 1 || identity.columns > kGridSideLimit ||
-      identity.rows < 1 || identity.rows > kGridSideLimit ||
+  identity.cell_size_units = kBackgroundDefaultCellUnits;
+  if (identity.columns < 1 || identity.columns > kLegacyGridSideLimit ||
+      identity.rows < 1 || identity.rows > kLegacyGridSideLimit ||
       bytes.size() != kHeaderBytes + std::size_t{identity.columns} *
                                          identity.rows * kCellBytes) {
     return std::unexpected(
@@ -360,6 +365,15 @@ std::expected<std::vector<std::byte>, std::string> EncodeFar(
     const BackgroundLayoutDocument& layout) {
   if (auto valid = ValidateBackgroundLayout(layout); !valid) {
     return std::unexpected(valid.error());
+  }
+  if (layout.cell_size_units != kBackgroundDefaultCellUnits) {
+    return std::unexpected(
+        layout.id + ": native cell size has no original FAR representation");
+  }
+  if (layout.columns > kLegacyGridSideLimit ||
+      layout.rows > kLegacyGridSideLimit) {
+    return std::unexpected(
+        layout.id + ": native grid exceeds the admitted FAR import budget");
   }
   std::vector<std::byte> bytes;
   Put(bytes, layout.columns, kWordBytes);
@@ -402,6 +416,7 @@ std::expected<std::string, std::string> WriteBackgroundLayout(
       {"draw_order", kDrawOrder},
       {"columns", layout.columns},
       {"rows", layout.rows},
+      {"cell_size_units", layout.cell_size_units},
       {"cells", cells},
       {"import_provenance",
        {{"source", layout.source},
@@ -422,10 +437,10 @@ std::expected<BackgroundLayoutDocument, std::string> ReadBackgroundLayout(
   auto json = ParseJsonText(bytes, name);
   if (!json) return std::unexpected(json.error());
   const JsonMembers members(*json, std::string(name));
-  if (auto valid = members.Only({"schema", "schema_version", "id", "image_id",
-                                 "unreferenced", "image_depth", "presentation",
-                                 "draw_order", "columns", "rows", "cells",
-                                 "import_provenance"});
+  if (auto valid = members.Only(
+          {"schema", "schema_version", "id", "image_id", "unreferenced",
+           "image_depth", "presentation", "draw_order", "columns", "rows",
+           "cell_size_units", "cells", "import_provenance"});
       !valid) {
     return std::unexpected(valid.error());
   }
@@ -433,8 +448,8 @@ std::expected<BackgroundLayoutDocument, std::string> ReadBackgroundLayout(
   auto version = members.Unsigned("schema_version", kBackgroundLayoutVersion);
   if (!schema) return std::unexpected(schema.error());
   if (!version) return std::unexpected(version.error());
-  if (*schema != kBackgroundLayoutSchema ||
-      *version != kBackgroundLayoutVersion) {
+  if (*schema != kBackgroundLayoutSchema || *version < 1 ||
+      *version > kBackgroundLayoutVersion) {
     return std::unexpected(std::string(name) +
                            ": unsupported background schema/version");
   }
@@ -442,8 +457,10 @@ std::expected<BackgroundLayoutDocument, std::string> ReadBackgroundLayout(
   if (auto valid = ReadIdentity(members, layout); !valid) {
     return std::unexpected(valid.error());
   }
-  auto columns = members.Unsigned("columns", kGridSideLimit);
-  auto rows = members.Unsigned("rows", kGridSideLimit);
+  const auto side_limit =
+      *version == 1 ? kLegacyGridSideLimit : kBackgroundGridSideBudget;
+  auto columns = members.Unsigned("columns", side_limit);
+  auto rows = members.Unsigned("rows", side_limit);
   auto cells = members.Get("cells");
   auto origin = members.Get("import_provenance");
   if (!columns) return std::unexpected(columns.error());
@@ -452,6 +469,15 @@ std::expected<BackgroundLayoutDocument, std::string> ReadBackgroundLayout(
   if (!origin) return std::unexpected(origin.error());
   layout.columns = static_cast<std::uint32_t>(*columns);
   layout.rows = static_cast<std::uint32_t>(*rows);
+  if (*version >= kBackgroundLayoutVersion) {
+    auto units = members.Unsigned("cell_size_units", kBackgroundLargeCellUnits);
+    if (!units) return std::unexpected(units.error());
+    layout.cell_size_units = static_cast<std::uint32_t>(*units);
+  } else if (members.Find("cell_size_units") != nullptr) {
+    return std::unexpected(
+        std::string(name) +
+        ": cell_size_units requires background schema version 2");
+  }
   if (!(**cells).is_array() || (**cells).size() != *columns * *rows) {
     return std::unexpected(std::string(name) +
                            ": cells must match grid dimensions");
@@ -493,8 +519,7 @@ std::expected<BackgroundLayoutDocument, std::string> LoadConvertedBackground(
   if (!bytes) return std::unexpected("cannot read native background " + file);
   auto layout = ReadBackgroundLayout(*bytes, file);
   if (!layout) return std::unexpected(layout.error());
-  if (layout->id != source.conversion->id ||
-      layout->source != source.entry->path ||
+  if (layout->id != source.files->id || layout->source != source.entry->path ||
       layout->source_sha256 != source.conversion->source_sha256 ||
       layout->unreferenced != source.conversion->unreferenced ||
       source.conversion->dependencies !=

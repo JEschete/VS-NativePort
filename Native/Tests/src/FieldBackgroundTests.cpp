@@ -358,7 +358,7 @@ TEST_CASE("Tiled background draws only a sized layout",
   auto layout = Layout();
   const fx::RoomBackgroundState state{.tiled_enabled = 1, .layout = layout};
   const std::vector<fx::BackgroundTile> tiles(std::size_t{32} * 32);
-  for (const std::int32_t width : {0, 32}) {
+  for (const std::int32_t width : {0, 65}) {
     *layout = {.width = width, .height = 1, .tiles = tiles};
     fx::DrawRoomBackground(host, state, std::nullopt);
   }
@@ -400,6 +400,26 @@ TEST_CASE("Background cells without a texture are skipped",
                               0, 0, 0x10);
   CHECK(host.shaded_quads.empty());
   CHECK(host.fills.size() == 1);
+}
+
+TEST_CASE("Native background cell size controls actual submitted geometry",
+          "[field-background][far-authoring]") {
+  FakeBackgroundHost host;
+  const std::array<fx::BackgroundTile, 1> tiles{
+      Tile({.x = 0, .y = 0, .width = 7, .height = 7})};
+  fx::DrawRoomBackgroundTiles(
+      host, {.width = 1, .height = 1, .tiles = tiles, .cell_size_units = 16}, 0,
+      0, 27);
+  REQUIRE_FALSE(host.shaded_quads.empty());
+  CHECK(host.shaded_quads.front().corners[1].x -
+            host.shaded_quads.front().corners[0].x ==
+        16);
+  CHECK(host.shaded_quads.size() == 29);
+  host.shaded_quads.clear();
+  fx::DrawRoomBackgroundTiles(
+      host, {.width = 1, .height = 1, .tiles = tiles, .cell_size_units = 0}, 0,
+      0, 27);
+  CHECK(host.shaded_quads.empty());
 }
 
 TEST_CASE("Background cells refuse a layout missing cells",

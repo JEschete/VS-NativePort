@@ -20,13 +20,13 @@ namespace VS::Content {
 namespace {
 
 struct ImageFileLocation {
-  std::filesystem::path directory;
+  std::string directory;
   std::string stem;
 };
 
 // The directory and stem of the sidecar and PNG an output lists.
 std::expected<ImageFileLocation, std::string> ImageFilesOf(
-    const std::filesystem::path& root, const ConversionOutput& output) {
+    const ConversionOutput& output) {
   const std::vector<std::string>& files = output.files;
   std::string sidecar;
   for (const std::string& file : files) {
@@ -50,21 +50,26 @@ std::expected<ImageFileLocation, std::string> ImageFilesOf(
   }
   const std::size_t separator = stem_path.rfind('/');
   ImageFileLocation location{
-      .directory = root,
+      .directory = {},
       .stem =
           stem_path.substr(separator == std::string::npos ? 0 : separator + 1)};
   if (separator != std::string::npos) {
-    location.directory /= Platform::Utf8Path(stem_path.substr(0, separator));
+    location.directory = stem_path.substr(0, separator);
   }
   return location;
 }
 
 std::expected<ImageDocument, std::string> ReadImageOutput(
-    const std::filesystem::path& root, const ConversionOutput& conversion,
+    const ImageFileReader& root_files, const ConversionOutput& conversion,
     const ConversionOutput& files) {
-  auto location = ImageFilesOf(root, files);
+  auto location = ImageFilesOf(files);
   if (!location) return std::unexpected(location.error());
-  auto document = LoadImageFiles(location->directory, location->stem);
+  auto document =
+      DecodeImageFiles(location->stem, [&](const std::string& name) {
+        return root_files(location->directory.empty()
+                              ? name
+                              : location->directory + "/" + name);
+      });
   if (!document) {
     return std::unexpected(
         std::format("{}: {}", conversion.id, document.error()));
@@ -107,8 +112,14 @@ std::expected<ConvertedSource, std::string> FindConvertedSource(
       continue;
     }
     if (conversion != nullptr) {
-      return std::unexpected(std::format("multiple {} outputs name {}",
-                                         read.converter, entry->path));
+      const auto* current_files = manifest->FilesOf(*conversion);
+      const auto* next_files = manifest->FilesOf(output);
+      if (current_files == nullptr || current_files != next_files ||
+          conversion->source_sha256 != output.source_sha256) {
+        return std::unexpected(std::format("multiple {} outputs name {}",
+                                           read.converter, entry->path));
+      }
+      if (!output.alias_of.empty()) continue;
     }
     conversion = &output;
   }
@@ -127,8 +138,8 @@ std::expected<ConvertedSource, std::string> FindConvertedSource(
 
 std::expected<ImageDocument, std::string> LoadConvertedImage(
     const DataStore& store, const ConvertedSource& source) {
-  auto document =
-      ReadImageOutput(store.Root(), *source.conversion, *source.files);
+  auto document = ReadImageOutput(DirectoryFileReader(store.Root()),
+                                  *source.conversion, *source.files);
   if (!document) return document;
   if (document->unreferenced) {
     return std::unexpected(std::format(
@@ -140,6 +151,12 @@ std::expected<ImageDocument, std::string> LoadConvertedImage(
 std::expected<ImageDocument, std::string> LoadConvertedImageById(
     const std::filesystem::path& root, const ConversionManifest& manifest,
     std::string_view image_id) {
+  return LoadConvertedImageById(manifest, image_id, DirectoryFileReader(root));
+}
+
+std::expected<ImageDocument, std::string> LoadConvertedImageById(
+    const ConversionManifest& manifest, std::string_view image_id,
+    const ImageFileReader& root_files) {
   if (!IsContentId(image_id)) {
     return std::unexpected(
         std::format("invalid native image ID '{}'", image_id));
@@ -154,7 +171,7 @@ std::expected<ImageDocument, std::string> LoadConvertedImageById(
     return std::unexpected(
         std::format("native image '{}' has no alias target", image_id));
   }
-  return ReadImageOutput(root, *output, *files);
+  return ReadImageOutput(root_files, *output, *files);
 }
 
 }  // namespace VS::Content

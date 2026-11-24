@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "Content/ActorArchetype.hpp"
+#include "Content/BackgroundAssets.hpp"
 #include "Content/CatalogTable.hpp"
 #include "Content/ConversionManifest.hpp"
 #include "Content/DataStore.hpp"
@@ -457,6 +458,14 @@ std::string FileLabel(const LabelIndex& names, std::string_view file,
     declared_source = StringMember(*provenance, "source");
   }
   if (!declared_source.empty()) source = declared_source;
+  if (const auto* background = Content::BackgroundAssetForSource(source)) {
+    if (file.ends_with(".image.json") || file.ends_with(".background.json")) {
+      return std::string(file.ends_with(".image.json")
+                             ? "Background image: "
+                             : "Background layout: ") +
+             std::string(background->display_name);
+    }
+  }
   const auto found = names.files.find(file);
   std::string label = found != names.files.end() && !found->second.empty()
                           ? Join(found->second)

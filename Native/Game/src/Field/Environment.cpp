@@ -49,7 +49,6 @@ constexpr std::int32_t kDuckShift = 2;
 // func_8009147C: the picture is 1024 pixels around in 32-pixel cells and is
 // drawn while a cell's corner is within 64 pixels of the 320x240 screen.
 constexpr std::int32_t kFixedOne = 4096;
-constexpr std::int32_t kCellPixels = 32;
 constexpr std::int32_t kPictureWidth = 1024;
 constexpr std::int32_t kPictureWrapMask = kPictureWidth - 1;
 constexpr std::int32_t kPictureHalfWidth = kPictureWidth / 2;
@@ -147,13 +146,20 @@ void MaybeTurnBack(WeatherHost& host, std::int16_t& step) {
 
 // The layout's cells must cover every row drawn; the original indexes past
 // them otherwise, and divides by a zero width.
-[[nodiscard]] bool CellsCoverRows(const BackgroundLayout& layout,
-                                  std::int32_t row_end) {
-  if (row_end <= 0) return true;
-  if (layout.width <= 0) return false;
-  const std::uint64_t rows =
-      (static_cast<std::uint64_t>(row_end) + kCellPixels - 1) / kCellPixels;
-  return rows * static_cast<std::uint64_t>(layout.width) <= layout.tiles.size();
+[[nodiscard]] bool CellsCoverRows(const BackgroundLayout& layout) {
+  if (layout.width <= 0 || layout.height <= 0 ||
+      static_cast<std::uint32_t>(layout.width) >
+          Content::kBackgroundGridSideBudget ||
+      static_cast<std::uint32_t>(layout.height) >
+          Content::kBackgroundGridSideBudget ||
+      !Content::IsBackgroundCellSize(
+          static_cast<std::uint32_t>(layout.cell_size_units))) {
+    return false;
+  }
+  const auto cells = static_cast<std::size_t>(layout.height) *
+                     static_cast<std::size_t>(layout.width);
+  return cells <= Content::kBackgroundCellBudget &&
+         cells <= layout.tiles.size();
 }
 
 [[nodiscard]] TexturedQuad TileQuad(const BackgroundTile& tile,
@@ -385,24 +391,25 @@ void DrawRoomBackgroundTiles(BackgroundHost& host,
   const ViewCamera camera = host.FrameCamera();
   const std::int32_t cosine = Math::Cosine(camera.angles.z);
   const std::int32_t sine = Math::Sine(camera.angles.z);
-  const std::int32_t cosine_step = cosine * kCellPixels;
-  const std::int32_t sine_step = sine * kCellPixels;
-  const std::int32_t row_end =
-      Math::WrappingMultiply(layout.height, kCellPixels);
+  const bool valid = CellsCoverRows(layout);
+  const std::int32_t cell_units = valid ? layout.cell_size_units : 1;
+  const std::int32_t cosine_step = cosine * cell_units;
+  const std::int32_t sine_step = sine * cell_units;
+  const std::int32_t row_end = valid ? layout.height * cell_units : 0;
 
-  if (!CellsCoverRows(layout, row_end)) {
+  if (!valid) {
     VS::Core::LogWarn(
         kChannel,
         "DrawRoomBackgroundTiles: a {}x{} layout has {} cells; only "
         "the backdrop fill is drawn",
         layout.width, layout.height, layout.tiles.size());
   } else {
-    for (std::int32_t row = 0; row < row_end; row += kCellPixels) {
+    for (std::int32_t row = 0; row < row_end; row += cell_units) {
       const std::int32_t y = Math::WrappingSubtract(row, vertical_offset);
-      const auto row_start = static_cast<std::size_t>(row / kCellPixels) *
+      const auto row_start = static_cast<std::size_t>(row / cell_units) *
                              static_cast<std::size_t>(layout.width);
       for (std::int32_t column = 0; column < kPictureWidth;
-           column += kCellPixels) {
+           column += cell_units) {
         const std::int32_t x =
             (Math::WrappingAdd(column, horizontal_offset) & kPictureWrapMask) -
             kPictureHalfWidth;
@@ -416,7 +423,7 @@ void DrawRoomBackgroundTiles(BackgroundHost& host,
         }
         const std::size_t cell =
             row_start +
-            static_cast<std::size_t>((column / kCellPixels) % layout.width);
+            static_cast<std::size_t>((column / cell_units) % layout.width);
         const BackgroundTile& tile = layout.tiles[cell];
         if (tile.texture.width == 0 && tile.texture.height == 0) continue;
         host.AddShadedTexturedQuad(TileQuad(tile, screen_x, screen_y,

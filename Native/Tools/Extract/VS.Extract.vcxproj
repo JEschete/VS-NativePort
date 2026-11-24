@@ -49,6 +49,7 @@
   <ItemGroup>
     <ClCompile Include="src\AssetLabels.cpp" />
     <ClCompile Include="src\AudioBankConversion.cpp" />
+    <ClCompile Include="src\BackgroundAuthoring.cpp" />
     <ClCompile Include="src\ConversionManifestWriter.cpp" />
     <ClCompile Include="src\ConverterBatch.cpp" />
     <ClCompile Include="src\EffectTextureConversion.cpp" />
@@ -70,6 +71,7 @@
   <ItemGroup>
     <ClInclude Include="include\Extract\AssetLabels.hpp" />
     <ClInclude Include="include\Extract\AudioBankConversion.hpp" />
+    <ClInclude Include="include\Extract\BackgroundAuthoring.hpp" />
     <ClInclude Include="include\Extract\ConversionManifestWriter.hpp" />
     <ClInclude Include="include\Extract\ConverterBatch.hpp" />
     <ClInclude Include="include\Extract\EffectTextureConversion.hpp" />

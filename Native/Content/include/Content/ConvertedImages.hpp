@@ -51,5 +51,10 @@ struct ConvertedRead {
 [[nodiscard]] std::expected<ImageDocument, std::string> LoadConvertedImageById(
     const std::filesystem::path& root, const ConversionManifest& manifest,
     std::string_view image_id);
+// The same validation against an overlay reader, used before staged files are
+// published.
+[[nodiscard]] std::expected<ImageDocument, std::string> LoadConvertedImageById(
+    const ConversionManifest& manifest, std::string_view image_id,
+    const ImageFileReader& root_files);
 
 }  // namespace VS::Content

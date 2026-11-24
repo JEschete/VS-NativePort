@@ -42,6 +42,9 @@
     <ClCompile Include="src\AudioStream.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\BackgroundAssets.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\BackgroundLayout.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -187,6 +190,9 @@
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\AudioStream.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\BackgroundAssets.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\BackgroundLayout.hpp">

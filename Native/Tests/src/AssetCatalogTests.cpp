@@ -233,6 +233,62 @@ std::expected<Content::AssetCatalog, std::string> Parse(const DataRoot& root,
                                       1);
 }
 
+TEST_CASE(
+    "Asset compatibility aliases share canonical handles and audio references",
+    "[asset-catalog][far-authoring]") {
+  DataRoot root;
+  auto assets = AssetsJson();
+  assets["schema_version"] = 2;
+  const auto canonical = IdOf(kFiles.front().path);
+  assets["aliases"] = {{"asset.compat.music", canonical}};
+  auto audio = AudioJson();
+  audio["music"][0]["asset"] = "asset.compat.music";
+  const auto catalog = Parse(root, assets, audio);
+  REQUIRE(catalog.has_value());
+  CHECK(catalog->Find("asset.compat.music") == catalog->Find(canonical));
+  CHECK(catalog->Audio().music.front() == Required(catalog->Find(canonical)));
+  CHECK(catalog->Size() == kFiles.size());
+}
+
+TEST_CASE(
+    "Asset aliases reject collisions, chains and unversioned declarations",
+    "[asset-catalog][far-authoring]") {
+  DataRoot root;
+  auto assets = AssetsJson();
+  assets["schema_version"] = 2;
+  const auto canonical = IdOf(kFiles.front().path);
+  SECTION("canonical collision") {
+    assets["aliases"] = {{canonical, canonical}};
+  }
+  SECTION("unresolved target") {
+    assets["aliases"] = {{"asset.compat.test", "asset.missing"}};
+  }
+  SECTION("alias chain") {
+    assets["aliases"] = {{"asset.compat.a", canonical},
+                         {"asset.compat.b", "asset.compat.a"}};
+  }
+  SECTION("version one") {
+    assets["schema_version"] = 1;
+    assets["aliases"] = Json::object();
+  }
+  CHECK_FALSE(Parse(root, assets, AudioJson()));
+}
+
+TEST_CASE("Duplicate asset alias keys are not silently replaced",
+          "[asset-catalog][far-authoring]") {
+  DataRoot root;
+  auto assets = AssetsJson();
+  assets["schema_version"] = 2;
+  auto text = assets.dump();
+  text.pop_back();
+  text += ",\"aliases\":{\"asset.compat.same\":\"" + IdOf(kFiles[0].path) +
+          "\",\"asset.compat.same\":\"" + IdOf(kFiles[1].path) + "\"}}";
+  const auto parsed =
+      Content::AssetCatalog::Parse(text, AudioJson().dump(), root.Path(), 1);
+  REQUIRE_FALSE(parsed);
+  CHECK(parsed.error().find("duplicate JSON object key") != std::string::npos);
+}
+
 // A data root opened as the current store with valid catalogs.
 struct OpenCatalog {
   Content::DataStore::ScopedOverride restore;
@@ -570,8 +626,8 @@ TEST_CASE("Asset catalogs reject invalid documents with the rule and pointer",
   const std::vector<Case> cases = {
       {"schema name", [](Json& a, Json&) { a["schema"] = "vs.other"; },
        "assets.json: /schema: must be \"vs.assets\""},
-      {"asset version", [](Json& a, Json&) { a["schema_version"] = 2; },
-       "assets.json: /schema_version: unsupported version 2"},
+      {"asset version", [](Json& a, Json&) { a["schema_version"] = 3; },
+       "assets.json: /schema_version: unsupported version 3"},
       {"audio version", [](Json&, Json& b) { b["schema_version"] = 0; },
        "audio.json: /schema_version: unsupported version 0"},
       {"unknown key", [](Json& a, Json&) { a["extra"] = 1; },

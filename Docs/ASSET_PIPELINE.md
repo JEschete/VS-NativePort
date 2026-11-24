@@ -352,7 +352,7 @@ The disc has 27 kinds of files. The "Source" column below names the files on the
 | `MAP\*.MPD` (512) | `rooms\<zone>\<MAP>.gltf` + `.room.json` | §6.3 | vstools `MPD.js`, VSViewer, decomp field loaders |
 | `MAP\*.ZND` (256) | `catalogs\world\zones.csv`, `zone-rooms.csv`, `zone-textures.csv`; `catalogs\enemies\zone-enemies.csv`, `zone-enemy-limbs.csv`, `zone-enemy-parts.csv`; `textures\zone\<ZONE>\*.png` | done (`znd-tables`, §6.9, #517): rows and images rebuild each zone exactly. The relational ENEMY_DATA_SCHEME catalogs remain #199 | ENEMY_DATA_SCHEME.md §3 |
 | `EVENT\*.EVT` (512) | `events\<id>.json` | command list `{op, args}` with op names from the decomp's event interpreter; text → string IDs | decomp `Event\` module |
-| `BG\*.TIM` (4), `BG\*.FAR` (4), root `*.TIM` | `textures\bg\*.png` + `.image.json`; `backgrounds\<stem>.background.json` | TIM → PNG (§6.4). The BG TIM headers are not authoritative: they declare mode `0xA` (16bpp + CLUT) with a 256-colour CLUT and three share id `0x110`; the layout's draw depth selects 8-bit indices. FAR has a 12-byte header and 24-byte cells; the reader consumes typed JSON cells directly and `image_id` selects the native image (§6.4.1). MPD section 15 remains the layout compatibility lookup and original-image provenance | native `Content\BackgroundLayout.hpp`, `Field\Background.cpp`, `BackgroundLive.cpp` |
+| `BG\*.TIM` (4), `BG\*.FAR` (4), root `*.TIM` | `textures\bg\<artwork-slug>.png` + `.image.json`; `backgrounds\<artwork-slug>.background.json` | TIM → PNG (§6.4). The BG TIM headers are not authoritative: they declare mode `0xA` (16bpp + CLUT) with a 256-colour CLUT and three share id `0x110`; the layout's draw depth selects 8-bit indices. FAR has a 12-byte header and 24-byte cells; the reader consumes typed JSON cells directly and `image_id` selects the native image (§6.4.1). MPD section 15 remains the layout compatibility lookup and original-image provenance | native `Content\BackgroundLayout.hpp`, `Field\Background.cpp`, `BackgroundLive.cpp` |
 | `GIM\*.GIM` (49) | `textures\gim\*.png` + composition JSON | VS screen-effect images: per-layer cell maps over shared strips, 4 × 16-colour CLUTs and a shared or owned 256-colour palette | native `Render\GimImages.cpp` |
 | `MENU\*.BIN` (11), `ENDING\ILLUST*.BIN` (11) | `ui\*.png` + `.image.json` + layout JSON | menu art, game-over, ending illustrations. `MENUBG` is word-RLE and `ILLUST*` are LZ/RLE-compressed TIMs, decoded at conversion; `ITEMNAME`, `ITEMHELP`, `MENU12` and `MCMAN` are text and tables, not images | native `Menu\`, `StaffRollCore.cpp` |
 | `MENU\*.SYD` (3) | `catalogs\menu\combination-<kind>-{results,pairs,materials}.csv` + `.schema.json` | workshop **combination recipes** (result records, ingredient pairs and material rules), not item definitions; there is no global item-stat file. Converted (§6.8) | native `Content\WorkshopRecipes.hpp`, `Menu\Setup\Combination.hpp` |
@@ -580,33 +580,59 @@ At runtime the effect loader finds a page's converted image by its sector throug
 ### 6.4.1 FAR background layouts
 
 **Implemented bounded slice (#210):** `VS.Extract backgrounds <datadir>
-[--force]` writes `backgrounds\<stem>.background.json`, using
-`far-layout-json` version 1 and the committed
-`Native\Content\schemas\background-layout.schema.json` version 1.
+[--force]` writes `backgrounds\<artwork-slug>.background.json`, using
+`far-layout-json` version 2 and the committed
+`Native\Content\schemas\background-layout.schema.json` version 2.
 Full extraction runs it after images. The configured SLUS-01040 corpus has
 four nonempty inputs and 288 cells:
 
-| Stem | Layout ID | Image ID | Grid | MPD references |
+| Import provenance | Layout ID | Image ID | Grid | MPD references |
 | --- | --- | --- | --- | --- |
-| `001OP01A` | `background.import.bg.001op01a` | `image.bg.001op01a` | 8×4 | MAP001, MAP215 |
-| `002OP01A` | `background.import.bg.002op01a` | `image.bg.002op01a` | 16×4 | MAP002, MAP216 |
-| `007OP01A` | `background.import.bg.007op01a` | `image.bg.007op01a` | 8×12 | MAP007 |
-| `008OP01A` | `background.import.bg.008op01a` | `image.bg.008op01a` | 8×12 | MAP008 |
+| `001OP01A` | `background.castle-silhouette` | `image.bg.castle-silhouette` | 8×4 | MAP001, MAP215 |
+| `002OP01A` | `background.dark-clouds` | `image.bg.dark-clouds` | 16×4 | MAP002, MAP216 |
+| `007OP01A` | `background.sun-on-horizon` | `image.bg.sun-on-horizon` | 8×12 | MAP007 |
+| `008OP01A` | `background.grey-clouds` | `image.bg.grey-clouds` | 8×12 | MAP008 |
 
 All four bindings have consistent room section tables and sector-rounded
 file sizes. MAP007 was also compared byte-for-byte with the configured disc;
 the earlier claim that `007OP01A` was unreferenced was incorrect
 ([investigation evidence](https://github.com/JEschete/VS-NativePort/issues/210#issuecomment-7121319720)).
-These are proven source/reuse relationships, **not verified semantic artwork
-or room names**. The `background.import.*` IDs explicitly retain that limit.
+The IDs describe the verified artwork, **not exact room names or a claimed
+sunrise/sunset**. The image PNG/sidecar stems match the artwork slugs.
+Original `background.import.bg.<stem>` and `image.bg.<stem>` identities are
+explicit manifest compatibility aliases, not the primary authoring IDs.
+
+`backgrounds`, `images` and `authoring` run an edit-preserving upgrade first.
+It renames stock native files, retags their owned metadata, upgrades old layout
+documents with `cell_size_units: 32`, and migrates stock image references.
+Existing custom IDs/aliases, custom filenames, pixel/palette data, cell edits,
+custom labels and import provenance are preserved. Already-current documents,
+including deliberately authored old-ID references, are not reformatted.
+Source catalog schema 2 (`assets.schema.json`) gives the eight import records
+`asset.background-source.<slug>.layout` / `.image` IDs; old `asset.bg.*` IDs
+remain aliases of the same handles. These records still identify import files,
+not native PNG/JSON resources. Version 1 catalogs remain readable.
+
+Conflicting semantic destinations, duplicate primary identities, alias
+ownership, malformed legacy metadata and invalid migrated image bindings refuse
+before publication. A custom raw catalog `file` reference to a renamed native
+file currently requires explicit migration and is refused, not silently broken;
+arbitrary cross-format URI rewriting is not provided. The shared staged writer
+publishes prepared files, then the manifest, then removes obsolete paths.
+`--force` is an explicit reimport, not permission to bypass a legacy migration
+conflict. A normal repeat conversion retains authored native bytes.
 
 The format follows the actual renderer, upstream
 `resources\rood-reverse\src\BATTLE\BATTLE.PRG\2842C.c:464`
 (`func_8009147C`), rather than treating every rectangle as a positive extent:
 
-- `columns`, `rows` and row-major `cells` describe the grid. The admitted
-  renderer envelope is 1–31 cells per side, with 32-screen-unit cells and
-  a 1024-screen-unit horizontal wrap.
+- `columns`, `rows` and row-major `cells` describe the grid. Native schema 2
+  admits 1–64 cells per side, at most 1,024 stored cells, and
+  `cell_size_units` of 16, 32 or 64 in 320×240 screen-coordinate space.
+  These are explicit renderer budgets; JSON is bounded to 1 MiB.
+  Original FAR/schema-1 imports retain the 1–31-side, 32-unit geometry.
+  Horizontal wrap remains 1,024 screen units. The offline FAR encoder refuses
+  native-only geometry; the production reader never calls it.
 - `source_texels.{left,top,right,bottom}` are inclusive sampled endpoints.
   Reversed endpoints mirror the texture; both endpoint pairs equal disable
   the cell. The original signed deltas are endpoint minus start; negative
@@ -662,13 +688,39 @@ actual renderer upload, **not** a scene-visible artwork change. The authored
 layout was restored byte-for-byte; evidence is
 `build\issue-210-rebinding-relocated-comparison.json`.
 
-**Remaining gates:** semantic identities/readability, native-only extensibility beyond the admitted renderer
-envelope, matched-reference placement/gradients/seams/parallax, an edited-layout
-room demonstration and production transitions/re-entry remain open. Dormant
+The later non-skipped MAP001 route (`1000:Start,1300:Circle`, with no prologue
+skip) exposes the artwork through the windows at ticks 4000/6000, event 0,
+thread 0 PC `+0x626`. A native PNG edit changed 7,815/7,800 scene pixels at
+matched camera/model/event states (`build\issue-210-enabled-comparison.json`).
+The previously inspected open-sky MAP062 view is **not FAR**: its MPD background
+section is empty and the skipped MAP008 route had already transitioned there.
+
+The semantic-layout follow-up changes **only** `cell_size_units: 32` to `16`.
+The actual production loader reports those sizes, and the matched MAP001 frames
+change **4,401/4,391 pixels** within x24..294/y48..169. Camera, models and
+normalized event state are identical; both Debug runs exit normally with zero
+errors. Source texels, corner colors and the PNG remain unchanged, and all
+watched native files restore byte-exactly. This is both a scene-visible JSON
+layout edit and a native-only capability: FAR has no cell-size field and the
+offline encoder refuses 16-unit geometry. Evidence:
+`build\issue-210-layout-comparison.json` and
+`build\issue-210-layout-comparison-{4000,6000}.png`.
+
+Cold-read evidence (`build\issue-210-semantic-corpus.json`) records all four
+artwork/grid/image identities and one seeded cell: seed 210 selects global
+cell 196, `background.grey-clouds` cell 4 (row 0, column 4), sampling
+(127,0)..(159,30), with all four RGB corners neutral at 128. The intended
+corner-darkening edit is identifiable directly from the schema without decomp
+lookups. The same report verifies all 288 imported cells, unchanged PNG/source
+bytes, eight compatibility aliases and the source-catalog migration.
+
+**Remaining gates:** matched-reference placement/gradients/seams/parallax and
+production transitions/re-entry remain open. Exact room names are not claimed
+by artwork IDs; semantic room integration belongs to the MPD/ARM handoff. Dormant
 legacy module pointer declarations and image/page rendering compatibility are
 not retired by this slice. The four-file offline round trip, direct reader
-tests and bounded prologue evidence do **not** establish full #210 or EC-04
-completion.
+tests, native-only edit and bounded prologue evidence do **not** establish full
+#210 or EC-04 completion. Publication and exact-revision CI remain required.
 
 ### 6.5 Sequenced audio (owner choice: **sequenced**)
 The game plays music and sound effects by sequencing sampled instruments at runtime. Tempo, volume, fades and battle transitions change live, so the content is converted into equivalent modern pieces and our ported sequencer (`Audio::Seq`, copied from the decomp `Audio\Seq`) plays it:
@@ -1146,16 +1198,16 @@ A label-only pass or one changed numeric value is not sufficient.
 {
   "schema_version": 2,
   "extractor_version": "0.1.0",
-  "converters": { "fbc-palette-png": 1, "fbt-texture-png": 1, "seq-gltf": 1, "shp-gltf": 2, "str-mkv": 1, "syd-recipe-csv": 1, "tim-png": 1, "wave-bank": 1, "wep-gltf": 1, "xa-flac": 1 },
+  "converters": { "far-layout-json": 2, "fbc-palette-png": 1, "fbt-texture-png": 1, "seq-gltf": 1, "shp-gltf": 2, "str-mkv": 1, "syd-recipe-csv": 1, "tim-png": 2, "wave-bank": 1, "wep-gltf": 1, "xa-flac": 1 },
   "outputs": [
     {
-      "id": "image.bg.001op01a",
+      "id": "image.bg.castle-silhouette",
       "source": "BG/001OP01A.TIM",
       "source_sha256": "…",
       "converter": "tim-png",
       "files": [
-        "textures/bg/001OP01A.png",
-        "textures/bg/001OP01A.image.json"
+        "textures/bg/castle-silhouette.png",
+        "textures/bg/castle-silhouette.image.json"
       ],
       "dependencies": [
         { "source": "BG/001OP01A.FAR", "source_sha256": "…" }
@@ -1175,7 +1227,7 @@ A label-only pass or one changed numeric value is not sufficient.
 ```
 
 - This is the current schema: every output has a stable `id`, primary source and hash, converter name, and output paths; dependencies include every other consumed input and its hash. Unknown members and paths outside the data root are errors. `files.tsv` remains the raw disc-file catalog.
-- **Aliases** (schema version 2): an exact duplicate lists no files and names in `alias_of` an output of the same converter that has files and the same source hash. Readers load the target's files (`ConversionManifest::FilesOf`), and an edit to them applies to every alias. Effect FBT pages are the first aliased outputs (§6.4). Version 1 manifests, which have no aliases, still read.
+- **Aliases** (schema version 2): an exact duplicate or compatibility ID lists no files and names in `alias_of` an output of the same converter that has files and the same source hash. Readers load the target's files (`ConversionManifest::FilesOf`), and an edit to them applies to every alias. Multiple IDs for one physical source are accepted only when they share that canonical owner; each alias retains its dependency checks. Effect FBT pages were the first aliases (§6.4); background source-era IDs now alias their semantic resources (§6.4.1). Version 1 manifests, which have no aliases, still read.
 - **Unused content:** valid content known to be unused is still converted and marked `"unreferenced": true` (for example `DBGFNT.TIM`). Skipped and unconverted output entries are not part of this schema.
 - **Versions:** each converter has an integer version in code (`VS.Extract`). The runtime embeds the minimum version it requires for each converter, so an old `Native\data\` is rejected with instructions (§2).
 - **Interleaved sources:** an XA or STR file (`files.tsv` form `stream` or `mkv`) has no extracted copy under `disc\`; its `source_sha256` is the hash of its raw 2352-byte sectors, read from the disc image by `VS.Extract`. The runtime cannot rehash these, so it checks only that each one has its output and that the output's files exist. One-byte zero files, like empty ones, are placeholders and need no output.

@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "Content/AssetCatalog.hpp"
+#include "Content/BackgroundAssets.hpp"
 #include "Content/DataStore.hpp"
 #include "Platform/AtomicFile.hpp"
 #include "Platform/Paths.hpp"
@@ -153,7 +154,7 @@ class Importer {
             entry.path));
       }
       assets.push_back(
-          {{"id", *id},
+          {{"id", BackgroundSourceAssetId(entry.path).value_or(*id)},
            {"file", "disc/" + entry.path},
            {"bytes", entry.size},
            {"provenance", {{"disc_path", entry.path}, {"lba", entry.lba}}}});
@@ -287,7 +288,14 @@ std::expected<AssetCatalogTexts, std::string> ImportAssetCatalogs(
 
   Json catalog = {{"schema", std::string(kAssetCatalogSchema)},
                   {"schema_version", kAssetCatalogSchemaVersion},
-                  {"assets", std::move(*assets)}};
+                  {"assets", std::move(*assets)},
+                  {"aliases", Json::object()}};
+  for (const auto& entry : entries) {
+    if (entry.form != "raw") continue;
+    const auto semantic = BackgroundSourceAssetId(entry.path);
+    const auto legacy = AssetIdForDiscPath(entry.path);
+    if (semantic && legacy) catalog["aliases"][*legacy] = *semantic;
+  }
   return AssetCatalogTexts{.assets = Lines(catalog), .audio = Lines(audio)};
 }
 

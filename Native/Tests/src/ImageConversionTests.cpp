@@ -462,9 +462,10 @@ void VerifyStaleDependency(TemporaryData& converted_data,
 void VerifyMissingConvertedOutput(const TemporaryData& converted_data,
                                   const Content::ConversionManifest& manifest) {
   REQUIRE_FALSE(manifest.outputs.empty());
-  REQUIRE_FALSE(manifest.outputs.front().files.empty());
-  fs::remove(converted_data.Root() /
-             fs::path(manifest.outputs.front().files.front()));
+  const auto* files = manifest.FilesOf(manifest.outputs.front());
+  REQUIRE(files != nullptr);
+  REQUIRE_FALSE(files->files.empty());
+  fs::remove(converted_data.Root() / fs::path(files->files.front()));
   Content::DataStore::ScopedOverride restore;
   REQUIRE(Content::DataStore::Open(converted_data.Root()).has_value());
   const auto required = Content::DataStore::Get()->RequireConversions();
@@ -588,10 +589,11 @@ void VerifyFbcCorpusOutput(const fs::path& converted_root,
 }
 
 TEST_CASE("TIM image identifiers and paths are stable", "[content-images]") {
-  CHECK(Extract::ImageIdForDiscPath("BG/001OP01A.TIM") == "image.bg.001op01a");
+  CHECK(Extract::ImageIdForDiscPath("BG/001OP01A.TIM") ==
+        "image.bg.castle-silhouette");
   CHECK(Extract::ImageIdForDiscPath("DBGFNT.TIM") == "image.root.dbgfnt");
   const Extract::ImageLocation expected_location{.directory = "textures/bg",
-                                                 .stem = "001OP01A"};
+                                                 .stem = "castle-silhouette"};
   CHECK(Extract::ImageLocationForDiscPath("BG/001OP01A.TIM") ==
         expected_location);
   CHECK_FALSE(Extract::ImageIdForDiscPath("../bad.TIM").has_value());
@@ -639,13 +641,14 @@ TEST_CASE("TIM conversion records source and layout provenance",
   const std::string layout_hash = VS::Core::Sha256Hex(layout);
   auto converted = ConvertBackgroundTim(tim, layout);
   REQUIRE(converted.has_value());
-  CHECK(converted->output.id == "image.bg.001op01a");
+  CHECK(converted->output.id == "image.bg.castle-silhouette");
   CHECK(converted->output.source_sha256 == tim_hash);
   REQUIRE(converted->output.dependencies.size() == 1);
   CHECK(converted->output.dependencies[0].source == "BG/001OP01A.FAR");
   CHECK(converted->output.dependencies[0].source_sha256 == layout_hash);
   const std::vector<std::string> expected_files{
-      "textures/bg/001OP01A.png", "textures/bg/001OP01A.image.json"};
+      "textures/bg/castle-silhouette.png",
+      "textures/bg/castle-silhouette.image.json"};
   CHECK(converted->output.files == expected_files);
 }
 
@@ -656,7 +659,7 @@ TEST_CASE("TIM conversion emits native indexed image files",
   auto converted = ConvertBackgroundTim(tim, layout);
   REQUIRE(converted.has_value());
   auto image = Content::DecodeImageFiles(
-      "001OP01A",
+      "castle-silhouette",
       [&converted](const std::string& name) -> std::optional<Bytes> {
         for (const auto& file : converted->files) {
           if (file.name == name) return file.bytes;
@@ -809,7 +812,8 @@ TEST_CASE("TIM conversion reuses unchanged outputs", "[content-images]") {
   REQUIRE(first.has_value());
   CHECK(first->converted == 1);
   CHECK(first->unchanged == 0);
-  const fs::path png = data.Root() / "textures" / "bg" / "001OP01A.png";
+  const fs::path png =
+      data.Root() / "textures" / "bg" / "castle-silhouette.png";
   const Bytes generated = ReadBytes(png);
   REQUIRE_FALSE(generated.empty());
 
@@ -1750,7 +1754,8 @@ TEST_CASE("TIM conversion preserves edits until a forced rebuild",
   TemporaryData data;
   data.WriteManifest(BackgroundTimFiles());
   REQUIRE(Extract::ConvertDiscImages(data.Root(), false).has_value());
-  const fs::path png = data.Root() / "textures" / "bg" / "001OP01A.png";
+  const fs::path png =
+      data.Root() / "textures" / "bg" / "castle-silhouette.png";
   const Bytes generated = ReadBytes(png);
   REQUIRE_FALSE(generated.empty());
   const Bytes edited{std::byte{0x01}, std::byte{0x02}};
@@ -1774,7 +1779,10 @@ TEST_CASE(
   data.WriteManifest(files);
   REQUIRE(Extract::ConvertDiscImages(data.Root(), false).has_value());
   auto manifest = RequiredManifest(data.Root());
-  manifest.outputs.front().files.push_back("textures/bg/obsolete.png");
+  for (auto& output : manifest.outputs) {
+    if (output.id == "image.bg.castle-silhouette")
+      output.files.push_back("textures/bg/obsolete.png");
+  }
   REQUIRE(Extract::WriteConversionManifest(data.Root(), manifest).has_value());
   const Bytes stale{std::byte{0x01}};
   {
@@ -1802,6 +1810,23 @@ TEST_CASE("A converted background refuses its deleted layout",
   CHECK(ConversionError(data).find(
             "missing tim-png dependency BG/001OP01A.FAR") != std::string::npos);
   CHECK_FALSE(Extract::ConvertDiscImages(data.Root(), false).has_value());
+}
+
+TEST_CASE("Image source aliases retain their own dependency checks",
+          "[content-images][far-authoring]") {
+  TemporaryData data;
+  data.WriteManifest(BackgroundTimFiles());
+  REQUIRE(RequiredConversion(data.Root(), false).converted == 1);
+  auto manifest = RequiredManifest(data.Root());
+  for (auto& output : manifest.outputs) {
+    if (output.id == "image.bg.001op01a") {
+      output.dependencies.push_back(
+          {.source = "BG/MISSING.FAR", .source_sha256 = std::string(64, 'a')});
+    }
+  }
+  REQUIRE(Extract::WriteConversionManifest(data.Root(), manifest).has_value());
+  CHECK(ConversionError(data).find(
+            "missing tim-png dependency BG/MISSING.FAR") != std::string::npos);
 }
 
 TEST_CASE("unsupported TIM inputs fail before publishing converted outputs",

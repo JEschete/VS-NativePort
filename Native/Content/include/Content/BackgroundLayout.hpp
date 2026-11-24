@@ -10,15 +10,16 @@
 #include <string_view>
 #include <vector>
 
+#include "Content/BackgroundAssets.hpp"
 #include "Content/ConvertedImages.hpp"
 #include "Content/ImageFiles.hpp"
 
 namespace VS::Content {
 
 inline constexpr std::string_view kFarConverterName = "far-layout-json";
-inline constexpr std::uint32_t kFarConverterVersion = 1;
+inline constexpr std::uint32_t kFarConverterVersion = 2;
 inline constexpr auto kBackgroundLayoutSchema = "background-layout.schema.json";
-inline constexpr std::uint32_t kBackgroundLayoutVersion = 1;
+inline constexpr std::uint32_t kBackgroundLayoutVersion = 2;
 inline constexpr std::uint32_t kNeutralBackgroundColor = 128;
 inline constexpr std::size_t kBackgroundCornerCount = 4;
 inline constexpr std::size_t kUnusedBackgroundCornerBytes = 3;
@@ -54,6 +55,7 @@ struct BackgroundLayoutDocument {
   bool unreferenced = false;
   std::uint32_t columns = 0;
   std::uint32_t rows = 0;
+  std::uint32_t cell_size_units = kBackgroundDefaultCellUnits;
   std::uint32_t unused_header_word = 0;
   std::vector<BackgroundCell> cells{};  // row-major
   bool operator==(const BackgroundLayoutDocument&) const = default;

@@ -8,9 +8,12 @@
 #include <utility>
 #include <vector>
 
+#include "Content/BackgroundAssets.hpp"
 #include "Content/BackgroundLayout.hpp"
 #include "Content/ConversionManifest.hpp"
 #include "Content/ImageFiles.hpp"
+#include "Content/JsonText.hpp"
+#include "Extract/BackgroundAuthoring.hpp"
 #include "Extract/ConverterBatch.hpp"
 #include "Extract/ImageConversion.hpp"
 
@@ -55,10 +58,8 @@ std::expected<PlannedLayout, std::string> PlanLayout(
     std::string_view path) {
   // MPD room section 15 binds these pairs: MAP001/215, MAP002/216,
   // MAP007 and MAP008 respectively (fresh disc audit in #210).
-  constexpr std::array<std::string_view, 4> kBoundLayouts{
-      "BG/001OP01A.FAR", "BG/002OP01A.FAR", "BG/007OP01A.FAR",
-      "BG/008OP01A.FAR"};
-  if (std::ranges::find(kBoundLayouts, path) == kBoundLayouts.end()) {
+  const auto* identity = Content::BackgroundAssetForSource(path);
+  if (identity == nullptr || !path.ends_with(".FAR")) {
     return std::unexpected(std::string(path) +
                            ": no verified background image binding");
   }
@@ -89,9 +90,7 @@ std::expected<PlannedLayout, std::string> PlanLayout(
         image_path +
         ": stale FAR depth dependency; run VS.Extract images first");
   }
-  // These are explicitly import identities until room/artwork meanings are
-  // resolved (#210/D26), not fabricated semantic background names.
-  const std::string id = "background.import." + image_id->substr(6);
+  const std::string id = Content::BackgroundLayoutId(*identity);
   auto layout = Content::DecodeFar(
       source->bytes, {.id = id,
                       .image_id = *image_id,
@@ -108,6 +107,11 @@ std::expected<PlannedLayout, std::string> PlanLayout(
   }
   auto text = Content::WriteBackgroundLayout(*layout);
   if (!text) return std::unexpected(text.error());
+  auto labeled = Content::ParseJsonText(std::as_bytes(std::span(*text)), id);
+  if (!labeled) return std::unexpected(labeled.error());
+  (*labeled)[Content::kDisplayName] =
+      "Background layout: " + std::string(identity->display_name);
+  *text = Content::FormatJsonText(*labeled) + "\n";
   auto reloaded =
       Content::ReadBackgroundLayout(std::as_bytes(std::span(*text)), id);
   if (!reloaded) return std::unexpected(reloaded.error());
@@ -116,8 +120,6 @@ std::expected<PlannedLayout, std::string> PlanLayout(
     return std::unexpected(std::string(path) +
                            ": native FAR round trip differs");
   }
-  auto location = ImageLocationForDiscPath(path);
-  if (!location) return std::unexpected(location.error());
   return PlannedLayout{
       .output = {.id = id,
                  .source = source->path,
@@ -128,10 +130,10 @@ std::expected<PlannedLayout, std::string> PlanLayout(
                                    .source_sha256 =
                                        layout->image_source_sha256}},
                  .unreferenced = layout->unreferenced,
-                 .note = "Typed camera-wrapped grid; semantic background "
-                         "identity unresolved (#210)",
+                 .note = "Typed camera-wrapped background: " +
+                         std::string(identity->display_name),
                  .alias_of = {}},
-      .file = "backgrounds/" + location->stem + ".background.json",
+      .file = Content::BackgroundLayoutPath(*identity),
       .text = std::move(*text)};
 }
 
@@ -164,6 +166,9 @@ std::expected<void, std::string> ValidateKept(
 
 std::expected<FarConversionReport, std::string> ConvertDiscBackgrounds(
     const std::filesystem::path& root, bool force) {
+  if (auto migration = UpgradeBackgroundAuthoring(root); !migration) {
+    return std::unexpected(migration.error());
+  }
   auto start = StartRun(root);
   if (!start) return std::unexpected(start.error());
   auto batch = StartBatch(start->previous, Content::kFarConverterName,
@@ -178,10 +183,11 @@ std::expected<FarConversionReport, std::string> ConvertDiscBackgrounds(
                            ? MatchingOutput(start->previous, root, plan->output)
                            : nullptr;
     if (kept != nullptr) {
-      if (kept->files != std::vector<std::string>{plan->file}) {
+      if (kept->files.size() != 1) {
         return std::unexpected(entry.path +
                                ": unexpected native layout output files");
       }
+      plan->file = kept->files.front();
       if (auto valid = ValidateKept(root, start->previous, *plan); !valid) {
         return std::unexpected(valid.error());
       }
@@ -193,6 +199,10 @@ std::expected<FarConversionReport, std::string> ConvertDiscBackgrounds(
       planned.push_back(std::move(*plan));
       ++report.converted;
     }
+  }
+  if (auto aliases = KeepBackgroundCompatibility(batch, start->previous);
+      !aliases) {
+    return std::unexpected(aliases.error());
   }
   std::vector<OutputBytes> files;
   for (const auto& plan : planned) {

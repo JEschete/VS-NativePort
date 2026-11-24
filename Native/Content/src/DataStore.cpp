@@ -222,10 +222,11 @@ std::expected<void, std::string> RequireConvertedSource(
   return RequireOutputFiles(store, *files);
 }
 
-using OutputMap = std::unordered_map<std::string_view, const ConversionOutput*>;
+using SourceOutputs = std::vector<const ConversionOutput*>;
+using OutputMap = std::unordered_map<std::string_view, SourceOutputs>;
 
 // Each output of `type`'s converter by source path, checking that it names a
-// file of `type` in its form and that no source has two outputs.
+// file of `type` in its form and that aliases share one physical output owner.
 std::expected<OutputMap, std::string> OutputsBySource(
     const DataStore& store, const ConversionManifest& manifest,
     const ConvertedType& type) {
@@ -239,10 +240,14 @@ std::expected<OutputMap, std::string> OutputsBySource(
           "{} output names a missing or non-{} {}*{} source {}", type.converter,
           type.form, type.prefix, type.extension, output.source));
     }
-    if (!outputs.emplace(output.source, &output).second) {
+    auto& matches = outputs[output.source];
+    if (!matches.empty() &&
+        (manifest.FilesOf(*matches.front()) != manifest.FilesOf(output) ||
+         matches.front()->source_sha256 != output.source_sha256)) {
       return std::unexpected(std::format("multiple {} outputs name {}",
                                          type.converter, output.source));
     }
+    matches.push_back(&output);
   }
   return outputs;
 }
@@ -269,10 +274,12 @@ std::expected<void, std::string> RequireConvertedType(
       return std::unexpected(std::format("no {} output for {}{}",
                                          type.converter, entry.path, kRerun));
     }
-    if (auto required = RequireConvertedSource(store, manifest, hashes, entry,
-                                               *found->second);
-        !required) {
-      return required;
+    for (const auto* output : found->second) {
+      if (auto required =
+              RequireConvertedSource(store, manifest, hashes, entry, *output);
+          !required) {
+        return required;
+      }
     }
   }
   return {};

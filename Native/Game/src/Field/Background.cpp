@@ -39,8 +39,8 @@ constexpr std::int32_t kWeatherCellUnits = 128;
 constexpr std::int32_t kWeatherCellsPerTile = 4;
 constexpr std::int16_t kDefaultWeatherCells = 0x20;
 
-// func_8008EC48: tiled layouts are 1..31 cells on a side.
-constexpr std::uint32_t kLayoutSideLimit = 31;
+// A bounded native grid; legacy import keeps its original 1..31 limit.
+constexpr std::uint32_t kLayoutSideLimit = Content::kBackgroundGridSideBudget;
 // The solid backdrop: a full-screen quad over texels 248..249 of texture page
 // 0x11 with CLUT 0x38B1, grey or tinted by the room tint.
 constexpr std::int16_t kScreenWidth = 320;
@@ -265,7 +265,8 @@ void DrawRoomBackground(BackgroundHost& host, const RoomBackgroundState& state,
       DrawRoomBackgroundTiles(host,
                               {.width = layout->width,
                                .height = layout->height,
-                               .tiles = layout->tiles},
+                               .tiles = layout->tiles,
+                               .cell_size_units = layout->cell_size_units},
                               horizontal, vertical, state.texture_page);
     }
     return;

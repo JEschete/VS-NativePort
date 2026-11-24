@@ -25,6 +25,7 @@
 #include "Core/Sha256.hpp"
 #include "Extract/AssetLabels.hpp"
 #include "Extract/AudioBankConversion.hpp"
+#include "Extract/BackgroundAuthoring.hpp"
 #include "Extract/ConverterBatch.hpp"
 #include "Extract/EsqConversion.hpp"
 #include "Extract/EtmConversion.hpp"
@@ -152,6 +153,16 @@ int UpgradeAuthoring(const fs::path& root) {
       "extract",
       "zone authoring: {} named columns, {} named values, {} files updated",
       zones->renamed_columns, zones->named_values, zones->written);
+  const auto backgrounds = Extract::UpgradeBackgroundAuthoring(root);
+  if (!backgrounds) {
+    VS::Core::LogError("extract", "background authoring: {}",
+                       backgrounds.error());
+    return 1;
+  }
+  VS::Core::LogInfo(
+      "extract",
+      "background authoring: {} identities, {} files updated, {} retired paths",
+      backgrounds->identities, backgrounds->files, backgrounds->removed);
   return 0;
 }
 

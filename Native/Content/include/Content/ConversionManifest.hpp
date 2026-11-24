@@ -40,13 +40,13 @@ struct ConverterVersion {
 // FAR adoption is checked at the background reader, including on older data
 // trees that have not yet run the optional backgrounds conversion command.
 inline constexpr std::array kBackgroundLayoutConverters{
-    ConverterVersion{.name = "far-layout-json", .version = 1},
+    ConverterVersion{.name = "far-layout-json", .version = 2},
 };
 
 // The converters whose outputs this build reads, at the oldest version it
 // accepts; a manifest without them is refused with instructions.
 inline constexpr std::array kRequiredConverters{
-    ConverterVersion{.name = "tim-png", .version = 1},
+    ConverterVersion{.name = "tim-png", .version = 2},
     ConverterVersion{.name = "fbc-palette-png", .version = 1},
     ConverterVersion{.name = "fbt-texture-png", .version = 1},
     ConverterVersion{.name = "syd-recipe-csv", .version = 1},

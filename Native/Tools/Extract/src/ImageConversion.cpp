@@ -13,8 +13,11 @@
 #include <utility>
 #include <vector>
 
+#include "Content/BackgroundAssets.hpp"
 #include "Content/DataStore.hpp"
+#include "Content/JsonText.hpp"
 #include "Content/TimFile.hpp"
+#include "Extract/BackgroundAuthoring.hpp"
 #include "Extract/ConverterBatch.hpp"
 #include "Extract/EffectTextureConversion.hpp"
 #include "Platform/Paths.hpp"
@@ -258,6 +261,10 @@ std::expected<void, std::string> VerifyFbcRoundTrip(
 std::expected<TimConversion, std::string> PlanBackground(
     const fs::path& root, const std::vector<DataStore::Entry>& entries,
     SourceFile tim, std::string_view stem) {
+  if (Content::BackgroundAssetForSource(tim.path) == nullptr) {
+    return std::unexpected(tim.path +
+                           ": background artwork identity is unresolved");
+  }
   const std::string layout_path =
       std::format("{}/{}{}", kBackgroundDirectory, stem, kLayoutExtension);
   const bool listed = std::ranges::any_of(
@@ -414,6 +421,9 @@ std::expected<ConverterBatch, std::string> ConvertTims(
       return std::unexpected(recorded.error());
     }
   }
+  if (auto aliases = KeepBackgroundCompatibility(batch, previous); !aliases) {
+    return std::unexpected(aliases.error());
+  }
   return batch;
 }
 
@@ -520,6 +530,9 @@ ConvertedImage ListConvertedImage(ConversionOutput output,
 
 std::expected<std::string, std::string> ImageIdForDiscPath(
     std::string_view disc_path) {
+  if (const auto* background = Content::BackgroundAssetForSource(disc_path)) {
+    return Content::BackgroundImageId(*background);
+  }
   auto parts = SplitDiscPath(disc_path);
   if (!parts) return std::unexpected(parts.error());
   std::string id =
@@ -534,6 +547,10 @@ std::expected<std::string, std::string> ImageIdForDiscPath(
 
 std::expected<ImageLocation, std::string> ImageLocationForDiscPath(
     std::string_view disc_path) {
+  if (const auto* background = Content::BackgroundAssetForSource(disc_path)) {
+    return ImageLocation{.directory = "textures/bg",
+                         .stem = std::string(background->slug)};
+  }
   auto parts = SplitDiscPath(disc_path);
   if (!parts) return std::unexpected(parts.error());
   ImageLocation location{.directory = std::format("{}/{}", kTexturesDirectory,
@@ -648,6 +665,18 @@ std::expected<ConvertedImage, std::string> ConvertTim(
   if (!files) {
     return std::unexpected(std::format("{}: {}", source.path, files.error()));
   }
+  if (const auto* background = Content::BackgroundAssetForSource(source.path)) {
+    for (auto& file : *files) {
+      if (!file.name.ends_with(Content::kImageSidecarSuffix)) continue;
+      auto json = Content::ParseJsonText(file.bytes, file.name);
+      if (!json) return std::unexpected(json.error());
+      (*json)[Content::kDisplayName] =
+          "Background image: " + std::string(background->display_name);
+      const auto text = Content::FormatJsonText(*json) + "\n";
+      const auto bytes = std::as_bytes(std::span(text));
+      file.bytes.assign(bytes.begin(), bytes.end());
+    }
+  }
   if (auto verified = VerifyRoundTrip(document, location->stem, *files, source);
       !verified) {
     return std::unexpected(verified.error());
@@ -740,6 +769,9 @@ std::expected<ConvertedImage, std::string> ConvertFbcPalette(
 
 std::expected<ImageConversionReport, std::string> ConvertDiscImages(
     const fs::path& root, bool force) {
+  if (auto migration = UpgradeBackgroundAuthoring(root); !migration) {
+    return std::unexpected(migration.error());
+  }
   auto start = StartRun(root);
   if (!start) return std::unexpected(start.error());
   const ConversionManifest& previous = start->previous;

@@ -30,21 +30,22 @@ namespace VS::Extract {
 namespace Content = VS::Content;
 
 inline constexpr std::string_view kTimConverterName = "tim-png";
-inline constexpr std::uint32_t kTimConverterVersion = 1;
+inline constexpr std::uint32_t kTimConverterVersion = 2;
 inline constexpr std::string_view kFbcPaletteConverterName = "fbc-palette-png";
 inline constexpr std::uint32_t kFbcPaletteConverterVersion = 1;
 
-// Where an image lives under the data root: textures/<directory>, lowercase,
-// and the source file's stem.
+// Where an image lives under the data root. Known background images use
+// verified artwork slugs; other imports retain their existing stems.
 struct ImageLocation {
   std::string directory;  // '/'-separated, e.g. textures/bg
-  std::string stem;       // e.g. 001OP01A
+  std::string stem;       // e.g. castle-silhouette
 
   bool operator==(const ImageLocation&) const = default;
 };
 
 // image.<directories>.<stem>, lowercase; a file in the disc's root directory
 // is image.root.<stem> (DBGFNT.TIM -> image.root.dbgfnt).
+// The four backgrounds use the shared semantic BackgroundAssets registry.
 [[nodiscard]] std::expected<std::string, std::string> ImageIdForDiscPath(
     std::string_view disc_path);
 // textures/<directories> (or textures/root) and the stem.

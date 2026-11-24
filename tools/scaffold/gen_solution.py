@@ -76,6 +76,7 @@ PROJECTS = [
             whole_archive=["VS.Engine", "VS.Content", "VS.Game"],
             see=["VS.CombatLab", "VS.Launcher", "VS.Extract"], extra_sources=[
                 r"Tools\Extract\src\AssetLabels.cpp",
+                r"Tools\Extract\src\BackgroundAuthoring.cpp",
                 r"Tools\Extract\src\AudioBankConversion.cpp",
                 r"Tools\Extract\src\ConversionManifestWriter.cpp",
                 r"Tools\Extract\src\ConverterBatch.cpp",

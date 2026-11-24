@@ -50,6 +50,7 @@
     <ClCompile Include="src\AssetCatalogImport.cpp" />
     <ClCompile Include="src\AudioBank.cpp" />
     <ClCompile Include="src\AudioStream.cpp" />
+    <ClCompile Include="src\BackgroundAssets.cpp" />
     <ClCompile Include="src\BackgroundLayout.cpp" />
     <ClCompile Include="src\CatalogDatabase.cpp" />
     <ClCompile Include="src\CatalogTable.cpp" />
@@ -114,6 +115,7 @@
     <ClInclude Include="include\Content\AssetHandle.hpp" />
     <ClInclude Include="include\Content\AudioBank.hpp" />
     <ClInclude Include="include\Content\AudioStream.hpp" />
+    <ClInclude Include="include\Content\BackgroundAssets.hpp" />
     <ClInclude Include="include\Content\BackgroundLayout.hpp" />
     <ClInclude Include="include\Content\CatalogDatabase.hpp" />
     <ClInclude Include="include\Content\CatalogTable.hpp" />

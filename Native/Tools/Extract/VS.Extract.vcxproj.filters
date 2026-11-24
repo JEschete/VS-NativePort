@@ -18,6 +18,9 @@
     <ClCompile Include="src\AudioBankConversion.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\BackgroundAuthoring.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ConversionManifestWriter.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -73,6 +76,9 @@
       <Filter>include\Extract</Filter>
     </ClInclude>
     <ClInclude Include="include\Extract\AudioBankConversion.hpp">
+      <Filter>include\Extract</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Extract\BackgroundAuthoring.hpp">
       <Filter>include\Extract</Filter>
     </ClInclude>
     <ClInclude Include="include\Extract\ConversionManifestWriter.hpp">

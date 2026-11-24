@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Import-source asset catalog with explicit compatibility aliases",
+  "description": "Version 2 adds aliases to version 1. Asset records still identify source files; semantic background layout/image resources are separate conversion-manifest outputs. Runtime validation also checks file sizes, unique identities and canonical alias targets.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "schema_version", "assets"],
+  "properties": {
+    "schema": {"const": "vs.assets"},
+    "schema_version": {"const": 2},
+    "display_name": {"type": "string"},
+    "assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "file", "bytes", "provenance"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "display_name": {"type": "string"},
+          "file": {"type": "string"},
+          "bytes": {"type": "integer", "minimum": 0, "maximum": 4294967295},
+          "provenance": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["disc_path", "lba"],
+            "properties": {
+              "display_name": {"type": "string"},
+              "disc_path": {"type": "string"},
+              "lba": {"type": "integer", "minimum": 0, "maximum": 4294967295}
+            }
+          }
+        }
+      }
+    },
+    "aliases": {
+      "type": "object",
+      "propertyNames": {"$ref": "#/$defs/id"},
+      "additionalProperties": {"$ref": "#/$defs/id"},
+      "description": "Compatibility ID to canonical source-record ID. Aliases cannot shadow records, target another alias or form cycles."
+    }
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^asset\\.[a-z0-9_-]+(?:\\.[a-z0-9_-]+)*$"}
+  }
+}
