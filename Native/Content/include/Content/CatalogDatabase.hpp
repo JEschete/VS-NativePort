@@ -23,9 +23,10 @@ struct CatalogConflict {
   std::string winning_source;
 };
 
-// CSV is authoritative. Each load builds a private, immutable SQLite database;
-// no cache or patch operation writes to the base files. catalog-layers.json
-// optionally lists patch/mod roots in increasing precedence.
+// CSV is authoritative. Unchanged content can open a compiled SQLite cache
+// read-only; otherwise a private immutable database is built.
+// catalog-layers.json optionally lists patch/mod roots in increasing
+// precedence.
 class CatalogDatabase {
  public:
   ~CatalogDatabase();
@@ -36,10 +37,14 @@ class CatalogDatabase {
 
   [[nodiscard]] static std::expected<CatalogDatabase, std::string> Load(
       const std::filesystem::path& root,
-      std::span<const CatalogTableSource> sources);
+      std::span<const CatalogTableSource> sources, bool use_cache = true);
   [[nodiscard]] std::expected<std::vector<TableRow>, std::string> Read(
       const TableSpec& spec) const;
   [[nodiscard]] std::span<const CatalogConflict> Conflicts() const;
+  [[nodiscard]] bool CacheHit() const;
+  // Only publish after typed consumers have validated the compiled records.
+  // Base/patch files are never written; publication is an atomic replacement.
+  [[nodiscard]] std::expected<void, std::string> PublishCache() const;
 
  private:
   struct State;

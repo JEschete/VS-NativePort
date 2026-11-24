@@ -301,6 +301,13 @@ std::expected<std::optional<LoadedRecipes>, std::string> LoadListedRecipes(
         Platform::PathText(root) + ")");
   }
   auto recipes = LoadWorkshopRecipes(*database);
+  if (!recipes && database->CacheHit()) {
+    Core::LogWarn("content", "compiled catalog rejected; recompiling CSVs: {}",
+                  recipes.error());
+    database = CatalogDatabase::Load(root, WorkshopCatalogSources(), false);
+    if (!database) return std::unexpected(database.error());
+    recipes = LoadWorkshopRecipes(*database);
+  }
   if (!recipes) {
     return std::unexpected(recipes.error());
   }
@@ -419,6 +426,11 @@ std::expected<void, std::string> DataStore::Open(const fs::path& root) {
                            ": " + error.message());
   }
   if (store->m_catalog_tables_) {
+    if (auto cached = store->m_catalog_tables_->PublishCache(); !cached) {
+      Core::LogWarn("content",
+                    "catalog validated; cache could not be saved: {}",
+                    cached.error());
+    }
     for (const auto& conflict : store->m_catalog_tables_->Conflicts()) {
       VS::Core::LogInfo("content", "catalog conflict {} [{}]: {} overrides {}",
                         conflict.table, conflict.key, conflict.winning_source,

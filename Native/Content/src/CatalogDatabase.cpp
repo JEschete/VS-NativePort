@@ -8,6 +8,7 @@
 #include <format>
 #include <fstream>
 #include <iterator>
+#include <limits>
 #include <map>
 #include <memory>
 #include <optional>
@@ -19,6 +20,9 @@
 #include <vector>
 
 #include "Content/JsonText.hpp"
+#include "Core/Log.hpp"
+#include "Core/Sha256.hpp"
+#include "Platform/AtomicFile.hpp"
 #include "Platform/Paths.hpp"
 
 namespace VS::Content {
@@ -28,6 +32,16 @@ namespace fs = std::filesystem;
 using SqlConnection = std::unique_ptr<sqlite3, decltype(&sqlite3_close_v2)>;
 using Statement = std::unique_ptr<sqlite3_stmt, decltype(&sqlite3_finalize)>;
 using Aliases = std::map<std::string, std::map<std::string, std::string>>;
+using InputFiles = std::map<fs::path, std::string>;
+// Bump when compiler behavior changes independently of the serialized schemas.
+constexpr int kCatalogCompilerVersion = 1;
+constexpr int kConflictsParameter = 3;
+
+struct CatalogInputs {
+  fs::path root;
+  std::vector<fs::path> tables;
+  std::string contract;
+};
 
 // NOLINTNEXTLINE(bugprone-exception-escape): std::map's noexcept move.
 struct SourceTable {
@@ -36,7 +50,16 @@ struct SourceTable {
   std::map<std::string, std::string> writers;
 };
 
-std::expected<std::string, std::string> ReadText(const fs::path& path) {
+std::expected<std::string, std::string> ReadText(
+    const fs::path& path, const InputFiles* snapshot = nullptr) {
+  if (snapshot != nullptr) {
+    const auto found = snapshot->find(path.lexically_normal());
+    if (found == snapshot->end()) {
+      return std::unexpected("missing captured catalog input " +
+                             Platform::PathText(path));
+    }
+    return found->second;
+  }
   std::ifstream input(path, std::ios::binary);
   if (!input) return std::unexpected("cannot open " + Platform::PathText(path));
   std::string text{std::istreambuf_iterator<char>(input),
@@ -47,7 +70,9 @@ std::expected<std::string, std::string> ReadText(const fs::path& path) {
   return text;
 }
 
-std::expected<bool, std::string> Exists(const fs::path& path) {
+std::expected<bool, std::string> Exists(const fs::path& path,
+                                        const InputFiles* snapshot = nullptr) {
+  if (snapshot != nullptr) return snapshot->contains(path.lexically_normal());
   std::error_code error;
   const bool exists = fs::exists(path, error);
   if (error) {
@@ -57,12 +82,12 @@ std::expected<bool, std::string> Exists(const fs::path& path) {
 }
 
 std::expected<std::vector<fs::path>, std::string> LayerRoots(
-    const fs::path& root) {
+    const fs::path& root, const InputFiles* snapshot = nullptr) {
   const auto file = root / "catalog-layers.json";
-  auto exists = Exists(file);
+  auto exists = Exists(file, snapshot);
   if (!exists) return std::unexpected(exists.error());
   if (!*exists) return std::vector<fs::path>{};
-  auto text = ReadText(file);
+  auto text = ReadText(file, snapshot);
   if (!text) return std::unexpected(text.error());
   const std::string name = Platform::PathText(file);
   auto json = ParseJsonText(std::as_bytes(std::span(*text)), name);
@@ -332,11 +357,11 @@ std::expected<void, std::string> ApplyPatchRow(
 
 std::expected<void, std::string> ApplyPatch(
     SourceTable& table, const fs::path& file, const Aliases& aliases,
-    std::vector<CatalogConflict>& conflicts) {
-  auto exists = Exists(file);
+    std::vector<CatalogConflict>& conflicts, const InputFiles& snapshot) {
+  auto exists = Exists(file, &snapshot);
   if (!exists) return std::unexpected(exists.error());
   if (!*exists) return {};
-  auto text = ReadText(file);
+  auto text = ReadText(file, &snapshot);
   if (!text) return std::unexpected(text.error());
   const auto name = Platform::PathText(file);
   auto records = ParseCsv(*text, name);
@@ -427,14 +452,118 @@ std::expected<void, std::string> CheckLayerFiles(
   return {};
 }
 
+void HashPart(Core::Sha256& hash, std::string_view text) {
+  const auto length = std::format("{}:", text.size());
+  hash.Update(std::as_bytes(std::span(length)));
+  hash.Update(std::as_bytes(std::span(text)));
+}
+
+std::expected<std::vector<fs::path>, std::string> LayerFiles(
+    const fs::path& layer) {
+  std::vector<fs::path> files;
+  std::error_code error;
+  fs::recursive_directory_iterator entry(layer, error);
+  const fs::recursive_directory_iterator end;
+  while (!error && entry != end) {
+    if (entry->is_regular_file(error)) files.push_back(entry->path());
+    if (!error) entry.increment(error);
+  }
+  if (error) {
+    return std::unexpected(Platform::PathText(layer) + ": " + error.message());
+  }
+  std::ranges::sort(files);
+  return files;
+}
+
+std::expected<void, std::string> HashInputFile(Core::Sha256& hash,
+                                               const fs::path& path,
+                                               InputFiles* snapshot = nullptr) {
+  auto text = ReadText(path);
+  if (!text) return std::unexpected(text.error());
+  HashPart(hash, Platform::PathText(path));
+  HashPart(hash, *text);
+  if (snapshot != nullptr) {
+    const auto [found, added] =
+        snapshot->emplace(path.lexically_normal(), *text);
+    if (!added && found->second != *text) {
+      return std::unexpected("catalog input changed during capture: " +
+                             Platform::PathText(path));
+    }
+  }
+  return {};
+}
+
+std::expected<std::string, std::string> InputFingerprint(
+    const CatalogInputs& inputs, InputFiles* snapshot = nullptr) {
+  auto layers = LayerRoots(inputs.root);
+  if (!layers) return std::unexpected(layers.error());
+  Core::Sha256 hash;
+  HashPart(hash, std::to_string(kCatalogCompilerVersion));
+  HashPart(hash, Platform::PathText(inputs.root));
+  HashPart(hash, inputs.contract);
+  const auto configuration = inputs.root / "catalog-layers.json";
+  auto configured = Exists(configuration);
+  if (!configured) return std::unexpected(configured.error());
+  HashPart(hash, *configured ? "configured layers" : "base only");
+  if (*configured) {
+    if (auto read = HashInputFile(hash, configuration, snapshot); !read) {
+      return std::unexpected(read.error());
+    }
+  }
+  for (const auto& table : inputs.tables) {
+    auto schema = table;
+    schema.replace_extension(Platform::Utf8Path(kTableSchemaSuffix));
+    if (auto read = HashInputFile(hash, inputs.root / table, snapshot); !read) {
+      return std::unexpected(read.error());
+    }
+    if (auto read = HashInputFile(hash, inputs.root / schema); !read) {
+      return std::unexpected(read.error());
+    }
+  }
+  for (const auto& layer : *layers) {
+    HashPart(hash, Platform::PathText(layer));
+    auto files = LayerFiles(layer);
+    if (!files) return std::unexpected(files.error());
+    for (const auto& file : *files) {
+      const bool table =
+          std::ranges::any_of(inputs.tables, [&](const auto& relative) {
+            return (layer / relative).lexically_normal() ==
+                   file.lexically_normal();
+          });
+      if (auto read = HashInputFile(hash, file, table ? snapshot : nullptr);
+          !read) {
+        return std::unexpected(read.error());
+      }
+    }
+  }
+  return Core::HexOf(hash.Finish());
+}
+
+std::expected<CatalogInputs, std::string> DescribeInputs(
+    const fs::path& root, std::span<const CatalogTableSource> sources) {
+  std::error_code error;
+  CatalogInputs inputs{.root = fs::absolute(root, error).lexically_normal(),
+                       .tables = {},
+                       .contract = {}};
+  if (error) {
+    return std::unexpected(Platform::PathText(root) + ": " + error.message());
+  }
+  for (const auto& source : sources) {
+    inputs.tables.push_back(source.file);
+    const auto schema = FormatTableSchema(source.spec);
+    inputs.contract += std::format("{}:{}", schema.size(), schema);
+  }
+  return inputs;
+}
+
 std::expected<std::vector<SourceTable>, std::string> ReadLayers(
     const fs::path& root, std::span<const CatalogTableSource> sources,
-    std::vector<CatalogConflict>& conflicts) {
-  auto layers = LayerRoots(root);
+    std::vector<CatalogConflict>& conflicts, const InputFiles& snapshot) {
+  auto layers = LayerRoots(root, &snapshot);
   if (!layers) return std::unexpected(layers.error());
   std::vector<SourceTable> tables;
   for (const auto& source : sources) {
-    auto text = ReadText(root / source.file);
+    auto text = ReadText(root / source.file, &snapshot);
     if (!text) return std::unexpected(text.error());
     auto rows =
         ReadTable(source.spec, *text, Platform::PathText(root / source.file));
@@ -450,8 +579,8 @@ std::expected<std::vector<SourceTable>, std::string> ReadLayers(
     for (auto& table : tables) {
       auto aliases = BuildAliases(tables);
       if (!aliases) return std::unexpected(aliases.error());
-      if (auto applied =
-              ApplyPatch(table, layer / table.source.file, *aliases, conflicts);
+      if (auto applied = ApplyPatch(table, layer / table.source.file, *aliases,
+                                    conflicts, snapshot);
           !applied) {
         return std::unexpected(applied.error());
       }
@@ -578,11 +707,164 @@ std::expected<std::string, std::string> TextAt(sqlite3_stmt* statement,
   return std::string(reinterpret_cast<const char*>(text),
                      static_cast<std::size_t>(bytes));
 }
+
+JsonDocument ConflictJson(std::span<const CatalogConflict> conflicts) {
+  JsonDocument json = JsonDocument::array();
+  for (const auto& conflict : conflicts) {
+    json.push_back({{"table", conflict.table},
+                    {"key", conflict.key},
+                    {"previous_source", conflict.previous_source},
+                    {"winning_source", conflict.winning_source}});
+  }
+  return json;
+}
+
+std::expected<std::vector<CatalogConflict>, std::string> ReadConflicts(
+    const std::string& text) {
+  auto json =
+      ParseJsonText(std::as_bytes(std::span(text)), "catalog cache conflicts");
+  if (!json) return std::unexpected(json.error());
+  if (!json->is_array()) {
+    return std::unexpected("catalog cache conflicts must be an array");
+  }
+  std::vector<CatalogConflict> conflicts;
+  for (const auto& value : *json) {
+    const JsonMembers row(value, "catalog cache conflict");
+    if (auto only =
+            row.Only({"table", "key", "previous_source", "winning_source"});
+        !only) {
+      return std::unexpected(only.error());
+    }
+    auto table = row.String("table");
+    auto key = row.String("key");
+    auto previous = row.String("previous_source");
+    auto winning = row.String("winning_source");
+    if (!table) return std::unexpected(table.error());
+    if (!key) return std::unexpected(key.error());
+    if (!previous) return std::unexpected(previous.error());
+    if (!winning) return std::unexpected(winning.error());
+    conflicts.push_back({*table, *key, *previous, *winning});
+  }
+  return conflicts;
+}
+
+std::expected<void, std::string> WriteCacheMetadata(
+    sqlite3* db, std::string_view fingerprint,
+    std::span<const CatalogConflict> conflicts) {
+  if (auto created =
+          Execute(db,
+                  "CREATE TABLE __catalog_cache (version INTEGER NOT NULL,"
+                  "fingerprint TEXT NOT NULL,conflicts TEXT NOT NULL)");
+      !created) {
+    return created;
+  }
+  auto statement = Prepare(db, "INSERT INTO __catalog_cache VALUES(?1,?2,?3)");
+  if (!statement) return std::unexpected(statement.error());
+  if (sqlite3_bind_int(statement->get(), 1, kCatalogCompilerVersion) !=
+          SQLITE_OK ||
+      !BindText(statement->get(), 2, std::string(fingerprint)) ||
+      !BindText(statement->get(), kConflictsParameter,
+                FormatJsonText(ConflictJson(conflicts))) ||
+      sqlite3_step(statement->get()) != SQLITE_DONE) {
+    return std::unexpected(
+        std::string("cannot record catalog cache contract: ") +
+        sqlite3_errmsg(db));
+  }
+  return {};
+}
+
+struct CachedCatalog {
+  SqlConnection db{nullptr, sqlite3_close_v2};
+  std::vector<CatalogConflict> conflicts;
+};
+
+std::expected<SqlConnection, std::string> ReadonlySnapshot(sqlite3* source) {
+  sqlite3* raw = nullptr;
+  const auto opened = sqlite3_open(":memory:", &raw);
+  SqlConnection snapshot(raw, sqlite3_close_v2);
+  if (opened != SQLITE_OK) {
+    return std::unexpected("cannot allocate compiled catalog snapshot");
+  }
+  sqlite3_backup* backup = sqlite3_backup_init(raw, "main", source, "main");
+  if (backup == nullptr) {
+    return std::unexpected(std::string("cannot snapshot compiled catalog: ") +
+                           sqlite3_errmsg(raw));
+  }
+  const int copied = sqlite3_backup_step(backup, -1);
+  const int finished = sqlite3_backup_finish(backup);
+  if (copied != SQLITE_DONE || finished != SQLITE_OK) {
+    return std::unexpected(
+        std::string("cannot read compiled catalog snapshot: ") +
+        sqlite3_errmsg(raw));
+  }
+  if (auto frozen =
+          Execute(raw, "PRAGMA foreign_keys=ON; PRAGMA query_only=ON");
+      !frozen) {
+    return std::unexpected(frozen.error());
+  }
+  return snapshot;
+}
+
+std::expected<std::optional<CachedCatalog>, std::string> ReadCachedCatalog(
+    const fs::path& path, const std::string& fingerprint) {
+  auto exists = Exists(path);
+  if (!exists) return std::unexpected(exists.error());
+  if (!*exists) return std::nullopt;
+  sqlite3* raw = nullptr;
+  const auto opened = sqlite3_open_v2(Platform::PathText(path).c_str(), &raw,
+                                      SQLITE_OPEN_READONLY, nullptr);
+  CachedCatalog cached{.db = SqlConnection(raw, sqlite3_close_v2),
+                       .conflicts = {}};
+  if (opened != SQLITE_OK) {
+    return std::unexpected(std::string("cannot open compiled catalog: ") +
+                           sqlite3_errstr(opened));
+  }
+  auto metadata =
+      Prepare(raw, "SELECT version,fingerprint,conflicts FROM __catalog_cache");
+  if (!metadata) return std::unexpected(metadata.error());
+  if (sqlite3_step(metadata->get()) != SQLITE_ROW) {
+    return std::unexpected("compiled catalog has no cache contract");
+  }
+  const auto version = sqlite3_column_int(metadata->get(), 0);
+  auto stored = TextAt(metadata->get(), 1);
+  if (!stored) return std::unexpected(stored.error());
+  if (version != kCatalogCompilerVersion || *stored != fingerprint) {
+    return std::nullopt;
+  }
+  auto text = TextAt(metadata->get(), 2);
+  if (!text) return std::unexpected(text.error());
+  if (sqlite3_step(metadata->get()) != SQLITE_DONE) {
+    return std::unexpected("compiled catalog has multiple cache contracts");
+  }
+  auto conflicts = ReadConflicts(*text);
+  if (!conflicts) return std::unexpected(conflicts.error());
+  auto check = Prepare(raw, "PRAGMA quick_check");
+  if (!check) return std::unexpected(check.error());
+  if (sqlite3_step(check->get()) != SQLITE_ROW) {
+    return std::unexpected("cannot check compiled catalog integrity");
+  }
+  auto integrity = TextAt(check->get(), 0);
+  if (!integrity || *integrity != "ok" ||
+      sqlite3_step(check->get()) != SQLITE_DONE) {
+    return std::unexpected("compiled catalog integrity check failed");
+  }
+  // Release the disk handle so Windows can replace the cache while an older
+  // immutable catalog generation is still alive.
+  auto snapshot = ReadonlySnapshot(raw);
+  if (!snapshot) return std::unexpected(snapshot.error());
+  cached.db = std::move(*snapshot);
+  cached.conflicts = std::move(*conflicts);
+  return std::move(cached);
+}
 }  // namespace
 
 struct CatalogDatabase::State {
   SqlConnection db{nullptr, sqlite3_close_v2};
   std::vector<CatalogConflict> conflicts;
+  CatalogInputs inputs;
+  std::string fingerprint;
+  bool cache_hit = false;
+  bool published = false;
 };
 
 CatalogDatabase::CatalogDatabase(std::unique_ptr<State> state)
@@ -594,9 +876,31 @@ CatalogDatabase& CatalogDatabase::operator=(CatalogDatabase&&) noexcept =
     default;
 
 std::expected<CatalogDatabase, std::string> CatalogDatabase::Load(
-    const fs::path& root, std::span<const CatalogTableSource> sources) {
+    const fs::path& root, std::span<const CatalogTableSource> sources,
+    bool use_cache) {
   auto state = std::make_unique<State>();
-  auto tables = ReadLayers(root, sources, state->conflicts);
+  auto inputs = DescribeInputs(root, sources);
+  if (!inputs) return std::unexpected(inputs.error());
+  state->inputs = std::move(*inputs);
+  InputFiles snapshot;
+  auto fingerprint = InputFingerprint(state->inputs, &snapshot);
+  if (!fingerprint) return std::unexpected(fingerprint.error());
+  state->fingerprint = std::move(*fingerprint);
+  if (use_cache) {
+    auto cached = ReadCachedCatalog(root / ".cache" / "catalog.sqlite",
+                                    state->fingerprint);
+    if (!cached) {
+      Core::LogWarn("content", "compiled catalog cache ignored: {}",
+                    cached.error());
+    } else if (*cached) {
+      state->db = std::move((**cached).db);
+      state->conflicts = std::move((**cached).conflicts);
+      state->cache_hit = true;
+      return CatalogDatabase(std::move(state));
+    }
+  }
+  auto tables =
+      ReadLayers(state->inputs.root, sources, state->conflicts, snapshot);
   if (!tables) return std::unexpected(tables.error());
   sqlite3* raw = nullptr;
   const int opened = sqlite3_open(":memory:", &raw);
@@ -619,10 +923,53 @@ std::expected<CatalogDatabase, std::string> CatalogDatabase::Load(
       return std::unexpected(inserted.error());
     }
   }
+  if (auto metadata =
+          WriteCacheMetadata(raw, state->fingerprint, state->conflicts);
+      !metadata) {
+    return std::unexpected(metadata.error());
+  }
+  auto current = InputFingerprint(state->inputs);
+  if (!current) return std::unexpected(current.error());
+  if (*current != state->fingerprint) {
+    return std::unexpected("catalog inputs changed during compilation; retry");
+  }
   if (auto frozen = Execute(raw, "COMMIT; PRAGMA query_only=ON"); !frozen) {
     return std::unexpected(frozen.error());
   }
   return CatalogDatabase(std::move(state));
+}
+
+bool CatalogDatabase::CacheHit() const { return state_ && state_->cache_hit; }
+
+std::expected<void, std::string> CatalogDatabase::PublishCache() const {
+  if (!state_) return std::unexpected("catalog database has been moved");
+  if (state_->cache_hit || state_->published) return {};
+  auto current = InputFingerprint(state_->inputs);
+  if (!current) return std::unexpected(current.error());
+  if (*current != state_->fingerprint) {
+    return std::unexpected(
+        "catalog inputs changed before cache publication; retry");
+  }
+  sqlite3_int64 size = 0;
+  const std::unique_ptr<unsigned char, decltype(&sqlite3_free)> bytes(
+      sqlite3_serialize(state_->db.get(), "main", &size, 0), sqlite3_free);
+  if (!bytes || size <= 0 ||
+      static_cast<std::uint64_t>(size) >
+          std::numeric_limits<std::size_t>::max()) {
+    return std::unexpected("cannot serialize compiled catalog");
+  }
+  const auto path = state_->inputs.root / ".cache" / "catalog.sqlite";
+  std::error_code error;
+  fs::create_directories(path.parent_path(), error);
+  if (error) {
+    return std::unexpected(Platform::PathText(path) + ": " + error.message());
+  }
+  auto written = Platform::WriteFileAtomically(
+      path, {reinterpret_cast<const char*>(bytes.get()),
+             static_cast<std::size_t>(size)});
+  if (!written) return written;
+  state_->published = true;
+  return {};
 }
 
 std::expected<std::vector<TableRow>, std::string> CatalogDatabase::Read(

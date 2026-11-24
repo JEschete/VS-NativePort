@@ -929,10 +929,21 @@ report. Numeric values, readable enum names and row source locations survive
 SQLite compilation. Foreign keys are enabled; compilation is transactional and
 the published database is read-only.
 
-The database is currently in-memory and owned by the data store. Reopening
-recompiles from current CSV files without a stale persistent cache, requires no
-write access to base assets, and does not affect a previous store on failure.
-Base files and import provenance are never changed by loading layers.
+Validated catalogs persist as `.cache/catalog.sqlite`. The input fingerprint
+includes actual CSV and schema contents, the serialized compiler schema
+contract, compiler version, layer configuration and every selected layer file
+in deterministic root/file order. CSV timestamps are never an authority.
+Unchanged input opens the cache read-only and snapshots it into the owned
+immutable catalog; releasing its file handle permits atomic replacement on
+Windows while a previous store remains alive. Conflict provenance is preserved.
+
+Compilation reads an immutable snapshot of the same input bytes that were
+fingerprinted, then checks the current fingerprint again. Only successfully typed
+consumer records may publish the serialized SQLite file. Failed validation or
+changed inputs leave the old cache intact; missing/corrupt/stale caches rebuild.
+An unavailable cache does not make a read-only asset tree unusable. Base files
+and import provenance are never changed by loading layers, and a SQLite cache
+does not retire EC-04-T-SYD's remaining recipe/item layout constraints.
 See [BUILDING.md section 5.1](BUILDING.md#51-recipe-patch-and-mod-layers) for the
 configuration and patch syntax. Other catalog families and asset-path overrides
 are not adopted by this slice; it does not complete #499 or #520.

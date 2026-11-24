@@ -1,6 +1,9 @@
+#include <sqlite3.h>
+
 #include <filesystem>
 #include <fstream>
 #include <iterator>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -83,6 +86,24 @@ content::WorkshopRecipeCatalog Recipes(
   return std::move(*recipes);
 }
 
+void Persist(const content::CatalogDatabase& database) {
+  const auto validated = content::LoadWorkshopRecipes(database);
+  if (!validated) FAIL(validated.error());
+  const auto published = database.PublishCache();
+  if (!published) FAIL(published.error());
+}
+
+void EditCache(const fs::path& path, const char* sql) {
+  sqlite3* raw = nullptr;
+  const auto opened = sqlite3_open_v2(VS::Platform::PathText(path).c_str(),
+                                      &raw, SQLITE_OPEN_READWRITE, nullptr);
+  const std::unique_ptr<sqlite3, decltype(&sqlite3_close_v2)> database(
+      raw, sqlite3_close_v2);
+  REQUIRE(opened == SQLITE_OK);
+  REQUIRE(sqlite3_exec(database.get(), sql, nullptr, nullptr, nullptr) ==
+          SQLITE_OK);
+}
+
 struct LiveRecipes {
   ~LiveRecipes() { setup::ResetLiveSetupStatics(); }
 };
@@ -131,6 +152,214 @@ TEST_CASE("SQLite catalogs preserve base records and directed recipes",
   if (!rows) FAIL(rows.error());
   CHECK(rows->at(1).cells.at(0) == "blade.battle-knife");
   CHECK(rows->at(1).values.at(8) == 10);
+}
+
+TEST_CASE(
+    "Validated catalogs persist as readable SQLite and reopen without "
+    "compilation",
+    "[catalog-cache]") {
+  WorkshopRecipeRoot root;
+  Prepare(root);
+  const auto first = Load(root);
+  CHECK_FALSE(first.CacheHit());
+  Persist(first);
+  const auto file = root.Root() / ".cache" / "catalog.sqlite";
+  CHECK(Read(file).starts_with("SQLite format 3"));
+  const auto stamp = fs::last_write_time(file);
+  const auto second = Load(root);
+  CHECK(second.CacheHit());
+  CHECK(Recipes(second).tables == Recipes(first).tables);
+  Persist(second);
+  CHECK(fs::last_write_time(file) == stamp);
+}
+
+TEST_CASE(
+    "Catalog fingerprints use CSV contents even when size and time are "
+    "preserved",
+    "[catalog-cache]") {
+  WorkshopRecipeRoot root;
+  Prepare(root);
+  Persist(Load(root));
+  const auto path =
+      root.TableFile(WorkshopKind::kBlade, WorkshopTablePart::kResults);
+  const auto stamp = fs::last_write_time(path);
+  const auto size = fs::file_size(path);
+  root.Table(WorkshopKind::kBlade).blades[1].stats.strength = 11;
+  Write(path,
+        content::FormatWorkshopTables(root.Table(WorkshopKind::kBlade))[0]);
+  fs::last_write_time(path, stamp);
+  REQUIRE(fs::file_size(path) == size);
+  const auto changed = Load(root);
+  CHECK_FALSE(changed.CacheHit());
+  CHECK(Recipes(changed).Of(WorkshopKind::kBlade).blades[1].stats.strength ==
+        11);
+  Persist(changed);
+  CHECK(Load(root).CacheHit());
+}
+
+TEST_CASE("Catalog cache invalidates on external and compiled schema changes",
+          "[catalog-cache]") {
+  const bool compiled_contract = GENERATE(false, true);
+  WorkshopRecipeRoot root;
+  Prepare(root);
+  Persist(Load(root));
+  auto sources = content::WorkshopCatalogSources();
+  std::vector<content::ColumnSpec> columns(sources.front().spec.columns.begin(),
+                                           sources.front().spec.columns.end());
+  if (compiled_contract) {
+    columns.front().description = "A changed compiler contract";
+    sources.front().spec.columns = columns;
+  } else {
+    const auto schema =
+        root.Root() / content::WorkshopSchemaPath(WorkshopKind::kBlade,
+                                                  WorkshopTablePart::kResults);
+    const auto stamp = fs::last_write_time(schema);
+    auto text = Read(schema);
+    const auto at = text.find("Semantic result id");
+    REQUIRE(at != std::string::npos);
+    text.replace(at, std::string_view("Semantic result id").size(),
+                 "Semantic result ID");
+    Write(schema, text);
+    fs::last_write_time(schema, stamp);
+  }
+  auto changed = content::CatalogDatabase::Load(root.Root(), sources);
+  if (!changed) FAIL(changed.error());
+  CHECK_FALSE(changed->CacheHit());
+}
+
+TEST_CASE(
+    "Catalog cache tracks layer additions deletion order and conflict reports",
+    "[catalog-cache]") {
+  WorkshopRecipeRoot root;
+  Prepare(root);
+  Persist(Load(root));
+  Layers(root);
+  Patch(root, "patch", WorkshopTablePart::kResults,
+        "id,strength\nblade.battle-knife,20\n");
+  Patch(root, "mod", WorkshopTablePart::kResults,
+        "id,strength\nblade.battle-knife,30\n");
+  const auto layered = Load(root);
+  CHECK_FALSE(layered.CacheHit());
+  Persist(layered);
+  const auto hit = Load(root);
+  CHECK(hit.CacheHit());
+  REQUIRE(hit.Conflicts().size() == 1);
+  CHECK(hit.Conflicts()[0].winning_source ==
+        layered.Conflicts()[0].winning_source);
+  Write(
+      root.Root() / "catalog-layers.json",
+      R"({"schema":"vs.catalog-layers","schema_version":1,"layers":["mod","patch"]})");
+  const auto reordered = Load(root);
+  CHECK_FALSE(reordered.CacheHit());
+  CHECK(Recipes(reordered).Of(WorkshopKind::kBlade).blades[1].stats.strength ==
+        20);
+  Persist(reordered);
+  const auto file = root.Root() / "patch" /
+                    content::WorkshopTablePath(WorkshopKind::kBlade,
+                                               WorkshopTablePart::kResults);
+  REQUIRE(fs::remove(file));
+  CHECK_FALSE(Load(root).CacheHit());
+}
+
+TEST_CASE("Malformed compiled databases rebuild from validated CSV sources",
+          "[catalog-cache]") {
+  WorkshopRecipeRoot root;
+  Prepare(root);
+  Persist(Load(root));
+  const auto file = root.Root() / ".cache" / "catalog.sqlite";
+  Write(file, "broken database");
+  const auto recovered = Load(root);
+  CHECK_FALSE(recovered.CacheHit());
+  CHECK(Recipes(recovered).Of(WorkshopKind::kBlade).blades[1].stats.strength ==
+        10);
+  Persist(recovered);
+  CHECK(Load(root).CacheHit());
+}
+
+TEST_CASE("Failed typed catalog validation cannot replace the persistent cache",
+          "[catalog-cache]") {
+  content::DataStore::ScopedOverride restore;
+  WorkshopRecipeRoot root;
+  Prepare(root);
+  REQUIRE(content::DataStore::Open(root.Root()).has_value());
+  const auto file = root.Root() / ".cache" / "catalog.sqlite";
+  const auto before = Read(file);
+  const auto* previous = content::DataStore::Get();
+  Layers(root);
+  Patch(root, "mod", WorkshopTablePart::kResults,
+        "id,cost\nblade.battle-knife,5\n");
+  const auto rejected = content::DataStore::Open(root.Root());
+  REQUIRE_FALSE(rejected.has_value());
+  CHECK(rejected.error().contains("none cost_type requires zero cost"));
+  CHECK(Read(file) == before);
+  CHECK(content::DataStore::Get() == previous);
+}
+
+TEST_CASE("Catalog publication refuses inputs changed after compilation",
+          "[catalog-cache]") {
+  WorkshopRecipeRoot root;
+  Prepare(root);
+  Persist(Load(root));
+  const auto file = root.Root() / ".cache" / "catalog.sqlite";
+  const auto before = Read(file);
+  auto pending = content::CatalogDatabase::Load(
+      root.Root(), content::WorkshopCatalogSources(), false);
+  if (!pending) FAIL(pending.error());
+  Layers(root);
+  const auto published = pending->PublishCache();
+  REQUIRE_FALSE(published.has_value());
+  CHECK(published.error().contains("inputs changed"));
+  CHECK(Read(file) == before);
+}
+
+TEST_CASE(
+    "Obsolete cache compiler versions rebuild without touching source files",
+    "[catalog-cache]") {
+  WorkshopRecipeRoot root;
+  Prepare(root);
+  Persist(Load(root));
+  EditCache(root.Root() / ".cache" / "catalog.sqlite",
+            "UPDATE __catalog_cache SET version=999");
+  const auto rebuilt = Load(root);
+  CHECK_FALSE(rebuilt.CacheHit());
+  CHECK(Recipes(rebuilt).Of(WorkshopKind::kBlade).blades[1].stats.strength ==
+        10);
+}
+
+TEST_CASE(
+    "Typed validation rejects damaged cache records and recompiles their "
+    "source",
+    "[catalog-cache]") {
+  content::DataStore::ScopedOverride restore;
+  WorkshopRecipeRoot root;
+  Prepare(root);
+  Persist(Load(root));
+  EditCache(root.Root() / ".cache" / "catalog.sqlite",
+            "UPDATE \"combination-blade-results\" SET cost=5 WHERE "
+            "id='blade.battle-knife'");
+  const auto opened = content::DataStore::Open(root.Root());
+  if (!opened) FAIL(opened.error());
+  const auto* store = content::DataStore::Get();
+  REQUIRE(store != nullptr);
+  REQUIRE(store->CatalogTables() != nullptr);
+  CHECK_FALSE(store->CatalogTables()->CacheHit());
+  CHECK(store->WorkshopRecipes()->Of(WorkshopKind::kBlade).blades[1].cost == 0);
+}
+
+TEST_CASE("An unavailable cache location does not reject valid catalogs",
+          "[catalog-cache]") {
+  content::DataStore::ScopedOverride restore;
+  WorkshopRecipeRoot root;
+  Prepare(root);
+  Write(root.Root() / ".cache", "not a directory");
+  const auto opened = content::DataStore::Open(root.Root());
+  if (!opened) FAIL(opened.error());
+  CHECK(Read(root.Root() / ".cache") == "not a directory");
+  CHECK(content::DataStore::Get()
+            ->WorkshopRecipes()
+            ->Of(WorkshopKind::kBlade)
+            .blades[1]
+            .stats.strength == 10);
 }
 
 TEST_CASE("Layers merge fields by legacy aliases and report precedence",

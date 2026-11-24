@@ -167,6 +167,45 @@ also passes. The typed FAR slice is separately verified locally and awaits
 its own scoped publication; do not certify either publication until its
 fixing revision's CI passes.
 
+## Persistent compiled catalog cache (#524)
+
+Worktree based on `e2dab4d12`. The validated workshop catalog now persists as
+`.cache/catalog.sqlite`. Fingerprints cover actual CSV/schema content, the
+serialized compiler schema contract and version, layer configuration, ordered
+roots and all selected layer files. Compilation uses an immutable snapshot of
+the fingerprinted text; fingerprints are checked again before publication.
+Timestamp-preserving authoring edits cannot bypass this check.
+
+Cache hits open SQLite read-only, check its integrity/contract and retain an
+immutable native snapshot. The disk handle is released so a newer generation
+can replace the file atomically on Windows while older stores remain alive.
+Conflict provenance survives cache reloads. Only fully validated typed records
+publish; damaged caches recompile, and unavailable cache storage does not
+invalidate otherwise usable assets.
+
+- Full Debug/Release builds and **68 cases / 7,980 assertions per configuration**
+  passed for `[catalog-cache],[catalog-layers],[source-verification],[asset-catalog],[content-tables][workshop]`.
+- Tests cover real SQLite output, unchanged hits, same-size/timestamp CSV edits,
+  external/compiled schema changes, compiler-version changes, layer additions,
+  deletion and reordering, conflict restoration, malformed caches, rejected typed
+  records, input changes before publication and unavailable cache storage.
+- The real database is **3,141,632 bytes**. Release median catalog load:
+  **90.676 ms forced compilation -> 17.762 ms cache hit**; unchanged sources
+  still report 3,323 stamp hits and zero bytes hashed.
+- Three completed Release launches with both caches: **1,967.302 ms median**,
+  versus the original observed 2,778.588 ms baseline. These are warm observations,
+  not a cold/clean-machine claim. Evidence: `build\issue-524-persistent-*`.
+- Scoped cache/test tidy and changed-file quality pass without new findings.
+  Both production Debug replays match unchanged baselines (2,400 and 900 frames);
+  evidence is `build\issue-524-persistent-replays.log`.
+  The final hazard reconciliation records the FAR divisor as constexpr 64 and
+  classifies filesystem path `/` operators as non-arithmetic; no safety rule was
+  disabled. Keep cache code and its generated hazard report together.
+
+This completes local implementation/verification of the two #524 cache slices,
+not exact-revision CI or issue closure. Cache optimization does not retire any
+remaining asset T-shim. Publish and confirm CI before closing #524/#525.
+
 ## Source verification cache and physical-size integrity (#524/#525)
 
 Worktree based on `1124d0e8b`, alongside the separately owned FAR image-binding

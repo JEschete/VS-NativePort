@@ -383,9 +383,21 @@ build\Debug\VS.Extract.exe authoring Native\data
 
 ### 5.1 Recipe patch and mod layers
 
-Workshop tables now compile into a private SQLite database when the data store
-opens. CSV remains authoritative; the database is rebuilt in memory, not written
-into the base data directory. The production workshop reads the compiled records.
+Workshop tables compile into SQLite when the data store opens. CSV remains
+authoritative; validated results are saved as `.cache\catalog.sqlite` under the
+data root, which can be inspected with a SQLite browser. Edit the CSVs, not this
+disposable cache. The production workshop reads the compiled records.
+
+Unchanged inputs load the cache read-only into an immutable snapshot, avoiding
+CSV parsing and compilation. The snapshot releases the disk handle so Windows
+can atomically replace the cache while an older data-store generation remains
+alive. Cache keys hash CSV/schema contents, the compiled schema contract,
+`catalog-layers.json`, every selected layer file and its ordered root, and the
+compiler version. Timestamp-preserving CSV edits, schema edits and layer
+addition/removal/reordering invalidate it. Malformed caches rebuild from source.
+Only a successfully typed/validated catalog may publish its cache; failed
+compilation leaves the old cache untouched. Cache-write failures use the normal
+warning logger and retain the usable in-memory catalog.
 
 To enable layers, create `catalog-layers.json` beside the data root's
 `manifest.json`, using the schema in
