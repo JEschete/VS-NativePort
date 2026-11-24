@@ -14,6 +14,7 @@ namespace VS::Extract {
 struct WorkshopAuthoringReport {
   std::size_t renamed = 0;
   std::size_t references = 0;
+  std::size_t named_values = 0;
   std::size_t quarantined = 0;
   std::size_t written = 0;
 };

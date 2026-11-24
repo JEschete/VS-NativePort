@@ -753,6 +753,21 @@ through `legacy_id`, normalize pairs to current IDs and reject ambiguous aliases
 or duplicate resolved directed pairs. Old numeric identifiers do not remain the
 primary authoring keys, and renaming a display label does not rename an ID.
 
+The same pass writes verified domains as names: materials (`bronze`, `iron`,
+`hagane`, etc.), blade categories (`dagger`, `axe-mace`, `heavy-mace`, etc.),
+damage (`blunt`, `edged`, `piercing`) and resource cost (`mp`, `risk`, `hp`,
+`weapon-pp`, or `none` with zero cost). Each CSV schema carries its code-to-name
+`enum` map. Numeric aliases remain explicitly accepted for legacy imports;
+the authoring pass emits canonical names, and key comparisons normalize aliases
+so numeric/named spellings cannot create duplicate rules.
+
+`cost_type` is the weapon resource selector, not `ActionDefinition::type`:
+`EquipmentStats` passes it through `WeaponLoadout.action_type` to
+`ActionCostsLive` and the resource mapping in `ActionCosts`. Unsupported
+selectors remain byte-preservable by the legacy codec but are refused as native
+authoring values. Numeric quantities remain numeric. Other enum/flag families
+still require their own verified mappings.
+
 The shield/armor overlap is not byte-identical: 15 shield records have gem
 slots where the corresponding armor import byte is zero. Original and native
 `combineArmor` do not read the imported model or gem-slot bytes, whereas

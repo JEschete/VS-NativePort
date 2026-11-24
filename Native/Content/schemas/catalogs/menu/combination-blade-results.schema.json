@@ -36,24 +36,46 @@
     },
     {
       "name": "category",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 9,
-      "description": "The blade category (0-9); the material table is by category."
+      "type": "enum",
+      "enum": {
+        "0": "none",
+        "1": "dagger",
+        "2": "sword",
+        "3": "great-sword",
+        "4": "axe-mace",
+        "5": "great-axe",
+        "6": "staff",
+        "7": "heavy-mace",
+        "8": "polearm",
+        "9": "crossbow"
+      },
+      "legacy_numeric_aliases": true,
+      "description": "The blade category; material rules use the same domain."
     },
     {
       "name": "damage_type",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 3,
-      "description": "The damage type (0-3)."
+      "type": "enum",
+      "enum": {
+        "0": "none",
+        "1": "blunt",
+        "2": "edged",
+        "3": "piercing"
+      },
+      "legacy_numeric_aliases": true,
+      "description": "The attack's damage type."
     },
     {
       "name": "cost_type",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 7,
-      "description": "What the blade's attacks cost (0-7)."
+      "type": "enum",
+      "enum": {
+        "0": "none",
+        "1": "mp",
+        "2": "risk",
+        "3": "hp",
+        "4": "weapon-pp"
+      },
+      "legacy_numeric_aliases": true,
+      "description": "The base attack's resource cost; none requires zero cost."
     },
     {
       "name": "cost",

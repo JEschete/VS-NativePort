@@ -6,9 +6,15 @@
   "columns": [
     {
       "name": "first_material",
-      "type": "integer",
-      "minimum": 3,
-      "maximum": 7,
+      "type": "enum",
+      "enum": {
+        "3": "bronze",
+        "4": "iron",
+        "5": "hagane",
+        "6": "silver",
+        "7": "damascus"
+      },
+      "legacy_numeric_aliases": true,
       "description": "The first ingredient's material (1 wood, 2 leather, 3 bronze, 4 iron, 5 hagane, 6 silver, 7 damascus)."
     },
     {
@@ -19,30 +25,66 @@
     },
     {
       "name": "first_category",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 9,
+      "type": "enum",
+      "enum": {
+        "0": "none",
+        "1": "dagger",
+        "2": "sword",
+        "3": "great-sword",
+        "4": "axe-mace",
+        "5": "great-axe",
+        "6": "staff",
+        "7": "heavy-mace",
+        "8": "polearm",
+        "9": "crossbow"
+      },
+      "legacy_numeric_aliases": true,
       "description": "The first ingredient's category."
     },
     {
       "name": "second_material",
-      "type": "integer",
-      "minimum": 3,
-      "maximum": 7,
+      "type": "enum",
+      "enum": {
+        "3": "bronze",
+        "4": "iron",
+        "5": "hagane",
+        "6": "silver",
+        "7": "damascus"
+      },
+      "legacy_numeric_aliases": true,
       "description": "The second ingredient's material."
     },
     {
       "name": "second_category",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 9,
+      "type": "enum",
+      "enum": {
+        "0": "none",
+        "1": "dagger",
+        "2": "sword",
+        "3": "great-sword",
+        "4": "axe-mace",
+        "5": "great-axe",
+        "6": "staff",
+        "7": "heavy-mace",
+        "8": "polearm",
+        "9": "crossbow"
+      },
+      "legacy_numeric_aliases": true,
       "description": "The second ingredient's category."
     },
     {
       "name": "material",
-      "type": "integer",
-      "minimum": 1,
-      "maximum": 7,
+      "type": "enum",
+      "enum": {
+        "1": "wood",
+        "2": "leather",
+        "3": "bronze",
+        "4": "iron",
+        "5": "hagane",
+        "6": "silver",
+        "7": "damascus"
+      },
+      "legacy_numeric_aliases": true,
       "description": "The combined item's material."
     }
   ]

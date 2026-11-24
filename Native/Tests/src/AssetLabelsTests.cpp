@@ -646,3 +646,50 @@ TEST_CASE("Incremental recipe conversion keeps authored IDs and import records",
   REQUIRE(fs::remove(root.Root() / extract::WorkshopImportPath(table.kind)));
   CHECK_FALSE(extract::ConvertDiscTables(root.Root(), false));
 }
+
+TEST_CASE(
+    "Named recipe domains preserve legacy values and reject invalid names",
+    "[workshop-authoring]") {
+  ModelRoot root({RecipeNames()});
+  auto table = SmallRecipe(content::WorkshopKind::kBlade);
+  table.blades.at(1).category = 1;
+  table.blades.at(1).damage_type = 2;
+  table.blades.at(1).cost_type = 2;
+  table.blades.at(1).cost = 3;
+  table.materials = {{.first_material = 3,
+                      .first_category = 1,
+                      .second_material = 4,
+                      .second_category = 2,
+                      .material = 5}};
+  WriteWorkshop(root.Root(), table);
+  REQUIRE(extract::UpgradeWorkshopAuthoring(root.Root()));
+  const auto result_path = content::WorkshopTablePath(
+      table.kind, content::WorkshopTablePart::kResults);
+  const auto material_path = content::WorkshopTablePath(
+      table.kind, content::WorkshopTablePart::kMaterials);
+  CHECK(Read(root.Root(), result_path).find("dagger,edged,risk") !=
+        std::string::npos);
+  CHECK(Read(root.Root(), material_path)
+            .find("bronze,dagger,iron,sword,hagane") != std::string::npos);
+  CHECK(Required(
+            extract::EncodeSydRecipes(ReadRecipe(root.Root(), table.kind))) ==
+        Required(extract::EncodeSydRecipes(table)));
+  EditCell(root.Root(), "cost_type", "mana", result_path);
+  CHECK_FALSE(extract::UpgradeWorkshopAuthoring(root.Root()));
+}
+
+TEST_CASE("Numeric enum aliases cannot create duplicate material rules",
+          "[workshop-authoring]") {
+  const auto kind = content::WorkshopKind::kShield;
+  auto table = SmallRecipe(kind);
+  table.materials = {{.first_material = 3,
+                      .first_category = 0,
+                      .second_material = 4,
+                      .second_category = 0,
+                      .material = 5}};
+  auto texts = content::FormatWorkshopTables(table);
+  texts.at(2) += "bronze,iron,hagane\n";
+  const auto duplicate = content::ParseWorkshopTables(kind, texts);
+  REQUIRE_FALSE(duplicate.has_value());
+  CHECK(duplicate.error().find("repeats the key") != std::string::npos);
+}

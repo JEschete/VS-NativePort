@@ -26,6 +26,12 @@ enum class ColumnType : std::uint8_t {
   kInteger,    // a decimal integer within [minimum, maximum]
   kReference,  // the id of a row in the table `references` names
   kBytes,      // `maximum` bytes as lowercase hexadecimal, two digits each
+  kEnum,       // a named value; numeric aliases are accepted for legacy imports
+};
+
+struct EnumValue {
+  std::int64_t code;
+  std::string_view name;
 };
 
 struct ColumnSpec {
@@ -35,6 +41,7 @@ struct ColumnSpec {
   std::int64_t maximum = 0;     // kBytes: the byte count
   std::string_view references;  // kReference only
   std::string_view description;
+  std::span<const EnumValue> enumeration{};
 };
 
 struct TableSpec {

@@ -29,7 +29,7 @@ constexpr std::int64_t kStatMin = -128;
 constexpr std::int64_t kStatMax = 127;
 constexpr std::int64_t kBladeCategoryMax = 9;
 constexpr std::int64_t kDamageTypeMax = 3;
-constexpr std::int64_t kCostTypeMax = 7;
+constexpr std::int64_t kCostTypeMax = 4;
 constexpr std::int64_t kAttackShapeMax = 7;
 constexpr std::int64_t kAttackAngleMax = 31;
 constexpr std::int64_t kPieceCategoryMax = 7;
@@ -113,6 +113,51 @@ constexpr ColumnSpec Reference(std::string_view name, std::string_view table,
           .description = description};
 }
 
+constexpr std::array<EnumValue, 8> kMaterials{
+    {{0, "none"},
+     {1, "wood"},
+     {2, "leather"},
+     {3, "bronze"},
+     {4, "iron"},
+     {5, "hagane"},
+     {6, "silver"},
+     // NOLINTNEXTLINE(whitespace/indent_namespace)
+     {7, "damascus"}}};
+// ItemRows.cpp indexes ITEMHELP's Dagger and Blunt lists with value - 1.
+constexpr std::array<EnumValue, 10> kBladeCategories{
+    {{0, "none"},
+     {1, "dagger"},
+     {2, "sword"},
+     {3, "great-sword"},
+     {4, "axe-mace"},
+     {5, "great-axe"},
+     {6, "staff"},
+     {7, "heavy-mace"},
+     {8, "polearm"},
+     // NOLINTNEXTLINE(whitespace/indent_namespace)
+     {9, "crossbow"}}};
+constexpr std::array<EnumValue, 4> kDamageTypes{
+    // NOLINTNEXTLINE(whitespace/indent_namespace): array initializer.
+    {{0, "none"}, {1, "blunt"}, {2, "edged"}, {3, "piercing"}}};
+// ActionCostsLive.cpp feeds the weapon selector to ActionCosts.cpp's resource
+// mapping, not ActionDefinition::type.
+constexpr std::array<EnumValue, 5> kCostResources{
+    // NOLINTNEXTLINE(whitespace/indent_namespace): array initializer.
+    {{0, "none"}, {1, "mp"}, {2, "risk"}, {3, "hp"}, {4, "weapon-pp"}}};
+
+constexpr ColumnSpec Enumeration(std::string_view name, std::int64_t minimum,
+                                 std::int64_t maximum,
+                                 std::span<const EnumValue> values,
+                                 std::string_view description) {
+  return {.name = name,
+          .type = ColumnType::kEnum,
+          .minimum = minimum,
+          .maximum = maximum,
+          .references = {},
+          .description = description,
+          .enumeration = values};
+}
+
 constexpr std::string_view kBladeResults = "combination-blade-results";
 constexpr std::string_view kShieldResults = "combination-shield-results";
 constexpr std::string_view kArmorResults = "combination-armor-results";
@@ -161,11 +206,12 @@ constexpr std::array kBladeResultColumns{
     Id("id", kIdText),
     Integer("legacy_id", 0, kMaxLegacyId, kLegacyIdText),
     Integer("model", 0, kByteMax, kModelText),
-    Integer("category", 0, kBladeCategoryMax,
-            "The blade category (0-9); the material table is by category."),
-    Integer("damage_type", 0, kDamageTypeMax, "The damage type (0-3)."),
-    Integer("cost_type", 0, kCostTypeMax,
-            "What the blade's attacks cost (0-7)."),
+    Enumeration("category", 0, kBladeCategoryMax, kBladeCategories,
+                "The blade category; material rules use the same domain."),
+    Enumeration("damage_type", 0, kDamageTypeMax, kDamageTypes,
+                "The attack's damage type."),
+    Enumeration("cost_type", 0, kCostTypeMax, kCostResources,
+                "The base attack's resource cost; none requires zero cost."),
     Integer("cost", 0, kByteMax, "How much each attack costs."),
     Integer("recovery_delay", 0, kByteMax,
             "The recovery delay after an attack (record byte 6)."),
@@ -264,23 +310,34 @@ constexpr std::string_view kSecondCategoryText{
 constexpr std::string_view kMaterialText = "The combined item's material.";
 
 constexpr std::array kBladeMaterialColumns{
-    Integer("first_material", 3, kLastMaterial, kFirstMaterialText),
-    Integer("first_category", 0, kBladeCategoryMax, kFirstCategoryText),
-    Integer("second_material", 3, kLastMaterial, kSecondMaterialText),
-    Integer("second_category", 0, kBladeCategoryMax, kSecondCategoryText),
-    Integer("material", kFirstMaterial, kLastMaterial, kMaterialText),
+    Enumeration("first_material", 3, kLastMaterial, kMaterials,
+                kFirstMaterialText),
+    Enumeration("first_category", 0, kBladeCategoryMax, kBladeCategories,
+                kFirstCategoryText),
+    Enumeration("second_material", 3, kLastMaterial, kMaterials,
+                kSecondMaterialText),
+    Enumeration("second_category", 0, kBladeCategoryMax, kBladeCategories,
+                kSecondCategoryText),
+    Enumeration("material", kFirstMaterial, kLastMaterial, kMaterials,
+                kMaterialText),
 };
 constexpr std::array kShieldMaterialColumns{
-    Integer("first_material", 0, kLastMaterial, kFirstMaterialText),
-    Integer("second_material", 0, kLastMaterial, kSecondMaterialText),
-    Integer("material", kFirstMaterial, kLastMaterial, kMaterialText),
+    Enumeration("first_material", 0, kLastMaterial, kMaterials,
+                kFirstMaterialText),
+    Enumeration("second_material", 0, kLastMaterial, kMaterials,
+                kSecondMaterialText),
+    Enumeration("material", kFirstMaterial, kLastMaterial, kMaterials,
+                kMaterialText),
 };
 constexpr std::array kArmorMaterialColumns{
-    Integer("first_material", 0, kLastMaterial, kFirstMaterialText),
+    Enumeration("first_material", 0, kLastMaterial, kMaterials,
+                kFirstMaterialText),
     Integer("first_category", 2, 5, kFirstCategoryText),
-    Integer("second_material", 0, kLastMaterial, kSecondMaterialText),
+    Enumeration("second_material", 0, kLastMaterial, kMaterials,
+                kSecondMaterialText),
     Integer("second_category", 2, 5, kSecondCategoryText),
-    Integer("material", kFirstMaterial, kLastMaterial, kMaterialText),
+    Enumeration("material", kFirstMaterial, kLastMaterial, kMaterials,
+                kMaterialText),
 };
 
 constexpr std::array<std::string_view, 1> kResultKey{"id"};
@@ -773,7 +830,13 @@ std::expected<WorkshopRecipeTable, std::string> ParseWorkshopTables(
   table.kind = kind;
   for (const TableRow& row : results) {
     if (kind == WorkshopKind::kBlade) {
-      table.blades.push_back(BladeOf(row));
+      auto blade = BladeOf(row);
+      if (blade.cost_type == 0 && blade.cost != 0) {
+        return std::unexpected(
+            CellError(WorkshopTablePath(kind, WorkshopTablePart::kResults),
+                      row.line, "cost", "none cost_type requires zero cost"));
+      }
+      table.blades.push_back(std::move(blade));
     } else {
       table.pieces.push_back(PieceOf(row));
     }

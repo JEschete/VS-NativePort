@@ -135,10 +135,10 @@ int UpgradeAuthoring(const fs::path& root) {
     return 1;
   }
   VS::Core::LogInfo("extract",
-                    "authoring: {} recipe IDs, {} references, {} unused "
-                    "records archived, {} files updated",
-                    report->renamed, report->references, report->quarantined,
-                    report->written);
+                    "authoring: {} recipe IDs, {} references, {} named values, "
+                    "{} unused records archived, {} files updated",
+                    report->renamed, report->references, report->named_values,
+                    report->quarantined, report->written);
   return 0;
 }
 

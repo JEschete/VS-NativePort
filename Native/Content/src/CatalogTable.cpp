@@ -115,12 +115,37 @@ std::string_view TypeName(ColumnType type) {
       return "reference";
     case ColumnType::kBytes:
       return "bytes";
+    case ColumnType::kEnum:
+      return "enum";
   }
   return "integer";
 }
 
 bool IsLowerHexDigit(char value) {
   return (value >= '0' && value <= '9') || (value >= 'a' && value <= 'f');
+}
+
+std::string_view EnumName(const ColumnSpec& column, std::int64_t code) {
+  for (const auto& value : column.enumeration) {
+    if (value.code == code && code >= column.minimum &&
+        code <= column.maximum) {
+      return value.name;
+    }
+  }
+  return {};
+}
+
+std::string EnumError(const ColumnSpec& column, std::string_view cell,
+                      std::string_view file, std::size_t line) {
+  std::string names;
+  for (const auto& value : column.enumeration) {
+    if (value.code < column.minimum || value.code > column.maximum) continue;
+    if (!names.empty()) names += ", ";
+    names += value.name;
+  }
+  return CellError(
+      file, line, column.name,
+      std::format("'{}' is not one of [{}] or its legacy code", cell, names));
 }
 
 // Each spec column's field position in the header.
@@ -164,6 +189,13 @@ std::expected<std::int64_t, std::string> ReadCell(const ColumnSpec& column,
                                                   std::string_view cell,
                                                   std::string_view file,
                                                   std::size_t line) {
+  if (column.type == ColumnType::kEnum) {
+    for (const auto& value : column.enumeration) {
+      if (value.name == cell && !EnumName(column, value.code).empty()) {
+        return value.code;
+      }
+    }
+  }
   if (column.type == ColumnType::kBytes) {
     const auto digits = static_cast<std::size_t>(2 * column.maximum);
     if (cell.size() == digits && std::ranges::all_of(cell, IsLowerHexDigit)) {
@@ -174,7 +206,7 @@ std::expected<std::int64_t, std::string> ReadCell(const ColumnSpec& column,
                   std::format("'{}' is not {} bytes as lowercase hexadecimal",
                               cell, column.maximum)));
   }
-  if (column.type != ColumnType::kInteger) {
+  if (column.type != ColumnType::kInteger && column.type != ColumnType::kEnum) {
     if (IsContentId(cell)) return 0;
     return std::unexpected(CellError(
         file, line, column.name,
@@ -187,6 +219,9 @@ std::expected<std::int64_t, std::string> ReadCell(const ColumnSpec& column,
       std::from_chars(cell.data(), cell.data() + cell.size(), value);
   if (cell.empty() || parsed.ec != std::errc() ||
       parsed.ptr != cell.data() + cell.size()) {
+    if (column.type == ColumnType::kEnum) {
+      return std::unexpected(EnumError(column, cell, file, line));
+    }
     return std::unexpected(
         CellError(file, line, column.name,
                   std::format("'{}' is not a decimal integer", cell)));
@@ -196,6 +231,9 @@ std::expected<std::int64_t, std::string> ReadCell(const ColumnSpec& column,
         CellError(file, line, column.name,
                   std::format("{} is outside {}..{}", value, column.minimum,
                               column.maximum)));
+  }
+  if (column.type == ColumnType::kEnum && EnumName(column, value).empty()) {
+    return std::unexpected(EnumError(column, cell, file, line));
   }
   return value;
 }
@@ -213,7 +251,9 @@ std::expected<TableRow, std::string> ReadRow(
     const std::string& cell = record.fields[position[column]];
     auto value = ReadCell(spec.columns[column], cell, file, record.line);
     if (!value) return std::unexpected(value.error());
-    row.cells.push_back(cell);
+    row.cells.emplace_back(spec.columns[column].type == ColumnType::kEnum
+                               ? EnumName(spec.columns[column], *value)
+                               : std::string_view(cell));
     row.values.push_back(*value);
   }
   return row;
@@ -361,6 +401,16 @@ std::string FormatTableSchema(const TableSpec& spec) {
     }
     if (column.type == ColumnType::kBytes) {
       entry["bytes"] = column.maximum;
+    }
+    if (column.type == ColumnType::kEnum) {
+      JsonDocument values = JsonDocument::object();
+      for (const auto& value : column.enumeration) {
+        if (value.code >= column.minimum && value.code <= column.maximum) {
+          values[std::to_string(value.code)] = value.name;
+        }
+      }
+      entry["enum"] = std::move(values);
+      entry["legacy_numeric_aliases"] = true;
     }
     entry["description"] = std::string(column.description);
     columns.push_back(std::move(entry));

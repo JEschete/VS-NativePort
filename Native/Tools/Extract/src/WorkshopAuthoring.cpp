@@ -475,6 +475,34 @@ std::expected<Content::WorkshopTexts, std::string> ReadTables(
   return texts;
 }
 
+std::expected<Rewrite, std::string> NormalizeEnums(
+    const Content::TableSpec& spec, const std::string& text,
+    std::string_view file) {
+  auto checked = Content::ReadTable(spec, text, file);
+  if (!checked) return std::unexpected(checked.error());
+  auto records = Content::ParseCsv(text, file);
+  if (!records) return std::unexpected(records.error());
+  const auto& header = records->front().fields;
+  std::size_t changed = 0;
+  for (std::size_t column = 0; column < spec.columns.size(); ++column) {
+    if (spec.columns[column].type != Content::ColumnType::kEnum) continue;
+    const auto found = std::ranges::find(header, spec.columns[column].name);
+    const auto index = static_cast<std::size_t>(found - header.begin());
+    for (std::size_t row = 0; row < checked->size(); ++row) {
+      std::string& cell = records->at(row + 1).fields.at(index);
+      const std::string& canonical = checked->at(row).cells.at(column);
+      if (cell != canonical) {
+        cell = canonical;
+        ++changed;
+      }
+    }
+  }
+  if (changed == 0) return Rewrite{.text = text, .cells = 0};
+  std::vector<std::vector<std::string>> rows;
+  for (auto& record : *records) rows.push_back(std::move(record.fields));
+  return Rewrite{.text = Content::FormatCsv(rows), .cells = changed};
+}
+
 using PendingFiles = std::vector<std::pair<std::string, std::string>>;
 
 std::expected<bool, std::string> RecordImports(
@@ -544,21 +572,29 @@ Check UpgradeTables(const fs::path& root, WorkshopKind kind, Naming& names,
   constexpr std::array<std::string_view, 3> kPairColumns{"first", "second",
                                                          "result"};
   const std::set<std::string> no_removed;
-  for (const auto part :
-       {WorkshopTablePart::kResults, WorkshopTablePart::kPairs}) {
+  for (const auto part : Content::kWorkshopTableParts) {
     const std::string path = Content::WorkshopTablePath(kind, part);
-    auto rewritten = RewriteReferences(
-        texts->at(static_cast<std::size_t>(part)), path, aliases,
-        part == WorkshopTablePart::kResults
-            ? std::span<const std::string_view>(kResultColumns)
-            : std::span<const std::string_view>(kPairColumns),
-        part == WorkshopTablePart::kResults ? *removed : no_removed);
-    if (!rewritten) return std::unexpected(rewritten.error());
-    if (part == WorkshopTablePart::kPairs) {
-      report.references += rewritten->cells;
+    const auto& original_text = texts->at(static_cast<std::size_t>(part));
+    std::string candidate = original_text;
+    if (part != WorkshopTablePart::kMaterials) {
+      auto rewritten = RewriteReferences(
+          candidate, path, aliases,
+          part == WorkshopTablePart::kResults
+              ? std::span<const std::string_view>(kResultColumns)
+              : std::span<const std::string_view>(kPairColumns),
+          part == WorkshopTablePart::kResults ? *removed : no_removed);
+      if (!rewritten) return std::unexpected(rewritten.error());
+      if (part == WorkshopTablePart::kPairs) {
+        report.references += rewritten->cells;
+      }
+      candidate = std::move(rewritten->text);
     }
-    if (rewritten->cells != 0) {
-      files.emplace_back(path, std::move(rewritten->text));
+    auto normalized =
+        NormalizeEnums(Content::WorkshopTableSpec(kind, part), candidate, path);
+    if (!normalized) return std::unexpected(normalized.error());
+    report.named_values += normalized->cells;
+    if (normalized->text != original_text) {
+      files.emplace_back(path, std::move(normalized->text));
     }
   }
   catalog.tables.at(static_cast<std::size_t>(kind)) = std::move(*table);

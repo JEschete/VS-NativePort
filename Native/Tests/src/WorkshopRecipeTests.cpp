@@ -73,7 +73,7 @@ content::WorkshopRecipeTable SampleTable(WorkshopKind kind) {
     blade.model = 35;
     blade.category = 9;
     blade.damage_type = 3;
-    blade.cost_type = 7;
+    blade.cost_type = 4;
     blade.cost = 255;
     blade.recovery_delay = 200;
     blade.stats = stats;
@@ -494,6 +494,23 @@ TEST_CASE("Committed workshop table schemas match the converter's",
       CHECK(committed == content::FormatTableSchema(spec));
     }
   }
+}
+
+TEST_CASE(
+    "Unsupported cost codes remain lossless imports but not authoring values",
+    "[content-tables][workshop][workshop-authoring]") {
+  auto table = SampleTable(WorkshopKind::kBlade);
+  table.blades.at(1).cost_type = 7;
+  const auto bytes = extract::EncodeSydRecipes(table);
+  REQUIRE(bytes.has_value());
+  const auto decoded = extract::DecodeSydRecipes(table.kind, *bytes);
+  REQUIRE(decoded.has_value());
+  CHECK(decoded->blades.at(1).cost_type == 7);
+  CHECK(extract::EncodeSydRecipes(*decoded) == bytes);
+  const auto converted =
+      extract::ConvertSydRecipes({.path = "MENU/BLADE.SYD", .bytes = *bytes});
+  REQUIRE_FALSE(converted.has_value());
+  CHECK(converted.error().find("cost_type") != std::string::npos);
 }
 
 TEST_CASE("Extracted workshop recipe files convert to tables exactly",

@@ -6,9 +6,18 @@
   "columns": [
     {
       "name": "first_material",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 7,
+      "type": "enum",
+      "enum": {
+        "0": "none",
+        "1": "wood",
+        "2": "leather",
+        "3": "bronze",
+        "4": "iron",
+        "5": "hagane",
+        "6": "silver",
+        "7": "damascus"
+      },
+      "legacy_numeric_aliases": true,
       "description": "The first ingredient's material (1 wood, 2 leather, 3 bronze, 4 iron, 5 hagane, 6 silver, 7 damascus)."
     },
     {
@@ -19,16 +28,33 @@
     },
     {
       "name": "second_material",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 7,
+      "type": "enum",
+      "enum": {
+        "0": "none",
+        "1": "wood",
+        "2": "leather",
+        "3": "bronze",
+        "4": "iron",
+        "5": "hagane",
+        "6": "silver",
+        "7": "damascus"
+      },
+      "legacy_numeric_aliases": true,
       "description": "The second ingredient's material."
     },
     {
       "name": "material",
-      "type": "integer",
-      "minimum": 1,
-      "maximum": 7,
+      "type": "enum",
+      "enum": {
+        "1": "wood",
+        "2": "leather",
+        "3": "bronze",
+        "4": "iron",
+        "5": "hagane",
+        "6": "silver",
+        "7": "damascus"
+      },
+      "legacy_numeric_aliases": true,
       "description": "The combined item's material."
     }
   ]

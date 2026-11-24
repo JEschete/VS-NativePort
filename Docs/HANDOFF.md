@@ -1,5 +1,42 @@
 # Current Handoff
 
+## Named recipe domains (#499/#520), 2026-11-23
+
+Base revision: `22b0be713` on `main`. The shared CSV schema/reader now supports
+named enum domains with explicit numeric import aliases. Material rules, blade
+categories, damage types and cost resources are written by name by the authoring
+pass. Readers preserve the original numeric runtime values and normalize keys,
+so mixed numeric/named aliases cannot create duplicate material rules.
+
+The cost mapping is now traced end to end:
+`EquipmentStats::BuildWeaponStatsFromParts` -> `WeaponLoadout.action_type` ->
+`ActionCostsLive::Resources` -> `ActionCosts`: 1 MP, 2 Risk, 3 HP, 4 weapon PP,
+or 0/0 for no payment. It is not `ActionDefinition::type`. Unsupported codes
+remain losslessly decodable/re-encodable by the import codec but are refused
+as authoring values; `none` requires zero cost.
+
+Verification on this slice:
+- Full Debug and Release solution builds passed (`VS_JOBS=4`, `/m:2`, x64).
+- Debug authoring/label/recipe selection: **35 cases / 680 assertions**.
+- Final Release authoring/label/recipe/catalog selection:
+  **61 cases / 7,847 assertions**.
+- Actual data: **12,897 numeric aliases** became their schema names across
+  **15,499 recipe rows**. Every underlying code, quantity, identity and reference
+  is unchanged. Repeating authoring changes zero files/values.
+- Both Debug production replays match the unchanged baselines (2,400 and 900
+  frames). Scoped tidy and changed-file quality report zero new findings.
+- A seed-520 five-record cold read records semantic IDs, names, categories,
+  damage, resource costs and stats in `build\issue-520-domains-cold-read.log`.
+  It is only the known-domain check: remaining import-only/unnamed fields still
+  block the full family readability gate.
+- Evidence: `build\issue-520-domains-*.log`; original rows are retained locally
+  in `build\issue-520-domains-before`.
+
+Still open: the other catalog families, flags and numbered field families,
+readable instruction/track structures, the authoritative string pipeline,
+one-copy shared item definitions and remaining per-format adoption/verification.
+No complete migration issue closes on this bounded step.
+
 ## Semantic recipe identity slice (#499/#520), 2026-11-23
 
 Base revision: `a144ae986`, on `main`. This is the first section 4 identity
