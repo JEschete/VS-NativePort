@@ -13,6 +13,7 @@ namespace VS::Menu::BattleAbilities {
 inline constexpr int kVisibleAbilityRows = 8;
 inline constexpr std::size_t kLearnedAbilitySlots = 14;
 inline constexpr std::size_t kAssignmentButtonCount = 3;
+inline constexpr std::size_t kUnlockPointsTextCapacity = 24;
 
 enum class AssignmentButton : std::uint8_t { kCircle, kTriangle, kSquare };
 enum class AssignmentSound : std::uint8_t { kLeave, kSet, kChange };
@@ -116,7 +117,7 @@ class UnlockPointsHost {
   virtual void Refuse(std::string_view reason) = 0;
   [[nodiscard]] virtual int UnlockCount() const = 0;
   [[nodiscard]] virtual std::uint16_t TotalKills() const = 0;
-  [[nodiscard]] virtual std::optional<std::uint16_t> Requirement(
+  [[nodiscard]] virtual std::optional<int> Requirement(
       int unlock_count) const = 0;
   virtual void DrawCompactText(std::string_view text,
                                std::uint32_t position) = 0;

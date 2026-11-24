@@ -27,11 +27,12 @@ class UnlockProgress {
   [[nodiscard]] virtual int ArtsLearned(int category) const = 0;
   virtual void SetArtsLearned(int category, int count) = 0;
   [[nodiscard]] virtual int WeaponCategoryKills(int category) const = 0;
-  [[nodiscard]] virtual int BreakArtRequirement(int category,
-                                                int tier) const = 0;
+  [[nodiscard]] virtual std::optional<int> BreakArtRequirement(
+      int category, int tier) const = 0;
   [[nodiscard]] virtual int BattleAbilitiesUnlocked() const = 0;
   virtual void SetBattleAbilitiesUnlocked(int count) = 0;
-  [[nodiscard]] virtual int BattleAbilityRequirement(int tier) const = 0;
+  [[nodiscard]] virtual std::optional<int> BattleAbilityRequirement(
+      int tier) const = 0;
   [[nodiscard]] virtual int TotalKills() const = 0;
   [[nodiscard]] virtual bool ActionUnlocked(std::uint8_t action) const = 0;
   virtual void UnlockAction(std::uint8_t action) = 0;

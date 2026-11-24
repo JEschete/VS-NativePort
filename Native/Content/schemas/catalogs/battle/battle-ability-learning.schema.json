@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "table": "battle-ability-learning",
+  "description": "Battle ability choice thresholds in unlock order. Values need not increase: the original checks only the next tier.",
+  "key": ["id"],
+  "columns": [
+    {
+      "name": "id",
+      "type": "id",
+      "description": "Stable learning definition identity."
+    },
+    {
+      "name": "display_name",
+      "type": "text",
+      "optional": true,
+      "description": "Informational plain-text label; not a key or gameplay value."
+    },
+    {
+      "name": "choice_order",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 22,
+      "description": "Ordinal opportunity to choose an unlearned chain or defense ability; not a specific action ID."
+    },
+    {
+      "name": "required_ability_points",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647,
+      "description": "Cumulative successful offensive/defensive timing credit. Legacy save field total_kills is NOT an enemy kill count. #183 banks credit up to 65535; a qualifying death triggers learning."
+    }
+  ]
+}

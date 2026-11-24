@@ -88,6 +88,7 @@
 #include "State/ScriptFlagsLive.hpp"
 #include "State/StateFlags.hpp"
 #include "State/Timers.hpp"
+#include "TestSupport/LearningRoot.hpp"
 
 using VS::Battle::ActionDefinition;
 using VS::Battle::ActionRequestRecord;
@@ -1423,36 +1424,23 @@ struct LootPresentationFixture : EnemyLootFixture {
 
 struct AbilityUnlockFixture : AbilityFixture {
   VS::State::ArtsStatus saved_progress = VS::State::artsStatus;
-  decltype(VS::Battle::battleAbilityPointRequirements) saved_points =
-      VS::Battle::battleAbilityPointRequirements;
-  decltype(kBreakArtThresholds)::value_type saved_art_points[10]{};
+  VS::test_support::LearningRoot learning;
 
   AbilityUnlockFixture() {
     VS::State::artsStatus = {};
     std::fill_n(VS::State::artsStatus.arts_learned, 12, 4);
-    std::copy(kAbilityThresholds.begin(), kAbilityThresholds.end(),
-              VS::Battle::battleAbilityPointRequirements.begin());
-    for (unsigned category = 0; category < kBreakArtThresholds.size();
-         ++category) {
-      saved_art_points[category] =
-          VS::Battle::breakArtPointRequirements[category];
-      std::copy(kBreakArtThresholds[category].begin(),
-                kBreakArtThresholds[category].end(),
-                VS::Battle::breakArtPointRequirements[category].begin());
+    for (auto& ability : learning.definitions.battle_abilities) {
+      ability.required_ability_points =
+          kAbilityThresholds.at(ability.choice_order - 1);
     }
+    for (auto& art : learning.definitions.break_arts) {
+      art.required_weapon_kills =
+          kBreakArtThresholds.at(art.weapon_category).at(art.tier - 1);
+    }
+    learning.Publish();
   }
 
-  ~AbilityUnlockFixture() {
-    VS::State::artsStatus = saved_progress;
-    std::copy(saved_points.begin(), saved_points.end(),
-              VS::Battle::battleAbilityPointRequirements.begin());
-    for (unsigned category = 0; category < kBreakArtThresholds.size();
-         ++category) {
-      std::copy(saved_art_points[category].begin(),
-                saved_art_points[category].end(),
-                VS::Battle::breakArtPointRequirements[category].begin());
-    }
-  }
+  ~AbilityUnlockFixture() { VS::State::artsStatus = saved_progress; }
 };
 
 struct ChainCreditFixture : AbilityUnlockFixture {
@@ -1815,6 +1803,28 @@ TEST_CASE("Qualifying lethal actions count once at every Break Art threshold",
   CheckAbilityProgress(expected);
   fixture.Resolve();
   CheckAbilityProgress(expected);
+}
+
+TEST_CASE(
+    "Live weapon learning refuses overflowing catalog credit without partial "
+    "progress",
+    "[combat][break-arts][learning-catalog]") {
+  BreakArtKillFixture fixture(1, 0);
+  fixture.learning.Write(
+      "catalog-layers.json",
+      R"({"schema":"vs.catalog-layers","schema_version":1,"layers":["mod"]})");
+  fixture.learning.Write(
+      "mod/catalogs/battle/break-art-learning.csv",
+      "id,required_weapon_kills\nlearning.whistle-sting,70000\n");
+  fixture.learning.Open();
+  VS::State::artsStatus.kills.weapon_category_kills[1] = UINT16_MAX;
+  const auto before = VS::State::artsStatus;
+  fixture.Resolve();
+  CHECK(fixture.actors[1].kill_counted == 0);
+  CheckAbilityProgress(before);
+  fixture.Resolve();
+  CHECK(fixture.actors[1].kill_counted == 0);
+  CheckAbilityProgress(before);
 }
 
 TEST_CASE("Break Art kill points preserve original qualification and cap gates",

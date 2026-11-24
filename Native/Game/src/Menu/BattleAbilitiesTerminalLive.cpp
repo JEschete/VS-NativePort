@@ -10,6 +10,7 @@
 #include "Battle/AbilityState.hpp"
 #include "Battle/ActionMenu.hpp"
 #include "Battle/ActionTable.hpp"
+#include "Battle/LearningLive.hpp"
 #include "Content/StringTables.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -269,16 +270,11 @@ class LivePointsHost final : public UnlockPointsHost {
   std::uint16_t TotalKills() const override {
     return VS::State::artsStatus.kills.total_kills;
   }
-  std::optional<std::uint16_t> Requirement(int count) const override {
-    if (count < 0 ||
-        static_cast<std::size_t>(count) >=
-            std::size(VS::Battle::battleAbilityPointRequirements)) {
-      return std::nullopt;
-    }
-    return VS::Battle::battleAbilityPointRequirements[count];
+  std::optional<int> Requirement(int count) const override {
+    return VS::Battle::LiveBattleAbilityRequirement(count);
   }
   void DrawCompactText(std::string_view text, std::uint32_t position) override {
-    std::array<char, kRiskTextCapacity> terminated{};
+    std::array<char, kUnlockPointsTextCapacity> terminated{};
     if (text.size() >= terminated.size()) {
       Refuse("ability points text exceeds its compact buffer");
       return;

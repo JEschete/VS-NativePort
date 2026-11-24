@@ -48,9 +48,22 @@ void CountWeaponKill(ActionEffectWorld& world, int execute) {
     return;
   }
   const auto learned = world.LearnedArts(category);
-  if (learned >= kArtsPerWeapon) return;
+  if (learned >= kArtsPerWeapon) {
+    return;
+  }
   const auto kills = world.WeaponKills(category);
-  if (kills < world.RequiredKills(category, learned)) {
+  const auto requirement = world.RequiredKills(category, learned);
+  if (!requirement) {
+    world.ClearKillCounted();
+    world.Refuse("missing learning requirement");
+    return;
+  }
+  if (kills < *requirement && kills == UINT16_MAX) {
+    world.ClearKillCounted();
+    world.Refuse("kill credit exceeds retained uint16 progress storage");
+    return;
+  }
+  if (kills < *requirement) {
     world.SetWeaponKills(category, static_cast<std::uint16_t>(kills + 1));
   }
 }

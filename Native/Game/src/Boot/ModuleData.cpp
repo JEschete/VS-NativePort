@@ -1486,16 +1486,6 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"SLUS_010.40", 0x405D0, sizeof VS::Actors::placeholderActorName,
      VS::Actors::placeholderActorName.data(),
      sizeof VS::Actors::placeholderActorName},  // G01915 D_8004FDD0
-    {"SLUS_010.40", 0x405E4, sizeof VS::Battle::breakArtPointRequirements,
-     &VS::Battle::breakArtPointRequirements,
-     sizeof VS::Battle::
-         breakArtPointRequirements},  // G01916
-                                      // vs_main_artsPointsRequirements
-    {"SLUS_010.40", 0x4065C, sizeof VS::Battle::battleAbilityPointRequirements,
-     &VS::Battle::battleAbilityPointRequirements,
-     sizeof VS::Battle::
-         battleAbilityPointRequirements},  // G01917
-                                           // vs_main_battleAbilitiesPointsRequirements
     {"SLUS_010.40", 0x40688, sizeof VS::Actors::usesSecondaryBodyModel,
      VS::Actors::usesSecondaryBodyModel.data(),
      sizeof VS::Actors::usesSecondaryBodyModel},  // G01918 D_8004FE88

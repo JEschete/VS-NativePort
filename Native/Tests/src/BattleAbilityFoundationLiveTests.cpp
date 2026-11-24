@@ -31,6 +31,7 @@
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
 #include "State/Progress.hpp"
+#include "TestSupport/LearningRoot.hpp"
 
 using VS::Content::disc::Locate;
 
@@ -59,6 +60,7 @@ bool IsBound(unsigned address, Entry entry) {
 }
 
 struct LiveFoundationFixture : equipment_detail_tests::LiveFixture {
+  VS::test_support::LearningRoot learning;
   std::vector<std::byte> arena = std::vector<std::byte>(0x20000);
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   ValueRestore<decltype(VS::Battle::characterState)> saved_actor{
@@ -92,6 +94,7 @@ struct LiveFoundationFixture : equipment_detail_tests::LiveFixture {
   VS::Battle::Actor actor{};
 
   LiveFoundationFixture() {
+    learning.Publish();
     abilities::ResetLiveAbilityFoundationState();
     VS::Battle::characterState = &actor;
     actor.equipped_weapon_category = 1;

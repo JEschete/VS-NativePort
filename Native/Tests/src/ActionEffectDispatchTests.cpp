@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <functional>
 #include <iterator>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -101,9 +102,13 @@ struct EffectWorld final : battle::ActionEffectWorld {
   std::int16_t hp = 2, pending = 2;
   std::uint32_t statuses{}, removed{}, flag = 10, last = 99;
   std::uint8_t category = 29, learned{};
-  std::uint16_t kills = 1, required = 2;
+  std::uint16_t kills = 1;
+  std::optional<int> required = 2;
+  std::string refusal;
   std::vector<int> events;
   std::function<void()> dispatch_callback, flag_callback;
+  void Refuse(std::string_view reason) override { refusal = reason; }
+  void ClearKillCounted() override { counted = false; }
   bool TargetPosition() override { return target_position; }
   std::uint8_t TargetActorId() override { return actor_id; }
   std::uint32_t TargetStatuses() override { return statuses; }
@@ -142,7 +147,8 @@ struct EffectWorld final : battle::ActionEffectWorld {
     events.push_back(cat);
     return kills;
   }
-  std::uint16_t RequiredKills(std::uint8_t cat, std::uint8_t count) override {
+  std::optional<int> RequiredKills(std::uint8_t cat,
+                                   std::uint8_t count) override {
     events.insert(events.end(), {cat, count});
     return required;
   }
@@ -209,6 +215,33 @@ TEST_CASE("F00507 keeps counted kills when later progress gates fail",
       CHECK(world.kills == before);
     }
   }
+}
+TEST_CASE(
+    "Weapon kill credit refuses missing or unrepresentable native requirements",
+    "[resource-dispatch][learning-catalog]") {
+  EffectWorld world;
+  world.kills = UINT16_MAX;
+  SECTION("missing") { world.required = std::nullopt; }
+  SECTION("wide threshold") { world.required = 70000; }
+  battle::ApplyActionHitEffect(world, 1, 0);
+  CHECK(world.kills == UINT16_MAX);
+  CHECK_FALSE(world.counted);
+  CHECK_FALSE(world.refusal.empty());
+  battle::ApplyActionHitEffect(world, 1, 0);
+  CHECK(world.kills == UINT16_MAX);
+  CHECK_FALSE(world.counted);
+}
+TEST_CASE(
+    "Weapon kill credit accepts the last representable point under a native "
+    "threshold",
+    "[resource-dispatch][learning-catalog]") {
+  EffectWorld world;
+  world.kills = UINT16_MAX - 1;
+  world.required = 70000;
+  battle::ApplyActionHitEffect(world, 1, 0);
+  CHECK(world.kills == UINT16_MAX);
+  CHECK(world.counted);
+  CHECK(world.refusal.empty());
 }
 TEST_CASE("F00507 tail gates never read character progress prematurely",
           "[resource-dispatch][F00507]") {

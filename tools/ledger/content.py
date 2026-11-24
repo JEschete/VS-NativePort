@@ -42,6 +42,11 @@ RUNTIME_CONVERTER = re.compile(r'ConverterVersion\{\s*\.name\s*=\s*"(?P<name>[^"
 # A table output is not evidence that its entire containing executable migrated.
 SECTION_CONVERTERS = {
     "material-csv": ("SLUS_010.40", "catalog.items.materials", "G01905 at 0x3F5DC, 240 bytes"),
+    "learning-csv": (
+        "SLUS_010.40", "catalog.battle.learning",
+        "G01916 at 0x405E4, 80 requirement bytes; G01917 at 0x4065C, 44 requirement bytes; "
+        "adjacent 40 unused action-ID bytes and 256 actorExtraShp bytes preserved offline only",
+    ),
 }
 TEXT_SECTIONS = {
     "text.ui.save": ("MENU/MCMAN.BIN", "MCMAN entries 36/37 only; 25 native-owned status messages"),

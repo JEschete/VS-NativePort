@@ -808,9 +808,8 @@ void CheckLivePlaceholderStats(const VS::Battle::ActorStats& stats) {
   constexpr std::size_t kNameBytes = sizeof VS::Actors::placeholderActorName;
   CHECK(std::memcmp(stats.name.data(), VS::Actors::placeholderActorName.data(),
                     kNameBytes) == 0);
-  CHECK(std::memcmp(stats.name.data() + kNameBytes,
-                    VS::Battle::breakArtPointRequirements.data(),
-                    actors::kActorNameBytes - kNameBytes) == 0);
+  CHECK(std::ranges::all_of(std::span(stats.name).subspan(kNameBytes),
+                            [](auto byte) { return byte == 0; }));
 }
 }  // namespace
 

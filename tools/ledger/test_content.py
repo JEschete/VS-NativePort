@@ -115,6 +115,21 @@ class ContentLedgerTests(unittest.TestCase):
         self.assertIn("converts under #499, #500, #502", row["notes"])
         self.assertEqual(self.fixture.rules(), [])
 
+    def test_learning_section_preserves_other_executable_owners_and_pending_status(self) -> None:
+        learning = {"id": "catalog.battle.learning", "source": "SLUS_010.40",
+                    "converter": "learning-csv", "files": ["catalogs/battle/break-art-learning.csv"]}
+        material = {"id": "catalog.items.materials", "source": "SLUS_010.40",
+                    "converter": "material-csv", "files": ["catalogs/items/materials.csv"]}
+        self.fixture.data([("SLUS_010.40", 337920, "raw")], [learning, material])
+        content.sync(self.fixture.root)
+        row = self.fixture.rows()["SLUS_010.40"]
+        self.assertEqual((row["status"], row["round_trip"], row["converter"]),
+                         ("unconverted", "pending", ""))
+        self.assertIn("G01916 at 0x405E4, 80 requirement bytes", row["notes"])
+        self.assertIn("G01917 at 0x4065C, 44 requirement bytes", row["notes"])
+        self.assertIn("partial catalog.items.materials", row["notes"])
+        self.assertEqual(self.fixture.rules(), [])
+
     def test_bestiary_conversion_is_accounted_without_inventing_round_trip_evidence(self) -> None:
         bestiary = {"id": "catalog.enemies.bestiary", "source": "SMALL/MON.BIN",
                     "converter": "bestiary-csv", "files": ["catalogs/enemies/bestiary.csv",

@@ -14,9 +14,11 @@
 #include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Hit.hpp"
+#include "Battle/LearningLive.hpp"
 #include "Battle/StatusEffects.hpp"
 #include "Battle/StatusQueueLive.hpp"
 #include "Core/Diagnostics.hpp"
+#include "Core/Log.hpp"
 #include "Items/ItemRecords.hpp"
 #include "State/Progress.hpp"
 #include "State/ScriptFlagsLive.hpp"
@@ -93,6 +95,10 @@ class LiveInjuryQueue final : public LimbInjuryQueue {
 
 class LiveEffectWorld final : public ActionEffectWorld {
  public:
+  void Refuse(std::string_view reason) override {
+    VS::Core::LogWarn("battle.learning", "weapon kill credit refused: {}",
+                      reason);
+  }
   LiveEffectWorld(ActionDefinition* action, VS::Battle::HitResult* source,
                   VS::Battle::HitResult& target)
       : action_(action), source_(source), target_(target) {}
@@ -136,6 +142,7 @@ class LiveEffectWorld final : public ActionEffectWorld {
   std::uint8_t TargetSlot() override { return target_.target.target_actor; }
   bool KillCounted() override { return ActorOf(target_).kill_counted != 0; }
   void MarkKillCounted() override { ActorOf(target_).kill_counted = 1; }
+  void ClearKillCounted() override { ActorOf(target_).kill_counted = 0; }
   std::uint8_t WeaponCategory() override {
     Require(VS::Battle::characterState != nullptr);
     return VS::Battle::characterState->equipped_weapon_category;
@@ -150,9 +157,9 @@ class LiveEffectWorld final : public ActionEffectWorld {
   std::uint16_t WeaponKills(std::uint8_t category) override {
     return VS::State::artsStatus.kills.weapon_category_kills[category];
   }
-  std::uint16_t RequiredKills(std::uint8_t category,
-                              std::uint8_t learned) override {
-    return VS::Battle::breakArtPointRequirements[category][learned];
+  std::optional<int> RequiredKills(std::uint8_t category,
+                                   std::uint8_t learned) override {
+    return VS::Battle::LiveBreakArtRequirement(category, learned);
   }
   void SetWeaponKills(std::uint8_t category, std::uint16_t kills) override {
     VS::State::artsStatus.kills.weapon_category_kills[category] = kills;

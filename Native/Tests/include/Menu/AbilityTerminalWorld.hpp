@@ -225,7 +225,7 @@ struct PointsWorld : abilities::UnlockPointsHost {
   std::vector<std::string> refusals;
   int count = 0;
   std::uint16_t kills = 0;
-  std::array<std::uint16_t, 22> requirements{};
+  std::array<int, 22> requirements{};
   bool missing_requirement = false;
   std::vector<std::string> texts;
   std::vector<std::uint32_t> positions;
@@ -235,7 +235,7 @@ struct PointsWorld : abilities::UnlockPointsHost {
   }
   int UnlockCount() const override { return count; }
   std::uint16_t TotalKills() const override { return kills; }
-  std::optional<std::uint16_t> Requirement(int index) const override {
+  std::optional<int> Requirement(int index) const override {
     if (missing_requirement || index < 0 ||
         index >= static_cast<int>(requirements.size())) {
       return std::nullopt;

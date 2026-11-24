@@ -3,6 +3,8 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <optional>
+#include <string_view>
 
 #include "Battle/ActionResults.hpp"
 
@@ -25,6 +27,7 @@ class LimbInjuryQueue {
 class ActionEffectWorld {
  public:
   virtual ~ActionEffectWorld() = default;
+  virtual void Refuse(std::string_view reason) = 0;
   [[nodiscard]] virtual bool TargetPosition() = 0;
   [[nodiscard]] virtual std::uint8_t TargetActorId() = 0;
   [[nodiscard]] virtual std::uint32_t TargetStatuses() = 0;
@@ -40,12 +43,13 @@ class ActionEffectWorld {
   [[nodiscard]] virtual std::uint8_t TargetSlot() = 0;
   [[nodiscard]] virtual bool KillCounted() = 0;
   virtual void MarkKillCounted() = 0;
+  virtual void ClearKillCounted() = 0;
   [[nodiscard]] virtual std::uint8_t WeaponCategory() = 0;
   [[nodiscard]] virtual std::uint32_t ProgressFlag() = 0;
   [[nodiscard]] virtual std::uint8_t LearnedArts(std::uint8_t category) = 0;
   [[nodiscard]] virtual std::uint16_t WeaponKills(std::uint8_t category) = 0;
-  [[nodiscard]] virtual std::uint16_t RequiredKills(std::uint8_t category,
-                                                    std::uint8_t learned) = 0;
+  [[nodiscard]] virtual std::optional<int> RequiredKills(
+      std::uint8_t category, std::uint8_t learned) = 0;
   virtual void SetWeaponKills(std::uint8_t category, std::uint16_t kills) = 0;
 };
 

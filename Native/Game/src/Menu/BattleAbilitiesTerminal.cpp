@@ -10,6 +10,8 @@ constexpr std::uint32_t kPointsY = 66;
 constexpr std::uint32_t kPointValueOffset = 96;
 constexpr std::uint32_t kCoordinateShift = 16;
 constexpr int kDecimalBase = 10;
+constexpr int kSeparatePointsMaximum = 99999;
+constexpr std::string_view kCombinedPointsPrefix = "#NEXT ";
 constexpr int kChainShortcut = 7;
 constexpr int kDefenseShortcut = 8;
 constexpr int kShortcutRowOffset = 3;
@@ -166,7 +168,8 @@ void DrawNextUnlockPoints(int x_offset, UnlockPointsHost& host) {
     return;
   }
   int points = std::max(0, static_cast<int>(*requirement) - host.TotalKills());
-  std::array<char, kRiskTextCapacity> text{};
+  const bool combined = points > kSeparatePointsMaximum;
+  std::array<char, kUnlockPointsTextCapacity> text{};
   auto position = text.size() - 2;
   text[position--] = 'T';
   text[position--] = 'P';
@@ -174,10 +177,15 @@ void DrawNextUnlockPoints(int x_offset, UnlockPointsHost& host) {
     text[position--] = static_cast<char>('0' + points % kDecimalBase);
     points /= kDecimalBase;
   } while (points != 0);
-  text[position] = '#';
+  if (combined) {
+    position = position + 1 - kCombinedPointsPrefix.size();
+    std::ranges::copy(kCombinedPointsPrefix, text.data() + position);
+  } else {
+    text[position] = '#';
+  }
   const auto screen = (static_cast<std::uint32_t>(x_offset) + kPointsX) |
                       (kPointsY << kCoordinateShift);
-  host.DrawCompactText("NEXT", screen);
+  if (!combined) host.DrawCompactText("NEXT", screen);
   host.DrawCompactText({text.data() + position, text.size() - position - 1},
                        screen + kPointValueOffset);
 }

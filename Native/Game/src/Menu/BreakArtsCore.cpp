@@ -35,8 +35,10 @@ constexpr int kArtTitleWidth = 0x7E;
 constexpr int kMenuItemBackgroundWidth = 8;
 constexpr int kArtTitleAnimationIndex = 10;
 constexpr std::uint32_t kNextPointsTextOffset = 96;
-constexpr std::size_t kFormatBufferSize = 16;
+constexpr std::size_t kFormatBufferSize = 24;
 constexpr std::string_view kPointsSuffix = "PT";
+constexpr int kSeparatePointsMaximum = 99999;
+constexpr std::string_view kCombinedPointsPrefix = "#NEXT ";
 constexpr int kPackedDigitBits = 4;
 constexpr int kPackedDigitMask = 0xF;
 constexpr int kPackedCoordinateBits = 16;
@@ -154,19 +156,25 @@ std::string_view FormatCost(std::uint8_t cost,
 }
 
 std::string_view FormatPoints(int points,
-                              std::array<char, kFormatBufferSize>& buffer) {
+                              std::array<char, kFormatBufferSize>& buffer,
+                              bool combined) {
   const std::size_t suffix_start = buffer.size() - kPointsSuffix.size() - 1;
   std::copy(kPointsSuffix.begin(), kPointsSuffix.end(),
             buffer.begin() + static_cast<std::ptrdiff_t>(suffix_start));
   buffer.back() = '\0';
   std::size_t index = suffix_start - 1;
   do {
-    const int packed = VS::Core::Math::SplitDecimalDigit(points);
-    buffer[index] = static_cast<char>((packed & kPackedDigitMask) + '0');
-    points = packed >> kPackedDigitBits;
+    constexpr int kDecimalBase = 10;
+    buffer[index] = static_cast<char>(points % kDecimalBase + '0');
+    points /= kDecimalBase;
     --index;
   } while (points != 0);
-  buffer[index] = '#';
+  if (combined) {
+    index = index + 1 - kCombinedPointsPrefix.size();
+    std::ranges::copy(kCombinedPointsPrefix, buffer.data() + index);
+  } else {
+    buffer[index] = '#';
+  }
   return {buffer.data() + index, kFormatBufferSize - 1 - index};
 }
 
@@ -284,15 +292,16 @@ void DrawNextUnlockPoints(int x_offset, int weapon_category, int row,
   const std::optional<int> kills = host.CategoryKills(category);
   const std::optional<int> requirement =
       host.PointRequirement(category, *learned);
-  if (!kills || !requirement) {
+  if (!kills || !requirement || *kills < 0 || *requirement < 0) {
     host.Refuse("Break Arts unlock-progress data is unavailable");
     return;
   }
   const int points = *requirement > *kills ? *requirement - *kills : 0;
   const std::uint32_t position = UnlockPosition(x_offset, row);
   std::array<char, kFormatBufferSize> buffer{};
-  const std::string_view points_text = FormatPoints(points, buffer);
-  host.DrawCompactText("NEXT", position);
+  const bool combined = points > kSeparatePointsMaximum;
+  const std::string_view points_text = FormatPoints(points, buffer, combined);
+  if (!combined) host.DrawCompactText("NEXT", position);
   host.DrawCompactText(points_text, position + kNextPointsTextOffset);
 }
 

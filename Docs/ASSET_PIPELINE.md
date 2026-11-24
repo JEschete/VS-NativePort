@@ -398,6 +398,73 @@ entry rather than falling back to a legacy read. Model preview, actor assets,
 progress storage and the GPU page/packet backend remain tracked dependencies.
 This is not completion of the wider #499/#500 or neighboring migration issues.
 
+### 4.4 Native learning requirements (#499)
+
+`VS.Extract learning <datadir>` imports two immutable learning tables; `tables`,
+`authoring` and full extraction include the same converter. `learning-csv` v1
+owns `catalog.battle.learning`, the two CSV/schema pairs under `catalogs\battle\`,
+and `catalogs\battle\import\learning.json`. Base, patch and mod layers compile
+through the existing SQLite/cache and publish checked `Content::LearningCatalog`
+definitions. The battle and both menu readers use those definitions directly:
+there is no reconstructed halfword table, module copy or address binding.
+
+| Table | Identity and meaningful order | Editable quantity |
+|---|---|---|
+| `break-art-learning.csv` | `learning.whistle-sting`, etc.; named weapon category, `first`..`fourth` learning tier, named action reference | `required_weapon_kills`: cumulative qualifying kills in that category, **not** an incremental price |
+| `battle-ability-learning.csv` | `learning.first-battle-ability-choice`, etc.; `choice_order` 1..22 is the next opportunity to choose an unlearned chain/defense ability, **not** an action ID | `required_ability_points`: cumulative successful offensive/defensive timing credit, despite the retained save name `total_kills` |
+
+Labels appear immediately after IDs. Categories are bare hands, dagger, sword,
+great sword, axe/mace, great axe, staff, heavy mace, polearm and crossbow. The schema's
+named enum codes explicitly adapt the retained equipment/progress indices.
+Names reuse the existing `GameplayDomains.hpp` blade-category domain, with only
+category zero renamed for its learning role.
+Equipment category 10 maps modulo 10 to **bare hands**, not material `none`.
+The supported zero equipment alias normalizes to category 10 for the action
+and notification name, while still reading progress category zero.
+Action codes 184..219 belong to weapon categories 1..9; 220..223 are the four
+bare-hands arts. Named action references, category/tier and stable identities
+must agree. Unsupported identities, missing definitions, duplicate keys/orders,
+bad values and mismatched references refuse publication with file/row/column
+diagnostics. General mod-defined action/category/progress identities await
+#499/#58; this slice does not invent additional compatible action slots.
+
+Thresholds are nonnegative signed 32-bit native quantities, including values
+above 65535. No monotonic rule is imposed: production checks the next tier,
+and an authored lower later threshold can become eligible immediately.
+Both next-points displays use safe decimal arithmetic and retain `max(0,
+requirement-progress)` presentation. More than five remaining-point digits
+use a single right-aligned `NEXT <value>PT` run instead of overlapping the
+original label/value slots; stock positioning is unchanged. Mutable kills, learned counts, chosen
+actions, notification phases and saves remain separate. #183's owner policy
+still banks successful ability timing, including lethal hits and pending
+rewards, saturating at 65535; only a qualifying death starts learning.
+Weapon-kill awards cannot wrap: if another point is required but the existing
+uint16 counter cannot hold it, the award reports refusal and rolls back its
+kill-counted mark. It does not truncate the threshold or invent a new clamp.
+Changing persistent progress width is separate work.
+
+**Precise original coverage:** pinned `src/SLUS_010.40/main.c:722,735,751,755`
+and the configured executable agree on 80 requirement bytes at `0x405E4`,
+40 unused `artsActionIds` bytes at `0x40634`, 44 requirement bytes at `0x4065C`,
+then 256 `actorExtraShp` bytes at `0x40688`. The previous G01916/G01917 copies
+incorrectly treated the 120/300-byte address gaps as table extents. Only **40
+plus 22 requirements** become authoring definitions. Original CSV snapshots
+and the two separately named neighboring byte arrays reload independently of
+authored edits and reconstruct all 420 bytes **offline**. G01918's actor-shape
+consumer remains unmigrated; this is not whole-executable conversion.
+The placeholder actor's terminated name no longer reads a fake four-byte
+threshold tail; native padding is zero and the original bytes remain offline.
+
+Normal reruns preserve edited files and timestamps. Missing owned schemas are
+repaired without replacing existing owned CSVs. Foreign output files are
+refused even with `--force`; a changed source requires explicit force before
+replacing owned content. Existing material, bestiary, text/font, FAR and save
+assets keep their ownership. See HANDOFF for exact local checks and remaining
+controller/CI limits; threshold edits are authored content, not earned progress.
+The generic label pass also leaves native text/font and import-only schemas to
+their semantic owners, including refresh runs (#526). It does not label a shared
+native text catalog with the name of one contributing executable.
+
 ## 5. Tier 2: text and fonts
 
 - **Strings:** every string the game shows (exe, MENU `ITEMNAME/ITEMHELP`, `SMALL\HELP*.HF0/HF1`, `MCDATA`, event text in `EVT`, menu labels) is decoded from the VS character table to UTF-8 and stored once in `text\strings.en.json` as `{ "id": "text", ... }`.

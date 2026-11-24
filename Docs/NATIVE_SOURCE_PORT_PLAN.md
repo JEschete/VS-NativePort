@@ -1552,6 +1552,19 @@ Reserved bytes and exact reconstruction exist only in the offline importer.
 This does not retire EC-04-T-SYD or the remaining executable catalogs, nor prove
 controller-driven workshop/action parity. See ASSET_PIPELINE section 4.2.
 
+G01916/G01917 learning checkpoint (#499, 2026-11-24): semantic Break Art
+and battle-ability choice thresholds now feed the actual battle/menu readers
+through the layered SQLite `LearningCatalog`. Their raw arrays, module copies
+and address bindings are removed. Only 40+22 halfwords are definitions, not
+the former 120/300-byte address gaps; unused action IDs and neighboring actor
+shape bytes survive separately in offline provenance. Native int32 thresholds
+can exceed uint16 progress storage and both next-points displays retain the
+wide values. Missing definitions refuse; unrepresentable weapon credit refuses
+without leaving its kill-counted mark or wrapping. #183 timing banking and its
+explicit saturation remain unchanged. Existing action/category adapters,
+mutable progress/saves and general action/text/item definitions remain
+#499/#58 scope. ASSET_PIPELINE §4.4 and HANDOFF record the bounded evidence.
+
 For every row, retirement requires:
 1. Trace and migrate producers, consumers, callbacks, persistence and cleanup to
    the typed destination; remove the runtime encoder/layout adapter and its

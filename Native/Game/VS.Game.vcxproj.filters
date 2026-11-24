@@ -870,6 +870,9 @@
     <ClCompile Include="src\Battle\HudStateLive.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
+    <ClCompile Include="src\Battle\LearningLive.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
     <ClCompile Include="src\Battle\RewardFlow.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
@@ -3589,6 +3592,9 @@
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\LabelScreenPoint.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\LearningLive.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\RewardFlow.hpp">

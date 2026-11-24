@@ -4974,7 +4974,7 @@ SE/SEP00096.DAT,1,placeholder,n/a,n/a,n/a,n/a,skipped,one-byte zero placeholder
 SE/SEP00097.DAT,1,placeholder,n/a,n/a,n/a,n/a,skipped,one-byte zero placeholder
 SE/SEP00098.DAT,1,placeholder,n/a,n/a,n/a,n/a,skipped,one-byte zero placeholder
 SE/SEP00099.DAT,1,placeholder,n/a,n/a,n/a,n/a,skipped,one-byte zero placeholder
-SLUS_010.40,337920,main executable data,,,,pending,unconverted,"partial catalog.items.materials (material-csv; G01905 at 0x3F5DC, 240 bytes); converts under #499, #500, #502"
+SLUS_010.40,337920,main executable data,,,,pending,unconverted,"partial catalog.battle.learning (learning-csv; G01916 at 0x405E4, 80 requirement bytes; G01917 at 0x4065C, 44 requirement bytes; adjacent 40 unused action-ID bytes and 256 actorExtraShp bytes preserved offline only); partial catalog.items.materials (material-csv; G01905 at 0x3F5DC, 240 bytes); converts under #499, #500, #502"
 SMALL/ATTACK.DIS,66624,presentation images,,,,pending,unconverted,converts under #211
 SMALL/DUMMY.ARM,1164,area map,,,,pending,unconverted,converts under #201
 SMALL/END.DIS,99936,presentation images,,,,pending,unconverted,converts under #211

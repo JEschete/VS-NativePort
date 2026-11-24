@@ -34,6 +34,7 @@
 #include "Battle/Feedback.hpp"
 #include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/Hit.hpp"
+#include "Battle/LearningLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Log.hpp"
 #include "Effects/Runtime.hpp"
@@ -165,11 +166,13 @@ class LiveAbilityHost final : public battle::AbilityHost {
   [[nodiscard]] int EquippedWeaponCategory() const override;
   [[nodiscard]] int ArtsLearned(int category) const override;
   [[nodiscard]] int WeaponCategoryKills(int category) const override;
-  [[nodiscard]] int BreakArtRequirement(int category, int tier) const override;
+  [[nodiscard]] std::optional<int> BreakArtRequirement(int category,
+                                                       int tier) const override;
   [[nodiscard]] int BattleAbilitiesUnlocked() const override {
     return VS::State::artsStatus.kills.battle_abilities_unlocked;
   }
-  [[nodiscard]] int BattleAbilityRequirement(int index) const override;
+  [[nodiscard]] std::optional<int> BattleAbilityRequirement(
+      int index) const override;
   [[nodiscard]] int TotalKills() const override {
     return VS::State::artsStatus.kills.total_kills;
   }
@@ -474,24 +477,13 @@ int LiveAbilityHost::WeaponCategoryKills(int category) const {
   return VS::State::artsStatus.kills.weapon_category_kills[category];
 }
 
-int LiveAbilityHost::BreakArtRequirement(int category, int tier) const {
-  if (!InRange(VS::Battle::breakArtPointRequirements, category) ||
-      !InRange(VS::Battle::breakArtPointRequirements[0], tier)) {
-    VS::Core::LogWarn("battle.ability",
-                      "break art requirement {}/{} out of range", category,
-                      tier);
-    return 0;
-  }
-  return VS::Battle::breakArtPointRequirements[category][tier];
+std::optional<int> LiveAbilityHost::BreakArtRequirement(int category,
+                                                        int tier) const {
+  return VS::Battle::LiveBreakArtRequirement(category, tier);
 }
 
-int LiveAbilityHost::BattleAbilityRequirement(int index) const {
-  if (!InRange(VS::Battle::battleAbilityPointRequirements, index)) {
-    VS::Core::LogWarn("battle.ability", "ability requirement {} out of range",
-                      index);
-    return 0;
-  }
-  return VS::Battle::battleAbilityPointRequirements[index];
+std::optional<int> LiveAbilityHost::BattleAbilityRequirement(int index) const {
+  return VS::Battle::LiveBattleAbilityRequirement(index);
 }
 
 bool HasActionState(const char* caller) {

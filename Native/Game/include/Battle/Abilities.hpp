@@ -2,6 +2,7 @@
 // Hand-maintained (tools/port/owned.csv).
 
 #include <cstdint>
+#include <optional>
 
 // Typed battle abilities (#276 row 31): the chain and defense ability timing
 // window, the follow-up sequence an accepted input starts, break art and
@@ -110,10 +111,11 @@ class AbilityHost {
   [[nodiscard]] virtual int EquippedWeaponCategory() const = 0;
   [[nodiscard]] virtual int ArtsLearned(int category) const = 0;
   [[nodiscard]] virtual int WeaponCategoryKills(int category) const = 0;
-  [[nodiscard]] virtual int BreakArtRequirement(int category,
-                                                int tier) const = 0;
+  [[nodiscard]] virtual std::optional<int> BreakArtRequirement(
+      int category, int tier) const = 0;
   [[nodiscard]] virtual int BattleAbilitiesUnlocked() const = 0;
-  [[nodiscard]] virtual int BattleAbilityRequirement(int index) const = 0;
+  [[nodiscard]] virtual std::optional<int> BattleAbilityRequirement(
+      int index) const = 0;
   [[nodiscard]] virtual int TotalKills() const = 0;
   virtual void SetTotalKills(int kills) = 0;
   [[nodiscard]] virtual int MaxChain() const = 0;

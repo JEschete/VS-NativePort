@@ -313,6 +313,7 @@
     <ClCompile Include="src\JumpEntryTests.cpp" />
     <ClCompile Include="src\LauncherTests.cpp" />
     <ClCompile Include="src\LayoutAsserts.cpp" />
+    <ClCompile Include="src\LearningCatalogTests.cpp" />
     <ClCompile Include="src\LegacyGpuTests.cpp" />
     <ClCompile Include="src\LogObserverTests.cpp" />
     <ClCompile Include="src\LogTests.cpp" />
@@ -514,6 +515,7 @@
     <ClCompile Include="..\Tools\Extract\src\WepModelConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\WorkshopRecipeConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\MaterialConversion.cpp" />
+    <ClCompile Include="..\Tools\Extract\src\LearningConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\SaveTextConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\TextContribution.cpp" />
     <ClCompile Include="..\Tools\Extract\src\BestiaryConversion.cpp" />
@@ -595,6 +597,7 @@
     <ClInclude Include="include\TestSupport\FloatingLabelQueueFixture.hpp" />
     <ClInclude Include="include\TestSupport\FloatingLabelQueueLiveFixture.hpp" />
     <ClInclude Include="include\TestSupport\FloatingLabelRenderingLiveFixture.hpp" />
+    <ClInclude Include="include\TestSupport\LearningRoot.hpp" />
     <ClInclude Include="include\TestSupport\ModelFixtures.hpp" />
     <ClInclude Include="include\TestSupport\ScriptSources.hpp" />
     <ClInclude Include="include\TestSupport\ScriptSteps.hpp" />

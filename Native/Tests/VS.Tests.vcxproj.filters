@@ -843,6 +843,9 @@
     <ClCompile Include="src\LayoutAsserts.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\LearningCatalogTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\LegacyGpuTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -1590,6 +1593,9 @@
     <ClInclude Include="include\TestSupport\FloatingLabelRenderingLiveFixture.hpp">
       <Filter>include\TestSupport</Filter>
     </ClInclude>
+    <ClInclude Include="include\TestSupport\LearningRoot.hpp">
+      <Filter>include\TestSupport</Filter>
+    </ClInclude>
     <ClInclude Include="include\TestSupport\ModelFixtures.hpp">
       <Filter>include\TestSupport</Filter>
     </ClInclude>
@@ -1654,6 +1660,9 @@
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>
     <ClCompile Include="..\Tools\Extract\src\MaterialConversion.cpp">
+      <Filter>..\Tools\Extract\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Tools\Extract\src\LearningConversion.cpp">
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>
     <ClCompile Include="..\Tools\Extract\src\SaveTextConversion.cpp">

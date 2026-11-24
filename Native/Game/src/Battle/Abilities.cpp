@@ -333,15 +333,17 @@ PendingAbilityUnlocks PendingBattleAbilityUnlocks(const AbilityHost& host) {
   PendingAbilityUnlocks pending;
   const int category = host.EquippedWeaponCategory() % kWeaponCategories;
   const int learned = host.ArtsLearned(category);
-  if (learned < kBreakArtTiers) {
-    pending.break_art = host.WeaponCategoryKills(category) >=
-                        host.BreakArtRequirement(category, learned);
+  if (learned >= 0 && learned < kBreakArtTiers) {
+    const auto requirement = host.BreakArtRequirement(category, learned);
+    if (!requirement) return pending;
+    pending.break_art = host.WeaponCategoryKills(category) >= *requirement;
   }
   if (!pending.break_art) {
     const int unlocked = host.BattleAbilitiesUnlocked();
-    pending.battle_ability =
-        unlocked < kBattleAbilityUnlocks &&
-        host.TotalKills() >= host.BattleAbilityRequirement(unlocked);
+    if (unlocked >= 0 && unlocked < kBattleAbilityUnlocks) {
+      const auto requirement = host.BattleAbilityRequirement(unlocked);
+      pending.battle_ability = requirement && host.TotalKills() >= *requirement;
+    }
   }
   return pending;
 }

@@ -88,6 +88,7 @@ constexpr std::array kConvertedTypes{
     ConvertedType{"", ".FBT", "fbt-texture-png", kRawForm},
     ConvertedType{"", ".SYD", kSydRecipeConverterName, kRawForm},
     ConvertedType{kMaterialSource, "", kMaterialConverterName, kRawForm, true},
+    ConvertedType{kLearningSource, "", kLearningConverter.name, kRawForm, true},
     ConvertedType{kBestiarySource, "", kBestiaryConverter, kRawForm, true},
     ConvertedType{"", ".SHP", "shp-gltf", kRawForm},
     ConvertedType{"", ".SEQ", "seq-gltf", kRawForm},
@@ -305,6 +306,7 @@ struct CatalogRecords {
   std::optional<WorkshopRecipeCatalog> recipes;
   std::optional<MaterialCatalog> materials;
   std::optional<BestiaryCatalog> bestiary;
+  std::optional<LearningCatalog> learning;
 };
 
 struct LoadedCatalogs {
@@ -314,8 +316,13 @@ struct LoadedCatalogs {
 
 std::expected<CatalogRecords, std::string> ReadCatalogRecords(
     const CatalogDatabase& database, bool recipes, bool materials,
-    bool bestiary) {
+    bool bestiary, bool learning) {
   CatalogRecords records;
+  if (learning) {
+    auto loaded = LoadLearning(database);
+    if (!loaded) return std::unexpected(loaded.error());
+    records.learning = std::move(*loaded);
+  }
   if (recipes) {
     auto loaded = LoadWorkshopRecipes(database);
     if (!loaded) return std::unexpected(loaded.error());
@@ -342,7 +349,20 @@ std::expected<std::optional<LoadedCatalogs>, std::string> LoadListedCatalogs(
   bool recipes = false;
   bool materials = false;
   bool bestiary = false;
+  bool learning = false;
   for (const auto& output : manifest->outputs) {
+    if (output.converter == kLearningConverter.name) {
+      const auto version = manifest->converters.find(kLearningConverter.name);
+      if (learning || output.id != kLearningOutputId ||
+          output.source != kLearningSource || !output.alias_of.empty() ||
+          version == manifest->converters.end() ||
+          version->second != kLearningConverter.version) {
+        return std::unexpected(
+            "invalid learning conversion registration (run VS.Extract tables "
+            "<dir>)");
+      }
+      learning = true;
+    }
     if (output.converter == kBestiaryConverter) {
       const auto version = manifest->converters.find(kBestiaryConverter);
       if (bestiary || output.id != kBestiaryId ||
@@ -366,11 +386,16 @@ std::expected<std::optional<LoadedCatalogs>, std::string> LoadListedCatalogs(
     }
     materials = true;
   }
-  if (!recipes && !materials && !bestiary) return std::nullopt;
+  if (!recipes && !materials && !bestiary && !learning) return std::nullopt;
   auto sources =
       recipes ? WorkshopCatalogSources() : std::vector<CatalogTableSource>{};
   if (materials) sources.push_back(MaterialCatalogSource());
   if (bestiary) sources.push_back(BestiaryCatalogSource());
+  if (learning) {
+    for (auto& source : LearningCatalogSources()) {
+      sources.push_back(std::move(source));
+    }
+  }
   auto database = CatalogDatabase::Load(root, sources);
   if (!database) {
     return std::unexpected(
@@ -379,13 +404,15 @@ std::expected<std::optional<LoadedCatalogs>, std::string> LoadListedCatalogs(
         "re-run VS.Extract tables " +
         Platform::PathText(root) + ")");
   }
-  auto records = ReadCatalogRecords(*database, recipes, materials, bestiary);
+  auto records =
+      ReadCatalogRecords(*database, recipes, materials, bestiary, learning);
   if (!records && database->CacheHit()) {
     Core::LogWarn("content", "compiled catalog rejected; recompiling CSVs: {}",
                   records.error());
     database = CatalogDatabase::Load(root, sources, false);
     if (!database) return std::unexpected(database.error());
-    records = ReadCatalogRecords(*database, recipes, materials, bestiary);
+    records =
+        ReadCatalogRecords(*database, recipes, materials, bestiary, learning);
   }
   if (!records) {
     return std::unexpected(records.error() +
@@ -483,6 +510,7 @@ std::expected<void, std::string> DataStore::Open(const fs::path& root) {
   if (*tables) {
     store->m_workshop_recipes_ = std::move((**tables).records.recipes);
     store->m_materials_ = std::move((**tables).records.materials);
+    store->m_learning_ = std::move((**tables).records.learning);
     store->m_catalog_tables_ = std::move((**tables).database);
   }
   // catalogs\ also holds the tier-1 tables (catalogs\menu\); either asset

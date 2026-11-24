@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "table": "break-art-learning",
+  "description": "Break Art cumulative learning thresholds; immutable definitions, separate from kills and learned-action state.",
+  "key": ["id"],
+  "columns": [
+    {
+      "name": "id",
+      "type": "id",
+      "description": "Stable learning definition identity."
+    },
+    {
+      "name": "display_name",
+      "type": "text",
+      "optional": true,
+      "description": "Informational plain-text label; not a key or gameplay value."
+    },
+    {
+      "name": "weapon_category",
+      "type": "enum",
+      "enum": {
+        "0": "bare-hands",
+        "1": "dagger",
+        "2": "sword",
+        "3": "great-sword",
+        "4": "axe-mace",
+        "5": "great-axe",
+        "6": "staff",
+        "7": "heavy-mace",
+        "8": "polearm",
+        "9": "crossbow"
+      },
+      "legacy_numeric_aliases": true,
+      "description": "Kill-credit category; bare-hands is category 0, including equipment category 10 modulo 10."
+    },
+    {
+      "name": "tier",
+      "type": "enum",
+      "enum": {
+        "1": "first",
+        "2": "second",
+        "3": "third",
+        "4": "fourth"
+      },
+      "legacy_numeric_aliases": true,
+      "description": "Next art in this category's four-step learning sequence; learned count plus one."
+    },
+    {
+      "name": "action",
+      "type": "enum",
+      "enum": {
+        "184": "whistle-sting",
+        "185": "shadoweave",
+        "186": "double-fang",
+        "187": "wyrm-scorn",
+        "188": "rending-gale",
+        "189": "vile-scar",
+        "190": "cherry-ronde",
+        "191": "papillon-reel",
+        "192": "sunder",
+        "193": "thunderwave",
+        "194": "swallow-slash",
+        "195": "advent-sign",
+        "196": "mistral-edge",
+        "197": "glacial-gale",
+        "198": "killer-mantis",
+        "199": "black-nebula",
+        "200": "bear-claw",
+        "201": "accursed-umbra",
+        "202": "iron-ripper",
+        "203": "emetic-bomb",
+        "204": "sirocco",
+        "205": "riskbreak",
+        "206": "gravis-aether",
+        "207": "trinity-pulse",
+        "208": "bonecrusher",
+        "209": "quickshock",
+        "210": "ignis-wheel",
+        "211": "hex-flux",
+        "212": "ruination",
+        "213": "scythe-wind",
+        "214": "giga-tempest",
+        "215": "spiral-scourge",
+        "216": "brimstone-hail",
+        "217": "heavens-scorn",
+        "218": "death-wail",
+        "219": "sanctus-flare",
+        "220": "lotus-palm",
+        "221": "vertigo",
+        "222": "vermillion-aura",
+        "223": "retribution"
+      },
+      "legacy_numeric_aliases": true,
+      "description": "Semantic action reference; enum codes explicitly adapt the current action table and saved flags."
+    },
+    {
+      "name": "required_weapon_kills",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647,
+      "description": "Cumulative qualifying kills using this weapon category, not a per-tier increment. Current persisted counter is uint16."
+    }
+  ]
+}

@@ -48,6 +48,9 @@
     <ClCompile Include="src\ImageFilesWriter.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\LearningConversion.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\main.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -118,6 +121,9 @@
       <Filter>include\Extract</Filter>
     </ClInclude>
     <ClInclude Include="include\Extract\ImageFilesWriter.hpp">
+      <Filter>include\Extract</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Extract\LearningConversion.hpp">
       <Filter>include\Extract</Filter>
     </ClInclude>
     <ClInclude Include="include\Extract\MaterialConversion.hpp">

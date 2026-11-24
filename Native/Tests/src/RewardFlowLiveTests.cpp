@@ -39,6 +39,7 @@
 #include "Render/PaletteAnimationLive.hpp"
 #include "State/Progress.hpp"
 #include "State/ScriptFlagsLive.hpp"
+#include "TestSupport/LearningRoot.hpp"
 
 using VS::Battle::ActionState;
 
@@ -63,8 +64,7 @@ struct LiveFixture {
   VS::Battle::Actor* saved_character = VS::Battle::characterState;
   VS::Items::LootListNode* saved_loot = VS::Items::lootListHead;
   decltype(VS::State::artsStatus) saved_progress = VS::State::artsStatus;
-  std::uint16_t saved_requirement =
-      VS::Battle::battleAbilityPointRequirements[0];
+  VS::test_support::LearningRoot learning;
   std::uint8_t saved_ab = VS::State::LiveScriptFlag(0xAB);
   std::uint8_t saved_b6 = VS::State::LiveScriptFlag(0xB6);
   ActionState action{};
@@ -91,7 +91,8 @@ struct LiveFixture {
     actor.equipped_weapon_category = 1;
     VS::State::artsStatus = {};
     std::fill_n(VS::State::artsStatus.arts_learned, 12, 4);
-    VS::Battle::battleAbilityPointRequirements[0] = 1;
+    learning.definitions.battle_abilities.front().required_ability_points = 1;
+    learning.Publish();
     VS::State::artsStatus.kills.total_kills = 1;
     VS::State::SetLiveScriptFlag(0xAB, 0);
     VS::State::SetLiveScriptFlag(0xB6, 0);
@@ -115,7 +116,6 @@ struct LiveFixture {
     VS::Battle::characterState = saved_character;
     VS::Items::lootListHead = saved_loot;
     VS::State::artsStatus = saved_progress;
-    VS::Battle::battleAbilityPointRequirements[0] = saved_requirement;
     VS::State::SetLiveScriptFlag(0xAB, saved_ab);
     VS::State::SetLiveScriptFlag(0xB6, saved_b6);
   }

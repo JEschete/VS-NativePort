@@ -10,6 +10,7 @@
 #include "Battle/AbilityState.hpp"
 #include "Battle/ActionTable.hpp"
 #include "Battle/Actor.hpp"
+#include "Battle/LearningLive.hpp"
 #include "Battle/TargetingState.hpp"
 #include "Content/StringTables.hpp"
 #include "Core/Log.hpp"
@@ -82,8 +83,9 @@ class LiveProgress final : public UnlockProgress {
   int WeaponCategoryKills(int category) const override {
     return VS::State::artsStatus.kills.weapon_category_kills[category];
   }
-  int BreakArtRequirement(int category, int tier) const override {
-    return VS::Battle::breakArtPointRequirements[category][tier];
+  std::optional<int> BreakArtRequirement(int category,
+                                         int tier) const override {
+    return VS::Battle::LiveBreakArtRequirement(category, tier);
   }
   int BattleAbilitiesUnlocked() const override {
     return VS::State::artsStatus.kills.battle_abilities_unlocked;
@@ -92,8 +94,8 @@ class LiveProgress final : public UnlockProgress {
     VS::State::artsStatus.kills.battle_abilities_unlocked =
         static_cast<std::uint16_t>(count);
   }
-  int BattleAbilityRequirement(int tier) const override {
-    return VS::Battle::battleAbilityPointRequirements[tier];
+  std::optional<int> BattleAbilityRequirement(int tier) const override {
+    return VS::Battle::LiveBattleAbilityRequirement(tier);
   }
   int TotalKills() const override {
     return VS::State::artsStatus.kills.total_kills;

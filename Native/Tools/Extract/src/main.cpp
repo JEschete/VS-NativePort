@@ -32,6 +32,7 @@
 #include "Extract/EtmConversion.hpp"
 #include "Extract/FarConversion.hpp"
 #include "Extract/ImageConversion.hpp"
+#include "Extract/LearningConversion.hpp"
 #include "Extract/MaterialConversion.hpp"
 #include "Extract/SaveTextConversion.hpp"
 #include "Extract/ShpModelConversion.hpp"
@@ -77,6 +78,7 @@ int Usage() {
       "  VS.Extract tables   <datadir> [--force]\n"
       "  VS.Extract text     <datadir> [--force]\n"
       "  VS.Extract bestiary <datadir> [--force]\n"
+      "  VS.Extract learning <datadir> [--force]\n"
       "  VS.Extract models   <datadir> [--force]\n"
       "  VS.Extract banks    <datadir> [--force]\n"
       "  VS.Extract labels   <datadir> [--force]\n"
@@ -95,8 +97,8 @@ int Usage() {
       "      in manifest.json; images converts again only what changed "
       "(--force: everything).\n"
       "      extract also converts the workshop recipe files (MENU/*.SYD) to "
-      "CSV tables under catalogs/menu/ and executable material definitions "
-      "under catalogs/items/;\n"
+      "CSV tables under catalogs/menu/, material definitions under "
+      "catalogs/items/, and learning requirements under catalogs/battle/;\n"
       "      tables converts again only what changed (--force: everything, "
       "replacing edited tables).\n"
       "      extract also converts the character models (OBJ/*.SHP) to glTF "
@@ -117,7 +119,8 @@ int Usage() {
       "metadata. labels adds it without reconverting;\n"
       "      labels --force refreshes only labels, preserving gameplay "
       "fields and original encoded names.\n"
-      "      authoring imports material definitions and upgrades zone fields "
+      "      authoring imports material and learning definitions and upgrades "
+      "zone fields "
       "and generated recipe "
       "IDs/references "
       "to semantic item names without changing recipe values.");
@@ -146,6 +149,10 @@ int UpgradeAuthoring(const fs::path& root) {
     return 1;
   }
   const auto materials = Extract::ConvertDiscMaterials(root, false);
+  if (auto learning = Extract::ConvertDiscLearning(root, false); !learning) {
+    VS::Core::LogError("extract", "learning: {}", learning.error());
+    return 1;
+  }
   if (!materials) {
     VS::Core::LogError("extract", "materials: {}", materials.error());
     return 1;
@@ -552,6 +559,10 @@ int ConvertImages(const fs::path& root, bool force) {
 // texture images and their manifest.json outputs from the disc files already
 // under root. The zones name the enemy archetypes, so this follows the models.
 int ConvertTables(const fs::path& root, bool force) {
+  if (auto learning = Extract::ConvertDiscLearning(root, force); !learning) {
+    VS::Core::LogError("extract", "learning: {}", learning.error());
+    return 1;
+  }
   if (auto bestiary = Extract::ConvertBestiary(root, force); !bestiary) {
     VS::Core::LogError("extract", "bestiary: {}", bestiary.error());
     return 1;
@@ -782,6 +793,14 @@ int Run(int argc, char** argv) {
     return Usage();
   }
   const std::string cmd = argv[1];
+  if (cmd == "learning") {
+    const auto force = ForceArgument(argc, argv);
+    if (!force) return Usage();
+    const auto result =
+        Extract::ConvertDiscLearning(Platform::Utf8Path(argv[2]), *force);
+    if (!result) VS::Core::LogError("extract", "{}", result.error());
+    return result ? 0 : 1;
+  }
   if (cmd == "text" || cmd == "bestiary") {
     const auto force = ForceArgument(argc, argv);
     if (!force) return Usage();

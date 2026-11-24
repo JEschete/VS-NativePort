@@ -18,6 +18,7 @@
 #include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionTable.hpp"
 #include "Battle/Actor.hpp"
+#include "Battle/LearningLive.hpp"
 #include "Content/StringTables.hpp"
 #include "Core/Log.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -42,7 +43,6 @@ namespace {
 constexpr std::size_t kActionCount = 256;
 constexpr std::size_t kActionNameBytes = 24;
 constexpr std::size_t kAnimationCount = 11;
-constexpr std::size_t kPointRequirementCategoryCount = 15;
 constexpr int kMenuItemTargetPosition = 180;
 State breakArtsState{};
 
@@ -133,14 +133,7 @@ class LiveHost final : public Host {
     return VS::State::artsStatus.kills.weapon_category_kills[category];
   }
   std::optional<int> PointRequirement(int category, int art_index) override {
-    if (category < 0 ||
-        static_cast<std::size_t>(category) >= kPointRequirementCategoryCount ||
-        art_index < 0 ||
-        art_index >= static_cast<int>(
-                         std::size(VS::Battle::breakArtPointRequirements[0]))) {
-      return std::nullopt;
-    }
-    return VS::Battle::breakArtPointRequirements[category][art_index];
+    return VS::Battle::LiveBreakArtRequirement(category, art_index);
   }
 
   std::uint8_t CursorMemory() override {

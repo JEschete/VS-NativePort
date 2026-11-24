@@ -738,14 +738,16 @@ struct FakeAbilityHost final : battle::AbilityHost {
   [[nodiscard]] int WeaponCategoryKills(int category) const override {
     return ValueOr(category_kills, category, 0);
   }
-  [[nodiscard]] int BreakArtRequirement(int category, int tier) const override {
+  [[nodiscard]] std::optional<int> BreakArtRequirement(
+      int category, int tier) const override {
     return ValueOr(break_requirements, std::pair{category, tier},
                    kUnsetRequirement);
   }
   [[nodiscard]] int BattleAbilitiesUnlocked() const override {
     return abilities_unlocked;
   }
-  [[nodiscard]] int BattleAbilityRequirement(int index) const override {
+  [[nodiscard]] std::optional<int> BattleAbilityRequirement(
+      int index) const override {
     return ValueOr(ability_requirements, index, kUnsetRequirement);
   }
   [[nodiscard]] int TotalKills() const override { return total_kills; }

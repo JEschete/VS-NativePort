@@ -1,5 +1,175 @@
 # Current Handoff
 
+## Native learning requirements (#499), 2026-11-24
+
+Based on `7fef62342425275888c3bb7007a29f3e3d7e3d35`, with the learning
+implementation, tests, schemas, generated projects and bookkeeping dirty.
+That starting revision's metadata CI `45458128060` is green; the earlier
+bestiary fixing-revision CI remains `45455719702`. **These are not CI results
+for the uncommitted learning changes.** Publication and exact-revision CI are
+the parent task's responsibility. No commit or push was made by this task.
+
+### Adopted boundary
+
+`VS.Extract learning <dir>` and the existing `tables`, `authoring` and full
+extraction flows produce `learning-csv` v1's `catalog.battle.learning` bundle.
+Its two semantic CSV/schema pairs live under `catalogs\battle\`; original
+snapshots and separately named neighboring bytes live in
+`catalogs\battle\import\learning.json`. Definitions share the existing layered
+SQLite/cache with other catalog families. All battle pending-unlock,
+weapon-credit, menu unlock and both next-points readers use the checked native
+definitions directly. G01916/G01917 storage, module copies and address bindings
+are removed; `characterState` remains unrelated mutable actor state.
+
+The actual source extents are **40 halfwords / 80 bytes** at `0x405E4` and
+**22 halfwords / 44 bytes** at `0x4065C`. The former 120/300-byte copies included
+40 unused `artsActionIds` bytes and 256 `actorExtraShp` bytes. All four sections
+match the CI-pinned source **element by element in original order** and rebuild
+exactly offline, including a persisted-provenance reload independent of edits.
+G01918's actor-shape consumer is not retired. The placeholder actor preserves
+its original 20-byte name prefix and zeroes its unused native tail, rather than
+reconstructing four requirement bytes to mimic an overread.
+
+Requirements are nonnegative int32 quantities. Break Art tiers are the next
+of four named actions in a weapon category; battle `choice_order` is one of
+22 opportunities to choose an unlearned chain/defense ability, not an action ID.
+The established blade domain supplies **axe-mace / great-axe / staff** for
+categories 4/5/6. Only category zero is renamed to **bare hands** for learning.
+The local prototype's duplicated category names were caught by the readability
+and controller gate and corrected before publication; its initial readability
+snapshot is superseded by `readability-seed-499.json`.
+
+The supported equipment-zero alias now uses action 220..223 and the actual
+Bare Hands notification-name index 10 while reading progress category zero.
+The old accepted-zero path selected action 180 and message-format index zero;
+both observations were logged on #499 before their repairs. Categories 1..10
+retain their behavior.
+
+No monotonic restriction is invented: production checks the next cumulative
+threshold. The retained `total_kills` save field means successful timing
+credit, not enemy kills. #183's deliberate banking, lethal timing, story
+gates, 22-choice limit, death-triggered learning and 65535 saturation remain.
+Weapon credit under a native threshold cannot wrap a uint16 counter: refusal
+undoes its kill-counted mark without writing progress. Missing definitions
+cannot unlock an action or manufacture a zero next-points display.
+Values over five remaining-point digits use one right-aligned `NEXT <value>PT`
+run so the label and number cannot overlap; stock positioning is unchanged.
+
+### Default-root ownership repair (#526)
+
+The first full `authoring Native\data` acceptance run exposed a generic-label
+producer defect: it added source-derived labels to five existing native
+text/font/provenance documents and the new learning provenance. It was logged
+as **#526 before repair**. The shared JSON reader permits string annotations,
+so the initial parser-failure hypothesis was corrected on the issue: the
+confirmed defect was unwanted ownership/format/timestamp changes, not proven
+gameplay corruption.
+
+The independent three-file fix is published as
+`b499aa72a154b82e5286abff1ecc4d4ff5dc247f`;
+[exact-revision CI 45475735499](https://github.com/JEschete/VS-NativePort/actions/runs/45475735499)
+passed. #526 is closed with its preservation evidence. This CI does not certify
+the separately staged learning-catalog implementation.
+
+The five existing documents were restored only after removing the added label
+reproduced their exact prior SHA-256; their timestamps were restored too.
+The generic label pass now leaves native strings, fonts, text contributions
+and import-only schemas to their owners, including refresh runs. The final
+default authoring run reports **0 updated / 3,126 unchanged label files**,
+21,704 CSV rows, and zero recipe/zone/background upgrades. All **60 watched
+existing assets, sources, save copies, learning outputs and manifest files**
+retain bytes and timestamps across that run and a subsequent learning import.
+Foreign files refuse even with force; missing owned schemas can be repaired
+without replacing edited CSVs. See `final-authoring-stability.json`.
+
+### Local verification
+
+All evidence below is under `build\issue-499-learning`; no disc-derived assets
+or captures belong in commits.
+
+- `VS_JOBS=4`, one heavy job, MSBuild `/m:2`, Debug and Release. The latest
+  layout/zero-alias build of both configurations passes **54 cases / 2,998
+  assertions** with
+  `VS.Tests.exe "[learning-catalog],[menu-break-arts],[battle-abilities]"`.
+  Logs: `<Config>-layout-{build,tests}.log`.
+- The corrected shared-category catalog and label producer passed **27 cases /
+  456 assertions each** using `"[learning-catalog],[asset-labels]"` in both
+  configurations (`{debug,release}-category-*`). Earlier, before the final
+  category-label and wide-layout refinements, Debug's broader learning,
+  acquisition, menu, resource-dispatch, actor, reward, labels, native-text and
+  bestiary selection passed **161 / 37,184**; Release's targeting/layers/source
+  selection passed **288 / 15,752**, and its native-text/bestiary/labels/source
+  selection passed **57 / 23,184**. These are not later reruns.
+- Tests cover actual 40+22 extents, neighboring bytes, schema/reference errors,
+  missing/duplicate definitions, named category edits, layered cache reload,
+  nonmonotonic thresholds, absent-catalog refusal, INT32_MAX formatting,
+  actual live weapon-credit overflow refusal, import ownership and schema
+  repair. Existing Catch2 identities remain; none required retirement or a
+  regression-baseline update.
+- Scoped compilation-based quality covered all **29 changed implementation/
+  test units**, then affected fixes and the final seven layout/notification
+  units. The final targeted passes report **0 new findings**; full changed-file
+  format/cpplint/ruff/clones also reports zero. No baseline was changed.
+  `tidy-files.txt`, `tidy*.log`, `layout-tidy.log`, `quality-final.log`.
+- The **13 content-ledger tests** and Pylance syntax checks pass. Default-root
+  accounting remains **5,162 files: 3,047 converted, 259 skipped, 1,856
+  unconverted; zero violations**. Learning is a section-only note on SLUS,
+  not whole-executable conversion. Pinned provenance checks report **7,991
+  citations / zero problems**; no broad sync against the ahead reference
+  checkout was run.
+- New files were staged before generation. All **eight changed project/filter
+  files** were byte-identical on a second generation (`generation-stability.json`).
+  Header, hazard and canonical gate checks passed. `pinned-source-comparison.json`
+  and the final seed-499 record sample retain independent source/readability
+  evidence.
+
+### Controller evidence
+
+`stock-debug`, `mod-debug` and `mod-release` contain exact arguments, capture
+metadata and PNG/BMP checkpoints. Each exits **0**. Debug has **zero engine
+errors**; standard Release provides no detailed engine log and no Release
+error-count claim is made.
+
+All use the same legitimate copied owner save, SHA-256
+`9f3429eb15da29c34823a5b320914641aedb280eceea50a916f579aa5e4ffa2f`,
+through Continue / default No / Up / confirm and normal menu inputs. Its
+unchanged progress is eight earned choices / 298 points, and one axe-mace art /
+37 kills. No HP, inventory, kill flags, action-unlock or progression edits are
+used for this evidence.
+
+- At **4500**, stock Battle Abilities shows **71 PT**; the private ninth-choice
+  threshold of **70,000** shows **69,702 PT**.
+- At **6000**, stock axe-mace Break Arts shows **63 PT**; the private Glacial
+  Gale threshold of **70,001** shows **69,964 PT**.
+- **7100** verifies the same authored Break Art display after backing out and
+  re-entering; **7650** returns to normal gameplay.
+
+These are authored-content comparisons, **not earned learning/combat progress**.
+The 70,000 runs precede the final more-than-five-digit layout refinement; that
+refinement leaves their five-digit presentation unchanged.
+
+The final `wide-debug` / `wide-release` runs use a second ordered native layer
+setting both thresholds to **2,147,483,647**. Both exit **0**, and Debug records
+**zero engine errors**. At 4500 the real ability menu reads **2,147,483,349 PT**;
+at 6000 and after re-entry at 7100 the real Break Art menu reads
+**2,147,483,610 PT**. The combined label/value runs remain readable without
+overlap. All four maximum-value captures are byte-identical across Debug and
+Release, as are all four earlier 70,000-layer captures. Every normal-return
+frame at 7650 matches the stock frame exactly. All 54 protected originals and
+save copies remain unchanged after the UI runs. `controller-proof.json`
+records the eight cross-configuration comparisons, immutable save hash,
+source revision/dirty state and explicit absence of an earned-progress claim.
+
+### Remaining scope
+
+#499/#58 remain open: general action/item/text definitions, new action/category
+identities, mutable progress width and broader gameplay/fidelity acceptance
+are not completed here. #526's scoped repair is published, CI-verified and closed.
+No new combat acquisition or matched PS1 action-damage
+claim is made. Proof roots contain read-only asset junctions: do not recursively
+clean them. Parent next step: publish the coherent scoped changes, verify CI,
+post evidence and reconcile #526 while retaining the broader open issues.
+
 ## Native bestiary adoption (#499/#500), 2026-11-24
 
 Local verification was based on `0c92bed8e8155aae04ae35a88dcbf2774d0113a7`

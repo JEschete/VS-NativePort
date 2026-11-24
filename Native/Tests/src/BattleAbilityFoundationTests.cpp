@@ -35,8 +35,9 @@ TEST_CASE(
   world.kills[category] = 100;
   CHECK(abilities::UpdateBreakArtUnlock(state, world, world, true) == 0);
   CHECK(world.learned[category] == tier + 1);
-  CHECK(world.message_action == 184 + (world.weapon - 1) * 4 + tier);
-  CHECK(world.message_weapon == world.weapon);
+  CHECK(world.message_action ==
+        (category == 0 ? 220 : 184 + (category - 1) * 4) + tier);
+  CHECK(world.message_weapon == (world.weapon == 0 ? 10 : world.weapon));
   CHECK(world.actions.at(world.message_action));
   CHECK(state.timeout == 120);
   CHECK(world.events == std::vector<std::string>{"box", "learn-art",

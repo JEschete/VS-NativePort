@@ -81,7 +81,8 @@ struct World : abilities::UnlockProgress,
   int WeaponCategoryKills(int category_index) const override {
     return kills.at(category_index);
   }
-  int BreakArtRequirement(int category_index, int tier) const override {
+  std::optional<int> BreakArtRequirement(int category_index,
+                                         int tier) const override {
     return art_requirements.at(category_index).at(tier);
   }
   int BattleAbilitiesUnlocked() const override { return unlocked; }
@@ -89,7 +90,7 @@ struct World : abilities::UnlockProgress,
     unlocked = count;
     events.emplace_back("earn-ability");
   }
-  int BattleAbilityRequirement(int tier) const override {
+  std::optional<int> BattleAbilityRequirement(int tier) const override {
     return ability_requirements.at(tier);
   }
   int TotalKills() const override { return total_kills; }

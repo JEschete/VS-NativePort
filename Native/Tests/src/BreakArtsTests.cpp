@@ -246,6 +246,18 @@ TEST_CASE("Break Arts DrawNextUnlockPoints uses category progress",
   break_arts::DrawNextUnlockPoints(10, 11, 2, host);
   CHECK(host.refusals.size() == 1);
 }
+TEST_CASE(
+    "Break Arts display supports native thresholds beyond halfwords and packed "
+    "decimals",
+    "[menu-break-arts][learning-catalog]") {
+  FakeHost host;
+  host.kills[1] = 65535;
+  host.requirements[1][0] = 2147483647;
+  break_arts::DrawNextUnlockPoints(0, 1, 0, host);
+  REQUIRE(host.drawings.size() == 1);
+  CHECK(host.drawings[0].first == "#NEXT 2147418112PT");
+  CHECK(host.refusals.empty());
+}
 
 TEST_CASE("Break Arts UpdateArtList initializes its title",
           "[menu-break-arts]") {

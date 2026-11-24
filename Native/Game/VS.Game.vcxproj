@@ -384,6 +384,7 @@
     <ClCompile Include="src\Battle\HudStateLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Battle\LearningLive.cpp" />
     <ClCompile Include="src\Battle\RewardFlow.cpp" />
     <ClCompile Include="src\Battle\RewardFlowLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -1937,6 +1938,7 @@
     <ClInclude Include="include\Battle\HudState.hpp" />
     <ClInclude Include="include\Battle\HudStateLive.hpp" />
     <ClInclude Include="include\Battle\LabelScreenPoint.hpp" />
+    <ClInclude Include="include\Battle\LearningLive.hpp" />
     <ClInclude Include="include\Battle\RewardFlow.hpp" />
     <ClInclude Include="include\Battle\RewardFlowLive.hpp" />
     <ClInclude Include="include\Battle\SphereContainment.hpp" />

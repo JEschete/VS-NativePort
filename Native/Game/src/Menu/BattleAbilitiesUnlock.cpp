@@ -53,8 +53,13 @@ int InitializeAbilityUnlock(AbilityUnlockState& state, UnlockProgress& progress,
     host.Refuse("ability unlock tier outside requirements");
     return 1;
   }
-  if (unlocked == kBattleAbilityTiers ||
-      progress.TotalKills() < progress.BattleAbilityRequirement(unlocked)) {
+  if (unlocked == kBattleAbilityTiers) return 1;
+  const auto requirement = progress.BattleAbilityRequirement(unlocked);
+  if (!requirement) {
+    host.Refuse("ability learning requirement unavailable");
+    return 1;
+  }
+  if (progress.TotalKills() < *requirement) {
     return 1;
   }
   progress.SetBattleAbilitiesUnlocked(unlocked + 1);
@@ -216,11 +221,13 @@ void CopyRow(std::span<std::uint16_t> destination, const AbilityRowText& row) {
 int UpdateBreakArtUnlock(BreakArtUnlockState& state, UnlockProgress& progress,
                          BreakArtUnlockHost& host, bool initialize) {
   if (initialize) {
-    const int weapon = progress.EquippedWeaponCategory();
+    int weapon = progress.EquippedWeaponCategory();
     if (weapon < 0 || weapon > kWeaponCategories) {
       host.Refuse("weapon category outside Break Art menu");
       return 1;
     }
+    // Bare hands use progress category 0 but equipment/text category 10.
+    if (weapon == 0) weapon = kWeaponCategories;
     const int category = weapon % kWeaponCategories;
     const int tier = progress.ArtsLearned(category);
     if (tier == kBreakArtTiers) return 1;
@@ -228,8 +235,12 @@ int UpdateBreakArtUnlock(BreakArtUnlockState& state, UnlockProgress& progress,
       host.Refuse("learned Break Art tier outside requirements");
       return 1;
     }
-    if (progress.WeaponCategoryKills(category) <
-        progress.BreakArtRequirement(category, tier)) {
+    const auto requirement = progress.BreakArtRequirement(category, tier);
+    if (!requirement) {
+      host.Refuse("Break Art learning requirement unavailable");
+      return 1;
+    }
+    if (progress.WeaponCategoryKills(category) < *requirement) {
       return 1;
     }
     const auto action = static_cast<std::uint8_t>(

@@ -115,23 +115,17 @@ class LiveDisplayFlagsHost final : public DisplayFlagsHost {
   }
 };
 
-// The original copied 24 name bytes from the 20-byte placeholder name
-// (D_8004FDD0), reading the first four bytes of the table after it,
-// VS::Battle::breakArtPointRequirements (D_8004FDE4). The name ends at its
-// fifth byte (0xE7), so the copied tail is never shown; it is kept byte for
-// byte.
+// The original 24-byte copy overread the 20-byte placeholder into the next
+// table. Its fifth byte terminates the displayed name; native padding is zero.
+// The adjacent original bytes are preserved only by the offline learning
+// import.
 std::array<std::uint8_t, kActorNameBytes> PlaceholderName() {
   constexpr std::size_t kNameBytes = sizeof VS::Actors::placeholderActorName;
   static_assert(kNameBytes < kActorNameBytes);
-  static_assert(sizeof VS::Battle::breakArtPointRequirements >=
-                kActorNameBytes - kNameBytes);
   std::array<std::uint8_t, kActorNameBytes> name{};
   const std::span<std::uint8_t> bytes(name);
   std::memcpy(bytes.data(), VS::Actors::placeholderActorName.data(),
               kNameBytes);
-  std::memcpy(bytes.subspan(kNameBytes).data(),
-              VS::Battle::breakArtPointRequirements.data(),
-              kActorNameBytes - kNameBytes);
   return name;
 }
 }  // namespace
