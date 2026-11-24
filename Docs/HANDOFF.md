@@ -97,6 +97,10 @@ The 2026-11-24 `build\` cleanup (BUILDING.md section 4.6) archived uncited
 scratch under `build\evidence-archive\20261124-build-cleanup\`; nothing cited
 by docs or issues moved.
 
+Published as `ef2575611d4282413ff572c4a34321944ea96bc0`; its exact-revision
+Source Quality run is 45502328777 (success), and the preceding `b5fbfc6c6`
+run 45489576774 also passed. Evidence is posted on #499.
+
 ## Native learning requirements (#499), 2026-11-24
 
 Based on `7fef62342425275888c3bb7007a29f3e3d7e3d35`, with the learning
