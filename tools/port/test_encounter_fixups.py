@@ -3762,9 +3762,24 @@ int func_800F9800(void) {
         self.assertIn("Content::CompleteLiveRefusedDiscRequest(&disc, Pointer(destination))", preview_live)
         background = "".join((root / r"Native\Game\src\Field\Background.cpp").read_text(encoding="utf-8").split())
         self.assertNotIn("state.texture_read", background)
-        self.assertIn("state.layout_read=host.CompleteRefusedRead(section->layout,state.layout);", background)
-        background_live = (root / r"Native\Game\src\Field\BackgroundLive.cpp").read_text(encoding="utf-8")
-        self.assertIn("Content::CompleteLiveRefusedDiscRequest(", background_live)
+        self.assertIn("autolayout=host.LoadBackgroundLayout(*section);", background)
+        refusal = background.index("if(!layout||!*layout){")
+        reservation = background.index("if(host.ReserveTexturePages(", refusal)
+        self.assertIn("VS::Core::LogError(", background[refusal:reservation])
+        self.assertIn("return0;", background[refusal:reservation])
+        self.assertIn("state.layout=std::move(*layout);", background)
+        background_live = "".join(
+            (root / r"Native\Game\src\Field\BackgroundLive.cpp").read_text(encoding="utf-8").split()
+        )
+        self.assertIn("Content::LoadConvertedBackground(", background_live)
+        self.assertIn("if(!document)returnstd::unexpected(document.error());", background_live)
+        self.assertIn("std::make_shared<OwnedBackgroundLayout>()", background_live)
+        self.assertIn("TileOf(constContent::BackgroundCell&tile)", background_live)
+        for retired in (
+            "state.layout_read", "CompleteRefusedRead(", "CompleteLiveRefusedDiscRequest(",
+            "AllocateHighBuffer(", "EnqueueRead(", "EncodeFar(", "DecodeFar(",
+        ):
+            self.assertNotIn(retired, background + background_live)
         room_loading_live = (root / r"Native\Game\src\Field\RoomLoadingLive.cpp").read_text(encoding="utf-8")
         self.assertIn("request = Content::CompleteLiveRefusedDiscRequest(extent, data);", room_loading_live)
         map_loading_live = "".join(
@@ -3821,8 +3836,11 @@ int func_800F9800(void) {
             gazette_live,
         )
         background_tests = (root / r"Native\Tests\src\FieldBackgroundTests.cpp").read_text(encoding="utf-8")
-        self.assertIn('"CompleteRefusedRead 200 1"', background_tests)
-        self.assertNotIn('"CompleteRefusedRead 100 1"', background_tests)
+        self.assertIn("Tiled background rejects invalid native data before reserving pages", background_tests)
+        self.assertIn(
+            'CHECK(refused.calls==Calls{"LoadBackgroundLayout200"});', "".join(background_tests.split())
+        )
+        self.assertNotIn("CompleteRefusedRead", background_tests)
         effects = "".join((root / r"Native\Game\src\Effects\EffectResources.cpp").read_text(encoding="utf-8").split())
         self.assertIn("}else{state.read=host.CompleteRefusedRead(read,destination.id);}", effects)
         effects_live = (root / r"Native\Game\src\Effects\EffectResourcesLive.cpp").read_text(encoding="utf-8")
@@ -3866,8 +3884,8 @@ int func_800F9800(void) {
         # game-over artwork load into FilesLive.cpp BeginGameOverLoad. Row 38 moved EffectResources.cpp's resource
         # read into the owned PollEffectResourceRead. Row 19c moved ActorLoading.cpp's ZUD read into
         # ActorSpawningLive.cpp BeginZudRead, and row 46 moved ItemRows.cpp's item text load into
-        # ItemRowsLive.cpp StartItemTextLoad. Row 24 moved Background.cpp's tiled TIM and layout reads into the
-        # owned QueueTiledBackgroundLoad, whose BackgroundLive.cpp EnqueueRead runs only for an allocated read.
+        # ItemRowsLive.cpp StartItemTextLoad. Row 24 moved Background.cpp's reads into owned code; #210 retired
+        # the background disc queue in favor of checked, owned native layouts (asserted above).
         # Row 49 moved Combination.cpp's recipe read into SetupLive.cpp StartRecipeLoad, which since #499 builds
         # the recipe book from the converted workshop tables instead. Row 25c moved
         # RoomLoading.cpp's ZND and MPD reads into RoomLoadingLive.cpp BeginRead. Row 37 moved Runtime.cpp's menu
