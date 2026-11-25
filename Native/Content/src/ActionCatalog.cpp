@@ -136,7 +136,7 @@ constexpr std::array<std::string_view, 8> kHitFunctionNames{
     "chain-evasion",
 };
 constexpr auto kHitFunctions = Numbered(kHitFunctionNames);
-// decomp: statCalculators (src/BATTLE/BATTLE.PRG/146C.c)
+// decomp: statCalculators (src/BATTLE/BATTLE.PRG/146C.c:303)
 constexpr std::array<std::string_view, 27> kStatCalculatorNames{
     "none",
     "last-value",
