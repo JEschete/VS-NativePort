@@ -91,6 +91,21 @@ by gameplay-facing runs. The action catalog, in which actions reference
 categories by identity, is a later slice. Tests that open the real
 `Native\data` store need locally extracted data.
 
+### Test-suite speed and publication
+
+Real-data tests share one store per process through `DataStore::OpenShared`,
+and `Open` itself is cheaper (SAX duplicate-key scan of `assets.json`, bulk
+manifest read: about 5.4 s to 1.8 s). The full Debug suite went from over 30
+minutes to about 19 (10,075 cases passed); `~[extract]` takes about 5 minutes
+and the 38 `[extract]` corpus tests about 1 minute in Release (71,993
+assertions). The 572 Live tests cost about 12 s in total. No binary cache of the
+parsed manifest and asset catalog exists, so each process still pays about 1.8 s
+once. `provenance.py --check` fails against a local `resources\rood-reverse`
+checkout that is ahead of the pinned commit; CI checks the pinned one.
+
+Published as `ee9be37fb` (catalog) and `4444b9803` (speed); Source Quality run
+45538193447 on `4444b9803` succeeded.
+
 ## Native status catalog adoption (#499), 2026-11-24
 
 Based on `b5fbfc6c6634a7486092e83c85c1a828268e3640` (a documentation-only
