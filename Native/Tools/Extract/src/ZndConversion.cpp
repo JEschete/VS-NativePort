@@ -370,7 +370,8 @@ std::expected<ZoneConversionReport, std::string> ConvertDiscZones(
   const auto version =
       start->previous.converters.find(Content::kZndTableConverterName);
   if (!force && version != start->previous.converters.end() &&
-      version->second == 1) {
+      version->second >= 1 &&
+      version->second < Content::kZndTableConverterVersion) {
     auto upgraded = UpgradeZoneAuthoring(root);
     if (!upgraded) return std::unexpected(upgraded.error());
     start = StartRun(root);

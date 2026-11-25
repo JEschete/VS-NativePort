@@ -31,7 +31,7 @@
 namespace VS::Content {
 
 inline constexpr std::string_view kZndTableConverterName = "znd-tables";
-inline constexpr std::uint32_t kZndTableConverterVersion = 2;
+inline constexpr std::uint32_t kZndTableConverterVersion = 3;
 
 enum class ZoneTable : std::uint8_t {
   kZones,     // catalogs/world/zones: music and room slot count
@@ -111,5 +111,18 @@ ReadZoneTables(const ZoneTableReader& read);
 // Whether the enemy, limb and part columns cover every bit of a template
 // exactly once; the error names the first byte at fault.
 [[nodiscard]] std::expected<void, std::string> CheckZoneTemplateCoverage();
+
+struct SplitZoneColumns {
+  std::string text;
+  std::size_t split_columns = 0;
+};
+
+// Splits the former columns that packed several bit fields (the parts
+// table's shape_bits) into the named columns that replaced them, so older
+// authoring loads; the text is unchanged when none remain. Refuses a value
+// the new columns cannot hold and a table with both forms.
+[[nodiscard]] std::expected<SplitZoneColumns, std::string>
+SplitPackedZoneColumns(ZoneTable table, const std::string& text,
+                       std::string_view file);
 
 }  // namespace VS::Content

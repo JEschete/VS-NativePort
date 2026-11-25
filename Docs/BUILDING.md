@@ -393,15 +393,16 @@ build\Debug\VS.Extract.exe bestiary Native\data
   exact offline reconstruction. The shared text producer preserves the save
   contributor; forcing bestiary does not replace save prompts. See
   [ASSET_PIPELINE.md §4.3](pipeline/GAMEPLAY_CATALOGS.md#43-native-encyclopedia-definitions-499500).
-- The same `authoring` command upgrades `znd-tables` version 1 to version 2:
-  named enemy classes/materials, meaningful type/class/affinity columns and
-  explicitly indexed DP splash percentages. Old headers remain readable through
+- The same `authoring` command upgrades `znd-tables` versions 1 and 2 to 3:
+  named enums, type/class/affinity and DP splash columns, and part
+  `shape_bits` split into `attack_shape`/`attack_angle` (ASSET_PIPELINE
+  section 6.9). Old headers remain readable through
   schema aliases. It checks every decoded record is unchanged before publishing
   files and records the converter version last. Normal `tables` conversion
   performs this upgrade first; do not use `--force` just to rename columns,
   because that explicitly reconverts source data and replaces native edits.
   The enemy's former `material` field is `movement_class`, not a wood/metal
-  material; its remaining semantics are documented in ASSET_PIPELINE section 6.9.
+  material; its remaining semantics are documented there.
 - Writes `Native\data\disc\<disc path>` for every file and `Native\data\files.tsv` (sector, size, form, path).
   Files not converted yet are copied as they are (form `raw`); the intro movie becomes `MOV\TITLE.STR.mkv` (AV1 +
   FLAC, form `mkv`). Effect and ending audio are imported separately under `audio\streams`;

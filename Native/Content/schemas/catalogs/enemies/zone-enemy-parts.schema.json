@@ -100,17 +100,28 @@
     },
     {
       "name": "damage_type",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 255,
-      "description": ""
+      "type": "enum",
+      "enum": {
+        "0": "none",
+        "1": "blunt",
+        "2": "edged",
+        "3": "piercing"
+      },
+      "legacy_numeric_aliases": true,
+      "description": "the blade's damage type"
     },
     {
       "name": "cost_type",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 255,
-      "description": ""
+      "type": "enum",
+      "enum": {
+        "0": "none",
+        "1": "mp",
+        "2": "risk",
+        "3": "hp",
+        "4": "weapon-pp"
+      },
+      "legacy_numeric_aliases": true,
+      "description": "the resource the blade's base attack costs"
     },
     {
       "name": "cost",
@@ -121,10 +132,19 @@
     },
     {
       "name": "material",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 255,
-      "description": ""
+      "type": "enum",
+      "enum": {
+        "0": "none",
+        "1": "wood",
+        "2": "leather",
+        "3": "bronze",
+        "4": "iron",
+        "5": "hagane",
+        "6": "silver",
+        "7": "damascus"
+      },
+      "legacy_numeric_aliases": true,
+      "description": "the part's material (zero on the disc: templates keep weapon, shield and armour materials in their own columns)"
     },
     {
       "name": "recovery_delay",
@@ -176,11 +196,27 @@
       "description": ""
     },
     {
-      "name": "shape_bits",
+      "name": "attack_shape",
+      "type": "enum",
+      "enum": {
+        "0": "none",
+        "1": "ellipsoid",
+        "2": "centered-cylinder",
+        "3": "cylinder",
+        "4": "cone",
+        "5": "reversed-cone",
+        "6": "rectangle",
+        "7": "diamond"
+      },
+      "legacy_numeric_aliases": true,
+      "description": "the blade's targeting volume; actions use the same domain"
+    },
+    {
+      "name": "attack_angle",
       "type": "integer",
       "minimum": 0,
-      "maximum": 255,
-      "description": "attack shape and angle"
+      "maximum": 31,
+      "description": "the attack area's angle"
     },
     {
       "name": "type_none",

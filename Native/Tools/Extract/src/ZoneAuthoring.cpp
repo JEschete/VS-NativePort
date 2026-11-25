@@ -51,10 +51,15 @@ std::expected<void, std::string> PrepareFiles(const fs::path& root,
     const auto path = Content::ZoneTablePath(table);
     auto text = Read(root / Platform::Utf8Path(path));
     if (!text) return std::unexpected(text.error());
-    auto rewrite =
-        Content::NormalizeTableText(Content::ZoneTableSpec(table), *text, path);
+    // The split is checked to be lossless; the records check below compares
+    // its result with the normalized tables.
+    auto split = Content::SplitPackedZoneColumns(table, *text, path);
+    if (!split) return std::unexpected(split.error());
+    report.split_columns += split->split_columns;
+    auto rewrite = Content::NormalizeTableText(Content::ZoneTableSpec(table),
+                                               split->text, path);
     if (!rewrite) return std::unexpected(rewrite.error());
-    original.emplace(path, *text);
+    original.emplace(path, split->text);
     normalized.emplace(path, rewrite->text);
     if (*text != rewrite->text) pending.emplace(path, rewrite->text);
     report.renamed_columns += rewrite->renamed_columns;
@@ -102,8 +107,10 @@ std::expected<ZoneAuthoringReport, std::string> UpgradeZoneAuthoring(
   if (*manifest) {
     auto found = (**manifest).converters.find(Content::kZndTableConverterName);
     if (found != (**manifest).converters.end()) {
-      if (found->second != 1 &&
-          found->second != Content::kZndTableConverterVersion) {
+      // Version 1 tables have numeric names and values, version 2 the packed
+      // shape_bits; both upgrade in place.
+      if (found->second < 1 ||
+          found->second > Content::kZndTableConverterVersion) {
         return std::unexpected(
             "unsupported zone table version for authoring migration");
       }

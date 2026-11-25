@@ -32,6 +32,7 @@
 #include "Extract/ZndConversion.hpp"
 #include "Extract/ZoneAuthoring.hpp"
 #include "TestSupport/ModelFixtures.hpp"
+#include "TestSupport/ZoneTemplates.hpp"
 
 namespace {
 
@@ -96,6 +97,7 @@ content::ZndFile SampleZone() {
   for (std::size_t limb = 0; limb < 6; ++limb) {
     enemy.data[0x238 + limb * 0x5C + 0x50] = static_cast<std::byte>(limb + 1);
   }
+  VS::test_support::UseValidPartCodes(enemy.data, 1);
   zone.enemies.push_back(enemy);
   // A room palette row with STP words and a texture page.
   zone.textures =
@@ -186,6 +188,28 @@ void EditTable(const ModelRoot& root, ZoneTable table, std::string_view from,
   WriteText(path, text);
 }
 
+// Packs the parts table's attack_shape and attack_angle back into the single
+// shape_bits byte that version 2 tables had.
+void PackShapeBits(std::vector<std::vector<std::string>>& rows,
+                   const std::vector<content::TableRow>& checked) {
+  auto& header = rows.front();
+  const auto shape = std::ranges::find(header, "attack_shape");
+  REQUIRE(shape != header.end());
+  REQUIRE(std::next(shape) != header.end());
+  REQUIRE(*std::next(shape) == "attack_angle");
+  const auto at = static_cast<std::size_t>(shape - header.begin());
+  for (std::size_t row = 0; row < rows.size(); ++row) {
+    auto& fields = rows.at(row);
+    if (row == 0) {
+      fields.at(at) = "shape_bits";
+    } else {
+      const auto& values = checked.at(row - 1).values;
+      fields.at(at) = std::to_string(values.at(at) + (values.at(at + 1) * 8));
+    }
+    fields.erase(fields.begin() + static_cast<std::ptrdiff_t>(at + 1));
+  }
+}
+
 void LegacyTableHeaders(const ModelRoot& root) {
   for (const auto table : content::kZoneTables) {
     const auto path = TableFile(root, table);
@@ -208,6 +232,7 @@ void LegacyTableHeaders(const ModelRoot& root) {
     }
     std::vector<std::vector<std::string>> rows;
     for (const auto& record : *records) rows.push_back(record.fields);
+    if (table == ZoneTable::kParts) PackShapeBits(rows, *checked);
     WriteText(path, content::FormatCsv(rows));
   }
   auto manifest = content::LoadConversionManifest(root.Root());
@@ -510,6 +535,11 @@ TEST_CASE("Old zone authoring upgrades without overwriting native edits",
   CHECK(Loaded(root) == edited);
   CHECK(ReadText(TableFile(root, ZoneTable::kEnemies))
             .contains("movement_class,"));
+  // The blade's packed shape byte split, and its codes became names.
+  const auto parts = ReadText(TableFile(root, ZoneTable::kParts));
+  CHECK(parts.contains(",attack_shape,attack_angle,"));
+  CHECK_FALSE(parts.contains("shape_bits"));
+  CHECK(parts.contains(",blunt,hp,"));
   const auto repeat = extract::UpgradeZoneAuthoring(root.Root());
   if (!repeat) FAIL(repeat.error());
   CHECK(repeat->written == 0);
@@ -521,7 +551,7 @@ TEST_CASE("Failed zone authoring upgrades preserve files and converter version",
   RecordArchetype(root.Root());
   REQUIRE(Convert(root).converted == 1);
   LegacyTableHeaders(root);
-  EditTable(root, ZoneTable::kParts, "affinity_3,",
+  EditTable(root, ZoneTable::kLimbs, "affinity_3,",
             "affinity_3,affinity_fire,");
   const auto before = OutputFiles(root);
   const auto manifest = ReadText(root.Root() / "manifest.json");

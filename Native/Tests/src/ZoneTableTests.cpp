@@ -13,6 +13,7 @@
 
 #include "Content/ZoneTables.hpp"
 #include "TestSupport/ModelFixtures.hpp"
+#include "TestSupport/ZoneTemplates.hpp"
 
 namespace {
 
@@ -55,6 +56,7 @@ content::ZndTemplate PatternTemplate(std::size_t seed, bool zeroed) {
     data[0x238 + limb * 0x5C + 0x50] =
         static_cast<std::byte>((seed + limb) % 8);
   }
+  VS::test_support::UseValidPartCodes(data, seed);
   if (zeroed) {
     for (std::size_t at = 0x140; at < 0x170; ++at) data.at(at) = std::byte{};
     for (std::size_t at = 0x238; at < 0x258; ++at) data.at(at) = std::byte{};
@@ -268,4 +270,34 @@ TEST_CASE(
   const auto decoded = content::DecodeZndFile(*encoded);
   if (!decoded) FAIL(decoded.error());
   CHECK(decoded->enemies[0].data == source.enemies[0].data);
+}
+
+TEST_CASE("Packed shape bits split into shape and angle columns",
+          "[zone-authoring][content-tables][znd]") {
+  // 41 is shape 1 (bits 0-2) and angle 5 (bits 3-7).
+  const auto split = content::SplitPackedZoneColumns(
+      ZoneTable::kParts, "item_id,shape_bits,range\n5,41,2\n", "parts.csv");
+  if (!split) FAIL(split.error());
+  CHECK(split->split_columns == 1);
+  CHECK(split->text == "item_id,attack_shape,attack_angle,range\n5,1,5,2\n");
+  const auto again =
+      content::SplitPackedZoneColumns(ZoneTable::kParts, split->text, "p.csv");
+  if (!again) FAIL(again.error());
+  CHECK(again->split_columns == 0);
+  CHECK(again->text == split->text);
+}
+
+TEST_CASE("Packed shape bits that the split would change are refused",
+          "[zone-authoring][content-tables][znd]") {
+  const auto split = [](const std::string& text) {
+    return ErrorOf(
+        content::SplitPackedZoneColumns(ZoneTable::kParts, text, "parts.csv"));
+  };
+  CHECK(split("item_id,shape_bits\n1,256\n") ==
+        "parts.csv:2: column 'shape_bits': 256 does not fit the columns that "
+        "replace it");
+  CHECK(split("item_id,shape_bits\n1,-1\n") ==
+        "parts.csv:2: column 'shape_bits': '-1' is not a decimal integer");
+  CHECK(split("shape_bits,attack_angle\n1,1\n") ==
+        "parts.csv: has both 'shape_bits' and 'attack_angle'");
 }

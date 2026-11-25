@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <array>
+#include <charconv>
 #include <cstddef>
 #include <cstdint>
 #include <deque>
@@ -16,6 +17,7 @@
 #include <span>
 #include <string>
 #include <string_view>
+#include <system_error>
 #include <utility>
 #include <vector>
 
@@ -77,12 +79,19 @@ struct Field {
   std::uint8_t bits = 0;  // 0: the whole value
 };
 
+// A former column that held whole bytes now split into bit-field columns.
+struct PackedColumn {
+  std::string_view legacy;
+  std::vector<std::string_view> columns;
+};
+
 // A table's columns: the leading key and reference columns, then the fields.
 struct TableLayout {
   std::deque<std::string> names;  // storage for generated column names
   std::vector<ColumnSpec> columns;
   std::vector<Field> fields;
   std::vector<std::string_view> key;
+  std::vector<PackedColumn> packed;
   TableSpec spec;
   std::string directory;
 
@@ -289,10 +298,15 @@ void AddPartFields(TableLayout& table) {
   table.Add("max_dp", 0x0A, 2, false, "");
   table.Add("current_pp", 0x0C, 2, false, "");
   table.Add("max_pp", 0x0E, 2, false, "");
-  table.Add("damage_type", 0x10, 1, false, "");
-  table.Add("cost_type", 0x11, 1, false, "");
+  table.Add("damage_type", 0x10, 1, false, "the blade's damage type",
+            kDamageTypes);
+  table.Add("cost_type", 0x11, 1, false,
+            "the resource the blade's base attack costs", kCostResources);
   table.Add("cost", 0x12, 1, false, "");
-  table.Add("material", 0x13, 1, false, "");
+  table.Add("material", 0x13, 1, false,
+            "the part's material (zero on the disc: templates keep weapon, "
+            "shield and armour materials in their own columns)",
+            kMaterials);
   table.Add("recovery_delay", 0x14, 1, false, "");
   table.Add("gem_slots", 0x15, 1, false, "");
   table.Add("gem_effects", 0x16, 1, false, "");
@@ -300,7 +314,13 @@ void AddPartFields(TableLayout& table) {
   table.Add("range", 0x18, 1, false, "");
   table.Add("range_y", 0x19, 1, false, "");
   table.Add("range_z", 0x1A, 1, false, "");
-  table.Add("shape_bits", 0x1B, 1, false, "attack shape and angle");
+  // decomp: vs_Range (src/SLUS_010.40/inventory.h:4)
+  table.Bits("attack_shape", 0x1B, 0, 3,
+             "the blade's targeting volume; actions use the same domain",
+             kVolumeShapes);
+  table.Bits("attack_angle", 0x1B, 3, 5, "the attack area's angle");
+  table.packed.push_back(
+      {.legacy = "shape_bits", .columns = {"attack_shape", "attack_angle"}});
   table.Run("type", 0x1C, kTypeFields, 1, true, "signed physical-type rating");
   table.Run("class", 0x20, kClassFields, 1, true,
             "signed class rating; storage_6/7 retain the original tail bytes");
@@ -577,6 +597,67 @@ std::expected<std::vector<Value>, std::string> Dense(
     values.push_back(value);
   }
   return values;
+}
+
+// A packed cell's value as its replacement columns' cells, in their order.
+std::expected<std::vector<std::string>, std::string> SplitCell(
+    const TableLayout& layout, const PackedColumn& packed,
+    std::string_view cell, std::string_view file, std::size_t line) {
+  unsigned value = 0;
+  const char* const first = cell.data();
+  const auto parsed = std::from_chars(first, first + cell.size(), value);
+  if (cell.empty() || parsed.ec != std::errc() ||
+      parsed.ptr != first + cell.size()) {
+    return std::unexpected(
+        CellError(file, line, packed.legacy,
+                  std::format("'{}' is not a decimal integer", cell)));
+  }
+  std::vector<std::string> cells;
+  unsigned rebuilt = 0;
+  for (const std::string_view column : packed.columns) {
+    const auto field = std::ranges::find(layout.fields, column, &Field::column);
+    if (field == layout.fields.end() || field->bits == 0) {
+      return std::unexpected(
+          std::format("{}: '{}' is not a bit field", file, column));
+    }
+    const unsigned part = (value >> field->bit) & ((1U << field->bits) - 1);
+    rebuilt |= part << field->bit;
+    cells.push_back(std::to_string(part));
+  }
+  if (rebuilt != value) {
+    return std::unexpected(CellError(
+        file, line, packed.legacy,
+        std::format("{} does not fit the columns that replace it", value)));
+  }
+  return cells;
+}
+
+// Replaces `packed`'s header field and cells with its replacement columns.
+std::expected<void, std::string> SplitColumn(const TableLayout& layout,
+                                             const PackedColumn& packed,
+                                             std::vector<CsvRecord>& records,
+                                             std::size_t at,
+                                             std::string_view file) {
+  for (CsvRecord& record : records) {
+    if (record.fields.size() != records.front().fields.size()) {
+      return std::unexpected(std::format(
+          "{}:{}: has {} fields; the header has {}", file, record.line,
+          record.fields.size(), records.front().fields.size()));
+    }
+  }
+  const auto position = static_cast<std::ptrdiff_t>(at);
+  std::vector<std::string> header(packed.columns.begin(), packed.columns.end());
+  auto& names = records.front().fields;
+  names.erase(names.begin() + position);
+  names.insert(names.begin() + position, header.begin(), header.end());
+  for (std::size_t row = 1; row < records.size(); ++row) {
+    auto& fields = records[row].fields;
+    auto cells = SplitCell(layout, packed, fields[at], file, records[row].line);
+    if (!cells) return std::unexpected(cells.error());
+    fields.erase(fields.begin() + position);
+    fields.insert(fields.begin() + position, cells->begin(), cells->end());
+  }
+  return {};
 }
 
 }  // namespace
@@ -858,6 +939,38 @@ std::expected<void, std::string> CheckZoneTemplateCoverage() {
     }
   }
   return {};
+}
+
+std::expected<SplitZoneColumns, std::string> SplitPackedZoneColumns(
+    ZoneTable table, const std::string& text, std::string_view file) {
+  const TableLayout& layout = LayoutOf(table);
+  SplitZoneColumns split{.text = text};
+  if (layout.packed.empty()) return split;
+  auto records = ParseCsv(text, file);
+  if (!records) return std::unexpected(records.error());
+  if (records->empty()) return split;
+  for (const PackedColumn& packed : layout.packed) {
+    const auto& header = records->front().fields;
+    const auto found = std::ranges::find(header, packed.legacy);
+    if (found == header.end()) continue;
+    for (const std::string_view column : packed.columns) {
+      if (std::ranges::find(header, column) != header.end()) {
+        return std::unexpected(std::format("{}: has both '{}' and '{}'", file,
+                                           packed.legacy, column));
+      }
+    }
+    const auto at = static_cast<std::size_t>(found - header.begin());
+    if (auto done = SplitColumn(layout, packed, *records, at, file); !done) {
+      return std::unexpected(done.error());
+    }
+    ++split.split_columns;
+  }
+  if (split.split_columns != 0) {
+    std::vector<std::vector<std::string>> rows;
+    for (CsvRecord& record : *records) rows.push_back(std::move(record.fields));
+    split.text = FormatCsv(rows);
+  }
+  return split;
 }
 
 }  // namespace VS::Content

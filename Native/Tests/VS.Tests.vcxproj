@@ -615,6 +615,7 @@
     <ClInclude Include="include\TestSupport\StatusRoot.hpp" />
     <ClInclude Include="include\TestSupport\TimeAttackDrawRecorder.hpp" />
     <ClInclude Include="include\TestSupport\WorkshopRecipeRoot.hpp" />
+    <ClInclude Include="include\TestSupport\ZoneTemplates.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Engine\VS.Engine.vcxproj">
