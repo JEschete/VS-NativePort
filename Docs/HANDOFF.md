@@ -1,5 +1,57 @@
 # Current Handoff
 
+## Native action catalog adoption (#499), 2026-11-24
+
+Based on `fefb09c57`. The action catalog, its converter, the battle-table
+bridge, committed schemas, tests and bookkeeping were verified in the working
+tree and published together as `efa85771a`; its exact-revision CI is recorded
+at the end of this section. This does not close #499 or #58.
+
+The implementation adds 256 named action rules and their hits
+(`catalogs/battle/actions.csv`, `action-hits.csv`, each led by a plain-text
+`name`; ids are `action.<slug>`), an offline source and provenance codec, the
+`kText` column type, layered SQLite/DataStore selection (`DataStore::Actions()`)
+and the `VS.Extract actions` entry point. ASSET_PIPELINE section 4.7 describes
+the contract. G01904's module-image read is gone: `LoadCatalogBackedGlobals`
+fills `Battle::actionDefinitions` through `Battle::BuildActionTable`.
+
+### Evidence obtained
+
+- Debug `VS.Tests.exe [action-catalog],[action-category-catalog],[content-tables]`:
+  64 cases, 2718 assertions, all passed. `[action-catalog]` alone: 20 cases,
+  205 assertions. A full `~[extract]` Debug run before the last test edits had
+  one failure, the category schema description (updated in the committed
+  schema and re-run green).
+- The configured disc's 256 action records rebuild exactly from the decoded
+  rules plus `import/actions.json`, and the published tables parse to the same
+  rules. `BuildActionTable` reproduces the original records apart from the
+  bits the catalog drops (unread AI nibble, reserved flag bits and word, name
+  tails), for both synthetic data and the disc.
+- Cold read: ids and names read without the decomp (`action.normal`, `Normal`;
+  `action.whistle-sting`; placeholder `action.untitled-000`), and every break
+  art in the learning catalog resolves to the action whose id carries its slug.
+- Refusals: unnamed prerequisite 63 and stat calculator 63, a name over 23
+  characters, duplicate or unknown ids and categories, and unnamed flag bits.
+- `python tools\lint\quality.py --since fefb09c57`: 0 findings, 0 new. The
+  content, gates, hazards and headers `--check` runs report 0 violations.
+
+### Boundary and ledgers
+
+`ActionRule` holds named kinds, categories by identity and hits as rules.
+`BuildActionTable` is the labelled EC-04-T-ACTION bridge (plan section 15):
+about 110 references in 62 files still read `ActionDefinition`, so the #58
+gate is not claimed. CONTENT_LEDGER's SLUS row lists `catalog.battle.actions`
+as partial; DATA_LEDGER G01904 records the catalog source and the bridge.
+
+### Remaining scope
+
+#499/#58 remain open. The top-level `effect_id` is an unnamed integer, the hit
+mediators are code, behaviour-identical prerequisites keep separate names, and
+the Learning catalog's `action` column still uses break-art slugs. No Release
+build or controller/combat capture of an authored action edit was made for
+this slice; only default values are exercised by gameplay-facing runs. Items
+and text (#500) are separate slices.
+
 ## Native action category catalog adoption (#499), 2026-11-24
 
 Based on `1ed79f640332e8609bd23736600a644ffba775bb` (the status-slice handoff
