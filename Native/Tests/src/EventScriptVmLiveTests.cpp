@@ -6,6 +6,7 @@
 #include <memory>
 #include <span>
 #include <stdexcept>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -16,6 +17,7 @@
 #include "Content/DiscQueue.hpp"
 #include "Content/DiscReaderLive.hpp"
 #include "Content/ModuleData.hpp"
+#include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Event/InterpolationCurveLive.hpp"
 #include "Event/RoomTriggerEntryLive.hpp"
@@ -45,6 +47,7 @@
 #include "State/SceneTimerLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 #include "State/Timers.hpp"
+#include "nlohmann/json.hpp"
 
 using VS::Legacy::ClearOTagR;
 
@@ -168,6 +171,82 @@ struct LiveVmFixture {
   LiveVmFixture(LiveVmFixture&&) = delete;
   LiveVmFixture& operator=(LiveVmFixture&&) = delete;
 };
+
+struct SceneLogCapture {
+  std::vector<std::string> commands;
+  std::vector<std::string> results;
+  VS::Core::LogObserver previous;
+  VS::Core::LogLevel console;
+
+  explicit SceneLogCapture(bool enabled = true)
+      : console(VS::Core::SetConsoleLogLevel(VS::Core::LogLevel::Warn)) {
+    VS::Core::SetLogLevel(enabled ? VS::Core::LogLevel::Debug
+                                  : VS::Core::LogLevel::Off);
+    VS::Core::SetLogChannels("");
+    previous = VS::Core::SetLogObserver([this](const VS::Core::LogRecord& row) {
+      if (row.channel == "event-command") commands.emplace_back(row.message);
+      if (row.channel == "event-result") results.emplace_back(row.message);
+    });
+  }
+  ~SceneLogCapture() {
+    VS::Core::SetLogObserver(std::move(previous));
+    VS::Core::SetConsoleLogLevel(console);
+    VS::Core::SetLogLevel(VS::Core::LogLevel::Info);
+    VS::Core::SetLogChannels("");
+  }
+  SceneLogCapture(const SceneLogCapture&) = delete;
+  SceneLogCapture& operator=(const SceneLogCapture&) = delete;
+  SceneLogCapture(SceneLogCapture&&) = delete;
+  SceneLogCapture& operator=(SceneLogCapture&&) = delete;
+};
+
+void CheckTracePairs(const SceneLogCapture& capture, std::size_t count) {
+  REQUIRE(capture.commands.size() == count);
+  REQUIRE(capture.results.size() == count);
+  std::vector<std::uint64_t> commands;
+  std::vector<std::uint64_t> results;
+  for (std::size_t index = 0; index < count; ++index) {
+    commands.push_back(nlohmann::json::parse(capture.commands[index])
+                           .at("command")
+                           .get<std::uint64_t>());
+    results.push_back(nlohmann::json::parse(capture.results[index])
+                          .at("command")
+                          .get<std::uint64_t>());
+  }
+  std::ranges::sort(results);
+  CHECK(commands == results);
+  CHECK(std::ranges::adjacent_find(commands) == commands.end());
+}
+
+void CheckDispatchTrace(const SceneLogCapture& capture,
+                        event::ScriptLocation start, bool skip) {
+  CheckTracePairs(capture, 3);
+  for (std::size_t index = 0; index < capture.commands.size(); ++index) {
+    const auto command = nlohmann::json::parse(capture.commands[index]);
+    CHECK(command.at("event") == 80);
+    CHECK(command.at("source") == 1);
+    CHECK(command.at("region") == "event_script");
+    CHECK(command.at("generation") == start.generation);
+    CHECK(command.at("skip_state") == (skip ? 2 : 0));
+    CHECK(command.at("encoded_size") == std::array{2, 3, 1}.at(index));
+  }
+  CHECK(nlohmann::json::parse(capture.commands[1]).at("operands") ==
+        nlohmann::json::array({3, 0}));
+  CHECK(nlohmann::json::parse(capture.results[1]).at("flow") == "jump_by");
+  CHECK(nlohmann::json::parse(capture.results[1]).at("displacement") == 3);
+}
+
+void CheckNestedTrace(const SceneLogCapture& capture) {
+  CheckTracePairs(capture, 3);
+  const auto outer = nlohmann::json::parse(capture.commands[0]);
+  const auto inner = nlohmann::json::parse(capture.commands[1]);
+  CHECK(outer.at("thread") == 0);
+  CHECK(inner.at("thread") == 1);
+  CHECK(nlohmann::json::parse(capture.results[0]).at("command") ==
+        inner.at("command"));
+  CHECK(nlohmann::json::parse(capture.results[1]).at("command") ==
+        outer.at("command"));
+}
 
 struct FlagDifferentialFixture {
   std::array<std::uint8_t, VS::State::kScriptFlagCount> saved{};
@@ -717,6 +796,25 @@ std::intptr_t JumpBridge(std::uint8_t* instruction, std::int16_t thread) {
 std::intptr_t StopBridge(std::uint8_t* instruction, std::int16_t thread) {
   return event::DispatchLiveScriptControlOpcode(instruction, thread,
                                                 ObserveStop);
+}
+
+event::ScriptLocation PrepareTraceDispatch(bool skip) {
+  const auto start = MountScript({0xE3, 4, 0x42, 3, 0, 0xE6});
+  event::eventId = 80;
+  event::eventSource = 1;
+  event::skipState = skip ? 2 : 0;
+  event::isSkipForced = 0;
+  VS::Input::buttonsPressed = 0;
+  VS::State::tickSpeed = 2;
+  event::opcodeSizes[0xE3] = 2;
+  event::opcodeSizes[0x42] = 3;
+  for (auto* handlers : {event::opcodeHandlers, event::skipOpcodeHandlers}) {
+    handlers[0xE3] = event::CommandSetTickSpeedOpcode;
+    handlers[0x42] = event::ScriptJumpForwardOpcode;
+    handlers[0xE6] = event::CommandStopScriptContextOpcode;
+  }
+  event::LiveScriptVm().SetThreadCursor(0, start);
+  return start;
 }
 
 std::intptr_t PointerResult(std::uint8_t*, std::int16_t) { return 0x12345678; }
@@ -1633,6 +1731,17 @@ std::intptr_t NestedJumpBridge(std::uint8_t* instruction, std::int16_t thread) {
   nestedFinished = !event::ExecuteLiveScriptThread(1);
   return event::DispatchLiveScriptControlOpcode(instruction, thread,
                                                 event::ScriptJumpForward);
+}
+
+event::ScriptFlow ReplaceTracedScript(const event::ScriptInstruction&,
+                                      event::ScriptVmHost&) {
+  return event::ScriptFlow::JumpTo(MountScript({0xE6}));
+}
+
+std::intptr_t ReplaceTracedScriptBridge(std::uint8_t* instruction,
+                                        std::int16_t thread) {
+  return event::DispatchLiveScriptControlOpcode(instruction, thread,
+                                                ReplaceTracedScript);
 }
 
 void MarkRoomStopPending() {
@@ -3406,8 +3515,9 @@ TEST_CASE("Live VM data bindings reject stale and out of range locations",
 }
 
 TEST_CASE("Live VM restores the outer typed invocation after nested dispatch",
-          "[event-vm-live]") {
+          "[event-vm-live][diagnostics][event-dispatch]") {
   const LiveVmFixture fixture;
+  SceneLogCapture capture;
   const auto start = MountScript({0x42, 3, 0, 0xF0, 0xF0});
   observations = 0;
   nestedFinished = false;
@@ -3426,6 +3536,82 @@ TEST_CASE("Live VM restores the outer typed invocation after nested dispatch",
         event::ScriptLocation{start.region, 3, start.generation});
   CHECK_FALSE(host.ThreadCursor(0).Present());
   CHECK_FALSE(host.ThreadCursor(1).Present());
+  CheckNestedTrace(capture);
+}
+
+TEST_CASE(
+    "Production dispatch traces normal and skipped commands without changing "
+    "execution",
+    "[event-vm-live][diagnostics][event-dispatch]") {
+  for (const bool enabled : {false, true}) {
+    for (const bool skip : {false, true}) {
+      CAPTURE(enabled, skip);
+      const LiveVmFixture fixture;
+      SceneLogCapture capture(enabled);
+      const auto start = PrepareTraceDispatch(skip);
+      CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+      CHECK(VS::State::tickSpeed == 4);
+      CHECK_FALSE(event::LiveScriptVm().ThreadCursor(0).Present());
+      if (enabled) {
+        CheckDispatchTrace(capture, start, skip);
+      } else {
+        CheckTracePairs(capture, 0);
+      }
+    }
+  }
+}
+
+TEST_CASE("Production dispatch pairs repeated waits with their typed results",
+          "[event-vm-live][diagnostics][event-dispatch]") {
+  const LiveVmFixture fixture;
+  SceneLogCapture capture;
+  const auto start = MountScript({0xE2, 2, 0xE6});
+  event::opcodeHandlers[0xE2] = event::CommandWaitFramesOpcode;
+  event::opcodeHandlers[0xE6] = event::CommandStopScriptContextOpcode;
+  event::opcodeSizes[0xE2] = 2;
+  event::threadWaitFrames[0] = 0;
+  event::LiveScriptVm().SetThreadCursor(0, start);
+  CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+  CHECK(event::LiveScriptVm().ThreadCursor(0) == start);
+  CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+  CHECK(event::LiveScriptVm().ThreadCursor(0) == start);
+  CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+  CHECK_FALSE(event::LiveScriptVm().ThreadCursor(0).Present());
+  CheckTracePairs(capture, 4);
+  const std::array flows{"wait", "wait", "advance", "thread_finished"};
+  for (std::size_t index = 0; index < flows.size(); ++index) {
+    CHECK(nlohmann::json::parse(capture.results[index]).at("flow") ==
+          flows[index]);
+  }
+}
+
+TEST_CASE("Dispatch snapshots operands before a script source is replaced",
+          "[event-vm-live][diagnostics][event-dispatch]") {
+  const LiveVmFixture fixture;
+  SceneLogCapture capture;
+  std::weak_ptr<const Bytes> lifetime;
+  const auto start = MountScript(
+      {0x42, 129, 130, 131, 132, 133, 134, 135, 136, 137}, &lifetime);
+  event::opcodeHandlers[0x42] = ReplaceTracedScriptBridge;
+  event::opcodeHandlers[0xE6] = event::CommandStopScriptContextOpcode;
+  event::opcodeSizes[0x42] = 10;
+  event::LiveScriptVm().SetThreadCursor(0, start);
+  CHECK_FALSE(event::ExecuteLiveScriptThread(0));
+  CHECK(lifetime.expired());
+  CheckTracePairs(capture, 2);
+  const auto before = nlohmann::json::parse(capture.commands[0]);
+  const auto after = nlohmann::json::parse(capture.commands[1]);
+  CHECK(before.at("operands") ==
+        nlohmann::json::array({129, 130, 131, 132, 133, 134, 135, 136, 137}));
+  CHECK(before.at("generation") == start.generation);
+  CHECK(after.at("generation") == start.generation + 1);
+  CHECK(before.at("script_offset") == 0);
+  const auto result = nlohmann::json::parse(capture.results[0]);
+  CHECK(result.at("flow") == "jump_to");
+  CHECK(result.at("target") ==
+        nlohmann::json({{"region", "event_script"},
+                        {"offset", 0},
+                        {"generation", start.generation + 1}}));
 }
 
 TEST_CASE("Live room import owns entry data and preserves ongoing room scripts",

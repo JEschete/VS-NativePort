@@ -15,13 +15,24 @@
 
 namespace VS::Game {
 
+struct TraceOptions {
+  bool frame_logging = false;
+  bool player_observations = false;
+  bool verification_log = false;
+
+  bool FramesEnabled() const {
+    return frame_logging || player_observations || verification_log;
+  }
+};
+
+TraceOptions ChooseTraceOptions(int argc, const char* const* argv);
+
 class GameplayTrace {
  public:
   explicit GameplayTrace(const std::filesystem::path& parent,
                          std::string_view host = "combat-lab",
                          const std::filesystem::path& compatibility_log = {},
-                         bool player_observations = false,
-                         bool verification_log = false);
+                         TraceOptions options = {});
   ~GameplayTrace();
   GameplayTrace(const GameplayTrace&) = delete;
   GameplayTrace& operator=(const GameplayTrace&) = delete;
@@ -31,6 +42,8 @@ class GameplayTrace {
   void Frame(std::uint64_t tick, const Input::PadState& input,
              const EncounterState& state,
              const nlohmann::json& scene = nullptr);
+  bool FramesEnabled() const { return options_.FramesEnabled(); }
+  void Flush() noexcept;
   const std::filesystem::path& Directory() const { return directory_; }
   bool Failed() const { return failed_.load(); }
   std::uint64_t Errors() const { return errors_.load(); }
@@ -38,12 +51,12 @@ class GameplayTrace {
   void EndScript(std::uint64_t tick, const nlohmann::json& result);
 
  private:
-  const bool player_observations_;
-  const bool verification_log_;
+  const TraceOptions options_;
   void WriteRecord(std::string_view category, const nlohmann::json& details,
                    std::uint64_t tick,
                    const nlohmann::json* scoped_details = nullptr);
   void Fail() noexcept;
+  void FlushFiles();
   const std::chrono::steady_clock::time_point started_ =
       std::chrono::steady_clock::now();
   std::filesystem::path directory_;

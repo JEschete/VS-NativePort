@@ -70,8 +70,7 @@ struct Options {
   bool start = false;
   bool catalog_only = false;
   bool devices = true;
-  bool player_observations = false;
-  bool verification_log = false;
+  Game::TraceOptions trace_options;
   bool door_transitions = false;
   bool scene_catalog = false;
   bool gpu_validation = false;
@@ -241,19 +240,17 @@ Options Parse(int argc, char** argv) {
       options.catalog_only = true;
     } else if (argument == "--scripted") {
       options.devices = false;
-    } else if (argument == "--player-observations") {
-      options.player_observations = true;
-    } else if (argument == "--verification-log") {
-      options.verification_log = true;
+    } else if (argument == "--player-observations" ||
+               argument == "--verification-log" ||
+               argument == "--trace-frames" || argument == "--gpu-validation" ||
+               argument == "--no-gpu-validation") {
+      // Read by the shared trace/GPU option parsers below.
     } else if (argument == "--door-transitions") {
       options.door_transitions = true;
     } else if (argument == "--scene-catalog") {
       options.scene_catalog = true;
     } else if (argument == "--verify-all") {
       options.verify_all = true;
-    } else if (argument == "--gpu-validation" ||
-               argument == "--no-gpu-validation") {
-      // Read by Render::ChooseGpuValidation below.
     } else {
       if (++index == argc) {
         throw std::runtime_error("option is missing a value");
@@ -261,6 +258,7 @@ Options Parse(int argc, char** argv) {
       ParseValue(options, argument, argv[index]);
     }
   }
+  options.trace_options = Game::ChooseTraceOptions(argc, argv);
   options.gpu_validation = Render::ChooseGpuValidation(argc, argv);
   ValidateOptions(options);
   if (options.data.empty()) options.data = FindData();
@@ -422,7 +420,8 @@ void WriteManifest(const Options& options, Trace& trace, std::size_t scripts,
                                  : fs::absolute(options.door_resume).string()},
              {"scripts", scripts},
              {"speed", options.speed},
-             {"verification_log", options.verification_log},
+             {"verification_log", options.trace_options.verification_log},
+             {"frame_logging", trace.FramesEnabled()},
              {"effect_path_trace",
               options.effect_paths
                   ? nlohmann::json{{"first", options.effect_paths->first},
@@ -1122,14 +1121,16 @@ class LiveSession {
         return;
       }
       simulation_timing_.Record(simulation_start);
-      const auto inspection_start = SDL_GetTicksNS();
-      const auto state = Game::InspectEncounter();
-      inspection_timing_.Record(inspection_start);
-      const auto trace_start = SDL_GetTicksNS();
-      const auto scene = Game::InspectGameplayScene(state);
-      trace_.Frame(ticks_, pad, state, scene);
-      trace_timing_.Record(trace_start);
-      UpdateScript(state, scene);
+      if (trace_.FramesEnabled() || !scripts_.empty()) {
+        const auto inspection_start = SDL_GetTicksNS();
+        const auto state = Game::InspectEncounter();
+        inspection_timing_.Record(inspection_start);
+        const auto trace_start = SDL_GetTicksNS();
+        const auto scene = Game::InspectGameplayScene(state);
+        trace_.Frame(ticks_, pad, state, scene);
+        trace_timing_.Record(trace_start);
+        UpdateScript(state, scene);
+      }
       if (!running) {
         ReleaseEncounter();
         help_ = paused_ = false;
@@ -1138,6 +1139,7 @@ class LiveSession {
         if (!scripts_.empty()) FinishScript();
       }
     }
+    if (!trace_.FramesEnabled()) trace_.Flush();
     if (trace_.Failed()) {
       throw std::runtime_error(
           "trace write failed; stopping without silent loss");
@@ -1243,16 +1245,8 @@ void LoadInputBindings(Input::InputSystem& input, const fs::path& path,
 }
 
 int Run(int argc, char** argv) {
-  const bool player_observations =
-      std::any_of(argv + 1, argv + argc, [](const char* argument) {
-        return std::string_view(argument) == "--player-observations";
-      });
-  const bool verification_log =
-      std::any_of(argv + 1, argv + argc, [](const char* argument) {
-        return std::string_view(argument) == "--verification-log";
-      });
   Trace trace(Platform::ExecutableDir() / "combat-lab" / "runs", "combat-lab",
-              {}, player_observations, verification_log);
+              {}, Game::ChooseTraceOptions(argc, argv));
   try {
     Platform::InstallCrashHandler();
     VS::Core::LogInfo("combat-lab", "log files: {}",

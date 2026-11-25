@@ -7,6 +7,7 @@
     --frames/--capture/--at and prints the end of build\Debug\vs-native.log (crash stacks included).
     Ticks are 1/60 s. The intro movie starts about tick 780 and is skipped by pressing Start (-SkipIntro, or
     "--press 1000:Start"); the title menu is then up much earlier than the tick 3300 of an unskipped run.
+    Add -TraceFrames for per-tick diagnostic snapshots; screenshot captures do not require it.
 
 .EXAMPLE
     tools\test\run_native.ps1 -NoCopy -SkipIntro -Frames 1800 -At '1500,1700'
@@ -17,6 +18,7 @@ param(
     [string]$At = '30,120,240,400,599',
     [switch]$NoCopy,
     [switch]$SkipIntro,
+    [switch]$TraceFrames,
     [string]$Press = '',
     [string]$Cap = 'build\cap1',
     [string]$Config = 'Debug',
@@ -54,6 +56,7 @@ if ($Press) { $presses += $Press }
 $argv = @('--frames', "$Frames", '--capture', "`"$Cap`"", '--at', $At,
           '--log-level', $LogLevel, '--log-channels', $LogChannels)
 if ($presses) { $argv += @('--press', ($presses -join ',')) }
+if ($TraceFrames) { $argv += '--trace-frames' }
 if (-not $Devices) { $argv += '--scripted' }
 if ($Speed -gt 1) { $argv += @('--speed', "$Speed") }
 if ($GpuValidation) { $argv += '--gpu-validation' }

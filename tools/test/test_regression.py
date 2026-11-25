@@ -172,6 +172,33 @@ class ReplayTests(unittest.TestCase):
         self.assertNotEqual(regression.fingerprint(self.event_trace(1000, 16)),
                             regression.fingerprint(self.event_trace(1000, 24)))
 
+    @staticmethod
+    def camera_trace(camera: dict) -> str:
+        return json.dumps({"tick": 42, "category": "frame", "data": {"scene": {"camera": camera}}}) + "\n"
+
+    def test_camera_label_repairs_preserve_existing_fingerprints(self) -> None:
+        old = {"delta_yaw": 2, "delta_pitch": 1234, "delta_distance": 31}
+        new = {"turn": 2, "target_yaw": 1234, "turn_speed": 31}
+        expected = regression.fingerprint(self.camera_trace(old))
+        self.assertEqual(expected["windows"], ["43ab91d563b7d83e"])
+        self.assertEqual(regression.fingerprint(self.camera_trace(new)), expected)
+        self.assertEqual(regression.fingerprint(self.camera_trace(old | new)), expected)
+
+    def test_camera_value_changes_still_change_fingerprints(self) -> None:
+        old = {"delta_yaw": 2, "delta_pitch": 1234, "delta_distance": 31}
+        new = {"turn": 2, "target_yaw": 1234, "turn_speed": 31}
+        expected = regression.fingerprint(self.camera_trace(old))
+        for name, value in new.items():
+            with self.subTest(field=name):
+                changed = new | {name: value + 1}
+                self.assertNotEqual(regression.fingerprint(self.camera_trace(changed)), expected)
+
+    def test_conflicting_camera_labels_are_reported(self) -> None:
+        for old, new in (("delta_yaw", "turn"), ("delta_pitch", "target_yaw"),
+                         ("delta_distance", "turn_speed")):
+            with self.subTest(field=new), self.assertRaisesRegex(ValueError, "Conflicting camera trace fields"):
+                regression.fingerprint(self.camera_trace({old: 1, new: 2}))
+
     def test_configurations_that_disagree_are_reported(self) -> None:
         same = regression.fingerprint(trace(120))
         other = regression.fingerprint(trace(120, change_at=50))
@@ -223,6 +250,7 @@ class ReplayRunTests(unittest.TestCase):
         traces = itertools.cycle(events)
 
         def run(command: list[str], **kwargs) -> types.SimpleNamespace:
+            self.assertIn("--trace-frames", command)
             text = next(traces)
             for _ in range(runs):
                 self.counter += 1

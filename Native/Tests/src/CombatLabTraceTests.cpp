@@ -31,6 +31,7 @@
 #include "Diagnostics/PlayerObservation.hpp"
 #include "Diagnostics/SceneTrace.hpp"
 #include "Event/ScriptVmLiveState.hpp"
+#include "Field/CameraLiveState.hpp"
 #include "Field/Collision.hpp"
 #include "Field/Gimmicks.hpp"
 #include "Field/Interactions.hpp"
@@ -58,6 +59,8 @@ using VS::Battle::kActionTypeItem;
 using VS::Battle::kActionTypeSpell;
 
 namespace {
+namespace event = VS::Event;
+
 struct TraceScope {
   std::filesystem::path parent =
       std::filesystem::temp_directory_path() /
@@ -119,8 +122,9 @@ VS::Game::EncounterState SampleState() {
 nlohmann::json FlushedFrame(TraceScope& scope,
                             const VS::Game::EncounterState& state,
                             bool player_observations = false) {
-  VS::combat_lab::Trace trace(scope.parent, "combat-lab", {},
-                              player_observations);
+  VS::combat_lab::Trace trace(
+      scope.parent, "combat-lab", {},
+      {.frame_logging = true, .player_observations = player_observations});
   scope.run = trace.Directory();
   scope.events = scope.run / "events.jsonl";
   scope.log = scope.run / "session.log";
@@ -144,19 +148,24 @@ nlohmann::json FlushedFrame(TraceScope& scope,
 void CheckSceneCommand(const nlohmann::json& record, std::uint64_t command) {
   const auto& captured = record.at("data");
   CHECK(record.at("tick") == 73);
-  CHECK(captured.at("command") == command);
-  CHECK(captured.at("event") == 80);
-  CHECK(captured.at("source") == 2);
-  CHECK(captured.at("thread") == 3);
-  CHECK(captured.at("script_offset") == 16);
-  CHECK(captured.at("encoded_size") == 10);
-  CHECK(captured.at("opcode") == 128);
-  CHECK(captured.at("operands") ==
-        nlohmann::json::array({129, 130, 131, 132, 133, 134, 135, 136, 137}));
+  CHECK(captured ==
+        nlohmann::json(
+            {{"schema", 2},
+             {"command", command},
+             {"event", 80},
+             {"source", 2},
+             {"thread", 3},
+             {"region", "door_events"},
+             {"script_offset", 16},
+             {"generation", 0x100000001ULL},
+             {"encoded_size", 10},
+             {"opcode", 128},
+             {"skip_state", 0},
+             {"operands", {129, 130, 131, 132, 133, 134, 135, 136, 137}}}));
 }
 
 void CheckSceneRecords(const TraceScope& scope, std::uint64_t command,
-                       std::int64_t branch_address) {
+                       event::ScriptLocation target) {
   std::ifstream stream(scope.events);
   std::string line;
   std::vector<nlohmann::json> records;
@@ -174,9 +183,14 @@ void CheckSceneRecords(const TraceScope& scope, std::uint64_t command,
         nlohmann::json(
             {{"flag", 180}, {"before", 7}, {"after", 9}, {"changed", true}}));
   CHECK(records[2].at("data").at("changed") == false);
-  CHECK(records[3].at("data").at("command") == command);
-  CHECK(records[3].at("data").at("result") == branch_address);
-  CHECK(records[3].at("data").at("flow") == "branch");
+  CHECK(records[3].at("data") ==
+        nlohmann::json({{"schema", 2},
+                        {"command", command},
+                        {"flow", "jump_to"},
+                        {"target",
+                         {{"region", "subroutine"},
+                          {"offset", target.offset},
+                          {"generation", target.generation}}}}));
   std::ifstream text_stream(scope.log);
   const std::string text((std::istreambuf_iterator<char>(text_stream)), {});
   CHECK(text.find("event-command") != std::string::npos);
@@ -267,13 +281,79 @@ void CheckVerificationScriptRecords(const std::filesystem::path& run,
 }
 }  // namespace
 
+TEST_CASE("Ordinary diagnostics retain messages without frame snapshots",
+          "[diagnostics][trace][frame-logging]") {
+  TraceScope scope;
+  VS::Game::GameplayTrace trace(scope.parent);
+  scope.run = trace.Directory();
+  scope.events = scope.run / "events.jsonl";
+  scope.log = scope.run / "session.log";
+  VS::Core::LogDebug("combat.test", "action retained without frame logging");
+  trace.Frame(42, {}, SampleState());
+  trace.Flush();
+  const auto records = ReadTraceRecords(scope.events);
+  CHECK_FALSE(trace.FramesEnabled());
+  CHECK_FALSE(trace.Failed());
+  CHECK(CountCategory(records, "frame") == 0);
+  CHECK(CountCategory(records, "engine") == 1);
+  CHECK(records.back().at("data").at("message") ==
+        "action retained without frame logging");
+  std::ifstream input(scope.log);
+  const std::string text((std::istreambuf_iterator<char>(input)), {});
+  CHECK(text.find("action retained without frame logging") !=
+        std::string::npos);
+}
+
+TEST_CASE("Frame opt-ins and diagnostic workflows retain snapshots",
+          "[diagnostics][trace][frame-logging]") {
+  for (const auto* flag :
+       {"--trace-frames", "--verification-log", "--player-observations",
+        "--sequence", "--door-transitions", "--trace-effect-paths"}) {
+    CAPTURE(flag);
+    const std::array arguments{"host", flag};
+    TraceScope scope;
+    VS::Game::GameplayTrace trace(
+        scope.parent, "combat-lab", {},
+        VS::Game::ChooseTraceOptions(static_cast<int>(arguments.size()),
+                                     arguments.data()));
+    scope.run = trace.Directory();
+    scope.events = scope.run / "events.jsonl";
+    scope.log = scope.run / "session.log";
+    trace.Frame(42, {}, {});
+    CHECK(trace.FramesEnabled());
+    CHECK_FALSE(trace.Failed());
+    const auto records = ReadTraceRecords(scope.events);
+    CHECK(CountCategory(records, "frame") == 1);
+    CHECK(records.front().at("data").at("frame_logging") == true);
+  }
+}
+
+TEST_CASE("A tick budget and scripted input do not enable frame logging",
+          "[diagnostics][trace][frame-logging]") {
+  const std::array arguments{"host", "--scripted", "--frames", "600"};
+  TraceScope scope;
+  VS::Game::GameplayTrace trace(
+      scope.parent, "desktop", {},
+      VS::Game::ChooseTraceOptions(static_cast<int>(arguments.size()),
+                                   arguments.data()));
+  scope.run = trace.Directory();
+  scope.events = scope.run / "events.jsonl";
+  scope.log = scope.run / "session.log";
+  trace.Frame(42, {}, SampleState());
+  trace.Flush();
+  const auto records = ReadTraceRecords(scope.events);
+  CHECK(CountCategory(records, "frame") == 0);
+  CHECK(records.front().at("data").at("frame_logging") == false);
+}
+
 TEST_CASE(
     "Verification logs retain source evidence without duplicate run frames",
     "[diagnostics][trace][verification-log]") {
   TraceScope scope;
   std::filesystem::path script_path;
   {
-    VS::Game::GameplayTrace trace(scope.parent, "combat-lab", {}, false, true);
+    VS::Game::GameplayTrace trace(scope.parent, "combat-lab", {},
+                                  {.verification_log = true});
     scope.run = trace.Directory();
     scope.events = scope.run / "events.jsonl";
     scope.log = scope.run / "session.log";
@@ -281,10 +361,12 @@ TEST_CASE(
     scope.directories.push_back(script_path);
     scope.files.push_back(script_path / "events.jsonl");
     const std::array<std::uint8_t, 4> instruction{128, 1, 2, 3};
-    const auto command =
-        VS::Game::RecordSceneCommand(80, 0, 0, instruction.data(),
-                                     instruction.data(), instruction.size(), 0);
-    VS::Game::RecordSceneResult(command, 2);
+    const auto command = VS::Game::RecordSceneCommand(
+        80, event::EventSource::kEventFile,
+        {instruction, {event::ScriptRegion::kEventScript, 0, 1}, 0},
+        instruction.size(), event::CutsceneSkip::kNone);
+    VS::Game::RecordSceneResult(
+        command, event::ScriptFlow::Of(event::ScriptFlowKind::kFinish));
     VS::Game::RecordScriptFlagWrite(180, 0, 1);
     VS::Core::LogTrace("rng", "unneeded per-draw trace");
     VS::Core::LogDebug("event-step", "duplicate instruction text");
@@ -328,7 +410,9 @@ TEST_CASE("Verification logs preserve player root frames and all error gates",
   TraceScope scope;
   std::filesystem::path script_path;
   {
-    VS::Game::GameplayTrace trace(scope.parent, "combat-lab", {}, true, true);
+    VS::Game::GameplayTrace trace(
+        scope.parent, "combat-lab", {},
+        {.player_observations = true, .verification_log = true});
     scope.run = trace.Directory();
     scope.events = scope.run / "events.jsonl";
     scope.log = scope.run / "session.log";
@@ -351,7 +435,8 @@ TEST_CASE("Verification logs retain native boot transition receipts",
   TraceScope scope;
   std::filesystem::path script_path;
   {
-    VS::Game::GameplayTrace trace(scope.parent, "combat-lab", {}, false, true);
+    VS::Game::GameplayTrace trace(scope.parent, "combat-lab", {},
+                                  {.verification_log = true});
     scope.run = trace.Directory();
     scope.events = scope.run / "events.jsonl";
     scope.log = scope.run / "session.log";
@@ -382,26 +467,31 @@ TEST_CASE(
       script[16 + index] = static_cast<std::uint8_t>(index + 128);
     }
     std::uint64_t command = 0;
-    constexpr std::int64_t kBranchAddress = 0x7fff12345678LL;
+    constexpr event::ScriptLocation kTarget{event::ScriptRegion::kSubroutine,
+                                            72, 0x100000002ULL};
     {
       VS::Game::GameplayTrace trace(scope.parent, host);
       scope.run = trace.Directory();
       scope.events = scope.run / "events.jsonl";
       scope.log = scope.run / "session.log";
       VS::Core::SetLogTick(73);
-      command = VS::Game::RecordSceneCommand(80, 2, 3, script.data() + 16,
-                                             script.data(), 10, 0);
+      command = VS::Game::RecordSceneCommand(
+          80, event::EventSource::kDoorScript,
+          {std::span(script).subspan(16),
+           {event::ScriptRegion::kDoorEvents, 16, 0x100000001ULL},
+           3},
+          10, event::CutsceneSkip::kNone);
       CHECK(command != 0);
       script.fill(0);
       VS::Game::RecordScriptFlagWrite(180, 7, 9);
       VS::Game::RecordScriptFlagWrite(180, 9, 9);
-      VS::Game::RecordSceneResult(command, kBranchAddress);
-      trace.Frame(73, {}, SampleState());
+      VS::Game::RecordSceneResult(command, event::ScriptFlow::JumpTo(kTarget));
+      trace.Flush();
       CHECK(trace.Errors() == 0);
       CHECK_FALSE(trace.Failed());
       VS::Core::SetLogTick(0);
     }
-    CheckSceneRecords(scope, command, kBranchAddress);
+    CheckSceneRecords(scope, command, kTarget);
   }
 }
 
@@ -417,9 +507,10 @@ TEST_CASE(
     scope.events = scope.run / "events.jsonl";
     scope.log = scope.run / "session.log";
     VS::Core::SetLogLevel(VS::Core::LogLevel::Info);
-    CHECK(VS::Game::RecordSceneCommand(80, 2, 0, nullptr, nullptr, 999, 0) ==
-          0);
-    VS::Game::RecordSceneResult(0, 3);
+    CHECK(VS::Game::RecordSceneCommand(80, event::EventSource::kDoorScript, {},
+                                       999, event::CutsceneSkip::kNone) == 0);
+    VS::Game::RecordSceneResult(
+        0, event::ScriptFlow::Of(event::ScriptFlowKind::kStop));
     VS::State::SetLiveScriptFlag(180, 17);
     CHECK(VS::State::LiveScriptFlag(180) == 17);
     VS::State::SetLiveScriptFlag(180, saved_flag);
@@ -443,9 +534,12 @@ TEST_CASE("Invalid scene diagnostic records report explicit failures",
   scope.run = trace.Directory();
   scope.events = scope.run / "events.jsonl";
   scope.log = scope.run / "session.log";
-  std::uint8_t opcode = 3;
-  CHECK(VS::Game::RecordSceneCommand(80, 2, 0, nullptr, nullptr, 1, 0) == 0);
-  CHECK(VS::Game::RecordSceneCommand(80, 2, 0, &opcode, &opcode, 257, 0) == 0);
+  const std::array<std::uint8_t, 1> opcode{3};
+  CHECK(VS::Game::RecordSceneCommand(80, event::EventSource::kDoorScript, {}, 1,
+                                     event::CutsceneSkip::kNone) == 0);
+  CHECK(VS::Game::RecordSceneCommand(80, event::EventSource::kDoorScript,
+                                     {opcode, {}, 0}, 257,
+                                     event::CutsceneSkip::kNone) == 0);
   CHECK(trace.Errors() == 2);
   VS::Core::LogWrite(VS::Core::LogLevel::Debug, "event-command", "not-json");
   CHECK(trace.Failed());
@@ -669,7 +763,8 @@ TEST_CASE(
     "[combat][encounter][sequence][trace]") {
   TraceScope scope;
   {
-    VS::combat_lab::Trace trace(scope.parent);
+    VS::combat_lab::Trace trace(scope.parent, "combat-lab", {},
+                                {.frame_logging = true});
     scope.run = trace.Directory();
     scope.events = scope.run / "events.jsonl";
     scope.log = scope.run / "session.log";
@@ -732,7 +827,8 @@ TEST_CASE("Desktop diagnostics retain Lab frame data and a live text mirror",
   const auto mirror = scope.parent / "vs-native.log";
   scope.files.push_back(mirror);
   {
-    VS::Game::GameplayTrace trace(scope.parent, "desktop", mirror);
+    VS::Game::GameplayTrace trace(scope.parent, "desktop", mirror,
+                                  {.frame_logging = true});
     scope.run = trace.Directory();
     scope.events = scope.run / "events.jsonl";
     scope.log = scope.run / "session.log";
@@ -808,6 +904,7 @@ struct GameplayInspectionFixture {
   VS::test_support::BattleCatalogRoot catalogs;
   int saved_gameplay = VS::Boot::isGameplayActive;
   decltype(VS::Field::controlMode) saved_control = VS::Field::controlMode;
+  VS::Field::SphericalCamera saved_camera = VS::Field::sphericalCamera;
   decltype(VS::Battle::actionState) saved_action = VS::Battle::actionState;
   decltype(VS::Items::lootListHead) saved_loot = VS::Items::lootListHead;
   decltype(VS::Field::roomData.floor_triggers) saved_triggers =
@@ -874,6 +971,7 @@ struct GameplayInspectionFixture {
     VS::Boot::ResetGameplayInspection();
     VS::Boot::isGameplayActive = saved_gameplay;
     VS::Field::controlMode = saved_control;
+    VS::Field::sphericalCamera = saved_camera;
     VS::Battle::actionState = saved_action;
     VS::Items::lootListHead = saved_loot;
     VS::Field::roomData.floor_triggers = saved_triggers;
@@ -957,6 +1055,24 @@ TEST_CASE("Normal-game inspection observes scene models only in a ready field",
   VS::Boot::isGameplayActive = 0;
   VS::Boot::EncounterPollStop();
   CHECK_FALSE(VS::Game::InspectGameplay().ready);
+}
+
+TEST_CASE("Camera diagnostics name turn state target yaw and turn speed",
+          "[diagnostics][inspection]") {
+  GameplayInspectionFixture fixture;
+  VS::Boot::EncounterPollStop();
+  VS::Field::sphericalCamera.motion = {VS::Field::kTurningLeft, 1234, 31,
+                                       VS::Field::kFarZoom};
+  const auto scene =
+      VS::Game::InspectGameplayScene(VS::Game::InspectGameplay());
+  const auto& camera = scene.at("camera");
+  CHECK(camera.at("turn") == VS::Field::kTurningLeft);
+  CHECK(camera.at("target_yaw") == 1234);
+  CHECK(camera.at("turn_speed") == 31);
+  CHECK_FALSE(camera.contains("delta_yaw"));
+  CHECK_FALSE(camera.contains("delta_pitch"));
+  CHECK_FALSE(camera.contains("delta_distance"));
+  CHECK(VS::Field::sphericalCamera.motion.target_yaw == 1234);
 }
 
 TEST_CASE("Detailed log initialization rejects an unwritable mirror path",

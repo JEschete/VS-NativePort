@@ -571,16 +571,17 @@ build\Release\VS.Desktop.exe
 | `--scripted` | Ignore keyboard and gamepad (only `--press` input). |
 | `--fixed-frame-ticks <n>` | Combat Lab only: each frame-counter read advances by `n` units instead of reading the clock, so identical runs match. See [MODERNIZATION.md](MODERNIZATION.md). |
 | `--speed <n>` | Run `n` logical ticks per real tick (e.g. 8 to reach the title attract scenes, about tick 5300, quickly). |
-| `--log-level <level>` | Minimum severity: `trace`, `debug`, `info` (default), `warn`, `error`, or `off`. `off` suppresses all normal logging, including crash messages. Invalid/missing values fail startup. |
-| `--log-channels <names>` | Exact, case-sensitive comma-separated channels, without spaces; default `*` selects all. Filters trace/debug/info only; warnings/errors remain visible unless excluded by severity or `off`. |
-| `--player-observations` | Explicitly enable read-only external-player observations in detailed traces. Off by default in Desktop and Combat Lab; collectors live under Diagnostics, not normal gameplay inspection. The external [player runner](../Native/Player/README.md) supplies this flag itself. No inference or navigation policy runs in the game. |
+| `--log-level <level>` | Engine severity: `trace` (Debug default), `debug`, `info`, `warn`, `error`, `off`. Invalid/missing values fail startup. Structured frames are independent. |
+| `--log-channels <names>` | Case-sensitive comma-separated channels, no spaces; default `*`. Filters trace/debug/info, not warnings/errors. Severity still applies. |
+| `--trace-frames` | Per-tick snapshots and Trace-level frame markers; off by default. Helper: `-TraceFrames`. Screenshots and `--frames` do not enable it. |
+| `--verification-log` | Lighter Debug-level profile, including all frames and VM records. See [Logging](COMBAT_LAB.md#logging). |
+| `--player-observations` | Read-only player snapshots; implies frames. Off by default; the [player runner](../Native/Player/README.md) supplies it. No game-side inference. |
+| `--trace-effect-paths <first:last>` | Effect paths and frame context for a tick range. Requires `--speed 1`; incompatible with `--verification-log`. |
 | `--gpu-validation` / `--no-gpu-validation` | Request or refuse SDL GPU debug mode (driver validation layers); the last one given wins. Debug builds request it by default and Release builds do not, so Release timings and captures measure the shipping configuration. The state SDL actually reported (`off`, `on`, `partial`, `unavailable` or `unreported`) is logged in Debug, recorded as a `render.gpu` trace event and written to `capture.json` beside `--capture` frames. Combat Lab accepts the same flags and records the state in its run `manifest.json`. `tools\test\run_native.ps1` passes them with `-GpuValidation` / `-NoGpuValidation`. |
 
-Release `VS.Desktop` disables normal gameplay logs and detailed trace creation,
-including `vs-native.log` and `game-logs`. Logging options are validated but
-cannot enable Release logging; observation/verification logging requires a
-Debug build. Extractor/launcher setup output is separate and remains available
-for actionable first-run failures. Debug diagnostic behavior is unchanged.
+Release Desktop creates neither gameplay logs nor detailed traces. Logging options
+are validated but cannot enable them; frame/player/verification tracing needs Debug.
+Extractor/launcher setup failures still report actionable errors.
 
 Startup source checks keep a disposable `.cache\source-verification.json` under
 the selected data directory. Only original extracted sources use size/time/hash
@@ -634,8 +635,10 @@ instead of invoking the old card backend or writing a fabricated checkpoint.
 Do not use owner saves for replay tests or treat an empty-picker test as a
 successful gameplay round trip.
 
-Logs go to the console and `build\<Config>\vs-native.log` (truncated each run, including an empty log with `off`).
-Each line includes `[tick=N]`: zero is startup, otherwise the logical simulation tick, not elapsed wall time.
+Debug keeps `session.log` and `events.jsonl` in `build\Debug\game-logs\<run>\`, mirroring the current text log to
+`vs-native.log`. Console output is Warn/Error only. Tick and lifecycle/warning/error boundaries flush buffered
+logs even without frames. See [Logging](COMBAT_LAB.md#logging).
+`[tick=N]` is the logical tick (0 at startup), not wall time.
 For a local native-mix recording, set `VS_AUDIO_CAPTURE` to an absolute file path before launching.
 The file is raw **48,000 Hz, two-channel f32le** PCM submitted to SDL; it excludes the independently bound
 movie and XA sources. For example, `ffmpeg -f f32le -ar 48000 -ac 2 -i capture.f32 capture.wav` converts it for listening.
@@ -643,11 +646,12 @@ Remove the environment variable afterward. Captures and disc-derived assets must
 The current output is stereo or dual-mono, not 5.1. Native noise, preceding-voice FM and the original
 reverb presets are implemented; bit-exact console output and full-content listening parity remain unverified.
 For AI diagnosis use `--log-level debug --log-channels ai,actors,boot,input,content`.
-`--log-level trace --log-channels frame,trace` enables per-tick begin/end markers and printf-style trace sites;
-this is intentionally verbose. Disabled messages skip formatting. Ports can use `VS::Core::Debugf(channel, format, ...)`;
-`VS::Core::Tracef(channel, format, ...)` writes at trace level. Do not use `off` when collecting crash evidence.
-The capture helper accepts the same controls as `-LogLevel debug -LogChannels 'ai,actors,boot,input,content'`
-and fails on build/run errors, timeouts, logged crashes, or missing requested captures within the tick limit.
+For frame markers use `--trace-frames --log-level trace --log-channels frame,trace`.
+For VM diagnostics use Debug/Trace and include `event-command,event-result,state-flag`.
+Disabled messages skip formatting, not argument evaluation. Ports can use `VS::Core::Debugf(channel, format, ...)`;
+`VS::Core::Tracef(channel, format, ...)` writes at trace level. `off` suppresses engine crash messages.
+The capture helper defaults to Info; `-LogLevel`/`-LogChannels` override it. Build/run errors, timeouts,
+logged crashes and missing requested captures fail the run.
 
 **Today:** the original boot and title run (see Current state); the game reads `Native\data\` for its files, and
 the disc only to report its label. The title screen appears about 55 s after start; **Start (or Circle) skips the
