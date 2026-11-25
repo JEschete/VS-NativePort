@@ -165,7 +165,7 @@ This work belongs to #55 and #57.
 
 Zero is only an example, and the right answer depends on the site. PS1 `div` does not trap, but the original compiler often
 added its own check that raised an exception, so read the original assembly before choosing. `Fixed12` from
-[plan section 8.1](NATIVE_SOURCE_PORT_PLAN.md#81-why-c-answer-to-the-owners-question) is the natural long-term home.
+[plan section 8.1](plan/RETIREMENT_AND_CPP.md#81-why-c-answer-to-the-owners-question) is the natural long-term home.
 
 ### Reads that depended on luck: `UNINITIALIZED`, `RETURN-FALLOFF`, `OUT-OF-BOUNDS`, `UNSIZED-ARRAY`
 

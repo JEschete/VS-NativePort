@@ -361,7 +361,7 @@ build\Debug\VS.Extract.exe bestiary Native\data
   capacity are refused, not replaced with the original image.
   Its version/schema checks run when a background is loaded,
   so older data trees need this command even if they reach the title screen.
-  See [ASSET_PIPELINE.md §6.4.1](ASSET_PIPELINE.md#641-far-background-layouts)
+  See [ASSET_PIPELINE.md §6.4.1](pipeline/BACKGROUNDS.md#641-far-background-layouts)
   for the format, proven room bindings and remaining authoring gates.
 - Other successful conversion commands also add optional, informational `display_name`
   labels to native CSV/JSON/glTF metadata. For an existing tree, use `labels`:
@@ -392,7 +392,7 @@ build\Debug\VS.Extract.exe bestiary Native\data
   ordered CSV/text layers. Keep `catalogs\enemies\import\bestiary.json` for
   exact offline reconstruction. The shared text producer preserves the save
   contributor; forcing bestiary does not replace save prompts. See
-  [ASSET_PIPELINE.md §4.3](ASSET_PIPELINE.md#43-native-encyclopedia-definitions-499500).
+  [ASSET_PIPELINE.md §4.3](pipeline/GAMEPLAY_CATALOGS.md#43-native-encyclopedia-definitions-499500).
 - The same `authoring` command upgrades `znd-tables` version 1 to version 2:
   named enemy classes/materials, meaningful type/class/affinity columns and
   explicitly indexed DP splash percentages. Old headers remain readable through

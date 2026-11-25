@@ -89,6 +89,42 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ledgers", "ledgers", "{B9B1
 		Docs\ledgers\VERIFY_LEDGER.csv = Docs\ledgers\VERIFY_LEDGER.csv
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipeline", "pipeline", "{87792B9A-088B-545B-B0C4-8E4E24784836}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\pipeline\ACTOR_ANIMATION.md = Docs\pipeline\ACTOR_ANIMATION.md
+		Docs\pipeline\AUDIO_VIDEO.md = Docs\pipeline\AUDIO_VIDEO.md
+		Docs\pipeline\BACKGROUNDS.md = Docs\pipeline\BACKGROUNDS.md
+		Docs\pipeline\CHARACTER_MODELS.md = Docs\pipeline\CHARACTER_MODELS.md
+		Docs\pipeline\FORMAT_MAP.md = Docs\pipeline\FORMAT_MAP.md
+		Docs\pipeline\GAMEPLAY_CATALOGS.md = Docs\pipeline\GAMEPLAY_CATALOGS.md
+		Docs\pipeline\IMAGES.md = Docs\pipeline\IMAGES.md
+		Docs\pipeline\MANIFEST_AND_TRACKING.md = Docs\pipeline\MANIFEST_AND_TRACKING.md
+		Docs\pipeline\OUTPUT_AND_TABLES.md = Docs\pipeline\OUTPUT_AND_TABLES.md
+		Docs\pipeline\ROOMS_AND_ZONES.md = Docs\pipeline\ROOMS_AND_ZONES.md
+		Docs\pipeline\TEXT.md = Docs\pipeline\TEXT.md
+		Docs\pipeline\VALIDATION.md = Docs\pipeline\VALIDATION.md
+		Docs\pipeline\WEAPONS_AND_ARCHETYPES.md = Docs\pipeline\WEAPONS_AND_ARCHETYPES.md
+		Docs\pipeline\WORKSHOP_RECIPES.md = Docs\pipeline\WORKSHOP_RECIPES.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "plan", "plan", "{72043A9D-18E6-5EDB-B7C7-DD7EB88F0A52}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\plan\DATA_CONTRACTS.md = Docs\plan\DATA_CONTRACTS.md
+		Docs\plan\EC_REGISTER.md = Docs\plan\EC_REGISTER.md
+		Docs\plan\EC_REGISTER_2.md = Docs\plan\EC_REGISTER_2.md
+		Docs\plan\EC_REGISTER_3.md = Docs\plan\EC_REGISTER_3.md
+		Docs\plan\LAYOUT.md = Docs\plan\LAYOUT.md
+		Docs\plan\LEDGERS.md = Docs\plan\LEDGERS.md
+		Docs\plan\PHASE1_HISTORY.md = Docs\plan\PHASE1_HISTORY.md
+		Docs\plan\RETIREMENT_AND_CPP.md = Docs\plan\RETIREMENT_AND_CPP.md
+		Docs\plan\ROADMAP.md = Docs\plan\ROADMAP.md
+		Docs\plan\SYSTEMS.md = Docs\plan\SYSTEMS.md
+		Docs\plan\SYSTEMS_2.md = Docs\plan\SYSTEMS_2.md
+		Docs\plan\VERIFICATION_AND_RISKS.md = Docs\plan\VERIFICATION_AND_RISKS.md
+		Docs\plan\WORK_PACKAGES.md = Docs\plan\WORK_PACKAGES.md
+		Docs\plan\WORK_PACKAGES_2.md = Docs\plan\WORK_PACKAGES_2.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{225CA01A-31F1-5259-BE2E-F958BC82010A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tools", "tools\scaffold\projects\tools.vcxproj", "{1E4BA3C1-448D-5A8F-B9D5-0B541FE2C2CE}"
@@ -155,5 +191,7 @@ Global
 		{46E34AD5-0AA2-5F6C-BFBD-C964BE74A2CF} = {F6F3FF77-BB1D-5D33-9C8A-5256501ED7B4}
 		{D7208116-D3B2-5B74-8045-C6DC531C788F} = {46E34AD5-0AA2-5F6C-BFBD-C964BE74A2CF}
 		{B9B1CF7E-C648-5E57-9EEB-347208BDD4B1} = {46E34AD5-0AA2-5F6C-BFBD-C964BE74A2CF}
+		{87792B9A-088B-545B-B0C4-8E4E24784836} = {46E34AD5-0AA2-5F6C-BFBD-C964BE74A2CF}
+		{72043A9D-18E6-5EDB-B7C7-DD7EB88F0A52} = {46E34AD5-0AA2-5F6C-BFBD-C964BE74A2CF}
 	EndGlobalSection
 EndGlobal

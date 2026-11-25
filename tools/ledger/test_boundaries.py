@@ -29,7 +29,7 @@ LEGACY_DIRECTORIES = """    <ClCompile Include="{path}">
 class Fixture:
     def __init__(self, root: Path) -> None:
         self.root = root
-        self.write("Docs/NATIVE_SOURCE_PORT_PLAN.md", PLAN)
+        self.write("Docs/plan/LAYOUT.md", PLAN)
         (root / "Docs" / "ledgers").mkdir()
         self.write("Native/Game/include/Battle/Targeting.hpp", "#pragma once\n")
         self.write("Native/Engine/include/Render/Font.hpp", "#pragma once\n")
@@ -83,7 +83,7 @@ class BoundaryTests(unittest.TestCase):
             ("Native/Engine/src/Render/Text.cpp", "Engine.Render", "Game", "remaining"),
         ])
         self.assertEqual(self.fixture.rules(), [])
-        plan = (self.fixture.root / "Docs/NATIVE_SOURCE_PORT_PLAN.md").read_text(encoding="utf-8")
+        plan = (self.fixture.root / "Docs/plan/LAYOUT.md").read_text(encoding="utf-8")
         self.assertIn("**0 of 4 crossing includes resolved**, 4 remaining in 3 files.", plan)
 
     def test_a_new_crossing_fails_and_sync_does_not_adopt_it(self) -> None:

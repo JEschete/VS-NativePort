@@ -34,7 +34,7 @@ OUTPUT = {
 class Fixture:
     def __init__(self, root: Path) -> None:
         self.root = root
-        self.write("Docs/ASSET_PIPELINE.md", f"# Pipeline\n\n{content.SUMMARY_BEGIN}\n\n{content.SUMMARY_END}\n")
+        self.write("Docs/pipeline/MANIFEST_AND_TRACKING.md", f"# Pipeline\n\n{content.SUMMARY_BEGIN}\n\n{content.SUMMARY_END}\n")
         self.write("Native/Content/include/Content/ConversionManifest.hpp",
                    'inline constexpr std::array kRequiredConverters{\n'
                    '    ConverterVersion{.name = "tim-png", .version = 1},\n};\n')
@@ -205,7 +205,7 @@ class ContentLedgerTests(unittest.TestCase):
         self.fixture.data([*FILES, ("MAP/MAP002.MPD", 4096, "raw")], [OUTPUT])
         self.assertEqual(self.fixture.rules(), ["ledger-stale"])
         content.sync(self.fixture.root)
-        self.fixture.write("Docs/ASSET_PIPELINE.md",
+        self.fixture.write("Docs/pipeline/MANIFEST_AND_TRACKING.md",
                            f"# Pipeline\n\n{content.SUMMARY_BEGIN}\n\nold\n\n{content.SUMMARY_END}\n")
         self.assertEqual(self.fixture.rules(), ["tracker-stale"])
 

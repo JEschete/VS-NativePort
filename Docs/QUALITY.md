@@ -314,7 +314,7 @@ page-space, SPU-register reset, GTE-state and scratchpad replacements is reporte
 `deferred_replacement_style`. The exact paths are in `RETIRING_NATIVE`; owned C
 gameplay code is not automatically a replacement exception. Safety and compiler
 diagnostics from replacement code remain checked. See the
-[EC register](NATIVE_SOURCE_PORT_PLAN.md#15-emulation-compatibility-register).
+[EC register](plan/EC_REGISTER.md#15-emulation-compatibility-register).
 
 Existing `VS` subsystem namespaces and decomp-linked C exports/types retain their
 published names. Local identifiers and private C++ state use Google naming.

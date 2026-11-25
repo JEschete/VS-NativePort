@@ -3,7 +3,7 @@
   python tools\\ledger\\boundaries.py --sync    mark crossings that are gone resolved, refresh the tracker
   python tools\\ledger\\boundaries.py --check   exit 1 on a new or returned crossing, a stale ledger or a stale project
 
-Docs\\NATIVE_SOURCE_PORT_PLAN.md section 3 defines the matrix: Game owns domain state, decisions and snapshots; Engine
+Docs\\plan\\LAYOUT.md (plan section 3) defines the matrix: Game owns domain state, decisions and snapshots; Engine
 owns generic mechanisms; Content returns decoded values or handles. Each Engine system, Content and Game is a layer,
 and ALLOWED lists the layers a layer may include. Docs\\ledgers\\BOUNDARY_LEDGER.csv has a row for every quoted include
 in Native\\Engine or Native\\Content that crosses the matrix: `remaining` while the include is there and `resolved` once
@@ -141,7 +141,7 @@ def ledger_path(root: Path) -> Path:
 
 
 def tracker_path(root: Path) -> Path:
-    return root / "Docs" / "NATIVE_SOURCE_PORT_PLAN.md"
+    return root / "Docs" / "plan" / "LAYOUT.md"
 
 
 def summary(rows: list[dict[str, str]]) -> str:

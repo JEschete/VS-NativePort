@@ -2,7 +2,7 @@
 
 Function promotion (#276) is complete. This report retains the per-function
 promotion/regression records and measured compatibility debt; completion of
-[plan section 8.2](NATIVE_SOURCE_PORT_PLAN.md#82-promotion-checklist-c--cpp-sets-cpp--yes)
+[plan section 8.2](plan/RETIREMENT_AND_CPP.md#82-promotion-checklist-sets-cpp--yes)
 does not establish complete gameplay verification or retirement of live bindings.
 
 [MODERNIZATION_LEDGER.csv](ledgers/MODERNIZATION_LEDGER.csv) has one row per port target. Roadmap issues in #217 describe

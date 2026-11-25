@@ -4,8 +4,9 @@
   python tools\\ledger\\content.py --check   exit 1 on an invalid or stale ledger, unbacked round-trip evidence or a
                                            stale summary
 
-Docs\\ASSET_PIPELINE.md section 9 and plan section 4.5 define the ledger: one row per disc file with its kind, decoder,
-converter, outputs, round-trip result and status. --sync reads Native\\data\\files.tsv (every disc file) and
+ASSET_PIPELINE section 9 (Docs\\pipeline\\MANIFEST_AND_TRACKING.md) and plan section 4.5 define the ledger: one row
+per disc file with its kind, decoder, converter, outputs, round-trip result and status. --sync reads
+Native\\data\\files.tsv (every disc file) and
 Native\\data\\manifest.json (the registered conversions), so it needs an extracted disc. A file that is the source of a
 whole-file manifest output is `converted`; registered section-only imports remain `unconverted` with a precise
 partial note. A placeholder (no bytes, or one zero byte), or a file section 6.1 drops, is `skipped`
@@ -13,7 +14,7 @@ with its reason;
 every other file is `unconverted`, noting the issue that converts it. A converted row has `round_trip=pass` only when
 every disc-corpus test named for its converter in EVIDENCE is a Catch2 TEST_CASE cited by a passing VERIFY_LEDGER
 record. --check needs no disc: it checks every row against these rules, the evidence and the runtime's converter list,
-and the summary block in ASSET_PIPELINE.md; with extracted data present it also fails on a stale ledger.
+and the summary block in ASSET_PIPELINE section 9; with extracted data present it also fails on a stale ledger.
 Tracked in issue #503.
 """
 from __future__ import annotations
@@ -191,7 +192,7 @@ def ledger_path(root: Path) -> Path:
 
 
 def tracker_path(root: Path) -> Path:
-    return root / "Docs" / "ASSET_PIPELINE.md"
+    return root / "Docs" / "pipeline" / "MANIFEST_AND_TRACKING.md"
 
 
 def data_root(root: Path) -> Path:

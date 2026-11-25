@@ -1,0 +1,122 @@
+# Native Source Port Plan: Ledgers
+
+[Plan index](../NATIVE_SOURCE_PORT_PLAN.md)
+
+## 4. Ledgers: the source of truth
+
+The owner requires a very detailed list of what is done and not done; the ledgers are that list. They were generated
+from the decomp, so nothing is missed, and their status is filled by hand or by agents. The first generator,
+`tools\ledger\build_ledgers.py`, is legacy: re-running it renumbers function IDs and rewrites the catalogs, so never
+run it to refresh status. Status columns are maintained in place and checked by `tools\ledger\gates.py --check`.
+
+Numeric counts below are historical reference-inventory snapshots, not current completion totals. See
+[ledgers/SUMMARY.md](../ledgers/SUMMARY.md) for the reconciled report of the persisted ledgers and ownership registry,
+including stale or unrecorded status markers. A source rescan is not a status refresh; preserve stable IDs, merged
+fields and local edits before any intentional regeneration. The EC register (§15) records subsystem architecture debt
+that function/SDK name counts alone cannot detect.
+
+### 4.1 FUNCTION_CATALOG.csv (master list)
+
+Historical inventory: 3,679 game rows plus 442 excluded SDK rows (C functions, effect template instantiations,
+asm-only, header, template-body and `INCLUDE_ASM` rows). Its generic names describe original decomp symbols, not
+current native names.
+
+| Column | Meaning |
+|---|---|
+| `id` | Stable row ID |
+| `overlay`, `unit`, `file`, `line` | Where it lives in the decomp |
+| `name`, `kind`, `generic` | Decomp name, row kind, still `func_`? |
+| `lines`, `callers`, `callees` | Size and call graph (for ordering work) |
+| `proposed_system`, `basis` | Auto-classification and why (api / name / unit / unit-low / none) |
+| `copy` | `yes` / `template` (becomes data + shared code) / `asm` (rewrite from asm + Ghidra) |
+| `sdk_apis` | SDK symbols it calls (links to the SDK ledger) |
+| `hw_reg … inline_asm` | Hazard counts (scratchpad, KSEG literals, 24-bit OT, pointer casts, inline asm) |
+| `final_name` | Native C++ name (`Namespace::Function` or `Class::Method`) |
+| `final_location` | `Native\…\File.cpp` |
+| `purpose` | One-sentence description of what it does |
+| `copied` … `verified` | Status (below) |
+| `notes` | Free text |
+
+**Status lifecycle (definition of done per column):**
+
+| Column | `yes` means |
+|---|---|
+| `copied` | The function body exists at `final_location` with a provenance comment (`stub` = assembly-only, a `VS::Core::RecordUnported` stub with the real prototype until ported) |
+| `compiles` | It builds in Debug and Release x64 with zero errors |
+| `named` | `final_name` is set and used in code, all parameters and locals have meaningful names, no `argN`/`varN`/`unk` remain |
+| `understood` | `purpose` is filled, and every struct field it touches is named in the type ledger |
+| `modernized` | It has no direct or indirect hardware-shaped bridge dependency, no hazards, no globals owned by another system, and uses typed data; evidence closes its applicable EC requirements |
+| `cpp` | Derived, not hand-set: `x` only when every §8.2 step in [CPP_PROMOTION.csv](../ledgers/CPP_PROMOTION.csv) verifies and no consumer of the old symbol remains; `wip` while a record exists but is incomplete; blank with no record |
+| `verified` | A reproducible test, canonical-state replay or reference comparison passes; a record in [VERIFY_LEDGER.csv](../ledgers/VERIFY_LEDGER.csv) holds revision, input/assets, expected result and artifact, including any remaining compatibility dependency |
+
+`tools\ledger\gates.py --check` enforces these definitions and the ownership registry in CI; see
+[QUALITY.md](../QUALITY.md#separately-reported-gates). A marker is a stored claim, not a fresh build or run.
+
+### 4.2 SDK_API_LEDGER.md
+
+Game code references **287 SDK symbols**, grouped by library with use counts, files and overlays. Strategy totals:
+**R = 86, T = 149, D = 52**.
+
+| Library | Symbols | Uses | Default strategy | Replacement target |
+|---|---:|---:|---|---|
+| libgpu | 78 | 1,742 | T | `Engine\Render` |
+| libgte | 41 | 1,489 | R | `VS::Math` |
+| libpad | 25 | 544 | R | `Engine\Input` |
+| crt | 7 | 264 | R | `<cstring>`, `<algorithm>` |
+| libetc | 9 | 146 | R/D | `FrameClock` (VSync), deleted callbacks |
+| libds | 33 | 98 | T | `VS.Content` AsyncLoader |
+| libspu | 36 | 78 | T | `Engine\Audio` |
+| libapi | 24 | 77 | T/D | `Engine\Save` events, deleted kernel calls |
+| libc | 2 | 33 | R | `VS::Core::Random` |
+| kernel | 11 | 25 | D | (removed) |
+| libpress | 13 | 15 | T | `Engine\Movie` |
+| libcard | 4 | 6 | T | `Engine\Save` |
+| libsn / libsnd / libcd | 1 / 2 / 1 | 2 / 2 / 1 | T/D | `VS.Content` / `Engine\Audio` |
+
+Status legend: `[ ]` not started, `[A]` shim exists, `[M]` all call sites migrated, `[x]` shim deleted and 0 uses.
+
+### 4.3 SOURCE_FILE_LEDGER.md (retired)
+
+Retired. It was a generated per-file checklist of the 440 decomp files; it was never updated after generation and has
+been removed ([last version](https://github.com/JEschete/VS-NativePort/blob/8db4f46e292aa19c382807757786d6f07f65c71c/Docs/ledgers/SOURCE_FILE_LEDGER.md)).
+Per-function status lives in `FUNCTION_CATALOG.csv` and `CPP_PROMOTION.csv`, behavior evidence in `VERIFY_LEDGER.csv`.
+The completed #276 scheduling snapshots (`PROMOTION_PLAN.csv`, `REMAINING_FUNCTIONS.csv`) were retired in #440 and
+remain in [Git history](https://github.com/JEschete/VS-NativePort/tree/d654bad79/Docs/ledgers); they are not work queues.
+
+### 4.4 DATA_LEDGER.csv
+
+Generated by `tools\ledger\build_symbol_ledgers.py`; since D24 removed its pinned index input, this ledger and
+TYPE/FIELD_LEDGER are maintained in place rather than regenerated. There is one row (`G#####`) per **storage
+identity**, not per spelling: a file `static`, a function-local `static`, an overlay's `D_` extern and a shared-header
+table instantiated in several overlays are separate storage, even when they share a name. Each row carries the
+generator's `proposed_disposition` and `proposed_system` (the majority system of its referencing functions); the naming
+pass fills `disposition`, `final_name`, `final_location`, `purpose` and `confidence`
+([NAMING_CONVENTIONS.md](../NAMING_CONVENTIONS.md) §8). Dispositions:
+
+| Disposition | Meaning |
+|---|---|
+| `catalog` | Game content (item stats, enemy tables, text, effect params). VS.Extract converts it from the user's disc into a schema'd catalog in `Native\data\catalogs\` with a decoder generated from the decomp struct ([ASSET_PIPELINE.md](../ASSET_PIPELINE.md) §4). It is **never committed**. |
+| `constexpr` | Engine constants (lookup tables, sin tables, layout constants), re-expressed as `constexpr` in code, either computed or proven equal by a test against the disc bytes. |
+| `state` | Runtime mutable state; it becomes a member of the owning system's state struct. |
+| `asset` | A reference to graphics/audio; it becomes an `AssetId`/handle into `Native\data\`. |
+| `drop` | Hardware buffers, OTs, packet pools and anything else with no native meaning. |
+
+### 4.5 Ledgers still to be added
+
+| Ledger | Generated from | Purpose |
+|---|---|---|
+| `TYPE_LEDGER.csv` ✅ | `build_symbol_ledgers.py` over every struct/union/enum/typedef | One row (`T#####`) per distinct type layout (typedef aliases folded, repeated `*_t.h` copies deduplicated, differing layouts of one name flagged in `layouts`; upstream layouts merged via `UPSTREAM_LAYOUTS.csv`). Final C++ name, owner system, `role` (Def / Instance / State / OnDisc / Packet / Enum), field naming % |
+| `FIELD_LEDGER.csv` ✅ | same | One row (`T#####.NNN`) per field or enumerator, seeded with the naming agents' `fields:` hints; fields from upstream carry `layout:upstream` |
+| `CONTENT_LEDGER.csv` ✅ | `tools\ledger\content.py --sync` over `Native\data\files.tsv` and the conversion manifest | Every disc file → kind → decoder → converter → output → round-trip evidence → status, with the issue that converts each unconverted kind; zero-byte and one-byte placeholder files are `n/a` (ASSET_PIPELINE §9, #503, #504) |
+| `VERIFY_LEDGER.csv` ✅ | hand + replay system | One record per verification: covered IDs, kind, references, revision, configurations, command, dirty state, expected result, outcome and limits. Every `verified=x` must resolve to a passing record; a record is a reference, not a fresh run |
+| `CPP_PROMOTION.csv` ✅ | `gates.py --sync` + reviewed claims | One row per owned C++ function with one column per §8.2 step; the catalog's `cpp` column derives from it |
+| `EC_BRIDGES.csv` ✅ | hand | Bridge headers and sources per EC ID; consumer counts in the gate report come from the include graph |
+| `GATE_SLICES.csv` ✅ | hand, measured by `gates.py` | Migrated slices with their old bridges and old-bridge consumer counts before and after |
+| `SHIM_USES` (auto) | `tools\ledger\scan_native.py` over `Native\` | Fills `copied`/`compiles` and the live shim use counts automatically; CI fails if the ledgers disagree with the code |
+
+### 4.6 Coverage facts (verified)
+
+- The disc has 331 code files (`*.PRG`, `PLG*.BIN`, `EFFPURGE.BIN`): **91** have decomp source, **48** are
+  byte-identical copies of a covered plugin and **192** are **zero-byte placeholders** (including `MENUA.PRG`).
+- **Therefore 100 % of the shipped game code is covered by the decomp.** No code needs to be written from disassembly
+  alone, except the 191 asm-only + 25 `INCLUDE_ASM` functions, which have asm and Ghidra available.
