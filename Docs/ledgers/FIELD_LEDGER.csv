@@ -5835,7 +5835,7 @@ T00640.021,T00640,vs_battle_charInitData,21,weapon,0,vs_battle_weaponIntermediat
 T00640.022,T00640,vs_battle_charInitData,22,shield,0,vs_battle_shieldIntermediate,,,,shield,Equipped shield,high,native:CharacterInit.hpp VS::Actors::CharacterInit::shield (#441);source:146C.c:6226
 T00640.023,T00640,vs_battle_charInitData,23,accessory,0,_accessoryIntermediate,,,,accessory,Equipped accessory,high,native:CharacterInit.hpp VS::Actors::CharacterInit::accessory (#441);source:146C.c:6227
 T00640.024,T00640,vs_battle_charInitData,24,limbs,0,_limbInit[6],,,,limbs,Per-limb initial state,high,native:CharacterInit.hpp VS::Actors::CharacterInit::limbs (#441);source:146C.c:6230
-T00640.025,T00640,vs_battle_charInitData,25,mpdIdentifer,0,int,,,,zud_index,Index of the character's ZUD in the zone,high,native:CharacterInit.hpp VS::Actors::CharacterInit::zud_index (#441);source:146C.c:6595
+T00640.025,T00640,vs_battle_charInitData,25,mpdIdentifer,0,int,,,,zud_index,Index of the zone ZUD entry the character loads; every disc template's own slot,high,native:CharacterInit.hpp VS::Actors::CharacterInit::zud_index (#441);source:146C.c:6409;source:146C.c:14659
 T00641.000,T00641,vs_battle_classAffinityBaseline,0,class,0,short[8],,,,classes,Class values (renamed: class is a C++ keyword),med,source:146C.c:1007
 T00641.001,T00641,vs_battle_classAffinityBaseline,1,affinity,0,u_short[8],,,,affinities,Affinity values,med,source:146C.c:1015
 T00642.000,T00642,vs_battle_classAffinityCurrent,0,class,0,short[2][8],,,,classes,Class values per set (renamed: class is a C++ keyword),med,source:146C.c:1008

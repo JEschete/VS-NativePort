@@ -220,17 +220,23 @@ void PackShapeBits(std::vector<std::vector<std::string>>& rows,
 }
 
 // Adds back the raw_<offset> columns version 4 tables had for reserved bytes,
-// the action_N_index columns version 5 had for each action slot's index, and
-// the equipment index columns version 6 had.
+// the action_N_index columns version 5 had for each action slot's index, the
+// equipment index columns version 6 had, and version 8's zud_index, which
+// held the template's slot.
 void AddReservedColumns(std::vector<std::vector<std::string>>& rows,
                         ZoneTable table,
                         const std::vector<content::TableRow>& checked) {
   if (table == ZoneTable::kEnemies) {
+    const auto slot = std::ranges::find(rows.front(), "slot");
+    REQUIRE(slot != rows.front().end());
+    const auto slot_at = static_cast<std::size_t>(slot - rows.front().begin());
     rows.front().insert(rows.front().end(),
                         {"raw_33", "raw_236", "raw_237", "weapon_index",
-                         "shield_index", "accessory_index"});
+                         "shield_index", "accessory_index", "zud_index"});
     for (std::size_t row = 1; row < rows.size(); ++row) {
-      rows.at(row).insert(rows.at(row).end(), {"0", "0", "0", "0", "0", "0"});
+      const std::string template_slot = rows.at(row).at(slot_at);
+      rows.at(row).insert(rows.at(row).end(),
+                          {"0", "0", "0", "0", "0", "0", template_slot});
     }
   }
   if (table == ZoneTable::kParts) {
@@ -592,6 +598,9 @@ TEST_CASE("The zone converter names the read it cannot resolve",
   // A blade (at 0x34) naming the inventory slot it came from (+0x17).
   content::ZndFile slotted = SampleZone();
   slotted.enemies.at(0).data.at(0x34 + 0x17) = std::byte{2};
+  // Template 0 loading ZUD entry 1 (0x460), not its own.
+  content::ZndFile borrowed = SampleZone();
+  borrowed.enemies.at(0).data.at(0x460) = std::byte{1};
   const std::vector<Refused> refusals{
       {mid_room, true,
        "MAP/ZONE001.ZND: room slot 0: sector 101 (4096 bytes) is no "
@@ -613,6 +622,9 @@ TEST_CASE("The zone converter names the read it cannot resolve",
       {slotted, true,
        "MAP/ZONE001.ZND: enemy.map.zone001.00: reserved byte 0x04B is 2, not "
        "the 0 it always holds"},
+      {borrowed, true,
+       "MAP/ZONE001.ZND: enemy.map.zone001.00: reserved byte 0x460 is 1, not "
+       "the 0 its slot 0 gives"},
       {SampleZone(), false,
        "MAP/ZONE001.ZND: enemy.map.zone001.00 loads archetype.map.z001u00, "
        "which the zud-json converter has not recorded (convert the models "
@@ -660,6 +672,8 @@ TEST_CASE("Old zone authoring upgrades without overwriting native edits",
   CHECK_FALSE(enemies.contains("weapon_index"));
   CHECK_FALSE(limbs.contains("armor_index"));
   CHECK_FALSE(parts.contains(",index"));
+  // Version 8's zud_index, which held each template's slot, went.
+  CHECK_FALSE(enemies.contains("zud_index"));
   const auto repeat = extract::UpgradeZoneAuthoring(root.Root());
   if (!repeat) FAIL(repeat.error());
   CHECK(repeat->written == 0);

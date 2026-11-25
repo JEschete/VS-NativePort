@@ -471,6 +471,7 @@ TEST_CASE("Shared model labels retain distinct enemy aliases",
   second.id = "enemy.map.zone009.01";
   second.data.at(4) = std::byte{0x0A};
   second.data.at(5) = std::byte{0xE7};
+  VS::test_support::UseReservedBytes(second.data, 1);
   zone.enemies.push_back(second);
   WriteZone(root.Root(), zone);
   WriteModels(root.Root());

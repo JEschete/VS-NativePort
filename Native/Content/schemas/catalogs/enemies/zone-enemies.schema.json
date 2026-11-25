@@ -273,13 +273,6 @@
       "minimum": 0,
       "maximum": 255,
       "description": "out of 255"
-    },
-    {
-      "name": "zud_index",
-      "type": "integer",
-      "minimum": -2147483648,
-      "maximum": 2147483647,
-      "description": "the template's index in its zone (upstream mpdIdentifier)"
     }
   ]
 }

@@ -21,7 +21,7 @@ A `MAP\ZONE*.ZND` is what the room loader reads when the zone changes (`Content/
 - **Enemy section:** a count, that many ZUD (sector, read size) entries, then that many 0x464-byte templates (`vs_CharInitData`, `Actors/CharacterInit.hpp`).
 - **Texture section:** either 32 zero bytes, or four table sizes of which only the first is used, followed by that table: a count and that many TIMs, each after its byte size.
 
-`VS.Extract tables <datadir>` (and `extract`) converts every zone with converter `znd-tables` version 8
+`VS.Extract tables <datadir>` (and `extract`) converts every zone with converter `znd-tables` version 9
 (`Extract/ZndConversion.hpp`, `Content/ZoneTables.hpp`). `tables` runs after `models`, because the zones name the
 enemy archetypes (§6.2.5), and after the action catalog, because limbs name actions. It writes six CSV tables, each with a committed schema that is written beside it and must
 match (a test checks this). Columns are described in the schemas; the rules they do not express are:
@@ -74,8 +74,9 @@ version-4 reserved byte column (below) only when every cell holds the value the 
 a version-5 numeric action cell, refusing an id the action catalog lacks, and drops `action_N_index` only when every
 cell is N-1. Rows are kept, so a limb whose only non-zero bytes were those indices keeps an all-zero row that a fresh
 conversion would omit; both read the same. It drops version 6's equipment index columns only when every cell is 0,
-and rewrites a version-7 `agility_defense_bonus` of 128-255 as the same byte's signed value.
-A normal `tables` run upgrades version 1-7 tables before considering
+and rewrites a version-7 `agility_defense_bonus` of 128-255 as the same byte's signed value. It drops version 8's
+`zud_index` only when every cell equals its row's `slot`.
+A normal `tables` run upgrades version 1-8 tables before considering
 source reconversion, preserving existing native edits. Unknown enum codes remain preservable by the raw ZND codec, but are refused as native authoring values.
 This does not resolve the remaining part categories, strings, semantic identities or relational enemy
 definitions.
@@ -89,8 +90,10 @@ definitions.
   the actor's slot, where nothing reads it. The equipment indices (`weapon_index` 0x126, `shield_index` 0x202,
   `accessory_index` 0x235, each limb armour's +0x53 and each part's +0x17) are 0 (not from the inventory) in every
   disc template. The `apply*Stats` functions copy them into actor stats, and only `vs_mainMenu_initInventory` reads
-  them, from the player's. The converter refuses a template whose reserved bytes differ, so every rebuild stays
-  exact.
+  them, from the player's. The ZUD index (0x460, 4 bytes, upstream `mpdIdentifer`) is the template's `slot` in
+  every disc template: `func_800775C0` loads the zone's ZUD entry it names, and entry N is template N's `archetype`
+  (`loadZndEnemies`), so `archetype` is the one model reference. The converter refuses a template whose reserved
+  bytes differ, so every rebuild stays exact.
 - A limb or part whose fields are all zero, and an empty room slot, has no row; a missing row reads as zeros plus
   its reserved bytes.
 - Rows name files by id, never by sector. The rebuild takes each named file's sector and sector-rounded size from `files.tsv` as it is now.

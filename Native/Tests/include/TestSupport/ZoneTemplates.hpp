@@ -47,9 +47,11 @@ inline void UseKnownActions(Content::ZndTemplate& data, std::size_t seed) {
 // padding at 0x33, 0x236, 0x237 and each limb's +0x5A/+0x5B is zero, each
 // limb's +0x52 is 1 exactly when its armour material (+0x50) is set, each
 // action slot's index byte (+0x13, 4 bytes apart) holds the slot's position,
-// and the equipment indices (0x126-0x127, 0x202-0x203, 0x235, each limb's
-// +0x53 and each part's +0x17) are zero.
-inline void UseReservedBytes(Content::ZndTemplate& data) {
+// the equipment indices (0x126-0x127, 0x202-0x203, 0x235, each limb's +0x53
+// and each part's +0x17) are zero, and the ZUD index (0x460, 4 bytes, little
+// endian) is the template's `template_slot`.
+inline void UseReservedBytes(Content::ZndTemplate& data,
+                             std::size_t template_slot = 0) {
   constexpr std::array<std::size_t, 8> kZeroBytes{0x33,  0x126, 0x127, 0x202,
                                                   0x203, 0x235, 0x236, 0x237};
   for (const std::size_t at : kZeroBytes) data.at(at) = std::byte{};
@@ -66,6 +68,10 @@ inline void UseReservedBytes(Content::ZndTemplate& data) {
   }
   for (const std::size_t part : kTemplatePartOffsets) {
     data.at(part + 0x17) = std::byte{};
+  }
+  for (std::size_t index = 0; index < 4; ++index) {
+    data.at(0x460 + index) =
+        static_cast<std::byte>((template_slot >> (8 * index)) & 0xFF);
   }
 }
 

@@ -290,7 +290,7 @@ std::expected<ConvertedZone, std::string> ConvertZone(
     if (!archetype) return std::unexpected(archetype.error());
     const std::string enemy_id = Content::ZoneEnemyId(record.id, slot);
     // The tables keep no reserved byte, so they could not rebuild another.
-    if (auto reserved = Content::CheckZoneReservedBytes(enemy.data);
+    if (auto reserved = Content::CheckZoneReservedBytes(enemy.data, slot);
         !reserved) {
       return std::unexpected(
           std::format("{}: {}: {}", source.path, enemy_id, reserved.error()));

@@ -22,10 +22,10 @@
 // the extracted disc files when it rebuilds the zone.
 //
 // Every byte of a 0x464-byte template (Actors/CharacterInit.hpp) is in
-// exactly one column or is reserved: the enemy row holds the scalars, the
-// weapon, shield and accessory fields around their parts and the trailing
-// index; a limb row the limb's fields but its armour; a part row one
-// equipment part (blade, grip, gem, shield, accessory or a limb's armour).
+// exactly one column or is reserved: the enemy row holds the scalars and the
+// weapon, shield and accessory fields around their parts; a limb row the
+// limb's fields but its armour; a part row one equipment part (blade, grip,
+// gem, shield, accessory or a limb's armour).
 // A limb row names each action slot's action by its id in
 // catalogs/battle/actions.csv, empty for none. Reserved bytes, which no code
 // reads (§4.1), have no column: the template's padding at 0x033, 0x236 and
@@ -34,14 +34,16 @@
 // index (+0x13, +0x17, +0x1B, +0x1F) as the slot's position, as on the disc.
 // The equipment indices (the weapon's at 0x126, the shield's at 0x202, the
 // accessory's at 0x235, each limb armour's at +0x53 and each part's at +0x17),
-// the inventory slots of the player's equipment, read as zero.
+// the inventory slots of the player's equipment, read as zero. The trailing
+// ZUD index (0x460, 4 bytes) reads as the template's slot: it picks the
+// zone's ZUD entry, which the row's archetype names.
 // A limb whose columns are all zero and a part whose bytes are all zero have
 // no row, and a missing row reads as such, so a template rebuilds byte for
 // byte.
 namespace VS::Content {
 
 inline constexpr std::string_view kZndTableConverterName = "znd-tables";
-inline constexpr std::uint32_t kZndTableConverterVersion = 8;
+inline constexpr std::uint32_t kZndTableConverterVersion = 9;
 
 enum class ZoneTable : std::uint8_t {
   kZones,     // catalogs/world/zones: music and room slot count
@@ -128,11 +130,11 @@ ReadZoneTables(const ZoneTableReader& read);
 // holds; the error names the first byte or column at fault.
 [[nodiscard]] std::expected<void, std::string> CheckZoneTemplateCoverage();
 
-// Whether `data`'s reserved bytes hold what the tables rebuild them as, so
-// its rows load as its bytes; the error names the first byte at fault and its
-// value.
+// Whether `data`, the template in `slot`, holds in its reserved bytes what
+// the tables rebuild them as, so its rows load as its bytes; the error names
+// the first byte at fault and its value.
 [[nodiscard]] std::expected<void, std::string> CheckZoneReservedBytes(
-    const ZndTemplate& data);
+    const ZndTemplate& data, std::size_t slot);
 
 struct ZoneColumnMigration {
   std::string text;

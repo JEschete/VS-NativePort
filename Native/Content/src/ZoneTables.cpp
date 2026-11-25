@@ -34,12 +34,17 @@ constexpr std::uint32_t kByteBits = 8;
 constexpr unsigned kByteMask = 0xFF;
 constexpr std::string_view kWorldDirectory = "catalogs/world";
 constexpr std::string_view kEnemyDirectory = "catalogs/enemies";
+// The enemy template column that holds its position in its zone.
+constexpr std::string_view kSlotColumn = "slot";
 // A zone's room slots, textures and enemies. An enemy placement names its
 // template by a byte.
 constexpr std::int64_t kMaxRoomSlots = 0xFFFF;
 constexpr std::int64_t kMaxTextures = 0xFFFF;
 constexpr std::int64_t kMaxEnemies = 0xFF;
 constexpr std::int64_t kLimbCount = 6;
+// The ZUD index is a template's last word.
+constexpr std::size_t kZudIndexBytes = 4;
+constexpr std::size_t kZudIndexAt = kZndTemplateBytes - kZudIndexBytes;
 constexpr std::size_t kNameBytes = 24;
 constexpr std::array<std::string_view, 4> kTypeFields{
     "none",
@@ -88,14 +93,17 @@ struct PackedColumn {
   std::vector<std::string_view> columns;
 };
 
-// A byte no column holds (§4.1): zero padding, a constant, or 1 exactly when
-// the column `set_by` is not zero. `legacy` is the column that held it before
-// version 5 (raw_<offset>), 6 (action_N_index) or 7 (the equipment indices).
+// A byte no column holds (§4.1): zero padding, a constant, 1 exactly when
+// the column `set_by` is not zero, or byte `slot_byte` (little-endian) of the
+// template's slot. `legacy` is the column that held it before version 5
+// (raw_<offset>), 6 (action_N_index), 7 (the equipment indices) or 9
+// (zud_index).
 struct ReservedByte {
   std::string_view legacy;
   std::size_t offset = 0;
   std::string_view set_by;
   std::optional<std::uint8_t> constant;
+  std::optional<std::uint8_t> slot_byte;
 };
 
 // A table's columns: the leading key and reference columns, then the fields.
@@ -119,13 +127,28 @@ struct TableLayout {
     reserved.push_back({.legacy = legacy,
                         .offset = offset,
                         .set_by = set_by,
-                        .constant = std::nullopt});
+                        .constant = std::nullopt,
+                        .slot_byte = std::nullopt});
   }
 
   void Constant(std::string_view legacy, std::size_t offset,
                 std::uint8_t value) {
-    reserved.push_back(
-        {.legacy = legacy, .offset = offset, .set_by = {}, .constant = value});
+    reserved.push_back({.legacy = legacy,
+                        .offset = offset,
+                        .set_by = {},
+                        .constant = value,
+                        .slot_byte = std::nullopt});
+  }
+
+  // A little-endian field of `size` bytes that holds the template's slot.
+  void Slot(std::string_view legacy, std::size_t offset, std::size_t size) {
+    for (std::size_t index = 0; index < size; ++index) {
+      reserved.push_back({.legacy = legacy,
+                          .offset = offset + index,
+                          .set_by = {},
+                          .constant = std::nullopt,
+                          .slot_byte = static_cast<std::uint8_t>(index)});
+    }
   }
 
   // A field of `size` bytes that always holds zero; each byte names the
@@ -376,8 +399,12 @@ void AddEnemyFields(TableLayout& table) {
   table.Zeros("accessory_index", 0x235, 1);
   table.Reserve("raw_236", 0x236);
   table.Reserve("raw_237", 0x237);
-  table.Add("zud_index", 0x460, 4, true,
-            "the template's index in its zone (upstream mpdIdentifier)");
+  // The ZUD index picks the zone's ZUD entry the enemy loads. The zone holds
+  // one entry per template, and every disc template picks its own, which the
+  // row's archetype names; so the tables give it the template's slot.
+  // decomp: loadZndEnemies (src/BATTLE/BATTLE.PRG/146C.c:14654)
+  // decomp: func_800775C0 (src/BATTLE/BATTLE.PRG/146C.c:6393)
+  table.Slot("zud_index", kZudIndexAt, kZudIndexBytes);
 }
 
 // Offsets from the limb's start.
@@ -586,8 +613,8 @@ void BuildLayouts(std::array<TableLayout, kZoneTableCount>& layouts) {
       layouts.at(static_cast<std::size_t>(ZoneTable::kEnemies));
   enemies.Lead(IdColumn("id", "the template (enemy.map.zone009.00)"));
   enemies.Lead(ReferenceColumn("zone", "zones", "the zone"));
-  enemies.Lead(
-      IntegerColumn("slot", 0, kMaxEnemies - 1, "the template's position"));
+  enemies.Lead(IntegerColumn(kSlotColumn, 0, kMaxEnemies - 1,
+                             "the template's position"));
   enemies.Lead(IdColumn("archetype", "the ZUD the template loads"));
   AddEnemyFields(enemies);
   enemies.key = {"id"};
@@ -869,9 +896,14 @@ std::optional<std::size_t> PartOffset(std::string_view id) {
   return found->offset;
 }
 
-// The value the tables give a reserved byte of `record`.
+// The value the tables give a reserved byte of `record`, a record of the
+// template in `slot`.
 unsigned ReservedValue(const TableLayout& layout, const ReservedByte& reserved,
-                       std::span<const std::byte> record) {
+                       std::span<const std::byte> record, std::size_t slot) {
+  if (reserved.slot_byte) {
+    return static_cast<unsigned>(slot >> (kByteBits * *reserved.slot_byte)) &
+           kByteMask;
+  }
   if (reserved.set_by.empty()) return reserved.constant.value_or(0);
   const auto field =
       std::ranges::find(layout.fields, reserved.set_by, &Field::column);
@@ -905,12 +937,12 @@ void ForEachReserved(Data& data, Visit visit) {
   }
 }
 
-void DeriveReservedBytes(ZndTemplate& data) {
+void DeriveReservedBytes(ZndTemplate& data, std::size_t slot) {
   ForEachReserved(
-      data, [](const TableLayout& layout, const ReservedByte& reserved,
-               std::span<std::byte> record, std::size_t /*base*/) {
-        record[reserved.offset] =
-            static_cast<std::byte>(ReservedValue(layout, reserved, record));
+      data, [slot](const TableLayout& layout, const ReservedByte& reserved,
+                   std::span<std::byte> record, std::size_t /*base*/) {
+        record[reserved.offset] = static_cast<std::byte>(
+            ReservedValue(layout, reserved, record, slot));
       });
 }
 
@@ -1106,17 +1138,24 @@ std::optional<std::int64_t> EnumCode(const ColumnSpec& column,
   return named->code;
 }
 
-// The value a retired column's cell must hold: 0 or the byte's constant, or
-// for a byte another column sets, 1 exactly when that column's cell (at
-// `set_by`) is not zero.
+// The value a retired column's cell must hold: 0 or the byte's constant; for
+// a byte another column sets, 1 exactly when that column's cell (at `source`)
+// is not zero; or for a field holding the template's slot, the slot cell (at
+// `source`).
 std::expected<std::int64_t, std::string> RetiredValue(
     const TableLayout& layout, const ReservedByte& reserved,
-    const CsvRecord& record, std::optional<std::size_t> set_by,
+    const CsvRecord& record, std::optional<std::size_t> source,
     std::string_view file) {
-  if (!set_by) return reserved.constant.value_or(0);
+  if (!source) return reserved.constant.value_or(0);
+  const std::string& cell = record.fields[*source];
+  if (reserved.slot_byte) {
+    if (const auto slot = IntegerCell(cell)) return *slot;
+    return std::unexpected(
+        CellError(file, record.line, kSlotColumn,
+                  std::format("'{}' is not a number", cell)));
+  }
   const auto column =
       std::ranges::find(layout.columns, reserved.set_by, &ColumnSpec::name);
-  const std::string& cell = record.fields[*set_by];
   const auto code =
       column == layout.columns.end() ? std::nullopt : EnumCode(*column, cell);
   if (!code) {
@@ -1128,9 +1167,10 @@ std::expected<std::int64_t, std::string> RetiredValue(
 }
 
 // Drops the columns that held reserved bytes before version 5 (raw_<offset>),
-// 6 (action_N_index) or 7 (the equipment indices), each of whose cells must
-// hold the value the tables now give its byte; the number of columns dropped.
-// A field of several zero bytes is checked and dropped with its first byte.
+// 6 (action_N_index), 7 (the equipment indices) or 9 (zud_index), each of
+// whose cells must hold the value the tables now give its field; the number
+// of columns dropped. A field of several bytes is checked whole and dropped
+// with its first byte.
 std::expected<std::size_t, std::string> RetireReservedColumns(
     const TableLayout& layout, std::vector<CsvRecord>& records,
     std::string_view file) {
@@ -1143,23 +1183,27 @@ std::expected<std::size_t, std::string> RetireReservedColumns(
       return std::unexpected(widths.error());
     }
     const auto at = static_cast<std::size_t>(found - header.begin());
-    std::optional<std::size_t> set_by;
-    if (!reserved.set_by.empty()) {
-      const auto source = std::ranges::find(header, reserved.set_by);
-      if (source == header.end()) {
+    std::optional<std::size_t> source;
+    const std::string_view sets =
+        reserved.slot_byte ? kSlotColumn : reserved.set_by;
+    if (!sets.empty()) {
+      const auto column = std::ranges::find(header, sets);
+      if (column == header.end()) {
         return std::unexpected(
             std::format("{}: has '{}' but not '{}', which sets it", file,
-                        reserved.legacy, reserved.set_by));
+                        reserved.legacy, sets));
       }
-      set_by = static_cast<std::size_t>(source - header.begin());
+      source = static_cast<std::size_t>(column - header.begin());
     }
     for (std::size_t row = 1; row < records.size(); ++row) {
       const CsvRecord& record = records[row];
-      auto expected = RetiredValue(layout, reserved, record, set_by, file);
+      auto expected = RetiredValue(layout, reserved, record, source, file);
       if (!expected) return std::unexpected(expected.error());
       if (IntegerCell(record.fields[at]) == *expected) continue;
       std::string why;
-      if (set_by) {
+      if (reserved.slot_byte) {
+        why = "the template's slot sets it now";
+      } else if (source) {
         why = std::format("{} sets byte 0x{:02X} now", reserved.set_by,
                           reserved.offset);
       } else if (reserved.constant) {
@@ -1521,8 +1565,9 @@ std::expected<std::vector<ZoneRecord>, std::string> ReadZoneTables(
       return std::unexpected(std::format(
           "{}: {}", tables->Path(ZoneTable::kEnemies), dense.error()));
     }
-    for (const std::string& id : *dense) {
-      DeriveReservedBytes(enemies.at(id).data);
+    for (std::size_t slot = 0; slot < dense->size(); ++slot) {
+      const std::string& id = dense->at(slot);
+      DeriveReservedBytes(enemies.at(id).data, slot);
       zones.at(zone_id).enemies.push_back(std::move(enemies.at(id)));
     }
   }
@@ -1601,17 +1646,21 @@ std::expected<void, std::string> CheckZoneTemplateCoverage() {
   return {};
 }
 
-std::expected<void, std::string> CheckZoneReservedBytes(
-    const ZndTemplate& data) {
+std::expected<void, std::string> CheckZoneReservedBytes(const ZndTemplate& data,
+                                                        std::size_t slot) {
   std::optional<std::string> fault;
   ForEachReserved(
       data, [&](const TableLayout& layout, const ReservedByte& reserved,
                 std::span<const std::byte> record, std::size_t base) {
-        const unsigned expected = ReservedValue(layout, reserved, record);
+        const unsigned expected = ReservedValue(layout, reserved, record, slot);
         const auto actual = std::to_integer<unsigned>(record[reserved.offset]);
         if (fault || actual == expected) return;
         const std::size_t at = base + reserved.offset;
-        if (!reserved.set_by.empty()) {
+        if (reserved.slot_byte) {
+          fault = std::format(
+              "reserved byte 0x{:03X} is {}, not the {} its slot {} gives", at,
+              actual, expected, slot);
+        } else if (!reserved.set_by.empty()) {
           fault = std::format(
               "reserved byte 0x{:03X} is {}, not the {} its {} "
               "gives",

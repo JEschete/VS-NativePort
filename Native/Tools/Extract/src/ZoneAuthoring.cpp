@@ -128,8 +128,10 @@ std::expected<ZoneAuthoringReport, std::string> UpgradeZoneAuthoring(
     if (found != (**manifest).converters.end()) {
       // Version 1 tables have numeric names and values, version 2 the packed
       // shape_bits, version 3 numeric status_immunities, version 4 the
-      // reserved bytes' raw_<offset> columns and version 5 numeric action ids
-      // and the action_N_index columns; all upgrade in place.
+      // reserved bytes' raw_<offset> columns, version 5 numeric action ids
+      // and the action_N_index columns, version 6 the equipment index
+      // columns, version 7 unsigned agility_defense_bonus cells and version 8
+      // the zud_index column; all upgrade in place.
       if (found->second < 1 ||
           found->second > Content::kZndTableConverterVersion) {
         return std::unexpected(

@@ -60,7 +60,7 @@ Texts Formatted(const std::vector<content::ZoneRecord>& zones,
 
 // A template whose every byte differs from its neighbours, so a column at the
 // wrong offset or width shows; `zeroed` clears the shield and a limb so their
-// rows are left out.
+// rows are left out. `seed` is also the template's slot.
 content::ZndTemplate PatternTemplate(std::size_t seed, bool zeroed) {
   content::ZndTemplate data{};
   for (std::size_t at = 0; at < data.size(); ++at) {
@@ -82,7 +82,7 @@ content::ZndTemplate PatternTemplate(std::size_t seed, bool zeroed) {
     for (std::size_t at = 0x238; at < 0x258; ++at) data.at(at) = std::byte{};
     for (std::size_t at = 0x288; at < 0x294; ++at) data.at(at) = std::byte{};
   }
-  VS::test_support::UseReservedBytes(data);
+  VS::test_support::UseReservedBytes(data, seed);
   return data;
 }
 
@@ -458,6 +458,16 @@ TEST_CASE("Equipment index columns retire when they hold zero",
   CHECK(limbs->text == "limb\n0\n");
 }
 
+TEST_CASE("The ZUD index column retires when it holds each row's slot",
+          "[zone-authoring][content-tables][znd]") {
+  const auto enemies = content::MigrateZoneColumns(
+      ZoneTable::kEnemies, "id,slot,zud_index,hp\na,0,0,5\nb,1,1,6\n",
+      "enemies.csv");
+  if (!enemies) FAIL(enemies.error());
+  CHECK(enemies->retired_columns == 1);
+  CHECK(enemies->text == "id,slot,hp\na,0,5\nb,1,6\n");
+}
+
 TEST_CASE("Part index columns retire when they hold zero",
           "[zone-authoring][content-tables][znd]") {
   const auto parts = content::MigrateZoneColumns(
@@ -496,6 +506,13 @@ TEST_CASE("Reserved byte columns unlike their bytes' values are refused",
         "t.csv:2: column 'armor_material': 'tin' is not a name or number");
   CHECK(retire(ZoneTable::kLimbs, "raw_52\n0\n") ==
         "t.csv: has 'raw_52' but not 'armor_material', which sets it");
+  CHECK(retire(ZoneTable::kEnemies, "id,slot,zud_index\na,0,0\nb,1,0\n") ==
+        "t.csv:3: column 'zud_index': '0' is not 1; the template's slot sets "
+        "it now");
+  CHECK(retire(ZoneTable::kEnemies, "id,slot,zud_index\na,x,0\n") ==
+        "t.csv:2: column 'slot': 'x' is not a number");
+  CHECK(retire(ZoneTable::kEnemies, "id,zud_index\na,0\n") ==
+        "t.csv: has 'zud_index' but not 'slot', which sets it");
 }
 
 TEST_CASE("A limb's armour material sets its reserved byte",
