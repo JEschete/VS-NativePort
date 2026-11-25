@@ -33,7 +33,7 @@ comparison.
 
 ## Native math comparison
 
-The [packed tile distance](Native/Engine/src/Core/Math/TileDistance.cpp) and shared
+The [packed tile distance](Native/Engine/src/Core/Math/Distance.cpp) and shared
 wide-to-short normalization behavior were checked against `pc/src/battle_movement.c`
 and `pc/src/boot_sdk.c` at the same pinned rood-boi revision and CC0 dedication.
 Existing native math implementations are reused for compatibility symbols rather
