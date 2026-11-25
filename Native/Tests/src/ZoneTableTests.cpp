@@ -442,6 +442,36 @@ TEST_CASE("Reserved enemy byte columns retire when they hold zero",
   CHECK(enemies->text == "id,hp\na,5\n");
 }
 
+TEST_CASE("Equipment index columns retire when they hold zero",
+          "[zone-authoring][content-tables][znd]") {
+  const auto enemies = content::MigrateZoneColumns(
+      ZoneTable::kEnemies,
+      "id,weapon_index,hp,shield_index,accessory_index\na,0,5,0,0\n",
+      "enemies.csv");
+  if (!enemies) FAIL(enemies.error());
+  CHECK(enemies->retired_columns == 3);
+  CHECK(enemies->text == "id,hp\na,5\n");
+  const auto limbs = content::MigrateZoneColumns(
+      ZoneTable::kLimbs, "limb,armor_index\n0,0\n", "limbs.csv");
+  if (!limbs) FAIL(limbs.error());
+  CHECK(limbs->retired_columns == 1);
+  CHECK(limbs->text == "limb\n0\n");
+}
+
+TEST_CASE("Part index columns retire when they hold zero",
+          "[zone-authoring][content-tables][znd]") {
+  const auto parts = content::MigrateZoneColumns(
+      ZoneTable::kParts, "item_id,index,range\n5,0,2\n", "parts.csv");
+  if (!parts) FAIL(parts.error());
+  CHECK(parts->retired_columns == 1);
+  CHECK(parts->text == "item_id,range\n5,2\n");
+  const auto again =
+      content::MigrateZoneColumns(ZoneTable::kParts, parts->text, "p.csv");
+  if (!again) FAIL(again.error());
+  CHECK(again->retired_columns == 0);
+  CHECK(again->text == parts->text);
+}
+
 TEST_CASE("Reserved byte columns unlike their bytes' values are refused",
           "[zone-authoring][content-tables][znd]") {
   const auto retire = [](ZoneTable table, const std::string& text) {
@@ -450,6 +480,12 @@ TEST_CASE("Reserved byte columns unlike their bytes' values are refused",
   CHECK(retire(ZoneTable::kEnemies, "id,raw_33\na,5\n") ==
         "t.csv:2: column 'raw_33': '5' is not 0; byte 0x33 is padding the "
         "tables keep zero");
+  CHECK(retire(ZoneTable::kEnemies, "id,weapon_index\na,1\n") ==
+        "t.csv:2: column 'weapon_index': '1' is not 0; byte 0x126 always "
+        "holds 0 now");
+  CHECK(retire(ZoneTable::kParts, "item_id,index\n5,3\n") ==
+        "t.csv:2: column 'index': '3' is not 0; byte 0x17 always holds 0 "
+        "now");
   CHECK(retire(ZoneTable::kLimbs, "armor_material,raw_52\niron,0\n") ==
         "t.csv:2: column 'raw_52': '0' is not 1; armor_material sets byte "
         "0x52 now");

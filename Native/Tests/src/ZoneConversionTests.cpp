@@ -220,14 +220,23 @@ void PackShapeBits(std::vector<std::vector<std::string>>& rows,
 }
 
 // Adds back the raw_<offset> columns version 4 tables had for reserved bytes,
-// and the action_N_index columns version 5 had for each action slot's index.
+// the action_N_index columns version 5 had for each action slot's index, and
+// the equipment index columns version 6 had.
 void AddReservedColumns(std::vector<std::vector<std::string>>& rows,
                         ZoneTable table,
                         const std::vector<content::TableRow>& checked) {
   if (table == ZoneTable::kEnemies) {
-    rows.front().insert(rows.front().end(), {"raw_33", "raw_236", "raw_237"});
+    rows.front().insert(rows.front().end(),
+                        {"raw_33", "raw_236", "raw_237", "weapon_index",
+                         "shield_index", "accessory_index"});
     for (std::size_t row = 1; row < rows.size(); ++row) {
-      rows.at(row).insert(rows.at(row).end(), {"0", "0", "0"});
+      rows.at(row).insert(rows.at(row).end(), {"0", "0", "0", "0", "0", "0"});
+    }
+  }
+  if (table == ZoneTable::kParts) {
+    rows.front().emplace_back("index");
+    for (std::size_t row = 1; row < rows.size(); ++row) {
+      rows.at(row).emplace_back("0");
     }
   }
   if (table != ZoneTable::kLimbs) return;
@@ -236,13 +245,14 @@ void AddReservedColumns(std::vector<std::vector<std::string>>& rows,
       columns, std::string_view("armor_material"), &content::ColumnSpec::name);
   REQUIRE(material != columns.end());
   const auto at = static_cast<std::size_t>(material - columns.begin());
-  rows.front().insert(rows.front().end(),
-                      {"raw_52", "raw_5a", "raw_5b", "action_1_index",
-                       "action_2_index", "action_3_index", "action_4_index"});
+  rows.front().insert(
+      rows.front().end(),
+      {"raw_52", "raw_5a", "raw_5b", "action_1_index", "action_2_index",
+       "action_3_index", "action_4_index", "armor_index"});
   for (std::size_t row = 1; row < rows.size(); ++row) {
     const bool armored = checked.at(row - 1).values.at(at) != 0;
-    rows.at(row).insert(rows.at(row).end(),
-                        {armored ? "1" : "0", "0", "0", "0", "1", "2", "3"});
+    rows.at(row).insert(rows.at(row).end(), {armored ? "1" : "0", "0", "0", "0",
+                                             "1", "2", "3", "0"});
   }
 }
 
@@ -570,6 +580,9 @@ TEST_CASE("The zone converter names the read it cannot resolve",
   // Limb 0's second action slot (+0x14) holding the first slot's index.
   content::ZndFile misindexed = SampleZone();
   misindexed.enemies.at(0).data.at(0x238 + 0x17) = std::byte{};
+  // A blade (at 0x34) naming the inventory slot it came from (+0x17).
+  content::ZndFile slotted = SampleZone();
+  slotted.enemies.at(0).data.at(0x34 + 0x17) = std::byte{2};
   const std::vector<Refused> refusals{
       {mid_room, true,
        "MAP/ZONE001.ZND: room slot 0: sector 101 (4096 bytes) is no "
@@ -588,6 +601,9 @@ TEST_CASE("The zone converter names the read it cannot resolve",
       {misindexed, true,
        "MAP/ZONE001.ZND: enemy.map.zone001.00: reserved byte 0x24F is 0, not "
        "the 1 it always holds"},
+      {slotted, true,
+       "MAP/ZONE001.ZND: enemy.map.zone001.00: reserved byte 0x04B is 2, not "
+       "the 0 it always holds"},
       {SampleZone(), false,
        "MAP/ZONE001.ZND: enemy.map.zone001.00 loads archetype.map.z001u00, "
        "which the zud-json converter has not recorded (convert the models "
@@ -631,6 +647,10 @@ TEST_CASE("Old zone authoring upgrades without overwriting native edits",
   CHECK(limbs.contains(",action_1,action_1_special_sequence,"));
   CHECK(limbs.contains(",action.rend,"));
   CHECK_FALSE(limbs.contains("action_1_index"));
+  // Version 6's equipment index columns went.
+  CHECK_FALSE(enemies.contains("weapon_index"));
+  CHECK_FALSE(limbs.contains("armor_index"));
+  CHECK_FALSE(parts.contains(",index"));
   const auto repeat = extract::UpgradeZoneAuthoring(root.Root());
   if (!repeat) FAIL(repeat.error());
   CHECK(repeat->written == 0);

@@ -2595,7 +2595,7 @@ T00300.002,T00300,VS_TILE_TPAGE,2,x0y0,0,u_long,,,,position,Packed signed screen
 T00300.003,T00300,VS_TILE_TPAGE,3,wh,0,u_long,,,,size,Packed width and height in pixels,med,replaced-by:Render rectangle size;source:MENU/MENU7.PRG/260.c:1314;use cited by sanity pass;source:gpu.h:43
 T00301.000,T00301,_accessoryIntermediate,0,equip,0,vs_battle_uiEquipment,,,,equipment,Accessory statistics,high,source:146C.c:1084
 T00301.001,T00301,_accessoryIntermediate,1,dropRate,0,char,,,,drop_rate,Drop rate,high,source:146C.c:1089
-T00301.002,T00301,_accessoryIntermediate,2,index,0,char,,,,index,Index,high,source:146C.c:1090
+T00301.002,T00301,_accessoryIntermediate,2,index,0,char,,,,index,Inventory slot (0 = not from the inventory); applyAccessoryStats copies it into actor stats; 0 in every zone template,high,source:146C.c:1090;source:146C.c:744
 T00301.003,T00301,_accessoryIntermediate,3,unk32,1,char,,,,reserved32,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Items\ItemRecords.hpp:359;declaration-only;source:146C.h:837
 T00301.004,T00301,_accessoryIntermediate,4,unk33,1,char,,,,reserved33,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Items\ItemRecords.hpp:360;declaration-only;source:146C.h:838
 T00302.000,T00302,_actions,0,id,0,u_short,,,,action_id,Action,high,native:CharacterInit.hpp VS::Actors::LimbActionInit::action_id (#441);source:146C.c:6260
@@ -2625,7 +2625,7 @@ T00305.000,T00305,_armorIntermediate,0,equip,0,vs_battle_uiEquipment,,,,equipmen
 T00305.001,T00305,_armorIntermediate,1,material,0,char,,,,material,Material,high,source:146C.c:1111
 T00305.002,T00305,_armorIntermediate,2,dropRate,0,char,,,,drop_rate,Drop rate,high,source:146C.c:1138
 T00305.003,T00305,_armorIntermediate,3,unk32,1,char,,,,opaque32,Copied into the armor state; meaning not established; only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Game\src\Items\EquipmentStats.cpp:214;source:146C.c:1139
-T00305.004,T00305,_armorIntermediate,4,index,0,char,,,,index,Index,high,source:146C.c:1117
+T00305.004,T00305,_armorIntermediate,4,index,0,char,,,,index,Inventory slot (0 = not from the inventory); applyArmorStats copies it into actor stats; 0 in every zone template limb,high,source:146C.c:1117;source:146C.c:771
 T00306.000,T00306,_buffReels_t,0,stat,0,short,,,,stat,Named in the fork; see cited use,med,native:GameClearLifecycle.hpp BonusReelEntry (#441);source:3B8.c:860
 T00306.001,T00306,_buffReels_t,1,amount,0,short,,,,amount,Named in the fork; see cited use,med,native:GameClearLifecycle.hpp BonusReelEntry (#441);source:3B8.c:859
 T00307.000,T00307,_clutSlot,0,unk4,1,char,,,,reserved0,First byte; no access found,low,declaration-only;source:main.c:35
@@ -5981,7 +5981,7 @@ T00668.000,T00668,vs_battle_shieldIntermediate,0,base,0,vs_battle_uiEquipment,,,
 T00668.001,T00668,vs_battle_shieldIntermediate,1,gems,0,vs_battle_uiEquipment[3],,,,gems,Socketed gem stats,med,declaration-only;source:146C.h:776
 T00668.002,T00668,vs_battle_shieldIntermediate,2,material,0,char,,,,material,Shield material,med,declaration-only;source:146C.h:777
 T00668.003,T00668,vs_battle_shieldIntermediate,3,dropRate,0,char,,,,drop_rate,Drop chance,med,declaration-only;source:146C.h:778
-T00668.004,T00668,vs_battle_shieldIntermediate,4,index,0,short,,,,index,Inventory index,med,declaration-only;source:146C.h:779
+T00668.004,T00668,vs_battle_shieldIntermediate,4,index,0,short,,,,index,Inventory slot (0 = not from the inventory); vs_battle_applyShieldStats copies it into actor stats; 0 in every zone template,high,source:146C.h:779;source:146C.c:695
 T00669.000,T00669,vs_battle_stringContext_t,0,integers,0,int[10],,,,integers,Named in the fork; see cited use,med,native:Menu/Framework/TextBoxes.hpp StringContext::integers (#441);source:BATTLE/BATTLE.PRG/battleUi.h:165
 T00669.001,T00669,vs_battle_stringContext_t,1,strings,0,char *[10],,,,strings,Named in the fork; see cited use,med,native:Menu/Framework/TextBoxes.hpp StringContext::strings (#441);source:BATTLE/BATTLE.PRG/battleUi.h:166
 T00670.000,T00670,vs_battle_texInfo_t,0,tpage,0,short,,,,texture_page,Texture page word,high,source:30DB0.c:1266
@@ -6066,7 +6066,7 @@ T00675.014,T00675,vs_battle_uiEquipment,14,material,0,char,,,,material,Material,
 T00675.015,T00675,vs_battle_uiEquipment,15,unk14,1,char,,,,recovery_delay,Recovery delay the blade gives its weapon; copied into the weapon stats' recovery delay (T00680.007) and the inventory blade,med,source:146C.c:988;source:146C.c:13178;renamed from opaque14 (#441);sanity pass 2026-10-17
 T00675.016,T00675,vs_battle_uiEquipment,16,gemSlots,0,char,,,,gem_slots,Gem slot count,med,source:120.c:1364;use cited by sanity pass;source:146C.h:314
 T00675.017,T00675,vs_battle_uiEquipment,17,gemEffects,0,char,,,,gem_effects,Gem special effect identifier,med,source:146C.c:9722;use cited by sanity pass;source:146C.h:315
-T00675.018,T00675,vs_battle_uiEquipment,18,index,0,char,,,,index,Inventory index,med,declaration-only;source:146C.h:316
+T00675.018,T00675,vs_battle_uiEquipment,18,index,0,char,,,,index,Inventory slot (0 = not from the inventory); vs_battle_copyInventory*Stats set it and the loot copies skip it; 0 in every zone template part,high,source:146C.h:316;source:146C.c:817
 T00675.019,T00675,vs_battle_uiEquipment,19,range,0,vs_battle_range_t,,,,range,Attack range,med,declaration-only;source:146C.h:317
 T00675.020,T00675,vs_battle_uiEquipment,20,types,0,signed char[4],,,,types,Damage-type values,med,source:146C.c:986;use cited by sanity pass;source:146C.h:318
 T00675.021,T00675,vs_battle_uiEquipment,21,classes,0,signed char[8],,,,classes,Enemy-class values,med,source:146C.c:1010;use cited by sanity pass;source:146C.h:319
@@ -6139,7 +6139,7 @@ T00682.001,T00682,vs_battle_weaponIntermediate,1,grip,0,vs_battle_uiEquipment,,,
 T00682.002,T00682,vs_battle_weaponIntermediate,2,gems,0,vs_battle_uiEquipment[3],,,,gems,Socketed gem stats,med,declaration-only;source:146C.h:767
 T00682.003,T00682,vs_battle_weaponIntermediate,3,material,0,char,,,,material,Blade material,med,declaration-only;source:146C.h:768
 T00682.004,T00682,vs_battle_weaponIntermediate,4,dropRate,0,char,,,,drop_rate,Drop chance,med,declaration-only;source:146C.h:769
-T00682.005,T00682,vs_battle_weaponIntermediate,5,index,0,short,,,,index,Inventory index,med,declaration-only;source:146C.h:770
+T00682.005,T00682,vs_battle_weaponIntermediate,5,index,0,short,,,,index,Inventory slot (0 = not from the inventory); vs_battle_applyWeaponStats copies it into actor stats; 0 in every zone template,high,source:146C.h:770;source:146C.c:637
 T00682.006,T00682,vs_battle_weaponIntermediate,6,name,0,char[24],,,,name,Weapon name in game text encoding,med,declaration-only;source:146C.h:771
 T00683.000,T00683,vs_battle_wepModels_t,0,nBones,0,u_char,,,,bone_count,Number of bones,med,native:WeaponModel.hpp VS::Actors::WeaponModel::bone_count (#441);source:30DB0.c:632;use cited by sanity pass;source:3A1A0.h:403
 T00683.001,T00683,vs_battle_wepModels_t,1,nVertexGroups,0,u_char,,,,vertex_group_count,Number of vertex groups,med,native:WeaponModel.hpp VS::Actors::WeaponModel::vertex_group_count (#441);declaration-only;source:3A1A0.h:404

@@ -90,7 +90,7 @@ struct PackedColumn {
 
 // A byte no column holds (§4.1): zero padding, a constant, or 1 exactly when
 // the column `set_by` is not zero. `legacy` is the column that held it before
-// version 5 (raw_<offset>) or 6 (action_N_index).
+// version 5 (raw_<offset>), 6 (action_N_index) or 7 (the equipment indices).
 struct ReservedByte {
   std::string_view legacy;
   std::size_t offset = 0;
@@ -123,6 +123,14 @@ struct TableLayout {
                 std::uint8_t value) {
     reserved.push_back(
         {.legacy = legacy, .offset = offset, .set_by = {}, .constant = value});
+  }
+
+  // A field of `size` bytes that always holds zero; each byte names the
+  // field's former column.
+  void Zeros(std::string_view legacy, std::size_t offset, std::size_t size) {
+    for (std::size_t at = offset; at < offset + size; ++at) {
+      Constant(legacy, at, 0);
+    }
   }
 
   // An optional reference stored as the row's original index; 0 is none.
@@ -320,14 +328,22 @@ void AddEnemyFields(TableLayout& table) {
   table.Reserve("raw_33", 0x33);
   table.Add("weapon_material", 0x124, 1, false, "weapon material", kMaterials);
   table.Add("weapon_drop_rate", 0x125, 1, false, "out of 255");
-  table.Add("weapon_index", 0x126, 2, true, "");
+  // An equipment index is the 1-based inventory slot the player's equipment
+  // came from. The apply*Stats copy each into the actor's stats, and only
+  // vs_mainMenu_initInventory reads them, from the player's. Every disc
+  // template holds 0 (not from the inventory) in each, as in its parts' and
+  // limb armours' indices.
+  // decomp: vs_battle_applyWeaponStats (src/BATTLE/BATTLE.PRG/146C.c:624)
+  // decomp: vs_battle_applyShieldStats (src/BATTLE/BATTLE.PRG/146C.c:683)
+  // decomp: vs_mainMenu_initInventory (src/MENU/MAINMENU.PRG/C48.c:51)
+  table.Zeros("weapon_index", 0x126, 2);
   table.Bytes("weapon_name", 0x128, kNameBytes,
               "the weapon's name, in the game's encoding");
   table.Add("shield_material", 0x200, 1, false, "shield material", kMaterials);
   table.Add("shield_drop_rate", 0x201, 1, false, "out of 255");
-  table.Add("shield_index", 0x202, 2, true, "");
+  table.Zeros("shield_index", 0x202, 2);
   table.Add("accessory_drop_rate", 0x234, 1, false, "out of 255");
-  table.Add("accessory_index", 0x235, 1, false, "");
+  table.Zeros("accessory_index", 0x235, 1);
   table.Reserve("raw_236", 0x236);
   table.Reserve("raw_237", 0x237);
   table.Add("zud_index", 0x460, 4, true,
@@ -372,7 +388,9 @@ void AddLimbFields(TableLayout& table) {
   // exactly when it has an armour material, as INITBTL.PRG's init of Ashley
   // does.
   table.Reserve("raw_52", 0x52, "armor_material");
-  table.Add("armor_index", 0x53, 1, false, "");
+  // An equipment index (AddEnemyFields), zero on the disc.
+  // decomp: applyArmorStats (src/BATTLE/BATTLE.PRG/146C.c:759)
+  table.Zeros("armor_index", 0x53, 1);
   table.Run("dp_splash", 0x54, kSplashFields, 1, false,
             "DP damage share (%) to the zero-based destination limb; body-part "
             "names depend on the model");
@@ -407,7 +425,10 @@ void AddPartFields(TableLayout& table) {
   table.Add("recovery_delay", 0x14, 1, false, "");
   table.Add("gem_slots", 0x15, 1, false, "");
   table.Add("gem_effects", 0x16, 1, false, "");
-  table.Add("index", 0x17, 1, false, "");
+  // The part's inventory slot, zero on the disc: an equipment index
+  // (AddEnemyFields). Loot copies of parts skip it.
+  // decomp: copyUiEquipmentStats (src/BATTLE/BATTLE.PRG/146C.c:1156)
+  table.Zeros("index", 0x17, 1);
   table.Add("range", 0x18, 1, false, "");
   table.Add("range_y", 0x19, 1, false, "");
   table.Add("range_z", 0x1A, 1, false, "");
@@ -787,8 +808,9 @@ unsigned ReservedValue(const TableLayout& layout, const ReservedByte& reserved,
                                                                         : 0U;
 }
 
-// Each reserved byte of a template's record and of its limbs, with the record
-// it belongs to and that record's offset in the template.
+// Each reserved byte of a template's record, its limbs and its equipment
+// parts, with the record it belongs to and that record's offset in the
+// template.
 template <typename Data, typename Visit>
 void ForEachReserved(Data& data, Visit visit) {
   const TableLayout& enemy = LayoutOf(ZoneTable::kEnemies);
@@ -801,6 +823,13 @@ void ForEachReserved(Data& data, Visit visit) {
     const std::size_t base = kLimbsAt + (limb * kLimbBytes);
     for (const ReservedByte& reserved : limbs.reserved) {
       visit(limbs, reserved, std::span(data).subspan(base, kLimbBytes), base);
+    }
+  }
+  const TableLayout& parts = LayoutOf(ZoneTable::kParts);
+  for (const PartSlot& part : kPartSlots) {
+    for (const ReservedByte& reserved : parts.reserved) {
+      visit(parts, reserved, std::span(data).subspan(part.offset, kPartBytes),
+            part.offset);
     }
   }
 }
@@ -1027,9 +1056,10 @@ std::expected<std::int64_t, std::string> RetiredValue(
   return *code != 0 ? 1 : 0;
 }
 
-// Drops the columns that held reserved bytes before version 5 (raw_<offset>)
-// or 6 (action_N_index), each of whose cells must hold the value the tables
-// now give its byte; the number of columns dropped.
+// Drops the columns that held reserved bytes before version 5 (raw_<offset>),
+// 6 (action_N_index) or 7 (the equipment indices), each of whose cells must
+// hold the value the tables now give its byte; the number of columns dropped.
+// A field of several zero bytes is checked and dropped with its first byte.
 std::expected<std::size_t, std::string> RetireReservedColumns(
     const TableLayout& layout, std::vector<CsvRecord>& records,
     std::string_view file) {

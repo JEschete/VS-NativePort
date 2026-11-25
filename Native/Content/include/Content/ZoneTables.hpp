@@ -32,13 +32,16 @@
 // 0x237 and each limb's at +0x5A and +0x5B read as zero, each limb's +0x52 as
 // 1 exactly when the limb has an armour material, and each action slot's
 // index (+0x13, +0x17, +0x1B, +0x1F) as the slot's position, as on the disc.
+// The equipment indices (the weapon's at 0x126, the shield's at 0x202, the
+// accessory's at 0x235, each limb armour's at +0x53 and each part's at +0x17),
+// the inventory slots of the player's equipment, read as zero.
 // A limb whose columns are all zero and a part whose bytes are all zero have
 // no row, and a missing row reads as such, so a template rebuilds byte for
 // byte.
 namespace VS::Content {
 
 inline constexpr std::string_view kZndTableConverterName = "znd-tables";
-inline constexpr std::uint32_t kZndTableConverterVersion = 6;
+inline constexpr std::uint32_t kZndTableConverterVersion = 7;
 
 enum class ZoneTable : std::uint8_t {
   kZones,     // catalogs/world/zones: music and room slot count

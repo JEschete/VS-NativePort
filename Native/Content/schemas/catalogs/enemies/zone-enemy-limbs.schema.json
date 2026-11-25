@@ -228,13 +228,6 @@
       "description": "out of 255"
     },
     {
-      "name": "armor_index",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 255,
-      "description": ""
-    },
-    {
       "name": "dp_splash_limb_0_percent",
       "type": "integer",
       "legacy_name": "dp_splash_1",

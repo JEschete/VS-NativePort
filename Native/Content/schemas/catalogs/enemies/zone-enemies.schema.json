@@ -239,13 +239,6 @@
       "description": "out of 255"
     },
     {
-      "name": "weapon_index",
-      "type": "integer",
-      "minimum": -32768,
-      "maximum": 32767,
-      "description": ""
-    },
-    {
       "name": "weapon_name",
       "type": "bytes",
       "bytes": 24,
@@ -275,25 +268,11 @@
       "description": "out of 255"
     },
     {
-      "name": "shield_index",
-      "type": "integer",
-      "minimum": -32768,
-      "maximum": 32767,
-      "description": ""
-    },
-    {
       "name": "accessory_drop_rate",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
       "description": "out of 255"
-    },
-    {
-      "name": "accessory_index",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 255,
-      "description": ""
     },
     {
       "name": "zud_index",

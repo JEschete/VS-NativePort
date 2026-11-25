@@ -168,13 +168,6 @@
       "description": ""
     },
     {
-      "name": "index",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 255,
-      "description": ""
-    },
-    {
       "name": "range",
       "type": "integer",
       "minimum": 0,

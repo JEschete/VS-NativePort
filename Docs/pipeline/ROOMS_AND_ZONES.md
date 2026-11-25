@@ -21,7 +21,7 @@ A `MAP\ZONE*.ZND` is what the room loader reads when the zone changes (`Content/
 - **Enemy section:** a count, that many ZUD (sector, read size) entries, then that many 0x464-byte templates (`vs_CharInitData`, `Actors/CharacterInit.hpp`).
 - **Texture section:** either 32 zero bytes, or four table sizes of which only the first is used, followed by that table: a count and that many TIMs, each after its byte size.
 
-`VS.Extract tables <datadir>` (and `extract`) converts every zone with converter `znd-tables` version 6
+`VS.Extract tables <datadir>` (and `extract`) converts every zone with converter `znd-tables` version 7
 (`Extract/ZndConversion.hpp`, `Content/ZoneTables.hpp`). `tables` runs after `models`, because the zones name the
 enemy archetypes (§6.2.5), and after the action catalog, because limbs name actions. It writes six CSV tables, each with a committed schema that is written beside it and must
 match (a test checks this). Columns are described in the schemas; the rules they do not express are:
@@ -68,7 +68,8 @@ version-3 numeric `status_immunities` cell (signed or unsigned), refusing a numb
 version-4 reserved byte column (below) only when every cell holds the value the tables now give that byte. It names
 a version-5 numeric action cell, refusing an id the action catalog lacks, and drops `action_N_index` only when every
 cell is N-1. Rows are kept, so a limb whose only non-zero bytes were those indices keeps an all-zero row that a fresh
-conversion would omit; both read the same. A normal `tables` run upgrades version 1-5 tables before considering
+conversion would omit; both read the same. It drops version 6's equipment index columns only when every cell is 0.
+A normal `tables` run upgrades version 1-6 tables before considering
 source reconversion, preserving existing native edits. Unknown enum codes remain preservable by the raw ZND codec, but are refused as native authoring values.
 This does not resolve the remaining part categories, strings, semantic identities or relational enemy
 definitions.
@@ -79,8 +80,11 @@ definitions.
   each limb's +0x5A and +0x5B are zero padding in every disc template. A limb's +0x52 is 1 exactly when its
   `armor_material` is not `none`. Upstream `applyArmorStats` copies it into equipment state that nothing reads.
   Each limb's action slot N holds index N-1 at +0x13+4(N-1) in every disc template; `func_80076784` copies it into
-  the actor's slot, where nothing reads it. The converter refuses a template whose reserved bytes differ, so every
-  rebuild stays exact.
+  the actor's slot, where nothing reads it. The equipment indices (`weapon_index` 0x126, `shield_index` 0x202,
+  `accessory_index` 0x235, each limb armour's +0x53 and each part's +0x17) are 0 (not from the inventory) in every
+  disc template. The `apply*Stats` functions copy them into actor stats, and only `vs_mainMenu_initInventory` reads
+  them, from the player's. The converter refuses a template whose reserved bytes differ, so every rebuild stays
+  exact.
 - A limb or part whose fields are all zero, and an empty room slot, has no row; a missing row reads as zeros plus
   its reserved bytes.
 - Rows name files by id, never by sector. The rebuild takes each named file's sector and sector-rounded size from `files.tsv` as it is now.
