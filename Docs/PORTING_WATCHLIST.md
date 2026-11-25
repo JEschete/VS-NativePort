@@ -284,94 +284,29 @@ arrays backward from `0x1F800400`. Its fix uses independent native `short[256]` 
 byte-sized dimension plus its final boundary, and checks the tile-table capacity. Tests verify the packet
 coordinates. The same function's scaled-quad links now use native handles rather than truncated pointers.
 
-## 7. Extractor (deferred)
+## 7. Lasting facts from the copy and the title slice
 
-**Owner, 2026-10-17:** `VS.Extract` stays C++. Its decoders will be ported from VS-Workshop's `Workshop.Core`
-(`D:\Dev\Modding\VS-Workshop`, C#), which already decodes BIN/CUE, ISO9660, MPD/ZND/SHP/WEP/ZUD/SEQ/ESQ/TIM, palettes
-and P-file effects. Workshop is still in development, so the port waits until it is further along. It is part of
-Phase 1a step 5 (data disposition and asset extraction). AKAO, XA and STR are not in Workshop and are ours to write.
+The extractor deferral, the copy's leftovers and the title-slice findings (former §7-§9) are in
+`git show b0383a255:Docs/PORTING_WATCHLIST.md`. These still hold:
 
-**Workshop headless API (available 2026-10-17).** `VS.Workshop.Headless.exe` serves the same readers over local
-HTTP (127.0.0.1, bearer token from `WORKSHOP_API_TOKEN`, never committed or printed) or MCP over stdio; see
-`D:\Dev\Modding\VS-Workshop\API.md`. Verified against `disks\SLUS-01040.cue` (39 operations; assets list, bytes,
-fields). Where it helps this port, without replacing the C++ extractor decision:
-
-- **Decoder oracle:** `asset_read`, `asset_texture` (PNG per palette), `asset_inspect` and the GLB export are the
-  reference that `VS.Extract`'s decoders and the round-trip tests (ASSET_PIPELINE.md §7) compare against.
-- **Naming evidence:** `asset_fields` returns verified field identities for on-disc formats (ZND enemy records,
-  MPD, SHP...), which can confirm or correct low/opaque `OnDisc` fields in FIELD_LEDGER.csv with a citation to the
-  Workshop field, alongside runtime tracing (#347).
-- **Development data for 1b:** extracting the few files the title slice needs before the converters exist; such
-  output stays under `build\` or `Native\data\` (git-ignored), never in the repo.
-
-## 8. Left by the copy (Step 4), for 1b and modernization
-
-What the mechanical copy kept as it was, so that each item gets a deliberate fix rather than a guess:
-
-- **Shims and stubs.** T shims (`Native\Engine\Legacy\`, `Native\Content\Legacy\`) and the 244 assembly-only
-  functions record `VS::Core::RecordUnported` and do nothing yet. `Core::DumpUnportedToLog` lists the ones a run reaches, which
-  orders the work. libpad, VSync and the root counters (strategy R in the SDK ledger) are still shims with the SDK
-  names because Engine\Input and Core::FrameClock have no matching API yet.
-- **GTE math.** `Core/Gte.hpp` follows the documented GTE arithmetic; its rotation order, `rsin`/`ratan2` rounding,
-  projection divide and fog setup need the parity tests of plan ?6.1 before gameplay depends on them.
-- **Casts for per-file declarations.** 98 uses go through a cast to the view a decomp file declared and 30 calls go
-  through an unprototyped pointer (copy report `view-cast`, `implicit-call-cast`). Each marks a place where two
-  files disagreed about a type or an argument list; modernization picks the real type.
-- **Disc positions.** `Content/DiscLayout.hpp` keeps real LBAs/sizes because the code does sector arithmetic; Content
-  must map a sector to its converted file. Code names a file by its disc path, `VS::Content::disc::Locate("DIR/FILE")`,
-  evaluated at compile time, so a path missing from the table does not compile. The table lists only the files the code
-  reads (the full listing is `Docs/ledgers/CONTENT_LEDGER.csv`); add a row, keeping path order, before citing a new one.
-  `MENUBGSZ` is the ledger size of the title background asset.
-- **String ids.** `Content/StringTables.hpp` holds the decomp's per-overlay string-table ids as
-  `VS::Content::text::<file>::<table>::{offset,index}` constants. The retired `gen_decomp_headers.py` read the
-  offsets from the user's extracted tables (`--data`), as the decomp's build reads them from the disc; the header is
-  now hand-maintained. The strings themselves stay in the extracted files.
-- **Disc data.** Module data and pointer tables are filled at start-up (plan "Phase 1b status"). 88 arrays whose
-  size neither the ledger nor the splat configs give stay tentative one-element definitions (84 are effect-plugin
-  arrays; reported as `module-data-unsized`).
-- **Helper macros.** The game's packet macros (`vs_getXY`, `vs_getRGB0`, `vs_getTag`...) keep their decomp names
-  (they are not ledger rows) until the primitive code moves to the render queue.
-- **Review list.** `tools\port\copy_fixups.py` holds the hand-reviewed text fixes (merged-layout member access, the
-  save copies, `_insertTPage` in C, the list splice, the game heap base, two nested same-as types); the copy fails if
-  one stops matching.
-- **Hand work.** The copy regenerates everything from the decomp, so output is never edited in place:
-  `tools\port\own.py <id> --to <new .c>` moves an item to a hand-maintained file listed in `tools\port\owned.csv`
-  (ledger `modernized` = `wip`), and the copy then includes that file's header instead of emitting the item. The
-  committed `tools\port\copy_manifest.json` hashes every generated file; a hand edit to one, or a file in the way,
-  stops the copy before it writes anything.
-- **Lint noise.** `native_boundary.py`'s `ps1-address` rule also matches sign-bit flags (`0x80000000`,
-  `0x80000001`); of its 36 hits only the overlay slot table and one KSEG pointer test in Audio are addresses.
-
-## 9. Found while running the title slice (1b)
-
-Each of these broke the running game silently; the fix is in the copy tool or the shims, so it holds for every
-module, not only the title.
-
-- **`char` is unsigned.** The original compiler ran with `-funsigned-char` (`tools\verification\matching.py`);
-  copied C now builds with `/J`. Signed `char` turned the pad bytes into negative numbers and lost buttons.
-- **Signed pointer-sized integers.** A pointer stored through `(long)`/`(int)` is `intptr_t`, not `uintptr_t`:
-  `(long)result < 0` is an error sentinel (`_loadFileMenu`), and unsigned made a failed card read look like a loaded
-  save.
-- **Views of globals.** `view-of` rows (34) were separate variables; they are macros over their base now. Watch for
-  new ones when the ledger changes: the copy report lists `view-macro`, `view-unresolved` and `view-negative-offset`
-  (3 left: `Field::triggerMarkerMatrix`, `Field::triggerMarkerVertex`, `Actors::sequenceTexturePagesOneBased`).
-- **Assets cut in two.** Splat may split one C array into several images (`_fontTable[]` = `_fontTable` +
-  `_fontTable1`); an asset now runs to the next subsegment the C code itself declares.
-- **Data next to its header.** `(u_long*)&header + 1` reaches pixels stored after a size header (`_nowLoading`);
-  natively they are two globals, so such uses get a reviewed fixup (F03421).
-- **Reads span files.** The game reads MCDATA.BIN and MCMAN.BIN in one request; Content reads on through
-  consecutive files as the drive did.
-- **Event no-ops.** Copied code retries `EnableEvent`/`SetRCnt`/... until they return 1, so the D no-ops return
-  success. Interrupt-completed transfers (`SpuWrite`) call their completion callback synchronously.
-- **Pad stick bytes.** `Input_ReadControllerPort` stores receive-buffer bytes 4/5 as the left stick and 6/7 as the
-  right; the controller sends the right stick first. The shim writes the hardware order, so the names in
-  `Input\Controller.c` (from the decomp) are swapped; check against analog movement in 1c before renaming.
-- **Palette-first images.** A splat `indexed` image without `cluts_after` stores its palette first, so the C symbol
-  starts 512 bytes into the segment (`_uiTable`, the load screen's CAUTION label).
-- **Overlay names.** Module pointer tables match the catalog overlay by file name (`BATTLE.PRG` vs
-  `BATTLE/BATTLE.PRG`); before that, BATTLE function tables stayed unresolved.
-- **Attract scenes (title idle) reach assembly-only rendering.** Loading (actors, SHP/SEQ/WEP, ZONE020/MAP213) and
-  the game loop run; drawing reaches unported stubs: `Actors::DrawActorModel` (~1150 lines of assembly),
-  `Render::SetRoomPolygonNearClip`, `Render::BuildRoomGeometryViewMatrix`, `Render::DrawSkyDome`,
-  `Render::QueueSpriteWithTexturePage`, `Core::Math::MultiplyMatrixIntoRight`, `Field::SampleCollisionHeightCode`,
-  `Battle::Ai::InitializeRoomAiMap`. These come first in the §5 rewrite order.
+- **Plain `char` was unsigned** (the original compiler used `-funsigned-char`). Bytes are `std::uint8_t`; a signed
+  `char` turned pad bytes negative and lost buttons.
+- **Pointer-sized integers are signed.** A pointer stored through `(long)`/`(int)` is `intptr_t`: `(long)result < 0`
+  is an error sentinel (`_loadFileMenu`), and unsigned made a failed card read look like a loaded save.
+- **Pad stick bytes.** The controller sends the right stick first: receive-buffer bytes 4/5 are the right stick and
+  6/7 the left. `Input::ControllerPortState` names them by the physical stick; the decomp's names are swapped.
+- **Reads span files.** The game reads MCDATA.BIN and MCMAN.BIN in one request; Content reads on through consecutive
+  files as the drive did.
+- **Splat image layout.** One C array may be split into several images (`_fontTable` + `_fontTable1`); an `indexed`
+  image without `cluts_after` stores its palette first, so the C symbol starts 512 bytes into the segment.
+- **Data after a header.** `(u_long*)&header + 1` reaches pixels stored after a size header (`_nowLoading`); natively
+  they are separate globals.
+- **Disc positions and string ids.** `Content/DiscLayout.hpp` keeps real LBAs and sizes, named by disc path through
+  `VS::Content::disc::Locate("DIR/FILE")` at compile time; add a row in path order before citing a new file.
+  `Content/StringTables.hpp` holds the per-overlay string-table ids. Both are hand-maintained.
+- **Whole-archive link check.** VS.Tests links the libraries with `/WHOLEARCHIVE`, so an unresolved or duplicate symbol
+  fails the build before anything calls it.
+- **`VS.Extract` stays C++** (owner, 2026-10-17). VS-Workshop (`D:\Dev\Modding\VS-Workshop`) serves its readers over
+  local HTTP or MCP; use `asset_read`, `asset_texture`, `asset_inspect` and `asset_fields` as a decoder oracle and as
+  field-identity evidence. Its API token comes from `WORKSHOP_API_TOKEN` and is never committed or printed; extracted
+  output stays under `build\` or `Native\data\`.

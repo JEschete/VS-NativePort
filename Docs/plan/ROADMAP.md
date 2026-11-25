@@ -42,15 +42,6 @@ alongside each slice, not only at Phase 2e.
 
 ## 13. Immediate actions
 
-### 13.1 Historical foundation record
-
-Phase 1a foundation is done and its checklist is history, not fresh validation of the current tree: ledgers generated,
-psx-spx and beetle-psx-libretro removed (D12), solution scaffolded with SDL3, every copied function, global, type and
-field named with cited evidence (runtime tracing of the remaining low-confidence names: #347), all game code copied
-and linking in Debug and Release, and the 1b slice started. The copier that did the copy is retired (D24); see
-[§5](PHASE1_HISTORY.md#5-phase-1a-workflow-in-order) and [PORTING_WATCHLIST.md](../PORTING_WATCHLIST.md). Current execution
-order is §13.2.
-
 ### 13.2 Next executable work
 
 1. **M0:** refresh the baseline and exception inventory; resolve or explicitly defer the decisions in §13.3.

@@ -1,68 +1,25 @@
 # C++ headers
 
-Every native file compiles as C++23 (plan D5), but most headers are still written in C: `.h` files with `#define`
-constants and everything at global scope. Until 2026-11-18 they also used `extern "C"`, `typedef struct`,
-`_Static_assert`, `f(void)`, GNU attributes, macro include guards and the copier's split type sections.
-They work, but they are not C++, and GitHub's language bar reports them as C for that reason. The owner decided on
-2026-11-18 that they are rewritten as real C++ headers rather than renamed or relabeled. Work is tracked in #441.
+Every native file compiles as C++23 (plan D5), and every header is real C++: a `.hpp` with `#pragma once`, its
+declarations in a `VS::<System>` or `VS::<Module>` namespace and no C idioms. The owner decided on 2026-11-18 that
+headers are rewritten, not renamed or relabeled; the migration (#441) is complete. Its dated retirement logs, owner
+decisions and per-header procedure are in `git show b0383a255:Docs/CPP_HEADERS.md`.
 
-[HEADER_LEDGER.csv](ledgers/HEADER_LEDGER.csv) has one row per file that needs work. `tools\ledger\headers.py` measures
+[HEADER_LEDGER.csv](ledgers/HEADER_LEDGER.csv) has one row per file that needed work. `tools\ledger\headers.py` measures
 every row from the source, so the ledger cannot claim progress the code does not have. CI fails on a stale ledger, on a
-`done` row that regresses, on a new C-style header or `.cpp`, and on C linkage or a retired criterion returning to any
-tracked file.
+`done` row that regresses, on a new C-style header or `.cpp`, and on C linkage or a retired criterion (`RETIRED_CRITERIA`
+in `headers.py`) returning to any tracked file.
 
-## C linkage retired (2026-11-18)
+## Writing a header
 
-C linkage was removed from every native file in one change rather than header by header. A name's linkage must agree in
-every translation unit that declares it, so migrating one header's linkage would have changed all of its includers
-anyway. Every file compiles as C++, and nothing outside the build looks up a native name by its C spelling: there are
-no exports, `GetProcAddress` lookups or assembly files, and the Python tools load only system DLLs. Debug and Release
-linked with no declaration that disagreed with its definition. The remaining `.h` files are still C-style in the other
-criteria below; their declarations now have C++ linkage.
-
-## C spellings retired (2026-11-18)
-
-Four more criteria were cleared from every header by rewrites that keep the meaning, across all of `Native\`:
-
-| Criterion | Rewrite |
-| --- | --- |
-| `static_asserts` | `_Static_assert(...)` became `static_assert(...)` |
-| `void_params` | `f(void)` became `f()` |
-| `gnu_attributes` | `__attribute__((unused))` on extern globals and one public field was removed; it has no effect there |
-| `typedefs` | `typedef struct X X;` became `struct X;` and `typedef struct X { ... } X;` became `struct X { ... };` (unions alike). `typedef enum X X;` was removed: each followed its own `enum X { ... }`, which C++ already names. `typedef T N;`, including function pointers and arrays, became `using N = T;` |
-
-Every tag already matched its typedef name, so no type changed its spelling. Enums stay unscoped: making one an
-`enum class` changes its uses, so it belongs to that header's own migration. `RETIRED_CRITERIA` in `headers.py` holds
-these four the way C linkage is held: a tracked header that regains one fails `--check`, even while other criteria
-keep it remaining. `tools\ledger\hazards.py` reads struct definitions in either form, and its sites were unchanged by
-the rewrite.
-
-## Include guards retired (2026-11-18)
-
-Every header now uses `#pragma once`, and `RETIRED_CRITERIA` holds `guard` to it.
-
-- The 65 headers guarded by a whole-file `#ifndef X` / `#define X` / `#endif` were converted; no other file tested or
-  defined any of those guard names.
-- The 222 `split` headers were merged into one section each. The copier wrote a types section and a declarations
-  section, and included type dependencies in `VS_TYPES_ONLY` mode, so an includer saw only their types. No source
-  file set `VS_TYPES_ONLY`, and only one declarations section defined a macro (`SPU_PAN_TABLE_SIZE`), so making the
-  declarations visible changes no expansion. It exposed one include cycle, `Effects/Runtime.h` ->
-  `Battle/ActionResolution.h` -> `Battle/BattleTypes.h` -> `Effects/Runtime.h`. `ActionResolution.h` included
-  `Action.h`, `BattleTypes.h` and `Hit.h` only for two pointer parameters, so it now forward-declares
-  `Battle_ActionDefinition` and `Battle_HitResult` instead. Those are now `VS::Battle::ActionDefinition` and
-  `VS::Battle::HitResult`, forward-declared in `Battle/ActionResolution.hpp`.
-
-## Owner decisions (2026-11-18)
-
-- **Real C++, not a rename.** Renaming `.h` to `.hpp` or overriding the language in `.gitattributes` would change the
-  label but not the code. "I want this project correct, not just 'works'."
-- **The copier is retired, file by file.** `tools\port\copy_to_native.py` reads the decomp under
-  `resources\rood-reverseWin`, which the owner removed on purpose in `6b20016f0`, so it can no longer regenerate
-  anything. `tools\port\copy_manifest.json` now lists files that have not been migrated yet. It no longer means the
-  file can be reproduced. Generated files are edited directly. A migration that crosses a generated file, for example
-  updating an include when a header becomes `.hpp`, edits it in place. A generated header
-  leaves the manifest when it is migrated itself, and from then on it is held to the strict quality checks like any
-  other hand-maintained file.
+- Name it `.hpp`, use `#pragma once` and declare in its system or module namespace with the ledgers' names: a
+  `final_name` such as `Field::zoneContext` becomes `VS::Field::zoneContext`. Break include cycles with forward
+  declarations.
+- Use `<cstdint>` types; the original's plain `char` was unsigned, so its bytes are `std::uint8_t`. Put an original
+  layout's sizes and offsets in a `layout` namespace of named constants, each with its `static_assert`.
+- Check the basename first: a private `src\Field\X.hpp` next to a public `include\Field\X.hpp` resolves to the
+  public one, and cpplint's `build/include_subdir` rejects a bare `"X.hpp"` include from the root of a `src` directory.
+- Run `python tools\scaffold\gen_solution.py` for a new file, then `python tools\ledger\headers.py --check`.
 
 ## Reading the ledger
 
@@ -119,44 +76,6 @@ compile settings, is part of #248.
 | `remaining` | At least one criterion fails |
 | `done` | Every criterion holds. `--sync` sets it, and it stays set: a later failure is reported as `header-regressed` or `source-regressed`, not recorded as `remaining` |
 | `retired` | The file was deleted on purpose. Written by hand with a note saying why |
-
-## Migrating a header
-
-1. Pick a header whose dependencies are done or move in the same change. Start with leaves.
-2. `git mv X.h X.hpp` and update every include of it. Check the new basename first: a private `src\Field\X.hpp` next to a
-   public `include\Field\X.hpp` resolves to the public one. When a private header only adds a declaration or two to a
-   public header of the same name, move them into the public header and mark the private row `retired` with a
-   `merged into` note. A private header at the root of a `src` directory cannot be renamed in place either: cpplint's
-   `build/include_subdir` rejects a bare `"X.hpp"` include.
-3. Rewrite it against the criteria table, with `#pragma once`, its system or module namespace and the ledgers' names.
-   A `final_name` such as `Field::zoneContext` becomes `VS::Field::zoneContext`. Define it with its qualified name at
-   global scope (`ZoneContext VS::Field::zoneContext;`) or unqualified inside the namespace. Inside that namespace, uses
-   drop the `VS::Field::` prefix unless a local or member of the same name would shadow it.
-4. If it was generated, remove it from `copy_manifest.json` and resolve what that exposes. The first migration
-   (`Event/Camera.hpp` and `Event/Screen.hpp`, #347) established these steps:
-   - Delete the path's line from `copy_manifest.json`. Only membership matters now; nothing compares the hashes.
-     Deleting or renaming a listed file without its line fails `tools\ledger\headers.py --check` (`manifest-stale`),
-     because `tools\port\check_leftovers.py` reads every listed path (#468).
-   - Run `tools\ledger\gates.py --check`. Headers carry no `owned.csv` rows, so none were reported, but a header
-     that a registered function names as its `header` would be.
-   - `tools\scaffold\gen_solution.py` gives only manifest `.cpp` files the cross-project include directories, so a
-     header changes no list. Rerun it for the new file name.
-   - The header is in the strict quality scope (every source is since #483): `lower_case` members, `<cstdint>` types (the original's plain
-     `char` was unsigned, so its bytes are `std::uint8_t`), and no magic numbers. Put the original layout's sizes and
-     offsets in a `layout` namespace of named constants, each with its `static_assert`.
-   - A generated file that stays in the manifest and declares data of the migrated type forward-declares it, for
-     example `namespace VS::Event { struct CameraState; }` before `extern VS::Event::CameraState* Event_camera;`.
-5. Update ledger locations that name the old path, then run `tools\scaffold\gen_solution.py`.
-6. Build Debug and Release, run the tests that cover the changed code, run the quality check on the changed files, and
-   run `python tools\ledger\headers.py --sync`.
-
-## Not part of this work
-
-- **C-style code in `.cpp` bodies and the relaxed compile settings:** #248.
-- **PS1 SDK types and hardware-shaped bridges** (`u_char`, `RECT`, packet macros): the EC register (plan §15) and
-  [SDK_API_LEDGER.md](ledgers/SDK_API_LEDGER.md). A migrated header may still use them.
-- **Removing the copier itself:** possible once `copy_manifest.json` is empty, which needs the generated `.cpp` files to
-  leave it under #248.
 
 ## Status
 

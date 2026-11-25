@@ -7,7 +7,7 @@ Target: Windows x64 desktop, built from one Visual Studio solution at the repo r
 **How to use this plan:** this index holds the decision log (§0), the target and baseline (§0.1, §0.2) and the hard
 rules (§2); every other section lives in a topic file under [plan/](plan/), listed in the section map below. §0 and §6
 define the destination, §14 the executable work packages and acceptance gates, and §15 the EC-01–EC-09
-emulation-compatibility register. §5 and §13.1 are history, not proof that a subsystem runs correctly. Code comments
+emulation-compatibility register. The Phase 1a workflow history (§5, Steps 1–7) was removed. Code comments
 cite "plan §N", "plan section N" or "plan Dn"; resolve them through the map. No runtime verification or owner
 approval is implied by this document.
 
@@ -18,10 +18,10 @@ Evidence and history removed in the 2026-11-24 split remain in Git: git show 215
 | Sections | File | Topic |
 |---|---|---|
 | 0, 0.1, 0.2, 2, 2.1, 2.2 | this file | Decision log, "not an emulator" target, inspected baseline, hard rules and shims |
-| 1 (Phase 1, Phase 2, Phase 3), 13, 13.1, 13.2, 13.3 | [plan/ROADMAP.md](plan/ROADMAP.md) | Phases and exit gates; foundation record, next work, open questions |
+| 1 (Phase 1, Phase 2, Phase 3), 13, 13.2, 13.3 | [plan/ROADMAP.md](plan/ROADMAP.md) | Phases and exit gates; next work, open questions |
 | 3 | [plan/LAYOUT.md](plan/LAYOUT.md) | Solution layout, including the generated project-boundary block |
-| 4, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6 | [plan/LEDGERS.md](plan/LEDGERS.md) | Ledgers: function catalog, SDK, retired source-file ledger, data, coverage |
-| 5, Step 1–Step 7, Phase 1b status | [plan/PHASE1_HISTORY.md](plan/PHASE1_HISTORY.md) | Phase 1a workflow and the retired copier (history) |
+| 4, 4.1, 4.2, 4.4, 4.5, 4.6 | [plan/LEDGERS.md](plan/LEDGERS.md) | Ledgers: function catalog, SDK, data, later ledgers, coverage |
+| 5, Step 1–Step 7, Phase 1b status, 4.3, 13.1 | removed history: `git show b0383a255:Docs/plan/PHASE1_HISTORY.md` | Phase 1a workflow, the retired copier and source-file ledger, foundation record |
 | 6, 6.1, 6.2, 6.3, 6.4, 6.5 | [plan/SYSTEMS.md](plan/SYSTEMS.md) | Per-system designs: Core, Render, Audio, Video, Input |
 | 6.6, 6.7, 6.8, 6.8.1, 6.8.2 | [plan/SYSTEMS_2.md](plan/SYSTEMS_2.md) | Content, Save, Game modules, actor assets, state ownership (#45) |
 | 7, 8, 8.1, 8.2 | [plan/RETIREMENT_AND_CPP.md](plan/RETIREMENT_AND_CPP.md) | R/T/D retirement strategies; why C++; promotion checklist |

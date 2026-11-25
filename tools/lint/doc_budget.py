@@ -28,10 +28,10 @@ BUDGETS = {
 LEGACY_CEILINGS = {
     "Docs/BUILDING.md": 53_000,
     "Docs/COMBAT_LAB.md": 33_000,
-    "Docs/NAMING_CONVENTIONS.md": 55_000,
-    "Docs/PORTING_WATCHLIST.md": 31_000,
+    "Docs/NAMING_CONVENTIONS.md": 34_000,
+    "Docs/PORTING_WATCHLIST.md": 25_000,
     "Docs/QUALITY.md": 22_000,
-    "Docs/ledgers/SDK_API_LEDGER.md": 34_000,
+    "Docs/ledgers/SDK_API_LEDGER.md": 32_000,
     "Native/Player/README.md": 30_000,
 }
 EXCLUDED_PREFIXES = ("resources/",)

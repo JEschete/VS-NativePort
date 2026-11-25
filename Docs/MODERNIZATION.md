@@ -127,10 +127,3 @@ the AI masks that state with a power of two. Replays do not exercise the path th
   turn any playtest into a regression test.
 - **Coverage shows a function ran, not that its result was checked.**
 - **The roadmap mapping is proposed,** from each path's system and each issue's title.
-
-## Bookkeeping to correct
-
-- The 8 `copied=stub` catalog rows are implemented: 7 are macro aliases of `Core_Gte_*` and 1 has its own body. Only the label
-  is stale.
-- `F03404` and `F03408` name `Native\Engine\src\Render\Lighting.cpp`, which does not exist. They are aliases in `Lighting.h`.
-- The `VS::Core::RecordUnported` count is measured from calls, not text. Comments that mention it are not call sites.

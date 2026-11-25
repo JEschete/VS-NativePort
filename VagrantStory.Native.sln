@@ -115,7 +115,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "plan", "plan", "{72043A9D-1
 		Docs\plan\EC_REGISTER_3.md = Docs\plan\EC_REGISTER_3.md
 		Docs\plan\LAYOUT.md = Docs\plan\LAYOUT.md
 		Docs\plan\LEDGERS.md = Docs\plan\LEDGERS.md
-		Docs\plan\PHASE1_HISTORY.md = Docs\plan\PHASE1_HISTORY.md
 		Docs\plan\RETIREMENT_AND_CPP.md = Docs\plan\RETIREMENT_AND_CPP.md
 		Docs\plan\ROADMAP.md = Docs\plan\ROADMAP.md
 		Docs\plan\SYSTEMS.md = Docs\plan\SYSTEMS.md
