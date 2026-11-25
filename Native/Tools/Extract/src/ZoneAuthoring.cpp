@@ -74,6 +74,7 @@ std::expected<void, std::string> PrepareFiles(const fs::path& root,
     report.split_columns += migrated->split_columns;
     report.retired_columns += migrated->retired_columns;
     report.named_values += migrated->named_values;
+    report.resigned_values += migrated->resigned_values;
     auto rewrite = Content::NormalizeTableText(Content::ZoneTableSpec(table),
                                                migrated->text, path);
     if (!rewrite) return std::unexpected(rewrite.error());

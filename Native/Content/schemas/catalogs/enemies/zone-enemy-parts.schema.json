@@ -26,77 +26,77 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 65535,
-      "description": ""
+      "description": "the global item id, which names the part"
     },
     {
       "name": "sub_id",
       "type": "integer",
       "minimum": -128,
       "maximum": 127,
-      "description": ""
+      "description": "the item's 1-based index in its family: item_id less 0 for a blade, 95 for a grip, 126 for a shield, armour or accessory, 260 for a gem"
     },
     {
       "name": "weapon_model_id",
       "type": "integer",
       "minimum": -128,
       "maximum": 127,
-      "description": ""
+      "description": "a blade's or shield's WEP model (OBJ/<two hex digits>.WEP, converted to models/weapons/<two hex digits>.gltf); 0 for other parts"
     },
     {
       "name": "category",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": ""
+      "description": "a blade's category (1 dagger .. 9 crossbow), which with a model also picks the enemy's attack animations; a grip's type (1-4); an armour piece's (1 shield, 2 helm, 3 breast armour, 4 leggings, 5 glove, 7 accessory); 0 for a gem"
     },
     {
       "name": "strength",
       "type": "integer",
       "minimum": -128,
       "maximum": 127,
-      "description": ""
+      "description": "strength the part adds; a weapon sums its blade, grip and gems, a shield its base and gems"
     },
     {
       "name": "intelligence",
       "type": "integer",
       "minimum": -128,
       "maximum": 127,
-      "description": ""
+      "description": "intelligence the part adds; summed as strength"
     },
     {
       "name": "agility",
       "type": "integer",
       "minimum": -128,
       "maximum": 127,
-      "description": ""
+      "description": "agility the part adds; summed as strength"
     },
     {
       "name": "current_dp",
       "type": "integer",
       "minimum": 0,
       "maximum": 65535,
-      "description": ""
+      "description": "current DP (equal to max_dp on the disc)"
     },
     {
       "name": "max_dp",
       "type": "integer",
       "minimum": 0,
       "maximum": 65535,
-      "description": ""
+      "description": "maximum DP of a blade, shield or armour piece"
     },
     {
       "name": "current_pp",
       "type": "integer",
       "minimum": 0,
       "maximum": 65535,
-      "description": ""
+      "description": "current PP (zero on the disc)"
     },
     {
       "name": "max_pp",
       "type": "integer",
       "minimum": 0,
       "maximum": 65535,
-      "description": ""
+      "description": "maximum PP of a blade or shield"
     },
     {
       "name": "damage_type",
@@ -128,7 +128,7 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": ""
+      "description": "how much each of the blade's attacks costs"
     },
     {
       "name": "material",
@@ -151,42 +151,42 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": ""
+      "description": "the blade's recovery delay after an attack, for actions that take the weapon's delay"
     },
     {
       "name": "gem_slots",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": ""
+      "description": "how many gems a grip or shield holds"
     },
     {
       "name": "gem_effects",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": ""
+      "description": "a gem's effect (0 none): 1/2 physical/spell hit bonus, 3/4 +5% physical/spell damage, 5/6 physical/spell evasion, 7/8 -5% physical/spell damage taken, 9 PP gain; 11-14, 16, 18, 19 and 21 evade specific action effects"
     },
     {
       "name": "range",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": ""
+      "description": "the blade's reach; the enemy's reach is added to it and to the other two extents"
     },
     {
       "name": "range_y",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": ""
+      "description": "the attack area's second extent"
     },
     {
       "name": "range_z",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": ""
+      "description": "the attack area's third extent"
     },
     {
       "name": "attack_shape",

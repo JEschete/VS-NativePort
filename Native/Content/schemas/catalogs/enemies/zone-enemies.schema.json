@@ -93,28 +93,28 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": ""
+      "description": "base strength; a room enemy spawns with up to 10 more or less"
     },
     {
       "name": "intelligence",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": ""
+      "description": "base intelligence; a room enemy spawns with up to 10 more or less"
     },
     {
       "name": "agility",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": ""
+      "description": "base agility; a room enemy spawns with up to 10 more or less"
     },
     {
       "name": "recovery_delay_bonus",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": ""
+      "description": "added to the recovery delay of each action the enemy takes but actions 22-53; the runtime keeps its low six bits"
     },
     {
       "name": "movement_class",
@@ -129,21 +129,21 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": ""
+      "description": "walking speed; the enemy walks at 9/10 of it"
     },
     {
       "name": "gait_class",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": ""
+      "description": "locomotion flags beside movement_class: 8 makes the AI's moves one run step long; scripted moves run, not walk, at 2 or 64 (to a tile), 4 or 128 (facing), 16 or 32 (the two flights); packed semantics remain under investigation"
     },
     {
       "name": "run_speed",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": ""
+      "description": "running speed; the enemy runs at 9/10 of it"
     },
     {
       "name": "status_immunities",
@@ -192,7 +192,7 @@
       "type": "integer",
       "minimum": -2147483648,
       "maximum": 2147483647,
-      "description": ""
+      "description": "packed AI settings: bits 2-3 facing delay, 4-6 wander preset, 8-9 step height, 10-11 tile step limit, 14 area lock, 16-17 view angle, 18-20 perception range, 21-22 relation category, 30-31 terrain mask; the rest set AI state flags, and an actor's saved flags can replace bits 21-31"
     },
     {
       "name": "mobility_limb_1",
@@ -213,7 +213,7 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": ""
+      "description": "the limb a hit aimed at the whole enemy strikes"
     },
     {
       "name": "weapon_material",

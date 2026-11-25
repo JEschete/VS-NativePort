@@ -289,6 +289,15 @@ void LegacyTableHeaders(const ModelRoot& root) {
         }
         continue;
       }
+      // Version 7 wrote the limbs' signed agility bonus unsigned.
+      if (spec.columns[column].name == "agility_defense_bonus") {
+        for (std::size_t row = 0; row < checked->size(); ++row) {
+          const std::int64_t value = checked->at(row).values[column];
+          records->at(row + 1).fields[column] =
+              std::to_string(static_cast<std::uint8_t>(value));
+        }
+        continue;
+      }
       // Enum codes, and flags as the signed number version 3 wrote.
       if (type != content::ColumnType::kEnum &&
           type != content::ColumnType::kFlags) {

@@ -21,7 +21,7 @@ A `MAP\ZONE*.ZND` is what the room loader reads when the zone changes (`Content/
 - **Enemy section:** a count, that many ZUD (sector, read size) entries, then that many 0x464-byte templates (`vs_CharInitData`, `Actors/CharacterInit.hpp`).
 - **Texture section:** either 32 zero bytes, or four table sizes of which only the first is used, followed by that table: a count and that many TIMs, each after its byte size.
 
-`VS.Extract tables <datadir>` (and `extract`) converts every zone with converter `znd-tables` version 7
+`VS.Extract tables <datadir>` (and `extract`) converts every zone with converter `znd-tables` version 8
 (`Extract/ZndConversion.hpp`, `Content/ZoneTables.hpp`). `tables` runs after `models`, because the zones name the
 enemy archetypes (§6.2.5), and after the action catalog, because limbs name actions. It writes six CSV tables, each with a committed schema that is written beside it and must
 match (a test checks this). Columns are described in the schemas; the rules they do not express are:
@@ -38,8 +38,9 @@ match (a test checks this). Columns are described in the schemas; the rules they
 All six tables receive early informational `display_name` columns through §1.2. `zone-enemies.csv` shows the
 decoded enemy name while its `name` and `weapon_name` hex fields continue to preserve every source byte.
 
-**Named fields and domains (versions 2-6).** Enemy class, equipment materials (the shared material domain),
-physical types, class ratings and affinities use the named domains in the schemas. Rules beyond the schemas:
+**Named fields and domains (versions 2-8).** Enemy class, equipment materials (the shared material domain),
+physical types, class ratings and affinities use the named domains in the schemas, and the schemas describe every
+template column from its upstream consumer. Rules beyond the schemas:
 - Version 3 names the parts' `damage_type`, `cost_type` (the resource the base attack spends) and `material`, and
   splits `shape_bits` into `attack_shape` (the shared volume-shape domain) and `attack_angle` (bits 3-7), as upstream
   `vs_Range`. Part `category` stays an integer: its domain depends on the part slot, which needs per-kind part tables.
@@ -49,12 +50,16 @@ physical types, class ratings and affinities use the named domains in the schema
 - Version 6 names each limb's four action slots `action_1`-`action_4` by `battle\actions.csv` id (blank for none,
   the game's action 0). `action_N_special_sequence` is the slot's 1-based special-attack sequence (0 = none), which
   `func_8007138C` plays for actions 141-223. Only the base action catalog resolves ids; catalog layers do not.
+- Version 8 makes the limbs' `agility_defense_bonus` signed, as the runtime limb's byte is. `getAgilityDifference`
+  and `getIntelligenceDifference` add it to the defender's totals, so the disc's 251, 246, 241 and 206 are -5, -10,
+  -15 and -50.
 - The remaining array tail bytes are explicit `storage_6`/`storage_7` fields, not invented classes/elements. They
   still need separation into import provenance when native template consumers are adopted.
 - DP splash columns identify their zero-based destination limb and percent units. A limb index is topology, not a
   universal head/arm/leg name; actual body-part names depend on the model.
 - The old enemy `material` column becomes `movement_class`. It feeds both gait/movement and body-load selection,
-  **not** the equipment material enum. Its packed semantics remain an explicit blocker rather than guessed names.
+  **not** the equipment material enum. Its packed semantics, and those of `gait_class` (its locomotion high byte),
+  remain an explicit blocker rather than guessed names; their schemas list only the bits consumers test.
 - Mappings follow `StringTables.hpp`'s status indices, `Targeting.cpp`, `EquipmentStats.cpp`,
   `EquipmentAffinity.cpp` and `ActorSpawning.cpp`, with upstream structures/consumers in `BATTLE.PRG/charInit.h`
   and `146C.c`.
@@ -68,8 +73,9 @@ version-3 numeric `status_immunities` cell (signed or unsigned), refusing a numb
 version-4 reserved byte column (below) only when every cell holds the value the tables now give that byte. It names
 a version-5 numeric action cell, refusing an id the action catalog lacks, and drops `action_N_index` only when every
 cell is N-1. Rows are kept, so a limb whose only non-zero bytes were those indices keeps an all-zero row that a fresh
-conversion would omit; both read the same. It drops version 6's equipment index columns only when every cell is 0.
-A normal `tables` run upgrades version 1-6 tables before considering
+conversion would omit; both read the same. It drops version 6's equipment index columns only when every cell is 0,
+and rewrites a version-7 `agility_defense_bonus` of 128-255 as the same byte's signed value.
+A normal `tables` run upgrades version 1-7 tables before considering
 source reconversion, preserving existing native edits. Unknown enum codes remain preservable by the raw ZND codec, but are refused as native authoring values.
 This does not resolve the remaining part categories, strings, semantic identities or relational enemy
 definitions.

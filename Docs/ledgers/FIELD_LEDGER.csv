@@ -2727,8 +2727,8 @@ T00313.000,T00313,_itemsText_t,0,name,0,u_short[14],,,,name,Named in the fork; s
 T00313.001,T00313,_itemsText_t,1,menuRowFlags,0,int,,,packed disabled/style/count/material/capacity/icon flags,flags,Named in the fork; see cited use,med,source:58EC.c:120
 T00313.002,T00313,_itemsText_t,2,description,0,u_short[48],,,,description,Named in the fork; see cited use,med,source:58EC.c:134
 T00314.000,T00314,_limbInit,0,hp,0,u_short,,,,hp,Hit points (also the maximum),high,native:CharacterInit.hpp VS::Actors::LimbInit::hp (#441);source:146C.c:6230
-T00314.001,T00314,_limbInit,1,agilityDefenseBonus,0,char,,,,agility_defense_bonus,Agility defense bonus,high,native:CharacterInit.hpp VS::Actors::LimbInit::agility_defense_bonus (#441);source:146C.c:6231
-T00314.002,T00314,_limbInit,2,chainEvasion,0,char,,,,chain_evasion,Chain evasion,high,native:CharacterInit.hpp VS::Actors::LimbInit::chain_evasion (#441);source:146C.c:6243
+T00314.001,T00314,_limbInit,1,agilityDefenseBonus,0,char,,,,agility_defense_bonus,Signed bonus added to this limb's defender totals in agility and intelligence hit checks (disc 251 = -5),high,native:CharacterInit.hpp VS::Actors::LimbInit::agility_defense_bonus (#441);source:146C.c:6231;source:146C.c:9904;source:146C.c:9955
+T00314.002,T00314,_limbInit,2,chainEvasion,0,char,,,,chain_evasion,Chain-attack evasion; hit chance (255 - value) * 100 / 255,high,native:CharacterInit.hpp VS::Actors::LimbInit::chain_evasion (#441);source:146C.c:6243;source:146C.c:10050
 T00314.003,T00314,_limbInit,3,types,0,signed char[4],,,,types,Limb type values,high,native:CharacterInit.hpp VS::Actors::LimbInit::types (#441);source:146C.c:6246
 T00314.004,T00314,_limbInit,4,affinities,0,signed char[8],,,,affinities,Limb affinity values,high,native:CharacterInit.hpp VS::Actors::LimbInit::affinities (#441);source:146C.c:6250
 T00314.005,T00314,_limbInit,5,actions,0,_actions[4],,,,actions,Actions the limb can perform,high,native:CharacterInit.hpp VS::Actors::LimbInit::actions (#441);source:146C.c:6260
@@ -6073,7 +6073,7 @@ T00675.021,T00675,vs_battle_uiEquipment,21,classes,0,signed char[8],,,,classes,E
 T00675.022,T00675,vs_battle_uiEquipment,22,affinities,0,signed char[8],,,,affinities,Elemental affinity values,med,source:146C.c:1018;use cited by sanity pass;source:146C.h:320
 T00676.000,T00676,vs_battle_uiEquipment_limb,0,hp,0,short,,,,hp,Current HP,high,native:Actor.hpp LimbStats::hp (#441);source:146C.c:864
 T00676.001,T00676,vs_battle_uiEquipment_limb,1,maxHp,0,short,,,,max_hp,Maximum HP,high,native:Actor.hpp LimbStats::max_hp (#441);source:146C.c:6230
-T00676.002,T00676,vs_battle_uiEquipment_limb,2,agilityDefenseBonus,0,signed char,,,,agility_defense_bonus,Fork name kept; see cited use,med,native:Actor.hpp LimbStats::agility_defense_bonus (#441);source:146C.c:6231
+T00676.002,T00676,vs_battle_uiEquipment_limb,2,agilityDefenseBonus,0,signed char,,,,agility_defense_bonus,Signed bonus added to this limb's defender totals in agility and intelligence hit checks,high,native:Actor.hpp LimbStats::agility_defense_bonus (#441);source:146C.c:6231;source:146C.c:9904;source:146C.c:9955
 T00676.003,T00676,vs_battle_uiEquipment_limb,3,unk5,1,char,,,modelLimbAnchorIndex,anchor_bone,Model bone the limb's labels and markers are projected from,high,native:Actor.hpp LimbStats::anchor_bone (#441);source:146C.c:6236;source:120.c:1214
 T00676.004,T00676,vs_battle_uiEquipment_limb,4,nameIndex,0,u_char,,,,name_index,Limb name index,med,native:Actor.hpp LimbStats::name_index (#441);source:146C.c:6237
 T00676.005,T00676,vs_battle_uiEquipment_limb,5,chainEvasion,0,char,,,,chain_evasion,Chain evasion,med,native:Actor.hpp LimbStats::chain_evasion (#441);source:146C.c:6243

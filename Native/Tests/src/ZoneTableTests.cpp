@@ -561,6 +561,34 @@ TEST_CASE("Limb actions the action catalog cannot name are refused",
         "catalogs/battle/actions.csv does not hold");
 }
 
+TEST_CASE("Limb agility bonuses are signed bytes", "[content-tables][znd]") {
+  Texts texts = SampleTexts();
+  // The first template's limb 0 holds 150 at +0x02.
+  CHECK(CellOf(texts, ZoneTable::kLimbs, 1, "agility_defense_bonus") == "-106");
+  SetCell(texts, ZoneTable::kLimbs, 1, "agility_defense_bonus", "-5");
+  auto expected = SampleZones();
+  expected[0].enemies[0].data[0x238 + 0x02] = std::byte{0xFB};
+  CHECK(ReadBack(texts) == expected);
+}
+
+TEST_CASE("Unsigned limb agility bonuses migrate to signed values",
+          "[zone-authoring][content-tables][znd]") {
+  // Version 7 wrote the byte unsigned; the schema refuses 256 as before.
+  const auto migrated = content::MigrateZoneColumns(
+      ZoneTable::kLimbs,
+      "limb,agility_defense_bonus\n0,251\n1,5\n2,-3\n3,128\n4,255\n5,256\n",
+      "limbs.csv");
+  if (!migrated) FAIL(migrated.error());
+  CHECK(migrated->resigned_values == 3);
+  CHECK(migrated->text ==
+        "limb,agility_defense_bonus\n0,-5\n1,5\n2,-3\n3,-128\n4,-1\n5,256\n");
+  const auto again =
+      content::MigrateZoneColumns(ZoneTable::kLimbs, migrated->text, "l.csv");
+  if (!again) FAIL(again.error());
+  CHECK(again->resigned_values == 0);
+  CHECK(again->text == migrated->text);
+}
+
 TEST_CASE("Numeric limb action ids migrate to action names",
           "[zone-authoring][content-tables][znd]") {
   const auto migrated = content::MigrateZoneColumns(

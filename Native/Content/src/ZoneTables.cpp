@@ -106,6 +106,9 @@ struct TableLayout {
   std::vector<std::string_view> key;
   std::vector<PackedColumn> packed;
   std::vector<ReservedByte> reserved;
+  // Byte columns version 8 made signed; version 7 wrote 128-255 for the
+  // negative values.
+  std::vector<std::string_view> resigned;
   TableSpec spec;
   std::string directory;
 
@@ -297,17 +300,35 @@ void AddEnemyFields(TableLayout& table) {
   table.Bytes("name", 0x04, kNameBytes, "the name, in the game's encoding");
   table.Add("hp", 0x1C, 2, true, "hit points");
   table.Add("mp", 0x1E, 2, true, "magic points");
-  table.Add("strength", 0x20, 1, false, "");
-  table.Add("intelligence", 0x21, 1, false, "");
-  table.Add("agility", 0x22, 1, false, "");
-  table.Add("recovery_delay_bonus", 0x23, 1, false, "");
+  // decomp: func_80076784 (src/BATTLE/BATTLE.PRG/146C.c:5941) varies a room
+  // enemy's HP, MP (unless 0) and attributes by -10..+10, keeps the recovery
+  // delay bonus's low six bits and gives the enemy 9/10 of each speed.
+  table.Add("strength", 0x20, 1, false,
+            "base strength; a room enemy spawns with up to 10 more or less");
+  table.Add("intelligence", 0x21, 1, false,
+            "base intelligence; a room enemy spawns with up to 10 more or "
+            "less");
+  table.Add("agility", 0x22, 1, false,
+            "base agility; a room enemy spawns with up to 10 more or less");
+  // decomp: func_800859B4 (src/BATTLE/BATTLE.PRG/146C.c:13010)
+  table.Add("recovery_delay_bonus", 0x23, 1, false,
+            "added to the recovery delay of each action the enemy takes but "
+            "actions 22-53; the runtime keeps its low six bits");
   table.Add("movement_class", 0x24, 1, false,
             "movement/body-load selector, not equipment material; packed "
             "semantics remain under investigation",
             {}, "material");
-  table.Add("walk_speed", 0x25, 1, false, "");
-  table.Add("gait_class", 0x26, 1, false, "");
-  table.Add("run_speed", 0x27, 1, false, "");
+  table.Add("walk_speed", 0x25, 1, false,
+            "walking speed; the enemy walks at 9/10 of it");
+  // decomp: func_800E6178 (src/BATTLE/BATTLE.PRG/7CD68.c:342) packs this
+  // byte above movement_class in the AI's locomotion flags.
+  table.Add("gait_class", 0x26, 1, false,
+            "locomotion flags beside movement_class: 8 makes the AI's moves "
+            "one run step long; scripted moves run, not walk, at 2 or 64 (to "
+            "a tile), 4 or 128 (facing), 16 or 32 (the two flights); packed "
+            "semantics remain under investigation");
+  table.Add("run_speed", 0x27, 1, false,
+            "running speed; the enemy runs at 9/10 of it");
   // decomp: applyStatus (src/BATTLE/BATTLE.PRG/146C.c:11129) masks the
   // status-rule bits with these.
   // decomp: func_80076784 (src/BATTLE/BATTLE.PRG/146C.c:5941) starts an enemy
@@ -316,12 +337,21 @@ void AddEnemyFields(TableLayout& table) {
               "statuses the enemy cannot receive; immunity to spell-immunity "
               "also starts it with that status",
               StatusFlags());
-  table.Add("ai_settings", 0x2C, 4, true, "");
+  // decomp: func_800E5A9C (src/BATTLE/BATTLE.PRG/7CD68.c:205) decodes it
+  // (Battle/Ai/ActorSettings.hpp).
+  // decomp: func_800E5A74 (src/BATTLE/BATTLE.PRG/7CD68.c:200)
+  table.Add("ai_settings", 0x2C, 4, true,
+            "packed AI settings: bits 2-3 facing delay, 4-6 wander preset, "
+            "8-9 step height, 10-11 tile step limit, 14 area lock, 16-17 view "
+            "angle, 18-20 perception range, 21-22 relation category, 30-31 "
+            "terrain mask; the rest set AI state flags, and an actor's saved "
+            "flags can replace bits 21-31");
   table.Add("mobility_limb_1", 0x30, 1, false,
             "a limb whose loss slows the enemy");
   table.Add("mobility_limb_2", 0x31, 1, false,
             "a limb whose loss slows the enemy");
-  table.Add("default_target_limb", 0x32, 1, false, "");
+  table.Add("default_target_limb", 0x32, 1, false,
+            "the limb a hit aimed at the whole enemy strikes");
   // decomp: func_80076784 (src/BATTLE/BATTLE.PRG/146C.c:5941) and
   // applyAccessoryStats (src/BATTLE/BATTLE.PRG/146C.c:734) read neither this
   // byte nor the accessory's last two; every disc template holds zero there.
@@ -353,8 +383,19 @@ void AddEnemyFields(TableLayout& table) {
 // Offsets from the limb's start.
 void AddLimbFields(TableLayout& table) {
   table.Add("hp", 0x00, 2, false, "the limb's hit points");
-  table.Add("agility_defense_bonus", 0x02, 1, false, "");
-  table.Add("chain_evasion", 0x03, 1, false, "");
+  // The runtime limb's byte is signed (vs_UiEquipment_limb); version 7 wrote
+  // it unsigned, so 251 was -5.
+  // decomp: getAgilityDifference (src/BATTLE/BATTLE.PRG/146C.c:9876)
+  // decomp: getIntelligenceDifference (src/BATTLE/BATTLE.PRG/146C.c:9927)
+  table.Add("agility_defense_bonus", 0x02, 1, true,
+            "signed; added to the enemy's agility and intelligence totals "
+            "when the chance of a hit on this limb is worked out");
+  table.resigned.push_back("agility_defense_bonus");
+  // decomp: getChainEvasionModifier (src/BATTLE/BATTLE.PRG/146C.c:10042)
+  table.Add("chain_evasion", 0x03, 1, false,
+            "how well the limb evades actions whose hit_function is "
+            "chain-evasion: they land (255 - value) * 100 / 255 percent of "
+            "the time");
   table.Run("type", 0x04, kTypeFields, 1, true,
             "signed physical-type resistance");
   table.Run(
@@ -401,37 +442,67 @@ void AddLimbFields(TableLayout& table) {
 }
 
 // Offsets from the part's start (vs_battle_uiEquipment, 0x30 bytes).
+// decomp: vs_battle_applyWeaponStats (src/BATTLE/BATTLE.PRG/146C.c:624)
+// decomp: vs_battle_applyShieldStats (src/BATTLE/BATTLE.PRG/146C.c:683)
+// decomp: applyArmorStats (src/BATTLE/BATTLE.PRG/146C.c:759)
 void AddPartFields(TableLayout& table) {
-  table.Add("item_id", 0x00, 2, false, "");
-  table.Add("sub_id", 0x02, 1, true, "");
-  table.Add("weapon_model_id", 0x03, 1, true, "");
-  table.Add("category", 0x04, 1, false, "");
-  table.Add("strength", 0x05, 1, true, "");
-  table.Add("intelligence", 0x06, 1, true, "");
-  table.Add("agility", 0x07, 1, true, "");
-  table.Add("current_dp", 0x08, 2, false, "");
-  table.Add("max_dp", 0x0A, 2, false, "");
-  table.Add("current_pp", 0x0C, 2, false, "");
-  table.Add("max_pp", 0x0E, 2, false, "");
+  table.Add("item_id", 0x00, 2, false,
+            "the global item id, which names the part");
+  table.Add("sub_id", 0x02, 1, true,
+            "the item's 1-based index in its family: item_id less 0 for a "
+            "blade, 95 for a grip, 126 for a shield, armour or accessory, "
+            "260 for a gem");
+  table.Add("weapon_model_id", 0x03, 1, true,
+            "a blade's or shield's WEP model (OBJ/<two hex digits>.WEP, "
+            "converted to models/weapons/<two hex digits>.gltf); 0 for other "
+            "parts");
+  table.Add("category", 0x04, 1, false,
+            "a blade's category (1 dagger .. 9 crossbow), which with a model "
+            "also picks the enemy's attack animations; a grip's type (1-4); "
+            "an armour piece's (1 shield, 2 helm, 3 breast armour, 4 "
+            "leggings, 5 glove, 7 accessory); 0 for a gem");
+  table.Add("strength", 0x05, 1, true,
+            "strength the part adds; a weapon sums its blade, grip and gems, "
+            "a shield its base and gems");
+  table.Add("intelligence", 0x06, 1, true,
+            "intelligence the part adds; summed as strength");
+  table.Add("agility", 0x07, 1, true,
+            "agility the part adds; summed as strength");
+  table.Add("current_dp", 0x08, 2, false,
+            "current DP (equal to max_dp on the disc)");
+  table.Add("max_dp", 0x0A, 2, false,
+            "maximum DP of a blade, shield or armour piece");
+  table.Add("current_pp", 0x0C, 2, false, "current PP (zero on the disc)");
+  table.Add("max_pp", 0x0E, 2, false, "maximum PP of a blade or shield");
   table.Add("damage_type", 0x10, 1, false, "the blade's damage type",
             kDamageTypes);
   table.Add("cost_type", 0x11, 1, false,
             "the resource the blade's base attack costs", kCostResources);
-  table.Add("cost", 0x12, 1, false, "");
+  table.Add("cost", 0x12, 1, false,
+            "how much each of the blade's attacks costs");
   table.Add("material", 0x13, 1, false,
             "the part's material (zero on the disc: templates keep weapon, "
             "shield and armour materials in their own columns)",
             kMaterials);
-  table.Add("recovery_delay", 0x14, 1, false, "");
-  table.Add("gem_slots", 0x15, 1, false, "");
-  table.Add("gem_effects", 0x16, 1, false, "");
+  table.Add("recovery_delay", 0x14, 1, false,
+            "the blade's recovery delay after an attack, for actions that "
+            "take the weapon's delay");
+  table.Add("gem_slots", 0x15, 1, false,
+            "how many gems a grip or shield holds");
+  table.Add("gem_effects", 0x16, 1, false,
+            "a gem's effect (0 none): 1/2 physical/spell hit bonus, 3/4 "
+            "+5% physical/spell damage, 5/6 physical/spell evasion, 7/8 -5% "
+            "physical/spell damage taken, 9 PP gain; 11-14, 16, 18, 19 and 21 "
+            "evade specific action effects");
   // The part's inventory slot, zero on the disc: an equipment index
   // (AddEnemyFields). Loot copies of parts skip it.
   // decomp: copyUiEquipmentStats (src/BATTLE/BATTLE.PRG/146C.c:1156)
   table.Zeros("index", 0x17, 1);
-  table.Add("range", 0x18, 1, false, "");
-  table.Add("range_y", 0x19, 1, false, "");
-  table.Add("range_z", 0x1A, 1, false, "");
+  table.Add("range", 0x18, 1, false,
+            "the blade's reach; the enemy's reach is added to it and to the "
+            "other two extents");
+  table.Add("range_y", 0x19, 1, false, "the attack area's second extent");
+  table.Add("range_z", 0x1A, 1, false, "the attack area's third extent");
   // decomp: vs_Range (src/SLUS_010.40/inventory.h:4)
   table.Bits("attack_shape", 0x1B, 0, 3,
              "the blade's targeting volume; actions use the same domain",
@@ -1163,6 +1234,33 @@ std::expected<std::size_t, std::string> NameActionCells(
   return named;
 }
 
+// Rewrites each cell of a column version 8 made signed (resigned) that holds
+// 128-255, as version 7 wrote a negative byte, as the same byte's signed
+// value; the number of cells it rewrote. Version 8 refuses 128-255 there, so
+// a cell is never rewritten twice; the schema refuses any other number the
+// byte cannot hold.
+std::size_t ResignCells(const TableLayout& layout,
+                        std::vector<CsvRecord>& records) {
+  constexpr std::int64_t kFirstNegative = 0x80;
+  constexpr std::int64_t kByteValues = 0x100;
+  std::size_t resigned = 0;
+  const auto& header = records.front().fields;
+  for (const std::string_view column : layout.resigned) {
+    const auto found = std::ranges::find(header, column);
+    if (found == header.end()) continue;
+    const auto at = static_cast<std::size_t>(found - header.begin());
+    for (std::size_t row = 1; row < records.size(); ++row) {
+      auto& fields = records[row].fields;
+      if (at >= fields.size()) continue;  // the schema refuses the short row
+      const auto value = IntegerCell(fields[at]);
+      if (!value || *value < kFirstNegative || *value >= kByteValues) continue;
+      fields[at] = std::to_string(*value - kByteValues);
+      ++resigned;
+    }
+  }
+  return resigned;
+}
+
 }  // namespace
 
 const TableSpec& ZoneTableSpec(ZoneTable table) { return LayoutOf(table).spec; }
@@ -1537,7 +1635,7 @@ std::expected<ZoneColumnMigration, std::string> MigrateZoneColumns(
   const TableLayout& layout = LayoutOf(table);
   ZoneColumnMigration migrated{.text = text};
   if (layout.packed.empty() && layout.reserved.empty() &&
-      !HasFieldOf(layout, ColumnType::kFlags) &&
+      layout.resigned.empty() && !HasFieldOf(layout, ColumnType::kFlags) &&
       !HasFieldOf(layout, ColumnType::kReference)) {
     return migrated;
   }
@@ -1569,8 +1667,9 @@ std::expected<ZoneColumnMigration, std::string> MigrateZoneColumns(
   auto actions_named = NameActionCells(layout, *records, file, actions);
   if (!actions_named) return std::unexpected(actions_named.error());
   migrated.named_values = *named + *actions_named;
+  migrated.resigned_values = ResignCells(layout, *records);
   if (migrated.split_columns != 0 || migrated.retired_columns != 0 ||
-      migrated.named_values != 0) {
+      migrated.named_values != 0 || migrated.resigned_values != 0) {
     std::vector<std::vector<std::string>> rows;
     for (CsvRecord& record : *records) rows.push_back(std::move(record.fields));
     migrated.text = FormatCsv(rows);

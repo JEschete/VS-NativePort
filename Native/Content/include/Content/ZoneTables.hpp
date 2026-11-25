@@ -41,7 +41,7 @@
 namespace VS::Content {
 
 inline constexpr std::string_view kZndTableConverterName = "znd-tables";
-inline constexpr std::uint32_t kZndTableConverterVersion = 7;
+inline constexpr std::uint32_t kZndTableConverterVersion = 8;
 
 enum class ZoneTable : std::uint8_t {
   kZones,     // catalogs/world/zones: music and room slot count
@@ -139,6 +139,7 @@ struct ZoneColumnMigration {
   std::size_t split_columns = 0;
   std::size_t retired_columns = 0;
   std::size_t named_values = 0;
+  std::size_t resigned_values = 0;
 };
 
 // Rewrites older authoring forms the current schema no longer reads, so it
@@ -151,7 +152,9 @@ struct ZoneColumnMigration {
 // number (version 3's status_immunities), refusing a number its bytes cannot
 // hold, and an action cell written as a number (version 5's action_N_id) by
 // the id `read` serves for it in the action catalog, refusing one the catalog
-// does not hold; 0 becomes an empty cell. Column renames are left to
+// does not hold; 0 becomes an empty cell. Rewrites a limb's
+// agility_defense_bonus of 128-255, which version 7 wrote unsigned, as the
+// same byte's signed value (251 is -5). Column renames are left to
 // NormalizeTableText.
 [[nodiscard]] std::expected<ZoneColumnMigration, std::string>
 MigrateZoneColumns(ZoneTable table, const std::string& text,

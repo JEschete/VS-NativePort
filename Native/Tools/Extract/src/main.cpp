@@ -205,10 +205,11 @@ int UpgradeAuthoring(const fs::path& root) {
   }
   VS::Core::LogInfo("extract",
                     "zone authoring: {} named columns, {} split columns, {} "
-                    "retired columns, {} named values, {} files updated",
+                    "retired columns, {} named values, {} signed values, {} "
+                    "files updated",
                     zones->renamed_columns, zones->split_columns,
                     zones->retired_columns, zones->named_values,
-                    zones->written);
+                    zones->resigned_values, zones->written);
   const auto backgrounds = Extract::UpgradeBackgroundAuthoring(root);
   if (!backgrounds) {
     VS::Core::LogError("extract", "background authoring: {}",

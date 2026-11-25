@@ -12,6 +12,7 @@ struct ZoneAuthoringReport {
   std::size_t split_columns = 0;
   std::size_t retired_columns = 0;
   std::size_t named_values = 0;
+  std::size_t resigned_values = 0;
   std::size_t written = 0;
 };
 

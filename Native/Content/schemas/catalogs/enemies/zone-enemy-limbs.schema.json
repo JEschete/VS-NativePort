@@ -33,16 +33,16 @@
     {
       "name": "agility_defense_bonus",
       "type": "integer",
-      "minimum": 0,
-      "maximum": 255,
-      "description": ""
+      "minimum": -128,
+      "maximum": 127,
+      "description": "signed; added to the enemy's agility and intelligence totals when the chance of a hit on this limb is worked out"
     },
     {
       "name": "chain_evasion",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": ""
+      "description": "how well the limb evades actions whose hit_function is chain-evasion: they land (255 - value) * 100 / 255 percent of the time"
     },
     {
       "name": "type_none",
