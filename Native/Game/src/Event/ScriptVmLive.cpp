@@ -29,6 +29,7 @@
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Runtime.hpp"
+#include "Diagnostics/SceneTrace.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Event/Actors.hpp"
 #include "Event/EventCameraControlLive.hpp"
@@ -1034,15 +1035,23 @@ ScriptFlow LiveVmHost::RunOpcode(ScriptLocation location, int thread) {
     return ScriptFlow::Of(ScriptFlowKind::kStop);
   }
   const auto command = bytes.subspan(location.offset);
+  const auto trace_command = Game::RecordSceneCommand(
+      EventId(), Source(), {command, location, thread},
+      static_cast<std::uint32_t>(OpcodeSize(command.front(), *this)),
+      SkipState());
+  const auto complete = [trace_command](ScriptFlow result) {
+    Game::RecordSceneResult(trace_command, result);
+    return result;
+  };
   const ScriptOpcodeHandler handler = SkipState() == CutsceneSkip::kSkipping
                                           ? skipOpcodeHandlers[command.front()]
                                           : opcodeHandlers[command.front()];
   if (handler == nullptr) {
     NoteInvalidOpcode({command, location, thread});
-    return ScriptFlow::Of(ScriptFlowKind::kStop);
+    return complete(ScriptFlow::Of(ScriptFlowKind::kStop));
   }
   if (const auto control = NativeControl(handler)) {
-    return control({command, location, thread}, *this);
+    return complete(control({command, location, thread}, *this));
   }
   static_assert(std::is_trivially_destructible_v<OpcodeInvocation>);
   const OpcodeInvocation previous = invocation;
@@ -1062,7 +1071,7 @@ ScriptFlow LiveVmHost::RunOpcode(ScriptLocation location, int thread) {
     }
   }
   invocation = previous;
-  return result;
+  return complete(result);
 }
 
 template <typename Operation>

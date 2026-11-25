@@ -74,7 +74,8 @@ Ticks are logical game ticks (1/60 s). Unknown options and invalid values are er
 | `--door-from <id>` | Door mode: start at this case and continue in inventory order. |
 | `--door-limit <n>` | Door mode: run at most `n` cases. |
 | `--door-resume <sequence-results.json>` | Door mode: keep valid passes from an earlier run's results. |
-| `--verification-log` | Use the lighter verification log profile. See [Logging](#logging). |
+| `--trace-frames` | Opt in to per-tick input, actor and scene snapshots. Ordinary play does not collect them. |
+| `--verification-log` | Use the lighter verification log profile, including every frame. See [Logging](#logging). |
 | `--player-observations` | Keep full per-tick observation frames for the external test player. Normally passed by its runner. |
 | `--fixed-frame-ticks <1..262>` | Advance the frame-counter clock by a fixed step per read, so repeated runs match. |
 | `--trace-effect-paths <first:last>` | Log effect and particle paths for an inclusive tick range. Needs `--speed 1`. |
@@ -352,35 +353,39 @@ plays. Unit tests: `"[scenes][catalog]"`, and `"[disc-scene-inventory]"` with lo
 
 ## Logging
 
-Every run, including option and startup errors, writes to a new folder next to the executable:
-`build\<Config>\combat-lab\runs\<timestamp>-<n>\`. The newest folder is the current run, and `session.log` records
-its path. No console redirection or debugger is needed.
+Each launch, including startup errors, writes `build\<Config>\combat-lab\runs\<timestamp>-<n>\`.
+`session.log` records its path; no console redirection is needed.
 
 | File | Contents |
 |---|---|
 | `session.log` | Readable engine messages. Trace level, all channels (Debug with `--verification-log`). |
-| `events.jsonl` | Ordered structured records: engine messages, RNG draws, action results, host controls and per-tick input, actor, action and inventory snapshots. |
-| `manifest.json` | Source revision, worktree status, data path, run mode and options. |
+| `events.jsonl` | Ordered engine, RNG, action, VM and host records; per-tick snapshots when enabled. |
+| `manifest.json` | Source revision, worktree status, data path, run mode and effective `frame_logging` policy. |
 | `catalog.json` | Room and enemy availability per zone, with reasons and spawn provenance. |
 | `encounter-N.json` | Each submitted encounter setup. |
 | `sequence-results.json`, `script-NNNN\` | Sequence and door runs. |
 | `door-inventory.json`, `door-plan.json`, `scene-inventory.json` | Door and scene catalog runs. |
 
-- The console shows warnings and errors only; the files keep everything. Each record has `sequence`, `tick`,
+- Console output is Warn/Error only. Records have `sequence`, `tick`,
   `elapsed_us` and `category`; script records add `script` and `script_tick`.
+- Tick and lifecycle/warning/error boundaries flush buffered text/JSON even without frames.
 - Frame snapshots include HP/MP, Risk, statuses, commands, positions, weapon state, targets, item counts, AI
   candidates and pending loot. Pending loot is not proof of delivery.
-- `event.command`, `event.result` and `state.flag_write` records show executed script commands with all operand bytes,
-  their results (joined by command ID) and flag writes with old and new values.
-- `performance.summary` at exit has phase and frame-interval timings. A write failure stops the run rather than
-  losing data silently. Crash stacks go to the session logs; the run watchdog writes `vs-native-hang.log` beside the
-  executable.
+- Schema 2 `event.command` records mounted `region`/`script_offset`/`generation`, thread, skip state and checked operands
+  before dispatch. `event.result` joins by command ID, with typed flow and signed `jump_by.displacement` or
+  `jump_to.target` region/offset/generation. Interrupted commands may lack results. `state.flag_write` keeps old/new values.
+- Camera `turn`/`target_yaw`/`turn_speed` replace `delta_yaw`/`delta_pitch`/`delta_distance`.
+  Regression hashes normalize these aliases, not value changes.
+- `performance.summary` records timings at exit. Write/flush failures stop the run. Crashes go to session logs;
+  the watchdog writes `vs-native-hang.log` beside the executable.
 
 ### Verification log and log volume
 
-Full tracing is the default. It can make large files, and there is no rotation. `--verification-log` keeps every
+Engine/event tracing is on; **frames are opt-in** (`--trace-frames`). Verification/player, sequence, door and
+effect-path modes imply frames. Regression replays request them; tick budgets, scripted input and screenshots do not.
+Logs are unrotated. `--verification-log` keeps every
 frame, command, result and flag write, content reads, lifecycle records and all warnings and errors. It drops
-per-draw Trace messages and lower-level engine messages outside the `content` and `boot` channels. In sequences
+per-draw Trace messages; the structured log also omits lower-level engine copies outside `content` and `boot`. In sequences
 without `--player-observations`, heavy records go only to each script's `events.jsonl`. Use full tracing for
 effect-path work.
 
@@ -392,22 +397,21 @@ build\Release\VS.CombatLab.exe --sequence <sequence.json> --speed 64 --scripted 
 
 - Group cases that share a prerequisite, and record a failed prerequisite once.
 - Remove or archive run folders you no longer need. Keep logs, captures and game data out of commits and issues.
-- Older raw logs are kept in the cold archive `build\evidence-archive\20261028`, where
-  `index.jsonl` maps each original path to its archived copy.
+- Older logs: `build\evidence-archive\20261028`; `index.jsonl` maps original paths to archived copies.
 
 ### Detailed logging in the Desktop game
 
-The Desktop game uses the same trace writer and frame format. `kEnableDetailedGameLogging` near the top of
-[Native/Desktop/src/main.cpp](../Native/Desktop/src/main.cpp) turns it on. It is `true` in Debug builds and `false`
-in Release builds, where normal logging is also off. Change it and rebuild to switch.
+Desktop shares the trace writer. `kEnableDetailedGameLogging` in [main.cpp](../Native/Desktop/src/main.cpp) is true
+in Debug and false in Release, where normal logging is also off.
 
-- Each launch writes `build\<Config>\game-logs\<timestamp>-<n>\` with `manifest.json`, `session.log` and
-  `events.jsonl`. Frames also include `scene` state: event and thread cursors, dialogue waits, camera, effect
+- Each Debug launch writes `build\Debug\game-logs\<timestamp>-<n>\` with `manifest.json`, `session.log` and
+  `events.jsonl`. Opted-in frames include `scene` state: event and thread cursors, dialogue waits, camera, effect
   progress and model poses.
 - `vs-native.log` beside the executable mirrors the current session and is replaced at each launch; run folders are
-  kept. `--verification-log` and `--player-observations` also work here, but only with detailed logging.
+  kept. `--trace-frames`, `--verification-log` and `--player-observations` require detailed logging.
 - `--log-level` and `--log-channels` filter Desktop engine messages. A diagnostic filter must include
-  `event-command`, `event-result` and `state-flag`. The Lab does not accept these options.
+  `event-command`, `event-result` and `state-flag` at Debug or Trace severity. They do not filter structured frames;
+  `off` also suppresses engine crash messages. The Lab does not accept these filtering options.
 
 ### Effect paths
 
@@ -423,8 +427,8 @@ correctly; watch the whole effect at normal speed. The Desktop game accepts the 
 
 ### Reviewing manual item tests
 
-Manual play uses the same automatic logs. Open the run folder and check `manifest.json` and `encounter-N.json` for
-the revision, profile, overrides and targets.
+Manual play records event/action diagnostics automatically. Add `--trace-frames` before snapshot-backed item tests.
+Check `manifest.json` and `encounter-N.json` for the revision, profile, overrides and targets.
 
 - For each use, line up the inventory decrement, chosen action, `combat.result` messages, nearby actor snapshots,
   learned-action changes and the return to field control.

@@ -10,7 +10,8 @@
                                                               the hazard ledger's compiler rows
 
 tools\\test\\regression_baseline.json holds test names, the assertion total and per-window hashes of each replay's frame
-state: no disc data. A replay steps the frame counter (--fixed-frame-ticks), the wall-clock input to the AI's randomness.
+state: no disc data. Replays request snapshots (--trace-frames) and step the frame counter (--fixed-frame-ticks),
+the wall-clock input to the AI's randomness.
 Recording is a reviewed change: its diff is the list of behavior someone chose to give up.
 """
 from __future__ import annotations
@@ -110,14 +111,24 @@ def compare_source(baseline: dict, directory: Path) -> list[Problem]:
     ]
 
 
-def without_addresses(frame: dict) -> dict:
-    """Memory addresses move with every build, so keep the script position as an offset and drop the raw address."""
-    event = frame.get("data", {}).get("scene", {}).get("event")
+def canonical_frame(frame: dict) -> dict:
+    """Normalize addresses and camera label repairs to the existing fingerprint schema."""
+    scene = frame.get("data", {}).get("scene", {})
+    event = scene.get("event")
     if isinstance(event, dict) and "script_buffer" in event:
         base = event.pop("script_buffer")
         for thread in event.get("threads", []):
             if thread.get("pc"):
                 thread["pc"] -= base
+    camera = scene.get("camera")
+    if isinstance(camera, dict):
+        for current, legacy in (("turn", "delta_yaw"), ("target_yaw", "delta_pitch"),
+                                ("turn_speed", "delta_distance")):
+            if current in camera:
+                value = camera.pop(current)
+                if legacy in camera and (camera[legacy] != value or type(camera[legacy]) is not type(value)):
+                    raise ValueError(f"Conflicting camera trace fields: {current} and {legacy}")
+                camera[legacy] = value
     return frame
 
 
@@ -133,7 +144,7 @@ def fingerprint(text: str) -> dict:
             continue
         if record.get("category") != "frame":
             continue
-        kept = without_addresses({key: value for key, value in record.items() if key not in VOLATILE_FIELDS})
+        kept = canonical_frame({key: value for key, value in record.items() if key not in VOLATILE_FIELDS})
         digest.update(json.dumps(kept, sort_keys=True, separators=(",", ":")).encode())
         frames += 1
         if frames % WINDOW_FRAMES == 0:
@@ -193,7 +204,7 @@ def run_replay(executable: Path, scenario: str, frames: int) -> Replay:
     before = set(runs.iterdir()) if runs.is_dir() else set()
     completed = subprocess.run(
         [str(executable), "--scenario", str(ROOT / scenario), "--start", "--scripted", "--frames", str(frames),
-         "--fixed-frame-ticks", FIXED_FRAME_TICKS],
+         "--fixed-frame-ticks", FIXED_FRAME_TICKS, "--trace-frames"],
         cwd=ROOT, check=False, timeout=REPLAY_TIMEOUT_SECONDS, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
     )
     created = sorted(set(runs.iterdir()) - before) if runs.is_dir() else []
@@ -368,7 +379,7 @@ def coverage() -> list[Problem]:
     for scenario, frames in SCENARIOS.values():
         subprocess.run(
             [str(objects[1]), "--scenario", str(ROOT / scenario), "--start", "--scripted", "--frames", str(frames),
-             "--fixed-frame-ticks", FIXED_FRAME_TICKS],
+             "--fixed-frame-ticks", FIXED_FRAME_TICKS, "--trace-frames"],
             cwd=ROOT, check=False, env={**environment, "LLVM_PROFILE_FILE": str(raw_replays)},
             timeout=REPLAY_TIMEOUT_SECONDS * 3, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
         )

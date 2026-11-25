@@ -419,10 +419,10 @@ void ConfigureEffectPathTrace(const RunSettings& settings,
   }
 }
 
-void BeginLogicalTick(u64 tick) {
+void BeginLogicalTick(u64 tick, bool trace_frames) {
   Core::SetLogTick(tick);
   Render::GamePages().SetEffectPathTraceTick(tick);
-  VS::Core::LogTrace("frame", "begin tick");
+  if (trace_frames) VS::Core::LogTrace("frame", "begin tick");
 }
 
 void ReportStartupFailure(const char* title, const std::string& message,
@@ -474,7 +474,8 @@ bool RunLogicalTick(Game::GameApp& game, Input::InputSystem& input,
                     const RunSettings& settings, Game::GameplayTrace* trace,
                     PresentedFrame& frame) {
   watchdog.Pulse(game.Ticks() + 1);
-  BeginLogicalTick(game.Ticks() + 1);
+  const bool trace_frames = trace != nullptr && trace->FramesEnabled();
+  BeginLogicalTick(game.Ticks() + 1, trace_frames);
   input.Inject(settings.script.MaskAt(game.Ticks() + 1));
   input.RequestRumble(game.Rumble());
   const auto& pad = input.Update();
@@ -484,16 +485,22 @@ bool RunLogicalTick(Game::GameApp& game, Input::InputSystem& input,
   }
   game.Tick(pad, true);
   if (trace != nullptr) {
-    const auto state = Game::InspectGameplay();
-    trace->Frame(game.Ticks(), pad, state, Game::InspectGameplayScene(state));
+    if (trace_frames) {
+      const auto state = Game::InspectGameplay();
+      trace->Frame(game.Ticks(), pad, state, Game::InspectGameplayScene(state));
+    } else {
+      trace->Flush();
+    }
     if (trace->Failed()) {
       throw std::runtime_error("detailed gameplay trace failed");
     }
   }
   const bool shown =
       Render::GamePages().Present(frame.pixels, frame.width, frame.height);
-  VS::Core::LogTrace("frame", "end tick; presented={}, image={}x{}", shown,
-                     frame.width, frame.height);
+  if (trace_frames) {
+    VS::Core::LogTrace("frame", "end tick; presented={}, image={}x{}", shown,
+                       frame.width, frame.height);
+  }
   if (shown) {
     settings.capture.Write(game.Ticks(), frame.pixels, frame.width,
                            frame.height);
@@ -655,31 +662,24 @@ int main(int argc, char** argv) try {
     Core::SetConsoleLogLevel(Core::LogLevel::Off);
   }
   std::unique_ptr<Game::GameplayTrace> trace;
-  const bool player_observations =
-      std::any_of(argv + 1, argv + argc, [](const char* argument) {
-        return std::string_view(argument) == "--player-observations";
-      });
-  const bool verification_log =
-      std::any_of(argv + 1, argv + argc, [](const char* argument) {
-        return std::string_view(argument) == "--verification-log";
-      });
-  if ((player_observations || verification_log) &&
-      !kEnableDetailedGameLogging) {
+  const auto trace_options = Game::ChooseTraceOptions(argc, argv);
+  if (trace_options.FramesEnabled() && !kEnableDetailedGameLogging) {
     throw std::runtime_error(
-        "player observations/verification log require detailed logging");
+        "frame/player/verification tracing requires detailed logging");
   }
   if (kEnableDetailedGameLogging) {
     const auto directory = Platform::ExecutableDir();
     trace = std::make_unique<Game::GameplayTrace>(
         directory / "game-logs", "desktop", directory / "vs-native.log",
-        player_observations, verification_log);
+        trace_options);
     const auto source = Game::TraceSourceProvenance(directory);
     Game::WriteTraceManifest(
         trace->Directory(),
         {{"schema", 1},
          {"host", "desktop"},
          {"detailed_logging", true},
-         {"verification_log", verification_log},
+         {"verification_log", trace_options.verification_log},
+         {"frame_logging", trace->FramesEnabled()},
          {"gpu_validation_requested", Render::ChooseGpuValidation(argc, argv)},
          {"build", __DATE__ " " __TIME__},
          {"revision", source.at("revision")},
