@@ -63,7 +63,11 @@ history. Verify each change with the smallest builds, Catch2 tags, replays and q
   tag with `build\Debug\VS.Tests.exe "[tag]"`; build Release as well for shared code. A test that reads the extracted
   `Native\data` without changing it uses `Content::DataStore::OpenShared` (one store per process), not `Open`
   (about two seconds each in Debug). Debug runs of the whole suite should exclude the `[extract]` corpus cases
-  (`"~[extract]"`, about 5 minutes); run those in Release (about a minute) when converters or loaders change.
+  (`"~[extract]"`, about 7 minutes); run those in Release (about a minute) when converters or loaders change.
+- Verify in tiers, not after every edit (owner decision, 2026-11-25). While iterating, build the touched targets
+  and run the focused tags. Run wide tag sets, `"~[extract]"`, Release `"[extract]"`, replays and `--tidy` only when
+  a change reaches what they cover and is otherwise finished: once per batch of slices, before closing an issue or
+  at a package boundary. Push each slice that passes its focused checks; CI runs the quality checks.
 - Keep each `TEST_CASE` to about 9 assertions. Every Catch2 assertion expands to several statements, and tidy's
   `readability-function-size` limit (80 statements, lambdas included) can still fail callback-heavy cases.
   Guard optional reads in the same function or a guarded value-returning helper; `.value()` or a Catch2 `REQUIRE`

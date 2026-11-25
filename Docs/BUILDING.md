@@ -711,7 +711,7 @@ Run time (Debug, one developer machine, with the disc data extracted): the
 whole suite takes about 19 minutes, of which about 13 are the 38 `[extract]`
 corpus cases that decode and rebuild every converted disc file; those take about
 a minute in Release. For Debug iteration run `test-native.cmd Debug "~[extract]"`
-(about 5 minutes) and run `test-native.cmd Release "[extract]"` when a converter,
+(about 7 minutes) and run `test-native.cmd Release "[extract]"` when a converter,
 loader or the converted data changed. Tests that read the extracted `Native\data`
 without modifying it open it through `Content::DataStore::OpenShared`, which
 keeps one store per process; opening it with `DataStore::Open` costs about two
