@@ -255,8 +255,9 @@ void PackAiSettings(std::vector<std::vector<std::string>>& rows,
 
 // Adds back the raw_<offset> columns version 4 tables had for reserved bytes,
 // the action_N_index columns version 5 had for each action slot's index, the
-// equipment index columns version 6 had, and version 8's zud_index, which
-// held the template's slot.
+// equipment index columns version 6 had, version 8's zud_index, which held
+// the template's slot, and the class and affinity tail columns under the
+// numbered names version 1 gave them.
 void AddReservedColumns(std::vector<std::vector<std::string>>& rows,
                         ZoneTable table,
                         const std::vector<content::TableRow>& checked) {
@@ -274,9 +275,10 @@ void AddReservedColumns(std::vector<std::vector<std::string>>& rows,
     }
   }
   if (table == ZoneTable::kParts) {
-    rows.front().emplace_back("index");
+    rows.front().insert(rows.front().end(),
+                        {"index", "class_7", "class_8", "affinity_8"});
     for (std::size_t row = 1; row < rows.size(); ++row) {
-      rows.at(row).emplace_back("0");
+      rows.at(row).insert(rows.at(row).end(), {"0", "0", "0", "0"});
     }
   }
   if (table != ZoneTable::kLimbs) return;
@@ -288,11 +290,11 @@ void AddReservedColumns(std::vector<std::vector<std::string>>& rows,
   rows.front().insert(
       rows.front().end(),
       {"raw_52", "raw_5a", "raw_5b", "action_1_index", "action_2_index",
-       "action_3_index", "action_4_index", "armor_index"});
+       "action_3_index", "action_4_index", "armor_index", "affinity_8"});
   for (std::size_t row = 1; row < rows.size(); ++row) {
     const bool armored = checked.at(row - 1).values.at(at) != 0;
     rows.at(row).insert(rows.at(row).end(), {armored ? "1" : "0", "0", "0", "0",
-                                             "1", "2", "3", "0"});
+                                             "1", "2", "3", "0", "0"});
   }
 }
 
@@ -639,6 +641,9 @@ TEST_CASE("The zone converter names the read it cannot resolve",
   // The AI settings' unread low bits (0x2C bits 0-1) set.
   content::ZndFile low_bits = SampleZone();
   low_bits.enemies.at(0).data.at(0x2C) |= std::byte{2};
+  // The blade's (0x34) class array tail (+0x26) set.
+  content::ZndFile class_tail = SampleZone();
+  class_tail.enemies.at(0).data.at(0x34 + 0x26) = std::byte{4};
   const std::vector<Refused> refusals{
       {mid_room, true,
        "MAP/ZONE001.ZND: room slot 0: sector 101 (4096 bytes) is no "
@@ -666,6 +671,9 @@ TEST_CASE("The zone converter names the read it cannot resolve",
       {low_bits, true,
        "MAP/ZONE001.ZND: enemy.map.zone001.00: bits 0x03 of reserved byte "
        "0x02C are 2, not padding 0"},
+      {class_tail, true,
+       "MAP/ZONE001.ZND: enemy.map.zone001.00: reserved byte 0x05A is 4, not "
+       "the 0 it always holds"},
       {SampleZone(), false,
        "MAP/ZONE001.ZND: enemy.map.zone001.00 loads archetype.map.z001u00, "
        "which the zud-json converter has not recorded (convert the models "
@@ -718,6 +726,11 @@ TEST_CASE("Old zone authoring upgrades without overwriting native edits",
   // Version 9's signed ai_settings word split into its named columns.
   CHECK_FALSE(enemies.contains("ai_settings"));
   CHECK(enemies.contains(",facing_delay_preset,wander_preset,"));
+  // The class and affinity tail columns went.
+  CHECK_FALSE(parts.contains("class_8"));
+  CHECK_FALSE(parts.contains("affinity_8"));
+  CHECK_FALSE(limbs.contains("affinity_8"));
+  CHECK(parts.contains(",class_evil,affinity_physical,"));
   const auto repeat = extract::UpgradeZoneAuthoring(root.Root());
   if (!repeat) FAIL(repeat.error());
   CHECK(repeat->written == 0);

@@ -520,6 +520,40 @@ TEST_CASE("Part index columns retire when they hold zero",
   CHECK(again->text == parts->text);
 }
 
+TEST_CASE("Class and affinity tail columns retire when they hold zero",
+          "[zone-authoring][content-tables][znd]") {
+  // Versions 2-10 named the tails storage_N; version 1 numbered them.
+  const auto parts = content::MigrateZoneColumns(
+      ZoneTable::kParts,
+      "item_id,class_evil,class_storage_6,class_storage_7,affinity_dark,"
+      "affinity_storage_7\n5,-3,0,0,2,0\n",
+      "parts.csv");
+  if (!parts) FAIL(parts.error());
+  CHECK(parts->retired_columns == 3);
+  CHECK(parts->text == "item_id,class_evil,affinity_dark\n5,-3,2\n");
+  const auto again =
+      content::MigrateZoneColumns(ZoneTable::kParts, parts->text, "p.csv");
+  if (!again) FAIL(again.error());
+  CHECK(again->retired_columns == 0);
+  CHECK(again->text == parts->text);
+  const auto numbered = content::MigrateZoneColumns(
+      ZoneTable::kParts, "item_id,class_7,class_8,affinity_8\n5,0,0,0\n",
+      "parts.csv");
+  if (!numbered) FAIL(numbered.error());
+  CHECK(numbered->retired_columns == 3);
+  CHECK(numbered->text == "item_id\n5\n");
+  constexpr std::array<std::string_view, 2> kLimbTails{"affinity_storage_7",
+                                                       "affinity_8"};
+  for (const std::string_view column : kLimbTails) {
+    CAPTURE(column);
+    const auto limbs = content::MigrateZoneColumns(
+        ZoneTable::kLimbs, std::format("limb,{}\n0,0\n", column), "limbs.csv");
+    if (!limbs) FAIL(limbs.error());
+    CHECK(limbs->retired_columns == 1);
+    CHECK(limbs->text == "limb\n0\n");
+  }
+}
+
 TEST_CASE("Reserved byte columns unlike their bytes' values are refused",
           "[zone-authoring][content-tables][znd]") {
   const auto retire = [](ZoneTable table, const std::string& text) {
@@ -534,6 +568,12 @@ TEST_CASE("Reserved byte columns unlike their bytes' values are refused",
   CHECK(retire(ZoneTable::kParts, "item_id,index\n5,3\n") ==
         "t.csv:2: column 'index': '3' is not 0; byte 0x17 always holds 0 "
         "now");
+  CHECK(retire(ZoneTable::kParts, "item_id,class_storage_6\n5,4\n") ==
+        "t.csv:2: column 'class_storage_6': '4' is not 0; byte 0x26 always "
+        "holds 0 now");
+  CHECK(retire(ZoneTable::kLimbs, "limb,affinity_8\n0,-1\n") ==
+        "t.csv:2: column 'affinity_8': '-1' is not 0; byte 0x0F always "
+        "holds 0 now");
   CHECK(retire(ZoneTable::kLimbs, "armor_material,raw_52\niron,0\n") ==
         "t.csv:2: column 'raw_52': '0' is not 1; armor_material sets byte "
         "0x52 now");

@@ -52,15 +52,13 @@ constexpr std::array<std::string_view, 4> kTypeFields{
     "edged",
     "piercing",
 };
-// EquipmentStats.cpp uses classes[0..5] and affinities[0..6].
-// Tail slots remain explicit storage until the import/runtime split retires
-// them.
-constexpr std::array<std::string_view, 8> kClassFields{
-    "human",  "beast", "undead",    "phantom",
-    "dragon", "evil",  "storage_6", "storage_7",
+// EquipmentStats.cpp uses classes[0..5] and affinities[0..6]; the arrays'
+// tail bytes are reserved (AddPartFields).
+constexpr std::array<std::string_view, 6> kClassFields{
+    "human", "beast", "undead", "phantom", "dragon", "evil",
 };
-constexpr std::array<std::string_view, 8> kAffinityFields{
-    "physical", "air", "fire", "earth", "water", "light", "dark", "storage_7",
+constexpr std::array<std::string_view, 7> kAffinityFields{
+    "physical", "air", "fire", "earth", "water", "light", "dark",
 };
 constexpr std::array<std::string_view, 6> kSplashFields{
     "limb_0_percent", "limb_1_percent", "limb_2_percent",
@@ -120,8 +118,9 @@ struct PackedColumn {
 // the column `set_by` is not zero, or byte `slot_byte` (little-endian) of the
 // template's slot. `legacy` is the column that held it before version 5
 // (raw_<offset>), 6 (action_N_index), 7 (the equipment indices), 9
-// (zud_index) or 10 (ai_settings). It holds the bits `mask` of the byte;
-// columns hold the rest.
+// (zud_index), 10 (ai_settings) or 11 (the class and affinity tail bytes),
+// and `numbered` the one version 1 gave it, when that differs. It holds the
+// bits `mask` of the byte; columns hold the rest.
 struct ReservedByte {
   std::string_view legacy;
   std::size_t offset = 0;
@@ -129,6 +128,7 @@ struct ReservedByte {
   std::optional<std::uint8_t> constant;
   std::optional<std::uint8_t> slot_byte;
   std::uint8_t mask = kByteMask;
+  std::string_view numbered;
 };
 
 // A table's columns: the leading key and reference columns, then the fields.
@@ -154,7 +154,8 @@ struct TableLayout {
                         .set_by = set_by,
                         .constant = std::nullopt,
                         .slot_byte = std::nullopt,
-                        .mask = kByteMask});
+                        .mask = kByteMask,
+                        .numbered = {}});
   }
 
   void Constant(std::string_view legacy, std::size_t offset,
@@ -164,7 +165,8 @@ struct TableLayout {
                         .set_by = {},
                         .constant = value,
                         .slot_byte = std::nullopt,
-                        .mask = kByteMask});
+                        .mask = kByteMask,
+                        .numbered = {}});
   }
 
   // Bits `mask` of a byte whose other bits are in columns, always zero.
@@ -174,7 +176,8 @@ struct TableLayout {
                         .set_by = {},
                         .constant = 0,
                         .slot_byte = std::nullopt,
-                        .mask = mask});
+                        .mask = mask,
+                        .numbered = {}});
   }
 
   // A little-endian field of `size` bytes that holds the template's slot.
@@ -185,7 +188,8 @@ struct TableLayout {
                           .set_by = {},
                           .constant = std::nullopt,
                           .slot_byte = static_cast<std::uint8_t>(index),
-                          .mask = kByteMask});
+                          .mask = kByteMask,
+                          .numbered = {}});
     }
   }
 
@@ -195,6 +199,14 @@ struct TableLayout {
     for (std::size_t at = offset; at < offset + size; ++at) {
       Constant(legacy, at, 0);
     }
+  }
+
+  // An array's tail byte that always holds zero, in column `legacy` before
+  // version 11 and `numbered` in version 1.
+  void Tail(std::string_view legacy, std::string_view numbered,
+            std::size_t offset) {
+    Constant(legacy, offset, 0);
+    reserved.back().numbered = numbered;
   }
 
   // An optional reference stored as the row's original index; 0 is none.
@@ -554,9 +566,12 @@ void AddLimbFields(TableLayout& table) {
             "the time");
   table.Run("type", 0x04, kTypeFields, 1, true,
             "signed physical-type resistance");
-  table.Run(
-      "affinity", 0x08, kAffinityFields, 1, true,
-      "signed elemental affinity; storage_7 retains the original tail byte");
+  table.Run("affinity", 0x08, kAffinityFields, 1, true,
+            "signed elemental affinity");
+  // The affinities' tail byte, zero on the disc, as in the parts (see
+  // AddPartFields): the limb's init copies only affinities 0-6.
+  // decomp: func_80076784 (src/BATTLE/BATTLE.PRG/146C.c:5941)
+  table.Tail("affinity_storage_7", "affinity_8", 0x0F);
   // decomp: func_80076784 (src/BATTLE/BATTLE.PRG/146C.c:5941) copies each
   // slot's id, sequence and index into the actor's stats; no code reads the
   // index, and every disc limb holds the slot's position there.
@@ -670,11 +685,21 @@ void AddPartFields(TableLayout& table) {
                           .is_signed = false,
                           .columns = {"attack_shape", "attack_angle"}});
   table.Run("type", 0x1C, kTypeFields, 1, true, "signed physical-type rating");
-  table.Run("class", 0x20, kClassFields, 1, true,
-            "signed class rating; storage_6/7 retain the original tail bytes");
-  table.Run(
-      "affinity", 0x28, kAffinityFields, 1, true,
-      "signed elemental affinity; storage_7 retains the original tail byte");
+  table.Run("class", 0x20, kClassFields, 1, true, "signed class rating");
+  table.Run("affinity", 0x28, kAffinityFields, 1, true,
+            "signed elemental affinity");
+  // The class array's last two bytes and the affinity array's last, zero in
+  // every disc template, are tails no code reads. The apply*Stats copy
+  // classes 0-5 and affinities 0-6 into the actor's stats, as loot copies do
+  // into the inventory; damage indexes classes by a 0-5 enemy class and
+  // affinities by an action's 3-bit affinity less one, and the menus show,
+  // sort and combine classes 0-5 and affinities 0-6.
+  // decomp: vs_battle_applyWeaponStats (src/BATTLE/BATTLE.PRG/146C.c:624)
+  // decomp: vs_battle_copyUiBladeStats (src/BATTLE/BATTLE.PRG/146C.c:1084)
+  // decomp: setClassAffinities (src/MENU/MENUC.PRG/168.c:4763)
+  table.Tail("class_storage_6", "class_7", 0x26);
+  table.Tail("class_storage_7", "class_8", 0x27);
+  table.Tail("affinity_storage_7", "affinity_8", 0x2F);
 }
 
 ColumnSpec IdColumn(std::string_view name, std::string_view description) {
@@ -1330,7 +1355,12 @@ std::expected<std::size_t, std::string> RetireReservedColumns(
   std::size_t retired = 0;
   for (const ReservedByte& reserved : layout.reserved) {
     const auto& header = records.front().fields;
-    const auto found = std::ranges::find(header, reserved.legacy);
+    std::string_view name = reserved.legacy;
+    auto found = std::ranges::find(header, name);
+    if (found == header.end() && !reserved.numbered.empty()) {
+      name = reserved.numbered;
+      found = std::ranges::find(header, name);
+    }
     if (found == header.end()) continue;
     if (auto widths = CheckWidths(records, file); !widths) {
       return std::unexpected(widths.error());
@@ -1342,9 +1372,8 @@ std::expected<std::size_t, std::string> RetireReservedColumns(
     if (!sets.empty()) {
       const auto column = std::ranges::find(header, sets);
       if (column == header.end()) {
-        return std::unexpected(
-            std::format("{}: has '{}' but not '{}', which sets it", file,
-                        reserved.legacy, sets));
+        return std::unexpected(std::format(
+            "{}: has '{}' but not '{}', which sets it", file, name, sets));
       }
       source = static_cast<std::size_t>(column - header.begin());
     }
@@ -1367,7 +1396,7 @@ std::expected<std::size_t, std::string> RetireReservedColumns(
                           reserved.offset);
       }
       return std::unexpected(
-          CellError(file, record.line, reserved.legacy,
+          CellError(file, record.line, name,
                     std::format("'{}' is not {}; {}", record.fields[at],
                                 *expected, why)));
     }

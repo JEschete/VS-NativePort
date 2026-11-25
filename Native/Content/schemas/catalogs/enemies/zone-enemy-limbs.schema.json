@@ -82,7 +82,7 @@
       "legacy_name": "affinity_1",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed elemental affinity; storage_7 retains the original tail byte"
+      "description": "signed elemental affinity"
     },
     {
       "name": "affinity_air",
@@ -90,7 +90,7 @@
       "legacy_name": "affinity_2",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed elemental affinity; storage_7 retains the original tail byte"
+      "description": "signed elemental affinity"
     },
     {
       "name": "affinity_fire",
@@ -98,7 +98,7 @@
       "legacy_name": "affinity_3",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed elemental affinity; storage_7 retains the original tail byte"
+      "description": "signed elemental affinity"
     },
     {
       "name": "affinity_earth",
@@ -106,7 +106,7 @@
       "legacy_name": "affinity_4",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed elemental affinity; storage_7 retains the original tail byte"
+      "description": "signed elemental affinity"
     },
     {
       "name": "affinity_water",
@@ -114,7 +114,7 @@
       "legacy_name": "affinity_5",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed elemental affinity; storage_7 retains the original tail byte"
+      "description": "signed elemental affinity"
     },
     {
       "name": "affinity_light",
@@ -122,7 +122,7 @@
       "legacy_name": "affinity_6",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed elemental affinity; storage_7 retains the original tail byte"
+      "description": "signed elemental affinity"
     },
     {
       "name": "affinity_dark",
@@ -130,15 +130,7 @@
       "legacy_name": "affinity_7",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed elemental affinity; storage_7 retains the original tail byte"
-    },
-    {
-      "name": "affinity_storage_7",
-      "type": "integer",
-      "legacy_name": "affinity_8",
-      "minimum": -128,
-      "maximum": 127,
-      "description": "signed elemental affinity; storage_7 retains the original tail byte"
+      "description": "signed elemental affinity"
     },
     {
       "name": "action_1",

@@ -393,7 +393,7 @@ build\Debug\VS.Extract.exe bestiary Native\data
   exact offline reconstruction. The shared text producer preserves the save
   contributor; forcing bestiary does not replace save prompts. See
   [ASSET_PIPELINE.md §4.3](pipeline/GAMEPLAY_CATALOGS.md#43-native-encyclopedia-definitions-499500).
-- The same `authoring` command upgrades `znd-tables` versions 1-9 to 10:
+- The same `authoring` command upgrades `znd-tables` versions 1-10 to 11:
   named enums, type/class/affinity/DP splash columns, split `shape_bits`
   and `ai_settings`, named `status_immunities` and limb actions, signed
   limb agility bonuses, no reserved byte columns (ASSET_PIPELINE §6.9).

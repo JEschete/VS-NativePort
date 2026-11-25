@@ -131,8 +131,8 @@ std::expected<ZoneAuthoringReport, std::string> UpgradeZoneAuthoring(
       // reserved bytes' raw_<offset> columns, version 5 numeric action ids
       // and the action_N_index columns, version 6 the equipment index
       // columns, version 7 unsigned agility_defense_bonus cells, version 8
-      // the zud_index column and version 9 the packed ai_settings; all
-      // upgrade in place.
+      // the zud_index column, version 9 the packed ai_settings and version
+      // 10 the class and affinity storage columns; all upgrade in place.
       if (found->second < 1 ||
           found->second > Content::kZndTableConverterVersion) {
         return std::unexpected(

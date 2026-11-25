@@ -48,9 +48,10 @@ inline void UseKnownActions(Content::ZndTemplate& data, std::size_t seed) {
 // +0x5A/+0x5B is zero, each limb's +0x52 is 1 exactly when its armour
 // material (+0x50) is set, each action slot's index byte (+0x13, 4 bytes
 // apart) holds the slot's position, the equipment indices (0x126-0x127,
-// 0x202-0x203, 0x235, each limb's +0x53 and each part's +0x17) are zero, and
-// the ZUD index (0x460, 4 bytes, little endian) is the template's
-// `template_slot`.
+// 0x202-0x203, 0x235, each limb's +0x53 and each part's +0x17) and the class
+// and affinity tails (each limb's +0x0F, each part's +0x26, +0x27 and +0x2F)
+// are zero, and the ZUD index (0x460, 4 bytes, little endian) is the
+// template's `template_slot`.
 inline void UseReservedBytes(Content::ZndTemplate& data,
                              std::size_t template_slot = 0) {
   constexpr std::array<std::size_t, 8> kZeroBytes{0x33,  0x126, 0x127, 0x202,
@@ -62,14 +63,18 @@ inline void UseReservedBytes(Content::ZndTemplate& data,
     for (std::size_t slot = 0; slot < kLimbActionSlots; ++slot) {
       data.at(base + 0x13 + (slot * 4)) = static_cast<std::byte>(slot);
     }
+    data.at(base + 0x0F) = std::byte{};
     data.at(base + 0x52) =
         data.at(base + 0x50) == std::byte{} ? std::byte{} : std::byte{1};
     data.at(base + 0x53) = std::byte{};
     data.at(base + 0x5A) = std::byte{};
     data.at(base + 0x5B) = std::byte{};
   }
+  constexpr std::array<std::size_t, 4> kPartZeroBytes{0x17, 0x26, 0x27, 0x2F};
   for (const std::size_t part : kTemplatePartOffsets) {
-    data.at(part + 0x17) = std::byte{};
+    for (const std::size_t at : kPartZeroBytes) {
+      data.at(part + at) = std::byte{};
+    }
   }
   for (std::size_t index = 0; index < 4; ++index) {
     data.at(0x460 + index) =

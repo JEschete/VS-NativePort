@@ -37,14 +37,16 @@
 // the inventory slots of the player's equipment, read as zero. The trailing
 // ZUD index (0x460, 4 bytes) reads as the template's slot: it picks the
 // zone's ZUD entry, which the row's archetype names. Bits 0-1 of 0x02C, below
-// the AI settings' columns, read as zero.
+// the AI settings' columns, read as zero, as do the class and affinity arrays'
+// tail bytes no code reads: each limb's +0x0F and each part's +0x26, +0x27
+// and +0x2F.
 // A limb whose columns are all zero and a part whose bytes are all zero have
 // no row, and a missing row reads as such, so a template rebuilds byte for
 // byte.
 namespace VS::Content {
 
 inline constexpr std::string_view kZndTableConverterName = "znd-tables";
-inline constexpr std::uint32_t kZndTableConverterVersion = 10;
+inline constexpr std::uint32_t kZndTableConverterVersion = 11;
 
 enum class ZoneTable : std::uint8_t {
   kZones,     // catalogs/world/zones: music and room slot count

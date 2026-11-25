@@ -21,7 +21,7 @@ A `MAP\ZONE*.ZND` is what the room loader reads when the zone changes (`Content/
 - **Enemy section:** a count, that many ZUD (sector, read size) entries, then that many 0x464-byte templates (`vs_CharInitData`, `Actors/CharacterInit.hpp`).
 - **Texture section:** either 32 zero bytes, or four table sizes of which only the first is used, followed by that table: a count and that many TIMs, each after its byte size.
 
-`VS.Extract tables <datadir>` (and `extract`) converts every zone with converter `znd-tables` version 10
+`VS.Extract tables <datadir>` (and `extract`) converts every zone with converter `znd-tables` version 11
 (`Extract/ZndConversion.hpp`, `Content/ZoneTables.hpp`). `tables` runs after `models`, because the zones name the
 enemy archetypes (§6.2.5), and after the action catalog, because limbs name actions. It writes six CSV tables, each with a committed schema that is written beside it and must
 match (a test checks this). Columns are described in the schemas; the rules they do not express are:
@@ -38,7 +38,7 @@ match (a test checks this). Columns are described in the schemas; the rules they
 All six tables receive early informational `display_name` columns through §1.2. `zone-enemies.csv` shows the
 decoded enemy name while its `name` and `weapon_name` hex fields continue to preserve every source byte.
 
-**Named fields and domains (versions 2-10).** Enemy class, equipment materials (the shared material domain),
+**Named fields and domains (versions 2-11).** Enemy class, equipment materials (the shared material domain),
 physical types, class ratings and affinities use the named domains in the schemas, and the schemas describe every
 template column from its upstream consumer. Rules beyond the schemas:
 - Version 3 names the parts' `damage_type`, `cost_type` (the resource the base attack spends) and `material`, and
@@ -58,8 +58,8 @@ template column from its upstream consumer. Rules beyond the schemas:
   `relation_category` (`func_800E7370`'s hostile/neutral/passive/ashley-ally classes) and `flee_rule`
   (`func_800D8EF4`). A room placement can override `relation_category` and the fields after it (bits 21-31,
   `func_800E5A74`). On the disc, 447 templates are hostile, 7 neutral and 1 an Ashley ally, and none flees.
-- The remaining array tail bytes are explicit `storage_6`/`storage_7` fields, not invented classes/elements. They
-  still need separation into import provenance when native template consumers are adopted.
+- Version 11 drops the class arrays' `class_storage_6`/`class_storage_7` and the affinity arrays'
+  `affinity_storage_7` columns: those tail bytes are reserved (Exactness), not classes or elements.
 - DP splash columns identify their zero-based destination limb and percent units. A limb index is topology, not a
   universal head/arm/leg name; actual body-part names depend on the model.
 - The old enemy `material` column becomes `movement_class`. It feeds both gait/movement and body-load selection,
@@ -81,8 +81,9 @@ cell is N-1. Rows are kept, so a limb whose only non-zero bytes were those indic
 conversion would omit; both read the same. It drops version 6's equipment index columns only when every cell is 0,
 and rewrites a version-7 `agility_defense_bonus` of 128-255 as the same byte's signed value. It drops version 8's
 `zud_index` only when every cell equals its row's `slot`, and splits a version-9 `ai_settings` cell (signed or
-unsigned), refusing a value outside 32 bits or one with bits 0-1 set.
-A normal `tables` run upgrades version 1-9 tables before considering
+unsigned), refusing a value outside 32 bits or one with bits 0-1 set. It drops version 10's class and affinity
+`storage` columns (version 1's `class_7`, `class_8` and `affinity_8`) only when every cell is 0.
+A normal `tables` run upgrades version 1-10 tables before considering
 source reconversion, preserving existing native edits. Unknown enum codes remain preservable by the raw ZND codec, but are refused as native authoring values.
 This does not resolve the remaining part categories, strings, semantic identities or relational enemy
 definitions.
@@ -99,7 +100,10 @@ definitions.
   them, from the player's. The ZUD index (0x460, 4 bytes, upstream `mpdIdentifer`) is the template's `slot` in
   every disc template: `func_800775C0` loads the zone's ZUD entry it names, and entry N is template N's `archetype`
   (`loadZndEnemies`), so `archetype` is the one model reference. Bits 0-1 of 0x2C, below the AI settings, are 0
-  in every disc template and nothing reads them. The converter refuses a template whose reserved
+  in every disc template and nothing reads them. So are the class and affinity arrays' tails (each part's +0x26,
+  +0x27 and +0x2F, each limb's +0x0F): `apply*Stats` and the loot copies take classes 0-5 and affinities 0-6,
+  damage indexes them by a 0-5 enemy class and an action's 3-bit affinity less one, and the menus show, sort and
+  combine the same ranges (`setClassAffinities`). The converter refuses a template whose reserved
   bytes differ, so every rebuild stays exact.
 - A limb or part whose fields are all zero, and an empty room slot, has no row; a missing row reads as zeros plus
   its reserved bytes.

@@ -2730,7 +2730,7 @@ T00314.000,T00314,_limbInit,0,hp,0,u_short,,,,hp,Hit points (also the maximum),h
 T00314.001,T00314,_limbInit,1,agilityDefenseBonus,0,char,,,,agility_defense_bonus,Signed bonus added to this limb's defender totals in agility and intelligence hit checks (disc 251 = -5),high,native:CharacterInit.hpp VS::Actors::LimbInit::agility_defense_bonus (#441);source:146C.c:6231;source:146C.c:9904;source:146C.c:9955
 T00314.002,T00314,_limbInit,2,chainEvasion,0,char,,,,chain_evasion,Chain-attack evasion; hit chance (255 - value) * 100 / 255,high,native:CharacterInit.hpp VS::Actors::LimbInit::chain_evasion (#441);source:146C.c:6243;source:146C.c:10050
 T00314.003,T00314,_limbInit,3,types,0,signed char[4],,,,types,Limb type values,high,native:CharacterInit.hpp VS::Actors::LimbInit::types (#441);source:146C.c:6246
-T00314.004,T00314,_limbInit,4,affinities,0,signed char[8],,,,affinities,Limb affinity values,high,native:CharacterInit.hpp VS::Actors::LimbInit::affinities (#441);source:146C.c:6250
+T00314.004,T00314,_limbInit,4,affinities,0,signed char[8],,,,affinities,Limb affinity values; only 0-6 are read and element 7 is a tail that is zero in every disc template,high,native:CharacterInit.hpp VS::Actors::LimbInit::affinities (#441);source:146C.c:6250
 T00314.005,T00314,_limbInit,5,actions,0,_actions[4],,,,actions,Actions the limb can perform,high,native:CharacterInit.hpp VS::Actors::LimbInit::actions (#441);source:146C.c:6260
 T00314.006,T00314,_limbInit,6,unk20,1,_armorIntermediate,,,,armor,Armor worn on the limb,high,native:CharacterInit.hpp VS::Actors::LimbInit::armor (#441);source:146C.c:6253
 T00314.007,T00314,_limbInit,7,dpSplash,0,char[6],,,,dp_splash,Damage-point splash values,high,native:CharacterInit.hpp VS::Actors::LimbInit::dp_splash (#441);source:146C.c:6269
@@ -6069,8 +6069,8 @@ T00675.017,T00675,vs_battle_uiEquipment,17,gemEffects,0,char,,,,gem_effects,Gem 
 T00675.018,T00675,vs_battle_uiEquipment,18,index,0,char,,,,index,Inventory slot (0 = not from the inventory); vs_battle_copyInventory*Stats set it and the loot copies skip it; 0 in every zone template part,high,source:146C.h:316;source:146C.c:817
 T00675.019,T00675,vs_battle_uiEquipment,19,range,0,vs_battle_range_t,,,,range,Attack range,med,declaration-only;source:146C.h:317
 T00675.020,T00675,vs_battle_uiEquipment,20,types,0,signed char[4],,,,types,Damage-type values,med,source:146C.c:986;use cited by sanity pass;source:146C.h:318
-T00675.021,T00675,vs_battle_uiEquipment,21,classes,0,signed char[8],,,,classes,Enemy-class values,med,source:146C.c:1010;use cited by sanity pass;source:146C.h:319
-T00675.022,T00675,vs_battle_uiEquipment,22,affinities,0,signed char[8],,,,affinities,Elemental affinity values,med,source:146C.c:1018;use cited by sanity pass;source:146C.h:320
+T00675.021,T00675,vs_battle_uiEquipment,21,classes,0,signed char[8],,,,classes,Enemy-class values; only 0-5 are read and elements 6-7 are a tail that is zero in every disc template,med,source:146C.c:1010;use cited by sanity pass;source:146C.h:319
+T00675.022,T00675,vs_battle_uiEquipment,22,affinities,0,signed char[8],,,,affinities,Elemental affinity values; only 0-6 are read and element 7 is a tail that is zero in every disc template,med,source:146C.c:1018;use cited by sanity pass;source:146C.h:320
 T00676.000,T00676,vs_battle_uiEquipment_limb,0,hp,0,short,,,,hp,Current HP,high,native:Actor.hpp LimbStats::hp (#441);source:146C.c:864
 T00676.001,T00676,vs_battle_uiEquipment_limb,1,maxHp,0,short,,,,max_hp,Maximum HP,high,native:Actor.hpp LimbStats::max_hp (#441);source:146C.c:6230
 T00676.002,T00676,vs_battle_uiEquipment_limb,2,agilityDefenseBonus,0,signed char,,,,agility_defense_bonus,Signed bonus added to this limb's defender totals in agility and intelligence hit checks,high,native:Actor.hpp LimbStats::agility_defense_bonus (#441);source:146C.c:6231;source:146C.c:9904;source:146C.c:9955
