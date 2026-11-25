@@ -188,11 +188,152 @@
       "description": "statuses the enemy cannot receive; immunity to spell-immunity also starts it with that status"
     },
     {
-      "name": "ai_settings",
+      "name": "facing_delay_preset",
       "type": "integer",
-      "minimum": -2147483648,
-      "maximum": 2147483647,
-      "description": "packed AI settings: bits 2-3 facing delay, 4-6 wander preset, 8-9 step height, 10-11 tile step limit, 14 area lock, 16-17 view angle, 18-20 perception range, 21-22 relation category, 30-31 terrain mask; the rest set AI state flags, and an actor's saved flags can replace bits 21-31"
+      "minimum": 0,
+      "maximum": 3,
+      "description": "picks a scale from Battle::Ai::facingDelayScales: the delay before the enemy turns to face its target is the scale times 8 (times 2 above a collision radius of 128); at 0 it never turns to face it"
+    },
+    {
+      "name": "wander_preset",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 7,
+      "description": "picks the wander move period, rest period and rate from Battle::Ai::kWanderTimingPresets"
+    },
+    {
+      "name": "approaches_target_point",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "1: closing on a near target steps to the point where it stands rather than following the target"
+    },
+    {
+      "name": "step_height_preset",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 3,
+      "description": "picks the highest rise or drop one step may take from Battle::Ai::stepHeights"
+    },
+    {
+      "name": "tile_step_limit",
+      "type": "enum",
+      "enum": {
+        "0": "one-tile",
+        "1": "two-tiles",
+        "2": "three-tiles",
+        "3": "four-tiles"
+      },
+      "legacy_numeric_aliases": true,
+      "description": "how many tiles (x plus z) one move step spans, which is also how far it reaches across a gap"
+    },
+    {
+      "name": "walks_to_waypoints",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "1: in a room with an active waypoint, a best action whose candidate flags have bit 0 walks to the nearest active waypoint instead of moving in place, unless it runs the patrol combat behavior"
+    },
+    {
+      "name": "chases_lost_target",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "1: chases a lost target to its last tile instead of looking around for it"
+    },
+    {
+      "name": "area_lock",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "1: keeps its ground moves in its current area unless it is stuck"
+    },
+    {
+      "name": "ignores_line_of_sight",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "1: perceives actors in range and in view without a clear line to them at body height"
+    },
+    {
+      "name": "view_angle_preset",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 3,
+      "description": "picks the field of view, in degrees, from Battle::Ai::viewAngles"
+    },
+    {
+      "name": "perception_range_preset",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 7,
+      "description": "picks the squared perception range from Battle::Ai::kPerceptionRangesSquared; the near range is the same, capped at 1536 squared"
+    },
+    {
+      "name": "relation_category",
+      "type": "enum",
+      "enum": {
+        "0": "hostile",
+        "1": "neutral",
+        "2": "passive",
+        "3": "ashley-ally"
+      },
+      "legacy_numeric_aliases": true,
+      "description": "how it holds the room's actors: hostile is hostile to Ashley and ashley-ally enemies and allied with the rest, neutral is neutral to all, passive is neutral to Ashley and ashley-ally enemies and allied with the rest, ashley-ally is allied with Ashley and ashley-ally enemies and hostile to the rest; a room placement can override it"
+    },
+    {
+      "name": "decays_hostility",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "1: an actor it holds hostile turns neutral once it has gone 121 perception updates unperceived; a room placement can override it"
+    },
+    {
+      "name": "shares_ally_hostility",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "1: takes on its allies' hostilities; a room placement can override it"
+    },
+    {
+      "name": "hostile_on_harm",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "1: turns hostile to an actor that harms it (only to Ashley when hostile_on_unprovoked_harm is also 1); a room placement can override it"
+    },
+    {
+      "name": "hostile_on_unprovoked_harm",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "1: turns hostile to an actor that harms it other than in return for its own earlier harm; a room placement can override it"
+    },
+    {
+      "name": "can_ally_with_ashley",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "1: a beneficial action from Ashley may make it her ally, and harm from Ashley ends the alliance; a room placement can override it"
+    },
+    {
+      "name": "flee_rule",
+      "type": "enum",
+      "enum": {
+        "0": "never",
+        "1": "below-quarter-hp",
+        "2": "below-half-hp",
+        "3": "on-sight-of-hostile"
+      },
+      "legacy_numeric_aliases": true,
+      "description": "when it flees; on-sight-of-hostile also flees while its flee timer runs, and any rule but never also flees while its action status is fleeing; a room placement can override it"
+    },
+    {
+      "name": "terrain_preset",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 3,
+      "description": "picks the tile kinds it will not walk on from Battle::Ai::kTerrainRejectMasks, unless movement_class or gait_class has 64 or 128, which keep its existing mask; a room placement can override it"
     },
     {
       "name": "mobility_limb_1",

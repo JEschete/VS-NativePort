@@ -364,6 +364,44 @@ TEST_CASE("Packed shape bits that the split would change are refused",
         "parts.csv: has both 'shape_bits' and 'attack_angle'");
 }
 
+TEST_CASE("Signed AI settings words split into their named columns",
+          "[zone-authoring][content-tables][znd]") {
+  constexpr std::string_view kColumns =
+      "facing_delay_preset,wander_preset,approaches_target_point,"
+      "step_height_preset,tile_step_limit,walks_to_waypoints,"
+      "chases_lost_target,area_lock,ignores_line_of_sight,view_angle_preset,"
+      "perception_range_preset,relation_category,decays_hostility,"
+      "shares_ally_hostility,hostile_on_harm,hostile_on_unprovoked_harm,"
+      "can_ally_with_ashley,flee_rule,terrain_preset";
+  // 0xC11D2A1C: facing 3, wander 1, step height 2, tile limit 2, bit 13,
+  // view 1, range 7, bit 24 and terrain 3; its unsigned form splits the same.
+  constexpr std::string_view kCells = "3,1,0,2,2,0,1,0,0,1,7,0,0,1,0,0,0,0,3";
+  const auto split = content::MigrateZoneColumns(
+      ZoneTable::kEnemies,
+      "id,ai_settings,hp\na,-1055053284,9\nb,3239914012,8\nc,0,7\n",
+      "enemies.csv");
+  if (!split) FAIL(split.error());
+  CHECK(split->split_columns == 1);
+  CHECK(split->text ==
+        std::format("id,{},hp\na,{},9\nb,{},8\nc,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+                    "0,0,0,0,0,7\n",
+                    kColumns, kCells, kCells));
+  const auto refused = [](const std::string& text) {
+    return ErrorOf(
+        content::MigrateZoneColumns(ZoneTable::kEnemies, text, "enemies.csv"));
+  };
+  // Bits 0-1 are padding no column holds.
+  CHECK(refused("id,ai_settings\na,-1\n") ==
+        "enemies.csv:2: column 'ai_settings': -1 does not fit the columns "
+        "that replace it: bits 0x3 have no column");
+  CHECK(refused("id,ai_settings\na,4294967296\n") ==
+        "enemies.csv:2: column 'ai_settings': 4294967296 does not fit the "
+        "columns that replace it");
+  CHECK(refused("id,ai_settings\na,-2147483652\n") ==
+        "enemies.csv:2: column 'ai_settings': -2147483652 does not fit the "
+        "columns that replace it");
+}
+
 TEST_CASE("Numeric status immunities migrate to status names",
           "[zone-authoring][content-tables][znd]") {
   // 147456 is bits 14 and 17; version 3 wrote bit 31 alone as -2147483648.

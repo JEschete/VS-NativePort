@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <expected>
@@ -102,8 +103,10 @@ content::ZndFile SampleZone() {
   VS::test_support::UseValidPartCodes(enemy.data, 1);
   VS::test_support::UseKnownActions(enemy.data, 1);
   VS::test_support::UseReservedBytes(enemy.data);
-  // Status immunities with bit 31, which version 3 wrote as a negative number.
+  // Status immunities with bit 31, which version 3 wrote as a negative number,
+  // and AI settings with bit 31, which version 9 did.
   enemy.data[0x2B] |= std::byte{0x80};
+  enemy.data[0x2F] |= std::byte{0x80};
   zone.enemies.push_back(enemy);
   // A room palette row with STP words and a texture page.
   zone.textures =
@@ -219,6 +222,37 @@ void PackShapeBits(std::vector<std::vector<std::string>>& rows,
   }
 }
 
+// Packs the enemies table's AI settings columns, by their bit positions, back
+// into the signed ai_settings word that version 9 tables had.
+void PackAiSettings(std::vector<std::vector<std::string>>& rows,
+                    const std::vector<content::TableRow>& checked) {
+  constexpr std::array<unsigned, 19> kShifts{
+      2, 4, 7, 8, 10, 12, 13, 14, 15, 16, 18, 21, 23, 24, 25, 26, 27, 28, 30};
+  auto& header = rows.front();
+  const auto first = std::ranges::find(header, "facing_delay_preset");
+  REQUIRE(first != header.end());
+  const auto at = static_cast<std::size_t>(first - header.begin());
+  REQUIRE(at + kShifts.size() <= header.size());
+  REQUIRE(header.at(at + kShifts.size() - 1) == "terrain_preset");
+  for (std::size_t row = 0; row < rows.size(); ++row) {
+    auto& fields = rows.at(row);
+    if (row == 0) {
+      fields.at(at) = "ai_settings";
+    } else {
+      const auto& values = checked.at(row - 1).values;
+      std::uint32_t word = 0;
+      for (std::size_t index = 0; index < kShifts.size(); ++index) {
+        word |= static_cast<std::uint32_t>(values.at(at + index))
+                << kShifts.at(index);
+      }
+      fields.at(at) = std::to_string(static_cast<std::int32_t>(word));
+    }
+    fields.erase(
+        fields.begin() + static_cast<std::ptrdiff_t>(at + 1),
+        fields.begin() + static_cast<std::ptrdiff_t>(at + kShifts.size()));
+  }
+}
+
 // Adds back the raw_<offset> columns version 4 tables had for reserved bytes,
 // the action_N_index columns version 5 had for each action slot's index, the
 // equipment index columns version 6 had, and version 8's zud_index, which
@@ -320,6 +354,7 @@ void LegacyTableHeaders(const ModelRoot& root) {
     std::vector<std::vector<std::string>> rows;
     for (const auto& record : *records) rows.push_back(record.fields);
     if (table == ZoneTable::kParts) PackShapeBits(rows, *checked);
+    if (table == ZoneTable::kEnemies) PackAiSettings(rows, *checked);
     AddReservedColumns(rows, table, *checked);
     WriteText(path, content::FormatCsv(rows));
   }
@@ -601,6 +636,9 @@ TEST_CASE("The zone converter names the read it cannot resolve",
   // Template 0 loading ZUD entry 1 (0x460), not its own.
   content::ZndFile borrowed = SampleZone();
   borrowed.enemies.at(0).data.at(0x460) = std::byte{1};
+  // The AI settings' unread low bits (0x2C bits 0-1) set.
+  content::ZndFile low_bits = SampleZone();
+  low_bits.enemies.at(0).data.at(0x2C) |= std::byte{2};
   const std::vector<Refused> refusals{
       {mid_room, true,
        "MAP/ZONE001.ZND: room slot 0: sector 101 (4096 bytes) is no "
@@ -625,6 +663,9 @@ TEST_CASE("The zone converter names the read it cannot resolve",
       {borrowed, true,
        "MAP/ZONE001.ZND: enemy.map.zone001.00: reserved byte 0x460 is 1, not "
        "the 0 its slot 0 gives"},
+      {low_bits, true,
+       "MAP/ZONE001.ZND: enemy.map.zone001.00: bits 0x03 of reserved byte "
+       "0x02C are 2, not padding 0"},
       {SampleZone(), false,
        "MAP/ZONE001.ZND: enemy.map.zone001.00 loads archetype.map.z001u00, "
        "which the zud-json converter has not recorded (convert the models "
@@ -674,6 +715,9 @@ TEST_CASE("Old zone authoring upgrades without overwriting native edits",
   CHECK_FALSE(parts.contains(",index"));
   // Version 8's zud_index, which held each template's slot, went.
   CHECK_FALSE(enemies.contains("zud_index"));
+  // Version 9's signed ai_settings word split into its named columns.
+  CHECK_FALSE(enemies.contains("ai_settings"));
+  CHECK(enemies.contains(",facing_delay_preset,wander_preset,"));
   const auto repeat = extract::UpgradeZoneAuthoring(root.Root());
   if (!repeat) FAIL(repeat.error());
   CHECK(repeat->written == 0);

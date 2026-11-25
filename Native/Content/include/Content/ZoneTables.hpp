@@ -36,14 +36,15 @@
 // accessory's at 0x235, each limb armour's at +0x53 and each part's at +0x17),
 // the inventory slots of the player's equipment, read as zero. The trailing
 // ZUD index (0x460, 4 bytes) reads as the template's slot: it picks the
-// zone's ZUD entry, which the row's archetype names.
+// zone's ZUD entry, which the row's archetype names. Bits 0-1 of 0x02C, below
+// the AI settings' columns, read as zero.
 // A limb whose columns are all zero and a part whose bytes are all zero have
 // no row, and a missing row reads as such, so a template rebuilds byte for
 // byte.
 namespace VS::Content {
 
 inline constexpr std::string_view kZndTableConverterName = "znd-tables";
-inline constexpr std::uint32_t kZndTableConverterVersion = 9;
+inline constexpr std::uint32_t kZndTableConverterVersion = 10;
 
 enum class ZoneTable : std::uint8_t {
   kZones,     // catalogs/world/zones: music and room slot count
@@ -146,15 +147,15 @@ struct ZoneColumnMigration {
 
 // Rewrites older authoring forms the current schema no longer reads, so it
 // loads; the text is unchanged when none remain. Splits the former columns
-// that packed several bit fields (the parts table's shape_bits) into the
-// columns that replaced them, refusing a value they cannot hold and a table
-// with both forms. Drops version 4's raw_<offset> columns for reserved bytes
-// and version 5's action_N_index columns, refusing a cell that differs from
-// the value the tables now give its byte. Names a flags cell written as a
-// number (version 3's status_immunities), refusing a number its bytes cannot
-// hold, and an action cell written as a number (version 5's action_N_id) by
-// the id `read` serves for it in the action catalog, refusing one the catalog
-// does not hold; 0 becomes an empty cell. Rewrites a limb's
+// that packed several bit fields (the parts table's shape_bits and version 9's
+// signed ai_settings) into the columns that replaced them, refusing a value
+// they cannot hold and a table with both forms. Drops version 4's raw_<offset>
+// columns for reserved bytes and version 5's action_N_index columns, refusing a
+// cell that differs from the value the tables now give its byte. Names a flags
+// cell written as a number (version 3's status_immunities), refusing a number
+// its bytes cannot hold, and an action cell written as a number (version 5's
+// action_N_id) by the id `read` serves for it in the action catalog, refusing
+// one the catalog does not hold; 0 becomes an empty cell. Rewrites a limb's
 // agility_defense_bonus of 128-255, which version 7 wrote unsigned, as the
 // same byte's signed value (251 is -5). Column renames are left to
 // NormalizeTableText.

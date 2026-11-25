@@ -66,6 +66,25 @@ constexpr std::array<std::string_view, 6> kSplashFields{
     "limb_0_percent", "limb_1_percent", "limb_2_percent",
     "limb_3_percent", "limb_4_percent", "limb_5_percent",
 };
+// The AI settings' domains; AddEnemyFields' descriptions give each meaning.
+constexpr std::array<EnumValue, 4> kRelationCategories{{
+    {0, "hostile"},
+    {1, "neutral"},
+    {2, "passive"},
+    {3, "ashley-ally"},
+}};
+constexpr std::array<EnumValue, 4> kFleeRules{{
+    {0, "never"},
+    {1, "below-quarter-hp"},
+    {2, "below-half-hp"},
+    {3, "on-sight-of-hostile"},
+}};
+constexpr std::array<EnumValue, 4> kTileStepLimits{{
+    {0, "one-tile"},
+    {1, "two-tiles"},
+    {2, "three-tiles"},
+    {3, "four-tiles"},
+}};
 
 // decomp: vs_CharInitData (src/BATTLE/BATTLE.PRG/charInit.h:24-51) and the
 // records it holds; see Actors/CharacterInit.hpp and Items/ItemRecords.hpp.
@@ -87,23 +106,29 @@ struct Field {
   std::uint8_t bits = 0;  // 0: the whole value
 };
 
-// A former column that held whole bytes now split into bit-field columns.
+// A former column of `size` little-endian bytes from `offset`, signed or not,
+// now split into bit-field columns.
 struct PackedColumn {
   std::string_view legacy;
+  std::size_t offset = 0;
+  std::size_t size = 1;
+  bool is_signed = false;
   std::vector<std::string_view> columns;
 };
 
 // A byte no column holds (§4.1): zero padding, a constant, 1 exactly when
 // the column `set_by` is not zero, or byte `slot_byte` (little-endian) of the
 // template's slot. `legacy` is the column that held it before version 5
-// (raw_<offset>), 6 (action_N_index), 7 (the equipment indices) or 9
-// (zud_index).
+// (raw_<offset>), 6 (action_N_index), 7 (the equipment indices), 9
+// (zud_index) or 10 (ai_settings). It holds the bits `mask` of the byte;
+// columns hold the rest.
 struct ReservedByte {
   std::string_view legacy;
   std::size_t offset = 0;
   std::string_view set_by;
   std::optional<std::uint8_t> constant;
   std::optional<std::uint8_t> slot_byte;
+  std::uint8_t mask = kByteMask;
 };
 
 // A table's columns: the leading key and reference columns, then the fields.
@@ -128,7 +153,8 @@ struct TableLayout {
                         .offset = offset,
                         .set_by = set_by,
                         .constant = std::nullopt,
-                        .slot_byte = std::nullopt});
+                        .slot_byte = std::nullopt,
+                        .mask = kByteMask});
   }
 
   void Constant(std::string_view legacy, std::size_t offset,
@@ -137,7 +163,18 @@ struct TableLayout {
                         .offset = offset,
                         .set_by = {},
                         .constant = value,
-                        .slot_byte = std::nullopt});
+                        .slot_byte = std::nullopt,
+                        .mask = kByteMask});
+  }
+
+  // Bits `mask` of a byte whose other bits are in columns, always zero.
+  void Padding(std::string_view legacy, std::size_t offset, std::uint8_t mask) {
+    reserved.push_back({.legacy = legacy,
+                        .offset = offset,
+                        .set_by = {},
+                        .constant = 0,
+                        .slot_byte = std::nullopt,
+                        .mask = mask});
   }
 
   // A little-endian field of `size` bytes that holds the template's slot.
@@ -147,7 +184,8 @@ struct TableLayout {
                           .offset = offset + index,
                           .set_by = {},
                           .constant = std::nullopt,
-                          .slot_byte = static_cast<std::uint8_t>(index)});
+                          .slot_byte = static_cast<std::uint8_t>(index),
+                          .mask = kByteMask});
     }
   }
 
@@ -360,15 +398,106 @@ void AddEnemyFields(TableLayout& table) {
               "statuses the enemy cannot receive; immunity to spell-immunity "
               "also starts it with that status",
               StatusFlags());
+  // The AI settings word. The presets index tables loaded with the battle
+  // program (Battle/Ai/ActorState.hpp), so the descriptions name them.
   // decomp: func_800E5A9C (src/BATTLE/BATTLE.PRG/7CD68.c:205) decodes it
-  // (Battle/Ai/ActorSettings.hpp).
-  // decomp: func_800E5A74 (src/BATTLE/BATTLE.PRG/7CD68.c:200)
-  table.Add("ai_settings", 0x2C, 4, true,
-            "packed AI settings: bits 2-3 facing delay, 4-6 wander preset, "
-            "8-9 step height, 10-11 tile step limit, 14 area lock, 16-17 view "
-            "angle, 18-20 perception range, 21-22 relation category, 30-31 "
-            "terrain mask; the rest set AI state flags, and an actor's saved "
-            "flags can replace bits 21-31");
+  // (Battle/Ai/ActorSettings.hpp); no code reads bits 0-1, which every disc
+  // template holds zero.
+  // decomp: func_800E5A74 (src/BATTLE/BATTLE.PRG/7CD68.c:200) replaces bits
+  // 21-31 with a room placement's saved flags when the placement sets them.
+  table.Padding("ai_settings", 0x2C, 0x03);
+  table.Bits("facing_delay_preset", 0x2C, 2, 2,
+             "picks a scale from Battle::Ai::facingDelayScales: the delay "
+             "before the enemy turns to face its target is the scale times 8 "
+             "(times 2 above a collision radius of 128); at 0 it never turns "
+             "to face it");
+  table.Bits("wander_preset", 0x2C, 4, 3,
+             "picks the wander move period, rest period and rate from "
+             "Battle::Ai::kWanderTimingPresets");
+  table.Bits("approaches_target_point", 0x2C, 7, 1,
+             "1: closing on a near target steps to the point where it stands "
+             "rather than following the target");
+  table.Bits("step_height_preset", 0x2D, 0, 2,
+             "picks the highest rise or drop one step may take from "
+             "Battle::Ai::stepHeights");
+  table.Bits("tile_step_limit", 0x2D, 2, 2,
+             "how many tiles (x plus z) one move step spans, which is also how "
+             "far it reaches across a gap",
+             kTileStepLimits);
+  table.Bits("walks_to_waypoints", 0x2D, 4, 1,
+             "1: in a room with an active waypoint, a best action whose "
+             "candidate flags have bit 0 walks to the nearest active waypoint "
+             "instead of moving in place, unless it runs the patrol combat "
+             "behavior");
+  table.Bits("chases_lost_target", 0x2D, 5, 1,
+             "1: chases a lost target to its last tile instead of looking "
+             "around for it");
+  table.Bits("area_lock", 0x2D, 6, 1,
+             "1: keeps its ground moves in its current area unless it is "
+             "stuck");
+  table.Bits("ignores_line_of_sight", 0x2D, 7, 1,
+             "1: perceives actors in range and in view without a clear line "
+             "to them at body height");
+  table.Bits("view_angle_preset", 0x2E, 0, 2,
+             "picks the field of view, in degrees, from "
+             "Battle::Ai::viewAngles");
+  table.Bits(
+      "perception_range_preset", 0x2E, 2, 3,
+      "picks the squared perception range from "
+      "Battle::Ai::kPerceptionRangesSquared; the near range is the same, "
+      "capped at 1536 squared");
+  // decomp: func_800E7370 (src/BATTLE/BATTLE.PRG/7CD68.c:62) classifies the
+  // room's actors by category; Ashley and category 3 are not combatants.
+  table.Bits("relation_category", 0x2E, 5, 2,
+             "how it holds the room's actors: hostile is hostile to Ashley "
+             "and ashley-ally enemies and allied with the rest, neutral is "
+             "neutral to all, passive is neutral to Ashley and ashley-ally "
+             "enemies and allied with the rest, ashley-ally is allied with "
+             "Ashley and ashley-ally enemies and hostile to the rest; a room "
+             "placement can override it",
+             kRelationCategories);
+  table.Bits("decays_hostility", 0x2E, 7, 1,
+             "1: an actor it holds hostile turns neutral once it has gone 121 "
+             "perception updates unperceived; a room placement can override "
+             "it");
+  table.Bits("shares_ally_hostility", 0x2F, 0, 1,
+             "1: takes on its allies' hostilities; a room placement can "
+             "override it");
+  table.Bits("hostile_on_harm", 0x2F, 1, 1,
+             "1: turns hostile to an actor that harms it (only to Ashley when "
+             "hostile_on_unprovoked_harm is also 1); a room placement can "
+             "override it");
+  table.Bits("hostile_on_unprovoked_harm", 0x2F, 2, 1,
+             "1: turns hostile to an actor that harms it other than in return "
+             "for its own earlier harm; a room placement can override it");
+  table.Bits("can_ally_with_ashley", 0x2F, 3, 1,
+             "1: a beneficial action from Ashley may make it her ally, and "
+             "harm from Ashley ends the alliance; a room placement can "
+             "override it");
+  // decomp: func_800D8EF4 (src/BATTLE/BATTLE.PRG/6FC00.c:324)
+  table.Bits("flee_rule", 0x2F, 4, 2,
+             "when it flees; on-sight-of-hostile also flees while its flee "
+             "timer runs, and any rule but never also flees while its action "
+             "status is fleeing; a room placement can override it",
+             kFleeRules);
+  table.Bits("terrain_preset", 0x2F, 6, 2,
+             "picks the tile kinds it will not walk on from "
+             "Battle::Ai::kTerrainRejectMasks, unless movement_class or "
+             "gait_class has 64 or 128, which keep its existing mask; a room "
+             "placement can override it");
+  table.packed.push_back(
+      {.legacy = "ai_settings",
+       .offset = 0x2C,
+       .size = 4,
+       .is_signed = true,
+       .columns = {
+           "facing_delay_preset", "wander_preset", "approaches_target_point",
+           "step_height_preset", "tile_step_limit", "walks_to_waypoints",
+           "chases_lost_target", "area_lock", "ignores_line_of_sight",
+           "view_angle_preset", "perception_range_preset", "relation_category",
+           "decays_hostility", "shares_ally_hostility", "hostile_on_harm",
+           "hostile_on_unprovoked_harm", "can_ally_with_ashley", "flee_rule",
+           "terrain_preset"}});
   table.Add("mobility_limb_1", 0x30, 1, false,
             "a limb whose loss slows the enemy");
   table.Add("mobility_limb_2", 0x31, 1, false,
@@ -535,8 +664,11 @@ void AddPartFields(TableLayout& table) {
              "the blade's targeting volume; actions use the same domain",
              kVolumeShapes);
   table.Bits("attack_angle", 0x1B, 3, 5, "the attack area's angle");
-  table.packed.push_back(
-      {.legacy = "shape_bits", .columns = {"attack_shape", "attack_angle"}});
+  table.packed.push_back({.legacy = "shape_bits",
+                          .offset = 0x1B,
+                          .size = 1,
+                          .is_signed = false,
+                          .columns = {"attack_shape", "attack_angle"}});
   table.Run("type", 0x1C, kTypeFields, 1, true, "signed physical-type rating");
   table.Run("class", 0x20, kClassFields, 1, true,
             "signed class rating; storage_6/7 retain the original tail bytes");
@@ -941,8 +1073,11 @@ void DeriveReservedBytes(ZndTemplate& data, std::size_t slot) {
   ForEachReserved(
       data, [slot](const TableLayout& layout, const ReservedByte& reserved,
                    std::span<std::byte> record, std::size_t /*base*/) {
+        const unsigned mask = reserved.mask;
+        const auto kept =
+            std::to_integer<unsigned>(record[reserved.offset]) & ~mask;
         record[reserved.offset] = static_cast<std::byte>(
-            ReservedValue(layout, reserved, record, slot));
+            kept | (ReservedValue(layout, reserved, record, slot) & mask));
       });
 }
 
@@ -994,31 +1129,49 @@ std::expected<std::vector<Value>, std::string> Dense(
 std::expected<std::vector<std::string>, std::string> SplitCell(
     const TableLayout& layout, const PackedColumn& packed,
     std::string_view cell, std::string_view file, std::size_t line) {
-  unsigned value = 0;
+  std::int64_t value = 0;
   const char* const first = cell.data();
   const auto parsed = std::from_chars(first, first + cell.size(), value);
   if (cell.empty() || parsed.ec != std::errc() ||
-      parsed.ptr != first + cell.size()) {
+      parsed.ptr != first + cell.size() || (value < 0 && !packed.is_signed)) {
     return std::unexpected(
         CellError(file, line, packed.legacy,
                   std::format("'{}' is not a decimal integer", cell)));
   }
-  std::vector<std::string> cells;
-  unsigned rebuilt = 0;
-  for (const std::string_view column : packed.columns) {
-    const auto field = std::ranges::find(layout.fields, column, &Field::column);
-    if (field == layout.fields.end() || field->bits == 0) {
-      return std::unexpected(
-          std::format("{}: '{}' is not a bit field", file, column));
-    }
-    const unsigned part = (value >> field->bit) & ((1U << field->bits) - 1);
-    rebuilt |= part << field->bit;
-    cells.push_back(std::to_string(part));
-  }
-  if (rebuilt != value) {
+  const auto width = static_cast<std::uint32_t>(packed.size) * kByteBits;
+  const std::int64_t span = std::int64_t{1} << width;
+  const std::int64_t lowest = packed.is_signed ? -(span / 2) : 0;
+  if (value < lowest || value >= span) {
     return std::unexpected(CellError(
         file, line, packed.legacy,
         std::format("{} does not fit the columns that replace it", value)));
+  }
+  const auto bits = static_cast<std::uint64_t>(value) &
+                    (static_cast<std::uint64_t>(span) - 1);
+  std::vector<std::string> cells;
+  std::uint64_t rebuilt = 0;
+  for (const std::string_view column : packed.columns) {
+    const auto field = std::ranges::find(layout.fields, column, &Field::column);
+    if (field == layout.fields.end() || field->bits == 0 ||
+        field->offset < packed.offset ||
+        field->offset >= packed.offset + packed.size) {
+      return std::unexpected(std::format("{}: '{}' is not a bit field of '{}'",
+                                         file, column, packed.legacy));
+    }
+    const auto shift =
+        static_cast<std::uint32_t>(field->offset - packed.offset) * kByteBits +
+        field->bit;
+    const std::uint64_t part =
+        (bits >> shift) & ((std::uint64_t{1} << field->bits) - 1);
+    rebuilt |= part << shift;
+    cells.push_back(std::to_string(part));
+  }
+  if (rebuilt != bits) {
+    return std::unexpected(
+        CellError(file, line, packed.legacy,
+                  std::format("{} does not fit the columns that replace it: "
+                              "bits 0x{:X} have no column",
+                              value, bits & ~rebuilt)));
   }
   return cells;
 }
@@ -1579,13 +1732,16 @@ std::expected<std::vector<ZoneRecord>, std::string> ReadZoneTables(
 std::expected<void, std::string> CheckZoneTemplateCoverage() {
   std::array<unsigned, kZndTemplateBytes> covered{};
   std::array<bool, kZndTemplateBytes> overlap{};
+  const auto mark_bits = [&](std::size_t at, unsigned mask) {
+    unsigned& bits = covered.at(at);
+    if ((bits & mask) != 0) overlap.at(at) = true;
+    bits |= mask;
+  };
   const auto mark = [&](const Field& field, std::size_t base) {
     for (std::size_t index = 0; index < field.size; ++index) {
-      const unsigned mask =
-          field.bits == 0 ? kByteMask : ((1U << field.bits) - 1) << field.bit;
-      unsigned& bits = covered.at(base + field.offset + index);
-      if ((bits & mask) != 0) overlap.at(base + field.offset + index) = true;
-      bits |= mask;
+      mark_bits(
+          base + field.offset + index,
+          field.bits == 0 ? kByteMask : ((1U << field.bits) - 1) << field.bit);
     }
   };
   for (const Field& field : LayoutOf(ZoneTable::kEnemies).fields) {
@@ -1606,14 +1762,7 @@ std::expected<void, std::string> CheckZoneTemplateCoverage() {
   ForEachReserved(
       covered, [&](const TableLayout& layout, const ReservedByte& reserved,
                    std::span<unsigned> /*record*/, std::size_t base) {
-        mark({.column = reserved.legacy,
-              .offset = reserved.offset,
-              .size = 1,
-              .is_signed = false,
-              .bytes = false,
-              .bit = 0,
-              .bits = 0},
-             base);
+        mark_bits(base + reserved.offset, reserved.mask);
         if (!reserved.set_by.empty() &&
             std::ranges::find(layout.fields, reserved.set_by, &Field::column) ==
                 layout.fields.end()) {
@@ -1652,11 +1801,18 @@ std::expected<void, std::string> CheckZoneReservedBytes(const ZndTemplate& data,
   ForEachReserved(
       data, [&](const TableLayout& layout, const ReservedByte& reserved,
                 std::span<const std::byte> record, std::size_t base) {
-        const unsigned expected = ReservedValue(layout, reserved, record, slot);
-        const auto actual = std::to_integer<unsigned>(record[reserved.offset]);
+        const unsigned mask = reserved.mask;
+        const unsigned expected =
+            ReservedValue(layout, reserved, record, slot) & mask;
+        const auto actual =
+            std::to_integer<unsigned>(record[reserved.offset]) & mask;
         if (fault || actual == expected) return;
         const std::size_t at = base + reserved.offset;
-        if (reserved.slot_byte) {
+        if (mask != kByteMask) {
+          fault = std::format(
+              "bits 0x{:02X} of reserved byte 0x{:03X} are {}, not padding {}",
+              mask, at, actual, expected);
+        } else if (reserved.slot_byte) {
           fault = std::format(
               "reserved byte 0x{:03X} is {}, not the {} its slot {} gives", at,
               actual, expected, slot);
