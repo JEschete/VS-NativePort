@@ -257,6 +257,10 @@ std::expected<std::int64_t, std::string> ReadCell(const ColumnSpec& column,
   }
   if (column.type != ColumnType::kInteger && column.type != ColumnType::kEnum) {
     if (IsContentId(cell)) return 0;
+    if (cell.empty() && column.optional &&
+        column.type == ColumnType::kReference) {
+      return 0;
+    }
     return std::unexpected(CellError(
         file, line, column.name,
         std::format("'{}' is not an id (lowercase letters, digits, '.', '_' "
@@ -503,6 +507,7 @@ std::string FormatTableSchema(const TableSpec& spec) {
     }
     if (column.type == ColumnType::kReference) {
       entry["references"] = std::string(column.references);
+      if (column.optional) entry["optional"] = true;
     }
     if (column.type == ColumnType::kBytes) {
       entry["bytes"] = column.maximum;

@@ -9,6 +9,7 @@
 #include <utility>
 #include <vector>
 
+#include "Content/ActionCatalog.hpp"
 #include "Content/CatalogTable.hpp"
 #include "Content/ConversionManifest.hpp"
 #include "Content/ZoneTables.hpp"
@@ -36,7 +37,7 @@ Content::ZoneTableReader Reader(const Texts& texts) {
              std::string_view path) -> std::expected<std::string, std::string> {
     const auto found = texts.find(std::string(path));
     if (found == texts.end()) {
-      return std::unexpected("missing zone table " + std::string(path));
+      return std::unexpected("missing " + std::string(path));
     }
     return found->second;
   };
@@ -47,13 +48,28 @@ std::expected<void, std::string> PrepareFiles(const fs::path& root,
                                               ZoneAuthoringReport& report) {
   Texts original;
   Texts normalized;
+  // The limbs name their actions from the action catalog, which upgrades
+  // before the zones.
+  const fs::path catalog = root / Platform::Utf8Path(Content::kActionsPath);
+  std::error_code error;
+  if (fs::exists(catalog, error)) {
+    auto text = Read(catalog);
+    if (!text) return std::unexpected(text.error());
+    original.emplace(Content::kActionsPath, *text);
+    normalized.emplace(Content::kActionsPath, *std::move(text));
+  } else if (error) {
+    return std::unexpected(Platform::PathText(catalog) + ": " +
+                           error.message());
+  }
+  const Content::ZoneTableReader read_original = Reader(original);
   for (const auto table : Content::kZoneTables) {
     const auto path = Content::ZoneTablePath(table);
     auto text = Read(root / Platform::Utf8Path(path));
     if (!text) return std::unexpected(text.error());
     // The migration is checked to be lossless; the records check below
     // compares its result with the normalized tables.
-    auto migrated = Content::MigrateZoneColumns(table, *text, path);
+    auto migrated =
+        Content::MigrateZoneColumns(table, *text, path, read_original);
     if (!migrated) return std::unexpected(migrated.error());
     report.split_columns += migrated->split_columns;
     report.retired_columns += migrated->retired_columns;
@@ -73,7 +89,7 @@ std::expected<void, std::string> PrepareFiles(const fs::path& root,
         Content::FormatTableSchema(Content::ZoneTableSpec(table));
     if (*schema != expected) pending.emplace(schema_path, expected);
   }
-  auto before = Content::ReadZoneTables(Reader(original));
+  auto before = Content::ReadZoneTables(read_original);
   if (!before) return std::unexpected(before.error());
   auto after = Content::ReadZoneTables(Reader(normalized));
   if (!after) return std::unexpected(after.error());
@@ -110,8 +126,9 @@ std::expected<ZoneAuthoringReport, std::string> UpgradeZoneAuthoring(
     auto found = (**manifest).converters.find(Content::kZndTableConverterName);
     if (found != (**manifest).converters.end()) {
       // Version 1 tables have numeric names and values, version 2 the packed
-      // shape_bits, version 3 numeric status_immunities and version 4 the
-      // reserved bytes' raw_<offset> columns; all upgrade in place.
+      // shape_bits, version 3 numeric status_immunities, version 4 the
+      // reserved bytes' raw_<offset> columns and version 5 numeric action ids
+      // and the action_N_index columns; all upgrade in place.
       if (found->second < 1 ||
           found->second > Content::kZndTableConverterVersion) {
         return std::unexpected(

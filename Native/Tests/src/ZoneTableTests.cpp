@@ -11,8 +11,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Content/ActionCatalog.hpp"
 #include "Content/CatalogTable.hpp"
 #include "Content/ZoneTables.hpp"
+#include "TestSupport/ActionRoot.hpp"
 #include "TestSupport/ModelFixtures.hpp"
 #include "TestSupport/ZoneTemplates.hpp"
 
@@ -21,11 +23,22 @@ namespace {
 namespace content = VS::Content;
 using content::ZoneTable;
 using VS::test_support::ErrorOf;
+using VS::test_support::Required;
 
 using Texts = std::array<std::string, content::kZoneTableCount>;
 
 std::string& TextOf(Texts& texts, ZoneTable table) {
   return texts.at(static_cast<std::size_t>(table));
+}
+
+// Reads the synthetic action catalog and nothing else.
+content::ZoneTableReader ActionReader() {
+  return [](std::string_view path) -> std::expected<std::string, std::string> {
+    if (path == content::kActionsPath) {
+      return VS::test_support::SyntheticActionsText();
+    }
+    return std::unexpected(std::format("no table {}", path));
+  };
 }
 
 content::ZoneTableReader ReaderOf(const Texts& texts) {
@@ -36,8 +49,13 @@ content::ZoneTableReader ReaderOf(const Texts& texts) {
         return texts.at(static_cast<std::size_t>(table));
       }
     }
-    return std::unexpected(std::format("no table {}", path));
+    return ActionReader()(path);
   };
+}
+
+Texts Formatted(const std::vector<content::ZoneRecord>& zones,
+                const content::ZoneTableReader& read = ActionReader()) {
+  return Required(content::FormatZoneTables(zones, read));
 }
 
 // A template whose every byte differs from its neighbours, so a column at the
@@ -58,6 +76,7 @@ content::ZndTemplate PatternTemplate(std::size_t seed, bool zeroed) {
         static_cast<std::byte>((seed + limb) % 8);
   }
   VS::test_support::UseValidPartCodes(data, seed);
+  VS::test_support::UseKnownActions(data, seed);
   if (zeroed) {
     for (std::size_t at = 0x140; at < 0x170; ++at) data.at(at) = std::byte{};
     for (std::size_t at = 0x238; at < 0x258; ++at) data.at(at) = std::byte{};
@@ -88,7 +107,7 @@ std::vector<content::ZoneRecord> SampleZones() {
   return {first, empty};  // by id, as the tables read back
 }
 
-Texts SampleTexts() { return content::FormatZoneTables(SampleZones()); }
+Texts SampleTexts() { return Formatted(SampleZones()); }
 
 std::vector<content::ZoneRecord> ReadBack(const Texts& texts) {
   auto zones = content::ReadZoneTables(ReaderOf(texts));
@@ -104,6 +123,47 @@ void Edit(Texts& texts, ZoneTable table, std::string_view from,
   const std::size_t at = text.find(from);
   REQUIRE(at != std::string::npos);
   text.replace(at, from.size(), to);
+}
+
+// The table's records and the index of `column` in its header.
+std::pair<std::vector<content::CsvRecord>, std::size_t> RecordsOf(
+    const Texts& texts, ZoneTable table, std::string_view column) {
+  auto records = Required(content::ParseCsv(
+      texts.at(static_cast<std::size_t>(table)), "table.csv"));
+  const auto& header = records.front().fields;
+  const auto found = std::ranges::find(header, column);
+  REQUIRE(found != header.end());
+  const auto at = static_cast<std::size_t>(found - header.begin());
+  return {std::move(records), at};
+}
+
+// The cell under `column` in the table's `row`th record (1 is the first row).
+std::string CellOf(const Texts& texts, ZoneTable table, std::size_t row,
+                   std::string_view column) {
+  const auto [records, at] = RecordsOf(texts, table, column);
+  return records.at(row).fields.at(at);
+}
+
+void SetCell(Texts& texts, ZoneTable table, std::size_t row,
+             std::string_view column, std::string_view value) {
+  auto [records, at] = RecordsOf(texts, table, column);
+  records.at(row).fields.at(at) = value;
+  std::vector<std::vector<std::string>> rows;
+  for (auto& record : records) rows.push_back(std::move(record.fields));
+  TextOf(texts, table) = content::FormatCsv(rows);
+}
+
+// Reads the zone tables and no action catalog.
+content::ZoneTableReader TablesOnly(const Texts& texts) {
+  return [&texts](
+             std::string_view path) -> std::expected<std::string, std::string> {
+    for (const ZoneTable table : content::kZoneTables) {
+      if (content::ZoneTablePath(table) == path) {
+        return texts.at(static_cast<std::size_t>(table));
+      }
+    }
+    return std::unexpected(std::format("cannot read {}", path));
+  };
 }
 
 }  // namespace
@@ -146,7 +206,7 @@ TEST_CASE("Zone tables round-trip every template byte",
   CHECK(limbs.find("enemy.map.zone009.01,0,") == std::string::npos);
   CHECK(limbs.find("enemy.map.zone009.01,1,") != std::string::npos);
   // A second formatting of what was read writes the same text.
-  CHECK(content::FormatZoneTables(ReadBack(texts)) == texts);
+  CHECK(Formatted(ReadBack(texts)) == texts);
 }
 
 TEST_CASE("Zone table edits reach the rebuilt template",
@@ -260,7 +320,7 @@ TEST_CASE(
     "[zone-authoring][content-tables][znd]") {
   auto zones = SampleZones();
   zones[0].enemies[0].data[3] = std::byte{0xFF};
-  const auto texts = content::FormatZoneTables(zones);
+  const auto texts = Formatted(zones);
   const auto read = content::ReadZoneTables(ReaderOf(texts));
   REQUIRE_FALSE(read.has_value());
   CHECK(read.error().contains("column 'enemy_class'"));
@@ -426,4 +486,79 @@ TEST_CASE("A limb's armour material sets its reserved byte",
   data[0x294 + 0x50] = std::byte{};
   data[0x294 + 0x52] = std::byte{};
   CHECK(ReadBack(texts) == expected);
+}
+
+TEST_CASE("Limb action slots name actions from the action catalog",
+          "[content-tables][znd]") {
+  Texts texts = SampleTexts();
+  // The first template's limb 0 holds actions 0-3 and limb 1 actions 4-7.
+  CHECK(CellOf(texts, ZoneTable::kLimbs, 1, "action_1").empty());
+  CHECK(CellOf(texts, ZoneTable::kLimbs, 1, "action_2") == "action.move-ab");
+  CHECK(CellOf(texts, ZoneTable::kLimbs, 2, "action_4") == "action.rend");
+  // The slot index bytes are rebuilt, not columns.
+  CHECK_FALSE(TextOf(texts, ZoneTable::kLimbs).contains("action_1_index"));
+  CHECK(content::FormatTableSchema(content::ZoneTableSpec(ZoneTable::kLimbs))
+            .contains("\"optional\": true"));
+  SetCell(texts, ZoneTable::kLimbs, 1, "action_1", "action.rend");
+  auto expected = SampleZones();
+  expected[0].enemies[0].data[0x238 + 0x10] = std::byte{7};
+  CHECK(ReadBack(texts) == expected);
+  SetCell(texts, ZoneTable::kLimbs, 1, "action_1", "action.nothing");
+  CHECK(ErrorOf(content::ReadZoneTables(ReaderOf(texts))) ==
+        "catalogs/enemies/zone-enemy-limbs.csv:2: column 'action_1': no "
+        "action 'action.nothing' in catalogs/battle/actions.csv");
+}
+
+TEST_CASE("Limb actions the action catalog cannot name are refused",
+          "[content-tables][znd]") {
+  const Texts texts = SampleTexts();
+  CHECK(ErrorOf(content::ReadZoneTables(TablesOnly(texts))) ==
+        "naming limb actions: cannot read catalogs/battle/actions.csv");
+  CHECK(ErrorOf(content::FormatZoneTables(SampleZones(),
+                                          content::ZoneTableReader{})) ==
+        "enemy.map.zone009.00 limb 0: naming limb actions needs "
+        "catalogs/battle/actions.csv");
+  auto zones = SampleZones();
+  zones[0].enemies[0].data[0x238 + 0x11] = std::byte{1};
+  CHECK(ErrorOf(content::FormatZoneTables(zones, ActionReader())) ==
+        "enemy.map.zone009.00 limb 0: action_1 names action 256, which "
+        "catalogs/battle/actions.csv does not hold");
+}
+
+TEST_CASE("Numeric limb action ids migrate to action names",
+          "[zone-authoring][content-tables][znd]") {
+  const auto migrated = content::MigrateZoneColumns(
+      ZoneTable::kLimbs,
+      "limb,action_1_id,action_1_index,action_2_id,action_2_index\n"
+      "0,0,0,7,1\n1,2,0,action.rend,1\n",
+      "limbs.csv", ActionReader());
+  if (!migrated) FAIL(migrated.error());
+  CHECK(migrated->retired_columns == 2);
+  CHECK(migrated->named_values == 3);
+  CHECK(migrated->text ==
+        "limb,action_1_id,action_2_id\n0,,action.rend\n"
+        "1,action.move-ac,action.rend\n");
+  const auto again = content::MigrateZoneColumns(
+      ZoneTable::kLimbs, migrated->text, "l.csv", ActionReader());
+  if (!again) FAIL(again.error());
+  CHECK(again->retired_columns == 0);
+  CHECK(again->named_values == 0);
+  CHECK(again->text == migrated->text);
+}
+
+TEST_CASE("Limb action columns their bytes cannot hold are refused",
+          "[zone-authoring][content-tables][znd]") {
+  const auto migrate = [](const std::string& text,
+                          const content::ZoneTableReader& read) {
+    return ErrorOf(
+        content::MigrateZoneColumns(ZoneTable::kLimbs, text, "t.csv", read));
+  };
+  CHECK(migrate("action_2_index\n0\n", ActionReader()) ==
+        "t.csv:2: column 'action_2_index': '0' is not 1; byte 0x17 always "
+        "holds 1 now");
+  CHECK(migrate("action_1_id\n300\n", ActionReader()) ==
+        "t.csv:2: column 'action_1_id': names action 300, which "
+        "catalogs/battle/actions.csv does not hold");
+  CHECK(migrate("action_1_id\n5\n", {}) ==
+        "naming limb actions needs catalogs/battle/actions.csv");
 }

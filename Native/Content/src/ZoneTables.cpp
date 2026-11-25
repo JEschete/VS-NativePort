@@ -21,6 +21,7 @@
 #include <utility>
 #include <vector>
 
+#include "Content/ActionCatalog.hpp"
 #include "Content/CatalogTable.hpp"
 #include "Content/ConversionManifest.hpp"
 #include "Content/GameplayDomains.hpp"
@@ -67,6 +68,7 @@ constexpr std::size_t kLimbsAt = 0x238;
 constexpr std::size_t kLimbBytes = 0x5C;
 constexpr std::size_t kLimbArmorAt = 0x20;
 constexpr std::size_t kPartBytes = 0x30;
+constexpr std::size_t kLimbActionSlots = 4;
 
 // One column's bytes in its record: a little-endian integer of `size` bytes,
 // `bits` bits of one byte from `bit` up, or `size` bytes as hexadecimal.
@@ -86,13 +88,14 @@ struct PackedColumn {
   std::vector<std::string_view> columns;
 };
 
-// A byte no column holds (§4.1): zero padding, or 1 exactly when the column
-// `set_by` is not zero. `legacy` is the raw_<offset> column that held it
-// before version 5.
+// A byte no column holds (§4.1): zero padding, a constant, or 1 exactly when
+// the column `set_by` is not zero. `legacy` is the column that held it before
+// version 5 (raw_<offset>) or 6 (action_N_index).
 struct ReservedByte {
   std::string_view legacy;
   std::size_t offset = 0;
   std::string_view set_by;
+  std::optional<std::uint8_t> constant;
 };
 
 // A table's columns: the leading key and reference columns, then the fields.
@@ -110,7 +113,38 @@ struct TableLayout {
 
   void Reserve(std::string_view legacy, std::size_t offset,
                std::string_view set_by = {}) {
-    reserved.push_back({.legacy = legacy, .offset = offset, .set_by = set_by});
+    reserved.push_back({.legacy = legacy,
+                        .offset = offset,
+                        .set_by = set_by,
+                        .constant = std::nullopt});
+  }
+
+  void Constant(std::string_view legacy, std::size_t offset,
+                std::uint8_t value) {
+    reserved.push_back(
+        {.legacy = legacy, .offset = offset, .set_by = {}, .constant = value});
+  }
+
+  // An optional reference stored as the row's original index; 0 is none.
+  void Reference(std::string_view name, std::size_t offset, std::size_t size,
+                 std::string_view table, std::string_view description,
+                 std::string_view legacy_name) {
+    fields.push_back({.column = name,
+                      .offset = offset,
+                      .size = size,
+                      .is_signed = false,
+                      .bytes = false,
+                      .bit = 0,
+                      .bits = 0});
+    columns.push_back({.name = name,
+                       .type = ColumnType::kReference,
+                       .minimum = 0,
+                       .maximum = 0,
+                       .references = table,
+                       .description = description,
+                       .enumeration = {},
+                       .legacy_name = legacy_name,
+                       .optional = true});
   }
 
   void Add(std::string_view name, std::size_t offset, std::size_t size,
@@ -310,14 +344,25 @@ void AddLimbFields(TableLayout& table) {
   table.Run(
       "affinity", 0x08, kAffinityFields, 1, true,
       "signed elemental affinity; storage_7 retains the original tail byte");
-  for (std::size_t action = 0; action < 4; ++action) {
+  // decomp: func_80076784 (src/BATTLE/BATTLE.PRG/146C.c:5941) copies each
+  // slot's id, sequence and index into the actor's stats; no code reads the
+  // index, and every disc limb holds the slot's position there.
+  // decomp: func_8007138C (src/BATTLE/BATTLE.PRG/146C.c:3618) loads the
+  // sequence for actions 141-223.
+  for (std::size_t action = 0; action < kLimbActionSlots; ++action) {
     const std::size_t at = 0x10 + (action * 4);
-    table.Add(table.Name(std::format("action_{}_id", action + 1)), at, 2, false,
-              "");
-    table.Add(table.Name(std::format("action_{}_effect_model", action + 1)),
-              at + 2, 1, false, "");
-    table.Add(table.Name(std::format("action_{}_index", action + 1)), at + 3, 1,
-              false, "");
+    table.Reference(table.Name(std::format("action_{}", action + 1)), at, 2,
+                    "actions", "the action in this slot; empty for none",
+                    table.Name(std::format("action_{}_id", action + 1)));
+    table.Add(table.Name(std::format("action_{}_special_sequence", action + 1)),
+              at + 2, 1, false,
+              "the special animation sequence (1-4, 0 for none) the enemy "
+              "plays for a break art or special action (141-223); the "
+              "runtime keeps its low four bits",
+              {},
+              table.Name(std::format("action_{}_effect_model", action + 1)));
+    table.Constant(table.Name(std::format("action_{}_index", action + 1)),
+                   at + 3, static_cast<std::uint8_t>(action));
   }
   table.Add("armor_material", 0x50, 1, false, "limb armor material",
             kMaterials);
@@ -466,7 +511,7 @@ void BuildLayouts(std::array<TableLayout, kZoneTableCount>& layouts) {
   limbs.key = {"enemy", "limb"};
   limbs.Finish("zone-enemy-limbs",
                "Each template's limbs but their armour parts; a limb with "
-               "no row is all zeros.",
+               "no row has zero in every column.",
                kEnemyDirectory);
 
   TableLayout& parts = layouts.at(static_cast<std::size_t>(ZoneTable::kParts));
@@ -548,9 +593,85 @@ unsigned HexDigit(char digit) {
                       : static_cast<unsigned>(digit - 'a') + 10;
 }
 
-// The record's fields as cells, in the layout's field order.
-void AppendCells(std::vector<std::string>& cells, const TableLayout& layout,
-                 std::span<const std::byte> record) {
+// The action catalog's ids by original index, read through the reader the
+// first time a limb names an action, so tables whose limbs name none need no
+// catalog. It reads the base catalogs/battle/actions.csv, not catalog layers.
+class ActionNames {
+ public:
+  explicit ActionNames(const ZoneTableReader& read) : read_(&read) {}
+
+  std::expected<void, std::string> Load() {
+    if (loaded_) return {};
+    if (!*read_) {
+      return std::unexpected(
+          std::format("naming limb actions needs {}", kActionsPath));
+    }
+    auto text = (*read_)(kActionsPath);
+    if (!text) {
+      return std::unexpected(
+          std::format("naming limb actions: {}", text.error()));
+    }
+    auto rows = ReadTable(ActionsSpec(), *text, kActionsPath);
+    if (!rows) return std::unexpected(rows.error());
+    const auto columns = ActionsSpec().columns;
+    const auto column = [&columns](std::string_view name) {
+      return static_cast<std::size_t>(
+          std::ranges::find(columns, name, &ColumnSpec::name) -
+          columns.begin());
+    };
+    const std::size_t id = column("id");
+    const std::size_t legacy = column("legacy_id");
+    for (const TableRow& row : *rows) {
+      const std::int64_t index = row.values.at(legacy);
+      std::string& name = ids_.at(static_cast<std::size_t>(index));
+      if (!name.empty()) {
+        return std::unexpected(
+            CellError(row.source, row.line, "legacy_id",
+                      std::format("{} also names action {}", name, index)));
+      }
+      name = row.cells.at(id);
+      legacy_.emplace(name, index);
+    }
+    loaded_ = true;
+    return {};
+  }
+
+  // After Load: the id of action `legacy`, or nothing.
+  [[nodiscard]] std::optional<std::string_view> IdOf(
+      std::int64_t legacy) const {
+    if (legacy < 0 || legacy >= static_cast<std::int64_t>(kActionCount) ||
+        ids_.at(static_cast<std::size_t>(legacy)).empty()) {
+      return std::nullopt;
+    }
+    return ids_.at(static_cast<std::size_t>(legacy));
+  }
+
+  // After Load: the original index of action `id`, or nothing.
+  [[nodiscard]] std::optional<std::int64_t> LegacyOf(
+      std::string_view id) const {
+    const auto found = legacy_.find(id);
+    if (found == legacy_.end()) return std::nullopt;
+    return found->second;
+  }
+
+ private:
+  const ZoneTableReader* read_;
+  bool loaded_ = false;
+  std::array<std::string, kActionCount> ids_;
+  std::map<std::string, std::int64_t, std::less<>> legacy_;
+};
+
+std::string UnheldAction(std::int64_t value) {
+  return std::format("names action {}, which {} does not hold", value,
+                     kActionsPath);
+}
+
+// The record's fields as cells, in the layout's field order; an action
+// reference as the action's id, empty for none.
+std::expected<void, std::string> AppendCells(std::vector<std::string>& cells,
+                                             const TableLayout& layout,
+                                             std::span<const std::byte> record,
+                                             ActionNames& actions) {
   for (const Field& field : layout.fields) {
     if (field.bytes) {
       cells.push_back(HexOf(record.subspan(field.offset, field.size)));
@@ -558,6 +679,22 @@ void AppendCells(std::vector<std::string>& cells, const TableLayout& layout,
     }
     const auto value = ReadField(record, field);
     const auto& column = layout.columns.at(cells.size());
+    if (column.type == ColumnType::kReference) {
+      if (value == 0 && column.optional) {
+        cells.emplace_back();
+        continue;
+      }
+      if (auto loaded = actions.Load(); !loaded) {
+        return loaded;
+      }
+      const auto id = actions.IdOf(value);
+      if (!id) {
+        return std::unexpected(
+            std::format("{} {}", column.name, UnheldAction(value)));
+      }
+      cells.emplace_back(*id);
+      continue;
+    }
     if (column.type == ColumnType::kFlags) {
       cells.push_back(
           FormatFlags(column.enumeration, static_cast<std::uint32_t>(value)));
@@ -569,26 +706,45 @@ void AppendCells(std::vector<std::string>& cells, const TableLayout& layout,
                         ? std::format("{}", value)
                         : std::string(named->name));
   }
+  return {};
 }
 
 // Writes a row's field cells (after the lead columns) into `record`.
-void ApplyRow(std::span<std::byte> record, const TableLayout& layout,
-              const TableRow& row) {
+std::expected<void, std::string> ApplyRow(std::span<std::byte> record,
+                                          const TableLayout& layout,
+                                          const TableRow& row,
+                                          ActionNames& actions) {
   for (std::size_t index = 0; index < layout.fields.size(); ++index) {
     const Field& field = layout.fields[index];
     const std::size_t column =
         layout.columns.size() - layout.fields.size() + index;
+    const std::string& cell = row.cells.at(column);
     if (field.bytes) {
-      const std::string& cell = row.cells.at(column);
       for (std::size_t at = 0; at < field.size; ++at) {
         record[field.offset + at] =
             static_cast<std::byte>((HexDigit(cell.at(2 * at)) << 4U) |
                                    HexDigit(cell.at((2 * at) + 1)));
       }
+    } else if (layout.columns.at(column).type == ColumnType::kReference) {
+      std::int64_t value = 0;
+      if (!cell.empty()) {
+        if (auto loaded = actions.Load(); !loaded) {
+          return loaded;
+        }
+        const auto legacy = actions.LegacyOf(cell);
+        if (!legacy) {
+          return std::unexpected(CellError(
+              row.source, row.line, layout.columns.at(column).name,
+              std::format("no action '{}' in {}", cell, kActionsPath)));
+        }
+        value = *legacy;
+      }
+      WriteField(record, field, value);
     } else {
       WriteField(record, field, row.values.at(column));
     }
   }
+  return {};
 }
 
 bool AllZero(std::span<const std::byte> bytes) {
@@ -600,10 +756,19 @@ std::span<const std::byte> LimbOf(const ZndTemplate& data, std::size_t limb) {
   return std::span(data).subspan(kLimbsAt + (limb * kLimbBytes), kLimbBytes);
 }
 
-// The limb's bytes its row holds: all but its armour part.
+// The limb's bytes its row holds: all but its armour part and the bytes the
+// tables derive.
 bool LimbFieldsZero(std::span<const std::byte> limb) {
-  return AllZero(limb.first(kLimbArmorAt)) &&
-         AllZero(limb.subspan(kLimbArmorAt + kPartBytes));
+  const auto& reserved = LayoutOf(ZoneTable::kLimbs).reserved;
+  for (std::size_t at = 0; at < limb.size(); ++at) {
+    if (at >= kLimbArmorAt && at < kLimbArmorAt + kPartBytes) continue;
+    if (std::ranges::find(reserved, at, &ReservedByte::offset) !=
+        reserved.end()) {
+      continue;
+    }
+    if (limb[at] != std::byte{}) return false;
+  }
+  return true;
 }
 
 std::optional<std::size_t> PartOffset(std::string_view id) {
@@ -615,7 +780,7 @@ std::optional<std::size_t> PartOffset(std::string_view id) {
 // The value the tables give a reserved byte of `record`.
 unsigned ReservedValue(const TableLayout& layout, const ReservedByte& reserved,
                        std::span<const std::byte> record) {
-  if (reserved.set_by.empty()) return 0;
+  if (reserved.set_by.empty()) return reserved.constant.value_or(0);
   const auto field =
       std::ranges::find(layout.fields, reserved.set_by, &Field::column);
   return field != layout.fields.end() && ReadField(record, *field) != 0 ? 1U
@@ -819,12 +984,6 @@ std::expected<std::size_t, std::string> NameFlagsCells(
   return named;
 }
 
-bool HasFlags(const TableLayout& layout) {
-  return std::ranges::any_of(layout.columns, [](const ColumnSpec& column) {
-    return column.type == ColumnType::kFlags;
-  });
-}
-
 // A decimal integer cell's value; nothing for any other text.
 std::optional<std::int64_t> IntegerCell(std::string_view cell) {
   std::int64_t value = 0;
@@ -847,13 +1006,14 @@ std::optional<std::int64_t> EnumCode(const ColumnSpec& column,
   return named->code;
 }
 
-// The value a retired column's cell must hold: 0, or for a byte another
-// column sets, 1 exactly when that column's cell (at `set_by`) is not zero.
+// The value a retired column's cell must hold: 0 or the byte's constant, or
+// for a byte another column sets, 1 exactly when that column's cell (at
+// `set_by`) is not zero.
 std::expected<std::int64_t, std::string> RetiredValue(
     const TableLayout& layout, const ReservedByte& reserved,
     const CsvRecord& record, std::optional<std::size_t> set_by,
     std::string_view file) {
-  if (!set_by) return 0;
+  if (!set_by) return reserved.constant.value_or(0);
   const auto column =
       std::ranges::find(layout.columns, reserved.set_by, &ColumnSpec::name);
   const std::string& cell = record.fields[*set_by];
@@ -867,9 +1027,9 @@ std::expected<std::int64_t, std::string> RetiredValue(
   return *code != 0 ? 1 : 0;
 }
 
-// Drops the raw_<offset> columns that held reserved bytes before version 5,
-// each of whose cells must hold the value the tables now give its byte; the
-// number of columns dropped.
+// Drops the columns that held reserved bytes before version 5 (raw_<offset>)
+// or 6 (action_N_index), each of whose cells must hold the value the tables
+// now give its byte; the number of columns dropped.
 std::expected<std::size_t, std::string> RetireReservedColumns(
     const TableLayout& layout, std::vector<CsvRecord>& records,
     std::string_view file) {
@@ -897,11 +1057,17 @@ std::expected<std::size_t, std::string> RetireReservedColumns(
       auto expected = RetiredValue(layout, reserved, record, set_by, file);
       if (!expected) return std::unexpected(expected.error());
       if (IntegerCell(record.fields[at]) == *expected) continue;
-      const std::string why =
-          set_by ? std::format("{} sets byte 0x{:02X} now", reserved.set_by,
-                               reserved.offset)
-                 : std::format("byte 0x{:02X} is padding the tables keep zero",
-                               reserved.offset);
+      std::string why;
+      if (set_by) {
+        why = std::format("{} sets byte 0x{:02X} now", reserved.set_by,
+                          reserved.offset);
+      } else if (reserved.constant) {
+        why = std::format("byte 0x{:02X} always holds {} now", reserved.offset,
+                          *reserved.constant);
+      } else {
+        why = std::format("byte 0x{:02X} is padding the tables keep zero",
+                          reserved.offset);
+      }
       return std::unexpected(
           CellError(file, record.line, reserved.legacy,
                     std::format("'{}' is not {}; {}", record.fields[at],
@@ -914,6 +1080,57 @@ std::expected<std::size_t, std::string> RetireReservedColumns(
     ++retired;
   }
   return retired;
+}
+
+// The field columns, after the lead key and reference columns.
+std::span<const ColumnSpec> FieldColumns(const TableLayout& layout) {
+  return std::span(layout.columns)
+      .subspan(layout.columns.size() - layout.fields.size());
+}
+
+bool HasFieldOf(const TableLayout& layout, ColumnType type) {
+  return std::ranges::any_of(
+      FieldColumns(layout),
+      [type](const ColumnSpec& column) { return column.type == type; });
+}
+
+// Writes each action cell that holds a number, as version 5's action_N_id
+// did, as the action's id (empty for 0); the number of cells it wrote.
+std::expected<std::size_t, std::string> NameActionCells(
+    const TableLayout& layout, std::vector<CsvRecord>& records,
+    std::string_view file, ActionNames& actions) {
+  std::size_t named = 0;
+  const auto& header = records.front().fields;
+  for (const ColumnSpec& column : FieldColumns(layout)) {
+    if (column.type != ColumnType::kReference) continue;
+    auto found = std::ranges::find(header, column.name);
+    if (found == header.end() && !column.legacy_name.empty()) {
+      found = std::ranges::find(header, column.legacy_name);
+    }
+    if (found == header.end()) continue;
+    const auto at = static_cast<std::size_t>(found - header.begin());
+    for (std::size_t row = 1; row < records.size(); ++row) {
+      auto& fields = records[row].fields;
+      if (at >= fields.size()) continue;  // the schema refuses the short row
+      const auto value = IntegerCell(fields[at]);
+      if (!value) continue;
+      ++named;
+      if (*value == 0) {
+        fields[at].clear();
+        continue;
+      }
+      if (auto loaded = actions.Load(); !loaded) {
+        return std::unexpected(loaded.error());
+      }
+      const auto id = actions.IdOf(*value);
+      if (!id) {
+        return std::unexpected(
+            CellError(file, records[row].line, *found, UnheldAction(*value)));
+      }
+      fields[at] = *id;
+    }
+  }
+  return named;
 }
 
 }  // namespace
@@ -981,8 +1198,9 @@ std::string ZoneEnemyId(std::string_view zone_id, std::size_t slot) {
   return std::format("enemy{}.{:02}", rest, slot);
 }
 
-std::array<std::string, kZoneTableCount> FormatZoneTables(
-    std::span<const ZoneRecord> zones) {
+std::expected<ZoneTableText, std::string> FormatZoneTables(
+    std::span<const ZoneRecord> zones, const ZoneTableReader& read) {
+  ActionNames actions(read);
   std::vector<const ZoneRecord*> sorted;
   for (const ZoneRecord& zone : zones) sorted.push_back(&zone);
   std::ranges::sort(sorted, {}, &ZoneRecord::id);
@@ -1009,14 +1227,23 @@ std::array<std::string, kZoneTableCount> FormatZoneTables(
       const ZoneEnemyRecord& enemy = zone->enemies[slot];
       std::vector<std::string> cells{enemy.id, zone->id,
                                      std::format("{}", slot), enemy.archetype};
-      AppendCells(cells, LayoutOf(ZoneTable::kEnemies), enemy.data);
+      if (auto done = AppendCells(cells, LayoutOf(ZoneTable::kEnemies),
+                                  enemy.data, actions);
+          !done) {
+        return std::unexpected(std::format("{}: {}", enemy.id, done.error()));
+      }
       enemy_rows.push_back(std::move(cells));
       for (std::size_t limb = 0; limb < static_cast<std::size_t>(kLimbCount);
            ++limb) {
         const auto bytes = LimbOf(enemy.data, limb);
         if (LimbFieldsZero(bytes)) continue;
         std::vector<std::string> limb_cells{enemy.id, std::format("{}", limb)};
-        AppendCells(limb_cells, LayoutOf(ZoneTable::kLimbs), bytes);
+        if (auto done = AppendCells(limb_cells, LayoutOf(ZoneTable::kLimbs),
+                                    bytes, actions);
+            !done) {
+          return std::unexpected(
+              std::format("{} limb {}: {}", enemy.id, limb, done.error()));
+        }
         limb_rows.push_back(std::move(limb_cells));
       }
       for (const PartSlot& part : kPartSlots) {
@@ -1024,12 +1251,17 @@ std::array<std::string, kZoneTableCount> FormatZoneTables(
             std::span(enemy.data).subspan(part.offset, kPartBytes);
         if (AllZero(bytes)) continue;
         std::vector<std::string> part_cells{enemy.id, std::string(part.id)};
-        AppendCells(part_cells, LayoutOf(ZoneTable::kParts), bytes);
+        if (auto done = AppendCells(part_cells, LayoutOf(ZoneTable::kParts),
+                                    bytes, actions);
+            !done) {
+          return std::unexpected(
+              std::format("{} {}: {}", enemy.id, part.id, done.error()));
+        }
         part_rows.push_back(std::move(part_cells));
       }
     }
   }
-  std::array<std::string, kZoneTableCount> texts;
+  ZoneTableText texts;
   for (const ZoneTable table : kZoneTables) {
     const auto index = static_cast<std::size_t>(table);
     texts.at(index) = FormatTable(ZoneTableSpec(table), rows.at(index));
@@ -1041,6 +1273,7 @@ std::expected<std::vector<ZoneRecord>, std::string> ReadZoneTables(
     const ZoneTableReader& read) {
   auto tables = ReadAll(read);
   if (!tables) return std::unexpected(tables.error());
+  ActionNames actions(read);
   std::map<std::string, ZoneRecord, std::less<>> zones;
   for (const TableRow& row : tables->Rows(ZoneTable::kZones)) {
     ZoneRecord& zone = zones[row.cells.at(0)];
@@ -1110,7 +1343,9 @@ std::expected<std::vector<ZoneRecord>, std::string> ReadZoneTables(
     ZoneEnemyRecord& enemy = enemies[row.cells.at(0)];
     enemy.id = row.cells.at(0);
     enemy.archetype = row.cells.at(3);
-    ApplyRow(enemy.data, enemy_layout, row);
+    if (auto done = ApplyRow(enemy.data, enemy_layout, row, actions); !done) {
+      return std::unexpected(done.error());
+    }
   }
   const auto enemy_of =
       [&](const TableRow& row,
@@ -1128,9 +1363,13 @@ std::expected<std::vector<ZoneRecord>, std::string> ReadZoneTables(
     auto enemy = enemy_of(row, ZoneTable::kLimbs);
     if (!enemy) return std::unexpected(enemy.error());
     const auto limb = static_cast<std::size_t>(row.values.at(1));
-    ApplyRow(std::span((*enemy)->data)
-                 .subspan(kLimbsAt + (limb * kLimbBytes), kLimbBytes),
-             LayoutOf(ZoneTable::kLimbs), row);
+    if (auto done =
+            ApplyRow(std::span((*enemy)->data)
+                         .subspan(kLimbsAt + (limb * kLimbBytes), kLimbBytes),
+                     LayoutOf(ZoneTable::kLimbs), row, actions);
+        !done) {
+      return std::unexpected(done.error());
+    }
   }
   for (const TableRow& row : tables->Rows(ZoneTable::kParts)) {
     auto enemy = enemy_of(row, ZoneTable::kParts);
@@ -1141,8 +1380,12 @@ std::expected<std::vector<ZoneRecord>, std::string> ReadZoneTables(
           tables->Path(ZoneTable::kParts), row.line, "part",
           std::format("'{}' is not an equipment part", row.cells.at(1))));
     }
-    ApplyRow(std::span((*enemy)->data).subspan(*offset, kPartBytes),
-             LayoutOf(ZoneTable::kParts), row);
+    if (auto done =
+            ApplyRow(std::span((*enemy)->data).subspan(*offset, kPartBytes),
+                     LayoutOf(ZoneTable::kParts), row, actions);
+        !done) {
+      return std::unexpected(done.error());
+    }
   }
   for (const auto& [zone_id, entries] : slots) {
     auto dense = Dense(entries, "template", zone_id);
@@ -1239,24 +1482,33 @@ std::expected<void, std::string> CheckZoneReservedBytes(
         const unsigned expected = ReservedValue(layout, reserved, record);
         const auto actual = std::to_integer<unsigned>(record[reserved.offset]);
         if (fault || actual == expected) return;
-        fault = reserved.set_by.empty()
-                    ? std::format("reserved byte 0x{:03X} is {}, not padding 0",
-                                  base + reserved.offset, actual)
-                    : std::format(
-                          "reserved byte 0x{:03X} is {}, not the {} its "
-                          "{} gives",
-                          base + reserved.offset, actual, expected,
-                          reserved.set_by);
+        const std::size_t at = base + reserved.offset;
+        if (!reserved.set_by.empty()) {
+          fault = std::format(
+              "reserved byte 0x{:03X} is {}, not the {} its {} "
+              "gives",
+              at, actual, expected, reserved.set_by);
+        } else if (reserved.constant) {
+          fault = std::format(
+              "reserved byte 0x{:03X} is {}, not the {} it always holds", at,
+              actual, expected);
+        } else {
+          fault = std::format("reserved byte 0x{:03X} is {}, not padding 0", at,
+                              actual);
+        }
       });
   if (fault) return std::unexpected(*fault);
   return {};
 }
 
 std::expected<ZoneColumnMigration, std::string> MigrateZoneColumns(
-    ZoneTable table, const std::string& text, std::string_view file) {
+    ZoneTable table, const std::string& text, std::string_view file,
+    const ZoneTableReader& read) {
   const TableLayout& layout = LayoutOf(table);
   ZoneColumnMigration migrated{.text = text};
-  if (layout.packed.empty() && layout.reserved.empty() && !HasFlags(layout)) {
+  if (layout.packed.empty() && layout.reserved.empty() &&
+      !HasFieldOf(layout, ColumnType::kFlags) &&
+      !HasFieldOf(layout, ColumnType::kReference)) {
     return migrated;
   }
   auto records = ParseCsv(text, file);
@@ -1283,7 +1535,10 @@ std::expected<ZoneColumnMigration, std::string> MigrateZoneColumns(
   migrated.retired_columns = *retired;
   auto named = NameFlagsCells(layout, *records, file);
   if (!named) return std::unexpected(named.error());
-  migrated.named_values = *named;
+  ActionNames actions(read);
+  auto actions_named = NameActionCells(layout, *records, file, actions);
+  if (!actions_named) return std::unexpected(actions_named.error());
+  migrated.named_values = *named + *actions_named;
   if (migrated.split_columns != 0 || migrated.retired_columns != 0 ||
       migrated.named_values != 0) {
     std::vector<std::vector<std::string>> rows;

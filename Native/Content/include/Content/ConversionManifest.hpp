@@ -70,7 +70,7 @@ inline constexpr std::array kRequiredConverters{
     ConverterVersion{.name = "esq-json", .version = 1},
     ConverterVersion{.name = "etm-png", .version = 1},
     ConverterVersion{.name = "zud-json", .version = 1},
-    ConverterVersion{.name = "znd-tables", .version = 5},
+    ConverterVersion{.name = "znd-tables", .version = 6},
     ConverterVersion{.name = "wave-bank", .version = 1},
     ConverterVersion{.name = "xa-flac", .version = 1},
     ConverterVersion{.name = "str-mkv", .version = 1},

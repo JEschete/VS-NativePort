@@ -22,17 +22,38 @@ inline void UseValidPartCodes(Content::ZndTemplate& data, std::size_t seed) {
   }
 }
 
+inline constexpr std::size_t kTemplateLimbsAt = 0x238;
+inline constexpr std::size_t kTemplateLimbBytes = 0x5C;
+inline constexpr std::size_t kLimbActionSlots = 4;
+
+// Gives every limb's four action slots (+0x10, 4 bytes each) an action id
+// below 8 that varies with the seed, limb and slot; 0 leaves a slot empty.
+inline void UseKnownActions(Content::ZndTemplate& data, std::size_t seed) {
+  constexpr std::size_t kKnownActions = 8;
+  for (std::size_t limb = 0; limb < 6; ++limb) {
+    const std::size_t base = kTemplateLimbsAt + (limb * kTemplateLimbBytes);
+    for (std::size_t slot = 0; slot < kLimbActionSlots; ++slot) {
+      const std::size_t at = base + 0x10 + (slot * 4);
+      data.at(at) = static_cast<std::byte>(
+          (seed + (limb * kLimbActionSlots) + slot) % kKnownActions);
+      data.at(at + 1) = std::byte{};
+    }
+  }
+}
+
 // Gives the template's reserved bytes the values its tables rebuild:
-// padding at 0x33, 0x236, 0x237 and each limb's +0x5A/+0x5B is zero, and each
-// limb's +0x52 is 1 exactly when its armour material (+0x50) is set.
+// padding at 0x33, 0x236, 0x237 and each limb's +0x5A/+0x5B is zero, each
+// limb's +0x52 is 1 exactly when its armour material (+0x50) is set, and each
+// action slot's index byte (+0x13, 4 bytes apart) holds the slot's position.
 inline void UseReservedBytes(Content::ZndTemplate& data) {
-  constexpr std::size_t kLimbsAt = 0x238;
-  constexpr std::size_t kLimbBytes = 0x5C;
   data.at(0x33) = std::byte{};
   data.at(0x236) = std::byte{};
   data.at(0x237) = std::byte{};
   for (std::size_t limb = 0; limb < 6; ++limb) {
-    const std::size_t base = kLimbsAt + (limb * kLimbBytes);
+    const std::size_t base = kTemplateLimbsAt + (limb * kTemplateLimbBytes);
+    for (std::size_t slot = 0; slot < kLimbActionSlots; ++slot) {
+      data.at(base + 0x13 + (slot * 4)) = static_cast<std::byte>(slot);
+    }
     data.at(base + 0x52) =
         data.at(base + 0x50) == std::byte{} ? std::byte{} : std::byte{1};
     data.at(base + 0x5A) = std::byte{};

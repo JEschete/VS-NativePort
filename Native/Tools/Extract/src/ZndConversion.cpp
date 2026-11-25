@@ -434,16 +434,30 @@ std::expected<ZoneConversionReport, std::string> ConvertDiscZones(
   std::vector<ZoneRecord> records;
   for (const ConvertedZone& zone : zones) records.push_back(zone.record);
   std::ranges::sort(records, {}, &ZoneRecord::id);
-  const auto tables = Content::FormatZoneTables(records);
+  // The limbs name their actions from the action catalog, which converts
+  // before the zones.
+  const auto read_catalog =
+      [&root](
+          std::string_view path) -> std::expected<std::string, std::string> {
+    auto bytes = ReadFileBytes(root / Platform::Utf8Path(path));
+    if (!bytes) return std::unexpected(bytes.error());
+    std::string text(bytes->size(), '\0');
+    std::ranges::transform(*bytes, text.begin(), [](std::byte value) {
+      return static_cast<char>(value);
+    });
+    return text;
+  };
+  const auto tables = Content::FormatZoneTables(records, read_catalog);
+  if (!tables) return std::unexpected(tables.error());
   auto read_back = Content::ReadZoneTables(
-      [&tables](
+      [&tables, &read_catalog](
           std::string_view path) -> std::expected<std::string, std::string> {
         for (const ZoneTable table : Content::kZoneTables) {
           if (Content::ZoneTablePath(table) == path) {
-            return tables.at(static_cast<std::size_t>(table));
+            return tables->at(static_cast<std::size_t>(table));
           }
         }
-        return std::unexpected(std::format("no table {}", path));
+        return read_catalog(path);
       });
   if (!read_back) return std::unexpected(read_back.error());
   if (*read_back != records) {
@@ -458,7 +472,7 @@ std::expected<ZoneConversionReport, std::string> ConvertDiscZones(
     batch.outputs.push_back(std::move(output));
   }
   auto removed = PublishBatch(root, previous, batch,
-                              [&] { return WriteZones(root, zones, tables); });
+                              [&] { return WriteZones(root, zones, *tables); });
   if (!removed) return std::unexpected(removed.error());
   report.converted = zones.size();
   report.removed = *removed;

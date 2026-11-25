@@ -45,6 +45,8 @@ struct ColumnSpec {
   std::string_view description;
   std::span<const EnumValue> enumeration{};
   std::string_view legacy_name{};
+  // kReference only: an empty cell names no row.
+  bool optional = false;
 };
 
 struct TableSpec {
@@ -86,7 +88,8 @@ struct TableRow {
                                     std::string_view problem);
 
 // The data rows of `text` checked against `spec`. References are checked
-// for their id syntax only; the caller resolves them.
+// for their id syntax only (an optional reference may also be empty); the
+// caller resolves them.
 [[nodiscard]] std::expected<std::vector<TableRow>, std::string> ReadTable(
     const TableSpec& spec, std::string_view text, std::string_view file);
 // Validates cells already ordered by the spec, retaining their source location.

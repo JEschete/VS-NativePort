@@ -20,6 +20,7 @@
 #include <utility>
 #include <vector>
 
+#include "Content/ActionCatalog.hpp"
 #include "Content/ConversionManifest.hpp"
 #include "Content/ConvertedImages.hpp"
 #include "Content/DataStore.hpp"
@@ -113,7 +114,8 @@ struct FileStamp {
 
   bool operator==(const FileStamp&) const = default;
 };
-using TableStamps = std::array<FileStamp, kZoneTableCount>;
+// The six tables', then the action catalog's, which limbs name actions from.
+using TableStamps = std::array<FileStamp, kZoneTableCount + 1>;
 
 std::optional<TableStamps> StampsOf(const fs::path& root) {
   TableStamps stamps{};
@@ -125,6 +127,14 @@ std::optional<TableStamps> StampsOf(const fs::path& root) {
     if (!error) stamp.size = fs::file_size(path, error);
     if (error) return std::nullopt;
   }
+  // Tables whose limbs name no action read without a catalog, so a missing
+  // one stamps as empty.
+  const fs::path actions = root / Platform::Utf8Path(kActionsPath);
+  FileStamp& stamp = stamps.back();
+  std::error_code error;
+  stamp.written = fs::last_write_time(actions, error);
+  if (!error) stamp.size = fs::file_size(actions, error);
+  if (error) stamp = {};
   return stamps;
 }
 

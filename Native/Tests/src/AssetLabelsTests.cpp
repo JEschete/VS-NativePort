@@ -26,6 +26,7 @@
 #include "Extract/WorkshopRecipeConversion.hpp"
 #include "TestSupport/ModelFixtures.hpp"
 #include "TestSupport/WorkshopRecipeRoot.hpp"
+#include "TestSupport/ZoneTemplates.hpp"
 
 namespace {
 namespace content = VS::Content;
@@ -76,12 +77,15 @@ content::ZoneRecord Zone() {
                     enemy.data.begin() + 4);
   enemy.data.at(0x34) = std::byte{1};   // blade item id
   enemy.data.at(0x238) = std::byte{9};  // first limb HP
+  VS::test_support::UseReservedBytes(enemy.data);
   zone.enemies.push_back(enemy);
   return zone;
 }
 
+// No limb names an action, so the tables need no action catalog.
 void WriteZone(const fs::path& root, const content::ZoneRecord& zone) {
-  const auto tables = content::FormatZoneTables(std::span(&zone, 1));
+  const auto tables = Required(content::FormatZoneTables(
+      std::span(&zone, 1), content::ZoneTableReader{}));
   for (const auto table : content::kZoneTables) {
     Write(root, content::ZoneTablePath(table),
           tables.at(static_cast<std::size_t>(table)));

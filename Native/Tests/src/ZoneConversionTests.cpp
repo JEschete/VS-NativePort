@@ -16,6 +16,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Content/ActionCatalog.hpp"
 #include "Content/ActorArchetype.hpp"
 #include "Content/CatalogTable.hpp"
 #include "Content/ConversionManifest.hpp"
@@ -31,6 +32,7 @@
 #include "Extract/ImageFilesWriter.hpp"
 #include "Extract/ZndConversion.hpp"
 #include "Extract/ZoneAuthoring.hpp"
+#include "TestSupport/ActionRoot.hpp"
 #include "TestSupport/ModelFixtures.hpp"
 #include "TestSupport/ZoneTemplates.hpp"
 
@@ -98,6 +100,7 @@ content::ZndFile SampleZone() {
     enemy.data[0x238 + limb * 0x5C + 0x50] = static_cast<std::byte>(limb + 1);
   }
   VS::test_support::UseValidPartCodes(enemy.data, 1);
+  VS::test_support::UseKnownActions(enemy.data, 1);
   VS::test_support::UseReservedBytes(enemy.data);
   // Status immunities with bit 31, which version 3 wrote as a negative number.
   enemy.data[0x2B] |= std::byte{0x80};
@@ -122,8 +125,11 @@ std::vector<extract::SourceFile> ZoneSources(const Bytes& zone) {
           {.path = std::string(kZonePath), .bytes = zone}};
 }
 
-// Records the archetype the zone names, as the zud-json converter would.
+// Records the archetype the zone names, as the zud-json converter would, and
+// publishes the synthetic action catalog the template's limbs name.
 void RecordArchetype(const fs::path& root) {
+  VS::test_support::WriteTestFile(root, content::kActionsPath,
+                                  VS::test_support::SyntheticActionsText());
   const auto bytes = ReadModel(root / "disc" / fs::path(kZudPath));
   content::ConversionManifest manifest;
   extract::ReplaceConverterOutputs(
@@ -213,7 +219,8 @@ void PackShapeBits(std::vector<std::vector<std::string>>& rows,
   }
 }
 
-// Adds back the raw_<offset> columns version 4 tables had for reserved bytes.
+// Adds back the raw_<offset> columns version 4 tables had for reserved bytes,
+// and the action_N_index columns version 5 had for each action slot's index.
 void AddReservedColumns(std::vector<std::vector<std::string>>& rows,
                         ZoneTable table,
                         const std::vector<content::TableRow>& checked) {
@@ -229,11 +236,25 @@ void AddReservedColumns(std::vector<std::vector<std::string>>& rows,
       columns, std::string_view("armor_material"), &content::ColumnSpec::name);
   REQUIRE(material != columns.end());
   const auto at = static_cast<std::size_t>(material - columns.begin());
-  rows.front().insert(rows.front().end(), {"raw_52", "raw_5a", "raw_5b"});
+  rows.front().insert(rows.front().end(),
+                      {"raw_52", "raw_5a", "raw_5b", "action_1_index",
+                       "action_2_index", "action_3_index", "action_4_index"});
   for (std::size_t row = 1; row < rows.size(); ++row) {
     const bool armored = checked.at(row - 1).values.at(at) != 0;
-    rows.at(row).insert(rows.at(row).end(), {armored ? "1" : "0", "0", "0"});
+    rows.at(row).insert(rows.at(row).end(),
+                        {armored ? "1" : "0", "0", "0", "0", "1", "2", "3"});
   }
+}
+
+// The number version 5 wrote for the synthetic action `id`; 0 for none.
+std::string LegacyActionCell(const std::string& id) {
+  if (id.empty()) return "0";
+  static const auto kDefinitions =
+      VS::test_support::SyntheticActions().definitions;
+  const auto found =
+      std::ranges::find(kDefinitions.actions, id, &content::ActionRule::id);
+  REQUIRE(found != kDefinitions.actions.end());
+  return std::to_string(found - kDefinitions.actions.begin());
 }
 
 void LegacyTableHeaders(const ModelRoot& root) {
@@ -249,8 +270,16 @@ void LegacyTableHeaders(const ModelRoot& root) {
       if (!spec.columns[column].legacy_name.empty()) {
         records->front().fields[column] = spec.columns[column].legacy_name;
       }
-      // Enum codes, and flags as the signed number version 3 wrote.
+      // Version 5 wrote action ids as numbers.
       const auto type = spec.columns[column].type;
+      if (spec.columns[column].references == "actions") {
+        for (std::size_t row = 1; row < records->size(); ++row) {
+          auto& cell = records->at(row).fields[column];
+          cell = LegacyActionCell(cell);
+        }
+        continue;
+      }
+      // Enum codes, and flags as the signed number version 3 wrote.
       if (type != content::ColumnType::kEnum &&
           type != content::ColumnType::kFlags) {
         continue;
@@ -538,6 +567,9 @@ TEST_CASE("The zone converter names the read it cannot resolve",
   padded.enemies.at(0).data.at(0x33) = std::byte{5};
   content::ZndFile unflagged = SampleZone();
   unflagged.enemies.at(0).data.at(0x238 + 0x52) = std::byte{};
+  // Limb 0's second action slot (+0x14) holding the first slot's index.
+  content::ZndFile misindexed = SampleZone();
+  misindexed.enemies.at(0).data.at(0x238 + 0x17) = std::byte{};
   const std::vector<Refused> refusals{
       {mid_room, true,
        "MAP/ZONE001.ZND: room slot 0: sector 101 (4096 bytes) is no "
@@ -553,6 +585,9 @@ TEST_CASE("The zone converter names the read it cannot resolve",
       {unflagged, true,
        "MAP/ZONE001.ZND: enemy.map.zone001.00: reserved byte 0x28A is 0, not "
        "the 1 its armor_material gives"},
+      {misindexed, true,
+       "MAP/ZONE001.ZND: enemy.map.zone001.00: reserved byte 0x24F is 0, not "
+       "the 1 it always holds"},
       {SampleZone(), false,
        "MAP/ZONE001.ZND: enemy.map.zone001.00 loads archetype.map.z001u00, "
        "which the zud-json converter has not recorded (convert the models "
@@ -590,7 +625,12 @@ TEST_CASE("Old zone authoring upgrades without overwriting native edits",
   CHECK(parts.contains(",blunt,hp,"));
   // Version 4's reserved byte columns are gone.
   CHECK_FALSE(enemies.contains("raw_"));
-  CHECK_FALSE(ReadText(TableFile(root, ZoneTable::kLimbs)).contains("raw_"));
+  const auto limbs = ReadText(TableFile(root, ZoneTable::kLimbs));
+  CHECK_FALSE(limbs.contains("raw_"));
+  // Version 5's action numbers became action ids, and its index columns went.
+  CHECK(limbs.contains(",action_1,action_1_special_sequence,"));
+  CHECK(limbs.contains(",action.rend,"));
+  CHECK_FALSE(limbs.contains("action_1_index"));
   const auto repeat = extract::UpgradeZoneAuthoring(root.Root());
   if (!repeat) FAIL(repeat.error());
   CHECK(repeat->written == 0);

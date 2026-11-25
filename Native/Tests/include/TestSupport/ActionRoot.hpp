@@ -116,6 +116,14 @@ inline std::string SyntheticActionExecutable() {
   return bytes;
 }
 
+// The synthetic actions as catalogs/battle/actions.csv text: action 0 is
+// action.untitled-000, 1-6 action.move-ab to action.move-ag and 7 action.rend.
+inline const std::string& SyntheticActionsText() {
+  static const std::string text =
+      Content::FormatActions(SyntheticActions().definitions);
+  return text;
+}
+
 // Publishes the action tables under `root` and registers their conversion; the
 // action categories they name must be published too.
 inline void AddActionCatalog(const std::filesystem::path& root,

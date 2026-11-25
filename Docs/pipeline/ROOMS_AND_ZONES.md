@@ -21,9 +21,9 @@ A `MAP\ZONE*.ZND` is what the room loader reads when the zone changes (`Content/
 - **Enemy section:** a count, that many ZUD (sector, read size) entries, then that many 0x464-byte templates (`vs_CharInitData`, `Actors/CharacterInit.hpp`).
 - **Texture section:** either 32 zero bytes, or four table sizes of which only the first is used, followed by that table: a count and that many TIMs, each after its byte size.
 
-`VS.Extract tables <datadir>` (and `extract`) converts every zone with converter `znd-tables` version 5
+`VS.Extract tables <datadir>` (and `extract`) converts every zone with converter `znd-tables` version 6
 (`Extract/ZndConversion.hpp`, `Content/ZoneTables.hpp`). `tables` runs after `models`, because the zones name the
-enemy archetypes (§6.2.5). It writes six CSV tables, each with a committed schema that is written beside it and must
+enemy archetypes (§6.2.5), and after the action catalog, because limbs name actions. It writes six CSV tables, each with a committed schema that is written beside it and must
 match (a test checks this). Columns are described in the schemas; the rules they do not express are:
 
 | Table ([schema](../../Native/Content/schemas/catalogs/)) | Rows and identities |
@@ -38,7 +38,7 @@ match (a test checks this). Columns are described in the schemas; the rules they
 All six tables receive early informational `display_name` columns through §1.2. `zone-enemies.csv` shows the
 decoded enemy name while its `name` and `weapon_name` hex fields continue to preserve every source byte.
 
-**Named fields and domains (versions 2-4).** Enemy class, equipment materials (the shared material domain),
+**Named fields and domains (versions 2-6).** Enemy class, equipment materials (the shared material domain),
 physical types, class ratings and affinities use the named domains in the schemas. Rules beyond the schemas:
 - Version 3 names the parts' `damage_type`, `cost_type` (the resource the base attack spends) and `material`, and
   splits `shape_bits` into `attack_shape` (the shared volume-shape domain) and `attack_angle` (bits 3-7), as upstream
@@ -46,6 +46,9 @@ physical types, class ratings and affinities use the named domains in the schema
 - Version 4 writes the enemies' `status_immunities` as status flags named as in `status-rules.csv` (`none` when
   empty). Upstream `applyStatus` masks each status with them, and an enemy immune to `spell-immunity` starts with
   that status (`func_80076784`).
+- Version 6 names each limb's four action slots `action_1`-`action_4` by `battle\actions.csv` id (blank for none,
+  the game's action 0). `action_N_special_sequence` is the slot's 1-based special-attack sequence (0 = none), which
+  `func_8007138C` plays for actions 141-223. Only the base action catalog resolves ids; catalog layers do not.
 - The remaining array tail bytes are explicit `storage_6`/`storage_7` fields, not invented classes/elements. They
   still need separation into import provenance when native template consumers are adopted.
 - DP splash columns identify their zero-based destination limb and percent units. A limb index is topology, not a
@@ -62,9 +65,11 @@ spellings without replacing IDs, labels, record values or row order. It validate
 decoded native record before writing, then publishes the new converter version last. It splits a version-2
 `shape_bits` cell into its two columns, refusing a value they cannot hold or a table with both forms, and names a
 version-3 numeric `status_immunities` cell (signed or unsigned), refusing a number outside 32 bits. It drops a
-version-4 reserved byte column (below) only when every cell holds the value the tables now give that byte. A normal
-`tables` run upgrades version 1-4 tables before considering source reconversion, preserving existing
-native edits. Unknown enum codes remain preservable by the raw ZND codec, but are refused as native authoring values.
+version-4 reserved byte column (below) only when every cell holds the value the tables now give that byte. It names
+a version-5 numeric action cell, refusing an id the action catalog lacks, and drops `action_N_index` only when every
+cell is N-1. Rows are kept, so a limb whose only non-zero bytes were those indices keeps an all-zero row that a fresh
+conversion would omit; both read the same. A normal `tables` run upgrades version 1-5 tables before considering
+source reconversion, preserving existing native edits. Unknown enum codes remain preservable by the raw ZND codec, but are refused as native authoring values.
 This does not resolve the remaining part categories, strings, semantic identities or relational enemy
 definitions.
 
@@ -73,8 +78,11 @@ definitions.
 - Reserved bytes have no column (version 4's `raw_<offset>` columns). The enemy's +0x33, +0x236 and +0x237 and
   each limb's +0x5A and +0x5B are zero padding in every disc template. A limb's +0x52 is 1 exactly when its
   `armor_material` is not `none`. Upstream `applyArmorStats` copies it into equipment state that nothing reads.
-  The converter refuses a template whose reserved bytes differ, so every rebuild stays exact.
-- A limb or part whose bytes are all zero, and an empty room slot, has no row; a missing row reads as zeros.
+  Each limb's action slot N holds index N-1 at +0x13+4(N-1) in every disc template; `func_80076784` copies it into
+  the actor's slot, where nothing reads it. The converter refuses a template whose reserved bytes differ, so every
+  rebuild stays exact.
+- A limb or part whose fields are all zero, and an empty room slot, has no row; a missing row reads as zeros plus
+  its reserved bytes.
 - Rows name files by id, never by sector. The rebuild takes each named file's sector and sector-rounded size from `files.tsv` as it is now.
 
 **Zone textures.** The texture table's TIMs become `textures\zone\<ZONE>\<nn>.png` with their sidecars (image id
@@ -94,9 +102,9 @@ would have filled from `Content::LoadConvertedZone` and never reads the zone fil
 update. This is **EC-04-T-ZND**, not completion of #199: the native input is still repacked in memory for an
 original-layout consumer. Replace that path with typed zone/enemy definitions; do not make its byte-sized block the
 native authoring or allocation limit.
-- The tables are read once and kept while their files are unchanged.
+- The tables are read once and kept while their files and `battle\actions.csv` are unchanged.
 - Each texture image must name its zone and that zone's manifest hash, and is rebuilt into its TIM (`Content::TimFromImage` and `EncodeTim`, shared with the importer).
-- A table error names the file, line and column. An unknown room, archetype or image, a stale image, or a zone rebuilt larger than the read's block is refused with the cause logged. The loader then refuses the zone as a failed read.
+- A table error names the file, line and column. An unknown room, archetype, action or image, a stale image, or a zone rebuilt larger than the read's block is refused with the cause logged. The loader then refuses the zone as a failed read.
 - `RequireConversions` refuses to start without a current `znd-tables` output for every zone.
 
 Open work: #199 (relational species, variant, loadout and loot tables; part references to the item catalog; SQLite

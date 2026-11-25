@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "table": "zone-enemy-limbs",
-  "description": "Each template's limbs but their armour parts; a limb with no row is all zeros.",
+  "description": "Each template's limbs but their armour parts; a limb with no row has zero in every column.",
   "key": ["enemy", "limb"],
   "columns": [
     {
@@ -141,88 +141,68 @@
       "description": "signed elemental affinity; storage_7 retains the original tail byte"
     },
     {
-      "name": "action_1_id",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 65535,
-      "description": ""
+      "name": "action_1",
+      "type": "reference",
+      "legacy_name": "action_1_id",
+      "references": "actions",
+      "optional": true,
+      "description": "the action in this slot; empty for none"
     },
     {
-      "name": "action_1_effect_model",
+      "name": "action_1_special_sequence",
       "type": "integer",
+      "legacy_name": "action_1_effect_model",
       "minimum": 0,
       "maximum": 255,
-      "description": ""
+      "description": "the special animation sequence (1-4, 0 for none) the enemy plays for a break art or special action (141-223); the runtime keeps its low four bits"
     },
     {
-      "name": "action_1_index",
+      "name": "action_2",
+      "type": "reference",
+      "legacy_name": "action_2_id",
+      "references": "actions",
+      "optional": true,
+      "description": "the action in this slot; empty for none"
+    },
+    {
+      "name": "action_2_special_sequence",
       "type": "integer",
+      "legacy_name": "action_2_effect_model",
       "minimum": 0,
       "maximum": 255,
-      "description": ""
+      "description": "the special animation sequence (1-4, 0 for none) the enemy plays for a break art or special action (141-223); the runtime keeps its low four bits"
     },
     {
-      "name": "action_2_id",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 65535,
-      "description": ""
+      "name": "action_3",
+      "type": "reference",
+      "legacy_name": "action_3_id",
+      "references": "actions",
+      "optional": true,
+      "description": "the action in this slot; empty for none"
     },
     {
-      "name": "action_2_effect_model",
+      "name": "action_3_special_sequence",
       "type": "integer",
-      "minimum": 0,
-      "maximum": 255,
-      "description": ""
-    },
-    {
-      "name": "action_2_index",
-      "type": "integer",
+      "legacy_name": "action_3_effect_model",
       "minimum": 0,
       "maximum": 255,
-      "description": ""
+      "description": "the special animation sequence (1-4, 0 for none) the enemy plays for a break art or special action (141-223); the runtime keeps its low four bits"
     },
     {
-      "name": "action_3_id",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 65535,
-      "description": ""
+      "name": "action_4",
+      "type": "reference",
+      "legacy_name": "action_4_id",
+      "references": "actions",
+      "optional": true,
+      "description": "the action in this slot; empty for none"
     },
     {
-      "name": "action_3_effect_model",
+      "name": "action_4_special_sequence",
       "type": "integer",
-      "minimum": 0,
-      "maximum": 255,
-      "description": ""
-    },
-    {
-      "name": "action_3_index",
-      "type": "integer",
+      "legacy_name": "action_4_effect_model",
       "minimum": 0,
       "maximum": 255,
-      "description": ""
-    },
-    {
-      "name": "action_4_id",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 65535,
-      "description": ""
-    },
-    {
-      "name": "action_4_effect_model",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 255,
-      "description": ""
-    },
-    {
-      "name": "action_4_index",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 255,
-      "description": ""
+      "description": "the special animation sequence (1-4, 0 for none) the enemy plays for a break art or special action (141-223); the runtime keeps its low four bits"
     },
     {
       "name": "armor_material",
