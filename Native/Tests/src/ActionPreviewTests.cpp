@@ -25,6 +25,7 @@
 #include "Battle/HitModifiers.hpp"
 #include "Battle/HitModifiersLive.hpp"
 #include "Content/ModuleData.hpp"
+#include "TestSupport/BattleCatalogRoot.hpp"
 
 using VS::Battle::ActionDefinition;
 using VS::Battle::ActionRequestRecord;
@@ -502,6 +503,7 @@ TEST_CASE("Preview category is reread after building the cached volume",
 
 namespace {
 struct PreviewFixture {
+  VS::test_support::BattleCatalogRoot catalogs;
   decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
   decltype(VS::Battle::actionDefinitions) saved_definitions =
       VS::Battle::actionDefinitions;

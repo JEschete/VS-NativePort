@@ -39,6 +39,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\ActionCategoryCatalog.cpp" />
     <ClCompile Include="src\ActorAnimation.cpp" />
     <ClCompile Include="src\ActorArchetype.cpp" />
     <ClCompile Include="src\ActorAssets.cpp" />
@@ -111,6 +112,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Content\ActionCategoryCatalog.hpp" />
     <ClInclude Include="include\Content\ActorAnimation.hpp" />
     <ClInclude Include="include\Content\ActorArchetype.hpp" />
     <ClInclude Include="include\Content\ActorAssets.hpp" />

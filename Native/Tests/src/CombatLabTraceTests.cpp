@@ -49,6 +49,7 @@
 #include "State/ScriptFlagsLive.hpp"
 #include "State/StateFlags.hpp"
 #include "State/Timers.hpp"
+#include "TestSupport/BattleCatalogRoot.hpp"
 
 using VS::Battle::ActionState;
 using VS::Battle::kActionTypeAbility;
@@ -804,6 +805,7 @@ TEST_CASE("Detailed runs preserve previous evidence and report invalid output",
 
 namespace {
 struct GameplayInspectionFixture {
+  VS::test_support::BattleCatalogRoot catalogs;
   int saved_gameplay = VS::Boot::isGameplayActive;
   decltype(VS::Field::controlMode) saved_control = VS::Field::controlMode;
   decltype(VS::Battle::actionState) saved_action = VS::Battle::actionState;

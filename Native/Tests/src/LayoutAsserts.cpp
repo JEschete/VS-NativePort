@@ -478,9 +478,7 @@ int Tests_ActionDefinitionsLoaded(void) {
          basic->range_z == 255 && basic->hits[0].effect_id == 58 &&
          basic->hits[0].prerequisite_function_id == 2 &&
          basic->hits[0].hit_function_id == 3 &&
-         basic->hits[0].stat_calculator_id == 25 &&
-         VS::Battle::categoryNeedsTargetSelection[basic->category] != 0 &&
-         VS::Battle::categoryTargetsBodyParts[basic->category] != 0;
+         basic->hits[0].stat_calculator_id == 25;
 }
 
 int Tests_ActorConditionSnapshot(void) {

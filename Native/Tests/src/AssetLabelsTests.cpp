@@ -427,10 +427,10 @@ TEST_CASE("Standalone audio metadata can be labeled without a disc inventory",
 TEST_CASE(
     "Native-owned text font and import records bypass generic asset labels",
     "[asset-labels][learning-catalog]") {
-  const auto schema =
-      GENERATE("vs.strings", "vs.font", "vs.text-contributions",
-               "vs.save-text-import", "vs.bestiary-import",
-               "vs.material-import", "vs.learning-import", "vs.status-import");
+  const auto schema = GENERATE("vs.strings", "vs.font", "vs.text-contributions",
+                               "vs.save-text-import", "vs.bestiary-import",
+                               "vs.material-import", "vs.learning-import",
+                               "vs.status-import", "vs.action-category-import");
   const bool refresh = GENERATE(false, true);
   const ModelRoot root({});
   const std::string text = std::string("{\"schema\":\"") + schema +

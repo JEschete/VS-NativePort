@@ -246,9 +246,9 @@ claim that all enemies, items, spells or abilities are complete.
 
 ### 4.6 Local state and evidence retention
 
-The existing `build\` tree contains both reproducible outputs and retained
-evidence. It is not a disposable directory as a whole. This cleanup leaves
-its contents and existing evidence paths unchanged.
+The `build\` tree contains both reproducible outputs and retained evidence. It is
+not a disposable directory as a whole. Keep its root limited to build outputs and
+tool state; evidence lives under `build\evidence\`.
 
 | Local contents | Retention rule |
 | --- | --- |
@@ -269,15 +269,43 @@ run, check its citations in the
 archive referenced evidence first; unknown provenance means retain it.
 Do not commit or attach disc-derived captures, audio, dumps or BIOS files.
 
-The 2026-11-24 cleanup moved 80 uncited capture/reference directories and 268
-uncited loose logs, drafts and backups (about 673 MB) from the `build\` root into
-`build\evidence-archive\20261124-build-cleanup\` (`captures\`, `reference-pins\`,
-`loose-files\`). Its `MOVES.json` maps every entry to its old path, so moving an
-entry back restores it. Everything cited by this documentation or an issue
-(`issue-*` evidence, the logs named in the handoff) stayed at its original path,
-as did `build\player`, `build\duckstation`, the Combat Lab logs and the retained
-reference data. Keep `build\` root entries that docs or issues cite in place;
-put new disposable output under `build\scratch\<experiment>`.
+Layout of the `build\` root:
+
+| Entry | Contents |
+| --- | --- |
+| `Debug\`, `Release\`, `Coverage\` | MSBuild outputs and intermediates. |
+| `player\`, `duckstation\`, `disc\`, `port\`, `naming\`, `quality\`, `releases\` | Tool and runtime state that scripts or sources reference by path. |
+| `ghidra\`, `ghidra-loot-*\`, `loot-reference-data\` | Retained reference data. |
+| `runtime-snapshot-tests\`, `test-*\` | Scratch roots the test executable creates and recreates. |
+| `scratch\<experiment>\` | Disposable output of one-off runs; delete freely. |
+| `evidence\<group>\` | Evidence runs and logs that docs or issues cite, one `issue-<N>\` folder per issue, plus `captures\`, `startup-baseline\`, `portability-migration\` and `misc\`. |
+| `evidence-archive\` | Older evidence that nothing cites, by cleanup date. |
+
+Write new evidence straight into `build\evidence\issue-<N>\` and put disposable
+output under `build\scratch\<experiment>`; do not add loose files to the root.
+
+**Never move or delete an evidence directory with PowerShell `Move-Item` or
+`Remove-Item`, or with `shutil`, without first checking it for junctions.** Proof
+runs sometimes link their data root to the live `Native\data\<name>` folders. A
+move that falls back to copy-and-delete follows those links and deletes the
+extracted data (this happened during the 2026-11-24 cleanup and needed a full
+re-extraction). Check with
+`Get-ChildItem <dir> -Recurse -Force -Attributes ReparsePoint`, remove links
+with `cmd /c rmdir <link>` (it removes the link, not the target), and prefer a
+plain copy of the needed data to a junction in new proof runs. The 49 links under
+`build\evidence*` were removed, so older proof directories no longer carry their
+data view; recreate it from `Native\data` if a run has to be repeated.
+
+The 2026-11-24 cleanups made this layout. The first moved 80 uncited
+capture/reference directories and 268 loose logs (about 673 MB) into
+`build\evidence-archive\20261124-build-cleanup\`; the second moved the remaining
+359 loose issue logs, captures and run directories from the root to
+`build\evidence\<group>\<same name>` and rewrote the paths cited by the handoff,
+the asset-pipeline document and the verification ledger. A cited name such as
+`build\issue-210-lifecycle` is now `build\evidence\issue-210\issue-210-lifecycle`;
+issue comments written before the move keep the old path. Both `MOVES.json`
+manifests (`build\evidence-archive\20261124-build-cleanup\` and `build\evidence\`)
+map every entry to its old path, so moving an entry back restores it.
 
 ---
 
@@ -673,6 +701,17 @@ The default configuration is Debug. The wrapper builds before running tests;
 up to four Catch2 arguments follow the configuration. Inspect available cases
 with `build\Debug\VS.Tests.exe --list-tests` after a successful build. Skipped
 disc-dependent cases are not release acceptance evidence.
+
+Run time (Debug, one developer machine, with the disc data extracted): the
+whole suite takes about 19 minutes, of which about 13 are the 38 `[extract]`
+corpus cases that decode and rebuild every converted disc file; those take about
+a minute in Release. For Debug iteration run `test-native.cmd Debug "~[extract]"`
+(about 5 minutes) and run `test-native.cmd Release "[extract]"` when a converter,
+loader or the converted data changed. Tests that read the extracted `Native\data`
+without modifying it open it through `Content::DataStore::OpenShared`, which
+keeps one store per process; opening it with `DataStore::Open` costs about two
+seconds in Debug each time. Tests that build a scratch root, or that rely on a
+fresh store generation, keep using `Open`.
 
 Audio tests include actual SDL postmix, stream/XA lifecycle and native music-state
 regressions. The `[audio][xa-playback][disc]` case also exercises the installed

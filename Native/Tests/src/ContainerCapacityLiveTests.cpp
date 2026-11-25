@@ -4,8 +4,10 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <filesystem>
 #include <span>
 #include <string>
+#include <system_error>
 #include <utility>
 #include <vector>
 
@@ -133,6 +135,11 @@ TEST_CASE(
   const auto result = VS::Platform::RunProcess(arguments, output);
   REQUIRE(result.has_value());
   CHECK(*result == 0);
+  if (*result == 0) {
+    std::error_code remove_error;
+    std::filesystem::remove(output, remove_error);
+    CHECK_FALSE(remove_error);
+  }
 }
 
 TEST_CASE("F02972 isolated callback retains the original workspace and packets",

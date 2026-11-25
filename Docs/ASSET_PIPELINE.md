@@ -536,6 +536,41 @@ is removed; other globals beside it are unchanged. This is **not** action,
 enemy-resistance, actor/save-width or whole-executable adoption. Current local
 validation and remaining controller/reference limits belong in HANDOFF.
 
+### 4.6 Native action categories (#499)
+
+The adopted contract is verified in HANDOFF ("Native action category catalog
+adoption"). `VS.Extract action-categories <datadir>` (also `tables`,
+`authoring` and full extraction) imports the sixteen category records that
+BATTLE.PRG stored as five parallel byte tables (needs-selection `0x7F984`,
+area `0x7F994`, includes-user `0x7F9B4`, body-part `0x7F9C4`, target-kind masks
+`0x7F9D4`; the sixteen bytes at `0x7F9A4` are zero padding). The
+`action-category-csv` bundle is `catalog.battle.action-categories`:
+
+- `catalogs\battle\action-categories.csv`: `action-category.<slug>` rows with
+  a plain-text `display_name` and the named columns `selection`
+  (`automatic`/`chosen`), `extent` (`single`/`area`), `includes_user`
+  (`no`/`yes`), `aim` (`actor`/`limb`) and `target_kinds`, a `|` set of
+  `leader`, `neutral`, `hostile`, `peaceful`, `object`, `cloudstone` and
+  `chest` (or `none`).
+- The matching schema defines each enum and flag with its original bit; the
+  committed copy must equal the generated schema (a Catch2 test compares them).
+- `catalogs\battle\import\action-categories.json` holds the five original
+  bytes of every record for offline reconstruction only; reconstruction never
+  consults edited CSVs and is not a runtime path. The importer refuses a source
+  whose padding bytes are not zero or whose mask uses the unnamed `0x40` bit
+  instead of narrowing it, and authoring cannot spell either.
+
+Live targeting, camera selection and action-result code read the checked
+catalog through `RequireLiveActionCategory`. A missing catalog logs and aborts
+like the status catalog; it never yields an all-zero rule. The module data
+globals G00019..G00023 and their address bindings are removed.
+
+Actions still reference a category by its compatibility index, and the retained
+action definition keeps a four-bit category field, so at most sixteen
+categories exist. AI category sets, action preview lists and the damage
+distribution policy remain keyed by category number in code. The action catalog
+that names the category by identity is a later #499 slice.
+
 ## 5. Tier 2: text and fonts
 
 - **Strings:** every string the game shows (exe, MENU `ITEMNAME/ITEMHELP`, `SMALL\HELP*.HF0/HF1`, `MCDATA`, event text in `EVT`, menu labels) is decoded from the VS character table to UTF-8 and stored once in `text\strings.en.json` as `{ "id": "text", ... }`.
@@ -1030,12 +1065,12 @@ pixels and palette. Six captured scene frames matched the original camera
 frames: the background was occluded in that interval, so this demonstrates
 actual renderer upload, **not** a scene-visible artwork change. The authored
 layout was restored byte-for-byte; evidence is
-`build\issue-210-rebinding-relocated-comparison.json`.
+`build\evidence\issue-210\issue-210-rebinding-relocated-comparison.json`.
 
 The later non-skipped MAP001 route (`1000:Start,1300:Circle`, with no prologue
 skip) exposes the artwork through the windows at ticks 4000/6000, event 0,
 thread 0 PC `+0x626`. A native PNG edit changed 7,815/7,800 scene pixels at
-matched camera/model/event states (`build\issue-210-enabled-comparison.json`).
+matched camera/model/event states (`build\evidence\issue-210\issue-210-enabled-comparison.json`).
 The previously inspected open-sky MAP062 view is **not FAR**: its MPD background
 section is empty and the skipped MAP008 route had already transitioned there.
 
@@ -1047,10 +1082,10 @@ errors. Source texels, corner colors and the PNG remain unchanged, and all
 watched native files restore byte-exactly. This is both a scene-visible JSON
 layout edit and a native-only capability: FAR has no cell-size field and the
 offline encoder refuses 16-unit geometry. Evidence:
-`build\issue-210-layout-comparison.json` and
-`build\issue-210-layout-comparison-{4000,6000}.png`.
+`build\evidence\issue-210\issue-210-layout-comparison.json` and
+`build\evidence\issue-210\issue-210-layout-comparison-{4000,6000}.png`.
 
-Cold-read evidence (`build\issue-210-semantic-corpus.json`) records all four
+Cold-read evidence (`build\evidence\issue-210\issue-210-semantic-corpus.json`) records all four
 artwork/grid/image identities and one seeded cell: seed 210 selects global
 cell 196, `background.grey-clouds` cell 4 (row 0, column 4), sampling
 (127,0)..(159,30), with all four RGB corners neutral at 128. The intended

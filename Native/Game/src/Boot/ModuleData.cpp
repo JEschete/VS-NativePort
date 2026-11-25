@@ -206,23 +206,6 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x2C7FC, sizeof VS::Audio::legacyUnreferencedWord,
      &VS::Audio::legacyUnreferencedWord,
      sizeof VS::Audio::legacyUnreferencedWord},  // G00018 D_80094FFC
-    {"BATTLE/BATTLE.PRG", 0x7F984,
-     sizeof VS::Battle::categoryNeedsTargetSelection,
-     &VS::Battle::categoryNeedsTargetSelection,
-     sizeof VS::Battle::categoryNeedsTargetSelection},  // G00019 D_800E8184
-    {"BATTLE/BATTLE.PRG", 0x7F994, sizeof VS::Battle::categoryIsAreaTarget,
-     &VS::Battle::categoryIsAreaTarget,
-     sizeof VS::Battle::categoryIsAreaTarget},  // G00020 D_800E8194
-    {"BATTLE/BATTLE.PRG", 0x7F9B4,
-     sizeof VS::Battle::categoryIncludesActingActor,
-     &VS::Battle::categoryIncludesActingActor,
-     sizeof VS::Battle::categoryIncludesActingActor},  // G00021 D_800E81B4
-    {"BATTLE/BATTLE.PRG", 0x7F9C4, sizeof VS::Battle::categoryTargetsBodyParts,
-     &VS::Battle::categoryTargetsBodyParts,
-     sizeof VS::Battle::categoryTargetsBodyParts},  // G00022 D_800E81C4
-    {"BATTLE/BATTLE.PRG", 0x7F9D4, sizeof VS::Battle::categoryTargetActorMasks,
-     &VS::Battle::categoryTargetActorMasks,
-     sizeof VS::Battle::categoryTargetActorMasks},  // G00023 D_800E81D4
     {"BATTLE/BATTLE.PRG", 0x7F9E4, sizeof VS::Items::weaponCategoryUpperIds,
      &VS::Items::weaponCategoryUpperIds,
      sizeof VS::Items::weaponCategoryUpperIds},  // G00024 _wepIdCategories

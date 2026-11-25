@@ -93,6 +93,15 @@ struct RunStart {
     const Content::ConversionManifest& previous, const ConverterBatch& batch,
     const std::function<std::expected<void, std::string>()>& write);
 
+// An authored-table converter's last step: refuses to convert `output` over
+// files it does not own (CheckAuthoringOwnership), records `output` in
+// `batch`, then writes and publishes like PublishBatch.
+[[nodiscard]] std::expected<std::size_t, std::string> PublishAuthoredBatch(
+    const Content::ConversionManifest& previous,
+    const std::filesystem::path& root, ConverterBatch& batch,
+    const Content::ConversionOutput& output, bool force,
+    const std::function<std::expected<void, std::string>()>& write);
+
 // A file to write: its name and its bytes.
 struct OutputBytes {
   std::string_view name;

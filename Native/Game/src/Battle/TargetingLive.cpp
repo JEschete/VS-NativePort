@@ -24,6 +24,7 @@
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/AbilityState.hpp"
 #include "Battle/Action.hpp"
+#include "Battle/ActionCategoryCatalogLive.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionPhasesLive.hpp"
 #include "Battle/ActionPresentationLive.hpp"
@@ -414,19 +415,18 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
 
   [[nodiscard]] battle::TargetCategoryRules CategoryRules(
       int category) const override {
-    if (!InRange(VS::Battle::categoryTargetActorMasks, category)) {
+    const auto* rule =
+        VS::Battle::RequireLiveActionCategoryCatalog().Rule(category);
+    if (rule == nullptr) {
       VS::Core::LogError("battle.targeting", "target category {} is unknown",
                          category);
       return {};
     }
-    return {.needs_target_selection =
-                VS::Battle::categoryNeedsTargetSelection[category] != 0,
-            .area_target = VS::Battle::categoryIsAreaTarget[category] != 0,
-            .includes_acting_actor =
-                VS::Battle::categoryIncludesActingActor[category] != 0,
-            .targets_body_parts =
-                VS::Battle::categoryTargetsBodyParts[category] != 0,
-            .actor_mask = VS::Battle::categoryTargetActorMasks[category]};
+    return {.needs_target_selection = rule->needs_target_selection,
+            .area_target = rule->area_target,
+            .includes_acting_actor = rule->includes_acting_actor,
+            .targets_body_parts = rule->targets_body_parts,
+            .actor_mask = static_cast<int>(rule->target_kinds)};
   }
 
   [[nodiscard]] int SelectionActionId() const override {

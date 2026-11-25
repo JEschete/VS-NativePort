@@ -10,6 +10,7 @@
 #include <string_view>
 #include <vector>
 
+#include "Content/ActionCategoryCatalog.hpp"
 #include "Content/AssetCatalog.hpp"
 #include "Content/AssetHandle.hpp"
 #include "Content/ConversionManifest.hpp"
@@ -56,7 +57,7 @@ class DataStore {
     void Restore() noexcept;
 
    private:
-    std::unique_ptr<DataStore> m_previous_;
+    std::shared_ptr<DataStore> m_previous_;
     bool m_active_ = true;
   };
 
@@ -81,6 +82,15 @@ class DataStore {
   // the asset catalog, which must then load. Each open catalog gets a fresh
   // handle generation. Catalog tables listed in manifest.json must load too.
   static std::expected<void, std::string> Open(
+      const std::filesystem::path& root);
+  // Open for read-only callers that repeatedly need the same extracted data
+  // (the Debug test suite's real-data fixtures): the first call opens `root`;
+  // later calls publish that same store again, with the same asset handle
+  // generation, until files.tsv or manifest.json changes or another root is
+  // asked for. The store is immutable once open. Use Open when a caller needs
+  // a fresh generation or reads a store it will edit. Not concurrent with
+  // Open or other overrides.
+  static std::expected<void, std::string> OpenShared(
       const std::filesystem::path& root);
   static const DataStore* Get();
 
@@ -128,6 +138,9 @@ class DataStore {
   [[nodiscard]] const StatusCatalog* StatusRules() const {
     return m_status_ ? &*m_status_ : nullptr;
   }
+  [[nodiscard]] const ActionCategoryCatalog* ActionCategories() const {
+    return m_action_categories_ ? &*m_action_categories_ : nullptr;
+  }
   [[nodiscard]] const NativeTextAssets* SaveText() const {
     return m_save_text_ ? &*m_save_text_ : nullptr;
   }
@@ -149,6 +162,7 @@ class DataStore {
   std::optional<MaterialCatalog> m_materials_;
   std::optional<LearningCatalog> m_learning_;
   std::optional<StatusCatalog> m_status_;
+  std::optional<ActionCategoryCatalog> m_action_categories_;
   std::optional<NativeTextAssets> m_save_text_;
   std::optional<CatalogDatabase> m_catalog_tables_;
 };

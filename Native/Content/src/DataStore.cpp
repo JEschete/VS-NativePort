@@ -4,7 +4,7 @@
 #include <array>
 #include <charconv>
 #include <cstddef>
-#include <cstring>
+#include <cstdint>
 #include <expected>
 #include <format>
 #include <fstream>
@@ -48,9 +48,45 @@ namespace VS::Content {
 
 namespace {
 
-std::unique_ptr<DataStore>& Instance() {
-  static std::unique_ptr<DataStore> store;
+std::shared_ptr<DataStore>& Instance() {
+  static std::shared_ptr<DataStore> store;
   return store;
+}
+
+// What OpenShared reuses: a store opened for `root` while its manifest files
+// still have these sizes and modification times.
+struct FileStamp {
+  std::optional<std::uintmax_t> size;
+  std::optional<fs::file_time_type> modified;
+  bool operator==(const FileStamp&) const = default;
+};
+
+struct SharedStore {
+  fs::path root;
+  std::array<FileStamp, 2> stamps;
+  std::shared_ptr<DataStore> store;
+};
+
+SharedStore& SharedInstance() {
+  static SharedStore shared;
+  return shared;
+}
+
+FileStamp StampOf(const fs::path& path) {
+  std::error_code error;
+  FileStamp stamp;
+  if (const auto size = fs::file_size(path, error); !error) {
+    stamp.size = size;
+  }
+  if (const auto time = fs::last_write_time(path, error); !error) {
+    stamp.modified = time;
+  }
+  return stamp;
+}
+
+std::array<FileStamp, 2> StampsOf(const fs::path& root) {
+  return {StampOf(root / DataStore::ManifestName),
+          StampOf(root / Platform::Utf8Path(kConversionManifestName))};
 }
 
 // The last catalog generation issued; handles from earlier catalogs no longer
@@ -90,6 +126,8 @@ constexpr std::array kConvertedTypes{
     ConvertedType{kMaterialSource, "", kMaterialConverterName, kRawForm, true},
     ConvertedType{kLearningSource, "", kLearningConverter.name, kRawForm, true},
     ConvertedType{kStatusSource, "", kStatusConverter.name, kRawForm, true},
+    ConvertedType{kActionCategorySource, "", kActionCategoryConverter.name,
+                  kRawForm, true},
     ConvertedType{kBestiarySource, "", kBestiaryConverter, kRawForm, true},
     ConvertedType{"", ".SHP", "shp-gltf", kRawForm},
     ConvertedType{"", ".SEQ", "seq-gltf", kRawForm},
@@ -112,8 +150,12 @@ std::string_view RerunFor(std::string_view converter) {
     return " (run VS.Extract bestiary <dir>)";
   }
   if (converter == kSaveTextConverter) return " (run VS.Extract text <dir>)";
-  if (converter == kStatusConverter.name)
+  if (converter == kStatusConverter.name) {
     return " (run VS.Extract status <dir>)";
+  }
+  if (converter == kActionCategoryConverter.name) {
+    return " (run VS.Extract action-categories <dir>)";
+  }
   return converter == kMaterialConverterName ? " (run VS.Extract tables <dir>)"
                                              : kRerun;
 }
@@ -311,6 +353,7 @@ struct CatalogRecords {
   std::optional<BestiaryCatalog> bestiary;
   std::optional<LearningCatalog> learning;
   std::optional<StatusCatalog> status;
+  std::optional<ActionCategoryCatalog> action_categories;
 };
 
 struct LoadedCatalogs {
@@ -318,31 +361,50 @@ struct LoadedCatalogs {
   CatalogRecords records;
 };
 
+// The catalog families the conversion manifest publishes.
+struct CatalogFamilies {
+  bool recipes = false;
+  bool materials = false;
+  bool bestiary = false;
+  bool learning = false;
+  bool status = false;
+  bool action_categories = false;
+
+  [[nodiscard]] bool Any() const {
+    return recipes || materials || bestiary || learning || status ||
+           action_categories;
+  }
+};
+
 std::expected<CatalogRecords, std::string> ReadCatalogRecords(
-    const CatalogDatabase& database, bool recipes, bool materials,
-    bool bestiary, bool learning, bool status) {
+    const CatalogDatabase& database, const CatalogFamilies& families) {
   CatalogRecords records;
-  if (status) {
+  if (families.action_categories) {
+    auto loaded = LoadActionCategoryCatalog(database);
+    if (!loaded) return std::unexpected(loaded.error());
+    records.action_categories = std::move(*loaded);
+  }
+  if (families.status) {
     auto loaded = LoadStatusCatalog(database);
     if (!loaded) return std::unexpected(loaded.error());
     records.status = std::move(*loaded);
   }
-  if (learning) {
+  if (families.learning) {
     auto loaded = LoadLearning(database);
     if (!loaded) return std::unexpected(loaded.error());
     records.learning = std::move(*loaded);
   }
-  if (recipes) {
+  if (families.recipes) {
     auto loaded = LoadWorkshopRecipes(database);
     if (!loaded) return std::unexpected(loaded.error());
     records.recipes = std::move(*loaded);
   }
-  if (materials) {
+  if (families.materials) {
     auto loaded = LoadMaterials(database);
     if (!loaded) return std::unexpected(loaded.error());
     records.materials = std::move(*loaded);
   }
-  if (bestiary) {
+  if (families.bestiary) {
     auto loaded = LoadBestiary(database);
     if (!loaded) return std::unexpected(loaded.error());
     records.bestiary = std::move(*loaded);
@@ -350,78 +412,104 @@ std::expected<CatalogRecords, std::string> ReadCatalogRecords(
   return records;
 }
 
+// One conversion registration: the single output a converter may publish, with
+// the converter version the manifest must record for it.
+struct CatalogRegistration {
+  std::string_view converter;
+  std::uint32_t version = 0;
+  std::string_view id;
+  std::string_view source;
+  std::string_view error;
+};
+
+bool ValidRegistration(const ConversionManifest& manifest,
+                       const ConversionOutput& output,
+                       const CatalogRegistration& registration, bool seen) {
+  const auto version = manifest.converters.find(registration.converter);
+  return !seen && output.id == registration.id &&
+         output.source == registration.source && output.alias_of.empty() &&
+         version != manifest.converters.end() &&
+         version->second == registration.version;
+}
+
+// Marks the family published by `output`, or returns its registration error.
+std::expected<void, std::string> RegisterFamily(
+    const ConversionManifest& manifest, const ConversionOutput& output,
+    const CatalogRegistration& registration, bool& family) {
+  if (output.converter != registration.converter) return {};
+  if (!ValidRegistration(manifest, output, registration, family)) {
+    return std::unexpected(std::string(registration.error));
+  }
+  family = true;
+  return {};
+}
+
+void AppendSources(std::vector<CatalogTableSource>& sources,
+                   std::vector<CatalogTableSource> more) {
+  for (auto& source : more) sources.push_back(std::move(source));
+}
+
+std::expected<CatalogFamilies, std::string> ReadCatalogFamilies(
+    const ConversionManifest& manifest) {
+  CatalogFamilies families;
+  const std::array registrations{
+      std::pair{
+          CatalogRegistration{
+              kActionCategoryConverter.name, kActionCategoryConverter.version,
+              kActionCategoryOutputId, kActionCategorySource,
+              "invalid action category conversion registration"},
+          &families.action_categories},
+      std::pair{
+          CatalogRegistration{kStatusConverter.name, kStatusConverter.version,
+                              kStatusOutputId, kStatusSource,
+                              "invalid status conversion registration"},
+          &families.status},
+      std::pair{CatalogRegistration{kLearningConverter.name,
+                                    kLearningConverter.version,
+                                    kLearningOutputId, kLearningSource,
+                                    "invalid learning conversion registration "
+                                    "(run VS.Extract tables <dir>)"},
+                &families.learning},
+      std::pair{
+          CatalogRegistration{kBestiaryConverter, kBestiaryConverterVersion,
+                              kBestiaryId, kBestiarySource,
+                              "invalid bestiary conversion registration"},
+          &families.bestiary},
+      std::pair{
+          CatalogRegistration{kMaterialConverterName, kMaterialConverterVersion,
+                              kMaterialOutputId, kMaterialSource,
+                              "invalid material conversion registration "
+                              "(run VS.Extract tables <dir>)"},
+          &families.materials}};
+  for (const auto& output : manifest.outputs) {
+    for (const auto& [registration, family] : registrations) {
+      if (auto marked = RegisterFamily(manifest, output, registration, *family);
+          !marked) {
+        return std::unexpected(marked.error());
+      }
+    }
+    families.recipes |= output.converter == kSydRecipeConverterName;
+  }
+  return families;
+}
+
 // Select only published families: the extractor can open raw/synthetic stores
 // before generating their tables. All selected consumers share one cache.
 std::expected<std::optional<LoadedCatalogs>, std::string> LoadListedCatalogs(
     const fs::path& root, const std::optional<ConversionManifest>& manifest) {
   if (!manifest) return std::nullopt;
-  bool recipes = false;
-  bool materials = false;
-  bool bestiary = false;
-  bool learning = false;
-  bool status = false;
-  for (const auto& output : manifest->outputs) {
-    if (output.converter == kStatusConverter.name) {
-      const auto version = manifest->converters.find(kStatusConverter.name);
-      if (status || output.id != kStatusOutputId ||
-          output.source != kStatusSource || !output.alias_of.empty() ||
-          version == manifest->converters.end() ||
-          version->second != kStatusConverter.version) {
-        return std::unexpected("invalid status conversion registration");
-      }
-      status = true;
-    }
-    if (output.converter == kLearningConverter.name) {
-      const auto version = manifest->converters.find(kLearningConverter.name);
-      if (learning || output.id != kLearningOutputId ||
-          output.source != kLearningSource || !output.alias_of.empty() ||
-          version == manifest->converters.end() ||
-          version->second != kLearningConverter.version) {
-        return std::unexpected(
-            "invalid learning conversion registration (run VS.Extract tables "
-            "<dir>)");
-      }
-      learning = true;
-    }
-    if (output.converter == kBestiaryConverter) {
-      const auto version = manifest->converters.find(kBestiaryConverter);
-      if (bestiary || output.id != kBestiaryId ||
-          output.source != kBestiarySource || !output.alias_of.empty() ||
-          version == manifest->converters.end() ||
-          version->second != kBestiaryConverterVersion) {
-        return std::unexpected("invalid bestiary conversion registration");
-      }
-      bestiary = true;
-    }
-    recipes |= output.converter == kSydRecipeConverterName;
-    if (output.converter != kMaterialConverterName) continue;
-    const auto version = manifest->converters.find(kMaterialConverterName);
-    if (materials || output.id != kMaterialOutputId ||
-        output.source != kMaterialSource || !output.alias_of.empty() ||
-        version == manifest->converters.end() ||
-        version->second != kMaterialConverterVersion) {
-      return std::unexpected(
-          "invalid material conversion registration (run VS.Extract tables "
-          "<dir>)");
-    }
-    materials = true;
-  }
-  if (!recipes && !materials && !bestiary && !learning && !status) {
-    return std::nullopt;
-  }
-  auto sources =
-      recipes ? WorkshopCatalogSources() : std::vector<CatalogTableSource>{};
-  if (materials) sources.push_back(MaterialCatalogSource());
-  if (bestiary) sources.push_back(BestiaryCatalogSource());
-  if (learning) {
-    for (auto& source : LearningCatalogSources()) {
-      sources.push_back(std::move(source));
-    }
-  }
-  if (status) {
-    for (auto& source : StatusCatalogSources()) {
-      sources.push_back(std::move(source));
-    }
+  const auto listed = ReadCatalogFamilies(*manifest);
+  if (!listed) return std::unexpected(listed.error());
+  const CatalogFamilies& families = *listed;
+  if (!families.Any()) return std::nullopt;
+  auto sources = families.recipes ? WorkshopCatalogSources()
+                                  : std::vector<CatalogTableSource>{};
+  if (families.materials) sources.push_back(MaterialCatalogSource());
+  if (families.bestiary) sources.push_back(BestiaryCatalogSource());
+  if (families.learning) AppendSources(sources, LearningCatalogSources());
+  if (families.status) AppendSources(sources, StatusCatalogSources());
+  if (families.action_categories) {
+    AppendSources(sources, ActionCategoryCatalogSources());
   }
   auto database = CatalogDatabase::Load(root, sources);
   if (!database) {
@@ -431,15 +519,13 @@ std::expected<std::optional<LoadedCatalogs>, std::string> LoadListedCatalogs(
         "re-run VS.Extract tables " +
         Platform::PathText(root) + ")");
   }
-  auto records = ReadCatalogRecords(*database, recipes, materials, bestiary,
-                                    learning, status);
+  auto records = ReadCatalogRecords(*database, families);
   if (!records && database->CacheHit()) {
     Core::LogWarn("content", "compiled catalog rejected; recompiling CSVs: {}",
                   records.error());
     database = CatalogDatabase::Load(root, sources, false);
     if (!database) return std::unexpected(database.error());
-    records = ReadCatalogRecords(*database, recipes, materials, bestiary,
-                                 learning, status);
+    records = ReadCatalogRecords(*database, families);
   }
   if (!records) {
     return std::unexpected(records.error() +
@@ -539,6 +625,8 @@ std::expected<void, std::string> DataStore::Open(const fs::path& root) {
     store->m_materials_ = std::move((**tables).records.materials);
     store->m_learning_ = std::move((**tables).records.learning);
     store->m_status_ = std::move((**tables).records.status);
+    store->m_action_categories_ =
+        std::move((**tables).records.action_categories);
     store->m_catalog_tables_ = std::move((**tables).database);
   }
   // catalogs\ also holds the tier-1 tables (catalogs\menu\); either asset
@@ -596,6 +684,20 @@ std::expected<void, std::string> DataStore::Open(const fs::path& root) {
                     store->m_catalog_ ? store->m_catalog_->Size() : 0,
                     Platform::PathText(root));
   Instance() = std::move(store);
+  return {};
+}
+
+std::expected<void, std::string> DataStore::OpenShared(const fs::path& root) {
+  SharedStore& shared = SharedInstance();
+  const auto stamps = StampsOf(root);
+  if (shared.store && shared.root == root && shared.stamps == stamps) {
+    Instance() = shared.store;
+    return {};
+  }
+  if (auto opened = Open(root); !opened) {
+    return opened;
+  }
+  shared = {.root = root, .stamps = stamps, .store = Instance()};
   return {};
 }
 

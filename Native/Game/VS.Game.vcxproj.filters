@@ -408,6 +408,9 @@
     <ClCompile Include="src\Battle\ActionCameraSelectionLive.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
+    <ClCompile Include="src\Battle\ActionCategoryCatalogLive.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
     <ClCompile Include="src\Battle\ActionCosts.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
@@ -3265,6 +3268,9 @@
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\ActionCameraSelectionLive.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\ActionCategoryCatalogLive.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\ActionCosts.hpp">

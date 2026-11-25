@@ -23,6 +23,7 @@
 #include "Content/MovieEncoder.hpp"
 #include "Core/Log.hpp"
 #include "Core/Sha256.hpp"
+#include "Extract/ActionCategoryConversion.hpp"
 #include "Extract/AssetLabels.hpp"
 #include "Extract/AudioBankConversion.hpp"
 #include "Extract/BackgroundAuthoring.hpp"
@@ -81,6 +82,7 @@ int Usage() {
       "  VS.Extract bestiary <datadir> [--force]\n"
       "  VS.Extract learning <datadir> [--force]\n"
       "  VS.Extract status <datadir> [--force]\n"
+      "  VS.Extract action-categories <datadir> [--force]\n"
       "  VS.Extract models   <datadir> [--force]\n"
       "  VS.Extract banks    <datadir> [--force]\n"
       "  VS.Extract labels   <datadir> [--force]\n"
@@ -146,6 +148,11 @@ int WithLabels(int result, const fs::path& root) {
 }
 
 int UpgradeAuthoring(const fs::path& root) {
+  if (auto categories = Extract::ConvertDiscActionCategories(root, false);
+      !categories) {
+    VS::Core::LogError("extract", "action categories: {}", categories.error());
+    return 1;
+  }
   if (auto status = Extract::ConvertDiscStatus(root, false); !status) {
     VS::Core::LogError("extract", "status: {}", status.error());
     return 1;
@@ -565,6 +572,11 @@ int ConvertImages(const fs::path& root, bool force) {
 // texture images and their manifest.json outputs from the disc files already
 // under root. The zones name the enemy archetypes, so this follows the models.
 int ConvertTables(const fs::path& root, bool force) {
+  if (auto categories = Extract::ConvertDiscActionCategories(root, force);
+      !categories) {
+    VS::Core::LogError("extract", "action categories: {}", categories.error());
+    return 1;
+  }
   if (auto status = Extract::ConvertDiscStatus(root, force); !status) {
     VS::Core::LogError("extract", "status: {}", status.error());
     return 1;
@@ -803,6 +815,14 @@ int Run(int argc, char** argv) {
     return Usage();
   }
   const std::string cmd = argv[1];
+  if (cmd == "action-categories") {
+    const auto force = ForceArgument(argc, argv);
+    if (!force) return Usage();
+    const auto result = Extract::ConvertDiscActionCategories(
+        Platform::Utf8Path(argv[2]), *force);
+    if (!result) VS::Core::LogError("extract", "{}", result.error());
+    return result ? 0 : 1;
+  }
   if (cmd == "status") {
     const auto force = ForceArgument(argc, argv);
     if (!force) return Usage();

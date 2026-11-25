@@ -47,6 +47,7 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\ActionCategoryConversion.cpp" />
     <ClCompile Include="src\AssetLabels.cpp" />
     <ClCompile Include="src\AudioBankConversion.cpp" />
     <ClCompile Include="src\BackgroundAuthoring.cpp" />
@@ -75,6 +76,7 @@
     <ClCompile Include="src\ZudConversion.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Extract\ActionCategoryConversion.hpp" />
     <ClInclude Include="include\Extract\AssetLabels.hpp" />
     <ClInclude Include="include\Extract\AudioBankConversion.hpp" />
     <ClInclude Include="include\Extract\BackgroundAuthoring.hpp" />

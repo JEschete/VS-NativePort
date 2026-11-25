@@ -14,6 +14,7 @@
 #include "Battle/Action.hpp"
 #include "Battle/ActionAnimation.hpp"
 #include "Battle/ActionAnimationsLive.hpp"
+#include "Battle/ActionCategoryCatalogLive.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionResults.hpp"
 #include "Battle/ActionTable.hpp"
@@ -79,9 +80,9 @@ class LiveActionTargetEffects final : public ActionTargetEffects {
   }
 
   bool IsAreaAction() override {
-    return VS::Battle::categoryIsAreaTarget
-               [VS::Battle::actionDefinitions[action_->action_id].category] !=
-           0;
+    return RequireLiveActionCategory(
+               VS::Battle::actionDefinitions[action_->action_id].category)
+        .area_target;
   }
 
   void ApplyHit(std::size_t index) override {

@@ -13,6 +13,16 @@
 #include "Platform/Paths.hpp"
 
 namespace VS::test_support {
+// Writes `text` to `path` under `root`, creating its folders.
+inline void WriteTestFile(const std::filesystem::path& root,
+                          std::string_view path, std::string_view text) {
+  const auto file = root / Platform::Utf8Path(path);
+  std::filesystem::create_directories(file.parent_path());
+  std::ofstream stream(file, std::ios::binary | std::ios::trunc);
+  stream << text;
+  REQUIRE(stream.good());
+}
+
 // A throwaway data root under build\<family>\ that is the active DataStore
 // until it is destroyed, then restores the previous store and deletes itself.
 class ScratchDataRoot {
@@ -35,11 +45,7 @@ class ScratchDataRoot {
 
   [[nodiscard]] const std::filesystem::path& Root() const { return root_; }
   void Write(std::string_view path, std::string_view text) const {
-    const auto file = root_ / Platform::Utf8Path(path);
-    std::filesystem::create_directories(file.parent_path());
-    std::ofstream stream(file, std::ios::binary | std::ios::trunc);
-    stream << text;
-    REQUIRE(stream.good());
+    WriteTestFile(root_, path, text);
   }
   void Open() const {
     auto opened = Content::DataStore::Open(root_);

@@ -3,16 +3,6 @@
 
 namespace VS::Battle {
 // The tables below hold module image contents (ModuleData.cpp).
-// decomp: D_800E8184 (D_800E8184@BATTLE/BATTLE.PRG)
-CategoryNeedsTargetSelectionTable categoryNeedsTargetSelection;
-// decomp: D_800E8194 (D_800E8194@BATTLE/BATTLE.PRG)
-CategoryIsAreaTargetTable categoryIsAreaTarget;
-// decomp: D_800E81B4 (D_800E81B4@BATTLE/BATTLE.PRG)
-CategoryIncludesActingActorTable categoryIncludesActingActor;
-// decomp: D_800E81C4 (D_800E81C4@BATTLE/BATTLE.PRG)
-CategoryTargetsBodyPartTable categoryTargetsBodyParts;
-// decomp: D_800E81D4 (D_800E81D4@BATTLE/BATTLE.PRG)
-CategoryTargetActorMaskTable categoryTargetActorMasks;
 // decomp: vs_battle_statusStrings (vs_battle_statusStrings@BATTLE/BATTLE.PRG)
 std::array<std::uint16_t, kStatusStringHalfwords> statusStrings;
 // decomp: D_800EA984 (D_800EA984@BATTLE/BATTLE.PRG)

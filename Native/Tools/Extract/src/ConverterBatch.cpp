@@ -207,6 +207,18 @@ std::expected<std::size_t, std::string> PublishBatch(
   return PublishBatches(root, previous, std::span(&batch, 1));
 }
 
+std::expected<std::size_t, std::string> PublishAuthoredBatch(
+    const ConversionManifest& previous, const fs::path& root,
+    ConverterBatch& batch, const ConversionOutput& output, bool force,
+    const std::function<std::expected<void, std::string>()>& write) {
+  if (const auto owned = CheckAuthoringOwnership(previous, root, output, force);
+      !owned) {
+    return std::unexpected(owned.error());
+  }
+  batch.outputs.push_back(output);
+  return PublishBatch(root, previous, batch, write);
+}
+
 std::expected<void, std::string> WriteOutputFiles(
     const fs::path& directory, std::span<const OutputBytes> files) {
   if (auto created = MakeDirectories(directory); !created) {

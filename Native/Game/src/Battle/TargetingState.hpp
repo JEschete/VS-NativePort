@@ -1,8 +1,8 @@
 #pragma once
-// Battle targeting's state: a target preview record, the action category
-// tables, the status strings and target info templates, and the target
-// columns the target list lays out. TargetingState.cpp defines the globals;
-// the module image fills the tables at start-up.
+// Battle targeting's state: a target preview record, the status strings and
+// target info templates, and the target columns the target list lays out.
+// TargetingState.cpp defines the globals; the module image fills the tables
+// at start-up. Action category rules are Content::ActionCategoryCatalog.
 
 #include <array>
 #include <cstddef>
@@ -34,11 +34,6 @@ static_assert(sizeof(TargetPreview) == kTargetPreviewBytes,
               "TargetPreview must keep its PS1 layout");
 
 // The bytes of the module image each table spans.
-inline constexpr std::size_t kCategoryNeedsTargetSelectionBytes = 96;
-inline constexpr std::size_t kCategoryIsAreaTargetBytes = 80;
-inline constexpr std::size_t kCategoryIncludesActingActorBytes = 48;
-inline constexpr std::size_t kCategoryTargetsBodyPartsBytes = 32;
-inline constexpr std::size_t kCategoryTargetActorMaskBytes = 16;
 inline constexpr std::size_t kStatusStringHalfwords = 1712;
 inline constexpr std::size_t kTargetInfoTemplateBytes = 3140;
 inline constexpr std::size_t kTargetStatusLineTemplateBytes = 3090;
@@ -54,32 +49,12 @@ using TargetColumnEntryBytes =
     std::array<std::uint8_t, kTargetColumnEntryByteCount>;
 using TargetColumnGroupBytes =
     std::array<std::uint8_t, kTargetColumnGroupByteCount>;
-using CategoryNeedsTargetSelectionTable =
-    std::array<std::int8_t, kCategoryNeedsTargetSelectionBytes>;
-using CategoryIsAreaTargetTable =
-    std::array<std::uint8_t, kCategoryIsAreaTargetBytes>;
-using CategoryIncludesActingActorTable =
-    std::array<std::uint8_t, kCategoryIncludesActingActorBytes>;
-using CategoryTargetsBodyPartTable =
-    std::array<std::uint8_t, kCategoryTargetsBodyPartsBytes>;
-using CategoryTargetActorMaskTable =
-    std::array<std::uint8_t, kCategoryTargetActorMaskBytes>;
 using TargetStatusLineTemplateTable =
     std::array<char, kTargetStatusLineTemplateBytes>;
 using TargetColumnEntryTable =
     std::array<TargetColumnEntryBytes, kTargetColumnTableCount>;
 // NOLINTEND
 
-// decomp: D_800E8184 (src/BATTLE/BATTLE.PRG/146C.c:291)
-extern CategoryNeedsTargetSelectionTable categoryNeedsTargetSelection;
-// decomp: D_800E8194 (src/BATTLE/BATTLE.PRG/146C.c:292)
-extern CategoryIsAreaTargetTable categoryIsAreaTarget;
-// decomp: D_800E81B4 (src/BATTLE/BATTLE.PRG/146C.c:293)
-extern CategoryIncludesActingActorTable categoryIncludesActingActor;
-// decomp: D_800E81C4 (src/BATTLE/BATTLE.PRG/146C.c:294)
-extern CategoryTargetsBodyPartTable categoryTargetsBodyParts;
-// decomp: D_800E81D4 (src/BATTLE/BATTLE.PRG/146C.c:295)
-extern CategoryTargetActorMaskTable categoryTargetActorMasks;
 // decomp: vs_battle_statusStrings (src/BATTLE/BATTLE.PRG/battleUi.h:271)
 extern std::array<std::uint16_t, kStatusStringHalfwords> statusStrings;
 // Module image entries inside vs_battle_statusStrings' block, which upstream

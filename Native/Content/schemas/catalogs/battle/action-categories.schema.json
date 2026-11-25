@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "table": "action-categories",
+  "description": "How each action category selects and filters its targets; actions reference a category by compatibility index until the action catalog lands.",
+  "key": ["id"],
+  "columns": [
+    {
+      "name": "id",
+      "type": "id",
+      "description": "Semantic identity."
+    },
+    {
+      "name": "display_name",
+      "type": "text",
+      "optional": true,
+      "description": "Informational plain-text label; not a key or gameplay value."
+    },
+    {
+      "name": "selection",
+      "type": "enum",
+      "enum": {
+        "0": "automatic",
+        "1": "chosen"
+      },
+      "legacy_numeric_aliases": true,
+      "description": "Whether the player or AI picks the target. Automatic categories resolve without a target list: an environment action, or the area around the user."
+    },
+    {
+      "name": "extent",
+      "type": "enum",
+      "enum": {
+        "0": "single",
+        "1": "area"
+      },
+      "legacy_numeric_aliases": true,
+      "description": "A single target, or every target inside the action's area: around a chosen ground point (chosen) or around the user (automatic)."
+    },
+    {
+      "name": "includes_user",
+      "type": "enum",
+      "enum": {
+        "0": "no",
+        "1": "yes"
+      },
+      "legacy_numeric_aliases": true,
+      "description": "Whether the acting actor may appear in the target list."
+    },
+    {
+      "name": "aim",
+      "type": "enum",
+      "enum": {
+        "0": "actor",
+        "1": "limb"
+      },
+      "legacy_numeric_aliases": true,
+      "description": "Whether each target is a whole actor or one of its limbs. Limb categories list every limb of each actor."
+    },
+    {
+      "name": "target_kinds",
+      "type": "flags",
+      "enum": {
+        "1": "leader",
+        "2": "neutral",
+        "4": "hostile",
+        "8": "peaceful",
+        "16": "object",
+        "32": "cloudstone",
+        "128": "chest"
+      },
+      "legacy_numeric_aliases": false,
+      "separator": "|",
+      "empty_set": "none",
+      "description": "Actor kinds the category may target; 'none' targets no actor. Chest also adds the room's treasure chests to the target list."
+    }
+  ]
+}

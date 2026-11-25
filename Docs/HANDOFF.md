@@ -1,5 +1,96 @@
 # Current Handoff
 
+## Native action category catalog adoption (#499), 2026-11-24
+
+Based on `1ed79f640332e8609bd23736600a644ffba775bb` (the status-slice handoff
+commit). The category implementation, tests, committed schema, generated
+projects, test-isolation repair and bookkeeping were verified in the working
+tree and published together; the publishing commit and its exact-revision CI
+are recorded in the metadata line at the end of this section. This does not
+close #499 or #58.
+
+The implementation adds sixteen named category rules (`action-category.<slug>`
+with a plain-text `display_name` as the second column), an offline source and
+provenance codec, layered SQLite/DataStore family selection, an
+`VS.Extract action-categories` entry point and checked live readers. The five
+BATTLE.PRG tables G00019..G00023 (target selection, area, includes user, limb
+aim and target actor mask) are retired: their module entries and address rows are
+removed and the targeting consumers read the typed rules through
+`RequireLiveActionCategory`. ASSET_PIPELINE section
+4.6 describes this contract.
+
+### Evidence obtained
+
+- The import JSON stores the five original bytes of each of the 16 records
+  (offsets `0x7F984`, `0x7F994`, `0x7F9B4`, `0x7F9C4`, `0x7F9D4`); the gap
+  table at `0x7F9A4` is all zero and is reconstructed as zero. The importer
+  refuses a non-zero gap byte and the unnamed `0x40` target bit rather than
+  dropping them, so `VS.Extract` can still rebuild the original table offline.
+- Cold read: the 16 rows read without the decomp
+  (`action-category.ground-area-limb`: chosen, area, no user, limb, leader |
+  neutral | hostile; `treasure-chest`: chosen, single, chest). No cell is
+  numeric.
+- With `VS_JOBS=4` and MSBuild `/m:2`, **Debug and Release both build with
+  exit 0** from the final worktree, including after the converter and
+  `DataStore` refactors below. Selections:
+  - Release `[action-category-catalog]` **8 cases / 76 assertions** (Debug
+    identical); Release `[action-category-catalog],[status-catalog],
+    [learning-catalog],[content-tables],[asset-labels]` **78 / 3,106**.
+  - Debug targeting/preview/gimmick/multi-limb selection **298 / 7,096**; Debug
+    inspection/trace/combat/sphere/runtime-snapshot/save selection
+    **353 / 812,812**; Debug catalog/content/data-store selection **101 / 25,594**.
+  - **Whole Release suite, single process:** `--order lex` and default random
+    order each pass **13,146,899 assertions in 10,073 test cases**, and lex
+    passes again with identical counts after the final refactor.
+- `VS.Extract action-categories Native\data` is byte-identical on a second run
+  and with `--force`. `VS.Extract authoring Native\data` reports **0 files
+  updated / 3,128 unchanged labels, 21,704 CSV rows** (the one new label is the
+  category table).
+- Bounded `run_native.ps1 -NoCopy -SkipIntro -Frames 1500` in Debug with scratch
+  capture and save directories exits **0** with **0 engine errors** (only the
+  existing `unported:` warnings). Evidence:
+  `build\evidence\issue-499\issue-499-action-categories`.
+- `python tools\lint\quality.py --since 1ed79f640` reports **0 new**;
+  `--files <changed sources> --tidy` reports 0 on the new and changed files.
+  Four ledger gates, `content.py --check`, regression static and provenance
+  (`--decomp build\evidence\issue-499\issue-499-bestiary\pinned-decomp`, 7,987 citations) report
+  0 violations or problems.
+
+### Test isolation repair (pre-existing defect)
+
+Adding a second mandatory live catalog exposed a defect the status slice only
+partly hid: about 25 tests reached live status or category consumers with no
+published catalog (and `RequireLive...Catalog` aborts by design), and three
+ESQ/ETM/ZUD tests lacked the category conversion output in their stub
+BATTLE.PRG. Those tests depended on state left by earlier tests in the same
+process. `Native\Tests\src\main.cpp` now registers
+a Catch2 listener that gives every test case an empty `DataStore`, and an abort
+reporter that prints `VS.Tests aborted while running: <test>` and exits 134
+without the Debug CRT modal. Fixtures publish what they need through
+`BattleCatalogRoot` (status plus categories) or the single-family roots. A
+300-shard run and both full-suite orders pass.
+
+### Boundary and ledgers
+
+`PublishAuthoredBatch` in `ConverterBatch` now owns the shared converter tail
+(ownership check, output record, write and publish) for the status, learning and
+action-category converters. `DataStore.cpp` reads converter registrations from
+one `CatalogRegistration` table instead of six copied blocks.
+DATA_LEDGER G00019..G00023 are retired as `Content::ActionCategoryCatalog`
+with `VR-ACTION-CATEGORY-CATALOG` (7 functions, 8 test references); no
+TYPE/FIELD ledger row changes.
+
+### Remaining scope
+
+#499/#58 remain open. The AI category sets (`PlanningPrimitives.cpp`), preview
+lists (`ActionPreview.cpp`) and `DamageDistribution` (`DamagePolicies.cpp`) are
+still keyed by category number in code, and the category stays a four-bit field
+in `ActionDefinition`, so at most 16 categories exist. No controller or combat
+capture of a changed category rule exists; only the default values are exercised
+by gameplay-facing runs. The action catalog, in which actions reference
+categories by identity, is a later slice. Tests that open the real
+`Native\data` store need locally extracted data.
+
 ## Native status catalog adoption (#499), 2026-11-24
 
 Based on `b5fbfc6c6634a7486092e83c85c1a828268e3640` (a documentation-only
@@ -20,7 +111,7 @@ catalogs. ASSET_PIPELINE section 4.5 describes this contract.
 - All **32 records / 512 bytes** of the actual executable match the independent
   initializer parse from pinned decomp
   `c9a869b8919efc561894fb6a851b300791553bd3`.
-  `build\issue-499-status\pinned-source-comparison.json` records the source
+  `build\evidence\issue-499\issue-499-status\pinned-source-comparison.json` records the source
   hash, actual words, revision and dirty state.
 - `source-assembly.txt` confirms seven byte-to-byte timer assignments
   (including paralysis/numbness sharing row 13) and AI's full-halfword
@@ -66,11 +157,11 @@ catalogs. ASSET_PIPELINE section 4.5 describes this contract.
 - Bounded `run_native.ps1 -NoCopy -SkipIntro -Frames 1500` on the default root
   with scratch capture/save directories exits **0** in Debug (**0 engine
   errors**) and Release; only the existing `unported:` warnings appear.
-  Evidence: `build\issue-499-status\run-debug`, `run-release`.
+  Evidence: `build\evidence\issue-499\issue-499-status\run-debug`, `run-release`.
 - Scoped quality: `python tools\lint\quality.py --since b5fbfc6c6` reports
   **0 new**; `--files <changed sources> --tidy` reports 0. Four ledger gates and
   regression static report 0 violations; provenance with
-  `--decomp build\issue-499-bestiary\pinned-decomp` reports **0 problems**.
+  `--decomp build\evidence\issue-499\issue-499-bestiary\pinned-decomp` reports **0 problems**.
   The default `resources\rood-reverse` checkout is ahead of the pin and gives
   thousands of false stale citations, so the pinned export is the reference.
 
@@ -186,7 +277,7 @@ without replacing edited CSVs. See `final-authoring-stability.json`.
 
 ### Local verification
 
-All evidence below is under `build\issue-499-learning`; no disc-derived assets
+All evidence below is under `build\evidence\issue-499\issue-499-learning`; no disc-derived assets
 or captures belong in commits.
 
 - `VS_JOBS=4`, one heavy job, MSBuild `/m:2`, Debug and Release. The latest
@@ -350,7 +441,7 @@ tables; release/reset also drops pending commands.
   manifest ownership, layer reference diagnostics and 300-entry native
   circular links. The configured-corpus test reloads the persisted import
   and compares every original byte.
-- `verify_import.ps1` in `build\issue-499-bestiary` changes the private base
+- `verify_import.ps1` in `build\evidence\issue-499\issue-499-bestiary` changes the private base
   preview to 6 and its name to 35 characters. Two non-forced imports preserve
   bytes **and timestamps of all six watched catalog/text/provenance/manifest
   files**. The private base is restored afterward. Default assets and the
@@ -384,7 +475,7 @@ tables; release/reset also drops pending commands.
 
 ### Accepted controller proof
 
-`mod-final-debug` and `mod-final-release` under `build\issue-499-bestiary`
+`mod-final-debug` and `mod-final-release` under `build\evidence\issue-499\issue-499-bestiary`
 contain the accepted runs and exact arguments. Both exited **0**.
 Debug run **`1795537793035089-0`** reports **0 engine errors** and
 `trace_failed=false`; standard Release does not claim detailed error counts.
@@ -436,7 +527,7 @@ No reference files or gitlink were changed. A provenance sync against the
 working checkout produced an unrelated sweep; all unrelated comment-only
 changes were restored, retaining only this slice's citations/bookkeeping.
 The actual CI-pinned source was exported read-only to
-`build\issue-499-bestiary\pinned-decomp`.
+`build\evidence\issue-499\issue-499-bestiary\pinned-decomp`.
 `provenance.py --check --decomp <that directory>` reports **0 problems**
 (7,988 native citations, 4,207 catalog rows, 470 unresolved records).
 Do not run another broad sync against the mismatched checkout.
@@ -450,7 +541,7 @@ settings. All **21 protected inputs** (existing FAR, material and font files
 plus original source files) retained hashes and modification times.
 A repeated import left all **six catalog/text/provenance/manifest files**
 byte- and timestamp-identical. Evidence:
-`build\issue-499-bestiary\default-integration.json`, `default-stability.json`,
+`build\evidence\issue-499\issue-499-bestiary\default-integration.json`, `default-stability.json`,
 `default-convert.log` and `default-repeat.log`.
 
 The real default-corpus sync exposed missing converter bookkeeping that the
@@ -546,8 +637,8 @@ The same bitmap is now redrawn after the cards, not claimed as newly converted.
   subsequent fixes. Final named-coordinate cleanup retains exactly `(10,181)`
   for Caution; both configurations were rebuilt and `[save-presentation]`
   rerun afterward (**5 cases / 198 assertions each**). Scoped tidy/quality
-  finished with **zero new findings**. Logs: `build\native-text-*-build.log`,
-  `build\native-text-*-tests.log`, `build\native-text-quality-*.log`.
+  finished with **zero new findings**. Logs: `build\evidence\issue-54\native-text-*-build.log`,
+  `build\evidence\issue-54\native-text-*-tests.log`, `build\evidence\issue-54\native-text-quality-*.log`.
 - `python -m unittest discover -s tools\ledger -p test_content.py`:
   **11 tests passed**. Section accounting explicitly prevents the two text
   sources from being reported wholly converted. This initial validation used
@@ -557,7 +648,7 @@ The same bitmap is now redrawn after the cards, not claimed as newly converted.
   `VR-MATERIAL-CATALOG` row is byte-identical to `HEAD`.
 - New files were staged before `gen_solution.py`; the second run leaves all
   **10 changed project/filter files byte-identical**. No projects were edited
-  by hand. `VS.Extract text build\issue-54-native-text\data` repeated without
+  by hand. `VS.Extract text build\evidence\issue-54\issue-54-native-text\data` repeated without
   force preserves bytes **and timestamps of all six output/manifest files**.
 - Readability seed **54** samples load/empty-container confirmation,
   resume/save/open failures and five explicitly keyed glyphs (`—`, `#`, `Û`,
@@ -570,7 +661,7 @@ The same bitmap is now redrawn after the cards, not claimed as newly converted.
 All runs used an exact copy of the legitimate owner save
 `build\Debug\saves\slot00.vssave`, SHA-256
 `9f3429eb15da29c34823a5b320914641aedb280eceea50a916f579aa5e4ffa2f`.
-Only `build\issue-54-native-text\private-saves` was opened by the test game.
+Only `build\evidence\issue-54\issue-54-native-text\private-saves` was opened by the test game.
 The isolated data root owns its manifest, text/image outputs, layers and cache;
 other asset directories are read-only junction inputs. No original save,
 inventory, HP, room/event flag or base asset was edited. Standing after resume
@@ -609,7 +700,7 @@ Their early re-entry confirmation inputs arrived before the picker was ready.
 The accepted sequence uses the observed ready tick, not forced state.
 
 Exact arguments, source/dirty metadata, captures, conversion/project stability,
-readability and immutable-file checks are under **`build\issue-54-native-text`**;
+readability and immutable-file checks are under **`build\evidence\issue-54\issue-54-native-text`**;
 start with `result.json`, `mod-debug\capture.json` and
 `mod-release\capture.json`. Debug trace:
 `build\Debug\game-logs\1795524177368893-0`. All **eight watched original files**
@@ -642,7 +733,7 @@ Two fresh Debug production Desktop runs on the **clean published revision**
 used the known Continue/confirmation inputs only:
 `--frames 2401 --scripted --at 2000,2300 --press 1000:Start,1300:Circle,1600:Circle`.
 Data, text layer, glyph metrics, save and other inputs were identical.
-The atlas at `build\issue-54-native-text\data\textures\ui\save-font.png` and
+The atlas at `build\evidence\issue-54\issue-54-native-text\data\textures\ui\save-font.png` and
 all its parent directories were verified as privately owned, not junctions.
 
 Between baseline **`1795525896603936-0`** and authored
@@ -674,7 +765,7 @@ The private PNG was restored to its exact original bytes
 and write/creation timestamps. All **16 protected inputs** retain their hashes
 and write timestamps, including the default font/text assets, default manifest,
 owner saves, private save/text/metrics/layer and sidecar.
-Evidence is in `build\issue-54-native-text\font-pixel-proof`
+Evidence is in `build\evidence\issue-54\issue-54-native-text\font-pixel-proof`
 (`runs.json`, `atlas-edit.json`, `frame-comparison.json`, `restoration.json`,
 both capture folders and exact argument files). No new build or whole test
 suite was run; the only maintained changes in this follow-up are these
@@ -724,7 +815,7 @@ inspection of the extracted MENUC image (SHA-1 matches its upstream splat
 configuration: `66eb6bfcdf6c8ec9ee1672da4824f6ebb7e9459a`) shows `lbu` at
 file offsets `0x8C54/0x8EA0/0x911C`, additions and byte stores: the compiler
 optimizes the ultimately byte-stored sums. Evidence:
-`build\issue-499-material-original-arithmetic.log`. Ghidra's local backend
+`build\evidence\issue-499\issue-499-material-original-arithmetic.log`. Ghidra's local backend
 was unavailable, so no Ghidra result is claimed.
 
 Native modifiers are signed32 and sums signed64. A layer's **150** strength
@@ -772,17 +863,17 @@ class/affinity fusion clamp (-100..100) and ingredient DP/PP rules are unchanged
 - Content/hazard ledger reconciliation passed. Hazard triage is preserved;
   only two DataStore source locations moved. Existing Catch2 names and replay
   fingerprints are unchanged.
-- Logs are `build\issue-499-material-{debug,release}-{build,tests}.log`,
-  `build\issue-499-material-content-ledger-tests.log`,
-  `build\issue-499-material-content-ledger.log` and
-  `build\issue-499-material-hazards.log`. Authoring stability/replay and final
-  quality/generator evidence are `build\issue-499-material-authoring-stability.json`,
-  `build\issue-499-material-replays.json`,
-  `build\issue-499-material-generator-stability.json`,
-  `build\issue-499-material-quality.log`, `build\issue-499-material-tidy.log`
-  and `build\issue-499-material-cursor-tidy.log`.
+- Logs are `build\evidence\issue-499\issue-499-material-{debug,release}-{build,tests}.log`,
+  `build\evidence\issue-499\issue-499-material-content-ledger-tests.log`,
+  `build\evidence\issue-499\issue-499-material-content-ledger.log` and
+  `build\evidence\issue-499\issue-499-material-hazards.log`. Authoring stability/replay and final
+  quality/generator evidence are `build\evidence\issue-499\issue-499-material-authoring-stability.json`,
+  `build\evidence\issue-499\issue-499-material-replays.json`,
+  `build\evidence\issue-499\issue-499-material-generator-stability.json`,
+  `build\evidence\issue-499\issue-499-material-quality.log`, `build\evidence\issue-499\issue-499-material-tidy.log`
+  and `build\evidence\issue-499\issue-499-material-cursor-tidy.log`.
 
-Exact publication scope is listed in `build\issue-499-material-files.txt`.
+Exact publication scope is listed in `build\evidence\issue-499\issue-499-material-files.txt`.
 It comprises the new Content material definition/schema and Extract importer;
 DataStore family selection; workshop host/core, old material storage,
 ModuleData/ModulePointers and snapshot material policy; three test files;
@@ -813,12 +904,12 @@ Posted as [#499 controller evidence](https://github.com/JEschete/VS-NativePort/i
 The repository-local Desktop save `build\Debug\saves\slot00.vssave` is an
 unchanged migrated owner save, not a Combat Lab preset. Its SHA-256
 `9f3429eb15da29c34823a5b320914641aedb280eceea50a916f579aa5e4ffa2f`
-matches `build\legacy-state-hashes.json`. It records zone 13 / room 12
+matches `build\evidence\portability-migration\legacy-state-hashes.json`. It records zone 13 / room 12
 (The Withered Spring), position `[1609,0,975]`, HP 171/262 and ordinary
 equipment, including two leather Cuirasses. The archived #15 boosted
 all-spells/999-stat presets were inspected but **not used**.
 
-An exact copy was placed in `build\issue-499-workshop\private-saves`.
+An exact copy was placed in `build\evidence\issue-499\issue-499-workshop\private-saves`.
 Its isolated `data` root copies `files.tsv`/`manifest.json` and uses directory
 junctions to the existing asset directories, with its own SQLite cache and
 layer configuration. No owner save, inventory, HP, room/workshop flag, scene
@@ -855,7 +946,7 @@ transaction evidence, **not** a byte-for-byte inventory or saved-result audit.
 No matched pre-adoption executable/emulator replay, action-damage acceptance or
 Release controller pass is claimed. #499 and #58 remain open.
 
-Evidence is under `build\issue-499-workshop`: `result.json` records transitions,
+Evidence is under `build\evidence\issue-499\issue-499-workshop`: `result.json` records transitions,
 actual input logs, compiled row and immutable-source checks;
 `base-combine-arguments.txt` / `mod-combine-arguments.txt` retain exact commands;
 `b\frame_10500.bmp` and `m\frame_10500.bmp` show the matching stock/edited
@@ -887,14 +978,14 @@ passed; semantic-slice publication evidence is
 executable SHA-256 is
 `c9443a1c9f748e16247a60e5551e073aabcc03e5f60eb1e889d8879f795d6f1f`.
 Existing desktop replay arguments were launched through the consent-aware UI
-launcher using ignored `build\issue-210-lifecycle\attempt1.lnk`:
+launcher using ignored `build\evidence\issue-210\issue-210-lifecycle\attempt1.lnk`:
 
 ```text
 --frames 8501 --scripted
 --press 1000:Start,1300:Circle,4200:Start+Select+L1+L2+R1+R2,4700:Start,5000:Circle
---capture build\issue-210-lifecycle\attempt1
+--capture build\evidence\issue-210\issue-210-lifecycle\attempt1
 --at 4000,4199,4300,4900,8000,8400 --no-gpu-validation --speed 8
---save-dir build\issue-210-lifecycle\saves --verification-log
+--save-dir build\evidence\issue-210\issue-210-lifecycle\saves --verification-log
 ```
 
 The actual controller reset at 4200 reaches title mode at 4211, completes
@@ -915,7 +1006,7 @@ existing log event, so allocator internals are not separately measured.
 This is a supported reset/title/new-game cycle, **not geographic room
 transitions/re-entry or complete compatibility retirement**.
 
-Evidence: `build\issue-210-lifecycle\result.json`, `attempt1.log`,
+Evidence: `build\evidence\issue-210\issue-210-lifecycle\result.json`, `attempt1.log`,
 `attempt1\capture.json`, six captures and `before-after.png`; trace
 `build\Debug\game-logs\1795512426264983-0`. All 14 published native authoring
 resources remain byte-identical.
@@ -932,7 +1023,7 @@ the target MAP001 dialogue/camera; observed council/negotiation scenes were
 different. An attract-route or controller-delivery explanation is **unconfirmed**.
 
 The built-in Screenshot menu saved
-`build\issue-210-reference-current\unmatched-reference.png` (849×594;
+`build\evidence\issue-210\issue-210-reference-current\unmatched-reference.png` (849×594;
 30/26/23 distinct channel levels, Software renderer observed). This is genuine
 hardware-mode output, **not a matched FAR comparison**. F10/F2 did not produce
 files with the existing minimal hotkey configuration; no save-state or reference
@@ -999,9 +1090,9 @@ CI 45361848788 passed. Historical dirty-state evidence below is retained;
   are 482; existing 1,005 behavior markers and C++ promotion counts are unchanged.
 
 **Actual layout edit:** Debug `VS.Desktop.exe --frames 6001 --scripted --press
-1000:Start,1300:Circle --capture build\issue-210-layout-{original,authored}
+1000:Start,1300:Circle --capture build\evidence\issue-210\issue-210-layout-{original,authored}
 --at 4000,6000 --no-gpu-validation --speed 8 --save-dir
-build\issue-210-layout-save --verification-log`. No prologue skip or forced
+build\evidence\issue-210\issue-210-layout-save --verification-log`. No prologue skip or forced
 state. Changing only castle-silhouette's cell size 32→16 changed **4,401/4,391
 presented pixels**, bounds x24..294/y48..169. Both states are MAP001,
 zone 1/room 0, event 0/source 1, thread 0 PC `+0x626`; camera, models and
@@ -1010,21 +1101,21 @@ Both runs exit 0 with no errors, and the layout, images, catalogs/manifest and
 executable restore/retain byte-exact hashes. The later label-only ordering pass
 is recorded separately above, not confused with the temporary gameplay edit.
 
-Evidence: `build\issue-210-semantic-{Debug,Release}-*-tests.log` and
-`build\issue-210-semantic-{Debug,Release}-tests.log`,
-`build\issue-210-semantic-{quality,tidy,tests-tidy}.{log,json}`,
-`build\issue-210-semantic-corpus.json`, `*-stable-hashes.csv`,
-`*-project-hashes.csv`; `build\issue-210-layout-comparison.json`,
-`build\issue-210-layout-comparison-{4000,6000}.png`, both `*-run.json` records
+Evidence: `build\evidence\issue-210\issue-210-semantic-{Debug,Release}-*-tests.log` and
+`build\evidence\issue-210\issue-210-semantic-{Debug,Release}-tests.log`,
+`build\evidence\issue-210\issue-210-semantic-{quality,tidy,tests-tidy}.{log,json}`,
+`build\evidence\issue-210\issue-210-semantic-corpus.json`, `*-stable-hashes.csv`,
+`*-project-hashes.csv`; `build\evidence\issue-210\issue-210-layout-comparison.json`,
+`build\evidence\issue-210\issue-210-layout-comparison-{4000,6000}.png`, both `*-run.json` records
 and `*-hashes.csv`. Verification traces:
 `1795509870105143-0` / `1795510010698398-0`.
-Ignored `build\issue-210-semantic-before` preserves the pre-migration files;
+Ignored `build\evidence\issue-210\issue-210-semantic-before` preserves the pre-migration files;
 `Native\data` now contains the semantic filenames, aliases and catalog v2.
 Original import files were not changed or repacked.
 
 The prior skipped MAP008/open-sky observation was MAP062 with no FAR section.
 The separately verified MAP001 PNG edit remains in
-`build\issue-210-enabled-comparison.json` (7,815/7,800 changed pixels).
+`build\evidence\issue-210\issue-210-enabled-comparison.json` (7,815/7,800 changed pixels).
 Remaining gates: matched emulator/reference placement, gradients, seams and
 parallax; production transitions/re-entry; MPD/ARM semantic room bindings and
 applicable compatibility retirement. No complete EC-04 retirement is claimed.
@@ -1061,9 +1152,9 @@ passed and evidence is posted on #500.
   informational. Hazard synchronization reports **274 sites / 0 violations**
   with no ledger changes. No test identity, assertion threshold or replay
   baseline was weakened or refreshed.
-- Evidence: `build\issue-500-controls-{Debug,Release}-{build,tests}.log`,
-  `build\issue-500-controls-quality.json`, and
-  `build\issue-500-controls-tidy.{log,json}`.
+- Evidence: `build\evidence\issue-500\issue-500-controls-{Debug,Release}-{build,tests}.log`,
+  `build\evidence\issue-500\issue-500-controls-quality.json`, and
+  `build\evidence\issue-500\issue-500-controls-tidy.{log,json}`.
 
 This is an **offline import codec**, not a new runtime string-table repacker or
 completed #500/#54 adoption. MCMAN's extended Japanese glyph records remain
@@ -1113,7 +1204,7 @@ are rebuilt at runtime.
   invalid owners/counts and ownership-preserving retirement.
 - Renderer probe: Release `--frames 3300 --scripted --press
   1000:Start,1300:Circle --at 2704,2710,2750,2800,3000,3200
-  --no-gpu-validation --speed 8 --save-dir build\issue-210-rebind-save`,
+  --no-gpu-validation --speed 8 --save-dir build\evidence\issue-210\issue-210-rebind-save`,
   changing only 001's image ID from `image.bg.001op01a` to `image.bg.002op01a`.
   Original hint 27+2 was occupied (logged on #210); the fix used pages 29–30.
   With `--capture-pages`, tick 3200 contains the selected image's exact pixel
@@ -1121,11 +1212,11 @@ are rebuilt at runtime.
   background is occluded here. Both runs exited normally; the original authored
   JSON was restored exactly. Do not claim a scene-visible artwork change.
 
-Evidence: `build\issue-210-rebinding-{Debug,Release}-{build,tests}.log`,
-`build\issue-210-rebinding-{Debug,Release}-placement-{build,tests}.log`,
-`build\issue-210-rebinding-placement-tidy.log`,
-`build\issue-210-rebind-before`, `build\issue-210-rebind-relocated`, and
-`build\issue-210-rebinding-relocated-comparison.json`. The earlier failed
+Evidence: `build\evidence\issue-210\issue-210-rebinding-{Debug,Release}-{build,tests}.log`,
+`build\evidence\issue-210\issue-210-rebinding-{Debug,Release}-placement-{build,tests}.log`,
+`build\evidence\issue-210\issue-210-rebinding-placement-tidy.log`,
+`build\evidence\issue-210\issue-210-rebind-before`, `build\evidence\issue-210\issue-210-rebind-relocated`, and
+`build\evidence\issue-210\issue-210-rebinding-relocated-comparison.json`. The earlier failed
 placement probe is retained separately; its camera divergence was not success.
 Rebinding code/new tests pass scoped tidy; expanded scanning of
 `ImageConversionTests.cpp` still reports the unchanged `RequiredConversion`
@@ -1174,17 +1265,17 @@ CI remains a publication gate; the historical measurements below are unchanged.
   retained four with byte-identical JSON/manifest. Project generation was also
   stable on its second run. Scoped codec/converter/test/runtime tidy passed.
 - Debug prologue: `VS.Desktop.exe --frames 6000 --scripted --press
-  1000:Start,1300:Circle --capture build\issue-210-native-debug --at
+  1000:Start,1300:Circle --capture build\evidence\issue-210\issue-210-native-debug --at
   2200,3200,4200,5900 --no-gpu-validation --speed 8 --save-dir
-  build\issue-210-native-save`. Native JSON 001 loaded at tick 2705; normal
+  build\evidence\issue-210\issue-210-native-save`. Native JSON 001 loaded at tick 2705; normal
   cancellation/exit at 6000, zero error log entries. Release produced the same
-  requested capture ticks under `build\issue-210-native`; detailed logs are
+  requested capture ticks under `build\evidence\issue-210\issue-210-native`; detailed logs are
   disabled in Release, so the Debug run supplies the load/exit evidence.
 
-Evidence: `build\issue-210-*-build.log`, `build\issue-210-*-far-tests.log`,
-`build\issue-210-convert-{first,repeat}.log`,
-`build\issue-210-{tidy,runtime-tidy}.log`,
-`build\issue-210-native-debug.log`, `build\issue-210-bindings.json`.
+Evidence: `build\evidence\issue-210\issue-210-*-build.log`, `build\evidence\issue-210\issue-210-*-far-tests.log`,
+`build\evidence\issue-210\issue-210-convert-{first,repeat}.log`,
+`build\evidence\issue-210\issue-210-{tidy,runtime-tidy}.log`,
+`build\evidence\issue-210\issue-210-native-debug.log`, `build\evidence\issue-210\issue-210-bindings.json`.
 The canonical verification record is `VR-FAR-TYPED-LAYOUTS`.
 
 **Remaining at this base checkpoint:** semantic artwork/room identities and
@@ -1239,8 +1330,8 @@ Source verification is the first optimization target; SQLite caching is smaller
 today. #524 records atomic publication, invalidation, content-hashed CSV/schema
 inputs, ordered layer fingerprints, `--verify-all`, timestamp limitations and
 read-only asset-tree behavior. **No cache or performance gain is implemented
-or claimed yet.** Evidence: `build\startup-baseline-release.json`,
-`build\startup-components-release.log`,
+or claimed yet.** Evidence: `build\evidence\startup-baseline\startup-baseline-release.json`,
+`build\evidence\startup-baseline\startup-components-release.log`,
 `build\Debug\game-logs\1795491820893310-0`.
 
 Current integration: `2764a890b` CI failed because Content's text codec included
@@ -1279,10 +1370,10 @@ invalidate otherwise usable assets.
   still report 3,323 stamp hits and zero bytes hashed.
 - Three completed Release launches with both caches: **1,967.302 ms median**,
   versus the original observed 2,778.588 ms baseline. These are warm observations,
-  not a cold/clean-machine claim. Evidence: `build\issue-524-persistent-*`.
+  not a cold/clean-machine claim. Evidence: `build\evidence\issue-524\issue-524-persistent-*`.
 - Scoped cache/test tidy and changed-file quality pass without new findings.
   Both production Debug replays match unchanged baselines (2,400 and 900 frames);
-  evidence is `build\issue-524-persistent-replays.log`.
+  evidence is `build\evidence\issue-524\issue-524-persistent-replays.log`.
   The final hazard reconciliation records the FAR divisor as constexpr 64 and
   classifies filesystem path `/` operators as non-arithmetic; no safety rule was
   disabled. Keep cache code and its generated hazard report together.
@@ -1317,7 +1408,7 @@ Verification:
   changed stamps/expected hashes, corrupt cache, missing sources/outputs,
   truncated/overlong sources, write failure and atomic replacement cleanup.
 - The exact synthetic append reproduction now rejects `9` versus `4` bytes:
-  `build\issue-525-fixed-repro.log`.
+  `build\evidence\issue-525\issue-525-fixed-repro.log`.
 - Release direct verification median: **765.402 ms full -> 106.021 ms cached**,
   with **3,323 hits, zero files/bytes hashed** on unchanged inputs.
 - Three actual one-tick Release launches per mode: median **2,778.943 ms full
@@ -1325,7 +1416,7 @@ Verification:
   -> 4,910.715 ms cached**; verification trace gap **13,073.644 -> 815.111 ms**.
   These are observed/warm runs, not cold-machine certification.
 - Desktop full/cached flags and Combat Lab `--verify-all --catalog-only`
-  exited successfully. Evidence: `build\issue-524-*.log/json`.
+  exited successfully. Evidence: `build\evidence\issue-524\issue-524-*.log/json`.
 
 Persistent compiled SQLite is still #524; this source-cache slice cannot close
 that whole issue. Caching does not retire EC-04 adapters or the temporary
@@ -1358,7 +1449,7 @@ claim is made for those.
   a terminator-valued parameter. Existing label/authoring tests are unchanged.
 - New codec/test tidy and complete changed-file quality: zero new findings.
   Project generation is stable on its second run. No native data changed.
-- Evidence: `build\issue-500-codec-*.log`.
+- Evidence: `build\evidence\issue-500\issue-500-codec-*.log`.
 
 Continue with authoritative string definitions and their real consumers, then
 the remaining semantic identities/domains and per-format adoption. A codec
@@ -1404,9 +1495,9 @@ Verification:
   The unchanged reader/byte helpers/fixture helpers were compared to `2276a0a6a`;
   no quality baseline or test expectation was weakened to hide those findings.
 - Generated projects are stable on a second run. Evidence:
-  `build\issue-199-fields-*.log`, `build\issue-199-fields-broad-tidy.json`;
+  `build\evidence\issue-199\issue-199-fields-*.log`, `build\evidence\issue-199\issue-199-fields-broad-tidy.json`;
   the 13 original table/schema/manifest files remain in
-  `build\issue-199-fields-before`.
+  `build\evidence\issue-199\issue-199-fields-before`.
 
 All broad asset migration issues remain open until their full adoption,
 authoring, lifecycle, reference and CI requirements pass. Next dependencies
@@ -1448,7 +1539,7 @@ Verification:
 - New compiler/test scoped tidy and complete changed-file quality: zero new
   findings. Project generation is stable on a second run; generator syntax,
   release script syntax and the configuration schema were checked.
-- Evidence: `build\issue-499-layers-*.log`. No disc-derived files changed.
+- Evidence: `build\evidence\issue-499\issue-499-layers-*.log`. No disc-derived files changed.
 
 This is an adopted foundation, not closure of #499/#520. Remaining work includes
 the other table families, shared item definitions, full text/flags/field
@@ -1487,11 +1578,11 @@ Verification on this slice:
 - Both Debug production replays match the unchanged baselines (2,400 and 900
   frames). Scoped tidy and changed-file quality report zero new findings.
 - A seed-520 five-record cold read records semantic IDs, names, categories,
-  damage, resource costs and stats in `build\issue-520-domains-cold-read.log`.
+  damage, resource costs and stats in `build\evidence\issue-520\issue-520-domains-cold-read.log`.
   It is only the known-domain check: remaining import-only/unnamed fields still
   block the full family readability gate.
-- Evidence: `build\issue-520-domains-*.log`; original rows are retained locally
-  in `build\issue-520-domains-before`.
+- Evidence: `build\evidence\issue-520\issue-520-domains-*.log`; original rows are retained locally
+  in `build\evidence\issue-520\issue-520-domains-before`.
 
 Still open: the other catalog families, flags and numbered field families,
 readable instruction/track structures, the authoritative string pipeline,
@@ -1543,9 +1634,9 @@ migration, not completion of the full authoring contract.
   **0** files, and changes **0** IDs/references/labels.
 - Scoped tidy and complete changed-file quality: **0 new findings**.
   Generated projects are stable on their second generation.
-- Logs: `build\issue-520-authoring-*.log`, `build\issue-520-semantic-*.log`,
-  `build\issue-520-import-*.log`; before-state data stays local under
-  `build\issue-520-authoring-before`.
+- Logs: `build\evidence\issue-520\issue-520-authoring-*.log`, `build\evidence\issue-520\issue-520-semantic-*.log`,
+  `build\evidence\issue-520\issue-520-import-*.log`; before-state data stays local under
+  `build\evidence\issue-520\issue-520-authoring-before`.
 
 **Still open:** machine-readable named enum/flag domains, meaningful numbered
 column families, authoritative readable text/markup, removal of remaining
@@ -1607,7 +1698,7 @@ accurately marked unimplemented; no new implementation is claimed for them.
 - Scoped tidy and the mixed changed-file quality pass report **0 new findings**.
   The generated projects are stable on a second generation; all 15 CSV schemas
   were produced by the native formatter and are stable on repeated annotation.
-- Evidence: `build\issue-520-*.log`, `build\issue-520-asset-before.json`.
+- Evidence: `build\evidence\issue-520\issue-520-*.log`, `build\evidence\issue-520\issue-520-asset-before.json`.
   Exact pushed-revision CI is recorded on the issue after publication.
 
 **Next:** implement the first actual section 4 authoring slice in workshop
@@ -1654,12 +1745,12 @@ Validation on the nine-file dirty changeset based on `0530c5dc8`:
 - Scoped quality/tidy on the changed loader and test translation units found
   two test-size findings; both were corrected. The affected translation unit
   was rechecked with tidy: **0 new findings**. No baseline was changed.
-- Evidence: `build\issue-518-debug-build.log`,
-  `build\issue-518-debug-regression.log`,
-  `build\issue-518-release-final-build.log`,
-  `build\issue-518-release-final-tests.log`,
-  `build\issue-518-release-final-console.log`, and
-  `build\issue-518-quality{,-retest}.log`.
+- Evidence: `build\evidence\issue-518\issue-518-debug-build.log`,
+  `build\evidence\issue-518\issue-518-debug-regression.log`,
+  `build\evidence\issue-518\issue-518-release-final-build.log`,
+  `build\evidence\issue-518\issue-518-release-final-tests.log`,
+  `build\evidence\issue-518\issue-518-release-final-console.log`, and
+  `build\evidence\issue-518\issue-518-quality{,-retest}.log`.
 
 This also supplies fresh Debug regression evidence for the preceding #48
 request-state milestone. #48 still has the limits below; neither change
@@ -1693,8 +1784,8 @@ Validation on the seven-file dirty changeset based on `23279779c`:
   --reporter compact`: **240 cases / 2,197 assertions passed**.
 - `quality.py --files` the changed `ActorAssetsLive.cpp/.hpp`,
   `ModelRenderingLive.cpp` and `EncyclopediaPreviewTests.cpp`: **0 new findings**.
-- Evidence: `build\issue-48-release-build.log`,
-  `build\issue-48-release-tests.log`, `build\issue-48-quality.log`.
+- Evidence: `build\evidence\issue-48\issue-48-release-build.log`,
+  `build\evidence\issue-48\issue-48-release-tests.log`, `build\evidence\issue-48\issue-48-quality.log`.
 
 At that checkpoint the owner was playtesting the Debug build. Its binaries,
 logs and `Native\data` were not changed; Debug builds and gameplay replays
@@ -1722,7 +1813,7 @@ not).
 - A replay of the traced primitives reproduces the native frame exactly in 5
   bits and the reference's yellow-green glow at 8 bits.
 - The reference setup now uses DuckStation's software renderer with unscaled
-  dithering. A new hardware-mode capture of `build\ds_map001` was not made:
+  dithering. A new hardware-mode capture of `build\evidence\captures\ds_map001` was not made:
   the capture script sends system-wide keys.
 
 **#517 (slice of #199)**
@@ -1875,7 +1966,7 @@ Two solution generations are stable. Native builds/replays were not repeated
 for this tooling-only cleanup because every native source/header/project hash
 is unchanged. Exact-revision CI closure evidence belongs on #440.
 
-Evidence: `build\transient-cleanup\before.json`, `verification.json`,
+Evidence: `build\evidence\misc\transient-cleanup\before.json`, `verification.json`,
 `removed-baseline-entries.json`, `copy-1.log`, `copy-2.log` and the project/test
 logs in the same directory. Retired scripts and snapshots remain in Git history.
 
@@ -1904,7 +1995,7 @@ logs in the same directory. Retired scripts and snapshots remain in Git history.
   extraction; old AppData state and its obsolete asset backups are gone.
   Explicit-state and self-check probes created no AppData. A native run using
   the moved assets and a nonexistent disc path reached 1,500 ticks and produced
-  its requested frame (`build\portability-smoke\frame_1500.bmp`). This verifies
+  its requested frame (`build\evidence\portability-migration\portability-smoke\frame_1500.bmp`). This verifies
   startup/loading, not combat or all gameplay.
 - Development state: `8cd4a839a`, 208 Player tests and CI passed. 8,829 Player
   files moved to `build\player` and 3,631 archive files to

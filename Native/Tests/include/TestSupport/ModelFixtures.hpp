@@ -26,6 +26,7 @@
 #include "Content/SeqFile.hpp"
 #include "Content/ShpFile.hpp"
 #include "Content/ShpModelFiles.hpp"
+#include "Extract/ActionCategoryConversion.hpp"
 #include "Extract/ConverterBatch.hpp"
 #include "Extract/EsqConversion.hpp"
 #include "Extract/EtmConversion.hpp"
@@ -217,6 +218,8 @@ class ModelRoot {
   [[nodiscard]] ModelReports Convert() const {
     static_cast<void>(Required(Extract::ConvertDiscImages(root_, false)));
     static_cast<void>(Required(Extract::ConvertDiscTables(root_, false)));
+    static_cast<void>(
+        Required(Extract::ConvertDiscActionCategories(root_, false)));
     auto characters = Required(Extract::ConvertDiscModels(root_, false));
     auto weapons = Required(Extract::ConvertDiscWeapons(root_, false));
     auto sets = Required(Extract::ConvertDiscAnimationSets(root_, false));
@@ -280,7 +283,7 @@ LoadModel(const std::filesystem::path& root,
     ModelLoader load, std::span<const std::uint8_t> event_lengths = {}) {
   Content::DataStore::ScopedOverride restore;
   const auto opened =
-      Content::DataStore::Open(models.parent_path().parent_path());
+      Content::DataStore::OpenShared(models.parent_path().parent_path());
   INFO(ErrorOf(opened));
   REQUIRE(opened.has_value());
   const Content::DataStore* store = Content::DataStore::Get();

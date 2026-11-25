@@ -69,6 +69,7 @@
 #include "State/ScriptFlagsLive.hpp"
 #include "State/StateFlags.hpp"
 #include "State/Timers.hpp"
+#include "TestSupport/BattleCatalogRoot.hpp"
 #include "Title/NewGame.hpp"
 
 using VS::Core::Math::kQ12Unit;
@@ -127,6 +128,9 @@ struct ContentFixture {
       : minimum_room_bytes(minimum_bytes) {
     BuildRoom();
     BuildIndex();
+    VS::test_support::PublishBattleCatalogs(
+        root, VS::test_support::DefaultStatusCatalog(),
+        VS::test_support::OriginalActionCategories());
     REQUIRE(Content::DataStore::Open(root).has_value());
   }
 

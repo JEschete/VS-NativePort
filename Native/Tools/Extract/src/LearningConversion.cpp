@@ -251,13 +251,10 @@ std::expected<TableConversionReport, std::string> ConvertDiscLearning(
                   std::string(Content::kAbilityLearningPath),
                   std::string(kArtSchema), std::string(kAbilitySchema),
                   std::string(kLearningImportPath)};
-  const auto owned =
-      CheckAuthoringOwnership(start->previous, root, output, force);
-  if (!owned) return std::unexpected(owned.error());
-  batch.outputs.push_back(output);
-  auto published = PublishBatch(root, start->previous, batch, [&] {
-    return WriteLearning(root, *imported, output.source_sha256, !force);
-  });
+  auto published =
+      PublishAuthoredBatch(start->previous, root, batch, output, force, [&] {
+        return WriteLearning(root, *imported, output.source_sha256, !force);
+      });
   if (!published) return std::unexpected(published.error());
   return TableConversionReport{.converted = 1, .removed = *published};
 }

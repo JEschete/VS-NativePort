@@ -15,6 +15,7 @@
 #include "Battle/Damage.hpp"
 #include "Battle/Hit.hpp"
 #include "Content/ModuleData.hpp"
+#include "TestSupport/StatusRoot.hpp"
 
 namespace {
 namespace battle = VS::Battle;
@@ -315,6 +316,7 @@ TEST_CASE("Lifecycle callback mutations are visible to later bits and add pass",
 TEST_CASE(
     "Live action result module binding preserves HP wrap and unused fields",
     "[actor-vitals][action-result-commit][F00522][live]") {
+  VS::test_support::StatusRoot status_catalog;
   const auto symbols = VS::Content::ModuleSymbols();
   const auto apply = reinterpret_cast<void (*)(VS::Battle::HitResult*)>(
       VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",

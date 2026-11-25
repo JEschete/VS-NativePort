@@ -143,6 +143,7 @@
     <ClCompile Include="src\Battle\ActionCameraSelectionLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Battle\ActionCategoryCatalogLive.cpp" />
     <ClCompile Include="src\Battle\ActionCosts.cpp" />
     <ClCompile Include="src\Battle\ActionCostsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -1829,6 +1830,7 @@
     <ClInclude Include="include\Battle\ActionAnimationsLive.hpp" />
     <ClInclude Include="include\Battle\ActionCameraSelection.hpp" />
     <ClInclude Include="include\Battle\ActionCameraSelectionLive.hpp" />
+    <ClInclude Include="include\Battle\ActionCategoryCatalogLive.hpp" />
     <ClInclude Include="include\Battle\ActionCosts.hpp" />
     <ClInclude Include="include\Battle\ActionCostsLive.hpp" />
     <ClInclude Include="include\Battle\ActionEffectDispatch.hpp" />

@@ -10,6 +10,7 @@
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/Action.hpp"
 #include "Battle/ActionCameraSelection.hpp"
+#include "Battle/ActionCategoryCatalogLive.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionPresentationLive.hpp"
 #include "Battle/ActionTable.hpp"
@@ -172,8 +173,7 @@ class LiveSelectionWorld final : public ActionSelectionWorld {
   std::optional<bool> NeedsTargeting(std::uint16_t action) override {
     Require(action < std::size(VS::Battle::actionDefinitions));
     const auto category = VS::Battle::actionDefinitions[action].category;
-    return static_cast<std::uint8_t>(
-               VS::Battle::categoryNeedsTargetSelection[category]) != 0;
+    return RequireLiveActionCategory(category).needs_target_selection;
   }
   void InitializeTargeting(std::uint16_t action) override {
     LiveInitializeActionTargeting(action);

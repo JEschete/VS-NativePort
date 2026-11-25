@@ -29,6 +29,7 @@
 #include "Render/Render.hpp"
 #include "Render/Text/CompactFont.hpp"
 #include "Render/UiPrimitives.hpp"
+#include "TestSupport/ActionCategoryRoot.hpp"
 
 using VS::Core::Gte::MATRIX;
 using VS::Core::Gte::SetGeomOffset;
@@ -525,6 +526,7 @@ TEST_CASE("Spell elevation clipping handles stepped terrain across camera yaw",
 
 namespace {
 struct AreaActionFixture {
+  VS::test_support::ActionCategoryRoot categories;
   ActionState storage{};
   ActionState* saved = VS::Battle::actionState;
 
