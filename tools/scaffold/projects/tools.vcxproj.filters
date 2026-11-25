@@ -945,6 +945,9 @@
     <None Include="..\..\lint\baseline.json">
       <Filter>tools\lint</Filter>
     </None>
+    <None Include="..\..\lint\doc_budget.py">
+      <Filter>tools\lint</Filter>
+    </None>
     <None Include="..\..\lint\jscpd_files.js">
       <Filter>tools\lint</Filter>
     </None>
@@ -958,6 +961,9 @@
       <Filter>tools\lint</Filter>
     </None>
     <None Include="..\..\lint\quality.py">
+      <Filter>tools\lint</Filter>
+    </None>
+    <None Include="..\..\lint\test_doc_budget.py">
       <Filter>tools\lint</Filter>
     </None>
     <None Include="..\..\lint\test_quality.py">

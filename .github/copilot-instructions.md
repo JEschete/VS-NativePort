@@ -3,9 +3,10 @@
 ## Project Guidelines
 - Never attribute changes to the assistant in commits. Do not add assistant authorship, co-author trailers, signatures, or AI attribution to commit messages or metadata.
 - When about to work on a new feature, do web research to understand how it should work and review any related existing code or documentation.
-- Do not treat a verified checkpoints as stopping points; always continue to validate subsequent changes and ensure overall consistencyun until the work is fully integrated and verified across all affected systems.
+- Do not treat a verified checkpoint as a stopping point; continue to validate subsequent changes and ensure overall consistency until the work is fully integrated and verified across all affected systems.
+
 ## Architecture and Sources of Truth
-- Follow owner decisions and implementation packages in [NATIVE_SOURCE_PORT_PLAN.md](../Docs/NATIVE_SOURCE_PORT_PLAN.md); use [HANDOFF.md](../Docs/HANDOFF.md) for recent evidence and remaining limits. Historical results are not fresh verification of the current worktree.
+- Follow owner decisions and implementation packages in [NATIVE_SOURCE_PORT_PLAN.md](../Docs/NATIVE_SOURCE_PORT_PLAN.md); use [HANDOFF.md](../Docs/HANDOFF.md) for the current state and open limits. Historical results are not fresh verification of the current worktree.
 - Keep the references under `resources\` read-only; the decomp to read is the upstream submodule `resources\rood-reverse`. The pinned copy `resources\rood-reverseWin` is retired and was removed in `6b20016f0`; do not restore it or cite it as a current path. Native implementations belong in the existing systems; do not include or link reference code from `resources\`.
 - Keep function/data/type status in the existing [ledgers](../Docs/ledgers/). Track behavior verification, C++ promotion and compatibility retirement separately; compiling or renaming a file does not establish all three.
 - Treat existing hardware-shaped compatibility bridges as tracked migration debt. Follow the plan's typed native APIs and EC retirement gates rather than extending those bridges as the destination.
@@ -17,11 +18,16 @@
 - Use GitHub CLI directly for authorized issue, comment and other GitHub updates that would otherwise open MCP approval forms. Never expose tokens or store credentials in the repository.
 - Close an issue only after its acceptance criteria have been verified. Include the fixing commit and concrete tests or replay evidence; a successful exit or a passing baseline alone is not proof of gameplay completion.
 - Inspect failed GitHub Actions quality checks on pushed commits when starting or resuming work and after any authorized push. Track and repair failures instead of refreshing the baseline to hide them. Keep CI issues open until the pushed fixing revision has a confirmed successful run.
-- The owner authorizes periodic, scoped commits and pushes throughout all authorized work in this repository, not only work listed in tracker #4 or defects discovered under it. Do not ask again for routine commit/push permission within that authorized work. Use the owner's configured identity with no additional attribution. Preserve unrelated edits; do not force-push or rewrite history without separate authorization.
-- Owner workflow decision (2026-11-23): work directly on `main`, with normal scoped commits and pushes; pull requests are not required. Fetch and fast-forward before starting new work. Preserve unrelated edits and never force-push or rewrite history without separate authorization.
-- For each issue, implement and verify the acceptance criteria, commit and push the scoped fix, confirm the relevant exact-revision CI checks, post the fixing commit and concrete evidence, then close the completed issue. Continue to the next ordered issue; log new defects before fixing them. Stop only for a genuine blocker or an owner pause, recording the evidence and next observation needed.
-- Commit and push at each coherent, verified milestone, with scoped commits per issue rather than accumulating many unrelated fixes into one checkpoint. During long investigations, periodically commit and push validated portions with explicit remaining limits; an unresolved issue or a long-running test does not justify withholding already verified work for hours.
-- At each checkpoint, reconcile issue status: open newly warranted issues with evidence before fixing them, update ongoing investigations, and close resolved issues promptly after their acceptance and exact-revision CI gates pass. Do not keep opening issues while deferring commits, pushes and eligible closures until the owner asks to stop. A partial checkpoint is not issue completion and must not weaken acceptance criteria.
+- Commits and pushes (owner decision, 2026-11-23): work directly on `main` with scoped commits and pushes, without pull requests, throughout all authorized work; do not ask again for routine permission. Use the owner's configured identity with no additional attribution. Fetch and fast-forward before starting new work, preserve unrelated edits, and never force-push or rewrite history without separate authorization.
+- For each issue, implement and verify the acceptance criteria, commit and push the scoped fix, confirm the exact-revision CI, post the fixing commit and concrete evidence on the issue, then close it and continue to the next ordered issue. Stop only for a genuine blocker or an owner pause, recording the evidence and next observation needed.
+- Commit and push at each coherent, verified milestone, scoped per issue. During long investigations, publish validated portions with explicit remaining limits rather than withholding verified work for hours. At each checkpoint, open newly warranted issues with evidence, update ongoing investigations and close resolved issues once their acceptance and CI gates pass; do not defer commits, pushes and eligible closures until the owner asks to stop. A partial checkpoint is not issue completion and must not weaken acceptance criteria.
+
+## Documentation
+- The plan and the asset pipeline are an index with a section map plus topic files (`Docs\plan\`, `Docs\pipeline\`). Open only the topic file you need; section numbers such as plan §15 or ASSET_PIPELINE §4.7 stay the same across files.
+- Post evidence once, on the issue: commits, CI runs, commands, test counts, captures and evidence paths. Do not copy it into documents.
+- Replace [HANDOFF.md](../Docs/HANDOFF.md), never append to it: current revision, work in progress, next step and open limits, linking to the issue evidence.
+- Edit the plan, the pipeline and ledger prose only when a contract, decision or status changes; state status in a sentence with its issue link, and delete text the change makes obsolete instead of adding a correction beside it.
+- `python tools\lint\doc_budget.py --check` (run in CI) limits every Markdown file: 12 KB for the handoff, 20 KB by default, recorded ceilings for older files. Split by topic or remove history instead of raising a budget.
 
 ## Working Loop and Productivity
 - Start from the current worktree, ordered issue, affected handoff/plan sections and ledger IDs. Preserve unrelated edits. Define a bounded behavior change and measurable acceptance criteria before implementation.
@@ -29,7 +35,7 @@
 - When Serena is configured, prefer symbol outlines, bodies and references over repeated whole-file reads. Verify the C/C++ index covers the affected translation units; missing results from an incomplete or stale index are not proof of no callers.
 - When Beads is configured, use `bd prime` and linked issue history to recover context, then explicitly claim work consistent with #4's priorities. Keep Beads for dependencies, discoveries, attempts and handoffs, not duplicate per-function status or a replacement priority tracker.
 - Discover available tools before relying on them. Proposed harness operations in the owner's local notes (`C:\Tools\Decomp Process.md`, not in the repository) are not implemented commands. Do not initialize tools, rewrite agent guidance or configure outbound sync as an incidental step.
-- If repeated attempts produce no new evidence, record the failed approaches, blocker and next observation needed. Preserve a concise handoff instead of repeating the same investigation or weakening the acceptance criteria.
+- If repeated attempts produce no new evidence, record the failed approaches, blocker and next observation needed on the issue instead of repeating the same investigation or weakening the acceptance criteria.
 
 ## Change Throughput
 The step-by-step checklist is [WORK_PROCEDURES.md](WORK_PROCEDURES.md).
@@ -41,7 +47,7 @@ The step-by-step checklist is [WORK_PROCEDURES.md](WORK_PROCEDURES.md).
 - Use existing build, Catch2 test selections and [quality checks](../Docs/QUALITY.md). Run the smallest checks that cover the change; expand for shared interfaces, state or lifecycle. Do not weaken tests, expected outputs or quality baselines to make an unexplained failure pass.
 - For generator changes, check output correctness, ownership preservation and stability on a second generation run. Do not regenerate over conflicting local edits.
 - Verify the reported behavior, not a proxy: exercise actual controller actions for interactive combat; do not edit HP, bypass event flags or force completion to claim a gameplay fix. Align scene/event state for reference comparisons, not just timestamps.
-- Record exact commands/selections, configuration, source revision and dirty state, outcomes, local evidence paths and remaining limits. Update relevant ledgers/issues only for what was demonstrated. Keep disc-derived data, captures, memory dumps and BIOS files out of commits and issue attachments.
+- Record exact commands/selections, configuration, source revision and dirty state, outcomes, local evidence paths and remaining limits in the issue comment. Update ledgers only for what was demonstrated. Keep disc-derived data, captures, memory dumps and BIOS files out of commits and issue attachments.
 
 ## Local environment (development machine)
 - **Platform:** Windows x64 with native Windows tools and PowerShell. Do not add Linux-only tools or workflows requiring WSL/Unix shells; verify Windows compatibility before introducing optional tooling.
@@ -53,11 +59,6 @@ The step-by-step checklist is [WORK_PROCEDURES.md](WORK_PROCEDURES.md).
 - **Reference captures:** `tools\test\duckstation_capture.ps1 -SkipIntro -Keys '40:Down,42:X' -Seconds 45,50 -Out build\ds_x` (keys briefly take focus; Z = Cross, X = Circle, Return = Start).
 - **Native test runs:** `tools\test\run_native.ps1 -NoCopy -SkipIntro -Frames 1800 -At '1500' -Press '1200:Down,1300:Circle'`. Ticks are 1/60 s. **Skip the intro movie by pressing Start (`-SkipIntro` = `--press 1000:Start`)**: the title menu is then up by tick ~1100 instead of ~3300. Crash stacks are in `build\Debug\vs-native.log`.
 - **Menu testing:** use the original prologue skip: Start during the opening, then Start again at the A. J. Durai quote. Verified replay inputs are `--press 1000:Start,1300:Circle,3000:Start,4000:Start,7000:Triangle`: MAP009 loads at tick 4058 and MAINMENU.PRG at 7005. Avoid repeated Circle presses, which can toggle the battle sphere. Use the full prologue for combat troubleshooting and implementation; skipping it is not combat verification.
-
-## Combat Testing Tooling
-- Create a live, interactive combat sandbox where the user can control the character, fight selectable enemies or multiple enemies, and use items, spells, and abilities through the production gameplay code. Automated/headless pass-fail tests are not the primary requested experience.
-- Persist extensive logs to files in the Combat Lab, not only display them in a console or debugger. 
-- Ensure Combat Lab menus remain clearly readable; the current game-asset font rendering produces illegible solid glyphs and is not acceptable.
 
 ## Code Translation Guidelines
 - When translating assembly into native implementations, add provenance comments identifying the original decomp symbol and source/assembly location so future upstream decomp progress can be cross-referenced. Use meaningful semantic names and preserve traceability. Cite as `// decomp: [OVERLAY ]NAME (src/PATH:LINE[; was OLD])`, where LINE is NAME's definition in `resources\rood-reverse`; `python tools\ledger\provenance.py --check` enforces it and `Docs\ledgers\PROVENANCE_UNRESOLVED.csv` lists the citations that cannot resolve (see [QUALITY.md](../Docs/QUALITY.md)).

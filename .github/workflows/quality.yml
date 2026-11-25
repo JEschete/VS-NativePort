@@ -76,6 +76,10 @@ jobs:
         run: python tools\test\regression.py static
       - name: Check decomp provenance citations
         run: python tools\ledger\provenance.py --check
+      - name: Verify document budget controls
+        run: python -m unittest discover -s tools\lint -p test_doc_budget.py -v
+      - name: Check document size budgets
+        run: python tools\lint\doc_budget.py --check
 
   source:
     name: Source quality

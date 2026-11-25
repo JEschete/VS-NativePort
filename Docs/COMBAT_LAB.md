@@ -8,6 +8,13 @@ sessions. Removing the host project (`Native/Tools/CombatLab`) does not remove a
 The Lab is part of [#16](https://github.com/JEschete/VS-NativePort/issues/16). It is not completion of that issue, M8
 or the ordered gameplay work in [#4](https://github.com/JEschete/VS-NativePort/issues/4).
 
+## Requirements (owner)
+
+- A live, interactive sandbox: the user controls the character, fights one or several selectable enemies and uses
+  items, spells and abilities through the production gameplay code. Automated pass/fail runs are secondary.
+- Extensive logs persist to files, not only to a console or debugger.
+- Menus stay clearly readable; game-font rendering that draws illegible solid glyphs is not acceptable.
+
 ## History
 
 The per-issue checkpoint, repair and acceptance records that used to be in this file are preserved in the last full

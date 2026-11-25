@@ -24,7 +24,8 @@ any, is in [HANDOFF.md](../Docs/HANDOFF.md).
 
 ## Session start
 
-1. Read [HANDOFF.md](../Docs/HANDOFF.md) and the next open item in tracker #4.
+1. Read [HANDOFF.md](../Docs/HANDOFF.md) and the next open item in tracker #4. For the plan and the asset pipeline,
+   read the index's section map and open only the topic files the work touches.
 2. Check CI on the last pushed commit: `gh run list --repo JEschete/VS-NativePort --limit 4`. Track and repair a
    failure instead of refreshing a baseline to hide it.
 3. Check `git status`, then fetch and fast-forward `main` without disturbing unrelated edits. Finish or commit
@@ -88,13 +89,18 @@ history. Verify each change with the smallest builds, Catch2 tags, replays and q
   demonstrated.
 - Commit only the change's files. Write the message to a UTF-8 file without BOM and use `git commit -F <file>`;
   no attribution. Push `main`, then `gh run watch <id> --exit-status`.
-- After CI passes, post a concise issue checkpoint with the commit, CI run and evidence location. Close the issue
-  when all its acceptance criteria are verified. Then continue the next ordered item.
-- Update [HANDOFF.md](../Docs/HANDOFF.md) at a package boundary, an owner pause or a genuine blocker. Include the exact
-  current revision, next action and any unresolved limits.
+- After CI passes, post a concise issue checkpoint with the commit, CI run, commands, results and evidence location.
+  This is the only place evidence is written. Close the issue when all its acceptance criteria are verified. Then
+  continue the next ordered item.
+- Update [HANDOFF.md](../Docs/HANDOFF.md) at a package boundary, an owner pause or a genuine blocker by **replacing** it:
+  the exact current revision, the work in progress, the next action and unresolved limits, linking to the issue
+  checkpoint instead of copying it.
+- Change the plan, the asset pipeline and ledger prose only when a contract, decision or status changes. Do not add
+  test counts, commits, CI runs or session narratives to them. When documents change, run
+  `python tools\lint\doc_budget.py --check`; split by topic or remove history rather than raising a budget.
 - Retain referenced verification evidence; clean only disposable scratch intermediates.
 
 ## Stopping
 
 When the owner asks to stop: finish or shelve the step in progress, commit and push any verified work with its limits
-stated, update [HANDOFF.md](../Docs/HANDOFF.md) with the exact state and the next step, and report the status.
+stated, replace [HANDOFF.md](../Docs/HANDOFF.md) with the exact state and the next step, and report the status.
