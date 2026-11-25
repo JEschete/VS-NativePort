@@ -23,7 +23,7 @@ constexpr std::size_t kRecords = 150, kLiveRecords = 78, kStride = 44;
 constexpr std::size_t kDescriptions = kRecords * kStride;
 constexpr std::size_t kName = 16, kNameBytes = 28;
 constexpr std::size_t kTableBytes = kRecords * 2;
-constexpr unsigned kByteBits = 8, kHexRadix = 16, kDecimalRadix = 10;
+constexpr unsigned kByteBits = 8;
 constexpr std::size_t kModelOffset = 0, kClassOffset = 2;
 constexpr std::size_t kFirstSubtypeOffset = 4, kSubtypeCountOffset = 6;
 constexpr int kPreviewTableEntries = 256;
@@ -33,32 +33,11 @@ int Word(std::span<const std::byte> bytes, std::size_t at) {
       std::to_integer<unsigned>(bytes[at]) |
       (std::to_integer<unsigned>(bytes[at + 1]) << kByteBits)));
 }
-std::string Hex(std::span<const std::byte> bytes) {
-  std::string result;
-  for (const auto value : bytes) {
-    result += std::format("{:02x}", std::to_integer<unsigned>(value));
-  }
-  return result;
-}
+using source_bytes::Hex;
 std::expected<std::vector<std::byte>, std::string> Unhex(std::string_view hex) {
-  std::vector<std::byte> bytes;
-  if (hex.size() % 2 != 0) {
-    return std::unexpected("bestiary: odd provenance hex");
-  }
-  const auto digit = [](char c) {
-    return c >= '0' && c <= '9'   ? c - '0'
-           : c >= 'a' && c <= 'f' ? c - 'a' + static_cast<int>(kDecimalRadix)
-                                  : -1;
-  };
-  for (std::size_t i = 0; i < hex.size(); i += 2) {
-    const int hi = digit(hex[i]), lo = digit(hex[i + 1]);
-    if (hi < 0 || lo < 0) {
-      return std::unexpected("bestiary: bad provenance hex");
-    }
-    bytes.push_back(
-        static_cast<std::byte>(hi * static_cast<int>(kHexRadix) + lo));
-  }
-  return bytes;
+  auto bytes = source_bytes::Unhex(hex);
+  if (!bytes) return std::unexpected("bestiary: bad provenance hex");
+  return std::move(*bytes);
 }
 std::expected<std::string, std::string> Name(std::string markup) {
   // F02820 deliberately skips this exact two-byte list indentation.

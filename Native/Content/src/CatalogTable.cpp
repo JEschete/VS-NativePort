@@ -119,6 +119,8 @@ std::string_view TypeName(ColumnType type) {
       return "enum";
     case ColumnType::kFlags:
       return "flags";
+    case ColumnType::kText:
+      return "text";
   }
   return "integer";
 }
@@ -241,6 +243,17 @@ std::expected<std::int64_t, std::string> ReadCell(const ColumnSpec& column,
         CellError(file, line, column.name,
                   std::format("'{}' is not {} bytes as lowercase hexadecimal",
                               cell, column.maximum)));
+  }
+  if (column.type == ColumnType::kText) {
+    if (cell.empty() || std::ranges::any_of(cell, [](char value) {
+          const auto byte = static_cast<unsigned char>(value);
+          return byte < 0x20 || byte == 0x7f;
+        })) {
+      return std::unexpected(
+          CellError(file, line, column.name,
+                    "text must be non-empty and free of control characters"));
+    }
+    return 0;
   }
   if (column.type != ColumnType::kInteger && column.type != ColumnType::kEnum) {
     if (IsContentId(cell)) return 0;

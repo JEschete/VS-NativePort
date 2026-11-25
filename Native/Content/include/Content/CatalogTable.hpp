@@ -28,6 +28,7 @@ enum class ColumnType : std::uint8_t {
   kBytes,      // `maximum` bytes as lowercase hexadecimal, two digits each
   kEnum,       // a named value; numeric aliases are accepted for legacy imports
   kFlags,      // named set members separated by '|'; "none" is the empty set
+  kText,       // non-empty readable text without control characters
 };
 
 struct EnumValue {

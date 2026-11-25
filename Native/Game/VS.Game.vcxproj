@@ -454,6 +454,7 @@
     <ClCompile Include="src\Battle\TextBoxes.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Boot\CatalogBackedGlobals.cpp" />
     <ClCompile Include="src\Boot\Encounter.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>

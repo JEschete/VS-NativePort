@@ -15,6 +15,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\ActionCatalog.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ActionCategoryCatalog.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -183,6 +186,9 @@
     <ClCompile Include="src\ZudFile.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClInclude Include="include\Content\ActionCatalog.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
     <ClInclude Include="include\Content\ActionCategoryCatalog.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>

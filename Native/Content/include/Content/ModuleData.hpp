@@ -12,6 +12,8 @@
 // from the user's disc at start-up.
 
 namespace VS::Content {
+class DataStore;
+
 struct ModuleDataEntry {
   const char* module;  // disc path of the module file (e.g. "TITLE/TITLE.PRG")
   unsigned offset;     // byte offset in that file
@@ -55,6 +57,9 @@ extern const unsigned kModulePointerCount;
 [[nodiscard]] inline std::span<const ModuleDataEntry> ModuleDataEntries() {
   return {kModuleData, kModuleDataCount};
 }
+// Fills the globals whose data a published catalog owns instead of a module
+// image (the game defines it). Returns how many could not be filled (logged).
+int LoadCatalogBackedGlobals(const DataStore& store);
 [[nodiscard]] inline std::span<const ModuleSymbol> ModuleSymbols() {
   return {kModuleSymbols, kModuleSymbolCount};
 }

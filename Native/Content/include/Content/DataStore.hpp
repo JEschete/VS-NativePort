@@ -10,6 +10,7 @@
 #include <string_view>
 #include <vector>
 
+#include "Content/ActionCatalog.hpp"
 #include "Content/ActionCategoryCatalog.hpp"
 #include "Content/AssetCatalog.hpp"
 #include "Content/AssetHandle.hpp"
@@ -141,6 +142,9 @@ class DataStore {
   [[nodiscard]] const ActionCategoryCatalog* ActionCategories() const {
     return m_action_categories_ ? &*m_action_categories_ : nullptr;
   }
+  [[nodiscard]] const ActionCatalog* Actions() const {
+    return m_actions_ ? &*m_actions_ : nullptr;
+  }
   [[nodiscard]] const NativeTextAssets* SaveText() const {
     return m_save_text_ ? &*m_save_text_ : nullptr;
   }
@@ -163,6 +167,7 @@ class DataStore {
   std::optional<LearningCatalog> m_learning_;
   std::optional<StatusCatalog> m_status_;
   std::optional<ActionCategoryCatalog> m_action_categories_;
+  std::optional<ActionCatalog> m_actions_;
   std::optional<NativeTextAssets> m_save_text_;
   std::optional<CatalogDatabase> m_catalog_tables_;
 };

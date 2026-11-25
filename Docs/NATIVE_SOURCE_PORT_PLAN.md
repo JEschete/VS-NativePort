@@ -1541,6 +1541,7 @@ production behavior and retirement remain separate claims.
 | EC-04-T-ESQ | `LoadConvertedAnimationSet` calls `EncodeEsqFile`; set selection still feeds the original-layout loader. | #206, #55, #48 | Typed shared animation sets and explicit skeleton/selector bindings, with owned playback state. |
 | EC-04-T-ETM | `LoadConvertedActorTexture` calls `EtmSheetOfImages` / `EncodeEtmFile` before actor texture loading. | #207, #55, #48 | Native texture-region/frame/palette definitions and instance bindings. PNG pixels are not repacked into ETM for playback. |
 | EC-04-T-SYD | Not a whole SYD-file rebuild: `BuildRecipeBook` calls `DenseWorkshopTables` and retains byte-valued results/material matrices and legacy-indexed equipment records. SQLite compilation does not retire this layout bridge. | #499, #58 | Semantic-ID recipe rules/lookups and item definitions/instances. Results are not limited to byte IDs; directed behavior remains exact without the SYD matrix layout. |
+| EC-04-T-ACTION | `Battle::BuildActionTable` (called by `LoadCatalogBackedGlobals` from `LoadModuleData`) rebuilds the 256 fifty-two-byte `ActionDefinition` bitfield records that about 110 references in 62 files still read; names, ids and categories stay within the original field widths. | #499, #58 | Battle code reads `Content::ActionRule` directly: named kinds, categories by identity, hits as rules, no 256-entry or four-bit-category limit. Mediator and top-level effect ids become named effect definitions. |
 
 G01905 material-table checkpoint (#499, 2026-11-24): its raw module-data storage
 and module-address mapping are removed. The workshop reads `MaterialCatalog`
@@ -1564,6 +1565,16 @@ without leaving its kill-counted mark or wrapping. #183 timing banking and its
 explicit saturation remain unchanged. Existing action/category adapters,
 mutable progress/saves and general action/text/item definitions remain
 #499/#58 scope. ASSET_PIPELINE §4.4 and HANDOFF record the bounded evidence.
+
+G01904 action checkpoint (#499, 2026-11-24): the 256 action records are
+authored as a named `Content::ActionCatalog` (plain-text name, kind, category
+identity, behavior flags, and one row per hit) from the layered SQLite store. The
+module-data entry for the raw table is gone; `LoadCatalogBackedGlobals` fills
+the working `Battle::actionDefinitions` array through `BuildActionTable`, which
+is the EC-04-T-ACTION bridge above, so this does not retire G01904's readers,
+the byte-width limits they impose or #58. Reserved bits and name tails survive
+only in the offline importer. Hit effect mediators and the action's own effect
+id are still unnamed. See ASSET_PIPELINE §4.7 and HANDOFF.
 
 For every row, retirement requires:
 1. Trace and migrate producers, consumers, callbacks, persistence and cleanup to

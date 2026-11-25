@@ -94,6 +94,7 @@ PROJECTS = [
                 r"Tools\Extract\src\LearningConversion.cpp",
                 r"Tools\Extract\src\StatusConversion.cpp",
                 r"Tools\Extract\src\ActionCategoryConversion.cpp",
+                r"Tools\Extract\src\ActionConversion.cpp",
                 r"Tools\Extract\src\SaveTextConversion.cpp",
                 r"Tools\Extract\src\TextContribution.cpp",
                 r"Tools\Extract\src\BestiaryConversion.cpp",

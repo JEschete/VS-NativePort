@@ -52,6 +52,7 @@
     <ClCompile Include="src\ActionAnimationsTests.cpp" />
     <ClCompile Include="src\ActionCameraSelectionLiveTests.cpp" />
     <ClCompile Include="src\ActionCameraSelectionTests.cpp" />
+    <ClCompile Include="src\ActionCatalogTests.cpp" />
     <ClCompile Include="src\ActionCategoryCatalogTests.cpp" />
     <ClCompile Include="src\ActionCostsTests.cpp" />
     <ClCompile Include="src\ActionEffectCallbacksTests.cpp" />
@@ -520,6 +521,7 @@
     <ClCompile Include="..\Tools\Extract\src\LearningConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\StatusConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\ActionCategoryConversion.cpp" />
+    <ClCompile Include="..\Tools\Extract\src\ActionConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\SaveTextConversion.cpp" />
     <ClCompile Include="..\Tools\Extract\src\TextContribution.cpp" />
     <ClCompile Include="..\Tools\Extract\src\BestiaryConversion.cpp" />
@@ -592,9 +594,11 @@
     <ClInclude Include="include\TestSupport\ActionCameraSelectionFixture.hpp" />
     <ClInclude Include="include\TestSupport\ActionCategoryRoot.hpp" />
     <ClInclude Include="include\TestSupport\ActionPresentationFixture.hpp" />
+    <ClInclude Include="include\TestSupport\ActionRoot.hpp" />
     <ClInclude Include="include\TestSupport\ActionSequenceFixture.hpp" />
     <ClInclude Include="include\TestSupport\ActorRecordTableScope.hpp" />
     <ClInclude Include="include\TestSupport\AudioConversionFixture.hpp" />
+    <ClInclude Include="include\TestSupport\BattleCatalogRoot.hpp" />
     <ClInclude Include="include\TestSupport\ChannelWarnings.hpp" />
     <ClInclude Include="include\TestSupport\EffectProgramScope.hpp" />
     <ClInclude Include="include\TestSupport\EndingDisplayRecorder.hpp" />

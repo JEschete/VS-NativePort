@@ -128,6 +128,8 @@ constexpr std::array kConvertedTypes{
     ConvertedType{kStatusSource, "", kStatusConverter.name, kRawForm, true},
     ConvertedType{kActionCategorySource, "", kActionCategoryConverter.name,
                   kRawForm, true},
+    ConvertedType{kActionSource, "", kActionCatalogConverter.name, kRawForm,
+                  true},
     ConvertedType{kBestiarySource, "", kBestiaryConverter, kRawForm, true},
     ConvertedType{"", ".SHP", "shp-gltf", kRawForm},
     ConvertedType{"", ".SEQ", "seq-gltf", kRawForm},
@@ -155,6 +157,9 @@ std::string_view RerunFor(std::string_view converter) {
   }
   if (converter == kActionCategoryConverter.name) {
     return " (run VS.Extract action-categories <dir>)";
+  }
+  if (converter == kActionCatalogConverter.name) {
+    return " (run VS.Extract actions <dir>)";
   }
   return converter == kMaterialConverterName ? " (run VS.Extract tables <dir>)"
                                              : kRerun;
@@ -354,6 +359,7 @@ struct CatalogRecords {
   std::optional<LearningCatalog> learning;
   std::optional<StatusCatalog> status;
   std::optional<ActionCategoryCatalog> action_categories;
+  std::optional<ActionCatalog> actions;
 };
 
 struct LoadedCatalogs {
@@ -369,10 +375,11 @@ struct CatalogFamilies {
   bool learning = false;
   bool status = false;
   bool action_categories = false;
+  bool actions = false;
 
   [[nodiscard]] bool Any() const {
     return recipes || materials || bestiary || learning || status ||
-           action_categories;
+           action_categories || actions;
   }
 };
 
@@ -383,6 +390,11 @@ std::expected<CatalogRecords, std::string> ReadCatalogRecords(
     auto loaded = LoadActionCategoryCatalog(database);
     if (!loaded) return std::unexpected(loaded.error());
     records.action_categories = std::move(*loaded);
+  }
+  if (families.actions) {
+    auto loaded = LoadActionCatalog(database);
+    if (!loaded) return std::unexpected(loaded.error());
+    records.actions = std::move(*loaded);
   }
   if (families.status) {
     auto loaded = LoadStatusCatalog(database);
@@ -459,6 +471,11 @@ std::expected<CatalogFamilies, std::string> ReadCatalogFamilies(
               kActionCategoryOutputId, kActionCategorySource,
               "invalid action category conversion registration"},
           &families.action_categories},
+      std::pair{CatalogRegistration{kActionCatalogConverter.name,
+                                    kActionCatalogConverter.version,
+                                    kActionOutputId, kActionSource,
+                                    "invalid action conversion registration"},
+                &families.actions},
       std::pair{
           CatalogRegistration{kStatusConverter.name, kStatusConverter.version,
                               kStatusOutputId, kStatusSource,
@@ -490,6 +507,11 @@ std::expected<CatalogFamilies, std::string> ReadCatalogFamilies(
     }
     families.recipes |= output.converter == kSydRecipeConverterName;
   }
+  if (families.actions && !families.action_categories) {
+    return std::unexpected(
+        "the action catalog names action categories, but none are published "
+        "(run VS.Extract action-categories <dir>)");
+  }
   return families;
 }
 
@@ -511,6 +533,7 @@ std::expected<std::optional<LoadedCatalogs>, std::string> LoadListedCatalogs(
   if (families.action_categories) {
     AppendSources(sources, ActionCategoryCatalogSources());
   }
+  if (families.actions) AppendSources(sources, ActionCatalogSources());
   auto database = CatalogDatabase::Load(root, sources);
   if (!database) {
     return std::unexpected(
@@ -627,6 +650,7 @@ std::expected<void, std::string> DataStore::Open(const fs::path& root) {
     store->m_status_ = std::move((**tables).records.status);
     store->m_action_categories_ =
         std::move((**tables).records.action_categories);
+    store->m_actions_ = std::move((**tables).records.actions);
     store->m_catalog_tables_ = std::move((**tables).database);
   }
   // catalogs\ also holds the tier-1 tables (catalogs\menu\); either asset

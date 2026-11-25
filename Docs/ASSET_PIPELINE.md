@@ -565,11 +565,58 @@ catalog through `RequireLiveActionCategory`. A missing catalog logs and aborts
 like the status catalog; it never yields an all-zero rule. The module data
 globals G00019..G00023 and their address bindings are removed.
 
-Actions still reference a category by its compatibility index, and the retained
-action definition keeps a four-bit category field, so at most sixteen
-categories exist. AI category sets, action preview lists and the damage
-distribution policy remain keyed by category number in code. The action catalog
-that names the category by identity is a later #499 slice.
+Actions name their category by identity in the action catalog (section 4.7).
+The retained action definition array keeps a four-bit category field, so at
+most sixteen categories exist. AI category sets, action preview lists and the
+damage distribution policy remain keyed by category number in code.
+
+### 4.7 Native actions (#499)
+
+`VS.Extract actions <datadir>` (also `tables`, `authoring` and full
+extraction) imports the 256 fifty-two-byte action records of G01904 at SLUS
+offset `0x3C1DC`. The `action-csv` bundle is `catalog.battle.actions` and needs
+the action categories to be published too (opening a root with actions but no
+action categories fails and says so):
+
+- `catalogs\battle\actions.csv`: one row per action. `id` is
+  `action.<slug>` from the in-game name (`-2`, `-3` after a repeated name,
+  `untitled-NNN` for placeholder records), and `name` follows it as readable
+  text (`Explosion {level}`; `{level}` is the only markup allowed). Then
+  `legacy_id` (the compatibility index saves and scripts still use), `kind`
+  (`none`, `spell`, `ability`, `break-art`, `weapon-pp`, `item`, `base-attack`,
+  `trap`), `category` (an `action-category.<slug>` reference), `cost`,
+  `recovery_delay`, `camera_zoom` (`follow`, `zoom-in`, `zoom-out`, `hold`),
+  `effect_id`, the extents `range_x/y/z` and `area_range_x/y/z` with
+  `range_shape`, `range_angle`, `area_shape` and `area_angle`, and `behavior`,
+  a `|` set of the twelve named AI bits plus `menu-action`,
+  `hits-first-obstruction` and `starts-unlocked` (or `none`).
+- `catalogs\battle\action-hits.csv`: one row per hit, keyed by `action` and
+  `slot` (`first`/`second`), with `effect`, `prerequisite`, `hit_function`,
+  `stat_calculator`, `stat_factor`, `damage_type` and `affinity`; every column
+  but the effect and the factor is a name. An action with no second hit has no
+  second row, and an all-zero row is refused.
+- The matching schemas define every enum and flag; the committed copies in
+  `Native\Content\schemas\catalogs\battle` must equal the generated ones (a
+  Catch2 test compares them). Numeric spellings of an enum are accepted as
+  legacy aliases and read back as the name.
+- `catalogs\battle\import\actions.json` holds the bits the catalog does not
+  keep: the four unread AI bits, the reserved flag nibble, the reserved word
+  and the bytes after each name's terminator. Reconstruction never consults
+  edited CSVs and is not a runtime path. The importer refuses a source whose
+  hit codes have no name (prerequisite codes 40-63, stat calculators 27-63).
+
+`Content::LoadModuleData` calls `LoadCatalogBackedGlobals`, which fills the
+`Battle::actionDefinitions` array from the catalog through
+`Battle::BuildActionTable`. This is a **temporary bridge (EC-04)**: about 110
+references in 62 files still read the 52-byte bitfield record, and the table
+retires with them under #499/#58. A missing catalog logs and leaves the table
+unchanged; it never yields an all-zero rule. The module data entry for G01904
+is removed.
+
+Tracked blockers: the action's own `effect_id` is an unnamed integer (a
+different index space from the hit effects, whose mediators are code); hit
+prerequisites that behave identically keep separate names; Learning's `action`
+column still names break arts by slug rather than by action identity.
 
 ## 5. Tier 2: text and fonts
 

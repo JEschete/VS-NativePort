@@ -5,6 +5,7 @@
 #include <expected>
 #include <filesystem>
 #include <functional>
+#include <optional>
 #include <span>
 #include <string>
 #include <string_view>
@@ -107,6 +108,22 @@ struct OutputBytes {
   std::string_view name;
   std::span<const std::byte> bytes;
 };
+
+// Reading and writing the byte fields of an original record, and the
+// hexadecimal text offline provenance files keep for the rest.
+namespace source_bytes {
+// The little-endian unsigned value of the `width` bytes at `bytes[offset]`.
+[[nodiscard]] std::uint32_t Read(std::span<const std::byte> bytes,
+                                 std::size_t offset, std::size_t width);
+// Appends the low `width` bytes of `value`, least significant first.
+void Append(std::vector<std::byte>& bytes, std::uint32_t value,
+            std::size_t width);
+// Lowercase hexadecimal, two digits per byte.
+[[nodiscard]] std::string Hex(std::span<const std::byte> bytes);
+// The bytes `hex` spells; nothing when its length is odd or it holds a
+// character other than 0-9 and a-f.
+[[nodiscard]] std::optional<std::vector<std::byte>> Unhex(std::string_view hex);
+}  // namespace source_bytes
 
 // Writes every file under `directory` (created if needed) through a temporary
 // file, replacing each only after all are written.

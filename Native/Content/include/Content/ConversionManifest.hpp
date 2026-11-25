@@ -53,6 +53,9 @@ inline constexpr std::array kStatusRuleCatalogConverters{
 inline constexpr std::array kActionCategoryCatalogConverters{
     ConverterVersion{.name = "action-category-csv", .version = 1},
 };
+inline constexpr std::array kActionCatalogConverters{
+    ConverterVersion{.name = "action-csv", .version = 1},
+};
 
 // The converters whose outputs this build reads, at the oldest version it
 // accepts; a manifest without them is refused with instructions.

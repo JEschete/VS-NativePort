@@ -18,7 +18,6 @@ constexpr std::string_view kRulesSchema{
 constexpr std::string_view kTimingsSchema{
     "catalogs/battle/status-timings.schema.json",
 };
-constexpr unsigned kByteBits = 8;
 constexpr std::size_t kRecordBytes = 16;
 // Source record layout: effect word, duration and interval halfwords, then the
 // replaces and blocked-by words.
@@ -36,22 +35,8 @@ constexpr std::size_t kPoisonRule = 14;
 constexpr std::size_t kRegenerationRule = 17;
 constexpr std::size_t kEquipmentRule = 19;
 
-std::uint32_t Read(std::span<const std::byte> bytes, std::size_t offset,
-                   std::size_t width) {
-  std::uint32_t value = 0;
-  for (std::size_t index = 0; index < width; ++index) {
-    value |= std::to_integer<std::uint32_t>(bytes[offset + index])
-             << (index * kByteBits);
-  }
-  return value;
-}
-void Append(std::vector<std::byte>& bytes, std::uint32_t value,
-            std::size_t width) {
-  for (std::size_t index = 0; index < width; ++index) {
-    bytes.push_back(static_cast<std::byte>(value & UINT8_MAX));
-    value >>= kByteBits;
-  }
-}
+using source_bytes::Append;
+using source_bytes::Read;
 
 std::expected<void, std::string> Write(const std::filesystem::path& root,
                                        const ImportedStatus& imported,

@@ -115,9 +115,8 @@ constexpr std::size_t kTargetKindsColumn = 5;
 constexpr TableSpec kSpec = {
     .name = "action-categories",
     .description =
-        "How each action category selects and filters its targets; actions "
-        "reference a category by compatibility index until the action catalog "
-        "lands.",
+        "How each action category selects and filters its targets; the "
+        "actions table references a category by its id.",
     .columns = kColumns,
     .key = kKey,
 };

@@ -6,6 +6,7 @@
 #include <format>
 #include <fstream>
 #include <limits>
+#include <optional>
 #include <set>
 #include <string>
 #include <system_error>
@@ -260,5 +261,57 @@ std::expected<void, std::string> WriteOutputFiles(
   }
   return {};
 }
+
+namespace source_bytes {
+namespace {
+constexpr unsigned kByteBits = 8;
+constexpr unsigned kHexRadix = 16;
+constexpr unsigned kDecimalRadix = 10;
+}  // namespace
+
+std::uint32_t Read(std::span<const std::byte> bytes, std::size_t offset,
+                   std::size_t width) {
+  std::uint32_t value = 0;
+  for (std::size_t index = 0; index < width; ++index) {
+    value |= std::to_integer<std::uint32_t>(bytes[offset + index])
+             << (index * kByteBits);
+  }
+  return value;
+}
+
+void Append(std::vector<std::byte>& bytes, std::uint32_t value,
+            std::size_t width) {
+  for (std::size_t index = 0; index < width; ++index) {
+    bytes.push_back(static_cast<std::byte>(value & UINT8_MAX));
+    value >>= kByteBits;
+  }
+}
+
+std::string Hex(std::span<const std::byte> bytes) {
+  std::string result;
+  for (const auto value : bytes) {
+    result += std::format("{:02x}", std::to_integer<unsigned>(value));
+  }
+  return result;
+}
+
+std::optional<std::vector<std::byte>> Unhex(std::string_view hex) {
+  if (hex.size() % 2 != 0) return std::nullopt;
+  const auto digit = [](char c) {
+    return c >= '0' && c <= '9'   ? c - '0'
+           : c >= 'a' && c <= 'f' ? c - 'a' + static_cast<int>(kDecimalRadix)
+                                  : -1;
+  };
+  std::vector<std::byte> bytes;
+  for (std::size_t at = 0; at < hex.size(); at += 2) {
+    const int high = digit(hex[at]);
+    const int low = digit(hex[at + 1]);
+    if (high < 0 || low < 0) return std::nullopt;
+    bytes.push_back(
+        static_cast<std::byte>(high * static_cast<int>(kHexRadix) + low));
+  }
+  return bytes;
+}
+}  // namespace source_bytes
 
 }  // namespace VS::Extract

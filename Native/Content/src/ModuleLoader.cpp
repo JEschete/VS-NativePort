@@ -330,7 +330,7 @@ int VS::Content::LoadModuleData(void) {
                             VS::Content::kModulePointerCount);
   }
   Modules modules(*store);
-  const int data_failed = LoadData(modules);
+  const int data_failed = LoadData(modules) + LoadCatalogBackedGlobals(*store);
   const int pointers_failed = RelocatePointers(modules);
   VS::Core::LogInfo(
       "content",

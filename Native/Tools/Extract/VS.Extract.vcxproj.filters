@@ -15,6 +15,9 @@
     <ClCompile Include="src\ActionCategoryConversion.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ActionConversion.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\AssetLabels.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -94,6 +97,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClInclude Include="include\Extract\ActionCategoryConversion.hpp">
+      <Filter>include\Extract</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Extract\ActionConversion.hpp">
       <Filter>include\Extract</Filter>
     </ClInclude>
     <ClInclude Include="include\Extract\AssetLabels.hpp">

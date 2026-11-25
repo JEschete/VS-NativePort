@@ -24,6 +24,7 @@
 #include "Core/Log.hpp"
 #include "Core/Sha256.hpp"
 #include "Extract/ActionCategoryConversion.hpp"
+#include "Extract/ActionConversion.hpp"
 #include "Extract/AssetLabels.hpp"
 #include "Extract/AudioBankConversion.hpp"
 #include "Extract/BackgroundAuthoring.hpp"
@@ -83,6 +84,7 @@ int Usage() {
       "  VS.Extract learning <datadir> [--force]\n"
       "  VS.Extract status <datadir> [--force]\n"
       "  VS.Extract action-categories <datadir> [--force]\n"
+      "  VS.Extract actions  <datadir> [--force]\n"
       "  VS.Extract models   <datadir> [--force]\n"
       "  VS.Extract banks    <datadir> [--force]\n"
       "  VS.Extract labels   <datadir> [--force]\n"
@@ -151,6 +153,10 @@ int UpgradeAuthoring(const fs::path& root) {
   if (auto categories = Extract::ConvertDiscActionCategories(root, false);
       !categories) {
     VS::Core::LogError("extract", "action categories: {}", categories.error());
+    return 1;
+  }
+  if (auto actions = Extract::ConvertDiscActions(root, false); !actions) {
+    VS::Core::LogError("extract", "actions: {}", actions.error());
     return 1;
   }
   if (auto status = Extract::ConvertDiscStatus(root, false); !status) {
@@ -577,6 +583,10 @@ int ConvertTables(const fs::path& root, bool force) {
     VS::Core::LogError("extract", "action categories: {}", categories.error());
     return 1;
   }
+  if (auto actions = Extract::ConvertDiscActions(root, force); !actions) {
+    VS::Core::LogError("extract", "actions: {}", actions.error());
+    return 1;
+  }
   if (auto status = Extract::ConvertDiscStatus(root, force); !status) {
     VS::Core::LogError("extract", "status: {}", status.error());
     return 1;
@@ -820,6 +830,14 @@ int Run(int argc, char** argv) {
     if (!force) return Usage();
     const auto result = Extract::ConvertDiscActionCategories(
         Platform::Utf8Path(argv[2]), *force);
+    if (!result) VS::Core::LogError("extract", "{}", result.error());
+    return result ? 0 : 1;
+  }
+  if (cmd == "actions") {
+    const auto force = ForceArgument(argc, argv);
+    if (!force) return Usage();
+    const auto result =
+        Extract::ConvertDiscActions(Platform::Utf8Path(argv[2]), *force);
     if (!result) VS::Core::LogError("extract", "{}", result.error());
     return result ? 0 : 1;
   }

@@ -1451,9 +1451,6 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"SLUS_010.40", 0x39954, sizeof VS::Render::loadingScreenPixels,
      &VS::Render::loadingScreenPixels,
      sizeof VS::Render::loadingScreenPixels},  // G02005 _nowLoading_data
-    {"SLUS_010.40", 0x3C1DC, sizeof VS::Battle::actionDefinitions,
-     VS::Battle::actionDefinitions.data(),
-     sizeof VS::Battle::actionDefinitions},  // G01904 vs_main_actions
     {"SLUS_010.40", 0x3F8CC, sizeof VS::Field::locationDestinations,
      &VS::Field::locationDestinations,
      sizeof VS::Field::locationDestinations},  // G01913

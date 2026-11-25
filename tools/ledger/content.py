@@ -51,6 +51,11 @@ SECTION_CONVERTERS = {
         "G01906 at 0x3F6CC, 512 source bytes; 32 rules and six shared timing roles; "
         "all original timing words preserved offline only",
     ),
+    "action-csv": (
+        "SLUS_010.40", "catalog.battle.actions",
+        "G01904 at 0x3C1DC, 13312 source bytes; 256 actions and up to two hits each; "
+        "unread flag bits, the reserved word and name tails preserved offline only",
+    ),
     "material-csv": ("SLUS_010.40", "catalog.items.materials", "G01905 at 0x3F5DC, 240 bytes"),
     "learning-csv": (
         "SLUS_010.40", "catalog.battle.learning",
@@ -126,6 +131,7 @@ DROPPED = {
 DECODERS = {
     "action-category-csv": "Extract::DecodeActionCategories",
     "status-csv": "Extract::DecodeStatus",
+    "action-csv": "Extract::DecodeActions",
     "bestiary-csv": "Extract::DecodeBestiary",
     "tim-png": "Content::DecodeTim",
     "far-layout-json": "Content::DecodeFar",
@@ -149,6 +155,7 @@ EVIDENCE = {
         "Action category configured disc and persisted provenance reload all 16 categories exactly",
     ),
     "status-csv": ("Status configured executable and persisted provenance reload all 32 records exactly",),
+    "action-csv": ("Action configured executable and persisted provenance reload all 256 actions exactly",),
     "bestiary-csv": ("Bestiary configured disc corpus reloads all records and descriptions exactly",),
     "tim-png": ("extracted TIM corpus converts without changing its source bytes",),
     "far-layout-json": ("Configured FAR corpus rebuilds exactly and loads through the live reader",),

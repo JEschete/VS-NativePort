@@ -1,0 +1,199 @@
+{
+  "schema_version": 1,
+  "table": "actions",
+  "description": "Every battle action: spells, abilities, break arts, items, traps and the base attacks. Hits are in action-hits.",
+  "key": ["id"],
+  "columns": [
+    {
+      "name": "id",
+      "type": "id",
+      "description": "Semantic identity: action.<name>, numbered when names repeat."
+    },
+    {
+      "name": "display_name",
+      "type": "text",
+      "optional": true,
+      "description": "Informational plain-text label; not a key or gameplay value."
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "description": "The name as the game shows it: ordinary spaces, {level} for the level glyph. It must encode to at most 23 game-text bytes."
+    },
+    {
+      "name": "legacy_id",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "The original table index, which saves, scripts and the learning catalog still use. Runs from 0 to 255 without gaps."
+    },
+    {
+      "name": "kind",
+      "type": "enum",
+      "enum": {
+        "0": "none",
+        "1": "spell",
+        "2": "ability",
+        "3": "break-art",
+        "4": "weapon-pp",
+        "5": "item",
+        "6": "base-attack",
+        "7": "trap"
+      },
+      "legacy_numeric_aliases": true,
+      "description": "What the action is. Spells spend MP, abilities RISK, break arts HP and weapon-pp actions the equipped weapon's PP; items and traps spend nothing here, and a base attack's cost comes from the weapon. No shipped action is weapon-pp."
+    },
+    {
+      "name": "category",
+      "type": "reference",
+      "references": "action-categories",
+      "description": "How the action picks and filters its targets."
+    },
+    {
+      "name": "cost",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "How much of the kind's resource one use spends; 255 on the base attack means the weapon decides."
+    },
+    {
+      "name": "recovery_delay",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "The delay before the actor acts again; 255 means the equipped weapon's delay."
+    },
+    {
+      "name": "camera_zoom",
+      "type": "enum",
+      "enum": {
+        "0": "follow",
+        "1": "zoom-in",
+        "2": "zoom-out",
+        "3": "hold"
+      },
+      "legacy_numeric_aliases": true,
+      "description": "How the combat camera frames the action."
+    },
+    {
+      "name": "effect_id",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "The original effect table slot that presents the action; not yet named."
+    },
+    {
+      "name": "range_x",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "The targeting volume's extent; 255 on the base attacks means unlimited."
+    },
+    {
+      "name": "range_y",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "The targeting volume's extent; 255 on the base attacks means unlimited."
+    },
+    {
+      "name": "range_z",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "The targeting volume's extent; 255 on the base attacks means unlimited."
+    },
+    {
+      "name": "range_shape",
+      "type": "enum",
+      "enum": {
+        "0": "none",
+        "1": "ellipsoid",
+        "2": "centered-cylinder",
+        "3": "cylinder",
+        "4": "cone",
+        "5": "reversed-cone",
+        "6": "rectangle",
+        "7": "diamond"
+      },
+      "legacy_numeric_aliases": true,
+      "description": "The targeting volume's shape; none means no volume."
+    },
+    {
+      "name": "range_angle",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 31,
+      "description": "The volume's pitch, in 16-unit steps of the game's angle scale."
+    },
+    {
+      "name": "area_range_x",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "The area of effect's extent around its target."
+    },
+    {
+      "name": "area_range_y",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "The area of effect's extent around its target."
+    },
+    {
+      "name": "area_range_z",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "The area of effect's extent around its target."
+    },
+    {
+      "name": "area_shape",
+      "type": "enum",
+      "enum": {
+        "0": "none",
+        "1": "ellipsoid",
+        "2": "centered-cylinder",
+        "3": "cylinder",
+        "4": "cone",
+        "5": "reversed-cone",
+        "6": "rectangle",
+        "7": "diamond"
+      },
+      "legacy_numeric_aliases": true,
+      "description": "The area of effect's shape; none means a single target."
+    },
+    {
+      "name": "area_angle",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 31,
+      "description": "The volume's pitch, in 16-unit steps of the game's angle scale."
+    },
+    {
+      "name": "behavior",
+      "type": "flags",
+      "enum": {
+        "16": "special-mode",
+        "32": "rarely-chosen",
+        "64": "fallback-eligible",
+        "128": "shaped-area",
+        "256": "targets-unconditionally",
+        "512": "targets-status-restricted",
+        "1024": "targets-low-mp",
+        "2048": "targets-low-hp",
+        "4096": "ignores-sight",
+        "8192": "radial-area",
+        "16384": "beneficial",
+        "32768": "harmful",
+        "65536": "menu-action",
+        "131072": "hits-first-obstruction",
+        "262144": "starts-unlocked"
+      },
+      "legacy_numeric_aliases": false,
+      "separator": "|",
+      "empty_set": "none",
+      "description": "Flags the battle and AI code read. menu-action actions are chosen from a menu (cancelling targeting returns to it) and are presented with their effect rather than a melee animation; starts-unlocked is the state a new game begins in."
+    }
+  ]
+}

@@ -1005,6 +1005,9 @@
     <ClInclude Include="src\Battle\ValueLabels.hpp">
       <Filter>src\Battle</Filter>
     </ClInclude>
+    <ClCompile Include="src\Boot\CatalogBackedGlobals.cpp">
+      <Filter>src\Boot</Filter>
+    </ClCompile>
     <ClCompile Include="src\Boot\Encounter.cpp">
       <Filter>src\Boot</Filter>
     </ClCompile>

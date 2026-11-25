@@ -60,6 +60,9 @@
     <ClCompile Include="src\ActionCameraSelectionTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ActionCatalogTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ActionCategoryCatalogTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -1572,6 +1575,9 @@
     <ClInclude Include="include\TestSupport\ActionPresentationFixture.hpp">
       <Filter>include\TestSupport</Filter>
     </ClInclude>
+    <ClInclude Include="include\TestSupport\ActionRoot.hpp">
+      <Filter>include\TestSupport</Filter>
+    </ClInclude>
     <ClInclude Include="include\TestSupport\ActionSequenceFixture.hpp">
       <Filter>include\TestSupport</Filter>
     </ClInclude>
@@ -1579,6 +1585,9 @@
       <Filter>include\TestSupport</Filter>
     </ClInclude>
     <ClInclude Include="include\TestSupport\AudioConversionFixture.hpp">
+      <Filter>include\TestSupport</Filter>
+    </ClInclude>
+    <ClInclude Include="include\TestSupport\BattleCatalogRoot.hpp">
       <Filter>include\TestSupport</Filter>
     </ClInclude>
     <ClInclude Include="include\TestSupport\ChannelWarnings.hpp">
@@ -1684,6 +1693,9 @@
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>
     <ClCompile Include="..\Tools\Extract\src\ActionCategoryConversion.cpp">
+      <Filter>..\Tools\Extract\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Tools\Extract\src\ActionConversion.cpp">
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>
     <ClCompile Include="..\Tools\Extract\src\SaveTextConversion.cpp">
