@@ -169,10 +169,14 @@ Rules beyond the schemas:
   `behavior` is a `|` set of the twelve named AI bits plus `menu-action`, `hits-first-obstruction` and
   `starts-unlocked` (or `none`).
 - `catalogs\battle\action-hits.csv`: one row per hit, keyed by `action` and `slot` (`first`/`second`). Every column
-  but the effect and the factor is a name. An action with no second hit has no second row; an all-zero row is refused.
+  but the factor is a name. An action with no second hit has no second row; an all-zero row is refused. `effect`
+  names the battle effect table slot the hit dispatches: `apply-*` and `cure-*` add or remove that status,
+  `recover-hp-on-*` heal only when the answered hit matches, the `mark-success-N` slots behave alike, and the
+  `unused-N` slots, empty in the original, are refused at run time. `VS.Extract authoring` spells numeric codes in an
+  existing tree by name and refreshes both schemas.
 - `catalogs\battle\import\actions.json` holds the bits the catalog does not keep: the four unread AI bits, the
   reserved flag nibble, the reserved word and the bytes after each name's terminator. The importer refuses a source
-  whose hit codes have no name (prerequisite codes 40-63, stat calculators 27-63).
+  whose hit codes have no name (effects 70-127, prerequisite codes 40-63, stat calculators 27-63).
 
 **Bridge (EC-04):** `Content::LoadModuleData` calls `LoadCatalogBackedGlobals`, which fills the
 `Battle::actionDefinitions` array from the catalog through `Battle::BuildActionTable`. This is a **temporary
@@ -180,6 +184,5 @@ bridge**: code still reads the 52-byte bitfield record, and the table retires wi
 A missing catalog logs and leaves the table unchanged; it never yields an all-zero rule. The module data entry for
 G01904 is removed.
 
-Open work: #499, #58 (the action's own `effect_id` is an unnamed index, distinct from the hit effects whose
-mediators are code; identically behaving hit prerequisites keep separate names; Learning's `action` column names
-break arts by slug rather than action identity).
+Open work: #499, #58 (the action's own `effect_id` is still an unnamed index; identically behaving hit prerequisites
+and effects keep separate names; Learning's `action` column names break arts by slug rather than action identity).

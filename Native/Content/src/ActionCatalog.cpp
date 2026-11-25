@@ -117,6 +117,84 @@ constexpr std::array<std::string_view, 40> kPrerequisiteNames{
     "unused-2",
 };
 constexpr auto kPrerequisites = Numbered(kPrerequisiteNames);
+// The battle effect table's slots. apply-* and cure-* add or remove the status
+// rule of that name. recover-hp-on-* heal only when the hit being answered
+// matches. The mark-success slots behave identically, as do the unused
+// slots, which are empty in the original and refused natively.
+// decomp: actionEffectMediators (src/BATTLE/BATTLE.PRG/146C.c:302)
+constexpr std::array<std::string_view, 70> kEffectNames{
+    "unused-0",
+    "apply-strength-down",
+    "apply-intelligence-down",
+    "apply-agility-down",
+    "apply-equipment-down",
+    "apply-legs-impaired",
+    "apply-strength-up",
+    "apply-intelligence-up",
+    "apply-agility-up",
+    "apply-equipment-up",
+    "apply-quicken",
+    "apply-silence",
+    "apply-magic-ward",
+    "apply-regeneration",
+    "apply-analyze",
+    "apply-paralysis",
+    "apply-poison",
+    "apply-numbness",
+    "apply-curse",
+    "apply-air-attack-up",
+    "apply-fire-attack-up",
+    "apply-earth-attack-up",
+    "apply-water-attack-up",
+    "apply-air-defense-up",
+    "apply-fire-defense-up",
+    "apply-earth-defense-up",
+    "apply-water-defense-up",
+    "cure-paralysis",
+    "cure-poison",
+    "cure-curse",
+    "cure-numbness",
+    "dispel",
+    "cure-paralysis-poison-and-numbness",
+    "mark-success-0",
+    "instant-defeat",
+    "armor-wear-from-damage",
+    "mark-success-1",
+    "set-script-flag-64",
+    "set-script-flag-32",
+    "mark-success-2",
+    "recover-hp-on-spell-hit",
+    "recover-hp-on-non-spell-hit",
+    "recover-hp-on-physical-hit",
+    "recover-hp-on-air-hit",
+    "recover-hp-on-fire-hit",
+    "recover-hp-on-earth-hit",
+    "recover-hp-on-water-hit",
+    "recover-hp-on-light-hit",
+    "recover-hp-on-dark-hit",
+    "recover-hp-on-damage",
+    "random-strength-increase",
+    "random-intelligence-increase",
+    "random-agility-increase",
+    "random-max-hp-increase",
+    "random-max-mp-increase",
+    "random-strength-decrease",
+    "random-intelligence-decrease",
+    "random-agility-decrease",
+    "damage",
+    "drain-mp",
+    "drain-weapon-pp",
+    "drain-shield-pp",
+    "recover-hp",
+    "recover-mp",
+    "recover-weapon-pp",
+    "recover-weapon-dp",
+    "reduce-risk",
+    "unused-1",
+    "unused-2",
+    "unused-3",
+};
+constexpr auto kEffects = Numbered(kEffectNames);
 // decomp: hitFunctions (Native/Game/src/Battle/HitChance.hpp:25)
 constexpr std::array<std::string_view, 8> kHitFunctionNames{
     "none",
@@ -307,9 +385,9 @@ constexpr std::array kHitColumns{
     Enumeration("slot", kSlots,
                 "Which of the action's two hits. An absent hit is an all-zero "
                 "word, so only hits that do something have a row."),
-    Integer("effect", 127,
-            "The hit's effect, an index into the battle effect table; not "
-            "yet named."),
+    Enumeration("effect", kEffects,
+                "What the hit does: the battle effect table slot it "
+                "dispatches."),
     Enumeration("prerequisite", kPrerequisites,
                 "What the target must satisfy for the hit to apply."),
     Enumeration("hit_function", kHitFunctions,
@@ -455,6 +533,7 @@ std::span<const EnumValue> ActionVolumeShapes() { return kVolumeShapes; }
 std::span<const EnumValue> ActionCameraZooms() { return kZooms; }
 std::span<const EnumValue> ActionBehaviors() { return kBehaviors; }
 std::span<const EnumValue> HitPrerequisites() { return kPrerequisites; }
+std::span<const EnumValue> HitEffects() { return kEffects; }
 std::span<const EnumValue> HitFunctions() { return kHitFunctions; }
 std::span<const EnumValue> HitStatCalculators() { return kStatCalculators; }
 std::span<const EnumValue> HitAffinities() { return kAffinities; }
@@ -581,7 +660,7 @@ std::string FormatActionHits(const ActionCatalog& catalog) {
       rows.push_back({
           rule.id,
           Label(kSlots, static_cast<std::int64_t>(slot)),
-          std::to_string(hit.effect),
+          Label(kEffects, hit.effect),
           Label(kPrerequisites, hit.prerequisite),
           Label(kHitFunctions, hit.hit_function),
           Label(kStatCalculators, hit.stat_calculator),

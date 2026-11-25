@@ -1,16 +1,21 @@
 #include "Extract/ActionConversion.hpp"
 
 #include <algorithm>
+#include <array>
 #include <bit>
 #include <format>
 #include <optional>
+#include <span>
 #include <string>
+#include <system_error>
 #include <utility>
 #include <vector>
 
+#include "Content/CatalogTable.hpp"
 #include "Content/GameTextCodec.hpp"
 #include "Content/JsonText.hpp"
 #include "Extract/ConverterBatch.hpp"
+#include "Platform/Paths.hpp"
 
 namespace VS::Extract {
 namespace {
@@ -183,6 +188,22 @@ std::expected<void, std::string> Write(const std::filesystem::path& root,
     }
   }
   return WriteOutputFiles(root, pending);
+}
+
+// The file's text, or nothing when it does not exist.
+std::expected<std::optional<std::string>, std::string> ReadOptionalText(
+    const std::filesystem::path& file) {
+  std::error_code error;
+  const bool exists = std::filesystem::exists(file, error);
+  if (error) {
+    return std::unexpected(Platform::PathText(file) + ": " + error.message());
+  }
+  if (!exists) return std::optional<std::string>{};
+  auto bytes = ReadFileBytes(file);
+  if (!bytes) return std::unexpected(bytes.error());
+  return std::optional<std::string>{
+      std::in_place, reinterpret_cast<const char*>(bytes->data()),
+      bytes->size()};
 }
 }  // namespace
 
@@ -429,5 +450,66 @@ std::expected<TableConversionReport, std::string> ConvertDiscActions(
       [&] { return Write(root, *imported, output.source_sha256, !force); });
   if (!published) return std::unexpected(published.error());
   return TableConversionReport{.converted = 1, .removed = *published};
+}
+
+std::expected<ActionAuthoringReport, std::string> UpgradeActionAuthoring(
+    const std::filesystem::path& root) {
+  struct Table {
+    const Content::TableSpec* spec;
+    std::string_view path;
+    std::string_view schema;
+  };
+  const std::array tables{
+      Table{&Content::ActionsSpec(), Content::kActionsPath, kActionsSchema},
+      Table{&Content::ActionHitsSpec(), Content::kActionHitsPath, kHitsSchema},
+  };
+  std::array<std::optional<std::string>, tables.size()> texts;
+  for (std::size_t index = 0; index < tables.size(); ++index) {
+    auto text = ReadOptionalText(root / Platform::Utf8Path(tables[index].path));
+    if (!text) return std::unexpected(text.error());
+    texts[index] = std::move(*text);
+  }
+  ActionAuthoringReport report;
+  if (!texts[0] && !texts[1]) return report;
+  if (!texts[0] || !texts[1]) {
+    return std::unexpected(
+        "action authoring needs both actions.csv and action-hits.csv (run "
+        "VS.Extract actions <dir>)");
+  }
+  std::array<std::string, tables.size()> normalized;
+  std::vector<std::pair<std::string_view, std::string>> pending;
+  for (std::size_t index = 0; index < tables.size(); ++index) {
+    const auto& table = tables[index];
+    auto rewrite =
+        Content::NormalizeTableText(*table.spec, *texts[index], table.path);
+    if (!rewrite) return std::unexpected(rewrite.error());
+    report.named_values += rewrite->named_values;
+    normalized[index] = std::move(rewrite->text);
+    if (normalized[index] != *texts[index]) {
+      pending.emplace_back(table.path, normalized[index]);
+    }
+    auto schema = ReadOptionalText(root / Platform::Utf8Path(table.schema));
+    if (!schema) return std::unexpected(schema.error());
+    auto expected = Content::FormatTableSchema(*table.spec);
+    if (*schema != expected) pending.emplace_back(table.schema, expected);
+  }
+  const auto before = Content::ParseActionCatalog(*texts[0], *texts[1]);
+  if (!before) return std::unexpected(before.error());
+  const auto after = Content::ParseActionCatalog(normalized[0], normalized[1]);
+  if (!after) return std::unexpected(after.error());
+  if (*after != *before) {
+    return std::unexpected("action authoring migration changed action rules");
+  }
+  std::vector<OutputBytes> outputs;
+  for (const auto& [path, text] : pending) {
+    outputs.push_back({.name = path, .bytes = std::as_bytes(std::span(text))});
+  }
+  if (!outputs.empty()) {
+    if (auto written = WriteOutputFiles(root, outputs); !written) {
+      return std::unexpected(written.error());
+    }
+  }
+  report.written = outputs.size();
+  return report;
 }
 }  // namespace VS::Extract

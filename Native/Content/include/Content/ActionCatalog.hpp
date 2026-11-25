@@ -38,6 +38,7 @@ inline constexpr std::size_t kActionVolumeAxes = 3;
 [[nodiscard]] std::span<const EnumValue> ActionCameraZooms();
 [[nodiscard]] std::span<const EnumValue> ActionBehaviors();
 [[nodiscard]] std::span<const EnumValue> HitPrerequisites();
+[[nodiscard]] std::span<const EnumValue> HitEffects();
 [[nodiscard]] std::span<const EnumValue> HitFunctions();
 [[nodiscard]] std::span<const EnumValue> HitStatCalculators();
 [[nodiscard]] std::span<const EnumValue> HitAffinities();

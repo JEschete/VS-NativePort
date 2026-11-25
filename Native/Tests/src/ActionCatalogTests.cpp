@@ -166,6 +166,25 @@ struct ActionTables {
   std::string actions = content::FormatActions(catalog);
   std::string hits = content::FormatActionHits(catalog);
 };
+// The first hit of the synthetic action 1, with its effect by name and by
+// legacy code.
+constexpr std::string_view kNamedEffect{
+    "action.move-ab,first,apply-intelligence-down,",
+};
+constexpr std::string_view kNumericEffect = "action.move-ab,first,2,";
+
+// The action tables and their schemas under `root`, in that order.
+std::vector<std::string> AuthoredActionFiles(
+    const std::filesystem::path& root) {
+  std::vector<std::string> files;
+  for (const std::string_view path :
+       {content::kActionsPath, content::kActionHitsPath,
+        std::string_view{"catalogs/battle/actions.schema.json"},
+        std::string_view{"catalogs/battle/action-hits.schema.json"}}) {
+    files.push_back(ReadText(root / path));
+  }
+  return files;
+}
 
 bool Parses(const std::string& actions, const std::string& hits) {
   return content::ParseActionCatalog(actions, hits).has_value();
@@ -261,6 +280,12 @@ TEST_CASE("Action source refuses codes the schema cannot name",
   const auto unnamed = extract::DecodeActions(calculator);
   REQUIRE_FALSE(unnamed);
   CHECK(unnamed.error().contains("stat_calculator"));
+  constexpr std::uint8_t kPastEffects = 70;
+  const auto effect =
+      SourceWithHitField(&content::ActionHit::effect, kPastEffects);
+  const auto unknown = extract::DecodeActions(effect);
+  REQUIRE_FALSE(unknown);
+  CHECK(unknown.error().contains("effect"));
 }
 
 TEST_CASE(
@@ -278,7 +303,7 @@ TEST_CASE(
   CHECK(hits.starts_with(
       "action,slot,effect,prerequisite,hit_function,stat_calculator,"
       "stat_factor,damage_type,affinity\n"));
-  CHECK(hits.contains("action.move-ab,first,"));
+  CHECK(hits.contains(kNamedEffect));
   CHECK(content::ParseActionCatalog(actions, hits) == synthetic);
 }
 
@@ -311,6 +336,20 @@ TEST_CASE("Action schema refuses unknown duplicate and unfit values",
   CHECK_FALSE(Parses(Replaced(actions, "harmful", "bit15"), hits));
   CHECK_FALSE(Parses(
       Replaced(actions, "menu-action", "menu-action|menu-action"), hits));
+}
+
+TEST_CASE("Action hit effects read by name or by legacy code",
+          "[action-catalog]") {
+  const ActionTables tables;
+  const auto& [synthetic, actions, hits] = tables;
+  const auto numeric_effect = content::ParseActionCatalog(
+      actions, Replaced(hits, kNamedEffect, kNumericEffect));
+  REQUIRE(numeric_effect);
+  if (numeric_effect) CHECK(*numeric_effect == synthetic);
+  CHECK_FALSE(Parses(actions,
+                     Replaced(hits, kNamedEffect, "action.move-ab,first,70,")));
+  CHECK_FALSE(Parses(
+      actions, Replaced(hits, kNamedEffect, "action.move-ab,first,heal,")));
 }
 
 TEST_CASE("Action schema refuses unfit names and inconsistent tables",
@@ -435,6 +474,40 @@ TEST_CASE(
   root.Write("source/disc/SLUS_010.40", source);
   CHECK_FALSE(extract::ConvertDiscActions(data, false));
   CHECK(ReadText(csv) == original);
+}
+
+TEST_CASE(
+    "Action authoring skips a root without tables and refuses half of one",
+    "[action-catalog]") {
+  support::ScratchDataRoot root("test-action");
+  const auto absent = extract::UpgradeActionAuthoring(root.Root());
+  REQUIRE(absent);
+  if (absent) CHECK(absent->written == 0);
+  root.Write(content::kActionsPath, ActionTables{}.actions);
+  CHECK_FALSE(extract::UpgradeActionAuthoring(root.Root()));
+}
+
+TEST_CASE("Action authoring names numeric effects and refreshes schemas once",
+          "[action-catalog]") {
+  using Counts = std::pair<std::size_t, std::size_t>;
+  support::ScratchDataRoot root("test-action");
+  const ActionTables tables;
+  const auto& [synthetic, actions, hits] = tables;
+  root.Write(content::kActionsPath, actions);
+  root.Write(content::kActionHitsPath,
+             Replaced(hits, kNamedEffect, kNumericEffect));
+  root.Write("catalogs/battle/action-hits.schema.json", "{}\n");
+  const auto upgraded = extract::UpgradeActionAuthoring(root.Root());
+  REQUIRE(upgraded);
+  if (!upgraded) return;
+  CHECK(Counts{upgraded->named_values, upgraded->written} == Counts{1, 3});
+  CHECK(AuthoredActionFiles(root.Root()) ==
+        std::vector<std::string>{
+            actions, hits, content::FormatTableSchema(content::ActionsSpec()),
+            content::FormatTableSchema(content::ActionHitsSpec())});
+  const auto repeat = extract::UpgradeActionAuthoring(root.Root());
+  REQUIRE(repeat);
+  if (repeat) CHECK(Counts{repeat->named_values, repeat->written} == Counts{});
 }
 
 TEST_CASE("Action configured executable reloads all 256 actions exactly",

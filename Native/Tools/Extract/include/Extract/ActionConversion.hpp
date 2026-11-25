@@ -49,4 +49,14 @@ ReconstructActionSource(const ImportedActions& imported);
 ParseActionProvenance(std::span<const std::byte> bytes);
 [[nodiscard]] std::expected<TableConversionReport, std::string>
 ConvertDiscActions(const std::filesystem::path& root, bool force);
+
+struct ActionAuthoringReport {
+  std::size_t named_values = 0;
+  std::size_t written = 0;
+};
+// Spells numeric enum codes in the authored action tables by name and
+// refreshes their schemas, refusing a rewrite that would change any rule. A
+// root without the action tables is left alone.
+[[nodiscard]] std::expected<ActionAuthoringReport, std::string>
+UpgradeActionAuthoring(const std::filesystem::path& root);
 }  // namespace VS::Extract

@@ -27,7 +27,7 @@ inline Extract::ImportedActions SyntheticActions() {
   constexpr std::size_t kZooms = 4;
   constexpr std::size_t kShapes = 8;
   constexpr std::size_t kAngles = 32;
-  constexpr std::size_t kHighHitEffect = 100;
+  constexpr std::size_t kHighHitEffect = 69;
   constexpr std::size_t kPrerequisites = 40;
   constexpr std::size_t kHitFunctions = 8;
   constexpr std::size_t kStatCalculators = 27;
