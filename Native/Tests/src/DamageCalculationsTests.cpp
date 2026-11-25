@@ -144,7 +144,7 @@ std::vector<std::uint8_t> Module(const char* name) {
   if (!std::filesystem::exists(root / VS::Content::DataStore::ManifestName)) {
     SKIP("Extracted data unavailable");
   }
-  REQUIRE(VS::Content::DataStore::Open(root));
+  REQUIRE(VS::Content::DataStore::OpenShared(root));
   auto& store = *VS::Content::DataStore::Get();
   const auto* asset = store.Find(name);
   REQUIRE(asset != nullptr);

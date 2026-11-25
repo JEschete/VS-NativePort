@@ -199,7 +199,7 @@ struct TextLoadingFixture : TerminalFixture {
   ValueRestore<std::uint16_t*> saved_menu12{VS::Menu::Framework::menu12Text};
 
   TextLoadingFixture() {
-    if (!content::DataStore::Open(R"(Native\data)")) {
+    if (!content::DataStore::OpenShared(R"(Native\data)")) {
       throw std::runtime_error(
           "menu terminal integration needs extracted data");
     }
@@ -418,7 +418,7 @@ TEST_CASE("MENUB text loads its original module bytes again after a cold reset",
           "[inventory-terminal-live][F02597]") {
   content::DataStore::ScopedOverride restore;
   TerminalSession session;
-  REQUIRE(content::DataStore::Open(R"(Native\data)").has_value());
+  REQUIRE(content::DataStore::OpenShared(R"(Native\data)").has_value());
   const auto* store = content::DataStore::Get();
   if (store == nullptr) {
     FAIL("data store was not opened");

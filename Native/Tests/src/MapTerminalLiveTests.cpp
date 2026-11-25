@@ -188,7 +188,7 @@ struct LiveWorld {
 
   explicit LiveWorld(bool data = false) {
     REQUIRE(VS::Battle::sceneBuffer == nullptr);
-    if (data && !content::DataStore::Open(R"(Native\data)")) {
+    if (data && !content::DataStore::OpenShared(R"(Native\data)")) {
       throw std::runtime_error(
           "Map terminal Live integration needs extracted data");
     }

@@ -699,7 +699,7 @@ void OpenWeaponSourceData() {
        dir = dir.parent_path()) {
     const auto root = dir / "Native" / "data";
     if (std::filesystem::exists(root / VS::Content::DataStore::ManifestName)) {
-      REQUIRE(VS::Content::DataStore::Open(root));
+      REQUIRE(VS::Content::DataStore::OpenShared(root));
       REQUIRE(VS::Content::LoadModuleData() == 0);
       return;
     }

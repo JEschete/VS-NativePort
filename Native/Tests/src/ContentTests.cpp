@@ -602,8 +602,8 @@ TEST_CASE("Original room trap kinds have bounded source-package mappings",
     SKIP("Repository disc location is unavailable");
   }
   Content::DataStore::ScopedOverride restore;
-  REQUIRE(Content::DataStore::Open(cue.parent_path().parent_path() / "Native" /
-                                   "data")
+  REQUIRE(Content::DataStore::OpenShared(cue.parent_path().parent_path() /
+                                         "Native" / "data")
               .has_value());
   const auto* store = Content::DataStore::Get();
   REQUIRE(store != nullptr);

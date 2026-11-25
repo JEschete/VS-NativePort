@@ -262,7 +262,7 @@ std::vector<std::uint8_t> ReadOriginalBattleModule() {
     if (!std::filesystem::exists(root / VS::Content::DataStore::ManifestName)) {
       continue;
     }
-    REQUIRE(VS::Content::DataStore::Open(root));
+    REQUIRE(VS::Content::DataStore::OpenShared(root));
     const auto* store = VS::Content::DataStore::Get();
     REQUIRE(store != nullptr);
     const auto* entry = store->Find("BATTLE/BATTLE.PRG");

@@ -352,7 +352,7 @@ TEST_CASE("Self-loop doors cannot pass without a real loading phase",
 
 TEST_CASE("Every readable original directed door has an exact inventory case",
           "[.assets][disc-door-inventory]") {
-  REQUIRE(VS::Content::DataStore::Open("Native\\data").has_value());
+  REQUIRE(VS::Content::DataStore::OpenShared("Native\\data").has_value());
   const auto* store = VS::Content::DataStore::Get();
   const auto catalog = VS::Game::ReadEncounterCatalog(true);
   REQUIRE(catalog.has_value());

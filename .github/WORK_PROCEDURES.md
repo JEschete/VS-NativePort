@@ -59,7 +59,10 @@ history. Verify each change with the smallest builds, Catch2 tags, replays and q
 ### 3. Test
 
 - Write Catch2 tests for the changed behavior under a tag, covering each branch and refusal. Build Debug and run the
-  tag with `build\Debug\VS.Tests.exe "[tag]"`; build Release as well for shared code.
+  tag with `build\Debug\VS.Tests.exe "[tag]"`; build Release as well for shared code. A test that reads the extracted
+  `Native\data` without changing it uses `Content::DataStore::OpenShared` (one store per process), not `Open`
+  (about two seconds each in Debug). Debug runs of the whole suite should exclude the `[extract]` corpus cases
+  (`"~[extract]"`, about 5 minutes); run those in Release (about a minute) when converters or loaders change.
 - Keep each `TEST_CASE` to about 9 assertions. Every Catch2 assertion expands to several statements, and tidy's
   `readability-function-size` limit (80 statements, lambdas included) can still fail callback-heavy cases.
   Guard optional reads in the same function or a guarded value-returning helper; `.value()` or a Catch2 `REQUIRE`

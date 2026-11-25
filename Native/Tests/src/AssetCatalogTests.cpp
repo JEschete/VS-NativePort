@@ -289,6 +289,30 @@ TEST_CASE("Duplicate asset alias keys are not silently replaced",
   CHECK(parsed.error().find("duplicate JSON object key") != std::string::npos);
 }
 
+TEST_CASE("Duplicate keys are found in wide objects without false positives",
+          "[asset-catalog]") {
+  DataRoot root;
+  auto assets = AssetsJson();
+  assets["schema_version"] = 2;
+  const std::string canonical = IdOf(kFiles[0].path);
+  std::string aliases;
+  for (int index = 0; index < 20; ++index) {
+    aliases += std::string(index == 0 ? "" : ",") + "\"asset.compat.k" +
+               std::to_string(index) + "\":\"" + canonical + "\"";
+  }
+  auto base = assets.dump();
+  base.pop_back();
+  const std::string audio = AudioJson().dump();
+  CHECK(Content::AssetCatalog::Parse(base + ",\"aliases\":{" + aliases + "}}",
+                                     audio, root.Path(), 1));
+  const auto parsed = Content::AssetCatalog::Parse(
+      base + ",\"aliases\":{" + aliases + ",\"asset.compat.k7\":\"" +
+          canonical + "\"}}",
+      audio, root.Path(), 1);
+  REQUIRE_FALSE(parsed);
+  CHECK(parsed.error().find("duplicate JSON object key") != std::string::npos);
+}
+
 // A data root opened as the current store with valid catalogs.
 struct OpenCatalog {
   Content::DataStore::ScopedOverride restore;
@@ -724,6 +748,61 @@ TEST_CASE("An invalid catalog fails opening the data",
   const auto missing = Content::DataStore::Open(root.Path());
   REQUIRE_FALSE(missing.has_value());
   CHECK(missing.error().find("cannot read") != std::string::npos);
+}
+
+namespace {
+const Content::DataStore* OpenSharedAt(const DataRoot& root) {
+  const auto opened = Content::DataStore::OpenShared(root.Path());
+  INFO((opened ? "shared store open" : opened.error()));
+  REQUIRE(opened.has_value());
+  return Content::DataStore::Get();
+}
+}  // namespace
+
+TEST_CASE("OpenShared reuses one open store across scopes",
+          "[content][asset-catalog]") {
+  const Content::DataStore::ScopedOverride restore;
+  const DataRoot root;
+  root.WriteManifest(RawEntries());
+  root.WriteCatalogs(AssetsJson(), AudioJson());
+  const Content::DataStore* shared = OpenSharedAt(root);
+  REQUIRE(shared != nullptr);
+  const Content::DataStore::ScopedOverride nested;
+  CHECK(Content::DataStore::Get() == nullptr);
+  CHECK(OpenSharedAt(root) == shared);
+}
+
+TEST_CASE("OpenShared survives a plain Open that issues a new generation",
+          "[content][asset-catalog]") {
+  const Content::DataStore::ScopedOverride restore;
+  const DataRoot root;
+  root.WriteManifest(RawEntries());
+  root.WriteCatalogs(AssetsJson(), AudioJson());
+  const Content::DataStore* shared = OpenSharedAt(root);
+  REQUIRE(shared != nullptr);
+  REQUIRE(shared->Catalog() != nullptr);
+  const std::uint32_t generation = shared->Catalog()->Generation();
+  REQUIRE(Content::DataStore::Open(root.Path()).has_value());
+  CHECK(Content::DataStore::Get()->Catalog()->Generation() != generation);
+  CHECK(OpenSharedAt(root) == shared);
+  CHECK(shared->Catalog()->Generation() == generation);
+}
+
+TEST_CASE("OpenShared reopens when the manifest changes",
+          "[content][asset-catalog]") {
+  const Content::DataStore::ScopedOverride restore;
+  const DataRoot root;
+  root.WriteManifest(RawEntries());
+  root.WriteCatalogs(AssetsJson(), AudioJson());
+  const Content::DataStore* shared = OpenSharedAt(root);
+  std::vector<Content::DataStore::Entry> entries = RawEntries();
+  entries.push_back(
+      {.path = "EXTRA/UNLISTED.BIN", .lba = 900, .size = 1, .form = "raw"});
+  root.WriteManifest(entries);
+  const Content::DataStore* reopened = OpenSharedAt(root);
+  CHECK(reopened != shared);
+  REQUIRE(reopened != nullptr);
+  CHECK(reopened->Find("EXTRA/UNLISTED.BIN") != nullptr);
 }
 
 TEST_CASE("Asset reads fill whole sectors and refuse stale or oversized reads",

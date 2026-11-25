@@ -189,7 +189,7 @@ class Fixture {
     REQUIRE_FALSE(results::InspectLiveGameClear().owns_pages);
     REQUIRE(results::InspectLiveGameClear().state_timer == 0);
     REQUIRE(content::LiveRefusedDiscRecordsInUse() == 0);
-    REQUIRE(content::DataStore::Open(R"(Native\data)").has_value());
+    REQUIRE(content::DataStore::OpenShared(R"(Native\data)").has_value());
     REQUIRE(content::DataStore::Get()->RequireCatalog().has_value());
     REQUIRE(std::ranges::all_of(
         VS::Content::discRequestSlots, [](const auto& slot) {

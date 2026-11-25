@@ -5,7 +5,6 @@
 #include <cstddef>
 #include <format>
 #include <fstream>
-#include <iterator>
 #include <limits>
 #include <ranges>
 #include <set>
@@ -335,9 +334,11 @@ LoadConversionManifest(const fs::path& root) {
     return std::unexpected(
         std::format("cannot open {}", Platform::PathText(path)));
   }
-  const std::vector<char> data{std::istreambuf_iterator<char>(input),
-                               std::istreambuf_iterator<char>()};
-  if (input.bad()) {
+  input.seekg(0, std::ios::end);
+  const std::streamoff size = input.tellg();
+  input.seekg(0, std::ios::beg);
+  std::vector<char> data(size > 0 ? static_cast<std::size_t>(size) : 0);
+  if (size < 0 || !input.read(data.data(), size)) {
     return std::unexpected(
         std::format("cannot read {}", Platform::PathText(path)));
   }

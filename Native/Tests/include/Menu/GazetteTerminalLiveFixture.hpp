@@ -179,7 +179,8 @@ class TerminalFixture
     ImportTable(score::rankText);
     ImportTable(VS::Menu::menuStrings);
     const auto* root = std::getenv("VS_BESTIARY_DATA_ROOT");
-    if (!content::DataStore::Open(root != nullptr ? root : R"(Native\data)")) {
+    if (!content::DataStore::OpenShared(root != nullptr ? root
+                                                        : R"(Native\data)")) {
       throw std::runtime_error("terminal fixture needs extracted data");
     }
     content::ResetLiveDiscDrive();

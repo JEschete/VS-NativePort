@@ -82,7 +82,7 @@ void RelocateTable() {
       &VS::Content::ModulePointerTable::target);
   REQUIRE(table != tables.end());
   const std::filesystem::path root = "Native\\data";
-  if (!VS::Content::DataStore::Open(root)) {
+  if (!VS::Content::DataStore::OpenShared(root)) {
     SKIP("Extracted Native/data is unavailable");
   }
   auto& store = *VS::Content::DataStore::Get();

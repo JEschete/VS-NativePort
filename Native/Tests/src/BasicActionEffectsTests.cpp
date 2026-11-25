@@ -354,7 +354,8 @@ std::vector<std::uint8_t> ReadOriginalModule() {
     REQUIRE(directory != directory.parent_path());
     directory = directory.parent_path();
   }
-  REQUIRE(VS::Content::DataStore::Open((directory / manifest).parent_path()));
+  REQUIRE(
+      VS::Content::DataStore::OpenShared((directory / manifest).parent_path()));
   const auto* store = VS::Content::DataStore::Get();
   REQUIRE(store != nullptr);
   const auto* entry = store->Find("BATTLE/BATTLE.PRG");

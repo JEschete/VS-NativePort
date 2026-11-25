@@ -687,7 +687,7 @@ TEST_CASE(
   const fs::path root = fs::current_path() / "Native" / "data";
   Content::DataStore::ScopedOverride store_scope;
   if (!fs::exists(root / "disc" / "BG")) SKIP("configured disc data absent");
-  REQUIRE(Content::DataStore::Open(root));
+  REQUIRE(Content::DataStore::OpenShared(root));
   const auto* store = Content::DataStore::Get();
   REQUIRE(store != nullptr);
   std::size_t count = 0;

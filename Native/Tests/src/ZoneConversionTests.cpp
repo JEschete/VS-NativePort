@@ -552,7 +552,7 @@ TEST_CASE("Extracted ZND zones load from their tables as exact bytes",
   if (!models) SKIP("Extracted Native/data is unavailable");
   content::DataStore::ScopedOverride restore;
   const auto opened =
-      content::DataStore::Open(models->parent_path().parent_path());
+      content::DataStore::OpenShared(models->parent_path().parent_path());
   INFO(ErrorOf(opened));
   REQUIRE(opened.has_value());
   const content::DataStore* store = content::DataStore::Get();

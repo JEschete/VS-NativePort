@@ -13,7 +13,6 @@
 #include <limits>
 #include <numeric>
 #include <optional>
-#include <set>
 #include <span>
 #include <sstream>
 #include <string>
@@ -65,25 +64,62 @@ std::string Pointer(std::string_view parent, std::size_t index) {
   return std::format("{}/{}", parent, index);
 }
 
+// Reports a key repeated within one object without building a document: the
+// callback parser the DOM would otherwise need costs far more.
+class DuplicateKeyScan final : public nlohmann::json_sax<Json> {
+ public:
+  [[nodiscard]] bool Duplicate() const { return duplicate_; }
+
+  bool null() override { return true; }
+  bool boolean(bool) override { return true; }
+  bool number_integer(number_integer_t) override { return true; }
+  bool number_unsigned(number_unsigned_t) override { return true; }
+  bool number_float(number_float_t, const string_t&) override { return true; }
+  bool string(string_t&) override { return true; }
+  bool binary(binary_t&) override { return true; }
+  bool start_object(std::size_t) override {
+    objects_.emplace_back();
+    return true;
+  }
+  bool key(string_t& name) override {
+    auto& keys = objects_.back();
+    if (keys.size() < kLinearKeys &&
+        std::ranges::find(keys, name) != keys.end()) {
+      duplicate_ = true;
+    }
+    keys.push_back(name);
+    return true;
+  }
+  bool end_object() override {
+    auto& keys = objects_.back();
+    if (keys.size() >= kLinearKeys) {
+      std::ranges::sort(keys);
+      duplicate_ |= std::ranges::adjacent_find(keys) != keys.end();
+    }
+    objects_.pop_back();
+    return true;
+  }
+  bool start_array(std::size_t) override { return true; }
+  bool end_array() override { return true; }
+  bool parse_error(std::size_t, const std::string&,
+                   const nlohmann::detail::exception&) override {
+    return false;
+  }
+
+ private:
+  // Small objects compare as keys arrive; larger ones are sorted once.
+  static constexpr std::size_t kLinearKeys = 16;
+  std::vector<std::vector<std::string>> objects_;
+  bool duplicate_ = false;
+};
+
 std::expected<Json, std::string> ParseText(std::string_view text,
                                            const Errors& errors) {
-  std::vector<std::set<std::string>> keys;
-  bool duplicate = false;
-  const auto check_keys = [&keys, &duplicate](int, Json::parse_event_t event,
-                                              Json& item) {
-    if (event == Json::parse_event_t::object_start) keys.emplace_back();
-    if (event == Json::parse_event_t::key && !keys.empty()) {
-      duplicate =
-          !keys.back().insert(item.get<std::string>()).second || duplicate;
-    }
-    if (event == Json::parse_event_t::object_end && !keys.empty()) {
-      keys.pop_back();
-    }
-    return true;
-  };
-  Json value = Json::parse(text, check_keys, false);
+  DuplicateKeyScan scan;
+  if (!Json::sax_parse(text, &scan)) return errors.Fail("", "not valid JSON");
+  if (scan.Duplicate()) return errors.Fail("", "duplicate JSON object key");
+  Json value = Json::parse(text, nullptr, false);
   if (value.is_discarded()) return errors.Fail("", "not valid JSON");
-  if (duplicate) return errors.Fail("", "duplicate JSON object key");
   return value;
 }
 
@@ -517,6 +553,7 @@ std::expected<AssetCatalog, std::string> AssetCatalog::Parse(
 
   auto audio = ParseAudioCatalog(audio_json, catalog);
   if (!audio) return std::unexpected(audio.error());
+  catalog.audio_ = *audio;
   catalog.audio_ = *audio;
   return catalog;
 }

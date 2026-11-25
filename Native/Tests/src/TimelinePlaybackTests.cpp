@@ -331,7 +331,7 @@ std::vector<std::vector<std::byte>> ExtractedEffectPackages() {
   if (!std::filesystem::exists(root / VS::Content::DataStore::ManifestName)) {
     SKIP("Extracted Native data is unavailable");
   }
-  REQUIRE(VS::Content::DataStore::Open(root));
+  REQUIRE(VS::Content::DataStore::OpenShared(root));
   const VS::Content::DataStore* store = VS::Content::DataStore::Get();
   REQUIRE(store != nullptr);
   std::vector<std::vector<std::byte>> packages;

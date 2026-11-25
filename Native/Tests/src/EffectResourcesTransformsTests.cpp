@@ -2472,7 +2472,7 @@ struct ExtractedClut {
 class ExtractedEffectData {
  public:
   ExtractedEffectData() {
-    if (!VS::Content::DataStore::Open("Native/data")) {
+    if (!VS::Content::DataStore::OpenShared("Native/data")) {
       SKIP("Extracted Native/data is unavailable");
     }
     store_ = VS::Content::DataStore::Get();

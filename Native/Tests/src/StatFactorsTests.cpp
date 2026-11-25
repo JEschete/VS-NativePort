@@ -433,7 +433,7 @@ void RelocateStatTable() {
   if (!std::filesystem::exists(root / VS::Content::DataStore::ManifestName)) {
     SKIP("Extracted Native/data is unavailable");
   }
-  REQUIRE(VS::Content::DataStore::Open(root));
+  REQUIRE(VS::Content::DataStore::OpenShared(root));
   auto& store = *VS::Content::DataStore::Get();
   const auto* module = store.Find("BATTLE/BATTLE.PRG");
   REQUIRE(module != nullptr);

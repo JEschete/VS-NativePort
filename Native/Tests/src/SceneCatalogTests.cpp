@@ -266,7 +266,7 @@ TEST_CASE("Scene trigger offsets cannot alias their own offset table",
 TEST_CASE("Scene inventory covers every original event and animation asset",
           "[.assets][disc-scene-inventory]") {
   VS::Content::DataStore::ScopedOverride restore;
-  REQUIRE(VS::Content::DataStore::Open("Native\\data").has_value());
+  REQUIRE(VS::Content::DataStore::OpenShared("Native\\data").has_value());
   REQUIRE(VS::Content::LoadModuleData() == 0);
   const auto catalog = VS::Game::ReadEncounterCatalog(true);
   REQUIRE(catalog.has_value());

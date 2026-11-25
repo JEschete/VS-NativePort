@@ -167,7 +167,7 @@ std::vector<std::uint8_t> ReadAsset(const char* name) {
   if (!std::filesystem::exists(root / VS::Content::DataStore::ManifestName)) {
     SKIP("Extracted Native data is unavailable");
   }
-  REQUIRE(VS::Content::DataStore::Open(root));
+  REQUIRE(VS::Content::DataStore::OpenShared(root));
   auto* store = VS::Content::DataStore::Get();
   REQUIRE(store != nullptr);
   const auto* asset = store->Find(name);

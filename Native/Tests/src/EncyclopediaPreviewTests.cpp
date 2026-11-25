@@ -1069,7 +1069,7 @@ int ReadQueuedConvertedModel(std::uint16_t model) {
       VS::test_support::ExtractedEventLengths(R"(Native\data\disc\OBJ)"),
       VS::Actors::animationEventLengths.begin());
   VS::Content::DataStore::ScopedOverride restore;
-  const auto opened = VS::Content::DataStore::Open(R"(Native\data)");
+  const auto opened = VS::Content::DataStore::OpenShared(R"(Native\data)");
   INFO(VS::test_support::ErrorOf(opened));
   REQUIRE(opened.has_value());
   const auto* store = VS::Content::DataStore::Get();
