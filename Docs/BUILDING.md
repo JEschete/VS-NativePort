@@ -370,12 +370,12 @@ build\Debug\VS.Extract.exe bestiary Native\data
   `--force`, it does not regenerate gameplay data. Rebuild consumers before
   annotating data used by an older build. See [ASSET_PIPELINE.md](ASSET_PIPELINE.md)
   section 1.2 for sources, binary companions and remaining name work.
-- `authoring` (also run by `tables` and `extract`) migrates generated recipe
-  keys to semantic item identities, retains explicit legacy aliases and
-  quarantines unreferenced stock placeholder tails in import-only provenance.
-  Do not delete a listed import file: it is needed for exact offline
-  reconstruction. See [ASSET_PIPELINE.md](ASSET_PIPELINE.md) section 6.8 for the
-  verified duplicate-name and shield/armor rules and the remaining §4 work.
+- `authoring` (also run by `tables` and `extract`) gives recipes semantic IDs
+  (keeping explicit legacy aliases) and named domains, and moves unread record
+  bytes and placeholder tails to import-only provenance. Trees with `raw.byte*`
+  recipe columns refuse to load until it runs. Keep listed import files: exact
+  offline reconstruction needs them. See [ASSET_PIPELINE.md](ASSET_PIPELINE.md)
+  section 6.8 for the rules and remaining §4 work.
 - `authoring`, `tables` and `extract` also import the native material catalog
   from the executable's G01905 table. Existing trees need
   `VS.Extract tables Native\data` (or `authoring Native\data`) before the

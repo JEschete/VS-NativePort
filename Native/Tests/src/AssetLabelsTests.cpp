@@ -232,6 +232,39 @@ content::WorkshopRecipeTable WithUntitledTail() {
   return table;
 }
 
+// Appends a former raw.byte<N> `column` to the table at `path`, holding
+// `value` in record `row` (1 is the first data row) and 0 elsewhere.
+void AddRawColumn(const fs::path& root, std::string_view path,
+                  std::string_view column, std::size_t row,
+                  std::string_view value) {
+  auto records = Required(content::ParseCsv(Read(root, path), path));
+  std::vector<std::vector<std::string>> rows;
+  for (std::size_t index = 0; index < records.size(); ++index) {
+    auto fields = std::move(records.at(index).fields);
+    fields.emplace_back(index == 0     ? column
+                        : index == row ? value
+                                       : std::string_view("0"));
+    rows.push_back(std::move(fields));
+  }
+  Write(root, path, content::FormatCsv(rows));
+}
+
+// Writes a blade recipe whose results table still has the former raw.byte7
+// (171 in legacy record 1) and raw.byte11 (all 0) columns and a stale schema.
+content::WorkshopRecipeTable WriteRawColumns(const fs::path& root) {
+  const auto table = SmallRecipe(content::WorkshopKind::kBlade);
+  WriteWorkshop(root, table);
+  const std::string path = content::WorkshopTablePath(
+      table.kind, content::WorkshopTablePart::kResults);
+  AddRawColumn(root, path, "raw.byte7", 2, "171");
+  AddRawColumn(root, path, "raw.byte11", 2, "0");
+  Write(root,
+        content::WorkshopSchemaPath(table.kind,
+                                    content::WorkshopTablePart::kResults),
+        "{}\n");
+  return table;
+}
+
 }  // namespace
 
 TEST_CASE("Readable names stop before terminator padding", "[asset-labels]") {
@@ -385,6 +418,45 @@ TEST_CASE("Recipe labels use item names with the original equipment offset",
   const auto pairs = Required(content::ParseCsv(texts.at(1), "pairs"));
   CHECK(pairs.at(1).fields.at(1) ==
         (kind == content::WorkshopKind::kBlade ? "A + A -> A" : "B + B -> B"));
+}
+
+TEST_CASE("Material rule captions name categories and replace retired ones",
+          "[asset-labels]") {
+  ModelRoot root({RecipeNames()});
+  auto table =
+      VS::test_support::FullWorkshopTable(content::WorkshopKind::kArmor);
+  table.materials = {{.first_material = 3,
+                      .first_category = 2,
+                      .second_material = 4,
+                      .second_category = 5,
+                      .material = 5}};
+  WriteWorkshop(root.Root(), table);
+  const std::string path = content::WorkshopTablePath(
+      table.kind, content::WorkshopTablePart::kMaterials);
+  const auto caption = [&root, &path] {
+    return Required(content::ParseCsv(Read(root.Root(), path), path))
+        .at(1)
+        .fields.at(1);
+  };
+  constexpr std::string_view kCaption =
+      "Bronze + Iron -> Hagane (helm + glove)";
+  REQUIRE(extract::LabelNativeAssets(root.Root()));
+  CHECK(caption() == kCaption);
+  EditCell(root.Root(), "display_name",
+           "Bronze + Iron -> Hagane (categories 2 + 5)", path);
+  CHECK(Required(extract::LabelNativeAssets(root.Root())).written == 1);
+  CHECK(caption() == kCaption);
+  EditCell(root.Root(), "display_name", "Owner's rule", path);
+  CHECK(Required(extract::LabelNativeAssets(root.Root())).written == 0);
+  CHECK(caption() == "Owner's rule");
+  const std::string results = content::WorkshopTablePath(
+      table.kind, content::WorkshopTablePart::kResults);
+  EditCell(root.Root(), "display_name", "", results);
+  CHECK(Required(extract::LabelNativeAssets(root.Root())).written == 0);
+  CHECK(Required(content::ParseCsv(Read(root.Root(), results), results))
+            .at(1)
+            .fields.at(1)
+            .empty());
 }
 
 TEST_CASE("Shared model labels retain distinct enemy aliases",
@@ -572,6 +644,67 @@ TEST_CASE(
   CHECK(Required(extract::UpgradeWorkshopAuthoring(root.Root())).written == 0);
 }
 
+TEST_CASE("Former raw record-byte columns move to import provenance",
+          "[workshop-authoring]") {
+  ModelRoot root({RecipeNames()});
+  const auto table = WriteRawColumns(root.Root());
+  const auto report = Required(extract::UpgradeWorkshopAuthoring(root.Root()));
+  CHECK(report.reserved == 1);
+  constexpr auto kResults = content::WorkshopTablePart::kResults;
+  CHECK(Read(root.Root(), content::WorkshopTablePath(table.kind, kResults))
+            .find("raw.") == std::string::npos);
+  CHECK(Read(root.Root(), content::WorkshopSchemaPath(table.kind, kResults)) ==
+        content::FormatTableSchema(
+            content::WorkshopTableSpec(table.kind, kResults)));
+  const std::array reserved{
+      extract::ReservedRecordByte{.legacy_id = 1, .offset = 7, .value = 171}};
+  CHECK(Required(extract::EncodeWorkshopAuthoring(
+            root.Root(), ReadRecipe(root.Root(), table.kind))) ==
+        Required(extract::EncodeSydRecipes(table, reserved)));
+  CHECK(Required(extract::UpgradeWorkshopAuthoring(root.Root())).written == 0);
+}
+
+TEST_CASE("Moved raw record bytes are version 2 import entries",
+          "[workshop-authoring]") {
+  ModelRoot root({RecipeNames()});
+  const auto table = WriteRawColumns(root.Root());
+  REQUIRE(extract::UpgradeWorkshopAuthoring(root.Root()));
+  const auto imported =
+      ReadJson(root.Root(), extract::WorkshopImportPath(table.kind));
+  CHECK(imported.at("schema_version") == 2);
+  REQUIRE(imported.at("reserved_bytes").size() == 1);
+  const auto& entry = imported.at("reserved_bytes").at(0);
+  CHECK(entry.at("legacy_id") == 1);
+  CHECK(entry.at("byte") == 7);
+  CHECK(entry.at("value") == 171);
+}
+
+TEST_CASE("Version 1 recipe imports upgrade without losing records",
+          "[workshop-authoring]") {
+  ModelRoot root({RecipeNames()});
+  const auto table = WithUntitledTail();
+  WriteWorkshop(root.Root(), table);
+  REQUIRE(extract::UpgradeWorkshopAuthoring(root.Root()));
+  const std::string path = extract::WorkshopImportPath(table.kind);
+  auto version1 = ReadJson(root.Root(), path);
+  version1["schema_version"] = 1;
+  auto with_reserved = version1;
+  version1.erase("reserved_bytes");
+  Write(root.Root(), path, content::FormatJsonText(with_reserved) + "\n");
+  const auto refused = extract::UpgradeWorkshopAuthoring(root.Root());
+  REQUIRE_FALSE(refused.has_value());
+  CHECK(refused.error().find("reserved_bytes needs schema_version 2") !=
+        std::string::npos);
+  Write(root.Root(), path, content::FormatJsonText(version1) + "\n");
+  CHECK(Required(extract::UpgradeWorkshopAuthoring(root.Root())).written == 1);
+  const auto upgraded = ReadJson(root.Root(), path);
+  CHECK(upgraded.at("schema_version") == 2);
+  CHECK(upgraded.at("unused_results") == version1.at("unused_results"));
+  CHECK(Required(extract::EncodeWorkshopAuthoring(
+            root.Root(), ReadRecipe(root.Root(), table.kind))) ==
+        Required(extract::EncodeSydRecipes(table)));
+}
+
 TEST_CASE("Edited or referenced untitled records require an explicit identity",
           "[workshop-authoring]") {
   const bool referenced = GENERATE(false, true);
@@ -687,6 +820,7 @@ TEST_CASE(
   table.blades.at(1).damage_type = 2;
   table.blades.at(1).cost_type = 2;
   table.blades.at(1).cost = 3;
+  table.blades.at(1).attack_shape = 4;
   table.materials = {{.first_material = 3,
                       .first_category = 1,
                       .second_material = 4,
@@ -700,6 +834,7 @@ TEST_CASE(
       table.kind, content::WorkshopTablePart::kMaterials);
   CHECK(Read(root.Root(), result_path).find("dagger,edged,risk") !=
         std::string::npos);
+  CHECK(Read(root.Root(), result_path).find(",cone,0") != std::string::npos);
   CHECK(Read(root.Root(), material_path)
             .find("bronze,dagger,iron,sword,hagane") != std::string::npos);
   CHECK(Required(
@@ -707,6 +842,29 @@ TEST_CASE(
         Required(extract::EncodeSydRecipes(table)));
   EditCell(root.Root(), "cost_type", "mana", result_path);
   CHECK_FALSE(extract::UpgradeWorkshopAuthoring(root.Root()));
+}
+
+TEST_CASE("Armor recipe categories are authored by name",
+          "[workshop-authoring]") {
+  ModelRoot root({RecipeNames()});
+  auto table = SmallRecipe(content::WorkshopKind::kArmor);
+  table.materials = {{.first_material = 3,
+                      .first_category = 2,
+                      .second_material = 4,
+                      .second_category = 5,
+                      .material = 5}};
+  WriteWorkshop(root.Root(), table);
+  REQUIRE(extract::UpgradeWorkshopAuthoring(root.Root()));
+  CHECK(Read(root.Root(), content::WorkshopTablePath(
+                              table.kind, content::WorkshopTablePart::kResults))
+            .find(",shield,") != std::string::npos);
+  CHECK(
+      Read(root.Root(), content::WorkshopTablePath(
+                            table.kind, content::WorkshopTablePart::kMaterials))
+          .find("bronze,helm,iron,glove,hagane") != std::string::npos);
+  CHECK(Required(
+            extract::EncodeSydRecipes(ReadRecipe(root.Root(), table.kind))) ==
+        Required(extract::EncodeSydRecipes(table)));
 }
 
 TEST_CASE("Numeric enum aliases cannot create duplicate material rules",

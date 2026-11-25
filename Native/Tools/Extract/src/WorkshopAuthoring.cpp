@@ -34,15 +34,24 @@ namespace {
 namespace fs = std::filesystem;
 using Check = std::expected<void, std::string>;
 using Aliases = std::map<std::string, std::string, std::less<>>;
-using ImportRows = std::map<std::uint32_t, std::vector<std::byte>>;
 using Content::WorkshopKind;
 using Content::WorkshopTablePart;
 constexpr std::uint32_t kEquipmentItemBase = 126;
 constexpr std::uint8_t kShieldCategory = 1;
 constexpr unsigned char kLastAscii = 0x7F;
 constexpr std::string_view kImportSchema = "vs.workshop-import";
+// Version 1 had no reserved_bytes.
+constexpr std::uint64_t kImportVersion = 2;
 constexpr unsigned kHexRadix = 16;
 constexpr std::size_t kHexDigits = 2;
+constexpr std::string_view kRawColumnPrefix = "raw.byte";
+
+// An import file as read: its provenance and its text, if it exists.
+// NOLINTNEXTLINE(bugprone-exception-escape): std::map's noexcept move.
+struct StoredImport {
+  WorkshopImport rows;
+  std::optional<std::string> text;
+};
 
 std::size_t RecordCount(const Content::WorkshopRecipeTable& table) {
   return table.kind == WorkshopKind::kBlade ? table.blades.size()
@@ -74,53 +83,32 @@ std::expected<std::vector<std::byte>, std::string> ImportBytes(
   return record;
 }
 
-Check ImportHeader(const Content::JsonMembers& members,
-                   const Content::WorkshopLayout& layout) {
+std::expected<std::uint64_t, std::string> ImportHeader(
+    const Content::JsonMembers& members,
+    const Content::WorkshopLayout& layout) {
   auto schema = members.String("schema");
   if (!schema) return std::unexpected(schema.error());
-  auto version = members.Unsigned("schema_version", 1);
+  auto version = members.Unsigned("schema_version", kImportVersion);
   if (!version) return std::unexpected(version.error());
   auto source = members.String("source");
   if (!source) return std::unexpected(source.error());
   auto width = members.Unsigned("record_bytes", layout.record_bytes);
   if (!width) return std::unexpected(width.error());
-  if (*schema != kImportSchema || *version != 1 || *source != layout.source ||
+  if (*schema != kImportSchema || *version == 0 || *source != layout.source ||
       *width != layout.record_bytes) {
     return std::unexpected("incompatible workshop import metadata");
   }
-  return {};
+  return *version;
 }
 
-std::expected<ImportRows, std::string> ReadImport(const fs::path& root,
-                                                  WorkshopKind kind) {
-  const std::string relative = WorkshopImportPath(kind);
-  const fs::path path = root / Platform::Utf8Path(relative);
-  std::error_code error;
-  const bool present = fs::is_regular_file(path, error);
-  if (error && error != std::errc::no_such_file_or_directory) {
-    return std::unexpected(std::format("{}: {}", relative, error.message()));
-  }
-  if (!present) return ImportRows{};
-  auto bytes = ReadFileBytes(path);
-  if (!bytes) return std::unexpected(bytes.error());
-  auto json = Content::ParseJsonText(*bytes, relative);
-  if (!json) return std::unexpected(json.error());
-  const Content::JsonMembers members(*json, relative);
-  if (auto only = members.Only({"schema", "schema_version", "source",
-                                "record_bytes", "unused_results"});
-      !only) {
-    return std::unexpected(only.error());
-  }
-  const auto& layout = Content::LayoutOf(kind);
-  if (auto header = ImportHeader(members, layout); !header) {
-    return std::unexpected(std::format("{}: {}", relative, header.error()));
-  }
+Check ReadUnusedResults(const Content::JsonMembers& members,
+                        const Content::WorkshopLayout& layout,
+                        const std::string& relative, WorkshopImport& imported) {
   auto rows = members.Get("unused_results");
   if (!rows) return std::unexpected(rows.error());
   if (!(*rows)->is_array()) {
     return std::unexpected(relative + ": unused_results must be an array");
   }
-  ImportRows imported;
   for (const auto& row : **rows) {
     const Content::JsonMembers item(row, relative + ".unused_results");
     if (auto only = item.Only({"legacy_id", "bytes"}); !only) {
@@ -133,40 +121,109 @@ std::expected<ImportRows, std::string> ReadImport(const fs::path& root,
     auto record = ImportBytes(*text, layout.record_bytes, relative);
     if (!record) return std::unexpected(record.error());
     if (std::to_integer<std::uint32_t>(record->front()) != *legacy ||
-        !imported
+        !imported.unused_results
              .emplace(static_cast<std::uint32_t>(*legacy), std::move(*record))
              .second) {
       return std::unexpected(relative +
                              ": duplicate or mismatched imported id");
     }
   }
-  return imported;
+  return {};
 }
 
-std::string FormatImport(WorkshopKind kind, const ImportRows& rows) {
-  Content::JsonDocument records = Content::JsonDocument::array();
-  for (const auto& [legacy, bytes] : rows) {
-    std::string hex;
-    for (const auto byte : bytes) {
-      hex += std::format("{:02x}", std::to_integer<unsigned>(byte));
+bool SameByte(const ReservedRecordByte& left, const ReservedRecordByte& right) {
+  return left.legacy_id == right.legacy_id && left.offset == right.offset;
+}
+
+Check ReadReservedBytes(const Content::JsonDocument& rows, WorkshopKind kind,
+                        const std::string& relative, WorkshopImport& imported) {
+  if (!rows.is_array()) {
+    return std::unexpected(relative + ": reserved_bytes must be an array");
+  }
+  const std::span<const std::uint8_t> offsets = ReservedRecordOffsets(kind);
+  for (const auto& row : rows) {
+    const Content::JsonMembers item(row, relative + ".reserved_bytes");
+    if (auto only = item.Only({"legacy_id", "byte", "value"}); !only) {
+      return std::unexpected(only.error());
     }
-    records.push_back({{"legacy_id", legacy}, {"bytes", std::move(hex)}});
+    auto legacy = item.Unsigned("legacy_id", UINT8_MAX);
+    if (!legacy) return std::unexpected(legacy.error());
+    auto offset = item.Unsigned("byte", UINT8_MAX);
+    if (!offset) return std::unexpected(offset.error());
+    auto value = item.Unsigned("value", UINT8_MAX);
+    if (!value) return std::unexpected(value.error());
+    if (*value == 0 || std::ranges::find(offsets, *offset) == offsets.end()) {
+      return std::unexpected(
+          std::format("{}: byte {} of record {} is not a non-zero reserved "
+                      "record byte",
+                      relative, *offset, *legacy));
+    }
+    imported.reserved_bytes.push_back(
+        {.legacy_id = static_cast<std::uint32_t>(*legacy),
+         .offset = static_cast<std::uint8_t>(*offset),
+         .value = static_cast<std::uint8_t>(*value)});
+  }
+  std::ranges::sort(imported.reserved_bytes);
+  if (std::ranges::adjacent_find(imported.reserved_bytes, SameByte) !=
+      imported.reserved_bytes.end()) {
+    return std::unexpected(relative + ": a reserved byte is listed twice");
+  }
+  return {};
+}
+
+std::expected<StoredImport, std::string> ReadImport(const fs::path& root,
+                                                    WorkshopKind kind) {
+  const std::string relative = WorkshopImportPath(kind);
+  const fs::path path = root / Platform::Utf8Path(relative);
+  std::error_code error;
+  const bool present = fs::is_regular_file(path, error);
+  if (error && error != std::errc::no_such_file_or_directory) {
+    return std::unexpected(std::format("{}: {}", relative, error.message()));
+  }
+  if (!present) return StoredImport{};
+  auto bytes = ReadFileBytes(path);
+  if (!bytes) return std::unexpected(bytes.error());
+  auto json = Content::ParseJsonText(*bytes, relative);
+  if (!json) return std::unexpected(json.error());
+  const Content::JsonMembers members(*json, relative);
+  if (auto only =
+          members.Only({"schema", "schema_version", "source", "record_bytes",
+                        "unused_results", "reserved_bytes"});
+      !only) {
+    return std::unexpected(only.error());
   }
   const auto& layout = Content::LayoutOf(kind);
-  return Content::FormatJsonText({{"schema", kImportSchema},
-                                  {"schema_version", 1},
-                                  {"source", layout.source},
-                                  {"record_bytes", layout.record_bytes},
-                                  {"unused_results", std::move(records)}}) +
-         "\n";
+  auto version = ImportHeader(members, layout);
+  if (!version) {
+    return std::unexpected(std::format("{}: {}", relative, version.error()));
+  }
+  StoredImport stored{
+      .rows = {},
+      .text = std::string(reinterpret_cast<const char*>(bytes->data()),
+                          bytes->size())};
+  if (auto unused = ReadUnusedResults(members, layout, relative, stored.rows);
+      !unused) {
+    return std::unexpected(unused.error());
+  }
+  if (const Content::JsonDocument* reserved = members.Find("reserved_bytes")) {
+    if (*version < kImportVersion) {
+      return std::unexpected(relative +
+                             ": reserved_bytes needs schema_version 2");
+    }
+    if (auto read = ReadReservedBytes(*reserved, kind, relative, stored.rows);
+        !read) {
+      return std::unexpected(read.error());
+    }
+  }
+  return stored;
 }
 
 std::expected<std::vector<std::byte>, std::string> WithImport(
-    const Content::WorkshopRecipeTable& table, const ImportRows& imported) {
-  auto bytes = EncodeSydRecipes(table);
+    const Content::WorkshopRecipeTable& table, const WorkshopImport& imported) {
+  auto bytes = EncodeSydRecipes(table, imported.reserved_bytes);
   if (!bytes) return std::unexpected(bytes.error());
   std::size_t count = RecordCount(table);
-  for (const auto& [legacy, record] : imported) {
+  for (const auto& [legacy, record] : imported.unused_results) {
     // An explicitly authored definition activates its former unused slot.
     if (legacy < count) continue;
     if (legacy != count) {
@@ -367,7 +424,7 @@ bool StockPlaceholder(const Content::BladeResult& blade) {
 
 std::expected<std::set<std::string>, std::string> QuarantineUnused(
     Content::WorkshopRecipeTable& table, const std::string& results,
-    Naming& names, ImportRows& imported) {
+    Naming& names, WorkshopImport& imported) {
   std::set<std::string> removed;
   if (table.kind != WorkshopKind::kBlade) return removed;
   const auto& layout = Content::LayoutOf(table.kind);
@@ -375,7 +432,7 @@ std::expected<std::set<std::string>, std::string> QuarantineUnused(
       results,
       Content::WorkshopTablePath(table.kind, WorkshopTablePart::kResults));
   if (!captions) return std::unexpected(captions.error());
-  auto source = EncodeSydRecipes(table);
+  auto source = EncodeSydRecipes(table, imported.reserved_bytes);
   if (!source) return std::unexpected(source.error());
   const std::size_t records_at =
       source->size() - table.blades.size() * layout.record_bytes;
@@ -398,10 +455,16 @@ std::expected<std::set<std::string>, std::string> QuarantineUnused(
     const auto bytes = std::span(*source).subspan(
         records_at + last.legacy_id * layout.record_bytes, layout.record_bytes);
     const std::vector<std::byte> record(bytes.begin(), bytes.end());
-    const auto [found, added] = imported.emplace(last.legacy_id, record);
+    const auto [found, added] =
+        imported.unused_results.emplace(last.legacy_id, record);
     if (!added && found->second != record) {
       return std::unexpected("conflicting unused recipe import record");
     }
+    // The archived record holds its reserved bytes itself.
+    std::erase_if(imported.reserved_bytes,
+                  [&last](const ReservedRecordByte& entry) {
+                    return entry.legacy_id == last.legacy_id;
+                  });
     removed.insert(last.id);
     table.blades.pop_back();
   }
@@ -514,56 +577,181 @@ std::expected<bool, std::string> RecordImports(
   return changed;
 }
 
-Check UpgradeTables(const fs::path& root, WorkshopKind kind, Naming& names,
-                    Content::WorkshopRecipeCatalog& catalog,
-                    PendingFiles& files, WorkshopAuthoringReport& report) {
-  auto texts = ReadTables(root, kind);
-  if (!texts) return std::unexpected(texts.error());
-  auto table = Content::ParseWorkshopTables(kind, *texts);
-  if (!table) return std::unexpected(table.error());
-  auto imported = ReadImport(root, kind);
-  if (!imported) return std::unexpected(imported.error());
-  auto original = WithImport(*table, *imported);
-  if (!original) return std::unexpected(original.error());
-  auto removed = QuarantineUnused(
-      *table, texts->at(static_cast<std::size_t>(WorkshopTablePart::kResults)),
-      names, *imported);
-  if (!removed) return std::unexpected(removed.error());
-  report.quarantined += removed->size();
-  if (!removed->empty()) {
-    // Save import-only bytes before removing their rows from authoring files.
-    files.emplace_back(WorkshopImportPath(kind), FormatImport(kind, *imported));
+std::optional<std::uint32_t> WholeNumber(std::string_view text,
+                                         std::uint32_t max) {
+  std::uint32_t value = 0;
+  const char* const first = text.data();
+  const char* const last = first + text.size();
+  const auto parsed = std::from_chars(first, last, value);
+  if (text.empty() || parsed.ec != std::errc() || parsed.ptr != last ||
+      value > max) {
+    return std::nullopt;
   }
-  Aliases aliases;
-  auto named = kind == WorkshopKind::kBlade
-                   ? NameRecords(table->blades, kind, names, aliases, report)
-                   : NameRecords(table->pieces, kind, names, aliases, report);
-  if (!named) return named;
-  if (auto pairs = RenamePairs(*table, aliases); !pairs) {
-    return pairs;
+  return value;
+}
+
+// The reserved record byte a former raw.byte<N> results column held.
+std::optional<std::uint8_t> RawColumnOffset(WorkshopKind kind,
+                                            std::string_view column) {
+  if (!column.starts_with(kRawColumnPrefix)) return std::nullopt;
+  for (const std::uint8_t offset : ReservedRecordOffsets(kind)) {
+    if (column.substr(kRawColumnPrefix.size()) == std::to_string(offset)) {
+      return offset;
+    }
   }
-  auto rebuilt = WithImport(*table, *imported);
-  if (!rebuilt) return std::unexpected(rebuilt.error());
-  if (*original != *rebuilt) {
-    return std::unexpected(
-        std::format("{}: identity migration changed recipe data",
-                    Content::LayoutOf(kind).source));
+  return std::nullopt;
+}
+
+using RawColumns = std::vector<std::pair<std::size_t, std::uint8_t>>;
+
+std::expected<std::size_t, std::string> MoveRawCells(
+    const Content::CsvRecord& record, const std::vector<std::string>& header,
+    std::size_t legacy_index, const RawColumns& raw, std::string_view path,
+    WorkshopImport& imported) {
+  const auto legacy = WholeNumber(record.fields.at(legacy_index), UINT8_MAX);
+  if (!legacy) {
+    return std::unexpected(Content::CellError(
+        path, record.line, header.at(legacy_index), "must be a record number"));
   }
+  std::size_t moved = 0;
+  for (const auto& [index, offset] : raw) {
+    const auto value = WholeNumber(record.fields.at(index), UINT8_MAX);
+    if (!value) {
+      return std::unexpected(Content::CellError(
+          path, record.line, header.at(index), "must be a byte value 0-255"));
+    }
+    if (*value == 0) continue;
+    const ReservedRecordByte entry{.legacy_id = *legacy,
+                                   .offset = offset,
+                                   .value = static_cast<std::uint8_t>(*value)};
+    const auto existing = std::ranges::find_if(
+        imported.reserved_bytes, [&entry](const ReservedRecordByte& other) {
+          return SameByte(entry, other);
+        });
+    if (existing != imported.reserved_bytes.end()) {
+      if (existing->value == entry.value) continue;
+      return std::unexpected(
+          Content::CellError(path, record.line, header.at(index),
+                             "differs from the import file's reserved byte"));
+    }
+    imported.reserved_bytes.push_back(entry);
+    ++moved;
+  }
+  return moved;
+}
+
+// Moves the non-zero values of former raw.byte<N> results columns (record
+// bytes no reader uses) to the import's reserved bytes and drops the columns.
+std::expected<std::size_t, std::string> MoveRawColumns(
+    WorkshopKind kind, std::string& results, WorkshopImport& imported) {
+  const std::string path =
+      Content::WorkshopTablePath(kind, WorkshopTablePart::kResults);
+  auto records = Content::ParseCsv(results, path);
+  if (!records) return std::unexpected(records.error());
+  if (records->empty()) return 0;
+  const std::vector<std::string>& header = records->front().fields;
+  RawColumns raw;
+  for (std::size_t index = 0; index < header.size(); ++index) {
+    if (const auto offset = RawColumnOffset(kind, header[index])) {
+      raw.emplace_back(index, *offset);
+    }
+  }
+  if (raw.empty()) return 0;
+  const auto legacy = std::ranges::find(header, "legacy_id");
+  if (legacy == header.end()) {
+    return std::unexpected(path + ": no legacy_id column");
+  }
+  const auto legacy_index = static_cast<std::size_t>(legacy - header.begin());
+  const auto is_raw = [&raw](std::size_t index) {
+    return std::ranges::any_of(
+        raw, [index](const auto& column) { return column.first == index; });
+  };
+  std::size_t moved = 0;
+  std::vector<std::vector<std::string>> rows;
+  for (std::size_t row = 0; row < records->size(); ++row) {
+    const Content::CsvRecord& record = records->at(row);
+    if (record.fields.size() != header.size()) {
+      return std::unexpected(
+          std::format("{}:{}: has {} fields; the header has {}", path,
+                      record.line, record.fields.size(), header.size()));
+    }
+    if (row > 0) {
+      auto added =
+          MoveRawCells(record, header, legacy_index, raw, path, imported);
+      if (!added) return std::unexpected(added.error());
+      moved += *added;
+    }
+    std::vector<std::string> cells;
+    for (std::size_t index = 0; index < record.fields.size(); ++index) {
+      if (!is_raw(index)) cells.push_back(record.fields[index]);
+    }
+    rows.push_back(std::move(cells));
+  }
+  results = Content::FormatCsv(rows);
+  std::ranges::sort(imported.reserved_bytes);
+  return moved;
+}
+
+// Queues the import file when its provenance is needed or it exists and its
+// text differs (an older version or changed rows).
+void QueueImport(WorkshopKind kind, const StoredImport& stored,
+                 PendingFiles& files) {
+  const bool needed = !stored.rows.unused_results.empty() ||
+                      !stored.rows.reserved_bytes.empty();
+  if (!needed && !stored.text) return;
+  std::string text = FormatWorkshopImport(kind, stored.rows);
+  if (stored.text != text) {
+    files.emplace_back(WorkshopImportPath(kind), std::move(text));
+  }
+}
+
+// Queues each table schema that is missing or differs from its spec.
+Check QueueSchemas(const fs::path& root, WorkshopKind kind,
+                   PendingFiles& files) {
+  for (const auto part : Content::kWorkshopTableParts) {
+    const std::string path = Content::WorkshopSchemaPath(kind, part);
+    std::string expected =
+        Content::FormatTableSchema(Content::WorkshopTableSpec(kind, part));
+    const fs::path file = root / Platform::Utf8Path(path);
+    std::error_code error;
+    const bool present = fs::is_regular_file(file, error);
+    if (error && error != std::errc::no_such_file_or_directory) {
+      return std::unexpected(std::format("{}: {}", path, error.message()));
+    }
+    if (present) {
+      auto bytes = ReadFileBytes(file);
+      if (!bytes) return std::unexpected(bytes.error());
+      if (std::string_view(reinterpret_cast<const char*>(bytes->data()),
+                           bytes->size()) == expected) {
+        continue;
+      }
+    }
+    files.emplace_back(path, std::move(expected));
+  }
+  return {};
+}
+
+// Queues each table whose renamed references or named values differ from
+// the file on disk.
+Check QueueTables(WorkshopKind kind, const Content::WorkshopTexts& texts,
+                  const Content::WorkshopTexts& on_disk, const Aliases& aliases,
+                  const std::set<std::string>& removed, PendingFiles& files,
+                  WorkshopAuthoringReport& report) {
   constexpr std::array<std::string_view, 1> kResultColumns{"id"};
   constexpr std::array<std::string_view, 3> kPairColumns{"first", "second",
                                                          "result"};
   const std::set<std::string> no_removed;
   for (const auto part : Content::kWorkshopTableParts) {
     const std::string path = Content::WorkshopTablePath(kind, part);
-    const auto& original_text = texts->at(static_cast<std::size_t>(part));
-    std::string candidate = original_text;
+    const auto index = static_cast<std::size_t>(part);
+    std::string candidate = texts.at(index);
     if (part != WorkshopTablePart::kMaterials) {
       auto rewritten = RewriteReferences(
           candidate, path, aliases,
           part == WorkshopTablePart::kResults
               ? std::span<const std::string_view>(kResultColumns)
               : std::span<const std::string_view>(kPairColumns),
-          part == WorkshopTablePart::kResults ? *removed : no_removed);
+          part == WorkshopTablePart::kResults ? removed : no_removed);
       if (!rewritten) return std::unexpected(rewritten.error());
       if (part == WorkshopTablePart::kPairs) {
         report.references += rewritten->cells;
@@ -574,9 +762,57 @@ Check UpgradeTables(const fs::path& root, WorkshopKind kind, Naming& names,
         NormalizeEnums(Content::WorkshopTableSpec(kind, part), candidate, path);
     if (!normalized) return std::unexpected(normalized.error());
     report.named_values += normalized->cells;
-    if (normalized->text != original_text) {
+    if (normalized->text != on_disk.at(index)) {
       files.emplace_back(path, std::move(normalized->text));
     }
+  }
+  return {};
+}
+
+Check UpgradeTables(const fs::path& root, WorkshopKind kind, Naming& names,
+                    Content::WorkshopRecipeCatalog& catalog,
+                    PendingFiles& files, WorkshopAuthoringReport& report) {
+  auto texts = ReadTables(root, kind);
+  if (!texts) return std::unexpected(texts.error());
+  const Content::WorkshopTexts on_disk = *texts;
+  auto imported = ReadImport(root, kind);
+  if (!imported) return std::unexpected(imported.error());
+  auto& results =
+      texts->at(static_cast<std::size_t>(WorkshopTablePart::kResults));
+  auto moved = MoveRawColumns(kind, results, imported->rows);
+  if (!moved) return std::unexpected(moved.error());
+  report.reserved += *moved;
+  auto table = Content::ParseWorkshopTables(kind, *texts);
+  if (!table) return std::unexpected(table.error());
+  auto original = WithImport(*table, imported->rows);
+  if (!original) return std::unexpected(original.error());
+  auto removed = QuarantineUnused(*table, results, names, imported->rows);
+  if (!removed) return std::unexpected(removed.error());
+  report.quarantined += removed->size();
+  // Save import-only bytes before removing their rows from authoring files.
+  QueueImport(kind, *imported, files);
+  Aliases aliases;
+  auto named = kind == WorkshopKind::kBlade
+                   ? NameRecords(table->blades, kind, names, aliases, report)
+                   : NameRecords(table->pieces, kind, names, aliases, report);
+  if (!named) return named;
+  if (auto pairs = RenamePairs(*table, aliases); !pairs) {
+    return pairs;
+  }
+  auto rebuilt = WithImport(*table, imported->rows);
+  if (!rebuilt) return std::unexpected(rebuilt.error());
+  if (*original != *rebuilt) {
+    return std::unexpected(
+        std::format("{}: identity migration changed recipe data",
+                    Content::LayoutOf(kind).source));
+  }
+  if (auto queued =
+          QueueTables(kind, *texts, on_disk, aliases, *removed, files, report);
+      !queued) {
+    return queued;
+  }
+  if (auto schemas = QueueSchemas(root, kind, files); !schemas) {
+    return schemas;
   }
   catalog.tables.at(static_cast<std::size_t>(kind)) = std::move(*table);
   return {};
@@ -593,7 +829,33 @@ std::expected<std::vector<std::byte>, std::string> EncodeWorkshopAuthoring(
     const fs::path& root, const Content::WorkshopRecipeTable& table) {
   auto imported = ReadImport(root, table.kind);
   if (!imported) return std::unexpected(imported.error());
-  return WithImport(table, *imported);
+  return WithImport(table, imported->rows);
+}
+
+std::string FormatWorkshopImport(WorkshopKind kind,
+                                 const WorkshopImport& imported) {
+  Content::JsonDocument records = Content::JsonDocument::array();
+  for (const auto& [legacy, bytes] : imported.unused_results) {
+    std::string hex;
+    for (const auto byte : bytes) {
+      hex += std::format("{:02x}", std::to_integer<unsigned>(byte));
+    }
+    records.push_back({{"legacy_id", legacy}, {"bytes", std::move(hex)}});
+  }
+  Content::JsonDocument reserved = Content::JsonDocument::array();
+  for (const ReservedRecordByte& entry : imported.reserved_bytes) {
+    reserved.push_back({{"legacy_id", entry.legacy_id},
+                        {"byte", entry.offset},
+                        {"value", entry.value}});
+  }
+  const auto& layout = Content::LayoutOf(kind);
+  return Content::FormatJsonText({{"schema", kImportSchema},
+                                  {"schema_version", kImportVersion},
+                                  {"source", layout.source},
+                                  {"record_bytes", layout.record_bytes},
+                                  {"unused_results", std::move(records)},
+                                  {"reserved_bytes", std::move(reserved)}}) +
+         "\n";
 }
 
 Check CheckWorkshopImports(const fs::path& root,

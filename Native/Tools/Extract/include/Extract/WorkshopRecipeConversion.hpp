@@ -1,6 +1,8 @@
 #pragma once
 
+#include <compare>
 #include <cstddef>
+#include <cstdint>
 #include <expected>
 #include <filesystem>
 #include <optional>
@@ -30,9 +32,32 @@ namespace VS::Extract {
 // matrix entry must name a record or a material (1-7).
 [[nodiscard]] std::expected<Content::WorkshopRecipeTable, std::string>
 DecodeSydRecipes(Content::WorkshopKind kind, std::span<const std::byte> file);
-// The SYD file `table` makes; DecodeSydRecipes reads it back to `table`.
+
+// A record byte the recipe tables do not hold because the game never reads
+// it: blade bytes 7 and 11 (_combineBlades skips them) and shield and armor
+// byte 7 (_armorInfo). Non-zero values stay import provenance
+// (catalogs/menu/import), not editable columns.
+struct ReservedRecordByte {
+  std::uint32_t legacy_id = 0;
+  std::uint8_t offset = 0;
+  std::uint8_t value = 0;
+
+  auto operator<=>(const ReservedRecordByte&) const = default;
+};
+
+// The record offsets of `kind`'s reserved bytes, in order.
+[[nodiscard]] std::span<const std::uint8_t> ReservedRecordOffsets(
+    Content::WorkshopKind kind);
+// The non-zero reserved bytes of a SYD file, ordered by record and offset.
+[[nodiscard]] std::expected<std::vector<ReservedRecordByte>, std::string>
+DecodeSydReservedBytes(Content::WorkshopKind kind,
+                       std::span<const std::byte> file);
+// The SYD file `table` makes with `reserved` restored (the other reserved
+// bytes are 0); DecodeSydRecipes reads it back to `table`. Each reserved byte
+// must name a record of the table and one of its kind's reserved offsets.
 [[nodiscard]] std::expected<std::vector<std::byte>, std::string>
-EncodeSydRecipes(const Content::WorkshopRecipeTable& table);
+EncodeSydRecipes(const Content::WorkshopRecipeTable& table,
+                 std::span<const ReservedRecordByte> reserved = {});
 
 // A converted table or schema file: its name under catalogs/menu.
 struct TableFile {
@@ -46,7 +71,8 @@ struct ConvertedTables {
 };
 
 // The tables and schemas of one SYD file and its manifest entry. The tables
-// must read back to the decoded ones, and those must rebuild the exact source
+// must read back to the decoded ones, and those with the file's non-zero
+// reserved bytes (kept in its import file) must rebuild the exact source
 // bytes.
 [[nodiscard]] std::expected<ConvertedTables, std::string> ConvertSydRecipes(
     const SourceFile& source);

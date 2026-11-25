@@ -32,14 +32,21 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "The combined item's model."
+      "description": "A combined shield's WEP model number (OBJ/<two hex digits>.WEP, converted to models/weapons/<two hex digits>.gltf); armor results keep 0 and the armor combination does not read it."
     },
     {
       "name": "category",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 7,
-      "description": "The item category: shields 0-1, armor 2-5 (the armor material table is by category 2-5)."
+      "type": "enum",
+      "enum": {
+        "0": "none",
+        "1": "shield",
+        "2": "helm",
+        "3": "breast-armor",
+        "4": "leggings",
+        "5": "glove"
+      },
+      "legacy_numeric_aliases": true,
+      "description": "The item category: shield results use shield, armor results the armor pieces (the armor material rules match helm to glove); none is the empty result."
     },
     {
       "name": "gem_slots",
@@ -68,13 +75,6 @@
       "minimum": -128,
       "maximum": 127,
       "description": "Base agility, before the material's bonus."
-    },
-    {
-      "name": "raw.byte7",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 255,
-      "description": "Record byte 7, not yet named; kept so the record rebuilds exactly."
     }
   ]
 }

@@ -333,11 +333,25 @@ std::string RowLabel(const Table& table, std::size_t row,
       Material(table.Number(row, "second_material")),
       Material(table.Number(row, "material")));
   if (kind != "combination-shield-materials") {
-    label += std::format(" (categories {} + {})",
-                         table.Number(row, "first_category"),
-                         table.Number(row, "second_category"));
+    label += std::format(" ({} + {})", table.Cell(row, "first_category"),
+                         table.Cell(row, "second_category"));
   }
   return label;
+}
+
+// The caption earlier versions generated for a row whose RowLabel has since
+// changed (material rules once showed category numbers), or empty.
+std::string RetiredRowLabel(const Table& table, std::size_t row) {
+  const std::string_view kind = table.spec->name;
+  if (!kind.ends_with("-materials") || kind == "combination-shield-materials") {
+    return {};
+  }
+  return std::format("{} + {} -> {} (categories {} + {})",
+                     Material(table.Number(row, "first_material")),
+                     Material(table.Number(row, "second_material")),
+                     Material(table.Number(row, "material")),
+                     table.Number(row, "first_category"),
+                     table.Number(row, "second_category"));
 }
 
 Check WriteChanged(const fs::path& root, std::string_view file,
@@ -372,6 +386,13 @@ Check LabelTable(const fs::path& root, const Table& table,
     auto cells = table.records.at(row + 1).fields;
     std::string label =
         labeled && !refresh ? cells.at(label_at) : RowLabel(table, row, names);
+    // A generated caption of an older version is not an owner edit.
+    if (labeled && !refresh) {
+      const std::string retired = RetiredRowLabel(table, row);
+      if (!retired.empty() && label == retired) {
+        label = RowLabel(table, row, names);
+      }
+    }
     if (labeled) {
       cells.erase(cells.begin() + static_cast<std::ptrdiff_t>(label_at));
     }

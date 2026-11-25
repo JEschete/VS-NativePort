@@ -15,8 +15,7 @@ converts each file to three CSV tables under `catalogs\menu\` (`Extract/Workshop
 
 - `combination-<kind>-results.csv`: one row per result definition, with a semantic `id` (`blade.battle-knife`) and
   its compatibility `legacy_id` (the record index the original matrices use; record 0 of each kind is the empty
-  one). Named enum domains and removal of remaining `raw.byte7`/`raw.byte11` authoring columns are still required by
-  §4; semantic IDs alone do not complete that work.
+  one). Record bytes the original never reads are not columns (see reserved bytes below).
 - `combination-<kind>-pairs.csv`: result ids, one row per ingredient pair that makes something.
 - `combination-<kind>-materials.csv`: one row per combination that gives a material.
 
@@ -55,13 +54,27 @@ provenance**, not another item catalog. The game does not read these records; th
 custom caption is not discarded: it needs an explicit authoring identity. Explicitly authoring a former unused slot
 takes precedence over its archived original.
 
+Result records also have reserved bytes: blade bytes 7 and 11 and shield/armor byte 7. `combineBlades`,
+`combineShields` and `combineArmor` (`MENUC.PRG/168.c`) never read them, and they are zero on the US disc, so they
+are not table columns. A non-zero value is kept in the same import file's `reserved_bytes` list (schema version 2) by `legacy_id`
+and offset. Only the offline export writes it back. `authoring` moves the former `raw.byte7`/`raw.byte11` columns
+there, dropping zeros, and upgrades version 1 import files. A tree that still has those columns refuses to load
+until `authoring` runs.
+
 Result schemas describe their old-ID alias pattern. Readers resolve aliases through `legacy_id`, normalize pairs to
 current IDs and reject ambiguous aliases or duplicate resolved directed pairs. Old numeric identifiers do not remain
 the primary authoring keys, and renaming a display label does not rename an ID.
 
 The same pass writes verified domains as names: materials (`bronze`, `iron`, `hagane`, etc.), blade categories
-(`dagger`, `axe-mace`, `heavy-mace`, etc.), damage (`blunt`, `edged`, `piercing`) and resource cost (`mp`, `risk`,
-`hp`, `weapon-pp`, or `none` with zero cost). Each CSV schema carries its code-to-name `enum` map. Numeric aliases
+(`dagger`, `axe-mace`, `heavy-mace`, etc.), damage (`blunt`, `edged`, `piercing`), resource cost (`mp`, `risk`,
+`hp`, `weapon-pp`, or `none` with zero cost), attack shapes (`ellipsoid`, `cone`, `rectangle`, etc., the targeting
+volumes that actions' `range_shape` also uses) and armor categories (`shield`, `helm`, `breast-armor`, `leggings`,
+`glove`; armor material rules accept only the last four). Each CSV schema carries its code-to-name `enum` map.
+Generated material-rule captions name the categories (`Bronze + Iron -> Hagane (helm + glove)`); `labels` replaces
+the old `(categories N + M)` captions it generated but keeps edited ones.
+
+`model` is the blade or shield WEP number (`OBJ/<hex>.WEP`, converted to `models/weapons/<hex>.gltf`); armor
+results keep 0. It stays a number until item definitions reference model assets (#204, #58). Numeric aliases
 remain explicitly accepted for legacy imports; the authoring pass emits canonical names, and key comparisons
 normalize aliases so numeric/named spellings cannot create duplicate rules.
 

@@ -96,8 +96,6 @@ struct BladeResult {
   std::uint8_t range_z = 0;
   std::uint8_t attack_shape = 0;
   std::uint8_t attack_angle = 0;
-  std::uint8_t raw_byte7 = 0;   // unnamed, kept (§4.1)
-  std::uint8_t raw_byte11 = 0;  // unnamed, kept (§4.1)
 
   bool operator==(const BladeResult&) const = default;
 };
@@ -111,7 +109,6 @@ struct PieceResult {
   std::uint8_t category = 0;
   std::uint8_t gem_slots = 0;
   WorkshopStats stats;
-  std::uint8_t raw_byte7 = 0;  // unnamed, kept (§4.1)
 
   bool operator==(const PieceResult&) const = default;
 };

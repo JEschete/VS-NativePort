@@ -1,10 +1,14 @@
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
+#include <format>
 #include <fstream>
+#include <functional>
 #include <iterator>
 #include <optional>
+#include <span>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -22,6 +26,7 @@
 #include "Extract/ImageConversion.hpp"
 #include "Extract/ShpModelConversion.hpp"
 #include "Extract/WepModelConversion.hpp"
+#include "Extract/WorkshopAuthoring.hpp"
 #include "Extract/WorkshopRecipeConversion.hpp"
 #include "Extract/ZndConversion.hpp"
 #include "Extract/ZudConversion.hpp"
@@ -82,17 +87,59 @@ content::WorkshopRecipeTable SampleTable(WorkshopKind kind) {
     blade.range_z = 12;
     blade.attack_shape = 5;
     blade.attack_angle = 18;
-    blade.raw_byte7 = 0xAB;
-    blade.raw_byte11 = 0xCD;
   } else {
     content::PieceResult& piece = table.pieces.at(1);
     piece.model = 9;
-    piece.category = 7;
+    piece.category = kind == WorkshopKind::kShield ? 1 : 5;
     piece.gem_slots = 3;
     piece.stats = stats;
-    piece.raw_byte7 = 0xEF;
   }
   return table;
+}
+
+// A non-zero value for each of `kind`'s reserved bytes in record 1.
+std::vector<extract::ReservedRecordByte> SampleReserved(WorkshopKind kind) {
+  std::vector<extract::ReservedRecordByte> reserved;
+  for (const std::uint8_t offset : extract::ReservedRecordOffsets(kind)) {
+    reserved.push_back({.legacy_id = 1,
+                        .offset = offset,
+                        .value = static_cast<std::uint8_t>(0xA0 + offset)});
+  }
+  return reserved;
+}
+
+// A sample table of `kind` encoded with SampleReserved's bytes.
+struct ReservedSample {
+  content::WorkshopRecipeTable table;
+  std::vector<extract::ReservedRecordByte> reserved;
+  std::vector<std::byte> bytes;
+};
+
+ReservedSample EncodedReservedSample(WorkshopKind kind) {
+  ReservedSample sample{.table = SampleTable(kind),
+                        .reserved = SampleReserved(kind),
+                        .bytes = {}};
+  auto bytes = extract::EncodeSydRecipes(sample.table, sample.reserved);
+  REQUIRE(bytes.has_value());
+  sample.bytes = std::move(*bytes);
+  return sample;
+}
+
+// Converts `bytes` as `kind`'s SYD file.
+extract::ConvertedTables ConvertSyd(WorkshopKind kind,
+                                    std::vector<std::byte> bytes) {
+  auto converted = extract::ConvertSydRecipes(
+      {.path = std::string(content::LayoutOf(kind).source),
+       .bytes = std::move(bytes)});
+  INFO((converted ? std::string{} : converted.error()));
+  REQUIRE(converted.has_value());
+  return std::move(*converted);
+}
+
+// Whether `file` is `kind`'s import provenance file.
+bool IsImportFile(WorkshopKind kind, const extract::TableFile& file) {
+  return std::format("{}/{}", content::kWorkshopTableDirectory, file.name) ==
+         extract::WorkshopImportPath(kind);
 }
 
 std::size_t WordAt(const std::vector<std::byte>& bytes, std::size_t offset) {
@@ -240,6 +287,24 @@ constexpr std::array kTableEdits{
                     "second_category,material\n0,1,0,2,3\n",
               .error = "catalogs/menu/combination-armor-materials.csv:2: "
                        "column 'first_category': 1 is outside 2..5"},
+    TableEdit{.kind = WorkshopKind::kArmor,
+              .part = WorkshopTablePart::kMaterials,
+              .from = {},
+              .to = "first_material,first_category,second_material,"
+                    "second_category,material\n0,shield,0,helm,3\n",
+              .error = "catalogs/menu/combination-armor-materials.csv:2: "
+                       "column 'first_category': 'shield' is not one of "
+                       "[helm, breast-armor, leggings, glove] or its legacy "
+                       "code"},
+    TableEdit{.kind = WorkshopKind::kBlade,
+              .part = WorkshopTablePart::kResults,
+              .from = "5,18\n",
+              .to = "sphere,18\n",
+              .error = "catalogs/menu/combination-blade-results.csv:3: "
+                       "column 'attack_shape': 'sphere' is not one of [none, "
+                       "ellipsoid, centered-cylinder, cylinder, cone, "
+                       "reversed-cone, rectangle, diamond] or its legacy "
+                       "code"},
 };
 
 // The shield results table of a converted data root, as generated and as
@@ -358,10 +423,10 @@ TEST_CASE("Workshop recipe tables read rows and columns in any order",
   // line ends and a blank line.
   std::string& results = texts[0];
   results = Replaced(results,
-                     "shield-015,15,0,0,0,0,0,0,0\n"
-                     "shield-016,16,0,0,0,0,0,0,0\n",
-                     "shield-016,16,0,0,0,0,0,0,0\n"
-                     "shield-015,15,0,0,0,0,0,0,0\n");
+                     "shield-015,15,0,0,0,0,0,0\n"
+                     "shield-016,16,0,0,0,0,0,0\n",
+                     "shield-016,16,0,0,0,0,0,0\n"
+                     "shield-015,15,0,0,0,0,0,0\n");
   texts[1] =
       "\xEF\xBB\xBF"
       "result,first,second\r\n"
@@ -425,6 +490,104 @@ TEST_CASE("SYD decoding refuses files outside the recipe layout",
   const auto decoded = extract::DecodeSydRecipes(WorkshopKind::kShield, bytes);
   REQUIRE_FALSE(decoded.has_value());
   CHECK(decoded.error() == error);
+}
+
+TEST_CASE("Reserved SYD record bytes round-trip outside the recipe tables",
+          "[content-tables][workshop]") {
+  const WorkshopKind kind = GENERATE(
+      WorkshopKind::kBlade, WorkshopKind::kShield, WorkshopKind::kArmor);
+  CAPTURE(content::LayoutOf(kind).name);
+  const ReservedSample sample = EncodedReservedSample(kind);
+  const auto plain = extract::EncodeSydRecipes(sample.table);
+  REQUIRE(plain.has_value());
+  CHECK(sample.bytes != *plain);
+  const auto decoded = extract::DecodeSydRecipes(kind, sample.bytes);
+  REQUIRE(decoded.has_value());
+  CHECK(*decoded == sample.table);
+  const auto restored = extract::DecodeSydReservedBytes(kind, sample.bytes);
+  REQUIRE(restored.has_value());
+  CHECK(*restored == sample.reserved);
+}
+
+TEST_CASE("SYD encoding refuses bytes outside the reserved record offsets",
+          "[content-tables][workshop]") {
+  const WorkshopKind kind = GENERATE(
+      WorkshopKind::kBlade, WorkshopKind::kShield, WorkshopKind::kArmor);
+  CAPTURE(content::LayoutOf(kind).name);
+  const content::WorkshopRecipeTable table = SampleTable(kind);
+  const auto records =
+      static_cast<std::uint32_t>(table.blades.size() + table.pieces.size());
+  const std::array misplaced{
+      extract::ReservedRecordByte{.legacy_id = 1, .offset = 6, .value = 1},
+      extract::ReservedRecordByte{
+          .legacy_id = records, .offset = 7, .value = 1}};
+  for (const extract::ReservedRecordByte& entry : misplaced) {
+    const auto refused = extract::EncodeSydRecipes(table, std::span(&entry, 1));
+    REQUIRE_FALSE(refused.has_value());
+    CHECK(refused.error().find("is not a reserved byte") != std::string::npos);
+  }
+}
+
+TEST_CASE("SYD conversion keeps non-zero reserved bytes as import provenance",
+          "[content-tables][workshop]") {
+  const WorkshopKind kind = GENERATE(
+      WorkshopKind::kBlade, WorkshopKind::kShield, WorkshopKind::kArmor);
+  CAPTURE(content::LayoutOf(kind).name);
+  const ReservedSample sample = EncodedReservedSample(kind);
+  const extract::ConvertedTables converted = ConvertSyd(kind, sample.bytes);
+  CHECK(std::ranges::find(converted.output.files,
+                          extract::WorkshopImportPath(kind)) !=
+        converted.output.files.end());
+  const auto file = std::ranges::find_if(converted.files,
+                                         std::bind_front(IsImportFile, kind));
+  REQUIRE(file != converted.files.end());
+  CHECK(file->text ==
+        extract::FormatWorkshopImport(
+            kind, {.unused_results = {}, .reserved_bytes = sample.reserved}));
+}
+
+TEST_CASE("SYD conversion writes no import file without reserved bytes",
+          "[content-tables][workshop]") {
+  const WorkshopKind kind = GENERATE(
+      WorkshopKind::kBlade, WorkshopKind::kShield, WorkshopKind::kArmor);
+  CAPTURE(content::LayoutOf(kind).name);
+  const auto plain = extract::EncodeSydRecipes(SampleTable(kind));
+  REQUIRE(plain.has_value());
+  const extract::ConvertedTables converted = ConvertSyd(kind, *plain);
+  CHECK(std::ranges::none_of(converted.files,
+                             std::bind_front(IsImportFile, kind)));
+  CHECK(std::ranges::find(converted.output.files,
+                          extract::WorkshopImportPath(kind)) ==
+        converted.output.files.end());
+}
+
+TEST_CASE("Converted reserved bytes survive kept conversions and rebuild SYD",
+          "[content-tables][workshop]") {
+  WorkshopRecipeRoot root;
+  root.WriteSources();
+  constexpr WorkshopKind kShield = WorkshopKind::kShield;
+  const content::WorkshopRecipeTable& table = root.Table(kShield);
+  const std::vector<extract::ReservedRecordByte> reserved{
+      {.legacy_id = 2, .offset = 7, .value = 0x5A}};
+  const auto bytes = extract::EncodeSydRecipes(table, reserved);
+  REQUIRE(bytes.has_value());
+  {
+    std::ofstream syd(
+        root.Root() / "disc" / fs::path(content::LayoutOf(kShield).source),
+        std::ios::binary | std::ios::trunc);
+    syd.write(reinterpret_cast<const char*>(bytes->data()),
+              static_cast<std::streamsize>(bytes->size()));
+    REQUIRE(syd.good());
+  }
+  CHECK(root.Convert(false).converted == 3);
+  CHECK(
+      fs::is_regular_file(root.Root() / extract::WorkshopImportPath(kShield)));
+  const auto kept = root.Convert(false);
+  CHECK(kept.unchanged == 3);
+  CHECK(kept.removed == 0);
+  const auto rebuilt = extract::EncodeWorkshopAuthoring(root.Root(), table);
+  REQUIRE(rebuilt.has_value());
+  CHECK(*rebuilt == *bytes);
 }
 
 TEST_CASE("Converted workshop tables keep edits across conversions",

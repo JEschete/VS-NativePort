@@ -60,11 +60,11 @@ enum BladeByte : std::uint8_t {
   kBladeCostTypeByte,
   kBladeCostByte,
   kBladeRecoveryDelayByte,
-  kBladeRaw7Byte,
+  kBladeReserved7Byte,
   kBladeStrengthByte,
   kBladeIntelligenceByte,
   kBladeAgilityByte,
-  kBladeRaw11Byte,
+  kBladeReserved11Byte,
   kBladeRangeByte,
   kBladeRangeYByte,
   kBladeRangeZByte,
@@ -79,7 +79,7 @@ enum PieceByte : std::uint8_t {
   kPieceStrengthByte,
   kPieceIntelligenceByte,
   kPieceAgilityByte,
-  kPieceRaw7Byte,
+  kPieceReserved7Byte,
 };
 // The shape byte: the shape in bits 0-2, the angle in bits 3-7.
 constexpr unsigned kAngleShift = 3;
@@ -166,9 +166,7 @@ BladeResult BladeAt(const WorkshopLayout& layout,
           .range_y = ByteAt(record, kBladeRangeYByte),
           .range_z = ByteAt(record, kBladeRangeZByte),
           .attack_shape = static_cast<std::uint8_t>(shape & kShapeMask),
-          .attack_angle = static_cast<std::uint8_t>(shape >> kAngleShift),
-          .raw_byte7 = ByteAt(record, kBladeRaw7Byte),
-          .raw_byte11 = ByteAt(record, kBladeRaw11Byte)};
+          .attack_angle = static_cast<std::uint8_t>(shape >> kAngleShift)};
 }
 
 PieceResult PieceAt(const WorkshopLayout& layout,
@@ -180,8 +178,7 @@ PieceResult PieceAt(const WorkshopLayout& layout,
           .gem_slots = ByteAt(record, kPieceGemSlotsByte),
           .stats = {.strength = SignedAt(record, kPieceStrengthByte),
                     .intelligence = SignedAt(record, kPieceIntelligenceByte),
-                    .agility = SignedAt(record, kPieceAgilityByte)},
-          .raw_byte7 = ByteAt(record, kPieceRaw7Byte)};
+                    .agility = SignedAt(record, kPieceAgilityByte)}};
 }
 
 std::expected<void, std::string> DecodeRecords(const WorkshopLayout& layout,
@@ -312,11 +309,9 @@ void PutBlade(std::span<std::byte> record, const BladeResult& blade) {
   PutByte(record, kBladeCostTypeByte, blade.cost_type);
   PutByte(record, kBladeCostByte, blade.cost);
   PutByte(record, kBladeRecoveryDelayByte, blade.recovery_delay);
-  PutByte(record, kBladeRaw7Byte, blade.raw_byte7);
   PutByte(record, kBladeStrengthByte, blade.stats.strength);
   PutByte(record, kBladeIntelligenceByte, blade.stats.intelligence);
   PutByte(record, kBladeAgilityByte, blade.stats.agility);
-  PutByte(record, kBladeRaw11Byte, blade.raw_byte11);
   PutByte(record, kBladeRangeByte, blade.range);
   PutByte(record, kBladeRangeYByte, blade.range_y);
   PutByte(record, kBladeRangeZByte, blade.range_z);
@@ -332,7 +327,26 @@ void PutPiece(std::span<std::byte> record, const PieceResult& piece) {
   PutByte(record, kPieceStrengthByte, piece.stats.strength);
   PutByte(record, kPieceIntelligenceByte, piece.stats.intelligence);
   PutByte(record, kPieceAgilityByte, piece.stats.agility);
-  PutByte(record, kPieceRaw7Byte, piece.raw_byte7);
+}
+
+// Restores `reserved` into the records an encoded table starts at `records`.
+std::expected<void, std::string> PutReserved(
+    WorkshopKind kind, std::span<std::byte> records,
+    std::span<const ReservedRecordByte> reserved) {
+  const WorkshopLayout& layout = LayoutOf(kind);
+  const std::size_t count = records.size() / layout.record_bytes;
+  const std::span<const std::uint8_t> offsets = ReservedRecordOffsets(kind);
+  for (const ReservedRecordByte& entry : reserved) {
+    if (entry.legacy_id >= count ||
+        std::ranges::find(offsets, entry.offset) == offsets.end()) {
+      return std::unexpected(std::format(
+          "{}: byte {} of record {} is not a reserved byte of a recipe record",
+          layout.source, entry.offset, entry.legacy_id));
+    }
+    records[(entry.legacy_id * layout.record_bytes) + entry.offset] =
+        std::byte{entry.value};
+  }
+  return {};
 }
 
 std::string OutputIdOf(WorkshopKind kind) {
@@ -417,8 +431,39 @@ std::expected<WorkshopRecipeTable, std::string> DecodeSydRecipes(
   return table;
 }
 
+std::span<const std::uint8_t> ReservedRecordOffsets(WorkshopKind kind) {
+  // Record bytes no reader uses (ReservedRecordByte).
+  static constexpr std::array<std::uint8_t, 2> kBlade{kBladeReserved7Byte,
+                                                      kBladeReserved11Byte};
+  static constexpr std::array<std::uint8_t, 1> kPiece{kPieceReserved7Byte};
+  if (kind == WorkshopKind::kBlade) return kBlade;
+  return kPiece;
+}
+
+std::expected<std::vector<ReservedRecordByte>, std::string>
+DecodeSydReservedBytes(WorkshopKind kind, std::span<const std::byte> file) {
+  const WorkshopLayout& layout = LayoutOf(kind);
+  const SydLayout syd = SydLayoutOf(layout);
+  if (auto framed = CheckFrame(layout, syd, file); !framed) {
+    return std::unexpected(framed.error());
+  }
+  std::vector<ReservedRecordByte> reserved;
+  for (std::size_t legacy = 0; legacy < syd.records; ++legacy) {
+    const std::size_t record = syd.offsets[2] + (legacy * layout.record_bytes);
+    for (const std::uint8_t offset : ReservedRecordOffsets(kind)) {
+      const std::uint8_t value = ByteAt(file, record + offset);
+      if (value == 0) continue;
+      reserved.push_back({.legacy_id = static_cast<std::uint32_t>(legacy),
+                          .offset = offset,
+                          .value = value});
+    }
+  }
+  return reserved;
+}
+
 std::expected<std::vector<std::byte>, std::string> EncodeSydRecipes(
-    const WorkshopRecipeTable& table) {
+    const WorkshopRecipeTable& table,
+    std::span<const ReservedRecordByte> reserved) {
   const WorkshopLayout& layout = LayoutOf(table.kind);
   auto matrices = Content::DenseWorkshopTables(table);
   if (!matrices) return std::unexpected(matrices.error());
@@ -445,6 +490,9 @@ std::expected<std::vector<std::byte>, std::string> EncodeSydRecipes(
     PutPiece(records.subspan(index * layout.record_bytes, layout.record_bytes),
              table.pieces[index]);
   }
+  if (auto restored = PutReserved(table.kind, records, reserved); !restored) {
+    return std::unexpected(restored.error());
+  }
   return file;
 }
 
@@ -457,6 +505,8 @@ std::expected<ConvertedTables, std::string> ConvertSydRecipes(
   }
   auto decoded = DecodeSydRecipes(*kind, source.bytes);
   if (!decoded) return std::unexpected(decoded.error());
+  auto reserved = DecodeSydReservedBytes(*kind, source.bytes);
+  if (!reserved) return std::unexpected(reserved.error());
   const Content::WorkshopTexts texts = Content::FormatWorkshopTables(*decoded);
   auto parsed = Content::ParseWorkshopTables(*kind, texts);
   if (!parsed) {
@@ -469,7 +519,7 @@ std::expected<ConvertedTables, std::string> ConvertSydRecipes(
         std::format("{}: the converted tables read back to different recipes",
                     source.path));
   }
-  auto encoded = EncodeSydRecipes(*parsed);
+  auto encoded = EncodeSydRecipes(*parsed, *reserved);
   if (!encoded) {
     return std::unexpected(std::format("{}: {}", source.path, encoded.error()));
   }
@@ -498,6 +548,14 @@ std::expected<ConvertedTables, std::string> ConvertSydRecipes(
         {.name = FileNameOf(Content::WorkshopSchemaPath(*kind, part)),
          .text = Content::FormatTableSchema(
              Content::WorkshopTableSpec(*kind, part))});
+  }
+  if (!reserved->empty()) {
+    const std::string import_path = WorkshopImportPath(*kind);
+    converted.output.files.push_back(import_path);
+    converted.files.push_back(
+        {.name = FileNameOf(import_path),
+         .text = FormatWorkshopImport(
+             *kind, {.unused_results = {}, .reserved_bytes = *reserved})});
   }
   return converted;
 }

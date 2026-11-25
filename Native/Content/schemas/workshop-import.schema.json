@@ -2,13 +2,13 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/JEschete/VS-NativePort/blob/main/Native/Content/schemas/workshop-import.schema.json",
   "title": "vs.workshop-import",
-  "description": "Import-only recipe records, not item definitions or gameplay inputs. Unreferenced stock untitled tail records remain available for lossless offline reconstruction. The game does not read them.",
+  "description": "Import-only recipe provenance, not item definitions or gameplay inputs. Unreferenced stock untitled tail records and the non-zero record bytes no reader uses (blade bytes 7 and 11, shield and armor byte 7) remain available for lossless offline reconstruction. The game does not read them. Version 1 had no reserved_bytes.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema", "schema_version", "source", "record_bytes", "unused_results"],
   "properties": {
     "schema": { "const": "vs.workshop-import" },
-    "schema_version": { "const": 1 },
+    "schema_version": { "enum": [1, 2] },
     "source": { "enum": ["MENU/BLADE.SYD", "MENU/SHIELD.SYD", "MENU/ARMOR.SYD"] },
     "record_bytes": { "enum": [8, 16] },
     "unused_results": {
@@ -24,6 +24,20 @@
             "type": "string",
             "pattern": "^(?:[0-9a-f]{16}|[0-9a-f]{32})$"
           }
+        }
+      }
+    },
+    "reserved_bytes": {
+      "type": "array",
+      "description": "Non-zero bytes of the recipe records that the tables do not hold; the other reserved bytes are 0.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["legacy_id", "byte", "value"],
+        "properties": {
+          "legacy_id": { "type": "integer", "minimum": 0, "maximum": 255 },
+          "byte": { "enum": [7, 11] },
+          "value": { "type": "integer", "minimum": 1, "maximum": 255 }
         }
       }
     }

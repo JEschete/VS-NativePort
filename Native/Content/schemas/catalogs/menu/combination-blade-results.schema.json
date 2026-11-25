@@ -32,7 +32,7 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "The combined item's model."
+      "description": "The combined blade's WEP model number: OBJ/<two hex digits>.WEP, converted to models/weapons/<two hex digits>.gltf."
     },
     {
       "name": "category",
@@ -135,10 +135,19 @@
     },
     {
       "name": "attack_shape",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 7,
-      "description": "The attack area's shape (the shape byte's low three bits)."
+      "type": "enum",
+      "enum": {
+        "0": "none",
+        "1": "ellipsoid",
+        "2": "centered-cylinder",
+        "3": "cylinder",
+        "4": "cone",
+        "5": "reversed-cone",
+        "6": "rectangle",
+        "7": "diamond"
+      },
+      "legacy_numeric_aliases": true,
+      "description": "The base attack's targeting volume (the shape byte's low three bits); actions' range_shape uses the same domain."
     },
     {
       "name": "attack_angle",
@@ -146,20 +155,6 @@
       "minimum": 0,
       "maximum": 31,
       "description": "The attack area's angle (the shape byte's high five bits)."
-    },
-    {
-      "name": "raw.byte7",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 255,
-      "description": "Record byte 7, not yet named; kept so the record rebuilds exactly."
-    },
-    {
-      "name": "raw.byte11",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 255,
-      "description": "Record byte 11, not yet named; kept so the record rebuilds exactly."
     }
   ]
 }

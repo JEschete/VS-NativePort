@@ -33,7 +33,8 @@ constexpr std::int64_t kDamageTypeMax = 3;
 constexpr std::int64_t kCostTypeMax = 4;
 constexpr std::int64_t kAttackShapeMax = 7;
 constexpr std::int64_t kAttackAngleMax = 31;
-constexpr std::int64_t kPieceCategoryMax = 7;
+constexpr std::int64_t kPieceCategoryMax = 5;
+constexpr std::int64_t kFirstArmorCategory = 2;
 constexpr std::int64_t kGemSlotsMax = 3;
 constexpr std::int64_t kFirstMaterial = 1;
 constexpr std::int64_t kLastMaterial = 7;
@@ -136,7 +137,15 @@ constexpr std::string_view kLegacyIdText{
     "The original record index: the combined item's sub id (and, for blades, "
     "its id; shields and armor add 126). Runs from 0 without gaps.",
 };
-constexpr std::string_view kModelText = "The combined item's model.";
+constexpr std::string_view kBladeModelText{
+    "The combined blade's WEP model number: OBJ/<two hex digits>.WEP, "
+    "converted to models/weapons/<two hex digits>.gltf.",
+};
+constexpr std::string_view kPieceModelText{
+    "A combined shield's WEP model number (OBJ/<two hex digits>.WEP, "
+    "converted to models/weapons/<two hex digits>.gltf); armor results keep 0 "
+    "and the armor combination does not read it.",
+};
 constexpr std::string_view kStrengthText{
     "Base strength, before the material's bonus.",
 };
@@ -146,10 +155,6 @@ constexpr std::string_view kIntelligenceText{
 constexpr std::string_view kAgilityText{
     "Base agility, before the material's bonus.",
 };
-constexpr std::string_view kRawByte7Text{
-    "Record byte 7, not yet named; kept so the record rebuilds exactly.",
-};
-
 enum BladeColumn : std::uint8_t {
   kBladeId,
   kBladeLegacyId,
@@ -167,14 +172,12 @@ enum BladeColumn : std::uint8_t {
   kBladeRangeZ,
   kBladeAttackShape,
   kBladeAttackAngle,
-  kBladeRawByte7,
-  kBladeRawByte11,
 };
 
 constexpr std::array kBladeResultColumns{
     Id("id", kIdText),
     Integer("legacy_id", 0, kMaxLegacyId, kLegacyIdText),
-    Integer("model", 0, kByteMax, kModelText),
+    Integer("model", 0, kByteMax, kBladeModelText),
     Enumeration("category", 0, kBladeCategoryMax, kBladeCategories,
                 "The blade category; material rules use the same domain."),
     Enumeration("damage_type", 0, kDamageTypeMax, kDamageTypes,
@@ -190,16 +193,13 @@ constexpr std::array kBladeResultColumns{
     Integer("range", 0, kByteMax, "The attack's reach."),
     Integer("range_y", 0, kByteMax, "The attack area's second extent."),
     Integer("range_z", 0, kByteMax, "The attack area's third extent."),
-    Integer("attack_shape", 0, kAttackShapeMax,
-            "The attack area's shape (the shape byte's low three bits)."),
+    Enumeration("attack_shape", 0, kAttackShapeMax, kVolumeShapes,
+                "The base attack's targeting volume (the shape byte's low "
+                "three bits); actions' range_shape uses the same domain."),
     Integer("attack_angle", 0, kAttackAngleMax,
             "The attack area's angle (the shape byte's high five bits)."),
-    Integer("raw.byte7", 0, kByteMax, kRawByte7Text),
-    Integer("raw.byte11", 0, kByteMax,
-            "Record byte 11, not yet named; kept so the record rebuilds "
-            "exactly."),
 };
-static_assert(kBladeResultColumns.size() == kBladeRawByte11 + 1);
+static_assert(kBladeResultColumns.size() == kBladeAttackAngle + 1);
 
 enum PieceColumn : std::uint8_t {
   kPieceId,
@@ -210,23 +210,22 @@ enum PieceColumn : std::uint8_t {
   kPieceStrength,
   kPieceIntelligence,
   kPieceAgility,
-  kPieceRawByte7,
 };
 
 constexpr std::array kPieceResultColumns{
     Id("id", kIdText),
     Integer("legacy_id", 0, kMaxLegacyId, kLegacyIdText),
-    Integer("model", 0, kByteMax, kModelText),
-    Integer("category", 0, kPieceCategoryMax,
-            "The item category: shields 0-1, armor 2-5 (the armor material "
-            "table is by category 2-5)."),
+    Integer("model", 0, kByteMax, kPieceModelText),
+    Enumeration("category", 0, kPieceCategoryMax, kArmorCategories,
+                "The item category: shield results use shield, armor results "
+                "the armor pieces (the armor material rules match helm to "
+                "glove); none is the empty result."),
     Integer("gem_slots", 0, kGemSlotsMax, "How many gems the shield holds."),
     Integer("strength", kStatMin, kStatMax, kStrengthText),
     Integer("intelligence", kStatMin, kStatMax, kIntelligenceText),
     Integer("agility", kStatMin, kStatMax, kAgilityText),
-    Integer("raw.byte7", 0, kByteMax, kRawByte7Text),
 };
-static_assert(kPieceResultColumns.size() == kPieceRawByte7 + 1);
+static_assert(kPieceResultColumns.size() == kPieceAgility + 1);
 
 enum PairColumn : std::uint8_t {
   kPairFirst,
@@ -301,10 +300,12 @@ constexpr std::array kShieldMaterialColumns{
 constexpr std::array kArmorMaterialColumns{
     Enumeration("first_material", 0, kLastMaterial, kMaterials,
                 kFirstMaterialText),
-    Integer("first_category", 2, 5, kFirstCategoryText),
+    Enumeration("first_category", kFirstArmorCategory, kPieceCategoryMax,
+                kArmorCategories, kFirstCategoryText),
     Enumeration("second_material", 0, kLastMaterial, kMaterials,
                 kSecondMaterialText),
-    Integer("second_category", 2, 5, kSecondCategoryText),
+    Enumeration("second_category", kFirstArmorCategory, kPieceCategoryMax,
+                kArmorCategories, kSecondCategoryText),
     Enumeration("material", kFirstMaterial, kLastMaterial, kMaterials,
                 kMaterialText),
 };
@@ -411,9 +412,7 @@ std::vector<std::string> RowOf(const BladeResult& blade) {
           Text(blade.range_y),
           Text(blade.range_z),
           Text(blade.attack_shape),
-          Text(blade.attack_angle),
-          Text(blade.raw_byte7),
-          Text(blade.raw_byte11)};
+          Text(blade.attack_angle)};
 }
 
 std::vector<std::string> RowOf(const PieceResult& piece) {
@@ -424,8 +423,7 @@ std::vector<std::string> RowOf(const PieceResult& piece) {
           Text(piece.gem_slots),
           Text(piece.stats.strength),
           Text(piece.stats.intelligence),
-          Text(piece.stats.agility),
-          Text(piece.raw_byte7)};
+          Text(piece.stats.agility)};
 }
 
 std::vector<std::string> RowOf(const MaterialRule& rule, bool by_category) {
@@ -462,9 +460,7 @@ BladeResult BladeOf(const TableRow& row) {
           .range_y = Byte(row, kBladeRangeY),
           .range_z = Byte(row, kBladeRangeZ),
           .attack_shape = Byte(row, kBladeAttackShape),
-          .attack_angle = Byte(row, kBladeAttackAngle),
-          .raw_byte7 = Byte(row, kBladeRawByte7),
-          .raw_byte11 = Byte(row, kBladeRawByte11)};
+          .attack_angle = Byte(row, kBladeAttackAngle)};
 }
 
 PieceResult PieceOf(const TableRow& row) {
@@ -475,8 +471,7 @@ PieceResult PieceOf(const TableRow& row) {
           .gem_slots = Byte(row, kPieceGemSlots),
           .stats = {.strength = Signed(row, kPieceStrength),
                     .intelligence = Signed(row, kPieceIntelligence),
-                    .agility = Signed(row, kPieceAgility)},
-          .raw_byte7 = Byte(row, kPieceRawByte7)};
+                    .agility = Signed(row, kPieceAgility)}};
 }
 
 MaterialRule RuleOf(const TableRow& row, bool by_category) {

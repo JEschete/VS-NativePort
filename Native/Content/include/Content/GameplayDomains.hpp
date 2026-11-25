@@ -30,6 +30,28 @@ inline constexpr std::array<EnumValue, 10> kBladeCategories{{
     {8, "polearm"},
     {9, "crossbow"},
 }};
+// ItemRows.cpp uses category - 1 + Shield (ITEMHELP 645-649) for shields and
+// armor pieces. Accessories (7) never combine; 6 has no ITEMHELP text.
+inline constexpr std::array<EnumValue, 6> kArmorCategories{{
+    {0, "none"},
+    {1, "shield"},
+    {2, "helm"},
+    {3, "breast-armor"},
+    {4, "leggings"},
+    {5, "glove"},
+}};
+// The volume kinds the targeting code implements; 0 is no volume.
+// decomp: VolumeKind (Native/Game/src/Battle/SphereContainment.cpp:28)
+inline constexpr std::array<EnumValue, 8> kVolumeShapes{{
+    {0, "none"},
+    {1, "ellipsoid"},
+    {2, "centered-cylinder"},
+    {3, "cylinder"},
+    {4, "cone"},
+    {5, "reversed-cone"},
+    {6, "rectangle"},
+    {7, "diamond"},
+}};
 inline constexpr std::array<EnumValue, 4> kDamageTypes{{
     {0, "none"},
     {1, "blunt"},

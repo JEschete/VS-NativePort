@@ -28,9 +28,14 @@
     },
     {
       "name": "first_category",
-      "type": "integer",
-      "minimum": 2,
-      "maximum": 5,
+      "type": "enum",
+      "enum": {
+        "2": "helm",
+        "3": "breast-armor",
+        "4": "leggings",
+        "5": "glove"
+      },
+      "legacy_numeric_aliases": true,
       "description": "The first ingredient's category."
     },
     {
@@ -51,9 +56,14 @@
     },
     {
       "name": "second_category",
-      "type": "integer",
-      "minimum": 2,
-      "maximum": 5,
+      "type": "enum",
+      "enum": {
+        "2": "helm",
+        "3": "breast-armor",
+        "4": "leggings",
+        "5": "glove"
+      },
+      "legacy_numeric_aliases": true,
       "description": "The second ingredient's category."
     },
     {

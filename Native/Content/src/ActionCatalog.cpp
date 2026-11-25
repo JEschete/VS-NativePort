@@ -38,13 +38,6 @@ constexpr std::array<std::string_view, 8> kKindNames{
     "weapon-pp", "item",  "base-attack", "trap",
 };
 constexpr auto kKinds = Numbered(kKindNames);
-// The volume kinds the targeting code implements; 0 is no volume.
-// decomp: VolumeKind (Native/Game/src/Battle/SphereContainment.cpp:28)
-constexpr std::array<std::string_view, 8> kShapeNames{
-    "none", "ellipsoid",     "centered-cylinder", "cylinder",
-    "cone", "reversed-cone", "rectangle",         "diamond",
-};
-constexpr auto kShapes = Numbered(kShapeNames);
 constexpr std::array<std::string_view, 4> kZoomNames{
     "follow",
     "zoom-in",
@@ -256,13 +249,13 @@ constexpr std::array kActionColumns{
     Integer("range_x", kByteMax, kRangeText),
     Integer("range_y", kByteMax, kRangeText),
     Integer("range_z", kByteMax, kRangeText),
-    Enumeration("range_shape", kShapes,
+    Enumeration("range_shape", kVolumeShapes,
                 "The targeting volume's shape; none means no volume."),
     Integer("range_angle", kFiveBitMax, kAngleText),
     Integer("area_range_x", kByteMax, kAreaText),
     Integer("area_range_y", kByteMax, kAreaText),
     Integer("area_range_z", kByteMax, kAreaText),
-    Enumeration("area_shape", kShapes,
+    Enumeration("area_shape", kVolumeShapes,
                 "The area of effect's shape; none means a single target."),
     Integer("area_angle", kFiveBitMax, kAngleText),
     ColumnSpec{
@@ -458,7 +451,7 @@ std::expected<ActionCatalog, std::string> FromRows(
 }  // namespace
 
 std::span<const EnumValue> ActionKinds() { return kKinds; }
-std::span<const EnumValue> ActionVolumeShapes() { return kShapes; }
+std::span<const EnumValue> ActionVolumeShapes() { return kVolumeShapes; }
 std::span<const EnumValue> ActionCameraZooms() { return kZooms; }
 std::span<const EnumValue> ActionBehaviors() { return kBehaviors; }
 std::span<const EnumValue> HitPrerequisites() { return kPrerequisites; }
@@ -566,12 +559,12 @@ std::string FormatActions(const ActionCatalog& catalog) {
         number(rule.range.extent[0]),
         number(rule.range.extent[1]),
         number(rule.range.extent[2]),
-        Label(kShapes, rule.range.shape),
+        Label(kVolumeShapes, rule.range.shape),
         number(rule.range.angle),
         number(rule.area.extent[0]),
         number(rule.area.extent[1]),
         number(rule.area.extent[2]),
-        Label(kShapes, rule.area.shape),
+        Label(kVolumeShapes, rule.area.shape),
         number(rule.area.angle),
         FormatFlags(kBehaviors, rule.behavior),
     });

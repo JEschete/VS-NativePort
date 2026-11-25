@@ -185,9 +185,10 @@ int UpgradeAuthoring(const fs::path& root) {
   }
   VS::Core::LogInfo("extract",
                     "authoring: {} recipe IDs, {} references, {} named values, "
-                    "{} unused records archived, {} files updated",
+                    "{} unused records archived, {} reserved bytes archived, "
+                    "{} files updated",
                     report->renamed, report->references, report->named_values,
-                    report->quarantined, report->written);
+                    report->quarantined, report->reserved, report->written);
   const auto zones = Extract::UpgradeZoneAuthoring(root);
   if (!zones) {
     VS::Core::LogError("extract", "zone authoring: {}", zones.error());
