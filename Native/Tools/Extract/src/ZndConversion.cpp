@@ -288,7 +288,14 @@ std::expected<ConvertedZone, std::string> ConvertZone(
     auto archetype =
         Content::DiscFileId(Content::kArchetypeIdKind, (*file)->path);
     if (!archetype) return std::unexpected(archetype.error());
-    record.enemies.push_back({.id = Content::ZoneEnemyId(record.id, slot),
+    const std::string enemy_id = Content::ZoneEnemyId(record.id, slot);
+    // The tables keep no reserved byte, so they could not rebuild another.
+    if (auto reserved = Content::CheckZoneReservedBytes(enemy.data);
+        !reserved) {
+      return std::unexpected(
+          std::format("{}: {}: {}", source.path, enemy_id, reserved.error()));
+    }
+    record.enemies.push_back({.id = enemy_id,
                               .archetype = std::move(*archetype),
                               .data = enemy.data});
   }

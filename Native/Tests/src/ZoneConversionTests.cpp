@@ -98,6 +98,7 @@ content::ZndFile SampleZone() {
     enemy.data[0x238 + limb * 0x5C + 0x50] = static_cast<std::byte>(limb + 1);
   }
   VS::test_support::UseValidPartCodes(enemy.data, 1);
+  VS::test_support::UseReservedBytes(enemy.data);
   // Status immunities with bit 31, which version 3 wrote as a negative number.
   enemy.data[0x2B] |= std::byte{0x80};
   zone.enemies.push_back(enemy);
@@ -212,6 +213,29 @@ void PackShapeBits(std::vector<std::vector<std::string>>& rows,
   }
 }
 
+// Adds back the raw_<offset> columns version 4 tables had for reserved bytes.
+void AddReservedColumns(std::vector<std::vector<std::string>>& rows,
+                        ZoneTable table,
+                        const std::vector<content::TableRow>& checked) {
+  if (table == ZoneTable::kEnemies) {
+    rows.front().insert(rows.front().end(), {"raw_33", "raw_236", "raw_237"});
+    for (std::size_t row = 1; row < rows.size(); ++row) {
+      rows.at(row).insert(rows.at(row).end(), {"0", "0", "0"});
+    }
+  }
+  if (table != ZoneTable::kLimbs) return;
+  const auto columns = content::ZoneTableSpec(table).columns;
+  const auto material = std::ranges::find(
+      columns, std::string_view("armor_material"), &content::ColumnSpec::name);
+  REQUIRE(material != columns.end());
+  const auto at = static_cast<std::size_t>(material - columns.begin());
+  rows.front().insert(rows.front().end(), {"raw_52", "raw_5a", "raw_5b"});
+  for (std::size_t row = 1; row < rows.size(); ++row) {
+    const bool armored = checked.at(row - 1).values.at(at) != 0;
+    rows.at(row).insert(rows.at(row).end(), {armored ? "1" : "0", "0", "0"});
+  }
+}
+
 void LegacyTableHeaders(const ModelRoot& root) {
   for (const auto table : content::kZoneTables) {
     const auto path = TableFile(root, table);
@@ -242,6 +266,7 @@ void LegacyTableHeaders(const ModelRoot& root) {
     std::vector<std::vector<std::string>> rows;
     for (const auto& record : *records) rows.push_back(record.fields);
     if (table == ZoneTable::kParts) PackShapeBits(rows, *checked);
+    AddReservedColumns(rows, table, *checked);
     WriteText(path, content::FormatCsv(rows));
   }
   auto manifest = content::LoadConversionManifest(root.Root());
@@ -508,6 +533,11 @@ TEST_CASE("The zone converter names the read it cannot resolve",
   short_room.rooms.at(0).bytes = kSector;
   content::ZndFile no_tims = SampleZone();
   no_tims.textures.emplace();
+  // A disc template whose reserved bytes the tables would not rebuild.
+  content::ZndFile padded = SampleZone();
+  padded.enemies.at(0).data.at(0x33) = std::byte{5};
+  content::ZndFile unflagged = SampleZone();
+  unflagged.enemies.at(0).data.at(0x238 + 0x52) = std::byte{};
   const std::vector<Refused> refusals{
       {mid_room, true,
        "MAP/ZONE001.ZND: room slot 0: sector 101 (4096 bytes) is no "
@@ -517,6 +547,12 @@ TEST_CASE("The zone converter names the read it cannot resolve",
        "extracted .MPD file's read"},
       {no_tims, true,
        "MAP/ZONE001.ZND: an empty texture table has no native form"},
+      {padded, true,
+       "MAP/ZONE001.ZND: enemy.map.zone001.00: reserved byte 0x033 is 5, not "
+       "padding 0"},
+      {unflagged, true,
+       "MAP/ZONE001.ZND: enemy.map.zone001.00: reserved byte 0x28A is 0, not "
+       "the 1 its armor_material gives"},
       {SampleZone(), false,
        "MAP/ZONE001.ZND: enemy.map.zone001.00 loads archetype.map.z001u00, "
        "which the zud-json converter has not recorded (convert the models "
@@ -552,6 +588,9 @@ TEST_CASE("Old zone authoring upgrades without overwriting native edits",
   CHECK(parts.contains(",attack_shape,attack_angle,"));
   CHECK_FALSE(parts.contains("shape_bits"));
   CHECK(parts.contains(",blunt,hp,"));
+  // Version 4's reserved byte columns are gone.
+  CHECK_FALSE(enemies.contains("raw_"));
+  CHECK_FALSE(ReadText(TableFile(root, ZoneTable::kLimbs)).contains("raw_"));
   const auto repeat = extract::UpgradeZoneAuthoring(root.Root());
   if (!repeat) FAIL(repeat.error());
   CHECK(repeat->written == 0);
@@ -563,8 +602,8 @@ TEST_CASE("Failed zone authoring upgrades preserve files and converter version",
   RecordArchetype(root.Root());
   REQUIRE(Convert(root).converted == 1);
   LegacyTableHeaders(root);
-  EditTable(root, ZoneTable::kLimbs, "affinity_3,",
-            "affinity_3,affinity_fire,");
+  // affinity_3 is affinity_fire's legacy name, so the column appears twice.
+  EditTable(root, ZoneTable::kLimbs, "affinity_2,", "affinity_fire,");
   const auto before = OutputFiles(root);
   const auto manifest = ReadText(root.Root() / "manifest.json");
   const auto upgraded = extract::UpgradeZoneAuthoring(root.Root());

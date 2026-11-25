@@ -21,7 +21,7 @@ A `MAP\ZONE*.ZND` is what the room loader reads when the zone changes (`Content/
 - **Enemy section:** a count, that many ZUD (sector, read size) entries, then that many 0x464-byte templates (`vs_CharInitData`, `Actors/CharacterInit.hpp`).
 - **Texture section:** either 32 zero bytes, or four table sizes of which only the first is used, followed by that table: a count and that many TIMs, each after its byte size.
 
-`VS.Extract tables <datadir>` (and `extract`) converts every zone with converter `znd-tables` version 4
+`VS.Extract tables <datadir>` (and `extract`) converts every zone with converter `znd-tables` version 5
 (`Extract/ZndConversion.hpp`, `Content/ZoneTables.hpp`). `tables` runs after `models`, because the zones name the
 enemy archetypes (§6.2.5). It writes six CSV tables, each with a committed schema that is written beside it and must
 match (a test checks this). Columns are described in the schemas; the rules they do not express are:
@@ -61,14 +61,19 @@ column; enum numeric aliases remain supported. `VS.Extract authoring <datadir>` 
 spellings without replacing IDs, labels, record values or row order. It validates all six tables and compares every
 decoded native record before writing, then publishes the new converter version last. It splits a version-2
 `shape_bits` cell into its two columns, refusing a value they cannot hold or a table with both forms, and names a
-version-3 numeric `status_immunities` cell (signed or unsigned), refusing a number outside 32 bits. A normal
-`tables` run upgrades version 1-3 tables before considering source reconversion, preserving existing
+version-3 numeric `status_immunities` cell (signed or unsigned), refusing a number outside 32 bits. It drops a
+version-4 reserved byte column (below) only when every cell holds the value the tables now give that byte. A normal
+`tables` run upgrades version 1-4 tables before considering source reconversion, preserving existing
 native edits. Unknown enum codes remain preservable by the raw ZND codec, but are refused as native authoring values.
 This does not resolve the remaining part categories, strings, semantic identities or relational enemy
 definitions.
 
 **Exactness.**
-- Every bit of a template is in exactly one column, and a test checks the coverage. Unnamed bytes are `raw_<offset>` columns (§4.1).
+- Every bit of a template is in exactly one column or is a reserved byte, and a test checks the coverage.
+- Reserved bytes have no column (version 4's `raw_<offset>` columns). The enemy's +0x33, +0x236 and +0x237 and
+  each limb's +0x5A and +0x5B are zero padding in every disc template. A limb's +0x52 is 1 exactly when its
+  `armor_material` is not `none`. Upstream `applyArmorStats` copies it into equipment state that nothing reads.
+  The converter refuses a template whose reserved bytes differ, so every rebuild stays exact.
 - A limb or part whose bytes are all zero, and an empty room slot, has no row; a missing row reads as zeros.
 - Rows name files by id, never by sector. The rebuild takes each named file's sector and sector-rounded size from `files.tsv` as it is now.
 

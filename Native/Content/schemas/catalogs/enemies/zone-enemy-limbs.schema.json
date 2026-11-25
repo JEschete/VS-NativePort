@@ -248,13 +248,6 @@
       "description": "out of 255"
     },
     {
-      "name": "raw_52",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 255,
-      "description": "unnamed"
-    },
-    {
       "name": "armor_index",
       "type": "integer",
       "minimum": 0,
@@ -308,20 +301,6 @@
       "minimum": 0,
       "maximum": 255,
       "description": "DP damage share (%) to the zero-based destination limb; body-part names depend on the model"
-    },
-    {
-      "name": "raw_5a",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 255,
-      "description": "unnamed"
-    },
-    {
-      "name": "raw_5b",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 255,
-      "description": "unnamed"
     }
   ]
 }

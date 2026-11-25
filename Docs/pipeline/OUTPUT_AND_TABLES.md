@@ -143,8 +143,9 @@ falls back to a legacy read.
 If a value has no clean meaning yet, it is **kept**, not dropped. In a CSV table it is a `raw.<field>` column; in JSON it goes under `"_raw": { "<field>": value }`. Either way it is listed in `TYPE_LEDGER` as unnamed. Unnamed fields block the 1a gate, so no raw field may remain at the end of Phase 1.
 
 These are temporary preservation representations, not final author-facing columns. Quarantine imported unknown
-bytes/unused padding in one documented provenance representation rather than mixing `raw.byte7`, `raw_33` and
-`raw_5a` into editable definitions. Unknown **consumed** semantics block authoring-format completion; moving them
+bytes/unused padding in one documented provenance representation rather than mixing `raw.byte7`-style fields
+into editable definitions. Zone templates' reserved bytes have no column; the converter verifies them (§6.9).
+Unknown **consumed** semantics block authoring-format completion; moving them
 to a sidecar or adding `unknown_` names does not satisfy the gate.
 
 ### 4.2 Native material definitions (#499)

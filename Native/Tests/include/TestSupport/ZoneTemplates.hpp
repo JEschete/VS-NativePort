@@ -22,4 +22,22 @@ inline void UseValidPartCodes(Content::ZndTemplate& data, std::size_t seed) {
   }
 }
 
+// Gives the template's reserved bytes the values its tables rebuild:
+// padding at 0x33, 0x236, 0x237 and each limb's +0x5A/+0x5B is zero, and each
+// limb's +0x52 is 1 exactly when its armour material (+0x50) is set.
+inline void UseReservedBytes(Content::ZndTemplate& data) {
+  constexpr std::size_t kLimbsAt = 0x238;
+  constexpr std::size_t kLimbBytes = 0x5C;
+  data.at(0x33) = std::byte{};
+  data.at(0x236) = std::byte{};
+  data.at(0x237) = std::byte{};
+  for (std::size_t limb = 0; limb < 6; ++limb) {
+    const std::size_t base = kLimbsAt + (limb * kLimbBytes);
+    data.at(base + 0x52) =
+        data.at(base + 0x50) == std::byte{} ? std::byte{} : std::byte{1};
+    data.at(base + 0x5A) = std::byte{};
+    data.at(base + 0x5B) = std::byte{};
+  }
+}
+
 }  // namespace VS::test_support

@@ -393,13 +393,13 @@ build\Debug\VS.Extract.exe bestiary Native\data
   exact offline reconstruction. The shared text producer preserves the save
   contributor; forcing bestiary does not replace save prompts. See
   [ASSET_PIPELINE.md §4.3](pipeline/GAMEPLAY_CATALOGS.md#43-native-encyclopedia-definitions-499500).
-- The same `authoring` command upgrades `znd-tables` versions 1-3 to 4:
+- The same `authoring` command upgrades `znd-tables` versions 1-4 to 5:
   named enums, type/class/affinity/DP splash columns, split part
-  `shape_bits` and named `status_immunities` (ASSET_PIPELINE section 6.9).
-  Old headers remain readable through schema aliases. It checks every
-  decoded record is unchanged before publishing files and records the
-  converter version last. Normal `tables` conversion performs this upgrade
-  first; do not use `--force` just to rename columns,
+  `shape_bits`, named `status_immunities` and no reserved byte columns
+  (ASSET_PIPELINE §6.9). Old headers remain readable through schema
+  aliases. It checks every decoded record is unchanged before publishing
+  files and records the converter version last. Normal `tables`
+  conversion upgrades first; do not use `--force` just to rename columns,
   because that explicitly reconverts source data and replaces native edits.
   The enemy's former `material` field is `movement_class`, not a wood/metal
   material; its remaining semantics are documented there.

@@ -86,6 +86,15 @@ struct PackedColumn {
   std::vector<std::string_view> columns;
 };
 
+// A byte no column holds (§4.1): zero padding, or 1 exactly when the column
+// `set_by` is not zero. `legacy` is the raw_<offset> column that held it
+// before version 5.
+struct ReservedByte {
+  std::string_view legacy;
+  std::size_t offset = 0;
+  std::string_view set_by;
+};
+
 // A table's columns: the leading key and reference columns, then the fields.
 struct TableLayout {
   std::deque<std::string> names;  // storage for generated column names
@@ -93,10 +102,16 @@ struct TableLayout {
   std::vector<Field> fields;
   std::vector<std::string_view> key;
   std::vector<PackedColumn> packed;
+  std::vector<ReservedByte> reserved;
   TableSpec spec;
   std::string directory;
 
   void Lead(ColumnSpec column) { columns.push_back(column); }
+
+  void Reserve(std::string_view legacy, std::size_t offset,
+               std::string_view set_by = {}) {
+    reserved.push_back({.legacy = legacy, .offset = offset, .set_by = set_by});
+  }
 
   void Add(std::string_view name, std::size_t offset, std::size_t size,
            bool is_signed, std::string_view description,
@@ -265,7 +280,10 @@ void AddEnemyFields(TableLayout& table) {
   table.Add("mobility_limb_2", 0x31, 1, false,
             "a limb whose loss slows the enemy");
   table.Add("default_target_limb", 0x32, 1, false, "");
-  table.Add("raw_33", 0x33, 1, false, "unnamed");
+  // decomp: func_80076784 (src/BATTLE/BATTLE.PRG/146C.c:5941) and
+  // applyAccessoryStats (src/BATTLE/BATTLE.PRG/146C.c:734) read neither this
+  // byte nor the accessory's last two; every disc template holds zero there.
+  table.Reserve("raw_33", 0x33);
   table.Add("weapon_material", 0x124, 1, false, "weapon material", kMaterials);
   table.Add("weapon_drop_rate", 0x125, 1, false, "out of 255");
   table.Add("weapon_index", 0x126, 2, true, "");
@@ -276,8 +294,8 @@ void AddEnemyFields(TableLayout& table) {
   table.Add("shield_index", 0x202, 2, true, "");
   table.Add("accessory_drop_rate", 0x234, 1, false, "out of 255");
   table.Add("accessory_index", 0x235, 1, false, "");
-  table.Add("raw_236", 0x236, 1, false, "unnamed");
-  table.Add("raw_237", 0x237, 1, false, "unnamed");
+  table.Reserve("raw_236", 0x236);
+  table.Reserve("raw_237", 0x237);
   table.Add("zud_index", 0x460, 4, true,
             "the template's index in its zone (upstream mpdIdentifier)");
 }
@@ -304,13 +322,19 @@ void AddLimbFields(TableLayout& table) {
   table.Add("armor_material", 0x50, 1, false, "limb armor material",
             kMaterials);
   table.Add("armor_drop_rate", 0x51, 1, false, "out of 255");
-  table.Add("raw_52", 0x52, 1, false, "unnamed");
+  // decomp: applyArmorStats (src/BATTLE/BATTLE.PRG/146C.c:759) copies this
+  // byte to vs_UiArmor.unk99, which no code reads. Every disc limb holds 1
+  // exactly when it has an armour material, as INITBTL.PRG's init of Ashley
+  // does.
+  table.Reserve("raw_52", 0x52, "armor_material");
   table.Add("armor_index", 0x53, 1, false, "");
   table.Run("dp_splash", 0x54, kSplashFields, 1, false,
             "DP damage share (%) to the zero-based destination limb; body-part "
             "names depend on the model");
-  table.Add("raw_5a", 0x5A, 1, false, "unnamed");
-  table.Add("raw_5b", 0x5B, 1, false, "unnamed");
+  // decomp: vs_CharInitData (src/BATTLE/BATTLE.PRG/charInit.h:24-51):
+  // LimbInit's unk5A padding, zero on the disc and read by no code.
+  table.Reserve("raw_5a", 0x5A);
+  table.Reserve("raw_5b", 0x5B);
 }
 
 // Offsets from the part's start (vs_battle_uiEquipment, 0x30 bytes).
@@ -588,6 +612,43 @@ std::optional<std::size_t> PartOffset(std::string_view id) {
   return found->offset;
 }
 
+// The value the tables give a reserved byte of `record`.
+unsigned ReservedValue(const TableLayout& layout, const ReservedByte& reserved,
+                       std::span<const std::byte> record) {
+  if (reserved.set_by.empty()) return 0;
+  const auto field =
+      std::ranges::find(layout.fields, reserved.set_by, &Field::column);
+  return field != layout.fields.end() && ReadField(record, *field) != 0 ? 1U
+                                                                        : 0U;
+}
+
+// Each reserved byte of a template's record and of its limbs, with the record
+// it belongs to and that record's offset in the template.
+template <typename Data, typename Visit>
+void ForEachReserved(Data& data, Visit visit) {
+  const TableLayout& enemy = LayoutOf(ZoneTable::kEnemies);
+  for (const ReservedByte& reserved : enemy.reserved) {
+    visit(enemy, reserved, std::span(data), std::size_t{0});
+  }
+  const TableLayout& limbs = LayoutOf(ZoneTable::kLimbs);
+  for (std::size_t limb = 0; limb < static_cast<std::size_t>(kLimbCount);
+       ++limb) {
+    const std::size_t base = kLimbsAt + (limb * kLimbBytes);
+    for (const ReservedByte& reserved : limbs.reserved) {
+      visit(limbs, reserved, std::span(data).subspan(base, kLimbBytes), base);
+    }
+  }
+}
+
+void DeriveReservedBytes(ZndTemplate& data) {
+  ForEachReserved(
+      data, [](const TableLayout& layout, const ReservedByte& reserved,
+               std::span<std::byte> record, std::size_t /*base*/) {
+        record[reserved.offset] =
+            static_cast<std::byte>(ReservedValue(layout, reserved, record));
+      });
+}
+
 // --- Reading
 
 struct ReadTables {
@@ -665,18 +726,27 @@ std::expected<std::vector<std::string>, std::string> SplitCell(
   return cells;
 }
 
+// Every record must have the header's fields.
+std::expected<void, std::string> CheckWidths(
+    const std::vector<CsvRecord>& records, std::string_view file) {
+  for (const CsvRecord& record : records) {
+    if (record.fields.size() != records.front().fields.size()) {
+      return std::unexpected(std::format(
+          "{}:{}: has {} fields; the header has {}", file, record.line,
+          record.fields.size(), records.front().fields.size()));
+    }
+  }
+  return {};
+}
+
 // Replaces `packed`'s header field and cells with its replacement columns.
 std::expected<void, std::string> SplitColumn(const TableLayout& layout,
                                              const PackedColumn& packed,
                                              std::vector<CsvRecord>& records,
                                              std::size_t at,
                                              std::string_view file) {
-  for (CsvRecord& record : records) {
-    if (record.fields.size() != records.front().fields.size()) {
-      return std::unexpected(std::format(
-          "{}:{}: has {} fields; the header has {}", file, record.line,
-          record.fields.size(), records.front().fields.size()));
-    }
+  if (auto widths = CheckWidths(records, file); !widths) {
+    return widths;
   }
   const auto position = static_cast<std::ptrdiff_t>(at);
   std::vector<std::string> header(packed.columns.begin(), packed.columns.end());
@@ -753,6 +823,97 @@ bool HasFlags(const TableLayout& layout) {
   return std::ranges::any_of(layout.columns, [](const ColumnSpec& column) {
     return column.type == ColumnType::kFlags;
   });
+}
+
+// A decimal integer cell's value; nothing for any other text.
+std::optional<std::int64_t> IntegerCell(std::string_view cell) {
+  std::int64_t value = 0;
+  const char* const first = cell.data();
+  const auto parsed = std::from_chars(first, first + cell.size(), value);
+  if (cell.empty() || parsed.ec != std::errc() ||
+      parsed.ptr != first + cell.size()) {
+    return std::nullopt;
+  }
+  return value;
+}
+
+// An enum cell's code: one of its names or, as version 1 wrote it, a number.
+std::optional<std::int64_t> EnumCode(const ColumnSpec& column,
+                                     std::string_view cell) {
+  if (const auto value = IntegerCell(cell)) return value;
+  const auto named =
+      std::ranges::find(column.enumeration, cell, &EnumValue::name);
+  if (named == column.enumeration.end()) return std::nullopt;
+  return named->code;
+}
+
+// The value a retired column's cell must hold: 0, or for a byte another
+// column sets, 1 exactly when that column's cell (at `set_by`) is not zero.
+std::expected<std::int64_t, std::string> RetiredValue(
+    const TableLayout& layout, const ReservedByte& reserved,
+    const CsvRecord& record, std::optional<std::size_t> set_by,
+    std::string_view file) {
+  if (!set_by) return 0;
+  const auto column =
+      std::ranges::find(layout.columns, reserved.set_by, &ColumnSpec::name);
+  const std::string& cell = record.fields[*set_by];
+  const auto code =
+      column == layout.columns.end() ? std::nullopt : EnumCode(*column, cell);
+  if (!code) {
+    return std::unexpected(
+        CellError(file, record.line, reserved.set_by,
+                  std::format("'{}' is not a name or number", cell)));
+  }
+  return *code != 0 ? 1 : 0;
+}
+
+// Drops the raw_<offset> columns that held reserved bytes before version 5,
+// each of whose cells must hold the value the tables now give its byte; the
+// number of columns dropped.
+std::expected<std::size_t, std::string> RetireReservedColumns(
+    const TableLayout& layout, std::vector<CsvRecord>& records,
+    std::string_view file) {
+  std::size_t retired = 0;
+  for (const ReservedByte& reserved : layout.reserved) {
+    const auto& header = records.front().fields;
+    const auto found = std::ranges::find(header, reserved.legacy);
+    if (found == header.end()) continue;
+    if (auto widths = CheckWidths(records, file); !widths) {
+      return std::unexpected(widths.error());
+    }
+    const auto at = static_cast<std::size_t>(found - header.begin());
+    std::optional<std::size_t> set_by;
+    if (!reserved.set_by.empty()) {
+      const auto source = std::ranges::find(header, reserved.set_by);
+      if (source == header.end()) {
+        return std::unexpected(
+            std::format("{}: has '{}' but not '{}', which sets it", file,
+                        reserved.legacy, reserved.set_by));
+      }
+      set_by = static_cast<std::size_t>(source - header.begin());
+    }
+    for (std::size_t row = 1; row < records.size(); ++row) {
+      const CsvRecord& record = records[row];
+      auto expected = RetiredValue(layout, reserved, record, set_by, file);
+      if (!expected) return std::unexpected(expected.error());
+      if (IntegerCell(record.fields[at]) == *expected) continue;
+      const std::string why =
+          set_by ? std::format("{} sets byte 0x{:02X} now", reserved.set_by,
+                               reserved.offset)
+                 : std::format("byte 0x{:02X} is padding the tables keep zero",
+                               reserved.offset);
+      return std::unexpected(
+          CellError(file, record.line, reserved.legacy,
+                    std::format("'{}' is not {}; {}", record.fields[at],
+                                *expected, why)));
+    }
+    for (CsvRecord& record : records) {
+      record.fields.erase(record.fields.begin() +
+                          static_cast<std::ptrdiff_t>(at));
+    }
+    ++retired;
+  }
+  return retired;
 }
 
 }  // namespace
@@ -990,6 +1151,7 @@ std::expected<std::vector<ZoneRecord>, std::string> ReadZoneTables(
           "{}: {}", tables->Path(ZoneTable::kEnemies), dense.error()));
     }
     for (const std::string& id : *dense) {
+      DeriveReservedBytes(enemies.at(id).data);
       zones.at(zone_id).enemies.push_back(std::move(enemies.at(id)));
     }
   }
@@ -1024,6 +1186,26 @@ std::expected<void, std::string> CheckZoneTemplateCoverage() {
       mark(field, part.offset);
     }
   }
+  std::optional<std::string> unset;
+  ForEachReserved(
+      covered, [&](const TableLayout& layout, const ReservedByte& reserved,
+                   std::span<unsigned> /*record*/, std::size_t base) {
+        mark({.column = reserved.legacy,
+              .offset = reserved.offset,
+              .size = 1,
+              .is_signed = false,
+              .bytes = false,
+              .bit = 0,
+              .bits = 0},
+             base);
+        if (!reserved.set_by.empty() &&
+            std::ranges::find(layout.fields, reserved.set_by, &Field::column) ==
+                layout.fields.end()) {
+          unset = std::format("reserved byte '{}' is set by no column '{}'",
+                              reserved.legacy, reserved.set_by);
+        }
+      });
+  if (unset) return std::unexpected(*unset);
   for (std::size_t at = 0; at < kZndTemplateBytes; ++at) {
     if (overlap.at(at)) {
       return std::unexpected(
@@ -1048,11 +1230,35 @@ std::expected<void, std::string> CheckZoneTemplateCoverage() {
   return {};
 }
 
+std::expected<void, std::string> CheckZoneReservedBytes(
+    const ZndTemplate& data) {
+  std::optional<std::string> fault;
+  ForEachReserved(
+      data, [&](const TableLayout& layout, const ReservedByte& reserved,
+                std::span<const std::byte> record, std::size_t base) {
+        const unsigned expected = ReservedValue(layout, reserved, record);
+        const auto actual = std::to_integer<unsigned>(record[reserved.offset]);
+        if (fault || actual == expected) return;
+        fault = reserved.set_by.empty()
+                    ? std::format("reserved byte 0x{:03X} is {}, not padding 0",
+                                  base + reserved.offset, actual)
+                    : std::format(
+                          "reserved byte 0x{:03X} is {}, not the {} its "
+                          "{} gives",
+                          base + reserved.offset, actual, expected,
+                          reserved.set_by);
+      });
+  if (fault) return std::unexpected(*fault);
+  return {};
+}
+
 std::expected<ZoneColumnMigration, std::string> MigrateZoneColumns(
     ZoneTable table, const std::string& text, std::string_view file) {
   const TableLayout& layout = LayoutOf(table);
   ZoneColumnMigration migrated{.text = text};
-  if (layout.packed.empty() && !HasFlags(layout)) return migrated;
+  if (layout.packed.empty() && layout.reserved.empty() && !HasFlags(layout)) {
+    return migrated;
+  }
   auto records = ParseCsv(text, file);
   if (!records) return std::unexpected(records.error());
   if (records->empty()) return migrated;
@@ -1072,10 +1278,14 @@ std::expected<ZoneColumnMigration, std::string> MigrateZoneColumns(
     }
     ++migrated.split_columns;
   }
+  auto retired = RetireReservedColumns(layout, *records, file);
+  if (!retired) return std::unexpected(retired.error());
+  migrated.retired_columns = *retired;
   auto named = NameFlagsCells(layout, *records, file);
   if (!named) return std::unexpected(named.error());
   migrated.named_values = *named;
-  if (migrated.split_columns != 0 || migrated.named_values != 0) {
+  if (migrated.split_columns != 0 || migrated.retired_columns != 0 ||
+      migrated.named_values != 0) {
     std::vector<std::vector<std::string>> rows;
     for (CsvRecord& record : *records) rows.push_back(std::move(record.fields));
     migrated.text = FormatCsv(rows);

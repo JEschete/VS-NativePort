@@ -22,16 +22,19 @@
 // the extracted disc files when it rebuilds the zone.
 //
 // Every byte of a 0x464-byte template (Actors/CharacterInit.hpp) is in
-// exactly one column: the enemy row holds the scalars, the weapon, shield and
-// accessory fields around their parts and the trailing index; a limb row the
-// limb's fields but its armour; a part row one equipment part (blade, grip,
-// gem, shield, accessory or a limb's armour). Unnamed bytes are raw_<offset>
-// columns (§4.1). A limb or part whose bytes are all zero has no row, and a
-// missing row reads as zeros, so a template rebuilds byte for byte.
+// exactly one column or is reserved: the enemy row holds the scalars, the
+// weapon, shield and accessory fields around their parts and the trailing
+// index; a limb row the limb's fields but its armour; a part row one
+// equipment part (blade, grip, gem, shield, accessory or a limb's armour).
+// Reserved bytes, which no code reads (§4.1), have no column: the template's
+// padding at 0x033, 0x236 and 0x237 and each limb's at +0x5A and +0x5B read
+// as zero, and each limb's +0x52 as 1 exactly when the limb has an armour
+// material, as on the disc. A limb or part whose bytes are all zero has no
+// row, and a missing row reads as zeros, so a template rebuilds byte for byte.
 namespace VS::Content {
 
 inline constexpr std::string_view kZndTableConverterName = "znd-tables";
-inline constexpr std::uint32_t kZndTableConverterVersion = 4;
+inline constexpr std::uint32_t kZndTableConverterVersion = 5;
 
 enum class ZoneTable : std::uint8_t {
   kZones,     // catalogs/world/zones: music and room slot count
@@ -108,14 +111,21 @@ using ZoneTableReader = std::function<std::expected<std::string, std::string>(
 [[nodiscard]] std::expected<std::vector<ZoneRecord>, std::string>
 ReadZoneTables(const ZoneTableReader& read);
 
-// Whether the enemy, limb and part columns cover every bit of a template
-// exactly once, and every flags column names each bit it holds; the error
-// names the first byte or column at fault.
+// Whether the enemy, limb and part columns and the reserved bytes cover every
+// bit of a template exactly once, and every flags column names each bit it
+// holds; the error names the first byte or column at fault.
 [[nodiscard]] std::expected<void, std::string> CheckZoneTemplateCoverage();
+
+// Whether `data`'s reserved bytes hold what the tables rebuild them as, so
+// its rows load as its bytes; the error names the first byte at fault and its
+// value.
+[[nodiscard]] std::expected<void, std::string> CheckZoneReservedBytes(
+    const ZndTemplate& data);
 
 struct ZoneColumnMigration {
   std::string text;
   std::size_t split_columns = 0;
+  std::size_t retired_columns = 0;
   std::size_t named_values = 0;
 };
 
@@ -123,8 +133,10 @@ struct ZoneColumnMigration {
 // loads; the text is unchanged when none remain. Splits the former columns
 // that packed several bit fields (the parts table's shape_bits) into the
 // columns that replaced them, refusing a value they cannot hold and a table
-// with both forms. Names a flags cell written as a number (version 3's
-// status_immunities), refusing a number its bytes cannot hold.
+// with both forms. Drops version 4's raw_<offset> columns for reserved bytes,
+// refusing a cell that differs from the value the tables now give its byte.
+// Names a flags cell written as a number (version 3's status_immunities),
+// refusing a number its bytes cannot hold.
 [[nodiscard]] std::expected<ZoneColumnMigration, std::string>
 MigrateZoneColumns(ZoneTable table, const std::string& text,
                    std::string_view file);

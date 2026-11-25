@@ -216,13 +216,6 @@
       "description": ""
     },
     {
-      "name": "raw_33",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 255,
-      "description": "unnamed"
-    },
-    {
       "name": "weapon_material",
       "type": "enum",
       "enum": {
@@ -301,20 +294,6 @@
       "minimum": 0,
       "maximum": 255,
       "description": ""
-    },
-    {
-      "name": "raw_236",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 255,
-      "description": "unnamed"
-    },
-    {
-      "name": "raw_237",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 255,
-      "description": "unnamed"
     },
     {
       "name": "zud_index",

@@ -63,6 +63,7 @@ content::ZndTemplate PatternTemplate(std::size_t seed, bool zeroed) {
     for (std::size_t at = 0x238; at < 0x258; ++at) data.at(at) = std::byte{};
     for (std::size_t at = 0x288; at < 0x294; ++at) data.at(at) = std::byte{};
   }
+  VS::test_support::UseReservedBytes(data);
   return data;
 }
 
@@ -350,4 +351,79 @@ TEST_CASE("Status immunity numbers their bytes cannot hold are refused",
   CHECK(migrate("status_immunities\n99999999999999999999\n") ==
         "enemies.csv:2: column 'status_immunities': 99999999999999999999 is "
         "outside -2147483648..4294967295");
+}
+
+TEST_CASE(
+    "Reserved limb byte columns retire when they hold their bytes' values",
+    "[zone-authoring][content-tables][znd]") {
+  // Version 1 wrote materials as numbers, later versions as names.
+  const auto limbs = content::MigrateZoneColumns(
+      ZoneTable::kLimbs,
+      "limb,armor_material,raw_52,raw_5a,raw_5b\n0,none,0,0,0\n1,3,1,0,0\n"
+      "2,leather,1,0,0\n",
+      "limbs.csv");
+  if (!limbs) FAIL(limbs.error());
+  CHECK(limbs->retired_columns == 3);
+  CHECK(limbs->text == "limb,armor_material\n0,none\n1,3\n2,leather\n");
+  const auto again =
+      content::MigrateZoneColumns(ZoneTable::kLimbs, limbs->text, "l.csv");
+  if (!again) FAIL(again.error());
+  CHECK(again->retired_columns == 0);
+  CHECK(again->text == limbs->text);
+}
+
+TEST_CASE("Reserved enemy byte columns retire when they hold zero",
+          "[zone-authoring][content-tables][znd]") {
+  const auto enemies = content::MigrateZoneColumns(
+      ZoneTable::kEnemies, "id,raw_33,hp,raw_236,raw_237\na,0,5,0,0\n",
+      "enemies.csv");
+  if (!enemies) FAIL(enemies.error());
+  CHECK(enemies->retired_columns == 3);
+  CHECK(enemies->text == "id,hp\na,5\n");
+}
+
+TEST_CASE("Reserved byte columns unlike their bytes' values are refused",
+          "[zone-authoring][content-tables][znd]") {
+  const auto retire = [](ZoneTable table, const std::string& text) {
+    return ErrorOf(content::MigrateZoneColumns(table, text, "t.csv"));
+  };
+  CHECK(retire(ZoneTable::kEnemies, "id,raw_33\na,5\n") ==
+        "t.csv:2: column 'raw_33': '5' is not 0; byte 0x33 is padding the "
+        "tables keep zero");
+  CHECK(retire(ZoneTable::kLimbs, "armor_material,raw_52\niron,0\n") ==
+        "t.csv:2: column 'raw_52': '0' is not 1; armor_material sets byte "
+        "0x52 now");
+  CHECK(retire(ZoneTable::kLimbs, "armor_material,raw_52\nnone,1\n") ==
+        "t.csv:2: column 'raw_52': '1' is not 0; armor_material sets byte "
+        "0x52 now");
+  CHECK(retire(ZoneTable::kLimbs, "armor_material,raw_52\ntin,1\n") ==
+        "t.csv:2: column 'armor_material': 'tin' is not a name or number");
+  CHECK(retire(ZoneTable::kLimbs, "raw_52\n0\n") ==
+        "t.csv: has 'raw_52' but not 'armor_material', which sets it");
+}
+
+TEST_CASE("A limb's armour material sets its reserved byte",
+          "[zone-authoring][content-tables][znd]") {
+  auto texts = SampleTexts();
+  auto rows = content::ParseCsv(TextOf(texts, ZoneTable::kLimbs), "limbs.csv");
+  if (!rows) FAIL(rows.error());
+  const auto& header = rows->front().fields;
+  const auto found = std::ranges::find(header, "armor_material");
+  REQUIRE(found != header.end());
+  const auto at = static_cast<std::size_t>(found - header.begin());
+  // The first template's limb 0 has no material and limb 1 wood.
+  REQUIRE(rows->at(1).fields.at(at) == "none");
+  REQUIRE(rows->at(2).fields.at(at) == "wood");
+  rows->at(1).fields.at(at) = "iron";
+  rows->at(2).fields.at(at) = "none";
+  std::vector<std::vector<std::string>> records;
+  for (const auto& row : *rows) records.push_back(row.fields);
+  TextOf(texts, ZoneTable::kLimbs) = content::FormatCsv(records);
+  auto expected = SampleZones();
+  auto& data = expected[0].enemies[0].data;
+  data[0x238 + 0x50] = std::byte{4};
+  data[0x238 + 0x52] = std::byte{1};
+  data[0x294 + 0x50] = std::byte{};
+  data[0x294 + 0x52] = std::byte{};
+  CHECK(ReadBack(texts) == expected);
 }
