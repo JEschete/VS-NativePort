@@ -31,7 +31,7 @@
 namespace VS::Content {
 
 inline constexpr std::string_view kZndTableConverterName = "znd-tables";
-inline constexpr std::uint32_t kZndTableConverterVersion = 3;
+inline constexpr std::uint32_t kZndTableConverterVersion = 4;
 
 enum class ZoneTable : std::uint8_t {
   kZones,     // catalogs/world/zones: music and room slot count
@@ -109,20 +109,24 @@ using ZoneTableReader = std::function<std::expected<std::string, std::string>(
 ReadZoneTables(const ZoneTableReader& read);
 
 // Whether the enemy, limb and part columns cover every bit of a template
-// exactly once; the error names the first byte at fault.
+// exactly once, and every flags column names each bit it holds; the error
+// names the first byte or column at fault.
 [[nodiscard]] std::expected<void, std::string> CheckZoneTemplateCoverage();
 
-struct SplitZoneColumns {
+struct ZoneColumnMigration {
   std::string text;
   std::size_t split_columns = 0;
+  std::size_t named_values = 0;
 };
 
-// Splits the former columns that packed several bit fields (the parts
-// table's shape_bits) into the named columns that replaced them, so older
-// authoring loads; the text is unchanged when none remain. Refuses a value
-// the new columns cannot hold and a table with both forms.
-[[nodiscard]] std::expected<SplitZoneColumns, std::string>
-SplitPackedZoneColumns(ZoneTable table, const std::string& text,
-                       std::string_view file);
+// Rewrites older authoring forms the current schema no longer reads, so it
+// loads; the text is unchanged when none remain. Splits the former columns
+// that packed several bit fields (the parts table's shape_bits) into the
+// columns that replaced them, refusing a value they cannot hold and a table
+// with both forms. Names a flags cell written as a number (version 3's
+// status_immunities), refusing a number its bytes cannot hold.
+[[nodiscard]] std::expected<ZoneColumnMigration, std::string>
+MigrateZoneColumns(ZoneTable table, const std::string& text,
+                   std::string_view file);
 
 }  // namespace VS::Content

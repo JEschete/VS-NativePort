@@ -98,6 +98,8 @@ content::ZndFile SampleZone() {
     enemy.data[0x238 + limb * 0x5C + 0x50] = static_cast<std::byte>(limb + 1);
   }
   VS::test_support::UseValidPartCodes(enemy.data, 1);
+  // Status immunities with bit 31, which version 3 wrote as a negative number.
+  enemy.data[0x2B] |= std::byte{0x80};
   zone.enemies.push_back(enemy);
   // A room palette row with STP words and a texture page.
   zone.textures =
@@ -223,11 +225,18 @@ void LegacyTableHeaders(const ModelRoot& root) {
       if (!spec.columns[column].legacy_name.empty()) {
         records->front().fields[column] = spec.columns[column].legacy_name;
       }
-      if (spec.columns[column].type == content::ColumnType::kEnum) {
-        for (std::size_t row = 0; row < checked->size(); ++row) {
-          records->at(row + 1).fields[column] =
-              std::to_string(checked->at(row).values[column]);
-        }
+      // Enum codes, and flags as the signed number version 3 wrote.
+      const auto type = spec.columns[column].type;
+      if (type != content::ColumnType::kEnum &&
+          type != content::ColumnType::kFlags) {
+        continue;
+      }
+      for (std::size_t row = 0; row < checked->size(); ++row) {
+        const std::int64_t value = checked->at(row).values[column];
+        records->at(row + 1).fields[column] = std::to_string(
+            type == content::ColumnType::kEnum
+                ? value
+                : static_cast<std::int32_t>(static_cast<std::uint32_t>(value)));
       }
     }
     std::vector<std::vector<std::string>> rows;
@@ -533,8 +542,11 @@ TEST_CASE("Old zone authoring upgrades without overwriting native edits",
   LegacyTableHeaders(root);
   CHECK(Convert(root).unchanged == 1);
   CHECK(Loaded(root) == edited);
-  CHECK(ReadText(TableFile(root, ZoneTable::kEnemies))
-            .contains("movement_class,"));
+  // The negative immunity number became its status names.
+  const auto enemies = ReadText(TableFile(root, ZoneTable::kEnemies));
+  CHECK(enemies.contains("movement_class,"));
+  CHECK(enemies.contains(",head-impaired|left-arm-impaired|body-impaired|"));
+  CHECK(enemies.contains("|analyze|spell-immunity,"));
   // The blade's packed shape byte split, and its codes became names.
   const auto parts = ReadText(TableFile(root, ZoneTable::kParts));
   CHECK(parts.contains(",attack_shape,attack_angle,"));

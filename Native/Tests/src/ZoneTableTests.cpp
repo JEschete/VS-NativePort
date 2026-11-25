@@ -11,6 +11,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Content/CatalogTable.hpp"
 #include "Content/ZoneTables.hpp"
 #include "TestSupport/ModelFixtures.hpp"
 #include "TestSupport/ZoneTemplates.hpp"
@@ -275,13 +276,13 @@ TEST_CASE(
 TEST_CASE("Packed shape bits split into shape and angle columns",
           "[zone-authoring][content-tables][znd]") {
   // 41 is shape 1 (bits 0-2) and angle 5 (bits 3-7).
-  const auto split = content::SplitPackedZoneColumns(
+  const auto split = content::MigrateZoneColumns(
       ZoneTable::kParts, "item_id,shape_bits,range\n5,41,2\n", "parts.csv");
   if (!split) FAIL(split.error());
   CHECK(split->split_columns == 1);
   CHECK(split->text == "item_id,attack_shape,attack_angle,range\n5,1,5,2\n");
   const auto again =
-      content::SplitPackedZoneColumns(ZoneTable::kParts, split->text, "p.csv");
+      content::MigrateZoneColumns(ZoneTable::kParts, split->text, "p.csv");
   if (!again) FAIL(again.error());
   CHECK(again->split_columns == 0);
   CHECK(again->text == split->text);
@@ -291,7 +292,7 @@ TEST_CASE("Packed shape bits that the split would change are refused",
           "[zone-authoring][content-tables][znd]") {
   const auto split = [](const std::string& text) {
     return ErrorOf(
-        content::SplitPackedZoneColumns(ZoneTable::kParts, text, "parts.csv"));
+        content::MigrateZoneColumns(ZoneTable::kParts, text, "parts.csv"));
   };
   CHECK(split("item_id,shape_bits\n1,256\n") ==
         "parts.csv:2: column 'shape_bits': 256 does not fit the columns that "
@@ -300,4 +301,53 @@ TEST_CASE("Packed shape bits that the split would change are refused",
         "parts.csv:2: column 'shape_bits': '-1' is not a decimal integer");
   CHECK(split("shape_bits,attack_angle\n1,1\n") ==
         "parts.csv: has both 'shape_bits' and 'attack_angle'");
+}
+
+TEST_CASE("Numeric status immunities migrate to status names",
+          "[zone-authoring][content-tables][znd]") {
+  // 147456 is bits 14 and 17; version 3 wrote bit 31 alone as -2147483648.
+  const auto migrated = content::MigrateZoneColumns(
+      ZoneTable::kEnemies,
+      "id,status_immunities\na,147456\nb,-2147483648\nc,0\nd,poison\n",
+      "enemies.csv");
+  if (!migrated) FAIL(migrated.error());
+  CHECK(migrated->named_values == 3);
+  CHECK(migrated->text ==
+        "id,status_immunities\na,poison|regeneration\nb,spell-immunity\n"
+        "c,none\nd,poison\n");
+  const auto again =
+      content::MigrateZoneColumns(ZoneTable::kEnemies, migrated->text, "e.csv");
+  if (!again) FAIL(again.error());
+  CHECK(again->named_values == 0);
+  CHECK(again->text == migrated->text);
+}
+
+TEST_CASE("Signed and unsigned status immunity numbers name the same flags",
+          "[zone-authoring][content-tables][znd]") {
+  const auto all = content::MigrateZoneColumns(
+      ZoneTable::kEnemies, "status_immunities\n-1\n4294967295\n", "e.csv");
+  if (!all) FAIL(all.error());
+  const auto rows = content::ParseCsv(all->text, "e.csv");
+  if (!rows) FAIL(rows.error());
+  REQUIRE(rows->size() == 3);
+  CHECK(rows->at(1).fields == rows->at(2).fields);
+  CHECK(rows->at(1).fields.at(0).starts_with("head-impaired|"));
+  CHECK(rows->at(1).fields.at(0).ends_with("|instant-defeat|spell-immunity"));
+}
+
+TEST_CASE("Status immunity numbers their bytes cannot hold are refused",
+          "[zone-authoring][content-tables][znd]") {
+  const auto migrate = [](const std::string& text) {
+    return ErrorOf(
+        content::MigrateZoneColumns(ZoneTable::kEnemies, text, "enemies.csv"));
+  };
+  CHECK(migrate("status_immunities\n4294967296\n") ==
+        "enemies.csv:2: column 'status_immunities': 4294967296 is outside "
+        "-2147483648..4294967295");
+  CHECK(migrate("status_immunities\n-2147483649\n") ==
+        "enemies.csv:2: column 'status_immunities': -2147483649 is outside "
+        "-2147483648..4294967295");
+  CHECK(migrate("status_immunities\n99999999999999999999\n") ==
+        "enemies.csv:2: column 'status_immunities': 99999999999999999999 is "
+        "outside -2147483648..4294967295");
 }

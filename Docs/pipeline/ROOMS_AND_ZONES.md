@@ -21,7 +21,7 @@ A `MAP\ZONE*.ZND` is what the room loader reads when the zone changes (`Content/
 - **Enemy section:** a count, that many ZUD (sector, read size) entries, then that many 0x464-byte templates (`vs_CharInitData`, `Actors/CharacterInit.hpp`).
 - **Texture section:** either 32 zero bytes, or four table sizes of which only the first is used, followed by that table: a count and that many TIMs, each after its byte size.
 
-`VS.Extract tables <datadir>` (and `extract`) converts every zone with converter `znd-tables` version 3
+`VS.Extract tables <datadir>` (and `extract`) converts every zone with converter `znd-tables` version 4
 (`Extract/ZndConversion.hpp`, `Content/ZoneTables.hpp`). `tables` runs after `models`, because the zones name the
 enemy archetypes (§6.2.5). It writes six CSV tables, each with a committed schema that is written beside it and must
 match (a test checks this). Columns are described in the schemas; the rules they do not express are:
@@ -38,11 +38,14 @@ match (a test checks this). Columns are described in the schemas; the rules they
 All six tables receive early informational `display_name` columns through §1.2. `zone-enemies.csv` shows the
 decoded enemy name while its `name` and `weapon_name` hex fields continue to preserve every source byte.
 
-**Named fields and domains (versions 2-3).** Enemy class, equipment materials (the shared material domain),
+**Named fields and domains (versions 2-4).** Enemy class, equipment materials (the shared material domain),
 physical types, class ratings and affinities use the named domains in the schemas. Rules beyond the schemas:
 - Version 3 names the parts' `damage_type`, `cost_type` (the resource the base attack spends) and `material`, and
   splits `shape_bits` into `attack_shape` (the shared volume-shape domain) and `attack_angle` (bits 3-7), as upstream
   `vs_Range`. Part `category` stays an integer: its domain depends on the part slot, which needs per-kind part tables.
+- Version 4 writes the enemies' `status_immunities` as status flags named as in `status-rules.csv` (`none` when
+  empty). Upstream `applyStatus` masks each status with them, and an enemy immune to `spell-immunity` starts with
+  that status (`func_80076784`).
 - The remaining array tail bytes are explicit `storage_6`/`storage_7` fields, not invented classes/elements. They
   still need separation into import provenance when native template consumers are adopted.
 - DP splash columns identify their zero-based destination limb and percent units. A limb index is topology, not a
@@ -57,10 +60,11 @@ Schemas expose each renamed column's `legacy_name`. Readers accept either name, 
 column; enum numeric aliases remain supported. `VS.Extract authoring <datadir>` upgrades existing headers and enum
 spellings without replacing IDs, labels, record values or row order. It validates all six tables and compares every
 decoded native record before writing, then publishes the new converter version last. It splits a version-2
-`shape_bits` cell into its two columns, refusing a value they cannot hold or a table with both forms. A normal
-`tables` run upgrades version-1 and version-2 tables before considering source reconversion, preserving existing
+`shape_bits` cell into its two columns, refusing a value they cannot hold or a table with both forms, and names a
+version-3 numeric `status_immunities` cell (signed or unsigned), refusing a number outside 32 bits. A normal
+`tables` run upgrades version 1-3 tables before considering source reconversion, preserving existing
 native edits. Unknown enum codes remain preservable by the raw ZND codec, but are refused as native authoring values.
-This does not resolve the remaining part categories, flags, strings, semantic identities or relational enemy
+This does not resolve the remaining part categories, strings, semantic identities or relational enemy
 definitions.
 
 **Exactness.**

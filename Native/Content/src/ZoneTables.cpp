@@ -24,6 +24,7 @@
 #include "Content/CatalogTable.hpp"
 #include "Content/ConversionManifest.hpp"
 #include "Content/GameplayDomains.hpp"
+#include "Content/StatusCatalog.hpp"
 
 namespace VS::Content {
 namespace {
@@ -142,6 +143,26 @@ struct TableLayout {
          .enumeration = domain});
   }
 
+  // An unsigned set of named bits; `domain` must name every bit.
+  void Flags(std::string_view name, std::size_t offset, std::size_t size,
+             std::string_view description, std::span<const EnumValue> domain) {
+    fields.push_back({.column = name,
+                      .offset = offset,
+                      .size = size,
+                      .is_signed = false,
+                      .bytes = false,
+                      .bit = 0,
+                      .bits = 0});
+    const std::uint32_t width = static_cast<std::uint32_t>(size) * kByteBits;
+    columns.push_back({.name = name,
+                       .type = ColumnType::kFlags,
+                       .minimum = 0,
+                       .maximum = (std::int64_t{1} << width) - 1,
+                       .references = {},
+                       .description = description,
+                       .enumeration = domain});
+  }
+
   void Bytes(std::string_view name, std::size_t offset, std::size_t size,
              std::string_view description) {
     fields.push_back({.column = name,
@@ -230,7 +251,14 @@ void AddEnemyFields(TableLayout& table) {
   table.Add("walk_speed", 0x25, 1, false, "");
   table.Add("gait_class", 0x26, 1, false, "");
   table.Add("run_speed", 0x27, 1, false, "");
-  table.Add("status_immunities", 0x28, 4, true, "status immunity bits");
+  // decomp: applyStatus (src/BATTLE/BATTLE.PRG/146C.c:11129) masks the
+  // status-rule bits with these.
+  // decomp: func_80076784 (src/BATTLE/BATTLE.PRG/146C.c:5941) starts an enemy
+  // immune to spell-immunity (bit 31) with that status.
+  table.Flags("status_immunities", 0x28, 4,
+              "statuses the enemy cannot receive; immunity to spell-immunity "
+              "also starts it with that status",
+              StatusFlags());
   table.Add("ai_settings", 0x2C, 4, true, "");
   table.Add("mobility_limb_1", 0x30, 1, false,
             "a limb whose loss slows the enemy");
@@ -506,6 +534,11 @@ void AppendCells(std::vector<std::string>& cells, const TableLayout& layout,
     }
     const auto value = ReadField(record, field);
     const auto& column = layout.columns.at(cells.size());
+    if (column.type == ColumnType::kFlags) {
+      cells.push_back(
+          FormatFlags(column.enumeration, static_cast<std::uint32_t>(value)));
+      continue;
+    }
     const auto named =
         std::ranges::find(column.enumeration, value, &EnumValue::code);
     cells.push_back(named == column.enumeration.end()
@@ -658,6 +691,68 @@ std::expected<void, std::string> SplitColumn(const TableLayout& layout,
     fields.insert(fields.begin() + position, cells->begin(), cells->end());
   }
   return {};
+}
+
+// A flags cell written as a number (in either the signed or the unsigned form
+// of its bytes) as its member names; nothing for a cell that is not a number,
+// which the schema then reads as names.
+std::expected<std::optional<std::string>, std::string> NamedFlagsCell(
+    const ColumnSpec& column, std::string_view cell, std::string_view file,
+    std::size_t line) {
+  std::int64_t value = 0;
+  const char* const first = cell.data();
+  const auto parsed = std::from_chars(first, first + cell.size(), value);
+  if (cell.empty() || parsed.ec == std::errc::invalid_argument ||
+      parsed.ptr != first + cell.size()) {
+    return std::nullopt;
+  }
+  const std::int64_t lowest = -((column.maximum + 1) / 2);
+  if (parsed.ec != std::errc() || value < lowest || value > column.maximum) {
+    return std::unexpected(CellError(
+        file, line, column.name,
+        std::format("{} is outside {}..{}", cell, lowest, column.maximum)));
+  }
+  const auto bits =
+      static_cast<std::uint32_t>(static_cast<std::uint64_t>(value) &
+                                 static_cast<std::uint64_t>(column.maximum));
+  std::string names = FormatFlags(column.enumeration, bits);
+  if (names.empty()) {
+    return std::unexpected(
+        CellError(file, line, column.name,
+                  std::format("{} has bits no flag names", cell)));
+  }
+  return names;
+}
+
+// Names the flags cells written as numbers; the number of cells it named.
+std::expected<std::size_t, std::string> NameFlagsCells(
+    const TableLayout& layout, std::vector<CsvRecord>& records,
+    std::string_view file) {
+  std::size_t named = 0;
+  const auto& header = records.front().fields;
+  for (const ColumnSpec& column : layout.columns) {
+    if (column.type != ColumnType::kFlags) continue;
+    const auto found = std::ranges::find(header, column.name);
+    if (found == header.end()) continue;
+    const auto at = static_cast<std::size_t>(found - header.begin());
+    for (std::size_t row = 1; row < records.size(); ++row) {
+      auto& fields = records[row].fields;
+      if (at >= fields.size()) continue;  // the schema refuses the short row
+      auto cell = NamedFlagsCell(column, fields[at], file, records[row].line);
+      if (!cell) return std::unexpected(cell.error());
+      if (*cell) {
+        fields[at] = *std::move(*cell);
+        ++named;
+      }
+    }
+  }
+  return named;
+}
+
+bool HasFlags(const TableLayout& layout) {
+  return std::ranges::any_of(layout.columns, [](const ColumnSpec& column) {
+    return column.type == ColumnType::kFlags;
+  });
 }
 
 }  // namespace
@@ -938,17 +1033,29 @@ std::expected<void, std::string> CheckZoneTemplateCoverage() {
       return std::unexpected(std::format("byte 0x{:03X} is in no column", at));
     }
   }
+  // An unnamed bit would leave FormatFlags no spelling for its cell.
+  for (const ZoneTable table : kZoneTables) {
+    for (const ColumnSpec& column : LayoutOf(table).columns) {
+      if (column.type != ColumnType::kFlags) continue;
+      std::int64_t named = 0;
+      for (const EnumValue& value : column.enumeration) named |= value.code;
+      if (named != column.maximum) {
+        return std::unexpected(
+            std::format("flags column '{}' leaves bits unnamed", column.name));
+      }
+    }
+  }
   return {};
 }
 
-std::expected<SplitZoneColumns, std::string> SplitPackedZoneColumns(
+std::expected<ZoneColumnMigration, std::string> MigrateZoneColumns(
     ZoneTable table, const std::string& text, std::string_view file) {
   const TableLayout& layout = LayoutOf(table);
-  SplitZoneColumns split{.text = text};
-  if (layout.packed.empty()) return split;
+  ZoneColumnMigration migrated{.text = text};
+  if (layout.packed.empty() && !HasFlags(layout)) return migrated;
   auto records = ParseCsv(text, file);
   if (!records) return std::unexpected(records.error());
-  if (records->empty()) return split;
+  if (records->empty()) return migrated;
   for (const PackedColumn& packed : layout.packed) {
     const auto& header = records->front().fields;
     const auto found = std::ranges::find(header, packed.legacy);
@@ -963,14 +1070,17 @@ std::expected<SplitZoneColumns, std::string> SplitPackedZoneColumns(
     if (auto done = SplitColumn(layout, packed, *records, at, file); !done) {
       return std::unexpected(done.error());
     }
-    ++split.split_columns;
+    ++migrated.split_columns;
   }
-  if (split.split_columns != 0) {
+  auto named = NameFlagsCells(layout, *records, file);
+  if (!named) return std::unexpected(named.error());
+  migrated.named_values = *named;
+  if (migrated.split_columns != 0 || migrated.named_values != 0) {
     std::vector<std::vector<std::string>> rows;
     for (CsvRecord& record : *records) rows.push_back(std::move(record.fields));
-    split.text = FormatCsv(rows);
+    migrated.text = FormatCsv(rows);
   }
-  return split;
+  return migrated;
 }
 
 }  // namespace VS::Content

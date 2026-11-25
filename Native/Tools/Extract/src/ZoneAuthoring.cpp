@@ -51,15 +51,16 @@ std::expected<void, std::string> PrepareFiles(const fs::path& root,
     const auto path = Content::ZoneTablePath(table);
     auto text = Read(root / Platform::Utf8Path(path));
     if (!text) return std::unexpected(text.error());
-    // The split is checked to be lossless; the records check below compares
-    // its result with the normalized tables.
-    auto split = Content::SplitPackedZoneColumns(table, *text, path);
-    if (!split) return std::unexpected(split.error());
-    report.split_columns += split->split_columns;
+    // The migration is checked to be lossless; the records check below
+    // compares its result with the normalized tables.
+    auto migrated = Content::MigrateZoneColumns(table, *text, path);
+    if (!migrated) return std::unexpected(migrated.error());
+    report.split_columns += migrated->split_columns;
+    report.named_values += migrated->named_values;
     auto rewrite = Content::NormalizeTableText(Content::ZoneTableSpec(table),
-                                               split->text, path);
+                                               migrated->text, path);
     if (!rewrite) return std::unexpected(rewrite.error());
-    original.emplace(path, split->text);
+    original.emplace(path, migrated->text);
     normalized.emplace(path, rewrite->text);
     if (*text != rewrite->text) pending.emplace(path, rewrite->text);
     report.renamed_columns += rewrite->renamed_columns;
@@ -108,7 +109,7 @@ std::expected<ZoneAuthoringReport, std::string> UpgradeZoneAuthoring(
     auto found = (**manifest).converters.find(Content::kZndTableConverterName);
     if (found != (**manifest).converters.end()) {
       // Version 1 tables have numeric names and values, version 2 the packed
-      // shape_bits; both upgrade in place.
+      // shape_bits, version 3 numeric status_immunities; all upgrade in place.
       if (found->second < 1 ||
           found->second > Content::kZndTableConverterVersion) {
         return std::unexpected(
