@@ -245,7 +245,7 @@ The `category` also selects how damage is assigned to limbs:
 This is the damage-distribution policy after a hit amount is calculated; it does not change target selection or
 the `effect` field.
 
-The seeded five-row cold read, including values, references and edit intent, is recorded in
+The seeded cold reads, including values, references and edit intent, are recorded in
 [ACTION_HITS_COLD_READ](ACTION_HITS_COLD_READ.md).
 
 Sources: `Battle/ActionPresentation.cpp`, `ActionCameraSelection.cpp`, `ActionCosts.cpp`, `ActionSequence.cpp`,
