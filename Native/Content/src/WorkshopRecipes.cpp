@@ -174,6 +174,10 @@ enum BladeColumn : std::uint8_t {
   kBladeAttackAngle,
 };
 
+// The equipped blade's extents and angle replace a base attack's (range_x
+// 255), and the wielder's reach is added; nothing reads the stored shape.
+// decomp: vs_battle_equipWeapon (src/BATTLE/BATTLE.PRG/146C.c:1035)
+// decomp: func_80071F68 (src/BATTLE/BATTLE.PRG/146C.c:3898)
 constexpr std::array kBladeResultColumns{
     Id("id", kIdText),
     Integer("legacy_id", 0, kMaxLegacyId, kLegacyIdText),
@@ -186,18 +190,26 @@ constexpr std::array kBladeResultColumns{
                 "The base attack's resource cost; none requires zero cost."),
     Integer("cost", 0, kByteMax, "How much each attack costs."),
     Integer("recovery_delay", 0, kByteMax,
-            "The recovery delay after an attack (record byte 6)."),
+            "The recovery delay (record byte 6): after an action that takes "
+            "the weapon's delay, the wielder waits (this + its recovery "
+            "bonus) * 256 / 35 battle updates to act again."),
     Integer("strength", kStatMin, kStatMax, kStrengthText),
     Integer("intelligence", kStatMin, kStatMax, kIntelligenceText),
     Integer("agility", kStatMin, kStatMax, kAgilityText),
-    Integer("range", 0, kByteMax, "The attack's reach."),
-    Integer("range_y", 0, kByteMax, "The attack area's second extent."),
-    Integer("range_z", 0, kByteMax, "The attack area's third extent."),
+    Integer("range", 0, kByteMax,
+            "The attack's horizontal x extent, 32 world units a step; the "
+            "wielder's reach is added to it and to the other two extents."),
+    Integer("range_y", 0, kByteMax,
+            "The attack's vertical extent, 32 world units a step (the "
+            "vertical radius of the base attacks' ellipsoid)."),
+    Integer("range_z", 0, kByteMax,
+            "The attack's horizontal z extent, 32 world units a step."),
     Enumeration("attack_shape", 0, kAttackShapeMax, kVolumeShapes,
-                "The base attack's targeting volume (the shape byte's low "
-                "three bits); actions' range_shape uses the same domain."),
+                "The shape byte's low three bits, kept with the blade but "
+                "unread: an attack keeps the action's range_shape."),
     Integer("attack_angle", 0, kAttackAngleMax,
-            "The attack area's angle (the shape byte's high five bits)."),
+            "The attack volume's pitch (the shape byte's high five bits), in "
+            "11.25-degree steps (1/32 turn)."),
 };
 static_assert(kBladeResultColumns.size() == kBladeAttackAngle + 1);
 

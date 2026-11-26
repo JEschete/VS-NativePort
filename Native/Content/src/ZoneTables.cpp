@@ -365,9 +365,27 @@ constexpr std::array<PartSlot, 16> kPartSlots{{
 }};
 
 void AddEnemyFields(TableLayout& table) {
-  table.Add("sub_type", 0x00, 2, false, "the enemy kind (kill and bestiary)");
-  table.Add("model_id", 0x02, 1, false, "the body model id");
-  table.Bits("reach", 0x03, 0, 5, "attack reach");
+  // decomp: updateEnemyKills (src/BATTLE/BATTLE.PRG/146C.c:1414) sets the
+  // kind's kill bit, which the bestiary's first_defeated_subtype ranges test.
+  // decomp: func_800E5A9C (src/BATTLE/BATTLE.PRG/7CD68.c:205)
+  table.Add("sub_type", 0x00, 2, false,
+            "the enemy kind: a defeat sets its bestiary kill bit (kinds "
+            "0-255; the disc's 'nothing' rows use 256-268), and kinds 172 "
+            "and 173 take the orbiting boss AI");
+  // decomp: func_800775C0 (src/BATTLE/BATTLE.PRG/146C.c:6393) gives the actor
+  // this id, loads id + 1 as a second body for the ids vs_main_actorExtraShp
+  // (src/SLUS_010.40/main.c:755) marks, and loads the body alone for 127.
+  // decomp: func_8007CF18 (src/BATTLE/BATTLE.PRG/146C.c:9093)
+  table.Add("model_id", 0x02, 1, false,
+            "the actor's model id, by which scripts find it; ids 26, 71, 79 "
+            "and 175 also load a second body model, and 127 loads the body "
+            "without animations, weapon or shield. The body itself comes "
+            "from the archetype");
+  // decomp: func_80076784 (src/BATTLE/BATTLE.PRG/146C.c:5941)
+  // decomp: vs_battle_equipWeapon (src/BATTLE/BATTLE.PRG/146C.c:1035)
+  table.Bits("reach", 0x03, 0, 5,
+             "added to each of the weapon's three range extents (32 world "
+             "units a step)");
   table.Bits("enemy_class", 0x03, 5, 3, "the class (human .. evil)",
              kEnemyClasses);
   table.Bytes("name", 0x04, kNameBytes, "the name, in the game's encoding");
@@ -510,18 +528,26 @@ void AddEnemyFields(TableLayout& table) {
            "decays_hostility", "shares_ally_hostility", "hostile_on_harm",
            "hostile_on_unprovoked_harm", "can_ally_with_ashley", "flee_rule",
            "terrain_preset"}});
+  // decomp: func_80085008 (src/BATTLE/BATTLE.PRG/146C.c:12767)
   table.Add("mobility_limb_1", 0x30, 1, false,
-            "a limb whose loss slows the enemy");
+            "a limb (1-5 in the limbs table; 0 for none) the enemy moves "
+            "on: while no listed limb has 2 HP or more it is legs-impaired");
   table.Add("mobility_limb_2", 0x31, 1, false,
-            "a limb whose loss slows the enemy");
+            "a second mobility limb, as mobility_limb_1");
   table.Add("default_target_limb", 0x32, 1, false,
-            "the limb a hit aimed at the whole enemy strikes");
+            "the limb (0-5 in the limbs table) a hit aimed at the whole "
+            "enemy strikes");
   // decomp: func_80076784 (src/BATTLE/BATTLE.PRG/146C.c:5941) and
   // applyAccessoryStats (src/BATTLE/BATTLE.PRG/146C.c:734) read neither this
   // byte nor the accessory's last two; every disc template holds zero there.
   table.Reserve("raw_33", 0x33);
   table.Add("weapon_material", 0x124, 1, false, "weapon material", kMaterials);
-  table.Add("weapon_drop_rate", 0x125, 1, false, "out of 255");
+  // A drop rolls a number from 0 to 254 and drops when it is below the rate.
+  // decomp: dropWeaponRand (src/BATTLE/BATTLE.PRG/146C.c:1251)
+  // decomp: dropLoot (src/BATTLE/BATTLE.PRG/146C.c:1363)
+  table.Add("weapon_drop_rate", 0x125, 1, false,
+            "the chance in 255 that a defeat drops the weapon (blade, grip, "
+            "gems and name): 0 never, 255 always");
   // An equipment index is the 1-based inventory slot the player's equipment
   // came from. The apply*Stats copy each into the actor's stats, and only
   // vs_mainMenu_initInventory reads them, from the player's. Every disc
@@ -534,9 +560,13 @@ void AddEnemyFields(TableLayout& table) {
   table.Bytes("weapon_name", 0x128, kNameBytes,
               "the weapon's name, in the game's encoding");
   table.Add("shield_material", 0x200, 1, false, "shield material", kMaterials);
-  table.Add("shield_drop_rate", 0x201, 1, false, "out of 255");
+  // decomp: dropShieldRand (src/BATTLE/BATTLE.PRG/146C.c:1275)
+  table.Add("shield_drop_rate", 0x201, 1, false,
+            "the chance in 255 that a defeat drops the shield with its gems");
   table.Zeros("shield_index", 0x202, 2);
-  table.Add("accessory_drop_rate", 0x234, 1, false, "out of 255");
+  // decomp: dropAccessoryRand (src/BATTLE/BATTLE.PRG/146C.c:1295)
+  table.Add("accessory_drop_rate", 0x234, 1, false,
+            "the chance in 255 that a defeat drops the accessory");
   table.Zeros("accessory_index", 0x235, 1);
   table.Reserve("raw_236", 0x236);
   table.Reserve("raw_237", 0x237);
@@ -564,10 +594,20 @@ void AddLimbFields(TableLayout& table) {
             "how well the limb evades actions whose hit_function is "
             "chain-evasion: they land (255 - value) * 100 / 255 percent of "
             "the time");
+  // Defense = (strength, or intelligence for a spell, plus the accessory's,
+  // less 20) * (100 + the limb's type and affinity values + the accessory's
+  // ratings) / 100, plus the shield and armour terms, all over risk / 2 + 100.
+  // Types count for physical hits and typed spells.
+  // decomp: getPhysicalAttackDamage (src/BATTLE/BATTLE.PRG/146C.c:11202)
+  // decomp: getMagicAttackDamage (src/BATTLE/BATTLE.PRG/146C.c:11404)
   table.Run("type", 0x04, kTypeFields, 1, true,
-            "signed physical-type resistance");
+            "signed; each point adds 1% to the defense the enemy's own "
+            "strength (intelligence for spells) gives this limb against hits "
+            "of this type");
   table.Run("affinity", 0x08, kAffinityFields, 1, true,
-            "signed elemental affinity");
+            "signed; each point adds 1% to the defense the enemy's own "
+            "strength (intelligence for spells) gives this limb against hits "
+            "of this affinity");
   // The affinities' tail byte, zero on the disc, as in the parts (see
   // AddPartFields): the limb's init copies only affinities 0-6.
   // decomp: func_80076784 (src/BATTLE/BATTLE.PRG/146C.c:5941)
@@ -594,7 +634,10 @@ void AddLimbFields(TableLayout& table) {
   }
   table.Add("armor_material", 0x50, 1, false, "limb armor material",
             kMaterials);
-  table.Add("armor_drop_rate", 0x51, 1, false, "out of 255");
+  // decomp: dropArmorRand (src/BATTLE/BATTLE.PRG/146C.c:1308)
+  table.Add("armor_drop_rate", 0x51, 1, false,
+            "the chance in 255 that a defeat drops this limb's armour; at "
+            "most two armour pieces drop");
   // decomp: applyArmorStats (src/BATTLE/BATTLE.PRG/146C.c:759) copies this
   // byte to vs_UiArmor.unk99, which no code reads. Every disc limb holds 1
   // exactly when it has an armour material, as INITBTL.PRG's init of Ashley
@@ -603,8 +646,15 @@ void AddLimbFields(TableLayout& table) {
   // An equipment index (AddEnemyFields), zero on the disc.
   // decomp: applyArmorStats (src/BATTLE/BATTLE.PRG/146C.c:759)
   table.Zeros("armor_index", 0x53, 1);
+  // Actions of categories 5, 7 and 14 spread a hit on this limb by these
+  // shares; categories 0-4 spread it evenly over the limbs with HP, and 6, 8,
+  // 11 and 12 put it all on the limb hit.
+  // decomp: func_80080000 (src/BATTLE/BATTLE.PRG/146C.c:10547)
+  // decomp: adjustDpPp (src/BATTLE/BATTLE.PRG/146C.c:10624)
   table.Run("dp_splash", 0x54, kSplashFields, 1, false,
-            "DP damage share (%) to the zero-based destination limb; body-part "
+            "percent of a hit on this limb that the zero-based destination "
+            "limb takes, and from which its armour's DP loss follows, for "
+            "actions that spread damage (categories 5, 7, 14); body-part "
             "names depend on the model");
   // decomp: vs_CharInitData (src/BATTLE/BATTLE.PRG/charInit.h:24-51):
   // LimbInit's unk5A padding, zero on the disc and read by no code.
@@ -655,39 +705,86 @@ void AddPartFields(TableLayout& table) {
             "the part's material (zero on the disc: templates keep weapon, "
             "shield and armour materials in their own columns)",
             kMaterials);
+  // The recovery timer gains (delay + bonus) * 256 and loses 35 a battle
+  // update.
+  // decomp: func_800859B4 (src/BATTLE/BATTLE.PRG/146C.c:13010)
+  // decomp: func_80088554 (src/BATTLE/BATTLE.PRG/146C.c:14560)
   table.Add("recovery_delay", 0x14, 1, false,
-            "the blade's recovery delay after an attack, for actions that "
-            "take the weapon's delay");
+            "the blade's recovery delay: after an action that takes the "
+            "weapon's delay, the wielder waits (this + the enemy's "
+            "recovery_delay_bonus) * 256 / 35 battle updates to act again");
   table.Add("gem_slots", 0x15, 1, false,
             "how many gems a grip or shield holds");
+  // Hit-chance points add to or take from the hit's percent chance.
+  // decomp: getAttackGemBuff (src/BATTLE/BATTLE.PRG/146C.c:9702)
+  // decomp: getDefenseGemBuff (src/BATTLE/BATTLE.PRG/146C.c:9731)
+  // decomp: func_8007FE5C (src/BATTLE/BATTLE.PRG/146C.c:10469)
+  // decomp: func_800803A4 (src/BATTLE/BATTLE.PRG/146C.c:10656)
   table.Add("gem_effects", 0x16, 1, false,
-            "a gem's effect (0 none): 1/2 physical/spell hit bonus, 3/4 "
-            "+5% physical/spell damage, 5/6 physical/spell evasion, 7/8 -5% "
-            "physical/spell damage taken, 9 PP gain; 11-14, 16, 18, 19 and 21 "
-            "evade specific action effects");
+            "a gem's effect (0 none). In a weapon: 1/2 +20 points of "
+            "physical/spell hit chance, 3/4 +5% physical/spell damage. In a "
+            "shield: 5/6 -20 points to physical/spell hits on the holder, 7/8 "
+            "-5% physical/spell damage taken, and 11, 12, 13, 14, 16, 18, 19 "
+            "and 21 -20 points to hits that apply strength-down, "
+            "intelligence-down, agility-down, legs-impaired, silence, "
+            "paralysis, poison and numbness. 9: a weapon gains 5% more PP a "
+            "physical hit, a shield 5% less. Hit-chance gems need the weapon "
+            "drawn");
   // The part's inventory slot, zero on the disc: an equipment index
   // (AddEnemyFields). Loot copies of parts skip it.
   // decomp: copyUiEquipmentStats (src/BATTLE/BATTLE.PRG/146C.c:1156)
   table.Zeros("index", 0x17, 1);
+  // Extents are 32 world units a step (a room tile is 128): x and z are
+  // horizontal radii, half-widths or half-diagonals; y is the vertical radius
+  // of an ellipsoid or centered cylinder and the height above the origin of
+  // the other shapes. A direct attack keeps the action's range_shape and, for
+  // range_x 255, takes these extents and angle; each equip sets the actor's
+  // own shape to ellipsoid.
+  // decomp: func_80071F68 (src/BATTLE/BATTLE.PRG/146C.c:3898)
+  // decomp: func_800C1564 (src/BATTLE/BATTLE.PRG/58578.c:360)
   table.Add("range", 0x18, 1, false,
-            "the blade's reach; the enemy's reach is added to it and to the "
-            "other two extents");
-  table.Add("range_y", 0x19, 1, false, "the attack area's second extent");
-  table.Add("range_z", 0x1A, 1, false, "the attack area's third extent");
+            "the blade's horizontal x extent, 32 world units a step; the "
+            "enemy's reach is added to it and to the other two extents");
+  table.Add("range_y", 0x19, 1, false,
+            "the blade's vertical extent, 32 world units a step (the "
+            "vertical radius of the ellipsoid the base attacks use)");
+  table.Add("range_z", 0x1A, 1, false,
+            "the blade's horizontal z extent, 32 world units a step");
   // decomp: vs_Range (src/SLUS_010.40/inventory.h:4)
   table.Bits("attack_shape", 0x1B, 0, 3,
-             "the blade's targeting volume; actions use the same domain",
+             "the volume shape stored with the blade; targeting ignores it "
+             "(an attack takes the action's range_shape, ellipsoid for the "
+             "base attacks), and every disc blade holds ellipsoid",
              kVolumeShapes);
-  table.Bits("attack_angle", 0x1B, 3, 5, "the attack area's angle");
+  table.Bits("attack_angle", 0x1B, 3, 5,
+             "the attack volume's pitch, in 11.25-degree steps (1/32 turn)");
   table.packed.push_back({.legacy = "shape_bits",
                           .offset = 0x1B,
                           .size = 1,
                           .is_signed = false,
                           .columns = {"attack_shape", "attack_angle"}});
-  table.Run("type", 0x1C, kTypeFields, 1, true, "signed physical-type rating");
-  table.Run("class", 0x20, kClassFields, 1, true, "signed class rating");
+  // Attack = stat * (100 + (weapon affinity + grip type + weapon class - DP% +
+  // PP bonus + accessory ratings) / 4) / 100: 4 points are 1%. In defense
+  // (AddLimbFields) armour and shield values scale the piece's own strength
+  // (intelligence for spells), the accessory's the wearer's; the shield
+  // counts while the weapon is drawn. Classes count for physical hits only.
+  // decomp: getPhysicalAttackDamage (src/BATTLE/BATTLE.PRG/146C.c:11202)
+  // decomp: getMagicAttackDamage (src/BATTLE/BATTLE.PRG/146C.c:11404)
+  table.Run("type", 0x1C, kTypeFields, 1, true,
+            "signed rating against hits of this type: a grip's, for its "
+            "blade's type, and an accessory's add 1% attack per 4 points; "
+            "armour's, a shield's and an accessory's add 1% defense per "
+            "point");
+  table.Run("class", 0x20, kClassFields, 1, true,
+            "signed rating against the opponent's class, physical hits "
+            "only: a weapon's and an accessory's add 1% attack per 4 points; "
+            "armour's, a shield's and an accessory's add 1% defense per "
+            "point");
   table.Run("affinity", 0x28, kAffinityFields, 1, true,
-            "signed elemental affinity");
+            "signed rating for hits of this affinity (a plain attack takes "
+            "the weapon's highest): a weapon's and an accessory's add 1% "
+            "attack per 4 points; armour's, a shield's and an accessory's "
+            "add 1% defense per point");
   // The class array's last two bytes and the affinity array's last, zero in
   // every disc template, are tails no code reads. The apply*Stats copy
   // classes 0-5 and affinities 0-6 into the actor's stats, as loot copies do

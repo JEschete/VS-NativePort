@@ -38,21 +38,21 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 65535,
-      "description": "the enemy kind (kill and bestiary)"
+      "description": "the enemy kind: a defeat sets its bestiary kill bit (kinds 0-255; the disc's 'nothing' rows use 256-268), and kinds 172 and 173 take the orbiting boss AI"
     },
     {
       "name": "model_id",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "the body model id"
+      "description": "the actor's model id, by which scripts find it; ids 26, 71, 79 and 175 also load a second body model, and 127 loads the body without animations, weapon or shield. The body itself comes from the archetype"
     },
     {
       "name": "reach",
       "type": "integer",
       "minimum": 0,
       "maximum": 31,
-      "description": "attack reach"
+      "description": "added to each of the weapon's three range extents (32 world units a step)"
     },
     {
       "name": "enemy_class",
@@ -340,21 +340,21 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "a limb whose loss slows the enemy"
+      "description": "a limb (1-5 in the limbs table; 0 for none) the enemy moves on: while no listed limb has 2 HP or more it is legs-impaired"
     },
     {
       "name": "mobility_limb_2",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "a limb whose loss slows the enemy"
+      "description": "a second mobility limb, as mobility_limb_1"
     },
     {
       "name": "default_target_limb",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "the limb a hit aimed at the whole enemy strikes"
+      "description": "the limb (0-5 in the limbs table) a hit aimed at the whole enemy strikes"
     },
     {
       "name": "weapon_material",
@@ -377,7 +377,7 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "out of 255"
+      "description": "the chance in 255 that a defeat drops the weapon (blade, grip, gems and name): 0 never, 255 always"
     },
     {
       "name": "weapon_name",
@@ -406,14 +406,14 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "out of 255"
+      "description": "the chance in 255 that a defeat drops the shield with its gems"
     },
     {
       "name": "accessory_drop_rate",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "out of 255"
+      "description": "the chance in 255 that a defeat drops the accessory"
     }
   ]
 }

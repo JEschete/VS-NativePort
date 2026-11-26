@@ -50,7 +50,7 @@
       "legacy_name": "type_1",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed physical-type resistance"
+      "description": "signed; each point adds 1% to the defense the enemy's own strength (intelligence for spells) gives this limb against hits of this type"
     },
     {
       "name": "type_blunt",
@@ -58,7 +58,7 @@
       "legacy_name": "type_2",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed physical-type resistance"
+      "description": "signed; each point adds 1% to the defense the enemy's own strength (intelligence for spells) gives this limb against hits of this type"
     },
     {
       "name": "type_edged",
@@ -66,7 +66,7 @@
       "legacy_name": "type_3",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed physical-type resistance"
+      "description": "signed; each point adds 1% to the defense the enemy's own strength (intelligence for spells) gives this limb against hits of this type"
     },
     {
       "name": "type_piercing",
@@ -74,7 +74,7 @@
       "legacy_name": "type_4",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed physical-type resistance"
+      "description": "signed; each point adds 1% to the defense the enemy's own strength (intelligence for spells) gives this limb against hits of this type"
     },
     {
       "name": "affinity_physical",
@@ -82,7 +82,7 @@
       "legacy_name": "affinity_1",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed elemental affinity"
+      "description": "signed; each point adds 1% to the defense the enemy's own strength (intelligence for spells) gives this limb against hits of this affinity"
     },
     {
       "name": "affinity_air",
@@ -90,7 +90,7 @@
       "legacy_name": "affinity_2",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed elemental affinity"
+      "description": "signed; each point adds 1% to the defense the enemy's own strength (intelligence for spells) gives this limb against hits of this affinity"
     },
     {
       "name": "affinity_fire",
@@ -98,7 +98,7 @@
       "legacy_name": "affinity_3",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed elemental affinity"
+      "description": "signed; each point adds 1% to the defense the enemy's own strength (intelligence for spells) gives this limb against hits of this affinity"
     },
     {
       "name": "affinity_earth",
@@ -106,7 +106,7 @@
       "legacy_name": "affinity_4",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed elemental affinity"
+      "description": "signed; each point adds 1% to the defense the enemy's own strength (intelligence for spells) gives this limb against hits of this affinity"
     },
     {
       "name": "affinity_water",
@@ -114,7 +114,7 @@
       "legacy_name": "affinity_5",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed elemental affinity"
+      "description": "signed; each point adds 1% to the defense the enemy's own strength (intelligence for spells) gives this limb against hits of this affinity"
     },
     {
       "name": "affinity_light",
@@ -122,7 +122,7 @@
       "legacy_name": "affinity_6",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed elemental affinity"
+      "description": "signed; each point adds 1% to the defense the enemy's own strength (intelligence for spells) gives this limb against hits of this affinity"
     },
     {
       "name": "affinity_dark",
@@ -130,7 +130,7 @@
       "legacy_name": "affinity_7",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed elemental affinity"
+      "description": "signed; each point adds 1% to the defense the enemy's own strength (intelligence for spells) gives this limb against hits of this affinity"
     },
     {
       "name": "action_1",
@@ -217,7 +217,7 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "out of 255"
+      "description": "the chance in 255 that a defeat drops this limb's armour; at most two armour pieces drop"
     },
     {
       "name": "dp_splash_limb_0_percent",
@@ -225,7 +225,7 @@
       "legacy_name": "dp_splash_1",
       "minimum": 0,
       "maximum": 255,
-      "description": "DP damage share (%) to the zero-based destination limb; body-part names depend on the model"
+      "description": "percent of a hit on this limb that the zero-based destination limb takes, and from which its armour's DP loss follows, for actions that spread damage (categories 5, 7, 14); body-part names depend on the model"
     },
     {
       "name": "dp_splash_limb_1_percent",
@@ -233,7 +233,7 @@
       "legacy_name": "dp_splash_2",
       "minimum": 0,
       "maximum": 255,
-      "description": "DP damage share (%) to the zero-based destination limb; body-part names depend on the model"
+      "description": "percent of a hit on this limb that the zero-based destination limb takes, and from which its armour's DP loss follows, for actions that spread damage (categories 5, 7, 14); body-part names depend on the model"
     },
     {
       "name": "dp_splash_limb_2_percent",
@@ -241,7 +241,7 @@
       "legacy_name": "dp_splash_3",
       "minimum": 0,
       "maximum": 255,
-      "description": "DP damage share (%) to the zero-based destination limb; body-part names depend on the model"
+      "description": "percent of a hit on this limb that the zero-based destination limb takes, and from which its armour's DP loss follows, for actions that spread damage (categories 5, 7, 14); body-part names depend on the model"
     },
     {
       "name": "dp_splash_limb_3_percent",
@@ -249,7 +249,7 @@
       "legacy_name": "dp_splash_4",
       "minimum": 0,
       "maximum": 255,
-      "description": "DP damage share (%) to the zero-based destination limb; body-part names depend on the model"
+      "description": "percent of a hit on this limb that the zero-based destination limb takes, and from which its armour's DP loss follows, for actions that spread damage (categories 5, 7, 14); body-part names depend on the model"
     },
     {
       "name": "dp_splash_limb_4_percent",
@@ -257,7 +257,7 @@
       "legacy_name": "dp_splash_5",
       "minimum": 0,
       "maximum": 255,
-      "description": "DP damage share (%) to the zero-based destination limb; body-part names depend on the model"
+      "description": "percent of a hit on this limb that the zero-based destination limb takes, and from which its armour's DP loss follows, for actions that spread damage (categories 5, 7, 14); body-part names depend on the model"
     },
     {
       "name": "dp_splash_limb_5_percent",
@@ -265,7 +265,7 @@
       "legacy_name": "dp_splash_6",
       "minimum": 0,
       "maximum": 255,
-      "description": "DP damage share (%) to the zero-based destination limb; body-part names depend on the model"
+      "description": "percent of a hit on this limb that the zero-based destination limb takes, and from which its armour's DP loss follows, for actions that spread damage (categories 5, 7, 14); body-part names depend on the model"
     }
   ]
 }

@@ -266,14 +266,20 @@ constexpr ColumnSpec Enumeration(std::string_view name,
           .enumeration = values};
 }
 
+// Volume extents are 32 world units a step (a room tile is 128); see the zone
+// part ranges for each axis. range_x 255 takes the attacker's weapon extents
+// and angle but keeps the action's shape.
+// decomp: func_80071F68 (src/BATTLE/BATTLE.PRG/146C.c:3898)
 constexpr std::string_view kRangeText{
-    "The targeting volume's extent; 255 on the base attacks means unlimited.",
+    "The targeting volume's extent, 32 world units a step; range_x 255, on "
+    "the base attacks, takes the attacker's weapon extents (blade range plus "
+    "reach) and angle instead, keeping range_shape.",
 };
 constexpr std::string_view kAreaText{
-    "The area of effect's extent around its target.",
+    "The area of effect's extent around its target, 32 world units a step.",
 };
 constexpr std::string_view kAngleText{
-    "The volume's pitch, in 16-unit steps of the game's angle scale.",
+    "The volume's pitch, in 11.25-degree steps (1/32 turn).",
 };
 constexpr std::array kActionColumns{
     ColumnSpec{
@@ -317,8 +323,9 @@ constexpr std::array kActionColumns{
             "How much of the kind's resource one use spends; 255 on the base "
             "attack means the weapon decides."),
     Integer("recovery_delay", kByteMax,
-            "The delay before the actor acts again; 255 means the equipped "
-            "weapon's delay."),
+            "The delay before the actor acts again: the actor waits (this + "
+            "its recovery bonus) * 256 / 35 battle updates. 255 means the "
+            "equipped weapon's delay; actions 22-53 add no delay."),
     Enumeration("camera_zoom", kZooms,
                 "How the combat camera frames the action."),
     Integer("effect_id", kByteMax,

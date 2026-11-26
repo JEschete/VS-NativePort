@@ -89,7 +89,7 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "The recovery delay after an attack (record byte 6)."
+      "description": "The recovery delay (record byte 6): after an action that takes the weapon's delay, the wielder waits (this + its recovery bonus) * 256 / 35 battle updates to act again."
     },
     {
       "name": "strength",
@@ -117,21 +117,21 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "The attack's reach."
+      "description": "The attack's horizontal x extent, 32 world units a step; the wielder's reach is added to it and to the other two extents."
     },
     {
       "name": "range_y",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "The attack area's second extent."
+      "description": "The attack's vertical extent, 32 world units a step (the vertical radius of the base attacks' ellipsoid)."
     },
     {
       "name": "range_z",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "The attack area's third extent."
+      "description": "The attack's horizontal z extent, 32 world units a step."
     },
     {
       "name": "attack_shape",
@@ -147,14 +147,14 @@
         "7": "diamond"
       },
       "legacy_numeric_aliases": true,
-      "description": "The base attack's targeting volume (the shape byte's low three bits); actions' range_shape uses the same domain."
+      "description": "The shape byte's low three bits, kept with the blade but unread: an attack keeps the action's range_shape."
     },
     {
       "name": "attack_angle",
       "type": "integer",
       "minimum": 0,
       "maximum": 31,
-      "description": "The attack area's angle (the shape byte's high five bits)."
+      "description": "The attack volume's pitch (the shape byte's high five bits), in 11.25-degree steps (1/32 turn)."
     }
   ]
 }

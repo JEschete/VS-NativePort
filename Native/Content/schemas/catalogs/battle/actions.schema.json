@@ -61,7 +61,7 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "The delay before the actor acts again; 255 means the equipped weapon's delay."
+      "description": "The delay before the actor acts again: the actor waits (this + its recovery bonus) * 256 / 35 battle updates. 255 means the equipped weapon's delay; actions 22-53 add no delay."
     },
     {
       "name": "camera_zoom",
@@ -87,21 +87,21 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "The targeting volume's extent; 255 on the base attacks means unlimited."
+      "description": "The targeting volume's extent, 32 world units a step; range_x 255, on the base attacks, takes the attacker's weapon extents (blade range plus reach) and angle instead, keeping range_shape."
     },
     {
       "name": "range_y",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "The targeting volume's extent; 255 on the base attacks means unlimited."
+      "description": "The targeting volume's extent, 32 world units a step; range_x 255, on the base attacks, takes the attacker's weapon extents (blade range plus reach) and angle instead, keeping range_shape."
     },
     {
       "name": "range_z",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "The targeting volume's extent; 255 on the base attacks means unlimited."
+      "description": "The targeting volume's extent, 32 world units a step; range_x 255, on the base attacks, takes the attacker's weapon extents (blade range plus reach) and angle instead, keeping range_shape."
     },
     {
       "name": "range_shape",
@@ -124,28 +124,28 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 31,
-      "description": "The volume's pitch, in 16-unit steps of the game's angle scale."
+      "description": "The volume's pitch, in 11.25-degree steps (1/32 turn)."
     },
     {
       "name": "area_range_x",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "The area of effect's extent around its target."
+      "description": "The area of effect's extent around its target, 32 world units a step."
     },
     {
       "name": "area_range_y",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "The area of effect's extent around its target."
+      "description": "The area of effect's extent around its target, 32 world units a step."
     },
     {
       "name": "area_range_z",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "The area of effect's extent around its target."
+      "description": "The area of effect's extent around its target, 32 world units a step."
     },
     {
       "name": "area_shape",
@@ -168,7 +168,7 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 31,
-      "description": "The volume's pitch, in 16-unit steps of the game's angle scale."
+      "description": "The volume's pitch, in 11.25-degree steps (1/32 turn)."
     },
     {
       "name": "behavior",

@@ -62,6 +62,10 @@ template column from its upstream consumer. Rules beyond the schemas:
   `affinity_storage_7` columns: those tail bytes are reserved (Exactness), not classes or elements.
 - DP splash columns identify their zero-based destination limb and percent units. A limb index is topology, not a
   universal head/arm/leg name; actual body-part names depend on the model.
+- Units (descriptions only, no version change): drop rates are chances in 255 (0 never, 255 always); range and reach
+  steps are 32 world units (a room tile is 128); angles are pitch in 11.25° steps. Equipment ratings add 1% attack
+  per 4 points and 1% defense per point, and the blades' `attack_shape` is stored but unread: base attacks use their
+  action's ellipsoid with the equipped blade's extents and angle.
 - The old enemy `material` column becomes `movement_class`. It feeds both gait/movement and body-load selection,
   **not** the equipment material enum. Its packed semantics, and those of `gait_class` (its locomotion high byte),
   remain an explicit blocker rather than guessed names; their schemas list only the bits consumers test.

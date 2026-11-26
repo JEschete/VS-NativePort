@@ -151,7 +151,7 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "the blade's recovery delay after an attack, for actions that take the weapon's delay"
+      "description": "the blade's recovery delay: after an action that takes the weapon's delay, the wielder waits (this + the enemy's recovery_delay_bonus) * 256 / 35 battle updates to act again"
     },
     {
       "name": "gem_slots",
@@ -165,28 +165,28 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "a gem's effect (0 none): 1/2 physical/spell hit bonus, 3/4 +5% physical/spell damage, 5/6 physical/spell evasion, 7/8 -5% physical/spell damage taken, 9 PP gain; 11-14, 16, 18, 19 and 21 evade specific action effects"
+      "description": "a gem's effect (0 none). In a weapon: 1/2 +20 points of physical/spell hit chance, 3/4 +5% physical/spell damage. In a shield: 5/6 -20 points to physical/spell hits on the holder, 7/8 -5% physical/spell damage taken, and 11, 12, 13, 14, 16, 18, 19 and 21 -20 points to hits that apply strength-down, intelligence-down, agility-down, legs-impaired, silence, paralysis, poison and numbness. 9: a weapon gains 5% more PP a physical hit, a shield 5% less. Hit-chance gems need the weapon drawn"
     },
     {
       "name": "range",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "the blade's reach; the enemy's reach is added to it and to the other two extents"
+      "description": "the blade's horizontal x extent, 32 world units a step; the enemy's reach is added to it and to the other two extents"
     },
     {
       "name": "range_y",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "the attack area's second extent"
+      "description": "the blade's vertical extent, 32 world units a step (the vertical radius of the ellipsoid the base attacks use)"
     },
     {
       "name": "range_z",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "the attack area's third extent"
+      "description": "the blade's horizontal z extent, 32 world units a step"
     },
     {
       "name": "attack_shape",
@@ -202,14 +202,14 @@
         "7": "diamond"
       },
       "legacy_numeric_aliases": true,
-      "description": "the blade's targeting volume; actions use the same domain"
+      "description": "the volume shape stored with the blade; targeting ignores it (an attack takes the action's range_shape, ellipsoid for the base attacks), and every disc blade holds ellipsoid"
     },
     {
       "name": "attack_angle",
       "type": "integer",
       "minimum": 0,
       "maximum": 31,
-      "description": "the attack area's angle"
+      "description": "the attack volume's pitch, in 11.25-degree steps (1/32 turn)"
     },
     {
       "name": "type_none",
@@ -217,7 +217,7 @@
       "legacy_name": "type_1",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed physical-type rating"
+      "description": "signed rating against hits of this type: a grip's, for its blade's type, and an accessory's add 1% attack per 4 points; armour's, a shield's and an accessory's add 1% defense per point"
     },
     {
       "name": "type_blunt",
@@ -225,7 +225,7 @@
       "legacy_name": "type_2",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed physical-type rating"
+      "description": "signed rating against hits of this type: a grip's, for its blade's type, and an accessory's add 1% attack per 4 points; armour's, a shield's and an accessory's add 1% defense per point"
     },
     {
       "name": "type_edged",
@@ -233,7 +233,7 @@
       "legacy_name": "type_3",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed physical-type rating"
+      "description": "signed rating against hits of this type: a grip's, for its blade's type, and an accessory's add 1% attack per 4 points; armour's, a shield's and an accessory's add 1% defense per point"
     },
     {
       "name": "type_piercing",
@@ -241,7 +241,7 @@
       "legacy_name": "type_4",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed physical-type rating"
+      "description": "signed rating against hits of this type: a grip's, for its blade's type, and an accessory's add 1% attack per 4 points; armour's, a shield's and an accessory's add 1% defense per point"
     },
     {
       "name": "class_human",
@@ -249,7 +249,7 @@
       "legacy_name": "class_1",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed class rating"
+      "description": "signed rating against the opponent's class, physical hits only: a weapon's and an accessory's add 1% attack per 4 points; armour's, a shield's and an accessory's add 1% defense per point"
     },
     {
       "name": "class_beast",
@@ -257,7 +257,7 @@
       "legacy_name": "class_2",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed class rating"
+      "description": "signed rating against the opponent's class, physical hits only: a weapon's and an accessory's add 1% attack per 4 points; armour's, a shield's and an accessory's add 1% defense per point"
     },
     {
       "name": "class_undead",
@@ -265,7 +265,7 @@
       "legacy_name": "class_3",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed class rating"
+      "description": "signed rating against the opponent's class, physical hits only: a weapon's and an accessory's add 1% attack per 4 points; armour's, a shield's and an accessory's add 1% defense per point"
     },
     {
       "name": "class_phantom",
@@ -273,7 +273,7 @@
       "legacy_name": "class_4",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed class rating"
+      "description": "signed rating against the opponent's class, physical hits only: a weapon's and an accessory's add 1% attack per 4 points; armour's, a shield's and an accessory's add 1% defense per point"
     },
     {
       "name": "class_dragon",
@@ -281,7 +281,7 @@
       "legacy_name": "class_5",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed class rating"
+      "description": "signed rating against the opponent's class, physical hits only: a weapon's and an accessory's add 1% attack per 4 points; armour's, a shield's and an accessory's add 1% defense per point"
     },
     {
       "name": "class_evil",
@@ -289,7 +289,7 @@
       "legacy_name": "class_6",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed class rating"
+      "description": "signed rating against the opponent's class, physical hits only: a weapon's and an accessory's add 1% attack per 4 points; armour's, a shield's and an accessory's add 1% defense per point"
     },
     {
       "name": "affinity_physical",
@@ -297,7 +297,7 @@
       "legacy_name": "affinity_1",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed elemental affinity"
+      "description": "signed rating for hits of this affinity (a plain attack takes the weapon's highest): a weapon's and an accessory's add 1% attack per 4 points; armour's, a shield's and an accessory's add 1% defense per point"
     },
     {
       "name": "affinity_air",
@@ -305,7 +305,7 @@
       "legacy_name": "affinity_2",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed elemental affinity"
+      "description": "signed rating for hits of this affinity (a plain attack takes the weapon's highest): a weapon's and an accessory's add 1% attack per 4 points; armour's, a shield's and an accessory's add 1% defense per point"
     },
     {
       "name": "affinity_fire",
@@ -313,7 +313,7 @@
       "legacy_name": "affinity_3",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed elemental affinity"
+      "description": "signed rating for hits of this affinity (a plain attack takes the weapon's highest): a weapon's and an accessory's add 1% attack per 4 points; armour's, a shield's and an accessory's add 1% defense per point"
     },
     {
       "name": "affinity_earth",
@@ -321,7 +321,7 @@
       "legacy_name": "affinity_4",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed elemental affinity"
+      "description": "signed rating for hits of this affinity (a plain attack takes the weapon's highest): a weapon's and an accessory's add 1% attack per 4 points; armour's, a shield's and an accessory's add 1% defense per point"
     },
     {
       "name": "affinity_water",
@@ -329,7 +329,7 @@
       "legacy_name": "affinity_5",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed elemental affinity"
+      "description": "signed rating for hits of this affinity (a plain attack takes the weapon's highest): a weapon's and an accessory's add 1% attack per 4 points; armour's, a shield's and an accessory's add 1% defense per point"
     },
     {
       "name": "affinity_light",
@@ -337,7 +337,7 @@
       "legacy_name": "affinity_6",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed elemental affinity"
+      "description": "signed rating for hits of this affinity (a plain attack takes the weapon's highest): a weapon's and an accessory's add 1% attack per 4 points; armour's, a shield's and an accessory's add 1% defense per point"
     },
     {
       "name": "affinity_dark",
@@ -345,7 +345,7 @@
       "legacy_name": "affinity_7",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed elemental affinity"
+      "description": "signed rating for hits of this affinity (a plain attack takes the weapon's highest): a weapon's and an accessory's add 1% attack per 4 points; armour's, a shield's and an accessory's add 1% defense per point"
     }
   ]
 }
