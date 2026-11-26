@@ -490,17 +490,17 @@ std::expected<std::vector<std::byte>, std::string> LoadConvertedSequence(
     return std::unexpected(recorded.error());
   }
   const auto& sequences = (*document)->sequences;
-  const auto found =
-      std::ranges::find_if(sequences, [&](const ActorAnimationDocument& owned) {
-        return owned.source == path &&
-               owned.source_sha256 == bank->conversion->source_sha256;
+  const auto found = std::ranges::find_if(
+      sequences, [&](const ShpSequenceBankDocument& owned) {
+        return owned.animation.source == path &&
+               owned.animation.source_sha256 == bank->conversion->source_sha256;
       });
   if (found == sequences.end()) {
     return std::unexpected(
         std::format("{}'s model holds no {} at the hash its output records",
                     owner->entry->path, path));
   }
-  auto bytes = EncodeSeqFile(found->file, read.event_lengths);
+  auto bytes = EncodeSeqFile(found->animation.file, read.event_lengths);
   if (!bytes) {
     return std::unexpected(std::format("{}: {}", path, bytes.error()));
   }

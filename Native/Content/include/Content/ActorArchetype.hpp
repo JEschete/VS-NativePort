@@ -39,7 +39,7 @@ inline constexpr std::uint32_t kActorArchetypeSchemaVersion = 3;
 // The zud-json converter writes each MAP\*.ZUD as <directory>/<ZUD>.json, and
 // a body no converted model matches as <directory>/<ZUD>.gltf.
 inline constexpr std::string_view kZudArchetypeConverterName = "zud-json";
-inline constexpr std::uint32_t kZudArchetypeConverterVersion = 4;
+inline constexpr std::uint32_t kZudArchetypeConverterVersion = 5;
 inline constexpr auto kArchetypeDirectory = "models/zud";
 
 // The equipped weapon category of an archetype without a blade

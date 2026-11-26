@@ -44,6 +44,7 @@ using Content::ShpFile;
 using Content::ShpModel;
 using Content::ShpModelDocument;
 using Content::ShpPolygon;
+using Content::ShpSequenceBankReferences;
 using Content::ShpTexture;
 using Content::ShpTextureSize;
 using Content::SourceDependency;
@@ -613,8 +614,8 @@ Check VerifyModel(const ShpModelDocument& document, std::string_view stem,
   }
   for (std::size_t index = 0; index < conversion.sequences.size(); ++index) {
     const SourceFile& bank = conversion.sequences[index];
-    auto rebuilt =
-        Content::EncodeSeqFile(decoded->sequences[index].file, lengths);
+    auto rebuilt = Content::EncodeSeqFile(
+        decoded->sequences[index].animation.file, lengths);
     if (!rebuilt || *rebuilt != bank.bytes) {
       return std::unexpected(
           std::format("{}: the converted model does not rebuild {}",
@@ -752,7 +753,8 @@ Result<ShpModelDocument> DocumentOf(const ShpConversion& conversion,
                             .image_id = {},
                             .lender_texture = lending.texture,
                             .shp = std::move(*shp),
-                            .sequences = {}};
+                            .sequences = {},
+                            .sequence_bank_ids = conversion.sequence_bank_ids};
   if (document.shp.texture) {
     auto image = ImageIdForDiscPath(model.path);
     if (!image) return std::unexpected(image.error());
@@ -768,9 +770,12 @@ Result<ShpModelDocument> DocumentOf(const ShpConversion& conversion,
           std::format("{} animates {} bones; its model {} has {}", bank.path,
                       file->bones, model.path, document.shp.bones.size()));
     }
-    document.sequences.push_back({.source = bank.path,
-                                  .source_sha256 = HashOf(bank),
-                                  .file = std::move(*file)});
+    auto bank_id = SeqAnimationIdForDiscPath(bank.path);
+    if (!bank_id) return std::unexpected(bank_id.error());
+    document.sequences.push_back({.id = std::move(*bank_id),
+                                  .animation = {.source = bank.path,
+                                                .source_sha256 = HashOf(bank),
+                                                .file = std::move(*file)}});
   }
   return document;
 }
@@ -845,7 +850,7 @@ class BankOwners {
   // `owner`'s field `field` names `sectors` sectors at `lba`: that bank, or
   // nothing when it names no sectors.
   Check Claim(std::string_view owner, std::uint32_t lba, std::uint32_t sectors,
-              std::string_view field) {
+              std::string_view field, std::string* bank_path = nullptr) {
     if (sectors == 0) return {};
     const auto found = sources_.bank_sectors.find(lba);
     if (found == sources_.bank_sectors.end() ||
@@ -856,6 +861,7 @@ class BankOwners {
                       owner, field, sectors, lba));
     }
     const std::string& bank = found->second->path;
+    if (bank_path != nullptr) *bank_path = bank;
     const auto [claimed, added] = owner_of_.try_emplace(bank, owner);
     if (!added && claimed->second != owner) {
       return std::unexpected(std::format("{} is loaded by both {} and {}", bank,
@@ -890,7 +896,8 @@ class BankOwners {
 };
 
 // The banks the model's battle and special sequence fields name.
-Check ClaimModelBanks(BankOwners& owners, const SourceFile& model) {
+Check ClaimModelBanks(BankOwners& owners, const SourceFile& model,
+                      ShpSequenceBankReferences& bank_ids) {
   constexpr std::size_t kBlockEnd =
       Content::kShpCountsBytes + Content::kShpLayoutBlockBytes;
   if (model.bytes.size() < kBlockEnd) {
@@ -902,23 +909,33 @@ Check ClaimModelBanks(BankOwners& owners, const SourceFile& model) {
       std::span(model.bytes).subspan(Content::kShpCountsBytes, block.size()),
       block.begin());
   const Json layout = Content::ShpLayoutJson(block);
-  constexpr std::array<std::pair<std::string_view, std::string_view>, 2>
-      kFields{{{"battle_sequence_lbas", "battle_sequence_sizes"},
-               {"special_sequence_lbas", "special_sequence_sizes"}}};
-  for (const auto& [lbas_name, sizes_name] : kFields) {
+  const auto claim = [&](auto& ids, std::string_view lbas_name,
+                         std::string_view sizes_name) -> Check {
     const Json& lbas = layout.at(std::string(lbas_name));
     const Json& sizes = layout.at(std::string(sizes_name));
     for (std::size_t index = 0; index < lbas.size(); ++index) {
+      std::string bank;
       if (auto claimed =
               owners.Claim(model.path, lbas.at(index).get<std::uint32_t>(),
                            sizes.at(index).get<std::uint32_t>() >> kSectorShift,
-                           std::format("{}[{}]", lbas_name, index));
+                           std::format("{}[{}]", lbas_name, index), &bank);
           !claimed) {
         return claimed;
       }
+      if (bank.empty()) continue;
+      auto id = SeqAnimationIdForDiscPath(bank);
+      if (!id) return std::unexpected(id.error());
+      ids.at(index) = std::move(*id);
     }
+    return {};
+  };
+  if (auto claimed = claim(bank_ids.battle, "battle_sequence_lbas",
+                           "battle_sequence_sizes");
+      !claimed) {
+    return claimed;
   }
-  return {};
+  return claim(bank_ids.special, "special_sequence_lbas",
+               "special_sequence_sizes");
 }
 
 std::uint32_t ProgramByte(const SourceFile& program, std::size_t at) {
@@ -968,6 +985,8 @@ Check ClaimMaterialBanks(BankOwners& owners, const SourceFile& program) {
 struct BankPlan {
   SeqEventTable events;
   std::map<std::string, std::vector<std::string>, std::less<>> banks;
+  std::map<std::string, ShpSequenceBankReferences, std::less<>>
+      sequence_bank_ids;
 };
 
 Result<BankPlan> PlanBanks(const ModelSources& sources) {
@@ -996,9 +1015,11 @@ Result<BankPlan> PlanBanks(const ModelSources& sources) {
     }
   }
   for (const auto& [path, model] : sources.models) {
-    if (auto claimed = ClaimModelBanks(owners, model); !claimed) {
+    ShpSequenceBankReferences bank_ids;
+    if (auto claimed = ClaimModelBanks(owners, model, bank_ids); !claimed) {
       return std::unexpected(claimed.error());
     }
+    plan.sequence_bank_ids.emplace(path, std::move(bank_ids));
   }
   auto banks = owners.ByModel();
   if (!banks) return std::unexpected(banks.error());
@@ -1013,10 +1034,12 @@ Result<ShpConversion> PlanConversion(const SourceFile& model,
   if (!peeked) {
     return std::unexpected(std::format("{}: {}", model.path, peeked.error()));
   }
-  ShpConversion conversion{.model = model,
-                           .lender = std::nullopt,
-                           .sequences = {},
-                           .events = plan.events};
+  ShpConversion conversion{
+      .model = model,
+      .lender = std::nullopt,
+      .sequences = {},
+      .events = plan.events,
+      .sequence_bank_ids = plan.sequence_bank_ids.at(model.path)};
   if (peeked->lender) {
     const std::string path = ShpLenderPath(*peeked->lender);
     const auto lender = sources.models.find(path);

@@ -449,7 +449,8 @@ Result<OwnBody> OwnBodyOf(const ZudConversion& conversion, const ZudFile& zud,
                            .image_id = {},
                            .lender_texture = lender_texture,
                            .shp = std::move(*shp),
-                           .sequences = {}},
+                           .sequences = {},
+                           .sequence_bank_ids = {}},
               .image_uri = std::move(image_uri)};
   if (own.document.shp.texture) {
     auto image = ImageIdForDiscPath(path);

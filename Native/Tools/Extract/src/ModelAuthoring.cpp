@@ -1,24 +1,30 @@
 // The model authoring upgrade (ModelAuthoring.hpp).
 #include "Extract/ModelAuthoring.hpp"
 
+#include <algorithm>
 #include <array>
 #include <charconv>
 #include <cstddef>
 #include <cstdint>
 #include <format>
+#include <functional>
 #include <limits>
 #include <optional>
+#include <set>
+#include <span>
 #include <string>
 #include <string_view>
 #include <system_error>
 #include <utility>
 
 #include "Content/ActorArchetype.hpp"
+#include "Content/DataStore.hpp"
 #include "Content/JsonText.hpp"
 #include "Content/ShpFile.hpp"
 #include "Content/ShpModelFiles.hpp"
 #include "Content/WepModelFiles.hpp"
 #include "Extract/AnimationAuthoring.hpp"
+#include "Extract/ShpModelConversion.hpp"
 #include "Extract/ZudConversion.hpp"
 
 namespace VS::Extract {
@@ -37,11 +43,17 @@ constexpr std::array kConverters{
     VersionStep{.name = Content::kShpModelConverterName,
                 .from = kNumberedPolygonShpVersion,
                 .to = Content::kShpModelConverterVersion},
+    VersionStep{.name = Content::kShpModelConverterName,
+                .from = Content::kShpModelConverterVersion - 1,
+                .to = Content::kShpModelConverterVersion},
     VersionStep{.name = Content::kWepModelConverterName,
                 .from = kNumberedPolygonWepVersion,
                 .to = Content::kWepModelConverterVersion},
     VersionStep{.name = Content::kZudArchetypeConverterName,
                 .from = kNamedHeaderArchetypeVersion,
+                .to = Content::kZudArchetypeConverterVersion},
+    VersionStep{.name = Content::kZudArchetypeConverterName,
+                .from = Content::kZudArchetypeConverterVersion - 1,
                 .to = Content::kZudArchetypeConverterVersion},
 };
 
@@ -72,6 +84,11 @@ constexpr int kHexBase = 16;
 struct ModelHeader {
   Content::ShpPolygonCounts counts{};
   bool colored = false;
+};
+
+struct PayloadUpgrade {
+  std::optional<ModelHeader> numbered_header;
+  bool changed = false;
 };
 
 template <std::size_t N>
@@ -128,8 +145,7 @@ Json NamedPayload(Json& payload, const SchemaStep& step,
 
 // Moves the model payload `payload` to its current version; nothing when it
 // is already current.
-Result<std::optional<ModelHeader>> UpgradePayload(Json& payload,
-                                                  const std::string& where) {
+Result<PayloadUpgrade> UpgradePayload(Json& payload, const std::string& where) {
   const SchemaStep* step = FindSchema(payload);
   if (step == nullptr) {
     return std::unexpected(std::format("{} is no {} or {} payload", where,
@@ -140,11 +156,24 @@ Result<std::optional<ModelHeader>> UpgradePayload(Json& payload,
   const std::optional<std::int64_t> number =
       version == payload.end() ? std::nullopt
                                : Content::JsonWholeNumber(*version);
-  if (number == step->version.to) return std::nullopt;
-  if (number != step->version.from) {
+  const bool numbered = number == step->version.from;
+  const bool previous_named = step->version.name == Content::kShpModelSchema &&
+                              number == step->version.to - 1;
+  if (number == step->version.to) return PayloadUpgrade{};
+  if (!numbered && !previous_named) {
+    if (step->version.name == Content::kShpModelSchema) {
+      return std::unexpected(
+          std::format("{}.schema_version must be {}, {}, or {} for {}", where,
+                      step->version.from, step->version.to - 1,
+                      step->version.to, step->version.name));
+    }
     return std::unexpected(
         std::format("{}.schema_version must be {} or {} for {}", where,
                     step->version.from, step->version.to, step->version.name));
+  }
+  if (previous_named) {
+    payload["schema_version"] = step->version.to;
+    return PayloadUpgrade{.numbered_header = std::nullopt, .changed = true};
   }
   ModelHeader header;
   if (!step->weapon) {
@@ -172,7 +201,132 @@ Result<std::optional<ModelHeader>> UpgradePayload(Json& payload,
         std::format("{} does not read back from its named form", where));
   }
   payload = std::move(named);
-  return header;
+  return PayloadUpgrade{.numbered_header = header, .changed = true};
+}
+
+template <std::size_t N>
+Result<void> AddSequenceBankReferences(
+    const Json& layout, std::string_view lba_key, std::string_view size_key,
+    const std::string& where, std::span<const Content::DataStore::Entry> files,
+    std::array<std::optional<std::string>, N>& references) {
+  const auto lbas = layout.find(std::string(lba_key));
+  const auto sizes = layout.find(std::string(size_key));
+  const std::string lba_where = std::format("{}.{}", where, lba_key);
+  const std::string size_where = std::format("{}.{}", where, size_key);
+  if (lbas == layout.end() || !lbas->is_array() || lbas->size() != N) {
+    return std::unexpected(
+        std::format("{} must be an array of {} LBAs", lba_where, N));
+  }
+  if (sizes == layout.end() || !sizes->is_array() || sizes->size() != N) {
+    return std::unexpected(
+        std::format("{} must be an array of {} byte sizes", size_where, N));
+  }
+  for (std::size_t index = 0; index < N; ++index) {
+    const std::string at = std::format("{}[{}]", lba_where, index);
+    auto lba = AuthoringNumber((*lbas)[index], kOrderMax, at);
+    if (!lba) return std::unexpected(lba.error());
+    auto size = AuthoringNumber((*sizes)[index], kOrderMax,
+                                std::format("{}[{}]", size_where, index));
+    if (!size) return std::unexpected(size.error());
+    const std::uint32_t sectors = static_cast<std::uint32_t>(*size) >> 11;
+    if (sectors == 0) continue;
+    const auto file =
+        std::ranges::lower_bound(files, static_cast<std::uint32_t>(*lba), {},
+                                 &Content::DataStore::Entry::lba);
+    if (file == files.end() || file->lba != *lba ||
+        !file->path.ends_with(Content::kSeqExtension) ||
+        file->SectorCount() != sectors) {
+      return std::unexpected(std::format(
+          "{} names {} sectors at LBA {}, which is no SEQ files.tsv lists", at,
+          sectors, *lba));
+    }
+    auto id = SeqAnimationIdForDiscPath(file->path);
+    if (!id) return std::unexpected(id.error());
+    references.at(index) = std::move(*id);
+  }
+  return {};
+}
+
+Result<void> UpgradeSequenceBanks(
+    Json& payload, std::span<const Content::DataStore::Entry> files,
+    const std::string& where, bool map_layout_references) {
+  const auto layout = payload.find("layout");
+  if (layout == payload.end() || !layout->is_object()) {
+    return std::unexpected(std::format("{}.layout must be an object", where));
+  }
+  auto sequences = payload.find("sequences");
+  if (sequences == payload.end() || !sequences->is_array()) {
+    return std::unexpected(std::format("{}.sequences must be an array", where));
+  }
+  Json named = Json::array();
+  std::set<std::string, std::less<>> known;
+  for (std::size_t index = 0; index < sequences->size(); ++index) {
+    Json& animation = (*sequences)[index];
+    const std::string item = std::format("{}.sequences[{}]", where, index);
+    if (!animation.is_object()) {
+      return std::unexpected(
+          std::format("{} must be an animation object", item));
+    }
+    const auto source = animation.find("source");
+    if (source == animation.end() || !source->is_string()) {
+      return std::unexpected(std::format("{}.source must be a string", item));
+    }
+    auto id = SeqAnimationIdForDiscPath(source->get_ref<const std::string&>());
+    if (!id) return std::unexpected(id.error());
+    if (!known.insert(*id).second) {
+      return std::unexpected(
+          std::format("{}.source duplicates a sequence bank ID", item));
+    }
+    Json bank = Json::object();
+    bank["id"] = *id;
+    bank["animation"] = std::move(animation);
+    named.push_back(std::move(bank));
+  }
+
+  Content::ShpSequenceBankReferences references;
+  if (map_layout_references) {
+    if (auto added = AddSequenceBankReferences(*layout, "battle_sequence_lbas",
+                                               "battle_sequence_sizes", where,
+                                               files, references.battle);
+        !added) {
+      return added;
+    }
+    if (auto added = AddSequenceBankReferences(*layout, "special_sequence_lbas",
+                                               "special_sequence_sizes", where,
+                                               files, references.special);
+        !added) {
+      return added;
+    }
+  }
+  const auto check = [&](const auto& slots,
+                         std::string_view kind) -> Result<void> {
+    for (std::size_t index = 0; index < slots.size(); ++index) {
+      if (slots[index] && !known.contains(*slots[index])) {
+        return std::unexpected(std::format(
+            "{}.sequence_bank_ids.{}[{}] has no owned sequence definition "
+            "\"{}\"",
+            where, kind, index, *slots[index]));
+      }
+    }
+    return {};
+  };
+  if (auto valid = check(references.battle, "battle"); !valid) {
+    return valid;
+  }
+  if (auto valid = check(references.special, "special"); !valid) {
+    return valid;
+  }
+  const auto json_ids = [](const auto& slots) {
+    Json list = Json::array();
+    for (const auto& id : slots) {
+      list.push_back(id ? Json(*id) : Json(nullptr));
+    }
+    return list;
+  };
+  payload["sequences"] = std::move(named);
+  payload["sequence_bank_ids"] = {{"battle", json_ids(references.battle)},
+                                  {"special", json_ids(references.special)}};
+  return {};
 }
 
 Result<Content::ShpPolygonEntry> LegacyEntryOf(const Json& json,
@@ -327,7 +481,8 @@ Json* PayloadOf(Json& gltf) {
 
 // Moves the model `gltf` holds to its current version; whether it did.
 Result<bool> UpgradeModel(Json& gltf, const std::string& file,
-                          ModelAuthoringReport& report) {
+                          ModelAuthoringReport& report,
+                          std::span<const Content::DataStore::Entry> files) {
   Json* payload = PayloadOf(gltf);
   const std::string where =
       std::format("{}.asset.extras.{}", file, Content::kShpExtrasKey);
@@ -336,12 +491,27 @@ Result<bool> UpgradeModel(Json& gltf, const std::string& file,
   }
   auto header = UpgradePayload(*payload, where);
   if (!header) return std::unexpected(header.error());
-  if (!*header) return false;
-  PolygonNamer namer(**header, report);
-  if (auto named = namer.NameMeshes(gltf, file); !named) {
-    return std::unexpected(named.error());
+  if (!header->changed) return false;
+  if (header->numbered_header) {
+    PolygonNamer namer(*header->numbered_header, report);
+    if (auto named = namer.NameMeshes(gltf, file); !named) {
+      return std::unexpected(named.error());
+    }
+    NameMaterials(gltf);
   }
-  NameMaterials(gltf);
+  const auto schema = payload->find("schema");
+  if (schema != payload->end() && schema->is_string() &&
+      schema->get_ref<const std::string&>() == Content::kShpModelSchema) {
+    // ZUD bodies preserve the layout but do not own OBJ sequence banks.
+    const auto source = payload->find("source");
+    const bool shp_source =
+        source != payload->end() && source->is_string() &&
+        source->get_ref<const std::string&>().ends_with(Content::kShpExtension);
+    if (auto banks = UpgradeSequenceBanks(*payload, files, where, shp_source);
+        !banks) {
+      return std::unexpected(banks.error());
+    }
+  }
   ++report.models;
   return true;
 }
@@ -355,9 +525,11 @@ bool IsGltfFile(std::string_view file) {
 std::expected<ModelAuthoringReport, std::string> UpgradeModelAuthoring(
     const fs::path& root) {
   ModelAuthoringReport report;
+  auto files = Content::DataStore::LoadManifest(root);
+  if (!files) return std::unexpected(files.error());
   auto written = UpgradeConverterOutputs(
       root, kConverters, IsGltfFile, [&](const std::string& file, Json& json) {
-        return UpgradeModel(json, file, report);
+        return UpgradeModel(json, file, report, *files);
       });
   if (!written) return std::unexpected(written.error());
   report.written = *written;

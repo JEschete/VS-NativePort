@@ -44,18 +44,21 @@
 // animation values edit as numbers. The animation banks are JSON in
 // the payload (ActorAnimation.hpp, §6.2.1): "sequence" is the SHP's embedded
 // bank in the vs.actor-animation bank form (null when it has none), and
-// "sequences" holds each OBJ\*.SEQ file the model owns as a whole
-// vs.actor-animation document, sorted by source. Banks with event scripts need
-// the game's event stride table (SeqFile.hpp kSeqEventLengthsAt) to read and
+// "sequences" holds each OBJ\*.SEQ file the model owns as an {id, animation}
+// entry sorted by source. "sequence_bank_ids" maps the battle and special
+// layout slots to those stable IDs or null. Banks with event scripts need the
+// game's event stride table (SeqFile.hpp kSeqEventLengthsAt) to read and
 // rebuild.
 namespace VS::Content {
 
 inline constexpr std::string_view kShpModelConverterName = "shp-gltf";
-inline constexpr std::uint32_t kShpModelConverterVersion = 4;
+inline constexpr std::uint32_t kShpModelConverterVersion = 5;
 inline constexpr std::string_view kShpModelSchema = "vs.shp-model";
-inline constexpr std::uint32_t kShpModelSchemaVersion = 4;
+inline constexpr std::uint32_t kShpModelSchemaVersion = 5;
 inline constexpr std::string_view kShpModelDirectory = "models/characters";
 inline constexpr std::string_view kShpExtension = ".SHP";
+inline constexpr std::size_t kShpBattleSequenceCount = 12;
+inline constexpr std::size_t kShpSpecialSequenceCount = 4;
 // Each OBJ\*.SEQ bank's own output, which lists its owner's glTF and buffer.
 inline constexpr std::string_view kSeqAnimationConverterName = "seq-gltf";
 inline constexpr std::uint32_t kSeqAnimationConverterVersion = 2;
@@ -106,6 +109,20 @@ struct ShpTextureSize {
   bool operator==(const ShpTextureSize&) const = default;
 };
 
+struct ShpSequenceBankReferences {
+  std::array<std::optional<std::string>, kShpBattleSequenceCount> battle{};
+  std::array<std::optional<std::string>, kShpSpecialSequenceCount> special{};
+
+  bool operator==(const ShpSequenceBankReferences&) const = default;
+};
+
+struct ShpSequenceBankDocument {
+  std::string id;
+  ActorAnimationDocument animation;
+
+  bool operator==(const ShpSequenceBankDocument&) const = default;
+};
+
 struct ShpModelDocument {
   std::string id;      // e.g. model.obj.4f
   std::string source;  // the disc path, e.g. OBJ/4F.SHP
@@ -116,8 +133,11 @@ struct ShpModelDocument {
   std::optional<ShpTextureSize> lender_texture;
   ShpFile shp;
   // The OBJ\*.SEQ banks the model owns, sorted by source, each for the
-  // model's bones.
-  std::vector<ActorAnimationDocument> sequences;
+  // model's bones, named by stable ID.
+  std::vector<ShpSequenceBankDocument> sequences;
+  // Stable references for the original battle and special sequence slots.
+  // The on-disc LBAs remain in `shp.layout` for import reconstruction.
+  ShpSequenceBankReferences sequence_bank_ids;
 
   bool operator==(const ShpModelDocument&) const = default;
 };

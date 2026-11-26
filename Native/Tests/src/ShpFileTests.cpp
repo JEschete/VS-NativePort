@@ -466,7 +466,8 @@ TEST_CASE("An SHP model converts to glTF files that rebuild its bytes",
         Converted({.model = {.path = "OBJ/4F.SHP", .bytes = bytes},
                    .lender = {},
                    .sequences = {},
-                   .events = {}});
+                   .events = {},
+                   .sequence_bank_ids = {}});
     CheckOwnTextureOutput(model.output);
     CheckOwnTextureFiles(model, shp, bytes);
   }
@@ -696,6 +697,14 @@ content::JsonDocument NumberedModel(content::JsonDocument gltf) {
     numbered[key == "body_part_polygons" ? "limb_ranges" : key] = value;
   }
   numbered["schema_version"] = extract::kNumberedPolygonShpVersion;
+  numbered.erase("sequence_bank_ids");
+  if (numbered.contains("sequences") && numbered["sequences"].is_array()) {
+    for (content::JsonDocument& bank : numbered["sequences"]) {
+      if (bank.is_object() && bank.contains("animation")) {
+        bank = std::move(bank["animation"]);
+      }
+    }
+  }
   numbered["polygon_counts"] = counts;
   numbered["limb_ranges"] = model.limb_ranges;
   payload = std::move(numbered);
@@ -812,10 +821,13 @@ void CheckBorrowerOutput(const extract::ConvertedModel& model,
   CHECK(model.output.files == files);
   REQUIRE(model.output.dependencies.size() == 1);
   CHECK(model.output.dependencies.front().source == lender.path);
-  CHECK(
-      model.output.dependencies.front().source_sha256 ==
-      Converted({.model = lender, .lender = {}, .sequences = {}, .events = {}})
-          .output.source_sha256);
+  CHECK(model.output.dependencies.front().source_sha256 ==
+        Converted({.model = lender,
+                   .lender = {},
+                   .sequences = {},
+                   .events = {},
+                   .sequence_bank_ids = {}})
+            .output.source_sha256);
   REQUIRE_FALSE(model.files.empty());
   const auto gltf = ParseGltf(model.files.front().bytes);
   CHECK(gltf["images"] ==
@@ -845,12 +857,18 @@ TEST_CASE("A converted model that borrows a texture depends on its lender",
                                    .bytes = Encoded(lender_shp)};
   const extract::SourceFile borrower{.path = "OBJ/50.SHP",
                                      .bytes = Encoded(BorrowingShp())};
-  const auto model = Converted(
-      {.model = borrower, .lender = lender, .sequences = {}, .events = {}});
+  const auto model = Converted({.model = borrower,
+                                .lender = lender,
+                                .sequences = {},
+                                .events = {},
+                                .sequence_bank_ids = {}});
   CheckBorrowerOutput(model, lender);
   CheckBorrowerDocument(model, lender_shp);
-  const auto missing = extract::ConvertShpModel(
-      {.model = borrower, .lender = {}, .sequences = {}, .events = {}});
+  const auto missing = extract::ConvertShpModel({.model = borrower,
+                                                 .lender = {},
+                                                 .sequences = {},
+                                                 .events = {},
+                                                 .sequence_bank_ids = {}});
   REQUIRE_FALSE(missing.has_value());
   CHECK(missing.error().find("OBJ/4F.SHP, which was not given") !=
         std::string::npos);
@@ -945,7 +963,8 @@ TEST_CASE("A model's glTF holds the SEQ banks it owns",
       {.model = {.path = "OBJ/4F.SHP", .bytes = Encoded(SampleShp(false))},
        .lender = {},
        .sequences = {bank},
-       .events = {}});
+       .events = {},
+       .sequence_bank_ids = {}});
   REQUIRE(model.output.dependencies.size() == 1);
   CHECK(model.output.dependencies.front().source == kBankPath);
   CheckBankOutput(model);
@@ -954,9 +973,9 @@ TEST_CASE("A model's glTF holds the SEQ banks it owns",
   INFO(ErrorOf(document));
   REQUIRE(document.has_value());
   REQUIRE(document->sequences.size() == 1);
-  CHECK(document->sequences.front().source == kBankPath);
+  CHECK(document->sequences.front().animation.source == kBankPath);
   const content::SeqFile sample{.bones = kSampleBones, .bank = SampleBank()};
-  CHECK(document->sequences.front().file == sample);
+  CHECK(document->sequences.front().animation.file == sample);
 }
 
 auto LoadSeq(const fs::path& root, const content::ConvertedModelRead& read) {
@@ -975,6 +994,7 @@ void CheckEditedBankLoads(const ModelRoot& root) {
                       .at("vs")
                       .at("sequences")
                       .at(kFirst)
+                      .at("animation")
                       .at("bank")
                       .at("clips")
                       .at(kFirst)
@@ -1014,6 +1034,9 @@ TEST_CASE("SEQ banks load from their owner's converted glTF",
   const ModelRoot root({{.path = std::string(kBankPath), .bytes = bank},
                         {.path = "OBJ/4F.SHP", .bytes = owner}});
   CHECK(root.Convert().characters.converted == 1);
+  const auto gltf = ParseGltf(ReadModel(SampleGltf(root)));
+  CHECK(gltf["asset"]["extras"]["vs"]["sequence_bank_ids"]["battle"][0] ==
+        "animation.obj.4f_bt1");
   CHECK(LoadSeq(root.Root(), root.Read(0)) == bank);
   CHECK(LoadShp(root.Root(), root.Read(1)) == owner);
   const extract::ModelConversionReport rerun = root.Convert().characters;
@@ -1027,6 +1050,65 @@ TEST_CASE("SEQ banks load from their owner's converted glTF",
   CHECK(dropped.converted == 1);
   CHECK(dropped.removed == 0);
   CHECK(LoadShp(root.Root(), root.Read(1)) == Encoded(SampleShp(false)));
+}
+
+TEST_CASE("SHP layout references must resolve to owned sequence banks",
+          "[content-models][shp][seq]") {
+  const ModelRoot root(
+      {{.path = std::string(kBankPath), .bytes = SampleSeq()},
+       {.path = "OBJ/4F.SHP", .bytes = OwningShp(ModelRoot::kFirstLba)}});
+  CHECK(root.Convert().characters.converted == 1);
+  root.EditGltf(
+      content::kShpModelDirectory, "4F", [](content::JsonDocument& gltf) {
+        gltf["asset"]["extras"]["vs"]["sequence_bank_ids"]["battle"][0] =
+            "animation.obj.missing";
+      });
+
+  const auto loaded = LoadShp(root.Root(), root.Read(1));
+  REQUIRE_FALSE(loaded.has_value());
+  CHECK(loaded.error().contains("references missing sequence bank"));
+}
+
+TEST_CASE("Authoring adds stable sequence-bank IDs to existing model files",
+          "[content-models][shp][seq]") {
+  const Bytes bank = SampleSeq();
+  const ModelRoot root(
+      {{.path = std::string(kBankPath), .bytes = bank},
+       {.path = "OBJ/4F.SHP", .bytes = OwningShp(ModelRoot::kFirstLba)}});
+  CHECK(root.Convert().characters.converted == 1);
+  content::JsonDocument expected = ParseGltf(ReadModel(SampleGltf(root)));
+  auto& payload = expected["asset"]["extras"]["vs"];
+  payload["sequences"][0]["animation"]["bank"]["clips"][0]["length"] = 1000;
+
+  root.EditGltf(
+      content::kShpModelDirectory, "4F", [](content::JsonDocument& gltf) {
+        auto& legacy = gltf["asset"]["extras"]["vs"];
+        legacy["sequences"][0]["animation"]["bank"]["clips"][0]["length"] =
+            1000;
+        legacy["schema_version"] = content::kShpModelSchemaVersion - 1;
+        content::JsonDocument sequences = content::JsonDocument::array();
+        for (auto& bank : legacy["sequences"]) {
+          sequences.push_back(std::move(bank["animation"]));
+        }
+        legacy["sequences"] = std::move(sequences);
+        legacy.erase("sequence_bank_ids");
+      });
+  RecordShpVersion(root.Root(), content::kShpModelConverterVersion - 1);
+
+  const auto upgraded = extract::UpgradeModelAuthoring(root.Root());
+  INFO(ErrorOf(upgraded));
+  REQUIRE(upgraded.has_value());
+  CHECK(upgraded->models == 1);
+  CHECK(upgraded->polygons == 0);
+  CHECK(upgraded->written == 2);
+  CHECK(ParseGltf(ReadModel(SampleGltf(root))) == expected);
+  CHECK(RecordedShpVersion(root.Root()) == content::kShpModelConverterVersion);
+  const auto rerun = extract::UpgradeModelAuthoring(root.Root());
+  INFO(ErrorOf(rerun));
+  REQUIRE(rerun.has_value());
+  CHECK(rerun->models == 0);
+  CHECK(rerun->written == 0);
+  CheckEditedBankLoads(root);
 }
 
 TEST_CASE("Every SEQ bank needs the one model that loads it",

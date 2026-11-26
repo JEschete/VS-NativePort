@@ -652,25 +652,107 @@ Check ReadSequences(const JsonMembers& members,
   document.sequences.clear();
   for (std::size_t index = 0; index < list.size(); ++index) {
     const std::string item = std::format("{}[{}]", where, index);
-    auto sequence = ActorAnimationOf(list[index], item);
+    const JsonMembers bank(list[index], item);
+    if (auto only = bank.Only({"id", "animation"}); !only) {
+      return only;
+    }
+    auto id = bank.String("id");
+    if (!id) return std::unexpected(id.error());
+    if (!IsContentId(*id)) {
+      return std::unexpected(
+          std::format("{}.id must be a content ID", bank.Where("id")));
+    }
+    if (std::ranges::any_of(document.sequences, [&](const auto& existing) {
+          return existing.id == *id;
+        })) {
+      return std::unexpected(
+          std::format("{}.id duplicates \"{}\"", bank.Where("id"), *id));
+    }
+    auto animation = bank.Get("animation");
+    if (!animation) return std::unexpected(animation.error());
+    auto sequence = ActorAnimationOf(**animation, bank.Where("animation"));
     if (!sequence) return std::unexpected(sequence.error());
     if (sequence->file.bones != document.shp.bones.size()) {
-      return std::unexpected(
-          std::format("{}.bones is {}; the model has {} bones", item,
-                      sequence->file.bones, document.shp.bones.size()));
+      return std::unexpected(std::format(
+          "{}.bones is {}; the model has {} bones", bank.Where("animation"),
+          sequence->file.bones, document.shp.bones.size()));
     }
     if (!document.sequences.empty() &&
-        sequence->source <= document.sequences.back().source) {
-      return std::unexpected(std::format("{}.source must sort after \"{}\"",
-                                         item,
-                                         document.sequences.back().source));
+        sequence->source <= document.sequences.back().animation.source) {
+      return std::unexpected(std::format(
+          "{}.source must sort after \"{}\"", bank.Where("animation"),
+          document.sequences.back().animation.source));
     }
     if (auto bytes = EncodeSeqFile(sequence->file, event_lengths); !bytes) {
       return std::unexpected(std::format("{}: {}", item, bytes.error()));
     }
-    document.sequences.push_back(*std::move(sequence));
+    document.sequences.push_back(
+        {.id = std::move(*id), .animation = *std::move(sequence)});
   }
   return {};
+}
+
+template <std::size_t N>
+Result<std::array<std::optional<std::string>, N>> SequenceBankIdsOf(
+    const JsonMembers& members, std::string_view key) {
+  auto value = members.Get(key);
+  if (!value) return std::unexpected(value.error());
+  const Json& list = **value;
+  const std::string where = members.Where(key);
+  if (!list.is_array() || list.size() != N) {
+    return std::unexpected(
+        std::format("{} must be an array of {} bank IDs or nulls", where, N));
+  }
+  std::array<std::optional<std::string>, N> ids{};
+  for (std::size_t index = 0; index < N; ++index) {
+    if (list[index].is_null()) continue;
+    if (!list[index].is_string()) {
+      return std::unexpected(
+          std::format("{}[{}] must be a bank ID or null", where, index));
+    }
+    const std::string id = list[index].get<std::string>();
+    if (!IsContentId(id)) {
+      return std::unexpected(
+          std::format("{}[{}] must be a content ID", where, index));
+    }
+    ids.at(index) = id;
+  }
+  return ids;
+}
+
+Check ReadSequenceBankIds(const JsonMembers& members,
+                          ShpModelDocument& document) {
+  auto value = members.Get("sequence_bank_ids");
+  if (!value) return std::unexpected(value.error());
+  const JsonMembers refs(**value, members.Where("sequence_bank_ids"));
+  if (auto only = refs.Only({"battle", "special"}); !only) {
+    return only;
+  }
+  auto battle = SequenceBankIdsOf<kShpBattleSequenceCount>(refs, "battle");
+  if (!battle) return std::unexpected(battle.error());
+  auto special = SequenceBankIdsOf<kShpSpecialSequenceCount>(refs, "special");
+  if (!special) return std::unexpected(special.error());
+  document.sequence_bank_ids = {.battle = std::move(*battle),
+                                .special = std::move(*special)};
+  const auto known = [&](const std::string& id) {
+    return std::ranges::any_of(
+        document.sequences,
+        [&](const ShpSequenceBankDocument& bank) { return bank.id == id; });
+  };
+  const auto check = [&](const auto& ids, std::string_view kind) -> Check {
+    for (std::size_t index = 0; index < ids.size(); ++index) {
+      if (ids[index] && !known(*ids[index])) {
+        return std::unexpected(
+            std::format("{}[{}] references missing sequence bank \"{}\"",
+                        refs.Where(kind), index, *ids[index]));
+      }
+    }
+    return {};
+  };
+  if (auto valid = check(document.sequence_bank_ids.battle, "battle"); !valid) {
+    return valid;
+  }
+  return check(document.sequence_bank_ids.special, "special");
 }
 
 Check ReadBones(const JsonMembers& members, ShpModel& model) {
@@ -881,10 +963,11 @@ Result<Payload> ReadPayload(const GltfFile& file,
   auto payload_members = ModelGltfPayload(file);
   if (!payload_members) return std::unexpected(payload_members.error());
   const JsonMembers& members = *payload_members;
-  if (auto only = members.Only(
-          {"schema", "schema_version", "id", "source", "source_sha256",
-           "colored", "polygon_counts", "body_part_polygons", "layout", "bones",
-           "sound", "sequence_word", "sequence", "texture", "sequences"});
+  if (auto only = members.Only({"schema", "schema_version", "id", "source",
+                                "source_sha256", "colored", "polygon_counts",
+                                "body_part_polygons", "layout", "bones",
+                                "sound", "sequence_word", "sequence", "texture",
+                                "sequences", "sequence_bank_ids"});
       !only) {
     return std::unexpected(only.error());
   }
@@ -901,6 +984,7 @@ Result<Payload> ReadPayload(const GltfFile& file,
   if (auto read = FirstError({
           ReadSequence(members, event_lengths, payload.document.shp),
           ReadSequences(members, event_lengths, payload.document),
+          ReadSequenceBankIds(members, payload.document),
       });
       !read) {
     return std::unexpected(read.error());
@@ -2286,10 +2370,23 @@ JsonDocument ShpModelPayload(const ShpModelDocument& document,
   payload["sequence"] = std::move(sequence);
   payload["texture"] = TexturePayload(document);
   Json sequences = Json::array();
-  for (const ActorAnimationDocument& owned : document.sequences) {
-    sequences.push_back(ActorAnimationJson(owned));
+  for (const ShpSequenceBankDocument& owned : document.sequences) {
+    Json bank = Json::object();
+    bank["id"] = owned.id;
+    bank["animation"] = ActorAnimationJson(owned.animation);
+    sequences.push_back(std::move(bank));
   }
   payload["sequences"] = std::move(sequences);
+  const auto ids = [](const auto& references) {
+    Json list = Json::array();
+    for (const auto& id : references) {
+      list.push_back(id ? Json(*id) : Json(nullptr));
+    }
+    return list;
+  };
+  payload["sequence_bank_ids"] = {
+      {"battle", ids(document.sequence_bank_ids.battle)},
+      {"special", ids(document.sequence_bank_ids.special)}};
   return payload;
 }
 

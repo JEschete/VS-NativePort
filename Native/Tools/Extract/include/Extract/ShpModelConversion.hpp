@@ -172,6 +172,7 @@ struct ShpConversion {
   std::optional<SourceFile> lender;   // needed when the model borrows
   std::vector<SourceFile> sequences;  // the banks it owns, sorted by path
   SeqEventTable events;
+  Content::ShpSequenceBankReferences sequence_bank_ids;
 };
 
 // One model's files and manifest entry, with a seq-gltf companion for each
