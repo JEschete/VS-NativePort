@@ -114,7 +114,7 @@ struct FileStamp {
 
   bool operator==(const FileStamp&) const = default;
 };
-// The six tables', then the action catalog's, which limbs name actions from.
+// The zone tables', then the action catalog's, which limbs name actions from.
 using TableStamps = std::array<FileStamp, kZoneTableCount + 1>;
 
 std::optional<TableStamps> StampsOf(const fs::path& root) {

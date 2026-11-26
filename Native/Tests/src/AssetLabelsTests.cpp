@@ -376,11 +376,13 @@ TEST_CASE("Zone labels preserve every source field and are stable on repeat",
   WriteZone(root.Root(), zone);
   const auto first = Required(extract::LabelNativeAssets(root.Root()));
   CHECK(first.written == content::kZoneTableCount);
-  CHECK(first.rows == 6);
+  CHECK(first.rows == 7);
   const auto records =
       Required(content::ParseCsv(Read(root.Root(), kEnemyPath), kEnemyPath));
   CHECK(records.front().fields.at(1) == "display_name");
   CHECK(records.at(1).fields.at(1) == "Guildenstern");
+  const std::string kinds(content::ZoneTablePath(content::ZoneTable::kKinds));
+  CHECK(Read(root.Root(), kinds).contains(",Guildenstern (kind "));
   CHECK(ReadZones(root.Root()) == std::vector{zone});
   CHECK(Required(extract::LabelNativeAssets(root.Root())).written == 0);
 }

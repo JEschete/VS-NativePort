@@ -21,9 +21,9 @@ A `MAP\ZONE*.ZND` is what the room loader reads when the zone changes (`Content/
 - **Enemy section:** a count, that many ZUD (sector, read size) entries, then that many 0x464-byte templates (`vs_CharInitData`, `Actors/CharacterInit.hpp`).
 - **Texture section:** either 32 zero bytes, or four table sizes of which only the first is used, followed by that table: a count and that many TIMs, each after its byte size.
 
-`VS.Extract tables <datadir>` (and `extract`) converts every zone with converter `znd-tables` version 11
+`VS.Extract tables <datadir>` (and `extract`) converts every zone with converter `znd-tables` version 13
 (`Extract/ZndConversion.hpp`, `Content/ZoneTables.hpp`). `tables` runs after `models`, because the zones name the
-enemy archetypes (§6.2.5), and after the action catalog, because limbs name actions. It writes six CSV tables, each with a committed schema that is written beside it and must
+enemy archetypes (§6.2.5), and after the action catalog, because limbs name actions. It writes seven CSV tables, each with a committed schema that is written beside it and must
 match (a test checks this). Columns are described in the schemas; the rules they do not express are:
 
 | Table ([schema](../../Native/Content/schemas/catalogs/)) | Rows and identities |
@@ -31,17 +31,19 @@ match (a test checks this). Columns are described in the schemas; the rules they
 | `world\zones.csv` ([schema](../../Native/Content/schemas/catalogs/world/zones.schema.json)) | `id` `zone.map.zone009`; `room_slots` is the room table's length, used or not |
 | `world\zone-rooms.csv` ([schema](../../Native/Content/schemas/catalogs/world/zone-rooms.schema.json)) | one row per used slot, naming the room by id (`room.map.map009`) |
 | `world\zone-textures.csv` ([schema](../../Native/Content/schemas/catalogs/world/zone-textures.schema.json)) | the texture table's images by id, in upload order |
-| `enemies\zone-enemies.csv` ([schema](../../Native/Content/schemas/catalogs/enemies/zone-enemies.schema.json)) | one row per template: `id` `enemy.map.zone009.00`, `zone`, `slot`, the `archetype` it loads (`archetype.map.z009u00`); `name` and `weapon_name` are text (below) |
+| `enemies\zone-enemies.csv` ([schema](../../Native/Content/schemas/catalogs/enemies/zone-enemies.schema.json)) | one row per template: `id` `enemy.map.zone009.00`, `zone`, `slot`, the `archetype` it loads (`archetype.map.z009u00`) and its `kind`; `name` and `weapon_name` are text (below) |
+| `enemies\enemy-kinds.csv` ([schema](../../Native/Content/schemas/catalogs/enemies/enemy-kinds.schema.json)) | one row per enemy kind: `id` `enemy-kind.ghast`, `legacy_id` the number the game stores (below) |
 | `enemies\zone-enemy-limbs.csv` ([schema](../../Native/Content/schemas/catalogs/enemies/zone-enemy-limbs.schema.json)) | one row per limb, except its armour part |
 | `enemies\zone-enemy-parts.csv` ([schema](../../Native/Content/schemas/catalogs/enemies/zone-enemy-parts.schema.json)) | one row per equipment part: `weapon.blade`, `weapon.grip`, `weapon.gem1-3`, `shield.base`, `shield.gem1-3`, `accessory`, `limb0-5.armor` |
 
-All six tables receive early informational `display_name` columns through §1.2. `zone-enemies.csv` shows the
-decoded enemy name; its `name` and `weapon_name` text columns are what the game reads.
+All seven tables receive early informational `display_name` columns through §1.2. `zone-enemies.csv` shows the
+decoded enemy name; its `name` and `weapon_name` text columns are what the game reads. `enemy-kinds.csv` shows its
+kind's first template name and number (`Zombie (kind 3)`).
 `zone-enemy-limbs.csv` adds the body part the target labels show (`Wyvern - limb 1 (NECK)`): the tag of the body
 model's first bone whose low limb nibble is the limb plus 1, as the spawn picks it, indexing BATTLE.PRG's limb names.
 `labels` replaces the older `Enemy - limb N` captions it generated but keeps edited ones.
 
-**Named fields and domains (versions 2-12).** Enemy class, equipment materials (the shared material domain),
+**Named fields and domains (versions 2-13).** Enemy class, equipment materials (the shared material domain),
 physical types, class ratings and affinities use the named domains in the schemas, and the schemas describe every
 template column from its upstream consumer. Rules beyond the schemas:
 - Version 3 names the parts' `damage_type`, `cost_type` (the resource the base attack spends) and `material`, and
@@ -69,6 +71,13 @@ template column from its upstream consumer. Rules beyond the schemas:
   `{spacing:6}`. An empty cell is an all-zero slot. The disc's 910 slots end in E7 with zero tails, so the text
   rebuilds every byte; a slot with a non-zero tail, a lone E7 or the space glyph `0x8F` is refused rather than
   approximated. Localized string IDs remain #500.
+- Version 13 names each template's kind (0x00, the former `sub_type`) by `enemy-kinds.csv` id. The number is the
+  actor's `subType`: a defeat sets its bestiary kill bit (`updateEnemyKills`), and the orbiting boss AI is kinds 172
+  and 173 (`func_800E5A9C`, `func_800DE3E4`). A kind's id is the slug of its first named template's name (zone, then
+  slot), Latin-1 letters folded to ASCII. When kinds share a slug, or it is empty (`untitled`) or ends in a number,
+  `-<number>` follows, so ids are distinct and stable across runs. Of the disc's 168 kinds, 54 have unnumbered
+  ids. A kind is required; a new kind is a new row with an unused `legacy_id`. The bestiary still matches kinds by
+  number range.
 - DP splash columns identify their zero-based destination limb and percent units. A limb index is topology, not a
   universal head/arm/leg name; actual body-part names depend on the model.
 - Units (descriptions only, no version change): drop rates are chances in 255 (0 never, 255 always); range and reach
@@ -84,7 +93,7 @@ template column from its upstream consumer. Rules beyond the schemas:
 
 Schemas expose each renamed column's `legacy_name`. Readers accept either name, but refuse both names for one
 column; enum numeric aliases remain supported. `VS.Extract authoring <datadir>` upgrades existing headers and enum
-spellings without replacing IDs, labels, record values or row order. It validates all six tables and compares every
+spellings without replacing IDs, labels, record values or row order. It validates all seven tables and compares every
 decoded native record before writing, then publishes the new converter version last. It splits a version-2
 `shape_bits` cell into its two columns, refusing a value they cannot hold or a table with both forms, and names a
 version-3 numeric `status_immunities` cell (signed or unsigned), refusing a number outside 32 bits. It drops a
@@ -96,8 +105,10 @@ and rewrites a version-7 `agility_defense_bonus` of 128-255 as the same byte's s
 `zud_index` only when every cell equals its row's `slot`, and splits a version-9 `ai_settings` cell (signed or
 unsigned), refusing a value outside 32 bits or one with bits 0-1 set. It drops version 10's class and affinity
 `storage` columns (version 1's `class_7`, `class_8` and `affinity_8`) only when every cell is 0. It decodes version
-11's 48-digit hexadecimal names to text, refusing a slot the text cannot rebuild.
-A normal `tables` run upgrades version 1-11 tables before considering
+11's 48-digit hexadecimal names to text, refusing a slot the text cannot rebuild. It names version 12's numeric
+`sub_type` cells as `kind` ids and writes `enemy-kinds.csv`, refusing a table with both columns or numeric kinds
+beside an existing kinds table.
+A normal `tables` run upgrades version 1-12 tables before considering
 source reconversion, preserving existing native edits. Unknown enum codes remain preservable by the raw ZND codec, but are refused as native authoring values.
 This does not resolve the remaining part categories, strings, semantic identities or relational enemy
 definitions.
@@ -128,7 +139,7 @@ definitions.
 offset. They are 16-bit: room palette rows and texture pages, kept as the words the zone uploads. A page's packed 4-
 or 8-bit indices become an indexed image when the rooms (#198) bind each page's depth and palette.
 
-**Manifest and reruns.** The manifest has one output per zone (`zone.map.zone009`), listing the twelve table files it shares with every zone and its own images. The tables hold every zone, so a run that converts any zone writes them all. A run whose zones are all unchanged writes nothing, so edits survive; `--force` rewrites everything.
+**Manifest and reruns.** The manifest has one output per zone (`zone.map.zone009`), listing the fourteen table files it shares with every zone and its own images; an authoring upgrade adds a new table's files to every zone's list. The tables hold every zone, so a run that converts any zone writes them all. A run whose zones are all unchanged writes nothing, so edits survive; `--force` rewrites everything.
 
 **Refusals.** The converter writes nothing unless every zone's rows and images rebuild the source file byte for byte and the tables read back to the same rows. It refuses:
 - a room or ZUD entry whose sector starts no extracted MPD or ZUD, or whose size is not that file's read;
@@ -142,7 +153,7 @@ original-layout consumer. Replace that path with typed zone/enemy definitions; d
 native authoring or allocation limit.
 - The tables are read once and kept while their files and `battle\actions.csv` are unchanged.
 - Each texture image must name its zone and that zone's manifest hash, and is rebuilt into its TIM (`Content::TimFromImage` and `EncodeTim`, shared with the importer).
-- A table error names the file, line and column. An unknown room, archetype, action or image, a stale image, or a zone rebuilt larger than the read's block is refused with the cause logged. The loader then refuses the zone as a failed read.
+- A table error names the file, line and column. An unknown room, archetype, action, kind or image, a stale image, or a zone rebuilt larger than the read's block is refused with the cause logged. The loader then refuses the zone as a failed read.
 - `RequireConversions` refuses to start without a current `znd-tables` output for every zone.
 
 Open work: #199 (relational species, variant, loadout and loot tables; part references to the item catalog; SQLite

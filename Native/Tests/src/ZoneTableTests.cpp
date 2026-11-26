@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <expected>
 #include <format>
+#include <map>
 #include <span>
 #include <string>
 #include <string_view>
@@ -275,6 +276,66 @@ TEST_CASE("Zone tables name the row at fault", "[content-tables][znd]") {
   Edit(texts, ZoneTable::kEnemies, ",Aa 1,", ",Aa {nope},");
   CHECK(ErrorOf(content::ReadZoneTables(ReaderOf(texts)))
             .ends_with("(in its markup 'Aa{spacing:6}{nope}')"));
+
+  // A kind is a row of the kinds table, whose numbers are distinct.
+  texts = SampleTexts();
+  SetCell(texts, ZoneTable::kEnemies, 1, "kind", "enemy-kind.none");
+  CHECK(ErrorOf(content::ReadZoneTables(ReaderOf(texts))) ==
+        "catalogs/enemies/zone-enemies.csv:2: column 'kind': no kind "
+        "'enemy-kind.none' in catalogs/enemies/enemy-kinds.csv");
+  texts = SampleTexts();
+  const auto first = CellOf(texts, ZoneTable::kKinds, 1, "id");
+  const auto number = CellOf(texts, ZoneTable::kKinds, 1, "legacy_id");
+  SetCell(texts, ZoneTable::kKinds, 2, "legacy_id", number);
+  CHECK(ErrorOf(content::ReadZoneTables(ReaderOf(texts))) ==
+        std::format("catalogs/enemies/enemy-kinds.csv:3: column 'legacy_id': "
+                    "{} also names kind {}",
+                    first, number));
+}
+
+TEST_CASE("Enemy kind ids are their names, numbered when not distinct",
+          "[zone-authoring][content-tables][znd]") {
+  // Shared names, no name and names ending in a number take the kind's
+  // number, so no two ids are equal; Latin-1 letters fold to ASCII.
+  const std::map<std::int64_t, std::string> names{
+      {1, "Dark Crusader"},   {2, "Ghost"},
+      {3, "Ghost"},           {4, ""},
+      {5, "Air Elemental 2"}, {6, "M\xC3\xBCllenkamp"},
+      {7, "{spacing:6}"}};
+  CHECK(content::EnemyKindIds(names) ==
+        std::map<std::int64_t, std::string>{{1, "enemy-kind.dark-crusader"},
+                                            {2, "enemy-kind.ghost-2"},
+                                            {3, "enemy-kind.ghost-3"},
+                                            {4, "enemy-kind.untitled-4"},
+                                            {5, "enemy-kind.air-elemental-2-5"},
+                                            {6, "enemy-kind.mullenkamp"},
+                                            {7, "enemy-kind.untitled-7"}});
+}
+
+TEST_CASE("Numeric enemy kinds migrate to the ids of a new kinds table",
+          "[zone-authoring][content-tables][znd]") {
+  // A kind takes the name of its first named template.
+  const auto migrated = content::MigrateZoneColumns(
+      ZoneTable::kEnemies,
+      "id,name,sub_type\na,,7\nb,Ghost,7\nc,Ghost,9\nd,Bat,12\n",
+      "enemies.csv");
+  if (!migrated) FAIL(migrated.error());
+  CHECK(migrated->named_values == 4);
+  CHECK(migrated->text ==
+        "id,name,sub_type\na,,enemy-kind.ghost-7\nb,Ghost,enemy-kind.ghost-7\n"
+        "c,Ghost,enemy-kind.ghost-9\nd,Bat,enemy-kind.bat\n");
+  CHECK(migrated->kinds ==
+        "id,legacy_id\nenemy-kind.ghost-7,7\nenemy-kind.ghost-9,9\n"
+        "enemy-kind.bat,12\n");
+  const auto again =
+      content::MigrateZoneColumns(ZoneTable::kEnemies, migrated->text, "e.csv");
+  if (!again) FAIL(again.error());
+  CHECK(again->named_values == 0);
+  CHECK(again->kinds.empty());
+  CHECK(again->text == migrated->text);
+  CHECK(ErrorOf(content::MigrateZoneColumns(
+            ZoneTable::kEnemies, "id,sub_type,kind\na,7,\n", "enemies.csv")) ==
+        "enemies.csv: has both 'sub_type' and 'kind'");
 }
 
 TEST_CASE("Zone names are text that rebuilds their slots",

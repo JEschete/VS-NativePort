@@ -1,5 +1,6 @@
 #include "Extract/ZoneAuthoring.hpp"
 
+#include <algorithm>
 #include <cstddef>
 #include <map>
 #include <span>
@@ -43,6 +44,54 @@ Content::ZoneTableReader Reader(const Texts& texts) {
   };
 }
 
+std::expected<bool, std::string> Exists(const fs::path& file) {
+  std::error_code error;
+  const bool exists = fs::exists(file, error);
+  if (error) {
+    return std::unexpected(Platform::PathText(file) + ": " + error.message());
+  }
+  return exists;
+}
+
+// The table's text. Version 12 has no enemy-kinds table: when the enemies'
+// migration made one (`made`), it is the table, and is written.
+std::expected<std::string, std::string> TableText(const fs::path& root,
+                                                  Content::ZoneTable table,
+                                                  const std::string& made,
+                                                  Texts& pending) {
+  const auto path = Content::ZoneTablePath(table);
+  const fs::path file = root / Platform::Utf8Path(path);
+  if (table != Content::ZoneTable::kKinds || made.empty()) return Read(file);
+  auto exists = Exists(file);
+  if (!exists) return std::unexpected(exists.error());
+  if (*exists) {
+    return std::unexpected(path +
+                           " exists, but the enemies table names kinds by "
+                           "number (sub_type)");
+  }
+  pending.emplace(path, made);
+  return made;
+}
+
+// Writes the table's schema when it is missing or differs.
+std::expected<void, std::string> PrepareSchema(const fs::path& root,
+                                               Content::ZoneTable table,
+                                               Texts& pending) {
+  const auto path = Content::ZoneTableSchemaPath(table);
+  const fs::path file = root / Platform::Utf8Path(path);
+  const auto expected =
+      Content::FormatTableSchema(Content::ZoneTableSpec(table));
+  auto exists = Exists(file);
+  if (!exists) return std::unexpected(exists.error());
+  if (*exists) {
+    auto schema = Read(file);
+    if (!schema) return std::unexpected(schema.error());
+    if (*schema == expected) return {};
+  }
+  pending.insert_or_assign(path, expected);
+  return {};
+}
+
 std::expected<void, std::string> PrepareFiles(const fs::path& root,
                                               Texts& pending,
                                               ZoneAuthoringReport& report) {
@@ -62,15 +111,17 @@ std::expected<void, std::string> PrepareFiles(const fs::path& root,
                            error.message());
   }
   const Content::ZoneTableReader read_original = Reader(original);
+  std::string kinds;  // the enemy-kinds table the enemies' migration made
   for (const auto table : Content::kZoneTables) {
     const auto path = Content::ZoneTablePath(table);
-    auto text = Read(root / Platform::Utf8Path(path));
+    auto text = TableText(root, table, kinds, pending);
     if (!text) return std::unexpected(text.error());
     // The migration is checked to be lossless; the records check below
     // compares its result with the normalized tables.
     auto migrated =
         Content::MigrateZoneColumns(table, *text, path, read_original);
     if (!migrated) return std::unexpected(migrated.error());
+    if (!migrated->kinds.empty()) kinds = migrated->kinds;
     report.split_columns += migrated->split_columns;
     report.retired_columns += migrated->retired_columns;
     report.named_values += migrated->named_values;
@@ -81,15 +132,12 @@ std::expected<void, std::string> PrepareFiles(const fs::path& root,
     if (!rewrite) return std::unexpected(rewrite.error());
     original.emplace(path, migrated->text);
     normalized.emplace(path, rewrite->text);
-    if (*text != rewrite->text) pending.emplace(path, rewrite->text);
+    if (*text != rewrite->text) pending.insert_or_assign(path, rewrite->text);
     report.renamed_columns += rewrite->renamed_columns;
     report.named_values += rewrite->named_values;
-    const auto schema_path = Content::ZoneTableSchemaPath(table);
-    auto schema = Read(root / Platform::Utf8Path(schema_path));
-    if (!schema) return std::unexpected(schema.error());
-    const auto expected =
-        Content::FormatTableSchema(Content::ZoneTableSpec(table));
-    if (*schema != expected) pending.emplace(schema_path, expected);
+    if (auto schema = PrepareSchema(root, table, pending); !schema) {
+      return std::unexpected(schema.error());
+    }
   }
   auto before = Content::ReadZoneTables(read_original);
   if (!before) return std::unexpected(before.error());
@@ -104,15 +152,37 @@ std::expected<void, std::string> PrepareFiles(const fs::path& root,
 std::expected<bool, std::string> HasTables(const fs::path& root) {
   bool any = false;
   for (const auto table : Content::kZoneTables) {
-    const auto path = root / Platform::Utf8Path(Content::ZoneTablePath(table));
-    std::error_code error;
-    const bool exists = fs::exists(path, error);
-    if (error) {
-      return std::unexpected(Platform::PathText(path) + ": " + error.message());
-    }
-    any = any || exists;
+    auto exists =
+        Exists(root / Platform::Utf8Path(Content::ZoneTablePath(table)));
+    if (!exists) return std::unexpected(exists.error());
+    any = any || *exists;
   }
   return any;
+}
+
+// Lists every zone table and schema in each zone output that lists files, as
+// ConvertDiscZones does; whether a file was missing (a table version 13
+// added). Unlisted files would be removed as stale.
+bool ListTableFiles(Content::ConversionManifest& manifest) {
+  std::vector<std::string> tables;
+  for (const auto table : Content::kZoneTables) {
+    tables.push_back(Content::ZoneTablePath(table));
+    tables.push_back(Content::ZoneTableSchemaPath(table));
+  }
+  bool added = false;
+  for (Content::ConversionOutput& output : manifest.outputs) {
+    if (output.converter != Content::kZndTableConverterName ||
+        output.files.empty()) {
+      continue;
+    }
+    for (const std::string& file : tables) {
+      if (std::ranges::find(output.files, file) != output.files.end()) continue;
+      output.files.push_back(file);
+      added = true;
+    }
+    std::ranges::sort(output.files);
+  }
+  return added;
 }
 }  // namespace
 
@@ -133,8 +203,9 @@ std::expected<ZoneAuthoringReport, std::string> UpgradeZoneAuthoring(
       // and the action_N_index columns, version 6 the equipment index
       // columns, version 7 unsigned agility_defense_bonus cells, version 8
       // the zud_index column, version 9 the packed ai_settings, version 10
-      // the class and affinity storage columns and version 11 hexadecimal
-      // names; all upgrade in place.
+      // the class and affinity storage columns, version 11 hexadecimal
+      // names and version 12 numeric sub_type kinds without the enemy-kinds
+      // table; all upgrade in place.
       if (found->second < 1 ||
           found->second > Content::kZndTableConverterVersion) {
         return std::unexpected(
@@ -159,7 +230,8 @@ std::expected<ZoneAuthoringReport, std::string> UpgradeZoneAuthoring(
     }
   }
   report.written = outputs.size();
-  if (version_changed && *manifest) {
+  const bool files_added = *manifest && ListTableFiles(**manifest);
+  if ((version_changed || files_added) && *manifest) {
     if (auto written = WriteConversionManifest(root, **manifest); !written) {
       return std::unexpected(written.error());
     }

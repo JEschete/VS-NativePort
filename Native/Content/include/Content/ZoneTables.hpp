@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <expected>
 #include <functional>
+#include <map>
 #include <span>
 #include <string>
 #include <string_view>
@@ -45,10 +46,13 @@
 // byte.
 // The enemy's and its weapon's names (0x004 and 0x128) are text in the
 // game's glyph set (ZoneNameText), not bytes.
+// A template names its enemy kind (0x000, the actor's sub_type) by id in
+// catalogs/enemies/enemy-kinds.csv, whose legacy_id is the number the game
+// stores.
 namespace VS::Content {
 
 inline constexpr std::string_view kZndTableConverterName = "znd-tables";
-inline constexpr std::uint32_t kZndTableConverterVersion = 12;
+inline constexpr std::uint32_t kZndTableConverterVersion = 13;
 
 enum class ZoneTable : std::uint8_t {
   kZones,     // catalogs/world/zones: music and room slot count
@@ -57,11 +61,13 @@ enum class ZoneTable : std::uint8_t {
   kEnemies,   // catalogs/enemies/zone-enemies: one row per template
   kLimbs,     // catalogs/enemies/zone-enemy-limbs
   kParts,     // catalogs/enemies/zone-enemy-parts
+  kKinds,     // catalogs/enemies/enemy-kinds: the kinds templates name
 };
-inline constexpr std::size_t kZoneTableCount = 6;
+inline constexpr std::size_t kZoneTableCount = 7;
 inline constexpr std::array kZoneTables{
     ZoneTable::kZones,   ZoneTable::kRooms, ZoneTable::kTextures,
     ZoneTable::kEnemies, ZoneTable::kLimbs, ZoneTable::kParts,
+    ZoneTable::kKinds,
 };
 
 [[nodiscard]] const TableSpec& ZoneTableSpec(ZoneTable table);
@@ -137,19 +143,30 @@ using ZoneTableReader = std::function<std::expected<std::string, std::string>(
 
 using ZoneTableText = std::array<std::string, kZoneTableCount>;
 
-// The six tables' text for `zones`, in kZoneTables order. Zones are written
-// by id, their rooms, textures and enemies by position. `read` serves the
-// action catalog the limbs' action ids are named from; a limb action the
-// catalog does not hold is refused.
+// The tables' text for `zones`, in kZoneTables order. Zones are written by
+// id, their rooms, textures and enemies by position. `read` serves the action
+// catalog the limbs' action ids are named from; a limb action the catalog
+// does not hold is refused. Each kind the templates hold has a kinds row,
+// with the id EnemyKindIds gives it after its first named template's name in
+// table order.
 [[nodiscard]] std::expected<ZoneTableText, std::string> FormatZoneTables(
     std::span<const ZoneRecord> zones, const ZoneTableReader& read);
 
-// The zones the six tables hold, by id. Each table must pass its schema; rows
-// must name zones and enemies the tables hold, and actions the action catalog
-// holds; a zone's rooms must lie within its room slots; and its textures and
-// enemies must be numbered from 0 with no gap.
+// The zones the tables hold, by id. Each table must pass its schema; rows
+// must name zones and enemies the tables hold, kinds the kinds table holds
+// and actions the action catalog holds; no two kinds may share a number; a
+// zone's rooms must lie within its room slots; and its textures and enemies
+// must be numbered from 0 with no gap.
 [[nodiscard]] std::expected<std::vector<ZoneRecord>, std::string>
 ReadZoneTables(const ZoneTableReader& read);
+
+// Each kind's id, given each kind's name by number (text, empty for none):
+// enemy-kind.<slug>, the slug being ActionSlug's with each Latin-1 letter as
+// its base letter (an umlauted u is u), or enemy-kind.<slug>-<number> when
+// another kind's name makes the same slug, the slug is empty (untitled) or it
+// ends in a number, so no two ids are equal.
+[[nodiscard]] std::map<std::int64_t, std::string> EnemyKindIds(
+    const std::map<std::int64_t, std::string>& names);
 
 // Whether the enemy, limb and part columns and the reserved bytes cover every
 // bit of a template exactly once, and every flags column names each bit it
@@ -164,6 +181,9 @@ ReadZoneTables(const ZoneTableReader& read);
 
 struct ZoneColumnMigration {
   std::string text;
+  // The enemy-kinds table the rewritten sub_type cells name; empty unless
+  // the enemies table held them.
+  std::string kinds;
   std::size_t split_columns = 0;
   std::size_t retired_columns = 0;
   std::size_t named_values = 0;
@@ -186,8 +206,11 @@ struct ZoneColumnMigration {
 // same byte's signed value (251 is -5). Rewrites a name written as its 24
 // bytes in lowercase hexadecimal (version 11's name and weapon_name) as its
 // text (ZoneNameText), refusing bytes the text cannot rebuild; no text that
-// fits a slot is 48 hexadecimal digits long. Column renames are left to
-// NormalizeTableText.
+// fits a slot is 48 hexadecimal digits long. Names each kind written as its
+// number (version 12's sub_type) by the id EnemyKindIds gives it after its
+// first named template in table order, and returns the enemy-kinds table of
+// those ids in `kinds`, refusing a table with both sub_type and kind. Column
+// renames are left to NormalizeTableText.
 [[nodiscard]] std::expected<ZoneColumnMigration, std::string>
 MigrateZoneColumns(ZoneTable table, const std::string& text,
                    std::string_view file, const ZoneTableReader& read = {});

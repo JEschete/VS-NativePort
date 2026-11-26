@@ -34,11 +34,11 @@
       "description": "the ZUD the template loads"
     },
     {
-      "name": "sub_type",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 65535,
-      "description": "the enemy kind: a defeat sets its bestiary kill bit (kinds 0-255; the disc's 'nothing' rows use 256-268), and kinds 172 and 173 take the orbiting boss AI"
+      "name": "kind",
+      "type": "reference",
+      "legacy_name": "sub_type",
+      "references": "enemy-kinds",
+      "description": "the enemy kind (the actor's sub_type): a defeat sets its bestiary kill bit (kinds 0-255; the disc's 'nothing' rows use 256-268), and kinds 172 and 173 take the orbiting boss AI"
     },
     {
       "name": "model_id",

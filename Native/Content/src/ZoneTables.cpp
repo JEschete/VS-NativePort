@@ -37,6 +37,16 @@ constexpr std::string_view kWorldDirectory = "catalogs/world";
 constexpr std::string_view kEnemyDirectory = "catalogs/enemies";
 // The enemy template column that holds its position in its zone.
 constexpr std::string_view kSlotColumn = "slot";
+// The tables a field reference names: the action catalog's actions, and the
+// enemy kinds templates name by the template column `kind` (version 12's
+// numeric sub_type). A kind number is the actor's 16-bit sub_type.
+constexpr std::string_view kActionsTable = "actions";
+constexpr std::string_view kKindsTable = "enemy-kinds";
+constexpr std::string_view kKindIdPrefix = "enemy-kind.";
+constexpr std::string_view kKindColumn = "kind";
+constexpr std::string_view kLegacyKindColumn = "sub_type";
+constexpr std::string_view kUntitled = "untitled";
+constexpr std::int64_t kMaxKind = 0xFFFF;
 // A zone's room slots, textures and enemies. An enemy placement names its
 // template by a byte.
 constexpr std::int64_t kMaxRoomSlots = 0xFFFF;
@@ -217,10 +227,11 @@ struct TableLayout {
     reserved.back().numbered = numbered;
   }
 
-  // An optional reference stored as the row's original index; 0 is none.
+  // A reference stored as the row's original index; 0 is none when
+  // `optional`.
   void Reference(std::string_view name, std::size_t offset, std::size_t size,
                  std::string_view table, std::string_view description,
-                 std::string_view legacy_name) {
+                 std::string_view legacy_name, bool optional = true) {
     fields.push_back({.column = name,
                       .offset = offset,
                       .size = size,
@@ -236,7 +247,7 @@ struct TableLayout {
                        .description = description,
                        .enumeration = {},
                        .legacy_name = legacy_name,
-                       .optional = true});
+                       .optional = optional});
   }
 
   void Add(std::string_view name, std::size_t offset, std::size_t size,
@@ -380,10 +391,13 @@ void AddEnemyFields(TableLayout& table) {
   // decomp: updateEnemyKills (src/BATTLE/BATTLE.PRG/146C.c:1414) sets the
   // kind's kill bit, which the bestiary's first_defeated_subtype ranges test.
   // decomp: func_800E5A9C (src/BATTLE/BATTLE.PRG/7CD68.c:205)
-  table.Add("sub_type", 0x00, 2, false,
-            "the enemy kind: a defeat sets its bestiary kill bit (kinds "
-            "0-255; the disc's 'nothing' rows use 256-268), and kinds 172 "
-            "and 173 take the orbiting boss AI");
+  // decomp: func_800DE3E4 (src/BATTLE/BATTLE.PRG/74088.c:718)
+  table.Reference(kKindColumn, 0x00, 2, kKindsTable,
+                  "the enemy kind (the actor's sub_type): a defeat sets its "
+                  "bestiary kill bit (kinds 0-255; the disc's 'nothing' rows "
+                  "use 256-268), and kinds 172 and 173 take the orbiting boss "
+                  "AI",
+                  kLegacyKindColumn, false);
   // decomp: func_800775C0 (src/BATTLE/BATTLE.PRG/146C.c:6393) gives the actor
   // this id, loads id + 1 as a second body for the ids vs_main_actorExtraShp
   // (src/SLUS_010.40/main.c:755) marks, and loads the body alone for 127.
@@ -672,7 +686,7 @@ void AddLimbFields(TableLayout& table) {
   for (std::size_t action = 0; action < kLimbActionSlots; ++action) {
     const std::size_t at = 0x10 + (action * 4);
     table.Reference(table.Name(std::format("action_{}", action + 1)), at, 2,
-                    "actions", "the action in this slot; empty for none",
+                    kActionsTable, "the action in this slot; empty for none",
                     table.Name(std::format("action_{}_id", action + 1)));
     table.Add(table.Name(std::format("action_{}_special_sequence", action + 1)),
               at + 2, 1, false,
@@ -894,6 +908,23 @@ ColumnSpec IntegerColumn(std::string_view name, std::int64_t minimum,
           .description = description};
 }
 
+// The enemy kinds: no record holds them; a template names one (its kind).
+// decomp: updateEnemyKills (src/BATTLE/BATTLE.PRG/146C.c:1414)
+void BuildKindLayout(TableLayout& kinds) {
+  kinds.Lead(IdColumn("id",
+                      "the kind, named after its first named template "
+                      "(enemy-kind.zombie-3)"));
+  kinds.Lead(IntegerColumn("legacy_id", 0, kMaxKind,
+                           "the number the game stores (the actor's "
+                           "sub_type), which the bestiary's kill bits and "
+                           "the orbiting boss AI (172 and 173) test"));
+  kinds.key = {"id"};
+  kinds.Finish("enemy-kinds",
+               "The enemy kinds zone templates name; each kind's number is "
+               "the actor's sub_type.",
+               kEnemyDirectory);
+}
+
 // Fills `layouts` in place: their specs point into their own columns.
 void BuildLayouts(std::array<TableLayout, kZoneTableCount>& layouts) {
   TableLayout& zones = layouts.at(static_cast<std::size_t>(ZoneTable::kZones));
@@ -972,6 +1003,8 @@ void BuildLayouts(std::array<TableLayout, kZoneTableCount>& layouts) {
                "Each template's equipment parts; a part with no row is all "
                "zeros.",
                kEnemyDirectory);
+
+  BuildKindLayout(layouts.at(static_cast<std::size_t>(ZoneTable::kKinds)));
 }
 
 const std::array<TableLayout, kZoneTableCount>& Layouts() {
@@ -1067,6 +1100,109 @@ unsigned HexDigit(char digit) {
                       : static_cast<unsigned>(digit - 'a') + 10;
 }
 
+// `name` with each Latin-1 letter (UTF-8 C3 80-BF) as its base ASCII letter;
+// the two signs among them (multiplication and division) become a space.
+std::string FoldLatin1(std::string_view name) {
+  constexpr std::string_view kBaseLetters =
+      "AAAAAAACEEEEIIIIDNOOOOO OUUUUY s"
+      "aaaaaaaceeeeiiiidnooooo ouuuuy y";
+  constexpr unsigned char kLatin1Lead = 0xC3;
+  constexpr std::size_t kFirstTrail = 0x80;
+  std::string folded;
+  for (std::size_t at = 0; at < name.size(); ++at) {
+    if (static_cast<unsigned char>(name[at]) == kLatin1Lead &&
+        at + 1 < name.size()) {
+      const std::size_t trail = static_cast<unsigned char>(name[at + 1]);
+      if (trail >= kFirstTrail && trail - kFirstTrail < kBaseLetters.size()) {
+        folded += kBaseLetters[trail - kFirstTrail];
+        ++at;
+        continue;
+      }
+    }
+    folded += name[at];
+  }
+  return folded;
+}
+
+// The slug of a kind's name; "untitled" for none.
+std::string KindSlug(std::string_view name) {
+  auto slug = ActionSlug(FoldLatin1(name));
+  if (slug.empty()) slug = kUntitled;
+  return slug;
+}
+
+// Whether `slug`'s last dash-separated word is a number, as a numbered id's
+// is.
+bool EndsInNumber(std::string_view slug) {
+  const auto word = slug.substr(slug.rfind('-') + 1);
+  return !word.empty() && std::ranges::all_of(word, [](char glyph) {
+    return glyph >= '0' && glyph <= '9';
+  });
+}
+
+// The enemy kinds' ids by number, and numbers by id. Built in place, never
+// moved: the maps' moves may allocate.
+class KindNames {
+ public:
+  KindNames() = default;
+
+  // The kinds `names` (each kind's name by number) holds, by the ids
+  // EnemyKindIds gives them.
+  explicit KindNames(const std::map<std::int64_t, std::string>& names) {
+    for (auto& [legacy, id] : EnemyKindIds(names)) {
+      Add(legacy, std::move(id));  // EnemyKindIds' ids are distinct
+    }
+  }
+
+  KindNames(const KindNames&) = delete;
+  KindNames& operator=(const KindNames&) = delete;
+  KindNames(KindNames&&) = delete;
+  KindNames& operator=(KindNames&&) = delete;
+  ~KindNames() = default;
+
+  // Adds kind `legacy` as `id`; false when either is taken.
+  bool Add(std::int64_t legacy, std::string id) {
+    if (ids_.contains(legacy) || legacy_.contains(id)) return false;
+    legacy_.emplace(id, legacy);
+    ids_.emplace(legacy, std::move(id));
+    return true;
+  }
+
+  [[nodiscard]] std::optional<std::string_view> IdOf(
+      std::int64_t legacy) const {
+    const auto found = ids_.find(legacy);
+    if (found == ids_.end()) return std::nullopt;
+    return found->second;
+  }
+
+  [[nodiscard]] std::optional<std::int64_t> LegacyOf(
+      std::string_view id) const {
+    const auto found = legacy_.find(id);
+    if (found == legacy_.end()) return std::nullopt;
+    return found->second;
+  }
+
+  // The kinds table's rows (id, legacy_id), by number.
+  [[nodiscard]] std::vector<std::vector<std::string>> Rows() const {
+    std::vector<std::vector<std::string>> rows;
+    for (const auto& [legacy, id] : ids_) {
+      rows.push_back({id, std::format("{}", legacy)});
+    }
+    return rows;
+  }
+
+ private:
+  std::map<std::int64_t, std::string> ids_;
+  std::map<std::string, std::int64_t, std::less<>> legacy_;
+};
+
+// Records `name` as kind `kind`'s unless an earlier template of it was named.
+void NameKind(std::map<std::int64_t, std::string>& names, std::int64_t kind,
+              std::string name) {
+  auto [found, added] = names.try_emplace(kind, name);
+  if (!added && found->second.empty()) found->second = std::move(name);
+}
+
 // The action catalog's ids by original index, read through the reader the
 // first time a limb names an action, so tables whose limbs name none need no
 // catalog. It reads the base catalogs/battle/actions.csv, not catalog layers.
@@ -1140,12 +1276,72 @@ std::string UnheldAction(std::int64_t value) {
                      kActionsPath);
 }
 
-// The record's fields as cells, in the layout's field order; an action
-// reference as the action's id, empty for none.
+// The tables a field reference names.
+struct ZoneReferences {
+  ActionNames& actions;
+  const KindNames& kinds;
+};
+
+// A reference field's cell: the id of the row `value` names, empty for an
+// optional reference's 0.
+std::expected<std::string, std::string> ReferenceCell(const ColumnSpec& column,
+                                                      std::int64_t value,
+                                                      ZoneReferences refs) {
+  if (value == 0 && column.optional) return std::string{};
+  if (column.references == kKindsTable) {
+    const auto id = refs.kinds.IdOf(value);
+    if (!id) {
+      return std::unexpected(
+          std::format("{} names kind {}, which {} does not hold", column.name,
+                      value, ZoneTablePath(ZoneTable::kKinds)));
+    }
+    return std::string(*id);
+  }
+  if (auto loaded = refs.actions.Load(); !loaded) {
+    return std::unexpected(loaded.error());
+  }
+  const auto id = refs.actions.IdOf(value);
+  if (!id) {
+    return std::unexpected(
+        std::format("{} {}", column.name, UnheldAction(value)));
+  }
+  return std::string(*id);
+}
+
+// The number of the row a reference cell of `row` names; 0 for an empty
+// cell.
+std::expected<std::int64_t, std::string> ReferenceValue(
+    const TableRow& row, const ColumnSpec& column, const std::string& cell,
+    ZoneReferences refs) {
+  if (cell.empty()) return 0;
+  if (column.references == kKindsTable) {
+    const auto legacy = refs.kinds.LegacyOf(cell);
+    if (!legacy) {
+      return std::unexpected(
+          CellError(row.source, row.line, column.name,
+                    std::format("no kind '{}' in {}", cell,
+                                ZoneTablePath(ZoneTable::kKinds))));
+    }
+    return *legacy;
+  }
+  if (auto loaded = refs.actions.Load(); !loaded) {
+    return std::unexpected(loaded.error());
+  }
+  const auto legacy = refs.actions.LegacyOf(cell);
+  if (!legacy) {
+    return std::unexpected(
+        CellError(row.source, row.line, column.name,
+                  std::format("no action '{}' in {}", cell, kActionsPath)));
+  }
+  return *legacy;
+}
+
+// The record's fields as cells, in the layout's field order; a reference as
+// the id of the row it names, empty for none.
 std::expected<void, std::string> AppendCells(std::vector<std::string>& cells,
                                              const TableLayout& layout,
                                              std::span<const std::byte> record,
-                                             ActionNames& actions) {
+                                             ZoneReferences refs) {
   for (const Field& field : layout.fields) {
     if (field.text) {
       const auto& column = layout.columns.at(cells.size());
@@ -1158,19 +1354,9 @@ std::expected<void, std::string> AppendCells(std::vector<std::string>& cells,
     const auto value = ReadField(record, field);
     const auto& column = layout.columns.at(cells.size());
     if (column.type == ColumnType::kReference) {
-      if (value == 0 && column.optional) {
-        cells.emplace_back();
-        continue;
-      }
-      if (auto loaded = actions.Load(); !loaded) {
-        return loaded;
-      }
-      const auto id = actions.IdOf(value);
-      if (!id) {
-        return std::unexpected(
-            std::format("{} {}", column.name, UnheldAction(value)));
-      }
-      cells.emplace_back(*id);
+      auto cell = ReferenceCell(column, value, refs);
+      if (!cell) return std::unexpected(cell.error());
+      cells.push_back(std::move(*cell));
       continue;
     }
     if (column.type == ColumnType::kFlags) {
@@ -1191,7 +1377,7 @@ std::expected<void, std::string> AppendCells(std::vector<std::string>& cells,
 std::expected<void, std::string> ApplyRow(std::span<std::byte> record,
                                           const TableLayout& layout,
                                           const TableRow& row,
-                                          ActionNames& actions) {
+                                          ZoneReferences refs) {
   for (std::size_t index = 0; index < layout.fields.size(); ++index) {
     const Field& field = layout.fields[index];
     const std::size_t column =
@@ -1206,20 +1392,10 @@ std::expected<void, std::string> ApplyRow(std::span<std::byte> record,
       }
       std::ranges::copy(*name, record.subspan(field.offset).begin());
     } else if (layout.columns.at(column).type == ColumnType::kReference) {
-      std::int64_t value = 0;
-      if (!cell.empty()) {
-        if (auto loaded = actions.Load(); !loaded) {
-          return loaded;
-        }
-        const auto legacy = actions.LegacyOf(cell);
-        if (!legacy) {
-          return std::unexpected(CellError(
-              row.source, row.line, layout.columns.at(column).name,
-              std::format("no action '{}' in {}", cell, kActionsPath)));
-        }
-        value = *legacy;
-      }
-      WriteField(record, field, value);
+      const auto value =
+          ReferenceValue(row, layout.columns.at(column), cell, refs);
+      if (!value) return std::unexpected(value.error());
+      WriteField(record, field, *value);
     } else {
       WriteField(record, field, row.values.at(column));
     }
@@ -1336,6 +1512,44 @@ std::expected<ReadTables, std::string> ReadAll(const ZoneTableReader& read) {
     tables.paths.at(static_cast<std::size_t>(table)) = path;
   }
   return tables;
+}
+
+// Adds the kinds the kinds table holds to `kinds`; no two may share a number.
+std::expected<void, std::string> ReadKinds(const ReadTables& tables,
+                                           KindNames& kinds) {
+  for (const TableRow& row : tables.Rows(ZoneTable::kKinds)) {
+    const std::int64_t legacy = row.values.at(1);
+    if (const auto taken = kinds.IdOf(legacy)) {
+      return std::unexpected(
+          CellError(tables.Path(ZoneTable::kKinds), row.line, "legacy_id",
+                    std::format("{} also names kind {}", *taken, legacy)));
+    }
+    kinds.Add(legacy, row.cells.at(0));  // ReadTable refuses a repeated id
+  }
+  return {};
+}
+
+const Field& FieldOf(const TableLayout& layout, std::string_view column) {
+  return *std::ranges::find(layout.fields, column, &Field::column);
+}
+
+// Each kind the zones' templates hold, by number, with the first name a
+// template of it holds in table order (empty for none).
+std::expected<std::map<std::int64_t, std::string>, std::string> KindNamesOf(
+    std::span<const ZoneRecord* const> zones) {
+  const TableLayout& layout = LayoutOf(ZoneTable::kEnemies);
+  const Field& kind = FieldOf(layout, kKindColumn);
+  const Field& name = FieldOf(layout, "name");
+  std::map<std::int64_t, std::string> names;
+  for (const ZoneRecord* zone : zones) {
+    for (const ZoneEnemyRecord& enemy : zone->enemies) {
+      auto text = ZoneNameText(
+          std::span(enemy.data).subspan(name.offset, name.size), enemy.id);
+      if (!text) return std::unexpected(text.error());
+      NameKind(names, ReadField(enemy.data, kind), std::move(*text));
+    }
+  }
+  return names;
 }
 
 // Entries keyed by position must run from 0 with no gap.
@@ -1633,7 +1847,10 @@ std::expected<std::size_t, std::string> NameActionCells(
   std::size_t named = 0;
   const auto& header = records.front().fields;
   for (const ColumnSpec& column : FieldColumns(layout)) {
-    if (column.type != ColumnType::kReference) continue;
+    if (column.type != ColumnType::kReference ||
+        column.references != kActionsTable) {
+      continue;
+    }
     auto found = std::ranges::find(header, column.name);
     if (found == header.end() && !column.legacy_name.empty()) {
       found = std::ranges::find(header, column.legacy_name);
@@ -1732,6 +1949,95 @@ std::expected<std::size_t, std::string> DecodeNameCells(
     }
   }
   return decoded;
+}
+
+bool HasKindField(const TableLayout& layout) {
+  return std::ranges::any_of(FieldColumns(layout),
+                             [](const ColumnSpec& column) {
+                               return column.references == kKindsTable;
+                             });
+}
+
+// A kind cell's number, when it holds one a kind can have.
+std::optional<std::int64_t> KindCell(const CsvRecord& record, std::size_t at) {
+  if (at >= record.fields.size()) return std::nullopt;  // the schema refuses
+  const auto value = IntegerCell(record.fields[at]);
+  if (!value || *value < 0 || *value > kMaxKind) return std::nullopt;
+  return value;
+}
+
+// Writes each kind cell that holds a number, as version 12's sub_type did, as
+// the id EnemyKindIds gives the kind after its first named template in row
+// order; the number of cells it wrote. `kinds` gets the enemy-kinds table of
+// those ids. The schema and reader refuse any other cell.
+std::expected<std::size_t, std::string> NameKindCells(
+    const TableLayout& layout, std::vector<CsvRecord>& records,
+    std::string_view file, std::string& kinds) {
+  const auto& header = records.front().fields;
+  const auto legacy = std::ranges::find(header, kLegacyKindColumn);
+  if (!HasKindField(layout) || legacy == header.end()) return 0;
+  if (std::ranges::find(header, kKindColumn) != header.end()) {
+    return std::unexpected(std::format("{}: has both '{}' and '{}'", file,
+                                       kLegacyKindColumn, kKindColumn));
+  }
+  const auto at = static_cast<std::size_t>(legacy - header.begin());
+  const auto name_at = static_cast<std::size_t>(
+      std::ranges::find(header, "name") - header.begin());
+  std::map<std::int64_t, std::string> names;
+  for (std::size_t row = 1; row < records.size(); ++row) {
+    const auto kind = KindCell(records[row], at);
+    if (!kind) continue;
+    const auto& fields = records[row].fields;
+    NameKind(names, *kind,
+             name_at < fields.size() ? fields[name_at] : std::string{});
+  }
+  if (names.empty()) return 0;
+  const KindNames named(names);
+  std::size_t written = 0;
+  for (std::size_t row = 1; row < records.size(); ++row) {
+    const auto kind = KindCell(records[row], at);
+    if (!kind) continue;
+    if (const auto id = named.IdOf(*kind)) {
+      records[row].fields[at] = *id;
+      ++written;
+    }
+  }
+  kinds = FormatTable(ZoneTableSpec(ZoneTable::kKinds), named.Rows());
+  return written;
+}
+
+// Appends a row for each of `enemy`'s limbs and equipment parts that holds a
+// field.
+std::expected<void, std::string> AppendLimbAndPartRows(
+    const ZoneEnemyRecord& enemy, const ZoneReferences& refs,
+    std::vector<std::vector<std::string>>& limb_rows,
+    std::vector<std::vector<std::string>>& part_rows) {
+  for (std::size_t limb = 0; limb < static_cast<std::size_t>(kLimbCount);
+       ++limb) {
+    const auto bytes = LimbOf(enemy.data, limb);
+    if (LimbFieldsZero(bytes)) continue;
+    std::vector<std::string> limb_cells{enemy.id, std::format("{}", limb)};
+    if (auto done =
+            AppendCells(limb_cells, LayoutOf(ZoneTable::kLimbs), bytes, refs);
+        !done) {
+      return std::unexpected(
+          std::format("{} limb {}: {}", enemy.id, limb, done.error()));
+    }
+    limb_rows.push_back(std::move(limb_cells));
+  }
+  for (const PartSlot& part : kPartSlots) {
+    const auto bytes = std::span(enemy.data).subspan(part.offset, kPartBytes);
+    if (AllZero(bytes)) continue;
+    std::vector<std::string> part_cells{enemy.id, std::string(part.id)};
+    if (auto done =
+            AppendCells(part_cells, LayoutOf(ZoneTable::kParts), bytes, refs);
+        !done) {
+      return std::unexpected(
+          std::format("{} {}: {}", enemy.id, part.id, done.error()));
+    }
+    part_rows.push_back(std::move(part_cells));
+  }
+  return {};
 }
 
 }  // namespace
@@ -1865,13 +2171,40 @@ std::expected<ZoneNameBytes, std::string> EncodeZoneName(std::string_view text,
   return name;
 }
 
+std::map<std::int64_t, std::string> EnemyKindIds(
+    const std::map<std::int64_t, std::string>& names) {
+  std::map<std::int64_t, std::string> slugs;
+  std::map<std::string, std::size_t, std::less<>> uses;
+  for (const auto& [number, name] : names) {
+    auto slug = KindSlug(name);
+    ++uses[slug];
+    slugs.emplace(number, std::move(slug));
+  }
+  // A numbered id ends in "-<number>"; no other id ends in a number, and the
+  // numbers are distinct, so no two ids are equal.
+  std::map<std::int64_t, std::string> ids;
+  for (const auto& [number, slug] : slugs) {
+    const bool numbered =
+        uses.at(slug) > 1 || slug == kUntitled || EndsInNumber(slug);
+    ids.emplace(number,
+                numbered ? std::format("{}{}-{}", kKindIdPrefix, slug, number)
+                         : std::format("{}{}", kKindIdPrefix, slug));
+  }
+  return ids;
+}
+
 std::expected<ZoneTableText, std::string> FormatZoneTables(
     std::span<const ZoneRecord> zones, const ZoneTableReader& read) {
   ActionNames actions(read);
   std::vector<const ZoneRecord*> sorted;
   for (const ZoneRecord& zone : zones) sorted.push_back(&zone);
   std::ranges::sort(sorted, {}, &ZoneRecord::id);
+  auto kind_names = KindNamesOf(sorted);
+  if (!kind_names) return std::unexpected(kind_names.error());
+  const KindNames kinds(*kind_names);
+  const ZoneReferences refs{.actions = actions, .kinds = kinds};
   std::array<std::vector<std::vector<std::string>>, kZoneTableCount> rows;
+  rows.at(static_cast<std::size_t>(ZoneTable::kKinds)) = kinds.Rows();
   auto& zone_rows = rows.at(static_cast<std::size_t>(ZoneTable::kZones));
   auto& room_rows = rows.at(static_cast<std::size_t>(ZoneTable::kRooms));
   auto& texture_rows = rows.at(static_cast<std::size_t>(ZoneTable::kTextures));
@@ -1895,36 +2228,14 @@ std::expected<ZoneTableText, std::string> FormatZoneTables(
       std::vector<std::string> cells{enemy.id, zone->id,
                                      std::format("{}", slot), enemy.archetype};
       if (auto done = AppendCells(cells, LayoutOf(ZoneTable::kEnemies),
-                                  enemy.data, actions);
+                                  enemy.data, refs);
           !done) {
         return std::unexpected(std::format("{}: {}", enemy.id, done.error()));
       }
       enemy_rows.push_back(std::move(cells));
-      for (std::size_t limb = 0; limb < static_cast<std::size_t>(kLimbCount);
-           ++limb) {
-        const auto bytes = LimbOf(enemy.data, limb);
-        if (LimbFieldsZero(bytes)) continue;
-        std::vector<std::string> limb_cells{enemy.id, std::format("{}", limb)};
-        if (auto done = AppendCells(limb_cells, LayoutOf(ZoneTable::kLimbs),
-                                    bytes, actions);
-            !done) {
-          return std::unexpected(
-              std::format("{} limb {}: {}", enemy.id, limb, done.error()));
-        }
-        limb_rows.push_back(std::move(limb_cells));
-      }
-      for (const PartSlot& part : kPartSlots) {
-        const auto bytes =
-            std::span(enemy.data).subspan(part.offset, kPartBytes);
-        if (AllZero(bytes)) continue;
-        std::vector<std::string> part_cells{enemy.id, std::string(part.id)};
-        if (auto done = AppendCells(part_cells, LayoutOf(ZoneTable::kParts),
-                                    bytes, actions);
-            !done) {
-          return std::unexpected(
-              std::format("{} {}: {}", enemy.id, part.id, done.error()));
-        }
-        part_rows.push_back(std::move(part_cells));
+      if (auto done = AppendLimbAndPartRows(enemy, refs, limb_rows, part_rows);
+          !done) {
+        return std::unexpected(done.error());
       }
     }
   }
@@ -1940,7 +2251,12 @@ std::expected<std::vector<ZoneRecord>, std::string> ReadZoneTables(
     const ZoneTableReader& read) {
   auto tables = ReadAll(read);
   if (!tables) return std::unexpected(tables.error());
+  KindNames kinds;
+  if (auto read_kinds = ReadKinds(*tables, kinds); !read_kinds) {
+    return std::unexpected(read_kinds.error());
+  }
   ActionNames actions(read);
+  const ZoneReferences refs{.actions = actions, .kinds = kinds};
   std::map<std::string, ZoneRecord, std::less<>> zones;
   for (const TableRow& row : tables->Rows(ZoneTable::kZones)) {
     ZoneRecord& zone = zones[row.cells.at(0)];
@@ -2010,7 +2326,7 @@ std::expected<std::vector<ZoneRecord>, std::string> ReadZoneTables(
     ZoneEnemyRecord& enemy = enemies[row.cells.at(0)];
     enemy.id = row.cells.at(0);
     enemy.archetype = row.cells.at(3);
-    if (auto done = ApplyRow(enemy.data, enemy_layout, row, actions); !done) {
+    if (auto done = ApplyRow(enemy.data, enemy_layout, row, refs); !done) {
       return std::unexpected(done.error());
     }
   }
@@ -2033,7 +2349,7 @@ std::expected<std::vector<ZoneRecord>, std::string> ReadZoneTables(
     if (auto done =
             ApplyRow(std::span((*enemy)->data)
                          .subspan(kLimbsAt + (limb * kLimbBytes), kLimbBytes),
-                     LayoutOf(ZoneTable::kLimbs), row, actions);
+                     LayoutOf(ZoneTable::kLimbs), row, refs);
         !done) {
       return std::unexpected(done.error());
     }
@@ -2049,7 +2365,7 @@ std::expected<std::vector<ZoneRecord>, std::string> ReadZoneTables(
     }
     if (auto done =
             ApplyRow(std::span((*enemy)->data).subspan(*offset, kPartBytes),
-                     LayoutOf(ZoneTable::kParts), row, actions);
+                     LayoutOf(ZoneTable::kParts), row, refs);
         !done) {
       return std::unexpected(done.error());
     }
@@ -2180,7 +2496,7 @@ std::expected<ZoneColumnMigration, std::string> MigrateZoneColumns(
     ZoneTable table, const std::string& text, std::string_view file,
     const ZoneTableReader& read) {
   const TableLayout& layout = LayoutOf(table);
-  ZoneColumnMigration migrated{.text = text};
+  ZoneColumnMigration migrated{.text = text, .kinds = {}};
   if (layout.packed.empty() && layout.reserved.empty() &&
       layout.resigned.empty() && !HasFieldOf(layout, ColumnType::kFlags) &&
       !HasFieldOf(layout, ColumnType::kReference) &&
@@ -2219,6 +2535,9 @@ std::expected<ZoneColumnMigration, std::string> MigrateZoneColumns(
   auto decoded = DecodeNameCells(layout, *records, file);
   if (!decoded) return std::unexpected(decoded.error());
   migrated.decoded_texts = *decoded;
+  auto kinds_named = NameKindCells(layout, *records, file, migrated.kinds);
+  if (!kinds_named) return std::unexpected(kinds_named.error());
+  migrated.named_values += *kinds_named;
   if (migrated.split_columns != 0 || migrated.retired_columns != 0 ||
       migrated.named_values != 0 || migrated.resigned_values != 0 ||
       migrated.decoded_texts != 0) {

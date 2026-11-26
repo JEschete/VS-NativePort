@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "table": "enemy-kinds",
+  "description": "The enemy kinds zone templates name; each kind's number is the actor's sub_type.",
+  "key": ["id"],
+  "columns": [
+    {
+      "name": "id",
+      "type": "id",
+      "description": "the kind, named after its first named template (enemy-kind.zombie-3)"
+    },
+    {
+      "name": "display_name",
+      "type": "text",
+      "optional": true,
+      "description": "Informational plain-text label; not a key or gameplay value."
+    },
+    {
+      "name": "legacy_id",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 65535,
+      "description": "the number the game stores (the actor's sub_type), which the bestiary's kill bits and the orbiting boss AI (172 and 173) test"
+    }
+  ]
+}

@@ -321,8 +321,90 @@ std::string LegacyNameCell(const std::string& text) {
   return cell;
 }
 
+// The number version 12 wrote for each enemy kind id.
+std::map<std::string, std::string> LegacyKinds(const ModelRoot& root) {
+  const auto path = TableFile(root, ZoneTable::kKinds);
+  auto records = content::ParseCsv(ReadText(path), path.string());
+  if (!records) FAIL(records.error());
+  REQUIRE_FALSE(records->empty());
+  REQUIRE(records->front().fields ==
+          std::vector<std::string>{"id", "legacy_id"});
+  std::map<std::string, std::string> kinds;
+  for (std::size_t row = 1; row < records->size(); ++row) {
+    const auto& fields = records->at(row).fields;
+    REQUIRE(fields.size() == 2);
+    kinds.emplace(fields[0], fields[1]);
+  }
+  return kinds;
+}
+
+// Version 12 had no enemy-kinds table or schema.
+void RemoveKindsTable(const ModelRoot& root,
+                      content::ConversionManifest& manifest) {
+  for (const std::string& file :
+       {content::ZoneTablePath(ZoneTable::kKinds),
+        content::ZoneTableSchemaPath(ZoneTable::kKinds)}) {
+    REQUIRE(fs::remove(root.Root() / fs::path(file)));
+    for (auto& output : manifest.outputs) std::erase(output.files, file);
+  }
+}
+
+// Writes `column`'s header and cells as the converter versions before the
+// current one did.
+void LegacyColumn(const content::TableSpec& spec, std::size_t column,
+                  const std::vector<content::TableRow>& checked,
+                  const std::map<std::string, std::string>& kinds,
+                  std::vector<content::CsvRecord>& records) {
+  const auto& column_spec = spec.columns[column];
+  if (!column_spec.legacy_name.empty()) {
+    records.front().fields[column] = column_spec.legacy_name;
+  }
+  const auto type = column_spec.type;
+  const auto rewrite = [&](const auto& legacy_cell) {
+    for (std::size_t row = 1; row < records.size(); ++row) {
+      auto& cell = records[row].fields[column];
+      cell = legacy_cell(cell, checked[row - 1].values[column]);
+    }
+  };
+  if (column_spec.references == "actions") {
+    // Version 5 wrote action ids as numbers.
+    rewrite([](const std::string& cell, std::int64_t) {
+      return LegacyActionCell(cell);
+    });
+  } else if (column_spec.references == "enemy-kinds") {
+    // Version 12 wrote enemy kinds as numbers.
+    rewrite([&](const std::string& cell, std::int64_t) {
+      const auto found = kinds.find(cell);
+      CHECK(found != kinds.end());
+      return found == kinds.end() ? cell : found->second;
+    });
+  } else if (type == content::ColumnType::kText) {
+    // Version 11 wrote names as their 24 bytes in hexadecimal.
+    rewrite([](const std::string& cell, std::int64_t) {
+      return LegacyNameCell(cell);
+    });
+  } else if (column_spec.name == "agility_defense_bonus") {
+    // Version 7 wrote the limbs' signed agility bonus unsigned.
+    rewrite([](const std::string&, std::int64_t value) {
+      return std::to_string(static_cast<std::uint8_t>(value));
+    });
+  } else if (type == content::ColumnType::kEnum) {
+    rewrite([](const std::string&, std::int64_t value) {
+      return std::to_string(value);
+    });
+  } else if (type == content::ColumnType::kFlags) {
+    // Flags as the signed number version 3 wrote.
+    rewrite([](const std::string&, std::int64_t value) {
+      return std::to_string(
+          static_cast<std::int32_t>(static_cast<std::uint32_t>(value)));
+    });
+  }
+}
+
 void LegacyTableHeaders(const ModelRoot& root) {
+  const auto kinds = LegacyKinds(root);
   for (const auto table : content::kZoneTables) {
+    if (table == ZoneTable::kKinds) continue;
     const auto path = TableFile(root, table);
     const auto text = ReadText(path);
     const auto& spec = content::ZoneTableSpec(table);
@@ -330,48 +412,9 @@ void LegacyTableHeaders(const ModelRoot& root) {
     if (!checked) FAIL(checked.error());
     auto records = content::ParseCsv(text, path.string());
     if (!records) FAIL(records.error());
+    REQUIRE(records->size() == checked->size() + 1);
     for (std::size_t column = 0; column < spec.columns.size(); ++column) {
-      if (!spec.columns[column].legacy_name.empty()) {
-        records->front().fields[column] = spec.columns[column].legacy_name;
-      }
-      // Version 5 wrote action ids as numbers.
-      const auto type = spec.columns[column].type;
-      if (spec.columns[column].references == "actions") {
-        for (std::size_t row = 1; row < records->size(); ++row) {
-          auto& cell = records->at(row).fields[column];
-          cell = LegacyActionCell(cell);
-        }
-        continue;
-      }
-      // Version 11 wrote names as their 24 bytes in hexadecimal.
-      if (type == content::ColumnType::kText) {
-        for (std::size_t row = 1; row < records->size(); ++row) {
-          auto& cell = records->at(row).fields[column];
-          cell = LegacyNameCell(cell);
-        }
-        continue;
-      }
-      // Version 7 wrote the limbs' signed agility bonus unsigned.
-      if (spec.columns[column].name == "agility_defense_bonus") {
-        for (std::size_t row = 0; row < checked->size(); ++row) {
-          const std::int64_t value = checked->at(row).values[column];
-          records->at(row + 1).fields[column] =
-              std::to_string(static_cast<std::uint8_t>(value));
-        }
-        continue;
-      }
-      // Enum codes, and flags as the signed number version 3 wrote.
-      if (type != content::ColumnType::kEnum &&
-          type != content::ColumnType::kFlags) {
-        continue;
-      }
-      for (std::size_t row = 0; row < checked->size(); ++row) {
-        const std::int64_t value = checked->at(row).values[column];
-        records->at(row + 1).fields[column] = std::to_string(
-            type == content::ColumnType::kEnum
-                ? value
-                : static_cast<std::int32_t>(static_cast<std::uint32_t>(value)));
-      }
+      LegacyColumn(spec, column, *checked, kinds, *records);
     }
     std::vector<std::vector<std::string>> rows;
     for (const auto& record : *records) rows.push_back(record.fields);
@@ -382,6 +425,7 @@ void LegacyTableHeaders(const ModelRoot& root) {
   }
   auto manifest = content::LoadConversionManifest(root.Root());
   if (!manifest || !*manifest) FAIL("fixture conversion manifest missing");
+  RemoveKindsTable(root, **manifest);
   (**manifest).converters[std::string(content::kZndTableConverterName)] = 1;
   REQUIRE(
       extract::WriteConversionManifest(root.Root(), **manifest).has_value());
@@ -763,6 +807,11 @@ TEST_CASE("Old zone authoring upgrades without overwriting native edits",
   // Version 11's hexadecimal names became text.
   CHECK(enemies.contains(",Bb 1,"));
   CHECK(enemies.contains(",Cb 2,"));
+  // Version 12's sub_type numbers became the enemy-kinds table's ids.
+  CHECK_FALSE(enemies.contains("sub_type"));
+  CHECK(enemies.contains(",enemy-kind.bb-1-"));
+  CHECK(ReadText(TableFile(root, ZoneTable::kKinds))
+            .starts_with("id,legacy_id\nenemy-kind."));
   const auto repeat = extract::UpgradeZoneAuthoring(root.Root());
   if (!repeat) FAIL(repeat.error());
   CHECK(repeat->written == 0);
@@ -783,6 +832,20 @@ TEST_CASE("Failed zone authoring upgrades preserve files and converter version",
   CHECK(upgraded.error().contains("appears twice"));
   CHECK(OutputFiles(root) == before);
   CHECK(ReadText(root.Root() / "manifest.json") == manifest);
+}
+
+TEST_CASE("Zone authoring refuses numeric kinds beside an enemy-kinds table",
+          "[zone-authoring][content-tables][znd]") {
+  const ModelRoot root(ZoneSources(Encoded(SampleZone())));
+  RecordArchetype(root.Root());
+  REQUIRE(Convert(root).converted == 1);
+  const auto kinds = TableFile(root, ZoneTable::kKinds);
+  const auto text = ReadText(kinds);
+  LegacyTableHeaders(root);
+  WriteText(kinds, text);
+  CHECK(ErrorOf(extract::UpgradeZoneAuthoring(root.Root())) ==
+        "catalogs/enemies/enemy-kinds.csv exists, but the enemies table names "
+        "kinds by number (sub_type)");
 }
 
 TEST_CASE("Committed zone table schemas match the converter's",

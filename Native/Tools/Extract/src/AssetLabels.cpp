@@ -47,6 +47,7 @@ constexpr std::string_view kItemNames = "MENU/ITEMNAME.BIN";
 constexpr std::string_view kEnemies = "zone-enemies";
 constexpr std::string_view kLimbs = "zone-enemy-limbs";
 constexpr std::string_view kParts = "zone-enemy-parts";
+constexpr std::string_view kKinds = "enemy-kinds";
 // BATTLE.PRG's limb names: pointers into the module, which the game loads at
 // Core::kOverlayBase, to the target labels' texts. Each text starts with a
 // '#' the labels can skip (TargetingLive.cpp SetLabelText); name 0 is empty.
@@ -172,6 +173,8 @@ struct LabelIndex {
   std::vector<std::string> limb_names;
   std::map<std::string, std::string, std::less<>> enemies;
   std::map<std::string, std::string, std::less<>> enemy_archetypes;
+  // Each enemy kind's first template name, in table order.
+  std::map<std::string, std::string, std::less<>> kinds;
   std::map<std::string, std::vector<BoneLabels>, std::less<>> bodies;
   std::map<std::string, std::string, std::less<>> results;
   NameMap ids;
@@ -297,7 +300,10 @@ Check IndexEnemies(std::span<const Table> tables, LabelIndex& names) {
       const std::string& archetype = table.Cell(row, "archetype");
       names.enemies[id] = name->empty() ? id : *name;
       names.enemy_archetypes[id] = archetype;
-      if (!name->empty()) names.ids[archetype].insert(*name);
+      if (!name->empty()) {
+        names.kinds.try_emplace(table.Cell(row, "kind"), *name);
+        names.ids[archetype].insert(*name);
+      }
       if (!weapon->empty()) names.weapons[archetype].insert(*weapon);
     }
   }
@@ -495,6 +501,13 @@ std::string RowLabel(const Table& table, std::size_t row,
   if (kind == "zones") return "Zone " + table.Cell(row, "id");
   if (kind == "zone-rooms") return "Room " + table.Cell(row, "room");
   if (kind == "zone-textures") return "Texture " + table.Cell(row, "image");
+  if (kind == kKinds) {
+    const std::int64_t legacy = table.Number(row, "legacy_id");
+    const auto named = names.kinds.find(table.Cell(row, "id"));
+    return named == names.kinds.end()
+               ? std::format("Kind {}", legacy)
+               : std::format("{} (kind {})", named->second, legacy);
+  }
   if (kind.ends_with("-results")) {
     return names.Result(table.Cell(row, "id"));
   }

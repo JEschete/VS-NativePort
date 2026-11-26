@@ -46,6 +46,7 @@ Native\data\
     battle\ break-arts.csv abilities.csv spells.csv status-effects.csv
     enemies\ species.csv enemies.csv modelsets.csv loot.csv bestiary.csv      (ENEMY_DATA_SCHEME.md)
              zone-enemies.csv zone-enemy-limbs.csv zone-enemy-parts.csv   (ZND templates, §6.9)
+             enemy-kinds.csv                                               (ZND kinds, §6.9)
     world\  zones.csv rooms.csv doors.csv keys.csv chests.csv save-points.csv puzzle-challenges.csv
              zone-rooms.csv zone-textures.csv                              (ZND, §6.9)
     menu\   combination-<kind>-results.csv -pairs.csv -materials.csv   (SYD workshop recipes, §6.8)
