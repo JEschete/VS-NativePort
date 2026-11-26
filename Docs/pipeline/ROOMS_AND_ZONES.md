@@ -21,7 +21,7 @@ A `MAP\ZONE*.ZND` is what the room loader reads when the zone changes (`Content/
 - **Enemy section:** a count, that many ZUD (sector, read size) entries, then that many 0x464-byte templates (`vs_CharInitData`, `Actors/CharacterInit.hpp`).
 - **Texture section:** either 32 zero bytes, or four table sizes of which only the first is used, followed by that table: a count and that many TIMs, each after its byte size.
 
-`VS.Extract tables <datadir>` (and `extract`) converts every zone with converter `znd-tables` version 13
+`VS.Extract tables <datadir>` (and `extract`) converts every zone with converter `znd-tables` version 14
 (`Extract/ZndConversion.hpp`, `Content/ZoneTables.hpp`). `tables` runs after `models`, because the zones name the
 enemy archetypes (§6.2.5), and after the action catalog, because limbs name actions. It writes seven CSV tables, each with a committed schema that is written beside it and must
 match (a test checks this). Columns are described in the schemas; the rules they do not express are:
@@ -43,7 +43,7 @@ kind's first template name and number (`Zombie (kind 3)`).
 model's first bone whose low limb nibble is the limb plus 1, as the spawn picks it, indexing BATTLE.PRG's limb names.
 `labels` replaces the older `Enemy - limb N` captions it generated but keeps edited ones.
 
-**Named fields and domains (versions 2-13).** Enemy class, equipment materials (the shared material domain),
+**Named fields and domains (versions 2-14).** Enemy class, equipment materials (the shared material domain),
 physical types, class ratings and affinities use the named domains in the schemas, and the schemas describe every
 template column from its upstream consumer. Rules beyond the schemas:
 - Version 3 names the parts' `damage_type`, `cost_type` (the resource the base attack spends) and `material`, and
@@ -78,6 +78,12 @@ template column from its upstream consumer. Rules beyond the schemas:
   `-<number>` follows, so ids are distinct and stable across runs. Of the disc's 168 kinds, 54 have unnumbered
   ids. A kind is required; a new kind is a new row with an unused `legacy_id`. The bestiary still matches kinds by
   number range.
+- Version 14 names the parts' `gem_effects` by what `getAttackGemBuff`, `getDefenseGemBuff`, `func_8007FE5C` and
+  `func_800803A4` do with each code: weapon gems raise hit chance or damage, shield gems lower hit chance or damage
+  taken, and `evade-<status>` lowers the chance of hits that apply that status. An effect works only in the
+  equipment that reads it. No code reads 10, 15, 17, 20 or codes above 21, so they are refused. The disc's enemy
+  gems use `physical-hit-chance-up`, `spell-hit-chance-up`, `physical-evasion-up`, `spell-evasion-up` and four
+  `evade-<status>` effects.
 - DP splash columns identify their zero-based destination limb and percent units. A limb index is topology, not a
   universal head/arm/leg name; actual body-part names depend on the model.
 - Units (descriptions only, no version change): drop rates are chances in 255 (0 never, 255 always); range and reach

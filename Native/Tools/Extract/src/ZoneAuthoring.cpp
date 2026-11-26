@@ -204,8 +204,8 @@ std::expected<ZoneAuthoringReport, std::string> UpgradeZoneAuthoring(
       // columns, version 7 unsigned agility_defense_bonus cells, version 8
       // the zud_index column, version 9 the packed ai_settings, version 10
       // the class and affinity storage columns, version 11 hexadecimal
-      // names and version 12 numeric sub_type kinds without the enemy-kinds
-      // table; all upgrade in place.
+      // names, version 12 numeric sub_type kinds without the enemy-kinds
+      // table and version 13 numeric gem effects; all upgrade in place.
       if (found->second < 1 ||
           found->second > Content::kZndTableConverterVersion) {
         return std::unexpected(

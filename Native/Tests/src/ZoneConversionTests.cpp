@@ -812,6 +812,8 @@ TEST_CASE("Old zone authoring upgrades without overwriting native edits",
   CHECK(enemies.contains(",enemy-kind.bb-1-"));
   CHECK(ReadText(TableFile(root, ZoneTable::kKinds))
             .starts_with("id,legacy_id\nenemy-kind."));
+  // Version 13's gem effect numbers became names (the blade holds code 21).
+  CHECK(parts.contains(",evade-numbness,"));
   const auto repeat = extract::UpgradeZoneAuthoring(root.Root());
   if (!repeat) FAIL(repeat.error());
   CHECK(repeat->written == 0);

@@ -100,6 +100,28 @@ constexpr std::array<EnumValue, 4> kTileStepLimits{{
     {2, "three-tiles"},
     {3, "four-tiles"},
 }};
+// A part's gem effect, as AddPartFields' gem_effects describes; no code reads
+// 10, 15, 17, 20 or above 21, so they have no name.
+constexpr std::array<EnumValue, 18> kGemEffects{{
+    {0, "none"},
+    {1, "physical-hit-chance-up"},
+    {2, "spell-hit-chance-up"},
+    {3, "physical-damage-up"},
+    {4, "spell-damage-up"},
+    {5, "physical-evasion-up"},
+    {6, "spell-evasion-up"},
+    {7, "physical-damage-taken-down"},
+    {8, "spell-damage-taken-down"},
+    {9, "weapon-pp-up-shield-pp-down"},
+    {11, "evade-strength-down"},
+    {12, "evade-intelligence-down"},
+    {13, "evade-agility-down"},
+    {14, "evade-legs-impaired"},
+    {16, "evade-silence"},
+    {18, "evade-paralysis"},
+    {19, "evade-poison"},
+    {21, "evade-numbness"},
+}};
 
 // decomp: vs_CharInitData (src/BATTLE/BATTLE.PRG/charInit.h:24-51) and the
 // records it holds; see Actors/CharacterInit.hpp and Items/ItemRecords.hpp.
@@ -801,15 +823,20 @@ void AddPartFields(TableLayout& table) {
   // decomp: func_8007FE5C (src/BATTLE/BATTLE.PRG/146C.c:10469)
   // decomp: func_800803A4 (src/BATTLE/BATTLE.PRG/146C.c:10656)
   table.Add("gem_effects", 0x16, 1, false,
-            "a gem's effect (0 none). In a weapon: 1/2 +20 points of "
-            "physical/spell hit chance, 3/4 +5% physical/spell damage. In a "
-            "shield: 5/6 -20 points to physical/spell hits on the holder, 7/8 "
-            "-5% physical/spell damage taken, and 11, 12, 13, 14, 16, 18, 19 "
-            "and 21 -20 points to hits that apply strength-down, "
-            "intelligence-down, agility-down, legs-impaired, silence, "
-            "paralysis, poison and numbness. 9: a weapon gains 5% more PP a "
-            "physical hit, a shield 5% less. Hit-chance gems need the weapon "
-            "drawn");
+            "a gem's effect, which works only in the equipment that reads it. "
+            "In a weapon: physical-hit-chance-up and spell-hit-chance-up add "
+            "20 points of hit chance to the wielder's non-spell and spell "
+            "hits, physical-damage-up and spell-damage-up 5% to their damage. "
+            "In a shield: physical-evasion-up and spell-evasion-up take 20 "
+            "points from non-spell hits (except actions 40-53 and the items, "
+            "224-255) and spell hits on the holder, "
+            "physical-damage-taken-down and spell-damage-taken-down 5% from "
+            "their damage, and each evade-<status> 20 points from hits that "
+            "apply that status. weapon-pp-up-shield-pp-down: a weapon gains "
+            "5% more PP a non-spell hit, a shield 5% less. Hit-chance points "
+            "count on gem-modifier hits while the holder's weapon is drawn; "
+            "several gems with one effect count once",
+            kGemEffects);
   // The part's inventory slot, zero on the disc: an equipment index
   // (AddEnemyFields). Loot copies of parts skip it.
   // decomp: copyUiEquipmentStats (src/BATTLE/BATTLE.PRG/146C.c:1156)

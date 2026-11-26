@@ -169,6 +169,14 @@ content::ZoneTableReader TablesOnly(const Texts& texts) {
   };
 }
 
+// The sample tables with the first template's blade (the parts table's first
+// row) holding `cell` as its gem effect.
+Texts WithBladeGem(std::string_view cell) {
+  Texts texts = SampleTexts();
+  SetCell(texts, ZoneTable::kParts, 1, "gem_effects", cell);
+  return texts;
+}
+
 }  // namespace
 
 TEST_CASE("Zone template columns cover every bit once",
@@ -448,6 +456,36 @@ TEST_CASE("Named affinity edits reach the correct equipment byte",
   auto expected = SampleZones();
   expected[0].enemies[0].data[0x34 + 0x28 + 2] = std::byte{0xE7};
   CHECK(ReadBack(texts) == expected);
+}
+
+TEST_CASE("Gem effects are named, and numeric cells name the same byte",
+          "[zone-authoring][content-tables][znd]") {
+  // The sample blade (0x34) holds code 19.
+  CHECK(CellOf(SampleTexts(), ZoneTable::kParts, 1, "gem_effects") ==
+        "evade-poison");
+  auto expected = SampleZones();
+  expected[0].enemies[0].data[0x34 + 0x16] = std::byte{9};
+  auto named = WithBladeGem("weapon-pp-up-shield-pp-down");
+  CHECK(ReadBack(named) == expected);
+  // Version 13 wrote the code as a number, which authoring names.
+  auto numeric = WithBladeGem("9");
+  CHECK(ReadBack(numeric) == expected);
+  const auto normalized = content::NormalizeTableText(
+      content::ZoneTableSpec(ZoneTable::kParts),
+      TextOf(numeric, ZoneTable::kParts), "parts.csv");
+  if (!normalized) FAIL(normalized.error());
+  CHECK(normalized->named_values == 1);
+  CHECK(normalized->text == TextOf(named, ZoneTable::kParts));
+}
+
+TEST_CASE("Gem effect codes no code reads are refused",
+          "[zone-authoring][content-tables][znd]") {
+  for (const std::string_view unread : {"10", "15", "17", "20", "22"}) {
+    const auto refused = WithBladeGem(unread);
+    const auto read = content::ReadZoneTables(ReaderOf(refused));
+    REQUIRE_FALSE(read.has_value());
+    CHECK(read.error().contains("column 'gem_effects'"));
+  }
 }
 
 TEST_CASE(
