@@ -291,13 +291,27 @@ constexpr ColumnSpec Renamed(ColumnSpec column,
 }
 
 // Volume extents are 32 world units a step (a room tile is 128); see the zone
-// part ranges for each axis. range_x 255 takes the attacker's weapon extents
-// and angle but keeps the action's shape.
+// part ranges for each axis. For a chosen single target, range_x 255 takes
+// the attacker's weapon extents and angle in place of range_x, range_y,
+// range_z and range_angle but keeps the action's shape; the area collector's
+// test for it never matches, so area actions keep their own values.
 // decomp: func_80071F68 (src/BATTLE/BATTLE.PRG/146C.c:3898)
+// decomp: func_80072734 (src/BATTLE/BATTLE.PRG/146C.c:4054)
+constexpr std::string_view kRangeXText{
+    "The targeting volume's extent, 32 world units a step. 255, on an action "
+    "whose category has a chosen single target (as the base attacks do), "
+    "takes the attacker's weapon extents (blade range plus reach) and angle "
+    "in place of range_x, range_y, range_z and range_angle, keeping "
+    "range_shape; actions with an area extent always use the values "
+    "written.",
+};
 constexpr std::string_view kRangeText{
-    "The targeting volume's extent, 32 world units a step; range_x 255, on "
-    "the base attacks, takes the attacker's weapon extents (blade range plus "
-    "reach) and angle instead, keeping range_shape.",
+    "The targeting volume's extent, 32 world units a step; replaced by the "
+    "weapon's when range_x 255 takes the weapon extents.",
+};
+constexpr std::string_view kRangeAngleText{
+    "The targeting volume's pitch, in 11.25-degree steps (1/32 turn); "
+    "replaced by the weapon's when range_x 255 takes the weapon extents.",
 };
 constexpr std::string_view kAreaText{
     "The area of effect's extent around its target, 32 world units a step.",
@@ -365,24 +379,24 @@ constexpr std::array kActionColumns{
         .maximum = kLastEffectPackageCode,
         .references = {},
         .description =
-            "The effect package a menu-action action plays when it is "
-            "presented, by asset id: asset.effect.e060.p is EFFECT/E060.P, "
-            "whose textures are image.effect.e060_*. none plays no effect. "
-            "Actions without menu-action never read it: a trap panel plays "
+            "The effect package an action whose behavior has menu-action "
+            "plays when it is presented, by asset id: asset.effect.e060.p is "
+            "EFFECT/E060.P, whose textures are image.effect.e060_*. none "
+            "plays no effect. Other actions never read it: a trap panel plays "
             "the package numbered like its action (action 6 plays "
             "asset.effect.e006.p) whatever this says. Actions may share a "
-            "package, and the presenter plays asset.effect.e036.p in place "
-            "of asset.effect.e039.p when the target is a treasure chest "
+            "package. An action set to asset.effect.e039.p plays "
+            "asset.effect.e036.p instead when its target is a treasure chest "
             "17th or later in its room's chest list.",
         .enumeration = kEffectPackages,
         .legacy_name = "effect_id",
     },
-    Integer("range_x", kByteMax, kRangeText),
+    Integer("range_x", kByteMax, kRangeXText),
     Integer("range_y", kByteMax, kRangeText),
     Integer("range_z", kByteMax, kRangeText),
     Enumeration("range_shape", kVolumeShapes,
                 "The targeting volume's shape; none means no volume."),
-    Integer("range_angle", kFiveBitMax, kAngleText),
+    Integer("range_angle", kFiveBitMax, kRangeAngleText),
     Integer("area_range_x", kByteMax, kAreaText),
     Integer("area_range_y", kByteMax, kAreaText),
     Integer("area_range_z", kByteMax, kAreaText),
