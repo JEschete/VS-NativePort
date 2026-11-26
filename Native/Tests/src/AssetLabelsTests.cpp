@@ -1,9 +1,11 @@
 #include <algorithm>
 #include <array>
+#include <climits>
 #include <cstddef>
 #include <cstdint>
 #include <expected>
 #include <filesystem>
+#include <format>
 #include <span>
 #include <string>
 #include <string_view>
@@ -116,18 +118,19 @@ std::vector<content::ZoneRecord> ReadZones(const fs::path& root) {
       }));
 }
 
-void WriteModels(const fs::path& root) {
+void WriteModels(const fs::path& root, const Json& bones = nullptr) {
   const std::string hash(64, 'a');
   const Json archetype{{"schema", content::kActorArchetypeSchema},
                        {"schema_version", 1},
                        {"source", "MAP/Z009U00.ZUD"},
                        {"source_sha256", hash},
                        {"body", {{"model", "model.obj.4b"}}}};
-  const Json model{
+  Json model{
       {"asset",
        {{"version", "2.0"},
         {"extras",
          {{"vs", {{"id", "model.obj.4b"}, {"source", "OBJ/4B.SHP"}}}}}}}};
+  if (!bones.is_null()) model["asset"]["extras"]["vs"]["bones"] = bones;
   Write(root, kArchetypePath, content::FormatJsonText(archetype) + "\n");
   Write(root, kModelPath, content::FormatJsonText(model) + "\n");
   content::ConversionManifest manifest;
@@ -197,6 +200,31 @@ extract::SourceFile RecipeNames(bool collision = false) {
   std::ranges::copy(std::as_bytes(std::span(kUntitled)),
                     out.subspan(3 * kWidth).begin());
   return {.path = "MENU/ITEMNAME.BIN", .bytes = std::move(bytes)};
+}
+
+// A BATTLE.PRG whose limb name table (vs_battle_limbNames, file offset
+// 0x81E20) points name N at "#PART<N>" and name 0 at an empty text.
+extract::SourceFile LimbNameProgram() {
+  constexpr std::size_t kTableAt = 0x81E20;
+  constexpr std::uint32_t kLoadAddress = 0x80068800;
+  constexpr std::size_t kNames = 20;
+  constexpr std::size_t kTextsAt = 0x100;
+  constexpr std::size_t kTextStride = 16;
+  std::vector<std::byte> bytes(kTableAt + (kNames * sizeof(std::uint32_t)));
+  for (std::size_t name = 0; name < kNames; ++name) {
+    const std::size_t at = kTextsAt + (name * kTextStride);
+    if (name != 0) {
+      const std::string text = std::format("#PART{}", name);
+      std::ranges::copy(std::as_bytes(std::span(text)),
+                        std::span(bytes).subspan(at).begin());
+    }
+    const auto address = static_cast<std::uint32_t>(kLoadAddress + at);
+    for (std::size_t byte = 0; byte < sizeof address; ++byte) {
+      bytes.at(kTableAt + (name * sizeof address) + byte) =
+          static_cast<std::byte>(address >> (CHAR_BIT * byte));
+    }
+  }
+  return {.path = "BATTLE/BATTLE.PRG", .bytes = std::move(bytes)};
 }
 
 content::WorkshopRecipeTable SmallRecipe(content::WorkshopKind kind) {
@@ -461,6 +489,37 @@ TEST_CASE("Material rule captions name categories and replace retired ones",
             .at(1)
             .fields.at(1)
             .empty());
+}
+
+TEST_CASE("Limb captions name the body part the target labels show",
+          "[asset-labels]") {
+  ModelRoot root({LimbNameProgram()});
+  WriteZone(root.Root(), Zone());
+  // Limb 0's name comes from the first bone whose low limb nibble is 1, not
+  // from a high-nibble match or a later bone.
+  WriteModels(root.Root(), Json::array({Json{{"tag", 1}, {"limb_ids", 0x10}},
+                                        Json{{"tag", 6}, {"limb_ids", 0x01}},
+                                        Json{{"tag", 1}, {"limb_ids", 0x01}}}));
+  const std::string path(content::ZoneTablePath(content::ZoneTable::kLimbs));
+  const auto caption = [&root, &path] {
+    return Required(content::ParseCsv(Read(root.Root(), path), path))
+        .at(1)
+        .fields.at(1);
+  };
+  constexpr std::string_view kCaption = "Guildenstern - limb 0 (PART6)";
+  REQUIRE(extract::LabelNativeAssets(root.Root()));
+  CHECK(caption() == kCaption);
+  EditCell(root.Root(), "display_name", "Guildenstern - limb 0", path);
+  CHECK(Required(extract::LabelNativeAssets(root.Root())).written == 1);
+  CHECK(caption() == kCaption);
+  EditCell(root.Root(), "display_name", "Owner's limb", path);
+  CHECK(Required(extract::LabelNativeAssets(root.Root())).written == 0);
+  CHECK(caption() == "Owner's limb");
+
+  ModelRoot truncated(
+      {{.path = "BATTLE/BATTLE.PRG", .bytes = std::vector<std::byte>(16)}});
+  WriteZone(truncated.Root(), Zone());
+  CHECK_FALSE(extract::LabelNativeAssets(truncated.Root()));
 }
 
 TEST_CASE("Shared model labels retain distinct enemy aliases",

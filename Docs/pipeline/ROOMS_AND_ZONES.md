@@ -37,6 +37,9 @@ match (a test checks this). Columns are described in the schemas; the rules they
 
 All six tables receive early informational `display_name` columns through §1.2. `zone-enemies.csv` shows the
 decoded enemy name while its `name` and `weapon_name` hex fields continue to preserve every source byte.
+`zone-enemy-limbs.csv` adds the body part the target labels show (`Wyvern - limb 1 (NECK)`): the tag of the body
+model's first bone whose low limb nibble is the limb plus 1, as the spawn picks it, indexing BATTLE.PRG's limb names.
+`labels` replaces the older `Enemy - limb N` captions it generated but keeps edited ones.
 
 **Named fields and domains (versions 2-11).** Enemy class, equipment materials (the shared material domain),
 physical types, class ratings and affinities use the named domains in the schemas, and the schemas describe every

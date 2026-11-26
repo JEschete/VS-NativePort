@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <array>
+#include <climits>
 #include <cstddef>
 #include <cstdint>
 #include <expected>
@@ -28,7 +29,9 @@
 #include "Content/JsonText.hpp"
 #include "Content/WorkshopRecipes.hpp"
 #include "Content/ZoneTables.hpp"
+#include "Core/Arena.hpp"
 #include "Extract/ConverterBatch.hpp"
+#include "Extract/ShpModelConversion.hpp"
 #include "Platform/Paths.hpp"
 #include "Render/EncodedText.hpp"
 
@@ -42,9 +45,19 @@ using NameMap = std::map<std::string, Names, std::less<>>;
 constexpr std::size_t kNameBytes = 24;
 constexpr std::string_view kItemNames = "MENU/ITEMNAME.BIN";
 constexpr std::string_view kEnemies = "zone-enemies";
+constexpr std::string_view kLimbs = "zone-enemy-limbs";
 constexpr std::string_view kParts = "zone-enemy-parts";
 constexpr unsigned kHexAlphabetOffset = 10;
 constexpr unsigned kHexBits = 4;
+// BATTLE.PRG's limb names: pointers into the module, which the game loads at
+// Core::kOverlayBase, to the target labels' texts. Each text starts with a
+// '#' the labels can skip (TargetingLive.cpp SetLabelText); name 0 is empty.
+// decomp: vs_battle_limbNames (src/BATTLE/BATTLE.PRG/battleUi.h:269)
+constexpr std::size_t kLimbNamesAt = 0x81E20;
+constexpr std::size_t kLimbNameCount = 20;
+constexpr std::size_t kPointerBytes = 4;
+constexpr char kLimbNameMarker = '#';
+constexpr std::int64_t kLowLimbMask = 0x0F;
 
 std::string Join(const Names& names) {
   std::string joined;
@@ -155,10 +168,18 @@ std::expected<std::string, std::string> NameCell(const Table& table,
   return name;
 }
 
+// The labels a body model's bone carries (ShpBone tag and limb_ids).
+struct BoneLabels {
+  std::int64_t tag = 0;
+  std::int64_t limb_ids = 0;
+};
+
 struct LabelIndex {
   std::vector<std::string> items;
+  std::vector<std::string> limb_names;
   std::map<std::string, std::string, std::less<>> enemies;
   std::map<std::string, std::string, std::less<>> enemy_archetypes;
+  std::map<std::string, std::vector<BoneLabels>, std::less<>> bodies;
   std::map<std::string, std::string, std::less<>> results;
   NameMap ids;
   NameMap weapons;
@@ -177,6 +198,25 @@ struct LabelIndex {
     const auto found = enemies.find(id);
     return found == enemies.end() ? std::string(id) : found->second;
   }
+  // The name the target labels show for `enemy`'s limb, as the spawn picks
+  // it: the tag of the first body bone whose low limb nibble is the limb
+  // plus 1. Empty when the body or the names are unknown.
+  // decomp: func_80076784 (src/BATTLE/BATTLE.PRG/146C.c:5941)
+  std::string LimbName(std::string_view enemy, std::int64_t limb) const {
+    const auto archetype = enemy_archetypes.find(enemy);
+    if (archetype == enemy_archetypes.end()) return {};
+    const auto body = bodies.find(archetype->second);
+    if (body == bodies.end()) return {};
+    const auto bone =
+        std::ranges::find(body->second, limb + 1, [](const BoneLabels& labels) {
+          return labels.limb_ids & kLowLimbMask;
+        });
+    if (bone == body->second.end() || bone->tag < 0 ||
+        static_cast<std::uint64_t>(bone->tag) >= limb_names.size()) {
+      return {};
+    }
+    return limb_names.at(static_cast<std::size_t>(bone->tag));
+  }
   std::string Result(std::string_view id) const {
     const auto found = results.find(id);
     return found == results.end() ? std::string(id) : found->second;
@@ -193,6 +233,62 @@ Check LoadItemNames(const fs::path& root, const RunStart& run,
   auto loaded = ReadItemDisplayNames(root);
   if (!loaded) return std::unexpected(loaded.error());
   names.items = std::move(*loaded);
+  return {};
+}
+
+std::uint32_t ReadPointer(std::span<const std::byte> data, std::size_t at) {
+  std::uint32_t word = 0;
+  for (std::size_t index = 0; index < kPointerBytes; ++index) {
+    word |= std::to_integer<std::uint32_t>(data[at + index])
+            << (CHAR_BIT * index);
+  }
+  return word;
+}
+
+Check LoadLimbNames(const fs::path& root, const RunStart& run,
+                    LabelIndex& names) {
+  if (std::ranges::find(run.entries, kBattleProgramPath,
+                        &Content::DataStore::Entry::path) ==
+      run.entries.end()) {
+    return {};
+  }
+  auto source = ReadSource(root, kBattleProgramPath);
+  if (!source) return std::unexpected(source.error());
+  const std::span<const std::byte> program = source->bytes;
+  if (program.size() < kLimbNamesAt + (kLimbNameCount * kPointerBytes)) {
+    return std::unexpected(
+        std::format("{}: no limb name table", kBattleProgramPath));
+  }
+  std::vector<std::string> loaded;
+  for (std::size_t index = 0; index < kLimbNameCount; ++index) {
+    const std::uint32_t address =
+        ReadPointer(program, kLimbNamesAt + (index * kPointerBytes));
+    const std::uint64_t at = std::uint64_t{address} - Core::kOverlayBase;
+    if (address < Core::kOverlayBase || at >= program.size()) {
+      return std::unexpected(
+          std::format("{}: limb name {} at {:08X} is outside "
+                      "the module",
+                      kBattleProgramPath, index, address));
+    }
+    const auto text = program.subspan(static_cast<std::size_t>(at));
+    const auto end = std::ranges::find(text, std::byte{});
+    std::string name;
+    for (auto byte = text.begin(); byte != end; ++byte) {
+      const auto code = std::to_integer<unsigned char>(*byte);
+      if (code < ' ' || code > '~') {
+        return std::unexpected(std::format("{}: limb name {} is not plain text",
+                                           kBattleProgramPath, index));
+      }
+      name += static_cast<char>(code);
+    }
+    if (end == text.end()) {
+      return std::unexpected(std::format("{}: limb name {} is unterminated",
+                                         kBattleProgramPath, index));
+    }
+    if (name.starts_with(kLimbNameMarker)) name.erase(0, 1);
+    loaded.push_back(std::move(name));
+  }
+  names.limb_names = std::move(loaded);
   return {};
 }
 
@@ -251,6 +347,12 @@ std::string StringMember(const Json& object, std::string_view key) {
                                                      : std::string{};
 }
 
+std::string ModelFile(const Json& part, std::string_view file) {
+  const std::string own = StringMember(part, "file");
+  if (own.empty()) return {};
+  return std::string(file.substr(0, file.rfind('/') + 1)) + own;
+}
+
 void BindNames(const Json& document, std::string_view member,
                const Names& labels, std::string_view file, LabelIndex& names) {
   const auto part = document.find(std::string(member));
@@ -259,17 +361,87 @@ void BindNames(const Json& document, std::string_view member,
   if (!model.empty()) {
     names.ids[model].insert(labels.begin(), labels.end());
   }
-  const std::string own = StringMember(*part, "file");
+  const std::string own = ModelFile(*part, file);
   if (!own.empty()) {
-    const std::string relative =
-        std::string(file.substr(0, file.rfind('/') + 1)) + own;
-    names.files[relative].insert(labels.begin(), labels.end());
+    names.files[own].insert(labels.begin(), labels.end());
   }
+}
+
+// The bone labels of the glTF model `path`, or none when it has no bones.
+std::expected<std::vector<BoneLabels>, std::string> ModelBones(
+    const fs::path& root, const std::string& path) {
+  auto present = Present(root / Platform::Utf8Path(path));
+  if (!present) return std::unexpected(present.error());
+  if (!*present) return std::vector<BoneLabels>{};
+  auto json = ReadJson(root, path);
+  if (!json) return std::unexpected(json.error());
+  const Json* bones = &*json;
+  for (const std::string_view key : {"asset", "extras", "vs", "bones"}) {
+    if (!bones->is_object()) return std::vector<BoneLabels>{};
+    const auto found = bones->find(std::string(key));
+    if (found == bones->end()) return std::vector<BoneLabels>{};
+    bones = &*found;
+  }
+  std::vector<BoneLabels> labels;
+  if (!bones->is_array()) return labels;
+  for (const Json& bone : *bones) {
+    const auto integer =
+        [&bone](std::string_view key) -> std::optional<std::int64_t> {
+      if (!bone.is_object()) return std::nullopt;
+      const auto found = bone.find(std::string(key));
+      if (found == bone.end() || !found->is_number_integer()) {
+        return std::nullopt;
+      }
+      return found->get<std::int64_t>();
+    };
+    const auto tag = integer("tag");
+    const auto limb_ids = integer("limb_ids");
+    if (!tag || !limb_ids) {
+      return std::unexpected(
+          std::format("{}: a bone's tag or limb_ids is not an integer", path));
+    }
+    labels.push_back({.tag = *tag, .limb_ids = *limb_ids});
+  }
+  return labels;
+}
+
+using ModelFiles = std::map<std::string, std::string, std::less<>>;
+using BoneCache = std::map<std::string, std::vector<BoneLabels>, std::less<>>;
+
+// Indexes the bones of `archetype`'s body model, which the archetype names
+// by model id or by its own file beside `file`.
+Check IndexBody(const fs::path& root, const Json& document,
+                std::string_view file, std::string_view archetype,
+                const ModelFiles& models, BoneCache& cache, LabelIndex& names) {
+  const auto body = document.find("body");
+  if (body == document.end() || !body->is_object()) return {};
+  std::string path = ModelFile(*body, file);
+  if (path.empty()) {
+    const auto model = models.find(StringMember(*body, "model"));
+    if (model == models.end()) return {};
+    path = model->second;
+  }
+  auto cached = cache.find(path);
+  if (cached == cache.end()) {
+    auto bones = ModelBones(root, path);
+    if (!bones) return std::unexpected(bones.error());
+    cached = cache.emplace(path, std::move(*bones)).first;
+  }
+  names.bodies[std::string(archetype)] = cached->second;
+  return {};
 }
 
 Check IndexArchetypes(const fs::path& root,
                       const Content::ConversionManifest& manifest,
                       LabelIndex& names) {
+  ModelFiles models;
+  for (const auto& output : manifest.outputs) {
+    const auto gltf = std::ranges::find_if(
+        output.files,
+        [](const std::string& file) { return file.ends_with(".gltf"); });
+    if (gltf != output.files.end()) models.try_emplace(output.id, *gltf);
+  }
+  BoneCache cache;
   for (const auto& output : manifest.outputs) {
     if (output.converter != Content::kZudArchetypeConverterName) continue;
     for (const std::string& file : output.files) {
@@ -282,6 +454,11 @@ Check IndexArchetypes(const fs::path& root,
       BindNames(*json, "body", names.ids[output.id], file, names);
       BindNames(*json, "weapon", names.weapons[output.id], file, names);
       BindNames(*json, "shield", names.shields[output.id], file, names);
+      if (auto body =
+              IndexBody(root, *json, file, output.id, models, cache, names);
+          !body) {
+        return body;
+      }
     }
   }
   for (const auto& output : manifest.outputs) {
@@ -308,9 +485,14 @@ std::string RowLabel(const Table& table, std::size_t row,
                      const LabelIndex& names) {
   const std::string_view kind = table.spec->name;
   if (kind == kEnemies) return names.Enemy(table.Cell(row, "id"));
-  if (kind == "zone-enemy-limbs") {
-    return std::format("{} - limb {}", names.Enemy(table.Cell(row, "enemy")),
-                       table.Number(row, "limb"));
+  if (kind == kLimbs) {
+    const std::string& enemy = table.Cell(row, "enemy");
+    const std::int64_t limb = table.Number(row, "limb");
+    std::string label = std::format("{} - limb {}", names.Enemy(enemy), limb);
+    if (const std::string part = names.LimbName(enemy, limb); !part.empty()) {
+      label += std::format(" ({})", part);
+    }
+    return label;
   }
   if (kind == kParts) {
     return std::format("{} - {}: {}", names.Enemy(table.Cell(row, "enemy")),
@@ -340,9 +522,15 @@ std::string RowLabel(const Table& table, std::size_t row,
 }
 
 // The caption earlier versions generated for a row whose RowLabel has since
-// changed (material rules once showed category numbers), or empty.
-std::string RetiredRowLabel(const Table& table, std::size_t row) {
+// changed (material rules once showed category numbers, limbs no body part),
+// or empty.
+std::string RetiredRowLabel(const Table& table, std::size_t row,
+                            const LabelIndex& names) {
   const std::string_view kind = table.spec->name;
+  if (kind == kLimbs) {
+    return std::format("{} - limb {}", names.Enemy(table.Cell(row, "enemy")),
+                       table.Number(row, "limb"));
+  }
   if (!kind.ends_with("-materials") || kind == "combination-shield-materials") {
     return {};
   }
@@ -388,7 +576,7 @@ Check LabelTable(const fs::path& root, const Table& table,
         labeled && !refresh ? cells.at(label_at) : RowLabel(table, row, names);
     // A generated caption of an older version is not an owner edit.
     if (labeled && !refresh) {
-      const std::string retired = RetiredRowLabel(table, row);
+      const std::string retired = RetiredRowLabel(table, row, names);
       if (!retired.empty() && label == retired) {
         label = RowLabel(table, row, names);
       }
@@ -710,6 +898,9 @@ std::expected<AssetLabelReport, std::string> LabelNativeAssets(
   LabelIndex names;
   if (auto items = LoadItemNames(root, run, names); !items) {
     return std::unexpected(items.error());
+  }
+  if (auto limbs = LoadLimbNames(root, run, names); !limbs) {
+    return std::unexpected(limbs.error());
   }
   if (auto enemies = IndexEnemies(*tables, names); !enemies) {
     return std::unexpected(enemies.error());
