@@ -172,8 +172,9 @@ Rules beyond the schemas:
   but the factor is a name. An action with no second hit has no second row; an all-zero row is refused. `effect`
   names the battle effect table slot the hit dispatches: `apply-*` and `cure-*` add or remove that status,
   `recover-hp-on-*` heal only when the answered hit matches, the `mark-success-N` slots behave alike, and the
-  `unused-N` slots, empty in the original, are refused at run time. `VS.Extract authoring` spells numeric codes in an
-  existing tree by name and refreshes both schemas.
+  `unused-N` slots, empty in the original, are refused at run time. What every value does, with the formulas, is in
+  [§4.7.1](ACTION_HITS.md#471-action-hit-values-520). `VS.Extract authoring` spells numeric codes in an existing tree
+  by name and refreshes both schemas.
 - `catalogs\battle\import\actions.json` holds the bits the catalog does not keep: the four unread AI bits, the
   reserved flag nibble, the reserved word and the bytes after each name's terminator. The importer refuses a source
   whose hit codes have no name (effects 70-127, prerequisite codes 40-63, stat calculators 27-63).

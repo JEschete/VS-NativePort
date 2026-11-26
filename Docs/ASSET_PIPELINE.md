@@ -46,6 +46,7 @@ must still be usable; gameplay policy and file-format limits are different.
 | 4.5 | [GAMEPLAY_CATALOGS](pipeline/GAMEPLAY_CATALOGS.md#45-native-status-rules-and-shared-timing-499) | Native status rules and shared timing (#499) |
 | 4.6 | [GAMEPLAY_CATALOGS](pipeline/GAMEPLAY_CATALOGS.md#46-native-action-categories-499) | Native action categories (#499) |
 | 4.7 | [GAMEPLAY_CATALOGS](pipeline/GAMEPLAY_CATALOGS.md#47-native-actions-499) | Native actions (#499) |
+| 4.7.1 | [ACTION_HITS](pipeline/ACTION_HITS.md#471-action-hit-values-520) | Action hit values (#520) |
 | 5 | [TEXT](pipeline/TEXT.md#5-tier-2-text-and-fonts) | Tier 2: text and fonts |
 | 5.1 | [TEXT](pipeline/TEXT.md#51-native-file-picker-prompt-adoption-54500) | Native file-picker prompt adoption (#54/#500) |
 | 5.2 | [TEXT](pipeline/TEXT.md#52-shared-catalog-ownership-and-encyclopedia-text) | Shared catalog ownership and encyclopedia text |

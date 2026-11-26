@@ -382,6 +382,13 @@ enum ActionColumn : std::size_t {
 };
 static_assert(kActionColumns.size() == kActionColumnCount);
 
+// The hit columns describe what the battle code does with each value; the
+// formulas are in Docs/pipeline/ACTION_HITS.md (ASSET_PIPELINE §4.7.1).
+// decomp: canPerformAttack (src/BATTLE/BATTLE.PRG/146C.c:10458)
+// decomp: doesAttackHit (src/BATTLE/BATTLE.PRG/146C.c:10059)
+// decomp: getPhysicalAttackDamage (src/BATTLE/BATTLE.PRG/146C.c:11202)
+// decomp: damageFromTrapPanel (src/BATTLE/BATTLE.PRG/146C.c:11655)
+// decomp: itemRecovery (src/BATTLE/BATTLE.PRG/146C.c:12032)
 constexpr std::array kHitColumns{
     ColumnSpec{
         .name = "action",
@@ -392,23 +399,101 @@ constexpr std::array kHitColumns{
     Enumeration("slot", kSlots,
                 "Which of the action's two hits. An absent hit is an all-zero "
                 "word, so only hits that do something have a row."),
-    Enumeration("effect", kEffects,
-                "What the hit does: the battle effect table slot it "
-                "dispatches."),
-    Enumeration("prerequisite", kPrerequisites,
-                "What the target must satisfy for the hit to apply."),
-    Enumeration("hit_function", kHitFunctions,
-                "How the chance to hit is rolled; none skips the roll."),
-    Enumeration("stat_calculator", kStatCalculators,
-                "How the hit's amount is worked out; none skips it."),
+    Enumeration(
+        "effect", kEffects,
+        "What the hit does to each target it lands on, using the stat "
+        "calculator's amount where it needs one. apply-X and cure-X add or "
+        "remove status X; cure-paralysis-poison-and-numbness removes all three "
+        "and dispel removes every stat, element, quicken, silence, "
+        "regeneration and magic-ward status. damage takes the amount from HP "
+        "and wears the equipment. drain-mp takes the amount from MP, at most "
+        "what the target has; drain-weapon-pp empties the target's weapon PP "
+        "and drain-shield-pp its shield PP (only when the answered hit did "
+        "damage). recover-hp, recover-mp, recover-weapon-pp and "
+        "recover-weapon-dp add the amount; reduce-risk lowers risk by it. "
+        "recover-hp-on-X heals the amount only when the hit being answered "
+        "matches X: a spell, a non-spell, that affinity or any damage. "
+        "random-X-increase and -decrease change that stat by 1-4. "
+        "instant-defeat clears the statuses the instant-defeat rule lists and "
+        "takes all remaining HP. armor-wear-from-damage wears the hit limb's "
+        "armor DP by twice the HP damage already queued. mark-success-0 to "
+        "-2 mark the user's action as succeeded for the field abilities that "
+        "check it. set-script-flag-32 and -64 set that script flag to 1 when "
+        "executed. unused-0 to -3 are refused."),
+    Enumeration(
+        "prerequisite", kPrerequisites,
+        "Which targets the hit applies to, checked per target before the "
+        "roll; a target that fails is skipped, and on the first hit it also "
+        "counts as a miss. never-0 disables the hit. never-1, never-2 and "
+        "never-3 make it direct: it applies once to the first target with no "
+        "check and no roll, so hit_function is unread. always-2 applies it to "
+        "the user instead. always-0, always-1 and unused-0 to -2 accept every "
+        "target, except that always-0 on the second hit skips a target whose "
+        "first hit was cancelled. undead and not-undead accept only that "
+        "enemy class. can-apply-X accepts a target that can receive status X: "
+        "the rule exists, the target is not immune and no blocking status is "
+        "active. Equipment up and down also need armor, a shield or a blade; "
+        "the attack-ups a blade; the defense-ups armor or a shield. "
+        "can-apply-banish checks the analyze rule; can-apply-exorcise and "
+        "can-apply-drain check the instant-defeat rule and accept only undead "
+        "or only living targets."),
+    Enumeration(
+        "hit_function", kHitFunctions,
+        "How the percent chance to hit is worked out when the hit rolls. "
+        "follows-previous-hit: 100 if the action's last roll landed (for one "
+        "target, its first hit), else a miss. gem-modifier: 100, +20 with the "
+        "matching accuracy gem on the user's drawn weapon, -20 for each "
+        "matching protective gem on the target's drawn shield. "
+        "agility-difference: 100 + the user's agility - the target's agility "
+        "and limb defense, each scaled by (100 - its risk)%. "
+        "intelligence-difference: the same with intelligence and no 100, the "
+        "target's side also scaled by its HP fraction. agility-difference-2: "
+        "130 - the action's cost in place of 100. These three vary by up to "
+        "5 either way when executed and add the gem bonuses. risk: (user's "
+        "risk + 150) x 100 / 256. chain-evasion: (255 - the target limb's "
+        "chain_evasion) x 100 / 255. none: refused if rolled. A spell starts "
+        "at 0 against a spell-immune target. The chance doubles against a "
+        "left-arm-impaired target and is capped at 100; the player's rolls "
+        "then get a hidden +10."),
+    Enumeration(
+        "stat_calculator", kStatCalculators,
+        "How the amount the effect uses is worked out. "
+        "physical-damage-with-status-modifiers and -without- use strength "
+        "(with halves it while the user is right-arm-impaired), magic-damage "
+        "intelligence and hp-healed intelligence for healing: the user's stat "
+        "and gear rating scaled by stat_factor, less the target's stat, armor "
+        "and shield defense, with random variation. item-recovery: 5 x "
+        "stat_factor, varying by up to 5. recoverable-hp and -mp: the "
+        "target's missing HP or MP. risk: the target's risk. weapon-pp: the "
+        "user's weapon PP. equipped-shield-dp, despite its name: the user's "
+        "shield PP. hp-lost-factor and mp-lost-factor: the user's missing HP "
+        "or MP x stat_factor / 10. current-hp-factor: the target's HP x "
+        "stat_factor / 100. previous-hit-factor-0 to -2: the HP and MP damage "
+        "the chained attack dealt its first target x stat_factor / 10. "
+        "magic-, physical- and damage-received factors: the answered hit's "
+        "damage x stat_factor / 10 when it did damage and was a spell, not a "
+        "spell, or either. spell-cost-factor: "
+        "the answered spell's MP cost x stat_factor / 10. last-value: the "
+        "previous calculation's amount; last-value-factor: it x stat_factor "
+        "/ 10. trap-panel-damage and heal-panel-hp-healed: the target's max "
+        "HP / 10 x stat_factor + 10 per trap level, less its defense. "
+        "weapon-pp and the hp-lost, mp-lost, current-hp and previous-hit "
+        "calculators add 1 for each earlier ability in a chain. none: no "
+        "amount, for status effects."),
     Integer("stat_factor", kFiveBitMax,
-            "The factor the stat calculator scales its amount by."),
+            "The stat calculator's multiplier: +10% attack per point for the "
+            "damage and healing calculators, 5 HP or MP per point for "
+            "item-recovery, tenths for the *-factor calculators (hundredths "
+            "for current-hp-factor) and the max-HP multiplier for the trap "
+            "panels. The other calculators ignore it."),
     Enumeration("damage_type", kDamageTypes,
                 "The hit's damage type; none lets a physical hit use the "
-                "equipped weapon's."),
+                "user's weapon's, or blunt without a blade."),
     Enumeration("affinity", kAffinities,
-                "The hit's element; weapon uses the drawn weapon's best "
-                "affinity and is not allowed on healing hits."),
+                "The hit's element. weapon takes the user's drawn blade's "
+                "highest affinity, or physical when the weapon is sheathed, "
+                "absent or has none above zero. hp-healed refuses weapon, and "
+                "physical while the user's weapon is drawn."),
 };
 enum HitColumn : std::size_t {
   kHitActionColumn,
