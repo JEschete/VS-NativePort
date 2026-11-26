@@ -217,3 +217,30 @@ Other categories do not use the volumes to find targets. Neither do chain and de
 defense ability (the `environment` abilities) answers the attack that hit the user, with the attacker as its only
 target. The AI's `shaped-area` reach
 (§4.7.2) reads `area_shape` and `area_angle` on its own.
+
+### 4.7.4 Action presentation and limb damage
+
+`camera_zoom` selects the combat camera transition: `follow` tracks the action midpoint, `zoom-in` moves toward
+the near distance while increasing projection, `zoom-out` moves toward the far distance, and `hold` keeps the
+current framing. A `zoom-in` action at a target distance of 449 or more falls back to `follow`.
+
+`recovery_delay` is the action's base delay before its actor can act again. The actor's recovery bonus is added;
+255 uses the equipped weapon's delay. Actions 22–53 add no delay. The timer advances by
+`(base delay + recovery bonus) × 256 / 35` battle updates.
+
+The visible `effect_package` is presentation, not the hit's `effect`. It is dispatched for the action before its
+animation and effect track start; required actor assets and effect resources gate that start. The first and second
+hit rows are applied separately during hit resolution, following §4.7.1's prerequisite and roll rules. There is no
+fixed frame number in the catalog for when a hit lands.
+
+The `category` also selects how damage is assigned to limbs:
+
+| Distribution | Categories | Assignment |
+|---|---|---|
+| Even | `environment`, `direct-actor-including-user`, `ground-area-including-user`, `direct-actor`, `ground-area` | Equal integer shares across limbs with nonzero maximum HP; any remainder is not assigned. |
+| Splash | `direct-limb-including-user`, `direct-limb`, `direct-limb-or-object` | Each limb receives its selected limb's splash percentage of the amount. |
+| Selected limb | `ground-area-limb-including-user`, `ground-area-limb`, `source-area-limb-including-user`, `source-area-limb` | The selected limb receives the full amount. |
+| None | `cloudstone`, `treasure-chest`, `trap`, `unused` | No limb damage is assigned. |
+
+This is the damage-distribution policy after a hit amount is calculated; it does not change target selection or
+the `effect` field.
