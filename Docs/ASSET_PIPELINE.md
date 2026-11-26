@@ -64,6 +64,7 @@ must still be usable; gameplay policy and file-format limits are different.
 | 6.2.3 | [ACTOR_ANIMATION](pipeline/ACTOR_ANIMATION.md#623-bounded-implementation-packages) | Bounded implementation packages |
 | 6.2.4 | [WEAPONS_AND_ARCHETYPES](pipeline/WEAPONS_AND_ARCHETYPES.md#624-weapon-models-wep--gltf-204) | Weapon models (WEP → glTF, #204) |
 | 6.2.5 | [WEAPONS_AND_ARCHETYPES](pipeline/WEAPONS_AND_ARCHETYPES.md#625-enemy-archetypes-zud--json-200-516) | Enemy archetypes (ZUD → JSON, #200, #516) |
+| 6.2.6 | [SHP_FIELDS](pipeline/SHP_FIELDS.md#626-shp-layout-and-bone-fields-520) | SHP layout and bone fields (#520) |
 | 6.3 | [ROOMS_AND_ZONES](pipeline/ROOMS_AND_ZONES.md#63-rooms-mpd--gltf--room-json) | Rooms (MPD → glTF + room JSON) |
 | 6.4 | [IMAGES](pipeline/IMAGES.md#64-textures-and-images-timgimfbtfbcbin-art--png--imagejson) | Textures and images (TIM/GIM/FBT/FBC/BIN art → PNG + `.image.json`) |
 | 6.4.1 | [BACKGROUNDS](pipeline/BACKGROUNDS.md#641-far-background-layouts) | FAR background layouts |

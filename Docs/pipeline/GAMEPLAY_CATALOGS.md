@@ -146,7 +146,13 @@ masks `0x7F9D4`; the sixteen bytes at `0x7F9A4` are zero padding). Bundle `actio
 (`catalog.battle.action-categories`) writes `catalogs\battle\action-categories.csv` with `action-category.<slug>`
 rows. Columns, enums and flag bits are in
 [action-categories.schema.json](../../Native/Content/schemas/catalogs/battle/action-categories.schema.json); the
-committed schema must equal the generated one. `target_kinds` is a `|` set (or `none`).
+committed schema must equal the generated one. `target_kinds` is a `|` set (or `none`) matched against each candidate
+actor's kind (`Battle/Targeting.cpp` `IsTargetCandidate`). `leader` is Ashley. `neutral` is actor 1 and a room spawn
+whose placement flags & 3 is 0. `hostile` is a spawn placed with its weapon drawn (1), and `peaceful` is a follower
+(2 or 3). A non-player actor moves between those two when it draws or sheathes its weapon (`SetActorBattleMode`) or an
+event sets it hostile (`SetActorHostile`). No shipped category targets `peaceful`. `object` is an auxiliary (gimmick)
+actor (`CreateAuxiliaryActor`). No native code gives an actor the `cloudstone` kind. `chest` adds the room's treasure
+chests.
 
 `catalogs\battle\import\action-categories.json` holds the five original bytes of every record. The importer refuses
 a source whose padding bytes are not zero or whose mask uses the unnamed `0x40` bit, and authoring cannot spell either.

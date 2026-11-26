@@ -27,7 +27,7 @@ Additions the reference does not have, required by P4 (lossless). The initial co
 - `asset.extras.vs.textureAnimation`: actor-local atlas bindings, overlay regions, frame definitions and palette data; animation-local texture/event tracks live with `extras.vs.seq` (§6.2.2).
 - Vertex colors and per-polygon flags (semi-transparency, double-sided, lighting mode) go in `COLOR_0` plus a per-primitive `extras.vs.polyFlags`. Group polygons by compatible flags rather than collapsing different states into one primitive.
 - **Which SEQ/ESQ clips and ETM regions belong to which SHP** comes from the decomp's loaders, event commands and ZUD bundles, not file-name guessing. A matching prefix/stem is a candidate association, not proof.
-- **Fixed-point scale:** positions are SHP units divided by a constant `VS_UNIT_SCALE`, recorded in `asset.extras.vs.unitScale` so the loader can return exact integer values. The Sydney reference's scale is measured and matched.
+- **Scale:** positions are the SHP's integer units at scale 1 (there is no scale field), so the loader gets exact integer values back.
 
 **Runtime target:** typed `ModelDef` / `AnimationDef` consumers read glTF and native metadata directly. The current
 SHP-shaped reconstruction is EC-04-T-SHP/SEQ migration debt, not the target `ModelLoader` contract. D21's temporary
@@ -61,9 +61,11 @@ converter `shp-gltf` version 5 (`Extract/ShpModelConversion.hpp`, `Content/ShpMo
   editable `collision_radius`). A buffer view holds the sound bytes. `sequence` is the SHP's embedded bank.
   `sequences` lists each owned `OBJ\*.SEQ` bank as `{id, animation}`, with the animation in `vs.actor-animation`
   form; `sequence_bank_ids.battle` and `.special` map the corresponding layout slots to those stable IDs or null.
-  The original LBA and size fields remain in `layout` for reconstruction (§6.2.1).
+  The original LBA and size fields remain in `layout` for reconstruction (§6.2.1). `asset.generator` names the
+  writing tool only; the converter version is the manifest's.
 - Layout and bone members named `reserved*` are opaque source values retained for exact reconstruction, not
   semantic authoring controls. Do not assign them guessed meanings or change them as part of an authored edit.
+  Named members are explained in [§6.2.6](SHP_FIELDS.md).
 - **The payload and the geometry are authoritative.** Materials, textures and images only preview the polygon flags.
   The reader rebuilds the SHP from those two sources and checks it against every value the payload records. Output
   must pass the Khronos glTF validator with no errors or warnings.
@@ -98,10 +100,15 @@ Weapons are §6.2.4 and ZUD enemy archetypes §6.2.5.
   - **SEQ banks (#205):** schema `vs.actor-animation` version 2 (`Content/ActorAnimation.hpp`) writes one bank as its source, source hash, bone count and bank.
     - The bank lists its clips, the animation-to-clip map and the motion pool. Each pool element is a track (an optional initial key and its commands as one flat list of frames, x, y, z groups), an event script (one object per event: its frame, its op by name and the op's named fields, §6.2.2) or unread bytes (lowercase hex).
     - Clips name pool elements by number, so a track can be lengthened without recomputing offsets.
+    - Units (`SequencePlayback.cpp`, `ModelDrawingLive.cpp`): a rotation key (`root`, `rotations`) is in 4096ths of a
+      turn and wraps at two turns; `vector` is the stored value doubled, so it is even. Each command adds its x, y, z
+      to the key every frame of its run. Each update moves the actor's position by the travel key divided by 4. A
+      scale key (`raw_scale`, `packed_scale`) is 64 for the bone's own size, and a bone's scale multiplies its
+      parent's. `move-vertex` events move the SHP vertex in model units.
     - The JSON Schema checks types and ranges. The native reader also checks references, clip flags and event lengths (`EncodeSeqBank`). Banks read back from JSON must rebuild their exact bytes.
     - Version 1 wrote each event as `[frame, op, arguments...]`. `VS.Extract authoring <datadir>`, or the next `models` run without `--force`, rewrites such outputs (`shp-gltf` 2, `seq-gltf` 1, `esq-json` 1, `zud-json` 1) in place with named events and keeps every other edit (`Extract/AnimationAuthoring.hpp`).
   - **SEQ banks in their models (#205):** each bank is stored once, in `asset.extras.vs.sequences` of the one model that loads it.
-    - Ownership comes from what the game reads, not from file names. A model owns the banks its layout block names (`battle_sequence_lbas`/`_sizes` and `special_sequence_lbas`/`_sizes`, LBA and sector count). `OBJ\00.SHP` and `OBJ\02.SHP` also own the material and material-model banks that `BATTLE.PRG`'s tables name (`ShpModelConversion.cpp` `BankOwners`).
+    - Ownership comes from what the game reads, not from file names. A model owns the banks its layout block names (`battle_sequence_lbas`/`_sizes` and `special_sequence_lbas`/`_sizes`, LBA and size in bytes, a whole number of 2048-byte sectors). `OBJ\00.SHP` and `OBJ\02.SHP` also own the material and material-model banks that `BATTLE.PRG`'s tables name (`ShpModelConversion.cpp` `BankOwners`).
     - The extractor refuses a bank that no model or two models load, and a layout entry that names no listed SEQ.
     - Every bank gets a `seq-gltf` output (id `animation.obj.<bank>`) that lists its owner's `.gltf` and `.bin`. Its dependencies are `BATTLE\BATTLE.PRG` (the event lengths) and the owner SHP at the hash the model output records. A bank with a changed source or owner reconverts its owner.
     - At runtime, `Content::LoadConvertedSequence` serves the animation bank read (`ActorAssetsLive` `BeginFileRead`, `kSequence`) of an `OBJ\*.SEQ` and never reads the bank from the disc. It finds the bank by LBA and sector-rounded size, reads its owner's glTF and rebuilds the bank's bytes. The last four models decoded are cached, keyed by their files' size and time, so one model's banks decode once.
