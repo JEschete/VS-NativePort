@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <format>
+#include <optional>
 #include <span>
 #include <string>
 #include <string_view>
@@ -12,11 +13,15 @@
 
 #include "Content/ActorAnimation.hpp"
 #include "Content/ActorArchetype.hpp"
+#include "Content/ConversionManifest.hpp"
 #include "Content/ConvertedModels.hpp"
 #include "Content/JsonText.hpp"
 #include "Content/SeqFile.hpp"
 #include "Content/ZudFile.hpp"
+#include "Extract/ConversionManifestWriter.hpp"
+#include "Extract/ZudConversion.hpp"
 #include "TestSupport/ModelFixtures.hpp"
+#include "TestSupport/ScratchDataRoot.hpp"
 
 namespace {
 
@@ -139,16 +144,16 @@ content::ActorArchetypeDocument SampleDocument() {
           .source_sha256 =
               "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934c"
               "a495991b7852b855",
-          .header = {.character_id = 0x4F,
-                     .weapon = 1,
-                     .battle_sequence_model = 0x4F,
+          .header = {.model_id = 0x4F,
+                     .blade_item_id = 1,
+                     .weapon_category = 1,
                      .weapon_material = 3,
-                     .shield = 0,
-                     .shield_material = 0,
-                     .default_material = 5},
+                     .shield = 98,
+                     .shield_material = 4,
+                     .movement_class = 2},
           .body = content::ArchetypeReference{.id = "model.obj.4f"},
           .weapon = content::ArchetypeReference{.id = "model.obj.01.wep"},
-          .shield = std::nullopt,
+          .shield = content::ArchetypeReference{.id = "model.obj.63.wep"},
           .common_animation =
               content::ArchetypeReference{.id = "animation.obj.4f_com"},
           .battle_animation = bank->file};
@@ -165,12 +170,20 @@ TEST_CASE("The actor-archetype form writes and reads the sample archetype",
   INFO(ErrorOf(read));
   REQUIRE(read.has_value());
   CHECK(*read == document);
-  // A body of its own and no banks.
+  // A body of its own, bare hands, no shield and no banks.
   document.body = content::ArchetypeOwnModel{.file = "Z049U06.gltf"};
+  document.header.blade_item_id = 0;
+  document.header.weapon_category = content::kBareHandsWeaponCategory;
+  document.header.shield = 0;
+  document.weapon = std::nullopt;
+  document.shield = std::nullopt;
   document.common_animation = std::monostate{};
   document.battle_animation = std::monostate{};
-  const auto own = content::ActorArchetypeOf(
-      Reparsed(content::ActorArchetypeJson(document)), "own");
+  const content::JsonDocument own_json = content::ActorArchetypeJson(document);
+  CHECK(own_json["header"]["blade_item_id"].is_null());
+  CHECK(own_json["header"]["weapon_category"] == "bare-hands");
+  CHECK(own_json["header"]["shield_item_id"].is_null());
+  const auto own = content::ActorArchetypeOf(Reparsed(own_json), "own");
   INFO(ErrorOf(own));
   REQUIRE(own.has_value());
   CHECK(*own == document);
@@ -185,10 +198,16 @@ TEST_CASE("The actor-archetype reader names the member at fault",
     std::string_view error;
   };
   const std::vector<Edit> edits{
-      {"/schema_version", 3, "s is vs.actor-archetype version 3; this build"},
+      {"/schema_version", 2, "s is vs.actor-archetype version 2; this build"},
       {"/source_sha256", "ABC", "s.source_sha256 must be a lowercase SHA-256"},
-      {"/header/shield", 256,
-       "s.header.shield must be a whole number from 0 to 255"},
+      {"/header/blade_item_id", 0,
+       "s.header.blade_item_id must be a whole number from 1 to 255"},
+      {"/header/shield_item_id", 31,
+       "s.header.shield_item_id must be a whole number from 32 to 286"},
+      {"/header/weapon_category", "none",
+       "s.header.weapon_category must be one of \"dagger\""},
+      {"/header/shield_material", 4,
+       "s.header.shield_material must be one of \"none\", \"wood\""},
       {"/header/extra", 1, "s.header has an unknown member"},
       {"/body", JsonDocument::parse(R"({"model": "Model.OBJ.4F"})"),
        "s.body.model \"Model.OBJ.4F\" is not a content id"},
@@ -216,6 +235,97 @@ TEST_CASE("The actor-archetype reader names the member at fault",
     INFO(read.error());
     CHECK(read.error().contains(edit.error));
   }
+}
+
+constexpr std::string_view kNumberedFile = "models/zud/Z001U00.json";
+
+// The sample archetype with an author's label, first among its members.
+content::JsonDocument LabelledSample() {
+  content::JsonDocument json = content::JsonDocument::object();
+  json["display_name"] = "An author's label";
+  for (const auto& [key, value] :
+       content::ActorArchetypeJson(SampleDocument()).items()) {
+    json[key] = value;
+  }
+  return json;
+}
+
+// The labelled sample as zud-json 2 wrote it, its header bytes numbered and
+// the battle sequence `sequence`, recorded as a version 2 conversion.
+void WriteNumberedSample(const fs::path& root, int sequence) {
+  content::JsonDocument json = LabelledSample();
+  json["schema_version"] = VS::Extract::kNumberedHeaderArchetypeVersion;
+  json["header"] = {{"character_id", 0x4F},
+                    {"weapon", 1},
+                    {"battle_sequence_model", sequence},
+                    {"weapon_material", 3},
+                    {"shield", 98},
+                    {"shield_material", 4},
+                    {"default_material", 2}};
+  VS::test_support::WriteTestFile(root, kNumberedFile,
+                                  content::FormatJsonText(json) + "\n");
+  content::ConversionManifest manifest;
+  manifest.converters = {{std::string(content::kZudArchetypeConverterName),
+                          VS::Extract::kNumberedHeaderArchetypeVersion}};
+  manifest.outputs = {
+      {.id = "archetype.map.z001u00",
+       .source = "MAP/Z001U00.ZUD",
+       .source_sha256 = std::string(64, 'a'),
+       .converter = std::string(content::kZudArchetypeConverterName),
+       .files = {std::string(kNumberedFile)},
+       .dependencies = {},
+       .unreferenced = false,
+       .note = {},
+       .alias_of = {}}};
+  REQUIRE(VS::Extract::WriteConversionManifest(root, manifest));
+}
+
+content::JsonDocument ReadNumberedFile(const fs::path& root) {
+  return VS::test_support::Required(content::ParseJsonText(
+      ReadModel(root / fs::path(kNumberedFile)), kNumberedFile));
+}
+
+// The zud-json version root's manifest records, if any.
+std::optional<std::uint32_t> ZudConverterVersion(const fs::path& root) {
+  const auto manifest =
+      VS::test_support::Required(content::LoadConversionManifest(root));
+  if (!manifest) return std::nullopt;
+  const auto found = manifest->converters.find(
+      std::string(content::kZudArchetypeConverterName));
+  if (found == manifest->converters.end()) return std::nullopt;
+  return found->second;
+}
+
+TEST_CASE("Authoring names existing archetype headers in place",
+          "[content-models][zud]") {
+  const VS::test_support::ModelRoot root({});
+  WriteNumberedSample(root.Root(), 1);
+
+  const auto report = VS::test_support::Required(
+      VS::Extract::UpgradeArchetypeAuthoring(root.Root()));
+  CHECK(report.headers == 1);
+  CHECK(report.written == 2);
+  CHECK(ReadNumberedFile(root.Root()) == LabelledSample());
+  CHECK(ZudConverterVersion(root.Root()) ==
+        content::kZudArchetypeConverterVersion);
+  CHECK(VS::test_support::Required(
+            VS::Extract::UpgradeArchetypeAuthoring(root.Root()))
+            .written == 0);
+}
+
+TEST_CASE("Authoring leaves an archetype header it cannot name",
+          "[content-models][zud]") {
+  const VS::test_support::ModelRoot root({});
+  // 0 is no weapon category; loadSeq reads it as the common sequence.
+  WriteNumberedSample(root.Root(), 0);
+  const content::JsonDocument before = ReadNumberedFile(root.Root());
+
+  const auto refused = VS::Extract::UpgradeArchetypeAuthoring(root.Root());
+  REQUIRE_FALSE(refused.has_value());
+  CHECK(refused.error().contains("header.weapon_category must be one of"));
+  CHECK(ReadNumberedFile(root.Root()) == before);
+  CHECK(ZudConverterVersion(root.Root()) ==
+        VS::Extract::kNumberedHeaderArchetypeVersion);
 }
 
 TEST_CASE("Extracted ZUD files decode and rebuild their exact bytes",

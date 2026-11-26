@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <format>
+#include <functional>
 #include <limits>
 #include <optional>
 #include <set>
@@ -22,6 +23,7 @@
 #include "Content/ShpModelFiles.hpp"
 #include "Extract/ConversionManifestWriter.hpp"
 #include "Extract/ConverterBatch.hpp"
+#include "Extract/ZudConversion.hpp"
 #include "Platform/Paths.hpp"
 
 namespace VS::Extract {
@@ -38,7 +40,9 @@ struct VersionStep {
   std::uint32_t to = 0;
 };
 
-// The versions that wrote events as [frame, op, arguments...] arrays.
+// The versions that wrote events as [frame, op, arguments...] arrays. An
+// archetype moves to the version that still numbers its header;
+// UpgradeArchetypeAuthoring names that next.
 constexpr std::array kConverters{
     VersionStep{.name = Content::kShpModelConverterName,
                 .from = 2,
@@ -51,7 +55,7 @@ constexpr std::array kConverters{
                 .to = Content::kEsqAnimationSetConverterVersion},
     VersionStep{.name = Content::kZudArchetypeConverterName,
                 .from = 1,
-                .to = Content::kZudArchetypeConverterVersion},
+                .to = kNumberedHeaderArchetypeVersion},
 };
 constexpr std::array kSchemas{
     VersionStep{.name = Content::kShpModelSchema,
@@ -65,7 +69,7 @@ constexpr std::array kSchemas{
                 .to = Content::kAnimationSetSchemaVersion},
     VersionStep{.name = Content::kActorArchetypeSchema,
                 .from = 1,
-                .to = Content::kActorArchetypeSchemaVersion},
+                .to = kNumberedHeaderArchetypeVersion},
 };
 
 constexpr std::int64_t kByteMax = std::numeric_limits<std::uint8_t>::max();
@@ -221,36 +225,46 @@ bool PlanFiles(Content::ConversionManifest& manifest,
 
 Result<void> UpgradeFile(const fs::path& root, const std::string& file,
                          AnimationAuthoringReport& report) {
+  auto written = EditJsonOutput(root, file, [&](Json& json) -> Result<bool> {
+    const std::size_t before = report.documents;
+    Upgrader upgrader(report);
+    if (auto walked = upgrader.Walk(json, false, file); !walked) {
+      return std::unexpected(walked.error());
+    }
+    return report.documents != before;
+  });
+  if (!written) return std::unexpected(written.error());
+  if (*written) ++report.written;
+  return {};
+}
+
+}  // namespace
+
+std::expected<bool, std::string> EditJsonOutput(
+    const fs::path& root, const std::string& file,
+    const std::function<std::expected<bool, std::string>(Json&)>& edit) {
   const fs::path path = root / Platform::Utf8Path(file);
-  // A missing file is the converter's to write again.
   std::error_code error;
   if (!fs::exists(path, error)) {
     if (error) {
       return std::unexpected(Platform::PathText(path) + ": " + error.message());
     }
-    return {};
+    return false;
   }
   auto bytes = ReadFileBytes(path);
   if (!bytes) return std::unexpected(bytes.error());
   auto json = Content::ParseJsonText(*bytes, file);
   if (!json) return std::unexpected(json.error());
-  const std::size_t before = report.documents;
-  Upgrader upgrader(report);
-  if (auto walked = upgrader.Walk(*json, false, file); !walked) {
-    return walked;
-  }
-  if (report.documents == before) return {};
+  auto edited = edit(*json);
+  if (!edited || !*edited) return edited;
   const std::string text = Content::FormatJsonText(*json) + "\n";
   const std::array outputs{
       OutputBytes{.name = file, .bytes = std::as_bytes(std::span(text))}};
   if (auto written = WriteOutputFiles(root, outputs); !written) {
     return std::unexpected(written.error());
   }
-  ++report.written;
-  return {};
+  return true;
 }
-
-}  // namespace
 
 std::expected<AnimationAuthoringReport, std::string> UpgradeAnimationAuthoring(
     const fs::path& root) {

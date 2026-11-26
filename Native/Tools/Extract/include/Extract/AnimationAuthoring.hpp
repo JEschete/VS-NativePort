@@ -3,9 +3,20 @@
 #include <cstddef>
 #include <expected>
 #include <filesystem>
+#include <functional>
 #include <string>
 
+#include "Content/JsonText.hpp"
+
 namespace VS::Extract {
+
+// Reads the JSON output `file` under `root` and writes it back formatted when
+// `edit` reports that it changed it; whether it was written. A missing file
+// is left for its converter to write again.
+[[nodiscard]] std::expected<bool, std::string> EditJsonOutput(
+    const std::filesystem::path& root, const std::string& file,
+    const std::function<
+        std::expected<bool, std::string>(Content::JsonDocument&)>& edit);
 
 struct AnimationAuthoringReport {
   std::size_t documents = 0;  // documents moved to the current schema version

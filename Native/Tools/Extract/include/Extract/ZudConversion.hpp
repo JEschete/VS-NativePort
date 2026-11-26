@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+#include <cstdint>
 #include <expected>
 #include <filesystem>
 #include <optional>
@@ -61,5 +63,23 @@ struct ZudConversion {
 // converts before anything is written.
 [[nodiscard]] std::expected<ModelConversionReport, std::string>
 ConvertDiscArchetypes(const std::filesystem::path& root, bool force);
+
+// The zud-json converter and vs.actor-archetype schema version that wrote the
+// header as numbered identity bytes; UpgradeAnimationAuthoring stops here.
+inline constexpr std::uint32_t kNumberedHeaderArchetypeVersion = 2;
+
+struct ArchetypeAuthoringReport {
+  std::size_t headers = 0;  // headers rewritten in their named form
+  std::size_t written = 0;  // files written, with the manifest
+};
+
+// Rewrites the header of each existing archetype output that still numbers
+// its identity bytes (Content/ActorArchetype.hpp) in its named form, without
+// reconverting source assets or replacing authored values and labels. Each
+// header is checked to give back the same bytes; the converter version is
+// published last, and a file already current is left as it is, so an
+// interrupted run resumes.
+[[nodiscard]] std::expected<ArchetypeAuthoringReport, std::string>
+UpgradeArchetypeAuthoring(const std::filesystem::path& root);
 
 }  // namespace VS::Extract

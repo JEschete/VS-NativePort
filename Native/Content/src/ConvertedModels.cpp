@@ -597,12 +597,7 @@ std::expected<std::vector<std::byte>, std::string> LoadConvertedArchetype(
     return std::unexpected(
         std::format("{} does not match its conversion manifest", path));
   }
-  const ArchetypeHeader& header = document->header;
-  ZudFile zud{.identity = {header.character_id, header.weapon,
-                           header.battle_sequence_model, header.weapon_material,
-                           header.shield, header.shield_material,
-                           header.default_material, 0},
-              .sections = {}};
+  ZudFile zud{.identity = ZudIdentityOf(document->header), .sections = {}};
   auto& sections = zud.sections;
   using enum ZudSection;
   auto body = BodyBytes(store, read, *document, *json);

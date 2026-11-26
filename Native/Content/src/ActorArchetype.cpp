@@ -2,20 +2,26 @@
 #include "Content/ActorArchetype.hpp"
 
 #include <algorithm>
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <expected>
 #include <format>
+#include <iterator>
 #include <optional>
+#include <span>
 #include <string>
 #include <string_view>
 #include <utility>
 #include <variant>
 
 #include "Content/ActorAnimation.hpp"
+#include "Content/CatalogTable.hpp"
 #include "Content/ConversionManifest.hpp"
+#include "Content/GameplayDomains.hpp"
 #include "Content/JsonText.hpp"
 #include "Content/SeqFile.hpp"
+#include "Content/ZudFile.hpp"
 
 namespace VS::Content {
 namespace {
@@ -25,21 +31,45 @@ using Result = std::expected<T, std::string>;
 
 constexpr std::string_view kModelExtension = ".gltf";
 constexpr std::int64_t kByteMax = 0xFF;
+constexpr std::int64_t kFirstShieldItem = kArchetypeShieldItemOffset + 1;
+
+// The header's weapon categories: the blade categories, then bare hands as
+// the learning catalog names it. 0 never occurs; loadSeq would read it as the
+// common sequence.
+constexpr auto kWeaponCategories = [] {
+  std::array<EnumValue, kBareHandsWeaponCategory> values{};
+  std::copy(std::next(kBladeCategories.begin()), kBladeCategories.end(),
+            values.begin());
+  values.back() = {.code = kBareHandsWeaponCategory, .name = "bare-hands"};
+  return values;
+}();
 
 template <typename... Visitors>
 struct Overloaded : Visitors... {
   using Visitors::operator()...;
 };
 
+// The name `code` has in `domain`, or the number itself when it has none, so
+// the reader reports it instead of the writer losing it.
+Json NameOf(std::span<const EnumValue> domain, std::int64_t code) {
+  const auto found = std::ranges::find(domain, code, &EnumValue::code);
+  if (found == domain.end()) return code;
+  return std::string(found->name);
+}
+
+Json ItemJson(std::int64_t item, std::int64_t offset) {
+  return item == 0 ? Json(nullptr) : Json(item + offset);
+}
+
 Json HeaderJson(const ArchetypeHeader& header) {
   Json json = Json::object();
-  json["character_id"] = header.character_id;
-  json["weapon"] = header.weapon;
-  json["battle_sequence_model"] = header.battle_sequence_model;
-  json["weapon_material"] = header.weapon_material;
-  json["shield"] = header.shield;
-  json["shield_material"] = header.shield_material;
-  json["default_material"] = header.default_material;
+  json["model_id"] = header.model_id;
+  json["blade_item_id"] = ItemJson(header.blade_item_id, 0);
+  json["weapon_category"] = NameOf(kWeaponCategories, header.weapon_category);
+  json["weapon_material"] = NameOf(kMaterials, header.weapon_material);
+  json["shield_item_id"] = ItemJson(header.shield, kArchetypeShieldItemOffset);
+  json["shield_material"] = NameOf(kMaterials, header.shield_material);
+  json["movement_class"] = header.movement_class;
   return json;
 }
 
@@ -85,31 +115,60 @@ Result<std::uint8_t> ByteOf(const JsonMembers& members, std::string_view key) {
   });
 }
 
+// An item id from `first` to `first` + 254 as its header byte, or 0 for null.
+Result<std::uint8_t> ItemOf(const JsonMembers& members, std::string_view key,
+                            std::int64_t first) {
+  auto value = members.Get(key);
+  if (!value) return std::unexpected(value.error());
+  if ((*value)->is_null()) return std::uint8_t{0};
+  const std::int64_t offset = first - 1;
+  return members.Integer(key, first, offset + kByteMax)
+      .transform([offset](std::int64_t item) {
+        return static_cast<std::uint8_t>(item - offset);
+      });
+}
+
+// The code of the name `key` holds in `domain`.
+Result<std::uint8_t> CodeOf(const JsonMembers& members, std::string_view key,
+                            std::span<const EnumValue> domain) {
+  auto name = members.String(key);
+  const auto found =
+      name ? std::ranges::find(domain, *name, &EnumValue::name) : domain.end();
+  if (found == domain.end()) {
+    std::string names;
+    for (const EnumValue& value : domain) {
+      names += std::format("{}\"{}\"", names.empty() ? "" : ", ", value.name);
+    }
+    return std::unexpected(
+        std::format("{} must be one of {}", members.Where(key), names));
+  }
+  return static_cast<std::uint8_t>(found->code);
+}
+
 Result<ArchetypeHeader> HeaderOf(const JsonMembers& members) {
   auto value = members.Get("header");
   if (!value) return std::unexpected(value.error());
   const JsonMembers header(**value, members.Where("header"));
-  if (auto only = header.Only(
-          {"character_id", "weapon", "battle_sequence_model", "weapon_material",
-           "shield", "shield_material", "default_material"});
+  if (auto only = header.Only({"model_id", "blade_item_id", "weapon_category",
+                               "weapon_material", "shield_item_id",
+                               "shield_material", "movement_class"});
       !only) {
     return std::unexpected(only.error());
   }
-  ArchetypeHeader result;
-  for (auto [key, field] :
-       {std::pair{"character_id", &ArchetypeHeader::character_id},
-        std::pair{"weapon", &ArchetypeHeader::weapon},
-        std::pair{"battle_sequence_model",
-                  &ArchetypeHeader::battle_sequence_model},
-        std::pair{"weapon_material", &ArchetypeHeader::weapon_material},
-        std::pair{"shield", &ArchetypeHeader::shield},
-        std::pair{"shield_material", &ArchetypeHeader::shield_material},
-        std::pair{"default_material", &ArchetypeHeader::default_material}}) {
-    auto byte = ByteOf(header, key);
-    if (!byte) return std::unexpected(byte.error());
-    result.*field = *byte;
+  const std::array<Result<std::uint8_t>, kZudIdentityBytes - 1> bytes{
+      ByteOf(header, "model_id"),
+      ItemOf(header, "blade_item_id", 1),
+      CodeOf(header, "weapon_category", kWeaponCategories),
+      CodeOf(header, "weapon_material", kMaterials),
+      ItemOf(header, "shield_item_id", kFirstShieldItem),
+      CodeOf(header, "shield_material", kMaterials),
+      ByteOf(header, "movement_class")};
+  std::array<std::uint8_t, kZudIdentityBytes> identity{};
+  for (std::size_t index = 0; index < bytes.size(); ++index) {
+    if (!bytes.at(index)) return std::unexpected(bytes.at(index).error());
+    identity.at(index) = *bytes.at(index);
   }
-  return result;
+  return ArchetypeHeaderOf(identity);
 }
 
 Result<ArchetypeReference> ReferenceOf(const JsonMembers& members,
@@ -189,6 +248,31 @@ Result<ArchetypeAnimation> AnimationOf(const JsonMembers& members,
 }
 
 }  // namespace
+
+ArchetypeHeader ArchetypeHeaderOf(
+    const std::array<std::uint8_t, kZudIdentityBytes>& identity) noexcept {
+  const auto& [model, blade, category, blade_material, shield, shield_material,
+               movement, pad] = identity;
+  return {.model_id = model,
+          .blade_item_id = blade,
+          .weapon_category = category,
+          .weapon_material = blade_material,
+          .shield = shield,
+          .shield_material = shield_material,
+          .movement_class = movement};
+}
+
+std::array<std::uint8_t, kZudIdentityBytes> ZudIdentityOf(
+    const ArchetypeHeader& header) noexcept {
+  return {header.model_id,        header.blade_item_id,
+          header.weapon_category, header.weapon_material,
+          header.shield,          header.shield_material,
+          header.movement_class,  0};
+}
+
+JsonDocument ArchetypeHeaderJson(const ArchetypeHeader& header) {
+  return HeaderJson(header);
+}
 
 std::optional<std::string_view> ArchetypeModelStem(
     std::string_view file) noexcept {

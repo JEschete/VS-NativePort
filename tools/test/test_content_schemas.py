@@ -217,13 +217,18 @@ class ActorArchetypeSchemaTests(SchemaChecks, unittest.TestCase):
 
     def edits(self) -> dict:
         return {
-            "a newer version": lambda d: d.update(schema_version=3),
+            "a newer version": lambda d: d.update(schema_version=4),
             "an uppercase hash": lambda d: d.update(
                 source_sha256=d["source_sha256"].upper()
             ),
-            "header byte 256": lambda d: d["header"].update(shield=256),
+            "header byte 256": lambda d: d["header"].update(model_id=256),
             "an unknown header member": lambda d: d["header"].update(extra=1),
-            "a missing header member": lambda d: d["header"].pop("weapon"),
+            "a missing header member": lambda d: d["header"].pop("blade_item_id"),
+            "shield item 31": lambda d: d["header"].update(shield_item_id=31),
+            "no weapon category": lambda d: d["header"].update(
+                weapon_category="none"
+            ),
+            "a material number": lambda d: d["header"].update(shield_material=4),
             "an uppercase id": lambda d: d.update(body={"model": "Model.OBJ.4F"}),
             "a body file in another directory": lambda d: d.update(
                 body={"file": "../4F.gltf"}

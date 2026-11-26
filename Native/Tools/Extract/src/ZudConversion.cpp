@@ -10,8 +10,10 @@
 #include <format>
 #include <functional>
 #include <iterator>
+#include <limits>
 #include <map>
 #include <optional>
+#include <set>
 #include <span>
 #include <string>
 #include <string_view>
@@ -31,6 +33,7 @@
 #include "Content/ZudFile.hpp"
 #include "Core/Sha256.hpp"
 #include "Extract/AnimationAuthoring.hpp"
+#include "Extract/ConversionManifestWriter.hpp"
 #include "Extract/EsqConversion.hpp"
 #include "Extract/ImageConversion.hpp"
 #include "Extract/WepModelConversion.hpp"
@@ -327,19 +330,6 @@ ArchetypeAnimation AnimationOf(const std::optional<ZudPart>& part) {
   return std::monostate{};
 }
 
-// The identity bytes as named numbers; the pad byte is DecodeZud's to check.
-Content::ArchetypeHeader HeaderOf(const ZudFile& zud) {
-  const auto& [character, weapon, sequence_model, weapon_material, shield,
-               shield_material, material, pad] = zud.identity;
-  return {.character_id = character,
-          .weapon = weapon,
-          .battle_sequence_model = sequence_model,
-          .weapon_material = weapon_material,
-          .shield = shield,
-          .shield_material = shield_material,
-          .default_material = material};
-}
-
 Result<ActorArchetypeDocument> DocumentOf(const ZudConversion& conversion,
                                           const ZudFile& zud,
                                           std::string_view stem) {
@@ -347,7 +337,7 @@ Result<ActorArchetypeDocument> DocumentOf(const ZudConversion& conversion,
   ActorArchetypeDocument document{
       .source = path,
       .source_sha256 = HashOf(conversion.zud),
-      .header = HeaderOf(zud),
+      .header = Content::ArchetypeHeaderOf(zud.identity),
       .body = ArchetypeReference{},
       .weapon = std::nullopt,
       .shield = std::nullopt,
@@ -529,13 +519,8 @@ Check VerifyArchetype(const ActorArchetypeDocument& document,
         "{}: the converted archetype reads back to a different archetype",
         path));
   }
-  const Content::ArchetypeHeader& header = read->header;
-  ZudFile rebuilt{
-      .identity = {header.character_id, header.weapon,
-                   header.battle_sequence_model, header.weapon_material,
-                   header.shield, header.shield_material,
-                   header.default_material, 0},
-      .sections = {}};
+  ZudFile rebuilt{.identity = Content::ZudIdentityOf(read->header),
+                  .sections = {}};
   // A named part's bytes are the OBJ file's, whose hash the section has.
   auto& sections = rebuilt.sections;
   using enum ZudSection;
@@ -562,6 +547,102 @@ Check VerifyArchetype(const ActorArchetypeDocument& document,
   if (!encoded || *encoded != conversion.zud.bytes) {
     return std::unexpected(std::format(
         "{}: the converted archetype does not rebuild the source bytes", path));
+  }
+  return {};
+}
+
+using Identity = std::array<std::uint8_t, Content::kZudIdentityBytes>;
+constexpr std::size_t kHeaderMembers = Content::kZudIdentityBytes - 1;
+
+// The numbered header's members in identity byte order.
+constexpr std::array<std::string_view, kHeaderMembers> kNumberedHeader{
+    "character_id",     "weapon", "battle_sequence_model",
+    "weapon_material",  "shield", "shield_material",
+    "default_material",
+};
+
+Result<Identity> NumberedIdentityOf(const Content::JsonDocument& document,
+                                    const std::string& where) {
+  const auto header = document.find("header");
+  if (header == document.end() || !header->is_object()) {
+    return std::unexpected(std::format("{}.header must be an object", where));
+  }
+  const Content::JsonMembers members(*header, where + ".header");
+  if (auto only = members.Only(kNumberedHeader); !only) {
+    return std::unexpected(only.error());
+  }
+  Identity identity{};
+  for (std::size_t index = 0; index < kNumberedHeader.size(); ++index) {
+    auto byte = members.Integer(kNumberedHeader.at(index), 0,
+                                std::numeric_limits<std::uint8_t>::max());
+    if (!byte) return std::unexpected(byte.error());
+    identity.at(index) = static_cast<std::uint8_t>(*byte);
+  }
+  return identity;
+}
+
+// Names the header of the archetype `json` holds when it still numbers it;
+// whether it did. Other documents and current archetypes are left as they are.
+Result<bool> NameHeader(Content::JsonDocument& json, const std::string& where) {
+  if (!json.is_object()) return false;
+  const auto schema = json.find("schema");
+  if (schema == json.end() || !schema->is_string() ||
+      schema->get_ref<const std::string&>() != Content::kActorArchetypeSchema) {
+    return false;
+  }
+  const auto version = json.find("schema_version");
+  const std::optional<std::int64_t> number =
+      version == json.end() ? std::nullopt : Content::JsonWholeNumber(*version);
+  if (number == Content::kActorArchetypeSchemaVersion) return false;
+  if (number != kNumberedHeaderArchetypeVersion) {
+    return std::unexpected(std::format(
+        "{}.schema_version must be {} or {} for {}", where,
+        kNumberedHeaderArchetypeVersion, Content::kActorArchetypeSchemaVersion,
+        Content::kActorArchetypeSchema));
+  }
+  auto identity = NumberedIdentityOf(json, where);
+  if (!identity) return std::unexpected(identity.error());
+  *version = Content::kActorArchetypeSchemaVersion;
+  json["header"] =
+      Content::ArchetypeHeaderJson(Content::ArchetypeHeaderOf(*identity));
+  auto read = Content::ActorArchetypeOf(json, where);
+  if (!read) return std::unexpected(read.error());
+  if (Content::ZudIdentityOf(read->header) != *identity) {
+    return std::unexpected(
+        std::format("{}.header does not read back from its named form", where));
+  }
+  return true;
+}
+
+// The archetype files of the zud-json outputs when its converter still writes
+// numbered headers, moving it to its current version; whether it moved.
+bool PlanHeaderFiles(ConversionManifest& manifest,
+                     std::set<std::string>& files) {
+  const auto found =
+      manifest.converters.find(Content::kZudArchetypeConverterName);
+  if (found == manifest.converters.end() ||
+      found->second != kNumberedHeaderArchetypeVersion) {
+    return false;
+  }
+  found->second = Content::kZudArchetypeConverterVersion;
+  for (const ConversionOutput& output : manifest.outputs) {
+    if (output.converter != Content::kZudArchetypeConverterName) continue;
+    for (const std::string& file : output.files) {
+      if (file.ends_with(kJsonSuffix)) files.insert(file);
+    }
+  }
+  return true;
+}
+
+Check UpgradeHeaderFile(const fs::path& root, const std::string& file,
+                        ArchetypeAuthoringReport& report) {
+  auto written = EditJsonOutput(
+      root, file,
+      [&file](Content::JsonDocument& json) { return NameHeader(json, file); });
+  if (!written) return std::unexpected(written.error());
+  if (*written) {
+    ++report.headers;
+    ++report.written;
   }
   return {};
 }
@@ -627,9 +708,13 @@ std::expected<ConvertedModel, std::string> ConvertZudArchetype(
 
 std::expected<ModelConversionReport, std::string> ConvertDiscArchetypes(
     const fs::path& root, bool force) {
-  // Existing outputs move to the named event form instead of reconverting.
+  // Existing outputs move to the named event and header forms instead of
+  // reconverting.
   if (!force) {
     if (auto upgraded = UpgradeAnimationAuthoring(root); !upgraded) {
+      return std::unexpected(upgraded.error());
+    }
+    if (auto upgraded = UpgradeArchetypeAuthoring(root); !upgraded) {
       return std::unexpected(upgraded.error());
     }
   }
@@ -663,6 +748,26 @@ std::expected<ModelConversionReport, std::string> ConvertDiscArchetypes(
                             .force = force,
                             .companion = std::nullopt},
                            jobs);
+}
+
+std::expected<ArchetypeAuthoringReport, std::string> UpgradeArchetypeAuthoring(
+    const fs::path& root) {
+  auto manifest = Content::LoadConversionManifest(root);
+  if (!manifest) return std::unexpected(manifest.error());
+  ArchetypeAuthoringReport report;
+  if (!*manifest) return report;
+  std::set<std::string> files;
+  if (!PlanHeaderFiles(**manifest, files)) return report;
+  for (const std::string& file : files) {
+    if (auto upgraded = UpgradeHeaderFile(root, file, report); !upgraded) {
+      return std::unexpected(upgraded.error());
+    }
+  }
+  if (auto written = WriteConversionManifest(root, **manifest); !written) {
+    return std::unexpected(written.error());
+  }
+  ++report.written;
+  return report;
 }
 
 }  // namespace VS::Extract

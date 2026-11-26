@@ -1349,7 +1349,8 @@ constexpr std::size_t kZudCount = 3;
 constexpr std::uint16_t kOwnBankLength = 3;
 constexpr std::int16_t kMovedVertex = 99;
 constexpr std::size_t kShieldMaterialByte = 5;
-constexpr std::uint8_t kEditedMaterial = 9;
+constexpr std::uint8_t kEditedMaterial = 6;  // silver
+constexpr std::size_t kWeaponCategoryByte = 2;
 
 constexpr std::size_t SectionIndex(content::ZudSection section) {
   return static_cast<std::size_t>(section);
@@ -1363,10 +1364,11 @@ Bytes ZudBody(bool borrowing) {
   return Encoded(shp);
 }
 
-// A ZUD of 4F's numbers and `body` alone.
+// An unarmed ZUD of 4F's numbers and `body` alone.
 content::ZudFile ZudOf(Bytes body) {
   content::ZudFile zud;
   zud.identity.front() = static_cast<std::uint8_t>(kSampleLender);
+  zud.identity.at(kWeaponCategoryByte) = content::kBareHandsWeaponCategory;
   zud.sections.at(SectionIndex(content::ZudSection::kBody)) = std::move(body);
   return zud;
 }
@@ -1554,7 +1556,7 @@ void CheckEditedArchetypeLoads(const ModelRoot& root) {
   auto edited = content::DecodeZudFile(*loaded);
   REQUIRE(edited.has_value());
   EditArchetype(root, [](content::JsonDocument& json) {
-    json.at("header").at("shield_material") = kEditedMaterial;
+    json.at("header").at("shield_material") = "silver";
     json.at("common_animation").at("bank").at("clips").front().at("length") =
         kEditedLength;
   });

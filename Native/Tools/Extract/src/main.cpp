@@ -150,7 +150,8 @@ int WithLabels(int result, const fs::path& root) {
   return result == 0 ? LabelAssets(root) : result;
 }
 
-// The zone, background and animation upgrades `authoring` runs last.
+// The zone, background, animation and archetype upgrades `authoring` runs
+// last.
 int UpgradeAssetAuthoring(const fs::path& root) {
   const auto zones = Extract::UpgradeZoneAuthoring(root);
   if (!zones) {
@@ -185,6 +186,15 @@ int UpgradeAssetAuthoring(const fs::path& root) {
       "extract",
       "animation authoring: {} documents, {} named events, {} files updated",
       animations->documents, animations->events, animations->written);
+  const auto archetypes = Extract::UpgradeArchetypeAuthoring(root);
+  if (!archetypes) {
+    VS::Core::LogError("extract", "archetype authoring: {}",
+                       archetypes.error());
+    return 1;
+  }
+  VS::Core::LogInfo("extract",
+                    "archetype authoring: {} named headers, {} files updated",
+                    archetypes->headers, archetypes->written);
   return 0;
 }
 

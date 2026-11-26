@@ -83,7 +83,10 @@ struct ZudSection {
   friend bool operator==(const ZudSection&, const ZudSection&) = default;
 };
 
-// _zudData_t (592C.c:25), read from the file's bytes.
+// _zudData_t (592C.c:25), read from the file's bytes. Each identity byte is
+// the sharing key of a part's data slot; Content::ArchetypeHeader names what
+// they hold (battle_sequence_model is the weapon category and
+// default_material the movement class).
 struct ZudHeader {
   std::uint8_t character_id = 0;
   std::uint8_t weapon = 0;

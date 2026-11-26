@@ -1,20 +1,20 @@
 {
   "schema": "vs.actor-archetype",
-  "schema_version": 2,
+  "schema_version": 3,
   "source": "MAP/Z001U00.ZUD",
   "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   "header": {
-    "character_id": 79,
-    "weapon": 1,
-    "battle_sequence_model": 79,
-    "weapon_material": 3,
-    "shield": 0,
-    "shield_material": 0,
-    "default_material": 5
+    "model_id": 79,
+    "blade_item_id": 1,
+    "weapon_category": "dagger",
+    "weapon_material": "bronze",
+    "shield_item_id": 129,
+    "shield_material": "iron",
+    "movement_class": 2
   },
   "body": {"model": "model.obj.4f"},
   "weapon": {"model": "model.obj.01.wep"},
-  "shield": null,
+  "shield": {"model": "model.obj.63.wep"},
   "common_animation": {"animation": "animation.obj.4f_com"},
   "battle_animation": {
     "bones": 2,

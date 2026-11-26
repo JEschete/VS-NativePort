@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <cstdint>
 #include <expected>
 #include <optional>
@@ -9,12 +10,15 @@
 
 #include "Content/JsonText.hpp"
 #include "Content/SeqFile.hpp"
+#include "Content/ZudFile.hpp"
 
 // The actor-archetype form of a MAP\*.ZUD enemy bundle (ASSET_PIPELINE.md
 // §6.2.5, #200), in schema vs.actor-archetype
 // (Native/Content/schemas/actor-archetype.schema.json). It names the parts
 // ZudFile.hpp holds instead of copying them:
-//   header       the identity bytes, as named numbers
+//   header       the identity bytes under their meanings: model, blade and
+//                shield item ids, weapon category, materials by name and
+//                movement class
 //   body         {"model": id}, a converted character model, or
 //                {"file": "<NAME>.gltf"}, a model of its own beside the JSON
 //   weapon,      null or {"model": id}, a converted weapon
@@ -31,25 +35,49 @@
 namespace VS::Content {
 
 inline constexpr std::string_view kActorArchetypeSchema = "vs.actor-archetype";
-inline constexpr std::uint32_t kActorArchetypeSchemaVersion = 2;
+inline constexpr std::uint32_t kActorArchetypeSchemaVersion = 3;
 // The zud-json converter writes each MAP\*.ZUD as <directory>/<ZUD>.json, and
 // a body no converted model matches as <directory>/<ZUD>.gltf.
 inline constexpr std::string_view kZudArchetypeConverterName = "zud-json";
-inline constexpr std::uint32_t kZudArchetypeConverterVersion = 2;
+inline constexpr std::uint32_t kZudArchetypeConverterVersion = 3;
 inline constexpr auto kArchetypeDirectory = "models/zud";
 
+// The equipped weapon category of an archetype without a blade
+// (func_80077240's i = 0xA); 1-9 are the blade's kBladeCategories.
+inline constexpr std::uint8_t kBareHandsWeaponCategory = 10;
+// A shield's header byte is its item id minus this; 0 is no shield.
+inline constexpr int kArchetypeShieldItemOffset = 31;
+
 // The identity bytes (ZudData, MENU9.PRG); the file's eighth byte is zero.
+// The encyclopedia preview passes each to vs_battle_populateDataSlot.
 struct ArchetypeHeader {
-  std::uint8_t character_id = 0;
-  std::uint8_t weapon = 0;
-  std::uint8_t battle_sequence_model = 0;
-  std::uint8_t weapon_material = 0;
+  // The SHP's model id: its sharing key and, for a converted body, the
+  // model.obj.<hex> number.
+  std::uint8_t model_id = 0;
+  std::uint8_t blade_item_id = 0;  // 0 for none
+  // The battle SEQ sharing key: 1-9 the blade's category, else
+  // kBareHandsWeaponCategory (the <shape>_BT<n> suffix, A for 10).
+  std::uint8_t weapon_category = 0;
+  std::uint8_t weapon_material = 0;  // kMaterials
+  // The shield's item id minus kArchetypeShieldItemOffset; 0 for none.
   std::uint8_t shield = 0;
-  std::uint8_t shield_material = 0;
-  std::uint8_t default_material = 0;
+  std::uint8_t shield_material = 0;  // kMaterials
+  // The shape's PlaceActorInRoom movement class (ActorPlacement.hpp); the
+  // decomp's defaultMaterial.
+  std::uint8_t movement_class = 0;
 
   bool operator==(const ArchetypeHeader&) const = default;
 };
+
+// The header a ZUD's identity bytes give, ignoring the pad byte, and the
+// identity bytes a header gives back, with a zero pad.
+[[nodiscard]] ArchetypeHeader ArchetypeHeaderOf(
+    const std::array<std::uint8_t, kZudIdentityBytes>& identity) noexcept;
+[[nodiscard]] std::array<std::uint8_t, kZudIdentityBytes> ZudIdentityOf(
+    const ArchetypeHeader& header) noexcept;
+// The header member of an archetype document, as ActorArchetypeJson writes
+// it.
+[[nodiscard]] JsonDocument ArchetypeHeaderJson(const ArchetypeHeader& header);
 
 // A part that is another conversion output, named by its id.
 struct ArchetypeReference {

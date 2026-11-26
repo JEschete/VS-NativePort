@@ -12,7 +12,7 @@
       "description": "Optional informational name, not an identity or gameplay field."
     },
     "schema": { "const": "vs.actor-archetype" },
-    "schema_version": { "const": 2 },
+    "schema_version": { "const": 3 },
     "source": {
       "type": "string",
       "description": "The disc file the archetype came from, e.g. MAP/Z001U00.ZUD."
@@ -25,16 +25,31 @@
     "header": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["character_id", "weapon", "battle_sequence_model", "weapon_material", "shield", "shield_material", "default_material"],
-      "description": "The identity bytes the encyclopedia preview reads (MENU9.PRG ZudData); the room spawn reads only the parts.",
+      "required": ["model_id", "blade_item_id", "weapon_category", "weapon_material", "shield_item_id", "shield_material", "movement_class"],
+      "description": "The identity bytes (MENU9.PRG ZudData): the encyclopedia preview shows them, and a room spawn shares each with the enemy's data slot. The spawn loads only the parts.",
       "properties": {
-        "character_id": { "$ref": "#/$defs/byte" },
-        "weapon": { "$ref": "#/$defs/byte" },
-        "battle_sequence_model": { "$ref": "#/$defs/byte" },
-        "weapon_material": { "$ref": "#/$defs/byte" },
-        "shield": { "$ref": "#/$defs/byte" },
-        "shield_material": { "$ref": "#/$defs/byte" },
-        "default_material": { "$ref": "#/$defs/byte" }
+        "model_id": {
+          "$ref": "#/$defs/byte",
+          "description": "The SHP model id the encyclopedia previews, e.g. 79 for OBJ/4F.SHP."
+        },
+        "blade_item_id": {
+          "oneOf": [{ "type": "null" }, { "type": "integer", "minimum": 1, "maximum": 255 }],
+          "description": "The blade's item id (combination-blade-results legacy_id), or null for none."
+        },
+        "weapon_category": {
+          "enum": ["dagger", "sword", "great-sword", "axe-mace", "great-axe", "staff", "heavy-mace", "polearm", "crossbow", "bare-hands"],
+          "description": "The weapon category the blade's battle sequence follows; bare-hands when the enemy has no blade."
+        },
+        "weapon_material": { "$ref": "#/$defs/material", "description": "The blade's material." },
+        "shield_item_id": {
+          "oneOf": [{ "type": "null" }, { "type": "integer", "minimum": 32, "maximum": 286 }],
+          "description": "The shield's item id, e.g. 127 for a Buckler, or null for none; stored as the item id less 31."
+        },
+        "shield_material": { "$ref": "#/$defs/material", "description": "The shield's material." },
+        "movement_class": {
+          "$ref": "#/$defs/byte",
+          "description": "The enemy's movement class, which room placement reads (decomp field defaultMaterial)."
+        }
       }
     },
     "body": {
@@ -54,6 +69,10 @@
   },
   "$defs": {
     "byte": { "type": "integer", "minimum": 0, "maximum": 255 },
+    "material": {
+      "enum": ["none", "wood", "leather", "bronze", "iron", "hagane", "silver", "damascus"],
+      "description": "A material as the materials catalog names it."
+    },
     "id": {
       "type": "string",
       "pattern": "^[a-z0-9._-]+$",

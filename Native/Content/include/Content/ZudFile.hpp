@@ -16,9 +16,10 @@
 //
 // A file is a 0x30-byte header, then the sections back to back in header
 // order with nothing between or after them. The header holds 8 identity bytes
-// (ZudData, MENU9.PRG 592C.c:8: the character, weapon, battle-sequence model,
-// weapon material, shield, shield material and default material, then a pad
-// byte), then each section's offset and size as little-endian words. An empty
+// (ZudData, MENU9.PRG 592C.c:8: the SHP model id, blade item id, weapon
+// category, blade material, shield item id less 31, shield material and
+// movement class, then a pad byte; Content/ActorArchetype.hpp names them),
+// then each section's offset and size as little-endian words. An empty
 // section has size 0 at the offset where the next one starts.
 namespace VS::Content {
 
