@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <cstring>
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <iterator>
 #include <optional>
@@ -17,9 +18,14 @@
 
 #include "Battle/ActionTable.hpp"
 #include "Content/ActionCatalog.hpp"
+#include "Content/AssetCatalog.hpp"
 #include "Content/DataStore.hpp"
+#include "Content/DiscLayout.hpp"
+#include "Content/EffectPackages.hpp"
 #include "Content/LearningCatalog.hpp"
 #include "Content/ModuleData.hpp"
+#include "Effects/EffectResources.hpp"
+#include "Effects/PurgeTables.hpp"
 #include "Extract/ActionConversion.hpp"
 #include "Extract/ConverterBatch.hpp"
 #include "TestSupport/ActionRoot.hpp"
@@ -173,6 +179,8 @@ constexpr std::string_view kNamedEffect{
     "action.move-ab,first,apply-intelligence-down,",
 };
 constexpr std::string_view kNumericEffect = "action.move-ab,first,2,";
+// The synthetic action 7's effect package, whose code is 35.
+constexpr std::string_view kNamedPackage = ",asset.effect.e035.p,";
 
 // The action tables and their schemas under `root`, in that order.
 std::vector<std::string> AuthoredActionFiles(
@@ -222,6 +230,20 @@ std::pair<std::string, std::size_t> WithEarlierNames(std::string hits) {
     respelled += cells;
   }
   return {std::move(hits), respelled};
+}
+
+// `actions` as authored before effect packages were named: the effect_id
+// header and every package by its code. Also how many cells that respelled.
+std::pair<std::string, std::size_t> WithEffectIds(std::string actions) {
+  actions = Replaced(std::move(actions), ",effect_package,", ",effect_id,");
+  std::size_t respelled = 0;
+  for (const auto& package : content::kEffectPackages) {
+    if (package.code == 0) continue;
+    actions = Replaced(std::move(actions), std::format(",{},", package.name),
+                       std::format(",{},", package.code));
+    ++respelled;
+  }
+  return {std::move(actions), respelled};
 }
 }  // namespace
 
@@ -322,7 +344,7 @@ TEST_CASE(
   const auto hits = content::FormatActionHits(synthetic);
   CHECK(actions.starts_with(
       "id,name,legacy_id,kind,category,cost,recovery_delay,camera_zoom,"
-      "effect_id,range_x,"));
+      "effect_package,range_x,"));
   CHECK(actions.contains(
       "action.untitled-000,untitled,0,none,action-category.environment,"));
   CHECK(actions.contains("action.rend,Rend {level},7,trap,"));
@@ -376,6 +398,47 @@ TEST_CASE("Action hit effects read by name or by legacy code",
                      Replaced(hits, kNamedEffect, "action.move-ab,first,70,")));
   CHECK_FALSE(Parses(
       actions, Replaced(hits, kNamedEffect, "action.move-ab,first,heal,")));
+}
+
+TEST_CASE("Action effect packages read by asset id or legacy code",
+          "[action-catalog]") {
+  const ActionTables tables;
+  const auto& [synthetic, actions, hits] = tables;
+  const auto numeric = content::ParseActionCatalog(
+      Replaced(actions, kNamedPackage, ",35,"), hits);
+  REQUIRE(numeric);
+  if (numeric) CHECK(*numeric == synthetic);
+  // Code 252 has no package file, so neither spelling of it reads.
+  CHECK_FALSE(Parses(Replaced(actions, kNamedPackage, ",252,"), hits));
+  CHECK_FALSE(
+      Parses(Replaced(actions, kNamedPackage, ",asset.effect.e252.p,"), hits));
+  CHECK_FALSE(
+      Parses(Replaced(actions, kNamedPackage, ",asset.effect.e35.p,"), hits));
+}
+
+TEST_CASE("Action effect packages name each package the effect table loads",
+          "[action-catalog]") {
+  namespace disc = content::disc;
+  constexpr auto kFirstPackage = disc::Locate("EFFECT/E000.P");
+  const std::span packages{VS::Effects::kPackageFiles};
+  CHECK(content::kEffectPackages.front().name == "none");
+  for (std::int64_t code = 1; code <= content::kLastEffectPackageCode; ++code) {
+    const auto path = std::format("EFFECT/E{:03}.P", code);
+    INFO(path);
+    const auto& package = packages[static_cast<std::size_t>(code)];
+    const bool loaded = package != packages.front();
+    CHECK(content::IsEffectPackageCode(code) == loaded);
+    const auto file = std::ranges::lower_bound(disc::kFiles, path, {},
+                                               &disc::FileEntry::path);
+    const bool listed = file != disc::kFiles.end() && file->path == path;
+    CHECK(listed == loaded);
+    const auto named = std::ranges::find(content::kEffectPackages, code,
+                                         &content::EnumValue::code);
+    if (!listed || named == content::kEffectPackages.end()) continue;
+    CHECK(package.lba == file->extent.lba - kFirstPackage.lba);
+    CHECK(package.size == file->extent.size);
+    CHECK(content::AssetIdForDiscPath(path) == std::string(named->name));
+  }
 }
 
 TEST_CASE("Action schema refuses unfit names and inconsistent tables",
@@ -557,6 +620,54 @@ TEST_CASE("Action hits read and rewrite the earlier names of renamed values",
   const auto repeat = extract::UpgradeActionAuthoring(root.Root());
   REQUIRE(repeat);
   if (repeat) CHECK(Counts{repeat->named_values, repeat->written} == Counts{});
+}
+
+TEST_CASE("Action authoring renames effect_id and names its packages once",
+          "[action-catalog]") {
+  using Counts = std::array<std::size_t, 3>;
+  const ActionTables tables;
+  const auto& [synthetic, actions, hits] = tables;
+  const auto [legacy, respelled] = WithEffectIds(actions);
+  const auto read = content::ParseActionCatalog(legacy, hits);
+  REQUIRE(read);
+  if (read) CHECK(*read == synthetic);
+  support::ScratchDataRoot root("test-action");
+  root.Write(content::kActionsPath, legacy);
+  root.Write(content::kActionHitsPath, hits);
+  const auto upgraded = extract::UpgradeActionAuthoring(root.Root());
+  REQUIRE(upgraded);
+  if (!upgraded) return;
+  const Counts wanted{1, respelled, 3};
+  CHECK(wanted == Counts{upgraded->renamed_columns, upgraded->named_values,
+                         upgraded->written});
+  CHECK(AuthoredActionFiles(root.Root()).at(0) == actions);
+  const auto repeat = extract::UpgradeActionAuthoring(root.Root());
+  REQUIRE(repeat);
+  if (repeat) {
+    const Counts again{repeat->renamed_columns, repeat->named_values,
+                       repeat->written};
+    CHECK(again == Counts{});
+  }
+}
+
+TEST_CASE("Action effect packages are the disc's package files and assets",
+          "[action-catalog][content-tables]") {
+  if (!content::DataStore::OpenShared("Native\\data")) {
+    SKIP("Extracted Native/data is unavailable");
+  }
+  const auto* store = content::DataStore::Get();
+  const auto* catalog = store == nullptr ? nullptr : store->Catalog();
+  REQUIRE(catalog != nullptr);
+  if (catalog == nullptr) return;
+  for (std::int64_t code = 1; code <= content::kLastEffectPackageCode; ++code) {
+    const auto path = std::format("EFFECT/E{:03}.P", code);
+    INFO(path);
+    CHECK(content::IsEffectPackageCode(code) == (store->Find(path) != nullptr));
+    const auto named = std::ranges::find(content::kEffectPackages, code,
+                                         &content::EnumValue::code);
+    if (named == content::kEffectPackages.end()) continue;
+    CHECK(catalog->Find(named->name).has_value());
+  }
 }
 
 TEST_CASE("Action configured executable reloads all 256 actions exactly",

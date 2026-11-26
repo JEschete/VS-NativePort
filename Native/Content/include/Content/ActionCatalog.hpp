@@ -79,7 +79,8 @@ struct ActionRule {
   std::uint8_t cost = 0;
   std::uint8_t recovery_delay = 0;
   std::uint8_t camera_zoom = 0;
-  std::uint8_t effect_id = 0;
+  // The effect package's code (Content/EffectPackages.hpp); 0 plays none.
+  std::uint8_t effect_package = 0;
   std::uint32_t behavior = 0;
   ActionVolume range;
   ActionVolume area;

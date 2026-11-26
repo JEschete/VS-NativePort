@@ -5665,7 +5665,7 @@ T00628.006,T00628,vs_actionFlags_t,6,unk12,1,u_short,1,,,ignores_sight,Set: the 
 T00628.007,T00628,vs_actionFlags_t,7,unk13,1,u_short,1,,,radial_area,Area reach is areaRangeY times 32,med,native:Action.hpp ActionAiFlags::radial_area (#441);source:7CD68.c:465
 T00628.008,T00628,vs_actionFlags_t,8,unk14,1,u_short,2,,,reserved1_bit6,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Battle\Action.hpp:134;native:Action.hpp ActionAiFlags::reserved1_bit6 (#441);declaration-only;source:main.h:71
 T00629.000,T00629,vs_action_t,0,id,0,u_char,,,,id,Action id,med,native:Action.hpp ActionDefinition::id (#441);source:146C.c:9759
-T00629.001,T00629,vs_action_t,1,unk1,1,u_char,,,,effect_id,Presentation effect id,high,native:Action.hpp ActionDefinition::effect_id (#441);source:146C.c:3967
+T00629.001,T00629,vs_action_t,1,unk1,1,u_char,,,,effect_id,Presentation effect package number (EFFECT/E<NNN>.P),high,native:Action.hpp ActionDefinition::effect_id (#441);catalog:actions.csv effect_package (asset ids; Content/EffectPackages.hpp);source:146C.c:3967
 T00629.002,T00629,vs_action_t,2,unk2_0,1,u_char,1,,,returns_to_menu_on_cancel,Cancelling targeting returns to the battle action menu; otherwise menus close and recovery begins,med,native:Action.hpp ActionDefinition::returns_to_menu_on_cancel (#441);source:146C.c:3604
 T00629.003,T00629,vs_action_t,3,type,0,u_char,3,,,type,Action type (Battle::ActionType),high,native:Action.hpp ActionDefinition::type (#441);source:146C.c:9719
 T00629.004,T00629,vs_action_t,4,unk2_4,1,u_char,4,,,category,Targeting category; indexes the category targeting tables,high,native:Action.hpp ActionDefinition::category (#441);source:146C.c:4469

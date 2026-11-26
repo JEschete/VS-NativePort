@@ -126,7 +126,7 @@ int Usage() {
       "      labels --force refreshes only labels, preserving gameplay "
       "fields and original encoded names.\n"
       "      authoring imports material and learning definitions and upgrades "
-      "action hit effects, zone fields "
+      "action hit effects and effect packages, zone fields "
       "and generated recipe "
       "IDs/references "
       "to semantic item names without changing recipe values.");
@@ -165,9 +165,11 @@ int UpgradeAuthoring(const fs::path& root) {
                        action_authoring.error());
     return 1;
   }
-  VS::Core::LogInfo("extract",
-                    "action authoring: {} named values, {} files updated",
-                    action_authoring->named_values, action_authoring->written);
+  VS::Core::LogInfo(
+      "extract",
+      "action authoring: {} named columns, {} named values, {} files updated",
+      action_authoring->renamed_columns, action_authoring->named_values,
+      action_authoring->written);
   if (auto status = Extract::ConvertDiscStatus(root, false); !status) {
     VS::Core::LogError("extract", "status: {}", status.error());
     return 1;

@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "Content/ActionCategoryCatalog.hpp"
+#include "Content/EffectPackages.hpp"
 #include "Content/GameTextCodec.hpp"
 #include "Content/GameplayDomains.hpp"
 #include "Platform/Paths.hpp"
@@ -351,9 +352,31 @@ constexpr std::array kActionColumns{
             "equipped weapon's delay; actions 22-53 add no delay."),
     Enumeration("camera_zoom", kZooms,
                 "How the combat camera frames the action."),
-    Integer("effect_id", kByteMax,
-            "The original effect table slot that presents the action; not "
-            "yet named."),
+    // decomp: func_8007138C (src/BATTLE/BATTLE.PRG/146C.c:3618)
+    // decomp: func_80073D30 (src/BATTLE/BATTLE.PRG/146C.c:4639)
+    // Chest targets are tagged 0x20 | index (func_80071F68) and the swap
+    // tests 0x10 of that tag (func_800708EC), so chests 16 and up.
+    // decomp: func_80071F68 (src/BATTLE/BATTLE.PRG/146C.c:3898)
+    // decomp: func_800708EC (src/BATTLE/BATTLE.PRG/146C.c:3368)
+    ColumnSpec{
+        .name = "effect_package",
+        .type = ColumnType::kEnum,
+        .minimum = 0,
+        .maximum = kLastEffectPackageCode,
+        .references = {},
+        .description =
+            "The effect package a menu-action action plays when it is "
+            "presented, by asset id: asset.effect.e060.p is EFFECT/E060.P, "
+            "whose textures are image.effect.e060_*. none plays no effect. "
+            "Actions without menu-action never read it: a trap panel plays "
+            "the package numbered like its action (action 6 plays "
+            "asset.effect.e006.p) whatever this says. Actions may share a "
+            "package, and the presenter plays asset.effect.e036.p in place "
+            "of asset.effect.e039.p when the target is a treasure chest "
+            "17th or later in its room's chest list.",
+        .enumeration = kEffectPackages,
+        .legacy_name = "effect_id",
+    },
     Integer("range_x", kByteMax, kRangeText),
     Integer("range_y", kByteMax, kRangeText),
     Integer("range_z", kByteMax, kRangeText),
@@ -389,7 +412,7 @@ enum ActionColumn : std::size_t {
   kCostColumn,
   kRecoveryDelayColumn,
   kCameraZoomColumn,
-  kEffectIdColumn,
+  kEffectPackageColumn,
   kRangeXColumn,
   kRangeYColumn,
   kRangeZColumn,
@@ -604,7 +627,7 @@ std::expected<ActionCatalog, std::string> FromRows(
         .cost = byte(kCostColumn),
         .recovery_delay = byte(kRecoveryDelayColumn),
         .camera_zoom = byte(kCameraZoomColumn),
-        .effect_id = byte(kEffectIdColumn),
+        .effect_package = byte(kEffectPackageColumn),
         .behavior = static_cast<std::uint32_t>(row.values[kBehaviorColumn]),
         .range = {{byte(kRangeXColumn), byte(kRangeYColumn),
                    byte(kRangeZColumn)},
@@ -756,7 +779,7 @@ std::string FormatActions(const ActionCatalog& catalog) {
         number(rule.cost),
         number(rule.recovery_delay),
         Label(kZooms, rule.camera_zoom),
-        number(rule.effect_id),
+        Label(kEffectPackages, rule.effect_package),
         number(rule.range.extent[0]),
         number(rule.range.extent[1]),
         number(rule.range.extent[2]),

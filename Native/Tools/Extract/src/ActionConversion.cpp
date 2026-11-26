@@ -236,7 +236,8 @@ std::expected<ImportedActions, std::string> DecodeActions(
     rule.recovery_delay =
         static_cast<std::uint8_t>(Read(record, kRecoveryOffset, 1));
     rule.camera_zoom = static_cast<std::uint8_t>(Get(flags, kCameraZoom));
-    rule.effect_id = static_cast<std::uint8_t>(Read(record, kEffectOffset, 1));
+    rule.effect_package =
+        static_cast<std::uint8_t>(Read(record, kEffectOffset, 1));
     rule.behavior =
         (ai & Content::kBehaviorAiMask) |
         (Get(packed, kMenuAction) != 0 ? Content::kBehaviorMenuAction : 0) |
@@ -294,7 +295,7 @@ std::expected<std::vector<std::byte>, std::string> ReconstructActionSource(
           index));
     }
     Append(bytes, static_cast<std::uint32_t>(index), 1);
-    Append(bytes, rule.effect_id, 1);
+    Append(bytes, rule.effect_package, 1);
     Append(bytes,
            Place((rule.behavior & Content::kBehaviorMenuAction) != 0 ? 1 : 0,
                  kMenuAction) |
@@ -483,6 +484,7 @@ std::expected<ActionAuthoringReport, std::string> UpgradeActionAuthoring(
     auto rewrite =
         Content::NormalizeTableText(*table.spec, *texts[index], table.path);
     if (!rewrite) return std::unexpected(rewrite.error());
+    report.renamed_columns += rewrite->renamed_columns;
     report.named_values += rewrite->named_values;
     normalized[index] = std::move(rewrite->text);
     if (normalized[index] != *texts[index]) {

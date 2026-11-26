@@ -174,14 +174,18 @@ Rules beyond the schemas:
   after a repeated name and `untitled-NNN` for placeholder records. `name` allows only the `{level}` markup.
   `legacy_id` is the index saves and scripts still use. `category` references an `action-category.<slug>`.
   `behavior` is a `|` set of the twelve named AI bits plus `menu-action`, `hits-first-obstruction` and
-  `starts-unlocked` (or `none`).
+  `starts-unlocked` (or `none`). `effect_package` names the package a `menu-action` action plays by asset id
+  (`asset.effect.e060.p` is `EFFECT/E060.P`) or `none`; code 252 has no package file and is refused. Packages are
+  shared freely, and a trap panel plays the package numbered like its action whatever the column says. Semantic
+  effect names wait for #216.
 - `catalogs\battle\action-hits.csv`: one row per hit, keyed by `action` and `slot` (`first`/`second`). Every column
   but the factor is a name. An action with no second hit has no second row; an all-zero row is refused. `effect`
   names the battle effect table slot the hit dispatches: `apply-*` and `cure-*` add or remove that status,
   `recover-hp-on-*` heal only when the answered hit matches, the `mark-success-N` slots behave alike, and the
   `unused-N` slots, empty in the original, are refused at run time. What every value does, with the formulas, is in
   [§4.7.1](ACTION_HITS.md#471-action-hit-values-520). `VS.Extract authoring` spells numeric codes and earlier names
-  in an existing tree by their current name and refreshes both schemas.
+  in an existing tree by their current name, renames the earlier `effect_id` header to `effect_package` and
+  refreshes both schemas.
 - `catalogs\battle\import\actions.json` holds the bits the catalog does not keep: the four unread AI bits, the
   reserved flag nibble, the reserved word and the bytes after each name's terminator. The importer refuses a source
   whose hit codes have no name (effects 70-127, prerequisite codes 40-63, stat calculators 27-63).
@@ -192,5 +196,5 @@ bridge**: code still reads the 52-byte bitfield record, and the table retires wi
 A missing catalog logs and leaves the table unchanged; it never yields an all-zero rule. The module data entry for
 G01904 is removed.
 
-Open work: #499, #58 (the action's own `effect_id` is still an unnamed index; identically behaving hit prerequisites
-and effects keep separate names; Learning's `action` column names break arts by slug rather than action identity).
+Open work: #499, #58 (identically behaving hit prerequisites and effects keep separate names; Learning's `action`
+column names break arts by slug rather than action identity).

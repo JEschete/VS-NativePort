@@ -143,6 +143,7 @@
     <ClInclude Include="include\Content\DiscQueue.hpp" />
     <ClInclude Include="include\Content\DiscReader.hpp" />
     <ClInclude Include="include\Content\DiscReaderLive.hpp" />
+    <ClInclude Include="include\Content\EffectPackages.hpp" />
     <ClInclude Include="include\Content\EnemyPreviews.hpp" />
     <ClInclude Include="include\Content\EsqFile.hpp" />
     <ClInclude Include="include\Content\EtmFile.hpp" />

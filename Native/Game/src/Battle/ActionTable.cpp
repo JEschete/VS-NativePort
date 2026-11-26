@@ -42,7 +42,7 @@ std::expected<void, std::string> BuildActionTable(
     }
     auto& action = built[index];
     action.id = static_cast<std::uint8_t>(index);
-    action.effect_id = rule.effect_id;
+    action.effect_id = rule.effect_package;
     action.returns_to_menu_on_cancel =
         (rule.behavior & Content::kBehaviorMenuAction) != 0;
     action.type = rule.kind;

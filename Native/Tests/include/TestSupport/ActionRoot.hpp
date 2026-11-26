@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "Content/ActionCatalog.hpp"
+#include "Content/EffectPackages.hpp"
 #include "Extract/ActionConversion.hpp"
 #include "Extract/ConversionManifestWriter.hpp"
 #include "TestSupport/ActionCategoryRoot.hpp"
@@ -63,7 +64,9 @@ inline Extract::ImportedActions SyntheticActions() {
     rule.cost = byte(1);
     rule.recovery_delay = byte(3);
     rule.camera_zoom = static_cast<std::uint8_t>(index % kZooms);
-    rule.effect_id = byte(5);
+    // Every byte but 252, which names no package file.
+    rule.effect_package =
+        Content::IsEffectPackageCode(byte(5)) ? byte(5) : std::uint8_t{0};
     rule.behavior =
         static_cast<std::uint32_t>(((index * 0x11) & kAiWordMask) << kAiShift) |
         ((index & 1) != 0 ? Content::kBehaviorMenuAction : 0) |

@@ -23,16 +23,16 @@ ASSET_PIPELINE §4 and the §7.2 readability gate. Shipped slices, each with evi
   equipment indices and class/affinity tail bytes, ZUD index derived from slot, named AI settings, described
   columns and units, enemy names as text, enemy kinds in an enemy-kinds table, gem effects by behavior, part
   categories by part kind (selected enums).
-- Actions: hit effects, hit formulas, hit prerequisites and shield PP by behavior.
+- Actions: hit effects, hit formulas, hit prerequisites and shield PP by behavior; effect packages by asset id
+  (`asset.effect.eNNN.p`; semantic effect names wait for #216).
 - Bestiary: previews by archetype, defeat ranges by enemy kind; limb labels by body part.
 - Materials: catalog version 2 keeps only the columns MENUC reads (strength, intelligence, agility); class
   points, affinities and base DP are archived as named fields in the import provenance (`694b6714c`).
 
 Remaining:
 
-- Blocked on their consumers: `actions.effect_id` (the presentation table is unnamed), zone-enemy
-  `movement_class`/`gait_class` (semantics unnamed; schemas list only the bits consumers test) and
-  `zones.music_id` (selects `MUSIC/MUSIC<n>` and `SOUND/WAVE<n>`; needs #501).
+- Blocked on their consumers: zone-enemy `movement_class`/`gait_class` (semantics unnamed; schemas list only the
+  bits consumers test) and `zones.music_id` (selects `MUSIC/MUSIC<n>` and `SOUND/WAVE<n>`; needs #501).
 - Deferred: room semantic names, JSON `raw_scale`, an optional typed `GemEffect` enum, and typed runtime
   adoption with EC-04 T-shim retirement.
 - Checked and kept as columns: action-hit `hit_function` picks every checked hit's chance formula (only direct
@@ -43,7 +43,7 @@ Remaining:
 
 | Issue | Open gates |
 |---|---|
-| #499 catalogs | No controller or combat capture of an authored edit exists for any slice. Actions: `effect_id` is unnamed and ~110 references in 62 files read `ActionDefinition` through EC-04-T-ACTION, so #58 is not claimed. Action categories stay keyed by number (AI sets, previews, `DamageDistribution`; 16-category cap). Status rules and bestiary consumers read through compatibility lookups. |
+| #499 catalogs | No controller or combat capture of an authored edit exists for any slice. Actions: ~110 references in 62 files read `ActionDefinition` through EC-04-T-ACTION, so #58 is not claimed. Action categories stay keyed by number (AI sets, previews, `DamageDistribution`; 16-category cap). Status rules and bestiary consumers read through compatibility lookups. |
 | #210 FAR backgrounds | Matched-reference placement, gradients, seams and parallax; room transitions and re-entry; MPD/ARM room bindings; EC-04 retirement. Reference parity needs an approved control path to "Have you found Sydney?" with the reference room, event and camera state. |
 | #500, #54 text | MCMAN's extended Japanese glyph records (47 location labels) are unsupported. Full catalogs, call-site argument bindings, font and charmap assets and typed UI consumers remain. |
 | #199, #200, #203, #55, #48 | Zones, actor archetypes, actor shapes, actor identity and content-request ownership. |
