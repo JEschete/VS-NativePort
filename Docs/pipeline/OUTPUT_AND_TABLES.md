@@ -78,7 +78,7 @@ Native\data\
     music\<id>.seq.json            (decoded AKAO event list per track)
     sfx\<id>.seq.json              (sound-effect sequences)
     streams\index.json             (effect/XA source locations and native assets)
-    streams\akao\<id>\stream.json  (bounded effect-stream metadata and source header)
+    streams\akao\<id>\stream.json  (named effect-stream header check record, vs.audio-stream 2)
     streams\akao\<id>\<n>.wav + <n>.sfz
     streams\xa\<disc path>.flac    (lossless decoded XA, e.g. ENDING\ENDING.XA.flac)
   movies\<name>.mkv                (planned; today disc\MOV\TITLE.STR.mkv: AV1 video + FLAC audio, §6.7)

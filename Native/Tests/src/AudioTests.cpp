@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <limits>
 #include <memory>
@@ -38,6 +39,7 @@
 #include "Content/AudioBank.hpp"
 #include "Content/AudioBankJson.hpp"
 #include "Content/AudioStream.hpp"
+#include "Content/AudioStreamJson.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/JsonText.hpp"
 #include "Core/Log.hpp"
@@ -329,14 +331,13 @@ Content::AudioBank SampleSoundBank() {
   return bank;
 }
 
-Content::JsonDocument SampleSoundBankJson() {
+// The schema fixture `file` under Native/Tests/data/audio.
+Content::JsonDocument AudioFixtureJson(std::string_view file) {
   std::ifstream in(std::filesystem::path(SDL_GetBasePath()) / ".." / ".." /
-                       "Native" / "Tests" / "data" / "audio" /
-                       "sample-sound-bank.json",
+                       "Native" / "Tests" / "data" / "audio" / file,
                    std::ios::binary);
   const std::string text{std::istreambuf_iterator<char>(in), {}};
-  auto json =
-      Content::ParseJsonText(std::as_bytes(std::span(text)), "sample bank");
+  auto json = Content::ParseJsonText(std::as_bytes(std::span(text)), file);
   REQUIRE(json);
   return *json;
 }
@@ -625,8 +626,9 @@ void CheckStreamMetadata(const Content::AudioStreamInfo& info, bool stereo,
   CHECK(info.source_pitch == 2048);
   CHECK(info.frames == 3640);
   CHECK_FALSE(info.repeat);
-  CHECK(std::equal(info.source_header.begin(), info.source_header.end(),
-                   source.begin()));
+  CHECK(info.start_page == 2048);
+  CHECK(std::ranges::equal(Content::AudioStreamHeaderOf(info),
+                           source.first(Content::kAudioStreamHeaderBytes)));
 }
 
 void CheckStreamVolumeFade() {
@@ -900,6 +902,25 @@ TEST_CASE("Cutscene stream validation rejects invalid flags and pitch",
   CHECK_FALSE(Content::DecodeAudioStream(bytes));
 }
 
+// Sound_Cutscene_StartStream reads header words +16 to +32 and the loop at
+// +20 only when the stream repeats, so stream.json can name every header byte.
+TEST_CASE("Cutscene stream headers refuse words the player does not read",
+          "[audio][stream-import]") {
+  auto bytes = StreamBytes();
+  usize word = 0;
+  SECTION("after the magic") { word = 4; }
+  SECTION("after the start page") { word = 40; }
+  SECTION("the last word") { word = 60; }
+  SECTION("a loop when the stream does not repeat") { word = 20; }
+  Put32(bytes, word, 28);
+  const auto info = Content::InspectAudioStream(bytes);
+  REQUIRE_FALSE(info);
+  CHECK(info.error() ==
+        std::format(
+            "stream header word +{} is not zero; the player does not read it",
+            word));
+}
+
 TEST_CASE("Cutscene stream validation rejects invalid ADPCM",
           "[audio][stream-import]") {
   auto bytes = StreamBytes();
@@ -984,18 +1005,94 @@ TEST_CASE("Native stream assets reject mismatches and missing channels",
       Content::AudioStreamInstrumentPath(fixture.root, stream->info, 0)
           .parent_path();
   const auto metadata_path = directory / "stream.json";
-  SECTION("mismatched metadata") {
+  std::string_view reason;
+  const auto edit = [&metadata_path](const char* key, int value) {
     std::ifstream input(metadata_path);
-    auto metadata = nlohmann::json::parse(input);
+    auto metadata = nlohmann::ordered_json::parse(input);
     input.close();
-    metadata["frames"] = -1;
+    metadata[key] = value;
     std::ofstream output(metadata_path);
     output << metadata;
+  };
+  SECTION("another stream's metadata") {
+    edit("frames", 3612);
+    reason = "differs from the stream its effect package holds";
+  }
+  SECTION("invalid metadata") {
+    edit("frames", -1);
+    reason = ".frames must be";
   }
   SECTION("missing channel") {
     REQUIRE(std::filesystem::remove(directory / "1.wav"));
+    reason = "stream channel asset is missing";
   }
-  CHECK_FALSE(Content::ValidateAudioStreamAssets(stream->info, fixture.root));
+  const auto checked =
+      Content::ValidateAudioStreamAssets(stream->info, fixture.root);
+  REQUIRE_FALSE(checked);
+  CAPTURE(checked.error());
+  CHECK(checked.error().contains(reason));
+}
+
+// The stream sample-audio-stream.json describes: stereo, repeating from frame
+// 3,584 of 3,640.
+Content::AudioStreamInfo SampleAudioStream() {
+  auto bytes = StreamBytes(true);
+  Put32(bytes, 24, 3);
+  Put32(bytes, 20, 4096);
+  const auto info = Content::InspectAudioStream(bytes);
+  REQUIRE(info);
+  return *info;
+}
+
+TEST_CASE("Effect stream documents match their schema fixture both ways",
+          "[audio][stream-import]") {
+  const auto info = SampleAudioStream();
+  const auto fixture = AudioFixtureJson("sample-audio-stream.json");
+  CHECK(Content::AudioStreamJson(info) == fixture);
+  const auto read = Content::AudioStreamInfoOf(fixture, "sample stream");
+  INFO((read ? std::string{} : read.error()));
+  REQUIRE(read);
+  CHECK(*read == info);
+}
+
+TEST_CASE("Effect stream documents name the member a header cannot hold",
+          "[audio][stream-import]") {
+  auto json = Content::AudioStreamJson(SampleAudioStream());
+  std::string_view reason;
+  SECTION("a version 1 document") {
+    json = {{"version", 1}, {"id", json["id"]}};
+    reason = "stream is a version 1 audio stream; run VS.Extract authoring";
+  }
+  SECTION("an id that is not FNV-1a hexadecimal") {
+    json["id"] = "0123456789ABCDEF";
+    reason = "stream.id must be 16 lowercase hexadecimal digits";
+  }
+  SECTION("frames that end inside an ADPCM block") {
+    json["frames"] = 3641;
+    reason = "stream.frames must be a whole number of 28-frame ADPCM blocks";
+  }
+  SECTION("a rate its pitch does not play") {
+    json["sample_rate"] = 22051;
+    reason = "stream.sample_rate must be 22050";
+  }
+  SECTION("a stereo loop inside a chunk") {
+    json["loop_frame"] = 28;
+    reason =
+        "stream.loop_frame must be 0 for a stream that does not repeat, "
+        "and otherwise before frames and a multiple of 3584";
+  }
+  SECTION("a loop on a stream that does not repeat") {
+    json["repeat"] = false;
+    reason = "stream.loop_frame must be 0";
+  }
+  SECTION("the header bytes version 1 kept") {
+    json["source_header"] = Content::JsonDocument::array();
+    reason = "stream has an unknown member 'source_header'";
+  }
+  const auto read = Content::AudioStreamInfoOf(json, "stream");
+  REQUIRE_FALSE(read);
+  CAPTURE(read.error());
+  CHECK(read.error().contains(reason));
 }
 
 TEST_CASE("Native voice pause freezes the first sample and envelope",
@@ -1542,7 +1639,7 @@ TEST_CASE("Sound bank envelopes name every ADSR bit the SPU reads",
 TEST_CASE("Sound bank documents match their schema fixture both ways",
           "[audio][bank]") {
   const auto bank = SampleSoundBank();
-  const auto fixture = SampleSoundBankJson();
+  const auto fixture = AudioFixtureJson("sample-sound-bank.json");
   const auto written = Content::AudioBankJson(bank);
   REQUIRE(written);
   CHECK(*written == fixture);

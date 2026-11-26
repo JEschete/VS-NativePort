@@ -28,6 +28,7 @@
 #include "Extract/AnimationAuthoring.hpp"
 #include "Extract/AssetLabels.hpp"
 #include "Extract/AudioBankConversion.hpp"
+#include "Extract/AudioStreamAuthoring.hpp"
 #include "Extract/BackgroundAuthoring.hpp"
 #include "Extract/BestiaryConversion.hpp"
 #include "Extract/ConverterBatch.hpp"
@@ -128,8 +129,8 @@ int Usage() {
       "fields and original encoded names.\n"
       "      authoring imports material and learning definitions and upgrades "
       "action hit effects and effect packages, zone fields, "
-      "animation event scripts, archetype headers, sound bank envelopes "
-      "and generated recipe "
+      "animation event scripts, archetype headers, sound bank envelopes, "
+      "effect stream headers and generated recipe "
       "IDs/references "
       "to semantic item names without changing recipe values.");
   return 2;
@@ -151,8 +152,8 @@ int WithLabels(int result, const fs::path& root) {
   return result == 0 ? LabelAssets(root) : result;
 }
 
-// The zone, background, animation, archetype and sound bank upgrades
-// `authoring` runs last.
+// The zone, background, animation, archetype, sound bank and effect stream
+// upgrades `authoring` runs last.
 int UpgradeAssetAuthoring(const fs::path& root) {
   const auto zones = Extract::UpgradeZoneAuthoring(root);
   if (!zones) {
@@ -203,6 +204,13 @@ int UpgradeAssetAuthoring(const fs::path& root) {
   }
   VS::Core::LogInfo("extract", "bank authoring: {} banks, {} files updated",
                     banks->banks, banks->written);
+  const auto streams = Extract::UpgradeStreamAuthoring(root);
+  if (!streams) {
+    VS::Core::LogError("extract", "stream authoring: {}", streams.error());
+    return 1;
+  }
+  VS::Core::LogInfo("extract", "stream authoring: {} streams, {} files updated",
+                    streams->streams, streams->written);
   return 0;
 }
 

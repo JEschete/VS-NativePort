@@ -180,18 +180,6 @@ Result<Content::AudioBank> NumberedBankOf(const Json& json,
   return bank;
 }
 
-// `named`, led by the display_name label `numbered` carries.
-Json Labeled(const Json& numbered, Json named) {
-  const auto label = numbered.find(std::string(Content::kDisplayName));
-  if (label == numbered.end()) return named;
-  Json labeled = Json::object();
-  labeled[std::string(Content::kDisplayName)] = *label;
-  for (auto member = named.begin(); member != named.end(); ++member) {
-    labeled[member.key()] = std::move(member.value());
-  }
-  return labeled;
-}
-
 // Moves the bank `json` holds to schema vs.audio-bank when the numbered
 // converter wrote it; whether it did. A current bank is left as it is.
 Result<bool> NameBank(Json& json, const std::string& where) {
@@ -217,12 +205,12 @@ Result<bool> NameBank(Json& json, const std::string& where) {
   if (!named) {
     return std::unexpected(std::format("{}: {}", where, named.error()));
   }
-  Json labeled = Labeled(json, std::move(*named));
+  Json labeled = LabeledJson(json, std::move(*named));
   const Json& numbered = json.at("instruments");
   Json& instruments = labeled.at("instruments");
   for (std::size_t index = 0; index < instruments.size(); ++index) {
     instruments[index] =
-        Labeled(numbered.at(index), std::move(instruments[index]));
+        LabeledJson(numbered.at(index), std::move(instruments[index]));
   }
   auto read = Content::AudioBankOf(labeled, where);
   if (!read) return std::unexpected(read.error());

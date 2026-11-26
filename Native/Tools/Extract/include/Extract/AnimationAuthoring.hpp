@@ -18,6 +18,10 @@ namespace VS::Extract {
     const std::function<
         std::expected<bool, std::string>(Content::JsonDocument&)>& edit);
 
+// `named`, led by the display_name label `numbered` carries, when it has one.
+[[nodiscard]] Content::JsonDocument LabeledJson(
+    const Content::JsonDocument& numbered, Content::JsonDocument named);
+
 struct AnimationAuthoringReport {
   std::size_t documents = 0;  // documents moved to the current schema version
   std::size_t events = 0;     // events rewritten in their named form

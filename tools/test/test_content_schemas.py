@@ -302,5 +302,35 @@ class AudioBankSchemaTests(SchemaChecks, unittest.TestCase):
         }
 
 
+class AudioStreamSchemaTests(SchemaChecks, unittest.TestCase):
+    """vs.audio-stream (Content/AudioStreamJson.hpp)."""
+
+    schema_file = "audio-stream.schema.json"
+    header = "AudioStreamJson.hpp"
+    constant = "kAudioStreamSchema"
+    fixture_directory = "audio"
+    fixture = "sample-audio-stream.json"
+
+    def edits(self) -> dict:
+        return {
+            "a newer version": lambda d: d.update(schema_version=3),
+            "a version 1 stream": lambda d: d.update(version=1),
+            "the header bytes": lambda d: d.update(source_header=[0] * 64),
+            "an uppercase id": lambda d: d.update(id="04D33B9AC03EF31E"),
+            "a short id": lambda d: d.update(id="04d33b9a"),
+            "three channels": lambda d: d.update(channels=3),
+            "frames inside a block": lambda d: d.update(frames=3641),
+            "a pitch past 16384": lambda d: d.update(spu_pitch=16385),
+            "a zero pitch": lambda d: d.update(spu_pitch=0),
+            "a numbered repeat": lambda d: d.update(repeat=1),
+            "a stereo loop inside a chunk": lambda d: d.update(loop_frame=28),
+            "a loop without repeat": lambda d: d.update(repeat=False),
+            "a mono loop inside a block": lambda d: d.update(
+                channels=1, loop_frame=14
+            ),
+            "no start page": lambda d: d.pop("start_page"),
+        }
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -1,28 +1,37 @@
 #include "Content/AudioStream.hpp"
 
 #include <algorithm>
+#include <cstddef>
 #include <format>
 #include <fstream>
+#include <iterator>
 #include <limits>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include "Content/AudioStreamJson.hpp"
+#include "Content/JsonText.hpp"
 #include "Platform/Paths.hpp"
-#include "nlohmann/json.hpp"
 
 namespace VS::Content {
 namespace {
-constexpr usize kChunkBytes = 0x800;
+constexpr usize kChunkBytes = kAudioStreamChunkBytes;
 constexpr u32 kMagic = 0x4F414B41;
 constexpr u32 kStereo = 1;
 constexpr u32 kRepeat = 2;
 constexpr u32 kPitchUnity = 4096;
 constexpr u32 kSourceRate = 44100;
-constexpr u32 kMaximumPitch = 16384;
+constexpr u32 kMaximumPitch = kAudioStreamMaximumPitch;
 constexpr unsigned kBitsPerByte = 8;
 constexpr u64 kFnvOffsetBasis = 14695981039346656037ULL;
 constexpr u64 kFnvPrime = 1099511628211ULL;
+// The header words Sound_Cutscene_StartStream reads (25AC.c:6445-6476).
+constexpr usize kChannelBytesWord = 16;
+constexpr usize kLoopWord = 20;
+constexpr usize kFormatWord = 24;
+constexpr usize kPitchWord = 28;
+constexpr usize kStartPageWord = 32;
 
 u32 Word(std::span<const u8> bytes, usize offset) {
   u32 result = 0;
@@ -30,6 +39,29 @@ u32 Word(std::span<const u8> bytes, usize offset) {
     result |= static_cast<u32>(bytes[offset + index]) << (index * kBitsPerByte);
   }
   return result;
+}
+
+void PutWord(std::span<u8> bytes, usize offset, u32 value) {
+  for (usize index = 0; index < sizeof(value); ++index) {
+    bytes[offset + index] = static_cast<u8>(value >> (index * kBitsPerByte));
+  }
+}
+
+// Whether the header word at `offset` holds a value the stream describes: the
+// magic, or a word the player reads (the loop only when it repeats).
+bool IsNamedWord(usize offset, bool repeat) {
+  switch (offset) {
+    case 0:
+    case kChannelBytesWord:
+    case kFormatWord:
+    case kPitchWord:
+    case kStartPageWord:
+      return true;
+    case kLoopWord:
+      return repeat;
+    default:
+      return false;
+  }
 }
 
 usize ChannelOffset(usize byte, usize channel, usize channels) {
@@ -41,18 +73,6 @@ usize ChannelOffset(usize byte, usize channel, usize channels) {
 std::filesystem::path StreamDirectory(const std::filesystem::path& root,
                                       const AudioStreamInfo& info) {
   return root / "audio" / "streams" / "akao" / info.id;
-}
-
-nlohmann::json Metadata(const AudioStreamInfo& info) {
-  return {{"version", 1},
-          {"id", info.id},
-          {"source_pitch", info.source_pitch},
-          {"sample_rate", info.sample_rate},
-          {"channels", info.channels},
-          {"frames", info.frames},
-          {"repeat", info.repeat},
-          {"loop_frame", info.loop_frame},
-          {"source_header", info.source_header}};
 }
 }  // namespace
 
@@ -79,14 +99,14 @@ FindEffectAudioStreams(std::span<const u8> package) {
   return std::unexpected("effect package has no terminator");
 }
 
-std::expected<AudioStreamInfo, std::string> InspectAudioStream(
-    std::span<const u8> bytes) {
-  if (bytes.size() < kAudioStreamHeaderBytes || Word(bytes, 0) != kMagic) {
+std::expected<AudioStreamInfo, std::string> ReadAudioStreamHeader(
+    std::span<const u8> header) {
+  if (header.size() < kAudioStreamHeaderBytes || Word(header, 0) != kMagic) {
     return std::unexpected("stream requires a complete AKAO header");
   }
-  const u32 channel_bytes = Word(bytes, 16);
-  const u32 flags = Word(bytes, 24);
-  const u32 pitch = Word(bytes, 28);
+  const u32 channel_bytes = Word(header, kChannelBytesWord);
+  const u32 flags = Word(header, kFormatWord);
+  const u32 pitch = Word(header, kPitchWord);
   if (channel_bytes == 0 || channel_bytes % PsxAdpcmDecoder::kBlockBytes != 0 ||
       (flags & ~(kStereo | kRepeat)) != 0 || pitch == 0 ||
       pitch > kMaximumPitch) {
@@ -94,9 +114,14 @@ std::expected<AudioStreamInfo, std::string> InspectAudioStream(
   }
   AudioStreamInfo info;
   info.channels = (flags & kStereo) != 0 ? 2 : 1;
-  if (ChannelOffset(channel_bytes - 1, info.channels - 1, info.channels) >=
-      bytes.size()) {
-    return std::unexpected("stream channel payload extends outside its block");
+  info.repeat = (flags & kRepeat) != 0;
+  for (usize offset = 0; offset < kAudioStreamHeaderBytes;
+       offset += sizeof(u32)) {
+    if (!IsNamedWord(offset, info.repeat) && Word(header, offset) != 0) {
+      return std::unexpected(std::format(
+          "stream header word +{} is not zero; the player does not read it",
+          offset));
+    }
   }
   const u64 frames = static_cast<u64>(channel_bytes) /
                      PsxAdpcmDecoder::kBlockBytes *
@@ -107,9 +132,8 @@ std::expected<AudioStreamInfo, std::string> InspectAudioStream(
   info.frames = static_cast<u32>(frames);
   info.source_pitch = pitch;
   info.sample_rate = (pitch * kSourceRate + kPitchUnity / 2) / kPitchUnity;
-  info.repeat = (flags & kRepeat) != 0;
   if (info.repeat) {
-    const u32 loop = Word(bytes, 20);
+    const u32 loop = Word(header, kLoopWord);
     const usize alignment = info.channels == 2 ? kChunkBytes * info.channels
                                                : PsxAdpcmDecoder::kBlockBytes;
     if (loop % alignment != 0 || loop / info.channels >= channel_bytes) {
@@ -118,14 +142,45 @@ std::expected<AudioStreamInfo, std::string> InspectAudioStream(
     info.loop_frame = loop / info.channels / PsxAdpcmDecoder::kBlockBytes *
                       PsxAdpcmDecoder::kBlockFrames;
   }
-  std::copy_n(bytes.begin(), kAudioStreamHeaderBytes,
-              info.source_header.begin());
+  info.start_page = Word(header, kStartPageWord);
+  return info;
+}
+
+std::array<u8, kAudioStreamHeaderBytes> AudioStreamHeaderOf(
+    const AudioStreamInfo& info) {
+  std::array<u8, kAudioStreamHeaderBytes> header{};
+  PutWord(header, 0, kMagic);
+  PutWord(header, kChannelBytesWord,
+          info.frames / PsxAdpcmDecoder::kBlockFrames *
+              PsxAdpcmDecoder::kBlockBytes);
+  if (info.repeat) {
+    PutWord(header, kLoopWord,
+            static_cast<u32>(static_cast<u64>(info.loop_frame) /
+                             PsxAdpcmDecoder::kBlockFrames *
+                             PsxAdpcmDecoder::kBlockBytes * info.channels));
+  }
+  PutWord(header, kFormatWord,
+          (info.channels == 2 ? kStereo : 0) | (info.repeat ? kRepeat : 0));
+  PutWord(header, kPitchWord, info.source_pitch);
+  PutWord(header, kStartPageWord, info.start_page);
+  return header;
+}
+
+std::expected<AudioStreamInfo, std::string> InspectAudioStream(
+    std::span<const u8> bytes) {
+  auto info = ReadAudioStreamHeader(bytes);
+  if (!info) return info;
+  const u32 channel_bytes = Word(bytes, kChannelBytesWord);
+  if (ChannelOffset(channel_bytes - 1, info->channels - 1, info->channels) >=
+      bytes.size()) {
+    return std::unexpected("stream channel payload extends outside its block");
+  }
   // Stable content identity, not an authenticity or cryptographic check.
   u64 hash = kFnvOffsetBasis;
   for (const u8 byte : bytes) {
     hash = (hash ^ byte) * kFnvPrime;
   }
-  info.id = std::format("{:016x}", hash);
+  info->id = std::format("{:016x}", hash);
   return info;
 }
 
@@ -162,6 +217,10 @@ std::filesystem::path AudioStreamInstrumentPath(
   return StreamDirectory(data_root, info) / (std::to_string(channel) + ".sfz");
 }
 
+std::string AudioStreamFile(std::string_view id) {
+  return std::format("audio/streams/akao/{}/stream.json", id);
+}
+
 std::expected<void, std::string> ExportAudioStream(
     const AudioStreamAsset& stream, const std::filesystem::path& data_root) {
   if (stream.channels.size() != stream.info.channels ||
@@ -188,8 +247,8 @@ std::expected<void, std::string> ExportAudioStream(
       return result;
     }
   }
-  std::ofstream out(directory / "stream.json");
-  out << Metadata(stream.info).dump(2) << '\n';
+  std::ofstream out(directory / "stream.json", std::ios::binary);
+  out << FormatJsonText(AudioStreamJson(stream.info)) << '\n';
   out.close();
   if (!out) return std::unexpected("writing stream metadata");
   return {};
@@ -197,23 +256,23 @@ std::expected<void, std::string> ExportAudioStream(
 
 std::expected<void, std::string> ValidateAudioStreamAssets(
     const AudioStreamInfo& info, const std::filesystem::path& data_root) {
-  std::ifstream in(StreamDirectory(data_root, info) / "stream.json");
+  std::ifstream in(StreamDirectory(data_root, info) / "stream.json",
+                   std::ios::binary);
   if (!in) {
     return std::unexpected("stream " + info.id +
                            " is missing; run VS.Extract streams");
   }
-  try {
-    nlohmann::json metadata;
-    in >> metadata;
-    const auto expected = Metadata(info);
-    for (const auto& [key, value] : expected.items()) {
-      if (!metadata.contains(key) || metadata.at(key) != value) {
-        return std::unexpected("stream metadata mismatch: " + key);
-      }
-    }
-  } catch (const nlohmann::json::exception& error) {
-    return std::unexpected(std::string("invalid stream metadata: ") +
-                           error.what());
+  const std::string text{std::istreambuf_iterator<char>(in), {}};
+  const std::string name = AudioStreamFile(info.id);
+  auto json = ParseJsonText(std::as_bytes(std::span(text)), name);
+  if (!json) return std::unexpected(json.error());
+  auto described = AudioStreamInfoOf(*json, name);
+  if (!described) return std::unexpected(described.error());
+  if (*described != info) {
+    return std::unexpected(
+        std::format("{} differs from the stream its effect package holds; run "
+                    "VS.Extract streams to write it again",
+                    name));
   }
   for (usize channel = 0; channel < info.channels; ++channel) {
     const auto instrument = AudioStreamInstrumentPath(data_root, info, channel);

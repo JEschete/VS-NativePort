@@ -29,6 +29,7 @@
 
 #include "Content/AudioBank.hpp"
 #include "Content/AudioStream.hpp"
+#include "Content/AudioStreamJson.hpp"
 #include "Content/ConversionManifest.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/Disc.hpp"
@@ -36,6 +37,7 @@
 #include "Content/MovieEncoder.hpp"
 #include "Core/Sha256.hpp"
 #include "Extract/AudioBankConversion.hpp"
+#include "Extract/AudioStreamAuthoring.hpp"
 #include "Extract/ConversionManifestWriter.hpp"
 #include "Extract/ConverterBatch.hpp"
 #include "Extract/EsqConversion.hpp"
@@ -387,6 +389,67 @@ void SetWaveBankVersion(const fs::path& root, std::uint32_t version) {
   REQUIRE(Extract::WriteConversionManifest(root, manifest));
 }
 
+constexpr std::string_view kStreamId = "0123456789abcdef";
+
+// The labeled stream.json version 1 wrote for a stereo stream of 3,640
+// frames a channel that repeats from frame 3,584, with its 64-byte header.
+Content::JsonDocument NumberedStreamJson() {
+  std::array<std::uint8_t, Content::kAudioStreamHeaderBytes> header{};
+  const auto put = [&header](std::size_t offset, std::uint32_t value) {
+    for (std::size_t index = 0; index < sizeof(value); ++index) {
+      header[offset + index] = static_cast<std::uint8_t>(value >> (index * 8));
+    }
+  };
+  put(0, 0x4F414B41);
+  put(16, 0x820);
+  put(20, 0x1000);
+  put(24, 3);
+  put(28, 0x800);
+  put(32, 0x800);
+  auto json = Content::JsonDocument::parse(R"({
+    "display_name": "Test stream",
+    "channels": 2,
+    "frames": 3640,
+    "id": "0123456789abcdef",
+    "loop_frame": 3584,
+    "repeat": true,
+    "sample_rate": 22050,
+    "source_pitch": 2048,
+    "version": 1
+  })");
+  json["source_header"] = header;
+  return json;
+}
+
+std::string StreamFile() { return Content::AudioStreamFile(kStreamId); }
+
+Content::JsonDocument ReadStreamJson(const fs::path& root) {
+  std::ifstream in(root / fs::path(StreamFile()), std::ios::binary);
+  const std::string text{std::istreambuf_iterator<char>(in), {}};
+  auto json =
+      Content::ParseJsonText(std::as_bytes(std::span(text)), StreamFile());
+  INFO((json ? std::string{} : json.error()));
+  REQUIRE(json.has_value());
+  return *json;
+}
+
+void WriteStreamJson(const AudioRoot& root, const Content::JsonDocument& json) {
+  const std::string text = Content::FormatJsonText(json) + "\n";
+  root.Write(StreamFile(), std::as_bytes(std::span(text)));
+}
+
+// Checks `named` rebuilds the header NumberedStreamJson lists.
+void CheckNamedHeader(const Content::JsonDocument& named) {
+  const auto info = Content::AudioStreamInfoOf(named, StreamFile());
+  INFO((info ? std::string{} : info.error()));
+  REQUIRE(info.has_value());
+  const auto header = Content::AudioStreamHeaderOf(*info);
+  const Content::JsonDocument numbered = NumberedStreamJson();
+  CHECK(std::ranges::equal(
+      header, numbered.at("source_header"),
+      [](std::uint8_t byte, const auto& value) { return value == byte; }));
+}
+
 }  // namespace
 
 TEST_CASE(
@@ -538,6 +601,69 @@ TEST_CASE(
   upgraded["instruments"][0].erase("display_name");
   CHECK(upgraded == converted);
   CHECK(WaveBankVersion(root.Root()) == Content::kWaveBankConverterVersion);
+}
+
+TEST_CASE("Authoring names existing effect stream headers in place",
+          "[content-audio][stream-authoring]") {
+  AudioRoot root;
+  WriteStreamJson(root, NumberedStreamJson());
+
+  const auto report = Extract::UpgradeStreamAuthoring(root.Root());
+  INFO((report ? std::string{} : report.error()));
+  REQUIRE(report.has_value());
+  CHECK(report->streams == 1);
+  CHECK(report->written == 1);
+  const Content::JsonDocument named = ReadStreamJson(root.Root());
+  CHECK(named == Content::JsonDocument::parse(R"({
+    "display_name": "Test stream",
+    "schema": "vs.audio-stream",
+    "schema_version": 2,
+    "id": "0123456789abcdef",
+    "channels": 2,
+    "frames": 3640,
+    "sample_rate": 22050,
+    "spu_pitch": 2048,
+    "repeat": true,
+    "loop_frame": 3584,
+    "start_page": 2048
+  })"));
+  CheckNamedHeader(named);
+
+  const auto repeat = Extract::UpgradeStreamAuthoring(root.Root());
+  REQUIRE(repeat.has_value());
+  CHECK(repeat->streams == 1);
+  CHECK(repeat->written == 0);
+}
+
+TEST_CASE("Authoring leaves an effect stream it cannot name",
+          "[content-audio][stream-authoring]") {
+  AudioRoot root;
+  Content::JsonDocument numbered = NumberedStreamJson();
+  std::string_view reason;
+  SECTION("a header word the player does not read") {
+    numbered["source_header"][40] = 1;
+    reason = "word +40 is not zero; the player does not read it";
+  }
+  SECTION("a value its header does not hold") {
+    numbered["frames"] = 3612;
+    reason = ".frames is not the value its source_header holds";
+  }
+  SECTION("an id that is not its directory") {
+    numbered["id"] = "fedcba9876543210";
+    reason = ".id must be its directory name 0123456789abcdef";
+  }
+  SECTION("an unknown version") {
+    numbered["version"] = 3;
+    reason = ".version must be 1 for a stream without a schema";
+  }
+  WriteStreamJson(root, numbered);
+  const Content::JsonDocument before = ReadStreamJson(root.Root());
+
+  const auto refused = Extract::UpgradeStreamAuthoring(root.Root());
+  REQUIRE_FALSE(refused.has_value());
+  CAPTURE(refused.error());
+  CHECK(refused.error().contains(reason));
+  CHECK(ReadStreamJson(root.Root()) == before);
 }
 
 TEST_CASE(
@@ -1060,6 +1186,34 @@ XaComparison CompareXa(drflac& flac, std::span<const std::uint8_t> selected,
   return result;
 }
 
+// Checks each stream the effect package `package` holds has assets under
+// `root` the runtime accepts; how many streams it holds.
+std::size_t CheckPackageStreams(const fs::path& root, const fs::path& package) {
+  INFO(package.filename().generic_string());
+  const auto bytes = Extract::ReadFileBytes(package);
+  if (!bytes) {
+    FAIL(bytes.error());
+    return 0;
+  }
+  const auto unsigned_bytes = Unsigned(*bytes);
+  const auto streams = Content::FindEffectAudioStreams(unsigned_bytes);
+  if (!streams) {
+    FAIL(streams.error());
+    return 0;
+  }
+  for (const auto& stream : *streams) {
+    INFO("stream at " << stream.offset);
+    const auto info = Content::InspectAudioStream(stream.bytes);
+    if (!info) {
+      FAIL(info.error());
+      continue;
+    }
+    const auto checked = Content::ValidateAudioStreamAssets(*info, root);
+    CHECK((checked ? std::string{} : checked.error()).empty());
+  }
+  return streams->size();
+}
+
 }  // namespace
 
 TEST_CASE("Extracted sound banks hold their WAVE files' exact ADPCM decode",
@@ -1080,6 +1234,19 @@ TEST_CASE("Extracted sound banks hold their WAVE files' exact ADPCM decode",
   CHECK(counts.banks == 83);
   CHECK(counts.placeholders == 18);
   CHECK(counts.samples > 0);
+}
+
+TEST_CASE("Extracted effect streams match the packages the runtime binds",
+          "[content-audio][stream-authoring][extract]") {
+  const auto root = ExtractedData();
+  if (!root) SKIP("Extracted Native/data is unavailable");
+  std::size_t streams = 0;
+  for (const auto& entry : fs::directory_iterator(*root / "disc" / "EFFECT")) {
+    if (entry.path().extension() == ".P") {
+      streams += CheckPackageStreams(*root, entry.path());
+    }
+  }
+  CHECK(streams == 113);
 }
 
 TEST_CASE("The extracted ending XA FLAC is its selected sectors' exact decode",

@@ -53,6 +53,7 @@
     <ClCompile Include="src\AudioBank.cpp" />
     <ClCompile Include="src\AudioBankJson.cpp" />
     <ClCompile Include="src\AudioStream.cpp" />
+    <ClCompile Include="src\AudioStreamJson.cpp" />
     <ClCompile Include="src\BackgroundAssets.cpp" />
     <ClCompile Include="src\BackgroundLayout.cpp" />
     <ClCompile Include="src\BestiaryCatalog.cpp" />
@@ -128,6 +129,7 @@
     <ClInclude Include="include\Content\AudioBank.hpp" />
     <ClInclude Include="include\Content\AudioBankJson.hpp" />
     <ClInclude Include="include\Content\AudioStream.hpp" />
+    <ClInclude Include="include\Content\AudioStreamJson.hpp" />
     <ClInclude Include="include\Content\BackgroundAssets.hpp" />
     <ClInclude Include="include\Content\BackgroundLayout.hpp" />
     <ClInclude Include="include\Content\BestiaryCatalog.hpp" />

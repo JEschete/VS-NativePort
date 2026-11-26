@@ -266,6 +266,17 @@ std::expected<bool, std::string> EditJsonOutput(
   return true;
 }
 
+Json LabeledJson(const Json& numbered, Json named) {
+  const auto label = numbered.find(std::string(Content::kDisplayName));
+  if (label == numbered.end()) return named;
+  Json labeled = Json::object();
+  labeled[std::string(Content::kDisplayName)] = *label;
+  for (auto member = named.begin(); member != named.end(); ++member) {
+    labeled[member.key()] = std::move(member.value());
+  }
+  return labeled;
+}
+
 std::expected<AnimationAuthoringReport, std::string> UpgradeAnimationAuthoring(
     const fs::path& root) {
   auto manifest = Content::LoadConversionManifest(root);

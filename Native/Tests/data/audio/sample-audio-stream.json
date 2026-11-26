@@ -1,0 +1,12 @@
+{
+  "schema": "vs.audio-stream",
+  "schema_version": 2,
+  "id": "04d33b9ac03ef31e",
+  "channels": 2,
+  "frames": 3640,
+  "sample_rate": 22050,
+  "spu_pitch": 2048,
+  "repeat": true,
+  "loop_frame": 3584,
+  "start_page": 2048
+}

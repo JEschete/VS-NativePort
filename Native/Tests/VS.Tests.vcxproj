@@ -506,6 +506,7 @@
     <ClCompile Include="..\Tools\Extract\src\AssetLabels.cpp" />
     <ClCompile Include="..\Tools\Extract\src\BackgroundAuthoring.cpp" />
     <ClCompile Include="..\Tools\Extract\src\AudioBankConversion.cpp" />
+    <ClCompile Include="..\Tools\Extract\src\AudioStreamAuthoring.cpp" />
     <ClCompile Include="..\Tools\Extract\src\ConversionManifestWriter.cpp" />
     <ClCompile Include="..\Tools\Extract\src\ConverterBatch.cpp" />
     <ClCompile Include="..\Tools\Extract\src\EffectTextureConversion.cpp" />

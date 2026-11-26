@@ -69,13 +69,20 @@ The game plays music and sound effects by sequencing sampled instruments at runt
 - **In-game menus:** the five owned wrappers dispatch original open/invalid/leave/select/change effects
   (10/7/6/5/4), preserving channel tags, centered pan and volume. These differ from the existing title-menu calls.
 - **Effect streams:** `VS.Extract streams disks\SLUS-01040.cue Native\data` imports block 13 from every
-  stream-bearing effect package (mono or stereo). The 64-byte source header, native frame loop and source pitch
-  remain in `stream.json`; the ID is a stable FNV content identity, not an authenticity check. Stereo uses separate
-  predictor histories and 0x800-byte source-channel chunks. Buffer-end ADPCM flags are not treated as logical sample
-  endpoints. Runtime binding validates the bounded source and native assets, uses canonical room slot 3, and
-  preserves native command-pointer width. The existing sfizz engine supplies the original reserved voice pair,
-  controls, pause/resume, fades, completion and cleanup. A paused voice remains active even before its first
-  rendered sample.
+  stream-bearing effect package (mono or stereo). `stream.json` (`vs.audio-stream` 2, `audio-stream.schema.json`)
+  names each header word `Sound_Cutscene_StartStream` reads: `channels`, `frames` per channel, `spu_pitch`
+  (4096 = 44,100 Hz) with its derived `sample_rate`, `repeat`, `loop_frame` (whole 0x800-byte chunks when stereo)
+  and the stored but unread `start_page`. The reader refuses any other nonzero header word. The file is a derived
+  check record: binding reads the header from the effect package and refuses a `stream.json` that differs, so
+  stream edits wait for the effect-package conversion (#216). The ID is a stable FNV content identity, not an
+  authenticity check. Stereo uses separate predictor histories and 0x800-byte source-channel chunks. Buffer-end
+  ADPCM flags are not treated as logical sample endpoints. Runtime binding validates the bounded source and native
+  assets, uses canonical room slot 3, and preserves native command-pointer width. The existing sfizz engine
+  supplies the original reserved voice pair, controls, pause/resume, fades, completion and cleanup. A paused voice
+  remains active even before its first rendered sample.
+- **Stream upgrade:** `VS.Extract authoring <datadir>` rewrites each version 1 `stream.json` (64 numbered
+  `source_header` bytes, `source_pitch`) in place, keeping labels, once its named form rebuilds the same header.
+  Binding refuses a version 1 file and names that command.
 - **Fidelity modes:** a shared 44.1-kHz noise sequence uses the original clock/parity rules, independently of voice
   pitch. FM changes sfizz sample pitch using the preceding voice's envelope-scaled, pre-pan signal; voice zero is not
   modulated, pitch is bounded to the original range, and zero pitch holds sample position. Noise-only notes require

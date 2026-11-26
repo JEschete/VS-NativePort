@@ -52,6 +52,7 @@
     <ClCompile Include="src\AnimationAuthoring.cpp" />
     <ClCompile Include="src\AssetLabels.cpp" />
     <ClCompile Include="src\AudioBankConversion.cpp" />
+    <ClCompile Include="src\AudioStreamAuthoring.cpp" />
     <ClCompile Include="src\BackgroundAuthoring.cpp" />
     <ClCompile Include="src\BestiaryConversion.cpp" />
     <ClCompile Include="src\ConversionManifestWriter.cpp" />
@@ -83,6 +84,7 @@
     <ClInclude Include="include\Extract\AnimationAuthoring.hpp" />
     <ClInclude Include="include\Extract\AssetLabels.hpp" />
     <ClInclude Include="include\Extract\AudioBankConversion.hpp" />
+    <ClInclude Include="include\Extract\AudioStreamAuthoring.hpp" />
     <ClInclude Include="include\Extract\BackgroundAuthoring.hpp" />
     <ClInclude Include="include\Extract\BestiaryConversion.hpp" />
     <ClInclude Include="include\Extract\ConversionManifestWriter.hpp" />

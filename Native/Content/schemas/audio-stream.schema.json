@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/JEschete/VS-NativePort/blob/main/Native/Content/schemas/audio-stream.schema.json",
+  "title": "vs.audio-stream",
+  "description": "One effect-package sample stream (effect block 13): what its 64-byte AKAO header holds, beside the decoded channels (N.wav and N.sfz per channel) in the same directory, audio/streams/akao/<id> (Docs/ASSET_PIPELINE.md §6.5, Content/AudioStreamJson.hpp). It is a record of the stream, not its source: the runtime reads the stream from its effect package and refuses one whose stream.json differs, so VS.Extract streams writes it again. audio/streams/index.json lists the packages and offsets that hold each id. The header is magic AKAO, +16 bytes per channel, +20 the loop, +24 the format flags, +28 the SPU pitch and +32 the start page; Sound_Cutscene_StartStream reads nothing else, and the rest is zero. The native reader also checks what a schema cannot: that loop_frame comes before frames and that sample_rate is the rate spu_pitch plays.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "schema_version", "id", "channels", "frames", "sample_rate", "spu_pitch", "repeat", "loop_frame", "start_page"],
+  "properties": {
+    "display_name": {
+      "type": "string",
+      "description": "Optional informational name, not an identity or gameplay field."
+    },
+    "schema": { "const": "vs.audio-stream" },
+    "schema_version": { "const": 2 },
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{16}$",
+      "description": "FNV-1a 64 of the whole stream block, header included, in lowercase hexadecimal. It names this directory; the runtime finds the stream's files by it."
+    },
+    "channels": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2,
+      "description": "Header +24 bit 0: 2 for a stereo stream, whose channels interleave in 2048-byte chunks."
+    },
+    "frames": {
+      "type": "integer",
+      "minimum": 28,
+      "maximum": 4294967295,
+      "multipleOf": 28,
+      "description": "Samples per channel. Header +16 holds the bytes per channel: 16 bytes of ADPCM per 28 frames."
+    },
+    "sample_rate": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295,
+      "description": "Hz: spu_pitch * 44100 / 4096, rounded to the nearest hertz. The rate of the WAV files beside this one."
+    },
+    "spu_pitch": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 16384,
+      "description": "Header +28: the SPU voice pitch, where 4096 plays 44,100 frames a second. Every disc stream holds 2048 (22,050 Hz)."
+    },
+    "repeat": {
+      "type": "boolean",
+      "description": "Header +24 bit 1: whether playback returns to loop_frame at the end."
+    },
+    "loop_frame": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295,
+      "description": "The frame a repeating stream returns to; 0 when it does not repeat. Header +20 holds it as a byte offset into the interleaved channel data, so a stereo loop starts a whole 2048-byte chunk of each channel (a multiple of 3584 frames) and a mono loop a whole 28-frame block."
+    },
+    "start_page": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295,
+      "description": "Header +32: the player stores it and never reads it. Every disc stream holds 2048."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "repeat": { "const": false } } },
+      "then": { "properties": { "loop_frame": { "const": 0 } } }
+    },
+    {
+      "if": { "properties": { "channels": { "const": 2 } } },
+      "then": { "properties": { "loop_frame": { "multipleOf": 3584 } } },
+      "else": { "properties": { "loop_frame": { "multipleOf": 28 } } }
+    }
+  ]
+}

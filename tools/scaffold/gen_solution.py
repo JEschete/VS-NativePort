@@ -79,6 +79,7 @@ PROJECTS = [
                 r"Tools\Extract\src\AssetLabels.cpp",
                 r"Tools\Extract\src\BackgroundAuthoring.cpp",
                 r"Tools\Extract\src\AudioBankConversion.cpp",
+                r"Tools\Extract\src\AudioStreamAuthoring.cpp",
                 r"Tools\Extract\src\ConversionManifestWriter.cpp",
                 r"Tools\Extract\src\ConverterBatch.cpp",
                 r"Tools\Extract\src\EffectTextureConversion.cpp",

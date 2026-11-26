@@ -6,7 +6,7 @@ counts, captures) goes once, on the issue; link to it here. Earlier handoffs are
 
 ## State
 
-- `main` at `93f92df8e` (animation event ops, #520; Source Quality run 45774702221 succeeded). The owner
+- `main` at `1c5a441ea` (audio bank envelopes, #520; Source Quality run 45787308134 succeeded). The owner
   authorized direct work on `main`; each slice is committed, pushed and CI-confirmed before its evidence comment
   on #520.
 - Work stream: asset migration, ordered by roadmap #217 under plan decisions D25 and D26. Tracker #4's ordered
@@ -32,6 +32,8 @@ ASSET_PIPELINE §4 and the §7.2 readability gate. Shipped slices, each with evi
 - Archetype headers: model, blade, weapon category, materials and shield as values (`zud-json` 3, `a867a2981`).
 - Sound banks: `vs.audio-bank` 2 names each envelope, tuning and offset; AKAO 3.0 extras are
   `akao3_articulation` provenance (AUDIO_VIDEO §6.5). `authoring` upgraded 83 banks (3,152 instruments).
+- Effect streams: `vs.audio-stream` 2 names each header word the player reads, with units; `authoring` upgraded
+  82 `stream.json` files, each rebuilding its version 1 header byte for byte. Still derived check records until #216.
 - Bestiary: previews by archetype, defeat ranges by enemy kind; limb labels by body part.
 - Materials: catalog version 2 keeps only the columns MENUC reads (strength, intelligence, agility); class
   points, affinities and base DP are archived as named fields in the import provenance (`694b6714c`).
@@ -43,8 +45,8 @@ Remaining:
   across limbs and effect timing stay undocumented). JSON/glTF read 1 (issuecomment-7184304082): backgrounds,
   text and image sidecars passed; archetypes, animation sets, AKAO streams and shape glTF were partly readable;
   audio banks failed.
-- Planned slices from read 1, in order (event ops, archetype headers and audio-bank envelopes done): stream
-  `source_header` and pitch units (with #216); glTF positional metadata labels and round-trip limits. Then fresh
+- Planned slices from read 1, in order (event ops, archetype headers, audio-bank envelopes and stream headers
+  done): glTF positional metadata labels and round-trip limits. Then fresh
   cold reads of each changed family and an action re-read.
 - Blocked on their consumers: zone-enemy `movement_class`/`gait_class` (semantics unnamed; schemas list only the
   bits consumers test) and `zones.music_id` (selects `MUSIC/MUSIC<n>` and `SOUND/WAVE<n>`; needs #501).
