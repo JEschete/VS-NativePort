@@ -128,7 +128,8 @@ int Usage() {
       "fields and original encoded names.\n"
       "      authoring imports material and learning definitions and upgrades "
       "action hit effects and effect packages, zone fields, "
-      "animation event scripts and generated recipe "
+      "animation event scripts, archetype headers, sound bank envelopes "
+      "and generated recipe "
       "IDs/references "
       "to semantic item names without changing recipe values.");
   return 2;
@@ -150,8 +151,8 @@ int WithLabels(int result, const fs::path& root) {
   return result == 0 ? LabelAssets(root) : result;
 }
 
-// The zone, background, animation and archetype upgrades `authoring` runs
-// last.
+// The zone, background, animation, archetype and sound bank upgrades
+// `authoring` runs last.
 int UpgradeAssetAuthoring(const fs::path& root) {
   const auto zones = Extract::UpgradeZoneAuthoring(root);
   if (!zones) {
@@ -195,6 +196,13 @@ int UpgradeAssetAuthoring(const fs::path& root) {
   VS::Core::LogInfo("extract",
                     "archetype authoring: {} named headers, {} files updated",
                     archetypes->headers, archetypes->written);
+  const auto banks = Extract::UpgradeBankAuthoring(root);
+  if (!banks) {
+    VS::Core::LogError("extract", "bank authoring: {}", banks.error());
+    return 1;
+  }
+  VS::Core::LogInfo("extract", "bank authoring: {} banks, {} files updated",
+                    banks->banks, banks->written);
   return 0;
 }
 

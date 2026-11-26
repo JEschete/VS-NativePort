@@ -339,7 +339,7 @@ build\Debug\VS.Extract.exe images Native\data
 build\Debug\VS.Extract.exe backgrounds Native\data
 rem Add readable names without reconverting or replacing gameplay edits.
 build\Debug\VS.Extract.exe labels Native\data
-rem Upgrade recipe IDs, zone fields, animations and archetypes in place.
+rem Upgrade recipe IDs, zone fields, animations, archetypes and banks in place.
 build\Debug\VS.Extract.exe authoring Native\data
 rem Import only encyclopedia definitions and their shared native text.
 build\Debug\VS.Extract.exe bestiary Native\data
@@ -423,13 +423,13 @@ build\Debug\VS.Extract.exe bestiary Native\data
 - Takes about a minute. Run it again after an extractor change; the converters replace one `raw` form at a time.
 - With FFmpeg available, it stops with an error if FFmpeg has no AV1 encoder or the movie conversion fails.
   Without FFmpeg, it lists the movie unconverted and warns.
-- `extract` converts all 83 wave banks into versioned JSON, mono PCM16 WAV and SFZ under
+- `extract` converts all 83 wave banks into named-envelope JSON (`authoring` upgrades v1), mono PCM16 WAV and SFZ under
   `Native\data\audio\banks` and records each in `manifest.json` (converter `wave-bank`); the 18 one-byte
   zero bank files are placeholders. The `banks` command reconverts them for an existing data directory:
   only changed banks, or all of them with `--force`. WAVE0069 supplies MUSIC016, WAVE0091 supplies
   MUSIC110, and WAVE0011 supplies MUSIC054 on entry to the dungeon; menu banks alone do not supply
   these music tracks. Missing banks are reported, not replaced with fabricated audio. The older WAVE0032 articulation layout,
-  exact-end records and erased final DMA padding are supported; unavailable slots are logged explicitly.
+  exact-end records and erased final DMA padding are supported; unavailable slots are logged.
   Reimport after the fidelity update so SFZ pitch-bend range/smoothing matches native FM rendering.
   Successful import is not evidence that every music track has been listened to.
 - The `streams` command updates existing installations without reconverting the movie. It imports

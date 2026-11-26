@@ -188,10 +188,10 @@ std::expected<bool, std::string> JsonMembers::Boolean(
   return (*value)->get<bool>();
 }
 
-std::expected<JsonSource, std::string> JsonSourceOf(const JsonMembers& members,
-                                                    std::string_view where,
-                                                    std::string_view schema,
-                                                    std::uint32_t version) {
+std::expected<void, std::string> CheckJsonSchema(const JsonMembers& members,
+                                                 std::string_view where,
+                                                 std::string_view schema,
+                                                 std::uint32_t version) {
   auto named = members.String("schema");
   if (!named) return std::unexpected(named.error());
   auto number = members.Integer("schema_version", 0,
@@ -201,6 +201,17 @@ std::expected<JsonSource, std::string> JsonSourceOf(const JsonMembers& members,
     return std::unexpected(
         std::format("{} is {} version {}; this build reads {} version {}",
                     where, *named, *number, schema, version));
+  }
+  return {};
+}
+
+std::expected<JsonSource, std::string> JsonSourceOf(const JsonMembers& members,
+                                                    std::string_view where,
+                                                    std::string_view schema,
+                                                    std::uint32_t version) {
+  if (auto checked = CheckJsonSchema(members, where, schema, version);
+      !checked) {
+    return std::unexpected(checked.error());
   }
   JsonSource found;
   auto source = members.String("source");

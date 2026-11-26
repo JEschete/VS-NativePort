@@ -73,9 +73,16 @@ struct JsonSource {
   std::string source_sha256;
 };
 
+// Nothing once the document `members` holds names schema `schema` and
+// schema_version `version`; otherwise the error names `where` or the member at
+// fault.
+[[nodiscard]] std::expected<void, std::string> CheckJsonSchema(
+    const JsonMembers& members, std::string_view where, std::string_view schema,
+    std::uint32_t version);
+
 // The source of the document `members` holds, once its schema and
-// schema_version are `schema` and `version`; the error names `where` or the
-// member at fault.
+// schema_version are `schema` and `version` (CheckJsonSchema); the error names
+// `where` or the member at fault.
 [[nodiscard]] std::expected<JsonSource, std::string> JsonSourceOf(
     const JsonMembers& members, std::string_view where, std::string_view schema,
     std::uint32_t version);

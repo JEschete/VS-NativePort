@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/JEschete/VS-NativePort/blob/main/Native/Content/schemas/audio-bank.schema.json",
+  "title": "vs.audio-bank",
+  "description": "One SOUND/WAVEnnnn.DAT instrument bank: what playback needs from each instrument record, beside the decoded samples (N.wav and N.sfz per available instrument) in the same directory (Docs/ASSET_PIPELINE.md §6.5, Content/AudioBankJson.hpp). The native loader also checks what a schema cannot: that the directory is audio/banks/<bank_id> and that the instruments fit from first_instrument to slot 255.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "schema_version", "bank_id", "first_instrument", "source_destination", "instruments"],
+  "properties": {
+    "display_name": {
+      "type": "string",
+      "description": "Optional informational name, not an identity or gameplay field."
+    },
+    "schema": { "const": "vs.audio-bank" },
+    "schema_version": { "const": 2 },
+    "bank_id": {
+      "$ref": "#/$defs/word",
+      "description": "The bank's id from its disc header. It names this directory, and the sound driver loads the bank by it."
+    },
+    "first_instrument": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "Provenance: the instrument slot the disc header names. Playback reads the disc header, so changing this changes nothing; see source_destination for when the driver uses it."
+    },
+    "source_destination": {
+      "$ref": "#/$defs/word",
+      "description": "Provenance: the disc header's sample memory request. 217344 (0x35100) asks for a music area (instrument slot 64 at 0x35100, or 96 at 0x55100), 45312 (0xB100) for a sound effect area (slot 128, 160 or 192); any other value is the address itself, with first_instrument as the slot. Playback reads the disc header, not this."
+    },
+    "instruments": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 256,
+      "items": { "$ref": "#/$defs/instrument" },
+      "description": "One per instrument record, in slot order from first_instrument. Playback refuses a bank whose count differs from its disc header's."
+    }
+  },
+  "$defs": {
+    "word": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+    "halfword": { "type": "integer", "minimum": -32768, "maximum": 32767 },
+    "curve": {
+      "enum": ["linear", "exponential"],
+      "description": "How the level changes: in equal steps, or by the SPU's exponential curve."
+    },
+    "mode": {
+      "enum": [
+        "direct",
+        "linear-increase",
+        "linear-increase-reverse-phase",
+        "linear-decrease",
+        "linear-decrease-reverse-phase",
+        "exponential-increase",
+        "exponential-increase-reverse-phase",
+        "exponential-decrease"
+      ],
+      "description": "A libspu ADSR mode (libspu.h SPU_VOICE_DIRECT to SPU_VOICE_EXPDec)."
+    },
+    "instrument": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["available", "root_note", "fine_tune", "envelope", "sample_offset", "loop_offset"],
+      "properties": {
+        "display_name": {
+          "type": "string",
+          "description": "Optional informational name, not an identity or gameplay field."
+        },
+        "available": {
+          "type": "boolean",
+          "description": "Whether the instrument has a playable sample, and so an N.wav and N.sfz; false for an unused record."
+        },
+        "root_note": {
+          "$ref": "#/$defs/halfword",
+          "description": "The note, counting 12 per octave, that plays the sample at its recorded 44,100 Hz rate."
+        },
+        "fine_tune": {
+          "$ref": "#/$defs/halfword",
+          "description": "A pitch scale on every note: a positive value plays it (1 + fine_tune / 32768) times as fast, a negative one (1 + fine_tune / 65536) times, so -32768 is exactly an octave down."
+        },
+        "envelope": { "$ref": "#/$defs/envelope" },
+        "sample_offset": {
+          "$ref": "#/$defs/word",
+          "description": "Where the sample starts, in bytes into the bank's ADPCM data (16-byte blocks of 28 samples each). Playback adds where the bank lands in sample memory."
+        },
+        "loop_offset": {
+          "$ref": "#/$defs/word",
+          "description": "Where a repeating sample loops back to, in bytes into the same data, unless one of its blocks marks its own loop start; N.sfz holds the decoded loop."
+        },
+        "akao3_articulation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["pitch_table", "attack_mode", "sustain_mode", "release_mode"],
+          "description": "Provenance, only for an AKAO 3.0 record (bank 32's 64-byte form): what it held beyond the members above. root_note and fine_tune were read from the first pitch and the envelope from the modes and rates; playback reads those members, not this.",
+          "properties": {
+            "pitch_table": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": { "$ref": "#/$defs/word" },
+              "description": "One pitch per semitone of an octave, where 1048576 plays the sample at its recorded rate."
+            },
+            "attack_mode": { "$ref": "#/$defs/mode" },
+            "sustain_mode": { "$ref": "#/$defs/mode" },
+            "release_mode": { "$ref": "#/$defs/mode" }
+          }
+        }
+      }
+    },
+    "envelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["attack_curve", "attack_rate", "decay_rate", "sustain_level", "sustain_curve", "sustain_direction", "sustain_rate", "release_curve", "release_rate"],
+      "description": "The SPU ADSR envelope of each note: attack from silence to full level, decay to the sustain level, sustain while the key is held, then release to silence. Rates count 0 as fastest. A sequence's envelope commands can replace parts of it per channel.",
+      "properties": {
+        "attack_curve": { "$ref": "#/$defs/curve" },
+        "attack_rate": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 127,
+          "description": "Each 4 more doubles the attack time; 127 holds the level."
+        },
+        "decay_rate": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 15,
+          "description": "Each 1 more doubles the decay time. Decay is always exponential and decreasing."
+        },
+        "sustain_level": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 15,
+          "description": "Decay stops at (sustain_level + 1) / 16 of full level."
+        },
+        "sustain_curve": { "$ref": "#/$defs/curve" },
+        "sustain_direction": {
+          "enum": ["increase", "decrease"],
+          "description": "Whether the level rises or falls while the key is held."
+        },
+        "sustain_rate": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 127,
+          "description": "Each 4 more doubles the sustain time; 127 holds the level until the key is released."
+        },
+        "release_curve": { "$ref": "#/$defs/curve" },
+        "release_rate": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 31,
+          "description": "Each 1 more doubles the release time; 31 holds the level. Release always decreases."
+        }
+      }
+    }
+  }
+}

@@ -8,7 +8,7 @@ The game plays music and sound effects by sequencing sampled instruments at runt
 | Piece | Format | Detail |
 |---|---|---|
 | Samples (implemented first slice) | `audio\banks\<bank>\<n>.wav` | 4-bit ADPCM decoded to mono PCM16 at 44.1 kHz. Console waveform parity is not established. |
-| Instruments | `audio\banks\<bank>\<n>.sfz`, `bank.json` | SFZ supplies a sample/loop region to sfizz. Version-1 JSON retains original sample/loop offsets, tuning, ADSR, availability and optional `source_record` bytes (16 or 64). The existing sequencer computes pitch/pan; native envelopes run separately, so SFZ key/velocity tracking and envelope shaping are neutral. Pitch bend has no smoothing and spans 12 octaves in either direction. |
+| Instruments | `audio\banks\<bank>\<n>.sfz`, `bank.json` | SFZ supplies a sample/loop region to sfizz. `bank.json` is `vs.audio-bank` version 2 ([schema](../../Native/Content/schemas/audio-bank.schema.json)): per instrument, availability, root note, fine tune (a pitch scale; -32768 is an octave down), sample/loop byte offsets into the bank's ADPCM data and a named ADSR envelope (curves, rates, sustain level and direction). The existing sequencer computes pitch/pan; native envelopes run separately, so SFZ key/velocity tracking and envelope shaping are neutral. Pitch bend has no smoothing and spans 12 octaves in either direction. |
 | Music (planned) | `audio\music\<id>.seq.json` | Decoded AKAO `{tick, op, args}` events with semantic jump targets; currently the original bytecode still drives the ported sequencer. |
 | Sound effects (planned) | `audio\sfx\<id>.seq.json` | Same future event format; current effects retain original AKAO programs and native sample-bank bindings. |
 | Index (planned) | `catalogs\music.json`, `catalogs\sfx.json` | Semantic IDs with original track/SE provenance. |
@@ -19,11 +19,17 @@ The game plays music and sound effects by sequencing sampled instruments at runt
   Each bank is a manifest output (`audio.bank.<wave file>`) listing its `bank.json`, `.wav` and `.sfz` files with
   the source hash, so a rerun keeps unchanged banks, `--force` rewrites them, and two banks writing one bank id are
   refused. Exact-end records and equal start/loop offsets in erased, final DMA padding are explicitly unavailable,
-  not fabricated silence. Active ADPCM remains strictly validated. WAVE0032's older 64-byte articulation is
-  recognized by its payload layout, pitch table and envelope fields. Q20 base pitch is converted to native root/fine
-  tuning; the complete twelve-pitch table and unpacked envelope survive in `source_record`. Its all-zero pitch tables
-  are unavailable records. Original data/provenance remain import sources, not a new authoring-format requirement.
+  not fabricated silence. Active ADPCM remains strictly validated. WAVE0032's older 64-byte (AKAO 3.0) articulation
+  is recognized by its payload layout, pitch table and envelope fields. Its first Q20 pitch becomes native root/fine
+  tuning and its modes and rates the named envelope; the twelve-pitch table and libspu modes stay as
+  `akao3_articulation` provenance. Its all-zero pitch tables are unavailable records. The packed ADSR words and the
+  16-byte record are not stored: every bit is a named member, and the writer refuses the unused upper bit 13.
+  Original data/provenance remain import sources, not a new authoring-format requirement.
   Reimport after upgrading: existing SFZ files need the unsmoothed, extended pitch-bend range for FM.
+- **Bank upgrade:** `VS.Extract authoring <datadir>`, or a `banks`/`extract` run without `--force`, rewrites each
+  version 1 `bank.json` (numbered `adsr_lower`/`adsr_upper`, `source_record`) in place, keeping labels, once its
+  named form reads back to the same bank; it records `wave-bank` version 2 last, so an interrupted run resumes.
+  Samples and SFZ files are untouched. The loader refuses a version 1 bank and names that command.
 - **Effect-package sample streams are not sample banks:** the `audio\streams\akao\<id>\` outputs come from block 13
   of the `EFFECT\*.P` packages. They are ADPCM samples, not AKAO sequences, and they stay outside the manifest until
   the effect-package conversion (#216) registers each package as one output. A separate converter for block 13 alone

@@ -25,6 +25,7 @@ class SchemaChecks:
     header: str
     constant: str
     fixture: str
+    fixture_directory = "animation"
     referenced: tuple[str, ...] = ()
 
     @classmethod
@@ -39,7 +40,7 @@ class SchemaChecks:
             )
         cls.schema = schema
         cls.validator = Draft202012Validator(schema, registry=registry)
-        cls.sample = load(FIXTURES / "animation" / cls.fixture)
+        cls.sample = load(FIXTURES / cls.fixture_directory / cls.fixture)
 
     def edits(self) -> dict:
         raise NotImplementedError
@@ -243,6 +244,61 @@ class ActorArchetypeSchemaTests(SchemaChecks, unittest.TestCase):
                 "map"
             ].__setitem__(1, 255),
             "an unknown member": lambda d: d.update(extra=1),
+        }
+
+
+class AudioBankSchemaTests(SchemaChecks, unittest.TestCase):
+    """vs.audio-bank (Content/AudioBankJson.hpp)."""
+
+    schema_file = "audio-bank.schema.json"
+    header = "AudioBankJson.hpp"
+    constant = "kAudioBankSchema"
+    fixture_directory = "audio"
+    fixture = "sample-sound-bank.json"
+
+    def edits(self) -> dict:
+        def envelope(**changes):
+            def edit(d: dict) -> None:
+                d["instruments"][0]["envelope"].update(changes)
+
+            return edit
+
+        def articulation(**changes):
+            def edit(d: dict) -> None:
+                d["instruments"][2]["akao3_articulation"].update(changes)
+
+            return edit
+
+        return {
+            "a newer version": lambda d: d.update(schema_version=3),
+            "a version 1 bank": lambda d: d.update(version=1),
+            "slot 256": lambda d: d.update(first_instrument=256),
+            "a negative destination": lambda d: d.update(source_destination=-1),
+            "no instruments": lambda d: d.update(instruments=[]),
+            "a fine tune past a halfword": lambda d: d["instruments"][0].update(
+                fine_tune=32768
+            ),
+            "a fractional root note": lambda d: d["instruments"][0].update(
+                root_note=1.5
+            ),
+            "an ADSR word": lambda d: d["instruments"][0].update(adsr_upper=24516),
+            "a disc record": lambda d: d["instruments"][0].update(
+                source_record=[0] * 16
+            ),
+            "a numbered availability": lambda d: d["instruments"][0].update(
+                available=1
+            ),
+            "an attack rate past 127": envelope(attack_rate=128),
+            "a decay rate past 15": envelope(decay_rate=16),
+            "a release rate past 31": envelope(release_rate=32),
+            "an unknown curve": envelope(release_curve="logarithmic"),
+            "a numbered direction": envelope(sustain_direction=1),
+            "a missing envelope member": lambda d: d["instruments"][0][
+                "envelope"
+            ].pop("sustain_level"),
+            "eleven pitches": articulation(pitch_table=[1048576] * 11),
+            "a numbered mode": articulation(attack_mode=1),
+            "an unknown mode": articulation(release_mode="fast"),
         }
 
 

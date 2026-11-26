@@ -45,6 +45,9 @@
     <ClCompile Include="src\AudioBank.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\AudioBankJson.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\AudioStream.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -220,6 +223,9 @@
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\AudioBank.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\AudioBankJson.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\AudioStream.hpp">

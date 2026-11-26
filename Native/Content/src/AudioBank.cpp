@@ -5,21 +5,25 @@
 #include <bit>
 #include <format>
 #include <fstream>
+#include <iterator>
 #include <limits>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include "Content/AudioBankJson.hpp"
+#include "Content/JsonText.hpp"
 #include "Platform/Paths.hpp"
-#include "nlohmann/json.hpp"
 namespace VS::Content {
 namespace {
 constexpr usize kHeaderBytes = 64;
 constexpr usize kInstrumentBytes = 16;
-constexpr usize kLegacyInstrumentBytes = 64;
 constexpr usize kLegacyEnvelopeOffset = 56;
 constexpr u64 kLegacyUnityPitch = 1U << 20;
 constexpr usize kLegacyPitchOffset = 8;
+constexpr usize kLegacyAttackMode = 5;
+constexpr usize kLegacySustainMode = 6;
+constexpr usize kLegacyReleaseMode = 7;
 constexpr i16 kChromaticNotes = 12;
 constexpr i16 kLegacyRootNote = 72;
 constexpr unsigned kPositivePitchDivisor = 32;
@@ -28,7 +32,6 @@ constexpr usize kBlockBytes = 16;
 constexpr usize kBlockSamples = 28;
 constexpr usize kTransferAlignment = 64;
 constexpr u32 kSampleRate = 44100;
-constexpr u32 kMaxInstruments = 256;
 constexpr usize kBankIdOffset = 4;
 constexpr usize kDestinationOffset = 16;
 constexpr usize kSampleSizeOffset = 20;
@@ -37,7 +40,6 @@ constexpr usize kInstrumentCountOffset = 28;
 constexpr u8 kEndFlag = 1;
 constexpr u8 kRepeatFlag = 2;
 constexpr u8 kLoopFlag = 4;
-constexpr u32 kVersion = 1;
 constexpr int kByteBits = 8;
 constexpr int kHalfWordBits = 16;
 constexpr u16 kByteMask = 255;
@@ -61,34 +63,12 @@ u32 Read32(std::span<const u8> bytes, usize offset) {
          (static_cast<u32>(Read16(bytes, offset + 2)) << kHalfWordBits);
 }
 
-template <class T>
-bool ReadNumber(const nlohmann::json& value, T* result) {
-  if (value.is_number_unsigned()) {
-    const auto number = value.get<u64>();
-    if (!std::in_range<T>(number)) return false;
-    *result = static_cast<T>(number);
-    return true;
-  }
-  if (value.is_number_integer()) {
-    const auto number = value.get<i64>();
-    if (!std::in_range<T>(number)) return false;
-    *result = static_cast<T>(number);
-    return true;
-  }
-  return false;
-}
-
-template <class T>
-bool ReadInteger(const nlohmann::json& entry, const char* key, T* result) {
-  return ReadNumber(entry.at(key), result);
-}
-
 bool LegacyRecords(std::span<const u8> bytes, u32 count, u32 size) {
-  const auto end = kHeaderBytes + count * kLegacyInstrumentBytes;
+  const auto end = kHeaderBytes + count * kAudioLegacyInstrumentBytes;
   if (end > bytes.size() || bytes.size() - end != size) return false;
   for (usize index = 0; index < count; ++index) {
-    const auto offset = kHeaderBytes + index * kLegacyInstrumentBytes;
-    const auto record = bytes.subspan(offset, kLegacyInstrumentBytes);
+    const auto offset = kHeaderBytes + index * kAudioLegacyInstrumentBytes;
+    const auto record = bytes.subspan(offset, kAudioLegacyInstrumentBytes);
     if (Read32(record, 0) > size || Read32(record, kLoopOffset) > size) {
       return false;
     }
@@ -113,7 +93,6 @@ AudioInstrument ReadInstrument(std::span<const u8> record) {
   AudioInstrument instrument;
   instrument.sample_offset = Read32(record, 0);
   instrument.loop_offset = Read32(record, kLoopOffset);
-  instrument.source_record.assign(record.begin(), record.end());
   if (record.size() == kInstrumentBytes) {
     instrument.fine_tune = std::bit_cast<i16>(Read16(record, kFineTuneOffset));
     instrument.root_note = std::bit_cast<i16>(Read16(record, kRootNoteOffset));
@@ -123,7 +102,10 @@ AudioInstrument ReadInstrument(std::span<const u8> record) {
   }
   // AKAO 3.0 articulation: Q20 chromatic pitches at +8, unpacked ADSR at +56.
   // WAVE0032 retains this older record; normal VS records are 16 bytes.
-  u64 pitch = Read32(record, kLegacyPitchOffset);
+  const auto articulation =
+      AudioLegacyArticulationOf(record.first<kAudioLegacyInstrumentBytes>());
+  instrument.legacy_articulation = articulation;
+  u64 pitch = articulation.pitch_table.front();
   instrument.available = pitch != 0;
   instrument.root_note = kLegacyRootNote;
   while (pitch >= kLegacyUnityPitch * 2) {
@@ -141,34 +123,15 @@ AudioInstrument ReadInstrument(std::span<const u8> record) {
           : std::bit_cast<i16>(static_cast<u16>(pitch / kNegativePitchDivisor));
   const auto envelope = record.subspan(kLegacyEnvelopeOffset);
   const auto lower =
-      static_cast<u16>(((envelope[5] & 4) << 13) | (envelope[0] << 8) |
-                       (envelope[1] << 4) | envelope[2]);
+      static_cast<u16>(((envelope[kLegacyAttackMode] & 4) << 13) |
+                       (envelope[0] << 8) | (envelope[1] << 4) | envelope[2]);
   const auto upper = static_cast<u16>(
-      ((envelope[6] & 4) << 13) | ((envelope[6] & 2) << 13) |
-      (envelope[3] << 6) | ((envelope[7] & 4) << 3) | envelope[4]);
+      ((envelope[kLegacySustainMode] & 4) << 13) |
+      ((envelope[kLegacySustainMode] & 2) << 13) | (envelope[3] << 6) |
+      ((envelope[kLegacyReleaseMode] & 4) << 3) | envelope[4]);
   instrument.adsr_lower = lower;
   instrument.adsr_upper = upper;
   return instrument;
-}
-
-std::expected<std::vector<u8>, std::string> ReadSourceRecord(
-    const nlohmann::json& entry) {
-  std::vector<u8> bytes;
-  if (!entry.contains("source_record")) return bytes;
-  const auto& record = entry.at("source_record");
-  if (!record.is_array() ||
-      (!record.empty() && record.size() != kInstrumentBytes &&
-       record.size() != kLegacyInstrumentBytes)) {
-    return std::unexpected("invalid original instrument record");
-  }
-  for (const auto& value : record) {
-    u8 byte = 0;
-    if (!ReadNumber(value, &byte)) {
-      return std::unexpected("invalid original instrument byte");
-    }
-    bytes.push_back(byte);
-  }
-  return bytes;
 }
 
 std::filesystem::path BankDirectory(const std::filesystem::path& root, u32 id) {
@@ -272,6 +235,21 @@ PsxAdpcmDecoder::Decode(std::span<const u8, kBlockBytes> block) {
   return output;
 }
 
+AudioLegacyArticulation AudioLegacyArticulationOf(
+    std::span<const u8, kAudioLegacyInstrumentBytes> record) noexcept {
+  AudioLegacyArticulation articulation;
+  usize offset = kLegacyPitchOffset;
+  for (u32& pitch : articulation.pitch_table) {
+    pitch = Read32(record, offset);
+    offset += sizeof(u32);
+  }
+  const auto envelope = record.subspan<kLegacyEnvelopeOffset>();
+  articulation.attack_mode = envelope[kLegacyAttackMode];
+  articulation.sustain_mode = envelope[kLegacySustainMode];
+  articulation.release_mode = envelope[kLegacyReleaseMode];
+  return articulation;
+}
+
 std::expected<void, std::string> ExportAudioSample(
     const AudioSample& sample, const std::filesystem::path& instrument_path,
     u32 sample_rate) {
@@ -318,12 +296,12 @@ std::expected<AudioBank, std::string> DecodeAudioBank(
   const auto count = Read32(bytes, kInstrumentCountOffset);
   const auto first = Read32(bytes, kFirstInstrumentOffset);
   const auto size = Read32(bytes, kSampleSizeOffset);
-  if (count == 0 || first >= kMaxInstruments ||
-      count > kMaxInstruments - first) {
+  if (count == 0 || first >= kAudioInstrumentSlots ||
+      count > kAudioInstrumentSlots - first) {
     return std::unexpected("instrument range exceeds native bank slots");
   }
   const usize stride = LegacyRecords(bytes, count, size)
-                           ? kLegacyInstrumentBytes
+                           ? kAudioLegacyInstrumentBytes
                            : kInstrumentBytes;
   const usize data_offset = kHeaderBytes + count * stride;
   if (bytes.size() < data_offset || size == 0 || size % kBlockBytes != 0) {
@@ -395,41 +373,28 @@ std::expected<void, std::string> ExportAudioBank(
       bank.instruments.size() != bank.samples.size()) {
     return std::unexpected("bank export requires decoded samples");
   }
+  // Checked first, so a bank with an unnamed envelope bit writes nothing.
+  auto metadata = AudioBankJson(bank);
+  if (!metadata) return std::unexpected(metadata.error());
   const auto directory = BankDirectory(data_root, bank.id);
   std::error_code error;
   std::filesystem::create_directories(directory, error);
   if (error) {
     return std::unexpected("creating audio bank directory: " + error.message());
   }
-  nlohmann::json metadata{{"version", kVersion},
-                          {"bank_id", bank.id},
-                          {"first_instrument", bank.first_instrument},
-                          {"source_destination", bank.source_destination},
-                          {"instruments", nlohmann::json::array()}};
   for (usize index = 0; index < bank.instruments.size(); ++index) {
-    const auto& instrument = bank.instruments[index];
-    const auto& sample = bank.samples[index];
-    metadata["instruments"].push_back(
-        {{"sample_offset", instrument.sample_offset},
-         {"loop_offset", instrument.loop_offset},
-         {"fine_tune", instrument.fine_tune},
-         {"root_note", instrument.root_note},
-         {"adsr_lower", instrument.adsr_lower},
-         {"adsr_upper", instrument.adsr_upper},
-         {"available", instrument.available},
-         {"source_record", instrument.source_record}});
-    if (!instrument.available) {
+    if (!bank.instruments[index].available) {
       continue;
     }
     if (auto result = ExportAudioSample(
-            sample, AudioInstrumentPath(data_root, bank.id, index),
+            bank.samples[index], AudioInstrumentPath(data_root, bank.id, index),
             kSampleRate);
         !result) {
       return result;
     }
   }
-  std::ofstream out(directory / "bank.json");
-  out << metadata.dump(2) << '\n';
+  std::ofstream out(directory / "bank.json", std::ios::binary);
+  out << FormatJsonText(*metadata) << '\n';
   out.close();
   if (!out) {
     return std::unexpected("writing audio bank metadata");
@@ -439,50 +404,21 @@ std::expected<void, std::string> ExportAudioBank(
 
 std::expected<AudioBank, std::string> LoadAudioBank(
     const std::filesystem::path& data_root, u32 id) {
-  std::ifstream in(BankDirectory(data_root, id) / "bank.json");
+  std::ifstream in(BankDirectory(data_root, id) / "bank.json",
+                   std::ios::binary);
   if (!in) {
     return std::unexpected("audio bank " + std::to_string(id) +
                            " is missing; run VS.Extract banks <datadir>");
   }
-  try {
-    nlohmann::json metadata;
-    in >> metadata;
-    AudioBank bank;
-    u32 version = 0;
-    if (!ReadInteger(metadata, "version", &version) || version != kVersion ||
-        !ReadInteger(metadata, "bank_id", &bank.id) || bank.id != id) {
-      return std::unexpected("unsupported audio bank version or mismatched ID");
-    }
-    if (!ReadInteger(metadata, "first_instrument", &bank.first_instrument) ||
-        !ReadInteger(metadata, "source_destination",
-                     &bank.source_destination) ||
-        !metadata.at("instruments").is_array()) {
-      return std::unexpected("invalid native bank metadata");
-    }
-    for (const auto& entry : metadata.at("instruments")) {
-      AudioInstrument instrument;
-      if (!ReadInteger(entry, "sample_offset", &instrument.sample_offset) ||
-          !ReadInteger(entry, "loop_offset", &instrument.loop_offset) ||
-          !ReadInteger(entry, "fine_tune", &instrument.fine_tune) ||
-          !ReadInteger(entry, "root_note", &instrument.root_note) ||
-          !ReadInteger(entry, "adsr_lower", &instrument.adsr_lower) ||
-          !ReadInteger(entry, "adsr_upper", &instrument.adsr_upper)) {
-        return std::unexpected("out-of-range native instrument metadata");
-      }
-      instrument.available = entry.at("available").get<bool>();
-      auto record = ReadSourceRecord(entry);
-      if (!record) return std::unexpected(record.error());
-      instrument.source_record = std::move(*record);
-      bank.instruments.push_back(instrument);
-    }
-    if (bank.instruments.empty() || bank.first_instrument >= kMaxInstruments ||
-        bank.instruments.size() > kMaxInstruments - bank.first_instrument) {
-      return std::unexpected("invalid audio bank instrument range");
-    }
-    return bank;
-  } catch (const nlohmann::json::exception& error) {
-    return std::unexpected("invalid audio bank metadata: " +
-                           std::string(error.what()));
+  const std::string text{std::istreambuf_iterator<char>(in), {}};
+  const std::string name = std::format("audio/banks/{}/bank.json", id);
+  auto json = ParseJsonText(std::as_bytes(std::span(text)), name);
+  if (!json) return std::unexpected(json.error());
+  auto bank = AudioBankOf(*json, name);
+  if (bank && bank->id != id) {
+    return std::unexpected(std::format(
+        "{}.bank_id is {}, not its directory's {}", name, bank->id, id));
   }
+  return bank;
 }
 }  // namespace VS::Content

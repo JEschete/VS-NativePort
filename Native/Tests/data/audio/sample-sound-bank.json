@@ -1,0 +1,69 @@
+{
+  "schema": "vs.audio-bank",
+  "schema_version": 2,
+  "bank_id": 5,
+  "first_instrument": 64,
+  "source_destination": 217344,
+  "instruments": [
+    {
+      "available": true,
+      "root_note": 60,
+      "fine_tune": 10800,
+      "envelope": {
+        "attack_curve": "linear",
+        "attack_rate": 0,
+        "decay_rate": 15,
+        "sustain_level": 15,
+        "sustain_curve": "linear",
+        "sustain_direction": "decrease",
+        "sustain_rate": 127,
+        "release_curve": "linear",
+        "release_rate": 4
+      },
+      "sample_offset": 0,
+      "loop_offset": 32
+    },
+    {
+      "available": false,
+      "root_note": 0,
+      "fine_tune": 0,
+      "envelope": {
+        "attack_curve": "exponential",
+        "attack_rate": 58,
+        "decay_rate": 3,
+        "sustain_level": 9,
+        "sustain_curve": "exponential",
+        "sustain_direction": "increase",
+        "sustain_rate": 21,
+        "release_curve": "exponential",
+        "release_rate": 31
+      },
+      "sample_offset": 64,
+      "loop_offset": 64
+    },
+    {
+      "available": true,
+      "root_note": 72,
+      "fine_tune": -32768,
+      "envelope": {
+        "attack_curve": "linear",
+        "attack_rate": 0,
+        "decay_rate": 15,
+        "sustain_level": 15,
+        "sustain_curve": "linear",
+        "sustain_direction": "decrease",
+        "sustain_rate": 127,
+        "release_curve": "linear",
+        "release_rate": 7
+      },
+      "sample_offset": 128,
+      "loop_offset": 144,
+      "akao3_articulation": {
+        "pitch_table": [524288, 555392, 588416, 623360, 660480, 699776, 741376, 785536, 832256, 881664, 934144, 989696],
+        "attack_mode": "linear-increase",
+        "sustain_mode": "linear-decrease",
+        "release_mode": "linear-decrease"
+      }
+    }
+  ]
+}

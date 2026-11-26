@@ -36,8 +36,10 @@
 #include "Audio/XaMixLive.hpp"
 #include "Audio/XaPlayback.hpp"
 #include "Content/AudioBank.hpp"
+#include "Content/AudioBankJson.hpp"
 #include "Content/AudioStream.hpp"
 #include "Content/DataStore.hpp"
+#include "Content/JsonText.hpp"
 #include "Core/Log.hpp"
 #include "Legacy/Psx.hpp"
 #include "Platform/Paths.hpp"
@@ -128,6 +130,7 @@ TEST_CASE("Zone music consumers read the initialized canonical zone state",
 
 namespace {
 using VS::i16;
+using VS::u16;
 using VS::u32;
 using VS::u64;
 using VS::u8;
@@ -284,6 +287,60 @@ std::array<u8, 160> LegacyBankBytes() {
   return bytes;
 }
 
+// The articulation `instrument` holds, or null.
+const Content::AudioLegacyArticulation* Articulation(
+    const Content::AudioInstrument& instrument) {
+  return instrument.legacy_articulation ? &*instrument.legacy_articulation
+                                        : nullptr;
+}
+
+// The bank Native/Tests/data/audio/sample-sound-bank.json describes.
+Content::AudioBank SampleSoundBank() {
+  Content::AudioBank bank;
+  bank.id = 5;
+  bank.first_instrument = 64;
+  bank.source_destination = 0x35100;
+  bank.instruments = {
+      {.sample_offset = 0,
+       .loop_offset = 32,
+       .fine_tune = 10800,
+       .root_note = 60,
+       .adsr_lower = 0x00FF,
+       .adsr_upper = 0x5FC4},
+      {.sample_offset = 64,
+       .loop_offset = 64,
+       .adsr_lower = 0xBA39,
+       .adsr_upper = 0x857F,
+       .available = false},
+      {.sample_offset = 128,
+       .loop_offset = 144,
+       .fine_tune = -32768,
+       .root_note = 72,
+       .adsr_lower = 0x00FF,
+       .adsr_upper = 0x5FC7,
+       .legacy_articulation =
+           Content::AudioLegacyArticulation{
+               .pitch_table = {524288, 555392, 588416, 623360, 660480, 699776,
+                               741376, 785536, 832256, 881664, 934144, 989696},
+               .attack_mode = 1,
+               .sustain_mode = 3,
+               .release_mode = 3}},
+  };
+  return bank;
+}
+
+Content::JsonDocument SampleSoundBankJson() {
+  std::ifstream in(std::filesystem::path(SDL_GetBasePath()) / ".." / ".." /
+                       "Native" / "Tests" / "data" / "audio" /
+                       "sample-sound-bank.json",
+                   std::ios::binary);
+  const std::string text{std::istreambuf_iterator<char>(in), {}};
+  auto json =
+      Content::ParseJsonText(std::as_bytes(std::span(text)), "sample bank");
+  REQUIRE(json);
+  return *json;
+}
+
 std::vector<u8> StreamBytes(bool stereo = false) {
   constexpr usize kChunk = 2048;
   constexpr u32 kChannelBytes = 2080;
@@ -356,6 +413,34 @@ struct AudioFixture {
     controls.instrument = Content::AudioInstrumentPath(root, 0, 0);
     controls.envelope = Audio::DecodeAkaoEnvelope(0x00FF, 0x5FC4);
     return controls;
+  }
+};
+
+std::filesystem::path ExportedBankMetadata(const AudioFixture& fixture) {
+  REQUIRE(Content::ExportAudioBank(fixture.bank, fixture.root));
+  return Content::AudioInstrumentPath(fixture.root, 0, 0).parent_path() /
+         "bank.json";
+}
+
+Content::JsonDocument ReadJsonFile(const std::filesystem::path& path) {
+  std::ifstream in(path);
+  return Content::JsonDocument::parse(in);
+}
+
+// An exported fixture bank whose bank.json a test breaks before loading it.
+struct BankMetadataFixture {
+  AudioFixture audio;
+  std::filesystem::path path = ExportedBankMetadata(audio);
+  Content::JsonDocument metadata = ReadJsonFile(path);
+
+  std::string LoadError() const {
+    std::ofstream out(path);
+    out << metadata;
+    out.close();
+    REQUIRE(out.good());
+    const auto loaded = Content::LoadAudioBank(audio.root, 0);
+    REQUIRE_FALSE(loaded);
+    return loaded.error();
   }
 };
 
@@ -1204,8 +1289,13 @@ TEST_CASE("Legacy wave articulations preserve tuning and envelope provenance",
   CHECK(instrument.fine_tune == 0);
   CHECK(instrument.adsr_lower == 0x00FF);
   CHECK(instrument.adsr_upper == 0x5FC7);
-  CHECK(instrument.source_record ==
-        std::vector<u8>(bytes.begin() + 64, bytes.begin() + 128));
+  Content::AudioLegacyArticulation expected{
+      .attack_mode = 1, .sustain_mode = 3, .release_mode = 3};
+  for (usize note = 0; note < expected.pitch_table.size(); ++note) {
+    expected.pitch_table[note] = static_cast<u32>(
+        std::lround(1048576 * std::exp2(static_cast<double>(note) / 12.0)));
+  }
+  CHECK(instrument.legacy_articulation == expected);
   CHECK(bank->samples[0].pcm.size() == 56);
 }
 
@@ -1217,8 +1307,8 @@ TEST_CASE("Exported legacy instrument provenance survives metadata loading",
   REQUIRE(Content::ExportAudioBank(*bank, fixture.root));
   const auto restored = Content::LoadAudioBank(fixture.root, 0);
   REQUIRE(restored);
-  CHECK(restored->instruments[0].source_record ==
-        bank->instruments[0].source_record);
+  CHECK(restored->instruments == bank->instruments);
+  CHECK(Articulation(restored->instruments[0]) != nullptr);
 }
 
 TEST_CASE("Legacy zero-pitch articulations are explicitly unavailable",
@@ -1228,7 +1318,9 @@ TEST_CASE("Legacy zero-pitch articulations are explicitly unavailable",
   const auto bank = Content::DecodeAudioBank(bytes);
   REQUIRE(bank);
   CHECK_FALSE(bank->instruments[0].available);
-  CHECK(bank->instruments[0].source_record.size() == 64);
+  CHECK(bank->instruments[0].legacy_articulation ==
+        Content::AudioLegacyArticulation{
+            .attack_mode = 1, .sustain_mode = 3, .release_mode = 3});
   CHECK(bank->samples[0].pcm.empty());
   Put32(bytes, 76, 1048576);
   CHECK_FALSE(Content::DecodeAudioBank(bytes));
@@ -1316,50 +1408,150 @@ TEST_CASE("Native envelope sustains, releases and restarts without old state",
   CHECK_FALSE(envelope.Finished());
 }
 
-TEST_CASE("Native bank metadata rejects malformed shapes and integer overflow",
+TEST_CASE("Native bank metadata rejects malformed bank members",
           "[audio][bank]") {
-  AudioFixture fixture;
-  REQUIRE(Content::ExportAudioBank(fixture.bank, fixture.root));
-  const auto path =
-      Content::AudioInstrumentPath(fixture.root, 0, 0).parent_path() /
-      "bank.json";
-  nlohmann::json metadata;
-  {
-    std::ifstream in(path);
-    in >> metadata;
+  BankMetadataFixture bank;
+  auto& metadata = bank.metadata;
+  std::string_view expected;
+  SECTION("version 1 bank") {
+    metadata.erase("schema");
+    metadata.erase("schema_version");
+    metadata["version"] = 1;
+    expected = "run VS.Extract authoring";
   }
-  SECTION("unsupported version") { metadata["version"] = 2; }
+  SECTION("newer schema version") {
+    metadata["schema_version"] = 3;
+    expected = "this build reads vs.audio-bank version 2";
+  }
   SECTION("bank ID overflow") {
     metadata["bank_id"] = std::numeric_limits<u64>::max();
+    expected = "bank_id must be a whole number from 0 to 4294967295";
   }
   SECTION("negative unsigned provenance") {
     metadata["source_destination"] = -1;
-  }
-  SECTION("signed instrument overflow") {
-    metadata["instruments"][0]["fine_tune"] = 32768;
-  }
-  SECTION("signed instrument underflow") {
-    metadata["instruments"][0]["root_note"] = -32769;
-  }
-  SECTION("fractional instrument") {
-    metadata["instruments"][0]["root_note"] = 1.5;
-  }
-  SECTION("envelope overflow") {
-    metadata["instruments"][0]["adsr_upper"] = 65536;
-  }
-  SECTION("non-boolean availability") {
-    metadata["instruments"][0]["available"] = 1;
+    expected = "source_destination must be a whole number";
   }
   SECTION("non-array instruments") {
-    metadata["instruments"] = nlohmann::json::object();
+    metadata["instruments"] = Content::JsonDocument::object();
+    expected = "instruments must hold 1 to 256 instruments";
   }
-  SECTION("missing field") { metadata.erase("first_instrument"); }
-  SECTION("non-object metadata") { metadata = nlohmann::json::array(); }
-  std::ofstream out(path);
-  out << metadata;
-  out.close();
-  REQUIRE(out.good());
-  CHECK_FALSE(Content::LoadAudioBank(fixture.root, 0));
+  SECTION("instruments past slot 255") {
+    metadata["first_instrument"] = 255;
+    metadata["instruments"].push_back(
+        Content::JsonDocument(metadata["instruments"][0]));
+    expected = "instruments must hold 1 to 1 instruments";
+  }
+  SECTION("missing field") {
+    metadata.erase("first_instrument");
+    expected = "first_instrument is missing";
+  }
+  SECTION("another bank's ID") {
+    metadata["bank_id"] = 1;
+    expected = "bank_id is 1, not its directory's 0";
+  }
+  SECTION("non-object metadata") {
+    metadata = Content::JsonDocument::array();
+    expected = "bank.json must be an object";
+  }
+  const auto error = bank.LoadError();
+  CAPTURE(error);
+  CHECK(error.contains(expected));
+}
+
+TEST_CASE("Native bank metadata rejects malformed instruments and overflow",
+          "[audio][bank]") {
+  BankMetadataFixture bank;
+  auto& instrument = bank.metadata["instruments"][0];
+  auto& envelope = instrument["envelope"];
+  std::string_view expected;
+  SECTION("signed instrument overflow") {
+    instrument["fine_tune"] = 32768;
+    expected = "instruments[0].fine_tune must be a whole number from -32768";
+  }
+  SECTION("signed instrument underflow") {
+    instrument["root_note"] = -32769;
+    expected = "root_note must be a whole number";
+  }
+  SECTION("fractional instrument") {
+    instrument["root_note"] = 1.5;
+    expected = "root_note must be a whole number";
+  }
+  SECTION("envelope rate overflow") {
+    envelope["attack_rate"] = 128;
+    expected = "envelope.attack_rate must be a whole number from 0 to 127";
+  }
+  SECTION("unknown envelope curve") {
+    envelope["release_curve"] = "logarithmic";
+    expected = "release_curve must be linear or exponential";
+  }
+  SECTION("numbered envelope direction") {
+    envelope["sustain_direction"] = 1;
+    expected = "sustain_direction must be a string";
+  }
+  SECTION("packed envelope word") {
+    instrument["adsr_upper"] = 0x5FC4;
+    expected = "has an unknown member 'adsr_upper'";
+  }
+  SECTION("non-boolean availability") {
+    instrument["available"] = 1;
+    expected = "available must be true or false";
+  }
+  SECTION("short pitch table") {
+    instrument["akao3_articulation"] = {
+        {"pitch_table", std::vector<u32>(11, 1048576)},
+        {"attack_mode", "linear-increase"},
+        {"sustain_mode", "linear-decrease"},
+        {"release_mode", "linear-decrease"}};
+    expected = "pitch_table must hold 12 whole numbers";
+  }
+  SECTION("unknown articulation mode") {
+    instrument["akao3_articulation"] = {
+        {"pitch_table", std::vector<u32>(12, 1048576)},
+        {"attack_mode", "linear-increase"},
+        {"sustain_mode", "linear-decrease"},
+        {"release_mode", "fast"}};
+    expected = "release_mode must be direct, linear-increase";
+  }
+  const auto error = bank.LoadError();
+  CAPTURE(error);
+  CHECK(error.contains(expected));
+}
+
+TEST_CASE("Sound bank envelopes name every ADSR bit the SPU reads",
+          "[audio][bank]") {
+  Content::AudioBank bank;
+  bank.instruments.resize(1);
+  auto& instrument = bank.instruments.front();
+  for (int bit = 0; bit < 32; ++bit) {
+    CAPTURE(bit);
+    instrument.adsr_lower = bit < 16 ? static_cast<u16>(1U << bit) : 0;
+    instrument.adsr_upper = bit < 16 ? 0 : static_cast<u16>(1U << (bit - 16));
+    const auto json = Content::AudioBankJson(bank);
+    if (bit == 16 + 13) {
+      REQUIRE_FALSE(json);
+      CHECK(json.error().contains("sets bit 13, which has no member"));
+      continue;
+    }
+    REQUIRE(json);
+    const auto restored = Content::AudioBankOf(*json, "bank");
+    REQUIRE(restored);
+    CHECK(restored->instruments == bank.instruments);
+  }
+}
+
+TEST_CASE("Sound bank documents match their schema fixture both ways",
+          "[audio][bank]") {
+  const auto bank = SampleSoundBank();
+  const auto fixture = SampleSoundBankJson();
+  const auto written = Content::AudioBankJson(bank);
+  REQUIRE(written);
+  CHECK(*written == fixture);
+  const auto read = Content::AudioBankOf(fixture, "sample bank");
+  REQUIRE(read);
+  CHECK(read->id == bank.id);
+  CHECK(read->first_instrument == bank.first_instrument);
+  CHECK(read->source_destination == bank.source_destination);
+  CHECK(read->instruments == bank.instruments);
 }
 
 TEST_CASE("Noise is shared, pitch independent, and needs no sample program",

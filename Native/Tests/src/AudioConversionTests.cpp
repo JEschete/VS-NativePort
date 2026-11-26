@@ -32,9 +32,11 @@
 #include "Content/ConversionManifest.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/Disc.hpp"
+#include "Content/JsonText.hpp"
 #include "Content/MovieEncoder.hpp"
 #include "Core/Sha256.hpp"
 #include "Extract/AudioBankConversion.hpp"
+#include "Extract/ConversionManifestWriter.hpp"
 #include "Extract/ConverterBatch.hpp"
 #include "Extract/EsqConversion.hpp"
 #include "Extract/EtmConversion.hpp"
@@ -308,6 +310,83 @@ void CheckNonzeroOneByteBank(const AudioRoot& root, const Bytes& bank) {
   CHECK(Contains(failed.error(), "SOUND/WAVE0002.DAT"));
 }
 
+constexpr std::string_view kBankJson = "audio/banks/5/bank.json";
+
+// The labeled bank.json the numbered (version 1) converter wrote for
+// BankBytes(kBankId), with ADSR words `lower` and `upper`.
+Content::JsonDocument NumberedBankJson(std::uint16_t lower,
+                                       std::uint16_t upper) {
+  auto json = Content::JsonDocument::parse(R"({
+    "display_name": "Test bank",
+    "bank_id": 5,
+    "first_instrument": 0,
+    "instruments": [{
+      "display_name": "Lead",
+      "adsr_lower": 0,
+      "adsr_upper": 0,
+      "available": true,
+      "fine_tune": 0,
+      "loop_offset": 16,
+      "root_note": 0,
+      "sample_offset": 0,
+      "source_record": [0, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    }],
+    "source_destination": 12544,
+    "version": 1
+  })");
+  json["instruments"][0]["adsr_lower"] = lower;
+  json["instruments"][0]["adsr_upper"] = upper;
+  return json;
+}
+
+Content::JsonDocument ReadBankJson(const fs::path& root) {
+  std::ifstream in(root / fs::path(kBankJson), std::ios::binary);
+  const std::string text{std::istreambuf_iterator<char>(in), {}};
+  auto json = Content::ParseJsonText(std::as_bytes(std::span(text)), kBankJson);
+  INFO((json ? std::string{} : json.error()));
+  REQUIRE(json.has_value());
+  return *json;
+}
+
+void WriteBankJson(const AudioRoot& root, const Content::JsonDocument& json) {
+  const std::string text = Content::FormatJsonText(json) + "\n";
+  root.Write(kBankJson, std::as_bytes(std::span(text)));
+}
+
+// Writes `json` as the bank, and a manifest recording it under wave-bank
+// converter `version`.
+void WriteNumberedBank(const AudioRoot& root, const Content::JsonDocument& json,
+                       std::uint32_t version) {
+  WriteBankJson(root, json);
+  Content::ConversionManifest manifest;
+  manifest.converters = {
+      {std::string(Content::kWaveBankConverterName), version}};
+  manifest.outputs = {
+      {.id = "audio.bank.wave0001",
+       .source = std::string(kBankPath),
+       .source_sha256 = std::string(64, 'a'),
+       .converter = std::string(Content::kWaveBankConverterName),
+       .files = {std::string(kBankJson)},
+       .dependencies = {},
+       .unreferenced = false,
+       .note = {},
+       .alias_of = {}}};
+  REQUIRE(Extract::WriteConversionManifest(root.Root(), manifest));
+}
+
+std::optional<std::uint32_t> WaveBankVersion(const fs::path& root) {
+  const Content::ConversionManifest manifest = ManifestAt(root);
+  const auto found = manifest.converters.find(Content::kWaveBankConverterName);
+  if (found == manifest.converters.end()) return std::nullopt;
+  return found->second;
+}
+
+void SetWaveBankVersion(const fs::path& root, std::uint32_t version) {
+  Content::ConversionManifest manifest = ManifestAt(root);
+  manifest.converters[std::string(Content::kWaveBankConverterName)] = version;
+  REQUIRE(Extract::WriteConversionManifest(root, manifest));
+}
+
 }  // namespace
 
 TEST_CASE(
@@ -354,6 +433,111 @@ TEST_CASE("Sound banks with one bank id are refused", "[content-audio]") {
   const auto converted = Extract::ConvertDiscBanks(root.Root(), false);
   REQUIRE_FALSE(converted.has_value());
   CHECK(Contains(converted.error(), "both write audio/banks/5/"));
+}
+
+TEST_CASE("Authoring names existing sound bank envelopes in place",
+          "[content-audio][bank-authoring]") {
+  AudioRoot root;
+  WriteNumberedBank(root, NumberedBankJson(0x00FF, 0x5FC4),
+                    Extract::kNumberedAdsrBankVersion);
+
+  const auto report = Extract::UpgradeBankAuthoring(root.Root());
+  INFO((report ? std::string{} : report.error()));
+  REQUIRE(report.has_value());
+  CHECK(report->banks == 1);
+  CHECK(report->written == 2);
+  CHECK(ReadBankJson(root.Root()) == Content::JsonDocument::parse(R"({
+    "display_name": "Test bank",
+    "schema": "vs.audio-bank",
+    "schema_version": 2,
+    "bank_id": 5,
+    "first_instrument": 0,
+    "source_destination": 12544,
+    "instruments": [{
+      "display_name": "Lead",
+      "available": true,
+      "root_note": 0,
+      "fine_tune": 0,
+      "envelope": {
+        "attack_curve": "linear",
+        "attack_rate": 0,
+        "decay_rate": 15,
+        "sustain_level": 15,
+        "sustain_curve": "linear",
+        "sustain_direction": "decrease",
+        "sustain_rate": 127,
+        "release_curve": "linear",
+        "release_rate": 4
+      },
+      "sample_offset": 0,
+      "loop_offset": 16
+    }]
+  })"));
+  CHECK(WaveBankVersion(root.Root()) == Content::kWaveBankConverterVersion);
+  const auto loaded = Content::LoadAudioBank(root.Root(), kBankId);
+  REQUIRE(loaded.has_value());
+  CHECK(loaded->instruments.front().adsr_upper == 0x5FC4);
+
+  const auto repeat = Extract::UpgradeBankAuthoring(root.Root());
+  REQUIRE(repeat.has_value());
+  CHECK(repeat->written == 0);
+}
+
+TEST_CASE("Authoring leaves a sound bank it cannot name",
+          "[content-audio][bank-authoring]") {
+  AudioRoot root;
+  Content::JsonDocument numbered = NumberedBankJson(0x00FF, 0x5FC4);
+  std::string_view reason;
+  SECTION("an unused envelope bit") {
+    numbered["instruments"][0]["adsr_upper"] = 0x7FC4;
+    reason = "sets bit 13, which has no member";
+  }
+  SECTION("an unknown version") {
+    numbered["version"] = 3;
+    reason = "version must be 1 for a numbered sound bank";
+  }
+  SECTION("a disc record of another size") {
+    numbered["instruments"][0]["source_record"] =
+        Content::JsonDocument::array({0, 0, 0});
+    reason = "source_record must hold 16 or 64 bytes";
+  }
+  WriteNumberedBank(root, numbered, Extract::kNumberedAdsrBankVersion);
+  const Content::JsonDocument before = ReadBankJson(root.Root());
+
+  const auto refused = Extract::UpgradeBankAuthoring(root.Root());
+  REQUIRE_FALSE(refused.has_value());
+  CAPTURE(refused.error());
+  CHECK(refused.error().contains(reason));
+  CHECK(ReadBankJson(root.Root()) == before);
+  CHECK(WaveBankVersion(root.Root()) == Extract::kNumberedAdsrBankVersion);
+  const auto stale = Content::LoadAudioBank(root.Root(), kBankId);
+  REQUIRE_FALSE(stale.has_value());
+  CHECK(Contains(stale.error(), "run VS.Extract authoring"));
+}
+
+TEST_CASE(
+    "Sound bank conversion upgrades labeled banks instead of "
+    "converting them again",
+    "[content-audio][bank-authoring]") {
+  AudioRoot root;
+  root.List({RawFile(kBankPath, BankBytes(kBankId))});
+  REQUIRE(Extract::ConvertDiscBanks(root.Root(), false).has_value());
+  const Content::JsonDocument converted = ReadBankJson(root.Root());
+  WriteBankJson(root, NumberedBankJson(0, 0));
+  SetWaveBankVersion(root.Root(), Extract::kNumberedAdsrBankVersion);
+
+  const auto again = Extract::ConvertDiscBanks(root.Root(), false);
+  INFO((again ? std::string{} : again.error()));
+  REQUIRE(again.has_value());
+  CHECK(again->converted == 0);
+  CHECK(again->unchanged == 1);
+  Content::JsonDocument upgraded = ReadBankJson(root.Root());
+  CHECK(upgraded["display_name"] == "Test bank");
+  CHECK(upgraded["instruments"][0]["display_name"] == "Lead");
+  upgraded.erase("display_name");
+  upgraded["instruments"][0].erase("display_name");
+  CHECK(upgraded == converted);
+  CHECK(WaveBankVersion(root.Root()) == Content::kWaveBankConverterVersion);
 }
 
 TEST_CASE(
