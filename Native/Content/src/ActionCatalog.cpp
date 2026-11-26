@@ -296,11 +296,17 @@ constexpr ColumnSpec Renamed(ColumnSpec column,
 // part ranges for each axis. For a chosen single target, range_x 255 takes
 // the attacker's weapon extents and angle in place of range_x, range_y,
 // range_z and range_angle but keeps the action's shape; the area collector's
-// test for it never matches, so area actions keep their own values.
+// test for it never matches, so area actions keep their own values. A source
+// area aims the range volume at the target instead of using range_angle. The
+// angle tilts the volume about its across axis; an actor faces away from its
+// heading's +z, so 24 leans a range volume forward (ACTION_HITS.md 4.7.3).
 // decomp: func_80071F68 (src/BATTLE/BATTLE.PRG/146C.c:3898)
 // decomp: func_80072734 (src/BATTLE/BATTLE.PRG/146C.c:4054)
+// decomp: func_800719FC (src/BATTLE/BATTLE.PRG/146C.c:3803)
+// decomp: func_800C1564 (src/BATTLE/BATTLE.PRG/58578.c:360)
+// decomp: func_800E437C (src/BATTLE/BATTLE.PRG/6E4CCShared.h:478)
 constexpr std::string_view kRangeXText{
-    "The targeting volume's extent, 32 world units a step. 255, on an action "
+    "The range volume's extent, 32 world units a step. 255, on an action "
     "whose category has a chosen single target (as the base attacks do), "
     "takes the attacker's weapon extents (blade range plus reach) and angle "
     "in place of range_x, range_y, range_z and range_angle, keeping "
@@ -308,18 +314,23 @@ constexpr std::string_view kRangeXText{
     "written.",
 };
 constexpr std::string_view kRangeText{
-    "The targeting volume's extent, 32 world units a step; replaced by the "
+    "The range volume's extent, 32 world units a step; replaced by the "
     "weapon's when range_x 255 takes the weapon extents.",
 };
 constexpr std::string_view kRangeAngleText{
-    "The targeting volume's pitch, in 11.25-degree steps (1/32 turn); "
-    "replaced by the weapon's when range_x 255 takes the weapon extents.",
+    "The range volume's tilt, in 11.25-degree steps (1/32 turn): 24 lays its "
+    "height axis flat ahead of the user, 8 flat behind and 16 upside down "
+    "(ACTION_HITS.md section 4.7.3). Replaced by the weapon's when range_x "
+    "255 takes the weapon extents; a source-area action aims the volume at "
+    "its target instead.",
 };
 constexpr std::string_view kAreaText{
-    "The area of effect's extent around its target, 32 world units a step.",
+    "The area volume's extent around its centre, 32 world units a step.",
 };
 constexpr std::string_view kAngleText{
-    "The volume's pitch, in 11.25-degree steps (1/32 turn).",
+    "The area volume's tilt, in 11.25-degree steps (1/32 turn): 8 lays its "
+    "height axis flat toward the map's +z, 24 toward its -z and 16 upside "
+    "down (ACTION_HITS.md section 4.7.3).",
 };
 constexpr std::array kActionColumns{
     ColumnSpec{
@@ -397,13 +408,17 @@ constexpr std::array kActionColumns{
     Integer("range_y", kByteMax, kRangeText),
     Integer("range_z", kByteMax, kRangeText),
     Enumeration("range_shape", kVolumeShapes,
-                "The targeting volume's shape; none means no volume."),
+                "The range volume's shape; none contains nothing. "
+                "ACTION_HITS.md section 4.7.3 gives each shape's geometry "
+                "and where each category places the volume."),
     Integer("range_angle", kFiveBitMax, kRangeAngleText),
     Integer("area_range_x", kByteMax, kAreaText),
     Integer("area_range_y", kByteMax, kAreaText),
     Integer("area_range_z", kByteMax, kAreaText),
     Enumeration("area_shape", kVolumeShapes,
-                "The area of effect's shape; none means a single target."),
+                "The area volume's shape, centred on the point a ground-area "
+                "action chooses; other categories do not target with it "
+                "(ACTION_HITS.md section 4.7.3)."),
     Integer("area_angle", kFiveBitMax, kAngleText),
     ColumnSpec{
         .name = "behavior",

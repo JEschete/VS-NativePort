@@ -344,21 +344,21 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "The targeting volume's extent, 32 world units a step. 255, on an action whose category has a chosen single target (as the base attacks do), takes the attacker's weapon extents (blade range plus reach) and angle in place of range_x, range_y, range_z and range_angle, keeping range_shape; actions with an area extent always use the values written."
+      "description": "The range volume's extent, 32 world units a step. 255, on an action whose category has a chosen single target (as the base attacks do), takes the attacker's weapon extents (blade range plus reach) and angle in place of range_x, range_y, range_z and range_angle, keeping range_shape; actions with an area extent always use the values written."
     },
     {
       "name": "range_y",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "The targeting volume's extent, 32 world units a step; replaced by the weapon's when range_x 255 takes the weapon extents."
+      "description": "The range volume's extent, 32 world units a step; replaced by the weapon's when range_x 255 takes the weapon extents."
     },
     {
       "name": "range_z",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "The targeting volume's extent, 32 world units a step; replaced by the weapon's when range_x 255 takes the weapon extents."
+      "description": "The range volume's extent, 32 world units a step; replaced by the weapon's when range_x 255 takes the weapon extents."
     },
     {
       "name": "range_shape",
@@ -374,35 +374,35 @@
         "7": "diamond"
       },
       "legacy_numeric_aliases": true,
-      "description": "The targeting volume's shape; none means no volume."
+      "description": "The range volume's shape; none contains nothing. ACTION_HITS.md section 4.7.3 gives each shape's geometry and where each category places the volume."
     },
     {
       "name": "range_angle",
       "type": "integer",
       "minimum": 0,
       "maximum": 31,
-      "description": "The targeting volume's pitch, in 11.25-degree steps (1/32 turn); replaced by the weapon's when range_x 255 takes the weapon extents."
+      "description": "The range volume's tilt, in 11.25-degree steps (1/32 turn): 24 lays its height axis flat ahead of the user, 8 flat behind and 16 upside down (ACTION_HITS.md section 4.7.3). Replaced by the weapon's when range_x 255 takes the weapon extents; a source-area action aims the volume at its target instead."
     },
     {
       "name": "area_range_x",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "The area of effect's extent around its target, 32 world units a step."
+      "description": "The area volume's extent around its centre, 32 world units a step."
     },
     {
       "name": "area_range_y",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "The area of effect's extent around its target, 32 world units a step."
+      "description": "The area volume's extent around its centre, 32 world units a step."
     },
     {
       "name": "area_range_z",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "The area of effect's extent around its target, 32 world units a step."
+      "description": "The area volume's extent around its centre, 32 world units a step."
     },
     {
       "name": "area_shape",
@@ -418,14 +418,14 @@
         "7": "diamond"
       },
       "legacy_numeric_aliases": true,
-      "description": "The area of effect's shape; none means a single target."
+      "description": "The area volume's shape, centred on the point a ground-area action chooses; other categories do not target with it (ACTION_HITS.md section 4.7.3)."
     },
     {
       "name": "area_angle",
       "type": "integer",
       "minimum": 0,
       "maximum": 31,
-      "description": "The volume's pitch, in 11.25-degree steps (1/32 turn)."
+      "description": "The area volume's tilt, in 11.25-degree steps (1/32 turn): 8 lays its height axis flat toward the map's +z, 24 toward its -z and 16 upside down (ACTION_HITS.md section 4.7.3)."
     },
     {
       "name": "behavior",

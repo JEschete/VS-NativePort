@@ -174,7 +174,9 @@ Rules beyond the schemas:
   after a repeated name and `untitled-NNN` for placeholder records. `name` allows only the `{level}` markup.
   `legacy_id` is the index saves and scripts still use. `category` references an `action-category.<slug>`.
   `behavior` is a `|` set of the twelve named AI bits plus `menu-action`, `hits-first-obstruction` and
-  `starts-unlocked` (or `none`); [§4.7.2](ACTION_HITS.md#472-action-behavior-flags-520) defines each. `effect_package` names the package a `menu-action` action plays by asset id
+  `starts-unlocked` (or `none`); [§4.7.2](ACTION_HITS.md#472-action-behavior-flags-520) defines each. The `range_*`
+  and `area_*` columns describe the range and area volumes; [§4.7.3](ACTION_HITS.md#473-action-volumes-520) gives
+  their shapes and placement. `effect_package` names the package a `menu-action` action plays by asset id
   (`asset.effect.e060.p` is `EFFECT/E060.P`) or `none`; code 252 has no package file and is refused. Packages are
   shared freely, and a trap panel plays the package numbered like its action whatever the column says. Semantic
   effect names wait for #216.

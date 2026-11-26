@@ -1,4 +1,4 @@
-# Asset Pipeline: action hit values and behavior flags
+# Asset Pipeline: action hit values, behavior flags and volumes
 
 [Asset pipeline index](../ASSET_PIPELINE.md)
 
@@ -147,7 +147,9 @@ values' codes are the same.
 This section defines each `behavior` flag of `catalogs\battle\actions.csv` (§4.7). Only the enemy AI reads the
 first twelve (`Battle/Ai/PlanningPrimitives.cpp`, `DecisionPrimitives.cpp`, `PlanningWorkspace.cpp` and
 `Battle/Targeting.cpp`): they change how an enemy chooses the action, not what the action does, and matter only
-when an enemy has the action. The battle code reads the last three for every user.
+when an enemy has the action in one of its action slots. No enemy has a `trap` action or an environment-category
+action in the original data, so those actions' AI flags have no effect. The battle code reads the last three for
+every user.
 
 The AI rates each pairing of one of its actions with a target. A pairing has a **score**, from the condition of
 every actor after a simulated hit, and a **weight** from 0 to 128: the simulated hit chance scaled to 128, or 128
@@ -157,21 +159,57 @@ action's targets, and it breaks ties between equal scores. A weight of 0 rules t
 
 | Flag | What it does |
 |---|---|
-| `special-mode` | An enemy spawned in special-action mode (bit 12 of its spawn flags, not yet an authored column) skips the hit simulation for the action. The pairing gets weight 40, and its score rises by one step, so it wins ties. Other enemies ignore the flag. |
+| `special-mode` | Special-action mode is a setting an enemy is spawned with (bit 12 of its spawn flags; no catalog column sets it yet). An enemy in that mode skips the hit simulation for the action. The pairing gets weight 40, and its score rises by one step, so it wins ties. Other enemies ignore the flag. |
 | `rarely-chosen` | The AI discards the pairing when a roll from 0 to 127 is below 115, so it considers the action in about one evaluation in ten. |
 | `fallback-eligible` | The AI remembers the first pairing for each action slot, up to 16, as a fallback. When a plan ends with no candidate and the enemy's spawn flags allow fallbacks (bit 13), the plan uses the remembered pairings at weight 128. |
-| `shaped-area` | The AI measures the area's reach from `area_shape`, its dimensions and `area_angle`, keeping it only when it is shorter than the action's range. It does not use the action on a target nearer than that reach. |
-| `radial-area` | As `shaped-area`, but the reach is `area_range_y` taken as a radius, whatever the shape. |
-| `targets-unconditionally` | A `beneficial` action may go to any ally. Without this flag, the ally must match one of the next three flags. |
+| `shaped-area` | The AI measures the area's reach from `area_shape`, its dimensions and `area_angle`, keeping it only when it is shorter than the action's range. It does not use the action on a target nearer to the enemy than that reach. |
+| `radial-area` | As `shaped-area`, but the reach is `area_range_y` steps of 32 world units, whatever the shape. |
+| `targets-unconditionally` | A `beneficial` action may go to any ally, and the next three flags are ignored. Without this flag, the ally must match one of them. |
 | `targets-status-restricted` | ... an ally with half movement, strength, intelligence or agility down, paralysis, poison or numbness, or silence when it has spells. |
 | `targets-low-mp` | ... an ally that has spells and has MP below half its maximum or below the cost of its costliest spell. |
 | `targets-low-hp` | ... an ally with HP below half its maximum. |
 | `ignores-sight` | The AI may use the action on a target out of its sight. Without the flag, the target must be in sight. |
 | `beneficial` | The AI uses the action only on allies, as the `targets-*` flags allow. |
-| `harmful` | The AI uses the action only on opponents. Against anything but a gimmick, it also waits out the enemy's minimum delay between attacks. |
+| `harmful` | The AI uses the action only on opponents. Unless the target is a gimmick (an interactive room object such as a crate), the action also waits for the enemy's attack timer to run out, and carrying it out restarts the timer: from the room's AI action delay, or 50 frames while the enemy is allied with Ashley. |
 | `menu-action` | The action is chosen from a menu: cancelling targeting returns to it, and the action is presented with its `effect_package` rather than a melee animation. |
 | `hits-first-obstruction` | When the action is carried out, a line is traced from the user to the target. Terrain in the way stops the hit there, and it affects no one. Another actor in the way takes the hit instead. |
 | `starts-unlocked` | The action is available when a new game begins. |
 
 With neither `beneficial` nor `harmful`, the AI may use the action on allies and opponents alike. The action with
 `legacy_id` 96 (the second Heal) swaps the two flags against an undead target, so the AI uses it to harm undead.
+
+### 4.7.3 Action volumes (#520)
+
+The `range_*` columns of `catalogs\battle\actions.csv` describe an action's **range volume** and the `area_*` columns
+its **area volume** (`Battle/Targeting.cpp`, `Battle/SphereContainment.cpp`). An actor, or a body part for a limb
+category, is a candidate when its targeting point lies inside the volume. Extents are in steps of 32 world units.
+Before it is tilted, a volume's height axis points straight up, its x extent runs across and its z extent runs from
+front to back.
+
+| Shape | Volume |
+|---|---|
+| `ellipsoid` | Centred on the origin, with half-axes x, y and z. |
+| `centered-cylinder` | An elliptical cylinder centred on the origin. Its base has half-axes x and z, and it reaches y above and y below the origin. The doubled height is kept in a byte, so a y above 127 wraps. |
+| `cylinder` | The same cylinder standing on the origin, y tall. |
+| `cone` | A cone with its base (half-axes x and z) on the origin and its tip y above it. |
+| `reversed-cone` | A cone with its tip on the origin, widening to its base y above it. |
+| `rectangle` | A box standing on the origin, y tall, reaching x to each side and z ahead and behind. |
+| `diamond` | As `rectangle`, but its base is a diamond with corners x to each side and z ahead and behind. |
+
+`none` contains nothing. The angle tilts the height axis about the volume's across axis in steps of 11.25 degrees
+(1/32 turn), and 16 turns the volume upside down. Where each volume goes depends on the action's category:
+
+- **Chosen single target** (`direct-*`, `treasure-chest`): the range volume stands on a point of the user's model
+  and turns with the user. A `range_angle` of 24 lays its height axis flat ahead of the user, as `analyze` and
+  `unlock` do, and 8 lays it flat behind. The actors or body parts inside it are the choices. A `range_x` of 255
+  takes the weapon's extents and angle instead.
+- **Ground area** (`ground-area*`): the action builds the same range volume and centres the area volume on the
+  chosen point. The area volume does not turn: x runs along the map's x axis and z along its z axis, and an
+  `area_angle` of 8 lays its height axis toward the map's +z. The actors or body parts inside it are the targets.
+- **Source area** (`source-area*`): there is no separate area volume. The range volume starts at the user's root
+  bone, turns toward the target and tilts so that its height axis points at it, so a `cylinder` is a beam `range_y`
+  steps long. `range_angle` and the `area_*` columns are not used for targeting. Only enemies have these actions;
+  when Ashley uses one, the volume stays level and points toward the map's +z.
+
+Other categories do not use the volumes to find targets. The AI's `shaped-area` reach (§4.7.2) reads `area_shape`
+and `area_angle` on its own.
