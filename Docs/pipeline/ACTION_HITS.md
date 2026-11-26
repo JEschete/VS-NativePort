@@ -1,4 +1,4 @@
-# Asset Pipeline: action hit values
+# Asset Pipeline: action hit values and behavior flags
 
 [Asset pipeline index](../ASSET_PIPELINE.md)
 
@@ -141,3 +141,37 @@ values' codes are the same.
 | `can-apply-exorcise` | `can-apply-instant-defeat-undead` | `hitPrerequisiteCanApplyExorcise` |
 | `can-apply-drain` | `can-apply-instant-defeat-living` | `hitPrerequisiteCanApplyDrain` |
 | `equipped-shield-dp` | `shield-pp` | `getEquippedShieldDp` |
+
+### 4.7.2 Action behavior flags (#520)
+
+This section defines each `behavior` flag of `catalogs\battle\actions.csv` (§4.7). Only the enemy AI reads the
+first twelve (`Battle/Ai/PlanningPrimitives.cpp`, `DecisionPrimitives.cpp`, `PlanningWorkspace.cpp` and
+`Battle/Targeting.cpp`): they change how an enemy chooses the action, not what the action does, and matter only
+when an enemy has the action. The battle code reads the last three for every user.
+
+The AI rates each pairing of one of its actions with a target. A pairing has a **score**, from the condition of
+every actor after a simulated hit, and a **weight** from 0 to 128: the simulated hit chance scaled to 128, or 128
+when nothing is simulated. The weight is the chance in 128 that the pairing enters the random pick among the
+action's targets, and it breaks ties between equal scores. A weight of 0 rules the pairing out. An enemy's
+**allies** and **opponents** come from its AI relations; an actor that is neither is never a target.
+
+| Flag | What it does |
+|---|---|
+| `special-mode` | An enemy spawned in special-action mode (bit 12 of its spawn flags, not yet an authored column) skips the hit simulation for the action. The pairing gets weight 40, and its score rises by one step, so it wins ties. Other enemies ignore the flag. |
+| `rarely-chosen` | The AI discards the pairing when a roll from 0 to 127 is below 115, so it considers the action in about one evaluation in ten. |
+| `fallback-eligible` | The AI remembers the first pairing for each action slot, up to 16, as a fallback. When a plan ends with no candidate and the enemy's spawn flags allow fallbacks (bit 13), the plan uses the remembered pairings at weight 128. |
+| `shaped-area` | The AI measures the area's reach from `area_shape`, its dimensions and `area_angle`, keeping it only when it is shorter than the action's range. It does not use the action on a target nearer than that reach. |
+| `radial-area` | As `shaped-area`, but the reach is `area_range_y` taken as a radius, whatever the shape. |
+| `targets-unconditionally` | A `beneficial` action may go to any ally. Without this flag, the ally must match one of the next three flags. |
+| `targets-status-restricted` | ... an ally with half movement, strength, intelligence or agility down, paralysis, poison or numbness, or silence when it has spells. |
+| `targets-low-mp` | ... an ally that has spells and has MP below half its maximum or below the cost of its costliest spell. |
+| `targets-low-hp` | ... an ally with HP below half its maximum. |
+| `ignores-sight` | The AI may use the action on a target out of its sight. Without the flag, the target must be in sight. |
+| `beneficial` | The AI uses the action only on allies, as the `targets-*` flags allow. |
+| `harmful` | The AI uses the action only on opponents. Against anything but a gimmick, it also waits out the enemy's minimum delay between attacks. |
+| `menu-action` | The action is chosen from a menu: cancelling targeting returns to it, and the action is presented with its `effect_package` rather than a melee animation. |
+| `hits-first-obstruction` | When the action is carried out, a line is traced from the user to the target. Terrain in the way stops the hit there, and it affects no one. Another actor in the way takes the hit instead. |
+| `starts-unlocked` | The action is available when a new game begins. |
+
+With neither `beneficial` nor `harmful`, the AI may use the action on allies and opponents alike. The action with
+`legacy_id` 96 (the second Heal) swaps the two flags against an undead target, so the AI uses it to harm undead.

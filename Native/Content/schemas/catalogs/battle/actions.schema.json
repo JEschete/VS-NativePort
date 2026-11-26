@@ -450,7 +450,7 @@
       "legacy_numeric_aliases": false,
       "separator": "|",
       "empty_set": "none",
-      "description": "Flags the battle and AI code read. menu-action actions are chosen from a menu (cancelling targeting returns to it) and are presented with their effect rather than a melee animation; starts-unlocked is the state a new game begins in."
+      "description": "Flags the battle and AI code read; ACTION_HITS.md section 4.7.2 defines each. The first twelve matter only when an enemy uses the action. harmful limits the AI to opponents and beneficial to allies; a beneficial action also needs targets-unconditionally or an ally matching targets-low-hp (HP below half), targets-low-mp or targets-status-restricted. ignores-sight allows a target out of sight; shaped-area and radial-area keep the target beyond the area's reach; rarely-chosen makes the AI pass the action over in 115 of 128 evaluations; fallback-eligible keeps it as a last resort; special-mode makes an enemy spawned in special-action mode skip its hit simulation. menu-action actions are chosen from a menu (cancelling targeting returns to it) and are presented with their effect rather than a melee animation; hits-first-obstruction hits the terrain or actor in the way instead of the target; starts-unlocked is the state a new game begins in."
     }
   ]
 }

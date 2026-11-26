@@ -50,10 +50,12 @@ constexpr std::array<EnumValue, 2> kSlots{{
     {0, "first"},
     {1, "second"},
 }};
-// Bits 4 to 15 are the record's AI flag word; 0 to 3 are never read. Bits 8 to
-// 11 are read by the AI planner's target filters; 14 and 15 by its decision
-// scoring. The last three are the record's own flags.
+// Bits 4 to 15 are the record's AI flag word; 0 to 3 are never read. Only the
+// enemy AI reads bits 4 to 15. The last three are the record's own flags.
+// Docs\pipeline\ACTION_HITS.md section 4.7.2 defines each.
 // decomp: vs_ActionFlags (src/SLUS_010.40/actions.h:17-27)
+// decomp: BATTLE.PRG func_800DCC94 (src/BATTLE/BATTLE.PRG/74088.c:164)
+// decomp: func_800E4CF4 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:496)
 constexpr std::array<EnumValue, 15> kBehaviors{{
     {0x10, "special-mode"},
     {0x20, "rarely-chosen"},
@@ -410,10 +412,23 @@ constexpr std::array kActionColumns{
         .maximum = UINT32_MAX,
         .references = {},
         .description =
-            "Flags the battle and AI code read. menu-action actions are "
-            "chosen from a menu (cancelling targeting returns to it) and "
-            "are presented with their effect rather than a melee "
-            "animation; starts-unlocked is the state a new game begins in.",
+            "Flags the battle and AI code read; ACTION_HITS.md section "
+            "4.7.2 defines each. The first twelve matter only when an "
+            "enemy uses the action. harmful limits the AI to opponents and "
+            "beneficial to allies; a beneficial action also needs "
+            "targets-unconditionally or an ally matching targets-low-hp "
+            "(HP below half), targets-low-mp or targets-status-restricted. "
+            "ignores-sight allows a target out of sight; shaped-area and "
+            "radial-area keep the target beyond the area's reach; "
+            "rarely-chosen makes the AI pass the action over in 115 of 128 "
+            "evaluations; fallback-eligible keeps it as a last resort; "
+            "special-mode makes an enemy spawned in special-action mode "
+            "skip its hit simulation. menu-action actions are chosen from "
+            "a menu (cancelling targeting returns to it) and are presented "
+            "with their effect rather than a melee animation; "
+            "hits-first-obstruction hits the terrain or actor in the way "
+            "instead of the target; starts-unlocked is the state a new game "
+            "begins in.",
         .enumeration = kBehaviors,
     },
 };
