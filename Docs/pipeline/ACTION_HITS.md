@@ -32,9 +32,9 @@ against.
 | `can-apply-equipment-up`/`-down` | As `can-apply-X`, and the target also has armor, a shield or a blade. |
 | `can-apply-*-attack-up` | As `can-apply-X`, and the target also has a blade. |
 | `can-apply-*-defense-up` | As `can-apply-X`, and the target also has armor or a shield. |
-| `can-apply-banish` | Checks the analyze rule. Used by Analyze. |
-| `can-apply-exorcise` | Checks the instant-defeat rule; undead targets only. |
-| `can-apply-drain` | Checks the instant-defeat rule; living targets only. Used by Banish and Drain Mind. |
+| `can-apply-analyze` | Checks the analyze rule. Used by Analyze. |
+| `can-apply-instant-defeat-undead` | Checks the instant-defeat rule; undead targets only. Used by Exorcism. |
+| `can-apply-instant-defeat-living` | Checks the instant-defeat rule; living targets only. Used by Banish and Drain Mind. |
 
 ### Chance to hit
 
@@ -72,7 +72,7 @@ The three difference functions then change by a random −5 to +5 when executed 
 | `recoverable-hp`, `recoverable-mp` | The target's max − current HP or MP. |
 | `risk` | The target's risk. |
 | `weapon-pp` | The user's weapon PP. |
-| `equipped-shield-dp` | Despite the name, the user's shield **PP**. |
+| `shield-pp` | The user's shield PP. |
 | `hp-lost-factor`, `mp-lost-factor` | The user's (max − current) HP or MP × `stat_factor` / 10. |
 | `current-hp-factor` | The target's HP × `stat_factor` / 100. |
 | `previous-hit-factor-0` to `-2` (identical) | The HP + MP damage the chained attack dealt its first target × `stat_factor` / 10. |
@@ -130,9 +130,14 @@ each earlier ability in a chain. "Answered" means the attack that a defense abil
 has no affinity above zero. `damage_type` `none` makes a physical hit use the weapon's damage type, or `blunt`
 without a blade.
 
-**Names kept for compatibility:**
+**Earlier names.** Four values were named after their upstream handlers until the names said what they do. The
+schema lists the earlier spellings under `legacy_values`. Readers, mod patches included, still accept them, and
+`VS.Extract authoring <dir>` rewrites them to the current names. No converter version changes, because the
+values' codes are the same.
 
-- `equipped-shield-dp` reads PP.
-- `can-apply-banish` is Analyze's check, and Banish uses `can-apply-drain`, as Drain Mind does.
-
-Renaming them needs a catalog version bump and aliases.
+| Earlier name | Current name | Decomp handler |
+|---|---|---|
+| `can-apply-banish` | `can-apply-analyze` | `hitPrerequisiteCanApplyBanish` |
+| `can-apply-exorcise` | `can-apply-instant-defeat-undead` | `hitPrerequisiteCanApplyExorcise` |
+| `can-apply-drain` | `can-apply-instant-defeat-living` | `hitPrerequisiteCanApplyDrain` |
+| `equipped-shield-dp` | `shield-pp` | `getEquippedShieldDp` |

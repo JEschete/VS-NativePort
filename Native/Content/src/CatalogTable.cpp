@@ -233,6 +233,11 @@ std::expected<std::int64_t, std::string> ReadCell(const ColumnSpec& column,
         return value.code;
       }
     }
+    for (const auto& value : column.legacy_values) {
+      if (value.name == cell && !EnumName(column, value.code).empty()) {
+        return value.code;
+      }
+    }
   }
   if (column.type == ColumnType::kBytes) {
     const auto digits = static_cast<std::size_t>(2 * column.maximum);
@@ -525,6 +530,13 @@ std::string FormatTableSchema(const TableSpec& spec) {
       }
       entry["enum"] = std::move(values);
       entry["legacy_numeric_aliases"] = column.type == ColumnType::kEnum;
+      if (!column.legacy_values.empty()) {
+        JsonDocument legacy = JsonDocument::object();
+        for (const auto& value : column.legacy_values) {
+          legacy[std::to_string(value.code)] = value.name;
+        }
+        entry["legacy_values"] = std::move(legacy);
+      }
       if (column.type == ColumnType::kFlags) {
         entry["separator"] = "|";
         entry["empty_set"] = "none";

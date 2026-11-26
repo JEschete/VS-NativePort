@@ -109,14 +109,26 @@ constexpr std::array<std::string_view, 40> kPrerequisiteNames{
     "can-apply-fire-defense-up",
     "can-apply-earth-defense-up",
     "can-apply-water-defense-up",
-    "can-apply-banish",
-    "can-apply-exorcise",
-    "can-apply-drain",
+    "can-apply-analyze",
+    "can-apply-instant-defeat-undead",
+    "can-apply-instant-defeat-living",
     "unused-0",
     "unused-1",
     "unused-2",
 };
 constexpr auto kPrerequisites = Numbered(kPrerequisiteNames);
+// The upstream names of slots 34-36, which this catalog spelled until the
+// names said what they check: 34 the analyze rule, 35 and 36 the
+// instant-defeat rule for undead and for living targets (Banish and Drain
+// Mind use 36).
+// decomp: hitPrerequisiteCanApplyBanish (src/BATTLE/BATTLE.PRG/146C.c:10429)
+// decomp: hitPrerequisiteCanApplyExorcise (src/BATTLE/BATTLE.PRG/146C.c:10434)
+// decomp: hitPrerequisiteCanApplyDrain (src/BATTLE/BATTLE.PRG/146C.c:10443)
+constexpr std::array<EnumValue, 3> kLegacyPrerequisites{{
+    {34, "can-apply-banish"},
+    {35, "can-apply-exorcise"},
+    {36, "can-apply-drain"},
+}};
 // The battle effect table's slots. apply-* and cure-* add or remove the status
 // rule of that name. recover-hp-on-* heal only when the hit being answered
 // matches. The mark-success slots behave identically, as do the unused
@@ -232,12 +244,18 @@ constexpr std::array<std::string_view, 27> kStatCalculatorNames{
     "physical-damage-received-factor-1",
     "spell-cost-factor",
     "damage-received-factor",
-    "equipped-shield-dp",
+    "shield-pp",
     "last-value-factor",
     "physical-damage-with-status-modifiers",
     "risk",
 };
 constexpr auto kStatCalculators = Numbered(kStatCalculatorNames);
+// Slot 23 reads the user's shield PP, not DP; the catalog spelled it as
+// upstream does until it was named for what it reads.
+// decomp: getEquippedShieldDp (src/BATTLE/BATTLE.PRG/146C.c:12138)
+constexpr std::array<EnumValue, 1> kLegacyStatCalculators{{
+    {23, "equipped-shield-dp"},
+}};
 // Zero follows the drawn weapon; the others are the physical and six elemental
 // affinities in the order the item tables use.
 constexpr std::array<std::string_view, 8> kAffinityNames{
@@ -264,6 +282,11 @@ constexpr ColumnSpec Enumeration(std::string_view name,
           .references = {},
           .description = description,
           .enumeration = values};
+}
+constexpr ColumnSpec Renamed(ColumnSpec column,
+                             std::span<const EnumValue> legacy_values) {
+  column.legacy_values = legacy_values;
+  return column;
 }
 
 // Volume extents are 32 world units a step (a room tile is 128); see the zone
@@ -420,23 +443,27 @@ constexpr std::array kHitColumns{
         "-2 mark the user's action as succeeded for the field abilities that "
         "check it. set-script-flag-32 and -64 set that script flag to 1 when "
         "executed. unused-0 to -3 are refused."),
-    Enumeration(
-        "prerequisite", kPrerequisites,
-        "Which targets the hit applies to, checked per target before the "
-        "roll; a target that fails is skipped, and on the first hit it also "
-        "counts as a miss. never-0 disables the hit. never-1, never-2 and "
-        "never-3 make it direct: it applies once to the first target with no "
-        "check and no roll, so hit_function is unread. always-2 applies it to "
-        "the user instead. always-0, always-1 and unused-0 to -2 accept every "
-        "target, except that always-0 on the second hit skips a target whose "
-        "first hit was cancelled. undead and not-undead accept only that "
-        "enemy class. can-apply-X accepts a target that can receive status X: "
-        "the rule exists, the target is not immune and no blocking status is "
-        "active. Equipment up and down also need armor, a shield or a blade; "
-        "the attack-ups a blade; the defense-ups armor or a shield. "
-        "can-apply-banish checks the analyze rule; can-apply-exorcise and "
-        "can-apply-drain check the instant-defeat rule and accept only undead "
-        "or only living targets."),
+    Renamed(
+        Enumeration(
+            "prerequisite", kPrerequisites,
+            "Which targets the hit applies to, checked per target before the "
+            "roll; a target that fails is skipped, and on the first hit it "
+            "also counts as a miss. never-0 disables the hit. never-1, never-2 "
+            "and never-3 make it direct: it applies once to the first target "
+            "with no check and no roll, so hit_function is unread. always-2 "
+            "applies it to the user instead. always-0, always-1 and unused-0 "
+            "to -2 accept every target, except that always-0 on the second hit "
+            "skips a target whose first hit was cancelled. undead and "
+            "not-undead accept only that enemy class. can-apply-X accepts a "
+            "target that can receive status X: the rule exists, the target is "
+            "not immune and no blocking status is active. Equipment up and "
+            "down also need armor, a shield or a blade; the attack-ups a "
+            "blade; the defense-ups armor or a shield. "
+            "can-apply-instant-defeat-undead and -living also accept only "
+            "undead or only living targets. Earlier names: can-apply-banish "
+            "(now -analyze), can-apply-exorcise (-instant-defeat-undead) and "
+            "can-apply-drain (-instant-defeat-living)."),
+        kLegacyPrerequisites),
     Enumeration(
         "hit_function", kHitFunctions,
         "How the percent chance to hit is worked out when the hit rolls. "
@@ -455,31 +482,34 @@ constexpr std::array kHitColumns{
         "at 0 against a spell-immune target. The chance doubles against a "
         "left-arm-impaired target and is capped at 100; the player's rolls "
         "then get a hidden +10."),
-    Enumeration(
-        "stat_calculator", kStatCalculators,
-        "How the amount the effect uses is worked out. "
-        "physical-damage-with-status-modifiers and -without- use strength "
-        "(with halves it while the user is right-arm-impaired), magic-damage "
-        "intelligence and hp-healed intelligence for healing: the user's stat "
-        "and gear rating scaled by stat_factor, less the target's stat, armor "
-        "and shield defense, with random variation. item-recovery: 5 x "
-        "stat_factor, varying by up to 5. recoverable-hp and -mp: the "
-        "target's missing HP or MP. risk: the target's risk. weapon-pp: the "
-        "user's weapon PP. equipped-shield-dp, despite its name: the user's "
-        "shield PP. hp-lost-factor and mp-lost-factor: the user's missing HP "
-        "or MP x stat_factor / 10. current-hp-factor: the target's HP x "
-        "stat_factor / 100. previous-hit-factor-0 to -2: the HP and MP damage "
-        "the chained attack dealt its first target x stat_factor / 10. "
-        "magic-, physical- and damage-received factors: the answered hit's "
-        "damage x stat_factor / 10 when it did damage and was a spell, not a "
-        "spell, or either. spell-cost-factor: "
-        "the answered spell's MP cost x stat_factor / 10. last-value: the "
-        "previous calculation's amount; last-value-factor: it x stat_factor "
-        "/ 10. trap-panel-damage and heal-panel-hp-healed: the target's max "
-        "HP / 10 x stat_factor + 10 per trap level, less its defense. "
-        "weapon-pp and the hp-lost, mp-lost, current-hp and previous-hit "
-        "calculators add 1 for each earlier ability in a chain. none: no "
-        "amount, for status effects."),
+    Renamed(
+        Enumeration(
+            "stat_calculator", kStatCalculators,
+            "How the amount the effect uses is worked out. "
+            "physical-damage-with-status-modifiers and -without- use strength "
+            "(with halves it while the user is right-arm-impaired), "
+            "magic-damage intelligence and hp-healed intelligence for "
+            "healing: the user's stat and gear rating scaled by stat_factor, "
+            "less the target's stat, armor and shield defense, with random "
+            "variation. item-recovery: 5 x stat_factor, varying by up to 5. "
+            "recoverable-hp and -mp: the target's missing HP or MP. risk: the "
+            "target's risk. weapon-pp and shield-pp: the user's weapon or "
+            "shield PP (shield-pp was equipped-shield-dp). hp-lost-factor and "
+            "mp-lost-factor: the user's missing HP or MP x stat_factor / 10. "
+            "current-hp-factor: the target's HP x stat_factor / 100. "
+            "previous-hit-factor-0 to -2: the HP and MP damage the chained "
+            "attack dealt its first target x stat_factor / 10. magic-, "
+            "physical- and damage-received factors: the answered hit's damage "
+            "x stat_factor / 10 when it did damage and was a spell, not a "
+            "spell, or either. spell-cost-factor: the answered spell's MP "
+            "cost x stat_factor / 10. last-value: the previous calculation's "
+            "amount; last-value-factor: it x stat_factor / 10. "
+            "trap-panel-damage and heal-panel-hp-healed: the target's max HP / "
+            "10 x stat_factor + 10 per trap level, less its defense. "
+            "weapon-pp and the hp-lost, mp-lost, current-hp and previous-hit "
+            "calculators add 1 for each earlier ability in a chain. none: no "
+            "amount, for status effects."),
+        kLegacyStatCalculators),
     Integer("stat_factor", kFiveBitMax,
             "The stat calculator's multiplier: +10% attack per point for the "
             "damage and healing calculators, 5 HP or MP per point for "

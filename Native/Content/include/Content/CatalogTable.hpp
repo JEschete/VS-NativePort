@@ -49,6 +49,9 @@ struct ColumnSpec {
   // kReference: an empty cell names no row. kText: an empty cell holds no
   // text.
   bool optional = false;
+  // kEnum: earlier names of renamed values, by code. Cells may still spell
+  // them; they read, and authoring normalizes them, as the current name.
+  std::span<const EnumValue> legacy_values{};
 };
 
 struct TableSpec {

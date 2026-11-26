@@ -164,6 +164,7 @@ actions but no action categories fails and says so. Columns, enums and flags are
 [actions.schema.json](../../Native/Content/schemas/catalogs/battle/actions.schema.json) and
 [action-hits.schema.json](../../Native/Content/schemas/catalogs/battle/action-hits.schema.json); the committed copies
 must equal the generated ones. Numeric spellings of an enum are accepted as legacy aliases and read back as the name.
+A renamed value's earlier spelling, listed under the column's `legacy_values`, is accepted the same way.
 Rules beyond the schemas:
 
 - `catalogs\battle\actions.csv`: one row per action. `id` is `action.<slug>` from the in-game name, with `-2`, `-3`
@@ -176,8 +177,8 @@ Rules beyond the schemas:
   names the battle effect table slot the hit dispatches: `apply-*` and `cure-*` add or remove that status,
   `recover-hp-on-*` heal only when the answered hit matches, the `mark-success-N` slots behave alike, and the
   `unused-N` slots, empty in the original, are refused at run time. What every value does, with the formulas, is in
-  [§4.7.1](ACTION_HITS.md#471-action-hit-values-520). `VS.Extract authoring` spells numeric codes in an existing tree
-  by name and refreshes both schemas.
+  [§4.7.1](ACTION_HITS.md#471-action-hit-values-520). `VS.Extract authoring` spells numeric codes and earlier names
+  in an existing tree by their current name and refreshes both schemas.
 - `catalogs\battle\import\actions.json` holds the bits the catalog does not keep: the four unread AI bits, the
   reserved flag nibble, the reserved word and the bytes after each name's terminator. The importer refuses a source
   whose hit codes have no name (effects 70-127, prerequisite codes 40-63, stat calculators 27-63).

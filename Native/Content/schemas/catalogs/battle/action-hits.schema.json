@@ -142,15 +142,20 @@
         "31": "can-apply-fire-defense-up",
         "32": "can-apply-earth-defense-up",
         "33": "can-apply-water-defense-up",
-        "34": "can-apply-banish",
-        "35": "can-apply-exorcise",
-        "36": "can-apply-drain",
+        "34": "can-apply-analyze",
+        "35": "can-apply-instant-defeat-undead",
+        "36": "can-apply-instant-defeat-living",
         "37": "unused-0",
         "38": "unused-1",
         "39": "unused-2"
       },
       "legacy_numeric_aliases": true,
-      "description": "Which targets the hit applies to, checked per target before the roll; a target that fails is skipped, and on the first hit it also counts as a miss. never-0 disables the hit. never-1, never-2 and never-3 make it direct: it applies once to the first target with no check and no roll, so hit_function is unread. always-2 applies it to the user instead. always-0, always-1 and unused-0 to -2 accept every target, except that always-0 on the second hit skips a target whose first hit was cancelled. undead and not-undead accept only that enemy class. can-apply-X accepts a target that can receive status X: the rule exists, the target is not immune and no blocking status is active. Equipment up and down also need armor, a shield or a blade; the attack-ups a blade; the defense-ups armor or a shield. can-apply-banish checks the analyze rule; can-apply-exorcise and can-apply-drain check the instant-defeat rule and accept only undead or only living targets."
+      "legacy_values": {
+        "34": "can-apply-banish",
+        "35": "can-apply-exorcise",
+        "36": "can-apply-drain"
+      },
+      "description": "Which targets the hit applies to, checked per target before the roll; a target that fails is skipped, and on the first hit it also counts as a miss. never-0 disables the hit. never-1, never-2 and never-3 make it direct: it applies once to the first target with no check and no roll, so hit_function is unread. always-2 applies it to the user instead. always-0, always-1 and unused-0 to -2 accept every target, except that always-0 on the second hit skips a target whose first hit was cancelled. undead and not-undead accept only that enemy class. can-apply-X accepts a target that can receive status X: the rule exists, the target is not immune and no blocking status is active. Equipment up and down also need armor, a shield or a blade; the attack-ups a blade; the defense-ups armor or a shield. can-apply-instant-defeat-undead and -living also accept only undead or only living targets. Earlier names: can-apply-banish (now -analyze), can-apply-exorcise (-instant-defeat-undead) and can-apply-drain (-instant-defeat-living)."
     },
     {
       "name": "hit_function",
@@ -195,13 +200,16 @@
         "20": "physical-damage-received-factor-1",
         "21": "spell-cost-factor",
         "22": "damage-received-factor",
-        "23": "equipped-shield-dp",
+        "23": "shield-pp",
         "24": "last-value-factor",
         "25": "physical-damage-with-status-modifiers",
         "26": "risk"
       },
       "legacy_numeric_aliases": true,
-      "description": "How the amount the effect uses is worked out. physical-damage-with-status-modifiers and -without- use strength (with halves it while the user is right-arm-impaired), magic-damage intelligence and hp-healed intelligence for healing: the user's stat and gear rating scaled by stat_factor, less the target's stat, armor and shield defense, with random variation. item-recovery: 5 x stat_factor, varying by up to 5. recoverable-hp and -mp: the target's missing HP or MP. risk: the target's risk. weapon-pp: the user's weapon PP. equipped-shield-dp, despite its name: the user's shield PP. hp-lost-factor and mp-lost-factor: the user's missing HP or MP x stat_factor / 10. current-hp-factor: the target's HP x stat_factor / 100. previous-hit-factor-0 to -2: the HP and MP damage the chained attack dealt its first target x stat_factor / 10. magic-, physical- and damage-received factors: the answered hit's damage x stat_factor / 10 when it did damage and was a spell, not a spell, or either. spell-cost-factor: the answered spell's MP cost x stat_factor / 10. last-value: the previous calculation's amount; last-value-factor: it x stat_factor / 10. trap-panel-damage and heal-panel-hp-healed: the target's max HP / 10 x stat_factor + 10 per trap level, less its defense. weapon-pp and the hp-lost, mp-lost, current-hp and previous-hit calculators add 1 for each earlier ability in a chain. none: no amount, for status effects."
+      "legacy_values": {
+        "23": "equipped-shield-dp"
+      },
+      "description": "How the amount the effect uses is worked out. physical-damage-with-status-modifiers and -without- use strength (with halves it while the user is right-arm-impaired), magic-damage intelligence and hp-healed intelligence for healing: the user's stat and gear rating scaled by stat_factor, less the target's stat, armor and shield defense, with random variation. item-recovery: 5 x stat_factor, varying by up to 5. recoverable-hp and -mp: the target's missing HP or MP. risk: the target's risk. weapon-pp and shield-pp: the user's weapon or shield PP (shield-pp was equipped-shield-dp). hp-lost-factor and mp-lost-factor: the user's missing HP or MP x stat_factor / 10. current-hp-factor: the target's HP x stat_factor / 100. previous-hit-factor-0 to -2: the HP and MP damage the chained attack dealt its first target x stat_factor / 10. magic-, physical- and damage-received factors: the answered hit's damage x stat_factor / 10 when it did damage and was a spell, not a spell, or either. spell-cost-factor: the answered spell's MP cost x stat_factor / 10. last-value: the previous calculation's amount; last-value-factor: it x stat_factor / 10. trap-panel-damage and heal-panel-hp-healed: the target's max HP / 10 x stat_factor + 10 per trap level, less its defense. weapon-pp and the hp-lost, mp-lost, current-hp and previous-hit calculators add 1 for each earlier ability in a chain. none: no amount, for status effects."
     },
     {
       "name": "stat_factor",

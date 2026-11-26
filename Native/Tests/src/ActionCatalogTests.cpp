@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -196,6 +197,31 @@ std::string Replaced(std::string text, std::string_view from,
   REQUIRE(at != std::string::npos);
   text.replace(at, from.size(), to);
   return text;
+}
+
+// `hits` with every renamed hit value spelled by its earlier name, and how
+// many cells that respelled.
+std::pair<std::string, std::size_t> WithEarlierNames(std::string hits) {
+  constexpr std::array<std::pair<std::string_view, std::string_view>, 4>
+      kRenamed{{
+          {",can-apply-analyze,", ",can-apply-banish,"},
+          {",can-apply-instant-defeat-undead,", ",can-apply-exorcise,"},
+          {",can-apply-instant-defeat-living,", ",can-apply-drain,"},
+          {",shield-pp,", ",equipped-shield-dp,"},
+      }};
+  std::size_t respelled = 0;
+  for (const auto& [current, earlier] : kRenamed) {
+    std::size_t cells = 0;
+    // The next search starts at the replaced cell's closing comma.
+    for (auto at = hits.find(current); at != std::string::npos;
+         at = hits.find(current, at + earlier.size() - 1)) {
+      hits.replace(at, current.size(), earlier);
+      ++cells;
+    }
+    CHECK(cells != 0);
+    respelled += cells;
+  }
+  return {std::move(hits), respelled};
 }
 }  // namespace
 
@@ -505,6 +531,29 @@ TEST_CASE("Action authoring names numeric effects and refreshes schemas once",
         std::vector<std::string>{
             actions, hits, content::FormatTableSchema(content::ActionsSpec()),
             content::FormatTableSchema(content::ActionHitsSpec())});
+  const auto repeat = extract::UpgradeActionAuthoring(root.Root());
+  REQUIRE(repeat);
+  if (repeat) CHECK(Counts{repeat->named_values, repeat->written} == Counts{});
+}
+
+TEST_CASE("Action hits read and rewrite the earlier names of renamed values",
+          "[action-catalog]") {
+  using Counts = std::pair<std::size_t, std::size_t>;
+  const ActionTables tables;
+  const auto& [synthetic, actions, hits] = tables;
+  const auto [earlier, respelled] = WithEarlierNames(hits);
+  const auto read = content::ParseActionCatalog(actions, earlier);
+  REQUIRE(read);
+  if (read) CHECK(*read == synthetic);
+  support::ScratchDataRoot root("test-action");
+  root.Write(content::kActionsPath, actions);
+  root.Write(content::kActionHitsPath, earlier);
+  const auto upgraded = extract::UpgradeActionAuthoring(root.Root());
+  REQUIRE(upgraded);
+  if (!upgraded) return;
+  const Counts wanted{respelled, 3};
+  CHECK(wanted == Counts{upgraded->named_values, upgraded->written});
+  CHECK(AuthoredActionFiles(root.Root()).at(1) == hits);
   const auto repeat = extract::UpgradeActionAuthoring(root.Root());
   REQUIRE(repeat);
   if (repeat) CHECK(Counts{repeat->named_values, repeat->written} == Counts{});
