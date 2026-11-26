@@ -25,14 +25,14 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "The original record index: the combined item's sub id (and, for blades, its id; shields and armor add 126). Runs from 0 without gaps."
+      "description": "The original record index, which the combined item keeps as its sub id. A blade's item id is the same; a shield's or armor piece's is this + 126. Runs from 0 without gaps."
     },
     {
       "name": "model",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "A combined shield's WEP model number (OBJ/<two hex digits>.WEP, converted to models/weapons/<two hex digits>.gltf); armor results keep 0 and the armor combination does not read it."
+      "description": "A combined shield's WEP model number (OBJ/<two hex digits>.WEP, converted to models/weapons/<two hex digits>.gltf). Combining armor never reads it; armor pieces keep 0."
     },
     {
       "name": "category",
@@ -53,7 +53,7 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 3,
-      "description": "How many gems the shield holds."
+      "description": "How many gems a combined shield holds. Armor pieces hold none; the armor book's copies of the shield records (legacy ids 1-16) also keep 0, as no armor pair makes them."
     },
     {
       "name": "strength",

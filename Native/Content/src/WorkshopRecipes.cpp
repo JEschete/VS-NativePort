@@ -134,8 +134,9 @@ constexpr std::string_view kArmorResults = "combination-armor-results";
 
 constexpr std::string_view kIdText = "Semantic result id; pairs name it.";
 constexpr std::string_view kLegacyIdText{
-    "The original record index: the combined item's sub id (and, for blades, "
-    "its id; shields and armor add 126). Runs from 0 without gaps.",
+    "The original record index, which the combined item keeps as its sub id. "
+    "A blade's item id is the same; a shield's or armor piece's is this + "
+    "126. Runs from 0 without gaps.",
 };
 constexpr std::string_view kBladeModelText{
     "The combined blade's WEP model number: OBJ/<two hex digits>.WEP, "
@@ -143,8 +144,8 @@ constexpr std::string_view kBladeModelText{
 };
 constexpr std::string_view kPieceModelText{
     "A combined shield's WEP model number (OBJ/<two hex digits>.WEP, "
-    "converted to models/weapons/<two hex digits>.gltf); armor results keep 0 "
-    "and the armor combination does not read it.",
+    "converted to models/weapons/<two hex digits>.gltf). Combining armor "
+    "never reads it; armor pieces keep 0.",
 };
 constexpr std::string_view kStrengthText{
     "Base strength, before the material's bonus.",
@@ -232,7 +233,10 @@ constexpr std::array kPieceResultColumns{
                 "The item category: shield results use shield, armor results "
                 "the armor pieces (the armor material rules match helm to "
                 "glove); none is the empty result."),
-    Integer("gem_slots", 0, kGemSlotsMax, "How many gems the shield holds."),
+    Integer("gem_slots", 0, kGemSlotsMax,
+            "How many gems a combined shield holds. Armor pieces hold none; "
+            "the armor book's copies of the shield records (legacy ids "
+            "1-16) also keep 0, as no armor pair makes them."),
     Integer("strength", kStatMin, kStatMax, kStrengthText),
     Integer("intelligence", kStatMin, kStatMax, kIntelligenceText),
     Integer("agility", kStatMin, kStatMax, kAgilityText),

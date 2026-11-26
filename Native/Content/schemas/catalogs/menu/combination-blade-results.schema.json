@@ -25,7 +25,7 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "The original record index: the combined item's sub id (and, for blades, its id; shields and armor add 126). Runs from 0 without gaps."
+      "description": "The original record index, which the combined item keeps as its sub id. A blade's item id is the same; a shield's or armor piece's is this + 126. Runs from 0 without gaps."
     },
     {
       "name": "model",
