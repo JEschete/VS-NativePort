@@ -245,6 +245,7 @@ std::expected<std::int64_t, std::string> ReadCell(const ColumnSpec& column,
                               cell, column.maximum)));
   }
   if (column.type == ColumnType::kText) {
+    if (cell.empty() && column.optional) return 0;
     if (cell.empty() || std::ranges::any_of(cell, [](char value) {
           const auto byte = static_cast<unsigned char>(value);
           return byte < 0x20 || byte == 0x7f;
@@ -507,7 +508,10 @@ std::string FormatTableSchema(const TableSpec& spec) {
     }
     if (column.type == ColumnType::kReference) {
       entry["references"] = std::string(column.references);
-      if (column.optional) entry["optional"] = true;
+    }
+    if (column.optional && (column.type == ColumnType::kReference ||
+                            column.type == ColumnType::kText)) {
+      entry["optional"] = true;
     }
     if (column.type == ColumnType::kBytes) {
       entry["bytes"] = column.maximum;

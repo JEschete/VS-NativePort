@@ -141,10 +141,10 @@ label pass leaves native text/font and import-only schemas to their semantic own
 and does not label a shared native text catalog with the name of one contributing executable.
 
 Current name sources:
-- Enemy and weapon display names decode the bounded English-edition ZND name fields. E7 ends the name; trailing
-  padding is ignored only for the label and remains in the original hex field. Accents and punctuation are
-  preserved. Layout controls are omitted; unknown glyphs/controls remain visible markers. This is not the lossless
-  text/markup converter still required by #500.
+- Enemy and weapon display names decode the ZND name fields, which zone-enemies.csv's `name` and `weapon_name`
+  hold as exact game-glyph text since converter version 12 ([§6.9](pipeline/ROOMS_AND_ZONES.md)). Accents and
+  punctuation are preserved. The label omits layout controls; unknown glyphs/controls remain visible markers.
+  Localized string IDs remain #500.
 - Equipment parts and workshop results use `MENU/ITEMNAME.BIN` where a name is available. Ingredient pairs and
   material rules describe their inputs/results.
 - ZUD references carry enemy names to their shared/owned model files. Shared models keep the applicable names in

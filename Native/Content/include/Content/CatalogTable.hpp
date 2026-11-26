@@ -28,7 +28,8 @@ enum class ColumnType : std::uint8_t {
   kBytes,      // `maximum` bytes as lowercase hexadecimal, two digits each
   kEnum,       // a named value; numeric aliases are accepted for legacy imports
   kFlags,      // named set members separated by '|'; "none" is the empty set
-  kText,       // non-empty readable text without control characters
+  kText,       // readable text without control characters; empty only when
+               // optional
 };
 
 struct EnumValue {
@@ -45,7 +46,8 @@ struct ColumnSpec {
   std::string_view description;
   std::span<const EnumValue> enumeration{};
   std::string_view legacy_name{};
-  // kReference only: an empty cell names no row.
+  // kReference: an empty cell names no row. kText: an empty cell holds no
+  // text.
   bool optional = false;
 };
 

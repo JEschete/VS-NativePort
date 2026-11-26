@@ -82,4 +82,28 @@ inline void UseReservedBytes(Content::ZndTemplate& data,
   }
 }
 
+// Gives the enemy (0x04) and weapon (0x128) name slots two-word names that
+// vary with the seed: glyphs (0-9, A-Z, a-z are 0..61), a word gap (FA 06),
+// a glyph, the E7 terminator and zero padding, as the disc's names are.
+inline void UseTextNames(Content::ZndTemplate& data, std::size_t seed) {
+  constexpr std::array<std::size_t, 2> kNameSlots{0x04, 0x128};
+  constexpr std::size_t kNameBytes = 24;
+  constexpr std::size_t kUpper = 10;
+  constexpr std::size_t kLower = 36;
+  constexpr std::size_t kLetters = 26;
+  for (std::size_t slot = 0; slot < kNameSlots.size(); ++slot) {
+    const std::array<std::size_t, 6> glyphs{kUpper + ((seed + slot) % kLetters),
+                                            kLower + (seed % kLetters),
+                                            0xFA,
+                                            0x06,
+                                            1 + slot,
+                                            0xE7};
+    for (std::size_t index = 0; index < kNameBytes; ++index) {
+      data.at(kNameSlots[slot] + index) =
+          index < glyphs.size() ? static_cast<std::byte>(glyphs[index])
+                                : std::byte{};
+    }
+  }
+}
+
 }  // namespace VS::test_support

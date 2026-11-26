@@ -24,6 +24,7 @@
 #include "Content/ActionCatalog.hpp"
 #include "Content/CatalogTable.hpp"
 #include "Content/ConversionManifest.hpp"
+#include "Content/GameTextCodec.hpp"
 #include "Content/GameplayDomains.hpp"
 #include "Content/StatusCatalog.hpp"
 
@@ -45,7 +46,13 @@ constexpr std::int64_t kLimbCount = 6;
 // The ZUD index is a template's last word.
 constexpr std::size_t kZudIndexBytes = 4;
 constexpr std::size_t kZudIndexAt = kZndTemplateBytes - kZudIndexBytes;
-constexpr std::size_t kNameBytes = 24;
+// A word gap: the FA control that advances 6 pixels, which names hold
+// between words in place of the space glyph.
+constexpr std::string_view kWordGap = "{spacing:6}";
+constexpr std::string_view kSpace = " ";
+// A name slot written as hexadecimal (version 11) holds two digits a byte.
+constexpr std::size_t kHexNameDigits = 2 * kZoneNameBytes;
+constexpr unsigned kHexDigitBits = 4U;
 constexpr std::array<std::string_view, 4> kTypeFields{
     "none",
     "blunt",
@@ -93,13 +100,14 @@ constexpr std::size_t kPartBytes = 0x30;
 constexpr std::size_t kLimbActionSlots = 4;
 
 // One column's bytes in its record: a little-endian integer of `size` bytes,
-// `bits` bits of one byte from `bit` up, or `size` bytes as hexadecimal.
+// `bits` bits of one byte from `bit` up, or a name slot of `size` bytes as
+// text (ZoneNameText).
 struct Field {
   std::string_view column;
   std::size_t offset = 0;
   std::size_t size = 1;
   bool is_signed = false;
-  bool bytes = false;
+  bool text = false;
   std::uint8_t bit = 0;
   std::uint8_t bits = 0;  // 0: the whole value
 };
@@ -217,7 +225,7 @@ struct TableLayout {
                       .offset = offset,
                       .size = size,
                       .is_signed = false,
-                      .bytes = false,
+                      .text = false,
                       .bit = 0,
                       .bits = 0});
     columns.push_back({.name = name,
@@ -239,7 +247,7 @@ struct TableLayout {
                 .offset = offset,
                 .size = size,
                 .is_signed = is_signed,
-                .bytes = false,
+                .text = false,
                 .bit = 0,
                 .bits = 0};
     fields.push_back(field);
@@ -263,7 +271,7 @@ struct TableLayout {
                       .offset = offset,
                       .size = 1,
                       .is_signed = false,
-                      .bytes = false,
+                      .text = false,
                       .bit = bit,
                       .bits = bits});
     columns.push_back(
@@ -283,7 +291,7 @@ struct TableLayout {
                       .offset = offset,
                       .size = size,
                       .is_signed = false,
-                      .bytes = false,
+                      .text = false,
                       .bit = 0,
                       .bits = 0});
     const std::uint32_t width = static_cast<std::uint32_t>(size) * kByteBits;
@@ -296,21 +304,25 @@ struct TableLayout {
                        .enumeration = domain});
   }
 
-  void Bytes(std::string_view name, std::size_t offset, std::size_t size,
-             std::string_view description) {
+  // A name slot as optional text (ZoneNameText).
+  void Text(std::string_view name, std::size_t offset,
+            std::string_view description) {
     fields.push_back({.column = name,
                       .offset = offset,
-                      .size = size,
+                      .size = kZoneNameBytes,
                       .is_signed = false,
-                      .bytes = true,
+                      .text = true,
                       .bit = 0,
                       .bits = 0});
     columns.push_back({.name = name,
-                       .type = ColumnType::kBytes,
+                       .type = ColumnType::kText,
                        .minimum = 0,
-                       .maximum = static_cast<std::int64_t>(size),
+                       .maximum = 0,
                        .references = {},
-                       .description = description});
+                       .description = description,
+                       .enumeration = {},
+                       .legacy_name = {},
+                       .optional = true});
   }
 
   void Run(std::string_view stem, std::size_t offset,
@@ -388,7 +400,12 @@ void AddEnemyFields(TableLayout& table) {
              "units a step)");
   table.Bits("enemy_class", 0x03, 5, 3, "the class (human .. evil)",
              kEnemyClasses);
-  table.Bytes("name", 0x04, kNameBytes, "the name, in the game's encoding");
+  // decomp: func_80076784 (src/BATTLE/BATTLE.PRG/146C.c:5941) copies the name
+  // into the actor's stats.
+  table.Text("name", 0x04,
+             "the actor's name: text of at most 23 bytes in the game's glyph "
+             "set (one byte a glyph; a {token} one or more), a space being a "
+             "word gap ({spacing:6}); empty for none");
   table.Add("hp", 0x1C, 2, true, "hit points");
   table.Add("mp", 0x1E, 2, true, "magic points");
   // decomp: func_80076784 (src/BATTLE/BATTLE.PRG/146C.c:5941) varies a room
@@ -579,8 +596,12 @@ void AddEnemyFields(TableLayout& table) {
   // decomp: vs_battle_applyShieldStats (src/BATTLE/BATTLE.PRG/146C.c:683)
   // decomp: vs_mainMenu_initInventory (src/MENU/MAINMENU.PRG/C48.c:51)
   table.Zeros("weapon_index", 0x126, 2);
-  table.Bytes("weapon_name", 0x128, kNameBytes,
-              "the weapon's name, in the game's encoding");
+  // vs_battle_applyWeaponStats gives the actor's weapon this name, and
+  // dropWeaponRand gives it to the weapon a defeat drops.
+  // decomp: dropWeaponRand (src/BATTLE/BATTLE.PRG/146C.c:1251)
+  table.Text("weapon_name", 0x128,
+             "the weapon's name, which a weapon a defeat drops keeps: text "
+             "as name");
   table.Add("shield_material", 0x200, 1, false, "shield material", kMaterials);
   // decomp: dropShieldRand (src/BATTLE/BATTLE.PRG/146C.c:1275)
   table.Add("shield_drop_rate", 0x201, 1, false,
@@ -1005,10 +1026,38 @@ void WriteField(std::span<std::byte> record, const Field& field,
   }
 }
 
-std::string HexOf(std::span<const std::byte> bytes) {
+// The markup's units: a {{ or }} brace, a {...} token or one byte. An
+// unclosed token runs to the end, for the codec to refuse.
+std::vector<std::string_view> MarkupUnits(std::string_view markup) {
+  std::vector<std::string_view> units;
+  while (!markup.empty()) {
+    std::size_t size = 1;
+    if (markup.starts_with("{{") || markup.starts_with("}}")) {
+      size = 2;
+    } else if (markup.front() == '{') {
+      size = std::min(markup.find('}'), markup.size() - 1) + 1;
+    }
+    units.push_back(markup.substr(0, size));
+    markup.remove_prefix(size);
+  }
+  return units;
+}
+
+// The authoring text of name markup: each word gap between two words as a
+// space.
+std::string NameTextOf(std::string_view markup) {
+  const auto units = MarkupUnits(markup);
+  std::size_t first = units.size();
+  std::size_t last = 0;
+  for (std::size_t index = 0; index < units.size(); ++index) {
+    if (units[index] == kWordGap) continue;
+    first = std::min(first, index);
+    last = index;
+  }
   std::string text;
-  for (const std::byte value : bytes) {
-    text += std::format("{:02x}", std::to_integer<unsigned>(value));
+  for (std::size_t index = 0; index < units.size(); ++index) {
+    const bool between = index > first && index < last;
+    text += between && units[index] == kWordGap ? kSpace : units[index];
   }
   return text;
 }
@@ -1098,8 +1147,12 @@ std::expected<void, std::string> AppendCells(std::vector<std::string>& cells,
                                              std::span<const std::byte> record,
                                              ActionNames& actions) {
   for (const Field& field : layout.fields) {
-    if (field.bytes) {
-      cells.push_back(HexOf(record.subspan(field.offset, field.size)));
+    if (field.text) {
+      const auto& column = layout.columns.at(cells.size());
+      auto text =
+          ZoneNameText(record.subspan(field.offset, field.size), column.name);
+      if (!text) return std::unexpected(text.error());
+      cells.push_back(std::move(*text));
       continue;
     }
     const auto value = ReadField(record, field);
@@ -1144,12 +1197,14 @@ std::expected<void, std::string> ApplyRow(std::span<std::byte> record,
     const std::size_t column =
         layout.columns.size() - layout.fields.size() + index;
     const std::string& cell = row.cells.at(column);
-    if (field.bytes) {
-      for (std::size_t at = 0; at < field.size; ++at) {
-        record[field.offset + at] =
-            static_cast<std::byte>((HexDigit(cell.at(2 * at)) << 4U) |
-                                   HexDigit(cell.at((2 * at) + 1)));
+    if (field.text) {
+      const auto name = EncodeZoneName(cell, std::format("'{}'", cell));
+      if (!name) {
+        return std::unexpected(CellError(row.source, row.line,
+                                         layout.columns.at(column).name,
+                                         name.error()));
       }
+      std::ranges::copy(*name, record.subspan(field.offset).begin());
     } else if (layout.columns.at(column).type == ColumnType::kReference) {
       std::int64_t value = 0;
       if (!cell.empty()) {
@@ -1636,6 +1691,49 @@ std::size_t ResignCells(const TableLayout& layout,
   return resigned;
 }
 
+bool IsLowerHexDigit(char value) {
+  return (value >= '0' && value <= '9') || (value >= 'a' && value <= 'f');
+}
+
+// Rewrites each text cell that holds its name slot's bytes as hexadecimal,
+// as version 11 wrote names, as the name's text; the number of cells it
+// rewrote.
+std::expected<std::size_t, std::string> DecodeNameCells(
+    const TableLayout& layout, std::vector<CsvRecord>& records,
+    std::string_view file) {
+  std::size_t decoded = 0;
+  const auto& header = records.front().fields;
+  for (const ColumnSpec& column : FieldColumns(layout)) {
+    if (column.type != ColumnType::kText) continue;
+    const auto found = std::ranges::find(header, column.name);
+    if (found == header.end()) continue;
+    const auto at = static_cast<std::size_t>(found - header.begin());
+    for (std::size_t row = 1; row < records.size(); ++row) {
+      auto& fields = records[row].fields;
+      if (at >= fields.size()) continue;  // the schema refuses the short row
+      std::string& cell = fields[at];
+      if (cell.size() != kHexNameDigits ||
+          !std::ranges::all_of(cell, IsLowerHexDigit)) {
+        continue;
+      }
+      ZoneNameBytes bytes{};
+      for (std::size_t index = 0; index < bytes.size(); ++index) {
+        bytes.at(index) = static_cast<std::byte>(
+            (HexDigit(cell.at(2 * index)) << kHexDigitBits) |
+            HexDigit(cell.at((2 * index) + 1)));
+      }
+      auto text = ZoneNameText(bytes, "its bytes");
+      if (!text) {
+        return std::unexpected(
+            CellError(file, records[row].line, column.name, text.error()));
+      }
+      cell = std::move(*text);
+      ++decoded;
+    }
+  }
+  return decoded;
+}
+
 }  // namespace
 
 const TableSpec& ZoneTableSpec(ZoneTable table) { return LayoutOf(table).spec; }
@@ -1699,6 +1797,72 @@ std::string ZoneEnemyId(std::string_view zone_id, std::size_t slot) {
                                     ? zone_id.substr(kZoneIdKind.size())
                                     : zone_id;
   return std::format("enemy{}.{:02}", rest, slot);
+}
+
+std::expected<std::string, std::string> ZoneNameText(
+    std::span<const std::byte> source, std::string_view id) {
+  if (source.size() != kZoneNameBytes) {
+    return std::unexpected(std::format("{}: a name slot is {} bytes, not {}",
+                                       id, kZoneNameBytes, source.size()));
+  }
+  if (AllZero(source)) return std::string{};
+  const auto decoded = DecodeGameText(source, id);
+  if (!decoded) return std::unexpected(decoded.error());
+  if (!decoded->ignored_font_bits.empty()) {
+    return std::unexpected(std::format(
+        "{}: a move-down holds low bits, which its text drops", id));
+  }
+  const auto tail = source.subspan(decoded->consumed);
+  const auto set = std::ranges::find_if(
+      tail, [](std::byte value) { return value != std::byte{}; });
+  if (set != tail.end()) {
+    return std::unexpected(std::format(
+        "{}: text byte {}: 0x{:02X} after the E7 is not padding 0", id,
+        decoded->consumed + static_cast<std::size_t>(set - tail.begin()),
+        std::to_integer<unsigned>(*set)));
+  }
+  if (decoded->markup.empty()) {
+    return std::unexpected(
+        std::format("{}: the name is an E7 alone, which no text rebuilds", id));
+  }
+  const auto units = MarkupUnits(decoded->markup);
+  if (std::ranges::find(units, kSpace) != units.end()) {
+    return std::unexpected(std::format(
+        "{}: the name holds the space glyph 0x8F, which its text writes as a "
+        "word gap",
+        id));
+  }
+  std::string text = NameTextOf(decoded->markup);
+  const auto rebuilt = EncodeZoneName(text, id);
+  if (!rebuilt) return std::unexpected(rebuilt.error());
+  if (!std::ranges::equal(*rebuilt, source)) {
+    return std::unexpected(
+        std::format("{}: the text '{}' does not rebuild the name", id, text));
+  }
+  return text;
+}
+
+std::expected<ZoneNameBytes, std::string> EncodeZoneName(std::string_view text,
+                                                         std::string_view id) {
+  ZoneNameBytes name{};
+  if (text.empty()) return name;
+  std::string markup;
+  for (const std::string_view unit : MarkupUnits(text)) {
+    markup += unit == kSpace ? kWordGap : unit;
+  }
+  const auto bytes = EncodeGameText(markup, id);
+  if (!bytes) {
+    if (markup == text) return std::unexpected(bytes.error());
+    return std::unexpected(
+        std::format("{} (in its markup '{}')", bytes.error(), markup));
+  }
+  if (bytes->size() > name.size()) {
+    return std::unexpected(
+        std::format("{}: encodes to {} bytes with its E7; a name holds {}", id,
+                    bytes->size(), name.size()));
+  }
+  std::ranges::copy(*bytes, name.begin());
+  return name;
 }
 
 std::expected<ZoneTableText, std::string> FormatZoneTables(
@@ -2019,7 +2183,8 @@ std::expected<ZoneColumnMigration, std::string> MigrateZoneColumns(
   ZoneColumnMigration migrated{.text = text};
   if (layout.packed.empty() && layout.reserved.empty() &&
       layout.resigned.empty() && !HasFieldOf(layout, ColumnType::kFlags) &&
-      !HasFieldOf(layout, ColumnType::kReference)) {
+      !HasFieldOf(layout, ColumnType::kReference) &&
+      !HasFieldOf(layout, ColumnType::kText)) {
     return migrated;
   }
   auto records = ParseCsv(text, file);
@@ -2051,8 +2216,12 @@ std::expected<ZoneColumnMigration, std::string> MigrateZoneColumns(
   if (!actions_named) return std::unexpected(actions_named.error());
   migrated.named_values = *named + *actions_named;
   migrated.resigned_values = ResignCells(layout, *records);
+  auto decoded = DecodeNameCells(layout, *records, file);
+  if (!decoded) return std::unexpected(decoded.error());
+  migrated.decoded_texts = *decoded;
   if (migrated.split_columns != 0 || migrated.retired_columns != 0 ||
-      migrated.named_values != 0 || migrated.resigned_values != 0) {
+      migrated.named_values != 0 || migrated.resigned_values != 0 ||
+      migrated.decoded_texts != 0) {
     std::vector<std::vector<std::string>> rows;
     for (CsvRecord& record : *records) rows.push_back(std::move(record.fields));
     migrated.text = FormatCsv(rows);

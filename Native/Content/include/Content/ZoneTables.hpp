@@ -43,10 +43,12 @@
 // A limb whose columns are all zero and a part whose bytes are all zero have
 // no row, and a missing row reads as such, so a template rebuilds byte for
 // byte.
+// The enemy's and its weapon's names (0x004 and 0x128) are text in the
+// game's glyph set (ZoneNameText), not bytes.
 namespace VS::Content {
 
 inline constexpr std::string_view kZndTableConverterName = "znd-tables";
-inline constexpr std::uint32_t kZndTableConverterVersion = 11;
+inline constexpr std::uint32_t kZndTableConverterVersion = 12;
 
 enum class ZoneTable : std::uint8_t {
   kZones,     // catalogs/world/zones: music and room slot count
@@ -107,6 +109,27 @@ struct ZoneRecord {
 [[nodiscard]] std::string ZoneEnemyId(std::string_view zone_id,
                                       std::size_t slot);
 
+// A template's name slot: game text ending in E7, then zero padding, or all
+// zeros for no name.
+// decomp: vs_CharInitData (src/BATTLE/BATTLE.PRG/charInit.h:24-51)
+inline constexpr std::size_t kZoneNameBytes = 24;
+using ZoneNameBytes = std::array<std::byte, kZoneNameBytes>;
+
+// The authoring text of a name slot: empty for all zeros, otherwise its game
+// text markup (GameTextCodec.hpp) with each word gap ({spacing:6}) between
+// two words written as a space; a gap before the first word or after the
+// last stays {spacing:6}. Refuses a slot that is not kZoneNameBytes long and
+// one its text does not rebuild byte for byte: bytes after the E7 that are
+// not zero, an E7 with no text, or the 0x8F space glyph, which names leave
+// for word gaps.
+[[nodiscard]] std::expected<std::string, std::string> ZoneNameText(
+    std::span<const std::byte> source, std::string_view id);
+// The name slot `text` encodes to: all zeros for empty text, otherwise each
+// space as a word gap ({spacing:6}) and the rest as game text markup, an E7
+// and zero padding. Refuses text that does not fit with its E7.
+[[nodiscard]] std::expected<ZoneNameBytes, std::string> EncodeZoneName(
+    std::string_view text, std::string_view id);
+
 // Each table's text by its path (ZoneTablePath), and the action catalog
 // (kActionsPath) when a limb names an action.
 using ZoneTableReader = std::function<std::expected<std::string, std::string>(
@@ -145,6 +168,7 @@ struct ZoneColumnMigration {
   std::size_t retired_columns = 0;
   std::size_t named_values = 0;
   std::size_t resigned_values = 0;
+  std::size_t decoded_texts = 0;
 };
 
 // Rewrites older authoring forms the current schema no longer reads, so it
@@ -159,7 +183,10 @@ struct ZoneColumnMigration {
 // action_N_id) by the id `read` serves for it in the action catalog, refusing
 // one the catalog does not hold; 0 becomes an empty cell. Rewrites a limb's
 // agility_defense_bonus of 128-255, which version 7 wrote unsigned, as the
-// same byte's signed value (251 is -5). Column renames are left to
+// same byte's signed value (251 is -5). Rewrites a name written as its 24
+// bytes in lowercase hexadecimal (version 11's name and weapon_name) as its
+// text (ZoneNameText), refusing bytes the text cannot rebuild; no text that
+// fits a slot is 48 hexadecimal digits long. Column renames are left to
 // NormalizeTableText.
 [[nodiscard]] std::expected<ZoneColumnMigration, std::string>
 MigrateZoneColumns(ZoneTable table, const std::string& text,

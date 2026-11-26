@@ -102,6 +102,7 @@ content::ZndFile SampleZone() {
   }
   VS::test_support::UseValidPartCodes(enemy.data, 1);
   VS::test_support::UseKnownActions(enemy.data, 1);
+  VS::test_support::UseTextNames(enemy.data, 1);
   VS::test_support::UseReservedBytes(enemy.data);
   // Status immunities with bit 31, which version 3 wrote as a negative number,
   // and AI settings with bit 31, which version 9 did.
@@ -309,6 +310,17 @@ std::string LegacyActionCell(const std::string& id) {
   return std::to_string(found - kDefinitions.actions.begin());
 }
 
+// The 48 hexadecimal digits version 11 wrote for the name `text`.
+std::string LegacyNameCell(const std::string& text) {
+  const auto bytes = content::EncodeZoneName(text, "fixture name");
+  if (!bytes) FAIL(bytes.error());
+  std::string cell;
+  for (const std::byte value : *bytes) {
+    cell += std::format("{:02x}", std::to_integer<unsigned>(value));
+  }
+  return cell;
+}
+
 void LegacyTableHeaders(const ModelRoot& root) {
   for (const auto table : content::kZoneTables) {
     const auto path = TableFile(root, table);
@@ -328,6 +340,14 @@ void LegacyTableHeaders(const ModelRoot& root) {
         for (std::size_t row = 1; row < records->size(); ++row) {
           auto& cell = records->at(row).fields[column];
           cell = LegacyActionCell(cell);
+        }
+        continue;
+      }
+      // Version 11 wrote names as their 24 bytes in hexadecimal.
+      if (type == content::ColumnType::kText) {
+        for (std::size_t row = 1; row < records->size(); ++row) {
+          auto& cell = records->at(row).fields[column];
+          cell = LegacyNameCell(cell);
         }
         continue;
       }
@@ -501,6 +521,14 @@ bool CheckNameSlot(std::span<const std::byte> source, std::string_view id) {
   return true;
 }
 
+// The zone tables' text form of a disc name slot rebuilds it.
+void CheckZoneNameText(std::span<const std::byte> slot, std::string_view id,
+                       bool present) {
+  const auto text = content::ZoneNameText(slot, id);
+  if (!text) FAIL(text.error());
+  CHECK(text->empty() != present);
+}
+
 std::size_t CheckTextTable(const fs::path& path) {
   const auto source = ReadModel(path);
   REQUIRE(source.size() >= 2);
@@ -560,9 +588,10 @@ TEST_CASE(
   for (const auto& zone : *zones) {
     for (const auto& enemy : zone.enemies) {
       for (const std::size_t at : {std::size_t{0x04}, std::size_t{0x128}}) {
-        const bool present = CheckNameSlot(
-            std::span(enemy.data).subspan(at, kNameBytes), enemy.id);
+        const auto slot = std::span(enemy.data).subspan(at, kNameBytes);
+        const bool present = CheckNameSlot(slot, enemy.id);
         ++(present ? names : empty);
+        CheckZoneNameText(slot, enemy.id, present);
       }
     }
   }
@@ -731,6 +760,9 @@ TEST_CASE("Old zone authoring upgrades without overwriting native edits",
   CHECK_FALSE(parts.contains("affinity_8"));
   CHECK_FALSE(limbs.contains("affinity_8"));
   CHECK(parts.contains(",class_evil,affinity_physical,"));
+  // Version 11's hexadecimal names became text.
+  CHECK(enemies.contains(",Bb 1,"));
+  CHECK(enemies.contains(",Cb 2,"));
   const auto repeat = extract::UpgradeZoneAuthoring(root.Root());
   if (!repeat) FAIL(repeat.error());
   CHECK(repeat->written == 0);

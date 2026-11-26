@@ -47,8 +47,6 @@ constexpr std::string_view kItemNames = "MENU/ITEMNAME.BIN";
 constexpr std::string_view kEnemies = "zone-enemies";
 constexpr std::string_view kLimbs = "zone-enemy-limbs";
 constexpr std::string_view kParts = "zone-enemy-parts";
-constexpr unsigned kHexAlphabetOffset = 10;
-constexpr unsigned kHexBits = 4;
 // BATTLE.PRG's limb names: pointers into the module, which the game loads at
 // Core::kOverlayBase, to the target labels' texts. Each text starts with a
 // '#' the labels can skip (TargetingLive.cpp SetLabelText); name 0 is empty.
@@ -145,25 +143,20 @@ std::expected<std::vector<Table>, std::string> LoadTables(
   return tables;
 }
 
-unsigned HexDigit(char value) {
-  return value <= '9' ? static_cast<unsigned>(value - '0')
-                      : static_cast<unsigned>(value - 'a') + kHexAlphabetOffset;
-}
-
 std::expected<std::string, std::string> NameCell(const Table& table,
                                                  std::size_t row,
                                                  std::string_view column) {
-  // ReadTable already checked the byte column's length and hex digits.
   const std::string& cell = table.Cell(row, column);
-  std::vector<std::byte> bytes;
-  for (std::size_t at = 0; at < cell.size(); at += 2) {
-    bytes.push_back(static_cast<std::byte>((HexDigit(cell.at(at)) << kHexBits) |
-                                           HexDigit(cell.at(at + 1))));
+  const std::size_t line = table.rows.at(row).line;
+  const auto bytes = Content::EncodeZoneName(cell, std::format("'{}'", cell));
+  if (!bytes) {
+    return std::unexpected(
+        Content::CellError(table.path, line, column, bytes.error()));
   }
-  auto name = DecodeAssetName(bytes);
+  auto name = DecodeAssetName(*bytes);
   if (!name) {
-    return std::unexpected(Content::CellError(
-        table.path, table.rows.at(row).line, column, name.error()));
+    return std::unexpected(
+        Content::CellError(table.path, line, column, name.error()));
   }
   return name;
 }

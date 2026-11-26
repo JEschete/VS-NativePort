@@ -75,6 +75,7 @@ std::expected<void, std::string> PrepareFiles(const fs::path& root,
     report.retired_columns += migrated->retired_columns;
     report.named_values += migrated->named_values;
     report.resigned_values += migrated->resigned_values;
+    report.decoded_texts += migrated->decoded_texts;
     auto rewrite = Content::NormalizeTableText(Content::ZoneTableSpec(table),
                                                migrated->text, path);
     if (!rewrite) return std::unexpected(rewrite.error());
@@ -131,8 +132,9 @@ std::expected<ZoneAuthoringReport, std::string> UpgradeZoneAuthoring(
       // reserved bytes' raw_<offset> columns, version 5 numeric action ids
       // and the action_N_index columns, version 6 the equipment index
       // columns, version 7 unsigned agility_defense_bonus cells, version 8
-      // the zud_index column, version 9 the packed ai_settings and version
-      // 10 the class and affinity storage columns; all upgrade in place.
+      // the zud_index column, version 9 the packed ai_settings, version 10
+      // the class and affinity storage columns and version 11 hexadecimal
+      // names; all upgrade in place.
       if (found->second < 1 ||
           found->second > Content::kZndTableConverterVersion) {
         return std::unexpected(

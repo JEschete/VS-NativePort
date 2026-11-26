@@ -43,6 +43,8 @@ constexpr std::array<std::uint8_t, 15> kGuildenstern{
     0x10, 0x38, 0x2C, 0x2F, 0x27, 0x28, 0x31, 0x36,
     // NOLINTNEXTLINE(whitespace/indent_namespace): array initializer.
     0x37, 0x28, 0x35, 0x31, 0xE7, 0xFF, 0xFF};
+// Guildenstern through its E7: a zone name's slot pads with zeros.
+constexpr std::size_t kGuildensternText = 13;
 constexpr std::string_view kEnemyPath = "catalogs/enemies/zone-enemies.csv";
 constexpr std::string_view kArchetypePath = "models/zud/Z009U00.json";
 constexpr std::string_view kModelPath = "models/characters/4B.gltf";
@@ -75,8 +77,9 @@ content::ZoneRecord Zone() {
   content::ZoneEnemyRecord enemy{.id = "enemy.map.zone009.00",
                                  .archetype = "archetype.map.z009u00",
                                  .data = {}};
-  std::ranges::copy(std::as_bytes(std::span(kGuildenstern)),
-                    enemy.data.begin() + 4);
+  std::ranges::copy(
+      std::as_bytes(std::span(kGuildenstern).first(kGuildensternText)),
+      enemy.data.begin() + 4);
   enemy.data.at(0x34) = std::byte{1};   // blade item id
   enemy.data.at(0x238) = std::byte{9};  // first limb HP
   VS::test_support::UseReservedBytes(enemy.data);
@@ -530,6 +533,7 @@ TEST_CASE("Shared model labels retain distinct enemy aliases",
   second.id = "enemy.map.zone009.01";
   second.data.at(4) = std::byte{0x0A};
   second.data.at(5) = std::byte{0xE7};
+  std::fill(second.data.begin() + 6, second.data.begin() + 0x1C, std::byte{});
   VS::test_support::UseReservedBytes(second.data, 1);
   zone.enemies.push_back(second);
   WriteZone(root.Root(), zone);

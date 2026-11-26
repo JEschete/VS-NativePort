@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <expected>
 #include <format>
+#include <span>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -82,6 +83,7 @@ content::ZndTemplate PatternTemplate(std::size_t seed, bool zeroed) {
     for (std::size_t at = 0x238; at < 0x258; ++at) data.at(at) = std::byte{};
     for (std::size_t at = 0x288; at < 0x294; ++at) data.at(at) = std::byte{};
   }
+  VS::test_support::UseTextNames(data, seed);
   VS::test_support::UseReservedBytes(data, seed);
   return data;
 }
@@ -262,20 +264,92 @@ TEST_CASE("Zone tables name the row at fault", "[content-tables][znd]") {
     CHECK(ErrorOf(content::ReadZoneTables(ReaderOf(texts))) == refused.error);
   }
 
-  // A name must be its 24 bytes in lowercase hexadecimal.
+  // A name must fit its slot with its E7 and be valid game text markup.
   Texts texts = SampleTexts();
-  const auto zones = SampleZones();
-  std::string name;
-  for (std::size_t at = 0x04; at < 0x1C; ++at) {
-    name += std::format("{:02x}", std::to_integer<unsigned>(
-                                      zones.at(0).enemies.at(0).data.at(at)));
-  }
-  std::string upper = name;
-  upper.front() = 'F';
-  Edit(texts, ZoneTable::kEnemies, name, upper);
+  const std::string long_name(24, 'x');
+  Edit(texts, ZoneTable::kEnemies, ",Aa 1,", "," + long_name + ",");
+  CHECK(ErrorOf(content::ReadZoneTables(ReaderOf(texts))) ==
+        "catalogs/enemies/zone-enemies.csv:2: column 'name': '" + long_name +
+            "': encodes to 25 bytes with its E7; a name holds 24");
+  texts = SampleTexts();
+  Edit(texts, ZoneTable::kEnemies, ",Aa 1,", ",Aa {nope},");
   CHECK(ErrorOf(content::ReadZoneTables(ReaderOf(texts)))
-            .ends_with("column 'name': '" + upper +
-                       "' is not 24 bytes as lowercase hexadecimal"));
+            .ends_with("(in its markup 'Aa{spacing:6}{nope}')"));
+}
+
+TEST_CASE("Zone names are text that rebuilds their slots",
+          "[zone-authoring][content-tables][znd]") {
+  // 23 glyphs and the E7 fill a slot.
+  auto texts = SampleTexts();
+  const std::string full(23, 'x');
+  Edit(texts, ZoneTable::kEnemies, ",Aa 1,", "," + full + ",");
+  auto expected = SampleZones();
+  auto& name = expected[0].enemies[0].data;
+  std::fill(name.begin() + 4, name.begin() + 4 + 23, std::byte{59});
+  name[4 + 23] = std::byte{0xE7};
+  CHECK(ReadBack(texts) == expected);
+  // Spaces between words are word gaps; gaps at the ends and other tokens
+  // keep their markup; empty text is a zero slot.
+  for (const std::string_view text :
+       {"Dark Crusader", "A  B", "nothing{spacing:6}", "{spacing:6}A",
+        "{{x}} {music}", "M\xC3\xBCllenkamp", ""}) {
+    CAPTURE(text);
+    const auto bytes = Required(content::EncodeZoneName(text, "name"));
+    CHECK(Required(content::ZoneNameText(bytes, "name")) == text);
+  }
+  const auto gap = Required(content::EncodeZoneName("A B", "name"));
+  CHECK(gap[1] == std::byte{0xFA});
+  CHECK(gap[2] == std::byte{0x06});
+}
+
+TEST_CASE("Zone name bytes no text rebuilds are refused",
+          "[zone-authoring][content-tables][znd]") {
+  content::ZoneNameBytes bytes{};
+  bytes[0] = std::byte{0x0A};
+  bytes[1] = std::byte{0xE7};
+  bytes[5] = std::byte{0xFF};
+  CHECK(ErrorOf(content::ZoneNameText(bytes, "name")) ==
+        "name: text byte 5: 0xFF after the E7 is not padding 0");
+  bytes = {};
+  bytes[0] = std::byte{0xE7};
+  CHECK(ErrorOf(content::ZoneNameText(bytes, "name")) ==
+        "name: the name is an E7 alone, which no text rebuilds");
+  bytes = {};
+  bytes[0] = std::byte{0x0A};
+  bytes[1] = std::byte{0x8F};
+  bytes[2] = std::byte{0x0B};
+  bytes[3] = std::byte{0xE7};
+  CHECK(ErrorOf(content::ZoneNameText(bytes, "name")) ==
+        "name: the name holds the space glyph 0x8F, which its text writes as "
+        "a word gap");
+  CHECK(ErrorOf(content::ZoneNameText(std::span(bytes).first(23), "name")) ==
+        "name: a name slot is 24 bytes, not 23");
+}
+
+TEST_CASE("Hexadecimal zone names migrate to text once",
+          "[zone-authoring][content-tables][znd]") {
+  // "Aa 1": A, a, a word gap (FA 06), 1 and the E7, then zero padding.
+  const std::string hex = "0a24fa0601e7" + std::string(36, '0');
+  const std::string none(48, '0');
+  const auto migrated = content::MigrateZoneColumns(
+      ZoneTable::kEnemies,
+      std::format("id,name,weapon_name\na,{},{}\nb,Text,\n", hex, none),
+      "enemies.csv");
+  if (!migrated) FAIL(migrated.error());
+  CHECK(migrated->decoded_texts == 2);
+  CHECK(migrated->text == "id,name,weapon_name\na,Aa 1,\nb,Text,\n");
+  const auto again =
+      content::MigrateZoneColumns(ZoneTable::kEnemies, migrated->text, "e.csv");
+  if (!again) FAIL(again.error());
+  CHECK(again->decoded_texts == 0);
+  CHECK(again->text == migrated->text);
+  std::string tail = hex;
+  tail.replace(12, 2, "ff");
+  CHECK(ErrorOf(content::MigrateZoneColumns(
+            ZoneTable::kEnemies, std::format("id,name\na,{}\n", tail),
+            "enemies.csv")) ==
+        "enemies.csv:2: column 'name': its bytes: text byte 6: 0xFF after the "
+        "E7 is not padding 0");
 }
 
 TEST_CASE("Zone named field aliases preserve every template byte",

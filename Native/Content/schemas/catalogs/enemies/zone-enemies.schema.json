@@ -70,9 +70,9 @@
     },
     {
       "name": "name",
-      "type": "bytes",
-      "bytes": 24,
-      "description": "the name, in the game's encoding"
+      "type": "text",
+      "optional": true,
+      "description": "the actor's name: text of at most 23 bytes in the game's glyph set (one byte a glyph; a {token} one or more), a space being a word gap ({spacing:6}); empty for none"
     },
     {
       "name": "hp",
@@ -381,9 +381,9 @@
     },
     {
       "name": "weapon_name",
-      "type": "bytes",
-      "bytes": 24,
-      "description": "the weapon's name, in the game's encoding"
+      "type": "text",
+      "optional": true,
+      "description": "the weapon's name, which a weapon a defeat drops keeps: text as name"
     },
     {
       "name": "shield_material",

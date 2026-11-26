@@ -31,17 +31,17 @@ match (a test checks this). Columns are described in the schemas; the rules they
 | `world\zones.csv` ([schema](../../Native/Content/schemas/catalogs/world/zones.schema.json)) | `id` `zone.map.zone009`; `room_slots` is the room table's length, used or not |
 | `world\zone-rooms.csv` ([schema](../../Native/Content/schemas/catalogs/world/zone-rooms.schema.json)) | one row per used slot, naming the room by id (`room.map.map009`) |
 | `world\zone-textures.csv` ([schema](../../Native/Content/schemas/catalogs/world/zone-textures.schema.json)) | the texture table's images by id, in upload order |
-| `enemies\zone-enemies.csv` ([schema](../../Native/Content/schemas/catalogs/enemies/zone-enemies.schema.json)) | one row per template: `id` `enemy.map.zone009.00`, `zone`, `slot`, the `archetype` it loads (`archetype.map.z009u00`); the two 24-byte names stay hexadecimal in the game's encoding (type `bytes`) until the string table (#500) gives them text ids |
+| `enemies\zone-enemies.csv` ([schema](../../Native/Content/schemas/catalogs/enemies/zone-enemies.schema.json)) | one row per template: `id` `enemy.map.zone009.00`, `zone`, `slot`, the `archetype` it loads (`archetype.map.z009u00`); `name` and `weapon_name` are text (below) |
 | `enemies\zone-enemy-limbs.csv` ([schema](../../Native/Content/schemas/catalogs/enemies/zone-enemy-limbs.schema.json)) | one row per limb, except its armour part |
 | `enemies\zone-enemy-parts.csv` ([schema](../../Native/Content/schemas/catalogs/enemies/zone-enemy-parts.schema.json)) | one row per equipment part: `weapon.blade`, `weapon.grip`, `weapon.gem1-3`, `shield.base`, `shield.gem1-3`, `accessory`, `limb0-5.armor` |
 
 All six tables receive early informational `display_name` columns through §1.2. `zone-enemies.csv` shows the
-decoded enemy name while its `name` and `weapon_name` hex fields continue to preserve every source byte.
+decoded enemy name; its `name` and `weapon_name` text columns are what the game reads.
 `zone-enemy-limbs.csv` adds the body part the target labels show (`Wyvern - limb 1 (NECK)`): the tag of the body
 model's first bone whose low limb nibble is the limb plus 1, as the spawn picks it, indexing BATTLE.PRG's limb names.
 `labels` replaces the older `Enemy - limb N` captions it generated but keeps edited ones.
 
-**Named fields and domains (versions 2-11).** Enemy class, equipment materials (the shared material domain),
+**Named fields and domains (versions 2-12).** Enemy class, equipment materials (the shared material domain),
 physical types, class ratings and affinities use the named domains in the schemas, and the schemas describe every
 template column from its upstream consumer. Rules beyond the schemas:
 - Version 3 names the parts' `damage_type`, `cost_type` (the resource the base attack spends) and `material`, and
@@ -63,6 +63,12 @@ template column from its upstream consumer. Rules beyond the schemas:
   `func_800E5A74`). On the disc, 447 templates are hostile, 7 neutral and 1 an Ashley ally, and none flees.
 - Version 11 drops the class arrays' `class_storage_6`/`class_storage_7` and the affinity arrays'
   `affinity_storage_7` columns: those tail bytes are reserved (Exactness), not classes or elements.
+- Version 12 writes the 24-byte `name` and `weapon_name` slots (`vs_CharInitData`; `func_80076784` and
+  `dropWeaponRand` copy them whole) as text in the game's glyph set, at most 23 bytes before the E7 terminator, with
+  `Content::GameTextCodec`'s `{token}` markup. A space is the word gap `FA 06`; a gap at either end stays
+  `{spacing:6}`. An empty cell is an all-zero slot. The disc's 910 slots end in E7 with zero tails, so the text
+  rebuilds every byte; a slot with a non-zero tail, a lone E7 or the space glyph `0x8F` is refused rather than
+  approximated. Localized string IDs remain #500.
 - DP splash columns identify their zero-based destination limb and percent units. A limb index is topology, not a
   universal head/arm/leg name; actual body-part names depend on the model.
 - Units (descriptions only, no version change): drop rates are chances in 255 (0 never, 255 always); range and reach
@@ -89,8 +95,9 @@ conversion would omit; both read the same. It drops version 6's equipment index 
 and rewrites a version-7 `agility_defense_bonus` of 128-255 as the same byte's signed value. It drops version 8's
 `zud_index` only when every cell equals its row's `slot`, and splits a version-9 `ai_settings` cell (signed or
 unsigned), refusing a value outside 32 bits or one with bits 0-1 set. It drops version 10's class and affinity
-`storage` columns (version 1's `class_7`, `class_8` and `affinity_8`) only when every cell is 0.
-A normal `tables` run upgrades version 1-10 tables before considering
+`storage` columns (version 1's `class_7`, `class_8` and `affinity_8`) only when every cell is 0. It decodes version
+11's 48-digit hexadecimal names to text, refusing a slot the text cannot rebuild.
+A normal `tables` run upgrades version 1-11 tables before considering
 source reconversion, preserving existing native edits. Unknown enum codes remain preservable by the raw ZND codec, but are refused as native authoring values.
 This does not resolve the remaining part categories, strings, semantic identities or relational enemy
 definitions.
