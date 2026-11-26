@@ -244,3 +244,6 @@ The `category` also selects how damage is assigned to limbs:
 
 This is the damage-distribution policy after a hit amount is calculated; it does not change target selection or
 the `effect` field.
+
+Sources: `Battle/ActionPresentation.cpp`, `ActionCameraSelection.cpp`, `ActionCosts.cpp`, `ActionSequence.cpp`,
+`ActionEffectDispatch.cpp` and `DamagePolicies.cpp`.
