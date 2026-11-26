@@ -221,16 +221,9 @@ std::expected<ZoneAuthoringReport, std::string> UpgradeZoneAuthoring(
   if (auto prepared = PrepareFiles(root, pending, report); !prepared) {
     return std::unexpected(prepared.error());
   }
-  std::vector<OutputBytes> outputs;
-  for (const auto& [path, text] : pending) {
-    outputs.push_back({.name = path, .bytes = std::as_bytes(std::span(text))});
-  }
-  if (!outputs.empty()) {
-    if (auto written = WriteOutputFiles(root, outputs); !written) {
-      return std::unexpected(written.error());
-    }
-  }
-  report.written = outputs.size();
+  auto files = WriteTextFiles(root, pending);
+  if (!files) return std::unexpected(files.error());
+  report.written = *files;
   const bool files_added = *manifest && ListTableFiles(**manifest);
   if ((version_changed || files_added) && *manifest) {
     if (auto written = WriteConversionManifest(root, **manifest); !written) {

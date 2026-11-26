@@ -48,14 +48,14 @@
 namespace VS::Content {
 
 inline constexpr std::string_view kShpModelConverterName = "shp-gltf";
-inline constexpr std::uint32_t kShpModelConverterVersion = 2;
+inline constexpr std::uint32_t kShpModelConverterVersion = 3;
 inline constexpr std::string_view kShpModelSchema = "vs.shp-model";
-inline constexpr std::uint32_t kShpModelSchemaVersion = 2;
+inline constexpr std::uint32_t kShpModelSchemaVersion = 3;
 inline constexpr std::string_view kShpModelDirectory = "models/characters";
 inline constexpr std::string_view kShpExtension = ".SHP";
 // Each OBJ\*.SEQ bank's own output, which lists its owner's glTF and buffer.
 inline constexpr std::string_view kSeqAnimationConverterName = "seq-gltf";
-inline constexpr std::uint32_t kSeqAnimationConverterVersion = 1;
+inline constexpr std::uint32_t kSeqAnimationConverterVersion = 2;
 inline constexpr std::string_view kSeqExtension = ".SEQ";
 inline constexpr std::string_view kGltfSuffix = ".gltf";
 inline constexpr std::string_view kGltfBufferSuffix = ".bin";

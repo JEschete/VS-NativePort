@@ -22,8 +22,10 @@
 //                 "packed_scale", three numbers), its "commands" as one flat
 //                 list of frames, x, y, z groups (null keeps that axis's
 //                 delta) and "terminated": false when no zero byte ends it;
-//                 an event script is {"events": [[frame, op, arguments...]]};
-//                 bytes nothing reads are {"unread": "<lowercase hex>"}
+//                 an event script is {"events": [...]}, one object per event
+//                 with its frame, its op by name and the op's named fields
+//                 (SeqEventForms.hpp); bytes nothing reads are
+//                 {"unread": "<lowercase hex>"}
 // A clip's track reference is the element number (read from its start),
 // {"track": n, "command": c} (read from command c) or {"empty": offset}.
 // The reader checks each value's type and range and names the member at
@@ -31,7 +33,7 @@
 namespace VS::Content {
 
 inline constexpr std::string_view kActorAnimationSchema = "vs.actor-animation";
-inline constexpr std::uint32_t kActorAnimationSchemaVersion = 1;
+inline constexpr std::uint32_t kActorAnimationSchemaVersion = 2;
 
 // One bank and where it came from.
 struct ActorAnimationDocument {

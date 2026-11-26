@@ -502,6 +502,7 @@
     <ClCompile Include="src\ZoneConversionTests.cpp" />
     <ClCompile Include="src\ZoneTableTests.cpp" />
     <ClCompile Include="src\ZudFileTests.cpp" />
+    <ClCompile Include="..\Tools\Extract\src\AnimationAuthoring.cpp" />
     <ClCompile Include="..\Tools\Extract\src\AssetLabels.cpp" />
     <ClCompile Include="..\Tools\Extract\src\BackgroundAuthoring.cpp" />
     <ClCompile Include="..\Tools\Extract\src\AudioBankConversion.cpp" />

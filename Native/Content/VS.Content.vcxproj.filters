@@ -144,6 +144,9 @@
     <ClCompile Include="src\PFile.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\SeqEventForms.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\SeqFile.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -328,6 +331,9 @@
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\PFile.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\SeqEventForms.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\SeqFile.hpp">

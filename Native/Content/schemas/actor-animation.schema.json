@@ -8,7 +8,7 @@
   "required": ["schema", "schema_version", "source", "source_sha256", "bones", "bank"],
   "properties": {
     "schema": { "const": "vs.actor-animation" },
-    "schema_version": { "const": 1 },
+    "schema_version": { "const": 2 },
     "source": {
       "type": "string",
       "description": "The disc file the bank came from, e.g. OBJ/6F_BT2.SEQ."
@@ -154,6 +154,19 @@
         ]
       }
     },
+    "int8": { "type": "integer", "minimum": -128, "maximum": 127 },
+    "vertex": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 511,
+      "description": "A vertex of the model, by its place in the vertex list."
+    },
+    "vertexDelta": {
+      "type": "integer",
+      "minimum": -64,
+      "maximum": 63,
+      "description": "How far the vertex moves along the axis."
+    },
     "events": {
       "type": "object",
       "additionalProperties": false,
@@ -161,15 +174,328 @@
       "properties": {
         "events": {
           "type": "array",
-          "description": "Each event as [frame, op, argument bytes...]; the last is the op that ends the script.",
-          "items": {
-            "type": "array",
-            "minItems": 2,
-            "prefixItems": [{ "$ref": "#/$defs/halfword" }, { "$ref": "#/$defs/byte" }],
-            "items": { "$ref": "#/$defs/byte" }
-          }
+          "description": "The script's events in order; the last is the op that ends the script.",
+          "items": { "$ref": "#/$defs/event" }
         }
       }
+    },
+    "event": {
+      "type": "object",
+      "description": "One event: the clip frame it runs at, its op by name and the op's named fields (Docs/pipeline/CHARACTER_MODELS.md lists them). Arguments that do not fit the fields, and those of the ops the game ignores, are written as bytes instead.",
+      "required": ["frame", "op"],
+      "properties": {
+        "frame": { "$ref": "#/$defs/halfword", "description": "The clip frame the event runs at." },
+        "op": { "$ref": "#/$defs/eventOp" },
+        "bytes": {
+          "type": "array",
+          "description": "The argument bytes, in place of the named fields.",
+          "items": { "$ref": "#/$defs/byte" }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "op": {
+                "enum": ["play-sound-pair", "stop-actor-sound", "play-effect-sound", "stop-effect-sound", "play-model-sound"]
+              }
+            }
+          },
+          "then": {
+            "properties": { "sound": { "$ref": "#/$defs/byte" } },
+            "if": { "required": ["bytes"] },
+            "then": { "maxProperties": 3 },
+            "else": { "required": ["sound"] }
+          }
+        },
+        {
+          "if": { "properties": { "op": { "enum": ["play-actor-sound", "play-effect-sound-at-volume"] } } },
+          "then": {
+            "properties": { "sound": { "$ref": "#/$defs/byte" }, "volume": { "$ref": "#/$defs/byte" } },
+            "if": { "required": ["bytes"] },
+            "then": { "maxProperties": 3 },
+            "else": { "required": ["sound", "volume"] }
+          }
+        },
+        {
+          "if": { "properties": { "op": { "enum": ["start-effect-track"] } } },
+          "then": {
+            "properties": { "track": { "$ref": "#/$defs/byte" } },
+            "if": { "required": ["bytes"] },
+            "then": { "maxProperties": 3 },
+            "else": { "required": ["track"] }
+          }
+        },
+        {
+          "if": { "properties": { "op": { "enum": ["start-weapon-trail", "unlock-bone", "lock-bone"] } } },
+          "then": {
+            "properties": { "bone": { "$ref": "#/$defs/byte" } },
+            "if": { "required": ["bytes"] },
+            "then": { "maxProperties": 3 },
+            "else": { "required": ["bone"] }
+          }
+        },
+        {
+          "if": { "properties": { "op": { "enum": ["fade-weapon-trails", "show-weapons", "hide-weapons", "wait"] } } },
+          "then": {
+            "properties": { "frames": { "$ref": "#/$defs/byte" } },
+            "if": { "required": ["bytes"] },
+            "then": { "maxProperties": 3 },
+            "else": { "required": ["frames"] }
+          }
+        },
+        {
+          "if": { "properties": { "op": { "enum": ["play-animation-13", "play-animation-1"] } } },
+          "then": {
+            "properties": { "blend_frames": { "$ref": "#/$defs/byte" } },
+            "if": { "required": ["bytes"] },
+            "then": { "maxProperties": 3 },
+            "else": { "required": ["blend_frames"] }
+          }
+        },
+        {
+          "if": { "properties": { "op": { "enum": ["play-animation"] } } },
+          "then": {
+            "properties": { "animation": { "$ref": "#/$defs/byte" } },
+            "if": { "required": ["bytes"] },
+            "then": { "maxProperties": 3 },
+            "else": { "required": ["animation"] }
+          }
+        },
+        {
+          "if": { "properties": { "op": { "enum": ["play-blended-animation"] } } },
+          "then": {
+            "properties": { "animation": { "$ref": "#/$defs/byte" }, "blend_frames": { "$ref": "#/$defs/byte" } },
+            "if": { "required": ["bytes"] },
+            "then": { "maxProperties": 3 },
+            "else": { "required": ["animation", "blend_frames"] }
+          }
+        },
+        {
+          "if": { "properties": { "op": { "enum": ["gimmick-interaction"] } } },
+          "then": {
+            "properties": { "command": { "$ref": "#/$defs/byte" } },
+            "if": { "required": ["bytes"] },
+            "then": { "maxProperties": 3 },
+            "else": { "required": ["command"] }
+          }
+        },
+        {
+          "if": { "properties": { "op": { "enum": ["cell-sheet-0", "cell-sheet-1"] } } },
+          "then": {
+            "properties": {
+              "overlay": { "$ref": "#/$defs/byte" },
+              "source_x": { "$ref": "#/$defs/byte" },
+              "source_y": { "$ref": "#/$defs/byte" },
+              "columns": { "$ref": "#/$defs/byte" }
+            },
+            "if": { "required": ["bytes"] },
+            "then": { "maxProperties": 3 },
+            "else": { "required": ["overlay", "source_x", "source_y", "columns"] }
+          }
+        },
+        {
+          "if": { "properties": { "op": { "enum": ["move-vertex-x", "move-vertex-y", "move-vertex-z"] } } },
+          "then": {
+            "properties": { "vertex": { "$ref": "#/$defs/vertex" }, "delta": { "$ref": "#/$defs/vertexDelta" } },
+            "if": { "required": ["bytes"] },
+            "then": { "maxProperties": 3 },
+            "else": { "required": ["vertex", "delta"] }
+          }
+        },
+        {
+          "if": { "properties": { "op": { "enum": ["move-vertex"] } } },
+          "then": {
+            "properties": {
+              "vertex": { "$ref": "#/$defs/vertex" },
+              "x": { "$ref": "#/$defs/vertexDelta" },
+              "y": { "$ref": "#/$defs/int8" },
+              "z": { "$ref": "#/$defs/int8" }
+            },
+            "if": { "required": ["bytes"] },
+            "then": { "maxProperties": 3 },
+            "else": { "required": ["vertex", "x", "y", "z"] }
+          }
+        },
+        {
+          "if": { "properties": { "op": { "enum": ["texture-overlay"] } } },
+          "then": {
+            "properties": {
+              "overlay": { "$ref": "#/$defs/byte" },
+              "source_x": { "$ref": "#/$defs/byte" },
+              "source_y": { "$ref": "#/$defs/byte" }
+            },
+            "if": { "required": ["bytes"] },
+            "then": { "maxProperties": 3 },
+            "else": { "required": ["overlay", "source_x", "source_y"] }
+          }
+        },
+        {
+          "if": { "properties": { "op": { "enum": ["shadow-expand", "shadow-shrink"] } } },
+          "then": {
+            "properties": { "rate": { "$ref": "#/$defs/halfword" }, "frames": { "$ref": "#/$defs/byte" } },
+            "if": { "required": ["bytes"] },
+            "then": { "maxProperties": 3 },
+            "else": { "required": ["rate", "frames"] }
+          }
+        },
+        {
+          "if": { "properties": { "op": { "enum": ["shadow-radius"] } } },
+          "then": {
+            "properties": {
+              "expand_rate": { "$ref": "#/$defs/halfword" },
+              "shrink_rate": { "$ref": "#/$defs/halfword" },
+              "frames": { "$ref": "#/$defs/byte" }
+            },
+            "if": { "required": ["bytes"] },
+            "then": { "maxProperties": 3 },
+            "else": { "required": ["expand_rate", "shrink_rate", "frames"] }
+          }
+        },
+        {
+          "if": { "properties": { "op": { "enum": ["shadow-level"] } } },
+          "then": {
+            "properties": { "level": { "$ref": "#/$defs/halfword" }, "frames": { "$ref": "#/$defs/byte" } },
+            "if": { "required": ["bytes"] },
+            "then": { "maxProperties": 3 },
+            "else": { "required": ["level", "frames"] }
+          }
+        },
+        {
+          "if": { "properties": { "op": { "enum": ["shadow-point"] } } },
+          "then": {
+            "properties": { "point": { "$ref": "#/$defs/byte" } },
+            "if": { "required": ["bytes"] },
+            "then": { "maxProperties": 3 },
+            "else": { "required": ["point"] }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "eventOp": {
+      "description": "The op's name, or the number of an op the game does not run (which ends the script, as end does).",
+      "oneOf": [
+        {
+          "enum": [
+            "end",
+            "initialize-pose",
+            "impact",
+            "play-sound-pair",
+            "play-actor-sound",
+            "stop-actor-sound",
+            "play-effect-sound",
+            "play-effect-sound-at-volume",
+            "stop-effect-sound",
+            "play-model-sound",
+            "play-surface-contact-sound",
+            "start-effect-track",
+            "restart-unless-advanced",
+            "start-weapon-trail",
+            "fade-weapon-trails",
+            "play-animation-13",
+            "play-animation-1",
+            "play-animation",
+            "play-blended-animation",
+            "previous-animation",
+            "next-animation",
+            "weapon-pose-on",
+            "show-weapons",
+            "hide-weapons",
+            "gimmick-interaction",
+            "palette-fade",
+            "cell-sheet-0",
+            "cell-sheet-1",
+            "play-timeline-1",
+            "stop-timeline-1",
+            "play-timeline-0",
+            "stop-timeline-0",
+            "move-vertex-x",
+            "move-vertex-y",
+            "move-vertex-z",
+            "move-vertex",
+            "ignored",
+            "ignored-long",
+            "texture-overlay",
+            "shadow-expand",
+            "shadow-shrink",
+            "shadow-radius",
+            "shadow-level",
+            "wait",
+            "unlock-bone",
+            "lock-bone",
+            "finish-action",
+            "reset-movement",
+            "shadow-point",
+            "normal-speed",
+            "fast-speed",
+            "source-effect",
+            "weapon-pose-off"
+          ]
+        },
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 255,
+          "not": {
+            "enum": [
+              0,
+              1,
+              2,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              19,
+              20,
+              21,
+              22,
+              23,
+              24,
+              25,
+              26,
+              27,
+              28,
+              29,
+              30,
+              31,
+              32,
+              33,
+              34,
+              35,
+              36,
+              37,
+              38,
+              39,
+              40,
+              41,
+              44,
+              51,
+              52,
+              53,
+              54,
+              55,
+              56,
+              57,
+              58,
+              59,
+              60,
+              61,
+              62,
+              63,
+              64
+            ]
+          }
+        }
+      ]
     },
     "unread": {
       "type": "object",

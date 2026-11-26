@@ -25,6 +25,7 @@
 #include "Core/Sha256.hpp"
 #include "Extract/ActionCategoryConversion.hpp"
 #include "Extract/ActionConversion.hpp"
+#include "Extract/AnimationAuthoring.hpp"
 #include "Extract/AssetLabels.hpp"
 #include "Extract/AudioBankConversion.hpp"
 #include "Extract/BackgroundAuthoring.hpp"
@@ -126,8 +127,8 @@ int Usage() {
       "      labels --force refreshes only labels, preserving gameplay "
       "fields and original encoded names.\n"
       "      authoring imports material and learning definitions and upgrades "
-      "action hit effects and effect packages, zone fields "
-      "and generated recipe "
+      "action hit effects and effect packages, zone fields, "
+      "animation event scripts and generated recipe "
       "IDs/references "
       "to semantic item names without changing recipe values.");
   return 2;
@@ -147,6 +148,44 @@ int LabelAssets(const fs::path& root, bool refresh = false) {
 
 int WithLabels(int result, const fs::path& root) {
   return result == 0 ? LabelAssets(root) : result;
+}
+
+// The zone, background and animation upgrades `authoring` runs last.
+int UpgradeAssetAuthoring(const fs::path& root) {
+  const auto zones = Extract::UpgradeZoneAuthoring(root);
+  if (!zones) {
+    VS::Core::LogError("extract", "zone authoring: {}", zones.error());
+    return 1;
+  }
+  VS::Core::LogInfo("extract",
+                    "zone authoring: {} named columns, {} split columns, {} "
+                    "retired columns, {} named values, {} signed values, {} "
+                    "decoded names, {} files updated",
+                    zones->renamed_columns, zones->split_columns,
+                    zones->retired_columns, zones->named_values,
+                    zones->resigned_values, zones->decoded_texts,
+                    zones->written);
+  const auto backgrounds = Extract::UpgradeBackgroundAuthoring(root);
+  if (!backgrounds) {
+    VS::Core::LogError("extract", "background authoring: {}",
+                       backgrounds.error());
+    return 1;
+  }
+  VS::Core::LogInfo(
+      "extract",
+      "background authoring: {} identities, {} files updated, {} retired paths",
+      backgrounds->identities, backgrounds->files, backgrounds->removed);
+  const auto animations = Extract::UpgradeAnimationAuthoring(root);
+  if (!animations) {
+    VS::Core::LogError("extract", "animation authoring: {}",
+                       animations.error());
+    return 1;
+  }
+  VS::Core::LogInfo(
+      "extract",
+      "animation authoring: {} documents, {} named events, {} files updated",
+      animations->documents, animations->events, animations->written);
+  return 0;
 }
 
 int UpgradeAuthoring(const fs::path& root) {
@@ -220,30 +259,7 @@ int UpgradeAuthoring(const fs::path& root) {
                     "{} files updated",
                     report->renamed, report->references, report->named_values,
                     report->quarantined, report->reserved, report->written);
-  const auto zones = Extract::UpgradeZoneAuthoring(root);
-  if (!zones) {
-    VS::Core::LogError("extract", "zone authoring: {}", zones.error());
-    return 1;
-  }
-  VS::Core::LogInfo("extract",
-                    "zone authoring: {} named columns, {} split columns, {} "
-                    "retired columns, {} named values, {} signed values, {} "
-                    "decoded names, {} files updated",
-                    zones->renamed_columns, zones->split_columns,
-                    zones->retired_columns, zones->named_values,
-                    zones->resigned_values, zones->decoded_texts,
-                    zones->written);
-  const auto backgrounds = Extract::UpgradeBackgroundAuthoring(root);
-  if (!backgrounds) {
-    VS::Core::LogError("extract", "background authoring: {}",
-                       backgrounds.error());
-    return 1;
-  }
-  VS::Core::LogInfo(
-      "extract",
-      "background authoring: {} identities, {} files updated, {} retired paths",
-      backgrounds->identities, backgrounds->files, backgrounds->removed);
-  return 0;
+  return UpgradeAssetAuthoring(root);
 }
 
 // --ffmpeg <path>, else ffmpeg.exe on PATH.

@@ -24,6 +24,7 @@
 #include "Content/JsonText.hpp"
 #include "Content/SeqFile.hpp"
 #include "Content/ShpFile.hpp"
+#include "Extract/AnimationAuthoring.hpp"
 #include "Extract/ImageConversion.hpp"
 #include "Extract/ImageFilesWriter.hpp"
 #include "Platform/Paths.hpp"
@@ -1271,6 +1272,12 @@ std::expected<ModelConversionReport, std::string> RunModelConverter(
 
 std::expected<ModelConversionReport, std::string> ConvertDiscModels(
     const fs::path& root, bool force) {
+  // Existing outputs move to the named event form instead of reconverting.
+  if (!force) {
+    if (auto upgraded = UpgradeAnimationAuthoring(root); !upgraded) {
+      return std::unexpected(upgraded.error());
+    }
+  }
   auto start = StartRun(root);
   if (!start) return std::unexpected(start.error());
   auto sources = ReadModelSources(root, start->entries);

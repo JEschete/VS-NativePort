@@ -22,6 +22,42 @@ The character glTF references the bound images and carries the actor-local contr
 
 Resolve colors from the verified character palette binding; never guess a palette or interpret index bytes as RGB. Missing/ambiguous bindings remain explicit errors or `unconverted` entries with diagnostics, not plausible-looking successful exports. Inventory unresolved regions and aliases until their consumption is understood. Multiple characters may reference the same source bank without duplicating meshes; §8 tracks every dependency that contributes to each output.
 
+**Event scripts (#520).** A bank's event script (§6.2.1) writes each event as an object: `frame` (the clip frame it runs at), `op` (its name) and the op's named fields, in the order the game reads its argument bytes (`Content/SeqEventForms.cpp`, after the handlers in `Actors/AnimationEvents.cpp`). Fields are bytes (0–255) unless a range is given. An op the game does not run keeps its number and ends the script, as `end` does. Arguments that do not fill an op's fields are written as `bytes`, as are those of `ignored` and `ignored-long`, which the game steps over. The reader refuses an unknown name, a named op written as its number, a field out of range, a member the op does not take and `bytes` beside a named field. "Reloads" means the script starts again from the (new) animation's first event.
+
+| Op (number) | Fields | What the game does |
+|---|---|---|
+| `end` (0) | — | Ends the script. |
+| `initialize-pose` (1) | — | Resets the pose and reloads. |
+| `impact` (2) | — | Queues the action's impact effects, or else plays animation 1 and reloads. |
+| `play-sound-pair` (4) | `sound` | Plays a sound pair below height 3000; sound 88 plays the drawn weapon's sound. |
+| `play-actor-sound` (5), `play-effect-sound-at-volume` (8) | `sound`, `volume` | Plays an actor or effect sound at the actor's pan and this volume; 0 plays nothing. |
+| `play-effect-sound` (7) | `sound` | Plays an effect sound at the actor's pan and volume. |
+| `stop-actor-sound` (6), `stop-effect-sound` (9) | `sound` | Stops the sound. |
+| `play-model-sound` (10), `play-surface-contact-sound` (11) | `sound`, — | Plays one of the model's sounds; the surface contact sound. |
+| `start-effect-track` (12), `source-effect` (63) | `track`, — | Starts an effect track; spawns the source effect. Both do nothing while the event flag is set. |
+| `restart-unless-advanced` (13) | — | While effects run and no advance is requested, acts as `initialize-pose`. |
+| `start-weapon-trail` (14), `fade-weapon-trails` (15) | `bone`, `frames` | Starts a weapon trail; fades the trails over the frames. |
+| `play-animation-13` (19), `play-animation-1` (20) | `blend_frames` | Plays animation 13 or 1, blending over the frames, and reloads. |
+| `play-animation` (21), `play-blended-animation` (22) | `animation`, `blend_frames` (22 only) | Plays the animation and reloads. |
+| `previous-animation` (23), `next-animation` (24) | — | Plays the animation before or after the current one and reloads. |
+| `weapon-pose-on` (25), `weapon-pose-off` (64) | — | Sets or clears the actor's action lock. |
+| `show-weapons` (26), `hide-weapons` (27) | `frames` | Scales the attached weapons in or out over the frames. |
+| `gimmick-interaction` (28), `palette-fade` (29) | `command`, — | Applies a gimmick command; starts the palette fade. |
+| `cell-sheet-0` (30), `cell-sheet-1` (31) | `overlay`, `source_x`, `source_y`, `columns` | Sets texture cell sheet 0 or 1. |
+| `play-timeline-1` (32), `stop-timeline-1` (33), `play-timeline-0` (34), `stop-timeline-0` (35) | — | Plays or stops a texture animation timeline. |
+| `texture-overlay` (44) | `overlay`, `source_x`, `source_y` | Uploads a texture overlay. |
+| `move-vertex-x` (36), `-y` (37), `-z` (38) | `vertex` (0–511), `delta` (−64–63) | Moves the model vertex along the axis; unwinding reverses it. |
+| `move-vertex` (39) | `vertex` (0–511), `x` (−64–63), `y`, `z` (−128–127) | Moves the vertex on all three axes. |
+| `ignored` (40), `ignored-long` (41) | `bytes` | Stepped over. |
+| `shadow-expand` (51), `shadow-shrink` (52) | `rate` (0–65535), `frames` | Blends that shadow radius rate to `rate` over the frames (0: at once). |
+| `shadow-radius` (53) | `expand_rate`, `shrink_rate` (0–65535), `frames` | Blends both rates. |
+| `shadow-level` (54) | `level` (0–65535, 4096 a turn), `frames` | Turns the shadow level the shorter way over the frames. |
+| `shadow-point` (60) | `point` | Blends to a shadow point's rates and level. |
+| `wait` (55) | `frames` | Holds the script for the frames. |
+| `unlock-bone` (56), `lock-bone` (57) | `bone` | Unlocks or locks the bone's pose. |
+| `finish-action` (58), `reset-movement` (59) | — | Marks the action animation finished; resets the actor's movement. |
+| `normal-speed` (61), `fast-speed` (62) | — | Plays animations at normal or fast speed. |
+
 #### 6.2.3 Bounded implementation packages
 
 All packages below are **planned**, not completed by this document. Their prerequisites describe technical dependencies, not permission to reorder tracker #4. They are incremental implementation slices within the up-front conversion architecture; runtime lazy conversion remains prohibited.

@@ -1,6 +1,6 @@
 {
   "schema": "vs.actor-animation",
-  "schema_version": 1,
+  "schema_version": 2,
   "source": "OBJ/SAMPLE.SEQ",
   "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   "bones": 2,
@@ -93,9 +93,20 @@
       },
       {
         "events": [
-          [0, 1, 9],
-          [300, 41, 1, 2, 3, 4, 5, 6, 7],
-          [5, 0]
+          {
+            "frame": 0,
+            "op": "play-sound-pair",
+            "sound": 9
+          },
+          {
+            "frame": 300,
+            "op": "ignored-long",
+            "bytes": [1, 2, 3, 4, 5, 6, 7]
+          },
+          {
+            "frame": 5,
+            "op": "end"
+          }
         ]
       },
       {

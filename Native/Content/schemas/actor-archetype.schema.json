@@ -12,7 +12,7 @@
       "description": "Optional informational name, not an identity or gameplay field."
     },
     "schema": { "const": "vs.actor-archetype" },
-    "schema_version": { "const": 1 },
+    "schema_version": { "const": 2 },
     "source": {
       "type": "string",
       "description": "The disc file the archetype came from, e.g. MAP/Z001U00.ZUD."

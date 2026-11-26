@@ -31,11 +31,11 @@
 namespace VS::Content {
 
 inline constexpr std::string_view kActorArchetypeSchema = "vs.actor-archetype";
-inline constexpr std::uint32_t kActorArchetypeSchemaVersion = 1;
+inline constexpr std::uint32_t kActorArchetypeSchemaVersion = 2;
 // The zud-json converter writes each MAP\*.ZUD as <directory>/<ZUD>.json, and
 // a body no converted model matches as <directory>/<ZUD>.gltf.
 inline constexpr std::string_view kZudArchetypeConverterName = "zud-json";
-inline constexpr std::uint32_t kZudArchetypeConverterVersion = 1;
+inline constexpr std::uint32_t kZudArchetypeConverterVersion = 2;
 inline constexpr auto kArchetypeDirectory = "models/zud";
 
 // The identity bytes (ZudData, MENU9.PRG); the file's eighth byte is zero.

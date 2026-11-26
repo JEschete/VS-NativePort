@@ -30,6 +30,7 @@
 #include "Content/WepFile.hpp"
 #include "Content/ZudFile.hpp"
 #include "Core/Sha256.hpp"
+#include "Extract/AnimationAuthoring.hpp"
 #include "Extract/EsqConversion.hpp"
 #include "Extract/ImageConversion.hpp"
 #include "Extract/WepModelConversion.hpp"
@@ -626,6 +627,12 @@ std::expected<ConvertedModel, std::string> ConvertZudArchetype(
 
 std::expected<ModelConversionReport, std::string> ConvertDiscArchetypes(
     const fs::path& root, bool force) {
+  // Existing outputs move to the named event form instead of reconverting.
+  if (!force) {
+    if (auto upgraded = UpgradeAnimationAuthoring(root); !upgraded) {
+      return std::unexpected(upgraded.error());
+    }
+  }
   auto start = StartRun(root);
   if (!start) return std::unexpected(start.error());
   auto sources = ReadZudSources(root, start->entries);

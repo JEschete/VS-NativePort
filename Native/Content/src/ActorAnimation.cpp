@@ -13,6 +13,8 @@
 #include <variant>
 #include <vector>
 
+#include "Content/SeqEventForms.hpp"
+
 namespace VS::Content {
 namespace {
 using Json = JsonDocument;
@@ -31,8 +33,6 @@ constexpr std::int64_t kPackedScaleMin = kInt16Min / 2;
 constexpr std::int64_t kPackedScaleMax = kInt16Max / 2;
 // 0xFF in a clip's base or the map means none, so a clip number stops below.
 constexpr std::int64_t kClipNumberMax = kByteMax - 1;
-// An event is its frame and op, then its arguments.
-constexpr std::size_t kEventHeader = 2;
 constexpr std::string_view kHexDigits = "0123456789abcdef";
 constexpr unsigned kNibbleBits = 4;
 constexpr unsigned kNibbleMask = 0x0F;
@@ -115,11 +115,7 @@ Json TrackJson(const SeqTrack& track) {
 Json EventsJson(const SeqEvents& script) {
   Json events = Json::array();
   for (const SeqEvent& event : script.events) {
-    Json entry = Json::array({event.frame, event.op});
-    for (const std::uint8_t argument : event.arguments) {
-      entry.push_back(argument);
-    }
-    events.push_back(std::move(entry));
+    events.push_back(SeqEventJson(event));
   }
   Json json = Json::object();
   json["events"] = std::move(events);
@@ -259,26 +255,6 @@ Result<SeqTrack> TrackOf(const JsonMembers& members, const std::string& where) {
   return track;
 }
 
-Result<SeqEvent> EventOf(const Json& json, const std::string& where) {
-  if (!json.is_array() || json.size() < kEventHeader) {
-    return std::unexpected(std::format(
-        "{} must be an array of a frame, an op and its arguments", where));
-  }
-  SeqEvent event;
-  auto frame = NumberIn(json[0], {0, kHalfwordMax}, At(where, 0));
-  if (!frame) return std::unexpected(frame.error());
-  event.frame = static_cast<std::uint16_t>(*frame);
-  auto op = NumberIn(json[1], {0, kByteMax}, At(where, 1));
-  if (!op) return std::unexpected(op.error());
-  event.op = static_cast<std::uint8_t>(*op);
-  for (std::size_t index = kEventHeader; index < json.size(); ++index) {
-    auto argument = NumberIn(json[index], {0, kByteMax}, At(where, index));
-    if (!argument) return std::unexpected(argument.error());
-    event.arguments.push_back(static_cast<std::uint8_t>(*argument));
-  }
-  return event;
-}
-
 Result<SeqEvents> EventsOf(const JsonMembers& members) {
   if (auto only = members.Only({"events"}); !only) {
     return std::unexpected(only.error());
@@ -288,7 +264,7 @@ Result<SeqEvents> EventsOf(const JsonMembers& members) {
   SeqEvents script;
   const std::string where = members.Where("events");
   for (std::size_t index = 0; index < (*list)->size(); ++index) {
-    auto event = EventOf((**list)[index], At(where, index));
+    auto event = SeqEventOf((**list)[index], At(where, index));
     if (!event) return std::unexpected(event.error());
     script.events.push_back(std::move(*event));
   }

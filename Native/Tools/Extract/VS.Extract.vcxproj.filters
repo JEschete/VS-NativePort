@@ -18,6 +18,9 @@
     <ClCompile Include="src\ActionConversion.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\AnimationAuthoring.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\AssetLabels.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -100,6 +103,9 @@
       <Filter>include\Extract</Filter>
     </ClInclude>
     <ClInclude Include="include\Extract\ActionConversion.hpp">
+      <Filter>include\Extract</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Extract\AnimationAuthoring.hpp">
       <Filter>include\Extract</Filter>
     </ClInclude>
     <ClInclude Include="include\Extract\AssetLabels.hpp">

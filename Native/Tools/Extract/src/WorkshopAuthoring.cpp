@@ -915,16 +915,9 @@ std::expected<WorkshopAuthoringReport, std::string> UpgradeWorkshopAuthoring(
   if (auto shared = Content::CheckSharedWorkshopResults(catalog); !shared) {
     return std::unexpected(shared.error());
   }
-  std::vector<OutputBytes> outputs;
-  for (const auto& [path, text] : files) {
-    outputs.push_back({.name = path, .bytes = std::as_bytes(std::span(text))});
-  }
-  if (!outputs.empty()) {
-    if (auto written = WriteOutputFiles(root, outputs); !written) {
-      return std::unexpected(written.error());
-    }
-  }
-  report.written = files.size();
+  auto written = WriteTextFiles(root, files);
+  if (!written) return std::unexpected(written.error());
+  report.written = *written;
   if (manifest->has_value()) {
     auto recorded = RecordImports(root, **manifest);
     if (!recorded) return std::unexpected(recorded.error());

@@ -92,6 +92,7 @@
       <AdditionalIncludeDirectories>$(VSLegacyIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\PFile.cpp" />
+    <ClCompile Include="src\SeqEventForms.cpp" />
     <ClCompile Include="src\SeqFile.cpp" />
     <ClCompile Include="src\ShpFile.cpp" />
     <ClCompile Include="src\ShpModelFiles.cpp" />
@@ -161,6 +162,7 @@
     <ClInclude Include="include\Content\OverlayWorkspace.hpp" />
     <ClInclude Include="include\Content\OverlayWorkspaceLive.hpp" />
     <ClInclude Include="include\Content\PFile.hpp" />
+    <ClInclude Include="include\Content\SeqEventForms.hpp" />
     <ClInclude Include="include\Content\SeqFile.hpp" />
     <ClInclude Include="include\Content\ShpFile.hpp" />
     <ClInclude Include="include\Content\ShpModelFiles.hpp" />

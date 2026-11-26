@@ -47,6 +47,8 @@ class JsonMembers {
   // Fails on unknown members, except optional string display_name metadata.
   [[nodiscard]] std::expected<void, std::string> Only(
       std::initializer_list<std::string_view> keys) const;
+  [[nodiscard]] std::expected<void, std::string> Only(
+      std::span<const std::string_view> keys) const;
   [[nodiscard]] const JsonDocument* Find(std::string_view key) const;
   [[nodiscard]] std::expected<const JsonDocument*, std::string> Get(
       std::string_view key) const;

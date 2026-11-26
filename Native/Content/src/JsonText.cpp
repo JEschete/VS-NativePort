@@ -107,6 +107,11 @@ std::string JsonMembers::Where(std::string_view key) const {
 
 std::expected<void, std::string> JsonMembers::Only(
     std::initializer_list<std::string_view> keys) const {
+  return Only(std::span(keys.begin(), keys.size()));
+}
+
+std::expected<void, std::string> JsonMembers::Only(
+    std::span<const std::string_view> keys) const {
   if (!object_->is_object()) {
     return std::unexpected(std::format("{} must be an object", where_));
   }

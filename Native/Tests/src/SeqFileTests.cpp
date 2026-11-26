@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <format>
+#include <fstream>
 #include <functional>
 #include <initializer_list>
 #include <map>
@@ -19,12 +20,16 @@
 
 #include "Content/ActorAnimation.hpp"
 #include "Content/AnimationSet.hpp"
+#include "Content/ConversionManifest.hpp"
 #include "Content/ConvertedModels.hpp"
 #include "Content/EsqFile.hpp"
 #include "Content/JsonText.hpp"
+#include "Content/SeqEventForms.hpp"
 #include "Content/SeqFile.hpp"
 #include "Content/ShpFile.hpp"
 #include "Content/ShpModelFiles.hpp"
+#include "Extract/AnimationAuthoring.hpp"
+#include "Extract/ConversionManifestWriter.hpp"
 #include "TestSupport/ModelFixtures.hpp"
 
 namespace {
@@ -93,7 +98,7 @@ std::vector<content::SeqElement> SampleMotion() {
       Vector({-8192, 0, 16382}, {}),
       Track(SeqStart::kPackedScale, {64, 64, -16384}, {Command(2, {1, 1, 1})}),
       Track(SeqStart::kRawScale, {64, 0, 255}, {}),
-      content::SeqEvents{.events = {{.frame = 0, .op = 1, .arguments = {9}},
+      content::SeqEvents{.events = {{.frame = 0, .op = 4, .arguments = {9}},
                                     {.frame = 300,
                                      .op = 41,
                                      .arguments = {1, 2, 3, 4, 5, 6, 7}},
@@ -497,7 +502,7 @@ TEST_CASE("The actor-animation reader names the member at fault",
     std::string_view error;
   };
   const std::vector<Edit> edits{
-      {"/schema_version", 2, "s is vs.actor-animation version 2; this build"},
+      {"/schema_version", 3, "s is vs.actor-animation version 3; this build"},
       {"/source_sha256", "ABC", "s.source_sha256 must be a lowercase SHA-256"},
       {"/bones", 42, "s.bones must be a whole number from 1 to 41"},
       {"/bank/map/1", 255,
@@ -527,7 +532,23 @@ TEST_CASE("The actor-animation reader names the member at fault",
       {"/bank/motion/4/raw_scale/1", 256,
        "s.bank.motion[4].raw_scale[1] must be a whole number from 0 to 255"},
       {"/bank/motion/5/events/2", JsonDocument::parse("[5]"),
-       "s.bank.motion[5].events[2] must be an array of a frame, an op"},
+       "s.bank.motion[5].events[2] must be an object with a frame and an op"},
+      {"/bank/motion/5/events/0/op", "play-sound",
+       "s.bank.motion[5].events[0].op names no event op: 'play-sound'"},
+      {"/bank/motion/5/events/0/op", 4,
+       "s.bank.motion[5].events[0].op must be written as its name, "
+       "'play-sound-pair'"},
+      {"/bank/motion/5/events/0/sound", 256,
+       "s.bank.motion[5].events[0].sound must be a whole number from 0 to "
+       "255"},
+      {"/bank/motion/5/events/0/volume", 1,
+       "s.bank.motion[5].events[0] has an unknown member 'volume'"},
+      {"/bank/motion/5/events/0/bytes", JsonDocument::parse("[9]"),
+       "s.bank.motion[5].events[0] has both bytes and the named field "
+       "'sound'"},
+      {"/bank/motion/5/events/1/bytes/0", 256,
+       "s.bank.motion[5].events[1].bytes[0] must be a whole number from 0 to "
+       "255"},
       {"/bank/motion/8/unread", "ABCD",
        "s.bank.motion[8].unread must be bytes in lowercase hexadecimal"},
       {"/bank/motion/8/unread", "abc",
@@ -541,6 +562,155 @@ TEST_CASE("The actor-animation reader names the member at fault",
     REQUIRE_FALSE(read.has_value());
     CheckContains(read.error(), edit.error);
   }
+}
+
+// --- Named event forms.
+
+TEST_CASE("Animation events name their ops and the game's operand fields",
+          "[content-models][seq]") {
+  using content::JsonDocument;
+  struct Form {
+    content::SeqEvent event;
+    std::string_view json;
+  };
+  const std::vector<Form> forms{
+      {{.frame = 3, .op = 22, .arguments = {5, 4}},
+       R"({"frame": 3, "op": "play-blended-animation", "animation": 5,
+           "blend_frames": 4})"},
+      // A vertex move packs a 9-bit vertex under a 7-bit signed delta.
+      {{.frame = 1, .op = 37, .arguments = {0xFB, 0x2C}},
+       R"({"frame": 1, "op": "move-vertex-y", "vertex": 300, "delta": -3})"},
+      {{.frame = 1, .op = 39, .arguments = {0x81, 0x05, 0xFF, 0x80}},
+       R"({"frame": 1, "op": "move-vertex", "vertex": 261, "x": -64, "y": -1,
+           "z": -128})"},
+      {{.frame = 9, .op = 53, .arguments = {0x12, 0x34, 0xAB, 0xCD, 7}},
+       R"({"frame": 9, "op": "shadow-radius", "expand_rate": 4660,
+           "shrink_rate": 43981, "frames": 7})"},
+      // Arguments that do not fit the fields, and skipped ones, are bytes.
+      {{.frame = 2, .op = 4, .arguments = {}},
+       R"({"frame": 2, "op": "play-sound-pair", "bytes": []})"},
+      {{.frame = 2, .op = 1, .arguments = {7}},
+       R"({"frame": 2, "op": "initialize-pose", "bytes": [7]})"},
+      {{.frame = 0, .op = 40, .arguments = {1, 2, 3}},
+       R"({"frame": 0, "op": "ignored", "bytes": [1, 2, 3]})"},
+      // An op the game does not run keeps its number.
+      {{.frame = 4, .op = 3, .arguments = {}}, R"({"frame": 4, "op": 3})"},
+      {{.frame = 4, .op = 200, .arguments = {6}},
+       R"({"frame": 4, "op": 200, "bytes": [6]})"},
+  };
+  for (const Form& form : forms) {
+    CAPTURE(form.json);
+    const JsonDocument expected = JsonDocument::parse(form.json);
+    CHECK(content::SeqEventJson(form.event) == expected);
+    const auto read = content::SeqEventOf(expected, "e");
+    INFO(ErrorOf(read));
+    REQUIRE(read.has_value());
+    CHECK(*read == form.event);
+  }
+}
+
+TEST_CASE("Every named event op reads back the bytes it writes",
+          "[content-models][seq]") {
+  constexpr std::uint8_t kPattern = 0xF0;
+  constexpr std::size_t kSkippedBytes = 2;
+  for (const content::SeqEventForm& form : content::SeqEventForms()) {
+    CAPTURE(form.name);
+    CHECK(content::FindSeqEventForm(form.name) == &form);
+    content::SeqEvent event{.frame = 510, .op = form.op, .arguments = {}};
+    const std::size_t size =
+        form.skipped ? kSkippedBytes : content::SeqEventFieldBytes(form);
+    for (std::size_t at = 0; at < size; ++at) {
+      event.arguments.push_back(static_cast<std::uint8_t>(kPattern + at));
+    }
+    const content::JsonDocument json = content::SeqEventJson(event);
+    CHECK(json.contains("bytes") == form.skipped);
+    const auto read = content::SeqEventOf(json, "e");
+    INFO(ErrorOf(read));
+    REQUIRE(read.has_value());
+    CHECK(*read == event);
+  }
+}
+
+// The sample document as the previous converters wrote it: version 1, each
+// event a [frame, op, arguments...] array.
+content::JsonDocument LegacySampleJson() {
+  content::JsonDocument json = content::ActorAnimationJson(SampleDocument());
+  json["schema_version"] = 1;
+  const auto motion = SampleMotion();
+  const auto& script = std::get<content::SeqEvents>(motion.at(5));
+  content::JsonDocument events = content::JsonDocument::array();
+  for (const content::SeqEvent& event : script.events) {
+    content::JsonDocument entry = content::JsonDocument::array();
+    entry.push_back(event.frame);
+    entry.push_back(event.op);
+    for (const std::uint8_t argument : event.arguments) {
+      entry.push_back(argument);
+    }
+    events.push_back(std::move(entry));
+  }
+  json["bank"]["motion"][5]["events"] = std::move(events);
+  return json;
+}
+
+constexpr std::string_view kLegacySampleFile = "models/characters/SAMPLE.json";
+
+// Writes the legacy sample under `root` with an author's label, recorded as a
+// version 1 SEQ conversion.
+void WriteLegacySample(const fs::path& root) {
+  content::JsonDocument legacy = LegacySampleJson();
+  legacy["display_name"] = "An author's label";
+  fs::create_directories(root / "models" / "characters");
+  {
+    std::ofstream output(root / fs::path(kLegacySampleFile), std::ios::binary);
+    output << content::FormatJsonText(legacy) << '\n';
+    REQUIRE(output.good());
+  }
+  content::ConversionManifest manifest;
+  manifest.converters = {{std::string(content::kSeqAnimationConverterName), 1}};
+  manifest.outputs = {
+      {.id = "sequence.sample",
+       .source = "OBJ/SAMPLE.SEQ",
+       .source_sha256 = std::string(64, 'a'),
+       .converter = std::string(content::kSeqAnimationConverterName),
+       .files = {std::string(kLegacySampleFile)},
+       .dependencies = {},
+       .note = {},
+       .alias_of = {}}};
+  REQUIRE(VS::Extract::WriteConversionManifest(root, manifest));
+}
+
+// The SEQ animation converter version `root`'s manifest records.
+std::optional<std::uint32_t> RecordedSeqVersion(const fs::path& root) {
+  const auto loaded = content::LoadConversionManifest(root);
+  if (!loaded || !*loaded) return std::nullopt;
+  const auto& converters = (**loaded).converters;
+  const auto found = converters.find(content::kSeqAnimationConverterName);
+  if (found == converters.end()) return std::nullopt;
+  return found->second;
+}
+
+TEST_CASE("Authoring names existing event scripts in place",
+          "[content-models][seq]") {
+  const VS::test_support::ModelRoot root({});
+  WriteLegacySample(root.Root());
+
+  const auto report = VS::test_support::Required(
+      VS::Extract::UpgradeAnimationAuthoring(root.Root()));
+  CHECK(report.documents == 1);
+  CHECK(report.events == 3);
+  CHECK(report.written == 2);
+  const auto upgraded = content::ParseJsonText(
+      ReadModel(root.Root() / fs::path(kLegacySampleFile)), kLegacySampleFile);
+  REQUIRE(upgraded.has_value());
+  content::JsonDocument expected =
+      content::ActorAnimationJson(SampleDocument());
+  expected["display_name"] = "An author's label";
+  CHECK(*upgraded == expected);
+  CHECK(RecordedSeqVersion(root.Root()) ==
+        content::kSeqAnimationConverterVersion);
+  const auto again = VS::test_support::Required(
+      VS::Extract::UpgradeAnimationAuthoring(root.Root()));
+  CHECK(again.written == 0);
 }
 
 void CountRef(const content::SeqRef& ref, Tallies& tallies) {
@@ -566,6 +736,16 @@ void Count(const content::SeqBank& bank, Tallies& tallies) {
   }
   for (const content::SeqElement& element : bank.motion) {
     ++tallies[std::string(kElements.at(element.index()))];
+    if (const auto* script = std::get_if<content::SeqEvents>(&element)) {
+      for (const content::SeqEvent& event : script->events) {
+        ++tallies["events"];
+        if (content::SeqEventJson(event).contains(
+                content::kSeqEventBytesMember)) {
+          ++tallies[std::format("op {} as bytes", event.op)];
+        }
+      }
+      continue;
+    }
     const auto* track = std::get_if<content::SeqTrack>(&element);
     if (track == nullptr) continue;
     tallies["commands"] += track->commands.size();
@@ -632,15 +812,11 @@ TEST_CASE("Extracted SEQ files decode and rebuild their exact bytes",
   }
   // Tracks often run on into the next one; the game stops at the clip's
   // length, so most need no terminator.
-  const Tallies expected{{"commands", 2416326},
-                         {"empty refs", 6391},
-                         {"files", 700},
-                         {"inherited clips", 1935},
-                         {"mid-track refs", 26566},
-                         {"own clips", 12556},
-                         {"scripts", 9297},
-                         {"tracks", 262258},
-                         {"unterminated", 148454}};
+  const Tallies expected{{"commands", 2416326},     {"empty refs", 6391},
+                         {"events", 29702},         {"files", 700},
+                         {"inherited clips", 1935}, {"mid-track refs", 26566},
+                         {"own clips", 12556},      {"scripts", 9297},
+                         {"tracks", 262258},        {"unterminated", 148454}};
   INFO(Describe(tallies));
   CHECK(tallies == expected);
 }
@@ -669,8 +845,10 @@ TEST_CASE("Banks embedded in extracted SHP files rebuild their exact bytes",
     }
   }
   // The embedded banks hold only each bone's initial key.
-  const Tallies expected{{"commands", 0},  {"files", 202},   {"own clips", 202},
-                         {"scripts", 140}, {"tracks", 4791}, {"unread", 115}};
+  const Tallies expected{{"commands", 0},    {"events", 292},  {"files", 202},
+                         {"own clips", 202}, {"scripts", 140}, {"tracks", 4791},
+                         {"unread", 115}};
+  INFO(Describe(tallies));
   CHECK(tallies == expected);
 }
 
@@ -683,6 +861,19 @@ TEST_CASE("Extracted SEQ banks load from their owners' glTF as exact bytes",
   CHECK(VS::test_support::CheckExtractedModelsLoad(
             *models, content::kSeqExtension, content::LoadConvertedSequence,
             lengths) == kExtractedBanks);
+}
+
+TEST_CASE("Named event fields fill the game's event strides",
+          "[content-models][seq][extract]") {
+  const auto models = ExtractedModels();
+  if (!models) SKIP("Extracted Native/data is unavailable");
+  const Lengths lengths = VS::test_support::ExtractedEventLengths(*models);
+  for (const content::SeqEventForm& form : content::SeqEventForms()) {
+    if (form.op == 0 || form.skipped) continue;
+    CAPTURE(form.name);
+    // Each stride counts the op byte.
+    CHECK(lengths.at(form.op) == 1 + content::SeqEventFieldBytes(form));
+  }
 }
 
 // --- ESQ shared animation sets.
@@ -894,9 +1085,9 @@ TEST_CASE("The animation-set reader names the member at fault",
   };
   const std::vector<Edit> edits{
       {"/schema", "vs.actor-animation",
-       "s is vs.actor-animation version 1; this build reads "
-       "vs.animation-set version 1"},
-      {"/schema_version", 2, "s is vs.animation-set version 2; this build"},
+       "s is vs.actor-animation version 2; this build reads "
+       "vs.animation-set version 2"},
+      {"/schema_version", 3, "s is vs.animation-set version 3; this build"},
       {"/source_sha256", "ABC", "s.source_sha256 must be a lowercase SHA-256"},
       {"/extra", 1, "s has an unknown member"},
       {"/entries", "x", "s.entries must be an array of at most 15 entries"},
@@ -969,19 +1160,12 @@ TEST_CASE("Extracted ESQ files decode and rebuild their exact bytes",
     CAPTURE(entry.path().filename().string());
     CheckSetRebuilds(ReadModel(entry.path()), lengths, tallies);
   }
-  const Tallies expected{{"clips past headers", 5},
-                         {"commands", 1694625},
-                         {"empty refs", 636},
-                         {"entries", 355},
-                         {"files", 97},
-                         {"inherited clips", 145},
-                         {"mid-track refs", 1697},
-                         {"own clips", 1732},
-                         {"scripts", 495},
-                         {"texture rows", 210},
-                         {"tracks", 41353},
-                         {"unread", 239},
-                         {"unterminated", 20790}};
+  const Tallies expected{
+      {"clips past headers", 5}, {"commands", 1694625},    {"empty refs", 636},
+      {"entries", 355},          {"events", 3843},         {"files", 97},
+      {"inherited clips", 145},  {"mid-track refs", 1697}, {"own clips", 1732},
+      {"scripts", 495},          {"texture rows", 210},    {"tracks", 41353},
+      {"unread", 239},           {"unterminated", 20790}};
   INFO(Describe(tallies));
   CHECK(tallies == expected);
 }

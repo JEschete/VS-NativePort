@@ -37,7 +37,7 @@ fields survive; it does not require the production loader to emit SHP or SEQ byt
 **Also emitted** (optional, `--posed`): `<SHP>_posed.obj/.mtl/_0.png`, like the reference folder. This is for quick previews only; the game never reads it.
 
 **SHP conversion (#203, #205).** `VS.Extract models <datadir>` (and `extract`) converts every `OBJ\*.SHP` with
-converter `shp-gltf` version 2 (`Extract/ShpModelConversion.hpp`, `Content/ShpModelFiles.hpp`,
+converter `shp-gltf` version 3 (`Extract/ShpModelConversion.hpp`, `Content/ShpModelFiles.hpp`,
 `Content/ShpFile.hpp`), and carries every `OBJ\*.SEQ` bank in its owner model's glTF (§6.2.1):
 
 - Each model writes `models\characters\<NN>.gltf` + `<NN>.bin`; id `model.obj.<nn>`. A model with its own texture
@@ -48,7 +48,7 @@ converter `shp-gltf` version 2 (`Extract/ShpModelConversion.hpp`, `Content/ShpMo
   are the SHP's integer units (scale 1) with each bone's rest origin added. Primitives are grouped by polygon flags
   0x71 (double-sided, semi-transparent, blend mode). Each corner carries the custom `_VS_VERTEX` attribute (its SHP
   vertex number); each primitive's `extras.vs.polygons` lists its polygons in triangle order.
-- `asset.extras.vs` holds the payload (schema `vs.shp-model` version 2): source and hash, bones, polygon counts,
+- `asset.extras.vs` holds the payload (schema `vs.shp-model` version 3): source and hash, bones, polygon counts,
   limb ranges and the 0xE8-byte layout block as named fields (e.g. editable `collision_radius`). A buffer view holds
   the sound bytes. `sequence` is the SHP's embedded bank and `sequences` lists the `OBJ\*.SEQ` banks the model owns,
   both as `vs.actor-animation` JSON (§6.2.1).
@@ -70,17 +70,18 @@ model larger than its original allocation and a Blender re-export through the va
 #### 6.2.1 Container, schema and optional extension
 
 - **First delivery:** keep the existing `extras.vs` design and define its versioned contract in [actor-animation.schema.json](../../Native/Content/schemas/actor-animation.schema.json). VS.Content and Workshop must agree on IDs, units, track semantics and fixtures; do not build incompatible per-tool interpretations. CI checks the writer fixtures in `Native\Tests\data\animation\` against the schemas (`tools\test\test_content_schemas.py`).
-  - **SEQ banks (#205):** schema `vs.actor-animation` version 1 (`Content/ActorAnimation.hpp`) writes one bank as its source, source hash, bone count and bank.
-    - The bank lists its clips, the animation-to-clip map and the motion pool. Each pool element is a track (an optional initial key and its commands as one flat list of frames, x, y, z groups), an event script (`[frame, op, arguments...]` per event) or unread bytes (lowercase hex).
+  - **SEQ banks (#205):** schema `vs.actor-animation` version 2 (`Content/ActorAnimation.hpp`) writes one bank as its source, source hash, bone count and bank.
+    - The bank lists its clips, the animation-to-clip map and the motion pool. Each pool element is a track (an optional initial key and its commands as one flat list of frames, x, y, z groups), an event script (one object per event: its frame, its op by name and the op's named fields, §6.2.2) or unread bytes (lowercase hex).
     - Clips name pool elements by number, so a track can be lengthened without recomputing offsets.
     - The JSON Schema checks types and ranges. The native reader also checks references, clip flags and event lengths (`EncodeSeqBank`). Banks read back from JSON must rebuild their exact bytes.
+    - Version 1 wrote each event as `[frame, op, arguments...]`. `VS.Extract authoring <datadir>`, or the next `models` run without `--force`, rewrites such outputs (`shp-gltf` 2, `seq-gltf` 1, `esq-json` 1, `zud-json` 1) in place with named events and keeps every other edit (`Extract/AnimationAuthoring.hpp`).
   - **SEQ banks in their models (#205):** each bank is stored once, in `asset.extras.vs.sequences` of the one model that loads it.
     - Ownership comes from what the game reads, not from file names. A model owns the banks its layout block names (`battle_sequence_lbas`/`_sizes` and `special_sequence_lbas`/`_sizes`, LBA and sector count). `OBJ\00.SHP` and `OBJ\02.SHP` also own the material and material-model banks that `BATTLE.PRG`'s tables name (`ShpModelConversion.cpp` `BankOwners`).
     - The extractor refuses a bank that no model or two models load, and a layout entry that names no listed SEQ.
     - Every bank gets a `seq-gltf` output (id `animation.obj.<bank>`) that lists its owner's `.gltf` and `.bin`. Its dependencies are `BATTLE\BATTLE.PRG` (the event lengths) and the owner SHP at the hash the model output records. A bank with a changed source or owner reconverts its owner.
     - At runtime, `Content::LoadConvertedSequence` serves the animation bank read (`ActorAssetsLive` `BeginFileRead`, `kSequence`) of an `OBJ\*.SEQ` and never reads the bank from the disc. It finds the bank by LBA and sector-rounded size, reads its owner's glTF and rebuilds the bank's bytes. The last four models decoded are cached, keyed by their files' size and time, so one model's banks decode once.
     - An edited bank is validated and loaded, or refused with the file and member named. It must fit the original sector-rounded read; a larger one is refused and leaves an empty bank. `RequireConversions` refuses to start without the `seq-gltf` batch or with a bank that has no current output.
-  - **ESQ shared animation sets (#206):** converter `esq-json` writes each `OBJ\E*.ESQ` as `models\animation-sets\<ESQ>.json` (id `animation-set.obj.<stem>`) in schema `vs.animation-set` version 1 (`Content/AnimationSet.hpp`, [animation-set.schema.json](../../Native/Content/schemas/animation-set.schema.json)).
+  - **ESQ shared animation sets (#206):** converter `esq-json` writes each `OBJ\E*.ESQ` as `models\animation-sets\<ESQ>.json` (id `animation-set.obj.<stem>`) in schema `vs.animation-set` version 2 (`Content/AnimationSet.hpp`, [animation-set.schema.json](../../Native/Content/schemas/animation-set.schema.json)).
     - A set holds up to 15 entries in the order the game searches them. Each entry has a selector (a model number or a model kind), a texture row or `null`, the bone count and its bank in the `vs.actor-animation` form. A set is its own file because several models play it.
     - Which models play an entry comes from `BATTLE.PRG`'s tables, not file names (`EsqConversion.cpp`). A model plays the first entry whose selector is its number or its kind (the kind table), and the set tables name each set's sectors.
     - The extractor refuses an entry no listed model plays, a model whose bone count differs from its entry's, a texture row for a selector that is not a listed model number, a repeated selector, and a set the tables do not name or a table entry naming no listed set. The output depends on `BATTLE.PRG` and on every model the set binds; a change to any of them reconverts the set.

@@ -339,7 +339,7 @@ build\Debug\VS.Extract.exe images Native\data
 build\Debug\VS.Extract.exe backgrounds Native\data
 rem Add readable names without reconverting or replacing gameplay edits.
 build\Debug\VS.Extract.exe labels Native\data
-rem Upgrade recipe identities and zone field names without replacing values.
+rem Upgrade recipe IDs, zone fields and animation events in place.
 build\Debug\VS.Extract.exe authoring Native\data
 rem Import only encyclopedia definitions and their shared native text.
 build\Debug\VS.Extract.exe bestiary Native\data

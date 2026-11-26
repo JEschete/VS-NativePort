@@ -1641,6 +1641,9 @@
     <ClInclude Include="include\TestSupport\ZoneTemplates.hpp">
       <Filter>include\TestSupport</Filter>
     </ClInclude>
+    <ClCompile Include="..\Tools\Extract\src\AnimationAuthoring.cpp">
+      <Filter>..\Tools\Extract\src</Filter>
+    </ClCompile>
     <ClCompile Include="..\Tools\Extract\src\AssetLabels.cpp">
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>

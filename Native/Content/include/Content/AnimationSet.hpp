@@ -24,10 +24,10 @@
 namespace VS::Content {
 
 inline constexpr std::string_view kAnimationSetSchema = "vs.animation-set";
-inline constexpr std::uint32_t kAnimationSetSchemaVersion = 1;
+inline constexpr std::uint32_t kAnimationSetSchemaVersion = 2;
 // The esq-json converter writes each OBJ\E*.ESQ as <directory>/<STEM>.json.
 inline constexpr std::string_view kEsqAnimationSetConverterName = "esq-json";
-inline constexpr std::uint32_t kEsqAnimationSetConverterVersion = 1;
+inline constexpr std::uint32_t kEsqAnimationSetConverterVersion = 2;
 inline constexpr auto kAnimationSetDirectory = "models/animation-sets";
 
 // One animation set and where it came from.

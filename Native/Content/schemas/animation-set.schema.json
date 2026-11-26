@@ -12,7 +12,7 @@
       "description": "Optional informational name, not an identity or gameplay field."
     },
     "schema": { "const": "vs.animation-set" },
-    "schema_version": { "const": 1 },
+    "schema_version": { "const": 2 },
     "source": {
       "type": "string",
       "description": "The disc file the set came from, e.g. OBJ/E001.ESQ."

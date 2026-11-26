@@ -130,4 +130,20 @@ void Append(std::vector<std::byte>& bytes, std::uint32_t value,
 [[nodiscard]] std::expected<void, std::string> WriteOutputFiles(
     const std::filesystem::path& directory, std::span<const OutputBytes> files);
 
+// Writes each name and text of `texts` as WriteOutputFiles does; the number of
+// files written.
+template <typename Texts>
+[[nodiscard]] std::expected<std::size_t, std::string> WriteTextFiles(
+    const std::filesystem::path& directory, const Texts& texts) {
+  std::vector<OutputBytes> files;
+  for (const auto& [name, text] : texts) {
+    files.push_back({.name = name, .bytes = std::as_bytes(std::span(text))});
+  }
+  if (files.empty()) return 0;
+  if (auto written = WriteOutputFiles(directory, files); !written) {
+    return std::unexpected(written.error());
+  }
+  return files.size();
+}
+
 }  // namespace VS::Extract

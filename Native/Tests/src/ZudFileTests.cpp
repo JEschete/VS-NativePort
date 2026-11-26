@@ -185,7 +185,7 @@ TEST_CASE("The actor-archetype reader names the member at fault",
     std::string_view error;
   };
   const std::vector<Edit> edits{
-      {"/schema_version", 2, "s is vs.actor-archetype version 2; this build"},
+      {"/schema_version", 3, "s is vs.actor-archetype version 3; this build"},
       {"/source_sha256", "ABC", "s.source_sha256 must be a lowercase SHA-256"},
       {"/header/shield", 256,
        "s.header.shield must be a whole number from 0 to 255"},

@@ -502,16 +502,9 @@ std::expected<ActionAuthoringReport, std::string> UpgradeActionAuthoring(
   if (*after != *before) {
     return std::unexpected("action authoring migration changed action rules");
   }
-  std::vector<OutputBytes> outputs;
-  for (const auto& [path, text] : pending) {
-    outputs.push_back({.name = path, .bytes = std::as_bytes(std::span(text))});
-  }
-  if (!outputs.empty()) {
-    if (auto written = WriteOutputFiles(root, outputs); !written) {
-      return std::unexpected(written.error());
-    }
-  }
-  report.written = outputs.size();
+  auto written = WriteTextFiles(root, pending);
+  if (!written) return std::unexpected(written.error());
+  report.written = *written;
   return report;
 }
 }  // namespace VS::Extract
