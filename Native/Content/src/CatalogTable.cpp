@@ -129,8 +129,10 @@ bool IsLowerHexDigit(char value) {
   return (value >= '0' && value <= '9') || (value >= 'a' && value <= 'f');
 }
 
-std::string_view EnumName(const ColumnSpec& column, std::int64_t code) {
-  for (const auto& value : column.enumeration) {
+std::string_view EnumName(const ColumnSpec& column,
+                          std::span<const EnumValue> domain,
+                          std::int64_t code) {
+  for (const auto& value : domain) {
     if (value.code == code && code >= column.minimum &&
         code <= column.maximum) {
       return value.name;
@@ -139,10 +141,11 @@ std::string_view EnumName(const ColumnSpec& column, std::int64_t code) {
   return {};
 }
 
-std::string EnumError(const ColumnSpec& column, std::string_view cell,
+std::string EnumError(const ColumnSpec& column,
+                      std::span<const EnumValue> domain, std::string_view cell,
                       std::string_view file, std::size_t line) {
   std::string names;
-  for (const auto& value : column.enumeration) {
+  for (const auto& value : domain) {
     if (value.code < column.minimum || value.code > column.maximum) continue;
     if (!names.empty()) names += ", ";
     names += value.name;
@@ -151,6 +154,32 @@ std::string EnumError(const ColumnSpec& column, std::string_view cell,
   return CellError(
       file, line, column.name,
       std::format("'{}' is not one of [{}] or its legacy code", cell, names));
+}
+
+// The error for a row whose selector cell picks none of `column`'s variants.
+std::string SelectorError(std::span<const ColumnSpec> columns,
+                          const ColumnSpec& column,
+                          std::span<const std::string> cells,
+                          std::string_view file, std::size_t line) {
+  const auto selector =
+      std::ranges::find(columns, column.selector, &ColumnSpec::name);
+  if (selector == columns.end()) {
+    return CellError(
+        file, line, column.name,
+        std::format("no column '{}' picks its values", column.selector));
+  }
+  std::string listed;
+  for (const EnumVariant& variant : column.variants) {
+    for (const std::string_view cell : variant.when) {
+      if (!listed.empty()) listed += ", ";
+      listed += cell;
+    }
+  }
+  const auto at = static_cast<std::size_t>(selector - columns.begin());
+  return CellError(
+      file, line, column.selector,
+      std::format("'{}' is not one of [{}], which pick {}'s values", cells[at],
+                  listed, column.name));
 }
 
 std::expected<std::int64_t, std::string> ReadFlags(const ColumnSpec& column,
@@ -220,21 +249,20 @@ std::expected<std::vector<std::size_t>, std::string> HeaderOrder(
   return position;
 }
 
-std::expected<std::int64_t, std::string> ReadCell(const ColumnSpec& column,
-                                                  std::string_view cell,
-                                                  std::string_view file,
-                                                  std::size_t line) {
+std::expected<std::int64_t, std::string> ReadCell(
+    const ColumnSpec& column, std::span<const EnumValue> domain,
+    std::string_view cell, std::string_view file, std::size_t line) {
   if (column.type == ColumnType::kFlags) {
     return ReadFlags(column, cell, file, line);
   }
   if (column.type == ColumnType::kEnum) {
-    for (const auto& value : column.enumeration) {
-      if (value.name == cell && !EnumName(column, value.code).empty()) {
+    for (const auto& value : domain) {
+      if (value.name == cell && !EnumName(column, domain, value.code).empty()) {
         return value.code;
       }
     }
     for (const auto& value : column.legacy_values) {
-      if (value.name == cell && !EnumName(column, value.code).empty()) {
+      if (value.name == cell && !EnumName(column, domain, value.code).empty()) {
         return value.code;
       }
     }
@@ -279,7 +307,7 @@ std::expected<std::int64_t, std::string> ReadCell(const ColumnSpec& column,
   if (cell.empty() || parsed.ec != std::errc() ||
       parsed.ptr != cell.data() + cell.size()) {
     if (column.type == ColumnType::kEnum) {
-      return std::unexpected(EnumError(column, cell, file, line));
+      return std::unexpected(EnumError(column, domain, cell, file, line));
     }
     return std::unexpected(
         CellError(file, line, column.name,
@@ -291,8 +319,9 @@ std::expected<std::int64_t, std::string> ReadCell(const ColumnSpec& column,
                   std::format("{} is outside {}..{}", value, column.minimum,
                               column.maximum)));
   }
-  if (column.type == ColumnType::kEnum && EnumName(column, value).empty()) {
-    return std::unexpected(EnumError(column, cell, file, line));
+  if (column.type == ColumnType::kEnum &&
+      EnumName(column, domain, value).empty()) {
+    return std::unexpected(EnumError(column, domain, cell, file, line));
   }
   return value;
 }
@@ -397,6 +426,22 @@ std::string CellError(std::string_view file, std::size_t line,
   return std::format("{}:{}: column '{}': {}", file, line, column, problem);
 }
 
+std::span<const EnumValue> RowDomain(std::span<const ColumnSpec> columns,
+                                     const ColumnSpec& column,
+                                     std::span<const std::string> cells) {
+  if (column.variants.empty()) return column.enumeration;
+  const auto selector =
+      std::ranges::find(columns, column.selector, &ColumnSpec::name);
+  const auto at = static_cast<std::size_t>(selector - columns.begin());
+  if (selector == columns.end() || at >= cells.size()) return {};
+  for (const EnumVariant& variant : column.variants) {
+    if (std::ranges::find(variant.when, cells[at]) != variant.when.end()) {
+      return variant.values;
+    }
+  }
+  return {};
+}
+
 std::expected<TableRow, std::string> ReadTableRow(
     const TableSpec& spec, std::span<const std::string> cells,
     std::string_view file, std::size_t line) {
@@ -408,13 +453,19 @@ std::expected<TableRow, std::string> ReadTableRow(
   TableRow row{
       .line = line, .cells = {}, .values = {}, .source = std::string(file)};
   for (std::size_t column = 0; column < cells.size(); ++column) {
-    auto value = ReadCell(spec.columns[column], cells[column], file, line);
+    const ColumnSpec& spec_column = spec.columns[column];
+    const auto domain = RowDomain(spec.columns, spec_column, cells);
+    if (!spec_column.variants.empty() && domain.empty()) {
+      return std::unexpected(
+          SelectorError(spec.columns, spec_column, cells, file, line));
+    }
+    auto value = ReadCell(spec_column, domain, cells[column], file, line);
     if (!value) return std::unexpected(value.error());
-    row.cells.emplace_back(spec.columns[column].type == ColumnType::kEnum
-                               ? EnumName(spec.columns[column], *value)
+    row.cells.emplace_back(spec_column.type == ColumnType::kEnum
+                               ? EnumName(spec_column, domain, *value)
                                : std::string_view(cells[column]));
-    if (spec.columns[column].type == ColumnType::kFlags) {
-      row.cells.back() = FormatFlags(spec.columns[column].enumeration,
+    if (spec_column.type == ColumnType::kFlags) {
+      row.cells.back() = FormatFlags(spec_column.enumeration,
                                      static_cast<std::uint32_t>(*value));
     }
     row.values.push_back(*value);
@@ -522,13 +573,30 @@ std::string FormatTableSchema(const TableSpec& spec) {
       entry["bytes"] = column.maximum;
     }
     if (column.type == ColumnType::kEnum || column.type == ColumnType::kFlags) {
-      JsonDocument values = JsonDocument::object();
-      for (const auto& value : column.enumeration) {
-        if (value.code >= column.minimum && value.code <= column.maximum) {
-          values[std::to_string(value.code)] = value.name;
+      const auto named = [&column](std::span<const EnumValue> domain) {
+        JsonDocument values = JsonDocument::object();
+        for (const auto& value : domain) {
+          if (value.code >= column.minimum && value.code <= column.maximum) {
+            values[std::to_string(value.code)] = value.name;
+          }
         }
+        return values;
+      };
+      if (column.variants.empty()) {
+        entry["enum"] = named(column.enumeration);
+      } else {
+        entry["selected_by"] = std::string(column.selector);
+        JsonDocument variants = JsonDocument::array();
+        for (const EnumVariant& variant : column.variants) {
+          JsonDocument when = JsonDocument::array();
+          for (const std::string_view cell : variant.when) {
+            when.push_back(std::string(cell));
+          }
+          variants.push_back(
+              {{"when", std::move(when)}, {"enum", named(variant.values)}});
+        }
+        entry["variants"] = std::move(variants);
       }
-      entry["enum"] = std::move(values);
       entry["legacy_numeric_aliases"] = column.type == ColumnType::kEnum;
       if (!column.legacy_values.empty()) {
         JsonDocument legacy = JsonDocument::object();

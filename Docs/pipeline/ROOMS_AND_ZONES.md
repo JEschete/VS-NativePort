@@ -21,7 +21,7 @@ A `MAP\ZONE*.ZND` is what the room loader reads when the zone changes (`Content/
 - **Enemy section:** a count, that many ZUD (sector, read size) entries, then that many 0x464-byte templates (`vs_CharInitData`, `Actors/CharacterInit.hpp`).
 - **Texture section:** either 32 zero bytes, or four table sizes of which only the first is used, followed by that table: a count and that many TIMs, each after its byte size.
 
-`VS.Extract tables <datadir>` (and `extract`) converts every zone with converter `znd-tables` version 14
+`VS.Extract tables <datadir>` (and `extract`) converts every zone with converter `znd-tables` version 15
 (`Extract/ZndConversion.hpp`, `Content/ZoneTables.hpp`). `tables` runs after `models`, because the zones name the
 enemy archetypes (§6.2.5), and after the action catalog, because limbs name actions. It writes seven CSV tables, each with a committed schema that is written beside it and must
 match (a test checks this). Columns are described in the schemas; the rules they do not express are:
@@ -43,12 +43,12 @@ kind's first template name and number (`Zombie (kind 3)`).
 model's first bone whose low limb nibble is the limb plus 1, as the spawn picks it, indexing BATTLE.PRG's limb names.
 `labels` replaces the older `Enemy - limb N` captions it generated but keeps edited ones.
 
-**Named fields and domains (versions 2-14).** Enemy class, equipment materials (the shared material domain),
+**Named fields and domains (versions 2-15).** Enemy class, equipment materials (the shared material domain),
 physical types, class ratings and affinities use the named domains in the schemas, and the schemas describe every
 template column from its upstream consumer. Rules beyond the schemas:
 - Version 3 names the parts' `damage_type`, `cost_type` (the resource the base attack spends) and `material`, and
   splits `shape_bits` into `attack_shape` (the shared volume-shape domain) and `attack_angle` (bits 3-7), as upstream
-  `vs_Range`. Part `category` stays an integer: its domain depends on the part slot, which needs per-kind part tables.
+  `vs_Range`. Part `category` stayed an integer until version 15 (below).
 - Version 4 writes the enemies' `status_immunities` as status flags named as in `status-rules.csv` (`none` when
   empty). Upstream `applyStatus` masks each status with them, and an enemy immune to `spell-immunity` starts with
   that status (`func_80076784`).
@@ -84,6 +84,13 @@ template column from its upstream consumer. Rules beyond the schemas:
   equipment that reads it. No code reads 10, 15, 17, 20 or codes above 21, so they are refused. The disc's enemy
   gems use `physical-hit-chance-up`, `spell-hit-chance-up`, `physical-evasion-up`, `spell-evasion-up` and four
   `evade-<status>` effects.
+- Version 15 names the parts' `category` from the part's own list, because a code means a different thing in each
+  part: blades use the blade categories (`dagger` … `crossbow`), grips `short-grip`, `long-grip`, `polearm-grip`
+  and `crossbow-grip` (ITEMHELP 641-644, the decomp's asset keys), the shield, accessory and armour `shield`,
+  `helm`, `breast-armor`, `leggings`, `glove` (ITEMHELP 645-649) and `accessory` (7), and gems only `none`. The
+  schema writes such a column with `selected_by` (here `part`) and one `variants` entry per list (`when` names the
+  parts, `enum` the codes); a code outside the row's list is refused. On the disc each of the 233 grips holds the
+  blade categories `kGripBladeCategories` allows it.
 - DP splash columns identify their zero-based destination limb and percent units. A limb index is topology, not a
   universal head/arm/leg name; actual body-part names depend on the model.
 - Units (descriptions only, no version change): drop rates are chances in 255 (0 never, 255 always); range and reach

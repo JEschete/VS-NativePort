@@ -814,6 +814,8 @@ TEST_CASE("Old zone authoring upgrades without overwriting native edits",
             .starts_with("id,legacy_id\nenemy-kind."));
   // Version 13's gem effect numbers became names (the blade holds code 21).
   CHECK(parts.contains(",evade-numbness,"));
+  // Version 14's category numbers became each part's names (the grip holds 1).
+  CHECK(parts.contains(",short-grip,"));
   const auto repeat = extract::UpgradeZoneAuthoring(root.Root());
   if (!repeat) FAIL(repeat.error());
   CHECK(repeat->written == 0);

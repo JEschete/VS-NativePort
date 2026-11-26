@@ -177,6 +177,27 @@ Texts WithBladeGem(std::string_view cell) {
   return texts;
 }
 
+// The sample zones with the first template's grip (0x64) and shield (0x140)
+// holding category code 2, which the blade (0x34) already holds.
+std::vector<content::ZoneRecord> WithCategoryTwo() {
+  auto zones = SampleZones();
+  zones[0].enemies[0].data[0x64 + 0x04] = std::byte{2};
+  zones[0].enemies[0].data[0x140 + 0x04] = std::byte{2};
+  return zones;
+}
+
+// The sample tables with the first template's blade, grip and shield (parts
+// rows 1, 2 and 6) holding `categories` in that order.
+Texts WithCategories(const std::array<std::string_view, 3>& categories) {
+  constexpr std::array<std::size_t, 3> kRows{1, 2, 6};
+  Texts texts = SampleTexts();
+  for (std::size_t at = 0; at < kRows.size(); ++at) {
+    SetCell(texts, ZoneTable::kParts, kRows.at(at), "category",
+            categories.at(at));
+  }
+  return texts;
+}
+
 }  // namespace
 
 TEST_CASE("Zone template columns cover every bit once",
@@ -264,7 +285,10 @@ TEST_CASE("Zone tables name the row at fault", "[content-tables][znd]") {
       {ZoneTable::kParts, "enemy.map.zone009.00,weapon.blade,",
        "enemy.map.zone009.00,weapon.edge,",
        "catalogs/enemies/zone-enemy-parts.csv:2: column 'part': 'weapon.edge' "
-       "is not an equipment part"},
+       "is not one of [weapon.blade, weapon.grip, weapon.gem1, weapon.gem2, "
+       "weapon.gem3, shield.gem1, shield.gem2, shield.gem3, shield.base, "
+       "accessory, limb0.armor, limb1.armor, limb2.armor, limb3.armor, "
+       "limb4.armor, limb5.armor], which pick category's values"},
   };
   for (const Refused& refused : refusals) {
     CAPTURE(refused.error);
@@ -485,6 +509,55 @@ TEST_CASE("Gem effect codes no code reads are refused",
     const auto read = content::ReadZoneTables(ReaderOf(refused));
     REQUIRE_FALSE(read.has_value());
     CHECK(read.error().contains("column 'gem_effects'"));
+  }
+}
+
+TEST_CASE("Part categories name the part's own list",
+          "[zone-authoring][content-tables][znd]") {
+  const Texts texts = SampleTexts();
+  // The first template's parts rows follow the part slots: the blade (0x34)
+  // holds 2, the grip (0x64) 0, a gem 0 and the shield (0x140) 5.
+  CHECK(CellOf(texts, ZoneTable::kParts, 2, "part") == "weapon.grip");
+  CHECK(CellOf(texts, ZoneTable::kParts, 3, "part") == "weapon.gem1");
+  CHECK(CellOf(texts, ZoneTable::kParts, 6, "part") == "shield.base");
+  CHECK(CellOf(texts, ZoneTable::kParts, 1, "category") == "sword");
+  CHECK(CellOf(texts, ZoneTable::kParts, 2, "category") == "none");
+  CHECK(CellOf(texts, ZoneTable::kParts, 3, "category") == "none");
+  CHECK(CellOf(texts, ZoneTable::kParts, 6, "category") == "glove");
+  // Code 2 is a sword, a long grip or a helm by the part that holds it.
+  CHECK(ReadBack(WithCategories({"sword", "long-grip", "helm"})) ==
+        WithCategoryTwo());
+}
+
+TEST_CASE("Numeric part categories are named by their row's part",
+          "[zone-authoring][content-tables][znd]") {
+  // Version 14 wrote the codes as numbers, which authoring names by row.
+  const Texts numeric = WithCategories({"2", "2", "2"});
+  CHECK(ReadBack(numeric) == WithCategoryTwo());
+  const auto normalized = content::NormalizeTableText(
+      content::ZoneTableSpec(ZoneTable::kParts),
+      numeric.at(static_cast<std::size_t>(ZoneTable::kParts)), "parts.csv");
+  if (!normalized) FAIL(normalized.error());
+  CHECK(normalized->named_values == 3);
+  const Texts named = WithCategories({"sword", "long-grip", "helm"});
+  CHECK(normalized->text ==
+        named.at(static_cast<std::size_t>(ZoneTable::kParts)));
+}
+
+TEST_CASE("A category from another part's list is refused",
+          "[zone-authoring][content-tables][znd]") {
+  // Rows 1, 2, 3 and 6 are the blade, the grip, a gem and the shield.
+  const std::vector<std::pair<std::size_t, std::string_view>> refusals{
+      {1, "short-grip"}, {1, "10"}, {2, "dagger"}, {2, "5"},
+      {3, "shield"},     {3, "1"},  {6, "sword"},  {6, "6"},
+  };
+  for (const auto& [row, cell] : refusals) {
+    CAPTURE(row, cell);
+    Texts refused = SampleTexts();
+    SetCell(refused, ZoneTable::kParts, row, "category", cell);
+    const auto read = content::ReadZoneTables(ReaderOf(refused));
+    REQUIRE_FALSE(read.has_value());
+    CHECK(read.error().contains("column 'category'"));
   }
 }
 

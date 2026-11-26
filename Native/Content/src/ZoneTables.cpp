@@ -122,6 +122,36 @@ constexpr std::array<EnumValue, 18> kGemEffects{{
     {19, "evade-poison"},
     {21, "evade-numbness"},
 }};
+// A part's category names a different list for each kind of part: blades
+// kBladeCategories, grips kGripTypes, shields, armour and accessories the
+// worn list (kArmorCategories and 7, the accessory: Combination.cpp's
+// kAccessoryCategory), and gems none.
+constexpr std::array<std::string_view, 1> kBladePart{"weapon.blade"};
+constexpr std::array<std::string_view, 1> kGripPart{"weapon.grip"};
+constexpr std::array<std::string_view, 6> kGemParts{
+    "weapon.gem1", "weapon.gem2", "weapon.gem3",
+    "shield.gem1", "shield.gem2", "shield.gem3",
+};
+constexpr std::array<std::string_view, 8> kWornParts{
+    "shield.base", "accessory",   "limb0.armor", "limb1.armor",
+    "limb2.armor", "limb3.armor", "limb4.armor", "limb5.armor",
+};
+constexpr std::array<EnumValue, 1> kGemCategories{{{0, "none"}}};
+constexpr std::array<EnumValue, 7> kWornCategories{{
+    {0, "none"},
+    {1, "shield"},
+    {2, "helm"},
+    {3, "breast-armor"},
+    {4, "leggings"},
+    {5, "glove"},
+    {7, "accessory"},
+}};
+constexpr std::array<EnumVariant, 4> kPartCategories{{
+    {.when = kBladePart, .values = kBladeCategories},
+    {.when = kGripPart, .values = kGripTypes},
+    {.when = kGemParts, .values = kGemCategories},
+    {.when = kWornParts, .values = kWornCategories},
+}};
 
 // decomp: vs_CharInitData (src/BATTLE/BATTLE.PRG/charInit.h:24-51) and the
 // records it holds; see Actors/CharacterInit.hpp and Items/ItemRecords.hpp.
@@ -129,6 +159,7 @@ constexpr std::size_t kLimbsAt = 0x238;
 constexpr std::size_t kLimbBytes = 0x5C;
 constexpr std::size_t kLimbArmorAt = 0x20;
 constexpr std::size_t kPartBytes = 0x30;
+constexpr std::size_t kPartCategoryAt = 0x04;
 constexpr std::size_t kLimbActionSlots = 4;
 
 // One column's bytes in its record: a little-endian integer of `size` bytes,
@@ -295,6 +326,31 @@ struct TableLayout {
          .description = description,
          .enumeration = domain,
          .legacy_name = legacy_name});
+  }
+
+  // An unsigned byte whose named values depend on the row's `selector` cell.
+  void Selected(std::string_view name, std::size_t offset,
+                std::string_view description, std::string_view selector,
+                std::span<const EnumVariant> variants) {
+    fields.push_back({.column = name,
+                      .offset = offset,
+                      .size = 1,
+                      .is_signed = false,
+                      .text = false,
+                      .bit = 0,
+                      .bits = 0});
+    columns.push_back({.name = name,
+                       .type = ColumnType::kEnum,
+                       .minimum = 0,
+                       .maximum = kByteMask,
+                       .references = {},
+                       .description = description,
+                       .enumeration = {},
+                       .legacy_name = {},
+                       .optional = false,
+                       .legacy_values = {},
+                       .selector = selector,
+                       .variants = variants});
   }
 
   void Bits(std::string_view name, std::size_t offset, std::uint8_t bit,
@@ -779,11 +835,15 @@ void AddPartFields(TableLayout& table) {
             "converted to models/weapons/<two hex digits>.gltf; the file "
             "names the number in hex, so 22 is models/weapons/16.gltf); 0 "
             "for other parts");
-  table.Add("category", 0x04, 1, false,
-            "a blade's category (1 dagger .. 9 crossbow), which with a model "
-            "also picks the enemy's attack animations; a grip's type (1-4); "
-            "an armour piece's (1 shield, 2 helm, 3 breast armour, 4 "
-            "leggings, 5 glove, 7 accessory); 0 for a gem");
+  table.Selected("category", kPartCategoryAt,
+                 "named by the part: a blade's category (dagger .. crossbow), "
+                 "which with a model also picks the enemy's attack "
+                 "animations; a grip's type, which says the blades it holds "
+                 "(short-grip: daggers, swords and great swords; long-grip: "
+                 "axes, maces and staves; polearm-grip; crossbow-grip); a "
+                 "shield's, armour piece's or accessory's (shield, helm, "
+                 "breast-armor, leggings, glove, accessory); none for a gem",
+                 "part", kPartCategories);
   table.Add("strength", 0x05, 1, true,
             "strength the part adds; a weapon sums its blade, grip and gems, "
             "a shield its base and gems");
@@ -1391,11 +1451,10 @@ std::expected<void, std::string> AppendCells(std::vector<std::string>& cells,
           FormatFlags(column.enumeration, static_cast<std::uint32_t>(value)));
       continue;
     }
-    const auto named =
-        std::ranges::find(column.enumeration, value, &EnumValue::code);
-    cells.push_back(named == column.enumeration.end()
-                        ? std::format("{}", value)
-                        : std::string(named->name));
+    const auto domain = RowDomain(layout.columns, column, cells);
+    const auto named = std::ranges::find(domain, value, &EnumValue::code);
+    cells.push_back(named == domain.end() ? std::format("{}", value)
+                                          : std::string(named->name));
   }
   return {};
 }
@@ -2475,6 +2534,16 @@ std::expected<void, std::string> CheckZoneTemplateCoverage() {
         return std::unexpected(
             std::format("flags column '{}' leaves bits unnamed", column.name));
       }
+    }
+  }
+  for (const PartSlot& part : kPartSlots) {
+    const auto lists = std::ranges::count_if(
+        kPartCategories, [&part](const EnumVariant& variant) {
+          return std::ranges::find(variant.when, part.id) != variant.when.end();
+        });
+    if (lists != 1) {
+      return std::unexpected(std::format(
+          "part '{}' is in {} category lists, not one", part.id, lists));
     }
   }
   return {};

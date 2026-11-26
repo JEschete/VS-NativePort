@@ -30,6 +30,17 @@ inline constexpr std::array<EnumValue, 10> kBladeCategories{{
     {8, "polearm"},
     {9, "crossbow"},
 }};
+// ItemRows.cpp uses category - 1 + ShortGrip (ITEMHELP 641-644: "Grip for
+// Daggers/Swords/Great Swords", "Grip for Axes/Maces/Staves", "Grip for
+// Polearms", "Bolt for Crossbows"); the names are the decomp's asset keys.
+// Assembly.hpp's kGripBladeCategories lists the blade categories each holds.
+inline constexpr std::array<EnumValue, 5> kGripTypes{{
+    {0, "none"},
+    {1, "short-grip"},
+    {2, "long-grip"},
+    {3, "polearm-grip"},
+    {4, "crossbow-grip"},
+}};
 // ItemRows.cpp uses category - 1 + Shield (ITEMHELP 645-649) for shields and
 // armor pieces. Accessories (7) never combine; 6 has no ITEMHELP text.
 inline constexpr std::array<EnumValue, 6> kArmorCategories{{

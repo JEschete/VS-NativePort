@@ -44,10 +44,55 @@
     },
     {
       "name": "category",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 255,
-      "description": "a blade's category (1 dagger .. 9 crossbow), which with a model also picks the enemy's attack animations; a grip's type (1-4); an armour piece's (1 shield, 2 helm, 3 breast armour, 4 leggings, 5 glove, 7 accessory); 0 for a gem"
+      "type": "enum",
+      "selected_by": "part",
+      "variants": [
+        {
+          "when": ["weapon.blade"],
+          "enum": {
+            "0": "none",
+            "1": "dagger",
+            "2": "sword",
+            "3": "great-sword",
+            "4": "axe-mace",
+            "5": "great-axe",
+            "6": "staff",
+            "7": "heavy-mace",
+            "8": "polearm",
+            "9": "crossbow"
+          }
+        },
+        {
+          "when": ["weapon.grip"],
+          "enum": {
+            "0": "none",
+            "1": "short-grip",
+            "2": "long-grip",
+            "3": "polearm-grip",
+            "4": "crossbow-grip"
+          }
+        },
+        {
+          "when": ["weapon.gem1", "weapon.gem2", "weapon.gem3", "shield.gem1", "shield.gem2", "shield.gem3"],
+          "enum": {
+            "0": "none"
+          }
+        },
+        {
+          "when": ["shield.base", "accessory", "limb0.armor", "limb1.armor", "limb2.armor", "limb3.armor", "limb4.armor", "limb5.armor"],
+          "enum": {
+            "0": "none",
+            "1": "shield",
+            "2": "helm",
+            "3": "breast-armor",
+            "4": "leggings",
+            "5": "glove",
+            "7": "accessory"
+          }
+        }
+      ],
+      "legacy_numeric_aliases": true,
+      "description": "named by the part: a blade's category (dagger .. crossbow), which with a model also picks the enemy's attack animations; a grip's type, which says the blades it holds (short-grip: daggers, swords and great swords; long-grip: axes, maces and staves; polearm-grip; crossbow-grip); a shield's, armour piece's or accessory's (shield, helm, breast-armor, leggings, glove, accessory); none for a gem"
     },
     {
       "name": "strength",

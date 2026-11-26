@@ -37,6 +37,13 @@ struct EnumValue {
   std::string_view name;
 };
 
+// One of the value lists of an enum column whose meaning depends on another
+// cell of its row: rows whose selector cell is one of `when` name `values`.
+struct EnumVariant {
+  std::span<const std::string_view> when;
+  std::span<const EnumValue> values;
+};
+
 struct ColumnSpec {
   std::string_view name;
   ColumnType type = ColumnType::kInteger;
@@ -52,6 +59,10 @@ struct ColumnSpec {
   // kEnum: earlier names of renamed values, by code. Cells may still spell
   // them; they read, and authoring normalizes them, as the current name.
   std::span<const EnumValue> legacy_values{};
+  // kEnum: when `variants` is not empty, the row's cell in column `selector`
+  // picks the variant whose values the cell names; `enumeration` is unused.
+  std::string_view selector{};
+  std::span<const EnumVariant> variants{};
 };
 
 struct TableSpec {
@@ -91,6 +102,14 @@ struct TableRow {
 [[nodiscard]] std::string CellError(std::string_view file, std::size_t line,
                                     std::string_view column,
                                     std::string_view problem);
+
+// The values `column` names in a row whose cells, in `columns` order, begin
+// with `cells`: the enumeration, or for a column with variants the variant
+// its selector cell picks (none when no variant lists that cell, or the row
+// has no selector cell yet).
+[[nodiscard]] std::span<const EnumValue> RowDomain(
+    std::span<const ColumnSpec> columns, const ColumnSpec& column,
+    std::span<const std::string> cells);
 
 // The data rows of `text` checked against `spec`. References are checked
 // for their id syntax only (an optional reference may also be empty); the

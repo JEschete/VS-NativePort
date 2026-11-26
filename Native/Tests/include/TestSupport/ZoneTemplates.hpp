@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -15,17 +16,28 @@ inline constexpr std::array<std::size_t, 16> kTemplatePartOffsets{
     0x1D0, 0x204, 0x258, 0x2B4, 0x310, 0x36C, 0x3C8, 0x424,
 };
 
-// Gives every equipment part's damage type, cost type, material and gem effect
-// a valid code, so a patterned template still formats to named part columns.
+// Gives every equipment part's category, damage type, cost type, material and
+// gem effect a valid code, so a patterned template still formats to named
+// part columns. A category's codes depend on the part: blades 0-9, grips 0-4,
+// gems 0, and the shield, accessory and armour 0-5 or 7.
 inline void UseValidPartCodes(Content::ZndTemplate& data, std::size_t seed) {
   constexpr std::array<std::uint8_t, 18> kGemEffects{
       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 16, 18, 19, 21};
-  for (const std::size_t part : kTemplatePartOffsets) {
-    data.at(part + 0x10) = static_cast<std::byte>((seed + part) % 4);
-    data.at(part + 0x11) = static_cast<std::byte>((seed + part) % 5);
-    data.at(part + 0x13) = static_cast<std::byte>((seed + part) % 8);
-    data.at(part + 0x16) = static_cast<std::byte>(
-        kGemEffects.at((seed + part) % kGemEffects.size()));
+  constexpr std::array<std::uint8_t, 7> kWornCategories{0, 1, 2, 3, 4, 5, 7};
+  constexpr std::array<std::size_t, 6> kGemParts{2, 3, 4, 6, 7, 8};
+  for (std::size_t index = 0; index < kTemplatePartOffsets.size(); ++index) {
+    const std::size_t part = kTemplatePartOffsets.at(index);
+    const std::size_t code = seed + part;
+    std::size_t category = kWornCategories.at(code % kWornCategories.size());
+    if (index == 0) category = code % 10;
+    if (index == 1) category = code % 5;
+    if (std::ranges::find(kGemParts, index) != kGemParts.end()) category = 0;
+    data.at(part + 0x04) = static_cast<std::byte>(category);
+    data.at(part + 0x10) = static_cast<std::byte>(code % 4);
+    data.at(part + 0x11) = static_cast<std::byte>(code % 5);
+    data.at(part + 0x13) = static_cast<std::byte>(code % 8);
+    data.at(part + 0x16) =
+        static_cast<std::byte>(kGemEffects.at(code % kGemEffects.size()));
   }
 }
 
