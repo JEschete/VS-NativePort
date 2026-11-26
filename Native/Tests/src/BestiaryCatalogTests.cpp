@@ -81,6 +81,19 @@ std::string LegacyPreviewText(std::string named) {
   }
   return named;
 }
+void Respell(std::string& text, std::string_view now, std::string_view was) {
+  for (auto at = text.find(now); at != std::string::npos;
+       at = text.find(now, at + was.size())) {
+    text.replace(at, now.size(), was);
+  }
+}
+// `named` as written before defeat ranges were named by enemy kind.
+std::string LegacyKindText(std::string named) {
+  Respell(named, ",first_defeated_kind,", ",first_defeated_subtype,");
+  Respell(named, ",defeated_kind_count,", ",defeated_subtype_count,");
+  Respell(named, ",defeated-kind-range,", ",defeated-subtype-range,");
+  return named;
+}
 }  // namespace
 
 TEST_CASE("Bestiary semantic definitions preserve every original byte offline",
@@ -178,21 +191,35 @@ TEST_CASE("Bestiary names preview codes by archetype and refuses unlisted ones",
   CHECK_FALSE(content::ParseBestiary(content::FormatBestiary(unlisted)));
 }
 
-TEST_CASE("Bestiary authoring names legacy preview codes by archetype once",
+TEST_CASE("Bestiary reads defeat ranges by their earlier subtype names",
+          "[bestiary][catalog]") {
+  const auto catalog = Import(Original()).definitions;
+  const auto named = content::FormatBestiary(catalog);
+  CHECK(named.contains(",first_defeated_kind,defeated_kind_count,"));
+  CHECK(named.contains(",defeated-kind-range,"));
+  const auto legacy = LegacyKindText(named);
+  CHECK_FALSE(legacy.contains("kind"));
+  const auto parsed = content::ParseBestiary(legacy);
+  REQUIRE(parsed);
+  if (parsed) CHECK(*parsed == catalog);
+}
+
+TEST_CASE("Bestiary authoring renames earlier preview and kind spellings once",
           "[bestiary][catalog]") {
   const auto named = content::FormatBestiary(Import(Original()).definitions);
   const support::ScratchDataRoot root("test-bestiary");
   const auto absent = extract::UpgradeBestiaryAuthoring(root.Root());
   REQUIRE(absent);
   if (absent) CHECK(absent->written == 0);
-  root.Write(content::kBestiaryPath, LegacyPreviewText(named));
+  root.Write(content::kBestiaryPath, LegacyKindText(LegacyPreviewText(named)));
   const auto upgraded = extract::UpgradeBestiaryAuthoring(root.Root());
   REQUIRE(upgraded);
   if (!upgraded) return;
   using Counts = std::array<std::size_t, 3>;
   const Counts counts{upgraded->renamed_columns, upgraded->named_values,
                       upgraded->written};
-  const Counts expected_counts{1, 78, 2};
+  // Three columns; 78 preview and 78 unlock cells.
+  const Counts expected_counts{3, 156, 2};
   CHECK(counts == expected_counts);
   const std::array<std::string, 2> authored{
       ReadText(root.Root() / content::kBestiaryPath),

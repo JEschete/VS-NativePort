@@ -135,25 +135,30 @@
       "name": "unlock",
       "type": "enum",
       "enum": {
-        "0": "defeated-subtype-range",
+        "0": "defeated-kind-range",
         "1": "always"
       },
       "legacy_numeric_aliases": true,
-      "description": "Any defeated actor subtype in the range, or explicitly always visible (no progress write)."
+      "legacy_values": {
+        "0": "defeated-subtype-range"
+      },
+      "description": "Any defeated enemy kind in the range, or explicitly always visible (no progress write)."
     },
     {
-      "name": "first_defeated_subtype",
+      "name": "first_defeated_kind",
       "type": "integer",
+      "legacy_name": "first_defeated_subtype",
       "minimum": 0,
       "maximum": 255,
-      "description": "First actor subtype tested in the saved defeat flags (#203)."
+      "description": "First enemy kind tested in the saved defeat flags, as numbered by enemy-kinds legacy_id (the actor's sub_type). Only kinds below 256 have a flag (#203); the range may hold kinds no zone template uses."
     },
     {
-      "name": "defeated_subtype_count",
+      "name": "defeated_kind_count",
       "type": "integer",
+      "legacy_name": "defeated_subtype_count",
       "minimum": 0,
       "maximum": 256,
-      "description": "Number of consecutive subtypes; range end is exclusive."
+      "description": "Number of consecutive kinds; the range end is exclusive."
     },
     {
       "name": "name",

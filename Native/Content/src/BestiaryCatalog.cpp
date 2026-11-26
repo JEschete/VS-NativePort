@@ -23,9 +23,13 @@ constexpr auto kClasses = std::to_array<EnumValue>({
     {5, "evil"},
 });
 constexpr auto kUnlocks = std::to_array<EnumValue>({
-    {0, "defeated-subtype-range"},
+    {0, "defeated-kind-range"},
     {1, "always"},
 });
+// The unlock's name before enemy kinds were named.
+constexpr std::array<EnumValue, 1> kLegacyUnlocks{{
+    {0, "defeated-subtype-range"},
+}};
 enum Column : std::size_t {
   kIdentity,
   kLegacy,
@@ -33,8 +37,8 @@ enum Column : std::size_t {
   kClass,
   kPreview,
   kUnlock,
-  kFirstSubtype,
-  kSubtypeCount,
+  kFirstKind,
+  kKindCount,
   kName,
   kDescription
 };
@@ -45,13 +49,14 @@ constexpr ColumnSpec Id(std::string_view name, std::string_view description) {
           .description = description};
 }
 constexpr ColumnSpec Number(std::string_view name, std::int64_t minimum,
-                            std::int64_t maximum,
-                            std::string_view description) {
+                            std::int64_t maximum, std::string_view description,
+                            std::string_view legacy_name = {}) {
   return {.name = name,
           .minimum = minimum,
           .maximum = maximum,
           .references = {},
-          .description = description};
+          .description = description,
+          .legacy_name = legacy_name};
 }
 constexpr ColumnSpec TextReference(std::string_view name,
                                    std::string_view description) {
@@ -61,8 +66,11 @@ constexpr ColumnSpec TextReference(std::string_view name,
           .description = description};
 }
 // decomp: MENU9.PRG initEnemyList (src/MENU/MENU9.PRG/238.c:1921)
-// Defeat flags are actor subtypes, not MON rows or model indices:
-// src/BATTLE/BATTLE.PRG/146C.c:1437 writes only subtypes below 256.
+// Defeat flags are enemy kinds, not MON rows or model indices: a spawn copies
+// its template's kind into the actor, and a defeat sets that kind's flag when
+// it is below 256.
+// decomp: func_80076F24 (src/BATTLE/BATTLE.PRG/146C.c:6179)
+// decomp: updateEnemyKills (src/BATTLE/BATTLE.PRG/146C.c:1414)
 constexpr std::array kColumns{
     Id("id", "Stable encyclopedia definition identity, not a spawned enemy."),
     Number("legacy_id", -1, 77,
@@ -92,13 +100,20 @@ constexpr std::array kColumns{
                .type = ColumnType::kEnum,
                .maximum = 1,
                .references = {},
-               .description = "Any defeated actor subtype in the range, or "
-                              "explicitly always visible (no progress write).",
-               .enumeration = kUnlocks},
-    Number("first_defeated_subtype", 0, 255,
-           "First actor subtype tested in the saved defeat flags (#203)."),
-    Number("defeated_subtype_count", 0, 256,
-           "Number of consecutive subtypes; range end is exclusive."),
+               .description =
+                   "Any defeated enemy kind in the range, or explicitly "
+                   "always visible (no progress write).",
+               .enumeration = kUnlocks,
+               .legacy_values = kLegacyUnlocks},
+    Number("first_defeated_kind", 0, 255,
+           "First enemy kind tested in the saved defeat flags, as numbered by "
+           "enemy-kinds legacy_id (the actor's sub_type). Only kinds below "
+           "256 have a flag (#203); the range may hold kinds no zone template "
+           "uses.",
+           "first_defeated_subtype"),
+    Number("defeated_kind_count", 0, 256,
+           "Number of consecutive kinds; the range end is exclusive.",
+           "defeated_subtype_count"),
     TextReference(
         "name",
         "Native text ID for the readable name; no embedded list indent."),
@@ -134,13 +149,13 @@ std::expected<BestiaryCatalog, std::string> FromRows(
       return std::unexpected(CellError(row.source, row.line, "legacy_id",
                                        "duplicate compatibility ID or order"));
     }
-    if (values[kFirstSubtype] + values[kSubtypeCount] > kBestiarySubtypeCount ||
-        (values[kUnlock] == 0 && values[kSubtypeCount] == 0) ||
+    if (values[kFirstKind] + values[kKindCount] > kBestiaryFlaggedKinds ||
+        (values[kUnlock] == 0 && values[kKindCount] == 0) ||
         (values[kUnlock] == 1 &&
-         (values[kFirstSubtype] != 0 || values[kSubtypeCount] != 0))) {
+         (values[kFirstKind] != 0 || values[kKindCount] != 0))) {
       return std::unexpected(CellError(
           row.source, row.line, "unlock",
-          "invalid subtype range; always requires both range fields zero"));
+          "invalid kind range; always requires both range fields zero"));
     }
     catalog.push_back({row.cells[kIdentity],
                        static_cast<std::int32_t>(values[kLegacy]),
@@ -148,8 +163,8 @@ std::expected<BestiaryCatalog, std::string> FromRows(
                        static_cast<BestiaryClass>(values[kClass]),
                        static_cast<std::uint32_t>(values[kPreview]),
                        static_cast<BestiaryUnlock>(values[kUnlock]),
-                       static_cast<std::uint32_t>(values[kFirstSubtype]),
-                       static_cast<std::uint32_t>(values[kSubtypeCount]),
+                       static_cast<std::uint32_t>(values[kFirstKind]),
+                       static_cast<std::uint32_t>(values[kKindCount]),
                        row.cells[kName], row.cells[kDescription]});
   }
   std::ranges::sort(catalog, {}, &BestiaryDefinition::display_order);
@@ -171,8 +186,8 @@ std::string FormatBestiary(const BestiaryCatalog& catalog) {
              kClasses.at(static_cast<std::size_t>(entry.enemy_class)).name),
          PreviewCell(entry.preview_table_index),
          std::string(kUnlocks.at(static_cast<std::size_t>(entry.unlock)).name),
-         std::to_string(entry.first_defeated_subtype),
-         std::to_string(entry.defeated_subtype_count), entry.name,
+         std::to_string(entry.first_defeated_kind),
+         std::to_string(entry.defeated_kind_count), entry.name,
          entry.description});
   }
   return FormatTable(kSpec, rows);

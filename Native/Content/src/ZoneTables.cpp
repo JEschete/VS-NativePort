@@ -389,7 +389,7 @@ constexpr std::array<PartSlot, 16> kPartSlots{{
 
 void AddEnemyFields(TableLayout& table) {
   // decomp: updateEnemyKills (src/BATTLE/BATTLE.PRG/146C.c:1414) sets the
-  // kind's kill bit, which the bestiary's first_defeated_subtype ranges test.
+  // kind's kill bit, which the bestiary's first_defeated_kind ranges test.
   // decomp: func_800E5A9C (src/BATTLE/BATTLE.PRG/7CD68.c:205)
   // decomp: func_800DE3E4 (src/BATTLE/BATTLE.PRG/74088.c:718)
   table.Reference(kKindColumn, 0x00, 2, kKindsTable,

@@ -453,9 +453,9 @@ bool BeginRead() {
     enemy.model_id = static_cast<std::int16_t>(definition.preview_table_index);
     enemy.class_id = static_cast<std::int16_t>(definition.enemy_class);
     enemy.first_defeat_bit =
-        static_cast<std::int16_t>(definition.first_defeated_subtype);
+        static_cast<std::int16_t>(definition.first_defeated_kind);
     enemy.defeat_bit_count =
-        static_cast<std::int16_t>(definition.defeated_subtype_count);
+        static_cast<std::int16_t>(definition.defeated_kind_count);
     enemy.name_id = definition.name;
     enemy.description_id = definition.description;
     enemy.always_unlocked =

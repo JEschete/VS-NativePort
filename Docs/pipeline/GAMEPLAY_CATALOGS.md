@@ -24,12 +24,15 @@ catalog (§5.2). The layered SQLite compiler owns validation and immutable runti
   archetype. Its legacy numeric alias (old trees' `preview_table_index`, which `VS.Extract authoring` renames) is that
   table's index, which also selects the entry's palette flag. Indices the table gives no archetype of their own
   would only repeat the default (code 0's), so the catalog refuses them. The
-  `defeated-subtype-range` unlock tests any saved defeat bit in `[first_defeated_subtype, first + count)`; those are
-  **actor subtypes** (the original producer writes subtypes below 256), not MON record numbers or preview indices.
+  `defeated-kind-range` unlock tests any saved defeat bit in `[first_defeated_kind, first + count)`; those are
+  **enemy kinds**, numbered as enemy-kinds `legacy_id` (a spawn copies its zone template's kind into the actor, and a
+  defeat sets that kind's bit when it is below 256), not MON record numbers or preview indices. A range may cover kinds
+  no zone template uses. `VS.Extract authoring` renames the earlier `first_defeated_subtype`,
+  `defeated_subtype_count` and `defeated-subtype-range` spellings.
   `always` exposes a native information entry with both range fields zero. Neither policy writes progress or
   implies a spawn.
 - **Sources:** upstream MENU9 `238.c` (definitions 372, unlock 1921, list 1977, detail 2074), preview `592C.c`
-  (table 28) and BATTLE `146C.c:1437` (defeat-bit producer). Extending actor identities or the persistent defeat
+  (table 28) and BATTLE `146C.c` (kind copy `func_80076F24`, defeat-bit producer 1437). Extending actor identities or the persistent defeat
   model remains #199/#200/#203, not an inferred field meaning.
 - **Ownership:** the Gazette owns its snapshot, selection/highlight/link state and native layouts separately from
   the definitions; cancel, re-entry, MENU9 replacement, cold-session and pre-heap boundaries release them. Native

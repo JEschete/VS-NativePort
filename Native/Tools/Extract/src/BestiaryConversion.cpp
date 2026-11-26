@@ -30,7 +30,7 @@ constexpr std::size_t kName = 16, kNameBytes = 28;
 constexpr std::size_t kTableBytes = kRecords * 2;
 constexpr unsigned kByteBits = 8;
 constexpr std::size_t kModelOffset = 0, kClassOffset = 2;
-constexpr std::size_t kFirstSubtypeOffset = 4, kSubtypeCountOffset = 6;
+constexpr std::size_t kFirstKindOffset = 4, kKindCountOffset = 6;
 
 int Word(std::span<const std::byte> bytes, std::size_t at) {
   return std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(
@@ -140,10 +140,10 @@ std::expected<ImportedBestiary, std::string> DecodeBestiary(
         Word(record, kClassOffset) < 0 ||
         Word(record, kClassOffset) >
             static_cast<int>(Content::BestiaryClass::kEvil) ||
-        Word(record, kFirstSubtypeOffset) < 0 ||
-        Word(record, kSubtypeCountOffset) <= 0 ||
-        Word(record, kFirstSubtypeOffset) + Word(record, kSubtypeCountOffset) >
-            static_cast<int>(Content::kBestiarySubtypeCount)) {
+        Word(record, kFirstKindOffset) < 0 ||
+        Word(record, kKindCountOffset) <= 0 ||
+        Word(record, kFirstKindOffset) + Word(record, kKindCountOffset) >
+            static_cast<int>(Content::kBestiaryFlaggedKinds)) {
       return std::unexpected(context + ": invalid preview/class/defeat range");
     }
     auto name =
@@ -163,9 +163,9 @@ std::expected<ImportedBestiary, std::string> DecodeBestiary(
         static_cast<std::uint32_t>(index + 1),
         static_cast<Content::BestiaryClass>(Word(record, kClassOffset)),
         static_cast<std::uint32_t>(Word(record, kModelOffset)),
-        Content::BestiaryUnlock::kDefeatedSubtypeRange,
-        static_cast<std::uint32_t>(Word(record, kFirstSubtypeOffset)),
-        static_cast<std::uint32_t>(Word(record, kSubtypeCountOffset)),
+        Content::BestiaryUnlock::kDefeatedKindRange,
+        static_cast<std::uint32_t>(Word(record, kFirstKindOffset)),
+        static_cast<std::uint32_t>(Word(record, kKindCountOffset)),
         "text." + id + ".name",
         "text." + id + ".description"};
     imported.strings[definition.name] = *readable;
