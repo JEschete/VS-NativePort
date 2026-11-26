@@ -60,6 +60,8 @@ converter `shp-gltf` version 4 (`Extract/ShpModelConversion.hpp`, `Content/ShpMo
   each body part; one entry per body part that has any) and the 0xE8-byte layout block as named fields (e.g.
   editable `collision_radius`). A buffer view holds the sound bytes. `sequence` is the SHP's embedded bank and `sequences` lists the `OBJ\*.SEQ` banks the model owns,
   both as `vs.actor-animation` JSON (§6.2.1).
+- Layout and bone members named `reserved*` are opaque source values retained for exact reconstruction, not
+  semantic authoring controls. Do not assign them guessed meanings or change them as part of an authored edit.
 - **The payload and the geometry are authoritative.** Materials, textures and images only preview the polygon flags.
   The reader rebuilds the SHP from those two sources and checks it against every value the payload records. Output
   must pass the Khronos glTF validator with no errors or warnings.
