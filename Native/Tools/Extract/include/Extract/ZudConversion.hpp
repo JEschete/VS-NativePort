@@ -67,6 +67,11 @@ ConvertDiscArchetypes(const std::filesystem::path& root, bool force);
 // The zud-json converter and vs.actor-archetype schema version that wrote the
 // header as numbered identity bytes; UpgradeAnimationAuthoring stops here.
 inline constexpr std::uint32_t kNumberedHeaderArchetypeVersion = 2;
+// The zud-json converter version that named the header but still numbered
+// its body model's polygons; UpgradeArchetypeAuthoring stops here and
+// UpgradeModelAuthoring names those next. The archetype schema stays at its
+// named header version.
+inline constexpr std::uint32_t kNamedHeaderArchetypeVersion = 3;
 
 struct ArchetypeAuthoringReport {
   std::size_t headers = 0;  // headers rewritten in their named form

@@ -1,10 +1,13 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 #include <expected>
 #include <filesystem>
 #include <functional>
+#include <span>
 #include <string>
+#include <string_view>
 
 #include "Content/JsonText.hpp"
 
@@ -17,6 +20,31 @@ namespace VS::Extract {
     const std::filesystem::path& root, const std::string& file,
     const std::function<
         std::expected<bool, std::string>(Content::JsonDocument&)>& edit);
+
+// A converter or schema version an authoring upgrade moves on from.
+struct AuthoringVersionStep {
+  std::string_view name;
+  std::uint32_t from = 0;
+  std::uint32_t to = 0;
+};
+
+// `value` as a whole number from 0 to `max`; the error names `where`.
+[[nodiscard]] std::expected<std::int64_t, std::string> AuthoringNumber(
+    const Content::JsonDocument& value, std::int64_t max,
+    const std::string& where);
+
+// Rewrites, one file at a time, each file `takes` accepts among the outputs
+// of every converter at its step's `from` version, by `upgrade`, which
+// reports whether it changed the file (EditJsonOutput). Those converters move
+// to their `to` versions in the manifest, which is written last, so an
+// interrupted run resumes; nothing is written when no converter is at its
+// `from` version. Returns the files written, with the manifest.
+[[nodiscard]] std::expected<std::size_t, std::string> UpgradeConverterOutputs(
+    const std::filesystem::path& root,
+    std::span<const AuthoringVersionStep> steps,
+    const std::function<bool(std::string_view)>& takes,
+    const std::function<std::expected<bool, std::string>(
+        const std::string&, Content::JsonDocument&)>& upgrade);
 
 // `named`, led by the display_name label `numbered` carries, when it has one.
 [[nodiscard]] Content::JsonDocument LabeledJson(

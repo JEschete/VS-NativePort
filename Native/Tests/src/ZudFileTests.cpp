@@ -307,7 +307,7 @@ TEST_CASE("Authoring names existing archetype headers in place",
   CHECK(report.written == 2);
   CHECK(ReadNumberedFile(root.Root()) == LabelledSample());
   CHECK(ZudConverterVersion(root.Root()) ==
-        content::kZudArchetypeConverterVersion);
+        VS::Extract::kNamedHeaderArchetypeVersion);
   CHECK(VS::test_support::Required(
             VS::Extract::UpgradeArchetypeAuthoring(root.Root()))
             .written == 0);

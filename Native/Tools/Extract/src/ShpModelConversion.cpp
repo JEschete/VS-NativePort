@@ -27,6 +27,7 @@
 #include "Extract/AnimationAuthoring.hpp"
 #include "Extract/ImageConversion.hpp"
 #include "Extract/ImageFilesWriter.hpp"
+#include "Extract/ModelAuthoring.hpp"
 #include "Platform/Paths.hpp"
 
 namespace VS::Extract {
@@ -176,8 +177,8 @@ struct Corner {
   auto operator<=>(const Corner&) const = default;
 };
 
-// The polygons whose flags share kShpPrimitiveFlags, with their corners
-// numbered in first use.
+// The polygons whose drawn flags (Content::ShpDrawnFlags) share
+// kShpPrimitiveFlags, with their corners numbered in first use.
 struct Primitive {
   std::uint8_t flags = 0;
   std::vector<Corner> corners;
@@ -231,19 +232,19 @@ Result<std::vector<std::uint16_t>> VertexBones(const ShpModel& shp) {
 }
 
 Check AddPolygon(const ShpModel& shp, const ShpPolygon& polygon,
-                 std::size_t ordinal, Primitive& primitive,
+                 std::size_t order, Primitive& primitive,
                  CornerNumbers& numbered, std::vector<bool>& used) {
   if (polygon.corners != kShpTriangleCorners &&
       polygon.corners != kShpMaxCorners) {
     return std::unexpected(
-        std::format("polygon {} has {} corners", ordinal, polygon.corners));
+        std::format("polygon {} has {} corners", order, polygon.corners));
   }
   std::array<std::uint32_t, kShpMaxCorners> numbers{};
   for (std::size_t corner = 0; corner < polygon.corners; ++corner) {
     const std::uint16_t vertex = polygon.vertices.at(corner);
     if (vertex >= shp.vertices.size()) {
       return std::unexpected(std::format("polygon {} names vertex {} of {}",
-                                         ordinal, vertex, shp.vertices.size()));
+                                         order, vertex, shp.vertices.size()));
     }
     used[vertex] = true;
     numbers.at(corner) = NumberOf(
@@ -258,32 +259,41 @@ Check AddPolygon(const ShpModel& shp, const ShpPolygon& polygon,
   for (std::size_t slot = 0; slot < needed; ++slot) {
     primitive.indices.push_back(numbers.at(kShpIndexCorners.at(slot)));
   }
-  primitive.polygons.push_back(
-      Json::array({ordinal, polygon.corners, polygon.flags, polygon.extra}));
   return {};
 }
 
-// The primitives in ascending flags, every polygon in ordinal order.
+// The primitives in ascending drawn flags (Content::ShpDrawnFlags), every
+// polygon in file order.
 Result<std::vector<Primitive>> PlanPrimitives(const ShpModel& shp) {
   std::map<std::uint8_t, Primitive> by_flags;
   std::map<std::uint8_t, CornerNumbers> numbers;
   std::vector<bool> used(shp.vertices.size());
-  std::size_t ordinal = 0;
-  for (const std::vector<ShpPolygon>& part : shp.parts) {
-    for (const ShpPolygon& polygon : part) {
-      const auto flags = static_cast<std::uint8_t>(polygon.flags &
-                                                   Content::kShpPrimitiveFlags);
+  const Content::ShpPolygonCounts counts = Content::ShpPolygonCountsOf(shp);
+  std::size_t order = 0;
+  for (std::size_t part = 0; part < shp.parts.size(); ++part) {
+    for (const ShpPolygon& polygon : shp.parts.at(part)) {
+      auto entry = Content::ShpPolygonEntryJson({.order = order,
+                                                 .corners = polygon.corners,
+                                                 .flags = polygon.flags,
+                                                 .extra = polygon.extra},
+                                                counts, shp.colored);
+      if (!entry) return std::unexpected(entry.error());
+      const auto flags = static_cast<std::uint8_t>(
+          Content::ShpDrawnFlags(polygon.flags,
+                                 static_cast<Content::ShpPart>(part)) &
+          Content::kShpPrimitiveFlags);
       Primitive& primitive = by_flags[flags];
       primitive.flags = flags;
-      if (auto added = AddPolygon(shp, polygon, ordinal, primitive,
-                                  numbers[flags], used);
+      if (auto added =
+              AddPolygon(shp, polygon, order, primitive, numbers[flags], used);
           !added) {
         return std::unexpected(added.error());
       }
-      ++ordinal;
+      primitive.polygons.push_back(std::move(*entry));
+      ++order;
     }
   }
-  if (ordinal == 0) {
+  if (order == 0) {
     return std::unexpected(std::string("the model has no polygons"));
   }
   if (const auto unused = std::ranges::find(used, false);
@@ -406,15 +416,16 @@ Json AddPrimitive(const MeshSource& source, const Primitive& primitive,
   return json;
 }
 
-// A preview of the polygon flags: texture `texture` unlit, blended when the
-// polygons are semi-transparent and drawn from both sides without culling.
-// A variant's copy adds its name to the material's.
+// A preview of the primitive's drawing style: texture `texture` unlit,
+// blended when the polygons are semi-transparent and drawn from both sides
+// without culling. A variant's copy adds its name to the material's.
 Json MaterialOf(std::uint8_t flags, std::size_t texture = 0,
                 std::string_view variant = {}) {
   Json material = Json::object();
-  material["name"] = variant.empty()
-                         ? std::format("flags_{:02x}", flags)
-                         : std::format("flags_{:02x}_{}", flags, variant);
+  material["name"] =
+      variant.empty()
+          ? Content::ShpMaterialName(flags)
+          : std::format("{}_{}", Content::ShpMaterialName(flags), variant);
   material["pbrMetallicRoughness"] =
       Json{{"baseColorTexture", Json{{"index", texture}}},
            {"metallicFactor", 0.0},
@@ -1272,9 +1283,13 @@ std::expected<ModelConversionReport, std::string> RunModelConverter(
 
 std::expected<ModelConversionReport, std::string> ConvertDiscModels(
     const fs::path& root, bool force) {
-  // Existing outputs move to the named event form instead of reconverting.
+  // Existing outputs move to the named event and polygon forms instead of
+  // reconverting.
   if (!force) {
     if (auto upgraded = UpgradeAnimationAuthoring(root); !upgraded) {
+      return std::unexpected(upgraded.error());
+    }
+    if (auto upgraded = UpgradeModelAuthoring(root); !upgraded) {
       return std::unexpected(upgraded.error());
     }
   }

@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -33,9 +34,11 @@
 #include "Content/ShpFile.hpp"
 #include "Content/ShpModelFiles.hpp"
 #include "Content/ZudFile.hpp"
+#include "Extract/ConversionManifestWriter.hpp"
 #include "Extract/EsqConversion.hpp"
 #include "Extract/EtmConversion.hpp"
 #include "Extract/ImageFilesWriter.hpp"
+#include "Extract/ModelAuthoring.hpp"
 #include "Extract/ShpModelConversion.hpp"
 #include "Extract/ZudConversion.hpp"
 #include "TestSupport/ModelFixtures.hpp"
@@ -143,8 +146,9 @@ content::ShpFile SampleShp(bool colored) {
     shp.layout.at(i) = static_cast<std::byte>(i);
   }
   NameBattleSequence(shp, 0, 0);
-  shp.limb_ranges.front() = 0x0102;
-  shp.limb_ranges.back() = 0xFFFF;
+  // Body part 0 holds the triangle and body part 7 both styled polygons.
+  shp.limb_ranges.front() = 1;
+  shp.limb_ranges.back() = 2;
   shp.bones = {{.length = 0,
                 .parent = kRootParent,
                 .reserved5 = 0,
@@ -170,13 +174,17 @@ content::ShpFile SampleShp(bool colored) {
                   {.x = 7, .y = 8, .z = 9},    {.x = -10, .y = 11, .z = 12},
                   {.x = 13, .y = 14, .z = 15}, {.x = 16, .y = 17, .z = -18}};
   constexpr std::uint8_t kFlags = 0x75;
+  // A split quad uncoloured; a coloured quad cannot split, so it draws both
+  // sides at depth offset 7, adding.
+  const std::uint8_t styled_quad_flags = colored ? 0x3D : 3;
   const std::uint8_t triangle_extra = colored ? 0 : 9;
   shp.parts.at(0) = {Polygon(
       {.corners = 3, .flags = kFlags, .extra = triangle_extra, .first = 0})};
   shp.parts.at(1) = {
       Polygon({.corners = 4, .flags = 1, .extra = 2, .first = 1})};
   shp.parts.at(2) = {
-      Polygon({.corners = 4, .flags = 3, .extra = 4, .first = 2}),
+      Polygon(
+          {.corners = 4, .flags = styled_quad_flags, .extra = 4, .first = 2}),
       Polygon({.corners = 3, .flags = 0, .extra = triangle_extra, .first = 3})};
   if (colored) {
     std::uint32_t color = 0x102030;
@@ -462,6 +470,337 @@ TEST_CASE("An SHP model converts to glTF files that rebuild its bytes",
     CheckOwnTextureOutput(model.output);
     CheckOwnTextureFiles(model, shp, bytes);
   }
+}
+
+// Two triangles, a quad and three styled polygons.
+constexpr content::ShpPolygonCounts kEntryCounts{2, 1, 3};
+
+struct EntryForm {
+  content::ShpPolygonEntry entry;
+  bool colored = false;
+  std::string_view json;
+};
+
+TEST_CASE("Polygon entries name the style the game draws each with",
+          "[content-models][shp]") {
+  const std::array forms{
+      EntryForm{.entry = {.order = 0, .corners = 3, .flags = 4, .extra = 0},
+                .colored = false,
+                .json = R"({"order":0,"corners":3})"},
+      EntryForm{
+          .entry = {.order = 2, .corners = 4, .flags = 0x75, .extra = 9},
+          .colored = false,
+          .json =
+              R"({"order":2,"corners":4,"unread":{"flags":117,"extra":9}})"},
+      EntryForm{.entry = {.order = 3, .corners = 3, .flags = 0, .extra = 0},
+                .colored = false,
+                .json = R"({"order":3,"corners":3,"style":{"sides":"one",
+                  "depth_offset":-5,"semi_transparent":false,
+                  "blend":"average"}})"},
+      EntryForm{.entry = {.order = 4, .corners = 4, .flags = 0x3D, .extra = 4},
+                .colored = true,
+                .json = R"({"order":4,"corners":4,"style":{"sides":"both",
+                  "depth_offset":7,"semi_transparent":true,"blend":"add"},
+                  "unread":{"extra":4}})"},
+      EntryForm{.entry = {.order = 5, .corners = 4, .flags = 0x5B, .extra = 0},
+                .colored = false,
+                .json = R"({"order":5,"corners":4,"style":{"sides":"split",
+                  "semi_transparent":true,"blend":"subtract"},
+                  "unread":{"depth_bits":2}})"},
+  };
+  for (const EntryForm& form : forms) {
+    CAPTURE(form.json);
+    const content::JsonDocument expected =
+        content::JsonDocument::parse(form.json);
+    const auto json =
+        content::ShpPolygonEntryJson(form.entry, kEntryCounts, form.colored);
+    INFO(ErrorOf(json));
+    REQUIRE(json.has_value());
+    CHECK(*json == expected);
+    const auto read =
+        content::ShpPolygonEntryOf(expected, "e", kEntryCounts, form.colored);
+    INFO(ErrorOf(read));
+    REQUIRE(read.has_value());
+    CHECK(*read == form.entry);
+  }
+  CHECK(content::ShpMaterialName(0x00) == "one_sided_opaque");
+  CHECK(content::ShpMaterialName(0x20) == "one_sided_opaque_add");
+  CHECK(content::ShpMaterialName(0x31) == "double_sided_add");
+}
+
+struct RefusedEntry {
+  content::ShpPolygonEntry entry;
+  bool colored = false;
+  std::string_view message;
+};
+
+TEST_CASE("Polygon entries refuse flags no style holds",
+          "[content-models][shp]") {
+  constexpr std::string_view kNoStyle = "which no style holds";
+  const std::array refused{
+      RefusedEntry{.entry = {.order = 3, .corners = 3, .flags = 0x80},
+                   .colored = false,
+                   .message = kNoStyle},
+      RefusedEntry{.entry = {.order = 3, .corners = 3, .flags = 0x02},
+                   .colored = false,
+                   .message = kNoStyle},
+      RefusedEntry{.entry = {.order = 3, .corners = 3, .flags = 0x03},
+                   .colored = false,
+                   .message = kNoStyle},
+      RefusedEntry{.entry = {.order = 4, .corners = 4, .flags = 0x03},
+                   .colored = true,
+                   .message = kNoStyle},
+      RefusedEntry{.entry = {.order = 6, .corners = 3},
+                   .colored = false,
+                   .message = "past the 6 polygons"},
+      RefusedEntry{.entry = {.order = 0, .corners = 4},
+                   .colored = false,
+                   .message = "has 4 corners"},
+  };
+  for (const RefusedEntry& entry : refused) {
+    CAPTURE(entry.entry.order, entry.entry.flags);
+    const auto json =
+        content::ShpPolygonEntryJson(entry.entry, kEntryCounts, entry.colored);
+    REQUIRE_FALSE(json.has_value());
+    CHECK(json.error().contains(entry.message));
+  }
+}
+
+struct RefusedForm {
+  std::string_view json;
+  bool colored = false;
+  std::string_view message;
+};
+
+TEST_CASE("Named polygon entries refuse a style their polygon cannot have",
+          "[content-models][shp]") {
+  const std::array refused{
+      RefusedForm{.json = R"({"order":0,"corners":3,"style":{"sides":"one",
+                    "depth_offset":-5,"semi_transparent":false,
+                    "blend":"average"}})",
+                  .colored = false,
+                  .message = "e.style must be left out"},
+      RefusedForm{.json = R"({"order":3,"corners":3})",
+                  .colored = false,
+                  .message = "e.style is missing"},
+      RefusedForm{.json = R"({"order":5,"corners":4,"style":{"sides":"split",
+                    "depth_offset":-1,"semi_transparent":false,
+                    "blend":"average"}})",
+                  .colored = false,
+                  .message = "depth_offset must be left out"},
+      RefusedForm{.json = R"({"order":5,"corners":4,"style":{"sides":"split",
+                    "semi_transparent":false,"blend":"average"}})",
+                  .colored = true,
+                  .message = "only a quad of an uncoloured model"},
+      RefusedForm{.json = R"({"order":3,"corners":3,"style":{"sides":"one",
+                    "depth_offset":0,"semi_transparent":false,
+                    "blend":"average"}})",
+                  .colored = false,
+                  .message = "must be -5, -1, 3 or 7"},
+      RefusedForm{.json = R"({"order":3,"corners":3,"style":{"sides":"one",
+                    "depth_offset":-5,"semi_transparent":false,
+                    "blend":"mix"}})",
+                  .colored = false,
+                  .message = R"(must be "average")"},
+      RefusedForm{.json = R"({"order":3,"corners":3,"style":{"sides":"one",
+                    "depth_offset":-5,"semi_transparent":false,
+                    "blend":"average"},"unread":{"flags":4}})",
+                  .colored = false,
+                  .message = "unknown member 'flags'"},
+      RefusedForm{.json = R"({"order":0,"corners":3,
+                    "unread":{"depth_bits":1}})",
+                  .colored = false,
+                  .message = "unknown member 'depth_bits'"},
+  };
+  for (const RefusedForm& form : refused) {
+    CAPTURE(form.json);
+    const auto read =
+        content::ShpPolygonEntryOf(content::JsonDocument::parse(form.json), "e",
+                                   kEntryCounts, form.colored);
+    REQUIRE_FALSE(read.has_value());
+    CHECK(read.error().contains(form.message));
+  }
+}
+
+// A model header of kEntryCounts, the body parts `body_parts` and the
+// sample's bones.
+content::JsonDocument HeaderPayload(std::string_view body_parts) {
+  content::JsonDocument payload = content::JsonDocument::object();
+  payload["polygon_counts"] = content::ShpPolygonCountsJson(kEntryCounts);
+  payload["body_part_polygons"] = content::JsonDocument::parse(body_parts);
+  payload["bones"] = content::ShpBonesJson(SampleShp(false));
+  return payload;
+}
+
+TEST_CASE("Body parts list their polygons once each, within the counts",
+          "[content-models][shp]") {
+  content::ShpLimbRanges ranges{};
+  ranges.at(0) = 2;  // both triangles in body part 0
+  ranges.at((2 * content::kShpBodyPartCount) + 7) = 1;  // a styled one in 7
+  const content::JsonDocument listed = content::ShpBodyPartPolygonsJson(ranges);
+  CHECK(listed == content::JsonDocument::parse(
+                      R"([{"body_part":0,"triangles":2,"quads":0,"styled":0},
+                          {"body_part":7,"triangles":0,"quads":0,
+                           "styled":1}])"));
+  content::ShpModel model;
+  const auto counts = content::ReadShpModelHeader(
+      content::JsonMembers(HeaderPayload(listed.dump()), "vs"), model);
+  INFO(ErrorOf(counts));
+  REQUIRE(counts.has_value());
+  CHECK(*counts == kEntryCounts);
+  CHECK(model.limb_ranges == ranges);
+
+  const std::array<std::pair<std::string_view, std::string_view>, 3> refused{{
+      {R"([{"body_part":0,"triangles":2,"quads":0,"styled":0},
+           {"body_part":1,"triangles":1,"quads":0,"styled":0}])",
+       "gives the body parts 3 triangles; polygon_counts.triangles is 2"},
+      {R"([{"body_part":1,"triangles":0,"quads":1,"styled":0},
+           {"body_part":1,"triangles":0,"quads":0,"styled":1}])",
+       "must be past the body part before it"},
+      {R"([{"body_part":8,"triangles":0,"quads":0,"styled":0}])", "body_part"},
+  }};
+  for (const auto& [body_parts, message] : refused) {
+    CAPTURE(body_parts);
+    const auto read = content::ReadShpModelHeader(
+        content::JsonMembers(HeaderPayload(body_parts), "vs"), model);
+    REQUIRE_FALSE(read.has_value());
+    CHECK(read.error().contains(message));
+  }
+}
+
+// `entries`, a primitive's polygons, as shp-gltf 3 numbered them:
+// [order, corners, flags, extra].
+content::JsonDocument NumberedEntries(const content::JsonDocument& entries,
+                                      const content::ShpPolygonCounts& counts,
+                                      bool colored) {
+  content::JsonDocument numbered = content::JsonDocument::array();
+  for (const content::JsonDocument& json : entries) {
+    const auto entry = VS::test_support::Required(
+        content::ShpPolygonEntryOf(json, "e", counts, colored));
+    numbered.push_back(content::JsonDocument::array(
+        {entry.order, entry.corners, entry.flags, entry.extra}));
+  }
+  return numbered;
+}
+
+// `gltf` as shp-gltf 3 wrote it: numbered polygon entries, polygon counts and
+// limb ranges, and materials named flags_<hex> by their primitive flags.
+content::JsonDocument NumberedModel(content::JsonDocument gltf) {
+  content::JsonDocument& payload = gltf["asset"]["extras"]["vs"];
+  content::ShpModel model;
+  const auto counts = VS::test_support::Required(
+      content::ReadShpModelHeader(content::JsonMembers(payload, "vs"), model));
+  const bool colored = payload["colored"].get<bool>();
+  content::JsonDocument numbered = content::JsonDocument::object();
+  for (const auto& [key, value] : payload.items()) {
+    numbered[key == "body_part_polygons" ? "limb_ranges" : key] = value;
+  }
+  numbered["schema_version"] = extract::kNumberedPolygonShpVersion;
+  numbered["polygon_counts"] = counts;
+  numbered["limb_ranges"] = model.limb_ranges;
+  payload = std::move(numbered);
+  for (content::JsonDocument& mesh : gltf["meshes"]) {
+    for (content::JsonDocument& primitive : mesh["primitives"]) {
+      content::JsonDocument& polygons = primitive["extras"]["vs"]["polygons"];
+      polygons = NumberedEntries(polygons, counts, colored);
+    }
+  }
+  std::map<std::string, std::string, std::less<>> legacy;
+  for (unsigned flags = 0; flags <= content::kShpPrimitiveFlags; ++flags) {
+    if ((flags & ~unsigned{content::kShpPrimitiveFlags}) != 0) continue;
+    legacy[content::ShpMaterialName(static_cast<std::uint8_t>(flags))] =
+        std::format("flags_{:02x}", flags);
+  }
+  for (content::JsonDocument& material : gltf["materials"]) {
+    material["name"] = legacy.at(material["name"].get<std::string>());
+  }
+  return gltf;
+}
+
+fs::path SampleGltf(const ModelRoot& root) {
+  return root.Root() / fs::path(content::kShpModelDirectory) / "4F.gltf";
+}
+
+// Records shp-gltf at `version` in `root`'s manifest.
+void RecordShpVersion(const fs::path& root, std::uint32_t version) {
+  auto manifest =
+      VS::test_support::Required(content::LoadConversionManifest(root));
+  REQUIRE(manifest.has_value());
+  if (!manifest) return;
+  manifest->converters[std::string(content::kShpModelConverterName)] = version;
+  REQUIRE(extract::WriteConversionManifest(root, *manifest).has_value());
+}
+
+std::optional<std::uint32_t> RecordedShpVersion(const fs::path& root) {
+  const auto manifest =
+      VS::test_support::Required(content::LoadConversionManifest(root));
+  if (!manifest) return std::nullopt;
+  const auto found = manifest->converters.find(content::kShpModelConverterName);
+  if (found == manifest->converters.end()) return std::nullopt;
+  return found->second;
+}
+
+// Upgrades `root`'s numbered sample model, which reads as `named` once named.
+void CheckUpgradedModel(const ModelRoot& root,
+                        const content::JsonDocument& named) {
+  const auto report =
+      VS::test_support::Required(extract::UpgradeModelAuthoring(root.Root()));
+  CHECK(report.models == 1);
+  CHECK(report.polygons == 4);
+  CHECK(report.written == 2);
+  CHECK(ParseGltf(ReadModel(SampleGltf(root))) == named);
+  CHECK(RecordedShpVersion(root.Root()) == content::kShpModelConverterVersion);
+}
+
+TEST_CASE("Authoring names existing polygon entries in place",
+          "[content-models][shp]") {
+  for (const bool colored : {false, true}) {
+    CAPTURE(colored);
+    const Bytes bytes = Encoded(SampleShp(colored));
+    const ModelRoot root({{.path = "OBJ/4F.SHP", .bytes = bytes}});
+    CHECK(root.Convert().characters.converted == 1);
+    const content::JsonDocument named = ParseGltf(ReadModel(SampleGltf(root)));
+    root.EditGltf(content::kShpModelDirectory, "4F",
+                  [](content::JsonDocument& gltf) {
+                    gltf = NumberedModel(std::move(gltf));
+                  });
+    RecordShpVersion(root.Root(), extract::kNumberedPolygonShpVersion);
+
+    CheckUpgradedModel(root, named);
+    CHECK(
+        VS::test_support::Required(extract::UpgradeModelAuthoring(root.Root()))
+            .written == 0);
+    CHECK(root.Convert().characters.unchanged == 1);
+    CHECK(VS::test_support::Required(LoadModel(root.Root(), root.Read(0),
+                                               content::LoadConvertedModel)) ==
+          bytes);
+  }
+}
+
+TEST_CASE("Authoring leaves a model whose polygons no style holds",
+          "[content-models][shp]") {
+  const ModelRoot root(
+      {{.path = "OBJ/4F.SHP", .bytes = Encoded(SampleShp(false))}});
+  static_cast<void>(root.Convert());
+  constexpr std::size_t kStyledTriangle = 3;
+  constexpr std::size_t kFlagsAt = 2;
+  root.EditGltf(content::kShpModelDirectory, "4F",
+                [](content::JsonDocument& gltf) {
+                  gltf = NumberedModel(std::move(gltf));
+                  for (auto& primitive : gltf["meshes"][0]["primitives"]) {
+                    for (auto& entry : primitive["extras"]["vs"]["polygons"]) {
+                      if (entry[0] == kStyledTriangle) entry[kFlagsAt] = 0x80;
+                    }
+                  }
+                });
+  RecordShpVersion(root.Root(), extract::kNumberedPolygonShpVersion);
+  const content::JsonDocument before = ParseGltf(ReadModel(SampleGltf(root)));
+
+  const auto refused = extract::UpgradeModelAuthoring(root.Root());
+  REQUIRE_FALSE(refused.has_value());
+  CHECK(refused.error().contains("polygon 3 has flags 0x80"));
+  CHECK(ParseGltf(ReadModel(SampleGltf(root))) == before);
+  CHECK(RecordedShpVersion(root.Root()) == extract::kNumberedPolygonShpVersion);
 }
 
 // The borrower's files: its glTF and buffer, showing the lender's image, and

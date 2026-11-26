@@ -209,10 +209,10 @@ struct Payload {
 Result<Payload> ReadPayload(const ModelGltfFile& file) {
   auto members = ModelGltfPayload(file);
   if (!members) return std::unexpected(members.error());
-  if (auto only =
-          members->Only({"schema", "schema_version", "id", "source",
-                         "source_sha256", "polygon_counts", "limb_ranges",
-                         "bones", "bone_rotations", "texture"});
+  if (auto only = members->Only({"schema", "schema_version", "id", "source",
+                                 "source_sha256", "polygon_counts",
+                                 "body_part_polygons", "bones",
+                                 "bone_rotations", "texture"});
       !only) {
     return std::unexpected(only.error());
   }
@@ -348,8 +348,8 @@ JsonDocument WepModelPayload(const WepModelDocument& document) {
   payload["id"] = document.id;
   payload["source"] = document.source;
   payload["source_sha256"] = document.source_sha256;
-  payload["polygon_counts"] = ShpPolygonCountsJson(wep);
-  payload["limb_ranges"] = wep.limb_ranges;
+  payload["polygon_counts"] = ShpPolygonCountsJson(ShpPolygonCountsOf(wep));
+  payload["body_part_polygons"] = ShpBodyPartPolygonsJson(wep.limb_ranges);
   payload["bones"] = ShpBonesJson(wep);
   payload["bone_rotations"] = RotationsJson(wep);
   payload["texture"] = Json{{"image", document.image_id},

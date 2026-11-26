@@ -38,6 +38,7 @@
 #include "Extract/ImageConversion.hpp"
 #include "Extract/LearningConversion.hpp"
 #include "Extract/MaterialConversion.hpp"
+#include "Extract/ModelAuthoring.hpp"
 #include "Extract/SaveTextConversion.hpp"
 #include "Extract/ShpModelConversion.hpp"
 #include "Extract/StatusConversion.hpp"
@@ -152,8 +153,8 @@ int WithLabels(int result, const fs::path& root) {
   return result == 0 ? LabelAssets(root) : result;
 }
 
-// The zone, background, animation, archetype, sound bank and effect stream
-// upgrades `authoring` runs last.
+// The zone, background, animation, archetype, model, sound bank and effect
+// stream upgrades `authoring` runs last.
 int UpgradeAssetAuthoring(const fs::path& root) {
   const auto zones = Extract::UpgradeZoneAuthoring(root);
   if (!zones) {
@@ -197,6 +198,15 @@ int UpgradeAssetAuthoring(const fs::path& root) {
   VS::Core::LogInfo("extract",
                     "archetype authoring: {} named headers, {} files updated",
                     archetypes->headers, archetypes->written);
+  const auto models = Extract::UpgradeModelAuthoring(root);
+  if (!models) {
+    VS::Core::LogError("extract", "model authoring: {}", models.error());
+    return 1;
+  }
+  VS::Core::LogInfo(
+      "extract",
+      "model authoring: {} models, {} named polygons, {} files updated",
+      models->models, models->polygons, models->written);
   const auto banks = Extract::UpgradeBankAuthoring(root);
   if (!banks) {
     VS::Core::LogError("extract", "bank authoring: {}", banks.error());

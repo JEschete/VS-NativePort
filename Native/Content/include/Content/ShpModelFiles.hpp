@@ -31,14 +31,17 @@
 // under a root node turned 180 degrees about X (the PlayStation's Y points
 // down). Each polygon corner is a glTF vertex whose _VS_VERTEX attribute is
 // its SHP vertex number and whose JOINTS_0 is the vertex's bone; each
-// primitive's extras.vs.polygons lists its polygons in triangle order as
-// [ordinal, corners, flags, extra]. Every value the game reads that glTF
-// cannot express exactly is in the payload, which is authoritative with the
-// geometry: the reader rebuilds the SHP from them, and ignores the materials,
-// textures and images, which only preview the polygon flags. The payload
-// names the 0xE8-byte layout block's fields (the actor record's texture
-// overlays through reserved6d4, ActorRecord.hpp), so collision, shadow and
-// texture animation values edit as numbers. The animation banks are JSON in
+// primitive's extras.vs.polygons lists its polygons in triangle order, each
+// by its place in the SHP's polygon order and its corners, with a styled
+// polygon's drawing style (ShpPolygonEntryJson). Every value the game reads
+// that glTF cannot express exactly is in the payload, which is authoritative
+// with the geometry: the reader rebuilds the SHP from them, and ignores the
+// materials, textures and images, which only preview the drawing styles. The
+// payload names each part's polygon count and how many of each part's
+// polygons belong to each body part (ShpBodyPartPolygonsJson), and the
+// 0xE8-byte layout block's fields (the actor record's texture overlays
+// through reserved6d4, ActorRecord.hpp), so collision, shadow and texture
+// animation values edit as numbers. The animation banks are JSON in
 // the payload (ActorAnimation.hpp, §6.2.1): "sequence" is the SHP's embedded
 // bank in the vs.actor-animation bank form (null when it has none), and
 // "sequences" holds each OBJ\*.SEQ file the model owns as a whole
@@ -48,9 +51,9 @@
 namespace VS::Content {
 
 inline constexpr std::string_view kShpModelConverterName = "shp-gltf";
-inline constexpr std::uint32_t kShpModelConverterVersion = 3;
+inline constexpr std::uint32_t kShpModelConverterVersion = 4;
 inline constexpr std::string_view kShpModelSchema = "vs.shp-model";
-inline constexpr std::uint32_t kShpModelSchemaVersion = 3;
+inline constexpr std::uint32_t kShpModelSchemaVersion = 4;
 inline constexpr std::string_view kShpModelDirectory = "models/characters";
 inline constexpr std::string_view kShpExtension = ".SHP";
 // Each OBJ\*.SEQ bank's own output, which lists its owner's glTF and buffer.
@@ -70,6 +73,9 @@ inline constexpr std::string_view kShpPolygonsKey = "polygons";
 inline constexpr std::uint8_t kShpPrimitiveFlags = 0x71;
 inline constexpr std::uint8_t kShpDoubleSidedFlag = 0x01;
 inline constexpr std::uint8_t kShpSemiTransparentFlag = 0x10;
+// The flags byte every triangle- and quad-part polygon on the disc holds; the
+// game does not read it.
+inline constexpr std::uint8_t kShpPlainPartFlags = 4;
 // glTF accessor component types and the triangle primitive mode.
 inline constexpr std::uint32_t kGltfUnsignedByte = 5121;
 inline constexpr std::uint32_t kGltfUnsignedShort = 5123;
@@ -215,16 +221,83 @@ struct ModelIdentity {
     const JsonMembers& payload, std::string_view schema, std::uint32_t version,
     std::string_view kind);
 
-// The polygons of each part (triangles, quads, mixed).
+// The polygons of each part (triangles, quads, styled).
 using ShpPolygonCounts = std::array<std::uint16_t, kShpPartCount>;
+// Per part, how many polygons from the part's start belong to each body part
+// in turn (ShpModel::limb_ranges, part-major); the rest belong to none.
+using ShpLimbRanges = std::array<std::uint16_t, kShpLimbRangeCount>;
+inline constexpr std::size_t kShpBodyPartCount = 8;
+static_assert(kShpBodyPartCount * kShpPartCount == kShpLimbRangeCount);
+// The names of the parts' counts in polygon_counts and body_part_polygons.
+inline constexpr std::array<std::string_view, kShpPartCount> kShpPartKeys{
+    "triangles",
+    "quads",
+    "styled",
+};
 
-// The payload members polygon_counts, limb_ranges and bones, which every
-// model payload has, and back.
-[[nodiscard]] JsonDocument ShpPolygonCountsJson(const ShpModel& model);
+// Each part's polygon count, which the file header holds in a halfword.
+[[nodiscard]] ShpPolygonCounts ShpPolygonCountsOf(const ShpModel& model);
+// The part polygon `order` (its place in the parts' file order) is in, or
+// nothing past `counts`.
+[[nodiscard]] std::optional<ShpPart> ShpPartOf(std::size_t order,
+                                               const ShpPolygonCounts& counts);
+
+// The payload members polygon_counts ({"triangles", "quads", "styled"}),
+// body_part_polygons (one {"body_part", "triangles", "quads", "styled"} entry
+// per body part with polygons, ascending; a body part not listed has none)
+// and bones, which every model payload has.
+[[nodiscard]] JsonDocument ShpPolygonCountsJson(const ShpPolygonCounts& counts);
+[[nodiscard]] JsonDocument ShpBodyPartPolygonsJson(const ShpLimbRanges& ranges);
 [[nodiscard]] JsonDocument ShpBonesJson(const ShpModel& model);
-// Reads limb_ranges and bones into `model` and returns polygon_counts.
+// Reads body_part_polygons and bones into `model` and returns polygon_counts;
+// each part's body parts must fit in its count.
 [[nodiscard]] std::expected<ShpPolygonCounts, std::string> ReadShpModelHeader(
     const JsonMembers& payload, ShpModel& model);
+
+// --- How the game draws a polygon (ModelGeometry.cpp DrawPolygons).
+// Only the styled part's polygons are drawn by their flags byte; the triangle
+// and quad parts draw one-sided and opaque at depth offset -1. A styled
+// polygon's flags: 0x01 draws both sides; 0x03 on an uncoloured quad splits
+// it into two one-sided triangles along a diagonal chosen as it is drawn, at
+// depth offset -1 (bits 2-3 are then not read); bits 2-3 add 4 each to depth
+// offset -5; 0x10 is semi-transparency and 0x60 its blend mode. The depth
+// offset is added to the polygon's sort depth: a larger one sorts it further
+// back. Bit 0x80 is not read.
+
+// One polygon's entry in its primitive's extras.vs.polygons.
+struct ShpPolygonEntry {
+  std::size_t order = 0;  // its place in the parts' file order
+  std::uint8_t corners = kShpTriangleCorners;
+  std::uint8_t flags = 0;
+  std::uint8_t extra = 0;  // ShpPolygon::extra, which the game does not read
+
+  bool operator==(const ShpPolygonEntry&) const = default;
+};
+
+// The entry as JSON: "order", "corners", a styled polygon's "style" ("sides":
+// "one", "both" or "split"; "depth_offset" -5, -1, 3 or 7, which a split quad
+// has not; "semi_transparent"; "blend": "average", "add", "subtract" or
+// "add_quarter"), and "unread" for the values the game does not read that
+// differ from the disc's: "flags" of a triangle- or quad-part polygon (4),
+// "depth_bits" of a split quad (0) and "extra" (0). `counts` places the
+// polygon in its part and `colored` is the model's polygon layout. The error
+// names flags no style holds: 0x80, 0x02 without 0x01, or 0x03 on a triangle
+// or coloured quad, none of which a disc model has.
+[[nodiscard]] std::expected<JsonDocument, std::string> ShpPolygonEntryJson(
+    const ShpPolygonEntry& entry, const ShpPolygonCounts& counts, bool colored);
+// The entry `json` holds; errors name the member at `where`.
+[[nodiscard]] std::expected<ShpPolygonEntry, std::string> ShpPolygonEntryOf(
+    const JsonDocument& json, const std::string& where,
+    const ShpPolygonCounts& counts, bool colored);
+// The flags a polygon of `part` is drawn with: its own in the styled part,
+// 0 in the others.
+[[nodiscard]] std::uint8_t ShpDrawnFlags(std::uint8_t flags,
+                                         ShpPart part) noexcept;
+// The preview material name of the primitive flags `flags`
+// (kShpPrimitiveFlags): one_sided or double_sided, then the blend mode when
+// semi-transparent or "opaque", e.g. double_sided_add or one_sided_opaque. A
+// blend mode without semi-transparency follows "opaque".
+[[nodiscard]] std::string ShpMaterialName(std::uint8_t flags);
 
 // What a model's mesh is read against.
 struct ModelMeshSpec {

@@ -883,7 +883,7 @@ Result<Payload> ReadPayload(const GltfFile& file,
   const JsonMembers& members = *payload_members;
   if (auto only = members.Only(
           {"schema", "schema_version", "id", "source", "source_sha256",
-           "colored", "polygon_counts", "limb_ranges", "layout", "bones",
+           "colored", "polygon_counts", "body_part_polygons", "layout", "bones",
            "sound", "sequence_word", "sequence", "texture", "sequences"});
       !only) {
     return std::unexpected(only.error());
@@ -1253,8 +1253,9 @@ struct MeshState {
   const std::vector<std::int64_t>* origins = nullptr;
   ShpTextureSize uv_scale;
   bool colored = false;
+  ShpPolygonCounts counts{};
   std::vector<VertexRecord> vertices;               // by SHP vertex number
-  std::vector<std::optional<ShpPolygon>> polygons;  // by ordinal
+  std::vector<std::optional<ShpPolygon>> polygons;  // by order
 };
 
 struct Attributes {
@@ -1492,50 +1493,330 @@ Result<std::vector<std::size_t>> ReadIndices(const GltfFile& file,
   return indices;
 }
 
-struct PolygonEntry {
-  std::size_t ordinal = 0;
-  std::uint8_t corners = 0;
-  std::uint8_t flags = 0;
-  std::uint8_t extra = 0;
+// --- Polygon entries (ShpPolygonEntryJson).
+
+constexpr std::uint8_t kSidesMask = 0x03;
+constexpr std::uint8_t kSplitSides = 0x03;
+constexpr std::uint8_t kSecondSidesBit = 0x02;
+constexpr std::uint8_t kUnreadStyleFlag = 0x80;
+constexpr unsigned kDepthShift = 2;
+constexpr std::uint8_t kDepthBitsMask = 0x03;
+constexpr std::int64_t kStyledDepthOffset = -5;
+constexpr std::int64_t kDepthOffsetStep = 4;
+constexpr std::uint8_t kBlendMask = 0x60;
+constexpr unsigned kBlendShift = 5;
+// By (flags & 0x60) >> 5, and by flags & 0x01 when not split.
+constexpr std::array<std::string_view, 4> kBlendNames{
+    "average",
+    "add",
+    "subtract",
+    "add_quarter",
+};
+constexpr std::array<std::string_view, 2> kSidesNames{"one", "both"};
+constexpr std::string_view kSplit = "split";
+constexpr std::array<std::string_view, 4> kEntryKeys{
+    "order",
+    "corners",
+    "style",
+    "unread",
+};
+constexpr std::array<std::string_view, 4> kStyleKeys{
+    "sides",
+    "depth_offset",
+    "semi_transparent",
+    "blend",
+};
+constexpr std::array<std::string_view, 2> kPlainUnreadKeys{"flags", "extra"};
+constexpr std::array<std::string_view, 2> kSplitUnreadKeys{
+    "depth_bits",
+    "extra",
+};
+constexpr std::array<std::string_view, 1> kStyledUnreadKeys{"extra"};
+
+bool IsSplit(std::uint8_t flags) { return (flags & kSidesMask) == kSplitSides; }
+
+std::string_view BlendName(std::uint8_t flags) {
+  return kBlendNames.at(static_cast<std::size_t>(flags & kBlendMask) >>
+                        kBlendShift);
+}
+
+// Only a quad of an uncoloured model splits (ModelGeometry.cpp Queue).
+bool CanSplit(std::uint8_t corners, bool colored) {
+  return !colored && corners == kShpMaxCorners;
+}
+
+std::uint8_t DepthBits(std::uint8_t flags) {
+  return static_cast<std::uint8_t>((flags >> kDepthShift) & kDepthBitsMask);
+}
+
+std::optional<std::uint8_t> DepthBitsOf(std::int64_t offset) {
+  for (std::uint8_t bits = 0; bits <= kDepthBitsMask; ++bits) {
+    if (offset == kStyledDepthOffset + (kDepthOffsetStep * bits)) return bits;
+  }
+  return std::nullopt;
+}
+
+std::optional<std::size_t> NameIndex(std::span<const std::string_view> names,
+                                     std::string_view text) {
+  const auto found = std::ranges::find(names, text);
+  if (found == names.end()) return std::nullopt;
+  return static_cast<std::size_t>(found - names.begin());
+}
+
+// Whether a polygon of `part` may have `corners` corners (ShpFile.cpp).
+bool CornersFit(std::uint64_t corners, ShpPart part) {
+  switch (part) {
+    case ShpPart::kTriangles:
+      return corners == kShpTriangleCorners;
+    case ShpPart::kQuads:
+      return corners == kShpMaxCorners;
+    case ShpPart::kStyled:
+      return corners == kShpTriangleCorners || corners == kShpMaxCorners;
+  }
+  return false;
+}
+
+std::size_t TotalOf(const ShpPolygonCounts& counts) {
+  std::size_t total = 0;
+  for (const std::uint16_t count : counts) total += count;
+  return total;
+}
+
+std::string_view PartName(ShpPart part) {
+  return kShpPartKeys.at(static_cast<std::size_t>(part));
+}
+
+// --- The polygon counts and body parts (ShpBodyPartPolygonsJson).
+
+constexpr std::array<std::string_view, 4> kBodyPartKeys{
+    "body_part",
+    "triangles",
+    "quads",
+    "styled",
 };
 
-// [ordinal, corners, flags, extra]
-constexpr std::size_t kPolygonEntryValues = 4;
+// Each part's count in `members` (kShpPartKeys).
+Check ReadPartCounts(const JsonMembers& members, ShpPolygonCounts& counts) {
+  for (std::size_t part = 0; part < kShpPartCount; ++part) {
+    if (auto read = ReadUnsigned(members, kShpPartKeys.at(part), counts[part]);
+        !read) {
+      return read;
+    }
+  }
+  return {};
+}
 
-Result<PolygonEntry> PolygonEntryOf(const Json& json, const std::string& where,
-                                    std::size_t total) {
-  std::array<std::uint64_t, kPolygonEntryValues> values{};
-  const bool numbers = json.is_array() && json.size() == values.size() &&
-                       std::ranges::all_of(json, [](const Json& value) {
-                         return value.is_number_unsigned();
-                       });
-  if (!numbers) {
+Result<ShpPolygonCounts> ReadPolygonCounts(const JsonMembers& payload) {
+  auto value = payload.Get("polygon_counts");
+  if (!value) return std::unexpected(value.error());
+  const JsonMembers members(**value, payload.Where("polygon_counts"));
+  if (auto only = members.Only(kShpPartKeys); !only) {
+    return std::unexpected(only.error());
+  }
+  ShpPolygonCounts counts{};
+  if (auto read = ReadPartCounts(members, counts); !read) {
+    return std::unexpected(read.error());
+  }
+  return counts;
+}
+
+Check CheckBodyPartSums(const ShpLimbRanges& ranges,
+                        const ShpPolygonCounts& counts,
+                        const std::string& where) {
+  for (std::size_t part = 0; part < kShpPartCount; ++part) {
+    std::size_t sum = 0;
+    for (std::size_t body_part = 0; body_part < kShpBodyPartCount;
+         ++body_part) {
+      sum += ranges.at((part * kShpBodyPartCount) + body_part);
+    }
+    if (sum > counts.at(part)) {
+      return std::unexpected(std::format(
+          "{} gives the body parts {} {}; polygon_counts.{} is {}", where, sum,
+          kShpPartKeys.at(part), kShpPartKeys.at(part), counts.at(part)));
+    }
+  }
+  return {};
+}
+
+Check ReadBodyPartPolygons(const JsonMembers& payload,
+                           const ShpPolygonCounts& counts,
+                           ShpLimbRanges& ranges) {
+  auto value = payload.Get("body_part_polygons");
+  if (!value) return std::unexpected(value.error());
+  const std::string where = payload.Where("body_part_polygons");
+  if (!(*value)->is_array()) {
+    return std::unexpected(std::format("{} must be an array", where));
+  }
+  ranges.fill(0);
+  std::optional<std::uint64_t> previous;
+  for (std::size_t index = 0; index < (*value)->size(); ++index) {
+    const JsonMembers entry((**value)[index],
+                            std::format("{}[{}]", where, index));
+    if (auto only = entry.Only(kBodyPartKeys); !only) {
+      return only;
+    }
+    auto body_part = entry.Unsigned("body_part", kShpBodyPartCount - 1);
+    if (!body_part) return std::unexpected(body_part.error());
+    if (previous && *body_part <= *previous) {
+      return std::unexpected(std::format(
+          "{} must be past the body part before it: each is listed once, in "
+          "ascending order",
+          entry.Where("body_part")));
+    }
+    previous = *body_part;
+    ShpPolygonCounts polygons{};
+    if (auto read = ReadPartCounts(entry, polygons); !read) {
+      return read;
+    }
+    for (std::size_t part = 0; part < kShpPartCount; ++part) {
+      ranges.at((part * kShpBodyPartCount) + *body_part) = polygons.at(part);
+    }
+  }
+  return CheckBodyPartSums(ranges, counts, where);
+}
+
+Result<ShpPart> PlacedPart(std::size_t order, std::uint64_t corners,
+                           const ShpPolygonCounts& counts,
+                           const std::string& where) {
+  const std::optional<ShpPart> part = ShpPartOf(order, counts);
+  if (!part) {
     return std::unexpected(
-        std::format("{} must be [ordinal, corners, flags, extra]", where));
+        std::format("{}: polygon {} is past the {} polygons of polygon_counts",
+                    where, order, TotalOf(counts)));
   }
-  for (std::size_t index = 0; index < values.size(); ++index) {
-    values[index] = json[index].get<std::uint64_t>();
-  }
-  const auto [ordinal, corners, flags, extra] = values;
-  if (ordinal >= total) {
-    return std::unexpected(
-        std::format("{} names polygon {}; polygon_counts adds up to {}", where,
-                    ordinal, total));
-  }
-  if ((corners != kShpTriangleCorners && corners != kShpMaxCorners) ||
-      flags > kUnitMax || extra > kUnitMax) {
+  if (!CornersFit(corners, *part)) {
     return std::unexpected(std::format(
-        "{} must have 3 or 4 corners and flags and extra from 0 to {}", where,
-        kUnitMax));
+        "{}: polygon {} is in the {} part and has {} corners; a polygon has 3 "
+        "in the triangles part, 4 in the quads part and 3 or 4 in the styled "
+        "part",
+        where, order, PartName(*part), corners));
   }
-  return PolygonEntry{.ordinal = static_cast<std::size_t>(ordinal),
-                      .corners = static_cast<std::uint8_t>(corners),
-                      .flags = static_cast<std::uint8_t>(flags),
-                      .extra = static_cast<std::uint8_t>(extra)};
+  return *part;
+}
+
+Result<Json> StyleJson(const ShpPolygonEntry& entry, bool colored) {
+  const std::uint8_t flags = entry.flags;
+  const bool split = IsSplit(flags);
+  if ((flags & kUnreadStyleFlag) != 0 ||
+      (flags & kSidesMask) == kSecondSidesBit ||
+      (split && !CanSplit(entry.corners, colored))) {
+    return std::unexpected(std::format(
+        "polygon {} has flags 0x{:02X}, which no style holds: 0x80, 0x02 "
+        "without 0x01, or 0x03 on a triangle or a coloured quad",
+        entry.order, flags));
+  }
+  Json style = Json::object();
+  style["sides"] = std::string(split ? kSplit
+                                     : kSidesNames.at(static_cast<std::size_t>(
+                                           flags & kShpDoubleSidedFlag)));
+  if (!split) {
+    style["depth_offset"] =
+        kStyledDepthOffset + (kDepthOffsetStep * DepthBits(flags));
+  }
+  style["semi_transparent"] = (flags & kShpSemiTransparentFlag) != 0;
+  style["blend"] = std::string(BlendName(flags));
+  return style;
+}
+
+Json UnreadJson(const ShpPolygonEntry& entry, ShpPart part) {
+  Json unread = Json::object();
+  if (part != ShpPart::kStyled) {
+    if (entry.flags != kShpPlainPartFlags) unread["flags"] = entry.flags;
+  } else if (IsSplit(entry.flags) && DepthBits(entry.flags) != 0) {
+    unread["depth_bits"] = DepthBits(entry.flags);
+  }
+  if (entry.extra != 0) unread["extra"] = entry.extra;
+  return unread;
+}
+
+// The flags `style` gives a polygon that may split when `can_split`.
+Result<std::uint8_t> ReadStyle(const JsonMembers& style, bool can_split) {
+  if (auto only = style.Only(kStyleKeys); !only) {
+    return std::unexpected(only.error());
+  }
+  auto sides = style.String("sides");
+  if (!sides) return std::unexpected(sides.error());
+  const bool split = *sides == kSplit;
+  const std::optional<std::size_t> drawn = NameIndex(kSidesNames, *sides);
+  if (!split && !drawn) {
+    return std::unexpected(std::format(
+        "{} must be \"one\", \"both\" or \"split\"", style.Where("sides")));
+  }
+  if (split && !can_split) {
+    return std::unexpected(
+        std::format("{} is \"split\", which only a quad of an uncoloured "
+                    "model can be",
+                    style.Where("sides")));
+  }
+  if (split && style.Find("depth_offset") != nullptr) {
+    return std::unexpected(
+        std::format("{} must be left out: a split quad draws at depth offset "
+                    "-1 (its depth bits are unread.depth_bits)",
+                    style.Where("depth_offset")));
+  }
+  auto flags = static_cast<std::uint8_t>(split ? kSplitSides : *drawn);
+  if (!split) {
+    auto offset =
+        style.Integer("depth_offset", kStyledDepthOffset,
+                      kStyledDepthOffset + (kDepthOffsetStep * kDepthBitsMask));
+    const std::optional<std::uint8_t> bits =
+        offset ? DepthBitsOf(*offset) : std::nullopt;
+    if (!bits) {
+      return std::unexpected(std::format("{} must be -5, -1, 3 or 7",
+                                         style.Where("depth_offset")));
+    }
+    flags |= static_cast<std::uint8_t>(*bits << kDepthShift);
+  }
+  auto semi_transparent = style.Boolean("semi_transparent");
+  if (!semi_transparent) return std::unexpected(semi_transparent.error());
+  if (*semi_transparent) flags |= kShpSemiTransparentFlag;
+  auto blend = style.String("blend");
+  const std::optional<std::size_t> mode =
+      blend ? NameIndex(kBlendNames, *blend) : std::nullopt;
+  if (!mode) {
+    return std::unexpected(
+        std::format("{} must be \"average\", \"add\", \"subtract\" or "
+                    "\"add_quarter\"",
+                    style.Where("blend")));
+  }
+  flags |= static_cast<std::uint8_t>(*mode << kBlendShift);
+  return flags;
+}
+
+// Adds the unread values to `entry`, whose flags already hold its style.
+Check ReadUnread(const JsonMembers& members, ShpPart part,
+                 ShpPolygonEntry& entry) {
+  const bool plain = part != ShpPart::kStyled;
+  const bool split = !plain && IsSplit(entry.flags);
+  if (plain) entry.flags = kShpPlainPartFlags;
+  const Json* value = members.Find("unread");
+  if (value == nullptr) return {};
+  const JsonMembers unread(*value, members.Where("unread"));
+  const std::span<const std::string_view> keys =
+      plain   ? std::span<const std::string_view>(kPlainUnreadKeys)
+      : split ? std::span<const std::string_view>(kSplitUnreadKeys)
+              : std::span<const std::string_view>(kStyledUnreadKeys);
+  if (auto only = unread.Only(keys); !only) {
+    return only;
+  }
+  auto extra = OptionalUnsigned(unread, "extra", kUnitMax);
+  if (!extra) return std::unexpected(extra.error());
+  entry.extra = static_cast<std::uint8_t>(*extra);
+  if (plain && unread.Find("flags") != nullptr) {
+    auto flags = unread.Unsigned("flags", kUnitMax);
+    if (!flags) return std::unexpected(flags.error());
+    entry.flags = static_cast<std::uint8_t>(*flags);
+  }
+  if (split) {
+    auto bits = OptionalUnsigned(unread, "depth_bits", kDepthBitsMask);
+    if (!bits) return std::unexpected(bits.error());
+    entry.flags |= static_cast<std::uint8_t>(*bits << kDepthShift);
+  }
+  return {};
 }
 
 // The polygon `entry` describes from the corners of its triangles' indices.
-Result<ShpPolygon> PolygonOf(const PolygonEntry& entry,
+Result<ShpPolygon> PolygonOf(const ShpPolygonEntry& entry,
                              std::span<const std::size_t> indices,
                              std::span<const Corner> corners) {
   std::array<std::optional<Corner>, kShpMaxCorners> ordered;
@@ -1593,8 +1874,8 @@ Check WalkPolygons(const PolygonList& polygons,
   std::size_t cursor = 0;
   for (std::size_t index = 0; index < polygons.list->size(); ++index) {
     const std::string where = std::format("{}[{}]", polygons.where, index);
-    auto entry =
-        PolygonEntryOf((*polygons.list)[index], where, mesh.polygons.size());
+    auto entry = ShpPolygonEntryOf((*polygons.list)[index], where, mesh.counts,
+                                   mesh.colored);
     if (!entry) return std::unexpected(entry.error());
     const std::size_t needed = entry->corners == kShpTriangleCorners
                                    ? kShpTriangleCorners
@@ -1609,11 +1890,11 @@ Check WalkPolygons(const PolygonList& polygons,
       return std::unexpected(std::format("{}: {}", where, polygon.error()));
     }
     cursor += needed;
-    if (mesh.polygons[entry->ordinal]) {
+    if (mesh.polygons[entry->order]) {
       return std::unexpected(
-          std::format("{} repeats polygon {}", where, entry->ordinal));
+          std::format("{} repeats polygon {}", where, entry->order));
     }
-    mesh.polygons[entry->ordinal] = std::move(*polygon);
+    mesh.polygons[entry->order] = std::move(*polygon);
   }
   if (cursor != indices.size()) {
     return std::unexpected(std::format("{} leaves {} indices in no polygon",
@@ -1661,9 +1942,8 @@ Result<MeshState> ReadMesh(const GltfFile& file, const ModelMeshSpec& spec,
   mesh.origins = &origins;
   mesh.uv_scale = spec.uv_scale;
   mesh.colored = colored;
-  std::size_t total = 0;
-  for (const std::uint16_t count : spec.counts) total += count;
-  mesh.polygons.resize(total);
+  mesh.counts = spec.counts;
+  mesh.polygons.resize(TotalOf(spec.counts));
   const JsonMembers top(file.json, file.name);
   auto meshes = top.Get("meshes");
   if (!meshes) return std::unexpected(meshes.error());
@@ -1716,14 +1996,14 @@ Check AssembleVertices(const MeshState& mesh, ShpModel& model) {
 
 Check AssembleParts(MeshState& mesh, const ShpPolygonCounts& counts,
                     ShpModel& model) {
-  std::size_t ordinal = 0;
+  std::size_t order = 0;
   for (std::size_t part = 0; part < kShpPartCount; ++part) {
-    for (std::size_t index = 0; index < counts[part]; ++index, ++ordinal) {
-      std::optional<ShpPolygon>& polygon = mesh.polygons[ordinal];
+    for (std::size_t index = 0; index < counts[part]; ++index, ++order) {
+      std::optional<ShpPolygon>& polygon = mesh.polygons[order];
       if (!polygon) {
         return std::unexpected(std::format(
             "polygon {} is in no primitive; polygon_counts adds up to {}",
-            ordinal, mesh.polygons.size()));
+            order, mesh.polygons.size()));
       }
       model.parts[part].push_back(std::move(*polygon));
     }
@@ -1997,8 +2277,8 @@ JsonDocument ShpModelPayload(const ShpModelDocument& document,
   payload["source"] = document.source;
   payload["source_sha256"] = document.source_sha256;
   payload["colored"] = shp.colored;
-  payload["polygon_counts"] = ShpPolygonCountsJson(shp);
-  payload["limb_ranges"] = shp.limb_ranges;
+  payload["polygon_counts"] = ShpPolygonCountsJson(ShpPolygonCountsOf(shp));
+  payload["body_part_polygons"] = ShpBodyPartPolygonsJson(shp.limb_ranges);
   payload["layout"] = ShpLayoutJson(shp.layout);
   payload["bones"] = ShpBonesJson(shp);
   payload["sound"] = IndexJson(sound_view);
@@ -2076,12 +2356,47 @@ std::expected<ModelIdentity, std::string> ReadModelIdentity(
                        .source_sha256 = std::move(*sha256)};
 }
 
-JsonDocument ShpPolygonCountsJson(const ShpModel& model) {
-  Json counts = Json::array();
-  for (const std::vector<ShpPolygon>& part : model.parts) {
-    counts.push_back(part.size());
+ShpPolygonCounts ShpPolygonCountsOf(const ShpModel& model) {
+  ShpPolygonCounts counts{};
+  for (std::size_t part = 0; part < kShpPartCount; ++part) {
+    counts.at(part) = static_cast<std::uint16_t>(model.parts.at(part).size());
   }
   return counts;
+}
+
+std::optional<ShpPart> ShpPartOf(std::size_t order,
+                                 const ShpPolygonCounts& counts) {
+  std::size_t end = 0;
+  for (std::size_t part = 0; part < kShpPartCount; ++part) {
+    end += counts.at(part);
+    if (order < end) return static_cast<ShpPart>(part);
+  }
+  return std::nullopt;
+}
+
+JsonDocument ShpPolygonCountsJson(const ShpPolygonCounts& counts) {
+  Json json = Json::object();
+  for (std::size_t part = 0; part < kShpPartCount; ++part) {
+    json[std::string(kShpPartKeys.at(part))] = counts.at(part);
+  }
+  return json;
+}
+
+JsonDocument ShpBodyPartPolygonsJson(const ShpLimbRanges& ranges) {
+  Json body_parts = Json::array();
+  for (std::size_t body_part = 0; body_part < kShpBodyPartCount; ++body_part) {
+    Json entry = Json::object();
+    entry["body_part"] = body_part;
+    bool any = false;
+    for (std::size_t part = 0; part < kShpPartCount; ++part) {
+      const std::uint16_t count =
+          ranges.at((part * kShpBodyPartCount) + body_part);
+      entry[std::string(kShpPartKeys.at(part))] = count;
+      any = any || count != 0;
+    }
+    if (any) body_parts.push_back(std::move(entry));
+  }
+  return body_parts;
 }
 
 JsonDocument ShpBonesJson(const ShpModel& model) {
@@ -2092,17 +2407,84 @@ JsonDocument ShpBonesJson(const ShpModel& model) {
 
 std::expected<ShpPolygonCounts, std::string> ReadShpModelHeader(
     const JsonMembers& payload, ShpModel& model) {
-  ShpPolygonCounts counts{};
   model.bones.clear();
+  auto counts = ReadPolygonCounts(payload);
+  if (!counts) return std::unexpected(counts.error());
   if (auto read = FirstError({
-          ReadUnsignedArray(payload, "polygon_counts", counts),
-          ReadUnsignedArray(payload, "limb_ranges", model.limb_ranges),
+          ReadBodyPartPolygons(payload, *counts, model.limb_ranges),
           ReadBones(payload, model),
       });
       !read) {
     return std::unexpected(read.error());
   }
-  return counts;
+  return *counts;
+}
+
+std::expected<JsonDocument, std::string> ShpPolygonEntryJson(
+    const ShpPolygonEntry& entry, const ShpPolygonCounts& counts,
+    bool colored) {
+  auto part = PlacedPart(entry.order, entry.corners, counts, "a polygon entry");
+  if (!part) return std::unexpected(part.error());
+  Json json = Json::object();
+  json["order"] = entry.order;
+  json["corners"] = entry.corners;
+  if (*part == ShpPart::kStyled) {
+    auto style = StyleJson(entry, colored);
+    if (!style) return std::unexpected(style.error());
+    json["style"] = std::move(*style);
+  }
+  Json unread = UnreadJson(entry, *part);
+  if (!unread.empty()) json["unread"] = std::move(unread);
+  return json;
+}
+
+std::expected<ShpPolygonEntry, std::string> ShpPolygonEntryOf(
+    const JsonDocument& json, const std::string& where,
+    const ShpPolygonCounts& counts, bool colored) {
+  const JsonMembers members(json, where);
+  if (auto only = members.Only(kEntryKeys); !only) {
+    return std::unexpected(only.error());
+  }
+  auto order = members.Unsigned("order", kU32Max);
+  if (!order) return std::unexpected(order.error());
+  auto corners = members.Unsigned("corners", kShpMaxCorners);
+  if (!corners) return std::unexpected(corners.error());
+  auto part = PlacedPart(*order, *corners, counts, where);
+  if (!part) return std::unexpected(part.error());
+  ShpPolygonEntry entry{.order = static_cast<std::size_t>(*order),
+                        .corners = static_cast<std::uint8_t>(*corners)};
+  const Json* style = members.Find("style");
+  const bool styled = *part == ShpPart::kStyled;
+  if (styled != (style != nullptr)) {
+    return std::unexpected(std::format(
+        "{} {}: only the styled part's polygons have one",
+        members.Where("style"), styled ? "is missing" : "must be left out"));
+  }
+  if (style != nullptr) {
+    auto flags = ReadStyle(JsonMembers(*style, members.Where("style")),
+                           CanSplit(entry.corners, colored));
+    if (!flags) return std::unexpected(flags.error());
+    entry.flags = *flags;
+  }
+  if (auto unread = ReadUnread(members, *part, entry); !unread) {
+    return std::unexpected(unread.error());
+  }
+  return entry;
+}
+
+std::uint8_t ShpDrawnFlags(std::uint8_t flags, ShpPart part) noexcept {
+  return part == ShpPart::kStyled ? flags : std::uint8_t{0};
+}
+
+std::string ShpMaterialName(std::uint8_t flags) {
+  std::string name =
+      (flags & kShpDoubleSidedFlag) != 0 ? "double_sided" : "one_sided";
+  if ((flags & kShpSemiTransparentFlag) != 0) {
+    return std::format("{}_{}", name, BlendName(flags));
+  }
+  name += "_opaque";
+  if ((flags & kBlendMask) != 0) name += std::format("_{}", BlendName(flags));
+  return name;
 }
 
 std::expected<void, std::string> ReadModelMesh(const ModelGltfFile& file,

@@ -36,9 +36,9 @@
 namespace VS::Content {
 
 inline constexpr std::string_view kWepModelConverterName = "wep-gltf";
-inline constexpr std::uint32_t kWepModelConverterVersion = 1;
+inline constexpr std::uint32_t kWepModelConverterVersion = 2;
 inline constexpr std::string_view kWepModelSchema = "vs.wep-model";
-inline constexpr std::uint32_t kWepModelSchemaVersion = 1;
+inline constexpr std::uint32_t kWepModelSchemaVersion = 2;
 inline constexpr std::string_view kWepModelDirectory = "models/weapons";
 // What a material preview's stem adds after <NN>.<material>.
 inline constexpr std::string_view kWepPreviewSuffix = ".preview";

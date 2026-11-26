@@ -36,6 +36,7 @@
 #include "Extract/ConversionManifestWriter.hpp"
 #include "Extract/EsqConversion.hpp"
 #include "Extract/ImageConversion.hpp"
+#include "Extract/ModelAuthoring.hpp"
 #include "Extract/WepModelConversion.hpp"
 
 namespace VS::Extract {
@@ -624,7 +625,7 @@ bool PlanHeaderFiles(ConversionManifest& manifest,
       found->second != kNumberedHeaderArchetypeVersion) {
     return false;
   }
-  found->second = Content::kZudArchetypeConverterVersion;
+  found->second = kNamedHeaderArchetypeVersion;
   for (const ConversionOutput& output : manifest.outputs) {
     if (output.converter != Content::kZudArchetypeConverterName) continue;
     for (const std::string& file : output.files) {
@@ -708,13 +709,16 @@ std::expected<ConvertedModel, std::string> ConvertZudArchetype(
 
 std::expected<ModelConversionReport, std::string> ConvertDiscArchetypes(
     const fs::path& root, bool force) {
-  // Existing outputs move to the named event and header forms instead of
-  // reconverting.
+  // Existing outputs move to the named event, header and polygon forms
+  // instead of reconverting.
   if (!force) {
     if (auto upgraded = UpgradeAnimationAuthoring(root); !upgraded) {
       return std::unexpected(upgraded.error());
     }
     if (auto upgraded = UpgradeArchetypeAuthoring(root); !upgraded) {
+      return std::unexpected(upgraded.error());
+    }
+    if (auto upgraded = UpgradeModelAuthoring(root); !upgraded) {
       return std::unexpected(upgraded.error());
     }
   }

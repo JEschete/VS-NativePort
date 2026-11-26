@@ -66,6 +66,7 @@
     <ClCompile Include="src\LearningConversion.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MaterialConversion.cpp" />
+    <ClCompile Include="src\ModelAuthoring.cpp" />
     <ClCompile Include="src\SaveTextConversion.cpp" />
     <ClCompile Include="src\ShpModelConversion.cpp" />
     <ClCompile Include="src\StatusConversion.cpp" />
@@ -97,6 +98,7 @@
     <ClInclude Include="include\Extract\ImageFilesWriter.hpp" />
     <ClInclude Include="include\Extract\LearningConversion.hpp" />
     <ClInclude Include="include\Extract\MaterialConversion.hpp" />
+    <ClInclude Include="include\Extract\ModelAuthoring.hpp" />
     <ClInclude Include="include\Extract\SaveTextConversion.hpp" />
     <ClInclude Include="include\Extract\ShpModelConversion.hpp" />
     <ClInclude Include="include\Extract\StatusConversion.hpp" />

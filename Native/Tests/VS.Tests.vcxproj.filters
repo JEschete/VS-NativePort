@@ -1680,6 +1680,9 @@
     <ClCompile Include="..\Tools\Extract\src\ImageConversion.cpp">
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>
+    <ClCompile Include="..\Tools\Extract\src\ModelAuthoring.cpp">
+      <Filter>..\Tools\Extract\src</Filter>
+    </ClCompile>
     <ClCompile Include="..\Tools\Extract\src\ShpModelConversion.cpp">
       <Filter>..\Tools\Extract\src</Filter>
     </ClCompile>

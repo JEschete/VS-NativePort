@@ -37,7 +37,7 @@ fields survive; it does not require the production loader to emit SHP or SEQ byt
 **Also emitted** (optional, `--posed`): `<SHP>_posed.obj/.mtl/_0.png`, like the reference folder. This is for quick previews only; the game never reads it.
 
 **SHP conversion (#203, #205).** `VS.Extract models <datadir>` (and `extract`) converts every `OBJ\*.SHP` with
-converter `shp-gltf` version 3 (`Extract/ShpModelConversion.hpp`, `Content/ShpModelFiles.hpp`,
+converter `shp-gltf` version 4 (`Extract/ShpModelConversion.hpp`, `Content/ShpModelFiles.hpp`,
 `Content/ShpFile.hpp`), and carries every `OBJ\*.SEQ` bank in its owner model's glTF (§6.2.1):
 
 - Each model writes `models\characters\<NN>.gltf` + `<NN>.bin`; id `model.obj.<nn>`. A model with its own texture
@@ -45,17 +45,29 @@ converter `shp-gltf` version 3 (`Extract/ShpModelConversion.hpp`, `Content/ShpMo
   another model's texture writes only the glTF and buffer; its glTF shows the lender's PNG and its manifest entry
   lists the lender's SHP as a dependency.
 - The glTF has one skinned mesh, a `root` node turned 180° about X and one `bone<N>` node per SHP bone. Positions
-  are the SHP's integer units (scale 1) with each bone's rest origin added. Primitives are grouped by polygon flags
-  0x71 (double-sided, semi-transparent, blend mode). Each corner carries the custom `_VS_VERTEX` attribute (its SHP
-  vertex number); each primitive's `extras.vs.polygons` lists its polygons in triangle order.
-- `asset.extras.vs` holds the payload (schema `vs.shp-model` version 3): source and hash, bones, polygon counts,
-  limb ranges and the 0xE8-byte layout block as named fields (e.g. editable `collision_radius`). A buffer view holds
-  the sound bytes. `sequence` is the SHP's embedded bank and `sequences` lists the `OBJ\*.SEQ` banks the model owns,
+  are the SHP's integer units (scale 1) with each bone's rest origin added. Primitives are grouped by how the game
+  draws each polygon (flags 0x71 of a styled-part polygon: double-sided, semi-transparent, blend mode; triangle- and
+  quad-part polygons draw one-sided and opaque), and each material is named for it (`one_sided_opaque`,
+  `double_sided_add`, …). Each corner carries the custom `_VS_VERTEX` attribute (its SHP vertex number).
+- Each primitive's `extras.vs.polygons` lists its polygons in triangle order as `{"order", "corners", "style",
+  "unread"}`. `order` is the polygon's place in the file. Only styled-part polygons have a `style`: `sides` (`one`,
+  `both`, or `split` for an uncoloured quad drawn as two triangles), `depth_offset` (-5, -1, 3 or 7; a split quad has
+  none), `semi_transparent` and `blend` (`average`, `add`, `subtract`, `add_quarter`). `unread` holds values the game
+  never reads that differ from the disc's usual ones (a plain polygon's `flags`, a split quad's `depth_bits`,
+  `extra`).
+- `asset.extras.vs` holds the payload (schema `vs.shp-model` version 4): source and hash, bones, `polygon_counts`
+  (`triangles`, `quads`, `styled`), `body_part_polygons` (how many of each part's polygons, from its start, belong to
+  each body part; one entry per body part that has any) and the 0xE8-byte layout block as named fields (e.g.
+  editable `collision_radius`). A buffer view holds the sound bytes. `sequence` is the SHP's embedded bank and `sequences` lists the `OBJ\*.SEQ` banks the model owns,
   both as `vs.actor-animation` JSON (§6.2.1).
 - **The payload and the geometry are authoritative.** Materials, textures and images only preview the polygon flags.
   The reader rebuilds the SHP from those two sources and checks it against every value the payload records. Output
   must pass the Khronos glTF validator with no errors or warnings.
 - A rerun leaves an unchanged SHP's files alone, so edits survive; `--force` rewrites every model.
+- `VS.Extract authoring <datadir>` (and a non-forced `models` run) rewrites version 3 outputs (`shp-gltf` 3,
+  `wep-gltf` 1, `zud-json` 3 own bodies), whose entries were `[order, corners, flags, extra]` and whose materials
+  were `flags_<hex>`, in this form in place, keeping every other edit (`Extract/ModelAuthoring.hpp`). Each entry and
+  payload header must read back as the same values.
 - At runtime, `Content::LoadConvertedModel` (`Content/ConvertedModels.hpp`) serves the actor model read
   (`ActorAssetsLive` `BeginFileRead`, `kActorModel`) and never reads the SHP from the disc. It matches the read's LBA
   and sector-rounded size to the extracted SHP and rebuilds the bytes from that model's files. An edit is validated

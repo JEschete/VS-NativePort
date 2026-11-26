@@ -41,8 +41,9 @@ inline constexpr std::uint8_t kShp4BitTexture = 0x10;
 // The texture size field that marks a borrowed texture.
 inline constexpr std::int32_t kShpBorrowedTextureSize = 4;
 
-// The polygon parts in file order: triangles, quads, then either kind.
-enum class ShpPart : std::uint8_t { kTriangles, kQuads, kMixed };
+// The polygon parts in file order: triangles, quads, then the styled part,
+// which holds either kind and is the only one drawn by its polygons' flags.
+enum class ShpPart : std::uint8_t { kTriangles, kQuads, kStyled };
 
 // decomp: Armature (src/BATTLE/BATTLE.PRG/entity.h:62)
 struct ShpBone {

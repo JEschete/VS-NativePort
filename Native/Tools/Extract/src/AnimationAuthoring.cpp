@@ -23,6 +23,7 @@
 #include "Content/ShpModelFiles.hpp"
 #include "Extract/ConversionManifestWriter.hpp"
 #include "Extract/ConverterBatch.hpp"
+#include "Extract/ModelAuthoring.hpp"
 #include "Extract/ZudConversion.hpp"
 #include "Platform/Paths.hpp"
 
@@ -34,19 +35,16 @@ template <typename T>
 using Result = std::expected<T, std::string>;
 
 // A converter or schema version the named event form replaces.
-struct VersionStep {
-  std::string_view name;
-  std::uint32_t from = 0;
-  std::uint32_t to = 0;
-};
+using VersionStep = AuthoringVersionStep;
 
-// The versions that wrote events as [frame, op, arguments...] arrays. An
-// archetype moves to the version that still numbers its header;
-// UpgradeArchetypeAuthoring names that next.
+// The versions that wrote events as [frame, op, arguments...] arrays. A
+// character model moves to the version that still numbers its polygons
+// (UpgradeModelAuthoring), and an archetype to the version that still numbers
+// its header (UpgradeArchetypeAuthoring); those name them next.
 constexpr std::array kConverters{
     VersionStep{.name = Content::kShpModelConverterName,
                 .from = 2,
-                .to = Content::kShpModelConverterVersion},
+                .to = kNumberedPolygonShpVersion},
     VersionStep{.name = Content::kSeqAnimationConverterName,
                 .from = 1,
                 .to = Content::kSeqAnimationConverterVersion},
@@ -60,7 +58,7 @@ constexpr std::array kConverters{
 constexpr std::array kSchemas{
     VersionStep{.name = Content::kShpModelSchema,
                 .from = 2,
-                .to = Content::kShpModelSchemaVersion},
+                .to = kNumberedPolygonShpVersion},
     VersionStep{.name = Content::kActorAnimationSchema,
                 .from = 1,
                 .to = Content::kActorAnimationSchemaVersion},
@@ -85,16 +83,6 @@ const VersionStep* FindStep(std::span<const VersionStep> steps,
   return nullptr;
 }
 
-Result<std::int64_t> NumberIn(const Json& value, std::int64_t max,
-                              const std::string& where) {
-  const std::optional<std::int64_t> number = Content::JsonWholeNumber(value);
-  if (!number || *number < 0 || *number > max) {
-    return std::unexpected(
-        std::format("{} must be a whole number from 0 to {}", where, max));
-  }
-  return *number;
-}
-
 Result<Content::SeqEvent> LegacyEventOf(const Json& json,
                                         const std::string& where) {
   if (!json.is_array() || json.size() < kLegacyHeader) {
@@ -102,15 +90,15 @@ Result<Content::SeqEvent> LegacyEventOf(const Json& json,
         "{} must be an array of a frame, an op and its arguments", where));
   }
   Content::SeqEvent event;
-  auto frame = NumberIn(json[0], kWordMax, where + "[0]");
+  auto frame = AuthoringNumber(json[0], kWordMax, where + "[0]");
   if (!frame) return std::unexpected(frame.error());
   event.frame = static_cast<std::uint16_t>(*frame);
-  auto op = NumberIn(json[1], kByteMax, where + "[1]");
+  auto op = AuthoringNumber(json[1], kByteMax, where + "[1]");
   if (!op) return std::unexpected(op.error());
   event.op = static_cast<std::uint8_t>(*op);
   for (std::size_t index = kLegacyHeader; index < json.size(); ++index) {
-    auto argument =
-        NumberIn(json[index], kByteMax, std::format("{}[{}]", where, index));
+    auto argument = AuthoringNumber(json[index], kByteMax,
+                                    std::format("{}[{}]", where, index));
     if (!argument) return std::unexpected(argument.error());
     event.arguments.push_back(static_cast<std::uint8_t>(*argument));
   }
@@ -200,13 +188,15 @@ bool IsJsonFile(std::string_view file) {
   return file.ends_with(".json") || file.ends_with(Content::kGltfSuffix);
 }
 
-// The files of every output whose converter still writes legacy events,
-// moving those converters to their current versions; whether any moved. Other
-// versions are left for the converters to reconvert.
+// The files `takes` accepts of every output whose converter is at its step's
+// `from` version, moving those converters to their `to` versions; whether any
+// moved. Other versions are left for the converters to reconvert.
 bool PlanFiles(Content::ConversionManifest& manifest,
+               std::span<const VersionStep> steps,
+               const std::function<bool(std::string_view)>& takes,
                std::set<std::string>& files) {
   bool moved = false;
-  for (const VersionStep& step : kConverters) {
+  for (const VersionStep& step : steps) {
     const auto found = manifest.converters.find(step.name);
     if (found == manifest.converters.end() || found->second != step.from) {
       continue;
@@ -216,26 +206,11 @@ bool PlanFiles(Content::ConversionManifest& manifest,
     for (const Content::ConversionOutput& output : manifest.outputs) {
       if (output.converter != step.name) continue;
       for (const std::string& file : output.files) {
-        if (IsJsonFile(file)) files.insert(file);
+        if (takes(file)) files.insert(file);
       }
     }
   }
   return moved;
-}
-
-Result<void> UpgradeFile(const fs::path& root, const std::string& file,
-                         AnimationAuthoringReport& report) {
-  auto written = EditJsonOutput(root, file, [&](Json& json) -> Result<bool> {
-    const std::size_t before = report.documents;
-    Upgrader upgrader(report);
-    if (auto walked = upgrader.Walk(json, false, file); !walked) {
-      return std::unexpected(walked.error());
-    }
-    return report.documents != before;
-  });
-  if (!written) return std::unexpected(written.error());
-  if (*written) ++report.written;
-  return {};
 }
 
 }  // namespace
@@ -277,24 +252,54 @@ Json LabeledJson(const Json& numbered, Json named) {
   return labeled;
 }
 
-std::expected<AnimationAuthoringReport, std::string> UpgradeAnimationAuthoring(
-    const fs::path& root) {
+std::expected<std::int64_t, std::string> AuthoringNumber(
+    const Json& value, std::int64_t max, const std::string& where) {
+  const std::optional<std::int64_t> number = Content::JsonWholeNumber(value);
+  if (!number || *number < 0 || *number > max) {
+    return std::unexpected(
+        std::format("{} must be a whole number from 0 to {}", where, max));
+  }
+  return *number;
+}
+
+std::expected<std::size_t, std::string> UpgradeConverterOutputs(
+    const fs::path& root, std::span<const AuthoringVersionStep> steps,
+    const std::function<bool(std::string_view)>& takes,
+    const std::function<Result<bool>(const std::string&, Json&)>& upgrade) {
   auto manifest = Content::LoadConversionManifest(root);
   if (!manifest) return std::unexpected(manifest.error());
-  AnimationAuthoringReport report;
-  if (!*manifest) return report;
+  if (!*manifest) return 0;
   std::set<std::string> files;
-  if (!PlanFiles(**manifest, files)) return report;
+  if (!PlanFiles(**manifest, steps, takes, files)) return 0;
+  std::size_t written = 0;
   // One file at a time: the character models alone are over 100 MB of JSON.
   for (const std::string& file : files) {
-    if (auto upgraded = UpgradeFile(root, file, report); !upgraded) {
-      return std::unexpected(upgraded.error());
-    }
+    auto edited = EditJsonOutput(
+        root, file, [&](Json& json) { return upgrade(file, json); });
+    if (!edited) return std::unexpected(edited.error());
+    if (*edited) ++written;
   }
-  if (auto written = WriteConversionManifest(root, **manifest); !written) {
-    return std::unexpected(written.error());
+  if (auto published = WriteConversionManifest(root, **manifest); !published) {
+    return std::unexpected(published.error());
   }
-  ++report.written;
+  return written + 1;
+}
+
+std::expected<AnimationAuthoringReport, std::string> UpgradeAnimationAuthoring(
+    const fs::path& root) {
+  AnimationAuthoringReport report;
+  auto written = UpgradeConverterOutputs(
+      root, kConverters, IsJsonFile,
+      [&](const std::string& file, Json& json) -> Result<bool> {
+        const std::size_t before = report.documents;
+        Upgrader upgrader(report);
+        if (auto walked = upgrader.Walk(json, false, file); !walked) {
+          return std::unexpected(walked.error());
+        }
+        return report.documents != before;
+      });
+  if (!written) return std::unexpected(written.error());
+  report.written = *written;
   return report;
 }
 

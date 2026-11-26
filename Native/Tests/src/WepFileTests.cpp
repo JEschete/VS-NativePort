@@ -112,7 +112,7 @@ content::WepTexture SampleTexture() {
 // encoder must keep.
 content::WepFile SampleWep() {
   content::WepFile wep;
-  wep.limb_ranges.front() = 0x0102;
+  wep.limb_ranges.front() = 1;  // body part 0 holds the triangle
   wep.bones = {Bone(0, kRootParent), Bone(-100, 0), Bone(-50, 1)};
   wep.bones.at(1).tag = 2;
   wep.bones.at(2).reserved13 = {7, 8, 9};

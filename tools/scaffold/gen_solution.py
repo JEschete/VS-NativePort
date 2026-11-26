@@ -88,6 +88,7 @@ PROJECTS = [
                 r"Tools\Extract\src\FarConversion.cpp",
                 r"Tools\Extract\src\ImageFilesWriter.cpp",
                 r"Tools\Extract\src\ImageConversion.cpp",
+                r"Tools\Extract\src\ModelAuthoring.cpp",
                 r"Tools\Extract\src\ShpModelConversion.cpp",
                 r"Tools\Extract\src\TimImage.cpp",
                 r"Tools\Extract\src\WepModelConversion.cpp",

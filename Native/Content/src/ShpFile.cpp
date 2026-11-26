@@ -26,7 +26,7 @@ constexpr std::size_t kBoneCountAt = 4;
 constexpr std::size_t kGroupCountAt = 5;
 constexpr std::size_t kTriangleCountAt = 6;
 constexpr std::size_t kQuadCountAt = 8;
-constexpr std::size_t kMixedCountAt = 10;
+constexpr std::size_t kStyledCountAt = 10;
 constexpr std::size_t kLayoutAt = 0x0C;
 constexpr std::size_t kModelSizeAt = 0xF4;
 constexpr std::size_t kModelHeaderBytes = 0x40;
@@ -789,7 +789,7 @@ std::expected<ShpModelCounts, std::string> DecodeShpCounts(Bytes data) {
                         .groups = ByteAt(data, kGroupCountAt),
                         .parts = {ReadLe<std::uint16_t>(data, kTriangleCountAt),
                                   ReadLe<std::uint16_t>(data, kQuadCountAt),
-                                  ReadLe<std::uint16_t>(data, kMixedCountAt)}};
+                                  ReadLe<std::uint16_t>(data, kStyledCountAt)}};
 }
 
 std::expected<ShpModel, std::string> DecodeShpModel(

@@ -22,6 +22,7 @@
 #include "Content/WepModelFiles.hpp"
 #include "Extract/ImageConversion.hpp"
 #include "Extract/ImageFilesWriter.hpp"
+#include "Extract/ModelAuthoring.hpp"
 
 namespace VS::Extract {
 using Content::ConversionOutput;
@@ -263,6 +264,12 @@ std::expected<ConvertedModel, std::string> ConvertWepModel(
 
 std::expected<ModelConversionReport, std::string> ConvertDiscWeapons(
     const fs::path& root, bool force) {
+  // Existing outputs move to the named polygon form instead of reconverting.
+  if (!force) {
+    if (auto upgraded = UpgradeModelAuthoring(root); !upgraded) {
+      return std::unexpected(upgraded.error());
+    }
+  }
   auto start = StartRun(root);
   if (!start) return std::unexpected(start.error());
   std::vector<ModelJob> jobs;
