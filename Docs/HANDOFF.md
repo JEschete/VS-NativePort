@@ -6,10 +6,9 @@ counts, captures) goes once, on the issue; link to it here. Earlier handoffs are
 
 ## State
 
-- `main` at `d4cc6aa40` (SHP stable sequence-bank IDs, #520; Source Quality
-  run 45815777096 succeeded). The owner
-  authorized direct work on `main`; each slice is committed, pushed and CI-confirmed before its evidence comment
-  on #520.
+- `main` at `69c949d22` (SHP field meanings and cold-read 2 doc fixes, #520; Source Quality run 45821363883).
+  The owner authorized direct work on `main`; each slice is committed, pushed and CI-confirmed before its
+  evidence comment on #520. Owner direction: work only on what #520 needs; no new slices without the owner.
 - Work stream: asset migration, ordered by roadmap #217 under plan decisions D25 and D26. Tracker #4's ordered
   gameplay list (#1-#16) is complete.
 - Verification policy (owner): focused Catch2 tags and scoped checks per slice; the wide Debug run (~24 min) only
@@ -37,25 +36,27 @@ ASSET_PIPELINE §4 and the §7.2 readability gate. Shipped slices, each with evi
   82 `stream.json` files, each rebuilding its version 1 header byte for byte. Still derived check records until #216.
 - SHP models: `vs.shp-model` 5 gives owned SEQ banks stable IDs and maps
   battle/special layout slots to them; authoring upgrades v4 SHP and ZUD
-  body-model outputs in place, preserving edits (`d4cc6aa40`).
+  body-model outputs in place, preserving edits (`d4cc6aa40`). glTF round-trip limits are stated (`6075c9323`)
+  and the named layout and bone fields are explained in §6.2.6 (`69c949d22`).
 - Bestiary: previews by archetype, defeat ranges by enemy kind; limb labels by body part.
 - Materials: catalog version 2 keeps only the columns MENUC reads (strength, intelligence, agility); class
   points, affinities and base DP are archived as named fields in the import provenance (`694b6714c`).
 
 Remaining:
 
-- §7.2 cold reads (five seeded records per family, seed `520:<family>`): materials passed; seeded action hit,
-  action-definition and action-category samples are recorded in ACTION_HITS_COLD_READ. Camera framing, damage split
-  across limbs and effect timing stay undocumented. JSON/glTF read 1 (issuecomment-7184304082): backgrounds,
-  text and image sidecars passed; archetypes, animation sets, AKAO streams and shape glTF were partly readable;
-  audio banks failed.
-- Next from read 1, in order (event ops, archetype headers, audio-bank envelopes, stream headers and SHP sequence
-  references done): glTF positional metadata labels and round-trip limits. Then fresh
-  cold reads of each changed family and an action re-read.
+- §7.2 cold reads (five seeded records per family). Read 1 (issuecomment-7184304082) and the action reads are
+  in ACTION_HITS_COLD_READ. Read 2 (seeds `520:<family>:2`, action CSVs `:3`): audio banks, audio streams, action
+  hits and actions passed; archetypes, animation sets, shape glTF and action categories were partly readable.
+  `69c949d22` answers its units and field gaps (SEQ key units, `target_kinds`, SHP layout/bone fields in
+  §6.2.6, WEP rotation unit) and its drift (sequence sizes in bytes, `zud-json` 5, no `unitScale`).
+- Still open from read 2: animation index roles (idle, walk, hit), the ESQ selector model-kind table, which
+  battle/special slot serves which weapon or role, SHP header `sound`/`sequence_word`/`palette_words`, and
+  `camera_zoom` distance units. A fresh read of the partly readable families follows any fix.
+- Closure gates beyond readability: authored-edit gameplay evidence, and typed runtime adoption with EC-04 T-shim
+  retirement (linked to #199, #58, #200, #55, #48, #203-#207, #499, #500, #216).
 - Blocked on their consumers: zone-enemy `movement_class`/`gait_class` (semantics unnamed; schemas list only the
   bits consumers test) and `zones.music_id` (selects `MUSIC/MUSIC<n>` and `SOUND/WAVE<n>`; needs #501).
-- Deferred: room semantic names, JSON `raw_scale`, an optional typed `GemEffect` enum, and typed runtime
-  adoption with EC-04 T-shim retirement.
+- Deferred: room semantic names, JSON `raw_scale` and an optional typed `GemEffect` enum.
 - Checked and kept as columns: action-hit `hit_function` picks every checked hit's chance formula (only direct
   hits skip it), and blade `attack_shape` is copied with the whole `vs_Range` into inventory and saves
   (`146C.c:637`, `MENUC 168.c:4974`), so it cannot move to import provenance as the unread material fields did.
