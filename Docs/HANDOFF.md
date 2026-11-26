@@ -6,7 +6,8 @@ counts, captures) goes once, on the issue; link to it here. Earlier handoffs are
 
 ## State
 
-- `main` at `1c5a441ea` (audio bank envelopes, #520; Source Quality run 45787308134 succeeded). The owner
+- `main` at `d4cc6aa40` (SHP stable sequence-bank IDs, #520; Source Quality
+  run 45815777096 succeeded). The owner
   authorized direct work on `main`; each slice is committed, pushed and CI-confirmed before its evidence comment
   on #520.
 - Work stream: asset migration, ordered by roadmap #217 under plan decisions D25 and D26. Tracker #4's ordered
@@ -34,19 +35,22 @@ ASSET_PIPELINE §4 and the §7.2 readability gate. Shipped slices, each with evi
   `akao3_articulation` provenance (AUDIO_VIDEO §6.5). `authoring` upgraded 83 banks (3,152 instruments).
 - Effect streams: `vs.audio-stream` 2 names each header word the player reads, with units; `authoring` upgraded
   82 `stream.json` files, each rebuilding its version 1 header byte for byte. Still derived check records until #216.
+- SHP models: `vs.shp-model` 5 gives owned SEQ banks stable IDs and maps
+  battle/special layout slots to them; authoring upgrades v4 SHP and ZUD
+  body-model outputs in place, preserving edits (`d4cc6aa40`).
 - Bestiary: previews by archetype, defeat ranges by enemy kind; limb labels by body part.
 - Materials: catalog version 2 keeps only the columns MENUC reads (strength, intelligence, agility); class
   points, affinities and base DP are archived as named fields in the import provenance (`694b6714c`).
 
 Remaining:
 
-- §7.2 cold reads (five seeded records per family, seed `520:<family>`): materials passed; actions reads 4 and 5
-  were partly readable (volume, flag, prerequisite and AI-reach findings since fixed; camera framing, damage split
-  across limbs and effect timing stay undocumented). JSON/glTF read 1 (issuecomment-7184304082): backgrounds,
+- §7.2 cold reads (five seeded records per family, seed `520:<family>`): materials passed; seeded action hit,
+  action-definition and action-category samples are recorded in ACTION_HITS_COLD_READ. Camera framing, damage split
+  across limbs and effect timing stay undocumented. JSON/glTF read 1 (issuecomment-7184304082): backgrounds,
   text and image sidecars passed; archetypes, animation sets, AKAO streams and shape glTF were partly readable;
   audio banks failed.
-- Planned slices from read 1, in order (event ops, archetype headers, audio-bank envelopes and stream headers
-  done): glTF positional metadata labels and round-trip limits. Then fresh
+- Next from read 1, in order (event ops, archetype headers, audio-bank envelopes, stream headers and SHP sequence
+  references done): glTF positional metadata labels and round-trip limits. Then fresh
   cold reads of each changed family and an action re-read.
 - Blocked on their consumers: zone-enemy `movement_class`/`gait_class` (semantics unnamed; schemas list only the
   bits consumers test) and `zones.music_id` (selects `MUSIC/MUSIC<n>` and `SOUND/WAVE<n>`; needs #501).
