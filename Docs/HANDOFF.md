@@ -6,7 +6,7 @@ counts, captures) goes once, on the issue; link to it here. Earlier handoffs are
 
 ## State
 
-- `main` at `694b6714c` (material fields archived, #520; Source Quality run 45759087013 succeeded). The owner
+- `main` at `aef2e1e47` (action volumes, #520; Source Quality run 45766202131 succeeded). The owner
   authorized direct work on `main`; each slice is committed, pushed and CI-confirmed before its evidence comment
   on #520.
 - Work stream: asset migration, ordered by roadmap #217 under plan decisions D25 and D26. Tracker #4's ordered
@@ -24,13 +24,18 @@ ASSET_PIPELINE §4 and the §7.2 readability gate. Shipped slices, each with evi
   columns and units, enemy names as text, enemy kinds in an enemy-kinds table, gem effects by behavior, part
   categories by part kind (selected enums).
 - Actions: hit effects, hit formulas, hit prerequisites and shield PP by behavior; effect packages by asset id
-  (`asset.effect.eNNN.p`; semantic effect names wait for #216).
+  (`asset.effect.eNNN.p`; semantic effect names wait for #216); behavior flags defined in ACTION_HITS §4.7.2 and
+  range/area volume shapes and placement in §4.7.3 (`aef2e1e47`).
 - Bestiary: previews by archetype, defeat ranges by enemy kind; limb labels by body part.
 - Materials: catalog version 2 keeps only the columns MENUC reads (strength, intelligence, agility); class
   points, affinities and base DP are archived as named fields in the import provenance (`694b6714c`).
 
 Remaining:
 
+- §7.2 cold reads (five seeded records per family, seed `520:<family>`): materials passed; actions reads 4 and 5
+  were partly readable. Their volume, flag, prerequisite and AI-reach findings are fixed in ACTION_HITS; camera
+  framing, damage split across limbs and effect timing stay undocumented. Still unread: the JSON families
+  (`models\zud`, `models\animation-sets`, audio banks and AKAO streams, backgrounds, text) and glTF.
 - Blocked on their consumers: zone-enemy `movement_class`/`gait_class` (semantics unnamed; schemas list only the
   bits consumers test) and `zones.music_id` (selects `MUSIC/MUSIC<n>` and `SOUND/WAVE<n>`; needs #501).
 - Deferred: room semantic names, JSON `raw_scale`, an optional typed `GemEffect` enum, and typed runtime

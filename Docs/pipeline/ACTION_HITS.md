@@ -18,9 +18,9 @@ against.
 - `never-1`, `never-2`, `never-3` (direct): the effect is applied once to the first target. There is no check and
   no roll, so `hit_function` is unread.
 - `always-2` (self): the hit is checked, rolled and applied against the user.
-- Every other value is handled per target. A failed check skips the target; on the first hit, it also stores a
-  miss for that target. Otherwise the hit is rolled. The effect applies when the roll lands, or always in a
-  preview (the menu's damage and chance display).
+- Every other value, `always-0` and `always-1` included, is handled per target. A failed check skips the target;
+  on the first hit, it also stores a miss for that target. Otherwise the hit is rolled. The effect applies when the
+  roll lands, or always in a preview (the menu's damage and chance display).
 
 ### Prerequisites
 
@@ -68,7 +68,7 @@ The three difference functions then change by a random −5 to +5 when executed 
 | `magic-damage` | Damage formula, using intelligence. |
 | `hp-healed` | Damage formula, using intelligence, varying by −5 to +5 when executed. Refused for affinity `weapon`, and for `physical` while the user's weapon is drawn. |
 | `item-recovery` | 5 × `stat_factor`, varying by −5 to +5 when executed, floored at 0. |
-| `trap-panel-damage`, `heal-panel-hp-healed` | Target max HP / 10 × `stat_factor` + 10 × (trap level + 1), less the target's strength, armor and raised-shield defense, floored at 0, ±5 when executed. Refused for affinity `weapon`. Trap damage never takes the last HP. |
+| `trap-panel-damage`, `heal-panel-hp-healed` | Target max HP / 10 × `stat_factor` + 10 × (trap level + 1), less the target's strength, armor and raised-shield defense, floored at 0, ±5 when executed. The trap level is a property of the room (from its MPD; no catalog authors it yet). Refused for affinity `weapon`. Trap damage never takes the last HP. |
 | `recoverable-hp`, `recoverable-mp` | The target's max − current HP or MP. |
 | `risk` | The target's risk. |
 | `weapon-pp` | The user's weapon PP. |
@@ -162,7 +162,7 @@ action's targets, and it breaks ties between equal scores. A weight of 0 rules t
 | `special-mode` | Special-action mode is a setting an enemy is spawned with (bit 12 of its spawn flags; no catalog column sets it yet). An enemy in that mode skips the hit simulation for the action. The pairing gets weight 40, and its score rises by one step, so it wins ties. Other enemies ignore the flag. |
 | `rarely-chosen` | The AI discards the pairing when a roll from 0 to 127 is below 115, so it considers the action in about one evaluation in ten. |
 | `fallback-eligible` | The AI remembers the first pairing for each action slot, up to 16, as a fallback. When a plan ends with no candidate and the enemy's spawn flags allow fallbacks (bit 13), the plan uses the remembered pairings at weight 128. |
-| `shaped-area` | The AI measures the area's reach from `area_shape`, its dimensions and `area_angle`, keeping it only when it is shorter than the action's range. It does not use the action on a target nearer to the enemy than that reach. |
+| `shaped-area` | The AI estimates the area's reach in steps of 32 world units from `area_shape` and the tilt θ = `area_angle` × 11.25 degrees: `area_range_z` × \|cos θ\| for `ellipsoid`, `centered-cylinder` and `cone`, `area_range_y` × \|cos θ\| for `cylinder`, and `area_range_y` × \|sin θ\| for the other shapes. It keeps the reach only when it is shorter than the action's range, and does not use the action on a target nearer to the enemy than that reach. |
 | `radial-area` | As `shaped-area`, but the reach is `area_range_y` steps of 32 world units, whatever the shape. |
 | `targets-unconditionally` | A `beneficial` action may go to any ally, and the next three flags are ignored. Without this flag, the ally must match one of them. |
 | `targets-status-restricted` | ... an ally with half movement, strength, intelligence or agility down, paralysis, poison or numbness, or silence when it has spells. |
@@ -181,10 +181,11 @@ With neither `beneficial` nor `harmful`, the AI may use the action on allies and
 ### 4.7.3 Action volumes (#520)
 
 The `range_*` columns of `catalogs\battle\actions.csv` describe an action's **range volume** and the `area_*` columns
-its **area volume** (`Battle/Targeting.cpp`, `Battle/SphereContainment.cpp`). An actor, or a body part for a limb
-category, is a candidate when its targeting point lies inside the volume. Extents are in steps of 32 world units.
-Before it is tilted, a volume's height axis points straight up, its x extent runs across and its z extent runs from
-front to back.
+its **area volume** (`Battle/Targeting.cpp`, `Battle/SphereContainment.cpp`). A whole actor is a candidate when its
+centre point (the bone its model tags 255) lies inside the volume; for a limb category, each body part is tested at
+its own position. Extents are in steps of 32 world units, and x and z are measured from the centre line, so an x of
+4 reaches 128 units to each side. Before it is tilted, a volume's height axis points straight up, its x (across)
+axis runs from side to side and its z axis from front to back.
 
 | Shape | Volume |
 |---|---|
@@ -196,13 +197,13 @@ front to back.
 | `rectangle` | A box standing on the origin, y tall, reaching x to each side and z ahead and behind. |
 | `diamond` | As `rectangle`, but its base is a diamond with corners x to each side and z ahead and behind. |
 
-`none` contains nothing. The angle tilts the height axis about the volume's across axis in steps of 11.25 degrees
-(1/32 turn), and 16 turns the volume upside down. Where each volume goes depends on the action's category:
+`none` contains nothing. An angle of n tilts the height axis n × 11.25 degrees (n/32 of a turn) about the x axis,
+so 16 turns the volume upside down. Where each volume goes depends on the action's category:
 
-- **Chosen single target** (`direct-*`, `treasure-chest`): the range volume stands on a point of the user's model
-  and turns with the user. A `range_angle` of 24 lays its height axis flat ahead of the user, as `analyze` and
-  `unlock` do, and 8 lays it flat behind. The actors or body parts inside it are the choices. A `range_x` of 255
-  takes the weapon's extents and angle instead.
+- **Chosen single target** (`direct-*`, `treasure-chest`): the range volume stands on the bone the user's model tags
+  250 and turns with the user. A `range_angle` of n leans it from upright toward the user's back, so 8 lies flat
+  behind and 24 flat ahead, as `analyze` and `unlock` do. The actors or body parts inside it are the choices. A
+  `range_x` of 255 takes the weapon's extents and angle instead.
 - **Ground area** (`ground-area*`): the action builds the same range volume and centres the area volume on the
   chosen point. The area volume does not turn: x runs along the map's x axis and z along its z axis, and an
   `area_angle` of 8 lays its height axis toward the map's +z. The actors or body parts inside it are the targets.
@@ -211,5 +212,8 @@ front to back.
   steps long. `range_angle` and the `area_*` columns are not used for targeting. Only enemies have these actions;
   when Ashley uses one, the volume stays level and points toward the map's +z.
 
-Other categories do not use the volumes to find targets. The AI's `shaped-area` reach (§4.7.2) reads `area_shape`
-and `area_angle` on its own.
+Other categories do not use the volumes to find targets. Neither do chain and defense abilities, whose volumes are
+`none`: a chain ability (the `direct-limb-or-object` abilities) hits the targets of the attack it follows, and a
+defense ability (the `environment` abilities) answers the attack that hit the user, with the attacker as its only
+target. The AI's `shaped-area` reach
+(§4.7.2) reads `area_shape` and `area_angle` on its own.
