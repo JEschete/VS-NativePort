@@ -8,6 +8,7 @@
 #include <fstream>
 #include <functional>
 #include <ios>
+#include <limits>
 #include <map>
 #include <optional>
 #include <span>
@@ -1024,6 +1025,111 @@ void DropBank(const ModelRoot& root) {
   WriteFile(manifest, std::as_bytes(std::span(kept)));
   REQUIRE(fs::remove(root.Root() / "disc" / fs::path(kBankPath)));
   WriteFile(root.Root() / "disc" / "OBJ" / "4F.SHP", Encoded(SampleShp(false)));
+}
+
+// Where an accessor's elements start in the model's buffer, and their stride.
+struct FloatColumn {
+  std::size_t start = 0;
+  std::size_t stride = 0;
+};
+
+FloatColumn ColumnOf(const content::JsonDocument& gltf,
+                     const content::JsonDocument& accessor_index,
+                     std::size_t element) {
+  const auto& accessor =
+      gltf.at("accessors").at(accessor_index.get<std::size_t>());
+  const auto& view =
+      gltf.at("bufferViews").at(accessor.at("bufferView").get<std::size_t>());
+  return {.start = view.value("byteOffset", std::size_t{0}) +
+                   accessor.value("byteOffset", std::size_t{0}),
+          .stride = view.value("byteStride", element)};
+}
+
+float FloatAt(std::span<const std::byte> bytes, std::size_t at) {
+  float value = 0;
+  std::memcpy(&value, &bytes[at], sizeof value);
+  return value;
+}
+
+// Moves the first `limit` glTF corners of SHP vertex `vertex`, across every
+// primitive of the sample model, one unit along X; how many corners it has.
+std::size_t MoveCorners(const ModelRoot& root, std::uint32_t vertex,
+                        std::size_t limit) {
+  const content::JsonDocument gltf = ParseGltf(ReadModel(SampleGltf(root)));
+  const fs::path bin = fs::path(SampleGltf(root)).replace_extension(".bin");
+  Bytes bytes = ReadModel(bin);
+  constexpr std::size_t kPositionBytes = 3 * sizeof(float);
+  std::size_t corners = 0;
+  for (const auto& primitive : gltf.at("meshes").at(0).at("primitives")) {
+    const auto& attributes = primitive.at("attributes");
+    const std::size_t count =
+        gltf.at("accessors")
+            .at(attributes.at("POSITION").get<std::size_t>())
+            .at("count")
+            .get<std::size_t>();
+    const FloatColumn positions =
+        ColumnOf(gltf, attributes.at("POSITION"), kPositionBytes);
+    const FloatColumn numbers =
+        ColumnOf(gltf, attributes.at(std::string(content::kShpVertexAttribute)),
+                 sizeof(float));
+    for (std::size_t corner = 0; corner < count; ++corner) {
+      const float number =
+          FloatAt(bytes, numbers.start + (corner * numbers.stride));
+      if (static_cast<std::uint32_t>(number) != vertex) continue;
+      if (corners++ >= limit) continue;
+      const std::size_t x = positions.start + (corner * positions.stride);
+      const float moved = FloatAt(bytes, x) + 1.0F;
+      std::memcpy(&bytes[x], &moved, sizeof moved);
+    }
+  }
+  WriteFile(bin, bytes);
+  return corners;
+}
+
+// Moves the first bone node with a translation `by` along X.
+void NudgeBoneNode(const ModelRoot& root, double by) {
+  root.EditGltf(
+      content::kShpModelDirectory, "4F", [by](content::JsonDocument& gltf) {
+        for (auto& node : gltf.at("nodes")) {
+          if (node.contains("translation")) {
+            node["translation"][0] = node["translation"][0].get<double>() + by;
+            return;
+          }
+        }
+        FAIL("no bone node has a translation");
+      });
+}
+
+TEST_CASE("Model geometry edits load when every corner of a vertex agrees",
+          "[content-models][shp]") {
+  // Vertex 2 is a corner of polygons in every part, so of several primitives.
+  constexpr std::uint32_t kShared = 2;
+  const content::ShpFile original = SampleShp(false);
+  const ModelRoot root({{.path = "OBJ/4F.SHP", .bytes = Encoded(original)}});
+  CHECK(root.Convert().characters.converted == 1);
+  const std::size_t corners =
+      MoveCorners(root, kShared, std::numeric_limits<std::size_t>::max());
+  REQUIRE(corners >= 3);
+  const auto moved = LoadShp(root.Root(), root.Read(0));
+  INFO(ErrorOf(moved));
+  REQUIRE(moved.has_value());
+  const auto shp = content::DecodeShp(*moved);
+  INFO(ErrorOf(shp));
+  REQUIRE(shp.has_value());
+  CHECK(shp->vertices.at(2).x == original.vertices.at(2).x + 1);
+  CHECK(shp->vertices.at(1) == original.vertices.at(1));
+  // The joints are derived from the payload's bones; a node edit is refused.
+  NudgeBoneNode(root, 1.0);
+  const auto node = LoadShp(root.Root(), root.Read(0));
+  REQUIRE_FALSE(node.has_value());
+  CHECK(node.error().find("edit the bones there") != std::string::npos);
+  NudgeBoneNode(root, -1.0);
+  REQUIRE(LoadShp(root.Root(), root.Read(0)).has_value());
+  // One corner moved alone splits the SHP vertex.
+  MoveCorners(root, kShared, 1);
+  const auto split = LoadShp(root.Root(), root.Read(0));
+  REQUIRE_FALSE(split.has_value());
+  CHECK(split.error().find("at another corner") != std::string::npos);
 }
 
 TEST_CASE("SEQ banks load from their owner's converted glTF",

@@ -80,10 +80,17 @@ converter `shp-gltf` version 5 (`Extract/ShpModelConversion.hpp`, `Content/ShpMo
   and loaded, or refused with the file and member named. `RequireConversions` refuses to start without the
   `shp-gltf` batch. The load completes in the same update that requests it (the original waited for the CD). An
   edited model must still fit the original sector-rounded allocation; a larger one is refused.
+- **Round-trip limits.** Tested geometry edits: move a vertex by moving every glTF corner that shares its
+  `_VS_VERTEX` number. Positions round to whole units and must stay within -32768 to 32767 of the bone's origin on
+  each axis. A corner moved alone is refused. UVs round to texels 0 to 255 each way; colours (coloured models only)
+  round to bytes. Each corner keeps one bone, weighted 1, in `JOINTS_0`/`WEIGHTS_0`. Bones are edited only in
+  `asset.extras.vs.bones`. Nodes, skin and inverse bind matrices are derived from those bones; editing a node is
+  refused. A file without `_VS_VERTEX`, the primitive entries or `asset.extras.vs`, or with extra skin sets, is
+  refused rather than repaired. Adding or removing vertices or polygons, and Blender re-export, are untested and
+  unsupported.
 
-Open work: #205, #206 (glTF preview clips for SEQ banks and ESQ sets), #207 (ETM references and texture tracks); a
-model larger than its original allocation and a Blender re-export through the validator are unsupported. Weapons are
-§6.2.4 and ZUD enemy archetypes §6.2.5.
+Open work: #205, #206 (glTF preview clips for SEQ banks and ESQ sets), #207 (ETM references and texture tracks).
+Weapons are §6.2.4 and ZUD enemy archetypes §6.2.5.
 
 #### 6.2.1 Container, schema and optional extension
 
