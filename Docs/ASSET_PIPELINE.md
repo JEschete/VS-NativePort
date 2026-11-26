@@ -49,6 +49,8 @@ must still be usable; gameplay policy and file-format limits are different.
 | 4.7.1 | [ACTION_HITS](pipeline/ACTION_HITS.md#471-action-hit-values-520) | Action hit values (#520) |
 | 4.7.2 | [ACTION_HITS](pipeline/ACTION_HITS.md#472-action-behavior-flags-520) | Action behavior flags (#520) |
 | 4.7.3 | [ACTION_HITS](pipeline/ACTION_HITS.md#473-action-volumes-520) | Action range and area volumes (#520) |
+| 4.7.4 | [ACTION_HITS](pipeline/ACTION_HITS.md#474-action-presentation-and-limb-damage) | Action presentation and limb damage (#520) |
+| 4.7.5 | [ACTION_HITS_COLD_READ](pipeline/ACTION_HITS_COLD_READ.md#475-seeded-action-hit-cold-read) | Seeded action-hit cold read (#520) |
 | 5 | [TEXT](pipeline/TEXT.md#5-tier-2-text-and-fonts) | Tier 2: text and fonts |
 | 5.1 | [TEXT](pipeline/TEXT.md#51-native-file-picker-prompt-adoption-54500) | Native file-picker prompt adoption (#54/#500) |
 | 5.2 | [TEXT](pipeline/TEXT.md#52-shared-catalog-ownership-and-encyclopedia-text) | Shared catalog ownership and encyclopedia text |
