@@ -33,7 +33,7 @@
       "type": "integer",
       "minimum": -128,
       "maximum": 127,
-      "description": "the item's 1-based index in its family: item_id less 0 for a blade, 95 for a grip, 126 for a shield, armour or accessory, 260 for a gem"
+      "description": "the item's number within its own list, counted from 1: item_id for a blade, item_id - 95 for a grip, item_id - 126 for a shield, armour or accessory, item_id - 260 for a gem"
     },
     {
       "name": "weapon_model_id",

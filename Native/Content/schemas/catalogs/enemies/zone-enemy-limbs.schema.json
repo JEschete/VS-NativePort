@@ -35,14 +35,14 @@
       "type": "integer",
       "minimum": -128,
       "maximum": 127,
-      "description": "signed; added to the enemy's agility and intelligence totals when the chance of a hit on this limb is worked out"
+      "description": "signed; added to the enemy's agility (intelligence for Exorcism and Banish) when an action rolls to hit this limb, then scaled by (100 - the enemy's risk) percent: at 0 risk each point lowers the chance by 1, and a negative value makes the limb easier to hit. It counts for the hit functions agility-difference (attacks, break arts, most enemy abilities), agility-difference-2 (spells) and intelligence-difference; see ASSET_PIPELINE 4.7.1"
     },
     {
       "name": "chain_evasion",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "how well the limb evades actions whose hit_function is chain-evasion: they land (255 - value) * 100 / 255 percent of the time"
+      "description": "how well the limb evades Ashley's chain abilities (hit_function chain-evasion): they land (255 - value) * 100 / 255 percent of the time, plus her hidden 10, so 0 always lands, 128 lands 59% and 255 lands 10%"
     },
     {
       "name": "type_none",

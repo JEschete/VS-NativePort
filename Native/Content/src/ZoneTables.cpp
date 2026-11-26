@@ -441,9 +441,19 @@ void AddEnemyFields(TableLayout& table) {
              "before the enemy turns to face its target is the scale times 8 "
              "(times 2 above a collision radius of 128); at 0 it never turns "
              "to face it");
+  // BATTLE.PRG's kWanderTimingPresets (move, rest, rate): (40, 5400, 6),
+  // (40, 30, 6), (240, 60, 7), (90, 15, 10), (300, 300, 7), (0, 0, 0),
+  // (70, 71, 72), (0, 1, 70); disc templates use 0-3 and 7.
+  // decomp: func_800E1EAC (src/BATTLE/BATTLE.PRG/770A4.c:1092)
   table.Bits("wander_preset", 0x2C, 4, 3,
-             "picks the wander move period, rest period and rate from "
-             "Battle::Ai::kWanderTimingPresets");
+             "how it wanders while idle, from "
+             "Battle::Ai::kWanderTimingPresets: it walks for the move period "
+             "and rests for the rest period, counted in AI updates, and at "
+             "the end of each has a 44 in 128 chance of repeating it; while "
+             "walking, each update has a 1 in 2^rate chance of starting a new "
+             "walk. 0: moves 40, rests 5400, rate 6 (hardly wanders); 1: 40, "
+             "30, 6; 2: 240, 60, 7; 3: 90, 15, 10; 4: 300, 300, 7; 5 and 7 "
+             "never walk; 6: 70, 71, 72 (read as rate 8)");
   table.Bits("approaches_target_point", 0x2C, 7, 1,
              "1: closing on a near target steps to the point where it stands "
              "rather than following the target");
@@ -510,11 +520,21 @@ void AddEnemyFields(TableLayout& table) {
              "timer runs, and any rule but never also flees while its action "
              "status is fleeing; a room placement can override it",
              kFleeRules);
+  // BATTLE.PRG's kTerrainRejectMasks are 4, 5, 5, 7, tested against the AI
+  // tile flags shifted down a byte. The room AI map sets 0x100 << the trap
+  // record's state word (0 or 1; disc traps also hold 2), and 0x400 marks a
+  // trap disabled once it has gone off or by DisableTrapAtPosition.
+  // decomp: func_800E6F9C (src/BATTLE/BATTLE.PRG/7CD68.c:338)
+  // decomp: func_800E68EC (src/BATTLE/BATTLE.PRG/7DDDC.s:226)
+  // decomp: BATTLE.PRG func_80074314 (src/BATTLE/BATTLE.PRG/146C.c:4810)
   table.Bits("terrain_preset", 0x2F, 6, 2,
-             "picks the tile kinds it will not walk on from "
-             "Battle::Ai::kTerrainRejectMasks, unless movement_class or "
-             "gait_class has 64 or 128, which keep its existing mask; a room "
-             "placement can override it");
+             "the floor traps it will not step on, from "
+             "Battle::Ai::kTerrainRejectMasks: 0 avoids traps that have gone "
+             "off or been disabled; 1 and 2 also avoid live traps whose room "
+             "record holds state word 0; 3 also avoids those holding 1 (live "
+             "traps holding any other value are walked on). A movement_class "
+             "or gait_class with 64 or 128 keeps its existing mask instead; a "
+             "room placement can override it");
   table.packed.push_back(
       {.legacy = "ai_settings",
        .offset = 0x2C,
@@ -586,14 +606,21 @@ void AddLimbFields(TableLayout& table) {
   // decomp: getAgilityDifference (src/BATTLE/BATTLE.PRG/146C.c:9876)
   // decomp: getIntelligenceDifference (src/BATTLE/BATTLE.PRG/146C.c:9927)
   table.Add("agility_defense_bonus", 0x02, 1, true,
-            "signed; added to the enemy's agility and intelligence totals "
-            "when the chance of a hit on this limb is worked out");
+            "signed; added to the enemy's agility (intelligence for "
+            "Exorcism and Banish) when an action rolls to hit this limb, "
+            "then scaled by (100 - the enemy's risk) percent: at 0 risk each "
+            "point lowers the chance by 1, and a negative value makes the "
+            "limb easier to hit. It counts for the hit functions "
+            "agility-difference (attacks, break arts, most enemy abilities), "
+            "agility-difference-2 (spells) and intelligence-difference; see "
+            "ASSET_PIPELINE 4.7.1");
   table.resigned.push_back("agility_defense_bonus");
   // decomp: getChainEvasionModifier (src/BATTLE/BATTLE.PRG/146C.c:10042)
   table.Add("chain_evasion", 0x03, 1, false,
-            "how well the limb evades actions whose hit_function is "
-            "chain-evasion: they land (255 - value) * 100 / 255 percent of "
-            "the time");
+            "how well the limb evades Ashley's chain abilities (hit_function "
+            "chain-evasion): they land (255 - value) * 100 / 255 percent of "
+            "the time, plus her hidden 10, so 0 always lands, 128 lands 59% "
+            "and 255 lands 10%");
   // Defense = (strength, or intelligence for a spell, plus the accessory's,
   // less 20) * (100 + the limb's type and affinity values + the accessory's
   // ratings) / 100, plus the shield and armour terms, all over risk / 2 + 100.
@@ -670,9 +697,9 @@ void AddPartFields(TableLayout& table) {
   table.Add("item_id", 0x00, 2, false,
             "the global item id, which names the part");
   table.Add("sub_id", 0x02, 1, true,
-            "the item's 1-based index in its family: item_id less 0 for a "
-            "blade, 95 for a grip, 126 for a shield, armour or accessory, "
-            "260 for a gem");
+            "the item's number within its own list, counted from 1: item_id "
+            "for a blade, item_id - 95 for a grip, item_id - 126 for a "
+            "shield, armour or accessory, item_id - 260 for a gem");
   table.Add("weapon_model_id", 0x03, 1, true,
             "a blade's or shield's WEP model (OBJ/<two hex digits>.WEP, "
             "converted to models/weapons/<two hex digits>.gltf); 0 for other "

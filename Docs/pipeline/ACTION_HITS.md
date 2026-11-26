@@ -50,7 +50,7 @@ The roll is `rand(100) < chance`; a chance of 255 is a miss. The chance is worke
 |---|---|
 | `follows-previous-hit` | 100 if the action's most recent roll landed (for one target, its first hit); otherwise a miss. |
 | `gem-modifier` | 100. +20 if the user's drawn weapon has the accuracy gem for physical or spell actions. −20 for each matching protective gem on the target's drawn shield (physical, spell, or one for the hit's effect). |
-| `agility-difference` | 100 + A·(100 − user risk)/100 − (B + limb defense)·(100 − target risk)/100, where A and B are the user's and target's agility: base + accessory + armor, plus weapon and shield while drawn. |
+| `agility-difference` | 100 + A·(100 − user risk)/100 − (B + the hit limb's `agility_defense_bonus`)·(100 − target risk)/100, where A and B are the user's and target's agility: base + accessory + armor, plus weapon and shield while drawn. |
 | `intelligence-difference` | As above with intelligence and without the 100; the target's side is also multiplied by its HP / max HP. |
 | `agility-difference-2` | As `agility-difference`, with 130 − the action's cost in place of 100. |
 | `risk` | (user risk + 150) × 100 / 256. |

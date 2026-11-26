@@ -199,7 +199,7 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 7,
-      "description": "picks the wander move period, rest period and rate from Battle::Ai::kWanderTimingPresets"
+      "description": "how it wanders while idle, from Battle::Ai::kWanderTimingPresets: it walks for the move period and rests for the rest period, counted in AI updates, and at the end of each has a 44 in 128 chance of repeating it; while walking, each update has a 1 in 2^rate chance of starting a new walk. 0: moves 40, rests 5400, rate 6 (hardly wanders); 1: 40, 30, 6; 2: 240, 60, 7; 3: 90, 15, 10; 4: 300, 300, 7; 5 and 7 never walk; 6: 70, 71, 72 (read as rate 8)"
     },
     {
       "name": "approaches_target_point",
@@ -333,7 +333,7 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 3,
-      "description": "picks the tile kinds it will not walk on from Battle::Ai::kTerrainRejectMasks, unless movement_class or gait_class has 64 or 128, which keep its existing mask; a room placement can override it"
+      "description": "the floor traps it will not step on, from Battle::Ai::kTerrainRejectMasks: 0 avoids traps that have gone off or been disabled; 1 and 2 also avoid live traps whose room record holds state word 0; 3 also avoids those holding 1 (live traps holding any other value are walked on). A movement_class or gait_class with 64 or 128 keeps its existing mask instead; a room placement can override it"
     },
     {
       "name": "mobility_limb_1",
