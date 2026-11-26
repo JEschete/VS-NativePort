@@ -5,17 +5,22 @@
 #include <bit>
 #include <cstddef>
 #include <cstdint>
+#include <filesystem>
 #include <format>
 #include <set>
+#include <span>
 #include <string>
+#include <system_error>
 #include <utility>
 #include <vector>
 
+#include "Content/EnemyPreviews.hpp"
 #include "Content/GameTextCodec.hpp"
 #include "Core/Sha256.hpp"
 #include "Extract/ConverterBatch.hpp"
 #include "Extract/SaveTextConversion.hpp"
 #include "Extract/TextContribution.hpp"
+#include "Platform/Paths.hpp"
 
 namespace VS::Extract {
 namespace {
@@ -26,7 +31,6 @@ constexpr std::size_t kTableBytes = kRecords * 2;
 constexpr unsigned kByteBits = 8;
 constexpr std::size_t kModelOffset = 0, kClassOffset = 2;
 constexpr std::size_t kFirstSubtypeOffset = 4, kSubtypeCountOffset = 6;
-constexpr int kPreviewTableEntries = 256;
 
 int Word(std::span<const std::byte> bytes, std::size_t at) {
   return std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(
@@ -132,8 +136,7 @@ std::expected<ImportedBestiary, std::string> DecodeBestiary(
       continue;
     }
     const std::string context = std::format("MON.BIN record {}", index);
-    if (Word(record, kModelOffset) < 0 ||
-        Word(record, kModelOffset) >= kPreviewTableEntries ||
+    if (!Content::IsEnemyPreviewCode(Word(record, kModelOffset)) ||
         Word(record, kClassOffset) < 0 ||
         Word(record, kClassOffset) >
             static_cast<int>(Content::BestiaryClass::kEvil) ||
@@ -423,5 +426,54 @@ std::expected<ImportedBestiary, std::string> ParseBestiaryProvenance(
     return std::unexpected(checked.error());
   }
   return original;
+}
+
+std::expected<BestiaryAuthoringReport, std::string> UpgradeBestiaryAuthoring(
+    const std::filesystem::path& root) {
+  BestiaryAuthoringReport report;
+  const auto table = root / Platform::Utf8Path(Content::kBestiaryPath);
+  std::error_code error;
+  const bool exists = std::filesystem::exists(table, error);
+  if (error) {
+    return std::unexpected(Platform::PathText(table) + ": " + error.message());
+  }
+  if (!exists) return report;
+  auto bytes = ReadFileBytes(table);
+  if (!bytes) return std::unexpected(bytes.error());
+  const std::string text(reinterpret_cast<const char*>(bytes->data()),
+                         bytes->size());
+  const auto& spec = Content::BestiaryTableSpec();
+  auto rewrite =
+      Content::NormalizeTableText(spec, text, Content::kBestiaryPath);
+  if (!rewrite) return std::unexpected(rewrite.error());
+  report.renamed_columns = rewrite->renamed_columns;
+  report.named_values = rewrite->named_values;
+  const auto before = Content::ParseBestiary(text);
+  if (!before) return std::unexpected(before.error());
+  const auto after = Content::ParseBestiary(rewrite->text);
+  if (!after) return std::unexpected(after.error());
+  if (*after != *before) {
+    return std::unexpected("bestiary authoring migration changed definitions");
+  }
+  const auto schema = Content::FormatTableSchema(spec);
+  const auto schema_bytes = std::as_bytes(std::span(schema));
+  const auto old_schema =
+      ReadFileBytes(root / Platform::Utf8Path(Content::kBestiarySchemaPath));
+  std::vector<OutputBytes> outputs;
+  if (rewrite->text != text) {
+    outputs.push_back({.name = Content::kBestiaryPath,
+                       .bytes = std::as_bytes(std::span(rewrite->text))});
+  }
+  if (!old_schema || !std::ranges::equal(*old_schema, schema_bytes)) {
+    outputs.push_back(
+        {.name = Content::kBestiarySchemaPath, .bytes = schema_bytes});
+  }
+  if (!outputs.empty()) {
+    if (auto written = WriteOutputFiles(root, outputs); !written) {
+      return std::unexpected(written.error());
+    }
+  }
+  report.written = outputs.size();
+  return report;
 }
 }  // namespace VS::Extract

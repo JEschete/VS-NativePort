@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <expected>
 #include <filesystem>
 #include <string>
@@ -26,4 +27,15 @@ ReconstructBestiary(const ImportedBestiary& imported);
 ParseBestiaryProvenance(std::span<const std::byte> json);
 [[nodiscard]] std::expected<void, std::string> ConvertBestiary(
     const std::filesystem::path& root, bool force);
+
+struct BestiaryAuthoringReport {
+  std::size_t renamed_columns = 0;
+  std::size_t named_values = 0;
+  std::size_t written = 0;
+};
+// Names the authored bestiary's preview codes by archetype and refreshes its
+// schema, refusing a rewrite that would change any definition. A root without
+// bestiary.csv is left alone.
+[[nodiscard]] std::expected<BestiaryAuthoringReport, std::string>
+UpgradeBestiaryAuthoring(const std::filesystem::path& root);
 }  // namespace VS::Extract

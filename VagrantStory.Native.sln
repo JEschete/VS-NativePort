@@ -91,6 +91,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ledgers", "ledgers", "{B9B1
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipeline", "pipeline", "{87792B9A-088B-545B-B0C4-8E4E24784836}"
 	ProjectSection(SolutionItems) = preProject
+		Docs\pipeline\ACTION_HITS.md = Docs\pipeline\ACTION_HITS.md
 		Docs\pipeline\ACTOR_ANIMATION.md = Docs\pipeline\ACTOR_ANIMATION.md
 		Docs\pipeline\AUDIO_VIDEO.md = Docs\pipeline\AUDIO_VIDEO.md
 		Docs\pipeline\BACKGROUNDS.md = Docs\pipeline\BACKGROUNDS.md

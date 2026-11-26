@@ -7,6 +7,7 @@
 #include <utility>
 #include <vector>
 
+#include "Content/EnemyPreviews.hpp"
 #include "Content/NativeText.hpp"
 #include "Content/TextCatalogRegistration.hpp"
 #include "Platform/Paths.hpp"
@@ -75,9 +76,18 @@ constexpr std::array kColumns{
                .references = {},
                .description = "Displayed enemy class.",
                .enumeration = kClasses},
-    Number("preview_table_index", 0, 255,
-           "MENU9 preview-table compatibility index (#200/#55); not a spawn "
-           "identity. Uses that table's model, equipment and palette policy."),
+    ColumnSpec{
+        .name = "preview_archetype",
+        .type = ColumnType::kEnum,
+        .maximum = kLastEnemyPreviewCode,
+        .references = {},
+        .description =
+            "Archetype whose model the Gazette previews, one of those MENU9's "
+            "preview table loads (#200 owns previewing any archetype); not a "
+            "spawn identity. Its legacy numeric alias is that table's index, "
+            "which also selects the entry's palette flag.",
+        .enumeration = kEnemyPreviews,
+        .legacy_name = "preview_table_index"},
     ColumnSpec{.name = "unlock",
                .type = ColumnType::kEnum,
                .maximum = 1,
@@ -103,6 +113,12 @@ constexpr TableSpec kSpec{
     .columns = kColumns,
     .key = kKey,
 };
+
+// Unlisted codes stay numeric so parsing reports them.
+std::string PreviewCell(std::uint32_t code) {
+  return IsEnemyPreviewCode(code) ? std::string(EnemyPreviewArchetype(code))
+                                  : std::to_string(code);
+}
 
 std::expected<BestiaryCatalog, std::string> FromRows(
     std::span<const TableRow> rows) {
@@ -153,7 +169,7 @@ std::string FormatBestiary(const BestiaryCatalog& catalog) {
          std::to_string(entry.display_order),
          std::string(
              kClasses.at(static_cast<std::size_t>(entry.enemy_class)).name),
-         std::to_string(entry.preview_table_index),
+         PreviewCell(entry.preview_table_index),
          std::string(kUnlocks.at(static_cast<std::size_t>(entry.unlock)).name),
          std::to_string(entry.first_defeated_subtype),
          std::to_string(entry.defeated_subtype_count), entry.name,

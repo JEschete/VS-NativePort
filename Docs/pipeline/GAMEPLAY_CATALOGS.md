@@ -19,8 +19,11 @@ catalog (§5.2). The layered SQLite compiler owns validation and immutable runti
   retains all 150 records and description extents, including initial UI values, reserved/name-suffix bytes and padding.
 - **Rules beyond the schema:** `legacy_id` is the visible record 0..77, or -1 for native-only entries.
   `display_order` is dense in the resulting list; the three-digit view admits at most 999 entries.
-  `preview_table_index` (0..255) is an explicit **MENU9 preview-table adapter** selecting that table's model,
-  equipment and palette policy, not an actor/species identity; #200/#55 own its replacement. The
+  `preview_archetype` names the archetype whose model the Gazette previews, one of the 79 MENU9's preview table
+  loads (`Content\EnemyPreviews.hpp`); it is not an actor/species identity, and #200/#55 own previewing any
+  archetype. Its legacy numeric alias (old trees' `preview_table_index`, which `VS.Extract authoring` renames) is that
+  table's index, which also selects the entry's palette flag. Indices the table gives no archetype of their own
+  would only repeat the default (code 0's), so the catalog refuses them. The
   `defeated-subtype-range` unlock tests any saved defeat bit in `[first_defeated_subtype, first + count)`; those are
   **actor subtypes** (the original producer writes subtypes below 256), not MON record numbers or preview indices.
   `always` exposes a native information entry with both range fields zero. Neither policy writes progress or

@@ -276,6 +276,9 @@
     <ClInclude Include="include\Content\DiscReaderLive.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
+    <ClInclude Include="include\Content\EnemyPreviews.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
     <ClInclude Include="include\Content\EsqFile.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>

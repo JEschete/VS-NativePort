@@ -35,7 +35,8 @@ struct BestiaryDefinition {
   std::int32_t legacy_id = -1;
   std::uint32_t display_order = 0;
   BestiaryClass enemy_class = BestiaryClass::kHuman;
-  // Explicit adapter to MENU9's preview table, not an enemy/spawn identity.
+  // MENU9 preview code of the preview_archetype column (EnemyPreviews.hpp);
+  // the Gazette's preview adapter, not an enemy/spawn identity.
   std::uint32_t preview_table_index = 0;
   BestiaryUnlock unlock = BestiaryUnlock::kDefeatedSubtypeRange;
   std::uint32_t first_defeated_subtype = 0;

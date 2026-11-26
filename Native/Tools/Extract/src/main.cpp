@@ -176,6 +176,17 @@ int UpgradeAuthoring(const fs::path& root) {
     VS::Core::LogError("extract", "bestiary: {}", bestiary.error());
     return 1;
   }
+  const auto bestiary_authoring = Extract::UpgradeBestiaryAuthoring(root);
+  if (!bestiary_authoring) {
+    VS::Core::LogError("extract", "bestiary authoring: {}",
+                       bestiary_authoring.error());
+    return 1;
+  }
+  VS::Core::LogInfo(
+      "extract",
+      "bestiary authoring: {} named columns, {} named values, {} files updated",
+      bestiary_authoring->renamed_columns, bestiary_authoring->named_values,
+      bestiary_authoring->written);
   const auto materials = Extract::ConvertDiscMaterials(root, false);
   if (auto learning = Extract::ConvertDiscLearning(root, false); !learning) {
     VS::Core::LogError("extract", "learning: {}", learning.error());
