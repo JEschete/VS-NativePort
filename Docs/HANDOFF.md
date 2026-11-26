@@ -2,56 +2,64 @@
 
 This file is the current state only. **Replace it, do not append**, at a package boundary, an owner pause or a
 blocker, and keep it under 12 KB (`python tools\lint\doc_budget.py --check`). Evidence (commits, CI runs, test
-counts, captures) goes once, on the issue; link to it here. Earlier handoffs are in Git history; the last long
-version is `git show 215cdd4d9:Docs/HANDOFF.md`.
+counts, captures) goes once, on the issue; link to it here. Earlier handoffs are in Git history.
 
 ## State
 
-- `main` at `215cdd4d9` (action catalog, #499) plus the documentation trim that replaced this file. Source
-  Quality run 45547829269 on `215cdd4d9` succeeded.
+- `main` at `694b6714c` (material fields archived, #520; Source Quality run 45759087013 succeeded). The owner
+  authorized direct work on `main`; each slice is committed, pushed and CI-confirmed before its evidence comment
+  on #520.
 - Work stream: asset migration, ordered by roadmap #217 under plan decisions D25 and D26. Tracker #4's ordered
   gameplay list (#1-#16) is complete.
+- Verification policy (owner): focused Catch2 tags and scoped checks per slice; the wide Debug run (~24 min) only
+  at batch boundaries. The last wide run, on `8dab23223`, passed 10,153 cases.
 
-## In progress: gameplay catalogs (#499)
+## In progress: semantic readable authoring (#520)
 
-Published slices, each with its evidence on #499: materials, bestiary (with #500), learning requirements, status
-rules and shared timing, action categories, actions. The contracts are ASSET_PIPELINE §4.2-§4.7.
+ASSET_PIPELINE §4 and the §7.2 readability gate. Shipped slices, each with evidence on #520:
 
-Open limits; none of the slices claims them:
+- Workshop recipe domains and archived reserved bytes; zone part domains and split shape bits.
+- Zone enemies: status immunities as status flags, limb action slots, quarantined template reserved bytes,
+  equipment indices and class/affinity tail bytes, ZUD index derived from slot, named AI settings, described
+  columns and units, enemy names as text, enemy kinds in an enemy-kinds table, gem effects by behavior, part
+  categories by part kind (selected enums).
+- Actions: hit effects, hit formulas, hit prerequisites and shield PP by behavior.
+- Bestiary: previews by archetype, defeat ranges by enemy kind; limb labels by body part.
+- Materials: catalog version 2 keeps only the columns MENUC reads (strength, intelligence, agility); class
+  points, affinities and base DP are archived as named fields in the import provenance (`694b6714c`).
 
-- No controller or combat capture of an authored edit exists for any #499 slice; gameplay runs exercise only the
-  default values.
-- Actions: the top-level `effect_id` is an unnamed integer, the hit mediators are code, and Learning's `action`
-  column still names break arts by slug. About 110 references in 62 files read `ActionDefinition` through the
-  EC-04-T-ACTION bridge, so the #58 gate is not claimed.
-- Action categories: the AI category sets (`PlanningPrimitives.cpp`), preview lists (`ActionPreview.cpp`) and
-  `DamageDistribution` (`DamagePolicies.cpp`) are keyed by category number, and the four-bit field caps the
-  catalog at 16 categories.
-- Status rules: action, limb and AI consumers read the typed rules through compatibility lookups.
-- Bestiary: preview-table indices, the ZUD/SHP/SEQ actor bridges, the BATTLE cursor bookmark and defeat flags keep
-  their compatibility limits.
+Remaining:
 
-Next: items and text (#500) are separate slices, then the remaining executable catalogs.
+- Blocked on their consumers: `actions.effect_id` (the presentation table is unnamed), zone-enemy
+  `movement_class`/`gait_class` (semantics unnamed; schemas list only the bits consumers test) and
+  `zones.music_id` (selects `MUSIC/MUSIC<n>` and `SOUND/WAVE<n>`; needs #501).
+- Deferred: room semantic names, JSON `raw_scale`, an optional typed `GemEffect` enum, and typed runtime
+  adoption with EC-04 T-shim retirement.
+- Checked and kept as columns: action-hit `hit_function` picks every checked hit's chance formula (only direct
+  hits skip it), and blade `attack_shape` is copied with the whole `vs_Range` into inventory and saves
+  (`146C.c:637`, `MENUC 168.c:4974`), so it cannot move to import provenance as the unread material fields did.
 
 ## Other open streams
 
 | Issue | Open gates |
 |---|---|
-| #210 FAR backgrounds | Matched-reference placement, gradients, seams and parallax; geographic room transitions and re-entry; MPD/ARM semantic room bindings; EC-04 retirement. Reference parity is blocked on state alignment: the next observation is an approved control path that selects New Game and pauses at "Have you found Sydney?", with the reference room, event and camera state. |
-| #500, #54 text | The offline codec decodes the F8-FF controls. MCMAN's extended Japanese glyph records (47 location labels) are unsupported. Full catalogs, call-site argument bindings, font and charmap assets and typed UI consumers remain. |
-| #520 readable authoring | Applies to every AM issue (ASSET_PIPELINE §1.2, §7.2). |
+| #499 catalogs | No controller or combat capture of an authored edit exists for any slice. Actions: `effect_id` is unnamed and ~110 references in 62 files read `ActionDefinition` through EC-04-T-ACTION, so #58 is not claimed. Action categories stay keyed by number (AI sets, previews, `DamageDistribution`; 16-category cap). Status rules and bestiary consumers read through compatibility lookups. |
+| #210 FAR backgrounds | Matched-reference placement, gradients, seams and parallax; room transitions and re-entry; MPD/ARM room bindings; EC-04 retirement. Reference parity needs an approved control path to "Have you found Sydney?" with the reference room, event and camera state. |
+| #500, #54 text | MCMAN's extended Japanese glyph records (47 location labels) are unsupported. Full catalogs, call-site argument bindings, font and charmap assets and typed UI consumers remain. |
 | #199, #200, #203, #55, #48 | Zones, actor archetypes, actor shapes, actor identity and content-request ownership. |
 | #58 | Item definitions and instances; gated by the action bridge above. |
 | #489 | EC-07: retire the legacy controller view. |
 
 ## Cautions
 
+- After pulling a converter version bump, run `build\Debug\VS.Extract.exe authoring Native\data` before tests
+  that open the real data; a second run must report no changes. Do not migrate while a wide run reads the data.
 - Offline preservation of imported bytes is not production adoption. Runtime repacking from native data is a
   T-shim even when its input is CSV, JSON, glTF or compiled SQLite (owner, 2026-11-23; plan §15, EC-04).
-  Reconstruction results alone do not complete an AM issue.
-- The local `resources\rood-reverse` checkout (`f6bf8402`) is ahead of the CI pin (`c9a869b8`), and its
-  `ignore = all` hides this from `git status`. `provenance.py --check` then fails locally: check against an export
-  of the pinned source (`--decomp <dir>`), and never run a broad `--sync` against the mismatched checkout.
-- Tests that open the real `Native\data` need locally extracted data.
+- The local `resources\rood-reverse` checkout is ahead of the CI pin, and its `ignore = all` hides this from
+  `git status`. Check provenance against an export of the pinned source (`provenance.py --check --decomp
+  <dir>`), and never run a broad `--sync` against the mismatched checkout.
+- `quality.py --files ... --tidy` reports existing findings as new; compare with the diff. CI runs
+  `quality-native.cmd --since github` without tidy.
 - Proof roots under `build\evidence` contain read-only asset junctions; do not clean them recursively. Do not
   delete migrated saves, assets, Player state or cited evidence as cache cleanup.
