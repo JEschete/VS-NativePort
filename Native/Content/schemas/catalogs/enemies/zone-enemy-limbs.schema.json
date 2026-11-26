@@ -21,7 +21,7 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 5,
-      "description": "the limb"
+      "description": "the limb's number, which mobility_limb_1, default_target_limb and the dp_splash columns use; the enemy's body model tags the bone that names it (HEAD, R.ARM, BODY and so on)"
     },
     {
       "name": "hp",
@@ -217,7 +217,7 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "the chance in 255 that a defeat drops this limb's armour; at most two armour pieces drop"
+      "description": "the chance that a defeat drops this limb's armour: rate / 255, rolled for each limb with armour (0 never, 128 about 50%, 255 always). Only the first two pieces that drop, in limb order, are kept"
     },
     {
       "name": "dp_splash_limb_0_percent",
@@ -225,7 +225,7 @@
       "legacy_name": "dp_splash_1",
       "minimum": 0,
       "maximum": 255,
-      "description": "percent of a hit on this limb that the zero-based destination limb takes, and from which its armour's DP loss follows, for actions that spread damage (categories 5, 7, 14); body-part names depend on the model"
+      "description": "when an action aimed at one limb (categories direct-limb, direct-limb-including-user and direct-limb-or-object) hits this row's limb, the percent of the hit that this column's limb (limb_N) loses from its own HP and from its armour's DP. The enemy's HP still loses the hit once. The limb hit usually holds 100, so other shares add limb damage on top; above 100 a limb loses more than the hit. Area actions aimed at limbs put the whole hit on the limb they strike, and actions aimed at the whole enemy split it evenly over the limbs with HP. limb_N numbers limbs as the limb column does"
     },
     {
       "name": "dp_splash_limb_1_percent",
@@ -233,7 +233,7 @@
       "legacy_name": "dp_splash_2",
       "minimum": 0,
       "maximum": 255,
-      "description": "percent of a hit on this limb that the zero-based destination limb takes, and from which its armour's DP loss follows, for actions that spread damage (categories 5, 7, 14); body-part names depend on the model"
+      "description": "when an action aimed at one limb (categories direct-limb, direct-limb-including-user and direct-limb-or-object) hits this row's limb, the percent of the hit that this column's limb (limb_N) loses from its own HP and from its armour's DP. The enemy's HP still loses the hit once. The limb hit usually holds 100, so other shares add limb damage on top; above 100 a limb loses more than the hit. Area actions aimed at limbs put the whole hit on the limb they strike, and actions aimed at the whole enemy split it evenly over the limbs with HP. limb_N numbers limbs as the limb column does"
     },
     {
       "name": "dp_splash_limb_2_percent",
@@ -241,7 +241,7 @@
       "legacy_name": "dp_splash_3",
       "minimum": 0,
       "maximum": 255,
-      "description": "percent of a hit on this limb that the zero-based destination limb takes, and from which its armour's DP loss follows, for actions that spread damage (categories 5, 7, 14); body-part names depend on the model"
+      "description": "when an action aimed at one limb (categories direct-limb, direct-limb-including-user and direct-limb-or-object) hits this row's limb, the percent of the hit that this column's limb (limb_N) loses from its own HP and from its armour's DP. The enemy's HP still loses the hit once. The limb hit usually holds 100, so other shares add limb damage on top; above 100 a limb loses more than the hit. Area actions aimed at limbs put the whole hit on the limb they strike, and actions aimed at the whole enemy split it evenly over the limbs with HP. limb_N numbers limbs as the limb column does"
     },
     {
       "name": "dp_splash_limb_3_percent",
@@ -249,7 +249,7 @@
       "legacy_name": "dp_splash_4",
       "minimum": 0,
       "maximum": 255,
-      "description": "percent of a hit on this limb that the zero-based destination limb takes, and from which its armour's DP loss follows, for actions that spread damage (categories 5, 7, 14); body-part names depend on the model"
+      "description": "when an action aimed at one limb (categories direct-limb, direct-limb-including-user and direct-limb-or-object) hits this row's limb, the percent of the hit that this column's limb (limb_N) loses from its own HP and from its armour's DP. The enemy's HP still loses the hit once. The limb hit usually holds 100, so other shares add limb damage on top; above 100 a limb loses more than the hit. Area actions aimed at limbs put the whole hit on the limb they strike, and actions aimed at the whole enemy split it evenly over the limbs with HP. limb_N numbers limbs as the limb column does"
     },
     {
       "name": "dp_splash_limb_4_percent",
@@ -257,7 +257,7 @@
       "legacy_name": "dp_splash_5",
       "minimum": 0,
       "maximum": 255,
-      "description": "percent of a hit on this limb that the zero-based destination limb takes, and from which its armour's DP loss follows, for actions that spread damage (categories 5, 7, 14); body-part names depend on the model"
+      "description": "when an action aimed at one limb (categories direct-limb, direct-limb-including-user and direct-limb-or-object) hits this row's limb, the percent of the hit that this column's limb (limb_N) loses from its own HP and from its armour's DP. The enemy's HP still loses the hit once. The limb hit usually holds 100, so other shares add limb damage on top; above 100 a limb loses more than the hit. Area actions aimed at limbs put the whole hit on the limb they strike, and actions aimed at the whole enemy split it evenly over the limbs with HP. limb_N numbers limbs as the limb column does"
     },
     {
       "name": "dp_splash_limb_5_percent",
@@ -265,7 +265,7 @@
       "legacy_name": "dp_splash_6",
       "minimum": 0,
       "maximum": 255,
-      "description": "percent of a hit on this limb that the zero-based destination limb takes, and from which its armour's DP loss follows, for actions that spread damage (categories 5, 7, 14); body-part names depend on the model"
+      "description": "when an action aimed at one limb (categories direct-limb, direct-limb-including-user and direct-limb-or-object) hits this row's limb, the percent of the hit that this column's limb (limb_N) loses from its own HP and from its armour's DP. The enemy's HP still loses the hit once. The limb hit usually holds 100, so other shares add limb damage on top; above 100 a limb loses more than the hit. Area actions aimed at limbs put the whole hit on the limb they strike, and actions aimed at the whole enemy split it evenly over the limbs with HP. limb_N numbers limbs as the limb column does"
     }
   ]
 }

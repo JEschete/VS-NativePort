@@ -377,7 +377,7 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "the chance in 255 that a defeat drops the weapon (blade, grip, gems and name): 0 never, 255 always"
+      "description": "the chance that a defeat drops the weapon (blade, grip, gems and name): rate / 255, rolled apart from the other drops; 0 never, 16 about 6%, 128 about 50%, 255 always"
     },
     {
       "name": "weapon_name",
@@ -406,14 +406,14 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "the chance in 255 that a defeat drops the shield with its gems"
+      "description": "the chance that a defeat drops the shield with its gems: rate / 255, as weapon_drop_rate"
     },
     {
       "name": "accessory_drop_rate",
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "the chance in 255 that a defeat drops the accessory"
+      "description": "the chance that a defeat drops the accessory: rate / 255, as weapon_drop_rate"
     }
   ]
 }

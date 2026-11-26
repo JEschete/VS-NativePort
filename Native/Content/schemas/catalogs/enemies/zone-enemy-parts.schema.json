@@ -40,7 +40,7 @@
       "type": "integer",
       "minimum": -128,
       "maximum": 127,
-      "description": "a blade's or shield's WEP model (OBJ/<two hex digits>.WEP, converted to models/weapons/<two hex digits>.gltf); 0 for other parts"
+      "description": "a blade's or shield's WEP model (OBJ/<two hex digits>.WEP, converted to models/weapons/<two hex digits>.gltf; the file names the number in hex, so 22 is models/weapons/16.gltf); 0 for other parts"
     },
     {
       "name": "category",

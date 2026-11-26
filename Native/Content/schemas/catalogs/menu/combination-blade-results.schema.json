@@ -32,7 +32,7 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "The combined blade's WEP model number: OBJ/<two hex digits>.WEP, converted to models/weapons/<two hex digits>.gltf."
+      "description": "The combined blade's WEP model number: OBJ/<two hex digits>.WEP, converted to models/weapons/<two hex digits>.gltf; the file names the number in hex, so 22 is models/weapons/16.gltf."
     },
     {
       "name": "category",

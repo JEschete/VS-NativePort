@@ -32,7 +32,7 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 255,
-      "description": "A combined shield's WEP model number (OBJ/<two hex digits>.WEP, converted to models/weapons/<two hex digits>.gltf). Combining armor never reads it; armor pieces keep 0."
+      "description": "A combined shield's WEP model number (OBJ/<two hex digits>.WEP, converted to models/weapons/<two hex digits>.gltf; the file names the number in hex, so 96 is models/weapons/60.gltf). Combining armor never reads it; armor pieces keep 0."
     },
     {
       "name": "category",

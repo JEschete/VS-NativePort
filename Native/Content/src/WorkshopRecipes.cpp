@@ -140,11 +140,13 @@ constexpr std::string_view kLegacyIdText{
 };
 constexpr std::string_view kBladeModelText{
     "The combined blade's WEP model number: OBJ/<two hex digits>.WEP, "
-    "converted to models/weapons/<two hex digits>.gltf.",
+    "converted to models/weapons/<two hex digits>.gltf; the file names the "
+    "number in hex, so 22 is models/weapons/16.gltf.",
 };
 constexpr std::string_view kPieceModelText{
     "A combined shield's WEP model number (OBJ/<two hex digits>.WEP, "
-    "converted to models/weapons/<two hex digits>.gltf). Combining armor "
+    "converted to models/weapons/<two hex digits>.gltf; the file names the "
+    "number in hex, so 96 is models/weapons/60.gltf). Combining armor "
     "never reads it; armor pieces keep 0.",
 };
 constexpr std::string_view kStrengthText{

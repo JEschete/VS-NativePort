@@ -563,11 +563,13 @@ void AddEnemyFields(TableLayout& table) {
   table.Reserve("raw_33", 0x33);
   table.Add("weapon_material", 0x124, 1, false, "weapon material", kMaterials);
   // A drop rolls a number from 0 to 254 and drops when it is below the rate.
+  // Each drop rolls on its own.
   // decomp: dropWeaponRand (src/BATTLE/BATTLE.PRG/146C.c:1251)
   // decomp: dropLoot (src/BATTLE/BATTLE.PRG/146C.c:1363)
   table.Add("weapon_drop_rate", 0x125, 1, false,
-            "the chance in 255 that a defeat drops the weapon (blade, grip, "
-            "gems and name): 0 never, 255 always");
+            "the chance that a defeat drops the weapon (blade, grip, gems "
+            "and name): rate / 255, rolled apart from the other drops; 0 "
+            "never, 16 about 6%, 128 about 50%, 255 always");
   // An equipment index is the 1-based inventory slot the player's equipment
   // came from. The apply*Stats copy each into the actor's stats, and only
   // vs_mainMenu_initInventory reads them, from the player's. Every disc
@@ -582,11 +584,13 @@ void AddEnemyFields(TableLayout& table) {
   table.Add("shield_material", 0x200, 1, false, "shield material", kMaterials);
   // decomp: dropShieldRand (src/BATTLE/BATTLE.PRG/146C.c:1275)
   table.Add("shield_drop_rate", 0x201, 1, false,
-            "the chance in 255 that a defeat drops the shield with its gems");
+            "the chance that a defeat drops the shield with its gems: rate "
+            "/ 255, as weapon_drop_rate");
   table.Zeros("shield_index", 0x202, 2);
   // decomp: dropAccessoryRand (src/BATTLE/BATTLE.PRG/146C.c:1295)
   table.Add("accessory_drop_rate", 0x234, 1, false,
-            "the chance in 255 that a defeat drops the accessory");
+            "the chance that a defeat drops the accessory: rate / 255, as "
+            "weapon_drop_rate");
   table.Zeros("accessory_index", 0x235, 1);
   table.Reserve("raw_236", 0x236);
   table.Reserve("raw_237", 0x237);
@@ -661,10 +665,13 @@ void AddLimbFields(TableLayout& table) {
   }
   table.Add("armor_material", 0x50, 1, false, "limb armor material",
             kMaterials);
+  // Limbs with armour roll in limb order into the loot's two armour slots.
   // decomp: dropArmorRand (src/BATTLE/BATTLE.PRG/146C.c:1308)
   table.Add("armor_drop_rate", 0x51, 1, false,
-            "the chance in 255 that a defeat drops this limb's armour; at "
-            "most two armour pieces drop");
+            "the chance that a defeat drops this limb's armour: rate / 255, "
+            "rolled for each limb with armour (0 never, 128 about 50%, 255 "
+            "always). Only the first two pieces that drop, in limb order, "
+            "are kept");
   // decomp: applyArmorStats (src/BATTLE/BATTLE.PRG/146C.c:759) copies this
   // byte to vs_UiArmor.unk99, which no code reads. Every disc limb holds 1
   // exactly when it has an armour material, as INITBTL.PRG's init of Ashley
@@ -675,14 +682,24 @@ void AddLimbFields(TableLayout& table) {
   table.Zeros("armor_index", 0x53, 1);
   // Actions of categories 5, 7 and 14 spread a hit on this limb by these
   // shares; categories 0-4 spread it evenly over the limbs with HP, and 6, 8,
-  // 11 and 12 put it all on the limb hit.
+  // 11 and 12 put it all on the limb hit. The enemy's own HP still loses the
+  // whole hit once (func_80084B70); each share lowers only the limb's HP and
+  // its armour's DP. Every disc value is 0-100, and the limb hit holds 100 in
+  // 1946 of the rows with HP.
   // decomp: func_80080000 (src/BATTLE/BATTLE.PRG/146C.c:10547)
   // decomp: adjustDpPp (src/BATTLE/BATTLE.PRG/146C.c:10624)
+  // decomp: func_80084B70 (src/BATTLE/BATTLE.PRG/146C.c:12641)
   table.Run("dp_splash", 0x54, kSplashFields, 1, false,
-            "percent of a hit on this limb that the zero-based destination "
-            "limb takes, and from which its armour's DP loss follows, for "
-            "actions that spread damage (categories 5, 7, 14); body-part "
-            "names depend on the model");
+            "when an action aimed at one limb (categories direct-limb, "
+            "direct-limb-including-user and direct-limb-or-object) hits this "
+            "row's limb, the percent of the hit that this column's limb "
+            "(limb_N) loses from its own HP and from its armour's DP. The "
+            "enemy's HP still loses the hit once. The limb hit usually holds "
+            "100, so other shares add limb damage on top; above 100 a limb "
+            "loses more than the hit. Area actions aimed at limbs put the "
+            "whole hit on the limb they strike, and actions aimed at the "
+            "whole enemy split it evenly over the limbs with HP. limb_N "
+            "numbers limbs as the limb column does");
   // decomp: vs_CharInitData (src/BATTLE/BATTLE.PRG/charInit.h:24-51):
   // LimbInit's unk5A padding, zero on the disc and read by no code.
   table.Reserve("raw_5a", 0x5A);
@@ -702,8 +719,9 @@ void AddPartFields(TableLayout& table) {
             "shield, armour or accessory, item_id - 260 for a gem");
   table.Add("weapon_model_id", 0x03, 1, true,
             "a blade's or shield's WEP model (OBJ/<two hex digits>.WEP, "
-            "converted to models/weapons/<two hex digits>.gltf); 0 for other "
-            "parts");
+            "converted to models/weapons/<two hex digits>.gltf; the file "
+            "names the number in hex, so 22 is models/weapons/16.gltf); 0 "
+            "for other parts");
   table.Add("category", 0x04, 1, false,
             "a blade's category (1 dagger .. 9 crossbow), which with a model "
             "also picks the enemy's attack animations; a grip's type (1-4); "
@@ -906,7 +924,14 @@ void BuildLayouts(std::array<TableLayout, kZoneTableCount>& layouts) {
 
   TableLayout& limbs = layouts.at(static_cast<std::size_t>(ZoneTable::kLimbs));
   limbs.Lead(ReferenceColumn("enemy", "zone-enemies", "the template"));
-  limbs.Lead(IntegerColumn("limb", 0, kLimbCount - 1, "the limb"));
+  // The spawn names a limb from the body model's bone whose low limb nibble
+  // is the limb plus 1: that bone's tag indexes vs_battle_limbNames.
+  // decomp: func_80076784 (src/BATTLE/BATTLE.PRG/146C.c:5941)
+  limbs.Lead(IntegerColumn(
+      "limb", 0, kLimbCount - 1,
+      "the limb's number, which mobility_limb_1, default_target_limb and "
+      "the dp_splash columns use; the enemy's body model tags the bone that "
+      "names it (HEAD, R.ARM, BODY and so on)"));
   AddLimbFields(limbs);
   limbs.key = {"enemy", "limb"};
   limbs.Finish("zone-enemy-limbs",
