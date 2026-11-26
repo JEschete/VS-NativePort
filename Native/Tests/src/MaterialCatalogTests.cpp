@@ -11,6 +11,7 @@
 #include <limits>
 #include <memory>
 #include <span>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -18,8 +19,12 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Content/CatalogTable.hpp"
+#include "Content/ConversionManifest.hpp"
 #include "Content/DataStore.hpp"
+#include "Content/JsonText.hpp"
 #include "Content/MaterialCatalog.hpp"
+#include "Extract/ConversionManifestWriter.hpp"
 #include "Extract/MaterialConversion.hpp"
 #include "Menu/Setup/Combination.hpp"
 #include "Menu/Setup/SetupLive.hpp"
@@ -74,8 +79,9 @@ extract::ImportedMaterials Synthetic() {
     definition.strength = static_cast<std::int32_t>(slot);
     definition.intelligence = -2;
     definition.agility = 1;
-    definition.max_dp = 3500;
-    imported->reserved[slot] = {std::byte{0xA5}, static_cast<std::byte>(slot)};
+    imported->archived[slot].max_dp = 3500;
+    imported->archived[slot].padding = {std::byte{0xA5},
+                                        static_cast<std::byte>(slot)};
   }
   return *imported;
 }
@@ -194,6 +200,94 @@ std::string Edit(std::string_view text, std::size_t row,
   }
   return content::FormatCsv(rows);
 }
+
+content::ConversionManifest Manifest(const WorkshopRecipeRoot& root) {
+  auto loaded = RequireValue(content::LoadConversionManifest(root.Root()));
+  if (!loaded.has_value()) {
+    throw std::runtime_error("no conversion manifest");
+  }
+  return std::move(*loaded);
+}
+
+// Rewrites a converted root as a version 1 material tree: the class,
+// affinity and max_dp columns in the table, the paddings alone in the
+// provenance. Bronze's class_beast cell is `beast` and its strength 40000.
+void Version1(const WorkshopRecipeRoot& root, std::string_view beast) {
+  std::vector<std::vector<std::string>> rows{{"id",
+                                              "legacy_id",
+                                              "class_human",
+                                              "class_beast",
+                                              "class_undead",
+                                              "class_phantom",
+                                              "class_dragon",
+                                              "class_evil",
+                                              "attack_affinity_physical",
+                                              "attack_affinity_air",
+                                              "attack_affinity_fire",
+                                              "attack_affinity_earth",
+                                              "attack_affinity_water",
+                                              "attack_affinity_light",
+                                              "attack_affinity_dark",
+                                              "defense_affinity_physical",
+                                              "defense_affinity_air",
+                                              "defense_affinity_fire",
+                                              "defense_affinity_earth",
+                                              "defense_affinity_water",
+                                              "defense_affinity_light",
+                                              "defense_affinity_dark",
+                                              "max_dp",
+                                              "strength",
+                                              "intelligence",
+                                              "agility",
+                                              "display_name"}};
+  constexpr std::size_t kBronze = 3;
+  constexpr std::size_t kModifierColumns = 20;
+  auto reserved = content::JsonDocument::array();
+  for (std::size_t slot = 0; slot < content::kMaterialIds.size(); ++slot) {
+    std::vector<std::string> row{std::string(content::kMaterialIds[slot]),
+                                 std::to_string(slot)};
+    for (std::size_t column = 0; column < kModifierColumns; ++column) {
+      row.emplace_back(slot == kBronze && column == 1 ? beast : "0");
+    }
+    row.emplace_back("3500");
+    row.emplace_back(slot == kBronze ? "40000" : std::to_string(slot));
+    row.emplace_back("-2");
+    row.emplace_back("1");
+    row.push_back("Material " + std::to_string(slot) + ", labelled");
+    rows.push_back(std::move(row));
+    reserved.push_back({{"id", content::kMaterialIds[slot]},
+                        {"attack_padding", 0xA5},
+                        {"defense_padding", slot}});
+  }
+  Write(root.Root() / content::kMaterialTablePath, content::FormatCsv(rows));
+  const auto import = root.Root() / extract::kMaterialImportPath;
+  const auto current = Read(import);
+  const auto json = RequireValue(content::ParseJsonText(
+      std::as_bytes(std::span(current)), extract::kMaterialImportPath));
+  Write(import, content::FormatJsonText(
+                    {{"display_name", "Old label"},
+                     {"schema", "vs.material-import"},
+                     {"schema_version", 1},
+                     {"source", content::kMaterialSource},
+                     {"source_sha256", json.at("source_sha256")},
+                     {"byte_offset", extract::kMaterialSourceOffset},
+                     {"record_bytes", extract::kMaterialRecordBytes},
+                     {"reserved", std::move(reserved)}}) +
+                    "\n");
+  auto manifest = Manifest(root);
+  manifest.converters[std::string(content::kMaterialConverterName)] = 1;
+  REQUIRE(extract::WriteConversionManifest(root.Root(), manifest));
+}
+
+std::uint32_t ConverterVersion(const WorkshopRecipeRoot& root) {
+  const auto manifest = Manifest(root);
+  const auto found =
+      manifest.converters.find(std::string(content::kMaterialConverterName));
+  if (found == manifest.converters.end()) {
+    throw std::runtime_error("no material converter version");
+  }
+  return found->second;
+}
 }  // namespace
 
 TEST_CASE("Material import preserves signed fields and both reserved bytes",
@@ -206,25 +300,23 @@ TEST_CASE("Material import preserves signed fields and both reserved bytes",
   const auto csv = content::FormatMaterials(imported.definitions);
   auto parsed = RequireValue(content::ParseMaterials(csv));
   const auto provenance = extract::FormatMaterialProvenance(
-      imported.reserved, std::string(64, 'a'));
-  auto reserved = RequireValue(
+      imported.archived, std::string(64, 'a'));
+  auto archived = RequireValue(
       extract::ParseMaterialProvenance(std::as_bytes(std::span(provenance))));
-  auto encoded = RequireValue(extract::EncodeMaterials({parsed, reserved}));
+  auto encoded = RequireValue(extract::EncodeMaterials({parsed, archived}));
   CHECK(std::ranges::equal(encoded, bytes));
   CHECK(csv.contains("material.damascus"));
   CHECK(csv.contains("display_name"));
   CHECK_FALSE(csv.contains("padding"));
+  CHECK_FALSE(csv.contains("class_"));
+  CHECK_FALSE(csv.contains("affinity"));
+  CHECK_FALSE(csv.contains("max_dp"));
 }
 
 TEST_CASE("Native material definitions do not inherit import field widths",
           "[material-catalog]") {
   auto imported = Synthetic();
-  auto& bronze = imported.definitions[3];
-  bronze.classes[0] = 1000;
-  bronze.attack_affinities[1] = -1000;
-  bronze.defense_affinities[6] = 500;
-  bronze.max_dp = 100000;
-  bronze.strength = std::numeric_limits<std::int32_t>::max();
+  imported.definitions[3].strength = std::numeric_limits<std::int32_t>::max();
   auto parsed =
       content::ParseMaterials(content::FormatMaterials(imported.definitions));
   if (!parsed) {
@@ -232,13 +324,20 @@ TEST_CASE("Native material definitions do not inherit import field widths",
   }
   CHECK(*parsed == imported.definitions);
   CHECK_FALSE(extract::EncodeMaterials(imported).has_value());
+  auto archived = Synthetic();
+  archived.archived[3].classes[0] = 1000;
+  CHECK_FALSE(extract::EncodeMaterials(archived).has_value());
+  archived = Synthetic();
+  archived.archived[3].max_dp = 100000;
+  CHECK_FALSE(extract::EncodeMaterials(archived).has_value());
 }
 
 TEST_CASE(
     "Material definitions reject malformed values and unsupported identities",
     "[material-catalog]") {
   const auto change =
-      GENERATE(std::pair{"strength", "2147483648"}, std::pair{"max_dp", "-1"},
+      GENERATE(std::pair{"strength", "2147483648"},
+               std::pair{"intelligence", "-2147483649"},
                std::pair{"id", "material.mithril"}, std::pair{"legacy_id", "8"},
                std::pair{"strength", "strong"});
   const auto csv = Edit(content::FormatMaterials(Synthetic().definitions), 4,
@@ -268,7 +367,7 @@ TEST_CASE(
     "[material-catalog]") {
   std::array<std::byte, extract::kMaterialImportBytes - 1> short_records{};
   CHECK_FALSE(extract::DecodeMaterials(short_records));
-  auto provenance = extract::FormatMaterialProvenance(Synthetic().reserved,
+  auto provenance = extract::FormatMaterialProvenance(Synthetic().archived,
                                                       std::string(64, 'a'));
   provenance.replace(provenance.find("material.wood"),
                      std::string("material.wood").size(), "material.none");
@@ -285,8 +384,7 @@ TEST_CASE(
   Prepare(root);
   const auto source = Read(root.Root() / "disc" / content::kMaterialSource);
   const auto csv = Read(root.Root() / content::kMaterialTablePath);
-  Layers(root,
-         "id,strength,class_beast,max_dp\nmaterial.bronze,150,1000,100000\n");
+  Layers(root, "id,strength\nmaterial.bronze,150\n");
   Write(root.Root() / "patch" / content::kMaterialTablePath,
         "id,strength\nmaterial.bronze,140\n");
   Open(root);
@@ -294,10 +392,21 @@ TEST_CASE(
   CHECK(result.strength == 110);
   CHECK(result.intelligence == 8);
   CHECK(result.agility == -4);
-  CHECK(Materials().at(3).classes[1] == 1000);
-  CHECK(Materials().at(3).max_dp == 100000);
+  CHECK(Materials().at(3).strength == 150);
   CHECK(Read(root.Root() / content::kMaterialTablePath) == csv);
   CHECK(Read(root.Root() / "disc" / content::kMaterialSource) == source);
+}
+
+TEST_CASE("Material layers refuse the archived fields no game code reads",
+          "[material-catalog][catalog-layers]") {
+  const auto column = GENERATE("max_dp", "class_beast", "attack_affinity_air");
+  content::DataStore::ScopedOverride restore;
+  WorkshopRecipeRoot root;
+  Prepare(root);
+  Layers(root, std::string("id,") + column + "\nmaterial.bronze,100\n");
+  const auto opened = content::DataStore::Open(root.Root());
+  REQUIRE_FALSE(opened.has_value());
+  CHECK(opened.error().contains(column));
 }
 
 TEST_CASE("Live material arithmetic refuses unrepresentable inventory stats",
@@ -378,6 +487,67 @@ TEST_CASE(
 }
 
 TEST_CASE(
+    "Material authoring archives version 1 columns with their edits and keeps "
+    "labels",
+    "[material-catalog]") {
+  WorkshopRecipeRoot root;
+  Prepare(root);
+  Version1(root, "1000");
+  const auto converted =
+      RequireValue(extract::ConvertDiscMaterials(root.Root(), false));
+  CHECK(converted.converted == 0);
+  CHECK(converted.unchanged == 1);
+  CHECK(ConverterVersion(root) == content::kMaterialConverterVersion);
+  const auto table = Read(root.Root() / content::kMaterialTablePath);
+  CHECK(table.starts_with(
+      "id,legacy_id,strength,intelligence,agility,display_name\n"));
+  CHECK(
+      table.contains("material.bronze,3,40000,-2,1,\"Material 3, labelled\""));
+  const auto import = Read(root.Root() / extract::kMaterialImportPath);
+  CHECK(import.starts_with("{\n  \"display_name\": \"Old label\",\n"));
+  const auto archived = RequireValue(
+      extract::ParseMaterialProvenance(std::as_bytes(std::span(import))));
+  CHECK(archived[3].classes[1] == 1000);
+  CHECK(archived[3].max_dp == 3500);
+  CHECK(archived[5].padding ==
+        extract::MaterialPadding{std::byte{0xA5}, std::byte{5}});
+}
+
+TEST_CASE("Upgraded material authoring is stable and loads its edits",
+          "[material-catalog]") {
+  content::DataStore::ScopedOverride restore;
+  WorkshopRecipeRoot root;
+  Prepare(root);
+  Version1(root, "1000");
+  REQUIRE(extract::ConvertDiscMaterials(root.Root(), false).has_value());
+  const auto table = Read(root.Root() / content::kMaterialTablePath);
+  const auto manifest = Read(root.Root() / "manifest.json");
+  const auto again =
+      RequireValue(extract::UpgradeMaterialAuthoring(root.Root()));
+  CHECK(again.written == 0);
+  CHECK(RequireValue(extract::ConvertDiscMaterials(root.Root(), false))
+            .unchanged == 1);
+  CHECK(Read(root.Root() / content::kMaterialTablePath) == table);
+  CHECK(Read(root.Root() / "manifest.json") == manifest);
+  Open(root);
+  CHECK(RequireValue(LiveMaterials()).at(3).strength == 40000);
+}
+
+TEST_CASE("Material authoring refuses a version 1 cell it cannot archive",
+          "[material-catalog]") {
+  const auto beast = GENERATE("strong", "2147483648", "");
+  WorkshopRecipeRoot root;
+  Prepare(root);
+  Version1(root, beast);
+  const auto table = Read(root.Root() / content::kMaterialTablePath);
+  const auto upgraded = extract::UpgradeMaterialAuthoring(root.Root());
+  REQUIRE_FALSE(upgraded.has_value());
+  CHECK(upgraded.error().contains("column 'class_beast'"));
+  CHECK(Read(root.Root() / content::kMaterialTablePath) == table);
+  CHECK(ConverterVersion(root) == 1);
+}
+
+TEST_CASE(
     "Missing material catalogs refuse live reads rather than return zero "
     "bonuses",
     "[material-catalog]") {
@@ -444,8 +614,8 @@ TEST_CASE(
   const auto text = content::FormatMaterials(imported.definitions);
   auto parsed = RequireValue(content::ParseMaterials(text));
   const auto encoded =
-      RequireValue(extract::EncodeMaterials({parsed, imported.reserved}));
+      RequireValue(extract::EncodeMaterials({parsed, imported.archived}));
   CHECK(std::ranges::equal(encoded, original));
-  CHECK(imported.definitions[1].max_dp == 3500);
+  CHECK(imported.archived[1].max_dp == 3500);
   CHECK(imported.definitions[7].strength == 8);
 }

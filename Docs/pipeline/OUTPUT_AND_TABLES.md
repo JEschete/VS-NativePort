@@ -153,7 +153,7 @@ to a sidecar or adding `unknown_` names does not satisfy the gate.
 
 `VS.Extract tables <datadir>`, `authoring <datadir>` and full `extract` import G01905 from **only** `SLUS_010.40`
 offset `0x3F5DC`, eight 30-byte records (`resources\rood-reverse\src\SLUS_010.40\main.c:350` and `modifiers.h`
-define the table and fields). Converter `material-csv` version 1 registers `catalog.items.materials`, writing
+define the table and fields). Converter `material-csv` version 2 registers `catalog.items.materials`, writing
 `catalogs\items\materials.csv`; its columns are described in
 [materials.schema.json](../../Native/Content/schemas/catalogs/items/materials.schema.json). The executable remains
 unconverted in the file-level content ledger; the note records this partial extent.
@@ -161,10 +161,15 @@ unconverted in the file-level content ledger; the note records this partial exte
 - **Identities:** `material.none`, `.wood`, `.leather`, `.bronze`, `.iron`, `.hagane`, `.silver` and `.damascus`.
   `legacy_id` maps them to the eight existing inventory, save and palette kinds. Missing, duplicate or mismatched
   identities are errors; additional kinds require #58's instance/appearance/persistence expansion.
-- **Widths:** modifiers are signed 32-bit native quantities and `max_dp` is unsigned 32-bit, not the import's
-  byte/halfword widths. The two reserved bytes per record live only in `catalogs\items\import\materials.json`, with
-  source hash, byte offset, record size and material identity. Offline encoding checks its own legacy limits and
-  preserves those bytes.
+- **Columns and widths:** the table holds what game code reads, the strength, intelligence and agility modifiers, as
+  signed 32-bit native quantities rather than the import's halfwords. The original MENUC.PRG machine code is the
+  only reader: three `lui 0x8005`/`addiu -4644` sites (file offsets `0x8C3C`, `0x8E84`, `0x9100`) load record
+  offsets 24, 26 and 28, and no other code in the executable or overlays addresses the table. The class,
+  attack/defense affinity and base-DP fields and the two padding bytes per record therefore live only in
+  `catalogs\items\import\materials.json`'s `original_records` (version 2), with source hash, byte offset, record
+  size and material identity. Offline encoding checks its own legacy limits and reproduces the records. `authoring`
+  and unforced conversion move a version 1 table's class, affinity and `max_dp` columns there, edits included;
+  labels and other cells are unchanged, and a cell that cannot be archived is refused with the tree untouched.
 - **Loading:** the layered SQLite compiler/cache loads this table with any listed workshop tables, validates typed
   records before publication and recompiles a cache whose material records fail validation. Raw/synthetic stores and
   initial extractor bootstrap need no material outputs; production conversion checks require them when the
@@ -172,9 +177,8 @@ unconverted in the file-level content ledger; the note records this partial exte
   Unchanged conversion preserves authored values and labels, including quantities the legacy format cannot hold;
   `tables --force` explicitly reimports; layer loading never changes base/import files.
 - **Consumers:** the workshop reads typed primary-stat bonuses from the catalog; G01905's `ModuleData` copy,
-  `ModulePointers` entry and raw storage are removed. Palette data stays separate. Class, affinity and base-DP fields
-  are preserved definitions, not new workshop calculations: combination keeps its ingredient affinity and
-  averaged-DP rules.
+  `ModulePointers` entry and raw storage are removed. Palette data stays separate. Combination keeps its ingredient
+  affinity and averaged-DP rules; the archived class, affinity and base-DP values feed nothing.
 - **Arithmetic:** original MENUC sums byte recipe stats with material fields and stores a byte (its compiler uses
   low-byte loads of the signed halfword fields). The native sum is signed 64-bit: modifier **150** plus recipe
   **-40** reaches the workshop as **110**. Results outside signed-byte inventory storage are refused, a #58 storage

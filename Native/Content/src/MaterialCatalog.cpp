@@ -26,7 +26,7 @@ constexpr ColumnSpec Modifier(std::string_view name,
 // Field families follow MaterialModifiers in src/SLUS_010.40/modifiers.h.
 // Only the workshop reads the table, and only its strength, intelligence and
 // agility (the three combine functions); items carry their own class and
-// affinity ratings and DP.
+// affinity ratings and DP, so those fields are archived, not columns.
 // decomp: MENUC.PRG combineShields (src/MENU/MENUC.PRG/168.c:5017)
 constexpr std::array kColumns{
     ColumnSpec{.name = "id",
@@ -40,49 +40,6 @@ constexpr std::array kColumns{
                .description =
                    "Compatibility kind for existing inventory, saves and "
                    "palettes; not a definition field-width limit."},
-    Modifier("class_human", "Human class points; kept but unread."),
-    Modifier("class_beast", "Beast class points; kept but unread."),
-    Modifier("class_undead", "Undead class points; kept but unread."),
-    Modifier("class_phantom", "Phantom class points; kept but unread."),
-    Modifier("class_dragon", "Dragon class points; kept but unread."),
-    Modifier("class_evil", "Evil class points; kept but unread."),
-    Modifier("attack_affinity_physical",
-             "Physical attack affinity points; kept but unread."),
-    Modifier("attack_affinity_air",
-             "Air (source wind) attack affinity points; kept but unread."),
-    Modifier("attack_affinity_fire",
-             "Fire attack affinity points; kept but unread."),
-    Modifier("attack_affinity_earth",
-             "Earth attack affinity points; kept but unread."),
-    Modifier("attack_affinity_water",
-             "Water attack affinity points; kept but unread."),
-    Modifier("attack_affinity_light",
-             "Light attack affinity points; kept but unread."),
-    Modifier("attack_affinity_dark",
-             "Dark attack affinity points; kept but unread."),
-    Modifier("defense_affinity_physical",
-             "Physical defense affinity points; kept but unread."),
-    Modifier("defense_affinity_air",
-             "Air (source wind) defense affinity points; kept but unread."),
-    Modifier("defense_affinity_fire",
-             "Fire defense affinity points; kept but unread."),
-    Modifier("defense_affinity_earth",
-             "Earth defense affinity points; kept but unread."),
-    Modifier("defense_affinity_water",
-             "Water defense affinity points; kept but unread."),
-    Modifier("defense_affinity_light",
-             "Light defense affinity points; kept but unread."),
-    Modifier("defense_affinity_dark",
-             "Dark defense affinity points; kept but unread."),
-    ColumnSpec{
-        .name = "max_dp",
-        .minimum = 0,
-        .maximum = std::numeric_limits<std::uint32_t>::max(),
-        .references = {},
-        .description =
-            "Material base durability in internal DP units (100 units per "
-            "displayed DP); kept but unread: the workshop averages the "
-            "ingredients' DP instead."},
     Modifier("strength",
              "Added to a workshop result's base strength when it is made of "
              "this material."),
@@ -94,12 +51,14 @@ constexpr std::array kColumns{
              "this material."),
 };
 constexpr std::array<std::string_view, 1> kKey{"id"};
+// strength, intelligence and agility follow id and legacy_id.
+constexpr std::size_t kStrengthAt = 2;
 constexpr std::string_view kDescription{
-    "Native material definitions; reserved import bytes are not editable "
-    "properties. The workshop adds a result material's strength, "
-    "intelligence and agility to the result's base stats. No game code reads "
-    "the class, affinity or max_dp values: items carry their own ratings and "
-    "DP.",
+    "Native material definitions: the stat bonuses a workshop result made of "
+    "the material gains. The original records' class, affinity and base-DP "
+    "values are not columns: no game code reads them (items carry their own "
+    "ratings and DP), so catalogs/items/import/materials.json keeps them "
+    "with the reserved bytes.",
 };
 constexpr TableSpec kSpec = {
     .name = "materials",
@@ -132,20 +91,11 @@ std::expected<MaterialCatalog, std::string> FromRows(
     auto& material = materials[slot];
     material.id = id;
     material.legacy_id = static_cast<std::uint32_t>(slot);
-    std::size_t column = 2;
-    for (auto& value : material.classes) {
-      value = static_cast<std::int32_t>(row.values.at(column++));
-    }
-    for (auto& value : material.attack_affinities) {
-      value = static_cast<std::int32_t>(row.values.at(column++));
-    }
-    for (auto& value : material.defense_affinities) {
-      value = static_cast<std::int32_t>(row.values.at(column++));
-    }
-    material.max_dp = static_cast<std::uint32_t>(row.values.at(column++));
-    material.strength = static_cast<std::int32_t>(row.values.at(column++));
-    material.intelligence = static_cast<std::int32_t>(row.values.at(column++));
-    material.agility = static_cast<std::int32_t>(row.values.at(column));
+    material.strength = static_cast<std::int32_t>(row.values.at(kStrengthAt));
+    material.intelligence =
+        static_cast<std::int32_t>(row.values.at(kStrengthAt + 1));
+    material.agility =
+        static_cast<std::int32_t>(row.values.at(kStrengthAt + 2));
   }
   for (std::size_t slot = 0; slot < seen.size(); ++slot) {
     if (!seen[slot]) {
@@ -175,16 +125,6 @@ std::string FormatMaterials(const MaterialCatalog& materials) {
   for (const auto& material : materials) {
     std::vector<std::string> row{material.id,
                                  std::to_string(material.legacy_id)};
-    for (const auto value : material.classes) {
-      row.push_back(std::to_string(value));
-    }
-    for (const auto value : material.attack_affinities) {
-      row.push_back(std::to_string(value));
-    }
-    for (const auto value : material.defense_affinities) {
-      row.push_back(std::to_string(value));
-    }
-    row.push_back(std::to_string(material.max_dp));
     row.push_back(std::to_string(material.strength));
     row.push_back(std::to_string(material.intelligence));
     row.push_back(std::to_string(material.agility));

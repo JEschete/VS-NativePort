@@ -380,9 +380,9 @@ build\Debug\VS.Extract.exe bestiary Native\data
   from the executable's G01905 table. Existing trees need
   `VS.Extract tables Native\data` (or `authoring Native\data`) before the
   workshop can combine materials. `catalogs\items\materials.csv` uses semantic
-  `material.*` IDs, named class/attack-affinity/defense-affinity columns and
-  explicit numeric quantities; its schema is beside it. Reserved import bytes
-  stay in `catalogs\items\import\materials.json`, not editable stat columns.
+  `material.*` IDs and primary-stat modifiers; its schema is beside it. Unread
+  class, affinity, DP and reserved values stay in
+  `catalogs\items\import\materials.json`; `authoring` moves old columns there.
   Normal reruns preserve edits; `tables --force` reimports.
 - `bestiary <datadir> [--force]` imports the native encyclopedia definitions
   and text without reconverting neighboring tables. `tables`, `authoring`,

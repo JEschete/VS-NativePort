@@ -12,7 +12,9 @@
 namespace VS::Content {
 
 inline constexpr std::string_view kMaterialConverterName = "material-csv";
-inline constexpr std::uint32_t kMaterialConverterVersion = 1;
+// Version 1 tables also held the unread class, affinity and base-DP values;
+// version 2 archives them in the import provenance.
+inline constexpr std::uint32_t kMaterialConverterVersion = 2;
 inline constexpr std::string_view kMaterialSource = "SLUS_010.40";
 inline constexpr std::string_view kMaterialOutputId = "catalog.items.materials";
 inline constexpr std::string_view kMaterialTablePath{
@@ -28,16 +30,12 @@ inline constexpr std::array<std::string_view, 8> kMaterialIds{
     "material.none", "material.wood",   "material.leather", "material.bronze",
     "material.iron", "material.hagane", "material.silver",  "material.damascus",
 };
-inline constexpr std::size_t kMaterialClassCount = 6;
-inline constexpr std::size_t kMaterialAffinityCount = 7;
-
+// The workshop's view of a material: only the stat bonuses the game reads.
+// The original records' class, affinity and base-DP values are unread and
+// stay in the import provenance.
 struct MaterialDefinition {
   std::string id;
   std::uint32_t legacy_id = 0;
-  std::array<std::int32_t, kMaterialClassCount> classes{};
-  std::array<std::int32_t, kMaterialAffinityCount> attack_affinities{};
-  std::array<std::int32_t, kMaterialAffinityCount> defense_affinities{};
-  std::uint32_t max_dp = 0;
   std::int32_t strength = 0;
   std::int32_t intelligence = 0;
   std::int32_t agility = 0;
