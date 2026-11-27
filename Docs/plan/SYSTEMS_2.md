@@ -35,9 +35,10 @@
     resources, without releasing foreign records. Status rendering starts after its switcher acquires the owned
     preview, without borrowing a previous entry's record during initialization. Auxiliary creation resolves its gimmick
     record through its owner and publishes the actor only after successful asset completion; scripted actors likewise
-    publish only after their owned model ticket reports success and cancel or drain pending loads before freeing the
-    allocation (#55). Refused publication and partial creation release that owner's geometry and occupancy without
-    clearing a foreign slot. Gimmick instances retain immutable compiled templates,
+    publish only after their owned model ticket reports success, and equipped actors only after all owned body and
+    equipment loads succeed. Both cancel or drain pending loads before freeing the allocation (#55). Refused
+    publication and partial creation release that owner's geometry and occupancy without clearing a foreign slot.
+    Gimmick instances retain immutable compiled templates,
     not mutable peer prefixes. A room change invalidates template cache selection without freeing geometry still
     needed for transition rendering; actor removal and model/session reset retire the instance bindings.
     Compiled SHP/WEP/SEQ rendering and playback layouts remain compatibility adapters, not retired authoring formats.

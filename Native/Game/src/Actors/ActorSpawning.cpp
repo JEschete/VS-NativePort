@@ -322,6 +322,25 @@ void ApplyTemplate(ActorSpawnHost& host, std::size_t slot,
       ModelLoadRequest(index, model_id, placement, flags), actor);
 }
 
+[[nodiscard]] ActorAssetRequest EquipmentLoadRequest(std::size_t slot,
+                                                     int model_id,
+                                                     EquipmentHand hand,
+                                                     int material) {
+  const ActorRecordPart part = hand == EquipmentHand::kWeapon
+                                   ? ActorRecordPart::kWeapon
+                                   : ActorRecordPart::kShield;
+  ActorAssetRequest request{};
+  request.kind = static_cast<std::uint8_t>(ActorAssetKind::kWeaponModelLoad);
+  request.target_slot =
+      static_cast<std::int8_t>(ActorPartRecordSlot(slot, part));
+  request.model_id = static_cast<std::int16_t>(model_id);
+  request.sub_kind = static_cast<std::uint8_t>(slot);
+  request.texture_slot =
+      hand == EquipmentHand::kWeapon ? kWeaponTextureSlot : kShieldTextureSlot;
+  request.material = static_cast<std::uint8_t>(material);
+  return request;
+}
+
 void QueueEquipment(ActorSpawnHost& host, SpawnedActor actor, int actor_id,
                     int model_id, EquipmentHand hand, int material) {
   if (model_id == kUnchangedEquipment) {
@@ -337,18 +356,45 @@ void QueueEquipment(ActorSpawnHost& host, SpawnedActor actor, int actor_id,
   if (model_id == 0) {
     return;
   }
-  ActorAssetRequest request{};
-  request.kind = static_cast<std::uint8_t>(ActorAssetKind::kWeaponModelLoad);
-  request.target_slot = static_cast<std::int8_t>(slot);
-  request.model_id = static_cast<std::int16_t>(model_id);
-  request.sub_kind = static_cast<std::uint8_t>(actor_id);
-  request.texture_slot =
-      hand == EquipmentHand::kWeapon ? kWeaponTextureSlot : kShieldTextureSlot;
-  request.material = static_cast<std::uint8_t>(material);
+  const ActorAssetRequest request = EquipmentLoadRequest(
+      static_cast<std::size_t>(actor_id), model_id, hand, material);
   // Native (#48): scripts load equipment for published actors, so the actor
   // owns the load and removal cancels it before the equipment memory goes.
   // The actor provides that memory when the record binds.
   static_cast<void>(host.QueueOwnedAsset(request, actor));
+}
+
+[[nodiscard]] bool SubmitEquippedEquipment(OwnedSpawnAssets& assets,
+                                           ActorSpawnHost& host,
+                                           std::size_t slot, int model_id,
+                                           EquipmentHand hand, int material) {
+  if (model_id == kUnchangedEquipment) {
+    return true;
+  }
+  const ActorRecordPart part = hand == EquipmentHand::kWeapon
+                                   ? ActorRecordPart::kWeapon
+                                   : ActorRecordPart::kShield;
+  const std::size_t record = ActorPartRecordSlot(slot, part);
+  if (record >= kEquipmentModelSlots) {
+    host.Refuse(SpawnRefusal::kEquipmentSlot);
+    return false;
+  }
+  host.ReleaseWeaponModel(static_cast<int>(record));
+  if (model_id == 0) {
+    return true;
+  }
+  ActorAssetRequest request =
+      EquipmentLoadRequest(slot, model_id, hand, material);
+  return assets.Submit(part, request);
+}
+
+void ReleaseEquippedAssets(ActorSpawnHost& host, std::size_t slot) {
+  host.ReleaseActorModel(
+      static_cast<int>(ActorPartRecordSlot(slot, ActorRecordPart::kBody)));
+  host.ReleaseWeaponModel(
+      static_cast<int>(ActorPartRecordSlot(slot, ActorRecordPart::kWeapon)));
+  host.ReleaseWeaponModel(
+      static_cast<int>(ActorPartRecordSlot(slot, ActorRecordPart::kShield)));
 }
 
 [[nodiscard]] SpawnedActor AllocateEquipped(
@@ -363,16 +409,31 @@ void QueueEquipment(ActorSpawnHost& host, SpawnedActor actor, int actor_id,
   const std::uint8_t category =
       EquippedWeaponCategory(blade_model, host.WeaponCategoryBounds());
   host.SetEquippedWeaponCategory(actor, category);
-  const int actor_id = static_cast<int>(slot);
-  static_cast<void>(
-      QueueModelLoad(host, actor, actor_id, model_id, placement, flags));
-  if (model_id != kBareModel) {
+  OwnedSpawnAssets assets(host, actor, slot);
+  ActorAssetRequest model =
+      ModelLoadRequest(static_cast<int>(slot), model_id, placement, flags);
+  bool submitted = assets.Submit(ActorRecordPart::kBody, model);
+  if (submitted && model_id != kBareModel) {
     host.QueueBaseSequence(actor, slot);
-    QueueEquipment(host, actor, actor_id, blade_model, EquipmentHand::kWeapon,
-                   blade_material);
-    QueueEquipment(host, actor, actor_id, shield_model, EquipmentHand::kShield,
-                   shield_material);
-    host.QueueWeaponSequence(actor, slot, category, flags);
+    submitted = SubmitEquippedEquipment(assets, host, slot, blade_model,
+                                        EquipmentHand::kWeapon, blade_material);
+    if (submitted) {
+      submitted =
+          SubmitEquippedEquipment(assets, host, slot, shield_model,
+                                  EquipmentHand::kShield, shield_material);
+    }
+    if (submitted) {
+      host.QueueWeaponSequence(actor, slot, category, flags);
+    }
+  }
+  if (!submitted || !assets.Finish()) {
+    host.Refuse(SpawnRefusal::kAssetQueue);
+    if (!assets.CancelOrFinish()) {
+      return SpawnedActor::kNone;
+    }
+    ReleaseEquippedAssets(host, slot);
+    host.DiscardUninstalled(actor);
+    return SpawnedActor::kNone;
   }
   return actor;
 }

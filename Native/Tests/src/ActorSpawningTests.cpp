@@ -1218,12 +1218,12 @@ TEST_CASE("An equipped actor queues its models and joins the list after Ashley",
   CHECK(host.table.at(3) == actor);
   CHECK(host.log == std::vector<std::string>{"Allocate 1",
                                              "Category 2",
-                                             "QueueOwnedAsset",
+                                             "QueueAsset",
                                              "BaseSequence 3",
                                              "Release 6",
-                                             "QueueOwnedAsset",
+                                             "QueueAsset",
                                              "Release 7",
-                                             "QueueOwnedAsset",
+                                             "QueueAsset",
                                              "WeaponSequence 3 2 1",
                                              "UpdateQueue",
                                              "Pump",
@@ -1269,8 +1269,46 @@ TEST_CASE("An equipped actor's requests load its slots and it owns its parts",
   shield.texture_slot = actors::kShieldTextureSlot;
   shield.material = 1;
   CHECK(host.requests.at(2) == shield);
-  // Native (#48): removing the actor cancels its body, blade and shield loads.
-  CHECK(host.queued_owners == std::vector{actor, actor, actor});
+  // Each initial model request is submitted under the allocated actor owner.
+  REQUIRE(host.owned_requests.size() == 3);
+  CHECK(std::ranges::all_of(
+      host.owned_requests, [actor](const FakeSpawnHost::OwnedRequest& request) {
+        return request.actor == actor;
+      }));
+}
+
+TEST_CASE("Equipped actor stays unpublished when a model load fails",
+          "[actors][actors-spawning]") {
+  FakeSpawnHost host;
+  host.table.at(actors::kAshleySlot) = Handle(0x10);
+  host.fail_owned_completion_at = 1;
+
+  CHECK(CreateEquippedActor(host) == SpawnedActor::kNone);
+  CHECK(host.table.at(3) == SpawnedActor::kNone);
+  CHECK(host.discarded == std::vector{Handle(kFirstHandle)});
+  CHECK(host.refusals == std::vector{SpawnRefusal::kAssetQueue});
+  CHECK(host.forgotten_outcomes ==
+        std::vector{content::ActorAssetOutcome::kLoaded,
+                    content::ActorAssetOutcome::kFailed,
+                    content::ActorAssetOutcome::kLoaded});
+  CHECK(host.released_actor_models == std::vector{3});
+  CHECK(host.released_weapon_models == std::vector{6, 7, 6, 7});
+}
+
+TEST_CASE("Equipped actor cleans up when a model request is refused",
+          "[actors][actors-spawning]") {
+  FakeSpawnHost host;
+  host.table.at(actors::kAshleySlot) = Handle(0x10);
+  host.refuse_owned_submit_at = 1;
+
+  CHECK(CreateEquippedActor(host) == SpawnedActor::kNone);
+  CHECK(host.table.at(3) == SpawnedActor::kNone);
+  CHECK(host.discarded == std::vector{Handle(kFirstHandle)});
+  CHECK(host.refusals == std::vector{SpawnRefusal::kAssetQueue});
+  CHECK(host.forgotten_outcomes ==
+        std::vector{content::ActorAssetOutcome::kCancelled});
+  CHECK(host.released_actor_models == std::vector{3});
+  CHECK(host.released_weapon_models == std::vector{6, 6, 7});
 }
 
 TEST_CASE("Ashley's slot ends the list and a bare model queues no parts",
@@ -1279,15 +1317,15 @@ TEST_CASE("Ashley's slot ends the list and a bare model queues no parts",
   const SpawnedActor actor = actors::CreateActorWithEquipment(
       host, 0, actors::kBareModel, 15, 2, 6, 1, {}, 0);
   REQUIRE(actor != SpawnedActor::kNone);
-  CHECK(host.log ==
-        std::vector<std::string>{"Allocate 1", "Category 2", "QueueOwnedAsset",
-                                 "UpdateQueue", "Pump", "Animation 0 0",
-                                 "Display 0 0x1847", "Install 0", "Defaults 0",
-                                 "Speeds 0 0x9000 0x12000", "CombatPose 0 0",
-                                 "ClearNext 0", "Display 0 0x46",
-                                 "TemplateWord 0 0", "AiState 0 -1"});
+  CHECK(host.log == std::vector<std::string>{
+                        "Allocate 1", "Category 2", "QueueAsset", "UpdateQueue",
+                        "Pump", "Animation 0 0", "Display 0 0x1847",
+                        "Install 0", "Defaults 0", "Speeds 0 0x9000 0x12000",
+                        "CombatPose 0 0", "ClearNext 0", "Display 0 0x46",
+                        "TemplateWord 0 0", "AiState 0 -1"});
   CHECK(host.requests.size() == 1);
-  CHECK(host.queued_owners == std::vector{actor});
+  REQUIRE(host.owned_requests.size() == 1);
+  CHECK(host.owned_requests.front().actor == actor);
 }
 
 TEST_CASE("An equipped actor is refused before anything is allocated",
