@@ -12,7 +12,6 @@ namespace VS::Menu::Framework {
 namespace {
 using Content::ActorAssetKind;
 using Content::ActorAssetRequest;
-using Content::AssetAddress;
 
 // The clone requests' sub-kinds and the companion clone's texture slot
 // (224.c:36, 50-51, 68).
@@ -59,7 +58,8 @@ bool QueueCompanionClone(ActorPreviewHost& host, const PreviewActor& source,
   request.kind = Kind(ActorAssetKind::kActorModelParse);
   request.target_slot = TargetSlot(kPreviewCompanionSlot);
   request.model_id = static_cast<std::int16_t>(companion->model_id);
-  request.shared_record_slot = companion_slot;
+  request.shared_model = host.ModelResource(companion_slot);
+  if (!request.shared_model) return false;
   request.sub_kind = kCloneLinkedSubKind;
   request.texture_slot = kCloneCompanionTextureSlot;
   request.variant = source.variant;
@@ -69,9 +69,8 @@ bool QueueCompanionClone(ActorPreviewHost& host, const PreviewActor& source,
 
 // decomp: MAINMENU.PRG func_800F9A78 (src/MENU/MAINMENU.PRG/224.c:58-73)
 // The request keeps the variant the record clone set.
-bool QueueWeaponClone(ActorPreviewHost& host, int source_slot,
-                      const PreviewActor& source, int weapon,
-                      ActorAssetRequest& request) {
+bool QueueWeaponClone(ActorPreviewHost& host, const PreviewActor& source,
+                      int weapon, ActorAssetRequest& request) {
   const int weapon_slot = (source.weapon_pair * kWeaponModelsPerActor) + weapon;
   // The original indexed the weapon models with the pair unchecked
   // (224.c:59-60).
@@ -84,7 +83,9 @@ bool QueueWeaponClone(ActorPreviewHost& host, int source_slot,
   request.kind = Kind(ActorAssetKind::kWeaponModelParse);
   request.target_slot = TargetSlot(kPreviewWeaponModelSlot + weapon);
   request.model_id = model->model_id;
-  request.shared_record_slot = (source_slot * kWeaponModelsPerActor) + weapon;
+  request.shared_model.reset();
+  request.shared_weapon = host.WeaponResource(weapon_slot);
+  if (!request.shared_weapon) return false;
   request.sub_kind = kCloneLinkedSubKind;
   request.texture_slot = model->attachment_slot;
   request.material = model->material;
@@ -152,14 +153,16 @@ bool CloneActorPreview(ActorPreviewHost& host, int source_slot) {
   }
   if (!host.BeginPreview(source_slot)) return false;
   if (source_slot == kPreviewActorSlot) return true;
-  // The original kept the source record's pointer across the asset queue
-  // (224.c:29, 78-90).
-  const AssetAddress source_block = host.ActorBlock(source_slot);
+  const auto sequences = host.SequenceResources(source_slot);
   ActorAssetRequest request{};
   request.kind = Kind(ActorAssetKind::kActorModelParse);
   request.target_slot = TargetSlot(kPreviewActorSlot);
   request.model_id = static_cast<std::int16_t>(source->model_id);
-  request.shared_record_slot = source_slot;
+  request.shared_model = host.ModelResource(source_slot);
+  if (!request.shared_model) {
+    host.Refuse("preview source has no immutable model resource");
+    return false;
+  }
   request.sub_kind = kCloneRecordSubKind;
   request.variant = source->variant;
   request.material = 0;
@@ -168,7 +171,7 @@ bool CloneActorPreview(ActorPreviewHost& host, int source_slot) {
     queued = QueueCompanionClone(host, *source, request);
   }
   for (int weapon = 0; queued && weapon < kWeaponModelsPerActor; ++weapon) {
-    queued = QueueWeaponClone(host, source_slot, *source, weapon, request);
+    queued = QueueWeaponClone(host, *source, weapon, request);
   }
   if (!queued) {
     host.Refuse("preview asset submission failed");
@@ -176,22 +179,7 @@ bool CloneActorPreview(ActorPreviewHost& host, int source_slot) {
     return false;
   }
   if (!host.FinishPreviewAssets()) return false;
-  const AssetAddress clone = host.ActorBlock(kPreviewActorSlot);
-  // Ashley's clone copies her battle sequence, which her weapon changes
-  // replace (QueueAshleyWeaponAnimations); other clones share the source's.
-  const AssetAddress battle_copy =
-      source->weapon_pair == 0
-          ? host.Allocate(PreviewAllocation::kBattleSequence)
-          : AssetAddress::kNone;
-  if (source->weapon_pair == 0 && battle_copy == AssetAddress::kNone) {
-    host.Refuse("preview battle sequence allocation failed");
-    host.ReleasePreviewAssets();
-    return false;
-  }
-  if (!host.CopySequences({.clone = clone,
-                           .source = source_block,
-                           .battle_copy = battle_copy})) {
-    if (battle_copy != AssetAddress::kNone) host.Free(battle_copy);
+  if (!host.BindSequences(sequences)) {
     host.ReleasePreviewAssets();
     return false;
   }

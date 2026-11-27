@@ -4,6 +4,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <optional>
 #include <span>
 
@@ -90,6 +91,17 @@ enum class AssetAddress : std::uintptr_t { kNone = 0 };
                                    static_cast<std::uintptr_t>(bytes));
 }
 
+class ActorModelResource;
+class WeaponModelResource;
+class ActorSequenceResource;
+enum class ActorSequenceKind : std::uint8_t;
+using ActorModelResourceRef = std::shared_ptr<const ActorModelResource>;
+using WeaponModelResourceRef = std::shared_ptr<const WeaponModelResource>;
+using ActorSequenceResourceRef = std::shared_ptr<const ActorSequenceResource>;
+
+// Target zero reloads only its resident model's texture from this SHP.
+inline constexpr std::int16_t kAshleyTextureModelId = 6;
+
 // vs_battle_objectData (30DB0.h:36). The original reads target_slot with lb,
 // model_id with lh and the last three bytes with lbu.
 struct ActorAssetRequest {
@@ -102,6 +114,9 @@ struct ActorAssetRequest {
   AssetAddress data = AssetAddress::kNone;
   // A shared record reference is distinct from an address or file cursor.
   std::optional<int> shared_record_slot;
+  ActorModelResourceRef shared_model{};
+  WeaponModelResourceRef shared_weapon{};
+  ActorSequenceResourceRef shared_sequence{};
   // The four placement bytes (tile X, surface, tile Z, facing).
   std::uint32_t placement = 0;
   std::uint8_t sub_kind = 0;
@@ -480,6 +495,10 @@ class ActorAssetHost {
   // bytes outside the heap; empty for an unknown address.
   virtual std::span<std::byte> Bytes(AssetAddress address,
                                      std::size_t wanted) = 0;
+  virtual std::span<const std::byte> ReadBytes(AssetAddress address,
+                                               std::size_t wanted) {
+    return Bytes(address, wanted);
+  }
 
   // The disc file tables and the loaders' disc requests.
   virtual std::optional<std::uint32_t> FileTableEntry(AssetFileTable table,
@@ -522,7 +541,9 @@ class ActorAssetHost {
   virtual bool BindWeaponRecord(int slot, const ActorAssetRequest& request) = 0;
   virtual WeaponAssetRecord LoadWeapon(int slot) const = 0;
   virtual void StoreWeapon(int slot, const WeaponAssetRecord& record) = 0;
-  virtual void CopyWeaponRecord(int target, int source) = 0;
+  virtual WeaponModelResourceRef FindWeaponResource(int model) const = 0;
+  virtual bool BindWeaponResource(int target,
+                                  const WeaponModelResourceRef& resource) = 0;
   virtual void WriteWeaponBones(int slot, std::span<const std::byte> bones) = 0;
   virtual void ClearWeaponSlot(int slot) = 0;
   // The fixed geometry buffer of weapon slots 0 and 1 (D_8010245C).
@@ -537,7 +558,9 @@ class ActorAssetHost {
   virtual bool BindActorRecord(int slot, const ActorAssetRequest& request) = 0;
   virtual ActorAssetRecord LoadActor(int slot) const = 0;
   virtual void StoreActor(int slot, const ActorAssetRecord& record) = 0;
-  virtual void CopyActorRecord(int target, int source) = 0;
+  virtual ActorModelResourceRef FindActorResource(int model) const = 0;
+  virtual bool BindActorResource(int target,
+                                 const ActorModelResourceRef& resource) = 0;
   virtual void WriteActorTextureLayout(int slot,
                                        std::span<const std::byte> layout) = 0;
   virtual void ClearActorSlot(int slot) = 0;
@@ -560,6 +583,15 @@ class ActorAssetHost {
   virtual AssetAddress SequenceWorkBuffer() const = 0;
   virtual std::optional<std::size_t> SequenceBankSize(
       AssetAddress bank) const = 0;
+  virtual ActorSequenceResourceRef FindSequenceResource(int model,
+                                                        int sequence) const = 0;
+  virtual ActorSequenceResourceRef MakeSequenceResource(
+      std::span<const std::byte> bytes, std::uint8_t animation_count) = 0;
+  virtual std::optional<AssetAddress> BindActorSequence(
+      int target, ActorSequenceKind kind,
+      const ActorSequenceResourceRef& resource) = 0;
+  virtual void ReleaseActorSequenceResource(int target,
+                                            ActorSequenceKind kind) = 0;
   virtual void ResetActorTextureFrames(int bank) = 0;
 
   // Native bookkeeping for the model and sequence validators.

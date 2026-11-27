@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <functional>
 #include <initializer_list>
+#include <memory>
 #include <optional>
 #include <span>
 #include <stdexcept>
@@ -70,6 +71,13 @@ class FakePreview final : public fw::ActorPreviewHost {
   std::array<std::optional<fw::PreviewWeapon>, fw::kWeaponModelSlots> weapons{};
   std::array<AssetAddress, fw::kActorSlots> actor_blocks{};
   std::array<AssetAddress, fw::kWeaponModelSlots> weapon_blocks{};
+  mutable std::array<VS::Content::ActorModelResourceRef, fw::kActorSlots>
+      models;
+  mutable std::array<VS::Content::WeaponModelResourceRef, fw::kWeaponModelSlots>
+      weapon_resources;
+  mutable std::array<VS::Content::ActorSequenceResources, fw::kActorSlots>
+      sequence_resources;
+  VS::Content::ActorSequenceResources bound_sequences;
   std::vector<ActorAssetRequest> requests;
   std::vector<std::string> calls;
   std::vector<std::string> refusals;
@@ -111,27 +119,63 @@ class FakePreview final : public fw::ActorPreviewHost {
     }
     return weapons.at(static_cast<std::size_t>(slot));
   }
-  AssetAddress Allocate(fw::PreviewAllocation kind) override {
-    calls.push_back(Call("Allocate", {static_cast<std::int64_t>(kind)}));
+  AssetAddress Allocate(int kind) {
+    calls.push_back(Call("Allocate", {kind}));
     return Block(next_block++);
   }
-  void Free(AssetAddress block) override {
+  void Free(AssetAddress block) {
     calls.push_back(Call("Free", {Value(block)}));
   }
-  AssetAddress ActorBlock(int slot) const override {
-    return actor_blocks.at(static_cast<std::size_t>(slot));
+  VS::Content::ActorModelResourceRef ModelResource(int slot) const override {
+    const auto index = static_cast<std::size_t>(slot);
+    auto& resource = models.at(index);
+    const auto actor = Actor(slot);
+    if (!actor) return {};
+    if (!resource) {
+      VS::Content::ActorAssetRecord definition;
+      definition.model_id = actor->model_id;
+      const std::array<std::byte, VS::Content::kActorTextureLayoutBytes>
+          layout{};
+      resource = std::make_shared<const VS::Content::ActorModelResource>(
+          definition, std::span<const std::byte>{}, layout, nullptr);
+    }
+    return resource;
   }
-  AssetAddress WeaponBlock(int slot) const override {
-    return weapon_blocks.at(static_cast<std::size_t>(slot));
+  VS::Content::WeaponModelResourceRef WeaponResource(int slot) const override {
+    const auto index = static_cast<std::size_t>(slot);
+    auto& resource = weapon_resources.at(index);
+    const auto weapon = Weapon(slot);
+    if (!weapon) return {};
+    if (!resource) {
+      VS::Content::WeaponAssetRecord definition;
+      definition.model_id = weapon->model_id;
+      resource = std::make_shared<const VS::Content::WeaponModelResource>(
+          definition, std::span<const std::byte>{},
+          std::span<const std::byte>{});
+    }
+    return resource;
+  }
+  VS::Content::ActorSequenceResources SequenceResources(
+      int slot) const override {
+    auto& resources = sequence_resources.at(static_cast<std::size_t>(slot));
+    if (!resources.common) {
+      const std::array bytes{std::byte{1}, std::byte{2}};
+      resources.common =
+          std::make_shared<const VS::Content::ActorSequenceResource>(bytes, 1);
+      resources.battle =
+          std::make_shared<const VS::Content::ActorSequenceResource>(bytes, 2);
+      resources.battle_model = 3;
+    }
+    return resources;
   }
   bool BeginPreview(int) override { return true; }
   bool QueueAsset(const ActorAssetRequest& request) override {
-    if (requests.size() >= queue_limit) return false;
+    if (requests.size() >= queue_limit || request.target_slot < 0) return false;
     if (request.kind == 2 || request.kind == 4) {
-      const auto kind = request.kind == 2 ? fw::PreviewAllocation::kActorRecord
-                                          : fw::PreviewAllocation::kWeaponModel;
+      const auto kind = request.kind == 2 ? 0 : 1;
       const auto block = Allocate(kind);
-      const auto slot = static_cast<std::size_t>(request.target_slot);
+      const auto slot = static_cast<std::size_t>(
+          static_cast<unsigned char>(request.target_slot));
       if (request.kind == 2) {
         actor_blocks.at(slot) = block;
       } else {
@@ -175,10 +219,10 @@ class FakePreview final : public fw::ActorPreviewHost {
   void ReleaseSequences(int slot) override {
     calls.push_back(Call("ReleaseSequences", {slot}));
   }
-  bool CopySequences(const fw::PreviewSequenceCopy& copy) override {
-    calls.push_back(
-        Call("CopySequences",
-             {Value(copy.clone), Value(copy.source), Value(copy.battle_copy)}));
+  bool BindSequences(
+      const VS::Content::ActorSequenceResources& resources) override {
+    calls.emplace_back("BindSequences");
+    bound_sequences = resources;
     return copy_success;
   }
   void SetWeaponDrawn(int slot) override {
@@ -289,14 +333,15 @@ void SetCloneSource(FakePreview& host) {
       fw::PreviewWeapon{.model_id = 10, .attachment_slot = 7, .material = 4};
 }
 
-ActorAssetRequest Request(std::uint8_t kind, std::int8_t target,
-                          std::int16_t model, AssetAddress destination,
-                          std::optional<int> shared_record_slot) {
-  return {.kind = kind,
-          .target_slot = target,
-          .model_id = model,
-          .destination = destination,
-          .shared_record_slot = shared_record_slot};
+ActorAssetRequest Request(FakePreview& host, std::uint8_t kind,
+                          std::int8_t target, std::int16_t model, int source) {
+  ActorAssetRequest request{.kind = kind,
+                            .target_slot = target,
+                            .model_id = model,
+                            .shared_record_slot = {}};
+  if (kind == 2) request.shared_model = host.ModelResource(source);
+  if (kind == 4) request.shared_weapon = host.WeaponResource(source);
+  return request;
 }
 
 fw::PreviewActor DrawnActor() { return {.model_id = 77, .bone_count = 10}; }
@@ -307,19 +352,19 @@ TEST_CASE("Actor preview clones a record with its companion and weapons",
   SetCloneSource(host);
   fw::CloneActorPreview(host, 3);
 
-  ActorAssetRequest record = Request(2, 1, 77, AssetAddress::kNone, 3);
+  ActorAssetRequest record = Request(host, 2, 1, 77, 3);
   record.sub_kind = 0xFF;
   record.variant = 2;
-  ActorAssetRequest companion = Request(2, 16, 88, AssetAddress::kNone, 5);
+  ActorAssetRequest companion = Request(host, 2, 16, 88, 5);
   companion.sub_kind = 1;
   companion.texture_slot = 0xFC;
   companion.variant = 2;
-  ActorAssetRequest first_weapon = Request(4, 2, 9, AssetAddress::kNone, 6);
+  ActorAssetRequest first_weapon = Request(host, 4, 2, 9, 8);
   first_weapon.sub_kind = 1;
   first_weapon.texture_slot = 6;
   first_weapon.material = 3;
   first_weapon.variant = 2;
-  ActorAssetRequest second_weapon = Request(4, 3, 10, AssetAddress::kNone, 7);
+  ActorAssetRequest second_weapon = Request(host, 4, 3, 10, 9);
   second_weapon.sub_kind = 1;
   second_weapon.texture_slot = 7;
   second_weapon.material = 4;
@@ -329,7 +374,7 @@ TEST_CASE("Actor preview clones a record with its companion and weapons",
   CHECK(host.calls == std::vector<std::string>{"Allocate(0)", "Allocate(0)",
                                                "Allocate(1)", "Allocate(1)",
                                                "Pump", "Pump", "Pump",
-                                               "CopySequences(4096,12288,0)"});
+                                               "BindSequences"});
   CHECK(host.refusals.empty());
 }
 
@@ -341,14 +386,14 @@ TEST_CASE("Actor preview copies Ashley's battle sequence",
   host.actor_blocks[0] = Block(0x2000);
   fw::CloneActorPreview(host, 0);
 
-  ActorAssetRequest record = Request(2, 1, 1, AssetAddress::kNone, 0);
+  ActorAssetRequest record = Request(host, 2, 1, 1, 0);
   record.sub_kind = 0xFF;
   // The outline marker is no companion record; Ashley's weapon models are
   // empty.
   CHECK(host.requests == std::vector<ActorAssetRequest>{record});
   CHECK(host.calls ==
-        std::vector<std::string>{"Allocate(0)", "Pump", "Allocate(2)",
-                                 "CopySequences(4096,8192,4097)"});
+        std::vector<std::string>{"Allocate(0)", "Pump", "BindSequences"});
+  CHECK(host.bound_sequences.battle == host.SequenceResources(0).battle);
   CHECK(host.refusals.empty());
 }
 
@@ -389,8 +434,7 @@ TEST_CASE("Actor preview clones without a companion or weapon past the tables",
   REQUIRE(past.requests.size() == 1);
   CHECK(past.requests[0].target_slot == 1);
   CHECK(past.calls == std::vector<std::string>{"Allocate(0)", "Pump", "Pump",
-                                               "Pump",
-                                               "CopySequences(4096,12288,0)"});
+                                               "Pump", "BindSequences"});
 }
 
 TEST_CASE("Actor preview clones without a missing companion",
@@ -407,7 +451,8 @@ TEST_CASE("Actor preview clones without a missing companion",
   CHECK(missing.requests[1].model_id == 10);
   CHECK(missing.requests[1].destination == AssetAddress::kNone);
   CHECK(missing.weapon_blocks[3] == Block(0x1001));
-  CHECK(missing.requests[1].shared_record_slot == 7);
+  CHECK(missing.requests[1].shared_weapon == missing.WeaponResource(9));
+  CHECK_FALSE(missing.requests[1].shared_record_slot);
 }
 
 TEST_CASE("Cloning the current preview preserves its existing owner",
@@ -426,13 +471,19 @@ TEST_CASE("Actor preview copies the sequences of the record it cloned",
           "[menu][menu-rows-details][menu-actor-preview]") {
   FakePreview host;
   SetCloneSource(host);
+  const auto original = host.SequenceResources(3);
   host.on_pump = [](FakePreview& current) {
     current.actor_blocks[3] = Block(0x9000);
+    current.sequence_resources[3] = {};
+    static_cast<void>(current.SequenceResources(3));
   };
   REQUIRE(fw::CloneActorPreview(host, 3));
   CHECK(host.actor_blocks[3] == Block(0x9000));
   REQUIRE_FALSE(host.calls.empty());
-  CHECK(host.calls.back() == "CopySequences(4096,12288,0)");
+  CHECK(host.calls.back() == "BindSequences");
+  CHECK(host.bound_sequences.common == original.common);
+  CHECK(host.bound_sequences.battle == original.battle);
+  CHECK(host.bound_sequences.battle != host.SequenceResources(3).battle);
   CHECK(host.refusals.empty());
 }
 
@@ -462,7 +513,7 @@ TEST_CASE(
   CHECK(host.weapon_blocks[2] == AssetAddress::kNone);
   CHECK(host.weapon_blocks[3] == AssetAddress::kNone);
   CHECK_FALSE(std::ranges::any_of(host.calls, [](const auto& call) {
-    return call.starts_with("CopySequences") ||
+    return call.starts_with("BindSequences") ||
            call.starts_with("PlayAnimation");
   }));
 }
@@ -520,13 +571,12 @@ TEST_CASE("Actor preview load clones, poses and animates the preview",
   host.actors[16] = fw::PreviewActor{};
   fw::LoadActorPreview(host, 3);
   CHECK(host.requests.size() == 4);
-  CHECK(host.calls == std::vector<std::string>{
-                          "Allocate(0)", "Allocate(0)", "Allocate(1)",
-                          "Allocate(1)", "Pump", "CopySequences(4096,12288,0)",
-                          "ResetMotion(1)", "ResetPlacement(1)",
-                          "ClearSkipped(16)", "SetFade(1,0,0,0,0)",
-                          "ClearTint(1)", "ClearPreviewFlag(1)",
-                          "SetWeaponDrawn(1)", "PlayAnimation(1,1)"});
+  CHECK(host.calls ==
+        std::vector<std::string>{
+            "Allocate(0)", "Allocate(0)", "Allocate(1)", "Allocate(1)", "Pump",
+            "BindSequences", "ResetMotion(1)", "ResetPlacement(1)",
+            "ClearSkipped(16)", "SetFade(1,0,0,0,0)", "ClearTint(1)",
+            "ClearPreviewFlag(1)", "SetWeaponDrawn(1)", "PlayAnimation(1,1)"});
   CHECK(host.refusals.empty());
 
   FakePreview missing;

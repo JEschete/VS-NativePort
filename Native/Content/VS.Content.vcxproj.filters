@@ -207,6 +207,9 @@
     <ClInclude Include="include\Content\ActorArchetype.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
+    <ClInclude Include="include\Content\ActorAssetResources.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
     <ClInclude Include="include\Content\ActorAssets.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>

@@ -16,7 +16,9 @@
 #include <expected>
 #include <format>
 #include <iterator>
+#include <memory>
 #include <optional>
+#include <ranges>
 #include <span>
 #include <string>
 #include <string_view>
@@ -827,7 +829,7 @@ struct FileReadState {
 struct QueuedAssetState {
   ActorAssetIdentity identity;
   ActorRecordMemory memory = nullptr;
-  std::optional<int> shared_record_slot;
+  std::optional<ActorAssetRequest> request;
   ActorAssetLoadState loader;
   std::array<FileReadState, 4> reads;
   bool loader_state_initialized = false;
@@ -885,6 +887,111 @@ VS::Render::TextureSlot* TextureSlotAt(AssetTextureTable table, int index) {
              : nullptr;
 }
 
+struct ActorResourceBinding {
+  const Actors::ActorRecord* record = nullptr;
+  ActorModelResourceRef model{};
+  std::array<ActorSequenceResourceRef, 4> sequences{};
+};
+
+struct WeaponResourceBinding {
+  const Actors::WeaponModel* record = nullptr;
+  WeaponModelResourceRef model{};
+};
+
+struct SequenceResourceKey {
+  std::uint16_t model = 0;
+  int sequence = 0;
+  std::weak_ptr<const ActorSequenceResource> resource;
+};
+
+struct AssetResourceEpoch {};
+
+struct LiveAssetResources {
+  std::array<ActorResourceBinding, kActorRecordSlots> actors;
+  std::array<WeaponResourceBinding, kWeaponModelSlots> weapons;
+  std::vector<std::weak_ptr<const ActorModelResource>> models;
+  std::vector<std::weak_ptr<const WeaponModelResource>> weapon_models;
+  std::vector<std::weak_ptr<const ActorSequenceResource>> sequences;
+  std::vector<SequenceResourceKey> sequence_keys;
+  // Destroyed first: late external references cannot release a new session's
+  // texture slots, or touch module storage during process teardown.
+  std::shared_ptr<const AssetResourceEpoch> epoch =
+      std::make_shared<const AssetResourceEpoch>();
+};
+
+LiveAssetResources& Resources() {
+  static LiveAssetResources resources;
+  return resources;
+}
+
+bool AdjustResourceTextures(AssetTextureTable table, int first, int count,
+                            int adjustment) {
+  if (first == kNoAssetTextureSlot) return true;
+  for (int i = first; i < first + count; ++i) {
+    const auto* slot = TextureSlotAt(table, i);
+    if (slot == nullptr || int{slot->reference_count} + adjustment < 0 ||
+        int{slot->reference_count} + adjustment > 255) {
+      CountRefusal("immutable resource texture lease", i);
+      return false;
+    }
+  }
+  for (int i = first; i < first + count; ++i) {
+    auto* slot = TextureSlotAt(table, i);
+    slot->reference_count =
+        static_cast<std::uint8_t>(slot->reference_count + adjustment);
+  }
+  return true;
+}
+
+void ReleaseActorResourceTextures(const ActorModelResource& resource) {
+  const auto& definition = resource.Definition();
+  if (!AdjustResourceTextures(
+          AssetTextureTable::kActor, definition.texture_slot,
+          definition.texture_slot_count_minus_one + 1, -1)) {
+    return;
+  }
+  constexpr int kFallbackSlot = 20;
+  constexpr std::uint32_t kFallbackPage = 31;
+  if (definition.texture_slot == kFallbackSlot &&
+      TextureSlotAt(AssetTextureTable::kActor, kFallbackSlot)
+              ->reference_count == 0) {
+    static_cast<void>(
+        Render::RetireLiveTexturePageRange(kFallbackPage, 1, kLoaderPageOwner));
+  }
+}
+
+void ReleaseWeaponResourceTextures(const WeaponModelResource& resource) {
+  const auto& definition = resource.Definition();
+  static_cast<void>(AdjustResourceTextures(
+      AssetTextureTable::kWeapon, definition.texture_slot,
+      definition.wide_texture ? 2 : 1, -1));
+}
+
+std::optional<std::span<const std::byte>> ImmutableSequenceBytes(
+    AssetAddress address) {
+  if (address == AssetAddress::kNone) return std::nullopt;
+  const auto at = static_cast<std::uintptr_t>(address);
+  for (const auto& entry : Resources().sequences) {
+    const auto resource = entry.lock();
+    if (!resource) continue;
+    const auto bytes = resource->Bytes();
+    const auto begin = reinterpret_cast<std::uintptr_t>(bytes.data());
+    if (at >= begin && at - begin <= bytes.size()) {
+      return bytes.subspan(at - begin);
+    }
+  }
+  return std::nullopt;
+}
+
+template <class Resource>
+bool RegisteredResource(
+    const std::shared_ptr<const Resource>& resource,
+    const std::vector<std::weak_ptr<const Resource>>& entries) {
+  return resource && std::ranges::any_of(entries, [&](const auto& entry) {
+           return entry.lock() == resource;
+         });
+}
+
 int RunLoader(ActorAssetHost& host, ActorAssetLoadState& state,
               ActorAssetRequest& request, ActorAssetKind kind) {
   switch (kind) {
@@ -916,9 +1023,9 @@ class LiveActorAssetHost final : public ActorAssetHost {
 
   // The request queue.
   [[nodiscard]] std::uint8_t RequestKind(int slot) const override {
-    return InRange(slot, kActorAssetRequestCount)
-               ? legacyActorAssetRequests[slot].asset_kind
-               : 0;
+    if (!InRange(slot, kActorAssetRequestCount)) return 0;
+    const auto& input = requestStates[slot].request;
+    return input ? input->kind : legacyActorAssetRequests[slot].asset_kind;
   }
   void StoreRequest(int slot, const ActorAssetRequest& request,
                     const ActorAssetIdentity& identity) override {
@@ -931,7 +1038,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
                            .memory = identity.owner != kUnownedActorAssetOwner
                                          ? submitted_memory_
                                          : nullptr,
-                           .shared_record_slot = request.shared_record_slot,
+                           .request = request,
                            .loader = {},
                            .reads = {},
                            .loader_state_initialized = true};
@@ -963,8 +1070,9 @@ class LiveActorAssetHost final : public ActorAssetHost {
   }
   int ProcessHeadRequest(ActorAssetKind kind) override {
     LegacyActorAssetRequest& head = legacyActorAssetRequests[0];
-    ActorAssetRequest request = LoadRequest(head);
-    request.shared_record_slot = requestStates[0].shared_record_slot;
+    auto& input = requestStates[0].request;
+    if (!input) input = LoadRequest(head);
+    ActorAssetRequest& request = *input;
     if (!requestStates[0].target_validated) {
       if (!CanStartOwnedRequest(request)) return kAssetRefused;
       requestStates[0].target_validated = true;
@@ -976,7 +1084,6 @@ class LiveActorAssetHost final : public ActorAssetHost {
     }
     if (kind == ActorAssetKind::kGimmick) {
       const auto result = VS::Field::CreateLiveGimmickInstance(request);
-      requestStates[0].shared_record_slot = request.shared_record_slot;
       StoreRequestFields(request, head);
       return result;
     }
@@ -993,8 +1100,10 @@ class LiveActorAssetHost final : public ActorAssetHost {
                             : 0};
       requestStates[0].loader_state_initialized = true;
     }
-    const int result = RunLoader(*this, state, request, kind);
-    requestStates[0].shared_record_slot = request.shared_record_slot;
+    int result = RunLoader(*this, state, request, kind);
+    if (result == kAssetDone && !RetainLoadedResource(request)) {
+      result = kAssetRefused;
+    }
     ReleaseIdleActorAssetCursors(state);
     PublishRequestSnapshot(requestStates[0]);
     StoreRequestFields(request, head);
@@ -1027,6 +1136,16 @@ class LiveActorAssetHost final : public ActorAssetHost {
   }
   std::span<std::byte> Bytes(AssetAddress address,
                              std::size_t wanted) override {
+    if (ImmutableSequenceBytes(address)) {
+      CountRefusal("mutable access to immutable sequence",
+                   static_cast<std::int64_t>(address));
+      return {};
+    }
+    return LiveBytes(address, wanted);
+  }
+  std::span<const std::byte> ReadBytes(AssetAddress address,
+                                       std::size_t wanted) override {
+    if (const auto bytes = ImmutableSequenceBytes(address)) return *bytes;
     return LiveBytes(address, wanted);
   }
 
@@ -1172,14 +1291,40 @@ class LiveActorAssetHost final : public ActorAssetHost {
     }
     StoreWeaponRecord(record, *model);
   }
-  void CopyWeaponRecord(int target, int source) override {
-    VS::Actors::WeaponModel* to = WeaponAt(target);
-    const VS::Actors::WeaponModel* from = WeaponAt(source);
-    if (to == nullptr || from == nullptr) {
-      CountRefusal("weapon record copy", source);
-      return;
+  WeaponModelResourceRef FindWeaponResource(int model) const override {
+    for (const auto& entry : Resources().weapon_models) {
+      if (auto resource = entry.lock();
+          resource && resource->Definition().model_id == model) {
+        return resource;
+      }
     }
-    std::memmove(to, from, sizeof *to);
+    return {};
+  }
+  bool BindWeaponResource(int target,
+                          const WeaponModelResourceRef& resource) override {
+    auto* record = WeaponAt(target);
+    if (record == nullptr ||
+        !RegisteredResource(resource, Resources().weapon_models)) {
+      return false;
+    }
+    const auto bytes = resource->Geometry();
+    const AssetAddress fixed = WeaponGeometryBuffer(target);
+    const auto geometry =
+        fixed == AssetAddress::kNone ? AllocateLow(bytes.size()) : fixed;
+    auto destination = Bytes(geometry, bytes.size());
+    if (geometry == AssetAddress::kNone || destination.size() < bytes.size()) {
+      if (fixed == AssetAddress::kNone) FreeLow(geometry);
+      CountRefusal("weapon instance geometry", target);
+      return false;
+    }
+    std::ranges::copy(bytes, destination.begin());
+    WeaponAssetRecord definition = resource->Definition();
+    definition.geometry = geometry;
+    StoreWeapon(target, definition);
+    WriteWeaponBones(target, resource->Bones());
+    RecordModelGeometry(geometry, bytes.size());
+    Resources().weapons[target] = {.record = record, .model = resource};
+    return true;
   }
   void WriteWeaponBones(int slot, std::span<const std::byte> bones) override {
     VS::Actors::WeaponModel* model = WeaponAt(slot);
@@ -1198,6 +1343,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
   void ClearWeaponSlot(int slot) override {
     if (InRange(slot, kWeaponModelSlots)) {
       VS::Actors::weaponModels[slot] = nullptr;
+      Resources().weapons[slot] = {};
     }
   }
   [[nodiscard]] AssetAddress WeaponGeometryBuffer(int slot) const override {
@@ -1258,14 +1404,44 @@ class LiveActorAssetHost final : public ActorAssetHost {
     StoreActorFields(record, *actor);
     StoreActorTables(record, *actor);
   }
-  void CopyActorRecord(int target, int source) override {
-    VS::Actors::ActorRecord* to = ActorAt(target);
-    const VS::Actors::ActorRecord* from = ActorAt(source);
-    if (to == nullptr || from == nullptr) {
-      CountRefusal("actor record copy", source);
-      return;
+  ActorModelResourceRef FindActorResource(int model) const override {
+    for (const auto& entry : std::views::reverse(Resources().models)) {
+      if (auto resource = entry.lock();
+          resource && resource->Definition().model_id == model) {
+        return resource;
+      }
     }
-    std::memmove(to, from, sizeof *to);
+    return {};
+  }
+  bool BindActorResource(int target,
+                         const ActorModelResourceRef& resource) override {
+    auto* record = ActorAt(target);
+    if (record == nullptr ||
+        !RegisteredResource(resource, Resources().models)) {
+      return false;
+    }
+    const auto bytes = resource->Geometry();
+    const auto geometry = AllocateLow(bytes.size());
+    if (geometry == AssetAddress::kNone) {
+      CountRefusal("actor instance geometry", target);
+      return false;
+    }
+    std::ranges::copy(bytes, Bytes(geometry, bytes.size()).begin());
+    ActorAssetRecord definition = resource->Definition();
+    definition.model = geometry;
+    const auto sequence = BindActorSequence(
+        target, ActorSequenceKind::kEmbedded, resource->EmbeddedSequence());
+    if (!sequence) {
+      FreeLow(geometry);
+      return false;
+    }
+    definition.owned_sequence = *sequence;
+    StoreActor(target, definition);
+    WriteActorTextureLayout(target, resource->Layout());
+    auto& binding = Resources().actors[target];
+    binding.record = record;
+    binding.model = resource;
+    return true;
   }
   void WriteActorTextureLayout(int slot,
                                std::span<const std::byte> layout) override {
@@ -1282,6 +1458,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
   void ClearActorSlot(int slot) override {
     if (InRange(slot, kActorRecordSlots)) {
       VS::Actors::actorRecords[slot] = nullptr;
+      Resources().actors[slot] = {};
     }
   }
   [[nodiscard]] std::int16_t RoomActorScale() const override {
@@ -1368,6 +1545,69 @@ class LiveActorAssetHost final : public ActorAssetHost {
     }
     return bytes.size();
   }
+  ActorSequenceResourceRef FindSequenceResource(int model,
+                                                int sequence) const override {
+    for (const auto& key : Resources().sequence_keys) {
+      if (key.model == model && key.sequence == sequence) {
+        if (auto resource = key.resource.lock()) return resource;
+      }
+    }
+    return {};
+  }
+  ActorSequenceResourceRef MakeSequenceResource(
+      std::span<const std::byte> bytes, std::uint8_t animation_count) override {
+    auto resource = ActorSequenceResourceRef(
+        new ActorSequenceResource(bytes, animation_count),
+        [epoch = std::weak_ptr(Resources().epoch)](
+            const ActorSequenceResource* value) {
+          const auto bank = value->Bytes();
+          if (!epoch.expired()) {
+            Actors::ForgetSequenceBanks(bank.data(), bank.size());
+          }
+          delete value;
+        });
+    const auto bank = resource->Bytes();
+    Actors::RegisterSequenceBank(bank.data(), bank.size());
+    std::erase_if(Resources().sequences,
+                  [](const auto& entry) { return entry.expired(); });
+    Resources().sequences.emplace_back(resource);
+    return resource;
+  }
+  std::optional<AssetAddress> BindActorSequence(
+      int target, ActorSequenceKind kind,
+      const ActorSequenceResourceRef& resource) override {
+    auto* record = ActorAt(target);
+    if (record == nullptr ||
+        (resource && !RegisteredResource(resource, Resources().sequences))) {
+      CountRefusal("actor immutable sequence binding", target);
+      return std::nullopt;
+    }
+    auto& binding = Resources().actors[target];
+    if (binding.record != record) binding = {.record = record};
+    binding.sequences.at(static_cast<std::size_t>(kind)) = resource;
+    return resource ? Address(resource->Bytes().data()) : AssetAddress::kNone;
+  }
+  void ReleaseActorSequenceResource(int target,
+                                    ActorSequenceKind kind) override {
+    auto& binding = Resources().actors.at(static_cast<std::size_t>(target));
+    auto& resource = binding.sequences.at(static_cast<std::size_t>(kind));
+    if (binding.record == ActorAt(target) && resource) {
+      resource.reset();
+      return;
+    }
+    const auto actor = LoadActor(target);
+    const auto address =
+        kind == ActorSequenceKind::kEmbedded ? actor.owned_sequence
+        : kind == ActorSequenceKind::kCommon ? actor.common_sequence
+        : kind == ActorSequenceKind::kBattle
+            ? actor.battle_sequence
+            : actor.shared_sequences[kSpecialSequenceRef];
+    if (address != AssetAddress::kNone && address != PrimarySequenceBuffer()) {
+      const auto bytes = SequenceBankSize(address);
+      if (bytes) Actors::ForgetSequenceBanks(Pointer(address), *bytes);
+      FreeLow(address);
+    }
+  }
   void ResetActorTextureFrames(int bank) override {
     VS::Actors::ResetLiveActorTextureFrames(bank);
   }
@@ -1396,6 +1636,136 @@ class LiveActorAssetHost final : public ActorAssetHost {
   }
   void Refuse(const char* what, std::int64_t value) override {
     CountRefusal(what, value);
+  }
+
+  bool RetainLoadedResource(const ActorAssetRequest& request) {
+    const int slot = request.target_slot;
+    const auto kind = static_cast<ActorAssetKind>(request.kind);
+    if (kind == ActorAssetKind::kActorModelLoad ||
+        kind == ActorAssetKind::kActorModelParse) {
+      if (request.model_id == kModellessActorId) return true;
+      if (CaptureActorResource(
+              slot, slot == 0 && request.model_id == kAshleyTextureModelId)) {
+        return true;
+      }
+      static_cast<void>(ReleaseActorModel(*this, slot, false));
+      return false;
+    }
+    if (kind == ActorAssetKind::kWeaponModelLoad ||
+        kind == ActorAssetKind::kWeaponModelParse) {
+      if (WeaponAt(slot) == nullptr) return true;
+      if (CaptureWeaponResource(slot)) return true;
+      static_cast<void>(ReleaseWeaponModel(*this, slot));
+      return false;
+    }
+    if ((kind == ActorAssetKind::kSequenceLoad ||
+         kind == ActorAssetKind::kSequenceParse) &&
+        request.sub_kind == 0 && request.model_id >= 0 &&
+        ActorAt(slot) != nullptr) {
+      const auto& binding = Resources().actors[slot];
+      const auto sequence_kind = request.model_id == 0
+                                     ? ActorSequenceKind::kCommon
+                                     : ActorSequenceKind::kBattle;
+      const auto& resource =
+          binding.sequences[static_cast<std::size_t>(sequence_kind)];
+      if (binding.record == ActorAt(slot) && resource) {
+        auto& keys = Resources().sequence_keys;
+        std::erase_if(keys, [&](const auto& key) {
+          return key.resource.expired() ||
+                 (key.model == ActorAt(slot)->model_id &&
+                  key.sequence == request.model_id);
+        });
+        keys.push_back({ActorAt(slot)->model_id, request.model_id, resource});
+      }
+    }
+    return true;
+  }
+
+  ActorModelResourceRef CaptureActorResource(int slot, bool refresh = false) {
+    const auto* actor = ActorAt(slot);
+    if (actor == nullptr) {
+      CountRefusal("immutable actor resource without record", slot);
+      return {};
+    }
+    auto& binding = Resources().actors[slot];
+    if (binding.record == actor && binding.model && !refresh) {
+      return binding.model;
+    }
+    const ActorAssetRecord definition = LoadActor(slot);
+    const auto previous =
+        binding.record == actor ? binding.model : ActorModelResourceRef{};
+    const auto geometry =
+        previous && previous->Definition().model_id == definition.model_id
+            ? previous->Geometry()
+            : ReadBytes(definition.model, definition.model_data_size);
+    if (definition.model_data_size == 0 ||
+        geometry.size() < definition.model_data_size) {
+      CountRefusal("immutable actor model extent", slot);
+      return {};
+    }
+    const std::span<const std::byte, kActorTextureLayoutBytes> layout{
+        reinterpret_cast<const std::byte*>(actor) +
+            offsetof(Actors::ActorRecord, texture_overlays),
+        kActorTextureLayoutBytes};
+    const int count = definition.texture_slot_count_minus_one + 1;
+    if (!AdjustResourceTextures(AssetTextureTable::kActor,
+                                definition.texture_slot, count, 1)) {
+      return {};
+    }
+    if (binding.record != actor) binding = {.record = actor};
+    auto resource = ActorModelResourceRef(
+        new ActorModelResource(
+            definition, geometry.first(definition.model_data_size), layout,
+            binding.sequences[static_cast<std::size_t>(
+                ActorSequenceKind::kEmbedded)]),
+        [epoch = std::weak_ptr(Resources().epoch)](
+            const ActorModelResource* value) {
+          if (!epoch.expired()) {
+            ReleaseActorResourceTextures(*value);
+          }
+          delete value;
+        });
+    std::erase_if(Resources().models,
+                  [](const auto& entry) { return entry.expired(); });
+    Resources().models.emplace_back(resource);
+    binding.model = resource;
+    return resource;
+  }
+
+  WeaponModelResourceRef CaptureWeaponResource(int slot) {
+    const auto* weapon = WeaponAt(slot);
+    if (weapon == nullptr) {
+      CountRefusal("immutable weapon resource without record", slot);
+      return {};
+    }
+    auto& binding = Resources().weapons[slot];
+    if (binding.record == weapon && binding.model) return binding.model;
+    const WeaponAssetRecord definition = LoadWeapon(slot);
+    const auto geometry = Render::LiveModelBytes(Pointer(definition.geometry));
+    if (geometry.empty()) {
+      CountRefusal("immutable weapon model extent", slot);
+      return {};
+    }
+    if (!AdjustResourceTextures(AssetTextureTable::kWeapon,
+                                definition.texture_slot,
+                                definition.wide_texture ? 2 : 1, 1)) {
+      return {};
+    }
+    auto resource = WeaponModelResourceRef(
+        new WeaponModelResource(definition, geometry,
+                                std::as_bytes(std::span(weapon->bones))),
+        [epoch = std::weak_ptr(Resources().epoch)](
+            const WeaponModelResource* value) {
+          if (!epoch.expired()) {
+            ReleaseWeaponResourceTextures(*value);
+          }
+          delete value;
+        });
+    std::erase_if(Resources().weapon_models,
+                  [](const auto& entry) { return entry.expired(); });
+    Resources().weapon_models.emplace_back(resource);
+    binding = {.record = weapon, .model = resource};
+    return resource;
   }
 
   // The game heap block holding `address` to its end; `wanted` bytes of
@@ -1459,9 +1829,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
   // destination.
   [[nodiscard]] static AssetAddress RecordMemory(
       ActorRecordTable table, int slot, const ActorAssetRequest& request) {
-    const ActorAssetOwner owner = legacyActorAssetRequests[0].asset_kind != 0
-                                      ? requestStates[0].identity.owner
-                                      : kUnownedActorAssetOwner;
+    const ActorAssetOwner owner = requestStates[0].identity.owner;
     if (owner == kUnownedActorAssetOwner) return request.destination;
     const ActorRecordMemory memory = requestStates[0].memory;
     return memory != nullptr ? memory(owner, table, slot) : AssetAddress::kNone;
@@ -1497,7 +1865,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
       CountRefusal(what, slot);
       return nullptr;
     }
-    const std::span<std::byte> bytes = LiveBytes(destination, sizeof(Record));
+    const std::span<std::byte> bytes = Bytes(destination, sizeof(Record));
     if (bytes.size() < sizeof(Record)) {
       CountRefusal(what, static_cast<std::int64_t>(destination));
       return nullptr;
@@ -1560,7 +1928,8 @@ bool CancelSequenceFile(ActorAssetLoadState& state) {
 }
 
 bool LiveActorAssetHost::AbandonHeadRequest(ActorAssetKind kind) {
-  const ActorAssetRequest request = LoadRequest(legacyActorAssetRequests[0]);
+  const ActorAssetRequest request = requestStates[0].request.value_or(
+      LoadRequest(legacyActorAssetRequests[0]));
   if (request.kind != static_cast<std::uint8_t>(kind) ||
       !IsOwnableActorAssetRequest(request)) {
     CountRefusal("unsupported asset head cancellation", request.kind);
@@ -1581,6 +1950,120 @@ bool LiveActorAssetHost::AbandonHeadRequest(ActorAssetKind kind) {
   return true;
 }
 }  // namespace
+
+ActorModelResourceRef LiveActorModelResource(int slot) {
+  if (!InRange(slot, kActorRecordSlots)) {
+    CountRefusal("immutable actor resource slot", slot);
+    return {};
+  }
+  const auto& binding = Resources().actors[slot];
+  if (binding.record != ActorAt(slot) || !binding.model) {
+    CountRefusal("actor has no immutable model resource", slot);
+    return {};
+  }
+  return binding.model;
+}
+
+WeaponModelResourceRef LiveWeaponModelResource(int slot) {
+  if (!InRange(slot, kWeaponModelSlots)) {
+    CountRefusal("immutable weapon resource slot", slot);
+    return {};
+  }
+  const auto& binding = Resources().weapons[slot];
+  if (binding.record != WeaponAt(slot) || !binding.model) {
+    CountRefusal("weapon has no immutable model resource", slot);
+    return {};
+  }
+  return binding.model;
+}
+
+ActorSequenceResources LiveActorSequenceResources(int slot) {
+  if (!InRange(slot, kActorRecordSlots)) {
+    CountRefusal("immutable actor sequence slot", slot);
+    return {};
+  }
+  const auto& binding = Resources().actors[slot];
+  const auto* actor = ActorAt(slot);
+  if (actor == nullptr || binding.record != actor) {
+    CountRefusal("actor has no immutable sequence resources", slot);
+    return {};
+  }
+  return {
+      .common =
+          binding
+              .sequences[static_cast<std::size_t>(ActorSequenceKind::kCommon)],
+      .battle =
+          binding
+              .sequences[static_cast<std::size_t>(ActorSequenceKind::kBattle)],
+      .battle_model = actor->sequence_model_id};
+}
+
+bool BindLiveActorSequenceResources(int slot,
+                                    const ActorSequenceResources& resources) {
+  LiveActorAssetHost host;
+  if (ActorAt(slot) == nullptr ||
+      (resources.common &&
+       !RegisteredResource(resources.common, Resources().sequences)) ||
+      (resources.battle &&
+       !RegisteredResource(resources.battle, Resources().sequences))) {
+    CountRefusal("actor sequence resources are no longer live", slot);
+    return false;
+  }
+  ActorAssetRecord actor = host.LoadActor(slot);
+  const auto common = host.BindActorSequence(slot, ActorSequenceKind::kCommon,
+                                             resources.common);
+  const auto battle = host.BindActorSequence(slot, ActorSequenceKind::kBattle,
+                                             resources.battle);
+  if (!common || !battle) return false;
+  actor.common_sequence = *common;
+  actor.battle_sequence = *battle;
+  actor.common_entry_count =
+      resources.common ? resources.common->AnimationCount() : 0;
+  actor.common_animation_count =
+      resources.battle ? resources.battle->AnimationCount() : 0;
+  actor.sequence_model_id = resources.battle_model;
+  host.StoreActor(slot, actor);
+  return true;
+}
+
+void ResetLiveActorAssetResources() {
+  auto& resources = Resources();
+  resources.epoch.reset();
+  for (const auto& entry : resources.models) {
+    if (const auto resource = entry.lock()) {
+      ReleaseActorResourceTextures(*resource);
+    }
+  }
+  for (const auto& entry : resources.weapon_models) {
+    if (const auto resource = entry.lock()) {
+      ReleaseWeaponResourceTextures(*resource);
+    }
+  }
+  for (const auto& entry : resources.sequences) {
+    if (const auto resource = entry.lock()) {
+      const auto bytes = resource->Bytes();
+      Actors::ForgetSequenceBanks(bytes.data(), bytes.size());
+    }
+  }
+  for (int slot = 0; slot < kActorRecordSlots; ++slot) {
+    const auto& binding = resources.actors[slot];
+    auto* actor = ActorAt(slot);
+    if (actor == nullptr || binding.record != actor) continue;
+    if (binding.sequences[0]) actor->owned_sequence = nullptr;
+    if (binding.sequences[1]) actor->common_sequence = nullptr;
+    if (binding.sequences[2]) actor->battle_sequence = nullptr;
+    if (binding.sequences[3]) {
+      actor->shared_sequences[kSpecialSequenceRef] = nullptr;
+    }
+  }
+  resources.actors = {};
+  resources.weapons = {};
+  resources.models.clear();
+  resources.weapon_models.clear();
+  resources.sequences.clear();
+  resources.sequence_keys.clear();
+  resources.epoch = std::make_shared<const AssetResourceEpoch>();
+}
 
 int FindLiveFreeActorAssetRequest() {
   LiveActorAssetHost host;

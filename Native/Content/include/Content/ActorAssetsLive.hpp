@@ -7,6 +7,7 @@
 #include <optional>
 #include <span>
 
+#include "Content/ActorAssetResources.hpp"
 #include "Content/ActorAssets.hpp"
 #include "Content/CdDrive.hpp"
 
@@ -29,6 +30,12 @@ struct WeaponModelData;
 // parser globals below are output-only diagnostic snapshots; only the
 // unowned ETM loader still reads its legacy phase and buffer (#207).
 namespace VS::Content {
+[[nodiscard]] ActorModelResourceRef LiveActorModelResource(int slot);
+[[nodiscard]] WeaponModelResourceRef LiveWeaponModelResource(int slot);
+[[nodiscard]] ActorSequenceResources LiveActorSequenceResources(int slot);
+bool BindLiveActorSequenceResources(int slot,
+                                    const ActorSequenceResources& resources);
+void ResetLiveActorAssetResources();
 
 struct DiscFile;
 struct DiscQueueSlot;

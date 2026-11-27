@@ -120,6 +120,7 @@
     <ClInclude Include="include\Content\ActionCategoryCatalog.hpp" />
     <ClInclude Include="include\Content\ActorAnimation.hpp" />
     <ClInclude Include="include\Content\ActorArchetype.hpp" />
+    <ClInclude Include="include\Content\ActorAssetResources.hpp" />
     <ClInclude Include="include\Content\ActorAssets.hpp" />
     <ClInclude Include="include\Content\ActorAssetsLive.hpp" />
     <ClInclude Include="include\Content\AnimationSet.hpp" />

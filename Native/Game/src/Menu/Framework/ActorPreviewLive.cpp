@@ -57,8 +57,6 @@ static_assert(kWeaponModelSlots == std::size(VS::Actors::weaponModels));
 static_assert(kActorBoneMatrices ==
               std::extent_v<decltype(VS::Actors::ActorRecord::bone_matrices)>);
 
-// Ashley's battle sequence copy (224.c:81).
-constexpr std::size_t kBattleSequenceBytes = 0x7800;
 // The loop counter the original passed as ResetLiveActorMotionState's unread
 // argument (224.c:116).
 constexpr int kMotionResetArgument = kWeaponModelsPerActor;
@@ -74,18 +72,6 @@ AssetAddress Address(const void* pointer) {
 template <typename T = void>
 T* Pointer(AssetAddress address) {
   return reinterpret_cast<T*>(static_cast<std::uintptr_t>(address));
-}
-
-[[nodiscard]] std::size_t AllocationBytes(PreviewAllocation kind) {
-  switch (kind) {
-    case PreviewAllocation::kActorRecord:
-      return sizeof(VS::Actors::ActorRecord);
-    case PreviewAllocation::kWeaponModel:
-      return sizeof(VS::Actors::WeaponModel);
-    case PreviewAllocation::kBattleSequence:
-      return kBattleSequenceBytes;
-  }
-  return 0;
 }
 
 [[nodiscard]] VS::Render::ColorCode LiveColor(const Render::ColorCode& color) {
@@ -143,7 +129,6 @@ struct PreviewRecordStorage {
 };
 
 std::array<PreviewRecordStorage, kPreviewRecordSlots.size()> previewRecords;
-AssetAddress previewBattleSequence = AssetAddress::kNone;
 
 AssetAddress PreviewRecordMemory(Content::ActorAssetOwner owner,
                                  Content::ActorRecordTable table, int slot) {
@@ -158,11 +143,6 @@ AssetAddress PreviewRecordMemory(Content::ActorAssetOwner owner,
 }
 
 bool ReleasePreviewRecords() {
-  if (previewBattleSequence != AssetAddress::kNone &&
-      !Core::Memory::LivePayloadCapacity(Pointer(previewBattleSequence))) {
-    Warn("owned preview sequence is no longer allocated");
-    return false;
-  }
   for (const PreviewRecordStorage& record : previewRecords) {
     if (record.block != AssetAddress::kNone &&
         !Core::Memory::LivePayloadCapacity(Pointer(record.block))) {
@@ -173,15 +153,6 @@ bool ReleasePreviewRecords() {
   if (!Content::CancelLiveActorAssetRequests(kPreviewAssetOwner)) {
     Warn("pending preview assets could not be cancelled");
     return false;
-  }
-  if (previewBattleSequence != AssetAddress::kNone) {
-    auto* body = Pointer<VS::Actors::ActorRecord>(previewRecords[0].block);
-    if (body != nullptr &&
-        Address(body->battle_sequence) == previewBattleSequence) {
-      body->battle_sequence = nullptr;
-    }
-    Core::Memory::FreeLiveFromLowEnd(Pointer(previewBattleSequence));
-    previewBattleSequence = AssetAddress::kNone;
   }
   for (std::size_t part = 0; part < previewRecords.size(); ++part) {
     const PreviewRecordStorage& record = previewRecords[part];
@@ -223,10 +194,9 @@ bool QueuePreviewAsset(const Content::ActorAssetRequest& request) {
       Warn("duplicate preview record request");
       return false;
     }
-    const auto kind = weapon ? PreviewAllocation::kWeaponModel
-                             : PreviewAllocation::kActorRecord;
-    record.block =
-        Address(Core::Memory::AllocateLiveFromLowEnd(AllocationBytes(kind)));
+    const auto bytes = weapon ? sizeof(VS::Actors::WeaponModel)
+                              : sizeof(VS::Actors::ActorRecord);
+    record.block = Address(Core::Memory::AllocateLiveFromLowEnd(bytes));
     if (record.block == AssetAddress::kNone) {
       Warn("preview record allocation failed");
       return false;
@@ -293,20 +263,14 @@ class LiveActorPreviewHost final : public ActorPreviewHost {
     return PreviewOf(*model);
   }
 
-  [[nodiscard]] AssetAddress Allocate(PreviewAllocation kind) override {
-    return Address(Core::Memory::AllocateLiveFromLowEnd(AllocationBytes(kind)));
+  Content::ActorModelResourceRef ModelResource(int slot) const override {
+    return Content::LiveActorModelResource(slot);
   }
-
-  void Free(AssetAddress block) override {
-    Core::Memory::FreeLiveFromLowEnd(Pointer(block));
+  Content::WeaponModelResourceRef WeaponResource(int slot) const override {
+    return Content::LiveWeaponModelResource(slot);
   }
-
-  [[nodiscard]] AssetAddress ActorBlock(int slot) const override {
-    return Address(Record(slot));
-  }
-
-  [[nodiscard]] AssetAddress WeaponBlock(int slot) const override {
-    return Address(Model(slot));
+  Content::ActorSequenceResources SequenceResources(int slot) const override {
+    return Content::LiveActorSequenceResources(slot);
   }
 
   bool BeginPreview(int source_slot) override {
@@ -352,32 +316,10 @@ class LiveActorPreviewHost final : public ActorPreviewHost {
   }
 
   // decomp: MAINMENU.PRG func_800F9A78 (src/MENU/MAINMENU.PRG/224.c:78-90)
-  bool CopySequences(const PreviewSequenceCopy& copy) override {
-    auto* preview = Pointer<VS::Actors::ActorRecord>(copy.clone);
-    const auto* source = Pointer<VS::Actors::ActorRecord>(copy.source);
-    if (preview == nullptr || source == nullptr) {
-      Refuse("sequence copy without the clone or its source");
-      return false;
-    }
-    if (copy.battle_copy != AssetAddress::kNone &&
-        source->battle_sequence != nullptr) {
-      if (!Content::CopyLiveWeaponSequence(
-              Pointer<VS::Content::SequenceBuffer>(copy.battle_copy),
-              static_cast<VS::Content::SequenceBuffer*>(
-                  source->battle_sequence))) {
-        return false;
-      }
-      preview->battle_sequence = Pointer(copy.battle_copy);
-      previewBattleSequence = copy.battle_copy;
-    } else {
-      if (copy.battle_copy != AssetAddress::kNone) Free(copy.battle_copy);
-      preview->battle_sequence = source->battle_sequence;
-    }
-    preview->common_sequence = source->common_sequence;
-    preview->sequence_model_id = source->sequence_model_id;
-    preview->common_entry_count = source->common_entry_count;
-    preview->common_animation_count = source->common_animation_count;
-    return true;
+  bool BindSequences(
+      const Content::ActorSequenceResources& resources) override {
+    return Content::BindLiveActorSequenceResources(kPreviewActorSlot,
+                                                   resources);
   }
 
   void SetWeaponDrawn(int slot) override {

@@ -19,6 +19,7 @@
 #include "Battle/SphereGeometryLive.hpp"
 #include "Battle/TargetingState.hpp"
 #include "Boot/GameLoop.hpp"
+#include "Content/ActorAssetsLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.hpp"
 #include "Content/DiscQueue.hpp"
@@ -465,6 +466,7 @@ void ResetLiveSessionHeap() {
     VS::Core::Errorf("boot", "frame cleanup refused before heap replacement");
     std::abort();
   }
+  Content::ResetLiveActorAssetResources();
   Core::Memory::ResetLiveGameHeap();
 }
 

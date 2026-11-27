@@ -14,6 +14,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Content/ActorAssetResources.hpp"
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
 
@@ -201,6 +202,19 @@ class FakeAssetHost final : public Content::ActorAssetHost {
     }
     return std::span<std::byte>(block->second).subspan(at);
   }
+  std::span<const std::byte> ReadBytes(AssetAddress address,
+                                       std::size_t wanted) override {
+    for (const auto& entry : immutable_sequences) {
+      if (const auto resource = entry.lock()) {
+        const auto bytes = resource->Bytes();
+        const auto base = reinterpret_cast<std::uintptr_t>(bytes.data());
+        if (Raw(address) >= base && Raw(address) - base <= bytes.size()) {
+          return bytes.subspan(Raw(address) - base);
+        }
+      }
+    }
+    return Bytes(address, wanted);
+  }
 
   std::optional<std::uint32_t> FileTableEntry(AssetFileTable table,
                                               std::size_t index) override {
@@ -298,14 +312,41 @@ class FakeAssetHost final : public Content::ActorAssetHost {
   void StoreWeapon(int slot, const WeaponAssetRecord& record) override {
     weapons.at(Index(slot)) = record;
   }
-  void CopyWeaponRecord(int target, int source) override {
-    weapons.at(Index(target)) = weapons.at(Index(source));
+  Content::WeaponModelResourceRef RememberWeaponResource(int slot) {
+    const auto definition = LoadWeapon(slot);
+    auto resource = std::make_shared<const Content::WeaponModelResource>(
+        definition, Block(definition.geometry), weapon_bones.at(Index(slot)));
+    weapon_resources.at(Index(slot)) = resource;
+    weapon_resource_cache[definition.model_id] = resource;
+    return resource;
+  }
+  Content::WeaponModelResourceRef FindWeaponResource(int model) const override {
+    const auto found = weapon_resource_cache.find(model);
+    return found == weapon_resource_cache.end() ? nullptr
+                                                : found->second.lock();
+  }
+  bool BindWeaponResource(
+      int target, const Content::WeaponModelResourceRef& resource) override {
+    if (!resource) return false;
+    const auto bytes = resource->Geometry();
+    const auto geometry =
+        target < 2 ? WeaponGeometryBuffer(target) : AllocateLow(bytes.size());
+    if (geometry == AssetAddress::kNone) return false;
+    std::ranges::copy(bytes, Block(geometry).begin());
+    auto definition = resource->Definition();
+    definition.geometry = geometry;
+    StoreWeapon(target, definition);
+    WriteWeaponBones(target, resource->Bones());
+    weapon_resources.at(Index(target)) = resource;
+    RecordModelGeometry(geometry, bytes.size());
+    return true;
   }
   void WriteWeaponBones(int slot, std::span<const std::byte> bones) override {
     weapon_bones.at(Index(slot)).assign(bones.begin(), bones.end());
   }
   void ClearWeaponSlot(int slot) override {
     weapons.at(Index(slot)).reset();
+    weapon_resources.at(Index(slot)).reset();
     cleared_weapons.push_back(slot);
   }
   AssetAddress WeaponGeometryBuffer(int slot) const override {
@@ -346,8 +387,42 @@ class FakeAssetHost final : public Content::ActorAssetHost {
   void StoreActor(int slot, const ActorAssetRecord& record) override {
     actors.at(Index(slot)) = record;
   }
-  void CopyActorRecord(int target, int source) override {
-    actors.at(Index(target)) = actors.at(Index(source));
+  Content::ActorModelResourceRef RememberActorResource(int slot) {
+    auto definition = LoadActor(slot);
+    const auto geometry = Block(definition.model);
+    definition.model_data_size = static_cast<std::uint32_t>(geometry.size());
+    const std::array<std::byte, Content::kActorTextureLayoutBytes> layout{};
+    auto resource = std::make_shared<const Content::ActorModelResource>(
+        definition, geometry, layout, actor_sequences.at(Index(slot))[0]);
+    actor_resources.at(Index(slot)) = resource;
+    actor_resource_cache[definition.model_id] = resource;
+    return resource;
+  }
+  Content::ActorModelResourceRef FindActorResource(int model) const override {
+    const auto found = actor_resource_cache.find(model);
+    return found == actor_resource_cache.end() ? nullptr : found->second.lock();
+  }
+  bool BindActorResource(
+      int target, const Content::ActorModelResourceRef& resource) override {
+    if (!resource) return false;
+    const auto bytes = resource->Geometry();
+    const auto geometry = AllocateLow(bytes.size());
+    if (geometry == AssetAddress::kNone) return false;
+    std::ranges::copy(bytes, Block(geometry).begin());
+    auto definition = resource->Definition();
+    definition.model = geometry;
+    const auto sequence =
+        BindActorSequence(target, Content::ActorSequenceKind::kEmbedded,
+                          resource->EmbeddedSequence());
+    if (!sequence) {
+      FreeLow(geometry);
+      return false;
+    }
+    definition.owned_sequence = *sequence;
+    StoreActor(target, definition);
+    WriteActorTextureLayout(target, resource->Layout());
+    actor_resources.at(Index(target)) = resource;
+    return true;
   }
   void WriteActorTextureLayout(int /*slot*/,
                                std::span<const std::byte> /*layout*/) override {
@@ -355,6 +430,8 @@ class FakeAssetHost final : public Content::ActorAssetHost {
   }
   void ClearActorSlot(int slot) override {
     actors.at(Index(slot)).reset();
+    actor_resources.at(Index(slot)).reset();
+    actor_sequences.at(Index(slot)) = {};
     cleared_actors.push_back(slot);
   }
   std::int16_t RoomActorScale() const override { return room_scale; }
@@ -399,6 +476,50 @@ class FakeAssetHost final : public Content::ActorAssetHost {
       }
     }
     return std::nullopt;
+  }
+  Content::ActorSequenceResourceRef FindSequenceResource(
+      int model, int sequence) const override {
+    const auto found = sequence_resource_cache.find({model, sequence});
+    return found == sequence_resource_cache.end() ? nullptr
+                                                  : found->second.lock();
+  }
+  Content::ActorSequenceResourceRef MakeSequenceResource(
+      std::span<const std::byte> bytes, std::uint8_t count) override {
+    auto resource =
+        std::make_shared<const Content::ActorSequenceResource>(bytes, count);
+    immutable_sequences.emplace_back(resource);
+    const auto address =
+        Address(reinterpret_cast<std::uintptr_t>(resource->Bytes().data()));
+    RecordSequenceBank(address, bytes.size());
+    return resource;
+  }
+  std::optional<AssetAddress> BindActorSequence(
+      int target, Content::ActorSequenceKind kind,
+      const Content::ActorSequenceResourceRef& resource) override {
+    actor_sequences.at(Index(target)).at(static_cast<std::size_t>(kind)) =
+        resource;
+    return resource ? Address(reinterpret_cast<std::uintptr_t>(
+                          resource->Bytes().data()))
+                    : AssetAddress::kNone;
+  }
+  void ReleaseActorSequenceResource(int target,
+                                    Content::ActorSequenceKind kind) override {
+    auto& resource =
+        actor_sequences.at(Index(target)).at(static_cast<std::size_t>(kind));
+    if (resource) {
+      resource.reset();
+      return;
+    }
+    const auto actor = LoadActor(target);
+    const auto address =
+        kind == Content::ActorSequenceKind::kEmbedded ? actor.owned_sequence
+        : kind == Content::ActorSequenceKind::kCommon ? actor.common_sequence
+        : kind == Content::ActorSequenceKind::kBattle
+            ? actor.battle_sequence
+            : actor.shared_sequences[3];
+    if (address != AssetAddress::kNone && address != primary_sequence) {
+      FreeLow(address);
+    }
   }
   void ResetActorTextureFrames(int bank) override {
     texture_frame_resets.push_back(bank);
@@ -472,6 +593,10 @@ class FakeAssetHost final : public Content::ActorAssetHost {
   std::array<std::vector<std::byte>, Content::kWeaponModelSlots> weapon_bones{};
   std::vector<int> cleared_weapons;
   std::array<AssetAddress, 2> weapon_buffers{};
+  std::array<Content::WeaponModelResourceRef, Content::kWeaponModelSlots>
+      weapon_resources;
+  std::map<int, std::weak_ptr<const Content::WeaponModelResource>>
+      weapon_resource_cache;
   std::vector<std::uint8_t> material_palettes;
   int bone_tag = 0;
   std::vector<std::pair<int, int>> bone_tag_queries;
@@ -486,6 +611,18 @@ class FakeAssetHost final : public Content::ActorAssetHost {
   std::vector<AssetAddress> stopped_sounds;
   std::int16_t room_scale = 0;
   int texture_layout_writes = 0;
+  std::array<Content::ActorModelResourceRef, Content::kActorRecordSlots>
+      actor_resources;
+  std::map<int, std::weak_ptr<const Content::ActorModelResource>>
+      actor_resource_cache;
+  std::array<std::array<Content::ActorSequenceResourceRef, 4>,
+             Content::kActorRecordSlots>
+      actor_sequences;
+  std::map<std::pair<int, int>,
+           std::weak_ptr<const Content::ActorSequenceResource>>
+      sequence_resource_cache;
+  std::vector<std::weak_ptr<const Content::ActorSequenceResource>>
+      immutable_sequences;
 
   std::array<SharedSequenceBank, Content::kSharedSequenceBanks> banks{};
   std::array<std::uint8_t, Content::kSharedSequenceBanks> bank_pages{};
@@ -715,7 +852,9 @@ ActorAssetRequest SharedModelRequest(FakeAssetHost& host) {
   peer.holds_texture_slots = true;
   peer.texture_slot = 5;
   peer.texture_slot_count_minus_one = 1;
+  peer.model = host.AddBlock(0x40);
   host.actors[2] = peer;
+  static_cast<void>(host.RememberActorResource(2));
   host.room_scale = 0x1234;
   ActorAssetRequest request = Request(ActorAssetKind::kActorModelLoad, 3, 9);
   request.destination = host.AddBlock(8);
@@ -723,6 +862,77 @@ ActorAssetRequest SharedModelRequest(FakeAssetHost& host) {
   request.material = 2;
   request.placement = 0xAABB;
   return request;
+}
+
+void CheckPrivateModelCopy(FakeAssetHost& host, int source, int target) {
+  const auto original = Required(host.actors[Index(source)]).model;
+  const auto copy = Required(host.actors[Index(target)]).model;
+  CHECK(copy != original);
+  CHECK(std::ranges::equal(host.Block(copy), host.Block(original)));
+}
+
+struct SharedWeaponPair {
+  AssetAddress original{};
+  AssetAddress copy{};
+  std::weak_ptr<const Content::WeaponModelResource> resource;
+};
+
+SharedWeaponPair MakeSharedWeapons(FakeAssetHost& host) {
+  WeaponAssetRecord model;
+  model.bone_count = 1;
+  model.actor_id = 1;
+  model.model_id = 12;
+  model.geometry = host.AddBlock(16);
+  model.texture_slot = 3;
+  host.weapons[4] = model;
+  const auto resource = host.RememberWeaponResource(4);
+  host.weapon_textures[3].references = 1;
+  ActorAssetLoadState state;
+  auto request = Request(ActorAssetKind::kWeaponModelLoad, 6, 12);
+  request.destination = host.AddBlock(8);
+  request.shared_weapon = resource;
+  request.sub_kind = 1;
+  REQUIRE(Content::UpdateWeaponModelLoad(host, state, request) == kAssetDone);
+  return {model.geometry, Required(host.weapons[6]).geometry, resource};
+}
+
+struct SharedActorPair {
+  AssetAddress original{};
+  AssetAddress copy{};
+  std::weak_ptr<const Content::ActorModelResource> model;
+  std::weak_ptr<const Content::ActorSequenceResource> common;
+};
+
+SharedActorPair MakeSharedActors(FakeAssetHost& host) {
+  ActorAssetRecord actor = ActorWithModel(9);
+  actor.model = host.AddBlock(0x40);
+  actor.model_data_size = 0x40;
+  host.actors[3] = actor;
+  const auto model = host.RememberActorResource(3);
+  ActorAssetLoadState state;
+  auto request = Request(ActorAssetKind::kActorModelLoad, 5, 9);
+  request.destination = host.AddBlock(8);
+  request.shared_model = model;
+  request.sub_kind = 0xFF;
+  REQUIRE(Content::UpdateActorModelLoad(host, state, request) == kAssetDone);
+  CheckPrivateModelCopy(host, 3, 5);
+  const std::array<std::byte, 4> bytes{};
+  const auto sequence = host.MakeSequenceResource(bytes, 1);
+  for (const int slot : {3, 5}) {
+    auto address = host.BindActorSequence(
+        slot, Content::ActorSequenceKind::kCommon, sequence);
+    Required(host.actors[Index(slot)]).common_sequence = Required(address);
+  }
+  return {actor.model, Required(host.actors[5]).model, model, sequence};
+}
+
+void ReleaseLastSharedActor(FakeAssetHost& host, const SharedActorPair& pair) {
+  CHECK(Content::ReleaseActorModel(host, 5) == 0);
+  CHECK(host.stopped_sounds == std::vector{pair.copy});
+  CHECK(host.low_frees == std::vector{pair.original, pair.copy});
+  CHECK(pair.model.expired());
+  CHECK(pair.common.expired());
+  CHECK(host.cleared_actors == std::vector{3, 6, 5});
 }
 
 // Actor 3's battle sequence 2 is at sector 5000; sequence 3 has no file.
@@ -755,7 +965,12 @@ int StartSequenceLoad(FakeAssetHost& host, ActorAssetRequest& request) {
 AssetAddress AddCommonSequencePeers(FakeAssetHost& host) {
   ActorAssetRecord peer = ActorWithModel(9);
   peer.common_entry_count = 5;
-  peer.common_sequence = host.AddBlock(8);
+  const std::array<std::byte, 8> bytes{};
+  const auto resource = host.MakeSequenceResource(bytes, 5);
+  auto address =
+      host.BindActorSequence(2, Content::ActorSequenceKind::kCommon, resource);
+  peer.common_sequence = Required(address);
+  host.sequence_resource_cache[{9, 0}] = resource;
   host.actors[2] = peer;
   host.actors[3] = ActorWithModel(9);
   host.actors[4] = ActorWithModel(9);
@@ -1375,16 +1590,19 @@ TEST_CASE("Ashley auxiliary sequence requests preserve kind and selector",
   CHECK(host.queued.empty());
 }
 
-TEST_CASE("Shared actor model lookups write only the matched peer slot",
+TEST_CASE("Shared actor model lookups retain immutable resources",
           "[content-slice][content][actor-assets][semantic-names][sequence]") {
   const auto owner = std::make_unique<FakeAssetHost>();
   FakeAssetHost& host = *owner;
   for (std::size_t slot = 0; slot < 4; ++slot) {
     host.actors[slot] = ActorWithModel(7);
   }
+  Required(host.actors[0]).model = host.AddBlock(4);
+  const auto resource = host.RememberActorResource(0);
   ActorAssetRequest request = Request(ActorAssetKind::kActorModelLoad, 2, 7);
   CHECK(Content::FindSharedActorModel(host, request) == 1);
-  CHECK(request.shared_record_slot == 0);
+  CHECK(request.shared_model == resource);
+  CHECK_FALSE(request.shared_record_slot);
   CHECK(request.data == AssetAddress::kNone);
   request.model_id = 8;
   request.data = Address(99);
@@ -1393,30 +1611,32 @@ TEST_CASE("Shared actor model lookups write only the matched peer slot",
   CHECK_FALSE(request.shared_record_slot.has_value());
 }
 
-TEST_CASE("Shared actor sequence searches respect player and model boundaries",
+TEST_CASE("Shared actor sequence searches use model and sequence identities",
           "[content-slice][content][actor-assets][semantic-names][sequence]") {
   const auto owner = std::make_unique<FakeAssetHost>();
   FakeAssetHost& host = *owner;
   for (std::size_t slot = 0; slot < 4; ++slot) {
     host.actors[slot] = ActorWithModel(7);
   }
-  const AssetAddress sequence = host.AddBlock(4);
-  Required(host.actors[0]).common_sequence = sequence;
-  Required(host.actors[3]).common_sequence = sequence;
-  ActorAssetRequest request = Request(ActorAssetKind::kSequenceLoad, 2, 0);
-  CHECK(Content::FindSharedActorSequence(host, request) == 1);
-  CHECK(request.shared_record_slot == 3);
-  CHECK(request.data == AssetAddress::kNone);
-  request.model_id = 4;
-  Required(host.actors[3]).sequence_model_id = 4;
-  CHECK(Content::FindSharedActorSequence(host, request) == 1);
-  CHECK(request.shared_record_slot == 3);
-  CHECK(request.data == AssetAddress::kNone);
-  Required(host.actors[3]).model_id = 8;
-  request.data = Address(99);
-  CHECK(Content::FindSharedActorSequence(host, request) == 0);
-  CHECK(request.data == Address(99));
-  CHECK_FALSE(request.shared_record_slot.has_value());
+  const std::array bytes{std::byte{1}, std::byte{2}};
+  const auto common = host.MakeSequenceResource(bytes, 2);
+  const auto battle = host.MakeSequenceResource(bytes, 1);
+  host.sequence_resource_cache[{7, 0}] = common;
+  host.sequence_resource_cache[{7, 4}] = battle;
+  for (const int sequence : {0, 4}) {
+    Required(host.actors[2]).model_id = 7;
+    auto request = Request(ActorAssetKind::kSequenceLoad, 2, sequence);
+    CHECK(Content::FindSharedActorSequence(host, request) == 1);
+    CHECK(request.shared_sequence == (sequence == 0 ? common : battle));
+    CHECK_FALSE(request.shared_record_slot);
+    CHECK(request.data == AssetAddress::kNone);
+    Required(host.actors[2]).model_id = 8;
+    request.shared_sequence.reset();
+    request.data = Address(99);
+    CHECK(Content::FindSharedActorSequence(host, request) == 0);
+    CHECK(request.data == Address(99));
+    CHECK_FALSE(request.shared_record_slot.has_value());
+  }
 }
 
 TEST_CASE("Model texture offsets move flat polygon UVs and wrap each byte",
@@ -1487,27 +1707,27 @@ TEST_CASE("Model geometry copies allocate a low block and refuse bad sizes",
                                                   "model geometry block"});
 }
 
-TEST_CASE("Shared weapon lookups need an owning actor or a player slot",
+TEST_CASE("Shared weapon resources do not depend on the source actor slot",
           "[content-slice][content][actor-assets]") {
   const auto owner = std::make_unique<FakeAssetHost>();
   FakeAssetHost& host = *owner;
   WeaponAssetRecord model;
   model.model_id = 12;
   host.weapons[5] = model;
-  ActorAssetRequest player = Request(ActorAssetKind::kWeaponModelLoad, 2, 12);
-  CHECK(Content::FindSharedWeaponModel(host, player) == 1);
-  CHECK(player.shared_record_slot == 5);
-  CHECK(player.data == AssetAddress::kNone);
-  ActorAssetRequest enemy = Request(ActorAssetKind::kWeaponModelLoad, 6, 12);
-  enemy.data = Address(99);
-  CHECK(Content::FindSharedWeaponModel(host, enemy) == 0);
-  CHECK(enemy.data == Address(99));
-  Required(host.weapons[5]).actor_id = 3;
-  CHECK(Content::FindSharedWeaponModel(host, enemy) == 1);
-  CHECK(enemy.shared_record_slot == 5);
-  CHECK(enemy.data == Address(99));
-  ActorAssetRequest self = Request(ActorAssetKind::kWeaponModelLoad, 5, 12);
-  CHECK(Content::FindSharedWeaponModel(host, self) == 0);
+  Required(host.weapons[5]).geometry = host.AddBlock(4);
+  const auto resource = host.RememberWeaponResource(5);
+  for (const std::uint8_t actor : {0, 3}) {
+    Required(host.weapons[5]).actor_id = actor;
+    for (const int target : {2, 6, 5}) {
+      auto request = Request(ActorAssetKind::kWeaponModelLoad, target, 12);
+      const auto data = target == 2 ? AssetAddress::kNone : Address(99);
+      request.data = data;
+      CHECK(Content::FindSharedWeaponModel(host, request) == 1);
+      CHECK(request.shared_weapon == resource);
+      CHECK_FALSE(request.shared_record_slot);
+      CHECK(request.data == data);
+    }
+  }
 }
 
 TEST_CASE("Weapon loads read their WEP file at the table's disc sector",
@@ -1772,26 +1992,20 @@ TEST_CASE("Weapon releases refuse an empty or out of range slot",
   CHECK(host.cleared_weapons.empty());
 }
 
-TEST_CASE("Weapon releases keep geometry another owner shares past slot three",
+TEST_CASE("Weapon releases free private geometry and retain shared definitions",
           "[content-slice][content][actor-assets]") {
   const auto owner = std::make_unique<FakeAssetHost>();
   FakeAssetHost& host = *owner;
-  WeaponAssetRecord model;
-  model.bone_count = 1;
-  model.actor_id = 1;
-  model.model_id = 12;
-  model.geometry = host.AddBlock(16);
-  model.texture_slot = 3;
-  host.weapons[2] = model;
-  host.weapons[6] = model;
-  host.weapons[8] = model;
-  host.weapon_textures[3].references = 3;
+  const auto pair = MakeSharedWeapons(host);
+  CHECK(pair.copy != pair.original);
+  CHECK(Content::ReleaseWeaponModel(host, 4) == 0);
+  CHECK(host.low_frees == std::vector{pair.original});
+  CHECK_FALSE(pair.resource.expired());
   CHECK(Content::ReleaseWeaponModel(host, 6) == 0);
-  CHECK(host.low_frees.empty());
-  CHECK(Content::ReleaseWeaponModel(host, 2) == 0);
-  CHECK(host.low_frees == std::vector{model.geometry});
-  CHECK(host.weapon_textures[3].references == 1);
-  CHECK(host.cleared_weapons == std::vector{6, 2});
+  CHECK(host.low_frees == std::vector{pair.original, pair.copy});
+  CHECK(pair.resource.expired());
+  CHECK(host.weapon_textures[3].references == 0);
+  CHECK(host.cleared_weapons == std::vector{4, 6});
 }
 
 TEST_CASE("Actor model loads fall back to model zero's SHP file",
@@ -1807,6 +2021,29 @@ TEST_CASE("Actor model loads fall back to model zero's SHP file",
   REQUIRE(host.reads.size() == 1);
   CHECK(SameRead(host.reads[0], AssetFileStream::kActorModel, 95007, 4096));
   CHECK(state.model_phase == 1);
+}
+
+TEST_CASE(
+    "A cached Ashley model still reloads her resident texture from the file",
+    "[content-slice][content][actor-assets][asset-immutable-sharing]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  auto& host = *owner;
+  host.SetTable(AssetFileTable::kShpSectors, Content::kAshleyTextureModelId, 2);
+  host.SetTable(AssetFileTable::kShpOffsets, Content::kAshleyTextureModelId, 7);
+  host.read_finished = false;
+  host.actors[0] = ActorWithModel(Content::kAshleyTextureModelId);
+  const auto geometry = host.AddBlock(0x40);
+  Required(host.actors[0]).model = geometry;
+  static_cast<void>(host.RememberActorResource(0));
+  auto request = Request(ActorAssetKind::kActorModelLoad, 0,
+                         Content::kAshleyTextureModelId);
+  ActorAssetLoadState state;
+  CHECK(Content::UpdateActorModelLoad(host, state, request) == kAssetPending);
+  REQUIRE(host.reads.size() == 1);
+  CHECK(host.reads[0].stream == AssetFileStream::kActorModel);
+  CHECK(state.model_file_allocated);
+  CHECK(request.data != AssetAddress::kNone);
+  CHECK(Required(host.actors[0]).model == geometry);
 }
 
 TEST_CASE("Actor model loads refuse a model missing from the SHP table",
@@ -1892,6 +2129,13 @@ bool DiscardedActor(const FakeAssetHost& host, int slot) {
   return !host.actors.at(Index(slot)).has_value() &&
          HoldsNoActorTextures(host) && host.low_frees == host.low_blocks;
 }
+
+void CheckImmutableModelStorage(FakeAssetHost& host,
+                                const ActorAssetRecord& actor) {
+  CHECK(host.low_blocks == std::vector{actor.model});
+  CHECK_FALSE(host.ReadBytes(actor.owned_sequence, 1).empty());
+  CHECK(host.Bytes(actor.owned_sequence, 1).empty());
+}
 }  // namespace
 
 TEST_CASE("Actor model files load and fix their primitives to place the actor",
@@ -1906,8 +2150,7 @@ TEST_CASE("Actor model files load and fix their primitives to place the actor",
   CHECK(actor.holds_texture_slots);
   CHECK(actor.texture_slot == 0);
   CHECK(host.actor_textures[0].references == 1);
-  const std::vector<AssetAddress> owned = {actor.model, actor.owned_sequence};
-  CHECK(owned == host.low_blocks);
+  CheckImmutableModelStorage(host, actor);
   CHECK(host.placements.size() == 1);
 }
 
@@ -1937,7 +2180,8 @@ TEST_CASE("A refused actor texture releases its slots and blocks",
   CHECK(host.refusals == std::vector<std::string>{"actor texture"});
   CHECK_FALSE(host.actors[3].has_value());
   CHECK(HoldsNoActorTextures(host));
-  CHECK(host.low_blocks.size() == 2);
+  CHECK(host.low_blocks.size() == 1);
+  CHECK_FALSE(host.actor_sequences[3][0]);
   CHECK(host.low_frees == host.low_blocks);
   CHECK(host.retired_pages.empty());
 }
@@ -1987,7 +2231,8 @@ TEST_CASE("A refused companion link discards the copied record",
   CHECK_FALSE(host.actors[3].has_value());
   CHECK(host.actors[2].has_value());
   CHECK(HoldsNoActorTextures(host));
-  CHECK(host.low_frees.empty());
+  CHECK(host.low_frees == host.low_blocks);
+  CHECK(host.low_blocks.size() == 1);
 }
 
 TEST_CASE("Abandoning an actor parse waiting on its primitives discards it",
@@ -2076,18 +2321,20 @@ TEST_CASE("Modelless actors reset their motion and take placement mode one",
   CHECK(host.placements[0].mode == 1);
 }
 
-TEST_CASE("Shared actor models copy the peer record and its texture references",
+TEST_CASE("Shared actor models copy immutable geometry and retain textures",
           "[content-slice][content][actor-assets]") {
   const auto owner = std::make_unique<FakeAssetHost>();
   FakeAssetHost& host = *owner;
   ActorAssetLoadState state;
   ActorAssetRequest request = SharedModelRequest(host);
   CHECK(Content::UpdateActorModelLoad(host, state, request) == kAssetDone);
-  CHECK(request.shared_record_slot == 2);
+  CHECK(request.shared_model == host.actor_resources[2]);
+  CHECK_FALSE(request.shared_record_slot);
   CHECK(request.data == AssetAddress::kNone);
   CHECK(host.actor_textures[5].references == 1);
   CHECK(host.actor_textures[6].references == 1);
   const ActorAssetRecord& actor = Required(host.actors[3]);
+  CheckPrivateModelCopy(host, 2, 3);
   CHECK(actor.scale == 0x1234);
   CHECK(actor.attach_parent == 0xFF);
 }
@@ -2139,25 +2386,23 @@ TEST_CASE("Actor model releases refuse an empty or out of range slot",
   CHECK(host.cleared_actors.empty());
 }
 
-TEST_CASE("Actor model releases keep files and sequences a peer shares",
-          "[content-slice][content][actor-assets]") {
+TEST_CASE(
+    "Actor model releases retain immutable resources until their last owner",
+    "[content-slice][content][actor-assets]") {
   const auto owner = std::make_unique<FakeAssetHost>();
   FakeAssetHost& host = *owner;
-  ActorAssetRecord actor = ActorWithModel(9);
-  actor.model = host.AddBlock(0x40);
-  actor.common_sequence = host.AddBlock(4);
-  host.actors[3] = actor;
-  host.actors[5] = actor;
+  const auto pair = MakeSharedActors(host);
   CHECK(Content::ReleaseActorModel(host, 3) == 0);
   CHECK(host.stopped_sounds.empty());
-  CHECK(host.low_frees.empty());
+  CHECK(host.low_frees == std::vector{pair.original});
+  CHECK_FALSE(pair.model.expired());
+  CHECK_FALSE(pair.common.expired());
   CHECK(host.actors[5].has_value());
   ActorAssetRecord modelless = ActorWithModel(0x7F);
-  modelless.common_sequence = actor.common_sequence;
   host.actors[6] = modelless;
   CHECK(Content::ReleaseActorModel(host, 6) == 0);
-  CHECK(host.low_frees.empty());
-  CHECK(host.cleared_actors == std::vector{3, 6});
+  CHECK(host.low_frees == std::vector{pair.original});
+  ReleaseLastSharedActor(host, pair);
 }
 
 TEST_CASE("Battle sequence loads read the actor's own sequence table",
@@ -2281,7 +2526,7 @@ TEST_CASE("Common sequences share a peer's sequence",
   const AssetAddress peer_sequence = AddCommonSequencePeers(host);
   ActorAssetLoadState state;
   ActorAssetRequest shared = Request(ActorAssetKind::kSequenceParse, 3, 0);
-  shared.shared_record_slot = 2;
+  shared.shared_sequence = host.actor_sequences[2][1];
   CHECK(Content::ParseActorSequence(host, state, shared) == kAssetDone);
   const ActorAssetRecord& actor = Required(host.actors[3]);
   CHECK(actor.common_sequence == peer_sequence);
@@ -2295,18 +2540,20 @@ TEST_CASE("Common sequences copy an actor's own sequence file",
   static_cast<void>(AddCommonSequencePeers(host));
   ActorAssetLoadState state;
   ActorAssetRequest shared = Request(ActorAssetKind::kSequenceParse, 3, 0);
-  shared.shared_record_slot = 2;
+  shared.shared_sequence = host.actor_sequences[2][1];
   static_cast<void>(Content::ParseActorSequence(host, state, shared));
   ActorAssetRequest own = Request(ActorAssetKind::kSequenceParse, 4, 0);
   own.data = OwnCommonSequenceFile(host);
   CHECK(Content::ParseActorSequence(host, state, own) == kAssetDone);
-  REQUIRE(host.low_blocks.size() == 1);
+  CHECK(host.low_blocks.empty());
   const ActorAssetRecord& actor = Required(host.actors[4]);
-  CHECK(actor.common_sequence == host.low_blocks[0]);
+  CHECK(actor.common_sequence != Required(host.actors[3]).common_sequence);
   CHECK(actor.common_entry_count == 7);
-  CHECK(host.Block(host.low_blocks[0])[7] == std::byte{0xC7});
-  REQUIRE(host.sequence_banks.size() == 1);
-  CHECK(host.sequence_banks[0].bytes == 8);
+  const auto bytes = host.ReadBytes(actor.common_sequence, 8);
+  REQUIRE(bytes.size() == 8);
+  CHECK(bytes[7] == std::byte{0xC7});
+  REQUIRE(host.sequence_banks.size() == 2);
+  CHECK(host.sequence_banks[1].bytes == 8);
 }
 
 TEST_CASE("Shared sequence banks parse their entries",
@@ -2397,26 +2644,48 @@ TEST_CASE("Battle sequence releases keep a sequence a peer shares",
           "[content-slice][content][actor-assets]") {
   const auto owner = std::make_unique<FakeAssetHost>();
   FakeAssetHost& host = *owner;
-  const ActorAssetRecord actor = BattleSequenceActor(host);
+  ActorAssetRecord actor = BattleSequenceActor(host);
+  auto sequence =
+      host.MakeSequenceResource(host.Block(actor.battle_sequence), 1);
+  std::weak_ptr retained = sequence;
+  auto address =
+      host.BindActorSequence(3, Content::ActorSequenceKind::kBattle, sequence);
+  actor.battle_sequence = Required(address);
+  REQUIRE(
+      host.BindActorSequence(5, Content::ActorSequenceKind::kBattle, sequence));
+  sequence.reset();
   host.actors[3] = actor;
   host.actors[5] = actor;
   CHECK(Content::ReleaseActorSequence(host, 3, 0) == 0);
   CHECK(host.low_frees.empty());
+  CHECK_FALSE(retained.expired());
   CHECK(Required(host.actors[3]).battle_sequence == AssetAddress::kNone);
+  CHECK(Content::ReleaseActorSequence(host, 5, 0) == 0);
+  CHECK(retained.expired());
 }
 
-TEST_CASE("Battle sequence releases free player slot one and never slot zero",
+TEST_CASE("Player battle sequences have the same immutable ownership as peers",
           "[content-slice][content][actor-assets]") {
   const auto owner = std::make_unique<FakeAssetHost>();
   FakeAssetHost& host = *owner;
   ActorAssetRecord actor = BattleSequenceActor(host);
   actor.model_id = 0;
+  auto sequence =
+      host.MakeSequenceResource(host.Block(actor.battle_sequence), 1);
+  std::weak_ptr retained = sequence;
+  auto address =
+      host.BindActorSequence(0, Content::ActorSequenceKind::kBattle, sequence);
+  actor.battle_sequence = Required(address);
+  REQUIRE(
+      host.BindActorSequence(1, Content::ActorSequenceKind::kBattle, sequence));
+  sequence.reset();
   host.actors[0] = actor;
   host.actors[1] = actor;
   CHECK(Content::ReleaseActorSequence(host, 1, 0) == 0);
-  CHECK(host.low_frees == std::vector{actor.battle_sequence});
+  CHECK_FALSE(retained.expired());
   CHECK(Content::ReleaseActorSequence(host, 0, 0) == 0);
-  CHECK(host.low_frees.size() == 1);
+  CHECK(retained.expired());
+  CHECK(host.low_frees.empty());
 }
 
 TEST_CASE("Shared sequence bank releases clear every actor and free the bank",
@@ -2838,6 +3107,7 @@ TEST_CASE("Refused shared weapon copies drop the references they took",
   source.texture_slot = 6;
   source.geometry = host.AddBlock(0x100);
   host.weapons[5] = source;
+  static_cast<void>(host.RememberWeaponResource(5));
   host.weapon_textures[6].references = 1;
   host.refuse_allocations = true;
   ActorAssetLoadState state;
@@ -2888,6 +3158,7 @@ TEST_CASE("Shared weapon copies into a fixed slot read only the source model",
   source.geometry = host.AddBlock(kSourceBytes);
   std::ranges::fill(host.Block(source.geometry), std::byte{0x5A});
   host.weapons[5] = source;
+  static_cast<void>(host.RememberWeaponResource(5));
   const std::span<std::byte> fixed = host.Block(host.weapon_buffers[0]);
   std::ranges::fill(fixed, std::byte{0xEE});
   ActorAssetLoadState state;

@@ -7,7 +7,7 @@
 #include <string_view>
 
 #include "Actors/ActorStateRecord.hpp"
-#include "Content/ActorAssets.hpp"
+#include "Content/ActorAssetResources.hpp"
 #include "Render/DepthCue.hpp"
 
 // MAINMENU.PRG's actor preview (224.c): the model beside the equipment and
@@ -32,15 +32,6 @@ static_assert(kPreviewWeaponModelSlot ==
               kPreviewActorSlot * kWeaponModelsPerActor);
 // The bone matrices of an actor record (VS::Actors::ActorRecord.bone_matrices).
 inline constexpr int kActorBoneMatrices = 42;
-
-// The heap blocks the clone allocates: a record for the clone and its
-// companion, a weapon model per weapon and Ashley's battle sequence copy
-// (0x7800 bytes, 224.c:81).
-enum class PreviewAllocation : std::uint8_t {
-  kActorRecord,
-  kWeaponModel,
-  kBattleSequence,
-};
 
 // DrawActorPreview's results (224.c:177).
 enum class PreviewDrawResult : std::int8_t {
@@ -80,16 +71,6 @@ struct PreviewWeapon {
   friend bool operator==(const PreviewWeapon&, const PreviewWeapon&) = default;
 };
 
-// The blocks of a clone's sequence copy (224.c:78-90). The source is the
-// cloned record's block, retained while the owned clone requests finish.
-// Cloning the current preview itself reuses that owner rather than replacing
-// the source while its data is still needed.
-struct PreviewSequenceCopy {
-  Content::AssetAddress clone = Content::AssetAddress::kNone;
-  Content::AssetAddress source = Content::AssetAddress::kNone;
-  Content::AssetAddress battle_copy = Content::AssetAddress::kNone;
-};
-
 class ActorPreviewHost {
  public:
   ActorPreviewHost() = default;
@@ -104,13 +85,12 @@ class ActorPreviewHost {
   // The model in weapon slot `slot` (below kWeaponModelSlots), or none.
   [[nodiscard]] virtual std::optional<PreviewWeapon> Weapon(int slot) const = 0;
 
-  // The game heap's low end (AllocateLiveFromLowEnd, FreeLiveFromLowEnd) and
-  // the blocks of the actor and weapon slots.
-  [[nodiscard]] virtual Content::AssetAddress Allocate(
-      PreviewAllocation kind) = 0;
-  virtual void Free(Content::AssetAddress block) = 0;
-  [[nodiscard]] virtual Content::AssetAddress ActorBlock(int slot) const = 0;
-  [[nodiscard]] virtual Content::AssetAddress WeaponBlock(int slot) const = 0;
+  [[nodiscard]] virtual Content::ActorModelResourceRef ModelResource(
+      int slot) const = 0;
+  [[nodiscard]] virtual Content::WeaponModelResourceRef WeaponResource(
+      int slot) const = 0;
+  [[nodiscard]] virtual Content::ActorSequenceResources SequenceResources(
+      int slot) const = 0;
 
   // A preview owns its record storage and tickets until release. Clone
   // requests name no destination; the owner supplies storage at bind time.
@@ -120,11 +100,8 @@ class ActorPreviewHost {
   [[nodiscard]] virtual bool FinishPreviewAssets() = 0;
   virtual void ReleasePreviewAssets() = 0;
   virtual void ReleaseSequences(int slot) = 0;
-  // Gives the record at `copy.clone` the sequences, sequence model, flags and
-  // common animation count of the record at `copy.source`; the battle
-  // sequence is copied into `copy.battle_copy`, or shared when that is kNone
-  // (224.c:78-90).
-  [[nodiscard]] virtual bool CopySequences(const PreviewSequenceCopy& copy) = 0;
+  [[nodiscard]] virtual bool BindSequences(
+      const Content::ActorSequenceResources& resources) = 0;
 
   // The record writes of the pose resets.
   virtual void SetWeaponDrawn(int slot) = 0;
