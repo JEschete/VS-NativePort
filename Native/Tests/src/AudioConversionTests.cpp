@@ -635,6 +635,15 @@ TEST_CASE("Authoring names existing effect stream headers in place",
   CHECK(repeat->written == 0);
 }
 
+TEST_CASE("Authoring accepts data roots without AKAO streams",
+          "[content-audio][stream-authoring]") {
+  AudioRoot root;
+  const auto report = Extract::UpgradeStreamAuthoring(root.Root());
+  REQUIRE(report.has_value());
+  CHECK(report->streams == 0);
+  CHECK(report->written == 0);
+}
+
 TEST_CASE("Authoring leaves an effect stream it cannot name",
           "[content-audio][stream-authoring]") {
   AudioRoot root;

@@ -158,6 +158,7 @@ Result<std::vector<std::string>> StreamIds(const fs::path& root) {
   std::vector<std::string> ids;
   std::error_code error;
   if (!fs::is_directory(directory, error)) {
+    if (error == std::errc::no_such_file_or_directory) return ids;
     if (error) {
       return std::unexpected(Platform::PathText(directory) + ": " +
                              error.message());
