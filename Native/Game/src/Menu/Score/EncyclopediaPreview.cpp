@@ -514,7 +514,9 @@ std::optional<EnemyPreviewPart> EnemyPreviewPartAt(
     }
     return std::nullopt;
   }
-  if (variant != 0) return std::nullopt;
+  if (table != Content::ActorRecordTable::kWeapon || variant != 0) {
+    return std::nullopt;
+  }
   if (slot == kEnemyPreviewWeaponSlot) return EnemyPreviewPart::kWeapon;
   if (slot == kEnemyPreviewShieldSlot) return EnemyPreviewPart::kShield;
   return std::nullopt;

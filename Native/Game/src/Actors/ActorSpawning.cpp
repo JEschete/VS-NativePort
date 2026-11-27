@@ -122,6 +122,64 @@ void DrainAssetQueue(ActorSpawnHost& host) {
   }
 }
 
+class OwnedSpawnAssets {
+ public:
+  OwnedSpawnAssets(ActorSpawnHost& host, SpawnedActor actor, std::size_t slot)
+      : host_(host), actor_(actor), slot_(slot) {}
+
+  [[nodiscard]] bool Submit(ActorRecordPart part, ActorAssetRequest& request) {
+    request.target_slot =
+        static_cast<std::int8_t>(ActorPartRecordSlot(slot_, part));
+    if (tickets_.size() == count_) return false;
+    const auto ticket = host_.SubmitOwnedAsset(request, actor_);
+    if (!ticket) return false;
+    tickets_.at(count_++) = *ticket;
+    return true;
+  }
+
+  [[nodiscard]] bool SubmitSequence(ActorAssetRequest& request) {
+    return Submit(ActorRecordPart::kBody, request);
+  }
+
+  [[nodiscard]] bool Finish() {
+    if (count_ == 0) return true;
+    DrainAssetQueue(host_);
+    bool loaded = true;
+    bool pending = false;
+    for (std::size_t i = 0; i < count_; ++i) {
+      const auto outcome = host_.AssetCompletion(tickets_.at(i)).outcome;
+      loaded = outcome == Content::ActorAssetOutcome::kLoaded && loaded;
+      pending = outcome == Content::ActorAssetOutcome::kPending || pending;
+    }
+    if (!pending) Forget();
+    return loaded;
+  }
+
+  [[nodiscard]] bool CancelOrFinish() {
+    if (host_.CancelOwnedAssets(actor_)) {
+      Forget();
+      return true;
+    }
+    static_cast<void>(Finish());
+    return count_ == 0;
+  }
+
+ private:
+  void Forget() {
+    for (std::size_t i = 0; i < count_; ++i) {
+      host_.ForgetAsset(tickets_.at(i));
+    }
+    count_ = 0;
+  }
+
+  static constexpr std::size_t kCapacity = 5;
+  ActorSpawnHost& host_;
+  SpawnedActor actor_;
+  std::size_t slot_;
+  std::array<Content::ActorAssetTicket, kCapacity> tickets_{};
+  std::size_t count_ = 0;
+};
+
 [[nodiscard]] std::int16_t RollStat(ActorSpawnHost& host, int value,
                                     bool randomize) {
   if (randomize) {
@@ -392,7 +450,7 @@ const char* SpawnRefusalText(SpawnRefusal refusal) {
     case SpawnRefusal::kAllocation:
       return "actor allocation refused";
     case SpawnRefusal::kAssetQueue:
-      return "actor model request queue is full";
+      return "actor asset request submission or completion failed";
     case SpawnRefusal::kZudIndex:
       return "ZUD index outside the zone's enemy files";
     case SpawnRefusal::kZudAllocation:
@@ -623,18 +681,25 @@ SpawnedActor CreateAuxiliaryActor(ActorSpawnHost& host, int index, int actor_id,
   queued.surface &= kSurfaceMask;
   ActorAssetRequest request{};
   request.kind = static_cast<std::uint8_t>(ActorAssetKind::kGimmick);
-  request.target_slot = static_cast<std::int8_t>(index);
   request.placement = PackPlacement(queued);
-  request.destination = host.ModelAddress(actor);
   request.sub_kind = static_cast<std::uint8_t>(actor_id);
   request.texture_slot = AuxiliaryTextureSlot(actor_id);
   request.material = static_cast<std::uint8_t>(material);
   request.variant =
       static_cast<std::uint8_t>(placement.surface >> kVariantShift);
-  static_cast<void>(host.QueueAsset(request));
-  DrainAssetQueue(host);
+  OwnedSpawnAssets assets(host, actor, *slot);
+  if (!assets.Submit(ActorRecordPart::kGimmick, request) || !assets.Finish()) {
+    host.Refuse(SpawnRefusal::kAssetQueue);
+    if (assets.CancelOrFinish()) host.DiscardUninstalled(actor);
+    return SpawnedActor::kNone;
+  }
 
   host.Install(*slot, actor);
+  if (host.ActorAt(*slot) != actor) {
+    host.Refuse(SpawnRefusal::kAllocation);
+    host.DiscardUninstalled(actor);
+    return SpawnedActor::kNone;
+  }
   host.InitializePlaceholder(*slot, actor_id);
   static_cast<void>(host.CreateAiState(*slot, kFreshAiFlags));
   host.SetDisplayFlags(*slot, kWeaponDrawnDisplayFlags);
@@ -667,6 +732,7 @@ std::optional<ActorRecordPart> ActorRecordPartAt(
                                              ActorRecordPart::kShield};
   static constexpr std::array kSecondaryBodyParts{ActorRecordPart::kBody,
                                                   ActorRecordPart::kSecondBody};
+  static constexpr std::array kAuxiliaryParts{ActorRecordPart::kGimmick};
   std::span<const ActorRecordPart> parts;
   switch (shape) {
     case ActorShape::kEquipped:
@@ -676,7 +742,8 @@ std::optional<ActorRecordPart> ActorRecordPartAt(
       parts = kSecondaryBodyParts;
       break;
     case ActorShape::kAuxiliary:
-      return std::nullopt;
+      parts = kAuxiliaryParts;
+      break;
   }
   for (const ActorRecordPart part : parts) {
     if (ActorPartTable(part) == table &&
@@ -802,81 +869,6 @@ struct RoomEnemyParts {
   bool shield = false;
   bool battle_animation = false;
   bool common_animation = false;
-};
-
-// Native (#48): the records a room enemy's requests load are parts of the
-// owning actor. Each part's record slot derives from the actor's slot, for
-// its request and for its release, and the actor provides its memory when
-// it binds, so neither can aim at another actor's records.
-class OwnedSpawnAssets {
- public:
-  OwnedSpawnAssets(ActorSpawnHost& host, SpawnedActor actor, std::size_t slot)
-      : host_(host), actor_(actor), slot_(slot) {}
-
-  // Aims `request` at the owning actor's `part` and submits it. The request
-  // keeps its other fields, carried from one part to the next as the
-  // original's stack record was.
-  [[nodiscard]] bool Submit(ActorRecordPart part, ActorAssetRequest& request) {
-    request.target_slot =
-        static_cast<std::int8_t>(ActorPartRecordSlot(slot_, part));
-    return Submit(request);
-  }
-
-  // Submits a sequence parse for the owning actor's body.
-  [[nodiscard]] bool SubmitSequence(ActorAssetRequest& request) {
-    return Submit(ActorRecordPart::kBody, request);
-  }
-
-  [[nodiscard]] bool Finish() {
-    if (count_ == 0) {
-      return true;
-    }
-    DrainAssetQueue(host_);
-    bool loaded = true;
-    for (std::size_t i = 0; i < count_; ++i) {
-      loaded = host_.AssetCompletion(tickets_.at(i)).outcome ==
-                   Content::ActorAssetOutcome::kLoaded &&
-               loaded;
-    }
-    Forget();
-    return loaded;
-  }
-
-  [[nodiscard]] bool Cancel() {
-    if (!host_.CancelOwnedAssets(actor_)) {
-      return false;
-    }
-    Forget();
-    return true;
-  }
-
- private:
-  [[nodiscard]] bool Submit(const ActorAssetRequest& request) {
-    if (tickets_.size() == count_) {
-      return false;
-    }
-    const std::optional<Content::ActorAssetTicket> ticket =
-        host_.SubmitOwnedAsset(request, actor_);
-    if (!ticket) {
-      return false;
-    }
-    tickets_.at(count_++) = *ticket;
-    return true;
-  }
-
-  void Forget() {
-    for (std::size_t i = 0; i < count_; ++i) {
-      host_.ForgetAsset(tickets_.at(i));
-    }
-    count_ = 0;
-  }
-
-  static constexpr std::size_t kCapacity = 5;
-  ActorSpawnHost& host_;
-  SpawnedActor actor_;
-  std::size_t slot_;
-  std::array<Content::ActorAssetTicket, kCapacity> tickets_{};
-  std::size_t count_ = 0;
 };
 
 [[nodiscard]] bool RoomEnemySectionsFit(const ZudLayout& layout,
@@ -1092,14 +1084,13 @@ SpawnedActor SpawnRoomEnemy(ActorSpawnHost& host, int actor_id,
        !QueueRoomEnemyParts(assets, request, slot, *block, *layout, character,
                             parts, body_model, category))) {
     host.Refuse(SpawnRefusal::kAssetQueue);
-    if (!assets.Cancel()) {
-      static_cast<void>(assets.Finish());
-    }
+    if (!assets.CancelOrFinish()) return SpawnedActor::kNone;
     DiscardRoomEnemy(host, actor, slot, parts);
     return SpawnedActor::kNone;
   }
   if (!assets.Finish()) {
     host.Refuse(SpawnRefusal::kAssetQueue);
+    if (!assets.CancelOrFinish()) return SpawnedActor::kNone;
     DiscardRoomEnemy(host, actor, slot, parts);
     return SpawnedActor::kNone;
   }

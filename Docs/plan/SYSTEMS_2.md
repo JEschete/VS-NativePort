@@ -15,8 +15,9 @@
     `DataStore::ReadAsset` and the disc queue's asset requests read by handle at the whole-sector load size. VS.Extract
     (`AssetCatalogImport`) is the only code that turns sectors and executable tables into IDs. Converted forms (`mkv`,
     `stream`) and the remaining sector-addressed consumers are EC-04 work.
-  - `AsyncLoader` does background loads with completion handles, replacing `DsRead` callbacks. **Actor queue (#48):**
-    each queue entry owns its parser phases, buffers, cursors, file-read identities, ticket and record-memory resolver; actor, weapon and
+  - `AsyncLoader` does background loads with completion handles, replacing `DsRead` callbacks.
+    **Actor queue ([#48](https://github.com/JEschete/VS-NativePort/issues/48)):** the actor/model request ownership slice
+    is adopted. Each queue entry owns its parser phases, buffers, cursors, file-read identities, ticket and record-memory resolver; actor, weapon and
     sequence loads resume and cancel from the entry, not module globals. Queue shifts move this state, and clearing
     the queue (used by the battle initializer) discards it. Legacy parser symbols are output-only diagnostic snapshots;
     a raw ETM queue entry imports its legacy phase and buffer once when first processed, while that unowned producer
@@ -26,11 +27,18 @@
     texture upload. File-read locations and request pointers are also entry-owned; the legacy stream symbols are
     output-only snapshots for submitted requests. Failed or replaced reads fail the owned request after releasing its
     actual allocation, without releasing a foreign read generation. Owned requests check their target again when
-    processing starts. Actor and weapon instances own private mutable geometry; queued loads and menu previews retain
+    processing starts. Actor, weapon and gimmick instances own private mutable geometry; queued loads and menu previews retain
     immutable model definitions and animation banks instead of source actor slots. Resource lifetimes include texture
-    leases and read-only bank extents, and reset invalidates old resource epochs. Menu previews own their records and
-    tickets; partial submission, failure, replacement and session cleanup cancel before releasing those resources,
-    without releasing foreign records. Open work: #48 (auxiliary/gimmick producer adoption and integrated acceptance).
+    leases and read-only bank extents, and reset invalidates old resource epochs. Reused model instances enter their
+    initial queued-animation boundary explicitly, without copying a peer's playback state. Menu previews own their
+    records and tickets; partial submission, failure, replacement and session cleanup cancel before releasing those
+    resources, without releasing foreign records. Status rendering starts after its switcher acquires the owned
+    preview, without borrowing a previous entry's record during initialization. Auxiliary creation resolves its gimmick
+    record through its owner and publishes the actor only after successful asset completion; refused publication and
+    partial creation release that owner's
+    geometry and occupancy without clearing a foreign slot. Gimmick instances retain immutable compiled templates,
+    not mutable peer prefixes. A room change invalidates template cache selection without freeing geometry still
+    needed for transition rendering; actor removal and model/session reset retire the instance bindings.
     Compiled SHP/WEP/SEQ rendering and playback layouts remain compatibility adapters, not retired authoring formats.
   - **Decoders** (used by VS.Extract and the round-trip tests) produce typed objects: TIM, MPD, ZND, SHP, SEQ, WEP, ARM, ZUD, SYD, FBT/FBC, EVT, AKAO, XA, MCDATA, ITEMNAME/ITEMHELP text, HF0/HF1 help, EFFECT data.
   - **Loaders** (used by the game) read glTF, PNG, WAV, FLAC and JSON from `Native\data\` and build the same typed objects. The round-trip rule in ASSET_PIPELINE §7 proves `decode(raw) == load(converted)`.

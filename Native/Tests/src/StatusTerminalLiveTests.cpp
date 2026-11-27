@@ -8,6 +8,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Actors/AnimationControlLive.hpp"
+#include "Actors/AnimationPoseLive.hpp"
 #include "Content/ActorAssetResources.hpp"
 #include "Menu/StatusTerminalLiveFixture.hpp"
 
@@ -87,7 +89,6 @@ content::ActorAssetRequest SharedBodyRequest(
               content::ActorAssetKind::kActorModelParse),
           .target_slot = 2,
           .model_id = static_cast<std::int16_t>(model->Definition().model_id),
-          .shared_record_slot = {},
           .shared_model = model,
           .sub_kind = 0xFF};
 }
@@ -140,6 +141,25 @@ RetainedResources QueueSourceResources(QueuedResourceOwner& owner,
   request.shared_sequence = sequences.battle;
   owner.Submit(request);
   return retained;
+}
+
+void LoadWolfSource(Fixture& fixture) {
+  fw::ReleaseLiveActorPreview();
+  REQUIRE(content::ReleaseLiveActorModel(0, false) == 0);
+  Fixture::ParseAsset(
+      R"(Native\data\disc\OBJ\7E.SHP)",
+      {.kind =
+           static_cast<std::uint8_t>(content::ActorAssetKind::kActorModelParse),
+       .target_slot = 0,
+       .model_id = 0x7E,
+       .destination = Fixture::Address(fixture.preview_owner.source),
+       .sub_kind = 0xFF});
+  Fixture::ParseAsset(R"(Native\data\disc\OBJ\7E_BTA.SEQ)",
+                      {.kind = static_cast<std::uint8_t>(
+                           content::ActorAssetKind::kSequenceParse),
+                       .target_slot = 0,
+                       .model_id = 10});
+  VS::Actors::AdvanceLiveSkeletalAnimation(*fixture.preview_owner.source, 0);
 }
 
 struct ModuleBindingSnapshot {
@@ -329,8 +349,7 @@ TEST_CASE("Resident texture reload publishes fresh immutable preview defaults",
                       {.kind = static_cast<std::uint8_t>(
                            content::ActorAssetKind::kActorModelParse),
                        .target_slot = 0,
-                       .model_id = content::kAshleyTextureModelId,
-                       .shared_record_slot = {}});
+                       .model_id = content::kAshleyTextureModelId});
   const auto refreshed = content::LiveActorModelResource(0);
   REQUIRE(previous != nullptr);
   REQUIRE(refreshed != nullptr);
@@ -339,6 +358,36 @@ TEST_CASE("Resident texture reload publishes fresh immutable preview defaults",
   CHECK(VS::Actors::actorRecords[0]->instance.model == geometry);
   fw::CloneLiveActorPreview(0);
   CHECK(content::LiveActorModelResource(1) == refreshed);
+}
+
+TEST_CASE(
+    "Shared enemy instances enter queued animation without replaying the bind "
+    "pose",
+    "[status-terminal-live][asset-immutable-sharing][actor-shared-animation]") {
+  Fixture fixture;
+  LoadWolfSource(fixture);
+  const auto sequences = content::LiveActorSequenceResources(0);
+  REQUIRE(sequences.battle != nullptr);
+  QueuedResourceOwner owner;
+  owner.Submit(SharedBodyRequest(content::LiveActorModelResource(0)));
+  owner.Finish();
+  Fixture::ParseAsset(R"(Native\data\disc\OBJ\7E_BTA.SEQ)",
+                      {.kind = static_cast<std::uint8_t>(
+                           content::ActorAssetKind::kSequenceParse),
+                       .target_slot = 2,
+                       .model_id = 10});
+  CHECK(content::LiveActorSequenceResources(2).battle == sequences.battle);
+  CHECK(owner.target->common_animation_count ==
+        sequences.battle->AnimationCount());
+  CHECK(owner.target->sequence_model_id == 10);
+  const auto header = VS::Actors::FindLiveAnimationHeader(*owner.target, 101);
+  CHECK(header.status == VS::Actors::AnimationHeaderStatus::kFound);
+  VS::Actors::SetLiveActorWeaponDrawn(2, 1, 2);
+  VS::Actors::QueueLiveActorAnimation(2, 1, 0, 0);
+  VS::Actors::AdvanceLiveSkeletalAnimation(*owner.target, 0);
+  CHECK(owner.target->animation_id == 101);
+  CHECK(owner.target->animation_length == 60);
+  CHECK(owner.target->queued_animation == 0);
 }
 
 TEST_CASE("A full queue abandons partially submitted live preview records",
@@ -357,8 +406,7 @@ TEST_CASE("A full queue abandons partially submitted live preview records",
       .kind = static_cast<std::uint8_t>(
           VS::Content::ActorAssetKind::kActorModelParse),
       .target_slot = 3,
-      .model_id = VS::Content::kModellessActorId,
-      .shared_record_slot = {}};
+      .model_id = VS::Content::kModellessActorId};
   for (int slot = 0; slot < VS::Content::kActorAssetRequestCount - 1; ++slot) {
     REQUIRE(VS::Content::QueueLiveActorAsset(foreign) == slot);
   }
@@ -422,8 +470,7 @@ TEST_CASE(
                    VS::Content::ActorAssetKind::kActorModelParse),
                .target_slot = 1,
                .model_id = VS::Content::kModellessActorId,
-               .destination = Fixture::Address(foreign),
-               .shared_record_slot = {}}) == 0);
+               .destination = Fixture::Address(foreign)}) == 0);
   fw::CloneLiveActorPreview(0);
   CHECK(VS::Actors::actorRecords[1] == foreign);
   CHECK(foreign->model_id == VS::Content::kModellessActorId);
@@ -601,7 +648,7 @@ TEST_CASE(
   CHECK(st::RefusedLiveTerminalControllerCount() == refused);
   CHECK(*fixture.State() == 5);
   CHECK(st::LiveStatusTerminalControllerState().saved_projection == 333);
-  CHECK(st::LiveStatusTerminalControllerState().screen_enabled == 1);
+  CHECK(st::LiveStatusTerminalControllerState().screen_enabled == 0);
   const auto current = st::terminal_live::LoadView();
   st::ResetLiveTerminalControllersModuleData();
   CHECK(st::LiveStatusTerminalControllerState() == st::StatusTerminalState{});

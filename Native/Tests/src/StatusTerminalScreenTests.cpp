@@ -20,12 +20,12 @@ TEST_CASE("F02682 initializes owned state and saves the real camera",
   std::uint8_t phase = 3;
   REQUIRE(st::UpdateStatusTerminal(world.screen, world, phase) == 0);
   CHECK(phase == 5);
-  CHECK(world.screen.screen_enabled == 1);
+  CHECK(world.screen.screen_enabled == 0);
   CHECK(world.screen.saved_projection == 333);
   CHECK(world.screen.saved_view == previous);
   CHECK(world.projection == 512);
   CHECK(world.frame.yaw == 2816);
-  CHECK(world.Count(Event::kBuildCamera) == 1);
+  CHECK(world.Count(Event::kBuildCamera) == 0);
 }
 
 TEST_CASE("F02682 does not enable rendering before menu readiness",

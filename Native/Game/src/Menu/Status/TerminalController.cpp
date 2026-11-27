@@ -121,7 +121,6 @@ constexpr std::uint8_t kQuitBattle = 14;
   if (!host.SwitchActor(1)) {
     return Unavailable();
   }
-  state.screen_enabled = 1;
   state.animation_wait = 1;
   state.saved_projection = host.ProjectionDistance();
   if (!host.SetProjection(kStatusProjection)) {
@@ -344,6 +343,8 @@ void Rotate(TerminalFrame& frame) {
     if (!switched) {
       return Unavailable();
     }
+    // The first advance acquires the owned preview before its first draw.
+    state.screen_enabled = 1;
     if (*switched != 0) {
       state.animation_wait = 0;
       if (!(host.LimbPanel(-1) && host.PrimaryStats(1))) {

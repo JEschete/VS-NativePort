@@ -115,8 +115,11 @@ struct ReloadFixture : Fixture {
     }
   }
 
-  void Reenter() {
+  void Reenter(bool cold) {
     IdleRows();
+    if (cold) {
+      CHECK(VS::Actors::actorRecords[1] == nullptr);
+    }
     *State() = 3;
     const auto refused = st::RefusedLiveTerminalControllerCount();
     REQUIRE(ModuleEntry(0x801064D4, &st::LiveUpdateStatusTerminal)(State()) ==
@@ -124,6 +127,15 @@ struct ReloadFixture : Fixture {
     CHECK(st::RefusedLiveTerminalControllerCount() == refused);
     CHECK(*State() == 5);
     CHECK(st::LiveStatusTerminalControllerState().saved_projection == 777);
+    CHECK(st::LiveStatusTerminalControllerState().screen_enabled == 0);
+  }
+
+  void AdvanceReentry() {
+    BindFrame();
+    const auto refused = st::RefusedLiveTerminalControllerCount();
+    REQUIRE(st::LiveUpdateStatusTerminal(State()) == 0);
+    CHECK(st::RefusedLiveTerminalControllerCount() == refused);
+    REQUIRE(VS::Actors::actorRecords[1] != nullptr);
     CHECK(st::LiveStatusTerminalControllerState().screen_enabled == 1);
   }
 };
@@ -183,5 +195,6 @@ TEST_CASE(
   CHECK(VS::Render::projectionDistance == 777);
   CHECK(*fixture.State() == 7);
   CHECK(memory::RefusedLiveHeapRequestCount() == refused);
-  fixture.Reenter();
+  fixture.Reenter(cold);
+  fixture.AdvanceReentry();
 }

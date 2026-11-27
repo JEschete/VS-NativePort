@@ -112,8 +112,6 @@ struct ActorAssetRequest {
   // none: its owner provides the memory when the record binds (#48).
   AssetAddress destination = AssetAddress::kNone;
   AssetAddress data = AssetAddress::kNone;
-  // A shared record reference is distinct from an address or file cursor.
-  std::optional<int> shared_record_slot;
   ActorModelResourceRef shared_model{};
   WeaponModelResourceRef shared_weapon{};
   ActorSequenceResourceRef shared_sequence{};
@@ -128,11 +126,11 @@ struct ActorAssetRequest {
                          const ActorAssetRequest&) = default;
 };
 
-// The record tables the loaders bind: the actor records (D_800F4538) and the
-// weapon records (D_800F4540).
+// The record tables the loaders bind.
 enum class ActorRecordTable : std::uint8_t {
   kActor,
   kWeapon,
+  kGimmick,
 };
 
 // Native (#48): request ownership. The owner is an opaque identity: an owner

@@ -35,6 +35,7 @@
 #include "Event/ScriptVmLive.hpp"
 #include "Event/ScriptVmLiveState.hpp"
 #include "Field/BackgroundLive.hpp"
+#include "Field/GimmickResourcesLive.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Input/Controllers.hpp"
@@ -467,6 +468,7 @@ void ResetLiveSessionHeap() {
     std::abort();
   }
   Content::ResetLiveActorAssetResources();
+  Field::ResetLiveGimmickResources();
   Core::Memory::ResetLiveGameHeap();
 }
 

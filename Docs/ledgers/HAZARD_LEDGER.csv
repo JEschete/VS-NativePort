@@ -1,10 +1,10 @@
 key,class,confidence,evidence,function,symbol,path,line,detail,issue,imp_step,status,notes
-cc6311a4708e,CAPACITY,medium,pattern,,legacyWeaponModelBuffers,Native/Content/include/Content/ActorAssetsLive.hpp,240,legacyWeaponModelBuffers[kWeaponModelBuffers],47,6,open,
+cc6311a4708e,CAPACITY,medium,pattern,,legacyWeaponModelBuffers,Native/Content/include/Content/ActorAssetsLive.hpp,252,legacyWeaponModelBuffers[kWeaponModelBuffers],47,6,open,
 cd16e365a329,CAPACITY,medium,pattern,,voiceOwners,Native/Engine/src/Audio/Mixer/VoiceMixer.hpp,107,voiceOwners[kVoiceCount],253,30A,open,
-59ecebc9dfec,CAPACITY,medium,pattern,,AshleyInventory,Native/Game/include/Actors/ActorSpawning.hpp,615,AshleyInventory.weapons[kInventoryWeapons],55,14,open,
-f2c96369ce13,CAPACITY,medium,pattern,,AshleyInventory,Native/Game/include/Actors/ActorSpawning.hpp,617,AshleyInventory.blades[kInventoryBlades],55,14,open,
-3156649840f1,CAPACITY,medium,pattern,,AshleyInventory,Native/Game/include/Actors/ActorSpawning.hpp,618,AshleyInventory.shields[kInventoryShields],55,14,open,
-9fda3230311f,CAPACITY,medium,pattern,,AshleyInventory,Native/Game/include/Actors/ActorSpawning.hpp,620,AshleyInventory.armor_limbs[kInventoryArmor],55,14,open,
+59ecebc9dfec,CAPACITY,medium,pattern,,AshleyInventory,Native/Game/include/Actors/ActorSpawning.hpp,620,AshleyInventory.weapons[kInventoryWeapons],55,14,open,
+f2c96369ce13,CAPACITY,medium,pattern,,AshleyInventory,Native/Game/include/Actors/ActorSpawning.hpp,622,AshleyInventory.blades[kInventoryBlades],55,14,open,
+3156649840f1,CAPACITY,medium,pattern,,AshleyInventory,Native/Game/include/Actors/ActorSpawning.hpp,623,AshleyInventory.shields[kInventoryShields],55,14,open,
+9fda3230311f,CAPACITY,medium,pattern,,AshleyInventory,Native/Game/include/Actors/ActorSpawning.hpp,625,AshleyInventory.armor_limbs[kInventoryArmor],55,14,open,
 8cc56b0557a1,CAPACITY,medium,pattern,,ContainerContents,Native/Game/include/Items/ContainerIndexing.hpp,19,ContainerContents.weapons[kCapacities[0]],58,15,open,
 6e5d4676496e,CAPACITY,medium,pattern,,ContainerContents,Native/Game/include/Items/ContainerIndexing.hpp,20,ContainerContents.blades[kCapacities[1]],58,15,open,
 469057de4be6,CAPACITY,medium,pattern,,ContainerContents,Native/Game/include/Items/ContainerIndexing.hpp,21,ContainerContents.grips[kCapacities[2]],58,15,open,
@@ -80,9 +80,9 @@ a8d3fd050cf6,CAPACITY,medium,pattern,,actors,Native/Game/src/Battle/Damage.hpp,3
 dcf910f6416b,CAPACITY,medium,pattern,,gimmickInstances,Native/Game/src/Field/Gimmicks.hpp,390,gimmickInstances[kGimmickInstanceCount],45,3,open,
 7515fc1e8e03,CAPACITY,medium,pattern,,InventoryStorage,Native/Game/src/Menu/Container/Storage.hpp,26,InventoryStorage.items_to_transfer[kPendingTransferSlots],60,34,open,
 7509963b0c42,CAPACITY,medium,pattern,,cardDirectoryEntries,Native/Game/src/Title/SaveCard.hpp,24,cardDirectoryEntries[kCardDirectoryCapacity],62,39,open,
-f286f867bb37,DIV-ZERO,medium,pattern,,ParseActorTexture,Native/Content/src/ActorAssets.cpp,1652,static_cast,47,6,open,
-287776e0f26f,DIV-ZERO,medium,pattern,,FlatTableEntry,Native/Content/src/ActorAssetsLive.cpp,812,Columns,47,6,open,
-53e00571f86b,DIV-ZERO,medium,pattern,,FlatTableEntry,Native/Content/src/ActorAssetsLive.cpp,812,Columns,47,6,open,
+f286f867bb37,DIV-ZERO,medium,pattern,,ParseActorTexture,Native/Content/src/ActorAssets.cpp,1594,static_cast,47,6,open,
+287776e0f26f,DIV-ZERO,medium,pattern,,FlatTableEntry,Native/Content/src/ActorAssetsLive.cpp,815,Columns,47,6,open,
+53e00571f86b,DIV-ZERO,medium,pattern,,FlatTableEntry,Native/Content/src/ActorAssetsLive.cpp,815,Columns,47,6,open,
 a8828e4c93ef,DIV-ZERO,medium,pattern,,ReadAudioStreamHeader,Native/Content/src/AudioStream.cpp,110,PsxAdpcmDecoder,48,7,open,
 137073879d3c,DIV-ZERO,medium,pattern,,ReadAudioStreamHeader,Native/Content/src/AudioStream.cpp,126,PsxAdpcmDecoder,48,7,open,
 cae9bcf9b871,DIV-ZERO,medium,pattern,,ReadAudioStreamHeader,Native/Content/src/AudioStream.cpp,139,alignment,48,7,open,
@@ -108,8 +108,8 @@ db9dd7cd1329,DIV-ZERO,medium,pattern,,ValidateImage,Native/Content/src/NativeIma
 43165d411bbb,DIV-ZERO,medium,pattern,,PackedWords,Native/Content/src/NativeImage.cpp,122,per_halfword,47,6,guarded,"divisor is PixelsPerHalfword(depth), 4, 2 or 1 for every depth value because BitsPerPixel counts an unknown depth as 16; NativeImageTests ""An image of an unknown depth is rejected, not divided by"" checks the unknown case"
 76ab692b974a,DIV-ZERO,medium,pattern,,TimFromImage,Native/Content/src/NativeImage.cpp,158,PixelsPerHalfword(image.depth),47,6,guarded,"divisor is PixelsPerHalfword(depth), 4, 2 or 1 for every depth value because BitsPerPixel counts an unknown depth as 16, and ValidateImage rejects an unknown depth before the division; NativeImageTests round-trips every depth through TimFromImage"
 7502769398ff,DIV-ZERO,medium,pattern,,ReadLayout,Native/Content/src/SeqFile.cpp,658,header_bytes,47,6,false-positive,"divisor is ClipHeaderBytes(bones_), kClipFixedBytes (10) plus 4 bytes per bone, so it is at least 10 for every bone count"
-308612fd6071,DIV-ZERO,medium,pattern,,PlaceAccessor,Native/Content/src/ShpModelFiles.cpp,1045,component,47,6,guarded,"divisor is ComponentBytes(layout.component_type), which returns 1, 2 or 4 for every input (the default case is 4 bytes); ShpFileTests round-trips every accessor"
-7fcea28132d7,DIV-ZERO,medium,pattern,,ShpTextureOf,Native/Content/src/ShpModelFiles.cpp,1916,per_unit,47,6,guarded,"divisor per_unit is k8BitPixelsPerUnit or k4BitPixelsPerUnit, both nonzero constants chosen by the image depth"
+308612fd6071,DIV-ZERO,medium,pattern,,PlaceAccessor,Native/Content/src/ShpModelFiles.cpp,1129,component,47,6,guarded,"divisor is ComponentBytes(layout.component_type), which returns 1, 2 or 4 for every input (the default case is 4 bytes); ShpFileTests round-trips every accessor"
+7fcea28132d7,DIV-ZERO,medium,pattern,,ShpTextureOf,Native/Content/src/ShpModelFiles.cpp,2280,per_unit,47,6,guarded,"divisor per_unit is k8BitPixelsPerUnit or k4BitPixelsPerUnit, both nonzero constants chosen by the image depth"
 bca3b9ef41b4,DIV-ZERO,medium,pattern,F03395,SlideStreamVolume,Native/Engine/src/Audio/Cutscene/StreamControl.cpp,159,static_cast,253,30A,guarded,"divisor is std::max(1, ticks); StreamControlTests.cpp ""Stream fades take at least one tick and clamp loud sources"" covers the zero-tick fade"
 c5292d7cba16,DIV-ZERO,medium,pattern,,AdvanceLogicalTick,Native/Engine/src/Audio/Driver/TickTimer.cpp,82,Core,253,30A,open,
 2fdbeda37c56,DIV-ZERO,medium,pattern,,AdvanceLogicalTick,Native/Engine/src/Audio/Driver/TickTimer.cpp,83,Core,253,30A,open,
@@ -228,7 +228,7 @@ e8cd5a414e5c,DIV-ZERO,medium,pattern,F01330,SelectTextBoxChoice,Native/Game/src/
 3871d5c13bc4,DIV-ZERO,low,pattern,,Stats,Native/Game/src/Save/NativeFilePresentation.cpp,487,(kClockRadix * kClockRadix),45,3,open,
 047be567d8a3,GUARD-AFTER-READ,medium,pattern,,RelocateTable,Native/Content/src/ModuleLoader.cpp,234,samples,47,6,open,
 daf4b56a8811,GUARD-AFTER-READ,medium,pattern,,UpdateTrack,Native/Game/src/Event/EventCameraTrackLive.cpp,198,camera,59,26,open,
-533e06691dc7,NARROW-ID,medium,pattern,,InventoryWeaponView,Native/Game/include/Actors/ActorSpawning.hpp,598,InventoryWeaponView.blade,55,14,open,
+533e06691dc7,NARROW-ID,medium,pattern,,InventoryWeaponView,Native/Game/include/Actors/ActorSpawning.hpp,603,InventoryWeaponView.blade,55,14,open,
 d19c60287e7d,NARROW-ID,medium,pattern,,EquipmentPart,Native/Game/include/Items/ItemRecords.hpp,189,EquipmentPart.sub_id,58,15,open,
 26d2ac69edb4,NARROW-ID,medium,pattern,,EquipmentPart,Native/Game/include/Items/ItemRecords.hpp,190,EquipmentPart.weapon_model_id,58,15,open,
 96d8877a2f23,NARROW-ID,medium,pattern,,EquipmentPart,Native/Game/include/Items/ItemRecords.hpp,206,EquipmentPart.index,58,15,open,
@@ -266,8 +266,8 @@ daabfcafea33,NARROW-ID,medium,pattern,,InventoryIndices,Native/Game/include/Item
 2782fc8a4419,NARROW-ID,medium,pattern,,InventoryIndices,Native/Game/include/Items/ItemRecords.hpp,542,InventoryIndices.gems,58,15,open,
 8cba3692ef57,NARROW-ID,medium,pattern,,InventoryIndices,Native/Game/include/Items/ItemRecords.hpp,543,InventoryIndices.misc,58,15,open,
 d5425c450161,NARROW-ID,medium,pattern,,DefenderLimb,Native/Game/include/Items/ItemRecords.hpp,728,DefenderLimb.name_index,58,15,open,
-986522f544bc,NULL-TABLE,medium,pattern,,LinkLiveActorAfterAshley,Native/Game/src/Actors/ActorRosterLive.cpp,148,leader = actors[decision.slot],55,14,open,
-df324a572825,NULL-TABLE,medium,pattern,,UnlinkLiveActorFromRoomList,Native/Game/src/Actors/ActorRosterLive.cpp,164,actors[decision.slot],55,14,open,
+986522f544bc,NULL-TABLE,medium,pattern,,LinkLiveActorAfterAshley,Native/Game/src/Actors/ActorRosterLive.cpp,151,leader = actors[decision.slot],55,14,open,
+df324a572825,NULL-TABLE,medium,pattern,,UnlinkLiveActorFromRoomList,Native/Game/src/Actors/ActorRosterLive.cpp,167,actors[decision.slot],55,14,open,
 047b269efca1,NULL-TABLE,medium,pattern,,TriggerLiveActorTrap,Native/Game/src/Field/ChestInteractionsLive.cpp,1079,actors[actor],45,3,open,
 d426f31fcbb0,NULL-TABLE,medium,pattern,,SnapLiveRoomActorsToSupport,Native/Game/src/Field/CollisionMapLive.cpp,306,actorRecords[slot],57,23,guarded,"the write loop only touches slots whose optional was filled by the read loop, which skips null actor records; the typed core between the loops does not change the actor table"
 7ec5efb7dd69,POINTER-INT,high,compiler,,Report,Native/Engine/src/Audio/Cutscene/StreamBuffersLive.cpp,202,-Wshorten-64-to-32: implicit conversion loses integer precision: 'size_t' (aka 'unsigned long long') to 'unsigned long',253,30A,open,

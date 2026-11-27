@@ -410,7 +410,6 @@ TEST_CASE("Equipped enemy parts carry fields over in the original order",
                                   .target_slot = 1,
                                   .model_id = 13,
                                   .data = At(0x10030),
-                                  .shared_record_slot = {},
                                   .sub_kind = 0xFF,
                                   .material = 6,
                                   .variant = 1});
@@ -418,7 +417,6 @@ TEST_CASE("Equipped enemy parts carry fields over in the original order",
                                             .target_slot = 2,
                                             .model_id = 17,
                                             .data = At(0x10070),
-                                            .shared_record_slot = {},
                                             .sub_kind = 1,
                                             .texture_slot = 0xF0,
                                             .material = 4,
@@ -427,7 +425,6 @@ TEST_CASE("Equipped enemy parts carry fields over in the original order",
                                             .target_slot = 3,
                                             .model_id = 27,
                                             .data = At(0x10090),
-                                            .shared_record_slot = {},
                                             .sub_kind = 1,
                                             .texture_slot = 0xF1,
                                             .material = 5,
@@ -436,7 +433,6 @@ TEST_CASE("Equipped enemy parts carry fields over in the original order",
                                             .target_slot = 1,
                                             .model_id = 9,
                                             .data = At(0x100C0),
-                                            .shared_record_slot = {},
                                             .sub_kind = 0,
                                             .texture_slot = 0xF1,
                                             .material = 5,
@@ -458,7 +454,6 @@ TEST_CASE("Companion enemies queue the companion record instead of weapons",
                                             .target_slot = 16,
                                             .model_id = 27,
                                             .data = At(0x10030),
-                                            .shared_record_slot = {},
                                             .sub_kind = 1,
                                             .texture_slot = 0xFC,
                                             .material = 6,
@@ -1041,8 +1036,7 @@ ActorAssetTicket StartPreviewSequenceRead(PreviewLifecycleFixture& fixture) {
   static_cast<void>(fixture.Submit(
       {.kind = static_cast<std::uint8_t>(ActorAssetKind::kActorModelParse),
        .target_slot = 1,
-       .model_id = VS::Content::kModellessActorId,
-       .shared_record_slot = {}}));
+       .model_id = VS::Content::kModellessActorId}));
   REQUIRE(VS::Content::UpdateLiveActorAssetQueue() == 1);
   auto* actor = VS::Actors::actorRecords[1];
   if (actor == nullptr) throw std::runtime_error("preview actor was not bound");
@@ -1051,8 +1045,7 @@ ActorAssetTicket StartPreviewSequenceRead(PreviewLifecycleFixture& fixture) {
   const auto ticket = fixture.Submit(
       {.kind = static_cast<std::uint8_t>(ActorAssetKind::kSequenceLoad),
        .target_slot = 1,
-       .model_id = 1,
-       .shared_record_slot = {}});
+       .model_id = 1});
   REQUIRE(VS::Content::UpdateLiveActorAssetQueue() == 1);
   REQUIRE(VS::Content::legacySequenceDiscRequest != nullptr);
   return ticket;
@@ -1582,13 +1575,11 @@ TEST_CASE(
                           weapon ? ActorAssetKind::kWeaponModelLoad
                                  : ActorAssetKind::kActorModelLoad),
                       .target_slot = static_cast<std::int8_t>(weapon ? 2 : 1),
-                      .model_id = 1,
-                      .shared_record_slot = {}});
+                      .model_id = 1});
   const auto next = fixture.Submit(
       {.kind = static_cast<std::uint8_t>(ActorAssetKind::kActorModelParse),
        .target_slot = 1,
-       .model_id = VS::Content::kModellessActorId,
-       .shared_record_slot = {}});
+       .model_id = VS::Content::kModellessActorId});
   CheckFailedReadThenNext(failed, next);
   REQUIRE(score::CleanupLiveEnemyPreviewOwnedState());
   CheckColdPreviewRelease(before);

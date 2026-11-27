@@ -335,10 +335,8 @@ void SetCloneSource(FakePreview& host) {
 
 ActorAssetRequest Request(FakePreview& host, std::uint8_t kind,
                           std::int8_t target, std::int16_t model, int source) {
-  ActorAssetRequest request{.kind = kind,
-                            .target_slot = target,
-                            .model_id = model,
-                            .shared_record_slot = {}};
+  ActorAssetRequest request{
+      .kind = kind, .target_slot = target, .model_id = model};
   if (kind == 2) request.shared_model = host.ModelResource(source);
   if (kind == 4) request.shared_weapon = host.WeaponResource(source);
   return request;
@@ -452,7 +450,6 @@ TEST_CASE("Actor preview clones without a missing companion",
   CHECK(missing.requests[1].destination == AssetAddress::kNone);
   CHECK(missing.weapon_blocks[3] == Block(0x1001));
   CHECK(missing.requests[1].shared_weapon == missing.WeaponResource(9));
-  CHECK_FALSE(missing.requests[1].shared_record_slot);
 }
 
 TEST_CASE("Cloning the current preview preserves its existing owner",
@@ -797,8 +794,7 @@ TEST_CASE("Ashley's weapon animations replace her weapon sequences",
   fw::QueueAshleyWeaponAnimations(host, 33);
   CHECK(host.calls == std::vector<std::string>{"ReleaseSequences(0)"});
   CHECK(host.requests ==
-        std::vector<ActorAssetRequest>{
-            {.kind = 7, .model_id = 33, .shared_record_slot = {}}});
+        std::vector<ActorAssetRequest>{{.kind = 7, .model_id = 33}});
 }
 
 TEST_CASE("Actor preview live adapter refuses a missing record or camera",

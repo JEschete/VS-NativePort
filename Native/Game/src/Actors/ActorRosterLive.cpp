@@ -78,10 +78,13 @@ class LiveRemovalHost final : public ActorRemovalHost {
     FinishLiveActorAssets(slot, actor_);
   }
   void ReleaseGimmick(std::size_t slot) override {
-    static_cast<void>(VS::Field::DropLiveUnsupportedGimmickStack(
-        static_cast<std::int32_t>(slot)));
-    static_cast<void>(
-        VS::Field::ReleaseLiveGimmickInstance(static_cast<int>(slot)));
+    auto* expected =
+        reinterpret_cast<VS::Field::GimmickInstance*>(actor_->model);
+    if (VS::Field::gimmickInstances[slot] == expected) {
+      static_cast<void>(VS::Field::DropLiveUnsupportedGimmickStack(
+          static_cast<std::int32_t>(slot)));
+    }
+    VS::Field::DiscardLiveGimmickInstance(static_cast<int>(slot), expected);
   }
   void ReleaseModel(std::size_t model_slot) override {
     VS::Content::ReleaseLiveActorModel(static_cast<int>(model_slot));

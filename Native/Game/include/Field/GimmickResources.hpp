@@ -3,8 +3,11 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <optional>
 #include <span>
+#include <utility>
+#include <vector>
 
 #include "Content/ActorAssets.hpp"
 
@@ -14,6 +17,26 @@ inline constexpr std::size_t kGimmickPaletteSets = 7;
 inline constexpr std::size_t kGimmickPaletteColors = 16;
 inline constexpr std::size_t kGimmickPaletteWordCount = 112;
 inline constexpr std::size_t kGimmickPaletteBytes = 0xE0;
+
+class GimmickModelResource final {
+ public:
+  GimmickModelResource(std::int32_t flags, std::int32_t word4,
+                       std::vector<std::byte> geometry)
+      : flags_(flags), word4_(word4), geometry_(std::move(geometry)) {}
+
+  [[nodiscard]] std::int32_t InstanceFlags() const { return flags_; }
+  [[nodiscard]] std::int32_t InstanceWord4() const { return word4_; }
+  [[nodiscard]] std::span<const std::byte> Geometry() const {
+    return geometry_;
+  }
+
+ private:
+  std::int32_t flags_;
+  std::int32_t word4_;
+  std::vector<std::byte> geometry_;
+};
+
+using GimmickModelResourceRef = std::shared_ptr<const GimmickModelResource>;
 
 struct GimmickResourceSlot {
   bool present = false;
@@ -60,8 +83,7 @@ class GimmickCreationHost {
   virtual bool Occupied(std::size_t slot) const = 0;
   virtual bool PublishDestination(std::size_t slot) = 0;
   virtual bool ClearPrefix(std::size_t slot) = 0;
-  virtual std::span<const GimmickResourceSlot> Slots() = 0;
-  virtual bool CopySharedPrefix(std::size_t slot, std::size_t source) = 0;
+  virtual void Discard(std::size_t slot) = 0;
   virtual bool CreateModel(std::size_t slot, std::uint8_t kind,
                            std::uint8_t uv_kind) = 0;
   virtual std::optional<GimmickCreationState> ReadState(std::size_t slot) = 0;
@@ -75,7 +97,7 @@ class GimmickCreationHost {
   virtual bool AddOccupancy(std::size_t slot) = 0;
 };
 
-int CreateGimmickInstance(Content::ActorAssetRequest& request,
+int CreateGimmickInstance(const Content::ActorAssetRequest& request,
                           GimmickCreationHost& host);
 
 using GimmickPaletteTable = std::array<std::uint16_t, kGimmickPaletteWordCount>;

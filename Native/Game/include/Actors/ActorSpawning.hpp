@@ -159,11 +159,15 @@ enum class ActorRecordPart : std::uint8_t {
   // memory of the hand.
   kWeapon,
   kShield,
+  kGimmick,
 };
 
 // The record table `part` binds.
 [[nodiscard]] constexpr Content::ActorRecordTable ActorPartTable(
     ActorRecordPart part) {
+  if (part == ActorRecordPart::kGimmick) {
+    return Content::ActorRecordTable::kGimmick;
+  }
   return part == ActorRecordPart::kWeapon || part == ActorRecordPart::kShield
              ? Content::ActorRecordTable::kWeapon
              : Content::ActorRecordTable::kActor;
@@ -180,6 +184,7 @@ enum class ActorRecordPart : std::uint8_t {
     case ActorRecordPart::kShield:
       return (slot * 2) + 1;
     case ActorRecordPart::kBody:
+    case ActorRecordPart::kGimmick:
       break;
   }
   return slot;
@@ -188,7 +193,7 @@ enum class ActorRecordPart : std::uint8_t {
 // The part of the `shape` actor in `slot` whose record is `record` of
 // `table`; none when that record is not one of the actor's. Only a
 // secondary body owns a second body, only an equipped actor its weapon and
-// shield, and a gimmick actor loads no owned records.
+// shield, and only an auxiliary actor owns a gimmick record.
 [[nodiscard]] std::optional<ActorRecordPart> ActorRecordPartAt(
     ActorShape shape, std::size_t slot, Content::ActorRecordTable table,
     std::size_t record);
@@ -209,7 +214,7 @@ enum class SpawnRefusal : std::uint8_t {
   kEquipmentSlot,
   // The heap refused the actor.
   kAllocation,
-  // The actor model could not be queued.
+  // The actor model request could not be submitted or completed.
   kAssetQueue,
   // A template's ZUD index outside the zone's enemy files.
   kZudIndex,
@@ -725,13 +730,10 @@ class ActorSpawnHost {
   // model links and allocation kind set; kNone when the heap refuses.
   [[nodiscard]] virtual SpawnedActor Allocate(ActorShape shape,
                                               std::size_t slot) = 0;
-  // Frees a newly allocated actor before it has been installed or given
-  // dependent resources.
+  // Frees an unpublished actor after its requests settle, including its
+  // auxiliary model. Other shapes release their parts before discarding.
   virtual void DiscardUninstalled(SpawnedActor actor) = 0;
   virtual void Install(std::size_t slot, SpawnedActor actor) = 0;
-  // The actor's model memory, which an unowned gimmick request names.
-  [[nodiscard]] virtual Content::AssetAddress ModelAddress(
-      SpawnedActor actor) const = 0;
   virtual void SetEquippedWeaponCategory(SpawnedActor actor,
                                          std::uint8_t category) = 0;
   // Sets the identity of a new gimmick actor, unlinked and not retained.

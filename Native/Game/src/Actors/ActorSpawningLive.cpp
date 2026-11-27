@@ -49,6 +49,7 @@
 #include "Core/RandomLive.hpp"
 #include "Core/Runtime.hpp"
 #include "Field/CameraLiveState.hpp"
+#include "Field/GimmickResourcesLive.hpp"
 #include "Field/Mpd.hpp"
 #include "Field/RoomLoading.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
@@ -380,10 +381,17 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     if (live == nullptr) {
       return;
     }
+    const auto slot = LiveActorHandles().Slot(actor);
+    const auto definition = LiveActorHandles().Definition(actor);
     if (!LiveActorHandles().Discard(actor)) {
       WarnActorRefused("DiscardUninstalledActor",
                        "actor handle is already installed or stale");
       return;
+    }
+    if (slot && definition && definition->shape == ActorShape::kAuxiliary) {
+      VS::Field::DiscardLiveGimmickInstance(
+          static_cast<int>(*slot),
+          reinterpret_cast<VS::Field::GimmickInstance*>(live->model));
     }
     VS::Core::Memory::FreeLiveFromLowEnd(live);
   }
@@ -400,12 +408,6 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
       return;
     }
     VS::Battle::actors[slot] = live;
-  }
-
-  [[nodiscard]] AssetAddress ModelAddress(SpawnedActor actor) const override {
-    const VS::Battle::Actor* live =
-        ActorPointer<const VS::Battle::Actor>(actor, "ActorModelAddress");
-    return live != nullptr ? Address(live->model) : AssetAddress::kNone;
   }
 
   void SetEquippedWeaponCategory(SpawnedActor actor,
@@ -1336,6 +1338,7 @@ AssetAddress LiveActorRecordMemory(Content::ActorAssetOwner owner,
   }
   switch (*part) {
     case ActorRecordPart::kBody:
+    case ActorRecordPart::kGimmick:
       return Address(live->model);
     case ActorRecordPart::kSecondBody:
     case ActorRecordPart::kWeapon:

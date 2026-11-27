@@ -1,17 +1,22 @@
 #include "Field/GimmickResourcesLive.hpp"
 
+#include <algorithm>
 #include <array>
 #include <bit>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <memory>
 #include <optional>
 #include <span>
+#include <utility>
+#include <vector>
 
 #include "Actors/ShpModel.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/ModuleData.hpp"
+#include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/ActorCollisionLive.hpp"
 #include "Field/GimmickPlacementLive.hpp"
@@ -37,6 +42,26 @@ constexpr std::size_t kTemplateFlagBytes = sizeof(std::int32_t);
 constexpr std::size_t kUvPairBytes = 2;
 constexpr unsigned kTileByteBits = 8;
 constexpr unsigned kReservedTileShift = 24;
+
+struct GimmickResourceBinding {
+  GimmickInstance* record = nullptr;
+  VS::Actors::ShpModel* geometry = nullptr;
+  VS::Field::GimmickModelResourceRef model;
+};
+
+struct GimmickResources {
+  std::array<std::weak_ptr<const VS::Field::GimmickModelResource>,
+             kGimmickTemplateKinds>
+      models;
+  std::array<GimmickResourceBinding, kGimmickResourceSlots> instances;
+  std::uint64_t room_generation = 0;
+  std::uint64_t epoch = 1;
+};
+
+GimmickResources& Resources() {
+  static GimmickResources resources;
+  return resources;
+}
 
 std::span<const std::byte> BytesAfter(const void* address,
                                       std::span<const std::byte> bytes) {
@@ -125,40 +150,89 @@ void StoreCreationState(VS::Field::GimmickInstance& record,
   record.position_z = state.z;
 }
 
-bool CreateModel(VS::Field::GimmickInstance& record, std::uint8_t kind,
-                 std::uint8_t uv_kind) {
-  if (kind >= kGimmickTemplateKinds) return false;
+VS::Field::GimmickModelResourceRef ModelResource(std::uint8_t kind,
+                                                 std::uint8_t uv_kind) {
+  if (kind >= kGimmickTemplateKinds) return {};
+  auto& resources = Resources();
+  const auto generation = VS::Field::LiveInteractionTargetDomain().generation;
+  if (resources.room_generation != generation) {
+    resources.models = {};
+    resources.room_generation = generation;
+  }
+  if (auto resource = resources.models[kind].lock()) return resource;
   const auto index = VS::Field::gimmickTemplateIndices[kind];
-  if (index >= kGimmickTemplatePointers) return false;
+  if (index >= kGimmickTemplatePointers) return {};
   const auto source = TemplateBytes(VS::Field::gimmickModelTemplates[index]);
-  if (source.size() < sizeof(VS::Field::GimmickTemplate)) return false;
+  if (source.size() < sizeof(VS::Field::GimmickTemplate)) return {};
   VS::Field::GimmickTemplate header{};
   std::memcpy(&header, source.data(), sizeof(header));
-  std::memcpy(&record.bone_count, &header.instance_flags, kTemplateFlagBytes);
-  record.reserved4 = header.instance_word4;
   if (header.model_data_size < static_cast<int>(sizeof(VS::Actors::ShpModel)) ||
       header.polygon_count < 0 ||
       static_cast<std::size_t>(header.model_data_size) >
           source.size() - sizeof(header)) {
-    return false;
+    return {};
   }
-  auto* const geometry = const_cast<std::byte*>(source.data() + sizeof(header));
-  record.model =
-      static_cast<VS::Actors::ShpModel*>(VS::Content::CopyLiveModelGeometry(
-          nullptr, geometry, header.model_data_size));
-  if (record.model == nullptr) return false;
-  const auto model_bytes = static_cast<std::size_t>(header.model_data_size);
-  VS::Render::RecordLiveModelExtent(record.model, model_bytes);
-  if (record.model->polygon_section > model_bytes) return false;
-  const auto polygons =
-      std::span{reinterpret_cast<std::byte*>(record.model), model_bytes}
-          .subspan(record.model->polygon_section);
+  const auto bytes = source.subspan(
+      sizeof(header), static_cast<std::size_t>(header.model_data_size));
+  std::vector<std::byte> geometry(bytes.begin(), bytes.end());
+  VS::Actors::ShpModel model{};
+  std::memcpy(&model, geometry.data(), sizeof(model));
+  if (model.polygon_section > geometry.size()) return {};
+  const auto polygons = std::span(geometry).subspan(model.polygon_section);
   const auto uv = static_cast<std::size_t>(uv_kind) * kUvPairBytes;
-  if (uv + 1 >= std::size(VS::Field::gimmickPaletteParameters)) return false;
-  return VS::Content::OffsetModelTextureCoordinates(
-      polygons, header.polygon_count, true,
-      VS::Field::gimmickPaletteParameters[uv],
-      VS::Field::gimmickPaletteParameters[uv + 1]);
+  if (uv + 1 >= std::size(VS::Field::gimmickPaletteParameters) ||
+      !VS::Content::OffsetModelTextureCoordinates(
+          polygons, header.polygon_count, true,
+          VS::Field::gimmickPaletteParameters[uv],
+          VS::Field::gimmickPaletteParameters[uv + 1])) {
+    return {};
+  }
+  auto resource = std::make_shared<const VS::Field::GimmickModelResource>(
+      header.instance_flags, header.instance_word4, std::move(geometry));
+  resources.models[kind] = resource;
+  return resource;
+}
+
+bool CreateModel(VS::Field::GimmickInstance& record, std::size_t slot,
+                 std::uint8_t kind, std::uint8_t uv_kind) {
+  auto resource = ModelResource(kind, uv_kind);
+  if (!resource) return false;
+  const auto bytes = resource->Geometry();
+  const auto model_bytes = bytes.size();
+  record.model = static_cast<VS::Actors::ShpModel*>(
+      VS::Core::Memory::AllocateLiveFromLowEnd(model_bytes));
+  if (record.model == nullptr) return false;
+  std::memcpy(record.model, bytes.data(), model_bytes);
+  const auto flags = resource->InstanceFlags();
+  std::memcpy(&record.bone_count, &flags, kTemplateFlagBytes);
+  record.reserved4 = resource->InstanceWord4();
+  VS::Render::RecordLiveModelExtent(record.model, model_bytes);
+  Resources().instances[slot] = {.record = &record,
+                                 .geometry = record.model,
+                                 .model = std::move(resource)};
+  return true;
+}
+
+void DiscardGimmickRecord(std::size_t slot, GimmickInstance* expected,
+                          bool remove_occupancy) {
+  auto& binding = Resources().instances[slot];
+  const bool bound = binding.record == expected;
+  const bool published = VS::Field::gimmickInstances[slot] == expected;
+  if (bound) {
+    VS::Render::ForgetLiveModelExtent(binding.geometry);
+    VS::Core::Memory::FreeLiveFromLowEnd(binding.geometry);
+    binding = {};
+  } else if (published && VS::Field::IsLiveGimmickPrefixReadable(expected) &&
+             expected->model != nullptr) {
+    VS::Render::ForgetLiveModelExtent(expected->model);
+    VS::Core::Memory::FreeLiveFromLowEnd(expected->model);
+  }
+  if ((bound || published) &&
+      VS::Field::IsLiveGimmickPrefixReadable(expected)) {
+    if (remove_occupancy) VS::Battle::Ai::RemoveLiveAiTileOccupant(expected);
+    expected->model = nullptr;
+  }
+  if (published) VS::Field::gimmickInstances[slot] = nullptr;
 }
 
 class LiveGimmickCreationHost final : public VS::Field::GimmickCreationHost {
@@ -167,13 +241,15 @@ class LiveGimmickCreationHost final : public VS::Field::GimmickCreationHost {
                           VS::Field::GimmickInstance* destination)
       : slot_(slot),
         record_(destination),
-        generation_(VS::Field::LiveInteractionTargetDomain().generation) {}
+        generation_(VS::Field::LiveInteractionTargetDomain().generation),
+        epoch_(Resources().epoch) {}
   bool Occupied(std::size_t slot) const override {
     return slot >= kGimmickResourceSlots ||
-           VS::Field::gimmickInstances[slot] != nullptr;
+           VS::Field::gimmickInstances[slot] != nullptr ||
+           Resources().instances[slot].record != nullptr;
   }
   bool PublishDestination(std::size_t slot) override {
-    if (slot != slot_ ||
+    if (slot != slot_ || epoch_ != Resources().epoch ||
         generation_ != VS::Field::LiveInteractionTargetDomain().generation) {
       return false;
     }
@@ -189,23 +265,19 @@ class LiveGimmickCreationHost final : public VS::Field::GimmickCreationHost {
     std::memset(record_, 0, kGimmickPrefixBytes);
     return true;
   }
-  std::span<const ResourceSlot> Slots() override {
-    slots_ = SnapshotResourceSlots();
-    return slots_;
-  }
-  bool CopySharedPrefix(std::size_t slot, std::size_t source) override {
-    if (!Valid(slot) || source >= kGimmickResourceSlots ||
-        !VS::Field::IsLiveGimmickPrefixReadable(
-            VS::Field::gimmickInstances[source])) {
-      return false;
+  void Discard(std::size_t slot) override {
+    if (slot != slot_ || epoch_ != Resources().epoch) return;
+    const bool current =
+        generation_ == VS::Field::LiveInteractionTargetDomain().generation;
+    DiscardGimmickRecord(slot, record_, current && occupancy_added_);
+    if (current && VS::Field::IsLiveGimmickPrefixReadable(record_)) {
+      std::memset(record_, 0, kGimmickPrefixBytes);
     }
-    std::memmove(record_, VS::Field::gimmickInstances[source],
-                 kGimmickPrefixBytes);
-    return true;
   }
   bool CreateModel(std::size_t slot, std::uint8_t kind,
                    std::uint8_t uv_kind) override {
-    return Valid(slot) && ::CreateModel(*record_, kind, uv_kind) && Valid(slot);
+    return Valid(slot) && ::CreateModel(*record_, slot, kind, uv_kind) &&
+           Valid(slot);
   }
   std::optional<VS::Field::GimmickCreationState> ReadState(
       std::size_t slot) override {
@@ -255,19 +327,22 @@ class LiveGimmickCreationHost final : public VS::Field::GimmickCreationHost {
   bool AddOccupancy(std::size_t slot) override {
     if (!Valid(slot)) return false;
     VS::Battle::Ai::AddLiveAiTileOccupant(record_);
+    occupancy_added_ = true;
     return Valid(slot);
   }
 
  private:
   bool Valid(std::size_t slot) const {
     return slot == slot_ && VS::Field::IsLiveGimmickPrefixReadable(record_) &&
+           epoch_ == Resources().epoch &&
            generation_ == VS::Field::LiveInteractionTargetDomain().generation &&
            VS::Field::gimmickInstances[slot_] == record_;
   }
   std::size_t slot_;
   VS::Field::GimmickInstance* record_;
   std::uint64_t generation_;
-  ResourceSlots slots_{};
+  std::uint64_t epoch_;
+  bool occupancy_added_ = false;
 };
 
 ResourceSlots SnapshotResourceSlots() {
@@ -291,8 +366,14 @@ class LiveGimmickReleaseHost final : public VS::Field::GimmickReleaseHost {
         generation_(VS::Field::LiveInteractionTargetDomain().generation) {}
   bool FreeModel(std::size_t slot) override {
     if (!Valid(slot)) return false;
-    VS::Render::ForgetLiveModelExtent(record_->model);
-    VS::Core::Memory::FreeLiveFromLowEnd(record_->model);
+    if (record_->model != nullptr) {
+      VS::Render::ForgetLiveModelExtent(record_->model);
+      VS::Core::Memory::FreeLiveFromLowEnd(record_->model);
+      record_->model = nullptr;
+    }
+    if (Resources().instances[slot].record == record_) {
+      Resources().instances[slot] = {};
+    }
     return Valid(slot);
   }
   bool RemoveOccupancy(std::size_t slot) override {
@@ -319,16 +400,60 @@ class LiveGimmickReleaseHost final : public VS::Field::GimmickReleaseHost {
 }  // namespace
 
 namespace VS::Field {
-int CreateLiveGimmickInstance(Content::ActorAssetRequest& request) {
+int CreateLiveGimmickInstance(const Content::ActorAssetRequest& request,
+                              GimmickInstance* destination) {
   if (request.target_slot < 0 ||
       static_cast<std::size_t>(request.target_slot) >= kGimmickResourceSlots) {
+    VS::Core::Warnf("field", "gimmick creation refused invalid slot %d",
+                    request.target_slot);
     return Content::kAssetRefused;
   }
-  auto* const destination = reinterpret_cast<VS::Field::GimmickInstance*>(
-      static_cast<std::uintptr_t>(request.destination));
   LiveGimmickCreationHost host(static_cast<std::size_t>(request.target_slot),
                                destination);
-  return CreateGimmickInstance(request, host);
+  const int result = CreateGimmickInstance(request, host);
+  if (result != Content::kAssetDone) {
+    VS::Core::Warnf("field",
+                    "gimmick creation failed: slot=%d kind=%u result=%d",
+                    request.target_slot, request.sub_kind, result);
+  }
+  return result;
+}
+
+void DiscardLiveGimmickInstance(std::int32_t slot, GimmickInstance* expected) {
+  if (slot < 0 || static_cast<std::size_t>(slot) >= kGimmickResourceSlots ||
+      expected == nullptr) {
+    VS::Core::Warnf("field",
+                    "gimmick discard refused invalid owner for slot %d", slot);
+    return;
+  }
+  DiscardGimmickRecord(static_cast<std::size_t>(slot), expected, true);
+}
+
+GimmickModelResourceRef LiveGimmickModelResource(std::int32_t slot) {
+  if (slot < 0 || static_cast<std::size_t>(slot) >= kGimmickResourceSlots) {
+    VS::Core::Warnf("field", "gimmick resource refused invalid slot %d", slot);
+    return {};
+  }
+  const auto& binding = Resources().instances[slot];
+  return binding.record == gimmickInstances[slot] ? binding.model
+                                                  : GimmickModelResourceRef{};
+}
+
+void ResetLiveGimmickResources() {
+  auto& resources = Resources();
+  for (std::size_t slot = 0; slot < resources.instances.size(); ++slot) {
+    auto& binding = resources.instances[slot];
+    if (binding.geometry != nullptr) {
+      VS::Render::ForgetLiveModelExtent(binding.geometry);
+      VS::Core::Memory::FreeLiveFromLowEnd(binding.geometry);
+    }
+    if (gimmickInstances[slot] == binding.record) {
+      gimmickInstances[slot] = nullptr;
+    }
+    binding = {};
+  }
+  resources.models = {};
+  if (++resources.epoch == 0) ++resources.epoch;
 }
 
 std::optional<std::size_t> FindLiveSharedGimmickModel(
@@ -391,19 +516,12 @@ int VS::Field::CreateGimmickInstanceEntry(
       .kind = input.asset_kind,
       .target_slot = input.target_slot,
       .model_id = input.model_id,
-      .destination = std::bit_cast<VS::Content::AssetAddress>(
-          reinterpret_cast<std::uintptr_t>(input.destination)),
       .data = std::bit_cast<VS::Content::AssetAddress>(input.data_address),
-      .shared_record_slot = {},
       .placement = input.placement,
       .sub_kind = static_cast<std::uint8_t>(input.sub_kind),
       .texture_slot = static_cast<std::uint8_t>(input.texture_slot),
       .material = static_cast<std::uint8_t>(input.material),
       .variant = static_cast<std::uint8_t>(input.variant)};
-  const auto result = VS::Field::CreateLiveGimmickInstance(state);
-  const auto value = static_cast<std::uintptr_t>(state.data);
-  std::memcpy(reinterpret_cast<std::byte*>(request) +
-                  offsetof(VS::Content::LegacyActorAssetRequest, data_address),
-              &value, sizeof(value));
-  return result;
+  return VS::Field::CreateLiveGimmickInstance(
+      state, static_cast<VS::Field::GimmickInstance*>(input.destination));
 }

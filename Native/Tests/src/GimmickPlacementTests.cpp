@@ -16,12 +16,17 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Actors/ActorRecord.hpp"
+#include "Actors/ActorRosterLive.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Battle/AbilityState.hpp"
 #include "Battle/ActionFlow.hpp"
 #include "Battle/Actor.hpp"
+#include "Battle/Ai/ActorState.hpp"
+#include "Battle/Ai/AiState.hpp"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Navigation.hpp"
 #include "Battle/Ai/NavigationPrimitives.hpp"
 #include "Battle/Damage.hpp"
@@ -65,6 +70,7 @@
 #include "Field/Traps.hpp"
 #include "Render/ModelGeometryLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
+#include "State/PlayTime.hpp"
 #include "State/ScriptFlagsLive.hpp"
 #include "State/StateFlags.hpp"
 
@@ -178,15 +184,14 @@ TEST_CASE(
   CHECK(host.calls == std::vector<int>{0, 1, 2});
 }
 
-TEST_CASE(
-    "Gimmick release retains models shared by any other live same-kind slot",
-    "[gimmick-release-core][field]") {
+TEST_CASE("Gimmick release frees private geometry even with a same-kind peer",
+          "[gimmick-release-core][field]") {
   RecordingGimmickReleaseHost host;
   std::array<VS::Field::GimmickResourceSlot, 16> slots{};
   slots[3] = {true, 5, 1};
   slots[15] = {true, 0x85, 0};
   CHECK(VS::Field::ReleaseGimmickInstance(3, slots, host) == 0);
-  CHECK(host.calls == std::vector<int>{1, 2});
+  CHECK(host.calls == std::vector<int>{0, 1, 2});
 }
 
 TEST_CASE("Gimmick release rejects missing bone-zero and out-of-range slots",
@@ -252,6 +257,10 @@ struct GimmickReleaseLiveFixture : GimmickResourcesLiveFixture {
   ~GimmickReleaseLiveFixture() {
     VS::Battle::Ai::tileFlagMap = saved_flags;
     VS::Battle::Ai::specialTerrainHeights = saved_heights;
+  }
+  static void CheckModelReleased(const void* model) {
+    CHECK_FALSE(VS::Core::Memory::LivePayloadCapacity(model).has_value());
+    CHECK(VS::Render::LiveModelBytes(model).empty());
   }
 };
 
@@ -440,28 +449,28 @@ TEST_CASE(
   VS::Render::RecordLiveModelExtent(model, 128);
   REQUIRE(VS::Field::ReleaseLiveGimmickInstance(1) == 0);
   CHECK(VS::Field::gimmickInstances[1] == nullptr);
-  CHECK_FALSE(VS::Core::Memory::LivePayloadCapacity(model).has_value());
-  CHECK(VS::Render::LiveModelBytes(model).empty());
+  fixture.CheckModelReleased(model);
 }
 
-TEST_CASE(
-    "Native gimmick release retains a shared heap model until its last owner",
-    "[gimmick-release-live][field]") {
+TEST_CASE("Native gimmick release frees only its private instance geometry",
+          "[gimmick-release-live][field]") {
   GimmickReleaseLiveFixture fixture;
   alignas(VS::Core::Memory::kHeapUnitBytes) std::array<std::byte, 4096> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   void* model = VS::Core::Memory::AllocateLiveFromLowEnd(128);
   REQUIRE(model != nullptr);
-  fixture.instances[0].model = fixture.instances[1].model =
-      static_cast<VS::Actors::ShpModel*>(model);
+  void* peer = VS::Core::Memory::AllocateLiveFromLowEnd(128);
+  REQUIRE(peer != nullptr);
+  fixture.instances[0].model = static_cast<VS::Actors::ShpModel*>(model);
+  fixture.instances[1].model = static_cast<VS::Actors::ShpModel*>(peer);
   fixture.instances[1].bone_count = 1;
   VS::Render::RecordLiveModelExtent(model, 128);
+  VS::Render::RecordLiveModelExtent(peer, 128);
   REQUIRE(VS::Field::ReleaseLiveGimmickInstance(1) == 0);
-  CHECK(VS::Core::Memory::LivePayloadCapacity(model).has_value());
-  CHECK(VS::Render::LiveModelBytes(model).size() == 128);
+  fixture.CheckModelReleased(model);
+  CHECK(VS::Render::LiveModelBytes(peer).size() == 128);
   REQUIRE(VS::Field::ReleaseLiveGimmickInstance(5) == 0);
-  CHECK_FALSE(VS::Core::Memory::LivePayloadCapacity(model).has_value());
-  CHECK(VS::Render::LiveModelBytes(model).empty());
+  fixture.CheckModelReleased(peer);
 }
 
 TEST_CASE("Native gimmick release refuses invalid and bone-zero slots",
@@ -613,7 +622,6 @@ struct RecordingAshleyFallHost final : VS::Field::AshleyFallHost {
 
 struct RecordingGimmickCreationHost final : VS::Field::GimmickCreationHost {
   std::array<std::optional<VS::Field::GimmickCreationState>, 16> states{};
-  std::array<VS::Field::GimmickResourceSlot, 16> slots{};
   mutable std::vector<std::string> calls;
   bool destination = true;
   bool model = true;
@@ -632,17 +640,9 @@ struct RecordingGimmickCreationHost final : VS::Field::GimmickCreationHost {
     states[slot] = VS::Field::GimmickCreationState{};
     return true;
   }
-  std::span<const VS::Field::GimmickResourceSlot> Slots() override {
-    calls.emplace_back("slots");
-    for (std::size_t index = 0; index < states.size(); ++index) {
-      const auto& state = states[index];
-      if (state.has_value()) {
-        slots[index] = {true, state->object_id, 1};
-      } else {
-        slots[index] = {false, 0, 1};
-      }
-    }
-    return slots;
+  void Discard(std::size_t slot) override {
+    calls.emplace_back("discard");
+    states[slot].reset();
   }
   VS::Field::GimmickCreationState& State(std::size_t slot) {
     auto& state = states[slot];
@@ -651,11 +651,6 @@ struct RecordingGimmickCreationHost final : VS::Field::GimmickCreationHost {
       throw std::bad_optional_access{};
     }
     return *state;
-  }
-  bool CopySharedPrefix(std::size_t slot, std::size_t source) override {
-    calls.push_back("copy" + std::to_string(source));
-    states[slot] = states[source];
-    return true;
   }
   bool CreateModel(std::size_t, std::uint8_t kind,
                    std::uint8_t uv_kind) override {
@@ -4876,13 +4871,10 @@ TEST_CASE("Facing event entry dispatches adjacent tile through native triggers",
   CHECK(VS::Event::LiveScriptVm().Phase() == VS::Event::PlaybackPhase::kIdle);
 }
 
-TEST_CASE(
-    "Gimmick creation refuses busy before publication and publishes before "
-    "model failure",
-    "[gimmick-create-core][field]") {
+TEST_CASE("Gimmick creation refuses busy records and rolls back model failure",
+          "[gimmick-create-core][field]") {
   RecordingGimmickCreationHost host;
-  VS::Content::ActorAssetRequest request{
-      .target_slot = 3, .shared_record_slot = {}, .sub_kind = 6};
+  VS::Content::ActorAssetRequest request{.target_slot = 3, .sub_kind = 6};
   host.states[3] = VS::Field::GimmickCreationState{};
   CHECK(VS::Field::CreateGimmickInstance(request, host) == -3);
   CHECK(host.calls == std::vector<std::string>{"occupied"});
@@ -4891,15 +4883,14 @@ TEST_CASE(
   host.model = false;
   CHECK(VS::Field::CreateGimmickInstance(request, host) == -2);
   CHECK(host.calls == std::vector<std::string>{"occupied", "publish", "clear",
-                                               "slots", "model6:5"});
-  CHECK(host.states[3].has_value());
+                                               "model6:5", "discard"});
+  CHECK_FALSE(host.states[3].has_value());
 }
 
 TEST_CASE("Gimmick creation retains null destination and invalid-slot refusal",
           "[gimmick-create-core][field]") {
   RecordingGimmickCreationHost host;
-  VS::Content::ActorAssetRequest request{.target_slot = -1,
-                                         .shared_record_slot = {}};
+  VS::Content::ActorAssetRequest request{.target_slot = -1};
   CHECK(VS::Field::CreateGimmickInstance(request, host) == -2);
   CHECK(host.calls.empty());
   request.target_slot = 0;
@@ -4909,21 +4900,19 @@ TEST_CASE("Gimmick creation retains null destination and invalid-slot refusal",
   CHECK_FALSE(host.states[0].has_value());
 }
 
-TEST_CASE(
-    "Gimmick creation shares first other model and applies original defaults",
-    "[gimmick-create-core][field]") {
+TEST_CASE("Gimmick creation uses private state and applies original defaults",
+          "[gimmick-create-core][field]") {
   RecordingGimmickCreationHost host;
   host.states[1] =
       VS::Field::GimmickCreationState{.object_id = 1, .subtype = 7};
   VS::Content::ActorAssetRequest request{.target_slot = 3,
-                                         .shared_record_slot = {},
                                          .placement = 0x77040802,
                                          .sub_kind = 1,
                                          .texture_slot = 255,
                                          .material = 3,
                                          .variant = 1};
   REQUIRE(VS::Field::CreateGimmickInstance(request, host) == 0);
-  CHECK(request.shared_record_slot == 1);
+  CHECK(std::ranges::find(host.calls, "model1:1") != host.calls.end());
   CHECK(request.data == VS::Content::AssetAddress::kNone);
   REQUIRE(host.states[3].has_value());
   CHECK(host.State(3).subtype == 255);
@@ -4936,11 +4925,8 @@ TEST_CASE(
 TEST_CASE("Gimmick creation uses unsigned placement bytes and wrapped height",
           "[gimmick-create-core][field]") {
   RecordingGimmickCreationHost host;
-  VS::Content::ActorAssetRequest request{.target_slot = 0,
-                                         .shared_record_slot = {},
-                                         .placement = 0xFFFE00FF,
-                                         .sub_kind = 0,
-                                         .variant = 255};
+  VS::Content::ActorAssetRequest request{
+      .target_slot = 0, .placement = 0xFFFE00FF, .sub_kind = 0, .variant = 255};
   REQUIRE(VS::Field::CreateGimmickInstance(request, host) == 0);
   REQUIRE(host.states[0].has_value());
   CHECK(host.State(0).x == 32704);
@@ -4957,11 +4943,8 @@ TEST_CASE("Gimmick creation stack takes the first earlier supporting type",
     RecordingGimmickCreationHost host;
     host.states[0] = VS::Field::GimmickCreationState{
         .object_id = supporting, .tile_word = 0x00040802, .y = 512};
-    VS::Content::ActorAssetRequest request{.target_slot = 3,
-                                           .shared_record_slot = {},
-                                           .placement = 0x77040802,
-                                           .sub_kind = 5,
-                                           .variant = 1};
+    VS::Content::ActorAssetRequest request{
+        .target_slot = 3, .placement = 0x77040802, .sub_kind = 5, .variant = 1};
     REQUIRE(VS::Field::CreateGimmickInstance(request, host) == 0);
     REQUIRE(host.states[3].has_value());
     CHECK(host.State(3).interaction == (supporting == 5 ? 2 : 1));
@@ -7998,6 +7981,8 @@ struct GimmickCreationLiveFixture : GimmickReleaseLiveFixture {
   VS::Field::CollisionSamples saved_samples = VS::Field::LiveCollisionSamples();
   VS::Render::PaletteAnimation saved_animation =
       VS::Render::LivePaletteAnimation();
+  std::vector<std::byte> arena = std::vector<std::byte>(65536);
+  VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   GimmickCreationLiveFixture() {
     std::fill_n(VS::Field::gimmickInstances.begin(), saved_instances.size(),
                 nullptr);
@@ -8008,9 +7993,7 @@ struct GimmickCreationLiveFixture : GimmickReleaseLiveFixture {
     VS::Field::roomData = {};
   }
   ~GimmickCreationLiveFixture() {
-    for (const auto& record : instances) {
-      VS::Render::ForgetLiveModelExtent(record.model);
-    }
+    VS::Field::ResetLiveGimmickResources();
     std::copy(saved_templates.begin(), saved_templates.end(),
               VS::Field::gimmickModelTemplates.begin());
     std::copy(saved_indices.begin(), saved_indices.end(),
@@ -8066,6 +8049,55 @@ struct GimmickCreationLiveFixture : GimmickReleaseLiveFixture {
     CheckModelUvs(record.model);
   }
 };
+
+struct AuxiliaryActorLiveFixture : GimmickCreationLiveFixture {
+  decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
+  decltype(VS::Actors::actorRecords) saved_records = VS::Actors::actorRecords;
+  decltype(VS::Battle::Ai::actorAiStates) saved_ai =
+      VS::Battle::Ai::actorAiStates;
+  decltype(VS::Battle::actorMarkers) saved_markers = VS::Battle::actorMarkers;
+  VS::Battle::Ai::RoomAiState* saved_ai_room = VS::Battle::Ai::roomAiState;
+  VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
+  VS::Battle::Ai::RoomAiState ai_room{};
+  VS::State::PlayTime saved_time = VS::State::playTime;
+
+  AuxiliaryActorLiveFixture() {
+    VS::Battle::actors.fill(nullptr);
+    VS::Actors::actorRecords.fill(nullptr);
+    VS::Battle::Ai::actorAiStates.fill(nullptr);
+    VS::Battle::Ai::roomAiState = &ai_room;
+    VS::Battle::Ai::LiveFrameContext() = {};
+    VS::Actors::ResetLiveActorHandles();
+    VS::Content::ClearLiveActorAssetQueue();
+    Template();
+  }
+  ~AuxiliaryActorLiveFixture() {
+    for (unsigned slot = 2; slot < VS::Battle::actors.size(); ++slot) {
+      if (VS::Battle::actors[slot] != nullptr) {
+        VS::Actors::RemoveLiveActorAtSlot(slot, 0);
+      }
+    }
+    VS::Content::ClearLiveActorAssetQueue();
+    VS::Actors::ResetLiveActorHandles();
+    VS::Battle::actors = saved_actors;
+    VS::Actors::actorRecords = saved_records;
+    VS::Battle::Ai::actorAiStates = saved_ai;
+    VS::Battle::actorMarkers = saved_markers;
+    VS::Battle::Ai::roomAiState = saved_ai_room;
+    VS::Battle::Ai::LiveFrameContext() = saved_frame;
+    VS::State::playTime = saved_time;
+  }
+  VS::Battle::Actor* Spawn(int slot, int kind = 1) {
+    const VS::Actors::SpawnPlacement placement{.tile_x = 1, .tile_z = 2};
+    return VS::Actors::CreateLiveAuxiliaryActor(slot, kind, &placement, 0, 0);
+  }
+  VS::Content::ActorAssetRequest Request(int slot) {
+    return {.kind = static_cast<std::uint8_t>(
+                VS::Content::ActorAssetKind::kGimmick),
+            .target_slot = static_cast<std::int8_t>(slot),
+            .sub_kind = 1};
+  }
+};
 }  // namespace
 
 TEST_CASE(
@@ -8073,8 +8105,6 @@ TEST_CASE(
     "polygon UVs",
     "[gimmick-create-live][field]") {
   GimmickCreationLiveFixture fixture;
-  alignas(VS::Core::Memory::kHeapUnitBytes) std::array<std::byte, 4096> arena{};
-  VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   fixture.Template();
   VS::Content::LegacyActorAssetRequest request{};
   request.target_slot = 2;
@@ -8090,11 +8120,10 @@ TEST_CASE(
 }
 
 TEST_CASE(
-    "Native gimmick creation shares prefix but preserves the caller-owned tail",
+    "Native gimmick creation isolates geometry and preserves the caller-owned "
+    "tail",
     "[gimmick-create-live][field]") {
   GimmickCreationLiveFixture fixture;
-  alignas(VS::Core::Memory::kHeapUnitBytes) std::array<std::byte, 4096> arena{};
-  VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   fixture.Template();
   VS::Content::LegacyActorAssetRequest request{};
   request.target_slot = 1;
@@ -8107,16 +8136,227 @@ TEST_CASE(
   request.destination = &fixture.instances[1];
   request.data_address = 0x9876;
   REQUIRE(VS::Field::CreateGimmickInstanceEntry(&request) == 0);
-  CHECK(request.data_address == 1);
-  CHECK(fixture.instances[1].model == fixture.instances[0].model);
-  CHECK(fixture.instances[1].matrices[0].t[0] == 0x12345678);
+  CHECK(request.data_address == 0x9876);
+  CHECK(fixture.instances[1].model != fixture.instances[0].model);
+  CHECK(fixture.instances[1].matrices[0].t[0] != 0x12345678);
   CHECK(fixture.instances[1].reserved178[0] == 0xA5);
   REQUIRE(VS::Field::ReleaseGimmickInstanceEntry(1) == 0);
   REQUIRE(VS::Field::ReleaseGimmickInstanceEntry(5) == 0);
 }
 
+TEST_CASE("Native gimmick instances do not inherit mutable peer geometry",
+          "[gimmick-create-live][field][auxiliary-ownership]") {
+  GimmickCreationLiveFixture fixture;
+  fixture.Template();
+  VS::Content::LegacyActorAssetRequest request{};
+  request.target_slot = 1;
+  request.destination = &fixture.instances[0];
+  REQUIRE(VS::Field::CreateGimmickInstanceEntry(&request) == 0);
+  const auto original = VS::Render::LiveModelBytes(fixture.instances[0].model);
+  REQUIRE(original.size() == 96);
+  const std::vector<std::byte> rest(original.begin(), original.end());
+  reinterpret_cast<std::byte*>(fixture.instances[0].model)[88] = std::byte{99};
+  request.target_slot = 5;
+  request.destination = &fixture.instances[1];
+  REQUIRE(VS::Field::CreateGimmickInstanceEntry(&request) == 0);
+  CHECK(VS::Field::LiveGimmickModelResource(1) ==
+        VS::Field::LiveGimmickModelResource(5));
+  CHECK(fixture.instances[1].model != fixture.instances[0].model);
+  CHECK(std::ranges::equal(
+      VS::Render::LiveModelBytes(fixture.instances[1].model), rest));
+  REQUIRE(VS::Field::ReleaseGimmickInstanceEntry(1) == 0);
+  REQUIRE(VS::Field::ReleaseGimmickInstanceEntry(5) == 0);
+}
+
+TEST_CASE("Native gimmick creation rolls back a partially loaded model",
+          "[gimmick-create-live][field][auxiliary-ownership]") {
+  GimmickCreationLiveFixture fixture;
+  fixture.Template();
+  const auto free_units = VS::Core::Memory::GameHeap().FreeUnits();
+  VS::Content::LegacyActorAssetRequest request{};
+  request.target_slot = 2;
+  request.destination = &fixture.instances[0];
+  request.sub_kind = 7;
+  fixture.instances[0].reserved178[0] = 0xA5;
+  CHECK(VS::Field::CreateGimmickInstanceEntry(&request) ==
+        VS::Content::kAssetRefused);
+  CHECK(VS::Field::gimmickInstances[2] == nullptr);
+  CHECK(fixture.instances[0].model == nullptr);
+  CHECK(fixture.instances[0].reserved178[0] == 0xA5);
+  CHECK(VS::Core::Memory::GameHeap().FreeUnits() == free_units);
+}
+
 TEST_CASE(
-    "Native gimmick creation bounds logical template indices without undoing "
+    "Native gimmick definitions survive source removal until the last owner",
+    "[gimmick-create-live][field][auxiliary-ownership]") {
+  GimmickCreationLiveFixture fixture;
+  fixture.Template();
+  const auto free_units = VS::Core::Memory::GameHeap().FreeUnits();
+  VS::Content::LegacyActorAssetRequest request{};
+  request.target_slot = 1;
+  request.destination = &fixture.instances[0];
+  REQUIRE(VS::Field::CreateGimmickInstanceEntry(&request) == 0);
+  std::weak_ptr resource = VS::Field::LiveGimmickModelResource(1);
+  request.target_slot = 5;
+  request.destination = &fixture.instances[1];
+  REQUIRE(VS::Field::CreateGimmickInstanceEntry(&request) == 0);
+  REQUIRE(VS::Field::ReleaseLiveGimmickInstance(1) == 0);
+  CHECK_FALSE(resource.expired());
+  fixture.CheckModelUvs(fixture.instances[1].model);
+  REQUIRE(VS::Field::ReleaseLiveGimmickInstance(5) == 0);
+  CHECK(resource.expired());
+  CHECK(VS::Core::Memory::GameHeap().FreeUnits() == free_units);
+}
+
+TEST_CASE(
+    "Native gimmick reset retires instances and does not reuse old definitions",
+    "[gimmick-create-live][field][auxiliary-ownership]") {
+  GimmickCreationLiveFixture fixture;
+  fixture.Template();
+  const auto free_units = VS::Core::Memory::GameHeap().FreeUnits();
+  VS::Content::LegacyActorAssetRequest request{};
+  request.target_slot = 1;
+  request.destination = &fixture.instances[0];
+  REQUIRE(VS::Field::CreateGimmickInstanceEntry(&request) == 0);
+  const auto resource = VS::Field::LiveGimmickModelResource(1);
+  const auto* geometry = fixture.instances[0].model;
+  VS::Field::ResetLiveGimmickResources();
+  CHECK(VS::Field::gimmickInstances[1] == nullptr);
+  CHECK_FALSE(VS::Core::Memory::LivePayloadCapacity(geometry));
+  CHECK(VS::Render::LiveModelBytes(geometry).empty());
+  CHECK(VS::Core::Memory::GameHeap().FreeUnits() == free_units);
+  REQUIRE(VS::Field::CreateGimmickInstanceEntry(&request) == 0);
+  CHECK(VS::Field::LiveGimmickModelResource(1) != resource);
+  fixture.CheckModelUvs(fixture.instances[0].model);
+}
+
+TEST_CASE("Native gimmick room changes retire only the template cache",
+          "[gimmick-create-live][field][auxiliary-ownership]") {
+  GimmickCreationLiveFixture fixture;
+  fixture.Template();
+  VS::Content::LegacyActorAssetRequest request{};
+  request.target_slot = 1;
+  request.destination = &fixture.instances[0];
+  REQUIRE(VS::Field::CreateGimmickInstanceEntry(&request) == 0);
+  const auto resource = VS::Field::LiveGimmickModelResource(1);
+  const auto* geometry = fixture.instances[0].model;
+  VS::Field::InvalidateLiveInteractionTargets();
+  CHECK(VS::Core::Memory::LivePayloadCapacity(geometry).has_value());
+  CHECK(VS::Field::LiveGimmickModelResource(1) == resource);
+  request.target_slot = 5;
+  request.destination = &fixture.instances[1];
+  REQUIRE(VS::Field::CreateGimmickInstanceEntry(&request) == 0);
+  CHECK(VS::Field::LiveGimmickModelResource(5) != resource);
+  fixture.CheckModelUvs(fixture.instances[0].model);
+}
+
+TEST_CASE(
+    "Native auxiliary publication and removal own the complete model lifetime",
+    "[actors-spawning][gimmick-create-live][auxiliary-ownership]") {
+  AuxiliaryActorLiveFixture fixture;
+  const auto free_units = VS::Core::Memory::GameHeap().FreeUnits();
+  for (int repeat = 0; repeat < 2; ++repeat) {
+    auto* actor = fixture.Spawn(2);
+    REQUIRE(actor != nullptr);
+    CHECK(VS::Battle::actors[2] == actor);
+    CHECK(VS::Field::gimmickInstances[2] ==
+          reinterpret_cast<VS::Field::GimmickInstance*>(actor->model));
+    std::weak_ptr resource = VS::Field::LiveGimmickModelResource(2);
+    CHECK_FALSE(resource.expired());
+    CHECK(VS::Actors::RemoveLiveActorAtSlot(2, 0) == 1);
+    CHECK(VS::Battle::actors[2] == nullptr);
+    CHECK(VS::Field::gimmickInstances[2] == nullptr);
+    CHECK(resource.expired());
+    CHECK(VS::Core::Memory::GameHeap().FreeUnits() == free_units);
+  }
+}
+
+TEST_CASE("Native auxiliary failure releases its allocation before publication",
+          "[actors-spawning][gimmick-create-live][auxiliary-ownership]") {
+  AuxiliaryActorLiveFixture fixture;
+  const auto free_units = VS::Core::Memory::GameHeap().FreeUnits();
+  CHECK(fixture.Spawn(2, 7) == nullptr);
+  CHECK(VS::Battle::actors[2] == nullptr);
+  CHECK(VS::Field::gimmickInstances[2] == nullptr);
+  CHECK(VS::Core::Memory::GameHeap().FreeUnits() == free_units);
+  REQUIRE(fixture.Spawn(2) != nullptr);
+}
+
+TEST_CASE("Native auxiliary removal leaves a foreign gimmick record untouched",
+          "[actors-spawning][gimmick-create-live][auxiliary-ownership]") {
+  AuxiliaryActorLiveFixture fixture;
+  REQUIRE(fixture.Spawn(2) != nullptr);
+  std::weak_ptr resource = VS::Field::LiveGimmickModelResource(2);
+  auto* geometry = VS::Field::gimmickInstances[2]->model;
+  auto& foreign = fixture.instances[0];
+  foreign.reserved4 = 123;
+  VS::Field::gimmickInstances[2] = &foreign;
+  CHECK(VS::Actors::RemoveLiveActorAtSlot(2, 0) == 1);
+  CHECK(VS::Field::gimmickInstances[2] == &foreign);
+  CHECK(foreign.reserved4 == 123);
+  CHECK_FALSE(VS::Core::Memory::LivePayloadCapacity(geometry));
+  CHECK(resource.expired());
+}
+
+TEST_CASE(
+    "Native auxiliary owners cancel independently before model replacement",
+    "[actors-spawning][gimmick-create-live][auxiliary-ownership]") {
+  AuxiliaryActorLiveFixture fixture;
+  auto* first = fixture.Spawn(2);
+  REQUIRE(first != nullptr);
+  REQUIRE(fixture.Spawn(3) != nullptr);
+  REQUIRE(VS::Field::ReleaseLiveGimmickInstance(2) == 0);
+  REQUIRE(VS::Field::ReleaseLiveGimmickInstance(3) == 0);
+  REQUIRE(VS::Actors::QueueLiveSlotActorAsset(2, fixture.Request(2)) == 0);
+  REQUIRE(VS::Actors::QueueLiveSlotActorAsset(3, fixture.Request(3)) == 1);
+  REQUIRE(VS::Actors::CancelLiveActorAssets(2, first));
+  VS::Content::UpdateLiveActorAssetQueue();
+  VS::Actors::SettleLiveActorLoads();
+  CHECK(VS::Field::gimmickInstances[2] == nullptr);
+  CHECK(VS::Field::gimmickInstances[3] != nullptr);
+}
+
+TEST_CASE("Native auxiliary removal releases occupancy despite a foreign slot",
+          "[actors-spawning][gimmick-create-live][auxiliary-ownership]") {
+  for (const bool foreign : {false, true}) {
+    constexpr auto kSide = VS::Battle::Ai::kNavigationGridSide;
+    std::uint16_t flags[kSide][kSide]{};
+    std::uint16_t heights[kSide][kSide]{};
+    AuxiliaryActorLiveFixture fixture;
+    VS::Battle::Ai::tileFlagMap = flags;
+    VS::Battle::Ai::specialTerrainHeights = heights;
+    REQUIRE(fixture.Spawn(2) != nullptr);
+    REQUIRE(heights[2][1] == VS::Battle::Ai::kDynamicObstacleFlag);
+    if (foreign) VS::Field::gimmickInstances[2] = &fixture.instances[0];
+    CHECK(VS::Actors::RemoveLiveActorAtSlot(2, 0) == 1);
+    CHECK(heights[2][1] == 0);
+    CHECK(VS::Field::gimmickInstances[2] ==
+          (foreign ? &fixture.instances[0] : nullptr));
+  }
+}
+
+TEST_CASE("Native auxiliary pending tail requests cancel before actor discard",
+          "[actors-spawning][gimmick-create-live][auxiliary-ownership]") {
+  AuxiliaryActorLiveFixture fixture;
+  const auto free_units = VS::Core::Memory::GameHeap().FreeUnits();
+  const VS::Content::ActorAssetRequest refused{
+      .kind = static_cast<std::uint8_t>(
+          VS::Content::ActorAssetKind::kActorModelParse),
+      .target_slot = 2};
+  for (int index = 0; index < 15; ++index) {
+    REQUIRE(VS::Content::QueueLiveActorAsset(refused) == index);
+  }
+  CHECK(fixture.Spawn(2) == nullptr);
+  CHECK(VS::Battle::actors[2] == nullptr);
+  CHECK(VS::Field::gimmickInstances[2] == nullptr);
+  CHECK(VS::Core::Memory::GameHeap().FreeUnits() == free_units);
+  for (int index = 0; index < VS::Content::kActorAssetRequestCount; ++index) {
+    CHECK(VS::Content::QueueLiveActorAsset(refused) == index);
+  }
+}
+
+TEST_CASE(
+    "Native gimmick creation bounds template indices and rolls back "
     "publication",
     "[gimmick-create-live][field]") {
   GimmickCreationLiveFixture fixture;
@@ -8126,14 +8366,13 @@ TEST_CASE(
   request.sub_kind = 8;
   fixture.instances[0].reserved178[0] = 0xA5;
   CHECK(VS::Field::CreateGimmickInstanceEntry(&request) == -2);
-  CHECK(VS::Field::gimmickInstances[2] == &fixture.instances[0]);
+  CHECK(VS::Field::gimmickInstances[2] == nullptr);
   CHECK(fixture.instances[0].model == nullptr);
   CHECK(fixture.instances[0].reserved178[0] == 0xA5);
-  VS::Field::gimmickInstances[2] = nullptr;
   request.sub_kind = 0;
   VS::Field::gimmickTemplateIndices[0] = 3;
   CHECK(VS::Field::CreateGimmickInstanceEntry(&request) == -2);
-  CHECK(VS::Field::gimmickInstances[2] == &fixture.instances[0]);
+  CHECK(VS::Field::gimmickInstances[2] == nullptr);
 }
 
 TEST_CASE(
@@ -8141,8 +8380,6 @@ TEST_CASE(
     "before publication",
     "[gimmick-create-live][field]") {
   GimmickCreationLiveFixture fixture;
-  alignas(VS::Core::Memory::kHeapUnitBytes) std::array<std::byte, 4096> arena{};
-  VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   auto* destination =
       static_cast<std::byte*>(VS::Core::Memory::AllocateLiveFromLowEnd(64));
   REQUIRE(destination != nullptr);
@@ -8163,16 +8400,13 @@ TEST_CASE(
     "Native gimmick creation refuses unbounded and incomplete model templates",
     "[gimmick-create-live][field]") {
   GimmickCreationLiveFixture fixture;
-  alignas(VS::Core::Memory::kHeapUnitBytes) std::array<std::byte, 4096> arena{};
-  VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   VS::Content::LegacyActorAssetRequest request{};
   request.target_slot = 2;
   request.destination = &fixture.instances[0];
   VS::Field::gimmickModelTemplates[0] = reinterpret_cast<void*>(0x1000);
   CHECK(VS::Field::CreateGimmickInstanceEntry(&request) == -2);
-  CHECK(VS::Field::gimmickInstances[2] == &fixture.instances[0]);
+  CHECK(VS::Field::gimmickInstances[2] == nullptr);
   CHECK(fixture.instances[0].model == nullptr);
-  VS::Field::gimmickInstances[2] = nullptr;
   auto* source = VS::Core::Memory::AllocateLiveFromLowEnd(
       sizeof(VS::Field::GimmickTemplate));
   REQUIRE(source != nullptr);
@@ -8180,7 +8414,7 @@ TEST_CASE(
   std::memcpy(source, &header, sizeof(header));
   VS::Field::gimmickModelTemplates[0] = source;
   CHECK(VS::Field::CreateGimmickInstanceEntry(&request) == -2);
-  CHECK(fixture.instances[0].reserved4 == 9);
+  CHECK(fixture.instances[0].reserved4 == 0);
   CHECK(fixture.instances[0].model == nullptr);
 }
 
@@ -8189,8 +8423,7 @@ TEST_CASE(
     "other bytes",
     "[gimmick-create-live][field]") {
   GimmickCreationLiveFixture fixture;
-  fixture.instances[0].object_info.object_id = 3;
-  VS::Field::gimmickInstances[1] = &fixture.instances[0];
+  fixture.Template();
   VS::Content::LegacyActorAssetRequest input{};
   input.target_slot = 2;
   input.destination = &fixture.instances[1];
@@ -8199,11 +8432,7 @@ TEST_CASE(
   std::array<std::byte, sizeof(input) + 2> bytes{};
   bytes.fill(std::byte{0xA5});
   std::memcpy(bytes.data() + 1, &input, sizeof(input));
-  auto expected = bytes;
-  const std::uintptr_t shared = 1;
-  std::memcpy(expected.data() + 1 +
-                  offsetof(VS::Content::LegacyActorAssetRequest, data_address),
-              &shared, sizeof(shared));
+  const auto expected = bytes;
   auto* request =
       reinterpret_cast<VS::Content::LegacyActorAssetRequest*>(bytes.data() + 1);
   CHECK(VS::Field::CreateGimmickInstanceEntry(request) == 0);
@@ -8216,8 +8445,7 @@ TEST_CASE(
     "bytes",
     "[gimmick-create-live][field]") {
   GimmickCreationLiveFixture fixture;
-  fixture.instances[0].object_info.object_id = 3;
-  VS::Field::gimmickInstances[1] = &fixture.instances[0];
+  fixture.Template();
   VS::Content::LegacyActorAssetRequest request{};
   request.target_slot = 2;
   request.destination = &fixture.instances[1];

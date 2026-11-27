@@ -2,33 +2,34 @@
 
 ## State
 
-- Native resource revision on `main`: `fba58a09d02f87df1aca097a21f9f07326f5b503`.
-- Current work: complete #48, actor/model request ownership, cancellation and completion. The issue remains open;
-  the owner requested completion, not a checkpoint-only stop.
-- Current reproduction and CI repair:
-  [#48 evidence](https://github.com/JEschete/VS-NativePort/issues/48#issuecomment-7215309875).
-  The source guard now follows the immutable weapon binding; its pushed CI must pass before this milestone is accepted.
+- Published source baseline on `main`: `62ba5955ee6a5103404424d3f7ed38ee82976478`.
+- Active work: final integration and publication of [#48](https://github.com/JEschete/VS-NativePort/issues/48).
+  Ownership implementation is complete; issue closure still requires the pushed revision's successful CI.
+- The production Status entry-ordering reproduction is recorded
+  [on #48](https://github.com/JEschete/VS-NativePort/issues/48#issuecomment-7217239279).
+  Its correction defers the first render until the switcher acquires the owned preview, preserving the load timing.
 
-## In progress: #48
+## Integrated ownership contract
 
-Queued actor/weapon inputs and menu previews retain immutable compiled models and animation banks. Mutable geometry
-is private to each instance; resource leases and bank extents retire at reset. Preview records and requests are owned,
-with cancellation before cleanup and foreign-record protection.
+Actor, weapon, sequence and auxiliary requests resolve destination records through their owners. Queued loads and
+previews retain immutable model definitions and animation banks; mutable geometry and playback state are private.
+Auxiliary publication follows successful completion, and cancellation precedes discard. Partial failure, foreign
+slots, occupancy, repeated entry and reset have explicit cleanup. The obsolete shared-record-slot request field is gone.
 
-Next: adopt owned requests in the auxiliary/gimmick producer, require successful completion before publication, and
-replace mutable peer-prefix sharing with immutable definitions and private geometry. Regressions already reproduce
-publication after failed loading, mutable peer geometry, and partial-creation leakage.
+Shared-model instances explicitly enter the initial queued-animation boundary without copying a peer's pose.
+Status initialization no longer relies on a previous entry's preview record. Gimmick room changes invalidate cache
+selection without freeing transition geometry; actor removal and model/session reset retire the instance bindings.
 
-Finish the producer-to-publication/removal path, cancellation/replacement, partial failure, repeated entry and
-integrated Debug/Release and controller replay verification. Remove the remaining shared-record slot request field,
-then verify all #48 acceptance criteria, publish with successful exact-revision CI, and close the issue.
+## Next
 
-Open limits: compiled SHP/WEP/SEQ rendering/playback layouts are still compatibility adapters. ETM and global material
-or shared-bank producers remain their existing integration work (#207 and the EC register), not retired by resource
-ownership. File streams remain serialized. Coordinate actor lifecycle with #55 and the handoffs in #217.
+Publish the verified #48 integration, confirm exact-revision CI, post the final acceptance evidence on the issue,
+then check the remaining criterion and close it. Do not stop at this publication checkpoint.
 
-## Cautions
+## Open limits
 
-- Keep `resources\rood-reverse` read-only.
-- Use focused checks; CI runs the tool suites and source-quality gates.
-- Preserve unrelated edits and keep disc-derived data, captures, memory dumps and BIOS files out of commits.
+Compiled SHP/WEP/SEQ rendering and playback layouts remain compatibility adapters. ETM and global material/shared-bank
+producers remain their existing integration work (#207 and the EC register); ownership does not retire their formats.
+File streams remain serialized. Remaining format and actor-lifecycle work stays under #200/#203/#205/#207/#55 and the
+handoffs in #217.
+
+Keep `resources\rood-reverse` read-only and disc-derived captures, data, dumps and BIOS files out of commits.

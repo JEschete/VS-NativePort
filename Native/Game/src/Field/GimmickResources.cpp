@@ -40,7 +40,28 @@ constexpr std::int32_t kNeutralGimmickColor = 0x808080;
 constexpr std::uint32_t kGimmickPlacementMask = 0xFFFFFF;
 constexpr unsigned kGimmickTileZShift = 16;
 
-bool InitializeGimmickPlacement(Content::ActorAssetRequest& request,
+class GimmickCreationTransaction {
+ public:
+  GimmickCreationTransaction(GimmickCreationHost& host, std::size_t slot)
+      : host_(host), slot_(slot) {}
+  ~GimmickCreationTransaction() {
+    if (!committed_) host_.Discard(slot_);
+  }
+  GimmickCreationTransaction(const GimmickCreationTransaction&) = delete;
+  GimmickCreationTransaction& operator=(const GimmickCreationTransaction&) =
+      delete;
+  GimmickCreationTransaction(GimmickCreationTransaction&&) = delete;
+  GimmickCreationTransaction& operator=(GimmickCreationTransaction&&) = delete;
+
+  void Commit() { committed_ = true; }
+
+ private:
+  GimmickCreationHost& host_;
+  std::size_t slot_;
+  bool committed_ = false;
+};
+
+bool InitializeGimmickPlacement(const Content::ActorAssetRequest& request,
                                 std::size_t slot, GimmickCreationState& state,
                                 GimmickCreationHost& host) {
   state.carrier = kNoGimmickCarrier;
@@ -96,7 +117,7 @@ bool AdjustGimmickStack(std::size_t slot, GimmickCreationState& state,
 
 // decomp: BATTLE.PRG func_8009998C (src/BATTLE/BATTLE.PRG/30DB0.c:290),248MIPS
 // publish/init/stack.
-int CreateGimmickInstance(Content::ActorAssetRequest& request,
+int CreateGimmickInstance(const Content::ActorAssetRequest& request,
                           GimmickCreationHost& host) {
   if (request.target_slot < 0) return Content::kAssetRefused;
   const auto slot =
@@ -105,17 +126,11 @@ int CreateGimmickInstance(Content::ActorAssetRequest& request,
     return Content::kAssetRefused;
   }
   if (host.Occupied(slot)) return Content::kAssetBusy;
-  if (!host.PublishDestination(slot) || !host.ClearPrefix(slot)) {
-    return Content::kAssetRefused;
-  }
-  const auto shared = FindSharedGimmickModel(host.Slots(), request.target_slot,
-                                             request.sub_kind);
-  if (shared) {
-    request.shared_record_slot = static_cast<int>(*shared);
-    if (!host.CopySharedPrefix(slot, *shared)) return Content::kAssetRefused;
-  } else if (!host.CreateModel(
-                 slot, request.sub_kind,
-                 std::min(request.sub_kind, kLastGimmickUvKind))) {
+  if (!host.PublishDestination(slot)) return Content::kAssetRefused;
+  GimmickCreationTransaction transaction(host, slot);
+  if (!host.ClearPrefix(slot) ||
+      !host.CreateModel(slot, request.sub_kind,
+                        std::min(request.sub_kind, kLastGimmickUvKind))) {
     return Content::kAssetRefused;
   }
   auto state = host.ReadState(slot);
@@ -135,11 +150,12 @@ int CreateGimmickInstance(Content::ActorAssetRequest& request,
       !AdjustGimmickStack(slot, *state, host)) {
     return Content::kAssetRefused;
   }
+  transaction.Commit();
   return Content::kAssetDone;
 }
 
 // decomp: BATTLE.PRG func_80099D6C (src/BATTLE/BATTLE.PRG/30DB0.c:399),68MIPS
-// shared/free/remove/clear.
+// free/remove/clear.
 int ReleaseGimmickInstance(std::int32_t slot,
                            std::span<const GimmickResourceSlot> slots,
                            GimmickReleaseHost& host) {
@@ -151,13 +167,7 @@ int ReleaseGimmickInstance(std::int32_t slot,
   const auto index = static_cast<std::size_t>(slot);
   const auto& released = slots[index];
   if (!released.present || released.bone_count == 0) return kRefused;
-  constexpr std::uint8_t kObjectIdMask = 7;
-  if (!FindSharedGimmickModel(
-          slots, static_cast<std::int8_t>(slot),
-          static_cast<std::uint8_t>(released.object_id & kObjectIdMask)) &&
-      !host.FreeModel(index)) {
-    return kRefused;
-  }
+  if (!host.FreeModel(index)) return kRefused;
   if (!host.RemoveOccupancy(index) || !host.ClearSlot(index)) return kRefused;
   return 0;
 }

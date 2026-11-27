@@ -1141,7 +1141,11 @@ TEST_CASE("Owned asset requests carry their tickets through the queue",
   FakeAssetHost& host = *owner;
   const Content::ActorAssetTicket first = Submit(host, 1);
   ActorAssetRequest second_request = PartRequest(2);
-  second_request.shared_record_slot = 5;
+  const std::array<std::byte, 4> geometry{};
+  const std::array<std::byte, Content::kActorTextureLayoutBytes> layout{};
+  second_request.shared_model =
+      std::make_shared<const Content::ActorModelResource>(
+          ActorWithModel(2), geometry, layout, nullptr);
   const std::optional<Content::ActorAssetTicket> submitted_second =
       Content::SubmitActorAssetRequest(host, second_request, kPreviewOwner);
   REQUIRE(submitted_second.has_value());
@@ -1154,7 +1158,7 @@ TEST_CASE("Owned asset requests carry their tickets through the queue",
   CHECK(Content::UpdateActorAssetQueue(host) == 1);
   // The shift carries the second request's identity to the head.
   CHECK(host.requests[0].model_id == 2);
-  CHECK(host.requests[0].shared_record_slot == 5);
+  CHECK(host.requests[0].shared_model == second_request.shared_model);
   CHECK(host.RequestIdentity(0).ticket == second);
 }
 
@@ -1602,13 +1606,11 @@ TEST_CASE("Shared actor model lookups retain immutable resources",
   ActorAssetRequest request = Request(ActorAssetKind::kActorModelLoad, 2, 7);
   CHECK(Content::FindSharedActorModel(host, request) == 1);
   CHECK(request.shared_model == resource);
-  CHECK_FALSE(request.shared_record_slot);
   CHECK(request.data == AssetAddress::kNone);
   request.model_id = 8;
   request.data = Address(99);
   CHECK(Content::FindSharedActorModel(host, request) == 0);
   CHECK(request.data == Address(99));
-  CHECK_FALSE(request.shared_record_slot.has_value());
 }
 
 TEST_CASE("Shared actor sequence searches use model and sequence identities",
@@ -1628,14 +1630,12 @@ TEST_CASE("Shared actor sequence searches use model and sequence identities",
     auto request = Request(ActorAssetKind::kSequenceLoad, 2, sequence);
     CHECK(Content::FindSharedActorSequence(host, request) == 1);
     CHECK(request.shared_sequence == (sequence == 0 ? common : battle));
-    CHECK_FALSE(request.shared_record_slot);
     CHECK(request.data == AssetAddress::kNone);
     Required(host.actors[2]).model_id = 8;
     request.shared_sequence.reset();
     request.data = Address(99);
     CHECK(Content::FindSharedActorSequence(host, request) == 0);
     CHECK(request.data == Address(99));
-    CHECK_FALSE(request.shared_record_slot.has_value());
   }
 }
 
@@ -1724,7 +1724,6 @@ TEST_CASE("Shared weapon resources do not depend on the source actor slot",
       request.data = data;
       CHECK(Content::FindSharedWeaponModel(host, request) == 1);
       CHECK(request.shared_weapon == resource);
-      CHECK_FALSE(request.shared_record_slot);
       CHECK(request.data == data);
     }
   }
@@ -2329,7 +2328,6 @@ TEST_CASE("Shared actor models copy immutable geometry and retain textures",
   ActorAssetRequest request = SharedModelRequest(host);
   CHECK(Content::UpdateActorModelLoad(host, state, request) == kAssetDone);
   CHECK(request.shared_model == host.actor_resources[2]);
-  CHECK_FALSE(request.shared_record_slot);
   CHECK(request.data == AssetAddress::kNone);
   CHECK(host.actor_textures[5].references == 1);
   CHECK(host.actor_textures[6].references == 1);

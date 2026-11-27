@@ -453,6 +453,7 @@ bool IsOwnableActorAssetRequest(const ActorAssetRequest& request) {
     case ActorAssetKind::kActorModelParse:
     case ActorAssetKind::kWeaponModelLoad:
     case ActorAssetKind::kWeaponModelParse:
+    case ActorAssetKind::kGimmick:
       return true;
     case ActorAssetKind::kSequenceParse:
       return request.sub_kind == kBattleSequence;
@@ -611,7 +612,6 @@ AssetAddress CopyModelGeometry(ActorAssetHost& host, AssetAddress destination,
 // decomp: BATTLE.PRG func_80099FA8 (src/BATTLE/BATTLE.PRG/30DB0.c:489)
 int FindSharedWeaponModel(const ActorAssetHost& host,
                           ActorAssetRequest& request) {
-  request.shared_record_slot.reset();
   if (request.shared_weapon &&
       request.shared_weapon->Definition().model_id != request.model_id) {
     request.shared_weapon.reset();
@@ -1488,7 +1488,15 @@ int CopySharedActorModel(ActorAssetHost& host, ActorAssetLoadState& state,
   state.model_palette_words =
       actor.is_8bit_texture ? kHeaderBitPaletteWords : kPlainPaletteWords;
   host.StoreActor(target, actor);
-  return CompleteActorModel(host, state, request);
+  const int result = CompleteActorModel(host, state, request);
+  if (result == kAssetDone) {
+    // Reused models start at the queued-animation boundary, without inheriting
+    // a mutable peer pose or waiting for the new instance's bind pose.
+    actor = host.LoadActor(target);
+    actor.animation_length = 0;
+    host.StoreActor(target, actor);
+  }
+  return result;
 }
 }  // namespace
 
@@ -1720,7 +1728,6 @@ int ParseActorModelFile(ActorAssetHost& host, ActorAssetLoadState& state,
 // decomp: BATTLE.PRG func_8009AC24 (src/BATTLE/BATTLE.PRG/30DB0.c:930)
 int FindSharedActorModel(const ActorAssetHost& host,
                          ActorAssetRequest& request) {
-  request.shared_record_slot.reset();
   if (request.shared_model &&
       request.shared_model->Definition().model_id != request.model_id) {
     request.shared_model.reset();
@@ -2255,7 +2262,6 @@ int CopySequence(ActorAssetHost& host, AssetAddress sequence,
 // (src/BATTLE/BATTLE.PRG/30DB0.c:1454)
 int FindSharedActorSequence(const ActorAssetHost& host,
                             ActorAssetRequest& request) {
-  request.shared_record_slot.reset();
   if (request.shared_sequence) return 1;
   const int target = TargetSlot(request);
   // The original reads the target's record without a check.

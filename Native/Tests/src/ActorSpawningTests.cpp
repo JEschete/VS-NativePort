@@ -46,7 +46,6 @@ using VS::test_support::Refused;
 
 constexpr std::uintptr_t kFirstHandle = 0x1000;
 constexpr std::uintptr_t kHandleStride = 0x100;
-constexpr std::uintptr_t kModelOffset = 0x10;
 constexpr std::uintptr_t kZudBase = 0x80000;
 
 SpawnedActor Handle(std::uintptr_t value) {
@@ -265,7 +264,7 @@ TEST_CASE("An equipped actor's owned records bind only into its own parts",
           .has_value());
 }
 
-TEST_CASE("Second bodies bind their records and gimmicks or strangers none",
+TEST_CASE("Second bodies and gimmicks bind only their own record tables",
           "[actors][actors-spawning][asset-ownership]") {
   actors::ActorInstanceTable handles;
   const SpawnedActor two_body = handles.Begin(2, 0x2000, kTwoBodyActor);
@@ -279,6 +278,9 @@ TEST_CASE("Second bodies bind their records and gimmicks or strangers none",
                                            ActorRecordTable::kWeapon, 4)
                   .has_value());
   const SpawnedActor gimmick = handles.Begin(5, 0x3000, kGimmickActor);
+  CHECK(actors::OwnedActorRecordPart(handles, gimmick,
+                                     ActorRecordTable::kGimmick,
+                                     5) == ActorRecordPart::kGimmick);
   CHECK_FALSE(actors::OwnedActorRecordPart(handles, gimmick,
                                            ActorRecordTable::kActor, 5)
                   .has_value());
@@ -414,6 +416,7 @@ struct FakeSpawnHost final : actors::ActorSpawnHost {
   std::vector<OwnedRequest> owned_requests;
   std::vector<SpawnedActor> queued_owners;
   std::vector<content::ActorAssetTicket> forgotten_assets;
+  std::vector<content::ActorAssetOutcome> forgotten_outcomes;
   std::vector<content::ActorAssetTicket> checked_assets;
   std::vector<SpawnedActor> discarded;
   std::vector<SpawnedActor> cancelled_owners;
@@ -427,6 +430,7 @@ struct FakeSpawnHost final : actors::ActorSpawnHost {
   int owned_submit_attempts = 0;
   int refuse_owned_submit_at = -1;
   int fail_owned_completion_at = -1;
+  int pending_owned_completion_at = -1;
   content::ActorAssetCompletions owned_completions;
   int ai_result = 0;
   int roll = 10;
@@ -491,9 +495,6 @@ struct FakeSpawnHost final : actors::ActorSpawnHost {
     if (!refuse_install) {
       table.at(slot) = actor;
     }
-  }
-  AssetAddress ModelAddress(SpawnedActor actor) const override {
-    return At(Raw(actor) + kModelOffset);
   }
   void SetEquippedWeaponCategory(SpawnedActor /*actor*/,
                                  std::uint8_t category) override {
@@ -650,6 +651,7 @@ struct FakeSpawnHost final : actors::ActorSpawnHost {
   }
   void ForgetAsset(content::ActorAssetTicket ticket) override {
     forgotten_assets.push_back(ticket);
+    forgotten_outcomes.push_back(owned_completions.Find(ticket).outcome);
     owned_completions.Forget(ticket);
   }
   bool CancelOwnedAssets(SpawnedActor actor) override {
@@ -671,6 +673,7 @@ struct FakeSpawnHost final : actors::ActorSpawnHost {
   void UpdateAssetQueue() override {
     busy = false;
     for (std::size_t i = 0; i < owned_requests.size(); ++i) {
+      if (static_cast<int>(i) == pending_owned_completion_at) continue;
       const content::ActorAssetOutcome outcome =
           static_cast<int>(i) == fail_owned_completion_at
               ? content::ActorAssetOutcome::kFailed
@@ -1064,7 +1067,6 @@ TEST_CASE("A gimmick actor takes the first free slot and queues its model",
   expected.target_slot = 3;
   expected.placement = actors::PackPlacement(
       {.tile_x = 1, .surface = 1, .tile_z = 2, .facing = 3});
-  expected.destination = At(kFirstHandle + kModelOffset);
   expected.sub_kind = 0x34;
   expected.texture_slot = 0x12;
   expected.material = 7;
@@ -1076,6 +1078,9 @@ TEST_CASE("A gimmick actor takes the first free slot and queues its model",
                                  "Install 3", "Placeholder 3 4660",
                                  "AiState 3 -1", "Display 3 0x1846"});
   CHECK(host.refusals.empty());
+  CHECK(host.owned_requests.size() == 1);
+  CHECK(host.forgotten_outcomes ==
+        std::vector{content::ActorAssetOutcome::kLoaded});
 }
 
 TEST_CASE("A gimmick actor is refused without a slot or an allocation",
@@ -1115,6 +1120,51 @@ TEST_CASE("A gimmick actor is refused in an occupied slot or outside the table",
         SpawnedActor::kNone);
   CHECK(outside.refusals == std::vector{SpawnRefusal::kActorSlot});
   CHECK(outside.log.empty());
+}
+
+TEST_CASE("Auxiliary actors require a loaded request before publication",
+          "[actors][actors-spawning][auxiliary-ownership]") {
+  for (const bool submission : {true, false}) {
+    FakeSpawnHost host;
+    if (submission) {
+      host.refuse_owned_submit_at = 0;
+    } else {
+      host.fail_owned_completion_at = 0;
+    }
+    CHECK(actors::CreateAuxiliaryActor(host, 2, 1, {}, 0) ==
+          SpawnedActor::kNone);
+    CHECK(host.table.at(2) == SpawnedActor::kNone);
+    CHECK(host.discarded == std::vector{Handle(kFirstHandle)});
+    CHECK(host.cancelled_owners == std::vector{Handle(kFirstHandle)});
+    CHECK(host.refusals == std::vector{SpawnRefusal::kAssetQueue});
+    CHECK(std::ranges::none_of(host.log, [](const std::string& entry) {
+      return entry.starts_with("Placeholder ") || entry.starts_with("AiState ");
+    }));
+  }
+}
+
+TEST_CASE("Auxiliary actors discard a loaded model if publication is refused",
+          "[actors][actors-spawning][auxiliary-ownership]") {
+  FakeSpawnHost host;
+  host.refuse_install = true;
+  CHECK(actors::CreateAuxiliaryActor(host, 2, 1, {}, 0) == SpawnedActor::kNone);
+  CHECK(host.table.at(2) == SpawnedActor::kNone);
+  CHECK(host.discarded == std::vector{Handle(kFirstHandle)});
+  CHECK(host.forgotten_assets.size() == 1);
+  CHECK(std::ranges::none_of(host.log, [](const std::string& entry) {
+    return entry.starts_with("Placeholder ") || entry.starts_with("AiState ");
+  }));
+}
+
+TEST_CASE("Auxiliary actors cancel pending tickets before forgetting them",
+          "[actors][actors-spawning][auxiliary-ownership]") {
+  FakeSpawnHost host;
+  host.pending_owned_completion_at = 0;
+  CHECK(actors::CreateAuxiliaryActor(host, 2, 1, {}, 0) == SpawnedActor::kNone);
+  CHECK(host.table.at(2) == SpawnedActor::kNone);
+  CHECK(host.discarded == std::vector{Handle(kFirstHandle)});
+  CHECK(host.forgotten_outcomes ==
+        std::vector{content::ActorAssetOutcome::kCancelled});
 }
 
 namespace {

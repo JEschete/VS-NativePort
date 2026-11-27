@@ -43,6 +43,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/GimmickDynamicsLive.hpp"
+#include "Field/GimmickResourcesLive.hpp"
 #include "Field/Gimmicks.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/ModelDraw.hpp"
@@ -640,6 +641,7 @@ void InitializeLiveActorModelResources() {
   VS::Actors::forcedModelOverrides = 0;
   VS::Content::ClearLiveActorAssetQueue();
   VS::Content::ResetLiveActorAssetResources();
+  VS::Field::ResetLiveGimmickResources();
   for (std::size_t slot = 0; slot < kInitializedActorTextureSlots; ++slot) {
     const TextureSlotIds ids = ActorTextureSlotIds(
         slot, SlotOriginHalfword(slot, 0), SlotOriginHalfword(slot, 1));

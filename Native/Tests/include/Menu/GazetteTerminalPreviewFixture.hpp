@@ -208,7 +208,6 @@ class PreviewFixture : public TerminalFixture {
         .model_id = header->character_id,
         .destination = Address(source_record_),
         .data = Address(source_file_ + header->shape.offset),
-        .shared_record_slot = {},
         .sub_kind = 0xFF,
         .material = header->default_material};
     if (content::QueueLiveActorAsset(model) < 0) {
@@ -225,8 +224,7 @@ class PreviewFixture : public TerminalFixture {
               content::ActorAssetKind::kSequenceParse),
           .target_slot = 0,
           .model_id = model_id,
-          .data = Address(source_file_ + section.offset),
-          .shared_record_slot = {}};
+          .data = Address(source_file_ + section.offset)};
       if (content::QueueLiveActorAsset(sequence) < 0) {
         throw std::runtime_error(
             "terminal source sequence request was refused");

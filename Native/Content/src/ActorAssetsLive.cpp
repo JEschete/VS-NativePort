@@ -16,6 +16,7 @@
 #include <expected>
 #include <format>
 #include <iterator>
+#include <limits>
 #include <memory>
 #include <optional>
 #include <ranges>
@@ -454,7 +455,6 @@ ActorAssetRequest LoadRequest(const LegacyActorAssetRequest& in) {
       .model_id = in.model_id,
       .destination = Address(in.destination),
       .data = static_cast<AssetAddress>(in.data_address),
-      .shared_record_slot = std::nullopt,
       .placement = in.placement,
       .sub_kind = in.sub_kind,
       .texture_slot = in.texture_slot,
@@ -826,12 +826,14 @@ struct FileReadState {
   std::uint64_t generation = 0;
 };
 
+constexpr std::size_t kAssetFileStreamCount = 4;
+
 struct QueuedAssetState {
   ActorAssetIdentity identity;
   ActorRecordMemory memory = nullptr;
   std::optional<ActorAssetRequest> request;
   ActorAssetLoadState loader;
-  std::array<FileReadState, 4> reads;
+  std::array<FileReadState, kAssetFileStreamCount> reads;
   bool loader_state_initialized = false;
   bool target_validated = false;
 };
@@ -865,10 +867,10 @@ bool ReadFailed(const FileReadState& read) {
 
 void PublishRequestSnapshot(const QueuedAssetState& state) {
   PublishLoaderSnapshot(state.loader);
-  constexpr std::array streams{
+  constexpr std::array kStreams{
       AssetFileStream::kWeapon, AssetFileStream::kActorModel,
       AssetFileStream::kSequence, AssetFileStream::kEffectTexture};
-  for (const AssetFileStream stream : streams) {
+  for (const AssetFileStream stream : kStreams) {
     const FileReadState& read = state.reads[static_cast<std::size_t>(stream)];
     const LiveFileStream snapshot = SnapshotStream(stream);
     *snapshot.file = {read.file.sector, read.file.bytes};
@@ -887,10 +889,12 @@ VS::Render::TextureSlot* TextureSlotAt(AssetTextureTable table, int index) {
              : nullptr;
 }
 
+constexpr std::size_t kActorSequenceKindCount = 4;
+
 struct ActorResourceBinding {
   const Actors::ActorRecord* record = nullptr;
   ActorModelResourceRef model{};
-  std::array<ActorSequenceResourceRef, 4> sequences{};
+  std::array<ActorSequenceResourceRef, kActorSequenceKindCount> sequences{};
 };
 
 struct WeaponResourceBinding {
@@ -930,7 +934,8 @@ bool AdjustResourceTextures(AssetTextureTable table, int first, int count,
   for (int i = first; i < first + count; ++i) {
     const auto* slot = TextureSlotAt(table, i);
     if (slot == nullptr || int{slot->reference_count} + adjustment < 0 ||
-        int{slot->reference_count} + adjustment > 255) {
+        int{slot->reference_count} + adjustment >
+            std::numeric_limits<std::uint8_t>::max()) {
       CountRefusal("immutable resource texture lease", i);
       return false;
     }
@@ -1083,7 +1088,10 @@ class LiveActorAssetHost final : public ActorAssetHost {
       return AbandonHeadRequest(kind) ? kAssetRefused : kAssetPending;
     }
     if (kind == ActorAssetKind::kGimmick) {
-      const auto result = VS::Field::CreateLiveGimmickInstance(request);
+      auto* destination = Pointer<VS::Field::GimmickInstance>(RecordMemory(
+          ActorRecordTable::kGimmick, request.target_slot, request));
+      const auto result =
+          VS::Field::CreateLiveGimmickInstance(request, destination);
       StoreRequestFields(request, head);
       return result;
     }
@@ -1639,7 +1647,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
   }
 
   bool RetainLoadedResource(const ActorAssetRequest& request) {
-    const int slot = request.target_slot;
+    const auto slot = request.target_slot;
     const auto kind = static_cast<ActorAssetKind>(request.kind);
     if (kind == ActorAssetKind::kActorModelLoad ||
         kind == ActorAssetKind::kActorModelParse) {
@@ -1841,12 +1849,22 @@ class LiveActorAssetHost final : public ActorAssetHost {
     const auto kind = static_cast<ActorAssetKind>(request.kind);
     const bool weapon = kind == ActorAssetKind::kWeaponModelLoad ||
                         kind == ActorAssetKind::kWeaponModelParse;
-    const auto table =
-        weapon ? ActorRecordTable::kWeapon : ActorRecordTable::kActor;
-    const int slot = request.target_slot;
+    const bool gimmick = kind == ActorAssetKind::kGimmick;
+    const auto table = gimmick  ? ActorRecordTable::kGimmick
+                       : weapon ? ActorRecordTable::kWeapon
+                                : ActorRecordTable::kActor;
+    const auto slot = request.target_slot;
     const AssetAddress expected = RecordMemory(table, slot, request);
-    const AssetAddress present =
-        weapon ? Address(WeaponAt(slot)) : Address(ActorAt(slot));
+    AssetAddress present = AssetAddress::kNone;
+    if (gimmick) {
+      if (!InRange(slot, static_cast<int>(VS::Field::kGimmickResourceSlots))) {
+        CountRefusal("owned gimmick slot", slot);
+        return false;
+      }
+      present = Address(VS::Field::gimmickInstances[slot]);
+    } else {
+      present = weapon ? Address(WeaponAt(slot)) : Address(ActorAt(slot));
+    }
     if (expected == AssetAddress::kNone ||
         (present != AssetAddress::kNone && present != expected)) {
       CountRefusal("asset target no longer belongs to its owner", slot);
@@ -2049,10 +2067,20 @@ void ResetLiveActorAssetResources() {
     const auto& binding = resources.actors[slot];
     auto* actor = ActorAt(slot);
     if (actor == nullptr || binding.record != actor) continue;
-    if (binding.sequences[0]) actor->owned_sequence = nullptr;
-    if (binding.sequences[1]) actor->common_sequence = nullptr;
-    if (binding.sequences[2]) actor->battle_sequence = nullptr;
-    if (binding.sequences[3]) {
+    if (binding.sequences[static_cast<std::size_t>(
+            ActorSequenceKind::kEmbedded)]) {
+      actor->owned_sequence = nullptr;
+    }
+    if (binding
+            .sequences[static_cast<std::size_t>(ActorSequenceKind::kCommon)]) {
+      actor->common_sequence = nullptr;
+    }
+    if (binding
+            .sequences[static_cast<std::size_t>(ActorSequenceKind::kBattle)]) {
+      actor->battle_sequence = nullptr;
+    }
+    if (binding
+            .sequences[static_cast<std::size_t>(ActorSequenceKind::kSpecial)]) {
       actor->shared_sequences[kSpecialSequenceRef] = nullptr;
     }
   }
