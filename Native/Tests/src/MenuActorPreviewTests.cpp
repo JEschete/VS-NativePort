@@ -422,6 +422,20 @@ TEST_CASE("Cloning the current preview preserves its existing owner",
   CHECK(host.refusals.empty());
 }
 
+TEST_CASE("Actor preview copies the sequences of the record it cloned",
+          "[menu][menu-rows-details][menu-actor-preview]") {
+  FakePreview host;
+  SetCloneSource(host);
+  host.on_pump = [](FakePreview& current) {
+    current.actor_blocks[3] = Block(0x9000);
+  };
+  REQUIRE(fw::CloneActorPreview(host, 3));
+  CHECK(host.actor_blocks[3] == Block(0x9000));
+  REQUIRE_FALSE(host.calls.empty());
+  CHECK(host.calls.back() == "CopySequences(4096,12288,0)");
+  CHECK(host.refusals.empty());
+}
+
 TEST_CASE("A refused preview part cleans up earlier submissions",
           "[menu-actor-preview][asset-ownership]") {
   FakePreview host;
