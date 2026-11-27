@@ -1884,7 +1884,12 @@ int func_800F9800(void) {
         self.assertIn("VS::Render::ForgetLiveModelExtent(record_->model);", gimmick_resources)
         self.assertLess(gimmick_resources.index("VS::Render::ForgetLiveModelExtent(record_->model);"),
                 gimmick_resources.index("VS::Core::Memory::FreeLiveFromLowEnd(record_->model);"))
-        self.assertIn("host.RecordModelCopy(model.geometry, original, kWeaponGeometryBytes);", assets)
+        self.assertIn("host.BindWeaponResource(target, request.shared_weapon)", assets)
+        weapon_bind = assets_live.split("bool BindWeaponResource(", 1)[1].split(
+            "void WriteWeaponBones(", 1
+        )[0]
+        self.assertIn("const auto bytes = resource->Geometry();", weapon_bind)
+        self.assertIn("RecordModelGeometry(geometry, bytes.size());", weapon_bind)
         self.assertIn("host.ForgetModelGeometry(model.geometry);", assets)
         self.assertIn("Render::RecordLiveModelCopy(Pointer(destination), Pointer(source),", assets_live)
         self.assertIn("Render::ForgetLiveModelExtent(Pointer(model));", assets_live)
