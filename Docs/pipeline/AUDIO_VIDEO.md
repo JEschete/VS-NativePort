@@ -168,6 +168,9 @@ attached to issues.
 - **Runtime (`Engine\Movie`):**
   - Matroska demux: libwebm `mkvparser`, BSD.
   - AV1 decode: **dav1d**, BSD.
-  - FLAC decode: dr_flac or libFLAC.
-  - The YUV planes are uploaded to an SDL3 GPU texture and converted in a shader. Presentation is clocked to the audio, and skipping is the game's original behavior.
+  - FLAC decode: dr_flac over the incremental Matroska audio track.
+  - `PlaybackSession` owns the decoders and exposes a move-only session, a typed RGBA frame view and audio-clock status. The live title intro is the current consumer.
+  - The audio source queue is capped at 100 ms. With real-time output, consumed source frames drive the presentation clock. No-device playback uses logical ticks; a lost or stalled source switches to a monotonic fallback from the last audio position.
+  - AV1 YUV is converted to session-owned RGBA on the CPU; the desktop host copies that frame into its presentation buffer and uses the existing GPU image path. Movie frames no longer use page space.
+  - The intro has no pause or seek operation. Skipping stops picture presentation, but the title host continues pumping audio without decoding video through the original 4401-tick soundtrack tail. Explicit close/interruption releases the source; a new session starts at the beginning. A device restored after failure is used only by a new session.
 - **Validation:** frame N of the decoded MKV against a jpsxdec decode of the same frame, with a PSNR threshold of ≥ 45 dB (near-lossless), for the first 60 frames and every 300th frame after that. The disc-corpus test checks only that the MKV keeps every frame FFmpeg's `psxstr` demuxer completes from the STR, at 15 frames a second; the PSNR comparison is not yet a test.

@@ -31,7 +31,7 @@
 #include "Input/ControllerLive.hpp"
 #include "Input/Pad.hpp"
 #include "Legacy/Psx.hpp"
-#include "Movie/MoviePlayer.hpp"
+#include "Movie/IntroPlayerLive.hpp"
 #include "Platform/App.hpp"
 #include "Platform/CrashHandler.hpp"
 #include "Platform/GameFiber.hpp"
@@ -636,7 +636,7 @@ class LiveSession {
         {{"ticks", ticks_}, {"encounter_interrupted", fiber_ != nullptr}},
         ticks_);
     ReleaseEncounter();
-    VS::Movie::PlayerClose();
+    VS::Movie::Intro::StopLive();
     return rejected_ || sequence_failed_ || sequence_cancelled_ ? 2 : 0;
   }
 

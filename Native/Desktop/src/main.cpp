@@ -25,7 +25,7 @@
 #include "Diagnostics/GameplayTrace.hpp"
 #include "Input/Bindings.hpp"
 #include "Input/Pad.hpp"
-#include "Movie/MoviePlayer.hpp"
+#include "Movie/IntroPlayerLive.hpp"
 #include "Platform/App.hpp"
 #include "Platform/CrashHandler.hpp"
 #include "Platform/Paths.hpp"
@@ -438,7 +438,22 @@ struct PresentedFrame {
   std::vector<u32> pixels;
   i32 width = 0;
   i32 height = 0;
+  float aspect = Render::Device::kDefaultDisplayAspect;
 };
+
+bool UpdatePresentedFrame(PresentedFrame& frame) {
+  const auto movie = VS::Movie::Intro::CurrentVideoFrame();
+  if (!movie.rgba.empty()) {
+    frame.pixels.assign(movie.rgba.begin(), movie.rgba.end());
+    frame.width = movie.width;
+    frame.height = movie.height;
+    frame.aspect =
+        static_cast<float>(movie.width) / static_cast<float>(movie.height);
+    return true;
+  }
+  frame.aspect = Render::Device::kDefaultDisplayAspect;
+  return Render::GamePages().Present(frame.pixels, frame.width, frame.height);
+}
 
 // Reads the player's key and gamepad bindings. A rejected file leaves the
 // defaults in force; the player hears why from the log, or from a warning in a
@@ -495,8 +510,7 @@ bool RunLogicalTick(Game::GameApp& game, Input::InputSystem& input,
       throw std::runtime_error("detailed gameplay trace failed");
     }
   }
-  const bool shown =
-      Render::GamePages().Present(frame.pixels, frame.width, frame.height);
+  const bool shown = UpdatePresentedFrame(frame);
   if (trace_frames) {
     VS::Core::LogTrace("frame", "end tick; presented={}, image={}x{}", shown,
                        frame.width, frame.height);
@@ -538,7 +552,7 @@ int RunGame(const RunSettings& settings, Game::GameplayTrace* trace) {
     VS::Core::LogWarn("boot", "{} (continuing without audio)", r.error());
   }
   struct MovieScope {
-    ~MovieScope() { VS::Movie::PlayerClose(); }
+    ~MovieScope() { VS::Movie::Intro::StopLive(); }
   } movie_scope;
 
   Input::InputSystem input;
@@ -576,11 +590,11 @@ int RunGame(const RunSettings& settings, Game::GameplayTrace* trace) {
       shown = RunLogicalTick(game, input, watchdog, settings, trace, frame);
     }
     if (ticks == 0) {
-      shown =
-          Render::GamePages().Present(frame.pixels, frame.width, frame.height);
+      shown = UpdatePresentedFrame(frame);
     }
     if (shown) {
-      gpu.PresentImage(frame.pixels.data(), frame.width, frame.height);
+      gpu.PresentImage(frame.pixels.data(), frame.width, frame.height,
+                       frame.aspect);
     } else {
       gpu.PresentClear({0.0f, 0.0f, 0.0f, 1.0f});
     }

@@ -1,14 +1,19 @@
+#include <SDL3/SDL.h>
+
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <bit>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
+#include <expected>
 #include <filesystem>
 #include <fstream>
 #include <memory>
+#include <optional>
 #include <span>
 #include <string>
 #include <string_view>
@@ -22,6 +27,7 @@
 #include "Actors/ActorRecord.hpp"
 #include "Actors/Animation.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
+#include "Audio/AudioDevice.hpp"
 #include "Audio/Seq/Sequencer.hpp"
 #include "Battle/Damage.hpp"
 #include "Content/ActorAssetsLive.hpp"
@@ -736,6 +742,8 @@ namespace {
 struct MovieScope {
   std::vector<u16> pixels;
   std::filesystem::path temporary;
+  std::optional<VS::Movie::PlaybackSession> session;
+
   ~MovieScope() {
     try {
       Restore();
@@ -744,7 +752,7 @@ struct MovieScope {
     }
   }
   void Restore() {
-    VS::Movie::PlayerClose();
+    session.reset();
     Render::GamePages().Upload(
         {0, 0, Render::PageSpace::Width, Render::PageSpace::Height},
         pixels.data());
@@ -757,49 +765,261 @@ struct MovieScope {
       }
     }
   }
+
+  std::filesystem::path CopyToUnicodeRoot(const std::filesystem::path& root) {
+    temporary =
+        std::filesystem::temp_directory_path() /
+        ("vs-movie-" +
+         std::to_string(
+             std::chrono::steady_clock::now().time_since_epoch().count()));
+    temporary += L" spaces-\u6E2C\u8A66";
+    std::filesystem::create_directories(temporary / "disc" / "MOV");
+    std::filesystem::copy_file(root / Content::DataStore::ManifestName,
+                               temporary / Content::DataStore::ManifestName);
+    std::filesystem::copy_file(root / "disc" / "MOV" / "TITLE.STR.mkv",
+                               temporary / "disc" / "MOV" / "TITLE.STR.mkv");
+    return temporary;
+  }
+
+  std::expected<VS::Movie::PlaybackFrame, std::string> Update(
+      std::uint32_t elapsed_ticks) {
+    auto opened = VS::Movie::PlaybackSession::Open("MOV/TITLE.STR");
+    if (!opened) return std::unexpected(opened.error());
+    session.emplace(std::move(*opened));
+    return session->Update(elapsed_ticks);
+  }
+};
+
+std::filesystem::path MovieDataRoot() {
+  const auto cue = FindRepoDisc();
+  return cue.empty() ? std::filesystem::path{}
+                     : cue.parent_path().parent_path() / "Native" / "data";
+}
+
+bool HasConvertedMovie(const std::filesystem::path& root) {
+  return !root.empty() &&
+         std::filesystem::exists(root / "disc/MOV/TITLE.STR.mkv");
+}
+
+std::expected<VS::Movie::PlaybackFrame, std::string> WaitForAudioClock(
+    VS::Movie::PlaybackSession& session) {
+  for (int waited_ms = 0; waited_ms < 1500; waited_ms += 5) {
+    SDL_Delay(5);
+    auto audio = session.PumpAudio(0);
+    if (!audio) return std::unexpected(audio.error());
+    if (audio->queued_frames >
+        static_cast<std::uint64_t>(audio->sample_rate) / 10U) {
+      return std::unexpected("movie audio queue exceeded 100 ms");
+    }
+    if (audio->consumed_frames >=
+        static_cast<std::uint64_t>(audio->sample_rate)) {
+      return session.Update(0);
+    }
+  }
+  return std::unexpected("movie audio clock did not consume one second");
+}
+
+void CheckMovieFrameShape(const VS::Movie::PlaybackFrame& frame) {
+  CHECK(frame.video.width == 320);
+  CHECK(frame.video.height == 224);
+  CHECK(frame.video.rgba.size() == static_cast<usize>(frame.video.width) *
+                                       static_cast<usize>(frame.video.height));
+  CHECK(frame.video.stride_pixels == frame.video.width);
+}
+
+void CheckMovieFrameTiming(const VS::Movie::PlaybackFrame& frame,
+                           u16 original_page_pixel) {
+  CHECK((frame.clock_source == VS::Movie::ClockSource::kLogicalTicks &&
+         !frame.audio.audible));
+  CHECK(frame.audio.total_frames > 0);
+  CHECK(frame.audio.queued_frames <=
+        static_cast<std::uint64_t>(frame.audio.sample_rate) / 10U);
+  CHECK(frame.video.presentation_time_ns <= frame.presentation_time_ns);
+  CHECK(frame.presentation_time_ns - frame.video.presentation_time_ns <=
+        100'000'000);
+  CHECK(Render::GamePages().At(0, 0) == original_page_pixel);
+}
+
+void CheckAudioClockFrame(const VS::Movie::PlaybackFrame& frame) {
+  CHECK((frame.clock_source == VS::Movie::ClockSource::kAudioSamples &&
+         frame.audio.audible && frame.audio.consumed_frames > 0));
+  CHECK(frame.audio.queued_frames <=
+        static_cast<std::uint64_t>(frame.audio.sample_rate) / 10U);
+  CHECK((frame.video.presentation_time_ns <= frame.presentation_time_ns &&
+         frame.presentation_time_ns - frame.video.presentation_time_ns <=
+             100'000'000));
+}
+
+void CheckFallbackFrame(const VS::Movie::PlaybackFrame& frame) {
+  CHECK((frame.clock_source == VS::Movie::ClockSource::kRealtimeFallback &&
+         !frame.audio.audible));
+}
+
+void CheckRestartedMovieFrame(const VS::Movie::PlaybackFrame& frame) {
+  CHECK((frame.clock_source == VS::Movie::ClockSource::kAudioSamples &&
+         frame.audio.audible));
+}
+
+void CheckMovieDeviceLossAndReopen(VS::Movie::PlaybackSession& session,
+                                   VS::Audio::AudioDevice& device) {
+  device.Close();
+  REQUIRE(device.Open());
+  auto failed_device_update = session.Update(0);
+  REQUIRE(failed_device_update.has_value());
+  CheckFallbackFrame(*failed_device_update);
+
+  session.Close();
+  CHECK_FALSE(session.Update(0).has_value());
+  auto reopened = VS::Movie::PlaybackSession::Open("MOV/TITLE.STR");
+  if (!reopened) FAIL(reopened.error());
+  auto restarted = reopened->Update(0);
+  REQUIRE(restarted.has_value());
+  CheckRestartedMovieFrame(*restarted);
+}
+
+struct MovieAudioOutput {
+  std::optional<std::string> previous_driver;
+  const bool owns_subsystem = SDL_WasInit(SDL_INIT_AUDIO) == 0;
+  VS::Audio::AudioDevice device;
+  std::unique_ptr<SDL_AudioStream,
+                  decltype(&VS::Audio::AudioDevice::CloseSource)>
+      probe_stream{nullptr, VS::Audio::AudioDevice::CloseSource};
+  SDL_AudioDeviceID probe_device = 0;
+  std::atomic<bool> non_silent_output = false;
+
+  MovieAudioOutput() {
+    if (owns_subsystem) {
+      if (const char* driver = SDL_GetHint(SDL_HINT_AUDIO_DRIVER)) {
+        previous_driver = driver;
+      }
+      REQUIRE(SDL_SetHint(SDL_HINT_AUDIO_DRIVER, "dummy"));
+      REQUIRE(SDL_InitSubSystem(SDL_INIT_AUDIO));
+    }
+    REQUIRE(VS::Audio::AudioDevice::Primary() == nullptr);
+    REQUIRE(device.Open());
+  }
+
+  void AttachProbe() {
+    probe_stream.reset(device.OpenSource(37800, 2));
+    REQUIRE(probe_stream != nullptr);
+    probe_device = SDL_GetAudioStreamDevice(probe_stream.get());
+    REQUIRE(probe_device != 0);
+    REQUIRE(SDL_SetAudioPostmixCallback(probe_device, ObserveOutput, this));
+  }
+
+  bool DetachProbe() {
+    if (probe_device == 0) return true;
+    const bool detached =
+        SDL_SetAudioPostmixCallback(probe_device, nullptr, nullptr);
+    probe_device = 0;
+    probe_stream.reset();
+    return detached;
+  }
+
+  bool HasNonSilentOutput() const {
+    return non_silent_output.load(std::memory_order_relaxed);
+  }
+
+  ~MovieAudioOutput() {
+    if (probe_device != 0 &&
+        !SDL_SetAudioPostmixCallback(probe_device, nullptr, nullptr)) {
+      std::fputs("movie audio probe could not detach\n", stderr);
+      std::abort();
+    }
+    probe_device = 0;
+    probe_stream.reset();
+    device.Close();
+    if (owns_subsystem) {
+      SDL_QuitSubSystem(SDL_INIT_AUDIO);
+      SDL_ResetHint(SDL_HINT_AUDIO_DRIVER);
+      if (previous_driver &&
+          !SDL_SetHint(SDL_HINT_AUDIO_DRIVER, previous_driver->c_str())) {
+        std::fputs("audio driver hint could not be restored\n", stderr);
+        std::abort();
+      }
+    }
+  }
+
+  static void SDLCALL ObserveOutput(void* context, const SDL_AudioSpec* spec,
+                                    float* data, int bytes) {
+    if (spec == nullptr || data == nullptr || bytes <= 0) return;
+    auto& output = *static_cast<MovieAudioOutput*>(context);
+    const auto sample_count = static_cast<std::size_t>(bytes) / sizeof(float);
+    for (std::size_t sample = 0; sample < sample_count; ++sample) {
+      if (data[sample] > 0.0001f || data[sample] < -0.0001f) {
+        output.non_silent_output.store(true, std::memory_order_relaxed);
+        return;
+      }
+    }
+  }
 };
 }  // namespace
 
 TEST_CASE("Converted intro movie decodes without changing page ownership",
           "[content][movie][disc]") {
-  const auto cue = FindRepoDisc();
-  const auto root = cue.parent_path().parent_path() / "Native" / "data";
-  if (cue.empty() ||
-      !std::filesystem::exists(root / "disc/MOV/TITLE.STR.mkv")) {
+  const auto root = MovieDataRoot();
+  if (!HasConvertedMovie(root)) {
     SKIP("Converted intro movie is unavailable");
   }
   const bool unicode_path = GENERATE(false, true);
   Content::DataStore::ScopedOverride restore;
   MovieScope scope{{Render::GamePages().Pixels().begin(),
                     Render::GamePages().Pixels().end()},
-                   {}};
-  auto selected_root = root;
-  if (unicode_path) {
-    scope.temporary =
-        std::filesystem::temp_directory_path() /
-        ("vs-movie-" +
-         std::to_string(
-             std::chrono::steady_clock::now().time_since_epoch().count()));
-    scope.temporary += L" spaces-\u6E2C\u8A66";
-    std::filesystem::create_directories(scope.temporary / "disc" / "MOV");
-    std::filesystem::copy_file(
-        root / Content::DataStore::ManifestName,
-        scope.temporary / Content::DataStore::ManifestName);
-    std::filesystem::copy_file(
-        root / "disc" / "MOV" / "TITLE.STR.mkv",
-        scope.temporary / "disc" / "MOV" / "TITLE.STR.mkv");
-    selected_root = scope.temporary;
-  }
+                   {},
+                   std::nullopt};
+  const auto selected_root =
+      unicode_path ? scope.CopyToUnicodeRoot(root) : root;
   REQUIRE(Content::DataStore::Open(selected_root).has_value());
   Render::GamePages().Fill(
       {0, 0, Render::PageSpace::Width, Render::PageSpace::Height}, 255, 0, 255);
   const u16 before = Render::GamePages().At(0, 0);
-  REQUIRE(VS::Movie::PlayerOpen("MOV/TITLE.STR") == 1);
-  REQUIRE(VS::Movie::PlayerDrawFrame(300, 0, 0) == 1);
-  CHECK(std::ranges::any_of(Render::GamePages().Pixels(),
-                            [before](u16 pixel) { return pixel != before; }));
-  VS::Movie::PlayerClose();
-  CHECK(VS::Movie::PlayerDrawFrame(301, 0, 0) == 0);
+  auto frame = scope.Update(600);
+  if (!frame) FAIL(frame.error());
+  CheckMovieFrameShape(*frame);
+  CheckMovieFrameTiming(*frame, before);
+}
+
+TEST_CASE("Movie session rejects a truncated converted asset during startup",
+          "[content][movie][disc]") {
+  const auto root = MovieDataRoot();
+  if (!HasConvertedMovie(root)) {
+    SKIP("Converted intro movie is unavailable");
+  }
+  Content::DataStore::ScopedOverride restore;
+  MovieScope scope{{Render::GamePages().Pixels().begin(),
+                    Render::GamePages().Pixels().end()},
+                   {},
+                   std::nullopt};
+  const auto truncated_root = scope.CopyToUnicodeRoot(root);
+  std::filesystem::resize_file(
+      truncated_root / "disc" / "MOV" / "TITLE.STR.mkv", 64);
+  REQUIRE(Content::DataStore::Open(truncated_root).has_value());
+
+  auto opened = VS::Movie::PlaybackSession::Open("MOV/TITLE.STR");
+  CHECK_FALSE(opened.has_value());
+  if (!opened) CHECK_FALSE(opened.error().empty());
+}
+
+TEST_CASE("Movie session follows audio output and recovers after device loss",
+          "[content][movie][audio][disc]") {
+  const auto root = MovieDataRoot();
+  if (!HasConvertedMovie(root)) {
+    SKIP("Converted intro movie is unavailable");
+  }
+  Content::DataStore::ScopedOverride restore;
+  REQUIRE(Content::DataStore::Open(root).has_value());
+  MovieAudioOutput output;
+  output.AttachProbe();
+  auto opened = VS::Movie::PlaybackSession::Open("MOV/TITLE.STR");
+  if (!opened) FAIL(opened.error());
+  auto session = std::move(*opened);
+
+  auto frame = WaitForAudioClock(session);
+  if (!frame) FAIL(frame.error());
+  CheckAudioClockFrame(*frame);
+  CHECK(output.HasNonSilentOutput());
+  REQUIRE(output.DetachProbe());
+  CheckMovieDeviceLossAndReopen(session, output.device);
 }
 
 TEST_CASE(

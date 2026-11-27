@@ -56,6 +56,9 @@ the former `Legacy/Movie/LibPress.cpp`, Render and Audio interfaces; EC-04/08.
 **Gate:** decoded picture/audio, duration, synchronization, skip and tail behavior pass. Black placeholders or bypassing
 the intro cannot satisfy the movie gate. Delete unused MDEC-facing dependencies as consumers migrate.
 
+**Verified title adoption:** #53 adopts an owned streaming session, bounded audio-clock presentation and GPU frame
+output for the title movie. Other movie-asset parity checks and broader compatibility retirement remain separate.
+
 ### M7 — One complete field and actor slice
 
 **Scope/files:** `Game/Field`, `Actors`, `Event`, `State`, Content room/model/animation decoders and required renderer;

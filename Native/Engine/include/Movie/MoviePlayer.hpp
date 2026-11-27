@@ -1,19 +1,71 @@
 #pragma once
 
-namespace VS::Movie {
-// The game's movies (TITLE.STR, MOV\*.STR) for copied and owned C code.
-// VS.Extract converts each STR into a Matroska file (AV1 video, FLAC audio)
-// under the extracted data; the player decodes it and writes the picture into
-// the page space where the original's MDEC output went, and plays the
-// soundtrack through the audio device.
+#include <cstdint>
+#include <expected>
+#include <memory>
+#include <span>
+#include <string>
+#include <string_view>
 
-// Opens the converted movie for a disc path ("MOV/TITLE.STR") and starts its
-// soundtrack. Returns 0 if it is not available (logged); the other calls then
-// do nothing.
-int PlayerOpen(const char* disc_path);
-// Draws the frame due `ticks` (1/60 s) after the start as 24-bit pixels at (x,
-// y) in the page space. Returns 0 once the picture has ended.
-int PlayerDrawFrame(int ticks, int x, int y);
-// Stops picture and soundtrack.
-void PlayerClose();
+#include "Core/Types.hpp"
+
+namespace VS::Movie {
+
+enum class ClockSource : std::uint8_t {
+  kAudioSamples,
+  kLogicalTicks,
+  kRealtimeFallback,
+};
+
+struct VideoFrameView {
+  std::span<const u32> rgba;
+  i32 width = 0;
+  i32 height = 0;
+  i32 stride_pixels = 0;
+  std::int64_t presentation_time_ns = 0;
+};
+
+struct AudioOutput {
+  i32 sample_rate = 0;
+  i32 channels = 0;
+  std::uint64_t total_frames = 0;
+  std::uint64_t submitted_frames = 0;
+  std::uint64_t consumed_frames = 0;
+  std::uint64_t queued_frames = 0;
+  bool audible = false;
+};
+
+struct PlaybackFrame {
+  VideoFrameView video;
+  AudioOutput audio;
+  ClockSource clock_source = ClockSource::kLogicalTicks;
+  std::int64_t presentation_time_ns = 0;
+  bool video_finished = false;
+};
+
+class PlaybackSession {
+ public:
+  static std::expected<PlaybackSession, std::string> Open(
+      std::string_view disc_path);
+
+  ~PlaybackSession();
+  PlaybackSession(PlaybackSession&&) noexcept;
+  PlaybackSession& operator=(PlaybackSession&&) noexcept;
+  PlaybackSession(const PlaybackSession&) = delete;
+  PlaybackSession& operator=(const PlaybackSession&) = delete;
+
+  // Advances bounded audio buffering and decodes only video due at the
+  // selected clock. The returned frame remains valid until the next call.
+  std::expected<PlaybackFrame, std::string> Update(std::uint32_t elapsed_ticks);
+  // Maintains the audio source without decoding or presenting video.
+  std::expected<AudioOutput, std::string> PumpAudio(
+      std::uint32_t elapsed_ticks);
+  void Close();
+
+ private:
+  struct Impl;
+  explicit PlaybackSession(std::unique_ptr<Impl> impl);
+  std::unique_ptr<Impl> m_impl_;
+};
+
 }  // namespace VS::Movie

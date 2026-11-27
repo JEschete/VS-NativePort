@@ -9,9 +9,11 @@
 #include <mkvparser/mkvreader.h>
 
 #include <algorithm>
+#include <array>
 #include <climits>
 #include <cstdio>
 #include <filesystem>
+#include <format>
 #include <limits>
 #include <memory>
 #include <string>
@@ -22,31 +24,31 @@
 #include "Content/DataStore.hpp"
 #include "Core/Log.hpp"
 #include "Platform/Paths.hpp"
-#include "Render/PageSpace.hpp"
-
-// Plays a movie VS.Extract converted (Matroska: AV1 video, FLAC audio). Both
-// streams are read into memory at open (the title movie is about 10 MB): the
-// soundtrack is decoded at once and queued on its own audio source, so it runs
-// on in real time while the game decides what to show; the picture is decoded
-// frame by frame as the game asks for the frame due at a tick and written as
-// 24-bit pixels into the page space, where the MDEC's output went.
 
 namespace {
 
 using VS::i32;
 using VS::i64;
-using VS::u16;
+using VS::u32;
+using VS::u64;
 using VS::u8;
 using VS::usize;
 namespace Audio = VS::Audio;
 namespace Content = VS::Content;
-namespace Core = VS::Core;
-namespace Render = VS::Render;
 
 constexpr i64 kNanosecondsPerSecond = 1'000'000'000;
 constexpr i64 kMovieTicksPerSecond = 60;
 constexpr i64 kFallbackFrameNanoseconds = 66'666'667;
 constexpr i32 kRgbChannels = 3;
+constexpr i32 kMaximumPacketBytes = 8 * 1024 * 1024;
+constexpr i32 kAudioBlockFrames = 2048;
+constexpr usize kMaximumAudioChannels = 2;
+constexpr usize kFlacSeekBufferBytes = 4096;
+constexpr i64 kAudioQueueNanoseconds = 100'000'000;
+constexpr u64 kAudioStallNanoseconds = 500'000'000;
+constexpr u32 kOpaqueBlackRgba = 0xFF000000U;
+constexpr int kBlueChannelShift = 16;
+constexpr int kGreenChannelShift = 8;
 constexpr float kByteMaximum = 255.0f;
 constexpr float kRoundToNearestByte = 0.5f;
 constexpr float kChromaCenter = 128.0f;
@@ -63,308 +65,710 @@ struct Packet {
   std::vector<u8> bytes;
 };
 
-class Player {
-  struct TrackSelection {
-    i64 video = -1;
-    i64 audio = -1;
-    std::vector<u8> flac;
-  };
+struct TrackCursor {
+  const mkvparser::Cluster* cluster = nullptr;
+  const mkvparser::BlockEntry* entry = nullptr;
+  int frame = 0;
+};
 
+struct MovieTracks {
+  i64 video = -1;
+  i64 audio = -1;
+  i32 width = 0;
+  i32 height = 0;
+  i32 sample_rate = 0;
+  i32 channels = 0;
+  std::vector<u8> flac_header;
+};
+
+class MatroskaReader {
  public:
-  ~Player() { Close(); }
+  using File = std::unique_ptr<std::FILE, decltype(&std::fclose)>;
 
-  bool Open(const std::filesystem::path& path) {
+  MatroskaReader() : m_input_(nullptr, &std::fclose) {}
+
+  std::expected<MovieTracks, std::string> Open(
+      const std::filesystem::path& path) {
     const auto file = VS::Platform::PathText(path);
-    const std::unique_ptr<std::FILE, decltype(&std::fclose)> input(
-        _wfopen(path.c_str(), L"rb"), std::fclose);
-    if (!input) {
-      VS::Core::LogError("movie", "cannot open {}", file);
-      return false;
+    m_input_.reset(_wfopen(path.c_str(), L"rb"));
+    if (!m_input_) {
+      return std::unexpected("cannot open " + file);
     }
-    mkvparser::MkvReader reader(input.get());
-    i64 pos = 0;
+    m_reader_ = std::make_unique<mkvparser::MkvReader>(m_input_.get());
+    i64 position = 0;
     mkvparser::EBMLHeader ebml;
-    if (ebml.Parse(&reader, pos) < 0) {
-      VS::Core::LogError("movie", "{}: not a Matroska file", file);
-      return false;
+    if (ebml.Parse(m_reader_.get(), position) < 0) {
+      return std::unexpected(file + ": not a Matroska file");
     }
-    mkvparser::Segment* raw = nullptr;
-    if (mkvparser::Segment::CreateInstance(&reader, pos, raw) != 0 ||
-        raw == nullptr) {
-      return false;
+    mkvparser::Segment* raw_segment = nullptr;
+    if (mkvparser::Segment::CreateInstance(m_reader_.get(), position,
+                                           raw_segment) != 0 ||
+        raw_segment == nullptr) {
+      return std::unexpected(file + ": cannot create Matroska segment");
     }
-    std::unique_ptr<mkvparser::Segment> segment(raw);
-    if (segment->Load() < 0) {
-      return false;
+    m_segment_.reset(raw_segment);
+    if (m_segment_->Load() < 0) {
+      return std::unexpected(file + ": cannot load Matroska segment");
     }
-    TrackSelection tracks;
-    if (!SelectTracks(*segment, tracks)) {
-      VS::Core::LogError("movie", "{}: missing or invalid supported tracks",
-                         file);
-      return false;
-    }
-    if (!ReadPackets(*segment, reader, tracks)) {
-      return false;
-    }
-    Dav1dSettings settings;
-    dav1d_default_settings(&settings);
-    settings.n_threads = 2;
-    settings.max_frame_delay = 1;
-    if (dav1d_open(&m_decoder_, &settings) != 0) {
-      VS::Core::LogError("movie", "dav1d_open failed");
-      return false;
-    }
-    const usize row_bytes = static_cast<usize>(m_width_) * kRgbChannels;
-    if (static_cast<usize>(m_height_) > m_rgb_.max_size() / row_bytes) {
-      return false;
-    }
-    m_rgb_.assign(row_bytes * m_height_, 0);
-    StartSoundtrack(tracks.flac);
-    VS::Core::LogInfo(
-        "movie", "{}: {}x{}, {} frames, {:.1f} s", file, m_width_, m_height_,
-        m_video_.size(),
-        static_cast<double>(m_video_.back().time_ns) / kNanosecondsPerSecond);
-    return true;
-  }
 
-  void Close() {
-    if (m_decoder_ != nullptr) {
-      dav1d_data_unref(&m_pending_);
-      dav1d_close(&m_decoder_);
+    const mkvparser::Tracks* tracks = m_segment_->GetTracks();
+    if (tracks == nullptr) {
+      return std::unexpected(file + ": missing Matroska tracks");
     }
-    Audio::AudioDevice::CloseSource(m_audio_);
-    m_audio_ = nullptr;
-  }
-
-  // Decodes up to the frame due at `timeNs`. False once past the last frame.
-  bool Advance(i64 time_ns) {
-    while (m_shown_ + 1 < static_cast<i64>(m_video_.size()) &&
-           m_video_[m_shown_ + 1].time_ns <= time_ns) {
-      if (!DecodeNext()) {
-        return false;
-      }
-      ++m_shown_;
-    }
-    const i64 frame_ns = m_video_.size() > 1
-                             ? m_video_[1].time_ns - m_video_[0].time_ns
-                             : kFallbackFrameNanoseconds;
-    return time_ns < m_video_.back().time_ns + frame_ns;
-  }
-
-  void Draw(i32 x, i32 y) const {
-    // 24-bit pixels are stored as consecutive R, G, B bytes: a row of w pixels
-    // covers w * 3 / 2 halfwords
-    Render::GamePages().Upload(
-        {x, y, m_width_ * kRgbChannels / static_cast<i32>(sizeof(u16)),
-         m_height_},
-        reinterpret_cast<const u16*>(m_rgb_.data()));
-  }
-
- private:
-  bool SelectTracks(const mkvparser::Segment& segment,
-                    TrackSelection& selected) {
-    const mkvparser::Tracks* tracks = segment.GetTracks();
-    if (tracks == nullptr) return false;
+    MovieTracks selected;
     for (decltype(tracks->GetTracksCount()) index = 0;
          index < tracks->GetTracksCount(); ++index) {
       const mkvparser::Track* track = tracks->GetTrackByIndex(index);
       if (track == nullptr) continue;
-      const std::string codec = track->GetCodecId() ? track->GetCodecId() : "";
+      const char* codec_id = track->GetCodecId();
+      const std::string codec = codec_id ? codec_id : "";
       if (track->GetType() == mkvparser::Track::kVideo && codec == "V_AV1") {
-        selected.video = track->GetNumber();
+        if (selected.video >= 0) {
+          return std::unexpected(file + ": multiple AV1 video tracks");
+        }
         const auto* video = static_cast<const mkvparser::VideoTrack*>(track);
         if (video->GetWidth() <= 0 || video->GetHeight() <= 0 ||
             video->GetWidth() >
                 std::numeric_limits<i32>::max() / kRgbChannels ||
             video->GetHeight() > std::numeric_limits<i32>::max()) {
-          return false;
+          return std::unexpected(file + ": invalid AV1 video dimensions");
         }
-        m_width_ = static_cast<i32>(video->GetWidth());
-        m_height_ = static_cast<i32>(video->GetHeight());
+        selected.video = track->GetNumber();
+        selected.width = static_cast<i32>(video->GetWidth());
+        selected.height = static_cast<i32>(video->GetHeight());
       } else if (track->GetType() == mkvparser::Track::kAudio &&
                  codec == "A_FLAC") {
-        selected.audio = track->GetNumber();
+        if (selected.audio >= 0) {
+          return std::unexpected(file + ": multiple FLAC audio tracks");
+        }
         const auto* audio = static_cast<const mkvparser::AudioTrack*>(track);
-        m_sample_rate_ = static_cast<i32>(audio->GetSamplingRate());
-        m_channels_ = static_cast<i32>(audio->GetChannels());
+        selected.audio = track->GetNumber();
+        selected.sample_rate = static_cast<i32>(audio->GetSamplingRate());
+        selected.channels = static_cast<i32>(audio->GetChannels());
         size_t size = 0;
         const unsigned char* metadata = track->GetCodecPrivate(size);
-        if (size != 0) {
-          if (metadata == nullptr) return false;
-          selected.flac.assign(metadata, metadata + size);
+        if (metadata == nullptr || size == 0 ||
+            size > static_cast<size_t>(kMaximumPacketBytes)) {
+          return std::unexpected(file + ": missing or invalid FLAC metadata");
         }
+        selected.flac_header.assign(metadata, metadata + size);
       }
     }
-    return selected.video >= 0;
+    if (selected.video < 0 || selected.audio < 0 || selected.sample_rate <= 0 ||
+        (selected.channels != 1 && selected.channels != 2)) {
+      return std::unexpected(file + ": missing or invalid supported tracks");
+    }
+    return selected;
   }
 
-  bool ReadPackets(mkvparser::Segment& segment, mkvparser::MkvReader& reader,
-                   TrackSelection& tracks) {
-    for (const mkvparser::Cluster* cluster = segment.GetFirst();
-         cluster != nullptr && !cluster->EOS();
-         cluster = segment.GetNext(cluster)) {
-      const mkvparser::BlockEntry* entry = nullptr;
-      if (cluster->GetFirst(entry) < 0) break;
-      while (entry != nullptr && !entry->EOS()) {
-        const mkvparser::Block* block = entry->GetBlock();
-        for (int index = 0; index < block->GetFrameCount(); ++index) {
-          const mkvparser::Block::Frame& frame = block->GetFrame(index);
-          if (frame.len <= 0) return false;
-          std::vector<u8> bytes(static_cast<usize>(frame.len));
-          if (frame.Read(&reader, bytes.data()) != 0) continue;
-          if (block->GetTrackNumber() == tracks.video) {
-            m_video_.push_back({block->GetTime(cluster), std::move(bytes)});
-          } else if (block->GetTrackNumber() == tracks.audio) {
-            tracks.flac.insert(tracks.flac.end(), bytes.begin(), bytes.end());
-          }
-        }
-        if (cluster->GetNext(entry, entry) < 0) break;
+  enum class ReadResult : std::uint8_t { kPacket, kEnd, kError };
+
+  ReadResult ReadPacket(i64 track_number, TrackCursor& cursor, Packet& packet,
+                        std::string& error) {
+    if (cursor.cluster == nullptr) {
+      cursor.cluster = m_segment_->GetFirst();
+      cursor.entry = nullptr;
+      cursor.frame = 0;
+      if (cursor.cluster != nullptr && !cursor.cluster->EOS() &&
+          cursor.cluster->GetFirst(cursor.entry) < 0) {
+        error = "cannot read Matroska cluster";
+        return ReadResult::kError;
       }
     }
-    return !m_video_.empty();
+    while (cursor.cluster != nullptr && !cursor.cluster->EOS()) {
+      if (cursor.entry == nullptr || cursor.entry->EOS()) {
+        cursor.cluster = m_segment_->GetNext(cursor.cluster);
+        cursor.entry = nullptr;
+        cursor.frame = 0;
+        if (cursor.cluster != nullptr && !cursor.cluster->EOS() &&
+            cursor.cluster->GetFirst(cursor.entry) < 0) {
+          error = "cannot read Matroska cluster";
+          return ReadResult::kError;
+        }
+        continue;
+      }
+      const mkvparser::Block* block = cursor.entry->GetBlock();
+      if (block == nullptr) {
+        error = "Matroska block is missing";
+        return ReadResult::kError;
+      }
+      if (block->GetTrackNumber() != track_number ||
+          cursor.frame >= block->GetFrameCount()) {
+        if (!AdvanceEntry(cursor, error)) return ReadResult::kError;
+        continue;
+      }
+      const mkvparser::Block::Frame& frame = block->GetFrame(cursor.frame++);
+      if (frame.len <= 0 || frame.len > kMaximumPacketBytes) {
+        error = "Matroska packet size is outside the supported bound";
+        return ReadResult::kError;
+      }
+      packet.time_ns = block->GetTime(cursor.cluster);
+      packet.bytes.resize(static_cast<usize>(frame.len));
+      if (frame.Read(m_reader_.get(), packet.bytes.data()) != 0) {
+        error = "cannot read Matroska packet";
+        return ReadResult::kError;
+      }
+      if (cursor.frame >= block->GetFrameCount() &&
+          !AdvanceEntry(cursor, error)) {
+        return ReadResult::kError;
+      }
+      return ReadResult::kPacket;
+    }
+    return ReadResult::kEnd;
   }
 
-  bool DecodeNext() {
-    Dav1dPicture pic{};
+ private:
+  bool AdvanceEntry(TrackCursor& cursor, std::string& error) {
+    const mkvparser::BlockEntry* next_entry = nullptr;
+    if (cursor.cluster->GetNext(cursor.entry, next_entry) < 0) {
+      error = "cannot advance Matroska cluster";
+      return false;
+    }
+    if (next_entry != nullptr) {
+      cursor.entry = next_entry;
+      cursor.frame = 0;
+      return true;
+    }
+
+    cursor.cluster = m_segment_->GetNext(cursor.cluster);
+    cursor.entry = nullptr;
+    cursor.frame = 0;
+    if (cursor.cluster != nullptr && !cursor.cluster->EOS() &&
+        cursor.cluster->GetFirst(cursor.entry) < 0) {
+      error = "cannot read Matroska cluster";
+      return false;
+    }
+    return true;
+  }
+
+  File m_input_;
+  std::unique_ptr<mkvparser::MkvReader> m_reader_;
+  std::unique_ptr<mkvparser::Segment> m_segment_;
+};
+
+struct FlacSource {
+  MatroskaReader* demux = nullptr;
+  i64 track_number = -1;
+  TrackCursor cursor;
+  std::vector<u8> header;
+  usize header_offset = 0;
+  Packet packet;
+  usize packet_offset = 0;
+  drflac_int64 stream_offset = 0;
+  bool ended = false;
+  std::string error;
+
+  size_t Read(void* output, size_t requested) {
+    auto* destination = static_cast<u8*>(output);
+    size_t copied = 0;
+    while (copied < requested) {
+      if (header_offset < header.size()) {
+        const size_t count =
+            std::min(requested - copied, header.size() - header_offset);
+        std::copy_n(header.data() + header_offset, count, destination + copied);
+        header_offset += count;
+        copied += count;
+        continue;
+      }
+      if (packet_offset == packet.bytes.size()) {
+        if (ended) break;
+        const auto result =
+            demux->ReadPacket(track_number, cursor, packet, error);
+        if (result == MatroskaReader::ReadResult::kError) {
+          ended = true;
+          break;
+        }
+        if (result == MatroskaReader::ReadResult::kEnd) {
+          ended = true;
+          break;
+        }
+        packet_offset = 0;
+      }
+      const size_t count =
+          std::min(requested - copied, packet.bytes.size() - packet_offset);
+      std::copy_n(packet.bytes.data() + packet_offset, count,
+                  destination + copied);
+      packet_offset += count;
+      copied += count;
+    }
+    stream_offset += static_cast<drflac_int64>(copied);
+    return copied;
+  }
+
+  drflac_bool32 Seek(int offset, drflac_seek_origin origin) {
+    if (offset < 0 ||
+        (origin != DRFLAC_SEEK_SET && origin != DRFLAC_SEEK_CUR)) {
+      return DRFLAC_FALSE;
+    }
+    const drflac_int64 target =
+        origin == DRFLAC_SEEK_SET
+            ? offset
+            : stream_offset + static_cast<drflac_int64>(offset);
+    if (target < 0) return DRFLAC_FALSE;
+    if (target < stream_offset) {
+      cursor = {};
+      header_offset = 0;
+      packet_offset = packet.bytes.size();
+      ended = false;
+      error.clear();
+      stream_offset = 0;
+    }
+    std::array<u8, kFlacSeekBufferBytes> discard{};
+    while (stream_offset < target) {
+      const auto remaining = static_cast<size_t>(target - stream_offset);
+      const size_t count =
+          Read(discard.data(), std::min(discard.size(), remaining));
+      if (count == 0) return DRFLAC_FALSE;
+    }
+    return DRFLAC_TRUE;
+  }
+
+  static size_t ReadCallback(void* user_data, void* output, size_t requested) {
+    return static_cast<FlacSource*>(user_data)->Read(output, requested);
+  }
+
+  static drflac_bool32 SeekCallback(void* user_data, int offset,
+                                    drflac_seek_origin origin) {
+    return static_cast<FlacSource*>(user_data)->Seek(offset, origin);
+  }
+
+  static drflac_bool32 TellCallback(void* user_data,
+                                    drflac_int64* stream_offset) {
+    *stream_offset = static_cast<FlacSource*>(user_data)->stream_offset;
+    return DRFLAC_TRUE;
+  }
+};
+
+}  // namespace
+
+struct VS::Movie::PlaybackSession::Impl {
+  ~Impl() { Close(); }
+
+  std::expected<void, std::string> Open(const std::filesystem::path& path) {
+    auto opened = demux.Open(path);
+    if (!opened) return std::unexpected(opened.error());
+    tracks = std::move(*opened);
+
+    flac_source.demux = &demux;
+    flac_source.track_number = tracks.audio;
+    flac_source.header = tracks.flac_header;
+    audio_decoder =
+        drflac_open(&FlacSource::ReadCallback, &FlacSource::SeekCallback,
+                    &FlacSource::TellCallback, &flac_source, nullptr);
+    if (audio_decoder == nullptr) {
+      return std::unexpected("cannot initialize Matroska FLAC track");
+    }
+    if (audio_decoder->sampleRate !=
+            static_cast<unsigned>(tracks.sample_rate) ||
+        audio_decoder->channels != static_cast<unsigned>(tracks.channels) ||
+        (audio_decoder->channels != 1 && audio_decoder->channels != 2)) {
+      return std::unexpected("FLAC metadata does not match the Matroska track");
+    }
+    audio_output.sample_rate = static_cast<i32>(audio_decoder->sampleRate);
+    audio_output.channels = static_cast<i32>(audio_decoder->channels);
+    audio_output.total_frames = audio_decoder->totalPCMFrameCount;
+
+    Dav1dSettings settings;
+    dav1d_default_settings(&settings);
+    settings.n_threads = 2;
+    settings.max_frame_delay = 1;
+    if (dav1d_open(&video_decoder, &settings) != 0) {
+      return std::unexpected("dav1d_open failed");
+    }
+    const usize pixels =
+        static_cast<usize>(tracks.width) * static_cast<usize>(tracks.height);
+    if (tracks.height != 0 && pixels / static_cast<usize>(tracks.height) !=
+                                  static_cast<usize>(tracks.width)) {
+      return std::unexpected("movie image dimensions overflow");
+    }
+    rgba.assign(pixels, kOpaqueBlackRgba);
+
+    Audio::AudioDevice* device = Audio::AudioDevice::Primary();
+    if (device != nullptr && device->IsOpen() && device->IsRealtime()) {
+      audio_device = device;
+      audio_stream =
+          device->OpenSource(audio_output.sample_rate, audio_output.channels);
+      if (audio_stream == nullptr) {
+        audio_device = nullptr;
+        VS::Core::LogWarn("movie",
+                          "soundtrack output unavailable; using logical clock");
+      } else {
+        audio_device_id = SDL_GetAudioStreamDevice(audio_stream);
+        if (audio_device_id == 0) {
+          Audio::AudioDevice::CloseSource(audio_stream);
+          audio_stream = nullptr;
+          audio_device = nullptr;
+          VS::Core::LogWarn(
+              "movie", "soundtrack source is unbound; using logical clock");
+        } else {
+          clock_source = VS::Movie::ClockSource::kAudioSamples;
+          last_audio_progress_ns = SDL_GetTicksNS();
+          QueueAudio();
+        }
+      }
+    } else {
+      VS::Core::LogWarn("movie",
+                        "soundtrack output unavailable; using logical clock");
+    }
+
+    const auto result =
+        demux.ReadPacket(tracks.video, video_cursor, next_video, demux_error);
+    if (result == MatroskaReader::ReadResult::kError) {
+      return std::unexpected(demux_error);
+    }
+    if (result == MatroskaReader::ReadResult::kEnd) {
+      return std::unexpected("movie has no video frames");
+    }
+    has_next_video = true;
+    return {};
+  }
+
+  void Close() {
+    if (audio_stream != nullptr) {
+      Audio::AudioDevice::CloseSource(audio_stream);
+      audio_stream = nullptr;
+    }
+    audio_device = nullptr;
+    audio_device_id = 0;
+    if (audio_decoder != nullptr) {
+      drflac_close(audio_decoder);
+      audio_decoder = nullptr;
+    }
+    if (video_decoder != nullptr) {
+      dav1d_data_unref(&pending_data);
+      dav1d_close(&video_decoder);
+    }
+    audio_output.audible = false;
+    has_video_frame = false;
+  }
+
+  bool QueueAudio() {
+    if (audio_stream == nullptr || audio_decoder == nullptr) return true;
+    const int queued_bytes = SDL_GetAudioStreamQueued(audio_stream);
+    if (queued_bytes < 0) {
+      DisableAudio("cannot query soundtrack queue");
+      return false;
+    }
+    const auto bytes_per_frame =
+        static_cast<u64>(audio_output.channels) * sizeof(drflac_int16);
+    u64 queued_frames = static_cast<u64>(queued_bytes) / bytes_per_frame;
+    const u64 target_frames = static_cast<u64>(audio_output.sample_rate) *
+                              static_cast<u64>(kAudioQueueNanoseconds) /
+                              static_cast<u64>(kNanosecondsPerSecond);
+    std::array<drflac_int16,
+               static_cast<usize>(kAudioBlockFrames) * kMaximumAudioChannels>
+        samples{};
+    while (queued_frames < target_frames && !audio_ended) {
+      const u64 wanted =
+          std::min<u64>(target_frames - queued_frames, kAudioBlockFrames);
+      const drflac_uint64 decoded =
+          drflac_read_pcm_frames_s16(audio_decoder, wanted, samples.data());
+      if (decoded == 0) {
+        if (!flac_source.error.empty() ||
+            (audio_output.total_frames != 0 &&
+             audio_output.submitted_frames < audio_output.total_frames)) {
+          DisableAudio(flac_source.error.empty()
+                           ? "FLAC ended before its declared frame count"
+                           : flac_source.error);
+          return false;
+        }
+        audio_ended = true;
+        if (!SDL_FlushAudioStream(audio_stream)) {
+          DisableAudio("cannot flush soundtrack output");
+          return false;
+        }
+        break;
+      }
+      const auto bytes = static_cast<int>(decoded * bytes_per_frame);
+      if (!SDL_PutAudioStreamData(audio_stream, samples.data(), bytes)) {
+        DisableAudio("cannot queue soundtrack samples");
+        return false;
+      }
+      audio_output.submitted_frames += decoded;
+      queued_frames += decoded;
+    }
+    audio_output.queued_frames = queued_frames;
+    return true;
+  }
+
+  void DisableAudio(const std::string& reason) {
+    if (audio_stream == nullptr) return;
+    VS::Core::LogError("movie", "soundtrack stopped: {}; continuing video",
+                       reason);
+    const i64 now = static_cast<i64>(SDL_GetTicksNS());
+    realtime_fallback_time_ns = last_presentation_time_ns;
+    realtime_fallback_start_ns = now;
+    clock_source = VS::Movie::ClockSource::kRealtimeFallback;
+    Audio::AudioDevice::CloseSource(audio_stream);
+    audio_stream = nullptr;
+    audio_device = nullptr;
+    audio_device_id = 0;
+    audio_output.audible = false;
+    audio_output.queued_frames = 0;
+    if (audio_decoder != nullptr) {
+      drflac_close(audio_decoder);
+      audio_decoder = nullptr;
+    }
+  }
+
+  i64 PresentationTime(std::uint32_t elapsed_ticks) {
+    if (clock_source == VS::Movie::ClockSource::kAudioSamples) {
+      if (Audio::AudioDevice::Primary() != audio_device ||
+          audio_device == nullptr || !audio_device->IsOpen() ||
+          SDL_GetAudioStreamDevice(audio_stream) != audio_device_id) {
+        DisableAudio("audio device was closed or replaced");
+        return PresentationTime(elapsed_ticks);
+      }
+      if (!QueueAudio()) {
+        if (clock_source == VS::Movie::ClockSource::kRealtimeFallback) {
+          return PresentationTime(elapsed_ticks);
+        }
+      }
+      if (audio_stream == nullptr) {
+        return PresentationTime(elapsed_ticks);
+      }
+      const int queued_bytes = SDL_GetAudioStreamQueued(audio_stream);
+      if (queued_bytes < 0) {
+        DisableAudio("cannot query soundtrack position");
+        return PresentationTime(elapsed_ticks);
+      }
+      const auto bytes_per_frame =
+          static_cast<u64>(audio_output.channels) * sizeof(drflac_int16);
+      const u64 queued_frames =
+          static_cast<u64>(queued_bytes) / bytes_per_frame;
+      const u64 consumed_frames =
+          audio_output.submitted_frames -
+          std::min(audio_output.submitted_frames, queued_frames);
+      audio_output.queued_frames = queued_frames;
+      audio_output.consumed_frames = consumed_frames;
+      const u64 now = SDL_GetTicksNS();
+      if (queued_frames < last_queued_frames ||
+          consumed_frames > last_consumed_frames) {
+        last_audio_progress_ns = now;
+      } else if (queued_frames != 0 &&
+                 now - last_audio_progress_ns > kAudioStallNanoseconds) {
+        DisableAudio("soundtrack queue stopped advancing");
+        return PresentationTime(elapsed_ticks);
+      }
+      last_queued_frames = queued_frames;
+      last_consumed_frames = consumed_frames;
+      const u64 elapsed_ns = consumed_frames *
+                             static_cast<u64>(kNanosecondsPerSecond) /
+                             static_cast<u64>(audio_output.sample_rate);
+      last_presentation_time_ns = static_cast<i64>(std::min<u64>(
+          elapsed_ns, static_cast<u64>(std::numeric_limits<i64>::max())));
+      return last_presentation_time_ns;
+    }
+    if (clock_source == VS::Movie::ClockSource::kRealtimeFallback) {
+      const i64 now = static_cast<i64>(SDL_GetTicksNS());
+      last_presentation_time_ns =
+          realtime_fallback_time_ns +
+          std::max<i64>(0, now - realtime_fallback_start_ns);
+      return last_presentation_time_ns;
+    }
+    last_presentation_time_ns = static_cast<i64>(elapsed_ticks) *
+                                kNanosecondsPerSecond / kMovieTicksPerSecond;
+    return last_presentation_time_ns;
+  }
+
+  bool DecodeVideoPacket(const Packet& packet, std::string& error) {
+    u8* destination = dav1d_data_create(&pending_data, packet.bytes.size());
+    if (destination == nullptr) {
+      error = "cannot allocate AV1 input packet";
+      return false;
+    }
+    std::copy(packet.bytes.begin(), packet.bytes.end(), destination);
     while (true) {
-      if (m_pending_.sz == 0 && m_sent_ < m_video_.size()) {
-        const Packet& p = m_video_[m_sent_++];
-        u8* dst = dav1d_data_create(&m_pending_, p.bytes.size());
-        if (dst == nullptr) return false;
-        std::ranges::copy(p.bytes, dst);
-      }
-      if (m_pending_.sz != 0) {
-        const int r = dav1d_send_data(m_decoder_, &m_pending_);
-        if (r < 0 && r != DAV1D_ERR(EAGAIN)) {
-          VS::Core::LogError("movie", "dav1d_send_data: {}", r);
+      if (pending_data.sz != 0) {
+        const int sent = dav1d_send_data(video_decoder, &pending_data);
+        if (sent < 0 && sent != DAV1D_ERR(EAGAIN)) {
+          error = std::format("dav1d_send_data failed: {}", sent);
           return false;
         }
       }
-      const int r = dav1d_get_picture(m_decoder_, &pic);
-      if (r == 0) {
-        break;
+      Dav1dPicture picture{};
+      const int received = dav1d_get_picture(video_decoder, &picture);
+      if (received == 0) {
+        const bool converted = ConvertPicture(picture, error);
+        dav1d_picture_unref(&picture);
+        return converted;
       }
-      if (r != DAV1D_ERR(EAGAIN) ||
-          (m_pending_.sz == 0 && m_sent_ >= m_video_.size())) {
+      if (received != DAV1D_ERR(EAGAIN) || pending_data.sz == 0) {
+        error = std::format("dav1d_get_picture failed: {}", received);
         return false;
       }
     }
-    const bool converted = ToRgb(pic);
-    dav1d_picture_unref(&pic);
-    return converted;
   }
 
-  // YCbCr 4:2:0 to RGB; the MDEC's output range is full (the conversion keeps
-  // it), BT.601 coefficients.
-  bool ToRgb(const Dav1dPicture& pic) {
-    if (pic.p.bpc != CHAR_BIT || pic.p.layout != DAV1D_PIXEL_LAYOUT_I420 ||
-        pic.data[0] == nullptr || pic.data[1] == nullptr ||
-        pic.data[2] == nullptr) {
-      VS::Core::LogError("movie", "unsupported decoded picture layout");
+  bool ConvertPicture(const Dav1dPicture& picture, std::string& error) {
+    if (picture.p.bpc != CHAR_BIT ||
+        picture.p.layout != DAV1D_PIXEL_LAYOUT_I420 ||
+        picture.data[0] == nullptr || picture.data[1] == nullptr ||
+        picture.data[2] == nullptr || picture.p.w != tracks.width ||
+        picture.p.h != tracks.height) {
+      error = "unsupported decoded AV1 picture layout or dimensions";
       return false;
     }
-    const bool full = pic.seq_hdr == nullptr || pic.seq_hdr->color_range != 0;
-    const auto* py = static_cast<const u8*>(pic.data[0]);
-    const auto* pu = static_cast<const u8*>(pic.data[1]);
-    const auto* pv = static_cast<const u8*>(pic.data[2]);
-    const i32 w = std::min(m_width_, pic.p.w), h = std::min(m_height_, pic.p.h);
-    for (i32 row = 0; row < h; ++row) {
-      u8* out =
-          m_rgb_.data() + static_cast<usize>(row) * m_width_ * kRgbChannels;
-      for (i32 col = 0; col < w; ++col) {
-        float y = py[row * pic.stride[0] + col];
-        const auto chroma_offset = (row / 2) * pic.stride[1] + col / 2;
-        const float u = static_cast<float>(pu[chroma_offset]) - kChromaCenter;
-        const float v = static_cast<float>(pv[chroma_offset]) - kChromaCenter;
-        float s = 1.0f;
+    const bool full =
+        picture.seq_hdr == nullptr || picture.seq_hdr->color_range != 0;
+    const auto* y_plane = static_cast<const u8*>(picture.data[0]);
+    const auto* u_plane = static_cast<const u8*>(picture.data[1]);
+    const auto* v_plane = static_cast<const u8*>(picture.data[2]);
+    for (i32 row = 0; row < tracks.height; ++row) {
+      for (i32 column = 0; column < tracks.width; ++column) {
+        float y = y_plane[row * picture.stride[0] + column];
+        const auto chroma_offset = (row / 2) * picture.stride[1] + column / 2;
+        const float u =
+            static_cast<float>(u_plane[chroma_offset]) - kChromaCenter;
+        const float v =
+            static_cast<float>(v_plane[chroma_offset]) - kChromaCenter;
+        float scale = 1.0f;
         if (!full) {
           y = (y - kLimitedLumaMinimum) * (kByteMaximum / kLimitedLumaRange);
-          s = kByteMaximum / kLimitedChromaRange;
+          scale = kByteMaximum / kLimitedChromaRange;
         }
-        const auto clamp = [](float v) {
-          return static_cast<u8>(
-              std::clamp(v + kRoundToNearestByte, 0.0f, kByteMaximum));
+        const auto clamp = [](float value) {
+          return static_cast<u32>(static_cast<u8>(
+              std::clamp(value + kRoundToNearestByte, 0.0f, kByteMaximum)));
         };
-        u8* pixel = out + static_cast<usize>(col) * kRgbChannels;
-        pixel[0] = clamp(y + kRedFromCr * s * v);
-        pixel[1] = clamp(y - kGreenFromCb * s * u - kGreenFromCr * s * v);
-        pixel[2] = clamp(y + kBlueFromCb * s * u);
+        const u32 red = clamp(y + kRedFromCr * scale * v);
+        const u32 green =
+            clamp(y - kGreenFromCb * scale * u - kGreenFromCr * scale * v);
+        const u32 blue = clamp(y + kBlueFromCb * scale * u);
+        rgba[static_cast<usize>(row) * tracks.width + column] =
+            kOpaqueBlackRgba | (blue << kBlueChannelShift) |
+            (green << kGreenChannelShift) | red;
       }
     }
     return true;
   }
 
-  void StartSoundtrack(const std::vector<u8>& flac) {
-    constexpr usize kFlacMarkerBytes = 4;
-    Audio::AudioDevice* device = Audio::AudioDevice::Primary();
-    if (device == nullptr || flac.size() < kFlacMarkerBytes ||
-        m_sample_rate_ <= 0) {
-      VS::Core::LogWarn(
-          "movie", "soundtrack not played (device {}, {} bytes of FLAC, {} Hz)",
-          device != nullptr, flac.size(), m_sample_rate_);
-      return;
+  bool AdvanceVideo(i64 presentation_time_ns, std::string& error) {
+    while (has_next_video && next_video.time_ns <= presentation_time_ns) {
+      const i64 packet_time_ns = next_video.time_ns;
+      if (!DecodeVideoPacket(next_video, error)) return false;
+      if (has_video_frame && packet_time_ns > current_video_time_ns) {
+        frame_duration_ns = packet_time_ns - current_video_time_ns;
+      }
+      current_video_time_ns = packet_time_ns;
+      has_video_frame = true;
+
+      const auto result =
+          demux.ReadPacket(tracks.video, video_cursor, next_video, demux_error);
+      if (result == MatroskaReader::ReadResult::kError) {
+        error = demux_error;
+        return false;
+      }
+      has_next_video = result == MatroskaReader::ReadResult::kPacket;
+      if (!has_next_video) video_eof = true;
     }
-    unsigned int channels = 0, rate = 0;
-    drflac_uint64 frames = 0;
-    drflac_int16* pcm = drflac_open_memory_and_read_pcm_frames_s16(
-        flac.data(), flac.size(), &channels, &rate, &frames, nullptr);
-    if (pcm == nullptr) {
-      VS::Core::LogError("movie", "soundtrack: FLAC decode failed");
-      return;
-    }
-    m_audio_ =
-        device->OpenSource(static_cast<i32>(rate), static_cast<i32>(channels));
-    if (m_audio_ != nullptr) {
-      SDL_PutAudioStreamData(
-          m_audio_, pcm,
-          static_cast<int>(frames * channels * sizeof(drflac_int16)));
-      VS::Core::LogInfo("movie", "soundtrack: {:.1f} s, {} Hz, {} ch",
-                        static_cast<double>(frames) / rate, rate, channels);
-    }
-    drflac_free(pcm, nullptr);
+    return true;
   }
 
-  std::vector<Packet> m_video_;
-  std::vector<u8> m_rgb_;
-  Dav1dContext* m_decoder_ = nullptr;
-  Dav1dData m_pending_{};
-  usize m_sent_ = 0;
-  i64 m_shown_ = -1;
-  i32 m_width_ = 0, m_height_ = 0, m_sample_rate_ = 0, m_channels_ = 0;
-  SDL_AudioStream* m_audio_ = nullptr;
+  PlaybackFrame Snapshot(i64 presentation_time_ns) const {
+    PlaybackFrame frame;
+    frame.video = {
+        has_video_frame ? std::span<const u32>(rgba) : std::span<const u32>{},
+        tracks.width, tracks.height, tracks.width, current_video_time_ns};
+    frame.audio = audio_output;
+    frame.audio.audible = audio_stream != nullptr;
+    frame.clock_source = clock_source;
+    frame.presentation_time_ns = presentation_time_ns;
+    frame.video_finished =
+        video_eof && has_video_frame &&
+        presentation_time_ns >= current_video_time_ns + frame_duration_ns;
+    return frame;
+  }
+
+  MatroskaReader demux;
+  MovieTracks tracks;
+  TrackCursor video_cursor;
+  std::string demux_error;
+  Packet next_video;
+  bool has_next_video = false;
+  bool video_eof = false;
+  bool has_video_frame = false;
+  i64 current_video_time_ns = 0;
+  i64 frame_duration_ns = kFallbackFrameNanoseconds;
+  std::vector<u32> rgba;
+
+  FlacSource flac_source;
+  drflac* audio_decoder = nullptr;
+  SDL_AudioStream* audio_stream = nullptr;
+  Audio::AudioDevice* audio_device = nullptr;
+  SDL_AudioDeviceID audio_device_id = 0;
+  AudioOutput audio_output;
+  bool audio_ended = false;
+  u64 last_queued_frames = 0;
+  u64 last_consumed_frames = 0;
+  u64 last_audio_progress_ns = 0;
+  ClockSource clock_source = ClockSource::kLogicalTicks;
+  i64 last_presentation_time_ns = 0;
+  i64 realtime_fallback_time_ns = 0;
+  i64 realtime_fallback_start_ns = 0;
+
+  Dav1dContext* video_decoder = nullptr;
+  Dav1dData pending_data{};
 };
 
-std::unique_ptr<Player> activePlayer;
+VS::Movie::PlaybackSession::PlaybackSession(std::unique_ptr<Impl> impl)
+    : m_impl_(std::move(impl)) {}
 
-}  // namespace
+VS::Movie::PlaybackSession::~PlaybackSession() = default;
 
-int VS::Movie::PlayerOpen(const char* disc_path) {
-  activePlayer.reset();
+VS::Movie::PlaybackSession::PlaybackSession(PlaybackSession&&) noexcept =
+    default;
+
+VS::Movie::PlaybackSession& VS::Movie::PlaybackSession::operator=(
+    PlaybackSession&&) noexcept = default;
+
+std::expected<VS::Movie::PlaybackSession, std::string>
+VS::Movie::PlaybackSession::Open(std::string_view disc_path) {
   const Content::DataStore* store = Content::DataStore::Get();
-  const Content::DataStore::Entry* e = store ? store->Find(disc_path) : nullptr;
-  if (e == nullptr || e->form == "raw" || e->form == "stream") {
-    VS::Core::LogWarn(
-        "movie",
-        "{}: no converted movie (run VS.Extract extract with FFmpeg available)",
-        disc_path);
-    return 0;
+  const Content::DataStore::Entry* entry =
+      store != nullptr ? store->Find(disc_path) : nullptr;
+  if (entry == nullptr || entry->form == "raw" || entry->form == "stream") {
+    return std::unexpected(
+        std::format("{}: no converted movie (run VS.Extract extract with "
+                    "FFmpeg available)",
+                    disc_path));
   }
-  auto player = std::make_unique<Player>();
-  if (!player->Open(store->FileOf(*e))) {
-    return 0;
-  }
-  activePlayer = std::move(player);
-  return 1;
+  auto impl = std::make_unique<Impl>();
+  auto opened = impl->Open(store->FileOf(*entry));
+  if (!opened) return std::unexpected(opened.error());
+  VS::Core::LogInfo("movie", "{}: {}x{}, audio {} Hz, {} ch, {} frames",
+                    VS::Platform::PathText(store->FileOf(*entry)),
+                    impl->tracks.width, impl->tracks.height,
+                    impl->audio_output.sample_rate, impl->audio_output.channels,
+                    impl->audio_output.total_frames);
+  return PlaybackSession(std::move(impl));
 }
 
-int VS::Movie::PlayerDrawFrame(int ticks, int x, int y) {
-  if (!activePlayer) {
-    return 0;
+std::expected<VS::Movie::PlaybackFrame, std::string>
+VS::Movie::PlaybackSession::Update(std::uint32_t elapsed_ticks) {
+  if (m_impl_ == nullptr || m_impl_->video_decoder == nullptr) {
+    return std::unexpected("movie session is closed");
   }
-  const bool more = activePlayer->Advance(
-      static_cast<i64>(ticks) * kNanosecondsPerSecond / kMovieTicksPerSecond);
-  activePlayer->Draw(x, y);
-  return more ? 1 : 0;
+  const i64 presentation_time_ns = m_impl_->PresentationTime(elapsed_ticks);
+  std::string error;
+  if (!m_impl_->AdvanceVideo(presentation_time_ns, error)) {
+    return std::unexpected(std::move(error));
+  }
+  return m_impl_->Snapshot(presentation_time_ns);
 }
 
-void VS::Movie::PlayerClose(void) { activePlayer.reset(); }
+std::expected<VS::Movie::AudioOutput, std::string>
+VS::Movie::PlaybackSession::PumpAudio(std::uint32_t elapsed_ticks) {
+  if (m_impl_ == nullptr || m_impl_->video_decoder == nullptr) {
+    return std::unexpected("movie session is closed");
+  }
+  static_cast<void>(m_impl_->PresentationTime(elapsed_ticks));
+  auto output = m_impl_->audio_output;
+  output.audible = m_impl_->audio_stream != nullptr;
+  return output;
+}
+
+void VS::Movie::PlaybackSession::Close() {
+  if (m_impl_ != nullptr) m_impl_->Close();
+  m_impl_.reset();
+}

@@ -1,6 +1,9 @@
 // Hand-maintained live binding for Movie/Intro/Player.cpp.
 #include <cstdint>
+#include <optional>
+#include <utility>
 
+#include "Core/Log.hpp"
 #include "Input/Actions.hpp"
 #include "Input/Buttons.hpp"
 #include "Input/ControllerLive.hpp"
@@ -52,10 +55,40 @@ class LiveHost final : public Host {
     setRECT(&rect, 0, 0, kPageWidth, 2 * kPictureHeight);
     ClearImage(&rect, 0, 0, 0);
   }
-  void OpenMovie() override { VS::Movie::PlayerOpen("MOV/TITLE.STR"); }
-  void CloseMovie() override { VS::Movie::PlayerClose(); }
-  void DrawFrame(std::int32_t elapsed_ticks, PicturePage page) override {
-    VS::Movie::PlayerDrawFrame(elapsed_ticks, 0, PageY(page));
+  void OpenMovie() override {
+    auto opened = VS::Movie::PlaybackSession::Open("MOV/TITLE.STR");
+    if (!opened) {
+      VS::Core::LogError("movie", "cannot start intro: {}", opened.error());
+      session_.reset();
+      frame_ = {};
+      return;
+    }
+    session_.emplace(std::move(*opened));
+  }
+  void CloseMovie() override {
+    frame_ = {};
+    session_.reset();
+  }
+  void DrawFrame(std::int32_t elapsed_ticks, PicturePage) override {
+    if (!session_) return;
+    auto update = session_->Update(static_cast<std::uint32_t>(elapsed_ticks));
+    if (!update) {
+      VS::Core::LogError("movie", "intro playback failed: {}", update.error());
+      frame_ = {};
+      session_.reset();
+      return;
+    }
+    frame_ = update->video;
+  }
+  void PumpAudioTail() {
+    if (!session_) return;
+    auto update = session_->PumpAudio(Tick() - StartTick());
+    if (!update) {
+      VS::Core::LogError("movie", "intro soundtrack update failed: {}",
+                         update.error());
+      frame_ = {};
+      session_.reset();
+    }
   }
   void ShowPage(PicturePage page) override {
     DISPENV disp;
@@ -86,7 +119,15 @@ class LiveHost final : public Host {
   [[nodiscard]] PicturePage DrawPage() const override { return draw_page_; }
   void SetDrawPage(PicturePage page) override { draw_page_ = page; }
 
+  void SetPresenting(bool presenting) { presenting_ = presenting; }
+  [[nodiscard]] VS::Movie::VideoFrameView CurrentVideoFrame() const {
+    return presenting_ ? frame_ : VS::Movie::VideoFrameView{};
+  }
+
  private:
+  std::optional<VS::Movie::PlaybackSession> session_;
+  VS::Movie::VideoFrameView frame_;
+  bool presenting_ = false;
   PicturePage draw_page_ = PicturePage::kUpper;
 };
 
@@ -97,12 +138,30 @@ LiveHost& Instance() {
 
 }  // namespace
 
-void StartLive() { Start(Instance()); }
+void StartLive() {
+  Instance().SetPresenting(false);
+  Start(Instance());
+}
 
-void StopLive() { Stop(Instance()); }
+void StopLive() {
+  Instance().SetPresenting(false);
+  Stop(Instance());
+}
 
-void StopLiveAfterAudioTail() { StopAfterAudioTail(Instance()); }
+void StopLiveAfterAudioTail() {
+  LiveHost& host = Instance();
+  host.PumpAudioTail();
+  StopAfterAudioTail(host);
+}
 
-int PlayLive() { return Play(Instance()) == PlaybackResult::kSkipped ? 1 : 0; }
+int PlayLive() {
+  LiveHost& host = Instance();
+  host.SetPresenting(true);
+  const PlaybackResult result = Play(host);
+  host.SetPresenting(false);
+  return result == PlaybackResult::kSkipped ? 1 : 0;
+}
+
+VideoFrameView CurrentVideoFrame() { return Instance().CurrentVideoFrame(); }
 
 }  // namespace VS::Movie::Intro

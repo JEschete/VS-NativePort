@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Movie/MoviePlayer.hpp"
+
 namespace VS::Movie::Intro {
 
 // Live bindings of the intro movie core to the title module's playing flag,
@@ -8,5 +10,6 @@ void StartLive();
 void StopLive();
 void StopLiveAfterAudioTail();
 int PlayLive();
+[[nodiscard]] VideoFrameView CurrentVideoFrame();
 
 }  // namespace VS::Movie::Intro

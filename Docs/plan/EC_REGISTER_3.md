@@ -85,25 +85,32 @@ Open work: #489.
 **Retirement gate:** title and gameplay use native input APIs; tests cover keyboard/gamepad equivalence, edges, repeat,
 analog axes, hot-plug and rumble cancellation. The legacy receive-buffer writer can be removed after its last consumer.
 
-#### EC-08: Native decoding with compatibility-backed presentation
+#### EC-08: Owned movie playback with native frame presentation
 
 **Evidence:** `Native/Engine/src/Movie/Intro/Player.cpp`, `Native/Engine/src/Movie/MoviePlayer.cpp`,
-and `Native/Tools/Extract/src/main.cpp`.
+`Native/Engine/src/Movie/Intro/PlayerLive.cpp`, `Native/Desktop/src/main.cpp`, and
+`Native/Tools/Extract/src/main.cpp`.
 
-The current player opens converted Matroska assets through DataStore, decodes AV1 with dav1d and FLAC with dr_flac,
-and submits native audio. Frame advancement uses movie ticks converted to nanoseconds. Rendering still uploads RGB
-data through page space; the global player and intro's existing scheduling/display contracts remain migration debt.
+The title intro now owns a move-only `PlaybackSession` over incremental Matroska, AV1 and FLAC decoding. Its audio
+source queue is capped at 100 ms; consumed samples drive the presentation clock, with logical-tick and monotonic
+fallbacks when output is unavailable or fails. The desktop consumer presents session-owned RGBA frames through the
+GPU path instead of writing movie pixels into page space. After skip or natural picture completion, the title host
+continues pumping audio without decoding hidden video through the 4401-tick soundtrack tail. Pause and seek are not
+supported; closing releases the session, and a new session starts from the beginning.
+
+**Status:** #53 verifies the adopted title-movie slice, including synchronization bounds, skip, natural completion,
+audio-tail lifetime, device loss/re-entry and cleanup. The title's legacy timing globals and display-environment
+setup remain in its control path; broader EC-08 compatibility retirement is not claimed.
+
 The old MDEC-facing intro routines (TITLE 22C.c:3433-3577), their strip buffers, ring stream and `MovieData_t`
-state, the `libpress` shims and the `libds` ring-stream shims are retired (#276); the intro's draw page is owned by its
-live host. That is source retirement, not frame-count, A/V-clock, skip, re-entry or soundtrack-tail acceptance.
-Open work: #53.
+state, the `libpress` shims and the `libds` ring-stream shims are retired (#276).
 
 **Retain:** picture duration, skip rules, attract-loop behavior and the soundtrack tail continuing under the title.
-**Replace:** remaining page-coordinate outputs and implicit session lifecycle with explicit frame/audio ownership,
-a native presentation contract and one defined synchronization clock.
+**Remaining boundary:** no pause or seek API; the title still binds its original scheduling and display state.
 
-**Retirement gate:** verified frame count/duration, A/V synchronization, skip, re-entry and audio-tail behavior. Missing
-or invalid converted assets fail explicitly. Black placeholder frames do not pass movie parity.
+**Retirement gate:** missing or invalid converted assets fail explicitly; black placeholder frames do not pass movie
+parity. The converted title-movie path is verified, while broader movie-asset parity and compatibility retirement
+remain separate from #53.
 
 #### EC-09: Memory-card stubs versus native persistence
 
