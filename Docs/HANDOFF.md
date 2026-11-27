@@ -2,8 +2,8 @@
 
 ## State
 
-- Current code revision: `efb998fc7`; the scripted-spawn evidence name is restored and exact-revision CI passed. The #55 issue comment has the run and focused-test evidence.
-- [#55](https://github.com/JEschete/VS-NativePort/issues/55) keeps scripted actor allocations unpublished until their owned model-load ticket reports success. This is a partial milestone, not issue completion; CI and focused evidence are tracked on the issue.
+- Current code revision: `decd4f504`; exact-revision CI passed. The #55 issue comment has the run and focused-test evidence.
+- [#55](https://github.com/JEschete/VS-NativePort/issues/55) publishes scripted and equipped actors only after their owned model loads succeed, discarding unpublished actors and releasing owned slots on failure. This is a partial milestone, not issue completion; evidence is tracked on the issue.
 
 ## Next and open limits
 
