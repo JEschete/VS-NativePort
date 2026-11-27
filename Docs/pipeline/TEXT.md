@@ -91,7 +91,10 @@ to the existing page/palette and restores both immediately after drawing. GPU pa
 explicit EC-01/EC-04 debt, **not** full font or compatibility retirement. Migrated prompts use no runtime
 UTF-8-to-legacy string/container reconstruction.
 
-Open work: #54, #500.
+The selected Save picker text-adoption gate in [#54](https://github.com/JEschete/VS-NativePort/issues/54) is
+verified; its [acceptance evidence](https://github.com/JEschete/VS-NativePort/issues/54#issuecomment-7227396323)
+covers stable IDs, decoded instant text, independent scaled layout/rendering and repeated entry. Broader
+string-table and character-map conversion remains open under [#500](https://github.com/JEschete/VS-NativePort/issues/500).
 
 ### 5.2 Shared catalog ownership and encyclopedia text
 
