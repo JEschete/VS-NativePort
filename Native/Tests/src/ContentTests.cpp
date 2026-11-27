@@ -12,6 +12,7 @@
 #include <expected>
 #include <filesystem>
 #include <fstream>
+#include <iterator>
 #include <memory>
 #include <optional>
 #include <span>
@@ -991,8 +992,19 @@ TEST_CASE("Movie session rejects a truncated converted asset during startup",
                    {},
                    std::nullopt};
   const auto truncated_root = scope.CopyToUnicodeRoot(root);
+  const auto movie_path = truncated_root / "disc" / "MOV" / "TITLE.STR.mkv";
+  std::ifstream input(movie_path, std::ios::binary);
+  REQUIRE(input.good());
+  const std::array<char, 4> cluster_id = {'\x1F', '\x43', '\xB6', '\x75'};
+  const std::vector<char> bytes((std::istreambuf_iterator<char>(input)),
+                                std::istreambuf_iterator<char>{});
+  const auto first_cluster = std::search(bytes.begin(), bytes.end(),
+                                         cluster_id.begin(), cluster_id.end());
+  REQUIRE(first_cluster != bytes.end());
+  REQUIRE(first_cluster != bytes.begin());
   std::filesystem::resize_file(
-      truncated_root / "disc" / "MOV" / "TITLE.STR.mkv", 64);
+      movie_path,
+      static_cast<std::uintmax_t>(std::distance(bytes.begin(), first_cluster)));
   REQUIRE(Content::DataStore::Open(truncated_root).has_value());
 
   auto opened = VS::Movie::PlaybackSession::Open("MOV/TITLE.STR");
