@@ -30,7 +30,8 @@ inline constexpr int kPercentComplete = 100;
 // animation sets (OBJ\E*.ESQ, #206). 7: extract converts the actor effect
 // texture sheets (OBJ\E*.ETM, #207). 8: extract converts the enemy archetypes
 // (MAP\*.ZUD, #200). 9: extract converts the zones (MAP\ZONE*.ZND, #517).
-inline constexpr int kAssetPipelineVersion = 9;
+// 10: workshop result CSVs no longer emit reserved bytes as columns (#520).
+inline constexpr int kAssetPipelineVersion = 10;
 using HashProgress = std::function<void(int)>;
 
 struct CloseDiscHandle {

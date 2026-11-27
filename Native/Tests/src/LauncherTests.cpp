@@ -892,6 +892,14 @@ TEST_CASE("Launcher checks every inventoried asset before reusing extraction",
                   .has_value());
 }
 
+TEST_CASE("Launcher rejects cached assets from the former workshop schema",
+          "[launcher][assets]") {
+  LauncherFixture fixture;
+  fixture.Ready(9);
+  CHECK_FALSE(Launcher::CheckAssets(fixture.root / "assets", fixture.image)
+                  .has_value());
+}
+
 TEST_CASE("Launcher does not accept a missing or invalid completion marker",
           "[launcher]") {
   LauncherFixture fixture;
