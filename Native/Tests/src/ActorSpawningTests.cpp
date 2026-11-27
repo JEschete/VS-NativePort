@@ -1917,7 +1917,7 @@ TEST_CASE("A scripted actor stays unpublished until its model is ready",
   REQUIRE(host.owned_requests.size() == 1);
 }
 
-TEST_CASE("A scripted actor publishes after its model completes",
+TEST_CASE("A scripted actor spawns into a free slot below 16",
           "[actors][actors-spawning]") {
   FakeSpawnHost host;
   actors::ScriptedActorSpawnTable pending;
