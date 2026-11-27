@@ -847,6 +847,7 @@ struct QueuedAssetState {
   ActorRecordMemory memory = nullptr;
   std::optional<int> shared_record_slot;
   ActorAssetLoadState loader;
+  bool loader_state_initialized = false;
 };
 
 std::array<QueuedAssetState, kActorAssetRequestCount> requestStates{};
@@ -924,7 +925,8 @@ class LiveActorAssetHost final : public ActorAssetHost {
                                          ? submitted_memory_
                                          : nullptr,
                            .shared_record_slot = request.shared_record_slot,
-                           .loader = {}};
+                           .loader = {},
+                           .loader_state_initialized = true};
   }
   [[nodiscard]] ActorAssetIdentity RequestIdentity(int slot) const override {
     if (RequestKind(slot) == 0) return {};
@@ -962,10 +964,11 @@ class LiveActorAssetHost final : public ActorAssetHost {
       return result;
     }
     ActorAssetLoadState& state = requestStates[0].loader;
-    // The unowned ETM stream still uses its legacy phase and buffer (#207).
-    if (kind == ActorAssetKind::kEffectTextureLoad) {
+    if (kind == ActorAssetKind::kEffectTextureLoad &&
+        !requestStates[0].loader_state_initialized) {
       state.effect_texture_phase = legacyEtmLoadPhase;
       state.effect_texture_file = Address(legacyEtmFileBuffer);
+      requestStates[0].loader_state_initialized = true;
     }
     const int result = RunLoader(*this, state, request, kind);
     requestStates[0].shared_record_slot = request.shared_record_slot;

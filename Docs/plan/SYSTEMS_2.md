@@ -18,8 +18,9 @@
   - `AsyncLoader` does background loads with completion handles, replacing `DsRead` callbacks. **Actor queue (#48):**
     each queue entry owns its parser phases, buffers, cursors, ticket and record-memory resolver; actor, weapon and
     sequence loads resume and cancel from the entry, not module globals. Queue shifts move this state, and clearing
-    the queue (used by the battle initializer) discards it. Legacy parser symbols are output-only diagnostic snapshots,
-    except the unowned ETM stream's phase and buffer (#207). File-read starts distinguish success, a full request queue
+    the queue (used by the battle initializer) discards it. Legacy parser symbols are output-only diagnostic snapshots;
+    a raw ETM queue entry imports its legacy phase and buffer once when first processed, while that unowned producer
+    remains #207. File-read starts distinguish success, a full request queue
     and failure (#518): only a full queue permits the synchronous read fallback, and a converted-file error or failed
     fallback frees the loader's allocation from the same heap end and fails the request before parsing, binding or
     texture upload. Open work: #48 (serialized file streams, typed shared-record references to mutable actor slots,

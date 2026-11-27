@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include <algorithm>
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <span>
@@ -41,6 +42,7 @@
 #include "Battle/TargetingDrawLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/DiscQueue.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Effects/CameraLiveState.hpp"
 #include "Effects/Runtime.hpp"
 #include "Event/ScriptActorOpcodes.hpp"
@@ -652,6 +654,9 @@ static int FacialTexturePixelsMatch(RECT* destination, const uint16_t* image,
 
 int Tests_FacialTextureBankHandoff(void) {
   enum { kFirstFrameColumn = 8, kSharedFrameColumn = 4 };
+  alignas(VS::Core::Memory::kHeapUnitBytes) std::array<std::byte, 4096>
+      heap_arena{};
+  VS::Core::Memory::ScopedLiveGameHeap heap{heap_arena};
   uint16_t image[kFacialImageHeaderWords +
                  kFacialImageWidth * kFacialImageHeight] = {kFacialImageWidth,
                                                             kFacialImageHeight};
@@ -660,6 +665,10 @@ int Tests_FacialTextureBankHandoff(void) {
     image[index + kFacialImageHeaderWords] =
         static_cast<uint16_t>(kFacialFirstPixel + index);
   }
+  auto* const uploaded_image = static_cast<uint16_t*>(
+      VS::Core::Memory::AllocateLiveFromHighEnd(sizeof image));
+  if (uploaded_image == nullptr) return 0;
+  memcpy(uploaded_image, image, sizeof image);
   RECT source = {640, 256, 64, 2}, destination = {264, 84, 4, 2};
   uint16_t saved_source[kFacialImageWidth * kFacialImageHeight];
   uint16_t saved_destination[kFacialUploadWidth * kFacialImageHeight];
@@ -699,7 +708,7 @@ int Tests_FacialTextureBankHandoff(void) {
   upload.texture_slot = 26;
   VS::Content::legacyActorAssetRequests[0] = upload;
   VS::Content::legacyEtmLoadPhase = 1;
-  VS::Content::legacyEtmFileBuffer = image;
+  VS::Content::legacyEtmFileBuffer = uploaded_image;
   VS::Content::legacyEtmDiscRequest = request;
   VS::Actors::sharedSequenceBankTexturePages[0] = 0;
   VS::Actors::sequenceTexturePagesOneBased[1] = 0;
@@ -707,7 +716,12 @@ int Tests_FacialTextureBankHandoff(void) {
   // The upload leaves the request at the head, pending its second frame.
   int passed = VS::Content::UpdateLiveActorAssetQueue() == 1 &&
                VS::Content::legacyActorAssetRequests[0].asset_kind == 9 &&
-               VS::Actors::sharedSequenceBankTexturePages[0] == 26;
+               VS::Actors::sharedSequenceBankTexturePages[0] == 26 &&
+               VS::Content::legacyEtmLoadPhase == 2;
+  VS::Content::legacyEtmLoadPhase = 0;
+  VS::Content::legacyEtmFileBuffer = nullptr;
+  passed = VS::Content::UpdateLiveActorAssetQueue() == 1 &&
+           VS::Content::legacyActorAssetRequests[0].asset_kind == 0 && passed;
   VS::Actors::ActorRecord actor = {};
   actor.is_8bit_texture = 1;
   actor.texture_overlays[6] = VS::Actors::TextureOverlayRect{16, 20, 8, 2};
