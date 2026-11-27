@@ -1531,6 +1531,34 @@ TEST_CASE("Preview cleanup preserves reused disc slots and empty foreign loads",
   VS::Content::ReleaseLiveDiscRequest(foreign);
 }
 
+TEST_CASE("A failed or replaced queued read fails its owned asset",
+          "[encyclopedia-preview][asset-ownership][asset-read-completion]") {
+  const bool replaced = GENERATE(false, true);
+  PreviewLifecycleFixture fixture;
+  static_cast<void>(QueuePreviewParts(false, true));
+  const auto ticket = StartPreviewSequenceRead(fixture);
+  auto* read = VS::Content::legacySequenceDiscRequest;
+  const auto* file = VS::Content::legacySequenceFileBuffer;
+  std::uint64_t foreign_generation = 0;
+  if (replaced) {
+    VS::Content::ReleaseLiveDiscRequest(read);
+    auto* foreign = VS::Content::AllocateLiveDiscRequest(
+        VS::Content::DiscFileExtent{1, 16});
+    REQUIRE(foreign == read);
+    foreign_generation = VS::Content::LiveDiscRequestGeneration(foreign);
+    foreign->state = VS::Content::DiscRequestState::kLoaded;
+  } else {
+    read->state = VS::Content::DiscRequestState::kError;
+  }
+  CHECK(VS::Content::UpdateLiveActorAssetQueue() == -1);
+  CHECK(VS::Content::LiveActorAssetCompletion(ticket).outcome ==
+        ActorAssetOutcome::kFailed);
+  CHECK_FALSE(VS::Core::Memory::LivePayloadCapacity(file).has_value());
+  CHECK(VS::Content::LiveDiscRequestGeneration(read) == foreign_generation);
+  REQUIRE(score::CleanupLiveEnemyPreviewOwnedState());
+  if (replaced) VS::Content::ReleaseLiveDiscRequest(read);
+}
+
 TEST_CASE(
     "Converted read failures fail owned tickets without blocking the next",
     "[encyclopedia-preview][asset-read-failure]") {

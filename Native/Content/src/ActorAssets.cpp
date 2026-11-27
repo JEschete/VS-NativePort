@@ -1945,7 +1945,8 @@ int ParseActorModel(ActorAssetHost& host, ActorAssetLoadState& state,
 }
 
 // decomp: BATTLE.PRG func_8009CFB0 (src/BATTLE/BATTLE.PRG/30DB0.c:1980)
-int ReleaseActorModel(ActorAssetHost& host, int slot) {
+int ReleaseActorModel(ActorAssetHost& host, int slot,
+                      bool release_attached_weapons) {
   if (slot < 0 || slot >= kActorRecordSlots ||
       !host.ActorSummary(slot).present) {
     return -1;
@@ -1980,7 +1981,7 @@ int ReleaseActorModel(ActorAssetHost& host, int slot) {
       }
     }
     static_cast<void>(ReleaseActorSequence(host, slot, 0));
-    if (slot < kWeaponOwnerSlots) {
+    if (release_attached_weapons && slot < kWeaponOwnerSlots) {
       static_cast<void>(ReleaseWeaponModel(host, slot * 2));
       static_cast<void>(ReleaseWeaponModel(host, (slot * 2) | 1));
     }

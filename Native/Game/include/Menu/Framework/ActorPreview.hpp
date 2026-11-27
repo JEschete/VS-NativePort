@@ -81,9 +81,9 @@ struct PreviewWeapon {
 };
 
 // The blocks of a clone's sequence copy (224.c:78-90). The source is the
-// cloned record's block, read before the asset queue ran: the queue installs
-// the clone in actor slot 1 (and its companion in slot 16) and may replace
-// the source's record there.
+// cloned record's block, retained while the owned clone requests finish.
+// Cloning the current preview itself reuses that owner rather than replacing
+// the source while its data is still needed.
 struct PreviewSequenceCopy {
   Content::AssetAddress clone = Content::AssetAddress::kNone;
   Content::AssetAddress source = Content::AssetAddress::kNone;
@@ -112,17 +112,19 @@ class ActorPreviewHost {
   [[nodiscard]] virtual Content::AssetAddress ActorBlock(int slot) const = 0;
   [[nodiscard]] virtual Content::AssetAddress WeaponBlock(int slot) const = 0;
 
-  // The battle asset queue: a request, one queue step (true while requests
-  // remain), a released model and Ashley's released weapon sequences.
-  virtual void QueueAsset(const Content::ActorAssetRequest& request) = 0;
-  [[nodiscard]] virtual bool UpdateAssetQueue() = 0;
-  virtual void ReleaseModel(int slot) = 0;
+  // A preview owns its record storage and tickets until release. Clone
+  // requests name no destination; the owner supplies storage at bind time.
+  [[nodiscard]] virtual bool BeginPreview(int source_slot) = 0;
+  [[nodiscard]] virtual bool QueueAsset(
+      const Content::ActorAssetRequest& request) = 0;
+  [[nodiscard]] virtual bool FinishPreviewAssets() = 0;
+  virtual void ReleasePreviewAssets() = 0;
   virtual void ReleaseSequences(int slot) = 0;
   // Gives the record at `copy.clone` the sequences, sequence model, flags and
   // common animation count of the record at `copy.source`; the battle
   // sequence is copied into `copy.battle_copy`, or shared when that is kNone
   // (224.c:78-90).
-  virtual void CopySequences(const PreviewSequenceCopy& copy) = 0;
+  [[nodiscard]] virtual bool CopySequences(const PreviewSequenceCopy& copy) = 0;
 
   // The record writes of the pose resets.
   virtual void SetWeaponDrawn(int slot) = 0;
@@ -206,7 +208,7 @@ inline constexpr int kCompanionOrderingEntries = 48;
 void LoadActorPreview(ActorPreviewHost& host, int source_slot);
 // MAINMENU.PRG func_800F9A78: queues the preview record, companion and
 // weapon clones and waits for the queue.
-void CloneActorPreview(ActorPreviewHost& host, int source_slot);
+bool CloneActorPreview(ActorPreviewHost& host, int source_slot);
 // MAINMENU.PRG func_800F9CB0.
 void ResetActorPreviewPose(ActorPreviewHost& host);
 // MAINMENU.PRG func_800F9E0C.

@@ -15,6 +15,7 @@ void LoadLiveActorPreview(int source_actor_slot);
 void CloneLiveActorPreview(int source_actor_slot);
 void ResetLiveActorPreviewPose();
 void ReleaseLiveActorPreview();
+[[nodiscard]] bool CleanupLiveActorPreviewOwnedState();
 int DrawLiveActorPreview(VS::Core::Gte::MATRIX* preview_camera_matrix);
 void ResetLiveAshleyEquipmentPose();
 void QueueLiveAshleyWeaponAnimations(int sequence_model_id);

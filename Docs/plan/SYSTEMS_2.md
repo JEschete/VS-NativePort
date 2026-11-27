@@ -24,8 +24,12 @@
     and failure (#518): only a full queue permits the synchronous read fallback, and a converted-file error or failed
     fallback frees the loader's allocation from the same heap end and fails the request before parsing, binding or
     texture upload. File-read locations and request pointers are also entry-owned; the legacy stream symbols are
-    output-only snapshots for submitted requests. Open work: #48 (typed shared-record references to mutable actor slots,
-    unowned producers, immutable model/animation sharing).
+    output-only snapshots for submitted requests. Failed or replaced reads fail the owned request after releasing its
+    actual allocation, without releasing a foreign read generation. Owned requests check their target again when
+    processing starts. Menu actor previews own their records, tickets and Ashley's copied battle bank; partial
+    submission, failure, replacement and session cleanup cancel before releasing those resources, without releasing
+    foreign records. Open work: #48 (typed shared-record references to mutable actor slots, remaining unowned producers,
+    immutable model/animation sharing).
   - **Decoders** (used by VS.Extract and the round-trip tests) produce typed objects: TIM, MPD, ZND, SHP, SEQ, WEP, ARM, ZUD, SYD, FBT/FBC, EVT, AKAO, XA, MCDATA, ITEMNAME/ITEMHELP text, HF0/HF1 help, EFFECT data.
   - **Loaders** (used by the game) read glTF, PNG, WAV, FLAC and JSON from `Native\data\` and build the same typed objects. The round-trip rule in ASSET_PIPELINE §7 proves `decode(raw) == load(converted)`.
   - **Catalogs** are loaded from `Native\data\catalogs\`, validated against `schemas\`, and frozen into immutable registries (§9).

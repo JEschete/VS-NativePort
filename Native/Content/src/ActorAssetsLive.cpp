@@ -831,6 +831,7 @@ struct QueuedAssetState {
   ActorAssetLoadState loader;
   std::array<FileReadState, 4> reads;
   bool loader_state_initialized = false;
+  bool target_validated = false;
 };
 
 std::array<QueuedAssetState, kActorAssetRequestCount> requestStates{};
@@ -852,6 +853,12 @@ LiveFileStream SnapshotStream(AssetFileStream stream) {
 
 FileReadState& ReadState(AssetFileStream stream) {
   return requestStates[0].reads.at(static_cast<std::size_t>(stream));
+}
+
+bool ReadFailed(const FileReadState& read) {
+  return read.request != nullptr &&
+         (LiveDiscRequestGeneration(read.request) != read.generation ||
+          read.request->state == DiscRequestState::kError);
 }
 
 void PublishRequestSnapshot(const QueuedAssetState& state) {
@@ -958,6 +965,15 @@ class LiveActorAssetHost final : public ActorAssetHost {
     LegacyActorAssetRequest& head = legacyActorAssetRequests[0];
     ActorAssetRequest request = LoadRequest(head);
     request.shared_record_slot = requestStates[0].shared_record_slot;
+    if (!requestStates[0].target_validated) {
+      if (!CanStartOwnedRequest(request)) return kAssetRefused;
+      requestStates[0].target_validated = true;
+    }
+    if (IsOwnableActorAssetRequest(request) &&
+        std::ranges::any_of(requestStates[0].reads, ReadFailed)) {
+      CountRefusal("asset file read failed or was replaced", request.kind);
+      return AbandonHeadRequest(kind) ? kAssetRefused : kAssetPending;
+    }
     if (kind == ActorAssetKind::kGimmick) {
       const auto result = VS::Field::CreateLiveGimmickInstance(request);
       requestStates[0].shared_record_slot = request.shared_record_slot;
@@ -1451,6 +1467,26 @@ class LiveActorAssetHost final : public ActorAssetHost {
     return memory != nullptr ? memory(owner, table, slot) : AssetAddress::kNone;
   }
 
+  [[nodiscard]] static bool CanStartOwnedRequest(
+      const ActorAssetRequest& request) {
+    if (requestStates[0].identity.owner == kUnownedActorAssetOwner) return true;
+    const auto kind = static_cast<ActorAssetKind>(request.kind);
+    const bool weapon = kind == ActorAssetKind::kWeaponModelLoad ||
+                        kind == ActorAssetKind::kWeaponModelParse;
+    const auto table =
+        weapon ? ActorRecordTable::kWeapon : ActorRecordTable::kActor;
+    const int slot = request.target_slot;
+    const AssetAddress expected = RecordMemory(table, slot, request);
+    const AssetAddress present =
+        weapon ? Address(WeaponAt(slot)) : Address(ActorAt(slot));
+    if (expected == AssetAddress::kNone ||
+        (present != AssetAddress::kNone && present != expected)) {
+      CountRefusal("asset target no longer belongs to its owner", slot);
+      return false;
+    }
+    return true;
+  }
+
   // A cleared record at `destination` for an empty slot. The loaders bind
   // only empty slots, so a refused destination leaves the slot empty, as the
   // original's null destination did.
@@ -1561,6 +1597,15 @@ int UpdateLiveActorAssetQueue() {
   return UpdateActorAssetQueue(host);
 }
 
+bool LiveActorAssetFileReadPending() {
+  return std::ranges::any_of(
+      requestStates[0].reads, [](const FileReadState& read) {
+        return read.request != nullptr && !ReadFailed(read) &&
+               (read.request->state == DiscRequestState::kEnqueued ||
+                read.request->state == DiscRequestState::kReading);
+      });
+}
+
 std::optional<ActorAssetTicket> SubmitLiveActorAsset(
     const ActorAssetRequest& request, ActorAssetOwner owner,
     ActorRecordMemory memory) {
@@ -1621,10 +1666,10 @@ int ReleaseLiveWeaponModel(int slot) {
   return ReleaseWeaponModel(host, slot);
 }
 
-void CopyLiveWeaponSequence(SequenceBuffer* destination,
+bool CopyLiveWeaponSequence(SequenceBuffer* destination,
                             SequenceBuffer* source) {
   LiveActorAssetHost host;
-  CopyWeaponSequence(host, Address(destination), Address(source));
+  return CopyWeaponSequence(host, Address(destination), Address(source));
 }
 
 int ReleaseLiveActorSequence(int target, int kind) {
@@ -1632,9 +1677,9 @@ int ReleaseLiveActorSequence(int target, int kind) {
   return ReleaseActorSequence(host, target, kind);
 }
 
-int ReleaseLiveActorModel(int slot) {
+int ReleaseLiveActorModel(int slot, bool release_attached_weapons) {
   LiveActorAssetHost host;
-  return ReleaseActorModel(host, slot);
+  return ReleaseActorModel(host, slot, release_attached_weapons);
 }
 
 int ReleaseLiveSequenceEffectTexture(int bank) {

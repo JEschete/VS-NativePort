@@ -654,7 +654,8 @@ int UpdateActorModelLoad(ActorAssetHost& host, ActorAssetLoadState& state,
                          ActorAssetRequest& request);
 int ParseActorModel(ActorAssetHost& host, ActorAssetLoadState& state,
                     ActorAssetRequest& request);
-int ReleaseActorModel(ActorAssetHost& host, int slot);
+int ReleaseActorModel(ActorAssetHost& host, int slot,
+                      bool release_attached_weapons = true);
 
 // SEQ and ETM files (30DB0.c:1433-2060).
 int FindSharedActorSequence(const ActorAssetHost& host,

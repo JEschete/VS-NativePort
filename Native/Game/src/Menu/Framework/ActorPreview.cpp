@@ -1,7 +1,6 @@
 // Hand-maintained (tools/port/owned.csv).
 #include "Menu/Framework/ActorPreview.hpp"  // NOLINT(build/include): typed API
 
-#include <array>
 #include <cstdint>
 #include <optional>
 
@@ -43,35 +42,34 @@ constexpr Render::ColorCode kNoFade{};
 }
 
 // decomp: MAINMENU.PRG func_800F9A78 (src/MENU/MAINMENU.PRG/224.c:42-56)
-void QueueCompanionClone(ActorPreviewHost& host, const PreviewActor& source,
+bool QueueCompanionClone(ActorPreviewHost& host, const PreviewActor& source,
                          ActorAssetRequest& request) {
   const int companion_slot = source.companion_slot;
   // The original indexed the actor table with the byte unchecked and read
   // the model of a missing companion (224.c:43-47).
   if (!ValidActorSlot(companion_slot)) {
     host.Refuse("preview clone of a companion past the actor table");
-    return;
+    return true;
   }
   const std::optional<PreviewActor> companion = host.Actor(companion_slot);
   if (!companion) {
     host.Refuse("preview clone of a missing companion");
-    return;
+    return true;
   }
   request.kind = Kind(ActorAssetKind::kActorModelParse);
   request.target_slot = TargetSlot(kPreviewCompanionSlot);
-  request.destination = host.Allocate(PreviewAllocation::kActorRecord);
   request.model_id = static_cast<std::int16_t>(companion->model_id);
   request.shared_record_slot = companion_slot;
   request.sub_kind = kCloneLinkedSubKind;
   request.texture_slot = kCloneCompanionTextureSlot;
   request.variant = source.variant;
   request.material = 0;
-  host.QueueAsset(request);
+  return host.QueueAsset(request);
 }
 
 // decomp: MAINMENU.PRG func_800F9A78 (src/MENU/MAINMENU.PRG/224.c:58-73)
 // The request keeps the variant the record clone set.
-void QueueWeaponClone(ActorPreviewHost& host, int source_slot,
+bool QueueWeaponClone(ActorPreviewHost& host, int source_slot,
                       const PreviewActor& source, int weapon,
                       ActorAssetRequest& request) {
   const int weapon_slot = (source.weapon_pair * kWeaponModelsPerActor) + weapon;
@@ -79,19 +77,18 @@ void QueueWeaponClone(ActorPreviewHost& host, int source_slot,
   // (224.c:59-60).
   if (!ValidWeaponSlot(weapon_slot)) {
     host.Refuse("preview clone of a weapon past the weapon models");
-    return;
+    return true;
   }
   const std::optional<PreviewWeapon> model = host.Weapon(weapon_slot);
-  if (!model) return;
+  if (!model) return true;
   request.kind = Kind(ActorAssetKind::kWeaponModelParse);
   request.target_slot = TargetSlot(kPreviewWeaponModelSlot + weapon);
-  request.destination = host.Allocate(PreviewAllocation::kWeaponModel);
   request.model_id = model->model_id;
   request.shared_record_slot = (source_slot * kWeaponModelsPerActor) + weapon;
   request.sub_kind = kCloneLinkedSubKind;
   request.texture_slot = model->attachment_slot;
   request.material = model->material;
-  host.QueueAsset(request);
+  return host.QueueAsset(request);
 }
 
 // decomp: MAINMENU.PRG func_800F9EB8 (src/MENU/MAINMENU.PRG/224.c:216-233)
@@ -129,7 +126,7 @@ void DrawPreviewWeapons(ActorPreviewHost& host, const PreviewActor& actor) {
 
 // decomp: MAINMENU.PRG func_800F9A24 (src/MENU/MAINMENU.PRG/224.c:14)
 void LoadActorPreview(ActorPreviewHost& host, int source_slot) {
-  CloneActorPreview(host, source_slot);
+  if (!CloneActorPreview(host, source_slot)) return;
   ResetActorPreviewPose(host);
   // The original wrote the flag through the record unchecked (224.c:15).
   if (!host.Actor(kPreviewActorSlot)) {
@@ -141,48 +138,64 @@ void LoadActorPreview(ActorPreviewHost& host, int source_slot) {
 }
 
 // decomp: MAINMENU.PRG func_800F9A78 (src/MENU/MAINMENU.PRG/224.c:24)
-void CloneActorPreview(ActorPreviewHost& host, int source_slot) {
+bool CloneActorPreview(ActorPreviewHost& host, int source_slot) {
   // The original indexed the actor table unchecked and read a missing
   // record's model (224.c:29-33).
   if (!ValidActorSlot(source_slot)) {
     host.Refuse("preview clone of an actor past the actor table");
-    return;
+    return false;
   }
   const std::optional<PreviewActor> source = host.Actor(source_slot);
   if (!source) {
     host.Refuse("preview clone of a missing actor");
-    return;
+    return false;
   }
+  if (!host.BeginPreview(source_slot)) return false;
+  if (source_slot == kPreviewActorSlot) return true;
   // The original kept the source record's pointer across the asset queue
   // (224.c:29, 78-90).
   const AssetAddress source_block = host.ActorBlock(source_slot);
-  const AssetAddress clone = host.Allocate(PreviewAllocation::kActorRecord);
   ActorAssetRequest request{};
   request.kind = Kind(ActorAssetKind::kActorModelParse);
   request.target_slot = TargetSlot(kPreviewActorSlot);
   request.model_id = static_cast<std::int16_t>(source->model_id);
   request.shared_record_slot = source_slot;
-  request.destination = clone;
   request.sub_kind = kCloneRecordSubKind;
   request.variant = source->variant;
   request.material = 0;
-  host.QueueAsset(request);
-  if (source->companion_slot >= Actors::kFirstCompanionRecord) {
-    QueueCompanionClone(host, *source, request);
+  bool queued = host.QueueAsset(request);
+  if (queued && source->companion_slot >= Actors::kFirstCompanionRecord) {
+    queued = QueueCompanionClone(host, *source, request);
   }
-  for (int weapon = 0; weapon < kWeaponModelsPerActor; ++weapon) {
-    QueueWeaponClone(host, source_slot, *source, weapon, request);
+  for (int weapon = 0; queued && weapon < kWeaponModelsPerActor; ++weapon) {
+    queued = QueueWeaponClone(host, source_slot, *source, weapon, request);
   }
-  while (host.UpdateAssetQueue()) {
+  if (!queued) {
+    host.Refuse("preview asset submission failed");
+    host.ReleasePreviewAssets();
+    return false;
   }
+  if (!host.FinishPreviewAssets()) return false;
+  const AssetAddress clone = host.ActorBlock(kPreviewActorSlot);
   // Ashley's clone copies her battle sequence, which her weapon changes
   // replace (QueueAshleyWeaponAnimations); other clones share the source's.
   const AssetAddress battle_copy =
       source->weapon_pair == 0
           ? host.Allocate(PreviewAllocation::kBattleSequence)
           : AssetAddress::kNone;
-  host.CopySequences(
-      {.clone = clone, .source = source_block, .battle_copy = battle_copy});
+  if (source->weapon_pair == 0 && battle_copy == AssetAddress::kNone) {
+    host.Refuse("preview battle sequence allocation failed");
+    host.ReleasePreviewAssets();
+    return false;
+  }
+  if (!host.CopySequences({.clone = clone,
+                           .source = source_block,
+                           .battle_copy = battle_copy})) {
+    if (battle_copy != AssetAddress::kNone) host.Free(battle_copy);
+    host.ReleasePreviewAssets();
+    return false;
+  }
+  return true;
 }
 
 // decomp: MAINMENU.PRG func_800F9CB0 (src/MENU/MAINMENU.PRG/224.c:100)
@@ -211,20 +224,7 @@ void ResetActorPreviewPose(ActorPreviewHost& host) {
 
 // decomp: MAINMENU.PRG func_800F9E0C (src/MENU/MAINMENU.PRG/224.c:149)
 void ReleaseActorPreview(ActorPreviewHost& host) {
-  const AssetAddress record = host.ActorBlock(kPreviewActorSlot);
-  const std::array<AssetAddress, kWeaponModelsPerActor> weapons{
-      host.WeaponBlock(kPreviewWeaponModelSlot),
-      host.WeaponBlock(kPreviewWeaponModelSlot + 1)};
-  host.ReleaseModel(kPreviewActorSlot);
-  host.Free(record);
-  const AssetAddress companion = host.ActorBlock(kPreviewCompanionSlot);
-  if (companion != AssetAddress::kNone) {
-    host.ReleaseModel(kPreviewCompanionSlot);
-    host.Free(companion);
-  }
-  for (const AssetAddress weapon : weapons) {
-    if (weapon != AssetAddress::kNone) host.Free(weapon);
-  }
+  host.ReleasePreviewAssets();
 }
 
 // decomp: MAINMENU.PRG func_800F9EB8 (src/MENU/MAINMENU.PRG/224.c:177)
@@ -295,6 +295,8 @@ void QueueAshleyWeaponAnimations(ActorPreviewHost& host,
   request.target_slot = TargetSlot(kAshleyActorSlot);
   request.model_id = static_cast<std::int16_t>(sequence_model_id);
   request.sub_kind = 0;
-  host.QueueAsset(request);
+  if (!host.QueueAsset(request)) {
+    host.Refuse("Ashley's weapon animation request failed");
+  }
 }
 }  // namespace VS::Menu::Framework

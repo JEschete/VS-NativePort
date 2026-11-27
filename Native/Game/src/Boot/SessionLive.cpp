@@ -39,6 +39,7 @@
 #include "Input/Controllers.hpp"
 #include "Legacy/Psx.hpp"
 #include "Menu/BattleAbilitiesTerminalLive.hpp"
+#include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/Loot/LootTerminalLive.hpp"
 #include "Menu/MagicCostsLive.hpp"
@@ -92,6 +93,11 @@ void CleanupMenuOwners() {
   if (!Menu::CleanupLiveSceneNotificationOwnedState()) {
     VS::Core::Errorf("boot",
                      "scene-notification cleanup refused before session reset");
+    std::abort();
+  }
+  if (!Menu::Framework::CleanupLiveActorPreviewOwnedState()) {
+    VS::Core::Errorf("boot",
+                     "actor-preview cleanup refused before session reset");
     std::abort();
   }
   if (!Menu::Score::CleanupLiveEnemyPreviewOwnedState()) {

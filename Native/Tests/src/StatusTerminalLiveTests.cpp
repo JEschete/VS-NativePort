@@ -80,6 +80,113 @@ TEST_CASE("Terminal fixture loads production sequence font and queue resources",
                             [](auto width) { return width != 0; }));
 }
 
+TEST_CASE("Live preview replacement keeps one owner and releases it once",
+          "[status-terminal-live][menu-actor-preview][asset-ownership]") {
+  Fixture fixture;
+  const auto* source = VS::Actors::actorRecords[0];
+  const auto free_units = memory::GameHeap().FreeUnits();
+  for (int replacement = 0; replacement < 3; ++replacement) {
+    fw::CloneLiveActorPreview(0);
+    REQUIRE(VS::Actors::actorRecords[1] != nullptr);
+    CHECK(memory::GameHeap().FreeUnits() == free_units);
+    CHECK(VS::Actors::actorRecords[0] == source);
+  }
+  REQUIRE(fw::CleanupLiveActorPreviewOwnedState());
+  const auto released_units = memory::GameHeap().FreeUnits();
+  REQUIRE(fw::CleanupLiveActorPreviewOwnedState());
+  CHECK(VS::Actors::actorRecords[1] == nullptr);
+  CHECK(memory::GameHeap().FreeUnits() == released_units);
+  CHECK(VS::Actors::actorRecords[0] == source);
+}
+
+TEST_CASE("A full queue abandons partially submitted live preview records",
+          "[status-terminal-live][menu-actor-preview][asset-ownership]") {
+  Fixture fixture;
+  fw::ReleaseLiveActorPreview();
+  const auto free_units = memory::GameHeap().FreeUnits();
+  auto* source = VS::Actors::actorRecords[0];
+  REQUIRE(source != nullptr);
+  VS::Actors::ActorRecord companion = *source;
+  equipment_detail_tests::ValueRestore saved_companion{source->companion_slot};
+  equipment_detail_tests::ValueRestore saved_record{
+      VS::Actors::actorRecords[2]};
+  source->companion_slot = 2;
+  VS::Actors::actorRecords[2] = &companion;
+  VS::Content::ActorAssetRequest foreign{
+      .kind = static_cast<std::uint8_t>(
+          VS::Content::ActorAssetKind::kActorModelParse),
+      .target_slot = 3,
+      .model_id = VS::Content::kModellessActorId,
+      .shared_record_slot = {}};
+  for (int slot = 0; slot < VS::Content::kActorAssetRequestCount - 1; ++slot) {
+    REQUIRE(VS::Content::QueueLiveActorAsset(foreign) == slot);
+  }
+  fw::CloneLiveActorPreview(0);
+  CHECK(VS::Actors::actorRecords[1] == nullptr);
+  CHECK(VS::Content::FindLiveFreeActorAssetRequest() == 15);
+  CHECK(memory::GameHeap().FreeUnits() == free_units);
+  CHECK(VS::Actors::actorRecords[0] == source);
+  VS::Content::ClearLiveActorAssetQueue();
+}
+
+TEST_CASE("Preview cleanup preserves weapon records it does not own",
+          "[status-terminal-live][menu-actor-preview][asset-ownership]") {
+  Fixture fixture;
+  VS::Actors::WeaponModel foreign{};
+  foreign.bone_count = 1;
+  equipment_detail_tests::ValueRestore saved_record{
+      VS::Actors::weaponModels[2]};
+  VS::Actors::weaponModels[2] = &foreign;
+  REQUIRE(fw::CleanupLiveActorPreviewOwnedState());
+  CHECK(VS::Actors::actorRecords[1] == nullptr);
+  CHECK(VS::Actors::weaponModels[2] == &foreign);
+  CHECK(foreign.bone_count == 1);
+}
+
+TEST_CASE("A failed live preview sequence copy releases its loaded model",
+          "[status-terminal-live][menu-actor-preview][asset-ownership]") {
+  Fixture fixture;
+  fw::ReleaseLiveActorPreview();
+  const auto free_units = memory::GameHeap().FreeUnits();
+  auto* source = VS::Actors::actorRecords[0];
+  REQUIRE(source != nullptr);
+  std::array<std::byte, 8> invalid_sequence{};
+  equipment_detail_tests::ValueRestore saved_sequence{source->battle_sequence};
+  source->battle_sequence = invalid_sequence.data();
+  const auto refused = VS::Content::LiveActorAssetRefusals();
+  fw::CloneLiveActorPreview(0);
+  CHECK(VS::Actors::actorRecords[1] == nullptr);
+  CHECK(memory::GameHeap().FreeUnits() == free_units);
+  CHECK(VS::Content::FindLiveFreeActorAssetRequest() == 0);
+  CHECK(VS::Content::LiveActorAssetRefusals() == refused + 1);
+}
+
+TEST_CASE(
+    "A queued preview never overwrites a different owner's record",
+    "[status-terminal-live][menu-actor-preview][asset-target-ownership]") {
+  Fixture fixture;
+  fw::ReleaseLiveActorPreview();
+  const auto free_units = memory::GameHeap().FreeUnits();
+  auto* foreign = static_cast<VS::Actors::ActorRecord*>(
+      memory::AllocateLiveFromLowEnd(sizeof(VS::Actors::ActorRecord)));
+  REQUIRE(foreign != nullptr);
+  REQUIRE(VS::Content::QueueLiveActorAsset(
+              {.kind = static_cast<std::uint8_t>(
+                   VS::Content::ActorAssetKind::kActorModelParse),
+               .target_slot = 1,
+               .model_id = VS::Content::kModellessActorId,
+               .destination = Fixture::Address(foreign),
+               .shared_record_slot = {}}) == 0);
+  fw::CloneLiveActorPreview(0);
+  CHECK(VS::Actors::actorRecords[1] == foreign);
+  CHECK(foreign->model_id == VS::Content::kModellessActorId);
+  REQUIRE(fw::CleanupLiveActorPreviewOwnedState());
+  CHECK(VS::Actors::actorRecords[1] == foreign);
+  static_cast<void>(VS::Content::ReleaseLiveActorModel(1));
+  memory::FreeLiveFromLowEnd(foreign);
+  CHECK(memory::GameHeap().FreeUnits() == free_units);
+}
+
 TEST_CASE(
     "Terminal Live rejects forged expired and mismatched workspace borrows",
     "[status-terminal][status-terminal-live]") {

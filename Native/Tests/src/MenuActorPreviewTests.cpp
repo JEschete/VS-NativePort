@@ -1,4 +1,5 @@
 // Hand-maintained tests for the typed menu actor preview (#276).
+#include <algorithm>
 #include <array>
 #include <cstdint>
 #include <functional>
@@ -74,8 +75,11 @@ class FakePreview final : public fw::ActorPreviewHost {
   std::vector<std::string> refusals;
   std::vector<VS::Actors::CompanionStyle> companions;
   std::uintptr_t next_block = kFirstBlock;
+  std::size_t queue_limit = VS::Content::kActorAssetRequestCount;
   int pending_steps = 2;
   int tick_speed = 5;
+  bool finish_success = true;
+  bool copy_success = true;
   // Runs inside DrawModel with its companion argument: the record edits the
   // model pass makes.
   std::function<void(FakePreview&, int)> on_draw;
@@ -120,26 +124,62 @@ class FakePreview final : public fw::ActorPreviewHost {
   AssetAddress WeaponBlock(int slot) const override {
     return weapon_blocks.at(static_cast<std::size_t>(slot));
   }
-  void QueueAsset(const ActorAssetRequest& request) override {
+  bool BeginPreview(int) override { return true; }
+  bool QueueAsset(const ActorAssetRequest& request) override {
+    if (requests.size() >= queue_limit) return false;
+    if (request.kind == 2 || request.kind == 4) {
+      const auto kind = request.kind == 2 ? fw::PreviewAllocation::kActorRecord
+                                          : fw::PreviewAllocation::kWeaponModel;
+      const auto block = Allocate(kind);
+      const auto slot = static_cast<std::size_t>(request.target_slot);
+      if (request.kind == 2) {
+        actor_blocks.at(slot) = block;
+      } else {
+        weapon_blocks.at(slot) = block;
+      }
+    }
     requests.push_back(request);
+    return true;
   }
-  bool UpdateAssetQueue() override {
+  bool UpdateAssetQueue() {
     calls.emplace_back("Pump");
     if (on_pump) {
       on_pump(*this);
     }
     return pending_steps-- > 0;
   }
-  void ReleaseModel(int slot) override {
-    calls.push_back(Call("ReleaseModel", {slot}));
+  bool FinishPreviewAssets() override {
+    while (UpdateAssetQueue()) {
+    }
+    if (!finish_success) ReleasePreviewAssets();
+    return finish_success;
   }
+  void ReleasePreviewAssets() override {
+    ReleaseModel(fw::kPreviewActorSlot);
+    Free(actor_blocks[fw::kPreviewActorSlot]);
+    actor_blocks[fw::kPreviewActorSlot] = AssetAddress::kNone;
+    if (actor_blocks[fw::kPreviewCompanionSlot] != AssetAddress::kNone) {
+      ReleaseModel(fw::kPreviewCompanionSlot);
+      Free(actor_blocks[fw::kPreviewCompanionSlot]);
+      actor_blocks[fw::kPreviewCompanionSlot] = AssetAddress::kNone;
+    }
+    for (int slot = fw::kPreviewWeaponModelSlot;
+         slot < fw::kPreviewWeaponModelSlot + fw::kWeaponModelsPerActor;
+         ++slot) {
+      auto& block = weapon_blocks.at(static_cast<std::size_t>(slot));
+      if (block != AssetAddress::kNone) Free(block);
+      block = AssetAddress::kNone;
+    }
+  }
+  void ReleaseModel(int slot) { calls.push_back(Call("ReleaseModel", {slot})); }
   void ReleaseSequences(int slot) override {
     calls.push_back(Call("ReleaseSequences", {slot}));
   }
-  void CopySequences(const fw::PreviewSequenceCopy& copy) override {
+  bool CopySequences(const fw::PreviewSequenceCopy& copy) override {
     calls.push_back(
         Call("CopySequences",
              {Value(copy.clone), Value(copy.source), Value(copy.battle_copy)}));
+    return copy_success;
   }
   void SetWeaponDrawn(int slot) override {
     calls.push_back(Call("SetWeaponDrawn", {slot}));
@@ -267,19 +307,19 @@ TEST_CASE("Actor preview clones a record with its companion and weapons",
   SetCloneSource(host);
   fw::CloneActorPreview(host, 3);
 
-  ActorAssetRequest record = Request(2, 1, 77, Block(0x1000), 3);
+  ActorAssetRequest record = Request(2, 1, 77, AssetAddress::kNone, 3);
   record.sub_kind = 0xFF;
   record.variant = 2;
-  ActorAssetRequest companion = Request(2, 16, 88, Block(0x1001), 5);
+  ActorAssetRequest companion = Request(2, 16, 88, AssetAddress::kNone, 5);
   companion.sub_kind = 1;
   companion.texture_slot = 0xFC;
   companion.variant = 2;
-  ActorAssetRequest first_weapon = Request(4, 2, 9, Block(0x1002), 6);
+  ActorAssetRequest first_weapon = Request(4, 2, 9, AssetAddress::kNone, 6);
   first_weapon.sub_kind = 1;
   first_weapon.texture_slot = 6;
   first_weapon.material = 3;
   first_weapon.variant = 2;
-  ActorAssetRequest second_weapon = Request(4, 3, 10, Block(0x1003), 7);
+  ActorAssetRequest second_weapon = Request(4, 3, 10, AssetAddress::kNone, 7);
   second_weapon.sub_kind = 1;
   second_weapon.texture_slot = 7;
   second_weapon.material = 4;
@@ -301,7 +341,7 @@ TEST_CASE("Actor preview copies Ashley's battle sequence",
   host.actor_blocks[0] = Block(0x2000);
   fw::CloneActorPreview(host, 0);
 
-  ActorAssetRequest record = Request(2, 1, 1, Block(0x1000), 0);
+  ActorAssetRequest record = Request(2, 1, 1, AssetAddress::kNone, 0);
   record.sub_kind = 0xFF;
   // The outline marker is no companion record; Ashley's weapon models are
   // empty.
@@ -365,31 +405,52 @@ TEST_CASE("Actor preview clones without a missing companion",
   REQUIRE(missing.requests.size() == 2);
   CHECK(missing.requests[1].target_slot == 3);
   CHECK(missing.requests[1].model_id == 10);
-  CHECK(missing.requests[1].destination == Block(0x1001));
+  CHECK(missing.requests[1].destination == AssetAddress::kNone);
+  CHECK(missing.weapon_blocks[3] == Block(0x1001));
   CHECK(missing.requests[1].shared_record_slot == 7);
 }
 
-TEST_CASE("Actor preview copies the sequences of the record it cloned",
+TEST_CASE("Cloning the current preview preserves its existing owner",
           "[menu][menu-rows-details][menu-actor-preview]") {
-  // Cloning the preview itself: the queue installs the clone in slot 1, and
-  // the copy still reads the record the clone was made from (224.c:29,
-  // 78-90).
   FakePreview host;
-  host.pending_steps = 1;
   host.actors[1] = fw::PreviewActor{.model_id = 5, .weapon_pair = 1};
   host.actor_blocks[1] = Block(0x5000);
-  host.on_pump = [](FakePreview& preview) {
-    preview.actors[1] = fw::PreviewActor{};
-    preview.actor_blocks[1] = Block(kFirstBlock);
-  };
-  fw::CloneActorPreview(host, 1);
-  CHECK(host.calls == std::vector<std::string>{"Allocate(0)", "Pump", "Pump",
-                                               "CopySequences(4096,20480,0)"});
-  REQUIRE(host.requests.size() == 1);
-  CHECK(host.requests[0].target_slot == 1);
-  CHECK(host.requests[0].model_id == 5);
-  CHECK(host.requests[0].shared_record_slot == 1);
+  CHECK(fw::CloneActorPreview(host, 1));
+  CHECK(host.calls.empty());
+  CHECK(host.requests.empty());
+  CHECK(host.actor_blocks[1] == Block(0x5000));
   CHECK(host.refusals.empty());
+}
+
+TEST_CASE("A refused preview part cleans up earlier submissions",
+          "[menu-actor-preview][asset-ownership]") {
+  FakePreview host;
+  SetCloneSource(host);
+  host.queue_limit = 1;
+  CHECK_FALSE(fw::CloneActorPreview(host, 3));
+  CHECK(host.requests.size() == 1);
+  CHECK(host.calls == std::vector<std::string>{"Allocate(0)", "ReleaseModel(1)",
+                                               "Free(4096)"});
+  CHECK(host.actor_blocks[1] == AssetAddress::kNone);
+  CHECK(host.refusals ==
+        std::vector<std::string>{"preview asset submission failed"});
+}
+
+TEST_CASE(
+    "A failed preview completion does not copy sequences or publish a pose",
+    "[menu-actor-preview][asset-ownership]") {
+  FakePreview host;
+  host.finish_success = false;
+  SetCloneSource(host);
+  fw::LoadActorPreview(host, 3);
+  CHECK(host.actor_blocks[1] == AssetAddress::kNone);
+  CHECK(host.actor_blocks[16] == AssetAddress::kNone);
+  CHECK(host.weapon_blocks[2] == AssetAddress::kNone);
+  CHECK(host.weapon_blocks[3] == AssetAddress::kNone);
+  CHECK_FALSE(std::ranges::any_of(host.calls, [](const auto& call) {
+    return call.starts_with("CopySequences") ||
+           call.starts_with("PlayAnimation");
+  }));
 }
 
 TEST_CASE("Actor preview pose reset outlines a preview without a companion",

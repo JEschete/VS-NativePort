@@ -70,12 +70,15 @@ int FindLiveFreeActorAssetRequest();
 // queue is full.
 int QueueLiveActorAsset(const ActorAssetRequest& request);
 int UpdateLiveActorAssetQueue();
+// A synchronous consumer only pumps file I/O when its head awaits a read.
+[[nodiscard]] bool LiveActorAssetFileReadPending();
 // Owned requests (#48; ActorAssets.hpp SubmitActorAssetRequest). Forgetting
 // a pending ticket disowns its request, which then completes unobserved;
 // owners cancel first. An owned request names no memory: `memory` is where
 // the owner keeps the record of `table` at `slot` that the request binds, or
-// kNone to refuse it, asked when the record binds. A submission without one
-// is refused.
+// kNone to refuse it. Checked again when processing starts, so an earlier
+// queued request cannot make this request overwrite another owner's record.
+// A submission without a resolver is refused.
 using ActorRecordMemory = AssetAddress (*)(ActorAssetOwner owner,
                                            ActorRecordTable table, int slot);
 [[nodiscard]] std::optional<ActorAssetTicket> SubmitLiveActorAsset(
@@ -96,10 +99,11 @@ void OffsetLiveModelTextureCoordinates(void* polygons, int count, int colored,
                                        int u_offset, int v_offset);
 void* CopyLiveModelGeometry(int* destination, void* source, int bytes);
 int ReleaseLiveWeaponModel(int slot);
-void CopyLiveWeaponSequence(SequenceBuffer* destination,
+bool CopyLiveWeaponSequence(SequenceBuffer* destination,
                             SequenceBuffer* source);
 int ReleaseLiveActorSequence(int target, int kind);
-int ReleaseLiveActorModel(int slot);
+// Owners releasing their weapon records separately pass false.
+int ReleaseLiveActorModel(int slot, bool release_attached_weapons = true);
 int ReleaseLiveSequenceEffectTexture(int bank);
 
 // Inputs the loaders refused since start-up.
