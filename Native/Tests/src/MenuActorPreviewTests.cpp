@@ -26,7 +26,6 @@ namespace {
 namespace fw = VS::Menu::Framework;
 using VS::Content::ActorAssetRequest;
 using VS::Content::AssetAddress;
-using VS::Content::SharedAssetAddress;
 
 constexpr std::uintptr_t kFirstBlock = 0x1000;
 
@@ -252,12 +251,12 @@ void SetCloneSource(FakePreview& host) {
 
 ActorAssetRequest Request(std::uint8_t kind, std::int8_t target,
                           std::int16_t model, AssetAddress destination,
-                          AssetAddress data) {
+                          std::optional<int> shared_record_slot) {
   return {.kind = kind,
           .target_slot = target,
           .model_id = model,
           .destination = destination,
-          .data = data};
+          .shared_record_slot = shared_record_slot};
 }
 
 fw::PreviewActor DrawnActor() { return {.model_id = 77, .bone_count = 10}; }
@@ -268,23 +267,19 @@ TEST_CASE("Actor preview clones a record with its companion and weapons",
   SetCloneSource(host);
   fw::CloneActorPreview(host, 3);
 
-  ActorAssetRequest record =
-      Request(2, 1, 77, Block(0x1000), SharedAssetAddress(3));
+  ActorAssetRequest record = Request(2, 1, 77, Block(0x1000), 3);
   record.sub_kind = 0xFF;
   record.variant = 2;
-  ActorAssetRequest companion =
-      Request(2, 16, 88, Block(0x1001), SharedAssetAddress(5));
+  ActorAssetRequest companion = Request(2, 16, 88, Block(0x1001), 5);
   companion.sub_kind = 1;
   companion.texture_slot = 0xFC;
   companion.variant = 2;
-  ActorAssetRequest first_weapon =
-      Request(4, 2, 9, Block(0x1002), SharedAssetAddress(6));
+  ActorAssetRequest first_weapon = Request(4, 2, 9, Block(0x1002), 6);
   first_weapon.sub_kind = 1;
   first_weapon.texture_slot = 6;
   first_weapon.material = 3;
   first_weapon.variant = 2;
-  ActorAssetRequest second_weapon =
-      Request(4, 3, 10, Block(0x1003), SharedAssetAddress(7));
+  ActorAssetRequest second_weapon = Request(4, 3, 10, Block(0x1003), 7);
   second_weapon.sub_kind = 1;
   second_weapon.texture_slot = 7;
   second_weapon.material = 4;
@@ -306,8 +301,7 @@ TEST_CASE("Actor preview copies Ashley's battle sequence",
   host.actor_blocks[0] = Block(0x2000);
   fw::CloneActorPreview(host, 0);
 
-  ActorAssetRequest record =
-      Request(2, 1, 1, Block(0x1000), SharedAssetAddress(0));
+  ActorAssetRequest record = Request(2, 1, 1, Block(0x1000), 0);
   record.sub_kind = 0xFF;
   // The outline marker is no companion record; Ashley's weapon models are
   // empty.
@@ -372,7 +366,7 @@ TEST_CASE("Actor preview clones without a missing companion",
   CHECK(missing.requests[1].target_slot == 3);
   CHECK(missing.requests[1].model_id == 10);
   CHECK(missing.requests[1].destination == Block(0x1001));
-  CHECK(missing.requests[1].data == SharedAssetAddress(7));
+  CHECK(missing.requests[1].shared_record_slot == 7);
 }
 
 TEST_CASE("Actor preview copies the sequences of the record it cloned",
@@ -394,7 +388,7 @@ TEST_CASE("Actor preview copies the sequences of the record it cloned",
   REQUIRE(host.requests.size() == 1);
   CHECK(host.requests[0].target_slot == 1);
   CHECK(host.requests[0].model_id == 5);
-  CHECK(host.requests[0].data == SharedAssetAddress(1));
+  CHECK(host.requests[0].shared_record_slot == 1);
   CHECK(host.refusals.empty());
 }
 
@@ -678,7 +672,8 @@ TEST_CASE("Ashley's weapon animations replace her weapon sequences",
   fw::QueueAshleyWeaponAnimations(host, 33);
   CHECK(host.calls == std::vector<std::string>{"ReleaseSequences(0)"});
   CHECK(host.requests ==
-        std::vector<ActorAssetRequest>{{.kind = 7, .model_id = 33}});
+        std::vector<ActorAssetRequest>{
+            {.kind = 7, .model_id = 33, .shared_record_slot = {}}});
 }
 
 TEST_CASE("Actor preview live adapter refuses a missing record or camera",

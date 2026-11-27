@@ -394,6 +394,7 @@ int VS::Field::CreateGimmickInstanceEntry(
       .destination = std::bit_cast<VS::Content::AssetAddress>(
           reinterpret_cast<std::uintptr_t>(input.destination)),
       .data = std::bit_cast<VS::Content::AssetAddress>(input.data_address),
+      .shared_record_slot = {},
       .placement = input.placement,
       .sub_kind = static_cast<std::uint8_t>(input.sub_kind),
       .texture_slot = static_cast<std::uint8_t>(input.texture_slot),

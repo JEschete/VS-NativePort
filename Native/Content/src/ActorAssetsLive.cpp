@@ -452,6 +452,7 @@ ActorAssetRequest LoadRequest(const LegacyActorAssetRequest& in) {
       .model_id = in.model_id,
       .destination = Address(in.destination),
       .data = static_cast<AssetAddress>(in.data_address),
+      .shared_record_slot = std::nullopt,
       .placement = in.placement,
       .sub_kind = in.sub_kind,
       .texture_slot = in.texture_slot,
@@ -844,6 +845,7 @@ FileReadOwner* ReadOwner(AssetFileStream stream) {
 struct QueuedAssetState {
   ActorAssetIdentity identity;
   ActorRecordMemory memory = nullptr;
+  std::optional<int> shared_record_slot;
   ActorAssetLoadState loader;
 };
 
@@ -921,6 +923,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
                            .memory = identity.owner != kUnownedActorAssetOwner
                                          ? submitted_memory_
                                          : nullptr,
+                           .shared_record_slot = request.shared_record_slot,
                            .loader = {}};
   }
   [[nodiscard]] ActorAssetIdentity RequestIdentity(int slot) const override {
@@ -951,8 +954,10 @@ class LiveActorAssetHost final : public ActorAssetHost {
   int ProcessHeadRequest(ActorAssetKind kind) override {
     LegacyActorAssetRequest& head = legacyActorAssetRequests[0];
     ActorAssetRequest request = LoadRequest(head);
+    request.shared_record_slot = requestStates[0].shared_record_slot;
     if (kind == ActorAssetKind::kGimmick) {
       const auto result = VS::Field::CreateLiveGimmickInstance(request);
+      requestStates[0].shared_record_slot = request.shared_record_slot;
       StoreRequestFields(request, head);
       return result;
     }
@@ -963,6 +968,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
       state.effect_texture_file = Address(legacyEtmFileBuffer);
     }
     const int result = RunLoader(*this, state, request, kind);
+    requestStates[0].shared_record_slot = request.shared_record_slot;
     ReleaseIdleActorAssetCursors(state);
     PublishLoaderSnapshot(state);
     StoreRequestFields(request, head);

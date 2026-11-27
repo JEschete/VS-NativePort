@@ -79,9 +79,7 @@ enum class ActorAssetKind : std::uint8_t {
   kEffectTextureLoad = 9,
 };
 
-// A native address: a record, a heap block or a cursor into file bytes. A
-// request's data field also carries a shared record index in-band (below
-// the record count), as the original does.
+// A native address: a record, a heap block or a cursor into file bytes.
 enum class AssetAddress : std::uintptr_t { kNone = 0 };
 
 [[nodiscard]] constexpr AssetAddress AdvanceAddress(AssetAddress address,
@@ -90,21 +88,6 @@ enum class AssetAddress : std::uintptr_t { kNone = 0 };
   // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   return static_cast<AssetAddress>(static_cast<std::uintptr_t>(address) +
                                    static_cast<std::uintptr_t>(bytes));
-}
-
-// The record index carried in `data` when it is below `slots`.
-[[nodiscard]] constexpr std::optional<int> SharedAssetSlot(AssetAddress data,
-                                                           int slots) {
-  const auto value = static_cast<std::uintptr_t>(data);
-  if (value < static_cast<std::uintptr_t>(slots)) {
-    return static_cast<int>(value);
-  }
-  return std::nullopt;
-}
-
-[[nodiscard]] constexpr AssetAddress SharedAssetAddress(int slot) {
-  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
-  return static_cast<AssetAddress>(static_cast<std::uintptr_t>(slot));
 }
 
 // vs_battle_objectData (30DB0.h:36). The original reads target_slot with lb,
@@ -117,6 +100,8 @@ struct ActorAssetRequest {
   // none: its owner provides the memory when the record binds (#48).
   AssetAddress destination = AssetAddress::kNone;
   AssetAddress data = AssetAddress::kNone;
+  // A shared record reference is distinct from an address or file cursor.
+  std::optional<int> shared_record_slot;
   // The four placement bytes (tile X, surface, tile Z, facing).
   std::uint32_t placement = 0;
   std::uint8_t sub_kind = 0;

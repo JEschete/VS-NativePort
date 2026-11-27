@@ -925,7 +925,12 @@ TEST_CASE("Owned asset requests carry their tickets through the queue",
   const auto owner = std::make_unique<FakeAssetHost>();
   FakeAssetHost& host = *owner;
   const Content::ActorAssetTicket first = Submit(host, 1);
-  const Content::ActorAssetTicket second = Submit(host, 2);
+  ActorAssetRequest second_request = PartRequest(2);
+  second_request.shared_record_slot = 5;
+  const std::optional<Content::ActorAssetTicket> submitted_second =
+      Content::SubmitActorAssetRequest(host, second_request, kPreviewOwner);
+  REQUIRE(submitted_second.has_value());
+  const Content::ActorAssetTicket second = *submitted_second;
   CHECK(first != second);
   CHECK(host.queued.size() == 2);
   CHECK(host.RequestIdentity(1) ==
@@ -934,6 +939,7 @@ TEST_CASE("Owned asset requests carry their tickets through the queue",
   CHECK(Content::UpdateActorAssetQueue(host) == 1);
   // The shift carries the second request's identity to the head.
   CHECK(host.requests[0].model_id == 2);
+  CHECK(host.requests[0].shared_record_slot == 5);
   CHECK(host.RequestIdentity(0).ticket == second);
 }
 
@@ -1378,11 +1384,13 @@ TEST_CASE("Shared actor model lookups write only the matched peer slot",
   }
   ActorAssetRequest request = Request(ActorAssetKind::kActorModelLoad, 2, 7);
   CHECK(Content::FindSharedActorModel(host, request) == 1);
-  CHECK(request.data == Content::SharedAssetAddress(0));
+  CHECK(request.shared_record_slot == 0);
+  CHECK(request.data == AssetAddress::kNone);
   request.model_id = 8;
   request.data = Address(99);
   CHECK(Content::FindSharedActorModel(host, request) == 0);
   CHECK(request.data == Address(99));
+  CHECK_FALSE(request.shared_record_slot.has_value());
 }
 
 TEST_CASE("Shared actor sequence searches respect player and model boundaries",
@@ -1397,15 +1405,18 @@ TEST_CASE("Shared actor sequence searches respect player and model boundaries",
   Required(host.actors[3]).common_sequence = sequence;
   ActorAssetRequest request = Request(ActorAssetKind::kSequenceLoad, 2, 0);
   CHECK(Content::FindSharedActorSequence(host, request) == 1);
-  CHECK(request.data == Content::SharedAssetAddress(3));
+  CHECK(request.shared_record_slot == 3);
+  CHECK(request.data == AssetAddress::kNone);
   request.model_id = 4;
   Required(host.actors[3]).sequence_model_id = 4;
   CHECK(Content::FindSharedActorSequence(host, request) == 1);
-  CHECK(request.data == Content::SharedAssetAddress(3));
+  CHECK(request.shared_record_slot == 3);
+  CHECK(request.data == AssetAddress::kNone);
   Required(host.actors[3]).model_id = 8;
   request.data = Address(99);
   CHECK(Content::FindSharedActorSequence(host, request) == 0);
   CHECK(request.data == Address(99));
+  CHECK_FALSE(request.shared_record_slot.has_value());
 }
 
 TEST_CASE("Model texture offsets move flat polygon UVs and wrap each byte",
@@ -1485,14 +1496,16 @@ TEST_CASE("Shared weapon lookups need an owning actor or a player slot",
   host.weapons[5] = model;
   ActorAssetRequest player = Request(ActorAssetKind::kWeaponModelLoad, 2, 12);
   CHECK(Content::FindSharedWeaponModel(host, player) == 1);
-  CHECK(player.data == Content::SharedAssetAddress(5));
+  CHECK(player.shared_record_slot == 5);
+  CHECK(player.data == AssetAddress::kNone);
   ActorAssetRequest enemy = Request(ActorAssetKind::kWeaponModelLoad, 6, 12);
   enemy.data = Address(99);
   CHECK(Content::FindSharedWeaponModel(host, enemy) == 0);
   CHECK(enemy.data == Address(99));
   Required(host.weapons[5]).actor_id = 3;
   CHECK(Content::FindSharedWeaponModel(host, enemy) == 1);
-  CHECK(enemy.data == Content::SharedAssetAddress(5));
+  CHECK(enemy.shared_record_slot == 5);
+  CHECK(enemy.data == Address(99));
   ActorAssetRequest self = Request(ActorAssetKind::kWeaponModelLoad, 5, 12);
   CHECK(Content::FindSharedWeaponModel(host, self) == 0);
 }
@@ -2070,7 +2083,8 @@ TEST_CASE("Shared actor models copy the peer record and its texture references",
   ActorAssetLoadState state;
   ActorAssetRequest request = SharedModelRequest(host);
   CHECK(Content::UpdateActorModelLoad(host, state, request) == kAssetDone);
-  CHECK(request.data == Content::SharedAssetAddress(2));
+  CHECK(request.shared_record_slot == 2);
+  CHECK(request.data == AssetAddress::kNone);
   CHECK(host.actor_textures[5].references == 1);
   CHECK(host.actor_textures[6].references == 1);
   const ActorAssetRecord& actor = Required(host.actors[3]);
@@ -2267,7 +2281,7 @@ TEST_CASE("Common sequences share a peer's sequence",
   const AssetAddress peer_sequence = AddCommonSequencePeers(host);
   ActorAssetLoadState state;
   ActorAssetRequest shared = Request(ActorAssetKind::kSequenceParse, 3, 0);
-  shared.data = Content::SharedAssetAddress(2);
+  shared.shared_record_slot = 2;
   CHECK(Content::ParseActorSequence(host, state, shared) == kAssetDone);
   const ActorAssetRecord& actor = Required(host.actors[3]);
   CHECK(actor.common_sequence == peer_sequence);
@@ -2281,7 +2295,7 @@ TEST_CASE("Common sequences copy an actor's own sequence file",
   static_cast<void>(AddCommonSequencePeers(host));
   ActorAssetLoadState state;
   ActorAssetRequest shared = Request(ActorAssetKind::kSequenceParse, 3, 0);
-  shared.data = Content::SharedAssetAddress(2);
+  shared.shared_record_slot = 2;
   static_cast<void>(Content::ParseActorSequence(host, state, shared));
   ActorAssetRequest own = Request(ActorAssetKind::kSequenceParse, 4, 0);
   own.data = OwnCommonSequenceFile(host);

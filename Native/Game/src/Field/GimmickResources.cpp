@@ -111,7 +111,7 @@ int CreateGimmickInstance(Content::ActorAssetRequest& request,
   const auto shared = FindSharedGimmickModel(host.Slots(), request.target_slot,
                                              request.sub_kind);
   if (shared) {
-    request.data = Content::SharedAssetAddress(static_cast<int>(*shared));
+    request.shared_record_slot = static_cast<int>(*shared);
     if (!host.CopySharedPrefix(slot, *shared)) return Content::kAssetRefused;
   } else if (!host.CreateModel(
                  slot, request.sub_kind,

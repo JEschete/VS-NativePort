@@ -61,7 +61,7 @@ void QueueCompanionClone(ActorPreviewHost& host, const PreviewActor& source,
   request.target_slot = TargetSlot(kPreviewCompanionSlot);
   request.destination = host.Allocate(PreviewAllocation::kActorRecord);
   request.model_id = static_cast<std::int16_t>(companion->model_id);
-  request.data = Content::SharedAssetAddress(companion_slot);
+  request.shared_record_slot = companion_slot;
   request.sub_kind = kCloneLinkedSubKind;
   request.texture_slot = kCloneCompanionTextureSlot;
   request.variant = source.variant;
@@ -87,8 +87,7 @@ void QueueWeaponClone(ActorPreviewHost& host, int source_slot,
   request.target_slot = TargetSlot(kPreviewWeaponModelSlot + weapon);
   request.destination = host.Allocate(PreviewAllocation::kWeaponModel);
   request.model_id = model->model_id;
-  request.data = Content::SharedAssetAddress(
-      (source_slot * kWeaponModelsPerActor) + weapon);
+  request.shared_record_slot = (source_slot * kWeaponModelsPerActor) + weapon;
   request.sub_kind = kCloneLinkedSubKind;
   request.texture_slot = model->attachment_slot;
   request.material = model->material;
@@ -162,7 +161,7 @@ void CloneActorPreview(ActorPreviewHost& host, int source_slot) {
   request.kind = Kind(ActorAssetKind::kActorModelParse);
   request.target_slot = TargetSlot(kPreviewActorSlot);
   request.model_id = static_cast<std::int16_t>(source->model_id);
-  request.data = Content::SharedAssetAddress(source_slot);
+  request.shared_record_slot = source_slot;
   request.destination = clone;
   request.sub_kind = kCloneRecordSubKind;
   request.variant = source->variant;

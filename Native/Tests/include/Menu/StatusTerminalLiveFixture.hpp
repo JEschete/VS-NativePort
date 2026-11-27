@@ -418,16 +418,19 @@ struct Fixture {
                 .target_slot = 0,
                 .model_id = kSourceModel,
                 .destination = Address(preview_owner.source),
+                .shared_record_slot = {},
                 .sub_kind = 0xFF});
     ParseAsset(R"(Native\data\disc\OBJ\01_COM.SEQ)",
                {.kind = static_cast<std::uint8_t>(
                     content::ActorAssetKind::kSequenceParse),
-                .target_slot = 0});
+                .target_slot = 0,
+                .shared_record_slot = {}});
     ParseAsset(R"(Native\data\disc\OBJ\01_BT2.SEQ)",
                {.kind = static_cast<std::uint8_t>(
                     content::ActorAssetKind::kSequenceParse),
                 .target_slot = 0,
-                .model_id = kSourceBattleSequence});
+                .model_id = kSourceBattleSequence,
+                .shared_record_slot = {}});
     const auto refused = content::LiveActorAssetRefusals();
     fw::LoadLiveActorPreview(0);
     const auto* preview = VS::Actors::actorRecords[1];

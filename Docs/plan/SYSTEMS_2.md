@@ -22,8 +22,8 @@
     except the unowned ETM stream's phase and buffer (#207). File-read starts distinguish success, a full request queue
     and failure (#518): only a full queue permits the synchronous read fallback, and a converted-file error or failed
     fallback frees the loader's allocation from the same heap end and fails the request before parsing, binding or
-    texture upload. Open work: #48 (serialized file streams, the shared-record index in `request.data`, unowned
-    producers, immutable model/animation sharing).
+    texture upload. Open work: #48 (serialized file streams, typed shared-record references to mutable actor slots,
+    unowned producers, immutable model/animation sharing).
   - **Decoders** (used by VS.Extract and the round-trip tests) produce typed objects: TIM, MPD, ZND, SHP, SEQ, WEP, ARM, ZUD, SYD, FBT/FBC, EVT, AKAO, XA, MCDATA, ITEMNAME/ITEMHELP text, HF0/HF1 help, EFFECT data.
   - **Loaders** (used by the game) read glTF, PNG, WAV, FLAC and JSON from `Native\data\` and build the same typed objects. The round-trip rule in ASSET_PIPELINE §7 proves `decode(raw) == load(converted)`.
   - **Catalogs** are loaded from `Native\data\catalogs\`, validated against `schemas\`, and frozen into immutable registries (§9).

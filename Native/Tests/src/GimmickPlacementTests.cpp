@@ -4881,7 +4881,8 @@ TEST_CASE(
     "model failure",
     "[gimmick-create-core][field]") {
   RecordingGimmickCreationHost host;
-  VS::Content::ActorAssetRequest request{.target_slot = 3, .sub_kind = 6};
+  VS::Content::ActorAssetRequest request{
+      .target_slot = 3, .shared_record_slot = {}, .sub_kind = 6};
   host.states[3] = VS::Field::GimmickCreationState{};
   CHECK(VS::Field::CreateGimmickInstance(request, host) == -3);
   CHECK(host.calls == std::vector<std::string>{"occupied"});
@@ -4897,7 +4898,8 @@ TEST_CASE(
 TEST_CASE("Gimmick creation retains null destination and invalid-slot refusal",
           "[gimmick-create-core][field]") {
   RecordingGimmickCreationHost host;
-  VS::Content::ActorAssetRequest request{.target_slot = -1};
+  VS::Content::ActorAssetRequest request{.target_slot = -1,
+                                         .shared_record_slot = {}};
   CHECK(VS::Field::CreateGimmickInstance(request, host) == -2);
   CHECK(host.calls.empty());
   request.target_slot = 0;
@@ -4914,13 +4916,15 @@ TEST_CASE(
   host.states[1] =
       VS::Field::GimmickCreationState{.object_id = 1, .subtype = 7};
   VS::Content::ActorAssetRequest request{.target_slot = 3,
+                                         .shared_record_slot = {},
                                          .placement = 0x77040802,
                                          .sub_kind = 1,
                                          .texture_slot = 255,
                                          .material = 3,
                                          .variant = 1};
   REQUIRE(VS::Field::CreateGimmickInstance(request, host) == 0);
-  CHECK(request.data == VS::Content::SharedAssetAddress(1));
+  CHECK(request.shared_record_slot == 1);
+  CHECK(request.data == VS::Content::AssetAddress::kNone);
   REQUIRE(host.states[3].has_value());
   CHECK(host.State(3).subtype == 255);
   CHECK(host.State(3).tile_word == 0x00040802);
@@ -4932,8 +4936,11 @@ TEST_CASE(
 TEST_CASE("Gimmick creation uses unsigned placement bytes and wrapped height",
           "[gimmick-create-core][field]") {
   RecordingGimmickCreationHost host;
-  VS::Content::ActorAssetRequest request{
-      .target_slot = 0, .placement = 0xFFFE00FF, .sub_kind = 0, .variant = 255};
+  VS::Content::ActorAssetRequest request{.target_slot = 0,
+                                         .shared_record_slot = {},
+                                         .placement = 0xFFFE00FF,
+                                         .sub_kind = 0,
+                                         .variant = 255};
   REQUIRE(VS::Field::CreateGimmickInstance(request, host) == 0);
   REQUIRE(host.states[0].has_value());
   CHECK(host.State(0).x == 32704);
@@ -4950,8 +4957,11 @@ TEST_CASE("Gimmick creation stack takes the first earlier supporting type",
     RecordingGimmickCreationHost host;
     host.states[0] = VS::Field::GimmickCreationState{
         .object_id = supporting, .tile_word = 0x00040802, .y = 512};
-    VS::Content::ActorAssetRequest request{
-        .target_slot = 3, .placement = 0x77040802, .sub_kind = 5, .variant = 1};
+    VS::Content::ActorAssetRequest request{.target_slot = 3,
+                                           .shared_record_slot = {},
+                                           .placement = 0x77040802,
+                                           .sub_kind = 5,
+                                           .variant = 1};
     REQUIRE(VS::Field::CreateGimmickInstance(request, host) == 0);
     REQUIRE(host.states[3].has_value());
     CHECK(host.State(3).interaction == (supporting == 5 ? 2 : 1));
