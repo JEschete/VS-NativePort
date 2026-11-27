@@ -28,6 +28,8 @@ struct RoomActorRecord;
 // freed, or before a gameplay session clears the actor table.
 void InvalidateLiveActorHandle(std::size_t slot, VS::Battle::Actor* actor);
 void ResetLiveActorHandles();
+// Cancels and discards a scripted actor that has not completed loading yet.
+[[nodiscard]] bool CancelLivePendingScriptedActorSpawn(std::size_t slot);
 // Native (#55): starts removing the installed `actor` in `slot` and returns
 // the slot resources its definition owns, once; nothing when `actor` is not
 // the slot's actor or is already being removed. An actor the spawn host did

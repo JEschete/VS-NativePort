@@ -477,6 +477,9 @@ struct FakeSpawnHost final : actors::ActorSpawnHost {
   SpawnedActor ActorAt(std::size_t slot) const override {
     return slot < table.size() ? table.at(slot) : SpawnedActor::kNone;
   }
+  bool SlotIsEmpty(std::size_t slot) const override {
+    return ActorAt(slot) == SpawnedActor::kNone;
+  }
   SpawnedActor Allocate(ActorShape shape, std::size_t /*slot*/) override {
     Log(std::format("Allocate {}", static_cast<int>(shape)));
     if (refuse_allocation) {
@@ -495,6 +498,14 @@ struct FakeSpawnHost final : actors::ActorSpawnHost {
     if (!refuse_install) {
       table.at(slot) = actor;
     }
+  }
+  bool InstallIfEmpty(std::size_t slot, SpawnedActor actor) override {
+    Log(std::format("InstallIfEmpty {}", slot));
+    if (refuse_install || table.at(slot) != SpawnedActor::kNone) {
+      return false;
+    }
+    table.at(slot) = actor;
+    return true;
   }
   void SetEquippedWeaponCategory(SpawnedActor /*actor*/,
                                  std::uint8_t category) override {
@@ -638,10 +649,21 @@ struct FakeSpawnHost final : actors::ActorSpawnHost {
   }
   int QueueOwnedAsset(const ActorAssetRequest& request,
                       SpawnedActor actor) override {
+    Log("QueueOwnedAsset");
+    if (queue_index < 0) {
+      return queue_index;
+    }
+    const content::ActorAssetOwner owner{.value =
+                                             static_cast<std::uint64_t>(actor)};
+    const std::optional<content::ActorAssetTicket> ticket =
+        owned_completions.Issue(owner);
+    if (!ticket) {
+      return -1;
+    }
     requests.push_back(request);
     queued_owners.push_back(actor);
+    owned_requests.push_back({.actor = actor, .ticket = *ticket});
     busy = true;
-    Log("QueueOwnedAsset");
     return queue_index;
   }
   content::ActorAssetCompletion AssetCompletion(
@@ -793,6 +815,14 @@ struct FakeSpawnHost final : actors::ActorSpawnHost {
 
   void Log(std::string entry) { log.push_back(std::move(entry)); }
 };
+
+void CompleteOwnedScriptedActorLoad(FakeSpawnHost& host,
+                                    actors::ScriptedActorSpawnTable& pending) {
+  host.UpdateAssetQueue();
+  const content::ActorAssetTicket ticket = host.owned_requests.at(0).ticket;
+  actors::CompleteScriptedActorSpawn(host, pending, Handle(kFirstHandle),
+                                     host.AssetCompletion(ticket).outcome);
+}
 
 void PutWord(std::vector<std::byte>& file, std::size_t at, std::int32_t word) {
   const auto bits = static_cast<std::uint32_t>(word);
@@ -1869,20 +1899,48 @@ TEST_CASE("An installed Ashley owns her model load",
   CHECK(host.requests.at(0).model_id == 0x12);
 }
 
-TEST_CASE("A scripted actor spawns into a free slot below 16",
+TEST_CASE("A scripted actor stays unpublished until its model is ready",
           "[actors][actors-spawning]") {
   FakeSpawnHost host;
+  actors::ScriptedActorSpawnTable pending;
   const actors::SpawnPlacement placement{
       .tile_x = 2, .surface = 1, .tile_z = 3, .facing = 4};
-  CHECK(actors::QueueScriptedActorSpawn(host, 9, 0x33, placement) ==
+  CHECK(actors::QueueScriptedActorSpawn(host, pending, 9, 0x33, placement) ==
         host.queue_index + 1);
+  CHECK(host.table.at(9) == SpawnedActor::kNone);
+  CHECK(pending.ContainsSlot(9));
+  CHECK(host.log == std::vector<std::string>{"Allocate 1", "QueueOwnedAsset"});
+  CHECK(actors::QueueScriptedActorSpawn(host, pending, 9, 0x34, placement) ==
+        0);
+  CHECK(host.log == std::vector<std::string>{"Allocate 1", "QueueOwnedAsset"});
+  CHECK(host.defaults == std::nullopt);
+  REQUIRE(host.owned_requests.size() == 1);
+}
+
+TEST_CASE("A scripted actor publishes after its model completes",
+          "[actors][actors-spawning]") {
+  FakeSpawnHost host;
+  actors::ScriptedActorSpawnTable pending;
+  CHECK(actors::QueueScriptedActorSpawn(host, pending, 9, 0x33, {}) ==
+        host.queue_index + 1);
+  REQUIRE(host.owned_requests.size() == 1);
+  CompleteOwnedScriptedActorLoad(host, pending);
   CHECK(host.table.at(9) == Handle(kFirstHandle));
-  CHECK(host.log == std::vector<std::string>{"Allocate 1", "QueueOwnedAsset",
-                                             "Install 9", "Defaults 9",
-                                             "AiState 9 -1"});
-  // #48: the actor owns its model request, so its removal can cancel it.
+  CHECK_FALSE(pending.ContainsSlot(9));
   CHECK(host.queued_owners == std::vector{Handle(kFirstHandle)});
-  CHECK(host.owned_requests.empty());
+}
+
+TEST_CASE("A loaded scripted actor receives its placement and spawn defaults",
+          "[actors][actors-spawning]") {
+  FakeSpawnHost host;
+  actors::ScriptedActorSpawnTable pending;
+  const actors::SpawnPlacement placement{
+      .tile_x = 2, .surface = 1, .tile_z = 3, .facing = 4};
+  CHECK(actors::QueueScriptedActorSpawn(host, pending, 9, 0x33, placement) ==
+        host.queue_index + 1);
+  REQUIRE(host.owned_requests.size() == 1);
+  CompleteOwnedScriptedActorLoad(host, pending);
+
   const actors::ActorDefaults& defaults = Required(host.defaults);
   CHECK(defaults.disposition == actors::SpawnDisposition{.kind = 8});
   CHECK(defaults.interaction_flags == 4);
@@ -1890,13 +1948,93 @@ TEST_CASE("A scripted actor spawns into a free slot below 16",
   CHECK(host.requests.at(0).target_slot == 9);
 }
 
+TEST_CASE("A failed scripted actor model load discards its unpublished actor",
+          "[actors][actors-spawning]") {
+  FakeSpawnHost host;
+  actors::ScriptedActorSpawnTable pending;
+  host.fail_owned_completion_at = 0;
+
+  CHECK(actors::QueueScriptedActorSpawn(host, pending, 9, 0x33, {}) ==
+        host.queue_index + 1);
+  REQUIRE(host.owned_requests.size() == 1);
+  CompleteOwnedScriptedActorLoad(host, pending);
+
+  CHECK(host.table.at(9) == SpawnedActor::kNone);
+  CHECK_FALSE(pending.ContainsSlot(9));
+  CHECK(host.discarded == std::vector{Handle(kFirstHandle)});
+  CHECK(host.released_actor_models == std::vector{9});
+  CHECK(host.defaults == std::nullopt);
+  CHECK(host.refusals == std::vector{SpawnRefusal::kAssetQueue});
+}
+
+TEST_CASE("A pending scripted actor is cancelled before discard",
+          "[actors][actors-spawning]") {
+  FakeSpawnHost host;
+  actors::ScriptedActorSpawnTable pending;
+
+  CHECK(actors::QueueScriptedActorSpawn(host, pending, 9, 0x33, {}) ==
+        host.queue_index + 1);
+  REQUIRE(host.owned_requests.size() == 1);
+  const content::ActorAssetTicket ticket = host.owned_requests.at(0).ticket;
+  CHECK(actors::CancelScriptedActorSpawn(host, pending, 9));
+
+  CHECK_FALSE(pending.ContainsSlot(9));
+  CHECK(host.table.at(9) == SpawnedActor::kNone);
+  CHECK(host.discarded == std::vector{Handle(kFirstHandle)});
+  CHECK(host.released_actor_models == std::vector{9});
+  CHECK(host.owned_completions.Find(ticket).outcome ==
+        content::ActorAssetOutcome::kCancelled);
+  CHECK(host.cancelled_owners == std::vector{Handle(kFirstHandle)});
+}
+
+TEST_CASE("A pending scripted actor drains when cancellation is refused",
+          "[actors][actors-spawning]") {
+  FakeSpawnHost host;
+  actors::ScriptedActorSpawnTable pending;
+  host.allow_owned_cancel = false;
+
+  CHECK(actors::QueueScriptedActorSpawn(host, pending, 9, 0x33, {}) ==
+        host.queue_index + 1);
+  REQUIRE(host.owned_requests.size() == 1);
+  const content::ActorAssetTicket ticket = host.owned_requests.at(0).ticket;
+  CHECK(actors::CancelScriptedActorSpawn(host, pending, 9));
+
+  CHECK_FALSE(pending.ContainsSlot(9));
+  CHECK(host.table.at(9) == SpawnedActor::kNone);
+  CHECK(host.discarded == std::vector{Handle(kFirstHandle)});
+  CHECK(host.released_actor_models == std::vector{9});
+  CHECK(host.owned_completions.Find(ticket).outcome ==
+        content::ActorAssetOutcome::kLoaded);
+  CHECK(host.cancelled_owners.empty());
+}
+
+TEST_CASE("A scripted actor does not replace a slot occupied before completion",
+          "[actors][actors-spawning]") {
+  FakeSpawnHost host;
+  actors::ScriptedActorSpawnTable pending;
+  CHECK(actors::QueueScriptedActorSpawn(host, pending, 9, 0x33, {}) ==
+        host.queue_index + 1);
+  host.table.at(9) = Handle(0x99);
+  REQUIRE(host.owned_requests.size() == 1);
+  CompleteOwnedScriptedActorLoad(host, pending);
+
+  CHECK(host.table.at(9) == Handle(0x99));
+  CHECK_FALSE(pending.ContainsSlot(9));
+  CHECK(host.discarded == std::vector{Handle(kFirstHandle)});
+  CHECK(host.released_actor_models.empty());
+  CHECK(host.defaults == std::nullopt);
+  CHECK(host.refusals == std::vector{SpawnRefusal::kAllocation});
+}
+
 TEST_CASE("A scripted actor is discarded when its model request cannot queue",
           "[actors][actors-spawning]") {
   FakeSpawnHost host;
+  actors::ScriptedActorSpawnTable pending;
   host.queue_index = -1;
 
-  CHECK(actors::QueueScriptedActorSpawn(host, 9, 0x33, {}) == 0);
+  CHECK(actors::QueueScriptedActorSpawn(host, pending, 9, 0x33, {}) == 0);
   CHECK(host.table.at(9) == SpawnedActor::kNone);
+  CHECK_FALSE(pending.ContainsSlot(9));
   CHECK(host.discarded == std::vector{Handle(kFirstHandle)});
   CHECK(host.refusals == std::vector{SpawnRefusal::kAssetQueue});
   CHECK(host.defaults == std::nullopt);
@@ -1909,15 +2047,19 @@ TEST_CASE(
     "allocation",
     "[actors][actors-spawning]") {
   FakeSpawnHost beyond;
-  CHECK(actors::QueueScriptedActorSpawn(beyond, 16, 1, {}) == 0);
+  actors::ScriptedActorSpawnTable beyond_pending;
+  CHECK(actors::QueueScriptedActorSpawn(beyond, beyond_pending, 16, 1, {}) ==
+        0);
   beyond.table.at(4) = Handle(0x40);
-  CHECK(actors::QueueScriptedActorSpawn(beyond, 4, 1, {}) == 0);
+  CHECK(actors::QueueScriptedActorSpawn(beyond, beyond_pending, 4, 1, {}) == 0);
   CHECK(beyond.refusals.empty());
   CHECK(beyond.log.empty());
 
   FakeSpawnHost refused;
+  actors::ScriptedActorSpawnTable refused_pending;
   refused.refuse_allocation = true;
-  CHECK(actors::QueueScriptedActorSpawn(refused, 4, 1, {}) == 0);
+  CHECK(actors::QueueScriptedActorSpawn(refused, refused_pending, 4, 1, {}) ==
+        0);
   CHECK(refused.refusals == std::vector{SpawnRefusal::kAllocation});
   CHECK(refused.table.at(4) == SpawnedActor::kNone);
 }

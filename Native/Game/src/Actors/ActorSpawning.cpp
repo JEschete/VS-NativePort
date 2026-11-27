@@ -1119,13 +1119,71 @@ int QueueAshleyModelLoad(ActorSpawnHost& host, int model_id) {
 
 // decomp: BATTLE.PRG spawnModelActor (src/BATTLE/BATTLE.PRG/146C.c:8891; was
 // func_8007C928)
-int QueueScriptedActorSpawn(ActorSpawnHost& host, std::uint32_t actor_id,
-                            int model_id, SpawnPlacement placement) {
+bool ScriptedActorSpawnTable::ContainsSlot(std::size_t slot) const {
+  return slot < pending_.size() && pending_.at(slot).has_value();
+}
+
+bool ScriptedActorSpawnTable::ContainsActor(SpawnedActor actor) const {
+  return std::ranges::any_of(pending_, [actor](const auto& pending) {
+    return pending && pending->actor == actor;
+  });
+}
+
+bool ScriptedActorSpawnTable::Track(PendingScriptedActorSpawn spawn) {
+  if (spawn.actor == SpawnedActor::kNone || spawn.slot >= pending_.size() ||
+      pending_.at(spawn.slot).has_value()) {
+    return false;
+  }
+  pending_.at(spawn.slot) = spawn;
+  return true;
+}
+
+std::optional<PendingScriptedActorSpawn> ScriptedActorSpawnTable::Take(
+    SpawnedActor actor) {
+  for (auto& pending : pending_) {
+    if (pending && pending->actor == actor) {
+      const PendingScriptedActorSpawn spawn = *pending;
+      pending.reset();
+      return spawn;
+    }
+  }
+  return std::nullopt;
+}
+
+std::optional<PendingScriptedActorSpawn> ScriptedActorSpawnTable::TakeSlot(
+    std::size_t slot) {
+  if (slot >= pending_.size() || !pending_.at(slot)) {
+    return std::nullopt;
+  }
+  const PendingScriptedActorSpawn spawn = *pending_.at(slot);
+  pending_.at(slot).reset();
+  return spawn;
+}
+
+void ScriptedActorSpawnTable::Reset() { pending_.fill(std::nullopt); }
+
+namespace {
+void DiscardPendingScriptedActor(ActorSpawnHost& host,
+                                 const PendingScriptedActorSpawn& spawn) {
+  if (!host.CancelOwnedAssets(spawn.actor)) {
+    DrainAssetQueue(host);
+  }
+  if (host.SlotIsEmpty(spawn.slot)) {
+    host.ReleaseActorModel(static_cast<int>(spawn.slot));
+  }
+  host.DiscardUninstalled(spawn.actor);
+}
+}  // namespace
+
+int QueueScriptedActorSpawn(ActorSpawnHost& host,
+                            ScriptedActorSpawnTable& pending,
+                            std::uint32_t actor_id, int model_id,
+                            SpawnPlacement placement) {
   if (actor_id >= kSpawnActorSlots) {
     return 0;
   }
   const std::size_t slot = actor_id;
-  if (host.ActorAt(slot) != SpawnedActor::kNone) {
+  if (pending.ContainsSlot(slot) || host.ActorAt(slot) != SpawnedActor::kNone) {
     return 0;
   }
   const SpawnedActor actor = host.Allocate(ActorShape::kEquipped, slot);
@@ -1133,9 +1191,8 @@ int QueueScriptedActorSpawn(ActorSpawnHost& host, std::uint32_t actor_id,
     host.Refuse(SpawnRefusal::kAllocation);
     return 0;
   }
-  // Native (#48): the actor is published while its model loads, so a queued
-  // request could outlive it and bind its record into the freed actor. The
-  // actor owns the request, and removal cancels it (RemoveActorAtSlot).
+  // Native (#55): keep the actor unpublished until its owned model load
+  // completes, so its slot never exposes an uninitialized model.
   const int request = host.QueueOwnedAsset(
       ModelLoadRequest(static_cast<int>(slot), model_id, placement, 0), actor);
   if (request < 0) {
@@ -1143,10 +1200,46 @@ int QueueScriptedActorSpawn(ActorSpawnHost& host, std::uint32_t actor_id,
     host.Refuse(SpawnRefusal::kAssetQueue);
     return 0;
   }
-  host.Install(slot, actor);
-  ApplyDefaults(host, slot, model_id, 0, 0, kScriptedSpawnFlags);
-  static_cast<void>(host.CreateAiState(slot, kFreshAiFlags));
+  if (!pending.Track({.actor = actor, .slot = slot, .model_id = model_id})) {
+    DiscardPendingScriptedActor(
+        host, {.actor = actor, .slot = slot, .model_id = model_id});
+    host.Refuse(SpawnRefusal::kAssetQueue);
+    return 0;
+  }
   return request + 1;
+}
+
+void CompleteScriptedActorSpawn(ActorSpawnHost& host,
+                                ScriptedActorSpawnTable& pending,
+                                SpawnedActor actor,
+                                Content::ActorAssetOutcome outcome) {
+  const std::optional<PendingScriptedActorSpawn> spawn = pending.Take(actor);
+  if (!spawn) {
+    return;
+  }
+  if (outcome != Content::ActorAssetOutcome::kLoaded) {
+    host.Refuse(SpawnRefusal::kAssetQueue);
+    DiscardPendingScriptedActor(host, *spawn);
+    return;
+  }
+  if (!host.InstallIfEmpty(spawn->slot, actor)) {
+    host.Refuse(SpawnRefusal::kAllocation);
+    DiscardPendingScriptedActor(host, *spawn);
+    return;
+  }
+  ApplyDefaults(host, spawn->slot, spawn->model_id, 0, 0, kScriptedSpawnFlags);
+  static_cast<void>(host.CreateAiState(spawn->slot, kFreshAiFlags));
+}
+
+bool CancelScriptedActorSpawn(ActorSpawnHost& host,
+                              ScriptedActorSpawnTable& pending,
+                              std::size_t slot) {
+  const std::optional<PendingScriptedActorSpawn> spawn = pending.TakeSlot(slot);
+  if (!spawn) {
+    return false;
+  }
+  DiscardPendingScriptedActor(host, *spawn);
+  return true;
 }
 
 // decomp: BATTLE.PRG setActorWeaponModels (src/BATTLE/BATTLE.PRG/146C.c:8920;

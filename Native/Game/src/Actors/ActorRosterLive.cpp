@@ -170,6 +170,9 @@ int UnlinkLiveActorFromRoomList(VS::Battle::Actor* actor) {
 }
 
 int RemoveLiveActorAtSlot(unsigned index, int hidden) {
+  if (CancelLivePendingScriptedActorSpawn(index)) {
+    return 1;
+  }
   LiveRemovalHost host(index < kRosterSlots ? VS::Battle::actors[index]
                                             : nullptr);
   return RemoveActorAtSlot(host, index, hidden) == RemovalResult::kOutOfRange

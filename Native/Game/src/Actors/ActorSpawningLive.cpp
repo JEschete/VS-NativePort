@@ -156,6 +156,14 @@ ActorLoadTable& LiveActorLoads() {
   return loads;
 }
 
+ScriptedActorSpawnTable& LiveScriptedActorSpawns() {
+  static ScriptedActorSpawnTable spawns;
+  return spawns;
+}
+
+void CompletePendingScriptedActorLoad(SpawnedActor actor,
+                                      Content::ActorAssetOutcome outcome);
+
 // Reports on the "actors" channel how each of an actor's loads ended.
 class LiveActorLoadHost final : public ActorLoadHost {
  public:
@@ -168,6 +176,7 @@ class LiveActorLoadHost final : public ActorLoadHost {
   }
   void Settled(SpawnedActor actor,
                const Content::ActorAssetCompletion& completion) override {
+    CompletePendingScriptedActorLoad(actor, completion.outcome);
     const auto handle = static_cast<std::uint64_t>(actor);
     switch (completion.outcome) {
       case Content::ActorAssetOutcome::kLoaded:
@@ -329,6 +338,10 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     return LiveActorHandles().Observe(slot, ActorAddress(SlotActor(slot)));
   }
 
+  [[nodiscard]] bool SlotIsEmpty(std::size_t slot) const override {
+    return SlotActor(slot) == nullptr;
+  }
+
   [[nodiscard]] SpawnedActor Allocate(ActorShape shape,
                                       std::size_t slot) override {
     switch (shape) {
@@ -408,6 +421,24 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
       return;
     }
     VS::Battle::actors[slot] = live;
+  }
+
+  [[nodiscard]] bool InstallIfEmpty(std::size_t slot,
+                                    SpawnedActor actor) override {
+    if (slot >= std::size(VS::Battle::actors) ||
+        VS::Battle::actors[slot] != nullptr) {
+      WarnActorRefused(operation_, "target slot is occupied");
+      return false;
+    }
+    VS::Battle::Actor* live =
+        ActorPointer<VS::Battle::Actor>(actor, "InstallSpawnedActor");
+    if (live == nullptr || !LiveActorHandles().Publish(slot, actor)) {
+      WarnActorRefused(operation_,
+                       "actor handle does not match the target slot");
+      return false;
+    }
+    VS::Battle::actors[slot] = live;
+    return true;
   }
 
   void SetEquippedWeaponCategory(SpawnedActor actor,
@@ -1139,6 +1170,16 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   std::optional<ZudReadState> converted_zud_;
 };
 
+void CompletePendingScriptedActorLoad(SpawnedActor actor,
+                                      Content::ActorAssetOutcome outcome) {
+  ScriptedActorSpawnTable& pending = LiveScriptedActorSpawns();
+  if (!pending.ContainsActor(actor)) {
+    return;
+  }
+  LiveActorSpawnHost host("SettleScriptedActorSpawn");
+  CompleteScriptedActorSpawn(host, pending, actor, outcome);
+}
+
 LimbTemplate DecodeLimb(const VS::Actors::LimbInit& limb) {
   LimbTemplate decoded{.hp = limb.hp,
                        .agility_defense_bonus = limb.agility_defense_bonus,
@@ -1385,7 +1426,31 @@ SpawnedActor InstallLiveActorInstance(std::size_t slot,
   return handle;
 }
 
-void ResetLiveActorHandles() { LiveActorHandles().Reset(); }
+void ResetLiveActorHandles() {
+  LiveActorSpawnHost host("ResetActorHandles");
+  bool cancelled = false;
+  for (std::size_t slot = 0; slot < kSpawnActorSlots; ++slot) {
+    cancelled =
+        CancelScriptedActorSpawn(host, LiveScriptedActorSpawns(), slot) ||
+        cancelled;
+  }
+  LiveScriptedActorSpawns().Reset();
+  LiveActorHandles().Reset();
+  if (cancelled) {
+    LiveActorLoadHost load_host;
+    LiveActorLoads().Settle(load_host);
+  }
+}
+
+bool CancelLivePendingScriptedActorSpawn(std::size_t slot) {
+  LiveActorSpawnHost host("CancelScriptedActorSpawn");
+  if (!CancelScriptedActorSpawn(host, LiveScriptedActorSpawns(), slot)) {
+    return false;
+  }
+  LiveActorLoadHost load_host;
+  LiveActorLoads().Settle(load_host);
+  return true;
+}
 
 // decomp: BATTLE.PRG func_800765B0 (src/BATTLE/BATTLE.PRG/146C.c:5877)
 VS::Battle::Actor* CreateLiveAuxiliaryActor(int index, int actor_id,
@@ -1458,7 +1523,8 @@ int QueueLiveScriptedActorSpawn(unsigned actor_id, int model_id,
     return 0;
   }
   LiveActorSpawnHost host(kOperation);
-  return QueueScriptedActorSpawn(host, actor_id, model_id, *placement);
+  return QueueScriptedActorSpawn(host, LiveScriptedActorSpawns(), actor_id,
+                                 model_id, *placement);
 }
 
 // decomp: BATTLE.PRG setActorWeaponModels (src/BATTLE/BATTLE.PRG/146C.c:8920;

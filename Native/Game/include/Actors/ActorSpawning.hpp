@@ -707,6 +707,28 @@ struct EquippedModels {
 // --- Host
 // ------------------------------------------------------------------------
 
+struct PendingScriptedActorSpawn {
+  SpawnedActor actor = SpawnedActor::kNone;
+  std::size_t slot = 0;
+  int model_id = 0;
+};
+
+class ScriptedActorSpawnTable {
+ public:
+  [[nodiscard]] bool ContainsSlot(std::size_t slot) const;
+  [[nodiscard]] bool ContainsActor(SpawnedActor actor) const;
+  [[nodiscard]] bool Track(PendingScriptedActorSpawn spawn);
+  [[nodiscard]] std::optional<PendingScriptedActorSpawn> Take(
+      SpawnedActor actor);
+  [[nodiscard]] std::optional<PendingScriptedActorSpawn> TakeSlot(
+      std::size_t slot);
+  void Reset();
+
+ private:
+  std::array<std::optional<PendingScriptedActorSpawn>, kSpawnActorSlots>
+      pending_{};
+};
+
 // The live actor table, asset queue, zone and Ashley state the spawn rules
 // edit. Slots are VS::Battle::actors indices; the rules check them first.
 class ActorSpawnHost {
@@ -730,10 +752,15 @@ class ActorSpawnHost {
   // model links and allocation kind set; kNone when the heap refuses.
   [[nodiscard]] virtual SpawnedActor Allocate(ActorShape shape,
                                               std::size_t slot) = 0;
+  [[nodiscard]] virtual bool SlotIsEmpty(std::size_t slot) const = 0;
   // Frees an unpublished actor after its requests settle, including its
   // auxiliary model. Other shapes release their parts before discarding.
   virtual void DiscardUninstalled(SpawnedActor actor) = 0;
   virtual void Install(std::size_t slot, SpawnedActor actor) = 0;
+  // Publishes an unpublished actor only when no actor currently occupies the
+  // slot; false leaves both the slot and the actor allocation unchanged.
+  [[nodiscard]] virtual bool InstallIfEmpty(std::size_t slot,
+                                            SpawnedActor actor) = 0;
   virtual void SetEquippedWeaponCategory(SpawnedActor actor,
                                          std::uint8_t category) = 0;
   // Sets the identity of a new gimmick actor, unlinked and not retained.
@@ -920,10 +947,19 @@ SpawnedActor SpawnRoomEnemy(ActorSpawnHost& host, int actor_id,
                             const CharacterTemplate& character, int flags);
 // func_8007C8F8 (146C.c:8926): the queue index plus one.
 int QueueAshleyModelLoad(ActorSpawnHost& host, int model_id);
-// func_8007C928 (146C.c:8936): the queue index plus one, or 0. Native (#48):
-// the actor owns its model request, so removing the actor cancels it.
-int QueueScriptedActorSpawn(ActorSpawnHost& host, std::uint32_t actor_id,
-                            int model_id, SpawnPlacement placement);
+// func_8007C928 (146C.c:8936): the queue index plus one, or 0. The actor is
+// published only after its owned model request completes.
+int QueueScriptedActorSpawn(ActorSpawnHost& host,
+                            ScriptedActorSpawnTable& pending,
+                            std::uint32_t actor_id, int model_id,
+                            SpawnPlacement placement);
+void CompleteScriptedActorSpawn(ActorSpawnHost& host,
+                                ScriptedActorSpawnTable& pending,
+                                SpawnedActor actor,
+                                Content::ActorAssetOutcome outcome);
+[[nodiscard]] bool CancelScriptedActorSpawn(ActorSpawnHost& host,
+                                            ScriptedActorSpawnTable& pending,
+                                            std::size_t slot);
 // func_8007CA20 (146C.c:8962). Native (#48): the actor owns its equipment
 // requests, as every equipment load, so removing the actor cancels them.
 void LoadActorEquipmentModels(ActorSpawnHost& host, int actor_id,
