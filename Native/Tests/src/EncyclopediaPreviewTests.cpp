@@ -996,7 +996,9 @@ struct PreviewLifecycleFixture : LivePreviewFixture {
       VS::Content::legacyShpParseCursor, VS::Content::legacyShpCopiedWordCount,
       VS::Content::legacyShpHeaderWord, VS::Content::legacyShpTextureWidth,
       VS::Content::legacyShpTextureHeight, VS::Content::legacyWeaponParseCursor,
-      VS::Content::legacySequenceParseData, VS::Content::legacyShpDiscOffsets,
+      VS::Content::legacySequenceParseData,
+      VS::Content::legacySequenceFileLocation,
+      VS::Content::legacySequenceDiscRequest, VS::Content::legacyShpDiscOffsets,
       VS::Content::legacyShpSectorCounts, VS::Content::legacyWepDiscOffsets,
       VS::Content::legacyWepSectorCounts>
       saved_loader;
@@ -1032,6 +1034,29 @@ struct PreviewLifecycleFixture : LivePreviewFixture {
     return *ticket;
   }
 };
+
+ActorAssetTicket StartPreviewSequenceRead(PreviewLifecycleFixture& fixture) {
+  using VS::Content::ActorAssetKind;
+  VS::Content::ClearLiveActorAssetQueue();
+  static_cast<void>(fixture.Submit(
+      {.kind = static_cast<std::uint8_t>(ActorAssetKind::kActorModelParse),
+       .target_slot = 1,
+       .model_id = VS::Content::kModellessActorId,
+       .shared_record_slot = {}}));
+  REQUIRE(VS::Content::UpdateLiveActorAssetQueue() == 1);
+  auto* actor = VS::Actors::actorRecords[1];
+  if (actor == nullptr) throw std::runtime_error("preview actor was not bound");
+  actor->battle_sequence_lbas[1] = 1;
+  actor->battle_sequence_sizes[1] = VS::Content::DataStore::kDataSectorBytes;
+  const auto ticket = fixture.Submit(
+      {.kind = static_cast<std::uint8_t>(ActorAssetKind::kSequenceLoad),
+       .target_slot = 1,
+       .model_id = 1,
+       .shared_record_slot = {}});
+  REQUIRE(VS::Content::UpdateLiveActorAssetQueue() == 1);
+  REQUIRE(VS::Content::legacySequenceDiscRequest != nullptr);
+  return ticket;
+}
 
 score::EnemyPreviewState QueuePreviewParts(bool companion,
                                            bool modelless = false) {
@@ -1457,6 +1482,31 @@ TEST_CASE(
   CHECK(VS::Actors::actorRecords[1] == nullptr);
   CHECK_FALSE(VS::Core::Memory::LivePayloadCapacity(geometry).has_value());
   CHECK(VS::Content::LiveActorAssetRefusals() == refused);
+}
+
+TEST_CASE("A queued file read ignores another request in its module snapshot",
+          "[encyclopedia-preview][asset-ownership][asset-read-ownership]") {
+  PreviewLifecycleFixture fixture;
+  const auto before = QueuePreviewParts(false, true);
+  const auto ticket = StartPreviewSequenceRead(fixture);
+  auto* own_read = VS::Content::legacySequenceDiscRequest;
+  const auto* file = VS::Content::legacySequenceFileBuffer;
+  auto* foreign =
+      VS::Content::AllocateLiveDiscRequest(VS::Content::DiscFileExtent{1, 16});
+  REQUIRE(foreign != nullptr);
+  const auto generation = VS::Content::LiveDiscRequestGeneration(foreign);
+  foreign->state = VS::Content::DiscRequestState::kLoaded;
+  VS::Content::legacySequenceDiscRequest = foreign;
+  REQUIRE(VS::Content::UpdateLiveActorAssetQueue() == 1);
+  CHECK(VS::Content::legacyModelLoadPhase == 1);
+  CHECK(VS::Content::LiveDiscRequestGeneration(foreign) == generation);
+  CHECK(VS::Content::LiveActorAssetCompletion(ticket).outcome ==
+        ActorAssetOutcome::kPending);
+  REQUIRE(score::CleanupLiveEnemyPreviewOwnedState());
+  CheckColdPreviewRelease(before);
+  CHECK(VS::Content::LiveDiscRequestGeneration(own_read) == 0);
+  CHECK_FALSE(VS::Core::Memory::LivePayloadCapacity(file).has_value());
+  VS::Content::ReleaseLiveDiscRequest(foreign);
 }
 
 TEST_CASE("Preview cleanup preserves reused disc slots and empty foreign loads",

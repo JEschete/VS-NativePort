@@ -818,42 +818,25 @@ struct LiveFileStream {
   DiscQueueSlot** request;
 };
 
-// Native (#48): the disc request each cancellable file read started, so a
-// cancellation releases that request and not a later one reusing its slot.
-struct FileReadOwner {
+struct FileReadState {
+  DiscFileExtent file;
   DiscQueueSlot* request = nullptr;
   std::uint64_t generation = 0;
 };
-
-FileReadOwner modelReadOwner;
-FileReadOwner weaponReadOwner;
-FileReadOwner sequenceReadOwner;
-
-FileReadOwner* ReadOwner(AssetFileStream stream) {
-  switch (stream) {
-    case AssetFileStream::kActorModel:
-      return &modelReadOwner;
-    case AssetFileStream::kWeapon:
-      return &weaponReadOwner;
-    case AssetFileStream::kSequence:
-      return &sequenceReadOwner;
-    default:
-      return nullptr;
-  }
-}
 
 struct QueuedAssetState {
   ActorAssetIdentity identity;
   ActorRecordMemory memory = nullptr;
   std::optional<int> shared_record_slot;
   ActorAssetLoadState loader;
+  std::array<FileReadState, 4> reads;
   bool loader_state_initialized = false;
 };
 
 std::array<QueuedAssetState, kActorAssetRequestCount> requestStates{};
 ActorAssetCompletions requestCompletions;
 
-LiveFileStream Stream(AssetFileStream stream) {
+LiveFileStream SnapshotStream(AssetFileStream stream) {
   switch (stream) {
     case AssetFileStream::kWeapon:
       return {&legacyWeaponFileLocation, &legacyWeaponDiscRequest};
@@ -864,6 +847,23 @@ LiveFileStream Stream(AssetFileStream stream) {
     case AssetFileStream::kEffectTexture:
     default:
       return {&legacyEtmFileLocation, &legacyEtmDiscRequest};
+  }
+}
+
+FileReadState& ReadState(AssetFileStream stream) {
+  return requestStates[0].reads.at(static_cast<std::size_t>(stream));
+}
+
+void PublishRequestSnapshot(const QueuedAssetState& state) {
+  PublishLoaderSnapshot(state.loader);
+  constexpr std::array streams{
+      AssetFileStream::kWeapon, AssetFileStream::kActorModel,
+      AssetFileStream::kSequence, AssetFileStream::kEffectTexture};
+  for (const AssetFileStream stream : streams) {
+    const FileReadState& read = state.reads[static_cast<std::size_t>(stream)];
+    const LiveFileStream snapshot = SnapshotStream(stream);
+    *snapshot.file = {read.file.sector, read.file.bytes};
+    *snapshot.request = read.request;
   }
 }
 
@@ -926,6 +926,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
                                          : nullptr,
                            .shared_record_slot = request.shared_record_slot,
                            .loader = {},
+                           .reads = {},
                            .loader_state_initialized = true};
   }
   [[nodiscard]] ActorAssetIdentity RequestIdentity(int slot) const override {
@@ -946,12 +947,12 @@ class LiveActorAssetHost final : public ActorAssetHost {
   void MoveRequest(int from, int to) override {
     legacyActorAssetRequests[to] = legacyActorAssetRequests[from];
     requestStates[to] = requestStates[from];
-    if (to == 0) PublishLoaderSnapshot(requestStates[0].loader);
+    if (to == 0) PublishRequestSnapshot(requestStates[0]);
   }
   void ClearRequestKind(int slot) override {
     legacyActorAssetRequests[slot].asset_kind = 0;
     requestStates[slot] = {};
-    if (slot == 0) PublishLoaderSnapshot({});
+    if (slot == 0) PublishRequestSnapshot({});
   }
   int ProcessHeadRequest(ActorAssetKind kind) override {
     LegacyActorAssetRequest& head = legacyActorAssetRequests[0];
@@ -968,12 +969,18 @@ class LiveActorAssetHost final : public ActorAssetHost {
         !requestStates[0].loader_state_initialized) {
       state.effect_texture_phase = legacyEtmLoadPhase;
       state.effect_texture_file = Address(legacyEtmFileBuffer);
+      ReadState(AssetFileStream::kEffectTexture) = {
+          .file = {legacyEtmFileLocation.lba, legacyEtmFileLocation.size},
+          .request = legacyEtmDiscRequest,
+          .generation = legacyEtmDiscRequest != nullptr
+                            ? LiveDiscRequestGeneration(legacyEtmDiscRequest)
+                            : 0};
       requestStates[0].loader_state_initialized = true;
     }
     const int result = RunLoader(*this, state, request, kind);
     requestStates[0].shared_record_slot = request.shared_record_slot;
     ReleaseIdleActorAssetCursors(state);
-    PublishLoaderSnapshot(state);
+    PublishRequestSnapshot(requestStates[0]);
     StoreRequestFields(request, head);
     return result;
   }
@@ -1014,9 +1021,8 @@ class LiveActorAssetHost final : public ActorAssetHost {
   }
   AssetFileReadStart BeginFileRead(AssetFileStream stream, DiscFileExtent file,
                                    AssetAddress destination) override {
-    const LiveFileStream live = Stream(stream);
-    live.file->lba = file.sector;
-    live.file->size = file.bytes;
+    FileReadState& read = ReadState(stream);
+    read = {.file = file};
     if (const std::optional<ConvertedRead> converted =
             ConvertedReadOf(stream, file)) {
       // Native (#203-#207): the converted file loads at once, with no disc
@@ -1025,19 +1031,15 @@ class LiveActorAssetHost final : public ActorAssetHost {
       const std::span<std::byte> bytes = Bytes(destination, wanted);
       const bool loaded = ReadConvertedModel(
           *converted, file, bytes.first(std::min(bytes.size(), wanted)));
-      *live.request = nullptr;
-      if (FileReadOwner* owner = ReadOwner(stream)) *owner = {};
       return loaded ? AssetFileReadStart::kStarted
                     : AssetFileReadStart::kFailed;
     }
-    *live.request = AllocateLiveDiscRequest(live.file);
-    if (FileReadOwner* owner = ReadOwner(stream)) {
-      *owner = {*live.request, LiveDiscRequestGeneration(*live.request)};
-    }
-    if (*live.request == nullptr) {
+    read.request = AllocateLiveDiscRequest(file);
+    if (read.request == nullptr) {
       return AssetFileReadStart::kQueueFull;
     }
-    EnqueueLiveDiscRequest(*live.request, Pointer(destination));
+    read.generation = LiveDiscRequestGeneration(read.request);
+    EnqueueLiveDiscRequest(read.request, Pointer(destination));
     return AssetFileReadStart::kStarted;
   }
   bool ReadRefusedFile(DiscFileExtent file, AssetAddress destination) override {
@@ -1047,12 +1049,17 @@ class LiveActorAssetHost final : public ActorAssetHost {
     return ReadLiveRefusedDiscFile(&location, Pointer(destination)) != 0;
   }
   bool FileReadFinished(AssetFileStream stream) override {
-    const DiscQueueSlot* request = *Stream(stream).request;
+    const DiscQueueSlot* request = ReadState(stream).request;
     return request == nullptr || request->state == DiscRequestState::kLoaded;
   }
   void ReleaseFileRead(AssetFileStream stream) override {
-    ReleaseLiveDiscRequest(*Stream(stream).request);
-    if (FileReadOwner* owner = ReadOwner(stream)) *owner = {};
+    FileReadState& read = ReadState(stream);
+    if (read.request != nullptr &&
+        LiveDiscRequestGeneration(read.request) == read.generation) {
+      ReleaseLiveDiscRequest(read.request);
+    }
+    read.request = nullptr;
+    read.generation = 0;
   }
 
   // VRAM.
@@ -1467,7 +1474,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
 };
 
 // Cancels the disc read into a loader's file and frees the file.
-bool CancelFileRead(AssetAddress address, FileReadOwner& owner,
+bool CancelFileRead(AssetAddress address, FileReadState& read,
                     const char* refusal) {
   auto* file = Pointer<std::byte>(address);
   const auto capacity = Core::Memory::LivePayloadCapacity(file);
@@ -1476,18 +1483,18 @@ bool CancelFileRead(AssetAddress address, FileReadOwner& owner,
     return false;
   }
   if (!CancelLiveDiscWrites({file, *capacity})) return false;
-  if (owner.generation != 0 &&
-      LiveDiscRequestGeneration(owner.request) == owner.generation) {
-    ReleaseLiveDiscRequest(owner.request);
+  if (read.generation != 0 &&
+      LiveDiscRequestGeneration(read.request) == read.generation) {
+    ReleaseLiveDiscRequest(read.request);
   }
-  owner = {};
+  read = {};
   Core::Memory::FreeLiveFromHighEnd(file);
   return true;
 }
 
 bool CancelModelFile(ActorAssetLoadState& state) {
   if (!HoldsActorModelFile(state)) return true;
-  if (!CancelFileRead(state.model_file, modelReadOwner,
+  if (!CancelFileRead(state.model_file, ReadState(AssetFileStream::kActorModel),
                       "cancelled actor file outside its heap allocation")) {
     return false;
   }
@@ -1497,7 +1504,7 @@ bool CancelModelFile(ActorAssetLoadState& state) {
 
 bool CancelWeaponFile(ActorAssetLoadState& state) {
   if (!HoldsWeaponFile(state)) return true;
-  if (!CancelFileRead(state.weapon_file, weaponReadOwner,
+  if (!CancelFileRead(state.weapon_file, ReadState(AssetFileStream::kWeapon),
                       "cancelled weapon file outside its heap allocation")) {
     return false;
   }
@@ -1507,7 +1514,8 @@ bool CancelWeaponFile(ActorAssetLoadState& state) {
 
 bool CancelSequenceFile(ActorAssetLoadState& state) {
   if (!HoldsSequenceFile(state)) return true;
-  if (!CancelFileRead(state.sequence_file, sequenceReadOwner,
+  if (!CancelFileRead(state.sequence_file,
+                      ReadState(AssetFileStream::kSequence),
                       "cancelled sequence file outside its heap allocation")) {
     return false;
   }
@@ -1533,7 +1541,7 @@ bool LiveActorAssetHost::AbandonHeadRequest(ActorAssetKind kind) {
     return false;
   }
   AbandonActorAssetLoad(*this, state, request);
-  PublishLoaderSnapshot(state);
+  PublishRequestSnapshot(requestStates[0]);
   return true;
 }
 }  // namespace

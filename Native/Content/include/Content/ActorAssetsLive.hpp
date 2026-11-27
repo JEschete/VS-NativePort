@@ -138,10 +138,11 @@ extern int lastLoadPhaseSnapshot;
 extern int assetQueueFrameTicks;
 extern int lastAssetRequestType;
 
-// The loaders' legacy snapshots and file streams (BATTLE.PRG 30DB0.c,
+// The loaders' legacy snapshots (BATTLE.PRG 30DB0.c,
 // declared upstream at src/BATTLE/BATTLE.PRG/30DB0.c:73-105). The module image
 // fills the three phases (ModuleData.cpp) and its symbol table names the
-// rest (ModulePointers.cpp). The serialized file streams remain shared.
+// rest (ModulePointers.cpp). Submitted requests own their file locations and
+// generation-checked reads; these symbols only mirror the active entry.
 
 // decomp: _loadShpState, upstream loadShpState
 extern std::uint8_t legacyModelLoadPhase;

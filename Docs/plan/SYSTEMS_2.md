@@ -16,14 +16,15 @@
     (`AssetCatalogImport`) is the only code that turns sectors and executable tables into IDs. Converted forms (`mkv`,
     `stream`) and the remaining sector-addressed consumers are EC-04 work.
   - `AsyncLoader` does background loads with completion handles, replacing `DsRead` callbacks. **Actor queue (#48):**
-    each queue entry owns its parser phases, buffers, cursors, ticket and record-memory resolver; actor, weapon and
+    each queue entry owns its parser phases, buffers, cursors, file-read identities, ticket and record-memory resolver; actor, weapon and
     sequence loads resume and cancel from the entry, not module globals. Queue shifts move this state, and clearing
     the queue (used by the battle initializer) discards it. Legacy parser symbols are output-only diagnostic snapshots;
     a raw ETM queue entry imports its legacy phase and buffer once when first processed, while that unowned producer
     remains #207. File-read starts distinguish success, a full request queue
     and failure (#518): only a full queue permits the synchronous read fallback, and a converted-file error or failed
     fallback frees the loader's allocation from the same heap end and fails the request before parsing, binding or
-    texture upload. Open work: #48 (serialized file streams, typed shared-record references to mutable actor slots,
+    texture upload. File-read locations and request pointers are also entry-owned; the legacy stream symbols are
+    output-only snapshots for submitted requests. Open work: #48 (typed shared-record references to mutable actor slots,
     unowned producers, immutable model/animation sharing).
   - **Decoders** (used by VS.Extract and the round-trip tests) produce typed objects: TIM, MPD, ZND, SHP, SEQ, WEP, ARM, ZUD, SYD, FBT/FBC, EVT, AKAO, XA, MCDATA, ITEMNAME/ITEMHELP text, HF0/HF1 help, EFFECT data.
   - **Loaders** (used by the game) read glTF, PNG, WAV, FLAC and JSON from `Native\data\` and build the same typed objects. The round-trip rule in ASSET_PIPELINE §7 proves `decode(raw) == load(converted)`.
