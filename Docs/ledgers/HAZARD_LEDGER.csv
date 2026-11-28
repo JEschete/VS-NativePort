@@ -156,7 +156,7 @@ f8da63549b09,DIV-ZERO,medium,pattern,F01851,ApplyLearnedActionUnlocks,Native/Gam
 237b8d3f6d5a,DIV-ZERO,low,pattern,,Regenerate,Native/Game/src/Battle/ActorVitals.cpp,63,(drawn ? kDrawnMpInterval : kStatusInterval),56,24,open,
 5a13dc2ba296,DIV-ZERO,low,pattern,,Regenerate,Native/Game/src/Battle/ActorVitals.cpp,66,(drawn ? kDrawnHpInterval : kRestInterval),56,24,open,
 688ed2071431,DIV-ZERO,medium,pattern,F00525,UpdateActorVitals,Native/Game/src/Battle/ActorVitals.cpp,142,static_cast,56,24,open,
-9f66cf8d9bf8,DIV-ZERO,medium,pattern,,ReadablePlanningBytes,Native/Game/src/Battle/Ai/PlanningPrimitivesLive.cpp,119,alignment,57,23,open,
+9f66cf8d9bf8,DIV-ZERO,medium,pattern,,ReadablePlanningBytes,Native/Game/src/Battle/Ai/PlanningPrimitivesLive.cpp,120,alignment,57,23,open,
 19e1bfedf4f8,DIV-ZERO,medium,pattern,,DrawChoice,Native/Game/src/Battle/Ai/Wander.cpp,159,static_cast,57,23,open,
 fe461f81515b,DIV-ZERO,medium,pattern,,Roam,Native/Game/src/Battle/Ai/Wander.cpp,168,range,57,23,open,
 ff7c2bc2c19e,DIV-ZERO,medium,pattern,F00396,DistributeHitLimbDamage,Native/Game/src/Battle/DamagePolicies.cpp,76,static_cast,56,24,open,
@@ -266,8 +266,7 @@ daabfcafea33,NARROW-ID,medium,pattern,,InventoryIndices,Native/Game/include/Item
 2782fc8a4419,NARROW-ID,medium,pattern,,InventoryIndices,Native/Game/include/Items/ItemRecords.hpp,542,InventoryIndices.gems,58,15,open,
 8cba3692ef57,NARROW-ID,medium,pattern,,InventoryIndices,Native/Game/include/Items/ItemRecords.hpp,543,InventoryIndices.misc,58,15,open,
 d5425c450161,NARROW-ID,medium,pattern,,DefenderLimb,Native/Game/include/Items/ItemRecords.hpp,728,DefenderLimb.name_index,58,15,open,
-986522f544bc,NULL-TABLE,medium,pattern,,LinkLiveActorAfterAshley,Native/Game/src/Actors/ActorRosterLive.cpp,151,leader = actors[decision.slot],55,14,open,
-df324a572825,NULL-TABLE,medium,pattern,,UnlinkLiveActorFromRoomList,Native/Game/src/Actors/ActorRosterLive.cpp,167,actors[decision.slot],55,14,open,
+df324a572825,NULL-TABLE,medium,pattern,,UnlinkLiveActorFromRoomList,Native/Game/src/Actors/ActorRosterLive.cpp,189,actors[decision.slot],55,14,open,
 047b269efca1,NULL-TABLE,medium,pattern,,TriggerLiveActorTrap,Native/Game/src/Field/ChestInteractionsLive.cpp,1079,actors[actor],45,3,open,
 d426f31fcbb0,NULL-TABLE,medium,pattern,,SnapLiveRoomActorsToSupport,Native/Game/src/Field/CollisionMapLive.cpp,306,actorRecords[slot],57,23,guarded,"the write loop only touches slots whose optional was filled by the read loop, which skips null actor records; the typed core between the loops does not change the actor table"
 7ec5efb7dd69,POINTER-INT,high,compiler,,Report,Native/Engine/src/Audio/Cutscene/StreamBuffersLive.cpp,202,-Wshorten-64-to-32: implicit conversion loses integer precision: 'size_t' (aka 'unsigned long long') to 'unsigned long',253,30A,open,
