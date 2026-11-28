@@ -2844,7 +2844,7 @@ TEST_CASE("AI decision cursors reject same-address actor replacement",
   actor.id = 5;
   fixture.InstallBorrowed(actor, 0);
   const auto cursor = VS::Battle::Ai::LiveDecisionListHead();
-  CHECK(VS::Battle::Ai::LiveDecisionListId(cursor) == 5);
+  CHECK(VS::Battle::Ai::LiveDecisionListId(cursor) == 0);
   actors::InvalidateLiveActorHandle(0, &actor);
   VS::Battle::actors[0] = nullptr;
   actor.id = 9;
@@ -2852,7 +2852,7 @@ TEST_CASE("AI decision cursors reject same-address actor replacement",
   CHECK_FALSE(VS::Battle::Ai::LiveDecisionListId(cursor));
   CHECK(VS::Battle::Ai::LiveDecisionListHead() != cursor);
   CHECK(VS::Battle::Ai::LiveDecisionListId(
-            VS::Battle::Ai::LiveDecisionListHead()) == 9);
+            VS::Battle::Ai::LiveDecisionListHead()) == 0);
 }
 
 TEST_CASE("Mutable actor pointers cannot redirect owned component destinations",
@@ -2912,4 +2912,14 @@ TEST_CASE("Actor-bound assets refuse unregistered and removing owners",
   content::ClearLiveActorAssetQueue();
   actors::SettleLiveActorLoads();
   actors::FinalizeLiveActorRemoval(identity);
+}
+
+TEST_CASE("A retained decision cursor uses its canonical actor slot",
+          "[actors][actors-spawning][actor55-integration]") {
+  NativeActorStorageFixture fixture;
+  VS::Battle::Actor actor{};
+  const auto identity = fixture.InstallBorrowed(actor);
+  actor.id = 5;
+  CHECK(VS::Battle::Ai::LiveDecisionListId(static_cast<std::size_t>(
+            identity)) == static_cast<int>(NativeActorStorageFixture::kSlot));
 }

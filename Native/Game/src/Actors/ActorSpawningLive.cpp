@@ -1249,9 +1249,11 @@ void FinalizeLiveActorRemoval(SpawnedActor actor) {
   const auto slot = handles.Slot(actor);
   auto* live = reinterpret_cast<VS::Battle::Actor*>(handles.Resolve(actor));
   if (!slot || live == nullptr || !handles.Removing(actor) ||
-      Content::LiveActorAssetsQueued(AssetOwnerOf(actor))) {
-    WarnActorRefused("FinalizeActorRemoval",
-                     "actor removal is stale, unclaimed or still owns loads");
+      Content::LiveActorAssetsQueued(AssetOwnerOf(actor)) ||
+      handles.AiState(actor) != nullptr) {
+    WarnActorRefused(
+        "FinalizeActorRemoval",
+        "actor removal is stale, unclaimed or still owns loads/AI");
     return;
   }
   const bool owns_storage = handles.OwnsStorage(actor);

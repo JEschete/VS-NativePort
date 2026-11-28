@@ -74,6 +74,8 @@ struct TeardownActor {
   std::uint8_t kind = 0;           // actor 0x1C
 };
 
+enum class ActorAiTeardown { kRoomExit, kActorRemoval };
+
 // The AI state table, the room, the battle actors and the heap the cleanup
 // routines use. Slot arguments are below kCleanupActorSlots.
 class ActorCleanupHost {
@@ -232,8 +234,10 @@ bool AllocateOrbitingBossState(ActorCleanupHost& host);
 // navigation override and AI state, and frees the orbiting boss state with
 // an orbiting boss. False refuses an actor outside the battle actor table,
 // an AI actor outside the AI slots, a missing room or inconsistent
-// engagement.
-bool FreeActorAiState(ActorCleanupHost& host, TeardownActor& actor);
+// engagement. Room exit retains Ashley's state; actual actor removal retires
+// every AI allocation even after the room's maps have been invalidated.
+bool FreeActorAiState(ActorCleanupHost& host, TeardownActor& actor,
+                      ActorAiTeardown teardown = ActorAiTeardown::kRoomExit);
 
 // decomp: func_800E48A8 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:485).
 // Draws a random value below `range` and, unless the actor follows a

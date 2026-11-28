@@ -26,7 +26,9 @@ void FreeLiveActorNavigationOverride(int actor_id);
 void ForceReleaseLiveActorAiReservations(int actor_id);
 void ReleaseLiveActorAiReservations(VS::Battle::Ai::ActorAiState* state);
 void FreeLiveActorAiState(VS::Battle::Actor* actor);
-void FreeLiveActorInstanceAi(Actors::SpawnedActor actor);
+void FreeLiveActorInstanceAi(
+    Actors::SpawnedActor actor,
+    ActorAiTeardown teardown = ActorAiTeardown::kRoomExit);
 void AllocateLiveOrbitingBossState(VS::Battle::Ai::SettingsView* state);
 void SetLiveActorAiReactionWithDelay(
     VS::Battle::Ai::PerceptionUpdateView* state, int value, int range);

@@ -384,7 +384,8 @@ void FreeLiveActorAiState(VS::Battle::Actor* actor) {
   FreeLiveActorInstanceAi(Actors::LiveActorIdentity(actor));
 }
 
-void FreeLiveActorInstanceAi(Actors::SpawnedActor identity) {
+void FreeLiveActorInstanceAi(Actors::SpawnedActor identity,
+                             ActorAiTeardown mode) {
   const auto slot = Actors::LiveActorSlot(identity);
   const auto* actor = Actors::ResolveLiveActorInstance(identity);
   if (!slot || actor == nullptr) {
@@ -397,7 +398,7 @@ void FreeLiveActorInstanceAi(Actors::SpawnedActor identity) {
                          .sub_type = actor->sub_type,
                          .kind = static_cast<std::uint8_t>(actor->kind)};
   LiveCleanupHost host(identity, static_cast<int>(*slot));
-  Require(FreeActorAiState(host, teardown),
+  Require(FreeActorAiState(host, teardown, mode),
           "AI teardown requires an actor in the AI slots, the room state and "
           "consistent engagement");
 }

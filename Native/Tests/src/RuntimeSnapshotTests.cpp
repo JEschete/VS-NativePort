@@ -304,12 +304,12 @@ struct RuntimeFixture {
 
   RuntimeFixture() {
     REQUIRE_FALSE(Save::ResumePending());
+    VS::Actors::ResetLiveActorHandles();
     std::copy(kBounds.begin(), kBounds.end(), VS::Items::itemCategoryUpperIds);
     std::fill_n(VS::Battle::actors.begin(), actors.size(), nullptr);
     std::fill_n(VS::Actors::actorRecords.begin(), models.size(), nullptr);
     std::fill_n(VS::Battle::Ai::actorAiStates.begin(), ai.size(), nullptr);
     VS::Battle::characterState = &player;
-    VS::Battle::actors[0] = &player;
     VS::Actors::actorRecords[0] = &player_model;
     // The three-byte textureRowOffsets union member does not initialize the
     // high byte of momentumDistance. Match VS::Actors::PlaceActorInRoom's
@@ -317,6 +317,9 @@ struct RuntimeFixture {
     VS::Actors::ResetLiveActorRunMomentum(0);
     player.stats = &player_stats;
     player.model = &player_model.instance;
+    REQUIRE(VS::Actors::InstallLiveActorInstance(
+                0, &player, VS::Actors::ActorShape::kEquipped) !=
+            VS::Actors::SpawnedActor::kNone);
     player.room_spawn_index = 0x80;
     player_model.instance.position = {193, -73, 325, 0};
     player_model.instance.facing = 2051;
@@ -547,12 +550,16 @@ struct RuntimeFixture {
   }
 
   void AddEnemy() {
-    VS::Battle::actors[2] = &enemy;
     VS::Actors::actorRecords[2] = &enemy_model;
     VS::Battle::Ai::actorAiStates[2] = &enemy_ai;
     enemy.room_spawn_index = 0;
     enemy.stats = &enemy_stats;
     enemy.model = &enemy_model.instance;
+    enemy.id = 2;
+    const auto identity = VS::Actors::InstallLiveActorInstance(
+        2, &enemy, VS::Actors::ActorShape::kEquipped);
+    REQUIRE(identity != VS::Actors::SpawnedActor::kNone);
+    REQUIRE(VS::Actors::BindLiveActorAiState(identity, &enemy_ai));
     enemy_stats.current_hp = 43;
     enemy_stats.max_hp = 90;
     enemy_stats.current_mp = 12;
@@ -608,6 +615,7 @@ struct RuntimeFixture {
 
   ~RuntimeFixture() {
     Save::CancelResume();
+    VS::Actors::ResetLiveActorHandles();
     VS::Boot::isClearSavePending = clear_pending;
     VS::State::stateFlags = flags;
     VS::Items::inventory = inventory;
@@ -789,6 +797,65 @@ TEST_CASE("Runtime capture reads canonical gameplay without modifying it",
   CheckCapturedProgress(state);
   CheckCapturedCache(state);
   CheckCapturedRandom(state);
+}
+
+TEST_CASE("Runtime room capture reads its registered actor components",
+          "[save][runtime-snapshot][actor55-integration]") {
+  RuntimeFixture fixture;
+  fixture.AddEnemy();
+  auto foreign_stats = fixture.enemy_stats;
+  auto foreign_model = fixture.enemy_model;
+  auto foreign_ai = fixture.enemy_ai;
+  foreign_stats.current_hp = 1;
+  foreign_stats.total_strength = 999;
+  foreign_model.instance.facing = 0;
+  foreign_ai.relations[0] = {};
+  fixture.enemy.stats = &foreign_stats;
+  fixture.enemy.model = &foreign_model.instance;
+  VS::Actors::actorRecords[2] = &foreign_model;
+  VS::Battle::Ai::actorAiStates[2] = &foreign_ai;
+
+  const auto state = fixture.Capture();
+  CheckCapturedCache(state);
+  CheckCapturedRandom(state);
+}
+
+TEST_CASE("Runtime Ashley capture reads her owned stats and body",
+          "[save][runtime-snapshot][actor55-integration]") {
+  RuntimeFixture fixture;
+  const auto expected = fixture.Capture();
+  auto foreign_stats = fixture.player_stats;
+  auto foreign_model = fixture.player_model;
+  foreign_stats.current_hp = 1;
+  foreign_model.instance.facing = 0;
+  fixture.player.stats = &foreign_stats;
+  fixture.player.model = &foreign_model.instance;
+  VS::Actors::actorRecords[0] = &foreign_model;
+
+  const auto state = fixture.Capture();
+  CHECK(state.ashley.current_hp == expected.ashley.current_hp);
+  CHECK(state.location.facing == expected.location.facing);
+}
+
+TEST_CASE("Runtime resume restores only Ashley's retained components",
+          "[save][runtime-snapshot][actor55-integration]") {
+  RuntimeFixture fixture;
+  const auto state = fixture.Capture();
+  REQUIRE(Save::PrepareResume({1, 0, state}).has_value());
+  VS::State::ashleySnapshot.stats.is_pending = 0;
+  fixture.player_stats.current_hp = 2;
+  fixture.player_model.instance.facing = 3;
+  auto foreign_stats = fixture.player_stats;
+  auto foreign_model = fixture.player_model;
+  fixture.player.stats = &foreign_stats;
+  fixture.player.model = &foreign_model.instance;
+  VS::Actors::actorRecords[0] = &foreign_model;
+
+  REQUIRE(Save::FinishResume().has_value());
+  CHECK(fixture.player_stats.current_hp == state.ashley.current_hp);
+  CHECK(fixture.player_model.instance.facing == state.location.facing);
+  CHECK(foreign_stats.current_hp == 2);
+  CHECK(foreign_model.instance.facing == 3);
 }
 
 TEST_CASE("Runtime fixtures clear reused momentum union storage",

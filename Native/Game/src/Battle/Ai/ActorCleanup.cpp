@@ -98,7 +98,8 @@ void ClearLinkedActorReferences(ActorCleanupHost& host, int actor_id) {
 
 // Drops the departing actor from the attribute mask, the other actors' links
 // and the room's special actors.
-bool DetachActorReferences(ActorCleanupHost& host, const TeardownActor& actor) {
+bool DetachActorReferences(ActorCleanupHost& host, const TeardownActor& actor,
+                           bool allow_missing_room) {
   if ((actor.id > 0 && actor.id < kCleanupActorSlots) ||
       (actor.kind & kAttributeKinds) != 0) {
     if (!IsCleanupSlot(actor.id)) {
@@ -111,7 +112,9 @@ bool DetachActorReferences(ActorCleanupHost& host, const TeardownActor& actor) {
   }
   ClearLinkedActorReferences(host, actor.id);
   std::optional<CleanupRoom> room = host.Room();
-  if (!room.has_value()) return Refuse("AI teardown requires the room state");
+  if (!room.has_value()) {
+    return allow_missing_room || Refuse("AI teardown requires the room state");
+  }
   for (BattleActorHandle& special : room->special_actors) {
     if (special == actor.handle) special = kNoBattleActor;
   }
@@ -297,12 +300,14 @@ bool AllocateOrbitingBossState(ActorCleanupHost& host) {
 }
 
 // decomp: func_800E7454 (src/BATTLE/BATTLE.PRG/6E4CCPrivate.h:83).
-bool FreeActorAiState(ActorCleanupHost& host, TeardownActor& actor) {
-  if (!host.HasTileFlagMap()) return true;
+bool FreeActorAiState(ActorCleanupHost& host, TeardownActor& actor,
+                      ActorAiTeardown teardown) {
+  const bool removing = teardown == ActorAiTeardown::kActorRemoval;
+  if (!host.HasTileFlagMap() && !removing) return true;
   if (actor.id < 0 || actor.id >= host.BattleActorSlots()) {
     return Refuse("AI teardown actor is outside the battle actor table");
   }
-  if (!DetachActorReferences(host, actor)) return false;
+  if (!DetachActorReferences(host, actor, removing)) return false;
   // A script may reclassify an actor without retiring its AI state, so a
   // present state is torn down whatever the actor's kind.
   const bool has_state =
@@ -311,17 +316,20 @@ bool FreeActorAiState(ActorCleanupHost& host, TeardownActor& actor) {
   if (!IsCleanupSlot(actor.id)) {
     return Refuse("AI teardown actor is outside the AI slots");
   }
-  if (!FreeActorNavigationOverride(host, actor.id) ||
-      !ReleaseHostReservations(host, actor.id, 0)) {
+  if (has_state && host.HasNavigationOverride(actor.id)) {
+    host.FreeNavigationOverride(actor.id);
+  }
+  const bool has_room = host.Room().has_value();
+  if (has_room && !ReleaseHostReservations(host, actor.id, 0)) {
     return false;
   }
-  if (actor.id == 0) return true;
-  if (!LeaveEngagement(host, actor.id, has_state)) return false;
+  if (actor.id == 0 && !removing) return true;
+  if (has_room && !LeaveEngagement(host, actor.id, has_state)) return false;
   actor.command_flags &= kCommandModeMask;
   host.StoreCommandFlags(actor.handle, actor.command_flags);
   if (has_state) {
     host.ResetAwarenessIndicator(actor.id);
-    host.UnlinkEngagedActor(actor.id);
+    if (has_room) host.UnlinkEngagedActor(actor.id);
   }
   host.RetireAiState(actor.id);
   if (actor.sub_type == kOrbitingBossFirst ||

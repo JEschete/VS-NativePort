@@ -114,9 +114,8 @@ class LiveExecution final : public ActionExecutionWorld {
         slot >= std::size(VS::Battle::Ai::roomAiState->special_actors)) {
       return std::nullopt;
     }
-    const auto* actor = Actors::ResolveLiveActorInstance(
-        VS::Battle::Ai::roomAiState->special_actors[slot]);
-    return actor != nullptr ? std::optional<int>(actor->id) : std::nullopt;
+    return LiveDecisionListId(static_cast<std::size_t>(
+        VS::Battle::Ai::roomAiState->special_actors[slot]));
   }
   std::optional<bool> GimmickReady(int actor) const override {
     if (actor < 0 ||
@@ -222,8 +221,11 @@ std::size_t LiveDecisionListHead() {
 std::optional<int> LiveDecisionListId(std::size_t node) {
   // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   const auto identity = static_cast<VS::Actors::SpawnedActor>(node);
-  const auto* actor = VS::Actors::ResolveLiveActorInstance(identity);
-  return actor != nullptr ? std::optional(actor->id) : std::nullopt;
+  if (VS::Actors::ResolveLiveActorInstance(identity) == nullptr) {
+    return std::nullopt;
+  }
+  const auto slot = VS::Actors::LiveActorSlot(identity);
+  return slot ? std::optional(static_cast<int>(*slot)) : std::nullopt;
 }
 
 std::size_t LiveDecisionListNext(std::size_t node) {

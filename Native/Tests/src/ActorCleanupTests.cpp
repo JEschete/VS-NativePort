@@ -11,6 +11,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Actors/ActorRecord.hpp"
+#include "Actors/ActorRosterLive.hpp"
 #include "Actors/ActorSpawningLive.hpp"
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/AppearanceTransition.hpp"
@@ -132,6 +133,19 @@ void CheckRetiredAiOwnership(const CleanupFixture& fixture,
   CHECK(VS::Battle::Ai::actorAiStates[5] == peer);
   CHECK(VS::Battle::Ai::LiveFrameContext().actors[5] == peer);
   CHECK(peer->linked_actor == 16);
+}
+
+void CheckEmptyEngagement(const VS::Battle::Ai::RoomAiState& room) {
+  CHECK(room.engaged_count == 0);
+  CHECK(room.engaged_head == nullptr);
+  CHECK(room.engaged_cursor == nullptr);
+}
+
+void CheckDestroyedActor(std::size_t slot) {
+  CHECK(VS::Battle::actors[slot] == nullptr);
+  CHECK(VS::Battle::Ai::actorAiStates[slot] == nullptr);
+  CHECK(VS::Battle::Ai::LiveFrameContext().actors[slot] == nullptr);
+  CHECK(VS::Core::Memory::GameHeap().Empty());
 }
 
 // Applies zeroed settings to Ashley's state with the given sub-type. Her
@@ -305,9 +319,7 @@ TEST_CASE("AI teardown leaves no engaged-list or marker references",
   REQUIRE(VS::Battle::Ai::TryEngageLiveActor(state));
   VS::Battle::actorMarkers[2] = 0x47;
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
-  CHECK(fixture.room.engaged_count == 0);
-  CHECK(fixture.room.engaged_head == nullptr);
-  CHECK(fixture.room.engaged_cursor == nullptr);
+  CheckEmptyEngagement(fixture.room);
   CHECK(VS::Battle::actorMarkers[2] == 0);
   CHECK(fixture.actors[1].command_flags == 0xF8);
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
@@ -326,10 +338,12 @@ TEST_CASE("AI teardown releases its own state and preserves a foreign slot",
   auto* peer = fixture.AllocateState(2);
   const auto peer_units =
       before_peer - VS::Core::Memory::GameHeap().FreeUnits();
+  REQUIRE(VS::Battle::Ai::TryEngageLiveActor(removed));
   VS::Battle::Ai::actorAiStates[2] = peer;
   VS::Battle::Ai::LiveFrameContext().actors[2] = peer;
 
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
+  CheckEmptyEngagement(fixture.room);
   const bool preserved = VS::Battle::Ai::actorAiStates[2] == peer;
   CHECK(preserved);
   CHECK(VS::Battle::Ai::LiveFrameContext().actors[2] == peer);
@@ -357,6 +371,54 @@ TEST_CASE("AI teardown preserves the original Ashley state lifetime",
   CHECK(state->native_pointer_18c == nullptr);
   VS::Core::Memory::FreeLiveFromLowEnd(state);
   VS::Battle::Ai::actorAiStates[0] = nullptr;
+  CHECK(VS::Core::Memory::GameHeap().Empty());
+}
+
+TEST_CASE("Actor destruction retires AI even after the room map is gone",
+          "[ai][cleanup][actor55-integration]") {
+  const std::size_t index = GENERATE(std::size_t{0}, std::size_t{1});
+  const bool has_room = GENERATE(false, true);
+  const bool has_grid = GENERATE(false, true);
+  CleanupFixture fixture;
+  auto& actor = fixture.actors[index];
+  actor.room_spawn_index = 0x80;
+  auto* state = fixture.AllocateState(index);
+  void* route = VS::Core::Memory::AllocateLiveFromHighEnd(128);
+  REQUIRE(route != nullptr);
+  state->native_pointer_18c = route;
+  const auto slot = static_cast<std::size_t>(actor.id);
+  VS::Battle::Ai::LiveFrameContext().actors[slot] = state;
+  if (!has_room) {
+    VS::Battle::Ai::roomAiState = nullptr;
+  }
+  if (!has_grid) {
+    VS::Battle::Ai::tileFlagMap = nullptr;
+  }
+
+  CHECK(VS::Actors::RemoveLiveActorAtSlot(static_cast<unsigned>(slot), 0) == 1);
+  CheckDestroyedActor(slot);
+  if (VS::Battle::Ai::actorAiStates[slot] != nullptr) {
+    if (state->native_pointer_18c != nullptr) {
+      VS::Core::Memory::FreeLiveFromHighEnd(route);
+    }
+    VS::Core::Memory::FreeLiveFromLowEnd(state);
+    VS::Battle::Ai::actorAiStates[slot] = nullptr;
+  }
+}
+
+TEST_CASE("An actor cannot finalize while its AI allocation remains",
+          "[ai][cleanup][actor55-integration]") {
+  CleanupFixture fixture;
+  auto* state = fixture.AllocateState(1);
+  const auto identity = VS::Actors::LiveActorIdentity(&fixture.actors[1]);
+  REQUIRE(VS::Actors::ClaimLiveActorRemoval(2, &fixture.actors[1]).has_value());
+  VS::Actors::FinalizeLiveActorRemoval(identity);
+  CHECK(VS::Battle::actors[2] == &fixture.actors[1]);
+  CHECK(VS::Actors::LiveActorAiState(identity) == state);
+  VS::Battle::Ai::FreeLiveActorInstanceAi(
+      identity, VS::Battle::Ai::ActorAiTeardown::kActorRemoval);
+  VS::Actors::FinalizeLiveActorRemoval(identity);
+  CHECK(VS::Battle::actors[2] == nullptr);
   CHECK(VS::Core::Memory::GameHeap().Empty());
 }
 

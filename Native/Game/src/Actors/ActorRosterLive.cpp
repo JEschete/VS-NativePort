@@ -101,7 +101,8 @@ class LiveRemovalHost final : public ActorRemovalHost {
     }
   }
   void FreeAiState(std::size_t /*slot*/) override {
-    VS::Battle::Ai::FreeLiveActorInstanceAi(identity_);
+    VS::Battle::Ai::FreeLiveActorInstanceAi(
+        identity_, VS::Battle::Ai::ActorAiTeardown::kActorRemoval);
   }
   [[nodiscard]] RosterView Links(std::size_t /*slot*/) const override {
     return ViewFrom(identity_);

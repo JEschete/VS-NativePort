@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "Actors/ActorRecord.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/ShpModel.hpp"
 #include "Audio/Driver/SoundDriver.hpp"
@@ -1084,8 +1085,8 @@ Result OverlayEquipped(Snapshot& state, const VS::Battle::ActorStats& stats) {
   return {};
 }
 
-void CaptureAshley(Snapshot& state, const VS::Battle::Actor& character) {
-  const auto& source = *character.stats;
+void CaptureAshley(Snapshot& state, const VS::Battle::Actor& character,
+                   const VS::Battle::ActorStats& source) {
   auto& target = state.ashley;
   target.is_pending = 1;
   target.current_hp = source.current_hp;
@@ -1126,10 +1127,10 @@ void CaptureAshley(Snapshot& state, const VS::Battle::Actor& character) {
 }
 
 void RestoreAshleyValues(const VS::State::AshleyStatsSnapshot& source,
-                         VS::Battle::Actor& character) {
+                         VS::Battle::Actor& character,
+                         VS::Battle::ActorStats& target) {
   // func_800F9AD8, INITBTL/18.c:310. Spawn has already built equipment and
   // status effects. Reassert saved scalars after room-entry status cleanup.
-  auto& target = *character.stats;
   target.current_hp = source.current_hp;
   target.max_hp = source.max_hp;
   target.current_mp = source.current_mp;
@@ -1180,11 +1181,24 @@ Result CaptureActors(Snapshot& state) {
   // projections, but acquire records ONLY in the owned staging cache.
   for (int slot = 0; std::cmp_less(slot, VS::Battle::Ai::kFrameActorSlots);
        ++slot) {
-    const auto* actor = VS::Battle::actors[slot];
-    if (actor == nullptr || actor->room_spawn_index == kNoRoomSpawn) continue;
-    if (actor->stats == nullptr || VS::Actors::actorRecords[slot] == nullptr ||
+    if (VS::Battle::actors[slot] == nullptr) continue;
+    const auto identity = VS::Actors::LiveActorIdentityAt(slot);
+    const auto* actor = VS::Actors::ResolveLiveActorInstance(identity);
+    if (actor == nullptr) {
+      return std::unexpected("live room actor has no registered identity");
+    }
+    if (actor->room_spawn_index == kNoRoomSpawn) continue;
+    const auto components = VS::Actors::LiveActorComponents(identity);
+    if (!components.has_value() || components->stats == nullptr ||
+        components->body == nullptr ||
         actor->room_spawn_index == kLastLocation) {
       return std::unexpected("live room actor is not ready");
+    }
+    const auto& stats = *components->stats;
+    const auto pose = VS::Actors::ReadLiveActorPersistencePose(
+        identity, stats.movement_class);
+    if (!pose.has_value()) {
+      return std::unexpected("live room actor has no owned placement");
     }
     const auto spawn = static_cast<unsigned>(actor->room_spawn_index) + 1;
     auto found = std::ranges::find(cache.actors, spawn,
@@ -1193,15 +1207,13 @@ Result CaptureActors(Snapshot& state) {
       found = cache.actors.begin() + cache.next_slot;
       cache.next_slot = (cache.next_slot + 1) % cache.actors.size();
     }
-    const auto& stats = *actor->stats;
     found->spawn_slot = static_cast<unsigned char>(spawn);
     found->hidden = 0;
-    found->ai_flags = VS::Battle::Ai::PackLiveActorAiPersistenceFlags(slot);
+    found->ai_flags = VS::Battle::Ai::PackLiveActorInstanceAiFlags(identity);
     // The action animation test of StateFlag::kActionAnimating
     // (ActorFlags.cpp), read directly so the snapshot does not compose the
     // weapon and model state.
-    const auto animation =
-        VS::Actors::actorRecords[slot]->instance.action_animation_state;
+    const auto animation = components->body->instance.action_animation_state;
     found->current_hp = animation != 0 && animation < kActiveAnimationEnd
                             ? 1
                             : stats.current_hp;
@@ -1215,16 +1227,10 @@ Result CaptureActors(Snapshot& state) {
       found->limb_hp[limb] = stats.limbs[limb].hp;
     }
     found->statuses = stats.statuses;
-    VS::Actors::ActorLocationQuery placement{};
-    VS::Actors::LiveActorSavedPlacement(slot, stats.movement_class, &placement);
-    found->tile_x = static_cast<unsigned char>(
-        placement.location.packed_tile.target.tile_x);
-    found->surface = static_cast<unsigned char>(
-        placement.location.packed_tile.target.tile_layer);
-    found->tile_z = static_cast<unsigned char>(
-        placement.location.packed_tile.target.tile_z);
-    found->facing = static_cast<unsigned char>(
-        placement.location.packed_tile.target.facing);
+    found->tile_x = pose->tile.x;
+    found->surface = pose->tile.layer;
+    found->tile_z = pose->tile.z;
+    found->facing = pose->tile.spare;
   }
   return {};
 }
@@ -1448,12 +1454,14 @@ std::expected<Document, std::string> CaptureClearGame() {
 
 std::expected<Snapshot, std::string> Capture(
     const VS::Items::ContainerData& storage) {
+  const auto identity = VS::Actors::LiveActorIdentityAt(0);
+  const auto components = VS::Actors::LiveActorComponents(identity);
   if (pending || !VS::Boot::isGameplayActive ||
       VS::Battle::characterState == nullptr ||
-      VS::Battle::characterState != VS::Battle::actors[0] ||
-      VS::Battle::characterState->stats == nullptr ||
-      VS::Actors::actorRecords[0] == nullptr ||
-      !VS::Field::roomData.is_loaded ||
+      VS::Battle::characterState !=
+          VS::Actors::ResolveLiveActorInstance(identity) ||
+      !components.has_value() || components->stats == nullptr ||
+      components->body == nullptr || !VS::Field::roomData.is_loaded ||
       VS::Field::roomData.environment == nullptr ||
       VS::Field::zoneContext.room_disc_request != nullptr ||
       VS::Field::zoneContext.zone_disc_request != nullptr) {
@@ -1467,17 +1475,17 @@ std::expected<Snapshot, std::string> Capture(
       VS::Field::zoneContext.scene_id > kLastScene) {
     return std::unexpected("live scene identity is invalid");
   }
-  const auto phase = ValidateCaptureBoundary(*VS::Actors::actorRecords[0]);
+  const auto phase = ValidateCaptureBoundary(*components->body);
   if (!phase) return std::unexpected(phase.error());
   Snapshot state;
   CapturePersistent(state);
   state.storage = storage;
-  CaptureAshley(state, *VS::Battle::characterState);
-  auto valid = OverlayEquipped(state, *VS::Battle::characterState->stats);
+  CaptureAshley(state, *VS::Battle::characterState, *components->stats);
+  auto valid = OverlayEquipped(state, *components->stats);
   if (!valid) return std::unexpected(valid.error());
   valid = CaptureInventoryOrder(state);
   if (!valid) return std::unexpected(valid.error());
-  const auto& model = VS::Actors::actorRecords[0]->instance;
+  const auto& model = components->body->instance;
   state.location.zone =
       static_cast<std::uint16_t>(VS::Field::zoneContext.zone_id);
   state.location.room =
@@ -1493,8 +1501,8 @@ std::expected<Snapshot, std::string> Capture(
   state.location.previous_tile = {model.previous_tile_x, model.previous_tile_z,
                                   model.previous_tile_layer};
   state.location.previous_facing = model.previous_facing;
-  const auto saved = std::bit_cast<VS::Actors::TileTarget>(
-      VS::Actors::actorRecords[0]->saved_placement);
+  const auto saved =
+      std::bit_cast<VS::Actors::TileTarget>(components->body->saved_placement);
   state.location.saved_placement = {
       {static_cast<std::uint8_t>(saved.tile_x),
        static_cast<std::uint8_t>(saved.tile_z),
@@ -1627,11 +1635,13 @@ std::expected<void, std::string> FinishResume() {
   const auto audio = ValidateAudioConsumer();
   if (!audio) return audio;
   const auto& state = pending->state;
+  const auto identity = VS::Actors::LiveActorIdentityAt(0);
+  const auto components = VS::Actors::LiveActorComponents(identity);
   if (!VS::Boot::isGameplayActive || VS::Battle::characterState == nullptr ||
-      VS::Battle::characterState != VS::Battle::actors[0] ||
-      VS::Battle::characterState->stats == nullptr ||
-      VS::Actors::actorRecords[0] == nullptr ||
-      !VS::Field::roomData.is_loaded ||
+      VS::Battle::characterState !=
+          VS::Actors::ResolveLiveActorInstance(identity) ||
+      !components.has_value() || components->stats == nullptr ||
+      components->body == nullptr || !VS::Field::roomData.is_loaded ||
       VS::Field::roomData.environment == nullptr ||
       VS::Field::zoneContext.zone_id != state.location.zone ||
       VS::Field::zoneContext.room_id != state.location.room ||
@@ -1648,9 +1658,10 @@ std::expected<void, std::string> FinishResume() {
     pending.reset();
     return {};
   }
-  auto& actor = *VS::Actors::actorRecords[0];
+  auto& actor = *components->body;
   auto& model = actor.instance;
-  RestoreAshleyValues(state.ashley, *VS::Battle::characterState);
+  RestoreAshleyValues(state.ashley, *VS::Battle::characterState,
+                      *components->stats);
   model.position.vx = static_cast<std::int16_t>(state.location.position[0]);
   model.position.vy = static_cast<std::int16_t>(state.location.position[1]);
   model.position.vz = static_cast<std::int16_t>(state.location.position[2]);
