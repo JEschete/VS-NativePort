@@ -164,8 +164,8 @@ TEST_CASE("Owned collision heights keep independent decoded inputs",
   CHECK(first.Sample(1, 1, 0) == 0x83);
   CHECK(second.Sample(1, 1, 0) == 7);
   CHECK(first.Sample(0, 0, 1) == 13);
-  CHECK(VS::Field::FloorHeightAt(first, 32, 32) == -48);
-  CHECK(VS::Field::FloorHeightAt(second, 32, 32) == 32656);
+  CHECK(first.FloorHeight(32, 32) == -48);
+  CHECK(second.FloorHeight(32, 32) == 32656);
   CHECK(first.Sample(1, 1, 0) == 0x83);
 }
 
@@ -175,7 +175,7 @@ TEST_CASE(
   const PaddedTileMap source;
   const auto decoded = Import(source.bytes);
   CheckSamples(decoded, source.bytes, 2, 1);
-  CHECK(VS::Field::FloorHeightAt(decoded, 176, 48) ==
+  CHECK(decoded.FloorHeight(176, 48) ==
         VS::Field::FloorHeightAt(source.bytes, 176, 48));
   CHECK(decoded.Sample(0, 0, 2) == VS::Field::kCollisionHeightInvalid);
 }
@@ -186,8 +186,7 @@ TEST_CASE("Collision height import distinguishes absent and malformed rooms",
   const auto absent =
       CollisionHeightMap::ImportLegacy(std::span<const std::byte>{});
   if (!absent) FAIL(absent.error());
-  CHECK(VS::Field::FloorHeightAt(*absent, 0, 0) ==
-        VS::Field::kMissingFloorHeight);
+  CHECK(absent->FloorHeight(0, 0) == VS::Field::kMissingFloorHeight);
   OneTileMap source;
   CHECK_FALSE(
       CollisionHeightMap::ImportLegacy(std::span(source.bytes).first(7)));

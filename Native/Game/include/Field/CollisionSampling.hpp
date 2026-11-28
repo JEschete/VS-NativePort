@@ -49,6 +49,9 @@ class CollisionHeightMap {
   }
   [[nodiscard]] std::uint8_t Sample(std::uint32_t sample_x, int sample_z,
                                     int layer) const;
+  // Packed floor height at world coordinates; INT16_MIN off the map.
+  [[nodiscard]] std::int16_t FloorHeight(std::int32_t world_x,
+                                         std::int32_t world_z) const;
 
  private:
   std::optional<CollisionMapHeader> header_;

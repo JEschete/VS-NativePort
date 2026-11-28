@@ -118,9 +118,6 @@ struct CameraBounds {
 [[nodiscard]] std::int16_t FloorHeightAt(
     std::span<const std::byte> collision_map, std::int32_t world_x,
     std::int32_t world_z);
-[[nodiscard]] std::int16_t FloorHeightAt(
-    const CollisionHeightMap& collision_map, std::int32_t world_x,
-    std::int32_t world_z);
 
 // The packed ceiling height at a world position; a ceiling below the origin
 // reads as -2032 (0xF810); 0 off the grid or without a map.

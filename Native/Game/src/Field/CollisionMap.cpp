@@ -91,9 +91,9 @@ bool TileInGrid(const CollisionMapHeader& map, std::int32_t world_x,
 }
 
 template <class Sample>
-std::int16_t FloorHeight(const std::optional<CollisionMapHeader>& header,
-                         std::int32_t world_x, std::int32_t world_z,
-                         Sample sample) {
+std::int16_t SampledFloorHeight(const std::optional<CollisionMapHeader>& header,
+                                std::int32_t world_x, std::int32_t world_z,
+                                Sample sample) {
   if (!header || !TileInGrid(*header, world_x, world_z)) {
     return kMissingFloorHeight;
   }
@@ -311,19 +311,19 @@ std::int16_t InterpolatedFloorHeight(std::span<const std::byte> collision_map,
 // decomp: BATTLE.PRG func_8008DC7C (src/BATTLE/BATTLE.PRG/146C.c:16957)
 std::int16_t FloorHeightAt(std::span<const std::byte> collision_map,
                            std::int32_t world_x, std::int32_t world_z) {
-  return FloorHeight(ReadCollisionMapHeader(collision_map), world_x, world_z,
-                     [collision_map](std::uint32_t x, int z, int layer) {
-                       return SampleCollisionHeightCode(collision_map, x, z,
-                                                        layer);
-                     });
+  return SampledFloorHeight(
+      ReadCollisionMapHeader(collision_map), world_x, world_z,
+      [collision_map](std::uint32_t x, int z, int layer) {
+        return SampleCollisionHeightCode(collision_map, x, z, layer);
+      });
 }
 
-std::int16_t FloorHeightAt(const CollisionHeightMap& collision_map,
-                           std::int32_t world_x, std::int32_t world_z) {
-  return FloorHeight(collision_map.Header(), world_x, world_z,
-                     [&collision_map](std::uint32_t x, int z, int layer) {
-                       return collision_map.Sample(x, z, layer);
-                     });
+std::int16_t CollisionHeightMap::FloorHeight(std::int32_t world_x,
+                                             std::int32_t world_z) const {
+  return SampledFloorHeight(header_, world_x, world_z,
+                            [this](std::uint32_t x, int z, int layer) {
+                              return Sample(x, z, layer);
+                            });
 }
 
 // decomp: BATTLE.PRG func_8008DD0C (src/BATTLE/BATTLE.PRG/146C.c:16971)

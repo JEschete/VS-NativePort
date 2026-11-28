@@ -15,7 +15,6 @@
 #include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Core/Log.hpp"
-#include "Field/CollisionMap.hpp"
 #include "Field/Gimmicks.hpp"
 #include "Field/Mpd.hpp"
 #include "Field/PlatformPlacementLive.hpp"
@@ -145,7 +144,7 @@ std::uint16_t SegmentCollisionContext::FloorHeightWord(std::int32_t x,
                                                        std::int32_t z) const {
   const auto& terrain = inputs_.terrain;
   if (!terrain) InvalidTrace(terrain.error().c_str());
-  return static_cast<std::uint16_t>(FloorHeightAt(*terrain, x, z));
+  return static_cast<std::uint16_t>(terrain->FloorHeight(x, z));
 }
 
 SegmentCollisionContext CaptureLiveSegmentCollisionContext() {
