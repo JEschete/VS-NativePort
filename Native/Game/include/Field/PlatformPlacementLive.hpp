@@ -1,7 +1,9 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
+#include <expected>
 #include <optional>
+#include <string>
 #include <vector>
 
 #include "Field/PlatformPlacement.hpp"
@@ -16,6 +18,8 @@ std::optional<MovingPlatformWaypoint> LiveMovingPlatformTargetWaypoint(
     int index);
 bool UpdateLiveMovingPlatforms();
 std::vector<PlatformContact> CollectLiveMovingPlatformPositions();
+[[nodiscard]] std::expected<MovingPlatformQueryInputs, std::string>
+CaptureLiveMovingPlatformQueryInputs();
 bool SetLiveMovingPlatformActor(int platform_index, std::int32_t rider);
 bool ResetLiveMovingPlatformWaypoint(int platform_index, std::int32_t waypoint);
 void SetLiveMovingPlatformsPaused(std::int32_t paused);

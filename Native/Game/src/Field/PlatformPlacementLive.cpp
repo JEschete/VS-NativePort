@@ -9,6 +9,7 @@
 #include <limits>
 #include <optional>
 #include <span>
+#include <string>
 #include <tuple>
 #include <type_traits>
 #include <vector>
@@ -532,6 +533,21 @@ std::vector<PlatformContact> CollectLiveMovingPlatformPositions() {
       {.platforms = LivePlatforms(poses),
        .bounce_offsets = std::span<const std::int16_t>(
            VS::Field::kPlatformBounceOffsets.data(), kBounceOffsetCount)});
+}
+
+std::expected<MovingPlatformQueryInputs, std::string>
+CaptureLiveMovingPlatformQueryInputs() {
+  const auto records = PlatformRecords(std::size(platformBounceFrames));
+  if (records.size_bytes() != roomData.header.moving_platforms_length) {
+    return std::unexpected(
+        "platform section is missing, incomplete, misaligned or oversized");
+  }
+  MovingPlatformQueryInputs inputs;
+  inputs.platforms.resize(records.size());
+  static_cast<void>(LivePlatforms(inputs.platforms));
+  inputs.bounce_offsets.assign(kPlatformBounceOffsets.begin(),
+                               kPlatformBounceOffsets.end());
+  return inputs;
 }
 
 bool UpdateLiveMovingPlatforms() {

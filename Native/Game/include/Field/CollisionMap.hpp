@@ -7,6 +7,7 @@
 #include <optional>
 #include <span>
 
+#include "Field/CollisionSampling.hpp"
 #include "Field/PlatformPlacement.hpp"
 
 // Room collision map rules: tile cell lookup and blocking, the floor and
@@ -15,15 +16,6 @@
 // units with up negative; a packed height keeps its value in bits 0..14 and
 // sets bit 15 when the sample is invalid.
 namespace VS::Field {
-// The MPD collision section header (_mpdRoomCollisionMapSection, 146C.h:12):
-// the grid in tiles, the height origin and the cell count.
-struct CollisionMapHeader {
-  std::int16_t width = 0;
-  std::int16_t height = 0;
-  std::int16_t height_origin = 0;
-  std::int16_t cell_count = 0;
-};
-
 // The header of `collision_map`, or nullopt when the section is missing or
 // shorter than the header.
 [[nodiscard]] std::optional<CollisionMapHeader> ReadCollisionMapHeader(
@@ -125,6 +117,9 @@ struct CameraBounds {
 // grid or without a map.
 [[nodiscard]] std::int16_t FloorHeightAt(
     std::span<const std::byte> collision_map, std::int32_t world_x,
+    std::int32_t world_z);
+[[nodiscard]] std::int16_t FloorHeightAt(
+    const CollisionHeightMap& collision_map, std::int32_t world_x,
     std::int32_t world_z);
 
 // The packed ceiling height at a world position; a ceiling below the origin

@@ -41,6 +41,15 @@ struct MovingPlatformRoom {
   std::span<const std::int16_t> bounce_offsets;
 };
 
+struct MovingPlatformQueryInputs {
+  std::vector<MovingPlatformPose> platforms;
+  std::vector<std::int16_t> bounce_offsets;
+
+  [[nodiscard]] MovingPlatformRoom View() const {
+    return {.platforms = platforms, .bounce_offsets = bounce_offsets};
+  }
+};
+
 struct MovingPlatformShadowSurface {
   bool geometry_present = false;
   bool pit = false;

@@ -157,6 +157,21 @@ struct OwnedSegmentFixture : SegmentFixture {
   }
 };
 
+struct SegmentRoomMap {
+  static constexpr std::size_t kPatterns = 8 + 4 * 2 * 2;
+  std::array<std::byte, kPatterns + 16> bytes{};
+
+  explicit SegmentRoomMap(std::uint8_t floor) {
+    const std::array<std::int16_t, 4> header{2, 2, 0, 4};
+    std::memcpy(bytes.data(), header.data(), sizeof(header));
+    std::fill(bytes.begin() + kPatterns, bytes.end(),
+              static_cast<std::byte>(floor));
+    VS::Field::roomData.collision_map =
+        reinterpret_cast<VS::Field::MpdCollisionHeader*>(bytes.data());
+    VS::Field::roomData.header.collision_map_length = bytes.size();
+  }
+};
+
 void CheckVolumePoint(const VS::Field::PlatformContact& volume,
                       const std::array<int, 3>& delta) {
   const VECTOR point{128 + delta[0], -64 + delta[1], 128 + delta[2], 0};
@@ -440,6 +455,117 @@ VS::Field::SegmentHit RequireHit(
 constexpr VS::Field::SegmentEndpoint kTypedFrom{0, -64, 128};
 constexpr VS::Field::SegmentEndpoint kTypedTo{256, -64, 128};
 }  // namespace
+
+TEST_CASE(
+    "Production collision contexts interleave without reading actor mirrors",
+    "[field][segment-collision][query-context][issue-57]") {
+  OwnedSegmentFixture fixture;
+  auto first = VS::Field::CaptureLiveSegmentCollisionContext();
+  fixture.models.at(1).instance.position.vx = 240;
+  auto second = VS::Field::CaptureLiveSegmentCollisionContext();
+  fixture.models.at(1).animation_locked = 1;
+  const SegmentFixture restore_bindings;
+  VS::Battle::actors.fill(nullptr);
+  VS::Actors::actorRecords.fill(nullptr);
+  const auto trace = [](VS::Field::SegmentCollisionContext& context) {
+    return RequireHit(VS::Field::TraceActorAndTerrainCollision(
+        kTypedFrom, kTypedTo, 0, context));
+  };
+  CHECK(trace(first).x == 104);
+  CHECK(trace(second).x == 216);
+  CHECK(trace(first).actor_slot == 1);
+  CHECK(trace(second).actor_slot == 1);
+}
+
+TEST_CASE(
+    "Collision contexts own room heights across teardown and repeated entry",
+    "[field][segment-collision][query-context][issue-57]") {
+  OwnedSegmentFixture fixture;
+  fixture.models.at(1).animation_locked = 1;
+  SegmentRoomMap source(0);
+  auto first = VS::Field::CaptureLiveSegmentCollisionContext();
+  std::fill(source.bytes.begin() + SegmentRoomMap::kPatterns,
+            source.bytes.end(), std::byte{4});
+  auto second = VS::Field::CaptureLiveSegmentCollisionContext();
+  source.bytes.fill(std::byte{});
+  VS::Field::roomData = {};
+  CHECK_FALSE(
+      VS::Field::TraceActorAndTerrainCollision(kTypedFrom, kTypedTo, 0, first));
+  const auto hit = RequireHit(VS::Field::TraceActorAndTerrainCollision(
+      kTypedFrom, kTypedTo, 0, second));
+  CHECK(hit.x == 8);
+  CHECK_FALSE(hit.actor_slot);
+  auto empty_room = VS::Field::CaptureLiveSegmentCollisionContext();
+  CHECK_FALSE(VS::Field::TraceActorAndTerrainCollision(kTypedFrom, kTypedTo, 0,
+                                                       empty_room));
+  CHECK(RequireHit(VS::Field::TraceActorAndTerrainCollision(
+                       kTypedFrom, kTypedTo, 0, second))
+            .x == 8);
+}
+
+TEST_CASE("Collision contexts retain platform poses and bounce inputs",
+          "[field][segment-collision][query-context][issue-57]") {
+  OwnedSegmentFixture fixture;
+  fixture.models.at(1).animation_locked = 1;
+  VS::Field::MpdMovingPlatform platform{};
+  platform.position_x = platform.position_z = 128 * 4096;
+  platform.position_y = (VS::Field::kPlatformBounceOffsets[0] + 96) * 4096;
+  VS::Field::roomData.moving_platforms = &platform;
+  VS::Field::roomData.header.moving_platforms_length = sizeof(platform);
+  VS::Field::platformBounceFrames[0] = 0;
+  auto first = VS::Field::CaptureLiveSegmentCollisionContext();
+  platform.is_hidden = 1;
+  auto second = VS::Field::CaptureLiveSegmentCollisionContext();
+  VS::Field::roomData = {};
+  VS::Field::platformBounceFrames[0] = 255;
+  CHECK(RequireHit(VS::Field::TraceActorAndTerrainCollision(kTypedFrom,
+                                                            kTypedTo, 0, first))
+            .x == 72);
+  CHECK_FALSE(VS::Field::TraceActorAndTerrainCollision(kTypedFrom, kTypedTo, 0,
+                                                       second));
+  CHECK(RequireHit(VS::Field::TraceActorAndTerrainCollision(kTypedFrom,
+                                                            kTypedTo, 0, first))
+            .x == 72);
+}
+
+TEST_CASE("A captured collider cannot adopt a replacement generation",
+          "[field][segment-collision][query-context][issue-57]") {
+  OwnedSegmentFixture fixture;
+  auto first = VS::Field::CaptureLiveSegmentCollisionContext();
+  const auto previous = first.ActorIdentity(1);
+  VS::Actors::InvalidateLiveActorHandle(1, &fixture.actors.at(1));
+  VS::Battle::actors[1] = nullptr;
+  fixture.models.at(1).instance.position.vx = 240;
+  const auto replacement = VS::Actors::InstallLiveActorInstance(
+      1, &fixture.actors.at(1), VS::Actors::ActorShape::kEquipped);
+  REQUIRE(replacement != VS::Actors::SpawnedActor::kNone);
+  auto second = VS::Field::CaptureLiveSegmentCollisionContext();
+  CHECK(first.ActorIdentity(1) == previous);
+  CHECK(second.ActorIdentity(1) == replacement);
+  CHECK(previous != replacement);
+  CHECK(VS::Actors::ResolveLiveActorInstance(previous) == nullptr);
+  CHECK(RequireHit(VS::Field::TraceActorAndTerrainCollision(kTypedFrom,
+                                                            kTypedTo, 0, first))
+            .x == 104);
+  CHECK(RequireHit(VS::Field::TraceActorAndTerrainCollision(
+                       kTypedFrom, kTypedTo, 0, second))
+            .x == 216);
+}
+
+TEST_CASE("An immediate actor hit does not consume invalid later query inputs",
+          "[field][segment-collision][query-context][issue-57]") {
+  OwnedSegmentFixture fixture;
+  fixture.models.at(1).instance.position.vx = 8;
+  VS::Field::roomData.header.moving_platforms_length = 1;
+  VS::Field::roomData.header.collision_map_length = 8;
+  VS::Battle::Actor unpublished{};
+  VS::Battle::actors[15] = &unpublished;
+  auto context = VS::Field::CaptureLiveSegmentCollisionContext();
+  const auto hit = RequireHit(VS::Field::TraceActorAndTerrainCollision(
+      kTypedFrom, kTypedTo, 0, context));
+  CHECK(hit.x == 8);
+  CHECK(hit.actor_slot == 1);
+}
 
 TEST_CASE("Typed segment trace reports the first actor slot without globals",
           "[field][segment-collision][typed]") {

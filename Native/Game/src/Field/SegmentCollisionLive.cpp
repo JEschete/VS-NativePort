@@ -6,6 +6,7 @@
 #include <iterator>
 #include <optional>
 #include <span>
+#include <utility>
 #include <vector>
 
 #include "Actors/ActorRecord.hpp"
@@ -14,7 +15,7 @@
 #include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Core/Log.hpp"
-#include "Field/CollisionMapLive.hpp"
+#include "Field/CollisionMap.hpp"
 #include "Field/Gimmicks.hpp"
 #include "Field/Mpd.hpp"
 #include "Field/PlatformPlacementLive.hpp"
@@ -29,9 +30,6 @@ namespace {
 constexpr unsigned kExcludedKindMask = 0xEA;
 constexpr int kGimmickRadius = 63;
 constexpr int kGimmickHalfHeight = 64;
-constexpr std::size_t kSourcePlatformBytes = 184;
-static_assert(sizeof(VS::Field::MpdMovingPlatform) == kSourcePlatformBytes);
-
 [[noreturn]] void InvalidTrace(const char* reason) {
   VS::Core::LogError("field.collision", "segment trace: {}", reason);
   std::abort();
@@ -69,69 +67,94 @@ std::optional<ActorTraceBounds> BoundsOf(const Battle::Actor* actor,
       model->collision_radius, half_height};
 }
 
-class LiveSegmentTraceWorld : public SegmentTraceWorld {
- public:
-  [[nodiscard]] std::optional<ActorTraceBounds> ActorBounds(
-      int slot) const override {
-    return BoundsOf(Battle::actors[slot], gimmickInstances[slot],
-                    Actors::actorRecords[slot]);
+SegmentColliderInput CaptureCollider(std::size_t slot, bool owned) {
+  if (!owned) {
+    return {.bounds = BoundsOf(Battle::actors[slot], gimmickInstances[slot],
+                               Actors::actorRecords[slot])};
   }
+  const auto identity = Actors::LiveActorIdentityAt(slot);
+  if (identity == Actors::SpawnedActor::kNone) {
+    if (Battle::actors[slot] != nullptr) {
+      return {.bounds =
+                  std::unexpected("combat collider is not a published actor")};
+    }
+    return {};
+  }
+  const auto* actor = Actors::ResolveLiveActorInstance(identity);
+  const auto components = Actors::LiveActorComponents(identity);
+  if (actor == nullptr || !components) {
+    return {.identity = identity,
+            .bounds = std::unexpected(
+                "combat collider lost its expected components")};
+  }
+  return {.identity = identity,
+          .bounds = BoundsOf(actor, components->gimmick, components->body)};
+}
 
-  [[nodiscard]] std::vector<SolidVolume> CollectSolidVolumes() override {
-    const auto bytes = VS::Field::roomData.header.moving_platforms_length;
-    if (VS::Field::roomData.moving_platforms == nullptr) {
-      if (bytes != 0) InvalidTrace("platform section is missing");
-      return {};
-    }
-    if (bytes % sizeof(VS::Field::MpdMovingPlatform) != 0) {
-      InvalidTrace("platform section contains a partial record");
-    }
-    const auto count = bytes / sizeof(VS::Field::MpdMovingPlatform);
-    if (count > std::size(VS::Field::platformBounceFrames)) {
-      InvalidTrace("platform count exceeds native animation storage");
-    }
-    const auto contacts = CollectLiveMovingPlatformPositions();
-    if (contacts.size() > count) {
-      InvalidTrace("platform collector exceeded its native result capacity");
-    }
-    std::vector<SolidVolume> volumes;
-    volumes.reserve(contacts.size());
-    for (const auto& contact : contacts) {
-      volumes.push_back(ToSolidVolume(contact));
-    }
-    return volumes;
+SegmentCollisionInputs CaptureInputs(bool owned) {
+  SegmentCollisionInputs inputs;
+  for (std::size_t slot = 0; slot < inputs.actors.size(); ++slot) {
+    inputs.actors[slot] = CaptureCollider(slot, owned);
   }
-
-  [[nodiscard]] std::uint16_t FloorHeightWord(std::int32_t x,
-                                              std::int32_t z) const override {
-    return static_cast<std::uint16_t>(VS::Field::LiveFloorHeightAt(x, z));
+  inputs.platforms = CaptureLiveMovingPlatformQueryInputs();
+  if (roomData.collision_map == nullptr &&
+      roomData.header.collision_map_length != 0) {
+    inputs.terrain = std::unexpected("collision height section is missing");
+  } else {
+    inputs.terrain = CollisionHeightMap::ImportLegacy(LiveRoomCollisionMap());
   }
-};
-
-class LiveOwnedSegmentTraceWorld final : public LiveSegmentTraceWorld {
- public:
-  std::optional<ActorTraceBounds> ActorBounds(int slot) const override {
-    const auto identity =
-        Actors::LiveActorIdentityAt(static_cast<std::size_t>(slot));
-    if (identity == Actors::SpawnedActor::kNone) {
-      if (Battle::actors[slot] != nullptr) {
-        InvalidTrace("combat collider is not a published actor");
-      }
-      return std::nullopt;
-    }
-    const auto* actor = Actors::ResolveLiveActorInstance(identity);
-    const auto components = Actors::LiveActorComponents(identity);
-    if (actor == nullptr || !components) {
-      InvalidTrace("combat collider lost its expected components");
-    }
-    return BoundsOf(actor, components->gimmick, components->body);
-  }
-};
+  return inputs;
+}
 }  // namespace
+
+SegmentCollisionContext::SegmentCollisionContext(SegmentCollisionInputs inputs)
+    : inputs_(std::move(inputs)) {}
+
+Actors::SpawnedActor SegmentCollisionContext::ActorIdentity(int slot) const {
+  return inputs_.actors.at(static_cast<std::size_t>(slot)).identity;
+}
+
+std::optional<ActorTraceBounds> SegmentCollisionContext::ActorBounds(
+    int slot) const {
+  const auto& bounds = inputs_.actors.at(static_cast<std::size_t>(slot)).bounds;
+  if (!bounds) InvalidTrace(bounds.error().c_str());
+  return *bounds;
+}
+
+std::vector<SolidVolume> SegmentCollisionContext::CollectSolidVolumes() {
+  const auto& platforms = inputs_.platforms;
+  if (!platforms) InvalidTrace(platforms.error().c_str());
+  for (const auto& platform : platforms->platforms) {
+    if (!platform.hidden &&
+        (platform.bounce_frame < 0 ||
+         std::cmp_greater(platform.bounce_frame,
+                          platforms->bounce_offsets.size()))) {
+      InvalidTrace("platform bounce frame is outside its offsets");
+    }
+  }
+  const auto contacts = CollectMovingPlatformPositions(platforms->View());
+  std::vector<SolidVolume> volumes;
+  volumes.reserve(contacts.size());
+  for (const auto& contact : contacts) {
+    volumes.push_back(ToSolidVolume(contact));
+  }
+  return volumes;
+}
+
+std::uint16_t SegmentCollisionContext::FloorHeightWord(std::int32_t x,
+                                                       std::int32_t z) const {
+  const auto& terrain = inputs_.terrain;
+  if (!terrain) InvalidTrace(terrain.error().c_str());
+  return static_cast<std::uint16_t>(FloorHeightAt(*terrain, x, z));
+}
+
+SegmentCollisionContext CaptureLiveSegmentCollisionContext() {
+  return SegmentCollisionContext(CaptureInputs(true));
+}
 
 std::optional<SegmentHit> TraceLiveOwnedActorAndTerrainCollision(
     SegmentEndpoint from, SegmentEndpoint to, int ignored_actor) {
-  LiveOwnedSegmentTraceWorld world;
+  auto world = CaptureLiveSegmentCollisionContext();
   return TraceActorAndTerrainCollision(from, to, ignored_actor, world);
 }
 
@@ -161,7 +184,7 @@ SVECTOR* TraceLiveActorAndTerrainCollision(const SVECTOR* from,
   if (from == nullptr || to == nullptr || output == nullptr) {
     InvalidTrace("segment endpoints and output are required");
   }
-  LiveSegmentTraceWorld world;
+  SegmentCollisionContext world(CaptureInputs(false));
   const auto hit = TraceActorAndTerrainCollision({from->vx, from->vy, from->vz},
                                                  {to->vx, to->vy, to->vz},
                                                  ignored_actor, world);

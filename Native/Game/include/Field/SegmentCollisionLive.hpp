@@ -1,12 +1,48 @@
 #pragma once
 
+#include <array>
 #include <cstddef>
+#include <expected>
+#include <string>
+#include <vector>
 
+#include "Actors/ActorInstances.hpp"
 #include "Core/Gte.hpp"
+#include "Field/CollisionSampling.hpp"
+#include "Field/PlatformPlacement.hpp"
 #include "Field/SegmentCollision.hpp"
 
 namespace VS::Field {
 struct PlatformContact;
+
+struct SegmentColliderInput {
+  Actors::SpawnedActor identity = Actors::SpawnedActor::kNone;
+  std::expected<std::optional<ActorTraceBounds>, std::string> bounds;
+};
+
+struct SegmentCollisionInputs {
+  std::array<SegmentColliderInput, kSegmentTraceActorSlots> actors{};
+  std::expected<MovingPlatformQueryInputs, std::string> platforms;
+  std::expected<CollisionHeightMap, std::string> terrain;
+};
+
+// All inputs survive room/actor teardown. Invalid unused inputs are retained
+// as errors until the original query ordering actually needs them.
+class SegmentCollisionContext final : public SegmentTraceWorld {
+ public:
+  explicit SegmentCollisionContext(SegmentCollisionInputs inputs);
+  [[nodiscard]] Actors::SpawnedActor ActorIdentity(int slot) const;
+  [[nodiscard]] std::optional<ActorTraceBounds> ActorBounds(
+      int slot) const override;
+  [[nodiscard]] std::vector<SolidVolume> CollectSolidVolumes() override;
+  [[nodiscard]] std::uint16_t FloorHeightWord(std::int32_t x,
+                                              std::int32_t z) const override;
+
+ private:
+  SegmentCollisionInputs inputs_;
+};
+
+[[nodiscard]] SegmentCollisionContext CaptureLiveSegmentCollisionContext();
 
 // Collision bounds come from the published actor's expected components.
 [[nodiscard]] std::optional<SegmentHit> TraceLiveOwnedActorAndTerrainCollision(

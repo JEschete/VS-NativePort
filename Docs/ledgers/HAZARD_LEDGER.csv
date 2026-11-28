@@ -199,8 +199,8 @@ d1d4b88b4f11,DIV-ZERO,medium,pattern,,ValidTarget,Native/Game/src/Field/GimmickA
 f2844639754b,DIV-ZERO,medium,pattern,,CountdownMove,Native/Game/src/Field/GimmickDynamics.cpp,224,count,45,3,open,
 44b3a90fd1ac,DIV-ZERO,medium,pattern,,ReadableQueryRecord,Native/Game/src/Field/GimmickPlacementLive.cpp,57,alignof(VS::Field::GimmickInstance),45,3,open,
 167b946ed35a,DIV-ZERO,medium,pattern,,TrapRecords,Native/Game/src/Field/InteractionTargetLive.cpp,32,alignof(VS::Field::MpdFloorTrigger),45,3,open,
-6bf93f97f59e,DIV-ZERO,medium,pattern,,PlatformRecords,Native/Game/src/Field/PlatformPlacementLive.cpp,80,alignof(VS::Field::MpdMovingPlatform),45,3,open,
-ef8e46bfc3b8,DIV-ZERO,medium,pattern,,SetLivePlatformFreezeAppearance,Native/Game/src/Field/PlatformPlacementLive.cpp,488,alignof(VS::Field::MpdEnvironment),45,3,open,
+6bf93f97f59e,DIV-ZERO,medium,pattern,,PlatformRecords,Native/Game/src/Field/PlatformPlacementLive.cpp,81,alignof(VS::Field::MpdMovingPlatform),45,3,open,
+ef8e46bfc3b8,DIV-ZERO,medium,pattern,,SetLivePlatformFreezeAppearance,Native/Game/src/Field/PlatformPlacementLive.cpp,489,alignof(VS::Field::MpdEnvironment),45,3,open,
 695570146789,DIV-ZERO,medium,pattern,,GeometryGroupCount,Native/Game/src/Field/RoomRendering.cpp,121,room_effects,45,3,open,
 d150bb7f49e7,DIV-ZERO,medium,pattern,,RoomDoorRecords,Native/Game/src/Field/RoomSwitchesLive.cpp,42,alignof(VS::Field::MpdLockTrigger),45,3,open,
 254d310e4e9a,DIV-ZERO,medium,pattern,,QuarterPercent,Native/Game/src/Field/Traps.cpp,38,denominator,45,3,guarded,"all three callers (ApplyLimbDefense, ApplyShieldDefense) call QuarterPercent only after checking that the max DP or PP denominator is nonzero"

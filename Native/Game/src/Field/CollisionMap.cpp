@@ -90,6 +90,19 @@ bool TileInGrid(const CollisionMapHeader& map, std::int32_t world_x,
              GridExtent(map.height);
 }
 
+template <class Sample>
+std::int16_t FloorHeight(const std::optional<CollisionMapHeader>& header,
+                         std::int32_t world_x, std::int32_t world_z,
+                         Sample sample) {
+  if (!header || !TileInGrid(*header, world_x, world_z)) {
+    return kMissingFloorHeight;
+  }
+  const std::uint8_t code =
+      sample(static_cast<std::uint32_t>(world_x >> kSampleShift),
+             world_z >> kSampleShift, kCollisionFloorLayer);
+  return PackHeight(DecodedHeight(header->height_origin, code), code);
+}
+
 std::optional<CollisionCellRef> PlatformCell(const CollisionCells& cells,
                                              std::int32_t layer) {
   const auto index = static_cast<std::size_t>(layer - kPlatformCollisionLayer);
@@ -298,13 +311,19 @@ std::int16_t InterpolatedFloorHeight(std::span<const std::byte> collision_map,
 // decomp: BATTLE.PRG func_8008DC7C (src/BATTLE/BATTLE.PRG/146C.c:16957)
 std::int16_t FloorHeightAt(std::span<const std::byte> collision_map,
                            std::int32_t world_x, std::int32_t world_z) {
-  const auto header = ReadCollisionMapHeader(collision_map);
-  if (!header || !TileInGrid(*header, world_x, world_z)) {
-    return kMissingFloorHeight;
-  }
-  const std::uint8_t code = SampleCode(collision_map, world_x >> kSampleShift,
-                                       world_z >> kSampleShift, 0);
-  return PackHeight(DecodedHeight(header->height_origin, code), code);
+  return FloorHeight(ReadCollisionMapHeader(collision_map), world_x, world_z,
+                     [collision_map](std::uint32_t x, int z, int layer) {
+                       return SampleCollisionHeightCode(collision_map, x, z,
+                                                        layer);
+                     });
+}
+
+std::int16_t FloorHeightAt(const CollisionHeightMap& collision_map,
+                           std::int32_t world_x, std::int32_t world_z) {
+  return FloorHeight(collision_map.Header(), world_x, world_z,
+                     [&collision_map](std::uint32_t x, int z, int layer) {
+                       return collision_map.Sample(x, z, layer);
+                     });
 }
 
 // decomp: BATTLE.PRG func_8008DD0C (src/BATTLE/BATTLE.PRG/146C.c:16971)

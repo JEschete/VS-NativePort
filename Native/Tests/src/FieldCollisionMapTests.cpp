@@ -427,7 +427,8 @@ TEST_CASE("Floor heights decode and pack, keeping invalid samples' heights",
   CHECK(VS::Field::FloorHeightAt(map.bytes, 255, 127) == 608 - 0x8000);
   CHECK(VS::Field::FloorHeightAt(map.bytes, 256, 0) == kMissingFloorHeight);
   CHECK(VS::Field::FloorHeightAt(map.bytes, -1, 0) == kMissingFloorHeight);
-  CHECK(VS::Field::FloorHeightAt({}, 10, 10) == kMissingFloorHeight);
+  CHECK(VS::Field::FloorHeightAt(std::span<const std::byte>{}, 10, 10) ==
+        kMissingFloorHeight);
 }
 
 TEST_CASE("Interpolated floor heights smooth toward close neighbours",
