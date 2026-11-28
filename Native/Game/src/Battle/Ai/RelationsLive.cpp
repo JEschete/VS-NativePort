@@ -12,6 +12,7 @@
 #include <span>
 #include <type_traits>
 
+#include "Actors/ActorSpawningLive.hpp"
 #include "Battle/Action.hpp"
 #include "Battle/ActionTable.hpp"
 #include "Battle/Actor.hpp"
@@ -43,7 +44,8 @@ class RoomActorList {
  public:
   RoomActorList() {
     for (const VS::Battle::Actor* actor = VS::Battle::actors[0];
-         actor != nullptr; actor = actor->next) {
+         actor != nullptr;
+         actor = VS::Actors::ResolveLiveActorInstance(actor->next)) {
       Require(count_ < ids_.size() && actor->id >= 0 &&
                   actor->id < kRelationActorSlots,
               "AI relations require a bounded battle actor list");
@@ -194,8 +196,10 @@ class LiveLinkedActorTable final : public LinkedActorTable {
     const VS::Battle::Actor* head = VS::Battle::actors[0];
     Require(head != nullptr,
             "AI linked actors require Ashley at the battle actor list head");
-    for (const VS::Battle::Actor* actor = head->next; actor != nullptr;
-         actor = actor->next) {
+    for (const VS::Battle::Actor* actor =
+             VS::Actors::ResolveLiveActorInstance(head->next);
+         actor != nullptr;
+         actor = VS::Actors::ResolveLiveActorInstance(actor->next)) {
       // The head takes one of the kRelationActorSlots list entries.
       Require(count_ + 1 < kRelationActorSlots && actor->id >= 0 &&
                   actor->id < kRelationActorSlots,

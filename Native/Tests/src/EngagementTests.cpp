@@ -7,6 +7,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Actors/ActorSpawningLive.hpp"
 #include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiViews.hpp"
@@ -30,6 +31,7 @@ struct EngagementFixture {
   std::array<VS::Battle::Ai::ActorAiState, 3> states{};
 
   EngagementFixture() {
+    VS::Actors::ResetLiveActorHandles();
     VS::Battle::Ai::roomAiState = &room;
     VS::Battle::Ai::candidateEngagedThisUpdate = 0;
     room.engagement_limit = 1;
@@ -41,19 +43,24 @@ struct EngagementFixture {
     const std::array<int, 3> ids{0, 2, 5};
     for (std::size_t index = 0; index < actors.size(); ++index) {
       actors[index].id = states[index].actor_id = ids[index];
-      actors[index].next =
-          index + 1 < actors.size() ? &actors[index + 1] : nullptr;
       states[index].actor =
           reinterpret_cast<VS::Battle::Ai::EngagementData*>(&actors[index]);
       states[index].engagement_request = 7;
-      VS::Battle::actors[ids[index]] = &actors[index];
+      REQUIRE(
+          VS::Actors::InstallLiveActorInstance(
+              ids[index], &actors[index], VS::Actors::ActorShape::kEquipped) !=
+          VS::Actors::SpawnedActor::kNone);
       VS::Battle::Ai::actorAiStates[ids[index]] = &states[index];
+    }
+    for (std::size_t index = 1; index < actors.size(); ++index) {
+      actors[index - 1].next = VS::Actors::LiveActorIdentity(&actors[index]);
     }
     std::fill_n(VS::Battle::actorMarkers.begin(), saved_markers.size(),
                 std::bit_cast<char>(uint8_t{0x80}));
   }
 
   ~EngagementFixture() {
+    VS::Actors::ResetLiveActorHandles();
     VS::Battle::Ai::roomAiState = saved_room;
     VS::Battle::Ai::candidateEngagedThisUpdate = saved_busy;
     std::copy(saved_actors.begin(), saved_actors.end(),
@@ -167,7 +174,7 @@ TEST_CASE(
     "[ai][engagement]") {
   const bool two_actors = GENERATE(false, true);
   EngagementFixture fixture;
-  if (two_actors) fixture.actors[1].next = nullptr;
+  if (two_actors) fixture.actors[1].next = VS::Actors::SpawnedActor::kNone;
   REQUIRE(VS::Battle::Ai::TryEngageLiveActor(&fixture.states[1]));
   VS::Battle::Ai::DisengageLiveActor(&fixture.states[1]);
   CHECK(fixture.states[1].engagement_frames == 0);

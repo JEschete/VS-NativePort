@@ -13,6 +13,7 @@
 #include <utility>
 
 #include "Actors/ActorRecord.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Actors/Movement.hpp"
 #include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
@@ -338,11 +339,14 @@ class LiveGroundRoom : public LiveRoomRegions<GroundNavigationWorld> {
     Frame().blocker_actor[direction] = actor;
   }
 
-  void RewindCollisionActors() override { cursor_ = VS::Battle::actors[0]; }
+  void RewindCollisionActors() override {
+    cursor_ = VS::Actors::LiveActorIdentityAt(0);
+  }
   [[nodiscard]] std::optional<int> NextCollisionActor() override {
-    if (cursor_ == nullptr) return std::nullopt;
-    const int id = cursor_->id;
-    cursor_ = cursor_->next;
+    const auto* actor = VS::Actors::ResolveLiveActorInstance(cursor_);
+    if (actor == nullptr) return std::nullopt;
+    const int id = actor->id;
+    cursor_ = actor->next;
     return id;
   }
   [[nodiscard]] std::optional<GroundCollisionActor> CollisionActor(
@@ -436,7 +440,7 @@ class LiveGroundRoom : public LiveRoomRegions<GroundNavigationWorld> {
     return Frame().actors[actor_id];
   }
 
-  const VS::Battle::Actor* cursor_ = nullptr;
+  VS::Actors::SpawnedActor cursor_ = VS::Actors::SpawnedActor::kNone;
 };
 
 // The room plus the actor AI state the navigator mirrors; each movement

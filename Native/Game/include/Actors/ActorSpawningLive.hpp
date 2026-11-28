@@ -33,6 +33,13 @@ void DiscardLiveActorInstance(SpawnedActor actor);
 [[nodiscard]] VS::Battle::Actor* ResolveLiveActorInstance(SpawnedActor actor);
 [[nodiscard]] std::optional<ActorDefinition> LiveActorDefinition(
     SpawnedActor actor);
+// Convert a current, borrowed actor pointer at a call boundary. Retain the
+// returned identity, not the pointer, across callbacks or actor replacement.
+[[nodiscard]] SpawnedActor LiveActorIdentity(const VS::Battle::Actor* actor);
+[[nodiscard]] SpawnedActor LiveActorIdentityAt(std::size_t slot);
+// Completes an already-claimed removal after its resources have been released.
+// Only storage allocated by the native spawn host is freed.
+void FinalizeLiveActorRemoval(SpawnedActor actor);
 
 // Invalidates the native identity before the matching legacy allocation is
 // freed, or before a gameplay session clears the actor table.

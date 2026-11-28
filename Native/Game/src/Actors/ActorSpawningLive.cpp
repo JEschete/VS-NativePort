@@ -222,7 +222,9 @@ class LiveActorLoadHost final : public ActorLoadHost {
 template <typename T>
 [[nodiscard]] T* ActorPointer(SpawnedActor actor, const char* operation) {
   const std::uintptr_t address = LiveActorHandles().Resolve(actor);
-  if (address == 0) {
+  const auto slot = LiveActorHandles().Slot(actor);
+  if (address == 0 || (LiveActorHandles().Installed(actor) &&
+                       (!slot || ActorAddress(SlotActor(*slot)) != address))) {
     if (actor != SpawnedActor::kNone) {
       WarnActorRefused(operation, "stale or invalid actor handle");
     }
@@ -237,7 +239,7 @@ template <typename T>
   static_cast<void>(
       LiveActorHandles().Observe(slot, ActorAddress(SlotActor(slot))));
   const SpawnedActor handle =
-      LiveActorHandles().Begin(slot, ActorAddress(actor), definition);
+      LiveActorHandles().Begin(slot, ActorAddress(actor), definition, true);
   if (handle == SpawnedActor::kNone) {
     VS::Core::Memory::FreeLiveFromLowEnd(actor);
     WarnActorRefused("AllocateLiveActor",
@@ -392,7 +394,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     live->model_id = identity.model_id;
     live->kind = identity.kind;
     live->id = identity.id;
-    live->next = nullptr;
+    live->next = SpawnedActor::kNone;
     live->retain_after_defeat = 0;
   }
 
@@ -613,18 +615,14 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   }
 
   void LinkAfterLeader(std::size_t slot) override {
-    VS::Battle::Actor* actor = SlotActor(slot);
-    VS::Battle::Actor* leader = VS::Battle::actors[kAshleySlot];
-    if (actor == nullptr || leader == nullptr || actor == leader) {
-      return;
+    if (SlotActor(slot) != nullptr && SlotActor(kAshleySlot) != nullptr) {
+      static_cast<void>(LinkLiveActorAfterLeader(ActorAt(slot)));
     }
-    actor->next = leader->next;
-    leader->next = actor;
   }
 
   void ClearNext(std::size_t slot) override {
     if (VS::Battle::Actor* actor = SlotActor(slot); actor != nullptr) {
-      actor->next = nullptr;
+      actor->next = SpawnedActor::kNone;
     }
   }
 
@@ -1172,6 +1170,38 @@ VS::Battle::Actor* ResolveLiveActorInstance(SpawnedActor actor) {
   return ActorPointer<VS::Battle::Actor>(actor, "ResolveActorInstance");
 }
 
+SpawnedActor LiveActorIdentityAt(std::size_t slot) {
+  return LiveActorHandles().Observe(slot, ActorAddress(SlotActor(slot)));
+}
+
+SpawnedActor LiveActorIdentity(const VS::Battle::Actor* actor) {
+  if (actor == nullptr) return SpawnedActor::kNone;
+  for (std::size_t slot = 0; slot < kSpawnActorSlots; ++slot) {
+    if (SlotActor(slot) == actor) return LiveActorIdentityAt(slot);
+  }
+  return LiveActorHandles().Pending(ActorAddress(actor));
+}
+
+void FinalizeLiveActorRemoval(SpawnedActor actor) {
+  ActorInstanceTable& handles = LiveActorHandles();
+  const auto slot = handles.Slot(actor);
+  auto* live = reinterpret_cast<VS::Battle::Actor*>(handles.Resolve(actor));
+  if (!slot || live == nullptr || !handles.Removing(actor) ||
+      Content::LiveActorAssetsQueued(AssetOwnerOf(actor))) {
+    WarnActorRefused("FinalizeActorRemoval",
+                     "actor removal is stale, unclaimed or still owns loads");
+    return;
+  }
+  const bool owns_storage = handles.OwnsStorage(actor);
+  if (!handles.Remove(*slot, actor)) {
+    WarnActorRefused("FinalizeActorRemoval", "actor identity could not retire");
+    return;
+  }
+  if (SlotActor(*slot) == live) VS::Battle::actors[*slot] = nullptr;
+  live->next = SpawnedActor::kNone;
+  if (owns_storage) Core::Memory::FreeLiveFromLowEnd(live);
+}
+
 std::optional<ActorDefinition> LiveActorDefinition(SpawnedActor actor) {
   return LiveActorHandles().Definition(actor);
 }
@@ -1275,8 +1305,12 @@ RememberedSpawn DecodeRemembered(const VS::Actors::RoomActorRecord& record) {
 }
 
 void InvalidateLiveActorHandle(std::size_t slot, VS::Battle::Actor* actor) {
-  const SpawnedActor handle =
-      LiveActorHandles().Observe(slot, ActorAddress(actor));
+  if (actor == nullptr || SlotActor(slot) != actor) {
+    WarnActorRefused("InvalidateLiveActorHandle",
+                     "actor does not own the current slot");
+    return;
+  }
+  const SpawnedActor handle = LiveActorIdentityAt(slot);
   if (handle != SpawnedActor::kNone &&
       !LiveActorHandles().Remove(slot, handle)) {
     WarnActorRefused("InvalidateLiveActorHandle",
@@ -1302,8 +1336,12 @@ std::optional<ActorResources> ClaimLiveActorRemoval(
 }
 
 bool CancelLiveActorAssets(std::size_t slot, const VS::Battle::Actor* actor) {
-  const SpawnedActor handle =
-      LiveActorHandles().Observe(slot, ActorAddress(actor));
+  if (actor != SlotActor(slot)) {
+    WarnActorRefused("CancelLiveActorAssets",
+                     "actor does not own the current slot");
+    return false;
+  }
+  const SpawnedActor handle = LiveActorIdentityAt(slot);
   if (handle == SpawnedActor::kNone) {
     return true;
   }
@@ -1316,8 +1354,12 @@ bool CancelLiveActorAssets(std::size_t slot, const VS::Battle::Actor* actor) {
 }
 
 void FinishLiveActorAssets(std::size_t slot, const VS::Battle::Actor* actor) {
-  const SpawnedActor handle =
-      LiveActorHandles().Observe(slot, ActorAddress(actor));
+  if (actor != SlotActor(slot)) {
+    WarnActorRefused("FinishLiveActorAssets",
+                     "actor does not own the current slot");
+    return;
+  }
+  const SpawnedActor handle = LiveActorIdentityAt(slot);
   if (handle == SpawnedActor::kNone) {
     return;
   }

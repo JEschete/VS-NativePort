@@ -14,6 +14,7 @@
 #include <span>
 
 #include "Actors/ActorRecord.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Actors/Movement.hpp"
 #include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
@@ -304,16 +305,15 @@ class LiveScriptedRouteHost final : public ScriptedRouteHost {
  public:
   void BeginUpdate() override {
     CacheLiveActorAiWorkingState();
-    started_ = false;
-    actor_ = nullptr;
+    next_ = VS::Actors::LiveActorIdentityAt(0);
   }
   [[nodiscard]] std::optional<ScriptedRouteActor> NextActor() override {
-    actor_ = started_ ? actor_->next : VS::Battle::actors[0];
-    started_ = true;
-    if (actor_ == nullptr) return std::nullopt;
+    const auto* actor = VS::Actors::ResolveLiveActorInstance(next_);
+    if (actor == nullptr) return std::nullopt;
+    next_ = actor->next;
     return ScriptedRouteActor{
-        .id = actor_->id,
-        .suspended = (actor_->command_state & kSuspendedActorCommands) != 0};
+        .id = actor->id,
+        .suspended = (actor->command_state & kSuspendedActorCommands) != 0};
   }
   void StampBudgetTick() override {
     LiveFrameContext().lastBudgetTick = VS::Core::ElapsedFrameCounterTicks();
@@ -378,8 +378,7 @@ class LiveScriptedRouteHost final : public ScriptedRouteHost {
   void SaveMovementRandomState() override { SaveLiveMovementRandomState(); }
 
  private:
-  bool started_ = false;
-  const VS::Battle::Actor* actor_ = nullptr;
+  VS::Actors::SpawnedActor next_ = VS::Actors::SpawnedActor::kNone;
   VS::Battle::Ai::ActorAiState* route_ = nullptr;
 };
 }  // namespace

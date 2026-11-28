@@ -9,6 +9,7 @@
 #include <optional>
 #include <span>
 
+#include "Actors/ActorSpawningLive.hpp"
 #include "Battle/Actor.hpp"
 #include "Battle/Ai/ConditionSnapshot.hpp"
 #include "Battle/BattleTypes.hpp"
@@ -69,7 +70,7 @@ void CaptureBattleActorConditions(
   std::array<ActorConditionReading, std::size(VS::Battle::actors)> readings{};
   std::size_t count = 0;
   for (const VS::Battle::Actor* actor = VS::Battle::actors[0]; actor != nullptr;
-       actor = actor->next) {
+       actor = VS::Actors::ResolveLiveActorInstance(actor->next)) {
     if (count == readings.size()) {
       VS::Core::Errorf("ai", "Battle actor list holds more than %zu actors",
                        readings.size());

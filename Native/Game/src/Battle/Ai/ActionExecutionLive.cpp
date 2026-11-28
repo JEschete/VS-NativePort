@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "Actors/ActorRecord.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Actors/ModelInstance.hpp"
 #include "Battle/Actor.hpp"
 #include "Battle/Ai/ActionExecution.hpp"
@@ -214,18 +215,22 @@ class LiveDecisions final : public LiveDecisionList<DecisionUpdateWorld> {
 }
 
 std::size_t LiveDecisionListHead() {
-  return reinterpret_cast<std::size_t>(VS::Battle::actors[0]);
+  return static_cast<std::size_t>(VS::Actors::LiveActorIdentityAt(0));
 }
 
 std::optional<int> LiveDecisionListId(std::size_t node) {
-  if (node == 0) return std::nullopt;
-  return reinterpret_cast<const VS::Battle::Actor*>(node)->id;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
+  const auto identity = static_cast<VS::Actors::SpawnedActor>(node);
+  const auto* actor = VS::Actors::ResolveLiveActorInstance(identity);
+  return actor != nullptr ? std::optional(actor->id) : std::nullopt;
 }
 
 std::size_t LiveDecisionListNext(std::size_t node) {
   Require(node != 0, "AI decision successor requires a list node");
-  return reinterpret_cast<std::size_t>(
-      reinterpret_cast<const VS::Battle::Actor*>(node)->next);
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
+  const auto identity = static_cast<VS::Actors::SpawnedActor>(node);
+  const auto* actor = VS::Actors::ResolveLiveActorInstance(identity);
+  return actor != nullptr ? static_cast<std::size_t>(actor->next) : 0;
 }
 
 void ResetLiveDecisionMovement(State& state, std::uint8_t area) {

@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <vector>
 
+#include "Actors/ActorSpawningLive.hpp"
 #include "Battle/Actor.hpp"
 #include "Battle/Ai/ActionPlanning.hpp"
 #include "Battle/Ai/ActorState.hpp"
@@ -67,7 +68,7 @@ VS::Battle::Ai::ActorAiState& AiStateOf(int slot) {
 
 VS::Battle::Actor& ActorOf(const PlanningActor& actor) {
   for (VS::Battle::Actor* live = VS::Battle::actors[0]; live != nullptr;
-       live = live->next) {
+       live = VS::Actors::ResolveLiveActorInstance(live->next)) {
     if (live->id == actor.slot) {
       return *live;
     }
@@ -103,7 +104,7 @@ class LiveActionPlanningRoom final : public ActionPlanningRoom {
   [[nodiscard]] std::vector<PlanningActor> Actors() const override {
     std::vector<PlanningActor> actors;
     for (const VS::Battle::Actor* live = VS::Battle::actors[0]; live != nullptr;
-         live = live->next) {
+         live = VS::Actors::ResolveLiveActorInstance(live->next)) {
       actors.push_back(
           {live->id, AiStateOf(live->id).actor_id, StatsOf(*live).current_hp});
     }

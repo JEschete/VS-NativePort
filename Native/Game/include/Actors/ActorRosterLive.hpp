@@ -1,6 +1,8 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
+#include "Actors/ActorInstances.hpp"
+
 namespace VS::Battle {
 struct Actor;
 }  // namespace VS::Battle
@@ -8,6 +10,8 @@ struct Actor;
 // Bindings from VS::Battle::actors and the actor records to the typed roster
 // (ActorRoster.cpp). Refusals are reported on the "actors" channel.
 namespace VS::Actors {
+// Inserts an installed identity once, without the legacy kind filter.
+[[nodiscard]] bool LinkLiveActorAfterLeader(SpawnedActor actor);
 // _insertActor (146C.c:884): 1 when `actor` joined the list after Ashley.
 // Refused (0) for a null actor or an empty Ashley slot.
 int LinkLiveActorAfterAshley(VS::Battle::Actor* actor);

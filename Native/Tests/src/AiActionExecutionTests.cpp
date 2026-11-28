@@ -13,6 +13,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Actors/ActorRecord.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Actors/ModelInstance.hpp"
 #include "Battle/Actor.hpp"
 #include "Battle/Ai/ActionExecution.hpp"
@@ -178,7 +179,7 @@ class Decisions final : public ai::DecisionUpdateWorld {
 
 struct LiveDecisionFixture {
   VS::Battle::Ai::FrameContext old_frame = VS::Battle::Ai::LiveFrameContext();
-  VS::Battle::Actor* old_head = VS::Battle::actors[0];
+  decltype(VS::Battle::actors) old_actors = VS::Battle::actors;
   VS::Battle::Ai::ActorAiState* old_player = VS::Battle::Ai::actorAiStates[0];
   VS::Actors::ActorRecord* old_record = VS::Actors::actorRecords[0];
   int old_budget = VS::Battle::Ai::frameTickBudget;
@@ -187,20 +188,27 @@ struct LiveDecisionFixture {
   VS::Actors::ActorRecord record{};
   VS::Actors::ModelInstance model{};
   LiveDecisionFixture() {
-    head.next = &actor;
+    VS::Actors::ResetLiveActorHandles();
+    VS::Battle::actors.fill(nullptr);
     head.model = &model;
     actor.id = 1;
     state.perception_skipped = 1;
     state.partial_perception = 1;
-    VS::Battle::actors[0] = &head;
+    REQUIRE(VS::Actors::InstallLiveActorInstance(
+                0, &head, VS::Actors::ActorShape::kEquipped) !=
+            VS::Actors::SpawnedActor::kNone);
+    head.next = VS::Actors::InstallLiveActorInstance(
+        1, &actor, VS::Actors::ActorShape::kEquipped);
+    REQUIRE(head.next != VS::Actors::SpawnedActor::kNone);
     VS::Battle::Ai::LiveFrameContext().actors[1] = &state;
     VS::Battle::Ai::actorAiStates[0] = &player;
     VS::Actors::actorRecords[0] = &record;
     VS::Battle::Ai::frameTickBudget = std::numeric_limits<int>::max();
   }
   ~LiveDecisionFixture() {
+    VS::Actors::ResetLiveActorHandles();
     VS::Battle::Ai::LiveFrameContext() = old_frame;
-    VS::Battle::actors[0] = old_head;
+    VS::Battle::actors = old_actors;
     VS::Battle::Ai::actorAiStates[0] = old_player;
     VS::Actors::actorRecords[0] = old_record;
     VS::Battle::Ai::frameTickBudget = old_budget;

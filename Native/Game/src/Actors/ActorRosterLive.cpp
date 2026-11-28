@@ -26,7 +26,6 @@
 #include "Battle/Feedback.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
-#include "Core/Memory/HeapLive.hpp"
 #include "Field/GimmickPlacementLive.hpp"
 #include "Field/GimmickResourcesLive.hpp"
 #include "Field/Gimmicks.hpp"
@@ -39,7 +38,7 @@ static_assert(std::size(VS::Battle::actors) >= kRosterSlots);
 static_assert(std::size(VS::Battle::actors) == kBattleActorSlots);
 static_assert(sizeof VS::Battle::ActorStats{}.name == kActorNameBytes);
 
-RosterView ViewFrom(const VS::Battle::Actor* actor) {
+RosterView ViewFrom(SpawnedActor actor) {
   RosterView view{};
   for (std::size_t slot = 0; slot < view.size(); ++slot) {
     const VS::Battle::Actor* occupant = VS::Battle::actors[slot];
@@ -60,7 +59,8 @@ RosterCandidate CandidateOf(const VS::Battle::Actor& actor) {
 // instance record, not from its rewritable kind.
 class LiveRemovalHost final : public ActorRemovalHost {
  public:
-  explicit LiveRemovalHost(VS::Battle::Actor* actor) : actor_(actor) {}
+  explicit LiveRemovalHost(VS::Battle::Actor* actor)
+      : actor_(actor), identity_(LiveActorIdentity(actor)) {}
 
   [[nodiscard]] std::optional<ActorResources> Claim(std::size_t slot) override {
     if (actor_ == nullptr) {
@@ -93,19 +93,18 @@ class LiveRemovalHost final : public ActorRemovalHost {
     VS::Battle::Ai::FreeLiveActorAiState(actor_);
   }
   [[nodiscard]] RosterView Links(std::size_t /*slot*/) const override {
-    return ViewFrom(actor_);
+    return ViewFrom(identity_);
   }
   void Bypass(std::size_t predecessor, std::size_t /*slot*/) override {
     VS::Battle::actors[predecessor]->next = actor_->next;
   }
-  void Free(std::size_t slot) override {
-    InvalidateLiveActorHandle(slot, actor_);
-    VS::Core::Memory::FreeLiveFromLowEnd(actor_);
-    VS::Battle::actors[slot] = nullptr;
+  void Free(std::size_t /*slot*/) override {
+    FinalizeLiveActorRemoval(identity_);
   }
 
  private:
   VS::Battle::Actor* actor_;
+  SpawnedActor identity_;
 };
 
 class LiveDisplayFlagsHost final : public DisplayFlagsHost {
@@ -133,14 +132,34 @@ std::array<std::uint8_t, kActorNameBytes> PlaceholderName() {
 }
 }  // namespace
 
+bool LinkLiveActorAfterLeader(SpawnedActor identity) {
+  auto* actor = ResolveLiveActorInstance(identity);
+  auto* leader = ResolveLiveActorInstance(LiveActorIdentityAt(0));
+  if (actor == nullptr || leader == nullptr) {
+    WarnActorRefused("LinkLiveActorAfterLeader", "actor or leader is absent");
+    return false;
+  }
+  const auto decision = LinkActorAfterAshley(
+      ViewFrom(identity), {.linkable_kind = true, .leader = actor == leader});
+  if (decision.edit != RosterEdit::kInsertAfterLeader) return false;
+  actor->next = leader->next;
+  leader->next = identity;
+  return true;
+}
+
 int LinkLiveActorAfterAshley(VS::Battle::Actor* actor) {
   constexpr const char* kOperation = "LinkLiveActorAfterAshley";
   if (actor == nullptr) {
     WarnActorRefused(kOperation, "no actor");
     return 0;
   }
+  const auto identity = LiveActorIdentity(actor);
+  if (identity == SpawnedActor::kNone) {
+    WarnActorRefused(kOperation, "actor has no current instance identity");
+    return 0;
+  }
   const RosterDecision decision =
-      LinkActorAfterAshley(ViewFrom(actor), CandidateOf(*actor));
+      LinkActorAfterAshley(ViewFrom(identity), CandidateOf(*actor));
   if (decision.edit == RosterEdit::kRefusedNoLeader) {
     WarnActorRefused(kOperation, "Ashley's actor slot is empty");
     return 0;
@@ -148,10 +167,7 @@ int LinkLiveActorAfterAshley(VS::Battle::Actor* actor) {
   if (decision.edit != RosterEdit::kInsertAfterLeader) {
     return 0;
   }
-  VS::Battle::Actor* leader = VS::Battle::actors[decision.slot];
-  actor->next = leader->next;
-  leader->next = actor;
-  return 1;
+  return LinkLiveActorAfterLeader(identity) ? 1 : 0;
 }
 
 int UnlinkLiveActorFromRoomList(VS::Battle::Actor* actor) {
@@ -159,13 +175,19 @@ int UnlinkLiveActorFromRoomList(VS::Battle::Actor* actor) {
     WarnActorRefused("UnlinkLiveActorFromRoomList", "no actor");
     return 0;
   }
+  const auto identity = LiveActorIdentity(actor);
+  if (identity == SpawnedActor::kNone) {
+    WarnActorRefused("UnlinkLiveActorFromRoomList",
+                     "actor has no current instance identity");
+    return 0;
+  }
   const RosterDecision decision =
-      UnlinkActorFromRoomList(ViewFrom(actor), CandidateOf(*actor));
+      UnlinkActorFromRoomList(ViewFrom(identity), CandidateOf(*actor));
   if (decision.edit != RosterEdit::kBypass) {
     return 0;
   }
   VS::Battle::actors[decision.slot]->next = actor->next;
-  actor->next = nullptr;
+  actor->next = SpawnedActor::kNone;
   return 1;
 }
 

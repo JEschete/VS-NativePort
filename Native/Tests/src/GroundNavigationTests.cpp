@@ -7,6 +7,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Actors/ActorRecord.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Actors/Movement.hpp"
 #include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
@@ -52,6 +53,7 @@ struct GroundFixture {
   std::array<std::uint8_t, 1024> regions{};
 
   GroundFixture() {
+    VS::Actors::ResetLiveActorHandles();
     auto& frame = VS::Battle::Ai::LiveFrameContext();
     std::memset(room.engaged_mask_bytes.data(), 0,
                 sizeof room.engaged_mask_bytes);
@@ -81,7 +83,9 @@ struct GroundFixture {
       frame.actors[index] = &states[index];
       VS::Battle::Ai::actorAiStates[index] = &states[index];
       VS::Actors::actorRecords[index] = &models[index];
-      VS::Battle::actors[index] = &actors[index];
+      REQUIRE(VS::Actors::InstallLiveActorInstance(
+                  index, &actors[index], VS::Actors::ActorShape::kEquipped) !=
+              VS::Actors::SpawnedActor::kNone);
       actors[index].id = static_cast<int>(index);
       states[index].actor_id = static_cast<std::uint8_t>(index);
       states[index].actor =
@@ -98,7 +102,7 @@ struct GroundFixture {
       const std::uint16_t step = 128;
       std::memcpy(states[index].step_height_bytes.data(), &step, sizeof(step));
     }
-    actors[0].next = &actors[1];
+    actors[0].next = VS::Actors::LiveActorIdentity(&actors[1]);
     states[0].tile.word = Tile(8, 8);
     states[0].previous_tile = -1;
     states[0].position.vx = states[0].position.vz = 1088;
@@ -109,6 +113,7 @@ struct GroundFixture {
   }
 
   ~GroundFixture() {
+    VS::Actors::ResetLiveActorHandles();
     VS::Battle::Ai::LiveFrameContext() = saved;
     std::copy(saved_models.begin(), saved_models.end(),
               VS::Actors::actorRecords.begin());

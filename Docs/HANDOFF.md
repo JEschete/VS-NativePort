@@ -2,11 +2,14 @@
 
 ## State
 
-- Current revision: `a78b0c336`, with the #55 reload outcome change in `28406aa60`. Exact-revision CI passed: [run 46099081879](https://github.com/JEschete/VS-NativePort/actions/runs/46099081879).
-- [#55](https://github.com/JEschete/VS-NativePort/issues/55) now checks the owned asset tickets for MENU3 equipment and MENUC workshop reloads. Failed, cancelled, or lost tickets stop the reload and restore a consistent equipment pose when possible; successful tickets are forgotten. This is a partial milestone, not issue completion.
+The published storage milestone is `808d9965a`; its current-revision evidence is on [#55](https://github.com/JEschete/VS-NativePort/issues/55#issuecomment-7232826139). Ashley's non-blocking script request now reports submission and eventual load failures. Actor allocations use complete typed components, immutable creation definitions and generation-checked identities.
+
+## Work in progress
+
+Continuing #55 with the owner's authorization through closure. The current identity change replaces pointer-valued roster links and retained decision/navigation/targeting cursors, refuses stale cleanup callers, and distinguishes native-owned allocations from caller-owned storage. The [reproduced failures](https://github.com/JEschete/VS-NativePort/issues/55#issuecomment-7232822939) and subsequent verification belong on the issue.
 
 ## Next and open limits
 
-Continue #55 in [#217](https://github.com/JEschete/VS-NativePort/issues/217) order. The Ashley script model request still needs outcome handling. Actor definition/instance separation, explicit ownership across room persistence, gimmicks, AI and linked lists, migration of raw slot/pointer callers, repeated-entry and target-invalidation coverage, and fresh live evidence remain.
+Finish expected-owner resource teardown and the remaining retained AI references, then verify the complete create/use/remove/reset slice with fresh lifecycle and applicable controller evidence. Runtime model/animation/collision adapters are not retired merely by changing allocation storage. Do not claim closure from the focused checks alone.
 
-Keep #55 open and do not advance to #58 until its acceptance is verified; #59 remains gated on #55. Record verification evidence on #55 only. Keep `resources\rood-reverse` read-only and disc-derived captures, data, dumps and BIOS files out of commits or issue attachments.
+Keep #55 open until all acceptance and exact-revision CI gates pass; do not advance to #58. #59 remains gated on #55. Keep `resources\rood-reverse` read-only and disc-derived captures, data, dumps and BIOS files out of commits or issue attachments.

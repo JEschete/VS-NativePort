@@ -10,6 +10,7 @@
 #include <iterator>
 #include <optional>
 
+#include "Actors/ActorSpawningLive.hpp"
 #include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiViews.hpp"
@@ -70,7 +71,8 @@ class LiveEngagementHost final : public EngagementBuildupHost {
   [[nodiscard]] std::optional<bool> HasSingleOpponent() const override {
     const VS::Battle::Actor* first = VS::Battle::actors[0];
     if (first == nullptr) return std::nullopt;
-    return first->next != nullptr && first->next->next == nullptr;
+    const auto* second = VS::Actors::ResolveLiveActorInstance(first->next);
+    return second != nullptr && second->next == VS::Actors::SpawnedActor::kNone;
   }
   void RememberActionTarget() override { RememberLiveAiActionTarget(&state_); }
 

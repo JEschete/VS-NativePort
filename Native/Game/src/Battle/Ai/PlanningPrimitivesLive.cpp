@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "Actors/ActorRecord.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/Location.hpp"
 #include "Battle/Action.hpp"
@@ -197,7 +198,7 @@ std::optional<std::span<const PlanningActorStats>> ReadPlanningStatsRows(
     std::array<PlanningActorStats, kBattleActorSlotCount>& rows) {
   std::size_t count = 0;
   for (const auto* actor = VS::Battle::actors[0]; actor != nullptr;
-       actor = actor->next) {
+       actor = VS::Actors::ResolveLiveActorInstance(actor->next)) {
     if (count >= rows.size() || !ReadablePlanningRecord(actor) ||
         actor->id < 0 || actor->id >= kBattleActorSlotCount ||
         !ReadablePlanningRecord(actor->stats)) {
@@ -345,7 +346,7 @@ class LiveCandidateEvaluation final : public CandidateEvaluationHost {
   std::optional<std::span<const CandidateCondition>> Conditions() override {
     std::size_t count = 0;
     for (const auto* actor = VS::Battle::actors[0]; actor != nullptr;
-         actor = actor->next) {
+         actor = VS::Actors::ResolveLiveActorInstance(actor->next)) {
       if (count >= conditions_.size() || !ReadablePlanningRecord(actor) ||
           actor->id >= kBattleActorSlotCount) {
         return std::nullopt;
@@ -470,7 +471,7 @@ class LiveActorActionPlan final : public ActorActionPlanHost {
       for (int column = 0; column < kLimbActionColumns; ++column) {
         std::size_t visited = 0;
         for (auto* actor = VS::Battle::actors[0]; actor != nullptr;
-             actor = actor->next) {
+             actor = VS::Actors::ResolveLiveActorInstance(actor->next)) {
           if (++visited > kBattleActorSlotCount ||
               !ReadablePlanningRecord(actor) || actor->id < 0 ||
               actor->id >= kBattleActorSlotCount ||
@@ -868,7 +869,7 @@ class LivePlanningSimulation final : public PlanningSimulationHost {
   explicit LivePlanningSimulation(VS::Battle::Ai::RoomAiState& room)
       : room_(room) {
     for (auto* actor = VS::Battle::actors[0]; actor != nullptr;
-         actor = actor->next) {
+         actor = VS::Actors::ResolveLiveActorInstance(actor->next)) {
       Require(count_ < actors_.size() && ReadablePlanningRecord(actor) &&
                   actor->id >= 0 && actor->id < kBattleActorSlotCount,
               "Planning simulation requires a bounded valid actor list");
@@ -954,29 +955,23 @@ class LiveCandidateEnumeration final : public CandidateEnumerationHost {
     return slot;
   }
   void BeginTargets() override {
-    head_ = VS::Battle::actors[0];
-    current_ = nullptr;
-    started_ = false;
+    next_ = VS::Actors::LiveActorIdentityAt(0);
+    current_ = VS::Actors::SpawnedActor::kNone;
     visited_ = 0;
   }
   std::optional<EnumerationTarget> NextTarget() override {
-    if (!started_) {
-      current_ = head_;
-      started_ = true;
-    } else if (current_ != nullptr) {
-      Require(ReadablePlanningRecord(current_),
-              "AI enumeration actor was invalidated during traversal");
-      current_ = current_->next;
-    }
-    if (current_ == nullptr) return std::nullopt;
+    current_ = next_;
+    const auto* actor = VS::Actors::ResolveLiveActorInstance(current_);
+    if (actor == nullptr) return std::nullopt;
+    next_ = actor->next;
     Require(++visited_ <= kBattleActorSlotCount &&
-                ReadablePlanningRecord(current_) && current_->id >= 0 &&
-                current_->id < kBattleActorSlotCount,
+                ReadablePlanningRecord(actor) && actor->id >= 0 &&
+                actor->id < kBattleActorSlotCount,
             "AI enumeration requires a bounded valid actor list");
-    const auto* target = VS::Battle::Ai::actorAiStates[current_->id];
+    const auto* target = VS::Battle::Ai::actorAiStates[actor->id];
     Require(ReadablePlanningRecord(target),
             "AI enumeration requires each actor's AI state");
-    return EnumerationTarget{.id = static_cast<unsigned>(current_->id),
+    return EnumerationTarget{.id = static_cast<unsigned>(actor->id),
                              .dead = target->is_dead != 0};
   }
   bool Harmful(unsigned action, unsigned target) override {
@@ -1010,17 +1005,19 @@ class LiveCandidateEnumeration final : public CandidateEnumerationHost {
         state_.action_slots[row][column].kind);
   }
   std::int16_t LimbMaximum(unsigned limb) const override {
-    Require(ReadablePlanningRecord(current_) &&
-                ReadablePlanningRecord(current_->stats) &&
+    const auto* actor = VS::Actors::ResolveLiveActorInstance(current_);
+    Require(ReadablePlanningRecord(actor) &&
+                ReadablePlanningRecord(actor->stats) &&
                 limb < static_cast<unsigned>(kLimbActionRows),
             "AI enumeration requires readable target limbs");
-    return current_->stats->limbs[limb].max_hp;
+    return actor->stats->limbs[limb].max_hp;
   }
   std::int16_t TargetHeight() const override {
-    Require(ReadablePlanningRecord(current_) && current_->id >= 0 &&
-                current_->id < kBattleActorSlotCount,
+    const auto* actor = VS::Actors::ResolveLiveActorInstance(current_);
+    Require(ReadablePlanningRecord(actor) && actor->id >= 0 &&
+                actor->id < kBattleActorSlotCount,
             "AI enumeration requires a valid aimed actor");
-    const auto* target = VS::Battle::Ai::actorAiStates[current_->id];
+    const auto* target = VS::Battle::Ai::actorAiStates[actor->id];
     Require(ReadablePlanningRecord(target),
             "AI enumeration requires the aimed actor's AI state");
     return target->point_height;
@@ -1050,16 +1047,16 @@ class LiveCandidateEnumeration final : public CandidateEnumerationHost {
 
  private:
   void RequireTargetStats(unsigned id) const {
-    const auto* actor = VS::Battle::actors[id];
-    Require(
-        ReadablePlanningRecord(actor) && ReadablePlanningRecord(actor->stats),
-        "AI enumeration requires complete targeting actor stats");
+    const auto* actor = VS::Actors::ResolveLiveActorInstance(current_);
+    Require(ReadablePlanningRecord(actor) &&
+                actor->id == static_cast<int>(id) &&
+                ReadablePlanningRecord(actor->stats),
+            "AI enumeration requires complete targeting actor stats");
   }
 
   VS::Battle::Ai::ActorAiState& state_;
-  const VS::Battle::Actor* head_ = nullptr;
-  const VS::Battle::Actor* current_ = nullptr;
-  bool started_ = false;
+  VS::Actors::SpawnedActor next_ = VS::Actors::SpawnedActor::kNone;
+  VS::Actors::SpawnedActor current_ = VS::Actors::SpawnedActor::kNone;
   std::size_t visited_ = 0;
 };
 
@@ -1140,7 +1137,7 @@ class LiveCandidateReadiness final : public CandidateReadinessHost {
     std::array<const VS::Battle::Actor*, kCandidateTargetSlots> visited{};
     std::size_t count = 0;
     for (const auto* actor = VS::Battle::actors[0]; actor != nullptr;
-         actor = actor->next) {
+         actor = VS::Actors::ResolveLiveActorInstance(actor->next)) {
       if (!ReadablePlanningRecord(actor) || actor->id < 0 ||
           actor->id >= kCandidateTargetSlots || count == visited.size() ||
           std::find(visited.begin(), visited.end(), actor) != visited.end()) {

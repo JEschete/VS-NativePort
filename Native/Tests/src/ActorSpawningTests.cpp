@@ -10,6 +10,7 @@
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "Actors/ActorInstances.hpp"
 #include "Actors/ActorLoads.hpp"
@@ -22,6 +23,7 @@
 #include "Actors/RoomActorCache.hpp"
 #include "Battle/AbilityState.hpp"
 #include "Battle/Actor.hpp"
+#include "Battle/Ai/ActionExecutionLive.hpp"
 #include "Battle/Damage.hpp"
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
@@ -2682,6 +2684,13 @@ struct NativeActorStorageFixture {
     if (actor == nullptr) throw std::logic_error("Actor allocation failed");
     return *actor;
   }
+  SpawnedActor InstallBorrowed(VS::Battle::Actor& actor,
+                               std::size_t slot = kSlot) {
+    const auto identity =
+        actors::InstallLiveActorInstance(slot, &actor, ActorShape::kEquipped);
+    REQUIRE(identity != SpawnedActor::kNone);
+    return identity;
+  }
   void Discard() {
     if (instance != SpawnedActor::kNone) {
       actors::DiscardLiveActorInstance(instance);
@@ -2779,4 +2788,58 @@ TEST_CASE("Native actor discard refuses outstanding owned asset requests",
         std::vector<std::string>{Refused("DiscardUninstalledActor",
                                          "actor still owns queued loads")});
   CHECK(content::CancelLiveActorAssetRequests(fixture.Owner()));
+}
+
+TEST_CASE("Stale actor cleanup cannot replace a current instance identity",
+          "[actors][actors-spawning][actor-identity]") {
+  const int operation = GENERATE(0, 1, 2);
+  CAPTURE(operation);
+  NativeActorStorageFixture fixture;
+  VS::Battle::Actor previous{}, current{};
+  actors::ActorRecord body{};
+  current.model = &body.instance;
+  constexpr auto kSlot = NativeActorStorageFixture::kSlot;
+  fixture.InstallBorrowed(previous);
+  actors::InvalidateLiveActorHandle(kSlot, &previous);
+  VS::Battle::actors[kSlot] = nullptr;
+  const auto identity = fixture.InstallBorrowed(current);
+  const content::ActorAssetOwner owner{
+      .value = static_cast<std::uint64_t>(identity)};
+  const ActorAssetRequest request{
+      .kind = Kind(ActorAssetKind::kActorModelParse), .target_slot = kSlot};
+  const auto ticket =
+      Required(actors::SubmitLiveSlotActorAsset(kSlot, request));
+  if (operation == 0) {
+    CHECK_FALSE(actors::CancelLiveActorAssets(kSlot, &previous));
+  } else if (operation == 1) {
+    actors::FinishLiveActorAssets(kSlot, &previous);
+  } else {
+    actors::InvalidateLiveActorHandle(kSlot, &previous);
+  }
+  CHECK(actors::ResolveLiveActorInstance(identity) == &current);
+  CHECK(actors::LiveActorRecordMemory(owner, content::ActorRecordTable::kActor,
+                                      kSlot) ==
+        At(reinterpret_cast<std::uintptr_t>(&body)));
+  CHECK(content::LiveActorAssetCompletion(ticket).outcome ==
+        content::ActorAssetOutcome::kPending);
+  CHECK(content::CancelLiveActorAssetRequests(owner));
+  content::ForgetLiveActorAsset(ticket);
+}
+
+TEST_CASE("AI decision cursors reject same-address actor replacement",
+          "[actors][actors-spawning][actor-identity]") {
+  NativeActorStorageFixture fixture;
+  VS::Battle::Actor actor{};
+  actor.id = 5;
+  fixture.InstallBorrowed(actor, 0);
+  const auto cursor = VS::Battle::Ai::LiveDecisionListHead();
+  CHECK(VS::Battle::Ai::LiveDecisionListId(cursor) == 5);
+  actors::InvalidateLiveActorHandle(0, &actor);
+  VS::Battle::actors[0] = nullptr;
+  actor.id = 9;
+  fixture.InstallBorrowed(actor, 0);
+  CHECK_FALSE(VS::Battle::Ai::LiveDecisionListId(cursor));
+  CHECK(VS::Battle::Ai::LiveDecisionListHead() != cursor);
+  CHECK(VS::Battle::Ai::LiveDecisionListId(
+            VS::Battle::Ai::LiveDecisionListHead()) == 9);
 }

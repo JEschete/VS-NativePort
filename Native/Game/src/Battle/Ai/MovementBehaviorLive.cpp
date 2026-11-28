@@ -13,6 +13,7 @@
 #include <type_traits>
 
 #include "Actors/ActorRecord.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Battle/Action.hpp"
 #include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
@@ -255,7 +256,7 @@ std::optional<ActorRoster> LiveBattleActors() {
   ActorRoster roster;
   unsigned visited = 0;
   for (const VS::Battle::Actor* actor = VS::Battle::actors[0]; actor != nullptr;
-       actor = actor->next) {
+       actor = VS::Actors::ResolveLiveActorInstance(actor->next)) {
     if (actor->id < 0 || actor->id >= kMovementActorSlots) return std::nullopt;
     const unsigned bit = 1u << static_cast<unsigned>(actor->id);
     if ((visited & bit) != 0) return std::nullopt;

@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "Actors/ActorRecord.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Actors/ModelInstance.hpp"
 #include "Battle/Actor.hpp"
 #include "Battle/Ai/ActionExecutionLive.hpp"
@@ -199,7 +200,7 @@ class LiveCandidateMovementWorld final
     ActorRoster roster;
     std::array<bool, kCandidateTargetSlots> seen{};
     for (auto* actor = VS::Battle::actors[0]; actor != nullptr;
-         actor = actor->next) {
+         actor = VS::Actors::ResolveLiveActorInstance(actor->next)) {
       if (!ValidTarget(actor->id) || seen.at(actor->id)) return std::nullopt;
       seen.at(actor->id) = true;
       roster.ids.at(roster.count++) = static_cast<std::uint8_t>(actor->id);

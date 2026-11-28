@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "Actors/ActorRecord.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Actors/Movement.hpp"
 #include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
@@ -114,11 +115,12 @@ class LiveFlightWorld final : public FlightMovementWorld {
       const override {
     return Field::CollectLiveMovingPlatformPositions();
   }
-  void RewindActors() override { cursor_ = VS::Battle::actors[0]; }
+  void RewindActors() override { cursor_ = VS::Actors::LiveActorIdentityAt(0); }
   [[nodiscard]] std::optional<int> NextActor() override {
-    if (cursor_ == nullptr) return std::nullopt;
-    const int id = cursor_->id;
-    cursor_ = cursor_->next;
+    const auto* actor = VS::Actors::ResolveLiveActorInstance(cursor_);
+    if (actor == nullptr) return std::nullopt;
+    const int id = actor->id;
+    cursor_ = actor->next;
     return id;
   }
   [[nodiscard]] std::optional<FlightObstacle> Obstacle(
@@ -229,7 +231,7 @@ class LiveFlightWorld final : public FlightMovementWorld {
   }
 
   AiState& state_;
-  const VS::Battle::Actor* cursor_ = nullptr;
+  VS::Actors::SpawnedActor cursor_ = VS::Actors::SpawnedActor::kNone;
 };
 
 AiState& RequireState(AiState* state) {

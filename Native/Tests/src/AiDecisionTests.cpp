@@ -8,6 +8,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Actors/ActorRecord.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Battle/ActionTable.hpp"
 #include "Battle/Actor.hpp"
 #include "Battle/Ai/ActionPlanning.hpp"
@@ -52,6 +53,7 @@ struct DecisionFixture {
   std::array<VS::Battle::Ai::CandidateEntryView, 16> fallback{};
 
   DecisionFixture() {
+    VS::Actors::ResetLiveActorHandles();
     std::fill_n(VS::Battle::actors.begin(), saved_actors.size(), nullptr);
     std::fill_n(VS::Actors::actorRecords.begin(), saved_records.size(),
                 nullptr);
@@ -61,10 +63,13 @@ struct DecisionFixture {
       const int id = index == 0 ? 0 : static_cast<int>(index + 1);
       actors[index].id = id;
       actors[index].stats = &stats[index];
-      actors[index].next =
-          index + 1 < actors.size() ? &actors[index + 1] : nullptr;
-      VS::Battle::actors[id] = &actors[index];
+      REQUIRE(VS::Actors::InstallLiveActorInstance(
+                  id, &actors[index], VS::Actors::ActorShape::kEquipped) !=
+              VS::Actors::SpawnedActor::kNone);
       VS::Actors::actorRecords[id] = &records[index];
+    }
+    for (std::size_t index = 1; index < actors.size(); ++index) {
+      actors[index - 1].next = VS::Actors::LiveActorIdentity(&actors[index]);
     }
     VS::Battle::Ai::roomAiState = &room;
     VS::Battle::Ai::fallbackCandidates = fallback.data();
@@ -83,6 +88,7 @@ struct DecisionFixture {
   }
 
   ~DecisionFixture() {
+    VS::Actors::ResetLiveActorHandles();
     VS::Battle::Ai::roomAiState = saved_room;
     VS::Battle::Ai::fallbackCandidates = saved_fallback;
     VS::Battle::Ai::fallbackCandidateCount = saved_count;
@@ -408,7 +414,7 @@ struct PerceptionFixture : DecisionFixture {
     frame.tileFlags = flags;
     actors[0].model = &records[0].instance;
     actors[1].model = &records[1].instance;
-    actors[1].next = nullptr;
+    actors[1].next = VS::Actors::SpawnedActor::kNone;
     state.model = reinterpret_cast<VS::Battle::Ai::ModelStatePrefix*>(
         &records[1].instance);
     state.position = records[1].instance.position = {64, 0, 96, 0};

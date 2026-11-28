@@ -13,6 +13,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Actors/ActorRecord.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Battle/Action.hpp"
 #include "Battle/ActionTable.hpp"
 #include "Battle/Actor.hpp"
@@ -84,6 +85,7 @@ struct PlanningAdvanceFixture : PlanningFixture {
   VS::Battle::Actor battle_actor{};
 
   PlanningAdvanceFixture() {
+    VS::Actors::ResetLiveActorHandles();
     std::copy_n(VS::Battle::Ai::kTimedStatusFlags.begin(), saved_masks.size(),
                 saved_masks.begin());
     std::fill_n(VS::Battle::Ai::kTimedStatusFlags.begin(), saved_masks.size(),
@@ -100,12 +102,15 @@ struct PlanningAdvanceFixture : PlanningFixture {
               nullptr);
     battle_actor.id = 1;
     battle_actor.stats = &stats;
-    VS::Battle::actors[0] = &battle_actor;
+    REQUIRE(VS::Actors::InstallLiveActorInstance(
+                0, &battle_actor, VS::Actors::ActorShape::kEquipped) !=
+            VS::Actors::SpawnedActor::kNone);
     for (auto& row : stats.limb_actions) {
       for (auto& slot : row) slot.action_id = 42;
     }
   }
   ~PlanningAdvanceFixture() {
+    VS::Actors::ResetLiveActorHandles();
     VS::Battle::Ai::roomAiState = saved_room;
     std::copy(saved_actors.begin(), saved_actors.end(),
               VS::Battle::actors.begin());
@@ -124,19 +129,25 @@ struct PlanningStatsFixture {
   VS::Battle::ActorStats first_stats{}, second_stats{};
 
   PlanningStatsFixture() {
+    VS::Actors::ResetLiveActorHandles();
     VS::Battle::Ai::InvalidateLivePlanningStatsSnapshot();
     std::fill(std::begin(VS::Battle::actors), std::end(VS::Battle::actors),
               nullptr);
     first.id = 1;
     first.stats = &first_stats;
-    first.next = &second;
     second.id = 15;
     second.stats = &second_stats;
-    VS::Battle::actors[0] = &first;
+    REQUIRE(VS::Actors::InstallLiveActorInstance(
+                0, &first, VS::Actors::ActorShape::kEquipped) !=
+            VS::Actors::SpawnedActor::kNone);
+    first.next = VS::Actors::InstallLiveActorInstance(
+        15, &second, VS::Actors::ActorShape::kEquipped);
+    REQUIRE(first.next != VS::Actors::SpawnedActor::kNone);
     first_stats.current_hp = 100;
     second_stats.current_hp = 50;
   }
   ~PlanningStatsFixture() {
+    VS::Actors::ResetLiveActorHandles();
     VS::Battle::Ai::InvalidateLivePlanningStatsSnapshot();
     std::copy(saved_actors.begin(), saved_actors.end(),
               VS::Battle::actors.begin());
@@ -187,6 +198,7 @@ struct ReadinessFixture : PlanningFixture {
   VS::Battle::Ai::RoomAiState room{};
   VS::Battle::Actor hostile{};
   ReadinessFixture() {
+    VS::Actors::ResetLiveActorHandles();
     VS::Battle::Ai::roomAiState = &room;
     std::fill_n(VS::Battle::actors.begin(), std::size(VS::Battle::actors),
                 nullptr);
@@ -203,6 +215,7 @@ struct ReadinessFixture : PlanningFixture {
     }
   }
   ~ReadinessFixture() {
+    VS::Actors::ResetLiveActorHandles();
     VS::Battle::Ai::roomAiState = saved_room;
     std::copy(saved_actors.begin(), saved_actors.end(),
               VS::Battle::actors.begin());
@@ -234,7 +247,10 @@ struct EnumerationFixture : ReadinessFixture {
     actor.stats = &target_stats;
     battle_actor.id = 1;
     battle_actor.stats = &target_stats;
-    VS::Battle::actors[0] = VS::Battle::actors[1] = &battle_actor;
+    REQUIRE(VS::Actors::InstallLiveActorInstance(
+                0, &battle_actor, VS::Actors::ActorShape::kEquipped) !=
+            VS::Actors::SpawnedActor::kNone);
+    VS::Battle::actors[1] = &battle_actor;
     VS::Battle::actionDefinitions[42].ai_flags =
         std::bit_cast<VS::Battle::ActionAiFlags>(std::uint16_t{0x150});
     auto& slot = state.action_slots[2][1];
@@ -609,7 +625,9 @@ TEST_CASE("Native planning simulation refreshes each actor by its own slot",
   second.stats = &second_stats;
   second_actor.stats = &second_stats;
   fixture.peer.actor = &second_actor;
-  fixture.battle_actor.next = &second;
+  fixture.battle_actor.next = VS::Actors::InstallLiveActorInstance(
+      3, &second, VS::Actors::ActorShape::kEquipped);
+  REQUIRE(fixture.battle_actor.next != VS::Actors::SpawnedActor::kNone);
   fixture.stats.current_hp = 0;
   for (auto& limb : fixture.stats.limbs) limb.hp = 0;
   for (auto& limb : second_stats.limbs) limb.hp = 2;
@@ -668,7 +686,7 @@ TEST_CASE("Native planning stats handle empty and shortened actor lists",
           "[ai][planning][stats-lifecycle-live]") {
   PlanningStatsFixture fixture;
   REQUIRE(VS::Battle::Ai::SnapshotLivePlanningActorStats());
-  fixture.first.next = nullptr;
+  fixture.first.next = VS::Actors::SpawnedActor::kNone;
   fixture.first_stats.current_hp = fixture.second_stats.current_hp = 1;
   VS::Battle::Ai::RestoreLivePlanningActorStats();
   CHECK(fixture.first_stats.current_hp == 100);
@@ -698,7 +716,9 @@ TEST_CASE(
   PlanningStatsFixture fixture;
   if (failure == 0) fixture.second.id = 16;
   if (failure == 1) fixture.second.stats = nullptr;
-  if (failure == 2) fixture.second.next = &fixture.first;
+  if (failure == 2) {
+    fixture.second.next = VS::Actors::LiveActorIdentity(&fixture.first);
+  }
   if (failure == 4) fixture.second.id = -1;
   if (failure == 3) {
     void* next_storage = VS::Core::Memory::AllocateLiveFromHighEnd(
@@ -714,7 +734,7 @@ TEST_CASE(
   CHECK(VS::Core::Memory::RefusedLiveHeapRequestCount() == refused);
   fixture.second.id = 15;
   fixture.second.stats = &fixture.second_stats;
-  fixture.second.next = nullptr;
+  fixture.second.next = VS::Actors::SpawnedActor::kNone;
   REQUIRE(VS::Battle::Ai::SnapshotLivePlanningActorStats());
   VS::Battle::Ai::RestoreLivePlanningActorStats();
 }
@@ -786,10 +806,14 @@ TEST_CASE(
   enemy_stats.current_hp = 50;
   ally.id = 1;
   ally.stats = &fixture.stats;
-  ally.next = &enemy;
   enemy.id = 3;
   enemy.stats = &enemy_stats;
-  VS::Battle::actors[0] = &ally;
+  REQUIRE(VS::Actors::InstallLiveActorInstance(
+              0, &ally, VS::Actors::ActorShape::kEquipped) !=
+          VS::Actors::SpawnedActor::kNone);
+  ally.next = VS::Actors::InstallLiveActorInstance(
+      3, &enemy, VS::Actors::ActorShape::kEquipped);
+  REQUIRE(ally.next != VS::Actors::SpawnedActor::kNone);
   fixture.state.relations[1].classification = 2;
   fixture.state.relations[3].classification = 3;
   VS::Battle::Ai::ActionCandidateRecord candidate = fixture.state.candidates[0];
@@ -1415,7 +1439,9 @@ TEST_CASE("Native candidate readiness empty status checks actual hostile links",
   fixture.state.candidate_count = 0;
   fixture.hostile.id = 4;
   fixture.state.relations[4].classification = 3;
-  VS::Battle::actors[0] = &fixture.hostile;
+  REQUIRE(VS::Actors::InstallLiveActorInstance(
+              0, &fixture.hostile, VS::Actors::ActorShape::kEquipped) !=
+          VS::Actors::SpawnedActor::kNone);
   CHECK(VS::Battle::Ai::RefreshLiveActionCandidateReadiness(&fixture.state) ==
         false);
   CHECK(fixture.state.action_status == 2);
@@ -1423,7 +1449,7 @@ TEST_CASE("Native candidate readiness empty status checks actual hostile links",
   CHECK(VS::Battle::Ai::RefreshLiveActionCandidateReadiness(&fixture.state) ==
         false);
   CHECK(fixture.state.action_status == 3);
-  fixture.hostile.next = &fixture.hostile;
+  fixture.hostile.next = VS::Actors::LiveActorIdentity(&fixture.hostile);
   CHECK_FALSE(
       VS::Battle::Ai::RefreshLiveActionCandidateReadiness(&fixture.state));
 }

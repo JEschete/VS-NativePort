@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "Actors/ActorRecord.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Actors/ModelInstance.hpp"
 #include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
@@ -119,7 +120,7 @@ template <typename Visit>
 void WalkBattleActors(Visit visit) {
   int walked = 0;
   for (VS::Battle::Actor* actor = VS::Battle::actors[0]; actor != nullptr;
-       actor = actor->next) {
+       actor = VS::Actors::ResolveLiveActorInstance(actor->next)) {
     Require(++walked <= kBattleActorSlots,
             "AI perception found a battle actor list longer than its table");
     visit(*actor);

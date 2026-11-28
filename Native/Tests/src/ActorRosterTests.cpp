@@ -17,6 +17,7 @@
 #include "Actors/ActorRecord.hpp"
 #include "Actors/ActorRoster.hpp"
 #include "Actors/ActorRosterLive.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Actors/RoomActorCache.hpp"
 #include "Actors/RoomEnemyMemory.hpp"
 #include "Actors/RoomEnemyMemoryLive.hpp"
@@ -27,6 +28,7 @@
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Legacy/Psx.hpp"
 #include "State/RoomCache.hpp"
 #include "State/RoomMemory.hpp"
@@ -505,6 +507,7 @@ struct LiveRosterFixture {
   int saved_room_slot = VS::State::currentRoomStateSlot;
 
   LiveRosterFixture() {
+    actors::ResetLiveActorHandles();
     std::fill_n(VS::Battle::actors.begin(), saved_actors.size(), nullptr);
     std::fill_n(VS::Actors::actorRecords.begin(), saved_records.size(),
                 nullptr);
@@ -521,6 +524,7 @@ struct LiveRosterFixture {
   LiveRosterFixture(LiveRosterFixture&&) = delete;
   LiveRosterFixture& operator=(LiveRosterFixture&&) = delete;
   ~LiveRosterFixture() {
+    actors::ResetLiveActorHandles();
     std::ranges::copy(saved_actors, VS::Battle::actors.begin());
     std::ranges::copy(saved_records, VS::Actors::actorRecords.begin());
     std::ranges::copy(saved_ai, VS::Battle::Ai::actorAiStates.begin());
@@ -530,6 +534,25 @@ struct LiveRosterFixture {
     VS::State::currentRoomStateSlot = saved_room_slot;
   }
 };
+
+TEST_CASE(
+    "Removing a borrowed actor leaves allocation ownership with its caller",
+    "[actors-room-memory][actor-identity]") {
+  LiveRosterFixture fixture;
+  actors::ResetLiveActorHandles();
+  VS::Battle::Actor actor{};
+  actor.id = 2;
+  actor.room_spawn_index = actors::kNoRoomSpawn;
+  const auto identity = actors::InstallLiveActorInstance(
+      2, &actor, actors::ActorShape::kEquipped);
+  REQUIRE(identity != actors::SpawnedActor::kNone);
+  const auto refused = VS::Core::Memory::RefusedLiveHeapRequestCount();
+  CHECK(actors::RemoveLiveActorAtSlot(2, 0) == 1);
+  CHECK(VS::Core::Memory::RefusedLiveHeapRequestCount() == refused);
+  CHECK(VS::Battle::actors[2] == nullptr);
+  CHECK(actors::ResolveLiveActorInstance(identity) == nullptr);
+  actors::ResetLiveActorHandles();
+}
 
 constexpr std::size_t kRoomBytes = sizeof VS::State::recentRoomEnemyStates;
 using RoomBytes = std::array<unsigned char, kRoomBytes>;
@@ -749,24 +772,27 @@ using LiveRoster = std::array<VS::Battle::Actor, 4>;
 void CheckLiveLinks(LiveRoster& roster) {
   CHECK(VS::Actors::LinkLiveActorAfterAshley(&roster[1]) == 1);
   CHECK(VS::Actors::LinkLiveActorAfterAshley(&roster[2]) == 1);
-  CHECK(std::to_array({roster[0].next, roster[2].next, roster[1].next}) ==
-        std::array<VS::Battle::Actor*, 3>{&roster[2], &roster[1], nullptr});
+  CHECK(
+      std::to_array({roster[0].next, roster[2].next, roster[1].next}) ==
+      std::array<actors::SpawnedActor, 3>{actors::LiveActorIdentity(&roster[2]),
+                                          actors::LiveActorIdentity(&roster[1]),
+                                          actors::SpawnedActor::kNone});
   CHECK(VS::Actors::LinkLiveActorAfterAshley(&roster[2]) == 0);
   CHECK(VS::Actors::LinkLiveActorAfterAshley(&roster[0]) == 0);
   CHECK(VS::Actors::LinkLiveActorAfterAshley(&roster[3]) == 0);
-  CHECK(roster[0].next == &roster[2]);
+  CHECK(roster[0].next == actors::LiveActorIdentity(&roster[2]));
 }
 
 // Leaving bypasses the actor's predecessor; a non-member and Ashley stay.
 void CheckLiveUnlinks(LiveRoster& roster) {
   CHECK(VS::Actors::UnlinkLiveActorFromRoomList(&roster[1]) == 1);
-  CHECK(roster[2].next == nullptr);
+  CHECK(roster[2].next == actors::SpawnedActor::kNone);
   CHECK(VS::Actors::UnlinkLiveActorFromRoomList(&roster[1]) == 0);
   CHECK(VS::Actors::UnlinkLiveActorFromRoomList(&roster[0]) == 0);
-  roster[2].next = &roster[3];
+  roster[2].next = actors::LiveActorIdentity(&roster[3]);
   CHECK(VS::Actors::UnlinkLiveActorFromRoomList(&roster[2]) == 1);
-  CHECK(roster[0].next == &roster[3]);
-  CHECK(roster[2].next == nullptr);
+  CHECK(roster[0].next == actors::LiveActorIdentity(&roster[3]));
+  CHECK(roster[2].next == actors::SpawnedActor::kNone);
 }
 }  // namespace
 
@@ -777,7 +803,9 @@ TEST_CASE("Live actors join and leave the list after Ashley",
   for (std::size_t index = 0; index < roster.size(); ++index) {
     roster[index].id = static_cast<int>(index);
     roster[index].kind = 1;
-    VS::Battle::actors[index] = &roster[index];
+    REQUIRE(actors::InstallLiveActorInstance(index, &roster[index],
+                                             actors::ActorShape::kEquipped) !=
+            actors::SpawnedActor::kNone);
   }
   roster[3].kind = 0x10;  // A gimmick never joins.
   ChannelWarnings warnings("actors");

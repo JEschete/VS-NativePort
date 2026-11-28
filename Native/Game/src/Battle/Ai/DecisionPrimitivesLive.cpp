@@ -14,6 +14,7 @@
 #include <type_traits>
 
 #include "Actors/ActorRecord.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Battle/Action.hpp"
 #include "Battle/ActionTable.hpp"
 #include "Battle/Actor.hpp"
@@ -81,7 +82,8 @@ class LiveActorProximity {
  public:
   explicit LiveActorProximity(const VS::Battle::Ai::ActorAiState& state) {
     for (const VS::Battle::Actor* actor = VS::Battle::actors[0];
-         actor != nullptr; actor = actor->next) {
+         actor != nullptr;
+         actor = VS::Actors::ResolveLiveActorInstance(actor->next)) {
       Require(count_ < actors_.size() && actor->id >= 0 &&
                   actor->id < kCandidateTargetSlots,
               "AI proximity check requires a bounded battle actor list");

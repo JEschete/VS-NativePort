@@ -9,6 +9,7 @@
 #include "Items/ItemRecords.hpp"
 
 namespace VS::Actors {
+enum class SpawnedActor : std::uint64_t;
 struct ActorRecord;
 struct ActorModelSlot;
 struct ModelInstance;
@@ -40,7 +41,7 @@ inline constexpr std::size_t kActorEquipmentModelCount = 2;
 // decomp: Actor (src/BATTLE/BATTLE.PRG/actor.h:104-150; formerly
 // vs_battle_actor)
 struct Actor {
-  Actor* next;
+  VS::Actors::SpawnedActor next;
   std::int32_t id;
   std::uint8_t command_state;
   std::uint8_t command_opcode;

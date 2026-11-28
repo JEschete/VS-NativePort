@@ -13,6 +13,7 @@
 
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorRecord.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Actors/Movement.hpp"
 #include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
@@ -120,10 +121,14 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
   std::uint16_t heights[32][32]{};
 
   ScriptedOverrideFixture() {
+    VS::Actors::ResetLiveActorHandles();
     std::fill_n(VS::Battle::actors.begin(), saved_actors.size(), nullptr);
-    VS::Battle::actors[0] = &actors[0];
-    VS::Battle::actors[1] = &actors[1];
-    actors[0].next = &actors[1];
+    REQUIRE(VS::Actors::InstallLiveActorInstance(
+                0, &actors[0], VS::Actors::ActorShape::kEquipped) !=
+            VS::Actors::SpawnedActor::kNone);
+    actors[0].next = VS::Actors::InstallLiveActorInstance(
+        1, &actors[1], VS::Actors::ActorShape::kEquipped);
+    REQUIRE(actors[0].next != VS::Actors::SpawnedActor::kNone);
     actors[0].command_state = 0xC0;
     actors[0].model = &ashley_model.instance;
     ashley_model.instance.position = {3000, -64, 3000, 0};
@@ -164,6 +169,7 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
   }
 
   ~ScriptedOverrideFixture() {
+    VS::Actors::ResetLiveActorHandles();
     if (source.native_pointer_18c != nullptr) {
       VS::Core::Memory::FreeLiveFromHighEnd(source.native_pointer_18c);
     }
@@ -909,7 +915,8 @@ TEST_CASE("Scripted route updates preserve strict source arrival boundaries",
       CHECK(fixture.ActiveRoute()->move_x == 1088 + delta[0]);
       CHECK(fixture.ActiveRoute()->move_z == 1088 + delta[1]);
     }
-    CHECK(fixture.actors[0].next == &fixture.actors[1]);
+    CHECK(fixture.actors[0].next ==
+          VS::Actors::LiveActorIdentity(&fixture.actors[1]));
   }
 }
 
@@ -959,7 +966,8 @@ TEST_CASE("Scripted route updates skip suspended and missing-AI actors safely",
   VS::Battle::Ai::actorAiStates[1] = nullptr;
   VS::Battle::Ai::UpdateLiveActorNavigationOverrides();
   CHECK(Snapshot(*fixture.ActiveRoute()) == before);
-  CHECK(fixture.actors[0].next == &fixture.actors[1]);
+  CHECK(fixture.actors[0].next ==
+        VS::Actors::LiveActorIdentity(&fixture.actors[1]));
 }
 
 TEST_CASE("Non-ground scripted arrival ignores layer and status metadata",
@@ -1026,7 +1034,7 @@ TEST_CASE("Scripted navigation rejects cyclic native actor lists",
   VS::Platform::InstallCrashHandler();
   ScriptedOverrideFixture fixture;
   fixture.actors[1].command_state = 0xC0;
-  fixture.actors[1].next = &fixture.actors[1];
+  fixture.actors[1].next = VS::Actors::LiveActorIdentity(&fixture.actors[1]);
   VS::Battle::Ai::UpdateLiveActorNavigationOverrides();
   FAIL("A cyclic actor list was accepted");
 }

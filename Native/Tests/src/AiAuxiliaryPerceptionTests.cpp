@@ -6,6 +6,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Actors/ActorRecord.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorPerceptionLive.hpp"
 #include "Battle/Ai/ActorState.hpp"
@@ -41,6 +42,7 @@ struct AuxiliaryPerceptionFixture {
 
   explicit AuxiliaryPerceptionFixture(bool auxiliary_target,
                                       bool target_ai = true) {
+    VS::Actors::ResetLiveActorHandles();
     std::fill_n(VS::Battle::actors.begin(), saved_actors.size(), nullptr);
     std::fill_n(VS::Actors::actorRecords.begin(), saved_records.size(),
                 nullptr);
@@ -59,11 +61,16 @@ struct AuxiliaryPerceptionFixture {
     VS::Actors::actorRecords[2] = &records[1];
     actors[0].id = 0;
     actors[0].model = &records[0].instance;
-    actors[0].next = &actors[1];
     actors[1].id = 2;
     actors[1].model = &records[1].instance;
-    VS::Battle::actors[0] = &actors[0];
-    VS::Battle::actors[2] = &actors[1];
+    REQUIRE(VS::Actors::InstallLiveActorInstance(
+                0, &actors[0], VS::Actors::ActorShape::kEquipped) !=
+            VS::Actors::SpawnedActor::kNone);
+    actors[0].next = VS::Actors::InstallLiveActorInstance(
+        2, &actors[1],
+        auxiliary_target ? VS::Actors::ActorShape::kAuxiliary
+                         : VS::Actors::ActorShape::kEquipped);
+    REQUIRE(actors[0].next != VS::Actors::SpawnedActor::kNone);
     owner.actor_id = 0;
     View().model =
         reinterpret_cast<VS::Battle::Ai::PerceivedObjectView*>(&records[0]);
@@ -85,6 +92,7 @@ struct AuxiliaryPerceptionFixture {
   }
 
   ~AuxiliaryPerceptionFixture() {
+    VS::Actors::ResetLiveActorHandles();
     std::copy(saved_actors.begin(), saved_actors.end(),
               VS::Battle::actors.begin());
     std::copy(saved_records.begin(), saved_records.end(),
@@ -115,8 +123,9 @@ struct AuxiliaryPerceptionFixture {
     actors[2].id = 3;
     actors[2].kind = 0x10;
     actors[2].model = reinterpret_cast<VS::Actors::ModelInstance*>(&auxiliary);
-    actors[1].next = &actors[2];
-    VS::Battle::actors[3] = &actors[2];
+    actors[1].next = VS::Actors::InstallLiveActorInstance(
+        3, &actors[2], VS::Actors::ActorShape::kAuxiliary);
+    REQUIRE(actors[1].next != VS::Actors::SpawnedActor::kNone);
     View().distances_squared[3] = blocking ? 48 * 48 : 96 * 96 + 48 * 48;
   }
   void Update() { VS::Battle::Ai::UpdateLiveTargetPerception(&View(), 2); }

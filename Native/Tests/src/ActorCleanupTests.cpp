@@ -11,6 +11,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Actors/ActorRecord.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/AppearanceTransition.hpp"
 #include "Actors/AppearanceTransitionLive.hpp"
@@ -59,6 +60,7 @@ struct CleanupFixture {
   std::uint16_t flags[32][32]{};
 
   CleanupFixture() {
+    VS::Actors::ResetLiveActorHandles();
     VS::Battle::Ai::roomAiState = &room;
     VS::Battle::Ai::tileFlagMap = flags;
     VS::Battle::Ai::arenaOrbit = nullptr;
@@ -72,9 +74,13 @@ struct CleanupFixture {
       actors[index].id = ids[index];
       actors[index].kind = 4;
       actors[index].command_flags = 0xFF;
-      actors[index].next =
-          index + 1 < actors.size() ? &actors[index + 1] : nullptr;
-      VS::Battle::actors[ids[index]] = &actors[index];
+      REQUIRE(
+          VS::Actors::InstallLiveActorInstance(
+              ids[index], &actors[index], VS::Actors::ActorShape::kEquipped) !=
+          VS::Actors::SpawnedActor::kNone);
+    }
+    for (std::size_t index = 1; index < actors.size(); ++index) {
+      actors[index - 1].next = VS::Actors::LiveActorIdentity(&actors[index]);
     }
     room.max_tile_x = room.max_tile_z = 31;
     room.min_tile_x = room.min_tile_z = 0;
@@ -84,6 +90,7 @@ struct CleanupFixture {
   }
 
   ~CleanupFixture() {
+    VS::Actors::ResetLiveActorHandles();
     std::copy(saved_actors.begin(), saved_actors.end(),
               VS::Battle::actors.begin());
     std::copy(saved_states.begin(), saved_states.end(),

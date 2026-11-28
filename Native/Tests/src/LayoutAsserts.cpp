@@ -9,6 +9,7 @@
 
 #include "Actors/ActorAllocation.hpp"
 #include "Actors/ActorRecord.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Actors/ModelRenderingLiveState.hpp"
 #include "Actors/ShpModel.hpp"
 #include "Audio/SoundBanksLive.hpp"
@@ -220,15 +221,23 @@ int Tests_AiRelations(void) {
   VS::Battle::Actor actors[3] = {};
   VS::Battle::Ai::ActorAiState states[3] = {};
   const unsigned ids[3] = {0, 2, 5};
-  VS::Battle::Actor* saved_head = VS::Battle::actors[0];
+  const auto saved_actors = VS::Battle::actors;
+  VS::Actors::ResetLiveActorHandles();
+  VS::Battle::actors.fill(nullptr);
+  bool installed = true;
   VS::Battle::Ai::ActorAiState* saved_states[3];
   for (unsigned index = 0; index < 3; ++index) {
     saved_states[index] = VS::Battle::Ai::actorAiStates[ids[index]];
     actors[index].id = static_cast<std::int32_t>(ids[index]);
-    actors[index].next = index + 1 < 3 ? &actors[index + 1] : nullptr;
+    const auto identity = VS::Actors::InstallLiveActorInstance(
+        ids[index], &actors[index], VS::Actors::ActorShape::kEquipped);
+    installed = installed && identity != VS::Actors::SpawnedActor::kNone;
     states[index].actor_id = ids[index];
     states[index].saved_relation_options = -1;
     VS::Battle::Ai::actorAiStates[ids[index]] = &states[index];
+  }
+  for (unsigned index = 1; index < 3; ++index) {
+    actors[index - 1].next = VS::Actors::LiveActorIdentity(&actors[index]);
   }
   states[0].relation_category = 3;
   states[1].relation_category = 0;
@@ -237,7 +246,7 @@ int Tests_AiRelations(void) {
   VS::Battle::actors[0] = actors;
   VS::Battle::Ai::InitializeLiveActorAiRelations(
       reinterpret_cast<VS::Battle::Ai::AiCreationView*>(&states[1]));
-  int passed = states[1].relations[0].classification == 3 &&
+  int passed = installed && states[1].relations[0].classification == 3 &&
                states[0].relations[2].classification == 3 &&
                states[1].relations[5].classification == 2 &&
                states[2].relations[2].classification == 2 &&
@@ -258,7 +267,8 @@ int Tests_AiRelations(void) {
       states[1].relations[0].visible == 1 &&
       states[1].relations[0].counter == 37 &&
       states[0].relations[2].classification == 3;
-  VS::Battle::actors[0] = saved_head;
+  VS::Actors::ResetLiveActorHandles();
+  VS::Battle::actors = saved_actors;
   for (unsigned index = 0; index < 3; ++index) {
     VS::Battle::Ai::actorAiStates[ids[index]] = saved_states[index];
   }
@@ -463,7 +473,9 @@ int Tests_ActorConditionSnapshot(void) {
   VS::Battle::Actor first = {}, second = {};
   VS::Battle::ActorStats first_stats = {}, second_stats = {};
   VS::Battle::Ai::ActorAiState first_ai = {}, second_ai = {};
-  VS::Battle::Actor* saved_head = VS::Battle::actors[0];
+  const auto saved_actors = VS::Battle::actors;
+  VS::Actors::ResetLiveActorHandles();
+  VS::Battle::actors.fill(nullptr);
   VS::Battle::Ai::ActorAiState* saved_first = VS::Battle::Ai::actorAiStates[2];
   VS::Battle::Ai::ActorAiState* saved_second = VS::Battle::Ai::actorAiStates[5];
   struct {
@@ -473,7 +485,8 @@ int Tests_ActorConditionSnapshot(void) {
   } output;
   memset(&output, 0xA5, sizeof output);
   first.id = 2;
-  first.next = &second;
+  first.next = VS::Actors::InstallLiveActorInstance(
+      5, &second, VS::Actors::ActorShape::kEquipped);
   first.stats = &first_stats;
   second.id = 5;
   second.stats = &second_stats;
@@ -489,11 +502,14 @@ int Tests_ActorConditionSnapshot(void) {
   second_stats.max_hp = 120;
   second_stats.statuses = (1 << 0) | (1 << 12);
   second_ai.max_spell_cost = 1;
-  VS::Battle::actors[0] = &first;
+  const auto first_identity = VS::Actors::InstallLiveActorInstance(
+      0, &first, VS::Actors::ActorShape::kEquipped);
   VS::Battle::Ai::actorAiStates[2] = &first_ai;
   VS::Battle::Ai::actorAiStates[5] = &second_ai;
   VS::Battle::Ai::CaptureBattleActorConditions(output.rows);
   const int passed =
+      first_identity != VS::Actors::SpawnedActor::kNone &&
+      first.next != VS::Actors::SpawnedActor::kNone &&
       output.rows[2].actor_id == 2 && output.rows[5].actor_id == 5 &&
       output.rows[2].hp == 20 && output.rows[2].max_hp == 100 &&
       output.rows[2].mp == 15 && output.rows[2].max_mp == 60 &&
@@ -503,7 +519,8 @@ int Tests_ActorConditionSnapshot(void) {
       VS::Battle::Ai::LiveActorStatusConditionScore(&output.rows[5]) == -314 &&
       output.before == 0xA5A5A5A5u && output.after == 0xA5A5A5A5u &&
       output.rows[1].statuses == 0xA5A5A5A5u;
-  VS::Battle::actors[0] = saved_head;
+  VS::Actors::ResetLiveActorHandles();
+  VS::Battle::actors = saved_actors;
   VS::Battle::Ai::actorAiStates[2] = saved_first;
   VS::Battle::Ai::actorAiStates[5] = saved_second;
   return passed;

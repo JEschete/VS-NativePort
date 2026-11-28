@@ -80,7 +80,8 @@ class ActorInstanceTable {
   // Records a new allocation of `definition` for `slot`, pending until
   // Publish; kNone when the slot already has a live or pending instance.
   [[nodiscard]] SpawnedActor Begin(std::size_t slot, std::uintptr_t address,
-                                   ActorDefinition definition) {
+                                   ActorDefinition definition,
+                                   bool owns_storage = false) {
     if (slot >= entries_.size() || address == 0) {
       return SpawnedActor::kNone;
     }
@@ -93,6 +94,7 @@ class ActorInstanceTable {
     entry.installed = false;
     entry.definition = definition;
     entry.removing = false;
+    entry.owns_storage = owns_storage;
     return Encode(slot, entry.generation);
   }
 
@@ -116,6 +118,7 @@ class ActorInstanceTable {
       entry.address = address;
       entry.definition.reset();
       entry.removing = false;
+      entry.owns_storage = false;
     }
     entry.installed = true;
     return Encode(slot, entry.generation);
@@ -133,6 +136,21 @@ class ActorInstanceTable {
   [[nodiscard]] std::uintptr_t Resolve(SpawnedActor actor) const {
     const Entry* entry = Find(actor);
     return entry != nullptr ? entry->address : 0;
+  }
+
+  [[nodiscard]] bool Installed(SpawnedActor actor) const {
+    const Entry* entry = Find(actor);
+    return entry != nullptr && entry->installed;
+  }
+
+  [[nodiscard]] bool Removing(SpawnedActor actor) const {
+    const Entry* entry = Find(actor);
+    return entry != nullptr && entry->removing;
+  }
+
+  [[nodiscard]] bool OwnsStorage(SpawnedActor actor) const {
+    const Entry* entry = Find(actor);
+    return entry != nullptr && entry->owns_storage;
   }
 
   // The unpublished allocation at `address`; kNone when no pending instance
@@ -220,6 +238,7 @@ class ActorInstanceTable {
     std::optional<ActorDefinition> definition;
     bool installed = false;
     bool removing = false;
+    bool owns_storage = false;
   };
 
   [[nodiscard]] static constexpr SpawnedActor Encode(std::size_t slot,
@@ -284,6 +303,7 @@ class ActorInstanceTable {
     entry.installed = false;
     entry.definition.reset();
     entry.removing = false;
+    entry.owns_storage = false;
     Advance(entry);
   }
 

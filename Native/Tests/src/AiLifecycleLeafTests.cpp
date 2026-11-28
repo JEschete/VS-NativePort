@@ -10,6 +10,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Actors/ActorSpawningLive.hpp"
 #include "Battle/Action.hpp"
 #include "Battle/ActionTable.hpp"
 #include "Battle/Actor.hpp"
@@ -94,6 +95,21 @@ struct HostilityFixture {
 
 int AshleyAllianceTestCallback(VS::Battle::Ai::ActorAiState*) { return 0x5A; }
 
+template <std::size_t Size>
+void RegisterActorRoster(std::array<VS::Battle::Actor, Size>& actors,
+                         const std::array<int, Size>& ids) {
+  for (std::size_t index = 0; index < actors.size(); ++index) {
+    actors[index].id = ids[index];
+    REQUIRE(
+        VS::Actors::InstallLiveActorInstance(
+            ids[index], &actors[index], VS::Actors::ActorShape::kEquipped) !=
+        VS::Actors::SpawnedActor::kNone);
+  }
+  for (std::size_t index = 1; index < actors.size(); ++index) {
+    actors[index - 1].next = VS::Actors::LiveActorIdentity(&actors[index]);
+  }
+}
+
 struct AshleyAllianceFixture {
   decltype(VS::Battle::Ai::actorAiStates) saved_ai_states =
       VS::Battle::Ai::actorAiStates;
@@ -107,20 +123,26 @@ struct AshleyAllianceFixture {
   VS::Battle::Actor actors[2]{};
 
   AshleyAllianceFixture() {
+    VS::Actors::ResetLiveActorHandles();
     std::fill_n(VS::Battle::Ai::actorAiStates.begin(), saved_ai_states.size(),
                 nullptr);
     state.actor_id = 1;
     other_state.actor_id = 0;
     actors[0].id = 0;
-    actors[0].next = &actors[1];
     actors[1].id = 1;
     VS::Battle::Ai::actorAiStates[0] = &other_state;
     VS::Battle::Ai::actorAiStates[1] = &state;
-    VS::Battle::actors[0] = &actors[0];
-    VS::Battle::actors[1] = &actors[1];
+    VS::Battle::actors[0] = VS::Battle::actors[1] = nullptr;
+    REQUIRE(VS::Actors::InstallLiveActorInstance(
+                0, &actors[0], VS::Actors::ActorShape::kEquipped) !=
+            VS::Actors::SpawnedActor::kNone);
+    actors[0].next = VS::Actors::InstallLiveActorInstance(
+        1, &actors[1], VS::Actors::ActorShape::kEquipped);
+    REQUIRE(actors[0].next != VS::Actors::SpawnedActor::kNone);
   }
 
   ~AshleyAllianceFixture() {
+    VS::Actors::ResetLiveActorHandles();
     std::copy(saved_ai_states.begin(), saved_ai_states.end(),
               VS::Battle::Ai::actorAiStates.begin());
     VS::Battle::Ai::LiveFrameContext() = saved_frame;
@@ -650,8 +672,15 @@ TEST_CASE("AI linked actors resolve through the live battle actor list",
           "[ai][relations][linked-actors]") {
   struct ListFixture {
     AiLifecycleFixture table;
-    VS::Battle::Actor* saved_head = VS::Battle::actors[0];
-    ~ListFixture() { VS::Battle::actors[0] = saved_head; }
+    decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
+    ListFixture() {
+      VS::Actors::ResetLiveActorHandles();
+      VS::Battle::actors.fill(nullptr);
+    }
+    ~ListFixture() {
+      VS::Actors::ResetLiveActorHandles();
+      VS::Battle::actors = saved_actors;
+    }
   } fixture;
   constexpr std::array<int, 4> kIds{0, 2, 5, 9};
   std::array<VS::Battle::Actor, kIds.size()> actors{};
@@ -659,10 +688,9 @@ TEST_CASE("AI linked actors resolve through the live battle actor list",
   for (std::size_t index = 0; index < kIds.size(); ++index) {
     std::memset(&states[index], 0xA5, sizeof(states[index]));
     states[index].linked_actor = 16;
-    actors[index].id = kIds[index];
-    actors[index].next = index + 1 < kIds.size() ? &actors[index + 1] : nullptr;
     VS::Battle::Ai::actorAiStates[kIds[index]] = &states[index];
   }
+  RegisterActorRoster(actors, kIds);
   // Ashley heads the list: it shares group 3 and is never examined or matched.
   actors[0].ai_group = 3;
   actors[0].ai_linked_group = 3;
@@ -718,7 +746,7 @@ namespace {
 // linked groups so the trailing link resolution has work to do.
 struct ActorSettingsFixture {
   AiLifecycleFixture table;
-  VS::Battle::Actor* saved_head = VS::Battle::actors[0];
+  decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
   void* saved_has_waypoints = VS::Battle::Ai::roomAuxiliaryData;
   std::uint16_t* saved_waypoints = VS::Battle::Ai::roomWaypoints;
   void* saved_section6 = VS::Field::roomData.ai_navigation;
@@ -729,11 +757,11 @@ struct ActorSettingsFixture {
   alignas(std::uint32_t) std::array<unsigned char, 0x450> auxiliary{};
 
   ActorSettingsFixture() {
+    VS::Actors::ResetLiveActorHandles();
+    VS::Battle::actors.fill(nullptr);
     constexpr std::array<int, 3> kIds{0, 2, 5};
-    for (std::size_t index = 0; index < kIds.size(); ++index) {
-      actors[index].id = kIds[index];
-      actors[index].next =
-          index + 1 < actors.size() ? &actors[index + 1] : nullptr;
+    RegisterActorRoster(actors, kIds);
+    for (std::size_t index = 0; index < states.size(); ++index) {
       VS::Battle::Ai::actorAiStates[kIds[index]] = &states[index];
     }
     actors[1].ai_group = 3;
@@ -749,7 +777,8 @@ struct ActorSettingsFixture {
   }
 
   ~ActorSettingsFixture() {
-    VS::Battle::actors[0] = saved_head;
+    VS::Actors::ResetLiveActorHandles();
+    VS::Battle::actors = saved_actors;
     VS::Battle::Ai::roomAuxiliaryData = saved_has_waypoints;
     VS::Battle::Ai::roomWaypoints = saved_waypoints;
     VS::Field::roomData.ai_navigation = saved_section6;
