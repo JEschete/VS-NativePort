@@ -25,6 +25,7 @@
 #include "Battle/Actor.hpp"
 #include "Battle/Ai/ActionExecutionLive.hpp"
 #include "Battle/Damage.hpp"
+#include "Boot/SessionLive.hpp"
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/CdDrive.hpp"
@@ -2922,4 +2923,51 @@ TEST_CASE("A retained decision cursor uses its canonical actor slot",
   actor.id = 5;
   CHECK(VS::Battle::Ai::LiveDecisionListId(static_cast<std::size_t>(
             identity)) == static_cast<int>(NativeActorStorageFixture::kSlot));
+}
+
+TEST_CASE("Actual heap replacement invalidates registered actor identities",
+          "[actors][actors-spawning][actor55-heap-reset]") {
+  NativeActorStorageFixture fixture;
+  VS::Battle::Actor actor{};
+  const auto identity = fixture.InstallBorrowed(actor);
+  VS::Boot::ResetLiveSessionHeap();
+  CHECK_FALSE(actors::LiveActorDefinition(identity));
+  CHECK(actors::LiveActorIdentityAt(NativeActorStorageFixture::kSlot) ==
+        SpawnedActor::kNone);
+}
+
+TEST_CASE("Actual heap replacement cancels unpublished actor loads",
+          "[actors][actors-spawning][actor55-heap-reset]") {
+  NativeActorStorageFixture fixture;
+  fixture.Allocate(kEquippedActor);
+  const auto identity = fixture.instance;
+  const auto owner = fixture.Owner();
+  const ActorAssetRequest request{
+      .kind = Kind(ActorAssetKind::kActorModelParse),
+      .target_slot = NativeActorStorageFixture::kSlot};
+  const auto ticket = Required(content::SubmitLiveActorAsset(
+      request, owner, &actors::LiveActorRecordMemory));
+  VS::Boot::ResetLiveSessionHeap();
+  CHECK_FALSE(actors::LiveActorDefinition(identity));
+  CHECK_FALSE(content::LiveActorAssetsQueued(owner));
+  CHECK(content::LiveActorAssetCompletion(ticket).outcome ==
+        content::ActorAssetOutcome::kCancelled);
+  fixture.instance = SpawnedActor::kNone;
+  content::ClearLiveActorAssetQueue();
+  content::ForgetLiveActorAsset(ticket);
+}
+
+TEST_CASE(
+    "Actual heap replacement retires pending scripted actors before reuse",
+    "[actors][actors-spawning][actor55-heap-reset]") {
+  NativeActorStorageFixture fixture;
+  const actors::SpawnPlacement placement{};
+  REQUIRE(actors::QueueLiveScriptedActorSpawn(NativeActorStorageFixture::kSlot,
+                                              1, &placement) > 0);
+  const auto refusals = VS::Core::Memory::RefusedLiveHeapRequestCount();
+  VS::Boot::ResetLiveSessionHeap();
+  actors::ResetLiveActorHandles();
+  CHECK_FALSE(actors::CancelLivePendingScriptedActorSpawn(
+      NativeActorStorageFixture::kSlot));
+  CHECK(VS::Core::Memory::RefusedLiveHeapRequestCount() == refusals);
 }

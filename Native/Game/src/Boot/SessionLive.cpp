@@ -8,6 +8,7 @@
 #include <cstring>
 #include <optional>
 
+#include "Actors/ActorSpawningLive.hpp"
 #include "Audio/MusicLive.hpp"
 #include "Audio/SampleBanksLive.hpp"
 #include "Audio/SoundBanksLive.hpp"
@@ -463,6 +464,7 @@ void ResetLiveSessionState() {
 
 void ResetLiveSessionHeap() {
   CleanupMenuOwners();
+  Actors::ResetLiveActorHandles();
   if (!Render::AbandonLiveFrameBeforeHeapReset()) {
     VS::Core::Errorf("boot", "frame cleanup refused before heap replacement");
     std::abort();

@@ -123,6 +123,13 @@ class ActorInstanceTable {
   }
 
   // Lookup never creates, replaces or retires an identity.
+  [[nodiscard]] SpawnedActor AllocatedAt(std::size_t slot) const {
+    if (slot >= entries_.size() || entries_[slot].address == 0) {
+      return SpawnedActor::kNone;
+    }
+    return Encode(slot, entries_[slot].generation);
+  }
+
   [[nodiscard]] SpawnedActor At(std::size_t slot) const {
     if (slot >= entries_.size()) {
       return SpawnedActor::kNone;

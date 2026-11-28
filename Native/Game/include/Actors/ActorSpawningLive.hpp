@@ -56,6 +56,8 @@ void FinalizeLiveActorRemoval(SpawnedActor actor);
 // Invalidates the native identity before the matching legacy allocation is
 // freed, or before a gameplay session clears the actor table.
 void InvalidateLiveActorHandle(std::size_t slot, VS::Battle::Actor* actor);
+// Cancels or drains owned loads and invalidates actors while their storage is
+// still live. Run before replacing the game heap.
 void ResetLiveActorHandles();
 // Cancels and discards a scripted actor that has not completed loading yet.
 [[nodiscard]] bool CancelLivePendingScriptedActorSpawn(std::size_t slot);

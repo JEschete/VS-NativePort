@@ -1129,6 +1129,13 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   std::optional<ZudReadState> converted_zud_;
 };
 
+void FinishOwnedActorLoads(SpawnedActor actor) {
+  while (Content::LiveActorAssetsQueued(AssetOwnerOf(actor))) {
+    static_cast<void>(Content::UpdateLiveActorAssetQueue());
+    State::UpdateLivePlayTimeAndLoading();
+  }
+}
+
 void CompletePendingScriptedActorLoad(SpawnedActor actor,
                                       Content::ActorAssetOutcome outcome) {
   ScriptedActorSpawnTable& pending = LiveScriptedActorSpawns();
@@ -1470,10 +1477,7 @@ void FinishLiveActorAssets(std::size_t slot, const VS::Battle::Actor* actor) {
     return;
   }
   // Pumped like the spawn paths' drain loop (ActorSpawning.cpp).
-  while (Content::LiveActorAssetsQueued(AssetOwnerOf(handle))) {
-    static_cast<void>(Content::UpdateLiveActorAssetQueue());
-    State::UpdateLivePlayTimeAndLoading();
-  }
+  FinishOwnedActorLoads(handle);
   LiveActorLoadHost host;
   LiveActorLoads().Release(host, handle);
 }
@@ -1583,18 +1587,18 @@ SpawnedActor InstallLiveActorInstance(std::size_t slot,
 
 void ResetLiveActorHandles() {
   LiveActorSpawnHost host("ResetActorHandles");
-  bool cancelled = false;
   for (std::size_t slot = 0; slot < kSpawnActorSlots; ++slot) {
-    cancelled =
-        CancelScriptedActorSpawn(host, LiveScriptedActorSpawns(), slot) ||
-        cancelled;
+    static_cast<void>(
+        CancelScriptedActorSpawn(host, LiveScriptedActorSpawns(), slot));
+    const auto actor = LiveActorHandles().AllocatedAt(slot);
+    if (actor != SpawnedActor::kNone && !host.CancelOwnedAssets(actor)) {
+      FinishOwnedActorLoads(actor);
+    }
   }
   LiveScriptedActorSpawns().Reset();
+  LiveActorLoadHost load_host;
+  LiveActorLoads().Settle(load_host);
   LiveActorHandles().Reset();
-  if (cancelled) {
-    LiveActorLoadHost load_host;
-    LiveActorLoads().Settle(load_host);
-  }
 }
 
 bool CancelLivePendingScriptedActorSpawn(std::size_t slot) {
