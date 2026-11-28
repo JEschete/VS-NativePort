@@ -156,9 +156,11 @@ f8da63549b09,DIV-ZERO,medium,pattern,F01851,ApplyLearnedActionUnlocks,Native/Gam
 237b8d3f6d5a,DIV-ZERO,low,pattern,,Regenerate,Native/Game/src/Battle/ActorVitals.cpp,63,(drawn ? kDrawnMpInterval : kStatusInterval),56,24,open,
 5a13dc2ba296,DIV-ZERO,low,pattern,,Regenerate,Native/Game/src/Battle/ActorVitals.cpp,66,(drawn ? kDrawnHpInterval : kRestInterval),56,24,open,
 688ed2071431,DIV-ZERO,medium,pattern,F00525,UpdateActorVitals,Native/Game/src/Battle/ActorVitals.cpp,142,static_cast,56,24,open,
-9f66cf8d9bf8,DIV-ZERO,medium,pattern,,ReadablePlanningBytes,Native/Game/src/Battle/Ai/PlanningPrimitivesLive.cpp,120,alignment,57,23,open,
+9f66cf8d9bf8,DIV-ZERO,medium,pattern,,ReadablePlanningBytes,Native/Game/src/Battle/Ai/PlanningPrimitivesLive.cpp,121,alignment,57,23,open,
 19e1bfedf4f8,DIV-ZERO,medium,pattern,,DrawChoice,Native/Game/src/Battle/Ai/Wander.cpp,159,static_cast,57,23,open,
 fe461f81515b,DIV-ZERO,medium,pattern,,Roam,Native/Game/src/Battle/Ai/Wander.cpp,168,range,57,23,open,
+9d5af25e3107,DIV-ZERO,medium,pattern,,Progress,Native/Game/src/Battle/CombatActionLive.cpp,145,Items,56,24,false-positive,Divisor is Items::kUnarmedWeaponCategory (constant 10 in Items/EquipmentStats.hpp); the pattern matched only the namespace token.
+8a2386d43d62,DIV-ZERO,medium,pattern,,CommitCalculation,Native/Game/src/Battle/CombatActionLive.cpp,183,Items,56,24,false-positive,Divisor is Items::kUnarmedWeaponCategory (constant 10 in Items/EquipmentStats.hpp); the pattern matched only the namespace token.
 ff7c2bc2c19e,DIV-ZERO,medium,pattern,F00396,DistributeHitLimbDamage,Native/Game/src/Battle/DamagePolicies.cpp,76,static_cast,56,24,open,
 51b6152f82c1,DIV-ZERO,medium,pattern,,Primitive,Native/Game/src/Battle/FloatingLabelRenderingLive.cpp,103,alignof(std::uint32_t),56,24,open,
 dccc46474def,DIV-ZERO,medium,pattern,,GaugeFill,Native/Game/src/Battle/HudRendering.cpp,57,gauge.maximum,56,24,open,
