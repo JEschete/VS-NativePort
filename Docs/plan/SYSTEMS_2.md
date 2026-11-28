@@ -130,7 +130,7 @@ lists the owners as built; `GameState` as one owned object (§6.8 `State`) is st
 | Persistent | across saves | `State::stateFlags` (typed `StateFlags`), read and written by id through `State::ScriptFlags` (`LiveScriptFlag`, `SetLiveScriptFlag`); `State::scoreData`, `artsStatus`, `roomVisitProgress`, `learnedActionFlags`, `playTime`, `recentRoomEnemyStates`; `Items::inventory` and `inventoryIndices` (the original's misnamed `Audio_Seq_unused*` storage); `Input::settings` | New Game (`Title::InitializeNewGameData`); `Game::Save::Capture` and its restore in `Save/RuntimeSnapshot.cpp` |
 | Session | from one title entry to the next | `Boot::SessionState`, `SoftResetState`, the save resume, and the workspaces that replaced the PS1 scratchpad: `Event::LiveEventCameraScratch()` (shake envelope and offsets), `Effects::EmitterWorkspace()` (emitter flags carried between emissions) and `Battle::LiveSphereWorkspace()` (sphere bases, sine samples, staged volumes) | `Boot::ResetLiveSessionState()`, called by every `ResetNativeSession` (`InitializeTitleSession`, `ResetToTitle`, the title transfer's preparation in `Boot::RunSession`, and the session's end); the jump into the game loop keeps them |
 | Scene | one room or battle | `Field::RoomVisitState`, `Event::cameraWorkspace`, `Battle::targetSphere`, the AI room state and its borrowed bindings | room load; the AI session invalidation (`Battle/Ai/RoomState.cpp`) |
-| Temporary | one frame or one call | `Render::FrameScratchpad()` (the frame setup rewrites it every frame), the AI `PlanningWorkspace` (one per call), `Render` model workspaces, event frame locals | none |
+| Temporary | one frame or one call | `Render::FrameScratchpad()` (the frame setup rewrites it every frame), owned `Field::SegmentCollisionContext` inputs, the AI `PlanningWorkspace` (one per call), `Render` model workspaces, event frame locals | none |
 
 Rules:
 - A soft reset must not leak session state into the next run. The PS1 kept scratchpad values across a soft reset
@@ -139,5 +139,7 @@ Rules:
   writers cannot reach each other's state. `Native\Tests\src\EventSessionTests.cpp` (`[session-reset][workspaces]`)
   checks that the workspaces survive the game-loop jump and are cleared at the title.
 
-Open work: #57 (the planner still publishes its call-local workspace through globals while it runs), #488 (the overlay
-arena keeps the original's overlapping slot offsets, EC-05).
+Segment traces use owned actor/platform/decoded-terrain inputs ([#57](https://github.com/JEschete/VS-NativePort/issues/57)).
+Open work: #57 (navigation/perception and movement probes still share query state; the planner still publishes its
+call-local workspace through globals while it runs), #488 (the overlay arena keeps the original's overlapping slot
+offsets, EC-05).

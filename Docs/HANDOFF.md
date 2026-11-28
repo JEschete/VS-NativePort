@@ -2,21 +2,25 @@
 
 ## Current state
 
-Runtime revision `705b295a567dcda44b786e8a8b47fe08fb892b2b` completes the adopted normal single-hit physical action 1 path in [#56](https://github.com/JEschete/VS-NativePort/issues/56). Controller and AI producers use owned combat inputs/results, generation-qualified delayed impacts and separate presentation consumers. [Acceptance evidence and publication status](https://github.com/JEschete/VS-NativePort/issues/56#issuecomment-7239339298) record the tests, controller runs, fixing revisions and CI.
+Implementation revision `f2df0c31e064bb155eead95d3f76a8a653aa78fe` adopts owned segment-collision inputs under [#57](https://github.com/JEschete/VS-NativePort/issues/57). Both live segment entries capture actor bounds, moving platforms and decoded collision heights before querying. Captured geometry survives source changes and teardown; captured actor identities keep their original generation. Publication and verification evidence remains on the issue.
+
+The adopted normal single-hit physical action 1 path in [#56](https://github.com/JEschete/VS-NativePort/issues/56) is complete. Controller and AI producers use owned combat inputs/results, generation-qualified delayed impacts and separate presentation consumers. [Acceptance evidence](https://github.com/JEschete/VS-NativePort/issues/56#issuecomment-7239339298) records that closure.
 
 The [#55 actor ownership handoff](https://github.com/JEschete/VS-NativePort/issues/55#issuecomment-7235106314) remains complete. Combat reads and commits expected actor components rather than adopting replaceable borrowed bindings.
 
 ## Work in progress
 
-No further code changes are pending for the verified #56 slice. Final publication and issue status are tracked in its acceptance comment. The M8 contract note records the adopted path without claiming the full package is complete.
+[#57](https://github.com/JEschete/VS-NativePort/issues/57) remains open. Segment traces no longer read live globals while querying, but navigation/perception contexts, planner simulation ownership and persistent movement probes still require adoption. The planner still publishes its temporary buffers globally and modifies live simulated stats; movement still shares probe/support state.
 
 ## Next
 
-The owner-authorized endpoint is #56 closure. Once its publication gate is complete, stop and await the owner's next instruction; do not automatically start another issue. Resume future work from the order in [#4](https://github.com/JEschete/VS-NativePort/issues/4).
+Confirm the collision milestone's pushed CI, then thread owned probe/support state and explicit room/actor inputs through real movement, navigation/perception and planning callers. Preserve immediate platform-contact callbacks and source ordering. Publish verified milestones and continue through #57's full acceptance and exact-revision CI. The owner-authorized endpoint is #57 closure; do not start the next issue without further authorization.
 
 ## Open limits
 
-Other action families retain their explicit compatibility route. Broader AI/query, equipment/asset and effect ownership retirement remains under [#57](https://github.com/JEschete/VS-NativePort/issues/57), [#58](https://github.com/JEschete/VS-NativePort/issues/58) and [#61](https://github.com/JEschete/VS-NativePort/issues/61); this is not full combat or M8 completion.
+Other action families retain their explicit compatibility route. Independent AI/navigation/planning ownership and current-worktree controller acceptance remain open under [#57](https://github.com/JEschete/VS-NativePort/issues/57). Equipment/asset and effect ownership retirement remains under [#58](https://github.com/JEschete/VS-NativePort/issues/58) and [#61](https://github.com/JEschete/VS-NativePort/issues/61); this is not full combat or M8 completion.
+
+Unchanged image-conversion test tidy findings discovered by the expanded header scan are tracked separately in [#531](https://github.com/JEschete/VS-NativePort/issues/531); no quality baseline was refreshed.
 
 Controlled comparisons use the opt-in stepped AI budget. Default wall-clock runs are not asserted deterministic, and accelerated captures do not certify real-time audio quality. The [cross-region script-offset diagnostic](https://github.com/JEschete/VS-NativePort/issues/59#issuecomment-7238503115) remains separate from combat behavior.
 
