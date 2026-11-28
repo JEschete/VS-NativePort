@@ -220,10 +220,10 @@ std::optional<PackedTile> ActorSavedPlacement(ActorStateHost& host, int id,
                                               int movement_class) {
   const ActorStateRecord* record = host.Record(id);
   if (record == nullptr) return std::nullopt;
-  return ActorSavedPlacement(*record, movement_class);
+  return SavedActorPlacement(*record, movement_class);
 }
 
-PackedTile ActorSavedPlacement(const ActorStateRecord& record,
+PackedTile SavedActorPlacement(const ActorStateRecord& record,
                                int movement_class) {
   PackedTile tile = record.saved_placement;
   if (record.motion.motion_locked && IsFlightClass(movement_class)) {

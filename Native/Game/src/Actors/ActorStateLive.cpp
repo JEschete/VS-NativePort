@@ -779,7 +779,7 @@ std::optional<ActorPersistencePose> ReadLiveActorPersistencePose(
   if (components && components->body != nullptr) {
     const auto record = RecordTraits::Load(*components->body);
     return ActorPersistencePose{
-        .tile = ActorSavedPlacement(record, movement_class),
+        .tile = SavedActorPlacement(record, movement_class),
         .fading = (ComposeActorStateFlags(record, {}) &
                    StateFlag::kActionAnimating) != 0};
   }

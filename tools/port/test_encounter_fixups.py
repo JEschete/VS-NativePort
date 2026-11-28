@@ -2632,9 +2632,16 @@ int func_800F9800(void) {
         ai = copy_to_native.REPO / r"Native\Game\src\Battle\Ai"
         for name in ("ActorState.cpp", "ActorState.hpp"):
             self.assertNotIn("Battle_Ai_CreateActorAiState", (ai / name).read_text(encoding="utf-8"))
-        # Spawning, its only caller, creates the state through the live binding.
+        # Spawning passes its registered identity; the module keeps its pointer boundary.
         spawning = (copy_to_native.REPO / r"Native\Game\src\Actors\ActorSpawningLive.cpp").read_text(encoding="utf-8")
-        self.assertEqual(spawning.count("return Battle::Ai::CreateLiveActorAiState(actor, flags);"), 1)
+        self.assertEqual(flat(spawning).count(
+            "return Battle::Ai::CreateLiveActorInstanceAi(LiveActorIdentityAt(slot), flags);"), 1)
+        self.assertNotIn("Battle::Ai::CreateLiveActorAiState(", spawning)
+        binding = (ai / "ActorCreationLive.cpp").read_text(encoding="utf-8")
+        self.assertIn(
+            "return CreateLiveActorInstanceAi(Actors::LiveActorIdentity(actor), options);",
+            flat(binding),
+        )
         self.assertIn('#include "Battle/Ai/ActorCreationLive.hpp"', spawning)
         self.assertNotIn("Battle_Ai_CreateActorAiState", spawning)
         pointers = module_pointers_text(copy_to_native.REPO)
