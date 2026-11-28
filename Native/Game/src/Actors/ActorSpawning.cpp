@@ -352,7 +352,7 @@ void QueueEquipment(ActorSpawnHost& host, SpawnedActor actor, int actor_id,
     host.Refuse(SpawnRefusal::kEquipmentSlot);
     return;
   }
-  host.ReleaseWeaponModel(static_cast<int>(slot));
+  host.ReleaseWeaponModel(actor, static_cast<int>(slot));
   if (model_id == 0) {
     return;
   }
@@ -366,8 +366,9 @@ void QueueEquipment(ActorSpawnHost& host, SpawnedActor actor, int actor_id,
 
 [[nodiscard]] bool SubmitEquippedEquipment(OwnedSpawnAssets& assets,
                                            ActorSpawnHost& host,
-                                           std::size_t slot, int model_id,
-                                           EquipmentHand hand, int material) {
+                                           SpawnedActor actor, std::size_t slot,
+                                           int model_id, EquipmentHand hand,
+                                           int material) {
   if (model_id == kUnchangedEquipment) {
     return true;
   }
@@ -379,7 +380,7 @@ void QueueEquipment(ActorSpawnHost& host, SpawnedActor actor, int actor_id,
     host.Refuse(SpawnRefusal::kEquipmentSlot);
     return false;
   }
-  host.ReleaseWeaponModel(static_cast<int>(record));
+  host.ReleaseWeaponModel(actor, static_cast<int>(record));
   if (model_id == 0) {
     return true;
   }
@@ -388,13 +389,14 @@ void QueueEquipment(ActorSpawnHost& host, SpawnedActor actor, int actor_id,
   return assets.Submit(part, request);
 }
 
-void ReleaseEquippedAssets(ActorSpawnHost& host, std::size_t slot) {
-  host.ReleaseActorModel(
-      static_cast<int>(ActorPartRecordSlot(slot, ActorRecordPart::kBody)));
-  host.ReleaseWeaponModel(
-      static_cast<int>(ActorPartRecordSlot(slot, ActorRecordPart::kWeapon)));
-  host.ReleaseWeaponModel(
-      static_cast<int>(ActorPartRecordSlot(slot, ActorRecordPart::kShield)));
+void ReleaseEquippedAssets(ActorSpawnHost& host, SpawnedActor actor,
+                           std::size_t slot) {
+  host.ReleaseActorModel(actor, static_cast<int>(ActorPartRecordSlot(
+                                    slot, ActorRecordPart::kBody)));
+  host.ReleaseWeaponModel(actor, static_cast<int>(ActorPartRecordSlot(
+                                     slot, ActorRecordPart::kWeapon)));
+  host.ReleaseWeaponModel(actor, static_cast<int>(ActorPartRecordSlot(
+                                     slot, ActorRecordPart::kShield)));
 }
 
 [[nodiscard]] SpawnedActor AllocateEquipped(
@@ -418,11 +420,11 @@ void ReleaseEquippedAssets(ActorSpawnHost& host, std::size_t slot) {
   bool submitted = assets.Submit(ActorRecordPart::kBody, model);
   if (submitted && model_id != kBareModel) {
     host.QueueBaseSequence(actor, slot);
-    submitted = SubmitEquippedEquipment(assets, host, slot, blade_model,
+    submitted = SubmitEquippedEquipment(assets, host, actor, slot, blade_model,
                                         EquipmentHand::kWeapon, blade_material);
     if (submitted) {
       submitted =
-          SubmitEquippedEquipment(assets, host, slot, shield_model,
+          SubmitEquippedEquipment(assets, host, actor, slot, shield_model,
                                   EquipmentHand::kShield, shield_material);
     }
     if (submitted) {
@@ -434,7 +436,7 @@ void ReleaseEquippedAssets(ActorSpawnHost& host, std::size_t slot) {
     if (!assets.CancelOrFinish()) {
       return SpawnedActor::kNone;
     }
-    ReleaseEquippedAssets(host, slot);
+    ReleaseEquippedAssets(host, actor, slot);
     host.DiscardUninstalled(actor);
     return SpawnedActor::kNone;
   }
@@ -1004,18 +1006,18 @@ struct RoomEnemyParts {
   return true;
 }
 
-void ReleaseRoomEnemyAssets(ActorSpawnHost& host, std::size_t slot,
-                            const RoomEnemyParts& parts) {
+void ReleaseRoomEnemyAssets(ActorSpawnHost& host, SpawnedActor actor,
+                            std::size_t slot, const RoomEnemyParts& parts) {
   const auto release_record = [&](ActorRecordPart part) {
     const std::size_t record = ActorPartRecordSlot(slot, part);
     if (record < Content::kActorRecordSlots) {
-      host.ReleaseActorModel(static_cast<int>(record));
+      host.ReleaseActorModel(actor, static_cast<int>(record));
     }
   };
   const auto release_equipment = [&](ActorRecordPart part) {
     const std::size_t record = ActorPartRecordSlot(slot, part);
     if (record < Content::kWeaponModelSlots) {
-      host.ReleaseWeaponModel(static_cast<int>(record));
+      host.ReleaseWeaponModel(actor, static_cast<int>(record));
     }
   };
   release_record(ActorRecordPart::kBody);
@@ -1029,7 +1031,7 @@ void ReleaseRoomEnemyAssets(ActorSpawnHost& host, std::size_t slot,
 
 void DiscardRoomEnemy(ActorSpawnHost& host, SpawnedActor actor,
                       std::size_t slot, const RoomEnemyParts& parts) {
-  ReleaseRoomEnemyAssets(host, slot, parts);
+  ReleaseRoomEnemyAssets(host, actor, slot, parts);
   host.DiscardUninstalled(actor);
 }
 
@@ -1244,7 +1246,7 @@ void DiscardPendingScriptedActor(ActorSpawnHost& host,
     DrainAssetQueue(host);
   }
   if (host.SlotIsEmpty(spawn.slot)) {
-    host.ReleaseActorModel(static_cast<int>(spawn.slot));
+    host.ReleaseActorModel(spawn.actor, static_cast<int>(spawn.slot));
   }
   host.DiscardUninstalled(spawn.actor);
 }

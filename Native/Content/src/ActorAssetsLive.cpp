@@ -1025,6 +1025,10 @@ class LiveActorAssetHost final : public ActorAssetHost {
   // A host storing the owned requests it queues with `memory`.
   explicit LiveActorAssetHost(ActorRecordMemory memory)
       : submitted_memory_(memory) {}
+  LiveActorAssetHost(int slot, Actors::ActorRecord* expected)
+      : actor_release_slot_(slot), actor_release_record_(expected) {}
+  LiveActorAssetHost(int slot, Actors::WeaponModel* expected)
+      : weapon_release_slot_(slot), weapon_release_record_(expected) {}
 
   // The request queue.
   [[nodiscard]] std::uint8_t RequestKind(int slot) const override {
@@ -1262,7 +1266,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
 
   // Weapon records.
   [[nodiscard]] WeaponAssetSummary WeaponSummary(int slot) const override {
-    const VS::Actors::WeaponModel* model = WeaponAt(slot);
+    const VS::Actors::WeaponModel* model = WeaponRecordAt(slot);
     if (model == nullptr) {
       return {};
     }
@@ -1284,7 +1288,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
     return true;
   }
   [[nodiscard]] WeaponAssetRecord LoadWeapon(int slot) const override {
-    const VS::Actors::WeaponModel* model = WeaponAt(slot);
+    const VS::Actors::WeaponModel* model = WeaponRecordAt(slot);
     if (model == nullptr) {
       CountRefusal("weapon record read", slot);
       return {};
@@ -1350,8 +1354,11 @@ class LiveActorAssetHost final : public ActorAssetHost {
   }
   void ClearWeaponSlot(int slot) override {
     if (InRange(slot, kWeaponModelSlots)) {
-      VS::Actors::weaponModels[slot] = nullptr;
-      Resources().weapons[slot] = {};
+      const auto* expected = WeaponRecordAt(slot);
+      if (WeaponAt(slot) == expected) VS::Actors::weaponModels[slot] = nullptr;
+      if (Resources().weapons[slot].record == expected) {
+        Resources().weapons[slot] = {};
+      }
     }
   }
   [[nodiscard]] AssetAddress WeaponGeometryBuffer(int slot) const override {
@@ -1368,7 +1375,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
 
   // Actor records.
   [[nodiscard]] ActorAssetSummary ActorSummary(int slot) const override {
-    const VS::Actors::ActorRecord* actor = ActorAt(slot);
+    const VS::Actors::ActorRecord* actor = ActorRecordAt(slot);
     if (actor == nullptr) {
       return {};
     }
@@ -1391,7 +1398,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
     return true;
   }
   [[nodiscard]] ActorAssetRecord LoadActor(int slot) const override {
-    const VS::Actors::ActorRecord* actor = ActorAt(slot);
+    const VS::Actors::ActorRecord* actor = ActorRecordAt(slot);
     if (actor == nullptr) {
       CountRefusal("actor record read", slot);
       return {};
@@ -1403,7 +1410,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
     return record;
   }
   void StoreActor(int slot, const ActorAssetRecord& record) override {
-    VS::Actors::ActorRecord* actor = ActorAt(slot);
+    VS::Actors::ActorRecord* actor = ActorRecordAt(slot);
     if (actor == nullptr) {
       CountRefusal("actor record write", slot);
       return;
@@ -1465,8 +1472,11 @@ class LiveActorAssetHost final : public ActorAssetHost {
   }
   void ClearActorSlot(int slot) override {
     if (InRange(slot, kActorRecordSlots)) {
-      VS::Actors::actorRecords[slot] = nullptr;
-      Resources().actors[slot] = {};
+      const auto* expected = ActorRecordAt(slot);
+      if (ActorAt(slot) == expected) VS::Actors::actorRecords[slot] = nullptr;
+      if (Resources().actors[slot].record == expected) {
+        Resources().actors[slot] = {};
+      }
     }
   }
   [[nodiscard]] std::int16_t RoomActorScale() const override {
@@ -1487,6 +1497,13 @@ class LiveActorAssetHost final : public ActorAssetHost {
     VS::Actors::AttachLiveActorToParentBone(slot, parent, bone, 0);
   }
   void StopModelSounds(AssetAddress sound_bank) override {
+    // A foreign occupant in the departing record's slot can share its bank.
+    const auto* current = ActorAt(actor_release_slot_);
+    if (actor_release_record_ != nullptr && current != nullptr &&
+        current != actor_release_record_ &&
+        current->model_id == actor_release_record_->model_id) {
+      return;
+    }
     VS::Audio::LiveStopBankSfx(kModelSoundChannels, Pointer<int>(sound_bank),
                                0);
   }
@@ -1599,7 +1616,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
                                     ActorSequenceKind kind) override {
     auto& binding = Resources().actors.at(static_cast<std::size_t>(target));
     auto& resource = binding.sequences.at(static_cast<std::size_t>(kind));
-    if (binding.record == ActorAt(target) && resource) {
+    if (binding.record == ActorRecordAt(target) && resource) {
       resource.reset();
       return;
     }
@@ -1799,6 +1816,14 @@ class LiveActorAssetHost final : public ActorAssetHost {
   }
 
  private:
+  Actors::ActorRecord* ActorRecordAt(int slot) const {
+    return slot == actor_release_slot_ ? actor_release_record_ : ActorAt(slot);
+  }
+  Actors::WeaponModel* WeaponRecordAt(int slot) const {
+    return slot == weapon_release_slot_ ? weapon_release_record_
+                                        : WeaponAt(slot);
+  }
+
   static std::optional<std::uint32_t> LiveFileTableEntry(AssetFileTable table,
                                                          std::size_t index) {
     switch (table) {
@@ -1893,6 +1918,10 @@ class LiveActorAssetHost final : public ActorAssetHost {
   }
 
   ActorRecordMemory submitted_memory_ = nullptr;
+  int actor_release_slot_ = -1;
+  Actors::ActorRecord* actor_release_record_ = nullptr;
+  int weapon_release_slot_ = -1;
+  Actors::WeaponModel* weapon_release_record_ = nullptr;
 };
 
 // Cancels the disc read into a loader's file and frees the file.
@@ -2191,6 +2220,32 @@ int ReleaseLiveActorSequence(int target, int kind) {
 int ReleaseLiveActorModel(int slot, bool release_attached_weapons) {
   LiveActorAssetHost host;
   return ReleaseActorModel(host, slot, release_attached_weapons);
+}
+
+void DiscardLiveActorModel(int slot, Actors::ActorRecord* expected) {
+  if (!InRange(slot, kActorRecordSlots) || expected == nullptr) {
+    CountRefusal("actor model discard owner", slot);
+    return;
+  }
+  if (ActorAt(slot) != expected &&
+      Resources().actors[slot].record != expected) {
+    return;
+  }
+  LiveActorAssetHost host(slot, expected);
+  static_cast<void>(ReleaseActorModel(host, slot, false));
+}
+
+void DiscardLiveWeaponModel(int slot, Actors::WeaponModel* expected) {
+  if (!InRange(slot, kWeaponModelSlots) || expected == nullptr) {
+    CountRefusal("weapon model discard owner", slot);
+    return;
+  }
+  if (WeaponAt(slot) != expected &&
+      Resources().weapons[slot].record != expected) {
+    return;
+  }
+  LiveActorAssetHost host(slot, expected);
+  DiscardWeaponRecord(host, slot);
 }
 
 int ReleaseLiveSequenceEffectTexture(int bank) {

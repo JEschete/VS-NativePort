@@ -1,5 +1,5 @@
 key,class,confidence,evidence,function,symbol,path,line,detail,issue,imp_step,status,notes
-cc6311a4708e,CAPACITY,medium,pattern,,legacyWeaponModelBuffers,Native/Content/include/Content/ActorAssetsLive.hpp,252,legacyWeaponModelBuffers[kWeaponModelBuffers],47,6,open,
+cc6311a4708e,CAPACITY,medium,pattern,,legacyWeaponModelBuffers,Native/Content/include/Content/ActorAssetsLive.hpp,258,legacyWeaponModelBuffers[kWeaponModelBuffers],47,6,open,
 cd16e365a329,CAPACITY,medium,pattern,,voiceOwners,Native/Engine/src/Audio/Mixer/VoiceMixer.hpp,107,voiceOwners[kVoiceCount],253,30A,open,
 59ecebc9dfec,CAPACITY,medium,pattern,,AshleyInventory,Native/Game/include/Actors/ActorSpawning.hpp,620,AshleyInventory.weapons[kInventoryWeapons],55,14,open,
 f2c96369ce13,CAPACITY,medium,pattern,,AshleyInventory,Native/Game/include/Actors/ActorSpawning.hpp,622,AshleyInventory.blades[kInventoryBlades],55,14,open,
@@ -80,7 +80,7 @@ a8d3fd050cf6,CAPACITY,medium,pattern,,actors,Native/Game/src/Battle/Damage.hpp,3
 dcf910f6416b,CAPACITY,medium,pattern,,gimmickInstances,Native/Game/src/Field/Gimmicks.hpp,390,gimmickInstances[kGimmickInstanceCount],45,3,open,
 7515fc1e8e03,CAPACITY,medium,pattern,,InventoryStorage,Native/Game/src/Menu/Container/Storage.hpp,26,InventoryStorage.items_to_transfer[kPendingTransferSlots],60,34,open,
 7509963b0c42,CAPACITY,medium,pattern,,cardDirectoryEntries,Native/Game/src/Title/SaveCard.hpp,24,cardDirectoryEntries[kCardDirectoryCapacity],62,39,open,
-f286f867bb37,DIV-ZERO,medium,pattern,,ParseActorTexture,Native/Content/src/ActorAssets.cpp,1594,static_cast,47,6,open,
+f286f867bb37,DIV-ZERO,medium,pattern,,ParseActorTexture,Native/Content/src/ActorAssets.cpp,1590,static_cast,47,6,open,
 287776e0f26f,DIV-ZERO,medium,pattern,,FlatTableEntry,Native/Content/src/ActorAssetsLive.cpp,815,Columns,47,6,open,
 53e00571f86b,DIV-ZERO,medium,pattern,,FlatTableEntry,Native/Content/src/ActorAssetsLive.cpp,815,Columns,47,6,open,
 a8828e4c93ef,DIV-ZERO,medium,pattern,,ReadAudioStreamHeader,Native/Content/src/AudioStream.cpp,110,PsxAdpcmDecoder,48,7,open,
@@ -266,7 +266,7 @@ daabfcafea33,NARROW-ID,medium,pattern,,InventoryIndices,Native/Game/include/Item
 2782fc8a4419,NARROW-ID,medium,pattern,,InventoryIndices,Native/Game/include/Items/ItemRecords.hpp,542,InventoryIndices.gems,58,15,open,
 8cba3692ef57,NARROW-ID,medium,pattern,,InventoryIndices,Native/Game/include/Items/ItemRecords.hpp,543,InventoryIndices.misc,58,15,open,
 d5425c450161,NARROW-ID,medium,pattern,,DefenderLimb,Native/Game/include/Items/ItemRecords.hpp,728,DefenderLimb.name_index,58,15,open,
-df324a572825,NULL-TABLE,medium,pattern,,UnlinkLiveActorFromRoomList,Native/Game/src/Actors/ActorRosterLive.cpp,189,actors[decision.slot],55,14,open,
+df324a572825,NULL-TABLE,medium,pattern,,UnlinkLiveActorFromRoomList,Native/Game/src/Actors/ActorRosterLive.cpp,202,actors[decision.slot],55,14,open,
 047b269efca1,NULL-TABLE,medium,pattern,,TriggerLiveActorTrap,Native/Game/src/Field/ChestInteractionsLive.cpp,1079,actors[actor],45,3,open,
 d426f31fcbb0,NULL-TABLE,medium,pattern,,SnapLiveRoomActorsToSupport,Native/Game/src/Field/CollisionMapLive.cpp,306,actorRecords[slot],57,23,guarded,"the write loop only touches slots whose optional was filled by the read loop, which skips null actor records; the typed core between the loops does not change the actor table"
 7ec5efb7dd69,POINTER-INT,high,compiler,,Report,Native/Engine/src/Audio/Cutscene/StreamBuffersLive.cpp,202,-Wshorten-64-to-32: implicit conversion loses integer precision: 'size_t' (aka 'unsigned long long') to 'unsigned long',253,30A,open,

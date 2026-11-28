@@ -111,11 +111,12 @@ class LiveExecution final : public ActionExecutionWorld {
   }
   std::optional<int> SpecialActor(unsigned slot) const override {
     if (!HasRoom() ||
-        slot >= std::size(VS::Battle::Ai::roomAiState->special_actors) ||
-        VS::Battle::Ai::roomAiState->special_actors[slot] == nullptr) {
+        slot >= std::size(VS::Battle::Ai::roomAiState->special_actors)) {
       return std::nullopt;
     }
-    return VS::Battle::Ai::roomAiState->special_actors[slot]->id;
+    const auto* actor = Actors::ResolveLiveActorInstance(
+        VS::Battle::Ai::roomAiState->special_actors[slot]);
+    return actor != nullptr ? std::optional<int>(actor->id) : std::nullopt;
   }
   std::optional<bool> GimmickReady(int actor) const override {
     if (actor < 0 ||

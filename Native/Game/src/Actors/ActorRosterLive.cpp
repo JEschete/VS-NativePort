@@ -59,8 +59,11 @@ RosterCandidate CandidateOf(const VS::Battle::Actor& actor) {
 // instance record, not from its rewritable kind.
 class LiveRemovalHost final : public ActorRemovalHost {
  public:
-  explicit LiveRemovalHost(VS::Battle::Actor* actor)
-      : actor_(actor), identity_(LiveActorIdentity(actor)) {}
+  LiveRemovalHost(VS::Battle::Actor* actor, std::size_t slot)
+      : actor_(actor),
+        identity_(LiveActorIdentity(actor)),
+        components_(LiveActorComponents(identity_)),
+        slot_(slot) {}
 
   [[nodiscard]] std::optional<ActorResources> Claim(std::size_t slot) override {
     if (actor_ == nullptr) {
@@ -78,16 +81,24 @@ class LiveRemovalHost final : public ActorRemovalHost {
     FinishLiveActorAssets(slot, actor_);
   }
   void ReleaseGimmick(std::size_t slot) override {
-    auto* expected =
-        reinterpret_cast<VS::Field::GimmickInstance*>(actor_->model);
+    if (!components_ || components_->gimmick == nullptr) return;
+    auto* expected = components_->gimmick;
     if (VS::Field::gimmickInstances[slot] == expected) {
       static_cast<void>(VS::Field::DropLiveUnsupportedGimmickStack(
           static_cast<std::int32_t>(slot)));
     }
-    VS::Field::DiscardLiveGimmickInstance(static_cast<int>(slot), expected);
+    ReleaseLiveActorRecord(identity_, ActorRecordPart::kGimmick);
   }
   void ReleaseModel(std::size_t model_slot) override {
-    VS::Content::ReleaseLiveActorModel(static_cast<int>(model_slot));
+    if (model_slot == slot_) {
+      ReleaseLiveActorRecord(identity_, ActorRecordPart::kBody);
+      ReleaseLiveActorRecord(identity_, ActorRecordPart::kWeapon);
+      ReleaseLiveActorRecord(identity_, ActorRecordPart::kShield);
+    } else if (model_slot == slot_ + kSecondBodySlotOffset) {
+      ReleaseLiveActorRecord(identity_, ActorRecordPart::kSecondBody);
+    } else {
+      WarnActorRefused("ReleaseModel", "model slot does not belong to actor");
+    }
   }
   void FreeAiState(std::size_t /*slot*/) override {
     VS::Battle::Ai::FreeLiveActorAiState(actor_);
@@ -105,6 +116,8 @@ class LiveRemovalHost final : public ActorRemovalHost {
  private:
   VS::Battle::Actor* actor_;
   SpawnedActor identity_;
+  std::optional<ActorInstanceComponents> components_;
+  std::size_t slot_;
 };
 
 class LiveDisplayFlagsHost final : public DisplayFlagsHost {
@@ -195,8 +208,8 @@ int RemoveLiveActorAtSlot(unsigned index, int hidden) {
   if (CancelLivePendingScriptedActorSpawn(index)) {
     return 1;
   }
-  LiveRemovalHost host(index < kRosterSlots ? VS::Battle::actors[index]
-                                            : nullptr);
+  LiveRemovalHost host(
+      index < kRosterSlots ? VS::Battle::actors[index] : nullptr, index);
   return RemoveActorAtSlot(host, index, hidden) == RemovalResult::kOutOfRange
              ? 0
              : 1;

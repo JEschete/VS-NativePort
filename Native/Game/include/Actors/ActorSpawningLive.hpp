@@ -33,6 +33,10 @@ void DiscardLiveActorInstance(SpawnedActor actor);
 [[nodiscard]] VS::Battle::Actor* ResolveLiveActorInstance(SpawnedActor actor);
 [[nodiscard]] std::optional<ActorDefinition> LiveActorDefinition(
     SpawnedActor actor);
+[[nodiscard]] std::optional<ActorInstanceComponents> LiveActorComponents(
+    SpawnedActor actor);
+// Releases a component's owned binding without touching a foreign occupant.
+void ReleaseLiveActorRecord(SpawnedActor actor, ActorRecordPart part);
 // Convert a current, borrowed actor pointer at a call boundary. Retain the
 // returned identity, not the pointer, across callbacks or actor replacement.
 [[nodiscard]] SpawnedActor LiveActorIdentity(const VS::Battle::Actor* actor);

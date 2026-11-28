@@ -715,11 +715,11 @@ struct FakeSpawnHost final : actors::ActorSpawnHost {
     Log("UpdateQueue");
   }
   void PumpLoading() override { Log("Pump"); }
-  void ReleaseActorModel(int slot) override {
+  void ReleaseActorModel(SpawnedActor /*owner*/, int slot) override {
     released_actor_models.push_back(slot);
     Log(std::format("ReleaseActorModel {}", slot));
   }
-  void ReleaseWeaponModel(int slot) override {
+  void ReleaseWeaponModel(SpawnedActor /*owner*/, int slot) override {
     released_weapon_models.push_back(slot);
     Log(std::format("Release {}", slot));
   }
@@ -2842,4 +2842,21 @@ TEST_CASE("AI decision cursors reject same-address actor replacement",
   CHECK(VS::Battle::Ai::LiveDecisionListHead() != cursor);
   CHECK(VS::Battle::Ai::LiveDecisionListId(
             VS::Battle::Ai::LiveDecisionListHead()) == 9);
+}
+
+TEST_CASE("Mutable actor pointers cannot redirect owned component destinations",
+          "[actors][actors-spawning][actor-resource-identity]") {
+  NativeActorStorageFixture fixture;
+  auto& actor = fixture.Allocate(kEquippedActor);
+  const auto body = At(reinterpret_cast<std::uintptr_t>(actor.model));
+  const auto weapon =
+      At(reinterpret_cast<std::uintptr_t>(actor.equipment_models[0]));
+  actors::ActorRecord foreign_body{};
+  actors::ActorModelSlot foreign_weapon{};
+  actor.model = &foreign_body.instance;
+  actor.equipment_models[0] = &foreign_weapon;
+  CHECK(actors::LiveActorRecordMemory(
+            fixture.Owner(), content::ActorRecordTable::kActor, 3) == body);
+  CHECK(actors::LiveActorRecordMemory(
+            fixture.Owner(), content::ActorRecordTable::kWeapon, 6) == weapon);
 }

@@ -10,6 +10,10 @@
 #include "Battle/Ai/Perception.hpp"
 #include "Core/Gte.hpp"
 
+namespace VS::Actors {
+enum class SpawnedActor : std::uint64_t;
+}
+
 namespace VS::Battle {
 struct Actor;
 struct ActorStats;
@@ -58,7 +62,7 @@ struct RoomAiState {
   /* 0x1C */ ActorAiState* engaged_head;
   /* 0x20 */ ActorAiState* engaged_cursor;
   /* 0x24 */ std::int32_t approach_moves;
-  /* 0x28 */ std::array<VS::Battle::Actor*, kRoomAiStateSpecialActorsCount>
+  /* 0x28 */ std::array<Actors::SpawnedActor, kRoomAiStateSpecialActorsCount>
       special_actors;
 };
 

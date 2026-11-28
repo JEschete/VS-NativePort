@@ -6,6 +6,13 @@
 #include <limits>
 #include <optional>
 
+namespace VS::Battle {
+struct ActorStats;
+}
+namespace VS::Field {
+struct GimmickInstance;
+}
+
 // Stable actor identity and ownership (#55). The original addressed an actor
 // only by its slot in vs_battle_actors, and its removal (removeActorById,
 // 146C.c:582) chose what to release from the actor's kind, a field scripts
@@ -14,6 +21,8 @@
 // table, not the mutable actor record, says which slot resources the actor
 // owns, and removal claims them once.
 namespace VS::Actors {
+struct ActorRecord;
+struct ActorModelSlot;
 // The slots room actors, scripted actors and gimmicks use.
 inline constexpr std::size_t kSpawnActorSlots = 16;
 // The second body's model takes model slot actor + 4.
@@ -29,7 +38,7 @@ enum class ActorShape : std::uint8_t {
   kAuxiliary,
   // An actor with weapon and shield model slots (allocation kind 1).
   kEquipped,
-  // An enemy whose second body takes the weapon model slot (kind 2).
+  // An enemy with an independently owned second body (allocation kind 2).
   kSecondaryBody,
 };
 
@@ -72,6 +81,16 @@ struct ActorDefinition {
                                    const ActorDefinition&) = default;
 };
 
+// Component addresses are fixed at registration, independently of the
+// mutable actor's compatibility views.
+struct ActorInstanceComponents {
+  Battle::ActorStats* stats = nullptr;
+  ActorRecord* body = nullptr;
+  ActorRecord* second_body = nullptr;
+  Field::GimmickInstance* gimmick = nullptr;
+  std::array<ActorModelSlot*, 2> equipment{};
+};
+
 // The actor instances of the spawn slots: each slot's allocation, generation,
 // definition and removal state. An address is retained only in this table and
 // is never part of a handle.
@@ -81,7 +100,8 @@ class ActorInstanceTable {
   // Publish; kNone when the slot already has a live or pending instance.
   [[nodiscard]] SpawnedActor Begin(std::size_t slot, std::uintptr_t address,
                                    ActorDefinition definition,
-                                   bool owns_storage = false) {
+                                   bool owns_storage = false,
+                                   ActorInstanceComponents components = {}) {
     if (slot >= entries_.size() || address == 0) {
       return SpawnedActor::kNone;
     }
@@ -95,6 +115,7 @@ class ActorInstanceTable {
     entry.definition = definition;
     entry.removing = false;
     entry.owns_storage = owns_storage;
+    entry.components = components;
     return Encode(slot, entry.generation);
   }
 
@@ -119,6 +140,7 @@ class ActorInstanceTable {
       entry.definition.reset();
       entry.removing = false;
       entry.owns_storage = false;
+      entry.components = {};
     }
     entry.installed = true;
     return Encode(slot, entry.generation);
@@ -151,6 +173,12 @@ class ActorInstanceTable {
   [[nodiscard]] bool OwnsStorage(SpawnedActor actor) const {
     const Entry* entry = Find(actor);
     return entry != nullptr && entry->owns_storage;
+  }
+
+  [[nodiscard]] std::optional<ActorInstanceComponents> Components(
+      SpawnedActor actor) const {
+    const Entry* entry = Find(actor);
+    return entry != nullptr ? std::optional(entry->components) : std::nullopt;
   }
 
   // The unpublished allocation at `address`; kNone when no pending instance
@@ -239,6 +267,7 @@ class ActorInstanceTable {
     bool installed = false;
     bool removing = false;
     bool owns_storage = false;
+    ActorInstanceComponents components;
   };
 
   [[nodiscard]] static constexpr SpawnedActor Encode(std::size_t slot,
@@ -304,6 +333,7 @@ class ActorInstanceTable {
     entry.definition.reset();
     entry.removing = false;
     entry.owns_storage = false;
+    entry.components = {};
     Advance(entry);
   }
 

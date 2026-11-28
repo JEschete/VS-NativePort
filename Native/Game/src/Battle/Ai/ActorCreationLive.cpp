@@ -172,31 +172,15 @@ static_assert(offsetof(CreationView, opaque226) ==
               offsetof(AiState, walk_step));
 static_assert(offsetof(CreationView, opaque227) == offsetof(AiState, run_step));
 
-BattleActorHandle HandleOf(const VS::Battle::Actor* actor) {
-  return static_cast<BattleActorHandle>(
-      reinterpret_cast<std::uintptr_t>(actor));
-}
-
-// The core hands back only the handle CreateLiveActorAiState made from a
-// live actor.
 VS::Battle::Actor& ActorOf(BattleActorHandle actor) {
-  Require(actor != kNoBattleActor, "AI creation requires an actor");
-  return *reinterpret_cast<VS::Battle::Actor*>(
-      static_cast<std::uintptr_t>(actor));
+  auto* live = Actors::ResolveLiveActorInstance(actor);
+  Require(live != nullptr, "AI creation requires a current actor identity");
+  return *live;
 }
 
-// Only actors with an equipped or secondary body allocation carry the actor
-// record fields past the model instance; an auxiliary core ends after its
-// matrices. Native (#55): the allocation is the actor's spawn definition, not
-// its allocation kind word (0x40), and an actor without one has no record.
-const VS::Actors::ActorRecord* RecordOf(const VS::Battle::Actor& actor) {
-  const std::optional<VS::Actors::ActorShape> shape =
-      VS::Actors::LiveActorShape(&actor);
-  if (actor.model == nullptr || !shape.has_value() ||
-      *shape == VS::Actors::ActorShape::kAuxiliary) {
-    return nullptr;
-  }
-  return reinterpret_cast<const VS::Actors::ActorRecord*>(actor.model);
+Actors::ActorRecord* RecordOf(BattleActorHandle actor) {
+  const auto components = Actors::LiveActorComponents(actor);
+  return components ? components->body : nullptr;
 }
 
 std::uint32_t TileWord(const VS::Actors::ModelInstance& model) {
@@ -315,10 +299,11 @@ class LiveCreationHost final : public ActorCreationHost {
   [[nodiscard]] std::optional<RoomSpecialActors> SpecialActors()
       const override {
     if (VS::Battle::Ai::roomAiState == nullptr) return std::nullopt;
-    RoomSpecialActors slots{};
-    for (std::size_t slot = 0; slot < kRoomSpecialActorSlots; ++slot) {
-      slots.at(slot) =
-          HandleOf(VS::Battle::Ai::roomAiState->special_actors[slot]);
+    RoomSpecialActors slots = VS::Battle::Ai::roomAiState->special_actors;
+    for (auto& actor : slots) {
+      if (Actors::ResolveLiveActorInstance(actor) == nullptr) {
+        actor = kNoBattleActor;
+      }
     }
     return slots;
   }
@@ -326,7 +311,7 @@ class LiveCreationHost final : public ActorCreationHost {
     Require(
         VS::Battle::Ai::roomAiState != nullptr && slot < kRoomSpecialActorSlots,
         "AI special actors require the room's AI state");
-    VS::Battle::Ai::roomAiState->special_actors[slot] = &ActorOf(actor);
+    VS::Battle::Ai::roomAiState->special_actors[slot] = actor;
   }
   [[nodiscard]] std::span<const std::uint16_t> TileFlags() const override {
     if (VS::Battle::Ai::tileFlagMap == nullptr) return {};
@@ -334,20 +319,17 @@ class LiveCreationHost final : public ActorCreationHost {
   }
   [[nodiscard]] std::optional<std::uint32_t> ModelObjectWord(
       BattleActorHandle actor) const override {
-    const VS::Battle::Actor& live = ActorOf(actor);
-    if (live.model == nullptr ||
-        Actors::LiveActorShape(&live) != Actors::ActorShape::kAuxiliary) {
+    const auto components = Actors::LiveActorComponents(actor);
+    if (!components || components->gimmick == nullptr) {
       return std::nullopt;
     }
-    const auto& gimmick =
-        *reinterpret_cast<const Field::GimmickInstance*>(live.model);
     std::uint32_t word = 0;
-    std::memcpy(&word, &gimmick.object_info, sizeof word);
+    std::memcpy(&word, &components->gimmick->object_info, sizeof word);
     return word;
   }
   [[nodiscard]] std::optional<CreationModel> Model(
       BattleActorHandle actor) const override {
-    const VS::Actors::ActorRecord* record = RecordOf(ActorOf(actor));
+    const VS::Actors::ActorRecord* record = RecordOf(actor);
     if (record == nullptr) return std::nullopt;
     const VS::Actors::ModelInstance& model = record->instance;
     return CreationModel{.motion_locked = model.motion_locked != 0,
@@ -358,8 +340,9 @@ class LiveCreationHost final : public ActorCreationHost {
   }
   [[nodiscard]] std::optional<CreationStats> Stats(
       BattleActorHandle actor) const override {
-    const VS::Battle::ActorStats* stats = ActorOf(actor).stats;
-    if (stats == nullptr) return std::nullopt;
+    const auto components = Actors::LiveActorComponents(actor);
+    if (!components || components->stats == nullptr) return std::nullopt;
+    const auto* stats = components->stats;
     return CreationStats{
         .movement_class = static_cast<std::uint8_t>(stats->movement_class),
         .walk_speed = static_cast<std::uint8_t>(stats->walk_speed),
@@ -371,7 +354,11 @@ class LiveCreationHost final : public ActorCreationHost {
     Require(actor_id >= 0 && actor_id < kCleanupActorSlots,
             "AI creation requires an actor ID in the AI state table");
     VS::Battle::Actor& live = ActorOf(actor);
-    Require(live.model != nullptr, "AI creation requires the actor's model");
+    auto* record = RecordOf(actor);
+    Require(record != nullptr, "AI creation requires the actor's owned model");
+    const auto components = Actors::LiveActorComponents(actor);
+    Require(components.has_value(), "AI creation requires actor components");
+    if (!components) return false;
     auto* state = static_cast<AiState*>(
         Core::Memory::AllocateLiveFromLowEnd(sizeof(AiState)));
     if (state == nullptr) return false;
@@ -383,14 +370,15 @@ class LiveCreationHost final : public ActorCreationHost {
     // and its actor record (AiState.hpp).
     state->actor = reinterpret_cast<VS::Battle::Ai::EngagementData*>(&live);
     state->model =
-        reinterpret_cast<VS::Battle::Ai::ModelStatePrefix*>(live.model);
-    state->stats = live.stats;
-    state->native_pointer60 = &live.model->position;
-    state->native_pointer64 = &live.model->current_tile_x;
-    VS::Core::Debugf(
-        "ai", "created state=%p id=%u model=%p stats=%p",
-        static_cast<void*>(state), static_cast<unsigned int>(state->actor_id),
-        static_cast<void*>(live.model), static_cast<void*>(live.stats));
+        reinterpret_cast<VS::Battle::Ai::ModelStatePrefix*>(&record->instance);
+    state->stats = components->stats;
+    state->native_pointer60 = &record->instance.position;
+    state->native_pointer64 = &record->instance.current_tile_x;
+    VS::Core::Debugf("ai", "created state=%p id=%u model=%p stats=%p",
+                     static_cast<void*>(state),
+                     static_cast<unsigned int>(state->actor_id),
+                     static_cast<void*>(&record->instance),
+                     static_cast<void*>(components->stats));
     return true;
   }
   [[nodiscard]] std::optional<std::int16_t> AnchorHeightY(
@@ -461,7 +449,7 @@ int CreateLiveActorAiState(VS::Battle::Actor* actor, int options) {
       static_cast<void*>(actor), actor->id, static_cast<unsigned int>(options),
       static_cast<void*>(actor->model), static_cast<void*>(actor->stats));
   const CreationActor creation{
-      .handle = HandleOf(actor),
+      .handle = Actors::LiveActorIdentity(actor),
       .id = actor->id,
       .kind = actor->kind,
       .combat_pose = actor->combat_pose,

@@ -684,6 +684,21 @@ struct LiveCreationFixture {
               0, &actor, VS::Actors::ActorShape::kEquipped) !=
           VS::Actors::SpawnedActor::kNone);
   }
+
+  void PrepareAuxiliary(VS::Field::GimmickInstance& gimmick) {
+    gimmick.object_info.object_id = 4;
+    gimmick.object_info.subtype = 0xFF;
+    gimmick.object_info.material = 0xFF;
+    gimmick.object_info.carrier = 0xFF;
+    actor.id = 6;
+    actor.kind = 0x10;
+    // The spawn definition, not this mutable word, owns the gimmick.
+    actor.allocation_kind = 1;
+    actor.model = reinterpret_cast<VS::Actors::ModelInstance*>(&gimmick);
+    REQUIRE(VS::Actors::InstallLiveActorInstance(
+                6, &actor, VS::Actors::ActorShape::kAuxiliary) !=
+            VS::Actors::SpawnedActor::kNone);
+  }
 };
 
 // Ashley's state points at her actor, model, stats and position in the heap.
@@ -757,30 +772,28 @@ TEST_CASE("Live AI creation builds Ashley's state from her actor record",
 }
 
 TEST_CASE("Live AI creation registers an auxiliary special actor",
-          "[ai][actor-creation][creation-live]") {
+          "[ai][actor-creation][creation-live][actor-resource-identity]") {
+  const bool stale_holder = GENERATE(false, true);
   LiveCreationFixture fixture;
   VS::Actors::ActorCore core{};
-  core.gimmick.object_info.object_id = 4;
-  core.gimmick.object_info.subtype = 0xFF;
-  core.gimmick.object_info.material = 0xFF;
-  core.gimmick.object_info.carrier = 0xFF;
+  fixture.PrepareAuxiliary(core.gimmick);
   VS::Battle::Actor holder{};
-  fixture.room.special_actors[0] = &holder;
-  fixture.actor.id = 6;
-  fixture.actor.kind = 0x10;
-  // #55: the allocation kind word says a body allocation (1), but the spawn
-  // definition, which creation reads, makes the actor an auxiliary core.
-  fixture.actor.allocation_kind = 1;
-  fixture.actor.model =
-      reinterpret_cast<VS::Actors::ModelInstance*>(&core.gimmick);
-  CHECK(VS::Actors::InstallLiveActorInstance(
-            6, &fixture.actor, VS::Actors::ActorShape::kAuxiliary) !=
-        VS::Actors::SpawnedActor::kNone);
-
+  holder.id = 5;
+  const auto holder_id = VS::Actors::InstallLiveActorInstance(
+      5, &holder, VS::Actors::ActorShape::kAuxiliary);
+  REQUIRE(holder_id != VS::Actors::SpawnedActor::kNone);
+  fixture.room.special_actors[0] = holder_id;
+  if (stale_holder) {
+    VS::Actors::InvalidateLiveActorHandle(5, &holder);
+    VS::Battle::actors[5] = nullptr;
+  }
   CHECK(VS::Battle::Ai::CreateLiveActorAiState(&fixture.actor, -1) == 0);
-  CHECK(fixture.room.special_actors[0] == &holder);
-  CHECK(fixture.room.special_actors[1] == &fixture.actor);
-  CHECK(fixture.room.special_actors[2] == nullptr);
+  const std::size_t inserted = stale_holder ? 0 : 1;
+  CHECK(fixture.room.special_actors[inserted] ==
+        VS::Actors::LiveActorIdentity(&fixture.actor));
+  CHECK(fixture.room.special_actors[inserted + 1] ==
+        VS::Actors::SpawnedActor::kNone);
+  if (!stale_holder) CHECK(fixture.room.special_actors[0] == holder_id);
   CHECK(VS::Battle::Ai::attributeActorMask == (1 << 6));
   CHECK(VS::Battle::Ai::actorAiStates[6] == nullptr);
 }

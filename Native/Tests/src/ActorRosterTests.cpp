@@ -12,8 +12,10 @@
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "Actors/ActorInstances.hpp"
+#include "Actors/ActorModelSlot.hpp"
 #include "Actors/ActorRecord.hpp"
 #include "Actors/ActorRoster.hpp"
 #include "Actors/ActorRosterLive.hpp"
@@ -21,6 +23,7 @@
 #include "Actors/RoomActorCache.hpp"
 #include "Actors/RoomEnemyMemory.hpp"
 #include "Actors/RoomEnemyMemoryLive.hpp"
+#include "Actors/ShpModel.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/Spawning.hpp"
 #include "Battle/AbilityState.hpp"
@@ -28,6 +31,8 @@
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
+#include "Content/ActorAssets.hpp"
+#include "Content/ActorAssetsLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Legacy/Psx.hpp"
 #include "State/RoomCache.hpp"
@@ -496,6 +501,7 @@ namespace {
 // restores them afterwards.
 struct LiveRosterFixture {
   decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
+  VS::Battle::Actor* saved_selected = VS::Battle::characterState;
   decltype(VS::Actors::actorRecords) saved_records = VS::Actors::actorRecords;
   decltype(VS::Battle::Ai::actorAiStates) saved_ai =
       VS::Battle::Ai::actorAiStates;
@@ -508,6 +514,7 @@ struct LiveRosterFixture {
 
   LiveRosterFixture() {
     actors::ResetLiveActorHandles();
+    VS::Battle::characterState = nullptr;
     std::fill_n(VS::Battle::actors.begin(), saved_actors.size(), nullptr);
     std::fill_n(VS::Actors::actorRecords.begin(), saved_records.size(),
                 nullptr);
@@ -525,6 +532,7 @@ struct LiveRosterFixture {
   LiveRosterFixture& operator=(LiveRosterFixture&&) = delete;
   ~LiveRosterFixture() {
     actors::ResetLiveActorHandles();
+    VS::Battle::characterState = saved_selected;
     std::ranges::copy(saved_actors, VS::Battle::actors.begin());
     std::ranges::copy(saved_records, VS::Actors::actorRecords.begin());
     std::ranges::copy(saved_ai, VS::Battle::Ai::actorAiStates.begin());
@@ -552,6 +560,82 @@ TEST_CASE(
   CHECK(VS::Battle::actors[2] == nullptr);
   CHECK(actors::ResolveLiveActorInstance(identity) == nullptr);
   actors::ResetLiveActorHandles();
+}
+
+TEST_CASE("Removing the selected actor invalidates its retained selection",
+          "[actors-room-memory][actor-resource-identity]") {
+  LiveRosterFixture fixture;
+  VS::Battle::Actor actor{};
+  actor.id = 2;
+  actor.room_spawn_index = actors::kNoRoomSpawn;
+  REQUIRE(actors::InstallLiveActorInstance(2, &actor,
+                                           actors::ActorShape::kEquipped) !=
+          actors::SpawnedActor::kNone);
+  VS::Battle::characterState = &actor;
+  CHECK(actors::RemoveLiveActorAtSlot(2, 0) == 1);
+  CHECK(VS::Battle::characterState == nullptr);
+}
+
+template <typename T>
+T* AllocateRosterResource() {
+  auto* storage =
+      static_cast<T*>(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(T)));
+  REQUIRE(storage != nullptr);
+  if (storage == nullptr) throw std::logic_error("Resource allocation failed");
+  return std::construct_at(storage);
+}
+
+TEST_CASE("Actor removal preserves a foreign body in its model slot",
+          "[actors-room-memory][actor-resource-identity]") {
+  const bool previously_bound = GENERATE(false, true);
+  std::vector<std::byte> arena(8192);
+  VS::Core::Memory::ScopedLiveGameHeap heap{arena};
+  LiveRosterFixture fixture;
+  VS::Battle::Actor actor{};
+  actors::ActorRecord owned{}, foreign{};
+  owned.model_id = foreign.model_id = 8;
+  foreign.sequence_model_id = 43;
+  actor.id = 2;
+  actor.room_spawn_index = actors::kNoRoomSpawn;
+  actor.model = &owned.instance;
+  REQUIRE(actors::InstallLiveActorInstance(2, &actor,
+                                           actors::ActorShape::kEquipped) !=
+          actors::SpawnedActor::kNone);
+  if (previously_bound) {
+    owned.instance.model = AllocateRosterResource<actors::ShpModel>();
+    actors::actorRecords[2] = &owned;
+    REQUIRE(VS::Content::BindLiveActorSequenceResources(2, {}));
+  }
+  actors::actorRecords[2] = &foreign;
+  CHECK(actors::RemoveLiveActorAtSlot(2, 0) == 1);
+  CHECK(actors::actorRecords[2] == &foreign);
+  CHECK(foreign.sequence_model_id == 43);
+  CHECK(VS::Core::Memory::GameHeap().Empty());
+}
+
+TEST_CASE("Actor removal clears owned partial equipment without a bound body",
+          "[actors-room-memory][actor-resource-identity]") {
+  std::vector<std::byte> arena(8192);
+  VS::Core::Memory::ScopedLiveGameHeap heap{arena};
+  LiveRosterFixture fixture;
+  VS::Battle::Actor actor{};
+  actors::ActorModelSlot equipment{};
+  equipment.weapon.texture_slot = VS::Content::kNoAssetTextureSlot;
+  equipment.weapon.section_offsets =
+      AllocateRosterResource<actors::WeaponModelData>();
+  actor.id = 2;
+  actor.room_spawn_index = actors::kNoRoomSpawn;
+  actor.equipment_models[0] = &equipment;
+  REQUIRE(actors::InstallLiveActorInstance(2, &actor,
+                                           actors::ActorShape::kEquipped) !=
+          actors::SpawnedActor::kNone);
+  actors::weaponModels[4] = &equipment.weapon;
+  CHECK(actors::RemoveLiveActorAtSlot(2, 0) == 1);
+  CHECK(actors::weaponModels[4] == nullptr);
+  CHECK(VS::Core::Memory::GameHeap().Empty());
+  const auto refused = VS::Core::Memory::RefusedLiveHeapRequestCount();
+  CHECK(actors::RemoveLiveActorAtSlot(2, 0) == 1);
+  CHECK(VS::Core::Memory::RefusedLiveHeapRequestCount() == refused);
 }
 
 constexpr std::size_t kRoomBytes = sizeof VS::State::recentRoomEnemyStates;

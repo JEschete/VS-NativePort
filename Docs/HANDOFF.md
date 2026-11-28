@@ -2,14 +2,14 @@
 
 ## State
 
-The published storage milestone is `808d9965a`; its current-revision evidence is on [#55](https://github.com/JEschete/VS-NativePort/issues/55#issuecomment-7232826139). Ashley's non-blocking script request now reports submission and eventual load failures. Actor allocations use complete typed components, immutable creation definitions and generation-checked identities.
+The last CI-verified published lifecycle revision is `ad5d4b96d`, including the identity implementation in `1cbddbb02`; [evidence is on #55](https://github.com/JEschete/VS-NativePort/issues/55#issuecomment-7233280568). Actor allocations have complete typed components, immutable creation definitions and generation identities. Roster links and retained decision/navigation/targeting cursors retain generations, and only native-owned allocation storage is freed.
 
 ## Work in progress
 
-Continuing #55 with the owner's authorization through closure. The current identity change replaces pointer-valued roster links and retained decision/navigation/targeting cursors, refuses stale cleanup callers, and distinguishes native-owned allocations from caller-owned storage. The [reproduced failures](https://github.com/JEschete/VS-NativePort/issues/55#issuecomment-7232822939) and subsequent verification belong on the issue.
+Continuing #55 with the owner's authorization through closure. The current component-ownership change fixes the [reproduced resource and selection failures](https://github.com/JEschete/VS-NativePort/issues/55#issuecomment-7233193672): component destinations are retained independently of mutable actor views; expected-record teardown preserves foreign bindings and handles partial equipment; selected actors are cleared on removal; room special targets retain generations.
 
 ## Next and open limits
 
-Finish expected-owner resource teardown and the remaining retained AI references, then verify the complete create/use/remove/reset slice with fresh lifecycle and applicable controller evidence. Runtime model/animation/collision adapters are not retired merely by changing allocation storage. Do not claim closure from the focused checks alone.
+Finish explicit actor registration and the remaining AI/persistence ownership checks, including failed publication when a slot changes. Then verify the complete create/use/remove/reset slice with fresh lifecycle and applicable controller evidence. Runtime model/animation/collision adapters and all EC-04/05 compatibility are not retired merely by changing instance ownership.
 
-Keep #55 open until all acceptance and exact-revision CI gates pass; do not advance to #58. #59 remains gated on #55. Keep `resources\rood-reverse` read-only and disc-derived captures, data, dumps and BIOS files out of commits or issue attachments.
+Keep #55 open until every acceptance criterion and exact-revision CI gate passes; do not advance to #58. #59 remains gated on #55. Keep `resources\rood-reverse` read-only and disc-derived captures, data, dumps and BIOS files out of commits or issue attachments.

@@ -138,6 +138,34 @@ ActorInstanceTable& LiveActorHandles() {
   return reinterpret_cast<std::uintptr_t>(actor);
 }
 
+ActorInstanceComponents ComponentsOf(const Battle::Actor& actor,
+                                     ActorShape shape) {
+  ActorInstanceComponents components{.stats = actor.stats};
+  if (shape == ActorShape::kAuxiliary) {
+    components.gimmick = reinterpret_cast<Field::GimmickInstance*>(actor.model);
+  } else {
+    components.body = reinterpret_cast<ActorRecord*>(actor.model);
+    if (shape == ActorShape::kSecondaryBody) {
+      components.second_body = actor.second_body;
+    } else {
+      components.equipment = actor.equipment_models;
+    }
+  }
+  return components;
+}
+
+void ReleaseOwnedRecord(SpawnedActor actor, Content::ActorRecordTable table,
+                        int record) {
+  const auto part =
+      OwnedActorRecordPart(LiveActorHandles(), actor, table, record);
+  if (!part) {
+    WarnActorRefused("ReleaseOwnedRecord",
+                     "record does not belong to the actor identity");
+    return;
+  }
+  ReleaseLiveActorRecord(actor, *part);
+}
+
 [[nodiscard]] Content::ActorAssetOwner AssetOwnerOf(SpawnedActor actor) {
   return {.value = static_cast<std::uint64_t>(actor)};
 }
@@ -239,7 +267,8 @@ template <typename T>
   static_cast<void>(
       LiveActorHandles().Observe(slot, ActorAddress(SlotActor(slot))));
   const SpawnedActor handle =
-      LiveActorHandles().Begin(slot, ActorAddress(actor), definition, true);
+      LiveActorHandles().Begin(slot, ActorAddress(actor), definition, true,
+                               ComponentsOf(*actor, definition.shape));
   if (handle == SpawnedActor::kNone) {
     VS::Core::Memory::FreeLiveFromLowEnd(actor);
     WarnActorRefused("AllocateLiveActor",
@@ -736,11 +765,11 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     static_cast<void>(Content::UpdateLiveActorAssetQueue());
   }
   void PumpLoading() override { State::UpdateLivePlayTimeAndLoading(); }
-  void ReleaseActorModel(int slot) override {
-    static_cast<void>(Content::ReleaseLiveActorModel(slot));
+  void ReleaseActorModel(SpawnedActor owner, int slot) override {
+    ReleaseOwnedRecord(owner, Content::ActorRecordTable::kActor, slot);
   }
-  void ReleaseWeaponModel(int slot) override {
-    static_cast<void>(Content::ReleaseLiveWeaponModel(slot));
+  void ReleaseWeaponModel(SpawnedActor owner, int slot) override {
+    ReleaseOwnedRecord(owner, Content::ActorRecordTable::kWeapon, slot);
   }
 
   // --- The zone
@@ -1198,6 +1227,7 @@ void FinalizeLiveActorRemoval(SpawnedActor actor) {
     return;
   }
   if (SlotActor(*slot) == live) VS::Battle::actors[*slot] = nullptr;
+  if (VS::Battle::characterState == live) VS::Battle::characterState = nullptr;
   live->next = SpawnedActor::kNone;
   if (owns_storage) Core::Memory::FreeLiveFromLowEnd(live);
 }
@@ -1206,12 +1236,54 @@ std::optional<ActorDefinition> LiveActorDefinition(SpawnedActor actor) {
   return LiveActorHandles().Definition(actor);
 }
 
+std::optional<ActorInstanceComponents> LiveActorComponents(SpawnedActor actor) {
+  return LiveActorHandles().Components(actor);
+}
+
+void ReleaseLiveActorRecord(SpawnedActor actor, ActorRecordPart part) {
+  const auto slot = LiveActorHandles().Slot(actor);
+  const auto components = LiveActorHandles().Components(actor);
+  if (!slot || !components) {
+    WarnActorRefused("ReleaseLiveActorRecord", "actor identity is stale");
+    return;
+  }
+  const auto record = static_cast<int>(ActorPartRecordSlot(*slot, part));
+  switch (part) {
+    case ActorRecordPart::kBody:
+      if (components->body != nullptr) {
+        Content::DiscardLiveActorModel(record, components->body);
+      }
+      return;
+    case ActorRecordPart::kSecondBody:
+      if (components->second_body != nullptr &&
+          record < Content::kActorRecordSlots) {
+        Content::DiscardLiveActorModel(record, components->second_body);
+      }
+      return;
+    case ActorRecordPart::kGimmick:
+      if (components->gimmick != nullptr) {
+        Field::DiscardLiveGimmickInstance(record, components->gimmick);
+      }
+      return;
+    case ActorRecordPart::kWeapon:
+    case ActorRecordPart::kShield: {
+      auto* equipment =
+          components->equipment[part == ActorRecordPart::kWeapon ? 0 : 1];
+      if (equipment != nullptr && record < Content::kWeaponModelSlots) {
+        Content::DiscardLiveWeaponModel(record, &equipment->weapon);
+      }
+      return;
+    }
+  }
+}
+
 void DiscardLiveActorInstance(SpawnedActor actor) {
   auto* live =
       ActorPointer<VS::Battle::Actor>(actor, "DiscardUninstalledActor");
   if (live == nullptr) return;
   const auto slot = LiveActorHandles().Slot(actor);
   const auto definition = LiveActorHandles().Definition(actor);
+  const auto components = LiveActorHandles().Components(actor);
   if (Content::LiveActorAssetsQueued(AssetOwnerOf(actor))) {
     WarnActorRefused("DiscardUninstalledActor",
                      "actor still owns queued loads");
@@ -1222,10 +1294,11 @@ void DiscardLiveActorInstance(SpawnedActor actor) {
                      "actor handle is already installed or stale");
     return;
   }
-  if (slot && definition && definition->shape == ActorShape::kAuxiliary) {
-    Field::DiscardLiveGimmickInstance(
-        static_cast<int>(*slot),
-        reinterpret_cast<Field::GimmickInstance*>(live->model));
+  if (slot && definition && components &&
+      definition->shape == ActorShape::kAuxiliary &&
+      components->gimmick != nullptr) {
+    Field::DiscardLiveGimmickInstance(static_cast<int>(*slot),
+                                      components->gimmick);
   }
   Core::Memory::FreeLiveFromLowEnd(live);
 }
@@ -1443,21 +1516,21 @@ AssetAddress LiveActorRecordMemory(Content::ActorAssetOwner owner,
   const ActorInstanceTable& handles = LiveActorHandles();
   const std::optional<ActorRecordPart> part =
       OwnedActorRecordPart(handles, actor, table, record);
-  const auto* live =
-      reinterpret_cast<const VS::Battle::Actor*>(handles.Resolve(actor));
-  if (!part || live == nullptr) {
+  const auto components = handles.Components(actor);
+  if (!part || !components) {
     return AssetAddress::kNone;
   }
   switch (*part) {
     case ActorRecordPart::kBody:
+      return Address(components->body);
     case ActorRecordPart::kGimmick:
-      return Address(live->model);
+      return Address(components->gimmick);
     case ActorRecordPart::kSecondBody:
-      return Address(live->second_body);
+      return Address(components->second_body);
     case ActorRecordPart::kWeapon:
-      return Address(live->equipment_models[0]);
+      return Address(components->equipment[0]);
     case ActorRecordPart::kShield:
-      return Address(live->equipment_models[1]);
+      return Address(components->equipment[1]);
   }
   return AssetAddress::kNone;
 }
@@ -1490,7 +1563,8 @@ SpawnedActor InstallLiveActorInstance(std::size_t slot,
   ActorInstanceTable& handles = LiveActorHandles();
   static_cast<void>(handles.Observe(slot, ActorAddress(SlotActor(slot))));
   const SpawnedActor handle =
-      handles.Begin(slot, ActorAddress(actor), ActorDefinition{.shape = shape});
+      handles.Begin(slot, ActorAddress(actor), ActorDefinition{.shape = shape},
+                    false, ComponentsOf(*actor, shape));
   if (handle == SpawnedActor::kNone || !handles.Publish(slot, handle)) {
     return SpawnedActor::kNone;
   }

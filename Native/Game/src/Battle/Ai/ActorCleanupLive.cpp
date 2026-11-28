@@ -13,6 +13,7 @@
 #include <type_traits>
 
 #include "Actors/ActorRecord.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorState.hpp"
 #include "Battle/Ai/AiViews.hpp"
@@ -84,18 +85,11 @@ VS::Battle::Ai::ActorAiState* StateAt(int actor_id) {
   return VS::Battle::Ai::actorAiStates[static_cast<std::size_t>(actor_id)];
 }
 
-BattleActorHandle HandleOf(const VS::Battle::Actor* actor) {
-  return static_cast<BattleActorHandle>(
-      reinterpret_cast<std::uintptr_t>(actor));
-}
-
-// Only FreeLiveActorAiState hands the core a non-empty handle to store
-// through, and it made that handle from a live actor.
 VS::Battle::Actor* ActorOf(BattleActorHandle actor) {
-  Require(actor != kNoBattleActor,
-          "AI teardown command flags require an actor");
-  return reinterpret_cast<VS::Battle::Actor*>(
-      static_cast<std::uintptr_t>(actor));
+  auto* live = Actors::ResolveLiveActorInstance(actor);
+  Require(live != nullptr,
+          "AI teardown command flags require a current actor identity");
+  return live;
 }
 
 ReservationState LoadReservations(const VS::Battle::Ai::ActorAiState& state) {
@@ -111,10 +105,8 @@ CleanupRoom LoadRoom(const VS::Battle::Ai::RoomAiState& room) {
                      .min_z = room.min_tile_z,
                      .flags = room.reserved_e_prefix[0],
                      .engaged_mask = EngagedMask(room),
-                     .engaged_count = room.engaged_count};
-  for (std::size_t slot = 0; slot < kRoomSpecialActorSlots; ++slot) {
-    loaded.special_actors.at(slot) = HandleOf(room.special_actors[slot]);
-  }
+                     .engaged_count = room.engaged_count,
+                     .special_actors = room.special_actors};
   return loaded;
 }
 
@@ -126,7 +118,7 @@ void StoreRoomFields(const CleanupRoom& room,
   // Cleanup only ever empties a special actor slot.
   for (std::size_t slot = 0; slot < kRoomSpecialActorSlots; ++slot) {
     if (room.special_actors.at(slot) == kNoBattleActor) {
-      target.special_actors[slot] = nullptr;
+      target.special_actors[slot] = kNoBattleActor;
     }
   }
 }
@@ -360,7 +352,7 @@ void ReleaseLiveActorAiReservations(VS::Battle::Ai::ActorAiState* state) {
 
 void FreeLiveActorAiState(VS::Battle::Actor* actor) {
   Require(actor != nullptr, "AI teardown requires an actor");
-  TeardownActor teardown{.handle = HandleOf(actor),
+  TeardownActor teardown{.handle = Actors::LiveActorIdentity(actor),
                          .id = actor->id,
                          .command_flags = actor->command_flags,
                          .sub_type = actor->sub_type,

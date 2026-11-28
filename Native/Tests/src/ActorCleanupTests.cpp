@@ -259,17 +259,19 @@ TEST_CASE(
   auto* peer = fixture.AllocateState(2);
   peer->linked_actor = 2;
   fixture.room.special_actors[0] = fixture.room.special_actors[3] =
-      &fixture.actors[1];
-  fixture.room.special_actors[1] = &fixture.actors[2];
+      VS::Actors::LiveActorIdentity(&fixture.actors[1]);
+  fixture.room.special_actors[1] =
+      VS::Actors::LiveActorIdentity(&fixture.actors[2]);
   REQUIRE(VS::Battle::Ai::TryEngageLiveActor(removed));
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
   CHECK(VS::Battle::Ai::actorAiStates[2] == nullptr);
   CHECK(VS::Battle::Ai::actorAiStates[5] == peer);
   CHECK(peer->linked_actor == 16);
   CHECK(VS::Battle::Ai::attributeActorMask == (1 << 5));
-  CHECK(fixture.room.special_actors[0] == nullptr);
-  CHECK(fixture.room.special_actors[3] == nullptr);
-  CHECK(fixture.room.special_actors[1] == &fixture.actors[2]);
+  CHECK(fixture.room.special_actors[0] == VS::Actors::SpawnedActor::kNone);
+  CHECK(fixture.room.special_actors[3] == VS::Actors::SpawnedActor::kNone);
+  CHECK(fixture.room.special_actors[1] ==
+        VS::Actors::LiveActorIdentity(&fixture.actors[2]));
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[2]);
   CHECK(VS::Core::Memory::GameHeap().Empty());
 }

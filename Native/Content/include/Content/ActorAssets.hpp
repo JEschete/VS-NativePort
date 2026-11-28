@@ -676,6 +676,8 @@ int ParseWeaponModel(ActorAssetHost& host, ActorAssetLoadState& state,
                      ActorAssetRequest& request);
 bool LoadWeaponMaterialPalette(ActorAssetHost& host, int slot, int material);
 int ReleaseWeaponModel(ActorAssetHost& host, int slot);
+// Also releases a partially initialized record with no bones.
+void DiscardWeaponRecord(ActorAssetHost& host, int slot);
 
 // SHP files (30DB0.c:930-1432).
 int FindSharedActorModel(const ActorAssetHost& host,

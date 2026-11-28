@@ -7,6 +7,8 @@
 #include <optional>
 #include <span>
 
+#include "Actors/ActorInstances.hpp"
+
 // Battle AI actor cleanup: releasing the destination tiles and room flags an
 // AI actor reserves, detaching it from the other actors, and tearing down its
 // AI state when it leaves the battle. The battle runtime owns the AI state
@@ -24,8 +26,7 @@ inline constexpr int kNoLinkedActor = kCleanupActorSlots;
 // The cooldown a newly allocated orbiting boss state starts with.
 inline constexpr std::int16_t kOrbitingBossInitialCooldown = 900;
 
-// A battle actor, compared but never dereferenced.
-enum class BattleActorHandle : std::uintptr_t {};
+using BattleActorHandle = Actors::SpawnedActor;
 inline constexpr BattleActorHandle kNoBattleActor{};
 
 // One actor's reservation fields (offsets in the AI state record).

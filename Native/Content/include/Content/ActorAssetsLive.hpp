@@ -12,8 +12,10 @@
 #include "Content/CdDrive.hpp"
 
 namespace VS::Actors {
+struct ActorRecord;
+struct WeaponModel;
 struct WeaponModelData;
-}
+}  // namespace VS::Actors
 
 // Live binding for the battle asset queue and loaders (ActorAssets.hpp) over
 // the legacy request queue (legacyActorAssetRequests), disc file tables
@@ -111,6 +113,10 @@ bool CopyLiveWeaponSequence(SequenceBuffer* destination,
 int ReleaseLiveActorSequence(int target, int kind);
 // Owners releasing their weapon records separately pass false.
 int ReleaseLiveActorModel(int slot, bool release_attached_weapons = true);
+// Releases only the expected record's resources, including partial loads.
+// A different record in the global slot or resource binding is preserved.
+void DiscardLiveActorModel(int slot, Actors::ActorRecord* expected);
+void DiscardLiveWeaponModel(int slot, Actors::WeaponModel* expected);
 int ReleaseLiveSequenceEffectTexture(int bank);
 
 // Inputs the loaders refused since start-up.

@@ -913,30 +913,6 @@ int FinishWeaponPrimitives(ActorAssetHost& host, ActorAssetLoadState& state,
   return FinishWeaponModel(host, state, request);
 }
 
-// Native (#48, #491): discards a weapon record a parse bound but did not
-// finish, with what it allocated: no release reaches a record whose bone
-// count is 0, or frees geometry before FinishWeaponModel sets the record's
-// actor.
-void DiscardWeaponRecord(ActorAssetHost& host, int slot) {
-  if (!host.WeaponSummary(slot).present) return;
-  const WeaponAssetRecord model = host.LoadWeapon(slot);
-  const bool fixed = slot < kFixedGeometrySlots &&
-                     model.geometry == host.WeaponGeometryBuffer(slot);
-  if (model.geometry != AssetAddress::kNone && !fixed) {
-    host.ForgetModelGeometry(model.geometry);
-    host.FreeLow(model.geometry);
-  }
-  if (model.texture_slot != kNoAssetTextureSlot) {
-    AddTextureReference(host, AssetTextureTable::kWeapon, model.texture_slot,
-                        -1);
-    if (model.wide_texture) {
-      AddTextureReference(host, AssetTextureTable::kWeapon,
-                          model.texture_slot + 1, -1);
-    }
-  }
-  host.ClearWeaponSlot(slot);
-}
-
 // Native (#491): the original's parse could not fail. A refused parse
 // discards the record it bound.
 int DiscardRefusedWeapon(ActorAssetHost& host, int slot, int result) {
@@ -1076,6 +1052,26 @@ int ReleaseWeaponModel(ActorAssetHost& host, int slot) {
   }
   host.ClearWeaponSlot(slot);
   return 0;
+}
+
+void DiscardWeaponRecord(ActorAssetHost& host, int slot) {
+  if (!ValidWeaponSlot(host, slot) || !host.WeaponSummary(slot).present) return;
+  const WeaponAssetRecord model = host.LoadWeapon(slot);
+  const bool fixed = slot < kFixedGeometrySlots &&
+                     model.geometry == host.WeaponGeometryBuffer(slot);
+  if (model.geometry != AssetAddress::kNone && !fixed) {
+    host.ForgetModelGeometry(model.geometry);
+    host.FreeLow(model.geometry);
+  }
+  if (model.texture_slot != kNoAssetTextureSlot) {
+    AddTextureReference(host, AssetTextureTable::kWeapon, model.texture_slot,
+                        -1);
+    if (model.wide_texture) {
+      AddTextureReference(host, AssetTextureTable::kWeapon,
+                          model.texture_slot + 1, -1);
+    }
+  }
+  host.ClearWeaponSlot(slot);
 }
 
 namespace {
@@ -1880,7 +1876,7 @@ int ReleaseActorModel(ActorAssetHost& host, int slot,
       other_sound_user |= other != slot && summary.present &&
                           summary.model_id == actor.model_id;
     }
-    if (!other_sound_user) {
+    if (!other_sound_user && actor.model != AssetAddress::kNone) {
       const std::span<const std::byte> header =
           host.ReadBytes(actor.model, kSoundSectionAt + sizeof(std::uint32_t));
       if (header.size() < kSoundSectionAt + sizeof(std::uint32_t)) {
@@ -1891,7 +1887,7 @@ int ReleaseActorModel(ActorAssetHost& host, int slot,
                              header, kSoundSectionAt, sizeof(std::uint32_t)))));
       }
     }
-    host.FreeLow(actor.model);
+    if (actor.model != AssetAddress::kNone) host.FreeLow(actor.model);
     host.ReleaseActorSequenceResource(slot, ActorSequenceKind::kEmbedded);
     host.ReleaseActorSequenceResource(slot, ActorSequenceKind::kCommon);
     static_cast<void>(ReleaseActorSequence(host, slot, 0));

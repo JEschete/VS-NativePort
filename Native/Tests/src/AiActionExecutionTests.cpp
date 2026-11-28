@@ -24,6 +24,7 @@
 #include "Battle/Ai/Perception.hpp"
 #include "Battle/Damage.hpp"
 #include "Content/ModuleData.hpp"
+#include "Field/Gimmicks.hpp"
 
 namespace {
 namespace ai = VS::Battle::Ai;
@@ -214,7 +215,41 @@ struct LiveDecisionFixture {
     VS::Battle::Ai::frameTickBudget = old_budget;
   }
 };
+
+struct LiveSpecialTargetFixture : LiveDecisionFixture {
+  ai::RoomAiState* saved_room = ai::roomAiState;
+  VS::Field::GimmickInstance* saved_gimmick = VS::Field::gimmickInstances[1];
+  ai::RoomAiState room{};
+  VS::Field::GimmickInstance gimmick{};
+
+  LiveSpecialTargetFixture() {
+    ai::roomAiState = &room;
+    VS::Field::gimmickInstances[1] = &gimmick;
+    room.special_actors[0] = VS::Actors::LiveActorIdentity(&actor);
+    state.current_choice.action = 42;
+    state.current_choice.target_id = 12;
+  }
+  ~LiveSpecialTargetFixture() {
+    ai::roomAiState = saved_room;
+    VS::Field::gimmickInstances[1] = saved_gimmick;
+  }
+};
 }  // namespace
+
+TEST_CASE("AI fallback targets do not follow same-address actor replacement",
+          "[action-execution][actor-resource-identity]") {
+  LiveSpecialTargetFixture fixture;
+  REQUIRE(ai::TryExecuteCheckedLivePlannedActions(&fixture.state) == 0);
+  CHECK(fixture.state.current_choice.target_id == 1);
+  VS::Actors::InvalidateLiveActorHandle(1, &fixture.actor);
+  VS::Battle::actors[1] = nullptr;
+  REQUIRE(VS::Actors::InstallLiveActorInstance(
+              1, &fixture.actor, VS::Actors::ActorShape::kEquipped) !=
+          VS::Actors::SpawnedActor::kNone);
+  fixture.state.current_choice.target_id = 12;
+  CHECK(ai::TryExecuteCheckedLivePlannedActions(&fixture.state) == 0);
+  CHECK(fixture.state.current_choice.target_id == 12);
+}
 
 TEST_CASE("Action execution gates run in original order",
           "[action-execution][F01657]") {

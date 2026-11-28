@@ -844,8 +844,8 @@ class ActorSpawnHost {
   virtual void UpdateAssetQueue() = 0;
   // vs_main_updatePlayTimeAndLoading(0): the frame-paced loading pump.
   virtual void PumpLoading() = 0;
-  virtual void ReleaseActorModel(int slot) = 0;
-  virtual void ReleaseWeaponModel(int slot) = 0;
+  virtual void ReleaseActorModel(SpawnedActor owner, int slot) = 0;
+  virtual void ReleaseWeaponModel(SpawnedActor owner, int slot) = 0;
 
   // --- The zone
   [[nodiscard]] virtual bool UsesSecondaryBodyModel(
