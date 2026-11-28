@@ -1245,9 +1245,7 @@ void DiscardPendingScriptedActor(ActorSpawnHost& host,
   if (!host.CancelOwnedAssets(spawn.actor)) {
     DrainAssetQueue(host);
   }
-  if (host.SlotIsEmpty(spawn.slot)) {
-    host.ReleaseActorModel(spawn.actor, static_cast<int>(spawn.slot));
-  }
+  host.ReleaseActorModel(spawn.actor, static_cast<int>(spawn.slot));
   host.DiscardUninstalled(spawn.actor);
 }
 }  // namespace

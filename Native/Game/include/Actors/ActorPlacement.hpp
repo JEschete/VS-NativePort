@@ -59,6 +59,8 @@ void SeparateActorFlightPlacement(ActorStateHost& host, int id,
 // facing in sixteenths in the spare byte.
 [[nodiscard]] std::optional<PackedTile> ActorSavedPlacement(
     ActorStateHost& host, int id, int movement_class);
+[[nodiscard]] PackedTile ActorSavedPlacement(const ActorStateRecord& record,
+                                             int movement_class);
 // decomp: BATTLE.PRG func_800A3760 (src/BATTLE/BATTLE.PRG/3A1A0.c:460)
 // How far the nearest-actor search reaches: `horizontal` across the floor
 // and `vertical` above or below the actor.

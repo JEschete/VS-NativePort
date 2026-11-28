@@ -1301,7 +1301,7 @@ class LiveRoomUnloadHost final
 
   void FreeScriptedActorAi() override {
     if (VS::Battle::actors[1] != nullptr) {
-      Battle::Ai::FreeLiveActorAiState(VS::Battle::actors[1]);
+      Battle::Ai::FreeLiveActorInstanceAi(Actors::LiveActorIdentityAt(1));
     }
   }
 

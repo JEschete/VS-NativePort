@@ -81,10 +81,6 @@ std::span<std::uint16_t> LiveTileFlags() {
   return {&VS::Battle::Ai::tileFlagMap[0][0], kTileFlagCells};
 }
 
-VS::Battle::Ai::ActorAiState* StateAt(int actor_id) {
-  return VS::Battle::Ai::actorAiStates[static_cast<std::size_t>(actor_id)];
-}
-
 VS::Battle::Actor* ActorOf(BattleActorHandle actor) {
   auto* live = Actors::ResolveLiveActorInstance(actor);
   Require(live != nullptr,
@@ -125,6 +121,12 @@ void StoreRoomFields(const CleanupRoom& room,
 
 class LiveCleanupHost final : public ActorCleanupHost {
  public:
+  LiveCleanupHost() = default;
+  LiveCleanupHost(Actors::SpawnedActor owner, int slot)
+      : owner_(owner),
+        owner_slot_(slot),
+        owner_state_(Actors::LiveActorAiState(owner)) {}
+
   [[nodiscard]] bool HasTileFlagMap() const override {
     return VS::Battle::Ai::tileFlagMap != nullptr;
   }
@@ -229,16 +231,28 @@ class LiveCleanupHost final : public ActorCleanupHost {
             StateAt(actor_id)));
   }
   void UnlinkEngagedActor(int actor_id) override {
-    UnlinkLiveEngagedActor(StateAt(actor_id));
+    if (owner_ != Actors::SpawnedActor::kNone && actor_id == owner_slot_) {
+      UnlinkLiveActorInstanceFromEngagement(owner_);
+    } else {
+      UnlinkLiveEngagedActor(StateAt(actor_id));
+    }
   }
   void RetireAiState(int actor_id) override {
     const auto slot = static_cast<std::size_t>(actor_id);
-    VS::Battle::Ai::ActorAiState* state = VS::Battle::Ai::actorAiStates[slot];
-    VS::Battle::Ai::actorAiStates[slot] = nullptr;
-    FrameContext* frame = &LiveFrameContext();
-    Require(frame != nullptr, "AI teardown requires the frame state");
-    frame->actors[slot] = nullptr;
-    if (state != nullptr) VS::Core::Memory::FreeLiveFromLowEnd(state);
+    auto* state = StateAt(actor_id);
+    if (state == nullptr) return;
+    if (owner_ != Actors::SpawnedActor::kNone) {
+      Require(actor_id == owner_slot_ &&
+                  Actors::UnbindLiveActorAiState(owner_, state),
+              "AI teardown lost its expected state binding");
+      owner_state_ = nullptr;
+    }
+    if (VS::Battle::Ai::actorAiStates[slot] == state) {
+      VS::Battle::Ai::actorAiStates[slot] = nullptr;
+    }
+    auto& frame = LiveFrameContext();
+    if (frame.actors[slot] == state) frame.actors[slot] = nullptr;
+    VS::Core::Memory::FreeLiveFromLowEnd(state);
   }
   void FreeOrbitingBossState() override {
     VS::Battle::Ai::ArenaOrbitState* orbit = VS::Battle::Ai::arenaOrbit;
@@ -255,6 +269,21 @@ class LiveCleanupHost final : public ActorCleanupHost {
     VS::Battle::Ai::arenaOrbit = orbit;
     return true;
   }
+
+ private:
+  ActorAiState* StateAt(int actor_id) const {
+    if (owner_ != Actors::SpawnedActor::kNone) {
+      return actor_id == owner_slot_
+                 ? owner_state_
+                 : Actors::LiveActorAiState(Actors::LiveActorIdentityAt(
+                       static_cast<std::size_t>(actor_id)));
+    }
+    return VS::Battle::Ai::actorAiStates[static_cast<std::size_t>(actor_id)];
+  }
+
+  Actors::SpawnedActor owner_ = Actors::SpawnedActor::kNone;
+  int owner_slot_ = -1;
+  ActorAiState* owner_state_ = nullptr;
 };
 
 class LiveReactionDelay final : public ReactionDelayHost {
@@ -352,12 +381,22 @@ void ReleaseLiveActorAiReservations(VS::Battle::Ai::ActorAiState* state) {
 
 void FreeLiveActorAiState(VS::Battle::Actor* actor) {
   Require(actor != nullptr, "AI teardown requires an actor");
-  TeardownActor teardown{.handle = Actors::LiveActorIdentity(actor),
-                         .id = actor->id,
+  FreeLiveActorInstanceAi(Actors::LiveActorIdentity(actor));
+}
+
+void FreeLiveActorInstanceAi(Actors::SpawnedActor identity) {
+  const auto slot = Actors::LiveActorSlot(identity);
+  const auto* actor = Actors::ResolveLiveActorInstance(identity);
+  if (!slot || actor == nullptr) {
+    Core::Warnf("ai", "AI teardown refused an unregistered actor");
+    return;
+  }
+  TeardownActor teardown{.handle = identity,
+                         .id = static_cast<int>(*slot),
                          .command_flags = actor->command_flags,
                          .sub_type = actor->sub_type,
                          .kind = static_cast<std::uint8_t>(actor->kind)};
-  LiveCleanupHost host;
+  LiveCleanupHost host(identity, static_cast<int>(*slot));
   Require(FreeActorAiState(host, teardown),
           "AI teardown requires an actor in the AI slots, the room state and "
           "consistent engagement");
@@ -416,6 +455,16 @@ std::int16_t PackLiveActorAiPersistenceFlags(int actor_id) {
   const std::optional<std::int16_t> flags =
       PackActorAiPersistenceFlags(host, actor_id);
   Require(flags.has_value(), "AI persistence actor ID is outside the AI slots");
+  return *flags;
+}
+
+std::int16_t PackLiveActorInstanceAiFlags(Actors::SpawnedActor actor) {
+  const auto slot = Actors::LiveActorSlot(actor);
+  Require(slot.has_value(), "AI persistence requires a registered actor");
+  if (!slot) return -1;
+  const LiveCleanupHost host(actor, static_cast<int>(*slot));
+  const auto flags = PackActorAiPersistenceFlags(host, static_cast<int>(*slot));
+  Require(flags.has_value(), "AI persistence actor is outside the AI slots");
   return *flags;
 }
 

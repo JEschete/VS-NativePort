@@ -669,6 +669,7 @@ struct LiveEnemy {
     actor.kind = 1;
     actor.room_spawn_index = 5;
     actor.stats = stats.get();
+    actor.model = &record->instance;
     stats->current_hp = 40;
     stats->max_hp = 90;
     stats->current_mp = 11;
@@ -684,10 +685,41 @@ struct LiveEnemy {
     record->instance.attach_parent = 0xFF;
     record->instance.facing = 0x340;
     record->saved_placement = 0x00030A07;
-    VS::Battle::actors[3] = &actor;
+    REQUIRE(actors::InstallLiveActorInstance(3, &actor,
+                                             actors::ActorShape::kEquipped) !=
+            actors::SpawnedActor::kNone);
     VS::Actors::actorRecords[3] = record.get();
   }
+
+  void Rebind() {
+    actors::InvalidateLiveActorHandle(3, &actor);
+    VS::Battle::actors[3] = nullptr;
+    REQUIRE(actors::InstallLiveActorInstance(3, &actor,
+                                             actors::ActorShape::kEquipped) !=
+            actors::SpawnedActor::kNone);
+  }
 };
+
+TEST_CASE("Room persistence reads the departing actor's owned components",
+          "[actors-room-memory][actor-ownership-final]") {
+  LiveRosterFixture fixture;
+  LiveEnemy enemy;
+  VS::Battle::ActorStats foreign_stats{};
+  actors::ActorRecord foreign_model{};
+  foreign_model.model_id = VS::Content::kModellessActorId;
+  enemy.actor.stats = &foreign_stats;
+  enemy.actor.model = &foreign_model.instance;
+  actors::actorRecords[3] = &foreign_model;
+
+  CHECK(actors::RemoveLiveActorAtSlot(3, 1) == 1);
+  const auto saved = SavedRecord(0, 0);
+  CHECK(saved.current_hp == 40);
+  CHECK(saved.max_hp == 90);
+  CHECK(saved.tile_x == 7);
+  CHECK(saved.tile_z == 3);
+  CHECK(saved.facing == 0x34);
+  CHECK(actors::actorRecords[3] == &foreign_model);
+}
 
 // The saved record StoreLiveRoomActorState writes for a hidden LiveEnemy.
 VS::Actors::RoomActorRecord StoredLiveEnemy() {
@@ -822,8 +854,10 @@ TEST_CASE("Storing a live enemy refuses what the original indexed past",
   VS::Actors::StoreLiveRoomActorState(4, 0);
   enemy.actor.room_spawn_index = 5;
   enemy.actor.stats = nullptr;
+  enemy.Rebind();
   VS::Actors::StoreLiveRoomActorState(3, 0);
   enemy.actor.stats = enemy.stats.get();
+  enemy.Rebind();
   VS::State::currentRoomStateSlot = 4;
   VS::Actors::StoreLiveRoomActorState(3, 0);
   CHECK_FALSE(VS::Actors::IsLiveRememberedRoom(0, 0));
@@ -841,8 +875,8 @@ TEST_CASE("Storing a live enemy refuses what the original indexed past",
   CHECK(warnings.messages ==
         std::vector<std::string>{
             Refused(store, "the actor id is outside the actor record table"),
-            Refused(store, "the actor has no stats"), Refused(store, outside),
-            Refused("IsLiveRememberedRoom", outside),
+            Refused(store, "the actor has no owned stats"),
+            Refused(store, outside), Refused("IsLiveRememberedRoom", outside),
             Refused("CopyLiveRememberedEnemy", outside),
             Refused("CopyLiveRememberedEnemy", "no output record"),
             Refused(store, "the saved room's next record is outside it")});

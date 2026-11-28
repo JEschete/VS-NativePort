@@ -9,11 +9,10 @@
 #include <cstring>
 #include <iterator>
 
-#include "Actors/ActorFlags.hpp"
 #include "Actors/ActorRoster.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/ActorTableLive.hpp"
-#include "Actors/Location.hpp"
 #include "Actors/RoomActorCache.hpp"
 #include "Actors/RoomEnemyMemory.hpp"
 #include "Battle/Actor.hpp"
@@ -24,10 +23,6 @@
 
 namespace VS::Actors {
 namespace {
-// LiveActorStateFlags (StateFlag::kActionAnimating): an appearance
-// transition is running.
-constexpr std::uint32_t kFadingStateFlag = StateFlag::kActionAnimating;
-
 static_assert(std::size(VS::State::recentRoomEnemyStates) == kRememberedRooms);
 static_assert(std::size(VS::State::recentRoomEnemyStates[0].actor_states) ==
               kRememberedEnemiesPerRoom);
@@ -131,19 +126,13 @@ RememberedEnemy* FindInCurrentRoom(RoomEnemyMemory& memory, int spawn_index,
   return FindRememberedEnemy(memory, spawn_index);
 }
 
-RememberedPlacement PlacementOf(const VS::Actors::TileTarget& tile) {
-  return {.tile_x = static_cast<std::uint8_t>(tile.tile_x),
-          .tile_layer = static_cast<std::uint8_t>(tile.tile_layer),
-          .tile_z = static_cast<std::uint8_t>(tile.tile_z),
-          .facing = static_cast<std::uint8_t>(tile.facing)};
-}
-
-EnemyStanding StandingOf(int actor_id, const VS::Battle::Actor& actor,
-                         const VS::Battle::ActorStats& stats) {
+EnemyStanding StandingOf(SpawnedActor identity, const VS::Battle::Actor& actor,
+                         const VS::Battle::ActorStats& stats,
+                         ActorPersistencePose pose) {
   EnemyStanding standing;
   standing.spawn_index = actor.room_spawn_index;
-  standing.fading = (LiveActorStateFlags(actor_id) & kFadingStateFlag) != 0;
-  standing.ai_flags = VS::Battle::Ai::PackLiveActorAiPersistenceFlags(actor_id);
+  standing.fading = pose.fading;
+  standing.ai_flags = VS::Battle::Ai::PackLiveActorInstanceAiFlags(identity);
   standing.current_hp = stats.current_hp;
   standing.max_hp = stats.max_hp;
   standing.current_mp = stats.current_mp;
@@ -155,14 +144,10 @@ EnemyStanding StandingOf(int actor_id, const VS::Battle::Actor& actor,
     standing.limb_hp[limb] = stats.limbs[limb].hp;
   }
   standing.statuses = stats.statuses;
-  // The current tile (an actor or a gimmick), then the saved placement of an
-  // actor record. Zero-initialized: the original left the stack word unset
-  // when the slot had neither.
-  VS::Actors::ActorLocationQuery query{};
-  LiveActorPlacement(actor_id, &query);
-  LiveActorSavedPlacement(
-      actor_id, std::bit_cast<std::uint8_t>(stats.movement_class), &query);
-  standing.placement = PlacementOf(query.location.packed_tile.target);
+  standing.placement = {.tile_x = pose.tile.x,
+                        .tile_layer = pose.tile.layer,
+                        .tile_z = pose.tile.z,
+                        .facing = pose.tile.spare};
   return standing;
 }
 }  // namespace
@@ -186,15 +171,32 @@ void StoreLiveRoomActorState(int actor_id, int hidden) {
                      "the actor id is outside the actor record table");
     return;
   }
-  const VS::Battle::Actor* actor = VS::Battle::actors[actor_id];
-  if (actor == nullptr || actor->room_spawn_index == kNoRoomSpawn) {
+  if (VS::Battle::actors[actor_id] == nullptr) return;
+  StoreLiveRoomActorState(
+      LiveActorIdentityAt(static_cast<std::size_t>(actor_id)), hidden);
+}
+
+void StoreLiveRoomActorState(SpawnedActor identity, int hidden) {
+  constexpr const char* kOperation = "StoreLiveRoomActorState";
+  const auto slot = LiveActorSlot(identity);
+  const auto components = LiveActorComponents(identity);
+  const VS::Battle::Actor* actor = ResolveLiveActorInstance(identity);
+  if (!slot || !components || actor == nullptr) {
+    WarnActorRefused(kOperation, "the actor has no current instance identity");
     return;
   }
-  if (actor->stats == nullptr) {
-    WarnActorRefused(kOperation, "the actor has no stats");
+  if (actor->room_spawn_index == kNoRoomSpawn) {
     return;
   }
-  const EnemyStanding standing = StandingOf(actor_id, *actor, *actor->stats);
+  if (components->stats == nullptr) {
+    WarnActorRefused(kOperation, "the actor has no owned stats");
+    return;
+  }
+  const auto pose = ReadLiveActorPersistencePose(
+      identity, std::bit_cast<std::uint8_t>(components->stats->movement_class));
+  if (!pose) return;
+  const EnemyStanding standing =
+      StandingOf(identity, *actor, *components->stats, *pose);
   RoomEnemyMemory memory = LoadLiveRoomEnemyMemory();
   if (CurrentRememberedRoom(memory) == nullptr) {
     WarnActorRefused(kOperation, "the current saved room is outside the four");

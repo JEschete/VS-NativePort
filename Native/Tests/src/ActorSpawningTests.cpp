@@ -100,6 +100,12 @@ constexpr ActorDefinition kEquippedActor{.shape = ActorShape::kEquipped};
 constexpr ActorDefinition kGimmickActor{.shape = ActorShape::kAuxiliary};
 constexpr ActorDefinition kTwoBodyActor{.shape = ActorShape::kSecondaryBody};
 
+void RegisterBorrowedSpawnActor(std::size_t slot, VS::Battle::Actor& actor) {
+  VS::Battle::actors[slot] = nullptr;
+  REQUIRE(actors::InstallLiveActorInstance(
+              slot, &actor, ActorShape::kEquipped) != SpawnedActor::kNone);
+}
+
 TEST_CASE("Actor handles validate and retire published identities",
           "[actors][actors-spawning]") {
   actors::ActorInstanceTable handles;
@@ -108,7 +114,7 @@ TEST_CASE("Actor handles validate and retire published identities",
   CHECK(actor != SpawnedActor::kNone);
   CHECK(handles.Resolve(actor) == 0x1000);
   CHECK(handles.Publish(3, actor));
-  CHECK(handles.Observe(3, 0x1000) == actor);
+  CHECK(handles.At(3) == actor);
   CHECK(handles.Remove(3, actor));
   CHECK(handles.Resolve(actor) == 0);
 }
@@ -152,13 +158,13 @@ TEST_CASE("Resetting the actor table invalidates published handles",
   handles.Reset();
 
   CHECK(handles.Resolve(actor) == 0);
-  const SpawnedActor replacement = handles.Observe(4, 0x3000);
+  CHECK(handles.At(4) == SpawnedActor::kNone);
+  const SpawnedActor replacement = handles.Begin(4, 0x3000, kGimmickActor);
   CHECK(replacement != SpawnedActor::kNone);
   CHECK(replacement != actor);
   CHECK(handles.Resolve(replacement) == 0x3000);
-  // Reset also forgets the definition: an address seen again afterwards is an
-  // instance the table did not allocate.
-  CHECK_FALSE(handles.Definition(replacement).has_value());
+  CHECK_FALSE(handles.Definition(actor).has_value());
+  CHECK(handles.Definition(replacement) == kGimmickActor);
 }
 
 TEST_CASE("Actor definitions fix the slot resources an actor owns",
@@ -169,19 +175,17 @@ TEST_CASE("Actor definitions fix the slot resources an actor owns",
         ActorResources{.model = true, .second_model = true});
 }
 
-TEST_CASE("An actor keeps its definition until another address takes its slot",
+TEST_CASE("An occupied actor slot refuses a different definition",
           "[actors][actors-spawning]") {
   actors::ActorInstanceTable handles;
   const SpawnedActor gimmick = handles.Begin(5, 0x4000, kGimmickActor);
   CHECK(handles.Definition(gimmick) == kGimmickActor);
   REQUIRE(handles.Publish(5, gimmick));
-  CHECK(handles.Observe(5, 0x4000) == gimmick);
+  CHECK(handles.At(5) == gimmick);
   CHECK(handles.Definition(gimmick) == kGimmickActor);
-  // An address the table did not allocate has no definition.
-  const SpawnedActor stranger = handles.Observe(5, 0x5000);
-  CHECK(stranger != gimmick);
-  CHECK_FALSE(handles.Definition(stranger).has_value());
-  CHECK_FALSE(handles.Definition(gimmick).has_value());
+  CHECK(handles.Begin(5, 0x5000, kEquippedActor) == SpawnedActor::kNone);
+  CHECK(handles.At(5) == gimmick);
+  CHECK(handles.Definition(gimmick) == kGimmickActor);
 }
 
 TEST_CASE("Removal claims an actor's resources exactly once",
@@ -216,12 +220,16 @@ TEST_CASE("A slot's replacement actor claims only its own resources",
         ActorResources{.gimmick = true});
 }
 
-TEST_CASE("An actor without a definition claims no resources, once",
-          "[actors][actors-spawning]") {
+TEST_CASE(
+    "An empty actor slot cannot claim resources or publish a pending actor",
+    "[actors][actors-spawning]") {
   actors::ActorInstanceTable handles;
-  const SpawnedActor stranger = handles.Observe(6, 0x7000);
-  CHECK(handles.ClaimRemoval(6, stranger) == ActorResources{});
-  CHECK_FALSE(handles.ClaimRemoval(6, stranger).has_value());
+  CHECK(handles.At(6) == SpawnedActor::kNone);
+  CHECK_FALSE(handles.ClaimRemoval(6, handles.At(6)).has_value());
+  const SpawnedActor pending = handles.Begin(6, 0x7000, kEquippedActor);
+  CHECK(handles.At(6) == SpawnedActor::kNone);
+  CHECK(handles.Resolve(pending) == 0x7000);
+  CHECK_FALSE(handles.Installed(pending));
 }
 
 TEST_CASE("A pending allocation is found by its address until published",
@@ -234,7 +242,7 @@ TEST_CASE("A pending allocation is found by its address until published",
   REQUIRE(handles.Publish(3, actor));
   CHECK(handles.Pending(0x1000) == SpawnedActor::kNone);
   // The lookup did not install or re-key anything.
-  CHECK(handles.Observe(3, 0x1000) == actor);
+  CHECK(handles.At(3) == actor);
 }
 
 using actors::ActorRecordPart;
@@ -289,7 +297,7 @@ TEST_CASE("Second bodies and gimmicks bind only their own record tables",
   CHECK_FALSE(actors::OwnedActorRecordPart(handles, gimmick,
                                            ActorRecordTable::kActor, 5)
                   .has_value());
-  const SpawnedActor stranger = handles.Observe(6, 0x4000);
+  const SpawnedActor stranger = handles.At(6);
   CHECK_FALSE(actors::OwnedActorRecordPart(handles, stranger,
                                            ActorRecordTable::kActor, 6)
                   .has_value());
@@ -426,6 +434,7 @@ struct FakeSpawnHost final : actors::ActorSpawnHost {
   std::vector<SpawnedActor> discarded;
   std::vector<SpawnedActor> cancelled_owners;
   std::vector<int> released_actor_models;
+  std::vector<SpawnedActor> released_actor_owners;
   std::vector<int> released_weapon_models;
   bool refuse_allocation = false;
   bool refuse_install = false;
@@ -715,8 +724,9 @@ struct FakeSpawnHost final : actors::ActorSpawnHost {
     Log("UpdateQueue");
   }
   void PumpLoading() override { Log("Pump"); }
-  void ReleaseActorModel(SpawnedActor /*owner*/, int slot) override {
+  void ReleaseActorModel(SpawnedActor owner, int slot) override {
     released_actor_models.push_back(slot);
+    released_actor_owners.push_back(owner);
     Log(std::format("ReleaseActorModel {}", slot));
   }
   void ReleaseWeaponModel(SpawnedActor /*owner*/, int slot) override {
@@ -2071,7 +2081,7 @@ TEST_CASE("A pending scripted actor drains when cancellation is refused",
 }
 
 TEST_CASE("A scripted actor does not replace a slot occupied before completion",
-          "[actors][actors-spawning]") {
+          "[actors][actors-spawning][actor-ownership-final]") {
   FakeSpawnHost host;
   actors::ScriptedActorSpawnTable pending;
   CHECK(actors::QueueScriptedActorSpawn(host, pending, 9, 0x33, {}) ==
@@ -2083,7 +2093,8 @@ TEST_CASE("A scripted actor does not replace a slot occupied before completion",
   CHECK(host.table.at(9) == Handle(0x99));
   CHECK_FALSE(pending.ContainsSlot(9));
   CHECK(host.discarded == std::vector{Handle(kFirstHandle)});
-  CHECK(host.released_actor_models.empty());
+  CHECK(host.released_actor_models == std::vector{9});
+  CHECK(host.released_actor_owners == std::vector{Handle(kFirstHandle)});
   CHECK(host.defaults == std::nullopt);
   CHECK(host.refusals == std::vector{SpawnRefusal::kAllocation});
 }
@@ -2443,6 +2454,8 @@ TEST_CASE("Live spawn adapters report their refusals on the actors channel",
   VS::Battle::Actor* const saved_actor = VS::Battle::actors[10];
   VS::Battle::Actor* const saved_character = VS::Battle::characterState;
   VS::Battle::Actor actor{};
+  actors::ResetLiveActorHandles();
+  RegisterBorrowedSpawnActor(10, actor);
   {
     ChannelWarnings warnings("actors");
     CHECK(actors::CreateLiveAuxiliaryActor(2, 1, nullptr, 0, 0) == nullptr);
@@ -2453,7 +2466,6 @@ TEST_CASE("Live spawn adapters report their refusals on the actors channel",
     actors::RefreshLiveActorEquipmentModels(42);
     VS::Battle::characterState = nullptr;
     actors::RestoreLiveAshleyRuntimeState();
-    VS::Battle::actors[10] = &actor;
     actors::LoadLiveActorEquipmentModels(10, actors::kUnchangedEquipment, 5);
     CHECK(warnings.messages ==
           std::vector<std::string>{
@@ -2470,6 +2482,7 @@ TEST_CASE("Live spawn adapters report their refusals on the actors channel",
                       "equipment model slot outside the weapon model "
                       "table")});
   }
+  actors::ResetLiveActorHandles();
   VS::Battle::actors[10] = saved_actor;
   VS::Battle::characterState = saved_character;
 }
@@ -2482,13 +2495,12 @@ TEST_CASE("Removing a live actor cancels only its own queued load",
   content::ClearLiveActorAssetQueue();
   actors::ResetLiveActorHandles();
   VS::Battle::Actor installed{};
-  VS::Battle::Actor stranger{};
-  VS::Battle::actors[kSlot] = &installed;
+  RegisterBorrowedSpawnActor(kSlot, installed);
   ActorAssetRequest request{};
   request.kind = Kind(ActorAssetKind::kWeaponModelLoad);
   request.target_slot = 0;
   request.model_id = 3;
-  CHECK(actors::QueueLiveActorOwnedAsset(&stranger, request) == 0);
+  CHECK(content::QueueLiveActorAsset(request) == 0);
   CHECK(actors::QueueLiveActorOwnedAsset(&installed, request) == 1);
   CHECK(content::FindLiveFreeActorAssetRequest() == 2);
   CHECK(actors::CancelLiveActorAssets(kSlot, &installed));
@@ -2505,7 +2517,7 @@ TEST_CASE("A live slot asset ticket survives until its consumer forgets it",
   content::ClearLiveActorAssetQueue();
   actors::ResetLiveActorHandles();
   VS::Battle::Actor installed{};
-  VS::Battle::actors[kSlot] = &installed;
+  RegisterBorrowedSpawnActor(kSlot, installed);
   ActorAssetRequest request{};
   request.kind = Kind(ActorAssetKind::kWeaponModelLoad);
   request.target_slot = 0;
@@ -2538,7 +2550,7 @@ TEST_CASE("A live actor owns the sequence loads its equipped spawn queues",
   actors::ResetLiveActorHandles();
   VS::Battle::Actor installed{};
   installed.equipped_weapon_category = 2;
-  VS::Battle::actors[kSlot] = &installed;
+  RegisterBorrowedSpawnActor(kSlot, installed);
   actors::QueueLiveSharedSequenceLoad(0, 1);
   actors::QueueLiveActorBaseSequenceLoad(&installed, kSlot);
   actors::QueueLiveActorWeaponSequenceLoad(reinterpret_cast<char*>(&installed),
@@ -2562,7 +2574,7 @@ TEST_CASE("Live actor loads report how they end and forget their tickets",
   actors::ResetLiveActorHandles();
   actors::SettleLiveActorLoads();
   VS::Battle::Actor installed{};
-  VS::Battle::actors[kSlot] = &installed;
+  RegisterBorrowedSpawnActor(kSlot, installed);
   ActorAssetRequest request{};
   // The weapon parser refuses a target below the weapon slots at once.
   request.kind = Kind(ActorAssetKind::kWeaponModelParse);
@@ -2587,10 +2599,8 @@ TEST_CASE("Live actor loads report how they end and forget their tickets",
   VS::Battle::actors[kSlot] = saved_actor;
 }
 
-TEST_CASE("A live removal claims an undefined actor once and releases nothing",
+TEST_CASE("A live removal refuses an unregistered actor without adopting it",
           "[actors][actors-spawning]") {
-  // #55: an actor the spawn host did not allocate has no definition, so its
-  // removal names no gimmick or model, whatever its kind says.
   constexpr std::size_t kSlot = 11;
   VS::Battle::Actor* const saved_actor = VS::Battle::actors[kSlot];
   actors::ResetLiveActorHandles();
@@ -2601,13 +2611,14 @@ TEST_CASE("A live removal claims an undefined actor once and releases nothing",
     ChannelWarnings warnings("actors");
     CHECK_FALSE(actors::ClaimLiveActorRemoval(kSlot, nullptr).has_value());
     CHECK_FALSE(actors::ClaimLiveActorRemoval(kSlot, &other).has_value());
-    CHECK(actors::ClaimLiveActorRemoval(kSlot, &foreign) == ActorResources{});
     CHECK_FALSE(actors::ClaimLiveActorRemoval(kSlot, &foreign).has_value());
+    CHECK(actors::LiveActorIdentity(&foreign) == SpawnedActor::kNone);
+    CHECK(VS::Battle::actors[kSlot] == &foreign);
     CHECK(warnings.messages ==
           std::vector<std::string>{
               Refused("RemoveActorAtSlot",
-                      "the actor has no spawn definition; no gimmick or "
-                      "model is released")});
+                      "the actor has no registered instance; nothing is "
+                      "released")});
   }
   actors::ResetLiveActorHandles();
   VS::Battle::actors[kSlot] = saved_actor;
@@ -2629,7 +2640,7 @@ TEST_CASE("Live actor shapes come from the spawn definitions",
   CHECK(VS::Battle::actors[kSlot] == &body);
   CHECK(actors::LiveActorShape(&body) == ActorShape::kSecondaryBody);
   CHECK_FALSE(actors::LiveActorShape(&other).has_value());
-  // A removed actor's storage left in its slot is observed without one.
+  // Leaving storage in a slot cannot re-register a retired actor.
   actors::InvalidateLiveActorHandle(kSlot, &body);
   CHECK_FALSE(actors::LiveActorShape(&body).has_value());
   actors::ResetLiveActorHandles();
@@ -2859,4 +2870,46 @@ TEST_CASE("Mutable actor pointers cannot redirect owned component destinations",
             fixture.Owner(), content::ActorRecordTable::kActor, 3) == body);
   CHECK(actors::LiveActorRecordMemory(
             fixture.Owner(), content::ActorRecordTable::kWeapon, 6) == weapon);
+}
+
+TEST_CASE("Actor identity lookup cannot adopt a foreign slot occupant",
+          "[actors][actors-spawning][actor-ownership-final]") {
+  NativeActorStorageFixture fixture;
+  const ActorDefinition definition{.shape = ActorShape::kEquipped,
+                                   .model_id = 0x23};
+  auto& owned = fixture.Allocate(definition);
+  const auto body = At(reinterpret_cast<std::uintptr_t>(owned.model));
+  VS::Battle::Actor foreign{};
+  VS::Battle::actors[NativeActorStorageFixture::kSlot] = &foreign;
+  CHECK(actors::LiveActorIdentityAt(NativeActorStorageFixture::kSlot) ==
+        SpawnedActor::kNone);
+  CHECK(actors::LiveActorDefinition(fixture.instance) == definition);
+  CHECK(actors::LiveActorRecordMemory(
+            fixture.Owner(), content::ActorRecordTable::kActor,
+            static_cast<int>(NativeActorStorageFixture::kSlot)) == body);
+  VS::Battle::actors[NativeActorStorageFixture::kSlot] = nullptr;
+}
+
+TEST_CASE("Actor-bound assets refuse unregistered and removing owners",
+          "[actors][actors-spawning][actor-owner-boundaries]") {
+  NativeActorStorageFixture fixture;
+  constexpr auto kSlot = NativeActorStorageFixture::kSlot;
+  VS::Battle::Actor actor{};
+  VS::Battle::actors[kSlot] = &actor;
+  ActorAssetRequest request{};
+  request.kind = Kind(ActorAssetKind::kActorModelLoad);
+  request.target_slot = static_cast<std::int8_t>(kSlot);
+  CHECK(actors::QueueLiveSlotActorAsset(kSlot, request) == -1);
+  CHECK(actors::QueueLiveActorOwnedAsset(&actor, request) == -1);
+  content::ClearLiveActorAssetQueue();
+
+  VS::Battle::actors[kSlot] = nullptr;
+  const auto identity = fixture.InstallBorrowed(actor);
+  REQUIRE(actors::ClaimLiveActorRemoval(kSlot, &actor).has_value());
+  CHECK(actors::QueueLiveActorOwnedAsset(&actor, request) == -1);
+  CHECK_FALSE(actors::SubmitLiveSlotActorAsset(kSlot, request).has_value());
+  CHECK(content::FindLiveFreeActorAssetRequest() == 0);
+  content::ClearLiveActorAssetQueue();
+  actors::SettleLiveActorLoads();
+  actors::FinalizeLiveActorRemoval(identity);
 }

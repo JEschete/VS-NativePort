@@ -115,6 +115,8 @@ struct CleanupFixture {
     state->actor =
         reinterpret_cast<VS::Battle::Ai::EngagementData*>(&actors[index]);
     state->next_tile.word = 0x00070004;
+    REQUIRE(VS::Actors::BindLiveActorAiState(
+        VS::Actors::LiveActorIdentity(&actors[index]), state));
     VS::Battle::Ai::actorAiStates[state->actor_id] = state;
     VS::Battle::Ai::attributeActorMask |= 1 << state->actor_id;
     return state;
@@ -276,6 +278,26 @@ TEST_CASE(
   CHECK(VS::Core::Memory::GameHeap().Empty());
 }
 
+TEST_CASE("AI teardown uses the actor identity rather than its mutable ID",
+          "[ai][cleanup][actor-ownership-final]") {
+  CleanupFixture fixture;
+  fixture.AllocateState(1);
+  auto* peer = fixture.AllocateState(2);
+  fixture.actors[1].id = 5;
+
+  VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
+  CHECK(VS::Battle::Ai::actorAiStates[2] == nullptr);
+  CHECK(VS::Battle::Ai::actorAiStates[5] == peer);
+
+  fixture.actors[1].id = 2;
+  for (std::size_t index = 1; index < fixture.actors.size(); ++index) {
+    if (VS::Battle::Ai::actorAiStates[fixture.actors[index].id] != nullptr) {
+      VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[index]);
+    }
+  }
+  CHECK(VS::Core::Memory::GameHeap().Empty());
+}
+
 TEST_CASE("AI teardown leaves no engaged-list or marker references",
           "[ai][cleanup]") {
   CleanupFixture fixture;
@@ -289,6 +311,38 @@ TEST_CASE("AI teardown leaves no engaged-list or marker references",
   CHECK(VS::Battle::actorMarkers[2] == 0);
   CHECK(fixture.actors[1].command_flags == 0xF8);
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
+  CHECK(VS::Core::Memory::GameHeap().Empty());
+}
+
+TEST_CASE("AI teardown releases its own state and preserves a foreign slot",
+          "[ai][cleanup][actor-owner-boundaries]") {
+  CleanupFixture fixture;
+  const auto empty_units = VS::Core::Memory::GameHeap().FreeUnits();
+  auto* removed = fixture.AllocateState(1);
+  void* route = VS::Core::Memory::AllocateLiveFromHighEnd(128);
+  REQUIRE(route != nullptr);
+  removed->native_pointer_18c = route;
+  const auto before_peer = VS::Core::Memory::GameHeap().FreeUnits();
+  auto* peer = fixture.AllocateState(2);
+  const auto peer_units =
+      before_peer - VS::Core::Memory::GameHeap().FreeUnits();
+  VS::Battle::Ai::actorAiStates[2] = peer;
+  VS::Battle::Ai::LiveFrameContext().actors[2] = peer;
+
+  VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
+  const bool preserved = VS::Battle::Ai::actorAiStates[2] == peer;
+  CHECK(preserved);
+  CHECK(VS::Battle::Ai::LiveFrameContext().actors[2] == peer);
+  CHECK(VS::Core::Memory::GameHeap().FreeUnits() == empty_units - peer_units);
+  VS::Battle::Ai::actorAiStates[2] = nullptr;
+  VS::Battle::Ai::LiveFrameContext().actors[2] = nullptr;
+  if (preserved) {
+    VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[2]);
+  } else {
+    VS::Battle::Ai::actorAiStates[5] = nullptr;
+    VS::Core::Memory::FreeLiveFromHighEnd(route);
+    VS::Core::Memory::FreeLiveFromLowEnd(removed);
+  }
   CHECK(VS::Core::Memory::GameHeap().Empty());
 }
 

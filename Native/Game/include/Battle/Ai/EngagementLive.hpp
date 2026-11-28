@@ -5,6 +5,10 @@
 
 #include "Battle/Ai/Engagement.hpp"
 
+namespace VS::Actors {
+enum class SpawnedActor : std::uint64_t;
+}
+
 namespace VS::Battle::Ai {
 struct ActorAiState;
 struct PerceptionUpdateView;
@@ -33,6 +37,7 @@ bool TryEngageLiveActor(VS::Battle::Ai::ActorAiState* state);
 // `state` must be the AI state table's entry for its actor ID; the engaged
 // list's pointers are matched against that table.
 void UnlinkLiveEngagedActor(VS::Battle::Ai::ActorAiState* state);
+void UnlinkLiveActorInstanceFromEngagement(Actors::SpawnedActor actor);
 void UpdateLiveEngagementBuildup(VS::Battle::Ai::ActorAiState* state);
 void AnimateLiveEngagementPhase();
 

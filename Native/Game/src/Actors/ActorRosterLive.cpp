@@ -71,8 +71,8 @@ class LiveRemovalHost final : public ActorRemovalHost {
     }
     return ClaimLiveActorRemoval(slot, actor_);
   }
-  void Remember(std::size_t slot, int hidden) override {
-    StoreLiveRoomActorState(static_cast<int>(slot), hidden);
+  void Remember(std::size_t /*slot*/, int hidden) override {
+    StoreLiveRoomActorState(identity_, hidden);
   }
   [[nodiscard]] bool CancelAssets(std::size_t slot) override {
     return CancelLiveActorAssets(slot, actor_);
@@ -101,7 +101,7 @@ class LiveRemovalHost final : public ActorRemovalHost {
     }
   }
   void FreeAiState(std::size_t /*slot*/) override {
-    VS::Battle::Ai::FreeLiveActorAiState(actor_);
+    VS::Battle::Ai::FreeLiveActorInstanceAi(identity_);
   }
   [[nodiscard]] RosterView Links(std::size_t /*slot*/) const override {
     return ViewFrom(identity_);

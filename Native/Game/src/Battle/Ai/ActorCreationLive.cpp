@@ -279,17 +279,16 @@ CreatedAiState Load(const AiState& state) {
   return created;
 }
 
-AiState& StateOf(int actor_id) {
-  Require(actor_id >= 0 && actor_id < kCleanupActorSlots,
-          "AI creation requires an actor ID in the AI state table");
-  AiState* state =
-      VS::Battle::Ai::actorAiStates[static_cast<std::size_t>(actor_id)];
+AiState& StateOf(Actors::SpawnedActor actor) {
+  AiState* state = Actors::LiveActorAiState(actor);
   Require(state != nullptr, "AI creation lost the actor's AI state");
   return *state;
 }
 
 class LiveCreationHost final : public ActorCreationHost {
  public:
+  explicit LiveCreationHost(Actors::SpawnedActor owner) : owner_(owner) {}
+
   [[nodiscard]] std::uint32_t AttributeActorMask() const override {
     return std::bit_cast<std::uint32_t>(VS::Battle::Ai::attributeActorMask);
   }
@@ -359,9 +358,20 @@ class LiveCreationHost final : public ActorCreationHost {
     const auto components = Actors::LiveActorComponents(actor);
     Require(components.has_value(), "AI creation requires actor components");
     if (!components) return false;
+    if (VS::Battle::Ai::actorAiStates[static_cast<std::size_t>(actor_id)] !=
+            nullptr ||
+        Actors::LiveActorAiState(actor) != nullptr) {
+      Core::Warnf("ai", "AI creation refused an occupied state slot %d",
+                  actor_id);
+      return false;
+    }
     auto* state = static_cast<AiState*>(
         Core::Memory::AllocateLiveFromLowEnd(sizeof(AiState)));
     if (state == nullptr) return false;
+    if (!Actors::BindLiveActorAiState(actor, state)) {
+      Core::Memory::FreeLiveFromLowEnd(state);
+      return false;
+    }
     VS::Battle::Ai::actorAiStates[static_cast<std::size_t>(actor_id)] = state;
     Core::Memory::ClearLiveAlignedWords(
         state, static_cast<std::int32_t>(sizeof(AiState)));
@@ -433,36 +443,46 @@ class LiveCreationHost final : public ActorCreationHost {
   }
 
  private:
-  static AiState& StoreState(const CreatedAiState& created) {
-    AiState& state = StateOf(created.actor_id);
+  AiState& StoreState(const CreatedAiState& created) {
+    AiState& state = StateOf(owner_);
     Store(created, state);
     return state;
   }
+  Actors::SpawnedActor owner_;
 };
 }  // namespace
 
 // decomp: func_800E6178 (src/BATTLE/BATTLE.PRG/7CD68.c:342).
 int CreateLiveActorAiState(VS::Battle::Actor* actor, int options) {
   Require(actor != nullptr, "AI creation requires an actor");
+  return CreateLiveActorInstanceAi(Actors::LiveActorIdentity(actor), options);
+}
+
+int CreateLiveActorInstanceAi(Actors::SpawnedActor identity, int options) {
+  auto* actor = Actors::ResolveLiveActorInstance(identity);
+  const auto slot = Actors::LiveActorSlot(identity);
+  Require(actor != nullptr && slot.has_value(),
+          "AI creation requires a registered actor");
+  if (!slot) return 0;
   VS::Core::Debugf(
       "ai", "create actor=%p id=%d options=0x%X model=%p stats=%p",
       static_cast<void*>(actor), actor->id, static_cast<unsigned int>(options),
       static_cast<void*>(actor->model), static_cast<void*>(actor->stats));
   const CreationActor creation{
-      .handle = Actors::LiveActorIdentity(actor),
-      .id = actor->id,
+      .handle = identity,
+      .id = static_cast<int>(*slot),
       .kind = actor->kind,
       .combat_pose = actor->combat_pose,
       .saved_settings_flags = static_cast<std::uint16_t>(
           std::bit_cast<std::uint32_t>(actor->spawn_ai_settings)),
       .settings = std::bit_cast<std::uint32_t>(actor->ai_settings),
       .shape = VS::Actors::LiveActorShape(actor)};
-  LiveCreationHost host;
+  LiveCreationHost host(identity);
   const std::optional<bool> remembered_idle =
       CreateActorAiState(host, creation, static_cast<std::int16_t>(options));
   Require(remembered_idle.has_value(), "AI creation refused the actor");
   if ((creation.kind & kAiStateActorKinds) != 0) {
-    const AiState& state = StateOf(creation.id);
+    const AiState& state = StateOf(identity);
     VS::Core::Debugf(
         "ai", "initialized actor=%d state=%p bytes=%u radius=%u height=%u",
         creation.id, static_cast<const void*>(&state),

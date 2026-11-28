@@ -229,6 +229,12 @@ class LiveActorLoadHost final : public ActorLoadHost {
                                  const Content::ActorAssetRequest& request) {
   LiveActorLoadHost host;
   LiveActorLoads().Settle(host);
+  if (LiveActorHandles().Resolve(actor) == 0 ||
+      LiveActorHandles().Removing(actor)) {
+    WarnActorRefused("QueueActorLoad",
+                     "actor is unregistered or being removed");
+    return -1;
+  }
   const int slot = Content::FindLiveFreeActorAssetRequest();
   if (slot < 0) {
     return -1;
@@ -264,8 +270,6 @@ template <typename T>
 [[nodiscard]] SpawnedActor BeginActorAllocation(std::size_t slot,
                                                 VS::Battle::Actor* actor,
                                                 ActorDefinition definition) {
-  static_cast<void>(
-      LiveActorHandles().Observe(slot, ActorAddress(SlotActor(slot))));
   const SpawnedActor handle =
       LiveActorHandles().Begin(slot, ActorAddress(actor), definition, true,
                                ComponentsOf(*actor, definition.shape));
@@ -356,7 +360,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
 
   // --- The actor table and allocations
   [[nodiscard]] SpawnedActor ActorAt(std::size_t slot) const override {
-    return LiveActorHandles().Observe(slot, ActorAddress(SlotActor(slot)));
+    return LiveActorIdentityAt(slot);
   }
 
   [[nodiscard]] bool SlotIsEmpty(std::size_t slot) const override {
@@ -697,11 +701,8 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     Battle::SetLiveEnemyCombatPose(static_cast<int>(slot), pose);
   }
   [[nodiscard]] int CreateAiState(std::size_t slot, int flags) override {
-    VS::Battle::Actor* actor = SlotActor(slot);
-    if (actor == nullptr) {
-      return 0;
-    }
-    return Battle::Ai::CreateLiveActorAiState(actor, flags);
+    return Battle::Ai::CreateLiveActorInstanceAi(LiveActorIdentityAt(slot),
+                                                 flags);
   }
   void InitializePlaceholder(std::size_t slot, int actor_id) override {
     InitializeLivePlaceholderActor(static_cast<int>(slot), actor_id);
@@ -961,8 +962,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     }
     for (std::size_t slot = 0; slot < kSpawnActorSlots; ++slot) {
       if (SlotActor(slot) == VS::Battle::characterState) {
-        const SpawnedActor actor = LiveActorHandles().Observe(
-            slot, ActorAddress(VS::Battle::characterState));
+        const SpawnedActor actor = LiveActorIdentityAt(slot);
         return ActorPointer<const VS::Battle::Actor>(actor, "CurrentActor") !=
                            nullptr &&
                        VS::Battle::characterState->stats != nullptr
@@ -1200,8 +1200,41 @@ VS::Battle::Actor* ResolveLiveActorInstance(SpawnedActor actor) {
 }
 
 SpawnedActor LiveActorIdentityAt(std::size_t slot) {
-  return LiveActorHandles().Observe(slot, ActorAddress(SlotActor(slot)));
+  const ActorInstanceTable& handles = LiveActorHandles();
+  const SpawnedActor actor = handles.At(slot);
+  return actor != SpawnedActor::kNone &&
+                 handles.Resolve(actor) == ActorAddress(SlotActor(slot))
+             ? actor
+             : SpawnedActor::kNone;
 }
+
+std::optional<std::size_t> LiveActorSlot(SpawnedActor actor) {
+  return LiveActorHandles().Slot(actor);
+}
+
+Battle::Ai::ActorAiState* LiveActorAiState(SpawnedActor actor) {
+  return LiveActorHandles().AiState(actor);
+}
+
+bool BindLiveActorAiState(SpawnedActor actor, Battle::Ai::ActorAiState* state) {
+  if (!LiveActorHandles().BindAiState(actor, state)) {
+    WarnActorRefused("BindActorAiState",
+                     "actor is absent, removing or already has AI state");
+    return false;
+  }
+  return true;
+}
+
+bool UnbindLiveActorAiState(SpawnedActor actor,
+                            Battle::Ai::ActorAiState* expected) {
+  if (!LiveActorHandles().UnbindAiState(actor, expected)) {
+    WarnActorRefused("UnbindActorAiState", "AI state does not belong to actor");
+    return false;
+  }
+  return true;
+}
+
+void InvalidateLiveActorAiBindings() { LiveActorHandles().ResetAiBindings(); }
 
 SpawnedActor LiveActorIdentity(const VS::Battle::Actor* actor) {
   if (actor == nullptr) return SpawnedActor::kNone;
@@ -1396,16 +1429,14 @@ std::optional<ActorResources> ClaimLiveActorRemoval(
   if (actor == nullptr || SlotActor(slot) != actor) {
     return std::nullopt;
   }
-  const SpawnedActor handle =
-      LiveActorHandles().Observe(slot, ActorAddress(actor));
-  const std::optional<ActorResources> owned =
-      LiveActorHandles().ClaimRemoval(slot, handle);
-  if (owned.has_value() && !LiveActorHandles().Definition(handle).has_value()) {
+  const SpawnedActor handle = LiveActorIdentityAt(slot);
+  if (handle == SpawnedActor::kNone) {
     WarnActorRefused("RemoveActorAtSlot",
-                     "the actor has no spawn definition; no gimmick or model "
-                     "is released");
+                     "the actor has no registered instance; nothing is "
+                     "released");
+    return std::nullopt;
   }
-  return owned;
+  return LiveActorHandles().ClaimRemoval(slot, handle);
 }
 
 bool CancelLiveActorAssets(std::size_t slot, const VS::Battle::Actor* actor) {
@@ -1452,26 +1483,19 @@ void SettleLiveActorLoads() {
 
 int QueueLiveSlotActorAsset(std::size_t slot,
                             const Content::ActorAssetRequest& request) {
-  const VS::Battle::Actor* actor = SlotActor(slot);
-  const SpawnedActor handle =
-      actor == nullptr ? SpawnedActor::kNone
-                       : LiveActorHandles().Observe(slot, ActorAddress(actor));
-  if (handle == SpawnedActor::kNone ||
-      !Content::IsOwnableActorAssetRequest(request)) {
+  if (!Content::IsOwnableActorAssetRequest(request)) {
     return Content::QueueLiveActorAsset(request);
   }
-  return QueueActorLoad(handle, request);
+  return QueueActorLoad(LiveActorIdentityAt(slot), request);
 }
 
 std::optional<Content::ActorAssetTicket> SubmitLiveSlotActorAsset(
     std::size_t slot, const Content::ActorAssetRequest& request) {
-  const VS::Battle::Actor* actor = SlotActor(slot);
-  if (actor == nullptr || !Content::IsOwnableActorAssetRequest(request)) {
-    return std::nullopt;
-  }
-  const SpawnedActor handle =
-      LiveActorHandles().Observe(slot, ActorAddress(actor));
-  if (handle == SpawnedActor::kNone) {
+  const SpawnedActor handle = LiveActorIdentityAt(slot);
+  if (handle == SpawnedActor::kNone || LiveActorHandles().Removing(handle) ||
+      !Content::IsOwnableActorAssetRequest(request)) {
+    WarnActorRefused("SubmitActorAsset",
+                     "request has no current, non-removing actor owner");
     return std::nullopt;
   }
   return Content::SubmitLiveActorAsset(request, AssetOwnerOf(handle),
@@ -1480,31 +1504,20 @@ std::optional<Content::ActorAssetTicket> SubmitLiveSlotActorAsset(
 
 std::optional<Content::ActorAssetTicket> SubmitLiveActorOwnedAsset(
     const VS::Battle::Actor* actor, const Content::ActorAssetRequest& request) {
-  if (actor == nullptr) return std::nullopt;
-  for (std::size_t slot = 0; slot < std::size(VS::Battle::actors); ++slot) {
-    if (SlotActor(slot) == actor) {
-      return SubmitLiveSlotActorAsset(slot, request);
-    }
+  const auto slot = LiveActorSlot(LiveActorIdentity(actor));
+  if (!slot) {
+    WarnActorRefused("SubmitActorAsset", "actor is not registered");
+    return std::nullopt;
   }
-  return std::nullopt;
+  return SubmitLiveSlotActorAsset(*slot, request);
 }
 
 int QueueLiveActorOwnedAsset(const VS::Battle::Actor* actor,
                              const Content::ActorAssetRequest& request) {
-  if (actor != nullptr) {
-    for (std::size_t slot = 0; slot < kSpawnActorSlots; ++slot) {
-      if (SlotActor(slot) == actor) {
-        return QueueLiveSlotActorAsset(slot, request);
-      }
-    }
-    const SpawnedActor pending =
-        LiveActorHandles().Pending(ActorAddress(actor));
-    if (pending != SpawnedActor::kNone &&
-        Content::IsOwnableActorAssetRequest(request)) {
-      return QueueActorLoad(pending, request);
-    }
+  if (!Content::IsOwnableActorAssetRequest(request)) {
+    return Content::QueueLiveActorAsset(request);
   }
-  return Content::QueueLiveActorAsset(request);
+  return QueueActorLoad(LiveActorIdentity(actor), request);
 }
 
 AssetAddress LiveActorRecordMemory(Content::ActorAssetOwner owner,
@@ -1536,18 +1549,8 @@ AssetAddress LiveActorRecordMemory(Content::ActorAssetOwner owner,
 }
 
 std::optional<ActorShape> LiveActorShape(const VS::Battle::Actor* actor) {
-  if (actor == nullptr) {
-    return std::nullopt;
-  }
-  ActorInstanceTable& handles = LiveActorHandles();
-  SpawnedActor handle = handles.Pending(ActorAddress(actor));
-  for (std::size_t slot = 0;
-       handle == SpawnedActor::kNone && slot < kSpawnActorSlots; ++slot) {
-    if (SlotActor(slot) == actor) {
-      handle = handles.Observe(slot, ActorAddress(actor));
-    }
-  }
-  const std::optional<ActorDefinition> definition = handles.Definition(handle);
+  const auto definition =
+      LiveActorHandles().Definition(LiveActorIdentity(actor));
   if (!definition) {
     return std::nullopt;
   }
@@ -1557,15 +1560,19 @@ std::optional<ActorShape> LiveActorShape(const VS::Battle::Actor* actor) {
 SpawnedActor InstallLiveActorInstance(std::size_t slot,
                                       VS::Battle::Actor* actor,
                                       ActorShape shape) {
-  if (actor == nullptr || slot >= kSpawnActorSlots) {
+  if (actor == nullptr || slot >= kSpawnActorSlots ||
+      SlotActor(slot) != nullptr) {
+    WarnActorRefused("InstallActorInstance",
+                     "actor or free spawn slot is missing");
     return SpawnedActor::kNone;
   }
   ActorInstanceTable& handles = LiveActorHandles();
-  static_cast<void>(handles.Observe(slot, ActorAddress(SlotActor(slot))));
   const SpawnedActor handle =
       handles.Begin(slot, ActorAddress(actor), ActorDefinition{.shape = shape},
                     false, ComponentsOf(*actor, shape));
   if (handle == SpawnedActor::kNone || !handles.Publish(slot, handle)) {
+    WarnActorRefused("InstallActorInstance",
+                     "actor slot already has a live or pending identity");
     return SpawnedActor::kNone;
   }
   VS::Battle::actors[slot] = actor;

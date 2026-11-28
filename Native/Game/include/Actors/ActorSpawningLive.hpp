@@ -41,6 +41,14 @@ void ReleaseLiveActorRecord(SpawnedActor actor, ActorRecordPart part);
 // returned identity, not the pointer, across callbacks or actor replacement.
 [[nodiscard]] SpawnedActor LiveActorIdentity(const VS::Battle::Actor* actor);
 [[nodiscard]] SpawnedActor LiveActorIdentityAt(std::size_t slot);
+[[nodiscard]] std::optional<std::size_t> LiveActorSlot(SpawnedActor actor);
+[[nodiscard]] Battle::Ai::ActorAiState* LiveActorAiState(SpawnedActor actor);
+[[nodiscard]] bool BindLiveActorAiState(SpawnedActor actor,
+                                        Battle::Ai::ActorAiState* state);
+[[nodiscard]] bool UnbindLiveActorAiState(SpawnedActor actor,
+                                          Battle::Ai::ActorAiState* expected);
+// The arena has been reclaimed; clear associations without touching storage.
+void InvalidateLiveActorAiBindings();
 // Completes an already-claimed removal after its resources have been released.
 // Only storage allocated by the native spawn host is freed.
 void FinalizeLiveActorRemoval(SpawnedActor actor);
@@ -53,8 +61,8 @@ void ResetLiveActorHandles();
 [[nodiscard]] bool CancelLivePendingScriptedActorSpawn(std::size_t slot);
 // Native (#55): starts removing the installed `actor` in `slot` and returns
 // the slot resources its definition owns, once; nothing when `actor` is not
-// the slot's actor or is already being removed. An actor the spawn host did
-// not allocate owns none and is reported on the "actors" channel.
+// the slot's registered actor or is already being removed. Unregistered
+// actors are refused and reported on the "actors" channel.
 [[nodiscard]] std::optional<ActorResources> ClaimLiveActorRemoval(
     std::size_t slot, const VS::Battle::Actor* actor);
 // Native (#48): cancels the queued asset requests the installed actor owns;
@@ -68,8 +76,8 @@ void FinishLiveActorAssets(std::size_t slot, const VS::Battle::Actor* actor);
 void SettleLiveActorLoads();
 // Native (#48): queues `request` for the actor installed in `slot`, with a
 // ticket the actor load table settles, so removing that actor cancels it.
-// Unowned, as the original queued it, when the slot is empty or the request
-// kind is not ownable. The queue index, or -1.
+// Only non-actor kinds may be unowned. Missing or removing actor owners are
+// refused. The queue index, or -1.
 int QueueLiveSlotActorAsset(std::size_t slot,
                             const Content::ActorAssetRequest& request);
 // Native (#55): submits an installed actor's ownable request with a ticket
@@ -80,15 +88,14 @@ int QueueLiveSlotActorAsset(std::size_t slot,
 SubmitLiveActorOwnedAsset(const VS::Battle::Actor* actor,
                           const Content::ActorAssetRequest& request);
 // As QueueLiveSlotActorAsset, for `actor` wherever it is installed or while
-// the spawn host's allocation of it is pending; unowned when the actor table
-// and the pending allocations do not hold it.
+// the spawn host's allocation of it is pending.
 int QueueLiveActorOwnedAsset(const VS::Battle::Actor* actor,
                              const Content::ActorAssetRequest& request);
 // Native (#48): the memory the actor named by `owner` keeps for its `record`
 // of `table`, where an owned request binds it: the model memory of its body or
 // gimmick, the weapon model memory of its second body or weapon, the shield
 // model memory of its shield. kNone for a stale or foreign owner, an actor
-// without a spawn definition, or a record that is not one of the actor's parts.
+// or a record that is not one of the actor's parts.
 [[nodiscard]] Content::AssetAddress LiveActorRecordMemory(
     Content::ActorAssetOwner owner, Content::ActorRecordTable table,
     int record);

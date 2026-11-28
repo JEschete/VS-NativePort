@@ -87,6 +87,9 @@ class LiveEngagementHost final : public EngagementBuildupHost {
 class LiveEngagedList final : public EngagedList {
  public:
   explicit LiveEngagedList(VS::Battle::Ai::RoomAiState& room) : room_(room) {}
+  LiveEngagedList(VS::Battle::Ai::RoomAiState& room, Actors::SpawnedActor owner,
+                  int slot, ActorAiState* state)
+      : room_(room), owner_(owner), owner_slot_(slot), owner_state_(state) {}
 
   [[nodiscard]] std::optional<int> Head() const override {
     return IdOf(room_.engaged_head);
@@ -118,10 +121,12 @@ class LiveEngagedList final : public EngagedList {
   }
   void SetPose(int actor_id, unsigned pose) override {
     VS::Battle::Ai::ActorAiState& state = At(actor_id);
-    Require(state.actor != nullptr, "AI engagement pose requires the actor");
-    auto& actor = *reinterpret_cast<VS::Battle::Actor*>(state.actor);
-    actor.command_flags =
-        static_cast<std::uint8_t>((actor.command_flags & ~kPoseMask) |
+    auto* actor = actor_id == owner_slot_
+                      ? Actors::ResolveLiveActorInstance(owner_)
+                      : reinterpret_cast<VS::Battle::Actor*>(state.actor);
+    Require(actor != nullptr, "AI engagement pose requires the actor");
+    actor->command_flags =
+        static_cast<std::uint8_t>((actor->command_flags & ~kPoseMask) |
                                   ((pose << kPoseShift) & kPoseMask));
   }
   [[nodiscard]] unsigned AshleyClassification(int actor_id) const override {
@@ -129,30 +134,40 @@ class LiveEngagedList final : public EngagedList {
   }
 
  private:
-  static std::optional<int> IdOf(const VS::Battle::Ai::ActorAiState* state) {
+  std::optional<int> IdOf(const VS::Battle::Ai::ActorAiState* state) const {
     if (state == nullptr) return std::nullopt;
     for (int id = 0; id < kEngagementActorSlots; ++id) {
-      if (VS::Battle::Ai::actorAiStates[static_cast<std::size_t>(id)] ==
-          state) {
+      if (StateAt(id) == state) {
         return id;
       }
     }
     Require(false, "AI engaged list holds a state outside the AI state table");
     return std::nullopt;
   }
-  static VS::Battle::Ai::ActorAiState* StateOrNull(
-      std::optional<int> actor_id) {
+  VS::Battle::Ai::ActorAiState* StateOrNull(std::optional<int> actor_id) const {
     if (!actor_id.has_value()) return nullptr;
     return &At(*actor_id);
   }
-  static VS::Battle::Ai::ActorAiState& At(int actor_id) {
-    VS::Battle::Ai::ActorAiState* state =
-        VS::Battle::Ai::actorAiStates[static_cast<std::size_t>(actor_id)];
+  VS::Battle::Ai::ActorAiState& At(int actor_id) const {
+    VS::Battle::Ai::ActorAiState* state = StateAt(actor_id);
     Require(state != nullptr, "AI engaged list requires the member's state");
     return *state;
   }
 
+  ActorAiState* StateAt(int actor_id) const {
+    if (owner_ != Actors::SpawnedActor::kNone) {
+      return actor_id == owner_slot_
+                 ? owner_state_
+                 : Actors::LiveActorAiState(Actors::LiveActorIdentityAt(
+                       static_cast<std::size_t>(actor_id)));
+    }
+    return VS::Battle::Ai::actorAiStates[static_cast<std::size_t>(actor_id)];
+  }
+
   VS::Battle::Ai::RoomAiState& room_;
+  Actors::SpawnedActor owner_ = Actors::SpawnedActor::kNone;
+  int owner_slot_ = -1;
+  ActorAiState* owner_state_ = nullptr;
 };
 
 class LiveEngagementTable final : public EngagementTable {
@@ -302,6 +317,18 @@ void UnlinkLiveEngagedActor(VS::Battle::Ai::ActorAiState* pointer) {
           "AI engaged-list removal requires the actor and room state");
   LiveEngagedList list(*VS::Battle::Ai::roomAiState);
   Require(UnlinkEngagedActor(list, state.actor_id),
+          "AI engaged-list removal requires a list without repeats");
+}
+
+void UnlinkLiveActorInstanceFromEngagement(Actors::SpawnedActor actor) {
+  const auto slot = Actors::LiveActorSlot(actor);
+  auto* state = Actors::LiveActorAiState(actor);
+  Require(slot && state != nullptr && VS::Battle::Ai::roomAiState != nullptr,
+          "AI engaged-list removal requires an owned state and room");
+  if (!slot) return;
+  LiveEngagedList list(*VS::Battle::Ai::roomAiState, actor,
+                       static_cast<int>(*slot), state);
+  Require(UnlinkEngagedActor(list, static_cast<int>(*slot)),
           "AI engaged-list removal requires a list without repeats");
 }
 

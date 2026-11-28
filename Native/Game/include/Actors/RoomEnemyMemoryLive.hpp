@@ -12,6 +12,7 @@
 // Refusals are reported on the "actors" channel.
 namespace VS::Actors {
 struct RoomActorRecord;
+enum class SpawnedActor : std::uint64_t;
 
 // The saved room records as the typed memory, and back (the room load's
 // enemy cache, 146C.c:15190).
@@ -25,6 +26,7 @@ void ForgetLiveRoomEnemies(int map, int zone);
 // `actor_id`. An empty slot and an actor without a room spawn (index 0x80)
 // are skipped; an id outside the actor record table is refused.
 void StoreLiveRoomActorState(int actor_id, int hidden);
+void StoreLiveRoomActorState(SpawnedActor actor, int hidden);
 // Whether the current saved room is `map` in `zone` (146C.c:6650, 6759).
 [[nodiscard]] bool IsLiveRememberedRoom(int zone, int map);
 // Copies the current room's record for `spawn_index` (func_80069E80) into

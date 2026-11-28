@@ -18,4 +18,5 @@ namespace VS::Battle::Ai {
 // module's pointer table stores this binding (0x800E6178). Aborts with a
 // diagnostic when creation refuses the actor.
 int CreateLiveActorAiState(VS::Battle::Actor* actor, int options);
+int CreateLiveActorInstanceAi(Actors::SpawnedActor actor, int options);
 }  // namespace VS::Battle::Ai

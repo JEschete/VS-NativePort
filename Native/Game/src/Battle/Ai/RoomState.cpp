@@ -12,6 +12,7 @@
 
 #include "Actors/ActorAllocation.hpp"
 #include "Actors/ActorRecord.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Actors/Animation.hpp"
 #include "Actors/ModelInstance.hpp"
 #include "Actors/ShpModel.hpp"
@@ -203,8 +204,11 @@ class BattleRuntime final : public VS::Battle::Ai::RoomAiRuntime {
   }
 
   void FreeActorAiStates() override {
-    for (VS::Battle::Actor* actor : VS::Battle::actors) {
-      if (actor != nullptr) VS::Battle::Ai::FreeLiveActorAiState(actor);
+    for (std::size_t slot = 0; slot < VS::Actors::kSpawnActorSlots; ++slot) {
+      const auto actor = VS::Actors::LiveActorIdentityAt(slot);
+      if (actor != VS::Actors::SpawnedActor::kNone) {
+        VS::Battle::Ai::FreeLiveActorInstanceAi(actor);
+      }
     }
   }
 
@@ -247,6 +251,7 @@ VS::Battle::Ai::BattleActorReactionDelays() {
 void VS::Battle::Ai::InvalidateSessionBindings(void) {
   // The arena was already reset: never dereference or free its former bindings.
   ClearRoomAiBindings();
+  VS::Actors::InvalidateLiveActorAiBindings();
   VS::Battle::Ai::actorAiStates.fill(nullptr);
   VS::Battle::Ai::attributeActorMask = 0;
   VS::Battle::Ai::secondPerceptionTarget = 0;

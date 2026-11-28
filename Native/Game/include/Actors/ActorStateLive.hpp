@@ -31,6 +31,15 @@ struct SVECTOR;
 // nothing), where the originals read past the table.
 namespace VS::Actors {
 struct SpawnPlacement;
+enum class SpawnedActor : std::uint64_t;
+
+struct ActorPersistencePose {
+  PackedTile tile{};
+  bool fading = false;
+};
+
+[[nodiscard]] std::optional<ActorPersistencePose> ReadLiveActorPersistencePose(
+    SpawnedActor actor, int movement_class);
 
 // decomp: BATTLE.PRG func_8007BF6C (src/BATTLE/BATTLE.PRG/146C.c:8566)
 void EnableLiveActorModel(int actor_id);

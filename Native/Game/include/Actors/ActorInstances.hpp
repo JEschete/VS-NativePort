@@ -9,6 +9,9 @@
 namespace VS::Battle {
 struct ActorStats;
 }
+namespace VS::Battle::Ai {
+struct ActorAiState;
+}
 namespace VS::Field {
 struct GimmickInstance;
 }
@@ -119,31 +122,14 @@ class ActorInstanceTable {
     return Encode(slot, entry.generation);
   }
 
-  // Reconciles an externally changed actor-table slot. A null slot invalidates
-  // an installed actor but leaves a pending, unpublished allocation intact. An
-  // address the table did not allocate becomes an instance without a
-  // definition.
-  [[nodiscard]] SpawnedActor Observe(std::size_t slot, std::uintptr_t address) {
+  // Lookup never creates, replaces or retires an identity.
+  [[nodiscard]] SpawnedActor At(std::size_t slot) const {
     if (slot >= entries_.size()) {
       return SpawnedActor::kNone;
     }
-    Entry& entry = entries_[slot];
-    if (address == 0) {
-      if (entry.installed) {
-        Clear(entry);
-      }
-      return SpawnedActor::kNone;
-    }
-    if (entry.address != address) {
-      Advance(entry);
-      entry.address = address;
-      entry.definition.reset();
-      entry.removing = false;
-      entry.owns_storage = false;
-      entry.components = {};
-    }
-    entry.installed = true;
-    return Encode(slot, entry.generation);
+    const Entry& entry = entries_[slot];
+    return entry.installed ? Encode(slot, entry.generation)
+                           : SpawnedActor::kNone;
   }
 
   [[nodiscard]] bool Publish(std::size_t slot, SpawnedActor actor) {
@@ -181,8 +167,39 @@ class ActorInstanceTable {
     return entry != nullptr ? std::optional(entry->components) : std::nullopt;
   }
 
+  [[nodiscard]] Battle::Ai::ActorAiState* AiState(SpawnedActor actor) const {
+    const Entry* entry = Find(actor);
+    return entry != nullptr ? entry->ai_state : nullptr;
+  }
+
+  [[nodiscard]] bool BindAiState(SpawnedActor actor,
+                                 Battle::Ai::ActorAiState* state) {
+    Entry* entry = Find(actor);
+    if (entry == nullptr || !entry->installed || entry->removing ||
+        entry->ai_state != nullptr || state == nullptr) {
+      return false;
+    }
+    entry->ai_state = state;
+    return true;
+  }
+
+  [[nodiscard]] bool UnbindAiState(SpawnedActor actor,
+                                   Battle::Ai::ActorAiState* expected) {
+    Entry* entry = Find(actor);
+    if (entry == nullptr || expected == nullptr ||
+        entry->ai_state != expected) {
+      return false;
+    }
+    entry->ai_state = nullptr;
+    return true;
+  }
+
+  void ResetAiBindings() {
+    for (Entry& entry : entries_) entry.ai_state = nullptr;
+  }
+
   // The unpublished allocation at `address`; kNone when no pending instance
-  // has it. Unlike Observe, this changes nothing.
+  // has it. This changes nothing.
   [[nodiscard]] SpawnedActor Pending(std::uintptr_t address) const {
     if (address == 0) {
       return SpawnedActor::kNone;
@@ -196,12 +213,11 @@ class ActorInstanceTable {
     return SpawnedActor::kNone;
   }
 
-  // The definition `actor` was allocated with; nothing for a stale handle or
-  // an instance the table only observed.
+  // The definition `actor` was allocated with; nothing for a stale handle.
   [[nodiscard]] std::optional<ActorDefinition> Definition(
       SpawnedActor actor) const {
     const Entry* entry = Find(actor);
-    return entry != nullptr ? entry->definition : std::nullopt;
+    return entry != nullptr ? std::optional(entry->definition) : std::nullopt;
   }
 
   // The slot `actor` names; nothing for a stale or invalid handle.
@@ -216,8 +232,7 @@ class ActorInstanceTable {
 
   // Starts removing the installed `actor` in `slot` and hands over the
   // resources it owns, once. A stale handle, an unpublished allocation or an
-  // actor already being removed claims nothing; an observed instance without
-  // a definition owns no slot resources.
+  // actor already being removed claims nothing.
   [[nodiscard]] std::optional<ActorResources> ClaimRemoval(std::size_t slot,
                                                            SpawnedActor actor) {
     Entry* entry = Find(actor, slot);
@@ -225,8 +240,7 @@ class ActorInstanceTable {
       return std::nullopt;
     }
     entry->removing = true;
-    return entry->definition ? entry->definition->Resources()
-                             : ActorResources{};
+    return entry->definition.Resources();
   }
 
   [[nodiscard]] bool Discard(SpawnedActor actor) {
@@ -263,11 +277,12 @@ class ActorInstanceTable {
   struct Entry {
     std::uintptr_t address = 0;
     std::uint64_t generation = 0;
-    std::optional<ActorDefinition> definition;
+    ActorDefinition definition;
     bool installed = false;
     bool removing = false;
     bool owns_storage = false;
     ActorInstanceComponents components;
+    Battle::Ai::ActorAiState* ai_state = nullptr;
   };
 
   [[nodiscard]] static constexpr SpawnedActor Encode(std::size_t slot,
@@ -330,10 +345,11 @@ class ActorInstanceTable {
   static void Clear(Entry& entry) {
     entry.address = 0;
     entry.installed = false;
-    entry.definition.reset();
+    entry.definition = {};
     entry.removing = false;
     entry.owns_storage = false;
     entry.components = {};
+    entry.ai_state = nullptr;
     Advance(entry);
   }
 

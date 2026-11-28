@@ -21,6 +21,7 @@
 #include "Actors/ActorRecord.hpp"
 #include "Actors/ActorRosterLive.hpp"
 #include "Actors/ActorSpawning.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Actors/ActorStateRecord.hpp"
 #include "Actors/ActorTableLive.hpp"
 #include "Actors/Animation.hpp"
@@ -378,6 +379,13 @@ VS::Actors::WeaponModel* LiveWeaponModel(int index) {
   return weaponModels[index];
 }
 
+PackedTile GimmickTile(const VS::Field::GimmickInstance& gimmick) {
+  return {.x = static_cast<std::uint8_t>(gimmick.tile_x),
+          .layer = static_cast<std::uint8_t>(gimmick.tile_layer),
+          .z = static_cast<std::uint8_t>(gimmick.tile_z),
+          .spare = static_cast<std::uint8_t>(gimmick.tile_extra)};
+}
+
 class LiveActorStateHost final : public ActorStateHost {
  public:
   explicit LiveActorStateHost(const char* operation) : operation_(operation) {}
@@ -393,18 +401,14 @@ class LiveActorStateHost final : public ActorStateHost {
     const VS::Field::GimmickInstance* gimmick =
         VS::Field::FindGimmickForActorSlot(id);
     if (gimmick == nullptr) return std::nullopt;
-    return GimmickView{
-        .skipped = gimmick->is_skipped != 0,
-        .visible = gimmick->is_visible != 0,
-        .tile = {.x = static_cast<std::uint8_t>(gimmick->tile_x),
-                 .layer = static_cast<std::uint8_t>(gimmick->tile_layer),
-                 .z = static_cast<std::uint8_t>(gimmick->tile_z),
-                 .spare = static_cast<std::uint8_t>(gimmick->tile_extra)},
-        .position = {.x = gimmick->position_x,
-                     .y = gimmick->position_y,
-                     .z = gimmick->position_z,
-                     .w = gimmick->position_pad},
-        .facing = gimmick->rotation_y};
+    return GimmickView{.skipped = gimmick->is_skipped != 0,
+                       .visible = gimmick->is_visible != 0,
+                       .tile = GimmickTile(*gimmick),
+                       .position = {.x = gimmick->position_x,
+                                    .y = gimmick->position_y,
+                                    .z = gimmick->position_z,
+                                    .w = gimmick->position_pad},
+                       .facing = gimmick->rotation_y};
   }
   void SetGimmickDisplay(int id, bool skipped, bool visible) override {
     if (VS::Field::GimmickInstance* gimmick = KnownGimmick(id)) {
@@ -767,6 +771,24 @@ void SetLiveActorDisplayFlags(int actor_id, int display_flags) {
 std::uint32_t LiveActorStateFlags(int actor_id) {
   LiveActorStateHost host("ActorStateFlags");
   return ActorStateFlags(host, actor_id);
+}
+
+std::optional<ActorPersistencePose> ReadLiveActorPersistencePose(
+    SpawnedActor actor, int movement_class) {
+  const auto components = LiveActorComponents(actor);
+  if (components && components->body != nullptr) {
+    const auto record = RecordTraits::Load(*components->body);
+    return ActorPersistencePose{
+        .tile = ActorSavedPlacement(record, movement_class),
+        .fading = (ComposeActorStateFlags(record, {}) &
+                   StateFlag::kActionAnimating) != 0};
+  }
+  if (components && components->gimmick != nullptr) {
+    return ActorPersistencePose{.tile = GimmickTile(*components->gimmick)};
+  }
+  WarnActorRefused("ReadActorPersistencePose",
+                   "actor has no owned body or gimmick");
+  return std::nullopt;
 }
 
 std::optional<ActorPlacementView> LiveActorPlacementView(int actor_id) {
