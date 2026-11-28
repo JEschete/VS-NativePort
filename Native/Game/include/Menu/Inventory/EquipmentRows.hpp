@@ -157,6 +157,11 @@ struct EquipmentModelChoice {
 
 enum class ModelReload : std::uint8_t { kDone, kLoading, kRefused };
 
+struct EquipmentModelReloadState {
+  std::array<Content::ActorAssetTicket, 2> tickets{};
+  bool request_refused = false;
+};
+
 class EquipmentModelHost {
  public:
   virtual ~EquipmentModelHost() = default;
@@ -168,10 +173,16 @@ class EquipmentModelHost {
   // Its record memory is the character's: the reload's requests are hers.
   [[nodiscard]] virtual bool HasEquipmentModelSlot(int index) = 0;
   virtual void ReleaseWeaponModel(int slot) = 0;
-  virtual void QueueWeaponAnimations(std::int32_t sequence_model) = 0;
-  virtual void QueueAsset(const Content::ActorAssetRequest& request) = 0;
+  [[nodiscard]] virtual std::optional<Content::ActorAssetTicket>
+  QueueWeaponAnimations(std::int32_t sequence_model) = 0;
+  [[nodiscard]] virtual bool QueueAsset(
+      const Content::ActorAssetRequest& request) = 0;
+  [[nodiscard]] virtual std::optional<Content::ActorAssetTicket> SubmitAsset(
+      const Content::ActorAssetRequest& request) = 0;
   virtual void SetWeaponDrawn(bool drawn) = 0;
-  [[nodiscard]] virtual bool AssetQueueBusy() = 0;
+  [[nodiscard]] virtual Content::ActorAssetOutcome AssetOutcome(
+      Content::ActorAssetTicket ticket) = 0;
+  virtual void ForgetAsset(Content::ActorAssetTicket ticket) = 0;
   virtual void ResetEquipmentPose() = 0;
   virtual void ReleasePreview() = 0;
   virtual void ClonePreview(int source_slot) = 0;
@@ -190,8 +201,8 @@ inline constexpr std::uint8_t kPreviewSettledAnimation = 101;
 // `step` is vs_battle_loadObjectDataState. Refused without the preview actor or
 // Ashley's model slots.
 [[nodiscard]] ModelReload ReloadEquipmentModels(
-    std::uint8_t& step, EquipmentModelHost& host,
-    const EquipmentModelChoice& choice);
+    std::uint8_t& step, EquipmentModelReloadState& state,
+    EquipmentModelHost& host, const EquipmentModelChoice& choice);
 // decomp: func_80109320 (src/MENU/MENU3.PRG/68C4.c:90).
 [[nodiscard]] bool IsTwoHandedWeapon(std::int32_t category);
 // decomp: populateDataSlot (src/MENU/MENU3.PRG/68C4.c:103; was

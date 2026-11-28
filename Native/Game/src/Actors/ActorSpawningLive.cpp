@@ -1345,6 +1345,32 @@ int QueueLiveSlotActorAsset(std::size_t slot,
   return QueueActorLoad(handle, request);
 }
 
+std::optional<Content::ActorAssetTicket> SubmitLiveSlotActorAsset(
+    std::size_t slot, const Content::ActorAssetRequest& request) {
+  const VS::Battle::Actor* actor = SlotActor(slot);
+  if (actor == nullptr || !Content::IsOwnableActorAssetRequest(request)) {
+    return std::nullopt;
+  }
+  const SpawnedActor handle =
+      LiveActorHandles().Observe(slot, ActorAddress(actor));
+  if (handle == SpawnedActor::kNone) {
+    return std::nullopt;
+  }
+  return Content::SubmitLiveActorAsset(request, AssetOwnerOf(handle),
+                                       &LiveActorRecordMemory);
+}
+
+std::optional<Content::ActorAssetTicket> SubmitLiveActorOwnedAsset(
+    const VS::Battle::Actor* actor, const Content::ActorAssetRequest& request) {
+  if (actor == nullptr) return std::nullopt;
+  for (std::size_t slot = 0; slot < std::size(VS::Battle::actors); ++slot) {
+    if (SlotActor(slot) == actor) {
+      return SubmitLiveSlotActorAsset(slot, request);
+    }
+  }
+  return std::nullopt;
+}
+
 int QueueLiveActorOwnedAsset(const VS::Battle::Actor* actor,
                              const Content::ActorAssetRequest& request) {
   if (actor != nullptr) {

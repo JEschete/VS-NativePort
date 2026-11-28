@@ -262,20 +262,30 @@ class LiveModelHost final : public EquipmentModelHost {
   void ReleaseWeaponModel(int slot) override {
     static_cast<void>(Content::ReleaseLiveWeaponModel(slot));
   }
-  void QueueWeaponAnimations(std::int32_t sequence_model) override {
-    Framework::QueueLiveAshleyWeaponAnimations(sequence_model);
+  std::optional<Content::ActorAssetTicket> QueueWeaponAnimations(
+      std::int32_t sequence_model) override {
+    return Framework::SubmitLiveAshleyWeaponAnimations(sequence_model);
   }
   // Native (#48): the reload writes Ashley's equipment memory, so she owns it.
-  void QueueAsset(const ActorAssetRequest& request) override {
-    static_cast<void>(
-        Actors::QueueLiveActorOwnedAsset(VS::Battle::characterState, request));
+  bool QueueAsset(const ActorAssetRequest& request) override {
+    return Actors::QueueLiveActorOwnedAsset(VS::Battle::characterState,
+                                            request) >= 0;
+  }
+  std::optional<Content::ActorAssetTicket> SubmitAsset(
+      const ActorAssetRequest& request) override {
+    return Actors::SubmitLiveActorOwnedAsset(VS::Battle::characterState,
+                                             request);
   }
   void SetWeaponDrawn(bool drawn) override {
     Actors::SetLiveActorWeaponDrawn(kPreviewActor, drawn ? 1 : 0,
                                     kWeaponDrawTransition);
   }
-  bool AssetQueueBusy() override {
-    return Content::UpdateLiveActorAssetQueue() != 0;
+  Content::ActorAssetOutcome AssetOutcome(
+      Content::ActorAssetTicket ticket) override {
+    return Content::LiveActorAssetCompletion(ticket).outcome;
+  }
+  void ForgetAsset(Content::ActorAssetTicket ticket) override {
+    Content::ForgetLiveActorAsset(ticket);
   }
   void ResetEquipmentPose() override {
     Framework::ResetLiveAshleyEquipmentPose();
@@ -366,12 +376,15 @@ void SetLiveAccessoryPreviewStats(int accessory_id) {
 
 int ReloadLiveEquipmentModels(int category, int wep_id, int material) {
   auto step = VS::Content::objectDataLoadStep;
+  static EquipmentModelReloadState reload_state;
   LiveModelHost host;
-  const ModelReload result =
-      ReloadEquipmentModels(step, host, {category, wep_id, material});
+  const ModelReload result = ReloadEquipmentModels(
+      step, reload_state, host, {category, wep_id, material});
   VS::Content::objectDataLoadStep = step;
   if (result == ModelReload::kRefused) {
-    Refuse("a model reload without the preview actor or Ashley's model slots");
+    Refuse(
+        "a model reload request failed or its actor/model slot was "
+        "unavailable");
     return 0;
   }
   return result == ModelReload::kLoading ? 1 : 0;

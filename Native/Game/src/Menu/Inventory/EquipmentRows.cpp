@@ -423,46 +423,153 @@ bool SetAccessoryPreviewStats(AccessoryPreviewHost& host,
 
 // decomp: MENU3.PRG loadObjectData (src/MENU/MENU3.PRG/68C4.c:13; was
 // _loadObjectData)
-ModelReload ReloadEquipmentModels(std::uint8_t& step, EquipmentModelHost& host,
+namespace {
+enum class ReloadAssets : std::uint8_t { kLoaded, kPending, kFailed };
+
+ReloadAssets SettleReloadAssets(EquipmentModelReloadState& state,
+                                EquipmentModelHost& host) {
+  bool pending = false;
+  bool failed = state.request_refused;
+  for (const Content::ActorAssetTicket ticket : state.tickets) {
+    if (ticket == Content::ActorAssetTicket::kNone) continue;
+    const Content::ActorAssetOutcome outcome = host.AssetOutcome(ticket);
+    if (outcome == Content::ActorAssetOutcome::kPending) {
+      pending = true;
+    } else if (outcome != Content::ActorAssetOutcome::kLoaded) {
+      failed = true;
+    }
+  }
+  if (pending) return ReloadAssets::kPending;
+  for (Content::ActorAssetTicket& ticket : state.tickets) {
+    if (ticket != Content::ActorAssetTicket::kNone) host.ForgetAsset(ticket);
+    ticket = Content::ActorAssetTicket::kNone;
+  }
+  state.request_refused = false;
+  return failed ? ReloadAssets::kFailed : ReloadAssets::kLoaded;
+}
+
+void AddReloadTicket(EquipmentModelReloadState& state,
+                     std::optional<Content::ActorAssetTicket> ticket) {
+  if (!ticket) {
+    state.request_refused = true;
+    return;
+  }
+  for (Content::ActorAssetTicket& current : state.tickets) {
+    if (current == Content::ActorAssetTicket::kNone) {
+      current = *ticket;
+      return;
+    }
+  }
+  state.request_refused = true;
+}
+
+std::optional<ActorAssetRequest> EquipmentModelRequest(EquipmentModelHost& host,
+                                                       std::int32_t model_id,
+                                                       std::int32_t material) {
+  if (model_id == 0) return std::nullopt;
+  const int index = ModelIndex(model_id);
+  if (!host.HasEquipmentModelSlot(index)) return std::nullopt;
+  ActorAssetRequest request{};
+  request.kind = kEquipmentModelKind;
+  request.target_slot = static_cast<std::int8_t>(index);
+  request.model_id = static_cast<std::int16_t>(model_id);
+  request.sub_kind = 0;
+  request.texture_slot = index == 0 ? kWeaponTextureSlot : kShieldTextureSlot;
+  request.material = static_cast<std::uint8_t>(material);
+  return request;
+}
+
+ModelReload QueueReloadAssets(std::uint8_t& step,
+                              EquipmentModelReloadState& state,
+                              EquipmentModelHost& host,
+                              const EquipmentModelChoice& choice) {
+  if (std::ranges::any_of(state.tickets, [](Content::ActorAssetTicket ticket) {
+        return ticket != Content::ActorAssetTicket::kNone;
+      })) {
+    const ReloadAssets previous = SettleReloadAssets(state, host);
+    if (previous == ReloadAssets::kPending) return ModelReload::kLoading;
+    if (previous == ReloadAssets::kFailed) {
+      host.ResetEquipmentPose();
+      step = 0;
+      return ModelReload::kRefused;
+    }
+  }
+  if (choice.model_id != 0 &&
+      !host.HasEquipmentModelSlot(ModelIndex(choice.model_id))) {
+    return ModelReload::kRefused;
+  }
+  if (choice.category == 0) {
+    host.ReleaseWeaponModel(kShieldModel);
+    if (choice.model_id != 0 &&
+        IsTwoHandedWeapon(host.PreviewSequenceModel())) {
+      host.ReleaseWeaponModel(kWeaponModel);
+      AddReloadTicket(state, host.QueueWeaponAnimations(kShieldStance));
+    }
+  } else {
+    if (choice.category != host.PreviewSequenceModel()) {
+      AddReloadTicket(state, host.QueueWeaponAnimations(choice.category));
+    }
+    host.ReleaseWeaponModel(kWeaponModel);
+    if (host.HasWeaponModel(kFirstPreviewWeaponModel + 1) &&
+        IsTwoHandedWeapon(choice.category)) {
+      host.ReleaseWeaponModel(kShieldModel);
+    }
+  }
+  if (const auto request =
+          EquipmentModelRequest(host, choice.model_id, choice.material)) {
+    AddReloadTicket(state, host.SubmitAsset(*request));
+  } else if (choice.model_id != 0) {
+    state.request_refused = true;
+  }
+  host.SetWeaponDrawn(false);
+  ++step;
+  return ModelReload::kLoading;
+}
+
+ModelReload WaitForReloadAssets(std::uint8_t& step,
+                                EquipmentModelReloadState& state,
+                                EquipmentModelHost& host,
+                                bool has_preview_actor) {
+  switch (SettleReloadAssets(state, host)) {
+    case ReloadAssets::kPending:
+      return ModelReload::kLoading;
+    case ReloadAssets::kFailed:
+      if (has_preview_actor) host.ResetEquipmentPose();
+      step = 0;
+      return ModelReload::kRefused;
+    case ReloadAssets::kLoaded:
+      if (!has_preview_actor) {
+        step = 0;
+        return ModelReload::kRefused;
+      }
+      if (host.PreviewAnimation() != kPreviewIdleAnimation) {
+        return ModelReload::kLoading;
+      }
+      host.ResetEquipmentPose();
+      ++step;
+      return ModelReload::kLoading;
+  }
+  return ModelReload::kRefused;
+}
+}  // namespace
+
+ModelReload ReloadEquipmentModels(std::uint8_t& step,
+                                  EquipmentModelReloadState& state,
+                                  EquipmentModelHost& host,
                                   const EquipmentModelChoice& choice) {
-  if (!host.HasPreviewActor()) {
+  const bool has_preview_actor = host.HasPreviewActor();
+  if (!has_preview_actor &&
+      (step != kReloadWait ||
+       std::ranges::all_of(state.tickets, [](Content::ActorAssetTicket ticket) {
+         return ticket == Content::ActorAssetTicket::kNone;
+       }))) {
     return ModelReload::kRefused;
   }
   switch (step) {
     case kReloadQueue:
-      if (choice.model_id != 0 &&
-          !host.HasEquipmentModelSlot(ModelIndex(choice.model_id))) {
-        return ModelReload::kRefused;
-      }
-      if (choice.category == 0) {
-        host.ReleaseWeaponModel(kShieldModel);
-        if (choice.model_id != 0 &&
-            IsTwoHandedWeapon(host.PreviewSequenceModel())) {
-          host.ReleaseWeaponModel(kWeaponModel);
-          host.QueueWeaponAnimations(kShieldStance);
-        }
-      } else {
-        if (choice.category != host.PreviewSequenceModel()) {
-          host.QueueWeaponAnimations(choice.category);
-        }
-        host.ReleaseWeaponModel(kWeaponModel);
-        if (host.HasWeaponModel(kFirstPreviewWeaponModel + 1) &&
-            IsTwoHandedWeapon(choice.category)) {
-          host.ReleaseWeaponModel(kShieldModel);
-        }
-      }
-      static_cast<void>(
-          QueueEquipmentModel(host, choice.model_id, choice.material));
-      host.SetWeaponDrawn(false);
-      ++step;
-      break;
+      return QueueReloadAssets(step, state, host, choice);
     case kReloadWait:
-      if (!host.AssetQueueBusy() &&
-          host.PreviewAnimation() == kPreviewIdleAnimation) {
-        host.ResetEquipmentPose();
-        ++step;
-      }
-      break;
+      return WaitForReloadAssets(step, state, host, has_preview_actor);
     case kReloadPose:
       host.ReleasePreview();
       host.ClonePreview(kSourceActorSlot);
@@ -511,19 +618,7 @@ bool QueueEquipmentModel(EquipmentModelHost& host, std::int32_t model_id,
   if (model_id == 0) {
     return true;
   }
-  const int index = ModelIndex(model_id);
-  const bool shield = index != 0;
-  if (!host.HasEquipmentModelSlot(index)) {
-    return false;
-  }
-  ActorAssetRequest request{};
-  request.kind = kEquipmentModelKind;
-  request.target_slot = static_cast<std::int8_t>(index);
-  request.model_id = static_cast<std::int16_t>(model_id);
-  request.sub_kind = 0;
-  request.texture_slot = shield ? kShieldTextureSlot : kWeaponTextureSlot;
-  request.material = static_cast<std::uint8_t>(material);
-  host.QueueAsset(request);
-  return true;
+  const auto request = EquipmentModelRequest(host, model_id, material);
+  return request && host.QueueAsset(*request);
 }
 }  // namespace VS::Menu::Inventory

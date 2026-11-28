@@ -38,6 +38,7 @@
 namespace {
 namespace inv = VS::Menu::Inventory;
 namespace fw = VS::Menu::Framework;
+namespace Content = VS::Content;
 using VS::Content::ActorAssetRequest;
 using VS::Content::AssetAddress;
 
@@ -628,9 +629,12 @@ class RecordingModelHost final : public inv::EquipmentModelHost {
   std::uint8_t animation = 0;
   std::array<bool, 4> weapon_models{};
   std::array<bool, 2> slots{true, true};
-  bool busy = false;
+  Content::ActorAssetOutcome asset_outcome =
+      Content::ActorAssetOutcome::kPending;
   std::vector<ActorAssetRequest> requests;
   std::vector<std::string> log;
+  std::vector<Content::ActorAssetTicket> forgotten;
+  std::uint32_t next_ticket = 1;
 
   bool HasPreviewActor() override { return actor; }
   std::uint8_t PreviewSequenceModel() override { return sequence_model; }
@@ -644,17 +648,32 @@ class RecordingModelHost final : public inv::EquipmentModelHost {
   void ReleaseWeaponModel(int slot) override {
     log.emplace_back("release " + std::to_string(slot));
   }
-  void QueueWeaponAnimations(std::int32_t sequence) override {
+  std::optional<Content::ActorAssetTicket> QueueWeaponAnimations(
+      std::int32_t sequence) override {
     log.emplace_back("animations " + std::to_string(sequence));
+    return static_cast<Content::ActorAssetTicket>(next_ticket++);
   }
-  void QueueAsset(const ActorAssetRequest& request) override {
+  bool QueueAsset(const ActorAssetRequest& request) override {
     requests.push_back(request);
     log.emplace_back("queue");
+    return true;
+  }
+  std::optional<Content::ActorAssetTicket> SubmitAsset(
+      const ActorAssetRequest& request) override {
+    requests.push_back(request);
+    log.emplace_back("queue");
+    return static_cast<Content::ActorAssetTicket>(next_ticket++);
   }
   void SetWeaponDrawn(bool drawn) override {
     log.emplace_back(drawn ? "drawn" : "sheathed");
   }
-  bool AssetQueueBusy() override { return busy; }
+  Content::ActorAssetOutcome AssetOutcome(
+      Content::ActorAssetTicket /*ticket*/) override {
+    return asset_outcome;
+  }
+  void ForgetAsset(Content::ActorAssetTicket ticket) override {
+    forgotten.push_back(ticket);
+  }
   void ResetEquipmentPose() override { log.emplace_back("equipment pose"); }
   void ReleasePreview() override { log.emplace_back("release preview"); }
   void ClonePreview(int source) override {
@@ -677,9 +696,10 @@ TEST_CASE("ReloadEquipmentModels swaps a shield and queues its model",
   RecordingModelHost host;
   host.sequence_model = 3;
   host.weapon_models[3] = true;
+  inv::EquipmentModelReloadState state;
   std::uint8_t step = 0;
   const inv::EquipmentModelChoice shield{0, 100, 2};
-  CHECK(inv::ReloadEquipmentModels(step, host, shield) ==
+  CHECK(inv::ReloadEquipmentModels(step, state, host, shield) ==
         inv::ModelReload::kLoading);
   CHECK(step == 1);
   CHECK(host.log == std::vector<std::string>{"release 1", "release 0",
@@ -692,40 +712,62 @@ TEST_CASE("ReloadEquipmentModels swaps a shield and queues its model",
 TEST_CASE("ReloadEquipmentModels waits for the assets and the idle preview",
           "[equipment-rows]") {
   RecordingModelHost host;
-  std::uint8_t step = 1;
+  inv::EquipmentModelReloadState state;
+  std::uint8_t step = 0;
   const inv::EquipmentModelChoice shield{0, 100, 2};
-  host.busy = true;
   host.animation = 1;
-  CHECK(inv::ReloadEquipmentModels(step, host, shield) ==
+  CHECK(inv::ReloadEquipmentModels(step, state, host, shield) ==
         inv::ModelReload::kLoading);
-  host.busy = false;
+  CHECK(step == 1);
+  host.log.clear();
+  CHECK(inv::ReloadEquipmentModels(step, state, host, shield) ==
+        inv::ModelReload::kLoading);
+  host.asset_outcome = Content::ActorAssetOutcome::kLoaded;
   host.animation = 2;
-  CHECK(inv::ReloadEquipmentModels(step, host, shield) ==
+  CHECK(inv::ReloadEquipmentModels(step, state, host, shield) ==
         inv::ModelReload::kLoading);
   CHECK(step == 1);
   host.animation = 1;
-  CHECK(inv::ReloadEquipmentModels(step, host, shield) ==
+  CHECK(inv::ReloadEquipmentModels(step, state, host, shield) ==
         inv::ModelReload::kLoading);
   CHECK(step == 2);
-  CHECK(host.log == std::vector<std::string>{"equipment pose"});
+  CHECK(host.log.back() == "equipment pose");
+}
+
+TEST_CASE("ReloadEquipmentModels refuses a failed owned asset",
+          "[equipment-rows]") {
+  RecordingModelHost host;
+  inv::EquipmentModelReloadState state;
+  std::uint8_t step = 0;
+  CHECK(inv::ReloadEquipmentModels(step, state, host, {1, 5, 0}) ==
+        inv::ModelReload::kLoading);
+  host.asset_outcome = Content::ActorAssetOutcome::kFailed;
+  CHECK(inv::ReloadEquipmentModels(step, state, host, {1, 5, 0}) ==
+        inv::ModelReload::kRefused);
+  CHECK(step == 0);
+  CHECK(state.tickets[0] == Content::ActorAssetTicket::kNone);
+  CHECK(state.tickets[1] == Content::ActorAssetTicket::kNone);
+  CHECK(host.log.back() == "equipment pose");
+  CHECK(host.forgotten.size() == 2);
 }
 
 TEST_CASE("ReloadEquipmentModels rebuilds the preview and waits until settled",
           "[equipment-rows]") {
   RecordingModelHost host;
+  inv::EquipmentModelReloadState state;
   host.weapon_models[3] = true;
   std::uint8_t step = 2;
   const inv::EquipmentModelChoice shield{0, 100, 2};
-  CHECK(inv::ReloadEquipmentModels(step, host, shield) ==
+  CHECK(inv::ReloadEquipmentModels(step, state, host, shield) ==
         inv::ModelReload::kLoading);
   CHECK(step == 3);
   CHECK(host.log == std::vector<std::string>{
                         "release preview", "clone 0", "preview pose", "sheathe",
                         "play 1", "advance", "blend", "clear 3", "drawn"});
-  CHECK(inv::ReloadEquipmentModels(step, host, shield) ==
+  CHECK(inv::ReloadEquipmentModels(step, state, host, shield) ==
         inv::ModelReload::kLoading);
   host.animation = inv::kPreviewSettledAnimation;
-  CHECK(inv::ReloadEquipmentModels(step, host, shield) ==
+  CHECK(inv::ReloadEquipmentModels(step, state, host, shield) ==
         inv::ModelReload::kDone);
   CHECK(step == 0);
 }
@@ -733,15 +775,17 @@ TEST_CASE("ReloadEquipmentModels rebuilds the preview and waits until settled",
 TEST_CASE("ReloadEquipmentModels keeps a one-handed weapon for a shield",
           "[equipment-rows]") {
   RecordingModelHost host;
+  inv::EquipmentModelReloadState state;
   host.sequence_model = 2;
   std::uint8_t step = 0;
-  CHECK(inv::ReloadEquipmentModels(step, host, {0, 100, 0}) ==
+  CHECK(inv::ReloadEquipmentModels(step, state, host, {0, 100, 0}) ==
         inv::ModelReload::kLoading);
   CHECK(host.log == std::vector<std::string>{"release 1", "queue", "sheathed"});
   RecordingModelHost removed;
+  inv::EquipmentModelReloadState removed_state;
   removed.sequence_model = 3;
   step = 0;
-  CHECK(inv::ReloadEquipmentModels(step, removed, {0, 0, 0}) ==
+  CHECK(inv::ReloadEquipmentModels(step, removed_state, removed, {0, 0, 0}) ==
         inv::ModelReload::kLoading);
   CHECK(removed.log == std::vector<std::string>{"release 1", "sheathed"});
 }
@@ -749,18 +793,20 @@ TEST_CASE("ReloadEquipmentModels keeps a one-handed weapon for a shield",
 TEST_CASE("ReloadEquipmentModels releases the shield for a two-handed weapon",
           "[equipment-rows]") {
   RecordingModelHost host;
+  inv::EquipmentModelReloadState state;
   host.sequence_model = 2;
   host.weapon_models[3] = true;
   std::uint8_t step = 0;
-  CHECK(inv::ReloadEquipmentModels(step, host, {8, 7, 1}) ==
+  CHECK(inv::ReloadEquipmentModels(step, state, host, {8, 7, 1}) ==
         inv::ModelReload::kLoading);
   CHECK(host.log == std::vector<std::string>{"animations 8", "release 0",
                                              "release 1", "queue", "sheathed"});
   RecordingModelHost same;
+  inv::EquipmentModelReloadState same_state;
   same.sequence_model = 4;
   same.weapon_models[3] = true;
   step = 0;
-  CHECK(inv::ReloadEquipmentModels(step, same, {4, 7, 1}) ==
+  CHECK(inv::ReloadEquipmentModels(step, same_state, same, {4, 7, 1}) ==
         inv::ModelReload::kLoading);
   CHECK(same.log == std::vector<std::string>{"release 0", "queue", "sheathed"});
 }
@@ -768,15 +814,17 @@ TEST_CASE("ReloadEquipmentModels releases the shield for a two-handed weapon",
 TEST_CASE("ReloadEquipmentModels refuses without a preview actor or model slot",
           "[equipment-rows]") {
   RecordingModelHost host;
+  inv::EquipmentModelReloadState state;
   host.actor = false;
   std::uint8_t step = 2;
-  CHECK(inv::ReloadEquipmentModels(step, host, {1, 5, 0}) ==
+  CHECK(inv::ReloadEquipmentModels(step, state, host, {1, 5, 0}) ==
         inv::ModelReload::kRefused);
   CHECK(step == 2);
   RecordingModelHost missing;
+  inv::EquipmentModelReloadState missing_state;
   missing.slots[0] = false;
   step = 0;
-  CHECK(inv::ReloadEquipmentModels(step, missing, {1, 5, 0}) ==
+  CHECK(inv::ReloadEquipmentModels(step, missing_state, missing, {1, 5, 0}) ==
         inv::ModelReload::kRefused);
   CHECK(step == 0);
   CHECK(missing.log.empty());

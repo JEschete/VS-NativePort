@@ -1,6 +1,9 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
+#include <optional>
+
+#include "Content/ActorAssets.hpp"
 #include "Legacy/Psx.hpp"
 
 // Binds the actor preview (ActorPreview.hpp) to the actor and weapon records
@@ -19,4 +22,6 @@ void ReleaseLiveActorPreview();
 int DrawLiveActorPreview(VS::Core::Gte::MATRIX* preview_camera_matrix);
 void ResetLiveAshleyEquipmentPose();
 void QueueLiveAshleyWeaponAnimations(int sequence_model_id);
+[[nodiscard]] std::optional<Content::ActorAssetTicket>
+SubmitLiveAshleyWeaponAnimations(int sequence_model_id);
 }  // namespace VS::Menu::Framework

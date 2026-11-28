@@ -509,12 +509,17 @@ class LiveHost final : public Host {
   void ReleaseWeaponModel(int slot) override {
     Content::ReleaseLiveWeaponModel(slot);
   }
-  void QueueWeaponAnimations(int sequence_model) override {
+  std::optional<Content::ActorAssetTicket> QueueWeaponAnimations(
+      int sequence_model) override {
     Commit();
-    Framework::QueueLiveAshleyWeaponAnimations(sequence_model);
+    return Framework::SubmitLiveAshleyWeaponAnimations(sequence_model);
   }
-  bool ActorAssetsPending() override {
-    return Content::UpdateLiveActorAssetQueue() != 0;
+  Content::ActorAssetOutcome AssetOutcome(
+      Content::ActorAssetTicket ticket) override {
+    return Content::LiveActorAssetCompletion(ticket).outcome;
+  }
+  void ForgetAsset(Content::ActorAssetTicket ticket) override {
+    Content::ForgetLiveActorAsset(ticket);
   }
   void ResetEquipmentPose() override {
     Commit();

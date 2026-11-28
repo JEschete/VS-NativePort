@@ -2474,6 +2474,36 @@ TEST_CASE("Removing a live actor cancels only its own queued load",
   VS::Battle::actors[kSlot] = saved_actor;
 }
 
+TEST_CASE("A live slot asset ticket survives until its consumer forgets it",
+          "[actors][actors-spawning][asset-ownership]") {
+  constexpr std::size_t kSlot = 10;
+  VS::Battle::Actor* const saved_actor = VS::Battle::actors[kSlot];
+  content::ClearLiveActorAssetQueue();
+  actors::ResetLiveActorHandles();
+  VS::Battle::Actor installed{};
+  VS::Battle::actors[kSlot] = &installed;
+  ActorAssetRequest request{};
+  request.kind = Kind(ActorAssetKind::kWeaponModelLoad);
+  request.target_slot = 0;
+  request.model_id = 3;
+  const auto ticket = actors::SubmitLiveSlotActorAsset(kSlot, request);
+  CHECK(ticket.has_value());
+  if (!ticket) {
+    content::ClearLiveActorAssetQueue();
+    actors::ResetLiveActorHandles();
+    VS::Battle::actors[kSlot] = saved_actor;
+    return;
+  }
+  CHECK(content::FindLiveFreeActorAssetRequest() == 1);
+  CHECK(actors::CancelLiveActorAssets(kSlot, &installed));
+  CHECK(content::LiveActorAssetCompletion(*ticket).outcome ==
+        content::ActorAssetOutcome::kCancelled);
+  content::ForgetLiveActorAsset(*ticket);
+  content::ClearLiveActorAssetQueue();
+  actors::ResetLiveActorHandles();
+  VS::Battle::actors[kSlot] = saved_actor;
+}
+
 TEST_CASE("A live actor owns the sequence loads its equipped spawn queues",
           "[actors][actors-spawning][asset-ownership]") {
   // #48: removing the actor cancels its own sequences; a shared sequence,

@@ -32,6 +32,7 @@ namespace {
 namespace fw = VS::Menu::Framework;
 namespace items = VS::Items;
 namespace setup = VS::Menu::Setup;
+namespace Content = VS::Content;
 using Strings = std::vector<std::string>;
 
 constexpr std::uint8_t kTerminator = 0xE7;
@@ -182,10 +183,19 @@ class FakeHost final : public setup::Host {
   void ReleaseWeaponModel(int slot) override {
     released_models.push_back(slot);
   }
-  void QueueWeaponAnimations(int sequence_model) override {
+  std::optional<Content::ActorAssetTicket> QueueWeaponAnimations(
+      int sequence_model) override {
     queued_model = sequence_model;
+    if (!queue_asset) return std::nullopt;
+    return static_cast<Content::ActorAssetTicket>(next_ticket++);
   }
-  bool ActorAssetsPending() override { return assets_pending; }
+  Content::ActorAssetOutcome AssetOutcome(
+      Content::ActorAssetTicket /*ticket*/) override {
+    return asset_outcome;
+  }
+  void ForgetAsset(Content::ActorAssetTicket ticket) override {
+    forgotten_assets.push_back(ticket);
+  }
   void ResetEquipmentPose() override { ++pose_resets; }
   int EquipmentModelLoadStep() override { return load_step; }
   void SetEquipmentModelLoadStep(int step) override { load_step = step; }
@@ -199,7 +209,11 @@ class FakeHost final : public setup::Host {
   std::optional<int> ashley_model;
   std::vector<int> released_models;
   int queued_model = 0;
-  bool assets_pending = true;
+  bool queue_asset = true;
+  Content::ActorAssetOutcome asset_outcome =
+      Content::ActorAssetOutcome::kPending;
+  std::uint32_t next_ticket = 1;
+  std::vector<Content::ActorAssetTicket> forgotten_assets;
   int pose_resets = 0;
   int load_step = 0;
   std::string material_error;
@@ -562,23 +576,65 @@ TEST_CASE("Workshop recipe loading polls the host's read",
 TEST_CASE("Workshop weapon reloads refuse a missing Ashley actor",
           "[menu][menu-setup]") {
   constexpr int kWeaponReload = 0;
-  constexpr int kShieldReload = 1;
-  constexpr int kFieldModel = 3;
-  constexpr int kMenuModel = 10;
   Workshop shop;
   CHECK(setup::ReloadAshleyEquipment(shop.context, kWeaponReload) == 0);
   CHECK(shop.host.refusals ==
         Strings{"no Ashley actor to reload the weapon onto"});
+}
 
+TEST_CASE("Workshop weapon reload waits on its animation ticket",
+          "[menu][menu-setup]") {
+  constexpr int kWeaponReload = 0;
+  constexpr int kFieldModel = 3;
+  constexpr int kMenuModel = 10;
+  Workshop shop;
   shop.host.ashley_model = kFieldModel;
   CHECK(setup::ReloadAshleyEquipment(shop.context, kWeaponReload) == 1);
   CHECK(shop.host.queued_model == kMenuModel);
-  shop.host.assets_pending = false;
+  CHECK(setup::ReloadAshleyEquipment(shop.context, kWeaponReload) == 1);
+  shop.host.asset_outcome = Content::ActorAssetOutcome::kLoaded;
   CHECK(setup::ReloadAshleyEquipment(shop.context, kWeaponReload) == 0);
   CHECK(shop.host.load_step == 0);
+  CHECK(shop.host.forgotten_assets.size() == 1);
+}
+
+TEST_CASE("Workshop shield reload keeps its original release and pose behavior",
+          "[menu][menu-setup]") {
+  constexpr int kShieldReload = 1;
+  Workshop shop;
   CHECK(setup::ReloadAshleyEquipment(shop.context, kShieldReload) == 0);
-  CHECK(shop.host.released_models == std::vector<int>{0, 1});
-  CHECK(shop.host.pose_resets == 2);
+  CHECK(shop.host.released_models == std::vector<int>{1});
+  CHECK(shop.host.pose_resets == 1);
+}
+
+TEST_CASE("Workshop weapon reload refuses a failed animation ticket",
+          "[menu][menu-setup]") {
+  constexpr int kWeaponReload = 0;
+  constexpr int kFieldModel = 3;
+  Workshop shop;
+  shop.host.ashley_model = kFieldModel;
+  CHECK(setup::ReloadAshleyEquipment(shop.context, kWeaponReload) == 1);
+  shop.host.asset_outcome = Content::ActorAssetOutcome::kFailed;
+  CHECK(setup::ReloadAshleyEquipment(shop.context, kWeaponReload) == 0);
+  CHECK(shop.host.load_step == 0);
+  CHECK(shop.host.pose_resets == 1);
+  CHECK(shop.host.forgotten_assets.size() == 1);
+  CHECK(shop.host.refusals ==
+        Strings{"Ashley's weapon animation request failed"});
+}
+
+TEST_CASE("Workshop weapon reload refuses an unsubmitted animation ticket",
+          "[menu][menu-setup]") {
+  constexpr int kWeaponReload = 0;
+  constexpr int kFieldModel = 3;
+  Workshop shop;
+  shop.host.ashley_model = kFieldModel;
+  shop.host.queue_asset = false;
+  CHECK(setup::ReloadAshleyEquipment(shop.context, kWeaponReload) == 0);
+  CHECK(shop.host.load_step == 0);
+  CHECK(shop.host.pose_resets == 1);
+  CHECK(shop.host.refusals ==
+        Strings{"Ashley's weapon animation request failed"});
 }
 
 TEST_CASE("Workshop ingredient counts leave accessories out",

@@ -594,4 +594,16 @@ void QueueLiveAshleyWeaponAnimations(int sequence_model_id) {
   LiveActorPreviewHost host;
   QueueAshleyWeaponAnimations(host, sequence_model_id);
 }
+
+std::optional<Content::ActorAssetTicket> SubmitLiveAshleyWeaponAnimations(
+    int sequence_model_id) {
+  Content::ReleaseLiveActorSequence(kAshleyActorSlot, 0);
+  Content::ActorAssetRequest request{};
+  request.kind =
+      static_cast<std::uint8_t>(Content::ActorAssetKind::kSequenceLoad);
+  request.target_slot = static_cast<std::int8_t>(kAshleyActorSlot);
+  request.model_id = static_cast<std::int16_t>(sequence_model_id);
+  request.sub_kind = 0;
+  return Actors::SubmitLiveSlotActorAsset(kAshleyActorSlot, request);
+}
 }  // namespace VS::Menu::Framework

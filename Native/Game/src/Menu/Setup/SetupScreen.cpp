@@ -1661,6 +1661,22 @@ int ReloadAshleyEquipment(Context& context, int mode) {
   }
   switch (context.host.EquipmentModelLoadStep()) {
     case 0: {
+      if (context.state.equipment_reload_ticket !=
+          Content::ActorAssetTicket::kNone) {
+        const Content::ActorAssetTicket previous =
+            context.state.equipment_reload_ticket;
+        const Content::ActorAssetOutcome outcome =
+            context.host.AssetOutcome(previous);
+        if (outcome == Content::ActorAssetOutcome::kPending) return 1;
+        context.host.ForgetAsset(previous);
+        context.state.equipment_reload_ticket =
+            Content::ActorAssetTicket::kNone;
+        if (outcome != Content::ActorAssetOutcome::kLoaded) {
+          context.host.Refuse("Ashley's weapon animation request failed");
+          context.host.ResetEquipmentPose();
+          return 0;
+        }
+      }
       const std::optional<int> model = context.host.AshleySequenceModel();
       if (!model) {
         context.host.Refuse("no Ashley actor to reload the weapon onto");
@@ -1670,17 +1686,44 @@ int ReloadAshleyEquipment(Context& context, int mode) {
         return 0;
       }
       context.host.ReleaseWeaponModel(0);
-      context.host.QueueWeaponAnimations(kMenuSequenceModel);
+      context.state.equipment_reload_ticket =
+          context.host.QueueWeaponAnimations(kMenuSequenceModel)
+              .value_or(Content::ActorAssetTicket::kNone);
+      if (context.state.equipment_reload_ticket ==
+          Content::ActorAssetTicket::kNone) {
+        context.host.Refuse("Ashley's weapon animation request failed");
+        context.host.ResetEquipmentPose();
+        return 0;
+      }
       context.host.SetEquipmentModelLoadStep(1);
       break;
     }
-    case 1:
-      if (!context.host.ActorAssetsPending()) {
+    case 1: {
+      if (context.state.equipment_reload_ticket ==
+          Content::ActorAssetTicket::kNone) {
+        context.host.Refuse(
+            "Ashley's weapon animation request ticket was lost");
         context.host.ResetEquipmentPose();
         context.host.SetEquipmentModelLoadStep(0);
         return 0;
       }
-      break;
+      const Content::ActorAssetTicket ticket =
+          context.state.equipment_reload_ticket;
+      const Content::ActorAssetOutcome outcome =
+          context.host.AssetOutcome(ticket);
+      if (outcome == Content::ActorAssetOutcome::kPending) return 1;
+      context.host.ForgetAsset(ticket);
+      context.state.equipment_reload_ticket = Content::ActorAssetTicket::kNone;
+      if (outcome != Content::ActorAssetOutcome::kLoaded) {
+        context.host.Refuse("Ashley's weapon animation request failed");
+        context.host.ResetEquipmentPose();
+        context.host.SetEquipmentModelLoadStep(0);
+        return 0;
+      }
+      context.host.ResetEquipmentPose();
+      context.host.SetEquipmentModelLoadStep(0);
+      return 0;
+    }
     default:
       break;
   }

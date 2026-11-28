@@ -10,6 +10,7 @@
 #include <string>
 #include <string_view>
 
+#include "Content/ActorAssets.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/ItemRows.hpp"
@@ -301,6 +302,8 @@ struct State {
   std::array<std::uint8_t, kAvailableItemCount> available_items{};
   std::uint8_t combining_item = 0;
   std::array<std::uint32_t, kSlotHistoryCount> slot_history{};
+  Content::ActorAssetTicket equipment_reload_ticket =
+      Content::ActorAssetTicket::kNone;
 };
 
 class Host {
@@ -422,8 +425,11 @@ class Host {
   // Ashley's weapon model (_loadObject): nothing without an actor.
   [[nodiscard]] virtual std::optional<int> AshleySequenceModel() = 0;
   virtual void ReleaseWeaponModel(int slot) = 0;
-  virtual void QueueWeaponAnimations(int sequence_model) = 0;
-  [[nodiscard]] virtual bool ActorAssetsPending() = 0;
+  [[nodiscard]] virtual std::optional<Content::ActorAssetTicket>
+  QueueWeaponAnimations(int sequence_model) = 0;
+  [[nodiscard]] virtual Content::ActorAssetOutcome AssetOutcome(
+      Content::ActorAssetTicket ticket) = 0;
+  virtual void ForgetAsset(Content::ActorAssetTicket ticket) = 0;
   virtual void ResetEquipmentPose() = 0;
   // VS::Content::objectDataLoadStep.
   [[nodiscard]] virtual int EquipmentModelLoadStep() = 0;
