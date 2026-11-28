@@ -8,6 +8,7 @@
 #include <iterator>
 #include <optional>
 #include <span>
+#include <utility>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
@@ -20,11 +21,14 @@
 #include "Battle/ActionResolution.hpp"
 #include "Battle/ActionTable.hpp"
 #include "Battle/Actor.hpp"
+#include "Battle/CombatAction.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/HitChance.hpp"
 #include "Battle/HitModifiers.hpp"
 #include "Battle/HitModifiersLive.hpp"
 #include "Content/ModuleData.hpp"
+#include "Core/Random.hpp"
+#include "Core/RandomLive.hpp"
 #include "TestSupport/BattleCatalogRoot.hpp"
 
 using VS::Battle::ActionDefinition;
@@ -682,4 +686,286 @@ TEST_CASE("Live previews preserve unused null stats and real no-resource cost",
   CHECK(b::PreviewLiveActionAgainstActor(0, 0, -1, -1, nullptr, nullptr,
                                          &result) == 0x01000000);
   CHECK(result.target_count == 0);
+}
+
+namespace {
+class CombatRandom final : public VS::Items::ItemRandom {
+ public:
+  VS::Core::Random random;
+  std::vector<int> draws;
+  std::function<void()> interleave;
+  bool lowest_draws{};
+  std::int32_t NextBounded(std::int32_t bound) override {
+    Interleave();
+    draws.push_back(bound);
+    return lowest_draws ? 0 : random.Next(bound);
+  }
+  std::int32_t NextAveraged(std::int32_t bound) override {
+    Interleave();
+    draws.push_back(-bound);
+    return lowest_draws ? 0 : random.NextSmoothed(bound);
+  }
+
+ private:
+  void Interleave() {
+    if (!interleave) return;
+    auto callback = std::move(interleave);
+    interleave = {};
+    callback();
+  }
+};
+
+struct PhysicalFixture {
+  PreviewFixture legacy;
+  decltype(b::limbArmorDpLoss) saved_loss = b::limbArmorDpLoss;
+  decltype(b::criticalHitOccurred) saved_critical = b::criticalHitOccurred;
+  VS::Core::Rand15 saved_random = VS::Core::BiosRand();
+  std::array<std::int32_t, VS::Core::Random::TableSize> saved_shuffle =
+      std::to_array(VS::Core::randomShuffleTable);
+  std::int32_t saved_index = VS::Core::randomShuffleIndex;
+  VS::Content::ActionRule rule;
+  VS::Actors::ActorInstanceTable identities;
+  std::array<b::CombatActorState, 2> actors{};
+  decltype(b::bladePpDamageBonuses) bonuses = b::bladePpDamageBonuses;
+  decltype(b::limbInjuryStatusIds) injuries = b::limbInjuryStatusIds;
+  b::CombatActionIntent intent{};
+
+  PhysicalFixture() {
+    legacy.OriginalDefinitions();
+    const auto& original = b::actionDefinitions[1];
+    rule.kind = original.type;
+    rule.category = original.category;
+    rule.cost = original.cost;
+    rule.recovery_delay = original.recovery_delay;
+    rule.behavior = VS::Content::kBehaviorHitsFirstObstruction |
+                    VS::Content::kBehaviorStartsUnlocked;
+    const auto& hit = original.hits[0];
+    rule.hits.front() = VS::Content::ActionHit{
+        static_cast<std::uint8_t>(hit.effect_id),
+        static_cast<std::uint8_t>(hit.prerequisite_function_id),
+        static_cast<std::uint8_t>(hit.hit_function_id),
+        static_cast<std::uint8_t>(hit.stat_calculator_id),
+        static_cast<std::uint8_t>(hit.stat_factor),
+        static_cast<std::uint8_t>(hit.damage_type),
+        static_cast<std::uint8_t>(hit.affinity)};
+    for (std::size_t i = 0; i < actors.size(); ++i) InitializeActor(i);
+    Select(0);
+  }
+  void InitializeActor(std::size_t i) {
+    auto& actor = actors.at(i);
+    actor.identity = identities.Begin(i, i + 1, {});
+    if (!identities.Publish(i, actor.identity)) FAIL("publish combat fixture");
+    actor.slot = actor.damage.actor_id = static_cast<std::uint8_t>(i);
+    actor.hp = actor.max_hp = 4000;
+    actor.mp = actor.max_mp = 100;
+    actor.agility = 100;
+    actor.damage.strength = static_cast<std::uint16_t>(100 - i * 80);
+    actor.weapon_drawn = 1;
+    actor.damage.weapon.current_dp = actor.damage.weapon.max_dp = 400;
+    actor.damage.weapon.current_pp = 20;
+    actor.damage.weapon.max_pp = 100;
+    actor.damage.weapon.action_type = 2;
+    actor.damage.weapon.risk = 10;
+    actor.damage.weapon.recovery_delay = 21;
+    for (std::size_t limb = 0; limb < actor.limbs.size(); ++limb) {
+      actor.limbs.at(limb).hp = {100, 100};
+      actor.limbs.at(limb).damage.armor.current_dp =
+          actor.limbs.at(limb).damage.armor.max_dp = 300;
+      actor.armor_splash.at(limb).at(limb) = 100;
+    }
+  }
+  ~PhysicalFixture() {
+    b::limbArmorDpLoss = saved_loss;
+    b::criticalHitOccurred = saved_critical;
+    VS::Core::BiosRand() = saved_random;
+    std::copy(saved_shuffle.begin(), saved_shuffle.end(),
+              std::begin(VS::Core::randomShuffleTable));
+    VS::Core::randomShuffleIndex = saved_index;
+  }
+  void Select(std::size_t source) {
+    intent.control =
+        source == 0 ? b::CombatControl::kPlayer : b::CombatControl::kAi;
+    intent.source = actors.at(source).identity;
+    intent.action = 1;
+    intent.targets = {b::CombatActorTarget{actors.at(1 - source).identity, 3}};
+  }
+  static void DetachLiveState() {
+    b::actors.fill(nullptr);
+    b::actionState = nullptr;
+    b::statCalculators.fill(nullptr);
+    b::hitFunctions.fill(nullptr);
+    b::actionEffectMediators.fill(nullptr);
+    b::lastActionStatValue = 0xABCDEF01U;
+    b::hitPrerequisiteResult = 31;
+    b::previousHitResult = 91;
+    b::criticalHitOccurred = 97;
+    b::limbArmorDpLoss.fill(79);
+  }
+  b::CombatRuleInputs Inputs(CombatRandom& random) {
+    return {rule,     actors, random, bonuses, legacy.catalogs.status.rules,
+            injuries, {},     1};
+  }
+  void RestoreLegacyActors() {
+    for (std::size_t i = 0; i < actors.size(); ++i) {
+      const auto& input = actors.at(i);
+      auto& actor = legacy.actors.at(i);
+      auto& stats = legacy.stats.at(i);
+      actor.weapon_drawn = static_cast<std::int32_t>(input.weapon_drawn);
+      actor.room_spawn_index = input.spawn;
+      stats.current_hp = input.hp;
+      stats.max_hp = input.max_hp;
+      stats.current_mp = input.mp;
+      stats.max_mp = input.max_mp;
+      stats.agility = input.agility;
+      stats.strength = input.damage.strength;
+      stats.intelligence = input.damage.intelligence;
+      stats.risk = input.damage.risk;
+      stats.weapon = input.damage.weapon;
+      stats.shield = input.damage.shield;
+      stats.accessory = input.damage.accessory;
+      stats.statuses = std::bit_cast<std::int32_t>(input.statuses);
+      stats.cancels_hit_results = input.cancels_results;
+      for (std::size_t limb = 0; limb < input.limbs.size(); ++limb) {
+        stats.limbs.at(limb).hp = input.limbs.at(limb).hp.current;
+        stats.limbs.at(limb).max_hp = input.limbs.at(limb).hp.maximum;
+        stats.limbs.at(limb).armor = input.limbs.at(limb).damage.armor;
+        for (std::size_t other = 0; other < input.limbs.size(); ++other) {
+          stats.dp_splash.at(limb).at(other) =
+              std::bit_cast<std::int8_t>(input.armor_splash.at(limb).at(other));
+        }
+      }
+    }
+  }
+  b::ActionRequest LegacyResult(std::size_t source, bool execute) {
+    RestoreLegacyActors();
+    // Both callers receive an already resolved trajectory in this comparison.
+    b::actionDefinitions[1].hits_first_obstruction = 0;
+    ActionRequestRecord request{}, output{};
+    request.primary_target.target.target_actor =
+        static_cast<std::uint8_t>(source);
+    request.target_count = 1;
+    request.targets[0].target.target_actor =
+        static_cast<std::uint8_t>(1 - source);
+    request.targets[0].target.target_limb = 3;
+    b::ResolveLiveActionTargets(1, &output, &request,
+                                static_cast<int>(execute));
+    return std::bit_cast<b::ActionRequest>(output);
+  }
+  b::CombatActionResult Run(CombatRandom& random, bool execute = true) {
+    auto result = b::ResolvePhysicalAction(intent, Inputs(random), execute);
+    if (!result) FAIL(result.error());
+    return std::move(*result);
+  }
+};
+void CheckPhysicalActor(const b::CombatActorState& actual,
+                        const b::ActorStats& expected) {
+  CHECK(actual.damage.risk == expected.risk);
+  CHECK(actual.damage.weapon.current_dp == expected.weapon.current_dp);
+  CHECK(actual.damage.weapon.current_pp == expected.weapon.current_pp);
+  CHECK(actual.damage.shield.current_dp == expected.shield.current_dp);
+  CHECK(actual.damage.shield.current_pp == expected.shield.current_pp);
+  CHECK(actual.recovery_timer == expected.action_recovery_timer);
+  for (std::size_t i = 0; i < actual.limbs.size(); ++i) {
+    CHECK(actual.limbs.at(i).damage.armor.current_dp ==
+          expected.limbs.at(i).armor.current_dp);
+  }
+}
+}  // namespace
+
+TEST_CASE("Physical rules preserve original player and AI damage and RNG",
+          "[combat-rules][action-preview][issue-56]") {
+  PhysicalFixture f;
+  const auto source = GENERATE(std::size_t{0}, std::size_t{1});
+  const bool execute = GENERATE(false, true);
+  const bool cancelled = GENERATE(false, true);
+  const int advance = GENERATE(0, 9, 31);
+  f.Select(source);
+  f.actors.at(1 - source).cancels_results = cancelled;
+  CombatRandom random;
+  VS::Core::InitializeLiveRandomShuffleTable();
+  for (int i = 0; i < advance; ++i) {
+    random.random.Next(100);
+    VS::Core::NextLiveRandomBounded(100);
+  }
+  const auto expected = f.LegacyResult(source, execute);
+  const auto result = f.Run(random, execute);
+  REQUIRE(result.hits.size() == 1);
+  CHECK(result.hits.front().changes ==
+        b::ReadActionHitResult(expected.targets.front()));
+  CHECK(result.hits.front().threshold == expected.targets.front().threshold);
+  CheckPhysicalActor(result.actors.at(source), f.legacy.stats.at(source));
+  CheckPhysicalActor(result.actors.at(1 - source),
+                     f.legacy.stats.at(1 - source));
+  CHECK(random.random.Next(100000) == VS::Core::NextLiveRandomBounded(100000));
+}
+
+TEST_CASE("Physical rules execute with no live actors state or calculators",
+          "[combat-rules][issue-56]") {
+  PhysicalFixture f;
+  PhysicalFixture::DetachLiveState();
+  CombatRandom random;
+  const auto result = f.Run(random);
+  REQUIRE(result.hits.size() == 1);
+  CHECK(result.hits.front().changes.changes.front().amount > 0);
+  CHECK(result.actors.front().damage.risk == 10);
+  CHECK(f.actors.front().damage.risk == 0);
+  CHECK(b::lastActionStatValue == 0xABCDEF01U);
+  CHECK(b::hitPrerequisiteResult == 31);
+  CHECK(b::previousHitResult == 91);
+  CHECK(b::criticalHitOccurred == 97);
+  CHECK(b::limbArmorDpLoss.front() == 79);
+}
+
+TEST_CASE("Nested physical simulations retain their own pending hit state",
+          "[combat-rules][issue-56]") {
+  PhysicalFixture f;
+  CombatRandom alone, interleaved, nested;
+  const auto expected = f.Run(alone);
+  std::optional<b::CombatActionResult> inner;
+  interleaved.interleave = [&] { inner = f.Run(nested); };
+  const auto actual = f.Run(interleaved);
+  REQUIRE(inner.has_value());
+  if (!inner) return;
+  CHECK(actual.hits.front().changes == expected.hits.front().changes);
+  CHECK(inner->hits.front().changes == expected.hits.front().changes);
+  CHECK(actual.actors.front().damage.risk ==
+        expected.actors.front().damage.risk);
+  CHECK(actual.actors.front().damage.weapon.current_dp ==
+        expected.actors.front().damage.weapon.current_dp);
+  CHECK(interleaved.draws == alone.draws);
+  CHECK(nested.draws == alone.draws);
+  CHECK(interleaved.random.Next(999) == alone.random.Next(999));
+}
+
+TEST_CASE("Physical rules refuse stale identities before consuming random",
+          "[combat-rules][issue-56]") {
+  PhysicalFixture f;
+  const bool source = GENERATE(false, true);
+  auto& actor = f.actors.at(source ? 0 : 1);
+  REQUIRE(f.identities.Remove(actor.slot, actor.identity));
+  actor.identity = f.identities.Begin(actor.slot, actor.slot + 1, {});
+  REQUIRE(f.identities.Publish(actor.slot, actor.identity));
+  CombatRandom random;
+  const auto result =
+      b::ResolvePhysicalAction(f.intent, f.Inputs(random), true);
+  CHECK_FALSE(result.has_value());
+  CHECK(random.draws.empty());
+  CHECK(f.actors.front().damage.risk == 0);
+  CHECK(f.actors.back().hp == 4000);
+}
+
+TEST_CASE("Physical equipment growth produces owned actor-qualified notices",
+          "[combat-rules][issue-56]") {
+  PhysicalFixture f;
+  f.actors.front().damage.weapon.blade.id = 1;
+  CombatRandom random;
+  random.lowest_draws = true;
+  const auto result = f.Run(random);
+  REQUIRE_FALSE(result.equipment_notices.empty());
+  CHECK(std::ranges::all_of(result.equipment_notices, [&](const auto& notice) {
+    return notice.actor == f.intent.source;
+  }));
+  CHECK(result.equipment_notices.front().label ==
+        VS::Items::kWeaponNoticeLabel);
+  CHECK(f.actors.front().damage.weapon.blade.classes.front() == 0);
 }

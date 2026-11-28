@@ -9,6 +9,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Battle/ActionPreview.hpp"
 #include "Battle/ActionResults.hpp"
 #include "Battle/ActionResultsLive.hpp"
 #include "Battle/Actor.hpp"
@@ -81,6 +82,34 @@ struct World final : battle::ActorActionResultWorld {
   }
 };
 }  // namespace
+
+TEST_CASE("Action result conversion preserves signed limbs and effect lanes",
+          "[action-result-commit][combat-rules]") {
+  battle::HitResult original{};
+  original.target.target_actor = 3;
+  original.target.target_limb = -1;
+  original.hp_effect = 3;
+  original.weapon_dp_effect = 1;
+  original.shield_pp_effect = 2;
+  original.stat_status_effect = 2;
+  original.target.hp = 32767;
+  original.weapon_dp_change = -32768;
+  original.shield_pp_change = -19;
+  original.limbs[4].effects.hp_change = -32768;
+  original.limbs[4].effects.armor_dp_change = 32767;
+  auto hit = std::bit_cast<battle::ActionHit>(original);
+  const auto result = battle::ReadActionHitResult(hit);
+  CHECK(result.limb == -1);
+  CHECK(result.changes.at(static_cast<std::size_t>(Field::kHp)) ==
+        battle::ActionResultChange{32767, 3});
+  CHECK(result.changes.at(static_cast<std::size_t>(Field::kWeaponDp)) ==
+        battle::ActionResultChange{-32768, 1});
+  CHECK(result.changes.at(static_cast<std::size_t>(Field::kShieldPp)) ==
+        battle::ActionResultChange{-19, 2});
+  CHECK(result.limbs.at(4) == battle::ActionResultLimb{-32768, 32767});
+  battle::WriteActionHitResult(result, hit);
+  CHECK(hit == std::bit_cast<battle::ActionHit>(original));
+}
 
 TEST_CASE("Result commit precedes reads then retains target and stats owner",
           "[actor-vitals][action-result-commit][F00522]") {

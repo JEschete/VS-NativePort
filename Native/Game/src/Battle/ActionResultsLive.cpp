@@ -16,6 +16,7 @@
 #include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/ActionCategoryCatalogLive.hpp"
 #include "Battle/ActionFlow.hpp"
+#include "Battle/ActionPreview.hpp"
 #include "Battle/ActionResults.hpp"
 #include "Battle/ActionTable.hpp"
 #include "Battle/Actor.hpp"
@@ -121,36 +122,7 @@ class LiveActionTargetEffects final : public ActionTargetEffects {
 };
 
 ActorActionResult ReadResult(const VS::Battle::HitResult& hit) {
-  ActorActionResult result{
-      .target = static_cast<std::uint8_t>(hit.target.target_actor),
-      .limb = std::bit_cast<std::int8_t>(
-          static_cast<std::uint8_t>(hit.target.target_limb)),
-      .impact = static_cast<std::uint8_t>(hit.target.impact_kind),
-      .changes = {{
-          {hit.target.hp, static_cast<std::uint8_t>(hit.hp_effect)},
-          {hit.target.mp, static_cast<std::uint8_t>(hit.mp_effect)},
-          {hit.risk_change, static_cast<std::uint8_t>(hit.risk_effect)},
-          {hit.strength_change, static_cast<std::uint8_t>(hit.strength_effect)},
-          {hit.intelligence_change,
-           static_cast<std::uint8_t>(hit.intelligence_effect)},
-          {hit.agility_change, static_cast<std::uint8_t>(hit.agility_effect)},
-          {hit.max_hp_change, static_cast<std::uint8_t>(hit.max_hp_effect)},
-          {hit.max_mp_change, static_cast<std::uint8_t>(hit.max_mp_effect)},
-          {hit.weapon_dp_change,
-           static_cast<std::uint8_t>(hit.weapon_dp_effect)},
-          {hit.weapon_pp_change,
-           static_cast<std::uint8_t>(hit.weapon_pp_effect)},
-          {hit.armor_dp_change, static_cast<std::uint8_t>(hit.armor_dp_effect)},
-          {hit.shield_pp_change,
-           static_cast<std::uint8_t>(hit.shield_pp_effect)},
-      }},
-      .inflict_statuses = std::bit_cast<std::uint32_t>(hit.inflict_statuses),
-      .remove_statuses = std::bit_cast<std::uint32_t>(hit.remove_statuses)};
-  for (std::size_t index = 0; index < result.limbs.size(); ++index) {
-    result.limbs.at(index) = {hit.limbs[index].effects.hp_change,
-                              hit.limbs[index].effects.armor_dp_change};
-  }
-  return result;
+  return ReadActionHitResult(std::bit_cast<ActionHit>(hit));
 }
 
 class LiveActorActionResultWorld final : public ActorActionResultWorld {

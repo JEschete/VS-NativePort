@@ -3,13 +3,80 @@
 
 #include <algorithm>
 #include <array>
+#include <bit>
 #include <cstddef>
 #include <cstdint>
 #include <type_traits>
 
+#include "Battle/ActionPreview.hpp"
 #include "Core/Math/ScalarMath.hpp"
 
 namespace VS::Battle {
+namespace {
+constexpr auto kEquipmentResultStart = 2 + kActionStatChangeCount;
+constexpr unsigned kResultEffectMask = 3;
+constexpr unsigned kResultHalfwordBits = 16;
+}  // namespace
+
+ActorActionResult ReadActionHitResult(const ActionHit& hit) {
+  ActorActionResult result{.target = hit.actor,
+                           .limb = std::bit_cast<std::int8_t>(hit.limb),
+                           .impact = hit.impact,
+                           .inflict_statuses = hit.inflict_statuses,
+                           .remove_statuses = hit.remove_statuses};
+  std::array<std::int16_t, static_cast<std::size_t>(ActionResultField::kCount)>
+      amounts{hit.hp, hit.mp};
+  std::copy(hit.stat_changes.begin(), hit.stat_changes.end(),
+            amounts.begin() + 2);
+  std::copy(hit.equipment_changes.begin(), hit.equipment_changes.end(),
+            amounts.begin() + kEquipmentResultStart);
+  for (std::size_t i = 0; i < amounts.size(); ++i) {
+    const auto shift = i * 2 + (i >= kEquipmentResultStart ? 2 : 0);
+    result.changes.at(i) = {
+        amounts.at(i),
+        static_cast<std::uint8_t>((hit.effects >> shift) & kResultEffectMask)};
+  }
+  for (std::size_t i = 0; i < result.limbs.size(); ++i) {
+    result.limbs.at(i) = {
+        std::bit_cast<std::int16_t>(
+            static_cast<std::uint16_t>(hit.limbs.at(i))),
+        std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(
+            hit.limbs.at(i) >> kResultHalfwordBits))};
+  }
+  return result;
+}
+
+void WriteActionHitResult(const ActorActionResult& result, ActionHit& hit) {
+  hit.actor = result.target;
+  hit.limb = std::bit_cast<std::uint8_t>(result.limb);
+  hit.impact = result.impact;
+  hit.inflict_statuses = result.inflict_statuses;
+  hit.remove_statuses = result.remove_statuses;
+  std::array<std::int16_t, static_cast<std::size_t>(ActionResultField::kCount)>
+      amounts{};
+  for (std::size_t i = 0; i < amounts.size(); ++i) {
+    amounts.at(i) = result.changes.at(i).amount;
+    const auto shift = i * 2 + (i >= kEquipmentResultStart ? 2 : 0);
+    hit.effects = (hit.effects & ~(kResultEffectMask << shift)) |
+                  ((static_cast<std::uint32_t>(result.changes.at(i).mode) &
+                    kResultEffectMask)
+                   << shift);
+  }
+  hit.hp = amounts.front();
+  hit.mp = amounts.at(1);
+  std::copy_n(amounts.begin() + 2, hit.stat_changes.size(),
+              hit.stat_changes.begin());
+  std::copy_n(amounts.begin() + kEquipmentResultStart,
+              hit.equipment_changes.size(), hit.equipment_changes.begin());
+  for (std::size_t i = 0; i < hit.limbs.size(); ++i) {
+    const auto& limb = result.limbs.at(i);
+    hit.limbs.at(i) =
+        std::bit_cast<std::uint16_t>(limb.hp) |
+        (static_cast<std::uint32_t>(std::bit_cast<std::uint16_t>(limb.armor_dp))
+         << kResultHalfwordBits);
+  }
+}
+
 namespace {
 constexpr unsigned kWorldLabelIdMask = 0x1F0;
 constexpr unsigned kWorldLabelIdTag = 0x80;

@@ -96,6 +96,10 @@ struct ActorActionResult {
                          const ActorActionResult&) = default;
 };
 
+struct ActionHit;
+[[nodiscard]] ActorActionResult ReadActionHitResult(const ActionHit& hit);
+void WriteActionHitResult(const ActorActionResult& result, ActionHit& hit);
+
 class ActorActionResultWorld {
  public:
   virtual ~ActorActionResultWorld() = default;

@@ -771,6 +771,9 @@
     <ClInclude Include="src\Battle\BattleTypes.hpp">
       <Filter>src\Battle</Filter>
     </ClInclude>
+    <ClCompile Include="src\Battle\CombatAction.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
     <ClCompile Include="src\Battle\Damage.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
@@ -3526,6 +3529,9 @@
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\BattleModeLive.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\CombatAction.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\DamageCalculations.hpp">
