@@ -110,6 +110,10 @@ components, and every fix lands there, never in a scene:
 | **Actor handler**: records, spawn/despawn, equipment, placement | `ActorInstanceTable` explicitly registers generations, immutable creation definitions, component bindings and allocation ownership; lookups never adopt foreign slots. `ActorSpawning` publishes loaded instances and refuses new owned loads during removal. Room persistence and semantic snapshots read/write retained components. Destruction retires owned AI even without room maps; ordinary room exit retains Ashley's AI. Finalization refuses remaining loads or AI. Heap replacement cancels or drains owned loads and invalidates instances before reclaiming storage. Roster links, retained AI cursors and room special targets resolve generation slots, not mutable IDs ([#55](https://github.com/JEschete/VS-NativePort/issues/55)). | `Actors::ActorSystem` owning actors as components (`Transform`, `Model`, `Animator`, `Stats`, `Equipment`) |
 | **Sequence handler**: playing SEQ animations, animation events | `Actors\Animation.c` (`Actors_PlayActorAnimation`, `Actors_FindActorAnimationHeader`, `Actors_InitializeActorAnimationPose`, `Actors_RunAnimationEvents`) | `Actors::Animator` over `Content::SeqBank`, with the same keyframe decoding and event script |
 
+The stable identity, component ownership and instance/resource teardown slice is complete
+([#55](https://github.com/JEschete/VS-NativePort/issues/55)); compiled model/animation/collision adapters and their
+remaining EC-04/05 retirement gates are separate.
+
 x64 rule for these formats until the typed decoders replace them: a loaded file keeps its own layout. Pointers the PS1
 loader relocated in place stay 32-bit offsets (`copy_fixups.ONDISC_OFFSETS`; each use adds the offset to the record's
 address), and records the code addresses by PS1 offset are reached by named field (`tools\port\field_at.py`). Each fix
