@@ -5099,8 +5099,8 @@ VS::Core::Memory::CopyAlignedWords(s1, VS::Field::gimmickInstances[arg0->dataAdd
         self.assertIn("constexpr int kFirstPreviewWeaponModel = 2;", rows)
         self.assertIn("host.ClearWeaponModelFlag(kFirstPreviewWeaponModel + i);", rows)
         self.assertIn(
-            "host.HasWeaponModel(kFirstPreviewWeaponModel + 1) &&\n            IsTwoHandedWeapon(choice.category)",
-            rows,
+            "host.HasWeaponModel(kFirstPreviewWeaponModel+1)&&IsTwoHandedWeapon(choice.category)",
+            "".join(rows.split()),
         )
         rows_live = (root / "Native/Game/src/Menu/Inventory/EquipmentRowsLive.cpp").read_text()
         self.assertIn("return VS::Actors::weaponModels[slot];", rows_live)
