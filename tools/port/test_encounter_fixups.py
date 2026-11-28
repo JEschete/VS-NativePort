@@ -2179,9 +2179,10 @@ int func_800F9800(void) {
             encoding="utf-8"
         )
         self.assertIn(
-            "found->ai_flags = VS::Battle::Ai::PackLiveActorAiPersistenceFlags(slot);",
+            "found->ai_flags = VS::Battle::Ai::PackLiveActorInstanceAiFlags(identity);",
             snapshot,
         )
+        self.assertNotIn("PackLiveActorAiPersistenceFlags(", snapshot)
         self.assertNotIn("relation.previous_classification <<", snapshot)
 
     def test_every_native_redirect_retains_its_module_symbol_binding(self):
