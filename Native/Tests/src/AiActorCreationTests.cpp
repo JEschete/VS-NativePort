@@ -760,7 +760,10 @@ TEST_CASE("Live AI creation registers an auxiliary special actor",
           "[ai][actor-creation][creation-live]") {
   LiveCreationFixture fixture;
   VS::Actors::ActorCore core{};
-  core.object_word = static_cast<int>(0xFFFFFF04u);
+  core.gimmick.object_info.object_id = 4;
+  core.gimmick.object_info.subtype = 0xFF;
+  core.gimmick.object_info.material = 0xFF;
+  core.gimmick.object_info.carrier = 0xFF;
   VS::Battle::Actor holder{};
   fixture.room.special_actors[0] = &holder;
   fixture.actor.id = 6;
@@ -768,7 +771,8 @@ TEST_CASE("Live AI creation registers an auxiliary special actor",
   // #55: the allocation kind word says a body allocation (1), but the spawn
   // definition, which creation reads, makes the actor an auxiliary core.
   fixture.actor.allocation_kind = 1;
-  fixture.actor.model = &core.model;
+  fixture.actor.model =
+      reinterpret_cast<VS::Actors::ModelInstance*>(&core.gimmick);
   CHECK(VS::Actors::InstallLiveActorInstance(
             6, &fixture.actor, VS::Actors::ActorShape::kAuxiliary) !=
         VS::Actors::SpawnedActor::kNone);

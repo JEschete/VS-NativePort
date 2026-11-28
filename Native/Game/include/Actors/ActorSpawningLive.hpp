@@ -24,6 +24,16 @@ namespace VS::Actors {
 struct CharacterInit;
 struct RoomActorRecord;
 
+// Creates unpublished, value-initialized native components. Only a successful
+// owned load may publish this identity. Discard requires settled/cancelled
+// loads and released model bindings; it refuses published or busy instances.
+[[nodiscard]] SpawnedActor AllocateLiveActorInstance(ActorDefinition definition,
+                                                     std::size_t slot);
+void DiscardLiveActorInstance(SpawnedActor actor);
+[[nodiscard]] VS::Battle::Actor* ResolveLiveActorInstance(SpawnedActor actor);
+[[nodiscard]] std::optional<ActorDefinition> LiveActorDefinition(
+    SpawnedActor actor);
+
 // Invalidates the native identity before the matching legacy allocation is
 // freed, or before a gameplay session clears the actor table.
 void InvalidateLiveActorHandle(std::size_t slot, VS::Battle::Actor* actor);

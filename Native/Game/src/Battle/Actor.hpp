@@ -9,6 +9,7 @@
 #include "Items/ItemRecords.hpp"
 
 namespace VS::Actors {
+struct ActorRecord;
 struct ActorModelSlot;
 struct ModelInstance;
 }  // namespace VS::Actors
@@ -74,6 +75,7 @@ struct Actor {
   VS::Actors::ModelInstance* model;
   std::array<VS::Actors::ActorModelSlot*, kActorEquipmentModelCount>
       equipment_models;
+  VS::Actors::ActorRecord* second_body;
 };
 
 // One limb action slot: the action and its effect model.

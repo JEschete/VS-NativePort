@@ -49,6 +49,9 @@ struct ActorResources {
 // What an actor is, fixed when its storage is allocated.
 struct ActorDefinition {
   ActorShape shape = ActorShape::kEquipped;
+  // The source model chosen at creation, not the instance's current model
+  // after a script or equipment reload.
+  std::uint16_t model_id = 0;
 
   // A gimmick actor owns its slot's gimmick instance; any other actor owns its
   // slot's model, and a second body also owns the model four slots on. The

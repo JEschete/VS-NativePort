@@ -750,7 +750,7 @@ class ActorSpawnHost {
   [[nodiscard]] virtual SpawnedActor ActorAt(std::size_t slot) const = 0;
   // A zeroed allocation of `shape` with its stats, model and equipment
   // model links and allocation kind set; kNone when the heap refuses.
-  [[nodiscard]] virtual SpawnedActor Allocate(ActorShape shape,
+  [[nodiscard]] virtual SpawnedActor Allocate(ActorDefinition definition,
                                               std::size_t slot) = 0;
   [[nodiscard]] virtual bool SlotIsEmpty(std::size_t slot) const = 0;
   // Frees an unpublished actor after its requests settle, including its

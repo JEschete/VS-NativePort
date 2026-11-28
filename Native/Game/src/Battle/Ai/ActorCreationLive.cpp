@@ -12,7 +12,6 @@
 #include <span>
 #include <type_traits>
 
-#include "Actors/ActorAllocation.hpp"
 #include "Actors/ActorInstances.hpp"
 #include "Actors/ActorRecord.hpp"
 #include "Actors/ActorSpawningLive.hpp"
@@ -31,6 +30,7 @@
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Field/Gimmicks.hpp"
 
 using VS::Core::Gte::SVECTOR;
 
@@ -45,10 +45,6 @@ using BoneTagKind = VS::Actors::BoneTagKind;
 
 // The far perception range (AI state 0xAC) within reservedA0 (0xA0).
 constexpr std::size_t kFarRangeOffset = 12;
-// Model word 0x16C follows an auxiliary actor core's eight matrices.
-constexpr std::size_t kCoreModel = offsetof(Actors::ActorCore, model);
-constexpr std::size_t kCoreObject = offsetof(Actors::ActorCore, object_word);
-constexpr std::size_t kModelObjectWordOffset = kCoreObject - kCoreModel;
 // The command flags bits creation keeps (bits 0-3 are cleared).
 constexpr std::uint8_t kKeptCommandFlags = 0xF0;
 // Bytes 1 and 3 of the actor's state word hold its command opcode and flags.
@@ -95,7 +91,8 @@ static_assert(offsetof(ModelView, position) ==
               offsetof(VS::Actors::ModelInstance, position));
 static_assert(offsetof(ModelView, tile) ==
               offsetof(VS::Actors::ModelInstance, current_tile_x));
-static_assert(offsetof(ModelView, kind) == kModelObjectWordOffset);
+static_assert(offsetof(ModelView, kind) ==
+              offsetof(Field::GimmickInstance, object_info));
 static_assert(offsetof(ModelView, radius) ==
               offsetof(VS::Actors::ActorRecord, collision_radius));
 static_assert(offsetof(ModelView, opaque_63e) ==
@@ -338,12 +335,14 @@ class LiveCreationHost final : public ActorCreationHost {
   [[nodiscard]] std::optional<std::uint32_t> ModelObjectWord(
       BattleActorHandle actor) const override {
     const VS::Battle::Actor& live = ActorOf(actor);
-    if (live.model == nullptr) return std::nullopt;
-    const std::span model_bytes{reinterpret_cast<const std::byte*>(live.model),
-                                kModelObjectWordOffset + sizeof(std::uint32_t)};
+    if (live.model == nullptr ||
+        Actors::LiveActorShape(&live) != Actors::ActorShape::kAuxiliary) {
+      return std::nullopt;
+    }
+    const auto& gimmick =
+        *reinterpret_cast<const Field::GimmickInstance*>(live.model);
     std::uint32_t word = 0;
-    std::memcpy(&word, model_bytes.subspan(kModelObjectWordOffset).data(),
-                sizeof word);
+    std::memcpy(&word, &gimmick.object_info, sizeof word);
     return word;
   }
   [[nodiscard]] std::optional<CreationModel> Model(

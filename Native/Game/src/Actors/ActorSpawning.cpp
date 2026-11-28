@@ -401,7 +401,10 @@ void ReleaseEquippedAssets(ActorSpawnHost& host, std::size_t slot) {
     ActorSpawnHost& host, std::size_t slot, int model_id, int blade_model,
     int blade_material, int shield_model, int shield_material,
     SpawnPlacement placement, int flags) {
-  const SpawnedActor actor = host.Allocate(ActorShape::kEquipped, slot);
+  const SpawnedActor actor =
+      host.Allocate({.shape = ActorShape::kEquipped,
+                     .model_id = static_cast<std::uint16_t>(model_id)},
+                    slot);
   if (actor == SpawnedActor::kNone) {
     host.Refuse(SpawnRefusal::kAllocation);
     return SpawnedActor::kNone;
@@ -731,7 +734,10 @@ SpawnedActor CreateAuxiliaryActor(ActorSpawnHost& host, int index, int actor_id,
   if (!slot || host.ActorAt(*slot) != SpawnedActor::kNone) {
     return SpawnedActor::kNone;
   }
-  const SpawnedActor actor = host.Allocate(ActorShape::kAuxiliary, *slot);
+  const SpawnedActor actor =
+      host.Allocate({.shape = ActorShape::kAuxiliary,
+                     .model_id = static_cast<std::uint16_t>(actor_id)},
+                    *slot);
   if (actor == SpawnedActor::kNone) {
     host.Refuse(SpawnRefusal::kAllocation);
     return SpawnedActor::kNone;
@@ -1114,9 +1120,11 @@ SpawnedActor SpawnRoomEnemy(ActorSpawnHost& host, int actor_id,
     return SpawnedActor::kNone;
   }
 
-  const SpawnedActor actor = host.Allocate(
-      parts.second_body ? ActorShape::kSecondaryBody : ActorShape::kEquipped,
-      slot);
+  const SpawnedActor actor =
+      host.Allocate({.shape = parts.second_body ? ActorShape::kSecondaryBody
+                                                : ActorShape::kEquipped,
+                     .model_id = character.model_id},
+                    slot);
   if (actor == SpawnedActor::kNone) {
     host.Refuse(SpawnRefusal::kAllocation);
     return SpawnedActor::kNone;
@@ -1253,7 +1261,10 @@ int QueueScriptedActorSpawn(ActorSpawnHost& host,
   if (pending.ContainsSlot(slot) || host.ActorAt(slot) != SpawnedActor::kNone) {
     return 0;
   }
-  const SpawnedActor actor = host.Allocate(ActorShape::kEquipped, slot);
+  const SpawnedActor actor =
+      host.Allocate({.shape = ActorShape::kEquipped,
+                     .model_id = static_cast<std::uint16_t>(model_id)},
+                    slot);
   if (actor == SpawnedActor::kNone) {
     host.Refuse(SpawnRefusal::kAllocation);
     return 0;

@@ -42,11 +42,6 @@ using VS::Battle::kActionTypeBaseAttack;
 using VS::Battle::TargetSphereLabelView;
 
 static_assert(
-    sizeof(VS::Actors::ActorCore) - offsetof(VS::Actors::ActorCore, model) >=
-        offsetof(VS::Field::GimmickInstance, reserved178),
-    "The auxiliary actor allocation must own the native gimmick prefix");
-
-static_assert(
     offsetof(VS::Battle::Ai::ActorAiState, engagement_frames) == 170,
     "Renamed engagement state must retain its verified native layout");
 static_assert(offsetof(VS::Battle::Ai::ActorAiState,
@@ -130,29 +125,12 @@ static_assert(offsetof(TargetSphereLabelView, opaque990) ==
                   offsetof(VS::Battle::TargetSphereRecord, labels),
               "sphere label view offset");
 
-// An actor record placed at core.model (VS::Content::ParseActorModel) must
-// end before the weapon model slots.
 static_assert(sizeof(VS::Actors::ActorModelSlot) >=
                   sizeof(VS::Actors::WeaponModel),
               "equipment slot must fit a native weapon model");
 static_assert(_Alignof(VS::Actors::ActorModelSlot) >=
                   _Alignof(VS::Actors::WeaponModel),
               "equipment slot must align a native weapon model");
-static_assert(offsetof(VS::Actors::ActorAllocation, model_slots) %
-                      _Alignof(VS::Actors::ActorRecord) ==
-                  0,
-              "secondary body record must be aligned");
-static_assert(offsetof(VS::Actors::ActorAllocation, model_slots) -
-                      offsetof(VS::Actors::ActorAllocation, core.model) >=
-                  sizeof(VS::Actors::ActorRecord),
-              "the actor record overlaps the weapon model slots");
-
-// VS::Actors::LiveActorSpawnHost (ActorSpawningLive.cpp) addresses the stats
-// block of an allocation as `actor + 1`.
-static_assert(offsetof(VS::Actors::ActorAllocation, core.actor.stats) ==
-                  sizeof(VS::Battle::Actor),
-              "stats do not follow the actor");
-
 // On-disc structs keep the file layout (ONDISC_OFFSETS): the SHP header is 64
 // bytes, the bones follow.
 static_assert(sizeof(VS::Actors::ShpModel) == 64, "SHP header layout");

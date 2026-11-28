@@ -13,6 +13,8 @@
 
 #include "Actors/ActorInstances.hpp"
 #include "Actors/ActorLoads.hpp"
+#include "Actors/ActorModelSlot.hpp"
+#include "Actors/ActorRecord.hpp"
 #include "Actors/ActorSpawning.hpp"
 #include "Actors/ActorSpawningLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
@@ -24,6 +26,7 @@
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/CdDrive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Field/Mpd.hpp"
 #include "Legacy/Psx.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
@@ -480,8 +483,9 @@ struct FakeSpawnHost final : actors::ActorSpawnHost {
   bool SlotIsEmpty(std::size_t slot) const override {
     return ActorAt(slot) == SpawnedActor::kNone;
   }
-  SpawnedActor Allocate(ActorShape shape, std::size_t /*slot*/) override {
-    Log(std::format("Allocate {}", static_cast<int>(shape)));
+  SpawnedActor Allocate(ActorDefinition definition,
+                        std::size_t /*slot*/) override {
+    Log(std::format("Allocate {}", static_cast<int>(definition.shape)));
     if (refuse_allocation) {
       return SpawnedActor::kNone;
     }
@@ -2649,4 +2653,130 @@ TEST_CASE("A live actor instance installs only into a free spawn slot",
   CHECK_FALSE(actors::LiveActorShape(&other).has_value());
   actors::ResetLiveActorHandles();
   VS::Battle::actors[kSlot] = saved_actor;
+}
+
+namespace {
+struct NativeActorStorageFixture {
+  static constexpr std::size_t kSlot = 3;
+  decltype(VS::Battle::actors) saved_actors = VS::Battle::actors;
+  std::vector<std::byte> arena = std::vector<std::byte>(65536);
+  VS::Core::Memory::ScopedLiveGameHeap heap{arena};
+  SpawnedActor instance = SpawnedActor::kNone;
+
+  NativeActorStorageFixture() {
+    content::ClearLiveActorAssetQueue();
+    actors::ResetLiveActorHandles();
+    VS::Battle::actors.fill(nullptr);
+  }
+  ~NativeActorStorageFixture() {
+    content::ClearLiveActorAssetQueue();
+    actors::SettleLiveActorLoads();
+    Discard();
+    actors::ResetLiveActorHandles();
+    VS::Battle::actors = saved_actors;
+  }
+  VS::Battle::Actor& Allocate(ActorDefinition definition) {
+    instance = actors::AllocateLiveActorInstance(definition, kSlot);
+    auto* actor = actors::ResolveLiveActorInstance(instance);
+    REQUIRE(actor != nullptr);
+    if (actor == nullptr) throw std::logic_error("Actor allocation failed");
+    return *actor;
+  }
+  void Discard() {
+    if (instance != SpawnedActor::kNone) {
+      actors::DiscardLiveActorInstance(instance);
+      instance = SpawnedActor::kNone;
+    }
+  }
+  content::ActorAssetOwner Owner() const {
+    return {.value = static_cast<std::uint64_t>(instance)};
+  }
+};
+}  // namespace
+
+TEST_CASE("Native actor components do not overlap body and equipment state",
+          "[actors][actors-spawning][actor-storage]") {
+  NativeActorStorageFixture fixture;
+  auto& actor =
+      fixture.Allocate({.shape = ActorShape::kEquipped, .model_id = 0x23});
+  REQUIRE(actor.model != nullptr);
+  REQUIRE(actor.stats != nullptr);
+  REQUIRE(actor.equipment_models[0] != nullptr);
+  REQUIRE(actor.equipment_models[1] != nullptr);
+  auto& body = *reinterpret_cast<actors::ActorRecord*>(actor.model);
+  body.model_data_size = 0x12345678;
+  actor.stats->current_hp = 57;
+  actor.equipment_models[0]->weapon.reserved5e4 = 0x11223344;
+  actor.equipment_models[1]->weapon.model_id = 32;
+  CHECK(body.model_data_size == 0x12345678);
+  CHECK(actor.stats->current_hp == 57);
+  CHECK(actor.equipment_models[0]->weapon.reserved5e4 == 0x11223344);
+  CHECK(actor.second_body == nullptr);
+}
+
+TEST_CASE("Native secondary bodies bind independently of equipment storage",
+          "[actors][actors-spawning][actor-storage]") {
+  NativeActorStorageFixture fixture;
+  auto& actor =
+      fixture.Allocate({.shape = ActorShape::kSecondaryBody, .model_id = 0x31});
+  REQUIRE(actor.second_body != nullptr);
+  CHECK(actor.equipment_models[0] == nullptr);
+  CHECK(actor.equipment_models[1] == nullptr);
+  CHECK(actors::LiveActorRecordMemory(fixture.Owner(),
+                                      content::ActorRecordTable::kActor, 7) ==
+        At(reinterpret_cast<std::uintptr_t>(actor.second_body)));
+  CHECK(actors::LiveActorRecordMemory(fixture.Owner(),
+                                      content::ActorRecordTable::kWeapon,
+                                      6) == AssetAddress::kNone);
+  actor.second_body->model_data_size = 99;
+  CHECK(reinterpret_cast<actors::ActorRecord*>(actor.model)->model_data_size ==
+        0);
+}
+
+TEST_CASE("Mutable actor state cannot rewrite its creation definition",
+          "[actors][actors-spawning][actor-storage]") {
+  NativeActorStorageFixture fixture;
+  constexpr ActorDefinition kDefinition{.shape = ActorShape::kEquipped,
+                                        .model_id = 0x23};
+  auto& actor = fixture.Allocate(kDefinition);
+  actor.model_id = 0x45;
+  actor.kind = actors::kAuxiliaryActorKind;
+  actor.allocation_kind = 0;
+  CHECK(actors::LiveActorDefinition(fixture.instance) == kDefinition);
+  CHECK(actors::LiveActorShape(&actor) == ActorShape::kEquipped);
+  CHECK(VS::Battle::actors[NativeActorStorageFixture::kSlot] == nullptr);
+}
+
+TEST_CASE("Discard and reallocation invalidate all old component destinations",
+          "[actors][actors-spawning][actor-storage]") {
+  NativeActorStorageFixture fixture;
+  const auto free_units = VS::Core::Memory::GameHeap().FreeUnits();
+  const auto* address = &fixture.Allocate(kEquippedActor);
+  const auto stale = fixture.instance;
+  const auto owner = fixture.Owner();
+  fixture.Discard();
+  CHECK(VS::Core::Memory::GameHeap().FreeUnits() == free_units);
+  CHECK(&fixture.Allocate(kTwoBodyActor) == address);
+  CHECK(fixture.instance != stale);
+  CHECK_FALSE(actors::LiveActorDefinition(stale));
+  CHECK(actors::LiveActorRecordMemory(owner, content::ActorRecordTable::kActor,
+                                      NativeActorStorageFixture::kSlot) ==
+        AssetAddress::kNone);
+}
+
+TEST_CASE("Native actor discard refuses outstanding owned asset requests",
+          "[actors][actors-spawning][actor-storage]") {
+  NativeActorStorageFixture fixture;
+  auto& actor = fixture.Allocate(kEquippedActor);
+  const ActorAssetRequest request{
+      .kind = Kind(ActorAssetKind::kActorModelParse),
+      .target_slot = NativeActorStorageFixture::kSlot};
+  REQUIRE(actors::QueueLiveActorOwnedAsset(&actor, request) == 0);
+  ChannelWarnings warnings("actors");
+  actors::DiscardLiveActorInstance(fixture.instance);
+  CHECK(actors::LiveActorDefinition(fixture.instance) == kEquippedActor);
+  CHECK(warnings.messages ==
+        std::vector<std::string>{Refused("DiscardUninstalledActor",
+                                         "actor still owns queued loads")});
+  CHECK(content::CancelLiveActorAssetRequests(fixture.Owner()));
 }

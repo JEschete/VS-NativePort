@@ -10,8 +10,10 @@
 #include <cstring>
 #include <iterator>
 #include <limits>
+#include <memory>
 #include <optional>
 #include <span>
+#include <type_traits>
 
 #include "Actors/ActorAllocation.hpp"
 #include "Actors/ActorLoads.hpp"
@@ -69,17 +71,6 @@ namespace VS::Actors {
 namespace {
 using Content::AssetAddress;
 
-// The actor's allocation kind word (0x40), kept in the PS1 layout. Native code
-// reads the allocation's definition instead (LiveActorShape).
-constexpr int kAuxiliaryAllocation = 0;
-constexpr int kEquippedAllocation = 1;
-constexpr int kSecondaryBodyAllocation = 2;
-// A room enemy whose second body takes the weapon model slot keeps an actor
-// record there, not a weapon model (146C.c:6597).
-constexpr std::size_t SecondaryBodyBytes() {
-  return offsetof(VS::Actors::ActorAllocation, model_slots) +
-         sizeof(VS::Actors::ActorRecord);
-}
 // The ZND record byte holding the zone enemy's body model.
 constexpr std::size_t kZoneEnemyModelByte = 2;
 constexpr int kNibbleMask = 0xF;
@@ -242,11 +233,11 @@ template <typename T>
 
 [[nodiscard]] SpawnedActor BeginActorAllocation(std::size_t slot,
                                                 VS::Battle::Actor* actor,
-                                                ActorShape shape) {
+                                                ActorDefinition definition) {
   static_cast<void>(
       LiveActorHandles().Observe(slot, ActorAddress(SlotActor(slot))));
-  const SpawnedActor handle = LiveActorHandles().Begin(
-      slot, ActorAddress(actor), ActorDefinition{.shape = shape});
+  const SpawnedActor handle =
+      LiveActorHandles().Begin(slot, ActorAddress(actor), definition);
   if (handle == SpawnedActor::kNone) {
     VS::Core::Memory::FreeLiveFromLowEnd(actor);
     WarnActorRefused("AllocateLiveActor",
@@ -273,13 +264,12 @@ template <typename T>
           .attack_shape_angle = range.AttackShapeAngle()};
 }
 
-// A zeroed block from the low end of the game heap, or null.
-[[nodiscard]] void* ZeroedBlock(std::size_t bytes) {
-  void* block = Core::Memory::AllocateLiveFromLowEnd(bytes);
-  if (block != nullptr) {
-    std::memset(block, 0, bytes);
-  }
-  return block;
+template <typename T>
+[[nodiscard]] T* AllocateInstanceStorage() {
+  static_assert(std::is_trivially_destructible_v<T>);
+  auto* storage =
+      static_cast<T*>(Core::Memory::AllocateLiveFromLowEnd(sizeof(T)));
+  return storage != nullptr ? std::construct_at(storage) : nullptr;
 }
 
 void WriteName(std::span<const std::uint8_t, kActorNameBytes> name,
@@ -342,71 +332,13 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     return SlotActor(slot) == nullptr;
   }
 
-  [[nodiscard]] SpawnedActor Allocate(ActorShape shape,
+  [[nodiscard]] SpawnedActor Allocate(ActorDefinition definition,
                                       std::size_t slot) override {
-    switch (shape) {
-      case ActorShape::kAuxiliary: {
-        auto* core = static_cast<VS::Actors::ActorCore*>(
-            ZeroedBlock(sizeof(VS::Actors::ActorCore)));
-        if (core == nullptr) {
-          return SpawnedActor::kNone;
-        }
-        VS::Battle::Actor& actor = core->actor.actor;
-        actor.stats = &core->actor.stats;
-        actor.model = &core->model;
-        actor.allocation_kind = kAuxiliaryAllocation;
-        return BeginActorAllocation(slot, &actor, shape);
-      }
-      case ActorShape::kEquipped: {
-        auto* allocation = static_cast<VS::Actors::ActorAllocation*>(
-            ZeroedBlock(sizeof(VS::Actors::ActorAllocation)));
-        if (allocation == nullptr) {
-          return SpawnedActor::kNone;
-        }
-        VS::Battle::Actor& actor = allocation->core.actor.actor;
-        actor.stats = &allocation->core.actor.stats;
-        actor.model = &allocation->core.model;
-        actor.equipment_models[0] = &allocation->model_slots[0];
-        actor.equipment_models[1] = &allocation->model_slots[1];
-        actor.allocation_kind = kEquippedAllocation;
-        return BeginActorAllocation(slot, &actor, shape);
-      }
-      case ActorShape::kSecondaryBody: {
-        auto* allocation = static_cast<VS::Actors::ActorAllocation*>(
-            ZeroedBlock(SecondaryBodyBytes()));
-        if (allocation == nullptr) {
-          return SpawnedActor::kNone;
-        }
-        VS::Battle::Actor& actor = allocation->core.actor.actor;
-        actor.stats = &allocation->core.actor.stats;
-        actor.model = &allocation->core.model;
-        actor.equipment_models[0] = &allocation->model_slots[0];
-        actor.allocation_kind = kSecondaryBodyAllocation;
-        return BeginActorAllocation(slot, &actor, shape);
-      }
-    }
-    return SpawnedActor::kNone;
+    return AllocateLiveActorInstance(definition, slot);
   }
 
   void DiscardUninstalled(SpawnedActor actor) override {
-    VS::Battle::Actor* live =
-        ActorPointer<VS::Battle::Actor>(actor, "DiscardUninstalledActor");
-    if (live == nullptr) {
-      return;
-    }
-    const auto slot = LiveActorHandles().Slot(actor);
-    const auto definition = LiveActorHandles().Definition(actor);
-    if (!LiveActorHandles().Discard(actor)) {
-      WarnActorRefused("DiscardUninstalledActor",
-                       "actor handle is already installed or stale");
-      return;
-    }
-    if (slot && definition && definition->shape == ActorShape::kAuxiliary) {
-      VS::Field::DiscardLiveGimmickInstance(
-          static_cast<int>(*slot),
-          reinterpret_cast<VS::Field::GimmickInstance*>(live->model));
-    }
-    VS::Core::Memory::FreeLiveFromLowEnd(live);
+    DiscardLiveActorInstance(actor);
   }
 
   void Install(std::size_t slot, SpawnedActor actor) override {
@@ -1197,6 +1129,77 @@ LimbTemplate DecodeLimb(const VS::Actors::LimbInit& limb) {
 }
 }  // namespace
 
+SpawnedActor AllocateLiveActorInstance(ActorDefinition definition,
+                                       std::size_t slot) {
+  if (slot >= kSpawnActorSlots || SlotActor(slot) != nullptr) {
+    WarnActorRefused("AllocateLiveActor", "actor slot is invalid or occupied");
+    return SpawnedActor::kNone;
+  }
+  switch (definition.shape) {
+    case ActorShape::kAuxiliary: {
+      auto* storage = AllocateInstanceStorage<ActorCore>();
+      if (storage == nullptr) break;
+      auto& actor = storage->actor.actor;
+      actor.stats = &storage->actor.stats;
+      actor.model = reinterpret_cast<ModelInstance*>(&storage->gimmick);
+      return BeginActorAllocation(slot, &actor, definition);
+    }
+    case ActorShape::kEquipped: {
+      auto* storage = AllocateInstanceStorage<ActorAllocation>();
+      if (storage == nullptr) break;
+      auto& actor = storage->actor.actor;
+      actor.stats = &storage->actor.stats;
+      actor.model = &storage->body.instance;
+      actor.equipment_models[0] = &storage->model_slots[0];
+      actor.equipment_models[1] = &storage->model_slots[1];
+      return BeginActorAllocation(slot, &actor, definition);
+    }
+    case ActorShape::kSecondaryBody: {
+      auto* storage = AllocateInstanceStorage<SecondaryBodyAllocation>();
+      if (storage == nullptr) break;
+      auto& actor = storage->actor.actor;
+      actor.stats = &storage->actor.stats;
+      actor.model = &storage->body.instance;
+      actor.second_body = &storage->second_body;
+      return BeginActorAllocation(slot, &actor, definition);
+    }
+  }
+  WarnActorRefused("AllocateLiveActor", "native instance allocation failed");
+  return SpawnedActor::kNone;
+}
+
+VS::Battle::Actor* ResolveLiveActorInstance(SpawnedActor actor) {
+  return ActorPointer<VS::Battle::Actor>(actor, "ResolveActorInstance");
+}
+
+std::optional<ActorDefinition> LiveActorDefinition(SpawnedActor actor) {
+  return LiveActorHandles().Definition(actor);
+}
+
+void DiscardLiveActorInstance(SpawnedActor actor) {
+  auto* live =
+      ActorPointer<VS::Battle::Actor>(actor, "DiscardUninstalledActor");
+  if (live == nullptr) return;
+  const auto slot = LiveActorHandles().Slot(actor);
+  const auto definition = LiveActorHandles().Definition(actor);
+  if (Content::LiveActorAssetsQueued(AssetOwnerOf(actor))) {
+    WarnActorRefused("DiscardUninstalledActor",
+                     "actor still owns queued loads");
+    return;
+  }
+  if (!LiveActorHandles().Discard(actor)) {
+    WarnActorRefused("DiscardUninstalledActor",
+                     "actor handle is already installed or stale");
+    return;
+  }
+  if (slot && definition && definition->shape == ActorShape::kAuxiliary) {
+    Field::DiscardLiveGimmickInstance(
+        static_cast<int>(*slot),
+        reinterpret_cast<Field::GimmickInstance*>(live->model));
+  }
+  Core::Memory::FreeLiveFromLowEnd(live);
+}
+
 CharacterTemplate DecodeCharacterTemplate(
     const VS::Actors::CharacterInit& init) {
   CharacterTemplate decoded{
@@ -1408,6 +1411,7 @@ AssetAddress LiveActorRecordMemory(Content::ActorAssetOwner owner,
     case ActorRecordPart::kGimmick:
       return Address(live->model);
     case ActorRecordPart::kSecondBody:
+      return Address(live->second_body);
     case ActorRecordPart::kWeapon:
       return Address(live->equipment_models[0]);
     case ActorRecordPart::kShield:
