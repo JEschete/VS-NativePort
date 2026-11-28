@@ -1164,18 +1164,24 @@ SpawnedActor SpawnRoomEnemy(ActorSpawnHost& host, int actor_id,
 }
 
 // decomp: BATTLE.PRG func_8007C8F8 (src/BATTLE/BATTLE.PRG/146C.c:8881)
-// Native (#48): an installed Ashley owns the load into her record; without
-// her it stays unowned, as the original queued it.
+// The script advances immediately; the actor load table reports and forgets
+// the eventual outcome. A request without its destination owner is refused.
 int QueueAshleyModelLoad(ActorSpawnHost& host, int model_id) {
+  const SpawnedActor ashley = host.ActorAt(kAshleySlot);
+  if (ashley == SpawnedActor::kNone) {
+    host.Refuse(SpawnRefusal::kNoActor);
+    return 0;
+  }
   ActorAssetRequest request{};
   request.model_id = static_cast<std::int16_t>(model_id);
   request.kind = static_cast<std::uint8_t>(ActorAssetKind::kActorModelLoad);
   request.target_slot = static_cast<std::int8_t>(kAshleySlot);
-  const SpawnedActor ashley = host.ActorAt(kAshleySlot);
-  if (ashley == SpawnedActor::kNone) {
-    return host.QueueAsset(request) + 1;
+  const int queued = host.QueueOwnedAsset(request, ashley);
+  if (queued < 0) {
+    host.Refuse(SpawnRefusal::kAssetQueue);
+    return 0;
   }
-  return host.QueueOwnedAsset(request, ashley) + 1;
+  return queued + 1;
 }
 
 // decomp: BATTLE.PRG spawnModelActor (src/BATTLE/BATTLE.PRG/146C.c:8891; was

@@ -1912,6 +1912,7 @@ TEST_CASE("Ashley's model request is value-initialized",
           "[actors][actors-spawning]") {
   // #302: the original queued a stack request with only three fields set.
   FakeSpawnHost host;
+  host.table.at(actors::kAshleySlot) = Handle(0x10);
   host.queue_index = 6;
   CHECK(actors::QueueAshleyModelLoad(host, 0x12) == 7);
   ActorAssetRequest expected{};
@@ -1919,8 +1920,7 @@ TEST_CASE("Ashley's model request is value-initialized",
   expected.target_slot = 0;
   expected.model_id = 0x12;
   CHECK(host.requests == std::vector<ActorAssetRequest>{expected});
-  // Without Ashley the load stays unowned, as the original queued it.
-  CHECK(host.queued_owners.empty());
+  CHECK(host.queued_owners == std::vector{Handle(0x10)});
 }
 
 TEST_CASE("An installed Ashley owns her model load",
@@ -1935,6 +1935,24 @@ TEST_CASE("An installed Ashley owns her model load",
   REQUIRE(host.requests.size() == 1);
   CHECK(host.requests.at(0).target_slot == 0);
   CHECK(host.requests.at(0).model_id == 0x12);
+}
+
+TEST_CASE("Ashley's script model request refuses a missing owner",
+          "[actors][actors-spawning][actor-script-load]") {
+  FakeSpawnHost host;
+  CHECK(actors::QueueAshleyModelLoad(host, 0x12) == 0);
+  CHECK(host.requests.empty());
+  CHECK(host.refusals == std::vector{SpawnRefusal::kNoActor});
+}
+
+TEST_CASE("Ashley's script model request reports a refused submission",
+          "[actors][actors-spawning][actor-script-load]") {
+  FakeSpawnHost host;
+  host.table.at(actors::kAshleySlot) = Handle(0x10);
+  host.queue_index = -1;
+  CHECK(actors::QueueAshleyModelLoad(host, 0x12) == 0);
+  CHECK(host.log == std::vector<std::string>{"QueueOwnedAsset"});
+  CHECK(host.refusals == std::vector{SpawnRefusal::kAssetQueue});
 }
 
 TEST_CASE("A scripted actor stays unpublished until its model is ready",
