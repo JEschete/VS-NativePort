@@ -84,6 +84,14 @@ struct PlanningAdvanceFixture : PlanningFixture {
   VS::Battle::Ai::RoomAiState room{};
   VS::Battle::Actor battle_actor{};
 
+  static VS::Actors::SpawnedActor Register(std::size_t slot,
+                                           VS::Battle::Actor& actor) {
+    const auto identity = VS::Actors::InstallLiveActorInstance(
+        slot, &actor, VS::Actors::ActorShape::kEquipped);
+    REQUIRE(identity != VS::Actors::SpawnedActor::kNone);
+    return identity;
+  }
+
   PlanningAdvanceFixture() {
     VS::Actors::ResetLiveActorHandles();
     std::copy_n(VS::Battle::Ai::kTimedStatusFlags.begin(), saved_masks.size(),
@@ -102,9 +110,7 @@ struct PlanningAdvanceFixture : PlanningFixture {
               nullptr);
     battle_actor.id = 1;
     battle_actor.stats = &stats;
-    REQUIRE(VS::Actors::InstallLiveActorInstance(
-                0, &battle_actor, VS::Actors::ActorShape::kEquipped) !=
-            VS::Actors::SpawnedActor::kNone);
+    Register(0, battle_actor);
     for (auto& row : stats.limb_actions) {
       for (auto& slot : row) slot.action_id = 42;
     }
@@ -625,9 +631,7 @@ TEST_CASE("Native planning simulation refreshes each actor by its own slot",
   second.stats = &second_stats;
   second_actor.stats = &second_stats;
   fixture.peer.actor = &second_actor;
-  fixture.battle_actor.next = VS::Actors::InstallLiveActorInstance(
-      3, &second, VS::Actors::ActorShape::kEquipped);
-  REQUIRE(fixture.battle_actor.next != VS::Actors::SpawnedActor::kNone);
+  fixture.battle_actor.next = PlanningAdvanceFixture::Register(3, second);
   fixture.stats.current_hp = 0;
   for (auto& limb : fixture.stats.limbs) limb.hp = 0;
   for (auto& limb : second_stats.limbs) limb.hp = 2;

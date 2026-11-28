@@ -774,6 +774,18 @@
     <ClCompile Include="src\Battle\CombatAction.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
+    <ClCompile Include="src\Battle\CombatActionLive.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Battle\CombatActionSession.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Battle\CombatImpact.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Battle\CombatImpactLive.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
     <ClCompile Include="src\Battle\Damage.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
@@ -3534,6 +3546,15 @@
     <ClInclude Include="include\Battle\CombatAction.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
+    <ClInclude Include="include\Battle\CombatActionLive.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\CombatActionSession.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\CombatImpact.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
     <ClInclude Include="include\Battle\DamageCalculations.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
@@ -4306,6 +4327,9 @@
       <Filter>include\Items</Filter>
     </ClInclude>
     <ClInclude Include="include\Items\InventoryLive.hpp">
+      <Filter>include\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Items\ItemRandomLive.hpp">
       <Filter>include\Items</Filter>
     </ClInclude>
     <ClInclude Include="include\Items\ItemRecords.hpp">

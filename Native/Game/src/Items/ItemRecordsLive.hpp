@@ -21,6 +21,7 @@
 #include "Core/Diagnostics.hpp"
 #include "Items/EquipmentAffinity.hpp"
 #include "Items/EquipmentStats.hpp"
+#include "Items/ItemRandomLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Legacy/Psx.hpp"
 
@@ -137,10 +138,4 @@ class LiveEquipStatusHost final : public EquipStatusHost {
   bool committed_ = false;
 };
 
-// The game's random draws (SLUS_010.40 vs_main_getRand*).
-class LiveItemRandom final : public ItemRandom {
- public:
-  [[nodiscard]] std::int32_t NextBounded(std::int32_t bound) override;
-  [[nodiscard]] std::int32_t NextAveraged(std::int32_t bound) override;
-};
 }  // namespace VS::Items::Live

@@ -8,20 +8,33 @@
 #include <iterator>
 #include <optional>
 #include <span>
+#include <tuple>
 #include <utility>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Actors/ActorRecord.hpp"
+#include "Actors/ActorSpawningLive.hpp"
+#include "Actors/ShpModel.hpp"
 #include "Battle/Action.hpp"
+#include "Battle/ActionCameraSelectionLive.hpp"
 #include "Battle/ActionFlow.hpp"
+#include "Battle/ActionPresentationLive.hpp"
 #include "Battle/ActionPreview.hpp"
 #include "Battle/ActionPreviewLive.hpp"
 #include "Battle/ActionResolution.hpp"
 #include "Battle/ActionTable.hpp"
 #include "Battle/Actor.hpp"
+#include "Battle/Ai/ActorState.hpp"
+#include "Battle/Ai/AiState.hpp"
+#include "Battle/Ai/AiViews.hpp"
+#include "Battle/Ai/PlanningPrimitivesLive.hpp"
+#include "Battle/Ai/RelationsLive.hpp"
 #include "Battle/CombatAction.hpp"
+#include "Battle/CombatActionLive.hpp"
+#include "Battle/CombatActionSession.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/HitChance.hpp"
 #include "Battle/HitModifiers.hpp"
@@ -29,6 +42,10 @@
 #include "Content/ModuleData.hpp"
 #include "Core/Random.hpp"
 #include "Core/RandomLive.hpp"
+#include "Effects/ActionRequest.hpp"
+#include "Field/Gimmicks.hpp"
+#include "Render/ModelGeometryLive.hpp"
+#include "State/Progress.hpp"
 #include "TestSupport/BattleCatalogRoot.hpp"
 
 using VS::Battle::ActionDefinition;
@@ -847,8 +864,8 @@ struct PhysicalFixture {
     request.targets[0].target.target_actor =
         static_cast<std::uint8_t>(1 - source);
     request.targets[0].target.target_limb = 3;
-    b::ResolveLiveActionTargets(1, &output, &request,
-                                static_cast<int>(execute));
+    b::ResolveLiveCompatibilityActionTargets(1, &output, &request,
+                                             static_cast<int>(execute));
     return std::bit_cast<b::ActionRequest>(output);
   }
   b::CombatActionResult Run(CombatRandom& random, bool execute = true) {
@@ -870,6 +887,114 @@ void CheckPhysicalActor(const b::CombatActorState& actual,
           expected.limbs.at(i).armor.current_dp);
   }
 }
+
+struct NativeCombatFixture {
+  PhysicalFixture base;
+  decltype(b::Ai::actorAiStates) saved_ai = b::Ai::actorAiStates;
+  decltype(VS::Actors::actorRecords) saved_models = VS::Actors::actorRecords;
+  decltype(VS::Field::gimmickInstances) saved_gimmicks =
+      VS::Field::gimmickInstances;
+  decltype(VS::State::scoreData) saved_score = VS::State::scoreData;
+  decltype(VS::State::artsStatus) saved_arts = VS::State::artsStatus;
+
+  NativeCombatFixture() {
+    const auto opened = VS::Content::DataStore::OpenShared("Native\\data");
+    if (!opened) FAIL(opened.error());
+    b::ResetLiveCombatActions();
+    VS::Actors::ResetLiveActorHandles();
+    VS::Actors::actorRecords.fill(nullptr);
+    VS::Field::gimmickInstances.fill(nullptr);
+    b::Ai::actorAiStates.fill(nullptr);
+    base.RestoreLegacyActors();
+    for (std::size_t slot = 0; slot < base.actors.size(); ++slot) {
+      Register(slot);
+    }
+    base.Select(0);
+    VS::Core::InitializeLiveRandomShuffleTable();
+  }
+  void Register(std::size_t slot) {
+    b::actors[slot] = nullptr;
+    base.legacy.actors.at(slot).id = static_cast<std::int16_t>(slot);
+    const auto identity = VS::Actors::InstallLiveActorInstance(
+        slot, &base.legacy.actors.at(slot), VS::Actors::ActorShape::kEquipped);
+    if (identity == VS::Actors::SpawnedActor::kNone) {
+      FAIL("register native combat actor");
+    }
+    base.actors.at(slot).identity = identity;
+  }
+  ~NativeCombatFixture() {
+    b::ResetLiveCombatActions();
+    for (std::size_t slot = 0; slot < base.actors.size(); ++slot) {
+      VS::Actors::InvalidateLiveActorHandle(slot, &base.legacy.actors.at(slot));
+    }
+    VS::Actors::actorRecords = saved_models;
+    VS::Field::gimmickInstances = saved_gimmicks;
+    b::Ai::actorAiStates = saved_ai;
+    VS::State::scoreData = saved_score;
+    VS::State::artsStatus = saved_arts;
+  }
+  b::LiveCombatResolution Execute(std::size_t source = 0) {
+    base.Select(source);
+    base.legacy.stats.at(source).strength = 100;
+    base.legacy.stats.at(source).agility = 100;
+    base.legacy.stats.at(1 - source).strength = 20;
+    base.legacy.stats.at(1 - source).agility = 1;
+    auto result = b::ResolveLiveCombatAction(base.intent, 1, true);
+    if (!result) FAIL(result.error());
+    return std::move(*result);
+  }
+};
+
+struct NativeCombatAiFixture : NativeCombatFixture {
+  std::array<b::Ai::ActorAiState, 2> states{};
+  NativeCombatAiFixture() {
+    for (std::size_t slot = 0; slot < states.size(); ++slot) {
+      auto& state = states.at(slot);
+      state.actor_id = static_cast<std::uint8_t>(slot);
+      state.actor = reinterpret_cast<b::Ai::EngagementData*>(
+          &base.legacy.actors.at(slot));
+      state.stats = &base.legacy.stats.at(slot);
+      b::Ai::actorAiStates[slot] = &state;
+      REQUIRE(VS::Actors::BindLiveActorAiState(base.actors.at(slot).identity,
+                                               &state));
+    }
+  }
+  ~NativeCombatAiFixture() {
+    for (std::size_t slot = 0; slot < states.size(); ++slot) {
+      const auto id = base.actors.at(slot).identity;
+      if (VS::Actors::LiveActorAiState(id) == &states.at(slot)) {
+        CHECK(VS::Actors::UnbindLiveActorAiState(id, &states.at(slot)));
+      }
+    }
+  }
+};
+
+struct NativeCombatPresentationFixture : NativeCombatFixture {
+  struct Model {
+    VS::Actors::ShpModel header{};
+    std::array<VS::Actors::ShpBone, 1> bones{};
+  } model;
+  VS::Actors::ActorRecord body{};
+
+  NativeCombatPresentationFixture() {
+    VS::Render::RecordLiveModelExtent(&model, sizeof(model));
+    body.instance.model = &model.header;
+    body.instance.bone_count = 1;
+    body.model_data_size = sizeof(model);
+    body.scale = 4096;
+    body.bone_matrices[0].m[0][0] = 4096;
+    body.bone_matrices[0].m[1][1] = 4096;
+    body.bone_matrices[0].m[2][2] = 4096;
+    base.legacy.actors.front().model = &body.instance;
+    VS::Actors::actorRecords[0] = &body;
+    VS::Actors::InvalidateLiveActorHandle(0, &base.legacy.actors.front());
+    Register(0);
+    base.legacy.state.queue_index = 0;
+  }
+  ~NativeCombatPresentationFixture() {
+    VS::Render::ForgetLiveModelExtent(&model);
+  }
+};
 }  // namespace
 
 TEST_CASE("Physical rules preserve original player and AI damage and RNG",
@@ -968,4 +1093,338 @@ TEST_CASE("Physical equipment growth produces owned actor-qualified notices",
   CHECK(result.equipment_notices.front().label ==
         VS::Items::kWeaponNoticeLabel);
   CHECK(f.actors.front().damage.weapon.blade.classes.front() == 0);
+}
+
+TEST_CASE("Pending combat owns immutable hits and permits repeated impacts",
+          "[combat-session][issue-56]") {
+  PhysicalFixture f;
+  CombatRandom random;
+  auto result = f.Run(random);
+  const auto expected = result.hits.front().changes;
+  b::CombatActionSession session;
+  const auto id = session.Submit(result);
+  if (!id) FAIL(id.error());
+  result.hits.front().changes.changes.front().amount = 777;
+  const auto first =
+      session.TargetImpact(*id, 0, f.intent.source, f.actors.back().identity);
+  const auto again =
+      session.TargetImpact(*id, 0, f.intent.source, f.actors.back().identity);
+  if (!first || !again) FAIL("active impacts must remain readable");
+  CHECK(first->changes == expected);
+  CHECK(again->changes == expected);
+  CHECK(session.SourceImpact(*id, f.intent.source).has_value());
+  session.Forget(*id);
+  CHECK_FALSE(
+      session.TargetImpact(*id, 0, f.intent.source, f.actors.back().identity)
+          .has_value());
+}
+
+TEST_CASE("Pending combat refuses replaced sources and targets",
+          "[combat-session][issue-56]") {
+  PhysicalFixture f;
+  CombatRandom random;
+  b::CombatActionSession session;
+  const auto id = session.Submit(f.Run(random));
+  if (!id) FAIL(id.error());
+  const bool source = GENERATE(false, true);
+  auto& actor = f.actors.at(source ? 0 : 1);
+  REQUIRE(f.identities.Remove(actor.slot, actor.identity));
+  actor.identity = f.identities.Begin(actor.slot, actor.slot + 1, {});
+  REQUIRE(f.identities.Publish(actor.slot, actor.identity));
+  CHECK_FALSE(session
+                  .TargetImpact(*id, 0, f.actors.front().identity,
+                                f.actors.back().identity)
+                  .has_value());
+  if (source) {
+    CHECK_FALSE(session.SourceImpact(*id, actor.identity).has_value());
+  }
+}
+
+TEST_CASE("Combat action ids are not reused across session resets",
+          "[combat-session][issue-56]") {
+  PhysicalFixture f;
+  CombatRandom random;
+  const auto result = f.Run(random);
+  b::CombatActionSession session;
+  const auto previous = session.Submit(result);
+  if (!previous) FAIL(previous.error());
+  session.Reset();
+  const auto current = session.Submit(result);
+  if (!current) FAIL(current.error());
+  CHECK(*current != *previous);
+  CHECK(session.Find(*previous) == nullptr);
+  CHECK(session.Find(*current) != nullptr);
+  CHECK_FALSE(
+      session
+          .TargetImpact(*current, 1, f.intent.source, f.actors.back().identity)
+          .has_value());
+  CHECK(
+      session
+          .TargetImpact(*current, 0, f.intent.source, f.actors.back().identity)
+          .has_value());
+}
+
+TEST_CASE(
+    "Live player and AI combat commits without presentation or calculators",
+    "[combat-live][issue-56]") {
+  NativeCombatFixture f;
+  const auto source = GENERATE(std::size_t{0}, std::size_t{1});
+  b::actionState = nullptr;
+  b::hitFunctions.fill(nullptr);
+  b::statCalculators.fill(nullptr);
+  b::actionEffectMediators.fill(nullptr);
+  const auto resolved = f.Execute(source);
+  auto& target = f.base.legacy.stats.at(1 - source);
+  const auto hp = target.current_hp;
+  const auto damage =
+      resolved.result.hits.front().changes.changes.front().amount;
+  CHECK(damage > 0);
+  CHECK(target.current_hp == 4000);
+  const auto impact = b::CommitLiveCombatImpact(resolved.id, 0);
+  if (!impact) FAIL(impact.error());
+  CHECK(target.current_hp == hp - damage);
+  CHECK_FALSE(impact->events.empty());
+  CHECK(b::FindLiveCombatAction(resolved.id) != nullptr);
+  CHECK(f.base.legacy.stats.at(source).action_recovery_timer > 0);
+}
+
+TEST_CASE(
+    "Live combat reads and commits expected stats instead of borrowed views",
+    "[combat-live][issue-56]") {
+  NativeCombatFixture f;
+  std::array<b::ActorStats, 2> foreign{};
+  for (std::size_t i = 0; i < foreign.size(); ++i) {
+    foreign.at(i).current_hp = 777;
+    f.base.legacy.actors.at(i).stats = &foreign.at(i);
+  }
+  const auto resolved = f.Execute();
+  CHECK_FALSE(b::LiveCombatPresentationAvailable(resolved.id));
+  const auto impact = b::CommitLiveCombatImpact(resolved.id, 0);
+  if (!impact) FAIL(impact.error());
+  CHECK(f.base.legacy.stats.at(1).current_hp < 4000);
+  CHECK(foreign.front().current_hp == 777);
+  CHECK(foreign.back().current_hp == 777);
+  CHECK(foreign.front().risk == 0);
+  CHECK(f.base.legacy.stats.front().risk == 10);
+}
+
+TEST_CASE("Native limb previews use owned stats and do not charge costs",
+          "[combat-live][action-preview][issue-56]") {
+  NativeCombatFixture f;
+  f.base.legacy.stats.at(1).default_target_limb = 3;
+  b::ActorStats foreign{};
+  foreign.default_target_limb = 5;
+  f.base.legacy.actors.at(1).stats = &foreign;
+  ActionRequestRecord result{};
+  const int availability = b::PreviewLiveActionAgainstLimb(1, 0, 1, 3, &result);
+  CHECK(availability == 0x01000000);
+  CHECK(result.targets.front().target.target_limb == 3);
+  CHECK(f.base.legacy.stats.front().risk == 0);
+  CHECK(f.base.legacy.stats.front().action_recovery_timer == 0);
+  CHECK(b::LiveCombatActionForRequest(result) == b::CombatActionId::kNone);
+}
+
+TEST_CASE(
+    "Live physical resolution preserves full compatibility projection and RNG",
+    "[combat-live][issue-56]") {
+  NativeCombatFixture f;
+  const auto source = GENERATE(std::size_t{0}, std::size_t{1});
+  const bool execute = GENERATE(false, true);
+  f.base.Select(source);
+  VS::Core::InitializeLiveRandomShuffleTable();
+  const auto expected = f.base.LegacyResult(source, execute);
+  const auto random_after = VS::Core::NextLiveRandomBounded(100000);
+  f.base.RestoreLegacyActors();
+  VS::Core::InitializeLiveRandomShuffleTable();
+  ActionRequestRecord request{}, result{};
+  request.primary_target.target.target_actor =
+      static_cast<std::uint8_t>(source);
+  request.target_count = 1;
+  request.targets.front().target.target_actor =
+      static_cast<std::uint8_t>(1 - source);
+  request.targets.front().target.target_limb = 3;
+  if (execute) {
+    auto resolved = b::ResolveLiveCombatAction(f.base.intent, 1, true);
+    if (!resolved) FAIL(resolved.error());
+    CHECK(b::ProjectLiveCombatHit(resolved->result.hits.front()) ==
+          expected.targets.front());
+  } else {
+    const auto resolved =
+        b::TryResolveLiveCombatRequest(1, result, request, false);
+    if (!resolved) FAIL(resolved.error());
+    CHECK(std::bit_cast<b::ActionRequest>(result) == expected);
+  }
+  CHECK(VS::Core::NextLiveRandomBounded(100000) == random_after);
+}
+
+TEST_CASE("Delayed live impacts refuse replaced actor generations",
+          "[combat-live][issue-56]") {
+  NativeCombatFixture f;
+  const auto resolved = f.Execute();
+  const auto replaced = GENERATE(std::size_t{0}, std::size_t{1});
+  VS::Actors::InvalidateLiveActorHandle(replaced,
+                                        &f.base.legacy.actors.at(replaced));
+  f.Register(replaced);
+  const auto hp = f.base.legacy.stats.back().current_hp;
+  const auto impact = b::CommitLiveCombatImpact(resolved.id, 0);
+  CHECK_FALSE(impact.has_value());
+  CHECK(f.base.legacy.stats.back().current_hp == hp);
+  b::ResetLiveCombatActions();
+  CHECK_FALSE(b::CommitLiveCombatImpact(resolved.id, 0).has_value());
+}
+
+TEST_CASE("Native action retirement leaves later work alive",
+          "[combat-live][issue-56]") {
+  NativeCombatFixture f;
+  const auto first = f.Execute();
+  const auto later = f.Execute();
+  b::ForgetLiveCombatAction(first.id);
+  CHECK_FALSE(b::CommitLiveCombatImpact(first.id, 0).has_value());
+  CHECK(b::CommitLiveCombatImpact(later.id, 0).has_value());
+  b::ResetLiveCombatActions();
+  const auto restarted = f.Execute();
+  CHECK(restarted.id != first.id);
+  CHECK(restarted.id != later.id);
+  CHECK_FALSE(b::CommitLiveCombatImpact(later.id, 0).has_value());
+}
+
+TEST_CASE("Live impacts retain immutable results through repeated callbacks",
+          "[combat-live][issue-56]") {
+  NativeCombatFixture f;
+  auto resolved = f.Execute();
+  const auto damage =
+      resolved.result.hits.front().changes.changes.front().amount;
+  resolved.result.hits.front().changes.changes.front().amount = 900;
+  CHECK(b::CommitLiveCombatImpact(resolved.id, 0).has_value());
+  CHECK(f.base.legacy.stats.back().current_hp == 4000 - damage);
+  CHECK(b::CommitLiveCombatImpact(resolved.id, 0).has_value());
+  CHECK(f.base.legacy.stats.back().current_hp == 4000 - 2 * damage);
+  CHECK(b::CommitLiveCombatImpact(resolved.id, std::nullopt).has_value());
+  CHECK(f.base.legacy.stats.front().current_hp == 4000);
+}
+
+TEST_CASE("Physical scoring preserves player-only exclusions and saturation",
+          "[combat-rules][issue-56]") {
+  PhysicalFixture f;
+  const auto [source, category, spawn, before, after] =
+      GENERATE(std::tuple{std::size_t{0}, 2, 0, 10, 11},
+               std::tuple{std::size_t{0}, 10, 0, 65535, 65535},
+               std::tuple{std::size_t{0}, 2, 128, 10, 10},
+               std::tuple{std::size_t{1}, 2, 0, 10, 10});
+  f.Select(source);
+  f.actors.at(1 - source).spawn = static_cast<std::uint8_t>(spawn);
+  CombatRandom random;
+  auto inputs = f.Inputs(random);
+  inputs.progress.weapon_category = static_cast<std::uint8_t>(category);
+  inputs.progress.weapon_attacks = static_cast<std::uint16_t>(before);
+  auto result = b::ResolvePhysicalAction(f.intent, inputs, true);
+  if (!result) FAIL(result.error());
+  CHECK(result->progress.weapon_attacks == after);
+  CHECK(inputs.progress.weapon_attacks == before);
+}
+
+TEST_CASE("Physical preview availability uses its owned resource snapshot",
+          "[combat-rules][issue-56]") {
+  PhysicalFixture f;
+  const auto mp = GENERATE(std::int16_t{9}, std::int16_t{10});
+  f.actors.front().damage.weapon.action_type = 1;
+  f.actors.front().mp = mp;
+  PhysicalFixture::DetachLiveState();
+  CombatRandom random;
+  const auto result = f.Run(random, false);
+  CHECK((result.availability >> 24) == (mp >= 10));
+  CHECK(result.actors.front().mp == mp);
+  CHECK(result.actors.front().recovery_timer == 0);
+  CHECK(result.progress.weapon_attacks == 0);
+}
+
+TEST_CASE("Completed native actions use owned hits for AI reactions",
+          "[combat-live][ai][alliance-action][issue-56]") {
+  NativeCombatAiFixture f;
+  const auto resolved = f.Execute();
+  auto& target = f.states.back();
+  target.settings_bit25 = 1;
+  target.relations[0].classification = 1;
+  b::actionDefinitions[1].ai_flags =
+      std::bit_cast<b::ActionAiFlags>(std::uint16_t{1u << 15});
+  b::actionDefinitions[1].hits[0].prerequisite_function_id = 3;
+  const int retired = GENERATE(-1, 0, 1);
+  if (retired >= 0) {
+    const auto slot = static_cast<std::size_t>(retired);
+    VS::Actors::InvalidateLiveActorHandle(slot, &f.base.legacy.actors.at(slot));
+    f.Register(slot);
+  }
+  b::Ai::ApplyLiveCombatActorReaction(
+      reinterpret_cast<b::Ai::ReactionView*>(&target), resolved.result);
+  CHECK(target.relations[0].classification == (retired < 0 ? 3 : 1));
+  CHECK(target.relations[0].timer == (retired < 0 ? 28 : 0));
+}
+
+TEST_CASE("Native completed plans forget retired targets without rebinding",
+          "[combat-live][ai][completed-plan][issue-56]") {
+  NativeCombatAiFixture f;
+  const auto resolved = f.Execute(1);
+  auto& state = f.states.back();
+  f.base.legacy.actors.back().command_opcode = 24;
+  state.candidate_count = 1;
+  state.candidates[0].action = 1;
+  state.candidates[0].target_id = 0;
+  state.candidate_order[0] = &state.candidates[0];
+  state.target_memory_disabled = 1;
+  state.previous_tile = 45;
+  state.detour_target = 13;
+  const int retired = GENERATE(-1, 0, 1);
+  if (retired >= 0) {
+    const auto slot = static_cast<std::size_t>(retired);
+    VS::Actors::InvalidateLiveActorHandle(slot, &f.base.legacy.actors.at(slot));
+    f.Register(slot);
+  }
+  b::Ai::ReconcileLiveCompletedCombatAction(resolved.result);
+  CHECK(state.detour_target == (retired == 1 ? 13 : 0));
+  CHECK(state.previous_tile == (retired == 1 ? 45 : -1));
+}
+
+TEST_CASE("Combat presentation refuses rebound AI and model views",
+          "[combat-live][issue-56]") {
+  NativeCombatAiFixture f;
+  const auto resolved = f.Execute();
+  CHECK(b::LiveCombatPresentationAvailable(resolved.id));
+  SECTION("rebound AI") { b::Ai::actorAiStates[1] = &f.states.front(); }
+  SECTION("rebound model") {
+    VS::Actors::ActorRecord other{};
+    VS::Actors::actorRecords[1] = &other;
+    CHECK_FALSE(b::LiveCombatPresentationAvailable(resolved.id));
+    CHECK(b::LiveCombatTarget(resolved.result.hits.front()).targets_position);
+    VS::Actors::actorRecords[1] = nullptr;
+    return;
+  }
+  CHECK_FALSE(b::LiveCombatPresentationAvailable(resolved.id));
+  CHECK(b::LiveCombatTarget(resolved.result.hits.front()).targets_position);
+}
+
+TEST_CASE("Camera and effect requests ignore rewritten combat projections",
+          "[combat-live][camera-selection][action-presentation][issue-56]") {
+  NativeCombatPresentationFixture f;
+  ActionRequestRecord request{};
+  request.focus_position = {10, 20, 30, 0};
+  auto& projection = f.base.legacy.state.queue.front();
+  const auto resolved =
+      b::TryResolveLiveCombatRequest(1, projection, request, true);
+  if (!resolved) FAIL(resolved.error());
+  CHECK(b::CurrentLiveCombatAction() != b::CombatActionId::kNone);
+  VS::Effects::LiveActionEffectRequest before{}, after{};
+  VS::Core::Gte::SVECTOR midpoint_before{}, midpoint_after{};
+  b::BuildLiveActionPresentationRequest(&projection, &before);
+  b::LiveActionCameraMidpoint(&midpoint_before);
+  projection.action_id = 60;
+  projection.primary_target.target.target_actor = 1;
+  projection.target_count = 1;
+  projection.targets[0].target.target_actor = 1;
+  projection.focus_position = {-100, -200, -300, 0};
+  b::BuildLiveActionPresentationRequest(&projection, &after);
+  b::LiveActionCameraMidpoint(&midpoint_after);
+  CHECK(std::bit_cast<std::array<std::byte, sizeof(before)>>(before) ==
+        std::bit_cast<std::array<std::byte, sizeof(after)>>(after));
+  CHECK(std::bit_cast<b::ActionPoint>(midpoint_before) ==
+        std::bit_cast<b::ActionPoint>(midpoint_after));
 }

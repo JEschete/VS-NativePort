@@ -14,11 +14,14 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Battle/CombatActionSession.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/EffectInstances.hpp"
 #include "Effects/EffectInstancesLive.hpp"
+#include "Effects/EffectScriptLive.hpp"
 #include "Effects/Runtime.hpp"
 #include "Effects/SpawnRequest.hpp"
+#include "TestSupport/EffectProgramScope.hpp"
 
 namespace {
 namespace fx = VS::Effects;
@@ -442,6 +445,44 @@ TEST_CASE("Live effect instances refuse missing spawn data",
   instance->priority = 9;
   fx::LiveInitEffectInstance(spawn, instance.get());
   CHECK(instance->priority == 9);
+  CHECK(Memory::GameHeap().Empty());
+}
+
+TEST_CASE("Live effect instances own the action id captured by their spawn",
+          "[effect-instances][combat-live][issue-56]") {
+  LiveInstances live;
+  auto* spawn = live.Spawn(0);
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
+  const auto id = static_cast<VS::Battle::CombatActionId>(19);
+  spawn->combat_action = id;
+  const auto create = GENERATE(&fx::LiveCreatePrimaryEffectInstance,
+                               &fx::LiveCreateSecondaryEffectInstance);
+  auto* instance = create(spawn);
+  REQUIRE(instance != nullptr);
+  spawn->combat_action = VS::Battle::CombatActionId::kNone;
+  CHECK(instance->context.combat_action == id);
+}
+
+TEST_CASE("Script children retain combat identity without a parent pointer",
+          "[effect-instances][effect-script][combat-live][issue-56]") {
+  LiveInstances live;
+  std::array program{std::byte{2}, std::byte{0}, std::byte{0}};
+  const VS::test_support::EffectProgramScope registered{program};
+  auto* spawn = live.Spawn(0);
+  spawn->script = reinterpret_cast<char*>(program.data());
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
+  spawn->combat_action = static_cast<VS::Battle::CombatActionId>(21);
+  auto* parent = fx::LiveCreatePrimaryEffectInstance(spawn);
+  REQUIRE(parent != nullptr);
+  CHECK(fx::LiveSpawnEffectScript(parent) == 1);
+  auto* child = parent->next;
+  REQUIRE(child != nullptr);
+  CHECK(child->script_offset == 2);
+  CHECK(child->parent == nullptr);
+  parent->context.combat_action = VS::Battle::CombatActionId::kNone;
+  CHECK(child->context.combat_action == spawn->combat_action);
+  fx::LiveDestroyPrimaryEffectInstance(child);
+  fx::LiveDestroyPrimaryEffectInstance(parent);
   CHECK(Memory::GameHeap().Empty());
 }
 

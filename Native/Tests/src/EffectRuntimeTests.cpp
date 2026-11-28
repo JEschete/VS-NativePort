@@ -15,13 +15,17 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Battle/CombatActionSession.hpp"
 #include "Content/DiscQueue.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Effects/CameraLiveState.hpp"
 #include "Effects/EffectInstances.hpp"
 #include "Effects/EffectInstancesLive.hpp"
+#include "Effects/EffectResourcesLive.hpp"
 #include "Effects/EffectRuntime.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/PrimaryEffect.hpp"
+#include "Effects/PrimaryEffectLive.hpp"
 #include "Effects/Runtime.hpp"
 
 namespace {
@@ -1039,6 +1043,36 @@ class LiveSecondaryScope {
   std::array<int, std::size(fx::tokenBitmaps)> saved_tokens_{};
 };
 
+struct LivePrimaryScope {
+  LiveSecondaryScope heap;
+  fx::EffectResourceContext context = fx::LoadLiveEffectResourceContext();
+  fx::LiveEffectPackage package = fx::actionPackage;
+  fx::PrimaryEffectState state = fx::LivePrimaryEffectState();
+  decltype(fx::primaryToken) token = fx::primaryToken;
+  fx::LiveActionEffectRequest request = fx::actionRequest;
+  fx::LiveEffectCamera saved_camera = fx::savedActionCamera;
+  fx::LiveEffectCamera camera = fx::effectCamera;
+  Instance* instances = std::exchange(fx::primaryInstances, nullptr);
+  std::array<char, 128> script{};
+
+  LivePrimaryScope() {
+    fx::actionPackage = {};
+    fx::actionPackage.programs = script.data();
+    fx::StoreLivePrimaryEffectState({});
+  }
+  ~LivePrimaryScope() {
+    fx::LiveClearPrimaryEffects();
+    fx::primaryInstances = instances;
+    fx::actionPackage = package;
+    fx::StoreLiveEffectResourceContext(context);
+    fx::StoreLivePrimaryEffectState(state);
+    fx::primaryToken = token;
+    fx::actionRequest = request;
+    fx::savedActionCamera = saved_camera;
+    fx::effectCamera = camera;
+  }
+};
+
 VS::Effects::LiveActionEffectRequest TwoTargetRequest() {
   VS::Effects::LiveActionEffectRequest request{};
   request.effect_id = 23;
@@ -1111,4 +1145,50 @@ TEST_CASE("F01435 the Live secondary spawns refuse a missing request",
   CHECK(fx::LiveBeginSecondaryEffects(nullptr, 1) == 0);
   CHECK(fx::LiveSpawnSecondaryEffectRequest(nullptr, 0, 1) == 0);
   CHECK(fx::tokenBitmaps[0] == tokens);
+}
+
+TEST_CASE("Secondary combat effects carry their action into every target",
+          "[effect-runtime][combat-live][issue-56]") {
+  const LiveSecondaryScope scope;
+  auto request = TwoTargetRequest();
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
+  const auto id = static_cast<VS::Battle::CombatActionId>(27);
+  CHECK(fx::LiveBeginCombatSecondaryEffects(&request, 0x1234, id) != 0);
+  const auto spawned = SecondaryInstances();
+  REQUIRE(spawned.size() == 2);
+  request = {};
+  for (auto* instance : spawned) {
+    CHECK(instance->context.combat_action == id);
+    CHECK(instance->context.effect_id == 23);
+    fx::LiveDestroySecondaryEffectInstance(instance);
+  }
+  CHECK(VS::Core::Memory::GameHeap().Empty());
+}
+
+TEST_CASE("Primary tracks capture combat identity at request submission",
+          "[effect-runtime][combat-live][issue-56]") {
+  LivePrimaryScope scope;
+  auto request = TwoTargetRequest();
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
+  const auto id = static_cast<VS::Battle::CombatActionId>(31);
+  CHECK(fx::LiveBeginCombatActionEffect(&request, 0, id) != 0);
+  request = {};
+  CHECK(fx::LiveStartEffectTrack(0) == 0);
+  fx::StoreLivePrimaryEffectState({.phase = PrimaryEffectPhase::kAwaitingTrack,
+                                   .track_count = 1,
+                                   .pending_tracks = 1,
+                                   .loaded = true});
+  CHECK(fx::LiveStartEffectTrack(0) == 1);
+  REQUIRE(fx::primaryInstances != nullptr);
+  CHECK(fx::primaryInstances->context.combat_action == id);
+  fx::LiveClearPrimaryEffects();
+  CHECK(fx::LiveBeginActionEffect(&request, 0, 0) != 0);
+  fx::StoreLivePrimaryEffectState({.phase = PrimaryEffectPhase::kAwaitingTrack,
+                                   .track_count = 1,
+                                   .pending_tracks = 1,
+                                   .loaded = true});
+  CHECK(fx::LiveStartEffectTrack(0) == 1);
+  REQUIRE(fx::primaryInstances != nullptr);
+  CHECK(fx::primaryInstances->context.combat_action ==
+        VS::Battle::CombatActionId::kNone);
 }

@@ -90,6 +90,7 @@ class LiveStart final : public EffectInstanceStart {
     context.timeline = nullptr;
     context.renderer = nullptr;
     context.parameter = 0;
+    context.combat_action = spawn_->combat_action;
   }
 
  private:

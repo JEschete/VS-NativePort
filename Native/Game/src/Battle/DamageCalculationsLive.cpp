@@ -8,6 +8,7 @@
 #include <optional>
 #include <type_traits>
 
+#include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/DamageCalculations.hpp"
 #include "Battle/Hit.hpp"
@@ -18,34 +19,40 @@
 using VS::Battle::ActionDefinition;
 
 namespace VS::Battle {
+DamageStats ReadLiveDamageStats(const ActorStats& stats) {
+  return {stats.actor_id, static_cast<std::uint8_t>(stats.enemy_class),
+          stats.strength, stats.intelligence,
+          stats.risk,     stats.weapon,
+          stats.shield,   stats.accessory};
+}
+
+std::optional<DamageLimb> ReadLiveDamageLimb(const ActorStats& stats,
+                                             int index) {
+  if (index < 0 || static_cast<std::size_t>(index) >= stats.limbs.size()) {
+    return std::nullopt;
+  }
+  const auto& limb = stats.limbs.at(static_cast<std::size_t>(index));
+  DamageLimb result;
+  for (std::size_t i = 0; i < result.types.size(); ++i) {
+    result.types.at(i) = std::bit_cast<std::int16_t>(
+        static_cast<std::uint16_t>(limb.types.at(i)));
+  }
+  for (std::size_t i = 0; i < result.affinities.size(); ++i) {
+    result.affinities.at(i) = std::bit_cast<std::int16_t>(
+        static_cast<std::uint16_t>(limb.affinities.at(i)));
+  }
+  result.armor = limb.armor;
+  return result;
+}
+
 namespace {
 class LiveDamageOwner final : public DamageOwner {
  public:
   LiveDamageOwner(VS::Battle::ActorStats& stats, ActionDefinition* action)
       : stats_(stats), action_(action) {}
-  DamageStats Read() override {
-    return {stats_.actor_id, static_cast<std::uint8_t>(stats_.enemy_class),
-            stats_.strength, stats_.intelligence,
-            stats_.risk,     stats_.weapon,
-            stats_.shield,   stats_.accessory};
-  }
+  DamageStats Read() override { return ReadLiveDamageStats(stats_); }
   std::optional<DamageLimb> Limb(int index) override {
-    if (index < 0 ||
-        static_cast<std::size_t>(index) >= std::size(stats_.limbs)) {
-      return std::nullopt;
-    }
-    const auto& limb = stats_.limbs[index];
-    DamageLimb result;
-    for (std::size_t i = 0; i < result.types.size(); ++i) {
-      result.types.at(i) = std::bit_cast<std::int16_t>(
-          static_cast<std::uint16_t>(limb.types[i]));
-    }
-    for (std::size_t i = 0; i < result.affinities.size(); ++i) {
-      result.affinities.at(i) = std::bit_cast<std::int16_t>(
-          static_cast<std::uint16_t>(limb.affinities[i]));
-    }
-    result.armor = limb.armor;
-    return result;
+    return ReadLiveDamageLimb(stats_, index);
   }
   std::uint32_t Statuses() override {
     return static_cast<std::uint32_t>(stats_.statuses);

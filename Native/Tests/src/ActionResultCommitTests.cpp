@@ -2,20 +2,26 @@
 #include <bit>
 #include <cstddef>
 #include <cstdint>
+#include <expected>
 #include <functional>
 #include <span>
+#include <string>
+#include <variant>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Actors/ActorInstances.hpp"
 #include "Battle/ActionPreview.hpp"
 #include "Battle/ActionResults.hpp"
 #include "Battle/ActionResultsLive.hpp"
 #include "Battle/Actor.hpp"
+#include "Battle/CombatImpact.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Hit.hpp"
 #include "Content/ModuleData.hpp"
+#include "Items/ItemRecords.hpp"
 #include "TestSupport/StatusRoot.hpp"
 
 namespace {
@@ -81,7 +87,157 @@ struct World final : battle::ActorActionResultWorld {
     hit.changes.at(static_cast<std::size_t>(field)) = {amount, mode};
   }
 };
+
+struct ImpactRandom final : VS::Items::ItemRandom {
+  std::vector<int> bounds;
+  std::int32_t NextBounded(std::int32_t bound) override {
+    bounds.push_back(bound);
+    return 0;
+  }
+  std::int32_t NextAveraged(std::int32_t bound) override {
+    bounds.push_back(-bound);
+    return 0;
+  }
+};
+
+struct ImpactFixture {
+  VS::Actors::ActorInstanceTable identities;
+  VS::Actors::SpawnedActor actor = identities.Begin(0, 1, {});
+  ImpactRandom random;
+  battle::ActorVitalsState state{};
+  battle::StatusDurations durations{};
+  battle::CombatHitResult hit{};
+
+  ImpactFixture() {
+    if (!identities.Publish(0, actor)) FAIL("publish impact fixture");
+    hit.target = battle::CombatActorTarget{actor, 2};
+    hit.changes.limb = 2;
+    state.status.hp = 80;
+    state.status.max_hp = 100;
+    state.status.limbs.at(2).hp = 5;
+    state.status.limbs.at(2).max_hp = 10;
+    state.status.limbs.at(2).armor.current_dp = 9;
+  }
+  void DamageAndInjury() {
+    state.status.statuses = 0x8000;
+    state.status.base_walk = 8;
+    state.status.base_run = 16;
+    state.status.walk = 4;
+    state.status.run = 8;
+    state.status.timers.at(4) = 99;
+    durations.movement = 45;
+    hit.changes.changes.at(static_cast<std::size_t>(Field::kHp)) = {20, 1};
+    hit.changes.limbs.at(2) = {5, 2};
+    hit.changes.inflict_statuses = 0x8000;
+    hit.changes.remove_statuses = 0x10;
+  }
+  std::expected<battle::CombatImpactResult, std::string> Apply() {
+    return battle::ApplyCombatImpact(hit, {actor, 0, state, durations, random});
+  }
+  battle::CombatImpactResult Run() {
+    auto result = Apply();
+    if (!result) FAIL(result.error());
+    return *result;
+  }
+};
 }  // namespace
+
+TEST_CASE("Detached impact owns damage, wear and complete injury status state",
+          "[combat-impact][issue-56]") {
+  ImpactFixture f;
+  f.DamageAndInjury();
+  const auto before = f.state;
+  auto expected = before;
+  expected.status.hp = 60;
+  expected.status.limbs.at(2).hp = 0;
+  expected.status.limbs.at(2).armor.current_dp = 7;
+  expected.status.statuses = 0x10;
+  expected.status.timers.at(1) = 45;
+  expected.status.timers.at(4) = 0;
+  const auto result = f.Run();
+  CHECK(result.state == expected);
+  CHECK(f.state == before);
+  CHECK(f.random.bounds.empty());
+}
+
+TEST_CASE("Detached impact reports ordered owner-qualified presentation events",
+          "[combat-impact][issue-56]") {
+  ImpactFixture f;
+  f.DamageAndInjury();
+  const auto result = f.Run();
+  const std::vector<battle::CombatImpactEvent> expected{
+      battle::CombatEquipmentFlush{},
+      battle::CombatNumberEvent{f.actor, 2, 0x80000014, 0},
+      battle::CombatStatusEvent{f.actor, 0x8000, true},
+      battle::CombatMovementChange{f.actor, 8, 16},
+      battle::CombatStatusEvent{f.actor, 0x10, false},
+      battle::CombatMovementChange{f.actor, 4, 8}};
+  CHECK(result.events == expected);
+}
+
+TEST_CASE("Exempt stats keep their role without replacing the impact owner",
+          "[combat-impact][issue-56]") {
+  ImpactFixture f;
+  f.state.status.actor_id = 128;
+  f.hit.changes.changes.at(static_cast<std::size_t>(Field::kHp)) = {20, 1};
+  const auto result = f.Run();
+  CHECK(result.state.status.actor_id == 128);
+  CHECK(result.state.status.hp == 60);
+  CHECK(result.events.at(1) ==
+        battle::CombatImpactEvent{
+            battle::CombatNumberEvent{f.actor, 2, 0x80000014, 0}});
+}
+
+TEST_CASE("Detached impact preserves elemental removal draws and growth",
+          "[combat-impact][issue-56]") {
+  ImpactFixture f;
+  f.state.status.statuses = f.hit.changes.inflict_statuses = 0x200000;
+  auto& weapon = f.state.status.weapon;
+  weapon.blade.id = 1;
+  weapon.blade.affinities.at(1) = 4;
+  weapon.blade.affinities.at(3) = 9;
+  weapon.affinity_modifiers.at(1) = 25;
+  weapon.affinity_modifiers.at(3) = -25;
+  const auto result = f.Run();
+  CHECK(f.random.bounds == std::vector<int>{8, 16});
+  CHECK(result.state.status.statuses == 0);
+  CHECK(result.state.status.weapon.blade.affinities.at(1) == 5);
+  CHECK(result.state.status.weapon.blade.affinities.at(3) == 8);
+  CHECK(result.state.status.weapon.affinity_modifiers.at(1) == 0);
+  CHECK(result.state.status.weapon.affinity_modifiers.at(3) == 0);
+  CHECK(result.events.at(2) ==
+        battle::CombatImpactEvent{
+            battle::CombatEquipmentEvent{f.actor, 0xF0, 7, 1}});
+  CHECK(result.events.at(3) ==
+        battle::CombatImpactEvent{
+            battle::CombatEquipmentEvent{f.actor, 0xF0, 9, 0x80000001}});
+}
+
+TEST_CASE("Detached impact refuses stale identity and invalid used state",
+          "[combat-impact][issue-56]") {
+  ImpactFixture f;
+  f.DamageAndInjury();
+  const int invalid = GENERATE(0, 1, 2);
+  if (invalid == 0) {
+    REQUIRE(f.identities.Remove(0, f.actor));
+    f.actor = f.identities.Begin(0, 1, {});
+    REQUIRE(f.identities.Publish(0, f.actor));
+  } else if (invalid == 1) {
+    f.state.status.statuses = 0x10;
+    f.hit.changes.inflict_statuses = 0x10;
+    f.state.status.mobility_limbs.front() = 6;
+  } else {
+    f.hit.changes.limb = -1;
+    f.hit.changes.changes.at(static_cast<std::size_t>(Field::kArmorDp)) = {1,
+                                                                           1};
+  }
+  const auto before = f.state;
+  const auto result = f.Apply();
+  REQUIRE_FALSE(result.has_value());
+  CHECK_FALSE(result.error().empty());
+  CHECK(f.state == before);
+  CHECK(f.random.bounds.empty());
+}
 
 TEST_CASE("Action result conversion preserves signed limbs and effect lanes",
           "[action-result-commit][combat-rules]") {

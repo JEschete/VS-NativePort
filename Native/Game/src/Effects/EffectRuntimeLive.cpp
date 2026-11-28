@@ -57,6 +57,7 @@ constexpr std::uint32_t kAllVibrationPatterns = 0;
 constexpr int kBattleVibrationOwner = 1;
 
 std::uint64_t refusedCalls = 0;
+Battle::CombatActionId primaryCombatAction{};
 
 void Refuse(std::string_view call, std::string_view reason) {
   if (std::has_single_bit(++refusedCalls)) {
@@ -109,8 +110,9 @@ class LivePlayback : public Host {
 class LivePrimary final : public LivePlayback<PrimaryEffectRuntime> {
  public:
   LivePrimary() = default;
-  explicit LivePrimary(const LiveActionEffectRequest& request)
-      : request_(&request) {}
+  explicit LivePrimary(const LiveActionEffectRequest& request,
+                       Battle::CombatActionId action)
+      : request_(&request), combat_action_(action) {}
 
   PrimaryEffectState Primary() override { return LivePrimaryEffectState(); }
   void SetPrimary(const PrimaryEffectState& state) override {
@@ -183,6 +185,7 @@ class LivePrimary final : public LivePlayback<PrimaryEffectRuntime> {
     spawn.script_offset = script_offset;
     spawn.parent = nullptr;
     spawn.token = token;
+    spawn.combat_action = primaryCombatAction;
     LiveCreatePrimaryEffectInstance(&spawn);
     return true;
   }
@@ -222,6 +225,7 @@ class LivePrimary final : public LivePlayback<PrimaryEffectRuntime> {
   void StoreActionRequest() override {
     if (request_ != nullptr) {
       actionRequest = *request_;
+      primaryCombatAction = combat_action_;
     }
   }
   void SetActionVariant(std::uint8_t variant) override {
@@ -247,6 +251,7 @@ class LivePrimary final : public LivePlayback<PrimaryEffectRuntime> {
 
  private:
   const LiveActionEffectRequest* request_ = nullptr;
+  Battle::CombatActionId combat_action_{};
 };
 
 class LiveSecondary final : public LivePlayback<SecondaryEffectRuntime> {
@@ -283,8 +288,9 @@ class LiveSecondary final : public LivePlayback<SecondaryEffectRuntime> {
 // caller's request, which the instances copy as they start.
 class LiveSecondarySpawner final : public SecondaryEffectSpawner {
  public:
-  explicit LiveSecondarySpawner(LiveActionEffectRequest& request)
-      : request_(&request) {}
+  explicit LiveSecondarySpawner(LiveActionEffectRequest& request,
+                                Battle::CombatActionId action = {})
+      : request_(&request), combat_action_(action) {}
 
   bool HasPackage() override {
     return CurrentPackage("secondary spawn") != nullptr;
@@ -308,6 +314,7 @@ class LiveSecondarySpawner final : public SecondaryEffectSpawner {
     request.script_offset = spawn.script_offset;
     request.parent = nullptr;
     request.token = spawn.token;
+    request.combat_action = combat_action_;
     Instance* instance = LiveCreateSecondaryEffectInstance(&request);
     if (instance == nullptr) {
       Refuse("secondary spawn", "no free secondary instance");
@@ -336,6 +343,7 @@ class LiveSecondarySpawner final : public SecondaryEffectSpawner {
 
  private:
   LiveActionEffectRequest* request_;
+  Battle::CombatActionId combat_action_{};
 };
 
 // The request, or null with a diagnostic; a count past the request's targets
@@ -390,6 +398,7 @@ void LiveInitEffectRuntime() {
 }
 
 void LiveResetEffectInstances() {
+  primaryCombatAction = {};
   EffectRuntimeRecords records{.primary = LivePrimaryEffectState()};
   ResetEffectInstances(records);
   StoreLivePrimaryEffectState(records.primary);
@@ -432,11 +441,17 @@ int LiveUpdateEffectRuntime() {
 
 int LiveBeginActionEffect(LiveActionEffectRequest* request, int action_variant,
                           int /*variant_argument*/) {
+  return LiveBeginCombatActionEffect(request, action_variant, {});
+}
+
+int LiveBeginCombatActionEffect(LiveActionEffectRequest* request,
+                                int action_variant,
+                                Battle::CombatActionId action) {
   if (request == nullptr) {
     Refuse("action effect", "no action request");
     return 0;
   }
-  LivePrimary primary(*request);
+  LivePrimary primary(*request, action);
   return BeginActionEffect(
       {.source_type = request->source.type, .variant = action_variant},
       primary);
@@ -445,6 +460,7 @@ int LiveBeginActionEffect(LiveActionEffectRequest* request, int action_variant,
 void LiveClearPrimaryEffects() {
   LivePrimary primary;
   ClearPrimaryEffects(primary);
+  primaryCombatAction = {};
 }
 
 int LiveSpawnSecondaryEffects(LiveActionEffectRequest* request, int /*unused*/,
@@ -458,10 +474,16 @@ int LiveSpawnSecondaryEffects(LiveActionEffectRequest* request, int /*unused*/,
 }
 
 int LiveBeginSecondaryEffects(LiveActionEffectRequest* request, int parameter) {
+  return LiveBeginCombatSecondaryEffects(request, parameter, {});
+}
+
+int LiveBeginCombatSecondaryEffects(LiveActionEffectRequest* request,
+                                    int parameter,
+                                    Battle::CombatActionId action) {
   if (CheckedSecondaryRequest(request, "secondary effects") == nullptr) {
     return 0;
   }
-  LiveSecondarySpawner spawner(*request);
+  LiveSecondarySpawner spawner(*request, action);
   return BeginSecondaryEffects(SecondaryRequestOf(*request), parameter,
                                spawner);
 }
@@ -489,7 +511,8 @@ void LiveSpawnSourceActorEffect() {
                      .vy = effect.target_y,
                      .vz = effect.target_z,
                      .pad = 0};
-  static_cast<void>(LiveBeginSecondaryEffects(&request, 0));
+  static_cast<void>(
+      LiveBeginCombatSecondaryEffects(&request, 0, primaryCombatAction));
 }
 
 void LiveClearActionEffectMode() {

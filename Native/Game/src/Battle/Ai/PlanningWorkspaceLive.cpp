@@ -17,6 +17,7 @@
 #include "Battle/Ai/Perception.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Ai/PlanningWorkspace.hpp"
+#include "Battle/CombatActionLive.hpp"
 #include "Battle/Damage.hpp"
 
 using VS::Battle::ActionRequestRecord;
@@ -88,17 +89,27 @@ class LiveActionPlanningRoom final : public ActionPlanningRoom {
   explicit LiveActionPlanningRoom(ActionRequestRecord* request)
       : request_(request),
         record_(reinterpret_cast<VS::Battle::Ai::ReactionRecord*>(request)) {}
+  explicit LiveActionPlanningRoom(const CombatActionResult& result)
+      : request_(nullptr), record_(nullptr), combat_(&result) {}
 
   void ResetReadiness() override {
     VS::Battle::Ai::roomAiState->readiness_level = 0;
   }
 
   void ReconcileCompletedPlan() override {
-    ReconcileLiveCompletedActionPlan(request_);
+    if (combat_ != nullptr) {
+      ReconcileLiveCompletedCombatAction(*combat_);
+    } else {
+      ReconcileLiveCompletedActionPlan(request_);
+    }
   }
 
   void ApplyRelationshipChanges() override {
-    ApplyLiveActionRelationshipChanges(record_);
+    if (combat_ != nullptr) {
+      ApplyLiveCombatRelationshipChanges(*combat_);
+    } else {
+      ApplyLiveActionRelationshipChanges(record_);
+    }
   }
 
   [[nodiscard]] std::vector<PlanningActor> Actors() const override {
@@ -156,6 +167,7 @@ class LiveActionPlanningRoom final : public ActionPlanningRoom {
  private:
   const ActionRequestRecord* request_;
   VS::Battle::Ai::ReactionRecord* record_;
+  const CombatActionResult* combat_ = nullptr;
 };
 
 }  // namespace
@@ -174,6 +186,16 @@ int RebuildLiveActorActionPlans(ActionRequestRecord* request) {
     planning = PlanningRequestOf(*request);
   }
   RebuildActorActionPlans(room, planning);
+  return 0;
+}
+
+int RebuildLiveCombatActionPlans(const CombatActionResult& result) {
+  PlanningWorkspace workspace;
+  const BoundPlanningWorkspace binding(workspace);
+  LiveActionPlanningRoom room(result);
+  const auto source = LiveCombatTarget(result.source);
+  RebuildActorActionPlans(
+      room, PlanningRequest{source.target_actor, source.targets_position});
   return 0;
 }
 

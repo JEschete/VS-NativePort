@@ -23,6 +23,7 @@
 #include "Battle/ActionTable.hpp"
 #include "Battle/Actor.hpp"
 #include "Battle/AttackPrerequisitesLive.hpp"
+#include "Battle/CombatActionLive.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/HitCalculationsLive.hpp"
 #include "Battle/Sphere.hpp"
@@ -255,11 +256,26 @@ class LiveWorld final : public ActionPreviewWorld {
                ActionRequest& source, int execute) override {
     if (preview_result == nullptr) Refuse();
     auto live_source = std::bit_cast<ActionRequestRecord>(source);
-    ResolveLiveActionTargets(std::bit_cast<int>(action), preview_result,
-                             &live_source, execute);
+    const auto native = TryResolveLiveCombatRequest(
+        std::bit_cast<int>(action), *preview_result, live_source, execute != 0);
+    if (!native) {
+      Core::Errorf("combat", "%s", native.error().c_str());
+      Refuse();
+    }
+    native_availability_ = *native;
+    if (!native_availability_) {
+      ResolveLiveCompatibilityActionTargets(
+          std::bit_cast<int>(action), preview_result, &live_source, execute);
+    }
     result = std::bit_cast<ActionRequest>(*preview_result);
     source = std::bit_cast<ActionRequest>(live_source);
     return true;
+  }
+  std::optional<std::uint32_t> PreviewCost(std::uint32_t action,
+                                           int source) override {
+    return native_availability_
+               ? native_availability_
+               : ActionPreviewWorld::PreviewCost(action, source);
   }
   void Publish() override {
     if (live_result_ == nullptr) return;
@@ -304,11 +320,13 @@ class LiveWorld final : public ActionPreviewWorld {
              std::size(VS::Battle::actionDefinitions)>
       definitions_{};
   std::vector<std::unique_ptr<LiveActor>> owners_;
+  std::optional<std::uint32_t> native_availability_;
 };
 }  // namespace
 // decomp: func_800856F8 (src/BATTLE/BATTLE.PRG/146C.c:12896).
 void ClearLiveActionRequest(void* request) {
   if (request == nullptr) Refuse();
+  ForgetLiveCombatRequest(*static_cast<ActionRequestRecord*>(request));
   ActionRequest value;
   ClearActionRequest(value);
   std::memcpy(request, &value, sizeof value);
@@ -331,6 +349,22 @@ void FinalizeLiveActionHit(HitStatusView* hit) {
 void ResolveLiveActionTargets(int action, ActionRequestRecord* result,
                               ActionRequestRecord* source, int execute) {
   if (result == nullptr || source == nullptr) Refuse();
+  const auto native =
+      TryResolveLiveCombatRequest(action, *result, *source, execute != 0);
+  if (!native) {
+    Core::Errorf("combat", "%s", native.error().c_str());
+    Refuse();
+  }
+  if (*native) return;
+  ResolveLiveCompatibilityActionTargets(action, result, source, execute);
+}
+
+void ResolveLiveCompatibilityActionTargets(int action,
+                                           ActionRequestRecord* result,
+                                           ActionRequestRecord* source,
+                                           int execute) {
+  if (result == nullptr || source == nullptr) Refuse();
+  ForgetLiveCombatRequest(*result);
   ActionRequest native_result{};
   ActionRequest native_source{};
   if (result != source) native_source = std::bit_cast<ActionRequest>(*source);

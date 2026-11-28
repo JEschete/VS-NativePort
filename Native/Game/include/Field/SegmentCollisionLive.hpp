@@ -2,10 +2,15 @@
 
 #include <cstddef>
 
-#include "Legacy/Psx.hpp"
+#include "Core/Gte.hpp"
+#include "Field/SegmentCollision.hpp"
 
 namespace VS::Field {
 struct PlatformContact;
+
+// Collision bounds come from the published actor's expected components.
+[[nodiscard]] std::optional<SegmentHit> TraceLiveOwnedActorAndTerrainCollision(
+    SegmentEndpoint from, SegmentEndpoint to, int ignored_actor);
 
 // Live binding for the original BATTLE.PRG entry 0x800E6BA0: adapts guest
 // platform contacts to the typed predicate; returns 1 when outside.

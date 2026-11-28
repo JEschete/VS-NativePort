@@ -16,6 +16,7 @@
 #include "Battle/ActionSequence.hpp"
 #include "Battle/ActorVitalsLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
+#include "Battle/CombatActionLive.hpp"
 #include "Battle/Hud.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
@@ -59,27 +60,48 @@ ActionTargetHit Hit(const VS::Battle::HitResult& hit) {
 }
 class LiveAction final : public SequenceAction {
  public:
-  explicit LiveAction(ActionRequestRecord& action) : action_(action) {}
+  explicit LiveAction(ActionRequestRecord& action) : action_(action) {
+    if (const auto* result =
+            FindLiveCombatAction(LiveCombatActionForRequest(action))) {
+      native_ = *result;
+    }
+  }
   ActionTargetHit Primary() const override {
+    if (native_) return LiveCombatTarget(native_->source);
     return Hit(action_.primary_target);
   }
   ActionTargetHit Target(std::size_t index) const override {
+    if (native_) return LiveCombatTarget(native_->hits.at(index));
     Require(index < std::size(action_.targets));
     return Hit(action_.targets[index]);
   }
   std::uint16_t Count() const override {
+    if (native_) return static_cast<std::uint16_t>(native_->hits.size());
     Require(action_.target_count <= std::size(action_.targets));
     return action_.target_count;
   }
   int RebuildPlans() override {
+    if (native_) return Ai::RebuildLiveCombatActionPlans(*native_);
     return Ai::RebuildLiveActorActionPlans(&action_);
   }
 
  private:
   ActionRequestRecord& action_;
+  std::optional<CombatActionResult> native_;
 };
 class LiveWorld final : public ActionSequenceWorld {
  public:
+  LiveWorld() {
+    if (actionState == nullptr) return;
+    for (const auto& request : actionState->queue) {
+      const auto id = LiveCombatActionForRequest(request);
+      if (id != CombatActionId::kNone) pending_.push_back(id);
+    }
+  }
+  void RetireFinishedActions() const {
+    if (!finished_) return;
+    for (const auto id : pending_) ForgetLiveCombatAction(id);
+  }
   SequenceAction& Queued() override {
     auto& state = State();
     constexpr std::uint32_t kQueueMask = 3;
@@ -133,12 +155,27 @@ class LiveWorld final : public ActionSequenceWorld {
     return State().preferred_camera_distance;
   }
   int LookAtOnAshley() override { return Field::LiveIsCameraLookAtOnAshley(); }
-  void ResumeField() override { Field::LiveResumeFieldAfterMenu(); }
+  void ResumeField() override {
+    finished_ = true;
+    Field::LiveResumeFieldAfterMenu();
+  }
   void ShowHud() override { VS::Battle::SetLiveHudHidden(0); }
   std::uint8_t SelectedActor() override {
+    const auto id = LiveCombatActionForRequest(State().queue.front());
+    if (const auto* result = FindLiveCombatAction(id)) {
+      return static_cast<std::uint8_t>(
+          LiveCombatTarget(result->source).target_actor);
+    }
     return State().selection.primary_target.target.target_actor;
   }
   void RestoreIdle(int actor) override {
+    const auto id = LiveCombatActionForRequest(State().queue.front());
+    if (const auto* result = FindLiveCombatAction(id)) {
+      if (LiveCombatTarget(result->source).targets_position ||
+          result->source.changes.target != actor) {
+        return;
+      }
+    }
     Actors::RestoreLiveActorIdlePose(actor);
   }
   void ResolveDefeat(int source, int target) override {
@@ -159,14 +196,24 @@ class LiveWorld final : public ActionSequenceWorld {
     return *actions_.back();
   }
   std::vector<std::unique_ptr<LiveAction>> actions_;
+  std::vector<CombatActionId> pending_;
+  bool finished_{};
 };
 }  // namespace
 
 void WaitForLiveActionEffectReady() {
+  if (!LiveCombatPresentationAvailable(CurrentLiveCombatAction())) {
+    BeginLivePostActionRecovery(0);
+    return;
+  }
   LiveWorld world;
   WaitForActionEffectReady(world);
 }
 void StartLiveReadyActionAnimation() {
+  if (!LiveCombatPresentationAvailable(CurrentLiveCombatAction())) {
+    BeginLivePostActionRecovery(0);
+    return;
+  }
   LiveWorld world;
   StartReadyActionAnimation(world);
 }
@@ -185,5 +232,6 @@ void WaitForLiveTargetRecovery() {
 void FinishLiveActionSequence() {
   LiveWorld world;
   FinishActionSequence(world);
+  world.RetireFinishedActions();
 }
 }  // namespace VS::Battle

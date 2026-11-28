@@ -362,6 +362,7 @@ class InstanceEffectHost final : public ScriptEffectHost {
     spawn.script = instance_->script;
     spawn.script_offset = script_offset;
     spawn.token = static_cast<std::uint8_t>(instance_->token);
+    spawn.combat_action = context.combat_action;
     (void)LiveCreatePrimaryEffectInstance(&spawn);
   }
   void AttachRenderer(std::uint8_t index, std::int32_t parameters) override {

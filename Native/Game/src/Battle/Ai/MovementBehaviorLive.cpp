@@ -31,6 +31,7 @@
 #include "Battle/Ai/TargetApproachLive.hpp"
 #include "Battle/Ai/WanderLive.hpp"
 #include "Battle/Ai/WaypointsLive.hpp"
+#include "Battle/CombatAction.hpp"
 #include "Battle/Damage.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Math/Distance.hpp"
@@ -394,6 +395,8 @@ class LiveRelationshipChanges final : public RelationshipChangeHost {
  public:
   explicit LiveRelationshipChanges(VS::Battle::Ai::ReactionRecord* record)
       : record_(record) {}
+  explicit LiveRelationshipChanges(const CombatActionResult& result)
+      : record_(nullptr), combat_(&result) {}
 
   [[nodiscard]] std::optional<ActorRoster> BattleActors() const override {
     return LiveBattleActors();
@@ -403,6 +406,10 @@ class LiveRelationshipChanges final : public RelationshipChangeHost {
            nullptr;
   }
   void ApplyActionReaction(int actor_id) override {
+    if (combat_ != nullptr) {
+      ApplyLiveCombatActorReaction(ReactionState(actor_id), *combat_);
+      return;
+    }
     // The original passes the completed action as actionStatApplication.
     ApplyLiveActorActionReaction(
         ReactionState(actor_id),
@@ -419,6 +426,7 @@ class LiveRelationshipChanges final : public RelationshipChangeHost {
   }
 
   VS::Battle::Ai::ReactionRecord* record_;
+  const CombatActionResult* combat_ = nullptr;
 };
 
 // Runs a movement behaviour on a live actor state and stores its changes.
@@ -591,5 +599,11 @@ void ApplyLiveActionRelationshipChanges(
   LiveRelationshipChanges host(record);
   Require(ApplyActionRelationshipChanges(host),
           "AI relationship changes require a valid battle actor list");
+}
+
+void ApplyLiveCombatRelationshipChanges(const CombatActionResult& result) {
+  LiveRelationshipChanges host(result);
+  Require(ApplyActionRelationshipChanges(host),
+          "Combat relationship changes require a valid battle actor list");
 }
 }  // namespace VS::Battle::Ai

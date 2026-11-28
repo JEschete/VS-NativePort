@@ -14,9 +14,11 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Audio/SoundBanks.hpp"
+#include "Battle/CombatActionSession.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/PFile.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Effects/EffectInstancesLive.hpp"
 #include "Effects/EffectResources.hpp"
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/Runtime.hpp"
@@ -262,6 +264,10 @@ class LiveTimelinePackage {
     fx::actionPackage.request = &request_;
   }
   ~LiveTimelinePackage() {
+    while (fx::primaryInstances != nullptr) {
+      fx::LiveDestroyPrimaryEffectInstance(fx::primaryInstances);
+    }
+    fx::primaryInstances = saved_instances_;
     if (instance.context.timeline != nullptr) {
       Memory::FreeLiveFromHighEnd(instance.context.timeline);
     }
@@ -297,6 +303,8 @@ class LiveTimelinePackage {
   Memory::ScopedLiveGameHeap heap_{arena_};
   fx::LiveEffectPackage saved_action_ = fx::actionPackage;
   fx::LiveEffectPackage* saved_package_ = fx::package;
+  fx::LiveEffectInstance* saved_instances_ =
+      std::exchange(fx::primaryInstances, nullptr);
   VS::Effects::LiveActionEffectRequest request_{};
   std::vector<std::uint32_t> package_;
 };
@@ -866,6 +874,28 @@ TEST_CASE("Live timelines tick their tracks", "[timeline-playback]") {
   fx::LiveTickEffectTimeline(&live.instance, 0);
   CHECK(timeline.active_tracks == 0b01);
   CHECK(timeline.frame == 6);
+}
+
+TEST_CASE("Timeline children keep the originating combat action",
+          "[timeline-playback][combat-live][issue-56]") {
+  auto block = TimelineBlock();
+  block[kChildKeys + 7] = std::byte{0};
+  LiveTimelinePackage live(TimelinePackage(block));
+  std::array<char, 16> script{};
+  fx::actionPackage.programs = script.data();
+  fx::actionPackage.request->count = 1;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
+  const auto id = static_cast<VS::Battle::CombatActionId>(29);
+  live.instance.context.combat_action = id;
+  live.Load();
+  fx::LiveTickEffectTimeline(&live.instance, 5);
+  auto* child = fx::primaryInstances;
+  REQUIRE(child != nullptr);
+  CHECK(child->parent == &live.instance);
+  CHECK(child->script_offset == 5);
+  live.instance.context.combat_action = VS::Battle::CombatActionId::kNone;
+  CHECK(child->context.combat_action == id);
+  CHECK(child->next == nullptr);
 }
 
 TEST_CASE("Live timeline tracks refuse missing records",

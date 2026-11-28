@@ -6,6 +6,7 @@
 #include <iterator>
 #include <optional>
 #include <type_traits>
+#include <utility>
 
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
@@ -20,10 +21,12 @@
 #include "Battle/ActionTable.hpp"
 #include "Battle/Actor.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
+#include "Battle/CombatActionLive.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Core/Diagnostics.hpp"
+#include "Core/Log.hpp"
 #include "Items/LootLive.hpp"
 #include "Save/Snapshot.hpp"
 #include "State/KillScoreLive.hpp"
@@ -104,7 +107,10 @@ class LiveAction final : public ActionOutcomeAction {
 };
 class LiveOutcomeWorld final : public ActionOutcomeWorld {
  public:
+  explicit LiveOutcomeWorld(ActionOutcomeAction* native = nullptr)
+      : native_(native) {}
   ActionOutcomeAction& Queued() override {
+    if (native_ != nullptr) return *native_;
     auto& state = State();
     constexpr std::uint32_t kQueueMask = 3;
     action_.emplace(state.queue[state.queue_index & kQueueMask]);
@@ -131,6 +137,32 @@ class LiveOutcomeWorld final : public ActionOutcomeWorld {
 
  private:
   std::optional<LiveAction> action_;
+  ActionOutcomeAction* native_;
+};
+
+class NativeAction final : public ActionOutcomeAction {
+ public:
+  NativeAction(CombatActionId id, CombatActionResult result)
+      : id_(id), result_(std::move(result)) {}
+  std::uint16_t Count() const override {
+    return static_cast<std::uint16_t>(result_.hits.size());
+  }
+  ActionTargetHit Target(std::size_t index) const override {
+    return LiveCombatTarget(result_.hits.at(index));
+  }
+  ActionTargetHit Primary() const override {
+    return LiveCombatTarget(result_.source);
+  }
+  void DamageReaction(int actor) override {
+    if (Primary().targets_position) return;
+    auto point = std::bit_cast<SVECTOR>(result_.intent.focus);
+    PlayLiveActorDamageReaction(actor, &point);
+  }
+  void ApplyPrimaryResult() override { ApplyLiveCombatPrimaryResult(id_); }
+
+ private:
+  CombatActionId id_;
+  CombatActionResult result_;
 };
 class LiveDefeatWorld final : public ActorDefeatWorld {
  public:
@@ -187,11 +219,38 @@ void ResolveLiveEnemyDefeat(int source_actor, int target_actor,
   ResolveEnemyDefeat(source_actor, count_kill, enemy);
 }
 int PlayLiveWeaponHitSounds(int source_actor) {
+  const auto id = CurrentLiveCombatAction();
+  if (id != CombatActionId::kNone) {
+    const auto* result = FindLiveCombatAction(id);
+    if (result == nullptr ||
+        LiveCombatTarget(result->source).targets_position) {
+      Core::LogWarn("combat", "Hit sounds belong to a retired action source");
+      return 0;
+    }
+    NativeAction action(id, *result);
+    LiveOutcomeWorld world(&action);
+    return PlayWeaponHitSounds(source_actor, world);
+  }
   LiveOutcomeWorld world;
   return PlayWeaponHitSounds(source_actor, world);
 }
 void ApplyLiveActionSourceEffects(int source_actor, SVECTOR*) {
+  if (CurrentLiveCombatAction() != CombatActionId::kNone) {
+    Core::LogWarn("combat",
+                  "Unticketed source impact refused for native action");
+    return;
+  }
   LiveOutcomeWorld world;
+  ApplyActionSourceEffects(source_actor, world);
+}
+void ApplyLiveCombatSourceEffects(CombatActionId id, int source_actor) {
+  const auto* result = FindLiveCombatAction(id);
+  if (result == nullptr) {
+    Core::LogWarn("combat", "Source impact belongs to an inactive action");
+    return;
+  }
+  NativeAction action(id, *result);
+  LiveOutcomeWorld world(&action);
   ApplyActionSourceEffects(source_actor, world);
 }
 int BeginLiveActorDefeatAnimation(int actor) {

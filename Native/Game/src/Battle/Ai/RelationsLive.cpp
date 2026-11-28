@@ -27,6 +27,7 @@
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/OrbitingBoss.hpp"
 #include "Battle/Ai/Perception.hpp"
+#include "Battle/CombatActionLive.hpp"
 #include "Battle/Damage.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/RandomLive.hpp"
@@ -335,9 +336,29 @@ ReactionHit ReadHit(const VS::Battle::HitResult& hit) {
           .skipped = hit.targets_position != 0};
 }
 
+ReactionHit ReadHit(const CombatHitResult& hit) {
+  const auto target = LiveCombatTarget(hit);
+  const auto hp =
+      hit.changes.changes.at(static_cast<std::size_t>(ActionResultField::kHp));
+  return {.actor = target.target_actor,
+          .hp_change = hp.amount,
+          .hp_effect = hp.mode,
+          .skipped = target.targets_position};
+}
+
 // The completed action as the reaction policy reads it.
 class LiveAppliedAction {
  public:
+  explicit LiveAppliedAction(const CombatActionResult& result) {
+    Require(result.hits.size() <= hits_.size(),
+            "AI combat reaction requires a bounded hit list");
+    std::ranges::transform(result.hits, hits_.begin(),
+                           [](const auto& hit) { return ReadHit(hit); });
+    action_.action = result.intent.action;
+    action_.hit_prerequisites = result.hit_prerequisites;
+    action_.acting = ReadHit(result.source);
+    action_.targets = std::span(hits_).first(result.hits.size());
+  }
   explicit LiveAppliedAction(const ActionRequestRecord& request) {
     Require(request.target_count <= kMaxActionHits,
             "AI action reaction requires a bounded hit list");
@@ -422,6 +443,15 @@ void ApplyLiveActorActionReaction(VS::Battle::Ai::ReactionView* state,
   LiveActorReaction host(*state);
   Require(ApplyActorActionReaction(host, applied.Action()),
           "AI action reaction requires a valid action and acting actor");
+}
+
+void ApplyLiveCombatActorReaction(ReactionView* state,
+                                  const CombatActionResult& result) {
+  Require(state != nullptr, "AI combat reaction requires a valid actor state");
+  const LiveAppliedAction applied(result);
+  LiveActorReaction host(*state);
+  Require(ApplyActorActionReaction(host, applied.Action()),
+          "AI combat reaction requires a valid action and acting actor");
 }
 
 void PropagateLiveActorRelationships(VS::Battle::Ai::ReactionView* state) {

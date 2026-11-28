@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Legacy/Psx.hpp"
+#include "Core/Gte.hpp"
 
 namespace VS::Battle {
 
@@ -18,6 +18,11 @@ void ResolveLiveActionTargets(int action,
                               VS::Battle::ActionRequestRecord* result,
                               VS::Battle::ActionRequestRecord* source,
                               int execute);
+// Nonmigrated actions and tests of the retained callback/alias contract.
+void ResolveLiveCompatibilityActionTargets(int action,
+                                           ActionRequestRecord* result,
+                                           ActionRequestRecord* source,
+                                           int execute);
 int PreviewLiveActionAgainstLimb(int action, int source, int target, int limb,
                                  void* result);
 int PreviewLiveActionAgainstActor(int action, int source, int target, int limb,

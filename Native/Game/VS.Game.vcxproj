@@ -332,6 +332,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Battle\CombatAction.cpp" />
+    <ClCompile Include="src\Battle\CombatActionLive.cpp" />
+    <ClCompile Include="src\Battle\CombatActionSession.cpp" />
+    <ClCompile Include="src\Battle\CombatImpact.cpp" />
+    <ClCompile Include="src\Battle\CombatImpactLive.cpp" />
     <ClCompile Include="src\Battle\Damage.cpp" />
     <ClCompile Include="src\Battle\DamageCalculations.cpp" />
     <ClCompile Include="src\Battle\DamageCalculationsLive.cpp">
@@ -1918,6 +1922,9 @@
     <ClInclude Include="include\Battle\BattleMode.hpp" />
     <ClInclude Include="include\Battle\BattleModeLive.hpp" />
     <ClInclude Include="include\Battle\CombatAction.hpp" />
+    <ClInclude Include="include\Battle\CombatActionLive.hpp" />
+    <ClInclude Include="include\Battle\CombatActionSession.hpp" />
+    <ClInclude Include="include\Battle\CombatImpact.hpp" />
     <ClInclude Include="include\Battle\DamageCalculations.hpp" />
     <ClInclude Include="include\Battle\DamageCalculationsLive.hpp" />
     <ClInclude Include="include\Battle\DamagePolicies.hpp" />
@@ -2176,6 +2183,7 @@
     <ClInclude Include="include\Items\EquipmentWear.hpp" />
     <ClInclude Include="include\Items\Inventory.hpp" />
     <ClInclude Include="include\Items\InventoryLive.hpp" />
+    <ClInclude Include="include\Items\ItemRandomLive.hpp" />
     <ClInclude Include="include\Items\ItemRecords.hpp" />
     <ClInclude Include="include\Items\Loot.hpp" />
     <ClInclude Include="include\Items\LootLive.hpp" />

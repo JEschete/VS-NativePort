@@ -21,6 +21,7 @@
 #include "Battle/ActionTable.hpp"
 #include "Battle/Actor.hpp"
 #include "Battle/ActorVitalsLive.hpp"
+#include "Battle/CombatActionLive.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
 #include "Battle/FloatingLabelPlacementLive.hpp"
@@ -167,6 +168,11 @@ void ApplyLiveActionTargetEffects(int actor_id, SVECTOR* position) {
   if (actor_id >= kActionActorSlots) {
     LiveActionTargetEffects effects(actor_id, nullptr, position);
     ApplyActionTargetEffects(actor_id, effects);
+    return;
+  }
+  if (CurrentLiveCombatAction() != CombatActionId::kNone) {
+    Core::LogWarn("combat",
+                  "Unticketed target impact refused for native action");
     return;
   }
   if (actor_id < 0 || VS::Battle::actionState == nullptr) {

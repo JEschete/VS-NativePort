@@ -205,6 +205,7 @@ bool LivePlaybackHost::SpawnChild(std::size_t target,
   spawn.script_offset = child_script_offset_;
   spawn.parent = instance_;
   spawn.token = static_cast<std::uint8_t>(instance_->token);
+  spawn.combat_action = instance_->context.combat_action;
   LiveEffectInstance* child = LiveCreatePrimaryEffectInstance(&spawn);
   if (child == nullptr) {
     RefuseTimelineCall("child effect track", "no free effect instance");

@@ -13,6 +13,7 @@
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/ActionTable.hpp"
+#include "Battle/CombatActionLive.hpp"
 #include "Battle/Hit.hpp"
 #include "Core/Log.hpp"
 #include "Effects/ActionRequest.hpp"
@@ -66,6 +67,11 @@ void Refuse(const char* what) {
 
 class LiveWorld final : public ActionImpactWorld {
  public:
+  explicit LiveWorld(Battle::CombatActionId action = {}) : action_(action) {
+    if (const auto* result = Battle::FindLiveCombatAction(action)) {
+      native_ = *result;
+    }
+  }
   void Begin(const SingleTargetEffectRequest& request,
              std::int32_t parameter) override {
     LiveActionEffectRequest live{};
@@ -74,13 +80,26 @@ class LiveWorld final : public ActionImpactWorld {
     live.other_count = 0;
     live.source = LiveEndpoint(request.source);
     live.targets[0] = LiveEndpoint(request.target);
-    static_cast<void>(LiveBeginSecondaryEffects(&live, parameter));
+    static_cast<void>(
+        LiveBeginCombatSecondaryEffects(&live, parameter, action_));
   }
   std::uint32_t BusyFlags() override {
     return static_cast<std::uint32_t>(effectBusyFlags);
   }
 
   std::optional<QueuedEffectAction> QueuedAction() override {
+    if (action_ != Battle::CombatActionId::kNone) {
+      if (!native_ ||
+          Battle::LiveCombatTarget(native_->source).targets_position) {
+        Refuse("retired combat action source");
+        return std::nullopt;
+      }
+      return QueuedEffectAction{
+          .action_id = native_->intent.action,
+          .affinity = native_->affinity,
+          .source_actor = native_->source.changes.target,
+          .target_count = static_cast<std::uint16_t>(native_->hits.size())};
+    }
     const ActionRequestRecord* queued = Queued();
     if (queued == nullptr) return std::nullopt;
     return QueuedEffectAction{
@@ -90,6 +109,20 @@ class LiveWorld final : public ActionImpactWorld {
         .target_count = queued->target_count};
   }
   std::optional<ImpactTarget> QueuedTarget(std::size_t index) override {
+    if (action_ != Battle::CombatActionId::kNone) {
+      if (!native_ || index >= native_->hits.size()) {
+        Refuse("missing combat action target");
+        return std::nullopt;
+      }
+      const auto& hit = native_->hits.at(index);
+      if (std::holds_alternative<Battle::CombatActorTarget>(hit.target) &&
+          Battle::LiveCombatTarget(hit).targets_position) {
+        Refuse("retired combat action target");
+        return std::nullopt;
+      }
+      return LiveImpactTarget(
+          std::bit_cast<Battle::HitResult>(Battle::ProjectLiveCombatHit(hit)));
+    }
     const ActionRequestRecord* queued = Queued();
     if (queued == nullptr) return std::nullopt;
     if (index >= std::size(queued->targets)) {
@@ -99,6 +132,8 @@ class LiveWorld final : public ActionImpactWorld {
     return LiveImpactTarget(queued->targets[index]);
   }
   std::uint8_t HitPrerequisite(std::uint16_t action) override {
+    // The adopted rule requires a single "always-1" physical hit.
+    if (native_) return 1;
     if (action >= std::size(VS::Battle::actionDefinitions)) return 0;
     return static_cast<std::uint8_t>(
         VS::Battle::actionDefinitions[action].hits[0].prerequisite_function_id);
@@ -112,6 +147,8 @@ class LiveWorld final : public ActionImpactWorld {
   }
 
  private:
+  Battle::CombatActionId action_;
+  std::optional<Battle::CombatActionResult> native_;
   static const ActionRequestRecord* Queued() {
     if (VS::Battle::actionState == nullptr) {
       Refuse("no action state");
@@ -139,7 +176,7 @@ void LiveQueueActionHitEffect(int effect_id, VS::Battle::HitResult* hit_result,
 
 // decomp: func_8006C84C (src/BATTLE/BATTLE.PRG/146C.c:1686)
 int LiveQueueActionImpactEffects(int attacker_index) {
-  LiveWorld world;
+  LiveWorld world(Battle::CurrentLiveCombatAction());
   return QueueActionImpactEffects(attacker_index, world);
 }
 

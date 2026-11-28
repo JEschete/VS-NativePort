@@ -14,6 +14,7 @@
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionPresentationLive.hpp"
 #include "Battle/ActionTable.hpp"
+#include "Battle/CombatActionLive.hpp"
 #include "Battle/Sphere.hpp"
 #include "Battle/SphereLifecycleLive.hpp"
 #include "Battle/TargetingLive.hpp"
@@ -48,16 +49,31 @@ ActionState& State() {
   return *VS::Battle::actionState;
 }
 struct LiveQueue final : ActionCameraRequest {
-  explicit LiveQueue(ActionRequestRecord& value) : record(value) {}
+  explicit LiveQueue(ActionRequestRecord& value) : record(value) {
+    if (const auto* result =
+            FindLiveCombatAction(LiveCombatActionForRequest(value))) {
+      native = *result;
+    }
+  }
   ActionRequestRecord& record;
+  std::optional<CombatActionResult> native;
   std::uint8_t PrimaryActor() const override {
-    return record.primary_target.target.target_actor;
+    return native ? native->source.changes.target
+                  : record.primary_target.target.target_actor;
   }
   ActionHit FirstTarget() const override {
+    if (native) {
+      return native->hits.empty() ? ActionHit{}
+                                  : ProjectLiveCombatHit(native->hits.front());
+    }
     return std::bit_cast<ActionHit>(record.targets[0]);
   }
-  std::uint16_t Count() const override { return record.target_count; }
+  std::uint16_t Count() const override {
+    return native ? static_cast<std::uint16_t>(native->hits.size())
+                  : record.target_count;
+  }
   ActionPoint Focus() const override {
+    if (native) return native->intent.focus;
     return std::bit_cast<ActionPoint>(record.focus_position);
   }
 };

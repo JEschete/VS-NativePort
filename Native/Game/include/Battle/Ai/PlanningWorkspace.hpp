@@ -75,6 +75,7 @@ struct CompletedAction {
 struct CompletedActionTarget {
   std::uint8_t slot = 0;
   bool targets_position = false;
+  bool retired = false;
 };
 
 // The room object in a target's slot of the gimmick table.

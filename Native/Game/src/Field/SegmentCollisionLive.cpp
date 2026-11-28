@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "Actors/ActorRecord.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Actors/ModelRenderingLiveState.hpp"
 #include "Battle/Actor.hpp"
 #include "Battle/Damage.hpp"
@@ -40,37 +41,40 @@ SolidVolume ToSolidVolume(const PlatformContact& contact) {
   return {static_cast<std::uint16_t>(contact.x), contact.height, contact.z};
 }
 
-class LiveSegmentTraceWorld final : public SegmentTraceWorld {
+std::optional<ActorTraceBounds> BoundsOf(const Battle::Actor* actor,
+                                         const GimmickInstance* object,
+                                         const Actors::ActorRecord* model) {
+  if (actor == nullptr ||
+      (static_cast<unsigned char>(actor->kind) & kExcludedKindMask) != 0) {
+    return std::nullopt;
+  }
+  if (object != nullptr) {
+    if (object->parent == 0 || static_cast<unsigned char>(object->mode) != 0) {
+      return std::nullopt;
+    }
+    return ActorTraceBounds{object->position_x,
+                            object->position_y - kGimmickHalfHeight,
+                            static_cast<std::uint16_t>(object->position_z),
+                            kGimmickRadius, kGimmickHalfHeight};
+  }
+  if (model == nullptr || model->animation_locked ||
+      model->instance.reaction_state == 1 ||
+      model->instance.reaction_state == 2) {
+    return std::nullopt;
+  }
+  const int half_height = model->collision_height / 2;
+  return ActorTraceBounds{
+      model->instance.position.vx, model->instance.position.vy - half_height,
+      static_cast<std::uint16_t>(model->instance.position.vz),
+      model->collision_radius, half_height};
+}
+
+class LiveSegmentTraceWorld : public SegmentTraceWorld {
  public:
   [[nodiscard]] std::optional<ActorTraceBounds> ActorBounds(
       int slot) const override {
-    const auto* actor = VS::Battle::actors[slot];
-    if (actor == nullptr ||
-        (static_cast<unsigned char>(actor->kind) & kExcludedKindMask) != 0) {
-      return std::nullopt;
-    }
-    if (const auto* object = VS::Field::gimmickInstances[slot];
-        object != nullptr) {
-      if (object->parent == 0 ||
-          static_cast<unsigned char>(object->mode) != 0) {
-        return std::nullopt;
-      }
-      return ActorTraceBounds{object->position_x,
-                              object->position_y - kGimmickHalfHeight,
-                              static_cast<std::uint16_t>(object->position_z),
-                              kGimmickRadius, kGimmickHalfHeight};
-    }
-    const auto* model = VS::Actors::actorRecords[slot];
-    if (model == nullptr || model->animation_locked ||
-        model->instance.reaction_state == 1 ||
-        model->instance.reaction_state == 2) {
-      return std::nullopt;
-    }
-    const int half_height = model->collision_height / 2;
-    return ActorTraceBounds{
-        model->instance.position.vx, model->instance.position.vy - half_height,
-        static_cast<std::uint16_t>(model->instance.position.vz),
-        model->collision_radius, half_height};
+    return BoundsOf(Battle::actors[slot], gimmickInstances[slot],
+                    Actors::actorRecords[slot]);
   }
 
   [[nodiscard]] std::vector<SolidVolume> CollectSolidVolumes() override {
@@ -103,7 +107,33 @@ class LiveSegmentTraceWorld final : public SegmentTraceWorld {
     return static_cast<std::uint16_t>(VS::Field::LiveFloorHeightAt(x, z));
   }
 };
+
+class LiveOwnedSegmentTraceWorld final : public LiveSegmentTraceWorld {
+ public:
+  std::optional<ActorTraceBounds> ActorBounds(int slot) const override {
+    const auto identity =
+        Actors::LiveActorIdentityAt(static_cast<std::size_t>(slot));
+    if (identity == Actors::SpawnedActor::kNone) {
+      if (Battle::actors[slot] != nullptr) {
+        InvalidTrace("combat collider is not a published actor");
+      }
+      return std::nullopt;
+    }
+    const auto* actor = Actors::ResolveLiveActorInstance(identity);
+    const auto components = Actors::LiveActorComponents(identity);
+    if (actor == nullptr || !components) {
+      InvalidTrace("combat collider lost its expected components");
+    }
+    return BoundsOf(actor, components->gimmick, components->body);
+  }
+};
 }  // namespace
+
+std::optional<SegmentHit> TraceLiveOwnedActorAndTerrainCollision(
+    SegmentEndpoint from, SegmentEndpoint to, int ignored_actor) {
+  LiveOwnedSegmentTraceWorld world;
+  return TraceActorAndTerrainCollision(from, to, ignored_actor, world);
+}
 
 // The original entry reads 8-byte SVECTOR contacts.
 static_assert(sizeof(PlatformContact) == sizeof(SVECTOR));

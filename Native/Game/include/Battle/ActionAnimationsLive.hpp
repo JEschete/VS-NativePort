@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Legacy/Psx.hpp"
+#include "Core/Gte.hpp"
 
 namespace VS::Battle {
 void PlayLiveMeleeAttackAnimation(int slot, VS::Core::Gte::SVECTOR* target,

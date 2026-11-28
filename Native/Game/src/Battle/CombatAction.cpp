@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <bit>
 #include <cstddef>
+#include <limits>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -15,6 +16,7 @@
 #include "Battle/DamageRecoveryEffects.hpp"
 #include "Battle/HitCalculations.hpp"
 #include "Battle/HitModifiers.hpp"
+#include "Items/EquipmentStats.hpp"
 #include "Items/EquipmentWear.hpp"
 
 namespace VS::Battle {
@@ -863,6 +865,27 @@ CombatHitResult ResultTarget(const ActionHit& hit, Rules& rules) {
   return result;
 }
 
+void RecordPhysicalAttack(Rules& rules) {
+  auto& result = rules.result;
+  if (result.intent.action != 1 ||
+      rules.Actor(result.intent.source).slot != 0) {
+    return;
+  }
+  const auto* target =
+      result.hits.empty() ? &rules.Actor(0)
+      : std::holds_alternative<CombatActorTarget>(result.hits.front().target)
+          ? &rules.Actor(
+                std::get<CombatActorTarget>(result.hits.front().target).actor)
+          : nullptr;
+  if (target == nullptr || target->spawn == kExemptActor) return;
+  Require(result.progress.weapon_category <= Items::kUnarmedWeaponCategory,
+          "physical attack score has an invalid weapon category");
+  if (result.progress.weapon_attacks !=
+      std::numeric_limits<std::uint16_t>::max()) {
+    ++result.progress.weapon_attacks;
+  }
+}
+
 CombatActionResult Resolve(const CombatActionIntent& intent,
                            const CombatRuleInputs& inputs,
                            const Content::ActionHit& first_hit, bool execute) {
@@ -885,13 +908,22 @@ CombatActionResult Resolve(const CombatActionIntent& intent,
   Require(ResolveActionTargets(intent.action, result, request,
                                static_cast<int>(execute), world),
           "physical action refused its rule inputs");
+  if (!execute) {
+    Costs costs(rules);
+    rules.result.availability =
+        RequireValue(costs.Pay(intent.action, 0),
+                     "physical preview refused its action cost");
+  }
   rules.result.affinity = result.affinity;
   rules.result.damage_type = result.damage_type;
+  rules.result.category = inputs.definition.category;
+  rules.result.hit_prerequisites = {first_hit.prerequisite, 0};
   rules.result.source = ResultTarget(result.primary, rules);
   rules.result.hits.reserve(result.count);
   for (std::size_t i = 0; i < result.count; ++i) {
     rules.result.hits.push_back(ResultTarget(result.targets.at(i), rules));
   }
+  if (execute) RecordPhysicalAttack(rules);
   return std::move(rules.result);
 }
 }  // namespace

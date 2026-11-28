@@ -4,8 +4,8 @@
 #include <optional>
 
 #include "Actors/Skeleton.hpp"
+#include "Core/Gte.hpp"
 #include "Core/Math/Matrix.hpp"
-#include "Legacy/Psx.hpp"
 
 namespace VS::Actors {
 struct ActorRecord;

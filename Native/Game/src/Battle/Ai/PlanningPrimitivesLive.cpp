@@ -35,6 +35,7 @@
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/OrbitingBoss.hpp"
 #include "Battle/Ai/PlanningWorkspace.hpp"
+#include "Battle/CombatActionLive.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/StatusCatalogLive.hpp"
 #include "Battle/TargetingLive.hpp"
@@ -639,6 +640,9 @@ class LiveCompletedActionPlan final : public CompletedActionPlanHost {
  public:
   explicit LiveCompletedActionPlan(const ActionRequestRecord* request)
       : request_(request) {}
+  explicit LiveCompletedActionPlan(
+      std::span<const CompletedActionTarget> targets)
+      : request_(nullptr), native_targets_(targets) {}
 
   std::optional<bool> SelectPerformer(unsigned slot) override {
     if (slot >= std::size(VS::Battle::Ai::actorAiStates)) return std::nullopt;
@@ -665,10 +669,15 @@ class LiveCompletedActionPlan final : public CompletedActionPlanHost {
     State().detour_target = target;
   }
   int TargetCount() const override {
+    if (native_targets_) return static_cast<int>(native_targets_->size());
     return request_ == nullptr ? 0 : request_->target_count;
   }
   std::optional<CompletedActionTarget> Target(
       std::size_t index) const override {
+    if (native_targets_) {
+      if (index >= native_targets_->size()) return std::nullopt;
+      return (*native_targets_)[index];
+    }
     if (request_ == nullptr || index >= std::size(request_->targets) ||
         !ReadablePlanningBytes(
             request_,
@@ -701,6 +710,7 @@ class LiveCompletedActionPlan final : public CompletedActionPlanHost {
   }
 
   const ActionRequestRecord* request_;
+  std::optional<std::span<const CompletedActionTarget>> native_targets_;
   VS::Battle::Ai::ActorAiState* state_ = nullptr;
 };
 
@@ -1488,6 +1498,27 @@ void ReconcileLiveCompletedActionPlan(const ActionRequestRecord* request) {
   LiveCompletedActionPlan host(request);
   Require(ReconcileCompletedActionPlan(action, host),
           "Completed action reconciliation refused invalid input");
+}
+
+void ReconcileLiveCompletedCombatAction(const CombatActionResult& result) {
+  const auto source = LiveCombatTarget(result.source);
+  const CompletedAction action{
+      .action_id = result.intent.action,
+      .performer = static_cast<std::uint8_t>(source.target_actor),
+      .performer_targets_position = source.targets_position};
+  std::vector<CompletedActionTarget> targets;
+  targets.reserve(result.hits.size());
+  for (const auto& hit : result.hits) {
+    const auto target = LiveCombatTarget(hit);
+    targets.push_back(
+        {.slot = static_cast<std::uint8_t>(target.target_actor),
+         .targets_position = target.targets_position,
+         .retired = std::holds_alternative<CombatActorTarget>(hit.target) &&
+                    target.targets_position});
+  }
+  LiveCompletedActionPlan host(targets);
+  Require(ReconcileCompletedActionPlan(action, host),
+          "Completed combat reconciliation refused invalid input");
 }
 
 void EnumerateLiveActionCandidates(VS::Battle::Ai::ActorAiState* state,

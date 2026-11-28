@@ -16,6 +16,7 @@
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Audio/VoiceOutputLive.hpp"
 #include "Battle/Ai/RoomState.hpp"
+#include "Battle/CombatActionLive.hpp"
 #include "Battle/EncounterHooks.hpp"
 #include "Battle/SphereGeometryLive.hpp"
 #include "Battle/TargetingState.hpp"
@@ -464,6 +465,7 @@ void ResetLiveSessionState() {
 
 void ResetLiveSessionHeap() {
   CleanupMenuOwners();
+  Battle::ResetLiveCombatActions();
   Actors::ResetLiveActorHandles();
   if (!Render::AbandonLiveFrameBeforeHeapReset()) {
     VS::Core::Errorf("boot", "frame cleanup refused before heap replacement");

@@ -1,7 +1,7 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
-#include "Legacy/Psx.hpp"
+#include "Core/Gte.hpp"
 
 namespace VS::Battle {
 void LiveActionTargetLimbPosition(int actor, int limb,

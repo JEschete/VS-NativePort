@@ -5,6 +5,9 @@
 
 #include "Battle/Ai/MovementBehavior.hpp"
 
+namespace VS::Battle {
+struct CombatActionResult;
+}
 namespace VS::Core::Gte {
 struct SVECTOR;
 }  // namespace VS::Core::Gte
@@ -56,4 +59,5 @@ void SelectLiveActionMovementMode(
     VS::Battle::Ai::CandidateReadinessView* state);
 // Actor creation passes no action record; the propagation pass still runs.
 void ApplyLiveActionRelationshipChanges(VS::Battle::Ai::ReactionRecord* record);
+void ApplyLiveCombatRelationshipChanges(const CombatActionResult& result);
 }  // namespace VS::Battle::Ai

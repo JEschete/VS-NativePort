@@ -70,6 +70,7 @@ bool CancelSelection(ActionPresentationWorld& world) {
   return true;
 }
 bool RecordAttack(ActionPresentationWorld& world) {
+  if (world.RulesRecordedAttack()) return true;
   auto& selection = world.Selection();
   const auto action = selection.Id();
   if (selection.Primary().actor != 0 ||

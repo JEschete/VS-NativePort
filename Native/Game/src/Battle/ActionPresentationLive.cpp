@@ -30,6 +30,7 @@
 #include "Battle/Actor.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/ReactionDelay.hpp"
+#include "Battle/CombatActionLive.hpp"
 #include "Battle/Damage.hpp"
 #include "Battle/Feedback.hpp"
 #include "Battle/Hud.hpp"
@@ -101,23 +102,40 @@ Menu::Framework::ActionSelection& MenuSelection() {
   return *VS::Battle::actionSelection;
 }
 struct LiveAction final : PresentationAction {
-  explicit LiveAction(ActionRequestRecord& value) : record(value) {}
+  explicit LiveAction(ActionRequestRecord& value) : record(value) {
+    if (const auto* result =
+            FindLiveCombatAction(LiveCombatActionForRequest(value))) {
+      native = *result;
+    }
+  }
   ActionRequestRecord& record;
-  std::uint16_t Id() const override { return record.action_id; }
+  std::optional<CombatActionResult> native;
+  std::uint16_t Id() const override {
+    return native ? native->intent.action : record.action_id;
+  }
   void ClearId() override { record.action_id = 0; }
   ActionHit Primary() const override {
+    if (native) return ProjectLiveCombatHit(native->source);
     return std::bit_cast<ActionHit>(record.primary_target);
   }
   ActionHit Target(std::size_t index) const override {
+    if (native) return ProjectLiveCombatHit(native->hits.at(index));
     Require(index < std::size(record.targets));
     return std::bit_cast<ActionHit>(record.targets[index]);
   }
-  std::uint16_t Count() const override { return record.target_count; }
-  std::uint16_t Animation() const override { return record.target_redirected; }
+  std::uint16_t Count() const override {
+    return native ? static_cast<std::uint16_t>(native->hits.size())
+                  : record.target_count;
+  }
+  std::uint16_t Animation() const override {
+    return native ? native->intent.redirected : record.target_redirected;
+  }
   std::uint8_t Variant() const override {
+    if (native) return native->affinity;
     return static_cast<std::uint8_t>(record.affinity);
   }
   ActionPoint Focus() const override {
+    if (native) return native->intent.focus;
     return std::bit_cast<ActionPoint>(record.focus_position);
   }
 };
@@ -163,6 +181,7 @@ class LiveWorld final : public ActionPresentationWorld {
   std::uint32_t QueueIndex() override { return State().queue_index; }
   std::uint8_t SelectedPreview() override { return State().selected_preview; }
   void BeginCommit() override {
+    ResetLiveCombatActions();
     State().chain_step = 1;
     State().queue_index = 0;
   }
@@ -240,6 +259,9 @@ class LiveWorld final : public ActionPresentationWorld {
     ResolveLiveActionTargets(state.selection.action_id, state.queue.data(),
                              &state.selection, 1);
   }
+  bool RulesRecordedAttack() const override {
+    return CurrentLiveCombatAction() != CombatActionId::kNone;
+  }
   std::uint8_t Spawn(int actor) override {
     return ActorInSlot(actor).room_spawn_index;
   }
@@ -304,7 +326,12 @@ class LiveWorld final : public ActionPresentationWorld {
   void Dispatch(const ActionPresentationRequest& request, int mode,
                 std::uint8_t variant) override {
     auto live = LiveRequest(request);
-    VS::Effects::LiveBeginActionEffect(&live, mode, variant);
+    const auto action = CurrentLiveCombatAction();
+    if (action != CombatActionId::kNone) {
+      Effects::LiveBeginCombatActionEffect(&live, mode, action);
+    } else {
+      Effects::LiveBeginActionEffect(&live, mode, variant);
+    }
   }
   std::uint8_t SourceMaterial(int actor) override {
     return ActorInSlot(actor).equipped_weapon_category;
@@ -372,7 +399,11 @@ void LiveWorld::SetField(AbilityField field, int value) {
 }
 void LiveWorld::Animate(ActionPose pose, int actor, int parameter,
                         std::uint32_t step) {
-  auto* focus = &State().selection.focus_position;
+  auto point = State().selection.focus_position;
+  if (const auto* result = FindLiveCombatAction(CurrentLiveCombatAction())) {
+    point = std::bit_cast<SVECTOR>(result->intent.focus);
+  }
+  auto* focus = &point;
   switch (pose) {
     case ActionPose::kMelee:
       PlayLiveMeleeAttackAnimation(actor, focus, parameter);
@@ -414,6 +445,10 @@ std::uint8_t LiveWorld::SourceModel(int slot) {
 }  // namespace
 // decomp: func_80070278 (src/BATTLE/BATTLE.PRG/146C.c:3219).
 void StartLiveActionAnimation() {
+  if (!LiveCombatPresentationAvailable(CurrentLiveCombatAction())) {
+    BeginLivePostActionRecovery(0);
+    return;
+  }
   LiveWorld world;
   Require(StartActionAnimation(world));
 }
@@ -429,6 +464,10 @@ void CommitLiveSelectedAction(int target_selection_mode) {
 }
 // decomp: func_8007138C (src/BATTLE/BATTLE.PRG/146C.c:3618).
 void StartLiveActionPresentation() {
+  if (!LiveCombatPresentationAvailable(CurrentLiveCombatAction())) {
+    BeginLivePostActionRecovery(0);
+    return;
+  }
   LiveWorld world;
   Require(StartActionPresentation(world));
 }

@@ -14,6 +14,7 @@
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/ActionResultsLive.hpp"
+#include "Battle/CombatActionLive.hpp"
 #include "Core/Gte.hpp"
 #include "Core/Log.hpp"
 #include "Core/RandomLive.hpp"
@@ -160,12 +161,28 @@ CommandEndpoint CommandEndpointOf(const LiveActionEffectTarget& endpoint) {
 
 void LiveApplyTargetActionImpact(LiveEffectInstance* instance) {
   if (Refused(instance, "target impact")) return;
+  if (instance->context.combat_action != Battle::CombatActionId::kNone) {
+    const auto impact = TargetActionImpact(EndpointsOf(*instance));
+    std::optional<Battle::ActionPoint> position;
+    if (impact.point) {
+      position = std::bit_cast<Battle::ActionPoint>(PointOf(*impact.point));
+    }
+    Battle::ApplyLiveCombatTargetEffects(instance->context.combat_action,
+                                         impact.actor, position);
+    return;
+  }
   ApplyImpact(TargetActionImpact(EndpointsOf(*instance)),
               Battle::ApplyLiveActionTargetEffects);
 }
 
 void LiveApplySourceActionImpact(LiveEffectInstance* instance) {
   if (Refused(instance, "source impact")) return;
+  if (instance->context.combat_action != Battle::CombatActionId::kNone) {
+    const auto impact = SourceActionImpact(EndpointsOf(*instance));
+    Battle::ApplyLiveCombatSourceEffects(instance->context.combat_action,
+                                         impact.actor);
+    return;
+  }
   ApplyImpact(SourceActionImpact(EndpointsOf(*instance)),
               Battle::ApplyLiveActionSourceEffects);
 }

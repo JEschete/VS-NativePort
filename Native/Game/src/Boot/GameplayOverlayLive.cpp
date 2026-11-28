@@ -11,6 +11,7 @@
 #include "Battle/ActionFlow.hpp"
 #include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
+#include "Battle/CombatActionLive.hpp"
 #include "Battle/Damage.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/OverlayWorkspaceLive.hpp"
@@ -187,6 +188,7 @@ class LiveGameplayOverlayHost final : public GameplayOverlayHost {
     VS::Actors::SpawnLiveAshleyWithEquipment();
   }
   void AllocateBattleActionState() override {
+    VS::Battle::ResetLiveCombatActions();
     auto* action_state = static_cast<ActionState*>(
         VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(ActionState)));
     if (action_state == nullptr) {

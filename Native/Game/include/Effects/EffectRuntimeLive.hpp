@@ -1,6 +1,12 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
+#include <cstdint>
+
+namespace VS::Battle {
+enum class CombatActionId : std::uint64_t;
+}
+
 // Live binding for the effect runtime and the primary effect's action
 // lifecycle (EffectRuntime.hpp) over Runtime.cpp's globals, the current
 // effect package (VS::Effects::package), the loader state
@@ -30,6 +36,9 @@ int LiveUpdateEffectRuntime();
 // The third argument only reached the write-only D_800F54A9 and is unused.
 int LiveBeginActionEffect(LiveActionEffectRequest* request, int action_variant,
                           int variant_argument);
+int LiveBeginCombatActionEffect(LiveActionEffectRequest* request,
+                                int action_variant,
+                                Battle::CombatActionId action);
 // func_800CF1A8 (5BF94.c:5462).
 void LiveClearPrimaryEffects();
 // func_800CF218 (5BF94.c:5479): the secondary instances' token; 0 when the
@@ -38,6 +47,9 @@ int LiveSpawnSecondaryEffects(LiveActionEffectRequest* request, int unused,
                               int parameter);
 // func_800CF3F8 (5BF94.c:5532): the secondary instances' token.
 int LiveBeginSecondaryEffects(LiveActionEffectRequest* request, int parameter);
+int LiveBeginCombatSecondaryEffects(LiveActionEffectRequest* request,
+                                    int parameter,
+                                    Battle::CombatActionId action);
 // func_800CF458 (5BF94.c:5541): LiveSpawnSecondaryEffects under its other
 // entry.
 int LiveSpawnSecondaryEffectRequest(LiveActionEffectRequest* request,

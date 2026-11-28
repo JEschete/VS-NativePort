@@ -21,6 +21,7 @@
 #include "Content/DataStore.hpp"
 #include "Content/Disc.hpp"
 #include "Core/FrameClock.hpp"
+#include "Core/FrameTiming.hpp"
 #include "Core/Log.hpp"
 #include "Diagnostics/GameplayTrace.hpp"
 #include "Input/Bindings.hpp"
@@ -339,6 +340,7 @@ InputScript ParseInputScript(int argc, char** argv) {
 struct RunSettings {
   u64 max_ticks = 0;
   u32 speed = 1;
+  int frame_tick_step = 0;
   bool devices = true;
   bool gpu_validation = false;
   Capture capture;
@@ -367,6 +369,18 @@ RunSettings ParseRunSettings(int argc, char** argv) {
   settings.script = ParseInputScript(argc, argv);
   for (int i = 1; i < argc; ++i) {
     const std::string_view option = argv[i];
+    if (option == "--fixed-frame-ticks") {
+      constexpr unsigned kMaxFrameTickStep = 262;
+      if (i + 1 == argc) {
+        throw std::runtime_error("--fixed-frame-ticks requires 1-262");
+      }
+      const auto step = ParseTick(argv[++i]);
+      if (!step || *step == 0 || *step > kMaxFrameTickStep) {
+        throw std::runtime_error("--fixed-frame-ticks must be 1-262");
+      }
+      settings.frame_tick_step = static_cast<int>(*step);
+      continue;
+    }
     if (option == "--trace-effect-paths") {
       if (i + 1 == argc) {
         throw std::runtime_error("--trace-effect-paths requires first:last");
@@ -526,6 +540,11 @@ bool RunLogicalTick(Game::GameApp& game, Input::InputSystem& input,
 
 int RunGame(const RunSettings& settings, Game::GameplayTrace* trace) {
   ConfigureEffectPathTrace(settings, trace);
+  Core::StepFrameCounterTicks(settings.frame_tick_step);
+  if (settings.frame_tick_step != 0) {
+    Core::LogInfo("boot", "deterministic frame budget: step={}",
+                  settings.frame_tick_step);
+  }
   VS::Core::LogInfo("boot", "run: tick limit={}, speed={}, scripted presses={}",
                     settings.max_ticks, settings.speed,
                     settings.script.presses.size());

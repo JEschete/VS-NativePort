@@ -88,6 +88,7 @@ class ActionPresentationWorld {
   virtual void CollectAll() = 0;
   virtual void CollectSingle() = 0;
   virtual void ResolveSelection() = 0;
+  virtual bool RulesRecordedAttack() const { return false; }
   virtual std::uint8_t Spawn(int actor) = 0;
   virtual std::uint8_t WeaponCategory() = 0;
   virtual std::uint16_t WeaponAttacks(std::size_t category) = 0;

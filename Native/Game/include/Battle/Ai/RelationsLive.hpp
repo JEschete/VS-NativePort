@@ -5,6 +5,7 @@
 
 namespace VS::Battle {
 struct ActionRequestRecord;
+struct CombatActionResult;
 }  // namespace VS::Battle
 namespace VS::Battle::Ai {
 struct AiCreationView;
@@ -32,6 +33,8 @@ void ResolveLiveAiLinkedActors();
 void ApplyLiveActorActionReaction(
     VS::Battle::Ai::ReactionView* state,
     const VS::Battle::ActionRequestRecord* request);
+void ApplyLiveCombatActorReaction(ReactionView* state,
+                                  const CombatActionResult& result);
 // Reclassifies the room or shares allies' hostility from the AI state
 // `state`'s point of view (func_800DD344).
 void PropagateLiveActorRelationships(VS::Battle::Ai::ReactionView* state);

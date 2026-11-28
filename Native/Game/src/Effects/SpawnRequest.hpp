@@ -8,6 +8,10 @@
 
 #include "Effects/ActionRequest.hpp"
 
+namespace VS::Battle {
+enum class CombatActionId : std::uint64_t;
+}
+
 namespace VS::Effects {
 struct LiveEffectInstance;
 struct LiveEffectTimeline;
@@ -30,6 +34,7 @@ struct LiveEffectInstanceTargets {
   // A secondary instance's SecondaryEffectPhase, as stored.
   std::int16_t phase;
   std::int32_t parameter;
+  Battle::CombatActionId combat_action{};
 };
 
 // decomp: D_800F53B8_t2 (src/BATTLE/BATTLE.PRG/5BF94.c:115): the request
@@ -49,5 +54,6 @@ struct LiveEffectSpawnRequest {
   std::uint8_t reserved22;
   std::uint8_t reserved23;
   std::int32_t reserved24;
+  Battle::CombatActionId combat_action{};
 };
 }  // namespace VS::Effects

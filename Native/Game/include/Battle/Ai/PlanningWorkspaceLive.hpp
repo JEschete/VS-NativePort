@@ -4,6 +4,10 @@
 #include "Battle/Ai/ActionRecords.hpp"
 #include "Battle/Ai/PlanningWorkspace.hpp"
 
+namespace VS::Battle {
+struct CombatActionResult;
+}
+
 namespace VS::Battle::Ai {
 
 // Call-local storage for one plan rebuild; it replaces the original fixed
@@ -29,5 +33,6 @@ PlanningRequest PlanningRequestOf(
 // (or null), with call-local planning storage bound to the planner globals for
 // the call only. Returns 0, as func_800DEC88 does for its callers' tests.
 int RebuildLiveActorActionPlans(VS::Battle::ActionRequestRecord* request);
+int RebuildLiveCombatActionPlans(const CombatActionResult& result);
 
 }  // namespace VS::Battle::Ai

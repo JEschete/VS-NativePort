@@ -12,6 +12,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Actors/ActorRecord.hpp"
+#include "Actors/ActorSpawningLive.hpp"
 #include "Actors/ModelRenderingLiveState.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Battle/Action.hpp"
@@ -136,6 +137,26 @@ struct ActionTraceFixture : SegmentFixture {
   }
 };
 
+struct OwnedSegmentFixture : SegmentFixture {
+  OwnedSegmentFixture() {
+    VS::Actors::ResetLiveActorHandles();
+    for (std::size_t slot = 0; slot < actors.size(); ++slot) {
+      VS::Battle::actors[slot] = nullptr;
+      actors.at(slot).model = &models.at(slot).instance;
+      const auto identity = VS::Actors::InstallLiveActorInstance(
+          slot, &actors.at(slot), VS::Actors::ActorShape::kEquipped);
+      if (identity == VS::Actors::SpawnedActor::kNone) {
+        FAIL("register combat collider");
+      }
+    }
+  }
+  ~OwnedSegmentFixture() {
+    for (std::size_t slot = 0; slot < actors.size(); ++slot) {
+      VS::Actors::InvalidateLiveActorHandle(slot, &actors.at(slot));
+    }
+  }
+};
+
 void CheckVolumePoint(const VS::Field::PlatformContact& volume,
                       const std::array<int, 3>& delta) {
   const VECTOR point{128 + delta[0], -64 + delta[1], 128 + delta[2], 0};
@@ -160,6 +181,28 @@ TEST_CASE("Ranged segment tracing returns the first strict actor-bound sample",
   CHECK(output.pad == 2);
   CHECK(from.pad == 77);
   CHECK(to.pad == 88);
+}
+
+TEST_CASE("Combat segment queries use expected body ownership",
+          "[field][segment-collision][combat-live][issue-56]") {
+  OwnedSegmentFixture fixture;
+  VS::Actors::ActorRecord foreign{};
+  foreign.instance.position = {240, 0, 128, 0};
+  foreign.collision_radius = 32;
+  foreign.collision_height = 128;
+  VS::Actors::actorRecords[1] = &foreign;
+  const auto hit = VS::Field::TraceLiveOwnedActorAndTerrainCollision(
+      {0, -64, 128}, {256, -64, 128}, 0);
+  if (!hit) FAIL("owned actor must obstruct segment");
+  CHECK(hit->actor_slot == 1);
+  CHECK(hit->x == 104);
+  SVECTOR compatibility{};
+  CHECK(TraceHorizontal(compatibility) != nullptr);
+  CHECK(compatibility.vx == 216);
+  fixture.models.at(1).animation_locked = 1;
+  CHECK_FALSE(VS::Field::TraceLiveOwnedActorAndTerrainCollision(
+                  {0, -64, 128}, {256, -64, 128}, 0)
+                  .has_value());
 }
 
 TEST_CASE(

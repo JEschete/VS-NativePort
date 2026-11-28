@@ -11,8 +11,10 @@ namespace VS::Battle {
 struct ActorStats;
 struct ActionDefinition;
 struct ActionRequestRecord;
+struct CombatActionResult;
 }  // namespace VS::Battle
 namespace VS::Battle::Ai {
+void ReconcileLiveCompletedCombatAction(const CombatActionResult& result);
 struct ActionCandidateRecord;
 struct ActionPlanView;
 struct ActorAiState;

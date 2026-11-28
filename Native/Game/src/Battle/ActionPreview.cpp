@@ -162,9 +162,12 @@ bool ResolveSelf(ResolutionDefinition& definition, ActionHit& target, int hit,
   }
   return true;
 }
-std::optional<bool> RedirectTarget(ActionRequest& result, ActionHit& target,
-                                   std::optional<ActionPoint> origin,
-                                   ActionPreviewWorld& world) {
+}  // namespace
+
+std::optional<bool> RedirectActionTarget(ActionRequest& result,
+                                         ActionHit& target,
+                                         std::optional<ActionPoint> origin,
+                                         ActionTrajectoryWorld& world) {
   if (!origin) return std::nullopt;
   const auto position =
       target.position_kind == 0
@@ -185,19 +188,20 @@ std::optional<bool> RedirectTarget(ActionRequest& result, ActionHit& target,
   if (static_cast<std::uint16_t>(impact.value().tag) < kActorImpactTagLimit &&
       impact.value().tag - 1 != target.actor) {
     target.actor = static_cast<std::uint8_t>(impact.value().tag - 1);
-    const auto actor = world.Actor(target.actor);
-    if (!actor || actor.value() == nullptr) return std::nullopt;
-    target.limb = actor.value()->DefaultLimb();
+    const auto limb = world.DefaultLimb(target.actor);
+    if (!limb) return std::nullopt;
+    target.limb = *limb;
     result.animation = 1;
   }
   return false;
 }
+namespace {
 bool ResolveTarget(ResolutionDefinition& definition, ActionRequest& result,
                    ActionHit& target, int hit, int execute,
                    std::optional<ActionPoint> origin,
                    ActionPreviewWorld& world) {
   if (execute != 0 && definition.Redirects()) {
-    const auto redirected = RedirectTarget(result, target, origin, world);
+    const auto redirected = RedirectActionTarget(result, target, origin, world);
     if (!redirected) return false;
     if (redirected.value()) return true;
   }
@@ -272,9 +276,7 @@ std::optional<std::uint32_t> FinishPreview(std::uint32_t action, int source,
                                            ActionRequest& request,
                                            ActionPreviewWorld& world) {
   if (!world.Resolve(action, result, request, 0)) return std::nullopt;
-  const auto actor = world.Actor(source);
-  if (!actor) return std::nullopt;
-  const auto cost = world.Cost(action, actor.value(), 0);
+  const auto cost = world.PreviewCost(action, source);
   return cost ? std::optional{cost.value() & kAvailabilityMask} : std::nullopt;
 }
 std::optional<PreviewVolume> BuildVolume(ResolutionDefinition& definition,
@@ -356,6 +358,17 @@ bool ResolveActionTargets(std::uint32_t action, ActionRequest& result,
 bool ActionPreviewWorld::Resolve(std::uint32_t action, ActionRequest& result,
                                  ActionRequest& source, int execute) {
   return ResolveActionTargets(action, result, source, execute, *this);
+}
+std::optional<std::uint8_t> ActionPreviewWorld::DefaultLimb(int slot) {
+  const auto actor = Actor(slot);
+  if (!actor || *actor == nullptr) return std::nullopt;
+  return (*actor)->DefaultLimb();
+}
+std::optional<std::uint32_t> ActionPreviewWorld::PreviewCost(
+    std::uint32_t action, int source) {
+  const auto actor = Actor(source);
+  if (!actor) return std::nullopt;
+  return Cost(action, *actor, 0);
 }
 // decomp: func_8008631C (src/BATTLE/BATTLE.PRG/146C.c:13285).
 std::optional<std::uint32_t> PreviewActionAgainstLimb(

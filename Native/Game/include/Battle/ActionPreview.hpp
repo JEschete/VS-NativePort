@@ -69,9 +69,18 @@ class ResolutionActor {
   virtual std::uint8_t DamageType() = 0;
   virtual std::array<std::int16_t, kActionAffinityCount> Affinities() = 0;
 };
-class ActionPreviewWorld {
+class ActionTrajectoryWorld {
  public:
-  virtual ~ActionPreviewWorld() = default;
+  virtual ~ActionTrajectoryWorld() = default;
+  virtual std::optional<ActionPoint> TargetPosition(int slot, int limb) = 0;
+  virtual std::optional<std::uint8_t> DefaultLimb(int slot) = 0;
+  virtual std::optional<ActionPoint> Trace(ActionPoint origin,
+                                           ActionPoint target, int source) = 0;
+};
+
+class ActionPreviewWorld : public ActionTrajectoryWorld {
+ public:
+  ~ActionPreviewWorld() override = default;
   // Returned owners remain stable across callbacks, but their fields are fresh.
   virtual ResolutionDefinition* Definition(std::uint32_t action) = 0;
   // Missing record is refused immediately; a present record may carry null
@@ -80,12 +89,13 @@ class ActionPreviewWorld {
   virtual std::optional<std::uint32_t> WeaponDrawn(int slot) = 0;
   virtual std::optional<std::uint8_t> SpawnId(int slot) = 0;
   virtual std::optional<ActionPoint> SourceOrigin(int slot) = 0;
-  virtual std::optional<ActionPoint> TargetPosition(int slot, int limb) = 0;
+  std::optional<ActionPoint> TargetPosition(int slot, int limb) override = 0;
+  std::optional<std::uint8_t> DefaultLimb(int slot) override;
   virtual std::optional<ActionPoint> LimbPosition(int slot, int limb) = 0;
   virtual std::optional<ActionPoint> PreviewPosition(bool target) = 0;
   virtual bool Contains(const PreviewVolume& volume, ActionPoint point) = 0;
-  virtual std::optional<ActionPoint> Trace(ActionPoint origin,
-                                           ActionPoint target, int source) = 0;
+  std::optional<ActionPoint> Trace(ActionPoint origin, ActionPoint target,
+                                   int source) override = 0;
   virtual void ResetHitState() = 0;
   virtual void Prerequisite(std::uint32_t value) = 0;
   virtual void PreviousHit(std::uint32_t value) = 0;
@@ -102,6 +112,8 @@ class ActionPreviewWorld {
   virtual std::optional<std::uint32_t> Cost(std::uint32_t action,
                                             ResolutionActor* actor,
                                             int update) = 0;
+  virtual std::optional<std::uint32_t> PreviewCost(std::uint32_t action,
+                                                   int source);
   virtual bool Resolve(std::uint32_t action, ActionRequest& result,
                        ActionRequest& source, int execute);
   // Publishes queue copy-back before the cost callbacks at the Live boundary.
@@ -111,6 +123,12 @@ class ActionPreviewWorld {
 void ClearActionRequest(ActionRequest& request);
 void InitializeActionHit(ActionHit& hit);
 void FinalizeActionHit(ActionHit& hit);
+// True is a terrain stop; false continues with the possibly redirected actor.
+// The trajectory producer, not the combat calculator, supplies these queries.
+std::optional<bool> RedirectActionTarget(ActionRequest& result,
+                                         ActionHit& target,
+                                         std::optional<ActionPoint> origin,
+                                         ActionTrajectoryWorld& world);
 // False refuses only a used missing owner/index or unavailable redirect origin.
 // World sources remain valid for nonphysical, nonredirecting trap actions.
 bool ResolveActionTargets(std::uint32_t action, ActionRequest& result,

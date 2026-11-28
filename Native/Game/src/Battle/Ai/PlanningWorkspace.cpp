@@ -226,6 +226,7 @@ std::optional<bool> CompletedTargetsEndMemory(CompletedActionPlanHost& host) {
       RefusePlan("Completed action requires a readable hit result");
       return std::nullopt;
     }
+    if (target->retired) return true;
     if (target->targets_position) continue;
     const auto object = host.TargetObject(target->slot);
     if (!object) {

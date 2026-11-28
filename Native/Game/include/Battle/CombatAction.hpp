@@ -82,6 +82,7 @@ struct CombatKillProgress {
   std::uint8_t learned_arts{};
   std::uint16_t weapon_kills{};
   std::optional<int> required_kills;
+  std::uint16_t weapon_attacks{};
 };
 
 struct CombatEquipmentNotice {
@@ -102,7 +103,9 @@ struct CombatHitResult {
 
 struct CombatActionResult {
   CombatActionIntent intent;
-  std::uint8_t affinity{}, damage_type{};
+  std::uint8_t affinity{}, damage_type{}, category{};
+  std::array<std::uint8_t, 2> hit_prerequisites{};
+  std::uint32_t availability{};
   CombatHitResult source;
   std::vector<CombatHitResult> hits;
   std::vector<CombatActorState> actors;
