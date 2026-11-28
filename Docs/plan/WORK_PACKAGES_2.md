@@ -88,6 +88,10 @@ The opening event and other Phase 1c content remain separate coverage entries un
 **Gate:** canonical encounter outcomes and audiovisual checkpoints match the defined reference. Explicitly list
 uncovered abilities/enemies/effects for M10; one encounter is not proof of full combat parity.
 
+Normal single-hit physical action 1 uses owned combat inputs/results and ticketed presentation/impact consumers
+([#56](https://github.com/JEschete/VS-NativePort/issues/56)). Other action families retain their explicit compatibility
+route; broader AI, equipment and effect ownership remains with #57, #58 and #61. This does not complete M8.
+
 ### M9 — Menus, inventory and recoverable persistence
 
 **Scope/files:** `Game/Menu`, `Items`, `State`, `Title` Continue flow, `Engine/Save`, `Legacy/Save/LibCard.cpp`; EC-04/05/07/09.
