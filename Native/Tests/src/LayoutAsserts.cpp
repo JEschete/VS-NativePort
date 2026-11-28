@@ -334,8 +334,8 @@ int Tests_TargetSphereViews(void) {
 int Tests_AiFrameStages(void) {
   const VS::Battle::Ai::FrameContext savedFrame =
       VS::Battle::Ai::LiveFrameContext();
-  VS::Battle::Actor* saved_actor = VS::Battle::actors[0];
-  VS::Battle::Ai::ActorAiState* saved_state = VS::Battle::Ai::actorAiStates[0];
+  const auto saved_actors = VS::Battle::actors;
+  const auto saved_states = VS::Battle::Ai::actorAiStates;
   VS::Battle::Ai::RoomAiState* saved_room = VS::Battle::Ai::roomAiState;
   std::uint16_t (*saved_flags)[32] = VS::Battle::Ai::tileFlagMap;
   const int saved_target = VS::Battle::Ai::secondPerceptionTarget;
@@ -349,10 +349,16 @@ int Tests_AiFrameStages(void) {
       reinterpret_cast<VS::Battle::Ai::PerceptionUpdateView*>(&state);
   VS::Battle::Ai::RoomAiState room = {};
   std::uint16_t flags[32][32] = {{0}};
+  VS::Actors::ResetLiveActorHandles();
+  VS::Battle::actors.fill(nullptr);
+  VS::Battle::Ai::actorAiStates.fill(nullptr);
   actor.stats = &stats;
+  actor.model = &model.instance;
   view->actor = reinterpret_cast<VS::Battle::Actor*>(&actor);
   view->model = reinterpret_cast<VS::Battle::Ai::PerceivedObjectView*>(&model);
-  VS::Battle::actors[0] = &actor;
+  const auto identity = VS::Actors::InstallLiveActorInstance(
+      0, &actor, VS::Actors::ActorShape::kEquipped);
+  const bool bound = VS::Actors::BindLiveActorAiState(identity, &state);
   VS::Battle::Ai::actorAiStates[0] = &state;
   VS::Battle::Ai::roomAiState = &room;
   VS::Battle::Ai::tileFlagMap = nullptr;
@@ -360,8 +366,8 @@ int Tests_AiFrameStages(void) {
   VS::Battle::Ai::attributeActorMask = 1 | (1 << 2) | (1 << 5);
   VS::Battle::Ai::savedMovementRandomState = 0x12345678;
   VS::Battle::Ai::RunLiveActorAiUpdateStages();
-  int passed =
-      room.readiness_level == 0 && VS::Battle::Ai::secondPerceptionTarget == 0;
+  int passed = bound && room.readiness_level == 0 &&
+               VS::Battle::Ai::secondPerceptionTarget == 0;
   VS::Battle::Ai::tileFlagMap = flags;
   VS::Battle::Ai::RunLiveActorAiUpdateStages();
   passed = passed && room.readiness_level == 1 &&
@@ -375,8 +381,9 @@ int Tests_AiFrameStages(void) {
            VS::Battle::Ai::savedMovementRandomState == 0x12345678 &&
            view->opaque14 == 1;
   VS::Battle::Ai::LiveFrameContext() = savedFrame;
-  VS::Battle::actors[0] = saved_actor;
-  VS::Battle::Ai::actorAiStates[0] = saved_state;
+  VS::Actors::ResetLiveActorHandles();
+  VS::Battle::actors = saved_actors;
+  VS::Battle::Ai::actorAiStates = saved_states;
   VS::Battle::Ai::roomAiState = saved_room;
   VS::Battle::Ai::tileFlagMap = saved_flags;
   VS::Battle::Ai::secondPerceptionTarget = saved_target;
